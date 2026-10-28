@@ -193,6 +193,66 @@ public static class ZoneMultiplayerAcceptance
         observer.ExpectQuiet();
     }
 
+    public static async Task RunGroundPickupSharedAsync()
+    {
+        var tokens = new HandoffTokens(HandoffTokens.DefaultSecret);
+        var login = new LoginService(JsonAccountStore.InMemory(), tokens);
+        var picker = Play(login, "pick1", "Picker", HumanClasses.Fighter);
+        var observer = Play(login, "pick2", "Watcher", HumanClasses.Mystic);
+
+        var world = new ZoneWorld();
+        await using var zone = ZoneHost.Start(tokens, world);
+        await using var left = await ZonePeer.ConnectAsync(zone.Port).ConfigureAwait(false);
+        await using var right = await ZonePeer.ConnectAsync(zone.Port).ConfigureAwait(false);
+
+        await left.AuthAsync(picker).ConfigureAwait(false);
+        await right.AuthAsync(observer).ConfigureAwait(false);
+        await left.EnterAsync(expectOthers: 0).ConfigureAwait(false);
+        await right.EnterAsync(picker, observer).ConfigureAwait(false);
+        _ = await left.ExpectAsync<CharInfoMsg>(MsgType.CharInfo).ConfigureAwait(false);
+
+        var gremlin = TalkingIsland.Gremlins[0];
+        await left.MoveNearAsync(gremlin).ConfigureAwait(false);
+        _ = await right.ExpectAsync<MoveToMsg>(MsgType.MoveToAck).ConfigureAwait(false);
+
+        await left.SendAsync(MsgType.SelectTarget, new SelectTargetMsg { TargetObjectId = gremlin.ObjectId })
+            .ConfigureAwait(false);
+        _ = await left.ExpectAsync<MyTargetSelectedMsg>(MsgType.MyTargetSelected).ConfigureAwait(false);
+
+        int hitsToKill = TalkingIsland.GremlinMaxHp / ZoneCombat.SampleMeleeDamage;
+        for (int hit = 1; hit <= hitsToKill; hit++)
+        {
+            await left.SendAsync(MsgType.AttackRequest, new AttackRequestMsg()).ConfigureAwait(false);
+            _ = await left.ExpectAsync<AttackMsg>(MsgType.Attack).ConfigureAwait(false);
+            _ = await left.ExpectAsync<StatusUpdateMsg>(MsgType.StatusUpdate).ConfigureAwait(false);
+            _ = await right.ExpectAsync<AttackMsg>(MsgType.Attack).ConfigureAwait(false);
+            _ = await right.ExpectAsync<StatusUpdateMsg>(MsgType.StatusUpdate).ConfigureAwait(false);
+        }
+
+        _ = await left.ExpectAsync<DeleteObjectMsg>(MsgType.DeleteObject).ConfigureAwait(false);
+        _ = await right.ExpectAsync<DeleteObjectMsg>(MsgType.DeleteObject).ConfigureAwait(false);
+        var dropLeft = await left.ExpectAsync<SpawnItemMsg>(MsgType.SpawnItem).ConfigureAwait(false);
+        var dropRight = await right.ExpectAsync<SpawnItemMsg>(MsgType.SpawnItem).ConfigureAwait(false);
+        ExpectGroundDrop(dropLeft, dropRight, gremlin);
+
+        await left.SendAsync(MsgType.PickupRequest, new PickupRequestMsg { ObjectId = dropLeft.ObjectId })
+            .ConfigureAwait(false);
+        var update = await left.ExpectAsync<InventoryUpdateMsg>(MsgType.InventoryUpdate).ConfigureAwait(false);
+        var goneLeft = await left.ExpectAsync<DeleteObjectMsg>(MsgType.DeleteObject).ConfigureAwait(false);
+        var goneRight = await right.ExpectAsync<DeleteObjectMsg>(MsgType.DeleteObject).ConfigureAwait(false);
+        if (goneLeft.ObjectId != dropLeft.ObjectId || goneRight.ObjectId != dropLeft.ObjectId)
+            throw new InvalidOperationException($"pickup delete expected {dropLeft.ObjectId}");
+        if (update.Changes.Length != 1)
+            throw new InvalidOperationException($"expected one inventory change, got {update.Changes.Length}");
+        var row = update.Changes[0];
+        if (row.Change != InventoryChange.Add || row.ItemId != TalkingIsland.GremlinDropItemId ||
+            row.Count != TalkingIsland.GremlinDropCount)
+            throw new InvalidOperationException($"inventory add item={row.ItemId} count={row.Count}");
+
+        left.ExpectQuiet();
+        right.ExpectQuiet();
+    }
+
     static void ExpectGroundDrop(SpawnItemMsg left, SpawnItemMsg right, NpcInfoMsg gremlin)
     {
         if (left.ObjectId != right.ObjectId || left.ObjectId < PlayerInventory.FirstObjectId)
