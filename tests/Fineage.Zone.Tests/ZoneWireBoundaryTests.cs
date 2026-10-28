@@ -10,7 +10,19 @@ namespace Fineage.Zone.Tests;
 public sealed class ZoneWireBoundaryTests
 {
     [Fact]
-    public async Task Register_on_zone_port_returns_wrong_endpoint()
+    public async Task Register_on_zone_port_returns_wrong_port()
+    {
+        await AssertWrongPortAsync(MsgType.Register,
+            MessagePackSerializer.Serialize(new RegisterMsg { Account = "x", Password = "yyyy" }));
+    }
+
+    [Fact]
+    public async Task ListCharacters_on_zone_port_returns_wrong_port()
+    {
+        await AssertWrongPortAsync(MsgType.ListCharacters, []);
+    }
+
+    static async Task AssertWrongPortAsync(MsgType opcode, byte[] body)
     {
         var tokens = HandoffTokens.FromEnvironment();
         var server = new ZoneServer(tokens);
@@ -30,14 +42,13 @@ public sealed class ZoneWireBoundaryTests
         await using var stream = client.GetStream();
         await FrameIO.SendAsync(stream, (ushort)MsgType.Hello, MessagePackSerializer.Serialize(new HelloMsg()));
         await ReadAsync(stream, MsgType.HelloAck);
-        await FrameIO.SendAsync(stream, (ushort)MsgType.Register,
-            MessagePackSerializer.Serialize(new RegisterMsg { Account = "x", Password = "yyyy" }));
+        await FrameIO.SendAsync(stream, (ushort)opcode, body);
 
         var frame = await FrameIO.ReadAsync(stream);
         Assert.NotNull(frame);
         Assert.Equal((ushort)MsgType.Error, frame!.Value.Type);
         var err = MessagePackSerializer.Deserialize<ErrorMsg>(frame.Value.Body);
-        Assert.Equal("wrong_endpoint", err.Code);
+        Assert.Equal("wrong_port", err.Code);
 
         listener.Stop();
         await cts.CancelAsync();

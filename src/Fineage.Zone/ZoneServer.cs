@@ -98,7 +98,7 @@ public sealed class ZoneServer
         if (ZoneWireBoundary.IsLoginClientOpcode(type))
         {
             ZoneLog.Info($"RX login opcode on zone type={type} session={sessionId}");
-            await ErrorAsync(session, "wrong_endpoint",
+            await ErrorAsync(session, "wrong_port",
                 "That message belongs on the login port, not the zone port.", ct).ConfigureAwait(false);
             return;
         }
