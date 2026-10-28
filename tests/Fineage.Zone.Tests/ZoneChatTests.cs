@@ -214,7 +214,7 @@ public sealed class ZoneChatTests
         await ReadAsync(stream, MsgType.UserInfo);
         await ReadAsync(stream, MsgType.ItemList);
         await ReadAsync(stream, MsgType.PlayerSpawned);
-        for (int i = 0; i < TalkingIsland.Gremlins.Length; i++)
+        for (int i = 0; i < TalkingIsland.NpcCount; i++)
             await ReadAsync(stream, MsgType.NpcInfo);
 
         var welcomeFrame = await FrameIO.ReadAsync(stream);

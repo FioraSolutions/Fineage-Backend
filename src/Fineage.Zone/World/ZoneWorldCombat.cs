@@ -135,6 +135,7 @@ public sealed partial class ZoneWorld
 
     void RemoveDeadNpc(ZoneEntity npc, List<Pending> outbound)
     {
+        // Kill quest steps are not applied here. IQuestKillHook is the later combat entry.
         int objectId = npc.ObjectId;
         int npcId = npc.NpcId;
         int x = npc.X;

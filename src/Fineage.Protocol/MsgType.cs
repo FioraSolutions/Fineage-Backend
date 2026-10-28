@@ -68,6 +68,14 @@ public enum MsgType : ushort
     EnchantConfirm = 40,
     /// <summary>Close the enchant window. Body is <see cref="EnchantCancelMsg"/>.</summary>
     EnchantCancel = 41,
+    /// <summary>Ask for the quest journal. Empty body. See <see cref="QuestProtocol"/>.</summary>
+    RequestQuestList = 42,
+    /// <summary>Abort a started quest. Body is <see cref="RequestQuestAbortMsg"/>.</summary>
+    RequestQuestAbort = 43,
+    /// <summary>Talk to an NPC. Body is <see cref="NpcTalkMsg"/>.</summary>
+    NpcTalk = 44,
+    /// <summary>Quest HTML bypass. Body is <see cref="QuestEventMsg"/>.</summary>
+    QuestEvent = 45,
     /// <summary>Keepalive from client. Server answers with <see cref="Pong"/>.</summary>
     Ping = 9,
     /// <summary>Zone chat. Fan-out is <see cref="CreatureSay"/>. See <see cref="ChatProtocol"/>.</summary>
@@ -132,6 +140,12 @@ public enum MsgType : ushort
     /// See <see cref="EnchantProtocol"/>.
     /// </summary>
     EnchantResult = 1060,
+    /// <summary>Quest journal. See <see cref="QuestProtocol"/>. Enchant result stays 1060.</summary>
+    QuestList = 1061,
+    /// <summary>NPC or quest HTML dialog.</summary>
+    QuestDialog = 1062,
+    /// <summary>One quest sound name.</summary>
+    QuestSound = 1063,
 
     // Login S → C. Canonical lobby set; see LobbyProtocol.
     RegisterOk = 1020,

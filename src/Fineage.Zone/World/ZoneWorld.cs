@@ -1,4 +1,5 @@
 using Fineage.Game;
+using Fineage.Game.Quests;
 using Fineage.Login;
 using Fineage.Protocol;
 using Fineage.Zone.Chat;
@@ -30,10 +31,13 @@ sealed class ZoneEntity
     public int NpcId { get; init; }
     public bool Attackable { get; init; }
     public int CurHp { get; set; }
-    public int MaxHp { get; init; }
+    public int MaxHp { get; set; }
     public int CurMp { get; set; }
-    public int MaxMp { get; init; }
-    public int Level { get; init; } = 1;
+    public int MaxMp { get; set; }
+    public int Level { get; set; } = 1;
+    public long Exp { get; set; }
+    public int Sp { get; set; }
+    public QuestJournal Quests { get; set; } = new();
     public int Race { get; init; }
     public int Sex { get; init; }
     public bool Hero { get; set; }
@@ -97,6 +101,7 @@ public sealed partial class ZoneWorld
     readonly bool _expertisePenalty;
     readonly IEnchantRandom _enchantRandom;
     readonly EnchantRates _enchantRates;
+    readonly QuestMachine _quests;
     readonly Dictionary<int, ZoneEntity> _byId = [];
     readonly DropCatalog _dropCatalog;
     readonly DropRates _dropRates;
@@ -133,7 +138,9 @@ public sealed partial class ZoneWorld
         _enchantRandom = enchantRandom ?? SharedEnchantRandom.Instance;
         _enchantRates = enchantRates ?? EnchantRates.Default;
         _enchantRates.Validate();
+        _quests = new QuestMachine(_game.Quests, _game.Items);
         BootstrapSpawns();
+        BootstrapQuestNpcs();
         LoadClans();
     }
 
@@ -262,6 +269,7 @@ public sealed partial class ZoneWorld
             Sex = vitals.sex,
             ClanId = ClanIdFor(session.ObjectId)
         };
+        LoadQuestProgress(session, entity);
         SyncClanStanding(entity);
         RefreshGradePenalty(entity);
         _byId[entity.ObjectId] = entity;
@@ -401,6 +409,7 @@ public sealed partial class ZoneWorld
         if (entity.Inventory != null)
             SaveInventory(session, entity.Inventory);
         SaveVitals(session, entity);
+        SaveQuestProgress(session, entity);
         SavePresence(session, entity.X, entity.Y, entity.Z, touchAccess: false);
 
         entity.Knownlist.Clear();

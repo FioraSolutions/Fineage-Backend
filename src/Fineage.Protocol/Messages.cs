@@ -695,6 +695,85 @@ public sealed class PartyKickRequestMsg
     [Key(0)] public int TargetObjectId { get; set; }
 }
 
+/// <summary>Opcode <see cref="MsgType.RequestQuestList"/> (42). Empty body.</summary>
+[MessagePackObject]
+public sealed class RequestQuestListMsg
+{
+}
+
+/// <summary>Opcode <see cref="MsgType.RequestQuestAbort"/> (43).</summary>
+[MessagePackObject]
+public sealed class RequestQuestAbortMsg
+{
+    [Key(0)] public int QuestId { get; set; }
+}
+
+/// <summary>Opcode <see cref="MsgType.NpcTalk"/> (44). First-talk hook, or the NPC's default page.</summary>
+[MessagePackObject]
+public sealed class NpcTalkMsg
+{
+    [Key(0)] public int NpcObjectId { get; set; }
+}
+
+/// <summary>
+/// Opcode <see cref="MsgType.QuestEvent"/> (45).
+/// Empty <see cref="Event"/> is the talk hook. Any other token is the adv-event hook.
+/// </summary>
+[MessagePackObject]
+public sealed class QuestEventMsg
+{
+    [Key(0)] public int NpcObjectId { get; set; }
+    [Key(1)] public int QuestId { get; set; }
+    [Key(2)] public string Event { get; set; } = "";
+}
+
+/// <summary>One started quest in <see cref="QuestListMsg"/>.</summary>
+[MessagePackObject]
+public sealed class QuestJournalEntryMsg
+{
+    [Key(0)] public int QuestId { get; set; }
+    [Key(1)] public string Name { get; set; } = "";
+    /// <summary>1 while started. Completed one-time quests are not in this list.</summary>
+    [Key(2)] public int State { get; set; }
+    [Key(3)] public int Cond { get; set; }
+    /// <summary>Raw <c>__compltdStateFlags</c>. Zero when the journal uses <see cref="Cond"/>.</summary>
+    [Key(4)] public int ProgressFlags { get; set; }
+    /// <summary>Flags when non-zero, otherwise <see cref="Cond"/>.</summary>
+    [Key(5)] public int JournalWord { get; set; }
+    [Key(6)] public bool Repeatable { get; set; }
+}
+
+/// <summary>Opcode <see cref="MsgType.QuestList"/> (1061).</summary>
+[MessagePackObject]
+public sealed class QuestListMsg
+{
+    [Key(0)] public QuestJournalEntryMsg[] Active { get; set; } = [];
+    /// <summary>128 bytes. Bit <c>id % 8</c> of byte <c>id / 8</c> for a completed one-time quest whose id is 0..1023.</summary>
+    [Key(1)] public byte[] CompletedMask { get; set; } = [];
+    [Key(2)] public int[] CompletedQuestIds { get; set; } = [];
+    [Key(3)] public int MaxActive { get; set; }
+}
+
+/// <summary>Opcode <see cref="MsgType.QuestDialog"/> (1062).</summary>
+[MessagePackObject]
+public sealed class QuestDialogMsg
+{
+    [Key(0)] public int NpcObjectId { get; set; }
+    [Key(1)] public int NpcId { get; set; }
+    [Key(2)] public int QuestId { get; set; }
+    /// <summary><c>first_talk</c>, <c>talk</c>, <c>event</c>, <c>kill</c>, or <c>default</c>.</summary>
+    [Key(3)] public string Hook { get; set; } = "";
+    [Key(4)] public string Event { get; set; } = "";
+    [Key(5)] public string Html { get; set; } = "";
+}
+
+/// <summary>Opcode <see cref="MsgType.QuestSound"/> (1063).</summary>
+[MessagePackObject]
+public sealed class QuestSoundMsg
+{
+    [Key(0)] public string Name { get; set; } = "";
+}
+
 /// <summary>Opcode <see cref="MsgType.ClanCreateRequest"/> (32).</summary>
 [MessagePackObject]
 public sealed class ClanCreateRequestMsg

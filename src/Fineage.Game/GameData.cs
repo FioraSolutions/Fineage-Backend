@@ -1,4 +1,5 @@
 using System.Text.Json;
+using Fineage.Game.Quests;
 
 namespace Fineage.Game;
 
@@ -19,11 +20,12 @@ public sealed class GameData
         AllowTrailingCommas = true
     };
 
-    GameData(ItemCatalog items, StarterKits starterKits, ClassCatalog? classes)
+    GameData(ItemCatalog items, StarterKits starterKits, ClassCatalog? classes, QuestCatalog quests)
     {
         Items = items;
         StarterKits = starterKits;
         Classes = classes;
+        Quests = quests;
     }
 
     public ItemCatalog Items { get; }
@@ -32,6 +34,8 @@ public sealed class GameData
 
     /// <summary>Null when the catalog was built in memory for an item test.</summary>
     public ClassCatalog? Classes { get; }
+
+    public QuestCatalog Quests { get; }
 
     public static GameData Load(string dataDirectory)
     {
@@ -42,7 +46,8 @@ public sealed class GameData
         var items = ReadItems(Path.Combine(dataDirectory, ItemsFileName));
         var kits = ReadKits(Path.Combine(dataDirectory, StarterKitsFileName), items);
         var classes = ClassCatalog.Load(dataDirectory);
-        return new GameData(items, kits, classes);
+        var quests = QuestCatalog.Load(Path.Combine(dataDirectory, QuestCatalog.FileName), items);
+        return new GameData(items, kits, classes, quests);
     }
 
     public static GameData LoadDefault()
@@ -78,11 +83,11 @@ public sealed class GameData
     }
 
     /// <summary>Builds game data from an in-memory catalog. Used by tests that need body slots the shipped catalog does not list.</summary>
-    public static GameData From(ItemCatalog items, StarterKits starterKits)
+    public static GameData From(ItemCatalog items, StarterKits starterKits, QuestCatalog? quests = null)
     {
         ArgumentNullException.ThrowIfNull(items);
         ArgumentNullException.ThrowIfNull(starterKits);
-        return new GameData(items, starterKits, classes: null);
+        return new GameData(items, starterKits, classes: null, quests ?? QuestCatalog.Empty);
     }
 
     public PlayerInventory CreateStarterInventory(int classId, int firstObjectId = PlayerInventory.FirstObjectId) =>

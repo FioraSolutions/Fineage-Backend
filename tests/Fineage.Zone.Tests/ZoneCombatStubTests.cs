@@ -44,7 +44,7 @@ public sealed class ZoneCombatStubTests
         await ReadExpectAsync(stream, MsgType.UserInfo);
         await ReadExpectAsync(stream, MsgType.ItemList);
         await ReadExpectAsync(stream, MsgType.PlayerSpawned);
-        for (int i = 0; i < TalkingIsland.Gremlins.Length; i++)
+        for (int i = 0; i < TalkingIsland.NpcCount; i++)
             await ReadExpectAsync(stream, MsgType.NpcInfo);
 
         listener.Stop();

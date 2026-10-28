@@ -31,8 +31,10 @@ public static class ZoneMultiplayerAcceptance
         var world = new ZoneWorld();
         int[] npcIds = [.. world.NpcObjectIds];
         int[] again = [.. world.NpcObjectIds];
-        if (!npcIds.SequenceEqual(again) || !npcIds.SequenceEqual(TalkingIsland.Gremlins.Select(g => g.ObjectId)))
-            throw new InvalidOperationException("gremlin object ids are not one shared set");
+        int[] sharedNpcs = [.. TalkingIsland.Gremlins.Select(g => g.ObjectId), .. TalkingIsland.Villagers.Select(v => v.ObjectId)];
+        Array.Sort(sharedNpcs);
+        if (!npcIds.SequenceEqual(again) || !npcIds.SequenceEqual(sharedNpcs))
+            throw new InvalidOperationException("npc object ids are not one shared set");
 
         await using var zone = ZoneHost.Start(tokens, world);
         await using var left = await ZonePeer.ConnectAsync(zone.Port).ConfigureAwait(false);
@@ -44,12 +46,12 @@ public static class ZoneMultiplayerAcceptance
         if (early.Code != "world")
             throw new InvalidOperationException($"say before enter returned {early.Code}");
 
-        var leftSpawn = await left.EnterAsync(TalkingIsland.Gremlins.Length, expectOthers: 0).ConfigureAwait(false);
+        var leftSpawn = await left.EnterAsync(TalkingIsland.NpcCount, expectOthers: 0).ConfigureAwait(false);
         if (leftSpawn.Spawned.ObjectId != fighter.CharacterId || leftSpawn.Spawned.Name != fighter.CharacterName)
             throw new InvalidOperationException("fighter spawn mismatch");
         ExpectGear(leftSpawn, fighter, weaponId: 2369);
 
-        var rightSpawn = await right.EnterAsync(fighter, mystic, TalkingIsland.Gremlins.Length).ConfigureAwait(false);
+        var rightSpawn = await right.EnterAsync(fighter, mystic, TalkingIsland.NpcCount).ConfigureAwait(false);
         ExpectGear(rightSpawn, mystic, weaponId: 6);
         var seen = await left.ExpectAsync<CharInfoMsg>(MsgType.CharInfo).ConfigureAwait(false);
         ExpectChar(seen, mystic, rightSpawn.Spawned.X, rightSpawn.Spawned.Y, rightSpawn.Spawned.Z);
@@ -269,7 +271,7 @@ public static class ZoneMultiplayerAcceptance
         await using var zone = ZoneHost.Start(tokens, world);
         await using var peer = await ZonePeer.ConnectAsync(zone.Port).ConfigureAwait(false);
         await peer.AuthAsync(fighter).ConfigureAwait(false);
-        await peer.EnterAsync(TalkingIsland.Gremlins.Length, expectOthers: 0).ConfigureAwait(false);
+        await peer.EnterAsync(TalkingIsland.NpcCount, expectOthers: 0).ConfigureAwait(false);
 
         var gremlin = TalkingIsland.Gremlins[0];
         await peer.MoveNearAsync(gremlin).ConfigureAwait(false);
@@ -376,7 +378,7 @@ public static class ZoneMultiplayerAcceptance
             await left.AuthAsync(fighter).ConfigureAwait(false);
             await right.AuthAsync(mystic).ConfigureAwait(false);
             await left.EnterAsync(expectOthers: 0).ConfigureAwait(false);
-            await right.EnterAsync(fighter, mystic, TalkingIsland.Gremlins.Length).ConfigureAwait(false);
+            await right.EnterAsync(fighter, mystic, TalkingIsland.NpcCount).ConfigureAwait(false);
 
             var selfStatus = await AwaitRegenUpdateAsync(left, fighter.CharacterId).ConfigureAwait(false);
             var peerStatus = await AwaitRegenUpdateAsync(right, fighter.CharacterId).ConfigureAwait(false);
@@ -410,7 +412,7 @@ public static class ZoneMultiplayerAcceptance
         await left.AuthAsync(leader).ConfigureAwait(false);
         await right.AuthAsync(member).ConfigureAwait(false);
         await left.EnterAsync(expectOthers: 0).ConfigureAwait(false);
-        await right.EnterAsync(leader, member, TalkingIsland.Gremlins.Length).ConfigureAwait(false);
+        await right.EnterAsync(leader, member, TalkingIsland.NpcCount).ConfigureAwait(false);
         var peerSeen = await left.ExpectAsync<CharInfoMsg>(MsgType.CharInfo).ConfigureAwait(false);
         if (peerSeen.ObjectId != member.CharacterId)
             throw new InvalidOperationException("leader did not receive member CharInfo before party invite");
@@ -576,7 +578,7 @@ public static class ZoneMultiplayerAcceptance
     static void ExpectDistinctItems(Arrival left, Arrival right, int leftCharacterId, int rightCharacterId)
     {
         var ids = new HashSet<int> { leftCharacterId, rightCharacterId };
-        foreach (var npc in TalkingIsland.Gremlins)
+        foreach (var npc in TalkingIsland.Gremlins.Concat(TalkingIsland.Villagers))
             ids.Add(npc.ObjectId);
         foreach (var item in left.Items.Items.Concat(right.Items.Items))
         {
@@ -601,18 +603,18 @@ public static class ZoneMultiplayerAcceptance
 
     static void SameGremlins(IReadOnlyList<NpcInfoMsg> left, IReadOnlyList<NpcInfoMsg> right)
     {
-        if (left.Count != TalkingIsland.Gremlins.Length || right.Count != left.Count)
-            throw new InvalidOperationException($"gremlin count {left.Count}/{right.Count}");
+        if (left.Count != TalkingIsland.NpcCount || right.Count != left.Count)
+            throw new InvalidOperationException($"npc count {left.Count}/{right.Count}");
+        var expected = TalkingIsland.Gremlins.Concat(TalkingIsland.Villagers).ToArray();
         for (int i = 0; i < left.Count; i++)
         {
-            var expected = TalkingIsland.Gremlins[i];
-            if (left[i].ObjectId != right[i].ObjectId || left[i].ObjectId != expected.ObjectId ||
-                left[i].NpcId != expected.NpcId || right[i].NpcId != expected.NpcId ||
-                left[i].Name != "Gremlin" || right[i].Name != "Gremlin" ||
-                left[i].X != expected.X || right[i].X != expected.X ||
-                left[i].Y != expected.Y || right[i].Y != expected.Y ||
-                left[i].Z != expected.Z || right[i].Z != expected.Z)
-                throw new InvalidOperationException($"shared gremlin {i} mismatch id={left[i].ObjectId}/{right[i].ObjectId}");
+            if (left[i].ObjectId != right[i].ObjectId || left[i].ObjectId != expected[i].ObjectId ||
+                left[i].NpcId != expected[i].NpcId || right[i].NpcId != expected[i].NpcId ||
+                left[i].Name != expected[i].Name || right[i].Name != expected[i].Name ||
+                left[i].X != expected[i].X || right[i].X != expected[i].X ||
+                left[i].Y != expected[i].Y || right[i].Y != expected[i].Y ||
+                left[i].Z != expected[i].Z || right[i].Z != expected[i].Z)
+                throw new InvalidOperationException($"shared npc {i} mismatch id={left[i].ObjectId}/{right[i].ObjectId}");
         }
     }
 
@@ -652,7 +654,7 @@ public static class ZoneMultiplayerAcceptance
         }
 
         public Task<Arrival> EnterAsync(int expectOthers) =>
-            EnterAsync(TalkingIsland.Gremlins.Length, expectOthers);
+            EnterAsync(TalkingIsland.NpcCount, expectOthers);
 
         public async Task<Arrival> EnterAsync(int expectNpcs, int expectOthers)
         {
@@ -673,7 +675,7 @@ public static class ZoneMultiplayerAcceptance
         }
 
         public Task<Arrival> EnterAsync(HandoffTicket alreadyIn, HandoffTicket self) =>
-            EnterAsync(alreadyIn, self, TalkingIsland.Gremlins.Length);
+            EnterAsync(alreadyIn, self, TalkingIsland.NpcCount);
 
         public async Task<Arrival> EnterAsync(HandoffTicket alreadyIn, HandoffTicket self, int expectNpcs)
         {

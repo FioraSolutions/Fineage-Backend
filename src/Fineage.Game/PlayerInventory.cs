@@ -1,3 +1,5 @@
+using Fineage.Game.Quests;
+
 namespace Fineage.Game;
 
 /// <summary>
@@ -47,6 +49,68 @@ public sealed class PlayerInventory
         }
 
         return null;
+    }
+
+    public int CountOf(int itemId)
+    {
+        int total = 0;
+        foreach (var item in _items)
+        {
+            if (item.ItemId == itemId)
+                total += item.Count;
+        }
+
+        return total;
+    }
+
+    /// <summary>Stackable items return the merged stack. Other items return every new piece.</summary>
+    public IReadOnlyList<ItemInstance> AddPieces(int itemId, int count)
+    {
+        if (count < 1)
+            throw new ArgumentOutOfRangeException(nameof(count));
+        var template = _catalog.Get(itemId);
+        if (template.Stackable)
+            return [Add(itemId, count)];
+
+        var created = new List<ItemInstance>(count);
+        for (int i = 0; i < count; i++)
+            created.Add(Add(itemId, 1));
+        return created;
+    }
+
+    /// <summary>
+    /// Removes <paramref name="count"/> of <paramref name="itemId"/>.
+    /// Returns false and changes nothing when the bag is short.
+    /// </summary>
+    public bool TryTake(int itemId, int count, ICollection<BagTouch> touches)
+    {
+        ArgumentNullException.ThrowIfNull(touches);
+        if (count < 1 || CountOf(itemId) < count)
+            return false;
+
+        int left = count;
+        for (int i = _items.Count - 1; i >= 0 && left > 0; i--)
+        {
+            var item = _items[i];
+            if (item.ItemId != itemId)
+                continue;
+            if (item.IsEquipped)
+                Unequip(item);
+            if (item.Count <= left)
+            {
+                left -= item.Count;
+                _items.RemoveAt(i);
+                touches.Add(new BagTouch(BagTouchKind.Remove, item));
+            }
+            else
+            {
+                item.Count -= left;
+                left = 0;
+                touches.Add(new BagTouch(BagTouchKind.Modify, item));
+            }
+        }
+
+        return true;
     }
 
     public ItemInstance? FindByItemId(int itemId)

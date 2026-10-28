@@ -67,6 +67,14 @@ public enum MsgType : ushort
     EnchantConfirm = 40,
     /// <summary>Same value as <see cref="Fineage.Protocol.MsgType.EnchantCancel"/>.</summary>
     EnchantCancel = 41,
+    /// <summary>Same value as <see cref="Fineage.Protocol.MsgType.RequestQuestList"/>.</summary>
+    RequestQuestList = 42,
+    /// <summary>Same value as <see cref="Fineage.Protocol.MsgType.RequestQuestAbort"/>.</summary>
+    RequestQuestAbort = 43,
+    /// <summary>Same value as <see cref="Fineage.Protocol.MsgType.NpcTalk"/>.</summary>
+    NpcTalk = 44,
+    /// <summary>Same value as <see cref="Fineage.Protocol.MsgType.QuestEvent"/>.</summary>
+    QuestEvent = 45,
 
     HelloAck = 1001,
     AuthOk = 1002,
@@ -111,6 +119,12 @@ public enum MsgType : ushort
     ClanJoinResult = 1053,
     /// <summary>Same value as <see cref="Fineage.Protocol.MsgType.EnchantResult"/>.</summary>
     EnchantResult = 1060,
+    /// <summary>Same value as <see cref="Fineage.Protocol.MsgType.QuestList"/>.</summary>
+    QuestList = 1061,
+    /// <summary>Same value as <see cref="Fineage.Protocol.MsgType.QuestDialog"/>.</summary>
+    QuestDialog = 1062,
+    /// <summary>Same value as <see cref="Fineage.Protocol.MsgType.QuestSound"/>.</summary>
+    QuestSound = 1063,
 
     /// <summary>Login roster. Was 1005; moved so it no longer aliases <see cref="CharInfo"/>.</summary>
     CharacterRoster = 1030,

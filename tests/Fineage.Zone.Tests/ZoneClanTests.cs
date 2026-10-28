@@ -598,7 +598,7 @@ public class ZoneClanTests
 
         public async Task<UserInfoMsg> EnterAsync(int? npcs = null, int others = 0, bool inClan = false)
         {
-            int npcCount = npcs ?? TalkingIsland.Gremlins.Length;
+            int npcCount = npcs ?? TalkingIsland.NpcCount;
             await SendAsync(MsgType.EnterWorld, new EnterWorldMsg());
             var user = await ExpectAsync<UserInfoMsg>(MsgType.UserInfo);
             await ExpectAsync<ItemListMsg>(MsgType.ItemList);

@@ -623,6 +623,60 @@ public sealed class ZoneServer
                     ZoneLog.Info($"RX EnchantConfirm session={sessionId} object={enchant.ObjectId}");
                 break;
             }
+            case MsgType.RequestQuestList:
+            {
+                string? code = await _world.TryQuestListAsync(session, ct).ConfigureAwait(false);
+                await QuestErrorAsync(session, code, ct).ConfigureAwait(false);
+                if (code == null)
+                    ZoneLog.Info($"RX QuestList session={sessionId}");
+                break;
+            }
+            case MsgType.RequestQuestAbort:
+            {
+                var abort = Decode<RequestQuestAbortMsg>(body);
+                if (abort == null)
+                {
+                    await ErrorAsync(session, "bad_request", "RequestQuestAbort body was not readable.", ct).ConfigureAwait(false);
+                    break;
+                }
+
+                string? code = await _world.TryQuestAbortAsync(session, abort.QuestId, ct).ConfigureAwait(false);
+                await QuestErrorAsync(session, code, ct).ConfigureAwait(false);
+                if (code == null)
+                    ZoneLog.Info($"RX QuestAbort session={sessionId} quest={abort.QuestId}");
+                break;
+            }
+            case MsgType.NpcTalk:
+            {
+                var talk = Decode<NpcTalkMsg>(body);
+                if (talk == null)
+                {
+                    await ErrorAsync(session, "bad_request", "NpcTalk body was not readable.", ct).ConfigureAwait(false);
+                    break;
+                }
+
+                string? code = await _world.TryNpcTalkAsync(session, talk.NpcObjectId, ct).ConfigureAwait(false);
+                await QuestErrorAsync(session, code, ct).ConfigureAwait(false);
+                if (code == null)
+                    ZoneLog.Info($"RX NpcTalk session={sessionId} npc={talk.NpcObjectId}");
+                break;
+            }
+            case MsgType.QuestEvent:
+            {
+                var questEvent = Decode<QuestEventMsg>(body);
+                if (questEvent == null)
+                {
+                    await ErrorAsync(session, "bad_request", "QuestEvent body was not readable.", ct).ConfigureAwait(false);
+                    break;
+                }
+
+                string? code = await _world.TryQuestEventAsync(session, questEvent.NpcObjectId, questEvent.QuestId, questEvent.Event, ct)
+                    .ConfigureAwait(false);
+                await QuestErrorAsync(session, code, ct).ConfigureAwait(false);
+                if (code == null)
+                    ZoneLog.Info($"RX QuestEvent session={sessionId} quest={questEvent.QuestId} event={questEvent.Event}");
+                break;
+            }
             case MsgType.EnchantCancel:
             {
                 if (Decode<EnchantCancelMsg>(body) == null)
@@ -771,6 +825,26 @@ public sealed class ZoneServer
 
         ZoneLog.Packet(session, code, code is "rate_limit" or "unknown" or "wrong_port");
         return session.SendAsync(MsgType.Error, new ErrorMsg { Code = code, Message = message }, ct);
+    }
+
+    static Task QuestErrorAsync(ZoneSession session, string? code, CancellationToken ct)
+    {
+        if (code == null)
+            return Task.CompletedTask;
+        return code switch
+        {
+            "world" => ErrorAsync(session, "world", "EnterWorld first.", ct),
+            "bad_request" => ErrorAsync(session, "bad_request", "Quest request was rejected.", ct),
+            "range" => ErrorAsync(session, "range", "You are too far away.", ct),
+            InventoryProtocol.Dead => ErrorAsync(session, code, "You cannot do that while dead.", ct),
+            QuestProtocol.Unknown => ErrorAsync(session, code, "That quest does not exist.", ct),
+            QuestProtocol.Limit => ErrorAsync(session, code, "You cannot take on any more quests.", ct),
+            QuestProtocol.State => ErrorAsync(session, code, "That quest cannot be updated.", ct),
+            QuestProtocol.Abort => ErrorAsync(session, code, "That quest cannot be aborted.", ct),
+            QuestProtocol.Item => ErrorAsync(session, code, "You do not have the required item.", ct),
+            QuestProtocol.Npc => ErrorAsync(session, code, "That NPC is not here.", ct),
+            _ => ErrorAsync(session, "bad_request", "Quest request was rejected.", ct)
+        };
     }
 
     static Task PartyErrorAsync(ZoneSession session, string? code, CancellationToken ct)

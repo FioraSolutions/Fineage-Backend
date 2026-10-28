@@ -63,6 +63,12 @@ public class ProtocolCompatTests
         Assert.Equal(39, (ushort)MsgType.EnchantRequest);
         Assert.Equal(40, (ushort)MsgType.EnchantConfirm);
         Assert.Equal(41, (ushort)MsgType.EnchantCancel);
+        Assert.Equal(42, (ushort)MsgType.RequestQuestList);
+        Assert.Equal(43, (ushort)MsgType.RequestQuestAbort);
+        Assert.Equal(44, (ushort)MsgType.NpcTalk);
+        Assert.Equal(45, (ushort)MsgType.QuestEvent);
+        Assert.Equal((ushort)MsgType.RequestQuestList, (ushort)Fineage.Protocol.V2.MsgType.RequestQuestList);
+        Assert.Equal((ushort)MsgType.QuestEvent, (ushort)Fineage.Protocol.V2.MsgType.QuestEvent);
         Assert.Equal((ushort)MsgType.EnchantRequest, (ushort)Fineage.Protocol.V2.MsgType.EnchantRequest);
         Assert.Equal((ushort)MsgType.EnchantConfirm, (ushort)Fineage.Protocol.V2.MsgType.EnchantConfirm);
         Assert.Equal((ushort)MsgType.EnchantCancel, (ushort)Fineage.Protocol.V2.MsgType.EnchantCancel);
@@ -105,6 +111,13 @@ public class ProtocolCompatTests
         Assert.Equal((ushort)MsgType.ClanAskJoin, (ushort)Fineage.Protocol.V2.MsgType.ClanAskJoin);
         Assert.Equal((ushort)MsgType.PledgeMemberList, (ushort)Fineage.Protocol.V2.MsgType.PledgeMemberList);
         Assert.Equal(1060, (ushort)MsgType.EnchantResult);
+        Assert.Equal(1061, (ushort)MsgType.QuestList);
+        Assert.Equal(1062, (ushort)MsgType.QuestDialog);
+        Assert.Equal(1063, (ushort)MsgType.QuestSound);
+        Assert.Equal((ushort)MsgType.QuestList, (ushort)Fineage.Protocol.V2.MsgType.QuestList);
+        Assert.Equal(QuestProtocol.Acquired, 30);
+        Assert.Equal(QuestProtocol.NotAbortable, 38);
+        Assert.Equal(QuestProtocol.MaxActive, 25);
         Assert.Equal((ushort)MsgType.EnchantResult, (ushort)Fineage.Protocol.V2.MsgType.EnchantResult);
         Assert.Equal(ChatProtocol.ChatBandFirst, (ushort)MsgType.SystemMessage);
         Assert.Equal((ushort)MsgType.SystemMessage, (ushort)Fineage.Protocol.V2.MsgType.SystemMessage);
