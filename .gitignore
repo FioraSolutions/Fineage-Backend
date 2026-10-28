@@ -9,6 +9,7 @@ data/*
 !data/stat-bonuses.json
 !data/quests.json
 !data/npcs.json
+!data/dungeons.json
 !data/spawns/
 !data/spawns/**
 !data/drops/

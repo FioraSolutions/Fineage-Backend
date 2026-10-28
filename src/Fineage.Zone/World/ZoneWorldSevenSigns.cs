@@ -64,6 +64,7 @@ public sealed partial class ZoneWorld
             outbound.Add(Pack(player.Session, MsgType.SevenSignsSky, sky));
         }
 
+        EvictDungeonLosers(outbound);
         return true;
     }
 

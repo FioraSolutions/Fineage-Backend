@@ -1,0 +1,159 @@
+{
+  "version": 1,
+  "dungeons": [
+    {
+      "id": 1,
+      "kind": "necropolis",
+      "name": "Necropolis of Sacrifice",
+      "entranceNpcId": 31095,
+      "exitNpcId": 31103,
+      "entrance": { "x": -41570, "y": 209785, "z": -5089 },
+      "exit": { "x": -41567, "y": 209292, "z": -5091 },
+      "feeItemId": 0,
+      "feeCount": 0
+    },
+    {
+      "id": 2,
+      "kind": "necropolis",
+      "name": "Pilgrim's Necropolis",
+      "entranceNpcId": 31096,
+      "exitNpcId": 31104,
+      "entrance": { "x": 45251, "y": 123890, "z": -5415 },
+      "exit": { "x": 45250, "y": 124366, "z": -5417 },
+      "feeItemId": 0,
+      "feeCount": 0
+    },
+    {
+      "id": 3,
+      "kind": "necropolis",
+      "name": "Worshipper's Necropolis",
+      "entranceNpcId": 31097,
+      "exitNpcId": 31105,
+      "entrance": { "x": 111273, "y": 174015, "z": -5417 },
+      "exit": { "x": 110818, "y": 174010, "z": -5443 },
+      "feeItemId": 0,
+      "feeCount": 0
+    },
+    {
+      "id": 4,
+      "kind": "necropolis",
+      "name": "Patriot's Necropolis",
+      "entranceNpcId": 31098,
+      "exitNpcId": 31106,
+      "entrance": { "x": -21726, "y": 77385, "z": -5177 },
+      "exit": { "x": -22197, "y": 77369, "z": -5177 },
+      "feeItemId": 0,
+      "feeCount": 0
+    },
+    {
+      "id": 5,
+      "kind": "necropolis",
+      "name": "Ascetics Necropolis",
+      "entranceNpcId": 31099,
+      "exitNpcId": 31107,
+      "entrance": { "x": -52254, "y": 79103, "z": -4743 },
+      "exit": { "x": -52716, "y": 79106, "z": -4745 },
+      "feeItemId": 0,
+      "feeCount": 0
+    },
+    {
+      "id": 6,
+      "kind": "necropolis",
+      "name": "Martyr's Necropolis",
+      "entranceNpcId": 31100,
+      "exitNpcId": 31108,
+      "entrance": { "x": 118308, "y": 132800, "z": -4833 },
+      "exit": { "x": 117793, "y": 132810, "z": -4835 },
+      "feeItemId": 0,
+      "feeCount": 0
+    },
+    {
+      "id": 7,
+      "kind": "necropolis",
+      "name": "Disciples Necropolis",
+      "entranceNpcId": 31101,
+      "exitNpcId": 31109,
+      "entrance": { "x": 172251, "y": -17605, "z": -4903 },
+      "exit": { "x": 171902, "y": -17595, "z": -4905 },
+      "feeItemId": 0,
+      "feeCount": 0
+    },
+    {
+      "id": 8,
+      "kind": "necropolis",
+      "name": "Saint's Necropolis",
+      "entranceNpcId": 31102,
+      "exitNpcId": 31110,
+      "entrance": { "x": 83000, "y": 209213, "z": -5443 },
+      "exit": { "x": 82608, "y": 209225, "z": -5443 },
+      "feeItemId": 0,
+      "feeCount": 0
+    },
+    {
+      "id": 9,
+      "kind": "catacomb",
+      "name": "Heretics Catacomb",
+      "entranceNpcId": 31114,
+      "exitNpcId": 31120,
+      "entrance": { "x": -53174, "y": -250275, "z": -7911 },
+      "exit": { "x": 42514, "y": 143917, "z": -5385 },
+      "feeItemId": 0,
+      "feeCount": 0
+    },
+    {
+      "id": 10,
+      "kind": "catacomb",
+      "name": "Catacomb of the Branded",
+      "entranceNpcId": 31115,
+      "exitNpcId": 31121,
+      "entrance": { "x": 46217, "y": 170290, "z": -4983 },
+      "exit": { "x": 45770, "y": 170299, "z": -4985 },
+      "feeItemId": 0,
+      "feeCount": 0
+    },
+    {
+      "id": 11,
+      "kind": "catacomb",
+      "name": "Catacomb of the Apostate",
+      "entranceNpcId": 31116,
+      "exitNpcId": 31122,
+      "entrance": { "x": -20230, "y": -250780, "z": -8168 },
+      "exit": { "x": 77225, "y": 78362, "z": -5119 },
+      "feeItemId": 0,
+      "feeCount": 0
+    },
+    {
+      "id": 12,
+      "kind": "catacomb",
+      "name": "Catacomb of the Witch",
+      "entranceNpcId": 31117,
+      "exitNpcId": 31123,
+      "entrance": { "x": 140404, "y": 79678, "z": -5431 },
+      "exit": { "x": 139965, "y": 79678, "z": -5433 },
+      "feeItemId": 0,
+      "feeCount": 0
+    },
+    {
+      "id": 13,
+      "kind": "catacomb",
+      "name": "Catacomb of Dark Omens",
+      "entranceNpcId": 31118,
+      "exitNpcId": 31124,
+      "entrance": { "x": -19500, "y": 13508, "z": -4905 },
+      "exit": { "x": -19931, "y": 13502, "z": -4905 },
+      "feeItemId": 0,
+      "feeCount": 0
+    },
+    {
+      "id": 14,
+      "kind": "catacomb",
+      "name": "Catacomb of the Forbidden Path",
+      "entranceNpcId": 31119,
+      "exitNpcId": 31125,
+      "entrance": { "x": 12521, "y": -248481, "z": -9585 },
+      "exit": { "x": 113429, "y": 84540, "z": -6545 },
+      "feeItemId": 0,
+      "feeCount": 0
+    }
+  ]
+}

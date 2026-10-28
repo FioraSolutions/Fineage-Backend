@@ -81,6 +81,7 @@ if (string.IsNullOrWhiteSpace(Environment.GetEnvironmentVariable("FINEAGE_HANDOF
 
 Console.WriteLine($"[ZONE] listen {bindDisplay}:{port} store={storePath} Talking Island (maxConn={maxConnections} outboundQ={outboundQueue} msgPerSec={maxMsgPerSec} interestRange={interestRange} npcs={world.NpcObjectIds.Count})");
 Console.WriteLine("[ZONE] Seven Signs period, cabal, and seal-stone scores are stored beside the account file as seven-signs.json.");
+Console.WriteLine("[ZONE] Catacomb and necropolis gates follow that cabal. Enter is opcode 92. See docs/dungeon-access-v2-protocol.md.");
 Console.WriteLine("[ZONE] Auth.Password is the login handoff token. EnterWorld sends UserInfo, ItemList, the village, then a welcome SystemMessage. Say ALL is local; SHOUT is the zone.");
 if (adminCommands)
     Console.WriteLine("[ZONE] admin commands enabled (GiveItem).");

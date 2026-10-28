@@ -520,6 +520,21 @@ public sealed class ZoneServer
                     ZoneLog.Info($"RX SevenSignsAction session={sessionId} action={action.Action} cabal={action.Cabal} seal={action.Seal}");
                 break;
             }
+            case MsgType.DungeonEnterRequest:
+            {
+                var enter = Decode<DungeonEnterRequestMsg>(body);
+                if (enter == null)
+                {
+                    await ErrorAsync(session, "bad_request", "DungeonEnterRequest body was not readable.", ct).ConfigureAwait(false);
+                    break;
+                }
+
+                string? code = await _world.TryDungeonAsync(session, enter, ct).ConfigureAwait(false);
+                await DungeonErrorAsync(session, code, ct).ConfigureAwait(false);
+                if (code == null)
+                    ZoneLog.Info($"RX DungeonEnter session={sessionId} dungeon={enter.DungeonId} action={enter.Action}");
+                break;
+            }
             case MsgType.PartyKickRequest:
             {
                 var kick = Decode<PartyKickRequestMsg>(body);
@@ -889,6 +904,25 @@ public sealed class ZoneServer
             SevenSignsProtocol.StonesMissing => ErrorAsync(session, code, "Not enough seal stones.", ct),
             _ => ErrorAsync(session, "bad_request", "Seven Signs request was rejected.", ct)
         };
+    }
+
+    static Task DungeonErrorAsync(ZoneSession session, string? code, CancellationToken ct)
+    {
+        if (code == null)
+            return Task.CompletedTask;
+        string message = code switch
+        {
+            "world" => "EnterWorld first.",
+            "bad_request" => "Dungeon request was rejected.",
+            DungeonProtocol.Unknown => "That catacomb or necropolis does not exist.",
+            DungeonProtocol.Cabal => "You may not pass.",
+            DungeonProtocol.Dawn => "Only a Lord of Dawn may use this.",
+            DungeonProtocol.Dusk => "Only a Revolutionary of Dusk may use this.",
+            DungeonProtocol.Fee => "You do not have enough to pay the entrance fee.",
+            InventoryProtocol.Dead => "You cannot do that while dead.",
+            _ => "Dungeon request was rejected."
+        };
+        return ErrorAsync(session, code, message, ct);
     }
 
     static Task PartyErrorAsync(ZoneSession session, string? code, CancellationToken ct)

@@ -57,6 +57,8 @@ MessagePack keys are additive. `CharInfo` keys 0–5 are unchanged; key **6** is
 
 Clan create, invite, leave, dismiss, and dissolution use opcodes **32–38** (admin spoil/sweep stay **30–31**) and **1050–1053**. Level 10, a 2–16 character alphanumeric name, and the Mobius day penalties (join 1, create 10, dissolve 7) are in `docs/clan-v2-protocol.md`. Membership is stored in `accounts.json` with the character.
 
+Catacomb and necropolis gates use **92** (`DungeonEnterRequest`) and **1092** (`DungeonEntered`). The eight necropolises and six catacombs, with Ziggurat entrance and exit coordinates, are in `data/dungeons.json`. Competition admits either cabal. Seal validation admits the winning cabal only when that cabal also holds Avarice (necropolis) or Gnosis (catacomb). A period change teleports anyone who lost access out to the surface exit. Layout: `docs/dungeon-access-v2-protocol.md`.
+
 `Handoff.Token` is the zone session key. Login TCP listens on **9106**. The same process serves play-landing HTTP on **5080** (`POST /api/auth/register`, `POST /api/auth/login`) against that store. Zone listens on **9777**. Both bind **0.0.0.0** unless `--bind` / `FINEAGE_BIND` says otherwise. Accounts live in `data/accounts.json` (`--store` / `FINEAGE_LOGIN_STORE`), including the email from HTTP register.
 
 ## Run

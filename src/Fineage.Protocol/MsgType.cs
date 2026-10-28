@@ -80,6 +80,8 @@ public enum MsgType : ushort
     SevenSignsStatusRequest = 90,
     /// <summary>Seven Signs join or seal-stone contribution. See <see cref="SevenSignsProtocol"/>.</summary>
     SevenSignsActionRequest = 91,
+    /// <summary>Enter or leave a catacomb or necropolis. See <see cref="DungeonProtocol"/>.</summary>
+    DungeonEnterRequest = 92,
     /// <summary>Keepalive from client. Server answers with <see cref="Pong"/>.</summary>
     Ping = 9,
     /// <summary>Zone chat. Fan-out is <see cref="CreatureSay"/>. See <see cref="ChatProtocol"/>.</summary>
@@ -154,6 +156,8 @@ public enum MsgType : ushort
     SevenSignsStatus = 1090,
     /// <summary>Seven Signs sky tint (SignsSky analogue). See <see cref="SevenSignsProtocol"/>.</summary>
     SevenSignsSky = 1091,
+    /// <summary>Catacomb or necropolis teleport result. See <see cref="DungeonProtocol"/>.</summary>
+    DungeonEntered = 1092,
 
     // Login S → C. Canonical lobby set; see LobbyProtocol.
     RegisterOk = 1020,

@@ -79,6 +79,8 @@ public enum MsgType : ushort
     SevenSignsStatusRequest = 90,
     /// <summary>Same value as <see cref="Fineage.Protocol.MsgType.SevenSignsActionRequest"/>.</summary>
     SevenSignsActionRequest = 91,
+    /// <summary>Same value as <see cref="Fineage.Protocol.MsgType.DungeonEnterRequest"/>.</summary>
+    DungeonEnterRequest = 92,
 
     HelloAck = 1001,
     AuthOk = 1002,
@@ -133,6 +135,8 @@ public enum MsgType : ushort
     SevenSignsStatus = 1090,
     /// <summary>Same value as <see cref="Fineage.Protocol.MsgType.SevenSignsSky"/>.</summary>
     SevenSignsSky = 1091,
+    /// <summary>Same value as <see cref="Fineage.Protocol.MsgType.DungeonEntered"/>.</summary>
+    DungeonEntered = 1092,
 
     /// <summary>Login roster. Was 1005; moved so it no longer aliases <see cref="CharInfo"/>.</summary>
     CharacterRoster = 1030,
