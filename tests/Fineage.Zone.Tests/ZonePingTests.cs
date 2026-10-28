@@ -12,6 +12,46 @@ namespace Fineage.Zone.Tests;
 public sealed class ZonePingTests
 {
     [Fact]
+    public async Task ZoneServer_replies_to_ping_over_tcp()
+    {
+        var tokens = new HandoffTokens(HandoffTokens.DefaultSecret);
+        var server = new ZoneServer(tokens, new ZoneWorld(), () => DateTimeOffset.FromUnixTimeMilliseconds(2000));
+
+        var listener = new TcpListener(IPAddress.Loopback, 0);
+        listener.Start();
+        int port = ((IPEndPoint)listener.LocalEndpoint).Port;
+        using var cts = new CancellationTokenSource();
+        var acceptTask = Task.Run(async () =>
+        {
+            using var accepted = await listener.AcceptTcpClientAsync(cts.Token);
+            await using var stream = accepted.GetStream();
+            await server.HandleAsync(stream, cts.Token);
+        });
+
+        using var client = new TcpClient();
+        await client.ConnectAsync(IPAddress.Loopback, port);
+        await using var stream = client.GetStream();
+        await FrameIO.SendAsync(stream, (ushort)MsgType.Ping, MessagePackSerializer.Serialize(new PingMsg { ClientUnixMs = 55 }));
+        var frame = await FrameIO.ReadAsync(stream);
+        listener.Stop();
+
+        Assert.NotNull(frame);
+        Assert.Equal((ushort)MsgType.Pong, frame!.Value.Type);
+        var pong = MessagePackSerializer.Deserialize<PongMsg>(frame.Value.Body);
+        Assert.Equal(55, pong.ClientUnixMs);
+        Assert.Equal(2000, pong.ServerUnixMs);
+
+        await cts.CancelAsync();
+        try
+        {
+            await acceptTask;
+        }
+        catch (OperationCanceledException)
+        {
+        }
+    }
+
+    [Fact]
     public async Task ZoneServer_replies_to_ping_over_pipeline()
     {
         var tokens = new HandoffTokens(HandoffTokens.DefaultSecret);
