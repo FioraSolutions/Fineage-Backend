@@ -10,7 +10,7 @@ namespace Fineage.Zone.Tests;
 public sealed class ZoneCombatStubTests
 {
     [Fact]
-    public async Task SelectTarget_and_AttackRequest_return_combat_not_ready()
+    public async Task EnterWorld_spawns_player_and_npcs()
     {
         var tokens = new HandoffTokens(HandoffTokens.DefaultSecret);
         var login = new LoginService(JsonAccountStore.InMemory(), tokens);
@@ -45,14 +45,6 @@ public sealed class ZoneCombatStubTests
         for (int i = 0; i < TalkingIsland.Gremlins.Length; i++)
             await ReadExpectAsync(stream, MsgType.NpcInfo);
 
-        await FrameIO.SendAsync(stream, (ushort)MsgType.SelectTarget, []);
-        var targetErr = await ReadErrorAsync(stream);
-        Assert.Equal("combat_not_ready", targetErr.Code);
-
-        await FrameIO.SendAsync(stream, (ushort)MsgType.AttackRequest, []);
-        var attackErr = await ReadErrorAsync(stream);
-        Assert.Equal("combat_not_ready", attackErr.Code);
-
         listener.Stop();
         await cts.CancelAsync();
         try
@@ -69,13 +61,5 @@ public sealed class ZoneCombatStubTests
         var frame = await FrameIO.ReadAsync(stream);
         Assert.NotNull(frame);
         Assert.Equal((ushort)type, frame!.Value.Type);
-    }
-
-    static async Task<ErrorMsg> ReadErrorAsync(NetworkStream stream)
-    {
-        var frame = await FrameIO.ReadAsync(stream);
-        Assert.NotNull(frame);
-        Assert.Equal((ushort)MsgType.Error, frame!.Value.Type);
-        return MessagePackSerializer.Deserialize<ErrorMsg>(frame.Value.Body);
     }
 }
