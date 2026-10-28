@@ -8,8 +8,8 @@ public sealed partial class ZoneWorld
 {
     /// <summary>
     /// Marks a live player dead or alive. Combat calls this when a player dies or revives.
-    /// Players spawn alive. <see cref="ZoneEntity.CurHp"/> is not consulted: it is still zero
-    /// until player HP is tracked, and treating zero as death would reject every equip.
+    /// Players spawn alive with their saved HP. <see cref="ZoneEntity.CurHp"/> is not consulted:
+    /// regen treats a low value as wounded, not dead.
     /// </summary>
     public bool TrySetPlayerDead(int objectId, bool dead)
     {

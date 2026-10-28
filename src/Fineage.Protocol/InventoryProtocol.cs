@@ -39,7 +39,7 @@ namespace Fineage.Protocol;
 /// <list type="bullet">
 /// <item><description><see cref="NotOwned"/> — object id is missing or belongs to someone else.</description></item>
 /// <item><description><see cref="NotEquippable"/> — the template has no body slot (adena, quest items).</description></item>
-/// <item><description><see cref="Dead"/> — the player is dead. Spawn is alive. <c>CurHp</c> is not the signal yet.</description></item>
+/// <item><description><see cref="Dead"/> — <c>ZoneEntity.Dead</c> is set. Spawn is alive. Low <c>CurHp</c> is not death; regen heals it.</description></item>
 /// <item><description><see cref="Blocked"/> — legs over full armor, or formal wear rejects the slot.</description></item>
 /// <item><description><see cref="BadSlot"/> — paperdoll index outside 0..16.</description></item>
 /// <item><description><see cref="Empty"/> — unequip of an empty paperdoll index.</description></item>

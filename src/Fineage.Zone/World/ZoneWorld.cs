@@ -40,7 +40,7 @@ sealed class ZoneEntity
     public PlayerInventory? Inventory { get; init; }
     /// <summary>
     /// Player is dead. Equip and unequip are rejected. Combat sets this; spawn leaves it false.
-    /// CurHp is not the signal: players still spawn with CurHp 0 until player HP is tracked.
+    /// CurHp is not the signal: a living player can sit at low HP while regen heals them.
     /// </summary>
     public bool Dead { get; set; }
     public int GroundItemId { get; set; }
