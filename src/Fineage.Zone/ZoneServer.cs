@@ -178,6 +178,20 @@ public sealed class ZoneServer
                     ZoneLog.Info($"RX Move session={sessionId} → {session.X},{session.Y},{session.Z}");
                 break;
             }
+            case MsgType.SelectTarget:
+            {
+                ZoneLog.Info($"RX SelectTarget session={sessionId}");
+                await ErrorAsync(session, "combat_not_ready",
+                    "Target selection is not enabled on this zone build.", ct).ConfigureAwait(false);
+                break;
+            }
+            case MsgType.AttackRequest:
+            {
+                ZoneLog.Info($"RX AttackRequest session={sessionId}");
+                await ErrorAsync(session, "combat_not_ready",
+                    "Combat is not enabled on this zone build.", ct).ConfigureAwait(false);
+                break;
+            }
             case MsgType.Say:
             {
                 var say = Decode<SayMsg>(body);
