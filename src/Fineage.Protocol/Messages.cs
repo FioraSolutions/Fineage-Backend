@@ -294,7 +294,7 @@ public sealed class ItemListMsg
     [Key(0)] public ItemListEntryMsg[] Items { get; set; } = [];
 }
 
-/// <summary>0 add, 1 modify, 2 remove. There is no client equip request yet; the zone defines the row for later.</summary>
+/// <summary>0 add, 1 modify, 2 remove. Equip and unequip send modify rows. Give and grant send add rows.</summary>
 public static class InventoryChange
 {
     public const int Add = 0;
@@ -452,6 +452,38 @@ public sealed class GrantItemRequestMsg
 public sealed class PickupRequestMsg
 {
     [Key(0)] public int ObjectId { get; set; }
+}
+
+/// <summary>
+/// Opcode <see cref="MsgType.UseItem"/> (15).
+/// An equippable item in the bag is equipped. The same object id, already worn, is unequipped.
+/// </summary>
+[MessagePackObject]
+public sealed class UseItemMsg
+{
+    /// <summary>Inventory object id. Not an item template id.</summary>
+    [Key(0)] public int ObjectId { get; set; }
+}
+
+/// <summary>
+/// Opcode <see cref="MsgType.UnequipItem"/> (16).
+/// <see cref="PaperdollSlot"/> is a paperdoll index (0 Under … 16 Hair2), not a body-slot token.
+/// </summary>
+[MessagePackObject]
+public sealed class UnequipItemMsg
+{
+    [Key(0)] public int PaperdollSlot { get; set; }
+}
+
+/// <summary>
+/// Opcode <see cref="MsgType.GiveItem"/> (17). Admin/dev bag grant.
+/// The zone accepts it only when <c>FINEAGE_ZONE_ADMIN</c> is <c>1</c>, <c>true</c>, or <c>yes</c>.
+/// </summary>
+[MessagePackObject]
+public sealed class GiveItemMsg
+{
+    [Key(0)] public int ItemId { get; set; }
+    [Key(1)] public int Count { get; set; } = 1;
 }
 
 /// <summary>Opcode <see cref="MsgType.SpawnItem"/> (1018). Ground item in AOI.</summary>

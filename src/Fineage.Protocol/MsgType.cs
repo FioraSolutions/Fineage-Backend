@@ -20,6 +20,19 @@ public enum MsgType : ushort
     GrantItemRequest = 13,
     /// <summary>Pick up a ground item by object id. Reply is <see cref="InventoryUpdate"/> and AOI <see cref="DeleteObject"/>.</summary>
     PickupRequest = 14,
+    /// <summary>
+    /// Equip a bag item, or unequip it when that object is already worn.
+    /// Body is <see cref="UseItemMsg"/>. See <see cref="InventoryProtocol"/>.
+    /// </summary>
+    UseItem = 15,
+    /// <summary>
+    /// Clear one paperdoll index. Body is <see cref="UnequipItemMsg"/>. See <see cref="InventoryProtocol"/>.
+    /// </summary>
+    UnequipItem = 16,
+    /// <summary>
+    /// Debug grant into the bag. Off unless <c>FINEAGE_ZONE_ADMIN</c> is set. Body is <see cref="GiveItemMsg"/>.
+    /// </summary>
+    GiveItem = 17,
     /// <summary>Keepalive from client. Server answers with <see cref="Pong"/>.</summary>
     Ping = 9,
     /// <summary>Zone chat. Fan-out is <see cref="CreatureSay"/>.</summary>

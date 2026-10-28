@@ -70,6 +70,14 @@ public sealed class GameData
         return null;
     }
 
+    /// <summary>Builds game data from an in-memory catalog. Used by tests that need body slots the shipped catalog does not list.</summary>
+    public static GameData From(ItemCatalog items, StarterKits starterKits)
+    {
+        ArgumentNullException.ThrowIfNull(items);
+        ArgumentNullException.ThrowIfNull(starterKits);
+        return new GameData(items, starterKits);
+    }
+
     public PlayerInventory CreateStarterInventory(int classId, int firstObjectId = PlayerInventory.FirstObjectId) =>
         CreateStarterInventory(classId, new ItemObjectIdAllocator(firstObjectId));
 

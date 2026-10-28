@@ -10,7 +10,7 @@ public enum ItemKind
 /// <summary>
 /// Where an item sits when equipped. <see cref="LrHand"/> is a two-handed weapon:
 /// it uses the right-hand paperdoll slot and clears the left hand. <see cref="FullArmor"/>
-/// uses the chest slot and clears the legs.
+/// uses the chest slot and clears the legs. Legs cannot be equipped while full armor is worn.
 /// </summary>
 public enum BodySlot
 {
