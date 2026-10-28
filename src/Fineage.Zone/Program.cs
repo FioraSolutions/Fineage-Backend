@@ -1,6 +1,6 @@
 using System.Net;
-using System.Net.Sockets;
 using Fineage.Login;
+using Fineage.Protocol.Net;
 using Fineage.Zone;
 
 if (args.Contains("--selftest"))
@@ -41,17 +41,10 @@ if (!BindAddress.TryResolve(bindText, out var bindAddress, out string bindDispla
 }
 
 var server = new ZoneServer(HandoffTokens.FromEnvironment());
-var listener = new TcpListener(bindAddress, port);
-try
-{
-    listener.Start();
-}
-catch (SocketException ex)
-{
-    Console.Error.WriteLine($"listen failed on {bindDisplay}:{port}: {ex.Message}");
-    Environment.ExitCode = 1;
-    return;
-}
+string host = bindAddress.Equals(IPAddress.Any) ? "0.0.0.0" : bindDisplay;
+int maxConnections = ZoneNetSettings.MaxConnections;
+int outboundQueue = ZoneNetSettings.OutboundQueue;
+int maxMsgPerSec = ZoneNetSettings.MaxMessagesPerSecond;
 
 if (string.IsNullOrWhiteSpace(Environment.GetEnvironmentVariable("FINEAGE_HANDOFF_SECRET")) &&
     !IPAddress.IsLoopback(bindAddress))
@@ -59,27 +52,33 @@ if (string.IsNullOrWhiteSpace(Environment.GetEnvironmentVariable("FINEAGE_HANDOF
     Console.WriteLine("[ZONE] warning: FINEAGE_HANDOFF_SECRET is unset. It must match Login before clients hand off from another machine.");
 }
 
-Console.WriteLine($"[ZONE] listen {bindDisplay}:{port} Talking Island");
+Console.WriteLine($"[ZONE] listen {bindDisplay}:{port} Talking Island (maxConn={maxConnections} outboundQ={outboundQueue} msgPerSec={maxMsgPerSec})");
 Console.WriteLine("[ZONE] Auth.Password is the login handoff token. EnterWorld spawns the village, shared Gremlins, and other players. Say is zone chat.");
-while (true)
+
+using var shutdown = new CancellationTokenSource();
+Console.CancelKeyPress += (_, e) =>
 {
-    var client = await listener.AcceptTcpClientAsync();
-    _ = Task.Run(async () =>
-    {
-        try
-        {
-            await using var stream = client.GetStream();
-            await server.HandleAsync(stream, CancellationToken.None);
-        }
-        catch (Exception ex)
-        {
-            Console.Error.WriteLine($"[ZONE] session error {ex.Message}");
-        }
-        finally
-        {
-            client.Dispose();
-        }
-    });
+    e.Cancel = true;
+    shutdown.Cancel();
+};
+
+var tcp = new TcpServer();
+try
+{
+    await tcp.RunAsync(
+        host,
+        port,
+        maxConnections,
+        outboundQueue,
+        "zone",
+        server.HandleAsync,
+        shutdown.Token,
+        ZoneOverload.RejectAsync).ConfigureAwait(false);
+}
+catch (Exception ex) when (ex is not OperationCanceledException)
+{
+    Console.Error.WriteLine($"listen failed on {bindDisplay}:{port}: {ex.Message}");
+    Environment.ExitCode = 1;
 }
 
 static string? Arg(string[] args, string name)

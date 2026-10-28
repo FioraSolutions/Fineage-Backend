@@ -1,14 +1,19 @@
 using Fineage.Protocol;
+using Fineage.Protocol.Net;
+using Fineage.Protocol.V2;
 using MessagePack;
 
 namespace Fineage.Zone;
 
 public sealed class ZoneSession
 {
-    readonly Stream _stream;
+    readonly Stream? _stream;
+    readonly PipelineConnection? _pipeline;
     readonly SemaphoreSlim _send = new(1, 1);
 
     public ZoneSession(Stream stream) => _stream = stream;
+
+    public ZoneSession(PipelineConnection pipeline) => _pipeline = pipeline;
 
     public int ObjectId { get; private set; }
     public string Account { get; private set; } = "";
@@ -39,7 +44,7 @@ public sealed class ZoneSession
         InWorld = false;
     }
 
-    public async Task SendAsync<T>(MsgType type, T message, CancellationToken ct)
+    public async Task SendAsync<T>(Fineage.Protocol.MsgType type, T message, CancellationToken ct)
     {
         byte[] body = MessagePackSerializer.Serialize(message);
         await SendFrameAsync((ushort)type, body, ct).ConfigureAwait(false);
@@ -50,7 +55,15 @@ public sealed class ZoneSession
         await _send.WaitAsync(ct).ConfigureAwait(false);
         try
         {
-            await FrameIO.SendAsync(_stream, type, body, ct).ConfigureAwait(false);
+            if (_pipeline != null)
+            {
+                byte[] frame = V2Codec.Frame((Fineage.Protocol.V2.MsgType)type, body.AsSpan());
+                await _pipeline.SendAsync(frame, ct).ConfigureAwait(false);
+            }
+            else
+            {
+                await FrameIO.SendAsync(_stream!, type, body, ct).ConfigureAwait(false);
+            }
         }
         finally
         {
