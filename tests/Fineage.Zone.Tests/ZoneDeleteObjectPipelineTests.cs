@@ -105,6 +105,10 @@ public sealed class ZoneDeleteObjectPipelineTests
 
             if (npcs != TalkingIsland.Gremlins.Length || others != expectOthers)
                 throw new InvalidOperationException($"enter presence npcs={npcs} others={others}");
+
+            var welcome = await ExpectAsync<SystemMessageMsg>(ProtocolMsgType.SystemMessage);
+            if (welcome.Id != ChatProtocol.Welcome)
+                throw new InvalidOperationException($"welcome system message id={welcome.Id}");
         }
 
         public async Task AuthEnterAsync(HandoffTicket ticket, int expectOthers)

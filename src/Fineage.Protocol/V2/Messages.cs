@@ -221,6 +221,15 @@ public sealed partial class CreatureSayMsg
     [Key(3)] public int ChatType { get; set; }
 }
 
+/// <summary>Same keys as <see cref="Fineage.Protocol.SystemMessageMsg"/>.</summary>
+[MessagePackObject]
+public sealed partial class SystemMessageMsg
+{
+    [Key(0)] public int Id { get; set; }
+    [Key(1)] public string[] Params { get; set; } = [];
+    [Key(2)] public string Text { get; set; } = "";
+}
+
 /// <summary>Same keys as <see cref="Fineage.Protocol.AbnormalStatusUpdateMsg"/>.</summary>
 [MessagePackObject]
 public sealed partial class AbnormalStatusUpdateMsg

@@ -64,15 +64,13 @@ public static class ZoneMultiplayerAcceptance
         if (blank.Code != "bad_request")
             throw new InvalidOperationException($"blank say returned {blank.Code}");
 
-        await left.SendAsync(MsgType.Say, new SayMsg { Text = "hello zone", ChatType = 0 }).ConfigureAwait(false);
+        await left.SendAsync(MsgType.Say, new SayMsg { Text = "hello zone", ChatType = ChatProtocol.All }).ConfigureAwait(false);
         var saidLeft = await left.ExpectAsync<CreatureSayMsg>(MsgType.CreatureSay).ConfigureAwait(false);
-        var saidRight = await right.ExpectAsync<CreatureSayMsg>(MsgType.CreatureSay).ConfigureAwait(false);
         ExpectSay(saidLeft, fighter, "hello zone");
-        ExpectSay(saidRight, fighter, "hello zone");
 
-        await right.SendAsync(MsgType.Say, new SayMsg { Text = "back", ChatType = 0 }).ConfigureAwait(false);
-        ExpectSay(await right.ExpectAsync<CreatureSayMsg>(MsgType.CreatureSay).ConfigureAwait(false), mystic, "back");
-        ExpectSay(await left.ExpectAsync<CreatureSayMsg>(MsgType.CreatureSay).ConfigureAwait(false), mystic, "back");
+        await right.SendAsync(MsgType.Say, new SayMsg { Text = "back", ChatType = ChatProtocol.Shout }).ConfigureAwait(false);
+        ExpectSay(await right.ExpectAsync<CreatureSayMsg>(MsgType.CreatureSay).ConfigureAwait(false), mystic, "back", ChatProtocol.Shout);
+        ExpectSay(await left.ExpectAsync<CreatureSayMsg>(MsgType.CreatureSay).ConfigureAwait(false), mystic, "back", ChatProtocol.Shout);
 
         var gremlin = TalkingIsland.Gremlins[0];
         await left.SendAsync(MsgType.MoveTo, new MoveToMsg
@@ -185,9 +183,9 @@ public static class ZoneMultiplayerAcceptance
         var dropRight = await observer.ExpectAsync<SpawnItemMsg>(MsgType.SpawnItem).ConfigureAwait(false);
         ExpectGroundDrop(dropLeft, dropRight, gremlin);
 
-        await attacker.SendAsync(MsgType.Say, new SayMsg { Text = "gg", ChatType = 0 }).ConfigureAwait(false);
-        ExpectSay(await attacker.ExpectAsync<CreatureSayMsg>(MsgType.CreatureSay).ConfigureAwait(false), fighter, "gg");
-        ExpectSay(await observer.ExpectAsync<CreatureSayMsg>(MsgType.CreatureSay).ConfigureAwait(false), fighter, "gg");
+        await attacker.SendAsync(MsgType.Say, new SayMsg { Text = "gg", ChatType = ChatProtocol.Shout }).ConfigureAwait(false);
+        ExpectSay(await attacker.ExpectAsync<CreatureSayMsg>(MsgType.CreatureSay).ConfigureAwait(false), fighter, "gg", ChatProtocol.Shout);
+        ExpectSay(await observer.ExpectAsync<CreatureSayMsg>(MsgType.CreatureSay).ConfigureAwait(false), fighter, "gg", ChatProtocol.Shout);
 
         attacker.ExpectQuiet();
         observer.ExpectQuiet();
@@ -491,10 +489,10 @@ public static class ZoneMultiplayerAcceptance
                 $"char mismatch id={info.ObjectId} name={info.Name} class={info.ClassId} @ {info.X},{info.Y},{info.Z}");
     }
 
-    static void ExpectSay(CreatureSayMsg say, HandoffTicket who, string text)
+    static void ExpectSay(CreatureSayMsg say, HandoffTicket who, string text, int chatType = ChatProtocol.All)
     {
-        if (say.ObjectId != who.CharacterId || say.Name != who.CharacterName || say.Text != text || say.ChatType != 0)
-            throw new InvalidOperationException($"say mismatch id={say.ObjectId} name={say.Name} text={say.Text}");
+        if (say.ObjectId != who.CharacterId || say.Name != who.CharacterName || say.Text != text || say.ChatType != chatType)
+            throw new InvalidOperationException($"say mismatch id={say.ObjectId} name={say.Name} text={say.Text} type={say.ChatType}");
     }
 
     static void ExpectMove(MoveToMsg move, int objectId, int originX, int originY, int destX, int destY)
@@ -617,6 +615,9 @@ public static class ZoneMultiplayerAcceptance
             var others = new List<CharInfoMsg>(expectOthers);
             for (int i = 0; i < expectOthers; i++)
                 others.Add(await ExpectIgnoringRegenAsync<CharInfoMsg>(MsgType.CharInfo).ConfigureAwait(false));
+            var welcome = await ExpectIgnoringRegenAsync<SystemMessageMsg>(MsgType.SystemMessage).ConfigureAwait(false);
+            if (welcome.Id != ChatProtocol.Welcome || welcome.Text.Length == 0 || welcome.Params.Length != 1)
+                throw new InvalidOperationException($"welcome system message id={welcome.Id} text={welcome.Text}");
             return new Arrival(user, items, spawned, npcs, others);
         }
 

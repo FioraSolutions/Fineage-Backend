@@ -1,6 +1,7 @@
 using Fineage.Game;
 using Fineage.Login;
 using Fineage.Protocol;
+using Fineage.Zone.Chat;
 using Fineage.Zone.Combat;
 using Fineage.Zone.Interest;
 using MessagePack;
@@ -56,7 +57,7 @@ sealed class ZoneEntity
 /// </summary>
 public sealed partial class ZoneWorld
 {
-    public const int MaxSayLength = 128;
+    public const int MaxSayLength = ChatProtocol.MaxTextLength;
     static readonly TimeSpan FanoutTimeout = TimeSpan.FromSeconds(2);
 
     readonly IAoi _aoi;
@@ -185,45 +186,6 @@ public sealed partial class ZoneWorld
         return null;
     }
 
-    public async Task<string?> TrySayAsync(ZoneSession session, SayMsg say, CancellationToken ct)
-    {
-        if (!session.InWorld)
-            return "world";
-        if (say.Text.Length > MaxSayLength)
-            return "bad_request";
-
-        string text = say.Text.Trim();
-        if (text.Length == 0 || text.Length > MaxSayLength || HasControl(text))
-            return "bad_request";
-
-        var said = new CreatureSayMsg
-        {
-            ObjectId = session.ObjectId,
-            Name = session.Name,
-            Text = text,
-            ChatType = say.ChatType
-        };
-
-        var outbound = new List<Pending>();
-        lock (_gate)
-        {
-            if (!IsLive(session))
-                return "world";
-
-            outbound.Add(Pack(session, MsgType.CreatureSay, said));
-            foreach (var entity in Players())
-            {
-                if (entity.Session == null || ReferenceEquals(entity.Session, session))
-                    continue;
-                outbound.Add(Pack(entity.Session, MsgType.CreatureSay, said));
-            }
-        }
-
-        ZoneLog.Info($"say object={session.ObjectId} name={session.Name} text={text}");
-        await FlushSelfAsync(session, outbound, ct).ConfigureAwait(false);
-        return null;
-    }
-
     bool TryEnter(ZoneSession session, List<Pending> toSelf, List<Pending> toOthers, out int known)
     {
         known = 0;
@@ -284,6 +246,7 @@ public sealed partial class ZoneWorld
             }
         }
 
+        toSelf.Add(Pack(session, MsgType.SystemMessage, SayRules.Welcome(session.Name)));
         known = entity.Knownlist.Count;
         return true;
     }
@@ -599,17 +562,6 @@ public sealed partial class ZoneWorld
         Stackable = entity.GroundStackable,
         Count = entity.GroundCount
     };
-
-    static bool HasControl(string text)
-    {
-        foreach (char c in text)
-        {
-            if (c < ' ' || c == '\u007f')
-                return true;
-        }
-
-        return false;
-    }
 
     static Pending Pack<T>(ZoneSession to, MsgType type, T message) =>
         new(to, type, MessagePackSerializer.Serialize(message));

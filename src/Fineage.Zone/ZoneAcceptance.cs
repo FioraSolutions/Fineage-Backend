@@ -98,6 +98,12 @@ public static class ZoneAcceptance
                 throw new InvalidOperationException($"gremlin {i} mismatch id={npc.NpcId} @ {npc.X},{npc.Y},{npc.Z}");
         }
 
+        var welcome = MessagePackSerializer.Deserialize<SystemMessageMsg>(
+            await ExpectAsync(stream, MsgType.SystemMessage).ConfigureAwait(false));
+        if (welcome.Id != ChatProtocol.Welcome || welcome.Params.Length != 1 || welcome.Params[0] != name ||
+            welcome.Text != $"Welcome, {name}.")
+            throw new InvalidOperationException($"welcome id={welcome.Id} text={welcome.Text}");
+
         var nearest = TalkingIsland.Gremlins[0];
         int destX = nearest.X;
         int destY = nearest.Y;

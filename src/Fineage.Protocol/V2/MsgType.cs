@@ -75,6 +75,8 @@ public enum MsgType : ushort
     PartyJoinResult = 1028,
     /// <summary>Full party member snapshot. See <see cref="Fineage.Protocol.MsgType.PartyMemberList"/>.</summary>
     PartyMemberList = 1029,
+    /// <summary>Same value as <see cref="Fineage.Protocol.MsgType.SystemMessage"/>. Chat band 1040–1049.</summary>
+    SystemMessage = 1040,
 
     /// <summary>Login roster. Was 1005; moved so it no longer aliases <see cref="CharInfo"/>.</summary>
     CharacterRoster = 1030,

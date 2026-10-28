@@ -246,7 +246,7 @@ public sealed class ZoneServer
                     break;
                 }
 
-                string? code = await _world.TrySayAsync(session, say, ct).ConfigureAwait(false);
+                string? code = await _world.TrySayAsync(session, say, _clock(), ct).ConfigureAwait(false);
                 if (code == "world")
                     await ErrorAsync(session, "world", "EnterWorld first.", ct).ConfigureAwait(false);
                 else if (code != null)

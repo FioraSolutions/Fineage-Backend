@@ -366,6 +366,18 @@ public sealed class CreatureSayMsg
 }
 
 /// <summary>
+/// Opcode <see cref="MsgType.SystemMessage"/> (1040).
+/// <see cref="Text"/> is the line to show. <see cref="Id"/> and <see cref="Params"/> match <see cref="ChatProtocol"/>.
+/// </summary>
+[MessagePackObject]
+public sealed class SystemMessageMsg
+{
+    [Key(0)] public int Id { get; set; }
+    [Key(1)] public string[] Params { get; set; } = [];
+    [Key(2)] public string Text { get; set; } = "";
+}
+
+/// <summary>
 /// Opcode <see cref="MsgType.NpcInfo"/> (1006). <see cref="NpcId"/> is the template id
 /// (Gremlin = 20001), not the Interlude value with 1_000_000 added.
 /// </summary>
