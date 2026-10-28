@@ -2,6 +2,7 @@ using System.Net;
 using System.Net.Sockets;
 using Fineage.Login;
 using Fineage.Protocol;
+using Fineage.Zone.Combat;
 using Fineage.Zone.Interest;
 using Fineage.Zone.World;
 using MessagePack;
@@ -134,6 +135,70 @@ public static class ZoneMultiplayerAcceptance
         right.ExpectQuiet();
     }
 
+    public static async Task RunCombatSharedAsync()
+    {
+        var tokens = new HandoffTokens(HandoffTokens.DefaultSecret);
+        var login = new LoginService(JsonAccountStore.InMemory(), tokens);
+        var fighter = Play(login, "combat1", "Striker", HumanClasses.Fighter);
+        var mystic = Play(login, "combat2", "Watcher", HumanClasses.Mystic);
+
+        var world = new ZoneWorld();
+        await using var zone = ZoneHost.Start(tokens, world);
+        await using var attacker = await ZonePeer.ConnectAsync(zone.Port).ConfigureAwait(false);
+        await using var observer = await ZonePeer.ConnectAsync(zone.Port).ConfigureAwait(false);
+
+        await attacker.AuthAsync(fighter).ConfigureAwait(false);
+        await observer.AuthAsync(mystic).ConfigureAwait(false);
+        await attacker.EnterAsync(expectOthers: 0).ConfigureAwait(false);
+        await observer.EnterAsync(fighter, mystic).ConfigureAwait(false);
+        _ = await attacker.ExpectAsync<CharInfoMsg>(MsgType.CharInfo).ConfigureAwait(false);
+
+        var gremlin = TalkingIsland.Gremlins[0];
+        await attacker.MoveNearAsync(gremlin).ConfigureAwait(false);
+        _ = await observer.ExpectAsync<MoveToMsg>(MsgType.MoveToAck).ConfigureAwait(false);
+
+        await attacker.SendAsync(MsgType.SelectTarget, new SelectTargetMsg { TargetObjectId = gremlin.ObjectId })
+            .ConfigureAwait(false);
+        var target = await attacker.ExpectAsync<MyTargetSelectedMsg>(MsgType.MyTargetSelected).ConfigureAwait(false);
+        if (target.ObjectId != gremlin.ObjectId)
+            throw new InvalidOperationException($"target select was {target.ObjectId}");
+
+        int hitsToKill = TalkingIsland.GremlinMaxHp / ZoneCombat.SampleMeleeDamage;
+        for (int hit = 1; hit <= hitsToKill; hit++)
+        {
+            await attacker.SendAsync(MsgType.AttackRequest, new AttackRequestMsg()).ConfigureAwait(false);
+            var atkLeft = await attacker.ExpectAsync<AttackMsg>(MsgType.Attack).ConfigureAwait(false);
+            var hpLeft = await attacker.ExpectAsync<StatusUpdateMsg>(MsgType.StatusUpdate).ConfigureAwait(false);
+            var atkRight = await observer.ExpectAsync<AttackMsg>(MsgType.Attack).ConfigureAwait(false);
+            var hpRight = await observer.ExpectAsync<StatusUpdateMsg>(MsgType.StatusUpdate).ConfigureAwait(false);
+
+            int expectedHp = TalkingIsland.GremlinMaxHp - hit * ZoneCombat.SampleMeleeDamage;
+            ExpectCombat(gremlin.ObjectId, fighter.CharacterId, expectedHp, atkLeft, hpLeft);
+            ExpectCombat(gremlin.ObjectId, fighter.CharacterId, expectedHp, atkRight, hpRight);
+        }
+
+        var delLeft = await attacker.ExpectAsync<DeleteObjectMsg>(MsgType.DeleteObject).ConfigureAwait(false);
+        var delRight = await observer.ExpectAsync<DeleteObjectMsg>(MsgType.DeleteObject).ConfigureAwait(false);
+        if (delLeft.ObjectId != gremlin.ObjectId || delRight.ObjectId != gremlin.ObjectId)
+            throw new InvalidOperationException($"delete expected {gremlin.ObjectId}");
+
+        attacker.ExpectQuiet();
+        observer.ExpectQuiet();
+    }
+
+    static void ExpectCombat(int targetId, int attackerId, int expectedCurHp, AttackMsg attack, StatusUpdateMsg status)
+    {
+        if (attack.AttackerObjectId != attackerId || attack.TargetObjectId != targetId ||
+            attack.Damage != ZoneCombat.SampleMeleeDamage)
+            throw new InvalidOperationException($"attack mismatch a={attack.AttackerObjectId} t={attack.TargetObjectId} d={attack.Damage}");
+        if (status.ObjectId != targetId || status.AttributeIds.Length != 2 ||
+            status.AttributeIds[0] != InterludeStatus.CurHp || status.AttributeIds[1] != InterludeStatus.MaxHp ||
+            status.Values.Length != 2 || status.Values[0] != expectedCurHp ||
+            status.Values[1] != TalkingIsland.GremlinMaxHp)
+            throw new InvalidOperationException(
+                $"status mismatch id={status.ObjectId} hp={status.Values[0]}/{status.Values[1]} expected={expectedCurHp}");
+    }
+
     static HandoffTicket Play(LoginService login, string account, string name, int classId)
     {
         var result = login.Play(account, "pass1234", name, classId);
@@ -236,6 +301,17 @@ public static class ZoneMultiplayerAcceptance
             if (arrival.Others[0].ObjectId != alreadyIn.CharacterId)
                 throw new InvalidOperationException("enter did not include the player already in the zone");
             return arrival;
+        }
+
+        public async Task MoveNearAsync(NpcInfoMsg npc)
+        {
+            await SendAsync(MsgType.MoveTo, new MoveToMsg
+            {
+                DestX = npc.X,
+                DestY = npc.Y,
+                DestZ = npc.Z
+            }).ConfigureAwait(false);
+            await ExpectAsync<MoveToMsg>(MsgType.MoveToAck).ConfigureAwait(false);
         }
 
         public async Task SendAsync<T>(MsgType type, T msg)

@@ -207,16 +207,32 @@ public sealed class ZoneServer
             }
             case MsgType.SelectTarget:
             {
-                ZoneLog.Info($"RX SelectTarget session={sessionId}");
-                await ErrorAsync(session, "combat_not_ready",
-                    "Target selection is not enabled on this zone build.", ct).ConfigureAwait(false);
+                var select = Decode<SelectTargetMsg>(body);
+                if (select == null)
+                {
+                    await ErrorAsync(session, "bad_request", "SelectTarget body was not readable.", ct).ConfigureAwait(false);
+                    break;
+                }
+
+                string? code = await _world.TrySelectTargetAsync(session, select, ct).ConfigureAwait(false);
+                if (code == "world")
+                    await ErrorAsync(session, "world", "EnterWorld first.", ct).ConfigureAwait(false);
+                else if (code == "target")
+                    await ErrorAsync(session, "target", "Invalid target.", ct).ConfigureAwait(false);
+                else
+                    ZoneLog.Info($"RX SelectTarget session={sessionId} → {select.TargetObjectId}");
                 break;
             }
             case MsgType.AttackRequest:
             {
-                ZoneLog.Info($"RX AttackRequest session={sessionId}");
-                await ErrorAsync(session, "combat_not_ready",
-                    "Combat is not enabled on this zone build.", ct).ConfigureAwait(false);
+                var attack = Decode<AttackRequestMsg>(body) ?? new AttackRequestMsg();
+                string? code = await _world.TryAttackAsync(session, attack, ct).ConfigureAwait(false);
+                if (code == "world")
+                    await ErrorAsync(session, "world", "EnterWorld first.", ct).ConfigureAwait(false);
+                else if (code != null)
+                    await ErrorAsync(session, "attack", "Attack failed.", ct).ConfigureAwait(false);
+                else
+                    ZoneLog.Info($"RX AttackRequest session={sessionId} target={session.SelectedTargetId}");
                 break;
             }
             case MsgType.Say:

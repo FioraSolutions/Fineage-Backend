@@ -59,6 +59,22 @@ public class ProtocolCompatTests
     }
 
     [Fact]
+    public void CombatMsgs_RoundTrip()
+    {
+        var status = new StatusUpdateMsg
+        {
+            ObjectId = 50_001,
+            AttributeIds = [InterludeStatus.CurHp, InterludeStatus.MaxHp],
+            Values = [64, 96]
+        };
+        var attack = new AttackMsg { AttackerObjectId = 1, TargetObjectId = 50_001, Damage = 32 };
+        Assert.Equal(64,
+            MessagePackSerializer.Deserialize<StatusUpdateMsg>(MessagePackSerializer.Serialize(status)).Values[0]);
+        Assert.Equal(32,
+            MessagePackSerializer.Deserialize<AttackMsg>(MessagePackSerializer.Serialize(attack)).Damage);
+    }
+
+    [Fact]
     public void Say_MatchesProtocolV2Layout()
     {
         Assert.Equal((ushort)MsgType.Say, (ushort)Fineage.Protocol.V2.MsgType.Say);
