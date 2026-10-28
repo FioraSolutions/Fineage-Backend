@@ -61,6 +61,36 @@ public sealed class ZoneV2WireBoundaryTests
     }
 
     [Fact]
+    public async Task MoveTo_on_zone_pipeline_after_auth_without_enter_world_returns_world()
+    {
+        var tokens = HandoffTokens.FromEnvironment();
+        var login = new LoginService(JsonAccountStore.InMemory(), tokens);
+        var ticket = login.Play("hero", "pass1234", "Fighter", HumanClasses.Fighter);
+        Assert.True(ticket.Ok && ticket.Value != null);
+
+        var server = new ZoneServer(tokens, new ZoneWorld());
+        await using var host = await PipelineZoneHost.StartAsync(server);
+
+        using var client = new TcpClient();
+        await client.ConnectAsync(IPAddress.Loopback, host.Port);
+        await using var stream = client.GetStream();
+
+        await FrameIO.SendAsync(stream, (ushort)MsgType.Hello, MessagePackSerializer.Serialize(new HelloMsg()));
+        await ReadAsync(stream, MsgType.HelloAck);
+        await FrameIO.SendAsync(stream, (ushort)MsgType.Auth,
+            MessagePackSerializer.Serialize(ticket.Value!.ToZoneAuth()));
+        await ReadAsync(stream, MsgType.AuthOk);
+        await FrameIO.SendAsync(stream, (ushort)MsgType.MoveTo,
+            MessagePackSerializer.Serialize(new MoveToMsg { DestX = 1, DestY = 1, DestZ = 0 }));
+
+        var frame = await FrameIO.ReadAsync(stream);
+        Assert.NotNull(frame);
+        Assert.Equal((ushort)MsgType.Error, frame!.Value.Type);
+        var err = MessagePackSerializer.Deserialize<ErrorMsg>(frame.Value.Body);
+        Assert.Equal("world", err.Code);
+    }
+
+    [Fact]
     public async Task EnterWorld_on_zone_pipeline_without_auth_returns_auth_required()
     {
         var tokens = HandoffTokens.FromEnvironment();
