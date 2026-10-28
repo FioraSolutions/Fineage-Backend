@@ -71,6 +71,7 @@ public sealed class ZoneServer
                 if (frame == null)
                     return;
 
+                PipelineTelemetry.FrameIn("zone");
                 idleWatch.Touch();
 
                 if (!rate.TryConsume())

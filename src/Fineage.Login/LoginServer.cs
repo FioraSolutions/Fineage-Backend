@@ -46,6 +46,9 @@ public sealed class LoginServer
                 if (frame == null)
                     return;
 
+                if (rateLimit)
+                    PipelineTelemetry.FrameIn("login");
+
                 idleWatch?.Touch();
 
                 if (rate != null && !rate.TryConsume())
