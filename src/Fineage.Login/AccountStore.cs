@@ -60,7 +60,9 @@ public sealed record CharacterRecord(
     long ClanJoinExpiryUnixMs = 0,
     long ClanCreateExpiryUnixMs = 0,
     long Exp = 0,
-    IReadOnlyList<QuestSaveRow>? Quests = null)
+    IReadOnlyList<QuestSaveRow>? Quests = null,
+    IReadOnlyList<StoredItem>? Warehouse = null,
+    bool Newbie = true)
 {
     /// <summary>Remaining whole seconds until hard delete. Zero when the character is not pending.</summary>
     public int DeleteSecondsLeft(DateTimeOffset now)
@@ -161,6 +163,9 @@ public interface IAccountStore
 
     /// <summary>Replaces the saved bag. An empty list is a real save; it does not mean "grant the kit".</summary>
     bool TryReplaceItems(string account, int characterId, IReadOnlyList<StoredItem> items);
+
+    /// <summary>Replaces the private warehouse. An empty list is an empty warehouse.</summary>
+    bool TryReplaceWarehouse(string account, int characterId, IReadOnlyList<StoredItem> items);
 
     /// <summary>Writes the last world position. When <paramref name="lastAccess"/> is set and later than the stored value, updates last played.</summary>
     bool TrySavePresence(string account, int characterId, int x, int y, int z, DateTimeOffset? lastAccess);
@@ -379,6 +384,7 @@ public sealed class JsonAccountStore : IAccountStore
                 Adena = adena,
                 Title = title ?? "",
                 Items = CopyItems(items),
+                Newbie = row.Characters.Count == 0,
                 CreatedAt = createdAt ?? DateTimeOffset.UtcNow
             };
             row.Characters.Add(character);
@@ -398,6 +404,21 @@ public sealed class JsonAccountStore : IAccountStore
             if (character == null)
                 return false;
             character.Items = CopyItems(items);
+            Save();
+            return true;
+        }
+    }
+
+    public bool TryReplaceWarehouse(string account, int characterId, IReadOnlyList<StoredItem> items)
+    {
+        ArgumentNullException.ThrowIfNull(items);
+        CharacterInventory.Validate(items);
+        lock (_gate)
+        {
+            var character = FindCharacter(account, characterId);
+            if (character == null)
+                return false;
+            character.Warehouse = CopyItems(items);
             Save();
             return true;
         }
@@ -989,7 +1010,11 @@ public sealed class JsonAccountStore : IAccountStore
                 : character.Quests.Select(quest => new QuestSaveRow(
                     quest.QuestId,
                     quest.State,
-                    (quest.Vars ?? []).Select(variable => new QuestSaveVar(variable.Key, variable.Value)).ToArray())).ToArray());
+                    (quest.Vars ?? []).Select(variable => new QuestSaveVar(variable.Key, variable.Value)).ToArray())).ToArray(),
+            character.Warehouse == null
+                ? null
+                : character.Warehouse.Select(item => new StoredItem(item.ItemId, item.Count, -1, item.EnchantLevel)).ToArray(),
+            character.Newbie);
 
     sealed class StoreFile
     {
@@ -1043,6 +1068,8 @@ public sealed class JsonAccountStore : IAccountStore
         public long Exp { get; set; }
         public List<StoredQuestDto>? Quests { get; set; }
         public List<StoredItemDto>? Items { get; set; }
+        public List<StoredItemDto>? Warehouse { get; set; }
+        public bool Newbie { get; set; } = true;
     }
 
     sealed class StoredQuestDto

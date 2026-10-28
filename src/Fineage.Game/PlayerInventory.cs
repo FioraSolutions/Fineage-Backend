@@ -307,6 +307,34 @@ public sealed class PlayerInventory
     /// <paramref name="removed"/> is true when the stack is gone; <paramref name="stack"/> is that row with count 0.
     /// Otherwise <paramref name="stack"/> is the reduced stack.
     /// </summary>
+    /// <summary>
+    /// Removes <paramref name="count"/> from the stack with this object id.
+    /// An equipped piece is left in place and the call returns false.
+    /// <paramref name="removed"/> is true when the stack is gone; <paramref name="item"/> then has count 0.
+    /// </summary>
+    public bool TryTakeFrom(int objectId, int count, out ItemInstance? item, out bool removed)
+    {
+        item = null;
+        removed = false;
+        if (count < 1)
+            return false;
+        var found = Find(objectId);
+        if (found == null || found.IsEquipped || found.Count < count)
+            return false;
+        if (found.Count == count)
+        {
+            found.Count = 0;
+            _items.Remove(found);
+            item = found;
+            removed = true;
+            return true;
+        }
+
+        found.Count -= count;
+        item = found;
+        return true;
+    }
+
     public bool TryConsume(int itemId, int count, out ItemInstance? stack, out bool removed)
     {
         stack = null;

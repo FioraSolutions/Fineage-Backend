@@ -12,13 +12,16 @@ public sealed partial class ZoneWorld
 
         string? error;
         var toSelf = new List<Pending>();
+        var toOthers = new List<Pending>();
         lock (_gate)
-            error = Bypass(session, npcObjectId, command, toSelf);
+            error = Bypass(session, npcObjectId, command, toSelf, toOthers);
         await FlushSelfAsync(session, toSelf, ct).ConfigureAwait(false);
+        if (toOthers.Count > 0)
+            await FlushOthersAsync(toOthers, ct).ConfigureAwait(false);
         return error;
     }
 
-    string? Bypass(ZoneSession session, int npcObjectId, string? command, List<Pending> toSelf)
+    string? Bypass(ZoneSession session, int npcObjectId, string? command, List<Pending> toSelf, List<Pending> toOthers)
     {
         if (!TryPlayer(session, out var player))
             return "world";
@@ -65,6 +68,9 @@ public sealed partial class ZoneWorld
                 return "bad_request";
             return Talk(session, npc.ObjectId, reply.QuestId, reply.QuestEvent, toSelf, out _);
         }
+
+        if (reply.Service != null)
+            return ApplyNpcService(session, player, npc, reply, toSelf, toOthers);
 
         SendHtml(session, player, npc, reply.Html ?? NpcHtmlText.NothingToSay, toSelf);
         return null;

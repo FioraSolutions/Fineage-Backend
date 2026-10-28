@@ -1307,3 +1307,119 @@ public sealed class OlympiadCountdownMsg
     [Key(1)] public int Kind { get; set; }
     [Key(2)] public int Seconds { get; set; }
 }
+
+/// <summary>Opcode <see cref="MsgType.TeleportSelectRequest"/> (105).</summary>
+[MessagePackObject]
+public sealed class TeleportSelectRequestMsg
+{
+    [Key(0)] public int NpcObjectId { get; set; }
+    [Key(1)] public string ListName { get; set; } = "";
+    [Key(2)] public int LocationId { get; set; }
+}
+
+/// <summary>One deposit or withdraw line. Object id is the inventory or warehouse instance.</summary>
+[MessagePackObject]
+public sealed class WarehouseCountMsg
+{
+    [Key(0)] public int ObjectId { get; set; }
+    [Key(1)] public int Count { get; set; }
+}
+
+/// <summary>Opcode <see cref="MsgType.WarehouseDepositRequest"/> (106).</summary>
+[MessagePackObject]
+public sealed class WarehouseDepositRequestMsg
+{
+    [Key(0)] public int NpcObjectId { get; set; }
+    [Key(1)] public WarehouseCountMsg[] Lines { get; set; } = [];
+}
+
+/// <summary>Opcode <see cref="MsgType.WarehouseWithdrawRequest"/> (107).</summary>
+[MessagePackObject]
+public sealed class WarehouseWithdrawRequestMsg
+{
+    [Key(0)] public int NpcObjectId { get; set; }
+    [Key(1)] public WarehouseCountMsg[] Lines { get; set; } = [];
+}
+
+/// <summary>Opcode <see cref="MsgType.SupportMagicRequest"/> (108).</summary>
+[MessagePackObject]
+public sealed class SupportMagicRequestMsg
+{
+    [Key(0)] public int NpcObjectId { get; set; }
+}
+
+/// <summary>Opcode <see cref="MsgType.GiveBlessingRequest"/> (109).</summary>
+[MessagePackObject]
+public sealed class GiveBlessingRequestMsg
+{
+    [Key(0)] public int NpcObjectId { get; set; }
+}
+
+/// <summary>One row of <see cref="TeleportListMsg"/>.</summary>
+[MessagePackObject]
+public sealed class TeleportLocationMsg
+{
+    [Key(0)] public int Id { get; set; }
+    [Key(1)] public string Name { get; set; } = "";
+    [Key(2)] public int X { get; set; }
+    [Key(3)] public int Y { get; set; }
+    [Key(4)] public int Z { get; set; }
+    [Key(5)] public int FeeItemId { get; set; }
+    /// <summary>What this player pays now, after the free-level and evening discount rules. 0 is free.</summary>
+    [Key(6)] public int FeeCount { get; set; }
+}
+
+/// <summary>Opcode <see cref="MsgType.TeleportList"/> (1105).</summary>
+[MessagePackObject]
+public sealed class TeleportListMsg
+{
+    [Key(0)] public int NpcObjectId { get; set; }
+    [Key(1)] public string ListName { get; set; } = "";
+    [Key(2)] public string ListType { get; set; } = "";
+    [Key(3)] public TeleportLocationMsg[] Locations { get; set; } = [];
+}
+
+/// <summary>Opcode <see cref="MsgType.WarehouseDepositList"/> (1106).</summary>
+[MessagePackObject]
+public sealed class WarehouseDepositListMsg
+{
+    [Key(0)] public int NpcObjectId { get; set; }
+    [Key(1)] public int FeePerLine { get; set; }
+    [Key(2)] public int SlotsUsed { get; set; }
+    [Key(3)] public int SlotsMax { get; set; }
+    [Key(4)] public int Adena { get; set; }
+    [Key(5)] public ItemListEntryMsg[] Items { get; set; } = [];
+}
+
+/// <summary>Opcode <see cref="MsgType.WarehouseWithdrawList"/> (1107).</summary>
+[MessagePackObject]
+public sealed class WarehouseWithdrawListMsg
+{
+    [Key(0)] public int NpcObjectId { get; set; }
+    [Key(1)] public int SlotsUsed { get; set; }
+    [Key(2)] public int SlotsMax { get; set; }
+    [Key(3)] public int InventorySlotsUsed { get; set; }
+    [Key(4)] public int InventorySlotsMax { get; set; }
+    [Key(5)] public int CurrentWeight { get; set; }
+    [Key(6)] public int MaxWeight { get; set; }
+    [Key(7)] public ItemListEntryMsg[] Items { get; set; } = [];
+}
+
+/// <summary>Opcode <see cref="MsgType.NewbieBuffResult"/> (1108).</summary>
+[MessagePackObject]
+public sealed class NewbieBuffResultMsg
+{
+    [Key(0)] public int NpcObjectId { get; set; }
+    [Key(1)] public int[] SkillIds { get; set; } = [];
+    /// <summary>Empty when buffs were applied. Otherwise <see cref="NewbieBuffRefusal"/> name is not used; this is a short code: low, high, newbie, class, none.</summary>
+    [Key(2)] public string Refusal { get; set; } = "";
+}
+
+/// <summary>Opcode <see cref="MsgType.BlessingResult"/> (1109).</summary>
+[MessagePackObject]
+public sealed class BlessingResultMsg
+{
+    [Key(0)] public int NpcObjectId { get; set; }
+    [Key(1)] public int SkillId { get; set; }
+    [Key(2)] public bool Accepted { get; set; }
+}

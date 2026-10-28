@@ -118,13 +118,12 @@ These handlers return HTML `{service} is not implemented yet.` Registering anoth
 | Service | Commands | Later work |
 |---------|----------|------------|
 | Shop | `Buy`, `Sell`, `Multisell`, `exc_multisell`, `Wear`, `Exchange` | buylists and multisell |
-| Teleport | `Teleport`, `goto`, `showTeleports`, `showNoblesSelect` | gatekeeper |
-| Warehouse | `DepositP`, `WithdrawP`, `DepositC`, `WithdrawC`, `DepositF`, `WithdrawF`, `package_deposit`, `package_withdraw` | private, clan, and freight warehouse |
-| Buff | `SupportMagic`, `SupportBlessing`, `GiveBlessing` | newbie helper |
+| Teleport | `showNoblesSelect` | noblesse lists stay on this stub. `goto`, `teleport`, and `showTeleports` are live. See `docs/npc-services-v2-protocol.md` |
+| Warehouse | `DepositC`, `WithdrawC`, `DepositF`, `WithdrawF`, `package_deposit`, `package_withdraw` | clan and freight. `DepositP` and `WithdrawP` are the private warehouse |
 
 Any other command returns `That action is not implemented yet.` It does not close the window with `Error`. `TerritoryStatus` is in that set until a residence wire exists.
 
-`IBypassHandler.Handle` runs while the zone lock is held and must not call back into the world. It returns a `BypassReply`. The world sends the HTML, replays talk, or runs the quest hook.
+`IBypassHandler.Handle` runs while the zone lock is held and must not call back into the world. It returns a `BypassReply`. The world sends the HTML, replays talk, runs the quest hook, or applies a service intent (`docs/npc-services-v2-protocol.md`).
 
 ## Errors (1099)
 

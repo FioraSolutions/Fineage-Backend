@@ -27,5 +27,8 @@
     <Content Include="..\..\data\dungeons.json" Link="data\dungeons.json" CopyToOutputDirectory="PreserveNewest" />
     <Content Include="..\..\data\html\**\*.*" Link="data\html\%(RecursiveDir)%(Filename)%(Extension)" CopyToOutputDirectory="PreserveNewest" />
     <Content Include="..\..\data\olympiad-stadiums.json" Link="data\olympiad-stadiums.json" CopyToOutputDirectory="PreserveNewest" />
+    <Content Include="..\..\data\teleports.json" Link="data\teleports.json" CopyToOutputDirectory="PreserveNewest" />
+    <Content Include="..\..\data\newbie-buffs.json" Link="data\newbie-buffs.json" CopyToOutputDirectory="PreserveNewest" />
+    <Content Include="..\..\data\item-weights.json" Link="data\item-weights.json" CopyToOutputDirectory="PreserveNewest" />
   </ItemGroup>
 </Project>

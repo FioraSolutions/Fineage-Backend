@@ -122,12 +122,20 @@ public sealed class NpcHtmlTests
         Assert.Equal("", talk.QuestEvent);
 
         Assert.Contains("Shop is not implemented yet.", registry.Find("Buy 1")!.Handle(call with { Command = "Buy 1" }).Html, StringComparison.Ordinal);
-        Assert.Contains("Teleport is not implemented yet.", registry.Find("goto 15")!.Handle(call with { Command = "goto 15" }).Html, StringComparison.Ordinal);
-        Assert.Contains("Teleport is not implemented yet.", registry.Find("showTeleports")!.Handle(call with { Command = "showTeleports" }).Html, StringComparison.Ordinal);
+        Assert.Equal(NpcServiceIntent.Teleport, registry.Find("goto 15")!.Handle(call with { Command = "goto 15" }).Service);
+        Assert.Equal("NORMAL", registry.Find("goto 15")!.Handle(call with { Command = "goto 15" }).ServiceArg);
+        Assert.Equal(15, registry.Find("goto 15")!.Handle(call with { Command = "goto 15" }).ServiceId);
+        Assert.Equal(NpcServiceIntent.TeleportList, registry.Find("showTeleports")!.Handle(call with { Command = "showTeleports" }).Service);
+        Assert.Equal(NpcServiceIntent.Teleport, registry.Find("teleport OTHER 0")!.Handle(call with { Command = "teleport OTHER 0" }).Service);
+        Assert.Equal("OTHER", registry.Find("teleport OTHER 0")!.Handle(call with { Command = "teleport OTHER 0" }).ServiceArg);
+        Assert.Equal(0, registry.Find("teleport OTHER 0")!.Handle(call with { Command = "teleport OTHER 0" }).ServiceId);
+        Assert.Contains("Teleport is not implemented yet.", registry.Find("showNoblesSelect")!.Handle(call with { Command = "showNoblesSelect" }).Html, StringComparison.Ordinal);
         Assert.Contains("Shop is not implemented yet.", registry.Find("exc_multisell 003")!.Handle(call with { Command = "exc_multisell 003" }).Html, StringComparison.Ordinal);
-        Assert.Contains("Warehouse is not implemented yet.", registry.Find("DepositP")!.Handle(call with { Command = "DepositP" }).Html, StringComparison.Ordinal);
+        Assert.Equal(NpcServiceIntent.Deposit, registry.Find("DepositP")!.Handle(call with { Command = "DepositP" }).Service);
+        Assert.Equal(NpcServiceIntent.Withdraw, registry.Find("WithdrawP")!.Handle(call with { Command = "WithdrawP" }).Service);
         Assert.Contains("Warehouse is not implemented yet.", registry.Find("package_deposit")!.Handle(call with { Command = "package_deposit" }).Html, StringComparison.Ordinal);
-        Assert.Contains("Buff is not implemented yet.", registry.Find("SupportMagic")!.Handle(call with { Command = "SupportMagic" }).Html, StringComparison.Ordinal);
+        Assert.Equal(NpcServiceIntent.SupportMagic, registry.Find("SupportMagic")!.Handle(call with { Command = "SupportMagic" }).Service);
+        Assert.Equal(NpcServiceIntent.GiveBlessing, registry.Find("GiveBlessing")!.Handle(call with { Command = "GiveBlessing" }).Service);
         Assert.Null(registry.Find("TerritoryStatus"));
 
         registry.Register(new ReplacingBuy());
@@ -185,14 +193,20 @@ public sealed class NpcHtmlTests
             NpcObjectId = 0,
             Command = $"bypass -h npc_{MerchantObjectId}_goto 15"
         });
+        var gateNotice = await link.ReadAsync<SystemMessageMsg>(MsgType.SystemMessage);
+        Assert.Equal(NpcServiceProtocol.UnknownTeleport, gateNotice.Id);
         var gate = await link.ReadAsync<NpcHtmlMsg>(MsgType.NpcHtml);
-        Assert.Contains("Teleport is not implemented yet.", gate.Html, StringComparison.Ordinal);
+        Assert.Contains("not available", gate.Html, StringComparison.Ordinal);
 
         await link.SendAsync(MsgType.BypassRequest, new BypassRequestMsg { NpcObjectId = MerchantObjectId, Command = "DepositP" });
-        Assert.Contains("Warehouse is not implemented yet.", (await link.ReadAsync<NpcHtmlMsg>(MsgType.NpcHtml)).Html, StringComparison.Ordinal);
+        Assert.Contains("warehouse keeper", (await link.ReadAsync<NpcHtmlMsg>(MsgType.NpcHtml)).Html, StringComparison.OrdinalIgnoreCase);
 
         await link.SendAsync(MsgType.BypassRequest, new BypassRequestMsg { NpcObjectId = MerchantObjectId, Command = "SupportMagic" });
-        Assert.Contains("Buff is not implemented yet.", (await link.ReadAsync<NpcHtmlMsg>(MsgType.NpcHtml)).Html, StringComparison.Ordinal);
+        var buffNotice = await link.ReadAsync<SystemMessageMsg>(MsgType.SystemMessage);
+        Assert.Equal(NpcServiceProtocol.BuffLevelLow, buffNotice.Id);
+        var buffResult = await link.ReadAsync<NewbieBuffResultMsg>(MsgType.NewbieBuffResult);
+        Assert.Equal("low", buffResult.Refusal);
+        Assert.Contains("low level", (await link.ReadAsync<NpcHtmlMsg>(MsgType.NpcHtml)).Html, StringComparison.OrdinalIgnoreCase);
 
         await link.SendAsync(MsgType.BypassRequest, new BypassRequestMsg { NpcObjectId = MerchantObjectId, Command = "Chat 1" });
         Assert.Contains("page-one", (await link.ReadAsync<NpcHtmlMsg>(MsgType.NpcHtml)).Html, StringComparison.Ordinal);

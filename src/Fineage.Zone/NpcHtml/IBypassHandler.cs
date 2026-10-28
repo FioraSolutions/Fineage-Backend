@@ -37,7 +37,23 @@ public sealed class BypassReply
     public string QuestEvent { get; init; } = "";
     public string? Error { get; init; }
 
+    /// <summary>World-applied service. See <see cref="Fineage.Protocol.NpcServiceIntent"/>.</summary>
+    public string? Service { get; init; }
+
+    /// <summary>List name for a teleport. Empty for other services.</summary>
+    public string ServiceArg { get; init; } = "";
+
+    /// <summary>Location id for a teleport. -1 when unused.</summary>
+    public int ServiceId { get; init; } = -1;
+
     public static BypassReply Page(string html) => new() { Html = html };
+
+    public static BypassReply ServiceCall(string service, string arg = "", int id = -1) => new()
+    {
+        Service = service,
+        ServiceArg = arg ?? "",
+        ServiceId = id
+    };
 
     public static BypassReply TalkAgain() => new() { ReplayTalk = true };
 

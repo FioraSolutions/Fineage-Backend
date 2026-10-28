@@ -124,6 +124,16 @@ public enum MsgType : ushort
     /// Mobius <c>RequestBypassToServer</c>. See <see cref="NpcHtmlProtocol"/>.
     /// </summary>
     BypassRequest = 95,
+    /// <summary>Pick a gatekeeper destination. See <see cref="NpcServiceProtocol"/>.</summary>
+    TeleportSelectRequest = 105,
+    /// <summary>Deposit lines into the private warehouse.</summary>
+    WarehouseDepositRequest = 106,
+    /// <summary>Withdraw lines from the private warehouse.</summary>
+    WarehouseWithdrawRequest = 107,
+    /// <summary>Ask the Newbie Helper for supplemental magic.</summary>
+    SupportMagicRequest = 108,
+    /// <summary>Ask the Newbie Helper for the Blessing of Protection.</summary>
+    GiveBlessingRequest = 109,
     /// <summary>Keepalive from client. Server answers with <see cref="Pong"/>.</summary>
     Ping = 9,
     /// <summary>Zone chat. Fan-out is <see cref="CreatureSay"/>. See <see cref="ChatProtocol"/>.</summary>
@@ -227,6 +237,16 @@ public enum MsgType : ushort
     /// Quest steps stay on <see cref="QuestDialog"/>. See <see cref="NpcHtmlProtocol"/>.
     /// </summary>
     NpcHtml = 1094,
+    /// <summary>Gatekeeper destinations. See <see cref="NpcServiceProtocol"/>.</summary>
+    TeleportList = 1105,
+    /// <summary>Items the player may deposit, plus the fee and slot counts.</summary>
+    WarehouseDepositList = 1106,
+    /// <summary>Private warehouse contents.</summary>
+    WarehouseWithdrawList = 1107,
+    /// <summary>Supplemental magic that was applied.</summary>
+    NewbieBuffResult = 1108,
+    /// <summary>Blessing of Protection result.</summary>
+    BlessingResult = 1109,
 
     // Login S → C. Canonical lobby set; see LobbyProtocol.
     RegisterOk = 1020,

@@ -109,6 +109,16 @@ public enum MsgType : ushort
     AdminBossSchedule = 94,
     /// <summary>Same value as <see cref="Fineage.Protocol.MsgType.BypassRequest"/>.</summary>
     BypassRequest = 95,
+    /// <summary>Same value as <see cref="Fineage.Protocol.MsgType.TeleportSelectRequest"/>.</summary>
+    TeleportSelectRequest = 105,
+    /// <summary>Same value as <see cref="Fineage.Protocol.MsgType.WarehouseDepositRequest"/>.</summary>
+    WarehouseDepositRequest = 106,
+    /// <summary>Same value as <see cref="Fineage.Protocol.MsgType.WarehouseWithdrawRequest"/>.</summary>
+    WarehouseWithdrawRequest = 107,
+    /// <summary>Same value as <see cref="Fineage.Protocol.MsgType.SupportMagicRequest"/>.</summary>
+    SupportMagicRequest = 108,
+    /// <summary>Same value as <see cref="Fineage.Protocol.MsgType.GiveBlessingRequest"/>.</summary>
+    GiveBlessingRequest = 109,
 
     HelloAck = 1001,
     AuthOk = 1002,
@@ -189,6 +199,16 @@ public enum MsgType : ushort
     BossStatus = 1093,
     /// <summary>Same value as <see cref="Fineage.Protocol.MsgType.NpcHtml"/>.</summary>
     NpcHtml = 1094,
+    /// <summary>Same value as <see cref="Fineage.Protocol.MsgType.TeleportList"/>.</summary>
+    TeleportList = 1105,
+    /// <summary>Same value as <see cref="Fineage.Protocol.MsgType.WarehouseDepositList"/>.</summary>
+    WarehouseDepositList = 1106,
+    /// <summary>Same value as <see cref="Fineage.Protocol.MsgType.WarehouseWithdrawList"/>.</summary>
+    WarehouseWithdrawList = 1107,
+    /// <summary>Same value as <see cref="Fineage.Protocol.MsgType.NewbieBuffResult"/>.</summary>
+    NewbieBuffResult = 1108,
+    /// <summary>Same value as <see cref="Fineage.Protocol.MsgType.BlessingResult"/>.</summary>
+    BlessingResult = 1109,
 
     /// <summary>Login roster. Was 1005; moved so it no longer aliases <see cref="CharInfo"/>.</summary>
     CharacterRoster = 1030,
