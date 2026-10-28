@@ -127,6 +127,8 @@ public class LoginServiceTests
         string flipped = ticket.Token[..^1] + (ticket.Token[^1] == 'a' ? "b" : "a");
         Assert.False(tokens.TryValidate(flipped, issuedAt, out _));
         Assert.False(tokens.TryValidate(ticket.Token, issuedAt.AddMinutes(11), out _));
+        Assert.Equal(HandoffTokens.ValidateStatus.Expired,
+            tokens.Validate(ticket.Token, issuedAt.AddMinutes(11), out _));
         Assert.True(tokens.TryValidate(ticket.Token, issuedAt.AddMinutes(9), out _));
     }
 

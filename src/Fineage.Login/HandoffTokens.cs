@@ -37,6 +37,13 @@ public sealed class HandoffTokens
     public const string DefaultSecret = "FineageLoginHandoffV1";
     public static readonly TimeSpan DefaultTtl = TimeSpan.FromMinutes(10);
 
+    public enum ValidateStatus
+    {
+        Ok,
+        Invalid,
+        Expired,
+    }
+
     readonly byte[] _key;
     readonly TimeSpan _ttl;
 
@@ -93,14 +100,17 @@ public sealed class HandoffTokens
             ZoneHandoff.AdvertisePort);
     }
 
-    public bool TryValidate(string token, DateTimeOffset now, out HandoffClaims claims)
+    public bool TryValidate(string token, DateTimeOffset now, out HandoffClaims claims) =>
+        Validate(token, now, out claims) == ValidateStatus.Ok;
+
+    public ValidateStatus Validate(string token, DateTimeOffset now, out HandoffClaims claims)
     {
         claims = new HandoffClaims("", 0, "", 0, 0, 0, 0);
         if (string.IsNullOrEmpty(token))
-            return false;
+            return ValidateStatus.Invalid;
         string[] parts = token.Split('.');
         if (parts.Length != 3 || parts[0] != "fa1")
-            return false;
+            return ValidateStatus.Invalid;
 
         byte[] payload;
         byte[] mac;
@@ -111,28 +121,28 @@ public sealed class HandoffTokens
         }
         catch (FormatException)
         {
-            return false;
+            return ValidateStatus.Invalid;
         }
 
         byte[] expected = Sign(payload);
         if (mac.Length != expected.Length || !CryptographicOperations.FixedTimeEquals(mac, expected))
-            return false;
+            return ValidateStatus.Invalid;
 
         string text = Encoding.UTF8.GetString(payload);
         string[] fields = text.Split('|');
         if (fields.Length != 9 || fields[0] != "1")
-            return false;
+            return ValidateStatus.Invalid;
         if (!int.TryParse(fields[2], out int id) ||
             !int.TryParse(fields[4], out int classId) ||
             !int.TryParse(fields[5], out int race) ||
             !int.TryParse(fields[6], out int sex) ||
             !long.TryParse(fields[7], out long exp))
-            return false;
+            return ValidateStatus.Invalid;
         if (now.ToUnixTimeSeconds() >= exp)
-            return false;
+            return ValidateStatus.Expired;
 
         claims = new HandoffClaims(fields[1], id, fields[3], classId, race, sex, exp);
-        return true;
+        return ValidateStatus.Ok;
     }
 
     byte[] Sign(byte[] payload)
