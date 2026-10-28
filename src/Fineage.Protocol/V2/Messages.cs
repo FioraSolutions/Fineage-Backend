@@ -579,6 +579,44 @@ public sealed partial class SiegeInfoMsg
     [Key(9)] public long EndsUnixMs { get; set; }
 }
 
+
+/// <summary>Same keys as <see cref="Fineage.Protocol.ReviveRequestMsg"/>.</summary>
+[MessagePackObject]
+public sealed partial class ReviveRequestMsg
+{
+    [Key(0)] public int Action { get; set; }
+}
+
+/// <summary>Same keys as <see cref="Fineage.Protocol.AdminKillPlayerMsg"/>.</summary>
+[MessagePackObject]
+public sealed partial class AdminKillPlayerMsg;
+
+/// <summary>Same keys as <see cref="Fineage.Protocol.DieMsg"/>.</summary>
+[MessagePackObject]
+public sealed partial class DieMsg
+{
+    [Key(0)] public int ObjectId { get; set; }
+    [Key(1)] public int KillerObjectId { get; set; }
+}
+
+/// <summary>Same keys as <see cref="Fineage.Protocol.ReviveMsg"/>.</summary>
+[MessagePackObject]
+public sealed partial class ReviveMsg
+{
+    [Key(0)] public int ObjectId { get; set; }
+}
+
+/// <summary>Same keys as <see cref="Fineage.Protocol.TeleportToLocationMsg"/>.</summary>
+[MessagePackObject]
+public sealed partial class TeleportToLocationMsg
+{
+    [Key(0)] public int ObjectId { get; set; }
+    [Key(1)] public int X { get; set; }
+    [Key(2)] public int Y { get; set; }
+    [Key(3)] public int Z { get; set; }
+    [Key(4)] public int Heading { get; set; }
+}
+
 /// <summary>Same keys as <see cref="Fineage.Protocol.OlympiadStatusRequestMsg"/>.</summary>
 [MessagePackObject]
 public sealed partial class OlympiadStatusRequestMsg

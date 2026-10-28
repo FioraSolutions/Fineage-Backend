@@ -51,6 +51,8 @@ public sealed partial class ZoneWorld
     {
         foreach (var entity in Players())
         {
+            if (entity.Dead)
+                continue;
             if (entity.CurHp >= entity.MaxHp && entity.CurMp >= entity.MaxMp)
                 continue;
 
