@@ -1,0 +1,90 @@
+using System.Net;
+using System.Net.Sockets;
+using Fineage.Login;
+using Fineage.Protocol;
+using Fineage.Protocol.Net;
+using MessagePack;
+using Xunit;
+using ProtocolMsgType = Fineage.Protocol.MsgType;
+using V2MsgType = Fineage.Protocol.V2.MsgType;
+
+namespace Fineage.Login.Tests;
+
+public sealed class LoginV2WireBoundaryTests
+{
+    [Fact]
+    public async Task ListCharacters_on_login_pipeline_without_auth_returns_auth_required()
+    {
+        var service = new LoginService(JsonAccountStore.InMemory(), HandoffTokens.FromEnvironment());
+        var server = new LoginServer(service);
+        await using var host = await PipelineLoginHost.StartAsync(server);
+
+        using var client = new TcpClient();
+        await client.ConnectAsync(IPAddress.Loopback, host.Port);
+        await using var stream = client.GetStream();
+
+        await FrameIO.SendAsync(stream, (ushort)ProtocolMsgType.Hello, MessagePackSerializer.Serialize(new HelloMsg()));
+        await ReadAsync(stream, ProtocolMsgType.HelloAck);
+        await FrameIO.SendAsync(stream, (ushort)V2MsgType.ListCharacters, []);
+
+        var frame = await FrameIO.ReadAsync(stream);
+        Assert.NotNull(frame);
+        Assert.Equal((ushort)ProtocolMsgType.Error, frame!.Value.Type);
+        var err = MessagePackSerializer.Deserialize<ErrorMsg>(frame.Value.Body);
+        Assert.Equal("auth_required", err.Code);
+    }
+
+    sealed class PipelineLoginHost : IAsyncDisposable
+    {
+        readonly CancellationTokenSource _cts;
+        readonly Task _run;
+
+        PipelineLoginHost(int port, CancellationTokenSource cts, Task run)
+        {
+            Port = port;
+            _cts = cts;
+            _run = run;
+        }
+
+        public int Port { get; }
+
+        public static async Task<PipelineLoginHost> StartAsync(LoginServer server)
+        {
+            var cts = new CancellationTokenSource();
+            var tcp = new TcpServer();
+            var run = Task.Run(() => tcp.RunAsync("127.0.0.1", 0, 4, 8, "login-test", server.HandleAsync, cts.Token));
+
+            for (int i = 0; i < 100; i++)
+            {
+                if (tcp.BoundPort != 0)
+                    return new PipelineLoginHost(tcp.BoundPort, cts, run);
+
+                await Task.Delay(20);
+            }
+
+            await cts.CancelAsync();
+            throw new InvalidOperationException("TcpServer did not bind.");
+        }
+
+        public async ValueTask DisposeAsync()
+        {
+            await _cts.CancelAsync();
+            try
+            {
+                await _run.WaitAsync(TimeSpan.FromSeconds(3));
+            }
+            catch (TimeoutException)
+            {
+            }
+
+            _cts.Dispose();
+        }
+    }
+
+    static async Task ReadAsync(NetworkStream stream, ProtocolMsgType expected)
+    {
+        var frame = await FrameIO.ReadAsync(stream);
+        Assert.NotNull(frame);
+        Assert.Equal((ushort)expected, frame!.Value.Type);
+    }
+}
