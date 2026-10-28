@@ -163,6 +163,41 @@ public sealed partial class EntityLeftMsg
     [Key(0)] public int ObjectId { get; set; }
 }
 
+/// <summary>Same keys as <see cref="Fineage.Protocol.DeleteObjectMsg"/>; zone opcode <see cref="MsgType.DeleteObject"/>.</summary>
+[MessagePackObject]
+public sealed partial class DeleteObjectMsg
+{
+    [Key(0)] public int ObjectId { get; set; }
+}
+
+/// <summary>Same keys as <see cref="Fineage.Protocol.CharInfoMsg"/>; zone opcode <see cref="MsgType.CharInfo"/>.</summary>
+[MessagePackObject]
+public sealed partial class CharInfoMsg
+{
+    [Key(0)] public int ObjectId { get; set; }
+    [Key(1)] public string Name { get; set; } = "";
+    [Key(2)] public int X { get; set; }
+    [Key(3)] public int Y { get; set; }
+    [Key(4)] public int Z { get; set; }
+    [Key(5)] public int ClassId { get; set; }
+}
+
+/// <summary>Same keys as <see cref="Fineage.Protocol.NpcInfoMsg"/>; zone opcode <see cref="MsgType.NpcInfo"/>.</summary>
+[MessagePackObject]
+public sealed partial class NpcInfoMsg
+{
+    [Key(0)] public int ObjectId { get; set; }
+    [Key(1)] public int NpcId { get; set; }
+    [Key(2)] public string Name { get; set; } = "";
+    [Key(3)] public int X { get; set; }
+    [Key(4)] public int Y { get; set; }
+    [Key(5)] public int Z { get; set; }
+    [Key(6)] public int Heading { get; set; }
+    [Key(7)] public bool Attackable { get; set; } = true;
+    [Key(8)] public float RunSpeed { get; set; } = 80f;
+    [Key(9)] public float WalkSpeed { get; set; } = 40f;
+}
+
 /// <summary>Same keys as <see cref="Fineage.Protocol.SayMsg"/>.</summary>
 [MessagePackObject]
 public sealed partial class SayMsg
