@@ -1,5 +1,6 @@
 using Fineage.Game;
 using Fineage.Protocol;
+using Fineage.Zone.Combat;
 using Fineage.Zone.Interest;
 using MessagePack;
 
@@ -23,6 +24,8 @@ sealed class ZoneEntity
     public int ClassId { get; init; }
     public int NpcId { get; init; }
     public bool Attackable { get; init; }
+    public int CurHp { get; set; }
+    public int MaxHp { get; init; }
     public float RunSpeed { get; init; }
     public float WalkSpeed { get; init; }
     public bool Running { get; init; }
@@ -35,7 +38,7 @@ sealed class ZoneEntity
 /// One zone. Players and NPCs are shared entities. Each player keeps a knownlist
 /// of what their client has been told; AOI decides membership.
 /// </summary>
-public sealed class ZoneWorld
+public sealed partial class ZoneWorld
 {
     public const int MaxSayLength = 128;
     static readonly TimeSpan FanoutTimeout = TimeSpan.FromSeconds(2);
@@ -66,6 +69,8 @@ public sealed class ZoneWorld
                 Heading = npc.Heading,
                 NpcId = npc.NpcId,
                 Attackable = npc.Attackable,
+                MaxHp = TalkingIsland.GremlinMaxHp,
+                CurHp = TalkingIsland.GremlinMaxHp,
                 RunSpeed = npc.RunSpeed,
                 WalkSpeed = npc.WalkSpeed
             };

@@ -23,6 +23,7 @@ public sealed class ZoneSession
     public int X { get; internal set; }
     public int Y { get; internal set; }
     public int Z { get; internal set; }
+    public int SelectedTargetId { get; set; }
 
     public bool Bound => ObjectId != 0;
 
@@ -42,6 +43,7 @@ public sealed class ZoneSession
         Name = "";
         ClassId = 0;
         InWorld = false;
+        SelectedTargetId = 0;
     }
 
     public async Task SendAsync<T>(Fineage.Protocol.MsgType type, T message, CancellationToken ct)

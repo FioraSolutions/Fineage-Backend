@@ -321,3 +321,58 @@ public sealed class NpcInfoMsg
     [Key(8)] public float RunSpeed { get; set; } = 80f;
     [Key(9)] public float WalkSpeed { get; set; } = 40f;
 }
+
+/// <summary>Opcode <see cref="MsgType.SelectTarget"/> (5).</summary>
+[MessagePackObject]
+public sealed class SelectTargetMsg
+{
+    [Key(0)] public int TargetObjectId { get; set; }
+}
+
+/// <summary>Opcode <see cref="MsgType.AttackRequest"/> (6). Uses session target when zero.</summary>
+[MessagePackObject]
+public sealed class AttackRequestMsg
+{
+    [Key(0)] public int TargetObjectId { get; set; }
+}
+
+/// <summary>Opcode <see cref="MsgType.MyTargetSelected"/> (1008).</summary>
+[MessagePackObject]
+public sealed class MyTargetSelectedMsg
+{
+    [Key(0)] public int ObjectId { get; set; }
+    [Key(1)] public int ColorHint { get; set; } = InterludeStatus.TargetColorHostile;
+}
+
+/// <summary>Opcode <see cref="MsgType.Attack"/> (1009).</summary>
+[MessagePackObject]
+public sealed class AttackMsg
+{
+    [Key(0)] public int AttackerObjectId { get; set; }
+    [Key(1)] public int TargetObjectId { get; set; }
+    [Key(2)] public int Damage { get; set; }
+    [Key(3)] public byte Flags { get; set; }
+    [Key(4)] public int AttackerX { get; set; }
+    [Key(5)] public int AttackerY { get; set; }
+    [Key(6)] public int AttackerZ { get; set; }
+    [Key(7)] public int TargetX { get; set; }
+    [Key(8)] public int TargetY { get; set; }
+    [Key(9)] public int TargetZ { get; set; }
+}
+
+/// <summary>Opcode <see cref="MsgType.StatusUpdate"/> (1010). Interlude attribute ids in <see cref="AttributeIds"/>.</summary>
+[MessagePackObject]
+public sealed class StatusUpdateMsg
+{
+    [Key(0)] public int ObjectId { get; set; }
+    [Key(1)] public int[] AttributeIds { get; set; } = [];
+    [Key(2)] public int[] Values { get; set; } = [];
+}
+
+/// <summary>Interlude StatusUpdate attribute ids (see client StatusUpdate.AttributeType).</summary>
+public static class InterludeStatus
+{
+    public const int CurHp = 0x09;
+    public const int MaxHp = 0x0a;
+    public const int TargetColorHostile = 11;
+}

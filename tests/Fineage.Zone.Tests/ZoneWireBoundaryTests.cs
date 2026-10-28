@@ -164,7 +164,7 @@ public sealed class ZoneWireBoundaryTests
     }
 
     [Fact]
-    public async Task V2_ListCharacters_opcode_on_zone_pipeline_returns_wrong_port()
+    public async Task V2_ListCharacters_opcode_on_zone_pipeline_returns_world_not_login_roster()
     {
         var tokens = HandoffTokens.FromEnvironment();
         var server = new ZoneServer(tokens, new ZoneWorld());
@@ -181,11 +181,11 @@ public sealed class ZoneWireBoundaryTests
         Assert.NotNull(frame);
         Assert.Equal((ushort)MsgType.Error, frame!.Value.Type);
         var err = MessagePackSerializer.Deserialize<ErrorMsg>(frame.Value.Body);
-        Assert.Equal("wrong_port", err.Code);
+        Assert.Equal("bad_request", err.Code);
     }
 
     [Fact]
-    public async Task V2_CreateCharacter_opcode_on_zone_pipeline_returns_wrong_port()
+    public async Task V2_CreateCharacter_opcode_on_zone_pipeline_returns_world_not_login_roster()
     {
         var tokens = HandoffTokens.FromEnvironment();
         var server = new ZoneServer(tokens, new ZoneWorld());
@@ -209,26 +209,26 @@ public sealed class ZoneWireBoundaryTests
         Assert.NotNull(frame);
         Assert.Equal((ushort)MsgType.Error, frame!.Value.Type);
         var err = MessagePackSerializer.Deserialize<ErrorMsg>(frame.Value.Body);
-        Assert.Equal("wrong_port", err.Code);
+        Assert.Equal("world", err.Code);
     }
 
     [Fact]
-    public async Task V2_ListCharacters_opcode_on_zone_port_returns_wrong_port()
+    public async Task V2_ListCharacters_opcode_on_zone_port_returns_world_not_login_roster()
     {
-        await AssertWrongPortAsync((MsgType)Fineage.Protocol.V2.MsgType.ListCharacters, []);
+        await AssertZoneErrorAsync((MsgType)Fineage.Protocol.V2.MsgType.ListCharacters, [], "bad_request");
     }
 
     [Fact]
-    public async Task V2_CreateCharacter_opcode_on_zone_port_returns_wrong_port()
+    public async Task V2_CreateCharacter_opcode_on_zone_port_returns_world_not_login_roster()
     {
-        await AssertWrongPortAsync((MsgType)Fineage.Protocol.V2.MsgType.CreateCharacter,
+        await AssertZoneErrorAsync((MsgType)Fineage.Protocol.V2.MsgType.CreateCharacter,
             MessagePackSerializer.Serialize(new Fineage.Protocol.V2.CreateCharacterMsg
             {
                 Name = "Aria",
                 Race = HumanClasses.RaceHuman,
                 Sex = HumanClasses.SexMale,
                 ClassId = HumanClasses.Fighter
-            }));
+            }), "world");
     }
 
     [Fact]
@@ -280,6 +280,11 @@ public sealed class ZoneWireBoundaryTests
 
     static async Task AssertWrongPortAsync(MsgType opcode, byte[] body)
     {
+        await AssertZoneErrorAsync(opcode, body, "wrong_port");
+    }
+
+    static async Task AssertZoneErrorAsync(MsgType opcode, byte[] body, string expectedCode)
+    {
         var tokens = HandoffTokens.FromEnvironment();
         var server = new ZoneServer(tokens);
         var listener = new TcpListener(IPAddress.Loopback, 0);
@@ -304,7 +309,7 @@ public sealed class ZoneWireBoundaryTests
         Assert.NotNull(frame);
         Assert.Equal((ushort)MsgType.Error, frame!.Value.Type);
         var err = MessagePackSerializer.Deserialize<ErrorMsg>(frame.Value.Body);
-        Assert.Equal("wrong_port", err.Code);
+        Assert.Equal(expectedCode, err.Code);
 
         listener.Stop();
         await cts.CancelAsync();

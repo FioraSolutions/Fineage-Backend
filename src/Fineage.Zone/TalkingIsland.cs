@@ -12,6 +12,7 @@ public static class TalkingIsland
     public const int SpawnY = TalkingIslandSpawn.Y;
     public const int SpawnZ = TalkingIslandSpawn.Z;
     public const int GremlinNpcId = 20001;
+    public const int GremlinMaxHp = 96;
     public const int MaxStep = 8000;
 
     public static readonly NpcInfoMsg[] Gremlins =
