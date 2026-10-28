@@ -34,6 +34,27 @@ public sealed class ZoneWireBoundaryTests
     }
 
     [Fact]
+    public async Task ListCharacters_on_zone_pipeline_returns_wrong_port()
+    {
+        var tokens = HandoffTokens.FromEnvironment();
+        var server = new ZoneServer(tokens, new ZoneWorld());
+        await using var host = await PipelineZoneHost.StartAsync(server);
+
+        using var client = new TcpClient();
+        await client.ConnectAsync(IPAddress.Loopback, host.Port);
+        await using var stream = client.GetStream();
+        await FrameIO.SendAsync(stream, (ushort)MsgType.Hello, MessagePackSerializer.Serialize(new HelloMsg()));
+        await ReadAsync(stream, MsgType.HelloAck);
+        await FrameIO.SendAsync(stream, (ushort)MsgType.ListCharacters, []);
+
+        var frame = await FrameIO.ReadAsync(stream);
+        Assert.NotNull(frame);
+        Assert.Equal((ushort)MsgType.Error, frame!.Value.Type);
+        var err = MessagePackSerializer.Deserialize<ErrorMsg>(frame.Value.Body);
+        Assert.Equal("wrong_port", err.Code);
+    }
+
+    [Fact]
     public async Task Register_on_zone_port_returns_wrong_port()
     {
         await AssertWrongPortAsync(MsgType.Register,
