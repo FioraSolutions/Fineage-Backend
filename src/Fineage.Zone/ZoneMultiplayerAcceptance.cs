@@ -260,6 +260,9 @@ public static class ZoneMultiplayerAcceptance
             return await ExpectAsync<ErrorMsg>(MsgType.Error).ConfigureAwait(false);
         }
 
+        public Task<Arrival> EnterAsync(int expectOthers) =>
+            EnterAsync(TalkingIsland.Gremlins.Length, expectOthers);
+
         public async Task<Arrival> EnterAsync(int expectNpcs, int expectOthers)
         {
             await SendAsync(MsgType.EnterWorld, new EnterWorldMsg()).ConfigureAwait(false);
@@ -274,6 +277,9 @@ public static class ZoneMultiplayerAcceptance
                 others.Add(await ExpectAsync<CharInfoMsg>(MsgType.CharInfo).ConfigureAwait(false));
             return new Arrival(user, items, spawned, npcs, others);
         }
+
+        public Task<Arrival> EnterAsync(HandoffTicket alreadyIn, HandoffTicket self) =>
+            EnterAsync(alreadyIn, self, TalkingIsland.Gremlins.Length);
 
         public async Task<Arrival> EnterAsync(HandoffTicket alreadyIn, HandoffTicket self, int expectNpcs)
         {
