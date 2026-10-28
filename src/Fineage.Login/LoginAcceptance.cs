@@ -105,6 +105,7 @@ public static class LoginAcceptance
             var created = MessagePackSerializer.Deserialize<CharacterCreatedMsg>(createdBody);
             if (created.ClassId != HumanClasses.Fighter || created.Name != "HumanOne")
                 throw new InvalidOperationException("created character was not the Human fighter");
+            await ExpectAsync(stream, MsgType.CharacterList).ConfigureAwait(false);
 
             await SendAsync(stream, MsgType.SelectCharacter, new SelectCharacterMsg { CharacterId = created.CharacterId })
                 .ConfigureAwait(false);
