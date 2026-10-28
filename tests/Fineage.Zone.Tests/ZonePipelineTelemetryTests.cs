@@ -11,6 +11,10 @@ using Xunit;
 
 namespace Fineage.Zone.Tests;
 
+[CollectionDefinition("Zone pipeline OTEL telemetry", DisableParallelization = true)]
+public sealed class ZonePipelineOtelTelemetryCollection;
+
+[Collection("Zone pipeline OTEL telemetry")]
 public sealed class ZonePipelineTelemetryTests
 {
     [Fact]
@@ -81,6 +85,44 @@ public sealed class ZonePipelineTelemetryTests
         Assert.NotNull(frame);
         Assert.Equal((ushort)MsgType.HelloAck, frame!.Value.Type);
         Assert.True(framesOut >= 1, $"expected fineage.frames.out for zone-test, got {framesOut}");
+    }
+
+    [Fact]
+    public async Task Pipeline_tcp_session_updates_connections_gauge()
+    {
+        long connections = 0;
+        using var meterListener = new MeterListener();
+        meterListener.InstrumentPublished = (instrument, listener) =>
+        {
+            if (instrument.Meter.Name == FineageTelemetry.MeterName && instrument.Name == "fineage.connections")
+                listener.EnableMeasurementEvents(instrument);
+        };
+        meterListener.SetMeasurementEventCallback<long>((_, measurement, tags, _) =>
+        {
+            foreach (KeyValuePair<string, object?> tag in tags)
+            {
+                if (tag.Key == "endpoint" && tag.Value?.ToString() == "zone-test")
+                    Interlocked.Add(ref connections, measurement);
+            }
+        });
+        meterListener.Start();
+
+        var tokens = new HandoffTokens(HandoffTokens.DefaultSecret);
+        var server = new ZoneServer(tokens, new ZoneWorld());
+        await using var host = await PipelineZoneHost.StartAsync(server);
+
+        using var client = new TcpClient();
+        await client.ConnectAsync(IPAddress.Loopback, host.Port);
+        await using var stream = client.GetStream();
+        await FrameIO.SendAsync(stream, (ushort)MsgType.Hello, MessagePackSerializer.Serialize(new HelloMsg()));
+        var frame = await FrameIO.ReadAsync(stream);
+        Assert.NotNull(frame);
+        Assert.Equal((ushort)MsgType.HelloAck, frame!.Value.Type);
+
+        for (int i = 0; i < 100 && connections < 1; i++)
+            await Task.Delay(20);
+
+        Assert.True(connections >= 1, $"expected fineage.connections +1 for zone-test, got {connections}");
     }
 
     sealed class PipelineZoneHost : IAsyncDisposable
