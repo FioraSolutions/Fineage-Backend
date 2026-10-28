@@ -63,6 +63,8 @@ public sealed partial class ZoneWorld
     {
         if (!_byId.TryGetValue(session.ObjectId, out var player) || player.Session == null)
             return "world";
+        if (player.Dead)
+            return InventoryProtocol.Dead;
 
         int targetId = requestedTargetId > 0 ? requestedTargetId : session.SelectedTargetId;
         if (targetId <= 0)

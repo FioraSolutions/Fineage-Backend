@@ -91,6 +91,10 @@ public enum MsgType : ushort
     SkillUseRequest = 50,
     /// <summary>Character action panel / hotkey. See <see cref="ActionProtocol"/>.</summary>
     CharacterActionRequest = 51,
+    /// <summary>Respawn after player death. See <see cref="DeathProtocol"/>.</summary>
+    ReviveRequest = 52,
+    /// <summary>Admin/test kill self. Off unless <c>FINEAGE_ZONE_ADMIN</c>. See <see cref="DeathProtocol"/>.</summary>
+    AdminKillPlayer = 53,
     /// <summary>Seven Signs status snapshot. See <see cref="SevenSignsProtocol"/>.</summary>
     SevenSignsStatusRequest = 90,
     /// <summary>Seven Signs join or seal-stone contribution. See <see cref="SevenSignsProtocol"/>.</summary>
@@ -193,6 +197,12 @@ public enum MsgType : ushort
     SocialAction = 1068,
     /// <summary>Walk / run on actor. See <see cref="ActionProtocol"/>.</summary>
     ChangeMoveType = 1069,
+    /// <summary>Creature died. See <see cref="DeathProtocol"/>.</summary>
+    Die = 1070,
+    /// <summary>Creature revived from death state. See <see cref="DeathProtocol"/>.</summary>
+    Revive = 1071,
+    /// <summary>Instant relocation fan-out. See <see cref="DeathProtocol"/>.</summary>
+    TeleportToLocation = 1072,
     /// <summary>Seven Signs record (SSQStatus analogue). See <see cref="SevenSignsProtocol"/>.</summary>
     SevenSignsStatus = 1090,
     /// <summary>Seven Signs sky tint (SignsSky analogue). See <see cref="SevenSignsProtocol"/>.</summary>

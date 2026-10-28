@@ -354,6 +354,8 @@ public sealed partial class ZoneWorld
             return "world";
 
         var entity = _byId[session.ObjectId];
+        if (entity.Dead)
+            return InventoryProtocol.Dead;
         if (entity.Sitting)
             return ActionProtocol.Sitting;
         if (!TalkingIsland.WithinStep(entity.X, entity.Y, move.DestX, move.DestY))

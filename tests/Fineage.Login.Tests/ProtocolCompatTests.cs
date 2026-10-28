@@ -135,7 +135,16 @@ public class ProtocolCompatTests
         Assert.Equal(1067, (ushort)MsgType.ChangeWaitType);
         Assert.Equal(1068, (ushort)MsgType.SocialAction);
         Assert.Equal(1069, (ushort)MsgType.ChangeMoveType);
+        Assert.Equal(1070, (ushort)MsgType.Die);
+        Assert.Equal(1071, (ushort)MsgType.Revive);
+        Assert.Equal(1072, (ushort)MsgType.TeleportToLocation);
+        Assert.Equal(52, (ushort)MsgType.ReviveRequest);
+        Assert.Equal(53, (ushort)MsgType.AdminKillPlayer);
         Assert.Equal((ushort)MsgType.CharacterActionRequest, (ushort)Fineage.Protocol.V2.MsgType.CharacterActionRequest);
+        Assert.Equal((ushort)MsgType.ReviveRequest, (ushort)Fineage.Protocol.V2.MsgType.ReviveRequest);
+        Assert.Equal((ushort)MsgType.Die, (ushort)Fineage.Protocol.V2.MsgType.Die);
+        Assert.Equal((ushort)MsgType.Revive, (ushort)Fineage.Protocol.V2.MsgType.Revive);
+        Assert.Equal((ushort)MsgType.TeleportToLocation, (ushort)Fineage.Protocol.V2.MsgType.TeleportToLocation);
         Assert.Equal((ushort)MsgType.ChangeWaitType, (ushort)Fineage.Protocol.V2.MsgType.ChangeWaitType);
         Assert.Equal((ushort)MsgType.SocialAction, (ushort)Fineage.Protocol.V2.MsgType.SocialAction);
         Assert.Equal((ushort)MsgType.ChangeMoveType, (ushort)Fineage.Protocol.V2.MsgType.ChangeMoveType);
@@ -291,6 +300,15 @@ public class ProtocolCompatTests
 
         byte[] entityLeft = MessagePackSerializer.Serialize(new Fineage.Protocol.V2.EntityLeftMsg { ObjectId = 9001 });
         Assert.Equal(legacy, entityLeft);
+    }
+
+    [Fact]
+    public void Die_MatchesProtocolV2Layout()
+    {
+        Assert.Equal((ushort)MsgType.Die, (ushort)Fineage.Protocol.V2.MsgType.Die);
+        byte[] legacy = MessagePackSerializer.Serialize(new DieMsg { ObjectId = 42, KillerObjectId = 7 });
+        byte[] v2 = MessagePackSerializer.Serialize(new Fineage.Protocol.V2.DieMsg { ObjectId = 42, KillerObjectId = 7 });
+        Assert.Equal(legacy, v2);
     }
 
     [Fact]

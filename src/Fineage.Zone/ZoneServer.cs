@@ -240,6 +240,8 @@ public sealed class ZoneServer
                     await ErrorAsync(session, "range", "Destination is too far.", ct).ConfigureAwait(false);
                 else if (code == ActionProtocol.Sitting)
                     await ErrorAsync(session, code, "You cannot move while sitting.", ct).ConfigureAwait(false);
+                else if (code == InventoryProtocol.Dead)
+                    await ErrorAsync(session, code, "You cannot do that while dead.", ct).ConfigureAwait(false);
                 else if (code != null)
                     await ErrorAsync(session, "world", "EnterWorld first.", ct).ConfigureAwait(false);
                 else
@@ -877,6 +879,42 @@ public sealed class ZoneServer
                     ZoneLog.Info($"RX CharacterAction session={sessionId} action={action.ActionId}");
                 break;
             }
+            case MsgType.ReviveRequest:
+            {
+                var revive = Decode<ReviveRequestMsg>(body);
+                if (revive == null)
+                {
+                    await ErrorAsync(session, "bad_request", "ReviveRequest body was not readable.", ct).ConfigureAwait(false);
+                    break;
+                }
+
+                string? code = await _world.TryReviveAsync(session, revive, ct).ConfigureAwait(false);
+                await DeathErrorAsync(session, code, ct).ConfigureAwait(false);
+                if (code == null)
+                    ZoneLog.Info($"RX ReviveRequest session={sessionId} action={revive.Action}");
+                break;
+            }
+            case MsgType.AdminKillPlayer:
+            {
+                if (!_adminCommands)
+                {
+                    await ErrorAsync(session, InventoryProtocol.Forbidden, "AdminKillPlayer is disabled.", ct)
+                        .ConfigureAwait(false);
+                    break;
+                }
+
+                if (Decode<AdminKillPlayerMsg>(body) == null)
+                {
+                    await ErrorAsync(session, "bad_request", "AdminKillPlayer body was not readable.", ct).ConfigureAwait(false);
+                    break;
+                }
+
+                string? code = await _world.TryAdminKillPlayerAsync(session, ct).ConfigureAwait(false);
+                await DeathErrorAsync(session, code, ct).ConfigureAwait(false);
+                if (code == null)
+                    ZoneLog.Info($"RX AdminKillPlayer session={sessionId}");
+                break;
+            }
             case MsgType.EnchantCancel:
             {
                 if (Decode<EnchantCancelMsg>(body) == null)
@@ -1070,6 +1108,22 @@ public sealed class ZoneServer
         if (code == NpcHtmlProtocol.Attackable)
             return ErrorAsync(session, code, "That NPC cannot be talked to.", ct);
         return QuestErrorAsync(session, code, ct);
+    }
+
+    static Task DeathErrorAsync(ZoneSession session, string? code, CancellationToken ct)
+    {
+        if (code == null)
+            return Task.CompletedTask;
+        return code switch
+        {
+            "world" => ErrorAsync(session, "world", "EnterWorld first.", ct),
+            "bad_request" => ErrorAsync(session, "bad_request", "Death request was rejected.", ct),
+            InventoryProtocol.Dead => ErrorAsync(session, code, "You cannot do that while dead.", ct),
+            DeathProtocol.NotDead => ErrorAsync(session, code, "You are not dead.", ct),
+            DeathProtocol.AlreadyDead => ErrorAsync(session, code, "You are already dead.", ct),
+            DeathProtocol.Unsupported => ErrorAsync(session, code, "That respawn option is not available yet.", ct),
+            _ => ErrorAsync(session, "bad_request", "Death request was rejected.", ct)
+        };
     }
 
     static Task QuestErrorAsync(ZoneSession session, string? code, CancellationToken ct)
