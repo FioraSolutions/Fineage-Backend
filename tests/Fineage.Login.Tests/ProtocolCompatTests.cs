@@ -76,7 +76,13 @@ public class ProtocolCompatTests
         Assert.Equal((ushort)MsgType.SiegeRegisterRequest, (ushort)Fineage.Protocol.V2.MsgType.SiegeRegisterRequest);
         Assert.Equal((ushort)MsgType.AdminCaptureCastle, (ushort)Fineage.Protocol.V2.MsgType.AdminCaptureCastle);
         Assert.Equal((ushort)MsgType.SkillUseRequest, (ushort)Fineage.Protocol.V2.MsgType.SkillUseRequest);
+        Assert.Equal(95, (ushort)MsgType.BypassRequest);
+        Assert.Equal(NpcHtmlProtocol.Bypass, (ushort)MsgType.BypassRequest);
+        Assert.Equal(NpcHtmlProtocol.Html, (ushort)MsgType.NpcHtml);
+        Assert.Equal(NpcHtmlProtocol.InteractionDistance, QuestProtocol.TalkRange);
         Assert.Equal((ushort)MsgType.RequestQuestList, (ushort)Fineage.Protocol.V2.MsgType.RequestQuestList);
+        Assert.Equal((ushort)MsgType.BypassRequest, (ushort)Fineage.Protocol.V2.MsgType.BypassRequest);
+        Assert.Equal((ushort)MsgType.NpcHtml, (ushort)Fineage.Protocol.V2.MsgType.NpcHtml);
         Assert.Equal((ushort)MsgType.QuestEvent, (ushort)Fineage.Protocol.V2.MsgType.QuestEvent);
         Assert.Equal((ushort)MsgType.EnchantRequest, (ushort)Fineage.Protocol.V2.MsgType.EnchantRequest);
         Assert.Equal((ushort)MsgType.EnchantConfirm, (ushort)Fineage.Protocol.V2.MsgType.EnchantConfirm);
@@ -141,6 +147,7 @@ public class ProtocolCompatTests
         Assert.Equal(SiegeProtocol.CycleWeeks, 2);
         Assert.Equal(SiegeProtocol.RegisteredAttacker, 140);
         Assert.Equal(SiegeProtocol.CastleCaptured, 149);
+        Assert.Equal(1094, (ushort)MsgType.NpcHtml);
         Assert.Equal((ushort)MsgType.QuestList, (ushort)Fineage.Protocol.V2.MsgType.QuestList);
         Assert.Equal(QuestProtocol.Acquired, 30);
         Assert.Equal(QuestProtocol.NotAbortable, 38);

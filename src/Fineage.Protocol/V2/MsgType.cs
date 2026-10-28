@@ -97,6 +97,8 @@ public enum MsgType : ushort
     BossStatusRequest = 93,
     /// <summary>Same value as <see cref="Fineage.Protocol.MsgType.AdminBossSchedule"/>.</summary>
     AdminBossSchedule = 94,
+    /// <summary>Same value as <see cref="Fineage.Protocol.MsgType.BypassRequest"/>.</summary>
+    BypassRequest = 95,
 
     HelloAck = 1001,
     AuthOk = 1002,
@@ -167,6 +169,8 @@ public enum MsgType : ushort
     DungeonEntered = 1092,
     /// <summary>Same value as <see cref="Fineage.Protocol.MsgType.BossStatus"/>. 1092 is dungeon access.</summary>
     BossStatus = 1093,
+    /// <summary>Same value as <see cref="Fineage.Protocol.MsgType.NpcHtml"/>.</summary>
+    NpcHtml = 1094,
 
     /// <summary>Login roster. Was 1005; moved so it no longer aliases <see cref="CharInfo"/>.</summary>
     CharacterRoster = 1030,

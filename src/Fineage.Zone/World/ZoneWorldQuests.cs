@@ -113,6 +113,8 @@ public sealed partial class ZoneWorld
             return "world";
         if (!_byId.TryGetValue(npcObjectId, out var npc) || npc.Kind != ZoneEntityKind.Npc)
             return QuestProtocol.Npc;
+        if (npc.Attackable)
+            return NpcHtmlProtocol.Attackable;
         if (player.Dead)
             return InventoryProtocol.Dead;
         if (!InTalkRange(player, npc))
@@ -123,10 +125,27 @@ public sealed partial class ZoneWorld
             : eventName.Length == 0
                 ? _quests.Talk(player.Quests, player.Inventory!, questId, npc.NpcId)
                 : _quests.AdvEvent(player.Quests, player.Inventory!, questId, npc.NpcId, eventName);
+        if (IsNpcPage(outcome))
+        {
+            SendNpcPage(session, player, npc, 0, toSelf);
+            return null;
+        }
+
         if (outcome.Ok || outcome.Lines.Count > 0 || outcome.JournalChanged)
             Publish(session, player, outcome, npc.ObjectId, npc.NpcId, toSelf);
         return outcome.Ok ? null : FailureCode(outcome.Failure);
     }
+
+    static bool IsNpcPage(QuestOutcome outcome) =>
+        outcome.Ok
+        && outcome.Hook == "default"
+        && outcome.QuestId == 0
+        && !outcome.JournalChanged
+        && outcome.Lines.Count == 0
+        && outcome.Items.Count == 0
+        && outcome.Sounds.Count == 0
+        && outcome.Exp == 0
+        && outcome.Sp == 0;
 
     void Publish(ZoneSession session, ZoneEntity player, QuestOutcome outcome, int npcObjectId, int npcId, List<Pending> toSelf)
     {
@@ -266,14 +285,8 @@ public sealed partial class ZoneWorld
         return false;
     }
 
-    bool InTalkRange(ZoneEntity player, ZoneEntity npc)
-    {
-        long dx = player.X - (long)npc.X;
-        long dy = player.Y - (long)npc.Y;
-        long dz = player.Z - (long)npc.Z;
-        long range = _game.Quests.TalkRange;
-        return dx * dx + dy * dy + dz * dz <= range * range;
-    }
+    bool InTalkRange(ZoneEntity player, ZoneEntity npc) =>
+        NpcHtmlProtocol.InRange(player.X, player.Y, player.Z, npc.X, npc.Y, npc.Z, _game.Quests.TalkRange);
 
     static bool EventOk(string text)
     {

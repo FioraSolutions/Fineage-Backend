@@ -106,6 +106,11 @@ public enum MsgType : ushort
     /// See <see cref="BossProtocol"/>.
     /// </summary>
     AdminBossSchedule = 94,
+    /// <summary>
+    /// NPC HTML bypass. Body is <see cref="BypassRequestMsg"/>.
+    /// Mobius <c>RequestBypassToServer</c>. See <see cref="NpcHtmlProtocol"/>.
+    /// </summary>
+    BypassRequest = 95,
     /// <summary>Keepalive from client. Server answers with <see cref="Pong"/>.</summary>
     Ping = 9,
     /// <summary>Zone chat. Fan-out is <see cref="CreatureSay"/>. See <see cref="ChatProtocol"/>.</summary>
@@ -196,6 +201,11 @@ public enum MsgType : ushort
     DungeonEntered = 1092,
     /// <summary>Boss schedule snapshot. 1092 is dungeon access. See <see cref="BossProtocol"/>.</summary>
     BossStatus = 1093,
+    /// <summary>
+    /// NPC HTML window. Body is <see cref="NpcHtmlMsg"/>.
+    /// Quest steps stay on <see cref="QuestDialog"/>. See <see cref="NpcHtmlProtocol"/>.
+    /// </summary>
+    NpcHtml = 1094,
 
     // Login S → C. Canonical lobby set; see LobbyProtocol.
     RegisterOk = 1020,

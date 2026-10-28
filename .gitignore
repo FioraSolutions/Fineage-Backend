@@ -17,6 +17,8 @@ data/*
 !data/spawns/**
 !data/drops/
 !data/drops/**
+!data/html/
+!data/html/**
 # Prefer converters → JSON; do not commit the full Mobius datapack (~1486+ XML files).
 data/mobius-xml/
 ref/mobius-ct0-interlude/

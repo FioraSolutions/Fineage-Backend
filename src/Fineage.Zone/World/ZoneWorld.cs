@@ -8,6 +8,7 @@ using Fineage.Zone.Interest;
 using Fineage.Zone.Spawns;
 using Fineage.Zone.Drops;
 using Fineage.Zone.Bosses;
+using Fineage.Zone.NpcHtml;
 using Fineage.Zone.SevenSigns;
 using Fineage.Zone.Dungeons;
 using Fineage.Zone.Siege;
@@ -120,6 +121,8 @@ public sealed partial class ZoneWorld
     readonly DungeonAccess _dungeonAccess;
     readonly SiegeSettings _siegeSettings;
     readonly SiegeBoard _siege;
+    readonly NpcHtmlCatalog _html;
+    readonly BypassRegistry _bypasses;
     readonly Dictionary<int, ZoneEntity> _byId = [];
     readonly DropCatalog _dropCatalog;
     readonly DropRates _dropRates;
@@ -146,7 +149,9 @@ public sealed partial class ZoneWorld
         DungeonAccessOptions? dungeonAccess = null,
         SiegeSettings? siege = null,
         BossSchedule? bosses = null,
-        Random? bossRandom = null)
+        Random? bossRandom = null,
+        NpcHtmlCatalog? html = null,
+        BypassRegistry? bypasses = null)
     {
         _aoi = aoi ?? new SingleCellAoi();
         _game = game ?? GameData.LoadDefault();
@@ -171,12 +176,17 @@ public sealed partial class ZoneWorld
         _siegeSettings = siege ?? SiegeSettings.FromEnvironment();
         _siege = new SiegeBoard(_clock().ToUnixTimeMilliseconds(), _siegeSettings);
         _bosses = bosses ?? BossSchedule.LoadDefault(_clock, bossRandom);
+        _html = html ?? NpcHtmlCatalog.LoadDefault();
+        _bypasses = bypasses ?? BypassRegistry.CreateDefault(_html);
         BootstrapSpawns();
         BootstrapBosses();
         BootstrapQuestNpcs();
         LoadClans();
         LoadSiege();
     }
+
+    /// <summary>Bypass handlers. A later <see cref="BypassRegistry.Register"/> replaces a stub.</summary>
+    public BypassRegistry Bypasses => _bypasses;
 
     public IReadOnlyList<int> NpcObjectIds
     {
