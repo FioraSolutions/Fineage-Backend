@@ -48,6 +48,41 @@ public sealed class ZonePipelineTelemetryTests
         Assert.True(framesIn >= 1, $"expected fineage.frames.in for zone, got {framesIn}");
     }
 
+    [Fact]
+    public async Task Pipeline_hello_ack_increments_frames_out()
+    {
+        long framesOut = 0;
+        using var listener = new MeterListener();
+        listener.InstrumentPublished = (instrument, meterListener) =>
+        {
+            if (instrument.Meter.Name == FineageTelemetry.MeterName && instrument.Name == "fineage.frames.out")
+                meterListener.EnableMeasurementEvents(instrument);
+        };
+        listener.SetMeasurementEventCallback<long>((_, measurement, tags, _) =>
+        {
+            foreach (KeyValuePair<string, object?> tag in tags)
+            {
+                if (tag.Key == "endpoint" && tag.Value?.ToString() == "zone-test")
+                    Interlocked.Add(ref framesOut, measurement);
+            }
+        });
+        listener.Start();
+
+        var tokens = new HandoffTokens(HandoffTokens.DefaultSecret);
+        var server = new ZoneServer(tokens, new ZoneWorld());
+        await using var host = await PipelineZoneHost.StartAsync(server);
+
+        using var client = new TcpClient();
+        await client.ConnectAsync(IPAddress.Loopback, host.Port);
+        await using var stream = client.GetStream();
+        await FrameIO.SendAsync(stream, (ushort)MsgType.Hello, MessagePackSerializer.Serialize(new HelloMsg()));
+
+        var frame = await FrameIO.ReadAsync(stream);
+        Assert.NotNull(frame);
+        Assert.Equal((ushort)MsgType.HelloAck, frame!.Value.Type);
+        Assert.True(framesOut >= 1, $"expected fineage.frames.out for zone-test, got {framesOut}");
+    }
+
     sealed class PipelineZoneHost : IAsyncDisposable
     {
         readonly CancellationTokenSource _cts;
