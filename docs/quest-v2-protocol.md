@@ -38,7 +38,7 @@ Abort only applies to a STARTED quest. It deletes the row, the same as Mobius `R
 |-----|--------|------|
 | 0 | npcObjectId | int |
 
-Runs the first-talk hook. The first matching datapack step wins (quest id order, then file order). If none match, the NPC's default page is sent. Quest links on that page use `quest_talk:<questId>`.
+Runs the first-talk hook. The first matching datapack step wins (quest id order, then file order). If one matches, the reply is `QuestDialog`. If none match, the reply is `NpcHtml` (1094), the NPC type's own page. See `docs/npc-html-v2-protocol.md`. The Quest bypass still sends this packet with hook `default` and `quest_talk:<questId>` links.
 
 ### `QuestEvent` (45)
 
@@ -100,7 +100,7 @@ A rule failure that still has a line (the 25-quest cap, a quest that cannot be a
 | 4 | event | string |
 | 5 | html | string |
 
-`hook` is `first_talk`, `talk`, `event`, `kill`, or `default`. `questId` is 0 on a default page.
+`hook` is `first_talk`, `talk`, `event`, `kill`, or `default`. `questId` is 0 on a quest-list page (`default`). An NPC type's own dialog is `NpcHtml` (1094), not this packet.
 
 ### `QuestSound` (1063)
 

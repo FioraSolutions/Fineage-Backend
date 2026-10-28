@@ -744,9 +744,24 @@ public sealed class ZoneServer
                 }
 
                 string? code = await _world.TryNpcTalkAsync(session, talk.NpcObjectId, ct).ConfigureAwait(false);
-                await QuestErrorAsync(session, code, ct).ConfigureAwait(false);
+                await NpcDialogErrorAsync(session, code, ct).ConfigureAwait(false);
                 if (code == null)
                     ZoneLog.Info($"RX NpcTalk session={sessionId} npc={talk.NpcObjectId}");
+                break;
+            }
+            case MsgType.BypassRequest:
+            {
+                var bypass = Decode<BypassRequestMsg>(body);
+                if (bypass == null)
+                {
+                    await ErrorAsync(session, "bad_request", "BypassRequest body was not readable.", ct).ConfigureAwait(false);
+                    break;
+                }
+
+                string? code = await _world.TryBypassAsync(session, bypass.NpcObjectId, bypass.Command, ct).ConfigureAwait(false);
+                await NpcDialogErrorAsync(session, code, ct).ConfigureAwait(false);
+                if (code == null)
+                    ZoneLog.Info($"RX Bypass session={sessionId} npc={bypass.NpcObjectId}");
                 break;
             }
             case MsgType.QuestEvent:
@@ -1048,6 +1063,13 @@ public sealed class ZoneServer
             ActionProtocol.Unsupported => ErrorAsync(session, code, "That action is not available yet.", ct),
             _ => ErrorAsync(session, "bad_request", "Character action was rejected.", ct)
         };
+    }
+
+    static Task NpcDialogErrorAsync(ZoneSession session, string? code, CancellationToken ct)
+    {
+        if (code == NpcHtmlProtocol.Attackable)
+            return ErrorAsync(session, code, "That NPC cannot be talked to.", ct);
+        return QuestErrorAsync(session, code, ct);
     }
 
     static Task QuestErrorAsync(ZoneSession session, string? code, CancellationToken ct)

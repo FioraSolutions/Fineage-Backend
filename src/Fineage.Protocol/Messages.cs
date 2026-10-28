@@ -714,11 +714,25 @@ public sealed class RequestQuestAbortMsg
     [Key(0)] public int QuestId { get; set; }
 }
 
-/// <summary>Opcode <see cref="MsgType.NpcTalk"/> (44). First-talk hook, or the NPC's default page.</summary>
+/// <summary>
+/// Opcode <see cref="MsgType.NpcTalk"/> (44).
+/// First-talk hook, or the NPC's HTML page when no quest step matches.
+/// </summary>
 [MessagePackObject]
 public sealed class NpcTalkMsg
 {
     [Key(0)] public int NpcObjectId { get; set; }
+}
+
+/// <summary>
+/// Opcode <see cref="MsgType.BypassRequest"/> (95). Mobius <c>RequestBypassToServer</c>.
+/// <see cref="Command"/> may be <c>npc_&lt;objectId&gt;_Chat 1</c> or the command alone.
+/// </summary>
+[MessagePackObject]
+public sealed class BypassRequestMsg
+{
+    [Key(0)] public int NpcObjectId { get; set; }
+    [Key(1)] public string Command { get; set; } = "";
 }
 
 /// <summary>
@@ -852,6 +866,19 @@ public sealed class MagicSkillUseMsg
     [Key(3)] public int SkillLevel { get; set; }
     [Key(4)] public int HitTimeMs { get; set; }
     [Key(5)] public int ReuseDelayMs { get; set; }
+}
+
+/// <summary>
+/// Opcode <see cref="MsgType.NpcHtml"/> (1094). Mobius <c>NpcHtmlMessage</c>.
+/// Quest steps stay on <see cref="QuestDialogMsg"/>. <see cref="ItemId"/> is 0 until item HTML exists.
+/// </summary>
+[MessagePackObject]
+public sealed class NpcHtmlMsg
+{
+    [Key(0)] public int NpcObjectId { get; set; }
+    [Key(1)] public int NpcId { get; set; }
+    [Key(2)] public string Html { get; set; } = "";
+    [Key(3)] public int ItemId { get; set; }
 }
 
 /// <summary>Opcode <see cref="MsgType.ClanCreateRequest"/> (32).</summary>

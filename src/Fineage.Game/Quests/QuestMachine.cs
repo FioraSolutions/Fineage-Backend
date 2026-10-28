@@ -34,6 +34,10 @@ public sealed class QuestMachine : IQuestKillHook
         return Default(npcId, npcName, journal);
     }
 
+    /// <summary>Quest-list page for a Quest bypass with no script name. Same links as a default talk.</summary>
+    public string QuestChoiceHtml(QuestJournal journal, int npcId, string npcName) =>
+        Default(npcId, npcName, journal).Html;
+
     public QuestOutcome Talk(QuestJournal journal, PlayerInventory inventory, int questId, int npcId)
     {
         if (_catalog.Find(questId) is not { } quest)

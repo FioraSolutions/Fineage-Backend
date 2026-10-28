@@ -1,0 +1,17 @@
+Interlude NPC dialog HTML.
+
+Source: L2J Mobius CT 0 Interlude datapack, dist/game/data/html
+Repository: https://gitlab.com/MobiusDevelopment/L2J_Mobius
+Folder: L2J_Mobius_CT_0_Interlude/dist/game/data/html
+
+Scope: Talking Island village NPC templates in data/spawns/ti_village.json,
+plus Chat pages and Link targets those dialogs reference.
+HTML text only. Java sources were not copied.
+
+Reference classes (rules, not copied):
+Npc.getHtmlPath, Npc.showChatWindow, Npc.canInteract,
+RequestBypassToServer (npc_<objectId>_ command),
+IBypassHandler / BypassHandler,
+handlers.bypass.npc.ChatLink, Link, QuestList,
+Merchant, Warehouse, Teleporter, Guard, Trainer, Fisherman,
+Adventurer, VillageMaster, PetManager getHtmlPath overrides.
