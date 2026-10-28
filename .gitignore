@@ -8,6 +8,7 @@ data/*
 !data/experience.json
 !data/stat-bonuses.json
 !data/quests.json
+!data/npcs.json
 !data/spawns/
 !data/spawns/**
 !data/drops/

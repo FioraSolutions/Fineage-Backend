@@ -1,14 +1,18 @@
 using System.Text.Json;
 using Fineage.Game;
+using Fineage.Zone.Npcs;
 
 namespace Fineage.Zone.Spawns;
 
 /// <summary>
 /// Loads Interlude-style fixed spawn rows from <c>data/spawns/*.json</c> (Mobius spawnlist subset).
+/// Rows that omit name, attackable, hp, or speeds take those from <see cref="NpcCatalog"/>.
+/// Inline values, such as the Cedric gremlin rows, win.
 /// </summary>
 public sealed class SpawnCatalog
 {
     public const string DefaultMapId = "ti_cedric";
+    public const string TalkingIslandVillageMapId = "ti_village";
     public const string SpawnsDirectoryName = "spawns";
 
     static readonly JsonSerializerOptions JsonOptions = new()
@@ -43,17 +47,82 @@ public sealed class SpawnCatalog
         if (!Directory.Exists(spawnsDir))
             throw new DirectoryNotFoundException($"Spawn data directory not found: {spawnsDir}");
 
-        var maps = new Dictionary<string, SpawnMapDefinition>(StringComparer.Ordinal);
-        foreach (string path in Directory.EnumerateFiles(spawnsDir, "*.json"))
+        var templates = NpcCatalog.Load(dataDirectory);
+        var pending = new List<PendingMap>();
+        var mapIds = new HashSet<string>(StringComparer.Ordinal);
+        foreach (string path in Directory.EnumerateFiles(spawnsDir, "*.json").OrderBy(Path.GetFileName, StringComparer.Ordinal))
         {
-            var map = ReadMap(path);
-            if (maps.ContainsKey(map.MapId))
+            var map = ReadPending(path);
+            if (!mapIds.Add(map.MapId))
                 throw new InvalidDataException($"Duplicate spawn map id '{map.MapId}' in {path}.");
-            maps.Add(map.MapId, map);
+            pending.Add(map);
         }
 
-        if (maps.Count == 0)
+        if (pending.Count == 0)
             throw new InvalidDataException($"No spawn maps under {spawnsDir}.");
+
+        var ids = new NpcObjectIdAllocator();
+        foreach (var map in pending)
+        {
+            foreach (var row in map.Npcs)
+            {
+                if (row.ObjectId is not int objectId)
+                    continue;
+                try
+                {
+                    ids.Reserve(objectId);
+                }
+                catch (Exception ex) when (ex is ArgumentOutOfRangeException or InvalidOperationException)
+                {
+                    throw new InvalidDataException(
+                        $"{map.Path} object {objectId} is outside the NPC id range or duplicated.",
+                        ex);
+                }
+            }
+        }
+
+        var maps = new Dictionary<string, SpawnMapDefinition>(StringComparer.Ordinal);
+        foreach (var map in pending)
+        {
+            var npcs = new List<SpawnNpcDefinition>(map.Npcs.Count);
+            foreach (var row in map.Npcs)
+            {
+                if (!templates.ById.TryGetValue(row.NpcId, out var template))
+                    throw new InvalidDataException($"{map.Path} object references missing npc template {row.NpcId}.");
+
+                int objectId = row.ObjectId ?? Allocate(ids, map.Path);
+                string name = string.IsNullOrWhiteSpace(row.Name) ? template.Name : row.Name.Trim();
+                if (string.IsNullOrWhiteSpace(name))
+                    throw new InvalidDataException($"{map.Path} npc {row.NpcId} needs a name.");
+
+                int maxHp = row.MaxHp ?? template.Hp;
+                if (maxHp < 1)
+                    throw new InvalidDataException($"{map.Path} object {objectId} needs maxHp.");
+                if (row.RespawnDelaySeconds < 0)
+                    throw new InvalidDataException($"{map.Path} object {objectId} has negative respawnDelaySeconds.");
+                if (row.RespawnRandomSeconds < 0)
+                    throw new InvalidDataException($"{map.Path} object {objectId} has negative respawnRandomSeconds.");
+
+                npcs.Add(new SpawnNpcDefinition(
+                    objectId,
+                    row.NpcId,
+                    name,
+                    row.X,
+                    row.Y,
+                    row.Z,
+                    row.Heading,
+                    row.Attackable ?? template.Attackable,
+                    maxHp,
+                    Speed(row.RunSpeed, template.RunSpeed, 80f),
+                    Speed(row.WalkSpeed, template.WalkSpeed, 40f),
+                    Math.Max(0, row.RespawnDelaySeconds),
+                    Math.Max(0, row.RespawnRandomSeconds),
+                    template.Title,
+                    template.Type));
+            }
+
+            maps.Add(map.MapId, new SpawnMapDefinition(map.MapId, map.Enabled, npcs));
+        }
 
         return new SpawnCatalog(maps);
     }
@@ -71,13 +140,31 @@ public sealed class SpawnCatalog
         return Load(directory);
     }
 
-    static SpawnMapDefinition ReadMap(string path)
+    static int Allocate(NpcObjectIdAllocator ids, string path)
+    {
+        try
+        {
+            return ids.Next();
+        }
+        catch (InvalidOperationException ex)
+        {
+            throw new InvalidDataException($"{path} could not allocate an NPC object id.", ex);
+        }
+    }
+
+    static float Speed(float? row, float template, float fallbackWhenNonPositive)
+    {
+        if (row == null)
+            return template > 0 ? template : fallbackWhenNonPositive;
+        return row.Value > 0 ? row.Value : fallbackWhenNonPositive;
+    }
+
+    static PendingMap ReadPending(string path)
     {
         MapFileDto file;
         try
         {
-            var json = File.ReadAllText(path);
-            file = JsonSerializer.Deserialize<MapFileDto>(json, JsonOptions)
+            file = JsonSerializer.Deserialize<MapFileDto>(File.ReadAllText(path), JsonOptions)
                 ?? throw new InvalidDataException($"{path} was empty.");
         }
         catch (JsonException ex)
@@ -90,40 +177,48 @@ public sealed class SpawnCatalog
         if (file.Npcs == null || file.Npcs.Count == 0)
             throw new InvalidDataException($"{path} has no npcs.");
 
-        var npcs = new List<SpawnNpcDefinition>(file.Npcs.Count);
+        var npcs = new List<PendingNpc>(file.Npcs.Count);
         foreach (var row in file.Npcs)
         {
-            if (row.ObjectId <= 0)
-                throw new InvalidDataException($"{path} has a non-positive objectId.");
             if (row.NpcId <= 0)
-                throw new InvalidDataException($"{path} object {row.ObjectId} needs npcId.");
-            if (string.IsNullOrWhiteSpace(row.Name))
-                throw new InvalidDataException($"{path} object {row.ObjectId} needs a name.");
-            if (row.MaxHp < 1)
-                throw new InvalidDataException($"{path} object {row.ObjectId} needs maxHp.");
-            if (row.RespawnDelaySeconds < 0)
-                throw new InvalidDataException($"{path} object {row.ObjectId} has negative respawnDelaySeconds.");
-            if (row.RespawnRandomSeconds < 0)
-                throw new InvalidDataException($"{path} object {row.ObjectId} has negative respawnRandomSeconds.");
-
-            npcs.Add(new SpawnNpcDefinition(
+                throw new InvalidDataException($"{path} has a row with no npcId.");
+            if (row.ObjectId is int explicitId && explicitId <= 0)
+                throw new InvalidDataException($"{path} has a non-positive objectId.");
+            npcs.Add(new PendingNpc(
                 row.ObjectId,
                 row.NpcId,
-                row.Name.Trim(),
+                row.Name,
                 row.X,
                 row.Y,
                 row.Z,
                 row.Heading,
                 row.Attackable,
                 row.MaxHp,
-                row.RunSpeed <= 0 ? 80f : row.RunSpeed,
-                row.WalkSpeed <= 0 ? 40f : row.WalkSpeed,
-                Math.Max(0, row.RespawnDelaySeconds),
-                Math.Max(0, row.RespawnRandomSeconds)));
+                row.RunSpeed,
+                row.WalkSpeed,
+                row.RespawnDelaySeconds,
+                row.RespawnRandomSeconds));
         }
 
-        return new SpawnMapDefinition(file.MapId.Trim(), file.Enabled, npcs);
+        return new PendingMap(path, file.MapId.Trim(), file.Enabled, npcs);
     }
+
+    sealed record PendingMap(string Path, string MapId, bool Enabled, List<PendingNpc> Npcs);
+
+    sealed record PendingNpc(
+        int? ObjectId,
+        int NpcId,
+        string? Name,
+        int X,
+        int Y,
+        int Z,
+        int Heading,
+        bool? Attackable,
+        int? MaxHp,
+        float? RunSpeed,
+        float? WalkSpeed,
+        int RespawnDelaySeconds,
+        int RespawnRandomSeconds);
 
     sealed class MapFileDto
     {
@@ -134,17 +229,17 @@ public sealed class SpawnCatalog
 
     sealed class NpcRowDto
     {
-        public int ObjectId { get; set; }
+        public int? ObjectId { get; set; }
         public int NpcId { get; set; }
         public string? Name { get; set; }
         public int X { get; set; }
         public int Y { get; set; }
         public int Z { get; set; }
         public int Heading { get; set; }
-        public bool Attackable { get; set; } = true;
-        public int MaxHp { get; set; } = 96;
-        public float RunSpeed { get; set; }
-        public float WalkSpeed { get; set; }
+        public bool? Attackable { get; set; }
+        public int? MaxHp { get; set; }
+        public float? RunSpeed { get; set; }
+        public float? WalkSpeed { get; set; }
         public int RespawnDelaySeconds { get; set; } = 60;
         public int RespawnRandomSeconds { get; set; }
     }

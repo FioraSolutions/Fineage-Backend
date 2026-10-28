@@ -54,7 +54,7 @@ Console.CancelKeyPress += (_, e) =>
 };
 
 var sevenSigns = SevenSignsEngine.OpenBesideAccounts(storePath);
-var world = ZoneAoiSettings.CreateWorld(accounts: accounts, sevenSigns: sevenSigns);
+var world = ZoneAoiSettings.CreateWorld(accounts: accounts, sevenSigns: sevenSigns, includeEnabledMaps: true);
 world.StartSimulation(shutdown.Token);
 FineageTelemetry.OnlineCount = () => world.OnlinePlayerCount;
 string host = bindAddress.Equals(IPAddress.Any) ? "0.0.0.0" : bindDisplay;
@@ -79,7 +79,7 @@ if (string.IsNullOrWhiteSpace(Environment.GetEnvironmentVariable("FINEAGE_HANDOF
     Console.WriteLine("[ZONE] warning: FINEAGE_HANDOFF_SECRET is unset. It must match Login before clients hand off from another machine.");
 }
 
-Console.WriteLine($"[ZONE] listen {bindDisplay}:{port} store={storePath} Talking Island (maxConn={maxConnections} outboundQ={outboundQueue} msgPerSec={maxMsgPerSec} interestRange={interestRange})");
+Console.WriteLine($"[ZONE] listen {bindDisplay}:{port} store={storePath} Talking Island (maxConn={maxConnections} outboundQ={outboundQueue} msgPerSec={maxMsgPerSec} interestRange={interestRange} npcs={world.NpcObjectIds.Count})");
 Console.WriteLine("[ZONE] Seven Signs period, cabal, and seal-stone scores are stored beside the account file as seven-signs.json.");
 Console.WriteLine("[ZONE] Auth.Password is the login handoff token. EnterWorld sends UserInfo, ItemList, the village, then a welcome SystemMessage. Say ALL is local; SHOUT is the zone.");
 if (adminCommands)

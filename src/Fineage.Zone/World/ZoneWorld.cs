@@ -24,6 +24,9 @@ sealed class ZoneEntity
     public int ObjectId { get; init; }
     public ZoneEntityKind Kind { get; init; }
     public string Name { get; init; } = "";
+    public string Title { get; init; } = "";
+    /// <summary>Mobius instance type (Merchant, Guard, Monster, …).</summary>
+    public string NpcType { get; init; } = "";
     public int X { get; set; }
     public int Y { get; set; }
     public int Z { get; set; }
@@ -124,7 +127,8 @@ public sealed partial class ZoneWorld
         Func<DateTimeOffset>? clock = null,
         IEnchantRandom? enchantRandom = null,
         EnchantRates? enchantRates = null,
-        SevenSignsEngine? sevenSigns = null)
+        SevenSignsEngine? sevenSigns = null,
+        bool includeEnabledMaps = false)
     {
         _aoi = aoi ?? new SingleCellAoi();
         _game = game ?? GameData.LoadDefault();
@@ -141,6 +145,7 @@ public sealed partial class ZoneWorld
         _enchantRandom = enchantRandom ?? SharedEnchantRandom.Instance;
         _enchantRates = enchantRates ?? EnchantRates.Default;
         _enchantRates.Validate();
+        _includeEnabledMaps = includeEnabledMaps;
         _quests = new QuestMachine(_game.Quests, _game.Items);
         _sevenSigns = sevenSigns ?? new SevenSignsEngine(new SystemGameClock());
         BootstrapSpawns();
@@ -626,8 +631,29 @@ public sealed partial class ZoneWorld
         Heading = entity.Heading,
         Attackable = entity.Attackable,
         RunSpeed = entity.RunSpeed,
-        WalkSpeed = entity.WalkSpeed
+        WalkSpeed = entity.WalkSpeed,
+        Title = entity.Title,
+        NpcType = entity.NpcType
     };
+
+    internal NpcInfoMsg NpcInfoByTemplateForTests(int npcId)
+    {
+        lock (_gate)
+        {
+            ZoneEntity? found = null;
+            foreach (var entity in _byId.Values)
+            {
+                if (entity.Kind != ZoneEntityKind.Npc || entity.NpcId != npcId)
+                    continue;
+                if (found == null || entity.ObjectId < found.ObjectId)
+                    found = entity;
+            }
+
+            if (found == null)
+                throw new KeyNotFoundException($"NPC template {npcId} is not spawned.");
+            return NpcInfo(found);
+        }
+    }
 
     internal static SpawnItemMsg SpawnItem(ZoneEntity entity) => new()
     {

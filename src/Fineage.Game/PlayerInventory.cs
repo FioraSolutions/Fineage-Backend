@@ -14,7 +14,8 @@ public sealed class PlayerInventory
 {
     /// <summary>
     /// First object id assigned to an item instance.
-    /// Character ids and Talking Island NPCs (50001–50003) sit below this.
+    /// Character ids stay below 50000. Legacy NPC rows use 50000–59999.
+    /// Town NPC rows use 60000–99999 (<see cref="NpcObjectIdAllocator"/>).
     /// </summary>
     public const int FirstObjectId = 100_000;
 
