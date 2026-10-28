@@ -304,6 +304,85 @@ public static class ZoneMultiplayerAcceptance
         right.ExpectQuiet();
     }
 
+    public static async Task RunRegenSharedAsync()
+    {
+        string? priorTick = Environment.GetEnvironmentVariable("FINEAGE_ZONE_TICK_MS");
+        Environment.SetEnvironmentVariable("FINEAGE_ZONE_TICK_MS", "25");
+        try
+        {
+            var store = JsonAccountStore.InMemory();
+            var tokens = new HandoffTokens(HandoffTokens.DefaultSecret);
+            var login = new LoginService(store, tokens);
+            var fighter = Play(login, "regen1", "Fighter", HumanClasses.Fighter);
+            var mystic = Play(login, "regen2", "Mystic", HumanClasses.Mystic);
+            if (!store.TrySaveVitals(fighter.Account, fighter.CharacterId, hp: 100, mp: 30) ||
+                !store.TrySaveVitals(mystic.Account, mystic.CharacterId, hp: 80, mp: 40))
+                throw new InvalidOperationException("failed to seed wounded vitals");
+
+            var world = new ZoneWorld(accounts: store);
+            await using var zone = ZoneHost.Start(tokens, world);
+            await using var left = await ZonePeer.ConnectAsync(zone.Port).ConfigureAwait(false);
+            await using var right = await ZonePeer.ConnectAsync(zone.Port).ConfigureAwait(false);
+
+            await left.AuthAsync(fighter).ConfigureAwait(false);
+            await right.AuthAsync(mystic).ConfigureAwait(false);
+            await left.EnterAsync(expectOthers: 0).ConfigureAwait(false);
+            await right.EnterAsync(fighter, mystic, TalkingIsland.Gremlins.Length).ConfigureAwait(false);
+
+            var selfStatus = await AwaitRegenUpdateAsync(left, fighter.CharacterId).ConfigureAwait(false);
+            var peerStatus = await AwaitRegenUpdateAsync(right, fighter.CharacterId).ConfigureAwait(false);
+            ExpectRegen(selfStatus, fighter.CharacterId, ClassTemplates.HumanFighterHp, ClassTemplates.HumanFighterMp,
+                minHp: 101, minMp: 31);
+            ExpectRegen(peerStatus, fighter.CharacterId, ClassTemplates.HumanFighterHp, ClassTemplates.HumanFighterMp,
+                minHp: 101, minMp: 31);
+            if (peerStatus.Values[0] < selfStatus.Values[0] || peerStatus.Values[2] < selfStatus.Values[2])
+                throw new InvalidOperationException("observer regen lagged behind self");
+        }
+        finally
+        {
+            Environment.SetEnvironmentVariable("FINEAGE_ZONE_TICK_MS", priorTick);
+        }
+    }
+
+    static async Task<StatusUpdateMsg> AwaitRegenUpdateAsync(ZonePeer peer, int objectId)
+    {
+        for (int attempt = 0; attempt < 12; attempt++)
+        {
+            var (type, body) = await peer.ReadFrameAsync().ConfigureAwait(false);
+            if (type == MsgType.CharInfo)
+                continue;
+            if (type != MsgType.StatusUpdate)
+                throw new InvalidOperationException($"expected regen StatusUpdate, got {type}");
+            var status = MessagePackSerializer.Deserialize<StatusUpdateMsg>(body);
+            if (status.ObjectId == objectId)
+                return status;
+        }
+
+        throw new InvalidOperationException($"timed out waiting for regen StatusUpdate object={objectId}");
+    }
+
+    static void ExpectRegen(
+        StatusUpdateMsg status,
+        int objectId,
+        int maxHp,
+        int maxMp,
+        int minHp,
+        int minMp)
+    {
+        if (status.ObjectId != objectId || status.AttributeIds.Length != 4 ||
+            status.AttributeIds[0] != InterludeStatus.CurHp ||
+            status.AttributeIds[1] != InterludeStatus.MaxHp ||
+            status.AttributeIds[2] != InterludeStatus.CurMp ||
+            status.AttributeIds[3] != InterludeStatus.MaxMp ||
+            status.Values.Length != 4)
+            throw new InvalidOperationException($"regen status shape mismatch id={status.ObjectId}");
+        if (status.Values[1] != maxHp || status.Values[3] != maxMp)
+            throw new InvalidOperationException($"regen max mismatch hp={status.Values[1]} mp={status.Values[3]}");
+        if (status.Values[0] < minHp || status.Values[2] < minMp)
+            throw new InvalidOperationException(
+                $"regen too low hp={status.Values[0]}/{maxHp} mp={status.Values[2]}/{maxMp} expected>={minHp}/{minMp}");
+    }
+
     static void ExpectAbnormal(AbnormalStatusUpdateMsg update, int objectId, int effectId)
     {
         if (update.ObjectId != objectId)
@@ -462,15 +541,15 @@ public static class ZoneMultiplayerAcceptance
         public async Task<Arrival> EnterAsync(int expectNpcs, int expectOthers)
         {
             await SendAsync(MsgType.EnterWorld, new EnterWorldMsg()).ConfigureAwait(false);
-            var user = await ExpectAsync<UserInfoMsg>(MsgType.UserInfo).ConfigureAwait(false);
-            var items = await ExpectAsync<ItemListMsg>(MsgType.ItemList).ConfigureAwait(false);
-            var spawned = await ExpectAsync<PlayerSpawnedMsg>(MsgType.PlayerSpawned).ConfigureAwait(false);
+            var user = await ExpectIgnoringRegenAsync<UserInfoMsg>(MsgType.UserInfo).ConfigureAwait(false);
+            var items = await ExpectIgnoringRegenAsync<ItemListMsg>(MsgType.ItemList).ConfigureAwait(false);
+            var spawned = await ExpectIgnoringRegenAsync<PlayerSpawnedMsg>(MsgType.PlayerSpawned).ConfigureAwait(false);
             var npcs = new List<NpcInfoMsg>(expectNpcs);
             for (int i = 0; i < expectNpcs; i++)
-                npcs.Add(await ExpectAsync<NpcInfoMsg>(MsgType.NpcInfo).ConfigureAwait(false));
+                npcs.Add(await ExpectIgnoringRegenAsync<NpcInfoMsg>(MsgType.NpcInfo).ConfigureAwait(false));
             var others = new List<CharInfoMsg>(expectOthers);
             for (int i = 0; i < expectOthers; i++)
-                others.Add(await ExpectAsync<CharInfoMsg>(MsgType.CharInfo).ConfigureAwait(false));
+                others.Add(await ExpectIgnoringRegenAsync<CharInfoMsg>(MsgType.CharInfo).ConfigureAwait(false));
             return new Arrival(user, items, spawned, npcs, others);
         }
 
@@ -504,7 +583,7 @@ public static class ZoneMultiplayerAcceptance
             await FrameIO.SendAsync(_stream, (ushort)type, body).ConfigureAwait(false);
         }
 
-        public async Task<T> ExpectAsync<T>(MsgType expected)
+        public async Task<(MsgType Type, byte[] Body)> ReadFrameAsync()
         {
             using var cts = new CancellationTokenSource(TimeSpan.FromSeconds(5));
             (ushort Type, byte[] Body)? frame;
@@ -514,24 +593,53 @@ public static class ZoneMultiplayerAcceptance
             }
             catch (OperationCanceledException)
             {
-                throw new InvalidOperationException($"timed out waiting for {expected}");
+                throw new InvalidOperationException("timed out waiting for zone frame");
             }
 
             if (frame == null)
-                throw new InvalidOperationException($"expected {expected}, got EOF");
-            if (frame.Value.Type != (ushort)expected)
+                throw new InvalidOperationException("expected zone frame, got EOF");
+            return ((MsgType)frame.Value.Type, frame.Value.Body);
+        }
+
+        public async Task<T> ExpectAsync<T>(MsgType expected)
+        {
+            var (type, body) = await ReadFrameAsync().ConfigureAwait(false);
+            if (type != expected)
             {
                 string detail = "";
-                if (frame.Value.Type == (ushort)MsgType.Error)
+                if (type == MsgType.Error)
                 {
-                    var err = MessagePackSerializer.Deserialize<ErrorMsg>(frame.Value.Body);
+                    var err = MessagePackSerializer.Deserialize<ErrorMsg>(body);
                     detail = $" {err.Code} {err.Message}";
                 }
 
-                throw new InvalidOperationException($"expected {expected}, got {(MsgType)frame.Value.Type}{detail}");
+                throw new InvalidOperationException($"expected {expected}, got {type}{detail}");
             }
 
-            return MessagePackSerializer.Deserialize<T>(frame.Value.Body);
+            return MessagePackSerializer.Deserialize<T>(body);
+        }
+
+        async Task<T> ExpectIgnoringRegenAsync<T>(MsgType expected)
+        {
+            while (true)
+            {
+                var (type, body) = await ReadFrameAsync().ConfigureAwait(false);
+                if (type == MsgType.StatusUpdate)
+                    continue;
+                if (type != expected)
+                {
+                    string detail = "";
+                    if (type == MsgType.Error)
+                    {
+                        var err = MessagePackSerializer.Deserialize<ErrorMsg>(body);
+                        detail = $" {err.Code} {err.Message}";
+                    }
+
+                    throw new InvalidOperationException($"expected {expected}, got {type}{detail}");
+                }
+
+                return MessagePackSerializer.Deserialize<T>(body);
+            }
         }
 
         public void ExpectQuiet()
