@@ -7,6 +7,7 @@ public sealed partial class ZoneWorld
 {
     readonly SpawnCatalog _spawnCatalog;
     readonly string _activeMapId;
+    readonly bool _includeEnabledMaps;
     readonly Func<DateTimeOffset> _clock;
     readonly Dictionary<int, SpawnSlotState> _spawnSlots = [];
 
@@ -18,16 +19,30 @@ public sealed partial class ZoneWorld
 
     void BootstrapSpawns()
     {
-        var map = _spawnCatalog.GetMap(_activeMapId);
-        if (!map.Enabled)
+        var active = _spawnCatalog.GetMap(_activeMapId);
+        if (!active.Enabled)
             throw new InvalidOperationException($"Active spawn map '{_activeMapId}' is disabled in datapack.");
 
-        foreach (var def in map.Npcs)
+        var maps = new List<SpawnMapDefinition> { active };
+        if (_includeEnabledMaps)
         {
-            if (_spawnSlots.ContainsKey(def.ObjectId))
-                throw new InvalidOperationException($"Duplicate spawn object id {def.ObjectId} on map '{_activeMapId}'.");
-            _spawnSlots.Add(def.ObjectId, new SpawnSlotState { Definition = def });
-            MaterializeSpawn(def);
+            foreach (var map in _spawnCatalog.Maps.Values.OrderBy(map => map.MapId, StringComparer.Ordinal))
+            {
+                if (!map.Enabled || map.MapId == _activeMapId)
+                    continue;
+                maps.Add(map);
+            }
+        }
+
+        foreach (var map in maps)
+        {
+            foreach (var def in map.Npcs)
+            {
+                if (_spawnSlots.ContainsKey(def.ObjectId))
+                    throw new InvalidOperationException($"Duplicate spawn object id {def.ObjectId}.");
+                _spawnSlots.Add(def.ObjectId, new SpawnSlotState { Definition = def });
+                MaterializeSpawn(def);
+            }
         }
     }
 
@@ -41,6 +56,8 @@ public sealed partial class ZoneWorld
             ObjectId = def.ObjectId,
             Kind = ZoneEntityKind.Npc,
             Name = def.Name,
+            Title = def.Title,
+            NpcType = def.NpcType,
             X = def.X,
             Y = def.Y,
             Z = def.Z,

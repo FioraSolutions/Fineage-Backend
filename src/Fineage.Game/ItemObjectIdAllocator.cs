@@ -2,7 +2,8 @@ namespace Fineage.Game;
 
 /// <summary>
 /// Hands out item instance ids. One allocator per zone keeps every player's items distinct.
-/// Ids start at <see cref="PlayerInventory.FirstObjectId"/>, above character ids and Talking Island NPCs.
+/// Ids start at <see cref="PlayerInventory.FirstObjectId"/>, above character ids and
+/// <see cref="NpcObjectIdAllocator"/> (legacy NPCs from 50000, town NPCs from 60000).
 /// </summary>
 public sealed class ItemObjectIdAllocator
 {

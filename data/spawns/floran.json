@@ -1,0 +1,137 @@
+{
+  "mapId": "floran",
+  "enabled": false,
+  "comment": "Mobius CT 0 Interlude Dion/FloranVillageNPCs.xml. Rows reference data/npcs.json by npcId. Name, title, type, attackable, hp, and speeds come from the template.",
+  "npcs": [
+    {
+      "objectId": 60537,
+      "npcId": 31571,
+      "x": 17232,
+      "y": 170528,
+      "z": -3498,
+      "heading": 53000,
+      "respawnDelaySeconds": 60,
+      "respawnRandomSeconds": 0
+    },
+    {
+      "objectId": 60538,
+      "npcId": 30078,
+      "x": 16970,
+      "y": 170391,
+      "z": -3496,
+      "heading": 61440,
+      "respawnDelaySeconds": 60,
+      "respawnRandomSeconds": 0
+    },
+    {
+      "objectId": 60539,
+      "npcId": 31773,
+      "x": 17788,
+      "y": 169842,
+      "z": -3496,
+      "heading": 20000,
+      "respawnDelaySeconds": 60,
+      "respawnRandomSeconds": 0
+    },
+    {
+      "objectId": 60540,
+      "npcId": 30079,
+      "x": 17836,
+      "y": 169853,
+      "z": -3494,
+      "heading": 20000,
+      "respawnDelaySeconds": 60,
+      "respawnRandomSeconds": 0
+    },
+    {
+      "objectId": 60541,
+      "npcId": 31801,
+      "x": 17972,
+      "y": 169945,
+      "z": -3496,
+      "heading": 20000,
+      "respawnDelaySeconds": 60,
+      "respawnRandomSeconds": 0
+    },
+    {
+      "objectId": 60542,
+      "npcId": 30291,
+      "x": 20943,
+      "y": 171358,
+      "z": -3548,
+      "heading": 12288,
+      "respawnDelaySeconds": 60,
+      "respawnRandomSeconds": 0
+    },
+    {
+      "objectId": 60543,
+      "npcId": 30626,
+      "x": 15734,
+      "y": 174805,
+      "z": -3636,
+      "heading": 0,
+      "respawnDelaySeconds": 60,
+      "respawnRandomSeconds": 0
+    },
+    {
+      "objectId": 60544,
+      "npcId": 30728,
+      "x": 10699,
+      "y": 171474,
+      "z": -3572,
+      "heading": 0,
+      "respawnDelaySeconds": 60,
+      "respawnRandomSeconds": 0
+    },
+    {
+      "objectId": 60545,
+      "npcId": 31803,
+      "x": 13520,
+      "y": 169840,
+      "z": -3712,
+      "heading": 2000,
+      "respawnDelaySeconds": 60,
+      "respawnRandomSeconds": 0
+    },
+    {
+      "objectId": 60546,
+      "npcId": 31802,
+      "x": 14784,
+      "y": 168800,
+      "z": -3504,
+      "heading": 58000,
+      "respawnDelaySeconds": 60,
+      "respawnRandomSeconds": 0
+    },
+    {
+      "objectId": 60547,
+      "npcId": 30633,
+      "x": 13258,
+      "y": 169790,
+      "z": -3705,
+      "heading": 1000,
+      "respawnDelaySeconds": 60,
+      "respawnRandomSeconds": 0
+    },
+    {
+      "objectId": 60548,
+      "npcId": 30609,
+      "x": 17475,
+      "y": 169556,
+      "z": -3493,
+      "heading": 57344,
+      "respawnDelaySeconds": 60,
+      "respawnRandomSeconds": 0
+    },
+    {
+      "objectId": 60549,
+      "npcId": 30981,
+      "x": 15520,
+      "y": 174572,
+      "z": -3637,
+      "heading": 57344,
+      "respawnDelaySeconds": 60,
+      "respawnRandomSeconds": 0
+    }
+  ]
+}

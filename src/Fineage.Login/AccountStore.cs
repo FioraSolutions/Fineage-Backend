@@ -1,5 +1,6 @@
 using System.Text.Json;
 using System.Text.Json.Serialization;
+using Fineage.Game;
 using Fineage.Game.Quests;
 
 namespace Fineage.Login;
@@ -323,6 +324,12 @@ public sealed class JsonAccountStore : IAccountStore
                 return CreateCharacterStatus.TooMany;
             if (NameTaken(name))
                 return CreateCharacterStatus.NameTaken;
+
+            if (_data.NextCharacterId >= NpcObjectIdAllocator.LegacyFirst)
+            {
+                throw new InvalidOperationException(
+                    $"Character id {_data.NextCharacterId} would enter the NPC object id range at {NpcObjectIdAllocator.LegacyFirst}.");
+            }
 
             var character = new CharacterDto
             {

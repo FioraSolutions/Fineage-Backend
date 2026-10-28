@@ -1,6 +1,10 @@
 namespace Fineage.Zone.Spawns;
 
-/// <summary>One fixed Mobius-style spawn row (template id + x/y/z + respawn seconds).</summary>
+/// <summary>
+/// One fixed Mobius-style spawn row. Name, attackable, hp, and speeds come from the row
+/// when the JSON sets them (Cedric gremlins). Otherwise they come from <c>data/npcs.json</c>.
+/// Title and type always come from the template.
+/// </summary>
 public sealed record SpawnNpcDefinition(
     int ObjectId,
     int NpcId,
@@ -14,7 +18,9 @@ public sealed record SpawnNpcDefinition(
     float RunSpeed,
     float WalkSpeed,
     int RespawnDelaySeconds,
-    int RespawnRandomSeconds);
+    int RespawnRandomSeconds,
+    string Title = "",
+    string NpcType = "");
 
 public sealed record SpawnMapDefinition(
     string MapId,

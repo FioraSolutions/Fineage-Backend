@@ -409,6 +409,8 @@ public sealed class SystemMessageMsg
 /// <summary>
 /// Opcode <see cref="MsgType.NpcInfo"/> (1006). <see cref="NpcId"/> is the template id
 /// (Gremlin = 20001), not the Interlude value with 1_000_000 added.
+/// Keys 0–9 are unchanged. Key 10 <see cref="Title"/> and key 11 <see cref="NpcType"/>
+/// were appended for town NPCs. Do not renumber.
 /// </summary>
 [MessagePackObject]
 public sealed class NpcInfoMsg
@@ -423,6 +425,10 @@ public sealed class NpcInfoMsg
     [Key(7)] public bool Attackable { get; set; } = true;
     [Key(8)] public float RunSpeed { get; set; } = 80f;
     [Key(9)] public float WalkSpeed { get; set; } = 40f;
+    /// <summary>Mobius title, such as Trader or Gatekeeper. Empty when the template has none.</summary>
+    [Key(10)] public string Title { get; set; } = "";
+    /// <summary>Mobius instance type, such as Merchant, Guard, Teleporter, or Monster.</summary>
+    [Key(11)] public string NpcType { get; set; } = "";
 }
 
 /// <summary>Opcode <see cref="MsgType.SelectTarget"/> (5).</summary>

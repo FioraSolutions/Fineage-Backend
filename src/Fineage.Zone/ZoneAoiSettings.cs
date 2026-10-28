@@ -12,15 +12,19 @@ public static class ZoneAoiSettings
 
     public static int InterestRange => ReadInt("FINEAGE_ZONE_INTEREST_RANGE", DefaultInterestRange, min: 0, max: 500_000);
 
-    public static ZoneWorld CreateWorld(IAoi? aoi = null, IAccountStore? accounts = null, SevenSignsEngine? sevenSigns = null)
+    public static ZoneWorld CreateWorld(
+        IAoi? aoi = null,
+        IAccountStore? accounts = null,
+        SevenSignsEngine? sevenSigns = null,
+        bool includeEnabledMaps = false)
     {
         if (aoi != null)
-            return new ZoneWorld(aoi, accounts: accounts, sevenSigns: sevenSigns);
+            return new ZoneWorld(aoi, accounts: accounts, sevenSigns: sevenSigns, includeEnabledMaps: includeEnabledMaps);
 
         int range = InterestRange;
         return range <= 0
-            ? new ZoneWorld(accounts: accounts, sevenSigns: sevenSigns)
-            : new ZoneWorld(new RangeAoi(range), accounts: accounts, sevenSigns: sevenSigns);
+            ? new ZoneWorld(accounts: accounts, sevenSigns: sevenSigns, includeEnabledMaps: includeEnabledMaps)
+            : new ZoneWorld(new RangeAoi(range), accounts: accounts, sevenSigns: sevenSigns, includeEnabledMaps: includeEnabledMaps);
     }
 
     static int ReadInt(string name, int fallback, int min, int max)

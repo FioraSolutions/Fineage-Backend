@@ -207,6 +207,10 @@ public sealed partial class NpcInfoMsg
     [Key(7)] public bool Attackable { get; set; } = true;
     [Key(8)] public float RunSpeed { get; set; } = 80f;
     [Key(9)] public float WalkSpeed { get; set; } = 40f;
+    /// <summary>Same key as <see cref="Fineage.Protocol.NpcInfoMsg.Title"/>.</summary>
+    [Key(10)] public string Title { get; set; } = "";
+    /// <summary>Same key as <see cref="Fineage.Protocol.NpcInfoMsg.NpcType"/>.</summary>
+    [Key(11)] public string NpcType { get; set; } = "";
 }
 
 /// <summary>Same keys as <see cref="Fineage.Protocol.SayMsg"/>.</summary>

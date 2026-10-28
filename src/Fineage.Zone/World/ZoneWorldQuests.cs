@@ -1,6 +1,7 @@
 using Fineage.Game;
 using Fineage.Game.Quests;
 using Fineage.Protocol;
+using Fineage.Zone.Npcs;
 
 namespace Fineage.Zone.World;
 
@@ -75,16 +76,20 @@ public sealed partial class ZoneWorld
 
     void BootstrapQuestNpcs()
     {
+        var templates = NpcCatalog.LoadDefault();
         foreach (var npc in TalkingIsland.Villagers)
         {
             if (_byId.ContainsKey(npc.ObjectId))
                 throw new InvalidOperationException($"Quest npc object id {npc.ObjectId} is already used.");
 
+            templates.ById.TryGetValue(npc.NpcId, out var template);
             var entity = new ZoneEntity
             {
                 ObjectId = npc.ObjectId,
                 Kind = ZoneEntityKind.Npc,
                 Name = npc.Name,
+                Title = template?.Title ?? "",
+                NpcType = template?.Type ?? "",
                 X = npc.X,
                 Y = npc.Y,
                 Z = npc.Z,

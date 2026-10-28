@@ -68,7 +68,9 @@ public static class TalkingIsland
                 Heading = row.Heading,
                 Attackable = row.Attackable,
                 RunSpeed = row.RunSpeed,
-                WalkSpeed = row.WalkSpeed
+                WalkSpeed = row.WalkSpeed,
+                Title = row.Title,
+                NpcType = row.NpcType
             });
         }
 
