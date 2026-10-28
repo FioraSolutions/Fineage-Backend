@@ -1,4 +1,5 @@
 using System.Text.Json;
+using System.Text.Json.Serialization;
 
 namespace Fineage.Login;
 
@@ -11,6 +12,13 @@ public enum CreateCharacterStatus
     InvalidName
 }
 
+public enum AddAccountStatus
+{
+    Created,
+    NameTaken,
+    EmailTaken
+}
+
 public sealed record AccountCredential(string AccountName, string PasswordHash, string PasswordSalt, int Iterations);
 
 public sealed record CharacterRecord(int Id, string Name, string Account, int ClassId, int Race, int Sex, int Level);
@@ -19,7 +27,9 @@ public interface IAccountStore
 {
     bool AccountExists(string account);
 
-    bool TryAddAccount(string name, string passwordHash, string passwordSalt, int iterations);
+    AddAccountStatus TryAddAccount(string name, string passwordHash, string passwordSalt, int iterations, string? email);
+
+    bool TryGetCredentialByEmail(string email, out AccountCredential credential);
 
     bool TryGetCredential(string account, out AccountCredential credential);
 
@@ -45,7 +55,8 @@ public sealed class JsonAccountStore : IAccountStore
     {
         PropertyNamingPolicy = JsonNamingPolicy.CamelCase,
         PropertyNameCaseInsensitive = true,
-        WriteIndented = true
+        WriteIndented = true,
+        DefaultIgnoreCondition = JsonIgnoreCondition.WhenWritingNull
     };
 
     readonly string? _path;
@@ -69,21 +80,41 @@ public sealed class JsonAccountStore : IAccountStore
             return FindAccount(account) != null;
     }
 
-    public bool TryAddAccount(string name, string passwordHash, string passwordSalt, int iterations)
+    public AddAccountStatus TryAddAccount(string name, string passwordHash, string passwordSalt, int iterations, string? email)
     {
         name = name.Trim();
+        string? canonicalEmail = string.IsNullOrWhiteSpace(email) ? null : email.Trim().ToLowerInvariant();
         lock (_gate)
         {
             if (FindAccount(name) != null)
-                return false;
+                return AddAccountStatus.NameTaken;
+            if (canonicalEmail != null && FindByEmail(canonicalEmail) != null)
+                return AddAccountStatus.EmailTaken;
             _data.Accounts.Add(new AccountDto
             {
                 Name = name,
+                Email = canonicalEmail,
                 PasswordHash = passwordHash,
                 PasswordSalt = passwordSalt,
                 Iterations = iterations
             });
             Save();
+            return AddAccountStatus.Created;
+        }
+    }
+
+    public bool TryGetCredentialByEmail(string email, out AccountCredential credential)
+    {
+        lock (_gate)
+        {
+            var row = FindByEmail(email);
+            if (row == null)
+            {
+                credential = new AccountCredential("", "", "", 0);
+                return false;
+            }
+
+            credential = new AccountCredential(row.Name, row.PasswordHash, row.PasswordSalt, row.Iterations);
             return true;
         }
     }
@@ -186,6 +217,16 @@ public sealed class JsonAccountStore : IAccountStore
             string.Equals(a.Name, key, StringComparison.OrdinalIgnoreCase));
     }
 
+    AccountDto? FindByEmail(string email)
+    {
+        if (string.IsNullOrWhiteSpace(email))
+            return null;
+        string key = email.Trim();
+        return _data.Accounts.FirstOrDefault(a =>
+            !string.IsNullOrEmpty(a.Email) &&
+            string.Equals(a.Email, key, StringComparison.OrdinalIgnoreCase));
+    }
+
     bool NameTaken(string name) =>
         _data.Accounts.Any(a => a.Characters.Any(c =>
             string.Equals(c.Name, name, StringComparison.OrdinalIgnoreCase)));
@@ -248,6 +289,7 @@ public sealed class JsonAccountStore : IAccountStore
     sealed class AccountDto
     {
         public string Name { get; set; } = "";
+        public string? Email { get; set; }
         public string PasswordHash { get; set; } = "";
         public string PasswordSalt { get; set; } = "";
         public int Iterations { get; set; }

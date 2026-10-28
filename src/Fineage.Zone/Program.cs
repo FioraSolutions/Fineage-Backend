@@ -29,20 +29,36 @@ if (!int.TryParse(portText, out int port) || port is < 1 or > 65535)
     return;
 }
 
+string bindText = Arg(args, "--bind")
+    ?? Environment.GetEnvironmentVariable("FINEAGE_BIND")
+    ?? BindAddress.Default;
+if (!BindAddress.TryResolve(bindText, out var bindAddress, out string bindDisplay))
+{
+    Console.Error.WriteLine("invalid --bind");
+    Environment.ExitCode = 1;
+    return;
+}
+
 var server = new ZoneServer(HandoffTokens.FromEnvironment());
-var listener = new TcpListener(IPAddress.Loopback, port);
+var listener = new TcpListener(bindAddress, port);
 try
 {
     listener.Start();
 }
 catch (SocketException ex)
 {
-    Console.Error.WriteLine($"listen failed on 127.0.0.1:{port}: {ex.Message}");
+    Console.Error.WriteLine($"listen failed on {bindDisplay}:{port}: {ex.Message}");
     Environment.ExitCode = 1;
     return;
 }
 
-Console.WriteLine($"[ZONE] listen 127.0.0.1:{port} Talking Island");
+if (string.IsNullOrWhiteSpace(Environment.GetEnvironmentVariable("FINEAGE_HANDOFF_SECRET")) &&
+    !IPAddress.IsLoopback(bindAddress))
+{
+    Console.WriteLine("[ZONE] warning: FINEAGE_HANDOFF_SECRET is unset. It must match Login before clients hand off from another machine.");
+}
+
+Console.WriteLine($"[ZONE] listen {bindDisplay}:{port} Talking Island");
 Console.WriteLine("[ZONE] Auth.Password is the login handoff token. EnterWorld spawns the village and three Gremlins.");
 while (true)
 {

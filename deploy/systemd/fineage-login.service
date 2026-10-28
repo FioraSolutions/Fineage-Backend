@@ -1,0 +1,17 @@
+[Unit]
+Description=Fineage Login (V2 TCP 9106 and HTTP auth 5080)
+After=network-online.target
+Wants=network-online.target
+
+[Service]
+Type=simple
+User=fineage
+Group=fineage
+WorkingDirectory=/var/lib/fineage
+EnvironmentFile=/etc/fineage.env
+ExecStart=/opt/fineage/login/Fineage.Login
+Restart=on-failure
+RestartSec=3
+
+[Install]
+WantedBy=multi-user.target

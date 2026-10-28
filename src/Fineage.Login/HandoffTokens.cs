@@ -83,8 +83,8 @@ public sealed class HandoffTokens
             character.Sex,
             token,
             exp,
-            ZoneHandoff.Host,
-            ZoneHandoff.Port);
+            ZoneHandoff.AdvertiseHost,
+            ZoneHandoff.AdvertisePort);
     }
 
     public bool TryValidate(string token, DateTimeOffset now, out HandoffClaims claims)
@@ -155,4 +155,24 @@ public static class ZoneHandoff
 {
     public const string Host = "127.0.0.1";
     public const int Port = 9777;
+
+    /// <summary>Host the client should dial. <c>FINEAGE_ZONE_HOST</c>, otherwise <see cref="Host"/>.</summary>
+    public static string AdvertiseHost
+    {
+        get
+        {
+            string? host = Environment.GetEnvironmentVariable("FINEAGE_ZONE_HOST");
+            return string.IsNullOrWhiteSpace(host) ? Host : host.Trim();
+        }
+    }
+
+    /// <summary>Zone TCP port written into the handoff ticket. <c>FINEAGE_ZONE_PORT</c>, otherwise <see cref="Port"/>.</summary>
+    public static int AdvertisePort
+    {
+        get
+        {
+            string? text = Environment.GetEnvironmentVariable("FINEAGE_ZONE_PORT");
+            return int.TryParse(text, out int port) && port is >= 1 and <= 65535 ? port : Port;
+        }
+    }
 }
