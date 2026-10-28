@@ -1,0 +1,10 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <OutputType>Exe</OutputType>
+    <RootNamespace>Fineage.MobiusImport</RootNamespace>
+    <Description>One-shot Mobius CT0 XML → Fineage data/*.json catalog importer.</Description>
+  </PropertyGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\Fineage.Game\Fineage.Game.csproj" />
+  </ItemGroup>
+</Project>

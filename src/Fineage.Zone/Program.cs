@@ -1,4 +1,6 @@
 using System.Net;
+using Fineage.Game;
+using Fineage.Game.Mobius;
 using Fineage.Login;
 using Fineage.Protocol.Net;
 using Fineage.Protocol.Telemetry;
@@ -46,6 +48,7 @@ string storePath = Arg(args, "--store")
     ?? Environment.GetEnvironmentVariable("FINEAGE_LOGIN_STORE")
     ?? Path.Combine("data", "accounts.json");
 var accounts = JsonAccountStore.Open(storePath);
+TryMobiusCatalogImportAtBoot(storePath);
 using var shutdown = new CancellationTokenSource();
 Console.CancelKeyPress += (_, e) =>
 {
@@ -113,3 +116,42 @@ static string? Arg(string[] args, string name)
         return null;
     return args[i + 1];
 }
+
+static void TryMobiusCatalogImportAtBoot(string storePath)
+{
+    if (string.IsNullOrWhiteSpace(Environment.GetEnvironmentVariable(MobiusXmlRoot.EnvVar)) &&
+        !IsTruthy(Environment.GetEnvironmentVariable("FINEAGE_MOBIUS_IMPORT_ON_BOOT")))
+        return;
+
+    var dataDir = GameData.FindDataDirectory(Path.GetDirectoryName(Path.GetFullPath(storePath)) ?? Directory.GetCurrentDirectory())
+        ?? GameData.FindDataDirectory(Directory.GetCurrentDirectory());
+    if (dataDir == null)
+    {
+        Console.WriteLine("[ZONE] Mobius import skipped: could not locate data/ catalog directory.");
+        return;
+    }
+
+    if (IsTruthy(Environment.GetEnvironmentVariable("FINEAGE_MOBIUS_IMPORT_ON_BOOT")))
+    {
+        try
+        {
+            var result = MobiusCatalogImporter.RunFromEnvironment(
+                dataDir,
+                MobiusImportTargets.Npcs | MobiusImportTargets.Spawns);
+            Console.WriteLine("[ZONE] Mobius import wrote " + string.Join(", ", result.WrittenPaths));
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine("[ZONE] Mobius import failed: " + ex.Message);
+        }
+
+        return;
+    }
+
+    MobiusCatalogImporter.LogRootStatus(Console.Out);
+}
+
+static bool IsTruthy(string? text) =>
+    text is "1" or "true" or "yes" or "on" ||
+    string.Equals(text, "TRUE", StringComparison.OrdinalIgnoreCase) ||
+    string.Equals(text, "YES", StringComparison.OrdinalIgnoreCase);

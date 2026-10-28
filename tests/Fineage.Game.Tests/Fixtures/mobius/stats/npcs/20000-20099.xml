@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<list>
+  <npc id="20001" level="1" type="Monster" name="Gremlin">
+    <race>FAIRY</race>
+    <stats str="40" int="21" dex="30" wit="20" con="43" men="10">
+      <vitals hp="39.74519" hpRegen="2" mp="40" mpRegen="0.9" />
+      <speed>
+        <walk ground="20" />
+        <run ground="50" />
+      </speed>
+    </stats>
+  </npc>
+</list>

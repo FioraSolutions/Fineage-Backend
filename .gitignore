@@ -1,9 +1,10 @@
 bin/
 obj/
-# Runtime files such as accounts.json. The game catalogs are tracked.
+# Runtime files such as accounts.json. The game catalogs are tracked JSON (not Mobius XML).
 data/*
 !data/items.json
 !data/starter-kits.json
+<<<<<<< HEAD
 !data/classes.json
 !data/experience.json
 !data/stat-bonuses.json
@@ -14,6 +15,15 @@ data/*
 !data/spawns/**
 !data/drops/
 !data/drops/**
+=======
+!data/npcs.json
+!data/skills.json
+!data/spawns/
+!data/spawns/**
+# Prefer converters → JSON; do not commit the full Mobius datapack (~1486+ XML files).
+data/mobius-xml/
+ref/mobius-ct0-interlude/
+>>>>>>> a53447e (feat(data): Mobius XML reference and catalog importer foundation)
 TestResults/
 .vs/
 .idea/
