@@ -28,6 +28,11 @@ sealed class ZoneEntity
     public bool Attackable { get; init; }
     public int CurHp { get; set; }
     public int MaxHp { get; init; }
+    public int CurMp { get; set; }
+    public int MaxMp { get; init; }
+    public int Level { get; init; } = 1;
+    /// <summary>When true, regen rates double (classic sitting rest). No sit opcode yet.</summary>
+    public bool Sitting { get; set; }
     public float RunSpeed { get; init; }
     public float WalkSpeed { get; init; }
     public bool Running { get; init; }
@@ -231,6 +236,7 @@ public sealed partial class ZoneWorld
 
         var spawn = SpawnFor(session);
         var inventory = LoadInventory(session);
+        var vitals = LoadVitals(session);
         var entity = new ZoneEntity
         {
             ObjectId = session.ObjectId,
@@ -244,7 +250,12 @@ public sealed partial class ZoneWorld
             WalkSpeed = 80f,
             Running = true,
             Session = session,
-            Inventory = inventory
+            Inventory = inventory,
+            MaxHp = vitals.maxHp,
+            CurHp = vitals.hp,
+            MaxMp = vitals.maxMp,
+            CurMp = vitals.mp,
+            Level = vitals.level
         };
         _byId[entity.ObjectId] = entity;
         _aoi.Enter(entity.ObjectId, entity.X, entity.Y);
@@ -380,6 +391,7 @@ public sealed partial class ZoneWorld
 
         if (entity.Inventory != null)
             SaveInventory(session, entity.Inventory);
+        SaveVitals(session, entity);
         SavePresence(session, entity.X, entity.Y, entity.Z, touchAccess: false);
 
         entity.Knownlist.Clear();

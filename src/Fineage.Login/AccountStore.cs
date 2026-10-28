@@ -108,6 +108,9 @@ public interface IAccountStore
     /// <summary>Writes the last world position. When <paramref name="lastAccess"/> is set and later than the stored value, updates last played.</summary>
     bool TrySavePresence(string account, int characterId, int x, int y, int z, DateTimeOffset? lastAccess);
 
+    /// <summary>Writes current HP/MP after zone play. Maxima are unchanged.</summary>
+    bool TrySaveVitals(string account, int characterId, int hp, int mp);
+
     bool TrySetLastAccess(string account, int characterId, DateTimeOffset when);
 
     bool TrySetDeleteAt(string account, int characterId, DateTimeOffset deleteAt);
@@ -321,6 +324,20 @@ public sealed class JsonAccountStore : IAccountStore
             character.Z = z;
             if (lastAccess is { } access && access > character.LastAccess)
                 character.LastAccess = access;
+            Save();
+            return true;
+        }
+    }
+
+    public bool TrySaveVitals(string account, int characterId, int hp, int mp)
+    {
+        lock (_gate)
+        {
+            var character = FindCharacter(account, characterId);
+            if (character == null)
+                return false;
+            character.Hp = hp;
+            character.Mp = mp;
             Save();
             return true;
         }
