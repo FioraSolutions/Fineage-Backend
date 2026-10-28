@@ -57,12 +57,39 @@ public class ProtocolCompatTests
     }
 
     [Fact]
+    public void Say_MatchesProtocolV2Layout()
+    {
+        Assert.Equal((ushort)MsgType.Say, (ushort)Fineage.Protocol.V2.MsgType.Say);
+        Assert.Equal((ushort)MsgType.CreatureSay, (ushort)Fineage.Protocol.V2.MsgType.CreatureSay);
+
+        byte[] say = MessagePackSerializer.Serialize(new SayMsg { Text = "hi", ChatType = 0 });
+        byte[] sayV2 = MessagePackSerializer.Serialize(new Fineage.Protocol.V2.SayMsg { Text = "hi", ChatType = 0 });
+        Assert.Equal(say, sayV2);
+
+        byte[] heard = MessagePackSerializer.Serialize(new CreatureSayMsg
+        {
+            ObjectId = 4,
+            Name = "Aria",
+            Text = "hi",
+            ChatType = 0
+        });
+        byte[] heardV2 = MessagePackSerializer.Serialize(new Fineage.Protocol.V2.CreatureSayMsg
+        {
+            ObjectId = 4,
+            Name = "Aria",
+            Text = "hi",
+            ChatType = 0
+        });
+        Assert.Equal(heard, heardV2);
+    }
+
+    [Fact]
     public void LoginOpcodes_DoNotReuseZoneOpcodes()
     {
         ushort[] zone =
         [
-            1, 2, 3, 4, 5, 6,
-            1001, 1002, 1003, 1004, 1005, 1006, 1007, 1008, 1009, 1010,
+            1, 2, 3, 4, 5, 6, 8,
+            1001, 1002, 1003, 1004, 1005, 1006, 1007, 1008, 1009, 1010, 1012,
             1099
         ];
         ushort[] login =

@@ -162,3 +162,21 @@ public sealed partial class EntityLeftMsg
 {
     [Key(0)] public int ObjectId { get; set; }
 }
+
+/// <summary>Same keys as <see cref="Fineage.Protocol.SayMsg"/>.</summary>
+[MessagePackObject]
+public sealed partial class SayMsg
+{
+    [Key(0)] public string Text { get; set; } = "";
+    [Key(1)] public int ChatType { get; set; }
+}
+
+/// <summary>Same keys as <see cref="Fineage.Protocol.CreatureSayMsg"/>.</summary>
+[MessagePackObject]
+public sealed partial class CreatureSayMsg
+{
+    [Key(0)] public int ObjectId { get; set; }
+    [Key(1)] public string Name { get; set; } = "";
+    [Key(2)] public string Text { get; set; } = "";
+    [Key(3)] public int ChatType { get; set; }
+}

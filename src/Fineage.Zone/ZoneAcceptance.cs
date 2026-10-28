@@ -13,7 +13,7 @@ public static class ZoneAcceptance
         var login = await LoginAcceptance.RunAsync().ConfigureAwait(false);
         var tokens = new HandoffTokens(HandoffTokens.DefaultSecret);
 
-        await using (var zone = ZoneListen.Start(tokens))
+        await using (var zone = ZoneHost.Start(tokens))
         {
             await PlayAsync(zone.Port, login.Fighter.Account, login.Fighter.Token, login.Fighter.CharacterId, login.Fighter.CharacterName)
                 .ConfigureAwait(false);
@@ -135,84 +135,5 @@ public static class ZoneAcceptance
     {
         var body = await ExpectAsync(stream, MsgType.Error).ConfigureAwait(false);
         return MessagePackSerializer.Deserialize<ErrorMsg>(body);
-    }
-
-    sealed class ZoneListen : IAsyncDisposable
-    {
-        readonly TcpListener _listener;
-        readonly CancellationTokenSource _cts;
-        readonly Task _loop;
-
-        ZoneListen(TcpListener listener, CancellationTokenSource cts, Task loop)
-        {
-            _listener = listener;
-            _cts = cts;
-            _loop = loop;
-            Port = ((IPEndPoint)listener.LocalEndpoint).Port;
-        }
-
-        public int Port { get; }
-
-        public static ZoneListen Start(HandoffTokens tokens)
-        {
-            var listener = new TcpListener(IPAddress.Loopback, 0);
-            listener.Start();
-            var cts = new CancellationTokenSource();
-            var server = new ZoneServer(tokens);
-            var loop = Task.Run(async () =>
-            {
-                try
-                {
-                    while (!cts.IsCancellationRequested)
-                    {
-                        TcpClient client;
-                        try
-                        {
-                            client = await listener.AcceptTcpClientAsync(cts.Token).ConfigureAwait(false);
-                        }
-                        catch (Exception ex) when (ex is OperationCanceledException or SocketException or ObjectDisposedException)
-                        {
-                            break;
-                        }
-
-                        _ = Task.Run(async () =>
-                        {
-                            try
-                            {
-                                await using var stream = client.GetStream();
-                                await server.HandleAsync(stream, cts.Token).ConfigureAwait(false);
-                            }
-                            catch (Exception ex) when (ex is IOException or OperationCanceledException or ObjectDisposedException)
-                            {
-                            }
-                            finally
-                            {
-                                client.Dispose();
-                            }
-                        });
-                    }
-                }
-                catch (ObjectDisposedException)
-                {
-                }
-            });
-
-            return new ZoneListen(listener, cts, loop);
-        }
-
-        public async ValueTask DisposeAsync()
-        {
-            await _cts.CancelAsync().ConfigureAwait(false);
-            _listener.Stop();
-            try
-            {
-                await _loop.WaitAsync(TimeSpan.FromSeconds(2)).ConfigureAwait(false);
-            }
-            catch (TimeoutException)
-            {
-            }
-
-            _cts.Dispose();
-        }
     }
 }

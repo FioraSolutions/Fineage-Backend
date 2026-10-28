@@ -14,6 +14,8 @@ public enum MsgType : ushort
     MoveTo = 4,
     SelectTarget = 5,
     AttackRequest = 6,
+    /// <summary>Zone chat. Fan-out is <see cref="CreatureSay"/>.</summary>
+    Say = 8,
 
     // Login C → S
     Register = 20,
@@ -32,6 +34,8 @@ public enum MsgType : ushort
     MyTargetSelected = 1008,
     Attack = 1009,
     StatusUpdate = 1010,
+    /// <summary>Zone chat fan-out. Not an Interlude opcode.</summary>
+    CreatureSay = 1012,
 
     // Login S → C
     RegisterOk = 1020,
