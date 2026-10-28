@@ -141,7 +141,17 @@ public sealed class ZoneServer
                     break;
                 }
 
-                if (!_tokens.TryValidate(auth.Password, _clock(), out var parsed) ||
+                var status = _tokens.Validate(auth.Password, _clock(), out var parsed);
+                if (status == HandoffTokens.ValidateStatus.Expired)
+                {
+                    ZoneLog.Info($"RX Auth rejected session={sessionId} account={auth.Account} reason=expired");
+                    await _world.LeaveAsync(session, ct).ConfigureAwait(false);
+                    session.Clear();
+                    await ErrorAsync(session, "handoff_expired", "Handoff token has expired.", ct).ConfigureAwait(false);
+                    break;
+                }
+
+                if (status != HandoffTokens.ValidateStatus.Ok ||
                     !string.Equals(parsed.Account, auth.Account, StringComparison.OrdinalIgnoreCase))
                 {
                     ZoneLog.Info($"RX Auth rejected session={sessionId} account={auth.Account}");
