@@ -103,29 +103,16 @@ public class LoginServiceTests
     }
 
     [Fact]
-    public void FromEnvironment_honors_handoff_ttl_seconds()
+    public void Handoff_honors_configured_ttl()
     {
-        string? priorSecret = Environment.GetEnvironmentVariable("FINEAGE_HANDOFF_SECRET");
-        string? priorTtl = Environment.GetEnvironmentVariable("FINEAGE_HANDOFF_TTL_SECONDS");
-        try
-        {
-            Environment.SetEnvironmentVariable("FINEAGE_HANDOFF_SECRET", HandoffTokens.DefaultSecret);
-            Environment.SetEnvironmentVariable("FINEAGE_HANDOFF_TTL_SECONDS", "90");
-            var now = DateTimeOffset.UnixEpoch.AddHours(5);
-            var service = new LoginService(JsonAccountStore.InMemory(), HandoffTokens.FromEnvironment(), () => now);
-            var ticket = service.Play("alice", "secret1", "Aria", HumanClasses.Fighter).Value!;
+        var now = DateTimeOffset.UnixEpoch.AddHours(5);
+        var tokens = new HandoffTokens(HandoffTokens.DefaultSecret, TimeSpan.FromSeconds(90));
+        var service = new LoginService(JsonAccountStore.InMemory(), tokens, () => now);
+        var ticket = service.Play("alice", "secret1", "Aria", HumanClasses.Fighter).Value!;
 
-            Assert.Equal(now.ToUnixTimeSeconds() + 90, ticket.ExpiresUnixSeconds);
-
-            var tokens = HandoffTokens.FromEnvironment();
-            Assert.True(tokens.TryValidate(ticket.Token, now.AddSeconds(89), out _));
-            Assert.False(tokens.TryValidate(ticket.Token, now.AddSeconds(90), out _));
-        }
-        finally
-        {
-            Environment.SetEnvironmentVariable("FINEAGE_HANDOFF_SECRET", priorSecret);
-            Environment.SetEnvironmentVariable("FINEAGE_HANDOFF_TTL_SECONDS", priorTtl);
-        }
+        Assert.Equal(now.ToUnixTimeSeconds() + 90, ticket.ExpiresUnixSeconds);
+        Assert.True(tokens.TryValidate(ticket.Token, now.AddSeconds(89), out _));
+        Assert.False(tokens.TryValidate(ticket.Token, now.AddSeconds(90), out _));
     }
 
     [Fact]
