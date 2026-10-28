@@ -31,7 +31,7 @@ public sealed partial class ZoneWorld
             return "target";
         if (target.CurHp <= 0 && target.Kind == ZoneEntityKind.Npc)
             return "target";
-        if (!VisibleTo(session.ObjectId, targetId))
+        if (targetId != session.ObjectId && !VisibleTo(session.ObjectId, targetId))
             return "target";
 
         if (request.Remove)
