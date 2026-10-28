@@ -87,3 +87,7 @@ dotnet run --project src/Fineage.Login -- play <account> <password> <name> fight
 
 - Client: https://github.com/FioraSolutions/Fineage
 - [Fineage #14](https://github.com/FioraSolutions/Fineage/issues/14) — LoginServer v2 auth + session handoff
+
+## License
+
+Fineage-Backend is open source under the [Apache License 2.0](LICENSE), the same license as the [Fineage client](https://github.com/FioraSolutions/Fineage).
