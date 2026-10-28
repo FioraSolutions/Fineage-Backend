@@ -77,15 +77,17 @@ The ticket’s zone address comes from `FINEAGE_ZONE_HOST` (default `127.0.0.1`)
 
 ## Raspberry Pi
 
-Overnight V2 play on the Pi is Login + Zone from this repo, not the Interlude stub.
+The **live** public stack on Tailscale host `raspberrypi` (`100.123.81.1`) runs Login + Zone from this repo under **`/home/pi/fineage-backend/`** (`login/`, `zone/`, `data/`, `logs/`, `run-login.sh`, `run-zone.sh`). Processes bind **`0.0.0.0`** on the WAN-facing remap below (not the local dev defaults **9106** / **9777**).
 
 | Port | Process | Role |
 |------|---------|------|
 | 5080 | `Fineage.Login` | HTTP register/login. Playtest tunnel `https://api.fineage.evpoint.by` forwards here |
-| 9106 | `Fineage.Login` | V2 MessagePack login |
-| 9777 | `Fineage.Zone` | V2 zone (Talking Island) |
+| 2106 | `Fineage.Login` | V2 MessagePack login (public remap; dev default **9106**) |
+| 7777 | `Fineage.Zone` | V2 zone (Talking Island; public remap; dev default **9777**) |
 
-`2106` and `7777` stay with [Fineage `tools/login-stub`](https://github.com/FioraSolutions/Fineage/tree/dev/tools/login-stub). That stub binds `127.0.0.1` and accepts any password; it does not read `accounts.json`. A router forward of WAN `:2106` / `:7777` to the Pi does not reach this backend. When the client is still Interlude, run the stub (and change its bind in that repo if WAN clients must hit it). When the client is V2, forward `9106` and `9777` instead. Point the landing Worker’s `FINEAGE_LOGIN_API_URL` at `http://<pi>:5080` on a path the Worker can reach. This repo does not change Cloudflare or DNS.
+Set `FINEAGE_ZONE_HOST` in `fineage.env` (or the environment) to the address clients dial for the zone. Put the shared handoff secret in `handoff.secret` or `FINEAGE_HANDOFF_SECRET`. Accounts and world state stay in `data/accounts.json` (and sibling files under `data/`); deploy never deletes that tree.
+
+Optional **systemd** under `/opt/fineage` with user `fineage` is documented below for greenfield installs; **GitHub Actions deploy** targets the live `fineage-backend` layout only. Point the landing Worker’s `FINEAGE_LOGIN_API_URL` at `http://<pi>:5080` on a path the Worker can reach. This repo does not change Cloudflare or DNS.
 
 Publish on a 64-bit Pi, or cross-publish from another machine. Self-contained needs no separate .NET install:
 
@@ -101,7 +103,18 @@ dotnet publish src/Fineage.Login/Fineage.Login.csproj -c Release -o publish/logi
 dotnet publish src/Fineage.Zone/Fineage.Zone.csproj -c Release -o publish/zone
 ```
 
-On the Pi:
+Live layout (matches auto-deploy):
+
+```bash
+mkdir -p ~/fineage-backend/{login,zone,data,logs}
+# copy publish/login and publish/zone once, add fineage.env / handoff.secret / data as needed
+cp deploy/run-login.sh deploy/run-zone.sh ~/fineage-backend/
+chmod +x ~/fineage-backend/run-*.sh ~/fineage-backend/login/Fineage.Login ~/fineage-backend/zone/Fineage.Zone
+~/fineage-backend/run-login.sh
+~/fineage-backend/run-zone.sh
+```
+
+Alternative **systemd** install (not used by the live Pi today):
 
 ```bash
 sudo useradd --system --home /var/lib/fineage --create-home fineage
@@ -146,7 +159,29 @@ Meter **`Fineage.Server`** (OpenTelemetry, and the optional text endpoint below)
 
 See the commented block in `deploy/fineage.env.example`. Export the same meter with the OpenTelemetry .NET SDK (`OTEL_SERVICE_NAME`, `OTEL_EXPORTER_OTLP_ENDPOINT`) if you want a collector instead of `/metrics`.
 
-There is no deploy workflow in this repo. CI is `.github/workflows/build-and-test.yml` (`dotnet test` on pull requests and pushes).
+CI is `.github/workflows/build-and-test.yml` (`dotnet test` on pull requests and pushes to `main` and `cursor/**`).
+
+### Auto-deploy to the Pi (GitHub Actions)
+
+Pushes to **`main`** run `.github/workflows/deploy-pi.yml`: `dotnet test`, Release **linux-arm64** self-contained publish for Login and Zone, Tailscale into the fineage tailnet, SSH to the Pi, rsync binaries into **`/home/pi/fineage-backend/login`** and **`.../zone`** (does **not** overwrite `data/`, `fineage.env`, or `handoff.secret`), refresh `run-login.sh` / `run-zone.sh`, restart both processes, and fail unless **2106**, **7777**, and **5080** listen on the Pi. Trigger manually via **Actions → deploy-pi → Run workflow**. Pull requests never run the deploy job.
+
+Configure these **repository secrets** (names only — never commit values):
+
+| Secret | Purpose |
+|--------|---------|
+| `TAILSCALE_AUTHKEY` | Reusable/ephemeral Tailscale auth key so the runner joins the tailnet (ACL must allow SSH to the Pi). Alternatively, replace the Tailscale step with `TS_OAUTH_CLIENT_ID` + `TS_OAUTH_SECRET` per [tailscale/github-action](https://github.com/tailscale/github-action). |
+| `FINEAGE_PI_SSH_PRIVATE_KEY` | Private key for SSH (e.g. `pi@raspberrypi` on Tailscale `100.123.81.1`). |
+| `FINEAGE_PI_HOST` | Optional. Tailscale hostname or IP (default in script: `raspberrypi`). |
+| `FINEAGE_PI_USER` | Optional. SSH user (default: `pi`). |
+| `FINEAGE_PI_APP_ROOT` | Optional. App directory (default: `/home/pi/fineage-backend`). |
+
+Manual deploy from a machine on Tailscale:
+
+```bash
+dotnet publish src/Fineage.Login/Fineage.Login.csproj -c Release -r linux-arm64 --self-contained true -o publish/login
+dotnet publish src/Fineage.Zone/Fineage.Zone.csproj -c Release -r linux-arm64 --self-contained true -o publish/zone
+FINEAGE_PI_HOST=raspberrypi ./deploy/deploy-to-pi.sh publish/login publish/zone
+```
 
 Login CLI, same store:
 
