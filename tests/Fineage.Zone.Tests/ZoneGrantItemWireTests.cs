@@ -3,6 +3,7 @@ using System.Net.Sockets;
 using Fineage.Login;
 using Fineage.Protocol;
 using Fineage.Zone;
+using Fineage.Zone.World;
 using MessagePack;
 using Xunit;
 
