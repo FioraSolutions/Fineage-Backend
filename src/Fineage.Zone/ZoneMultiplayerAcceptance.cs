@@ -541,15 +541,14 @@ public static class ZoneMultiplayerAcceptance
         await left.ExpectAsync<TradeConfirmStateMsg>(MsgType.TradeConfirmState).ConfigureAwait(false);
         await right.ExpectAsync<TradeConfirmStateMsg>(MsgType.TradeConfirmState).ConfigureAwait(false);
 
+        var sellerUpdate = await left.ExpectAsync<InventoryUpdateMsg>(MsgType.InventoryUpdate).ConfigureAwait(false);
+        _ = await left.ExpectAsync<UserInfoMsg>(MsgType.UserInfo).ConfigureAwait(false);
         var finishedLeft = await left.ExpectAsync<TradeFinishedMsg>(MsgType.TradeFinished).ConfigureAwait(false);
+        var buyerUpdate = await right.ExpectAsync<InventoryUpdateMsg>(MsgType.InventoryUpdate).ConfigureAwait(false);
+        _ = await right.ExpectAsync<UserInfoMsg>(MsgType.UserInfo).ConfigureAwait(false);
         var finishedRight = await right.ExpectAsync<TradeFinishedMsg>(MsgType.TradeFinished).ConfigureAwait(false);
         if (finishedLeft.Response != 1 || finishedRight.Response != 1)
             throw new InvalidOperationException("TradeFinished expected success");
-
-        var sellerUpdate = await left.ExpectAsync<InventoryUpdateMsg>(MsgType.InventoryUpdate).ConfigureAwait(false);
-        _ = await left.ExpectAsync<UserInfoMsg>(MsgType.UserInfo).ConfigureAwait(false);
-        var buyerUpdate = await right.ExpectAsync<InventoryUpdateMsg>(MsgType.InventoryUpdate).ConfigureAwait(false);
-        _ = await right.ExpectAsync<UserInfoMsg>(MsgType.UserInfo).ConfigureAwait(false);
         if (sellerUpdate.Changes.Length < 1 || buyerUpdate.Changes.Length < 1)
             throw new InvalidOperationException("expected inventory updates after trade");
 
@@ -563,43 +562,58 @@ public static class ZoneMultiplayerAcceptance
         int destX,
         int destY,
         int destZ,
-        int startX,
-        int startY,
-        int startZ)
+        int fromX,
+        int fromY,
+        int fromZ)
     {
-        int x = startX;
-        int y = startY;
-        int z = startZ;
-        for (int attempt = 0; attempt < 24; attempt++)
+        int curX = fromX;
+        int curY = fromY;
+        int curZ = fromZ;
+        while (curX != destX || curY != destY || curZ != destZ)
         {
-            long dx = destX - x;
-            long dy = destY - y;
-            if (dx * dx + dy * dy <= (long)TradeProtocol.Distance * TradeProtocol.Distance)
-                return;
-
-            int stepX = destX;
-            int stepY = destY;
-            if (!TalkingIsland.WithinStep(x, y, destX, destY))
+            var step = StepToward(curX, curY, curZ, destX, destY, destZ);
+            await mover.SendAsync(MsgType.MoveTo, new MoveToMsg
             {
-                double len = Math.Sqrt(dx * dx + dy * dy);
-                stepX = x + (int)(dx / len * TalkingIsland.MaxStep);
-                stepY = y + (int)(dy / len * TalkingIsland.MaxStep);
-                if (!TalkingIsland.WithinStep(x, y, stepX, stepY))
-                {
-                    stepX = x + Math.Clamp((int)dx, -TalkingIsland.MaxStep, TalkingIsland.MaxStep);
-                    stepY = y + Math.Clamp((int)dy, -TalkingIsland.MaxStep, TalkingIsland.MaxStep);
-                }
-            }
-
-            await mover.SendAsync(MsgType.MoveTo, new MoveToMsg { DestX = stepX, DestY = stepY, DestZ = z })
-                .ConfigureAwait(false);
-            _ = await mover.ExpectAsync<MoveToMsg>(MsgType.MoveToAck).ConfigureAwait(false);
+                DestX = step.X,
+                DestY = step.Y,
+                DestZ = step.Z
+            }).ConfigureAwait(false);
+            var ack = await mover.ExpectAsync<MoveToMsg>(MsgType.MoveToAck).ConfigureAwait(false);
             _ = await observer.ExpectAsync<MoveToMsg>(MsgType.MoveToAck).ConfigureAwait(false);
-            x = stepX;
-            y = stepY;
+            curX = ack.DestX;
+            curY = ack.DestY;
+            curZ = ack.DestZ;
+        }
+    }
+
+    static (int X, int Y, int Z) StepToward(int fromX, int fromY, int fromZ, int toX, int toY, int toZ)
+    {
+        if (TalkingIsland.WithinStep(fromX, fromY, toX, toY))
+            return (toX, toY, toZ);
+
+        long dx = toX - (long)fromX;
+        long dy = toY - (long)fromY;
+        double dist = Math.Sqrt(dx * dx + dy * dy);
+        if (dist < 1)
+            return (toX, toY, toZ);
+
+        double scale = TalkingIsland.MaxStep / dist;
+        int stepX = fromX + (int)Math.Floor(dx * scale);
+        int stepY = fromY + (int)Math.Floor(dy * scale);
+        if (!TalkingIsland.WithinStep(fromX, fromY, stepX, stepY))
+        {
+            scale = (TalkingIsland.MaxStep - 1) / dist;
+            stepX = fromX + (int)Math.Floor(dx * scale);
+            stepY = fromY + (int)Math.Floor(dy * scale);
         }
 
-        throw new InvalidOperationException("could not move trade peers within range");
+        int stepZ = fromZ;
+        if (dist <= TalkingIsland.MaxStep)
+            stepZ = toZ;
+        else
+            stepZ = fromZ + (int)Math.Floor((toZ - (long)fromZ) * scale);
+
+        return (stepX, stepY, stepZ);
     }
 
     static void ExpectPartyList(PartyMemberListMsg list, int leaderId, params int[] memberIds)
