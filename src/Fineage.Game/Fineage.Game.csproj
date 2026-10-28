@@ -1,0 +1,6 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <RootNamespace>Fineage.Game</RootNamespace>
+    <Description>Fineage game rules: item templates, paperdoll, inventory, and starter kits.</Description>
+  </PropertyGroup>
+</Project>
