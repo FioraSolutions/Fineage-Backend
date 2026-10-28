@@ -701,6 +701,85 @@ public sealed class PartyKickRequestMsg
     [Key(0)] public int TargetObjectId { get; set; }
 }
 
+/// <summary>Opcode <see cref="MsgType.TradeRequest"/> (28).</summary>
+[MessagePackObject]
+public sealed class TradeRequestMsg
+{
+    [Key(0)] public int TargetObjectId { get; set; }
+}
+
+/// <summary>Opcode <see cref="MsgType.TradeAnswerRequest"/> (29).</summary>
+[MessagePackObject]
+public sealed class TradeAnswerRequestMsg
+{
+    [Key(0)] public int RequestorObjectId { get; set; }
+    [Key(1)] public int Response { get; set; }
+}
+
+/// <summary>Opcode <see cref="MsgType.TradeAddItemRequest"/> (54).</summary>
+[MessagePackObject]
+public sealed class TradeAddItemRequestMsg
+{
+    [Key(0)] public int InventoryObjectId { get; set; }
+    [Key(1)] public long Count { get; set; } = 1;
+}
+
+/// <summary>Opcode <see cref="MsgType.TradeDoneRequest"/> (55). Response 1 confirm, 0 cancel.</summary>
+[MessagePackObject]
+public sealed class TradeDoneRequestMsg
+{
+    [Key(0)] public int Response { get; set; }
+}
+
+/// <summary>Opcode <see cref="MsgType.TradeAsk"/> (1073).</summary>
+[MessagePackObject]
+public sealed class TradeAskMsg
+{
+    [Key(0)] public int RequestorObjectId { get; set; }
+    [Key(1)] public string RequestorName { get; set; } = "";
+}
+
+/// <summary>Opcode <see cref="MsgType.TradeRequestResult"/> (1074).</summary>
+[MessagePackObject]
+public sealed class TradeRequestResultMsg
+{
+    [Key(0)] public int Response { get; set; }
+}
+
+/// <summary>Opcode <see cref="MsgType.TradeStart"/> (1075).</summary>
+[MessagePackObject]
+public sealed class TradeStartMsg
+{
+    [Key(0)] public int PartnerObjectId { get; set; }
+    [Key(1)] public string PartnerName { get; set; } = "";
+}
+
+/// <summary>Opcode <see cref="MsgType.TradeOfferUpdate"/> (1076).</summary>
+[MessagePackObject]
+public sealed class TradeOfferUpdateMsg
+{
+    [Key(0)] public int IsOwn { get; set; }
+    [Key(1)] public int InventoryObjectId { get; set; }
+    [Key(2)] public int ItemId { get; set; }
+    [Key(3)] public long Count { get; set; }
+    [Key(4)] public int EnchantLevel { get; set; }
+}
+
+/// <summary>Opcode <see cref="MsgType.TradeConfirmState"/> (1077).</summary>
+[MessagePackObject]
+public sealed class TradeConfirmStateMsg
+{
+    [Key(0)] public int SelfConfirmed { get; set; }
+    [Key(1)] public int PartnerConfirmed { get; set; }
+}
+
+/// <summary>Opcode <see cref="MsgType.TradeFinished"/> (1078).</summary>
+[MessagePackObject]
+public sealed class TradeFinishedMsg
+{
+    [Key(0)] public int Response { get; set; }
+}
+
 /// <summary>Opcode <see cref="MsgType.RequestQuestList"/> (42). Empty body.</summary>
 [MessagePackObject]
 public sealed class RequestQuestListMsg

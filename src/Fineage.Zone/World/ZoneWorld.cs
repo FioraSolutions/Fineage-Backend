@@ -470,6 +470,7 @@ public sealed partial class ZoneWorld
         session.InWorld = false;
 
         PartyPlayerLeftWorld(session.ObjectId, toOthers);
+        TradePlayerLeftWorld(session.ObjectId, toOthers);
         ClanPlayerLeftWorld(session.ObjectId, session.Name, toOthers);
 
         byte[] body = MessagePackSerializer.Serialize(new DeleteObjectMsg { ObjectId = session.ObjectId });
