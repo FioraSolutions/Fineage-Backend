@@ -95,6 +95,14 @@ public sealed class ZoneServer
 
     async Task DispatchAsync(ZoneSession session, int sessionId, ushort type, byte[] body, CancellationToken ct)
     {
+        if (ZoneWireBoundary.IsLoginClientOpcode(type))
+        {
+            ZoneLog.Info($"RX login opcode on zone type={type} session={sessionId}");
+            await ErrorAsync(session, "wrong_endpoint",
+                "That message belongs on the login port, not the zone port.", ct).ConfigureAwait(false);
+            return;
+        }
+
         switch ((MsgType)type)
         {
             case MsgType.Hello:
