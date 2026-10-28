@@ -447,6 +447,13 @@ public sealed class GrantItemRequestMsg
     [Key(1)] public int Count { get; set; } = 1;
 }
 
+/// <summary>Opcode <see cref="MsgType.PickupRequest"/> (14). Picks up a visible ground item.</summary>
+[MessagePackObject]
+public sealed class PickupRequestMsg
+{
+    [Key(0)] public int ObjectId { get; set; }
+}
+
 /// <summary>Opcode <see cref="MsgType.SpawnItem"/> (1018). Ground item in AOI.</summary>
 [MessagePackObject]
 public sealed class SpawnItemMsg

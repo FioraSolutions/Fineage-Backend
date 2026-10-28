@@ -45,6 +45,7 @@ public class ProtocolCompatTests
         Assert.Equal(6, (ushort)MsgType.AttackRequest);
         Assert.Equal(12, (ushort)MsgType.BuffRequest);
         Assert.Equal(13, (ushort)MsgType.GrantItemRequest);
+        Assert.Equal(14, (ushort)MsgType.PickupRequest);
         Assert.Equal(9, (ushort)MsgType.Ping);
         Assert.Equal(1001, (ushort)MsgType.HelloAck);
         Assert.Equal(1002, (ushort)MsgType.AuthOk);
@@ -160,7 +161,7 @@ public class ProtocolCompatTests
     {
         ushort[] zone =
         [
-            1, 2, 3, 4, 5, 6, 8, 9, 12, 13,
+            1, 2, 3, 4, 5, 6, 8, 9, 12, 13, 14,
             1001, 1002, 1003, 1004, 1005, 1006, 1007, 1008, 1009, 1010, 1012, 1013,
             1018,
             1099

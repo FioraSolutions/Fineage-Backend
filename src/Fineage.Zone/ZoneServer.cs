@@ -270,6 +270,27 @@ public sealed class ZoneServer
                     ZoneLog.Info($"RX GrantItem session={sessionId} item={grant.ItemId} count={grant.Count}");
                 break;
             }
+            case MsgType.PickupRequest:
+            {
+                var pickup = Decode<PickupRequestMsg>(body);
+                if (pickup == null)
+                {
+                    await ErrorAsync(session, "bad_request", "PickupRequest body was not readable.", ct)
+                        .ConfigureAwait(false);
+                    break;
+                }
+
+                string? code = await _world.TryPickupAsync(session, pickup, ct).ConfigureAwait(false);
+                if (code == "world")
+                    await ErrorAsync(session, "world", "EnterWorld first.", ct).ConfigureAwait(false);
+                else if (code == "pickup")
+                    await ErrorAsync(session, "pickup", "Pickup failed.", ct).ConfigureAwait(false);
+                else if (code != null)
+                    await ErrorAsync(session, "bad_request", "Pickup was rejected.", ct).ConfigureAwait(false);
+                else
+                    ZoneLog.Info($"RX Pickup session={sessionId} object={pickup.ObjectId}");
+                break;
+            }
             case MsgType.BuffRequest:
             {
                 var buff = Decode<BuffRequestMsg>(body);
