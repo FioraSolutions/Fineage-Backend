@@ -1,0 +1,74 @@
+using System.Net;
+using System.Net.Sockets;
+using Fineage.Login;
+using Fineage.Zone;
+
+if (args.Contains("--selftest"))
+{
+    try
+    {
+        await ZoneAcceptance.RunAsync();
+        ZoneAcceptance.Write(Console.Out);
+    }
+    catch (Exception ex)
+    {
+        Console.Error.WriteLine("selftest FAIL " + ex.Message);
+        Environment.ExitCode = 1;
+    }
+
+    return;
+}
+
+string portText = Arg(args, "--port")
+    ?? Environment.GetEnvironmentVariable("FINEAGE_ZONE_PORT")
+    ?? ZoneHandoff.Port.ToString();
+if (!int.TryParse(portText, out int port) || port is < 1 or > 65535)
+{
+    Console.Error.WriteLine("invalid --port");
+    Environment.ExitCode = 1;
+    return;
+}
+
+var server = new ZoneServer(HandoffTokens.FromEnvironment());
+var listener = new TcpListener(IPAddress.Loopback, port);
+try
+{
+    listener.Start();
+}
+catch (SocketException ex)
+{
+    Console.Error.WriteLine($"listen failed on 127.0.0.1:{port}: {ex.Message}");
+    Environment.ExitCode = 1;
+    return;
+}
+
+Console.WriteLine($"[ZONE] listen 127.0.0.1:{port} Talking Island");
+Console.WriteLine("[ZONE] Auth.Password is the login handoff token. EnterWorld spawns the village and three Gremlins.");
+while (true)
+{
+    var client = await listener.AcceptTcpClientAsync();
+    _ = Task.Run(async () =>
+    {
+        try
+        {
+            await using var stream = client.GetStream();
+            await server.HandleAsync(stream, CancellationToken.None);
+        }
+        catch (Exception ex)
+        {
+            Console.Error.WriteLine($"[ZONE] session error {ex.Message}");
+        }
+        finally
+        {
+            client.Dispose();
+        }
+    });
+}
+
+static string? Arg(string[] args, string name)
+{
+    int i = Array.IndexOf(args, name);
+    if (i < 0 || i + 1 >= args.Length)
+        return null;
+    return args[i + 1];
+}

@@ -124,3 +124,55 @@ public sealed class HandoffMsg
     [Key(6)] public int ZonePort { get; set; } = 9777;
     [Key(7)] public long ExpiresUnixSeconds { get; set; }
 }
+
+[MessagePackObject]
+public sealed class EnterWorldMsg
+{
+    [Key(0)] public int CharacterSlot { get; set; }
+}
+
+/// <summary>Same keys as tools/zone-server <c>PlayerSpawnedMsg</c>.</summary>
+[MessagePackObject]
+public sealed class PlayerSpawnedMsg
+{
+    [Key(0)] public int ObjectId { get; set; }
+    [Key(1)] public string Name { get; set; } = "";
+    [Key(2)] public int X { get; set; }
+    [Key(3)] public int Y { get; set; }
+    [Key(4)] public int Z { get; set; }
+    [Key(5)] public float RunSpeed { get; set; } = 120f;
+    [Key(6)] public float WalkSpeed { get; set; } = 80f;
+    [Key(7)] public bool Running { get; set; } = true;
+}
+
+/// <summary>Same keys as tools/zone-server <c>MoveToMsg</c>. Also the body of <see cref="MsgType.MoveToAck"/>.</summary>
+[MessagePackObject]
+public sealed class MoveToMsg
+{
+    [Key(0)] public int ObjectId { get; set; }
+    [Key(1)] public int DestX { get; set; }
+    [Key(2)] public int DestY { get; set; }
+    [Key(3)] public int DestZ { get; set; }
+    [Key(4)] public int OriginX { get; set; }
+    [Key(5)] public int OriginY { get; set; }
+    [Key(6)] public int OriginZ { get; set; }
+}
+
+/// <summary>
+/// Opcode <see cref="MsgType.NpcInfo"/> (1006). <see cref="NpcId"/> is the template id
+/// (Gremlin = 20001), not the Interlude value with 1_000_000 added.
+/// </summary>
+[MessagePackObject]
+public sealed class NpcInfoMsg
+{
+    [Key(0)] public int ObjectId { get; set; }
+    [Key(1)] public int NpcId { get; set; }
+    [Key(2)] public string Name { get; set; } = "";
+    [Key(3)] public int X { get; set; }
+    [Key(4)] public int Y { get; set; }
+    [Key(5)] public int Z { get; set; }
+    [Key(6)] public int Heading { get; set; }
+    [Key(7)] public bool Attackable { get; set; } = true;
+    [Key(8)] public float RunSpeed { get; set; } = 80f;
+    [Key(9)] public float WalkSpeed { get; set; } = 40f;
+}
