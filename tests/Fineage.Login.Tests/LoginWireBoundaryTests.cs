@@ -76,6 +76,48 @@ public sealed class LoginWireBoundaryTests
         Assert.Equal("wrong_endpoint", err.Code);
     }
 
+    [Fact]
+    public async Task Say_on_login_port_returns_wrong_endpoint()
+    {
+        var service = new LoginService(JsonAccountStore.InMemory(), HandoffTokens.FromEnvironment());
+        var server = new LoginServer(service);
+
+        var listener = new TcpListener(IPAddress.Loopback, 0);
+        listener.Start();
+        int port = ((IPEndPoint)listener.LocalEndpoint).Port;
+        using var cts = new CancellationTokenSource();
+        var acceptTask = Task.Run(async () =>
+        {
+            using var accepted = await listener.AcceptTcpClientAsync(cts.Token);
+            await using var stream = accepted.GetStream();
+            await server.HandleAsync(stream, cts.Token);
+        });
+
+        using var client = new TcpClient();
+        await client.ConnectAsync(IPAddress.Loopback, port);
+        await using var stream = client.GetStream();
+        await FrameIO.SendAsync(stream, (ushort)ProtocolMsgType.Hello, MessagePackSerializer.Serialize(new HelloMsg()));
+        await ReadAsync(stream, ProtocolMsgType.HelloAck);
+        await FrameIO.SendAsync(stream, (ushort)ProtocolMsgType.Say,
+            MessagePackSerializer.Serialize(new SayMsg { Text = "hello", ChatType = 0 }));
+
+        var frame = await FrameIO.ReadAsync(stream);
+        Assert.NotNull(frame);
+        Assert.Equal((ushort)ProtocolMsgType.Error, frame!.Value.Type);
+        var err = MessagePackSerializer.Deserialize<ErrorMsg>(frame.Value.Body);
+        Assert.Equal("wrong_endpoint", err.Code);
+
+        listener.Stop();
+        await cts.CancelAsync();
+        try
+        {
+            await acceptTask;
+        }
+        catch (OperationCanceledException)
+        {
+        }
+    }
+
     sealed class PipelineLoginHost : IAsyncDisposable
     {
         readonly CancellationTokenSource _cts;
