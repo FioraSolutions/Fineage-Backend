@@ -68,6 +68,14 @@ public sealed class LoginServer
 
     async Task<string?> DispatchAsync(LoginSession session, string? account, ushort type, byte[] body, CancellationToken ct)
     {
+        if (LoginWireBoundary.IsZoneClientOpcode(type) && !TryGetV2Opcode(type, out _))
+        {
+            LoginLog.Info($"RX zone opcode on login type={type}");
+            await SendErrorAsync(session, "wrong_endpoint",
+                "That message belongs on the zone port, not the login port.", ct).ConfigureAwait(false);
+            return account;
+        }
+
         if (TryGetV2Opcode(type, out var v2))
         {
             return v2 switch
