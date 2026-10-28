@@ -938,6 +938,81 @@ public sealed class ZoneServer
                     ZoneLog.Info($"RX AdminReportOlympiadResult session={sessionId} match={report.MatchId} winner={report.WinnerObjectId}");
                 break;
             }
+            case MsgType.TeleportSelectRequest:
+            {
+                var teleport = Decode<TeleportSelectRequestMsg>(body);
+                if (teleport == null)
+                {
+                    await ErrorAsync(session, "bad_request", "TeleportSelectRequest body was not readable.", ct).ConfigureAwait(false);
+                    break;
+                }
+
+                string? code = await _world.TryTeleportSelectAsync(session, teleport, ct).ConfigureAwait(false);
+                await NpcDialogErrorAsync(session, code, ct).ConfigureAwait(false);
+                if (code == null)
+                    ZoneLog.Info($"RX TeleportSelect session={sessionId} npc={teleport.NpcObjectId}");
+                break;
+            }
+            case MsgType.WarehouseDepositRequest:
+            {
+                var deposit = Decode<WarehouseDepositRequestMsg>(body);
+                if (deposit == null)
+                {
+                    await ErrorAsync(session, "bad_request", "WarehouseDepositRequest body was not readable.", ct).ConfigureAwait(false);
+                    break;
+                }
+
+                string? code = await _world.TryWarehouseDepositAsync(session, deposit, ct).ConfigureAwait(false);
+                await NpcDialogErrorAsync(session, code, ct).ConfigureAwait(false);
+                if (code == null)
+                    ZoneLog.Info($"RX WarehouseDeposit session={sessionId} npc={deposit.NpcObjectId}");
+                break;
+            }
+            case MsgType.WarehouseWithdrawRequest:
+            {
+                var withdraw = Decode<WarehouseWithdrawRequestMsg>(body);
+                if (withdraw == null)
+                {
+                    await ErrorAsync(session, "bad_request", "WarehouseWithdrawRequest body was not readable.", ct).ConfigureAwait(false);
+                    break;
+                }
+
+                string? code = await _world.TryWarehouseWithdrawAsync(session, withdraw, ct).ConfigureAwait(false);
+                await NpcDialogErrorAsync(session, code, ct).ConfigureAwait(false);
+                if (code == null)
+                    ZoneLog.Info($"RX WarehouseWithdraw session={sessionId} npc={withdraw.NpcObjectId}");
+                break;
+            }
+            case MsgType.SupportMagicRequest:
+            {
+                var magic = Decode<SupportMagicRequestMsg>(body);
+                if (magic == null)
+                {
+                    await ErrorAsync(session, "bad_request", "SupportMagicRequest body was not readable.", ct).ConfigureAwait(false);
+                    break;
+                }
+
+                string? code = await _world.TrySupportMagicAsync(session, magic.NpcObjectId, ct).ConfigureAwait(false);
+                await NpcDialogErrorAsync(session, code, ct).ConfigureAwait(false);
+                if (code == null)
+                    ZoneLog.Info($"RX SupportMagic session={sessionId} npc={magic.NpcObjectId}");
+                break;
+            }
+            case MsgType.GiveBlessingRequest:
+            {
+                var blessing = Decode<GiveBlessingRequestMsg>(body);
+                if (blessing == null)
+                {
+                    await ErrorAsync(session, "bad_request", "GiveBlessingRequest body was not readable.", ct).ConfigureAwait(false);
+                    break;
+                }
+
+                string? code = await _world.TryGiveBlessingAsync(session, blessing.NpcObjectId, ct).ConfigureAwait(false);
+                await NpcDialogErrorAsync(session, code, ct).ConfigureAwait(false);
+                if (code == null)
+                    ZoneLog.Info($"RX GiveBlessing session={sessionId} npc={blessing.NpcObjectId}");
+                break;
+            }
             case MsgType.EnchantCancel:
             {
                 if (Decode<EnchantCancelMsg>(body) == null)

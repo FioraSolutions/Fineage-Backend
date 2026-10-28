@@ -13,6 +13,7 @@ using Fineage.Zone.SevenSigns;
 using Fineage.Zone.Dungeons;
 using Fineage.Zone.Siege;
 using Fineage.Zone.Olympiad;
+using Fineage.Game.Services;
 using MessagePack;
 
 namespace Fineage.Zone.World;
@@ -98,6 +99,10 @@ sealed class ZoneEntity
     public int DungeonId { get; set; }
     /// <summary>0 is the open world. An Olympiad stadium uses its zone id so the pair does not share knownlist with the town.</summary>
     public int InstanceId { get; set; }
+    /// <summary>Private warehouse. Null on NPCs.</summary>
+    public PrivateWarehouse? Warehouse { get; set; }
+    /// <summary>First character created on the account. Mobius <c>Player.isNewbie</c> when the account had no characters yet.</summary>
+    public bool Newbie { get; set; } = true;
 }
 
 /// <summary>
@@ -128,6 +133,11 @@ public sealed partial class ZoneWorld
     readonly BypassRegistry _bypasses;
     readonly OlympiadBoard _olympiad;
     readonly List<Pending> _olympiadHeld = [];
+    readonly TeleportCatalog _teleports;
+    readonly NewbieBuffCatalog _newbieBuffs;
+    readonly ItemWeights _weights;
+    readonly int _teleportOffset;
+    readonly Random _serviceRandom;
     readonly Dictionary<int, ZoneEntity> _byId = [];
     readonly DropCatalog _dropCatalog;
     readonly DropRates _dropRates;
@@ -159,7 +169,12 @@ public sealed partial class ZoneWorld
         BypassRegistry? bypasses = null,
         OlympiadBoard? olympiad = null,
         OlympiadSettings? olympiadSettings = null,
-        Random? olympiadRandom = null)
+        Random? olympiadRandom = null,
+        TeleportCatalog? teleports = null,
+        NewbieBuffCatalog? newbieBuffs = null,
+        ItemWeights? weights = null,
+        int? teleportOffset = null,
+        Random? serviceRandom = null)
     {
         _aoi = aoi ?? new SingleCellAoi();
         _game = game ?? GameData.LoadDefault();
@@ -187,6 +202,11 @@ public sealed partial class ZoneWorld
         _html = html ?? NpcHtmlCatalog.LoadDefault();
         _bypasses = bypasses ?? BypassRegistry.CreateDefault(_html);
         _olympiad = olympiad ?? new OlympiadBoard(_clock(), olympiadSettings ?? OlympiadSettings.FromEnvironment(), random: olympiadRandom);
+        _teleports = teleports ?? TeleportCatalog.LoadDefault();
+        _newbieBuffs = newbieBuffs ?? NewbieBuffCatalog.LoadDefault();
+        _weights = weights ?? ItemWeights.LoadDefault();
+        _teleportOffset = teleportOffset ?? ReadTeleportOffset();
+        _serviceRandom = serviceRandom ?? Random.Shared;
         BootstrapSpawns();
         BootstrapBosses();
         BootstrapQuestNpcs();
@@ -299,7 +319,11 @@ public sealed partial class ZoneWorld
 
         var spawn = SpawnFor(session);
         var inventory = LoadInventory(session);
+        var stored = _accounts?.FindById(session.Account, session.ObjectId);
         var vitals = LoadVitals(session);
+        var warehouse = new PrivateWarehouse(_game.Items);
+        if (stored?.Warehouse != null)
+            warehouse.Restore(stored.Warehouse.Select(item => new WarehouseRow(item.ItemId, item.Count, item.EnchantLevel)));
         RememberPenalties(session);
         var entity = new ZoneEntity
         {
@@ -322,7 +346,9 @@ public sealed partial class ZoneWorld
             Level = vitals.level,
             Race = vitals.race,
             Sex = vitals.sex,
-            ClanId = ClanIdFor(session.ObjectId)
+            ClanId = ClanIdFor(session.ObjectId),
+            Warehouse = warehouse,
+            Newbie = stored?.Newbie ?? true
         };
         LoadQuestProgress(session, entity);
         RefreshKnownSkills(entity);
@@ -470,6 +496,7 @@ public sealed partial class ZoneWorld
 
         if (entity.Inventory != null)
             SaveInventory(session, entity.Inventory);
+        SaveWarehouse(session, entity);
         SaveVitals(session, entity);
         SaveQuestProgress(session, entity);
         SavePresence(session, entity.X, entity.Y, entity.Z, touchAccess: false);

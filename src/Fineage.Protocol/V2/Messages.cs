@@ -678,3 +678,117 @@ public sealed partial class OlympiadCountdownMsg
     [Key(1)] public int Kind { get; set; }
     [Key(2)] public int Seconds { get; set; }
 }
+
+/// <summary>Same keys as <see cref="Fineage.Protocol.TeleportSelectRequestMsg"/>.</summary>
+[MessagePackObject]
+public sealed partial class TeleportSelectRequestMsg
+{
+    [Key(0)] public int NpcObjectId { get; set; }
+    [Key(1)] public string ListName { get; set; } = "";
+    [Key(2)] public int LocationId { get; set; }
+}
+
+/// <summary>Same keys as <see cref="Fineage.Protocol.WarehouseCountMsg"/>.</summary>
+[MessagePackObject]
+public sealed partial class WarehouseCountMsg
+{
+    [Key(0)] public int ObjectId { get; set; }
+    [Key(1)] public int Count { get; set; }
+}
+
+/// <summary>Same keys as <see cref="Fineage.Protocol.WarehouseDepositRequestMsg"/>.</summary>
+[MessagePackObject]
+public sealed partial class WarehouseDepositRequestMsg
+{
+    [Key(0)] public int NpcObjectId { get; set; }
+    [Key(1)] public WarehouseCountMsg[] Lines { get; set; } = [];
+}
+
+/// <summary>Same keys as <see cref="Fineage.Protocol.WarehouseWithdrawRequestMsg"/>.</summary>
+[MessagePackObject]
+public sealed partial class WarehouseWithdrawRequestMsg
+{
+    [Key(0)] public int NpcObjectId { get; set; }
+    [Key(1)] public WarehouseCountMsg[] Lines { get; set; } = [];
+}
+
+/// <summary>Same keys as <see cref="Fineage.Protocol.SupportMagicRequestMsg"/>.</summary>
+[MessagePackObject]
+public sealed partial class SupportMagicRequestMsg
+{
+    [Key(0)] public int NpcObjectId { get; set; }
+}
+
+/// <summary>Same keys as <see cref="Fineage.Protocol.GiveBlessingRequestMsg"/>.</summary>
+[MessagePackObject]
+public sealed partial class GiveBlessingRequestMsg
+{
+    [Key(0)] public int NpcObjectId { get; set; }
+}
+
+/// <summary>Same keys as <see cref="Fineage.Protocol.TeleportLocationMsg"/>.</summary>
+[MessagePackObject]
+public sealed partial class TeleportLocationMsg
+{
+    [Key(0)] public int Id { get; set; }
+    [Key(1)] public string Name { get; set; } = "";
+    [Key(2)] public int X { get; set; }
+    [Key(3)] public int Y { get; set; }
+    [Key(4)] public int Z { get; set; }
+    [Key(5)] public int FeeItemId { get; set; }
+    [Key(6)] public int FeeCount { get; set; }
+}
+
+/// <summary>Same keys as <see cref="Fineage.Protocol.TeleportListMsg"/>.</summary>
+[MessagePackObject]
+public sealed partial class TeleportListMsg
+{
+    [Key(0)] public int NpcObjectId { get; set; }
+    [Key(1)] public string ListName { get; set; } = "";
+    [Key(2)] public string ListType { get; set; } = "";
+    [Key(3)] public TeleportLocationMsg[] Locations { get; set; } = [];
+}
+
+/// <summary>Same keys as <see cref="Fineage.Protocol.WarehouseDepositListMsg"/>.</summary>
+[MessagePackObject]
+public sealed partial class WarehouseDepositListMsg
+{
+    [Key(0)] public int NpcObjectId { get; set; }
+    [Key(1)] public int FeePerLine { get; set; }
+    [Key(2)] public int SlotsUsed { get; set; }
+    [Key(3)] public int SlotsMax { get; set; }
+    [Key(4)] public int Adena { get; set; }
+    [Key(5)] public Fineage.Protocol.ItemListEntryMsg[] Items { get; set; } = [];
+}
+
+/// <summary>Same keys as <see cref="Fineage.Protocol.WarehouseWithdrawListMsg"/>.</summary>
+[MessagePackObject]
+public sealed partial class WarehouseWithdrawListMsg
+{
+    [Key(0)] public int NpcObjectId { get; set; }
+    [Key(1)] public int SlotsUsed { get; set; }
+    [Key(2)] public int SlotsMax { get; set; }
+    [Key(3)] public int InventorySlotsUsed { get; set; }
+    [Key(4)] public int InventorySlotsMax { get; set; }
+    [Key(5)] public int CurrentWeight { get; set; }
+    [Key(6)] public int MaxWeight { get; set; }
+    [Key(7)] public Fineage.Protocol.ItemListEntryMsg[] Items { get; set; } = [];
+}
+
+/// <summary>Same keys as <see cref="Fineage.Protocol.NewbieBuffResultMsg"/>.</summary>
+[MessagePackObject]
+public sealed partial class NewbieBuffResultMsg
+{
+    [Key(0)] public int NpcObjectId { get; set; }
+    [Key(1)] public int[] SkillIds { get; set; } = [];
+    [Key(2)] public string Refusal { get; set; } = "";
+}
+
+/// <summary>Same keys as <see cref="Fineage.Protocol.BlessingResultMsg"/>.</summary>
+[MessagePackObject]
+public sealed partial class BlessingResultMsg
+{
+    [Key(0)] public int NpcObjectId { get; set; }
+    [Key(1)] public int SkillId { get; set; }
+    [Key(2)] public bool Accepted { get; set; }
+}

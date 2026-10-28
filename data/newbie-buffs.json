@@ -1,0 +1,32 @@
+{
+  "reference": "Newbie Helper supplemental magic transcribed from L2J Mobius CT 0 Interlude handlers/bypass/npc/SupportMagic.java and dist/game/data/stats/skills/04300-04399.xml (skill ids, abnormal level, abnormal time). Mage class ids are CategoryData.xml BEGINNER_MAGE. Orc mystics are not in that category and use the fighter set. Life Cubic is a summon in Mobius (cubicDuration 3600); this server records it as a buff row. Blessing of Protection is skill 5182 from 05100-05199.xml and SupportBlessing.java (refused above level 39 or at class level 2+).",
+  "lowestLevel": 8,
+  "highestLevel": 25,
+  "mageClassIds": [10, 11, 12, 13, 14, 15, 16, 17, 25, 26, 27, 28, 29, 30, 38, 39, 40, 41, 42, 43],
+  "blessing": {
+    "skillId": 5182,
+    "skillLevel": 1,
+    "abnormalLevel": 1,
+    "durationSeconds": 7200,
+    "maxLevel": 39,
+    "refusedClassLevel": 2
+  },
+  "fighter": [
+    { "skillId": 4322, "skillLevel": 1, "name": "Wind Walk for Beginners", "minLevel": 8, "maxLevel": 24, "abnormalLevel": 3, "durationSeconds": 3600 },
+    { "skillId": 4323, "skillLevel": 1, "name": "Shield for Beginners", "minLevel": 11, "maxLevel": 23, "abnormalLevel": 4, "durationSeconds": 3600 },
+    { "skillId": 4324, "skillLevel": 1, "name": "Blessed Body for Beginners", "minLevel": 12, "maxLevel": 22, "abnormalLevel": 7, "durationSeconds": 3600 },
+    { "skillId": 4325, "skillLevel": 1, "name": "Vampiric Rage for Beginners", "minLevel": 13, "maxLevel": 21, "abnormalLevel": 5, "durationSeconds": 3600 },
+    { "skillId": 4326, "skillLevel": 1, "name": "Regeneration for Beginners", "minLevel": 14, "maxLevel": 20, "abnormalLevel": 4, "durationSeconds": 3600 },
+    { "skillId": 4327, "skillLevel": 1, "name": "Haste for Beginners", "minLevel": 15, "maxLevel": 19, "abnormalLevel": 2, "durationSeconds": 3600 },
+    { "skillId": 4338, "skillLevel": 1, "name": "Life Cubic for Beginners", "minLevel": 16, "maxLevel": 19, "abnormalLevel": 1, "durationSeconds": 3600 }
+  ],
+  "mage": [
+    { "skillId": 4322, "skillLevel": 1, "name": "Wind Walk for Beginners", "minLevel": 8, "maxLevel": 24, "abnormalLevel": 3, "durationSeconds": 3600 },
+    { "skillId": 4323, "skillLevel": 1, "name": "Shield for Beginners", "minLevel": 11, "maxLevel": 23, "abnormalLevel": 4, "durationSeconds": 3600 },
+    { "skillId": 4328, "skillLevel": 1, "name": "Blessed Soul for Beginners", "minLevel": 12, "maxLevel": 22, "abnormalLevel": 7, "durationSeconds": 3600 },
+    { "skillId": 4329, "skillLevel": 1, "name": "Acumen for Beginners", "minLevel": 13, "maxLevel": 21, "abnormalLevel": 4, "durationSeconds": 3600 },
+    { "skillId": 4330, "skillLevel": 1, "name": "Concentration for Beginners", "minLevel": 14, "maxLevel": 20, "abnormalLevel": 2, "durationSeconds": 3600 },
+    { "skillId": 4331, "skillLevel": 1, "name": "Empower for Beginners", "minLevel": 15, "maxLevel": 19, "abnormalLevel": 2, "durationSeconds": 3600 },
+    { "skillId": 4338, "skillLevel": 1, "name": "Life Cubic for Beginners", "minLevel": 16, "maxLevel": 19, "abnormalLevel": 1, "durationSeconds": 3600 }
+  ]
+}
