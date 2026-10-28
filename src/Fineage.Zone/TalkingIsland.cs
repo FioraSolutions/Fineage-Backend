@@ -3,14 +3,14 @@ using Fineage.Protocol;
 namespace Fineage.Zone;
 
 /// <summary>
-/// Talking Island village, tile 17_25. Spawn matches Fineage login-stub.
+/// Cedric's Training Hall (human fighter start). Spawn matches <see cref="TalkingIslandSpawn"/> / login V2 wire.
 /// Gremlins stand a short walk from that point and do not move.
 /// </summary>
 public static class TalkingIsland
 {
-    public const int SpawnX = -84318;
-    public const int SpawnY = 244578;
-    public const int SpawnZ = -3730;
+    public const int SpawnX = TalkingIslandSpawn.X;
+    public const int SpawnY = TalkingIslandSpawn.Y;
+    public const int SpawnZ = TalkingIslandSpawn.Z;
     public const int GremlinNpcId = 20001;
     public const int MaxStep = 8000;
 

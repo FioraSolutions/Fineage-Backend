@@ -5,9 +5,9 @@ namespace Fineage.Login;
 /// <summary>Maps account records to Unity V2 login wire shapes (separate from legacy 20+/1020+ opcodes).</summary>
 static class LoginV2Wire
 {
-    public const int TalkingIslandSpawnX = -84318;
-    public const int TalkingIslandSpawnY = 244578;
-    public const int TalkingIslandSpawnZ = -3730;
+    public const int TalkingIslandSpawnX = Protocol.TalkingIslandSpawn.X;
+    public const int TalkingIslandSpawnY = Protocol.TalkingIslandSpawn.Y;
+    public const int TalkingIslandSpawnZ = Protocol.TalkingIslandSpawn.Z;
 
     public static CharacterSummaryMsg ToSummary(CharacterRecord character, int slot) => new()
     {
