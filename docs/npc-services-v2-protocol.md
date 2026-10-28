@@ -2,7 +2,7 @@
 
 Gatekeeper teleports, Newbie Helper supplemental magic, and the private warehouse. Talk and bypass still use `docs/npc-html-v2-protocol.md` (`BypassRequest` 95, `NpcHtml` 1094). This page is the service result that those bypasses apply.
 
-Opcodes already taken include NPC HTML **95** / **1094**. Shops are reserved at **96–99** / **1095–1098** and system messages **180–189**. Olympiad is reserved at **60–64** / **1070–1073** and system messages **160–179**. This block is **105–109**, **1105–1109**, and system messages **190–209**.
+Opcodes already taken include NPC HTML **95** / **1094**. Shops are reserved at **96–99** / **1095–1098** and system messages **180–189**. Olympiad is reserved at **60–64** / **1070–1073** and system messages **160–179**. Player death replies are **1074–1076** (`docs/death-v2-protocol.md`). This block is **105–109**, **1105–1109**, and system messages **190–209**.
 
 MessagePack keys are a fixarray (`0..n-1`). Do not renumber these.
 

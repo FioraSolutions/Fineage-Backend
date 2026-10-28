@@ -839,6 +839,44 @@ public sealed class ChangeMoveTypeMsg
     [Key(1)] public bool Running { get; set; }
 }
 
+/// <summary>Opcode <see cref="MsgType.ReviveRequest"/> (52). Respawn after death.</summary>
+[MessagePackObject]
+public sealed class ReviveRequestMsg
+{
+    /// <summary><see cref="DeathProtocol.ReviveToVillage"/> is the MVP restart.</summary>
+    [Key(0)] public int Action { get; set; }
+}
+
+/// <summary>Admin/test: kill the requesting player. Empty body.</summary>
+[MessagePackObject]
+public sealed class AdminKillPlayerMsg;
+
+/// <summary>Opcode <see cref="MsgType.Die"/> (1074). Creature died; corpse stays in world for players.</summary>
+[MessagePackObject]
+public sealed class DieMsg
+{
+    [Key(0)] public int ObjectId { get; set; }
+    [Key(1)] public int KillerObjectId { get; set; }
+}
+
+/// <summary>Opcode <see cref="MsgType.Revive"/> (1075).</summary>
+[MessagePackObject]
+public sealed class ReviveMsg
+{
+    [Key(0)] public int ObjectId { get; set; }
+}
+
+/// <summary>Opcode <see cref="MsgType.TeleportToLocation"/> (1076). Instant move (respawn, dungeon, …).</summary>
+[MessagePackObject]
+public sealed class TeleportToLocationMsg
+{
+    [Key(0)] public int ObjectId { get; set; }
+    [Key(1)] public int X { get; set; }
+    [Key(2)] public int Y { get; set; }
+    [Key(3)] public int Z { get; set; }
+    [Key(4)] public int Heading { get; set; }
+}
+
 /// <summary>One row of <see cref="SkillListMsg"/>.</summary>
 [MessagePackObject]
 public sealed class SkillListEntryMsg

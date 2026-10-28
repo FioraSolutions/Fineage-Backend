@@ -91,6 +91,10 @@ public enum MsgType : ushort
     SkillUseRequest = 50,
     /// <summary>Character action panel / hotkey. See <see cref="ActionProtocol"/>.</summary>
     CharacterActionRequest = 51,
+    /// <summary>Respawn after player death. See <see cref="DeathProtocol"/>.</summary>
+    ReviveRequest = 52,
+    /// <summary>Admin/test kill self. Off unless <c>FINEAGE_ZONE_ADMIN</c>. See <see cref="DeathProtocol"/>.</summary>
+    AdminKillPlayer = 53,
     /// <summary>Olympiad status. Body is empty. See <see cref="OlympiadProtocol"/>.</summary>
     OlympiadStatusRequest = 60,
     /// <summary>Join a classed or non-classed queue. Body is <see cref="OlympiadRegisterRequestMsg"/>.</summary>
@@ -224,6 +228,12 @@ public enum MsgType : ushort
     OlympiadResult = 1072,
     /// <summary>Stadium, fight, or return countdown.</summary>
     OlympiadCountdown = 1073,
+    /// <summary>Creature died. See <see cref="DeathProtocol"/>.</summary>
+    Die = 1074,
+    /// <summary>Creature revived from death state. See <see cref="DeathProtocol"/>.</summary>
+    Revive = 1075,
+    /// <summary>Instant relocation fan-out. See <see cref="DeathProtocol"/>.</summary>
+    TeleportToLocation = 1076,
     /// <summary>Seven Signs record (SSQStatus analogue). See <see cref="SevenSignsProtocol"/>.</summary>
     SevenSignsStatus = 1090,
     /// <summary>Seven Signs sky tint (SignsSky analogue). See <see cref="SevenSignsProtocol"/>.</summary>
