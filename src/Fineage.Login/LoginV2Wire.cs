@@ -5,23 +5,23 @@ namespace Fineage.Login;
 /// <summary>Maps account records to Unity V2 login wire shapes (separate from legacy 20+/1020+ opcodes).</summary>
 static class LoginV2Wire
 {
-    public const int TalkingIslandSpawnX = Protocol.TalkingIslandSpawn.X;
-    public const int TalkingIslandSpawnY = Protocol.TalkingIslandSpawn.Y;
-    public const int TalkingIslandSpawnZ = Protocol.TalkingIslandSpawn.Z;
-
-    public static CharacterSummaryMsg ToSummary(CharacterRecord character, int slot) => new()
+    public static CharacterSummaryMsg ToSummary(CharacterRecord character, int slot)
     {
-        Slot = slot,
-        ObjectId = character.Id,
-        Name = character.Name,
-        Race = character.Race,
-        Sex = character.Sex,
-        ClassId = character.ClassId,
-        Level = character.Level,
-        X = TalkingIslandSpawnX,
-        Y = TalkingIslandSpawnY,
-        Z = TalkingIslandSpawnZ
-    };
+        var start = Fineage.Protocol.ClassSpawn.Preview(character.ClassId);
+        return new CharacterSummaryMsg
+        {
+            Slot = slot,
+            ObjectId = character.Id,
+            Name = character.Name,
+            Race = character.Race,
+            Sex = character.Sex,
+            ClassId = character.ClassId,
+            Level = character.Level,
+            X = start.X,
+            Y = start.Y,
+            Z = start.Z
+        };
+    }
 
     public static CharacterRosterMsg ToRoster(IReadOnlyList<CharacterRecord> characters)
     {

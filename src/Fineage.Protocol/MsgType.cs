@@ -40,6 +40,12 @@ public enum MsgType : ushort
     CreatureSay = 1012,
     /// <summary>Keepalive reply (echoes <see cref="PingMsg"/> timestamp).</summary>
     Pong = 1013,
+    /// <summary>Full inventory on enter world. Same value as <see cref="V2.MsgType.ItemList"/>.</summary>
+    ItemList = 1014,
+    /// <summary>Add, modify, or remove inventory rows. Same value as <see cref="V2.MsgType.InventoryUpdate"/>.</summary>
+    InventoryUpdate = 1015,
+    /// <summary>Own character, including paperdoll. Same value as <see cref="V2.MsgType.UserInfo"/>.</summary>
+    UserInfo = 1016,
 
     // Login S → C
     RegisterOk = 1020,

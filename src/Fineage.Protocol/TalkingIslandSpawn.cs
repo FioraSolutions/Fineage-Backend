@@ -1,8 +1,8 @@
 namespace Fineage.Protocol;
 
 /// <summary>
-/// Human fighter first spawn on Talking Island (Cedric's Training Hall, Interlude reference).
-/// Zone and login V2 roster must stay aligned.
+/// Cedric's Training Hall, where the shared Gremlins stand.
+/// New characters spawn at <see cref="ClassSpawn"/> instead of this single point.
 /// </summary>
 public static class TalkingIslandSpawn
 {

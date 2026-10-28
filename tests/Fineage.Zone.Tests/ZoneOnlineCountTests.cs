@@ -45,6 +45,8 @@ public sealed class ZoneOnlineCountTests
         Assert.Equal(0, world.OnlinePlayerCount);
 
         await FrameIO.SendAsync(stream, (ushort)MsgType.EnterWorld, MessagePackSerializer.Serialize(new EnterWorldMsg()));
+        await ReadAsync(stream, MsgType.UserInfo);
+        await ReadAsync(stream, MsgType.ItemList);
         await ReadAsync(stream, MsgType.PlayerSpawned);
         for (int i = 0; i < TalkingIsland.Gremlins.Length; i++)
             await ReadAsync(stream, MsgType.NpcInfo);

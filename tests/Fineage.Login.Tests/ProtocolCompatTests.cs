@@ -55,6 +55,12 @@ public class ProtocolCompatTests
         Assert.Equal(1009, (ushort)MsgType.Attack);
         Assert.Equal(1010, (ushort)MsgType.StatusUpdate);
         Assert.Equal(1013, (ushort)MsgType.Pong);
+        Assert.Equal(1014, (ushort)MsgType.ItemList);
+        Assert.Equal(1015, (ushort)MsgType.InventoryUpdate);
+        Assert.Equal(1016, (ushort)MsgType.UserInfo);
+        Assert.Equal((ushort)MsgType.ItemList, (ushort)Fineage.Protocol.V2.MsgType.ItemList);
+        Assert.Equal((ushort)MsgType.InventoryUpdate, (ushort)Fineage.Protocol.V2.MsgType.InventoryUpdate);
+        Assert.Equal((ushort)MsgType.UserInfo, (ushort)Fineage.Protocol.V2.MsgType.UserInfo);
         Assert.Equal(1099, (ushort)MsgType.Error);
     }
 

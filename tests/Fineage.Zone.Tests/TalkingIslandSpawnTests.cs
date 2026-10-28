@@ -17,7 +17,7 @@ public sealed class TalkingIslandSpawnTests
     }
 
     [Fact]
-    public void Gremlins_use_spawn_z_and_stay_near_player_start()
+    public void Gremlins_stay_at_cedrics_hall()
     {
         Assert.Equal(3, TalkingIsland.Gremlins.Length);
         foreach (var gremlin in TalkingIsland.Gremlins)

@@ -57,7 +57,7 @@ if (string.IsNullOrWhiteSpace(Environment.GetEnvironmentVariable("FINEAGE_HANDOF
 }
 
 Console.WriteLine($"[ZONE] listen {bindDisplay}:{port} Talking Island (maxConn={maxConnections} outboundQ={outboundQueue} msgPerSec={maxMsgPerSec} interestRange={interestRange})");
-Console.WriteLine("[ZONE] Auth.Password is the login handoff token. EnterWorld spawns the village, shared Gremlins, and other players. Say is zone chat.");
+Console.WriteLine("[ZONE] Auth.Password is the login handoff token. EnterWorld sends UserInfo, ItemList, then the village. Say is zone chat.");
 
 using var shutdown = new CancellationTokenSource();
 Console.CancelKeyPress += (_, e) =>

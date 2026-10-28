@@ -4,7 +4,12 @@
     <RootNamespace>Fineage.Zone</RootNamespace>
   </PropertyGroup>
   <ItemGroup>
+    <ProjectReference Include="..\Fineage.Game\Fineage.Game.csproj" />
     <ProjectReference Include="..\Fineage.Protocol\Fineage.Protocol.csproj" />
     <ProjectReference Include="..\Fineage.Login\Fineage.Login.csproj" />
+  </ItemGroup>
+  <ItemGroup>
+    <Content Include="..\..\data\items.json" Link="data\items.json" CopyToOutputDirectory="PreserveNewest" />
+    <Content Include="..\..\data\starter-kits.json" Link="data\starter-kits.json" CopyToOutputDirectory="PreserveNewest" />
   </ItemGroup>
 </Project>
