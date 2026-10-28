@@ -70,9 +70,13 @@ public sealed class GameData
         return null;
     }
 
-    public PlayerInventory CreateStarterInventory(int classId, int firstObjectId = PlayerInventory.FirstObjectId)
+    public PlayerInventory CreateStarterInventory(int classId, int firstObjectId = PlayerInventory.FirstObjectId) =>
+        CreateStarterInventory(classId, new ItemObjectIdAllocator(firstObjectId));
+
+    public PlayerInventory CreateStarterInventory(int classId, ItemObjectIdAllocator ids)
     {
-        var inventory = new PlayerInventory(Items, firstObjectId);
+        ArgumentNullException.ThrowIfNull(ids);
+        var inventory = new PlayerInventory(Items, ids);
         inventory.AddStarterKit(StarterKits.ForClass(classId));
         return inventory;
     }

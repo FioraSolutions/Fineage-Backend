@@ -1,3 +1,4 @@
+using Fineage.Game;
 using Fineage.Protocol;
 using Fineage.Zone.Combat;
 using Fineage.Zone.Interest;
@@ -29,6 +30,7 @@ sealed class ZoneEntity
     public float WalkSpeed { get; init; }
     public bool Running { get; init; }
     public ZoneSession? Session { get; init; }
+    public PlayerInventory? Inventory { get; init; }
     public HashSet<int> Knownlist { get; } = [];
 }
 
@@ -42,12 +44,18 @@ public sealed partial class ZoneWorld
     static readonly TimeSpan FanoutTimeout = TimeSpan.FromSeconds(2);
 
     readonly IAoi _aoi;
+    readonly GameData _game;
+    readonly ItemObjectIdAllocator _itemIds;
+    readonly Random _spawnRandom;
     readonly Dictionary<int, ZoneEntity> _byId = [];
     readonly object _gate = new();
 
-    public ZoneWorld(IAoi? aoi = null)
+    public ZoneWorld(IAoi? aoi = null, GameData? game = null, ItemObjectIdAllocator? itemIds = null, Random? spawnRandom = null)
     {
         _aoi = aoi ?? new SingleCellAoi();
+        _game = game ?? GameData.LoadDefault();
+        _itemIds = itemIds ?? new ItemObjectIdAllocator();
+        _spawnRandom = spawnRandom ?? Random.Shared;
         foreach (var npc in TalkingIsland.Gremlins)
         {
             var entity = new ZoneEntity
@@ -208,19 +216,22 @@ public sealed partial class ZoneWorld
                  !ReferenceEquals(current.Session, session))
             Unlink(current.Session, toOthers);
 
+        var spawn = ClassSpawn.Pick(session.ClassId, _spawnRandom);
+        var inventory = _game.CreateStarterInventory(session.ClassId, _itemIds);
         var entity = new ZoneEntity
         {
             ObjectId = session.ObjectId,
             Kind = ZoneEntityKind.Player,
             Name = session.Name,
-            X = TalkingIsland.SpawnX,
-            Y = TalkingIsland.SpawnY,
-            Z = TalkingIsland.SpawnZ,
+            X = spawn.X,
+            Y = spawn.Y,
+            Z = spawn.Z,
             ClassId = session.ClassId,
             RunSpeed = 120f,
             WalkSpeed = 80f,
             Running = true,
-            Session = session
+            Session = session,
+            Inventory = inventory
         };
         _byId[entity.ObjectId] = entity;
         _aoi.Enter(entity.ObjectId, entity.X, entity.Y);
@@ -229,6 +240,8 @@ public sealed partial class ZoneWorld
         session.Y = entity.Y;
         session.Z = entity.Z;
 
+        toSelf.Add(Pack(session, MsgType.UserInfo, UserInfo(entity)));
+        toSelf.Add(Pack(session, MsgType.ItemList, InventoryMessages.ItemList(inventory)));
         toSelf.Add(Pack(session, MsgType.PlayerSpawned, Spawned(entity)));
         foreach (var other in OrderedVisible(entity.ObjectId))
         {
@@ -443,6 +456,23 @@ public sealed partial class ZoneWorld
         Running = entity.Running
     };
 
+    static UserInfoMsg UserInfo(ZoneEntity entity)
+    {
+        if (entity.Inventory == null)
+            throw new InvalidOperationException($"Player {entity.ObjectId} has no inventory.");
+        return InventoryMessages.UserInfo(
+            entity.ObjectId,
+            entity.Name,
+            entity.ClassId,
+            entity.X,
+            entity.Y,
+            entity.Z,
+            entity.RunSpeed,
+            entity.WalkSpeed,
+            entity.Running,
+            entity.Inventory);
+    }
+
     static CharInfoMsg CharInfo(ZoneEntity entity) => new()
     {
         ObjectId = entity.ObjectId,
@@ -450,7 +480,10 @@ public sealed partial class ZoneWorld
         X = entity.X,
         Y = entity.Y,
         Z = entity.Z,
-        ClassId = entity.ClassId
+        ClassId = entity.ClassId,
+        Paperdoll = entity.Inventory == null
+            ? new int[InventoryMessages.PaperdollSlotCount]
+            : InventoryMessages.ItemIds(entity.Inventory)
     };
 
     static NpcInfoMsg NpcInfo(ZoneEntity entity) => new()

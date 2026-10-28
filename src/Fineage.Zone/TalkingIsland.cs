@@ -3,8 +3,8 @@ using Fineage.Protocol;
 namespace Fineage.Zone;
 
 /// <summary>
-/// Cedric's Training Hall (human fighter start). Spawn matches <see cref="TalkingIslandSpawn"/> / login V2 wire.
-/// Gremlins stand a short walk from that point and do not move.
+/// Cedric's Training Hall. Gremlins stand here and do not move.
+/// Players with no saved position use <see cref="ClassSpawn"/>.
 /// </summary>
 public static class TalkingIsland
 {

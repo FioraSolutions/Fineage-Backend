@@ -12,7 +12,21 @@ Login issues an HMAC handoff token. The zone on **9777** accepts it as `Auth.Pas
 
 `Hello` → `Register` or `Auth` → `CreateCharacter` (Human fighter `0` or mystic `10`, male) → `SelectCharacter` → `Handoff`.
 
-Then, on the zone: `Hello` → `Auth` (account + handoff token) → `EnterWorld` on Talking Island at Cedric's Training Hall (`-72674, 256819, -3112`) → `PlayerSpawned` for yourself, `NpcInfo` for the three shared Gremlins (template **20001**, one object id each for the whole zone), and `CharInfo` for every other player already there. Those players receive your `CharInfo`. `MoveTo` is answered with `MoveToAck` to you and to anyone who still has you in knownlist. Leaving the zone, or walking out of interest, sends `DeleteObject`. `SelectTarget` → `MyTargetSelected`; `AttackRequest` applies flat melee damage to shared Gremlins and fans out `Attack` + `StatusUpdate` (`CUR_HP` / `MAX_HP`) to every player who sees the mob. At **0 HP** the server removes the NPC and sends `DeleteObject` to those clients. `Say` (opcode **8**) is echoed to everyone in the zone as `CreatureSay` (opcode **1012**).
+Then, on the zone: `Hello` → `Auth` (account + handoff token) → `EnterWorld`. A new character with no saved position is placed on a class creation point: human fighter (class **0**) picks one of four points around `-71338, 258271, -3104`; human mystic (class **10**) picks one of four points around `-90875, 248162, -3570`. The login roster shows the first of those points until a position is saved. The entering client then receives, in order, `UserInfo` (**1016**), `ItemList` (**1014**), `PlayerSpawned`, `NpcInfo` for each shared Gremlin still in interest (template **20001**, Cedric's Training Hall `-72674, 256819, -3112`, one object id each for the whole zone), and `CharInfo` for every other player already there. Those players receive your `CharInfo`, including paperdoll item ids. `MoveTo` is answered with `MoveToAck` to you and to anyone who still has you in knownlist. Leaving the zone, or walking out of interest, sends `DeleteObject`. `SelectTarget` → `MyTargetSelected`; `AttackRequest` applies flat melee damage to shared Gremlins and fans out `Attack` + `StatusUpdate` (`CUR_HP` / `MAX_HP`) to every player who sees the mob. At **0 HP** the server removes the NPC and sends `DeleteObject` to those clients. `Say` (opcode **8**) is echoed to everyone in the zone as `CreatureSay` (opcode **1012**). `InventoryUpdate` (**1015**) is the add/modify/remove row for a later equip; enter world sends the full `ItemList` instead.
+
+Item object ids start at **100000** and are unique across the zone. Starter kits are in memory for the session (human fighter wears Squire's Sword **2369** in paperdoll slot **7**).
+
+### Enter-world gear
+
+MessagePack keys are additive. `CharInfo` keys 0–5 are unchanged; key **6** is new.
+
+`UserInfo` (1016): `0` objectId, `1` name, `2` classId, `3` x, `4` y, `5` z, `6` runSpeed, `7` walkSpeed, `8` running, `9` paperdoll. Paperdoll is 17 slots in order Under, Lear, Rear, Neck, LFinger, RFinger, Head, RHand, LHand, Gloves, Chest, Legs, Feet, Cloak, Face, Hair, Hair2. Each slot is `0` objectId, `1` itemId (both 0 when empty). Right hand is index **7**.
+
+`ItemList` (1014): `0` items. Each item is `0` objectId, `1` itemId, `2` count, `3` equippedSlot (paperdoll index, or **-1** in the bag), `4` bodySlot (`none`, `rhand`, `lhand`, `lrhand`, `chest`, `legs`, …), `5` kind (`weapon`, `armor`, `etc`), `6` icon, `7` weaponType (`sword`, `dagger`, `blunt`, …, or empty), `8` armorType (`light`, `heavy`, `magic`, or empty).
+
+`InventoryUpdate` (1015): `0` changes. Each change is `0` change (**0** add, **1** modify, **2** remove), then the same item fields as `ItemList` shifted by one: `1` objectId, `2` itemId, `3` count, `4` equippedSlot, `5` bodySlot, `6` kind, `7` icon, `8` weaponType, `9` armorType.
+
+`CharInfo` (1005) key `6` is an `int[17]` of item ids in the same paperdoll order. **0** means empty. Other clients still read keys 0–5.
 
 `Handoff.Token` is the zone session key. Login TCP listens on **9106**. The same process serves play-landing HTTP on **5080** (`POST /api/auth/register`, `POST /api/auth/login`) against that store. Zone listens on **9777**. Both bind **0.0.0.0** unless `--bind` / `FINEAGE_BIND` says otherwise. Accounts live in `data/accounts.json` (`--store` / `FINEAGE_LOGIN_STORE`), including the email from HTTP register.
 

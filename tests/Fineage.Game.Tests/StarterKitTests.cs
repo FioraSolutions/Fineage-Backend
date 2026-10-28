@@ -68,6 +68,19 @@ public class StarterKitTests
     }
 
     [Fact]
+    public void One_allocator_keeps_item_ids_unique_across_kits()
+    {
+        var data = GameData.LoadDefault();
+        var ids = new ItemObjectIdAllocator();
+        var fighter = data.CreateStarterInventory(0, ids);
+        var mystic = data.CreateStarterInventory(10, ids);
+        var objects = fighter.Items.Select(item => item.ObjectId).Concat(mystic.Items.Select(item => item.ObjectId)).ToArray();
+        Assert.Equal(objects.Length, objects.Distinct().Count());
+        Assert.Equal(PlayerInventory.FirstObjectId, objects.Min());
+        Assert.DoesNotContain(objects, id => id is >= 50001 and <= 50003);
+    }
+
+    [Fact]
     public void Defined_kits_are_only_human_fighter_and_mystic()
     {
         var ids = GameData.LoadDefault().StarterKits.All.Select(kit => kit.ClassId).ToArray();

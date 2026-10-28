@@ -56,6 +56,8 @@ public sealed class ZoneOnlineTelemetryTests
                 MessagePackSerializer.Serialize(ticket.Value!.ToZoneAuth()));
             await ReadAsync(stream, MsgType.AuthOk);
             await FrameIO.SendAsync(stream, (ushort)MsgType.EnterWorld, MessagePackSerializer.Serialize(new EnterWorldMsg()));
+            await ReadAsync(stream, MsgType.UserInfo);
+            await ReadAsync(stream, MsgType.ItemList);
             await ReadAsync(stream, MsgType.PlayerSpawned);
             for (int i = 0; i < TalkingIsland.Gremlins.Length; i++)
                 await ReadAsync(stream, MsgType.NpcInfo);

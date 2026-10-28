@@ -31,6 +31,12 @@ public enum MsgType : ushort
     PlayToken = 1011,
     /// <summary>Same value as <see cref="Fineage.Protocol.MsgType.CreatureSay"/>. Zone chat fan-out.</summary>
     CreatureSay = 1012,
+    /// <summary>Same value as <see cref="Fineage.Protocol.MsgType.ItemList"/>.</summary>
+    ItemList = 1014,
+    /// <summary>Same value as <see cref="Fineage.Protocol.MsgType.InventoryUpdate"/>.</summary>
+    InventoryUpdate = 1015,
+    /// <summary>Same value as <see cref="Fineage.Protocol.MsgType.UserInfo"/>.</summary>
+    UserInfo = 1016,
 
     Error = 1099
 }

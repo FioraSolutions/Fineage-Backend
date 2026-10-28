@@ -171,6 +171,98 @@ public sealed class CharInfoMsg
     [Key(3)] public int Y { get; set; }
     [Key(4)] public int Z { get; set; }
     [Key(5)] public int ClassId { get; set; }
+    /// <summary>
+    /// Item ids in paperdoll order, length 17. Index 0 is Under, 7 is the right hand, 10 is chest, 11 is legs, 16 is Hair2.
+    /// Zero means the slot is empty. Older clients ignore this key.
+    /// </summary>
+    [Key(6)] public int[] Paperdoll { get; set; } = [];
+}
+
+/// <summary>One paperdoll slot in <see cref="UserInfoMsg"/>. Object id and item id are 0 when the slot is empty.</summary>
+[MessagePackObject]
+public sealed class PaperdollSlotMsg
+{
+    [Key(0)] public int ObjectId { get; set; }
+    [Key(1)] public int ItemId { get; set; }
+}
+
+/// <summary>
+/// Opcode <see cref="MsgType.UserInfo"/> (1016). Sent to the entering player before <see cref="ItemListMsg"/>.
+/// <see cref="Paperdoll"/> has 17 slots in <c>PaperdollSlot</c> order (right hand is index 7).
+/// </summary>
+[MessagePackObject]
+public sealed class UserInfoMsg
+{
+    [Key(0)] public int ObjectId { get; set; }
+    [Key(1)] public string Name { get; set; } = "";
+    [Key(2)] public int ClassId { get; set; }
+    [Key(3)] public int X { get; set; }
+    [Key(4)] public int Y { get; set; }
+    [Key(5)] public int Z { get; set; }
+    [Key(6)] public float RunSpeed { get; set; } = 120f;
+    [Key(7)] public float WalkSpeed { get; set; } = 80f;
+    [Key(8)] public bool Running { get; set; } = true;
+    [Key(9)] public PaperdollSlotMsg[] Paperdoll { get; set; } = [];
+}
+
+/// <summary>One row of <see cref="ItemListMsg"/> or the item fields of <see cref="InventoryUpdateEntryMsg"/>.</summary>
+[MessagePackObject]
+public sealed class ItemListEntryMsg
+{
+    [Key(0)] public int ObjectId { get; set; }
+    [Key(1)] public int ItemId { get; set; }
+    [Key(2)] public int Count { get; set; }
+    /// <summary>Paperdoll index while worn, or -1 in the bag.</summary>
+    [Key(3)] public int EquippedSlot { get; set; } = -1;
+    /// <summary>none, rhand, lhand, lrhand, chest, legs, fullarmor, and the other body tokens.</summary>
+    [Key(4)] public string BodySlot { get; set; } = "none";
+    /// <summary>weapon, armor, or etc.</summary>
+    [Key(5)] public string Kind { get; set; } = "etc";
+    [Key(6)] public string Icon { get; set; } = "";
+    /// <summary>sword, dagger, blunt, and the other weapon tokens, or empty when this is not a weapon.</summary>
+    [Key(7)] public string WeaponType { get; set; } = "";
+    /// <summary>light, heavy, magic, or empty when this is not armor.</summary>
+    [Key(8)] public string ArmorType { get; set; } = "";
+}
+
+/// <summary>Opcode <see cref="MsgType.ItemList"/> (1014). Every item in the entering player's inventory.</summary>
+[MessagePackObject]
+public sealed class ItemListMsg
+{
+    [Key(0)] public ItemListEntryMsg[] Items { get; set; } = [];
+}
+
+/// <summary>0 add, 1 modify, 2 remove. There is no client equip request yet; the zone defines the row for later.</summary>
+public static class InventoryChange
+{
+    public const int Add = 0;
+    public const int Modify = 1;
+    public const int Remove = 2;
+}
+
+/// <summary>One row of <see cref="InventoryUpdateMsg"/>.</summary>
+[MessagePackObject]
+public sealed class InventoryUpdateEntryMsg
+{
+    /// <summary><see cref="InventoryChange.Add"/>, <see cref="InventoryChange.Modify"/>, or <see cref="InventoryChange.Remove"/>.</summary>
+    [Key(0)] public int Change { get; set; }
+    [Key(1)] public int ObjectId { get; set; }
+    [Key(2)] public int ItemId { get; set; }
+    [Key(3)] public int Count { get; set; }
+    /// <summary>Paperdoll index while worn, or -1 in the bag. Remove rows still carry the last slot or -1.</summary>
+    [Key(4)] public int EquippedSlot { get; set; } = -1;
+    [Key(5)] public string BodySlot { get; set; } = "none";
+    [Key(6)] public string Kind { get; set; } = "etc";
+    [Key(7)] public string Icon { get; set; } = "";
+    [Key(8)] public string WeaponType { get; set; } = "";
+    [Key(9)] public string ArmorType { get; set; } = "";
+}
+
+/// <summary>Opcode <see cref="MsgType.InventoryUpdate"/> (1015).</summary>
+[MessagePackObject]
+public sealed class InventoryUpdateMsg
+{
+    [Key(0)] public InventoryUpdateEntryMsg[] Changes { get; set; } = [];
 }
 
 /// <summary>Opcode <see cref="MsgType.DeleteObject"/> (1007). Left knownlist.</summary>

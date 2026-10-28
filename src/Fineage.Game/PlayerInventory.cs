@@ -16,17 +16,21 @@ public sealed class PlayerInventory
     const int SlotCount = (int)PaperdollSlot.Hair2 + 1;
 
     readonly ItemCatalog _catalog;
+    readonly ItemObjectIdAllocator _ids;
     readonly List<ItemInstance> _items = [];
     readonly ItemInstance?[] _equipped = new ItemInstance?[SlotCount];
-    int _nextObjectId;
 
     public PlayerInventory(ItemCatalog catalog, int firstObjectId = FirstObjectId)
+        : this(catalog, new ItemObjectIdAllocator(firstObjectId))
+    {
+    }
+
+    public PlayerInventory(ItemCatalog catalog, ItemObjectIdAllocator ids)
     {
         ArgumentNullException.ThrowIfNull(catalog);
-        if (firstObjectId <= 0)
-            throw new ArgumentOutOfRangeException(nameof(firstObjectId), firstObjectId, "Object ids must be positive.");
+        ArgumentNullException.ThrowIfNull(ids);
         _catalog = catalog;
-        _nextObjectId = firstObjectId;
+        _ids = ids;
     }
 
     public IReadOnlyList<ItemInstance> Items => _items;
@@ -201,9 +205,7 @@ public sealed class PlayerInventory
 
     ItemInstance Create(ItemTemplate template, int count)
     {
-        var objectId = _nextObjectId;
-        _nextObjectId = checked(_nextObjectId + 1);
-        return new ItemInstance(objectId, template, count);
+        return new ItemInstance(_ids.Next(), template, count);
     }
 
     bool RejectedByFormalWear(BodySlot body)

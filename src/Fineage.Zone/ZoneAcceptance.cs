@@ -63,11 +63,22 @@ public static class ZoneAcceptance
             throw new InvalidOperationException($"expected world, got {tooSoon.Code}");
 
         await SendAsync(stream, MsgType.EnterWorld, new EnterWorldMsg { CharacterSlot = 0 }).ConfigureAwait(false);
-        var spawnedBody = await ExpectAsync(stream, MsgType.PlayerSpawned).ConfigureAwait(false);
-        var spawned = MessagePackSerializer.Deserialize<PlayerSpawnedMsg>(spawnedBody);
+        var user = MessagePackSerializer.Deserialize<UserInfoMsg>(await ExpectAsync(stream, MsgType.UserInfo).ConfigureAwait(false));
+        var items = MessagePackSerializer.Deserialize<ItemListMsg>(await ExpectAsync(stream, MsgType.ItemList).ConfigureAwait(false));
+        var spawned = MessagePackSerializer.Deserialize<PlayerSpawnedMsg>(await ExpectAsync(stream, MsgType.PlayerSpawned).ConfigureAwait(false));
         if (spawned.ObjectId != characterId || spawned.Name != name ||
-            spawned.X != TalkingIsland.SpawnX || spawned.Y != TalkingIsland.SpawnY || spawned.Z != TalkingIsland.SpawnZ)
+            user.ObjectId != characterId || user.X != spawned.X || user.Y != spawned.Y || user.Z != spawned.Z)
             throw new InvalidOperationException($"spawn mismatch id={spawned.ObjectId} name={spawned.Name} @ {spawned.X},{spawned.Y},{spawned.Z}");
+        bool fighter = HasItem(items, 2369);
+        int classId = fighter ? ClassSpawn.HumanFighter : ClassSpawn.HumanMystic;
+        if (!IsClassPoint(classId, spawned.X, spawned.Y, spawned.Z))
+            throw new InvalidOperationException($"spawn {spawned.X},{spawned.Y},{spawned.Z} is not a class {classId} point");
+        int weaponId = fighter ? 2369 : 6;
+        if (user.Paperdoll.Length != InventoryMessages.PaperdollSlotCount || user.Paperdoll[7].ItemId != weaponId)
+            throw new InvalidOperationException($"user paperdoll rhand={user.Paperdoll.ElementAtOrDefault(7)?.ItemId}");
+        var weapon = FindItem(items, weaponId);
+        if (weapon.EquippedSlot != 7 || weapon.ObjectId != user.Paperdoll[7].ObjectId || weapon.ObjectId < 100_000)
+            throw new InvalidOperationException($"item list weapon id={weapon.ItemId} slot={weapon.EquippedSlot} object={weapon.ObjectId}");
 
         var seen = new List<NpcInfoMsg>();
         for (int i = 0; i < TalkingIsland.Gremlins.Length; i++)
@@ -88,21 +99,64 @@ public static class ZoneAcceptance
         }
 
         var nearest = TalkingIsland.Gremlins[0];
+        int destX = nearest.X;
+        int destY = nearest.Y;
+        int destZ = nearest.Z;
+        if (!TalkingIsland.WithinStep(spawned.X, spawned.Y, destX, destY))
+        {
+            destX = spawned.X + 10;
+            destY = spawned.Y;
+            destZ = spawned.Z;
+        }
+
         await SendAsync(stream, MsgType.MoveTo, new MoveToMsg
         {
             ObjectId = spawned.ObjectId,
-            DestX = nearest.X,
-            DestY = nearest.Y,
-            DestZ = nearest.Z,
+            DestX = destX,
+            DestY = destY,
+            DestZ = destZ,
             OriginX = spawned.X,
             OriginY = spawned.Y,
             OriginZ = spawned.Z
         }).ConfigureAwait(false);
         var ackBody = await ExpectAsync(stream, MsgType.MoveToAck).ConfigureAwait(false);
         var ack = MessagePackSerializer.Deserialize<MoveToMsg>(ackBody);
-        if (ack.ObjectId != characterId || ack.OriginX != TalkingIsland.SpawnX || ack.OriginY != TalkingIsland.SpawnY ||
-            ack.DestX != nearest.X || ack.DestY != nearest.Y)
+        if (ack.ObjectId != characterId || ack.OriginX != spawned.X || ack.OriginY != spawned.Y ||
+            ack.DestX != destX || ack.DestY != destY)
             throw new InvalidOperationException($"move ack mismatch dest={ack.DestX},{ack.DestY} origin={ack.OriginX},{ack.OriginY}");
+    }
+
+    static bool HasItem(ItemListMsg items, int itemId)
+    {
+        foreach (var item in items.Items)
+        {
+            if (item.ItemId == itemId)
+                return true;
+        }
+
+        return false;
+    }
+
+    static ItemListEntryMsg FindItem(ItemListMsg items, int itemId)
+    {
+        foreach (var item in items.Items)
+        {
+            if (item.ItemId == itemId)
+                return item;
+        }
+
+        throw new InvalidOperationException($"item {itemId} missing from ItemList");
+    }
+
+    static bool IsClassPoint(int classId, int x, int y, int z)
+    {
+        foreach (var point in ClassSpawn.Points(classId))
+        {
+            if (point.X == x && point.Y == y && point.Z == z)
+                return true;
+        }
+
+        return false;
     }
 
     static async Task SendAsync<T>(NetworkStream stream, MsgType type, T msg)

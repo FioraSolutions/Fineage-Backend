@@ -1,5 +1,6 @@
 using System.Net;
 using System.Net.Sockets;
+using Fineage.Game;
 using Fineage.Login;
 using Fineage.Protocol;
 using Fineage.Zone.Combat;
@@ -42,14 +43,21 @@ public static class ZoneMultiplayerAcceptance
         if (early.Code != "world")
             throw new InvalidOperationException($"say before enter returned {early.Code}");
 
-        var leftSpawn = await left.EnterAsync(expectOthers: 0).ConfigureAwait(false);
+        var leftSpawn = await left.EnterAsync(TalkingIsland.Gremlins.Length, expectOthers: 0).ConfigureAwait(false);
         if (leftSpawn.Spawned.ObjectId != fighter.CharacterId || leftSpawn.Spawned.Name != fighter.CharacterName)
             throw new InvalidOperationException("fighter spawn mismatch");
+        ExpectGear(leftSpawn, fighter, weaponId: 2369);
 
-        var rightSpawn = await right.EnterAsync(fighter, mystic).ConfigureAwait(false);
+        var rightSpawn = await right.EnterAsync(fighter, mystic, TalkingIsland.Gremlins.Length).ConfigureAwait(false);
+        ExpectGear(rightSpawn, mystic, weaponId: 6);
         var seen = await left.ExpectAsync<CharInfoMsg>(MsgType.CharInfo).ConfigureAwait(false);
-        ExpectChar(seen, mystic, TalkingIsland.SpawnX, TalkingIsland.SpawnY, TalkingIsland.SpawnZ);
-        ExpectChar(rightSpawn.Others[0], fighter, TalkingIsland.SpawnX, TalkingIsland.SpawnY, TalkingIsland.SpawnZ);
+        ExpectChar(seen, mystic, rightSpawn.Spawned.X, rightSpawn.Spawned.Y, rightSpawn.Spawned.Z);
+        ExpectChar(rightSpawn.Others[0], fighter, leftSpawn.Spawned.X, leftSpawn.Spawned.Y, leftSpawn.Spawned.Z);
+        if (seen.Paperdoll.Length != InventoryMessages.PaperdollSlotCount || seen.Paperdoll[7] != 6)
+            throw new InvalidOperationException($"mystic char paperdoll rhand={PaperdollAt(seen, 7)}");
+        if (rightSpawn.Others[0].Paperdoll.Length != InventoryMessages.PaperdollSlotCount || rightSpawn.Others[0].Paperdoll[7] != 2369)
+            throw new InvalidOperationException($"fighter char paperdoll rhand={PaperdollAt(rightSpawn.Others[0], 7)}");
+        ExpectDistinctItems(leftSpawn, rightSpawn, fighter.CharacterId, mystic.CharacterId);
         SameGremlins(leftSpawn.Npcs, rightSpawn.Npcs);
 
         var blank = await left.SayAsync("   ").ConfigureAwait(false);
@@ -75,8 +83,8 @@ public static class ZoneMultiplayerAcceptance
         }).ConfigureAwait(false);
         var moveLeft = await left.ExpectAsync<MoveToMsg>(MsgType.MoveToAck).ConfigureAwait(false);
         var moveRight = await right.ExpectAsync<MoveToMsg>(MsgType.MoveToAck).ConfigureAwait(false);
-        ExpectMove(moveLeft, fighter.CharacterId, gremlin.X, gremlin.Y);
-        ExpectMove(moveRight, fighter.CharacterId, gremlin.X, gremlin.Y);
+        ExpectMove(moveLeft, fighter.CharacterId, leftSpawn.Spawned.X, leftSpawn.Spawned.Y, gremlin.X, gremlin.Y);
+        ExpectMove(moveRight, fighter.CharacterId, leftSpawn.Spawned.X, leftSpawn.Spawned.Y, gremlin.X, gremlin.Y);
 
         var leftBehind = right.ExpectAsync<DeleteObjectMsg>(MsgType.DeleteObject);
         await left.DisposeAsync().ConfigureAwait(false);
@@ -91,41 +99,32 @@ public static class ZoneMultiplayerAcceptance
         var tokens = new HandoffTokens(HandoffTokens.DefaultSecret);
         var login = new LoginService(JsonAccountStore.InMemory(), tokens);
         var fighter = Play(login, "selftest", "HumanOne", HumanClasses.Fighter);
-        var mystic = Play(login, "selftest2", "HumanTwo", HumanClasses.Mystic);
+        var other = Play(login, "selftest2", "HumanTwo", HumanClasses.Fighter);
         var world = new ZoneWorld(new RangeAoi(1000));
 
         await using var zone = ZoneHost.Start(tokens, world);
         await using var left = await ZonePeer.ConnectAsync(zone.Port).ConfigureAwait(false);
         await using var right = await ZonePeer.ConnectAsync(zone.Port).ConfigureAwait(false);
         await left.AuthAsync(fighter).ConfigureAwait(false);
-        await right.AuthAsync(mystic).ConfigureAwait(false);
-        await left.EnterAsync(expectOthers: 0).ConfigureAwait(false);
-        await right.EnterAsync(fighter, mystic).ConfigureAwait(false);
+        await right.AuthAsync(other).ConfigureAwait(false);
+        var leftSpawn = await left.EnterAsync(expectNpcs: 0, expectOthers: 0).ConfigureAwait(false);
+        await right.EnterAsync(fighter, other, expectNpcs: 0).ConfigureAwait(false);
         _ = await left.ExpectAsync<CharInfoMsg>(MsgType.CharInfo).ConfigureAwait(false);
 
         await left.SendAsync(MsgType.MoveTo, new MoveToMsg
         {
-            DestX = TalkingIsland.SpawnX + TalkingIsland.MaxStep,
-            DestY = TalkingIsland.SpawnY,
-            DestZ = TalkingIsland.SpawnZ
+            DestX = leftSpawn.Spawned.X + TalkingIsland.MaxStep,
+            DestY = leftSpawn.Spawned.Y,
+            DestZ = leftSpawn.Spawned.Z
         }).ConfigureAwait(false);
 
         var ack = await left.ExpectAsync<MoveToMsg>(MsgType.MoveToAck).ConfigureAwait(false);
-        if (ack.ObjectId != fighter.CharacterId || ack.DestX != TalkingIsland.SpawnX + TalkingIsland.MaxStep)
+        if (ack.ObjectId != fighter.CharacterId || ack.DestX != leftSpawn.Spawned.X + TalkingIsland.MaxStep)
             throw new InvalidOperationException("aoi move ack mismatch");
 
         var dropped = new List<int>();
-        for (int i = 0; i < 4; i++)
-            dropped.Add((await left.ExpectAsync<DeleteObjectMsg>(MsgType.DeleteObject).ConfigureAwait(false)).ObjectId);
-        int[] expected =
-        [
-            mystic.CharacterId,
-            TalkingIsland.Gremlins[0].ObjectId,
-            TalkingIsland.Gremlins[1].ObjectId,
-            TalkingIsland.Gremlins[2].ObjectId
-        ];
-        Array.Sort(expected);
-        if (!dropped.SequenceEqual(expected))
+        dropped.Add((await left.ExpectAsync<DeleteObjectMsg>(MsgType.DeleteObject).ConfigureAwait(false)).ObjectId);
+        if (dropped.Count != 1 || dropped[0] != other.CharacterId)
             throw new InvalidOperationException($"knownlist drop was {string.Join(",", dropped)}");
 
         var gone = await right.ExpectAsync<DeleteObjectMsg>(MsgType.DeleteObject).ConfigureAwait(false);
@@ -221,11 +220,57 @@ public static class ZoneMultiplayerAcceptance
             throw new InvalidOperationException($"say mismatch id={say.ObjectId} name={say.Name} text={say.Text}");
     }
 
-    static void ExpectMove(MoveToMsg move, int objectId, int destX, int destY)
+    static void ExpectMove(MoveToMsg move, int objectId, int originX, int originY, int destX, int destY)
     {
-        if (move.ObjectId != objectId || move.OriginX != TalkingIsland.SpawnX || move.OriginY != TalkingIsland.SpawnY ||
+        if (move.ObjectId != objectId || move.OriginX != originX || move.OriginY != originY ||
             move.DestX != destX || move.DestY != destY)
-            throw new InvalidOperationException($"move mismatch id={move.ObjectId} dest={move.DestX},{move.DestY}");
+            throw new InvalidOperationException($"move mismatch id={move.ObjectId} dest={move.DestX},{move.DestY} origin={move.OriginX},{move.OriginY}");
+    }
+
+    static void ExpectGear(Arrival arrival, HandoffTicket who, int weaponId)
+    {
+        if (arrival.User.ObjectId != who.CharacterId || arrival.User.ClassId != who.ClassId ||
+            arrival.User.X != arrival.Spawned.X || arrival.User.Y != arrival.Spawned.Y || arrival.User.Z != arrival.Spawned.Z)
+            throw new InvalidOperationException($"user info mismatch {arrival.User.Name} @ {arrival.User.X},{arrival.User.Y},{arrival.User.Z}");
+        if (!IsClassPoint(who.ClassId, arrival.Spawned.X, arrival.Spawned.Y, arrival.Spawned.Z))
+            throw new InvalidOperationException($"spawn {arrival.Spawned.X},{arrival.Spawned.Y},{arrival.Spawned.Z} is not class {who.ClassId}");
+        if (arrival.User.Paperdoll.Length != InventoryMessages.PaperdollSlotCount || arrival.User.Paperdoll[7].ItemId != weaponId)
+            throw new InvalidOperationException($"user rhand={arrival.User.Paperdoll.ElementAtOrDefault(7)?.ItemId}");
+        ItemListEntryMsg? weapon = null;
+        foreach (var item in arrival.Items.Items)
+        {
+            if (item.ItemId == weaponId)
+                weapon = item;
+        }
+
+        if (weapon == null || weapon.EquippedSlot != 7 || weapon.ObjectId != arrival.User.Paperdoll[7].ObjectId)
+            throw new InvalidOperationException($"item list missing equipped {weaponId}");
+    }
+
+    static void ExpectDistinctItems(Arrival left, Arrival right, int leftCharacterId, int rightCharacterId)
+    {
+        var ids = new HashSet<int> { leftCharacterId, rightCharacterId };
+        foreach (var npc in TalkingIsland.Gremlins)
+            ids.Add(npc.ObjectId);
+        foreach (var item in left.Items.Items.Concat(right.Items.Items))
+        {
+            if (item.ObjectId < PlayerInventory.FirstObjectId || !ids.Add(item.ObjectId))
+                throw new InvalidOperationException($"item object id {item.ObjectId} collides");
+        }
+    }
+
+    static int PaperdollAt(CharInfoMsg info, int slot) =>
+        info.Paperdoll != null && slot < info.Paperdoll.Length ? info.Paperdoll[slot] : -1;
+
+    static bool IsClassPoint(int classId, int x, int y, int z)
+    {
+        foreach (var point in ClassSpawn.Points(classId))
+        {
+            if (point.X == x && point.Y == y && point.Z == z)
+                return true;
+        }
+
+        return false;
     }
 
     static void SameGremlins(IReadOnlyList<NpcInfoMsg> left, IReadOnlyList<NpcInfoMsg> right)
@@ -280,22 +325,30 @@ public static class ZoneMultiplayerAcceptance
             return await ExpectAsync<ErrorMsg>(MsgType.Error).ConfigureAwait(false);
         }
 
-        public async Task<Arrival> EnterAsync(int expectOthers)
+        public Task<Arrival> EnterAsync(int expectOthers) =>
+            EnterAsync(TalkingIsland.Gremlins.Length, expectOthers);
+
+        public async Task<Arrival> EnterAsync(int expectNpcs, int expectOthers)
         {
             await SendAsync(MsgType.EnterWorld, new EnterWorldMsg()).ConfigureAwait(false);
+            var user = await ExpectAsync<UserInfoMsg>(MsgType.UserInfo).ConfigureAwait(false);
+            var items = await ExpectAsync<ItemListMsg>(MsgType.ItemList).ConfigureAwait(false);
             var spawned = await ExpectAsync<PlayerSpawnedMsg>(MsgType.PlayerSpawned).ConfigureAwait(false);
-            var npcs = new List<NpcInfoMsg>(TalkingIsland.Gremlins.Length);
-            for (int i = 0; i < TalkingIsland.Gremlins.Length; i++)
+            var npcs = new List<NpcInfoMsg>(expectNpcs);
+            for (int i = 0; i < expectNpcs; i++)
                 npcs.Add(await ExpectAsync<NpcInfoMsg>(MsgType.NpcInfo).ConfigureAwait(false));
             var others = new List<CharInfoMsg>(expectOthers);
             for (int i = 0; i < expectOthers; i++)
                 others.Add(await ExpectAsync<CharInfoMsg>(MsgType.CharInfo).ConfigureAwait(false));
-            return new Arrival(spawned, npcs, others);
+            return new Arrival(user, items, spawned, npcs, others);
         }
 
-        public async Task<Arrival> EnterAsync(HandoffTicket alreadyIn, HandoffTicket self)
+        public Task<Arrival> EnterAsync(HandoffTicket alreadyIn, HandoffTicket self) =>
+            EnterAsync(alreadyIn, self, TalkingIsland.Gremlins.Length);
+
+        public async Task<Arrival> EnterAsync(HandoffTicket alreadyIn, HandoffTicket self, int expectNpcs)
         {
-            var arrival = await EnterAsync(expectOthers: 1).ConfigureAwait(false);
+            var arrival = await EnterAsync(expectNpcs, expectOthers: 1).ConfigureAwait(false);
             if (arrival.Spawned.ObjectId != self.CharacterId || arrival.Spawned.Name != self.CharacterName)
                 throw new InvalidOperationException("second spawn mismatch");
             if (arrival.Others[0].ObjectId != alreadyIn.CharacterId)
@@ -366,5 +419,5 @@ public static class ZoneMultiplayerAcceptance
         }
     }
 
-    readonly record struct Arrival(PlayerSpawnedMsg Spawned, List<NpcInfoMsg> Npcs, List<CharInfoMsg> Others);
+    readonly record struct Arrival(UserInfoMsg User, ItemListMsg Items, PlayerSpawnedMsg Spawned, List<NpcInfoMsg> Npcs, List<CharInfoMsg> Others);
 }
