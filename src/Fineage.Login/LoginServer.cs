@@ -1,3 +1,4 @@
+using System.Diagnostics;
 using Fineage.Protocol;
 using Fineage.Protocol.Net;
 using MessagePack;
@@ -11,6 +12,7 @@ public sealed class LoginServer
     readonly int _maxMessagesPerSecond;
     readonly TimeSpan _selectMinInterval;
     readonly Func<DateTimeOffset> _clock;
+    int _nextSession = 1;
 
     public LoginServer(LoginService service)
         : this(service, null, null)
@@ -39,6 +41,9 @@ public sealed class LoginServer
         CancellationToken readCt = idleWatch?.Token ?? ct;
         MessageRateGate? rate = rateLimit ? new MessageRateGate(_maxMessagesPerSecond) : null;
 
+        int sessionId = Interlocked.Increment(ref _nextSession);
+        session.WireSessionId = sessionId;
+        LoginLog.Connect(session);
         string? account = null;
         var lobby = new LobbyGate();
         try
@@ -50,22 +55,49 @@ public sealed class LoginServer
                     return;
 
                 if (rateLimit)
-                    PipelineTelemetry.FrameIn("login");
+                    PipelineTelemetry.FrameIn("login", FrameIO.HeaderSize + frame.Value.Body.Length);
 
                 idleWatch?.Touch();
-
-                if (rate != null && !rate.TryConsume())
+                session.LastPacketId = frame.Value.Type;
+                session.AccountName = account ?? "";
+                session.FailureRecorded = false;
+                long started = Stopwatch.GetTimestamp();
+                try
                 {
-                    await SendErrorAsync(session, "rate_limit", "Too many messages per second.", readCt).ConfigureAwait(false);
-                    return;
-                }
+                    if (rate != null && !rate.TryConsume())
+                    {
+                        await SendErrorAsync(session, "rate_limit", "Too many messages per second.", readCt).ConfigureAwait(false);
+                        return;
+                    }
 
-                account = await DispatchAsync(session, account, lobby, frame.Value.Type, frame.Value.Body, readCt).ConfigureAwait(false);
+                    account = await DispatchAsync(session, account, lobby, frame.Value.Type, frame.Value.Body, readCt).ConfigureAwait(false);
+                    session.AccountName = account ?? "";
+                }
+                catch (Exception ex) when (ex is not OperationCanceledException)
+                {
+                    if (!session.FailureRecorded)
+                    {
+                        session.FailureRecorded = true;
+                        PipelineTelemetry.PacketErrored("login");
+                    }
+
+                    LoginLog.Fault(session, ex);
+                    throw;
+                }
+                finally
+                {
+                    PipelineTelemetry.Handler("login", Stopwatch.GetElapsedTime(started).TotalMilliseconds);
+                }
             }
         }
         catch (OperationCanceledException) when (idleWatch != null && idleWatch.Token.IsCancellationRequested && !ct.IsCancellationRequested)
         {
+            session.FailureRecorded = false;
             await SendErrorAsync(session, "idle_timeout", "Session timed out.", CancellationToken.None).ConfigureAwait(false);
+        }
+        finally
+        {
+            LoginLog.Disconnect(session);
         }
     }
 
@@ -124,6 +156,7 @@ public sealed class LoginServer
                     var result = _service.Register(msg.Account, msg.Password);
                     if (!result.Ok || result.Value == null)
                     {
+                        session.AccountName = msg.Account;
                         await SendErrorAsync(session, result.Code, result.Message, ct).ConfigureAwait(false);
                         return account;
                     }
@@ -145,6 +178,7 @@ public sealed class LoginServer
                     var result = _service.Login(msg.Account, msg.Password);
                     if (!result.Ok || result.Value == null)
                     {
+                        session.AccountName = msg.Account;
                         await SendErrorAsync(session, result.Code, result.Message, ct).ConfigureAwait(false);
                         return account;
                     }
@@ -265,6 +299,7 @@ public sealed class LoginServer
 
     static async Task SendHandoffAsync(LoginSession session, HandoffTicket ticket, CancellationToken ct)
     {
+        session.CharacterName = ticket.CharacterName;
         LoginLog.Info($"TX Handoff account={ticket.Account} character={ticket.CharacterName} zone={ticket.ZoneHost}:{ticket.ZonePort}");
         await session.SendAsync(MsgType.Handoff, new HandoffMsg
         {
@@ -393,7 +428,9 @@ public sealed class LoginServer
         }
 
         lobby.Committed = true;
-        LoginLog.Info($"RX V2 EnterWorld account={account} slot={enter.CharacterSlot} character={character.Name}");
+        session.AccountName = account;
+        session.CharacterName = character.Name;
+        LoginLog.EnterWorld(session);
         await SendFrameV2Async(session, V2.MsgType.PlayToken, LoginV2Wire.ToPlayToken(ticket.Value), ct).ConfigureAwait(false);
         await SendHandoffAsync(session, ticket.Value, ct).ConfigureAwait(false);
         return account;
@@ -535,7 +572,17 @@ public sealed class LoginServer
 
     static Task SendErrorAsync(LoginSession session, string code, string message, CancellationToken ct)
     {
-        LoginLog.Info($"TX Error code={code}");
+        bool rejected = code is "rate_limit" or "unknown" or "wrong_port" or "wrong_endpoint";
+        if (!session.FailureRecorded)
+        {
+            session.FailureRecorded = true;
+            if (rejected)
+                PipelineTelemetry.PacketRejected("login");
+            else
+                PipelineTelemetry.PacketErrored("login");
+        }
+
+        LoginLog.Packet(session, code, rejected);
         return session.SendAsync(MsgType.Error, new ErrorMsg { Code = code, Message = message }, ct);
     }
 
@@ -552,11 +599,6 @@ public sealed class LoginServer
             return null;
         }
     }
-}
-
-static class LoginLog
-{
-    public static void Info(string message) => Console.WriteLine($"[LOGIN] {message}");
 }
 
 sealed class LobbyGate

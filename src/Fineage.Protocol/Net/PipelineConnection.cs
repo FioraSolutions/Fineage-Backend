@@ -80,7 +80,7 @@ public sealed class PipelineConnection : IAsyncDisposable
         {
             await foreach (byte[] frame in _outbound.Reader.ReadAllAsync(ct).ConfigureAwait(false))
             {
-                PipelineTelemetry.FrameOut(_endpoint);
+                PipelineTelemetry.FrameOut(_endpoint, frame.Length);
                 FlushResult flush = await _writer.WriteAsync(frame, ct).ConfigureAwait(false);
                 if (flush.IsCompleted)
                     break;

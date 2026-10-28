@@ -110,7 +110,33 @@ sudo systemctl enable --now fineage-login fineage-zone
 
 `FINEAGE_HANDOFF_SECRET` must be set and identical for both processes. The dev default is only for local loops. Listening on `0.0.0.0` without it prints a warning. Sample unit files and env: `deploy/systemd/`, `deploy/fineage.env.example`.
 
-Both processes emit OpenTelemetry metrics on meter **`Fineage.Server`** (`fineage.connections`, `fineage.frames.in` / `fineage.frames.out`, `fineage.outbound.dropped`, and zone-only `fineage.tick.ms` / `fineage.zone.online`). See the commented block at the bottom of `deploy/fineage.env.example` for instrument names and sample `OTEL_*` variables.
+## Logs and metrics
+
+Both processes log through `Microsoft.Extensions.Logging`. The default console format is one key=value line per event. `FINEAGE_LOG_FORMAT=json` switches to JSON lines. `FINEAGE_LOG_LEVEL` sets the minimum (`trace`, `debug`, `info`, `warn`, `error`, `critical`, `off`; default `info`).
+
+Connect, disconnect, enter world, and packet errors carry `session`, `account`, `character`, and `packet`. Passwords, handoff tokens, and session keys are not logged. A field named `password`, `token`, `secret`, or `session_key` is dropped, and `password=` / `token=` assignments inside a message are rewritten to `[redacted]`.
+
+Meter **`Fineage.Server`** (OpenTelemetry, and the optional text endpoint below):
+
+| Instrument | Kind | Meaning |
+|------------|------|---------|
+| `fineage.connections` | UpDownCounter | Open TCP sessions. Tag `endpoint` = `login` or `zone` |
+| `fineage.zone.online` | Gauge | Players in the zone simulation |
+| `fineage.frames.in` / `fineage.frames.out` | Counter | Packets by direction |
+| `fineage.bytes.in` / `fineage.bytes.out` | Counter | Packet bytes, header included |
+| `fineage.packets.per_second` | Gauge | Packets/s. Tag `direction` = `in` or `out`. Updated on each summary line and each `/metrics` scrape |
+| `fineage.handler.ms` | Histogram | Packet handler duration |
+| `fineage.tick.ms` | Histogram | Zone simulation tick (HP/MP regen). Zone only |
+| `fineage.packets.rejected` | Counter | Rate limit, unknown opcode, or wrong port |
+| `fineage.packets.errored` | Counter | Error response or handler failure |
+| `fineage.connections.rejected` | Counter | Accept dropped at the connection cap |
+| `fineage.outbound.dropped` | Counter | Outbound queue full |
+
+`FINEAGE_METRICS_SUMMARY_SECONDS` prints one `fineage conn=…` line on that interval (default **60**). `0` or `off` disables it. Counts on that line are for the interval; `conn` and `online` are the current gauges. `in_pps` / `out_pps` are packets per second.
+
+`FINEAGE_METRICS_PORT` serves Prometheus text at `GET /metrics` (disabled when unset or `0`). Login and zone are separate processes, so set `FINEAGE_LOGIN_METRICS_PORT` and `FINEAGE_ZONE_METRICS_PORT` when both should export; the role-specific variable wins over `FINEAGE_METRICS_PORT`. Bind is `FINEAGE_METRICS_BIND` (default `127.0.0.1`). Prometheus names use underscores (`fineage_frames_in_total`, `fineage_handler_ms`, `fineage_tick_ms`, `fineage_zone_online`, …).
+
+See the commented block in `deploy/fineage.env.example`. Export the same meter with the OpenTelemetry .NET SDK (`OTEL_SERVICE_NAME`, `OTEL_EXPORTER_OTLP_ENDPOINT`) if you want a collector instead of `/metrics`.
 
 There is no deploy workflow in this repo. CI is `.github/workflows/build-and-test.yml` (`dotnet test` on pull requests and pushes).
 

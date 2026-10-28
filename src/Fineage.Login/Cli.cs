@@ -1,6 +1,7 @@
 using System.Net;
 using System.Net.Sockets;
 using Fineage.Protocol.Net;
+using Fineage.Protocol.Telemetry;
 
 namespace Fineage.Login;
 
@@ -194,6 +195,7 @@ public static class Cli
             $"[LOGIN] listen tcp={bindDisplay}:{port} http={http.BaseUrl} store={storePath} (maxConn={maxConnections} outboundQ={outboundQueue} msgPerSec={maxMsgPerSec})");
         output.WriteLine($"[LOGIN] zone handoff target {ZoneHandoff.AdvertiseHost}:{ZoneHandoff.AdvertisePort}");
 
+        await using FineageMetricsHost? metrics = FineageMetricsHost.Start("login", output, error);
         using var shutdown = new CancellationTokenSource();
         Console.CancelKeyPress += (_, e) =>
         {

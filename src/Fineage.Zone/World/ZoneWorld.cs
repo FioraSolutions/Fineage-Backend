@@ -152,7 +152,7 @@ public sealed partial class ZoneWorld
         if (!ok)
             return false;
 
-        ZoneLog.Info($"enter object={session.ObjectId} name={session.Name} known={known}");
+        ZoneLog.EnterWorld(session, known);
         await FlushSelfAsync(session, toSelf, ct).ConfigureAwait(false);
         await FlushOthersAsync(toOthers, ct).ConfigureAwait(false);
         return true;
@@ -167,7 +167,7 @@ public sealed partial class ZoneWorld
         if (!removed)
             return;
 
-        ZoneLog.Info($"leave object={session.ObjectId} name={session.Name}");
+        ZoneLog.LeaveWorld(session);
         await FlushOthersAsync(toOthers, ct).ConfigureAwait(false);
     }
 

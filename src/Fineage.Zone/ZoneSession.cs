@@ -19,6 +19,9 @@ public sealed class ZoneSession
     public string Account { get; private set; } = "";
     public string Name { get; private set; } = "";
     public int ClassId { get; private set; }
+    public int WireSessionId { get; set; }
+    public ushort LastPacketId { get; set; }
+    internal bool FailureRecorded { get; set; }
     public bool InWorld { get; internal set; }
     public int X { get; internal set; }
     public int Y { get; internal set; }
@@ -37,6 +40,12 @@ public sealed class ZoneSession
         Name = name;
         ClassId = classId;
         InWorld = false;
+    }
+
+    internal void NoteForLog(string account)
+    {
+        if (!string.IsNullOrEmpty(account))
+            Account = account;
     }
 
     public void Clear()

@@ -1,3 +1,4 @@
+using System.Diagnostics;
 using Fineage.Login;
 using Fineage.Protocol;
 using Fineage.Protocol.Net;
@@ -38,6 +39,8 @@ public sealed class ZoneServer
     {
         var session = new ZoneSession(stream);
         int sessionId = Interlocked.Increment(ref _nextSession);
+        session.WireSessionId = sessionId;
+        ZoneLog.Connect(sessionId, "");
         try
         {
             while (!ct.IsCancellationRequested)
@@ -46,7 +49,7 @@ public sealed class ZoneServer
                 if (frame == null)
                     return;
 
-                await DispatchAsync(session, sessionId, frame.Value.Type, frame.Value.Body, ct).ConfigureAwait(false);
+                await HandleFrameAsync(session, sessionId, frame.Value.Type, frame.Value.Body, ct, rate: null).ConfigureAwait(false);
             }
         }
         catch (OperationCanceledException)
@@ -55,6 +58,7 @@ public sealed class ZoneServer
         finally
         {
             await _world.LeaveAsync(session, CancellationToken.None).ConfigureAwait(false);
+            ZoneLog.Disconnect(session);
         }
     }
 
@@ -62,6 +66,8 @@ public sealed class ZoneServer
     {
         var session = new ZoneSession(connection);
         int sessionId = Interlocked.Increment(ref _nextSession);
+        session.WireSessionId = sessionId;
+        ZoneLog.Connect(sessionId, connection.Remote);
         var rate = new MessageRateGate(_maxMessagesPerSecond);
         using var idleWatch = new SessionIdleWatchdog(ct, TcpSessionSettings.IdleTimeout);
         CancellationToken readCt = idleWatch.Token;
@@ -73,25 +79,54 @@ public sealed class ZoneServer
                 if (frame == null)
                     return;
 
-                PipelineTelemetry.FrameIn("zone");
+                PipelineTelemetry.FrameIn("zone", FrameIO.HeaderSize + frame.Value.Body.Length);
                 idleWatch.Touch();
-
-                if (!rate.TryConsume())
-                {
-                    await ErrorAsync(session, "rate_limit", "Too many messages per second.", readCt).ConfigureAwait(false);
+                if (!await HandleFrameAsync(session, sessionId, frame.Value.Type, frame.Value.Body, readCt, rate).ConfigureAwait(false))
                     return;
-                }
-
-                await DispatchAsync(session, sessionId, frame.Value.Type, frame.Value.Body, readCt).ConfigureAwait(false);
             }
         }
         catch (OperationCanceledException) when (idleWatch.Token.IsCancellationRequested && !ct.IsCancellationRequested)
         {
+            session.FailureRecorded = false;
             await ErrorAsync(session, "idle_timeout", "Session timed out.", CancellationToken.None).ConfigureAwait(false);
         }
         finally
         {
             await _world.LeaveAsync(session, CancellationToken.None).ConfigureAwait(false);
+            ZoneLog.Disconnect(session);
+        }
+    }
+
+    async Task<bool> HandleFrameAsync(ZoneSession session, int sessionId, ushort type, byte[] body, CancellationToken ct, MessageRateGate? rate)
+    {
+        session.LastPacketId = type;
+        session.FailureRecorded = false;
+        long started = Stopwatch.GetTimestamp();
+        try
+        {
+            if (rate != null && !rate.TryConsume())
+            {
+                await ErrorAsync(session, "rate_limit", "Too many messages per second.", ct).ConfigureAwait(false);
+                return false;
+            }
+
+            await DispatchAsync(session, sessionId, type, body, ct).ConfigureAwait(false);
+            return true;
+        }
+        catch (Exception ex) when (ex is not OperationCanceledException)
+        {
+            if (!session.FailureRecorded)
+            {
+                session.FailureRecorded = true;
+                PipelineTelemetry.PacketErrored("zone");
+            }
+
+            ZoneLog.Fault(session, type, ex);
+            throw;
+        }
+        finally
+        {
+            PipelineTelemetry.Handler("zone", Stopwatch.GetElapsedTime(started).TotalMilliseconds);
         }
     }
 
@@ -148,8 +183,9 @@ public sealed class ZoneServer
                 {
                     ZoneLog.Info($"RX Auth rejected session={sessionId} account={auth.Account} reason=expired");
                     await _world.LeaveAsync(session, ct).ConfigureAwait(false);
-                    session.Clear();
+                    session.NoteForLog(auth.Account);
                     await ErrorAsync(session, "handoff_expired", "Handoff token has expired.", ct).ConfigureAwait(false);
+                    session.Clear();
                     break;
                 }
 
@@ -158,8 +194,9 @@ public sealed class ZoneServer
                 {
                     ZoneLog.Info($"RX Auth rejected session={sessionId} account={auth.Account}");
                     await _world.LeaveAsync(session, ct).ConfigureAwait(false);
-                    session.Clear();
+                    session.NoteForLog(auth.Account);
                     await ErrorAsync(session, "invalid_credentials", "Handoff token was rejected.", ct).ConfigureAwait(false);
+                    session.Clear();
                     break;
                 }
 
@@ -464,7 +501,16 @@ public sealed class ZoneServer
 
     static Task ErrorAsync(ZoneSession session, string code, string message, CancellationToken ct)
     {
-        ZoneLog.Info($"TX Error code={code}");
+        if (!session.FailureRecorded)
+        {
+            session.FailureRecorded = true;
+            if (code is "rate_limit" or "unknown" or "wrong_port")
+                PipelineTelemetry.PacketRejected("zone");
+            else
+                PipelineTelemetry.PacketErrored("zone");
+        }
+
+        ZoneLog.Packet(session, code, code is "rate_limit" or "unknown" or "wrong_port");
         return session.SendAsync(MsgType.Error, new ErrorMsg { Code = code, Message = message }, ct);
     }
 
@@ -499,9 +545,4 @@ public sealed class ZoneServer
             return null;
         }
     }
-}
-
-static class ZoneLog
-{
-    public static void Info(string message) => Console.WriteLine($"[ZONE] {message}");
 }

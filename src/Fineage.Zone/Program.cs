@@ -82,6 +82,7 @@ Console.WriteLine("[ZONE] Auth.Password is the login handoff token. EnterWorld s
 if (adminCommands)
     Console.WriteLine("[ZONE] admin commands enabled (GiveItem).");
 
+await using FineageMetricsHost? metrics = FineageMetricsHost.Start("zone", Console.Out, Console.Error);
 var tcp = new TcpServer();
 try
 {
