@@ -32,6 +32,7 @@ public sealed partial class ZoneWorld
                 {
                     TickRegen(outbound);
                     TickSpawns(outbound);
+                    TickAbnormals(outbound);
                     CompleteDueDissolutions(_clock().ToUnixTimeMilliseconds(), outbound);
                     TickSevenSigns(outbound);
                 }
