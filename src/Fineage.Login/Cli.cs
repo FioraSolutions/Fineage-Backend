@@ -1,5 +1,6 @@
 using System.Net;
 using System.Net.Sockets;
+using Fineage.Protocol.Net;
 
 namespace Fineage.Login;
 
@@ -160,18 +161,17 @@ public static class Cli
     {
         var service = new LoginService(JsonAccountStore.Open(storePath), HandoffTokens.FromEnvironment());
         var server = new LoginServer(service);
-        var listener = new TcpListener(bindAddress, port);
         LoginHttpHost? http = null;
+        string host = bindAddress.Equals(IPAddress.Any) ? "0.0.0.0" : bindDisplay;
+        int maxConnections = LoginNetSettings.MaxConnections;
+        int outboundQueue = LoginNetSettings.OutboundQueue;
+        int maxMsgPerSec = LoginNetSettings.MaxMessagesPerSecond;
         try
         {
-            listener.Start();
             http = await LoginHttpHost.StartAsync(service, bindAddress, httpPort).ConfigureAwait(false);
         }
         catch (Exception ex)
         {
-            listener.Stop();
-            if (http != null)
-                await http.DisposeAsync().ConfigureAwait(false);
             error.WriteLine($"listen failed on {bindDisplay} tcp={port} http={httpPort}: {ex.Message}");
             return false;
         }
@@ -182,28 +182,42 @@ public static class Cli
             output.WriteLine("[LOGIN] warning: FINEAGE_HANDOFF_SECRET is unset. Set one shared secret on Login and Zone before exposing this bind.");
         }
 
-        output.WriteLine($"[LOGIN] listen tcp={bindDisplay}:{port} http={http.BaseUrl} store={storePath}");
+        output.WriteLine(
+            $"[LOGIN] listen tcp={bindDisplay}:{port} http={http.BaseUrl} store={storePath} (maxConn={maxConnections} outboundQ={outboundQueue} msgPerSec={maxMsgPerSec})");
         output.WriteLine($"[LOGIN] zone handoff target {ZoneHandoff.AdvertiseHost}:{ZoneHandoff.AdvertisePort}");
-        while (true)
+
+        using var shutdown = new CancellationTokenSource();
+        Console.CancelKeyPress += (_, e) =>
         {
-            var client = await listener.AcceptTcpClientAsync().ConfigureAwait(false);
-            _ = Task.Run(async () =>
-            {
-                try
-                {
-                    await using var stream = client.GetStream();
-                    await server.HandleAsync(stream, CancellationToken.None).ConfigureAwait(false);
-                }
-                catch (Exception ex)
-                {
-                    Console.Error.WriteLine($"[LOGIN] session error {ex.Message}");
-                }
-                finally
-                {
-                    client.Dispose();
-                }
-            });
+            e.Cancel = true;
+            shutdown.Cancel();
+        };
+
+        var tcp = new TcpServer();
+        try
+        {
+            await tcp.RunAsync(
+                host,
+                port,
+                maxConnections,
+                outboundQueue,
+                "login",
+                server.HandleAsync,
+                shutdown.Token,
+                LoginOverload.RejectAsync).ConfigureAwait(false);
         }
+        catch (Exception ex) when (ex is not OperationCanceledException)
+        {
+            error.WriteLine($"listen failed on {bindDisplay} tcp={port}: {ex.Message}");
+            return false;
+        }
+        finally
+        {
+            if (http != null)
+                await http.DisposeAsync().ConfigureAwait(false);
+        }
+
+        return true;
     }
 
     static string? TakeOption(List<string> args, string name)

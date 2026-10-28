@@ -47,6 +47,9 @@ public sealed class ZoneServer
                 await DispatchAsync(session, sessionId, frame.Value.Type, frame.Value.Body, ct).ConfigureAwait(false);
             }
         }
+        catch (OperationCanceledException)
+        {
+        }
         finally
         {
             await _world.LeaveAsync(session, CancellationToken.None).ConfigureAwait(false);
@@ -58,22 +61,30 @@ public sealed class ZoneServer
         var session = new ZoneSession(connection);
         int sessionId = Interlocked.Increment(ref _nextSession);
         var rate = new MessageRateGate(_maxMessagesPerSecond);
+        using var idleWatch = new SessionIdleWatchdog(ct, TcpSessionSettings.IdleTimeout);
+        CancellationToken readCt = idleWatch.Token;
         try
         {
-            while (!ct.IsCancellationRequested)
+            while (!readCt.IsCancellationRequested)
             {
-                var frame = await PipeFrames.ReadV2Async(connection.Reader, ct).ConfigureAwait(false);
+                var frame = await PipeFrames.ReadV2Async(connection.Reader, readCt).ConfigureAwait(false);
                 if (frame == null)
                     return;
 
+                idleWatch.Touch();
+
                 if (!rate.TryConsume())
                 {
-                    await ErrorAsync(session, "rate_limit", "Too many messages per second.", ct).ConfigureAwait(false);
+                    await ErrorAsync(session, "rate_limit", "Too many messages per second.", readCt).ConfigureAwait(false);
                     return;
                 }
 
-                await DispatchAsync(session, sessionId, frame.Value.Type, frame.Value.Body, ct).ConfigureAwait(false);
+                await DispatchAsync(session, sessionId, frame.Value.Type, frame.Value.Body, readCt).ConfigureAwait(false);
             }
+        }
+        catch (OperationCanceledException) when (idleWatch.Token.IsCancellationRequested && !ct.IsCancellationRequested)
+        {
+            await ErrorAsync(session, "idle_timeout", "Session timed out.", CancellationToken.None).ConfigureAwait(false);
         }
         finally
         {
@@ -94,6 +105,14 @@ public sealed class ZoneServer
                     ProtocolVersion = 1,
                     ServerName = "FineageZone"
                 }, ct).ConfigureAwait(false);
+                break;
+            }
+            case MsgType.Ping:
+            {
+                var ping = Decode<PingMsg>(body) ?? new PingMsg();
+                long now = _clock().ToUnixTimeMilliseconds();
+                await session.SendAsync(MsgType.Pong, new PongMsg { ClientUnixMs = ping.ClientUnixMs, ServerUnixMs = now }, ct)
+                    .ConfigureAwait(false);
                 break;
             }
             case MsgType.Auth:

@@ -14,6 +14,8 @@ public enum MsgType : ushort
     MoveTo = 4,
     SelectTarget = 5,
     AttackRequest = 6,
+    /// <summary>Keepalive from client. Server answers with <see cref="Pong"/>.</summary>
+    Ping = 9,
     /// <summary>Zone chat. Fan-out is <see cref="CreatureSay"/>.</summary>
     Say = 8,
 
@@ -36,6 +38,8 @@ public enum MsgType : ushort
     StatusUpdate = 1010,
     /// <summary>Zone chat fan-out. Not an Interlude opcode.</summary>
     CreatureSay = 1012,
+    /// <summary>Keepalive reply (echoes <see cref="PingMsg"/> timestamp).</summary>
+    Pong = 1013,
 
     // Login S → C
     RegisterOk = 1020,

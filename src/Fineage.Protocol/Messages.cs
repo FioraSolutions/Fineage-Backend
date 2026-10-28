@@ -180,6 +180,19 @@ public sealed class DeleteObjectMsg
     [Key(0)] public int ObjectId { get; set; }
 }
 
+[MessagePackObject]
+public sealed class PingMsg
+{
+    [Key(0)] public long ClientUnixMs { get; set; }
+}
+
+[MessagePackObject]
+public sealed class PongMsg
+{
+    [Key(0)] public long ClientUnixMs { get; set; }
+    [Key(1)] public long ServerUnixMs { get; set; }
+}
+
 /// <summary>Opcode <see cref="MsgType.Say"/> (8). Client zone chat.</summary>
 [MessagePackObject]
 public sealed class SayMsg
