@@ -16,9 +16,10 @@ public sealed class LoginHandoffValidationTests
         Assert.False(tokens.TryValidate(ticket.Token + "x", issuedAt, out _));
         string flipped = ticket.Token[..^1] + (ticket.Token[^1] == 'a' ? "b" : "a");
         Assert.False(tokens.TryValidate(flipped, issuedAt, out _));
-        Assert.False(tokens.TryValidate(ticket.Token, issuedAt.AddSeconds(601), out _));
+        var atExpiry = DateTimeOffset.FromUnixTimeSeconds(ticket.ExpiresUnixSeconds);
+        Assert.False(tokens.TryValidate(ticket.Token, atExpiry, out _));
         Assert.Equal(HandoffTokens.ValidateStatus.Expired,
-            tokens.Validate(ticket.Token, issuedAt.AddSeconds(601), out _));
-        Assert.True(tokens.TryValidate(ticket.Token, issuedAt.AddSeconds(599), out _));
+            tokens.Validate(ticket.Token, atExpiry, out _));
+        Assert.True(tokens.TryValidate(ticket.Token, atExpiry.AddSeconds(-1), out _));
     }
 }

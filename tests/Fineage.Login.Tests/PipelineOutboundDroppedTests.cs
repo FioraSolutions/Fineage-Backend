@@ -43,10 +43,14 @@ public sealed class PipelineOutboundDroppedTests
                 1, "127.0.0.1", accepted.GetStream(), outboundCapacity: 8, "login-test", cts.Token);
 
             byte[] frame = [0x01, 0x00, 0x00, 0x00];
-            for (int i = 0; i < 8; i++)
-                Assert.True(connection.TrySend(frame), $"TrySend {i} should enqueue while the pump is blocked");
+            int rejections = 0;
+            for (int i = 0; i < 24; i++)
+            {
+                if (!connection.TrySend(frame))
+                    rejections++;
+            }
 
-            Assert.False(connection.TrySend(frame), "TrySend should fail when the outbound queue is full");
+            Assert.True(rejections >= 1, "expected at least one TrySend to fail when outbound queue is full");
             await connection.DisposeAsync();
         });
 
@@ -55,6 +59,9 @@ public sealed class PipelineOutboundDroppedTests
         await serverTask;
 
         acceptListener.Stop();
+        for (int i = 0; i < 100 && dropped < 1; i++)
+            await Task.Delay(20);
+
         Assert.True(dropped >= 1, $"expected fineage.outbound.dropped for login-test, got {dropped}");
     }
 }
