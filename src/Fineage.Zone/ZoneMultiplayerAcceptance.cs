@@ -468,13 +468,18 @@ public static class ZoneMultiplayerAcceptance
         await left.AuthAsync(seller).ConfigureAwait(false);
         await right.AuthAsync(buyer).ConfigureAwait(false);
         var leftSpawn = await left.EnterAsync(expectOthers: 0).ConfigureAwait(false);
-        await right.EnterAsync(seller, buyer, TalkingIsland.NpcCount).ConfigureAwait(false);
+        var rightSpawn = await right.EnterAsync(seller, buyer, TalkingIsland.NpcCount).ConfigureAwait(false);
         _ = await left.ExpectAsync<CharInfoMsg>(MsgType.CharInfo).ConfigureAwait(false);
 
-        int x = leftSpawn.Spawned.X;
-        int y = leftSpawn.Spawned.Y;
-        int z = leftSpawn.Spawned.Z;
-        await MovePeerNearAsync(right, left, x, y, z).ConfigureAwait(false);
+        await MovePeerNearAsync(
+            right,
+            left,
+            leftSpawn.Spawned.X,
+            leftSpawn.Spawned.Y,
+            leftSpawn.Spawned.Z,
+            rightSpawn.Spawned.X,
+            rightSpawn.Spawned.Y,
+            rightSpawn.Spawned.Z).ConfigureAwait(false);
 
         int tradableObjectId = 0;
         foreach (var item in leftSpawn.Items.Items)
@@ -552,11 +557,49 @@ public static class ZoneMultiplayerAcceptance
         right.ExpectQuiet();
     }
 
-    static async Task MovePeerNearAsync(ZonePeer mover, ZonePeer observer, int x, int y, int z)
+    static async Task MovePeerNearAsync(
+        ZonePeer mover,
+        ZonePeer observer,
+        int destX,
+        int destY,
+        int destZ,
+        int startX,
+        int startY,
+        int startZ)
     {
-        await mover.SendAsync(MsgType.MoveTo, new MoveToMsg { DestX = x, DestY = y, DestZ = z }).ConfigureAwait(false);
-        _ = await mover.ExpectAsync<MoveToMsg>(MsgType.MoveToAck).ConfigureAwait(false);
-        _ = await observer.ExpectAsync<MoveToMsg>(MsgType.MoveToAck).ConfigureAwait(false);
+        int x = startX;
+        int y = startY;
+        int z = startZ;
+        for (int attempt = 0; attempt < 24; attempt++)
+        {
+            long dx = destX - x;
+            long dy = destY - y;
+            if (dx * dx + dy * dy <= (long)TradeProtocol.Distance * TradeProtocol.Distance)
+                return;
+
+            int stepX = destX;
+            int stepY = destY;
+            if (!TalkingIsland.WithinStep(x, y, destX, destY))
+            {
+                double len = Math.Sqrt(dx * dx + dy * dy);
+                stepX = x + (int)(dx / len * TalkingIsland.MaxStep);
+                stepY = y + (int)(dy / len * TalkingIsland.MaxStep);
+                if (!TalkingIsland.WithinStep(x, y, stepX, stepY))
+                {
+                    stepX = x + Math.Clamp((int)dx, -TalkingIsland.MaxStep, TalkingIsland.MaxStep);
+                    stepY = y + Math.Clamp((int)dy, -TalkingIsland.MaxStep, TalkingIsland.MaxStep);
+                }
+            }
+
+            await mover.SendAsync(MsgType.MoveTo, new MoveToMsg { DestX = stepX, DestY = stepY, DestZ = z })
+                .ConfigureAwait(false);
+            _ = await mover.ExpectAsync<MoveToMsg>(MsgType.MoveToAck).ConfigureAwait(false);
+            _ = await observer.ExpectAsync<MoveToMsg>(MsgType.MoveToAck).ConfigureAwait(false);
+            x = stepX;
+            y = stepY;
+        }
+
+        throw new InvalidOperationException("could not move trade peers within range");
     }
 
     static void ExpectPartyList(PartyMemberListMsg list, int leaderId, params int[] memberIds)
