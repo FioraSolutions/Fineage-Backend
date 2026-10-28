@@ -1,6 +1,5 @@
 using System.IO.Pipelines;
 using System.Threading.Channels;
-using Fineage.Protocol.Telemetry;
 
 namespace Fineage.Protocol.Net;
 
@@ -53,7 +52,7 @@ public sealed class PipelineConnection : IAsyncDisposable
         if (_outbound.Writer.TryWrite(frame))
             return true;
 
-        FineageTelemetry.OutboundDropped.Add(1, new KeyValuePair<string, object?>("endpoint", _endpoint));
+        PipelineTelemetry.OutboundDropped(_endpoint);
         return false;
     }
 
