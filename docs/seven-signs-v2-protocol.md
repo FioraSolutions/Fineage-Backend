@@ -40,3 +40,5 @@ Failures use `Error` **1099** with snake_case codes: `seven_signs_period`, `seve
 ## Persistence
 
 `seven-signs.json` sits beside the account store. It keeps the period, scores, seal owners, and each character's cabal, seal, and contribution. `FINEAGE_SSQ_LAZY_UPDATE` defaults to true: the file is written on period change, on leave, and on `Save`. Set it to false to write every accepted join, contribution, and festival score.
+
+Catacomb and necropolis gates read this state. See `docs/dungeon-access-v2-protocol.md`.

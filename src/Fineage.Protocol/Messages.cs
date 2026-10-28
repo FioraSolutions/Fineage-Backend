@@ -950,3 +950,30 @@ public sealed class SevenSignsSkyMsg
     [Key(1)] public int Period { get; set; }
     [Key(2)] public int WinningCabal { get; set; }
 }
+
+/// <summary>
+/// Opcode <see cref="MsgType.DungeonEnterRequest"/> (92).
+/// <see cref="Action"/> is <see cref="DungeonProtocol.ActionEnter"/> or <see cref="DungeonProtocol.ActionExit"/>.
+/// </summary>
+[MessagePackObject]
+public sealed class DungeonEnterRequestMsg
+{
+    [Key(0)] public int DungeonId { get; set; }
+    [Key(1)] public int Action { get; set; }
+}
+
+/// <summary>
+/// Opcode <see cref="MsgType.DungeonEntered"/> (1092).
+/// <see cref="Action"/> is enter, exit, or the period-change kick.
+/// <see cref="Inside"/> is true only after a successful entrance teleport.
+/// </summary>
+[MessagePackObject]
+public sealed class DungeonEnteredMsg
+{
+    [Key(0)] public int DungeonId { get; set; }
+    [Key(1)] public int X { get; set; }
+    [Key(2)] public int Y { get; set; }
+    [Key(3)] public int Z { get; set; }
+    [Key(4)] public bool Inside { get; set; }
+    [Key(5)] public int Action { get; set; }
+}

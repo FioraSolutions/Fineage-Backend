@@ -501,3 +501,23 @@ public sealed partial class SevenSignsSkyMsg
     [Key(1)] public int Period { get; set; }
     [Key(2)] public int WinningCabal { get; set; }
 }
+
+/// <summary>Same keys as <see cref="Fineage.Protocol.DungeonEnterRequestMsg"/>.</summary>
+[MessagePackObject]
+public sealed partial class DungeonEnterRequestMsg
+{
+    [Key(0)] public int DungeonId { get; set; }
+    [Key(1)] public int Action { get; set; }
+}
+
+/// <summary>Same keys as <see cref="Fineage.Protocol.DungeonEnteredMsg"/>.</summary>
+[MessagePackObject]
+public sealed partial class DungeonEnteredMsg
+{
+    [Key(0)] public int DungeonId { get; set; }
+    [Key(1)] public int X { get; set; }
+    [Key(2)] public int Y { get; set; }
+    [Key(3)] public int Z { get; set; }
+    [Key(4)] public bool Inside { get; set; }
+    [Key(5)] public int Action { get; set; }
+}

@@ -8,6 +8,7 @@ using Fineage.Zone.Interest;
 using Fineage.Zone.Spawns;
 using Fineage.Zone.Drops;
 using Fineage.Zone.SevenSigns;
+using Fineage.Zone.Dungeons;
 using MessagePack;
 
 namespace Fineage.Zone.World;
@@ -85,6 +86,8 @@ sealed class ZoneEntity
     public int ClanId { get; set; }
     /// <summary>Attack stance end, unix milliseconds. Leave and dismiss are refused until this passes.</summary>
     public long CombatUntilUnixMs { get; set; }
+    /// <summary>Catacomb or necropolis id while inside a Seven Signs gate. 0 is outside. Runtime only, same as Mobius <c>isIn7sDungeon</c>.</summary>
+    public int DungeonId { get; set; }
 }
 
 /// <summary>
@@ -107,6 +110,8 @@ public sealed partial class ZoneWorld
     readonly EnchantRates _enchantRates;
     readonly QuestMachine _quests;
     readonly SevenSignsEngine _sevenSigns;
+    readonly DungeonCatalog _dungeons;
+    readonly DungeonAccess _dungeonAccess;
     readonly Dictionary<int, ZoneEntity> _byId = [];
     readonly DropCatalog _dropCatalog;
     readonly DropRates _dropRates;
@@ -128,7 +133,9 @@ public sealed partial class ZoneWorld
         IEnchantRandom? enchantRandom = null,
         EnchantRates? enchantRates = null,
         SevenSignsEngine? sevenSigns = null,
-        bool includeEnabledMaps = false)
+        bool includeEnabledMaps = false,
+        DungeonCatalog? dungeons = null,
+        DungeonAccessOptions? dungeonAccess = null)
     {
         _aoi = aoi ?? new SingleCellAoi();
         _game = game ?? GameData.LoadDefault();
@@ -148,6 +155,8 @@ public sealed partial class ZoneWorld
         _includeEnabledMaps = includeEnabledMaps;
         _quests = new QuestMachine(_game.Quests, _game.Items);
         _sevenSigns = sevenSigns ?? new SevenSignsEngine(new SystemGameClock());
+        _dungeons = dungeons ?? DungeonCatalog.LoadDefault();
+        _dungeonAccess = new DungeonAccess(_dungeons, dungeonAccess ?? DungeonAccessOptions.FromEnvironment());
         BootstrapSpawns();
         BootstrapQuestNpcs();
         LoadClans();

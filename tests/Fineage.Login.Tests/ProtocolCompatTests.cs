@@ -128,6 +128,17 @@ public class ProtocolCompatTests
         Assert.Equal((ushort)MsgType.SpawnItem, (ushort)Fineage.Protocol.V2.MsgType.SpawnItem);
         Assert.Equal((ushort)MsgType.PartyInviteRequest, (ushort)Fineage.Protocol.V2.MsgType.PartyInviteRequest);
         Assert.Equal((ushort)MsgType.PartyAskJoin, (ushort)Fineage.Protocol.V2.MsgType.PartyAskJoin);
+        Assert.Equal(90, (ushort)MsgType.SevenSignsStatusRequest);
+        Assert.Equal(91, (ushort)MsgType.SevenSignsActionRequest);
+        Assert.Equal(92, (ushort)MsgType.DungeonEnterRequest);
+        Assert.Equal(1090, (ushort)MsgType.SevenSignsStatus);
+        Assert.Equal(1091, (ushort)MsgType.SevenSignsSky);
+        Assert.Equal(1092, (ushort)MsgType.DungeonEntered);
+        Assert.Equal((ushort)MsgType.DungeonEnterRequest, (ushort)Fineage.Protocol.V2.MsgType.DungeonEnterRequest);
+        Assert.Equal((ushort)MsgType.DungeonEntered, (ushort)Fineage.Protocol.V2.MsgType.DungeonEntered);
+        Assert.Equal(DungeonProtocol.DawnOnlyMessage, 1301);
+        Assert.Equal(DungeonProtocol.DuskOnlyMessage, 1302);
+        Assert.Equal(DungeonProtocol.GateRefusedMessage, 137);
         Assert.Equal(1099, (ushort)MsgType.Error);
         AssertUnique<MsgType>();
         AssertUnique<Fineage.Protocol.V2.MsgType>();
