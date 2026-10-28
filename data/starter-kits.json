@@ -1,5 +1,5 @@
 {
-  "reference": "Hand-written starter kits for the two classes Fineage can create. Human Fighter (classId 0) and Human Mystic (classId 10) match the corresponding rows of L2J Mobius CT 0 Interlude initial equipment. This file is not that XML. Any other class id is an empty kit.",
+  "reference": "Starter kits for every Interlude base class (class ids 0, 10, 18, 25, 31, 38, 44, 49, 53). Rows match L2J Mobius CT 0 Interlude dist/game/data/stats/players/initialEquipment.xml. This file is not that XML. Any other class id gets an empty kit.",
   "kits": [
     {
       "classId": 0,
@@ -17,6 +17,73 @@
         { "itemId": 6, "count": 1, "equipped": true },
         { "itemId": 425, "count": 1, "equipped": true },
         { "itemId": 461, "count": 1, "equipped": true },
+        { "itemId": 5588, "count": 1 }
+      ]
+    },
+    {
+      "classId": 18,
+      "items": [
+        { "itemId": 2369, "count": 1, "equipped": true },
+        { "itemId": 10, "count": 1 },
+        { "itemId": 1146, "count": 1, "equipped": true },
+        { "itemId": 1147, "count": 1, "equipped": true },
+        { "itemId": 5588, "count": 1 }
+      ]
+    },
+    {
+      "classId": 25,
+      "items": [
+        { "itemId": 6, "count": 1, "equipped": true },
+        { "itemId": 425, "count": 1, "equipped": true },
+        { "itemId": 461, "count": 1, "equipped": true },
+        { "itemId": 5588, "count": 1 }
+      ]
+    },
+    {
+      "classId": 31,
+      "items": [
+        { "itemId": 2369, "count": 1, "equipped": true },
+        { "itemId": 10, "count": 1 },
+        { "itemId": 1146, "count": 1, "equipped": true },
+        { "itemId": 1147, "count": 1, "equipped": true },
+        { "itemId": 5588, "count": 1 }
+      ]
+    },
+    {
+      "classId": 38,
+      "items": [
+        { "itemId": 6, "count": 1, "equipped": true },
+        { "itemId": 425, "count": 1, "equipped": true },
+        { "itemId": 461, "count": 1, "equipped": true },
+        { "itemId": 5588, "count": 1 }
+      ]
+    },
+    {
+      "classId": 44,
+      "items": [
+        { "itemId": 2369, "count": 1 },
+        { "itemId": 2368, "count": 1, "equipped": true },
+        { "itemId": 1146, "count": 1, "equipped": true },
+        { "itemId": 1147, "count": 1, "equipped": true },
+        { "itemId": 5588, "count": 1 }
+      ]
+    },
+    {
+      "classId": 49,
+      "items": [
+        { "itemId": 2368, "count": 1, "equipped": true },
+        { "itemId": 425, "count": 1, "equipped": true },
+        { "itemId": 461, "count": 1, "equipped": true },
+        { "itemId": 5588, "count": 1 }
+      ]
+    },
+    {
+      "classId": 53,
+      "items": [
+        { "itemId": 2370, "count": 1, "equipped": true },
+        { "itemId": 10, "count": 1 },
+        { "itemId": 1146, "count": 1, "equipped": true },
+        { "itemId": 1147, "count": 1, "equipped": true },
         { "itemId": 5588, "count": 1 }
       ]
     }
