@@ -28,7 +28,7 @@ public sealed partial class ZoneWorld
             return "world";
         if (request.ItemId <= 0 || request.Count <= 0 || request.Count > MaxGrantCount)
             return "bad_request";
-        if (!_game.Catalog.TryGet(request.ItemId, out _))
+        if (!_game.Items.TryGet(request.ItemId, out _))
             return "bad_request";
 
         var added = player.Inventory.Add(request.ItemId, request.Count);
