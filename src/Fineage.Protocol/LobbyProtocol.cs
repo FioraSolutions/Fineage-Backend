@@ -8,7 +8,8 @@ namespace Fineage.Protocol;
 /// <para>Client → server</para>
 /// <list type="bullet">
 /// <item><description>20 <see cref="MsgType.Register"/> — 0 account, 1 password</description></item>
-/// <item><description>21 <see cref="MsgType.CreateCharacter"/> — 0 name, 1 classId, 2 race, 3 sex</description></item>
+/// <item><description>21 <see cref="MsgType.CreateCharacter"/> — 0 name, 1 classId, 2 race, 3 sex, 4 hairStyle, 5 hairColor, 6 face.
+/// Success is <see cref="MsgType.CharacterCreated"/> then a fresh <see cref="MsgType.CharacterList"/>. Failure is <see cref="MsgType.Error"/>.</description></item>
 /// <item><description>22 <see cref="MsgType.ListCharacters"/> — empty body</description></item>
 /// <item><description>23 <see cref="MsgType.SelectCharacter"/> — 0 characterId, 1 name, 2 slot.
 /// Id is used when it is greater than 0. Otherwise a non-empty name is used.
@@ -21,7 +22,7 @@ namespace Fineage.Protocol;
 /// <para>Server → client</para>
 /// <list type="bullet">
 /// <item><description>1020 <see cref="MsgType.RegisterOk"/></description></item>
-/// <item><description>1021 <see cref="MsgType.CharacterCreated"/></description></item>
+/// <item><description>1021 <see cref="MsgType.CharacterCreated"/> — 0 characterId, 1 name, 2 classId, 3 race, 4 sex, 5 hairStyle, 6 hairColor, 7 face, 8 x, 9 y, 10 z. Followed by <see cref="MsgType.CharacterList"/>.</description></item>
 /// <item><description>1022 <see cref="MsgType.CharacterList"/> — 0 characters. Sent for list, after a successful delete, and after a successful restore.</description></item>
 /// <item><description>1023 <see cref="MsgType.Handoff"/></description></item>
 /// <item><description>1024 <see cref="MsgType.LoginOk"/></description></item>
@@ -79,6 +80,24 @@ public static class LobbyProtocol
     public const string CharacterNotFound = "character_not_found";
     public const string CharacterPendingDelete = "character_pending_delete";
     public const string DeleteFailed = "delete_failed";
+
+    /// <summary>Empty name or longer than 16 characters (Mobius reason 3).</summary>
+    public const string NameTooLong = "name_too_long";
+
+    /// <summary>Charset, forbidden fragment, or name template (Mobius reason 4).</summary>
+    public const string InvalidName = "invalid_name";
+
+    /// <summary>Appearance, non-base class, disabled race, or other create rejection (Mobius reason 0).</summary>
+    public const string CreationFailed = "creation_failed";
+
+    /// <summary>Server-wide create toggle is off (Mobius reason 5).</summary>
+    public const string CreateNotAllowed = "create_not_allowed";
+
+    public const string RaceNotSupported = "race_not_supported";
+    public const string ClassNotSupported = "class_not_supported";
+    public const string SexNotSupported = "sex_not_supported";
+    public const string NameTaken = "name_taken";
+    public const string CharacterLimit = "character_limit";
 
     /// <summary>Zone and inventory opcodes the lobby set must not reuse.</summary>
     public static readonly ushort[] ZoneAndInventory =

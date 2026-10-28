@@ -71,8 +71,14 @@ public sealed class CreateCharacterMsg
     [Key(1)] public int ClassId { get; set; }
     /// <summary>0 Human. Other races are rejected.</summary>
     [Key(2)] public int Race { get; set; }
-    /// <summary>0 male. Other sexes are rejected.</summary>
+    /// <summary>0 male, 1 female.</summary>
     [Key(3)] public int Sex { get; set; }
+    /// <summary>0–4 male, 0–6 female. Omitted by older clients (defaults to 0).</summary>
+    [Key(4)] public int HairStyle { get; set; }
+    /// <summary>0–3.</summary>
+    [Key(5)] public int HairColor { get; set; }
+    /// <summary>0–2.</summary>
+    [Key(6)] public int Face { get; set; }
 }
 
 [MessagePackObject]
@@ -83,6 +89,12 @@ public sealed class CharacterCreatedMsg
     [Key(2)] public int ClassId { get; set; }
     [Key(3)] public int Race { get; set; }
     [Key(4)] public int Sex { get; set; }
+    [Key(5)] public int HairStyle { get; set; }
+    [Key(6)] public int HairColor { get; set; }
+    [Key(7)] public int Face { get; set; }
+    [Key(8)] public int X { get; set; }
+    [Key(9)] public int Y { get; set; }
+    [Key(10)] public int Z { get; set; }
 }
 
 [MessagePackObject]

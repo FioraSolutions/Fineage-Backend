@@ -42,7 +42,14 @@ public sealed record CharacterRecord(
     int Z = 0,
     DateTimeOffset CreatedAt = default,
     DateTimeOffset LastAccess = default,
-    DateTimeOffset? DeleteAt = null)
+    DateTimeOffset? DeleteAt = null,
+    int MaxHp = 0,
+    int Hp = 0,
+    int MaxMp = 0,
+    int Mp = 0,
+    int Sp = 0,
+    long Adena = 0,
+    string Title = "")
 {
     /// <summary>Remaining whole seconds until hard delete. Zero when the character is not pending.</summary>
     public int DeleteSecondsLeft(DateTimeOffset now)
@@ -77,7 +84,23 @@ public interface IAccountStore
         out CharacterRecord? created,
         IReadOnlyList<StoredItem>? items = null,
         DateTimeOffset? createdAt = null,
-        DateTimeOffset? now = null);
+        DateTimeOffset? now = null,
+        int hairStyle = 0,
+        int hairColor = 0,
+        int face = 0,
+        bool hasPosition = false,
+        int x = 0,
+        int y = 0,
+        int z = 0,
+        int level = 1,
+        int maxHp = 0,
+        int hp = 0,
+        int maxMp = 0,
+        int mp = 0,
+        int sp = 0,
+        long adena = 0,
+        string title = "",
+        int? maxCharacters = null);
 
     /// <summary>Replaces the saved bag. An empty list is a real save; it does not mean "grant the kit".</summary>
     bool TryReplaceItems(string account, int characterId, IReadOnlyList<StoredItem> items);
@@ -200,7 +223,23 @@ public sealed class JsonAccountStore : IAccountStore
         out CharacterRecord? created,
         IReadOnlyList<StoredItem>? items = null,
         DateTimeOffset? createdAt = null,
-        DateTimeOffset? now = null)
+        DateTimeOffset? now = null,
+        int hairStyle = 0,
+        int hairColor = 0,
+        int face = 0,
+        bool hasPosition = false,
+        int x = 0,
+        int y = 0,
+        int z = 0,
+        int level = 1,
+        int maxHp = 0,
+        int hp = 0,
+        int maxMp = 0,
+        int mp = 0,
+        int sp = 0,
+        long adena = 0,
+        string title = "",
+        int? maxCharacters = null)
     {
         created = null;
         if (!NameRules.IsCharacterName(name))
@@ -216,7 +255,8 @@ public sealed class JsonAccountStore : IAccountStore
                 return CreateCharacterStatus.AccountMissing;
             if (now is { } purgeAt && PurgeUnlocked(row, purgeAt) > 0)
                 Save();
-            if (row.Characters.Count >= HumanClasses.MaxCharactersPerAccount)
+            int cap = maxCharacters ?? HumanClasses.MaxCharactersPerAccount;
+            if (cap > 0 && row.Characters.Count >= cap)
                 return CreateCharacterStatus.TooMany;
             if (NameTaken(name))
                 return CreateCharacterStatus.NameTaken;
@@ -228,7 +268,21 @@ public sealed class JsonAccountStore : IAccountStore
                 ClassId = classId,
                 Race = race,
                 Sex = sex,
-                Level = 1,
+                Level = level,
+                HairStyle = hairStyle,
+                HairColor = hairColor,
+                Face = face,
+                HasPosition = hasPosition,
+                X = x,
+                Y = y,
+                Z = z,
+                MaxHp = maxHp,
+                Hp = hp,
+                MaxMp = maxMp,
+                Mp = mp,
+                Sp = sp,
+                Adena = adena,
+                Title = title ?? "",
                 Items = CopyItems(items),
                 CreatedAt = createdAt ?? DateTimeOffset.UtcNow
             };
@@ -473,7 +527,14 @@ public sealed class JsonAccountStore : IAccountStore
             character.Z,
             character.CreatedAt,
             character.LastAccess,
-            character.DeleteAt);
+            character.DeleteAt,
+            character.MaxHp,
+            character.Hp,
+            character.MaxMp,
+            character.Mp,
+            character.Sp,
+            character.Adena,
+            character.Title);
 
     sealed class StoreFile
     {
@@ -510,6 +571,13 @@ public sealed class JsonAccountStore : IAccountStore
         public DateTimeOffset CreatedAt { get; set; }
         public DateTimeOffset LastAccess { get; set; }
         public DateTimeOffset? DeleteAt { get; set; }
+        public int MaxHp { get; set; }
+        public int Hp { get; set; }
+        public int MaxMp { get; set; }
+        public int Mp { get; set; }
+        public int Sp { get; set; }
+        public long Adena { get; set; }
+        public string Title { get; set; } = "";
         public List<StoredItemDto>? Items { get; set; }
     }
 

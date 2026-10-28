@@ -54,6 +54,8 @@ public sealed class LoginV2RosterTests
         Assert.Equal((ushort)Fineage.Protocol.V2.MsgType.CreateCharacterResult, createFrame.Type);
         var create = MessagePackSerializer.Deserialize<CreateCharacterResultMsg>(createFrame.Body);
         Assert.True(create.Ok);
+        var pushedRoster = await ReadAsync(stream);
+        Assert.Equal((ushort)Fineage.Protocol.V2.MsgType.CharacterRoster, pushedRoster.Type);
 
         await FrameIO.SendAsync(stream, (ushort)Fineage.Protocol.V2.MsgType.ListCharacters, []);
         var listFrame = await ReadAsync(stream);

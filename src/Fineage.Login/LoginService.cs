@@ -1,3 +1,4 @@
+using System.Text.RegularExpressions;
 using Fineage.Game;
 using Fineage.Protocol;
 
@@ -24,13 +25,17 @@ public sealed class LoginService
     readonly GameData _game;
     readonly Func<DateTimeOffset> _clock;
     readonly int _deleteAfterDays;
+    readonly CharacterCreateOptions _create;
+    readonly Action<string> _warn;
 
     public LoginService(
         IAccountStore store,
         HandoffTokens tokens,
         Func<DateTimeOffset>? clock = null,
         GameData? game = null,
-        int? deleteAfterDays = null)
+        int? deleteAfterDays = null,
+        CharacterCreateOptions? create = null,
+        Action<string>? warn = null)
     {
         _store = store;
         _tokens = tokens;
@@ -39,6 +44,8 @@ public sealed class LoginService
         _deleteAfterDays = deleteAfterDays ?? CharacterRules.DefaultDeleteAfterDays;
         if (_deleteAfterDays < 0)
             throw new ArgumentOutOfRangeException(nameof(deleteAfterDays));
+        _create = create ?? CharacterCreateOptions.Default;
+        _warn = warn ?? (message => Console.WriteLine("[LOGIN] warning: " + message));
     }
 
     public bool AccountExists(string account) => _store.AccountExists(account);
@@ -101,31 +108,142 @@ public sealed class LoginService
         return Login(id, password!);
     }
 
-    public LoginResult<CharacterRecord> CreateHuman(string account, string name, int classId, int race = 0, int sex = 0)
+    public LoginResult<CharacterRecord> CreateHuman(
+        string account,
+        string name,
+        int classId,
+        int race = 0,
+        int sex = 0,
+        int hairStyle = 0,
+        int hairColor = 0,
+        int face = 0)
     {
         if (!_store.AccountExists(account))
             return LoginResult<CharacterRecord>.Fail("auth_required", "Login required.");
-        if (!NameRules.IsCharacterName(name))
-            return LoginResult<CharacterRecord>.Fail("invalid_name", "Character name must be 1-16 letters or digits.");
-        if (race != HumanClasses.RaceHuman)
-            return LoginResult<CharacterRecord>.Fail("race_not_supported", "Only Human is available.");
-        if (sex != HumanClasses.SexMale)
-            return LoginResult<CharacterRecord>.Fail("sex_not_supported", "Only male characters are available.");
-        if (classId is not (HumanClasses.Fighter or HumanClasses.Mystic))
-            return LoginResult<CharacterRecord>.Fail("class_not_supported", "Choose Human fighter or mystic.");
+        if (!_create.CreateAllowed)
+            return LoginResult<CharacterRecord>.Fail(LobbyProtocol.CreateNotAllowed, "Character creation is turned off.");
 
-        var kit = CharacterInventory.Rows(_game.CreateStarterInventory(classId));
+        if (ClassifyName(name) is { } nameCode)
+            return LoginResult<CharacterRecord>.Fail(nameCode, NameMessage(nameCode));
+        if (sex is not (HumanClasses.SexMale or HumanClasses.SexFemale))
+            return LoginResult<CharacterRecord>.Fail(LobbyProtocol.SexNotSupported, "Sex must be male or female.");
+        if (!AppearanceOk(sex, hairStyle, hairColor, face))
+        {
+            _warn($"create appearance rejected account={account} sex={sex} hairStyle={hairStyle} hairColor={hairColor} face={face}");
+            return LoginResult<CharacterRecord>.Fail(LobbyProtocol.CreationFailed, "Character appearance was rejected.");
+        }
+
+        if (!ClassTemplates.TryGet(classId, out var template) || template == null)
+            return LoginResult<CharacterRecord>.Fail(LobbyProtocol.ClassNotSupported, "That class cannot be created.");
+        if (!template.IsBase)
+            return LoginResult<CharacterRecord>.Fail(LobbyProtocol.CreationFailed, "Only a base class can be created.");
+        if (!_create.AllowedClasses.Contains(classId))
+            return LoginResult<CharacterRecord>.Fail(LobbyProtocol.ClassNotSupported, "That class cannot be created.");
+        if (race != template.Race)
+            return LoginResult<CharacterRecord>.Fail(LobbyProtocol.RaceNotSupported, "Race does not match the class.");
+        if (!_create.AllowedRaces.Contains(template.Race))
+            return LoginResult<CharacterRecord>.Fail(LobbyProtocol.CreationFailed, "That race cannot be created.");
+
+        var inventory = _game.CreateStarterInventory(classId);
+        long adena = Math.Max(0, _create.StartingAdena);
+        if (adena > 0)
+            inventory.Add(57, adena > int.MaxValue ? int.MaxValue : (int)adena);
+        var kit = CharacterInventory.Rows(inventory);
         var now = _clock();
-        var status = _store.TryAddCharacter(account, name, classId, race, sex, out var created, kit, createdAt: now, now: now);
+        int level = Math.Max(1, _create.StartingLevel);
+        int sp = Math.Max(0, _create.StartingSp);
+        var status = _store.TryAddCharacter(
+            account,
+            name,
+            template.ClassId,
+            template.Race,
+            sex,
+            out var created,
+            kit,
+            createdAt: now,
+            now: now,
+            hairStyle: hairStyle,
+            hairColor: hairColor,
+            face: face,
+            hasPosition: true,
+            x: template.CreationPoint.X,
+            y: template.CreationPoint.Y,
+            z: template.CreationPoint.Z,
+            level: level,
+            maxHp: template.MaxHp,
+            hp: template.MaxHp,
+            maxMp: template.MaxMp,
+            mp: template.MaxMp,
+            sp: sp,
+            adena: adena,
+            title: "",
+            maxCharacters: _create.CharMaxNumber);
         return status switch
         {
             CreateCharacterStatus.Ok when created != null => LoginResult<CharacterRecord>.Success(created),
-            CreateCharacterStatus.NameTaken => LoginResult<CharacterRecord>.Fail("name_taken", "That character name is already used."),
-            CreateCharacterStatus.TooMany => LoginResult<CharacterRecord>.Fail("character_limit", "An account can hold 7 characters."),
+            CreateCharacterStatus.NameTaken => LoginResult<CharacterRecord>.Fail(LobbyProtocol.NameTaken, "That character name is already used."),
+            CreateCharacterStatus.TooMany => LoginResult<CharacterRecord>.Fail(
+                LobbyProtocol.CharacterLimit,
+                _create.CharMaxNumber > 0
+                    ? $"An account can hold {_create.CharMaxNumber} characters."
+                    : "Character limit reached."),
             CreateCharacterStatus.AccountMissing => LoginResult<CharacterRecord>.Fail("auth_required", "Login required."),
-            _ => LoginResult<CharacterRecord>.Fail("invalid_name", "Character name must be 1-16 letters or digits.")
+            _ => LoginResult<CharacterRecord>.Fail(LobbyProtocol.InvalidName, "Character name must be letters or digits.")
         };
     }
+
+    string? ClassifyName(string? name)
+    {
+        if (string.IsNullOrWhiteSpace(name))
+            return LobbyProtocol.NameTooLong;
+        name = name.Trim();
+        if (name.Length > 16)
+            return LobbyProtocol.NameTooLong;
+        if (!IsAsciiAlnum(name))
+            return LobbyProtocol.InvalidName;
+        foreach (string forbidden in _create.ForbiddenNames)
+        {
+            if (forbidden.Length > 0 && name.Contains(forbidden, StringComparison.OrdinalIgnoreCase))
+                return LobbyProtocol.InvalidName;
+        }
+
+        try
+        {
+            if (!_create.NameTemplate.IsMatch(name))
+                return LobbyProtocol.InvalidName;
+        }
+        catch (RegexMatchTimeoutException)
+        {
+            return LobbyProtocol.InvalidName;
+        }
+
+        return null;
+    }
+
+    static bool IsAsciiAlnum(string name)
+    {
+        foreach (char ch in name)
+        {
+            if (ch is >= 'a' and <= 'z' or >= 'A' and <= 'Z' or >= '0' and <= '9')
+                continue;
+            return false;
+        }
+
+        return name.Length > 0;
+    }
+
+    static bool AppearanceOk(int sex, int hairStyle, int hairColor, int face)
+    {
+        if (face is < 0 or > 2 || hairColor is < 0 or > 3)
+            return false;
+        int maxStyle = sex == HumanClasses.SexFemale ? 6 : 4;
+        return hairStyle >= 0 && hairStyle <= maxStyle;
+    }
+
+    static string NameMessage(string code) =>
+        code == LobbyProtocol.NameTooLong
+            ? "Character name must be 1-16 characters."
+            : "Character name must be letters or digits.";
 
     public LoginResult<IReadOnlyList<CharacterRecord>> List(string account)
     {

@@ -169,7 +169,8 @@ public sealed class LoginServer
                     }
 
                     LoginLog.Info($"RX CreateCharacter account={account} name={msg.Name} class={msg.ClassId}");
-                    var result = _service.CreateHuman(account, msg.Name, msg.ClassId, msg.Race, msg.Sex);
+                    var result = _service.CreateHuman(
+                        account, msg.Name, msg.ClassId, msg.Race, msg.Sex, msg.HairStyle, msg.HairColor, msg.Face);
                     if (!result.Ok || result.Value == null)
                     {
                         await SendErrorAsync(session, result.Code, result.Message, ct).ConfigureAwait(false);
@@ -183,8 +184,17 @@ public sealed class LoginServer
                         Name = created.Name,
                         ClassId = created.ClassId,
                         Race = created.Race,
-                        Sex = created.Sex
+                        Sex = created.Sex,
+                        HairStyle = created.HairStyle,
+                        HairColor = created.HairColor,
+                        Face = created.Face,
+                        X = created.X,
+                        Y = created.Y,
+                        Z = created.Z
                     }, ct).ConfigureAwait(false);
+                    var roster = _service.List(account);
+                    if (roster.Ok && roster.Value != null)
+                        await SendRosterAsync(session, roster.Value, ct).ConfigureAwait(false);
                     return account;
                 }
             case MsgType.ListCharacters:
@@ -316,7 +326,8 @@ public sealed class LoginServer
         }
 
         LoginLog.Info($"RX V2 CreateCharacter account={account} name={msg.Name} class={msg.ClassId}");
-        var result = _service.CreateHuman(account, msg.Name, msg.ClassId, msg.Race, msg.Sex);
+        var result = _service.CreateHuman(
+            account, msg.Name, msg.ClassId, msg.Race, msg.Sex, msg.HairStyle, msg.HairColor, msg.Face);
         V2.CreateCharacterResultMsg response;
         if (!result.Ok || result.Value == null)
         {
@@ -343,6 +354,8 @@ public sealed class LoginServer
         int lastPlayedId = LoginService.LastPlayedId(listAfter.Ok && listAfter.Value != null ? listAfter.Value : []);
         response = LoginV2Wire.ToCreateResult(result.Value, slot, now, lastPlayedId);
         await SendFrameV2Async(session, V2.MsgType.CreateCharacterResult, response, ct).ConfigureAwait(false);
+        if (listAfter.Ok && listAfter.Value != null)
+            await SendFrameV2Async(session, V2.MsgType.CharacterRoster, LoginV2Wire.ToRoster(listAfter.Value, now), ct).ConfigureAwait(false);
         return account;
     }
 

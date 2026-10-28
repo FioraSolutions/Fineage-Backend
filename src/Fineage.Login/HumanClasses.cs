@@ -5,6 +5,7 @@ public static class HumanClasses
 {
     public const int RaceHuman = 0;
     public const int SexMale = 0;
+    public const int SexFemale = 1;
     public const int Fighter = 0;
     public const int Mystic = 10;
     public const int MaxCharactersPerAccount = 7;

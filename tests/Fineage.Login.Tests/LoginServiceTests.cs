@@ -71,10 +71,11 @@ public class LoginServiceTests
         var service = NewService();
         Assert.True(service.Register("alice", "secret1").Ok);
 
-        Assert.Equal("race_not_supported", service.CreateHuman("alice", "Elf", HumanClasses.Fighter, race: 1).Code);
-        Assert.Equal("sex_not_supported", service.CreateHuman("alice", "Fighter", HumanClasses.Fighter, sex: 1).Code);
-        Assert.Equal("class_not_supported", service.CreateHuman("alice", "ElfF", classId: 18).Code);
-        Assert.Equal("invalid_name", service.CreateHuman("alice", "Bad Name", HumanClasses.Fighter).Code);
+        Assert.Equal(LobbyProtocol.RaceNotSupported, service.CreateHuman("alice", "Elf", HumanClasses.Fighter, race: 1).Code);
+        Assert.Equal(LobbyProtocol.SexNotSupported, service.CreateHuman("alice", "Fighter", HumanClasses.Fighter, sex: 2).Code);
+        Assert.Equal(LobbyProtocol.ClassNotSupported, service.CreateHuman("alice", "ElfF", classId: 18).Code);
+        Assert.Equal(LobbyProtocol.InvalidName, service.CreateHuman("alice", "Bad Name", HumanClasses.Fighter).Code);
+        Assert.True(service.CreateHuman("alice", "Fighter", HumanClasses.Fighter, sex: HumanClasses.SexFemale).Ok);
     }
 
     [Fact]

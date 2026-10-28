@@ -51,7 +51,11 @@ public static class Cli
             return await ListenAsync(storePath, bindAddress, bindDisplay, port, httpPort, output, error).ConfigureAwait(false) ? 0 : 1;
 
         var tokens = HandoffTokens.FromEnvironment();
-        var service = new LoginService(JsonAccountStore.Open(storePath), tokens, deleteAfterDays: CharacterRules.DeleteAfterDays);
+        var service = new LoginService(
+            JsonAccountStore.Open(storePath),
+            tokens,
+            deleteAfterDays: CharacterRules.DeleteAfterDays,
+            create: CharacterCreateOptions.FromEnvironment());
         string cmd = rest[0].ToLowerInvariant();
         switch (cmd)
         {
@@ -162,7 +166,8 @@ public static class Cli
         var service = new LoginService(
             JsonAccountStore.Open(storePath),
             HandoffTokens.FromEnvironment(),
-            deleteAfterDays: CharacterRules.DeleteAfterDays);
+            deleteAfterDays: CharacterRules.DeleteAfterDays,
+            create: CharacterCreateOptions.FromEnvironment());
         var server = new LoginServer(service);
         LoginHttpHost? http = null;
         string host = bindAddress.Equals(IPAddress.Any) ? "0.0.0.0" : bindDisplay;
