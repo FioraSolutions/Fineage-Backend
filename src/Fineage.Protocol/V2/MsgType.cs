@@ -14,6 +14,8 @@ public enum MsgType : ushort
     ListCharacters = 5,
     CreateCharacter = 6,
     AuthToken = 7,
+    /// <summary>Same value as <see cref="Fineage.Protocol.MsgType.Say"/>.</summary>
+    Say = 8,
 
     RequestServerList = 10,
     SelectServer = 11,
@@ -27,6 +29,8 @@ public enum MsgType : ushort
     EntityLeft = 1007,
     ServerList = 1010,
     PlayToken = 1011,
+    /// <summary>Same value as <see cref="Fineage.Protocol.MsgType.CreatureSay"/>. Zone chat fan-out.</summary>
+    CreatureSay = 1012,
 
     Error = 1099
 }

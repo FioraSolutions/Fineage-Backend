@@ -159,6 +159,46 @@ public sealed class MoveToMsg
 }
 
 /// <summary>
+/// Opcode <see cref="MsgType.CharInfo"/> (1005). Another player entered knownlist.
+/// Keys match tools/zone-server <c>CharInfoMsg</c>.
+/// </summary>
+[MessagePackObject]
+public sealed class CharInfoMsg
+{
+    [Key(0)] public int ObjectId { get; set; }
+    [Key(1)] public string Name { get; set; } = "";
+    [Key(2)] public int X { get; set; }
+    [Key(3)] public int Y { get; set; }
+    [Key(4)] public int Z { get; set; }
+    [Key(5)] public int ClassId { get; set; }
+}
+
+/// <summary>Opcode <see cref="MsgType.DeleteObject"/> (1007). Left knownlist.</summary>
+[MessagePackObject]
+public sealed class DeleteObjectMsg
+{
+    [Key(0)] public int ObjectId { get; set; }
+}
+
+/// <summary>Opcode <see cref="MsgType.Say"/> (8). Client zone chat.</summary>
+[MessagePackObject]
+public sealed class SayMsg
+{
+    [Key(0)] public string Text { get; set; } = "";
+    [Key(1)] public int ChatType { get; set; }
+}
+
+/// <summary>Opcode <see cref="MsgType.CreatureSay"/> (1012). Zone chat fan-out.</summary>
+[MessagePackObject]
+public sealed class CreatureSayMsg
+{
+    [Key(0)] public int ObjectId { get; set; }
+    [Key(1)] public string Name { get; set; } = "";
+    [Key(2)] public string Text { get; set; } = "";
+    [Key(3)] public int ChatType { get; set; }
+}
+
+/// <summary>
 /// Opcode <see cref="MsgType.NpcInfo"/> (1006). <see cref="NpcId"/> is the template id
 /// (Gremlin = 20001), not the Interlude value with 1_000_000 added.
 /// </summary>

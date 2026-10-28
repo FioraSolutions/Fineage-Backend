@@ -8,6 +8,7 @@ if (args.Contains("--selftest"))
     try
     {
         await ZoneAcceptance.RunAsync();
+        await ZoneMultiplayerAcceptance.RunAsync();
         ZoneAcceptance.Write(Console.Out);
     }
     catch (Exception ex)
@@ -59,7 +60,7 @@ if (string.IsNullOrWhiteSpace(Environment.GetEnvironmentVariable("FINEAGE_HANDOF
 }
 
 Console.WriteLine($"[ZONE] listen {bindDisplay}:{port} Talking Island");
-Console.WriteLine("[ZONE] Auth.Password is the login handoff token. EnterWorld spawns the village and three Gremlins.");
+Console.WriteLine("[ZONE] Auth.Password is the login handoff token. EnterWorld spawns the village, shared Gremlins, and other players. Say is zone chat.");
 while (true)
 {
     var client = await listener.AcceptTcpClientAsync();
