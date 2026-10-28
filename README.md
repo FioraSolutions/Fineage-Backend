@@ -75,7 +75,28 @@ sudo systemctl enable --now fineage-login fineage-zone
 
 Both processes emit OpenTelemetry metrics on meter **`Fineage.Server`** (`fineage.connections`, `fineage.frames.in` / `fineage.frames.out`, `fineage.outbound.dropped`, and zone-only `fineage.tick.ms` / `fineage.zone.online`). See the commented block at the bottom of `deploy/fineage.env.example` for instrument names and sample `OTEL_*` variables.
 
-There is no deploy workflow in this repo. CI is `.github/workflows/build-and-test.yml` (`dotnet test` on pull requests and pushes).
+CI is `.github/workflows/build-and-test.yml` (`dotnet test` on pull requests and pushes to `main` and `cursor/**`).
+
+### Auto-deploy to the Pi (GitHub Actions)
+
+Pushes to **`main`** run `.github/workflows/deploy-pi.yml`: `dotnet test`, Release **linux-arm64** self-contained publish for Login and Zone, Tailscale into the fineage tailnet, SSH to the Pi, rsync binaries to `/opt/fineage/login` and `/opt/fineage/zone` (does **not** overwrite `/etc/fineage.env` or `/var/lib/fineage/accounts.json`), then `systemctl restart fineage-login fineage-zone` with active-unit and local port checks on **5080**, **9106**, and **9777**. You can also trigger the same workflow manually (**Actions → deploy-pi → Run workflow**). Pull requests never run the deploy job.
+
+Configure these **repository secrets** (names only — never commit values):
+
+| Secret | Purpose |
+|--------|---------|
+| `TAILSCALE_AUTHKEY` | Reusable/ephemeral Tailscale auth key so the runner joins the tailnet (ACL must allow SSH to the Pi). Alternatively, replace the Tailscale step with `TS_OAUTH_CLIENT_ID` + `TS_OAUTH_SECRET` per [tailscale/github-action](https://github.com/tailscale/github-action). |
+| `FINEAGE_PI_SSH_PRIVATE_KEY` | Private key for SSH (e.g. `pi@raspberrypi` on Tailscale `100.123.81.1`). |
+| `FINEAGE_PI_HOST` | Optional. Tailscale hostname or IP (default in script: `raspberrypi`). |
+| `FINEAGE_PI_USER` | Optional. SSH user (default: `pi`). |
+
+One-time Pi setup (user `fineage`, env, systemd) stays as in the **On the Pi** section above. Manual deploy from a machine on Tailscale:
+
+```bash
+dotnet publish src/Fineage.Login/Fineage.Login.csproj -c Release -r linux-arm64 --self-contained true -o publish/login
+dotnet publish src/Fineage.Zone/Fineage.Zone.csproj -c Release -r linux-arm64 --self-contained true -o publish/zone
+FINEAGE_PI_HOST=raspberrypi ./deploy/deploy-to-pi.sh publish/login publish/zone
+```
 
 Login CLI, same store:
 
