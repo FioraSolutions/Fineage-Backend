@@ -108,6 +108,21 @@ public class ProtocolCompatTests
     }
 
     [Fact]
+    public void DeleteObject_MatchesProtocolV2Layout()
+    {
+        Assert.Equal((ushort)MsgType.DeleteObject, (ushort)Fineage.Protocol.V2.MsgType.DeleteObject);
+        Assert.Equal((ushort)MsgType.CharInfo, (ushort)Fineage.Protocol.V2.MsgType.CharInfo);
+        Assert.Equal((ushort)MsgType.NpcInfo, (ushort)Fineage.Protocol.V2.MsgType.NpcInfo);
+
+        byte[] legacy = MessagePackSerializer.Serialize(new DeleteObjectMsg { ObjectId = 9001 });
+        byte[] v2 = MessagePackSerializer.Serialize(new Fineage.Protocol.V2.DeleteObjectMsg { ObjectId = 9001 });
+        Assert.Equal(legacy, v2);
+
+        byte[] entityLeft = MessagePackSerializer.Serialize(new Fineage.Protocol.V2.EntityLeftMsg { ObjectId = 9001 });
+        Assert.Equal(legacy, entityLeft);
+    }
+
+    [Fact]
     public void LoginOpcodes_DoNotReuseZoneOpcodes()
     {
         ushort[] zone =

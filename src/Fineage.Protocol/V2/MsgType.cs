@@ -26,7 +26,14 @@ public enum MsgType : ushort
     MoveToAck = 1004,
     CharacterRoster = 1005,
     CreateCharacterResult = 1006,
+    /// <summary>Login roster slot cleared. On the zone port the same value is AOI remove.</summary>
     EntityLeft = 1007,
+    /// <summary>Zone knownlist remove; same as <see cref="Fineage.Protocol.MsgType.DeleteObject"/>.</summary>
+    DeleteObject = EntityLeft,
+    /// <summary>Zone: another player entered AOI; same value as <see cref="Fineage.Protocol.MsgType.CharInfo"/>.</summary>
+    CharInfo = CharacterRoster,
+    /// <summary>Zone: shared NPC entered AOI; same value as <see cref="Fineage.Protocol.MsgType.NpcInfo"/>.</summary>
+    NpcInfo = CreateCharacterResult,
     ServerList = 1010,
     PlayToken = 1011,
     /// <summary>Same value as <see cref="Fineage.Protocol.MsgType.CreatureSay"/>. Zone chat fan-out.</summary>
