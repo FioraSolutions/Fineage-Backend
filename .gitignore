@@ -4,6 +4,8 @@ obj/
 data/*
 !data/items.json
 !data/starter-kits.json
+!data/spawns/
+!data/spawns/**
 TestResults/
 .vs/
 .idea/

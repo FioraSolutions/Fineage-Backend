@@ -1,10 +1,12 @@
 using Fineage.Protocol;
+using Fineage.Zone.Spawns;
 
 namespace Fineage.Zone;
 
 /// <summary>
 /// Cedric's Training Hall. Gremlins stand here and do not move.
 /// Players with no saved position use <see cref="ClassSpawn"/>.
+/// Gremlin layout is loaded from <c>data/spawns/ti_cedric_training_hall.json</c>.
 /// </summary>
 public static class TalkingIsland
 {
@@ -18,12 +20,7 @@ public static class TalkingIsland
     public const int GremlinDropCount = 25;
     public const int MaxStep = 8000;
 
-    public static readonly NpcInfoMsg[] Gremlins =
-    [
-        Gremlin(50001, SpawnX + 150, SpawnY + 80, 16000),
-        Gremlin(50002, SpawnX - 220, SpawnY + 60, 0),
-        Gremlin(50003, SpawnX + 40, SpawnY - 180, 32000)
-    ];
+    public static readonly NpcInfoMsg[] Gremlins = LoadGremlins();
 
     public static bool WithinStep(int fromX, int fromY, int toX, int toY)
     {
@@ -32,17 +29,32 @@ public static class TalkingIsland
         return dx * dx + dy * dy <= (long)MaxStep * MaxStep;
     }
 
-    static NpcInfoMsg Gremlin(int objectId, int x, int y, int heading) => new()
+    static NpcInfoMsg[] LoadGremlins()
     {
-        ObjectId = objectId,
-        NpcId = GremlinNpcId,
-        Name = "Gremlin",
-        X = x,
-        Y = y,
-        Z = SpawnZ,
-        Heading = heading,
-        Attackable = true,
-        RunSpeed = 80f,
-        WalkSpeed = 40f
-    };
+        var map = SpawnCatalog.LoadDefault().GetMap(SpawnCatalog.DefaultMapId);
+        var gremlins = new List<NpcInfoMsg>();
+        foreach (var row in map.Npcs)
+        {
+            if (row.NpcId != GremlinNpcId)
+                continue;
+            gremlins.Add(new NpcInfoMsg
+            {
+                ObjectId = row.ObjectId,
+                NpcId = row.NpcId,
+                Name = row.Name,
+                X = row.X,
+                Y = row.Y,
+                Z = row.Z,
+                Heading = row.Heading,
+                Attackable = row.Attackable,
+                RunSpeed = row.RunSpeed,
+                WalkSpeed = row.WalkSpeed
+            });
+        }
+
+        gremlins.Sort(static (a, b) => a.ObjectId.CompareTo(b.ObjectId));
+        if (gremlins.Count == 0)
+            throw new InvalidOperationException("Spawn datapack has no Cedric gremlins.");
+        return gremlins.ToArray();
+    }
 }

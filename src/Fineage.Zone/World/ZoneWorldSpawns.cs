@@ -1,0 +1,112 @@
+using Fineage.Protocol;
+using Fineage.Zone.Spawns;
+
+namespace Fineage.Zone.World;
+
+public sealed partial class ZoneWorld
+{
+    readonly SpawnCatalog _spawnCatalog;
+    readonly string _activeMapId;
+    readonly Func<DateTimeOffset> _clock;
+    readonly Dictionary<int, SpawnSlotState> _spawnSlots = [];
+
+    sealed class SpawnSlotState
+    {
+        public required SpawnNpcDefinition Definition { get; init; }
+        public DateTimeOffset? RespawnAt { get; set; }
+    }
+
+    void BootstrapSpawns()
+    {
+        var map = _spawnCatalog.GetMap(_activeMapId);
+        if (!map.Enabled)
+            throw new InvalidOperationException($"Active spawn map '{_activeMapId}' is disabled in datapack.");
+
+        foreach (var def in map.Npcs)
+        {
+            if (_spawnSlots.ContainsKey(def.ObjectId))
+                throw new InvalidOperationException($"Duplicate spawn object id {def.ObjectId} on map '{_activeMapId}'.");
+            _spawnSlots.Add(def.ObjectId, new SpawnSlotState { Definition = def });
+            MaterializeSpawn(def);
+        }
+    }
+
+    void MaterializeSpawn(SpawnNpcDefinition def)
+    {
+        if (_byId.ContainsKey(def.ObjectId))
+            return;
+
+        var entity = new ZoneEntity
+        {
+            ObjectId = def.ObjectId,
+            Kind = ZoneEntityKind.Npc,
+            Name = def.Name,
+            X = def.X,
+            Y = def.Y,
+            Z = def.Z,
+            Heading = def.Heading,
+            NpcId = def.NpcId,
+            Attackable = def.Attackable,
+            MaxHp = def.MaxHp,
+            CurHp = def.MaxHp,
+            RunSpeed = def.RunSpeed,
+            WalkSpeed = def.WalkSpeed
+        };
+        _byId.Add(entity.ObjectId, entity);
+        _aoi.Enter(entity.ObjectId, entity.X, entity.Y);
+    }
+
+    void ScheduleRespawn(int objectId)
+    {
+        if (!_spawnSlots.TryGetValue(objectId, out var slot))
+            return;
+
+        int delaySeconds = slot.Definition.RespawnDelaySeconds;
+        int jitter = slot.Definition.RespawnRandomSeconds;
+        if (jitter > 0)
+            delaySeconds += _spawnRandom.Next(0, jitter + 1);
+
+        slot.RespawnAt = _clock().AddSeconds(Math.Max(1, delaySeconds));
+    }
+
+    void TickSpawns(List<Pending> outbound)
+    {
+        var now = _clock();
+        foreach (var slot in _spawnSlots.Values)
+        {
+            if (slot.RespawnAt == null || now < slot.RespawnAt)
+                continue;
+            if (_byId.ContainsKey(slot.Definition.ObjectId))
+            {
+                slot.RespawnAt = null;
+                continue;
+            }
+
+            MaterializeSpawn(slot.Definition);
+            slot.RespawnAt = null;
+            if (_byId.TryGetValue(slot.Definition.ObjectId, out var npc))
+                FanoutNewNpc(npc, outbound);
+        }
+    }
+
+    void FanoutNewNpc(ZoneEntity npc, List<Pending> outbound)
+    {
+        foreach (var player in Players())
+        {
+            if (player.Session == null)
+                continue;
+            if (!VisibleTo(player.ObjectId, npc.ObjectId))
+                continue;
+            if (!player.Knownlist.Add(npc.ObjectId))
+                continue;
+            outbound.Add(Pack(player.Session, MsgType.NpcInfo, NpcInfo(npc)));
+        }
+    }
+
+    /// <summary>Test hook: advance respawn timers without waiting on the simulation loop.</summary>
+    internal void AdvanceSpawnsForTests()
+    {
+        lock (_gate)
+            TickSpawns([]);
+    }
+}

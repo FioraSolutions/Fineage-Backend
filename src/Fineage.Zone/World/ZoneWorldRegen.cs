@@ -29,7 +29,10 @@ public sealed partial class ZoneWorld
                 long started = Stopwatch.GetTimestamp();
                 var outbound = new List<Pending>();
                 lock (_gate)
+                {
                     TickRegen(outbound);
+                    TickSpawns(outbound);
+                }
                 await FlushOthersAsync(outbound, ct).ConfigureAwait(false);
                 FineageTelemetry.TickMilliseconds.Record(Stopwatch.GetElapsedTime(started).TotalMilliseconds);
             }
