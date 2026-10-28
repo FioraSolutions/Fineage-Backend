@@ -44,6 +44,8 @@ public enum MsgType : ushort
     InventoryUpdate = 1015,
     /// <summary>Same value as <see cref="Fineage.Protocol.MsgType.UserInfo"/>.</summary>
     UserInfo = 1016,
+    /// <summary>Same value as <see cref="Fineage.Protocol.MsgType.AbnormalStatusUpdate"/>.</summary>
+    AbnormalStatusUpdate = 1017,
 
     Error = 1099
 }

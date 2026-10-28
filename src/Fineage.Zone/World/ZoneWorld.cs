@@ -32,6 +32,7 @@ sealed class ZoneEntity
     public bool Running { get; init; }
     public ZoneSession? Session { get; init; }
     public PlayerInventory? Inventory { get; init; }
+    public List<AbnormalEffectMsg> AbnormalEffects { get; } = [];
     public HashSet<int> Knownlist { get; } = [];
 }
 

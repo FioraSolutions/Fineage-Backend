@@ -43,6 +43,7 @@ public class ProtocolCompatTests
         Assert.Equal(4, (ushort)MsgType.MoveTo);
         Assert.Equal(5, (ushort)MsgType.SelectTarget);
         Assert.Equal(6, (ushort)MsgType.AttackRequest);
+        Assert.Equal(12, (ushort)MsgType.BuffRequest);
         Assert.Equal(13, (ushort)MsgType.GrantItemRequest);
         Assert.Equal(9, (ushort)MsgType.Ping);
         Assert.Equal(1001, (ushort)MsgType.HelloAck);
@@ -59,9 +60,11 @@ public class ProtocolCompatTests
         Assert.Equal(1014, (ushort)MsgType.ItemList);
         Assert.Equal(1015, (ushort)MsgType.InventoryUpdate);
         Assert.Equal(1016, (ushort)MsgType.UserInfo);
+        Assert.Equal(1017, (ushort)MsgType.AbnormalStatusUpdate);
         Assert.Equal((ushort)MsgType.ItemList, (ushort)Fineage.Protocol.V2.MsgType.ItemList);
         Assert.Equal((ushort)MsgType.InventoryUpdate, (ushort)Fineage.Protocol.V2.MsgType.InventoryUpdate);
         Assert.Equal((ushort)MsgType.UserInfo, (ushort)Fineage.Protocol.V2.MsgType.UserInfo);
+        Assert.Equal((ushort)MsgType.AbnormalStatusUpdate, (ushort)Fineage.Protocol.V2.MsgType.AbnormalStatusUpdate);
         Assert.Equal(1099, (ushort)MsgType.Error);
     }
 
@@ -128,7 +131,7 @@ public class ProtocolCompatTests
     {
         ushort[] zone =
         [
-            1, 2, 3, 4, 5, 6, 8, 9, 13,
+            1, 2, 3, 4, 5, 6, 8, 9, 12, 13,
             1001, 1002, 1003, 1004, 1005, 1006, 1007, 1008, 1009, 1010, 1012, 1013,
             1099
         ];
