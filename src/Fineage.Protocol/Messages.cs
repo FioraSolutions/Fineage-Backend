@@ -529,3 +529,72 @@ public sealed class BuffRequestMsg
     /// <summary>When true, removes <see cref="EffectId"/> or clears all effects when zero.</summary>
     [Key(2)] public bool Remove { get; set; }
 }
+
+/// <summary>Opcode <see cref="MsgType.PartyInviteRequest"/> (18).</summary>
+[MessagePackObject]
+public sealed class PartyInviteRequestMsg
+{
+    [Key(0)] public int TargetObjectId { get; set; }
+    /// <summary>Loot mode for a new party; ignored when inviter is already in a party.</summary>
+    [Key(1)] public int ItemDistribution { get; set; }
+}
+
+/// <summary>Opcode <see cref="MsgType.PartyAnswerJoinRequest"/> (19). Response 1 accept, 0 decline.</summary>
+[MessagePackObject]
+public sealed class PartyAnswerJoinRequestMsg
+{
+    [Key(0)] public int RequestorObjectId { get; set; }
+    [Key(1)] public int Response { get; set; }
+}
+
+/// <summary>Opcode <see cref="MsgType.PartyAskJoin"/> (1027).</summary>
+[MessagePackObject]
+public sealed class PartyAskJoinMsg
+{
+    [Key(0)] public int RequestorObjectId { get; set; }
+    [Key(1)] public string RequestorName { get; set; } = "";
+    [Key(2)] public int ItemDistribution { get; set; }
+}
+
+/// <summary>Opcode <see cref="MsgType.PartyJoinResult"/> (1028). 1 accepted, 0 declined.</summary>
+[MessagePackObject]
+public sealed class PartyJoinResultMsg
+{
+    [Key(0)] public int Response { get; set; }
+}
+
+/// <summary>One row of <see cref="PartyMemberListMsg"/>.</summary>
+[MessagePackObject]
+public sealed class PartyMemberEntryMsg
+{
+    [Key(0)] public int ObjectId { get; set; }
+    [Key(1)] public string Name { get; set; } = "";
+    [Key(2)] public int ClassId { get; set; }
+    [Key(3)] public int Level { get; set; }
+    [Key(4)] public int CurHp { get; set; }
+    [Key(5)] public int MaxHp { get; set; }
+    [Key(6)] public int CurMp { get; set; }
+    [Key(7)] public int MaxMp { get; set; }
+}
+
+/// <summary>Opcode <see cref="MsgType.PartyMemberList"/> (1029).</summary>
+[MessagePackObject]
+public sealed class PartyMemberListMsg
+{
+    [Key(0)] public int LeaderObjectId { get; set; }
+    [Key(1)] public int PartyId { get; set; }
+    [Key(2)] public PartyMemberEntryMsg[] Members { get; set; } = [];
+}
+
+/// <summary>Opcode <see cref="MsgType.PartyLeaveRequest"/> (26). Empty body.</summary>
+[MessagePackObject]
+public sealed class PartyLeaveRequestMsg
+{
+}
+
+/// <summary>Opcode <see cref="MsgType.PartyKickRequest"/> (27).</summary>
+[MessagePackObject]
+public sealed class PartyKickRequestMsg
+{
+    [Key(0)] public int TargetObjectId { get; set; }
+}

@@ -49,6 +49,10 @@ public class ProtocolCompatTests
         Assert.Equal(15, (ushort)MsgType.UseItem);
         Assert.Equal(16, (ushort)MsgType.UnequipItem);
         Assert.Equal(17, (ushort)MsgType.GiveItem);
+        Assert.Equal(18, (ushort)MsgType.PartyInviteRequest);
+        Assert.Equal(19, (ushort)MsgType.PartyAnswerJoinRequest);
+        Assert.Equal(26, (ushort)MsgType.PartyLeaveRequest);
+        Assert.Equal(27, (ushort)MsgType.PartyKickRequest);
         Assert.Equal((ushort)MsgType.UseItem, (ushort)Fineage.Protocol.V2.MsgType.UseItem);
         Assert.Equal((ushort)MsgType.UnequipItem, (ushort)Fineage.Protocol.V2.MsgType.UnequipItem);
         Assert.Equal((ushort)MsgType.GiveItem, (ushort)Fineage.Protocol.V2.MsgType.GiveItem);
@@ -76,6 +80,9 @@ public class ProtocolCompatTests
         Assert.Equal(1016, (ushort)MsgType.UserInfo);
         Assert.Equal(1017, (ushort)MsgType.AbnormalStatusUpdate);
         Assert.Equal(1018, (ushort)MsgType.SpawnItem);
+        Assert.Equal(1027, (ushort)MsgType.PartyAskJoin);
+        Assert.Equal(1028, (ushort)MsgType.PartyJoinResult);
+        Assert.Equal(1029, (ushort)MsgType.PartyMemberList);
         Assert.Equal((ushort)MsgType.ItemList, (ushort)Fineage.Protocol.V2.MsgType.ItemList);
         Assert.Equal((ushort)MsgType.InventoryUpdate, (ushort)Fineage.Protocol.V2.MsgType.InventoryUpdate);
         Assert.Equal((ushort)MsgType.UserInfo, (ushort)Fineage.Protocol.V2.MsgType.UserInfo);

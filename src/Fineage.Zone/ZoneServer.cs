@@ -367,6 +367,59 @@ public sealed class ZoneServer
                     ZoneLog.Info($"RX BuffRequest session={sessionId} target={buff.TargetObjectId} effect={buff.EffectId} remove={buff.Remove}");
                 break;
             }
+            case MsgType.PartyInviteRequest:
+            {
+                var invite = Decode<PartyInviteRequestMsg>(body);
+                if (invite == null)
+                {
+                    await ErrorAsync(session, "bad_request", "PartyInviteRequest body was not readable.", ct).ConfigureAwait(false);
+                    break;
+                }
+
+                string? code = await _world.TryPartyInviteAsync(session, invite, ct).ConfigureAwait(false);
+                await PartyErrorAsync(session, code, ct).ConfigureAwait(false);
+                if (code == null)
+                    ZoneLog.Info($"RX PartyInvite session={sessionId} target={invite.TargetObjectId}");
+                break;
+            }
+            case MsgType.PartyAnswerJoinRequest:
+            {
+                var answer = Decode<PartyAnswerJoinRequestMsg>(body);
+                if (answer == null)
+                {
+                    await ErrorAsync(session, "bad_request", "PartyAnswerJoinRequest body was not readable.", ct).ConfigureAwait(false);
+                    break;
+                }
+
+                string? code = await _world.TryPartyAnswerAsync(session, answer, ct).ConfigureAwait(false);
+                await PartyErrorAsync(session, code, ct).ConfigureAwait(false);
+                if (code == null)
+                    ZoneLog.Info($"RX PartyAnswer session={sessionId} requestor={answer.RequestorObjectId} response={answer.Response}");
+                break;
+            }
+            case MsgType.PartyLeaveRequest:
+            {
+                string? code = await _world.TryPartyLeaveAsync(session, ct).ConfigureAwait(false);
+                await PartyErrorAsync(session, code, ct).ConfigureAwait(false);
+                if (code == null)
+                    ZoneLog.Info($"RX PartyLeave session={sessionId}");
+                break;
+            }
+            case MsgType.PartyKickRequest:
+            {
+                var kick = Decode<PartyKickRequestMsg>(body);
+                if (kick == null)
+                {
+                    await ErrorAsync(session, "bad_request", "PartyKickRequest body was not readable.", ct).ConfigureAwait(false);
+                    break;
+                }
+
+                string? code = await _world.TryPartyKickAsync(session, kick, ct).ConfigureAwait(false);
+                await PartyErrorAsync(session, code, ct).ConfigureAwait(false);
+                if (code == null)
+                    ZoneLog.Info($"RX PartyKick session={sessionId} target={kick.TargetObjectId}");
+                break;
+            }
             default:
                 ZoneLog.Info($"RX unknown type={type} session={sessionId}");
                 await ErrorAsync(session, "unknown", $"msgType={type}", ct).ConfigureAwait(false);
@@ -413,6 +466,24 @@ public sealed class ZoneServer
     {
         ZoneLog.Info($"TX Error code={code}");
         return session.SendAsync(MsgType.Error, new ErrorMsg { Code = code, Message = message }, ct);
+    }
+
+    static Task PartyErrorAsync(ZoneSession session, string? code, CancellationToken ct)
+    {
+        if (code == null)
+            return Task.CompletedTask;
+        return code switch
+        {
+            "world" => ErrorAsync(session, "world", "EnterWorld first.", ct),
+            "bad_request" => ErrorAsync(session, "bad_request", "Party request was rejected.", ct),
+            "target" => ErrorAsync(session, "target", "Invalid party target.", ct),
+            "party_full" => ErrorAsync(session, "party_full", "The party is full.", ct),
+            "party_leader" => ErrorAsync(session, "party_leader", "Only the party leader can do that.", ct),
+            "party_busy" => ErrorAsync(session, "party_busy", "That player cannot join right now.", ct),
+            "party_invite" => ErrorAsync(session, "party_invite", "No pending party invite.", ct),
+            "party" => ErrorAsync(session, "party", "Not in a party.", ct),
+            _ => ErrorAsync(session, "party", "Party action failed.", ct)
+        };
     }
 
     static T? Decode<T>(byte[] body) where T : class

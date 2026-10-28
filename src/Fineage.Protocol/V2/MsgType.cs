@@ -35,6 +35,14 @@ public enum MsgType : ushort
     UnequipItem = 16,
     /// <summary>Same value as <see cref="Fineage.Protocol.MsgType.GiveItem"/>. Admin grant; off unless the zone enables it.</summary>
     GiveItem = 17,
+    /// <summary>Same value as <see cref="Fineage.Protocol.MsgType.PartyInviteRequest"/>.</summary>
+    PartyInviteRequest = 18,
+    /// <summary>Same value as <see cref="Fineage.Protocol.MsgType.PartyAnswerJoinRequest"/>.</summary>
+    PartyAnswerJoinRequest = 19,
+    /// <summary>Same value as <see cref="Fineage.Protocol.MsgType.PartyLeaveRequest"/>.</summary>
+    PartyLeaveRequest = 26,
+    /// <summary>Same value as <see cref="Fineage.Protocol.MsgType.PartyKickRequest"/>.</summary>
+    PartyKickRequest = 27,
 
     HelloAck = 1001,
     AuthOk = 1002,
@@ -60,6 +68,13 @@ public enum MsgType : ushort
     AbnormalStatusUpdate = 1017,
     /// <summary>Same value as <see cref="Fineage.Protocol.MsgType.SpawnItem"/>.</summary>
     SpawnItem = 1018,
+
+    /// <summary>Party invite prompt. See <see cref="Fineage.Protocol.MsgType.PartyAskJoin"/>.</summary>
+    PartyAskJoin = 1027,
+    /// <summary>Invite result for requestor. See <see cref="Fineage.Protocol.MsgType.PartyJoinResult"/>.</summary>
+    PartyJoinResult = 1028,
+    /// <summary>Full party member snapshot. See <see cref="Fineage.Protocol.MsgType.PartyMemberList"/>.</summary>
+    PartyMemberList = 1029,
 
     /// <summary>Login roster. Was 1005; moved so it no longer aliases <see cref="CharInfo"/>.</summary>
     CharacterRoster = 1030,

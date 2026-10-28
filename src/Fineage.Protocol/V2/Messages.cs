@@ -251,3 +251,71 @@ public sealed partial class SpawnItemMsg
     [Key(6)] public int Count { get; set; } = 1;
     [Key(7)] public int Unknown { get; set; }
 }
+
+/// <summary>Same keys as <see cref="Fineage.Protocol.PartyInviteRequestMsg"/>.</summary>
+[MessagePackObject]
+public sealed partial class PartyInviteRequestMsg
+{
+    [Key(0)] public int TargetObjectId { get; set; }
+    [Key(1)] public int ItemDistribution { get; set; }
+}
+
+/// <summary>Same keys as <see cref="Fineage.Protocol.PartyAnswerJoinRequestMsg"/>.</summary>
+[MessagePackObject]
+public sealed partial class PartyAnswerJoinRequestMsg
+{
+    [Key(0)] public int RequestorObjectId { get; set; }
+    [Key(1)] public int Response { get; set; }
+}
+
+/// <summary>Same keys as <see cref="Fineage.Protocol.PartyAskJoinMsg"/>.</summary>
+[MessagePackObject]
+public sealed partial class PartyAskJoinMsg
+{
+    [Key(0)] public int RequestorObjectId { get; set; }
+    [Key(1)] public string RequestorName { get; set; } = "";
+    [Key(2)] public int ItemDistribution { get; set; }
+}
+
+/// <summary>Same keys as <see cref="Fineage.Protocol.PartyJoinResultMsg"/>.</summary>
+[MessagePackObject]
+public sealed partial class PartyJoinResultMsg
+{
+    [Key(0)] public int Response { get; set; }
+}
+
+/// <summary>Same keys as <see cref="Fineage.Protocol.PartyMemberEntryMsg"/>.</summary>
+[MessagePackObject]
+public sealed partial class PartyMemberEntryMsg
+{
+    [Key(0)] public int ObjectId { get; set; }
+    [Key(1)] public string Name { get; set; } = "";
+    [Key(2)] public int ClassId { get; set; }
+    [Key(3)] public int Level { get; set; }
+    [Key(4)] public int CurHp { get; set; }
+    [Key(5)] public int MaxHp { get; set; }
+    [Key(6)] public int CurMp { get; set; }
+    [Key(7)] public int MaxMp { get; set; }
+}
+
+/// <summary>Same keys as <see cref="Fineage.Protocol.PartyMemberListMsg"/>.</summary>
+[MessagePackObject]
+public sealed partial class PartyMemberListMsg
+{
+    [Key(0)] public int LeaderObjectId { get; set; }
+    [Key(1)] public int PartyId { get; set; }
+    [Key(2)] public PartyMemberEntryMsg[] Members { get; set; } = [];
+}
+
+/// <summary>Same keys as <see cref="Fineage.Protocol.PartyLeaveRequestMsg"/>.</summary>
+[MessagePackObject]
+public sealed partial class PartyLeaveRequestMsg
+{
+}
+
+/// <summary>Same keys as <see cref="Fineage.Protocol.PartyKickRequestMsg"/>.</summary>
+[MessagePackObject]
+public sealed partial class PartyKickRequestMsg
+{
+    [Key(0)] public int TargetObjectId { get; set; }
+}

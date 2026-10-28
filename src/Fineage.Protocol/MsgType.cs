@@ -33,6 +33,14 @@ public enum MsgType : ushort
     /// Debug grant into the bag. Off unless <c>FINEAGE_ZONE_ADMIN</c> is set. Body is <see cref="GiveItemMsg"/>.
     /// </summary>
     GiveItem = 17,
+    /// <summary>Invite a player to party. See Project store <c>docs/party-java-l2.md</c>.</summary>
+    PartyInviteRequest = 18,
+    /// <summary>Accept or decline a pending party invite.</summary>
+    PartyAnswerJoinRequest = 19,
+    /// <summary>Leave the current party.</summary>
+    PartyLeaveRequest = 26,
+    /// <summary>Leader removes a member by object id.</summary>
+    PartyKickRequest = 27,
     /// <summary>Keepalive from client. Server answers with <see cref="Pong"/>.</summary>
     Ping = 9,
     /// <summary>Zone chat. Fan-out is <see cref="CreatureSay"/>.</summary>
@@ -73,6 +81,12 @@ public enum MsgType : ushort
     AbnormalStatusUpdate = 1017,
     /// <summary>Ground item entered AOI. Keys match Interlude SpawnItem / client <c>SpawnItemDto</c>.</summary>
     SpawnItem = 1018,
+    /// <summary>Pending party invite (Interlude AskJoinParty).</summary>
+    PartyAskJoin = 1027,
+    /// <summary>Invite outcome for the requestor (Interlude JoinParty).</summary>
+    PartyJoinResult = 1028,
+    /// <summary>Full party roster fan-out (Interlude PartySmallWindowAll snapshot).</summary>
+    PartyMemberList = 1029,
 
     // Login S → C. Canonical lobby set; see LobbyProtocol.
     RegisterOk = 1020,

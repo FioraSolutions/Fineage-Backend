@@ -404,6 +404,8 @@ public sealed partial class ZoneWorld
         _byId.Remove(session.ObjectId);
         session.InWorld = false;
 
+        PartyPlayerLeftWorld(session.ObjectId, toOthers);
+
         byte[] body = MessagePackSerializer.Serialize(new DeleteObjectMsg { ObjectId = session.ObjectId });
         foreach (var watcher in watchers)
             toOthers.Add(new Pending(watcher, MsgType.DeleteObject, body));

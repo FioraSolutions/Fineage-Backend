@@ -344,6 +344,73 @@ public static class ZoneMultiplayerAcceptance
         }
     }
 
+    public static async Task RunPartySharedAsync()
+    {
+        var tokens = new HandoffTokens(HandoffTokens.DefaultSecret);
+        var login = new LoginService(JsonAccountStore.InMemory(), tokens);
+        var leader = Play(login, "party1", "Leader", HumanClasses.Fighter);
+        var member = Play(login, "party2", "Member", HumanClasses.Mystic);
+        if (leader.CharacterId == member.CharacterId)
+            throw new InvalidOperationException("party selftest ids collided");
+
+        var world = new ZoneWorld();
+        await using var zone = ZoneHost.Start(tokens, world);
+        await using var left = await ZonePeer.ConnectAsync(zone.Port).ConfigureAwait(false);
+        await using var right = await ZonePeer.ConnectAsync(zone.Port).ConfigureAwait(false);
+
+        await left.AuthAsync(leader).ConfigureAwait(false);
+        await right.AuthAsync(member).ConfigureAwait(false);
+        await left.EnterAsync(expectOthers: 0).ConfigureAwait(false);
+        await right.EnterAsync(leader, member, TalkingIsland.Gremlins.Length).ConfigureAwait(false);
+        var peerSeen = await left.ExpectAsync<CharInfoMsg>(MsgType.CharInfo).ConfigureAwait(false);
+        if (peerSeen.ObjectId != member.CharacterId)
+            throw new InvalidOperationException("leader did not receive member CharInfo before party invite");
+
+        await left.SendAsync(MsgType.PartyInviteRequest, new PartyInviteRequestMsg
+        {
+            TargetObjectId = member.CharacterId,
+            ItemDistribution = 0
+        }).ConfigureAwait(false);
+
+        var ask = await right.ExpectAsync<PartyAskJoinMsg>(MsgType.PartyAskJoin).ConfigureAwait(false);
+        if (ask.RequestorObjectId != leader.CharacterId || ask.RequestorName != leader.CharacterName || ask.ItemDistribution != 0)
+            throw new InvalidOperationException("AskJoin mismatch");
+
+        await right.SendAsync(MsgType.PartyAnswerJoinRequest, new PartyAnswerJoinRequestMsg
+        {
+            RequestorObjectId = leader.CharacterId,
+            Response = 1
+        }).ConfigureAwait(false);
+
+        var joined = await left.ExpectAsync<PartyJoinResultMsg>(MsgType.PartyJoinResult).ConfigureAwait(false);
+        if (joined.Response != 1)
+            throw new InvalidOperationException("join result expected accept");
+
+        var listLeft = await left.ExpectAsync<PartyMemberListMsg>(MsgType.PartyMemberList).ConfigureAwait(false);
+        var listRight = await right.ExpectAsync<PartyMemberListMsg>(MsgType.PartyMemberList).ConfigureAwait(false);
+        ExpectPartyList(listLeft, leader.CharacterId, leader.CharacterId, member.CharacterId);
+        ExpectPartyList(listRight, leader.CharacterId, leader.CharacterId, member.CharacterId);
+
+        await right.SendAsync(MsgType.PartyLeaveRequest, new PartyLeaveRequestMsg()).ConfigureAwait(false);
+        var cleared = await left.ExpectAsync<PartyMemberListMsg>(MsgType.PartyMemberList).ConfigureAwait(false);
+        if (cleared.Members.Length != 0 || cleared.PartyId != 0)
+            throw new InvalidOperationException("leader should receive empty party list after member leaves");
+
+        left.ExpectQuiet();
+        right.ExpectQuiet();
+    }
+
+    static void ExpectPartyList(PartyMemberListMsg list, int leaderId, params int[] memberIds)
+    {
+        if (list.LeaderObjectId != leaderId || list.Members.Length != memberIds.Length || list.PartyId == 0)
+            throw new InvalidOperationException($"party list leader={list.LeaderObjectId} count={list.Members.Length}");
+        for (int i = 0; i < memberIds.Length; i++)
+        {
+            if (list.Members[i].ObjectId != memberIds[i])
+                throw new InvalidOperationException($"party member {i} id={list.Members[i].ObjectId}");
+        }
+    }
+
     static async Task<StatusUpdateMsg> AwaitRegenUpdateAsync(ZonePeer peer, int objectId)
     {
         for (int attempt = 0; attempt < 12; attempt++)
