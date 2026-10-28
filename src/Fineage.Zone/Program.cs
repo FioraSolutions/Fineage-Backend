@@ -40,11 +40,13 @@ if (!BindAddress.TryResolve(bindText, out var bindAddress, out string bindDispla
     return;
 }
 
-var server = new ZoneServer(HandoffTokens.FromEnvironment());
+var world = ZoneAoiSettings.CreateWorld();
+var server = new ZoneServer(HandoffTokens.FromEnvironment(), world);
 string host = bindAddress.Equals(IPAddress.Any) ? "0.0.0.0" : bindDisplay;
 int maxConnections = ZoneNetSettings.MaxConnections;
 int outboundQueue = ZoneNetSettings.OutboundQueue;
 int maxMsgPerSec = ZoneNetSettings.MaxMessagesPerSecond;
+int interestRange = ZoneAoiSettings.InterestRange;
 
 if (string.IsNullOrWhiteSpace(Environment.GetEnvironmentVariable("FINEAGE_HANDOFF_SECRET")) &&
     !IPAddress.IsLoopback(bindAddress))
@@ -52,7 +54,7 @@ if (string.IsNullOrWhiteSpace(Environment.GetEnvironmentVariable("FINEAGE_HANDOF
     Console.WriteLine("[ZONE] warning: FINEAGE_HANDOFF_SECRET is unset. It must match Login before clients hand off from another machine.");
 }
 
-Console.WriteLine($"[ZONE] listen {bindDisplay}:{port} Talking Island (maxConn={maxConnections} outboundQ={outboundQueue} msgPerSec={maxMsgPerSec})");
+Console.WriteLine($"[ZONE] listen {bindDisplay}:{port} Talking Island (maxConn={maxConnections} outboundQ={outboundQueue} msgPerSec={maxMsgPerSec} interestRange={interestRange})");
 Console.WriteLine("[ZONE] Auth.Password is the login handoff token. EnterWorld spawns the village, shared Gremlins, and other players. Say is zone chat.");
 
 using var shutdown = new CancellationTokenSource();
