@@ -18,6 +18,8 @@ public enum MsgType : ushort
     BuffRequest = 12,
     /// <summary>Authoritative grant into the player's bag. Reply is <see cref="InventoryUpdate"/>.</summary>
     GrantItemRequest = 13,
+    /// <summary>Pick up a ground item by object id. Reply is <see cref="InventoryUpdate"/> and AOI <see cref="DeleteObject"/>.</summary>
+    PickupRequest = 14,
     /// <summary>Keepalive from client. Server answers with <see cref="Pong"/>.</summary>
     Ping = 9,
     /// <summary>Zone chat. Fan-out is <see cref="CreatureSay"/>.</summary>
