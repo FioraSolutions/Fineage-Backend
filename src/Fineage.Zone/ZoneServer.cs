@@ -511,6 +511,90 @@ public sealed class ZoneServer
                     ZoneLog.Info($"RX PartyKick session={sessionId} target={kick.TargetObjectId}");
                 break;
             }
+            case MsgType.ClanCreateRequest:
+            {
+                var create = Decode<ClanCreateRequestMsg>(body);
+                if (create == null)
+                {
+                    await ErrorAsync(session, "bad_request", "ClanCreateRequest body was not readable.", ct).ConfigureAwait(false);
+                    break;
+                }
+
+                string? code = await _world.TryClanCreateAsync(session, create, _clock(), ct).ConfigureAwait(false);
+                await ClanErrorAsync(session, code, ct).ConfigureAwait(false);
+                if (code == null)
+                    ZoneLog.Info($"RX ClanCreate session={sessionId} name={create.Name}");
+                break;
+            }
+            case MsgType.ClanInviteRequest:
+            {
+                var invite = Decode<ClanInviteRequestMsg>(body);
+                if (invite == null)
+                {
+                    await ErrorAsync(session, "bad_request", "ClanInviteRequest body was not readable.", ct).ConfigureAwait(false);
+                    break;
+                }
+
+                string? code = await _world.TryClanInviteAsync(session, invite, _clock(), ct).ConfigureAwait(false);
+                await ClanErrorAsync(session, code, ct).ConfigureAwait(false);
+                if (code == null)
+                    ZoneLog.Info($"RX ClanInvite session={sessionId} target={invite.TargetObjectId}");
+                break;
+            }
+            case MsgType.ClanAnswerJoinRequest:
+            {
+                var answer = Decode<ClanAnswerJoinRequestMsg>(body);
+                if (answer == null)
+                {
+                    await ErrorAsync(session, "bad_request", "ClanAnswerJoinRequest body was not readable.", ct).ConfigureAwait(false);
+                    break;
+                }
+
+                string? code = await _world.TryClanAnswerAsync(session, answer, _clock(), ct).ConfigureAwait(false);
+                await ClanErrorAsync(session, code, ct).ConfigureAwait(false);
+                if (code == null)
+                    ZoneLog.Info($"RX ClanAnswer session={sessionId} requestor={answer.RequestorObjectId} response={answer.Response}");
+                break;
+            }
+            case MsgType.ClanLeaveRequest:
+            {
+                string? code = await _world.TryClanLeaveAsync(session, _clock(), ct).ConfigureAwait(false);
+                await ClanErrorAsync(session, code, ct).ConfigureAwait(false);
+                if (code == null)
+                    ZoneLog.Info($"RX ClanLeave session={sessionId}");
+                break;
+            }
+            case MsgType.ClanKickRequest:
+            {
+                var kick = Decode<ClanKickRequestMsg>(body);
+                if (kick == null)
+                {
+                    await ErrorAsync(session, "bad_request", "ClanKickRequest body was not readable.", ct).ConfigureAwait(false);
+                    break;
+                }
+
+                string? code = await _world.TryClanKickAsync(session, kick, _clock(), ct).ConfigureAwait(false);
+                await ClanErrorAsync(session, code, ct).ConfigureAwait(false);
+                if (code == null)
+                    ZoneLog.Info($"RX ClanKick session={sessionId} target={kick.TargetObjectId}");
+                break;
+            }
+            case MsgType.ClanDissolveRequest:
+            {
+                string? code = await _world.TryClanDissolveAsync(session, _clock(), ct).ConfigureAwait(false);
+                await ClanErrorAsync(session, code, ct).ConfigureAwait(false);
+                if (code == null)
+                    ZoneLog.Info($"RX ClanDissolve session={sessionId}");
+                break;
+            }
+            case MsgType.ClanCancelDissolveRequest:
+            {
+                string? code = await _world.TryClanCancelDissolveAsync(session, _clock(), ct).ConfigureAwait(false);
+                await ClanErrorAsync(session, code, ct).ConfigureAwait(false);
+                if (code == null)
+                    ZoneLog.Info($"RX ClanCancelDissolve session={sessionId}");
+                break;
+            }
             default:
                 ZoneLog.Info($"RX unknown type={type} session={sessionId}");
                 await ErrorAsync(session, "unknown", $"msgType={type}", ct).ConfigureAwait(false);
@@ -623,6 +707,43 @@ public sealed class ZoneServer
             "party" => ErrorAsync(session, "party", "Not in a party.", ct),
             _ => ErrorAsync(session, "party", "Party action failed.", ct)
         };
+    }
+
+    static Task ClanErrorAsync(ZoneSession session, string? code, CancellationToken ct)
+    {
+        if (code == null)
+            return Task.CompletedTask;
+        string message = code switch
+        {
+            "world" => "EnterWorld first.",
+            "bad_request" => "Clan request was rejected.",
+            ClanProtocol.Level => "Level 10 is required to create a clan.",
+            ClanProtocol.Member => "You already belong to a clan.",
+            ClanProtocol.CreatePenalty => "You must wait before creating another clan.",
+            ClanProtocol.Name => "Clan name is incorrect.",
+            ClanProtocol.NameLength => "Clan name is too long.",
+            ClanProtocol.NameTaken => "That clan name already exists.",
+            ClanProtocol.None => "You are not in a clan.",
+            ClanProtocol.Leader => "Only the clan leader can do that.",
+            ClanProtocol.LeaderLeave => "The clan leader cannot leave the clan.",
+            ClanProtocol.Pledge => "That pledge type is not available.",
+            ClanProtocol.Self => "You cannot invite yourself.",
+            ClanProtocol.Target => "That target cannot be invited.",
+            ClanProtocol.TargetClan => "That player is already in a clan.",
+            ClanProtocol.Busy => "That player is busy.",
+            ClanProtocol.Waiting => "You are already waiting for a reply.",
+            ClanProtocol.RecruitPenalty => "The clan must wait before accepting a new member.",
+            ClanProtocol.JoinPenalty => "That player must wait before joining a clan.",
+            ClanProtocol.Full => "The clan is full.",
+            ClanProtocol.Invite => "No pending clan invite.",
+            ClanProtocol.Combat => "You cannot do that during combat.",
+            ClanProtocol.DismissSelf => "You cannot dismiss yourself.",
+            ClanProtocol.Dissolving => "Clan dissolution is already in progress.",
+            ClanProtocol.NotDissolving => "The clan is not being dissolved.",
+            ClanProtocol.Store => "The clan could not be saved.",
+            _ => "Clan action failed."
+        };
+        return ErrorAsync(session, code, message, ct);
     }
 
     static T? Decode<T>(byte[] body) where T : class

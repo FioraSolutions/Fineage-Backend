@@ -45,6 +45,20 @@ public enum MsgType : ushort
     AdminSpoilTarget = 30,
     /// <summary>Debug sweeper on a spoiled corpse. Off unless <c>FINEAGE_ZONE_ADMIN</c>.</summary>
     AdminSweepCorpse = 31,
+    /// <summary>Create a clan. Body is <see cref="ClanCreateRequestMsg"/>. See <see cref="ClanProtocol"/>.</summary>
+    ClanCreateRequest = 32,
+    /// <summary>Invite a visible player. Body is <see cref="ClanInviteRequestMsg"/>.</summary>
+    ClanInviteRequest = 33,
+    /// <summary>Accept or decline a pending clan invite.</summary>
+    ClanAnswerJoinRequest = 34,
+    /// <summary>Leave the current clan. Empty body. The leader cannot leave.</summary>
+    ClanLeaveRequest = 35,
+    /// <summary>Leader dismisses a member by object id.</summary>
+    ClanKickRequest = 36,
+    /// <summary>Leader registers dissolution. Empty body. The clan remains until the dissolve delay elapses.</summary>
+    ClanDissolveRequest = 37,
+    /// <summary>Leader cancels a pending dissolution. Empty body.</summary>
+    ClanCancelDissolveRequest = 38,
     /// <summary>Keepalive from client. Server answers with <see cref="Pong"/>.</summary>
     Ping = 9,
     /// <summary>Zone chat. Fan-out is <see cref="CreatureSay"/>. See <see cref="ChatProtocol"/>.</summary>
@@ -96,6 +110,14 @@ public enum MsgType : ushort
     /// See <see cref="ChatProtocol"/>. 1041–1049 are reserved.
     /// </summary>
     SystemMessage = 1040,
+    /// <summary>Pending clan invite. Clan band is 1050–1059. See <see cref="ClanProtocol"/>.</summary>
+    ClanAskJoin = 1050,
+    /// <summary>Clan snapshot for online members (Interlude pledge status).</summary>
+    PledgeStatusChanged = 1051,
+    /// <summary>Full clan member list for online members.</summary>
+    PledgeMemberList = 1052,
+    /// <summary>Invite outcome for the requestor. 0 declined, any other stored response means accepted.</summary>
+    ClanJoinResult = 1053,
 
     // Login S → C. Canonical lobby set; see LobbyProtocol.
     RegisterOk = 1020,

@@ -4,6 +4,9 @@
     <RootNamespace>Fineage.Zone</RootNamespace>
   </PropertyGroup>
   <ItemGroup>
+    <InternalsVisibleTo Include="Fineage.Zone.Tests" />
+  </ItemGroup>
+  <ItemGroup>
     <ProjectReference Include="..\Fineage.Game\Fineage.Game.csproj" />
     <ProjectReference Include="..\Fineage.Protocol\Fineage.Protocol.csproj" />
     <ProjectReference Include="..\Fineage.Login\Fineage.Login.csproj" />

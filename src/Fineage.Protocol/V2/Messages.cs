@@ -185,6 +185,10 @@ public sealed partial class CharInfoMsg
     [Key(3)] public int Y { get; set; }
     [Key(4)] public int Z { get; set; }
     [Key(5)] public int ClassId { get; set; }
+    /// <summary>Same key as <see cref="Fineage.Protocol.CharInfoMsg.ClanId"/>.</summary>
+    [Key(7)] public int ClanId { get; set; }
+    /// <summary>Same key as <see cref="Fineage.Protocol.CharInfoMsg.ClanCrestId"/>.</summary>
+    [Key(8)] public int ClanCrestId { get; set; }
 }
 
 /// <summary>Same keys as <see cref="Fineage.Protocol.NpcInfoMsg"/>; zone opcode <see cref="MsgType.NpcInfo"/>.</summary>
@@ -327,4 +331,105 @@ public sealed partial class PartyLeaveRequestMsg
 public sealed partial class PartyKickRequestMsg
 {
     [Key(0)] public int TargetObjectId { get; set; }
+}
+
+/// <summary>Same keys as <see cref="Fineage.Protocol.ClanCreateRequestMsg"/>.</summary>
+[MessagePackObject]
+public sealed partial class ClanCreateRequestMsg
+{
+    [Key(0)] public string Name { get; set; } = "";
+}
+
+/// <summary>Same keys as <see cref="Fineage.Protocol.ClanInviteRequestMsg"/>.</summary>
+[MessagePackObject]
+public sealed partial class ClanInviteRequestMsg
+{
+    [Key(0)] public int TargetObjectId { get; set; }
+    [Key(1)] public int PledgeType { get; set; }
+}
+
+/// <summary>Same keys as <see cref="Fineage.Protocol.ClanAnswerJoinRequestMsg"/>.</summary>
+[MessagePackObject]
+public sealed partial class ClanAnswerJoinRequestMsg
+{
+    [Key(0)] public int RequestorObjectId { get; set; }
+    [Key(1)] public int Response { get; set; }
+}
+
+/// <summary>Same keys as <see cref="Fineage.Protocol.ClanLeaveRequestMsg"/>.</summary>
+[MessagePackObject]
+public sealed partial class ClanLeaveRequestMsg
+{
+}
+
+/// <summary>Same keys as <see cref="Fineage.Protocol.ClanKickRequestMsg"/>.</summary>
+[MessagePackObject]
+public sealed partial class ClanKickRequestMsg
+{
+    [Key(0)] public int TargetObjectId { get; set; }
+}
+
+/// <summary>Same keys as <see cref="Fineage.Protocol.ClanDissolveRequestMsg"/>.</summary>
+[MessagePackObject]
+public sealed partial class ClanDissolveRequestMsg
+{
+}
+
+/// <summary>Same keys as <see cref="Fineage.Protocol.ClanCancelDissolveRequestMsg"/>.</summary>
+[MessagePackObject]
+public sealed partial class ClanCancelDissolveRequestMsg
+{
+}
+
+/// <summary>Same keys as <see cref="Fineage.Protocol.ClanAskJoinMsg"/>.</summary>
+[MessagePackObject]
+public sealed partial class ClanAskJoinMsg
+{
+    [Key(0)] public int RequestorObjectId { get; set; }
+    [Key(1)] public string RequestorName { get; set; } = "";
+    [Key(2)] public int ClanId { get; set; }
+    [Key(3)] public string ClanName { get; set; } = "";
+    [Key(4)] public int PledgeType { get; set; }
+}
+
+/// <summary>Same keys as <see cref="Fineage.Protocol.PledgeStatusChangedMsg"/>.</summary>
+[MessagePackObject]
+public sealed partial class PledgeStatusChangedMsg
+{
+    [Key(0)] public int ClanId { get; set; }
+    [Key(1)] public string Name { get; set; } = "";
+    [Key(2)] public int Level { get; set; }
+    [Key(3)] public int LeaderObjectId { get; set; }
+    [Key(4)] public int CrestId { get; set; }
+    [Key(5)] public int MemberCount { get; set; }
+    [Key(6)] public long DissolvingExpiryUnixMs { get; set; }
+    [Key(7)] public long CharPenaltyExpiryUnixMs { get; set; }
+}
+
+/// <summary>Same keys as <see cref="Fineage.Protocol.PledgeMemberEntryMsg"/>.</summary>
+[MessagePackObject]
+public sealed partial class PledgeMemberEntryMsg
+{
+    [Key(0)] public int ObjectId { get; set; }
+    [Key(1)] public string Name { get; set; } = "";
+    [Key(2)] public int ClassId { get; set; }
+    [Key(3)] public int Level { get; set; }
+    [Key(4)] public bool Online { get; set; }
+    [Key(5)] public int PledgeType { get; set; }
+}
+
+/// <summary>Same keys as <see cref="Fineage.Protocol.PledgeMemberListMsg"/>.</summary>
+[MessagePackObject]
+public sealed partial class PledgeMemberListMsg
+{
+    [Key(0)] public int ClanId { get; set; }
+    [Key(1)] public int LeaderObjectId { get; set; }
+    [Key(2)] public PledgeMemberEntryMsg[] Members { get; set; } = [];
+}
+
+/// <summary>Same keys as <see cref="Fineage.Protocol.ClanJoinResultMsg"/>.</summary>
+[MessagePackObject]
+public sealed partial class ClanJoinResultMsg
+{
+    [Key(0)] public int Response { get; set; }
 }

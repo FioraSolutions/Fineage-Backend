@@ -49,7 +49,10 @@ public sealed record CharacterRecord(
     int Mp = 0,
     int Sp = 0,
     long Adena = 0,
-    string Title = "")
+    string Title = "",
+    int ClanId = 0,
+    long ClanJoinExpiryUnixMs = 0,
+    long ClanCreateExpiryUnixMs = 0)
 {
     /// <summary>Remaining whole seconds until hard delete. Zero when the character is not pending.</summary>
     public int DeleteSecondsLeft(DateTimeOffset now)
@@ -64,6 +67,34 @@ public sealed record CharacterRecord(
 
     public bool IsPendingDelete => DeleteAt != null;
 }
+
+/// <summary>One persisted clan member. <see cref="CharacterId"/> is the zone object id.</summary>
+public sealed record ClanMemberRecord(
+    int CharacterId,
+    string Account,
+    string Name,
+    int ClassId,
+    int Level,
+    int PledgeType);
+
+/// <summary>Persisted clan. Crest id stays 0 until crests exist. Times are unix milliseconds; 0 means none.</summary>
+public sealed record ClanRecord(
+    int Id,
+    string Name,
+    int Level,
+    int LeaderId,
+    int CrestId,
+    long DissolvingExpiryUnixMs,
+    long CharPenaltyExpiryUnixMs,
+    IReadOnlyList<ClanMemberRecord> Members);
+
+/// <summary>Character clan id and penalty expiries written with a clan mutation.</summary>
+public readonly record struct CharacterClanState(
+    string Account,
+    int CharacterId,
+    int ClanId,
+    long JoinExpiryUnixMs,
+    long CreateExpiryUnixMs);
 
 public interface IAccountStore
 {
@@ -128,6 +159,22 @@ public interface IAccountStore
     IReadOnlyList<CharacterRecord> List(string account, DateTimeOffset now);
 
     IReadOnlyList<CharacterRecord> List(string account);
+
+    IReadOnlyList<ClanRecord> ListClans();
+
+    ClanRecord? FindClan(int clanId);
+
+    ClanRecord? FindClanByName(string name);
+
+    /// <summary>Assigns a new id. Sets <see cref="CharacterRecord.ClanId"/> on every member. Leader penalties come from <paramref name="leader"/>.</summary>
+    ClanRecord? InsertClan(ClanRecord draft, CharacterClanState leader);
+
+    /// <summary>Replaces the clan row and writes <paramref name="characters"/>.</summary>
+    bool UpdateClan(ClanRecord clan, IReadOnlyList<CharacterClanState> characters);
+
+    bool DeleteClan(int clanId, IReadOnlyList<CharacterClanState> characters);
+
+    bool TrySetCharacterClanState(CharacterClanState state);
 }
 
 /// <summary>JSON file store. Pass a null path for process memory only.</summary>
@@ -382,13 +429,140 @@ public sealed class JsonAccountStore : IAccountStore
         }
     }
 
+    public IReadOnlyList<ClanRecord> ListClans()
+    {
+        lock (_gate)
+            return _data.Clans.Select(ToClan).ToArray();
+    }
+
+    public ClanRecord? FindClan(int clanId)
+    {
+        lock (_gate)
+        {
+            var clan = _data.Clans.FirstOrDefault(c => c.Id == clanId);
+            return clan == null ? null : ToClan(clan);
+        }
+    }
+
+    public ClanRecord? FindClanByName(string name)
+    {
+        lock (_gate)
+        {
+            var clan = FindClanDto(name);
+            return clan == null ? null : ToClan(clan);
+        }
+    }
+
+    public ClanRecord? InsertClan(ClanRecord draft, CharacterClanState leader)
+    {
+        ArgumentNullException.ThrowIfNull(draft);
+        ArgumentNullException.ThrowIfNull(draft.Members);
+        if (draft.Members.Count == 0 || string.IsNullOrWhiteSpace(draft.Name))
+            return null;
+
+        lock (_gate)
+        {
+            if (FindClanDto(draft.Name) != null)
+                return null;
+            var rows = new List<CharacterDto>(draft.Members.Count);
+            foreach (var member in draft.Members)
+            {
+                var character = FindCharacter(member.Account, member.CharacterId);
+                if (character == null)
+                    return null;
+                rows.Add(character);
+            }
+
+            int id = _data.NextClanId++;
+            var dto = ToDto(draft, id);
+            _data.Clans.Add(dto);
+            for (int i = 0; i < draft.Members.Count; i++)
+            {
+                rows[i].ClanId = id;
+                if (draft.Members[i].CharacterId != leader.CharacterId)
+                    continue;
+                rows[i].ClanJoinExpiryUnixMs = leader.JoinExpiryUnixMs;
+                rows[i].ClanCreateExpiryUnixMs = leader.CreateExpiryUnixMs;
+            }
+
+            Save();
+            return ToClan(dto);
+        }
+    }
+
+    public bool UpdateClan(ClanRecord clan, IReadOnlyList<CharacterClanState> characters)
+    {
+        ArgumentNullException.ThrowIfNull(clan);
+        ArgumentNullException.ThrowIfNull(characters);
+        lock (_gate)
+        {
+            int index = _data.Clans.FindIndex(c => c.Id == clan.Id);
+            if (index < 0)
+                return false;
+            var rows = new List<CharacterDto>(characters.Count);
+            foreach (var state in characters)
+            {
+                var character = FindCharacter(state.Account, state.CharacterId);
+                if (character == null)
+                    return false;
+                rows.Add(character);
+            }
+
+            _data.Clans[index] = ToDto(clan, clan.Id);
+            for (int i = 0; i < characters.Count; i++)
+                ApplyClanState(rows[i], characters[i]);
+            Save();
+            return true;
+        }
+    }
+
+    public bool DeleteClan(int clanId, IReadOnlyList<CharacterClanState> characters)
+    {
+        ArgumentNullException.ThrowIfNull(characters);
+        lock (_gate)
+        {
+            int index = _data.Clans.FindIndex(c => c.Id == clanId);
+            if (index < 0)
+                return false;
+            var rows = new List<CharacterDto>(characters.Count);
+            foreach (var state in characters)
+            {
+                var character = FindCharacter(state.Account, state.CharacterId);
+                if (character == null)
+                    return false;
+                rows.Add(character);
+            }
+
+            _data.Clans.RemoveAt(index);
+            for (int i = 0; i < characters.Count; i++)
+                ApplyClanState(rows[i], characters[i]);
+            Save();
+            return true;
+        }
+    }
+
+    public bool TrySetCharacterClanState(CharacterClanState state)
+    {
+        lock (_gate)
+        {
+            var character = FindCharacter(state.Account, state.CharacterId);
+            if (character == null)
+                return false;
+            ApplyClanState(character, state);
+            Save();
+            return true;
+        }
+    }
+
     public bool TryHardDelete(string account, int characterId)
     {
         lock (_gate)
         {
             var row = FindAccount(account);
             var character = row?.Characters.FirstOrDefault(c => c.Id == characterId);
-            if (row == null || character == null)
+            if (row == null || character == null || character.ClanId != 0)
+                return false;
+            if (_data.Clans.Any(c => c.Members.Any(m => m.CharacterId == characterId)))
                 return false;
             row.Characters.Remove(character);
             Save();
@@ -438,7 +612,7 @@ public sealed class JsonAccountStore : IAccountStore
         FindAccount(account)?.Characters.FirstOrDefault(c => c.Id == characterId);
 
     static int PurgeUnlocked(AccountDto row, DateTimeOffset now) =>
-        row.Characters.RemoveAll(c => c.DeleteAt is { } at && at < now);
+        row.Characters.RemoveAll(c => c.ClanId == 0 && c.DeleteAt is { } at && at < now);
 
     static List<CharacterRecord> Ordered(AccountDto row) =>
         row.Characters
@@ -470,6 +644,52 @@ public sealed class JsonAccountStore : IAccountStore
         _data.Accounts.Any(a => a.Characters.Any(c =>
             string.Equals(c.Name, name, StringComparison.OrdinalIgnoreCase)));
 
+    ClanDto? FindClanDto(string name) =>
+        _data.Clans.FirstOrDefault(c => string.Equals(c.Name, name, StringComparison.OrdinalIgnoreCase));
+
+    static void ApplyClanState(CharacterDto character, CharacterClanState state)
+    {
+        character.ClanId = state.ClanId;
+        character.ClanJoinExpiryUnixMs = state.JoinExpiryUnixMs;
+        character.ClanCreateExpiryUnixMs = state.CreateExpiryUnixMs;
+    }
+
+    static ClanDto ToDto(ClanRecord clan, int id) => new()
+    {
+        Id = id,
+        Name = clan.Name,
+        Level = clan.Level,
+        LeaderId = clan.LeaderId,
+        CrestId = clan.CrestId,
+        DissolvingExpiryUnixMs = clan.DissolvingExpiryUnixMs,
+        CharPenaltyExpiryUnixMs = clan.CharPenaltyExpiryUnixMs,
+        Members = clan.Members.Select(member => new ClanMemberDto
+        {
+            CharacterId = member.CharacterId,
+            Account = member.Account,
+            Name = member.Name,
+            ClassId = member.ClassId,
+            Level = member.Level,
+            PledgeType = member.PledgeType
+        }).ToList()
+    };
+
+    static ClanRecord ToClan(ClanDto clan) => new(
+        clan.Id,
+        clan.Name,
+        clan.Level,
+        clan.LeaderId,
+        clan.CrestId,
+        clan.DissolvingExpiryUnixMs,
+        clan.CharPenaltyExpiryUnixMs,
+        clan.Members.Select(member => new ClanMemberRecord(
+            member.CharacterId,
+            member.Account,
+            member.Name,
+            member.ClassId,
+            member.Level,
+            member.PledgeType)).ToArray());
+
     void Load()
     {
         if (_path == null || !File.Exists(_path))
@@ -484,6 +704,7 @@ public sealed class JsonAccountStore : IAccountStore
         if (data.Version != 1)
             throw new InvalidDataException($"unsupported account store version {data.Version}");
 
+        data.Clans ??= [];
         var names = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
         var ids = new HashSet<int>();
         foreach (var account in data.Accounts)
@@ -497,9 +718,31 @@ public sealed class JsonAccountStore : IAccountStore
             }
         }
 
+        var clanIds = new HashSet<int>();
+        var clanNames = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
+        var memberIds = new HashSet<int>();
+        foreach (var clan in data.Clans)
+        {
+            clan.Members ??= [];
+            if (clan.Id <= 0 || !clanIds.Add(clan.Id))
+                throw new InvalidDataException($"duplicate clan id {clan.Id}");
+            if (string.IsNullOrWhiteSpace(clan.Name) || !clanNames.Add(clan.Name))
+                throw new InvalidDataException($"duplicate clan name {clan.Name}");
+            foreach (var member in clan.Members)
+            {
+                if (!memberIds.Add(member.CharacterId))
+                    throw new InvalidDataException($"character {member.CharacterId} is in two clans");
+                if (!ids.Contains(member.CharacterId))
+                    throw new InvalidDataException($"clan member {member.CharacterId} has no character");
+            }
+        }
+
         int maxId = ids.Count == 0 ? 0 : ids.Max();
         if (data.NextCharacterId <= maxId)
             data.NextCharacterId = maxId + 1;
+        int maxClan = clanIds.Count == 0 ? 0 : clanIds.Max();
+        if (data.NextClanId <= maxClan)
+            data.NextClanId = maxClan + 1;
         _data = data;
     }
 
@@ -551,13 +794,18 @@ public sealed class JsonAccountStore : IAccountStore
             character.Mp,
             character.Sp,
             character.Adena,
-            character.Title);
+            character.Title,
+            character.ClanId,
+            character.ClanJoinExpiryUnixMs,
+            character.ClanCreateExpiryUnixMs);
 
     sealed class StoreFile
     {
         public int Version { get; set; } = 1;
         public int NextCharacterId { get; set; } = 1;
+        public int NextClanId { get; set; } = 1;
         public List<AccountDto> Accounts { get; set; } = [];
+        public List<ClanDto> Clans { get; set; } = [];
     }
 
     sealed class AccountDto
@@ -595,7 +843,32 @@ public sealed class JsonAccountStore : IAccountStore
         public int Sp { get; set; }
         public long Adena { get; set; }
         public string Title { get; set; } = "";
+        public int ClanId { get; set; }
+        public long ClanJoinExpiryUnixMs { get; set; }
+        public long ClanCreateExpiryUnixMs { get; set; }
         public List<StoredItemDto>? Items { get; set; }
+    }
+
+    sealed class ClanDto
+    {
+        public int Id { get; set; }
+        public string Name { get; set; } = "";
+        public int Level { get; set; }
+        public int LeaderId { get; set; }
+        public int CrestId { get; set; }
+        public long DissolvingExpiryUnixMs { get; set; }
+        public long CharPenaltyExpiryUnixMs { get; set; }
+        public List<ClanMemberDto> Members { get; set; } = [];
+    }
+
+    sealed class ClanMemberDto
+    {
+        public int CharacterId { get; set; }
+        public string Account { get; set; } = "";
+        public string Name { get; set; } = "";
+        public int ClassId { get; set; }
+        public int Level { get; set; }
+        public int PledgeType { get; set; }
     }
 
     sealed class StoredItemDto

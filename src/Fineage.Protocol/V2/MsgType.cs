@@ -47,6 +47,20 @@ public enum MsgType : ushort
     AdminSpoilTarget = 30,
     /// <summary>Same value as <see cref="Fineage.Protocol.MsgType.AdminSweepCorpse"/>.</summary>
     AdminSweepCorpse = 31,
+    /// <summary>Same value as <see cref="Fineage.Protocol.MsgType.ClanCreateRequest"/>.</summary>
+    ClanCreateRequest = 32,
+    /// <summary>Same value as <see cref="Fineage.Protocol.MsgType.ClanInviteRequest"/>.</summary>
+    ClanInviteRequest = 33,
+    /// <summary>Same value as <see cref="Fineage.Protocol.MsgType.ClanAnswerJoinRequest"/>.</summary>
+    ClanAnswerJoinRequest = 34,
+    /// <summary>Same value as <see cref="Fineage.Protocol.MsgType.ClanLeaveRequest"/>.</summary>
+    ClanLeaveRequest = 35,
+    /// <summary>Same value as <see cref="Fineage.Protocol.MsgType.ClanKickRequest"/>.</summary>
+    ClanKickRequest = 36,
+    /// <summary>Same value as <see cref="Fineage.Protocol.MsgType.ClanDissolveRequest"/>.</summary>
+    ClanDissolveRequest = 37,
+    /// <summary>Same value as <see cref="Fineage.Protocol.MsgType.ClanCancelDissolveRequest"/>.</summary>
+    ClanCancelDissolveRequest = 38,
 
     HelloAck = 1001,
     AuthOk = 1002,
@@ -81,6 +95,14 @@ public enum MsgType : ushort
     PartyMemberList = 1029,
     /// <summary>Same value as <see cref="Fineage.Protocol.MsgType.SystemMessage"/>. Chat band 1040–1049.</summary>
     SystemMessage = 1040,
+    /// <summary>Same value as <see cref="Fineage.Protocol.MsgType.ClanAskJoin"/>. Clan band 1050–1059.</summary>
+    ClanAskJoin = 1050,
+    /// <summary>Same value as <see cref="Fineage.Protocol.MsgType.PledgeStatusChanged"/>.</summary>
+    PledgeStatusChanged = 1051,
+    /// <summary>Same value as <see cref="Fineage.Protocol.MsgType.PledgeMemberList"/>.</summary>
+    PledgeMemberList = 1052,
+    /// <summary>Same value as <see cref="Fineage.Protocol.MsgType.ClanJoinResult"/>.</summary>
+    ClanJoinResult = 1053,
 
     /// <summary>Login roster. Was 1005; moved so it no longer aliases <see cref="CharInfo"/>.</summary>
     CharacterRoster = 1030,
