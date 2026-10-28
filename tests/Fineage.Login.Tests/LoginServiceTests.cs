@@ -103,6 +103,19 @@ public class LoginServiceTests
     }
 
     [Fact]
+    public void Handoff_honors_configured_ttl()
+    {
+        var now = DateTimeOffset.UnixEpoch.AddHours(5);
+        var tokens = new HandoffTokens(HandoffTokens.DefaultSecret, TimeSpan.FromSeconds(90));
+        var service = new LoginService(JsonAccountStore.InMemory(), tokens, () => now);
+        var ticket = service.Play("alice", "secret1", "Aria", HumanClasses.Fighter).Value!;
+
+        Assert.Equal(now.ToUnixTimeSeconds() + 90, ticket.ExpiresUnixSeconds);
+        Assert.True(tokens.TryValidate(ticket.Token, now.AddSeconds(89), out _));
+        Assert.False(tokens.TryValidate(ticket.Token, now.AddSeconds(90), out _));
+    }
+
+    [Fact]
     public void Handoff_RejectsTamperAndExpiry()
     {
         var issuedAt = DateTimeOffset.UnixEpoch.AddDays(10);

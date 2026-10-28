@@ -55,7 +55,13 @@ public sealed class HandoffTokens
         string? secret = Environment.GetEnvironmentVariable("FINEAGE_HANDOFF_SECRET");
         if (string.IsNullOrWhiteSpace(secret))
             secret = DefaultSecret;
-        return new HandoffTokens(secret);
+
+        TimeSpan? ttl = null;
+        string? ttlText = Environment.GetEnvironmentVariable("FINEAGE_HANDOFF_TTL_SECONDS");
+        if (int.TryParse(ttlText, out int seconds) && seconds > 0)
+            ttl = TimeSpan.FromSeconds(seconds);
+
+        return new HandoffTokens(secret, ttl);
     }
 
     public HandoffTicket Issue(CharacterRecord character, DateTimeOffset now)
