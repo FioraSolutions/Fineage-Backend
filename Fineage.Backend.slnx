@@ -4,6 +4,7 @@
     <Project Path="src/Fineage.Login/Fineage.Login.csproj" />
     <Project Path="src/Fineage.Protocol/Fineage.Protocol.csproj" />
     <Project Path="src/Fineage.Zone/Fineage.Zone.csproj" />
+    <Project Path="src/Fineage.MobiusImport/Fineage.MobiusImport.csproj" />
   </Folder>
   <Folder Name="/tests/">
     <Project Path="tests/Fineage.Game.Tests/Fineage.Game.Tests.csproj" />
