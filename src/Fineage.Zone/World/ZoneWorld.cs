@@ -72,6 +72,9 @@ sealed class ZoneEntity
     public bool CorpseAwaitingSweep { get; set; }
     public List<AbnormalEffectMsg> AbnormalEffects { get; } = [];
     public HashSet<int> Knownlist { get; } = [];
+    public int ClanId { get; set; }
+    /// <summary>Attack stance end, unix milliseconds. Leave and dismiss are refused until this passes.</summary>
+    public long CombatUntilUnixMs { get; set; }
 }
 
 /// <summary>
@@ -122,6 +125,7 @@ public sealed partial class ZoneWorld
         _activeMapId = string.IsNullOrWhiteSpace(activeMapId) ? SpawnCatalog.DefaultMapId : activeMapId.Trim();
         _clock = clock ?? (() => DateTimeOffset.UtcNow);
         BootstrapSpawns();
+        LoadClans();
     }
 
     public IReadOnlyList<int> NpcObjectIds
@@ -225,6 +229,7 @@ public sealed partial class ZoneWorld
         var spawn = SpawnFor(session);
         var inventory = LoadInventory(session);
         var vitals = LoadVitals(session);
+        RememberPenalties(session);
         var entity = new ZoneEntity
         {
             ObjectId = session.ObjectId,
@@ -245,8 +250,10 @@ public sealed partial class ZoneWorld
             CurMp = vitals.mp,
             Level = vitals.level,
             Race = vitals.race,
-            Sex = vitals.sex
+            Sex = vitals.sex,
+            ClanId = ClanIdFor(session.ObjectId)
         };
+        SyncClanStanding(entity);
         RefreshGradePenalty(entity);
         _byId[entity.ObjectId] = entity;
         _aoi.Enter(entity.ObjectId, entity.X, entity.Y);
@@ -270,6 +277,7 @@ public sealed partial class ZoneWorld
             }
         }
 
+        AnnounceClanEnter(entity, toSelf, toOthers);
         toSelf.Add(Pack(session, MsgType.SystemMessage, SayRules.Welcome(session.Name)));
         known = entity.Knownlist.Count;
         return true;
@@ -392,6 +400,7 @@ public sealed partial class ZoneWorld
         session.InWorld = false;
 
         PartyPlayerLeftWorld(session.ObjectId, toOthers);
+        ClanPlayerLeftWorld(session.ObjectId, session.Name, toOthers);
 
         byte[] body = MessagePackSerializer.Serialize(new DeleteObjectMsg { ObjectId = session.ObjectId });
         foreach (var watcher in watchers)
@@ -548,7 +557,9 @@ public sealed partial class ZoneWorld
             entity.Running,
             entity.Inventory,
             entity.WeaponGradePenalty,
-            entity.ArmorGradePenalty);
+            entity.ArmorGradePenalty,
+            entity.ClanId,
+            ClanProtocol.CrestId);
     }
 
     static CharInfoMsg CharInfo(ZoneEntity entity) => new()
@@ -561,7 +572,9 @@ public sealed partial class ZoneWorld
         ClassId = entity.ClassId,
         Paperdoll = entity.Inventory == null
             ? new int[InventoryMessages.PaperdollSlotCount]
-            : InventoryMessages.ItemIds(entity.Inventory)
+            : InventoryMessages.ItemIds(entity.Inventory),
+        ClanId = entity.ClanId,
+        ClanCrestId = entity.ClanId == 0 ? 0 : ClanProtocol.CrestId
     };
 
     static NpcInfoMsg NpcInfo(ZoneEntity entity) => new()

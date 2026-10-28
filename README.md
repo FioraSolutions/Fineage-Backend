@@ -43,13 +43,15 @@ Item object ids start at **100000** and are unique across the zone. Creating a c
 
 MessagePack keys are additive. `CharInfo` keys 0–5 are unchanged; key **6** is new.
 
-`UserInfo` (1016): `0` objectId, `1` name, `2` classId, `3` x, `4` y, `5` z, `6` runSpeed, `7` walkSpeed, `8` running, `9` paperdoll, `10` weaponGradePenalty, `11` armorGradePenalty, `12` gradePenalty. Paperdoll is 17 slots in order Under, Lear, Rear, Neck, LFinger, RFinger, Head, RHand, LHand, Gloves, Chest, Legs, Feet, Cloak, Face, Hair, Hair2. Each slot is `0` objectId, `1` itemId (both 0 when empty). Right hand is index **7**. Keys 10 and 11 are 0–4. Key 12 is the greater of the two, or 0. They stay 0 when `FINEAGE_EXPERTISE_PENALTY` is `0`, `false`, or `no` (the default is on).
+`UserInfo` (1016): `0` objectId, `1` name, `2` classId, `3` x, `4` y, `5` z, `6` runSpeed, `7` walkSpeed, `8` running, `9` paperdoll, `10` weaponGradePenalty, `11` armorGradePenalty, `12` gradePenalty, `13` clanId, `14` clanCrestId (0 until crests exist). Paperdoll is 17 slots in order Under, Lear, Rear, Neck, LFinger, RFinger, Head, RHand, LHand, Gloves, Chest, Legs, Feet, Cloak, Face, Hair, Hair2. Each slot is `0` objectId, `1` itemId (both 0 when empty). Right hand is index **7**. Keys 10 and 11 are 0–4. Key 12 is the greater of the two, or 0. They stay 0 when `FINEAGE_EXPERTISE_PENALTY` is `0`, `false`, or `no` (the default is on).
 
 `ItemList` (1014): `0` items. Each item is `0` objectId, `1` itemId, `2` count, `3` equippedSlot (paperdoll index, or **-1** in the bag), `4` bodySlot (`none`, `rhand`, `lhand`, `lrhand`, `chest`, `legs`, …), `5` kind (`weapon`, `armor`, `etc`), `6` icon, `7` weaponType (`sword`, `dagger`, `blunt`, …, or empty), `8` armorType (`light`, `heavy`, `magic`, or empty).
 
 `InventoryUpdate` (1015): `0` changes. Each change is `0` change (**0** add, **1** modify, **2** remove), then the same item fields as `ItemList` shifted by one: `1` objectId, `2` itemId, `3` count, `4` equippedSlot, `5` bodySlot, `6` kind, `7` icon, `8` weaponType, `9` armorType.
 
-`CharInfo` (1005) key `6` is an `int[17]` of item ids in the same paperdoll order. **0** means empty. Other clients still read keys 0–5.
+`CharInfo` (1005) key `6` is an `int[17]` of item ids in the same paperdoll order. **0** means empty. Key `7` is clanId and key `8` is clanCrestId (0). Other clients still read keys 0–5.
+
+Clan create, invite, leave, dismiss, and dissolution use opcodes **32–38** (admin spoil/sweep stay **30–31**) and **1050–1053**. Level 10, a 2–16 character alphanumeric name, and the Mobius day penalties (join 1, create 10, dissolve 7) are in `docs/clan-v2-protocol.md`. Membership is stored in `accounts.json` with the character.
 
 `Handoff.Token` is the zone session key. Login TCP listens on **9106**. The same process serves play-landing HTTP on **5080** (`POST /api/auth/register`, `POST /api/auth/login`) against that store. Zone listens on **9777**. Both bind **0.0.0.0** unless `--bind` / `FINEAGE_BIND` says otherwise. Accounts live in `data/accounts.json` (`--store` / `FINEAGE_LOGIN_STORE`), including the email from HTTP register.
 

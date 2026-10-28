@@ -98,6 +98,8 @@ public sealed partial class ZoneWorld
 
         FanoutCombat(player, target, attack, status, outbound);
 
+        player.CombatUntilUnixMs = _clock().ToUnixTimeMilliseconds() + ClanProtocol.CombatStanceMillis;
+
         if (target.CurHp <= 0)
             RemoveDeadNpc(target, outbound);
 

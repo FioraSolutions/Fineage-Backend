@@ -20,7 +20,9 @@ public static class InventoryMessages
         bool running,
         PlayerInventory inventory,
         int weaponGradePenalty = 0,
-        int armorGradePenalty = 0)
+        int armorGradePenalty = 0,
+        int clanId = 0,
+        int clanCrestId = 0)
     {
         ArgumentNullException.ThrowIfNull(inventory);
         var penalty = new GradePenalty(weaponGradePenalty, armorGradePenalty);
@@ -38,7 +40,9 @@ public static class InventoryMessages
             Paperdoll = Paperdoll(inventory),
             WeaponGradePenalty = penalty.Weapon,
             ArmorGradePenalty = penalty.Armor,
-            GradePenalty = penalty.SkillLevel
+            GradePenalty = penalty.SkillLevel,
+            ClanId = clanId,
+            ClanCrestId = clanCrestId
         };
     }
 

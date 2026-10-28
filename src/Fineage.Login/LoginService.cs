@@ -359,14 +359,17 @@ public sealed class LoginService
     }
 
     /// <summary>
-    /// Clan membership is not implemented. Mobius refuses a clan member (reason 2) and a clan leader (reason 3).
-    /// Return a player-facing sentence when that data exists; null allows the delete.
+    /// Mobius refuses a clan member (reason 2) and a clan leader (reason 3).
+    /// Null allows the delete.
     /// </summary>
-    static string? ClanDeleteBlock(CharacterRecord character)
+    string? ClanDeleteBlock(CharacterRecord character)
     {
-        if (string.IsNullOrEmpty(character.Account))
-            return "Character could not be deleted.";
-        return null;
+        if (character.ClanId == 0)
+            return null;
+        var clan = _store.FindClan(character.ClanId);
+        if (clan != null && clan.LeaderId == character.Id)
+            return "A clan leader cannot be deleted.";
+        return "A clan member cannot be deleted.";
     }
 
     /// <summary>Register when the account is new, create the Human when missing, then select.</summary>

@@ -238,6 +238,10 @@ public sealed class CharInfoMsg
     /// Zero means the slot is empty. Older clients ignore this key.
     /// </summary>
     [Key(6)] public int[] Paperdoll { get; set; } = [];
+    /// <summary>0 when the character is not in a clan. Older clients ignore this key.</summary>
+    [Key(7)] public int ClanId { get; set; }
+    /// <summary>Pledge crest id. Always 0 until crests exist.</summary>
+    [Key(8)] public int ClanCrestId { get; set; }
 }
 
 /// <summary>One paperdoll slot in <see cref="UserInfoMsg"/>. Object id and item id are 0 when the slot is empty.</summary>
@@ -275,6 +279,10 @@ public sealed class UserInfoMsg
     /// Mobius EtcStatusUpdate sends 1 when this is non-zero. Stat multipliers are not applied.
     /// </summary>
     [Key(12)] public int GradePenalty { get; set; }
+    /// <summary>0 when the character is not in a clan. Older clients ignore this key.</summary>
+    [Key(13)] public int ClanId { get; set; }
+    /// <summary>Pledge crest id. Always 0 until crests exist.</summary>
+    [Key(14)] public int ClanCrestId { get; set; }
 }
 
 /// <summary>One row of <see cref="ItemListMsg"/> or the item fields of <see cref="InventoryUpdateEntryMsg"/>.</summary>
@@ -633,4 +641,108 @@ public sealed class PartyLeaveRequestMsg
 public sealed class PartyKickRequestMsg
 {
     [Key(0)] public int TargetObjectId { get; set; }
+}
+
+/// <summary>Opcode <see cref="MsgType.ClanCreateRequest"/> (32).</summary>
+[MessagePackObject]
+public sealed class ClanCreateRequestMsg
+{
+    [Key(0)] public string Name { get; set; } = "";
+}
+
+/// <summary>Opcode <see cref="MsgType.ClanInviteRequest"/> (33). Pledge type must be 0 (main).</summary>
+[MessagePackObject]
+public sealed class ClanInviteRequestMsg
+{
+    [Key(0)] public int TargetObjectId { get; set; }
+    [Key(1)] public int PledgeType { get; set; }
+}
+
+/// <summary>
+/// Opcode <see cref="MsgType.ClanAnswerJoinRequest"/> (34).
+/// Response 0 declines. Any other value accepts (Mobius <c>RequestAnswerJoinPledge</c>).
+/// </summary>
+[MessagePackObject]
+public sealed class ClanAnswerJoinRequestMsg
+{
+    [Key(0)] public int RequestorObjectId { get; set; }
+    [Key(1)] public int Response { get; set; }
+}
+
+/// <summary>Opcode <see cref="MsgType.ClanLeaveRequest"/> (35). Empty body.</summary>
+[MessagePackObject]
+public sealed class ClanLeaveRequestMsg
+{
+}
+
+/// <summary>Opcode <see cref="MsgType.ClanKickRequest"/> (36).</summary>
+[MessagePackObject]
+public sealed class ClanKickRequestMsg
+{
+    [Key(0)] public int TargetObjectId { get; set; }
+}
+
+/// <summary>Opcode <see cref="MsgType.ClanDissolveRequest"/> (37). Empty body.</summary>
+[MessagePackObject]
+public sealed class ClanDissolveRequestMsg
+{
+}
+
+/// <summary>Opcode <see cref="MsgType.ClanCancelDissolveRequest"/> (38). Empty body.</summary>
+[MessagePackObject]
+public sealed class ClanCancelDissolveRequestMsg
+{
+}
+
+/// <summary>Opcode <see cref="MsgType.ClanAskJoin"/> (1050).</summary>
+[MessagePackObject]
+public sealed class ClanAskJoinMsg
+{
+    [Key(0)] public int RequestorObjectId { get; set; }
+    [Key(1)] public string RequestorName { get; set; } = "";
+    [Key(2)] public int ClanId { get; set; }
+    [Key(3)] public string ClanName { get; set; } = "";
+    [Key(4)] public int PledgeType { get; set; }
+}
+
+/// <summary>Opcode <see cref="MsgType.PledgeStatusChanged"/> (1051). Clan id 0 clears the pledge.</summary>
+[MessagePackObject]
+public sealed class PledgeStatusChangedMsg
+{
+    [Key(0)] public int ClanId { get; set; }
+    [Key(1)] public string Name { get; set; } = "";
+    [Key(2)] public int Level { get; set; }
+    [Key(3)] public int LeaderObjectId { get; set; }
+    [Key(4)] public int CrestId { get; set; }
+    [Key(5)] public int MemberCount { get; set; }
+    [Key(6)] public long DissolvingExpiryUnixMs { get; set; }
+    [Key(7)] public long CharPenaltyExpiryUnixMs { get; set; }
+}
+
+/// <summary>One row of <see cref="PledgeMemberListMsg"/>.</summary>
+[MessagePackObject]
+public sealed class PledgeMemberEntryMsg
+{
+    [Key(0)] public int ObjectId { get; set; }
+    [Key(1)] public string Name { get; set; } = "";
+    [Key(2)] public int ClassId { get; set; }
+    [Key(3)] public int Level { get; set; }
+    [Key(4)] public bool Online { get; set; }
+    [Key(5)] public int PledgeType { get; set; }
+}
+
+/// <summary>Opcode <see cref="MsgType.PledgeMemberList"/> (1052).</summary>
+[MessagePackObject]
+public sealed class PledgeMemberListMsg
+{
+    [Key(0)] public int ClanId { get; set; }
+    [Key(1)] public int LeaderObjectId { get; set; }
+    [Key(2)] public PledgeMemberEntryMsg[] Members { get; set; } = [];
+}
+
+/// <summary>Opcode <see cref="MsgType.ClanJoinResult"/> (1053). 0 declined, otherwise the accepted response.</summary>
+[MessagePackObject]
+public sealed class ClanJoinResultMsg
+{
+    [Key(0)] public int Response { get; set; }
 }

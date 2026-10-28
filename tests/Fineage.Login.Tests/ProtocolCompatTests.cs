@@ -53,6 +53,13 @@ public class ProtocolCompatTests
         Assert.Equal(19, (ushort)MsgType.PartyAnswerJoinRequest);
         Assert.Equal(26, (ushort)MsgType.PartyLeaveRequest);
         Assert.Equal(27, (ushort)MsgType.PartyKickRequest);
+        Assert.Equal(32, (ushort)MsgType.ClanCreateRequest);
+        Assert.Equal(33, (ushort)MsgType.ClanInviteRequest);
+        Assert.Equal(34, (ushort)MsgType.ClanAnswerJoinRequest);
+        Assert.Equal(35, (ushort)MsgType.ClanLeaveRequest);
+        Assert.Equal(36, (ushort)MsgType.ClanKickRequest);
+        Assert.Equal(37, (ushort)MsgType.ClanDissolveRequest);
+        Assert.Equal(38, (ushort)MsgType.ClanCancelDissolveRequest);
         Assert.Equal((ushort)MsgType.UseItem, (ushort)Fineage.Protocol.V2.MsgType.UseItem);
         Assert.Equal((ushort)MsgType.UnequipItem, (ushort)Fineage.Protocol.V2.MsgType.UnequipItem);
         Assert.Equal((ushort)MsgType.GiveItem, (ushort)Fineage.Protocol.V2.MsgType.GiveItem);
@@ -84,6 +91,13 @@ public class ProtocolCompatTests
         Assert.Equal(1028, (ushort)MsgType.PartyJoinResult);
         Assert.Equal(1029, (ushort)MsgType.PartyMemberList);
         Assert.Equal(1040, (ushort)MsgType.SystemMessage);
+        Assert.Equal(1050, (ushort)MsgType.ClanAskJoin);
+        Assert.Equal(1051, (ushort)MsgType.PledgeStatusChanged);
+        Assert.Equal(1052, (ushort)MsgType.PledgeMemberList);
+        Assert.Equal(1053, (ushort)MsgType.ClanJoinResult);
+        Assert.Equal(ClanProtocol.BandFirst, (ushort)MsgType.ClanAskJoin);
+        Assert.Equal((ushort)MsgType.ClanAskJoin, (ushort)Fineage.Protocol.V2.MsgType.ClanAskJoin);
+        Assert.Equal((ushort)MsgType.PledgeMemberList, (ushort)Fineage.Protocol.V2.MsgType.PledgeMemberList);
         Assert.Equal(ChatProtocol.ChatBandFirst, (ushort)MsgType.SystemMessage);
         Assert.Equal((ushort)MsgType.SystemMessage, (ushort)Fineage.Protocol.V2.MsgType.SystemMessage);
         Assert.Equal((ushort)MsgType.ItemList, (ushort)Fineage.Protocol.V2.MsgType.ItemList);
@@ -304,5 +318,54 @@ public class ProtocolCompatTests
         Assert.Equal((ushort)MsgType.Auth, frame!.Value.Type);
         Assert.Equal(body, frame.Value.Body);
         Assert.Equal(8, stream.Length);
+    }
+
+    [Fact]
+    public void ClanMessages_MatchProtocolV2Layout()
+    {
+        byte[] ask = MessagePackSerializer.Serialize(new ClanAskJoinMsg
+        {
+            RequestorObjectId = 4,
+            RequestorName = "Aria",
+            ClanId = 2,
+            ClanName = "Fine",
+            PledgeType = 0
+        });
+        byte[] askV2 = MessagePackSerializer.Serialize(new Fineage.Protocol.V2.ClanAskJoinMsg
+        {
+            RequestorObjectId = 4,
+            RequestorName = "Aria",
+            ClanId = 2,
+            ClanName = "Fine",
+            PledgeType = 0
+        });
+        Assert.Equal(ask, askV2);
+
+        var info = new CharInfoMsg
+        {
+            ObjectId = 4,
+            Name = "Aria",
+            X = 1,
+            Y = 2,
+            Z = 3,
+            ClassId = 0,
+            Paperdoll = new int[17],
+            ClanId = 9,
+            ClanCrestId = 0
+        };
+        var round = MessagePackSerializer.Deserialize<CharInfoMsg>(MessagePackSerializer.Serialize(info));
+        Assert.Equal(9, round.ClanId);
+        Assert.Equal(0, round.ClanCrestId);
+        Assert.Equal(17, round.Paperdoll.Length);
+
+        var user = MessagePackSerializer.Deserialize<UserInfoMsg>(MessagePackSerializer.Serialize(new UserInfoMsg
+        {
+            ObjectId = 4,
+            Name = "Aria",
+            ClanId = 9,
+            ClanCrestId = 0
+        }));
+        Assert.Equal(9, user.ClanId);
+        Assert.Equal(0, user.ClanCrestId);
     }
 }
