@@ -1,0 +1,37 @@
+{
+  "mapId": "ti_village_road",
+  "enabled": false,
+  "comment": "Second TI map slice in datapack; not materialized until multi-map init lands.",
+  "npcs": [
+    {
+      "objectId": 50101,
+      "npcId": 20001,
+      "name": "Gremlin",
+      "x": -71300,
+      "y": 259500,
+      "z": -3120,
+      "heading": 0,
+      "attackable": true,
+      "maxHp": 96,
+      "runSpeed": 80,
+      "walkSpeed": 40,
+      "respawnDelaySeconds": 45,
+      "respawnRandomSeconds": 15
+    },
+    {
+      "objectId": 50102,
+      "npcId": 20001,
+      "name": "Gremlin",
+      "x": -70800,
+      "y": 259800,
+      "z": -3120,
+      "heading": 16000,
+      "attackable": true,
+      "maxHp": 96,
+      "runSpeed": 80,
+      "walkSpeed": 40,
+      "respawnDelaySeconds": 45,
+      "respawnRandomSeconds": 15
+    }
+  ]
+}

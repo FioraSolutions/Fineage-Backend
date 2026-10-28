@@ -1,0 +1,52 @@
+{
+  "mapId": "ti_cedric",
+  "enabled": true,
+  "comment": "Cedric Training Hall gremlins; coords match Mobius-style fixed spawnlist rows.",
+  "npcs": [
+    {
+      "objectId": 50001,
+      "npcId": 20001,
+      "name": "Gremlin",
+      "x": -72524,
+      "y": 256899,
+      "z": -3112,
+      "heading": 16000,
+      "attackable": true,
+      "maxHp": 96,
+      "runSpeed": 80,
+      "walkSpeed": 40,
+      "respawnDelaySeconds": 60,
+      "respawnRandomSeconds": 0
+    },
+    {
+      "objectId": 50002,
+      "npcId": 20001,
+      "name": "Gremlin",
+      "x": -72894,
+      "y": 256879,
+      "z": -3112,
+      "heading": 0,
+      "attackable": true,
+      "maxHp": 96,
+      "runSpeed": 80,
+      "walkSpeed": 40,
+      "respawnDelaySeconds": 60,
+      "respawnRandomSeconds": 0
+    },
+    {
+      "objectId": 50003,
+      "npcId": 20001,
+      "name": "Gremlin",
+      "x": -72634,
+      "y": 256639,
+      "z": -3112,
+      "heading": 32000,
+      "attackable": true,
+      "maxHp": 96,
+      "runSpeed": 80,
+      "walkSpeed": 40,
+      "respawnDelaySeconds": 60,
+      "respawnRandomSeconds": 0
+    }
+  ]
+}

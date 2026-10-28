@@ -146,6 +146,7 @@ public sealed partial class ZoneWorld
 
         _aoi.Leave(objectId);
         _byId.Remove(objectId);
+        ScheduleRespawn(objectId);
 
         byte[] deleteBody = MessagePackSerializer.Serialize(new DeleteObjectMsg { ObjectId = objectId });
         foreach (var player in Players())

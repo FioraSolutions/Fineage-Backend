@@ -4,6 +4,7 @@ using Fineage.Protocol;
 using Fineage.Zone.Chat;
 using Fineage.Zone.Combat;
 using Fineage.Zone.Interest;
+using Fineage.Zone.Spawns;
 using MessagePack;
 
 namespace Fineage.Zone.World;
@@ -90,7 +91,10 @@ public sealed partial class ZoneWorld
         ItemObjectIdAllocator? itemIds = null,
         Random? spawnRandom = null,
         IAccountStore? accounts = null,
-        bool? expertisePenalty = null)
+        bool? expertisePenalty = null,
+        SpawnCatalog? spawnCatalog = null,
+        string? activeMapId = null,
+        Func<DateTimeOffset>? clock = null)
     {
         _aoi = aoi ?? new SingleCellAoi();
         _game = game ?? GameData.LoadDefault();
@@ -98,27 +102,10 @@ public sealed partial class ZoneWorld
         _spawnRandom = spawnRandom ?? Random.Shared;
         _accounts = accounts;
         _expertisePenalty = expertisePenalty ?? ZoneGearSettings.ExpertisePenalty;
-        foreach (var npc in TalkingIsland.Gremlins)
-        {
-            var entity = new ZoneEntity
-            {
-                ObjectId = npc.ObjectId,
-                Kind = ZoneEntityKind.Npc,
-                Name = npc.Name,
-                X = npc.X,
-                Y = npc.Y,
-                Z = npc.Z,
-                Heading = npc.Heading,
-                NpcId = npc.NpcId,
-                Attackable = npc.Attackable,
-                MaxHp = TalkingIsland.GremlinMaxHp,
-                CurHp = TalkingIsland.GremlinMaxHp,
-                RunSpeed = npc.RunSpeed,
-                WalkSpeed = npc.WalkSpeed
-            };
-            _byId.Add(entity.ObjectId, entity);
-            _aoi.Enter(entity.ObjectId, entity.X, entity.Y);
-        }
+        _spawnCatalog = spawnCatalog ?? SpawnCatalog.LoadDefault();
+        _activeMapId = string.IsNullOrWhiteSpace(activeMapId) ? SpawnCatalog.DefaultMapId : activeMapId.Trim();
+        _clock = clock ?? (() => DateTimeOffset.UtcNow);
+        BootstrapSpawns();
     }
 
     public IReadOnlyList<int> NpcObjectIds
