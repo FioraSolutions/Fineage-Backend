@@ -212,6 +212,53 @@ public sealed class LoginV2WireBoundaryTests
     }
 
     [Fact]
+    public async Task SelectServer_on_login_port_after_auth_returns_character_required()
+    {
+        var service = new LoginService(JsonAccountStore.InMemory(), HandoffTokens.FromEnvironment());
+        service.Register("hero", "pass1234");
+        var server = new LoginServer(service);
+
+        var listener = new TcpListener(IPAddress.Loopback, 0);
+        listener.Start();
+        int port = ((IPEndPoint)listener.LocalEndpoint).Port;
+        using var cts = new CancellationTokenSource();
+        var acceptTask = Task.Run(async () =>
+        {
+            using var accepted = await listener.AcceptTcpClientAsync(cts.Token);
+            await using var stream = accepted.GetStream();
+            await server.HandleAsync(stream, cts.Token);
+        });
+
+        using var client = new TcpClient();
+        await client.ConnectAsync(IPAddress.Loopback, port);
+        await using var stream = client.GetStream();
+
+        await FrameIO.SendAsync(stream, (ushort)ProtocolMsgType.Hello, MessagePackSerializer.Serialize(new HelloMsg()));
+        await ReadAsync(stream, ProtocolMsgType.HelloAck);
+        await FrameIO.SendAsync(stream, (ushort)ProtocolMsgType.Auth,
+            MessagePackSerializer.Serialize(new AuthMsg { Account = "hero", Password = "pass1234" }));
+        await ReadAsync(stream, ProtocolMsgType.LoginOk);
+        await FrameIO.SendAsync(stream, (ushort)V2MsgType.SelectServer,
+            MessagePackSerializer.Serialize(new Fineage.Protocol.V2.SelectServerMsg { ServerId = 1 }));
+
+        var frame = await FrameIO.ReadAsync(stream);
+        Assert.NotNull(frame);
+        Assert.Equal((ushort)ProtocolMsgType.Error, frame!.Value.Type);
+        var err = MessagePackSerializer.Deserialize<ErrorMsg>(frame.Value.Body);
+        Assert.Equal("character_required", err.Code);
+
+        listener.Stop();
+        await cts.CancelAsync();
+        try
+        {
+            await acceptTask;
+        }
+        catch (OperationCanceledException)
+        {
+        }
+    }
+
+    [Fact]
     public async Task SelectServer_on_login_pipeline_after_auth_returns_character_required()
     {
         var service = new LoginService(JsonAccountStore.InMemory(), HandoffTokens.FromEnvironment());
