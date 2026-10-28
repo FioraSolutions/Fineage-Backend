@@ -92,6 +92,22 @@ def parse_skill(node: ET.Element) -> dict | None:
     target = child_text(node, "targetType") or "ONE"
     passive = operate.upper().startswith("P")
 
+    abnormal_levels = parse_num_list(parse_table(node, "#abnormalLevels"), levels)
+    if not any(abnormal_levels):
+        single = child_text(node, "abnormalLevel")
+        if single and not single.startswith("#"):
+            abnormal_levels = [num(single)] * levels
+        else:
+            abnormal_levels = [1] * levels
+
+    abnormal_time = child_text(node, "abnormalTime")
+    if abnormal_time and abnormal_time.isdigit():
+        abnormal_time_seconds = int(abnormal_time)
+    else:
+        abnormal_time_seconds = 0
+
+    is_debuff = (child_text(node, "isDebuff") or "").lower() == "true"
+
     level_rows = []
     for index in range(levels):
         level_rows.append(
@@ -99,10 +115,11 @@ def parse_skill(node: ET.Element) -> dict | None:
                 "level": index + 1,
                 "mpConsume": mp[index] if index < len(mp) else 0,
                 "power": power[index] if index < len(power) else 0,
+                "abnormalLevel": abnormal_levels[index] if index < len(abnormal_levels) else 1,
             }
         )
 
-    return {
+    row = {
         "skillId": skill_id,
         "name": name,
         "levels": levels,
@@ -114,6 +131,11 @@ def parse_skill(node: ET.Element) -> dict | None:
         "reuseDelayMs": reuse_ms,
         "levelData": level_rows,
     }
+    if abnormal_time_seconds > 0:
+        row["abnormalTimeSeconds"] = abnormal_time_seconds
+    if is_debuff:
+        row["isDebuff"] = True
+    return row
 
 
 def load_skill_templates(skills_root: Path) -> dict[int, dict]:

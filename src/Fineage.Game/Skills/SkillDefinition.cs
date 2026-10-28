@@ -14,6 +14,8 @@ public sealed class SkillDefinition
         int castRange,
         int hitTimeMs,
         int reuseDelayMs,
+        int abnormalTimeSeconds,
+        bool isDebuff,
         SkillLevelData[] levels)
     {
         SkillId = skillId;
@@ -24,6 +26,8 @@ public sealed class SkillDefinition
         CastRange = castRange;
         HitTimeMs = hitTimeMs;
         ReuseDelayMs = reuseDelayMs;
+        AbnormalTimeSeconds = Math.Max(0, abnormalTimeSeconds);
+        IsDebuff = isDebuff;
         _levels = levels;
     }
 
@@ -42,6 +46,17 @@ public sealed class SkillDefinition
     public int HitTimeMs { get; }
 
     public int ReuseDelayMs { get; }
+
+    /// <summary>Mobius <c>abnormalTime</c> in seconds. 0 when the skill does not apply an abnormal.</summary>
+    public int AbnormalTimeSeconds { get; }
+
+    public bool IsDebuff { get; }
+
+    public bool AppliesAbnormal => AbnormalTimeSeconds > 0;
+
+    public bool IsBuffSkill => AppliesAbnormal && !IsDebuff;
+
+    public bool IsDebuffSkill => AppliesAbnormal && IsDebuff;
 
     public int MaxLevel => _levels.Length;
 

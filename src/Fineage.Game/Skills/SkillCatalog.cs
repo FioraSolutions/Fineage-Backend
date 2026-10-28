@@ -67,7 +67,12 @@ public sealed class SkillCatalog
             {
                 var levelRow = row.LevelData[i];
                 int level = levelRow.Level == 0 ? i + 1 : levelRow.Level;
-                levels[i] = new SkillLevelData(level, Math.Max(0, levelRow.MpConsume), Math.Max(0, levelRow.Power));
+                int abnormalLevel = levelRow.AbnormalLevel <= 0 ? 1 : levelRow.AbnormalLevel;
+                levels[i] = new SkillLevelData(
+                    level,
+                    Math.Max(0, levelRow.MpConsume),
+                    Math.Max(0, levelRow.Power),
+                    abnormalLevel);
             }
 
             skills.Add(new SkillDefinition(
@@ -79,6 +84,8 @@ public sealed class SkillCatalog
                 Math.Max(0, row.CastRange),
                 Math.Max(0, row.HitTimeMs),
                 Math.Max(0, row.ReuseDelayMs),
+                Math.Max(0, row.AbnormalTimeSeconds),
+                row.IsDebuff,
                 levels));
         }
 
@@ -100,6 +107,8 @@ public sealed class SkillCatalog
         public int CastRange { get; set; }
         public int HitTimeMs { get; set; }
         public int ReuseDelayMs { get; set; }
+        public int AbnormalTimeSeconds { get; set; }
+        public bool IsDebuff { get; set; }
         public List<LevelDto>? LevelData { get; set; }
     }
 
@@ -108,5 +117,6 @@ public sealed class SkillCatalog
         public int Level { get; set; }
         public int MpConsume { get; set; }
         public int Power { get; set; }
+        public int AbnormalLevel { get; set; } = 1;
     }
 }

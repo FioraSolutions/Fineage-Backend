@@ -12,4 +12,12 @@ public static class ZoneCombat
         long dy = ay - (long)by;
         return dx * dx + dy * dy <= (long)MeleeRange * MeleeRange;
     }
+
+    public static bool InCastRange(int ax, int ay, int bx, int by, int castRange)
+    {
+        int range = Math.Max(40, castRange);
+        long dx = ax - (long)bx;
+        long dy = ay - (long)by;
+        return dx * dx + dy * dy <= (long)range * range;
+    }
 }

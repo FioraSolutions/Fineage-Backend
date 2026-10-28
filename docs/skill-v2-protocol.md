@@ -22,10 +22,15 @@ Siege occupies **46–49** and **1064** (`docs/siege-v2-protocol.md`). Quest ban
 
 ## SkillUse (MVP)
 
-- Validates known skill, reuse timer, MP (`mpConsume` from Mobius level row), melee range (same as basic attack stub), attackable NPC target.  
-- Physical damage skills use Mobius `power` plus a small stub bonus.  
+- Validates known skill, reuse timer, MP (`mpConsume` from Mobius level row).  
+- **Attack (A1):** melee range, attackable NPC; damage from Mobius `power` plus a small stub bonus.  
+- **Buff/debuff (A2 + `abnormalTimeSeconds` in catalog):** cast range from Mobius `castRange`; applies timed abnormal (effect id = skill id, value = `abnormalLevel`); fan-out **`AbnormalStatusUpdate` (1017)**; simulation tick clears expired rows.  
 - Errors: `skill_unknown`, `skill_passive`, `skill_reuse`, `skill_mp`, `skill_target`, `skill_range`, `skill_dead`.
 
-## Follow-ups (#137)
+## Catalog abnormal fields (#138)
 
-- `RequestAcquireSkill` / trainer NPC, persistence, buff effects from skill data (#138), toggle/passive apply.
+`tools/import_skills.py` transcribes Mobius `abnormalTime`, `abnormalLevel`, and `isDebuff` into `data/skills.json` (`abnormalTimeSeconds`, per-level `abnormalLevel`).
+
+## Follow-ups
+
+- `RequestAcquireSkill` / trainer NPC, persistence, toggle/passive stat apply, debuff resist formulas.

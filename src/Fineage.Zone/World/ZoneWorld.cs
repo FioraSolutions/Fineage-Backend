@@ -82,7 +82,7 @@ sealed class ZoneEntity
     public List<Drops.DropStack> SweepItems { get; } = [];
     /// <summary>Dead NPC kept in world until sweeper takes <see cref="SweepItems"/>.</summary>
     public bool CorpseAwaitingSweep { get; set; }
-    public List<AbnormalEffectMsg> AbnormalEffects { get; } = [];
+    public List<ZoneAbnormalEntry> Abnormals { get; } = [];
     /// <summary>Known skill id to level (auto-get tree on enter).</summary>
     public Dictionary<int, int> KnownSkills { get; } = [];
     /// <summary>Skill id to unix-ms when reuse expires.</summary>

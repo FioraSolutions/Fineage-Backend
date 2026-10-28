@@ -10,14 +10,10 @@ public sealed partial class ZoneWorld
         if (!IsLive(session))
             return "world";
 
-        int targetId = request.TargetObjectId > 0 ? request.TargetObjectId : session.ObjectId;
-        if (request.EffectId <= 0 && !request.Remove)
-            return "bad_request";
-
         var outbound = new List<Pending>();
         string? error;
         lock (_gate)
-            error = TryBuffRequest(session, targetId, request, outbound);
+            error = TryBuffRequest(session, targetId: request.TargetObjectId > 0 ? request.TargetObjectId : session.ObjectId, request, outbound);
         if (error != null)
             return error;
 
@@ -34,51 +30,32 @@ public sealed partial class ZoneWorld
         if (targetId != session.ObjectId && !VisibleTo(session.ObjectId, targetId))
             return "target";
 
+        long now = _clock().ToUnixTimeMilliseconds();
         if (request.Remove)
         {
             if (request.EffectId <= 0)
-                target.AbnormalEffects.Clear();
+                target.Abnormals.Clear();
             else
-                target.AbnormalEffects.RemoveAll(e => e.Id == request.EffectId);
+            {
+                for (int i = target.Abnormals.Count - 1; i >= 0; i--)
+                {
+                    if (target.Abnormals[i].Id == request.EffectId)
+                        target.Abnormals.RemoveAt(i);
+                }
+            }
         }
         else
         {
             int effectId = request.EffectId > 0 ? request.EffectId : ZoneBuffs.SampleWindWalk;
-            var effect = new AbnormalEffectMsg
-            {
-                Id = effectId,
-                Value = ZoneBuffs.SampleEffectValue,
-                DurationSeconds = ZoneBuffs.SampleDurationSeconds
-            };
-            int index = target.AbnormalEffects.FindIndex(e => e.Id == effectId);
-            if (index >= 0)
-                target.AbnormalEffects[index] = effect;
-            else
-                target.AbnormalEffects.Add(effect);
+            int value = ResolveAbnormalValue(effectId, ZoneBuffs.SampleEffectValue);
+            int duration = ResolveAbnormalDurationSeconds(effectId, ZoneBuffs.SampleDurationSeconds);
+            ApplyAbnormalPlaytest(target, effectId, value, duration, now, outbound);
+            ZoneLog.Info($"buff object={targetId} count={target.Abnormals.Count} remove={request.Remove}");
+            return null;
         }
 
         FanoutAbnormal(target, outbound);
-        ZoneLog.Info($"buff object={targetId} count={target.AbnormalEffects.Count} remove={request.Remove}");
+        ZoneLog.Info($"buff object={targetId} count={target.Abnormals.Count} remove={request.Remove}");
         return null;
     }
-
-    void FanoutAbnormal(ZoneEntity target, List<Pending> outbound)
-    {
-        var update = AbnormalFor(target);
-        foreach (var watcher in Players())
-        {
-            if (watcher.Session == null)
-                continue;
-            bool cares = ReferenceEquals(watcher, target) || watcher.Knownlist.Contains(target.ObjectId);
-            if (!cares)
-                continue;
-            outbound.Add(Pack(watcher.Session, MsgType.AbnormalStatusUpdate, update));
-        }
-    }
-
-    static AbnormalStatusUpdateMsg AbnormalFor(ZoneEntity entity) => new()
-    {
-        ObjectId = entity.ObjectId,
-        Effects = entity.AbnormalEffects.ToArray()
-    };
 }
