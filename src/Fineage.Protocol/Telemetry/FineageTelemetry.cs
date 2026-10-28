@@ -4,8 +4,9 @@ using System.Diagnostics.Metrics;
 namespace Fineage.Protocol.Telemetry;
 
 /// <summary>
-/// Process-wide counters and traces. A host can export them by adding the
-/// <c>Fineage.Server</c> meter and activity source to OpenTelemetry.
+/// Process-wide counters and traces. Export by subscribing the OpenTelemetry SDK to
+/// meter <see cref="MeterName"/> and activity source <see cref="ActivitySourceName"/>.
+/// TCP instruments use tag <c>endpoint</c> (<c>login</c> or <c>zone</c> in production CLI).
 /// </summary>
 public static class FineageTelemetry
 {
