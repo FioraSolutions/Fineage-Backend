@@ -713,6 +713,32 @@ public sealed class LoginV2WireBoundaryTests
     }
 
     [Fact]
+    public async Task ProtocolCreateCharacter_on_login_pipeline_after_auth_unreadable_body_returns_bad_request()
+    {
+        var service = new LoginService(JsonAccountStore.InMemory(), HandoffTokens.FromEnvironment());
+        service.Register("hero", "pass1234");
+        var server = new LoginServer(service);
+        await using var host = await PipelineLoginHost.StartAsync(server);
+
+        using var client = new TcpClient();
+        await client.ConnectAsync(IPAddress.Loopback, host.Port);
+        await using var stream = client.GetStream();
+
+        await FrameIO.SendAsync(stream, (ushort)ProtocolMsgType.Hello, MessagePackSerializer.Serialize(new HelloMsg()));
+        await ReadAsync(stream, ProtocolMsgType.HelloAck);
+        await FrameIO.SendAsync(stream, (ushort)ProtocolMsgType.Auth,
+            MessagePackSerializer.Serialize(new AuthMsg { Account = "hero", Password = "pass1234" }));
+        await ReadAsync(stream, ProtocolMsgType.LoginOk);
+        await FrameIO.SendAsync(stream, (ushort)ProtocolMsgType.CreateCharacter, [0xC0]);
+
+        var frame = await FrameIO.ReadAsync(stream);
+        Assert.NotNull(frame);
+        Assert.Equal((ushort)ProtocolMsgType.Error, frame!.Value.Type);
+        var err = MessagePackSerializer.Deserialize<ErrorMsg>(frame.Value.Body);
+        Assert.Equal("bad_request", err.Code);
+    }
+
+    [Fact]
     public async Task CreateCharacter_on_login_port_after_auth_unreadable_body_returns_bad_request()
     {
         var service = new LoginService(JsonAccountStore.InMemory(), HandoffTokens.FromEnvironment());
