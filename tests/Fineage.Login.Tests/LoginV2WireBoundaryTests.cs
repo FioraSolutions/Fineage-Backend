@@ -37,6 +37,29 @@ public sealed class LoginV2WireBoundaryTests
     }
 
     [Fact]
+    public async Task SelectServer_on_login_pipeline_unknown_server_returns_server_not_found()
+    {
+        var service = new LoginService(JsonAccountStore.InMemory(), HandoffTokens.FromEnvironment());
+        var server = new LoginServer(service);
+        await using var host = await PipelineLoginHost.StartAsync(server);
+
+        using var client = new TcpClient();
+        await client.ConnectAsync(IPAddress.Loopback, host.Port);
+        await using var stream = client.GetStream();
+
+        await FrameIO.SendAsync(stream, (ushort)ProtocolMsgType.Hello, MessagePackSerializer.Serialize(new HelloMsg()));
+        await ReadAsync(stream, ProtocolMsgType.HelloAck);
+        await FrameIO.SendAsync(stream, (ushort)V2MsgType.SelectServer,
+            MessagePackSerializer.Serialize(new Fineage.Protocol.V2.SelectServerMsg { ServerId = 99 }));
+
+        var frame = await FrameIO.ReadAsync(stream);
+        Assert.NotNull(frame);
+        Assert.Equal((ushort)ProtocolMsgType.Error, frame!.Value.Type);
+        var err = MessagePackSerializer.Deserialize<ErrorMsg>(frame.Value.Body);
+        Assert.Equal("server_not_found", err.Code);
+    }
+
+    [Fact]
     public async Task SelectServer_on_login_pipeline_without_auth_returns_auth_required()
     {
         var service = new LoginService(JsonAccountStore.InMemory(), HandoffTokens.FromEnvironment());
