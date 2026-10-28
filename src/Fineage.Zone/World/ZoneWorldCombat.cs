@@ -1,5 +1,6 @@
 using Fineage.Protocol;
 using Fineage.Zone.Combat;
+using Fineage.Zone.Drops;
 using MessagePack;
 
 namespace Fineage.Zone.World;
@@ -133,6 +134,7 @@ public sealed partial class ZoneWorld
     void RemoveDeadNpc(ZoneEntity npc, List<Pending> outbound)
     {
         int objectId = npc.ObjectId;
+        int npcId = npc.NpcId;
         int x = npc.X;
         int y = npc.Y;
         int z = npc.Z;
@@ -144,8 +146,34 @@ public sealed partial class ZoneWorld
                 watchers.Add(player);
         }
 
+        npc.SweepItems.Clear();
+        if (npc.SpoilerObjectId != 0 && _dropCatalog.TryGet(npcId, out var definition))
+        {
+            foreach (var stack in DropRoller.RollCorpse(definition, _dropRandom, _dropRates))
+                npc.SweepItems.Add(stack);
+        }
+
+        if (npc.SweepItems.Count > 0)
+        {
+            SpawnDeathDrops(npcId, x, y, z, watchers, outbound);
+            npc.CorpseAwaitingSweep = true;
+            ZoneLog.Info($"corpse object={objectId} spoiler={npc.SpoilerObjectId} sweep={npc.SweepItems.Count}");
+            return;
+        }
+
+        DespawnNpc(npc, outbound);
+        SpawnDeathDrops(npcId, x, y, z, watchers, outbound);
+    }
+
+    void DespawnNpc(ZoneEntity npc, List<Pending> outbound)
+    {
+        int objectId = npc.ObjectId;
+
         _aoi.Leave(objectId);
         _byId.Remove(objectId);
+        npc.SpoilerObjectId = 0;
+        npc.SweepItems.Clear();
+        npc.CorpseAwaitingSweep = false;
         ScheduleRespawn(objectId);
 
         byte[] deleteBody = MessagePackSerializer.Serialize(new DeleteObjectMsg { ObjectId = objectId });
@@ -158,8 +186,6 @@ public sealed partial class ZoneWorld
             if (player.Session.SelectedTargetId == objectId)
                 player.Session.SelectedTargetId = 0;
         }
-
-        SpawnGremlinDrop(x, y, z, watchers, outbound);
     }
 
     bool VisibleTo(int observerId, int otherId)

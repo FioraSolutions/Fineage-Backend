@@ -6,6 +6,8 @@ data/*
 !data/starter-kits.json
 !data/spawns/
 !data/spawns/**
+!data/drops/
+!data/drops/**
 TestResults/
 .vs/
 .idea/

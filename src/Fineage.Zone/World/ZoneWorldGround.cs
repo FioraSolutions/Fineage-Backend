@@ -1,5 +1,6 @@
 using Fineage.Protocol;
 using Fineage.Zone.Combat;
+using Fineage.Zone.Drops;
 using MessagePack;
 
 namespace Fineage.Zone.World;
@@ -43,9 +44,21 @@ public sealed partial class ZoneWorld
         return null;
     }
 
-    void SpawnGremlinDrop(int x, int y, int z, IReadOnlyList<ZoneEntity> watchers, List<Pending> outbound)
+    void SpawnDeathDrops(int npcId, int x, int y, int z, IReadOnlyList<ZoneEntity> watchers, List<Pending> outbound)
     {
-        if (!_game.Items.TryGet(TalkingIsland.GremlinDropItemId, out var template))
+        if (!_dropCatalog.TryGet(npcId, out var definition))
+            return;
+
+        var rolls = DropRoller.RollDeath(definition, _dropRandom, _dropRates);
+        foreach (var stack in rolls)
+            SpawnGroundStack(stack.ItemId, stack.Count, x, y, z, watchers, outbound);
+    }
+
+    void SpawnGroundStack(int itemId, int count, int x, int y, int z, IReadOnlyList<ZoneEntity> watchers, List<Pending> outbound)
+    {
+        if (count <= 0)
+            return;
+        if (!_game.Items.TryGet(itemId, out var template))
             return;
 
         int objectId = _itemIds.Next();
@@ -56,8 +69,8 @@ public sealed partial class ZoneWorld
             X = x,
             Y = y,
             Z = z,
-            GroundItemId = TalkingIsland.GremlinDropItemId,
-            GroundCount = TalkingIsland.GremlinDropCount,
+            GroundItemId = itemId,
+            GroundCount = count,
             GroundStackable = template.Stackable
         };
         _byId[objectId] = ground;
@@ -74,7 +87,7 @@ public sealed partial class ZoneWorld
             outbound.Add(new Pending(watcher.Session, MsgType.SpawnItem, body));
         }
 
-        ZoneLog.Info($"drop object={objectId} item={ground.GroundItemId} count={ground.GroundCount} @ {x},{y},{z}");
+        ZoneLog.Info($"drop object={objectId} item={itemId} count={count} @ {x},{y},{z}");
     }
 
     void RemoveGroundItem(ZoneEntity ground, List<Pending> outbound)

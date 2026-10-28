@@ -43,6 +43,10 @@ public enum MsgType : ushort
     PartyLeaveRequest = 26,
     /// <summary>Same value as <see cref="Fineage.Protocol.MsgType.PartyKickRequest"/>.</summary>
     PartyKickRequest = 27,
+    /// <summary>Same value as <see cref="Fineage.Protocol.MsgType.AdminSpoilTarget"/>.</summary>
+    AdminSpoilTarget = 30,
+    /// <summary>Same value as <see cref="Fineage.Protocol.MsgType.AdminSweepCorpse"/>.</summary>
+    AdminSweepCorpse = 31,
 
     HelloAck = 1001,
     AuthOk = 1002,
