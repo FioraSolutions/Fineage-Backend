@@ -4,6 +4,7 @@ using Fineage.Game;
 using Fineage.Login;
 using Fineage.Protocol;
 using Fineage.Zone.Combat;
+using Fineage.Zone.Drops;
 using Fineage.Zone.Interest;
 using Fineage.Zone.World;
 using MessagePack;
@@ -139,7 +140,9 @@ public static class ZoneMultiplayerAcceptance
         var fighter = Play(login, "combat1", "Striker", HumanClasses.Fighter);
         var mystic = Play(login, "combat2", "Watcher", HumanClasses.Mystic);
 
-        var world = new ZoneWorld();
+        var world = new ZoneWorld(
+            spawnRandom: new Random(MobiusDropTestSeed.DefaultSeed),
+            dropRandom: new Random(MobiusDropTestSeed.DefaultSeed));
         await using var zone = ZoneHost.Start(tokens, world);
         await using var attacker = await ZonePeer.ConnectAsync(zone.Port).ConfigureAwait(false);
         await using var observer = await ZonePeer.ConnectAsync(zone.Port).ConfigureAwait(false);
@@ -198,7 +201,9 @@ public static class ZoneMultiplayerAcceptance
         var picker = Play(login, "pick1", "Picker", HumanClasses.Fighter);
         var observer = Play(login, "pick2", "Watcher", HumanClasses.Mystic);
 
-        var world = new ZoneWorld();
+        var world = new ZoneWorld(
+            spawnRandom: new Random(MobiusDropTestSeed.DefaultSeed),
+            dropRandom: new Random(MobiusDropTestSeed.DefaultSeed));
         await using var zone = ZoneHost.Start(tokens, world);
         await using var left = await ZonePeer.ConnectAsync(zone.Port).ConfigureAwait(false);
         await using var right = await ZonePeer.ConnectAsync(zone.Port).ConfigureAwait(false);
@@ -243,20 +248,66 @@ public static class ZoneMultiplayerAcceptance
         if (update.Changes.Length != 1)
             throw new InvalidOperationException($"expected one inventory change, got {update.Changes.Length}");
         var row = update.Changes[0];
-        if (row.Change != InventoryChange.Add || row.ItemId != TalkingIsland.GremlinDropItemId ||
-            row.Count != TalkingIsland.GremlinDropCount)
+        var expected = MobiusDropTestSeed.ExpectedGremlinDeathDrop();
+        if (row.Change != InventoryChange.Add || row.ItemId != expected.ItemId || row.Count != expected.Count)
             throw new InvalidOperationException($"inventory add item={row.ItemId} count={row.Count}");
 
         left.ExpectQuiet();
         right.ExpectQuiet();
     }
 
+    public static async Task RunSpoilAdminAsync()
+    {
+        if (!ZoneAdmin.Enabled)
+            throw new InvalidOperationException($"{ZoneAdmin.EnvVar} must be enabled for spoil admin selftest.");
+
+        var tokens = new HandoffTokens(HandoffTokens.DefaultSecret);
+        var login = new LoginService(JsonAccountStore.InMemory(), tokens);
+        var fighter = Play(login, "spoil1", "Spoiler", HumanClasses.Fighter);
+
+        var world = new ZoneWorld(spawnRandom: new Random(901), dropRandom: new Random(901));
+        await using var zone = ZoneHost.Start(tokens, world);
+        await using var peer = await ZonePeer.ConnectAsync(zone.Port).ConfigureAwait(false);
+        await peer.AuthAsync(fighter).ConfigureAwait(false);
+        await peer.EnterAsync(TalkingIsland.Gremlins.Length, expectOthers: 0).ConfigureAwait(false);
+
+        var gremlin = TalkingIsland.Gremlins[0];
+        await peer.MoveNearAsync(gremlin).ConfigureAwait(false);
+        await peer.SendAsync(MsgType.AdminSpoilTarget, new AdminSpoilTargetMsg { TargetObjectId = gremlin.ObjectId })
+            .ConfigureAwait(false);
+
+        await peer.SendAsync(MsgType.SelectTarget, new SelectTargetMsg { TargetObjectId = gremlin.ObjectId })
+            .ConfigureAwait(false);
+        _ = await peer.ExpectAsync<MyTargetSelectedMsg>(MsgType.MyTargetSelected).ConfigureAwait(false);
+
+        int hits = TalkingIsland.GremlinMaxHp / ZoneCombat.SampleMeleeDamage;
+        for (int hit = 0; hit < hits; hit++)
+        {
+            await peer.SendAsync(MsgType.AttackRequest, new AttackRequestMsg()).ConfigureAwait(false);
+            _ = await peer.ExpectAsync<AttackMsg>(MsgType.Attack).ConfigureAwait(false);
+            _ = await peer.ExpectAsync<StatusUpdateMsg>(MsgType.StatusUpdate).ConfigureAwait(false);
+        }
+
+        _ = await peer.ExpectAsync<SpawnItemMsg>(MsgType.SpawnItem).ConfigureAwait(false);
+
+        await peer.SendAsync(MsgType.AdminSweepCorpse, new AdminSweepCorpseMsg { TargetObjectId = gremlin.ObjectId })
+            .ConfigureAwait(false);
+        var update = await peer.ExpectAsync<InventoryUpdateMsg>(MsgType.InventoryUpdate).ConfigureAwait(false);
+        _ = await peer.ExpectAsync<DeleteObjectMsg>(MsgType.DeleteObject).ConfigureAwait(false);
+
+        if (update.Changes.Length != 1 || update.Changes[0].Change != InventoryChange.Add ||
+            update.Changes[0].ItemId != 1864 || update.Changes[0].Count < 1)
+            throw new InvalidOperationException($"sweep inventory item={update.Changes[0].ItemId} count={update.Changes[0].Count}");
+
+        peer.ExpectQuiet();
+    }
+
     static void ExpectGroundDrop(SpawnItemMsg left, SpawnItemMsg right, NpcInfoMsg gremlin)
     {
+        var expected = MobiusDropTestSeed.ExpectedGremlinDeathDrop();
         if (left.ObjectId != right.ObjectId || left.ObjectId < PlayerInventory.FirstObjectId)
             throw new InvalidOperationException($"drop object id {left.ObjectId}/{right.ObjectId}");
-        if (left.ItemId != TalkingIsland.GremlinDropItemId || left.Count != TalkingIsland.GremlinDropCount ||
-            !left.Stackable)
+        if (left.ItemId != expected.ItemId || left.Count != expected.Count || !left.Stackable)
             throw new InvalidOperationException($"drop item={left.ItemId} count={left.Count} stackable={left.Stackable}");
         if (left.X != gremlin.X || left.Y != gremlin.Y || left.Z != gremlin.Z)
             throw new InvalidOperationException($"drop @ {left.X},{left.Y},{left.Z} expected gremlin tile");

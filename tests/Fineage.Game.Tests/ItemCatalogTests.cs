@@ -68,6 +68,6 @@ public class ItemCatalogTests
     public void Catalog_has_the_starter_set_and_adena()
     {
         var ids = GameData.LoadDefault().Items.Templates.Select(item => item.Id).ToArray();
-        Assert.Equal([2369, 10, 6, 1146, 1147, 425, 461, 5588, 57, 6611, 7682, 8923, 7850, 7860, 6834, 6841], ids);
+        Assert.Equal([2369, 10, 6, 1146, 1147, 425, 461, 5588, 57, 1864, 6611, 7682, 8923, 7850, 7860, 6834, 6841], ids);
     }
 }

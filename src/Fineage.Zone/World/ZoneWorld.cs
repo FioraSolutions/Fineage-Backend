@@ -5,6 +5,7 @@ using Fineage.Zone.Chat;
 using Fineage.Zone.Combat;
 using Fineage.Zone.Interest;
 using Fineage.Zone.Spawns;
+using Fineage.Zone.Drops;
 using MessagePack;
 
 namespace Fineage.Zone.World;
@@ -63,6 +64,12 @@ sealed class ZoneEntity
     public int GroundItemId { get; set; }
     public int GroundCount { get; set; } = 1;
     public bool GroundStackable { get; set; }
+    /// <summary>Mobius spoil: who activated spoil on this attackable (0 = none).</summary>
+    public int SpoilerObjectId { get; set; }
+    /// <summary>Pre-rolled corpse drops after death when spoiled; cleared by sweeper.</summary>
+    public List<Drops.DropStack> SweepItems { get; } = [];
+    /// <summary>Dead NPC kept in world until sweeper takes <see cref="SweepItems"/>.</summary>
+    public bool CorpseAwaitingSweep { get; set; }
     public List<AbnormalEffectMsg> AbnormalEffects { get; } = [];
     public HashSet<int> Knownlist { get; } = [];
 }
@@ -80,9 +87,12 @@ public sealed partial class ZoneWorld
     readonly GameData _game;
     readonly ItemObjectIdAllocator _itemIds;
     readonly Random _spawnRandom;
+    readonly Random _dropRandom;
     readonly IAccountStore? _accounts;
     readonly bool _expertisePenalty;
     readonly Dictionary<int, ZoneEntity> _byId = [];
+    readonly DropCatalog _dropCatalog;
+    readonly DropRates _dropRates;
     readonly object _gate = new();
 
     public ZoneWorld(
@@ -90,9 +100,12 @@ public sealed partial class ZoneWorld
         GameData? game = null,
         ItemObjectIdAllocator? itemIds = null,
         Random? spawnRandom = null,
+        Random? dropRandom = null,
         IAccountStore? accounts = null,
         bool? expertisePenalty = null,
         SpawnCatalog? spawnCatalog = null,
+        DropCatalog? dropCatalog = null,
+        DropRates? dropRates = null,
         string? activeMapId = null,
         Func<DateTimeOffset>? clock = null)
     {
@@ -100,9 +113,12 @@ public sealed partial class ZoneWorld
         _game = game ?? GameData.LoadDefault();
         _itemIds = itemIds ?? new ItemObjectIdAllocator();
         _spawnRandom = spawnRandom ?? Random.Shared;
+        _dropRandom = dropRandom ?? spawnRandom ?? Random.Shared;
         _accounts = accounts;
         _expertisePenalty = expertisePenalty ?? ZoneGearSettings.ExpertisePenalty;
         _spawnCatalog = spawnCatalog ?? SpawnCatalog.LoadDefault();
+        _dropCatalog = dropCatalog ?? DropCatalog.LoadDefault();
+        _dropRates = dropRates ?? DropRates.Retail;
         _activeMapId = string.IsNullOrWhiteSpace(activeMapId) ? SpawnCatalog.DefaultMapId : activeMapId.Trim();
         _clock = clock ?? (() => DateTimeOffset.UtcNow);
         BootstrapSpawns();

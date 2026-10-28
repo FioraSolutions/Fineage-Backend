@@ -41,6 +41,10 @@ public enum MsgType : ushort
     PartyLeaveRequest = 26,
     /// <summary>Leader removes a member by object id.</summary>
     PartyKickRequest = 27,
+    /// <summary>Debug spoil on a living attackable. Off unless <c>FINEAGE_ZONE_ADMIN</c>.</summary>
+    AdminSpoilTarget = 30,
+    /// <summary>Debug sweeper on a spoiled corpse. Off unless <c>FINEAGE_ZONE_ADMIN</c>.</summary>
+    AdminSweepCorpse = 31,
     /// <summary>Keepalive from client. Server answers with <see cref="Pong"/>.</summary>
     Ping = 9,
     /// <summary>Zone chat. Fan-out is <see cref="CreatureSay"/>. See <see cref="ChatProtocol"/>.</summary>

@@ -363,6 +363,60 @@ public sealed class ZoneServer
                     ZoneLog.Info($"RX GiveItem session={sessionId} item={give.ItemId} count={give.Count}");
                 break;
             }
+            case MsgType.AdminSpoilTarget:
+            {
+                if (!_adminCommands)
+                {
+                    await ErrorAsync(session, InventoryProtocol.Forbidden, "AdminSpoilTarget is disabled.", ct)
+                        .ConfigureAwait(false);
+                    break;
+                }
+
+                var spoil = Decode<AdminSpoilTargetMsg>(body);
+                if (spoil == null)
+                {
+                    await ErrorAsync(session, "bad_request", "AdminSpoilTarget body was not readable.", ct).ConfigureAwait(false);
+                    break;
+                }
+
+                string? code = await _world.TryAdminSpoilAsync(session, spoil, ct).ConfigureAwait(false);
+                if (code == "world")
+                    await ErrorAsync(session, "world", "EnterWorld first.", ct).ConfigureAwait(false);
+                else if (code == "target")
+                    await ErrorAsync(session, "target", "Spoil target rejected.", ct).ConfigureAwait(false);
+                else if (code != null)
+                    await ErrorAsync(session, "bad_request", "AdminSpoilTarget was rejected.", ct).ConfigureAwait(false);
+                else
+                    ZoneLog.Info($"RX AdminSpoilTarget session={sessionId} target={spoil.TargetObjectId}");
+                break;
+            }
+            case MsgType.AdminSweepCorpse:
+            {
+                if (!_adminCommands)
+                {
+                    await ErrorAsync(session, InventoryProtocol.Forbidden, "AdminSweepCorpse is disabled.", ct)
+                        .ConfigureAwait(false);
+                    break;
+                }
+
+                var sweep = Decode<AdminSweepCorpseMsg>(body);
+                if (sweep == null)
+                {
+                    await ErrorAsync(session, "bad_request", "AdminSweepCorpse body was not readable.", ct).ConfigureAwait(false);
+                    break;
+                }
+
+                string? code = await _world.TryAdminSweepAsync(session, sweep, ct).ConfigureAwait(false);
+                if (code == "world")
+                    await ErrorAsync(session, "world", "EnterWorld first.", ct).ConfigureAwait(false);
+                else if (code == "sweep")
+                    await ErrorAsync(session, "sweep", "Sweep failed.", ct).ConfigureAwait(false);
+                else if (code != null)
+                    await ErrorAsync(session, "bad_request", "AdminSweepCorpse was rejected.", ct).ConfigureAwait(false);
+                else
+                    ZoneLog.Info($"RX AdminSweepCorpse session={sessionId} target={sweep.TargetObjectId}");
+                break;
+            }
             case MsgType.PickupRequest:
             {
                 var pickup = Decode<PickupRequestMsg>(body);

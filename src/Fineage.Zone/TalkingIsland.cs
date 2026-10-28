@@ -15,9 +15,6 @@ public static class TalkingIsland
     public const int SpawnZ = TalkingIslandSpawn.Z;
     public const int GremlinNpcId = 20001;
     public const int GremlinMaxHp = 96;
-    /// <summary>Minimal loot after a gremlin kill (stackable adena).</summary>
-    public const int GremlinDropItemId = 57;
-    public const int GremlinDropCount = 25;
     public const int MaxStep = 8000;
 
     public static readonly NpcInfoMsg[] Gremlins = LoadGremlins();

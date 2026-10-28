@@ -78,6 +78,13 @@
       "icon": "icon.etc_adena_i00"
     },
     {
+      "id": 1864,
+      "name": "Stem",
+      "kind": "etc",
+      "stackable": true,
+      "icon": "icon.etc_branch_gold_i00"
+    },
+    {
       "id": 6611,
       "name": "Infinity Blade",
       "kind": "weapon",

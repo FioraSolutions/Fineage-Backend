@@ -510,6 +510,20 @@ public sealed class GiveItemMsg
     [Key(1)] public int Count { get; set; } = 1;
 }
 
+/// <summary>Opcode <see cref="MsgType.AdminSpoilTarget"/> (30). Admin spoil hook before skill 254 exists.</summary>
+[MessagePackObject]
+public sealed class AdminSpoilTargetMsg
+{
+    [Key(0)] public int TargetObjectId { get; set; }
+}
+
+/// <summary>Opcode <see cref="MsgType.AdminSweepCorpse"/> (31). Admin sweeper hook before skill 42 exists.</summary>
+[MessagePackObject]
+public sealed class AdminSweepCorpseMsg
+{
+    [Key(0)] public int TargetObjectId { get; set; }
+}
+
 /// <summary>Opcode <see cref="MsgType.SpawnItem"/> (1018). Ground item in AOI.</summary>
 [MessagePackObject]
 public sealed class SpawnItemMsg
