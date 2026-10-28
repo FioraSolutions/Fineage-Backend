@@ -22,6 +22,13 @@ public sealed class ZoneWireBoundaryTests
         await AssertWrongPortAsync(MsgType.ListCharacters, []);
     }
 
+    [Fact]
+    public async Task AuthToken_on_zone_port_returns_wrong_port()
+    {
+        await AssertWrongPortAsync((MsgType)7,
+            MessagePackSerializer.Serialize(new Fineage.Protocol.V2.AuthTokenMsg { Account = "hero" }));
+    }
+
     static async Task AssertWrongPortAsync(MsgType opcode, byte[] body)
     {
         var tokens = HandoffTokens.FromEnvironment();
