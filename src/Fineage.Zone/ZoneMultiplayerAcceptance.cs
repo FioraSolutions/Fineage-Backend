@@ -181,6 +181,10 @@ public static class ZoneMultiplayerAcceptance
         if (delLeft.ObjectId != gremlin.ObjectId || delRight.ObjectId != gremlin.ObjectId)
             throw new InvalidOperationException($"delete expected {gremlin.ObjectId}");
 
+        await attacker.SendAsync(MsgType.Say, new SayMsg { Text = "gg", ChatType = 0 }).ConfigureAwait(false);
+        ExpectSay(await attacker.ExpectAsync<CreatureSayMsg>(MsgType.CreatureSay).ConfigureAwait(false), fighter, "gg");
+        ExpectSay(await observer.ExpectAsync<CreatureSayMsg>(MsgType.CreatureSay).ConfigureAwait(false), fighter, "gg");
+
         attacker.ExpectQuiet();
         observer.ExpectQuiet();
     }
