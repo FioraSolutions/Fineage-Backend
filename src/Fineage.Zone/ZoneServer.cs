@@ -251,6 +251,25 @@ public sealed class ZoneServer
                     await ErrorAsync(session, "bad_request", "Say text was rejected.", ct).ConfigureAwait(false);
                 break;
             }
+            case MsgType.GrantItemRequest:
+            {
+                var grant = Decode<GrantItemRequestMsg>(body);
+                if (grant == null)
+                {
+                    await ErrorAsync(session, "bad_request", "GrantItemRequest body was not readable.", ct)
+                        .ConfigureAwait(false);
+                    break;
+                }
+
+                string? code = await _world.TryGrantItemAsync(session, grant, ct).ConfigureAwait(false);
+                if (code == "world")
+                    await ErrorAsync(session, "world", "EnterWorld first.", ct).ConfigureAwait(false);
+                else if (code != null)
+                    await ErrorAsync(session, "bad_request", "Grant was rejected.", ct).ConfigureAwait(false);
+                else
+                    ZoneLog.Info($"RX GrantItem session={sessionId} item={grant.ItemId} count={grant.Count}");
+                break;
+            }
             default:
                 ZoneLog.Info($"RX unknown type={type} session={sessionId}");
                 await ErrorAsync(session, "unknown", $"msgType={type}", ct).ConfigureAwait(false);

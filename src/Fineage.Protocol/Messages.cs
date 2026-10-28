@@ -376,3 +376,11 @@ public static class InterludeStatus
     public const int MaxHp = 0x0a;
     public const int TargetColorHostile = 11;
 }
+
+/// <summary>Opcode <see cref="MsgType.GrantItemRequest"/> (13). Adds items to the requesting player's bag.</summary>
+[MessagePackObject]
+public sealed class GrantItemRequestMsg
+{
+    [Key(0)] public int ItemId { get; set; }
+    [Key(1)] public int Count { get; set; } = 1;
+}

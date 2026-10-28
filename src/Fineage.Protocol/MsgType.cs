@@ -14,6 +14,8 @@ public enum MsgType : ushort
     MoveTo = 4,
     SelectTarget = 5,
     AttackRequest = 6,
+    /// <summary>Authoritative grant into the player's bag. Reply is <see cref="InventoryUpdate"/>.</summary>
+    GrantItemRequest = 13,
     /// <summary>Keepalive from client. Server answers with <see cref="Pong"/>.</summary>
     Ping = 9,
     /// <summary>Zone chat. Fan-out is <see cref="CreatureSay"/>.</summary>
