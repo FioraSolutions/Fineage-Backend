@@ -521,3 +521,60 @@ public sealed partial class DungeonEnteredMsg
     [Key(4)] public bool Inside { get; set; }
     [Key(5)] public int Action { get; set; }
 }
+
+/// <summary>Same keys as <see cref="Fineage.Protocol.SiegeRegisterRequestMsg"/>.</summary>
+[MessagePackObject]
+public sealed partial class SiegeRegisterRequestMsg
+{
+    [Key(0)] public int CastleId { get; set; }
+    [Key(1)] public int Attacker { get; set; }
+    [Key(2)] public int Joining { get; set; }
+}
+
+/// <summary>Same keys as <see cref="Fineage.Protocol.SiegeDefenderAnswerRequestMsg"/>.</summary>
+[MessagePackObject]
+public sealed partial class SiegeDefenderAnswerRequestMsg
+{
+    [Key(0)] public int CastleId { get; set; }
+    [Key(1)] public int ClanId { get; set; }
+    [Key(2)] public int Approved { get; set; }
+}
+
+/// <summary>Same keys as <see cref="Fineage.Protocol.SiegeListRequestMsg"/>.</summary>
+[MessagePackObject]
+public sealed partial class SiegeListRequestMsg
+{
+    [Key(0)] public int CastleId { get; set; }
+}
+
+/// <summary>Same keys as <see cref="Fineage.Protocol.AdminCaptureCastleMsg"/>.</summary>
+[MessagePackObject]
+public sealed partial class AdminCaptureCastleMsg
+{
+    [Key(0)] public int CastleId { get; set; }
+    [Key(1)] public int ClanId { get; set; }
+}
+
+/// <summary>Same keys as <see cref="Fineage.Protocol.SiegeClanMsg"/>.</summary>
+[MessagePackObject]
+public sealed partial class SiegeClanMsg
+{
+    [Key(0)] public int ClanId { get; set; }
+    [Key(1)] public int Side { get; set; }
+}
+
+/// <summary>Same keys as <see cref="Fineage.Protocol.SiegeInfoMsg"/>.</summary>
+[MessagePackObject]
+public sealed partial class SiegeInfoMsg
+{
+    [Key(0)] public int CastleId { get; set; }
+    [Key(1)] public string Name { get; set; } = "";
+    [Key(2)] public int OwnerClanId { get; set; }
+    [Key(3)] public int TaxPercent { get; set; }
+    [Key(4)] public long SiegeUnixMs { get; set; }
+    [Key(5)] public long RegistrationDeadlineUnixMs { get; set; }
+    [Key(6)] public bool RegistrationClosed { get; set; }
+    [Key(7)] public bool InProgress { get; set; }
+    [Key(8)] public SiegeClanMsg[] Clans { get; set; } = [];
+    [Key(9)] public long EndsUnixMs { get; set; }
+}

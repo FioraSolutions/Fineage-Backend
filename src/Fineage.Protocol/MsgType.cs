@@ -76,6 +76,17 @@ public enum MsgType : ushort
     NpcTalk = 44,
     /// <summary>Quest HTML bypass. Body is <see cref="QuestEventMsg"/>.</summary>
     QuestEvent = 45,
+    /// <summary>Register or withdraw a clan for a castle siege. Body is <see cref="SiegeRegisterRequestMsg"/>.</summary>
+    SiegeRegisterRequest = 46,
+    /// <summary>Castle owner approves or refuses a defender. Body is <see cref="SiegeDefenderAnswerRequestMsg"/>.</summary>
+    SiegeDefenderAnswerRequest = 47,
+    /// <summary>List one castle's siege registration. Body is <see cref="SiegeListRequestMsg"/>.</summary>
+    SiegeListRequest = 48,
+    /// <summary>
+    /// Admin/test hook for <c>CaptureCastle(clanId)</c>. Off unless <c>FINEAGE_ZONE_ADMIN</c> is set.
+    /// Body is <see cref="AdminCaptureCastleMsg"/>.
+    /// </summary>
+    AdminCaptureCastle = 49,
     /// <summary>Seven Signs status snapshot. See <see cref="SevenSignsProtocol"/>.</summary>
     SevenSignsStatusRequest = 90,
     /// <summary>Seven Signs join or seal-stone contribution. See <see cref="SevenSignsProtocol"/>.</summary>
@@ -152,6 +163,8 @@ public enum MsgType : ushort
     QuestDialog = 1062,
     /// <summary>One quest sound name.</summary>
     QuestSound = 1063,
+    /// <summary>Castle siege registration and schedule. See <see cref="SiegeProtocol"/>. 1065–1069 stay free.</summary>
+    SiegeInfo = 1064,
     /// <summary>Seven Signs record (SSQStatus analogue). See <see cref="SevenSignsProtocol"/>.</summary>
     SevenSignsStatus = 1090,
     /// <summary>Seven Signs sky tint (SignsSky analogue). See <see cref="SevenSignsProtocol"/>.</summary>

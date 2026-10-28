@@ -3,7 +3,7 @@ namespace Fineage.Protocol;
 /// <summary>
 /// Zone quest wire. Requests sit at 42–45, after enchant 39–41 and clan 32–38.
 /// Replies sit at 1061–1063, after enchant result 1060 and the clan band 1050–1059.
-/// Chat stays 1040–1049. 46–50 and 1064–1069 are left open.
+/// Chat stays 1040–1049. Siege uses 46–49 and 1064. 50 and 1065–1069 are left open.
 /// </summary>
 /// <remarks>
 /// Rules follow L2J Mobius Interlude (not its Java layout):

@@ -87,7 +87,7 @@ Console.WriteLine("[ZONE] Seven Signs period, cabal, and seal-stone scores are s
 Console.WriteLine("[ZONE] Catacomb and necropolis gates follow that cabal. Enter is opcode 92. See docs/dungeon-access-v2-protocol.md.");
 Console.WriteLine("[ZONE] Auth.Password is the login handoff token. EnterWorld sends UserInfo, ItemList, the village, then a welcome SystemMessage. Say ALL is local; SHOUT is the zone.");
 if (adminCommands)
-    Console.WriteLine("[ZONE] admin commands enabled (GiveItem).");
+    Console.WriteLine("[ZONE] admin commands enabled (GiveItem, AdminCaptureCastle).");
 
 await using FineageMetricsHost? metrics = FineageMetricsHost.Start("zone", Console.Out, Console.Error);
 var tcp = new TcpServer();

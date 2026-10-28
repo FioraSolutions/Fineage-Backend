@@ -716,6 +716,73 @@ public sealed class ZoneServer
                     ZoneLog.Info($"RX QuestEvent session={sessionId} quest={questEvent.QuestId} event={questEvent.Event}");
                 break;
             }
+            case MsgType.SiegeRegisterRequest:
+            {
+                var register = Decode<SiegeRegisterRequestMsg>(body);
+                if (register == null)
+                {
+                    await ErrorAsync(session, "bad_request", "SiegeRegisterRequest body was not readable.", ct).ConfigureAwait(false);
+                    break;
+                }
+
+                string? code = await _world.TrySiegeRegisterAsync(session, register, ct).ConfigureAwait(false);
+                await SiegeErrorAsync(session, code, ct).ConfigureAwait(false);
+                if (code == null)
+                    ZoneLog.Info($"RX SiegeRegister session={sessionId} castle={register.CastleId} attacker={register.Attacker} joining={register.Joining}");
+                break;
+            }
+            case MsgType.SiegeDefenderAnswerRequest:
+            {
+                var answer = Decode<SiegeDefenderAnswerRequestMsg>(body);
+                if (answer == null)
+                {
+                    await ErrorAsync(session, "bad_request", "SiegeDefenderAnswerRequest body was not readable.", ct).ConfigureAwait(false);
+                    break;
+                }
+
+                string? code = await _world.TrySiegeAnswerAsync(session, answer, ct).ConfigureAwait(false);
+                await SiegeErrorAsync(session, code, ct).ConfigureAwait(false);
+                if (code == null)
+                    ZoneLog.Info($"RX SiegeDefenderAnswer session={sessionId} castle={answer.CastleId} clan={answer.ClanId} approved={answer.Approved}");
+                break;
+            }
+            case MsgType.SiegeListRequest:
+            {
+                var list = Decode<SiegeListRequestMsg>(body);
+                if (list == null)
+                {
+                    await ErrorAsync(session, "bad_request", "SiegeListRequest body was not readable.", ct).ConfigureAwait(false);
+                    break;
+                }
+
+                string? code = await _world.TrySiegeListAsync(session, list.CastleId, ct).ConfigureAwait(false);
+                await SiegeErrorAsync(session, code, ct).ConfigureAwait(false);
+                if (code == null)
+                    ZoneLog.Info($"RX SiegeList session={sessionId} castle={list.CastleId}");
+                break;
+            }
+            case MsgType.AdminCaptureCastle:
+            {
+                if (!_adminCommands)
+                {
+                    await ErrorAsync(session, InventoryProtocol.Forbidden, "AdminCaptureCastle is disabled.", ct)
+                        .ConfigureAwait(false);
+                    break;
+                }
+
+                var capture = Decode<AdminCaptureCastleMsg>(body);
+                if (capture == null)
+                {
+                    await ErrorAsync(session, "bad_request", "AdminCaptureCastle body was not readable.", ct).ConfigureAwait(false);
+                    break;
+                }
+
+                string? code = await _world.TryAdminCaptureAsync(session, capture.CastleId, capture.ClanId, ct).ConfigureAwait(false);
+                await SiegeErrorAsync(session, code, ct).ConfigureAwait(false);
+                if (code == null)
+                    ZoneLog.Info($"RX AdminCaptureCastle session={sessionId} castle={capture.CastleId} clan={capture.ClanId}");
+                break;
+            }
             case MsgType.EnchantCancel:
             {
                 if (Decode<EnchantCancelMsg>(body) == null)
@@ -941,6 +1008,39 @@ public sealed class ZoneServer
             "party" => ErrorAsync(session, "party", "Not in a party.", ct),
             _ => ErrorAsync(session, "party", "Party action failed.", ct)
         };
+    }
+
+    static Task SiegeErrorAsync(ZoneSession session, string? code, CancellationToken ct)
+    {
+        if (code == null)
+            return Task.CompletedTask;
+        string message = code switch
+        {
+            "world" => "EnterWorld first.",
+            "bad_request" => "Siege request was rejected.",
+            SiegeProtocol.Clan => "You are not in a clan.",
+            SiegeProtocol.Leader => "Only the clan leader can do that.",
+            SiegeProtocol.Dissolving => "Your clan may not register for a siege while it is dissolving.",
+            SiegeProtocol.Npc => "You cannot defend a castle that is owned by an NPC.",
+            SiegeProtocol.Closed => "The deadline to register for that siege has passed.",
+            SiegeProtocol.Progress => "This is not the time for siege registration.",
+            SiegeProtocol.Level => $"Only clans of level {SiegeProtocol.MinClanLevel} or higher may register for a castle siege.",
+            SiegeProtocol.AutoDefender => "The clan that owns the castle is automatically registered on the defending side.",
+            SiegeProtocol.Owns => "A clan that owns a castle cannot participate in another siege.",
+            SiegeProtocol.Duplicate => "You have already requested a siege battle.",
+            SiegeProtocol.SameDay => "Your clan is already registered for another siege on that day.",
+            SiegeProtocol.Attackers => "No more clans may register on the attacking side.",
+            SiegeProtocol.Defenders => "No more clans may register on the defending side.",
+            SiegeProtocol.None => "Your clan is not registered for that siege.",
+            SiegeProtocol.NotOwner => "Only the castle owner can approve defenders.",
+            SiegeProtocol.Pending => "That clan is not waiting for defender approval.",
+            SiegeProtocol.Castle => "That castle does not exist.",
+            SiegeProtocol.Idle => "That castle is not under siege.",
+            SiegeProtocol.NotAttacker => "That clan is not attacking the castle.",
+            SiegeProtocol.Store => "The siege could not be saved.",
+            _ => "Siege request was rejected."
+        };
+        return ErrorAsync(session, code, message, ct);
     }
 
     static Task ClanErrorAsync(ZoneSession session, string? code, CancellationToken ct)

@@ -21,6 +21,8 @@ public sealed partial class ZoneWorld
         public int LeaderId { get; set; }
         public long DissolvingExpiryUnixMs { get; set; }
         public long CharPenaltyExpiryUnixMs { get; set; }
+        /// <summary>Mobius <c>hasCastle</c>. 0 when this clan owns no castle.</summary>
+        public int CastleId { get; set; }
         public List<ZoneClanMember> Members { get; } = [];
     }
 
@@ -648,6 +650,7 @@ public sealed partial class ZoneWorld
         }
 
         _clans.Remove(clanId);
+        ReleaseSiegeClan(clanId);
         foreach (var pair in _pendingClanInvites.ToList())
         {
             if (pair.Value.ClanId == clanId)
@@ -803,7 +806,8 @@ public sealed partial class ZoneWorld
             Level = record.Level,
             LeaderId = record.LeaderId,
             DissolvingExpiryUnixMs = record.DissolvingExpiryUnixMs,
-            CharPenaltyExpiryUnixMs = record.CharPenaltyExpiryUnixMs
+            CharPenaltyExpiryUnixMs = record.CharPenaltyExpiryUnixMs,
+            CastleId = record.CastleId
         };
         foreach (var member in record.Members)
         {
@@ -836,7 +840,8 @@ public sealed partial class ZoneWorld
             member.Name,
             member.ClassId,
             member.Level,
-            ClanProtocol.MainPledge)).ToArray());
+            ClanProtocol.MainPledge)).ToArray(),
+        clan.CastleId);
 
     PledgeStatusChangedMsg StatusOf(ZoneClan clan) => new()
     {
@@ -876,6 +881,7 @@ public sealed partial class ZoneWorld
         var clan = entity.ClanId == 0 ? null : ClanOf(entity.ObjectId);
         entity.InClan = clan != null;
         entity.ClanLeader = clan != null && clan.LeaderId == entity.ObjectId;
+        entity.CastleId = clan?.CastleId ?? 0;
     }
 
     void QueueCharInfo(ZoneEntity player, List<Pending> outbound)

@@ -75,6 +75,14 @@ public enum MsgType : ushort
     NpcTalk = 44,
     /// <summary>Same value as <see cref="Fineage.Protocol.MsgType.QuestEvent"/>.</summary>
     QuestEvent = 45,
+    /// <summary>Same value as <see cref="Fineage.Protocol.MsgType.SiegeRegisterRequest"/>.</summary>
+    SiegeRegisterRequest = 46,
+    /// <summary>Same value as <see cref="Fineage.Protocol.MsgType.SiegeDefenderAnswerRequest"/>.</summary>
+    SiegeDefenderAnswerRequest = 47,
+    /// <summary>Same value as <see cref="Fineage.Protocol.MsgType.SiegeListRequest"/>.</summary>
+    SiegeListRequest = 48,
+    /// <summary>Same value as <see cref="Fineage.Protocol.MsgType.AdminCaptureCastle"/>.</summary>
+    AdminCaptureCastle = 49,
     /// <summary>Same value as <see cref="Fineage.Protocol.MsgType.SevenSignsStatusRequest"/>.</summary>
     SevenSignsStatusRequest = 90,
     /// <summary>Same value as <see cref="Fineage.Protocol.MsgType.SevenSignsActionRequest"/>.</summary>
@@ -131,6 +139,8 @@ public enum MsgType : ushort
     QuestDialog = 1062,
     /// <summary>Same value as <see cref="Fineage.Protocol.MsgType.QuestSound"/>.</summary>
     QuestSound = 1063,
+    /// <summary>Same value as <see cref="Fineage.Protocol.MsgType.SiegeInfo"/>.</summary>
+    SiegeInfo = 1064,
     /// <summary>Same value as <see cref="Fineage.Protocol.MsgType.SevenSignsStatus"/>.</summary>
     SevenSignsStatus = 1090,
     /// <summary>Same value as <see cref="Fineage.Protocol.MsgType.SevenSignsSky"/>.</summary>
