@@ -21,3 +21,7 @@ MessagePack shapes: `Fineage.Protocol.Messages` (`Party*Msg` types).
 ## Scope
 
 In-memory party per zone instance; max 9; leader-only invite when already grouped; full roster fan-out on change. No loot rules, dismiss, or leader transfer yet.
+
+## `dev` integration (dual playtest)
+
+Integration branch **`dev`** carries the same party opcodes as **`main`** (#129) together with death/respawn (#162: `ReviveRequest` / `AdminKillPlayer`, `Die` / `Revive` / `TeleportToLocation`). Inventory **15–17** and party **18–19 / 26–27 / 1027–1029** stay unchanged; handlers live in `ZoneWorldParty` and `ZoneServer`.
