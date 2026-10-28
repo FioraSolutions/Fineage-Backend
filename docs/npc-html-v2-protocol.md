@@ -106,6 +106,11 @@ The first word selects a handler. `quest_talk:` and `quest_event:` select the Qu
 | `quest_talk:<id>` | Talk hook |
 | `quest_event:<id>:<event>` | Adv-event hook |
 | `Script <name>` | Readable not-implemented page. Village-master names such as `FirstClassTransferTalk` land here |
+| `Buy <listId>` | `BuyList` (1095) when that list names this NPC. See `docs/shop-v2-protocol.md` |
+| `Sell` | `SellList` (1096) for a merchant or fisherman |
+| `Multisell <listId>` | `MultiSellList` (1097), full list |
+| `exc_multisell <listId>` | `MultiSellList` filtered to the bag. Enchant is kept when the list says so |
+| `Exchange <listId>` | Same window as `exc_multisell` |
 
 `Link` rejects an empty path, a path that is not `.htm` or `.html`, and any segment `.` or `..`. A `teleporter/` path from an NPC that is not a Teleporter is the nothing-to-say page. A legal path that is not in the catalog says `My Text is missing`.
 
@@ -117,13 +122,13 @@ These handlers return HTML `{service} is not implemented yet.` Registering anoth
 
 | Service | Commands | Later work |
 |---------|----------|------------|
-| Shop | `Buy`, `Sell`, `Multisell`, `exc_multisell`, `Wear`, `Exchange` | buylists and multisell |
+| Wear | `Wear` | preview window. `RequestPreviewItem` (99) answers with system message 189 |
 | Teleport | `showNoblesSelect` | noblesse lists stay on this stub. `goto`, `teleport`, and `showTeleports` are live. See `docs/npc-services-v2-protocol.md` |
 | Warehouse | `DepositC`, `WithdrawC`, `DepositF`, `WithdrawF`, `package_deposit`, `package_withdraw` | clan and freight. `DepositP` and `WithdrawP` are the private warehouse |
 
 Any other command returns `That action is not implemented yet.` It does not close the window with `Error`. `TerritoryStatus` is in that set until a residence wire exists.
 
-`IBypassHandler.Handle` runs while the zone lock is held and must not call back into the world. It returns a `BypassReply`. The world sends the HTML, replays talk, runs the quest hook, or applies a service intent (`docs/npc-services-v2-protocol.md`).
+`IBypassHandler.Handle` runs while the zone lock is held and must not call back into the world. It returns a `BypassReply`. The world sends the HTML, replays talk, runs the quest hook, opens a shop window (`docs/shop-v2-protocol.md`), or applies a service intent (`docs/npc-services-v2-protocol.md`).
 
 ## Errors (1099)
 

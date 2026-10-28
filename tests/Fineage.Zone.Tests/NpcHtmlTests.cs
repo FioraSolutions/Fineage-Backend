@@ -121,7 +121,7 @@ public sealed class NpcHtmlTests
         Assert.Equal(999, talk.QuestId);
         Assert.Equal("", talk.QuestEvent);
 
-        Assert.Contains("Shop is not implemented yet.", registry.Find("Buy 1")!.Handle(call with { Command = "Buy 1" }).Html, StringComparison.Ordinal);
+        Assert.Equal(1, registry.Find("Buy 1")!.Handle(call with { Command = "Buy 1" }).BuyListId);
         Assert.Equal(NpcServiceIntent.Teleport, registry.Find("goto 15")!.Handle(call with { Command = "goto 15" }).Service);
         Assert.Equal("NORMAL", registry.Find("goto 15")!.Handle(call with { Command = "goto 15" }).ServiceArg);
         Assert.Equal(15, registry.Find("goto 15")!.Handle(call with { Command = "goto 15" }).ServiceId);
@@ -130,7 +130,10 @@ public sealed class NpcHtmlTests
         Assert.Equal("OTHER", registry.Find("teleport OTHER 0")!.Handle(call with { Command = "teleport OTHER 0" }).ServiceArg);
         Assert.Equal(0, registry.Find("teleport OTHER 0")!.Handle(call with { Command = "teleport OTHER 0" }).ServiceId);
         Assert.Contains("Teleport is not implemented yet.", registry.Find("showNoblesSelect")!.Handle(call with { Command = "showNoblesSelect" }).Html, StringComparison.Ordinal);
-        Assert.Contains("Shop is not implemented yet.", registry.Find("exc_multisell 003")!.Handle(call with { Command = "exc_multisell 003" }).Html, StringComparison.Ordinal);
+        var exchange = registry.Find("exc_multisell 003")!.Handle(call with { Command = "exc_multisell 003" });
+        Assert.Equal(3, exchange.MultiSellListId);
+        Assert.True(exchange.MultiSellInventoryOnly);
+        Assert.Contains("Wear is not implemented yet.", registry.Find("Wear 3000100")!.Handle(call with { Command = "Wear 3000100" }).Html, StringComparison.Ordinal);
         Assert.Equal(NpcServiceIntent.Deposit, registry.Find("DepositP")!.Handle(call with { Command = "DepositP" }).Service);
         Assert.Equal(NpcServiceIntent.Withdraw, registry.Find("WithdrawP")!.Handle(call with { Command = "WithdrawP" }).Service);
         Assert.Contains("Warehouse is not implemented yet.", registry.Find("package_deposit")!.Handle(call with { Command = "package_deposit" }).Html, StringComparison.Ordinal);
@@ -140,7 +143,7 @@ public sealed class NpcHtmlTests
 
         registry.Register(new ReplacingBuy());
         Assert.Equal("<html>custom</html>", registry.Find("Buy 3")!.Handle(call with { Command = "Buy 3" }).Html);
-        Assert.Contains("Shop is not implemented yet.", registry.Find("Sell")!.Handle(call with { Command = "Sell" }).Html, StringComparison.Ordinal);
+        Assert.True(registry.Find("Sell")!.Handle(call with { Command = "Sell" }).OpenSell);
     }
 
     [Fact]
@@ -186,7 +189,7 @@ public sealed class NpcHtmlTests
         await link.SendAsync(MsgType.BypassRequest, new BypassRequestMsg { NpcObjectId = MerchantObjectId, Command = "Buy 1" });
         var shop = await link.ReadAsync<NpcHtmlMsg>(MsgType.NpcHtml);
         Assert.Contains("Lector", shop.Html, StringComparison.Ordinal);
-        Assert.Contains("Shop is not implemented yet.", shop.Html, StringComparison.Ordinal);
+        Assert.Contains("I have no such list.", shop.Html, StringComparison.Ordinal);
 
         await link.SendAsync(MsgType.BypassRequest, new BypassRequestMsg
         {

@@ -8,7 +8,9 @@ using Fineage.Zone.Interest;
 using Fineage.Zone.Spawns;
 using Fineage.Zone.Drops;
 using Fineage.Zone.Bosses;
+using Fineage.Game.Shops;
 using Fineage.Zone.NpcHtml;
+using Fineage.Zone.Shops;
 using Fineage.Zone.SevenSigns;
 using Fineage.Zone.Dungeons;
 using Fineage.Zone.Siege;
@@ -103,6 +105,12 @@ sealed class ZoneEntity
     public PrivateWarehouse? Warehouse { get; set; }
     /// <summary>First character created on the account. Mobius <c>Player.isNewbie</c> when the account had no characters yet.</summary>
     public bool Newbie { get; set; } = true;
+    /// <summary>Mobius merchant price config castle. 0 when the NPC is not in a taxed town.</summary>
+    public int MerchantCastleId { get; set; }
+    /// <summary>Town base tax percent from Mobius <c>MerchantPriceConfig.xml</c>. Castle tax is separate.</summary>
+    public int MerchantBaseTaxPercent { get; set; }
+    /// <summary>Buylist or multisell this player opened. Null until a shop bypass.</summary>
+    public ShopSession? Shop { get; set; }
 }
 
 /// <summary>
@@ -138,6 +146,9 @@ public sealed partial class ZoneWorld
     readonly ItemWeights _weights;
     readonly int _teleportOffset;
     readonly Random _serviceRandom;
+    readonly BuyListCatalog _buyLists;
+    readonly MultiSellCatalog _multisells;
+    readonly ShopStock _shopStock;
     readonly Dictionary<int, ZoneEntity> _byId = [];
     readonly DropCatalog _dropCatalog;
     readonly DropRates _dropRates;
@@ -174,7 +185,9 @@ public sealed partial class ZoneWorld
         NewbieBuffCatalog? newbieBuffs = null,
         ItemWeights? weights = null,
         int? teleportOffset = null,
-        Random? serviceRandom = null)
+        Random? serviceRandom = null,
+        BuyListCatalog? buyLists = null,
+        MultiSellCatalog? multisells = null)
     {
         _aoi = aoi ?? new SingleCellAoi();
         _game = game ?? GameData.LoadDefault();
@@ -207,6 +220,9 @@ public sealed partial class ZoneWorld
         _weights = weights ?? ItemWeights.LoadDefault();
         _teleportOffset = teleportOffset ?? ReadTeleportOffset();
         _serviceRandom = serviceRandom ?? Random.Shared;
+        _buyLists = buyLists ?? BuyListCatalog.LoadDefault();
+        _multisells = multisells ?? MultiSellCatalog.LoadDefault();
+        _shopStock = new ShopStock(_buyLists);
         BootstrapSpawns();
         BootstrapBosses();
         BootstrapQuestNpcs();
@@ -216,6 +232,9 @@ public sealed partial class ZoneWorld
 
     /// <summary>Bypass handlers. A later <see cref="BypassRegistry.Register"/> replaces a stub.</summary>
     public BypassRegistry Bypasses => _bypasses;
+
+    /// <summary>Castle row for shop tax. Tests set <see cref="Siege.CastleSiege.OwnerClanId"/> and tax on the result.</summary>
+    internal CastleSiege? FindCastle(int castleId) => _siege.Find(castleId);
 
     public IReadOnlyList<int> NpcObjectIds
     {

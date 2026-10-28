@@ -36,6 +36,10 @@ public sealed class BypassReply
     public int QuestId { get; init; }
     public string QuestEvent { get; init; } = "";
     public string? Error { get; init; }
+    public int? BuyListId { get; init; }
+    public bool OpenSell { get; init; }
+    public int? MultiSellListId { get; init; }
+    public bool MultiSellInventoryOnly { get; init; }
 
     /// <summary>World-applied service. See <see cref="Fineage.Protocol.NpcServiceIntent"/>.</summary>
     public string? Service { get; init; }
@@ -53,6 +57,16 @@ public sealed class BypassReply
         Service = service,
         ServiceArg = arg ?? "",
         ServiceId = id
+    };
+
+    public static BypassReply Buy(int listId) => new() { BuyListId = listId };
+
+    public static BypassReply Sell() => new() { OpenSell = true };
+
+    public static BypassReply MultiSell(int listId, bool inventoryOnly) => new()
+    {
+        MultiSellListId = listId,
+        MultiSellInventoryOnly = inventoryOnly
     };
 
     public static BypassReply TalkAgain() => new() { ReplayTalk = true };

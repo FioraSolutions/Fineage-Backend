@@ -128,6 +128,14 @@ public enum MsgType : ushort
     /// Mobius <c>RequestBypassToServer</c>. See <see cref="NpcHtmlProtocol"/>.
     /// </summary>
     BypassRequest = 95,
+    /// <summary>Buy from the open buylist. Body is <see cref="RequestBuyItemMsg"/>. See <see cref="ShopProtocol"/>.</summary>
+    RequestBuyItem = 96,
+    /// <summary>Sell bag items to the open merchant. Body is <see cref="RequestSellItemMsg"/>.</summary>
+    RequestSellItem = 97,
+    /// <summary>Choose one prepared multisell row. Body is <see cref="RequestMultiSellChooseMsg"/>.</summary>
+    RequestMultiSellChoose = 98,
+    /// <summary>Wear preview. The service stays stubbed. Body is <see cref="RequestPreviewItemMsg"/>.</summary>
+    RequestPreviewItem = 99,
     /// <summary>Pick a gatekeeper destination. See <see cref="NpcServiceProtocol"/>.</summary>
     TeleportSelectRequest = 105,
     /// <summary>Deposit lines into the private warehouse.</summary>
@@ -247,6 +255,14 @@ public enum MsgType : ushort
     /// Quest steps stay on <see cref="QuestDialog"/>. See <see cref="NpcHtmlProtocol"/>.
     /// </summary>
     NpcHtml = 1094,
+    /// <summary>Merchant buylist. Body is <see cref="BuyListMsg"/>. See <see cref="ShopProtocol"/>.</summary>
+    BuyList = 1095,
+    /// <summary>Items the merchant will buy. Body is <see cref="SellListMsg"/>.</summary>
+    SellList = 1096,
+    /// <summary>Prepared multisell. Body is <see cref="MultiSellListMsg"/>.</summary>
+    MultiSellList = 1097,
+    /// <summary>Adena, weight, and slots after a shop window or a trade. Body is <see cref="ShopBalanceMsg"/>.</summary>
+    ShopBalance = 1098,
     /// <summary>Gatekeeper destinations. See <see cref="NpcServiceProtocol"/>.</summary>
     TeleportList = 1105,
     /// <summary>Items the player may deposit, plus the fee and slot counts.</summary>

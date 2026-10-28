@@ -766,6 +766,64 @@ public sealed class ZoneServer
                     ZoneLog.Info($"RX Bypass session={sessionId} npc={bypass.NpcObjectId}");
                 break;
             }
+            case MsgType.RequestBuyItem:
+            {
+                var buy = Decode<RequestBuyItemMsg>(body);
+                if (buy == null)
+                {
+                    await ErrorAsync(session, "bad_request", "RequestBuyItem body was not readable.", ct).ConfigureAwait(false);
+                    break;
+                }
+
+                string? code = await _world.TryBuyAsync(session, buy, ct).ConfigureAwait(false);
+                await ShopErrorAsync(session, code, ct).ConfigureAwait(false);
+                if (code == null)
+                    ZoneLog.Info($"RX Buy session={sessionId} list={buy.ListId} npc={buy.NpcObjectId}");
+                break;
+            }
+            case MsgType.RequestSellItem:
+            {
+                var sell = Decode<RequestSellItemMsg>(body);
+                if (sell == null)
+                {
+                    await ErrorAsync(session, "bad_request", "RequestSellItem body was not readable.", ct).ConfigureAwait(false);
+                    break;
+                }
+
+                string? code = await _world.TrySellAsync(session, sell, ct).ConfigureAwait(false);
+                await ShopErrorAsync(session, code, ct).ConfigureAwait(false);
+                if (code == null)
+                    ZoneLog.Info($"RX Sell session={sessionId} npc={sell.NpcObjectId}");
+                break;
+            }
+            case MsgType.RequestMultiSellChoose:
+            {
+                var choose = Decode<RequestMultiSellChooseMsg>(body);
+                if (choose == null)
+                {
+                    await ErrorAsync(session, "bad_request", "RequestMultiSellChoose body was not readable.", ct).ConfigureAwait(false);
+                    break;
+                }
+
+                string? code = await _world.TryMultiSellAsync(session, choose, ct).ConfigureAwait(false);
+                await ShopErrorAsync(session, code, ct).ConfigureAwait(false);
+                if (code == null)
+                    ZoneLog.Info($"RX MultiSell session={sessionId} list={choose.ListId} entry={choose.EntryId}");
+                break;
+            }
+            case MsgType.RequestPreviewItem:
+            {
+                var preview = Decode<RequestPreviewItemMsg>(body);
+                if (preview == null)
+                {
+                    await ErrorAsync(session, "bad_request", "RequestPreviewItem body was not readable.", ct).ConfigureAwait(false);
+                    break;
+                }
+
+                string? code = await _world.TryPreviewAsync(session, preview, ct).ConfigureAwait(false);
+                await ShopErrorAsync(session, code, ct).ConfigureAwait(false);
+                break;
+            }
             case MsgType.QuestEvent:
             {
                 var questEvent = Decode<QuestEventMsg>(body);
@@ -1300,6 +1358,23 @@ public sealed class ZoneServer
             SevenSignsProtocol.StonesMissing => ErrorAsync(session, code, "Not enough seal stones.", ct),
             _ => ErrorAsync(session, "bad_request", "Seven Signs request was rejected.", ct)
         };
+    }
+
+    static Task ShopErrorAsync(ZoneSession session, string? code, CancellationToken ct)
+    {
+        if (code == null)
+            return Task.CompletedTask;
+        string message = code switch
+        {
+            "world" => "EnterWorld first.",
+            "bad_request" => "Shop request was rejected.",
+            "range" => "You are too far away.",
+            InventoryProtocol.Dead => "You cannot do that while dead.",
+            QuestProtocol.Npc => "That NPC is not here.",
+            NpcHtmlProtocol.Attackable => "That NPC will not trade.",
+            _ => "Shop request was rejected."
+        };
+        return ErrorAsync(session, code, message, ct);
     }
 
     static Task DungeonErrorAsync(ZoneSession session, string? code, CancellationToken ct)

@@ -30,5 +30,7 @@
     <Content Include="..\..\data\teleports.json" Link="data\teleports.json" CopyToOutputDirectory="PreserveNewest" />
     <Content Include="..\..\data\newbie-buffs.json" Link="data\newbie-buffs.json" CopyToOutputDirectory="PreserveNewest" />
     <Content Include="..\..\data\item-weights.json" Link="data\item-weights.json" CopyToOutputDirectory="PreserveNewest" />
+    <Content Include="..\..\data\buylists.json" Link="data\buylists.json" CopyToOutputDirectory="PreserveNewest" />
+    <Content Include="..\..\data\multisell.json" Link="data\multisell.json" CopyToOutputDirectory="PreserveNewest" />
   </ItemGroup>
 </Project>

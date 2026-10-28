@@ -20,7 +20,13 @@ public sealed record ItemTemplate(
     EquipRequirement? Equip = null,
     int CrystalCount = 0,
     bool Enchantable = false,
-    EnchantScroll? Scroll = null)
+    EnchantScroll? Scroll = null,
+    int ReferencePrice = 0,
+    int Weight = 0,
+    bool Sellable = true)
 {
     public bool Equippable => BodySlot != global::Fineage.Game.BodySlot.None;
+
+    /// <summary>Mobius reference price. Sell price is this value divided by 2.</summary>
+    public bool CanSell => Sellable && ReferencePrice / 2 >= 1;
 }
