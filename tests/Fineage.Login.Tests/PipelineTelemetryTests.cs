@@ -11,6 +11,7 @@ using ProtocolMsgType = Fineage.Protocol.MsgType;
 
 namespace Fineage.Login.Tests;
 
+[Collection("Pipeline OTEL telemetry")]
 public sealed class PipelineTelemetryTests
 {
     [Fact]
