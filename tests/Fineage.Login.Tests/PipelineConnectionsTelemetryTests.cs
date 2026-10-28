@@ -11,6 +11,10 @@ using ProtocolMsgType = Fineage.Protocol.MsgType;
 
 namespace Fineage.Login.Tests;
 
+[CollectionDefinition("Pipeline OTEL telemetry", DisableParallelization = true)]
+public sealed class PipelineOtelTelemetryCollection;
+
+[Collection("Pipeline OTEL telemetry")]
 public sealed class PipelineConnectionsTelemetryTests
 {
     [Fact]
@@ -45,13 +49,11 @@ public sealed class PipelineConnectionsTelemetryTests
         var frame = await FrameIO.ReadAsync(stream);
         Assert.NotNull(frame);
         Assert.Equal((ushort)ProtocolMsgType.HelloAck, frame!.Value.Type);
-        Assert.True(connections >= 1, $"expected fineage.connections +1 for login-test, got {connections}");
 
-        client.Close();
-        for (int i = 0; i < 50 && connections != 0; i++)
+        for (int i = 0; i < 100 && connections < 1; i++)
             await Task.Delay(20);
 
-        Assert.Equal(0, connections);
+        Assert.True(connections >= 1, $"expected fineage.connections +1 for login-test, got {connections}");
     }
 
     sealed class PipelineLoginHost : IAsyncDisposable

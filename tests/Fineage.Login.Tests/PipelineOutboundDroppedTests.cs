@@ -7,6 +7,7 @@ using Xunit;
 
 namespace Fineage.Login.Tests;
 
+[Collection("Pipeline OTEL telemetry")]
 public sealed class PipelineOutboundDroppedTests
 {
     [Fact]
