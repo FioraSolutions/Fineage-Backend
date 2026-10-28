@@ -362,16 +362,13 @@ public sealed partial class ZoneWorld
 
         bool stackable = item.Template.Stackable;
 
-        if (item.Count == row.Count)
-        {
-            from.Remove(item);
+        if (!from.TryRemoveFromStack(item, (int)row.Count, out bool removedEntirely))
+            return;
+
+        if (removedEntirely)
             fromChanges.Add(InventoryMessages.RemoveRow(item, -1));
-        }
         else
-        {
-            item.Count -= (int)row.Count;
             fromChanges.Add(InventoryMessages.ChangeRow(InventoryChange.Modify, item));
-        }
 
         var received = to.Add(itemId, (int)row.Count, enchant);
         int change = !stackable || before == 0 ? InventoryChange.Add : InventoryChange.Modify;
