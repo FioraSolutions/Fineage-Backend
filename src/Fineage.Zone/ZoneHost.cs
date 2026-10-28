@@ -21,13 +21,13 @@ sealed class ZoneHost : IAsyncDisposable
 
     public int Port { get; }
 
-    public static ZoneHost Start(HandoffTokens tokens, ZoneWorld? world = null, Func<DateTimeOffset>? clock = null)
+    public static ZoneHost Start(HandoffTokens tokens, ZoneWorld? world = null, Func<DateTimeOffset>? clock = null, ZoneServerOptions? options = null)
     {
         var listener = new TcpListener(IPAddress.Loopback, 0);
         listener.Start();
         var cts = new CancellationTokenSource();
         var created = world ?? ZoneAoiSettings.CreateWorld();
-        var server = new ZoneServer(tokens, created, clock);
+        var server = new ZoneServer(tokens, created, clock, options);
         created.StartSimulation(cts.Token);
         var loop = Task.Run(async () =>
         {

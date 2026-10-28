@@ -193,6 +193,8 @@ public sealed partial class ZoneWorld
 
     bool VisibleTo(int observerId, int otherId)
     {
+        if (!SameInstance(observerId, otherId))
+            return false;
         foreach (int id in _aoi.GetVisible(observerId))
         {
             if (id == otherId)

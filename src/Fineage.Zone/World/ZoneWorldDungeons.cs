@@ -114,7 +114,7 @@ public sealed partial class ZoneWorld
         }
     }
 
-    void Relocate(ZoneEntity entity, int x, int y, int z, List<Pending> toSelf, List<Pending> toOthers)
+    void Relocate(ZoneEntity entity, int x, int y, int z, List<Pending> toSelf, List<Pending> toOthers, int? instanceId = null, bool persist = true)
     {
         var session = entity.Session;
         if (session == null)
@@ -132,6 +132,8 @@ public sealed partial class ZoneWorld
         };
 
         var before = new HashSet<int>(entity.Knownlist);
+        if (instanceId.HasValue)
+            entity.InstanceId = instanceId.Value;
         entity.X = x;
         entity.Y = y;
         entity.Z = z;
@@ -139,11 +141,11 @@ public sealed partial class ZoneWorld
         session.Y = y;
         session.Z = z;
         _aoi.Move(entity.ObjectId, x, y);
-        SavePresence(session, x, y, z, touchAccess: false);
+        if (persist)
+            SavePresence(session, x, y, z, touchAccess: false);
 
         var after = new HashSet<int>();
-        foreach (int id in _aoi.GetVisible(entity.ObjectId))
-            after.Add(id);
+        CollectVisible(entity, after);
 
         toSelf.Add(Pack(session, MsgType.MoveToAck, ack));
         foreach (int id in SortedExcept(after, before))

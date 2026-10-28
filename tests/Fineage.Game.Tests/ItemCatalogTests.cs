@@ -38,6 +38,7 @@ public class ItemCatalogTests
     [InlineData(461, "Apprentice's Stockings", ItemKind.Armor, BodySlot.Legs, WeaponType.None, ArmorType.Magic, false, false, 10, "icon.armor_t01_l_i00")]
     [InlineData(5588, "Tutorial Guide", ItemKind.Etc, BodySlot.None, WeaponType.None, ArmorType.None, false, false, 0, "icon.etc_spellbook_gray_i00")]
     [InlineData(57, "Adena", ItemKind.Etc, BodySlot.None, WeaponType.None, ArmorType.None, false, true, 0, "icon.etc_adena_i00")]
+    [InlineData(6651, "Noblesse Gate Pass", ItemKind.Etc, BodySlot.None, WeaponType.None, ArmorType.None, false, true, 0, "icon.etc_noblesse_gate_pass_i00")]
     public void Templates_match_the_hand_written_catalog(
         int id,
         string name,
@@ -73,7 +74,7 @@ public class ItemCatalogTests
              58, 73, 79, 98, 123, 911, 2390, 6364, 1458, 1459, 1460, 1461, 1462,
              955, 956, 957, 958, 951, 952, 953, 954, 947, 948, 949, 950, 729, 730, 731, 732,
              959, 960, 961, 962, 6569, 6570, 6571, 6572, 6573, 6574, 6575, 6576, 6577, 6578,
-             6360, 6361, 6362, 6388],
+             6360, 6361, 6362, 6388, 6651],
             ids);
     }
 }

@@ -769,6 +769,13 @@
       "kind": "etc",
       "stackable": true,
       "icon": "icon.etc_permit_i00"
+    },
+    {
+      "id": 6651,
+      "name": "Noblesse Gate Pass",
+      "kind": "etc",
+      "stackable": true,
+      "icon": "icon.etc_noblesse_gate_pass_i00"
     }
   ]
 }

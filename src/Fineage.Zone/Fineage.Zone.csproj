@@ -26,5 +26,6 @@
     <Content Include="..\..\data\drops\**\*.json" Link="data\drops\%(RecursiveDir)%(Filename)%(Extension)" CopyToOutputDirectory="PreserveNewest" />
     <Content Include="..\..\data\dungeons.json" Link="data\dungeons.json" CopyToOutputDirectory="PreserveNewest" />
     <Content Include="..\..\data\html\**\*.*" Link="data\html\%(RecursiveDir)%(Filename)%(Extension)" CopyToOutputDirectory="PreserveNewest" />
+    <Content Include="..\..\data\olympiad-stadiums.json" Link="data\olympiad-stadiums.json" CopyToOutputDirectory="PreserveNewest" />
   </ItemGroup>
 </Project>

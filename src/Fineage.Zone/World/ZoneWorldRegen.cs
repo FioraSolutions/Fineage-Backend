@@ -36,6 +36,7 @@ public sealed partial class ZoneWorld
                     TickBosses(outbound);
                     CompleteDueDissolutions(_clock().ToUnixTimeMilliseconds(), outbound);
                     TickSevenSigns(outbound);
+                    TickOlympiad(outbound);
                 }
                 await FlushOthersAsync(outbound, ct).ConfigureAwait(false);
                 FineageTelemetry.TickMilliseconds.Record(Stopwatch.GetElapsedTime(started).TotalMilliseconds);

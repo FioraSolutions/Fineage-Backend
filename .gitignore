@@ -1,6 +1,6 @@
 bin/
 obj/
-# Runtime files such as accounts.json and boss-schedule.json. The game catalogs are tracked JSON (not Mobius XML).
+# Runtime files such as accounts.json, boss-schedule.json, and olympiad.json. The game catalogs are tracked JSON (not Mobius XML).
 data/*
 !data/items.json
 !data/starter-kits.json
@@ -12,6 +12,7 @@ data/*
 !data/skill-trees.json
 !data/npcs.json
 !data/dungeons.json
+!data/olympiad-stadiums.json
 !data/raidbosses.json
 !data/spawns/
 !data/spawns/**
