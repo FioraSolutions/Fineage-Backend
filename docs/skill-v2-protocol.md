@@ -10,7 +10,7 @@ Mobius Interlude references: `SkillList` on enter, `RequestMagicSkillUse`, fan-o
 | S→C | **1065** | `SkillList` | `SkillListMsg` (after `ItemList` on enter) |
 | S→C | **1066** | `MagicSkillUse` | `MagicSkillUseMsg` (AOI + caster) |
 
-Siege occupies **46–49** and **1064** (`docs/siege-v2-protocol.md`). Quest band **42–45** / **1061–1063**. **1067–1069** remain free.
+Siege occupies **46–49** and **1064** (`docs/siege-v2-protocol.md`). Quest band **42–45** / **1061–1063**. Character actions use **51** and **1067–1069** (`docs/action-v2-protocol.md`).
 
 ## Enter world order
 

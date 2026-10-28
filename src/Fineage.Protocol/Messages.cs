@@ -790,6 +790,41 @@ public sealed class SkillUseRequestMsg
     [Key(2)] public bool CtrlPressed { get; set; }
 }
 
+/// <summary>Opcode <see cref="MsgType.CharacterActionRequest"/> (51). Mobius <c>RequestActionUse</c> action id.</summary>
+[MessagePackObject]
+public sealed class CharacterActionRequestMsg
+{
+    [Key(0)] public int ActionId { get; set; }
+    [Key(1)] public bool CtrlPressed { get; set; }
+    [Key(2)] public bool ShiftPressed { get; set; }
+    /// <summary>Optional target for assist-style actions; unused in MVP.</summary>
+    [Key(3)] public int TargetObjectId { get; set; }
+}
+
+/// <summary>Opcode <see cref="MsgType.ChangeWaitType"/> (1067). Interlude wait type on <see cref="ActionProtocol.WaitSitting"/> / standing.</summary>
+[MessagePackObject]
+public sealed class ChangeWaitTypeMsg
+{
+    [Key(0)] public int ObjectId { get; set; }
+    [Key(1)] public int WaitType { get; set; }
+}
+
+/// <summary>Opcode <see cref="MsgType.SocialAction"/> (1068).</summary>
+[MessagePackObject]
+public sealed class SocialActionMsg
+{
+    [Key(0)] public int ObjectId { get; set; }
+    [Key(1)] public int ActionId { get; set; }
+}
+
+/// <summary>Opcode <see cref="MsgType.ChangeMoveType"/> (1069).</summary>
+[MessagePackObject]
+public sealed class ChangeMoveTypeMsg
+{
+    [Key(0)] public int ObjectId { get; set; }
+    [Key(1)] public bool Running { get; set; }
+}
+
 /// <summary>One row of <see cref="SkillListMsg"/>.</summary>
 [MessagePackObject]
 public sealed class SkillListEntryMsg

@@ -238,6 +238,8 @@ public sealed class ZoneServer
                 string? code = await _world.TryMoveAsync(session, move, ct).ConfigureAwait(false);
                 if (code == "range")
                     await ErrorAsync(session, "range", "Destination is too far.", ct).ConfigureAwait(false);
+                else if (code == ActionProtocol.Sitting)
+                    await ErrorAsync(session, code, "You cannot move while sitting.", ct).ConfigureAwait(false);
                 else if (code != null)
                     await ErrorAsync(session, "world", "EnterWorld first.", ct).ConfigureAwait(false);
                 else
@@ -798,6 +800,21 @@ public sealed class ZoneServer
                     ZoneLog.Info($"RX SkillUse session={sessionId} skill={skill.SkillId} target={skill.TargetObjectId}");
                 break;
             }
+            case MsgType.CharacterActionRequest:
+            {
+                var action = Decode<CharacterActionRequestMsg>(body);
+                if (action == null)
+                {
+                    await ErrorAsync(session, "bad_request", "CharacterActionRequest body was not readable.", ct).ConfigureAwait(false);
+                    break;
+                }
+
+                string? code = await _world.TryCharacterActionAsync(session, action, ct).ConfigureAwait(false);
+                await ActionErrorAsync(session, code, ct).ConfigureAwait(false);
+                if (code == null)
+                    ZoneLog.Info($"RX CharacterAction session={sessionId} action={action.ActionId}");
+                break;
+            }
             case MsgType.EnchantCancel:
             {
                 if (Decode<EnchantCancelMsg>(body) == null)
@@ -964,6 +981,25 @@ public sealed class ZoneServer
             SkillProtocol.Target => ErrorAsync(session, code, "Invalid skill target.", ct),
             SkillProtocol.Range => ErrorAsync(session, code, "Target is out of range.", ct),
             _ => ErrorAsync(session, "bad_request", "Skill request was rejected.", ct)
+        };
+    }
+
+    static Task ActionErrorAsync(ZoneSession session, string? code, CancellationToken ct)
+    {
+        if (code == null)
+            return Task.CompletedTask;
+        return code switch
+        {
+            "world" => ErrorAsync(session, "world", "EnterWorld first.", ct),
+            "bad_request" => ErrorAsync(session, "bad_request", "Character action was rejected.", ct),
+            "target" => ErrorAsync(session, "target", "No valid target.", ct),
+            "attack" => ErrorAsync(session, "attack", "Attack failed.", ct),
+            ActionProtocol.Dead => ErrorAsync(session, code, "You cannot do that while dead.", ct),
+            ActionProtocol.Blocked => ErrorAsync(session, code, "You cannot do that now.", ct),
+            ActionProtocol.Sitting => ErrorAsync(session, code, "You cannot move while sitting.", ct),
+            ActionProtocol.Unknown => ErrorAsync(session, code, "Unknown action.", ct),
+            ActionProtocol.Unsupported => ErrorAsync(session, code, "That action is not available yet.", ct),
+            _ => ErrorAsync(session, "bad_request", "Character action was rejected.", ct)
         };
     }
 

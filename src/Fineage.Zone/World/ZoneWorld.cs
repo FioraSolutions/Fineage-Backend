@@ -59,11 +59,11 @@ sealed class ZoneEntity
     public int WeaponGradePenalty { get; set; }
     /// <summary>Armor expertise penalty, 0–4. Updated when gear changes and on enter.</summary>
     public int ArmorGradePenalty { get; set; }
-    /// <summary>When true, regen rates double (classic sitting rest). No sit opcode yet.</summary>
+    /// <summary>When true, regen rates double (classic sitting rest).</summary>
     public bool Sitting { get; set; }
     public float RunSpeed { get; init; }
     public float WalkSpeed { get; init; }
-    public bool Running { get; init; }
+    public bool Running { get; set; } = true;
     public ZoneSession? Session { get; init; }
     public PlayerInventory? Inventory { get; init; }
     /// <summary>
@@ -338,6 +338,8 @@ public sealed partial class ZoneWorld
             return "world";
 
         var entity = _byId[session.ObjectId];
+        if (entity.Sitting)
+            return ActionProtocol.Sitting;
         if (!TalkingIsland.WithinStep(entity.X, entity.Y, move.DestX, move.DestY))
             return "range";
 
