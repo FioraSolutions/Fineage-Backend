@@ -251,6 +251,7 @@ public sealed class PaperdollSlotMsg
 /// <summary>
 /// Opcode <see cref="MsgType.UserInfo"/> (1016). Sent to the entering player before <see cref="ItemListMsg"/>.
 /// <see cref="Paperdoll"/> has 17 slots in <c>PaperdollSlot</c> order (right hand is index 7).
+/// Keys 10–12 are the expertise grade penalty. They are 0 when the penalty is off or the gear is within grade.
 /// </summary>
 [MessagePackObject]
 public sealed class UserInfoMsg
@@ -265,6 +266,15 @@ public sealed class UserInfoMsg
     [Key(7)] public float WalkSpeed { get; set; } = 80f;
     [Key(8)] public bool Running { get; set; } = true;
     [Key(9)] public PaperdollSlotMsg[] Paperdoll { get; set; } = [];
+    /// <summary>Weapon expertise penalty, 0–4. Zero when every equipped weapon is within Expertise. Older clients ignore this key.</summary>
+    [Key(10)] public int WeaponGradePenalty { get; set; }
+    /// <summary>Armor expertise penalty, 0–4. Arrows are not counted. Older clients ignore this key.</summary>
+    [Key(11)] public int ArmorGradePenalty { get; set; }
+    /// <summary>
+    /// Grade-penalty level, the greater of <see cref="WeaponGradePenalty"/> and <see cref="ArmorGradePenalty"/>, or 0.
+    /// Mobius EtcStatusUpdate sends 1 when this is non-zero. Stat multipliers are not applied.
+    /// </summary>
+    [Key(12)] public int GradePenalty { get; set; }
 }
 
 /// <summary>One row of <see cref="ItemListMsg"/> or the item fields of <see cref="InventoryUpdateEntryMsg"/>.</summary>

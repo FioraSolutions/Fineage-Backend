@@ -1,5 +1,6 @@
 using System.Net;
 using System.Net.Sockets;
+using Fineage.Game;
 using Fineage.Login;
 using Fineage.Protocol;
 using Fineage.Zone.World;
@@ -40,6 +41,9 @@ public sealed class ZoneEquipWireTests
         Assert.Equal("world", early.Code);
 
         var entered = await actor.EnterAsync();
+        Assert.Equal(0, entered.User.WeaponGradePenalty);
+        Assert.Equal(0, entered.User.ArmorGradePenalty);
+        Assert.Equal(0, entered.User.GradePenalty);
         int sword = entered.Items.Items.Single(item => item.ItemId == 2369).ObjectId;
         int dagger = entered.Items.Items.Single(item => item.ItemId == 10).ObjectId;
         int guide = entered.Items.Items.Single(item => item.ItemId == 5588).ObjectId;
@@ -158,6 +162,60 @@ public sealed class ZoneEquipWireTests
         Assert.Equal("bad_request", (await admin.ExpectErrorAsync()).Code);
     }
 
+    [Fact]
+    public async Task Restricted_equip_returns_1099_and_a_higher_grade_reports_the_penalty()
+    {
+        await using var host = await ZoneGearHost.StartAsync(
+            new ZoneServerOptions { AdminCommands = true },
+            GradeAndClassGame());
+        var ticket = host.Login.Play("wire", "pass1234", "Alden", HumanClasses.Fighter);
+        Assert.True(ticket.Ok && ticket.Value != null, ticket.Message);
+        await using var actor = await ZoneGearPeer.ConnectAsync(host.Port);
+        await actor.AuthAsync(ticket.Value);
+        await actor.EnterAsync();
+
+        await actor.SendAsync(MsgType.GiveItem, new GiveItemMsg { ItemId = 6611, Count = 1 });
+        var given = await actor.ExpectAsync<InventoryUpdateMsg>(MsgType.InventoryUpdate);
+        int heroBlade = given.Changes[0].ObjectId;
+        await actor.SendAsync(MsgType.UseItem, new UseItemMsg { ObjectId = heroBlade });
+        var denied = await actor.ExpectErrorAsync();
+        Assert.Equal(InventoryProtocol.HeroRestricted, denied.Code);
+        Assert.Equal((ushort)MsgType.Error, 1099);
+        Assert.Contains(host.Store.FindById(ticket.Value.Account, ticket.Value.CharacterId)!.Items!, item => item.ItemId == 6611 && item.EquippedSlot == -1);
+
+        await actor.SendAsync(MsgType.GiveItem, new GiveItemMsg { ItemId = 90001, Count = 1 });
+        given = await actor.ExpectAsync<InventoryUpdateMsg>(MsgType.InventoryUpdate);
+        int locked = given.Changes[0].ObjectId;
+        await actor.SendAsync(MsgType.UseItem, new UseItemMsg { ObjectId = locked });
+        Assert.Equal(InventoryProtocol.ClassRestricted, (await actor.ExpectErrorAsync()).Code);
+        Assert.Contains(host.Store.FindById(ticket.Value.Account, ticket.Value.CharacterId)!.Items!, item => item.ItemId == 90001 && item.EquippedSlot == -1);
+
+        await actor.SendAsync(MsgType.GiveItem, new GiveItemMsg { ItemId = 90008, Count = 1 });
+        given = await actor.ExpectAsync<InventoryUpdateMsg>(MsgType.InventoryUpdate);
+        int graded = given.Changes[0].ObjectId;
+        await actor.SendAsync(MsgType.UseItem, new UseItemMsg { ObjectId = graded });
+        var update = await actor.ExpectAsync<InventoryUpdateMsg>(MsgType.InventoryUpdate);
+        var user = await actor.ExpectAsync<UserInfoMsg>(MsgType.UserInfo);
+        Assert.Contains(update.Changes, row => row.ObjectId == graded && row.EquippedSlot == 7);
+        Assert.Equal(90008, user.Paperdoll[7].ItemId);
+        Assert.Equal(1, user.WeaponGradePenalty);
+        Assert.Equal(0, user.ArmorGradePenalty);
+        Assert.Equal(1, user.GradePenalty);
+    }
+
+    static GameData GradeAndClassGame()
+    {
+        var data = GameData.LoadDefault();
+        var templates = data.Items.Templates.ToList();
+        templates.Add(new ItemTemplate(
+            90001, "Class Blade", ItemKind.Weapon, BodySlot.RightHand, "icon.test", WeaponType.Sword,
+            Equip: new EquipRequirement.Classes([5])));
+        templates.Add(new ItemTemplate(
+            90008, "D Sword", ItemKind.Weapon, BodySlot.RightHand, "icon.test", WeaponType.Sword,
+            Crystal: CrystalGrade.D));
+        return GameData.From(new ItemCatalog(templates), data.StarterKits);
+    }
+
     sealed class ZoneGearHost : IAsyncDisposable
     {
         readonly TcpListener _listener;
@@ -180,11 +238,11 @@ public sealed class ZoneEquipWireTests
         public JsonAccountStore Store { get; }
         public ZoneWorld World { get; }
 
-        public static async Task<ZoneGearHost> StartAsync(ZoneServerOptions? options = null)
+        public static async Task<ZoneGearHost> StartAsync(ZoneServerOptions? options = null, GameData? game = null, bool? expertisePenalty = null)
         {
             var tokens = new HandoffTokens(HandoffTokens.DefaultSecret);
             var store = JsonAccountStore.InMemory();
-            var world = new ZoneWorld(accounts: store);
+            var world = new ZoneWorld(game: game, accounts: store, expertisePenalty: expertisePenalty);
             var server = new ZoneServer(tokens, world, clock: null, options);
             var listener = new TcpListener(IPAddress.Loopback, 0);
             listener.Start();

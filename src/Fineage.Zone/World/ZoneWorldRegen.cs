@@ -89,7 +89,7 @@ public sealed partial class ZoneWorld
         Values = [entity.CurHp, entity.MaxHp, entity.CurMp, entity.MaxMp]
     };
 
-    (int hp, int maxHp, int mp, int maxMp, int level) LoadVitals(ZoneSession session)
+    (int hp, int maxHp, int mp, int maxMp, int level, int race, int sex) LoadVitals(ZoneSession session)
     {
         if (_accounts != null)
         {
@@ -100,15 +100,15 @@ public sealed partial class ZoneWorld
                 int hp = record.Hp > 0 ? Math.Min(record.Hp, maxHp) : maxHp;
                 int mp = record.Mp > 0 ? Math.Min(record.Mp, maxMp) : maxMp;
                 int level = record.Level > 0 ? record.Level : 1;
-                return (hp, maxHp, mp, maxMp, level);
+                return (hp, maxHp, mp, maxMp, level, record.Race, record.Sex);
             }
         }
 
         if (ClassTemplates.TryGet(session.ClassId, out var template) && template != null)
-            return (template.MaxHp, template.MaxHp, template.MaxMp, template.MaxMp, 1);
+            return (template.MaxHp, template.MaxHp, template.MaxMp, template.MaxMp, 1, template.Race, 0);
 
         return (ClassTemplates.HumanFighterHp, ClassTemplates.HumanFighterHp, ClassTemplates.HumanFighterMp,
-            ClassTemplates.HumanFighterMp, 1);
+            ClassTemplates.HumanFighterMp, 1, 0, 0);
     }
 
     static (int maxHp, int maxMp) ResolveMaxima(CharacterRecord record)

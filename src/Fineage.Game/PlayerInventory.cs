@@ -6,7 +6,7 @@ namespace Fineage.Game;
 /// left hand (and a left-hand item clears a two-handed weapon, except arrows on a bow
 /// and lures on a fishing rod), full armor clears the legs, legs cannot be worn while
 /// full armor is equipped, and stackable items merge into the existing stack.
-/// Class and grade restrictions are not applied.
+/// Class, race, and other item conditions are checked by the zone before <see cref="Equip"/>.
 /// </summary>
 public sealed class PlayerInventory
 {

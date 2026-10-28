@@ -117,12 +117,13 @@ public sealed class GameData
                 throw new InvalidDataException($"{path} weapon {row.Id} needs a weaponType.");
             if (kind == ItemKind.Weapon && body == BodySlot.None)
                 throw new InvalidDataException($"{path} weapon {row.Id} needs a bodySlot.");
-            if (kind == ItemKind.Armor && armor == ArmorType.None)
-                throw new InvalidDataException($"{path} armor {row.Id} needs an armorType.");
             if (kind == ItemKind.Armor && body == BodySlot.None)
                 throw new InvalidDataException($"{path} armor {row.Id} needs a bodySlot.");
             if (row.Magic && kind != ItemKind.Weapon)
                 throw new InvalidDataException($"{path} item {row.Id} is marked magic but is not a weapon.");
+
+            var crystal = ParseCrystal(row.Crystal, path, row.Id);
+            var equip = EquipConditionReader.Read(row.Equip, path, row.Id);
 
             templates.Add(new ItemTemplate(
                 row.Id,
@@ -135,7 +136,9 @@ public sealed class GameData
                 etc,
                 row.Magic,
                 row.Stackable,
-                row.PDef));
+                row.PDef,
+                crystal,
+                equip));
         }
 
         try
@@ -276,6 +279,22 @@ public sealed class GameData
         };
     }
 
+    static CrystalGrade ParseCrystal(string? text, string path, int itemId)
+    {
+        if (string.IsNullOrWhiteSpace(text))
+            return CrystalGrade.None;
+        return Token(text) switch
+        {
+            "none" or "ng" or "no_grade" => CrystalGrade.None,
+            "d" => CrystalGrade.D,
+            "c" => CrystalGrade.C,
+            "b" => CrystalGrade.B,
+            "a" => CrystalGrade.A,
+            "s" => CrystalGrade.S,
+            _ => throw new InvalidDataException($"{path} item {itemId} has unknown crystal '{text}'.")
+        };
+    }
+
     static EtcItemType ParseEtc(string? text, string path, int itemId)
     {
         if (string.IsNullOrWhiteSpace(text))
@@ -309,6 +328,8 @@ public sealed class GameData
         public bool Magic { get; set; }
         public bool Stackable { get; set; }
         public int PDef { get; set; }
+        public string? Crystal { get; set; }
+        public JsonElement Equip { get; set; }
     }
 
     sealed class KitFileDto

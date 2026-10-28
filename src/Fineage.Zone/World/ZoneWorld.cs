@@ -32,6 +32,21 @@ sealed class ZoneEntity
     public int CurMp { get; set; }
     public int MaxMp { get; init; }
     public int Level { get; init; } = 1;
+    public int Race { get; init; }
+    public int Sex { get; init; }
+    public bool Hero { get; set; }
+    public bool InClan { get; set; }
+    public bool ClanLeader { get; set; }
+    public int PledgeClass { get; set; }
+    public int CastleId { get; set; }
+    public int HideoutId { get; set; }
+    public bool PvpFlagged { get; set; }
+    public int PkKills { get; set; }
+    public int ExpertiseBonus { get; set; }
+    /// <summary>Weapon expertise penalty, 0–4. Updated when gear changes and on enter.</summary>
+    public int WeaponGradePenalty { get; set; }
+    /// <summary>Armor expertise penalty, 0–4. Updated when gear changes and on enter.</summary>
+    public int ArmorGradePenalty { get; set; }
     /// <summary>When true, regen rates double (classic sitting rest). No sit opcode yet.</summary>
     public bool Sitting { get; set; }
     public float RunSpeed { get; init; }
@@ -65,6 +80,7 @@ public sealed partial class ZoneWorld
     readonly ItemObjectIdAllocator _itemIds;
     readonly Random _spawnRandom;
     readonly IAccountStore? _accounts;
+    readonly bool _expertisePenalty;
     readonly Dictionary<int, ZoneEntity> _byId = [];
     readonly object _gate = new();
 
@@ -73,13 +89,15 @@ public sealed partial class ZoneWorld
         GameData? game = null,
         ItemObjectIdAllocator? itemIds = null,
         Random? spawnRandom = null,
-        IAccountStore? accounts = null)
+        IAccountStore? accounts = null,
+        bool? expertisePenalty = null)
     {
         _aoi = aoi ?? new SingleCellAoi();
         _game = game ?? GameData.LoadDefault();
         _itemIds = itemIds ?? new ItemObjectIdAllocator();
         _spawnRandom = spawnRandom ?? Random.Shared;
         _accounts = accounts;
+        _expertisePenalty = expertisePenalty ?? ZoneGearSettings.ExpertisePenalty;
         foreach (var npc in TalkingIsland.Gremlins)
         {
             var entity = new ZoneEntity
@@ -222,8 +240,11 @@ public sealed partial class ZoneWorld
             CurHp = vitals.hp,
             MaxMp = vitals.maxMp,
             CurMp = vitals.mp,
-            Level = vitals.level
+            Level = vitals.level,
+            Race = vitals.race,
+            Sex = vitals.sex
         };
+        RefreshGradePenalty(entity);
         _byId[entity.ObjectId] = entity;
         _aoi.Enter(entity.ObjectId, entity.X, entity.Y);
         session.InWorld = true;
@@ -522,7 +543,9 @@ public sealed partial class ZoneWorld
             entity.RunSpeed,
             entity.WalkSpeed,
             entity.Running,
-            entity.Inventory);
+            entity.Inventory,
+            entity.WeaponGradePenalty,
+            entity.ArmorGradePenalty);
     }
 
     static CharInfoMsg CharInfo(ZoneEntity entity) => new()

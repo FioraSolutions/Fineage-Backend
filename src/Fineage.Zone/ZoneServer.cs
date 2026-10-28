@@ -491,6 +491,45 @@ public sealed class ZoneServer
             case InventoryProtocol.Empty:
                 await ErrorAsync(session, code, "That paperdoll slot is empty.", ct).ConfigureAwait(false);
                 break;
+            case InventoryProtocol.ClassRestricted:
+                await ErrorAsync(session, code, "Your class cannot equip that item.", ct).ConfigureAwait(false);
+                break;
+            case InventoryProtocol.RaceRestricted:
+                await ErrorAsync(session, code, "Your race cannot equip that item.", ct).ConfigureAwait(false);
+                break;
+            case InventoryProtocol.SexRestricted:
+                await ErrorAsync(session, code, "Your sex cannot equip that item.", ct).ConfigureAwait(false);
+                break;
+            case InventoryProtocol.HeroRestricted:
+                await ErrorAsync(session, code, "Only a hero can equip that item.", ct).ConfigureAwait(false);
+                break;
+            case InventoryProtocol.ClanLeaderRestricted:
+                await ErrorAsync(session, code, "Only a clan leader can equip that item.", ct).ConfigureAwait(false);
+                break;
+            case InventoryProtocol.PledgeRestricted:
+                await ErrorAsync(session, code, "Your clan rank cannot equip that item.", ct).ConfigureAwait(false);
+                break;
+            case InventoryProtocol.PvpRestricted:
+                await ErrorAsync(session, code, "Your PvP status cannot equip that item.", ct).ConfigureAwait(false);
+                break;
+            case InventoryProtocol.LevelRestricted:
+                await ErrorAsync(session, code, "Your level cannot equip that item.", ct).ConfigureAwait(false);
+                break;
+            case InventoryProtocol.CastleRestricted:
+                await ErrorAsync(session, code, "Your castle cannot equip that item.", ct).ConfigureAwait(false);
+                break;
+            case InventoryProtocol.ClanHallRestricted:
+                await ErrorAsync(session, code, "Your clan hall cannot equip that item.", ct).ConfigureAwait(false);
+                break;
+            case InventoryProtocol.PkRestricted:
+                await ErrorAsync(session, code, "Your PK count cannot equip that item.", ct).ConfigureAwait(false);
+                break;
+            case InventoryProtocol.GradeRestricted:
+                await ErrorAsync(session, code, "Your expertise grade cannot equip that item.", ct).ConfigureAwait(false);
+                break;
+            case InventoryProtocol.ConditionRestricted:
+                await ErrorAsync(session, code, "You do not meet the required condition to equip that item.", ct).ConfigureAwait(false);
+                break;
             default:
                 await ErrorAsync(session, "bad_request", fallback, ct).ConfigureAwait(false);
                 break;
