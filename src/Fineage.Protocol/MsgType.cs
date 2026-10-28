@@ -95,6 +95,15 @@ public enum MsgType : ushort
     SevenSignsActionRequest = 91,
     /// <summary>Enter or leave a catacomb or necropolis. See <see cref="DungeonProtocol"/>.</summary>
     DungeonEnterRequest = 92,
+    /// <summary>
+    /// Boss status query. 92 is dungeon access. See <see cref="BossProtocol"/>.
+    /// </summary>
+    BossStatusRequest = 93,
+    /// <summary>
+    /// Admin mark-dead or force-spawn. Off unless <c>FINEAGE_ZONE_ADMIN</c> is set.
+    /// See <see cref="BossProtocol"/>.
+    /// </summary>
+    AdminBossSchedule = 94,
     /// <summary>Keepalive from client. Server answers with <see cref="Pong"/>.</summary>
     Ping = 9,
     /// <summary>Zone chat. Fan-out is <see cref="CreatureSay"/>. See <see cref="ChatProtocol"/>.</summary>
@@ -177,6 +186,8 @@ public enum MsgType : ushort
     SevenSignsSky = 1091,
     /// <summary>Catacomb or necropolis teleport result. See <see cref="DungeonProtocol"/>.</summary>
     DungeonEntered = 1092,
+    /// <summary>Boss schedule snapshot. 1092 is dungeon access. See <see cref="BossProtocol"/>.</summary>
+    BossStatus = 1093,
 
     // Login S → C. Canonical lobby set; see LobbyProtocol.
     RegisterOk = 1020,

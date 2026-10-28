@@ -21,6 +21,7 @@
     <Content Include="..\..\data\skills.json" Link="data/skills.json" CopyToOutputDirectory="PreserveNewest" />
     <Content Include="..\..\data\skill-trees.json" Link="data/skill-trees.json" CopyToOutputDirectory="PreserveNewest" />
     <Content Include="..\..\data\npcs.json" Link="data\npcs.json" CopyToOutputDirectory="PreserveNewest" />
+    <Content Include="..\..\data\raidbosses.json" Link="data\raidbosses.json" CopyToOutputDirectory="PreserveNewest" />
     <Content Include="..\..\data\spawns\**\*.json" Link="data\spawns\%(RecursiveDir)%(Filename)%(Extension)" CopyToOutputDirectory="PreserveNewest" />
     <Content Include="..\..\data\drops\**\*.json" Link="data\drops\%(RecursiveDir)%(Filename)%(Extension)" CopyToOutputDirectory="PreserveNewest" />
     <Content Include="..\..\data\dungeons.json" Link="data\dungeons.json" CopyToOutputDirectory="PreserveNewest" />

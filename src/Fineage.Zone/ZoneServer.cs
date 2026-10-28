@@ -505,6 +505,53 @@ public sealed class ZoneServer
                     ZoneLog.Info($"RX SevenSignsStatus session={sessionId}");
                 break;
             }
+            case MsgType.BossStatusRequest:
+            {
+                var query = Decode<BossStatusRequestMsg>(body);
+                if (query == null)
+                {
+                    await ErrorAsync(session, "bad_request", "BossStatusRequest body was not readable.", ct).ConfigureAwait(false);
+                    break;
+                }
+
+                string? code = await _world.TryBossStatusAsync(session, query.NpcId, ct).ConfigureAwait(false);
+                if (code == "world")
+                    await ErrorAsync(session, "world", "EnterWorld first.", ct).ConfigureAwait(false);
+                else if (code == BossProtocol.UnknownBoss)
+                    await ErrorAsync(session, BossProtocol.UnknownBoss, "Boss is not on the schedule.", ct).ConfigureAwait(false);
+                else if (code != null)
+                    await ErrorAsync(session, code, "BossStatusRequest was rejected.", ct).ConfigureAwait(false);
+                else
+                    ZoneLog.Info($"RX BossStatus session={sessionId} npc={query.NpcId}");
+                break;
+            }
+            case MsgType.AdminBossSchedule:
+            {
+                if (!_adminCommands)
+                {
+                    await ErrorAsync(session, InventoryProtocol.Forbidden, "AdminBossSchedule is disabled.", ct)
+                        .ConfigureAwait(false);
+                    break;
+                }
+
+                var adminBoss = Decode<AdminBossScheduleMsg>(body);
+                if (adminBoss == null)
+                {
+                    await ErrorAsync(session, "bad_request", "AdminBossSchedule body was not readable.", ct).ConfigureAwait(false);
+                    break;
+                }
+
+                string? code = await _world.TryAdminBossAsync(session, adminBoss, ct).ConfigureAwait(false);
+                if (code == "world")
+                    await ErrorAsync(session, "world", "EnterWorld first.", ct).ConfigureAwait(false);
+                else if (code == BossProtocol.UnknownBoss)
+                    await ErrorAsync(session, BossProtocol.UnknownBoss, "Boss is not on the schedule.", ct).ConfigureAwait(false);
+                else if (code != null)
+                    await ErrorAsync(session, code, "AdminBossSchedule was rejected.", ct).ConfigureAwait(false);
+                else
+                    ZoneLog.Info($"RX AdminBossSchedule session={sessionId} npc={adminBoss.NpcId} action={adminBoss.Action}");
+                break;
+            }
             case MsgType.SevenSignsActionRequest:
             {
                 var action = Decode<SevenSignsActionRequestMsg>(body);

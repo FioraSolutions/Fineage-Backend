@@ -7,6 +7,7 @@ using Fineage.Zone.Combat;
 using Fineage.Zone.Interest;
 using Fineage.Zone.Spawns;
 using Fineage.Zone.Drops;
+using Fineage.Zone.Bosses;
 using Fineage.Zone.SevenSigns;
 using Fineage.Zone.Dungeons;
 using Fineage.Zone.Siege;
@@ -143,7 +144,9 @@ public sealed partial class ZoneWorld
         bool includeEnabledMaps = false,
         DungeonCatalog? dungeons = null,
         DungeonAccessOptions? dungeonAccess = null,
-        SiegeSettings? siege = null)
+        SiegeSettings? siege = null,
+        BossSchedule? bosses = null,
+        Random? bossRandom = null)
     {
         _aoi = aoi ?? new SingleCellAoi();
         _game = game ?? GameData.LoadDefault();
@@ -167,7 +170,9 @@ public sealed partial class ZoneWorld
         _dungeonAccess = new DungeonAccess(_dungeons, dungeonAccess ?? DungeonAccessOptions.FromEnvironment());
         _siegeSettings = siege ?? SiegeSettings.FromEnvironment();
         _siege = new SiegeBoard(_clock().ToUnixTimeMilliseconds(), _siegeSettings);
+        _bosses = bosses ?? BossSchedule.LoadDefault(_clock, bossRandom);
         BootstrapSpawns();
+        BootstrapBosses();
         BootstrapQuestNpcs();
         LoadClans();
         LoadSiege();
@@ -238,6 +243,7 @@ public sealed partial class ZoneWorld
             return;
 
         _sevenSigns.Save();
+        _bosses.Save();
         ZoneLog.LeaveWorld(session);
         await FlushOthersAsync(toOthers, ct).ConfigureAwait(false);
     }

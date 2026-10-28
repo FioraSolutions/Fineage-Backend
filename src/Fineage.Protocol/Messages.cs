@@ -1084,3 +1084,50 @@ public sealed class SiegeInfoMsg
     /// <summary>Unix milliseconds when the siege ends. 0 when it is not in progress.</summary>
     [Key(9)] public long EndsUnixMs { get; set; }
 }
+
+/// <summary>
+/// Opcode <see cref="MsgType.BossStatusRequest"/> (93).
+/// <see cref="NpcId"/> 0 asks for every scheduled boss.
+/// </summary>
+[MessagePackObject]
+public sealed class BossStatusRequestMsg
+{
+    [Key(0)] public int NpcId { get; set; }
+}
+
+/// <summary>
+/// Opcode <see cref="MsgType.AdminBossSchedule"/> (94).
+/// <see cref="Action"/> is <see cref="BossProtocol.ActionMarkDead"/> or <see cref="BossProtocol.ActionForceSpawn"/>.
+/// </summary>
+[MessagePackObject]
+public sealed class AdminBossScheduleMsg
+{
+    [Key(0)] public int NpcId { get; set; }
+    [Key(1)] public int Action { get; set; }
+}
+
+/// <summary>Opcode <see cref="MsgType.BossStatus"/> (1093).</summary>
+[MessagePackObject]
+public sealed class BossStatusMsg
+{
+    [Key(0)] public BossStatusEntryMsg[] Bosses { get; set; } = [];
+}
+
+/// <summary>One row of <see cref="BossStatusMsg"/>. Keys are 0..10.</summary>
+[MessagePackObject]
+public sealed class BossStatusEntryMsg
+{
+    [Key(0)] public int NpcId { get; set; }
+    [Key(1)] public int ObjectId { get; set; }
+    /// <summary><see cref="BossProtocol.KindRaid"/> or <see cref="BossProtocol.KindGrand"/>.</summary>
+    [Key(2)] public int Kind { get; set; }
+    /// <summary>Alive 0, waiting 1, fighting 2, dead 3. See <see cref="BossProtocol"/>.</summary>
+    [Key(3)] public int Status { get; set; }
+    [Key(4)] public long RespawnUnixMs { get; set; }
+    [Key(5)] public int CurrentHp { get; set; }
+    [Key(6)] public int MaxHp { get; set; }
+    [Key(7)] public int CurrentMp { get; set; }
+    [Key(8)] public int MaxMp { get; set; }
+    [Key(9)] public bool Enabled { get; set; }
+    [Key(10)] public bool Spawned { get; set; }
+}

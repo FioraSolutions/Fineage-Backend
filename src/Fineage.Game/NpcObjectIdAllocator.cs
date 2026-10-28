@@ -4,7 +4,8 @@ namespace Fineage.Game;
 /// Object ids for world NPCs. Character ids stay below <see cref="LegacyFirst"/>.
 /// Legacy spawn rows (Cedric gremlins, the dormant village-road pair) use
 /// [<see cref="LegacyFirst"/>, <see cref="First"/>). Town rows allocate
-/// [<see cref="First"/>, <see cref="ExclusiveEnd"/>). Item instances start at
+/// [<see cref="First"/>, <see cref="ExclusiveEnd"/>). Raid and grand bosses use
+/// 80_001 and up inside that band. Item instances start at
 /// <see cref="ExclusiveEnd"/>, which is <see cref="PlayerInventory.FirstObjectId"/>.
 /// </summary>
 public sealed class NpcObjectIdAllocator
