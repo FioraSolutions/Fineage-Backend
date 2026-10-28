@@ -1,4 +1,5 @@
 using Fineage.Login;
+using Fineage.Zone.Bosses;
 using Fineage.Zone.Interest;
 using Fineage.Zone.SevenSigns;
 using Fineage.Zone.World;
@@ -16,15 +17,23 @@ public static class ZoneAoiSettings
         IAoi? aoi = null,
         IAccountStore? accounts = null,
         SevenSignsEngine? sevenSigns = null,
-        bool includeEnabledMaps = false)
+        bool includeEnabledMaps = false,
+        BossSchedule? bosses = null)
     {
         if (aoi != null)
-            return new ZoneWorld(aoi, accounts: accounts, sevenSigns: sevenSigns, includeEnabledMaps: includeEnabledMaps);
+        {
+            return new ZoneWorld(
+                aoi,
+                accounts: accounts,
+                sevenSigns: sevenSigns,
+                includeEnabledMaps: includeEnabledMaps,
+                bosses: bosses);
+        }
 
         int range = InterestRange;
         return range <= 0
-            ? new ZoneWorld(accounts: accounts, sevenSigns: sevenSigns, includeEnabledMaps: includeEnabledMaps)
-            : new ZoneWorld(new RangeAoi(range), accounts: accounts, sevenSigns: sevenSigns, includeEnabledMaps: includeEnabledMaps);
+            ? new ZoneWorld(accounts: accounts, sevenSigns: sevenSigns, includeEnabledMaps: includeEnabledMaps, bosses: bosses)
+            : new ZoneWorld(new RangeAoi(range), accounts: accounts, sevenSigns: sevenSigns, includeEnabledMaps: includeEnabledMaps, bosses: bosses);
     }
 
     static int ReadInt(string name, int fallback, int min, int max)

@@ -5,6 +5,7 @@ using Fineage.Login;
 using Fineage.Protocol.Net;
 using Fineage.Protocol.Telemetry;
 using Fineage.Zone;
+using Fineage.Zone.Bosses;
 using Fineage.Zone.SevenSigns;
 
 if (args.Contains("--selftest"))
@@ -57,7 +58,8 @@ Console.CancelKeyPress += (_, e) =>
 };
 
 var sevenSigns = SevenSignsEngine.OpenBesideAccounts(storePath);
-var world = ZoneAoiSettings.CreateWorld(accounts: accounts, sevenSigns: sevenSigns, includeEnabledMaps: true);
+var bosses = BossSchedule.OpenBesideAccounts(storePath);
+var world = ZoneAoiSettings.CreateWorld(accounts: accounts, sevenSigns: sevenSigns, includeEnabledMaps: true, bosses: bosses);
 world.StartSimulation(shutdown.Token);
 FineageTelemetry.OnlineCount = () => world.OnlinePlayerCount;
 string host = bindAddress.Equals(IPAddress.Any) ? "0.0.0.0" : bindDisplay;
@@ -85,9 +87,10 @@ if (string.IsNullOrWhiteSpace(Environment.GetEnvironmentVariable("FINEAGE_HANDOF
 Console.WriteLine($"[ZONE] listen {bindDisplay}:{port} store={storePath} Talking Island (maxConn={maxConnections} outboundQ={outboundQueue} msgPerSec={maxMsgPerSec} interestRange={interestRange} npcs={world.NpcObjectIds.Count})");
 Console.WriteLine("[ZONE] Seven Signs period, cabal, and seal-stone scores are stored beside the account file as seven-signs.json.");
 Console.WriteLine("[ZONE] Catacomb and necropolis gates follow that cabal. Enter is opcode 92. See docs/dungeon-access-v2-protocol.md.");
+Console.WriteLine("[ZONE] Raid and grand boss respawn state is stored beside the account file as boss-schedule.json.");
 Console.WriteLine("[ZONE] Auth.Password is the login handoff token. EnterWorld sends UserInfo, ItemList, the village, then a welcome SystemMessage. Say ALL is local; SHOUT is the zone.");
 if (adminCommands)
-    Console.WriteLine("[ZONE] admin commands enabled (GiveItem, AdminCaptureCastle).");
+    Console.WriteLine("[ZONE] admin commands enabled (GiveItem, AdminCaptureCastle, AdminBossSchedule).");
 
 await using FineageMetricsHost? metrics = FineageMetricsHost.Start("zone", Console.Out, Console.Error);
 var tcp = new TcpServer();
@@ -107,6 +110,10 @@ catch (Exception ex) when (ex is not OperationCanceledException)
 {
     Console.Error.WriteLine($"listen failed on {bindDisplay}:{port}: {ex.Message}");
     Environment.ExitCode = 1;
+}
+finally
+{
+    bosses.Save();
 }
 
 static string? Arg(string[] args, string name)
