@@ -124,6 +124,7 @@ public sealed class ZoneGrantItemWireTests
         await ReadAsync(stream, MsgType.ItemList);
         await ReadAsync(stream, MsgType.PlayerSpawned);
         await SkipGremlinsAsync(stream);
+        await ReadAsync(stream, MsgType.SystemMessage);
     }
 
     static async Task SkipGremlinsAsync(Stream stream)

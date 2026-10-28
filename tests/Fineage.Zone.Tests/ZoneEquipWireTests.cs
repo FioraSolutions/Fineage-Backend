@@ -275,6 +275,7 @@ public sealed class ZoneEquipWireTests
                 await ExpectAsync<NpcInfoMsg>(MsgType.NpcInfo);
             for (int i = 0; i < expectOthers; i++)
                 await ExpectAsync<CharInfoMsg>(MsgType.CharInfo);
+            await ExpectAsync<SystemMessageMsg>(MsgType.SystemMessage);
             return new Arrival(user, items);
         }
 

@@ -43,7 +43,7 @@ public enum MsgType : ushort
     PartyKickRequest = 27,
     /// <summary>Keepalive from client. Server answers with <see cref="Pong"/>.</summary>
     Ping = 9,
-    /// <summary>Zone chat. Fan-out is <see cref="CreatureSay"/>.</summary>
+    /// <summary>Zone chat. Fan-out is <see cref="CreatureSay"/>. See <see cref="ChatProtocol"/>.</summary>
     Say = 8,
 
     // Login C → S. Canonical lobby set; see LobbyProtocol.
@@ -67,7 +67,7 @@ public enum MsgType : ushort
     MyTargetSelected = 1008,
     Attack = 1009,
     StatusUpdate = 1010,
-    /// <summary>Zone chat fan-out. Not an Interlude opcode.</summary>
+    /// <summary>Zone chat fan-out. Not an Interlude opcode. See <see cref="ChatProtocol"/>.</summary>
     CreatureSay = 1012,
     /// <summary>Keepalive reply (echoes <see cref="PingMsg"/> timestamp).</summary>
     Pong = 1013,
@@ -87,6 +87,11 @@ public enum MsgType : ushort
     PartyJoinResult = 1028,
     /// <summary>Full party roster fan-out (Interlude PartySmallWindowAll snapshot).</summary>
     PartyMemberList = 1029,
+    /// <summary>
+    /// System line (id, params, plain text). Chat band is 1040–1049.
+    /// See <see cref="ChatProtocol"/>. 1041–1049 are reserved.
+    /// </summary>
+    SystemMessage = 1040,
 
     // Login S → C. Canonical lobby set; see LobbyProtocol.
     RegisterOk = 1020,

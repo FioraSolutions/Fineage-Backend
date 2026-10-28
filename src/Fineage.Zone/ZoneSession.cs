@@ -25,6 +25,9 @@ public sealed class ZoneSession
     public int Z { get; internal set; }
     public int SelectedTargetId { get; set; }
 
+    /// <summary>Unix milliseconds of the last accepted say. 0 means this session has not spoken.</summary>
+    public long LastChatUnixMs { get; set; }
+
     public bool Bound => ObjectId != 0;
 
     public void Bind(int objectId, string account, string name, int classId)
@@ -44,6 +47,7 @@ public sealed class ZoneSession
         ClassId = 0;
         InWorld = false;
         SelectedTargetId = 0;
+        LastChatUnixMs = 0;
     }
 
     public async Task SendAsync<T>(Fineage.Protocol.MsgType type, T message, CancellationToken ct)

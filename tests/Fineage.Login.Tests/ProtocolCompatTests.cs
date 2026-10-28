@@ -83,6 +83,9 @@ public class ProtocolCompatTests
         Assert.Equal(1027, (ushort)MsgType.PartyAskJoin);
         Assert.Equal(1028, (ushort)MsgType.PartyJoinResult);
         Assert.Equal(1029, (ushort)MsgType.PartyMemberList);
+        Assert.Equal(1040, (ushort)MsgType.SystemMessage);
+        Assert.Equal(ChatProtocol.ChatBandFirst, (ushort)MsgType.SystemMessage);
+        Assert.Equal((ushort)MsgType.SystemMessage, (ushort)Fineage.Protocol.V2.MsgType.SystemMessage);
         Assert.Equal((ushort)MsgType.ItemList, (ushort)Fineage.Protocol.V2.MsgType.ItemList);
         Assert.Equal((ushort)MsgType.InventoryUpdate, (ushort)Fineage.Protocol.V2.MsgType.InventoryUpdate);
         Assert.Equal((ushort)MsgType.UserInfo, (ushort)Fineage.Protocol.V2.MsgType.UserInfo);
@@ -165,6 +168,34 @@ public class ProtocolCompatTests
             ChatType = 0
         });
         Assert.Equal(heard, heardV2);
+    }
+
+    [Fact]
+    public void SystemMessage_MatchesProtocolV2Layout()
+    {
+        Assert.Equal(1040, (ushort)MsgType.SystemMessage);
+        Assert.Equal((ushort)MsgType.SystemMessage, (ushort)Fineage.Protocol.V2.MsgType.SystemMessage);
+        Assert.Equal(8, (ushort)MsgType.Say);
+        Assert.Equal(1012, (ushort)MsgType.CreatureSay);
+
+        var msg = new SystemMessageMsg
+        {
+            Id = ChatProtocol.Welcome,
+            Params = ["Aria"],
+            Text = "Welcome, Aria."
+        };
+        byte[] legacy = MessagePackSerializer.Serialize(msg);
+        byte[] v2 = MessagePackSerializer.Serialize(new Fineage.Protocol.V2.SystemMessageMsg
+        {
+            Id = ChatProtocol.Welcome,
+            Params = ["Aria"],
+            Text = "Welcome, Aria."
+        });
+        Assert.Equal(legacy, v2);
+        var round = MessagePackSerializer.Deserialize<SystemMessageMsg>(legacy);
+        Assert.Equal(ChatProtocol.Welcome, round.Id);
+        Assert.Equal("Aria", Assert.Single(round.Params));
+        Assert.Equal("Welcome, Aria.", round.Text);
     }
 
     [Fact]
