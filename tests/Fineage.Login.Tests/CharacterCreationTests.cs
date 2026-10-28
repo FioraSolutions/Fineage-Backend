@@ -196,6 +196,22 @@ public class CharacterCreationTests
     }
 
     [Fact]
+    public void Non_human_starter_kits_match_mobius_initial_equipment()
+    {
+        var service = Service();
+        Assert.True(service.Register("alice", "secret1").Ok);
+
+        var orc = service.CreateHuman("alice", "OrcF", classId: 44, race: 3);
+        Assert.True(orc.Ok, orc.Message);
+        Assert.Contains(orc.Value!.Items!, item => item.ItemId == 2368 && item.EquippedSlot == 7);
+        Assert.Contains(orc.Value.Items!, item => item.ItemId == 2369 && item.EquippedSlot == -1);
+
+        var dwarf = service.CreateHuman("alice", "DwarfF", classId: 53, race: 4, sex: HumanClasses.SexMale);
+        Assert.True(dwarf.Ok, dwarf.Message);
+        Assert.Contains(dwarf.Value!.Items!, item => item.ItemId == 2370 && item.EquippedSlot == 7);
+    }
+
+    [Fact]
     public void Server_wide_toggle_rejects_create()
     {
         var service = Service(create: new CharacterCreateOptions { CreateAllowed = false });

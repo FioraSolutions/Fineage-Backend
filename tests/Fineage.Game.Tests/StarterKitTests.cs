@@ -51,12 +51,28 @@ public class StarterKitTests
         Assert.Null(inventory.Items.Single(item => item.ItemId == 5588).EquippedSlot);
     }
 
+    [Fact]
+    public void Orc_fighter_wears_training_gloves_and_keeps_spare_sword_in_bag()
+    {
+        var inventory = GameData.LoadDefault().CreateStarterInventory(44);
+        Assert.Equal([2369, 2368, 1146, 1147, 5588], inventory.Items.Select(item => item.ItemId).ToArray());
+        Assert.Equal(2368, inventory.GetEquipped(PaperdollSlot.RHand)!.ItemId);
+        Assert.Equal(BodySlot.LrHand, inventory.GetEquipped(PaperdollSlot.RHand)!.Template.BodySlot);
+        Assert.Null(inventory.Items.Single(item => item.ItemId == 2369).EquippedSlot);
+    }
+
+    [Fact]
+    public void Dwarf_fighter_wears_guild_club()
+    {
+        var inventory = GameData.LoadDefault().CreateStarterInventory(53);
+        Assert.Equal(2370, inventory.GetEquipped(PaperdollSlot.RHand)!.ItemId);
+    }
+
     [Theory]
     [InlineData(-1)]
     [InlineData(1)]
-    [InlineData(18)]
-    [InlineData(44)]
-    public void Unknown_class_gets_an_empty_kit(int classId)
+    [InlineData(19)]
+    public void Non_base_class_gets_an_empty_kit(int classId)
     {
         var data = GameData.LoadDefault();
         var kit = data.StarterKits.ForClass(classId);
@@ -81,9 +97,10 @@ public class StarterKitTests
     }
 
     [Fact]
-    public void Defined_kits_are_only_human_fighter_and_mystic()
+    public void Defined_kits_cover_every_base_class()
     {
-        var ids = GameData.LoadDefault().StarterKits.All.Select(kit => kit.ClassId).ToArray();
-        Assert.Equal([0, 10], ids);
+        var catalog = GameData.LoadDefault().Classes!;
+        var ids = GameData.LoadDefault().StarterKits.All.Select(kit => kit.ClassId).OrderBy(id => id).ToArray();
+        Assert.Equal(catalog.BaseClassIds, ids);
     }
 }

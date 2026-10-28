@@ -10,6 +10,22 @@
       "icon": "icon.weapon_squires_sword_i00"
     },
     {
+      "id": 2368,
+      "name": "Training Gloves",
+      "kind": "weapon",
+      "bodySlot": "lrhand",
+      "weaponType": "fist",
+      "icon": "icon.weapon_training_gloves_i00"
+    },
+    {
+      "id": 2370,
+      "name": "Guild Member's Club",
+      "kind": "weapon",
+      "bodySlot": "rhand",
+      "weaponType": "blunt",
+      "icon": "icon.weapon_club_i00"
+    },
+    {
       "id": 10,
       "name": "Dagger",
       "kind": "weapon",

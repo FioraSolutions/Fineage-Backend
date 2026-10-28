@@ -30,6 +30,8 @@ public class ItemCatalogTests
 
     [Theory]
     [InlineData(2369, "Squire's Sword", ItemKind.Weapon, BodySlot.RightHand, WeaponType.Sword, ArmorType.None, false, false, 0, "icon.weapon_squires_sword_i00")]
+    [InlineData(2368, "Training Gloves", ItemKind.Weapon, BodySlot.LrHand, WeaponType.Fist, ArmorType.None, false, false, 0, "icon.weapon_training_gloves_i00")]
+    [InlineData(2370, "Guild Member's Club", ItemKind.Weapon, BodySlot.RightHand, WeaponType.Blunt, ArmorType.None, false, false, 0, "icon.weapon_club_i00")]
     [InlineData(10, "Dagger", ItemKind.Weapon, BodySlot.RightHand, WeaponType.Dagger, ArmorType.None, false, false, 0, "icon.weapon_dagger_i00")]
     [InlineData(6, "Apprentice's Wand", ItemKind.Weapon, BodySlot.RightHand, WeaponType.Blunt, ArmorType.None, true, false, 0, "icon.weapon_apprentices_wand_i00")]
     [InlineData(1146, "Squire's Shirt", ItemKind.Armor, BodySlot.Chest, WeaponType.None, ArmorType.Light, false, false, 33, "icon.armor_t01_u_i00")]
@@ -70,7 +72,7 @@ public class ItemCatalogTests
     {
         var ids = GameData.LoadDefault().Items.Templates.Select(item => item.Id).ToArray();
         Assert.Equal(
-            [2369, 10, 6, 1146, 1147, 425, 461, 5588, 57, 736, 1864, 6611, 7682, 8923, 7850, 7860, 6834, 6841,
+            [2369, 2368, 2370, 10, 6, 1146, 1147, 425, 461, 5588, 57, 736, 1864, 6611, 7682, 8923, 7850, 7860, 6834, 6841,
              58, 73, 79, 98, 123, 911, 2390, 6364, 1458, 1459, 1460, 1461, 1462,
              955, 956, 957, 958, 951, 952, 953, 954, 947, 948, 949, 950, 729, 730, 731, 732,
              959, 960, 961, 962, 6569, 6570, 6571, 6572, 6573, 6574, 6575, 6576, 6577, 6578,

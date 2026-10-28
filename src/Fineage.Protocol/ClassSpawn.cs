@@ -3,7 +3,7 @@ namespace Fineage.Protocol;
 /// <summary>
 /// Shared spawn-point type. The coordinates live in the class datapack
 /// (<c>data/classes.json</c>), transcribed from L2J Mobius Interlude creation points.
-/// Human fighter and human mystic keep the points this server already used.
+/// Human fighter and mystic class ids for call sites that still name the TI MVP defaults.
 /// </summary>
 public static class ClassSpawn
 {
