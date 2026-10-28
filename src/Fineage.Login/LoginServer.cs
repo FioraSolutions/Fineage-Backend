@@ -1,6 +1,7 @@
 using Fineage.Protocol;
 using Fineage.Protocol.Net;
 using MessagePack;
+using V2 = Fineage.Protocol.V2;
 
 namespace Fineage.Login;
 
@@ -64,6 +65,20 @@ public sealed class LoginServer
 
     async Task<string?> DispatchAsync(LoginSession session, string? account, ushort type, byte[] body, CancellationToken ct)
     {
+        if (TryGetV2Opcode(type, out var v2))
+        {
+            return v2 switch
+            {
+                Fineage.Protocol.V2.MsgType.ListCharacters => await HandleV2ListAsync(session, account, ct).ConfigureAwait(false),
+                Fineage.Protocol.V2.MsgType.CreateCharacter => await HandleV2CreateAsync(session, account, body, ct).ConfigureAwait(false),
+                Fineage.Protocol.V2.MsgType.EnterWorld => await HandleV2EnterWorldAsync(session, account, body, ct).ConfigureAwait(false),
+                Fineage.Protocol.V2.MsgType.RequestServerList => await HandleV2ServerListAsync(session, account, ct).ConfigureAwait(false),
+                Fineage.Protocol.V2.MsgType.SelectServer => await HandleV2SelectServerAsync(session, account, body, ct).ConfigureAwait(false),
+                Fineage.Protocol.V2.MsgType.AuthToken => await HandleV2AuthTokenStubAsync(session, ct).ConfigureAwait(false),
+                _ => account
+            };
+        }
+
         switch ((MsgType)type)
         {
             case MsgType.Hello:
@@ -242,6 +257,166 @@ public sealed class LoginServer
             ExpiresUnixSeconds = ticket.ExpiresUnixSeconds
         }, ct).ConfigureAwait(false);
     }
+
+    static bool TryGetV2Opcode(ushort type, out V2.MsgType opcode)
+    {
+        opcode = (V2.MsgType)type;
+        return type switch
+        {
+            3 or 5 or 6 or 7 or 10 or 11 => true,
+            _ => false
+        };
+    }
+
+    async Task<string?> HandleV2ListAsync(LoginSession session, string? account, CancellationToken ct)
+    {
+        if (account == null)
+        {
+            await SendErrorAsync(session, "auth_required", "Login required.", ct).ConfigureAwait(false);
+            return null;
+        }
+
+        var result = _service.List(account);
+        if (!result.Ok || result.Value == null)
+        {
+            await SendErrorAsync(session, result.Code, result.Message, ct).ConfigureAwait(false);
+            return account;
+        }
+
+        LoginLog.Info($"RX V2 ListCharacters account={account} count={result.Value.Count}");
+        byte[] body = MessagePackSerializer.Serialize(LoginV2Wire.ToRoster(result.Value));
+        await session.SendFrameAsync((ushort)V2.MsgType.CharacterRoster, body, ct).ConfigureAwait(false);
+        return account;
+    }
+
+    async Task<string?> HandleV2CreateAsync(LoginSession session, string? account, byte[] body, CancellationToken ct)
+    {
+        if (account == null)
+        {
+            await SendErrorAsync(session, "auth_required", "Login required.", ct).ConfigureAwait(false);
+            return null;
+        }
+
+        V2.CreateCharacterMsg? msg = DecodeV2<V2.CreateCharacterMsg>(body);
+        if (msg == null)
+        {
+            await SendErrorAsync(session, "bad_request", "CreateCharacter body was not readable.", ct).ConfigureAwait(false);
+            return account;
+        }
+
+        LoginLog.Info($"RX V2 CreateCharacter account={account} name={msg.Name} class={msg.ClassId}");
+        var result = _service.CreateHuman(account, msg.Name, msg.ClassId, msg.Race, msg.Sex);
+        V2.CreateCharacterResultMsg response;
+        if (!result.Ok || result.Value == null)
+        {
+            response = LoginV2Wire.CreateFailed(result.Code, result.Message);
+            await SendFrameV2Async(session, V2.MsgType.CreateCharacterResult, response, ct).ConfigureAwait(false);
+            return account;
+        }
+
+        int slot = 0;
+        var listAfter = _service.List(account);
+        if (listAfter.Ok && listAfter.Value != null)
+        {
+            for (int i = 0; i < listAfter.Value.Count; i++)
+            {
+                if (listAfter.Value[i].Id == result.Value.Id)
+                {
+                    slot = i;
+                    break;
+                }
+            }
+        }
+
+        response = LoginV2Wire.ToCreateResult(result.Value, slot);
+        await SendFrameV2Async(session, V2.MsgType.CreateCharacterResult, response, ct).ConfigureAwait(false);
+        return account;
+    }
+
+    async Task<string?> HandleV2EnterWorldAsync(LoginSession session, string? account, byte[] body, CancellationToken ct)
+    {
+        if (account == null)
+        {
+            await SendErrorAsync(session, "auth_required", "Login required.", ct).ConfigureAwait(false);
+            return null;
+        }
+
+        var enter = Decode<EnterWorldMsg>(body) ?? new EnterWorldMsg();
+        var roster = _service.List(account);
+        if (!roster.Ok || roster.Value == null)
+        {
+            await SendErrorAsync(session, roster.Code, roster.Message, ct).ConfigureAwait(false);
+            return account;
+        }
+
+        if (enter.CharacterSlot < 0 || enter.CharacterSlot >= roster.Value.Count)
+        {
+            await SendErrorAsync(session, "bad_slot", "Character slot is out of range.", ct).ConfigureAwait(false);
+            return account;
+        }
+
+        var character = roster.Value[enter.CharacterSlot];
+        var ticket = _service.Select(account, character.Id);
+        if (!ticket.Ok || ticket.Value == null)
+        {
+            await SendErrorAsync(session, ticket.Code, ticket.Message, ct).ConfigureAwait(false);
+            return account;
+        }
+
+        LoginLog.Info($"RX V2 EnterWorld account={account} slot={enter.CharacterSlot} character={character.Name}");
+        await SendFrameV2Async(session, V2.MsgType.PlayToken, LoginV2Wire.ToPlayToken(ticket.Value), ct).ConfigureAwait(false);
+        await SendHandoffAsync(session, ticket.Value, ct).ConfigureAwait(false);
+        return account;
+    }
+
+    async Task<string?> HandleV2ServerListAsync(LoginSession session, string? account, CancellationToken ct)
+    {
+        LoginLog.Info("RX V2 RequestServerList");
+        await SendFrameV2Async(session, V2.MsgType.ServerList, LoginV2Wire.DefaultServerList(), ct).ConfigureAwait(false);
+        return account;
+    }
+
+    async Task<string?> HandleV2SelectServerAsync(LoginSession session, string? account, byte[] body, CancellationToken ct)
+    {
+        var pick = DecodeV2<V2.SelectServerMsg>(body);
+        if (pick == null)
+        {
+            await SendErrorAsync(session, "bad_request", "SelectServer body was not readable.", ct).ConfigureAwait(false);
+            return account;
+        }
+
+        if (pick.ServerId != 1)
+        {
+            await SendErrorAsync(session, "server_not_found", "Only server id 1 is available.", ct).ConfigureAwait(false);
+            return account;
+        }
+
+        if (account == null)
+        {
+            await SendErrorAsync(session, "auth_required", "Login required.", ct).ConfigureAwait(false);
+            return null;
+        }
+
+        LoginLog.Info($"RX V2 SelectServer account={account} server={pick.ServerId}");
+        await SendErrorAsync(session, "character_required",
+            "Send EnterWorld (3) with a character slot after choosing a character.", ct).ConfigureAwait(false);
+        return account;
+    }
+
+    async Task<string?> HandleV2AuthTokenStubAsync(LoginSession session, CancellationToken ct)
+    {
+        await SendErrorAsync(session, "not_implemented",
+            "AuthToken is not wired; use Auth (2) then EnterWorld (3) with a character slot.", ct).ConfigureAwait(false);
+        return null;
+    }
+
+    Task SendFrameV2Async<T>(LoginSession session, V2.MsgType type, T message, CancellationToken ct)
+    {
+        byte[] body = MessagePackSerializer.Serialize(message);
+        return session.SendFrameAsync((ushort)type, body, ct);
+    }
+
+    static T? DecodeV2<T>(byte[] body) where T : class => Decode<T>(body);
 
     static Task SendErrorAsync(LoginSession session, string code, string message, CancellationToken ct)
     {
