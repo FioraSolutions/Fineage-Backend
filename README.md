@@ -73,6 +73,8 @@ sudo systemctl enable --now fineage-login fineage-zone
 
 `FINEAGE_HANDOFF_SECRET` must be set and identical for both processes. The dev default is only for local loops. Listening on `0.0.0.0` without it prints a warning. Sample unit files and env: `deploy/systemd/`, `deploy/fineage.env.example`.
 
+Both processes emit OpenTelemetry metrics on meter **`Fineage.Server`** (`fineage.connections`, `fineage.frames.in` / `fineage.frames.out`, `fineage.outbound.dropped`, and zone-only `fineage.tick.ms` / `fineage.zone.online`). See the commented block at the bottom of `deploy/fineage.env.example` for instrument names and sample `OTEL_*` variables.
+
 There is no deploy workflow in this repo. CI is `.github/workflows/build-and-test.yml` (`dotnet test` on pull requests and pushes).
 
 Login CLI, same store:
