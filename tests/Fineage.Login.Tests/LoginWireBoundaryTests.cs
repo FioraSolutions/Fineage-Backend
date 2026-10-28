@@ -77,6 +77,29 @@ public sealed class LoginWireBoundaryTests
     }
 
     [Fact]
+    public async Task Say_on_login_pipeline_returns_wrong_endpoint()
+    {
+        var service = new LoginService(JsonAccountStore.InMemory(), HandoffTokens.FromEnvironment());
+        var server = new LoginServer(service);
+        await using var host = await PipelineLoginHost.StartAsync(server);
+
+        using var client = new TcpClient();
+        await client.ConnectAsync(IPAddress.Loopback, host.Port);
+        await using var stream = client.GetStream();
+
+        await FrameIO.SendAsync(stream, (ushort)ProtocolMsgType.Hello, MessagePackSerializer.Serialize(new HelloMsg()));
+        await ReadAsync(stream, ProtocolMsgType.HelloAck);
+        await FrameIO.SendAsync(stream, (ushort)ProtocolMsgType.Say,
+            MessagePackSerializer.Serialize(new SayMsg { Text = "hello", ChatType = 0 }));
+
+        var frame = await FrameIO.ReadAsync(stream);
+        Assert.NotNull(frame);
+        Assert.Equal((ushort)ProtocolMsgType.Error, frame!.Value.Type);
+        var err = MessagePackSerializer.Deserialize<ErrorMsg>(frame.Value.Body);
+        Assert.Equal("wrong_endpoint", err.Code);
+    }
+
+    [Fact]
     public async Task Say_on_login_port_returns_wrong_endpoint()
     {
         var service = new LoginService(JsonAccountStore.InMemory(), HandoffTokens.FromEnvironment());
