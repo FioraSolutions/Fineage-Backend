@@ -9,6 +9,7 @@ using Fineage.Zone.Spawns;
 using Fineage.Zone.Drops;
 using Fineage.Zone.SevenSigns;
 using Fineage.Zone.Dungeons;
+using Fineage.Zone.Siege;
 using MessagePack;
 
 namespace Fineage.Zone.World;
@@ -112,6 +113,8 @@ public sealed partial class ZoneWorld
     readonly SevenSignsEngine _sevenSigns;
     readonly DungeonCatalog _dungeons;
     readonly DungeonAccess _dungeonAccess;
+    readonly SiegeSettings _siegeSettings;
+    readonly SiegeBoard _siege;
     readonly Dictionary<int, ZoneEntity> _byId = [];
     readonly DropCatalog _dropCatalog;
     readonly DropRates _dropRates;
@@ -135,7 +138,8 @@ public sealed partial class ZoneWorld
         SevenSignsEngine? sevenSigns = null,
         bool includeEnabledMaps = false,
         DungeonCatalog? dungeons = null,
-        DungeonAccessOptions? dungeonAccess = null)
+        DungeonAccessOptions? dungeonAccess = null,
+        SiegeSettings? siege = null)
     {
         _aoi = aoi ?? new SingleCellAoi();
         _game = game ?? GameData.LoadDefault();
@@ -157,9 +161,12 @@ public sealed partial class ZoneWorld
         _sevenSigns = sevenSigns ?? new SevenSignsEngine(new SystemGameClock());
         _dungeons = dungeons ?? DungeonCatalog.LoadDefault();
         _dungeonAccess = new DungeonAccess(_dungeons, dungeonAccess ?? DungeonAccessOptions.FromEnvironment());
+        _siegeSettings = siege ?? SiegeSettings.FromEnvironment();
+        _siege = new SiegeBoard(_clock().ToUnixTimeMilliseconds(), _siegeSettings);
         BootstrapSpawns();
         BootstrapQuestNpcs();
         LoadClans();
+        LoadSiege();
     }
 
     public IReadOnlyList<int> NpcObjectIds

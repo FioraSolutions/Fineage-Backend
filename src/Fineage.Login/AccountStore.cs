@@ -85,7 +85,10 @@ public sealed record ClanMemberRecord(
     int Level,
     int PledgeType);
 
-/// <summary>Persisted clan. Crest id stays 0 until crests exist. Times are unix milliseconds; 0 means none.</summary>
+/// <summary>
+/// Persisted clan. Crest id stays 0 until crests exist. Times are unix milliseconds; 0 means none.
+/// <see cref="CastleId"/> is Mobius <c>clan_data.hasCastle</c>. 0 means the clan owns no castle.
+/// </summary>
 public sealed record ClanRecord(
     int Id,
     string Name,
@@ -94,7 +97,22 @@ public sealed record ClanRecord(
     int CrestId,
     long DissolvingExpiryUnixMs,
     long CharPenaltyExpiryUnixMs,
-    IReadOnlyList<ClanMemberRecord> Members);
+    IReadOnlyList<ClanMemberRecord> Members,
+    int CastleId = 0);
+
+/// <summary>Persisted castle row. Owner 0 is an NPC castle. Tax is a percent. Times are unix milliseconds.</summary>
+public sealed record CastleSave(
+    int Id,
+    int OwnerClanId,
+    int TaxPercent,
+    long SiegeUnixMs,
+    bool RegistrationClosed,
+    bool ScheduleAccepted,
+    bool InProgress,
+    long EndsUnixMs);
+
+/// <summary>One <c>siege_clans</c> row. Owner clans are not stored; side is attacker, defender, or pending.</summary>
+public sealed record SiegeClanSave(int CastleId, int ClanId, int Side);
 
 /// <summary>Character clan id and penalty expiries written with a clan mutation.</summary>
 public readonly record struct CharacterClanState(
@@ -189,6 +207,13 @@ public interface IAccountStore
     bool DeleteClan(int clanId, IReadOnlyList<CharacterClanState> characters);
 
     bool TrySetCharacterClanState(CharacterClanState state);
+
+    IReadOnlyList<CastleSave> ListCastles();
+
+    IReadOnlyList<SiegeClanSave> ListSiegeClans();
+
+    /// <summary>Replaces castle rows and siege registrations, and writes each clan's <see cref="ClanRecord.CastleId"/>.</summary>
+    bool SaveSiege(IReadOnlyList<CastleSave> castles, IReadOnlyList<SiegeClanSave> clans, IReadOnlyDictionary<int, int> clanCastleIds);
 }
 
 /// <summary>JSON file store. Pass a null path for process memory only.</summary>
@@ -627,6 +652,75 @@ public sealed class JsonAccountStore : IAccountStore
         }
     }
 
+    public IReadOnlyList<CastleSave> ListCastles()
+    {
+        lock (_gate)
+        {
+            return _data.Castles.Select(castle => new CastleSave(
+                castle.Id,
+                castle.OwnerClanId,
+                castle.TaxPercent,
+                castle.SiegeUnixMs,
+                castle.RegistrationClosed,
+                castle.ScheduleAccepted,
+                castle.InProgress,
+                castle.EndsUnixMs)).ToArray();
+        }
+    }
+
+    public IReadOnlyList<SiegeClanSave> ListSiegeClans()
+    {
+        lock (_gate)
+        {
+            return _data.SiegeClans.Select(row => new SiegeClanSave(row.CastleId, row.ClanId, row.Side)).ToArray();
+        }
+    }
+
+    public bool SaveSiege(IReadOnlyList<CastleSave> castles, IReadOnlyList<SiegeClanSave> clans, IReadOnlyDictionary<int, int> clanCastleIds)
+    {
+        ArgumentNullException.ThrowIfNull(castles);
+        ArgumentNullException.ThrowIfNull(clans);
+        ArgumentNullException.ThrowIfNull(clanCastleIds);
+        lock (_gate)
+        {
+            var ids = new HashSet<int>();
+            foreach (var castle in castles)
+            {
+                if (castle.Id <= 0 || !ids.Add(castle.Id))
+                    return false;
+            }
+
+            var pairs = new HashSet<(int CastleId, int ClanId)>();
+            foreach (var row in clans)
+            {
+                if (!ids.Contains(row.CastleId) || row.ClanId <= 0 || !pairs.Add((row.CastleId, row.ClanId)))
+                    return false;
+            }
+
+            _data.Castles = castles.Select(castle => new CastleDto
+            {
+                Id = castle.Id,
+                OwnerClanId = castle.OwnerClanId,
+                TaxPercent = castle.TaxPercent,
+                SiegeUnixMs = castle.SiegeUnixMs,
+                RegistrationClosed = castle.RegistrationClosed,
+                ScheduleAccepted = castle.ScheduleAccepted,
+                InProgress = castle.InProgress,
+                EndsUnixMs = castle.EndsUnixMs
+            }).ToList();
+            _data.SiegeClans = clans.Select(row => new SiegeClanDto
+            {
+                CastleId = row.CastleId,
+                ClanId = row.ClanId,
+                Side = row.Side
+            }).ToList();
+            foreach (var clan in _data.Clans)
+                clan.CastleId = clanCastleIds.TryGetValue(clan.Id, out int castleId) ? castleId : 0;
+            Save();
+            return true;
+        }
+    }
+
     public bool TrySetCharacterClanState(CharacterClanState state)
     {
         lock (_gate)
@@ -749,6 +843,7 @@ public sealed class JsonAccountStore : IAccountStore
         CrestId = clan.CrestId,
         DissolvingExpiryUnixMs = clan.DissolvingExpiryUnixMs,
         CharPenaltyExpiryUnixMs = clan.CharPenaltyExpiryUnixMs,
+        CastleId = clan.CastleId,
         Members = clan.Members.Select(member => new ClanMemberDto
         {
             CharacterId = member.CharacterId,
@@ -774,7 +869,8 @@ public sealed class JsonAccountStore : IAccountStore
             member.Name,
             member.ClassId,
             member.Level,
-            member.PledgeType)).ToArray());
+            member.PledgeType)).ToArray(),
+        clan.CastleId);
 
     void Load()
     {
@@ -791,6 +887,8 @@ public sealed class JsonAccountStore : IAccountStore
             throw new InvalidDataException($"unsupported account store version {data.Version}");
 
         data.Clans ??= [];
+        data.Castles ??= [];
+        data.SiegeClans ??= [];
         var names = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
         var ids = new HashSet<int>();
         foreach (var account in data.Accounts)
@@ -900,6 +998,8 @@ public sealed class JsonAccountStore : IAccountStore
         public int NextClanId { get; set; } = 1;
         public List<AccountDto> Accounts { get; set; } = [];
         public List<ClanDto> Clans { get; set; } = [];
+        public List<CastleDto> Castles { get; set; } = [];
+        public List<SiegeClanDto> SiegeClans { get; set; } = [];
     }
 
     sealed class AccountDto
@@ -967,7 +1067,27 @@ public sealed class JsonAccountStore : IAccountStore
         public int CrestId { get; set; }
         public long DissolvingExpiryUnixMs { get; set; }
         public long CharPenaltyExpiryUnixMs { get; set; }
+        public int CastleId { get; set; }
         public List<ClanMemberDto> Members { get; set; } = [];
+    }
+
+    sealed class CastleDto
+    {
+        public int Id { get; set; }
+        public int OwnerClanId { get; set; }
+        public int TaxPercent { get; set; }
+        public long SiegeUnixMs { get; set; }
+        public bool RegistrationClosed { get; set; }
+        public bool ScheduleAccepted { get; set; }
+        public bool InProgress { get; set; }
+        public long EndsUnixMs { get; set; }
+    }
+
+    sealed class SiegeClanDto
+    {
+        public int CastleId { get; set; }
+        public int ClanId { get; set; }
+        public int Side { get; set; }
     }
 
     sealed class ClanMemberDto

@@ -977,3 +977,71 @@ public sealed class DungeonEnteredMsg
     [Key(4)] public bool Inside { get; set; }
     [Key(5)] public int Action { get; set; }
 }
+
+/// <summary>
+/// Opcode <see cref="MsgType.SiegeRegisterRequest"/> (46).
+/// <see cref="Attacker"/> 1 registers as attacker, 0 as defender.
+/// <see cref="Joining"/> 1 registers, 0 withdraws. Mobius <c>RequestJoinSiege</c>.
+/// </summary>
+[MessagePackObject]
+public sealed class SiegeRegisterRequestMsg
+{
+    [Key(0)] public int CastleId { get; set; }
+    [Key(1)] public int Attacker { get; set; }
+    [Key(2)] public int Joining { get; set; }
+}
+
+/// <summary>
+/// Opcode <see cref="MsgType.SiegeDefenderAnswerRequest"/> (47).
+/// <see cref="Approved"/> 1 accepts a waiting defender. Any other value refuses. Mobius <c>RequestConfirmSiegeWaitingList</c>.
+/// </summary>
+[MessagePackObject]
+public sealed class SiegeDefenderAnswerRequestMsg
+{
+    [Key(0)] public int CastleId { get; set; }
+    [Key(1)] public int ClanId { get; set; }
+    [Key(2)] public int Approved { get; set; }
+}
+
+/// <summary>Opcode <see cref="MsgType.SiegeListRequest"/> (48).</summary>
+[MessagePackObject]
+public sealed class SiegeListRequestMsg
+{
+    [Key(0)] public int CastleId { get; set; }
+}
+
+/// <summary>
+/// Opcode <see cref="MsgType.AdminCaptureCastle"/> (49). Off unless <c>FINEAGE_ZONE_ADMIN</c> is set.
+/// Calls <c>CaptureCastle(clanId)</c>. Combat does not send this.
+/// </summary>
+[MessagePackObject]
+public sealed class AdminCaptureCastleMsg
+{
+    [Key(0)] public int CastleId { get; set; }
+    [Key(1)] public int ClanId { get; set; }
+}
+
+/// <summary>One clan on <see cref="SiegeInfoMsg"/>. Side is owner -1, defender 0, attacker 1, or pending 2.</summary>
+[MessagePackObject]
+public sealed class SiegeClanMsg
+{
+    [Key(0)] public int ClanId { get; set; }
+    [Key(1)] public int Side { get; set; }
+}
+
+/// <summary>Opcode <see cref="MsgType.SiegeInfo"/> (1064). The castle and its current registrations.</summary>
+[MessagePackObject]
+public sealed class SiegeInfoMsg
+{
+    [Key(0)] public int CastleId { get; set; }
+    [Key(1)] public string Name { get; set; } = "";
+    [Key(2)] public int OwnerClanId { get; set; }
+    [Key(3)] public int TaxPercent { get; set; }
+    [Key(4)] public long SiegeUnixMs { get; set; }
+    [Key(5)] public long RegistrationDeadlineUnixMs { get; set; }
+    [Key(6)] public bool RegistrationClosed { get; set; }
+    [Key(7)] public bool InProgress { get; set; }
+    [Key(8)] public SiegeClanMsg[] Clans { get; set; } = [];
+    /// <summary>Unix milliseconds when the siege ends. 0 when it is not in progress.</summary>
+    [Key(9)] public long EndsUnixMs { get; set; }
+}
