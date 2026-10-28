@@ -29,6 +29,12 @@ public enum MsgType : ushort
 
     RequestServerList = 10,
     SelectServer = 11,
+    /// <summary>Same value as <see cref="Fineage.Protocol.MsgType.UseItem"/>.</summary>
+    UseItem = 15,
+    /// <summary>Same value as <see cref="Fineage.Protocol.MsgType.UnequipItem"/>.</summary>
+    UnequipItem = 16,
+    /// <summary>Same value as <see cref="Fineage.Protocol.MsgType.GiveItem"/>. Admin grant; off unless the zone enables it.</summary>
+    GiveItem = 17,
 
     HelloAck = 1001,
     AuthOk = 1002,

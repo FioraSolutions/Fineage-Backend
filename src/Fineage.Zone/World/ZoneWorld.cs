@@ -38,6 +38,11 @@ sealed class ZoneEntity
     public bool Running { get; init; }
     public ZoneSession? Session { get; init; }
     public PlayerInventory? Inventory { get; init; }
+    /// <summary>
+    /// Player is dead. Equip and unequip are rejected. Combat sets this; spawn leaves it false.
+    /// CurHp is not the signal: a living player can sit at low HP while regen heals them.
+    /// </summary>
+    public bool Dead { get; set; }
     public int GroundItemId { get; set; }
     public int GroundCount { get; set; } = 1;
     public bool GroundStackable { get; set; }

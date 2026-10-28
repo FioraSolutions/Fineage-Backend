@@ -97,7 +97,7 @@ public class InventoryRulesTests
     }
 
     [Fact]
-    public void Full_armor_and_legs_displace_each_other()
+    public void Full_armor_frees_legs_and_blocks_them_until_it_is_removed()
     {
         var catalog = new ItemCatalog(
         [
@@ -115,7 +115,13 @@ public class InventoryRulesTests
         Assert.Equal(breastplate, inventory.GetEquipped(PaperdollSlot.Chest));
         Assert.Null(inventory.GetEquipped(PaperdollSlot.Legs));
         Assert.Null(pants.EquippedSlot);
+        Assert.Contains(pants, inventory.Items);
 
+        Assert.Throws<InvalidOperationException>(() => inventory.Equip(pants));
+        Assert.Equal(breastplate, inventory.GetEquipped(PaperdollSlot.Chest));
+        Assert.False(pants.IsEquipped);
+
+        inventory.Unequip(breastplate);
         inventory.Equip(pants);
         Assert.Equal(pants, inventory.GetEquipped(PaperdollSlot.Legs));
         Assert.Null(breastplate.EquippedSlot);
@@ -123,6 +129,7 @@ public class InventoryRulesTests
         inventory.Equip(shirt);
         Assert.Equal(shirt, inventory.GetEquipped(PaperdollSlot.Chest));
         Assert.Equal(pants, inventory.GetEquipped(PaperdollSlot.Legs));
+        Assert.Contains(breastplate, inventory.Items);
     }
 
     [Fact]
@@ -190,6 +197,76 @@ public class InventoryRulesTests
     }
 
     [Fact]
+    public void Direct_body_slots_land_on_the_paperdoll_and_the_replaced_piece_returns_to_the_bag()
+    {
+        var catalog = new ItemCatalog(
+        [
+            Armor(1, "Shirt", BodySlot.Underwear),
+            Armor(2, "Necklace", BodySlot.Neck),
+            Armor(3, "Helmet", BodySlot.Head),
+            Armor(4, "Circlet", BodySlot.Head),
+            Piece(5, "Sword", BodySlot.RightHand, WeaponType.Sword),
+            Armor(6, "Shield", BodySlot.LeftHand),
+            Armor(7, "Gloves", BodySlot.Gloves),
+            Armor(8, "Tunic", BodySlot.Chest),
+            Armor(9, "Shoes", BodySlot.Feet)
+        ]);
+        var inventory = new PlayerInventory(catalog, firstObjectId: 1);
+        var shirt = inventory.Add(1);
+        var necklace = inventory.Add(2);
+        var helmet = inventory.Add(3);
+        var circlet = inventory.Add(4);
+        var sword = inventory.Add(5);
+        var shield = inventory.Add(6);
+        var gloves = inventory.Add(7);
+        var tunic = inventory.Add(8);
+        var shoes = inventory.Add(9);
+
+        inventory.Equip(shirt);
+        inventory.Equip(necklace);
+        inventory.Equip(helmet);
+        inventory.Equip(sword);
+        inventory.Equip(shield);
+        inventory.Equip(gloves);
+        inventory.Equip(tunic);
+        inventory.Equip(shoes);
+
+        Assert.Equal(shirt, inventory.GetEquipped(PaperdollSlot.Under));
+        Assert.Equal(necklace, inventory.GetEquipped(PaperdollSlot.Neck));
+        Assert.Equal(helmet, inventory.GetEquipped(PaperdollSlot.Head));
+        Assert.Equal(sword, inventory.GetEquipped(PaperdollSlot.RHand));
+        Assert.Equal(shield, inventory.GetEquipped(PaperdollSlot.LHand));
+        Assert.Equal(gloves, inventory.GetEquipped(PaperdollSlot.Gloves));
+        Assert.Equal(tunic, inventory.GetEquipped(PaperdollSlot.Chest));
+        Assert.Equal(shoes, inventory.GetEquipped(PaperdollSlot.Feet));
+
+        inventory.Equip(circlet);
+        Assert.Equal(circlet, inventory.GetEquipped(PaperdollSlot.Head));
+        Assert.Null(helmet.EquippedSlot);
+        Assert.Contains(helmet, inventory.Items);
+    }
+
+    [Fact]
+    public void Rings_fill_the_empty_finger_then_replace_the_left()
+    {
+        var catalog = new ItemCatalog(
+        [
+            new ItemTemplate(1, "Ring", ItemKind.Armor, BodySlot.BothFingers, "icon.test")
+        ]);
+        var inventory = new PlayerInventory(catalog, firstObjectId: 1);
+        var left = inventory.Add(1);
+        var right = inventory.Add(1);
+        var third = inventory.Add(1);
+        inventory.Equip(left);
+        inventory.Equip(right);
+        inventory.Equip(third);
+        Assert.Equal(third, inventory.GetEquipped(PaperdollSlot.LFinger));
+        Assert.Equal(right, inventory.GetEquipped(PaperdollSlot.RFinger));
+        Assert.Null(left.EquippedSlot);
+        Assert.Contains(left, inventory.Items);
+    }
+
+    [Fact]
     public void Earrings_fill_the_empty_ear_then_replace_the_left()
     {
         var catalog = new ItemCatalog(
@@ -213,4 +290,7 @@ public class InventoryRulesTests
 
     static ItemTemplate Shield(int id) =>
         new(id, "Shield", ItemKind.Armor, BodySlot.LeftHand, "icon.test");
+
+    static ItemTemplate Armor(int id, string name, BodySlot slot) =>
+        new(id, name, ItemKind.Armor, slot, "icon.test");
 }

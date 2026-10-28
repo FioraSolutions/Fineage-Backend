@@ -12,6 +12,7 @@ public sealed class ZoneServer
     readonly ZoneWorld _world;
     readonly Func<DateTimeOffset> _clock;
     readonly int _maxMessagesPerSecond;
+    readonly bool _adminCommands;
     int _nextSession = 1;
 
     public ZoneServer(HandoffTokens tokens, Func<DateTimeOffset>? clock = null)
@@ -30,6 +31,7 @@ public sealed class ZoneServer
         _world = world;
         _clock = clock ?? (() => DateTimeOffset.UtcNow);
         _maxMessagesPerSecond = options?.MaxMessagesPerSecond ?? ZoneNetSettings.MaxMessagesPerSecond;
+        _adminCommands = options?.AdminCommands ?? ZoneAdmin.Enabled;
     }
 
     public async Task HandleAsync(Stream stream, CancellationToken ct)
@@ -270,6 +272,60 @@ public sealed class ZoneServer
                     ZoneLog.Info($"RX GrantItem session={sessionId} item={grant.ItemId} count={grant.Count}");
                 break;
             }
+            case MsgType.UseItem:
+            {
+                var use = Decode<UseItemMsg>(body);
+                if (use == null)
+                {
+                    await ErrorAsync(session, "bad_request", "UseItem body was not readable.", ct).ConfigureAwait(false);
+                    break;
+                }
+
+                string? code = await _world.TryUseItemAsync(session, use, ct).ConfigureAwait(false);
+                if (!await RejectGearAsync(session, code, "UseItem was rejected.", ct).ConfigureAwait(false))
+                    ZoneLog.Info($"RX UseItem session={sessionId} object={use.ObjectId}");
+                break;
+            }
+            case MsgType.UnequipItem:
+            {
+                var unequip = Decode<UnequipItemMsg>(body);
+                if (unequip == null)
+                {
+                    await ErrorAsync(session, "bad_request", "UnequipItem body was not readable.", ct)
+                        .ConfigureAwait(false);
+                    break;
+                }
+
+                string? code = await _world.TryUnequipItemAsync(session, unequip, ct).ConfigureAwait(false);
+                if (!await RejectGearAsync(session, code, "UnequipItem was rejected.", ct).ConfigureAwait(false))
+                    ZoneLog.Info($"RX UnequipItem session={sessionId} slot={unequip.PaperdollSlot}");
+                break;
+            }
+            case MsgType.GiveItem:
+            {
+                if (!_adminCommands)
+                {
+                    await ErrorAsync(session, InventoryProtocol.Forbidden, "GiveItem is disabled.", ct)
+                        .ConfigureAwait(false);
+                    break;
+                }
+
+                var give = Decode<GiveItemMsg>(body);
+                if (give == null)
+                {
+                    await ErrorAsync(session, "bad_request", "GiveItem body was not readable.", ct).ConfigureAwait(false);
+                    break;
+                }
+
+                string? code = await _world.TryGiveItemAsync(session, give, ct).ConfigureAwait(false);
+                if (code == "world")
+                    await ErrorAsync(session, "world", "EnterWorld first.", ct).ConfigureAwait(false);
+                else if (code != null)
+                    await ErrorAsync(session, "bad_request", "GiveItem was rejected.", ct).ConfigureAwait(false);
+                else
+                    ZoneLog.Info($"RX GiveItem session={sessionId} item={give.ItemId} count={give.Count}");
+                break;
+            }
             case MsgType.PickupRequest:
             {
                 var pickup = Decode<PickupRequestMsg>(body);
@@ -316,6 +372,41 @@ public sealed class ZoneServer
                 await ErrorAsync(session, "unknown", $"msgType={type}", ct).ConfigureAwait(false);
                 break;
         }
+    }
+
+    static async Task<bool> RejectGearAsync(ZoneSession session, string? code, string fallback, CancellationToken ct)
+    {
+        switch (code)
+        {
+            case null:
+                return false;
+            case "world":
+                await ErrorAsync(session, "world", "EnterWorld first.", ct).ConfigureAwait(false);
+                break;
+            case InventoryProtocol.NotOwned:
+                await ErrorAsync(session, code, "That item is not in your inventory.", ct).ConfigureAwait(false);
+                break;
+            case InventoryProtocol.NotEquippable:
+                await ErrorAsync(session, code, "That item cannot be equipped.", ct).ConfigureAwait(false);
+                break;
+            case InventoryProtocol.Dead:
+                await ErrorAsync(session, code, "You cannot change gear while dead.", ct).ConfigureAwait(false);
+                break;
+            case InventoryProtocol.Blocked:
+                await ErrorAsync(session, code, "That item cannot be equipped right now.", ct).ConfigureAwait(false);
+                break;
+            case InventoryProtocol.BadSlot:
+                await ErrorAsync(session, code, "Paperdoll slot is out of range.", ct).ConfigureAwait(false);
+                break;
+            case InventoryProtocol.Empty:
+                await ErrorAsync(session, code, "That paperdoll slot is empty.", ct).ConfigureAwait(false);
+                break;
+            default:
+                await ErrorAsync(session, "bad_request", fallback, ct).ConfigureAwait(false);
+                break;
+        }
+
+        return true;
     }
 
     static Task ErrorAsync(ZoneSession session, string code, string message, CancellationToken ct)

@@ -45,28 +45,35 @@ public static class InventoryMessages
         return new ItemListMsg { Items = rows };
     }
 
-    /// <summary>One add, modify, or remove row. The zone has no equip request yet; tests and a later equip path share this shape.</summary>
-    public static InventoryUpdateMsg Update(int change, ItemInstance item)
+    /// <summary>One add, modify, or remove row.</summary>
+    public static InventoryUpdateMsg Update(int change, ItemInstance item) =>
+        new() { Changes = [ChangeRow(change, item)] };
+
+    /// <summary>Modify row for each item whose paperdoll slot changed. Caller orders the list.</summary>
+    public static InventoryUpdateMsg Modify(IReadOnlyList<ItemInstance> items)
+    {
+        ArgumentNullException.ThrowIfNull(items);
+        var changes = new InventoryUpdateEntryMsg[items.Count];
+        for (int i = 0; i < items.Count; i++)
+            changes[i] = ChangeRow(InventoryChange.Modify, items[i]);
+        return new InventoryUpdateMsg { Changes = changes };
+    }
+
+    public static InventoryUpdateEntryMsg ChangeRow(int change, ItemInstance item)
     {
         var row = Entry(item);
-        return new InventoryUpdateMsg
+        return new InventoryUpdateEntryMsg
         {
-            Changes =
-            [
-                new InventoryUpdateEntryMsg
-                {
-                    Change = change,
-                    ObjectId = row.ObjectId,
-                    ItemId = row.ItemId,
-                    Count = row.Count,
-                    EquippedSlot = row.EquippedSlot,
-                    BodySlot = row.BodySlot,
-                    Kind = row.Kind,
-                    Icon = row.Icon,
-                    WeaponType = row.WeaponType,
-                    ArmorType = row.ArmorType
-                }
-            ]
+            Change = change,
+            ObjectId = row.ObjectId,
+            ItemId = row.ItemId,
+            Count = row.Count,
+            EquippedSlot = row.EquippedSlot,
+            BodySlot = row.BodySlot,
+            Kind = row.Kind,
+            Icon = row.Icon,
+            WeaponType = row.WeaponType,
+            ArmorType = row.ArmorType
         };
     }
 

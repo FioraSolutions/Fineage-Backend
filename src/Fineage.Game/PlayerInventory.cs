@@ -3,7 +3,10 @@ namespace Fineage.Game;
 /// <summary>
 /// A player's bag and paperdoll. Equip follows L2J Mobius Interlude inventory rules:
 /// a new item in a slot unequips the previous one, a two-handed weapon clears the
-/// left hand, and stackable items merge into the existing stack.
+/// left hand (and a left-hand item clears a two-handed weapon, except arrows on a bow
+/// and lures on a fishing rod), full armor clears the legs, legs cannot be worn while
+/// full armor is equipped, and stackable items merge into the existing stack.
+/// Class and grade restrictions are not applied.
 /// </summary>
 public sealed class PlayerInventory
 {
@@ -138,7 +141,8 @@ public sealed class PlayerInventory
             case BodySlot.Legs:
                 var chest = GetEquipped(PaperdollSlot.Chest);
                 if (chest != null && chest.Template.BodySlot == BodySlot.FullArmor)
-                    Place(PaperdollSlot.Chest, null);
+                    throw new InvalidOperationException(
+                        $"Item {item.ItemId} ({item.Template.Name}) cannot be equipped while full armor is worn.");
                 Place(PaperdollSlot.Legs, item);
                 break;
             case BodySlot.FullArmor:

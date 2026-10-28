@@ -46,6 +46,19 @@ public class ProtocolCompatTests
         Assert.Equal(12, (ushort)MsgType.BuffRequest);
         Assert.Equal(13, (ushort)MsgType.GrantItemRequest);
         Assert.Equal(14, (ushort)MsgType.PickupRequest);
+        Assert.Equal(15, (ushort)MsgType.UseItem);
+        Assert.Equal(16, (ushort)MsgType.UnequipItem);
+        Assert.Equal(17, (ushort)MsgType.GiveItem);
+        Assert.Equal((ushort)MsgType.UseItem, (ushort)Fineage.Protocol.V2.MsgType.UseItem);
+        Assert.Equal((ushort)MsgType.UnequipItem, (ushort)Fineage.Protocol.V2.MsgType.UnequipItem);
+        Assert.Equal((ushort)MsgType.GiveItem, (ushort)Fineage.Protocol.V2.MsgType.GiveItem);
+        Assert.Equal(InventoryProtocol.NotOwned, "not_owned");
+        Assert.Equal(InventoryProtocol.NotEquippable, "not_equippable");
+        Assert.Equal(InventoryProtocol.Dead, "dead");
+        Assert.Equal(InventoryProtocol.Blocked, "blocked");
+        Assert.Equal(InventoryProtocol.BadSlot, "bad_slot");
+        Assert.Equal(InventoryProtocol.Empty, "empty");
+        Assert.Equal(InventoryProtocol.Forbidden, "forbidden");
         Assert.Equal(9, (ushort)MsgType.Ping);
         Assert.Equal(1001, (ushort)MsgType.HelloAck);
         Assert.Equal(1002, (ushort)MsgType.AuthOk);
@@ -69,6 +82,37 @@ public class ProtocolCompatTests
         Assert.Equal((ushort)MsgType.AbnormalStatusUpdate, (ushort)Fineage.Protocol.V2.MsgType.AbnormalStatusUpdate);
         Assert.Equal((ushort)MsgType.SpawnItem, (ushort)Fineage.Protocol.V2.MsgType.SpawnItem);
         Assert.Equal(1099, (ushort)MsgType.Error);
+        AssertUnique<MsgType>();
+        AssertUnique<Fineage.Protocol.V2.MsgType>();
+    }
+
+    static void AssertUnique<T>() where T : struct, Enum
+    {
+        var seen = new HashSet<ushort>();
+        foreach (var value in Enum.GetValues<T>())
+        {
+            ushort id = Convert.ToUInt16(value);
+            Assert.True(seen.Add(id), $"{typeof(T).Name} reuses opcode {id} ({value}).");
+        }
+    }
+
+    [Fact]
+    public void GiveItem_omitted_count_defaults_to_one()
+    {
+        byte[] oneKey = [0x91, 0x39];
+        var msg = MessagePackSerializer.Deserialize<GiveItemMsg>(oneKey);
+        Assert.Equal(57, msg.ItemId);
+        Assert.Equal(1, msg.Count);
+
+        var round = MessagePackSerializer.Deserialize<GiveItemMsg>(
+            MessagePackSerializer.Serialize(new GiveItemMsg { ItemId = 2369, Count = 2 }));
+        Assert.Equal(2369, round.ItemId);
+        Assert.Equal(2, round.Count);
+
+        var use = MessagePackSerializer.Deserialize<UseItemMsg>(MessagePackSerializer.Serialize(new UseItemMsg { ObjectId = 100_000 }));
+        Assert.Equal(100_000, use.ObjectId);
+        var slot = MessagePackSerializer.Deserialize<UnequipItemMsg>(MessagePackSerializer.Serialize(new UnequipItemMsg { PaperdollSlot = 7 }));
+        Assert.Equal(7, slot.PaperdollSlot);
     }
 
     [Fact]

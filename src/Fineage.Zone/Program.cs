@@ -55,12 +55,21 @@ Console.CancelKeyPress += (_, e) =>
 var world = ZoneAoiSettings.CreateWorld(accounts: accounts);
 world.StartSimulation(shutdown.Token);
 FineageTelemetry.OnlineCount = () => world.OnlinePlayerCount;
-var server = new ZoneServer(HandoffTokens.FromEnvironment(), world);
 string host = bindAddress.Equals(IPAddress.Any) ? "0.0.0.0" : bindDisplay;
 int maxConnections = ZoneNetSettings.MaxConnections;
 int outboundQueue = ZoneNetSettings.OutboundQueue;
 int maxMsgPerSec = ZoneNetSettings.MaxMessagesPerSecond;
 int interestRange = ZoneAoiSettings.InterestRange;
+bool adminCommands = ZoneAdmin.Enabled;
+var server = new ZoneServer(
+    HandoffTokens.FromEnvironment(),
+    world,
+    clock: null,
+    new ZoneServerOptions
+    {
+        MaxMessagesPerSecond = maxMsgPerSec,
+        AdminCommands = adminCommands
+    });
 
 if (string.IsNullOrWhiteSpace(Environment.GetEnvironmentVariable("FINEAGE_HANDOFF_SECRET")) &&
     !IPAddress.IsLoopback(bindAddress))
@@ -70,6 +79,8 @@ if (string.IsNullOrWhiteSpace(Environment.GetEnvironmentVariable("FINEAGE_HANDOF
 
 Console.WriteLine($"[ZONE] listen {bindDisplay}:{port} store={storePath} Talking Island (maxConn={maxConnections} outboundQ={outboundQueue} msgPerSec={maxMsgPerSec} interestRange={interestRange})");
 Console.WriteLine("[ZONE] Auth.Password is the login handoff token. EnterWorld sends UserInfo, ItemList, then the village. Say is zone chat.");
+if (adminCommands)
+    Console.WriteLine("[ZONE] admin commands enabled (GiveItem).");
 
 var tcp = new TcpServer();
 try
