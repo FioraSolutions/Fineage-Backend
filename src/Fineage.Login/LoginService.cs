@@ -27,6 +27,9 @@ public sealed class LoginService
     readonly int _deleteAfterDays;
     readonly CharacterCreateOptions _create;
     readonly Action<string> _warn;
+    readonly ClassCatalog _classes;
+    readonly IReadOnlySet<int> _allowedClasses;
+    readonly IReadOnlySet<int> _allowedRaces;
 
     public LoginService(
         IAccountStore store,
@@ -46,7 +49,19 @@ public sealed class LoginService
             throw new ArgumentOutOfRangeException(nameof(deleteAfterDays));
         _create = create ?? CharacterCreateOptions.Default;
         _warn = warn ?? (message => Console.WriteLine("[LOGIN] warning: " + message));
+        _classes = _game.Classes ?? throw new InvalidOperationException("Class templates were not loaded.");
+        _allowedClasses = _create.AllowedClasses ?? _classes.BaseClassIdSet;
+        _allowedRaces = _create.AllowedRaces ?? _classes.BaseRaceSet;
+        _classes.EnsureCreatable(_allowedClasses);
+        foreach (int race in _allowedRaces)
+        {
+            if (!_classes.BaseRaceSet.Contains(race))
+                throw new InvalidDataException($"Race {race} is not a creatable race.");
+        }
     }
+
+    /// <summary>Class ids this service will create. Defaults to every datapack base class.</summary>
+    public IReadOnlySet<int> CreatableClassIds => _allowedClasses;
 
     public bool AccountExists(string account) => _store.AccountExists(account);
 
@@ -133,15 +148,15 @@ public sealed class LoginService
             return LoginResult<CharacterRecord>.Fail(LobbyProtocol.CreationFailed, "Character appearance was rejected.");
         }
 
-        if (!ClassTemplates.TryGet(classId, out var template) || template == null)
+        if (!_classes.TryGet(classId, out var template) || template == null)
             return LoginResult<CharacterRecord>.Fail(LobbyProtocol.ClassNotSupported, "That class cannot be created.");
         if (!template.IsBase)
             return LoginResult<CharacterRecord>.Fail(LobbyProtocol.CreationFailed, "Only a base class can be created.");
-        if (!_create.AllowedClasses.Contains(classId))
+        if (!_allowedClasses.Contains(classId))
             return LoginResult<CharacterRecord>.Fail(LobbyProtocol.ClassNotSupported, "That class cannot be created.");
         if (race != template.Race)
             return LoginResult<CharacterRecord>.Fail(LobbyProtocol.RaceNotSupported, "Race does not match the class.");
-        if (!_create.AllowedRaces.Contains(template.Race))
+        if (!_allowedRaces.Contains(template.Race))
             return LoginResult<CharacterRecord>.Fail(LobbyProtocol.CreationFailed, "That race cannot be created.");
 
         var inventory = _game.CreateStarterInventory(classId);
@@ -166,14 +181,14 @@ public sealed class LoginService
             hairColor: hairColor,
             face: face,
             hasPosition: true,
-            x: template.CreationPoint.X,
-            y: template.CreationPoint.Y,
-            z: template.CreationPoint.Z,
+            x: template.Spawns[0].X,
+            y: template.Spawns[0].Y,
+            z: template.Spawns[0].Z,
             level: level,
-            maxHp: template.MaxHp,
-            hp: template.MaxHp,
-            maxMp: template.MaxMp,
-            mp: template.MaxMp,
+            maxHp: template.ModifiedHp(level),
+            hp: template.ModifiedHp(level),
+            maxMp: template.ModifiedMp(level),
+            mp: template.ModifiedMp(level),
             sp: sp,
             adena: adena,
             title: "",

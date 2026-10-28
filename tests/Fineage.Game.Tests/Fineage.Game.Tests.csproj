@@ -19,5 +19,8 @@
   <ItemGroup>
     <Content Include="..\..\data\items.json" Link="data\items.json" CopyToOutputDirectory="PreserveNewest" />
     <Content Include="..\..\data\starter-kits.json" Link="data\starter-kits.json" CopyToOutputDirectory="PreserveNewest" />
+    <Content Include="..\..\data\classes.json" Link="data\classes.json" CopyToOutputDirectory="PreserveNewest" />
+    <Content Include="..\..\data\experience.json" Link="data\experience.json" CopyToOutputDirectory="PreserveNewest" />
+    <Content Include="..\..\data\stat-bonuses.json" Link="data\stat-bonuses.json" CopyToOutputDirectory="PreserveNewest" />
   </ItemGroup>
 </Project>

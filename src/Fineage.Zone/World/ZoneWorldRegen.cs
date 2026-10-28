@@ -108,19 +108,23 @@ public sealed partial class ZoneWorld
             }
         }
 
-        if (ClassTemplates.TryGet(session.ClassId, out var template) && template != null)
+        if (PlayerClasses.TryGet(session.ClassId, out var template) && template != null)
             return (template.MaxHp, template.MaxHp, template.MaxMp, template.MaxMp, 1, template.Race, 0);
 
         return (ClassTemplates.HumanFighterHp, ClassTemplates.HumanFighterHp, ClassTemplates.HumanFighterMp,
             ClassTemplates.HumanFighterMp, 1, 0, 0);
     }
 
-    static (int maxHp, int maxMp) ResolveMaxima(CharacterRecord record)
+    (int maxHp, int maxMp) ResolveMaxima(CharacterRecord record)
     {
         if (record.MaxHp > 0 && record.MaxMp > 0)
             return (record.MaxHp, record.MaxMp);
-        if (ClassTemplates.TryGet(record.ClassId, out var template) && template != null)
-            return (template.MaxHp, template.MaxMp);
+        if (PlayerClasses.TryGet(record.ClassId, out var template) && template != null)
+        {
+            int level = record.Level > 0 ? record.Level : 1;
+            return (template.ModifiedHp(level), template.ModifiedMp(level));
+        }
+
         return (ClassTemplates.HumanFighterHp, ClassTemplates.HumanFighterMp);
     }
 

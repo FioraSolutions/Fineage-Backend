@@ -19,7 +19,7 @@ public sealed class CharacterPresenceTests
         var session = new ZoneSession(stream);
         session.Bind(ticket.CharacterId, ticket.Account, ticket.CharacterName, ticket.ClassId);
         Assert.True(await world.TryEnterAsync(session, CancellationToken.None));
-        Assert.Contains(new ClassSpawn.Point(session.X, session.Y, session.Z), ClassSpawn.Points(HumanClasses.Fighter));
+        Assert.Contains(new ClassSpawn.Point(session.X, session.Y, session.Z), ClassTemplates.Points(HumanClasses.Fighter));
 
         int movedX = session.X + 100;
         int movedY = session.Y;

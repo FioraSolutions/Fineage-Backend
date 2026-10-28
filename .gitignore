@@ -4,6 +4,9 @@ obj/
 data/*
 !data/items.json
 !data/starter-kits.json
+!data/classes.json
+!data/experience.json
+!data/stat-bonuses.json
 !data/spawns/
 !data/spawns/**
 !data/drops/

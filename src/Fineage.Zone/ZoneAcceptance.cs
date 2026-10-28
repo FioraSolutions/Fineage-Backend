@@ -156,7 +156,7 @@ public static class ZoneAcceptance
 
     static bool IsClassPoint(int classId, int x, int y, int z)
     {
-        foreach (var point in ClassSpawn.Points(classId))
+        foreach (var point in ClassTemplates.Points(classId))
         {
             if (point.X == x && point.Y == y && point.Z == z)
                 return true;

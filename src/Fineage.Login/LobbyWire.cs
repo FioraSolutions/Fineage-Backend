@@ -8,7 +8,7 @@ public static class LobbyWire
     {
         var point = character.HasPosition
             ? new ClassSpawn.Point(character.X, character.Y, character.Z)
-            : ClassSpawn.Preview(character.ClassId);
+            : ClassTemplates.Preview(character.ClassId);
         return new CharacterSummaryMsg
         {
             CharacterId = character.Id,

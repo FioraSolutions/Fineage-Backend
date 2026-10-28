@@ -3,8 +3,8 @@ using System.Text.RegularExpressions;
 namespace Fineage.Login;
 
 /// <summary>
-/// Character-create policy. Defaults match Mobius Interlude: 7 characters, Human fighter and mystic,
-/// forbidden-name fragments, a <c>.*</c> name template, and no starting adena.
+/// Character-create policy. Defaults match Mobius Interlude character limits and name rules.
+/// A null class or race set means every base class in the datapack (and the races those classes use).
 /// </summary>
 public sealed class CharacterCreateOptions
 {
@@ -22,9 +22,11 @@ public sealed class CharacterCreateOptions
 
     public Regex NameTemplate { get; init; } = new(".*", RegexOptions.CultureInvariant, TimeSpan.FromMilliseconds(100));
 
-    public IReadOnlySet<int> AllowedRaces { get; init; } = new HashSet<int> { HumanClasses.RaceHuman };
+    /// <summary>Null allows every race that has a base class.</summary>
+    public IReadOnlySet<int>? AllowedRaces { get; init; }
 
-    public IReadOnlySet<int> AllowedClasses { get; init; } = new HashSet<int> { HumanClasses.Fighter, HumanClasses.Mystic };
+    /// <summary>Null allows every base class. A set may only name base classes.</summary>
+    public IReadOnlySet<int>? AllowedClasses { get; init; }
 
     public long StartingAdena { get; init; }
 
@@ -40,8 +42,8 @@ public sealed class CharacterCreateOptions
             CharMaxNumber = ReadInt("FINEAGE_CHAR_MAX_NUMBER", HumanClasses.MaxCharactersPerAccount, 0, 100),
             ForbiddenNames = ReadForbidden(Environment.GetEnvironmentVariable("FINEAGE_FORBIDDEN_NAMES")),
             NameTemplate = ReadTemplate(Environment.GetEnvironmentVariable("FINEAGE_CNAME_TEMPLATE")),
-            AllowedRaces = ReadIdSet("FINEAGE_ALLOWED_RACES", [HumanClasses.RaceHuman]),
-            AllowedClasses = ReadIdSet("FINEAGE_ALLOWED_CLASSES", [HumanClasses.Fighter, HumanClasses.Mystic]),
+            AllowedRaces = ReadIdSet("FINEAGE_ALLOWED_RACES"),
+            AllowedClasses = ReadIdSet("FINEAGE_ALLOWED_CLASSES"),
             StartingAdena = ReadLong("FINEAGE_STARTING_ADENA", 0),
             StartingLevel = ReadInt("FINEAGE_STARTING_LEVEL", 1, 1, 80),
             StartingSp = ReadInt("FINEAGE_STARTING_SP", 0, 0, int.MaxValue)
@@ -77,11 +79,11 @@ public sealed class CharacterCreateOptions
         }
     }
 
-    static IReadOnlySet<int> ReadIdSet(string name, IReadOnlyList<int> fallback)
+    static IReadOnlySet<int>? ReadIdSet(string name)
     {
         string? text = Environment.GetEnvironmentVariable(name);
         if (string.IsNullOrWhiteSpace(text))
-            return new HashSet<int>(fallback);
+            return null;
         var ids = new HashSet<int>();
         foreach (string part in text.Split(',', StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries))
         {
@@ -89,7 +91,9 @@ public sealed class CharacterCreateOptions
                 ids.Add(id);
         }
 
-        return ids.Count == 0 ? new HashSet<int>(fallback) : ids;
+        if (ids.Count == 0)
+            throw new InvalidOperationException($"{name} did not contain an id.");
+        return ids;
     }
 
     static int ReadInt(string name, int fallback, int min, int max)

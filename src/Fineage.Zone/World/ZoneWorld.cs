@@ -239,8 +239,8 @@ public sealed partial class ZoneWorld
             Y = spawn.Y,
             Z = spawn.Z,
             ClassId = session.ClassId,
-            RunSpeed = 120f,
-            WalkSpeed = 80f,
+            RunSpeed = MoveSpeed(session.ClassId).run,
+            WalkSpeed = MoveSpeed(session.ClassId).walk,
             Running = true,
             Session = session,
             Inventory = inventory,
@@ -417,7 +417,19 @@ public sealed partial class ZoneWorld
                 return new ClassSpawn.Point(record.X, record.Y, record.Z);
         }
 
-        return ClassSpawn.Pick(session.ClassId, _spawnRandom);
+        if (!PlayerClasses.TryGet(session.ClassId, out var template) || template == null || template.Spawns.Count == 0)
+            return new ClassSpawn.Point(TalkingIslandSpawn.X, TalkingIslandSpawn.Y, TalkingIslandSpawn.Z);
+        var picked = template.Spawns[_spawnRandom.Next(template.Spawns.Count)];
+        return new ClassSpawn.Point(picked.X, picked.Y, picked.Z);
+    }
+
+    ClassCatalog PlayerClasses => _game.Classes ?? ClassTemplates.Catalog;
+
+    (float run, float walk) MoveSpeed(int classId)
+    {
+        if (PlayerClasses.TryGet(classId, out var template) && template != null)
+            return (template.RunSpeed, template.WalkSpeed);
+        return (120f, 80f);
     }
 
     void SavePresence(ZoneSession session, int x, int y, int z, bool touchAccess)
