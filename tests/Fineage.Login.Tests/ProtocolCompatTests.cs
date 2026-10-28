@@ -61,10 +61,12 @@ public class ProtocolCompatTests
         Assert.Equal(1015, (ushort)MsgType.InventoryUpdate);
         Assert.Equal(1016, (ushort)MsgType.UserInfo);
         Assert.Equal(1017, (ushort)MsgType.AbnormalStatusUpdate);
+        Assert.Equal(1018, (ushort)MsgType.SpawnItem);
         Assert.Equal((ushort)MsgType.ItemList, (ushort)Fineage.Protocol.V2.MsgType.ItemList);
         Assert.Equal((ushort)MsgType.InventoryUpdate, (ushort)Fineage.Protocol.V2.MsgType.InventoryUpdate);
         Assert.Equal((ushort)MsgType.UserInfo, (ushort)Fineage.Protocol.V2.MsgType.UserInfo);
         Assert.Equal((ushort)MsgType.AbnormalStatusUpdate, (ushort)Fineage.Protocol.V2.MsgType.AbnormalStatusUpdate);
+        Assert.Equal((ushort)MsgType.SpawnItem, (ushort)Fineage.Protocol.V2.MsgType.SpawnItem);
         Assert.Equal(1099, (ushort)MsgType.Error);
     }
 
@@ -127,12 +129,40 @@ public class ProtocolCompatTests
     }
 
     [Fact]
+    public void SpawnItem_MatchesProtocolV2Layout()
+    {
+        var msg = new SpawnItemMsg
+        {
+            ObjectId = 100_001,
+            ItemId = 57,
+            X = 1,
+            Y = 2,
+            Z = 3,
+            Stackable = true,
+            Count = 25
+        };
+        byte[] legacy = MessagePackSerializer.Serialize(msg);
+        byte[] v2 = MessagePackSerializer.Serialize(new Fineage.Protocol.V2.SpawnItemMsg
+        {
+            ObjectId = 100_001,
+            ItemId = 57,
+            X = 1,
+            Y = 2,
+            Z = 3,
+            Stackable = true,
+            Count = 25
+        });
+        Assert.Equal(legacy, v2);
+    }
+
+    [Fact]
     public void LoginOpcodes_DoNotReuseZoneOpcodes()
     {
         ushort[] zone =
         [
             1, 2, 3, 4, 5, 6, 8, 9, 12, 13,
             1001, 1002, 1003, 1004, 1005, 1006, 1007, 1008, 1009, 1010, 1012, 1013,
+            1018,
             1099
         ];
         ushort[] login =

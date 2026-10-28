@@ -447,6 +447,20 @@ public sealed class GrantItemRequestMsg
     [Key(1)] public int Count { get; set; } = 1;
 }
 
+/// <summary>Opcode <see cref="MsgType.SpawnItem"/> (1018). Ground item in AOI.</summary>
+[MessagePackObject]
+public sealed class SpawnItemMsg
+{
+    [Key(0)] public int ObjectId { get; set; }
+    [Key(1)] public int ItemId { get; set; }
+    [Key(2)] public int X { get; set; }
+    [Key(3)] public int Y { get; set; }
+    [Key(4)] public int Z { get; set; }
+    [Key(5)] public bool Stackable { get; set; }
+    [Key(6)] public int Count { get; set; } = 1;
+    [Key(7)] public int Unknown { get; set; }
+}
+
 /// <summary>One row of <see cref="AbnormalStatusUpdateMsg"/>. Keys match client <c>EffectHolder</c>.</summary>
 [MessagePackObject]
 public sealed class AbnormalEffectMsg

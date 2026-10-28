@@ -52,6 +52,8 @@ public enum MsgType : ushort
     UserInfo = 1016,
     /// <summary>Same value as <see cref="Fineage.Protocol.MsgType.AbnormalStatusUpdate"/>.</summary>
     AbnormalStatusUpdate = 1017,
+    /// <summary>Same value as <see cref="Fineage.Protocol.MsgType.SpawnItem"/>.</summary>
+    SpawnItem = 1018,
 
     /// <summary>Login roster. Was 1005; moved so it no longer aliases <see cref="CharInfo"/>.</summary>
     CharacterRoster = 1030,

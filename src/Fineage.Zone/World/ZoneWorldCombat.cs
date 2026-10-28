@@ -133,6 +133,17 @@ public sealed partial class ZoneWorld
     void RemoveDeadNpc(ZoneEntity npc, List<Pending> outbound)
     {
         int objectId = npc.ObjectId;
+        int x = npc.X;
+        int y = npc.Y;
+        int z = npc.Z;
+
+        var watchers = new List<ZoneEntity>();
+        foreach (var player in Players())
+        {
+            if (player.Knownlist.Contains(objectId))
+                watchers.Add(player);
+        }
+
         _aoi.Leave(objectId);
         _byId.Remove(objectId);
 
@@ -146,6 +157,8 @@ public sealed partial class ZoneWorld
             if (player.Session.SelectedTargetId == objectId)
                 player.Session.SelectedTargetId = 0;
         }
+
+        SpawnGremlinDrop(x, y, z, watchers, outbound);
     }
 
     bool VisibleTo(int observerId, int otherId)

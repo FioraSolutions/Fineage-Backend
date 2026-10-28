@@ -10,7 +10,8 @@ namespace Fineage.Zone.World;
 public enum ZoneEntityKind
 {
     Npc = 0,
-    Player = 1
+    GroundItem = 1,
+    Player = 2
 }
 
 sealed class ZoneEntity
@@ -32,6 +33,9 @@ sealed class ZoneEntity
     public bool Running { get; init; }
     public ZoneSession? Session { get; init; }
     public PlayerInventory? Inventory { get; init; }
+    public int GroundItemId { get; set; }
+    public int GroundCount { get; set; } = 1;
+    public bool GroundStackable { get; set; }
     public List<AbnormalEffectMsg> AbnormalEffects { get; } = [];
     public HashSet<int> Knownlist { get; } = [];
 }
@@ -504,6 +508,8 @@ public sealed partial class ZoneWorld
     {
         if (entity.Kind == ZoneEntityKind.Npc)
             target.Add(Pack(to, MsgType.NpcInfo, NpcInfo(entity)));
+        else if (entity.Kind == ZoneEntityKind.GroundItem)
+            target.Add(Pack(to, MsgType.SpawnItem, SpawnItem(entity)));
         else
             target.Add(Pack(to, MsgType.CharInfo, CharInfo(entity)));
     }
@@ -562,6 +568,17 @@ public sealed partial class ZoneWorld
         Attackable = entity.Attackable,
         RunSpeed = entity.RunSpeed,
         WalkSpeed = entity.WalkSpeed
+    };
+
+    internal static SpawnItemMsg SpawnItem(ZoneEntity entity) => new()
+    {
+        ObjectId = entity.ObjectId,
+        ItemId = entity.GroundItemId,
+        X = entity.X,
+        Y = entity.Y,
+        Z = entity.Z,
+        Stackable = entity.GroundStackable,
+        Count = entity.GroundCount
     };
 
     static bool HasControl(string text)

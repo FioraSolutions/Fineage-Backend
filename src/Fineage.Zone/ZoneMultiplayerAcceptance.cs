@@ -181,12 +181,27 @@ public static class ZoneMultiplayerAcceptance
         if (delLeft.ObjectId != gremlin.ObjectId || delRight.ObjectId != gremlin.ObjectId)
             throw new InvalidOperationException($"delete expected {gremlin.ObjectId}");
 
+        var dropLeft = await attacker.ExpectAsync<SpawnItemMsg>(MsgType.SpawnItem).ConfigureAwait(false);
+        var dropRight = await observer.ExpectAsync<SpawnItemMsg>(MsgType.SpawnItem).ConfigureAwait(false);
+        ExpectGroundDrop(dropLeft, dropRight, gremlin);
+
         await attacker.SendAsync(MsgType.Say, new SayMsg { Text = "gg", ChatType = 0 }).ConfigureAwait(false);
         ExpectSay(await attacker.ExpectAsync<CreatureSayMsg>(MsgType.CreatureSay).ConfigureAwait(false), fighter, "gg");
         ExpectSay(await observer.ExpectAsync<CreatureSayMsg>(MsgType.CreatureSay).ConfigureAwait(false), fighter, "gg");
 
         attacker.ExpectQuiet();
         observer.ExpectQuiet();
+    }
+
+    static void ExpectGroundDrop(SpawnItemMsg left, SpawnItemMsg right, NpcInfoMsg gremlin)
+    {
+        if (left.ObjectId != right.ObjectId || left.ObjectId < PlayerInventory.FirstObjectId)
+            throw new InvalidOperationException($"drop object id {left.ObjectId}/{right.ObjectId}");
+        if (left.ItemId != TalkingIsland.GremlinDropItemId || left.Count != TalkingIsland.GremlinDropCount ||
+            !left.Stackable)
+            throw new InvalidOperationException($"drop item={left.ItemId} count={left.Count} stackable={left.Stackable}");
+        if (left.X != gremlin.X || left.Y != gremlin.Y || left.Z != gremlin.Z)
+            throw new InvalidOperationException($"drop @ {left.X},{left.Y},{left.Z} expected gremlin tile");
     }
 
     public static async Task RunBuffSharedAsync()
