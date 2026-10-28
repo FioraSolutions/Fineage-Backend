@@ -6,6 +6,7 @@ using Fineage.Protocol.Net;
 using MessagePack;
 using Xunit;
 using ProtocolMsgType = Fineage.Protocol.MsgType;
+using V2MsgType = Fineage.Protocol.V2.MsgType;
 
 namespace Fineage.Login.Tests;
 
@@ -74,6 +75,30 @@ public sealed class LoginWireBoundaryTests
         Assert.Equal((ushort)ProtocolMsgType.Error, frame!.Value.Type);
         var err = MessagePackSerializer.Deserialize<ErrorMsg>(frame.Value.Body);
         Assert.Equal("wrong_endpoint", err.Code);
+    }
+
+    [Fact]
+    public async Task AuthToken_on_login_pipeline_returns_not_implemented()
+    {
+        var service = new LoginService(JsonAccountStore.InMemory(), HandoffTokens.FromEnvironment());
+        var server = new LoginServer(service);
+        await using var host = await PipelineLoginHost.StartAsync(server);
+
+        using var client = new TcpClient();
+        await client.ConnectAsync(IPAddress.Loopback, host.Port);
+        await using var stream = client.GetStream();
+
+        await FrameIO.SendAsync(stream, (ushort)ProtocolMsgType.Hello, MessagePackSerializer.Serialize(new HelloMsg()));
+        await ReadAsync(stream, ProtocolMsgType.HelloAck);
+        await FrameIO.SendAsync(stream, (ushort)V2MsgType.AuthToken,
+            MessagePackSerializer.Serialize(new Fineage.Protocol.V2.AuthTokenMsg { Account = "hero" }));
+
+        var frame = await FrameIO.ReadAsync(stream);
+        Assert.NotNull(frame);
+        Assert.Equal((ushort)ProtocolMsgType.Error, frame!.Value.Type);
+        var err = MessagePackSerializer.Deserialize<ErrorMsg>(frame.Value.Body);
+        Assert.Equal("not_implemented", err.Code);
+        Assert.Contains("Auth (2)", err.Message);
     }
 
     [Fact]
