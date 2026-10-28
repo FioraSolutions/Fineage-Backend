@@ -41,6 +41,10 @@ public enum MsgType : ushort
     PartyLeaveRequest = 26,
     /// <summary>Leader removes a member by object id.</summary>
     PartyKickRequest = 27,
+    /// <summary>Ask a visible player to trade. See <see cref="TradeProtocol"/>.</summary>
+    TradeRequest = 28,
+    /// <summary>Accept or decline a pending trade ask.</summary>
+    TradeAnswerRequest = 29,
     /// <summary>Debug spoil on a living attackable. Off unless <c>FINEAGE_ZONE_ADMIN</c>.</summary>
     AdminSpoilTarget = 30,
     /// <summary>Debug sweeper on a spoiled corpse. Off unless <c>FINEAGE_ZONE_ADMIN</c>.</summary>
@@ -95,6 +99,10 @@ public enum MsgType : ushort
     ReviveRequest = 52,
     /// <summary>Admin/test kill self. Off unless <c>FINEAGE_ZONE_ADMIN</c>. See <see cref="DeathProtocol"/>.</summary>
     AdminKillPlayer = 53,
+    /// <summary>Add or update an item on your trade offer. See <see cref="TradeProtocol"/>.</summary>
+    TradeAddItemRequest = 54,
+    /// <summary>Confirm or cancel the trade window.</summary>
+    TradeDoneRequest = 55,
     /// <summary>Olympiad status. Body is empty. See <see cref="OlympiadProtocol"/>.</summary>
     OlympiadStatusRequest = 60,
     /// <summary>Join a classed or non-classed queue. Body is <see cref="OlympiadRegisterRequestMsg"/>.</summary>
@@ -242,6 +250,18 @@ public enum MsgType : ushort
     Revive = 1075,
     /// <summary>Instant relocation fan-out. See <see cref="DeathProtocol"/>.</summary>
     TeleportToLocation = 1076,
+    /// <summary>Pending trade ask (Interlude TradeRequest). Band 1077–1082; see <see cref="TradeProtocol"/>.</summary>
+    TradeAsk = 1077,
+    /// <summary>Ask outcome for the requestor.</summary>
+    TradeRequestResult = 1078,
+    /// <summary>Trade window opened; names the partner.</summary>
+    TradeStart = 1079,
+    /// <summary>One offer row for self or partner column.</summary>
+    TradeOfferUpdate = 1080,
+    /// <summary>Confirm flags from this client's view.</summary>
+    TradeConfirmState = 1081,
+    /// <summary>Trade closed. 1 exchanged, 0 cancelled.</summary>
+    TradeFinished = 1082,
     /// <summary>Seven Signs record (SSQStatus analogue). See <see cref="SevenSignsProtocol"/>.</summary>
     SevenSignsStatus = 1090,
     /// <summary>Seven Signs sky tint (SignsSky analogue). See <see cref="SevenSignsProtocol"/>.</summary>
