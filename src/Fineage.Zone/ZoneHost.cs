@@ -26,7 +26,9 @@ sealed class ZoneHost : IAsyncDisposable
         var listener = new TcpListener(IPAddress.Loopback, 0);
         listener.Start();
         var cts = new CancellationTokenSource();
-        var server = world == null ? new ZoneServer(tokens) : new ZoneServer(tokens, world);
+        var created = world ?? ZoneAoiSettings.CreateWorld();
+        var server = new ZoneServer(tokens, created);
+        created.StartSimulation(cts.Token);
         var loop = Task.Run(async () =>
         {
             try

@@ -45,7 +45,15 @@ string storePath = Arg(args, "--store")
     ?? Environment.GetEnvironmentVariable("FINEAGE_LOGIN_STORE")
     ?? Path.Combine("data", "accounts.json");
 var accounts = JsonAccountStore.Open(storePath);
+using var shutdown = new CancellationTokenSource();
+Console.CancelKeyPress += (_, e) =>
+{
+    e.Cancel = true;
+    shutdown.Cancel();
+};
+
 var world = ZoneAoiSettings.CreateWorld(accounts: accounts);
+world.StartSimulation(shutdown.Token);
 FineageTelemetry.OnlineCount = () => world.OnlinePlayerCount;
 var server = new ZoneServer(HandoffTokens.FromEnvironment(), world);
 string host = bindAddress.Equals(IPAddress.Any) ? "0.0.0.0" : bindDisplay;
@@ -62,13 +70,6 @@ if (string.IsNullOrWhiteSpace(Environment.GetEnvironmentVariable("FINEAGE_HANDOF
 
 Console.WriteLine($"[ZONE] listen {bindDisplay}:{port} store={storePath} Talking Island (maxConn={maxConnections} outboundQ={outboundQueue} msgPerSec={maxMsgPerSec} interestRange={interestRange})");
 Console.WriteLine("[ZONE] Auth.Password is the login handoff token. EnterWorld sends UserInfo, ItemList, then the village. Say is zone chat.");
-
-using var shutdown = new CancellationTokenSource();
-Console.CancelKeyPress += (_, e) =>
-{
-    e.Cancel = true;
-    shutdown.Cancel();
-};
 
 var tcp = new TcpServer();
 try
