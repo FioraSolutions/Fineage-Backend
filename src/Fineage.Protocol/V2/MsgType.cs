@@ -87,6 +87,10 @@ public enum MsgType : ushort
     SkillUseRequest = 50,
     /// <summary>Same value as <see cref="Fineage.Protocol.MsgType.CharacterActionRequest"/>.</summary>
     CharacterActionRequest = 51,
+    /// <summary>Same value as <see cref="Fineage.Protocol.MsgType.ReviveRequest"/>.</summary>
+    ReviveRequest = 52,
+    /// <summary>Same value as <see cref="Fineage.Protocol.MsgType.AdminKillPlayer"/>.</summary>
+    AdminKillPlayer = 53,
     /// <summary>Same value as <see cref="Fineage.Protocol.MsgType.SevenSignsStatusRequest"/>.</summary>
     SevenSignsStatusRequest = 90,
     /// <summary>Same value as <see cref="Fineage.Protocol.MsgType.SevenSignsActionRequest"/>.</summary>
@@ -161,6 +165,12 @@ public enum MsgType : ushort
     SocialAction = 1068,
     /// <summary>Same value as <see cref="Fineage.Protocol.MsgType.ChangeMoveType"/>.</summary>
     ChangeMoveType = 1069,
+    /// <summary>Same value as <see cref="Fineage.Protocol.MsgType.Die"/>.</summary>
+    Die = 1070,
+    /// <summary>Same value as <see cref="Fineage.Protocol.MsgType.Revive"/>.</summary>
+    Revive = 1071,
+    /// <summary>Same value as <see cref="Fineage.Protocol.MsgType.TeleportToLocation"/>.</summary>
+    TeleportToLocation = 1072,
     /// <summary>Same value as <see cref="Fineage.Protocol.MsgType.SevenSignsStatus"/>.</summary>
     SevenSignsStatus = 1090,
     /// <summary>Same value as <see cref="Fineage.Protocol.MsgType.SevenSignsSky"/>.</summary>
