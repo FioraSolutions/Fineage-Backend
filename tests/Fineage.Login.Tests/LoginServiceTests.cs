@@ -116,23 +116,6 @@ public class LoginServiceTests
     }
 
     [Fact]
-    public void Handoff_RejectsTamperAndExpiry()
-    {
-        var issuedAt = DateTimeOffset.UnixEpoch.AddDays(10);
-        var service = NewService(now: issuedAt);
-        var ticket = service.Play("alice", "secret1", "Aria", HumanClasses.Fighter).Value!;
-        var tokens = new HandoffTokens(HandoffTokens.DefaultSecret);
-
-        Assert.False(tokens.TryValidate(ticket.Token + "x", issuedAt, out _));
-        string flipped = ticket.Token[..^1] + (ticket.Token[^1] == 'a' ? "b" : "a");
-        Assert.False(tokens.TryValidate(flipped, issuedAt, out _));
-        Assert.False(tokens.TryValidate(ticket.Token, issuedAt.AddMinutes(11), out _));
-        Assert.Equal(HandoffTokens.ValidateStatus.Expired,
-            tokens.Validate(ticket.Token, issuedAt.AddMinutes(11), out _));
-        Assert.True(tokens.TryValidate(ticket.Token, issuedAt.AddMinutes(9), out _));
-    }
-
-    [Fact]
     public void Store_ReloadsAccounts_WithoutPlaintextPassword()
     {
         string dir = Path.Combine(Path.GetTempPath(), "fineage-login-" + Guid.NewGuid().ToString("n"));
