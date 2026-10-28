@@ -30,7 +30,7 @@ public sealed class PipelineTelemetryTests
                 if (tag.Key == "endpoint" && tag.Value?.ToString() == "login-test")
                     Interlocked.Add(ref framesOut, measurement);
             }
-        }, null);
+        });
         listener.Start();
 
         var service = new LoginService(JsonAccountStore.InMemory(), HandoffTokens.FromEnvironment());
