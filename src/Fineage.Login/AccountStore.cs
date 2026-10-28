@@ -21,7 +21,18 @@ public enum AddAccountStatus
 
 public sealed record AccountCredential(string AccountName, string PasswordHash, string PasswordSalt, int Iterations);
 
-public sealed record CharacterRecord(int Id, string Name, string Account, int ClassId, int Race, int Sex, int Level);
+/// <summary>One saved stack. <see cref="EquippedSlot"/> is a paperdoll index, or -1 in the bag. Null <c>Items</c> on a character means the kit was never granted.</summary>
+public sealed record StoredItem(int ItemId, int Count, int EquippedSlot);
+
+public sealed record CharacterRecord(
+    int Id,
+    string Name,
+    string Account,
+    int ClassId,
+    int Race,
+    int Sex,
+    int Level,
+    IReadOnlyList<StoredItem>? Items = null);
 
 public interface IAccountStore
 {
@@ -39,7 +50,11 @@ public interface IAccountStore
         int classId,
         int race,
         int sex,
-        out CharacterRecord? created);
+        out CharacterRecord? created,
+        IReadOnlyList<StoredItem>? items = null);
+
+    /// <summary>Replaces the saved bag. An empty list is a real save; it does not mean "grant the kit".</summary>
+    bool TryReplaceItems(string account, int characterId, IReadOnlyList<StoredItem> items);
 
     CharacterRecord? FindById(string account, int characterId);
 
@@ -141,12 +156,15 @@ public sealed class JsonAccountStore : IAccountStore
         int classId,
         int race,
         int sex,
-        out CharacterRecord? created)
+        out CharacterRecord? created,
+        IReadOnlyList<StoredItem>? items = null)
     {
         created = null;
         if (!NameRules.IsCharacterName(name))
             return CreateCharacterStatus.InvalidName;
         name = name.Trim();
+        if (items != null)
+            CharacterInventory.Validate(items);
 
         lock (_gate)
         {
@@ -165,12 +183,29 @@ public sealed class JsonAccountStore : IAccountStore
                 ClassId = classId,
                 Race = race,
                 Sex = sex,
-                Level = 1
+                Level = 1,
+                Items = CopyItems(items)
             };
             row.Characters.Add(character);
             Save();
             created = ToRecord(row.Name, character);
             return CreateCharacterStatus.Ok;
+        }
+    }
+
+    public bool TryReplaceItems(string account, int characterId, IReadOnlyList<StoredItem> items)
+    {
+        ArgumentNullException.ThrowIfNull(items);
+        CharacterInventory.Validate(items);
+        lock (_gate)
+        {
+            var row = FindAccount(account);
+            var character = row?.Characters.FirstOrDefault(c => c.Id == characterId);
+            if (row == null || character == null)
+                return false;
+            character.Items = CopyItems(items);
+            Save();
+            return true;
         }
     }
 
@@ -276,8 +311,26 @@ public sealed class JsonAccountStore : IAccountStore
         File.Move(tmp, _path, overwrite: true);
     }
 
+    static List<StoredItemDto>? CopyItems(IReadOnlyList<StoredItem>? items) =>
+        items == null ? null : items.Select(item => new StoredItemDto
+        {
+            ItemId = item.ItemId,
+            Count = item.Count,
+            EquippedSlot = item.EquippedSlot
+        }).ToList();
+
     static CharacterRecord ToRecord(string account, CharacterDto character) =>
-        new(character.Id, character.Name, account, character.ClassId, character.Race, character.Sex, character.Level);
+        new(
+            character.Id,
+            character.Name,
+            account,
+            character.ClassId,
+            character.Race,
+            character.Sex,
+            character.Level,
+            character.Items == null
+                ? null
+                : character.Items.Select(item => new StoredItem(item.ItemId, item.Count, item.EquippedSlot)).ToArray());
 
     sealed class StoreFile
     {
@@ -304,5 +357,13 @@ public sealed class JsonAccountStore : IAccountStore
         public int Race { get; set; }
         public int Sex { get; set; }
         public int Level { get; set; } = 1;
+        public List<StoredItemDto>? Items { get; set; }
+    }
+
+    sealed class StoredItemDto
+    {
+        public int ItemId { get; set; }
+        public int Count { get; set; }
+        public int EquippedSlot { get; set; } = -1;
     }
 }

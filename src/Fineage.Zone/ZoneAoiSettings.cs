@@ -1,3 +1,4 @@
+using Fineage.Login;
 using Fineage.Zone.Interest;
 using Fineage.Zone.World;
 
@@ -10,13 +11,15 @@ public static class ZoneAoiSettings
 
     public static int InterestRange => ReadInt("FINEAGE_ZONE_INTEREST_RANGE", DefaultInterestRange, min: 0, max: 500_000);
 
-    public static ZoneWorld CreateWorld(IAoi? aoi = null)
+    public static ZoneWorld CreateWorld(IAoi? aoi = null, IAccountStore? accounts = null)
     {
         if (aoi != null)
-            return new ZoneWorld(aoi);
+            return new ZoneWorld(aoi, accounts: accounts);
 
         int range = InterestRange;
-        return range <= 0 ? new ZoneWorld(new SingleCellAoi()) : new ZoneWorld(new RangeAoi(range));
+        return range <= 0
+            ? new ZoneWorld(accounts: accounts)
+            : new ZoneWorld(new RangeAoi(range), accounts: accounts);
     }
 
     static int ReadInt(string name, int fallback, int min, int max)

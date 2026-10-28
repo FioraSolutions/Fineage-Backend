@@ -1,3 +1,5 @@
+using Fineage.Game;
+
 namespace Fineage.Login;
 
 public sealed class LoginResult<T>
@@ -18,12 +20,14 @@ public sealed class LoginService
 {
     readonly IAccountStore _store;
     readonly HandoffTokens _tokens;
+    readonly GameData _game;
     readonly Func<DateTimeOffset> _clock;
 
-    public LoginService(IAccountStore store, HandoffTokens tokens, Func<DateTimeOffset>? clock = null)
+    public LoginService(IAccountStore store, HandoffTokens tokens, Func<DateTimeOffset>? clock = null, GameData? game = null)
     {
         _store = store;
         _tokens = tokens;
+        _game = game ?? GameData.LoadDefault();
         _clock = clock ?? (() => DateTimeOffset.UtcNow);
     }
 
@@ -100,7 +104,8 @@ public sealed class LoginService
         if (classId is not (HumanClasses.Fighter or HumanClasses.Mystic))
             return LoginResult<CharacterRecord>.Fail("class_not_supported", "Choose Human fighter or mystic.");
 
-        var status = _store.TryAddCharacter(account, name, classId, race, sex, out var created);
+        var kit = CharacterInventory.Rows(_game.CreateStarterInventory(classId));
+        var status = _store.TryAddCharacter(account, name, classId, race, sex, out var created, kit);
         return status switch
         {
             CreateCharacterStatus.Ok when created != null => LoginResult<CharacterRecord>.Success(created),

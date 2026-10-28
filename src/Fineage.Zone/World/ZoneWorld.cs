@@ -1,4 +1,5 @@
 using Fineage.Game;
+using Fineage.Login;
 using Fineage.Protocol;
 using Fineage.Zone.Combat;
 using Fineage.Zone.Interest;
@@ -47,15 +48,22 @@ public sealed partial class ZoneWorld
     readonly GameData _game;
     readonly ItemObjectIdAllocator _itemIds;
     readonly Random _spawnRandom;
+    readonly IAccountStore? _accounts;
     readonly Dictionary<int, ZoneEntity> _byId = [];
     readonly object _gate = new();
 
-    public ZoneWorld(IAoi? aoi = null, GameData? game = null, ItemObjectIdAllocator? itemIds = null, Random? spawnRandom = null)
+    public ZoneWorld(
+        IAoi? aoi = null,
+        GameData? game = null,
+        ItemObjectIdAllocator? itemIds = null,
+        Random? spawnRandom = null,
+        IAccountStore? accounts = null)
     {
         _aoi = aoi ?? new SingleCellAoi();
         _game = game ?? GameData.LoadDefault();
         _itemIds = itemIds ?? new ItemObjectIdAllocator();
         _spawnRandom = spawnRandom ?? Random.Shared;
+        _accounts = accounts;
         foreach (var npc in TalkingIsland.Gremlins)
         {
             var entity = new ZoneEntity
@@ -217,7 +225,7 @@ public sealed partial class ZoneWorld
             Unlink(current.Session, toOthers);
 
         var spawn = ClassSpawn.Pick(session.ClassId, _spawnRandom);
-        var inventory = _game.CreateStarterInventory(session.ClassId, _itemIds);
+        var inventory = LoadInventory(session);
         var entity = new ZoneEntity
         {
             ObjectId = session.ObjectId,
@@ -364,6 +372,9 @@ public sealed partial class ZoneWorld
                 watchers.Add(other.Session);
         }
 
+        if (entity.Inventory != null)
+            SaveInventory(session, entity.Inventory);
+
         entity.Knownlist.Clear();
         _aoi.Leave(session.ObjectId);
         _byId.Remove(session.ObjectId);
@@ -373,6 +384,31 @@ public sealed partial class ZoneWorld
         foreach (var watcher in watchers)
             toOthers.Add(new Pending(watcher, MsgType.DeleteObject, body));
         return true;
+    }
+
+    PlayerInventory LoadInventory(ZoneSession session)
+    {
+        if (_accounts == null)
+            return _game.CreateStarterInventory(session.ClassId, _itemIds);
+
+        var record = _accounts.FindById(session.Account, session.ObjectId);
+        if (record == null)
+            return _game.CreateStarterInventory(session.ClassId, _itemIds);
+        if (record.Items == null)
+        {
+            var granted = _game.CreateStarterInventory(session.ClassId, _itemIds);
+            _accounts.TryReplaceItems(session.Account, session.ObjectId, CharacterInventory.Rows(granted));
+            return granted;
+        }
+
+        return CharacterInventory.Restore(_game.Items, _itemIds, record.Items);
+    }
+
+    void SaveInventory(ZoneSession session, PlayerInventory inventory)
+    {
+        if (_accounts == null)
+            return;
+        _accounts.TryReplaceItems(session.Account, session.ObjectId, CharacterInventory.Rows(inventory));
     }
 
     bool IsLive(ZoneSession session) =>
