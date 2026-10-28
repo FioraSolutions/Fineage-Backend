@@ -189,6 +189,8 @@ public sealed partial class CharInfoMsg
     [Key(7)] public int ClanId { get; set; }
     /// <summary>Same key as <see cref="Fineage.Protocol.CharInfoMsg.ClanCrestId"/>.</summary>
     [Key(8)] public int ClanCrestId { get; set; }
+    /// <summary>Same key as <see cref="Fineage.Protocol.CharInfoMsg.Enchant"/>.</summary>
+    [Key(9)] public int[] Enchant { get; set; } = [];
 }
 
 /// <summary>Same keys as <see cref="Fineage.Protocol.NpcInfoMsg"/>; zone opcode <see cref="MsgType.NpcInfo"/>.</summary>

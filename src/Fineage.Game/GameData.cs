@@ -131,6 +131,13 @@ public sealed class GameData
 
             var crystal = ParseCrystal(row.Crystal, path, row.Id);
             var equip = EquipConditionReader.Read(row.Equip, path, row.Id);
+            if (row.CrystalCount < 0)
+                throw new InvalidDataException($"{path} item {row.Id} has a negative crystalCount.");
+            var scroll = ParseScroll(row.Scroll, path, row.Id);
+            if (scroll != null && kind != ItemKind.Etc)
+                throw new InvalidDataException($"{path} item {row.Id} is a scroll but is not etc.");
+            if (row.Enchantable && kind == ItemKind.Etc)
+                throw new InvalidDataException($"{path} item {row.Id} is etc and cannot be enchantable.");
 
             templates.Add(new ItemTemplate(
                 row.Id,
@@ -145,7 +152,10 @@ public sealed class GameData
                 row.Stackable,
                 row.PDef,
                 crystal,
-                equip));
+                equip,
+                row.CrystalCount,
+                row.Enchantable,
+                scroll));
         }
 
         try
@@ -315,6 +325,60 @@ public sealed class GameData
         };
     }
 
+    static EnchantScroll? ParseScroll(JsonElement element, string path, int itemId)
+    {
+        if (element.ValueKind is JsonValueKind.Undefined or JsonValueKind.Null)
+            return null;
+        if (element.ValueKind != JsonValueKind.Object)
+            throw new InvalidDataException($"{path} item {itemId} scroll must be an object.");
+
+        var target = RequiredString(element, "target", path, itemId);
+        var fail = RequiredString(element, "fail", path, itemId);
+        var grade = ParseCrystal(RequiredString(element, "grade", path, itemId), path, itemId);
+        if (grade == CrystalGrade.None)
+            throw new InvalidDataException($"{path} item {itemId} scroll grade cannot be none.");
+
+        bool weapon = Token(target) switch
+        {
+            "weapon" => true,
+            "armor" => false,
+            _ => throw new InvalidDataException($"{path} item {itemId} scroll target '{target}' is unknown.")
+        };
+        var mode = Token(fail) switch
+        {
+            "crystallize" => EnchantFail.Crystallize,
+            "reset" => EnchantFail.Reset,
+            "keep" => EnchantFail.Keep,
+            _ => throw new InvalidDataException($"{path} item {itemId} scroll fail '{fail}' is unknown.")
+        };
+
+        int max = EnchantScroll.DefaultMaxEnchant;
+        if (element.TryGetProperty("maxEnchant", out var maxElement))
+        {
+            if (!maxElement.TryGetInt32(out max) || max < 1 || max > EnchantScroll.DefaultMaxEnchant)
+                throw new InvalidDataException($"{path} item {itemId} scroll maxEnchant must be 1..65535.");
+        }
+
+        double bonus = 0;
+        if (element.TryGetProperty("bonusRate", out var bonusElement))
+        {
+            if (!bonusElement.TryGetDouble(out bonus) || bonus < 0 || bonus > 100)
+                throw new InvalidDataException($"{path} item {itemId} scroll bonusRate must be 0..100.");
+        }
+
+        return new EnchantScroll(weapon, grade, mode, max, bonus);
+    }
+
+    static string RequiredString(JsonElement element, string name, string path, int itemId)
+    {
+        if (!element.TryGetProperty(name, out var value) || value.ValueKind != JsonValueKind.String)
+            throw new InvalidDataException($"{path} item {itemId} scroll needs {name}.");
+        var text = value.GetString();
+        if (string.IsNullOrWhiteSpace(text))
+            throw new InvalidDataException($"{path} item {itemId} scroll needs {name}.");
+        return text;
+    }
+
     static string Token(string? text) => (text ?? "").Trim().ToLowerInvariant();
 
     sealed class ItemFileDto
@@ -336,7 +400,10 @@ public sealed class GameData
         public bool Stackable { get; set; }
         public int PDef { get; set; }
         public string? Crystal { get; set; }
+        public int CrystalCount { get; set; }
+        public bool Enchantable { get; set; }
         public JsonElement Equip { get; set; }
+        public JsonElement Scroll { get; set; }
     }
 
     sealed class KitFileDto

@@ -61,6 +61,12 @@ public enum MsgType : ushort
     ClanDissolveRequest = 37,
     /// <summary>Same value as <see cref="Fineage.Protocol.MsgType.ClanCancelDissolveRequest"/>.</summary>
     ClanCancelDissolveRequest = 38,
+    /// <summary>Same value as <see cref="Fineage.Protocol.MsgType.EnchantRequest"/>.</summary>
+    EnchantRequest = 39,
+    /// <summary>Same value as <see cref="Fineage.Protocol.MsgType.EnchantConfirm"/>.</summary>
+    EnchantConfirm = 40,
+    /// <summary>Same value as <see cref="Fineage.Protocol.MsgType.EnchantCancel"/>.</summary>
+    EnchantCancel = 41,
 
     HelloAck = 1001,
     AuthOk = 1002,
@@ -103,6 +109,8 @@ public enum MsgType : ushort
     PledgeMemberList = 1052,
     /// <summary>Same value as <see cref="Fineage.Protocol.MsgType.ClanJoinResult"/>.</summary>
     ClanJoinResult = 1053,
+    /// <summary>Same value as <see cref="Fineage.Protocol.MsgType.EnchantResult"/>.</summary>
+    EnchantResult = 1060,
 
     /// <summary>Login roster. Was 1005; moved so it no longer aliases <see cref="CharInfo"/>.</summary>
     CharacterRoster = 1030,

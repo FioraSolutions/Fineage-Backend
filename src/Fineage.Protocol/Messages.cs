@@ -242,6 +242,11 @@ public sealed class CharInfoMsg
     [Key(7)] public int ClanId { get; set; }
     /// <summary>Pledge crest id. Always 0 until crests exist.</summary>
     [Key(8)] public int ClanCrestId { get; set; }
+    /// <summary>
+    /// Enchant level of each paperdoll slot, same order and length as <see cref="Paperdoll"/>.
+    /// Zero when the slot is empty or the item is +0. Older clients ignore this key.
+    /// </summary>
+    [Key(9)] public int[] Enchant { get; set; } = [];
 }
 
 /// <summary>One paperdoll slot in <see cref="UserInfoMsg"/>. Object id and item id are 0 when the slot is empty.</summary>
@@ -250,6 +255,8 @@ public sealed class PaperdollSlotMsg
 {
     [Key(0)] public int ObjectId { get; set; }
     [Key(1)] public int ItemId { get; set; }
+    /// <summary>Enchant level while this slot is occupied. 0 when empty or +0. Older clients ignore this key.</summary>
+    [Key(2)] public int EnchantLevel { get; set; }
 }
 
 /// <summary>
@@ -303,6 +310,8 @@ public sealed class ItemListEntryMsg
     [Key(7)] public string WeaponType { get; set; } = "";
     /// <summary>light, heavy, magic, or empty when this is not armor.</summary>
     [Key(8)] public string ArmorType { get; set; } = "";
+    /// <summary>Enchant level. 0 when the piece is not enchanted. Older clients ignore this key.</summary>
+    [Key(9)] public int EnchantLevel { get; set; }
 }
 
 /// <summary>Opcode <see cref="MsgType.ItemList"/> (1014). Every item in the entering player's inventory.</summary>
@@ -336,6 +345,8 @@ public sealed class InventoryUpdateEntryMsg
     [Key(7)] public string Icon { get; set; } = "";
     [Key(8)] public string WeaponType { get; set; } = "";
     [Key(9)] public string ArmorType { get; set; } = "";
+    /// <summary>Enchant level. Remove rows still carry the level the piece had. Older clients ignore this key.</summary>
+    [Key(10)] public int EnchantLevel { get; set; }
 }
 
 /// <summary>Opcode <see cref="MsgType.InventoryUpdate"/> (1015).</summary>
@@ -530,6 +541,47 @@ public sealed class AdminSpoilTargetMsg
 public sealed class AdminSweepCorpseMsg
 {
     [Key(0)] public int TargetObjectId { get; set; }
+}
+
+/// <summary>Opcode <see cref="MsgType.EnchantRequest"/> (39). Selects the scroll and opens the window.</summary>
+[MessagePackObject]
+public sealed class EnchantRequestMsg
+{
+    /// <summary>Inventory object id of the scroll. Not an item template id.</summary>
+    [Key(0)] public int ObjectId { get; set; }
+}
+
+/// <summary>Opcode <see cref="MsgType.EnchantConfirm"/> (40). The scroll is the one selected by the request.</summary>
+[MessagePackObject]
+public sealed class EnchantConfirmMsg
+{
+    /// <summary>Inventory object id of the weapon or armor to enchant.</summary>
+    [Key(0)] public int ObjectId { get; set; }
+}
+
+/// <summary>Opcode <see cref="MsgType.EnchantCancel"/> (41). An empty map is enough.</summary>
+[MessagePackObject]
+public sealed class EnchantCancelMsg
+{
+}
+
+/// <summary>
+/// Opcode <see cref="MsgType.EnchantResult"/> (1060).
+/// <see cref="Result"/> is <see cref="EnchantProtocol.ResultCancel"/>, <see cref="EnchantProtocol.ResultSuccess"/>,
+/// <see cref="EnchantProtocol.ResultKeep"/>, <see cref="EnchantProtocol.ResultReset"/>, or <see cref="EnchantProtocol.ResultCrystallize"/>.
+/// On success <see cref="EnchantLevel"/> is the level after the increase. On reset it is 0.
+/// On keep and on a success that does not increase (base chance 0) it is the unchanged level.
+/// </summary>
+[MessagePackObject]
+public sealed class EnchantResultMsg
+{
+    [Key(0)] public int Result { get; set; }
+    [Key(1)] public int EnchantLevel { get; set; }
+    /// <summary>Target object id. 0 on cancel.</summary>
+    [Key(2)] public int ObjectId { get; set; }
+    /// <summary>Crystal item id gained from a normal failure. 0 when none are gained.</summary>
+    [Key(3)] public int CrystalItemId { get; set; }
+    [Key(4)] public int CrystalCount { get; set; }
 }
 
 /// <summary>Opcode <see cref="MsgType.SpawnItem"/> (1018). Ground item in AOI.</summary>

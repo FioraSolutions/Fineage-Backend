@@ -60,6 +60,12 @@ public class ProtocolCompatTests
         Assert.Equal(36, (ushort)MsgType.ClanKickRequest);
         Assert.Equal(37, (ushort)MsgType.ClanDissolveRequest);
         Assert.Equal(38, (ushort)MsgType.ClanCancelDissolveRequest);
+        Assert.Equal(39, (ushort)MsgType.EnchantRequest);
+        Assert.Equal(40, (ushort)MsgType.EnchantConfirm);
+        Assert.Equal(41, (ushort)MsgType.EnchantCancel);
+        Assert.Equal((ushort)MsgType.EnchantRequest, (ushort)Fineage.Protocol.V2.MsgType.EnchantRequest);
+        Assert.Equal((ushort)MsgType.EnchantConfirm, (ushort)Fineage.Protocol.V2.MsgType.EnchantConfirm);
+        Assert.Equal((ushort)MsgType.EnchantCancel, (ushort)Fineage.Protocol.V2.MsgType.EnchantCancel);
         Assert.Equal((ushort)MsgType.UseItem, (ushort)Fineage.Protocol.V2.MsgType.UseItem);
         Assert.Equal((ushort)MsgType.UnequipItem, (ushort)Fineage.Protocol.V2.MsgType.UnequipItem);
         Assert.Equal((ushort)MsgType.GiveItem, (ushort)Fineage.Protocol.V2.MsgType.GiveItem);
@@ -98,6 +104,8 @@ public class ProtocolCompatTests
         Assert.Equal(ClanProtocol.BandFirst, (ushort)MsgType.ClanAskJoin);
         Assert.Equal((ushort)MsgType.ClanAskJoin, (ushort)Fineage.Protocol.V2.MsgType.ClanAskJoin);
         Assert.Equal((ushort)MsgType.PledgeMemberList, (ushort)Fineage.Protocol.V2.MsgType.PledgeMemberList);
+        Assert.Equal(1060, (ushort)MsgType.EnchantResult);
+        Assert.Equal((ushort)MsgType.EnchantResult, (ushort)Fineage.Protocol.V2.MsgType.EnchantResult);
         Assert.Equal(ChatProtocol.ChatBandFirst, (ushort)MsgType.SystemMessage);
         Assert.Equal((ushort)MsgType.SystemMessage, (ushort)Fineage.Protocol.V2.MsgType.SystemMessage);
         Assert.Equal((ushort)MsgType.ItemList, (ushort)Fineage.Protocol.V2.MsgType.ItemList);

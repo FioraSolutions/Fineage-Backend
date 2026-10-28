@@ -595,11 +595,93 @@ public sealed class ZoneServer
                     ZoneLog.Info($"RX ClanCancelDissolve session={sessionId}");
                 break;
             }
+            case MsgType.EnchantRequest:
+            {
+                var enchant = Decode<EnchantRequestMsg>(body);
+                if (enchant == null)
+                {
+                    await ErrorAsync(session, "bad_request", "EnchantRequest body was not readable.", ct).ConfigureAwait(false);
+                    break;
+                }
+
+                string? code = await _world.TryEnchantRequestAsync(session, enchant, ct).ConfigureAwait(false);
+                if (!await RejectEnchantAsync(session, code, ct).ConfigureAwait(false))
+                    ZoneLog.Info($"RX EnchantRequest session={sessionId} object={enchant.ObjectId}");
+                break;
+            }
+            case MsgType.EnchantConfirm:
+            {
+                var enchant = Decode<EnchantConfirmMsg>(body);
+                if (enchant == null)
+                {
+                    await ErrorAsync(session, "bad_request", "EnchantConfirm body was not readable.", ct).ConfigureAwait(false);
+                    break;
+                }
+
+                string? code = await _world.TryEnchantConfirmAsync(session, enchant, ct).ConfigureAwait(false);
+                if (!await RejectEnchantAsync(session, code, ct).ConfigureAwait(false))
+                    ZoneLog.Info($"RX EnchantConfirm session={sessionId} object={enchant.ObjectId}");
+                break;
+            }
+            case MsgType.EnchantCancel:
+            {
+                if (Decode<EnchantCancelMsg>(body) == null)
+                {
+                    await ErrorAsync(session, "bad_request", "EnchantCancel body was not readable.", ct).ConfigureAwait(false);
+                    break;
+                }
+
+                string? code = await _world.TryEnchantCancelAsync(session, ct).ConfigureAwait(false);
+                if (!await RejectEnchantAsync(session, code, ct).ConfigureAwait(false))
+                    ZoneLog.Info($"RX EnchantCancel session={sessionId}");
+                break;
+            }
             default:
                 ZoneLog.Info($"RX unknown type={type} session={sessionId}");
                 await ErrorAsync(session, "unknown", $"msgType={type}", ct).ConfigureAwait(false);
                 break;
         }
+    }
+
+    static async Task<bool> RejectEnchantAsync(ZoneSession session, string? code, CancellationToken ct)
+    {
+        switch (code)
+        {
+            case null:
+                return false;
+            case "world":
+                await ErrorAsync(session, "world", "EnterWorld first.", ct).ConfigureAwait(false);
+                break;
+            case InventoryProtocol.NotOwned:
+                await ErrorAsync(session, code, "That item is not in your inventory.", ct).ConfigureAwait(false);
+                break;
+            case InventoryProtocol.Dead:
+                await ErrorAsync(session, code, "You cannot enchant while dead.", ct).ConfigureAwait(false);
+                break;
+            case EnchantProtocol.NotScroll:
+                await ErrorAsync(session, code, "That item is not an enchant scroll.", ct).ConfigureAwait(false);
+                break;
+            case EnchantProtocol.NoRequest:
+                await ErrorAsync(session, code, "No enchant scroll is selected.", ct).ConfigureAwait(false);
+                break;
+            case EnchantProtocol.NotEnchantable:
+                await ErrorAsync(session, code, "That item cannot be enchanted.", ct).ConfigureAwait(false);
+                break;
+            case EnchantProtocol.GradeMismatch:
+                await ErrorAsync(session, code, "The scroll grade does not match the item.", ct).ConfigureAwait(false);
+                break;
+            case EnchantProtocol.SlotMismatch:
+                await ErrorAsync(session, code, "That scroll cannot enchant this item.", ct).ConfigureAwait(false);
+                break;
+            case EnchantProtocol.MaxEnchant:
+                await ErrorAsync(session, code, "That item is already at the maximum enchant.", ct).ConfigureAwait(false);
+                break;
+            default:
+                await ErrorAsync(session, "bad_request", "Enchant request was rejected.", ct).ConfigureAwait(false);
+                break;
+        }
+
+        return true;
     }
 
     static async Task<bool> RejectGearAsync(ZoneSession session, string? code, string fallback, CancellationToken ct)

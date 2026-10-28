@@ -61,6 +61,8 @@ sealed class ZoneEntity
     /// CurHp is not the signal: a living player can sit at low HP while regen heals them.
     /// </summary>
     public bool Dead { get; set; }
+    /// <summary>Scroll object id selected for the enchant window. 0 when the window is closed.</summary>
+    public int ActiveEnchantObjectId { get; set; }
     public int GroundItemId { get; set; }
     public int GroundCount { get; set; } = 1;
     public bool GroundStackable { get; set; }
@@ -93,6 +95,8 @@ public sealed partial class ZoneWorld
     readonly Random _dropRandom;
     readonly IAccountStore? _accounts;
     readonly bool _expertisePenalty;
+    readonly IEnchantRandom _enchantRandom;
+    readonly EnchantRates _enchantRates;
     readonly Dictionary<int, ZoneEntity> _byId = [];
     readonly DropCatalog _dropCatalog;
     readonly DropRates _dropRates;
@@ -110,7 +114,9 @@ public sealed partial class ZoneWorld
         DropCatalog? dropCatalog = null,
         DropRates? dropRates = null,
         string? activeMapId = null,
-        Func<DateTimeOffset>? clock = null)
+        Func<DateTimeOffset>? clock = null,
+        IEnchantRandom? enchantRandom = null,
+        EnchantRates? enchantRates = null)
     {
         _aoi = aoi ?? new SingleCellAoi();
         _game = game ?? GameData.LoadDefault();
@@ -124,6 +130,9 @@ public sealed partial class ZoneWorld
         _dropRates = dropRates ?? DropRates.Retail;
         _activeMapId = string.IsNullOrWhiteSpace(activeMapId) ? SpawnCatalog.DefaultMapId : activeMapId.Trim();
         _clock = clock ?? (() => DateTimeOffset.UtcNow);
+        _enchantRandom = enchantRandom ?? SharedEnchantRandom.Instance;
+        _enchantRates = enchantRates ?? EnchantRates.Default;
+        _enchantRates.Validate();
         BootstrapSpawns();
         LoadClans();
     }
@@ -586,7 +595,10 @@ public sealed partial class ZoneWorld
             ? new int[InventoryMessages.PaperdollSlotCount]
             : InventoryMessages.ItemIds(entity.Inventory),
         ClanId = entity.ClanId,
-        ClanCrestId = entity.ClanId == 0 ? 0 : ClanProtocol.CrestId
+        ClanCrestId = entity.ClanId == 0 ? 0 : ClanProtocol.CrestId,
+        Enchant = entity.Inventory == null
+            ? new int[InventoryMessages.PaperdollSlotCount]
+            : InventoryMessages.EnchantLevels(entity.Inventory)
     };
 
     static NpcInfoMsg NpcInfo(ZoneEntity entity) => new()

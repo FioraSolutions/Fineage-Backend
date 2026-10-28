@@ -83,7 +83,8 @@ public static class InventoryMessages
             Kind = row.Kind,
             Icon = row.Icon,
             WeaponType = row.WeaponType,
-            ArmorType = row.ArmorType
+            ArmorType = row.ArmorType,
+            EnchantLevel = row.EnchantLevel
         };
     }
 
@@ -111,7 +112,8 @@ public static class InventoryMessages
             slots[i] = new PaperdollSlotMsg
             {
                 ObjectId = item?.ObjectId ?? 0,
-                ItemId = item?.ItemId ?? 0
+                ItemId = item?.ItemId ?? 0,
+                EnchantLevel = item?.EnchantLevel ?? 0
             };
         }
 
@@ -131,8 +133,33 @@ public static class InventoryMessages
             Kind = KindToken(item.Template.Kind),
             Icon = item.Template.Icon,
             WeaponType = item.Template.WeaponType == WeaponType.None ? "" : WeaponToken(item.Template.WeaponType),
-            ArmorType = item.Template.ArmorType == ArmorType.None ? "" : ArmorToken(item.Template.ArmorType)
+            ArmorType = item.Template.ArmorType == ArmorType.None ? "" : ArmorToken(item.Template.ArmorType),
+            EnchantLevel = item.EnchantLevel
         };
+    }
+
+    /// <summary>Enchant of each paperdoll slot. Empty slots are 0. Same order as <see cref="ItemIds"/>.</summary>
+    public static int[] EnchantLevels(PlayerInventory inventory)
+    {
+        ArgumentNullException.ThrowIfNull(inventory);
+        var levels = new int[PaperdollSlotCount];
+        for (int i = 0; i < PaperdollSlotCount; i++)
+        {
+            var item = inventory.GetEquipped((PaperdollSlot)i);
+            if (item != null)
+                levels[i] = item.EnchantLevel;
+        }
+
+        return levels;
+    }
+
+    /// <summary>Remove row. Count is 0. The slot is the slot before the piece left the paperdoll, or -1.</summary>
+    public static InventoryUpdateEntryMsg RemoveRow(ItemInstance item, int equippedSlot)
+    {
+        var row = ChangeRow(InventoryChange.Remove, item);
+        row.Count = 0;
+        row.EquippedSlot = equippedSlot;
+        return row;
     }
 
     static string KindToken(ItemKind kind) => kind switch

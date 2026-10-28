@@ -59,6 +59,15 @@ public enum MsgType : ushort
     ClanDissolveRequest = 37,
     /// <summary>Leader cancels a pending dissolution. Empty body.</summary>
     ClanCancelDissolveRequest = 38,
+    /// <summary>
+    /// Select an enchant scroll and open the window. Body is <see cref="EnchantRequestMsg"/>.
+    /// Clan uses 32–38. See <see cref="EnchantProtocol"/>.
+    /// </summary>
+    EnchantRequest = 39,
+    /// <summary>Enchant the target with the selected scroll. Body is <see cref="EnchantConfirmMsg"/>.</summary>
+    EnchantConfirm = 40,
+    /// <summary>Close the enchant window. Body is <see cref="EnchantCancelMsg"/>.</summary>
+    EnchantCancel = 41,
     /// <summary>Keepalive from client. Server answers with <see cref="Pong"/>.</summary>
     Ping = 9,
     /// <summary>Zone chat. Fan-out is <see cref="CreatureSay"/>. See <see cref="ChatProtocol"/>.</summary>
@@ -118,6 +127,11 @@ public enum MsgType : ushort
     PledgeMemberList = 1052,
     /// <summary>Invite outcome for the requestor. 0 declined, any other stored response means accepted.</summary>
     ClanJoinResult = 1053,
+    /// <summary>
+    /// Enchant roll or cancel. Clan replies use 1050–1059. 1041–1049 stay in the chat band.
+    /// See <see cref="EnchantProtocol"/>.
+    /// </summary>
+    EnchantResult = 1060,
 
     // Login S → C. Canonical lobby set; see LobbyProtocol.
     RegisterOk = 1020,

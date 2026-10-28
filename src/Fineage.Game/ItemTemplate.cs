@@ -17,7 +17,10 @@ public sealed record ItemTemplate(
     bool Stackable = false,
     int PDef = 0,
     CrystalGrade Crystal = CrystalGrade.None,
-    EquipRequirement? Equip = null)
+    EquipRequirement? Equip = null,
+    int CrystalCount = 0,
+    bool Enchantable = false,
+    EnchantScroll? Scroll = null)
 {
     public bool Equippable => BodySlot != global::Fineage.Game.BodySlot.None;
 }

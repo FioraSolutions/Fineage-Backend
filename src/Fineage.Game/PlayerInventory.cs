@@ -74,14 +74,17 @@ public sealed class PlayerInventory
     /// Other templates become <paramref name="count"/> separate pieces.
     /// Returns the merged stack, or the first piece when several were created.
     /// </summary>
-    public ItemInstance Add(int itemId, int count = 1)
+    public ItemInstance Add(int itemId, int count = 1, int enchantLevel = 0)
     {
         if (count < 1)
             throw new ArgumentOutOfRangeException(nameof(count), count, "Count must be at least 1.");
+        CheckEnchant(enchantLevel);
 
         var template = _catalog.Get(itemId);
         if (template.Stackable)
         {
+            if (enchantLevel != 0)
+                throw new InvalidOperationException($"Stackable item {itemId} cannot carry an enchant level.");
             var existing = FindByItemId(itemId);
             if (existing != null)
             {
@@ -89,16 +92,57 @@ public sealed class PlayerInventory
                 return existing;
             }
 
-            var stack = Create(template, count);
+            var stack = Create(template, count, 0);
             _items.Add(stack);
             return stack;
         }
 
-        var first = Create(template, 1);
+        var first = Create(template, 1, enchantLevel);
         _items.Add(first);
         for (var i = 1; i < count; i++)
-            _items.Add(Create(template, 1));
+            _items.Add(Create(template, 1, enchantLevel));
         return first;
+    }
+
+    public void SetEnchantLevel(ItemInstance item, int level)
+    {
+        ArgumentNullException.ThrowIfNull(item);
+        if (!ReferenceEquals(Find(item.ObjectId), item))
+            throw new InvalidOperationException($"Item object {item.ObjectId} is not in this inventory.");
+        CheckEnchant(level);
+        if (item.Template.Stackable && level != 0)
+            throw new InvalidOperationException($"Stackable item {item.ItemId} cannot carry an enchant level.");
+        item.EnchantLevel = level;
+    }
+
+    /// <summary>
+    /// Removes one from the stack, or the whole piece when the count is 1.
+    /// Returns the count still in the bag. 0 means the object was removed.
+    /// An equipped piece is unequipped first.
+    /// </summary>
+    public int TakeOne(ItemInstance item)
+    {
+        ArgumentNullException.ThrowIfNull(item);
+        if (!ReferenceEquals(Find(item.ObjectId), item))
+            throw new InvalidOperationException($"Item object {item.ObjectId} is not in this inventory.");
+        if (item.Count > 1)
+        {
+            item.Count -= 1;
+            return item.Count;
+        }
+
+        Remove(item);
+        return 0;
+    }
+
+    public void Remove(ItemInstance item)
+    {
+        ArgumentNullException.ThrowIfNull(item);
+        if (!ReferenceEquals(Find(item.ObjectId), item))
+            throw new InvalidOperationException($"Item object {item.ObjectId} is not in this inventory.");
+        if (item.IsEquipped)
+            Unequip(item);
+        _items.Remove(item);
     }
 
     public void AddStarterKit(StarterKit kit)
@@ -207,9 +251,17 @@ public sealed class PlayerInventory
     ItemInstance Require(int objectId) =>
         Find(objectId) ?? throw new InvalidOperationException($"Item object {objectId} is not in this inventory.");
 
-    ItemInstance Create(ItemTemplate template, int count)
+    ItemInstance Create(ItemTemplate template, int count, int enchantLevel)
     {
-        return new ItemInstance(_ids.Next(), template, count);
+        var item = new ItemInstance(_ids.Next(), template, count);
+        item.EnchantLevel = enchantLevel;
+        return item;
+    }
+
+    static void CheckEnchant(int level)
+    {
+        if (level < 0 || level > EnchantRules.AbsoluteMax)
+            throw new ArgumentOutOfRangeException(nameof(level), level, "Enchant level must be 0..65535.");
     }
 
     bool RejectedByFormalWear(BodySlot body)

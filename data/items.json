@@ -1,5 +1,5 @@
 {
-  "reference": "Hand-written Interlude item templates. Ids, names, slots, weapon types, armor types, icons, crystal grades, equip conditions, magic flag, stackability, and pDef were checked against L2J Mobius CT 0 Interlude. This file is not Mobius data. equip fields are the player conditions from that item's cond block: races, classes, sex, hero, clanLeader, pvp, minLevel, pledgeClass, castle, clanHalls, maxPk, expertise, and all/any/not.",
+  "reference": "Hand-written Interlude item templates. Ids, names, slots, weapon types, armor types, icons, crystal grades, crystal counts, enchant scrolls, equip conditions, magic flag, stackability, and pDef were checked against L2J Mobius CT 0 Interlude. This file is not Mobius data. equip fields are the player conditions from that item's cond block. scroll fields are the enchant scroll target, fail mode, grade, max enchant, and bonus rate.",
   "items": [
     {
       "id": 2369,
@@ -52,7 +52,15 @@
       "armorType": "magic",
       "pDef": 17,
       "icon": "icon.armor_t01_u_i00",
-      "equip": { "races": ["human", "elf", "dark_elf", "orc", "dwarf"] }
+      "equip": {
+        "races": [
+          "human",
+          "elf",
+          "dark_elf",
+          "orc",
+          "dwarf"
+        ]
+      }
     },
     {
       "id": 461,
@@ -62,7 +70,15 @@
       "armorType": "magic",
       "pDef": 10,
       "icon": "icon.armor_t01_l_i00",
-      "equip": { "races": ["human", "elf", "dark_elf", "orc", "dwarf"] }
+      "equip": {
+        "races": [
+          "human",
+          "elf",
+          "dark_elf",
+          "orc",
+          "dwarf"
+        ]
+      }
     },
     {
       "id": 5588,
@@ -92,7 +108,9 @@
       "weaponType": "sword",
       "crystal": "s",
       "icon": "icon.weapon_the_sword_of_hero_i00",
-      "equip": { "hero": true }
+      "equip": {
+        "hero": true
+      }
     },
     {
       "id": 7682,
@@ -100,7 +118,9 @@
       "kind": "armor",
       "bodySlot": "hair2",
       "icon": "icon.accessory_maidens_hairpin_i00",
-      "equip": { "sex": "female" }
+      "equip": {
+        "sex": "female"
+      }
     },
     {
       "id": 8923,
@@ -108,7 +128,9 @@
       "kind": "armor",
       "bodySlot": "hair",
       "icon": "icon.Accessary_scar_i00",
-      "equip": { "sex": "male" }
+      "equip": {
+        "sex": "male"
+      }
     },
     {
       "id": 7850,
@@ -117,7 +139,9 @@
       "bodySlot": "head",
       "crystal": "d",
       "icon": "icon.armor_helmet_i00",
-      "equip": { "pledgeClass": 1 }
+      "equip": {
+        "pledgeClass": 1
+      }
     },
     {
       "id": 7860,
@@ -126,7 +150,9 @@
       "bodySlot": "head",
       "crystal": "a",
       "icon": "icon.armor_helmet_i00",
-      "equip": { "pledgeClass": 4 }
+      "equip": {
+        "pledgeClass": 4
+      }
     },
     {
       "id": 6834,
@@ -134,7 +160,16 @@
       "kind": "armor",
       "bodySlot": "hair",
       "icon": "icon.accessory_pledge_cap1_i00",
-      "equip": { "all": [{ "castle": 6 }, { "pledgeClass": 2 }] }
+      "equip": {
+        "all": [
+          {
+            "castle": 6
+          },
+          {
+            "pledgeClass": 2
+          }
+        ]
+      }
     },
     {
       "id": 6841,
@@ -142,7 +177,563 @@
       "kind": "armor",
       "bodySlot": "hair",
       "icon": "icon.accessory_crown_i00",
-      "equip": { "all": [{ "castle": -1 }, { "pledgeClass": -1 }] }
+      "equip": {
+        "all": [
+          {
+            "castle": -1
+          },
+          {
+            "pledgeClass": -1
+          }
+        ]
+      }
+    },
+    {
+      "id": 58,
+      "name": "Mithril Breastplate",
+      "kind": "armor",
+      "bodySlot": "chest",
+      "icon": "icon.armor_t19_u_i00",
+      "enchantable": true,
+      "armorType": "heavy",
+      "crystal": "d",
+      "crystalCount": 332
+    },
+    {
+      "id": 73,
+      "name": "Shamshir",
+      "kind": "weapon",
+      "bodySlot": "rhand",
+      "icon": "icon.weapon_shamshir_i00",
+      "enchantable": true,
+      "weaponType": "sword",
+      "crystal": "c",
+      "crystalCount": 1148
+    },
+    {
+      "id": 79,
+      "name": "Sword of Damascus",
+      "kind": "weapon",
+      "bodySlot": "rhand",
+      "icon": "icon.weapon_sword_of_damascus_i00",
+      "enchantable": true,
+      "weaponType": "sword",
+      "crystal": "b",
+      "crystalCount": 1746
+    },
+    {
+      "id": 98,
+      "name": "Halberd",
+      "kind": "weapon",
+      "bodySlot": "lrhand",
+      "icon": "icon.weapon_halbard_i00",
+      "enchantable": true,
+      "weaponType": "pole",
+      "crystal": "a",
+      "crystalCount": 1464
+    },
+    {
+      "id": 123,
+      "name": "Saber",
+      "kind": "weapon",
+      "bodySlot": "rhand",
+      "icon": "icon.weapon_saber_i00",
+      "enchantable": true,
+      "weaponType": "sword",
+      "crystal": "d",
+      "crystalCount": 743
+    },
+    {
+      "id": 911,
+      "name": "Enchanted Necklace",
+      "kind": "armor",
+      "bodySlot": "neck",
+      "icon": "icon.accessary_enchanted_necklace_i00",
+      "enchantable": true,
+      "crystal": "d",
+      "crystalCount": 103
+    },
+    {
+      "id": 2390,
+      "name": "Avadon Leather Armor",
+      "kind": "armor",
+      "bodySlot": "fullarmor",
+      "icon": "icon.armor_t67_ul_i00",
+      "enchantable": true,
+      "armorType": "light",
+      "crystal": "b",
+      "crystalCount": 304
+    },
+    {
+      "id": 6364,
+      "name": "Forgotten Blade",
+      "kind": "weapon",
+      "bodySlot": "rhand",
+      "icon": "icon.weapon_forgotten_blade_i00",
+      "enchantable": true,
+      "weaponType": "sword",
+      "crystal": "s",
+      "crystalCount": 2440
+    },
+    {
+      "id": 1458,
+      "name": "Crystal: D-Grade",
+      "kind": "etc",
+      "crystal": "d",
+      "stackable": true,
+      "icon": "icon.etc_crystal_blue_i00"
+    },
+    {
+      "id": 1459,
+      "name": "Crystal: C-Grade",
+      "kind": "etc",
+      "crystal": "c",
+      "stackable": true,
+      "icon": "icon.etc_crystal_green_i00"
+    },
+    {
+      "id": 1460,
+      "name": "Crystal: B-Grade",
+      "kind": "etc",
+      "crystal": "b",
+      "stackable": true,
+      "icon": "icon.etc_crystal_red_i00"
+    },
+    {
+      "id": 1461,
+      "name": "Crystal: A-Grade",
+      "kind": "etc",
+      "crystal": "a",
+      "stackable": true,
+      "icon": "icon.etc_crystal_silver_i00"
+    },
+    {
+      "id": 1462,
+      "name": "Crystal: S Grade",
+      "kind": "etc",
+      "crystal": "s",
+      "stackable": true,
+      "icon": "icon.etc_crystal_gold_i00"
+    },
+    {
+      "id": 955,
+      "name": "Scroll: Enchant Weapon (Grade D)",
+      "kind": "etc",
+      "stackable": false,
+      "icon": "icon.etc_scroll_of_enchant_weapon_i01",
+      "scroll": {
+        "target": "weapon",
+        "fail": "crystallize",
+        "grade": "d",
+        "maxEnchant": 16,
+        "bonusRate": 0
+      }
+    },
+    {
+      "id": 956,
+      "name": "Scroll: Enchant Armor (Grade D)",
+      "kind": "etc",
+      "stackable": false,
+      "icon": "icon.etc_scroll_of_enchant_armor_i01",
+      "scroll": {
+        "target": "armor",
+        "fail": "crystallize",
+        "grade": "d",
+        "maxEnchant": 16,
+        "bonusRate": 0
+      }
+    },
+    {
+      "id": 957,
+      "name": "Crystal Scroll: Enchant Weapon (Grade D)",
+      "kind": "etc",
+      "stackable": false,
+      "icon": "icon.etc_scroll_of_enchant_weapon_i01",
+      "scroll": {
+        "target": "weapon",
+        "fail": "keep",
+        "grade": "d",
+        "maxEnchant": 65535,
+        "bonusRate": 100
+      }
+    },
+    {
+      "id": 958,
+      "name": "Crystal Scroll: Enchant Armor (Grade D)",
+      "kind": "etc",
+      "stackable": false,
+      "icon": "icon.etc_scroll_of_enchant_armor_i01",
+      "scroll": {
+        "target": "armor",
+        "fail": "keep",
+        "grade": "d",
+        "maxEnchant": 65535,
+        "bonusRate": 100
+      }
+    },
+    {
+      "id": 951,
+      "name": "Scroll: Enchant Weapon (Grade C)",
+      "kind": "etc",
+      "stackable": false,
+      "icon": "icon.etc_scroll_of_enchant_weapon_i02",
+      "scroll": {
+        "target": "weapon",
+        "fail": "crystallize",
+        "grade": "c",
+        "maxEnchant": 16,
+        "bonusRate": 0
+      }
+    },
+    {
+      "id": 952,
+      "name": "Scroll: Enchant Armor (Grade C)",
+      "kind": "etc",
+      "stackable": false,
+      "icon": "icon.etc_scroll_of_enchant_armor_i02",
+      "scroll": {
+        "target": "armor",
+        "fail": "crystallize",
+        "grade": "c",
+        "maxEnchant": 16,
+        "bonusRate": 0
+      }
+    },
+    {
+      "id": 953,
+      "name": "Crystal Scroll: Enchant Weapon (Grade C)",
+      "kind": "etc",
+      "stackable": false,
+      "icon": "icon.etc_scroll_of_enchant_weapon_i01",
+      "scroll": {
+        "target": "weapon",
+        "fail": "keep",
+        "grade": "c",
+        "maxEnchant": 65535,
+        "bonusRate": 100
+      }
+    },
+    {
+      "id": 954,
+      "name": "Crystal Scroll: Enchant Armor (Grade C)",
+      "kind": "etc",
+      "stackable": false,
+      "icon": "icon.etc_scroll_of_enchant_armor_i01",
+      "scroll": {
+        "target": "armor",
+        "fail": "keep",
+        "grade": "c",
+        "maxEnchant": 65535,
+        "bonusRate": 100
+      }
+    },
+    {
+      "id": 947,
+      "name": "Scroll: Enchant Weapon (Grade B)",
+      "kind": "etc",
+      "stackable": false,
+      "icon": "icon.etc_scroll_of_enchant_weapon_i03",
+      "scroll": {
+        "target": "weapon",
+        "fail": "crystallize",
+        "grade": "b",
+        "maxEnchant": 16,
+        "bonusRate": 0
+      }
+    },
+    {
+      "id": 948,
+      "name": "Scroll: Enchant Armor (Grade B)",
+      "kind": "etc",
+      "stackable": false,
+      "icon": "icon.etc_scroll_of_enchant_armor_i03",
+      "scroll": {
+        "target": "armor",
+        "fail": "crystallize",
+        "grade": "b",
+        "maxEnchant": 16,
+        "bonusRate": 0
+      }
+    },
+    {
+      "id": 949,
+      "name": "Crystal Scroll: Enchant Weapon (Grade B)",
+      "kind": "etc",
+      "stackable": false,
+      "icon": "icon.etc_scroll_of_enchant_weapon_i01",
+      "scroll": {
+        "target": "weapon",
+        "fail": "keep",
+        "grade": "b",
+        "maxEnchant": 65535,
+        "bonusRate": 100
+      }
+    },
+    {
+      "id": 950,
+      "name": "Crystal Scroll: Enchant Armor (Grade B)",
+      "kind": "etc",
+      "stackable": false,
+      "icon": "icon.etc_scroll_of_enchant_armor_i01",
+      "scroll": {
+        "target": "armor",
+        "fail": "keep",
+        "grade": "b",
+        "maxEnchant": 65535,
+        "bonusRate": 100
+      }
+    },
+    {
+      "id": 729,
+      "name": "Scroll: Enchant Weapon (Grade A)",
+      "kind": "etc",
+      "stackable": false,
+      "icon": "icon.etc_scroll_of_enchant_weapon_i04",
+      "scroll": {
+        "target": "weapon",
+        "fail": "crystallize",
+        "grade": "a",
+        "maxEnchant": 16,
+        "bonusRate": 0
+      }
+    },
+    {
+      "id": 730,
+      "name": "Scroll: Enchant Armor (Grade A)",
+      "kind": "etc",
+      "stackable": false,
+      "icon": "icon.etc_scroll_of_enchant_armor_i04",
+      "scroll": {
+        "target": "armor",
+        "fail": "crystallize",
+        "grade": "a",
+        "maxEnchant": 16,
+        "bonusRate": 0
+      }
+    },
+    {
+      "id": 731,
+      "name": "Crystal Scroll: Enchant Weapon (Grade A)",
+      "kind": "etc",
+      "stackable": false,
+      "icon": "icon.etc_scroll_of_enchant_weapon_i01",
+      "scroll": {
+        "target": "weapon",
+        "fail": "keep",
+        "grade": "a",
+        "maxEnchant": 65535,
+        "bonusRate": 100
+      }
+    },
+    {
+      "id": 732,
+      "name": "Crystal Scroll: Enchant Armor (Grade A)",
+      "kind": "etc",
+      "stackable": false,
+      "icon": "icon.etc_scroll_of_enchant_armor_i01",
+      "scroll": {
+        "target": "armor",
+        "fail": "keep",
+        "grade": "a",
+        "maxEnchant": 65535,
+        "bonusRate": 100
+      }
+    },
+    {
+      "id": 959,
+      "name": "Scroll: Enchant Weapon (Grade S)",
+      "kind": "etc",
+      "stackable": false,
+      "icon": "icon.etc_scroll_of_enchant_weapon_i05",
+      "scroll": {
+        "target": "weapon",
+        "fail": "crystallize",
+        "grade": "s",
+        "maxEnchant": 16,
+        "bonusRate": 0
+      }
+    },
+    {
+      "id": 960,
+      "name": "Scroll: Enchant Armor (Grade S)",
+      "kind": "etc",
+      "stackable": false,
+      "icon": "icon.etc_scroll_of_enchant_armor_i05",
+      "scroll": {
+        "target": "armor",
+        "fail": "crystallize",
+        "grade": "s",
+        "maxEnchant": 16,
+        "bonusRate": 0
+      }
+    },
+    {
+      "id": 961,
+      "name": "Crystal Scroll: Enchant Weapon (Grade S)",
+      "kind": "etc",
+      "stackable": false,
+      "icon": "icon.etc_scroll_of_enchant_weapon_i01",
+      "scroll": {
+        "target": "weapon",
+        "fail": "keep",
+        "grade": "s",
+        "maxEnchant": 65535,
+        "bonusRate": 100
+      }
+    },
+    {
+      "id": 962,
+      "name": "Crystal Scroll: Enchant Armor (Grade S)",
+      "kind": "etc",
+      "stackable": false,
+      "icon": "icon.etc_scroll_of_enchant_armor_i01",
+      "scroll": {
+        "target": "armor",
+        "fail": "keep",
+        "grade": "s",
+        "maxEnchant": 65535,
+        "bonusRate": 100
+      }
+    },
+    {
+      "id": 6569,
+      "name": "Blessed Scroll: Enchant Weapon (Grade A)",
+      "kind": "etc",
+      "stackable": false,
+      "icon": "icon.etc_blessed_scrl_of_ench_wp_a_i04",
+      "scroll": {
+        "target": "weapon",
+        "fail": "reset",
+        "grade": "a",
+        "maxEnchant": 16,
+        "bonusRate": 0
+      }
+    },
+    {
+      "id": 6570,
+      "name": "Blessed Scroll: Enchant Armor (Grade A)",
+      "kind": "etc",
+      "stackable": false,
+      "icon": "icon.etc_blessed_scrl_of_ench_am_a_i04",
+      "scroll": {
+        "target": "armor",
+        "fail": "reset",
+        "grade": "a",
+        "maxEnchant": 16,
+        "bonusRate": 0
+      }
+    },
+    {
+      "id": 6571,
+      "name": "Blessed Scroll: Enchant Weapon (Grade B)",
+      "kind": "etc",
+      "stackable": false,
+      "icon": "icon.etc_blessed_scrl_of_ench_wp_b_i03",
+      "scroll": {
+        "target": "weapon",
+        "fail": "reset",
+        "grade": "b",
+        "maxEnchant": 16,
+        "bonusRate": 0
+      }
+    },
+    {
+      "id": 6572,
+      "name": "Blessed Scroll: Enchant Armor (Grade B)",
+      "kind": "etc",
+      "stackable": false,
+      "icon": "icon.etc_blessed_scrl_of_ench_am_b_i03",
+      "scroll": {
+        "target": "armor",
+        "fail": "reset",
+        "grade": "b",
+        "maxEnchant": 16,
+        "bonusRate": 0
+      }
+    },
+    {
+      "id": 6573,
+      "name": "Blessed Scroll: Enchant Weapon (Grade C)",
+      "kind": "etc",
+      "stackable": false,
+      "icon": "icon.etc_blessed_scrl_of_ench_wp_c_i02",
+      "scroll": {
+        "target": "weapon",
+        "fail": "reset",
+        "grade": "c",
+        "maxEnchant": 16,
+        "bonusRate": 0
+      }
+    },
+    {
+      "id": 6574,
+      "name": "Blessed Scroll: Enchant Armor (Grade C)",
+      "kind": "etc",
+      "stackable": false,
+      "icon": "icon.etc_blessed_scrl_of_ench_am_c_i02",
+      "scroll": {
+        "target": "armor",
+        "fail": "reset",
+        "grade": "c",
+        "maxEnchant": 16,
+        "bonusRate": 0
+      }
+    },
+    {
+      "id": 6575,
+      "name": "Blessed Scroll: Enchant Weapon (Grade D)",
+      "kind": "etc",
+      "stackable": false,
+      "icon": "icon.etc_blessed_scrl_of_ench_wp_d_i01",
+      "scroll": {
+        "target": "weapon",
+        "fail": "reset",
+        "grade": "d",
+        "maxEnchant": 16,
+        "bonusRate": 0
+      }
+    },
+    {
+      "id": 6576,
+      "name": "Blessed Scroll: Enchant Armor (Grade D)",
+      "kind": "etc",
+      "stackable": false,
+      "icon": "icon.etc_blessed_scrl_of_ench_am_d_i01",
+      "scroll": {
+        "target": "armor",
+        "fail": "reset",
+        "grade": "d",
+        "maxEnchant": 16,
+        "bonusRate": 0
+      }
+    },
+    {
+      "id": 6577,
+      "name": "Blessed Scroll: Enchant Weapon (Grade S)",
+      "kind": "etc",
+      "stackable": false,
+      "icon": "icon.etc_blessed_scrl_of_ench_wp_s_i05",
+      "scroll": {
+        "target": "weapon",
+        "fail": "reset",
+        "grade": "s",
+        "maxEnchant": 16,
+        "bonusRate": 0
+      }
+    },
+    {
+      "id": 6578,
+      "name": "Blessed Scroll: Enchant Armor (Grade S)",
+      "kind": "etc",
+      "stackable": false,
+      "icon": "icon.etc_blessed_scrl_of_ench_am_s_i05",
+      "scroll": {
+        "target": "armor",
+        "fail": "reset",
+        "grade": "s",
+        "maxEnchant": 16,
+        "bonusRate": 0
+      }
     }
   ]
 }
