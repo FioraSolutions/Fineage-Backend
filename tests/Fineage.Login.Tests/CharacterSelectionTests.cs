@@ -30,7 +30,7 @@ public class CharacterSelectionTests
         Assert.False(earlier.HasPosition);
         Assert.Equal(1, earlier.Level);
 
-        var preview = ClassSpawn.Preview(HumanClasses.Mystic);
+        var preview = ClassTemplates.Preview(HumanClasses.Mystic);
         var rows = LobbyWire.ToSummaries(roster.Value!, now);
         Assert.Equal(0, rows[0].Slot);
         Assert.Equal(1, rows[1].Slot);
@@ -255,7 +255,7 @@ public class CharacterSelectionTests
         Assert.Equal(["Aria", "Bron"], list.Characters.Select(c => c.Name).ToArray());
         Assert.Equal(0, list.Characters[0].Slot);
         Assert.Equal(1, list.Characters[1].Slot);
-        Assert.Equal(ClassSpawn.Preview(HumanClasses.Fighter).X, list.Characters[0].X);
+        Assert.Equal(ClassTemplates.Preview(HumanClasses.Fighter).X, list.Characters[0].X);
         Assert.False(list.Characters[0].IsLastPlayed);
 
         await link.SendAsync(MsgType.DeleteCharacter, new DeleteCharacterMsg { Slot = 0 });

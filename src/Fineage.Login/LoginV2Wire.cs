@@ -9,7 +9,7 @@ static class LoginV2Wire
     {
         var point = character.HasPosition
             ? new Fineage.Protocol.ClassSpawn.Point(character.X, character.Y, character.Z)
-            : Fineage.Protocol.ClassSpawn.Preview(character.ClassId);
+            : ClassTemplates.Preview(character.ClassId);
         return new CharacterSummaryMsg
         {
             Slot = slot,

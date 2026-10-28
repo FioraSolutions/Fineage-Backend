@@ -1,44 +1,44 @@
+using Fineage.Game;
 using Fineage.Protocol;
 
 namespace Fineage.Login;
 
 /// <summary>
-/// Base-class facts needed to create a character. Level-1 HP/MP are the player-facing
-/// maxima (class base times the race's base CON/MEN), not a stat formula.
-/// Human Fighter is 126/38 and Human Mystic is 99/59. Warrior (class 1) is recorded
-/// only so a first-class request fails as a non-base class. This is not a Mobius table.
+/// Class facts for login and zone call sites. The values come from the datapack
+/// (<see cref="ClassCatalog"/>), including level-1 HP/MP after the CON/MEN bonus.
 /// </summary>
-public sealed record ClassTemplate(int ClassId, int Race, int ClassLevel, int MaxHp, int MaxMp, ClassSpawn.Point CreationPoint)
-{
-    public bool IsBase => ClassLevel == 0;
-}
-
 public static class ClassTemplates
 {
-    public const int HumanFighterHp = 126;
-    public const int HumanFighterMp = 38;
-    public const int HumanMysticHp = 99;
-    public const int HumanMysticMp = 59;
+    static readonly Lazy<ClassCatalog> LazyCatalog = new(() => GameData.LoadDefault().Classes!);
 
-    static readonly ClassTemplate[] Templates =
-    [
-        new(HumanClasses.Fighter, HumanClasses.RaceHuman, 0, HumanFighterHp, HumanFighterMp, ClassSpawn.Preview(HumanClasses.Fighter)),
-        new(1, HumanClasses.RaceHuman, 1, 0, 0, ClassSpawn.Preview(HumanClasses.Fighter)),
-        new(HumanClasses.Mystic, HumanClasses.RaceHuman, 0, HumanMysticHp, HumanMysticMp, ClassSpawn.Preview(HumanClasses.Mystic))
-    ];
+    public static ClassCatalog Catalog => LazyCatalog.Value;
 
-    public static bool TryGet(int classId, out ClassTemplate? template)
+    public static int HumanFighterHp => Catalog.Get(HumanClasses.Fighter).MaxHp;
+
+    public static int HumanFighterMp => Catalog.Get(HumanClasses.Fighter).MaxMp;
+
+    public static int HumanMysticHp => Catalog.Get(HumanClasses.Mystic).MaxHp;
+
+    public static int HumanMysticMp => Catalog.Get(HumanClasses.Mystic).MaxMp;
+
+    public static bool TryGet(int classId, out ClassTemplate? template) => Catalog.TryGet(classId, out template);
+
+    public static ClassSpawn.Point[] Points(int classId)
     {
-        foreach (var row in Templates)
+        if (!Catalog.TryGet(classId, out var template) || template == null || template.Spawns.Count == 0)
+            return [new ClassSpawn.Point(TalkingIslandSpawn.X, TalkingIslandSpawn.Y, TalkingIslandSpawn.Z)];
+
+        var points = new ClassSpawn.Point[template.Spawns.Count];
+        for (int i = 0; i < points.Length; i++)
         {
-            if (row.ClassId == classId)
-            {
-                template = row;
-                return true;
-            }
+            var point = template.Spawns[i];
+            points[i] = new ClassSpawn.Point(point.X, point.Y, point.Z);
         }
 
-        template = null;
-        return false;
+        return points;
     }
+
+    public static ClassSpawn.Point Preview(int classId) => Points(classId)[0];
+
+    public static ClassSpawn.Point Pick(int classId, Random random) => ClassSpawn.Pick(Points(classId), random);
 }

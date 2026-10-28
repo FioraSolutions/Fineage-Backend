@@ -106,7 +106,11 @@ public class CharacterCreationTests
         var service = Service();
         Assert.True(service.Register("alice", "secret1").Ok);
         Assert.Equal(LobbyProtocol.CreationFailed, service.CreateHuman("alice", "War", classId: 1).Code);
-        Assert.Equal(LobbyProtocol.ClassNotSupported, service.CreateHuman("alice", "ElfF", classId: 18).Code);
+        Assert.Equal(LobbyProtocol.RaceNotSupported, service.CreateHuman("alice", "ElfF", classId: 18).Code);
+        Assert.Equal(LobbyProtocol.ClassNotSupported, service.CreateHuman("alice", "Nope", classId: 200).Code);
+        var elf = service.CreateHuman("alice", "ElfF", classId: 18, race: 1);
+        Assert.True(elf.Ok, elf.Message);
+        Assert.Equal(1, elf.Value!.Race);
 
         var elvesOnly = Service(create: new CharacterCreateOptions
         {
@@ -142,7 +146,7 @@ public class CharacterCreationTests
         Assert.Equal(character.MaxHp, character.Hp);
         Assert.Equal(ClassTemplates.HumanFighterMp, character.MaxMp);
         Assert.Equal(character.MaxMp, character.Mp);
-        var point = ClassSpawn.Preview(HumanClasses.Fighter);
+        var point = ClassTemplates.Preview(HumanClasses.Fighter);
         Assert.True(character.HasPosition);
         Assert.Equal(point.X, character.X);
         Assert.Equal(point.Y, character.Y);
@@ -161,6 +165,34 @@ public class CharacterCreationTests
         Assert.Equal(6, row.HairStyle);
         Assert.Equal(point.X, row.X);
         Assert.Equal(HumanClasses.SexFemale, row.Sex);
+    }
+
+    [Fact]
+    public void Every_base_class_matches_the_lobby_and_can_be_created()
+    {
+        var catalog = ClassTemplates.Catalog;
+        var service = Service(create: new CharacterCreateOptions { CharMaxNumber = 0 });
+        Assert.True(catalog.CreationListMatchesBaseClasses(service.CreatableClassIds));
+        Assert.True(service.Register("alice", "secret1").Ok);
+
+        foreach (int classId in catalog.BaseClassIds)
+        {
+            var template = catalog.Get(classId);
+            var created = service.CreateHuman("alice", "C" + classId, classId, race: template.Race);
+            Assert.True(created.Ok, created.Message);
+            Assert.Equal(template.Race, created.Value!.Race);
+            Assert.Equal(catalog.ModifiedHp(classId, 1), created.Value.MaxHp);
+            Assert.Equal(catalog.ModifiedMp(classId, 1), created.Value.MaxMp);
+            Assert.Equal(template.Spawns[0].X, created.Value.X);
+            Assert.Equal(template.Spawns[0].Y, created.Value.Y);
+            Assert.Equal(template.Spawns[0].Z, created.Value.Z);
+        }
+
+        Assert.Equal(LobbyProtocol.CreationFailed, service.CreateHuman("alice", "Third", classId: 88).Code);
+        Assert.Throws<InvalidDataException>(() => Service(create: new CharacterCreateOptions
+        {
+            AllowedClasses = new HashSet<int> { 1 }
+        }));
     }
 
     [Fact]
@@ -197,7 +229,7 @@ public class CharacterCreationTests
         Assert.Equal(6, created.HairStyle);
         Assert.Equal(2, created.HairColor);
         Assert.Equal(1, created.Face);
-        Assert.Equal(ClassSpawn.Preview(HumanClasses.Fighter).X, created.X);
+        Assert.Equal(ClassTemplates.Preview(HumanClasses.Fighter).X, created.X);
 
         var roster = await link.Expect<CharacterListMsg>(MsgType.CharacterList);
         var row = Assert.Single(roster.Characters);

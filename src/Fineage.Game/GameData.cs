@@ -3,9 +3,8 @@ using System.Text.Json;
 namespace Fineage.Game;
 
 /// <summary>
-/// Loads hand-written item templates and starter kits from <c>data/items.json</c>
-/// and <c>data/starter-kits.json</c>. Ids and stats were checked against L2J Mobius
-/// Interlude; the JSON is original data, not a copy of Mobius XML.
+/// Loads item templates, starter kits, and Interlude class templates from <c>data/</c>.
+/// Ids and stats were checked against L2J Mobius Interlude; the JSON is original data, not a copy of Mobius XML.
 /// </summary>
 public sealed class GameData
 {
@@ -20,15 +19,19 @@ public sealed class GameData
         AllowTrailingCommas = true
     };
 
-    GameData(ItemCatalog items, StarterKits starterKits)
+    GameData(ItemCatalog items, StarterKits starterKits, ClassCatalog? classes)
     {
         Items = items;
         StarterKits = starterKits;
+        Classes = classes;
     }
 
     public ItemCatalog Items { get; }
 
     public StarterKits StarterKits { get; }
+
+    /// <summary>Null when the catalog was built in memory for an item test.</summary>
+    public ClassCatalog? Classes { get; }
 
     public static GameData Load(string dataDirectory)
     {
@@ -38,7 +41,8 @@ public sealed class GameData
 
         var items = ReadItems(Path.Combine(dataDirectory, ItemsFileName));
         var kits = ReadKits(Path.Combine(dataDirectory, StarterKitsFileName), items);
-        return new GameData(items, kits);
+        var classes = ClassCatalog.Load(dataDirectory);
+        return new GameData(items, kits, classes);
     }
 
     public static GameData LoadDefault()
@@ -48,7 +52,7 @@ public sealed class GameData
         if (directory == null)
         {
             throw new DirectoryNotFoundException(
-                "Could not find data/items.json and data/starter-kits.json. Pass the data directory to GameData.Load.");
+                "Could not find data/items.json, data/starter-kits.json, and the class catalogs. Pass the data directory to GameData.Load.");
         }
 
         return Load(directory);
@@ -62,7 +66,10 @@ public sealed class GameData
         {
             var data = Path.Combine(dir.FullName, "data");
             if (File.Exists(Path.Combine(data, ItemsFileName)) &&
-                File.Exists(Path.Combine(data, StarterKitsFileName)))
+                File.Exists(Path.Combine(data, StarterKitsFileName)) &&
+                File.Exists(Path.Combine(data, ClassCatalog.ClassesFileName)) &&
+                File.Exists(Path.Combine(data, ClassCatalog.ExperienceFileName)) &&
+                File.Exists(Path.Combine(data, ClassCatalog.StatBonusesFileName)))
                 return data;
             dir = dir.Parent;
         }
@@ -75,7 +82,7 @@ public sealed class GameData
     {
         ArgumentNullException.ThrowIfNull(items);
         ArgumentNullException.ThrowIfNull(starterKits);
-        return new GameData(items, starterKits);
+        return new GameData(items, starterKits, classes: null);
     }
 
     public PlayerInventory CreateStarterInventory(int classId, int firstObjectId = PlayerInventory.FirstObjectId) =>

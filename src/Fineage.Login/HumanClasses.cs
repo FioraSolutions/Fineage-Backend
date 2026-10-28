@@ -1,6 +1,6 @@
 namespace Fineage.Login;
 
-/// <summary>Interlude base classes this login MVP will create. One sex (male).</summary>
+/// <summary>Interlude race and class ids, plus the CLI names for the two human base classes.</summary>
 public static class HumanClasses
 {
     public const int RaceHuman = 0;
