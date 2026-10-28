@@ -54,6 +54,28 @@ public sealed class ZoneV2WireBoundaryTests
     }
 
     [Fact]
+    public async Task MoveTo_on_zone_pipeline_unreadable_body_returns_bad_request()
+    {
+        var tokens = HandoffTokens.FromEnvironment();
+        var server = new ZoneServer(tokens, new ZoneWorld());
+        await using var host = await PipelineZoneHost.StartAsync(server);
+
+        using var client = new TcpClient();
+        await client.ConnectAsync(IPAddress.Loopback, host.Port);
+        await using var stream = client.GetStream();
+
+        await FrameIO.SendAsync(stream, (ushort)MsgType.Hello, MessagePackSerializer.Serialize(new HelloMsg()));
+        await ReadAsync(stream, MsgType.HelloAck);
+        await FrameIO.SendAsync(stream, (ushort)MsgType.MoveTo, [0xC0]);
+
+        var frame = await FrameIO.ReadAsync(stream);
+        Assert.NotNull(frame);
+        Assert.Equal((ushort)MsgType.Error, frame!.Value.Type);
+        var err = MessagePackSerializer.Deserialize<ErrorMsg>(frame.Value.Body);
+        Assert.Equal("bad_request", err.Code);
+    }
+
+    [Fact]
     public async Task MoveTo_on_zone_port_without_auth_returns_world()
     {
         var tokens = HandoffTokens.FromEnvironment();
