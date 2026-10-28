@@ -15,7 +15,7 @@ public sealed class ZoneServer
     int _nextSession = 1;
 
     public ZoneServer(HandoffTokens tokens, Func<DateTimeOffset>? clock = null)
-        : this(tokens, new ZoneWorld(), clock)
+        : this(tokens, ZoneAoiSettings.CreateWorld(), clock)
     {
     }
 
