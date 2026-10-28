@@ -23,6 +23,8 @@ data/*
 !data/drops/**
 !data/html/
 !data/html/**
+!data/buylists.json
+!data/multisell.json
 # Prefer converters → JSON; do not commit the full Mobius datapack (~1486+ XML files).
 data/mobius-xml/
 ref/mobius-ct0-interlude/

@@ -1,4 +1,5 @@
 using Fineage.Protocol;
+using Fineage.Zone.Shops;
 using Fineage.Zone.Spawns;
 
 namespace Fineage.Zone.World;
@@ -14,6 +15,7 @@ public sealed partial class ZoneWorld
     sealed class SpawnSlotState
     {
         public required SpawnNpcDefinition Definition { get; init; }
+        public required string MapId { get; init; }
         public DateTimeOffset? RespawnAt { get; set; }
     }
 
@@ -40,17 +42,18 @@ public sealed partial class ZoneWorld
             {
                 if (_spawnSlots.ContainsKey(def.ObjectId))
                     throw new InvalidOperationException($"Duplicate spawn object id {def.ObjectId}.");
-                _spawnSlots.Add(def.ObjectId, new SpawnSlotState { Definition = def });
-                MaterializeSpawn(def);
+                _spawnSlots.Add(def.ObjectId, new SpawnSlotState { Definition = def, MapId = map.MapId });
+                MaterializeSpawn(def, map.MapId);
             }
         }
     }
 
-    void MaterializeSpawn(SpawnNpcDefinition def)
+    void MaterializeSpawn(SpawnNpcDefinition def, string mapId)
     {
         if (_byId.ContainsKey(def.ObjectId))
             return;
 
+        var tax = MerchantTowns.For(mapId);
         var entity = new ZoneEntity
         {
             ObjectId = def.ObjectId,
@@ -67,7 +70,9 @@ public sealed partial class ZoneWorld
             MaxHp = def.MaxHp,
             CurHp = def.MaxHp,
             RunSpeed = def.RunSpeed,
-            WalkSpeed = def.WalkSpeed
+            WalkSpeed = def.WalkSpeed,
+            MerchantCastleId = tax.CastleId,
+            MerchantBaseTaxPercent = tax.BaseTaxPercent
         };
         _byId.Add(entity.ObjectId, entity);
         _aoi.Enter(entity.ObjectId, entity.X, entity.Y);
@@ -99,7 +104,7 @@ public sealed partial class ZoneWorld
                 continue;
             }
 
-            MaterializeSpawn(slot.Definition);
+            MaterializeSpawn(slot.Definition, slot.MapId);
             slot.RespawnAt = null;
             if (_byId.TryGetValue(slot.Definition.ObjectId, out var npc))
                 FanoutNewNpc(npc, outbound);

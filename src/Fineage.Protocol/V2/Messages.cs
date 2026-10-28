@@ -830,3 +830,137 @@ public sealed partial class BlessingResultMsg
     [Key(1)] public int SkillId { get; set; }
     [Key(2)] public bool Accepted { get; set; }
 }
+
+/// <summary>Same keys as <see cref="Fineage.Protocol.RequestBuyItemMsg"/>.</summary>
+[MessagePackObject]
+public sealed partial class RequestBuyItemMsg
+{
+    [Key(0)] public int NpcObjectId { get; set; }
+    [Key(1)] public int ListId { get; set; }
+    [Key(2)] public ShopCountMsg[] Items { get; set; } = [];
+}
+
+/// <summary>Same keys as <see cref="Fineage.Protocol.ShopCountMsg"/>.</summary>
+[MessagePackObject]
+public sealed partial class ShopCountMsg
+{
+    [Key(0)] public int ItemId { get; set; }
+    [Key(1)] public int Count { get; set; }
+}
+
+/// <summary>Same keys as <see cref="Fineage.Protocol.RequestSellItemMsg"/>.</summary>
+[MessagePackObject]
+public sealed partial class RequestSellItemMsg
+{
+    [Key(0)] public int NpcObjectId { get; set; }
+    [Key(1)] public ShopObjectCountMsg[] Items { get; set; } = [];
+}
+
+/// <summary>Same keys as <see cref="Fineage.Protocol.ShopObjectCountMsg"/>.</summary>
+[MessagePackObject]
+public sealed partial class ShopObjectCountMsg
+{
+    [Key(0)] public int ObjectId { get; set; }
+    [Key(1)] public int Count { get; set; }
+}
+
+/// <summary>Same keys as <see cref="Fineage.Protocol.RequestMultiSellChooseMsg"/>.</summary>
+[MessagePackObject]
+public sealed partial class RequestMultiSellChooseMsg
+{
+    [Key(0)] public int NpcObjectId { get; set; }
+    [Key(1)] public int ListId { get; set; }
+    [Key(2)] public int EntryId { get; set; }
+    [Key(3)] public int Amount { get; set; }
+}
+
+/// <summary>Same keys as <see cref="Fineage.Protocol.RequestPreviewItemMsg"/>.</summary>
+[MessagePackObject]
+public sealed partial class RequestPreviewItemMsg
+{
+    [Key(0)] public int NpcObjectId { get; set; }
+    [Key(1)] public int ListId { get; set; }
+    [Key(2)] public int ItemId { get; set; }
+}
+
+/// <summary>Same keys as <see cref="Fineage.Protocol.BuyListMsg"/>.</summary>
+[MessagePackObject]
+public sealed partial class BuyListMsg
+{
+    [Key(0)] public int NpcObjectId { get; set; }
+    [Key(1)] public int ListId { get; set; }
+    [Key(2)] public int BaseTaxPercent { get; set; }
+    [Key(3)] public int CastleTaxPercent { get; set; }
+    [Key(4)] public BuyListItemMsg[] Items { get; set; } = [];
+}
+
+/// <summary>Same keys as <see cref="Fineage.Protocol.BuyListItemMsg"/>.</summary>
+[MessagePackObject]
+public sealed partial class BuyListItemMsg
+{
+    [Key(0)] public int ItemId { get; set; }
+    [Key(1)] public int Price { get; set; }
+    [Key(2)] public int Count { get; set; } = -1;
+}
+
+/// <summary>Same keys as <see cref="Fineage.Protocol.SellListMsg"/>.</summary>
+[MessagePackObject]
+public sealed partial class SellListMsg
+{
+    [Key(0)] public int NpcObjectId { get; set; }
+    [Key(1)] public SellListItemMsg[] Items { get; set; } = [];
+}
+
+/// <summary>Same keys as <see cref="Fineage.Protocol.SellListItemMsg"/>.</summary>
+[MessagePackObject]
+public sealed partial class SellListItemMsg
+{
+    [Key(0)] public int ObjectId { get; set; }
+    [Key(1)] public int ItemId { get; set; }
+    [Key(2)] public int Count { get; set; }
+    [Key(3)] public int Price { get; set; }
+    [Key(4)] public int EnchantLevel { get; set; }
+}
+
+/// <summary>Same keys as <see cref="Fineage.Protocol.MultiSellListMsg"/>.</summary>
+[MessagePackObject]
+public sealed partial class MultiSellListMsg
+{
+    [Key(0)] public int NpcObjectId { get; set; }
+    [Key(1)] public int ListId { get; set; }
+    [Key(2)] public bool MaintainEnchantment { get; set; }
+    [Key(3)] public bool InventoryOnly { get; set; }
+    [Key(4)] public int CastleTaxPercent { get; set; }
+    [Key(5)] public MultiSellEntryMsg[] Entries { get; set; } = [];
+}
+
+/// <summary>Same keys as <see cref="Fineage.Protocol.MultiSellEntryMsg"/>.</summary>
+[MessagePackObject]
+public sealed partial class MultiSellEntryMsg
+{
+    [Key(0)] public int EntryId { get; set; }
+    [Key(1)] public MultiSellPartMsg[] Ingredients { get; set; } = [];
+    [Key(2)] public MultiSellPartMsg[] Products { get; set; } = [];
+}
+
+/// <summary>Same keys as <see cref="Fineage.Protocol.MultiSellPartMsg"/>.</summary>
+[MessagePackObject]
+public sealed partial class MultiSellPartMsg
+{
+    [Key(0)] public int ItemId { get; set; }
+    [Key(1)] public int Count { get; set; }
+    [Key(2)] public int EnchantLevel { get; set; }
+}
+
+/// <summary>Same keys as <see cref="Fineage.Protocol.ShopBalanceMsg"/>.</summary>
+[MessagePackObject]
+public sealed partial class ShopBalanceMsg
+{
+    [Key(0)] public int Adena { get; set; }
+    [Key(1)] public int Weight { get; set; }
+    [Key(2)] public int MaxWeight { get; set; }
+    [Key(3)] public int Slots { get; set; }
+    [Key(4)] public int MaxSlots { get; set; }
+    [Key(5)] public int BaseTaxPercent { get; set; }
+    [Key(6)] public int CastleTaxPercent { get; set; }
+}

@@ -1461,3 +1461,140 @@ public sealed class BlessingResultMsg
     [Key(1)] public int SkillId { get; set; }
     [Key(2)] public bool Accepted { get; set; }
 }
+
+/// <summary>Opcode <see cref="MsgType.RequestBuyItem"/> (96). Counts are template counts, not object ids.</summary>
+[MessagePackObject]
+public sealed class RequestBuyItemMsg
+{
+    [Key(0)] public int NpcObjectId { get; set; }
+    [Key(1)] public int ListId { get; set; }
+    [Key(2)] public ShopCountMsg[] Items { get; set; } = [];
+}
+
+/// <summary>One template id and count on <see cref="RequestBuyItemMsg"/>.</summary>
+[MessagePackObject]
+public sealed class ShopCountMsg
+{
+    [Key(0)] public int ItemId { get; set; }
+    [Key(1)] public int Count { get; set; }
+}
+
+/// <summary>Opcode <see cref="MsgType.RequestSellItem"/> (97). Counts come off one object id.</summary>
+[MessagePackObject]
+public sealed class RequestSellItemMsg
+{
+    [Key(0)] public int NpcObjectId { get; set; }
+    [Key(1)] public ShopObjectCountMsg[] Items { get; set; } = [];
+}
+
+/// <summary>One bag object and count on <see cref="RequestSellItemMsg"/>.</summary>
+[MessagePackObject]
+public sealed class ShopObjectCountMsg
+{
+    [Key(0)] public int ObjectId { get; set; }
+    [Key(1)] public int Count { get; set; }
+}
+
+/// <summary>
+/// Opcode <see cref="MsgType.RequestMultiSellChoose"/> (98).
+/// <see cref="EntryId"/> is the prepared id from <see cref="MultiSellEntryMsg"/>, not the template id.
+/// </summary>
+[MessagePackObject]
+public sealed class RequestMultiSellChooseMsg
+{
+    [Key(0)] public int NpcObjectId { get; set; }
+    [Key(1)] public int ListId { get; set; }
+    [Key(2)] public int EntryId { get; set; }
+    [Key(3)] public int Amount { get; set; }
+}
+
+/// <summary>Opcode <see cref="MsgType.RequestPreviewItem"/> (99). Wear stays stubbed.</summary>
+[MessagePackObject]
+public sealed class RequestPreviewItemMsg
+{
+    [Key(0)] public int NpcObjectId { get; set; }
+    [Key(1)] public int ListId { get; set; }
+    [Key(2)] public int ItemId { get; set; }
+}
+
+/// <summary>Opcode <see cref="MsgType.BuyList"/> (1095). <see cref="Price"/> is the taxed unit price.</summary>
+[MessagePackObject]
+public sealed class BuyListMsg
+{
+    [Key(0)] public int NpcObjectId { get; set; }
+    [Key(1)] public int ListId { get; set; }
+    [Key(2)] public int BaseTaxPercent { get; set; }
+    [Key(3)] public int CastleTaxPercent { get; set; }
+    [Key(4)] public BuyListItemMsg[] Items { get; set; } = [];
+}
+
+/// <summary>One buylist row. <see cref="Count"/> below 0 means the stock is not limited.</summary>
+[MessagePackObject]
+public sealed class BuyListItemMsg
+{
+    [Key(0)] public int ItemId { get; set; }
+    [Key(1)] public int Price { get; set; }
+    [Key(2)] public int Count { get; set; } = -1;
+}
+
+/// <summary>Opcode <see cref="MsgType.SellList"/> (1096). Only unequipped items the merchant will buy.</summary>
+[MessagePackObject]
+public sealed class SellListMsg
+{
+    [Key(0)] public int NpcObjectId { get; set; }
+    [Key(1)] public SellListItemMsg[] Items { get; set; } = [];
+}
+
+/// <summary>One sellable stack. <see cref="Price"/> is the reference price divided by 2.</summary>
+[MessagePackObject]
+public sealed class SellListItemMsg
+{
+    [Key(0)] public int ObjectId { get; set; }
+    [Key(1)] public int ItemId { get; set; }
+    [Key(2)] public int Count { get; set; }
+    [Key(3)] public int Price { get; set; }
+    [Key(4)] public int EnchantLevel { get; set; }
+}
+
+/// <summary>Opcode <see cref="MsgType.MultiSellList"/> (1097).</summary>
+[MessagePackObject]
+public sealed class MultiSellListMsg
+{
+    [Key(0)] public int NpcObjectId { get; set; }
+    [Key(1)] public int ListId { get; set; }
+    [Key(2)] public bool MaintainEnchantment { get; set; }
+    [Key(3)] public bool InventoryOnly { get; set; }
+    [Key(4)] public int CastleTaxPercent { get; set; }
+    [Key(5)] public MultiSellEntryMsg[] Entries { get; set; } = [];
+}
+
+/// <summary>One prepared row. <see cref="EntryId"/> is what <see cref="RequestMultiSellChooseMsg"/> sends back.</summary>
+[MessagePackObject]
+public sealed class MultiSellEntryMsg
+{
+    [Key(0)] public int EntryId { get; set; }
+    [Key(1)] public MultiSellPartMsg[] Ingredients { get; set; } = [];
+    [Key(2)] public MultiSellPartMsg[] Products { get; set; } = [];
+}
+
+/// <summary>One ingredient or product. <see cref="EnchantLevel"/> is 0 when the row does not keep enchant.</summary>
+[MessagePackObject]
+public sealed class MultiSellPartMsg
+{
+    [Key(0)] public int ItemId { get; set; }
+    [Key(1)] public int Count { get; set; }
+    [Key(2)] public int EnchantLevel { get; set; }
+}
+
+/// <summary>Opcode <see cref="MsgType.ShopBalance"/> (1098). Castle tax is 0 when that castle has no owner.</summary>
+[MessagePackObject]
+public sealed class ShopBalanceMsg
+{
+    [Key(0)] public int Adena { get; set; }
+    [Key(1)] public int Weight { get; set; }
+    [Key(2)] public int MaxWeight { get; set; }
+    [Key(3)] public int Slots { get; set; }
+    [Key(4)] public int MaxSlots { get; set; }
+    [Key(5)] public int BaseTaxPercent { get; set; }
+    [Key(6)] public int CastleTaxPercent { get; set; }
+}

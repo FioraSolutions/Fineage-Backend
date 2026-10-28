@@ -69,6 +69,12 @@ public sealed partial class ZoneWorld
             return Talk(session, npc.ObjectId, reply.QuestId, reply.QuestEvent, toSelf, out _);
         }
 
+        if (reply.BuyListId is int buyListId)
+            return OpenBuyList(session, player, npc, buyListId, toSelf);
+        if (reply.OpenSell)
+            return OpenSellList(session, player, npc, toSelf);
+        if (reply.MultiSellListId is int multiListId)
+            return OpenMultiSell(session, player, npc, multiListId, reply.MultiSellInventoryOnly, toSelf);
         if (reply.Service != null)
             return ApplyNpcService(session, player, npc, reply, toSelf, toOthers);
 

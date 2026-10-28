@@ -60,7 +60,8 @@ public sealed class BypassRegistry
         registry.Register(new ChatBypassHandler(html));
         registry.Register(new LinkBypassHandler(html));
         registry.Register(new QuestBypassHandler());
-        registry.Register(new StubBypassHandler("Shop", "Buy", "Sell", "Multisell", "exc_multisell", "Wear", "Exchange"));
+        registry.Register(new ShopBypassHandler());
+        registry.Register(new StubBypassHandler("Wear", "Wear"));
         registry.Register(new TeleportBypassHandler());
         registry.Register(new StubBypassHandler("Teleport", "showNoblesSelect"));
         registry.Register(new WarehouseBypassHandler());

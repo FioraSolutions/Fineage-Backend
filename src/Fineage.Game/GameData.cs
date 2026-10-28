@@ -166,6 +166,10 @@ public sealed class GameData
                 throw new InvalidDataException($"{path} item {row.Id} is a scroll but is not etc.");
             if (row.Enchantable && kind == ItemKind.Etc)
                 throw new InvalidDataException($"{path} item {row.Id} is etc and cannot be enchantable.");
+            if (row.Price < 0)
+                throw new InvalidDataException($"{path} item {row.Id} has a negative price.");
+            if (row.Weight < 0)
+                throw new InvalidDataException($"{path} item {row.Id} has a negative weight.");
 
             templates.Add(new ItemTemplate(
                 row.Id,
@@ -183,7 +187,10 @@ public sealed class GameData
                 equip,
                 row.CrystalCount,
                 row.Enchantable,
-                scroll));
+                scroll,
+                row.Price,
+                row.Weight,
+                row.Sellable ?? true));
         }
 
         try
@@ -432,6 +439,10 @@ public sealed class GameData
         public bool Enchantable { get; set; }
         public JsonElement Equip { get; set; }
         public JsonElement Scroll { get; set; }
+        public int Price { get; set; }
+        public int Weight { get; set; }
+        /// <summary>Null when the file omits the flag. Omitted means the item can be sold.</summary>
+        public bool? Sellable { get; set; }
     }
 
     sealed class KitFileDto
