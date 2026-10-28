@@ -29,6 +29,19 @@ public sealed class ZoneWireBoundaryTests
             MessagePackSerializer.Serialize(new Fineage.Protocol.V2.AuthTokenMsg { Account = "hero" }));
     }
 
+    [Fact]
+    public async Task RequestServerList_on_zone_port_returns_wrong_port()
+    {
+        await AssertWrongPortAsync((MsgType)10, []);
+    }
+
+    [Fact]
+    public async Task SelectServer_on_zone_port_returns_wrong_port()
+    {
+        await AssertWrongPortAsync((MsgType)11,
+            MessagePackSerializer.Serialize(new Fineage.Protocol.V2.SelectServerMsg { ServerId = 1 }));
+    }
+
     static async Task AssertWrongPortAsync(MsgType opcode, byte[] body)
     {
         var tokens = HandoffTokens.FromEnvironment();
