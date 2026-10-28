@@ -126,10 +126,18 @@ public sealed class ZoneServer
             }
             case MsgType.Auth:
             {
-                var auth = Decode<AuthMsg>(body);
-                if (auth == null)
+                if (session.Bound)
                 {
-                    await ErrorAsync(session, "bad_request", "Auth body was not readable.", ct).ConfigureAwait(false);
+                    ZoneLog.Info($"RX Auth rejected session={sessionId} reason=already_authenticated");
+                    await ErrorAsync(session, "already_authenticated",
+                        "This session already completed zone Auth.", ct).ConfigureAwait(false);
+                    break;
+                }
+
+                var auth = Decode<AuthMsg>(body);
+                if (auth == null || string.IsNullOrWhiteSpace(auth.Account))
+                {
+                    await ErrorAsync(session, "bad_request", "Auth account is required.", ct).ConfigureAwait(false);
                     break;
                 }
 
