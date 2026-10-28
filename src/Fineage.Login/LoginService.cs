@@ -37,19 +37,54 @@ public sealed class LoginService
             return LoginResult<string>.Fail("invalid_password", "Password must be 4-64 characters.");
 
         var (hash, salt, iterations) = PasswordHasher.Hash(password);
-        if (!_store.TryAddAccount(account.Trim(), hash, salt, iterations))
+        if (_store.TryAddAccount(account.Trim(), hash, salt, iterations, email: null) != AddAccountStatus.Created)
             return LoginResult<string>.Fail("account_exists", "That account is already registered.");
         if (!_store.TryGetCredential(account, out var cred))
             return LoginResult<string>.Fail("store", "Account was not stored.");
         return LoginResult<string>.Success(cred.AccountName);
     }
 
+    /// <summary>Landing HTTP register. Username and email are stored in canonical form.</summary>
+    public LoginResult<string> RegisterLanding(string? username, string? email, string? password)
+    {
+        if (LandingAuth.ValidateUsername(username, out string user) is { } userError)
+            return LoginResult<string>.Fail(userError, "Username was rejected.");
+        if (LandingAuth.ValidateEmail(email, out string mail) is { } mailError)
+            return LoginResult<string>.Fail(mailError, "Email was rejected.");
+        if (LandingAuth.RegisterPasswordError(password, user, mail) is { } passwordError)
+            return LoginResult<string>.Fail(passwordError, "Password was rejected.");
+
+        var (hash, salt, iterations) = PasswordHasher.Hash(password!);
+        var status = _store.TryAddAccount(user, hash, salt, iterations, mail);
+        return status switch
+        {
+            AddAccountStatus.Created => LoginResult<string>.Success(user),
+            AddAccountStatus.NameTaken => LoginResult<string>.Fail("username_taken", "That username is already registered."),
+            AddAccountStatus.EmailTaken => LoginResult<string>.Fail("email_taken", "That email is already registered."),
+            _ => LoginResult<string>.Fail("store", "Account was not stored.")
+        };
+    }
+
     public LoginResult<string> Login(string account, string password)
     {
-        if (!_store.TryGetCredential(account, out var cred) ||
-            !PasswordHasher.Verify(password, cred.PasswordHash, cred.PasswordSalt, cred.Iterations))
+        if (string.IsNullOrWhiteSpace(account))
+            return LoginResult<string>.Fail("invalid_credentials", "Unknown account or password.");
+
+        bool found = _store.TryGetCredential(account, out var cred) ||
+                     _store.TryGetCredentialByEmail(account, out cred);
+        if (!found || !PasswordHasher.Verify(password, cred.PasswordHash, cred.PasswordSalt, cred.Iterations))
             return LoginResult<string>.Fail("invalid_credentials", "Unknown account or password.");
         return LoginResult<string>.Success(cred.AccountName);
+    }
+
+    /// <summary>Landing HTTP login. The identifier is a username or an email address.</summary>
+    public LoginResult<string> LoginLanding(string? usernameOrEmail, string? password)
+    {
+        if (LandingAuth.LoginIdError(usernameOrEmail, out string id) is { } idError)
+            return LoginResult<string>.Fail(idError, "Username or email was rejected.");
+        if (LandingAuth.LoginPasswordError(password) is { } passwordError)
+            return LoginResult<string>.Fail(passwordError, "Password was rejected.");
+        return Login(id, password!);
     }
 
     public LoginResult<CharacterRecord> CreateHuman(string account, string name, int classId, int race = 0, int sex = 0)

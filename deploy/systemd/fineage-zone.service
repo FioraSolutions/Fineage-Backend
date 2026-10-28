@@ -1,0 +1,17 @@
+[Unit]
+Description=Fineage Zone (V2 TCP 9777, Talking Island)
+After=network-online.target fineage-login.service
+Wants=network-online.target
+
+[Service]
+Type=simple
+User=fineage
+Group=fineage
+WorkingDirectory=/var/lib/fineage
+EnvironmentFile=/etc/fineage.env
+ExecStart=/opt/fineage/zone/Fineage.Zone
+Restart=on-failure
+RestartSec=3
+
+[Install]
+WantedBy=multi-user.target

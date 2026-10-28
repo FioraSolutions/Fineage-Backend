@@ -22,19 +22,32 @@ public static class Cli
             return 1;
         }
 
-        if (rest.Count == 0)
+        string httpPortText = TakeOption(rest, "--http-port")
+            ?? Environment.GetEnvironmentVariable("FINEAGE_LOGIN_HTTP_PORT")
+            ?? "5080";
+        if (!int.TryParse(httpPortText, out int httpPort) || httpPort is < 1 or > 65535)
         {
-            try
-            {
-                await ListenAsync(storePath, port, output, error).ConfigureAwait(false);
-            }
-            catch (SocketException)
-            {
-                return 1;
-            }
-
-            return 0;
+            error.WriteLine("invalid --http-port");
+            return 1;
         }
+
+        if (httpPort == port)
+        {
+            error.WriteLine("http port must differ from the TCP login port");
+            return 1;
+        }
+
+        string bindText = TakeOption(rest, "--bind")
+            ?? Environment.GetEnvironmentVariable("FINEAGE_BIND")
+            ?? BindAddress.Default;
+        if (!BindAddress.TryResolve(bindText, out var bindAddress, out string bindDisplay))
+        {
+            error.WriteLine("invalid --bind");
+            return 1;
+        }
+
+        if (rest.Count == 0)
+            return await ListenAsync(storePath, bindAddress, bindDisplay, port, httpPort, output, error).ConfigureAwait(false) ? 0 : 1;
 
         var tokens = HandoffTokens.FromEnvironment();
         var service = new LoginService(JsonAccountStore.Open(storePath), tokens);
@@ -131,28 +144,46 @@ public static class Cli
               Fineage.Login create <account> <password> <name> <fighter|mystic>
               Fineage.Login select <account> <password> <name>
               Fineage.Login play <account> <password> <name> <fighter|mystic>
-              Fineage.Login [--port 9106] [--store data/accounts.json]
+              Fineage.Login [--bind 0.0.0.0] [--port 9106] [--http-port 5080] [--store data/accounts.json]
             """);
         return 1;
     }
 
-    static async Task ListenAsync(string storePath, int port, TextWriter output, TextWriter error)
+    static async Task<bool> ListenAsync(
+        string storePath,
+        IPAddress bindAddress,
+        string bindDisplay,
+        int port,
+        int httpPort,
+        TextWriter output,
+        TextWriter error)
     {
         var service = new LoginService(JsonAccountStore.Open(storePath), HandoffTokens.FromEnvironment());
         var server = new LoginServer(service);
-        var listener = new TcpListener(IPAddress.Loopback, port);
+        var listener = new TcpListener(bindAddress, port);
+        LoginHttpHost? http = null;
         try
         {
             listener.Start();
+            http = await LoginHttpHost.StartAsync(service, bindAddress, httpPort).ConfigureAwait(false);
         }
-        catch (SocketException ex)
+        catch (Exception ex)
         {
-            error.WriteLine($"listen failed on 127.0.0.1:{port}: {ex.Message}");
-            throw;
+            listener.Stop();
+            if (http != null)
+                await http.DisposeAsync().ConfigureAwait(false);
+            error.WriteLine($"listen failed on {bindDisplay} tcp={port} http={httpPort}: {ex.Message}");
+            return false;
         }
 
-        output.WriteLine($"[LOGIN] listen 127.0.0.1:{port} store={storePath}");
-        output.WriteLine($"[LOGIN] zone handoff target {ZoneHandoff.Host}:{ZoneHandoff.Port}");
+        if (string.IsNullOrWhiteSpace(Environment.GetEnvironmentVariable("FINEAGE_HANDOFF_SECRET")) &&
+            !IPAddress.IsLoopback(bindAddress))
+        {
+            output.WriteLine("[LOGIN] warning: FINEAGE_HANDOFF_SECRET is unset. Set one shared secret on Login and Zone before exposing this bind.");
+        }
+
+        output.WriteLine($"[LOGIN] listen tcp={bindDisplay}:{port} http={http.BaseUrl} store={storePath}");
+        output.WriteLine($"[LOGIN] zone handoff target {ZoneHandoff.AdvertiseHost}:{ZoneHandoff.AdvertisePort}");
         while (true)
         {
             var client = await listener.AcceptTcpClientAsync().ConfigureAwait(false);
