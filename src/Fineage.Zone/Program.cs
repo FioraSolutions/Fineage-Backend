@@ -41,7 +41,11 @@ if (!BindAddress.TryResolve(bindText, out var bindAddress, out string bindDispla
     return;
 }
 
-var world = ZoneAoiSettings.CreateWorld();
+string storePath = Arg(args, "--store")
+    ?? Environment.GetEnvironmentVariable("FINEAGE_LOGIN_STORE")
+    ?? Path.Combine("data", "accounts.json");
+var accounts = JsonAccountStore.Open(storePath);
+var world = ZoneAoiSettings.CreateWorld(accounts: accounts);
 FineageTelemetry.OnlineCount = () => world.OnlinePlayerCount;
 var server = new ZoneServer(HandoffTokens.FromEnvironment(), world);
 string host = bindAddress.Equals(IPAddress.Any) ? "0.0.0.0" : bindDisplay;
@@ -56,7 +60,7 @@ if (string.IsNullOrWhiteSpace(Environment.GetEnvironmentVariable("FINEAGE_HANDOF
     Console.WriteLine("[ZONE] warning: FINEAGE_HANDOFF_SECRET is unset. It must match Login before clients hand off from another machine.");
 }
 
-Console.WriteLine($"[ZONE] listen {bindDisplay}:{port} Talking Island (maxConn={maxConnections} outboundQ={outboundQueue} msgPerSec={maxMsgPerSec} interestRange={interestRange})");
+Console.WriteLine($"[ZONE] listen {bindDisplay}:{port} store={storePath} Talking Island (maxConn={maxConnections} outboundQ={outboundQueue} msgPerSec={maxMsgPerSec} interestRange={interestRange})");
 Console.WriteLine("[ZONE] Auth.Password is the login handoff token. EnterWorld sends UserInfo, ItemList, then the village. Say is zone chat.");
 
 using var shutdown = new CancellationTokenSource();
