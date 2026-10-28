@@ -9,6 +9,7 @@ public sealed class LoginServer
 {
     readonly LoginService _service;
     readonly int _maxMessagesPerSecond;
+    readonly TimeSpan _selectMinInterval;
     readonly Func<DateTimeOffset> _clock;
 
     public LoginServer(LoginService service)
@@ -20,6 +21,7 @@ public sealed class LoginServer
     {
         _service = service;
         _maxMessagesPerSecond = options?.MaxMessagesPerSecond ?? LoginNetSettings.MaxMessagesPerSecond;
+        _selectMinInterval = options?.SelectMinInterval ?? TimeSpan.FromSeconds(1);
         _clock = clock ?? (() => DateTimeOffset.UtcNow);
     }
 
@@ -38,6 +40,7 @@ public sealed class LoginServer
         MessageRateGate? rate = rateLimit ? new MessageRateGate(_maxMessagesPerSecond) : null;
 
         string? account = null;
+        var lobby = new LobbyGate();
         try
         {
             while (!readCt.IsCancellationRequested)
@@ -57,7 +60,7 @@ public sealed class LoginServer
                     return;
                 }
 
-                account = await DispatchAsync(session, account, frame.Value.Type, frame.Value.Body, readCt).ConfigureAwait(false);
+                account = await DispatchAsync(session, account, lobby, frame.Value.Type, frame.Value.Body, readCt).ConfigureAwait(false);
             }
         }
         catch (OperationCanceledException) when (idleWatch != null && idleWatch.Token.IsCancellationRequested && !ct.IsCancellationRequested)
@@ -66,7 +69,7 @@ public sealed class LoginServer
         }
     }
 
-    async Task<string?> DispatchAsync(LoginSession session, string? account, ushort type, byte[] body, CancellationToken ct)
+    async Task<string?> DispatchAsync(LoginSession session, string? account, LobbyGate lobby, ushort type, byte[] body, CancellationToken ct)
     {
         if (LoginWireBoundary.IsZoneClientOpcode(type) && !TryGetV2Opcode(type, out _))
         {
@@ -82,7 +85,7 @@ public sealed class LoginServer
             {
                 Fineage.Protocol.V2.MsgType.ListCharacters => await HandleV2ListAsync(session, account, ct).ConfigureAwait(false),
                 Fineage.Protocol.V2.MsgType.CreateCharacter => await HandleV2CreateAsync(session, account, body, ct).ConfigureAwait(false),
-                Fineage.Protocol.V2.MsgType.EnterWorld => await HandleV2EnterWorldAsync(session, account, body, ct).ConfigureAwait(false),
+                Fineage.Protocol.V2.MsgType.EnterWorld => await HandleV2EnterWorldAsync(session, account, lobby, body, ct).ConfigureAwait(false),
                 Fineage.Protocol.V2.MsgType.RequestServerList => await HandleV2ServerListAsync(session, account, ct).ConfigureAwait(false),
                 Fineage.Protocol.V2.MsgType.SelectServer => await HandleV2SelectServerAsync(session, account, body, ct).ConfigureAwait(false),
                 Fineage.Protocol.V2.MsgType.AuthToken => await HandleV2AuthTokenStubAsync(session, ct).ConfigureAwait(false),
@@ -199,20 +202,13 @@ public sealed class LoginServer
                         return account;
                     }
 
-                    await session.SendAsync(MsgType.CharacterList, new CharacterListMsg
-                    {
-                        Characters = result.Value.Select(c => new CharacterSummaryMsg
-                        {
-                            CharacterId = c.Id,
-                            Name = c.Name,
-                            ClassId = c.ClassId,
-                            Race = c.Race,
-                            Sex = c.Sex,
-                            Level = c.Level
-                        }).ToArray()
-                    }, ct).ConfigureAwait(false);
+                    await SendRosterAsync(session, result.Value, ct).ConfigureAwait(false);
                     return account;
                 }
+            case MsgType.DeleteCharacter:
+                return await HandleDeleteAsync(session, account, body, ct).ConfigureAwait(false);
+            case MsgType.RestoreCharacter:
+                return await HandleRestoreAsync(session, account, body, ct).ConfigureAwait(false);
             case MsgType.SelectCharacter:
                 {
                     if (account == null)
@@ -228,14 +224,18 @@ public sealed class LoginServer
                         return account;
                     }
 
-                    LoginLog.Info($"RX SelectCharacter account={account} id={msg.CharacterId} name={msg.Name}");
-                    var result = _service.Select(account, msg.CharacterId, msg.Name);
+                    if (!TryBeginSelect(lobby))
+                        return account;
+
+                    LoginLog.Info($"RX SelectCharacter account={account} id={msg.CharacterId} name={msg.Name} slot={msg.Slot}");
+                    var result = _service.Select(account, msg.CharacterId, msg.Name, msg.Slot);
                     if (!result.Ok || result.Value == null)
                     {
                         await SendErrorAsync(session, result.Code, result.Message, ct).ConfigureAwait(false);
                         return account;
                     }
 
+                    lobby.Committed = true;
                     await SendHandoffAsync(session, result.Value, ct).ConfigureAwait(false);
                     return account;
                 }
@@ -295,7 +295,7 @@ public sealed class LoginServer
         }
 
         LoginLog.Info($"RX V2 ListCharacters account={account} count={result.Value.Count}");
-        byte[] body = MessagePackSerializer.Serialize(LoginV2Wire.ToRoster(result.Value));
+        byte[] body = MessagePackSerializer.Serialize(LoginV2Wire.ToRoster(result.Value, _clock()));
         await session.SendFrameAsync((ushort)V2.MsgType.CharacterRoster, body, ct).ConfigureAwait(false);
         return account;
     }
@@ -339,12 +339,14 @@ public sealed class LoginServer
             }
         }
 
-        response = LoginV2Wire.ToCreateResult(result.Value, slot);
+        var now = _clock();
+        int lastPlayedId = LoginService.LastPlayedId(listAfter.Ok && listAfter.Value != null ? listAfter.Value : []);
+        response = LoginV2Wire.ToCreateResult(result.Value, slot, now, lastPlayedId);
         await SendFrameV2Async(session, V2.MsgType.CreateCharacterResult, response, ct).ConfigureAwait(false);
         return account;
     }
 
-    async Task<string?> HandleV2EnterWorldAsync(LoginSession session, string? account, byte[] body, CancellationToken ct)
+    async Task<string?> HandleV2EnterWorldAsync(LoginSession session, string? account, LobbyGate lobby, byte[] body, CancellationToken ct)
     {
         if (account == null)
         {
@@ -366,6 +368,9 @@ public sealed class LoginServer
             return account;
         }
 
+        if (!TryBeginSelect(lobby))
+            return account;
+
         var character = roster.Value[enter.CharacterSlot];
         var ticket = _service.Select(account, character.Id);
         if (!ticket.Ok || ticket.Value == null)
@@ -374,6 +379,7 @@ public sealed class LoginServer
             return account;
         }
 
+        lobby.Committed = true;
         LoginLog.Info($"RX V2 EnterWorld account={account} slot={enter.CharacterSlot} character={character.Name}");
         await SendFrameV2Async(session, V2.MsgType.PlayToken, LoginV2Wire.ToPlayToken(ticket.Value), ct).ConfigureAwait(false);
         await SendHandoffAsync(session, ticket.Value, ct).ConfigureAwait(false);
@@ -429,6 +435,91 @@ public sealed class LoginServer
 
     static T? DecodeV2<T>(byte[] body) where T : class => Decode<T>(body);
 
+    Task SendRosterAsync(LoginSession session, IReadOnlyList<CharacterRecord> characters, CancellationToken ct) =>
+        session.SendAsync(MsgType.CharacterList, new CharacterListMsg
+        {
+            Characters = LobbyWire.ToSummaries(characters, _clock())
+        }, ct);
+
+    async Task<string?> HandleDeleteAsync(LoginSession session, string? account, byte[] body, CancellationToken ct)
+    {
+        if (account == null)
+        {
+            await SendErrorAsync(session, "auth_required", "Login required.", ct).ConfigureAwait(false);
+            return null;
+        }
+
+        var msg = Decode<DeleteCharacterMsg>(body);
+        if (msg == null)
+        {
+            await SendErrorAsync(session, "bad_request", "DeleteCharacter body was not readable.", ct).ConfigureAwait(false);
+            return account;
+        }
+
+        LoginLog.Info($"RX DeleteCharacter account={account} id={msg.CharacterId} slot={msg.Slot}");
+        var result = _service.Delete(account, msg.Slot, msg.CharacterId);
+        if (!result.Ok || result.Value == null)
+        {
+            await session.SendAsync(MsgType.CharacterDeleteFailed, new CharacterDeleteFailedMsg
+            {
+                Slot = msg.Slot,
+                CharacterId = msg.CharacterId,
+                Code = result.Code,
+                Message = result.Message
+            }, ct).ConfigureAwait(false);
+            return account;
+        }
+
+        await session.SendAsync(MsgType.CharacterDeleted, new CharacterDeletedMsg
+        {
+            Slot = result.Value.Slot,
+            CharacterId = result.Value.CharacterId,
+            HardDeleted = result.Value.HardDeleted
+        }, ct).ConfigureAwait(false);
+        await SendRosterAsync(session, result.Value.Roster, ct).ConfigureAwait(false);
+        return account;
+    }
+
+    async Task<string?> HandleRestoreAsync(LoginSession session, string? account, byte[] body, CancellationToken ct)
+    {
+        if (account == null)
+        {
+            await SendErrorAsync(session, "auth_required", "Login required.", ct).ConfigureAwait(false);
+            return null;
+        }
+
+        var msg = Decode<RestoreCharacterMsg>(body);
+        if (msg == null)
+        {
+            await SendErrorAsync(session, "bad_request", "RestoreCharacter body was not readable.", ct).ConfigureAwait(false);
+            return account;
+        }
+
+        LoginLog.Info($"RX RestoreCharacter account={account} id={msg.CharacterId} slot={msg.Slot}");
+        var result = _service.Restore(account, msg.Slot, msg.CharacterId);
+        if (!result.Ok || result.Value == null)
+        {
+            if (result.Code == LobbyProtocol.CharacterNotFound)
+                return account;
+            await SendErrorAsync(session, result.Code, result.Message, ct).ConfigureAwait(false);
+            return account;
+        }
+
+        await SendRosterAsync(session, result.Value, ct).ConfigureAwait(false);
+        return account;
+    }
+
+    bool TryBeginSelect(LobbyGate lobby)
+    {
+        if (lobby.Committed)
+            return false;
+        var now = _clock();
+        if (now < lobby.NextSelectAt)
+            return false;
+        lobby.NextSelectAt = now + _selectMinInterval;
+        return true;
+    }
+
     static Task SendErrorAsync(LoginSession session, string code, string message, CancellationToken ct)
     {
         LoginLog.Info($"TX Error code={code}");
@@ -453,4 +544,10 @@ public sealed class LoginServer
 static class LoginLog
 {
     public static void Info(string message) => Console.WriteLine($"[LOGIN] {message}");
+}
+
+sealed class LobbyGate
+{
+    public bool Committed { get; set; }
+    public DateTimeOffset NextSelectAt { get; set; } = DateTimeOffset.MinValue;
 }

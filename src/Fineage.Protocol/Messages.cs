@@ -94,6 +94,17 @@ public sealed class CharacterSummaryMsg
     [Key(3)] public int Race { get; set; }
     [Key(4)] public int Sex { get; set; }
     [Key(5)] public int Level { get; set; } = 1;
+    /// <summary>Index in creation order. Older clients ignore this key.</summary>
+    [Key(6)] public int Slot { get; set; }
+    [Key(7)] public int HairStyle { get; set; }
+    [Key(8)] public int HairColor { get; set; }
+    [Key(9)] public int Face { get; set; }
+    [Key(10)] public int X { get; set; }
+    [Key(11)] public int Y { get; set; }
+    [Key(12)] public int Z { get; set; }
+    /// <summary>Whole seconds until hard delete, or 0 when the character is not pending.</summary>
+    [Key(13)] public int DeleteSecondsLeft { get; set; }
+    [Key(14)] public bool IsLastPlayed { get; set; }
 }
 
 [MessagePackObject]
@@ -107,6 +118,45 @@ public sealed class SelectCharacterMsg
 {
     [Key(0)] public int CharacterId { get; set; }
     [Key(1)] public string Name { get; set; } = "";
+    /// <summary>Used when <see cref="CharacterId"/> is 0 and <see cref="Name"/> is empty. −1 means the client did not send a slot. Slot 0 is the first character.</summary>
+    [Key(2)] public int Slot { get; set; } = -1;
+}
+
+/// <summary>Opcode <see cref="MsgType.DeleteCharacter"/> (24). A positive <see cref="CharacterId"/> wins over <see cref="Slot"/>.</summary>
+[MessagePackObject]
+public sealed class DeleteCharacterMsg
+{
+    /// <summary>−1 when the client is deleting by id.</summary>
+    [Key(0)] public int Slot { get; set; } = -1;
+    /// <summary>0 when the client is deleting by slot.</summary>
+    [Key(1)] public int CharacterId { get; set; }
+}
+
+/// <summary>Opcode <see cref="MsgType.RestoreCharacter"/> (25). Same keys as <see cref="DeleteCharacterMsg"/>.</summary>
+[MessagePackObject]
+public sealed class RestoreCharacterMsg
+{
+    [Key(0)] public int Slot { get; set; } = -1;
+    [Key(1)] public int CharacterId { get; set; }
+}
+
+/// <summary>Opcode <see cref="MsgType.CharacterDeleted"/> (1025). A <see cref="CharacterListMsg"/> follows.</summary>
+[MessagePackObject]
+public sealed class CharacterDeletedMsg
+{
+    [Key(0)] public int Slot { get; set; }
+    [Key(1)] public int CharacterId { get; set; }
+    [Key(2)] public bool HardDeleted { get; set; }
+}
+
+/// <summary>Opcode <see cref="MsgType.CharacterDeleteFailed"/> (1026).</summary>
+[MessagePackObject]
+public sealed class CharacterDeleteFailedMsg
+{
+    [Key(0)] public int Slot { get; set; }
+    [Key(1)] public int CharacterId { get; set; }
+    [Key(2)] public string Code { get; set; } = "";
+    [Key(3)] public string Message { get; set; } = "";
 }
 
 /// <summary>

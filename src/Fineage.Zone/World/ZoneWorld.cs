@@ -225,7 +225,7 @@ public sealed partial class ZoneWorld
                  !ReferenceEquals(current.Session, session))
             Unlink(current.Session, toOthers);
 
-        var spawn = ClassSpawn.Pick(session.ClassId, _spawnRandom);
+        var spawn = SpawnFor(session);
         var inventory = LoadInventory(session);
         var entity = new ZoneEntity
         {
@@ -248,6 +248,7 @@ public sealed partial class ZoneWorld
         session.X = entity.X;
         session.Y = entity.Y;
         session.Z = entity.Z;
+        SavePresence(session, entity.X, entity.Y, entity.Z, touchAccess: true);
 
         toSelf.Add(Pack(session, MsgType.UserInfo, UserInfo(entity)));
         toSelf.Add(Pack(session, MsgType.ItemList, InventoryMessages.ItemList(inventory)));
@@ -375,6 +376,7 @@ public sealed partial class ZoneWorld
 
         if (entity.Inventory != null)
             SaveInventory(session, entity.Inventory);
+        SavePresence(session, entity.X, entity.Y, entity.Z, touchAccess: false);
 
         entity.Knownlist.Clear();
         _aoi.Leave(session.ObjectId);
@@ -385,6 +387,31 @@ public sealed partial class ZoneWorld
         foreach (var watcher in watchers)
             toOthers.Add(new Pending(watcher, MsgType.DeleteObject, body));
         return true;
+    }
+
+    ClassSpawn.Point SpawnFor(ZoneSession session)
+    {
+        if (_accounts != null)
+        {
+            var record = _accounts.FindById(session.Account, session.ObjectId);
+            if (record is { HasPosition: true })
+                return new ClassSpawn.Point(record.X, record.Y, record.Z);
+        }
+
+        return ClassSpawn.Pick(session.ClassId, _spawnRandom);
+    }
+
+    void SavePresence(ZoneSession session, int x, int y, int z, bool touchAccess)
+    {
+        if (_accounts == null)
+            return;
+        _accounts.TrySavePresence(
+            session.Account,
+            session.ObjectId,
+            x,
+            y,
+            z,
+            touchAccess ? DateTimeOffset.UtcNow : null);
     }
 
     PlayerInventory LoadInventory(ZoneSession session)

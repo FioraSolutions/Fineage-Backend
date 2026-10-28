@@ -141,13 +141,40 @@ public class ProtocolCompatTests
             (ushort)MsgType.CreateCharacter,
             (ushort)MsgType.ListCharacters,
             (ushort)MsgType.SelectCharacter,
+            (ushort)MsgType.DeleteCharacter,
+            (ushort)MsgType.RestoreCharacter,
             (ushort)MsgType.RegisterOk,
             (ushort)MsgType.CharacterCreated,
             (ushort)MsgType.CharacterList,
             (ushort)MsgType.Handoff,
-            (ushort)MsgType.LoginOk
+            (ushort)MsgType.LoginOk,
+            (ushort)MsgType.CharacterDeleted,
+            (ushort)MsgType.CharacterDeleteFailed
         ];
         Assert.All(login, op => Assert.DoesNotContain(op, zone));
+    }
+
+    [Fact]
+    public void LobbyOpcodes_DoNotCollideWithZoneOrInventory()
+    {
+        var lobby = LobbyProtocol.ClientToServer.Concat(LobbyProtocol.ServerToClient).ToArray();
+        Assert.Equal(lobby, LobbyProtocol.ClientToServer.Concat(LobbyProtocol.ServerToClient).Distinct().ToArray());
+        Assert.All(lobby, op => Assert.DoesNotContain(op, LobbyProtocol.ZoneAndInventory));
+
+        Assert.Equal(1005, (ushort)Fineage.Protocol.V2.MsgType.CharInfo);
+        Assert.Equal(1006, (ushort)Fineage.Protocol.V2.MsgType.NpcInfo);
+        Assert.Equal(1007, (ushort)Fineage.Protocol.V2.MsgType.DeleteObject);
+        Assert.Equal(1030, (ushort)Fineage.Protocol.V2.MsgType.CharacterRoster);
+        Assert.Equal(1031, (ushort)Fineage.Protocol.V2.MsgType.CreateCharacterResult);
+        Assert.Equal(1032, (ushort)Fineage.Protocol.V2.MsgType.EntityLeft);
+        Assert.Equal(1033, (ushort)Fineage.Protocol.V2.MsgType.ServerList);
+        Assert.Equal(1011, (ushort)Fineage.Protocol.V2.MsgType.PlayToken);
+        Assert.DoesNotContain((ushort)Fineage.Protocol.V2.MsgType.CharacterRoster, LobbyProtocol.ZoneAndInventory);
+        Assert.DoesNotContain((ushort)Fineage.Protocol.V2.MsgType.CreateCharacterResult, LobbyProtocol.ZoneAndInventory);
+        Assert.DoesNotContain((ushort)Fineage.Protocol.V2.MsgType.EntityLeft, LobbyProtocol.ZoneAndInventory);
+        Assert.DoesNotContain((ushort)Fineage.Protocol.V2.MsgType.ServerList, LobbyProtocol.ZoneAndInventory);
+        Assert.NotEqual((ushort)Fineage.Protocol.V2.MsgType.CharacterRoster, (ushort)Fineage.Protocol.V2.MsgType.CharInfo);
+        Assert.NotEqual((ushort)Fineage.Protocol.V2.MsgType.ServerList, (ushort)MsgType.StatusUpdate);
     }
 
     [Fact]

@@ -98,7 +98,7 @@ public class LoginServiceTests
         var alice = service.Register("alice", "secret1").Value!;
         var bob = service.Register("bob", "secret1").Value!;
         var created = service.CreateHuman(alice, "Aria", HumanClasses.Fighter).Value!;
-        Assert.Equal("not_found", service.Select(bob, created.Id).Code);
+        Assert.Equal(LobbyProtocol.CharacterNotFound, service.Select(bob, created.Id).Code);
         Assert.True(service.Select(alice, 0, "aria").Ok);
     }
 

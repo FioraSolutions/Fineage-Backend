@@ -5,9 +5,11 @@ namespace Fineage.Login;
 /// <summary>Maps account records to Unity V2 login wire shapes (separate from legacy 20+/1020+ opcodes).</summary>
 static class LoginV2Wire
 {
-    public static CharacterSummaryMsg ToSummary(CharacterRecord character, int slot)
+    public static CharacterSummaryMsg ToSummary(CharacterRecord character, int slot, DateTimeOffset now, int lastPlayedId)
     {
-        var start = Fineage.Protocol.ClassSpawn.Preview(character.ClassId);
+        var point = character.HasPosition
+            ? new Fineage.Protocol.ClassSpawn.Point(character.X, character.Y, character.Z)
+            : Fineage.Protocol.ClassSpawn.Preview(character.ClassId);
         return new CharacterSummaryMsg
         {
             Slot = slot,
@@ -17,25 +19,31 @@ static class LoginV2Wire
             Sex = character.Sex,
             ClassId = character.ClassId,
             Level = character.Level,
-            X = start.X,
-            Y = start.Y,
-            Z = start.Z
+            X = point.X,
+            Y = point.Y,
+            Z = point.Z,
+            HairStyle = character.HairStyle,
+            HairColor = character.HairColor,
+            Face = character.Face,
+            DeleteSecondsLeft = character.DeleteSecondsLeft(now),
+            IsLastPlayed = character.Id == lastPlayedId
         };
     }
 
-    public static CharacterRosterMsg ToRoster(IReadOnlyList<CharacterRecord> characters)
+    public static CharacterRosterMsg ToRoster(IReadOnlyList<CharacterRecord> characters, DateTimeOffset now)
     {
+        int lastPlayedId = LoginService.LastPlayedId(characters);
         var rows = new CharacterSummaryMsg[characters.Count];
         for (int i = 0; i < characters.Count; i++)
-            rows[i] = ToSummary(characters[i], i);
+            rows[i] = ToSummary(characters[i], i, now, lastPlayedId);
         return new CharacterRosterMsg { Characters = rows };
     }
 
-    public static CreateCharacterResultMsg ToCreateResult(CharacterRecord character, int slot) => new()
+    public static CreateCharacterResultMsg ToCreateResult(CharacterRecord character, int slot, DateTimeOffset now, int lastPlayedId) => new()
     {
         Ok = true,
         Reason = "",
-        Character = ToSummary(character, slot)
+        Character = ToSummary(character, slot, now, lastPlayedId)
     };
 
     public static CreateCharacterResultMsg CreateFailed(string code, string message) => new()
