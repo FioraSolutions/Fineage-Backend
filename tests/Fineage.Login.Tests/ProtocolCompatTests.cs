@@ -88,6 +88,8 @@ public class ProtocolCompatTests
         Assert.Equal((ushort)MsgType.UserInfo, (ushort)Fineage.Protocol.V2.MsgType.UserInfo);
         Assert.Equal((ushort)MsgType.AbnormalStatusUpdate, (ushort)Fineage.Protocol.V2.MsgType.AbnormalStatusUpdate);
         Assert.Equal((ushort)MsgType.SpawnItem, (ushort)Fineage.Protocol.V2.MsgType.SpawnItem);
+        Assert.Equal((ushort)MsgType.PartyInviteRequest, (ushort)Fineage.Protocol.V2.MsgType.PartyInviteRequest);
+        Assert.Equal((ushort)MsgType.PartyAskJoin, (ushort)Fineage.Protocol.V2.MsgType.PartyAskJoin);
         Assert.Equal(1099, (ushort)MsgType.Error);
         AssertUnique<MsgType>();
         AssertUnique<Fineage.Protocol.V2.MsgType>();
