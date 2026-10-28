@@ -49,6 +49,42 @@ public sealed class PipelineTelemetryTests
         Assert.True(framesOut >= 1, $"expected fineage.frames.out for login-test, got {framesOut}");
     }
 
+    [Fact]
+    public async Task Pipeline_hello_increments_frames_in()
+    {
+        long framesIn = 0;
+        using var listener = new MeterListener();
+        listener.InstrumentPublished = (instrument, meterListener) =>
+        {
+            if (instrument.Meter.Name == FineageTelemetry.MeterName && instrument.Name == "fineage.frames.in")
+                meterListener.EnableMeasurementEvents(instrument);
+        };
+        listener.SetMeasurementEventCallback<long>((_, measurement, tags, _) =>
+        {
+            foreach (KeyValuePair<string, object?> tag in tags)
+            {
+                if (tag.Key == "endpoint" && tag.Value?.ToString() == "login")
+                    Interlocked.Add(ref framesIn, measurement);
+            }
+        });
+        listener.Start();
+
+        var service = new LoginService(JsonAccountStore.InMemory(), HandoffTokens.FromEnvironment());
+        var server = new LoginServer(service);
+        await using var host = await PipelineLoginHost.StartAsync(server);
+
+        using var client = new TcpClient();
+        await client.ConnectAsync(IPAddress.Loopback, host.Port);
+        await using var stream = client.GetStream();
+        await FrameIO.SendAsync(stream, (ushort)ProtocolMsgType.Hello,
+            MessagePackSerializer.Serialize(new HelloMsg()));
+
+        var frame = await FrameIO.ReadAsync(stream);
+        Assert.NotNull(frame);
+        Assert.Equal((ushort)ProtocolMsgType.HelloAck, frame!.Value.Type);
+        Assert.True(framesIn >= 1, $"expected fineage.frames.in for login, got {framesIn}");
+    }
+
     sealed class PipelineLoginHost : IAsyncDisposable
     {
         readonly CancellationTokenSource _cts;
