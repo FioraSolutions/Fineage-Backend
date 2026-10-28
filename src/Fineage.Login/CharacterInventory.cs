@@ -11,7 +11,11 @@ public static class CharacterInventory
         for (int i = 0; i < rows.Length; i++)
         {
             var item = inventory.Items[i];
-            rows[i] = new StoredItem(item.ItemId, item.Count, item.EquippedSlot is { } slot ? (int)slot : -1);
+            rows[i] = new StoredItem(
+                item.ItemId,
+                item.Count,
+                item.EquippedSlot is { } slot ? (int)slot : -1,
+                item.EnchantLevel);
         }
 
         return rows;
@@ -26,7 +30,7 @@ public static class CharacterInventory
         var inventory = new PlayerInventory(catalog, ids);
         foreach (var row in items)
         {
-            var instance = inventory.Add(row.ItemId, row.Count);
+            var instance = inventory.Add(row.ItemId, row.Count, row.EnchantLevel);
             if (row.EquippedSlot >= 0 && instance.Template.Equippable)
                 inventory.Equip(instance);
         }
@@ -45,6 +49,8 @@ public static class CharacterInventory
                 throw new ArgumentOutOfRangeException(nameof(items), $"Item {item.ItemId} count must be at least 1.");
             if (item.EquippedSlot < -1 || item.EquippedSlot > (int)PaperdollSlot.Hair2)
                 throw new ArgumentOutOfRangeException(nameof(items), $"Item {item.ItemId} equipped slot {item.EquippedSlot} is outside -1..16.");
+            if (item.EnchantLevel < 0 || item.EnchantLevel > EnchantRules.AbsoluteMax)
+                throw new ArgumentOutOfRangeException(nameof(items), $"Item {item.ItemId} enchant {item.EnchantLevel} is outside 0..65535.");
         }
     }
 }

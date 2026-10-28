@@ -21,8 +21,12 @@ public enum AddAccountStatus
 
 public sealed record AccountCredential(string AccountName, string PasswordHash, string PasswordSalt, int Iterations);
 
-/// <summary>One saved stack. <see cref="EquippedSlot"/> is a paperdoll index, or -1 in the bag. Null <c>Items</c> on a character means the kit was never granted.</summary>
-public sealed record StoredItem(int ItemId, int Count, int EquippedSlot);
+/// <summary>
+/// One saved stack. <see cref="EquippedSlot"/> is a paperdoll index, or -1 in the bag.
+/// <see cref="EnchantLevel"/> is 0 for a stack and for an unenchanted piece. Older saves omit it and load as 0.
+/// Null <c>Items</c> on a character means the kit was never granted.
+/// </summary>
+public sealed record StoredItem(int ItemId, int Count, int EquippedSlot, int EnchantLevel = 0);
 
 public sealed record CharacterRecord(
     int Id,
@@ -763,7 +767,8 @@ public sealed class JsonAccountStore : IAccountStore
         {
             ItemId = item.ItemId,
             Count = item.Count,
-            EquippedSlot = item.EquippedSlot
+            EquippedSlot = item.EquippedSlot,
+            EnchantLevel = item.EnchantLevel
         }).ToList();
 
     static CharacterRecord ToRecord(string account, CharacterDto character) =>
@@ -777,7 +782,7 @@ public sealed class JsonAccountStore : IAccountStore
             character.Level,
             character.Items == null
                 ? null
-                : character.Items.Select(item => new StoredItem(item.ItemId, item.Count, item.EquippedSlot)).ToArray(),
+                : character.Items.Select(item => new StoredItem(item.ItemId, item.Count, item.EquippedSlot, item.EnchantLevel)).ToArray(),
             character.HairStyle,
             character.HairColor,
             character.Face,
@@ -876,5 +881,6 @@ public sealed class JsonAccountStore : IAccountStore
         public int ItemId { get; set; }
         public int Count { get; set; }
         public int EquippedSlot { get; set; } = -1;
+        public int EnchantLevel { get; set; }
     }
 }

@@ -19,6 +19,9 @@ public sealed class ItemInstance
 
     public int Count { get; internal set; }
 
+    /// <summary>Enchant level. 0 is an unenchanted piece. Stacks stay at 0.</summary>
+    public int EnchantLevel { get; internal set; }
+
     /// <summary>Paperdoll slot while worn. Null while the item is only in the bag.</summary>
     public PaperdollSlot? EquippedSlot { get; internal set; }
 
