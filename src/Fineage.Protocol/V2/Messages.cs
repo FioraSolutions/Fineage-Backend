@@ -237,3 +237,17 @@ public sealed partial class AbnormalEffectMsg
     [Key(1)] public int Value { get; set; }
     [Key(2)] public int DurationSeconds { get; set; }
 }
+
+/// <summary>Same keys as <see cref="Fineage.Protocol.SpawnItemMsg"/>; zone opcode <see cref="MsgType.SpawnItem"/>.</summary>
+[MessagePackObject]
+public sealed partial class SpawnItemMsg
+{
+    [Key(0)] public int ObjectId { get; set; }
+    [Key(1)] public int ItemId { get; set; }
+    [Key(2)] public int X { get; set; }
+    [Key(3)] public int Y { get; set; }
+    [Key(4)] public int Z { get; set; }
+    [Key(5)] public bool Stackable { get; set; }
+    [Key(6)] public int Count { get; set; } = 1;
+    [Key(7)] public int Unknown { get; set; }
+}

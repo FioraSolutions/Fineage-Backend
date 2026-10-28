@@ -56,6 +56,8 @@ public enum MsgType : ushort
     UserInfo = 1016,
     /// <summary>Active abnormal effects on a creature. Same value as <see cref="V2.MsgType.AbnormalStatusUpdate"/>.</summary>
     AbnormalStatusUpdate = 1017,
+    /// <summary>Ground item entered AOI. Keys match Interlude SpawnItem / client <c>SpawnItemDto</c>.</summary>
+    SpawnItem = 1018,
 
     // Login S → C. Canonical lobby set; see LobbyProtocol.
     RegisterOk = 1020,
