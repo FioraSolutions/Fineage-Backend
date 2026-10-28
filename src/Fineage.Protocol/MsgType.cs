@@ -14,6 +14,8 @@ public enum MsgType : ushort
     MoveTo = 4,
     SelectTarget = 5,
     AttackRequest = 6,
+    /// <summary>Dev/playtest buff toggle. Fan-out is <see cref="AbnormalStatusUpdate"/>.</summary>
+    BuffRequest = 12,
     /// <summary>Authoritative grant into the player's bag. Reply is <see cref="InventoryUpdate"/>.</summary>
     GrantItemRequest = 13,
     /// <summary>Keepalive from client. Server answers with <see cref="Pong"/>.</summary>
@@ -48,6 +50,8 @@ public enum MsgType : ushort
     InventoryUpdate = 1015,
     /// <summary>Own character, including paperdoll. Same value as <see cref="V2.MsgType.UserInfo"/>.</summary>
     UserInfo = 1016,
+    /// <summary>Active abnormal effects on a creature. Same value as <see cref="V2.MsgType.AbnormalStatusUpdate"/>.</summary>
+    AbnormalStatusUpdate = 1017,
 
     // Login S → C
     RegisterOk = 1020,

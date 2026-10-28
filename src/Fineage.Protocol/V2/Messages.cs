@@ -215,3 +215,20 @@ public sealed partial class CreatureSayMsg
     [Key(2)] public string Text { get; set; } = "";
     [Key(3)] public int ChatType { get; set; }
 }
+
+/// <summary>Same keys as <see cref="Fineage.Protocol.AbnormalStatusUpdateMsg"/>.</summary>
+[MessagePackObject]
+public sealed partial class AbnormalStatusUpdateMsg
+{
+    [Key(0)] public int ObjectId { get; set; }
+    [Key(1)] public AbnormalEffectMsg[] Effects { get; set; } = [];
+}
+
+/// <summary>Same keys as <see cref="Fineage.Protocol.AbnormalEffectMsg"/>.</summary>
+[MessagePackObject]
+public sealed partial class AbnormalEffectMsg
+{
+    [Key(0)] public int Id { get; set; }
+    [Key(1)] public int Value { get; set; }
+    [Key(2)] public int DurationSeconds { get; set; }
+}

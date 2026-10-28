@@ -270,6 +270,26 @@ public sealed class ZoneServer
                     ZoneLog.Info($"RX GrantItem session={sessionId} item={grant.ItemId} count={grant.Count}");
                 break;
             }
+            case MsgType.BuffRequest:
+            {
+                var buff = Decode<BuffRequestMsg>(body);
+                if (buff == null)
+                {
+                    await ErrorAsync(session, "bad_request", "BuffRequest body was not readable.", ct).ConfigureAwait(false);
+                    break;
+                }
+
+                string? code = await _world.TryBuffRequestAsync(session, buff, ct).ConfigureAwait(false);
+                if (code == "world")
+                    await ErrorAsync(session, "world", "EnterWorld first.", ct).ConfigureAwait(false);
+                else if (code == "target")
+                    await ErrorAsync(session, "target", "Invalid buff target.", ct).ConfigureAwait(false);
+                else if (code != null)
+                    await ErrorAsync(session, "bad_request", "Buff request was rejected.", ct).ConfigureAwait(false);
+                else
+                    ZoneLog.Info($"RX BuffRequest session={sessionId} target={buff.TargetObjectId} effect={buff.EffectId} remove={buff.Remove}");
+                break;
+            }
             default:
                 ZoneLog.Info($"RX unknown type={type} session={sessionId}");
                 await ErrorAsync(session, "unknown", $"msgType={type}", ct).ConfigureAwait(false);

@@ -384,3 +384,31 @@ public sealed class GrantItemRequestMsg
     [Key(0)] public int ItemId { get; set; }
     [Key(1)] public int Count { get; set; } = 1;
 }
+
+/// <summary>One row of <see cref="AbnormalStatusUpdateMsg"/>. Keys match client <c>EffectHolder</c>.</summary>
+[MessagePackObject]
+public sealed class AbnormalEffectMsg
+{
+    [Key(0)] public int Id { get; set; }
+    [Key(1)] public int Value { get; set; }
+    [Key(2)] public int DurationSeconds { get; set; }
+}
+
+/// <summary>Opcode <see cref="MsgType.AbnormalStatusUpdate"/> (1017). Full effect list for one object.</summary>
+[MessagePackObject]
+public sealed class AbnormalStatusUpdateMsg
+{
+    [Key(0)] public int ObjectId { get; set; }
+    [Key(1)] public AbnormalEffectMsg[] Effects { get; set; } = [];
+}
+
+/// <summary>Opcode <see cref="MsgType.BuffRequest"/> (12). Playtest toggle until real skills land.</summary>
+[MessagePackObject]
+public sealed class BuffRequestMsg
+{
+    /// <summary>0 means the requesting player's object id.</summary>
+    [Key(0)] public int TargetObjectId { get; set; }
+    [Key(1)] public int EffectId { get; set; }
+    /// <summary>When true, removes <see cref="EffectId"/> or clears all effects when zero.</summary>
+    [Key(2)] public bool Remove { get; set; }
+}

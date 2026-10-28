@@ -189,6 +189,58 @@ public static class ZoneMultiplayerAcceptance
         observer.ExpectQuiet();
     }
 
+    public static async Task RunBuffSharedAsync()
+    {
+        var tokens = new HandoffTokens(HandoffTokens.DefaultSecret);
+        var login = new LoginService(JsonAccountStore.InMemory(), tokens);
+        var caster = Play(login, "buff1", "Windy", HumanClasses.Fighter);
+        var observer = Play(login, "buff2", "Looker", HumanClasses.Mystic);
+
+        var world = new ZoneWorld();
+        await using var zone = ZoneHost.Start(tokens, world);
+        await using var left = await ZonePeer.ConnectAsync(zone.Port).ConfigureAwait(false);
+        await using var right = await ZonePeer.ConnectAsync(zone.Port).ConfigureAwait(false);
+
+        await left.AuthAsync(caster).ConfigureAwait(false);
+        await right.AuthAsync(observer).ConfigureAwait(false);
+        await left.EnterAsync(expectOthers: 0).ConfigureAwait(false);
+        await right.EnterAsync(caster, observer).ConfigureAwait(false);
+        _ = await left.ExpectAsync<CharInfoMsg>(MsgType.CharInfo).ConfigureAwait(false);
+
+        await left.SendAsync(MsgType.BuffRequest, new BuffRequestMsg
+        {
+            EffectId = ZoneBuffs.SampleWindWalk
+        }).ConfigureAwait(false);
+
+        var selfUpdate = await left.ExpectAsync<AbnormalStatusUpdateMsg>(MsgType.AbnormalStatusUpdate).ConfigureAwait(false);
+        var peerUpdate = await right.ExpectAsync<AbnormalStatusUpdateMsg>(MsgType.AbnormalStatusUpdate).ConfigureAwait(false);
+        ExpectAbnormal(selfUpdate, caster.CharacterId, ZoneBuffs.SampleWindWalk);
+        ExpectAbnormal(peerUpdate, caster.CharacterId, ZoneBuffs.SampleWindWalk);
+
+        await left.SendAsync(MsgType.BuffRequest, new BuffRequestMsg { Remove = true }).ConfigureAwait(false);
+        var clearedSelf = await left.ExpectAsync<AbnormalStatusUpdateMsg>(MsgType.AbnormalStatusUpdate).ConfigureAwait(false);
+        var clearedPeer = await right.ExpectAsync<AbnormalStatusUpdateMsg>(MsgType.AbnormalStatusUpdate).ConfigureAwait(false);
+        if (clearedSelf.ObjectId != caster.CharacterId || clearedSelf.Effects.Length != 0)
+            throw new InvalidOperationException("self clear mismatch");
+        if (clearedPeer.ObjectId != caster.CharacterId || clearedPeer.Effects.Length != 0)
+            throw new InvalidOperationException("peer clear mismatch");
+
+        left.ExpectQuiet();
+        right.ExpectQuiet();
+    }
+
+    static void ExpectAbnormal(AbnormalStatusUpdateMsg update, int objectId, int effectId)
+    {
+        if (update.ObjectId != objectId)
+            throw new InvalidOperationException($"abnormal object={update.ObjectId} expected={objectId}");
+        if (update.Effects.Length != 1)
+            throw new InvalidOperationException($"expected one effect, got {update.Effects.Length}");
+        var effect = update.Effects[0];
+        if (effect.Id != effectId || effect.Value != ZoneBuffs.SampleEffectValue ||
+            effect.DurationSeconds != ZoneBuffs.SampleDurationSeconds)
+            throw new InvalidOperationException($"effect id={effect.Id} value={effect.Value} dur={effect.DurationSeconds}");
+    }
+
     static void ExpectCombat(int targetId, int attackerId, int expectedCurHp, AttackMsg attack, StatusUpdateMsg status)
     {
         if (attack.AttackerObjectId != attackerId || attack.TargetObjectId != targetId ||
