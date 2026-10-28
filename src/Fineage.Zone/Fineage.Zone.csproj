@@ -17,6 +17,7 @@
     <Content Include="..\..\data\classes.json" Link="data\classes.json" CopyToOutputDirectory="PreserveNewest" />
     <Content Include="..\..\data\experience.json" Link="data\experience.json" CopyToOutputDirectory="PreserveNewest" />
     <Content Include="..\..\data\stat-bonuses.json" Link="data\stat-bonuses.json" CopyToOutputDirectory="PreserveNewest" />
+    <Content Include="..\..\data\quests.json" Link="data\quests.json" CopyToOutputDirectory="PreserveNewest" />
     <Content Include="..\..\data\spawns\**\*.json" Link="data\spawns\%(RecursiveDir)%(Filename)%(Extension)" CopyToOutputDirectory="PreserveNewest" />
     <Content Include="..\..\data\drops\**\*.json" Link="data\drops\%(RecursiveDir)%(Filename)%(Extension)" CopyToOutputDirectory="PreserveNewest" />
   </ItemGroup>

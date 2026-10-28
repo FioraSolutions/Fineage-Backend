@@ -19,6 +19,29 @@ public static class TalkingIsland
 
     public static readonly NpcInfoMsg[] Gremlins = LoadGremlins();
 
+    /// <summary>Roxxy and Bitz, used by the Talking Island smoke quest. Not part of the gremlin spawnlist.</summary>
+    public static readonly NpcInfoMsg[] Villagers =
+    [
+        Villager(50010, 30006, "Roxxy", SpawnX + 300, SpawnY, 0),
+        Villager(50011, 30026, "Bitz", SpawnX + 300, SpawnY + 120, 16000)
+    ];
+
+    public static int NpcCount => Gremlins.Length + Villagers.Length;
+
+    static NpcInfoMsg Villager(int objectId, int npcId, string name, int x, int y, int heading) => new()
+    {
+        ObjectId = objectId,
+        NpcId = npcId,
+        Name = name,
+        X = x,
+        Y = y,
+        Z = SpawnZ,
+        Heading = heading,
+        Attackable = false,
+        RunSpeed = 80f,
+        WalkSpeed = 40f
+    };
+
     public static bool WithinStep(int fromX, int fromY, int toX, int toY)
     {
         long dx = fromX - (long)toX;

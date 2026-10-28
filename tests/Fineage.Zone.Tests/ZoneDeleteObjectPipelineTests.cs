@@ -80,7 +80,7 @@ public sealed class ZoneDeleteObjectPipelineTests
             await ExpectAsync<UserInfoMsg>(ProtocolMsgType.UserInfo);
             await ExpectAsync<ItemListMsg>(ProtocolMsgType.ItemList);
             await ExpectAsync<PlayerSpawnedMsg>(ProtocolMsgType.PlayerSpawned);
-            var pending = TalkingIsland.Gremlins.Length + expectOthers;
+            var pending = TalkingIsland.NpcCount + expectOthers;
             int npcs = 0;
             int others = 0;
             for (int i = 0; i < pending; i++)
@@ -103,7 +103,7 @@ public sealed class ZoneDeleteObjectPipelineTests
                 }
             }
 
-            if (npcs != TalkingIsland.Gremlins.Length || others != expectOthers)
+            if (npcs != TalkingIsland.NpcCount || others != expectOthers)
                 throw new InvalidOperationException($"enter presence npcs={npcs} others={others}");
 
             var welcome = await ExpectAsync<SystemMessageMsg>(ProtocolMsgType.SystemMessage);

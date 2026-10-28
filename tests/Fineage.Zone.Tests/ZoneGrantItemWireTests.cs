@@ -129,7 +129,7 @@ public sealed class ZoneGrantItemWireTests
 
     static async Task SkipGremlinsAsync(Stream stream)
     {
-        for (int i = 0; i < TalkingIsland.Gremlins.Length; i++)
+        for (int i = 0; i < TalkingIsland.NpcCount; i++)
             await ReadAsync(stream, MsgType.NpcInfo);
     }
 

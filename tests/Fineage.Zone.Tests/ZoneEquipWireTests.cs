@@ -329,7 +329,7 @@ public sealed class ZoneEquipWireTests
             var user = await ExpectAsync<UserInfoMsg>(MsgType.UserInfo);
             var items = await ExpectAsync<ItemListMsg>(MsgType.ItemList);
             await ExpectAsync<PlayerSpawnedMsg>(MsgType.PlayerSpawned);
-            for (int i = 0; i < TalkingIsland.Gremlins.Length; i++)
+            for (int i = 0; i < TalkingIsland.NpcCount; i++)
                 await ExpectAsync<NpcInfoMsg>(MsgType.NpcInfo);
             for (int i = 0; i < expectOthers; i++)
                 await ExpectAsync<CharInfoMsg>(MsgType.CharInfo);

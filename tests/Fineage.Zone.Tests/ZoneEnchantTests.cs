@@ -596,7 +596,7 @@ public sealed class ZoneEnchantTests
             await ExpectAsync<UserInfoMsg>(MsgType.UserInfo);
             var items = await ExpectAsync<ItemListMsg>(MsgType.ItemList);
             await ExpectAsync<PlayerSpawnedMsg>(MsgType.PlayerSpawned);
-            for (int i = 0; i < TalkingIsland.Gremlins.Length; i++)
+            for (int i = 0; i < TalkingIsland.NpcCount; i++)
                 await ExpectAsync<NpcInfoMsg>(MsgType.NpcInfo);
             await ExpectAsync<SystemMessageMsg>(MsgType.SystemMessage);
             return items;

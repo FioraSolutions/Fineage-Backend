@@ -1,0 +1,94 @@
+{
+  "reference": "Fineage smoke quest. Lifecycle matches L2J Mobius Interlude QuestState (created/started/completed, cond, one-time exit, abort deletes). Dialog text is original, not Mobius HTML.",
+  "maxActive": 25,
+  "talkRange": 150,
+  "quests": [
+    {
+      "id": 999,
+      "name": "Roxxy's Message",
+      "repeatable": false,
+      "abortable": true,
+      "questItems": [],
+      "dialogs": [
+        {
+          "npcId": 30006,
+          "hook": "first_talk",
+          "when": "absent",
+          "html": "<html><body>Roxxy:<br>The training hall is open again. Tell Bitz for me.<br><a action=\"quest_event:accept\">I will tell him.</a></body></html>",
+          "ops": [{ "op": "create" }]
+        },
+        {
+          "npcId": 30006,
+          "hook": "first_talk",
+          "when": "created",
+          "html": "<html><body>Roxxy:<br>Will you tell Bitz the hall is open?<br><a action=\"quest_event:accept\">I will tell him.</a></body></html>"
+        },
+        {
+          "npcId": 30006,
+          "hook": "event",
+          "event": "accept",
+          "when": "created",
+          "html": "<html><body>Roxxy:<br>Thank you. Bitz is in the hall.</body></html>",
+          "ops": [{ "op": "start" }]
+        },
+        {
+          "npcId": 30006,
+          "hook": "first_talk",
+          "when": "started",
+          "cond": 1,
+          "html": "<html><body>Roxxy:<br>Bitz is waiting for the message.</body></html>"
+        },
+        {
+          "npcId": 30026,
+          "hook": "first_talk",
+          "when": "started",
+          "cond": 1,
+          "html": "<html><body>Bitz:<br>Roxxy says the hall is open?<br><a action=\"quest_event:heard\">He has the message.</a></body></html>"
+        },
+        {
+          "npcId": 30026,
+          "hook": "event",
+          "event": "heard",
+          "when": "started",
+          "cond": 1,
+          "html": "<html><body>Bitz:<br>Tell Roxxy I heard her.</body></html>",
+          "ops": [{ "op": "set_cond", "cond": 2 }]
+        },
+        {
+          "npcId": 30026,
+          "hook": "first_talk",
+          "when": "started",
+          "cond": 2,
+          "html": "<html><body>Bitz:<br>I already heard Roxxy's message.</body></html>"
+        },
+        {
+          "npcId": 30006,
+          "hook": "first_talk",
+          "when": "started",
+          "cond": 2,
+          "html": "<html><body>Roxxy:<br>Then the hall is in good hands.<br><a action=\"quest_event:reward\">Thank you.</a></body></html>"
+        },
+        {
+          "npcId": 30006,
+          "hook": "event",
+          "event": "reward",
+          "when": "started",
+          "cond": 2,
+          "html": "<html><body>Roxxy:<br>Take this scroll. It will bring you home.</body></html>",
+          "ops": [
+            { "op": "give_item", "itemId": 736, "count": 1 },
+            { "op": "give_adena", "count": 25 },
+            { "op": "give_exp_sp", "exp": 50, "sp": 5 },
+            { "op": "complete" }
+          ]
+        },
+        {
+          "npcId": 30006,
+          "hook": "first_talk",
+          "when": "completed",
+          "html": "<html><body>Roxxy:<br>You already carried that message.</body></html>"
+        }
+      ]
+    }
+  ]
+}

@@ -1,5 +1,6 @@
 using System.Text.Json;
 using System.Text.Json.Serialization;
+using Fineage.Game.Quests;
 
 namespace Fineage.Login;
 
@@ -56,7 +57,9 @@ public sealed record CharacterRecord(
     string Title = "",
     int ClanId = 0,
     long ClanJoinExpiryUnixMs = 0,
-    long ClanCreateExpiryUnixMs = 0)
+    long ClanCreateExpiryUnixMs = 0,
+    long Exp = 0,
+    IReadOnlyList<QuestSaveRow>? Quests = null)
 {
     /// <summary>Remaining whole seconds until hard delete. Zero when the character is not pending.</summary>
     public int DeleteSecondsLeft(DateTimeOffset now)
@@ -145,6 +148,12 @@ public interface IAccountStore
 
     /// <summary>Writes current HP/MP after zone play. Maxima are unchanged.</summary>
     bool TrySaveVitals(string account, int characterId, int hp, int mp);
+
+    /// <summary>Writes level, experience, SP, and the vitals that a level change may have raised.</summary>
+    bool TrySaveProgress(string account, int characterId, int level, long exp, int sp, int maxHp, int hp, int maxMp, int mp);
+
+    /// <summary>Replaces the character's quest rows. An empty list is a real save.</summary>
+    bool TryReplaceQuests(string account, int characterId, IReadOnlyList<QuestSaveRow> quests);
 
     bool TrySetLastAccess(string account, int characterId, DateTimeOffset when);
 
@@ -393,6 +402,72 @@ public sealed class JsonAccountStore : IAccountStore
             return true;
         }
     }
+
+    public bool TrySaveProgress(string account, int characterId, int level, long exp, int sp, int maxHp, int hp, int maxMp, int mp)
+    {
+        if (level < 1 || exp < 0 || sp < 0 || maxHp < 0 || hp < 0 || maxMp < 0 || mp < 0)
+            return false;
+        lock (_gate)
+        {
+            var character = FindCharacter(account, characterId);
+            if (character == null)
+                return false;
+            character.Level = level;
+            character.Exp = exp;
+            character.Sp = sp;
+            character.MaxHp = maxHp;
+            character.Hp = hp;
+            character.MaxMp = maxMp;
+            character.Mp = mp;
+            Save();
+            return true;
+        }
+    }
+
+    public bool TryReplaceQuests(string account, int characterId, IReadOnlyList<QuestSaveRow> quests)
+    {
+        ArgumentNullException.ThrowIfNull(quests);
+        if (!ValidQuests(quests))
+            return false;
+        lock (_gate)
+        {
+            var character = FindCharacter(account, characterId);
+            if (character == null)
+                return false;
+            character.Quests = quests.Select(CopyQuest).ToList();
+            Save();
+            return true;
+        }
+    }
+
+    static bool ValidQuests(IReadOnlyList<QuestSaveRow> quests)
+    {
+        var ids = new HashSet<int>();
+        foreach (var quest in quests)
+        {
+            if (quest.QuestId <= 0 || !ids.Add(quest.QuestId))
+                return false;
+            if (quest.State is not ((int)QuestPhase.Created or (int)QuestPhase.Started or (int)QuestPhase.Completed))
+                return false;
+            if (quest.Vars == null)
+                return false;
+            var keys = new HashSet<string>(StringComparer.Ordinal);
+            foreach (var variable in quest.Vars)
+            {
+                if (!QuestJournal.IsStoredVar(variable.Key, variable.Value) || !keys.Add(variable.Key))
+                    return false;
+            }
+        }
+
+        return true;
+    }
+
+    static StoredQuestDto CopyQuest(QuestSaveRow quest) => new()
+    {
+        QuestId = quest.QuestId,
+        State = quest.State,
+        Vars = quest.Vars.Select(variable => new StoredQuestVarDto { Key = variable.Key, Value = variable.Value }).ToList()
+    };
 
     public bool TrySetLastAccess(string account, int characterId, DateTimeOffset when)
     {
@@ -802,7 +877,14 @@ public sealed class JsonAccountStore : IAccountStore
             character.Title,
             character.ClanId,
             character.ClanJoinExpiryUnixMs,
-            character.ClanCreateExpiryUnixMs);
+            character.ClanCreateExpiryUnixMs,
+            character.Exp,
+            character.Quests == null
+                ? null
+                : character.Quests.Select(quest => new QuestSaveRow(
+                    quest.QuestId,
+                    quest.State,
+                    (quest.Vars ?? []).Select(variable => new QuestSaveVar(variable.Key, variable.Value)).ToArray())).ToArray());
 
     sealed class StoreFile
     {
@@ -851,7 +933,22 @@ public sealed class JsonAccountStore : IAccountStore
         public int ClanId { get; set; }
         public long ClanJoinExpiryUnixMs { get; set; }
         public long ClanCreateExpiryUnixMs { get; set; }
+        public long Exp { get; set; }
+        public List<StoredQuestDto>? Quests { get; set; }
         public List<StoredItemDto>? Items { get; set; }
+    }
+
+    sealed class StoredQuestDto
+    {
+        public int QuestId { get; set; }
+        public int State { get; set; }
+        public List<StoredQuestVarDto>? Vars { get; set; }
+    }
+
+    sealed class StoredQuestVarDto
+    {
+        public string Key { get; set; } = "";
+        public string Value { get; set; } = "";
     }
 
     sealed class ClanDto

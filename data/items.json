@@ -94,6 +94,13 @@
       "icon": "icon.etc_adena_i00"
     },
     {
+      "id": 736,
+      "name": "Scroll of Escape",
+      "kind": "etc",
+      "stackable": true,
+      "icon": "icon.etc_scroll_of_return_i00"
+    },
+    {
       "id": 1864,
       "name": "Stem",
       "kind": "etc",

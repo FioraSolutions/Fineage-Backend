@@ -81,21 +81,22 @@ public static class ZoneAcceptance
             throw new InvalidOperationException($"item list weapon id={weapon.ItemId} slot={weapon.EquippedSlot} object={weapon.ObjectId}");
 
         var seen = new List<NpcInfoMsg>();
-        for (int i = 0; i < TalkingIsland.Gremlins.Length; i++)
+        for (int i = 0; i < TalkingIsland.NpcCount; i++)
         {
             var body = await ExpectAsync(stream, MsgType.NpcInfo).ConfigureAwait(false);
             seen.Add(MessagePackSerializer.Deserialize<NpcInfoMsg>(body));
         }
 
-        if (seen.Count != TalkingIsland.Gremlins.Length)
-            throw new InvalidOperationException($"expected {TalkingIsland.Gremlins.Length} gremlins, got {seen.Count}");
+        if (seen.Count != TalkingIsland.NpcCount)
+            throw new InvalidOperationException($"expected {TalkingIsland.NpcCount} npcs, got {seen.Count}");
+        var expectedNpcs = TalkingIsland.Gremlins.Concat(TalkingIsland.Villagers).ToArray();
         for (int i = 0; i < seen.Count; i++)
         {
             var npc = seen[i];
-            var expected = TalkingIsland.Gremlins[i];
-            if (npc.NpcId != TalkingIsland.GremlinNpcId || npc.Name != "Gremlin" ||
+            var expected = expectedNpcs[i];
+            if (npc.NpcId != expected.NpcId || npc.Name != expected.Name ||
                 npc.ObjectId != expected.ObjectId || npc.X != expected.X || npc.Y != expected.Y || npc.Z != expected.Z)
-                throw new InvalidOperationException($"gremlin {i} mismatch id={npc.NpcId} @ {npc.X},{npc.Y},{npc.Z}");
+                throw new InvalidOperationException($"npc {i} mismatch id={npc.NpcId} name={npc.Name} @ {npc.X},{npc.Y},{npc.Z}");
         }
 
         var welcome = MessagePackSerializer.Deserialize<SystemMessageMsg>(
