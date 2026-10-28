@@ -23,6 +23,20 @@ public sealed class ZoneWireBoundaryTests
     }
 
     [Fact]
+    public async Task CreateCharacter_on_zone_port_returns_wrong_port()
+    {
+        await AssertWrongPortAsync(MsgType.CreateCharacter,
+            MessagePackSerializer.Serialize(new CreateCharacterMsg { Name = "X", ClassId = 1 }));
+    }
+
+    [Fact]
+    public async Task SelectCharacter_on_zone_port_returns_wrong_port()
+    {
+        await AssertWrongPortAsync(MsgType.SelectCharacter,
+            MessagePackSerializer.Serialize(new SelectCharacterMsg { CharacterId = 1, Name = "X" }));
+    }
+
+    [Fact]
     public async Task AuthToken_on_zone_port_returns_wrong_port()
     {
         await AssertWrongPortAsync((MsgType)7,
