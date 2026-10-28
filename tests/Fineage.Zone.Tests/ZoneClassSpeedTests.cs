@@ -36,9 +36,12 @@ public sealed class ZoneClassSpeedTests
         Assert.Equal(run, user.RunSpeed);
         Assert.Equal(walk, user.WalkSpeed);
 
-        var spawned = await FrameIO.ReadAsync(stream);
-        Assert.NotNull(spawned);
-        Assert.Equal((ushort)MsgType.ItemList, spawned!.Value.Type);
+        var itemFrame = await FrameIO.ReadAsync(stream);
+        Assert.NotNull(itemFrame);
+        Assert.Equal((ushort)MsgType.ItemList, itemFrame!.Value.Type);
+        var skillFrame = await FrameIO.ReadAsync(stream);
+        Assert.NotNull(skillFrame);
+        Assert.Equal((ushort)MsgType.SkillList, skillFrame!.Value.Type);
         var next = await FrameIO.ReadAsync(stream);
         Assert.NotNull(next);
         Assert.Equal((ushort)MsgType.PlayerSpawned, next!.Value.Type);

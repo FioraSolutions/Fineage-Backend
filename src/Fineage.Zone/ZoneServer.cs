@@ -783,6 +783,21 @@ public sealed class ZoneServer
                     ZoneLog.Info($"RX AdminCaptureCastle session={sessionId} castle={capture.CastleId} clan={capture.ClanId}");
                 break;
             }
+            case MsgType.SkillUseRequest:
+            {
+                var skill = Decode<SkillUseRequestMsg>(body);
+                if (skill == null)
+                {
+                    await ErrorAsync(session, "bad_request", "SkillUseRequest body was not readable.", ct).ConfigureAwait(false);
+                    break;
+                }
+
+                string? code = await _world.TrySkillUseAsync(session, skill, ct).ConfigureAwait(false);
+                await SkillErrorAsync(session, code, ct).ConfigureAwait(false);
+                if (code == null)
+                    ZoneLog.Info($"RX SkillUse session={sessionId} skill={skill.SkillId} target={skill.TargetObjectId}");
+                break;
+            }
             case MsgType.EnchantCancel:
             {
                 if (Decode<EnchantCancelMsg>(body) == null)
@@ -931,6 +946,25 @@ public sealed class ZoneServer
 
         ZoneLog.Packet(session, code, code is "rate_limit" or "unknown" or "wrong_port");
         return session.SendAsync(MsgType.Error, new ErrorMsg { Code = code, Message = message }, ct);
+    }
+
+    static Task SkillErrorAsync(ZoneSession session, string? code, CancellationToken ct)
+    {
+        if (code == null)
+            return Task.CompletedTask;
+        return code switch
+        {
+            "world" => ErrorAsync(session, "world", "EnterWorld first.", ct),
+            "bad_request" => ErrorAsync(session, "bad_request", "Skill request was rejected.", ct),
+            SkillProtocol.Dead => ErrorAsync(session, code, "You cannot do that while dead.", ct),
+            SkillProtocol.Unknown => ErrorAsync(session, code, "You do not know that skill.", ct),
+            SkillProtocol.Passive => ErrorAsync(session, code, "That skill cannot be used.", ct),
+            SkillProtocol.Reuse => ErrorAsync(session, code, "That skill is not ready yet.", ct),
+            SkillProtocol.Mp => ErrorAsync(session, code, "Not enough MP.", ct),
+            SkillProtocol.Target => ErrorAsync(session, code, "Invalid skill target.", ct),
+            SkillProtocol.Range => ErrorAsync(session, code, "Target is out of range.", ct),
+            _ => ErrorAsync(session, "bad_request", "Skill request was rejected.", ct)
+        };
     }
 
     static Task QuestErrorAsync(ZoneSession session, string? code, CancellationToken ct)

@@ -661,6 +661,7 @@ public static class ZoneMultiplayerAcceptance
             await SendAsync(MsgType.EnterWorld, new EnterWorldMsg()).ConfigureAwait(false);
             var user = await ExpectIgnoringRegenAsync<UserInfoMsg>(MsgType.UserInfo).ConfigureAwait(false);
             var items = await ExpectIgnoringRegenAsync<ItemListMsg>(MsgType.ItemList).ConfigureAwait(false);
+            await ExpectIgnoringRegenAsync<SkillListMsg>(MsgType.SkillList).ConfigureAwait(false);
             var spawned = await ExpectIgnoringRegenAsync<PlayerSpawnedMsg>(MsgType.PlayerSpawned).ConfigureAwait(false);
             var npcs = new List<NpcInfoMsg>(expectNpcs);
             for (int i = 0; i < expectNpcs; i++)

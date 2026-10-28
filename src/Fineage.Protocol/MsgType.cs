@@ -87,6 +87,8 @@ public enum MsgType : ushort
     /// Body is <see cref="AdminCaptureCastleMsg"/>.
     /// </summary>
     AdminCaptureCastle = 49,
+    /// <summary>Cast a known skill. Body is <see cref="SkillUseRequestMsg"/>. See <see cref="SkillProtocol"/>.</summary>
+    SkillUseRequest = 50,
     /// <summary>Seven Signs status snapshot. See <see cref="SevenSignsProtocol"/>.</summary>
     SevenSignsStatusRequest = 90,
     /// <summary>Seven Signs join or seal-stone contribution. See <see cref="SevenSignsProtocol"/>.</summary>
@@ -163,8 +165,12 @@ public enum MsgType : ushort
     QuestDialog = 1062,
     /// <summary>One quest sound name.</summary>
     QuestSound = 1063,
-    /// <summary>Castle siege registration and schedule. See <see cref="SiegeProtocol"/>. 1065–1069 stay free.</summary>
+    /// <summary>Castle siege registration and schedule. See <see cref="SiegeProtocol"/>.</summary>
     SiegeInfo = 1064,
+    /// <summary>Known skills on enter. See <see cref="SkillProtocol"/>.</summary>
+    SkillList = 1065,
+    /// <summary>Skill cast fan-out (self + AOI). See <see cref="SkillProtocol"/>.</summary>
+    MagicSkillUse = 1066,
     /// <summary>Seven Signs record (SSQStatus analogue). See <see cref="SevenSignsProtocol"/>.</summary>
     SevenSignsStatus = 1090,
     /// <summary>Seven Signs sky tint (SignsSky analogue). See <see cref="SevenSignsProtocol"/>.</summary>

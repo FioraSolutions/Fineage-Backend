@@ -71,8 +71,10 @@ public class ProtocolCompatTests
         Assert.Equal(47, (ushort)MsgType.SiegeDefenderAnswerRequest);
         Assert.Equal(48, (ushort)MsgType.SiegeListRequest);
         Assert.Equal(49, (ushort)MsgType.AdminCaptureCastle);
+        Assert.Equal(50, (ushort)MsgType.SkillUseRequest);
         Assert.Equal((ushort)MsgType.SiegeRegisterRequest, (ushort)Fineage.Protocol.V2.MsgType.SiegeRegisterRequest);
         Assert.Equal((ushort)MsgType.AdminCaptureCastle, (ushort)Fineage.Protocol.V2.MsgType.AdminCaptureCastle);
+        Assert.Equal((ushort)MsgType.SkillUseRequest, (ushort)Fineage.Protocol.V2.MsgType.SkillUseRequest);
         Assert.Equal((ushort)MsgType.RequestQuestList, (ushort)Fineage.Protocol.V2.MsgType.RequestQuestList);
         Assert.Equal((ushort)MsgType.QuestEvent, (ushort)Fineage.Protocol.V2.MsgType.QuestEvent);
         Assert.Equal((ushort)MsgType.EnchantRequest, (ushort)Fineage.Protocol.V2.MsgType.EnchantRequest);
@@ -121,7 +123,10 @@ public class ProtocolCompatTests
         Assert.Equal(1062, (ushort)MsgType.QuestDialog);
         Assert.Equal(1063, (ushort)MsgType.QuestSound);
         Assert.Equal(1064, (ushort)MsgType.SiegeInfo);
+        Assert.Equal(1065, (ushort)MsgType.SkillList);
+        Assert.Equal(1066, (ushort)MsgType.MagicSkillUse);
         Assert.Equal((ushort)MsgType.SiegeInfo, (ushort)Fineage.Protocol.V2.MsgType.SiegeInfo);
+        Assert.Equal((ushort)MsgType.SkillList, (ushort)Fineage.Protocol.V2.MsgType.SkillList);
         Assert.Equal(SiegeProtocol.MinClanLevel, 4);
         Assert.Equal(SiegeProtocol.CycleWeeks, 2);
         Assert.Equal(SiegeProtocol.RegisteredAttacker, 140);

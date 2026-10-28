@@ -79,6 +79,7 @@ public sealed class ZoneDeleteObjectPipelineTests
             await SendAsync(ProtocolMsgType.EnterWorld, new EnterWorldMsg());
             await ExpectAsync<UserInfoMsg>(ProtocolMsgType.UserInfo);
             await ExpectAsync<ItemListMsg>(ProtocolMsgType.ItemList);
+            await ExpectAsync<SkillListMsg>(MsgType.SkillList);
             await ExpectAsync<PlayerSpawnedMsg>(ProtocolMsgType.PlayerSpawned);
             var pending = TalkingIsland.NpcCount + expectOthers;
             int npcs = 0;

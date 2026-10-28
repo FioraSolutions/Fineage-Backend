@@ -58,6 +58,7 @@ public sealed class ZoneOnlineTelemetryTests
             await FrameIO.SendAsync(stream, (ushort)MsgType.EnterWorld, MessagePackSerializer.Serialize(new EnterWorldMsg()));
             await ReadAsync(stream, MsgType.UserInfo);
             await ReadAsync(stream, MsgType.ItemList);
+        await ZoneEnterWire.ReadSkillListAsync(stream);
             await ReadAsync(stream, MsgType.PlayerSpawned);
             for (int i = 0; i < TalkingIsland.NpcCount; i++)
                 await ReadAsync(stream, MsgType.NpcInfo);
