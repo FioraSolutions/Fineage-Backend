@@ -1,0 +1,79 @@
+{
+  "reference": "Hand-written Interlude item templates. Ids, names, slots, weapon types, armor types, icons, magic flag, stackability, and pDef were checked against L2J Mobius CT 0 Interlude (L2J_Mobius_CT_0_Interlude). This file is not Mobius data.",
+  "items": [
+    {
+      "id": 2369,
+      "name": "Squire's Sword",
+      "kind": "weapon",
+      "bodySlot": "rhand",
+      "weaponType": "sword",
+      "icon": "icon.weapon_squires_sword_i00"
+    },
+    {
+      "id": 10,
+      "name": "Dagger",
+      "kind": "weapon",
+      "bodySlot": "rhand",
+      "weaponType": "dagger",
+      "icon": "icon.weapon_dagger_i00"
+    },
+    {
+      "id": 6,
+      "name": "Apprentice's Wand",
+      "kind": "weapon",
+      "bodySlot": "rhand",
+      "weaponType": "blunt",
+      "magic": true,
+      "icon": "icon.weapon_apprentices_wand_i00"
+    },
+    {
+      "id": 1146,
+      "name": "Squire's Shirt",
+      "kind": "armor",
+      "bodySlot": "chest",
+      "armorType": "light",
+      "pDef": 33,
+      "icon": "icon.armor_t01_u_i00"
+    },
+    {
+      "id": 1147,
+      "name": "Squire's Pants",
+      "kind": "armor",
+      "bodySlot": "legs",
+      "armorType": "light",
+      "pDef": 20,
+      "icon": "icon.armor_t01_l_i00"
+    },
+    {
+      "id": 425,
+      "name": "Apprentice's Tunic",
+      "kind": "armor",
+      "bodySlot": "chest",
+      "armorType": "magic",
+      "pDef": 17,
+      "icon": "icon.armor_t01_u_i00"
+    },
+    {
+      "id": 461,
+      "name": "Apprentice's Stockings",
+      "kind": "armor",
+      "bodySlot": "legs",
+      "armorType": "magic",
+      "pDef": 10,
+      "icon": "icon.armor_t01_l_i00"
+    },
+    {
+      "id": 5588,
+      "name": "Tutorial Guide",
+      "kind": "etc",
+      "icon": "icon.etc_spellbook_gray_i00"
+    },
+    {
+      "id": 57,
+      "name": "Adena",
+      "kind": "etc",
+      "stackable": true,
+      "icon": "icon.etc_adena_i00"
+    }
+  ]
+}

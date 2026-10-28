@@ -1,6 +1,9 @@
 bin/
 obj/
-data/
+# Runtime files such as accounts.json. The game catalogs are tracked.
+data/*
+!data/items.json
+!data/starter-kits.json
 TestResults/
 .vs/
 .idea/
