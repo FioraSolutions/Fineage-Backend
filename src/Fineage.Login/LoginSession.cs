@@ -15,6 +15,13 @@ public sealed class LoginSession
 
     public LoginSession(PipelineConnection pipeline) => _pipeline = pipeline;
 
+    public int WireSessionId { get; set; }
+    public string AccountName { get; set; } = "";
+    public string CharacterName { get; set; } = "";
+    public ushort LastPacketId { get; set; }
+    public string Remote => _pipeline?.Remote ?? "";
+    internal bool FailureRecorded { get; set; }
+
     public async Task<(ushort Type, byte[] Body)?> ReadAsync(CancellationToken ct)
     {
         if (_pipeline != null)

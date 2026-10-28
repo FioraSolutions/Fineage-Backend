@@ -1,3 +1,4 @@
+using System.Diagnostics;
 using Fineage.Login;
 using Fineage.Protocol;
 using Fineage.Protocol.Telemetry;
@@ -25,12 +26,12 @@ public sealed partial class ZoneWorld
         {
             while (await timer.WaitForNextTickAsync(ct).ConfigureAwait(false))
             {
-                var started = Environment.TickCount64;
+                long started = Stopwatch.GetTimestamp();
                 var outbound = new List<Pending>();
                 lock (_gate)
                     TickRegen(outbound);
                 await FlushOthersAsync(outbound, ct).ConfigureAwait(false);
-                FineageTelemetry.TickMilliseconds.Record(Environment.TickCount64 - started);
+                FineageTelemetry.TickMilliseconds.Record(Stopwatch.GetElapsedTime(started).TotalMilliseconds);
             }
         }
         catch (OperationCanceledException)
