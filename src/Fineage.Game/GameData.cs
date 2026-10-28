@@ -1,5 +1,6 @@
 using System.Text.Json;
 using Fineage.Game.Quests;
+using Fineage.Game.Skills;
 
 namespace Fineage.Game;
 
@@ -20,12 +21,20 @@ public sealed class GameData
         AllowTrailingCommas = true
     };
 
-    GameData(ItemCatalog items, StarterKits starterKits, ClassCatalog? classes, QuestCatalog quests)
+    GameData(
+        ItemCatalog items,
+        StarterKits starterKits,
+        ClassCatalog? classes,
+        QuestCatalog quests,
+        SkillCatalog skills,
+        SkillTreeCatalog skillTrees)
     {
         Items = items;
         StarterKits = starterKits;
         Classes = classes;
         Quests = quests;
+        Skills = skills;
+        SkillTrees = skillTrees;
     }
 
     public ItemCatalog Items { get; }
@@ -37,6 +46,10 @@ public sealed class GameData
 
     public QuestCatalog Quests { get; }
 
+    public SkillCatalog Skills { get; }
+
+    public SkillTreeCatalog SkillTrees { get; }
+
     public static GameData Load(string dataDirectory)
     {
         ArgumentException.ThrowIfNullOrWhiteSpace(dataDirectory);
@@ -47,7 +60,9 @@ public sealed class GameData
         var kits = ReadKits(Path.Combine(dataDirectory, StarterKitsFileName), items);
         var classes = ClassCatalog.Load(dataDirectory);
         var quests = QuestCatalog.Load(Path.Combine(dataDirectory, QuestCatalog.FileName), items);
-        return new GameData(items, kits, classes, quests);
+        var skills = SkillCatalog.Load(Path.Combine(dataDirectory, SkillCatalog.FileName));
+        var skillTrees = SkillTreeCatalog.Load(Path.Combine(dataDirectory, SkillTreeCatalog.FileName));
+        return new GameData(items, kits, classes, quests, skills, skillTrees);
     }
 
     public static GameData LoadDefault()
@@ -74,7 +89,9 @@ public sealed class GameData
                 File.Exists(Path.Combine(data, StarterKitsFileName)) &&
                 File.Exists(Path.Combine(data, ClassCatalog.ClassesFileName)) &&
                 File.Exists(Path.Combine(data, ClassCatalog.ExperienceFileName)) &&
-                File.Exists(Path.Combine(data, ClassCatalog.StatBonusesFileName)))
+                File.Exists(Path.Combine(data, ClassCatalog.StatBonusesFileName)) &&
+                File.Exists(Path.Combine(data, SkillCatalog.FileName)) &&
+                File.Exists(Path.Combine(data, SkillTreeCatalog.FileName)))
                 return data;
             dir = dir.Parent;
         }
@@ -87,7 +104,13 @@ public sealed class GameData
     {
         ArgumentNullException.ThrowIfNull(items);
         ArgumentNullException.ThrowIfNull(starterKits);
-        return new GameData(items, starterKits, classes: null, quests ?? QuestCatalog.Empty);
+        return new GameData(
+            items,
+            starterKits,
+            classes: null,
+            quests ?? QuestCatalog.Empty,
+            skills: SkillCatalog.Parse("{\"skills\":[]}", "memory"),
+            skillTrees: SkillTreeCatalog.Parse("{\"trees\":[]}", "memory"));
     }
 
     public PlayerInventory CreateStarterInventory(int classId, int firstObjectId = PlayerInventory.FirstObjectId) =>

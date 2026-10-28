@@ -11,7 +11,7 @@ namespace Fineage.Zone.Tests;
 public sealed class ZoneItemListEnterWireTests
 {
     [Fact]
-    public async Task EnterWorld_sends_UserInfo_then_ItemList_then_PlayerSpawned_with_starter_kit()
+    public async Task EnterWorld_sends_UserInfo_then_ItemList_then_SkillList_then_PlayerSpawned_with_starter_kit()
     {
         var tokens = new HandoffTokens(HandoffTokens.DefaultSecret);
         var server = new ZoneServer(tokens);
@@ -56,6 +56,12 @@ public sealed class ZoneItemListEnterWireTests
         Assert.Equal("rhand", sword.BodySlot);
         Assert.True(sword.ObjectId >= 100_000);
         Assert.Equal(1014, (int)MsgType.ItemList);
+
+        var skillFrame = await FrameIO.ReadAsync(stream);
+        Assert.NotNull(skillFrame);
+        Assert.Equal((ushort)MsgType.SkillList, skillFrame!.Value.Type);
+        var skills = MessagePackSerializer.Deserialize<SkillListMsg>(skillFrame.Value.Body);
+        Assert.Contains(skills.Skills, row => row.SkillId == 194 && row.Level == 1);
 
         var spawnFrame = await FrameIO.ReadAsync(stream);
         Assert.NotNull(spawnFrame);

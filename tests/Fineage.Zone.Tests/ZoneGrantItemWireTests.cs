@@ -122,6 +122,7 @@ public sealed class ZoneGrantItemWireTests
         await FrameIO.SendAsync(stream, (ushort)MsgType.EnterWorld, MessagePackSerializer.Serialize(new EnterWorldMsg()));
         await ReadAsync(stream, MsgType.UserInfo);
         await ReadAsync(stream, MsgType.ItemList);
+        await ZoneEnterWire.ReadSkillListAsync(stream);
         await ReadAsync(stream, MsgType.PlayerSpawned);
         await SkipGremlinsAsync(stream);
         await ReadAsync(stream, MsgType.SystemMessage);

@@ -602,6 +602,7 @@ public class ZoneClanTests
             await SendAsync(MsgType.EnterWorld, new EnterWorldMsg());
             var user = await ExpectAsync<UserInfoMsg>(MsgType.UserInfo);
             await ExpectAsync<ItemListMsg>(MsgType.ItemList);
+            await ExpectAsync<SkillListMsg>(MsgType.SkillList);
             await ExpectAsync<PlayerSpawnedMsg>(MsgType.PlayerSpawned);
             for (int i = 0; i < npcCount; i++)
                 await ExpectAsync<NpcInfoMsg>(MsgType.NpcInfo);

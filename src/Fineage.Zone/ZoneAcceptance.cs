@@ -65,6 +65,7 @@ public static class ZoneAcceptance
         await SendAsync(stream, MsgType.EnterWorld, new EnterWorldMsg { CharacterSlot = 0 }).ConfigureAwait(false);
         var user = MessagePackSerializer.Deserialize<UserInfoMsg>(await ExpectAsync(stream, MsgType.UserInfo).ConfigureAwait(false));
         var items = MessagePackSerializer.Deserialize<ItemListMsg>(await ExpectAsync(stream, MsgType.ItemList).ConfigureAwait(false));
+        await ExpectAsync(stream, MsgType.SkillList);
         var spawned = MessagePackSerializer.Deserialize<PlayerSpawnedMsg>(await ExpectAsync(stream, MsgType.PlayerSpawned).ConfigureAwait(false));
         if (spawned.ObjectId != characterId || spawned.Name != name ||
             user.ObjectId != characterId || user.X != spawned.X || user.Y != spawned.Y || user.Z != spawned.Z)

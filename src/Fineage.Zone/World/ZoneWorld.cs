@@ -83,6 +83,10 @@ sealed class ZoneEntity
     /// <summary>Dead NPC kept in world until sweeper takes <see cref="SweepItems"/>.</summary>
     public bool CorpseAwaitingSweep { get; set; }
     public List<AbnormalEffectMsg> AbnormalEffects { get; } = [];
+    /// <summary>Known skill id to level (auto-get tree on enter).</summary>
+    public Dictionary<int, int> KnownSkills { get; } = [];
+    /// <summary>Skill id to unix-ms when reuse expires.</summary>
+    public Dictionary<int, long> SkillReuseUntilMs { get; } = [];
     public HashSet<int> Knownlist { get; } = [];
     public int ClanId { get; set; }
     /// <summary>Attack stance end, unix milliseconds. Leave and dismiss are refused until this passes.</summary>
@@ -296,6 +300,7 @@ public sealed partial class ZoneWorld
             ClanId = ClanIdFor(session.ObjectId)
         };
         LoadQuestProgress(session, entity);
+        RefreshKnownSkills(entity);
         SyncClanStanding(entity);
         RefreshGradePenalty(entity);
         _byId[entity.ObjectId] = entity;
@@ -308,6 +313,7 @@ public sealed partial class ZoneWorld
 
         toSelf.Add(Pack(session, MsgType.UserInfo, UserInfo(entity)));
         toSelf.Add(Pack(session, MsgType.ItemList, InventoryMessages.ItemList(inventory)));
+        toSelf.Add(Pack(session, MsgType.SkillList, SkillListFor(entity)));
         toSelf.Add(Pack(session, MsgType.PlayerSpawned, Spawned(entity)));
         foreach (var other in OrderedVisible(entity.ObjectId))
         {

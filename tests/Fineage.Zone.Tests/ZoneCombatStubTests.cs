@@ -43,6 +43,7 @@ public sealed class ZoneCombatStubTests
         await FrameIO.SendAsync(stream, (ushort)MsgType.EnterWorld, MessagePackSerializer.Serialize(new EnterWorldMsg()));
         await ReadExpectAsync(stream, MsgType.UserInfo);
         await ReadExpectAsync(stream, MsgType.ItemList);
+        await ZoneEnterWire.ReadSkillListAsync(stream);
         await ReadExpectAsync(stream, MsgType.PlayerSpawned);
         for (int i = 0; i < TalkingIsland.NpcCount; i++)
             await ReadExpectAsync(stream, MsgType.NpcInfo);

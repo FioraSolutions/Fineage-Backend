@@ -780,6 +780,45 @@ public sealed class QuestSoundMsg
     [Key(0)] public string Name { get; set; } = "";
 }
 
+/// <summary>Opcode <see cref="MsgType.SkillUseRequest"/> (50).</summary>
+[MessagePackObject]
+public sealed class SkillUseRequestMsg
+{
+    [Key(0)] public int SkillId { get; set; }
+    /// <summary>0 uses the selected target or self.</summary>
+    [Key(1)] public int TargetObjectId { get; set; }
+    [Key(2)] public bool CtrlPressed { get; set; }
+}
+
+/// <summary>One row of <see cref="SkillListMsg"/>.</summary>
+[MessagePackObject]
+public sealed class SkillListEntryMsg
+{
+    [Key(0)] public int SkillId { get; set; }
+    [Key(1)] public int Level { get; set; }
+    /// <summary>Remaining reuse in milliseconds. Zero when ready.</summary>
+    [Key(2)] public int ReuseDelayMs { get; set; }
+}
+
+/// <summary>Opcode <see cref="MsgType.SkillList"/> (1065). Sent after <see cref="ItemListMsg"/> on enter.</summary>
+[MessagePackObject]
+public sealed class SkillListMsg
+{
+    [Key(0)] public SkillListEntryMsg[] Skills { get; set; } = [];
+}
+
+/// <summary>Opcode <see cref="MsgType.MagicSkillUse"/> (1066).</summary>
+[MessagePackObject]
+public sealed class MagicSkillUseMsg
+{
+    [Key(0)] public int CasterObjectId { get; set; }
+    [Key(1)] public int TargetObjectId { get; set; }
+    [Key(2)] public int SkillId { get; set; }
+    [Key(3)] public int SkillLevel { get; set; }
+    [Key(4)] public int HitTimeMs { get; set; }
+    [Key(5)] public int ReuseDelayMs { get; set; }
+}
+
 /// <summary>Opcode <see cref="MsgType.ClanCreateRequest"/> (32).</summary>
 [MessagePackObject]
 public sealed class ClanCreateRequestMsg

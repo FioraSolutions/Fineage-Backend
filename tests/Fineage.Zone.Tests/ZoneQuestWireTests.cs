@@ -202,6 +202,7 @@ public sealed class ZoneQuestWireTests
             await SendAsync(MsgType.EnterWorld, new EnterWorldMsg());
             await ReadAsync<UserInfoMsg>(MsgType.UserInfo);
             await ReadAsync<ItemListMsg>(MsgType.ItemList);
+            await ReadAsync<SkillListMsg>(MsgType.SkillList);
             await ReadAsync<PlayerSpawnedMsg>(MsgType.PlayerSpawned);
             for (int i = 0; i < TalkingIsland.NpcCount; i++)
                 await ReadAsync<NpcInfoMsg>(MsgType.NpcInfo);

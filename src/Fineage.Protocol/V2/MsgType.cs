@@ -83,6 +83,8 @@ public enum MsgType : ushort
     SiegeListRequest = 48,
     /// <summary>Same value as <see cref="Fineage.Protocol.MsgType.AdminCaptureCastle"/>.</summary>
     AdminCaptureCastle = 49,
+    /// <summary>Same value as <see cref="Fineage.Protocol.MsgType.SkillUseRequest"/>.</summary>
+    SkillUseRequest = 50,
     /// <summary>Same value as <see cref="Fineage.Protocol.MsgType.SevenSignsStatusRequest"/>.</summary>
     SevenSignsStatusRequest = 90,
     /// <summary>Same value as <see cref="Fineage.Protocol.MsgType.SevenSignsActionRequest"/>.</summary>
@@ -141,6 +143,10 @@ public enum MsgType : ushort
     QuestSound = 1063,
     /// <summary>Same value as <see cref="Fineage.Protocol.MsgType.SiegeInfo"/>.</summary>
     SiegeInfo = 1064,
+    /// <summary>Same value as <see cref="Fineage.Protocol.MsgType.SkillList"/>.</summary>
+    SkillList = 1065,
+    /// <summary>Same value as <see cref="Fineage.Protocol.MsgType.MagicSkillUse"/>.</summary>
+    MagicSkillUse = 1066,
     /// <summary>Same value as <see cref="Fineage.Protocol.MsgType.SevenSignsStatus"/>.</summary>
     SevenSignsStatus = 1090,
     /// <summary>Same value as <see cref="Fineage.Protocol.MsgType.SevenSignsSky"/>.</summary>

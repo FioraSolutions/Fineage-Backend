@@ -53,6 +53,7 @@ public sealed class ZoneAuthHandoffTests
         await FrameIO.SendAsync(stream, (ushort)MsgType.EnterWorld, MessagePackSerializer.Serialize(new EnterWorldMsg()));
         await ReadAsync(stream, MsgType.UserInfo);
         await ReadAsync(stream, MsgType.ItemList);
+        await ZoneEnterWire.ReadSkillListAsync(stream);
         await ReadAsync(stream, MsgType.PlayerSpawned);
 
         listener.Stop();
