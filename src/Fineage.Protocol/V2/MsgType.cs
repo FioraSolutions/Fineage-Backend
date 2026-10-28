@@ -75,6 +75,10 @@ public enum MsgType : ushort
     NpcTalk = 44,
     /// <summary>Same value as <see cref="Fineage.Protocol.MsgType.QuestEvent"/>.</summary>
     QuestEvent = 45,
+    /// <summary>Same value as <see cref="Fineage.Protocol.MsgType.SevenSignsStatusRequest"/>.</summary>
+    SevenSignsStatusRequest = 90,
+    /// <summary>Same value as <see cref="Fineage.Protocol.MsgType.SevenSignsActionRequest"/>.</summary>
+    SevenSignsActionRequest = 91,
 
     HelloAck = 1001,
     AuthOk = 1002,
@@ -125,6 +129,10 @@ public enum MsgType : ushort
     QuestDialog = 1062,
     /// <summary>Same value as <see cref="Fineage.Protocol.MsgType.QuestSound"/>.</summary>
     QuestSound = 1063,
+    /// <summary>Same value as <see cref="Fineage.Protocol.MsgType.SevenSignsStatus"/>.</summary>
+    SevenSignsStatus = 1090,
+    /// <summary>Same value as <see cref="Fineage.Protocol.MsgType.SevenSignsSky"/>.</summary>
+    SevenSignsSky = 1091,
 
     /// <summary>Login roster. Was 1005; moved so it no longer aliases <see cref="CharInfo"/>.</summary>
     CharacterRoster = 1030,

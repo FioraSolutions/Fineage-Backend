@@ -76,6 +76,10 @@ public enum MsgType : ushort
     NpcTalk = 44,
     /// <summary>Quest HTML bypass. Body is <see cref="QuestEventMsg"/>.</summary>
     QuestEvent = 45,
+    /// <summary>Seven Signs status snapshot. See <see cref="SevenSignsProtocol"/>.</summary>
+    SevenSignsStatusRequest = 90,
+    /// <summary>Seven Signs join or seal-stone contribution. See <see cref="SevenSignsProtocol"/>.</summary>
+    SevenSignsActionRequest = 91,
     /// <summary>Keepalive from client. Server answers with <see cref="Pong"/>.</summary>
     Ping = 9,
     /// <summary>Zone chat. Fan-out is <see cref="CreatureSay"/>. See <see cref="ChatProtocol"/>.</summary>
@@ -146,6 +150,10 @@ public enum MsgType : ushort
     QuestDialog = 1062,
     /// <summary>One quest sound name.</summary>
     QuestSound = 1063,
+    /// <summary>Seven Signs record (SSQStatus analogue). See <see cref="SevenSignsProtocol"/>.</summary>
+    SevenSignsStatus = 1090,
+    /// <summary>Seven Signs sky tint (SignsSky analogue). See <see cref="SevenSignsProtocol"/>.</summary>
+    SevenSignsSky = 1091,
 
     // Login S → C. Canonical lobby set; see LobbyProtocol.
     RegisterOk = 1020,

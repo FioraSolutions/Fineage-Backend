@@ -33,6 +33,7 @@ public sealed partial class ZoneWorld
                     TickRegen(outbound);
                     TickSpawns(outbound);
                     CompleteDueDissolutions(_clock().ToUnixTimeMilliseconds(), outbound);
+                    TickSevenSigns(outbound);
                 }
                 await FlushOthersAsync(outbound, ct).ConfigureAwait(false);
                 FineageTelemetry.TickMilliseconds.Record(Stopwatch.GetElapsedTime(started).TotalMilliseconds);

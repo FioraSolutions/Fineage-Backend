@@ -1,5 +1,6 @@
 using Fineage.Login;
 using Fineage.Zone.Interest;
+using Fineage.Zone.SevenSigns;
 using Fineage.Zone.World;
 
 namespace Fineage.Zone;
@@ -11,15 +12,15 @@ public static class ZoneAoiSettings
 
     public static int InterestRange => ReadInt("FINEAGE_ZONE_INTEREST_RANGE", DefaultInterestRange, min: 0, max: 500_000);
 
-    public static ZoneWorld CreateWorld(IAoi? aoi = null, IAccountStore? accounts = null)
+    public static ZoneWorld CreateWorld(IAoi? aoi = null, IAccountStore? accounts = null, SevenSignsEngine? sevenSigns = null)
     {
         if (aoi != null)
-            return new ZoneWorld(aoi, accounts: accounts);
+            return new ZoneWorld(aoi, accounts: accounts, sevenSigns: sevenSigns);
 
         int range = InterestRange;
         return range <= 0
-            ? new ZoneWorld(accounts: accounts)
-            : new ZoneWorld(new RangeAoi(range), accounts: accounts);
+            ? new ZoneWorld(accounts: accounts, sevenSigns: sevenSigns)
+            : new ZoneWorld(new RangeAoi(range), accounts: accounts, sevenSigns: sevenSigns);
     }
 
     static int ReadInt(string name, int fallback, int min, int max)
