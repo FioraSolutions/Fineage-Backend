@@ -32,7 +32,31 @@ public sealed record CharacterRecord(
     int Race,
     int Sex,
     int Level,
-    IReadOnlyList<StoredItem>? Items = null);
+    IReadOnlyList<StoredItem>? Items = null,
+    int HairStyle = 0,
+    int HairColor = 0,
+    int Face = 0,
+    bool HasPosition = false,
+    int X = 0,
+    int Y = 0,
+    int Z = 0,
+    DateTimeOffset CreatedAt = default,
+    DateTimeOffset LastAccess = default,
+    DateTimeOffset? DeleteAt = null)
+{
+    /// <summary>Remaining whole seconds until hard delete. Zero when the character is not pending.</summary>
+    public int DeleteSecondsLeft(DateTimeOffset now)
+    {
+        if (DeleteAt is not { } at)
+            return 0;
+        long remainingMs = at.ToUnixTimeMilliseconds() - now.ToUnixTimeMilliseconds();
+        if (remainingMs <= 0)
+            return 0;
+        return (int)(remainingMs / 1000);
+    }
+
+    public bool IsPendingDelete => DeleteAt != null;
+}
 
 public interface IAccountStore
 {
@@ -51,14 +75,31 @@ public interface IAccountStore
         int race,
         int sex,
         out CharacterRecord? created,
-        IReadOnlyList<StoredItem>? items = null);
+        IReadOnlyList<StoredItem>? items = null,
+        DateTimeOffset? createdAt = null,
+        DateTimeOffset? now = null);
 
     /// <summary>Replaces the saved bag. An empty list is a real save; it does not mean "grant the kit".</summary>
     bool TryReplaceItems(string account, int characterId, IReadOnlyList<StoredItem> items);
 
+    /// <summary>Writes the last world position. When <paramref name="lastAccess"/> is set and later than the stored value, updates last played.</summary>
+    bool TrySavePresence(string account, int characterId, int x, int y, int z, DateTimeOffset? lastAccess);
+
+    bool TrySetLastAccess(string account, int characterId, DateTimeOffset when);
+
+    bool TrySetDeleteAt(string account, int characterId, DateTimeOffset deleteAt);
+
+    bool TryClearDeletion(string account, int characterId);
+
+    /// <summary>Removes the character and the items stored on it. The name can be used again.</summary>
+    bool TryHardDelete(string account, int characterId);
+
     CharacterRecord? FindById(string account, int characterId);
 
     CharacterRecord? FindByName(string account, string name);
+
+    /// <summary>Creation order, after hard-deleting characters whose delete time is already in the past.</summary>
+    IReadOnlyList<CharacterRecord> List(string account, DateTimeOffset now);
 
     IReadOnlyList<CharacterRecord> List(string account);
 }
@@ -157,7 +198,9 @@ public sealed class JsonAccountStore : IAccountStore
         int race,
         int sex,
         out CharacterRecord? created,
-        IReadOnlyList<StoredItem>? items = null)
+        IReadOnlyList<StoredItem>? items = null,
+        DateTimeOffset? createdAt = null,
+        DateTimeOffset? now = null)
     {
         created = null;
         if (!NameRules.IsCharacterName(name))
@@ -171,6 +214,8 @@ public sealed class JsonAccountStore : IAccountStore
             var row = FindAccount(account);
             if (row == null)
                 return CreateCharacterStatus.AccountMissing;
+            if (now is { } purgeAt && PurgeUnlocked(row, purgeAt) > 0)
+                Save();
             if (row.Characters.Count >= HumanClasses.MaxCharactersPerAccount)
                 return CreateCharacterStatus.TooMany;
             if (NameTaken(name))
@@ -184,7 +229,8 @@ public sealed class JsonAccountStore : IAccountStore
                 Race = race,
                 Sex = sex,
                 Level = 1,
-                Items = CopyItems(items)
+                Items = CopyItems(items),
+                CreatedAt = createdAt ?? DateTimeOffset.UtcNow
             };
             row.Characters.Add(character);
             Save();
@@ -199,11 +245,81 @@ public sealed class JsonAccountStore : IAccountStore
         CharacterInventory.Validate(items);
         lock (_gate)
         {
+            var character = FindCharacter(account, characterId);
+            if (character == null)
+                return false;
+            character.Items = CopyItems(items);
+            Save();
+            return true;
+        }
+    }
+
+    public bool TrySavePresence(string account, int characterId, int x, int y, int z, DateTimeOffset? lastAccess)
+    {
+        lock (_gate)
+        {
+            var character = FindCharacter(account, characterId);
+            if (character == null)
+                return false;
+            character.HasPosition = true;
+            character.X = x;
+            character.Y = y;
+            character.Z = z;
+            if (lastAccess is { } access && access > character.LastAccess)
+                character.LastAccess = access;
+            Save();
+            return true;
+        }
+    }
+
+    public bool TrySetLastAccess(string account, int characterId, DateTimeOffset when)
+    {
+        lock (_gate)
+        {
+            var character = FindCharacter(account, characterId);
+            if (character == null)
+                return false;
+            character.LastAccess = when;
+            Save();
+            return true;
+        }
+    }
+
+    public bool TrySetDeleteAt(string account, int characterId, DateTimeOffset deleteAt)
+    {
+        lock (_gate)
+        {
+            var character = FindCharacter(account, characterId);
+            if (character == null)
+                return false;
+            character.DeleteAt = deleteAt;
+            Save();
+            return true;
+        }
+    }
+
+    public bool TryClearDeletion(string account, int characterId)
+    {
+        lock (_gate)
+        {
+            var character = FindCharacter(account, characterId);
+            if (character == null)
+                return false;
+            character.DeleteAt = null;
+            Save();
+            return true;
+        }
+    }
+
+    public bool TryHardDelete(string account, int characterId)
+    {
+        lock (_gate)
+        {
             var row = FindAccount(account);
             var character = row?.Characters.FirstOrDefault(c => c.Id == characterId);
             if (row == null || character == null)
                 return false;
-            character.Items = CopyItems(items);
+            row.Characters.Remove(character);
             Save();
             return true;
         }
@@ -232,16 +348,33 @@ public sealed class JsonAccountStore : IAccountStore
         }
     }
 
-    public IReadOnlyList<CharacterRecord> List(string account)
+    public IReadOnlyList<CharacterRecord> List(string account) => List(account, DateTimeOffset.UtcNow);
+
+    public IReadOnlyList<CharacterRecord> List(string account, DateTimeOffset now)
     {
         lock (_gate)
         {
             var row = FindAccount(account);
             if (row == null)
                 return [];
-            return row.Characters.Select(c => ToRecord(row.Name, c)).ToArray();
+            if (PurgeUnlocked(row, now) > 0)
+                Save();
+            return Ordered(row);
         }
     }
+
+    CharacterDto? FindCharacter(string account, int characterId) =>
+        FindAccount(account)?.Characters.FirstOrDefault(c => c.Id == characterId);
+
+    static int PurgeUnlocked(AccountDto row, DateTimeOffset now) =>
+        row.Characters.RemoveAll(c => c.DeleteAt is { } at && at < now);
+
+    static List<CharacterRecord> Ordered(AccountDto row) =>
+        row.Characters
+            .OrderBy(c => c.CreatedAt)
+            .ThenBy(c => c.Id)
+            .Select(c => ToRecord(row.Name, c))
+            .ToList();
 
     AccountDto? FindAccount(string account)
     {
@@ -330,7 +463,17 @@ public sealed class JsonAccountStore : IAccountStore
             character.Level,
             character.Items == null
                 ? null
-                : character.Items.Select(item => new StoredItem(item.ItemId, item.Count, item.EquippedSlot)).ToArray());
+                : character.Items.Select(item => new StoredItem(item.ItemId, item.Count, item.EquippedSlot)).ToArray(),
+            character.HairStyle,
+            character.HairColor,
+            character.Face,
+            character.HasPosition,
+            character.X,
+            character.Y,
+            character.Z,
+            character.CreatedAt,
+            character.LastAccess,
+            character.DeleteAt);
 
     sealed class StoreFile
     {
@@ -357,6 +500,16 @@ public sealed class JsonAccountStore : IAccountStore
         public int Race { get; set; }
         public int Sex { get; set; }
         public int Level { get; set; } = 1;
+        public int HairStyle { get; set; }
+        public int HairColor { get; set; }
+        public int Face { get; set; }
+        public bool HasPosition { get; set; }
+        public int X { get; set; }
+        public int Y { get; set; }
+        public int Z { get; set; }
+        public DateTimeOffset CreatedAt { get; set; }
+        public DateTimeOffset LastAccess { get; set; }
+        public DateTimeOffset? DeleteAt { get; set; }
         public List<StoredItemDto>? Items { get; set; }
     }
 

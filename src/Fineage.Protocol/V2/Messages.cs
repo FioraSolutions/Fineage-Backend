@@ -141,6 +141,11 @@ public sealed partial class CharacterSummaryMsg
     [Key(7)] public int X { get; set; }
     [Key(8)] public int Y { get; set; }
     [Key(9)] public int Z { get; set; }
+    [Key(10)] public int HairStyle { get; set; }
+    [Key(11)] public int HairColor { get; set; }
+    [Key(12)] public int Face { get; set; }
+    [Key(13)] public int DeleteSecondsLeft { get; set; }
+    [Key(14)] public bool IsLastPlayed { get; set; }
 }
 
 [MessagePackObject]

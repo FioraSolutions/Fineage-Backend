@@ -1,4 +1,5 @@
 using Fineage.Game;
+using Fineage.Protocol;
 
 namespace Fineage.Login;
 
@@ -22,13 +23,22 @@ public sealed class LoginService
     readonly HandoffTokens _tokens;
     readonly GameData _game;
     readonly Func<DateTimeOffset> _clock;
+    readonly int _deleteAfterDays;
 
-    public LoginService(IAccountStore store, HandoffTokens tokens, Func<DateTimeOffset>? clock = null, GameData? game = null)
+    public LoginService(
+        IAccountStore store,
+        HandoffTokens tokens,
+        Func<DateTimeOffset>? clock = null,
+        GameData? game = null,
+        int? deleteAfterDays = null)
     {
         _store = store;
         _tokens = tokens;
         _game = game ?? GameData.LoadDefault();
         _clock = clock ?? (() => DateTimeOffset.UtcNow);
+        _deleteAfterDays = deleteAfterDays ?? CharacterRules.DefaultDeleteAfterDays;
+        if (_deleteAfterDays < 0)
+            throw new ArgumentOutOfRangeException(nameof(deleteAfterDays));
     }
 
     public bool AccountExists(string account) => _store.AccountExists(account);
@@ -105,7 +115,8 @@ public sealed class LoginService
             return LoginResult<CharacterRecord>.Fail("class_not_supported", "Choose Human fighter or mystic.");
 
         var kit = CharacterInventory.Rows(_game.CreateStarterInventory(classId));
-        var status = _store.TryAddCharacter(account, name, classId, race, sex, out var created, kit);
+        var now = _clock();
+        var status = _store.TryAddCharacter(account, name, classId, race, sex, out var created, kit, createdAt: now, now: now);
         return status switch
         {
             CreateCharacterStatus.Ok when created != null => LoginResult<CharacterRecord>.Success(created),
@@ -120,26 +131,124 @@ public sealed class LoginService
     {
         if (!_store.AccountExists(account))
             return LoginResult<IReadOnlyList<CharacterRecord>>.Fail("auth_required", "Login required.");
-        return LoginResult<IReadOnlyList<CharacterRecord>>.Success(_store.List(account));
+        return LoginResult<IReadOnlyList<CharacterRecord>>.Success(_store.List(account, _clock()));
     }
 
-    public LoginResult<HandoffTicket> Select(string account, int characterId, string? name = null)
+    /// <summary>Id when <paramref name="characterId"/> is positive, otherwise name, otherwise slot. Slot −1 means unspecified.</summary>
+    public LoginResult<HandoffTicket> Select(string account, int characterId, string? name = null, int slot = -1)
     {
         if (!_store.AccountExists(account))
             return LoginResult<HandoffTicket>.Fail("auth_required", "Login required.");
+        if (characterId <= 0 && string.IsNullOrWhiteSpace(name) && slot < 0)
+            return LoginResult<HandoffTicket>.Fail("bad_request", "Character id, name, or slot is required.");
 
-        CharacterRecord? character = null;
-        if (characterId > 0)
-            character = _store.FindById(account, characterId);
-        else if (!string.IsNullOrWhiteSpace(name))
-            character = _store.FindByName(account, name);
-        else
-            return LoginResult<HandoffTicket>.Fail("bad_request", "Character id or name is required.");
-
+        var now = _clock();
+        var character = Resolve(account, characterId, name, slot, now);
         if (character == null)
-            return LoginResult<HandoffTicket>.Fail("not_found", "Character was not found on this account.");
+            return LoginResult<HandoffTicket>.Fail(LobbyProtocol.CharacterNotFound, "Character was not found on this account.");
+        if (character.IsPendingDelete)
+            return LoginResult<HandoffTicket>.Fail(LobbyProtocol.CharacterPendingDelete, "That character is pending deletion.");
 
-        return LoginResult<HandoffTicket>.Success(_tokens.Issue(character, _clock()));
+        if (!_store.TrySetLastAccess(account, character.Id, now))
+            return LoginResult<HandoffTicket>.Fail(LobbyProtocol.CharacterNotFound, "Character was not found on this account.");
+
+        return LoginResult<HandoffTicket>.Success(_tokens.Issue(character, now));
+    }
+
+    public LoginResult<CharacterDeleteOutcome> Delete(string account, int slot = -1, int characterId = 0)
+    {
+        if (!_store.AccountExists(account))
+            return LoginResult<CharacterDeleteOutcome>.Fail("auth_required", "Login required.");
+
+        var now = _clock();
+        var character = Resolve(account, characterId, name: null, slot, now);
+        if (character == null)
+            return LoginResult<CharacterDeleteOutcome>.Fail(LobbyProtocol.CharacterNotFound, "Character was not found on this account.");
+
+        if (ClanDeleteBlock(character) is { } clanBlock)
+            return LoginResult<CharacterDeleteOutcome>.Fail(LobbyProtocol.DeleteFailed, clanBlock);
+
+        int resolvedSlot = SlotOf(account, character.Id, now);
+        bool hard = _deleteAfterDays == 0;
+        bool stored = hard
+            ? _store.TryHardDelete(account, character.Id)
+            : _store.TrySetDeleteAt(account, character.Id, now.AddDays(_deleteAfterDays));
+        if (!stored)
+            return LoginResult<CharacterDeleteOutcome>.Fail(LobbyProtocol.DeleteFailed, "Character could not be deleted.");
+
+        return LoginResult<CharacterDeleteOutcome>.Success(new CharacterDeleteOutcome(
+            resolvedSlot,
+            character.Id,
+            hard,
+            _store.List(account, now)));
+    }
+
+    /// <summary>Clears a delete timer. An unknown slot or id fails with <see cref="LobbyProtocol.CharacterNotFound"/>; the login session does not send that on the wire.</summary>
+    public LoginResult<IReadOnlyList<CharacterRecord>> Restore(string account, int slot = -1, int characterId = 0)
+    {
+        if (!_store.AccountExists(account))
+            return LoginResult<IReadOnlyList<CharacterRecord>>.Fail("auth_required", "Login required.");
+
+        var now = _clock();
+        var character = Resolve(account, characterId, name: null, slot, now);
+        if (character == null)
+            return LoginResult<IReadOnlyList<CharacterRecord>>.Fail(LobbyProtocol.CharacterNotFound, "Character was not found on this account.");
+
+        if (character.IsPendingDelete && !_store.TryClearDeletion(account, character.Id))
+            return LoginResult<IReadOnlyList<CharacterRecord>>.Fail(LobbyProtocol.DeleteFailed, "Character could not be restored.");
+
+        return LoginResult<IReadOnlyList<CharacterRecord>>.Success(_store.List(account, now));
+    }
+
+    /// <summary>Character id with the greatest <see cref="CharacterRecord.LastAccess"/>, or 0 when nobody has played.</summary>
+    public static int LastPlayedId(IReadOnlyList<CharacterRecord> characters)
+    {
+        ArgumentNullException.ThrowIfNull(characters);
+        CharacterRecord? best = null;
+        foreach (var character in characters)
+        {
+            if (character.LastAccess == default)
+                continue;
+            if (best == null || character.LastAccess >= best.LastAccess)
+                best = character;
+        }
+
+        return best?.Id ?? 0;
+    }
+
+    CharacterRecord? Resolve(string account, int characterId, string? name, int slot, DateTimeOffset now)
+    {
+        var roster = _store.List(account, now);
+        if (characterId > 0)
+            return roster.FirstOrDefault(c => c.Id == characterId);
+        if (!string.IsNullOrWhiteSpace(name))
+            return roster.FirstOrDefault(c => string.Equals(c.Name, name.Trim(), StringComparison.OrdinalIgnoreCase));
+        if (slot >= 0 && slot < roster.Count)
+            return roster[slot];
+        return null;
+    }
+
+    int SlotOf(string account, int characterId, DateTimeOffset now)
+    {
+        var roster = _store.List(account, now);
+        for (int i = 0; i < roster.Count; i++)
+        {
+            if (roster[i].Id == characterId)
+                return i;
+        }
+
+        return -1;
+    }
+
+    /// <summary>
+    /// Clan membership is not implemented. Mobius refuses a clan member (reason 2) and a clan leader (reason 3).
+    /// Return a player-facing sentence when that data exists; null allows the delete.
+    /// </summary>
+    static string? ClanDeleteBlock(CharacterRecord character)
+    {
+        if (string.IsNullOrEmpty(character.Account))
+            return "Character could not be deleted.";
+        return null;
     }
 
     /// <summary>Register when the account is new, create the Human when missing, then select.</summary>

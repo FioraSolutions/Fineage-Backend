@@ -23,11 +23,15 @@ public enum MsgType : ushort
     /// <summary>Zone chat. Fan-out is <see cref="CreatureSay"/>.</summary>
     Say = 8,
 
-    // Login C → S
+    // Login C → S. Canonical lobby set; see LobbyProtocol.
     Register = 20,
     CreateCharacter = 21,
     ListCharacters = 22,
     SelectCharacter = 23,
+    /// <summary>Mark a roster slot for deletion. See <see cref="LobbyProtocol"/>.</summary>
+    DeleteCharacter = 24,
+    /// <summary>Clear a pending delete. See <see cref="LobbyProtocol"/>.</summary>
+    RestoreCharacter = 25,
 
     // Zone S → C
     HelloAck = 1001,
@@ -53,12 +57,16 @@ public enum MsgType : ushort
     /// <summary>Active abnormal effects on a creature. Same value as <see cref="V2.MsgType.AbnormalStatusUpdate"/>.</summary>
     AbnormalStatusUpdate = 1017,
 
-    // Login S → C
+    // Login S → C. Canonical lobby set; see LobbyProtocol.
     RegisterOk = 1020,
     CharacterCreated = 1021,
     CharacterList = 1022,
     Handoff = 1023,
     LoginOk = 1024,
+    /// <summary>Delete accepted. A fresh <see cref="CharacterList"/> follows.</summary>
+    CharacterDeleted = 1025,
+    /// <summary>Delete rejected. The roster is not resent.</summary>
+    CharacterDeleteFailed = 1026,
 
     Error = 1099
 }
