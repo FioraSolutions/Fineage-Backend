@@ -1,5 +1,5 @@
 {
-  "reference": "Hand-written Interlude item templates. Ids, names, slots, weapon types, armor types, icons, magic flag, stackability, and pDef were checked against L2J Mobius CT 0 Interlude (L2J_Mobius_CT_0_Interlude). This file is not Mobius data.",
+  "reference": "Hand-written Interlude item templates. Ids, names, slots, weapon types, armor types, icons, crystal grades, equip conditions, magic flag, stackability, and pDef were checked against L2J Mobius CT 0 Interlude. This file is not Mobius data. equip fields are the player conditions from that item's cond block: races, classes, sex, hero, clanLeader, pvp, minLevel, pledgeClass, castle, clanHalls, maxPk, expertise, and all/any/not.",
   "items": [
     {
       "id": 2369,
@@ -51,7 +51,8 @@
       "bodySlot": "chest",
       "armorType": "magic",
       "pDef": 17,
-      "icon": "icon.armor_t01_u_i00"
+      "icon": "icon.armor_t01_u_i00",
+      "equip": { "races": ["human", "elf", "dark_elf", "orc", "dwarf"] }
     },
     {
       "id": 461,
@@ -60,7 +61,8 @@
       "bodySlot": "legs",
       "armorType": "magic",
       "pDef": 10,
-      "icon": "icon.armor_t01_l_i00"
+      "icon": "icon.armor_t01_l_i00",
+      "equip": { "races": ["human", "elf", "dark_elf", "orc", "dwarf"] }
     },
     {
       "id": 5588,
@@ -74,6 +76,66 @@
       "kind": "etc",
       "stackable": true,
       "icon": "icon.etc_adena_i00"
+    },
+    {
+      "id": 6611,
+      "name": "Infinity Blade",
+      "kind": "weapon",
+      "bodySlot": "rhand",
+      "weaponType": "sword",
+      "crystal": "s",
+      "icon": "icon.weapon_the_sword_of_hero_i00",
+      "equip": { "hero": true }
+    },
+    {
+      "id": 7682,
+      "name": "Maiden's Hairpin",
+      "kind": "armor",
+      "bodySlot": "hair2",
+      "icon": "icon.accessory_maidens_hairpin_i00",
+      "equip": { "sex": "female" }
+    },
+    {
+      "id": 8923,
+      "name": "Scar",
+      "kind": "armor",
+      "bodySlot": "hair",
+      "icon": "icon.Accessary_scar_i00",
+      "equip": { "sex": "male" }
+    },
+    {
+      "id": 7850,
+      "name": "Clan Oath Helm",
+      "kind": "armor",
+      "bodySlot": "head",
+      "crystal": "d",
+      "icon": "icon.armor_helmet_i00",
+      "equip": { "pledgeClass": 1 }
+    },
+    {
+      "id": 7860,
+      "name": "Apella Helm",
+      "kind": "armor",
+      "bodySlot": "head",
+      "crystal": "a",
+      "icon": "icon.armor_helmet_i00",
+      "equip": { "pledgeClass": 4 }
+    },
+    {
+      "id": 6834,
+      "name": "Circlet of Innadril",
+      "kind": "armor",
+      "bodySlot": "hair",
+      "icon": "icon.accessory_pledge_cap1_i00",
+      "equip": { "all": [{ "castle": 6 }, { "pledgeClass": 2 }] }
+    },
+    {
+      "id": 6841,
+      "name": "The Lord's Crown",
+      "kind": "armor",
+      "bodySlot": "hair",
+      "icon": "icon.accessory_crown_i00",
+      "equip": { "all": [{ "castle": -1 }, { "pledgeClass": -1 }] }
     }
   ]
 }

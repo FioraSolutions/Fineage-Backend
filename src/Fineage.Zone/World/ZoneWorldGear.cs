@@ -70,12 +70,14 @@ public sealed partial class ZoneWorld
         if (!TryLivePlayer(session, out var player, out var error))
             return error;
 
-        // Class and grade restrictions are not applied yet.
         var item = player.Inventory!.Find(objectId);
         if (item == null)
             return InventoryProtocol.NotOwned;
         if (!item.Template.Equippable)
             return InventoryProtocol.NotEquippable;
+        // Unequip skips conditions. There is no cast state, so weapon changes are not deferred.
+        if (!item.IsEquipped && Restriction(player, item) is { } denied)
+            return denied;
 
         var before = PaperdollSnapshot(player.Inventory);
         try
@@ -168,6 +170,7 @@ public sealed partial class ZoneWorld
         if (changed.Count == 0)
             return false;
 
+        RefreshGradePenalty(player);
         toSelf.Add(Pack(session, MsgType.InventoryUpdate, InventoryMessages.Modify(changed)));
         toSelf.Add(Pack(session, MsgType.UserInfo, UserInfo(player)));
         byte[] body = MessagePackSerializer.Serialize(CharInfo(player));
@@ -201,4 +204,80 @@ public sealed partial class ZoneWorld
         changed.Sort(static (a, b) => a.ObjectId.CompareTo(b.ObjectId));
         return changed;
     }
+
+    /// <summary>
+    /// Clan, hero, castle, and PvP standing used by equip conditions.
+    /// Defaults are an ordinary character: not a hero, not in a clan, not PvP flagged.
+    /// </summary>
+    public bool TrySetEquipStanding(int objectId, PlayerEquipStanding standing)
+    {
+        ArgumentNullException.ThrowIfNull(standing);
+        lock (_gate)
+        {
+            if (!_byId.TryGetValue(objectId, out var entity) || entity.Kind != ZoneEntityKind.Player)
+                return false;
+            entity.Hero = standing.Hero;
+            entity.InClan = standing.InClan;
+            entity.ClanLeader = standing.ClanLeader;
+            entity.PledgeClass = standing.PledgeClass;
+            entity.CastleId = standing.CastleId;
+            entity.HideoutId = standing.HideoutId;
+            entity.PvpFlagged = standing.PvpFlagged;
+            entity.PkKills = standing.PkKills;
+            entity.ExpertiseBonus = standing.ExpertiseBonus;
+            RefreshGradePenalty(entity);
+            return true;
+        }
+    }
+
+    void RefreshGradePenalty(ZoneEntity player)
+    {
+        if (player.Inventory == null)
+            return;
+        var penalty = GradePenalty.Compute(
+            player.Inventory.Items,
+            Expertise.ForLevel(player.Level),
+            player.ExpertiseBonus,
+            _expertisePenalty);
+        player.WeaponGradePenalty = penalty.Weapon;
+        player.ArmorGradePenalty = penalty.Armor;
+    }
+
+    static string? Restriction(ZoneEntity player, ItemInstance item)
+    {
+        var deny = item.Template.Equip?.Deny(Actor(player));
+        return deny == null ? null : EquipDenyCode(deny.Value);
+    }
+
+    static EquipActor Actor(ZoneEntity player) => new(
+        player.ClassId,
+        player.Race,
+        player.Sex,
+        player.Level,
+        player.Hero,
+        player.InClan,
+        player.ClanLeader,
+        player.PledgeClass,
+        player.CastleId,
+        player.HideoutId,
+        player.PvpFlagged,
+        player.PkKills);
+
+    static string EquipDenyCode(EquipDeny deny) => deny switch
+    {
+        EquipDeny.Class => InventoryProtocol.ClassRestricted,
+        EquipDeny.Race => InventoryProtocol.RaceRestricted,
+        EquipDeny.Sex => InventoryProtocol.SexRestricted,
+        EquipDeny.Hero => InventoryProtocol.HeroRestricted,
+        EquipDeny.ClanLeader => InventoryProtocol.ClanLeaderRestricted,
+        EquipDeny.Pledge => InventoryProtocol.PledgeRestricted,
+        EquipDeny.Pvp => InventoryProtocol.PvpRestricted,
+        EquipDeny.Level => InventoryProtocol.LevelRestricted,
+        EquipDeny.Castle => InventoryProtocol.CastleRestricted,
+        EquipDeny.ClanHall => InventoryProtocol.ClanHallRestricted,
+        EquipDeny.Pk => InventoryProtocol.PkRestricted,
+        EquipDeny.Grade => InventoryProtocol.GradeRestricted,
+        EquipDeny.Condition => InventoryProtocol.ConditionRestricted,
+        _ => InventoryProtocol.ConditionRestricted
+    };
 }

@@ -44,10 +44,27 @@ namespace Fineage.Protocol;
 /// <item><description><see cref="BadSlot"/> — paperdoll index outside 0..16.</description></item>
 /// <item><description><see cref="Empty"/> — unequip of an empty paperdoll index.</description></item>
 /// <item><description><see cref="Forbidden"/> — <see cref="MsgType.GiveItem"/> while admin commands are off.</description></item>
+/// <item><description><see cref="ClassRestricted"/> — class id is not in the item's class list. State is unchanged.</description></item>
+/// <item><description><see cref="RaceRestricted"/> — race is not in the item's race list.</description></item>
+/// <item><description><see cref="SexRestricted"/> — sex does not match (0 male, 1 female).</description></item>
+/// <item><description><see cref="HeroRestricted"/> — hero flag does not match. Hero weapons require hero.</description></item>
+/// <item><description><see cref="ClanLeaderRestricted"/> — pledge class -1, or an explicit clan-leader flag, and the character is not the leader.</description></item>
+/// <item><description><see cref="PledgeRestricted"/> — not in a clan, or pledge class is below the item's rank. A clan leader passes a positive rank.</description></item>
+/// <item><description><see cref="PvpRestricted"/> — PvP flag does not match the item.</description></item>
+/// <item><description><see cref="LevelRestricted"/> — level is below the item's minimum.</description></item>
+/// <item><description><see cref="CastleRestricted"/> — castle id does not match. -1 means any castle. 0 with no clan passes.</description></item>
+/// <item><description><see cref="ClanHallRestricted"/> — clan hall id does not match. -1 means any hall.</description></item>
+/// <item><description><see cref="PkRestricted"/> — PK count is above the item's maximum.</description></item>
+/// <item><description><see cref="GradeRestricted"/> — item condition requires an exact Expertise rank. This is not the grade penalty; higher-grade gear still equips.</description></item>
+/// <item><description><see cref="ConditionRestricted"/> — a nested condition failed and no single reason applies.</description></item>
 /// <item><description><c>world</c> — <c>EnterWorld</c> has not completed. <c>bad_request</c> — body or count or unknown template.</description></item>
 /// </list>
 ///
-/// <para>Class and grade restrictions are not applied. Gear is written to the account store on each successful change and again on leave.</para>
+/// <para>Unequip does not re-check conditions. Changing weapons while casting is not applied: the zone has no cast state.
+/// A higher crystal grade is not rejected. <c>FINEAGE_EXPERTISE_PENALTY</c> defaults to on (Mobius <c>ExpertisePenalty=True</c>).
+/// When it is on, <see cref="UserInfoMsg"/> keys 10–12 carry the weapon penalty, armor penalty, and grade-penalty skill level.
+/// Set the variable to <c>0</c>, <c>false</c>, or <c>no</c> to leave those keys at 0.
+/// Gear is written to the account store on each successful change and again on leave.</para>
 /// </summary>
 public static class InventoryProtocol
 {
@@ -58,4 +75,17 @@ public static class InventoryProtocol
     public const string BadSlot = "bad_slot";
     public const string Empty = "empty";
     public const string Forbidden = "forbidden";
+    public const string ClassRestricted = "class_restricted";
+    public const string RaceRestricted = "race_restricted";
+    public const string SexRestricted = "sex_restricted";
+    public const string HeroRestricted = "hero_restricted";
+    public const string ClanLeaderRestricted = "clan_leader_restricted";
+    public const string PledgeRestricted = "pledge_restricted";
+    public const string PvpRestricted = "pvp_restricted";
+    public const string LevelRestricted = "level_restricted";
+    public const string CastleRestricted = "castle_restricted";
+    public const string ClanHallRestricted = "clan_hall_restricted";
+    public const string PkRestricted = "pk_restricted";
+    public const string GradeRestricted = "grade_restricted";
+    public const string ConditionRestricted = "condition_restricted";
 }

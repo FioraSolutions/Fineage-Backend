@@ -18,9 +18,12 @@ public static class InventoryMessages
         float runSpeed,
         float walkSpeed,
         bool running,
-        PlayerInventory inventory)
+        PlayerInventory inventory,
+        int weaponGradePenalty = 0,
+        int armorGradePenalty = 0)
     {
         ArgumentNullException.ThrowIfNull(inventory);
+        var penalty = new GradePenalty(weaponGradePenalty, armorGradePenalty);
         return new UserInfoMsg
         {
             ObjectId = objectId,
@@ -32,7 +35,10 @@ public static class InventoryMessages
             RunSpeed = runSpeed,
             WalkSpeed = walkSpeed,
             Running = running,
-            Paperdoll = Paperdoll(inventory)
+            Paperdoll = Paperdoll(inventory),
+            WeaponGradePenalty = penalty.Weapon,
+            ArmorGradePenalty = penalty.Armor,
+            GradePenalty = penalty.SkillLevel
         };
     }
 

@@ -15,7 +15,9 @@ public sealed record ItemTemplate(
     EtcItemType EtcType = EtcItemType.None,
     bool MagicWeapon = false,
     bool Stackable = false,
-    int PDef = 0)
+    int PDef = 0,
+    CrystalGrade Crystal = CrystalGrade.None,
+    EquipRequirement? Equip = null)
 {
     public bool Equippable => BodySlot != global::Fineage.Game.BodySlot.None;
 }
