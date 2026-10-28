@@ -1,5 +1,6 @@
 using Fineage.Login;
 using Fineage.Protocol;
+using Fineage.Protocol.Net;
 using Fineage.Zone.World;
 using MessagePack;
 
@@ -10,6 +11,7 @@ public sealed class ZoneServer
     readonly HandoffTokens _tokens;
     readonly ZoneWorld _world;
     readonly Func<DateTimeOffset> _clock;
+    readonly int _maxMessagesPerSecond;
     int _nextSession = 1;
 
     public ZoneServer(HandoffTokens tokens, Func<DateTimeOffset>? clock = null)
@@ -18,10 +20,16 @@ public sealed class ZoneServer
     }
 
     public ZoneServer(HandoffTokens tokens, ZoneWorld world, Func<DateTimeOffset>? clock = null)
+        : this(tokens, world, clock, null)
+    {
+    }
+
+    public ZoneServer(HandoffTokens tokens, ZoneWorld world, Func<DateTimeOffset>? clock, ZoneServerOptions? options)
     {
         _tokens = tokens;
         _world = world;
         _clock = clock ?? (() => DateTimeOffset.UtcNow);
+        _maxMessagesPerSecond = options?.MaxMessagesPerSecond ?? ZoneNetSettings.MaxMessagesPerSecond;
     }
 
     public async Task HandleAsync(Stream stream, CancellationToken ct)
@@ -35,6 +43,34 @@ public sealed class ZoneServer
                 var frame = await FrameIO.ReadAsync(stream, ct).ConfigureAwait(false);
                 if (frame == null)
                     return;
+
+                await DispatchAsync(session, sessionId, frame.Value.Type, frame.Value.Body, ct).ConfigureAwait(false);
+            }
+        }
+        finally
+        {
+            await _world.LeaveAsync(session, CancellationToken.None).ConfigureAwait(false);
+        }
+    }
+
+    public async Task HandleAsync(PipelineConnection connection, CancellationToken ct)
+    {
+        var session = new ZoneSession(connection);
+        int sessionId = Interlocked.Increment(ref _nextSession);
+        var rate = new MessageRateGate(_maxMessagesPerSecond);
+        try
+        {
+            while (!ct.IsCancellationRequested)
+            {
+                var frame = await PipeFrames.ReadV2Async(connection.Reader, ct).ConfigureAwait(false);
+                if (frame == null)
+                    return;
+
+                if (!rate.TryConsume())
+                {
+                    await ErrorAsync(session, "rate_limit", "Too many messages per second.", ct).ConfigureAwait(false);
+                    return;
+                }
 
                 await DispatchAsync(session, sessionId, frame.Value.Type, frame.Value.Body, ct).ConfigureAwait(false);
             }
