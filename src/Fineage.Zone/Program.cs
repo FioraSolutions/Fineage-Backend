@@ -1,6 +1,7 @@
 using System.Net;
 using Fineage.Login;
 using Fineage.Protocol.Net;
+using Fineage.Protocol.Telemetry;
 using Fineage.Zone;
 
 if (args.Contains("--selftest"))
@@ -41,6 +42,7 @@ if (!BindAddress.TryResolve(bindText, out var bindAddress, out string bindDispla
 }
 
 var world = ZoneAoiSettings.CreateWorld();
+FineageTelemetry.OnlineCount = () => world.OnlinePlayerCount;
 var server = new ZoneServer(HandoffTokens.FromEnvironment(), world);
 string host = bindAddress.Equals(IPAddress.Any) ? "0.0.0.0" : bindDisplay;
 int maxConnections = ZoneNetSettings.MaxConnections;

@@ -85,6 +85,25 @@ public sealed class ZoneWorld
         }
     }
 
+    /// <summary>Players with an active zone session in the world (for OTEL <c>fineage.zone.online</c>).</summary>
+    public int OnlinePlayerCount
+    {
+        get
+        {
+            lock (_gate)
+            {
+                int count = 0;
+                foreach (var entity in _byId.Values)
+                {
+                    if (entity.Kind == ZoneEntityKind.Player && entity.Session is { InWorld: true })
+                        count++;
+                }
+
+                return count;
+            }
+        }
+    }
+
     public async Task<bool> TryEnterAsync(ZoneSession session, CancellationToken ct)
     {
         var toSelf = new List<Pending>();
