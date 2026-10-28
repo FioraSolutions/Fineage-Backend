@@ -91,6 +91,19 @@ public enum MsgType : ushort
     SkillUseRequest = 50,
     /// <summary>Character action panel / hotkey. See <see cref="ActionProtocol"/>.</summary>
     CharacterActionRequest = 51,
+    /// <summary>Olympiad status. Body is empty. See <see cref="OlympiadProtocol"/>.</summary>
+    OlympiadStatusRequest = 60,
+    /// <summary>Join a classed or non-classed queue. Body is <see cref="OlympiadRegisterRequestMsg"/>.</summary>
+    OlympiadRegisterRequest = 61,
+    /// <summary>Leave the waiting list. Empty body.</summary>
+    OlympiadUnregisterRequest = 62,
+    /// <summary>Leave a match. A loss, using the Mobius default or disconnect rule. Empty body.</summary>
+    OlympiadLeaveRequest = 63,
+    /// <summary>
+    /// Admin/test hook for <c>ReportOlympiadResult</c>. Off unless <c>FINEAGE_ZONE_ADMIN</c> is set.
+    /// Body is <see cref="AdminReportOlympiadResultMsg"/>.
+    /// </summary>
+    AdminReportOlympiadResult = 64,
     /// <summary>Seven Signs status snapshot. See <see cref="SevenSignsProtocol"/>.</summary>
     SevenSignsStatusRequest = 90,
     /// <summary>Seven Signs join or seal-stone contribution. See <see cref="SevenSignsProtocol"/>.</summary>
@@ -193,6 +206,14 @@ public enum MsgType : ushort
     SocialAction = 1068,
     /// <summary>Walk / run on actor. See <see cref="ActionProtocol"/>.</summary>
     ChangeMoveType = 1069,
+    /// <summary>Olympiad period, points, and queue. See <see cref="OlympiadProtocol"/>.</summary>
+    OlympiadStatus = 1070,
+    /// <summary>Current match, stadium, and phase.</summary>
+    OlympiadMatch = 1071,
+    /// <summary>Match points, winner, and gate-pass reward.</summary>
+    OlympiadResult = 1072,
+    /// <summary>Stadium, fight, or return countdown.</summary>
+    OlympiadCountdown = 1073,
     /// <summary>Seven Signs record (SSQStatus analogue). See <see cref="SevenSignsProtocol"/>.</summary>
     SevenSignsStatus = 1090,
     /// <summary>Seven Signs sky tint (SignsSky analogue). See <see cref="SevenSignsProtocol"/>.</summary>

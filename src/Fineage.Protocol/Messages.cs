@@ -1193,3 +1193,117 @@ public sealed class BossStatusEntryMsg
     [Key(9)] public bool Enabled { get; set; }
     [Key(10)] public bool Spawned { get; set; }
 }
+
+/// <summary>Opcode <see cref="MsgType.OlympiadStatusRequest"/> (60). Empty body.</summary>
+[MessagePackObject]
+public sealed class OlympiadStatusRequestMsg
+{
+}
+
+/// <summary>
+/// Opcode <see cref="MsgType.OlympiadRegisterRequest"/> (61).
+/// <see cref="Classed"/> 1 is the class queue. 0 is the non-classed queue.
+/// </summary>
+[MessagePackObject]
+public sealed class OlympiadRegisterRequestMsg
+{
+    [Key(0)] public int Classed { get; set; }
+}
+
+/// <summary>Opcode <see cref="MsgType.OlympiadUnregisterRequest"/> (62). Empty body.</summary>
+[MessagePackObject]
+public sealed class OlympiadUnregisterRequestMsg
+{
+}
+
+/// <summary>Opcode <see cref="MsgType.OlympiadLeaveRequest"/> (63). Empty body. Leaving a match is a loss.</summary>
+[MessagePackObject]
+public sealed class OlympiadLeaveRequestMsg
+{
+}
+
+/// <summary>
+/// Opcode <see cref="MsgType.AdminReportOlympiadResult"/> (64). Off unless <c>FINEAGE_ZONE_ADMIN</c> is set.
+/// <see cref="WinnerObjectId"/> 0 is a draw. Combat calls <c>ReportOlympiadResult</c> with the same pair.
+/// </summary>
+[MessagePackObject]
+public sealed class AdminReportOlympiadResultMsg
+{
+    [Key(0)] public int MatchId { get; set; }
+    [Key(1)] public int WinnerObjectId { get; set; }
+}
+
+/// <summary>Opcode <see cref="MsgType.OlympiadStatus"/> (1070).</summary>
+[MessagePackObject]
+public sealed class OlympiadStatusMsg
+{
+    [Key(0)] public int Period { get; set; }
+    [Key(1)] public int Cycle { get; set; }
+    [Key(2)] public bool InCompetition { get; set; }
+    [Key(3)] public long CompetitionStartUnixMs { get; set; }
+    [Key(4)] public long CompetitionEndUnixMs { get; set; }
+    [Key(5)] public long OlympiadEndUnixMs { get; set; }
+    [Key(6)] public long ValidationEndUnixMs { get; set; }
+    [Key(7)] public long NextWeeklyUnixMs { get; set; }
+    [Key(8)] public bool RegistrationOpen { get; set; }
+    [Key(9)] public bool Noble { get; set; }
+    [Key(10)] public int Points { get; set; }
+    [Key(11)] public int CompetitionsDone { get; set; }
+    [Key(12)] public int Won { get; set; }
+    [Key(13)] public int Lost { get; set; }
+    [Key(14)] public int Drawn { get; set; }
+    /// <summary>0 none, 1 classed queue, 2 non-classed queue.</summary>
+    [Key(15)] public int Queue { get; set; }
+    [Key(16)] public int MatchId { get; set; }
+    /// <summary>Stadium index, or -1 when this character is not in a match.</summary>
+    [Key(17)] public int StadiumId { get; set; }
+    [Key(18)] public int ClassId { get; set; }
+}
+
+/// <summary>Opcode <see cref="MsgType.OlympiadMatch"/> (1071). Sent to both participants.</summary>
+[MessagePackObject]
+public sealed class OlympiadMatchMsg
+{
+    [Key(0)] public int MatchId { get; set; }
+    [Key(1)] public int StadiumId { get; set; }
+    [Key(2)] public int ZoneId { get; set; }
+    [Key(3)] public bool Classed { get; set; }
+    /// <summary>0 countdown, 1 pause, 2 battle countdown, 3 fighting, 4 returning.</summary>
+    [Key(4)] public int Phase { get; set; }
+    [Key(5)] public int PlayerOneId { get; set; }
+    [Key(6)] public int PlayerTwoId { get; set; }
+    [Key(7)] public string PlayerOneName { get; set; } = "";
+    [Key(8)] public string PlayerTwoName { get; set; } = "";
+    [Key(9)] public int InstanceId { get; set; }
+}
+
+/// <summary>Opcode <see cref="MsgType.OlympiadResult"/> (1072).</summary>
+[MessagePackObject]
+public sealed class OlympiadResultMsg
+{
+    [Key(0)] public int MatchId { get; set; }
+    /// <summary>0 tie, 1 player one won, 2 player two won, 3 player one disconnected, 4 player two disconnected, 5 both disconnected, 6 player one defaulted, 7 player two defaulted, 8 both defaulted.</summary>
+    [Key(1)] public int Outcome { get; set; }
+    /// <summary>0 when there is no single winner (tie, both crashed, or a default).</summary>
+    [Key(2)] public int WinnerObjectId { get; set; }
+    [Key(3)] public int PointsOne { get; set; }
+    [Key(4)] public int PointsTwo { get; set; }
+    [Key(5)] public int DeltaOne { get; set; }
+    [Key(6)] public int DeltaTwo { get; set; }
+    [Key(7)] public int RewardItemId { get; set; }
+    [Key(8)] public int RewardCount { get; set; }
+    [Key(9)] public int CompetitionsDoneOne { get; set; }
+    [Key(10)] public int CompetitionsDoneTwo { get; set; }
+}
+
+/// <summary>
+/// Opcode <see cref="MsgType.OlympiadCountdown"/> (1073).
+/// <see cref="Kind"/> 1 is the stadium teleport, 2 is the fight start, 3 is the return to town.
+/// </summary>
+[MessagePackObject]
+public sealed class OlympiadCountdownMsg
+{
+    [Key(0)] public int MatchId { get; set; }
+    [Key(1)] public int Kind { get; set; }
+    [Key(2)] public int Seconds { get; set; }
+}

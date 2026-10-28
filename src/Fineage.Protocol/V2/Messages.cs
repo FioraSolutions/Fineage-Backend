@@ -578,3 +578,103 @@ public sealed partial class SiegeInfoMsg
     [Key(8)] public SiegeClanMsg[] Clans { get; set; } = [];
     [Key(9)] public long EndsUnixMs { get; set; }
 }
+
+/// <summary>Same keys as <see cref="Fineage.Protocol.OlympiadStatusRequestMsg"/>.</summary>
+[MessagePackObject]
+public sealed partial class OlympiadStatusRequestMsg
+{
+}
+
+/// <summary>Same keys as <see cref="Fineage.Protocol.OlympiadRegisterRequestMsg"/>.</summary>
+[MessagePackObject]
+public sealed partial class OlympiadRegisterRequestMsg
+{
+    [Key(0)] public int Classed { get; set; }
+}
+
+/// <summary>Same keys as <see cref="Fineage.Protocol.OlympiadUnregisterRequestMsg"/>.</summary>
+[MessagePackObject]
+public sealed partial class OlympiadUnregisterRequestMsg
+{
+}
+
+/// <summary>Same keys as <see cref="Fineage.Protocol.OlympiadLeaveRequestMsg"/>.</summary>
+[MessagePackObject]
+public sealed partial class OlympiadLeaveRequestMsg
+{
+}
+
+/// <summary>Same keys as <see cref="Fineage.Protocol.AdminReportOlympiadResultMsg"/>.</summary>
+[MessagePackObject]
+public sealed partial class AdminReportOlympiadResultMsg
+{
+    [Key(0)] public int MatchId { get; set; }
+    [Key(1)] public int WinnerObjectId { get; set; }
+}
+
+/// <summary>Same keys as <see cref="Fineage.Protocol.OlympiadStatusMsg"/>.</summary>
+[MessagePackObject]
+public sealed partial class OlympiadStatusMsg
+{
+    [Key(0)] public int Period { get; set; }
+    [Key(1)] public int Cycle { get; set; }
+    [Key(2)] public bool InCompetition { get; set; }
+    [Key(3)] public long CompetitionStartUnixMs { get; set; }
+    [Key(4)] public long CompetitionEndUnixMs { get; set; }
+    [Key(5)] public long OlympiadEndUnixMs { get; set; }
+    [Key(6)] public long ValidationEndUnixMs { get; set; }
+    [Key(7)] public long NextWeeklyUnixMs { get; set; }
+    [Key(8)] public bool RegistrationOpen { get; set; }
+    [Key(9)] public bool Noble { get; set; }
+    [Key(10)] public int Points { get; set; }
+    [Key(11)] public int CompetitionsDone { get; set; }
+    [Key(12)] public int Won { get; set; }
+    [Key(13)] public int Lost { get; set; }
+    [Key(14)] public int Drawn { get; set; }
+    [Key(15)] public int Queue { get; set; }
+    [Key(16)] public int MatchId { get; set; }
+    [Key(17)] public int StadiumId { get; set; }
+    [Key(18)] public int ClassId { get; set; }
+}
+
+/// <summary>Same keys as <see cref="Fineage.Protocol.OlympiadMatchMsg"/>.</summary>
+[MessagePackObject]
+public sealed partial class OlympiadMatchMsg
+{
+    [Key(0)] public int MatchId { get; set; }
+    [Key(1)] public int StadiumId { get; set; }
+    [Key(2)] public int ZoneId { get; set; }
+    [Key(3)] public bool Classed { get; set; }
+    [Key(4)] public int Phase { get; set; }
+    [Key(5)] public int PlayerOneId { get; set; }
+    [Key(6)] public int PlayerTwoId { get; set; }
+    [Key(7)] public string PlayerOneName { get; set; } = "";
+    [Key(8)] public string PlayerTwoName { get; set; } = "";
+    [Key(9)] public int InstanceId { get; set; }
+}
+
+/// <summary>Same keys as <see cref="Fineage.Protocol.OlympiadResultMsg"/>.</summary>
+[MessagePackObject]
+public sealed partial class OlympiadResultMsg
+{
+    [Key(0)] public int MatchId { get; set; }
+    [Key(1)] public int Outcome { get; set; }
+    [Key(2)] public int WinnerObjectId { get; set; }
+    [Key(3)] public int PointsOne { get; set; }
+    [Key(4)] public int PointsTwo { get; set; }
+    [Key(5)] public int DeltaOne { get; set; }
+    [Key(6)] public int DeltaTwo { get; set; }
+    [Key(7)] public int RewardItemId { get; set; }
+    [Key(8)] public int RewardCount { get; set; }
+    [Key(9)] public int CompetitionsDoneOne { get; set; }
+    [Key(10)] public int CompetitionsDoneTwo { get; set; }
+}
+
+/// <summary>Same keys as <see cref="Fineage.Protocol.OlympiadCountdownMsg"/>.</summary>
+[MessagePackObject]
+public sealed partial class OlympiadCountdownMsg
+{
+    [Key(0)] public int MatchId { get; set; }
+    [Key(1)] public int Kind { get; set; }
+    [Key(2)] public int Seconds { get; set; }
+}

@@ -12,6 +12,7 @@ using Fineage.Zone.NpcHtml;
 using Fineage.Zone.SevenSigns;
 using Fineage.Zone.Dungeons;
 using Fineage.Zone.Siege;
+using Fineage.Zone.Olympiad;
 using MessagePack;
 
 namespace Fineage.Zone.World;
@@ -95,6 +96,8 @@ sealed class ZoneEntity
     public long CombatUntilUnixMs { get; set; }
     /// <summary>Catacomb or necropolis id while inside a Seven Signs gate. 0 is outside. Runtime only, same as Mobius <c>isIn7sDungeon</c>.</summary>
     public int DungeonId { get; set; }
+    /// <summary>0 is the open world. An Olympiad stadium uses its zone id so the pair does not share knownlist with the town.</summary>
+    public int InstanceId { get; set; }
 }
 
 /// <summary>
@@ -123,6 +126,8 @@ public sealed partial class ZoneWorld
     readonly SiegeBoard _siege;
     readonly NpcHtmlCatalog _html;
     readonly BypassRegistry _bypasses;
+    readonly OlympiadBoard _olympiad;
+    readonly List<Pending> _olympiadHeld = [];
     readonly Dictionary<int, ZoneEntity> _byId = [];
     readonly DropCatalog _dropCatalog;
     readonly DropRates _dropRates;
@@ -151,7 +156,10 @@ public sealed partial class ZoneWorld
         BossSchedule? bosses = null,
         Random? bossRandom = null,
         NpcHtmlCatalog? html = null,
-        BypassRegistry? bypasses = null)
+        BypassRegistry? bypasses = null,
+        OlympiadBoard? olympiad = null,
+        OlympiadSettings? olympiadSettings = null,
+        Random? olympiadRandom = null)
     {
         _aoi = aoi ?? new SingleCellAoi();
         _game = game ?? GameData.LoadDefault();
@@ -178,6 +186,7 @@ public sealed partial class ZoneWorld
         _bosses = bosses ?? BossSchedule.LoadDefault(_clock, bossRandom);
         _html = html ?? NpcHtmlCatalog.LoadDefault();
         _bypasses = bypasses ?? BypassRegistry.CreateDefault(_html);
+        _olympiad = olympiad ?? new OlympiadBoard(_clock(), olympiadSettings ?? OlympiadSettings.FromEnvironment(), random: olympiadRandom);
         BootstrapSpawns();
         BootstrapBosses();
         BootstrapQuestNpcs();
@@ -380,8 +389,7 @@ public sealed partial class ZoneWorld
         _aoi.Move(entity.ObjectId, entity.X, entity.Y);
 
         var after = new HashSet<int>();
-        foreach (int id in _aoi.GetVisible(entity.ObjectId))
-            after.Add(id);
+        CollectVisible(entity, after);
 
         toSelf.Add(Pack(session, MsgType.MoveToAck, ack));
 
@@ -455,6 +463,10 @@ public sealed partial class ZoneWorld
             if (other.Session != null)
                 watchers.Add(other.Session);
         }
+
+        var olympiadOutbound = new List<Pending>();
+        NoteOlympiadDisconnect(entity, olympiadOutbound);
+        toOthers.AddRange(olympiadOutbound);
 
         if (entity.Inventory != null)
             SaveInventory(session, entity.Inventory);
@@ -547,9 +559,11 @@ public sealed partial class ZoneWorld
     List<ZoneEntity> OrderedVisible(int objectId)
     {
         var visible = new List<ZoneEntity>();
+        if (!_byId.TryGetValue(objectId, out var self))
+            return visible;
         foreach (int id in _aoi.GetVisible(objectId))
         {
-            if (_byId.TryGetValue(id, out var entity))
+            if (_byId.TryGetValue(id, out var entity) && entity.InstanceId == self.InstanceId)
                 visible.Add(entity);
         }
 

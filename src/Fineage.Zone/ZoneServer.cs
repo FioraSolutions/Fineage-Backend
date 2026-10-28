@@ -877,6 +877,67 @@ public sealed class ZoneServer
                     ZoneLog.Info($"RX CharacterAction session={sessionId} action={action.ActionId}");
                 break;
             }
+            case MsgType.OlympiadStatusRequest:
+            {
+                string? code = await _world.TryOlympiadStatusAsync(session, ct).ConfigureAwait(false);
+                await OlympiadErrorAsync(session, code, ct).ConfigureAwait(false);
+                if (code == null)
+                    ZoneLog.Info($"RX OlympiadStatus session={sessionId}");
+                break;
+            }
+            case MsgType.OlympiadRegisterRequest:
+            {
+                var register = Decode<OlympiadRegisterRequestMsg>(body);
+                if (register == null)
+                {
+                    await ErrorAsync(session, "bad_request", "OlympiadRegisterRequest body was not readable.", ct).ConfigureAwait(false);
+                    break;
+                }
+
+                string? code = await _world.TryOlympiadRegisterAsync(session, register, ct).ConfigureAwait(false);
+                await OlympiadErrorAsync(session, code, ct).ConfigureAwait(false);
+                if (code == null)
+                    ZoneLog.Info($"RX OlympiadRegister session={sessionId} classed={register.Classed}");
+                break;
+            }
+            case MsgType.OlympiadUnregisterRequest:
+            {
+                string? code = await _world.TryOlympiadUnregisterAsync(session, ct).ConfigureAwait(false);
+                await OlympiadErrorAsync(session, code, ct).ConfigureAwait(false);
+                if (code == null)
+                    ZoneLog.Info($"RX OlympiadUnregister session={sessionId}");
+                break;
+            }
+            case MsgType.OlympiadLeaveRequest:
+            {
+                string? code = await _world.TryOlympiadLeaveAsync(session, ct).ConfigureAwait(false);
+                await OlympiadErrorAsync(session, code, ct).ConfigureAwait(false);
+                if (code == null)
+                    ZoneLog.Info($"RX OlympiadLeave session={sessionId}");
+                break;
+            }
+            case MsgType.AdminReportOlympiadResult:
+            {
+                if (!_adminCommands)
+                {
+                    await ErrorAsync(session, InventoryProtocol.Forbidden, "AdminReportOlympiadResult is disabled.", ct)
+                        .ConfigureAwait(false);
+                    break;
+                }
+
+                var report = Decode<AdminReportOlympiadResultMsg>(body);
+                if (report == null)
+                {
+                    await ErrorAsync(session, "bad_request", "AdminReportOlympiadResult body was not readable.", ct).ConfigureAwait(false);
+                    break;
+                }
+
+                string? code = await _world.TryAdminReportOlympiadAsync(session, report.MatchId, report.WinnerObjectId, ct).ConfigureAwait(false);
+                await OlympiadErrorAsync(session, code, ct).ConfigureAwait(false);
+                if (code == null)
+                    ZoneLog.Info($"RX AdminReportOlympiadResult session={sessionId} match={report.MatchId} winner={report.WinnerObjectId}");
+                break;
+            }
             case MsgType.EnchantCancel:
             {
                 if (Decode<EnchantCancelMsg>(body) == null)
@@ -1178,6 +1239,35 @@ public sealed class ZoneServer
             SiegeProtocol.NotAttacker => "That clan is not attacking the castle.",
             SiegeProtocol.Store => "The siege could not be saved.",
             _ => "Siege request was rejected."
+        };
+        return ErrorAsync(session, code, message, ct);
+    }
+
+    static Task OlympiadErrorAsync(ZoneSession session, string? code, CancellationToken ct)
+    {
+        if (code == null)
+            return Task.CompletedTask;
+        string message = code switch
+        {
+            "world" => "EnterWorld first.",
+            "bad_request" => "Olympiad request was rejected.",
+            OlympiadProtocol.Disabled => "The Olympiad is disabled.",
+            OlympiadProtocol.Period => "The Grand Olympiad Games are not currently in progress.",
+            OlympiadProtocol.Noble => "Only noblesse can participate in the Olympiad.",
+            OlympiadProtocol.Subclass => "A subclass cannot enter the Olympiad.",
+            OlympiadProtocol.Cursed => "A cursed weapon cannot enter the Olympiad.",
+            OlympiadProtocol.Inventory => "Your inventory is too full for the Olympiad.",
+            OlympiadProtocol.Late => "Olympiad registration is closed for the last 10 minutes.",
+            OlympiadProtocol.Classed => "You are already on the classed waiting list.",
+            OlympiadProtocol.Registered => "You are already registered for the Olympiad.",
+            OlympiadProtocol.Points => "You do not have enough Olympiad points.",
+            OlympiadProtocol.Selected => "You are already selected for an Olympiad match.",
+            OlympiadProtocol.None => "You are not on an Olympiad waiting list.",
+            OlympiadProtocol.MatchMissing => "You are not in an Olympiad match.",
+            OlympiadProtocol.Phase => "That Olympiad match is not in progress.",
+            OlympiadProtocol.Winner => "That character is not in the match.",
+            OlympiadProtocol.Store => "The Olympiad could not be saved.",
+            _ => "Olympiad request was rejected."
         };
         return ErrorAsync(session, code, message, ct);
     }
