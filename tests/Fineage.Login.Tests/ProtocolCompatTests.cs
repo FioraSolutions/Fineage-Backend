@@ -72,6 +72,7 @@ public class ProtocolCompatTests
         Assert.Equal(48, (ushort)MsgType.SiegeListRequest);
         Assert.Equal(49, (ushort)MsgType.AdminCaptureCastle);
         Assert.Equal(50, (ushort)MsgType.SkillUseRequest);
+        Assert.Equal(51, (ushort)MsgType.CharacterActionRequest);
         Assert.Equal((ushort)MsgType.SiegeRegisterRequest, (ushort)Fineage.Protocol.V2.MsgType.SiegeRegisterRequest);
         Assert.Equal((ushort)MsgType.AdminCaptureCastle, (ushort)Fineage.Protocol.V2.MsgType.AdminCaptureCastle);
         Assert.Equal((ushort)MsgType.SkillUseRequest, (ushort)Fineage.Protocol.V2.MsgType.SkillUseRequest);
@@ -125,6 +126,15 @@ public class ProtocolCompatTests
         Assert.Equal(1064, (ushort)MsgType.SiegeInfo);
         Assert.Equal(1065, (ushort)MsgType.SkillList);
         Assert.Equal(1066, (ushort)MsgType.MagicSkillUse);
+        Assert.Equal(1067, (ushort)MsgType.ChangeWaitType);
+        Assert.Equal(1068, (ushort)MsgType.SocialAction);
+        Assert.Equal(1069, (ushort)MsgType.ChangeMoveType);
+        Assert.Equal((ushort)MsgType.CharacterActionRequest, (ushort)Fineage.Protocol.V2.MsgType.CharacterActionRequest);
+        Assert.Equal((ushort)MsgType.ChangeWaitType, (ushort)Fineage.Protocol.V2.MsgType.ChangeWaitType);
+        Assert.Equal((ushort)MsgType.SocialAction, (ushort)Fineage.Protocol.V2.MsgType.SocialAction);
+        Assert.Equal((ushort)MsgType.ChangeMoveType, (ushort)Fineage.Protocol.V2.MsgType.ChangeMoveType);
+        Assert.Equal(ActionProtocol.SitStand, 0);
+        Assert.Equal(ActionProtocol.WalkRun, 1);
         Assert.Equal((ushort)MsgType.SiegeInfo, (ushort)Fineage.Protocol.V2.MsgType.SiegeInfo);
         Assert.Equal((ushort)MsgType.SkillList, (ushort)Fineage.Protocol.V2.MsgType.SkillList);
         Assert.Equal(SiegeProtocol.MinClanLevel, 4);

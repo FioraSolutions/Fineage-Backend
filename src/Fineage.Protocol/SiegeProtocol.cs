@@ -15,7 +15,7 @@ namespace Fineage.Protocol;
 /// The owner clan is a defender and is not stored in <c>siege_clans</c>.
 /// Defender signup is <c>DEFENDER_NOT_APPROVED</c> until the owner approves.
 /// Requests are 46–49, after quests 42–45. The reply is 1064, after quest 1063.
-/// 50 and 1065–1069 stay free. Chat stays 1040–1049.
+/// 50 and 1065–1066 are skills. 51 and 1067–1069 are character actions. Chat stays 1040–1049.
 /// </remarks>
 public static class SiegeProtocol
 {

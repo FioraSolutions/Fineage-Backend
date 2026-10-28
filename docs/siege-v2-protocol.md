@@ -17,7 +17,7 @@ Interlude rules and defaults are in `Fineage.Protocol.SiegeProtocol` and `Fineag
 
 ## Opcodes
 
-Quests use **42–45** and **1061–1063**. This block is the next free ids. **50** and **1065–1069** stay unused. Seven Signs uses **90–91** and **1090–1091**. Catacomb and necropolis access uses **92** and **1092**. Chat stays **1040–1049**. Seven Signs system lines are **120–136**, so siege lines start at **140**.
+Quests use **42–45** and **1061–1063**. Skills use **50** and **1065–1066**. Character actions use **51** and **1067–1069**. This block is siege **46–49** and **1064**. Seven Signs uses **90–91** and **1090–1091**. Catacomb and necropolis access uses **92** and **1092**. Chat stays **1040–1049**. Seven Signs system lines are **120–136**, so siege lines start at **140**.
 
 | Direction | Id | Name | Body |
 |-----------|----|------|------|

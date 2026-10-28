@@ -89,6 +89,8 @@ public enum MsgType : ushort
     AdminCaptureCastle = 49,
     /// <summary>Cast a known skill. Body is <see cref="SkillUseRequestMsg"/>. See <see cref="SkillProtocol"/>.</summary>
     SkillUseRequest = 50,
+    /// <summary>Character action panel / hotkey. See <see cref="ActionProtocol"/>.</summary>
+    CharacterActionRequest = 51,
     /// <summary>Seven Signs status snapshot. See <see cref="SevenSignsProtocol"/>.</summary>
     SevenSignsStatusRequest = 90,
     /// <summary>Seven Signs join or seal-stone contribution. See <see cref="SevenSignsProtocol"/>.</summary>
@@ -180,6 +182,12 @@ public enum MsgType : ushort
     SkillList = 1065,
     /// <summary>Skill cast fan-out (self + AOI). See <see cref="SkillProtocol"/>.</summary>
     MagicSkillUse = 1066,
+    /// <summary>Sit / stand on actor. See <see cref="ActionProtocol"/>.</summary>
+    ChangeWaitType = 1067,
+    /// <summary>Social gesture on actor. See <see cref="ActionProtocol"/>.</summary>
+    SocialAction = 1068,
+    /// <summary>Walk / run on actor. See <see cref="ActionProtocol"/>.</summary>
+    ChangeMoveType = 1069,
     /// <summary>Seven Signs record (SSQStatus analogue). See <see cref="SevenSignsProtocol"/>.</summary>
     SevenSignsStatus = 1090,
     /// <summary>Seven Signs sky tint (SignsSky analogue). See <see cref="SevenSignsProtocol"/>.</summary>

@@ -85,6 +85,8 @@ public enum MsgType : ushort
     AdminCaptureCastle = 49,
     /// <summary>Same value as <see cref="Fineage.Protocol.MsgType.SkillUseRequest"/>.</summary>
     SkillUseRequest = 50,
+    /// <summary>Same value as <see cref="Fineage.Protocol.MsgType.CharacterActionRequest"/>.</summary>
+    CharacterActionRequest = 51,
     /// <summary>Same value as <see cref="Fineage.Protocol.MsgType.SevenSignsStatusRequest"/>.</summary>
     SevenSignsStatusRequest = 90,
     /// <summary>Same value as <see cref="Fineage.Protocol.MsgType.SevenSignsActionRequest"/>.</summary>
@@ -151,6 +153,12 @@ public enum MsgType : ushort
     SkillList = 1065,
     /// <summary>Same value as <see cref="Fineage.Protocol.MsgType.MagicSkillUse"/>.</summary>
     MagicSkillUse = 1066,
+    /// <summary>Same value as <see cref="Fineage.Protocol.MsgType.ChangeWaitType"/>.</summary>
+    ChangeWaitType = 1067,
+    /// <summary>Same value as <see cref="Fineage.Protocol.MsgType.SocialAction"/>.</summary>
+    SocialAction = 1068,
+    /// <summary>Same value as <see cref="Fineage.Protocol.MsgType.ChangeMoveType"/>.</summary>
+    ChangeMoveType = 1069,
     /// <summary>Same value as <see cref="Fineage.Protocol.MsgType.SevenSignsStatus"/>.</summary>
     SevenSignsStatus = 1090,
     /// <summary>Same value as <see cref="Fineage.Protocol.MsgType.SevenSignsSky"/>.</summary>
