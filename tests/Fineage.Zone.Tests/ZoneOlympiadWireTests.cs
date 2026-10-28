@@ -22,7 +22,7 @@ public class ZoneOlympiadWireTests
         Assert.Equal(CreateCharacterStatus.Ok, store.TryAddCharacter("oly", "Oly", HumanClasses.Fighter, 0, 0, out var created));
         Assert.NotNull(created);
         var world = new ZoneWorld(accounts: store, clock: () => Now);
-        await using var host = OlympiadHost.Start(tokens, world, () => Now);
+        await using var host = OlympiadHost.Start(tokens, world, () => Now, new ZoneServerOptions { AdminCommands = false });
         await using var peer = await OlympiadPeer.ConnectAsync(host.Port);
         await peer.AuthAsync(tokens.Issue(created, Now));
         await peer.EnterAsync();
