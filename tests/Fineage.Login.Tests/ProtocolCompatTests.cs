@@ -43,6 +43,7 @@ public class ProtocolCompatTests
         Assert.Equal(4, (ushort)MsgType.MoveTo);
         Assert.Equal(5, (ushort)MsgType.SelectTarget);
         Assert.Equal(6, (ushort)MsgType.AttackRequest);
+        Assert.Equal(9, (ushort)MsgType.Ping);
         Assert.Equal(1001, (ushort)MsgType.HelloAck);
         Assert.Equal(1002, (ushort)MsgType.AuthOk);
         Assert.Equal(1003, (ushort)MsgType.PlayerSpawned);
@@ -53,6 +54,7 @@ public class ProtocolCompatTests
         Assert.Equal(1008, (ushort)MsgType.MyTargetSelected);
         Assert.Equal(1009, (ushort)MsgType.Attack);
         Assert.Equal(1010, (ushort)MsgType.StatusUpdate);
+        Assert.Equal(1013, (ushort)MsgType.Pong);
         Assert.Equal(1099, (ushort)MsgType.Error);
     }
 
@@ -88,8 +90,8 @@ public class ProtocolCompatTests
     {
         ushort[] zone =
         [
-            1, 2, 3, 4, 5, 6, 8,
-            1001, 1002, 1003, 1004, 1005, 1006, 1007, 1008, 1009, 1010, 1012,
+            1, 2, 3, 4, 5, 6, 8, 9,
+            1001, 1002, 1003, 1004, 1005, 1006, 1007, 1008, 1009, 1010, 1012, 1013,
             1099
         ];
         ushort[] login =
