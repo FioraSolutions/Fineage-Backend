@@ -1,0 +1,57 @@
+name: deploy-pi
+
+# Pushes to main only (not pull_request) so CI never SSHes from PR builds.
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+concurrency:
+  group: deploy-pi-main
+  cancel-in-progress: false
+
+jobs:
+  deploy:
+    name: deploy-linux-arm64-to-pi
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup .NET
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: '10.0.x'
+
+      - name: Test
+        run: dotnet test Fineage.Backend.slnx --configuration Release --verbosity minimal
+
+      - name: Publish Login and Zone (linux-arm64 self-contained)
+        run: |
+          dotnet publish src/Fineage.Login/Fineage.Login.csproj \
+            -c Release -r linux-arm64 --self-contained true -o publish/login
+          dotnet publish src/Fineage.Zone/Fineage.Zone.csproj \
+            -c Release -r linux-arm64 --self-contained true -o publish/zone
+
+      - name: Tailscale
+        uses: tailscale/github-action@v3
+        with:
+          authkey: ${{ secrets.TAILSCALE_AUTHKEY }}
+          tags: tag:github-actions
+
+      - name: Configure SSH
+        env:
+          SSH_PRIVATE_KEY: ${{ secrets.FINEAGE_PI_SSH_PRIVATE_KEY }}
+        run: |
+          install -m 700 -d ~/.ssh
+          printf '%s\n' "$SSH_PRIVATE_KEY" > ~/.ssh/id_ed25519
+          chmod 600 ~/.ssh/id_ed25519
+
+      - name: Deploy to Raspberry Pi
+        env:
+          FINEAGE_PI_HOST: ${{ secrets.FINEAGE_PI_HOST }}
+          FINEAGE_PI_USER: ${{ secrets.FINEAGE_PI_USER }}
+          FINEAGE_PI_APP_ROOT: ${{ secrets.FINEAGE_PI_APP_ROOT }}
+          FINEAGE_PI_SSH_KEY: ~/.ssh/id_ed25519
+        run: |
+          chmod +x deploy/deploy-to-pi.sh deploy/run-login.sh deploy/run-zone.sh
+          deploy/deploy-to-pi.sh publish/login publish/zone
