@@ -877,3 +877,70 @@ public sealed class ClanJoinResultMsg
 {
     [Key(0)] public int Response { get; set; }
 }
+
+/// <summary>Opcode <see cref="MsgType.SevenSignsStatusRequest"/> (90). Page is ignored; the reply is the full record.</summary>
+[MessagePackObject]
+public sealed class SevenSignsStatusRequestMsg
+{
+    [Key(0)] public int Page { get; set; } = 1;
+}
+
+/// <summary>
+/// Opcode <see cref="MsgType.SevenSignsActionRequest"/> (91).
+/// <see cref="Action"/> is <see cref="SevenSignsProtocol.ActionJoin"/> or <see cref="SevenSignsProtocol.ActionContribute"/>.
+/// </summary>
+[MessagePackObject]
+public sealed class SevenSignsActionRequestMsg
+{
+    [Key(0)] public int Action { get; set; }
+    /// <summary>1 Dusk, 2 Dawn. Used by join.</summary>
+    [Key(1)] public int Cabal { get; set; }
+    /// <summary>1 Avarice, 2 Gnosis, 3 Strife. Used by join.</summary>
+    [Key(2)] public int Seal { get; set; }
+    [Key(3)] public int BlueStones { get; set; }
+    [Key(4)] public int GreenStones { get; set; }
+    [Key(5)] public int RedStones { get; set; }
+}
+
+/// <summary>Opcode <see cref="MsgType.SevenSignsStatus"/> (1090). One record instead of the four Interlude SSQStatus pages.</summary>
+[MessagePackObject]
+public sealed class SevenSignsStatusMsg
+{
+    [Key(0)] public int Period { get; set; }
+    [Key(1)] public int Cycle { get; set; }
+    [Key(2)] public int PlayerCabal { get; set; }
+    [Key(3)] public int PlayerSeal { get; set; }
+    [Key(4)] public int PlayerStoneCount { get; set; }
+    [Key(5)] public int PlayerAncientAdena { get; set; }
+    [Key(6)] public int PlayerContribution { get; set; }
+    [Key(7)] public int DawnScore { get; set; }
+    [Key(8)] public int DuskScore { get; set; }
+    [Key(9)] public int DawnFestivalScore { get; set; }
+    [Key(10)] public int DuskFestivalScore { get; set; }
+    [Key(11)] public long DawnStonePoints { get; set; }
+    [Key(12)] public long DuskStonePoints { get; set; }
+    [Key(13)] public int AvariceOwner { get; set; }
+    [Key(14)] public int GnosisOwner { get; set; }
+    [Key(15)] public int StrifeOwner { get; set; }
+    [Key(16)] public int DawnMembers { get; set; }
+    [Key(17)] public int DuskMembers { get; set; }
+    [Key(18)] public int WinningCabal { get; set; }
+    [Key(19)] public long NextChangeUnixMs { get; set; }
+    [Key(20)] public int SkyState { get; set; }
+    [Key(21)] public int DawnAvarice { get; set; }
+    [Key(22)] public int DawnGnosis { get; set; }
+    [Key(23)] public int DawnStrife { get; set; }
+    [Key(24)] public int DuskAvarice { get; set; }
+    [Key(25)] public int DuskGnosis { get; set; }
+    [Key(26)] public int DuskStrife { get; set; }
+    [Key(27)] public int PreviousWinner { get; set; }
+}
+
+/// <summary>Opcode <see cref="MsgType.SevenSignsSky"/> (1091). State 0 normal, 1 dusk, 2 dawn.</summary>
+[MessagePackObject]
+public sealed class SevenSignsSkyMsg
+{
+    [Key(0)] public int State { get; set; }
+    [Key(1)] public int Period { get; set; }
+    [Key(2)] public int WinningCabal { get; set; }
+}

@@ -3,6 +3,7 @@ using Fineage.Login;
 using Fineage.Protocol.Net;
 using Fineage.Protocol.Telemetry;
 using Fineage.Zone;
+using Fineage.Zone.SevenSigns;
 
 if (args.Contains("--selftest"))
 {
@@ -52,7 +53,8 @@ Console.CancelKeyPress += (_, e) =>
     shutdown.Cancel();
 };
 
-var world = ZoneAoiSettings.CreateWorld(accounts: accounts);
+var sevenSigns = SevenSignsEngine.OpenBesideAccounts(storePath);
+var world = ZoneAoiSettings.CreateWorld(accounts: accounts, sevenSigns: sevenSigns);
 world.StartSimulation(shutdown.Token);
 FineageTelemetry.OnlineCount = () => world.OnlinePlayerCount;
 string host = bindAddress.Equals(IPAddress.Any) ? "0.0.0.0" : bindDisplay;
@@ -78,6 +80,7 @@ if (string.IsNullOrWhiteSpace(Environment.GetEnvironmentVariable("FINEAGE_HANDOF
 }
 
 Console.WriteLine($"[ZONE] listen {bindDisplay}:{port} store={storePath} Talking Island (maxConn={maxConnections} outboundQ={outboundQueue} msgPerSec={maxMsgPerSec} interestRange={interestRange})");
+Console.WriteLine("[ZONE] Seven Signs period, cabal, and seal-stone scores are stored beside the account file as seven-signs.json.");
 Console.WriteLine("[ZONE] Auth.Password is the login handoff token. EnterWorld sends UserInfo, ItemList, the village, then a welcome SystemMessage. Say ALL is local; SHOUT is the zone.");
 if (adminCommands)
     Console.WriteLine("[ZONE] admin commands enabled (GiveItem).");

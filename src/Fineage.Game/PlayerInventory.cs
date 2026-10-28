@@ -301,6 +301,38 @@ public sealed class PlayerInventory
         }
     }
 
+    /// <summary>
+    /// Removes <paramref name="count"/> from the stack of <paramref name="itemId"/>.
+    /// <paramref name="removed"/> is true when the stack is gone; <paramref name="stack"/> is that row with count 0.
+    /// Otherwise <paramref name="stack"/> is the reduced stack.
+    /// </summary>
+    public bool TryConsume(int itemId, int count, out ItemInstance? stack, out bool removed)
+    {
+        stack = null;
+        removed = false;
+        if (count < 1)
+            return false;
+
+        var found = FindByItemId(itemId);
+        if (found == null || found.Count < count)
+            return false;
+
+        if (found.Count == count)
+        {
+            if (found.IsEquipped)
+                Unequip(found);
+            found.Count = 0;
+            _items.Remove(found);
+            stack = found;
+            removed = true;
+            return true;
+        }
+
+        found.Count -= count;
+        stack = found;
+        return true;
+    }
+
     public void Unequip(int objectId) => Unequip(Require(objectId));
 
     public void Unequip(ItemInstance item)

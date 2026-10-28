@@ -741,6 +741,34 @@
         "maxEnchant": 16,
         "bonusRate": 0
       }
+    },
+    {
+      "id": 6360,
+      "name": "Blue Seal Stone",
+      "kind": "etc",
+      "stackable": true,
+      "icon": "icon.etc_sealstone_blue_i00"
+    },
+    {
+      "id": 6361,
+      "name": "Green Seal Stone",
+      "kind": "etc",
+      "stackable": true,
+      "icon": "icon.etc_sealstone_green_i00"
+    },
+    {
+      "id": 6362,
+      "name": "Red Seal Stone",
+      "kind": "etc",
+      "stackable": true,
+      "icon": "icon.etc_sealstone_red_i00"
+    },
+    {
+      "id": 6388,
+      "name": "Lord's Certificate of Approval",
+      "kind": "etc",
+      "stackable": true,
+      "icon": "icon.etc_permit_i00"
     }
   ]
 }

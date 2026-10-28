@@ -496,6 +496,30 @@ public sealed class ZoneServer
                     ZoneLog.Info($"RX PartyLeave session={sessionId}");
                 break;
             }
+            case MsgType.SevenSignsStatusRequest:
+            {
+                string? code = await _world.TrySevenSignsStatusAsync(session, ct).ConfigureAwait(false);
+                if (code == "world")
+                    await ErrorAsync(session, "world", "EnterWorld first.", ct).ConfigureAwait(false);
+                else if (code == null)
+                    ZoneLog.Info($"RX SevenSignsStatus session={sessionId}");
+                break;
+            }
+            case MsgType.SevenSignsActionRequest:
+            {
+                var action = Decode<SevenSignsActionRequestMsg>(body);
+                if (action == null)
+                {
+                    await ErrorAsync(session, "bad_request", "SevenSignsAction body was not readable.", ct).ConfigureAwait(false);
+                    break;
+                }
+
+                string? code = await _world.TrySevenSignsActionAsync(session, action, ct).ConfigureAwait(false);
+                await SevenSignsErrorAsync(session, code, ct).ConfigureAwait(false);
+                if (code == null)
+                    ZoneLog.Info($"RX SevenSignsAction session={sessionId} action={action.Action} cabal={action.Cabal} seal={action.Seal}");
+                break;
+            }
             case MsgType.PartyKickRequest:
             {
                 var kick = Decode<PartyKickRequestMsg>(body);
@@ -844,6 +868,26 @@ public sealed class ZoneServer
             QuestProtocol.Item => ErrorAsync(session, code, "You do not have the required item.", ct),
             QuestProtocol.Npc => ErrorAsync(session, code, "That NPC is not here.", ct),
             _ => ErrorAsync(session, "bad_request", "Quest request was rejected.", ct)
+        };
+    }
+
+    static Task SevenSignsErrorAsync(ZoneSession session, string? code, CancellationToken ct)
+    {
+        if (code == null)
+            return Task.CompletedTask;
+        return code switch
+        {
+            "world" => ErrorAsync(session, "world", "EnterWorld first.", ct),
+            "bad_request" => ErrorAsync(session, "bad_request", "Seven Signs request was rejected.", ct),
+            SevenSignsProtocol.PeriodClosed => ErrorAsync(session, code, "Seven Signs is not open for that during this period.", ct),
+            SevenSignsProtocol.BadCabal => ErrorAsync(session, code, "Cabal join was rejected.", ct),
+            SevenSignsProtocol.BadSeal => ErrorAsync(session, code, "Seal choice was rejected.", ct),
+            SevenSignsProtocol.ClassTooLow => ErrorAsync(session, code, "A class transfer is required to join a cabal.", ct),
+            SevenSignsProtocol.CastleBlocked => ErrorAsync(session, code, "Castle owners cannot join Dusk.", ct),
+            SevenSignsProtocol.FeeRequired => ErrorAsync(session, code, "Dawn requires a certificate of approval or the adena fee.", ct),
+            SevenSignsProtocol.ContributionRejected => ErrorAsync(session, code, "That contribution exceeds the seal stone cap.", ct),
+            SevenSignsProtocol.StonesMissing => ErrorAsync(session, code, "Not enough seal stones.", ct),
+            _ => ErrorAsync(session, "bad_request", "Seven Signs request was rejected.", ct)
         };
     }
 

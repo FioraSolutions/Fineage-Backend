@@ -7,6 +7,7 @@ using Fineage.Zone.Combat;
 using Fineage.Zone.Interest;
 using Fineage.Zone.Spawns;
 using Fineage.Zone.Drops;
+using Fineage.Zone.SevenSigns;
 using MessagePack;
 
 namespace Fineage.Zone.World;
@@ -102,6 +103,7 @@ public sealed partial class ZoneWorld
     readonly IEnchantRandom _enchantRandom;
     readonly EnchantRates _enchantRates;
     readonly QuestMachine _quests;
+    readonly SevenSignsEngine _sevenSigns;
     readonly Dictionary<int, ZoneEntity> _byId = [];
     readonly DropCatalog _dropCatalog;
     readonly DropRates _dropRates;
@@ -121,7 +123,8 @@ public sealed partial class ZoneWorld
         string? activeMapId = null,
         Func<DateTimeOffset>? clock = null,
         IEnchantRandom? enchantRandom = null,
-        EnchantRates? enchantRates = null)
+        EnchantRates? enchantRates = null,
+        SevenSignsEngine? sevenSigns = null)
     {
         _aoi = aoi ?? new SingleCellAoi();
         _game = game ?? GameData.LoadDefault();
@@ -139,6 +142,7 @@ public sealed partial class ZoneWorld
         _enchantRates = enchantRates ?? EnchantRates.Default;
         _enchantRates.Validate();
         _quests = new QuestMachine(_game.Quests, _game.Items);
+        _sevenSigns = sevenSigns ?? new SevenSignsEngine(new SystemGameClock());
         BootstrapSpawns();
         BootstrapQuestNpcs();
         LoadClans();
@@ -208,6 +212,7 @@ public sealed partial class ZoneWorld
         if (!removed)
             return;
 
+        _sevenSigns.Save();
         ZoneLog.LeaveWorld(session);
         await FlushOthersAsync(toOthers, ct).ConfigureAwait(false);
     }

@@ -435,3 +435,65 @@ public sealed partial class ClanJoinResultMsg
 {
     [Key(0)] public int Response { get; set; }
 }
+
+/// <summary>Same keys as <see cref="Fineage.Protocol.SevenSignsStatusRequestMsg"/>.</summary>
+[MessagePackObject]
+public sealed partial class SevenSignsStatusRequestMsg
+{
+    [Key(0)] public int Page { get; set; } = 1;
+}
+
+/// <summary>Same keys as <see cref="Fineage.Protocol.SevenSignsActionRequestMsg"/>.</summary>
+[MessagePackObject]
+public sealed partial class SevenSignsActionRequestMsg
+{
+    [Key(0)] public int Action { get; set; }
+    [Key(1)] public int Cabal { get; set; }
+    [Key(2)] public int Seal { get; set; }
+    [Key(3)] public int BlueStones { get; set; }
+    [Key(4)] public int GreenStones { get; set; }
+    [Key(5)] public int RedStones { get; set; }
+}
+
+/// <summary>Same keys as <see cref="Fineage.Protocol.SevenSignsStatusMsg"/>.</summary>
+[MessagePackObject]
+public sealed partial class SevenSignsStatusMsg
+{
+    [Key(0)] public int Period { get; set; }
+    [Key(1)] public int Cycle { get; set; }
+    [Key(2)] public int PlayerCabal { get; set; }
+    [Key(3)] public int PlayerSeal { get; set; }
+    [Key(4)] public int PlayerStoneCount { get; set; }
+    [Key(5)] public int PlayerAncientAdena { get; set; }
+    [Key(6)] public int PlayerContribution { get; set; }
+    [Key(7)] public int DawnScore { get; set; }
+    [Key(8)] public int DuskScore { get; set; }
+    [Key(9)] public int DawnFestivalScore { get; set; }
+    [Key(10)] public int DuskFestivalScore { get; set; }
+    [Key(11)] public long DawnStonePoints { get; set; }
+    [Key(12)] public long DuskStonePoints { get; set; }
+    [Key(13)] public int AvariceOwner { get; set; }
+    [Key(14)] public int GnosisOwner { get; set; }
+    [Key(15)] public int StrifeOwner { get; set; }
+    [Key(16)] public int DawnMembers { get; set; }
+    [Key(17)] public int DuskMembers { get; set; }
+    [Key(18)] public int WinningCabal { get; set; }
+    [Key(19)] public long NextChangeUnixMs { get; set; }
+    [Key(20)] public int SkyState { get; set; }
+    [Key(21)] public int DawnAvarice { get; set; }
+    [Key(22)] public int DawnGnosis { get; set; }
+    [Key(23)] public int DawnStrife { get; set; }
+    [Key(24)] public int DuskAvarice { get; set; }
+    [Key(25)] public int DuskGnosis { get; set; }
+    [Key(26)] public int DuskStrife { get; set; }
+    [Key(27)] public int PreviousWinner { get; set; }
+}
+
+/// <summary>Same keys as <see cref="Fineage.Protocol.SevenSignsSkyMsg"/>.</summary>
+[MessagePackObject]
+public sealed partial class SevenSignsSkyMsg
+{
+    [Key(0)] public int State { get; set; }
+    [Key(1)] public int Period { get; set; }
+    [Key(2)] public int WinningCabal { get; set; }
+}
