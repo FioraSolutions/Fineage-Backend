@@ -1,0 +1,10 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <OutputType>Exe</OutputType>
+    <RootNamespace>Fineage.Zone</RootNamespace>
+  </PropertyGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\Fineage.Protocol\Fineage.Protocol.csproj" />
+    <ProjectReference Include="..\Fineage.Login\Fineage.Login.csproj" />
+  </ItemGroup>
+</Project>
