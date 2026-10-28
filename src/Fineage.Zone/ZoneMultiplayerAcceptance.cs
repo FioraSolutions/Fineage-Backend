@@ -451,6 +451,114 @@ public static class ZoneMultiplayerAcceptance
         right.ExpectQuiet();
     }
 
+    public static async Task RunTradeSharedAsync()
+    {
+        var tokens = new HandoffTokens(HandoffTokens.DefaultSecret);
+        var login = new LoginService(JsonAccountStore.InMemory(), tokens);
+        var seller = Play(login, "trade1", "Seller", HumanClasses.Fighter);
+        var buyer = Play(login, "trade2", "Buyer", HumanClasses.Mystic);
+        if (seller.CharacterId == buyer.CharacterId)
+            throw new InvalidOperationException("trade selftest ids collided");
+
+        var world = new ZoneWorld();
+        await using var zone = ZoneHost.Start(tokens, world);
+        await using var left = await ZonePeer.ConnectAsync(zone.Port).ConfigureAwait(false);
+        await using var right = await ZonePeer.ConnectAsync(zone.Port).ConfigureAwait(false);
+
+        await left.AuthAsync(seller).ConfigureAwait(false);
+        await right.AuthAsync(buyer).ConfigureAwait(false);
+        var leftSpawn = await left.EnterAsync(expectOthers: 0).ConfigureAwait(false);
+        await right.EnterAsync(seller, buyer, TalkingIsland.NpcCount).ConfigureAwait(false);
+        _ = await left.ExpectAsync<CharInfoMsg>(MsgType.CharInfo).ConfigureAwait(false);
+
+        int x = leftSpawn.Spawned.X;
+        int y = leftSpawn.Spawned.Y;
+        int z = leftSpawn.Spawned.Z;
+        await MovePeerNearAsync(right, left, x, y, z).ConfigureAwait(false);
+
+        int tradableObjectId = 0;
+        foreach (var item in leftSpawn.Items.Items)
+        {
+            if (item.ItemId == 5588)
+            {
+                tradableObjectId = item.ObjectId;
+                break;
+            }
+        }
+
+        if (tradableObjectId == 0)
+            throw new InvalidOperationException("fighter starter kit missing item 5588");
+
+        await left.SendAsync(MsgType.TradeRequest, new TradeRequestMsg { TargetObjectId = buyer.CharacterId })
+            .ConfigureAwait(false);
+        var ask = await right.ExpectAsync<TradeAskMsg>(MsgType.TradeAsk).ConfigureAwait(false);
+        if (ask.RequestorObjectId != seller.CharacterId || ask.RequestorName != seller.CharacterName)
+            throw new InvalidOperationException("TradeAsk mismatch");
+
+        await right.SendAsync(MsgType.TradeAnswerRequest, new TradeAnswerRequestMsg
+        {
+            RequestorObjectId = seller.CharacterId,
+            Response = 1
+        }).ConfigureAwait(false);
+
+        var accepted = await left.ExpectAsync<TradeRequestResultMsg>(MsgType.TradeRequestResult).ConfigureAwait(false);
+        if (accepted.Response != 1)
+            throw new InvalidOperationException("trade accept expected");
+
+        var startLeft = await left.ExpectAsync<TradeStartMsg>(MsgType.TradeStart).ConfigureAwait(false);
+        var startRight = await right.ExpectAsync<TradeStartMsg>(MsgType.TradeStart).ConfigureAwait(false);
+        if (startLeft.PartnerObjectId != buyer.CharacterId || startRight.PartnerObjectId != seller.CharacterId)
+            throw new InvalidOperationException("TradeStart partner mismatch");
+
+        await left.ExpectAsync<TradeConfirmStateMsg>(MsgType.TradeConfirmState).ConfigureAwait(false);
+        await right.ExpectAsync<TradeConfirmStateMsg>(MsgType.TradeConfirmState).ConfigureAwait(false);
+
+        await left.SendAsync(MsgType.TradeAddItemRequest, new TradeAddItemRequestMsg
+        {
+            InventoryObjectId = tradableObjectId,
+            Count = 1
+        }).ConfigureAwait(false);
+
+        var ownOffer = await left.ExpectAsync<TradeOfferUpdateMsg>(MsgType.TradeOfferUpdate).ConfigureAwait(false);
+        var peerOffer = await right.ExpectAsync<TradeOfferUpdateMsg>(MsgType.TradeOfferUpdate).ConfigureAwait(false);
+        if (ownOffer.IsOwn != 1 || peerOffer.IsOwn != 0 || ownOffer.ItemId != 5588 || ownOffer.Count != 1)
+            throw new InvalidOperationException("TradeOfferUpdate mismatch");
+
+        await left.ExpectAsync<TradeConfirmStateMsg>(MsgType.TradeConfirmState).ConfigureAwait(false);
+        await right.ExpectAsync<TradeConfirmStateMsg>(MsgType.TradeConfirmState).ConfigureAwait(false);
+
+        await left.SendAsync(MsgType.TradeDoneRequest, new TradeDoneRequestMsg { Response = 1 }).ConfigureAwait(false);
+        await left.ExpectAsync<TradeConfirmStateMsg>(MsgType.TradeConfirmState).ConfigureAwait(false);
+        await right.ExpectAsync<TradeConfirmStateMsg>(MsgType.TradeConfirmState).ConfigureAwait(false);
+
+        await right.SendAsync(MsgType.TradeDoneRequest, new TradeDoneRequestMsg { Response = 1 }).ConfigureAwait(false);
+
+        await left.ExpectAsync<TradeConfirmStateMsg>(MsgType.TradeConfirmState).ConfigureAwait(false);
+        await right.ExpectAsync<TradeConfirmStateMsg>(MsgType.TradeConfirmState).ConfigureAwait(false);
+
+        var finishedLeft = await left.ExpectAsync<TradeFinishedMsg>(MsgType.TradeFinished).ConfigureAwait(false);
+        var finishedRight = await right.ExpectAsync<TradeFinishedMsg>(MsgType.TradeFinished).ConfigureAwait(false);
+        if (finishedLeft.Response != 1 || finishedRight.Response != 1)
+            throw new InvalidOperationException("TradeFinished expected success");
+
+        var sellerUpdate = await left.ExpectAsync<InventoryUpdateMsg>(MsgType.InventoryUpdate).ConfigureAwait(false);
+        _ = await left.ExpectAsync<UserInfoMsg>(MsgType.UserInfo).ConfigureAwait(false);
+        var buyerUpdate = await right.ExpectAsync<InventoryUpdateMsg>(MsgType.InventoryUpdate).ConfigureAwait(false);
+        _ = await right.ExpectAsync<UserInfoMsg>(MsgType.UserInfo).ConfigureAwait(false);
+        if (sellerUpdate.Changes.Length < 1 || buyerUpdate.Changes.Length < 1)
+            throw new InvalidOperationException("expected inventory updates after trade");
+
+        left.ExpectQuiet();
+        right.ExpectQuiet();
+    }
+
+    static async Task MovePeerNearAsync(ZonePeer mover, ZonePeer observer, int x, int y, int z)
+    {
+        await mover.SendAsync(MsgType.MoveTo, new MoveToMsg { DestX = x, DestY = y, DestZ = z }).ConfigureAwait(false);
+        _ = await mover.ExpectAsync<MoveToMsg>(MsgType.MoveToAck).ConfigureAwait(false);
+        _ = await observer.ExpectAsync<MoveToMsg>(MsgType.MoveToAck).ConfigureAwait(false);
+    }
+
     static void ExpectPartyList(PartyMemberListMsg list, int leaderId, params int[] memberIds)
     {
         if (list.LeaderObjectId != leaderId || list.Members.Length != memberIds.Length || list.PartyId == 0)
