@@ -116,6 +116,14 @@ sealed class ZoneEntity
     public int AggroTargetId { get; set; }
     /// <summary>NPC: next melee swing time, unix ms.</summary>
     public long NextMobAttackMs { get; set; }
+    /// <summary>NPC: last chase destination broadcast (Mobius MoveToPawn re-sent when the pawn moves).</summary>
+    public int ChaseDestX { get; set; }
+    public int ChaseDestY { get; set; }
+    public bool Chasing { get; set; }
+    /// <summary>NPC: last AI tick, unix ms (movement integration).</summary>
+    public long LastAiTickMs { get; set; }
+    /// <summary>NPC corpse: unix ms when DecayTaskManager removes it. 0 = alive / not scheduled.</summary>
+    public long DecayAtMs { get; set; }
     /// <summary>Mobius merchant price config castle. 0 when the NPC is not in a taxed town.</summary>
     public int MerchantCastleId { get; set; }
     /// <summary>Town base tax percent from Mobius <c>MerchantPriceConfig.xml</c>. Castle tax is separate.</summary>

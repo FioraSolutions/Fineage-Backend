@@ -137,6 +137,7 @@ public sealed partial class ZoneWorld
                     TickPendingHits(now, outbound);
                     TickAutoAttacks(outbound);
                     TickMobAttacks(now, outbound);
+                    TickCorpseDecay(now, outbound);
                 }
                 if (outbound.Count > 0)
                     await FlushOthersAsync(outbound, ct).ConfigureAwait(false);
@@ -217,6 +218,19 @@ public sealed partial class ZoneWorld
                 watchers.Add(player);
         }
 
+        // Mobius Creature.doDie -> broadcastPacket(new Die(this)): client plays the death animation.
+        npc.AggroTargetId = 0;
+        npc.Chasing = false;
+        byte[] dieBody = MessagePackSerializer.Serialize(new DieMsg { ObjectId = objectId });
+        foreach (var watcher in watchers)
+        {
+            if (watcher.Session == null)
+                continue;
+            outbound.Add(new Pending(watcher.Session, MsgType.Die, dieBody));
+            if (watcher.Session.SelectedTargetId == objectId)
+                watcher.Session.AutoAttackTargetId = 0;
+        }
+
         npc.SweepItems.Clear();
         if (npc.SpoilerObjectId != 0 && _dropCatalog.TryGet(npcId, out var definition))
         {
@@ -232,8 +246,9 @@ public sealed partial class ZoneWorld
             return;
         }
 
-        DespawnNpc(npc, outbound);
         SpawnDeathDrops(npcId, x, y, z, watchers, outbound);
+        // Corpse lies for DEFAULT_CORPSE_TIME, then DeleteObject (TickCorpseDecay).
+        npc.DecayAtMs = _clock().ToUnixTimeMilliseconds() + ZoneCombat.CorpseDecayMs;
     }
 
     void DespawnNpc(ZoneEntity npc, List<Pending> outbound)
@@ -245,6 +260,10 @@ public sealed partial class ZoneWorld
         npc.SpoilerObjectId = 0;
         npc.SweepItems.Clear();
         npc.CorpseAwaitingSweep = false;
+        npc.DecayAtMs = 0;
+        npc.Chasing = false;
+        npc.AggroTargetId = 0;
+        npc.LastAiTickMs = 0;
         ScheduleRespawn(objectId);
 
         byte[] deleteBody = MessagePackSerializer.Serialize(new DeleteObjectMsg { ObjectId = objectId });

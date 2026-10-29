@@ -62,6 +62,9 @@ public sealed class ZoneSpawnRespawnTests
                 CancellationToken.None));
         }
 
+        // Corpse stays for Mobius DEFAULT_CORPSE_TIME, then decays and the respawn timer starts.
+        clock.Advance(TimeSpan.FromMilliseconds(ZoneCombat.CorpseDecayMs));
+        world.AdvanceSpawnsForTests();
         Assert.DoesNotContain(gremlin.ObjectId, world.NpcObjectIds);
 
         clock.Advance(TimeSpan.FromSeconds(2));
