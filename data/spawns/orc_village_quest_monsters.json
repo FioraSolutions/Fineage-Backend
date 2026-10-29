@@ -1,0 +1,17 @@
+{
+  "mapId": "orc_village_quest_monsters",
+  "enabled": true,
+  "comment": "Mobius CT 0 Interlude spawns/OrcTerritory/OrcVillageQuestMonsters.xml. Fixed rows keep Mobius x/y/z/heading. Territory rows are one spawn per count, placed inside the polygon at minZ (no geodata). Day and night rows are both present. Raid bosses are left to data/raidbosses.json. Name, title, type, attackable, hp, and speeds come from data/npcs.json.",
+  "npcs": [
+    {
+      "objectId": 83794,
+      "npcId": 27199,
+      "x": -16732,
+      "y": -79832,
+      "z": -3616,
+      "heading": 0,
+      "respawnDelaySeconds": 180,
+      "respawnRandomSeconds": 0
+    }
+  ]
+}

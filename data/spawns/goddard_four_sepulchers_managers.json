@@ -1,0 +1,47 @@
+{
+  "mapId": "goddard_four_sepulchers_managers",
+  "enabled": true,
+  "comment": "Mobius CT 0 Interlude spawns/Goddard/FourSepulchersManagers.xml. Fixed rows keep Mobius x/y/z/heading. Territory rows are one spawn per count, placed inside the polygon at minZ (no geodata). Day and night rows are both present. Raid bosses are left to data/raidbosses.json. Name, title, type, attackable, hp, and speeds come from data/npcs.json.",
+  "npcs": [
+    {
+      "objectId": 76162,
+      "npcId": 31921,
+      "x": 181061,
+      "y": -85595,
+      "z": -7200,
+      "heading": -32584,
+      "respawnDelaySeconds": 60,
+      "respawnRandomSeconds": 0
+    },
+    {
+      "objectId": 76163,
+      "npcId": 31922,
+      "x": 179292,
+      "y": -88981,
+      "z": -7200,
+      "heading": -33272,
+      "respawnDelaySeconds": 60,
+      "respawnRandomSeconds": 0
+    },
+    {
+      "objectId": 76164,
+      "npcId": 31923,
+      "x": 173202,
+      "y": -87004,
+      "z": -7200,
+      "heading": -16248,
+      "respawnDelaySeconds": 60,
+      "respawnRandomSeconds": 0
+    },
+    {
+      "objectId": 76165,
+      "npcId": 31924,
+      "x": 175606,
+      "y": -82853,
+      "z": -7200,
+      "heading": -16248,
+      "respawnDelaySeconds": 60,
+      "respawnRandomSeconds": 0
+    }
+  ]
+}

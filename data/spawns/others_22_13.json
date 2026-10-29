@@ -1,0 +1,117 @@
+{
+  "mapId": "others_22_13",
+  "enabled": true,
+  "comment": "Mobius CT 0 Interlude spawns/Others/22_13.xml. Fixed rows keep Mobius x/y/z/heading. Territory rows are one spawn per count, placed inside the polygon at minZ (no geodata). Day and night rows are both present. Raid bosses are left to data/raidbosses.json. Name, title, type, attackable, hp, and speeds come from data/npcs.json.",
+  "npcs": [
+    {
+      "objectId": 91763,
+      "npcId": 27321,
+      "x": 93706,
+      "y": -137005,
+      "z": -2949,
+      "heading": 16167,
+      "respawnDelaySeconds": 60,
+      "respawnRandomSeconds": 0
+    },
+    {
+      "objectId": 91764,
+      "npcId": 27321,
+      "x": 93813,
+      "y": -137539,
+      "z": -2989,
+      "heading": 27090,
+      "respawnDelaySeconds": 60,
+      "respawnRandomSeconds": 0
+    },
+    {
+      "objectId": 91765,
+      "npcId": 27321,
+      "x": 93889,
+      "y": -137494,
+      "z": -2989,
+      "heading": 42111,
+      "respawnDelaySeconds": 60,
+      "respawnRandomSeconds": 0
+    },
+    {
+      "objectId": 91766,
+      "npcId": 27321,
+      "x": 94064,
+      "y": -137600,
+      "z": -2979,
+      "heading": 52460,
+      "respawnDelaySeconds": 60,
+      "respawnRandomSeconds": 0
+    },
+    {
+      "objectId": 91767,
+      "npcId": 27321,
+      "x": 94324,
+      "y": -137725,
+      "z": -2954,
+      "heading": 63438,
+      "respawnDelaySeconds": 60,
+      "respawnRandomSeconds": 0
+    },
+    {
+      "objectId": 91768,
+      "npcId": 27322,
+      "x": 69121,
+      "y": -136896,
+      "z": -2660,
+      "heading": 25579,
+      "respawnDelaySeconds": 60,
+      "respawnRandomSeconds": 0
+    },
+    {
+      "objectId": 91769,
+      "npcId": 27322,
+      "x": 69428,
+      "y": -137271,
+      "z": -2682,
+      "heading": 28909,
+      "respawnDelaySeconds": 60,
+      "respawnRandomSeconds": 0
+    },
+    {
+      "objectId": 91770,
+      "npcId": 27322,
+      "x": 69910,
+      "y": -137509,
+      "z": -2742,
+      "heading": 6353,
+      "respawnDelaySeconds": 60,
+      "respawnRandomSeconds": 0
+    },
+    {
+      "objectId": 91771,
+      "npcId": 27322,
+      "x": 69964,
+      "y": -137073,
+      "z": -2637,
+      "heading": 4209,
+      "respawnDelaySeconds": 60,
+      "respawnRandomSeconds": 0
+    },
+    {
+      "objectId": 91772,
+      "npcId": 27322,
+      "x": 70050,
+      "y": -138018,
+      "z": -2813,
+      "heading": 46457,
+      "respawnDelaySeconds": 60,
+      "respawnRandomSeconds": 0
+    },
+    {
+      "objectId": 91773,
+      "npcId": 27322,
+      "x": 70647,
+      "y": -137738,
+      "z": -2860,
+      "heading": 63559,
+      "respawnDelaySeconds": 60,
+      "respawnRandomSeconds": 0
+    }
+  ]
+}

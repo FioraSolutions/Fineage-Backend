@@ -1,0 +1,7607 @@
+{
+  "mapId": "goddard_ketra_orc_outpost",
+  "enabled": true,
+  "comment": "Mobius CT 0 Interlude spawns/Goddard/KetraOrcOutpost.xml. Fixed rows keep Mobius x/y/z/heading. Territory rows are one spawn per count, placed inside the polygon at minZ (no geodata). Day and night rows are both present. Raid bosses are left to data/raidbosses.json. Name, title, type, attackable, hp, and speeds come from data/npcs.json.",
+  "npcs": [
+    {
+      "objectId": 76844,
+      "npcId": 21324,
+      "x": 137738,
+      "y": -90895,
+      "z": -3860,
+      "heading": 0,
+      "respawnDelaySeconds": 120,
+      "respawnRandomSeconds": 80
+    },
+    {
+      "objectId": 76845,
+      "npcId": 21324,
+      "x": 138112,
+      "y": -89046,
+      "z": -3860,
+      "heading": 0,
+      "respawnDelaySeconds": 120,
+      "respawnRandomSeconds": 80
+    },
+    {
+      "objectId": 76846,
+      "npcId": 21324,
+      "x": 139116,
+      "y": -90763,
+      "z": -3860,
+      "heading": 0,
+      "respawnDelaySeconds": 120,
+      "respawnRandomSeconds": 80
+    },
+    {
+      "objectId": 76847,
+      "npcId": 21324,
+      "x": 137160,
+      "y": -90321,
+      "z": -3860,
+      "heading": 0,
+      "respawnDelaySeconds": 120,
+      "respawnRandomSeconds": 80
+    },
+    {
+      "objectId": 76848,
+      "npcId": 21324,
+      "x": 138926,
+      "y": -90747,
+      "z": -3860,
+      "heading": 0,
+      "respawnDelaySeconds": 120,
+      "respawnRandomSeconds": 80
+    },
+    {
+      "objectId": 76849,
+      "npcId": 21324,
+      "x": 137019,
+      "y": -89324,
+      "z": -3860,
+      "heading": 0,
+      "respawnDelaySeconds": 120,
+      "respawnRandomSeconds": 80
+    },
+    {
+      "objectId": 76850,
+      "npcId": 21324,
+      "x": 138344,
+      "y": -91159,
+      "z": -3860,
+      "heading": 0,
+      "respawnDelaySeconds": 120,
+      "respawnRandomSeconds": 80
+    },
+    {
+      "objectId": 76851,
+      "npcId": 21324,
+      "x": 137508,
+      "y": -90329,
+      "z": -3860,
+      "heading": 0,
+      "respawnDelaySeconds": 120,
+      "respawnRandomSeconds": 80
+    },
+    {
+      "objectId": 76852,
+      "npcId": 21325,
+      "x": 136603,
+      "y": -90877,
+      "z": -3860,
+      "heading": 0,
+      "respawnDelaySeconds": 120,
+      "respawnRandomSeconds": 80
+    },
+    {
+      "objectId": 76853,
+      "npcId": 21325,
+      "x": 138965,
+      "y": -89238,
+      "z": -3860,
+      "heading": 0,
+      "respawnDelaySeconds": 120,
+      "respawnRandomSeconds": 80
+    },
+    {
+      "objectId": 76854,
+      "npcId": 21325,
+      "x": 139481,
+      "y": -89618,
+      "z": -3860,
+      "heading": 0,
+      "respawnDelaySeconds": 120,
+      "respawnRandomSeconds": 80
+    },
+    {
+      "objectId": 76855,
+      "npcId": 21325,
+      "x": 137166,
+      "y": -90871,
+      "z": -3860,
+      "heading": 0,
+      "respawnDelaySeconds": 120,
+      "respawnRandomSeconds": 80
+    },
+    {
+      "objectId": 76856,
+      "npcId": 21325,
+      "x": 135985,
+      "y": -90169,
+      "z": -3860,
+      "heading": 0,
+      "respawnDelaySeconds": 120,
+      "respawnRandomSeconds": 80
+    },
+    {
+      "objectId": 76857,
+      "npcId": 21325,
+      "x": 136109,
+      "y": -89514,
+      "z": -3860,
+      "heading": 0,
+      "respawnDelaySeconds": 120,
+      "respawnRandomSeconds": 80
+    },
+    {
+      "objectId": 76858,
+      "npcId": 21325,
+      "x": 137510,
+      "y": -89350,
+      "z": -3860,
+      "heading": 0,
+      "respawnDelaySeconds": 120,
+      "respawnRandomSeconds": 80
+    },
+    {
+      "objectId": 76859,
+      "npcId": 21325,
+      "x": 136283,
+      "y": -90983,
+      "z": -3860,
+      "heading": 0,
+      "respawnDelaySeconds": 120,
+      "respawnRandomSeconds": 80
+    },
+    {
+      "objectId": 76860,
+      "npcId": 21326,
+      "x": 139039,
+      "y": -90941,
+      "z": -3860,
+      "heading": 0,
+      "respawnDelaySeconds": 120,
+      "respawnRandomSeconds": 80
+    },
+    {
+      "objectId": 76861,
+      "npcId": 21326,
+      "x": 137438,
+      "y": -90072,
+      "z": -3860,
+      "heading": 0,
+      "respawnDelaySeconds": 120,
+      "respawnRandomSeconds": 80
+    },
+    {
+      "objectId": 76862,
+      "npcId": 21326,
+      "x": 137822,
+      "y": -89873,
+      "z": -3860,
+      "heading": 0,
+      "respawnDelaySeconds": 120,
+      "respawnRandomSeconds": 80
+    },
+    {
+      "objectId": 76863,
+      "npcId": 21326,
+      "x": 138342,
+      "y": -90197,
+      "z": -3860,
+      "heading": 0,
+      "respawnDelaySeconds": 120,
+      "respawnRandomSeconds": 80
+    },
+    {
+      "objectId": 76864,
+      "npcId": 21326,
+      "x": 137119,
+      "y": -90088,
+      "z": -3860,
+      "heading": 0,
+      "respawnDelaySeconds": 120,
+      "respawnRandomSeconds": 80
+    },
+    {
+      "objectId": 76865,
+      "npcId": 21326,
+      "x": 135774,
+      "y": -89359,
+      "z": -3860,
+      "heading": 0,
+      "respawnDelaySeconds": 120,
+      "respawnRandomSeconds": 80
+    },
+    {
+      "objectId": 76866,
+      "npcId": 21326,
+      "x": 137989,
+      "y": -91290,
+      "z": -3860,
+      "heading": 0,
+      "respawnDelaySeconds": 120,
+      "respawnRandomSeconds": 80
+    },
+    {
+      "objectId": 76867,
+      "npcId": 21326,
+      "x": 136604,
+      "y": -90208,
+      "z": -3860,
+      "heading": 0,
+      "respawnDelaySeconds": 120,
+      "respawnRandomSeconds": 80
+    },
+    {
+      "objectId": 76868,
+      "npcId": 21324,
+      "x": 139325,
+      "y": -86572,
+      "z": -4492,
+      "heading": 0,
+      "respawnDelaySeconds": 120,
+      "respawnRandomSeconds": 80
+    },
+    {
+      "objectId": 76869,
+      "npcId": 21324,
+      "x": 138834,
+      "y": -86686,
+      "z": -4492,
+      "heading": 0,
+      "respawnDelaySeconds": 120,
+      "respawnRandomSeconds": 80
+    },
+    {
+      "objectId": 76870,
+      "npcId": 21324,
+      "x": 137230,
+      "y": -86133,
+      "z": -4492,
+      "heading": 0,
+      "respawnDelaySeconds": 120,
+      "respawnRandomSeconds": 80
+    },
+    {
+      "objectId": 76871,
+      "npcId": 21324,
+      "x": 136753,
+      "y": -88334,
+      "z": -4492,
+      "heading": 0,
+      "respawnDelaySeconds": 120,
+      "respawnRandomSeconds": 80
+    },
+    {
+      "objectId": 76872,
+      "npcId": 21324,
+      "x": 139604,
+      "y": -86637,
+      "z": -4492,
+      "heading": 0,
+      "respawnDelaySeconds": 120,
+      "respawnRandomSeconds": 80
+    },
+    {
+      "objectId": 76873,
+      "npcId": 21324,
+      "x": 137990,
+      "y": -86838,
+      "z": -4492,
+      "heading": 0,
+      "respawnDelaySeconds": 120,
+      "respawnRandomSeconds": 80
+    },
+    {
+      "objectId": 76874,
+      "npcId": 21324,
+      "x": 138293,
+      "y": -88129,
+      "z": -4492,
+      "heading": 0,
+      "respawnDelaySeconds": 120,
+      "respawnRandomSeconds": 80
+    },
+    {
+      "objectId": 76875,
+      "npcId": 21324,
+      "x": 136979,
+      "y": -86850,
+      "z": -4492,
+      "heading": 0,
+      "respawnDelaySeconds": 120,
+      "respawnRandomSeconds": 80
+    },
+    {
+      "objectId": 76876,
+      "npcId": 21325,
+      "x": 139883,
+      "y": -87307,
+      "z": -4492,
+      "heading": 0,
+      "respawnDelaySeconds": 120,
+      "respawnRandomSeconds": 80
+    },
+    {
+      "objectId": 76877,
+      "npcId": 21325,
+      "x": 138250,
+      "y": -86679,
+      "z": -4492,
+      "heading": 0,
+      "respawnDelaySeconds": 120,
+      "respawnRandomSeconds": 80
+    },
+    {
+      "objectId": 76878,
+      "npcId": 21325,
+      "x": 136526,
+      "y": -88269,
+      "z": -4492,
+      "heading": 0,
+      "respawnDelaySeconds": 120,
+      "respawnRandomSeconds": 80
+    },
+    {
+      "objectId": 76879,
+      "npcId": 21325,
+      "x": 136749,
+      "y": -86343,
+      "z": -4492,
+      "heading": 0,
+      "respawnDelaySeconds": 120,
+      "respawnRandomSeconds": 80
+    },
+    {
+      "objectId": 76880,
+      "npcId": 21325,
+      "x": 139770,
+      "y": -87737,
+      "z": -4492,
+      "heading": 0,
+      "respawnDelaySeconds": 120,
+      "respawnRandomSeconds": 80
+    },
+    {
+      "objectId": 76881,
+      "npcId": 21325,
+      "x": 138494,
+      "y": -86462,
+      "z": -4492,
+      "heading": 0,
+      "respawnDelaySeconds": 120,
+      "respawnRandomSeconds": 80
+    },
+    {
+      "objectId": 76882,
+      "npcId": 21325,
+      "x": 139166,
+      "y": -86443,
+      "z": -4492,
+      "heading": 0,
+      "respawnDelaySeconds": 120,
+      "respawnRandomSeconds": 80
+    },
+    {
+      "objectId": 76883,
+      "npcId": 21325,
+      "x": 138996,
+      "y": -87167,
+      "z": -4492,
+      "heading": 0,
+      "respawnDelaySeconds": 120,
+      "respawnRandomSeconds": 80
+    },
+    {
+      "objectId": 76884,
+      "npcId": 21326,
+      "x": 137627,
+      "y": -86016,
+      "z": -4492,
+      "heading": 0,
+      "respawnDelaySeconds": 120,
+      "respawnRandomSeconds": 80
+    },
+    {
+      "objectId": 76885,
+      "npcId": 21326,
+      "x": 137142,
+      "y": -88113,
+      "z": -4492,
+      "heading": 0,
+      "respawnDelaySeconds": 120,
+      "respawnRandomSeconds": 80
+    },
+    {
+      "objectId": 76886,
+      "npcId": 21326,
+      "x": 135940,
+      "y": -87641,
+      "z": -4492,
+      "heading": 0,
+      "respawnDelaySeconds": 120,
+      "respawnRandomSeconds": 80
+    },
+    {
+      "objectId": 76887,
+      "npcId": 21326,
+      "x": 135659,
+      "y": -86993,
+      "z": -4492,
+      "heading": 0,
+      "respawnDelaySeconds": 120,
+      "respawnRandomSeconds": 80
+    },
+    {
+      "objectId": 76888,
+      "npcId": 21326,
+      "x": 137136,
+      "y": -86531,
+      "z": -4492,
+      "heading": 0,
+      "respawnDelaySeconds": 120,
+      "respawnRandomSeconds": 80
+    },
+    {
+      "objectId": 76889,
+      "npcId": 21326,
+      "x": 136664,
+      "y": -86898,
+      "z": -4492,
+      "heading": 0,
+      "respawnDelaySeconds": 120,
+      "respawnRandomSeconds": 80
+    },
+    {
+      "objectId": 76890,
+      "npcId": 21326,
+      "x": 136234,
+      "y": -87840,
+      "z": -4492,
+      "heading": 0,
+      "respawnDelaySeconds": 120,
+      "respawnRandomSeconds": 80
+    },
+    {
+      "objectId": 76891,
+      "npcId": 21326,
+      "x": 135565,
+      "y": -86145,
+      "z": -4492,
+      "heading": 0,
+      "respawnDelaySeconds": 120,
+      "respawnRandomSeconds": 80
+    },
+    {
+      "objectId": 76892,
+      "npcId": 21343,
+      "x": 137739,
+      "y": -86697,
+      "z": -4492,
+      "heading": 0,
+      "respawnDelaySeconds": 100,
+      "respawnRandomSeconds": 30
+    },
+    {
+      "objectId": 76893,
+      "npcId": 21343,
+      "x": 138032,
+      "y": -87344,
+      "z": -4492,
+      "heading": 0,
+      "respawnDelaySeconds": 100,
+      "respawnRandomSeconds": 30
+    },
+    {
+      "objectId": 76894,
+      "npcId": 21327,
+      "x": 140814,
+      "y": -88032,
+      "z": -4740,
+      "heading": 0,
+      "respawnDelaySeconds": 120,
+      "respawnRandomSeconds": 80
+    },
+    {
+      "objectId": 76895,
+      "npcId": 21327,
+      "x": 143073,
+      "y": -88163,
+      "z": -4740,
+      "heading": 0,
+      "respawnDelaySeconds": 120,
+      "respawnRandomSeconds": 80
+    },
+    {
+      "objectId": 76896,
+      "npcId": 21327,
+      "x": 144528,
+      "y": -89441,
+      "z": -4740,
+      "heading": 0,
+      "respawnDelaySeconds": 120,
+      "respawnRandomSeconds": 80
+    },
+    {
+      "objectId": 76897,
+      "npcId": 21327,
+      "x": 141245,
+      "y": -88514,
+      "z": -4740,
+      "heading": 0,
+      "respawnDelaySeconds": 120,
+      "respawnRandomSeconds": 80
+    },
+    {
+      "objectId": 76898,
+      "npcId": 21327,
+      "x": 141433,
+      "y": -88312,
+      "z": -4740,
+      "heading": 0,
+      "respawnDelaySeconds": 120,
+      "respawnRandomSeconds": 80
+    },
+    {
+      "objectId": 76899,
+      "npcId": 21327,
+      "x": 144056,
+      "y": -89092,
+      "z": -4740,
+      "heading": 0,
+      "respawnDelaySeconds": 120,
+      "respawnRandomSeconds": 80
+    },
+    {
+      "objectId": 76900,
+      "npcId": 21328,
+      "x": 144031,
+      "y": -88622,
+      "z": -4740,
+      "heading": 0,
+      "respawnDelaySeconds": 120,
+      "respawnRandomSeconds": 80
+    },
+    {
+      "objectId": 76901,
+      "npcId": 21328,
+      "x": 143929,
+      "y": -88496,
+      "z": -4740,
+      "heading": 0,
+      "respawnDelaySeconds": 120,
+      "respawnRandomSeconds": 80
+    },
+    {
+      "objectId": 76902,
+      "npcId": 21328,
+      "x": 139814,
+      "y": -88026,
+      "z": -4740,
+      "heading": 0,
+      "respawnDelaySeconds": 120,
+      "respawnRandomSeconds": 80
+    },
+    {
+      "objectId": 76903,
+      "npcId": 21328,
+      "x": 140707,
+      "y": -88340,
+      "z": -4740,
+      "heading": 0,
+      "respawnDelaySeconds": 120,
+      "respawnRandomSeconds": 80
+    },
+    {
+      "objectId": 76904,
+      "npcId": 21328,
+      "x": 142639,
+      "y": -89238,
+      "z": -4740,
+      "heading": 0,
+      "respawnDelaySeconds": 120,
+      "respawnRandomSeconds": 80
+    },
+    {
+      "objectId": 76905,
+      "npcId": 21328,
+      "x": 142078,
+      "y": -88732,
+      "z": -4740,
+      "heading": 0,
+      "respawnDelaySeconds": 120,
+      "respawnRandomSeconds": 80
+    },
+    {
+      "objectId": 76906,
+      "npcId": 21329,
+      "x": 143337,
+      "y": -89331,
+      "z": -4740,
+      "heading": 0,
+      "respawnDelaySeconds": 120,
+      "respawnRandomSeconds": 80
+    },
+    {
+      "objectId": 76907,
+      "npcId": 21329,
+      "x": 143597,
+      "y": -89379,
+      "z": -4740,
+      "heading": 0,
+      "respawnDelaySeconds": 120,
+      "respawnRandomSeconds": 80
+    },
+    {
+      "objectId": 76908,
+      "npcId": 21329,
+      "x": 144274,
+      "y": -88709,
+      "z": -4740,
+      "heading": 0,
+      "respawnDelaySeconds": 120,
+      "respawnRandomSeconds": 80
+    },
+    {
+      "objectId": 76909,
+      "npcId": 21329,
+      "x": 140422,
+      "y": -87189,
+      "z": -4740,
+      "heading": 0,
+      "respawnDelaySeconds": 120,
+      "respawnRandomSeconds": 80
+    },
+    {
+      "objectId": 76910,
+      "npcId": 21329,
+      "x": 142257,
+      "y": -88125,
+      "z": -4740,
+      "heading": 0,
+      "respawnDelaySeconds": 120,
+      "respawnRandomSeconds": 80
+    },
+    {
+      "objectId": 76911,
+      "npcId": 21329,
+      "x": 140883,
+      "y": -87303,
+      "z": -4740,
+      "heading": 0,
+      "respawnDelaySeconds": 120,
+      "respawnRandomSeconds": 80
+    },
+    {
+      "objectId": 76912,
+      "npcId": 21330,
+      "x": 141043,
+      "y": -87936,
+      "z": -4740,
+      "heading": 0,
+      "respawnDelaySeconds": 120,
+      "respawnRandomSeconds": 80
+    },
+    {
+      "objectId": 76913,
+      "npcId": 21330,
+      "x": 141864,
+      "y": -89235,
+      "z": -4740,
+      "heading": 0,
+      "respawnDelaySeconds": 120,
+      "respawnRandomSeconds": 80
+    },
+    {
+      "objectId": 76914,
+      "npcId": 21330,
+      "x": 140133,
+      "y": -88005,
+      "z": -4740,
+      "heading": 0,
+      "respawnDelaySeconds": 120,
+      "respawnRandomSeconds": 80
+    },
+    {
+      "objectId": 76915,
+      "npcId": 21330,
+      "x": 144856,
+      "y": -89360,
+      "z": -4740,
+      "heading": 0,
+      "respawnDelaySeconds": 120,
+      "respawnRandomSeconds": 80
+    },
+    {
+      "objectId": 76916,
+      "npcId": 21330,
+      "x": 142408,
+      "y": -88280,
+      "z": -4740,
+      "heading": 0,
+      "respawnDelaySeconds": 120,
+      "respawnRandomSeconds": 80
+    },
+    {
+      "objectId": 76917,
+      "npcId": 21330,
+      "x": 141687,
+      "y": -88568,
+      "z": -4740,
+      "heading": 0,
+      "respawnDelaySeconds": 120,
+      "respawnRandomSeconds": 80
+    },
+    {
+      "objectId": 76918,
+      "npcId": 21331,
+      "x": 145818,
+      "y": -91161,
+      "z": -4820,
+      "heading": 0,
+      "respawnDelaySeconds": 120,
+      "respawnRandomSeconds": 80
+    },
+    {
+      "objectId": 76919,
+      "npcId": 21331,
+      "x": 147230,
+      "y": -90991,
+      "z": -4820,
+      "heading": 0,
+      "respawnDelaySeconds": 120,
+      "respawnRandomSeconds": 80
+    },
+    {
+      "objectId": 76920,
+      "npcId": 21331,
+      "x": 149705,
+      "y": -91273,
+      "z": -4820,
+      "heading": 0,
+      "respawnDelaySeconds": 120,
+      "respawnRandomSeconds": 80
+    },
+    {
+      "objectId": 76921,
+      "npcId": 21331,
+      "x": 146572,
+      "y": -91501,
+      "z": -4820,
+      "heading": 0,
+      "respawnDelaySeconds": 120,
+      "respawnRandomSeconds": 80
+    },
+    {
+      "objectId": 76922,
+      "npcId": 21331,
+      "x": 147068,
+      "y": -90025,
+      "z": -4820,
+      "heading": 0,
+      "respawnDelaySeconds": 120,
+      "respawnRandomSeconds": 80
+    },
+    {
+      "objectId": 76923,
+      "npcId": 21331,
+      "x": 149264,
+      "y": -90754,
+      "z": -4820,
+      "heading": 0,
+      "respawnDelaySeconds": 120,
+      "respawnRandomSeconds": 80
+    },
+    {
+      "objectId": 76924,
+      "npcId": 21332,
+      "x": 150670,
+      "y": -90546,
+      "z": -4820,
+      "heading": 0,
+      "respawnDelaySeconds": 120,
+      "respawnRandomSeconds": 80
+    },
+    {
+      "objectId": 76925,
+      "npcId": 21332,
+      "x": 149787,
+      "y": -89900,
+      "z": -4820,
+      "heading": 0,
+      "respawnDelaySeconds": 120,
+      "respawnRandomSeconds": 80
+    },
+    {
+      "objectId": 76926,
+      "npcId": 21332,
+      "x": 147397,
+      "y": -91310,
+      "z": -4820,
+      "heading": 0,
+      "respawnDelaySeconds": 120,
+      "respawnRandomSeconds": 80
+    },
+    {
+      "objectId": 76927,
+      "npcId": 21332,
+      "x": 148798,
+      "y": -90178,
+      "z": -4820,
+      "heading": 0,
+      "respawnDelaySeconds": 120,
+      "respawnRandomSeconds": 80
+    },
+    {
+      "objectId": 76928,
+      "npcId": 21332,
+      "x": 145864,
+      "y": -90204,
+      "z": -4820,
+      "heading": 0,
+      "respawnDelaySeconds": 120,
+      "respawnRandomSeconds": 80
+    },
+    {
+      "objectId": 76929,
+      "npcId": 21332,
+      "x": 149632,
+      "y": -91100,
+      "z": -4820,
+      "heading": 0,
+      "respawnDelaySeconds": 120,
+      "respawnRandomSeconds": 80
+    },
+    {
+      "objectId": 76930,
+      "npcId": 21333,
+      "x": 148356,
+      "y": -90469,
+      "z": -4820,
+      "heading": 0,
+      "respawnDelaySeconds": 120,
+      "respawnRandomSeconds": 80
+    },
+    {
+      "objectId": 76931,
+      "npcId": 21333,
+      "x": 148044,
+      "y": -89451,
+      "z": -4820,
+      "heading": 0,
+      "respawnDelaySeconds": 120,
+      "respawnRandomSeconds": 80
+    },
+    {
+      "objectId": 76932,
+      "npcId": 21333,
+      "x": 145366,
+      "y": -89423,
+      "z": -4820,
+      "heading": 0,
+      "respawnDelaySeconds": 120,
+      "respawnRandomSeconds": 80
+    },
+    {
+      "objectId": 76933,
+      "npcId": 21333,
+      "x": 148514,
+      "y": -90587,
+      "z": -4820,
+      "heading": 0,
+      "respawnDelaySeconds": 120,
+      "respawnRandomSeconds": 80
+    },
+    {
+      "objectId": 76934,
+      "npcId": 21333,
+      "x": 146722,
+      "y": -89127,
+      "z": -4820,
+      "heading": 0,
+      "respawnDelaySeconds": 120,
+      "respawnRandomSeconds": 80
+    },
+    {
+      "objectId": 76935,
+      "npcId": 21333,
+      "x": 146167,
+      "y": -89936,
+      "z": -4820,
+      "heading": 0,
+      "respawnDelaySeconds": 120,
+      "respawnRandomSeconds": 80
+    },
+    {
+      "objectId": 76936,
+      "npcId": 21334,
+      "x": 150679,
+      "y": -90213,
+      "z": -4820,
+      "heading": 0,
+      "respawnDelaySeconds": 120,
+      "respawnRandomSeconds": 80
+    },
+    {
+      "objectId": 76937,
+      "npcId": 21334,
+      "x": 147035,
+      "y": -89326,
+      "z": -4820,
+      "heading": 0,
+      "respawnDelaySeconds": 120,
+      "respawnRandomSeconds": 80
+    },
+    {
+      "objectId": 76938,
+      "npcId": 21334,
+      "x": 148412,
+      "y": -91215,
+      "z": -4820,
+      "heading": 0,
+      "respawnDelaySeconds": 120,
+      "respawnRandomSeconds": 80
+    },
+    {
+      "objectId": 76939,
+      "npcId": 21334,
+      "x": 149974,
+      "y": -90630,
+      "z": -4820,
+      "heading": 0,
+      "respawnDelaySeconds": 120,
+      "respawnRandomSeconds": 80
+    },
+    {
+      "objectId": 76940,
+      "npcId": 21334,
+      "x": 148314,
+      "y": -90240,
+      "z": -4820,
+      "heading": 0,
+      "respawnDelaySeconds": 120,
+      "respawnRandomSeconds": 80
+    },
+    {
+      "objectId": 76941,
+      "npcId": 21334,
+      "x": 145702,
+      "y": -90797,
+      "z": -4820,
+      "heading": 0,
+      "respawnDelaySeconds": 120,
+      "respawnRandomSeconds": 80
+    },
+    {
+      "objectId": 76942,
+      "npcId": 21334,
+      "x": 148030,
+      "y": -90325,
+      "z": -4820,
+      "heading": 0,
+      "respawnDelaySeconds": 120,
+      "respawnRandomSeconds": 80
+    },
+    {
+      "objectId": 76943,
+      "npcId": 21334,
+      "x": 147016,
+      "y": -90228,
+      "z": -4820,
+      "heading": 0,
+      "respawnDelaySeconds": 120,
+      "respawnRandomSeconds": 80
+    },
+    {
+      "objectId": 76944,
+      "npcId": 21345,
+      "x": 147451,
+      "y": -89942,
+      "z": -4820,
+      "heading": 0,
+      "respawnDelaySeconds": 100,
+      "respawnRandomSeconds": 30
+    },
+    {
+      "objectId": 76945,
+      "npcId": 21345,
+      "x": 150609,
+      "y": -90746,
+      "z": -4820,
+      "heading": 0,
+      "respawnDelaySeconds": 100,
+      "respawnRandomSeconds": 30
+    },
+    {
+      "objectId": 76946,
+      "npcId": 21327,
+      "x": 135403,
+      "y": -83587,
+      "z": -4460,
+      "heading": 0,
+      "respawnDelaySeconds": 120,
+      "respawnRandomSeconds": 80
+    },
+    {
+      "objectId": 76947,
+      "npcId": 21327,
+      "x": 135834,
+      "y": -82787,
+      "z": -4460,
+      "heading": 0,
+      "respawnDelaySeconds": 120,
+      "respawnRandomSeconds": 80
+    },
+    {
+      "objectId": 76948,
+      "npcId": 21327,
+      "x": 136856,
+      "y": -83212,
+      "z": -4460,
+      "heading": 0,
+      "respawnDelaySeconds": 120,
+      "respawnRandomSeconds": 80
+    },
+    {
+      "objectId": 76949,
+      "npcId": 21327,
+      "x": 135665,
+      "y": -83251,
+      "z": -4460,
+      "heading": 0,
+      "respawnDelaySeconds": 120,
+      "respawnRandomSeconds": 80
+    },
+    {
+      "objectId": 76950,
+      "npcId": 21327,
+      "x": 136405,
+      "y": -85059,
+      "z": -4460,
+      "heading": 0,
+      "respawnDelaySeconds": 120,
+      "respawnRandomSeconds": 80
+    },
+    {
+      "objectId": 76951,
+      "npcId": 21327,
+      "x": 134897,
+      "y": -82797,
+      "z": -4460,
+      "heading": 0,
+      "respawnDelaySeconds": 120,
+      "respawnRandomSeconds": 80
+    },
+    {
+      "objectId": 76952,
+      "npcId": 21328,
+      "x": 136526,
+      "y": -84780,
+      "z": -4460,
+      "heading": 0,
+      "respawnDelaySeconds": 120,
+      "respawnRandomSeconds": 80
+    },
+    {
+      "objectId": 76953,
+      "npcId": 21328,
+      "x": 136469,
+      "y": -84325,
+      "z": -4460,
+      "heading": 0,
+      "respawnDelaySeconds": 120,
+      "respawnRandomSeconds": 80
+    },
+    {
+      "objectId": 76954,
+      "npcId": 21328,
+      "x": 136840,
+      "y": -82544,
+      "z": -4460,
+      "heading": 0,
+      "respawnDelaySeconds": 120,
+      "respawnRandomSeconds": 80
+    },
+    {
+      "objectId": 76955,
+      "npcId": 21328,
+      "x": 135962,
+      "y": -84555,
+      "z": -4460,
+      "heading": 0,
+      "respawnDelaySeconds": 120,
+      "respawnRandomSeconds": 80
+    },
+    {
+      "objectId": 76956,
+      "npcId": 21329,
+      "x": 135280,
+      "y": -82889,
+      "z": -4460,
+      "heading": 0,
+      "respawnDelaySeconds": 120,
+      "respawnRandomSeconds": 80
+    },
+    {
+      "objectId": 76957,
+      "npcId": 21329,
+      "x": 137003,
+      "y": -83427,
+      "z": -4460,
+      "heading": 0,
+      "respawnDelaySeconds": 120,
+      "respawnRandomSeconds": 80
+    },
+    {
+      "objectId": 76958,
+      "npcId": 21329,
+      "x": 136047,
+      "y": -83322,
+      "z": -4460,
+      "heading": 0,
+      "respawnDelaySeconds": 120,
+      "respawnRandomSeconds": 80
+    },
+    {
+      "objectId": 76959,
+      "npcId": 21329,
+      "x": 135933,
+      "y": -84343,
+      "z": -4460,
+      "heading": 0,
+      "respawnDelaySeconds": 120,
+      "respawnRandomSeconds": 80
+    },
+    {
+      "objectId": 76960,
+      "npcId": 21329,
+      "x": 135958,
+      "y": -83139,
+      "z": -4460,
+      "heading": 0,
+      "respawnDelaySeconds": 120,
+      "respawnRandomSeconds": 80
+    },
+    {
+      "objectId": 76961,
+      "npcId": 21329,
+      "x": 135843,
+      "y": -81900,
+      "z": -4460,
+      "heading": 0,
+      "respawnDelaySeconds": 120,
+      "respawnRandomSeconds": 80
+    },
+    {
+      "objectId": 76962,
+      "npcId": 21330,
+      "x": 134886,
+      "y": -82358,
+      "z": -4460,
+      "heading": 0,
+      "respawnDelaySeconds": 120,
+      "respawnRandomSeconds": 80
+    },
+    {
+      "objectId": 76963,
+      "npcId": 21330,
+      "x": 135442,
+      "y": -84458,
+      "z": -4460,
+      "heading": 0,
+      "respawnDelaySeconds": 120,
+      "respawnRandomSeconds": 80
+    },
+    {
+      "objectId": 76964,
+      "npcId": 21330,
+      "x": 134978,
+      "y": -81964,
+      "z": -4460,
+      "heading": 0,
+      "respawnDelaySeconds": 120,
+      "respawnRandomSeconds": 80
+    },
+    {
+      "objectId": 76965,
+      "npcId": 21330,
+      "x": 135286,
+      "y": -82018,
+      "z": -4460,
+      "heading": 0,
+      "respawnDelaySeconds": 120,
+      "respawnRandomSeconds": 80
+    },
+    {
+      "objectId": 76966,
+      "npcId": 21330,
+      "x": 136326,
+      "y": -85700,
+      "z": -4460,
+      "heading": 0,
+      "respawnDelaySeconds": 120,
+      "respawnRandomSeconds": 80
+    },
+    {
+      "objectId": 76967,
+      "npcId": 21330,
+      "x": 135189,
+      "y": -83935,
+      "z": -4460,
+      "heading": 0,
+      "respawnDelaySeconds": 120,
+      "respawnRandomSeconds": 80
+    },
+    {
+      "objectId": 76968,
+      "npcId": 21331,
+      "x": 138000,
+      "y": -81147,
+      "z": -4616,
+      "heading": 0,
+      "respawnDelaySeconds": 120,
+      "respawnRandomSeconds": 80
+    },
+    {
+      "objectId": 76969,
+      "npcId": 21331,
+      "x": 137139,
+      "y": -81358,
+      "z": -4616,
+      "heading": 0,
+      "respawnDelaySeconds": 120,
+      "respawnRandomSeconds": 80
+    },
+    {
+      "objectId": 76970,
+      "npcId": 21331,
+      "x": 137266,
+      "y": -81790,
+      "z": -4616,
+      "heading": 0,
+      "respawnDelaySeconds": 120,
+      "respawnRandomSeconds": 80
+    },
+    {
+      "objectId": 76971,
+      "npcId": 21331,
+      "x": 136138,
+      "y": -81003,
+      "z": -4616,
+      "heading": 0,
+      "respawnDelaySeconds": 120,
+      "respawnRandomSeconds": 80
+    },
+    {
+      "objectId": 76972,
+      "npcId": 21332,
+      "x": 136274,
+      "y": -81145,
+      "z": -4616,
+      "heading": 0,
+      "respawnDelaySeconds": 120,
+      "respawnRandomSeconds": 80
+    },
+    {
+      "objectId": 76973,
+      "npcId": 21332,
+      "x": 137360,
+      "y": -80796,
+      "z": -4616,
+      "heading": 0,
+      "respawnDelaySeconds": 120,
+      "respawnRandomSeconds": 80
+    },
+    {
+      "objectId": 76974,
+      "npcId": 21333,
+      "x": 138438,
+      "y": -80708,
+      "z": -4616,
+      "heading": 0,
+      "respawnDelaySeconds": 120,
+      "respawnRandomSeconds": 80
+    },
+    {
+      "objectId": 76975,
+      "npcId": 21333,
+      "x": 136952,
+      "y": -81087,
+      "z": -4616,
+      "heading": 0,
+      "respawnDelaySeconds": 120,
+      "respawnRandomSeconds": 80
+    },
+    {
+      "objectId": 76976,
+      "npcId": 21333,
+      "x": 136574,
+      "y": -81072,
+      "z": -4616,
+      "heading": 0,
+      "respawnDelaySeconds": 120,
+      "respawnRandomSeconds": 80
+    },
+    {
+      "objectId": 76977,
+      "npcId": 21333,
+      "x": 138111,
+      "y": -81581,
+      "z": -4616,
+      "heading": 0,
+      "respawnDelaySeconds": 120,
+      "respawnRandomSeconds": 80
+    },
+    {
+      "objectId": 76978,
+      "npcId": 21334,
+      "x": 137354,
+      "y": -82005,
+      "z": -4616,
+      "heading": 0,
+      "respawnDelaySeconds": 120,
+      "respawnRandomSeconds": 80
+    },
+    {
+      "objectId": 76979,
+      "npcId": 21334,
+      "x": 137727,
+      "y": -81704,
+      "z": -4616,
+      "heading": 0,
+      "respawnDelaySeconds": 120,
+      "respawnRandomSeconds": 80
+    },
+    {
+      "objectId": 76980,
+      "npcId": 21331,
+      "x": 137839,
+      "y": -83981,
+      "z": -4952,
+      "heading": 0,
+      "respawnDelaySeconds": 120,
+      "respawnRandomSeconds": 80
+    },
+    {
+      "objectId": 76981,
+      "npcId": 21331,
+      "x": 139852,
+      "y": -85176,
+      "z": -4952,
+      "heading": 0,
+      "respawnDelaySeconds": 120,
+      "respawnRandomSeconds": 80
+    },
+    {
+      "objectId": 76982,
+      "npcId": 21331,
+      "x": 139126,
+      "y": -83300,
+      "z": -4952,
+      "heading": 0,
+      "respawnDelaySeconds": 120,
+      "respawnRandomSeconds": 80
+    },
+    {
+      "objectId": 76983,
+      "npcId": 21331,
+      "x": 138689,
+      "y": -83905,
+      "z": -4952,
+      "heading": 0,
+      "respawnDelaySeconds": 120,
+      "respawnRandomSeconds": 80
+    },
+    {
+      "objectId": 76984,
+      "npcId": 21331,
+      "x": 140081,
+      "y": -83560,
+      "z": -4952,
+      "heading": 0,
+      "respawnDelaySeconds": 120,
+      "respawnRandomSeconds": 80
+    },
+    {
+      "objectId": 76985,
+      "npcId": 21331,
+      "x": 139586,
+      "y": -83772,
+      "z": -4952,
+      "heading": 0,
+      "respawnDelaySeconds": 120,
+      "respawnRandomSeconds": 80
+    },
+    {
+      "objectId": 76986,
+      "npcId": 21332,
+      "x": 140435,
+      "y": -84875,
+      "z": -4952,
+      "heading": 0,
+      "respawnDelaySeconds": 120,
+      "respawnRandomSeconds": 80
+    },
+    {
+      "objectId": 76987,
+      "npcId": 21332,
+      "x": 138224,
+      "y": -84203,
+      "z": -4952,
+      "heading": 0,
+      "respawnDelaySeconds": 120,
+      "respawnRandomSeconds": 80
+    },
+    {
+      "objectId": 76988,
+      "npcId": 21332,
+      "x": 139503,
+      "y": -84737,
+      "z": -4952,
+      "heading": 0,
+      "respawnDelaySeconds": 120,
+      "respawnRandomSeconds": 80
+    },
+    {
+      "objectId": 76989,
+      "npcId": 21332,
+      "x": 139623,
+      "y": -82851,
+      "z": -4952,
+      "heading": 0,
+      "respawnDelaySeconds": 120,
+      "respawnRandomSeconds": 80
+    },
+    {
+      "objectId": 76990,
+      "npcId": 21333,
+      "x": 138191,
+      "y": -84881,
+      "z": -4952,
+      "heading": 0,
+      "respawnDelaySeconds": 120,
+      "respawnRandomSeconds": 80
+    },
+    {
+      "objectId": 76991,
+      "npcId": 21333,
+      "x": 138654,
+      "y": -83332,
+      "z": -4952,
+      "heading": 0,
+      "respawnDelaySeconds": 120,
+      "respawnRandomSeconds": 80
+    },
+    {
+      "objectId": 76992,
+      "npcId": 21333,
+      "x": 139788,
+      "y": -83403,
+      "z": -4952,
+      "heading": 0,
+      "respawnDelaySeconds": 120,
+      "respawnRandomSeconds": 80
+    },
+    {
+      "objectId": 76993,
+      "npcId": 21333,
+      "x": 138918,
+      "y": -84723,
+      "z": -4952,
+      "heading": 0,
+      "respawnDelaySeconds": 120,
+      "respawnRandomSeconds": 80
+    },
+    {
+      "objectId": 76994,
+      "npcId": 21333,
+      "x": 139966,
+      "y": -83987,
+      "z": -4952,
+      "heading": 0,
+      "respawnDelaySeconds": 120,
+      "respawnRandomSeconds": 80
+    },
+    {
+      "objectId": 76995,
+      "npcId": 21333,
+      "x": 137893,
+      "y": -82321,
+      "z": -4952,
+      "heading": 0,
+      "respawnDelaySeconds": 120,
+      "respawnRandomSeconds": 80
+    },
+    {
+      "objectId": 76996,
+      "npcId": 21334,
+      "x": 138928,
+      "y": -83296,
+      "z": -4952,
+      "heading": 0,
+      "respawnDelaySeconds": 120,
+      "respawnRandomSeconds": 80
+    },
+    {
+      "objectId": 76997,
+      "npcId": 21334,
+      "x": 139584,
+      "y": -84278,
+      "z": -4952,
+      "heading": 0,
+      "respawnDelaySeconds": 120,
+      "respawnRandomSeconds": 80
+    },
+    {
+      "objectId": 76998,
+      "npcId": 21334,
+      "x": 138815,
+      "y": -83139,
+      "z": -4952,
+      "heading": 0,
+      "respawnDelaySeconds": 120,
+      "respawnRandomSeconds": 80
+    },
+    {
+      "objectId": 76999,
+      "npcId": 21334,
+      "x": 138883,
+      "y": -82672,
+      "z": -4952,
+      "heading": 0,
+      "respawnDelaySeconds": 120,
+      "respawnRandomSeconds": 80
+    },
+    {
+      "objectId": 77000,
+      "npcId": 21334,
+      "x": 138366,
+      "y": -83751,
+      "z": -4952,
+      "heading": 0,
+      "respawnDelaySeconds": 120,
+      "respawnRandomSeconds": 80
+    },
+    {
+      "objectId": 77001,
+      "npcId": 21334,
+      "x": 139508,
+      "y": -83164,
+      "z": -4952,
+      "heading": 0,
+      "respawnDelaySeconds": 120,
+      "respawnRandomSeconds": 80
+    },
+    {
+      "objectId": 77002,
+      "npcId": 21345,
+      "x": 139001,
+      "y": -84912,
+      "z": -4952,
+      "heading": 0,
+      "respawnDelaySeconds": 100,
+      "respawnRandomSeconds": 30
+    },
+    {
+      "objectId": 77003,
+      "npcId": 21345,
+      "x": 139709,
+      "y": -85093,
+      "z": -4952,
+      "heading": 0,
+      "respawnDelaySeconds": 100,
+      "respawnRandomSeconds": 30
+    },
+    {
+      "objectId": 77004,
+      "npcId": 21335,
+      "x": 142058,
+      "y": -84903,
+      "z": -4972,
+      "heading": 0,
+      "respawnDelaySeconds": 120,
+      "respawnRandomSeconds": 80
+    },
+    {
+      "objectId": 77005,
+      "npcId": 21335,
+      "x": 143044,
+      "y": -86880,
+      "z": -4972,
+      "heading": 0,
+      "respawnDelaySeconds": 120,
+      "respawnRandomSeconds": 80
+    },
+    {
+      "objectId": 77006,
+      "npcId": 21335,
+      "x": 140251,
+      "y": -85292,
+      "z": -4972,
+      "heading": 0,
+      "respawnDelaySeconds": 120,
+      "respawnRandomSeconds": 80
+    },
+    {
+      "objectId": 77007,
+      "npcId": 21335,
+      "x": 142169,
+      "y": -85889,
+      "z": -4972,
+      "heading": 0,
+      "respawnDelaySeconds": 120,
+      "respawnRandomSeconds": 80
+    },
+    {
+      "objectId": 77008,
+      "npcId": 21335,
+      "x": 142111,
+      "y": -86188,
+      "z": -4972,
+      "heading": 0,
+      "respawnDelaySeconds": 120,
+      "respawnRandomSeconds": 80
+    },
+    {
+      "objectId": 77009,
+      "npcId": 21335,
+      "x": 142451,
+      "y": -84920,
+      "z": -4972,
+      "heading": 0,
+      "respawnDelaySeconds": 120,
+      "respawnRandomSeconds": 80
+    },
+    {
+      "objectId": 77010,
+      "npcId": 21336,
+      "x": 142667,
+      "y": -86062,
+      "z": -4972,
+      "heading": 0,
+      "respawnDelaySeconds": 120,
+      "respawnRandomSeconds": 80
+    },
+    {
+      "objectId": 77011,
+      "npcId": 21336,
+      "x": 140793,
+      "y": -85933,
+      "z": -4972,
+      "heading": 0,
+      "respawnDelaySeconds": 120,
+      "respawnRandomSeconds": 80
+    },
+    {
+      "objectId": 77012,
+      "npcId": 21336,
+      "x": 143930,
+      "y": -86898,
+      "z": -4972,
+      "heading": 0,
+      "respawnDelaySeconds": 120,
+      "respawnRandomSeconds": 80
+    },
+    {
+      "objectId": 77013,
+      "npcId": 21336,
+      "x": 140819,
+      "y": -84865,
+      "z": -4972,
+      "heading": 0,
+      "respawnDelaySeconds": 120,
+      "respawnRandomSeconds": 80
+    },
+    {
+      "objectId": 77014,
+      "npcId": 21337,
+      "x": 141539,
+      "y": -84802,
+      "z": -4972,
+      "heading": 0,
+      "respawnDelaySeconds": 120,
+      "respawnRandomSeconds": 80
+    },
+    {
+      "objectId": 77015,
+      "npcId": 21337,
+      "x": 141239,
+      "y": -84958,
+      "z": -4972,
+      "heading": 0,
+      "respawnDelaySeconds": 120,
+      "respawnRandomSeconds": 80
+    },
+    {
+      "objectId": 77016,
+      "npcId": 21337,
+      "x": 140467,
+      "y": -84961,
+      "z": -4972,
+      "heading": 0,
+      "respawnDelaySeconds": 120,
+      "respawnRandomSeconds": 80
+    },
+    {
+      "objectId": 77017,
+      "npcId": 21337,
+      "x": 140743,
+      "y": -85635,
+      "z": -4972,
+      "heading": 0,
+      "respawnDelaySeconds": 120,
+      "respawnRandomSeconds": 80
+    },
+    {
+      "objectId": 77018,
+      "npcId": 21337,
+      "x": 141175,
+      "y": -85481,
+      "z": -4972,
+      "heading": 0,
+      "respawnDelaySeconds": 120,
+      "respawnRandomSeconds": 80
+    },
+    {
+      "objectId": 77019,
+      "npcId": 21337,
+      "x": 143202,
+      "y": -87577,
+      "z": -4972,
+      "heading": 0,
+      "respawnDelaySeconds": 120,
+      "respawnRandomSeconds": 80
+    },
+    {
+      "objectId": 77020,
+      "npcId": 21338,
+      "x": 141856,
+      "y": -84962,
+      "z": -4972,
+      "heading": 0,
+      "respawnDelaySeconds": 120,
+      "respawnRandomSeconds": 80
+    },
+    {
+      "objectId": 77021,
+      "npcId": 21338,
+      "x": 143188,
+      "y": -85780,
+      "z": -4972,
+      "heading": 0,
+      "respawnDelaySeconds": 120,
+      "respawnRandomSeconds": 80
+    },
+    {
+      "objectId": 77022,
+      "npcId": 21338,
+      "x": 143386,
+      "y": -85812,
+      "z": -4972,
+      "heading": 0,
+      "respawnDelaySeconds": 120,
+      "respawnRandomSeconds": 80
+    },
+    {
+      "objectId": 77023,
+      "npcId": 21338,
+      "x": 143636,
+      "y": -86404,
+      "z": -4972,
+      "heading": 0,
+      "respawnDelaySeconds": 120,
+      "respawnRandomSeconds": 80
+    },
+    {
+      "objectId": 77024,
+      "npcId": 21338,
+      "x": 141930,
+      "y": -84775,
+      "z": -4972,
+      "heading": 0,
+      "respawnDelaySeconds": 120,
+      "respawnRandomSeconds": 80
+    },
+    {
+      "objectId": 77025,
+      "npcId": 21338,
+      "x": 143433,
+      "y": -87047,
+      "z": -4972,
+      "heading": 0,
+      "respawnDelaySeconds": 120,
+      "respawnRandomSeconds": 80
+    },
+    {
+      "objectId": 77026,
+      "npcId": 21339,
+      "x": 146205,
+      "y": -88594,
+      "z": -5136,
+      "heading": 0,
+      "respawnDelaySeconds": 120,
+      "respawnRandomSeconds": 80
+    },
+    {
+      "objectId": 77027,
+      "npcId": 21339,
+      "x": 145409,
+      "y": -88472,
+      "z": -5136,
+      "heading": 0,
+      "respawnDelaySeconds": 120,
+      "respawnRandomSeconds": 80
+    },
+    {
+      "objectId": 77028,
+      "npcId": 21339,
+      "x": 146343,
+      "y": -88693,
+      "z": -5136,
+      "heading": 0,
+      "respawnDelaySeconds": 120,
+      "respawnRandomSeconds": 80
+    },
+    {
+      "objectId": 77029,
+      "npcId": 21339,
+      "x": 145876,
+      "y": -87511,
+      "z": -5136,
+      "heading": 0,
+      "respawnDelaySeconds": 120,
+      "respawnRandomSeconds": 80
+    },
+    {
+      "objectId": 77030,
+      "npcId": 21340,
+      "x": 144928,
+      "y": -87104,
+      "z": -5136,
+      "heading": 0,
+      "respawnDelaySeconds": 120,
+      "respawnRandomSeconds": 80
+    },
+    {
+      "objectId": 77031,
+      "npcId": 21340,
+      "x": 144966,
+      "y": -88202,
+      "z": -5136,
+      "heading": 0,
+      "respawnDelaySeconds": 120,
+      "respawnRandomSeconds": 80
+    },
+    {
+      "objectId": 77032,
+      "npcId": 21340,
+      "x": 144253,
+      "y": -87028,
+      "z": -5136,
+      "heading": 0,
+      "respawnDelaySeconds": 120,
+      "respawnRandomSeconds": 80
+    },
+    {
+      "objectId": 77033,
+      "npcId": 21340,
+      "x": 145912,
+      "y": -87106,
+      "z": -5136,
+      "heading": 0,
+      "respawnDelaySeconds": 120,
+      "respawnRandomSeconds": 80
+    },
+    {
+      "objectId": 77034,
+      "npcId": 21341,
+      "x": 144634,
+      "y": -87754,
+      "z": -5136,
+      "heading": 0,
+      "respawnDelaySeconds": 120,
+      "respawnRandomSeconds": 80
+    },
+    {
+      "objectId": 77035,
+      "npcId": 21341,
+      "x": 145283,
+      "y": -87551,
+      "z": -5136,
+      "heading": 0,
+      "respawnDelaySeconds": 120,
+      "respawnRandomSeconds": 80
+    },
+    {
+      "objectId": 77036,
+      "npcId": 21341,
+      "x": 144792,
+      "y": -87892,
+      "z": -5136,
+      "heading": 0,
+      "respawnDelaySeconds": 120,
+      "respawnRandomSeconds": 80
+    },
+    {
+      "objectId": 77037,
+      "npcId": 21341,
+      "x": 145561,
+      "y": -88757,
+      "z": -5136,
+      "heading": 0,
+      "respawnDelaySeconds": 120,
+      "respawnRandomSeconds": 80
+    },
+    {
+      "objectId": 77038,
+      "npcId": 21341,
+      "x": 145016,
+      "y": -87604,
+      "z": -5136,
+      "heading": 0,
+      "respawnDelaySeconds": 120,
+      "respawnRandomSeconds": 80
+    },
+    {
+      "objectId": 77039,
+      "npcId": 21341,
+      "x": 146681,
+      "y": -87849,
+      "z": -5136,
+      "heading": 0,
+      "respawnDelaySeconds": 120,
+      "respawnRandomSeconds": 80
+    },
+    {
+      "objectId": 77040,
+      "npcId": 21342,
+      "x": 145294,
+      "y": -88635,
+      "z": -5136,
+      "heading": 0,
+      "respawnDelaySeconds": 120,
+      "respawnRandomSeconds": 80
+    },
+    {
+      "objectId": 77041,
+      "npcId": 21342,
+      "x": 144222,
+      "y": -87589,
+      "z": -5136,
+      "heading": 0,
+      "respawnDelaySeconds": 120,
+      "respawnRandomSeconds": 80
+    },
+    {
+      "objectId": 77042,
+      "npcId": 21342,
+      "x": 144305,
+      "y": -87855,
+      "z": -5136,
+      "heading": 0,
+      "respawnDelaySeconds": 120,
+      "respawnRandomSeconds": 80
+    },
+    {
+      "objectId": 77043,
+      "npcId": 21342,
+      "x": 145509,
+      "y": -88305,
+      "z": -5136,
+      "heading": 0,
+      "respawnDelaySeconds": 120,
+      "respawnRandomSeconds": 80
+    },
+    {
+      "objectId": 77044,
+      "npcId": 21339,
+      "x": 147555,
+      "y": -85810,
+      "z": -5376,
+      "heading": 0,
+      "respawnDelaySeconds": 120,
+      "respawnRandomSeconds": 80
+    },
+    {
+      "objectId": 77045,
+      "npcId": 21339,
+      "x": 147754,
+      "y": -85346,
+      "z": -5376,
+      "heading": 0,
+      "respawnDelaySeconds": 120,
+      "respawnRandomSeconds": 80
+    },
+    {
+      "objectId": 77046,
+      "npcId": 21340,
+      "x": 147445,
+      "y": -86414,
+      "z": -5376,
+      "heading": 0,
+      "respawnDelaySeconds": 120,
+      "respawnRandomSeconds": 80
+    },
+    {
+      "objectId": 77047,
+      "npcId": 21340,
+      "x": 147421,
+      "y": -86061,
+      "z": -5376,
+      "heading": 0,
+      "respawnDelaySeconds": 120,
+      "respawnRandomSeconds": 80
+    },
+    {
+      "objectId": 77048,
+      "npcId": 21341,
+      "x": 147649,
+      "y": -86036,
+      "z": -5376,
+      "heading": 0,
+      "respawnDelaySeconds": 120,
+      "respawnRandomSeconds": 80
+    },
+    {
+      "objectId": 77049,
+      "npcId": 21341,
+      "x": 146595,
+      "y": -86992,
+      "z": -5376,
+      "heading": 0,
+      "respawnDelaySeconds": 120,
+      "respawnRandomSeconds": 80
+    },
+    {
+      "objectId": 77050,
+      "npcId": 21342,
+      "x": 146911,
+      "y": -86745,
+      "z": -5376,
+      "heading": 0,
+      "respawnDelaySeconds": 120,
+      "respawnRandomSeconds": 80
+    },
+    {
+      "objectId": 77051,
+      "npcId": 21342,
+      "x": 147019,
+      "y": -86964,
+      "z": -5376,
+      "heading": 0,
+      "respawnDelaySeconds": 120,
+      "respawnRandomSeconds": 80
+    },
+    {
+      "objectId": 77052,
+      "npcId": 21339,
+      "x": 147602,
+      "y": -84442,
+      "z": -5576,
+      "heading": 0,
+      "respawnDelaySeconds": 120,
+      "respawnRandomSeconds": 80
+    },
+    {
+      "objectId": 77053,
+      "npcId": 21339,
+      "x": 148703,
+      "y": -83894,
+      "z": -5576,
+      "heading": 0,
+      "respawnDelaySeconds": 120,
+      "respawnRandomSeconds": 80
+    },
+    {
+      "objectId": 77054,
+      "npcId": 21340,
+      "x": 148313,
+      "y": -84041,
+      "z": -5576,
+      "heading": 0,
+      "respawnDelaySeconds": 120,
+      "respawnRandomSeconds": 80
+    },
+    {
+      "objectId": 77055,
+      "npcId": 21340,
+      "x": 148030,
+      "y": -84631,
+      "z": -5576,
+      "heading": 0,
+      "respawnDelaySeconds": 120,
+      "respawnRandomSeconds": 80
+    },
+    {
+      "objectId": 77056,
+      "npcId": 21341,
+      "x": 148420,
+      "y": -84379,
+      "z": -5576,
+      "heading": 0,
+      "respawnDelaySeconds": 120,
+      "respawnRandomSeconds": 80
+    },
+    {
+      "objectId": 77057,
+      "npcId": 21341,
+      "x": 148157,
+      "y": -84095,
+      "z": -5576,
+      "heading": 0,
+      "respawnDelaySeconds": 120,
+      "respawnRandomSeconds": 80
+    },
+    {
+      "objectId": 77058,
+      "npcId": 21342,
+      "x": 147954,
+      "y": -84326,
+      "z": -5576,
+      "heading": 0,
+      "respawnDelaySeconds": 120,
+      "respawnRandomSeconds": 80
+    },
+    {
+      "objectId": 77059,
+      "npcId": 21342,
+      "x": 148409,
+      "y": -83849,
+      "z": -5576,
+      "heading": 0,
+      "respawnDelaySeconds": 120,
+      "respawnRandomSeconds": 80
+    },
+    {
+      "objectId": 77060,
+      "npcId": 21339,
+      "x": 147488,
+      "y": -89169,
+      "z": -4704,
+      "heading": 0,
+      "respawnDelaySeconds": 120,
+      "respawnRandomSeconds": 80
+    },
+    {
+      "objectId": 77061,
+      "npcId": 21339,
+      "x": 149048,
+      "y": -89274,
+      "z": -4704,
+      "heading": 0,
+      "respawnDelaySeconds": 120,
+      "respawnRandomSeconds": 80
+    },
+    {
+      "objectId": 77062,
+      "npcId": 21339,
+      "x": 148966,
+      "y": -87436,
+      "z": -4704,
+      "heading": 0,
+      "respawnDelaySeconds": 120,
+      "respawnRandomSeconds": 80
+    },
+    {
+      "objectId": 77063,
+      "npcId": 21339,
+      "x": 148363,
+      "y": -86793,
+      "z": -4704,
+      "heading": 0,
+      "respawnDelaySeconds": 120,
+      "respawnRandomSeconds": 80
+    },
+    {
+      "objectId": 77064,
+      "npcId": 21339,
+      "x": 149996,
+      "y": -89034,
+      "z": -4704,
+      "heading": 0,
+      "respawnDelaySeconds": 120,
+      "respawnRandomSeconds": 80
+    },
+    {
+      "objectId": 77065,
+      "npcId": 21339,
+      "x": 148016,
+      "y": -87347,
+      "z": -4704,
+      "heading": 0,
+      "respawnDelaySeconds": 120,
+      "respawnRandomSeconds": 80
+    },
+    {
+      "objectId": 77066,
+      "npcId": 21340,
+      "x": 149694,
+      "y": -88460,
+      "z": -4704,
+      "heading": 0,
+      "respawnDelaySeconds": 120,
+      "respawnRandomSeconds": 80
+    },
+    {
+      "objectId": 77067,
+      "npcId": 21340,
+      "x": 149107,
+      "y": -89099,
+      "z": -4704,
+      "heading": 0,
+      "respawnDelaySeconds": 120,
+      "respawnRandomSeconds": 80
+    },
+    {
+      "objectId": 77068,
+      "npcId": 21340,
+      "x": 148684,
+      "y": -89124,
+      "z": -4704,
+      "heading": 0,
+      "respawnDelaySeconds": 120,
+      "respawnRandomSeconds": 80
+    },
+    {
+      "objectId": 77069,
+      "npcId": 21340,
+      "x": 150192,
+      "y": -89657,
+      "z": -4704,
+      "heading": 0,
+      "respawnDelaySeconds": 120,
+      "respawnRandomSeconds": 80
+    },
+    {
+      "objectId": 77070,
+      "npcId": 21341,
+      "x": 148244,
+      "y": -89253,
+      "z": -4704,
+      "heading": 0,
+      "respawnDelaySeconds": 120,
+      "respawnRandomSeconds": 80
+    },
+    {
+      "objectId": 77071,
+      "npcId": 21341,
+      "x": 147468,
+      "y": -88921,
+      "z": -4704,
+      "heading": 0,
+      "respawnDelaySeconds": 120,
+      "respawnRandomSeconds": 80
+    },
+    {
+      "objectId": 77072,
+      "npcId": 21341,
+      "x": 149643,
+      "y": -89428,
+      "z": -4704,
+      "heading": 0,
+      "respawnDelaySeconds": 120,
+      "respawnRandomSeconds": 80
+    },
+    {
+      "objectId": 77073,
+      "npcId": 21341,
+      "x": 148663,
+      "y": -86792,
+      "z": -4704,
+      "heading": 0,
+      "respawnDelaySeconds": 120,
+      "respawnRandomSeconds": 80
+    },
+    {
+      "objectId": 77074,
+      "npcId": 21341,
+      "x": 147409,
+      "y": -88321,
+      "z": -4704,
+      "heading": 0,
+      "respawnDelaySeconds": 120,
+      "respawnRandomSeconds": 80
+    },
+    {
+      "objectId": 77075,
+      "npcId": 21341,
+      "x": 148330,
+      "y": -87586,
+      "z": -4704,
+      "heading": 0,
+      "respawnDelaySeconds": 120,
+      "respawnRandomSeconds": 80
+    },
+    {
+      "objectId": 77076,
+      "npcId": 21342,
+      "x": 150342,
+      "y": -87727,
+      "z": -4704,
+      "heading": 0,
+      "respawnDelaySeconds": 120,
+      "respawnRandomSeconds": 80
+    },
+    {
+      "objectId": 77077,
+      "npcId": 21342,
+      "x": 147857,
+      "y": -89130,
+      "z": -4704,
+      "heading": 0,
+      "respawnDelaySeconds": 120,
+      "respawnRandomSeconds": 80
+    },
+    {
+      "objectId": 77078,
+      "npcId": 21342,
+      "x": 149895,
+      "y": -86953,
+      "z": -4704,
+      "heading": 0,
+      "respawnDelaySeconds": 120,
+      "respawnRandomSeconds": 80
+    },
+    {
+      "objectId": 77079,
+      "npcId": 21342,
+      "x": 148594,
+      "y": -88445,
+      "z": -4704,
+      "heading": 0,
+      "respawnDelaySeconds": 120,
+      "respawnRandomSeconds": 80
+    },
+    {
+      "objectId": 77080,
+      "npcId": 21342,
+      "x": 149389,
+      "y": -88853,
+      "z": -4704,
+      "heading": 0,
+      "respawnDelaySeconds": 120,
+      "respawnRandomSeconds": 80
+    },
+    {
+      "objectId": 77081,
+      "npcId": 21342,
+      "x": 149148,
+      "y": -89489,
+      "z": -4704,
+      "heading": 0,
+      "respawnDelaySeconds": 120,
+      "respawnRandomSeconds": 80
+    },
+    {
+      "objectId": 77082,
+      "npcId": 21347,
+      "x": 150379,
+      "y": -88415,
+      "z": -4704,
+      "heading": 0,
+      "respawnDelaySeconds": 100,
+      "respawnRandomSeconds": 30
+    },
+    {
+      "objectId": 77083,
+      "npcId": 21347,
+      "x": 148225,
+      "y": -87277,
+      "z": -4704,
+      "heading": 0,
+      "respawnDelaySeconds": 100,
+      "respawnRandomSeconds": 30
+    },
+    {
+      "objectId": 77084,
+      "npcId": 21339,
+      "x": 149041,
+      "y": -85683,
+      "z": -5048,
+      "heading": 0,
+      "respawnDelaySeconds": 120,
+      "respawnRandomSeconds": 80
+    },
+    {
+      "objectId": 77085,
+      "npcId": 21339,
+      "x": 148806,
+      "y": -85578,
+      "z": -5048,
+      "heading": 0,
+      "respawnDelaySeconds": 120,
+      "respawnRandomSeconds": 80
+    },
+    {
+      "objectId": 77086,
+      "npcId": 21339,
+      "x": 149369,
+      "y": -84216,
+      "z": -5048,
+      "heading": 0,
+      "respawnDelaySeconds": 120,
+      "respawnRandomSeconds": 80
+    },
+    {
+      "objectId": 77087,
+      "npcId": 21339,
+      "x": 151564,
+      "y": -83517,
+      "z": -5048,
+      "heading": 0,
+      "respawnDelaySeconds": 120,
+      "respawnRandomSeconds": 80
+    },
+    {
+      "objectId": 77088,
+      "npcId": 21339,
+      "x": 150954,
+      "y": -83294,
+      "z": -5048,
+      "heading": 0,
+      "respawnDelaySeconds": 120,
+      "respawnRandomSeconds": 80
+    },
+    {
+      "objectId": 77089,
+      "npcId": 21339,
+      "x": 149808,
+      "y": -83880,
+      "z": -5048,
+      "heading": 0,
+      "respawnDelaySeconds": 120,
+      "respawnRandomSeconds": 80
+    },
+    {
+      "objectId": 77090,
+      "npcId": 21340,
+      "x": 151728,
+      "y": -83934,
+      "z": -5048,
+      "heading": 0,
+      "respawnDelaySeconds": 120,
+      "respawnRandomSeconds": 80
+    },
+    {
+      "objectId": 77091,
+      "npcId": 21340,
+      "x": 150281,
+      "y": -83450,
+      "z": -5048,
+      "heading": 0,
+      "respawnDelaySeconds": 120,
+      "respawnRandomSeconds": 80
+    },
+    {
+      "objectId": 77092,
+      "npcId": 21340,
+      "x": 150501,
+      "y": -84289,
+      "z": -5048,
+      "heading": 0,
+      "respawnDelaySeconds": 120,
+      "respawnRandomSeconds": 80
+    },
+    {
+      "objectId": 77093,
+      "npcId": 21340,
+      "x": 151775,
+      "y": -84131,
+      "z": -5048,
+      "heading": 0,
+      "respawnDelaySeconds": 120,
+      "respawnRandomSeconds": 80
+    },
+    {
+      "objectId": 77094,
+      "npcId": 21340,
+      "x": 150997,
+      "y": -84976,
+      "z": -5048,
+      "heading": 0,
+      "respawnDelaySeconds": 120,
+      "respawnRandomSeconds": 80
+    },
+    {
+      "objectId": 77095,
+      "npcId": 21340,
+      "x": 150355,
+      "y": -84619,
+      "z": -5048,
+      "heading": 0,
+      "respawnDelaySeconds": 120,
+      "respawnRandomSeconds": 80
+    },
+    {
+      "objectId": 77096,
+      "npcId": 21341,
+      "x": 150393,
+      "y": -84136,
+      "z": -5048,
+      "heading": 0,
+      "respawnDelaySeconds": 120,
+      "respawnRandomSeconds": 80
+    },
+    {
+      "objectId": 77097,
+      "npcId": 21341,
+      "x": 150837,
+      "y": -85268,
+      "z": -5048,
+      "heading": 0,
+      "respawnDelaySeconds": 120,
+      "respawnRandomSeconds": 80
+    },
+    {
+      "objectId": 77098,
+      "npcId": 21341,
+      "x": 151083,
+      "y": -85710,
+      "z": -5048,
+      "heading": 0,
+      "respawnDelaySeconds": 120,
+      "respawnRandomSeconds": 80
+    },
+    {
+      "objectId": 77099,
+      "npcId": 21341,
+      "x": 150653,
+      "y": -84381,
+      "z": -5048,
+      "heading": 0,
+      "respawnDelaySeconds": 120,
+      "respawnRandomSeconds": 80
+    },
+    {
+      "objectId": 77100,
+      "npcId": 21341,
+      "x": 151244,
+      "y": -83099,
+      "z": -5048,
+      "heading": 0,
+      "respawnDelaySeconds": 120,
+      "respawnRandomSeconds": 80
+    },
+    {
+      "objectId": 77101,
+      "npcId": 21341,
+      "x": 150526,
+      "y": -83376,
+      "z": -5048,
+      "heading": 0,
+      "respawnDelaySeconds": 120,
+      "respawnRandomSeconds": 80
+    },
+    {
+      "objectId": 77102,
+      "npcId": 21342,
+      "x": 149505,
+      "y": -84625,
+      "z": -5048,
+      "heading": 0,
+      "respawnDelaySeconds": 120,
+      "respawnRandomSeconds": 80
+    },
+    {
+      "objectId": 77103,
+      "npcId": 21342,
+      "x": 149658,
+      "y": -86058,
+      "z": -5048,
+      "heading": 0,
+      "respawnDelaySeconds": 120,
+      "respawnRandomSeconds": 80
+    },
+    {
+      "objectId": 77104,
+      "npcId": 21342,
+      "x": 148991,
+      "y": -86289,
+      "z": -5048,
+      "heading": 0,
+      "respawnDelaySeconds": 120,
+      "respawnRandomSeconds": 80
+    },
+    {
+      "objectId": 77105,
+      "npcId": 21342,
+      "x": 151036,
+      "y": -83695,
+      "z": -5048,
+      "heading": 0,
+      "respawnDelaySeconds": 120,
+      "respawnRandomSeconds": 80
+    },
+    {
+      "objectId": 77106,
+      "npcId": 21347,
+      "x": 149363,
+      "y": -85230,
+      "z": -5048,
+      "heading": 0,
+      "respawnDelaySeconds": 100,
+      "respawnRandomSeconds": 30
+    },
+    {
+      "objectId": 77107,
+      "npcId": 21347,
+      "x": 151245,
+      "y": -85814,
+      "z": -5048,
+      "heading": 0,
+      "respawnDelaySeconds": 100,
+      "respawnRandomSeconds": 30
+    },
+    {
+      "objectId": 77108,
+      "npcId": 21335,
+      "x": 153962,
+      "y": -87557,
+      "z": -4948,
+      "heading": 0,
+      "respawnDelaySeconds": 120,
+      "respawnRandomSeconds": 80
+    },
+    {
+      "objectId": 77109,
+      "npcId": 21335,
+      "x": 151457,
+      "y": -89702,
+      "z": -4948,
+      "heading": 0,
+      "respawnDelaySeconds": 120,
+      "respawnRandomSeconds": 80
+    },
+    {
+      "objectId": 77110,
+      "npcId": 21335,
+      "x": 153313,
+      "y": -86431,
+      "z": -4948,
+      "heading": 0,
+      "respawnDelaySeconds": 120,
+      "respawnRandomSeconds": 80
+    },
+    {
+      "objectId": 77111,
+      "npcId": 21335,
+      "x": 152867,
+      "y": -89407,
+      "z": -4948,
+      "heading": 0,
+      "respawnDelaySeconds": 120,
+      "respawnRandomSeconds": 80
+    },
+    {
+      "objectId": 77112,
+      "npcId": 21335,
+      "x": 152342,
+      "y": -89078,
+      "z": -4948,
+      "heading": 0,
+      "respawnDelaySeconds": 120,
+      "respawnRandomSeconds": 80
+    },
+    {
+      "objectId": 77113,
+      "npcId": 21335,
+      "x": 152917,
+      "y": -85327,
+      "z": -4948,
+      "heading": 0,
+      "respawnDelaySeconds": 120,
+      "respawnRandomSeconds": 80
+    },
+    {
+      "objectId": 77114,
+      "npcId": 21335,
+      "x": 154863,
+      "y": -85941,
+      "z": -4948,
+      "heading": 0,
+      "respawnDelaySeconds": 120,
+      "respawnRandomSeconds": 80
+    },
+    {
+      "objectId": 77115,
+      "npcId": 21335,
+      "x": 154221,
+      "y": -87621,
+      "z": -4948,
+      "heading": 0,
+      "respawnDelaySeconds": 120,
+      "respawnRandomSeconds": 80
+    },
+    {
+      "objectId": 77116,
+      "npcId": 21335,
+      "x": 154403,
+      "y": -88450,
+      "z": -4948,
+      "heading": 0,
+      "respawnDelaySeconds": 120,
+      "respawnRandomSeconds": 80
+    },
+    {
+      "objectId": 77117,
+      "npcId": 21335,
+      "x": 151323,
+      "y": -89497,
+      "z": -4948,
+      "heading": 0,
+      "respawnDelaySeconds": 120,
+      "respawnRandomSeconds": 80
+    },
+    {
+      "objectId": 77118,
+      "npcId": 21336,
+      "x": 153827,
+      "y": -87324,
+      "z": -4948,
+      "heading": 0,
+      "respawnDelaySeconds": 120,
+      "respawnRandomSeconds": 80
+    },
+    {
+      "objectId": 77119,
+      "npcId": 21336,
+      "x": 154846,
+      "y": -88388,
+      "z": -4948,
+      "heading": 0,
+      "respawnDelaySeconds": 120,
+      "respawnRandomSeconds": 80
+    },
+    {
+      "objectId": 77120,
+      "npcId": 21336,
+      "x": 154666,
+      "y": -90232,
+      "z": -4948,
+      "heading": 0,
+      "respawnDelaySeconds": 120,
+      "respawnRandomSeconds": 80
+    },
+    {
+      "objectId": 77121,
+      "npcId": 21336,
+      "x": 152457,
+      "y": -89258,
+      "z": -4948,
+      "heading": 0,
+      "respawnDelaySeconds": 120,
+      "respawnRandomSeconds": 80
+    },
+    {
+      "objectId": 77122,
+      "npcId": 21336,
+      "x": 153144,
+      "y": -87966,
+      "z": -4948,
+      "heading": 0,
+      "respawnDelaySeconds": 120,
+      "respawnRandomSeconds": 80
+    },
+    {
+      "objectId": 77123,
+      "npcId": 21336,
+      "x": 154608,
+      "y": -86544,
+      "z": -4948,
+      "heading": 0,
+      "respawnDelaySeconds": 120,
+      "respawnRandomSeconds": 80
+    },
+    {
+      "objectId": 77124,
+      "npcId": 21336,
+      "x": 153086,
+      "y": -88157,
+      "z": -4948,
+      "heading": 0,
+      "respawnDelaySeconds": 120,
+      "respawnRandomSeconds": 80
+    },
+    {
+      "objectId": 77125,
+      "npcId": 21336,
+      "x": 152772,
+      "y": -88064,
+      "z": -4948,
+      "heading": 0,
+      "respawnDelaySeconds": 120,
+      "respawnRandomSeconds": 80
+    },
+    {
+      "objectId": 77126,
+      "npcId": 21337,
+      "x": 154182,
+      "y": -89599,
+      "z": -4948,
+      "heading": 0,
+      "respawnDelaySeconds": 120,
+      "respawnRandomSeconds": 80
+    },
+    {
+      "objectId": 77127,
+      "npcId": 21337,
+      "x": 153803,
+      "y": -86495,
+      "z": -4948,
+      "heading": 0,
+      "respawnDelaySeconds": 120,
+      "respawnRandomSeconds": 80
+    },
+    {
+      "objectId": 77128,
+      "npcId": 21337,
+      "x": 151597,
+      "y": -88188,
+      "z": -4948,
+      "heading": 0,
+      "respawnDelaySeconds": 120,
+      "respawnRandomSeconds": 80
+    },
+    {
+      "objectId": 77129,
+      "npcId": 21337,
+      "x": 153316,
+      "y": -85893,
+      "z": -4948,
+      "heading": 0,
+      "respawnDelaySeconds": 120,
+      "respawnRandomSeconds": 80
+    },
+    {
+      "objectId": 77130,
+      "npcId": 21337,
+      "x": 154592,
+      "y": -89770,
+      "z": -4948,
+      "heading": 0,
+      "respawnDelaySeconds": 120,
+      "respawnRandomSeconds": 80
+    },
+    {
+      "objectId": 77131,
+      "npcId": 21337,
+      "x": 152840,
+      "y": -89899,
+      "z": -4948,
+      "heading": 0,
+      "respawnDelaySeconds": 120,
+      "respawnRandomSeconds": 80
+    },
+    {
+      "objectId": 77132,
+      "npcId": 21337,
+      "x": 153480,
+      "y": -89873,
+      "z": -4948,
+      "heading": 0,
+      "respawnDelaySeconds": 120,
+      "respawnRandomSeconds": 80
+    },
+    {
+      "objectId": 77133,
+      "npcId": 21337,
+      "x": 154094,
+      "y": -85468,
+      "z": -4948,
+      "heading": 0,
+      "respawnDelaySeconds": 120,
+      "respawnRandomSeconds": 80
+    },
+    {
+      "objectId": 77134,
+      "npcId": 21337,
+      "x": 152867,
+      "y": -86819,
+      "z": -4948,
+      "heading": 0,
+      "respawnDelaySeconds": 120,
+      "respawnRandomSeconds": 80
+    },
+    {
+      "objectId": 77135,
+      "npcId": 21337,
+      "x": 153390,
+      "y": -88542,
+      "z": -4948,
+      "heading": 0,
+      "respawnDelaySeconds": 120,
+      "respawnRandomSeconds": 80
+    },
+    {
+      "objectId": 77136,
+      "npcId": 21338,
+      "x": 153362,
+      "y": -87980,
+      "z": -4948,
+      "heading": 0,
+      "respawnDelaySeconds": 120,
+      "respawnRandomSeconds": 80
+    },
+    {
+      "objectId": 77137,
+      "npcId": 21338,
+      "x": 151143,
+      "y": -88554,
+      "z": -4948,
+      "heading": 0,
+      "respawnDelaySeconds": 120,
+      "respawnRandomSeconds": 80
+    },
+    {
+      "objectId": 77138,
+      "npcId": 21338,
+      "x": 152690,
+      "y": -89312,
+      "z": -4948,
+      "heading": 0,
+      "respawnDelaySeconds": 120,
+      "respawnRandomSeconds": 80
+    },
+    {
+      "objectId": 77139,
+      "npcId": 21338,
+      "x": 153593,
+      "y": -88844,
+      "z": -4948,
+      "heading": 0,
+      "respawnDelaySeconds": 120,
+      "respawnRandomSeconds": 80
+    },
+    {
+      "objectId": 77140,
+      "npcId": 21338,
+      "x": 153935,
+      "y": -86953,
+      "z": -4948,
+      "heading": 0,
+      "respawnDelaySeconds": 120,
+      "respawnRandomSeconds": 80
+    },
+    {
+      "objectId": 77141,
+      "npcId": 21338,
+      "x": 152217,
+      "y": -88396,
+      "z": -4948,
+      "heading": 0,
+      "respawnDelaySeconds": 120,
+      "respawnRandomSeconds": 80
+    },
+    {
+      "objectId": 77142,
+      "npcId": 21338,
+      "x": 154456,
+      "y": -90184,
+      "z": -4948,
+      "heading": 0,
+      "respawnDelaySeconds": 120,
+      "respawnRandomSeconds": 80
+    },
+    {
+      "objectId": 77143,
+      "npcId": 21338,
+      "x": 153155,
+      "y": -89575,
+      "z": -4948,
+      "heading": 0,
+      "respawnDelaySeconds": 120,
+      "respawnRandomSeconds": 80
+    },
+    {
+      "objectId": 77144,
+      "npcId": 21347,
+      "x": 152155,
+      "y": -88119,
+      "z": -4948,
+      "heading": 0,
+      "respawnDelaySeconds": 100,
+      "respawnRandomSeconds": 30
+    },
+    {
+      "objectId": 77145,
+      "npcId": 21347,
+      "x": 153150,
+      "y": -90775,
+      "z": -4948,
+      "heading": 0,
+      "respawnDelaySeconds": 100,
+      "respawnRandomSeconds": 30
+    },
+    {
+      "objectId": 77146,
+      "npcId": 21331,
+      "x": 154522,
+      "y": -82174,
+      "z": -5424,
+      "heading": 0,
+      "respawnDelaySeconds": 120,
+      "respawnRandomSeconds": 80
+    },
+    {
+      "objectId": 77147,
+      "npcId": 21331,
+      "x": 153193,
+      "y": -82861,
+      "z": -5424,
+      "heading": 0,
+      "respawnDelaySeconds": 120,
+      "respawnRandomSeconds": 80
+    },
+    {
+      "objectId": 77148,
+      "npcId": 21331,
+      "x": 154665,
+      "y": -82800,
+      "z": -5424,
+      "heading": 0,
+      "respawnDelaySeconds": 120,
+      "respawnRandomSeconds": 80
+    },
+    {
+      "objectId": 77149,
+      "npcId": 21331,
+      "x": 152823,
+      "y": -82554,
+      "z": -5424,
+      "heading": 0,
+      "respawnDelaySeconds": 120,
+      "respawnRandomSeconds": 80
+    },
+    {
+      "objectId": 77150,
+      "npcId": 21331,
+      "x": 153349,
+      "y": -82355,
+      "z": -5424,
+      "heading": 0,
+      "respawnDelaySeconds": 120,
+      "respawnRandomSeconds": 80
+    },
+    {
+      "objectId": 77151,
+      "npcId": 21331,
+      "x": 154515,
+      "y": -83184,
+      "z": -5424,
+      "heading": 0,
+      "respawnDelaySeconds": 120,
+      "respawnRandomSeconds": 80
+    },
+    {
+      "objectId": 77152,
+      "npcId": 21332,
+      "x": 154858,
+      "y": -85435,
+      "z": -5424,
+      "heading": 0,
+      "respawnDelaySeconds": 120,
+      "respawnRandomSeconds": 80
+    },
+    {
+      "objectId": 77153,
+      "npcId": 21332,
+      "x": 153620,
+      "y": -81875,
+      "z": -5424,
+      "heading": 0,
+      "respawnDelaySeconds": 120,
+      "respawnRandomSeconds": 80
+    },
+    {
+      "objectId": 77154,
+      "npcId": 21332,
+      "x": 153452,
+      "y": -84126,
+      "z": -5424,
+      "heading": 0,
+      "respawnDelaySeconds": 120,
+      "respawnRandomSeconds": 80
+    },
+    {
+      "objectId": 77155,
+      "npcId": 21332,
+      "x": 153610,
+      "y": -83987,
+      "z": -5424,
+      "heading": 0,
+      "respawnDelaySeconds": 120,
+      "respawnRandomSeconds": 80
+    },
+    {
+      "objectId": 77156,
+      "npcId": 21333,
+      "x": 154851,
+      "y": -84070,
+      "z": -5424,
+      "heading": 0,
+      "respawnDelaySeconds": 120,
+      "respawnRandomSeconds": 80
+    },
+    {
+      "objectId": 77157,
+      "npcId": 21333,
+      "x": 154259,
+      "y": -85180,
+      "z": -5424,
+      "heading": 0,
+      "respawnDelaySeconds": 120,
+      "respawnRandomSeconds": 80
+    },
+    {
+      "objectId": 77158,
+      "npcId": 21333,
+      "x": 153538,
+      "y": -84806,
+      "z": -5424,
+      "heading": 0,
+      "respawnDelaySeconds": 120,
+      "respawnRandomSeconds": 80
+    },
+    {
+      "objectId": 77159,
+      "npcId": 21333,
+      "x": 152594,
+      "y": -82286,
+      "z": -5424,
+      "heading": 0,
+      "respawnDelaySeconds": 120,
+      "respawnRandomSeconds": 80
+    },
+    {
+      "objectId": 77160,
+      "npcId": 21333,
+      "x": 152736,
+      "y": -83638,
+      "z": -5424,
+      "heading": 0,
+      "respawnDelaySeconds": 120,
+      "respawnRandomSeconds": 80
+    },
+    {
+      "objectId": 77161,
+      "npcId": 21333,
+      "x": 153902,
+      "y": -83859,
+      "z": -5424,
+      "heading": 0,
+      "respawnDelaySeconds": 120,
+      "respawnRandomSeconds": 80
+    },
+    {
+      "objectId": 77162,
+      "npcId": 21334,
+      "x": 153720,
+      "y": -83083,
+      "z": -5424,
+      "heading": 0,
+      "respawnDelaySeconds": 120,
+      "respawnRandomSeconds": 80
+    },
+    {
+      "objectId": 77163,
+      "npcId": 21334,
+      "x": 152722,
+      "y": -83445,
+      "z": -5424,
+      "heading": 0,
+      "respawnDelaySeconds": 120,
+      "respawnRandomSeconds": 80
+    },
+    {
+      "objectId": 77164,
+      "npcId": 21334,
+      "x": 153136,
+      "y": -83061,
+      "z": -5424,
+      "heading": 0,
+      "respawnDelaySeconds": 120,
+      "respawnRandomSeconds": 80
+    },
+    {
+      "objectId": 77165,
+      "npcId": 21334,
+      "x": 154983,
+      "y": -83866,
+      "z": -5424,
+      "heading": 0,
+      "respawnDelaySeconds": 120,
+      "respawnRandomSeconds": 80
+    },
+    {
+      "objectId": 77166,
+      "npcId": 21327,
+      "x": 157737,
+      "y": -85819,
+      "z": -4144,
+      "heading": 0,
+      "respawnDelaySeconds": 120,
+      "respawnRandomSeconds": 80
+    },
+    {
+      "objectId": 77167,
+      "npcId": 21327,
+      "x": 156731,
+      "y": -88104,
+      "z": -4144,
+      "heading": 0,
+      "respawnDelaySeconds": 120,
+      "respawnRandomSeconds": 80
+    },
+    {
+      "objectId": 77168,
+      "npcId": 21327,
+      "x": 158511,
+      "y": -87204,
+      "z": -4144,
+      "heading": 0,
+      "respawnDelaySeconds": 120,
+      "respawnRandomSeconds": 80
+    },
+    {
+      "objectId": 77169,
+      "npcId": 21327,
+      "x": 158113,
+      "y": -87715,
+      "z": -4144,
+      "heading": 0,
+      "respawnDelaySeconds": 120,
+      "respawnRandomSeconds": 80
+    },
+    {
+      "objectId": 77170,
+      "npcId": 21327,
+      "x": 157272,
+      "y": -88555,
+      "z": -4144,
+      "heading": 0,
+      "respawnDelaySeconds": 120,
+      "respawnRandomSeconds": 80
+    },
+    {
+      "objectId": 77171,
+      "npcId": 21327,
+      "x": 156628,
+      "y": -88667,
+      "z": -4144,
+      "heading": 0,
+      "respawnDelaySeconds": 120,
+      "respawnRandomSeconds": 80
+    },
+    {
+      "objectId": 77172,
+      "npcId": 21328,
+      "x": 157916,
+      "y": -86592,
+      "z": -4144,
+      "heading": 0,
+      "respawnDelaySeconds": 120,
+      "respawnRandomSeconds": 80
+    },
+    {
+      "objectId": 77173,
+      "npcId": 21328,
+      "x": 156520,
+      "y": -84804,
+      "z": -4144,
+      "heading": 0,
+      "respawnDelaySeconds": 120,
+      "respawnRandomSeconds": 80
+    },
+    {
+      "objectId": 77174,
+      "npcId": 21328,
+      "x": 158186,
+      "y": -86009,
+      "z": -4144,
+      "heading": 0,
+      "respawnDelaySeconds": 120,
+      "respawnRandomSeconds": 80
+    },
+    {
+      "objectId": 77175,
+      "npcId": 21328,
+      "x": 155681,
+      "y": -88570,
+      "z": -4144,
+      "heading": 0,
+      "respawnDelaySeconds": 120,
+      "respawnRandomSeconds": 80
+    },
+    {
+      "objectId": 77176,
+      "npcId": 21328,
+      "x": 155538,
+      "y": -87369,
+      "z": -4144,
+      "heading": 0,
+      "respawnDelaySeconds": 120,
+      "respawnRandomSeconds": 80
+    },
+    {
+      "objectId": 77177,
+      "npcId": 21328,
+      "x": 157982,
+      "y": -87292,
+      "z": -4144,
+      "heading": 0,
+      "respawnDelaySeconds": 120,
+      "respawnRandomSeconds": 80
+    },
+    {
+      "objectId": 77178,
+      "npcId": 21329,
+      "x": 157203,
+      "y": -87322,
+      "z": -4144,
+      "heading": 0,
+      "respawnDelaySeconds": 120,
+      "respawnRandomSeconds": 80
+    },
+    {
+      "objectId": 77179,
+      "npcId": 21329,
+      "x": 158622,
+      "y": -86790,
+      "z": -4144,
+      "heading": 0,
+      "respawnDelaySeconds": 120,
+      "respawnRandomSeconds": 80
+    },
+    {
+      "objectId": 77180,
+      "npcId": 21329,
+      "x": 156652,
+      "y": -87203,
+      "z": -4144,
+      "heading": 0,
+      "respawnDelaySeconds": 120,
+      "respawnRandomSeconds": 80
+    },
+    {
+      "objectId": 77181,
+      "npcId": 21329,
+      "x": 157806,
+      "y": -87934,
+      "z": -4144,
+      "heading": 0,
+      "respawnDelaySeconds": 120,
+      "respawnRandomSeconds": 80
+    },
+    {
+      "objectId": 77182,
+      "npcId": 21329,
+      "x": 156157,
+      "y": -86562,
+      "z": -4144,
+      "heading": 0,
+      "respawnDelaySeconds": 120,
+      "respawnRandomSeconds": 80
+    },
+    {
+      "objectId": 77183,
+      "npcId": 21329,
+      "x": 156982,
+      "y": -87222,
+      "z": -4144,
+      "heading": 0,
+      "respawnDelaySeconds": 120,
+      "respawnRandomSeconds": 80
+    },
+    {
+      "objectId": 77184,
+      "npcId": 21330,
+      "x": 156077,
+      "y": -88274,
+      "z": -4144,
+      "heading": 0,
+      "respawnDelaySeconds": 120,
+      "respawnRandomSeconds": 80
+    },
+    {
+      "objectId": 77185,
+      "npcId": 21330,
+      "x": 157309,
+      "y": -86538,
+      "z": -4144,
+      "heading": 0,
+      "respawnDelaySeconds": 120,
+      "respawnRandomSeconds": 80
+    },
+    {
+      "objectId": 77186,
+      "npcId": 21330,
+      "x": 156986,
+      "y": -85250,
+      "z": -4144,
+      "heading": 0,
+      "respawnDelaySeconds": 120,
+      "respawnRandomSeconds": 80
+    },
+    {
+      "objectId": 77187,
+      "npcId": 21330,
+      "x": 158279,
+      "y": -86535,
+      "z": -4144,
+      "heading": 0,
+      "respawnDelaySeconds": 120,
+      "respawnRandomSeconds": 80
+    },
+    {
+      "objectId": 77188,
+      "npcId": 21330,
+      "x": 156744,
+      "y": -88395,
+      "z": -4144,
+      "heading": 0,
+      "respawnDelaySeconds": 120,
+      "respawnRandomSeconds": 80
+    },
+    {
+      "objectId": 77189,
+      "npcId": 21330,
+      "x": 156031,
+      "y": -85713,
+      "z": -4144,
+      "heading": 0,
+      "respawnDelaySeconds": 120,
+      "respawnRandomSeconds": 80
+    },
+    {
+      "objectId": 77190,
+      "npcId": 21330,
+      "x": 156965,
+      "y": -86443,
+      "z": -4144,
+      "heading": 0,
+      "respawnDelaySeconds": 120,
+      "respawnRandomSeconds": 80
+    },
+    {
+      "objectId": 77191,
+      "npcId": 21330,
+      "x": 155751,
+      "y": -86104,
+      "z": -4144,
+      "heading": 0,
+      "respawnDelaySeconds": 120,
+      "respawnRandomSeconds": 80
+    },
+    {
+      "objectId": 77192,
+      "npcId": 21343,
+      "x": 157261,
+      "y": -85515,
+      "z": -4144,
+      "heading": 0,
+      "respawnDelaySeconds": 100,
+      "respawnRandomSeconds": 30
+    },
+    {
+      "objectId": 77193,
+      "npcId": 21343,
+      "x": 157651,
+      "y": -86750,
+      "z": -4144,
+      "heading": 0,
+      "respawnDelaySeconds": 100,
+      "respawnRandomSeconds": 30
+    },
+    {
+      "objectId": 77194,
+      "npcId": 21324,
+      "x": 157940,
+      "y": -85597,
+      "z": -4008,
+      "heading": 0,
+      "respawnDelaySeconds": 120,
+      "respawnRandomSeconds": 80
+    },
+    {
+      "objectId": 77195,
+      "npcId": 21324,
+      "x": 156959,
+      "y": -83828,
+      "z": -4008,
+      "heading": 0,
+      "respawnDelaySeconds": 120,
+      "respawnRandomSeconds": 80
+    },
+    {
+      "objectId": 77196,
+      "npcId": 21324,
+      "x": 159217,
+      "y": -84295,
+      "z": -4008,
+      "heading": 0,
+      "respawnDelaySeconds": 120,
+      "respawnRandomSeconds": 80
+    },
+    {
+      "objectId": 77197,
+      "npcId": 21324,
+      "x": 158556,
+      "y": -84583,
+      "z": -4008,
+      "heading": 0,
+      "respawnDelaySeconds": 120,
+      "respawnRandomSeconds": 80
+    },
+    {
+      "objectId": 77198,
+      "npcId": 21324,
+      "x": 157426,
+      "y": -84332,
+      "z": -4008,
+      "heading": 0,
+      "respawnDelaySeconds": 120,
+      "respawnRandomSeconds": 80
+    },
+    {
+      "objectId": 77199,
+      "npcId": 21324,
+      "x": 157763,
+      "y": -84637,
+      "z": -4008,
+      "heading": 0,
+      "respawnDelaySeconds": 120,
+      "respawnRandomSeconds": 80
+    },
+    {
+      "objectId": 77200,
+      "npcId": 21325,
+      "x": 157515,
+      "y": -84867,
+      "z": -4008,
+      "heading": 0,
+      "respawnDelaySeconds": 120,
+      "respawnRandomSeconds": 80
+    },
+    {
+      "objectId": 77201,
+      "npcId": 21325,
+      "x": 158645,
+      "y": -85070,
+      "z": -4008,
+      "heading": 0,
+      "respawnDelaySeconds": 120,
+      "respawnRandomSeconds": 80
+    },
+    {
+      "objectId": 77202,
+      "npcId": 21325,
+      "x": 158178,
+      "y": -85048,
+      "z": -4008,
+      "heading": 0,
+      "respawnDelaySeconds": 120,
+      "respawnRandomSeconds": 80
+    },
+    {
+      "objectId": 77203,
+      "npcId": 21325,
+      "x": 158205,
+      "y": -84422,
+      "z": -4008,
+      "heading": 0,
+      "respawnDelaySeconds": 120,
+      "respawnRandomSeconds": 80
+    },
+    {
+      "objectId": 77204,
+      "npcId": 21325,
+      "x": 158284,
+      "y": -84080,
+      "z": -4008,
+      "heading": 0,
+      "respawnDelaySeconds": 120,
+      "respawnRandomSeconds": 80
+    },
+    {
+      "objectId": 77205,
+      "npcId": 21325,
+      "x": 158218,
+      "y": -85574,
+      "z": -4008,
+      "heading": 0,
+      "respawnDelaySeconds": 120,
+      "respawnRandomSeconds": 80
+    },
+    {
+      "objectId": 77206,
+      "npcId": 21326,
+      "x": 157704,
+      "y": -84245,
+      "z": -4008,
+      "heading": 0,
+      "respawnDelaySeconds": 120,
+      "respawnRandomSeconds": 80
+    },
+    {
+      "objectId": 77207,
+      "npcId": 21326,
+      "x": 157392,
+      "y": -83678,
+      "z": -4008,
+      "heading": 0,
+      "respawnDelaySeconds": 120,
+      "respawnRandomSeconds": 80
+    },
+    {
+      "objectId": 77208,
+      "npcId": 21326,
+      "x": 158757,
+      "y": -84891,
+      "z": -4008,
+      "heading": 0,
+      "respawnDelaySeconds": 120,
+      "respawnRandomSeconds": 80
+    },
+    {
+      "objectId": 77209,
+      "npcId": 21326,
+      "x": 159039,
+      "y": -84023,
+      "z": -4008,
+      "heading": 0,
+      "respawnDelaySeconds": 120,
+      "respawnRandomSeconds": 80
+    },
+    {
+      "objectId": 77210,
+      "npcId": 21326,
+      "x": 158766,
+      "y": -85817,
+      "z": -4008,
+      "heading": 0,
+      "respawnDelaySeconds": 120,
+      "respawnRandomSeconds": 80
+    },
+    {
+      "objectId": 77211,
+      "npcId": 21326,
+      "x": 157966,
+      "y": -84416,
+      "z": -4008,
+      "heading": 0,
+      "respawnDelaySeconds": 120,
+      "respawnRandomSeconds": 80
+    },
+    {
+      "objectId": 77212,
+      "npcId": 21324,
+      "x": 157707,
+      "y": -82199,
+      "z": -4168,
+      "heading": 0,
+      "respawnDelaySeconds": 120,
+      "respawnRandomSeconds": 80
+    },
+    {
+      "objectId": 77213,
+      "npcId": 21324,
+      "x": 157364,
+      "y": -81757,
+      "z": -4168,
+      "heading": 0,
+      "respawnDelaySeconds": 120,
+      "respawnRandomSeconds": 80
+    },
+    {
+      "objectId": 77214,
+      "npcId": 21324,
+      "x": 158321,
+      "y": -80880,
+      "z": -4168,
+      "heading": 0,
+      "respawnDelaySeconds": 120,
+      "respawnRandomSeconds": 80
+    },
+    {
+      "objectId": 77215,
+      "npcId": 21324,
+      "x": 158724,
+      "y": -81825,
+      "z": -4168,
+      "heading": 0,
+      "respawnDelaySeconds": 120,
+      "respawnRandomSeconds": 80
+    },
+    {
+      "objectId": 77216,
+      "npcId": 21324,
+      "x": 159501,
+      "y": -81025,
+      "z": -4168,
+      "heading": 0,
+      "respawnDelaySeconds": 120,
+      "respawnRandomSeconds": 80
+    },
+    {
+      "objectId": 77217,
+      "npcId": 21324,
+      "x": 156853,
+      "y": -80048,
+      "z": -4168,
+      "heading": 0,
+      "respawnDelaySeconds": 120,
+      "respawnRandomSeconds": 80
+    },
+    {
+      "objectId": 77218,
+      "npcId": 21325,
+      "x": 159668,
+      "y": -82213,
+      "z": -4168,
+      "heading": 0,
+      "respawnDelaySeconds": 120,
+      "respawnRandomSeconds": 80
+    },
+    {
+      "objectId": 77219,
+      "npcId": 21325,
+      "x": 158394,
+      "y": -80340,
+      "z": -4168,
+      "heading": 0,
+      "respawnDelaySeconds": 120,
+      "respawnRandomSeconds": 80
+    },
+    {
+      "objectId": 77220,
+      "npcId": 21325,
+      "x": 159736,
+      "y": -81422,
+      "z": -4168,
+      "heading": 0,
+      "respawnDelaySeconds": 120,
+      "respawnRandomSeconds": 80
+    },
+    {
+      "objectId": 77221,
+      "npcId": 21325,
+      "x": 158053,
+      "y": -81852,
+      "z": -4168,
+      "heading": 0,
+      "respawnDelaySeconds": 120,
+      "respawnRandomSeconds": 80
+    },
+    {
+      "objectId": 77222,
+      "npcId": 21325,
+      "x": 157471,
+      "y": -82167,
+      "z": -4168,
+      "heading": 0,
+      "respawnDelaySeconds": 120,
+      "respawnRandomSeconds": 80
+    },
+    {
+      "objectId": 77223,
+      "npcId": 21325,
+      "x": 157337,
+      "y": -81331,
+      "z": -4168,
+      "heading": 0,
+      "respawnDelaySeconds": 120,
+      "respawnRandomSeconds": 80
+    },
+    {
+      "objectId": 77224,
+      "npcId": 21326,
+      "x": 159324,
+      "y": -81689,
+      "z": -4168,
+      "heading": 0,
+      "respawnDelaySeconds": 120,
+      "respawnRandomSeconds": 80
+    },
+    {
+      "objectId": 77225,
+      "npcId": 21326,
+      "x": 157710,
+      "y": -81226,
+      "z": -4168,
+      "heading": 0,
+      "respawnDelaySeconds": 120,
+      "respawnRandomSeconds": 80
+    },
+    {
+      "objectId": 77226,
+      "npcId": 21326,
+      "x": 157265,
+      "y": -81154,
+      "z": -4168,
+      "heading": 0,
+      "respawnDelaySeconds": 120,
+      "respawnRandomSeconds": 80
+    },
+    {
+      "objectId": 77227,
+      "npcId": 21326,
+      "x": 159378,
+      "y": -82503,
+      "z": -4168,
+      "heading": 0,
+      "respawnDelaySeconds": 120,
+      "respawnRandomSeconds": 80
+    },
+    {
+      "objectId": 77228,
+      "npcId": 21326,
+      "x": 157107,
+      "y": -82081,
+      "z": -4168,
+      "heading": 0,
+      "respawnDelaySeconds": 120,
+      "respawnRandomSeconds": 80
+    },
+    {
+      "objectId": 77229,
+      "npcId": 21326,
+      "x": 159405,
+      "y": -82796,
+      "z": -4168,
+      "heading": 0,
+      "respawnDelaySeconds": 120,
+      "respawnRandomSeconds": 80
+    },
+    {
+      "objectId": 77230,
+      "npcId": 21324,
+      "x": 156319,
+      "y": -79576,
+      "z": -4180,
+      "heading": 0,
+      "respawnDelaySeconds": 120,
+      "respawnRandomSeconds": 80
+    },
+    {
+      "objectId": 77231,
+      "npcId": 21324,
+      "x": 157357,
+      "y": -78703,
+      "z": -4180,
+      "heading": 0,
+      "respawnDelaySeconds": 120,
+      "respawnRandomSeconds": 80
+    },
+    {
+      "objectId": 77232,
+      "npcId": 21324,
+      "x": 156820,
+      "y": -78047,
+      "z": -4180,
+      "heading": 0,
+      "respawnDelaySeconds": 120,
+      "respawnRandomSeconds": 80
+    },
+    {
+      "objectId": 77233,
+      "npcId": 21324,
+      "x": 157220,
+      "y": -79188,
+      "z": -4180,
+      "heading": 0,
+      "respawnDelaySeconds": 120,
+      "respawnRandomSeconds": 80
+    },
+    {
+      "objectId": 77234,
+      "npcId": 21324,
+      "x": 156631,
+      "y": -77378,
+      "z": -4180,
+      "heading": 0,
+      "respawnDelaySeconds": 120,
+      "respawnRandomSeconds": 80
+    },
+    {
+      "objectId": 77235,
+      "npcId": 21324,
+      "x": 156927,
+      "y": -77191,
+      "z": -4180,
+      "heading": 0,
+      "respawnDelaySeconds": 120,
+      "respawnRandomSeconds": 80
+    },
+    {
+      "objectId": 77236,
+      "npcId": 21325,
+      "x": 157374,
+      "y": -77434,
+      "z": -4180,
+      "heading": 0,
+      "respawnDelaySeconds": 120,
+      "respawnRandomSeconds": 80
+    },
+    {
+      "objectId": 77237,
+      "npcId": 21325,
+      "x": 157392,
+      "y": -75391,
+      "z": -4180,
+      "heading": 0,
+      "respawnDelaySeconds": 120,
+      "respawnRandomSeconds": 80
+    },
+    {
+      "objectId": 77238,
+      "npcId": 21325,
+      "x": 157889,
+      "y": -77484,
+      "z": -4180,
+      "heading": 0,
+      "respawnDelaySeconds": 120,
+      "respawnRandomSeconds": 80
+    },
+    {
+      "objectId": 77239,
+      "npcId": 21325,
+      "x": 157456,
+      "y": -79331,
+      "z": -4180,
+      "heading": 0,
+      "respawnDelaySeconds": 120,
+      "respawnRandomSeconds": 80
+    },
+    {
+      "objectId": 77240,
+      "npcId": 21325,
+      "x": 157258,
+      "y": -76521,
+      "z": -4180,
+      "heading": 0,
+      "respawnDelaySeconds": 120,
+      "respawnRandomSeconds": 80
+    },
+    {
+      "objectId": 77241,
+      "npcId": 21325,
+      "x": 156417,
+      "y": -77812,
+      "z": -4180,
+      "heading": 0,
+      "respawnDelaySeconds": 120,
+      "respawnRandomSeconds": 80
+    },
+    {
+      "objectId": 77242,
+      "npcId": 21326,
+      "x": 156164,
+      "y": -76721,
+      "z": -4180,
+      "heading": 0,
+      "respawnDelaySeconds": 120,
+      "respawnRandomSeconds": 80
+    },
+    {
+      "objectId": 77243,
+      "npcId": 21326,
+      "x": 156595,
+      "y": -76753,
+      "z": -4180,
+      "heading": 0,
+      "respawnDelaySeconds": 120,
+      "respawnRandomSeconds": 80
+    },
+    {
+      "objectId": 77244,
+      "npcId": 21326,
+      "x": 156500,
+      "y": -76118,
+      "z": -4180,
+      "heading": 0,
+      "respawnDelaySeconds": 120,
+      "respawnRandomSeconds": 80
+    },
+    {
+      "objectId": 77245,
+      "npcId": 21326,
+      "x": 156053,
+      "y": -78233,
+      "z": -4180,
+      "heading": 0,
+      "respawnDelaySeconds": 120,
+      "respawnRandomSeconds": 80
+    },
+    {
+      "objectId": 77246,
+      "npcId": 21326,
+      "x": 157392,
+      "y": -78864,
+      "z": -4180,
+      "heading": 0,
+      "respawnDelaySeconds": 120,
+      "respawnRandomSeconds": 80
+    },
+    {
+      "objectId": 77247,
+      "npcId": 21326,
+      "x": 157085,
+      "y": -76137,
+      "z": -4180,
+      "heading": 0,
+      "respawnDelaySeconds": 120,
+      "respawnRandomSeconds": 80
+    },
+    {
+      "objectId": 77248,
+      "npcId": 21326,
+      "x": 156780,
+      "y": -78709,
+      "z": -4180,
+      "heading": 0,
+      "respawnDelaySeconds": 120,
+      "respawnRandomSeconds": 80
+    },
+    {
+      "objectId": 77249,
+      "npcId": 21326,
+      "x": 157087,
+      "y": -75720,
+      "z": -4180,
+      "heading": 0,
+      "respawnDelaySeconds": 120,
+      "respawnRandomSeconds": 80
+    },
+    {
+      "objectId": 77250,
+      "npcId": 21343,
+      "x": 157222,
+      "y": -77687,
+      "z": -4180,
+      "heading": 0,
+      "respawnDelaySeconds": 100,
+      "respawnRandomSeconds": 30
+    },
+    {
+      "objectId": 77251,
+      "npcId": 21343,
+      "x": 155821,
+      "y": -78112,
+      "z": -4180,
+      "heading": 0,
+      "respawnDelaySeconds": 100,
+      "respawnRandomSeconds": 30
+    },
+    {
+      "objectId": 77252,
+      "npcId": 21327,
+      "x": 153488,
+      "y": -79334,
+      "z": -5004,
+      "heading": 0,
+      "respawnDelaySeconds": 120,
+      "respawnRandomSeconds": 80
+    },
+    {
+      "objectId": 77253,
+      "npcId": 21327,
+      "x": 155853,
+      "y": -81752,
+      "z": -5004,
+      "heading": 0,
+      "respawnDelaySeconds": 120,
+      "respawnRandomSeconds": 80
+    },
+    {
+      "objectId": 77254,
+      "npcId": 21327,
+      "x": 152002,
+      "y": -79902,
+      "z": -5004,
+      "heading": 0,
+      "respawnDelaySeconds": 120,
+      "respawnRandomSeconds": 80
+    },
+    {
+      "objectId": 77255,
+      "npcId": 21327,
+      "x": 152449,
+      "y": -79101,
+      "z": -5004,
+      "heading": 0,
+      "respawnDelaySeconds": 120,
+      "respawnRandomSeconds": 80
+    },
+    {
+      "objectId": 77256,
+      "npcId": 21327,
+      "x": 153963,
+      "y": -79816,
+      "z": -5004,
+      "heading": 0,
+      "respawnDelaySeconds": 120,
+      "respawnRandomSeconds": 80
+    },
+    {
+      "objectId": 77257,
+      "npcId": 21327,
+      "x": 154692,
+      "y": -78906,
+      "z": -5004,
+      "heading": 0,
+      "respawnDelaySeconds": 120,
+      "respawnRandomSeconds": 80
+    },
+    {
+      "objectId": 77258,
+      "npcId": 21328,
+      "x": 151785,
+      "y": -78916,
+      "z": -5004,
+      "heading": 0,
+      "respawnDelaySeconds": 120,
+      "respawnRandomSeconds": 80
+    },
+    {
+      "objectId": 77259,
+      "npcId": 21328,
+      "x": 153398,
+      "y": -79736,
+      "z": -5004,
+      "heading": 0,
+      "respawnDelaySeconds": 120,
+      "respawnRandomSeconds": 80
+    },
+    {
+      "objectId": 77260,
+      "npcId": 21328,
+      "x": 153450,
+      "y": -81580,
+      "z": -5004,
+      "heading": 0,
+      "respawnDelaySeconds": 120,
+      "respawnRandomSeconds": 80
+    },
+    {
+      "objectId": 77261,
+      "npcId": 21328,
+      "x": 153797,
+      "y": -79417,
+      "z": -5004,
+      "heading": 0,
+      "respawnDelaySeconds": 120,
+      "respawnRandomSeconds": 80
+    },
+    {
+      "objectId": 77262,
+      "npcId": 21328,
+      "x": 152246,
+      "y": -78735,
+      "z": -5004,
+      "heading": 0,
+      "respawnDelaySeconds": 120,
+      "respawnRandomSeconds": 80
+    },
+    {
+      "objectId": 77263,
+      "npcId": 21328,
+      "x": 154481,
+      "y": -81319,
+      "z": -5004,
+      "heading": 0,
+      "respawnDelaySeconds": 120,
+      "respawnRandomSeconds": 80
+    },
+    {
+      "objectId": 77264,
+      "npcId": 21329,
+      "x": 154796,
+      "y": -81665,
+      "z": -5004,
+      "heading": 0,
+      "respawnDelaySeconds": 120,
+      "respawnRandomSeconds": 80
+    },
+    {
+      "objectId": 77265,
+      "npcId": 21329,
+      "x": 152587,
+      "y": -79613,
+      "z": -5004,
+      "heading": 0,
+      "respawnDelaySeconds": 120,
+      "respawnRandomSeconds": 80
+    },
+    {
+      "objectId": 77266,
+      "npcId": 21329,
+      "x": 152530,
+      "y": -80641,
+      "z": -5004,
+      "heading": 0,
+      "respawnDelaySeconds": 120,
+      "respawnRandomSeconds": 80
+    },
+    {
+      "objectId": 77267,
+      "npcId": 21329,
+      "x": 152415,
+      "y": -79278,
+      "z": -5004,
+      "heading": 0,
+      "respawnDelaySeconds": 120,
+      "respawnRandomSeconds": 80
+    },
+    {
+      "objectId": 77268,
+      "npcId": 21329,
+      "x": 153398,
+      "y": -80941,
+      "z": -5004,
+      "heading": 0,
+      "respawnDelaySeconds": 120,
+      "respawnRandomSeconds": 80
+    },
+    {
+      "objectId": 77269,
+      "npcId": 21329,
+      "x": 152480,
+      "y": -79471,
+      "z": -5004,
+      "heading": 0,
+      "respawnDelaySeconds": 120,
+      "respawnRandomSeconds": 80
+    },
+    {
+      "objectId": 77270,
+      "npcId": 21330,
+      "x": 154947,
+      "y": -79823,
+      "z": -5004,
+      "heading": 0,
+      "respawnDelaySeconds": 120,
+      "respawnRandomSeconds": 80
+    },
+    {
+      "objectId": 77271,
+      "npcId": 21330,
+      "x": 154061,
+      "y": -79523,
+      "z": -5004,
+      "heading": 0,
+      "respawnDelaySeconds": 120,
+      "respawnRandomSeconds": 80
+    },
+    {
+      "objectId": 77272,
+      "npcId": 21330,
+      "x": 155313,
+      "y": -80271,
+      "z": -5004,
+      "heading": 0,
+      "respawnDelaySeconds": 120,
+      "respawnRandomSeconds": 80
+    },
+    {
+      "objectId": 77273,
+      "npcId": 21330,
+      "x": 155126,
+      "y": -81365,
+      "z": -5004,
+      "heading": 0,
+      "respawnDelaySeconds": 120,
+      "respawnRandomSeconds": 80
+    },
+    {
+      "objectId": 77274,
+      "npcId": 21330,
+      "x": 155105,
+      "y": -81097,
+      "z": -5004,
+      "heading": 0,
+      "respawnDelaySeconds": 120,
+      "respawnRandomSeconds": 80
+    },
+    {
+      "objectId": 77275,
+      "npcId": 21330,
+      "x": 154667,
+      "y": -79697,
+      "z": -5004,
+      "heading": 0,
+      "respawnDelaySeconds": 120,
+      "respawnRandomSeconds": 80
+    },
+    {
+      "objectId": 77276,
+      "npcId": 21345,
+      "x": 152164,
+      "y": -79848,
+      "z": -5004,
+      "heading": 0,
+      "respawnDelaySeconds": 100,
+      "respawnRandomSeconds": 30
+    },
+    {
+      "objectId": 77277,
+      "npcId": 21345,
+      "x": 152737,
+      "y": -81046,
+      "z": -5004,
+      "heading": 0,
+      "respawnDelaySeconds": 100,
+      "respawnRandomSeconds": 30
+    },
+    {
+      "objectId": 77278,
+      "npcId": 21331,
+      "x": 153751,
+      "y": -76910,
+      "z": -5016,
+      "heading": 0,
+      "respawnDelaySeconds": 120,
+      "respawnRandomSeconds": 80
+    },
+    {
+      "objectId": 77279,
+      "npcId": 21331,
+      "x": 153228,
+      "y": -77072,
+      "z": -5016,
+      "heading": 0,
+      "respawnDelaySeconds": 120,
+      "respawnRandomSeconds": 80
+    },
+    {
+      "objectId": 77280,
+      "npcId": 21331,
+      "x": 152292,
+      "y": -78268,
+      "z": -5016,
+      "heading": 0,
+      "respawnDelaySeconds": 120,
+      "respawnRandomSeconds": 80
+    },
+    {
+      "objectId": 77281,
+      "npcId": 21331,
+      "x": 153947,
+      "y": -76948,
+      "z": -5016,
+      "heading": 0,
+      "respawnDelaySeconds": 120,
+      "respawnRandomSeconds": 80
+    },
+    {
+      "objectId": 77282,
+      "npcId": 21331,
+      "x": 151977,
+      "y": -75798,
+      "z": -5016,
+      "heading": 0,
+      "respawnDelaySeconds": 120,
+      "respawnRandomSeconds": 80
+    },
+    {
+      "objectId": 77283,
+      "npcId": 21331,
+      "x": 152503,
+      "y": -76568,
+      "z": -5016,
+      "heading": 0,
+      "respawnDelaySeconds": 120,
+      "respawnRandomSeconds": 80
+    },
+    {
+      "objectId": 77284,
+      "npcId": 21332,
+      "x": 153944,
+      "y": -77851,
+      "z": -5016,
+      "heading": 0,
+      "respawnDelaySeconds": 120,
+      "respawnRandomSeconds": 80
+    },
+    {
+      "objectId": 77285,
+      "npcId": 21332,
+      "x": 152527,
+      "y": -78462,
+      "z": -5016,
+      "heading": 0,
+      "respawnDelaySeconds": 120,
+      "respawnRandomSeconds": 80
+    },
+    {
+      "objectId": 77286,
+      "npcId": 21332,
+      "x": 151842,
+      "y": -75406,
+      "z": -5016,
+      "heading": 0,
+      "respawnDelaySeconds": 120,
+      "respawnRandomSeconds": 80
+    },
+    {
+      "objectId": 77287,
+      "npcId": 21332,
+      "x": 151618,
+      "y": -75282,
+      "z": -5016,
+      "heading": 0,
+      "respawnDelaySeconds": 120,
+      "respawnRandomSeconds": 80
+    },
+    {
+      "objectId": 77288,
+      "npcId": 21332,
+      "x": 153401,
+      "y": -78132,
+      "z": -5016,
+      "heading": 0,
+      "respawnDelaySeconds": 120,
+      "respawnRandomSeconds": 80
+    },
+    {
+      "objectId": 77289,
+      "npcId": 21332,
+      "x": 151185,
+      "y": -77627,
+      "z": -5016,
+      "heading": 0,
+      "respawnDelaySeconds": 120,
+      "respawnRandomSeconds": 80
+    },
+    {
+      "objectId": 77290,
+      "npcId": 21333,
+      "x": 151326,
+      "y": -77121,
+      "z": -5016,
+      "heading": 0,
+      "respawnDelaySeconds": 120,
+      "respawnRandomSeconds": 80
+    },
+    {
+      "objectId": 77291,
+      "npcId": 21333,
+      "x": 152608,
+      "y": -75656,
+      "z": -5016,
+      "heading": 0,
+      "respawnDelaySeconds": 120,
+      "respawnRandomSeconds": 80
+    },
+    {
+      "objectId": 77292,
+      "npcId": 21333,
+      "x": 151610,
+      "y": -76580,
+      "z": -5016,
+      "heading": 0,
+      "respawnDelaySeconds": 120,
+      "respawnRandomSeconds": 80
+    },
+    {
+      "objectId": 77293,
+      "npcId": 21333,
+      "x": 152120,
+      "y": -76446,
+      "z": -5016,
+      "heading": 0,
+      "respawnDelaySeconds": 120,
+      "respawnRandomSeconds": 80
+    },
+    {
+      "objectId": 77294,
+      "npcId": 21333,
+      "x": 152454,
+      "y": -77328,
+      "z": -5016,
+      "heading": 0,
+      "respawnDelaySeconds": 120,
+      "respawnRandomSeconds": 80
+    },
+    {
+      "objectId": 77295,
+      "npcId": 21333,
+      "x": 150457,
+      "y": -77282,
+      "z": -5016,
+      "heading": 0,
+      "respawnDelaySeconds": 120,
+      "respawnRandomSeconds": 80
+    },
+    {
+      "objectId": 77296,
+      "npcId": 21334,
+      "x": 151018,
+      "y": -75187,
+      "z": -5016,
+      "heading": 0,
+      "respawnDelaySeconds": 120,
+      "respawnRandomSeconds": 80
+    },
+    {
+      "objectId": 77297,
+      "npcId": 21334,
+      "x": 152433,
+      "y": -77602,
+      "z": -5016,
+      "heading": 0,
+      "respawnDelaySeconds": 120,
+      "respawnRandomSeconds": 80
+    },
+    {
+      "objectId": 77298,
+      "npcId": 21334,
+      "x": 151713,
+      "y": -77326,
+      "z": -5016,
+      "heading": 0,
+      "respawnDelaySeconds": 120,
+      "respawnRandomSeconds": 80
+    },
+    {
+      "objectId": 77299,
+      "npcId": 21334,
+      "x": 153314,
+      "y": -77993,
+      "z": -5016,
+      "heading": 0,
+      "respawnDelaySeconds": 120,
+      "respawnRandomSeconds": 80
+    },
+    {
+      "objectId": 77300,
+      "npcId": 21334,
+      "x": 151971,
+      "y": -77398,
+      "z": -5016,
+      "heading": 0,
+      "respawnDelaySeconds": 120,
+      "respawnRandomSeconds": 80
+    },
+    {
+      "objectId": 77301,
+      "npcId": 21334,
+      "x": 151834,
+      "y": -77639,
+      "z": -5016,
+      "heading": 0,
+      "respawnDelaySeconds": 120,
+      "respawnRandomSeconds": 80
+    },
+    {
+      "objectId": 77302,
+      "npcId": 21345,
+      "x": 152789,
+      "y": -75483,
+      "z": -5016,
+      "heading": 0,
+      "respawnDelaySeconds": 100,
+      "respawnRandomSeconds": 30
+    },
+    {
+      "objectId": 77303,
+      "npcId": 21345,
+      "x": 151472,
+      "y": -76269,
+      "z": -5016,
+      "heading": 0,
+      "respawnDelaySeconds": 100,
+      "respawnRandomSeconds": 30
+    },
+    {
+      "objectId": 77304,
+      "npcId": 21331,
+      "x": 155627,
+      "y": -75884,
+      "z": -4688,
+      "heading": 0,
+      "respawnDelaySeconds": 120,
+      "respawnRandomSeconds": 80
+    },
+    {
+      "objectId": 77305,
+      "npcId": 21331,
+      "x": 155311,
+      "y": -76459,
+      "z": -4688,
+      "heading": 0,
+      "respawnDelaySeconds": 120,
+      "respawnRandomSeconds": 80
+    },
+    {
+      "objectId": 77306,
+      "npcId": 21332,
+      "x": 154548,
+      "y": -77241,
+      "z": -4688,
+      "heading": 0,
+      "respawnDelaySeconds": 120,
+      "respawnRandomSeconds": 80
+    },
+    {
+      "objectId": 77307,
+      "npcId": 21332,
+      "x": 155679,
+      "y": -76109,
+      "z": -4688,
+      "heading": 0,
+      "respawnDelaySeconds": 120,
+      "respawnRandomSeconds": 80
+    },
+    {
+      "objectId": 77308,
+      "npcId": 21332,
+      "x": 155363,
+      "y": -77087,
+      "z": -4688,
+      "heading": 0,
+      "respawnDelaySeconds": 120,
+      "respawnRandomSeconds": 80
+    },
+    {
+      "objectId": 77309,
+      "npcId": 21332,
+      "x": 154935,
+      "y": -77434,
+      "z": -4688,
+      "heading": 0,
+      "respawnDelaySeconds": 120,
+      "respawnRandomSeconds": 80
+    },
+    {
+      "objectId": 77310,
+      "npcId": 21333,
+      "x": 154998,
+      "y": -76338,
+      "z": -4688,
+      "heading": 0,
+      "respawnDelaySeconds": 120,
+      "respawnRandomSeconds": 80
+    },
+    {
+      "objectId": 77311,
+      "npcId": 21333,
+      "x": 155477,
+      "y": -76701,
+      "z": -4688,
+      "heading": 0,
+      "respawnDelaySeconds": 120,
+      "respawnRandomSeconds": 80
+    },
+    {
+      "objectId": 77312,
+      "npcId": 21334,
+      "x": 154756,
+      "y": -76819,
+      "z": -4688,
+      "heading": 0,
+      "respawnDelaySeconds": 120,
+      "respawnRandomSeconds": 80
+    },
+    {
+      "objectId": 77313,
+      "npcId": 21334,
+      "x": 154737,
+      "y": -77346,
+      "z": -4688,
+      "heading": 0,
+      "respawnDelaySeconds": 120,
+      "respawnRandomSeconds": 80
+    },
+    {
+      "objectId": 77314,
+      "npcId": 21335,
+      "x": 154144,
+      "y": -72807,
+      "z": -4396,
+      "heading": 0,
+      "respawnDelaySeconds": 120,
+      "respawnRandomSeconds": 80
+    },
+    {
+      "objectId": 77315,
+      "npcId": 21335,
+      "x": 154451,
+      "y": -75244,
+      "z": -4396,
+      "heading": 0,
+      "respawnDelaySeconds": 120,
+      "respawnRandomSeconds": 80
+    },
+    {
+      "objectId": 77316,
+      "npcId": 21335,
+      "x": 154028,
+      "y": -74688,
+      "z": -4396,
+      "heading": 0,
+      "respawnDelaySeconds": 120,
+      "respawnRandomSeconds": 80
+    },
+    {
+      "objectId": 77317,
+      "npcId": 21335,
+      "x": 151246,
+      "y": -73448,
+      "z": -4396,
+      "heading": 0,
+      "respawnDelaySeconds": 120,
+      "respawnRandomSeconds": 80
+    },
+    {
+      "objectId": 77318,
+      "npcId": 21335,
+      "x": 153509,
+      "y": -74914,
+      "z": -4396,
+      "heading": 0,
+      "respawnDelaySeconds": 120,
+      "respawnRandomSeconds": 80
+    },
+    {
+      "objectId": 77319,
+      "npcId": 21335,
+      "x": 153745,
+      "y": -74432,
+      "z": -4396,
+      "heading": 0,
+      "respawnDelaySeconds": 120,
+      "respawnRandomSeconds": 80
+    },
+    {
+      "objectId": 77320,
+      "npcId": 21336,
+      "x": 153091,
+      "y": -74250,
+      "z": -4396,
+      "heading": 0,
+      "respawnDelaySeconds": 120,
+      "respawnRandomSeconds": 80
+    },
+    {
+      "objectId": 77321,
+      "npcId": 21336,
+      "x": 151542,
+      "y": -72769,
+      "z": -4396,
+      "heading": 0,
+      "respawnDelaySeconds": 120,
+      "respawnRandomSeconds": 80
+    },
+    {
+      "objectId": 77322,
+      "npcId": 21336,
+      "x": 152347,
+      "y": -74560,
+      "z": -4396,
+      "heading": 0,
+      "respawnDelaySeconds": 120,
+      "respawnRandomSeconds": 80
+    },
+    {
+      "objectId": 77323,
+      "npcId": 21336,
+      "x": 153153,
+      "y": -74016,
+      "z": -4396,
+      "heading": 0,
+      "respawnDelaySeconds": 120,
+      "respawnRandomSeconds": 80
+    },
+    {
+      "objectId": 77324,
+      "npcId": 21336,
+      "x": 152910,
+      "y": -74428,
+      "z": -4396,
+      "heading": 0,
+      "respawnDelaySeconds": 120,
+      "respawnRandomSeconds": 80
+    },
+    {
+      "objectId": 77325,
+      "npcId": 21336,
+      "x": 153698,
+      "y": -72893,
+      "z": -4396,
+      "heading": 0,
+      "respawnDelaySeconds": 120,
+      "respawnRandomSeconds": 80
+    },
+    {
+      "objectId": 77326,
+      "npcId": 21337,
+      "x": 151725,
+      "y": -73280,
+      "z": -4396,
+      "heading": 0,
+      "respawnDelaySeconds": 120,
+      "respawnRandomSeconds": 80
+    },
+    {
+      "objectId": 77327,
+      "npcId": 21337,
+      "x": 152084,
+      "y": -73102,
+      "z": -4396,
+      "heading": 0,
+      "respawnDelaySeconds": 120,
+      "respawnRandomSeconds": 80
+    },
+    {
+      "objectId": 77328,
+      "npcId": 21337,
+      "x": 153270,
+      "y": -72686,
+      "z": -4396,
+      "heading": 0,
+      "respawnDelaySeconds": 120,
+      "respawnRandomSeconds": 80
+    },
+    {
+      "objectId": 77329,
+      "npcId": 21337,
+      "x": 153508,
+      "y": -73493,
+      "z": -4396,
+      "heading": 0,
+      "respawnDelaySeconds": 120,
+      "respawnRandomSeconds": 80
+    },
+    {
+      "objectId": 77330,
+      "npcId": 21337,
+      "x": 153795,
+      "y": -75237,
+      "z": -4396,
+      "heading": 0,
+      "respawnDelaySeconds": 120,
+      "respawnRandomSeconds": 80
+    },
+    {
+      "objectId": 77331,
+      "npcId": 21337,
+      "x": 155395,
+      "y": -74699,
+      "z": -4396,
+      "heading": 0,
+      "respawnDelaySeconds": 120,
+      "respawnRandomSeconds": 80
+    },
+    {
+      "objectId": 77332,
+      "npcId": 21338,
+      "x": 154522,
+      "y": -74339,
+      "z": -4396,
+      "heading": 0,
+      "respawnDelaySeconds": 120,
+      "respawnRandomSeconds": 80
+    },
+    {
+      "objectId": 77333,
+      "npcId": 21338,
+      "x": 151778,
+      "y": -72940,
+      "z": -4396,
+      "heading": 0,
+      "respawnDelaySeconds": 120,
+      "respawnRandomSeconds": 80
+    },
+    {
+      "objectId": 77334,
+      "npcId": 21338,
+      "x": 153298,
+      "y": -74347,
+      "z": -4396,
+      "heading": 0,
+      "respawnDelaySeconds": 120,
+      "respawnRandomSeconds": 80
+    },
+    {
+      "objectId": 77335,
+      "npcId": 21338,
+      "x": 154941,
+      "y": -74321,
+      "z": -4396,
+      "heading": 0,
+      "respawnDelaySeconds": 120,
+      "respawnRandomSeconds": 80
+    },
+    {
+      "objectId": 77336,
+      "npcId": 21338,
+      "x": 152262,
+      "y": -72118,
+      "z": -4396,
+      "heading": 0,
+      "respawnDelaySeconds": 120,
+      "respawnRandomSeconds": 80
+    },
+    {
+      "objectId": 77337,
+      "npcId": 21338,
+      "x": 153982,
+      "y": -73086,
+      "z": -4396,
+      "heading": 0,
+      "respawnDelaySeconds": 120,
+      "respawnRandomSeconds": 80
+    },
+    {
+      "objectId": 77338,
+      "npcId": 21335,
+      "x": 148126,
+      "y": -73099,
+      "z": -4972,
+      "heading": 0,
+      "respawnDelaySeconds": 120,
+      "respawnRandomSeconds": 80
+    },
+    {
+      "objectId": 77339,
+      "npcId": 21335,
+      "x": 148291,
+      "y": -75765,
+      "z": -4972,
+      "heading": 0,
+      "respawnDelaySeconds": 120,
+      "respawnRandomSeconds": 80
+    },
+    {
+      "objectId": 77340,
+      "npcId": 21335,
+      "x": 147171,
+      "y": -74983,
+      "z": -4972,
+      "heading": 0,
+      "respawnDelaySeconds": 120,
+      "respawnRandomSeconds": 80
+    },
+    {
+      "objectId": 77341,
+      "npcId": 21335,
+      "x": 147299,
+      "y": -73646,
+      "z": -4972,
+      "heading": 0,
+      "respawnDelaySeconds": 120,
+      "respawnRandomSeconds": 80
+    },
+    {
+      "objectId": 77342,
+      "npcId": 21335,
+      "x": 148221,
+      "y": -75084,
+      "z": -4972,
+      "heading": 0,
+      "respawnDelaySeconds": 120,
+      "respawnRandomSeconds": 80
+    },
+    {
+      "objectId": 77343,
+      "npcId": 21335,
+      "x": 147817,
+      "y": -75535,
+      "z": -4972,
+      "heading": 0,
+      "respawnDelaySeconds": 120,
+      "respawnRandomSeconds": 80
+    },
+    {
+      "objectId": 77344,
+      "npcId": 21336,
+      "x": 148325,
+      "y": -74813,
+      "z": -4972,
+      "heading": 0,
+      "respawnDelaySeconds": 120,
+      "respawnRandomSeconds": 80
+    },
+    {
+      "objectId": 77345,
+      "npcId": 21336,
+      "x": 147826,
+      "y": -72974,
+      "z": -4972,
+      "heading": 0,
+      "respawnDelaySeconds": 120,
+      "respawnRandomSeconds": 80
+    },
+    {
+      "objectId": 77346,
+      "npcId": 21336,
+      "x": 147355,
+      "y": -74229,
+      "z": -4972,
+      "heading": 0,
+      "respawnDelaySeconds": 120,
+      "respawnRandomSeconds": 80
+    },
+    {
+      "objectId": 77347,
+      "npcId": 21336,
+      "x": 147305,
+      "y": -73852,
+      "z": -4972,
+      "heading": 0,
+      "respawnDelaySeconds": 120,
+      "respawnRandomSeconds": 80
+    },
+    {
+      "objectId": 77348,
+      "npcId": 21337,
+      "x": 147884,
+      "y": -74717,
+      "z": -4972,
+      "heading": 0,
+      "respawnDelaySeconds": 120,
+      "respawnRandomSeconds": 80
+    },
+    {
+      "objectId": 77349,
+      "npcId": 21337,
+      "x": 147784,
+      "y": -73514,
+      "z": -4972,
+      "heading": 0,
+      "respawnDelaySeconds": 120,
+      "respawnRandomSeconds": 80
+    },
+    {
+      "objectId": 77350,
+      "npcId": 21337,
+      "x": 147874,
+      "y": -73960,
+      "z": -4972,
+      "heading": 0,
+      "respawnDelaySeconds": 120,
+      "respawnRandomSeconds": 80
+    },
+    {
+      "objectId": 77351,
+      "npcId": 21337,
+      "x": 148631,
+      "y": -74842,
+      "z": -4972,
+      "heading": 0,
+      "respawnDelaySeconds": 120,
+      "respawnRandomSeconds": 80
+    },
+    {
+      "objectId": 77352,
+      "npcId": 21338,
+      "x": 148280,
+      "y": -73749,
+      "z": -4972,
+      "heading": 0,
+      "respawnDelaySeconds": 120,
+      "respawnRandomSeconds": 80
+    },
+    {
+      "objectId": 77353,
+      "npcId": 21338,
+      "x": 147517,
+      "y": -73705,
+      "z": -4972,
+      "heading": 0,
+      "respawnDelaySeconds": 120,
+      "respawnRandomSeconds": 80
+    },
+    {
+      "objectId": 77354,
+      "npcId": 21338,
+      "x": 147779,
+      "y": -75146,
+      "z": -4972,
+      "heading": 0,
+      "respawnDelaySeconds": 120,
+      "respawnRandomSeconds": 80
+    },
+    {
+      "objectId": 77355,
+      "npcId": 21338,
+      "x": 148436,
+      "y": -73347,
+      "z": -4972,
+      "heading": 0,
+      "respawnDelaySeconds": 120,
+      "respawnRandomSeconds": 80
+    },
+    {
+      "objectId": 77356,
+      "npcId": 21339,
+      "x": 147131,
+      "y": -77219,
+      "z": -5028,
+      "heading": 0,
+      "respawnDelaySeconds": 120,
+      "respawnRandomSeconds": 80
+    },
+    {
+      "objectId": 77357,
+      "npcId": 21339,
+      "x": 149406,
+      "y": -78064,
+      "z": -5028,
+      "heading": 0,
+      "respawnDelaySeconds": 120,
+      "respawnRandomSeconds": 80
+    },
+    {
+      "objectId": 77358,
+      "npcId": 21339,
+      "x": 147731,
+      "y": -76932,
+      "z": -5028,
+      "heading": 0,
+      "respawnDelaySeconds": 120,
+      "respawnRandomSeconds": 80
+    },
+    {
+      "objectId": 77359,
+      "npcId": 21339,
+      "x": 149248,
+      "y": -77675,
+      "z": -5028,
+      "heading": 0,
+      "respawnDelaySeconds": 120,
+      "respawnRandomSeconds": 80
+    },
+    {
+      "objectId": 77360,
+      "npcId": 21339,
+      "x": 149877,
+      "y": -78250,
+      "z": -5028,
+      "heading": 0,
+      "respawnDelaySeconds": 120,
+      "respawnRandomSeconds": 80
+    },
+    {
+      "objectId": 77361,
+      "npcId": 21339,
+      "x": 149650,
+      "y": -77588,
+      "z": -5028,
+      "heading": 0,
+      "respawnDelaySeconds": 120,
+      "respawnRandomSeconds": 80
+    },
+    {
+      "objectId": 77362,
+      "npcId": 21340,
+      "x": 148797,
+      "y": -78228,
+      "z": -5028,
+      "heading": 0,
+      "respawnDelaySeconds": 120,
+      "respawnRandomSeconds": 80
+    },
+    {
+      "objectId": 77363,
+      "npcId": 21340,
+      "x": 147917,
+      "y": -77439,
+      "z": -5028,
+      "heading": 0,
+      "respawnDelaySeconds": 120,
+      "respawnRandomSeconds": 80
+    },
+    {
+      "objectId": 77364,
+      "npcId": 21340,
+      "x": 149533,
+      "y": -78446,
+      "z": -5028,
+      "heading": 0,
+      "respawnDelaySeconds": 120,
+      "respawnRandomSeconds": 80
+    },
+    {
+      "objectId": 77365,
+      "npcId": 21340,
+      "x": 147421,
+      "y": -77229,
+      "z": -5028,
+      "heading": 0,
+      "respawnDelaySeconds": 120,
+      "respawnRandomSeconds": 80
+    },
+    {
+      "objectId": 77366,
+      "npcId": 21341,
+      "x": 149240,
+      "y": -77348,
+      "z": -5028,
+      "heading": 0,
+      "respawnDelaySeconds": 120,
+      "respawnRandomSeconds": 80
+    },
+    {
+      "objectId": 77367,
+      "npcId": 21341,
+      "x": 150127,
+      "y": -77837,
+      "z": -5028,
+      "heading": 0,
+      "respawnDelaySeconds": 120,
+      "respawnRandomSeconds": 80
+    },
+    {
+      "objectId": 77368,
+      "npcId": 21341,
+      "x": 148137,
+      "y": -78095,
+      "z": -5028,
+      "heading": 0,
+      "respawnDelaySeconds": 120,
+      "respawnRandomSeconds": 80
+    },
+    {
+      "objectId": 77369,
+      "npcId": 21341,
+      "x": 148541,
+      "y": -77496,
+      "z": -5028,
+      "heading": 0,
+      "respawnDelaySeconds": 120,
+      "respawnRandomSeconds": 80
+    },
+    {
+      "objectId": 77370,
+      "npcId": 21342,
+      "x": 148858,
+      "y": -77428,
+      "z": -5028,
+      "heading": 0,
+      "respawnDelaySeconds": 120,
+      "respawnRandomSeconds": 80
+    },
+    {
+      "objectId": 77371,
+      "npcId": 21342,
+      "x": 148236,
+      "y": -77653,
+      "z": -5028,
+      "heading": 0,
+      "respawnDelaySeconds": 120,
+      "respawnRandomSeconds": 80
+    },
+    {
+      "objectId": 77372,
+      "npcId": 21342,
+      "x": 146988,
+      "y": -77614,
+      "z": -5028,
+      "heading": 0,
+      "respawnDelaySeconds": 120,
+      "respawnRandomSeconds": 80
+    },
+    {
+      "objectId": 77373,
+      "npcId": 21342,
+      "x": 149647,
+      "y": -78128,
+      "z": -5028,
+      "heading": 0,
+      "respawnDelaySeconds": 120,
+      "respawnRandomSeconds": 80
+    },
+    {
+      "objectId": 77374,
+      "npcId": 21339,
+      "x": 144865,
+      "y": -75652,
+      "z": -4944,
+      "heading": 0,
+      "respawnDelaySeconds": 120,
+      "respawnRandomSeconds": 80
+    },
+    {
+      "objectId": 77375,
+      "npcId": 21339,
+      "x": 143680,
+      "y": -77091,
+      "z": -4944,
+      "heading": 0,
+      "respawnDelaySeconds": 120,
+      "respawnRandomSeconds": 80
+    },
+    {
+      "objectId": 77376,
+      "npcId": 21339,
+      "x": 141326,
+      "y": -74402,
+      "z": -4944,
+      "heading": 0,
+      "respawnDelaySeconds": 120,
+      "respawnRandomSeconds": 80
+    },
+    {
+      "objectId": 77377,
+      "npcId": 21339,
+      "x": 145942,
+      "y": -77050,
+      "z": -4944,
+      "heading": 0,
+      "respawnDelaySeconds": 120,
+      "respawnRandomSeconds": 80
+    },
+    {
+      "objectId": 77378,
+      "npcId": 21339,
+      "x": 143928,
+      "y": -76428,
+      "z": -4944,
+      "heading": 0,
+      "respawnDelaySeconds": 120,
+      "respawnRandomSeconds": 80
+    },
+    {
+      "objectId": 77379,
+      "npcId": 21339,
+      "x": 142095,
+      "y": -75728,
+      "z": -4944,
+      "heading": 0,
+      "respawnDelaySeconds": 120,
+      "respawnRandomSeconds": 80
+    },
+    {
+      "objectId": 77380,
+      "npcId": 21339,
+      "x": 145054,
+      "y": -76210,
+      "z": -4944,
+      "heading": 0,
+      "respawnDelaySeconds": 120,
+      "respawnRandomSeconds": 80
+    },
+    {
+      "objectId": 77381,
+      "npcId": 21339,
+      "x": 142018,
+      "y": -76319,
+      "z": -4944,
+      "heading": 0,
+      "respawnDelaySeconds": 120,
+      "respawnRandomSeconds": 80
+    },
+    {
+      "objectId": 77382,
+      "npcId": 21340,
+      "x": 145441,
+      "y": -75839,
+      "z": -4944,
+      "heading": 0,
+      "respawnDelaySeconds": 120,
+      "respawnRandomSeconds": 80
+    },
+    {
+      "objectId": 77383,
+      "npcId": 21340,
+      "x": 145744,
+      "y": -76494,
+      "z": -4944,
+      "heading": 0,
+      "respawnDelaySeconds": 120,
+      "respawnRandomSeconds": 80
+    },
+    {
+      "objectId": 77384,
+      "npcId": 21340,
+      "x": 142214,
+      "y": -75600,
+      "z": -4944,
+      "heading": 0,
+      "respawnDelaySeconds": 120,
+      "respawnRandomSeconds": 80
+    },
+    {
+      "objectId": 77385,
+      "npcId": 21340,
+      "x": 142516,
+      "y": -76688,
+      "z": -4944,
+      "heading": 0,
+      "respawnDelaySeconds": 120,
+      "respawnRandomSeconds": 80
+    },
+    {
+      "objectId": 77386,
+      "npcId": 21340,
+      "x": 145114,
+      "y": -77126,
+      "z": -4944,
+      "heading": 0,
+      "respawnDelaySeconds": 120,
+      "respawnRandomSeconds": 80
+    },
+    {
+      "objectId": 77387,
+      "npcId": 21340,
+      "x": 143521,
+      "y": -77567,
+      "z": -4944,
+      "heading": 0,
+      "respawnDelaySeconds": 120,
+      "respawnRandomSeconds": 80
+    },
+    {
+      "objectId": 77388,
+      "npcId": 21340,
+      "x": 143748,
+      "y": -74903,
+      "z": -4944,
+      "heading": 0,
+      "respawnDelaySeconds": 120,
+      "respawnRandomSeconds": 80
+    },
+    {
+      "objectId": 77389,
+      "npcId": 21340,
+      "x": 143191,
+      "y": -77175,
+      "z": -4944,
+      "heading": 0,
+      "respawnDelaySeconds": 120,
+      "respawnRandomSeconds": 80
+    },
+    {
+      "objectId": 77390,
+      "npcId": 21341,
+      "x": 142840,
+      "y": -74640,
+      "z": -4944,
+      "heading": 0,
+      "respawnDelaySeconds": 120,
+      "respawnRandomSeconds": 80
+    },
+    {
+      "objectId": 77391,
+      "npcId": 21341,
+      "x": 141553,
+      "y": -75253,
+      "z": -4944,
+      "heading": 0,
+      "respawnDelaySeconds": 120,
+      "respawnRandomSeconds": 80
+    },
+    {
+      "objectId": 77392,
+      "npcId": 21341,
+      "x": 141869,
+      "y": -74534,
+      "z": -4944,
+      "heading": 0,
+      "respawnDelaySeconds": 120,
+      "respawnRandomSeconds": 80
+    },
+    {
+      "objectId": 77393,
+      "npcId": 21341,
+      "x": 144316,
+      "y": -76387,
+      "z": -4944,
+      "heading": 0,
+      "respawnDelaySeconds": 120,
+      "respawnRandomSeconds": 80
+    },
+    {
+      "objectId": 77394,
+      "npcId": 21341,
+      "x": 142226,
+      "y": -76104,
+      "z": -4944,
+      "heading": 0,
+      "respawnDelaySeconds": 120,
+      "respawnRandomSeconds": 80
+    },
+    {
+      "objectId": 77395,
+      "npcId": 21341,
+      "x": 141893,
+      "y": -74822,
+      "z": -4944,
+      "heading": 0,
+      "respawnDelaySeconds": 120,
+      "respawnRandomSeconds": 80
+    },
+    {
+      "objectId": 77396,
+      "npcId": 21341,
+      "x": 142162,
+      "y": -74607,
+      "z": -4944,
+      "heading": 0,
+      "respawnDelaySeconds": 120,
+      "respawnRandomSeconds": 80
+    },
+    {
+      "objectId": 77397,
+      "npcId": 21341,
+      "x": 144612,
+      "y": -76089,
+      "z": -4944,
+      "heading": 0,
+      "respawnDelaySeconds": 120,
+      "respawnRandomSeconds": 80
+    },
+    {
+      "objectId": 77398,
+      "npcId": 21341,
+      "x": 145002,
+      "y": -75804,
+      "z": -4944,
+      "heading": 0,
+      "respawnDelaySeconds": 120,
+      "respawnRandomSeconds": 80
+    },
+    {
+      "objectId": 77399,
+      "npcId": 21341,
+      "x": 141835,
+      "y": -76399,
+      "z": -4944,
+      "heading": 0,
+      "respawnDelaySeconds": 120,
+      "respawnRandomSeconds": 80
+    },
+    {
+      "objectId": 77400,
+      "npcId": 21342,
+      "x": 141171,
+      "y": -76135,
+      "z": -4944,
+      "heading": 0,
+      "respawnDelaySeconds": 120,
+      "respawnRandomSeconds": 80
+    },
+    {
+      "objectId": 77401,
+      "npcId": 21342,
+      "x": 142818,
+      "y": -77031,
+      "z": -4944,
+      "heading": 0,
+      "respawnDelaySeconds": 120,
+      "respawnRandomSeconds": 80
+    },
+    {
+      "objectId": 77402,
+      "npcId": 21342,
+      "x": 140907,
+      "y": -74287,
+      "z": -4944,
+      "heading": 0,
+      "respawnDelaySeconds": 120,
+      "respawnRandomSeconds": 80
+    },
+    {
+      "objectId": 77403,
+      "npcId": 21342,
+      "x": 145262,
+      "y": -76277,
+      "z": -4944,
+      "heading": 0,
+      "respawnDelaySeconds": 120,
+      "respawnRandomSeconds": 80
+    },
+    {
+      "objectId": 77404,
+      "npcId": 21342,
+      "x": 145559,
+      "y": -77119,
+      "z": -4944,
+      "heading": 0,
+      "respawnDelaySeconds": 120,
+      "respawnRandomSeconds": 80
+    },
+    {
+      "objectId": 77405,
+      "npcId": 21342,
+      "x": 145266,
+      "y": -76562,
+      "z": -4944,
+      "heading": 0,
+      "respawnDelaySeconds": 120,
+      "respawnRandomSeconds": 80
+    },
+    {
+      "objectId": 77406,
+      "npcId": 21342,
+      "x": 142141,
+      "y": -76629,
+      "z": -4944,
+      "heading": 0,
+      "respawnDelaySeconds": 120,
+      "respawnRandomSeconds": 80
+    },
+    {
+      "objectId": 77407,
+      "npcId": 21342,
+      "x": 145129,
+      "y": -75558,
+      "z": -4944,
+      "heading": 0,
+      "respawnDelaySeconds": 120,
+      "respawnRandomSeconds": 80
+    },
+    {
+      "objectId": 77408,
+      "npcId": 21347,
+      "x": 142460,
+      "y": -75503,
+      "z": -4944,
+      "heading": 0,
+      "respawnDelaySeconds": 100,
+      "respawnRandomSeconds": 30
+    },
+    {
+      "objectId": 77409,
+      "npcId": 21347,
+      "x": 143218,
+      "y": -76543,
+      "z": -4944,
+      "heading": 0,
+      "respawnDelaySeconds": 100,
+      "respawnRandomSeconds": 30
+    },
+    {
+      "objectId": 77410,
+      "npcId": 21331,
+      "x": 141150,
+      "y": -72493,
+      "z": -4512,
+      "heading": 0,
+      "respawnDelaySeconds": 120,
+      "respawnRandomSeconds": 80
+    },
+    {
+      "objectId": 77411,
+      "npcId": 21331,
+      "x": 140100,
+      "y": -73326,
+      "z": -4512,
+      "heading": 0,
+      "respawnDelaySeconds": 120,
+      "respawnRandomSeconds": 80
+    },
+    {
+      "objectId": 77412,
+      "npcId": 21331,
+      "x": 138839,
+      "y": -72423,
+      "z": -4512,
+      "heading": 0,
+      "respawnDelaySeconds": 120,
+      "respawnRandomSeconds": 80
+    },
+    {
+      "objectId": 77413,
+      "npcId": 21331,
+      "x": 141648,
+      "y": -73284,
+      "z": -4512,
+      "heading": 0,
+      "respawnDelaySeconds": 120,
+      "respawnRandomSeconds": 80
+    },
+    {
+      "objectId": 77414,
+      "npcId": 21331,
+      "x": 141235,
+      "y": -73676,
+      "z": -4512,
+      "heading": 0,
+      "respawnDelaySeconds": 120,
+      "respawnRandomSeconds": 80
+    },
+    {
+      "objectId": 77415,
+      "npcId": 21331,
+      "x": 140305,
+      "y": -72152,
+      "z": -4512,
+      "heading": 0,
+      "respawnDelaySeconds": 120,
+      "respawnRandomSeconds": 80
+    },
+    {
+      "objectId": 77416,
+      "npcId": 21332,
+      "x": 140450,
+      "y": -71918,
+      "z": -4512,
+      "heading": 0,
+      "respawnDelaySeconds": 120,
+      "respawnRandomSeconds": 80
+    },
+    {
+      "objectId": 77417,
+      "npcId": 21332,
+      "x": 140932,
+      "y": -71635,
+      "z": -4512,
+      "heading": 0,
+      "respawnDelaySeconds": 120,
+      "respawnRandomSeconds": 80
+    },
+    {
+      "objectId": 77418,
+      "npcId": 21332,
+      "x": 141341,
+      "y": -71694,
+      "z": -4512,
+      "heading": 0,
+      "respawnDelaySeconds": 120,
+      "respawnRandomSeconds": 80
+    },
+    {
+      "objectId": 77419,
+      "npcId": 21332,
+      "x": 140499,
+      "y": -73499,
+      "z": -4512,
+      "heading": 0,
+      "respawnDelaySeconds": 120,
+      "respawnRandomSeconds": 80
+    },
+    {
+      "objectId": 77420,
+      "npcId": 21332,
+      "x": 140520,
+      "y": -73845,
+      "z": -4512,
+      "heading": 0,
+      "respawnDelaySeconds": 120,
+      "respawnRandomSeconds": 80
+    },
+    {
+      "objectId": 77421,
+      "npcId": 21332,
+      "x": 141539,
+      "y": -71907,
+      "z": -4512,
+      "heading": 0,
+      "respawnDelaySeconds": 120,
+      "respawnRandomSeconds": 80
+    },
+    {
+      "objectId": 77422,
+      "npcId": 21333,
+      "x": 139761,
+      "y": -72800,
+      "z": -4512,
+      "heading": 0,
+      "respawnDelaySeconds": 120,
+      "respawnRandomSeconds": 80
+    },
+    {
+      "objectId": 77423,
+      "npcId": 21333,
+      "x": 139974,
+      "y": -71433,
+      "z": -4512,
+      "heading": 0,
+      "respawnDelaySeconds": 120,
+      "respawnRandomSeconds": 80
+    },
+    {
+      "objectId": 77424,
+      "npcId": 21333,
+      "x": 140695,
+      "y": -73431,
+      "z": -4512,
+      "heading": 0,
+      "respawnDelaySeconds": 120,
+      "respawnRandomSeconds": 80
+    },
+    {
+      "objectId": 77425,
+      "npcId": 21333,
+      "x": 140792,
+      "y": -71318,
+      "z": -4512,
+      "heading": 0,
+      "respawnDelaySeconds": 120,
+      "respawnRandomSeconds": 80
+    },
+    {
+      "objectId": 77426,
+      "npcId": 21333,
+      "x": 141318,
+      "y": -73496,
+      "z": -4512,
+      "heading": 0,
+      "respawnDelaySeconds": 120,
+      "respawnRandomSeconds": 80
+    },
+    {
+      "objectId": 77427,
+      "npcId": 21333,
+      "x": 140958,
+      "y": -73200,
+      "z": -4512,
+      "heading": 0,
+      "respawnDelaySeconds": 120,
+      "respawnRandomSeconds": 80
+    },
+    {
+      "objectId": 77428,
+      "npcId": 21334,
+      "x": 140672,
+      "y": -71775,
+      "z": -4512,
+      "heading": 0,
+      "respawnDelaySeconds": 120,
+      "respawnRandomSeconds": 80
+    },
+    {
+      "objectId": 77429,
+      "npcId": 21334,
+      "x": 140775,
+      "y": -73806,
+      "z": -4512,
+      "heading": 0,
+      "respawnDelaySeconds": 120,
+      "respawnRandomSeconds": 80
+    },
+    {
+      "objectId": 77430,
+      "npcId": 21334,
+      "x": 138241,
+      "y": -71850,
+      "z": -4512,
+      "heading": 0,
+      "respawnDelaySeconds": 120,
+      "respawnRandomSeconds": 80
+    },
+    {
+      "objectId": 77431,
+      "npcId": 21334,
+      "x": 140227,
+      "y": -71726,
+      "z": -4512,
+      "heading": 0,
+      "respawnDelaySeconds": 120,
+      "respawnRandomSeconds": 80
+    },
+    {
+      "objectId": 77432,
+      "npcId": 21334,
+      "x": 140129,
+      "y": -74064,
+      "z": -4512,
+      "heading": 0,
+      "respawnDelaySeconds": 120,
+      "respawnRandomSeconds": 80
+    },
+    {
+      "objectId": 77433,
+      "npcId": 21334,
+      "x": 140209,
+      "y": -71310,
+      "z": -4512,
+      "heading": 0,
+      "respawnDelaySeconds": 120,
+      "respawnRandomSeconds": 80
+    },
+    {
+      "objectId": 77434,
+      "npcId": 21345,
+      "x": 140999,
+      "y": -72120,
+      "z": -4512,
+      "heading": 0,
+      "respawnDelaySeconds": 100,
+      "respawnRandomSeconds": 30
+    },
+    {
+      "objectId": 77435,
+      "npcId": 21345,
+      "x": 138993,
+      "y": -72326,
+      "z": -4512,
+      "heading": 0,
+      "respawnDelaySeconds": 100,
+      "respawnRandomSeconds": 30
+    },
+    {
+      "objectId": 77436,
+      "npcId": 21335,
+      "x": 142699,
+      "y": -71833,
+      "z": -4436,
+      "heading": 0,
+      "respawnDelaySeconds": 120,
+      "respawnRandomSeconds": 80
+    },
+    {
+      "objectId": 77437,
+      "npcId": 21335,
+      "x": 143403,
+      "y": -73580,
+      "z": -4436,
+      "heading": 0,
+      "respawnDelaySeconds": 120,
+      "respawnRandomSeconds": 80
+    },
+    {
+      "objectId": 77438,
+      "npcId": 21335,
+      "x": 143425,
+      "y": -73371,
+      "z": -4436,
+      "heading": 0,
+      "respawnDelaySeconds": 120,
+      "respawnRandomSeconds": 80
+    },
+    {
+      "objectId": 77439,
+      "npcId": 21335,
+      "x": 142891,
+      "y": -71465,
+      "z": -4436,
+      "heading": 0,
+      "respawnDelaySeconds": 120,
+      "respawnRandomSeconds": 80
+    },
+    {
+      "objectId": 77440,
+      "npcId": 21335,
+      "x": 142849,
+      "y": -70828,
+      "z": -4436,
+      "heading": 0,
+      "respawnDelaySeconds": 120,
+      "respawnRandomSeconds": 80
+    },
+    {
+      "objectId": 77441,
+      "npcId": 21335,
+      "x": 144064,
+      "y": -73598,
+      "z": -4436,
+      "heading": 0,
+      "respawnDelaySeconds": 120,
+      "respawnRandomSeconds": 80
+    },
+    {
+      "objectId": 77442,
+      "npcId": 21335,
+      "x": 144470,
+      "y": -73145,
+      "z": -4436,
+      "heading": 0,
+      "respawnDelaySeconds": 120,
+      "respawnRandomSeconds": 80
+    },
+    {
+      "objectId": 77443,
+      "npcId": 21335,
+      "x": 141867,
+      "y": -71562,
+      "z": -4436,
+      "heading": 0,
+      "respawnDelaySeconds": 120,
+      "respawnRandomSeconds": 80
+    },
+    {
+      "objectId": 77444,
+      "npcId": 21335,
+      "x": 142153,
+      "y": -73130,
+      "z": -4436,
+      "heading": 0,
+      "respawnDelaySeconds": 120,
+      "respawnRandomSeconds": 80
+    },
+    {
+      "objectId": 77445,
+      "npcId": 21335,
+      "x": 145394,
+      "y": -70978,
+      "z": -4436,
+      "heading": 0,
+      "respawnDelaySeconds": 120,
+      "respawnRandomSeconds": 80
+    },
+    {
+      "objectId": 77446,
+      "npcId": 21336,
+      "x": 142532,
+      "y": -71517,
+      "z": -4436,
+      "heading": 0,
+      "respawnDelaySeconds": 120,
+      "respawnRandomSeconds": 80
+    },
+    {
+      "objectId": 77447,
+      "npcId": 21336,
+      "x": 142764,
+      "y": -72271,
+      "z": -4436,
+      "heading": 0,
+      "respawnDelaySeconds": 120,
+      "respawnRandomSeconds": 80
+    },
+    {
+      "objectId": 77448,
+      "npcId": 21336,
+      "x": 142447,
+      "y": -71700,
+      "z": -4436,
+      "heading": 0,
+      "respawnDelaySeconds": 120,
+      "respawnRandomSeconds": 80
+    },
+    {
+      "objectId": 77449,
+      "npcId": 21336,
+      "x": 144004,
+      "y": -70510,
+      "z": -4436,
+      "heading": 0,
+      "respawnDelaySeconds": 120,
+      "respawnRandomSeconds": 80
+    },
+    {
+      "objectId": 77450,
+      "npcId": 21336,
+      "x": 145194,
+      "y": -70753,
+      "z": -4436,
+      "heading": 0,
+      "respawnDelaySeconds": 120,
+      "respawnRandomSeconds": 80
+    },
+    {
+      "objectId": 77451,
+      "npcId": 21336,
+      "x": 144059,
+      "y": -73248,
+      "z": -4436,
+      "heading": 0,
+      "respawnDelaySeconds": 120,
+      "respawnRandomSeconds": 80
+    },
+    {
+      "objectId": 77452,
+      "npcId": 21336,
+      "x": 146297,
+      "y": -71397,
+      "z": -4436,
+      "heading": 0,
+      "respawnDelaySeconds": 120,
+      "respawnRandomSeconds": 80
+    },
+    {
+      "objectId": 77453,
+      "npcId": 21336,
+      "x": 145406,
+      "y": -73213,
+      "z": -4436,
+      "heading": 0,
+      "respawnDelaySeconds": 120,
+      "respawnRandomSeconds": 80
+    },
+    {
+      "objectId": 77454,
+      "npcId": 21337,
+      "x": 144205,
+      "y": -71713,
+      "z": -4436,
+      "heading": 0,
+      "respawnDelaySeconds": 120,
+      "respawnRandomSeconds": 80
+    },
+    {
+      "objectId": 77455,
+      "npcId": 21337,
+      "x": 143848,
+      "y": -72180,
+      "z": -4436,
+      "heading": 0,
+      "respawnDelaySeconds": 120,
+      "respawnRandomSeconds": 80
+    },
+    {
+      "objectId": 77456,
+      "npcId": 21337,
+      "x": 143680,
+      "y": -71155,
+      "z": -4436,
+      "heading": 0,
+      "respawnDelaySeconds": 120,
+      "respawnRandomSeconds": 80
+    },
+    {
+      "objectId": 77457,
+      "npcId": 21337,
+      "x": 143459,
+      "y": -71487,
+      "z": -4436,
+      "heading": 0,
+      "respawnDelaySeconds": 120,
+      "respawnRandomSeconds": 80
+    },
+    {
+      "objectId": 77458,
+      "npcId": 21337,
+      "x": 144644,
+      "y": -71091,
+      "z": -4436,
+      "heading": 0,
+      "respawnDelaySeconds": 120,
+      "respawnRandomSeconds": 80
+    },
+    {
+      "objectId": 77459,
+      "npcId": 21337,
+      "x": 144180,
+      "y": -71202,
+      "z": -4436,
+      "heading": 0,
+      "respawnDelaySeconds": 120,
+      "respawnRandomSeconds": 80
+    },
+    {
+      "objectId": 77460,
+      "npcId": 21337,
+      "x": 146054,
+      "y": -72616,
+      "z": -4436,
+      "heading": 0,
+      "respawnDelaySeconds": 120,
+      "respawnRandomSeconds": 80
+    },
+    {
+      "objectId": 77461,
+      "npcId": 21337,
+      "x": 143790,
+      "y": -70548,
+      "z": -4436,
+      "heading": 0,
+      "respawnDelaySeconds": 120,
+      "respawnRandomSeconds": 80
+    },
+    {
+      "objectId": 77462,
+      "npcId": 21337,
+      "x": 142273,
+      "y": -71510,
+      "z": -4436,
+      "heading": 0,
+      "respawnDelaySeconds": 120,
+      "respawnRandomSeconds": 80
+    },
+    {
+      "objectId": 77463,
+      "npcId": 21337,
+      "x": 145791,
+      "y": -71988,
+      "z": -4436,
+      "heading": 0,
+      "respawnDelaySeconds": 120,
+      "respawnRandomSeconds": 80
+    },
+    {
+      "objectId": 77464,
+      "npcId": 21338,
+      "x": 145556,
+      "y": -71286,
+      "z": -4436,
+      "heading": 0,
+      "respawnDelaySeconds": 120,
+      "respawnRandomSeconds": 80
+    },
+    {
+      "objectId": 77465,
+      "npcId": 21338,
+      "x": 142144,
+      "y": -73488,
+      "z": -4436,
+      "heading": 0,
+      "respawnDelaySeconds": 120,
+      "respawnRandomSeconds": 80
+    },
+    {
+      "objectId": 77466,
+      "npcId": 21338,
+      "x": 141880,
+      "y": -72463,
+      "z": -4436,
+      "heading": 0,
+      "respawnDelaySeconds": 120,
+      "respawnRandomSeconds": 80
+    },
+    {
+      "objectId": 77467,
+      "npcId": 21338,
+      "x": 144308,
+      "y": -72170,
+      "z": -4436,
+      "heading": 0,
+      "respawnDelaySeconds": 120,
+      "respawnRandomSeconds": 80
+    },
+    {
+      "objectId": 77468,
+      "npcId": 21338,
+      "x": 144578,
+      "y": -73343,
+      "z": -4436,
+      "heading": 0,
+      "respawnDelaySeconds": 120,
+      "respawnRandomSeconds": 80
+    },
+    {
+      "objectId": 77469,
+      "npcId": 21338,
+      "x": 144143,
+      "y": -70609,
+      "z": -4436,
+      "heading": 0,
+      "respawnDelaySeconds": 120,
+      "respawnRandomSeconds": 80
+    },
+    {
+      "objectId": 77470,
+      "npcId": 21338,
+      "x": 145223,
+      "y": -71147,
+      "z": -4436,
+      "heading": 0,
+      "respawnDelaySeconds": 120,
+      "respawnRandomSeconds": 80
+    },
+    {
+      "objectId": 77471,
+      "npcId": 21338,
+      "x": 142520,
+      "y": -71338,
+      "z": -4436,
+      "heading": 0,
+      "respawnDelaySeconds": 120,
+      "respawnRandomSeconds": 80
+    },
+    {
+      "objectId": 77472,
+      "npcId": 21347,
+      "x": 145269,
+      "y": -71583,
+      "z": -4436,
+      "heading": 0,
+      "respawnDelaySeconds": 100,
+      "respawnRandomSeconds": 30
+    },
+    {
+      "objectId": 77473,
+      "npcId": 21347,
+      "x": 145732,
+      "y": -71714,
+      "z": -4436,
+      "heading": 0,
+      "respawnDelaySeconds": 100,
+      "respawnRandomSeconds": 30
+    },
+    {
+      "objectId": 77474,
+      "npcId": 21324,
+      "x": 134027,
+      "y": -69869,
+      "z": -3496,
+      "heading": 0,
+      "respawnDelaySeconds": 120,
+      "respawnRandomSeconds": 80
+    },
+    {
+      "objectId": 77475,
+      "npcId": 21324,
+      "x": 134624,
+      "y": -68734,
+      "z": -3496,
+      "heading": 0,
+      "respawnDelaySeconds": 120,
+      "respawnRandomSeconds": 80
+    },
+    {
+      "objectId": 77476,
+      "npcId": 21324,
+      "x": 133907,
+      "y": -70940,
+      "z": -3496,
+      "heading": 0,
+      "respawnDelaySeconds": 120,
+      "respawnRandomSeconds": 80
+    },
+    {
+      "objectId": 77477,
+      "npcId": 21324,
+      "x": 134685,
+      "y": -71559,
+      "z": -3496,
+      "heading": 0,
+      "respawnDelaySeconds": 120,
+      "respawnRandomSeconds": 80
+    },
+    {
+      "objectId": 77478,
+      "npcId": 21324,
+      "x": 136451,
+      "y": -69988,
+      "z": -3496,
+      "heading": 0,
+      "respawnDelaySeconds": 120,
+      "respawnRandomSeconds": 80
+    },
+    {
+      "objectId": 77479,
+      "npcId": 21324,
+      "x": 136214,
+      "y": -69956,
+      "z": -3496,
+      "heading": 0,
+      "respawnDelaySeconds": 120,
+      "respawnRandomSeconds": 80
+    },
+    {
+      "objectId": 77480,
+      "npcId": 21324,
+      "x": 134896,
+      "y": -71145,
+      "z": -3496,
+      "heading": 0,
+      "respawnDelaySeconds": 120,
+      "respawnRandomSeconds": 80
+    },
+    {
+      "objectId": 77481,
+      "npcId": 21324,
+      "x": 135963,
+      "y": -68778,
+      "z": -3496,
+      "heading": 0,
+      "respawnDelaySeconds": 120,
+      "respawnRandomSeconds": 80
+    },
+    {
+      "objectId": 77482,
+      "npcId": 21325,
+      "x": 134581,
+      "y": -69841,
+      "z": -3496,
+      "heading": 0,
+      "respawnDelaySeconds": 120,
+      "respawnRandomSeconds": 80
+    },
+    {
+      "objectId": 77483,
+      "npcId": 21325,
+      "x": 134379,
+      "y": -71178,
+      "z": -3496,
+      "heading": 0,
+      "respawnDelaySeconds": 120,
+      "respawnRandomSeconds": 80
+    },
+    {
+      "objectId": 77484,
+      "npcId": 21325,
+      "x": 135849,
+      "y": -70509,
+      "z": -3496,
+      "heading": 0,
+      "respawnDelaySeconds": 120,
+      "respawnRandomSeconds": 80
+    },
+    {
+      "objectId": 77485,
+      "npcId": 21325,
+      "x": 136984,
+      "y": -69420,
+      "z": -3496,
+      "heading": 0,
+      "respawnDelaySeconds": 120,
+      "respawnRandomSeconds": 80
+    },
+    {
+      "objectId": 77486,
+      "npcId": 21325,
+      "x": 135312,
+      "y": -70476,
+      "z": -3496,
+      "heading": 0,
+      "respawnDelaySeconds": 120,
+      "respawnRandomSeconds": 80
+    },
+    {
+      "objectId": 77487,
+      "npcId": 21325,
+      "x": 134334,
+      "y": -68908,
+      "z": -3496,
+      "heading": 0,
+      "respawnDelaySeconds": 120,
+      "respawnRandomSeconds": 80
+    },
+    {
+      "objectId": 77488,
+      "npcId": 21325,
+      "x": 135900,
+      "y": -69091,
+      "z": -3496,
+      "heading": 0,
+      "respawnDelaySeconds": 120,
+      "respawnRandomSeconds": 80
+    },
+    {
+      "objectId": 77489,
+      "npcId": 21325,
+      "x": 133796,
+      "y": -70790,
+      "z": -3496,
+      "heading": 0,
+      "respawnDelaySeconds": 120,
+      "respawnRandomSeconds": 80
+    },
+    {
+      "objectId": 77490,
+      "npcId": 21326,
+      "x": 137304,
+      "y": -69314,
+      "z": -3496,
+      "heading": 0,
+      "respawnDelaySeconds": 120,
+      "respawnRandomSeconds": 80
+    },
+    {
+      "objectId": 77491,
+      "npcId": 21326,
+      "x": 134704,
+      "y": -71239,
+      "z": -3496,
+      "heading": 0,
+      "respawnDelaySeconds": 120,
+      "respawnRandomSeconds": 80
+    },
+    {
+      "objectId": 77492,
+      "npcId": 21326,
+      "x": 135978,
+      "y": -69958,
+      "z": -3496,
+      "heading": 0,
+      "respawnDelaySeconds": 120,
+      "respawnRandomSeconds": 80
+    },
+    {
+      "objectId": 77493,
+      "npcId": 21326,
+      "x": 134584,
+      "y": -70986,
+      "z": -3496,
+      "heading": 0,
+      "respawnDelaySeconds": 120,
+      "respawnRandomSeconds": 80
+    },
+    {
+      "objectId": 77494,
+      "npcId": 21326,
+      "x": 134536,
+      "y": -69252,
+      "z": -3496,
+      "heading": 0,
+      "respawnDelaySeconds": 120,
+      "respawnRandomSeconds": 80
+    },
+    {
+      "objectId": 77495,
+      "npcId": 21326,
+      "x": 136982,
+      "y": -69184,
+      "z": -3496,
+      "heading": 0,
+      "respawnDelaySeconds": 120,
+      "respawnRandomSeconds": 80
+    },
+    {
+      "objectId": 77496,
+      "npcId": 21326,
+      "x": 134322,
+      "y": -70737,
+      "z": -3496,
+      "heading": 0,
+      "respawnDelaySeconds": 120,
+      "respawnRandomSeconds": 80
+    },
+    {
+      "objectId": 77497,
+      "npcId": 21326,
+      "x": 135390,
+      "y": -68840,
+      "z": -3496,
+      "heading": 0,
+      "respawnDelaySeconds": 120,
+      "respawnRandomSeconds": 80
+    },
+    {
+      "objectId": 77498,
+      "npcId": 21326,
+      "x": 135210,
+      "y": -71247,
+      "z": -3496,
+      "heading": 0,
+      "respawnDelaySeconds": 120,
+      "respawnRandomSeconds": 80
+    },
+    {
+      "objectId": 77499,
+      "npcId": 21326,
+      "x": 136406,
+      "y": -69425,
+      "z": -3496,
+      "heading": 0,
+      "respawnDelaySeconds": 120,
+      "respawnRandomSeconds": 80
+    },
+    {
+      "objectId": 77500,
+      "npcId": 21343,
+      "x": 134806,
+      "y": -70810,
+      "z": -3496,
+      "heading": 0,
+      "respawnDelaySeconds": 100,
+      "respawnRandomSeconds": 30
+    },
+    {
+      "objectId": 77501,
+      "npcId": 21343,
+      "x": 136823,
+      "y": -69078,
+      "z": -3496,
+      "heading": 0,
+      "respawnDelaySeconds": 100,
+      "respawnRandomSeconds": 30
+    },
+    {
+      "objectId": 77502,
+      "npcId": 21327,
+      "x": 136536,
+      "y": -76011,
+      "z": -4328,
+      "heading": 0,
+      "respawnDelaySeconds": 120,
+      "respawnRandomSeconds": 80
+    },
+    {
+      "objectId": 77503,
+      "npcId": 21327,
+      "x": 136088,
+      "y": -76177,
+      "z": -4328,
+      "heading": 0,
+      "respawnDelaySeconds": 120,
+      "respawnRandomSeconds": 80
+    },
+    {
+      "objectId": 77504,
+      "npcId": 21327,
+      "x": 135733,
+      "y": -73839,
+      "z": -4328,
+      "heading": 0,
+      "respawnDelaySeconds": 120,
+      "respawnRandomSeconds": 80
+    },
+    {
+      "objectId": 77505,
+      "npcId": 21327,
+      "x": 138651,
+      "y": -76879,
+      "z": -4328,
+      "heading": 0,
+      "respawnDelaySeconds": 120,
+      "respawnRandomSeconds": 80
+    },
+    {
+      "objectId": 77506,
+      "npcId": 21327,
+      "x": 138679,
+      "y": -76622,
+      "z": -4328,
+      "heading": 0,
+      "respawnDelaySeconds": 120,
+      "respawnRandomSeconds": 80
+    },
+    {
+      "objectId": 77507,
+      "npcId": 21327,
+      "x": 137054,
+      "y": -73666,
+      "z": -4328,
+      "heading": 0,
+      "respawnDelaySeconds": 120,
+      "respawnRandomSeconds": 80
+    },
+    {
+      "objectId": 77508,
+      "npcId": 21327,
+      "x": 138820,
+      "y": -76006,
+      "z": -4328,
+      "heading": 0,
+      "respawnDelaySeconds": 120,
+      "respawnRandomSeconds": 80
+    },
+    {
+      "objectId": 77509,
+      "npcId": 21327,
+      "x": 136660,
+      "y": -74802,
+      "z": -4328,
+      "heading": 0,
+      "respawnDelaySeconds": 120,
+      "respawnRandomSeconds": 80
+    },
+    {
+      "objectId": 77510,
+      "npcId": 21327,
+      "x": 135794,
+      "y": -73275,
+      "z": -4328,
+      "heading": 0,
+      "respawnDelaySeconds": 120,
+      "respawnRandomSeconds": 80
+    },
+    {
+      "objectId": 77511,
+      "npcId": 21327,
+      "x": 135741,
+      "y": -74058,
+      "z": -4328,
+      "heading": 0,
+      "respawnDelaySeconds": 120,
+      "respawnRandomSeconds": 80
+    },
+    {
+      "objectId": 77512,
+      "npcId": 21328,
+      "x": 135370,
+      "y": -74373,
+      "z": -4328,
+      "heading": 0,
+      "respawnDelaySeconds": 120,
+      "respawnRandomSeconds": 80
+    },
+    {
+      "objectId": 77513,
+      "npcId": 21328,
+      "x": 137491,
+      "y": -77040,
+      "z": -4328,
+      "heading": 0,
+      "respawnDelaySeconds": 120,
+      "respawnRandomSeconds": 80
+    },
+    {
+      "objectId": 77514,
+      "npcId": 21328,
+      "x": 137715,
+      "y": -73272,
+      "z": -4328,
+      "heading": 0,
+      "respawnDelaySeconds": 120,
+      "respawnRandomSeconds": 80
+    },
+    {
+      "objectId": 77515,
+      "npcId": 21328,
+      "x": 138889,
+      "y": -75050,
+      "z": -4328,
+      "heading": 0,
+      "respawnDelaySeconds": 120,
+      "respawnRandomSeconds": 80
+    },
+    {
+      "objectId": 77516,
+      "npcId": 21328,
+      "x": 137372,
+      "y": -74909,
+      "z": -4328,
+      "heading": 0,
+      "respawnDelaySeconds": 120,
+      "respawnRandomSeconds": 80
+    },
+    {
+      "objectId": 77517,
+      "npcId": 21328,
+      "x": 138359,
+      "y": -77009,
+      "z": -4328,
+      "heading": 0,
+      "respawnDelaySeconds": 120,
+      "respawnRandomSeconds": 80
+    },
+    {
+      "objectId": 77518,
+      "npcId": 21329,
+      "x": 137970,
+      "y": -74694,
+      "z": -4328,
+      "heading": 0,
+      "respawnDelaySeconds": 120,
+      "respawnRandomSeconds": 80
+    },
+    {
+      "objectId": 77519,
+      "npcId": 21329,
+      "x": 138256,
+      "y": -75885,
+      "z": -4328,
+      "heading": 0,
+      "respawnDelaySeconds": 120,
+      "respawnRandomSeconds": 80
+    },
+    {
+      "objectId": 77520,
+      "npcId": 21329,
+      "x": 136181,
+      "y": -74786,
+      "z": -4328,
+      "heading": 0,
+      "respawnDelaySeconds": 120,
+      "respawnRandomSeconds": 80
+    },
+    {
+      "objectId": 77521,
+      "npcId": 21329,
+      "x": 135861,
+      "y": -77690,
+      "z": -4328,
+      "heading": 0,
+      "respawnDelaySeconds": 120,
+      "respawnRandomSeconds": 80
+    },
+    {
+      "objectId": 77522,
+      "npcId": 21329,
+      "x": 136428,
+      "y": -73749,
+      "z": -4328,
+      "heading": 0,
+      "respawnDelaySeconds": 120,
+      "respawnRandomSeconds": 80
+    },
+    {
+      "objectId": 77523,
+      "npcId": 21329,
+      "x": 137371,
+      "y": -75159,
+      "z": -4328,
+      "heading": 0,
+      "respawnDelaySeconds": 120,
+      "respawnRandomSeconds": 80
+    },
+    {
+      "objectId": 77524,
+      "npcId": 21329,
+      "x": 136057,
+      "y": -74120,
+      "z": -4328,
+      "heading": 0,
+      "respawnDelaySeconds": 120,
+      "respawnRandomSeconds": 80
+    },
+    {
+      "objectId": 77525,
+      "npcId": 21329,
+      "x": 138503,
+      "y": -75444,
+      "z": -4328,
+      "heading": 0,
+      "respawnDelaySeconds": 120,
+      "respawnRandomSeconds": 80
+    },
+    {
+      "objectId": 77526,
+      "npcId": 21329,
+      "x": 136394,
+      "y": -75608,
+      "z": -4328,
+      "heading": 0,
+      "respawnDelaySeconds": 120,
+      "respawnRandomSeconds": 80
+    },
+    {
+      "objectId": 77527,
+      "npcId": 21329,
+      "x": 135421,
+      "y": -76874,
+      "z": -4328,
+      "heading": 0,
+      "respawnDelaySeconds": 120,
+      "respawnRandomSeconds": 80
+    },
+    {
+      "objectId": 77528,
+      "npcId": 21330,
+      "x": 138414,
+      "y": -74126,
+      "z": -4328,
+      "heading": 0,
+      "respawnDelaySeconds": 120,
+      "respawnRandomSeconds": 80
+    },
+    {
+      "objectId": 77529,
+      "npcId": 21330,
+      "x": 137940,
+      "y": -73554,
+      "z": -4328,
+      "heading": 0,
+      "respawnDelaySeconds": 120,
+      "respawnRandomSeconds": 80
+    },
+    {
+      "objectId": 77530,
+      "npcId": 21330,
+      "x": 135567,
+      "y": -76270,
+      "z": -4328,
+      "heading": 0,
+      "respawnDelaySeconds": 120,
+      "respawnRandomSeconds": 80
+    },
+    {
+      "objectId": 77531,
+      "npcId": 21330,
+      "x": 135308,
+      "y": -75320,
+      "z": -4328,
+      "heading": 0,
+      "respawnDelaySeconds": 120,
+      "respawnRandomSeconds": 80
+    },
+    {
+      "objectId": 77532,
+      "npcId": 21330,
+      "x": 138763,
+      "y": -74700,
+      "z": -4328,
+      "heading": 0,
+      "respawnDelaySeconds": 120,
+      "respawnRandomSeconds": 80
+    },
+    {
+      "objectId": 77533,
+      "npcId": 21330,
+      "x": 137157,
+      "y": -76643,
+      "z": -4328,
+      "heading": 0,
+      "respawnDelaySeconds": 120,
+      "respawnRandomSeconds": 80
+    },
+    {
+      "objectId": 77534,
+      "npcId": 21330,
+      "x": 137297,
+      "y": -77103,
+      "z": -4328,
+      "heading": 0,
+      "respawnDelaySeconds": 120,
+      "respawnRandomSeconds": 80
+    },
+    {
+      "objectId": 77535,
+      "npcId": 21330,
+      "x": 135806,
+      "y": -77276,
+      "z": -4328,
+      "heading": 0,
+      "respawnDelaySeconds": 120,
+      "respawnRandomSeconds": 80
+    },
+    {
+      "objectId": 77536,
+      "npcId": 21330,
+      "x": 138239,
+      "y": -75317,
+      "z": -4328,
+      "heading": 0,
+      "respawnDelaySeconds": 120,
+      "respawnRandomSeconds": 80
+    },
+    {
+      "objectId": 77537,
+      "npcId": 21330,
+      "x": 137612,
+      "y": -74674,
+      "z": -4328,
+      "heading": 0,
+      "respawnDelaySeconds": 120,
+      "respawnRandomSeconds": 80
+    },
+    {
+      "objectId": 77538,
+      "npcId": 21324,
+      "x": 139416,
+      "y": -79096,
+      "z": -4452,
+      "heading": 0,
+      "respawnDelaySeconds": 120,
+      "respawnRandomSeconds": 80
+    },
+    {
+      "objectId": 77539,
+      "npcId": 21324,
+      "x": 138788,
+      "y": -78752,
+      "z": -4452,
+      "heading": 0,
+      "respawnDelaySeconds": 120,
+      "respawnRandomSeconds": 80
+    },
+    {
+      "objectId": 77540,
+      "npcId": 21324,
+      "x": 136444,
+      "y": -78755,
+      "z": -4452,
+      "heading": 0,
+      "respawnDelaySeconds": 120,
+      "respawnRandomSeconds": 80
+    },
+    {
+      "objectId": 77541,
+      "npcId": 21324,
+      "x": 137744,
+      "y": -79012,
+      "z": -4452,
+      "heading": 0,
+      "respawnDelaySeconds": 120,
+      "respawnRandomSeconds": 80
+    },
+    {
+      "objectId": 77542,
+      "npcId": 21324,
+      "x": 138075,
+      "y": -77371,
+      "z": -4452,
+      "heading": 0,
+      "respawnDelaySeconds": 120,
+      "respawnRandomSeconds": 80
+    },
+    {
+      "objectId": 77543,
+      "npcId": 21324,
+      "x": 136506,
+      "y": -78056,
+      "z": -4452,
+      "heading": 0,
+      "respawnDelaySeconds": 120,
+      "respawnRandomSeconds": 80
+    },
+    {
+      "objectId": 77544,
+      "npcId": 21324,
+      "x": 138796,
+      "y": -77820,
+      "z": -4452,
+      "heading": 0,
+      "respawnDelaySeconds": 120,
+      "respawnRandomSeconds": 80
+    },
+    {
+      "objectId": 77545,
+      "npcId": 21324,
+      "x": 138407,
+      "y": -77104,
+      "z": -4452,
+      "heading": 0,
+      "respawnDelaySeconds": 120,
+      "respawnRandomSeconds": 80
+    },
+    {
+      "objectId": 77546,
+      "npcId": 21324,
+      "x": 137399,
+      "y": -78861,
+      "z": -4452,
+      "heading": 0,
+      "respawnDelaySeconds": 120,
+      "respawnRandomSeconds": 80
+    },
+    {
+      "objectId": 77547,
+      "npcId": 21324,
+      "x": 138030,
+      "y": -77560,
+      "z": -4452,
+      "heading": 0,
+      "respawnDelaySeconds": 120,
+      "respawnRandomSeconds": 80
+    },
+    {
+      "objectId": 77548,
+      "npcId": 21325,
+      "x": 137364,
+      "y": -79429,
+      "z": -4452,
+      "heading": 0,
+      "respawnDelaySeconds": 120,
+      "respawnRandomSeconds": 80
+    },
+    {
+      "objectId": 77549,
+      "npcId": 21325,
+      "x": 135630,
+      "y": -79218,
+      "z": -4452,
+      "heading": 0,
+      "respawnDelaySeconds": 120,
+      "respawnRandomSeconds": 80
+    },
+    {
+      "objectId": 77550,
+      "npcId": 21325,
+      "x": 136426,
+      "y": -79636,
+      "z": -4452,
+      "heading": 0,
+      "respawnDelaySeconds": 120,
+      "respawnRandomSeconds": 80
+    },
+    {
+      "objectId": 77551,
+      "npcId": 21325,
+      "x": 136792,
+      "y": -78378,
+      "z": -4452,
+      "heading": 0,
+      "respawnDelaySeconds": 120,
+      "respawnRandomSeconds": 80
+    },
+    {
+      "objectId": 77552,
+      "npcId": 21325,
+      "x": 138377,
+      "y": -77497,
+      "z": -4452,
+      "heading": 0,
+      "respawnDelaySeconds": 120,
+      "respawnRandomSeconds": 80
+    },
+    {
+      "objectId": 77553,
+      "npcId": 21325,
+      "x": 136587,
+      "y": -77645,
+      "z": -4452,
+      "heading": 0,
+      "respawnDelaySeconds": 120,
+      "respawnRandomSeconds": 80
+    },
+    {
+      "objectId": 77554,
+      "npcId": 21325,
+      "x": 138380,
+      "y": -79117,
+      "z": -4452,
+      "heading": 0,
+      "respawnDelaySeconds": 120,
+      "respawnRandomSeconds": 80
+    },
+    {
+      "objectId": 77555,
+      "npcId": 21325,
+      "x": 139498,
+      "y": -78447,
+      "z": -4452,
+      "heading": 0,
+      "respawnDelaySeconds": 120,
+      "respawnRandomSeconds": 80
+    },
+    {
+      "objectId": 77556,
+      "npcId": 21326,
+      "x": 138916,
+      "y": -78083,
+      "z": -4452,
+      "heading": 0,
+      "respawnDelaySeconds": 120,
+      "respawnRandomSeconds": 80
+    },
+    {
+      "objectId": 77557,
+      "npcId": 21326,
+      "x": 137227,
+      "y": -79071,
+      "z": -4452,
+      "heading": 0,
+      "respawnDelaySeconds": 120,
+      "respawnRandomSeconds": 80
+    },
+    {
+      "objectId": 77558,
+      "npcId": 21326,
+      "x": 136762,
+      "y": -79346,
+      "z": -4452,
+      "heading": 0,
+      "respawnDelaySeconds": 120,
+      "respawnRandomSeconds": 80
+    },
+    {
+      "objectId": 77559,
+      "npcId": 21326,
+      "x": 136428,
+      "y": -78223,
+      "z": -4452,
+      "heading": 0,
+      "respawnDelaySeconds": 120,
+      "respawnRandomSeconds": 80
+    },
+    {
+      "objectId": 77560,
+      "npcId": 21326,
+      "x": 136167,
+      "y": -79558,
+      "z": -4452,
+      "heading": 0,
+      "respawnDelaySeconds": 120,
+      "respawnRandomSeconds": 80
+    },
+    {
+      "objectId": 77561,
+      "npcId": 21326,
+      "x": 136088,
+      "y": -78691,
+      "z": -4452,
+      "heading": 0,
+      "respawnDelaySeconds": 120,
+      "respawnRandomSeconds": 80
+    },
+    {
+      "objectId": 77562,
+      "npcId": 21326,
+      "x": 137314,
+      "y": -77690,
+      "z": -4452,
+      "heading": 0,
+      "respawnDelaySeconds": 120,
+      "respawnRandomSeconds": 80
+    },
+    {
+      "objectId": 77563,
+      "npcId": 21326,
+      "x": 138448,
+      "y": -77922,
+      "z": -4452,
+      "heading": 0,
+      "respawnDelaySeconds": 120,
+      "respawnRandomSeconds": 80
+    },
+    {
+      "objectId": 77564,
+      "npcId": 21343,
+      "x": 137173,
+      "y": -79565,
+      "z": -4452,
+      "heading": 0,
+      "respawnDelaySeconds": 100,
+      "respawnRandomSeconds": 30
+    },
+    {
+      "objectId": 77565,
+      "npcId": 21343,
+      "x": 138963,
+      "y": -78345,
+      "z": -4452,
+      "heading": 0,
+      "respawnDelaySeconds": 100,
+      "respawnRandomSeconds": 30
+    },
+    {
+      "objectId": 77566,
+      "npcId": 21339,
+      "x": 140154,
+      "y": -76327,
+      "z": -4840,
+      "heading": 0,
+      "respawnDelaySeconds": 120,
+      "respawnRandomSeconds": 80
+    },
+    {
+      "objectId": 77567,
+      "npcId": 21339,
+      "x": 140299,
+      "y": -76573,
+      "z": -4840,
+      "heading": 0,
+      "respawnDelaySeconds": 120,
+      "respawnRandomSeconds": 80
+    },
+    {
+      "objectId": 77568,
+      "npcId": 21339,
+      "x": 141138,
+      "y": -77357,
+      "z": -4840,
+      "heading": 0,
+      "respawnDelaySeconds": 120,
+      "respawnRandomSeconds": 80
+    },
+    {
+      "objectId": 77569,
+      "npcId": 21339,
+      "x": 140972,
+      "y": -76197,
+      "z": -4840,
+      "heading": 0,
+      "respawnDelaySeconds": 120,
+      "respawnRandomSeconds": 80
+    },
+    {
+      "objectId": 77570,
+      "npcId": 21340,
+      "x": 140921,
+      "y": -78142,
+      "z": -4840,
+      "heading": 0,
+      "respawnDelaySeconds": 120,
+      "respawnRandomSeconds": 80
+    },
+    {
+      "objectId": 77571,
+      "npcId": 21340,
+      "x": 141002,
+      "y": -78516,
+      "z": -4840,
+      "heading": 0,
+      "respawnDelaySeconds": 120,
+      "respawnRandomSeconds": 80
+    },
+    {
+      "objectId": 77572,
+      "npcId": 21341,
+      "x": 141574,
+      "y": -78086,
+      "z": -4840,
+      "heading": 0,
+      "respawnDelaySeconds": 120,
+      "respawnRandomSeconds": 80
+    },
+    {
+      "objectId": 77573,
+      "npcId": 21341,
+      "x": 141206,
+      "y": -78373,
+      "z": -4840,
+      "heading": 0,
+      "respawnDelaySeconds": 120,
+      "respawnRandomSeconds": 80
+    },
+    {
+      "objectId": 77574,
+      "npcId": 21341,
+      "x": 140650,
+      "y": -76750,
+      "z": -4840,
+      "heading": 0,
+      "respawnDelaySeconds": 120,
+      "respawnRandomSeconds": 80
+    },
+    {
+      "objectId": 77575,
+      "npcId": 21341,
+      "x": 141397,
+      "y": -78080,
+      "z": -4840,
+      "heading": 0,
+      "respawnDelaySeconds": 120,
+      "respawnRandomSeconds": 80
+    },
+    {
+      "objectId": 77576,
+      "npcId": 21342,
+      "x": 139874,
+      "y": -76708,
+      "z": -4840,
+      "heading": 0,
+      "respawnDelaySeconds": 120,
+      "respawnRandomSeconds": 80
+    },
+    {
+      "objectId": 77577,
+      "npcId": 21342,
+      "x": 139992,
+      "y": -75858,
+      "z": -4840,
+      "heading": 0,
+      "respawnDelaySeconds": 120,
+      "respawnRandomSeconds": 80
+    },
+    {
+      "objectId": 77578,
+      "npcId": 21339,
+      "x": 141395,
+      "y": -79861,
+      "z": -5380,
+      "heading": 0,
+      "respawnDelaySeconds": 120,
+      "respawnRandomSeconds": 80
+    },
+    {
+      "objectId": 77579,
+      "npcId": 21339,
+      "x": 141083,
+      "y": -79747,
+      "z": -5380,
+      "heading": 0,
+      "respawnDelaySeconds": 120,
+      "respawnRandomSeconds": 80
+    },
+    {
+      "objectId": 77580,
+      "npcId": 21339,
+      "x": 141352,
+      "y": -79321,
+      "z": -5380,
+      "heading": 0,
+      "respawnDelaySeconds": 120,
+      "respawnRandomSeconds": 80
+    },
+    {
+      "objectId": 77581,
+      "npcId": 21339,
+      "x": 143310,
+      "y": -78915,
+      "z": -5380,
+      "heading": 0,
+      "respawnDelaySeconds": 120,
+      "respawnRandomSeconds": 80
+    },
+    {
+      "objectId": 77582,
+      "npcId": 21340,
+      "x": 142397,
+      "y": -78960,
+      "z": -5380,
+      "heading": 0,
+      "respawnDelaySeconds": 120,
+      "respawnRandomSeconds": 80
+    },
+    {
+      "objectId": 77583,
+      "npcId": 21340,
+      "x": 141834,
+      "y": -79852,
+      "z": -5380,
+      "heading": 0,
+      "respawnDelaySeconds": 120,
+      "respawnRandomSeconds": 80
+    },
+    {
+      "objectId": 77584,
+      "npcId": 21341,
+      "x": 142015,
+      "y": -79829,
+      "z": -5380,
+      "heading": 0,
+      "respawnDelaySeconds": 120,
+      "respawnRandomSeconds": 80
+    },
+    {
+      "objectId": 77585,
+      "npcId": 21341,
+      "x": 141710,
+      "y": -79516,
+      "z": -5380,
+      "heading": 0,
+      "respawnDelaySeconds": 120,
+      "respawnRandomSeconds": 80
+    },
+    {
+      "objectId": 77586,
+      "npcId": 21341,
+      "x": 143144,
+      "y": -79526,
+      "z": -5380,
+      "heading": 0,
+      "respawnDelaySeconds": 120,
+      "respawnRandomSeconds": 80
+    },
+    {
+      "objectId": 77587,
+      "npcId": 21341,
+      "x": 144240,
+      "y": -78631,
+      "z": -5380,
+      "heading": 0,
+      "respawnDelaySeconds": 120,
+      "respawnRandomSeconds": 80
+    },
+    {
+      "objectId": 77588,
+      "npcId": 21342,
+      "x": 144315,
+      "y": -78975,
+      "z": -5380,
+      "heading": 0,
+      "respawnDelaySeconds": 120,
+      "respawnRandomSeconds": 80
+    },
+    {
+      "objectId": 77589,
+      "npcId": 21342,
+      "x": 143043,
+      "y": -79770,
+      "z": -5380,
+      "heading": 0,
+      "respawnDelaySeconds": 120,
+      "respawnRandomSeconds": 80
+    },
+    {
+      "objectId": 77590,
+      "npcId": 21335,
+      "x": 140419,
+      "y": -82602,
+      "z": -5260,
+      "heading": 0,
+      "respawnDelaySeconds": 120,
+      "respawnRandomSeconds": 80
+    },
+    {
+      "objectId": 77591,
+      "npcId": 21335,
+      "x": 140750,
+      "y": -80047,
+      "z": -5260,
+      "heading": 0,
+      "respawnDelaySeconds": 120,
+      "respawnRandomSeconds": 80
+    },
+    {
+      "objectId": 77592,
+      "npcId": 21335,
+      "x": 140723,
+      "y": -80902,
+      "z": -5260,
+      "heading": 0,
+      "respawnDelaySeconds": 120,
+      "respawnRandomSeconds": 80
+    },
+    {
+      "objectId": 77593,
+      "npcId": 21335,
+      "x": 139875,
+      "y": -80862,
+      "z": -5260,
+      "heading": 0,
+      "respawnDelaySeconds": 120,
+      "respawnRandomSeconds": 80
+    },
+    {
+      "objectId": 77594,
+      "npcId": 21336,
+      "x": 139967,
+      "y": -81934,
+      "z": -5260,
+      "heading": 0,
+      "respawnDelaySeconds": 120,
+      "respawnRandomSeconds": 80
+    },
+    {
+      "objectId": 77595,
+      "npcId": 21336,
+      "x": 139501,
+      "y": -80758,
+      "z": -5260,
+      "heading": 0,
+      "respawnDelaySeconds": 120,
+      "respawnRandomSeconds": 80
+    },
+    {
+      "objectId": 77596,
+      "npcId": 21337,
+      "x": 139153,
+      "y": -81104,
+      "z": -5260,
+      "heading": 0,
+      "respawnDelaySeconds": 120,
+      "respawnRandomSeconds": 80
+    },
+    {
+      "objectId": 77597,
+      "npcId": 21337,
+      "x": 140810,
+      "y": -81131,
+      "z": -5260,
+      "heading": 0,
+      "respawnDelaySeconds": 120,
+      "respawnRandomSeconds": 80
+    },
+    {
+      "objectId": 77598,
+      "npcId": 21337,
+      "x": 139668,
+      "y": -81119,
+      "z": -5260,
+      "heading": 0,
+      "respawnDelaySeconds": 120,
+      "respawnRandomSeconds": 80
+    },
+    {
+      "objectId": 77599,
+      "npcId": 21337,
+      "x": 139697,
+      "y": -80556,
+      "z": -5260,
+      "heading": 0,
+      "respawnDelaySeconds": 120,
+      "respawnRandomSeconds": 80
+    },
+    {
+      "objectId": 77600,
+      "npcId": 21338,
+      "x": 139314,
+      "y": -81689,
+      "z": -5260,
+      "heading": 0,
+      "respawnDelaySeconds": 120,
+      "respawnRandomSeconds": 80
+    },
+    {
+      "objectId": 77601,
+      "npcId": 21338,
+      "x": 140460,
+      "y": -81635,
+      "z": -5260,
+      "heading": 0,
+      "respawnDelaySeconds": 120,
+      "respawnRandomSeconds": 80
+    },
+    {
+      "objectId": 77602,
+      "npcId": 21338,
+      "x": 139067,
+      "y": -81840,
+      "z": -5260,
+      "heading": 0,
+      "respawnDelaySeconds": 120,
+      "respawnRandomSeconds": 80
+    },
+    {
+      "objectId": 77603,
+      "npcId": 21338,
+      "x": 139707,
+      "y": -81399,
+      "z": -5260,
+      "heading": 0,
+      "respawnDelaySeconds": 120,
+      "respawnRandomSeconds": 80
+    }
+  ]
+}

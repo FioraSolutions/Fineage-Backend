@@ -1,0 +1,87 @@
+{
+  "mapId": "rune_wild_beast_reserve",
+  "enabled": true,
+  "comment": "Mobius CT 0 Interlude spawns/Rune/WildBeastReserve.xml. Fixed rows keep Mobius x/y/z/heading. Territory rows are one spawn per count, placed inside the polygon at minZ (no geodata). Day and night rows are both present. Raid bosses are left to data/raidbosses.json. Name, title, type, attackable, hp, and speeds come from data/npcs.json.",
+  "npcs": [
+    {
+      "objectId": 96226,
+      "npcId": 16019,
+      "x": 55973,
+      "y": -91534,
+      "z": -1360,
+      "heading": 0,
+      "respawnDelaySeconds": 60,
+      "respawnRandomSeconds": 0
+    },
+    {
+      "objectId": 96227,
+      "npcId": 16019,
+      "x": 56099,
+      "y": -91534,
+      "z": -1360,
+      "heading": 0,
+      "respawnDelaySeconds": 60,
+      "respawnRandomSeconds": 0
+    },
+    {
+      "objectId": 96228,
+      "npcId": 16021,
+      "x": 56015,
+      "y": -91284,
+      "z": -1360,
+      "heading": 0,
+      "respawnDelaySeconds": 60,
+      "respawnRandomSeconds": 0
+    },
+    {
+      "objectId": 96229,
+      "npcId": 16023,
+      "x": 55889,
+      "y": -91934,
+      "z": -1360,
+      "heading": 0,
+      "respawnDelaySeconds": 60,
+      "respawnRandomSeconds": 0
+    },
+    {
+      "objectId": 96230,
+      "npcId": 16023,
+      "x": 56225,
+      "y": -91684,
+      "z": -1360,
+      "heading": 0,
+      "respawnDelaySeconds": 60,
+      "respawnRandomSeconds": 0
+    },
+    {
+      "objectId": 96231,
+      "npcId": 35625,
+      "x": 55184,
+      "y": -93040,
+      "z": -1360,
+      "heading": 35000,
+      "respawnDelaySeconds": 60,
+      "respawnRandomSeconds": 0
+    },
+    {
+      "objectId": 96232,
+      "npcId": 35626,
+      "x": 55400,
+      "y": -93008,
+      "z": -1360,
+      "heading": 3000,
+      "respawnDelaySeconds": 60,
+      "respawnRandomSeconds": 0
+    },
+    {
+      "objectId": 96233,
+      "npcId": 35627,
+      "x": 53508,
+      "y": -93776,
+      "z": -1584,
+      "heading": 36000,
+      "respawnDelaySeconds": 60,
+      "respawnRandomSeconds": 0
+    }
+  ]
+}

@@ -1,0 +1,107 @@
+{
+  "mapId": "others_21_19",
+  "enabled": true,
+  "comment": "Mobius CT 0 Interlude spawns/Others/21_19.xml. Fixed rows keep Mobius x/y/z/heading. Territory rows are one spawn per count, placed inside the polygon at minZ (no geodata). Day and night rows are both present. Raid bosses are left to data/raidbosses.json. Name, title, type, attackable, hp, and speeds come from data/npcs.json.",
+  "npcs": [
+    {
+      "objectId": 91088,
+      "npcId": 27017,
+      "x": 34357,
+      "y": 36004,
+      "z": -3624,
+      "heading": 51333,
+      "respawnDelaySeconds": 30,
+      "respawnRandomSeconds": 0
+    },
+    {
+      "objectId": 91089,
+      "npcId": 27017,
+      "x": 34630,
+      "y": 35928,
+      "z": -3632,
+      "heading": 0,
+      "respawnDelaySeconds": 30,
+      "respawnRandomSeconds": 0
+    },
+    {
+      "objectId": 91090,
+      "npcId": 27017,
+      "x": 34721,
+      "y": 35472,
+      "z": -3624,
+      "heading": 0,
+      "respawnDelaySeconds": 30,
+      "respawnRandomSeconds": 0
+    },
+    {
+      "objectId": 91091,
+      "npcId": 27017,
+      "x": 34721,
+      "y": 36156,
+      "z": -3640,
+      "heading": 0,
+      "respawnDelaySeconds": 30,
+      "respawnRandomSeconds": 0
+    },
+    {
+      "objectId": 91092,
+      "npcId": 27017,
+      "x": 34721,
+      "y": 36308,
+      "z": -3648,
+      "heading": 0,
+      "respawnDelaySeconds": 30,
+      "respawnRandomSeconds": 0
+    },
+    {
+      "objectId": 91093,
+      "npcId": 27017,
+      "x": 34812,
+      "y": 36156,
+      "z": -3664,
+      "heading": 50841,
+      "respawnDelaySeconds": 30,
+      "respawnRandomSeconds": 0
+    },
+    {
+      "objectId": 91094,
+      "npcId": 27017,
+      "x": 34994,
+      "y": 35244,
+      "z": -3624,
+      "heading": 0,
+      "respawnDelaySeconds": 30,
+      "respawnRandomSeconds": 0
+    },
+    {
+      "objectId": 91095,
+      "npcId": 27017,
+      "x": 34994,
+      "y": 35928,
+      "z": -3632,
+      "heading": 0,
+      "respawnDelaySeconds": 30,
+      "respawnRandomSeconds": 0
+    },
+    {
+      "objectId": 91096,
+      "npcId": 27017,
+      "x": 34994,
+      "y": 36156,
+      "z": -3672,
+      "heading": 0,
+      "respawnDelaySeconds": 30,
+      "respawnRandomSeconds": 0
+    },
+    {
+      "objectId": 91097,
+      "npcId": 27060,
+      "x": 36910,
+      "y": 61471,
+      "z": -3616,
+      "heading": 0,
+      "respawnDelaySeconds": 180,
+      "respawnRandomSeconds": 0
+    }
+  ]
+}

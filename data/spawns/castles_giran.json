@@ -1,0 +1,137 @@
+{
+  "mapId": "castles_giran",
+  "enabled": true,
+  "comment": "Mobius CT 0 Interlude spawns/Castles/Giran.xml. Fixed rows keep Mobius x/y/z/heading. Territory rows are one spawn per count, placed inside the polygon at minZ (no geodata). Day and night rows are both present. Raid bosses are left to data/raidbosses.json. Name, title, type, attackable, hp, and speeds come from data/npcs.json.",
+  "npcs": [
+    {
+      "objectId": 65811,
+      "npcId": 35147,
+      "x": 117950,
+      "y": 145096,
+      "z": -2544,
+      "heading": 32768,
+      "respawnDelaySeconds": 60,
+      "respawnRandomSeconds": 0
+    },
+    {
+      "objectId": 65812,
+      "npcId": 35179,
+      "x": 116535,
+      "y": 146677,
+      "z": -1851,
+      "heading": 49152,
+      "respawnDelaySeconds": 60,
+      "respawnRandomSeconds": 0
+    },
+    {
+      "objectId": 65813,
+      "npcId": 35180,
+      "x": 112661,
+      "y": 144757,
+      "z": -2817,
+      "heading": 32768,
+      "respawnDelaySeconds": 10800,
+      "respawnRandomSeconds": 0
+    },
+    {
+      "objectId": 65814,
+      "npcId": 35180,
+      "x": 113009,
+      "y": 144703,
+      "z": -2817,
+      "heading": 49152,
+      "respawnDelaySeconds": 10800,
+      "respawnRandomSeconds": 0
+    },
+    {
+      "objectId": 65815,
+      "npcId": 35181,
+      "x": 115220,
+      "y": 144930,
+      "z": -2527,
+      "heading": 32768,
+      "respawnDelaySeconds": 10800,
+      "respawnRandomSeconds": 0
+    },
+    {
+      "objectId": 65816,
+      "npcId": 35181,
+      "x": 115575,
+      "y": 144864,
+      "z": -2567,
+      "heading": 49152,
+      "respawnDelaySeconds": 10800,
+      "respawnRandomSeconds": 0
+    },
+    {
+      "objectId": 65817,
+      "npcId": 35182,
+      "x": 116494,
+      "y": 145516,
+      "z": -2723,
+      "heading": 58824,
+      "respawnDelaySeconds": 60,
+      "respawnRandomSeconds": 0
+    },
+    {
+      "objectId": 65818,
+      "npcId": 35183,
+      "x": 115910,
+      "y": 145101,
+      "z": -2723,
+      "heading": 1353,
+      "respawnDelaySeconds": 60,
+      "respawnRandomSeconds": 0
+    },
+    {
+      "objectId": 65819,
+      "npcId": 35184,
+      "x": 117095,
+      "y": 144997,
+      "z": -2539,
+      "heading": 32768,
+      "respawnDelaySeconds": 60,
+      "respawnRandomSeconds": 0
+    },
+    {
+      "objectId": 65820,
+      "npcId": 35185,
+      "x": 117780,
+      "y": 145257,
+      "z": -2099,
+      "heading": 49000,
+      "respawnDelaySeconds": 60,
+      "respawnRandomSeconds": 0
+    },
+    {
+      "objectId": 65821,
+      "npcId": 35186,
+      "x": 116984,
+      "y": 145278,
+      "z": -2555,
+      "heading": 32768,
+      "respawnDelaySeconds": 60,
+      "respawnRandomSeconds": 0
+    },
+    {
+      "objectId": 65822,
+      "npcId": 35188,
+      "x": 107386,
+      "y": 145807,
+      "z": -3300,
+      "heading": 32768,
+      "respawnDelaySeconds": 60,
+      "respawnRandomSeconds": 0
+    },
+    {
+      "objectId": 65823,
+      "npcId": 35650,
+      "x": 116983,
+      "y": 144864,
+      "z": -2566,
+      "heading": 36123,
+      "respawnDelaySeconds": 60,
+      "respawnRandomSeconds": 0
+    }
+  ]
+}
