@@ -185,12 +185,22 @@ public static class Cli
         int maxConnections = LoginNetSettings.MaxConnections;
         int outboundQueue = LoginNetSettings.OutboundQueue;
         int maxMsgPerSec = LoginNetSettings.MaxMessagesPerSecond;
+        HttpZoneStatusSource? zoneProbe = HttpZoneStatusSource.FromEnvironment(error);
         try
         {
-            http = await LoginHttpHost.StartAsync(service, bindAddress, httpPort).ConfigureAwait(false);
+            IZoneStatusSource zoneStatus = zoneProbe != null
+                ? zoneProbe
+                : UnavailableZoneStatus.Instance;
+            http = await LoginHttpHost.StartAsync(
+                service,
+                bindAddress,
+                httpPort,
+                zoneStatus: zoneStatus).ConfigureAwait(false);
+            zoneProbe = null;
         }
         catch (Exception ex)
         {
+            zoneProbe?.Dispose();
             error.WriteLine($"listen failed on {bindDisplay} tcp={port} http={httpPort}: {ex.Message}");
             return false;
         }
@@ -203,6 +213,9 @@ public static class Cli
 
         output.WriteLine(
             $"[LOGIN] listen tcp={bindDisplay}:{port} http={http.BaseUrl} store={storePath} (maxConn={maxConnections} outboundQ={outboundQueue} msgPerSec={maxMsgPerSec})");
+        output.WriteLine(http.ZoneStatusProbe == null
+            ? "[LOGIN] GET /api/status (zone probe disabled)"
+            : $"[LOGIN] GET /api/status (zone probe {http.ZoneStatusProbe})");
         output.WriteLine($"[LOGIN] zone handoff target {ZoneHandoff.AdvertiseHost}:{ZoneHandoff.AdvertisePort}");
         if (CharacterCreateOptions.EnvironmentUsesLegacyHumanOnly())
         {

@@ -59,7 +59,7 @@ Clan create, invite, leave, dismiss, and dissolution use opcodes **32–38** (ad
 
 Catacomb and necropolis gates use **92** (`DungeonEnterRequest`) and **1092** (`DungeonEntered`). The eight necropolises and six catacombs, with Ziggurat entrance and exit coordinates, are in `data/dungeons.json`. Competition admits either cabal. Seal validation admits the winning cabal only when that cabal also holds Avarice (necropolis) or Gnosis (catacomb). A period change teleports anyone who lost access out to the surface exit. Layout: `docs/dungeon-access-v2-protocol.md`.
 
-`Handoff.Token` is the zone session key. Login TCP listens on **9106**. The same process serves play-landing HTTP on **5080** (`POST /api/auth/register`, `POST /api/auth/login`) against that store. Zone listens on **9777**. Both bind **0.0.0.0** unless `--bind` / `FINEAGE_BIND` says otherwise. Accounts live in `data/accounts.json` (`--store` / `FINEAGE_LOGIN_STORE`), including the email from HTTP register.
+`Handoff.Token` is the zone session key. Login TCP listens on **9106**. The same process serves play-landing HTTP on **5080** (`POST /api/auth/register`, `POST /api/auth/login`, `GET /api/status`) against that store. Zone listens on **9777**. Both bind **0.0.0.0** unless `--bind` / `FINEAGE_BIND` says otherwise. Accounts live in `data/accounts.json` (`--store` / `FINEAGE_LOGIN_STORE`), including the email from HTTP register.
 
 ## Run
 
@@ -73,6 +73,8 @@ dotnet run --project src/Fineage.Zone -- --bind 0.0.0.0 --port 9777
 
 HTTP register body is `{ "username", "email", "password" }`. Login body is `{ "username", "password" }` where `username` may be the email. Success is `{ "ok": true, "username", "mode": "live" }` with **201** (register) or **200** (login). Failures are `{ "ok": false, "error" }`: **400** (`invalid_body`, `invalid_username`, `invalid_email`, `invalid_password`, `password_matches_username`), **409** (`username_taken`, `email_taken`), **401** (`invalid_credentials`). Usernames are a letter then letters, digits, or `_` (3–24). Register passwords are 8–72 characters with no whitespace. TCP `Auth` still accepts the shorter passwords already in the store.
 
+`GET /api/status` returns `{ "ok": true, "login": true, "zone": <bool>, "playersOnline": <int> }` with `Cache-Control: no-store`. `ok` and `login` are true when Login HTTP answers. `zone` is true when Zone answers its loopback status. `playersOnline` is the live count of players in the world, or **0** when Zone is down (an empty world is `zone: true` and `playersOnline: 0`). The response is **200** in both cases. The play-landing Worker should proxy this GET to `FINEAGE_LOGIN_API_URL` the same way it proxies `POST /api/auth/*`. This process does not send CORS headers.
+
 The ticket’s zone address comes from `FINEAGE_ZONE_HOST` (default `127.0.0.1`) and `FINEAGE_ZONE_PORT` (default `9777`). Set the host to the address clients can dial. It is not the bind address.
 
 ## Raspberry Pi
@@ -81,9 +83,11 @@ The **live** public stack on Tailscale host `raspberrypi` (`100.123.81.1`) runs 
 
 | Port | Process | Role |
 |------|---------|------|
-| 5080 | `Fineage.Login` | HTTP register/login. Playtest tunnel `https://api.fineage.evpoint.by` forwards here |
+| 5080 | `Fineage.Login` | HTTP register/login and `GET /api/status`. Playtest tunnel `https://api.fineage.evpoint.by` forwards here |
 | 2106 | `Fineage.Login` | V2 MessagePack login (public remap; dev default **9106**) |
 | 7777 | `Fineage.Zone` | V2 zone (Talking Island; public remap; dev default **9777**) |
+
+Zone also binds **127.0.0.1:7780** for `GET /status` (`{"playersOnline": n}` from `ZoneWorld.OnlinePlayerCount`). Login's `GET /api/status` reads it. That listener is loopback only and is not a public port.
 
 Set `FINEAGE_ZONE_HOST` in `fineage.env` (or the environment) to the address clients dial for the zone. Put the shared handoff secret in `handoff.secret` or `FINEAGE_HANDOFF_SECRET`. Accounts and world state stay in `data/accounts.json` (and sibling files under `data/`); deploy never deletes that tree.
 
@@ -156,6 +160,8 @@ Meter **`Fineage.Server`** (OpenTelemetry, and the optional text endpoint below)
 `FINEAGE_METRICS_SUMMARY_SECONDS` prints one `fineage conn=…` line on that interval (default **60**). `0` or `off` disables it. Counts on that line are for the interval; `conn` and `online` are the current gauges. `in_pps` / `out_pps` are packets per second.
 
 `FINEAGE_METRICS_PORT` serves Prometheus text at `GET /metrics` (disabled when unset or `0`). Login and zone are separate processes, so set `FINEAGE_LOGIN_METRICS_PORT` and `FINEAGE_ZONE_METRICS_PORT` when both should export; the role-specific variable wins over `FINEAGE_METRICS_PORT`. Bind is `FINEAGE_METRICS_BIND` (default `127.0.0.1`). Prometheus names use underscores (`fineage_frames_in_total`, `fineage_handler_ms`, `fineage_tick_ms`, `fineage_zone_online`, …).
+
+The landing does not scrape Prometheus. Zone always publishes the same online gauge as JSON on loopback `GET /status` (default **127.0.0.1:7780**, `FINEAGE_ZONE_STATUS_PORT`; `0` or `off` disables it). Login probes that URL with a 500ms budget and folds it into `GET /api/status`. Set `FINEAGE_ZONE_STATUS_URL` on Login only when Zone is not on this machine's loopback; the URL must include the `/status` path. A refused connection or timeout is `zone: false`, `playersOnline: 0`, not an HTTP error.
 
 See the commented block in `deploy/fineage.env.example`. Export the same meter with the OpenTelemetry .NET SDK (`OTEL_SERVICE_NAME`, `OTEL_EXPORTER_OTLP_ENDPOINT`) if you want a collector instead of `/metrics`.
 
