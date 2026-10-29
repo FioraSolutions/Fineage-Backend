@@ -489,6 +489,9 @@ public static class InterludeStatus
     public const int CurMp = 0x0b;
     public const int MaxMp = 0x0c;
     public const int TargetColorHostile = 11;
+
+    /// <summary>Interlude MyTargetSelected color: attacker level minus target level (L2J/Mobius).</summary>
+    public static int TargetColor(int attackerLevel, int targetLevel) => attackerLevel - targetLevel;
 }
 
 /// <summary>Opcode <see cref="MsgType.GrantItemRequest"/> (13). Adds items to the requesting player's bag.</summary>

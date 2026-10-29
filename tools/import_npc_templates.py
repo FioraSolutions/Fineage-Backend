@@ -152,6 +152,9 @@ def load_templates(npc_dir: Path) -> list[dict]:
             attackable = parse_bool(None if status is None else status.attrib.get("attackable"), True)
             aggressive = parse_bool(None if ai is None else ai.attrib.get("isAggressive"), True)
             level = int(node.attrib.get("level", "70"))
+            acquire = child(node, "acquire")
+            exp = int(float(acquire.attrib.get("exp", "0"))) if acquire is not None else 0
+            sp = int(float(acquire.attrib.get("sp", "0"))) if acquire is not None else 0
             # Mobius allows an empty name (doors, effect points). Town spawns do not use those.
             name = (node.attrib.get("name") or "").strip()
 
@@ -169,6 +172,8 @@ def load_templates(npc_dir: Path) -> list[dict]:
                 "mp": hp_stat(None if vitals is None else vitals.attrib.get("mp")),
                 "runSpeed": positive_stat(None if run is None else run.attrib.get("ground"), 0.1),
                 "walkSpeed": positive_stat(None if walk is None else walk.attrib.get("ground"), 0.1),
+                "exp": exp,
+                "sp": sp,
             }
 
     return [templates[npc_id] for npc_id in sorted(templates)]

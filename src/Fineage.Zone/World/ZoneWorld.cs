@@ -49,6 +49,9 @@ sealed class ZoneEntity
     public int Level { get; set; } = 1;
     public long Exp { get; set; }
     public int Sp { get; set; }
+    /// <summary>NPC kill reward from the Mobius template (acquire exp/sp). Zero for players.</summary>
+    public long RewardExp { get; init; }
+    public int RewardSp { get; init; }
     public QuestJournal Quests { get; set; } = new();
     public int Race { get; init; }
     public int Sex { get; init; }

@@ -192,21 +192,23 @@ public sealed partial class ZoneWorld
             SaveQuestProgress(session, player);
     }
 
-    void ApplyProgress(ZoneEntity player, QuestOutcome outcome)
+    void ApplyProgress(ZoneEntity player, QuestOutcome outcome) => ApplyExpSp(player, outcome.Exp, outcome.Sp);
+
+    void ApplyExpSp(ZoneEntity player, long exp, int sp)
     {
-        if (outcome.Exp == 0 && outcome.Sp == 0)
+        if (exp == 0 && sp == 0)
             return;
 
         var table = _game.Classes?.Experience;
         if (table == null)
         {
-            player.Exp = outcome.Exp > long.MaxValue - player.Exp ? long.MaxValue : player.Exp + outcome.Exp;
-            player.Sp = outcome.Sp > int.MaxValue - player.Sp ? int.MaxValue : player.Sp + outcome.Sp;
+            player.Exp = exp > long.MaxValue - player.Exp ? long.MaxValue : player.Exp + exp;
+            player.Sp = sp > int.MaxValue - player.Sp ? int.MaxValue : player.Sp + sp;
             return;
         }
 
         int previous = player.Level;
-        var progress = table.Add(player.Exp, player.Level, player.Sp, outcome.Exp, outcome.Sp);
+        var progress = table.Add(player.Exp, player.Level, player.Sp, exp, sp);
         player.Exp = progress.Exp;
         player.Sp = progress.Sp;
         if (progress.Level == previous || _game.Classes == null || !_game.Classes.TryGet(player.ClassId, out var template) || template == null)
@@ -257,6 +259,33 @@ public sealed partial class ZoneWorld
         entity.Sp = record.Sp;
         entity.Quests = QuestJournal.Load(record.Quests);
     }
+
+    /// <summary>
+    /// Mobius-style solo kill reward: template acquire exp/sp to the killer, then UserInfo and
+    /// SystemMessage 95 ("You have earned $s1 experience and $s2 SP.").
+    /// </summary>
+    void GrantKillReward(ZoneEntity killer, ZoneEntity npc, List<Pending> outbound)
+    {
+        if (killer.Kind != ZoneEntityKind.Player || killer.Session == null || npc.Kind != ZoneEntityKind.Npc)
+            return;
+        long exp = npc.RewardExp;
+        int sp = npc.RewardSp;
+        if (exp <= 0 && sp <= 0)
+            return;
+
+        ApplyExpSp(killer, exp, sp);
+        var session = killer.Session;
+        outbound.Add(Pack(session, MsgType.SystemMessage, new SystemMessageMsg
+        {
+            Id = KillRewardMessageId,
+            Params = [exp.ToString(System.Globalization.CultureInfo.InvariantCulture), sp.ToString(System.Globalization.CultureInfo.InvariantCulture)],
+            Text = $"You have earned {exp} experience and {sp} SP."
+        }));
+        outbound.Add(Pack(session, MsgType.UserInfo, UserInfo(killer)));
+        SaveQuestProgress(session, killer);
+    }
+
+    internal const int KillRewardMessageId = 95;
 
     void SaveQuestProgress(ZoneSession session, ZoneEntity entity)
     {

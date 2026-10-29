@@ -61,7 +61,7 @@ public sealed partial class ZoneWorld
         toSelf.Add(Pack(session, MsgType.MyTargetSelected, new MyTargetSelectedMsg
         {
             ObjectId = targetObjectId,
-            ColorHint = InterludeStatus.TargetColorHostile
+            ColorHint = InterludeStatus.TargetColor(player.Level, target.Level)
         }));
         return null;
     }
@@ -110,7 +110,10 @@ public sealed partial class ZoneWorld
         player.CombatUntilUnixMs = _clock().ToUnixTimeMilliseconds() + ClanProtocol.CombatStanceMillis;
 
         if (target.CurHp <= 0)
+        {
             RemoveDeadNpc(target, outbound);
+            GrantKillReward(player, target, outbound);
+        }
 
         return null;
     }

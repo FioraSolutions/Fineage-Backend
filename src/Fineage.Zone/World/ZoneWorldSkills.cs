@@ -117,7 +117,10 @@ public sealed partial class ZoneWorld
         session.SelectedTargetId = targetId;
 
         if (target.CurHp <= 0)
+        {
             RemoveDeadNpc(target, outbound);
+            GrantKillReward(player, target, outbound);
+        }
 
         return null;
     }
@@ -205,14 +208,14 @@ public sealed partial class ZoneWorld
         int skillId,
         int level,
         SkillDefinition template) => new()
-    {
-        CasterObjectId = caster.ObjectId,
-        TargetObjectId = target.ObjectId,
-        SkillId = skillId,
-        SkillLevel = level,
-        HitTimeMs = template.HitTimeMs,
-        ReuseDelayMs = template.ReuseDelayMs
-    };
+        {
+            CasterObjectId = caster.ObjectId,
+            TargetObjectId = target.ObjectId,
+            SkillId = skillId,
+            SkillLevel = level,
+            HitTimeMs = template.HitTimeMs,
+            ReuseDelayMs = template.ReuseDelayMs
+        };
 
     static StatusUpdateMsg CasterMpStatus(ZoneEntity player) => new()
     {

@@ -118,7 +118,10 @@ public sealed class SpawnCatalog
                     Math.Max(0, row.RespawnDelaySeconds),
                     Math.Max(0, row.RespawnRandomSeconds),
                     template.Title,
-                    template.Type));
+                    template.Type,
+                    Math.Max(1, template.Level),
+                    template.Exp,
+                    template.Sp));
             }
 
             maps.Add(map.MapId, new SpawnMapDefinition(map.MapId, map.Enabled, npcs));
