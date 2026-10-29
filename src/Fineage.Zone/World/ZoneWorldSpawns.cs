@@ -21,25 +21,41 @@ public sealed partial class ZoneWorld
 
     void BootstrapSpawns()
     {
-        var active = _spawnCatalog.GetMap(_activeMapId);
-        if (!active.Enabled)
-            throw new InvalidOperationException($"Active spawn map '{_activeMapId}' is disabled in datapack.");
-
-        var maps = new List<SpawnMapDefinition> { active };
-        if (_includeEnabledMaps)
+        var maps = new List<SpawnMapDefinition>();
+        var whitelist = ZoneMapFilter.Maps;
+        if (whitelist.Count > 0)
         {
-            foreach (var map in _spawnCatalog.Maps.Values.OrderBy(map => map.MapId, StringComparer.Ordinal))
+            foreach (string id in whitelist)
             {
-                if (!map.Enabled || map.MapId == _activeMapId)
-                    continue;
+                if (!_spawnCatalog.Maps.TryGetValue(id, out var map))
+                    throw new InvalidOperationException($"FINEAGE_ZONE_MAPS references unknown spawn map '{id}'.");
                 maps.Add(map);
             }
         }
+        else
+        {
+            var active = _spawnCatalog.GetMap(_activeMapId);
+            if (!active.Enabled)
+                throw new InvalidOperationException($"Active spawn map '{_activeMapId}' is disabled in datapack.");
+            maps.Add(active);
+            if (_includeEnabledMaps)
+            {
+                foreach (var map in _spawnCatalog.Maps.Values.OrderBy(map => map.MapId, StringComparer.Ordinal))
+                {
+                    if (!map.Enabled || map.MapId == _activeMapId)
+                        continue;
+                    maps.Add(map);
+                }
+            }
+        }
 
+        var bounds = ZoneMapFilter.Bounds;
         foreach (var map in maps)
         {
             foreach (var def in map.Npcs)
             {
+                if (bounds is { } b && (def.X < b.MinX || def.X > b.MaxX || def.Y < b.MinY || def.Y > b.MaxY))
+                    continue;
                 if (_spawnSlots.ContainsKey(def.ObjectId))
                     throw new InvalidOperationException($"Duplicate spawn object id {def.ObjectId}.");
                 _spawnSlots.Add(def.ObjectId, new SpawnSlotState { Definition = def, MapId = map.MapId });

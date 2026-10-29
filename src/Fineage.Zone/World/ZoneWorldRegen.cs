@@ -16,6 +16,7 @@ public sealed partial class ZoneWorld
         if (_simulation != null)
             return;
         _simulation = Task.Run(() => SimulationLoopAsync(shutdown));
+        _combatLoop = Task.Run(() => CombatLoopAsync(shutdown));
     }
 
     async Task SimulationLoopAsync(CancellationToken ct)

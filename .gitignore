@@ -34,3 +34,6 @@ TestResults/
 .idea/
 *.user
 *.suo
+
+# Local Mobius Interlude XML SoT (sparse clone; do not commit 100MB+ dump)
+ref/

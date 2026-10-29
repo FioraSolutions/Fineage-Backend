@@ -94,9 +94,13 @@ public sealed partial class ZoneWorld
         if (!VisibleTo(player.ObjectId, targetId))
             return SkillProtocol.Target;
 
-        if (!ZoneCombat.InMeleeRange(player.X, player.Y, target.X, target.Y))
+        bool inRange = template.CastRange > 0
+            ? ZoneCombat.InCastRange(player.X, player.Y, target.X, target.Y, template.CastRange + 100)
+            : ZoneCombat.InMeleeRange(player.X, player.Y, target.X, target.Y);
+        if (!inRange)
             return SkillProtocol.Range;
 
+        session.AutoAttackTargetId = 0;
         player.CurMp = Math.Max(0, player.CurMp - levelData.MpConsume);
         if (template.ReuseDelayMs > 0)
             player.SkillReuseUntilMs[request.SkillId] = now + template.ReuseDelayMs;
@@ -110,6 +114,7 @@ public sealed partial class ZoneWorld
         FanoutSkill(player, target, cast, status, selfMp, outbound);
 
         player.CombatUntilUnixMs = now + ClanProtocol.CombatStanceMillis;
+        session.SelectedTargetId = targetId;
 
         if (target.CurHp <= 0)
             RemoveDeadNpc(target, outbound);

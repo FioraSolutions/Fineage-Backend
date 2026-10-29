@@ -31,7 +31,14 @@ public sealed partial class ZoneWorld
         var outbound = new List<Pending>();
         string? error;
         lock (_gate)
+        {
             error = TryAttack(session, request.TargetObjectId, outbound);
+            if (error == null)
+            {
+                session.AutoAttackTargetId = session.SelectedTargetId;
+                session.NextAutoAttackUnixMs = _clock().ToUnixTimeMilliseconds() + ZoneCombat.AutoAttackIntervalMs;
+            }
+        }
         if (error != null)
             return error;
 
@@ -106,6 +113,54 @@ public sealed partial class ZoneWorld
             RemoveDeadNpc(target, outbound);
 
         return null;
+    }
+
+    Task? _combatLoop;
+
+    async Task CombatLoopAsync(CancellationToken ct)
+    {
+        using var timer = new PeriodicTimer(TimeSpan.FromMilliseconds(ZoneCombat.AutoAttackTickMs));
+        try
+        {
+            while (await timer.WaitForNextTickAsync(ct).ConfigureAwait(false))
+            {
+                var outbound = new List<Pending>();
+                lock (_gate)
+                    TickAutoAttacks(outbound);
+                if (outbound.Count > 0)
+                    await FlushOthersAsync(outbound, ct).ConfigureAwait(false);
+            }
+        }
+        catch (OperationCanceledException)
+        {
+        }
+    }
+
+    void TickAutoAttacks(List<Pending> outbound)
+    {
+        long now = _clock().ToUnixTimeMilliseconds();
+        foreach (var player in Players().ToList())
+        {
+            var session = player.Session;
+            if (session == null || session.AutoAttackTargetId <= 0 || now < session.NextAutoAttackUnixMs)
+                continue;
+            int targetId = session.AutoAttackTargetId;
+            if (player.Dead || !_byId.TryGetValue(targetId, out var target) || target.CurHp <= 0 || session.SelectedTargetId != targetId)
+            {
+                session.AutoAttackTargetId = 0;
+                continue;
+            }
+            if (!VisibleTo(player.ObjectId, targetId))
+            {
+                session.AutoAttackTargetId = 0;
+                continue;
+            }
+            session.NextAutoAttackUnixMs = now + ZoneCombat.AutoAttackIntervalMs;
+            if (!ZoneCombat.InMeleeRange(player.X, player.Y, target.X, target.Y))
+                continue; // still walking in; keep the intent
+            if (TryAttack(session, targetId, outbound) != null)
+                session.AutoAttackTargetId = 0;
+        }
     }
 
     static StatusUpdateMsg StatusFor(ZoneEntity entity) => new()
