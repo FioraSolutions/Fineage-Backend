@@ -2,6 +2,7 @@ using System.Net;
 using Fineage.Game;
 using Fineage.Game.Mobius;
 using Fineage.Login;
+using Fineage.Protocol;
 using Fineage.Protocol.Net;
 using Fineage.Protocol.Telemetry;
 using Fineage.Zone;
@@ -94,6 +95,18 @@ Console.WriteLine("[ZONE] Raid and grand boss respawn state is stored beside the
 Console.WriteLine("[ZONE] Auth.Password is the login handoff token. EnterWorld sends UserInfo, ItemList, the village, then a welcome SystemMessage. Say ALL is local; SHOUT is the zone.");
 if (adminCommands)
     Console.WriteLine("[ZONE] admin commands enabled (GiveItem, AdminCaptureCastle, AdminBossSchedule, AdminReportOlympiadResult, AdminKillPlayer).");
+
+int statusPort = ZoneStatus.ResolvePort(Environment.GetEnvironmentVariable(ZoneStatus.PortVariable), out string? statusPortError);
+if (statusPortError != null)
+    Console.Error.WriteLine($"[ZONE] ignoring {ZoneStatus.PortVariable}: {statusPortError}");
+else if (statusPort <= 0)
+    Console.WriteLine("[ZONE] status disabled");
+
+await using ZoneStatusHost? zoneStatus = statusPort > 0
+    ? ZoneStatusHost.TryStart(statusPort, () => world.OnlinePlayerCount, Console.Error)
+    : null;
+if (zoneStatus != null)
+    Console.WriteLine($"[ZONE] status {zoneStatus.Url}");
 
 await using FineageMetricsHost? metrics = FineageMetricsHost.Start("zone", Console.Out, Console.Error);
 var tcp = new TcpServer();
