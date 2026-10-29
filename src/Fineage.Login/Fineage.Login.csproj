@@ -17,5 +17,7 @@
     <Content Include="..\..\data\experience.json" Link="data\experience.json" CopyToOutputDirectory="PreserveNewest" />
     <Content Include="..\..\data\stat-bonuses.json" Link="data\stat-bonuses.json" CopyToOutputDirectory="PreserveNewest" />
     <Content Include="..\..\data\quests.json" Link="data\quests.json" CopyToOutputDirectory="PreserveNewest" />
+    <Content Include="..\..\data\skills.json" Link="data\skills.json" CopyToOutputDirectory="PreserveNewest" />
+    <Content Include="..\..\data\skill-trees.json" Link="data\skill-trees.json" CopyToOutputDirectory="PreserveNewest" />
   </ItemGroup>
 </Project>

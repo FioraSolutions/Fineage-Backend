@@ -212,6 +212,56 @@ public class CharacterCreationTests
     }
 
     [Fact]
+    public void Every_playtest_starter_is_accepted_and_mismatched_pairs_are_rejected()
+    {
+        var service = Service(create: new CharacterCreateOptions { CharMaxNumber = 0 });
+        Assert.True(service.Register("alice", "secret1").Ok);
+        Assert.Equal(9, CharacterCreateOptions.PlaytestStarters.Length);
+
+        foreach (var (classId, race) in CharacterCreateOptions.PlaytestStarters)
+        {
+            string name = "S" + classId;
+            var created = service.CreateHuman("alice", name, classId, race: race);
+            Assert.True(created.Ok, $"class {classId} race {race}: {created.Code} {created.Message}");
+            Assert.Equal(classId, created.Value!.ClassId);
+            Assert.Equal(race, created.Value.Race);
+            Assert.True(created.Value.MaxHp > 0);
+            Assert.True(created.Value.MaxMp > 0);
+            Assert.Equal(created.Value.MaxHp, created.Value.Hp);
+            Assert.Equal(created.Value.MaxMp, created.Value.Mp);
+            Assert.NotEmpty(created.Value.Items!);
+            Assert.Contains(service.CreatableClassIds, id => id == classId);
+        }
+
+        Assert.Equal(LobbyProtocol.RaceNotSupported, service.CreateHuman("alice", "BadHum", classId: 0, race: 1).Code);
+        Assert.Equal(LobbyProtocol.RaceNotSupported, service.CreateHuman("alice", "BadElf", classId: 18, race: 0).Code);
+        Assert.Equal(LobbyProtocol.RaceNotSupported, service.CreateHuman("alice", "BadDark", classId: 31, race: 3).Code);
+        Assert.Equal(LobbyProtocol.RaceNotSupported, service.CreateHuman("alice", "BadOrc", classId: 44, race: 0).Code);
+        Assert.Equal(LobbyProtocol.RaceNotSupported, service.CreateHuman("alice", "BadSha", classId: 49, race: 4).Code);
+        Assert.Equal(LobbyProtocol.RaceNotSupported, service.CreateHuman("alice", "BadDwa", classId: 53, race: 3).Code);
+        Assert.Equal(LobbyProtocol.CreationFailed, service.CreateHuman("alice", "Warrior", classId: 1, race: 0).Code);
+        Assert.Equal(LobbyProtocol.CreationFailed, service.CreateHuman("alice", "Scav", classId: 54, race: 4).Code);
+        Assert.Equal(LobbyProtocol.ClassNotSupported, service.CreateHuman("alice", "Nope", classId: 200, race: 0).Code);
+
+        var humanOnly = Service(create: new CharacterCreateOptions
+        {
+            AllowedRaces = new HashSet<int> { HumanClasses.RaceHuman },
+            AllowedClasses = new HashSet<int> { HumanClasses.Fighter, HumanClasses.Mystic }
+        });
+        Assert.True(humanOnly.Register("alice", "secret1").Ok);
+        Assert.Equal(LobbyProtocol.ClassNotSupported, humanOnly.CreateHuman("alice", "OrcF", classId: 44, race: 3).Code);
+        Assert.Equal(LobbyProtocol.ClassNotSupported, humanOnly.CreateHuman("alice", "ElfF", classId: 18, race: 1).Code);
+
+        var humanRaces = Service(create: new CharacterCreateOptions
+        {
+            AllowedRaces = new HashSet<int> { HumanClasses.RaceHuman },
+            AllowedClasses = new HashSet<int> { HumanClasses.Fighter, HumanClasses.Mystic, 44 }
+        });
+        Assert.True(humanRaces.Register("alice", "secret1").Ok);
+        Assert.Equal(LobbyProtocol.CreationFailed, humanRaces.CreateHuman("alice", "OrcRace", classId: 44, race: 3).Code);
+    }
+
+    [Fact]
     public void Server_wide_toggle_rejects_create()
     {
         var service = Service(create: new CharacterCreateOptions { CreateAllowed = false });

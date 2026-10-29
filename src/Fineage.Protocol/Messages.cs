@@ -67,9 +67,12 @@ public sealed class LoginOkMsg
 public sealed class CreateCharacterMsg
 {
     [Key(0)] public string Name { get; set; } = "";
-    /// <summary>0 Human Fighter, 10 Human Mystic. Other classes are rejected.</summary>
+    /// <summary>
+    /// Interlude base class. Human 0/10, Elf 18/25, Dark Elf 31/38, Orc 44/49, Dwarf 53.
+    /// A non-base class is rejected.
+    /// </summary>
     [Key(1)] public int ClassId { get; set; }
-    /// <summary>0 Human. Other races are rejected.</summary>
+    /// <summary>0 Human, 1 Elf, 2 Dark Elf, 3 Orc, 4 Dwarf. Must match the class.</summary>
     [Key(2)] public int Race { get; set; }
     /// <summary>0 male, 1 female.</summary>
     [Key(3)] public int Sex { get; set; }
