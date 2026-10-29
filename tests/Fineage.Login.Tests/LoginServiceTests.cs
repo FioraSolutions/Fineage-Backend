@@ -1,3 +1,4 @@
+using System.Text.Json;
 using Fineage.Protocol;
 using MessagePack;
 using Xunit;
@@ -64,6 +65,62 @@ public class LoginServiceTests
         var shortPw = service.Register("carol", "x");
         Assert.Equal("invalid_password", shortPw.Code);
     }
+
+    [Fact]
+    public void RegisterLanding_AllowsMissingEmail_AndRejectsBadEmail()
+    {
+        Assert.Null(LandingAuth.ValidateEmail(null, out string omitted));
+        Assert.Equal("", omitted);
+        Assert.Null(LandingAuth.ValidateEmail("", out omitted));
+        Assert.Null(LandingAuth.ValidateEmail("   ", out omitted));
+        Assert.Equal("", omitted);
+        Assert.Equal("invalid_email", LandingAuth.ValidateEmail("not-an-email", out _));
+        Assert.Equal("invalid_email", LandingAuth.ValidateEmail("a@b", out _));
+        Assert.Null(LandingAuth.ValidateEmail("A@Example.com", out string canonical));
+        Assert.Equal("a@example.com", canonical);
+
+        string dir = Path.Combine(Path.GetTempPath(), "fineage-login-no-email-" + Guid.NewGuid().ToString("n"));
+        string path = Path.Combine(dir, "accounts.json");
+        var service = new LoginService(JsonAccountStore.Open(path), new HandoffTokens(HandoffTokens.DefaultSecret));
+
+        var missing = service.RegisterLanding("NoMail", null, "password123");
+        Assert.True(missing.Ok, missing.Message);
+        Assert.Equal("nomail", missing.Value);
+        Assert.True(service.RegisterLanding("empty_mail", "", "password123").Ok);
+        Assert.True(service.RegisterLanding("blank_mail", "   ", "password123").Ok);
+        Assert.True(service.RegisterLanding("also_none", null, "password123").Ok);
+
+        var bad = service.RegisterLanding("bad_mail", "not-an-email", "password123");
+        Assert.False(bad.Ok);
+        Assert.Equal("invalid_email", bad.Code);
+        Assert.Equal("invalid_email", service.RegisterLanding("short_mail", "a@b", "password123").Code);
+        Assert.Equal("password_matches_username", service.RegisterLanding("longname", null, "longname").Code);
+
+        var withMail = service.RegisterLanding("has_mail", "Has@Example.com", "password123");
+        Assert.True(withMail.Ok, withMail.Message);
+        Assert.Equal("has_mail", service.Login("HAS_MAIL", "password123").Value);
+        Assert.Equal("has_mail", service.Login("has@example.com", "password123").Value);
+        Assert.Equal("nomail", service.Login("nomail", "password123").Value);
+        Assert.Equal("invalid_credentials", service.Login("missing@example.com", "password123").Code);
+        Assert.Equal("email_taken", service.RegisterLanding("other", "has@example.com", "password123").Code);
+
+        using var doc = JsonDocument.Parse(File.ReadAllText(path));
+        var byName = doc.RootElement.GetProperty("accounts").EnumerateArray()
+            .ToDictionary(account => account.GetProperty("name").GetString()!, account => account);
+        Assert.False(byName.ContainsKey("bad_mail"));
+        foreach (string name in new[] { "nomail", "empty_mail", "blank_mail", "also_none" })
+        {
+            Assert.False(HasEmail(byName[name]));
+            Assert.DoesNotContain("@", byName[name].GetRawText());
+        }
+
+        Assert.Equal("has@example.com", byName["has_mail"].GetProperty("email").GetString());
+    }
+
+    static bool HasEmail(JsonElement account) =>
+        account.TryGetProperty("email", out var email) &&
+        email.ValueKind == JsonValueKind.String &&
+        !string.IsNullOrWhiteSpace(email.GetString());
 
     [Fact]
     public void CreateHuman_RejectsNonHumanNonMaleAndOtherClasses()

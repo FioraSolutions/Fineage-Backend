@@ -64,6 +64,45 @@ public class LoginHttpTests
     }
 
     [Fact]
+    public async Task Register_WithoutEmail_Succeeds_AndRejectsBadEmail()
+    {
+        await using var host = await Start();
+        using var client = Client(host);
+
+        var missing = await Post(client, "/api/auth/register", new { username = "no_mail", password = "password123" });
+        Assert.Equal(HttpStatusCode.Created, missing.Status);
+        Assert.True(missing.Body.GetProperty("ok").GetBoolean());
+        Assert.Equal("no_mail", missing.Body.GetProperty("username").GetString());
+        Assert.Equal("live", missing.Body.GetProperty("mode").GetString());
+
+        var nullEmail = await Send(client, "/api/auth/register",
+            """{"username":"null_mail","email":null,"password":"password123"}""");
+        Assert.Equal(HttpStatusCode.Created, nullEmail.Status);
+        Assert.Equal("null_mail", nullEmail.Body.GetProperty("username").GetString());
+
+        var empty = await Post(client, "/api/auth/register", new { username = "empty_mail", email = "", password = "password123" });
+        Assert.Equal(HttpStatusCode.Created, empty.Status);
+        Assert.Equal("empty_mail", empty.Body.GetProperty("username").GetString());
+
+        var blank = await Post(client, "/api/auth/register", new { username = "blank_mail", email = "   ", password = "password123" });
+        Assert.Equal(HttpStatusCode.Created, blank.Status);
+
+        var byName = await Post(client, "/api/auth/login", new { username = "NO_MAIL", password = "password123" });
+        Assert.Equal(HttpStatusCode.OK, byName.Status);
+        Assert.Equal("no_mail", byName.Body.GetProperty("username").GetString());
+
+        await AssertError(client, "/api/auth/register",
+            Body(new { username = "bad_mail", email = "not-an-email", password = "password123" }),
+            HttpStatusCode.BadRequest, "invalid_email");
+        await AssertError(client, "/api/auth/register",
+            Body(new { username = "bad_mail", email = "a@b", password = "password123" }),
+            HttpStatusCode.BadRequest, "invalid_email");
+        await AssertError(client, "/api/auth/login",
+            Body(new { username = "not-email@", password = "password123" }),
+            HttpStatusCode.BadRequest, "invalid_email");
+    }
+
+    [Fact]
     public async Task Register_RejectsBadInput_AndConflicts()
     {
         await using var host = await Start();
