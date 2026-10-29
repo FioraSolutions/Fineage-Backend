@@ -53,6 +53,8 @@ public class ProtocolCompatTests
         Assert.Equal(19, (ushort)MsgType.PartyAnswerJoinRequest);
         Assert.Equal(26, (ushort)MsgType.PartyLeaveRequest);
         Assert.Equal(27, (ushort)MsgType.PartyKickRequest);
+        Assert.Equal(28, (ushort)MsgType.TradeRequest);
+        Assert.Equal(29, (ushort)MsgType.TradeAnswerRequest);
         Assert.Equal(32, (ushort)MsgType.ClanCreateRequest);
         Assert.Equal(33, (ushort)MsgType.ClanInviteRequest);
         Assert.Equal(34, (ushort)MsgType.ClanAnswerJoinRequest);
@@ -166,8 +168,16 @@ public class ProtocolCompatTests
         Assert.Equal(1074, (ushort)MsgType.Die);
         Assert.Equal(1075, (ushort)MsgType.Revive);
         Assert.Equal(1076, (ushort)MsgType.TeleportToLocation);
+        Assert.Equal(1077, (ushort)MsgType.TradeAsk);
+        Assert.Equal(1078, (ushort)MsgType.TradeRequestResult);
+        Assert.Equal(1079, (ushort)MsgType.TradeStart);
+        Assert.Equal(1080, (ushort)MsgType.TradeOfferUpdate);
+        Assert.Equal(1081, (ushort)MsgType.TradeConfirmState);
+        Assert.Equal(1082, (ushort)MsgType.TradeFinished);
         Assert.Equal(52, (ushort)MsgType.ReviveRequest);
         Assert.Equal(53, (ushort)MsgType.AdminKillPlayer);
+        Assert.Equal(54, (ushort)MsgType.TradeAddItemRequest);
+        Assert.Equal(55, (ushort)MsgType.TradeDoneRequest);
         Assert.Equal((ushort)MsgType.CharacterActionRequest, (ushort)Fineage.Protocol.V2.MsgType.CharacterActionRequest);
         Assert.Equal((ushort)MsgType.ReviveRequest, (ushort)Fineage.Protocol.V2.MsgType.ReviveRequest);
         Assert.Equal((ushort)MsgType.Die, (ushort)Fineage.Protocol.V2.MsgType.Die);
@@ -224,6 +234,9 @@ public class ProtocolCompatTests
         Assert.Equal((ushort)MsgType.SpawnItem, (ushort)Fineage.Protocol.V2.MsgType.SpawnItem);
         Assert.Equal((ushort)MsgType.PartyInviteRequest, (ushort)Fineage.Protocol.V2.MsgType.PartyInviteRequest);
         Assert.Equal((ushort)MsgType.PartyAskJoin, (ushort)Fineage.Protocol.V2.MsgType.PartyAskJoin);
+        Assert.Equal((ushort)MsgType.TradeRequest, (ushort)Fineage.Protocol.V2.MsgType.TradeRequest);
+        Assert.Equal((ushort)MsgType.TradeFinished, (ushort)Fineage.Protocol.V2.MsgType.TradeFinished);
+        Assert.Equal(TradeProtocol.Distance, QuestProtocol.TalkRange);
         Assert.Equal(90, (ushort)MsgType.SevenSignsStatusRequest);
         Assert.Equal(91, (ushort)MsgType.SevenSignsActionRequest);
         Assert.Equal(92, (ushort)MsgType.DungeonEnterRequest);

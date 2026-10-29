@@ -601,6 +601,66 @@ public sealed class ZoneServer
                     ZoneLog.Info($"RX PartyKick session={sessionId} target={kick.TargetObjectId}");
                 break;
             }
+            case MsgType.TradeRequest:
+            {
+                var trade = Decode<TradeRequestMsg>(body);
+                if (trade == null)
+                {
+                    await ErrorAsync(session, "bad_request", "TradeRequest body was not readable.", ct).ConfigureAwait(false);
+                    break;
+                }
+
+                string? code = await _world.TryTradeRequestAsync(session, trade, ct).ConfigureAwait(false);
+                await TradeErrorAsync(session, code, ct).ConfigureAwait(false);
+                if (code == null)
+                    ZoneLog.Info($"RX TradeRequest session={sessionId} target={trade.TargetObjectId}");
+                break;
+            }
+            case MsgType.TradeAnswerRequest:
+            {
+                var answer = Decode<TradeAnswerRequestMsg>(body);
+                if (answer == null)
+                {
+                    await ErrorAsync(session, "bad_request", "TradeAnswerRequest body was not readable.", ct).ConfigureAwait(false);
+                    break;
+                }
+
+                string? code = await _world.TryTradeAnswerAsync(session, answer, ct).ConfigureAwait(false);
+                await TradeErrorAsync(session, code, ct).ConfigureAwait(false);
+                if (code == null)
+                    ZoneLog.Info($"RX TradeAnswer session={sessionId} requestor={answer.RequestorObjectId} response={answer.Response}");
+                break;
+            }
+            case MsgType.TradeAddItemRequest:
+            {
+                var add = Decode<TradeAddItemRequestMsg>(body);
+                if (add == null)
+                {
+                    await ErrorAsync(session, "bad_request", "TradeAddItemRequest body was not readable.", ct).ConfigureAwait(false);
+                    break;
+                }
+
+                string? code = await _world.TryTradeAddItemAsync(session, add, ct).ConfigureAwait(false);
+                await TradeErrorAsync(session, code, ct).ConfigureAwait(false);
+                if (code == null)
+                    ZoneLog.Info($"RX TradeAddItem session={sessionId} object={add.InventoryObjectId} count={add.Count}");
+                break;
+            }
+            case MsgType.TradeDoneRequest:
+            {
+                var done = Decode<TradeDoneRequestMsg>(body);
+                if (done == null)
+                {
+                    await ErrorAsync(session, "bad_request", "TradeDoneRequest body was not readable.", ct).ConfigureAwait(false);
+                    break;
+                }
+
+                string? code = await _world.TryTradeDoneAsync(session, done, ct).ConfigureAwait(false);
+                await TradeErrorAsync(session, code, ct).ConfigureAwait(false);
+                if (code == null)
+                    ZoneLog.Info($"RX TradeDone session={sessionId} response={done.Response}");
+                break;
+            }
             case MsgType.ClanCreateRequest:
             {
                 var create = Decode<ClanCreateRequestMsg>(body);
@@ -1411,6 +1471,25 @@ public sealed class ZoneServer
             "party_invite" => ErrorAsync(session, "party_invite", "No pending party invite.", ct),
             "party" => ErrorAsync(session, "party", "Not in a party.", ct),
             _ => ErrorAsync(session, "party", "Party action failed.", ct)
+        };
+    }
+
+    static Task TradeErrorAsync(ZoneSession session, string? code, CancellationToken ct)
+    {
+        if (code == null)
+            return Task.CompletedTask;
+        return code switch
+        {
+            "world" => ErrorAsync(session, "world", "EnterWorld first.", ct),
+            "bad_request" => ErrorAsync(session, "bad_request", "Trade request was rejected.", ct),
+            "target" => ErrorAsync(session, "target", "Invalid trade target.", ct),
+            TradeProtocol.Busy => ErrorAsync(session, TradeProtocol.Busy, "That player cannot trade right now.", ct),
+            TradeProtocol.Invite => ErrorAsync(session, TradeProtocol.Invite, "No pending trade request.", ct),
+            TradeProtocol.Session => ErrorAsync(session, TradeProtocol.Session, "You are not trading.", ct),
+            TradeProtocol.Item => ErrorAsync(session, TradeProtocol.Item, "That item cannot be traded.", ct),
+            TradeProtocol.Range => ErrorAsync(session, TradeProtocol.Range, "You are too far to trade.", ct),
+            InventoryProtocol.NotOwned => ErrorAsync(session, InventoryProtocol.NotOwned, "You do not own that item.", ct),
+            _ => ErrorAsync(session, TradeProtocol.Session, "Trade action failed.", ct)
         };
     }
 

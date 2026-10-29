@@ -292,6 +292,29 @@ public sealed class PlayerInventory
         return 0;
     }
 
+    /// <summary>
+    /// Removes <paramref name="count"/> from a specific bag stack.
+    /// Returns false when the stack is short or not in this bag.
+    /// </summary>
+    public bool TryRemoveFromStack(ItemInstance item, int count, out bool removedEntirely)
+    {
+        removedEntirely = false;
+        ArgumentNullException.ThrowIfNull(item);
+        if (count < 1 || !ReferenceEquals(Find(item.ObjectId), item) || item.Count < count)
+            return false;
+        if (item.IsEquipped)
+            Unequip(item);
+        if (item.Count == count)
+        {
+            Remove(item);
+            removedEntirely = true;
+            return true;
+        }
+
+        item.Count -= count;
+        return true;
+    }
+
     public void Remove(ItemInstance item)
     {
         ArgumentNullException.ThrowIfNull(item);
