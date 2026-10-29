@@ -49,6 +49,9 @@ The speaker is included. `chatType` is the type the client sent (`0` or `1`).
 | 1 | Welcome, sent once at the end of enter world | `[name]` | `Welcome, {name}.` |
 | 2 | Chat type is not delivered | `[chatType]` | `not supported yet` |
 | 3 | Flood throttle | `[]` | `Please do not spam the chat.` |
+| 2264 | Melee or offensive skill hit (Mobius `YOU_HIT_S1_FOR_S2_DAMAGE`) | `[targetName, damage]` | `You hit {targetName} for {damage} damage.` |
+
+Combat damage lines go only to the attacking player, after `Attack` / `StatusUpdate` (or skill cast + target vitals). Observers still get combat animation and HP packets, not this system line.
 
 Enter world order is unchanged up through knownlist (`UserInfo`, `ItemList`, `PlayerSpawned`, then `NpcInfo` / `SpawnItem` / `CharInfo`). `SystemMessage` welcome is the last packet of that burst.
 

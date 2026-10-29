@@ -108,6 +108,7 @@ public sealed partial class ZoneWorld
         var status = StatusFor(target);
         var selfMp = CasterMpStatus(player);
         FanoutSkill(player, target, cast, status, selfMp, outbound);
+        QueueAttackerDamageMessage(player, target, damage, outbound);
 
         player.CombatUntilUnixMs = now + ClanProtocol.CombatStanceMillis;
 

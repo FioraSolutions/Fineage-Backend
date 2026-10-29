@@ -331,6 +331,7 @@ public class ZoneClanTests
         await right.SendAsync(MsgType.AttackRequest, new AttackRequestMsg { TargetObjectId = gremlin.ObjectId });
         await right.ExpectAsync<AttackMsg>(MsgType.Attack);
         await right.ExpectAsync<StatusUpdateMsg>(MsgType.StatusUpdate);
+        await right.ExpectAsync<SystemMessageMsg>(MsgType.SystemMessage);
         await left.ExpectAsync<AttackMsg>(MsgType.Attack);
         await left.ExpectAsync<StatusUpdateMsg>(MsgType.StatusUpdate);
 

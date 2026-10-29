@@ -99,6 +99,7 @@ public sealed partial class ZoneWorld
         var status = StatusFor(target);
 
         FanoutCombat(player, target, attack, status, outbound);
+        QueueAttackerDamageMessage(player, target, damage, outbound);
 
         player.CombatUntilUnixMs = _clock().ToUnixTimeMilliseconds() + ClanProtocol.CombatStanceMillis;
 
@@ -133,6 +134,14 @@ public sealed partial class ZoneWorld
             outbound.Add(new Pending(watcher.Session, MsgType.Attack, attackBody));
             outbound.Add(new Pending(watcher.Session, MsgType.StatusUpdate, statusBody));
         }
+    }
+
+    void QueueAttackerDamageMessage(ZoneEntity attacker, ZoneEntity target, int damage, List<Pending> outbound)
+    {
+        if (damage <= 0 || attacker.Session == null)
+            return;
+
+        outbound.Add(Pack(attacker.Session, MsgType.SystemMessage, CombatLines.HitTarget(target.Name, damage)));
     }
 
     void RemoveDeadNpc(ZoneEntity npc, List<Pending> outbound)

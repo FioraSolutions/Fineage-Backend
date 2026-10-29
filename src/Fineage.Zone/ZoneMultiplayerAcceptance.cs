@@ -171,12 +171,14 @@ public static class ZoneMultiplayerAcceptance
             await attacker.SendAsync(MsgType.AttackRequest, new AttackRequestMsg()).ConfigureAwait(false);
             var atkLeft = await attacker.ExpectAsync<AttackMsg>(MsgType.Attack).ConfigureAwait(false);
             var hpLeft = await attacker.ExpectAsync<StatusUpdateMsg>(MsgType.StatusUpdate).ConfigureAwait(false);
+            var dmgLeft = await attacker.ExpectAsync<SystemMessageMsg>(MsgType.SystemMessage).ConfigureAwait(false);
             var atkRight = await observer.ExpectAsync<AttackMsg>(MsgType.Attack).ConfigureAwait(false);
             var hpRight = await observer.ExpectAsync<StatusUpdateMsg>(MsgType.StatusUpdate).ConfigureAwait(false);
 
             int expectedHp = TalkingIsland.GremlinMaxHp - hit * ZoneCombat.SampleMeleeDamage;
             ExpectCombat(gremlin.ObjectId, fighter.CharacterId, expectedHp, atkLeft, hpLeft);
             ExpectCombat(gremlin.ObjectId, fighter.CharacterId, expectedHp, atkRight, hpRight);
+            ExpectDamageLine(dmgLeft, ZoneCombat.SampleMeleeDamage);
         }
 
         var delLeft = await attacker.ExpectAsync<DeleteObjectMsg>(MsgType.DeleteObject).ConfigureAwait(false);
@@ -230,6 +232,7 @@ public static class ZoneMultiplayerAcceptance
             await left.SendAsync(MsgType.AttackRequest, new AttackRequestMsg()).ConfigureAwait(false);
             _ = await left.ExpectAsync<AttackMsg>(MsgType.Attack).ConfigureAwait(false);
             _ = await left.ExpectAsync<StatusUpdateMsg>(MsgType.StatusUpdate).ConfigureAwait(false);
+            _ = await left.ExpectAsync<SystemMessageMsg>(MsgType.SystemMessage).ConfigureAwait(false);
             _ = await right.ExpectAsync<AttackMsg>(MsgType.Attack).ConfigureAwait(false);
             _ = await right.ExpectAsync<StatusUpdateMsg>(MsgType.StatusUpdate).ConfigureAwait(false);
         }
@@ -288,6 +291,7 @@ public static class ZoneMultiplayerAcceptance
             await peer.SendAsync(MsgType.AttackRequest, new AttackRequestMsg()).ConfigureAwait(false);
             _ = await peer.ExpectAsync<AttackMsg>(MsgType.Attack).ConfigureAwait(false);
             _ = await peer.ExpectAsync<StatusUpdateMsg>(MsgType.StatusUpdate).ConfigureAwait(false);
+            _ = await peer.ExpectAsync<SystemMessageMsg>(MsgType.SystemMessage).ConfigureAwait(false);
         }
 
         _ = await peer.ExpectAsync<SpawnItemMsg>(MsgType.SpawnItem).ConfigureAwait(false);
@@ -689,6 +693,13 @@ public static class ZoneMultiplayerAcceptance
             status.Values[1] != TalkingIsland.GremlinMaxHp)
             throw new InvalidOperationException(
                 $"status mismatch id={status.ObjectId} hp={status.Values[0]}/{status.Values[1]} expected={expectedCurHp}");
+    }
+
+    static void ExpectDamageLine(SystemMessageMsg line, int damage)
+    {
+        if (line.Id != CombatProtocol.HitTargetForDamage || line.Params.Length != 2 ||
+            line.Params[1] != damage.ToString() || !line.Text.Contains(damage.ToString(), StringComparison.Ordinal))
+            throw new InvalidOperationException($"damage line id={line.Id} text={line.Text}");
     }
 
     static HandoffTicket Play(LoginService login, string account, string name, int classId)
