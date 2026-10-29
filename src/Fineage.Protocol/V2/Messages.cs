@@ -146,6 +146,18 @@ public sealed partial class CharacterSummaryMsg
     [Key(12)] public int Face { get; set; }
     [Key(13)] public int DeleteSecondsLeft { get; set; }
     [Key(14)] public bool IsLastPlayed { get; set; }
+    /// <summary>CharSelect vitals and progress (Mobius CharSelectionInfo). Older clients ignore these keys.</summary>
+    [Key(15)] public int CurHp { get; set; }
+    [Key(16)] public int MaxHp { get; set; }
+    [Key(17)] public int CurMp { get; set; }
+    [Key(18)] public int MaxMp { get; set; }
+    [Key(19)] public int CurCp { get; set; }
+    [Key(20)] public int MaxCp { get; set; }
+    [Key(21)] public long Exp { get; set; }
+    [Key(22)] public int Sp { get; set; }
+    [Key(23)] public int Karma { get; set; }
+    /// <summary>Right-hand (or two-hand) item id, 0 when unarmed.</summary>
+    [Key(24)] public int WeaponItemId { get; set; }
 }
 
 [MessagePackObject]

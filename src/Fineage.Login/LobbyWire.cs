@@ -9,6 +9,7 @@ public static class LobbyWire
         var point = character.HasPosition
             ? new ClassSpawn.Point(character.X, character.Y, character.Z)
             : ClassTemplates.Preview(character.ClassId);
+        var stats = CharSelectStats.For(character);
         return new CharacterSummaryMsg
         {
             CharacterId = character.Id,
@@ -25,7 +26,17 @@ public static class LobbyWire
             Y = point.Y,
             Z = point.Z,
             DeleteSecondsLeft = character.DeleteSecondsLeft(now),
-            IsLastPlayed = character.Id == lastPlayedId
+            IsLastPlayed = character.Id == lastPlayedId,
+            CurHp = stats.CurHp,
+            MaxHp = stats.MaxHp,
+            CurMp = stats.CurMp,
+            MaxMp = stats.MaxMp,
+            CurCp = stats.CurCp,
+            MaxCp = stats.MaxCp,
+            Exp = character.Exp,
+            Sp = character.Sp,
+            Karma = 0,
+            WeaponItemId = stats.WeaponItemId
         };
     }
 

@@ -10,6 +10,7 @@ static class LoginV2Wire
         var point = character.HasPosition
             ? new Fineage.Protocol.ClassSpawn.Point(character.X, character.Y, character.Z)
             : ClassTemplates.Preview(character.ClassId);
+        var stats = CharSelectStats.For(character);
         return new CharacterSummaryMsg
         {
             Slot = slot,
@@ -26,7 +27,17 @@ static class LoginV2Wire
             HairColor = character.HairColor,
             Face = character.Face,
             DeleteSecondsLeft = character.DeleteSecondsLeft(now),
-            IsLastPlayed = character.Id == lastPlayedId
+            IsLastPlayed = character.Id == lastPlayedId,
+            CurHp = stats.CurHp,
+            MaxHp = stats.MaxHp,
+            CurMp = stats.CurMp,
+            MaxMp = stats.MaxMp,
+            CurCp = stats.CurCp,
+            MaxCp = stats.MaxCp,
+            Exp = character.Exp,
+            Sp = character.Sp,
+            Karma = 0,
+            WeaponItemId = stats.WeaponItemId
         };
     }
 
