@@ -72,6 +72,8 @@ public sealed partial class ZoneWorld
             return "world";
         if (player.Dead)
             return InventoryProtocol.Dead;
+        if (player.CastingUntilMs > _clock().ToUnixTimeMilliseconds())
+            return null; // Mobius: auto-attack waits while casting
 
         int targetId = requestedTargetId > 0 ? requestedTargetId : session.SelectedTargetId;
         if (targetId <= 0)
@@ -106,6 +108,7 @@ public sealed partial class ZoneWorld
         var status = StatusFor(target);
 
         FanoutCombat(player, target, attack, status, outbound);
+        AddHate(target, player);
 
         player.CombatUntilUnixMs = _clock().ToUnixTimeMilliseconds() + ClanProtocol.CombatStanceMillis;
 
@@ -129,7 +132,12 @@ public sealed partial class ZoneWorld
             {
                 var outbound = new List<Pending>();
                 lock (_gate)
+                {
+                    long now = _clock().ToUnixTimeMilliseconds();
+                    TickPendingHits(now, outbound);
                     TickAutoAttacks(outbound);
+                    TickMobAttacks(now, outbound);
+                }
                 if (outbound.Count > 0)
                     await FlushOthersAsync(outbound, ct).ConfigureAwait(false);
             }

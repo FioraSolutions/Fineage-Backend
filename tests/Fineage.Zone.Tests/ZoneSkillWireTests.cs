@@ -76,7 +76,8 @@ public sealed class ZoneSkillWireTests
         var ticket = login.Play("duel", "pass1234", created.Value!.Name, HumanClasses.Fighter);
         Assert.True(ticket.Ok && ticket.Value != null);
 
-        var world = new ZoneWorld(accounts: store, spawnRandom: new Random(3));
+        var now = DateTimeOffset.UtcNow;
+        var world = new ZoneWorld(accounts: store, spawnRandom: new Random(3), clock: () => now);
         await using var stream = new MemoryStream();
         var session = new ZoneSession(stream);
         session.Bind(ticket.Value!.CharacterId, ticket.Value.Account, ticket.Value.CharacterName, ticket.Value.ClassId);
@@ -118,6 +119,24 @@ public sealed class ZoneSkillWireTests
             TargetObjectId = gremlinObjectId
         }, CancellationToken.None));
 
+        // Mobius onMagicHitTimer: no damage on key press; movement locked while casting.
+        Assert.Equal("casting", await world.TryMoveAsync(session, new MoveToMsg
+        {
+            DestX = gremlinTemplate.X + 10,
+            DestY = gremlinTemplate.Y,
+            DestZ = gremlinTemplate.Z
+        }, CancellationToken.None));
+        await world.RunCombatTickAsync(CancellationToken.None);
+        stream.Position = 0;
+        while (await FrameIO.ReadAsync(stream) is { } early)
+        {
+            if (early.Type == (ushort)MsgType.StatusUpdate)
+                Assert.NotEqual(gremlinObjectId, MessagePackSerializer.Deserialize<StatusUpdateMsg>(early.Body).ObjectId);
+        }
+
+        now = now.AddSeconds(5);
+        await world.RunCombatTickAsync(CancellationToken.None);
+
         stream.Position = 0;
         MagicSkillUseMsg? cast = null;
         StatusUpdateMsg? targetHp = null;
@@ -143,6 +162,21 @@ public sealed class ZoneSkillWireTests
         Assert.Equal(gremlinObjectId, targetHp!.ObjectId);
         Assert.True(targetHp.Values[0] > 0);
         Assert.True(targetHp.Values[0] < targetHp.Values[1]);
+
+        // Mobius addDamageHate -> mob swings back at the attacker.
+        stream.SetLength(0);
+        now = now.AddSeconds(2);
+        await world.RunCombatTickAsync(CancellationToken.None);
+        stream.Position = 0;
+        AttackMsg? retaliate = null;
+        while (await FrameIO.ReadAsync(stream) is { } f)
+        {
+            if (f.Type == (ushort)MsgType.Attack)
+                retaliate = MessagePackSerializer.Deserialize<AttackMsg>(f.Body);
+        }
+        Assert.NotNull(retaliate);
+        Assert.Equal(gremlinObjectId, retaliate!.AttackerObjectId);
+        Assert.Equal(session.ObjectId, retaliate.TargetObjectId);
     }
 
     static async Task ReadAsync(Stream stream, MsgType type)
