@@ -28,6 +28,10 @@ public sealed class ZoneSession
     public int Z { get; internal set; }
     public int SelectedTargetId { get; set; }
 
+    /// <summary>Interlude-style auto attack: target kept swinging at until it dies or the player stops.</summary>
+    public int AutoAttackTargetId { get; set; }
+    public long NextAutoAttackUnixMs { get; set; }
+
     /// <summary>Unix milliseconds of the last accepted say. 0 means this session has not spoken.</summary>
     public long LastChatUnixMs { get; set; }
 
@@ -56,6 +60,8 @@ public sealed class ZoneSession
         ClassId = 0;
         InWorld = false;
         SelectedTargetId = 0;
+        AutoAttackTargetId = 0;
+        NextAutoAttackUnixMs = 0;
         LastChatUnixMs = 0;
     }
 

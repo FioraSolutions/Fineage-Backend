@@ -5,6 +5,8 @@ public static class ZoneCombat
 {
     public const int MeleeRange = 900;
     public const int SampleMeleeDamage = 32;
+    public const int AutoAttackIntervalMs = 1100;
+    public const int AutoAttackTickMs = 200;
 
     public static bool InMeleeRange(int ax, int ay, int bx, int by)
     {
