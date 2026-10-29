@@ -56,7 +56,7 @@ The same NPC, range (150), and alive checks as `BypassRequest` apply. Business r
 
 `TeleportList.feeCount` is what this player pays now (0 when the trip is free). The HTML omits the price when the fee is 0, matching Mobius.
 
-A destination is on a loaded map when any spawned NPC is within **8000** (2D). Talking Island village and Cedric cover the island gatekeeper spots once those spawns are loaded. Gludin and the other towns are outside that radius today, so the server replies with system message **191** and does not move the player or take the fee. Movement uses the existing relocate path (`MoveToAck` and AOI). `FINEAGE_TELEPORT_OFFSET` defaults to Mobius `MaxOffsetOnTeleport` **50**. An offset that would leave the loaded neighborhood is dropped.
+A destination is on a loaded map when any spawned NPC is within **8000** (2D). Enabled town and village spawns cover their gatekeeper squares: Talking Island, the race villages, Gludin, Gludio, Dion, Giran, Heine, Oren, Aden, Hunter's Village, Floran, Goddard, Rune, and Schuttgart. A spot with no spawned NPC inside that radius, such as Giran Harbor or an open hunting ground, still replies with system message **191** and does not move the player or take the fee. Movement uses the existing relocate path (`MoveToAck` and AOI). `FINEAGE_TELEPORT_OFFSET` defaults to Mobius `MaxOffsetOnTeleport` **50**. An offset that would leave the loaded neighborhood is dropped.
 
 If a destination lists castle ids and that siege is in progress, message **192** and no move.
 
