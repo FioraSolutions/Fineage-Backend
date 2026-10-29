@@ -148,6 +148,9 @@ public sealed partial class ZoneWorld
     internal void AdvanceSpawnsForTests()
     {
         lock (_gate)
+        {
+            TickCorpseDecay(_clock().ToUnixTimeMilliseconds(), []);
             TickSpawns([]);
+        }
     }
 }

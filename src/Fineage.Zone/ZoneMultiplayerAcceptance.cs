@@ -179,10 +179,11 @@ public static class ZoneMultiplayerAcceptance
             ExpectCombat(gremlin.ObjectId, fighter.CharacterId, expectedHp, atkRight, hpRight);
         }
 
-        var delLeft = await attacker.ExpectAsync<DeleteObjectMsg>(MsgType.DeleteObject).ConfigureAwait(false);
-        var delRight = await observer.ExpectAsync<DeleteObjectMsg>(MsgType.DeleteObject).ConfigureAwait(false);
+        // Mobius doDie: Die broadcast (death anim); corpse DeleteObject comes after DEFAULT_CORPSE_TIME.
+        var delLeft = await attacker.ExpectAsync<DieMsg>(MsgType.Die).ConfigureAwait(false);
+        var delRight = await observer.ExpectAsync<DieMsg>(MsgType.Die).ConfigureAwait(false);
         if (delLeft.ObjectId != gremlin.ObjectId || delRight.ObjectId != gremlin.ObjectId)
-            throw new InvalidOperationException($"delete expected {gremlin.ObjectId}");
+            throw new InvalidOperationException($"die expected {gremlin.ObjectId}");
 
         var dropLeft = await attacker.ExpectAsync<SpawnItemMsg>(MsgType.SpawnItem).ConfigureAwait(false);
         var dropRight = await observer.ExpectAsync<SpawnItemMsg>(MsgType.SpawnItem).ConfigureAwait(false);
@@ -234,8 +235,8 @@ public static class ZoneMultiplayerAcceptance
             _ = await right.ExpectAsync<StatusUpdateMsg>(MsgType.StatusUpdate).ConfigureAwait(false);
         }
 
-        _ = await left.ExpectAsync<DeleteObjectMsg>(MsgType.DeleteObject).ConfigureAwait(false);
-        _ = await right.ExpectAsync<DeleteObjectMsg>(MsgType.DeleteObject).ConfigureAwait(false);
+        _ = await left.ExpectAsync<DieMsg>(MsgType.Die).ConfigureAwait(false);
+        _ = await right.ExpectAsync<DieMsg>(MsgType.Die).ConfigureAwait(false);
         var dropLeft = await left.ExpectAsync<SpawnItemMsg>(MsgType.SpawnItem).ConfigureAwait(false);
         var dropRight = await right.ExpectAsync<SpawnItemMsg>(MsgType.SpawnItem).ConfigureAwait(false);
         ExpectGroundDrop(dropLeft, dropRight, gremlin);
@@ -290,6 +291,7 @@ public static class ZoneMultiplayerAcceptance
             _ = await peer.ExpectAsync<StatusUpdateMsg>(MsgType.StatusUpdate).ConfigureAwait(false);
         }
 
+        _ = await peer.ExpectAsync<DieMsg>(MsgType.Die).ConfigureAwait(false);
         _ = await peer.ExpectAsync<SpawnItemMsg>(MsgType.SpawnItem).ConfigureAwait(false);
 
         await peer.SendAsync(MsgType.AdminSweepCorpse, new AdminSweepCorpseMsg { TargetObjectId = gremlin.ObjectId })
