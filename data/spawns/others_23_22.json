@@ -1,0 +1,17 @@
+{
+  "mapId": "others_23_22",
+  "enabled": true,
+  "comment": "Mobius CT 0 Interlude spawns/Others/23_22.xml. Fixed rows keep Mobius x/y/z/heading. Territory rows are one spawn per count, placed inside the polygon at minZ (no geodata). Day and night rows are both present. Raid bosses are left to data/raidbosses.json. Name, title, type, attackable, hp, and speeds come from data/npcs.json.",
+  "npcs": [
+    {
+      "objectId": 92302,
+      "npcId": 30640,
+      "x": 106345,
+      "y": 135523,
+      "z": -3408,
+      "heading": 0,
+      "respawnDelaySeconds": 60,
+      "respawnRandomSeconds": 0
+    }
+  ]
+}

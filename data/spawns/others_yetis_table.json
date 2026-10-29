@@ -1,0 +1,17 @@
+{
+  "mapId": "others_yetis_table",
+  "enabled": true,
+  "comment": "Mobius CT 0 Interlude spawns/Others/YetisTable.xml. Fixed rows keep Mobius x/y/z/heading. Territory rows are one spawn per count, placed inside the polygon at minZ (no geodata). Day and night rows are both present. Raid bosses are left to data/raidbosses.json. Name, title, type, attackable, hp, and speeds come from data/npcs.json.",
+  "npcs": [
+    {
+      "objectId": 94034,
+      "npcId": 31542,
+      "x": 157136,
+      "y": -121456,
+      "z": -2363,
+      "heading": 40000,
+      "respawnDelaySeconds": 129600,
+      "respawnRandomSeconds": 0
+    }
+  ]
+}

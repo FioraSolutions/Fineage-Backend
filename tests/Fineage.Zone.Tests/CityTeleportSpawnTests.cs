@@ -8,7 +8,7 @@ using Xunit;
 namespace Fineage.Zone.Tests;
 
 /// <summary>
-/// Town and village spawn maps the live zone materializes so gatekeepers stand
+/// Town, village, and outdoor spawn maps the live zone materializes so gatekeepers stand
 /// and a destination within <see cref="NpcServiceProtocol.LoadedZoneRadius"/> loads.
 /// </summary>
 public sealed class CityTeleportSpawnTests
@@ -126,9 +126,10 @@ public sealed class CityTeleportSpawnTests
         AssertLoaded(teleports, anchors, 30540, "Town of Schuttgart");
         AssertLoaded(teleports, anchors, 35403, "Entrance to Floran Village", "tel2");
 
-        AssertUnloaded(teleports, anchors, 30080, "Giran Harbor");
-        AssertUnloaded(teleports, anchors, 30059, "Cruma Marshlands");
-        AssertUnloaded(teleports, anchors, 30540, "Mithril Mines");
+        AssertLoaded(teleports, anchors, 30080, "Giran Harbor");
+        AssertLoaded(teleports, anchors, 30059, "Cruma Marshlands");
+        AssertLoaded(teleports, anchors, 30540, "Mithril Mines");
+        Assert.False(NpcServiceProtocol.InLoadedZone(-200_000, 0, anchors));
     }
 
     static void AssertLoaded(
@@ -140,16 +141,6 @@ public sealed class CityTeleportSpawnTests
     {
         var loc = Find(teleports, npcId, destination, listName);
         Assert.True(Loaded(loc, anchors), destination);
-    }
-
-    static void AssertUnloaded(
-        TeleportCatalog teleports,
-        IReadOnlyList<(int X, int Y)> anchors,
-        int npcId,
-        string destination)
-    {
-        var loc = Find(teleports, npcId, destination, TeleportRules.Normal);
-        Assert.False(Loaded(loc, anchors), destination);
     }
 
     static TeleportLocation Find(TeleportCatalog teleports, int npcId, string destination, string listName)

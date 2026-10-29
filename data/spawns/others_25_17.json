@@ -1,0 +1,77 @@
+{
+  "mapId": "others_25_17",
+  "enabled": true,
+  "comment": "Mobius CT 0 Interlude spawns/Others/25_17.xml. Fixed rows keep Mobius x/y/z/heading. Territory rows are one spawn per count, placed inside the polygon at minZ (no geodata). Day and night rows are both present. Raid bosses are left to data/raidbosses.json. Name, title, type, attackable, hp, and speeds come from data/npcs.json.",
+  "npcs": [
+    {
+      "objectId": 92905,
+      "npcId": 31111,
+      "x": 183225,
+      "y": -11911,
+      "z": -4897,
+      "heading": 32768,
+      "respawnDelaySeconds": 60,
+      "respawnRandomSeconds": 0
+    },
+    {
+      "objectId": 92906,
+      "npcId": 35417,
+      "x": 178120,
+      "y": -15336,
+      "z": -2263,
+      "heading": 0,
+      "respawnDelaySeconds": 60,
+      "respawnRandomSeconds": 0
+    },
+    {
+      "objectId": 92907,
+      "npcId": 35417,
+      "x": 178242,
+      "y": -14663,
+      "z": -2260,
+      "heading": 16264,
+      "respawnDelaySeconds": 60,
+      "respawnRandomSeconds": 0
+    },
+    {
+      "objectId": 92908,
+      "npcId": 35418,
+      "x": 178433,
+      "y": -18773,
+      "z": -2263,
+      "heading": 6840,
+      "respawnDelaySeconds": 60,
+      "respawnRandomSeconds": 0
+    },
+    {
+      "objectId": 92909,
+      "npcId": 35419,
+      "x": 177408,
+      "y": -17904,
+      "z": -2229,
+      "heading": 6000,
+      "respawnDelaySeconds": 60,
+      "respawnRandomSeconds": 0
+    },
+    {
+      "objectId": 92910,
+      "npcId": 35420,
+      "x": 179040,
+      "y": -13717,
+      "z": -2263,
+      "heading": 5456,
+      "respawnDelaySeconds": 60,
+      "respawnRandomSeconds": 0
+    },
+    {
+      "objectId": 92911,
+      "npcId": 35421,
+      "x": 177598,
+      "y": -18610,
+      "z": -2238,
+      "heading": 0,
+      "respawnDelaySeconds": 60,
+      "respawnRandomSeconds": 0
+    }
+  ]
+}
