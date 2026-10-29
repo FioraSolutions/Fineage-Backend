@@ -24,7 +24,7 @@ public static class NpcServiceProtocol
     /// <summary>
     /// A destination is on a loaded map when some spawned NPC is within this 2D radius.
     /// Talking Island local spots sit inside it once the village spawn is loaded.
-    /// Other towns (Gludin and the rest) do not.
+    /// A town square sits inside it once that town's spawn map is enabled.
     /// </summary>
     public const int LoadedZoneRadius = 8000;
 

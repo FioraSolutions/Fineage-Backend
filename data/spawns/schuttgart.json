@@ -1,6 +1,6 @@
 {
   "mapId": "schuttgart",
-  "enabled": false,
+  "enabled": true,
   "comment": "Mobius CT 0 Interlude Schuttgart/SchuttgartNPCs.xml. Rows reference data/npcs.json by npcId. Name, title, type, attackable, hp, and speeds come from the template.",
   "npcs": [
     {
