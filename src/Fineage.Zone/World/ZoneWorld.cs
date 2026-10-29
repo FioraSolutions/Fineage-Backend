@@ -108,6 +108,14 @@ sealed class ZoneEntity
     public PrivateWarehouse? Warehouse { get; set; }
     /// <summary>First character created on the account. Mobius <c>Player.isNewbie</c> when the account had no characters yet.</summary>
     public bool Newbie { get; set; } = true;
+    /// <summary>Mobius <c>Creature.isCastingNow</c>: unix ms until the current cast ends. Movement is refused before this.</summary>
+    public long CastingUntilMs { get; set; }
+    /// <summary>Skill damage queued for Mobius <c>onMagicHitTimer</c> (applied at hitTime, not on key press).</summary>
+    public PendingSkillHit? PendingHit { get; set; }
+    /// <summary>NPC: most-hated player (Mobius <c>AggroList</c> top, simplified to last attacker).</summary>
+    public int AggroTargetId { get; set; }
+    /// <summary>NPC: next melee swing time, unix ms.</summary>
+    public long NextMobAttackMs { get; set; }
     /// <summary>Mobius merchant price config castle. 0 when the NPC is not in a taxed town.</summary>
     public int MerchantCastleId { get; set; }
     /// <summary>Town base tax percent from Mobius <c>MerchantPriceConfig.xml</c>. Castle tax is separate.</summary>
@@ -415,6 +423,8 @@ public sealed partial class ZoneWorld
             return InventoryProtocol.Dead;
         if (entity.Sitting)
             return ActionProtocol.Sitting;
+        if (entity.CastingUntilMs > _clock().ToUnixTimeMilliseconds())
+            return "casting";
         if (!TalkingIsland.WithinStep(entity.X, entity.Y, move.DestX, move.DestY))
             return "range";
 

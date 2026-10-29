@@ -106,21 +106,18 @@ public sealed partial class ZoneWorld
             player.SkillReuseUntilMs[request.SkillId] = now + template.ReuseDelayMs;
 
         int damage = Math.Max(1, levelData.Power + ZoneCombat.SampleMeleeDamage / 3);
-        target.CurHp = Math.Max(0, target.CurHp - damage);
+        int hitTime = Math.Max(0, template.HitTimeMs);
 
+        // Mobius Creature.doCast: MagicSkillUse goes out now, damage lands in onMagicHitTimer after hitTime.
         var cast = BuildCast(player, target, request.SkillId, level, template);
-        var status = StatusFor(target);
-        var selfMp = CasterMpStatus(player);
-        FanoutSkill(player, target, cast, status, selfMp, outbound);
+        FanoutSkill(player, target, cast, targetStatus: null, CasterMpStatus(player), outbound);
 
         player.CombatUntilUnixMs = now + ClanProtocol.CombatStanceMillis;
         session.SelectedTargetId = targetId;
-
-        if (target.CurHp <= 0)
-        {
-            RemoveDeadNpc(target, outbound);
-            GrantKillReward(player, target, outbound);
-        }
+        player.CastingUntilMs = now + hitTime;
+        player.PendingHit = new PendingSkillHit(targetId, damage, now + hitTime);
+        if (hitTime == 0)
+            ResolvePendingHit(player, now, outbound);
 
         return null;
     }
