@@ -62,7 +62,15 @@ Console.CancelKeyPress += (_, e) =>
 var sevenSigns = SevenSignsEngine.OpenBesideAccounts(storePath);
 var bosses = BossSchedule.OpenBesideAccounts(storePath);
 var olympiad = OlympiadBoard.OpenBesideAccounts(storePath, DateTimeOffset.UtcNow);
-var world = ZoneAoiSettings.CreateWorld(accounts: accounts, sevenSigns: sevenSigns, includeEnabledMaps: true, bosses: bosses, olympiad: olympiad);
+bool includeEnabledMaps = string.Equals(
+    Environment.GetEnvironmentVariable("FINEAGE_ZONE_INCLUDE_ENABLED_MAPS"),
+    "1",
+    StringComparison.OrdinalIgnoreCase)
+    || string.Equals(
+        Environment.GetEnvironmentVariable("FINEAGE_ZONE_INCLUDE_ENABLED_MAPS"),
+        "true",
+        StringComparison.OrdinalIgnoreCase);
+var world = ZoneAoiSettings.CreateWorld(accounts: accounts, sevenSigns: sevenSigns, includeEnabledMaps: includeEnabledMaps, bosses: bosses, olympiad: olympiad);
 world.StartSimulation(shutdown.Token);
 FineageTelemetry.OnlineCount = () => world.OnlinePlayerCount;
 string host = bindAddress.Equals(IPAddress.Any) ? "0.0.0.0" : bindDisplay;
