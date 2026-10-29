@@ -134,6 +134,16 @@ public static class Cli
         LoginAcceptance.WriteHandoff(output, ticket.Account, ticket.CharacterName, ticket.ClassId, ticket.Token,
             ticket.ZoneHost, ticket.ZonePort, ticket.ExpiresUnixSeconds);
 
+    static string FormatIds(IReadOnlySet<int> ids)
+    {
+        var list = new int[ids.Count];
+        int n = 0;
+        foreach (int id in ids)
+            list[n++] = id;
+        Array.Sort(list);
+        return string.Join(',', list);
+    }
+
     static int Fail(TextWriter error, string code, string message)
     {
         error.WriteLine($"error {code}: {message}");
@@ -194,6 +204,13 @@ public static class Cli
         output.WriteLine(
             $"[LOGIN] listen tcp={bindDisplay}:{port} http={http.BaseUrl} store={storePath} (maxConn={maxConnections} outboundQ={outboundQueue} msgPerSec={maxMsgPerSec})");
         output.WriteLine($"[LOGIN] zone handoff target {ZoneHandoff.AdvertiseHost}:{ZoneHandoff.AdvertisePort}");
+        if (CharacterCreateOptions.EnvironmentUsesLegacyHumanOnly())
+        {
+            output.WriteLine(
+                "[LOGIN] ignoring Human-only FINEAGE_ALLOWED_RACES/CLASSES; all Interlude base races are creatable.");
+        }
+
+        output.WriteLine("[LOGIN] creatable classes " + FormatIds(service.CreatableClassIds));
 
         await using FineageMetricsHost? metrics = FineageMetricsHost.Start("login", output, error);
         using var shutdown = new CancellationTokenSource();
