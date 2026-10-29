@@ -2,7 +2,7 @@ namespace Fineage.Protocol.Net;
 
 public static class TcpSessionSettings
 {
-    public const int DefaultIdleSeconds = 120;
+    public const int DefaultIdleSeconds = 1800; // 30 min: client may idle (standing, AFK) without sending frames
 
     public static TimeSpan IdleTimeout
     {
