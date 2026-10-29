@@ -80,7 +80,10 @@ public sealed class LoginService
         return LoginResult<string>.Success(cred.AccountName);
     }
 
-    /// <summary>Landing HTTP register. Username and email are stored in canonical form.</summary>
+    /// <summary>
+    /// Landing HTTP register. Username is required. A supplied email is stored in canonical form;
+    /// a missing or blank email is stored as null.
+    /// </summary>
     public LoginResult<string> RegisterLanding(string? username, string? email, string? password)
     {
         if (LandingAuth.ValidateUsername(username, out string user) is { } userError)
@@ -91,7 +94,8 @@ public sealed class LoginService
             return LoginResult<string>.Fail(passwordError, "Password was rejected.");
 
         var (hash, salt, iterations) = PasswordHasher.Hash(password!);
-        var status = _store.TryAddAccount(user, hash, salt, iterations, mail);
+        string? storedEmail = mail.Length == 0 ? null : mail;
+        var status = _store.TryAddAccount(user, hash, salt, iterations, storedEmail);
         return status switch
         {
             AddAccountStatus.Created => LoginResult<string>.Success(user),
