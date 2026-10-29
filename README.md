@@ -175,7 +175,8 @@ Configure these **repository secrets** (names only — never commit values):
 
 | Secret | Purpose |
 |--------|---------|
-| `TAILSCALE_AUTHKEY` | Reusable/ephemeral Tailscale auth key so the runner joins the tailnet (ACL must allow SSH to the Pi). Alternatively, replace the Tailscale step with `TS_OAUTH_CLIENT_ID` + `TS_OAUTH_SECRET` per [tailscale/github-action](https://github.com/tailscale/github-action). |
+| `TS_OAUTH_CLIENT_ID` | Tailscale OAuth client ID. The client needs the writable `auth_keys` scope and tag `tag:github-actions` ([tailscale/github-action](https://github.com/tailscale/github-action) v4). |
+| `TS_OAUTH_SECRET` | Tailscale OAuth client secret for that client. |
 | `FINEAGE_PI_SSH_PRIVATE_KEY` | Private key for SSH (e.g. `pi@raspberrypi` on Tailscale `100.123.81.1`). |
 | `FINEAGE_PI_HOST` | Optional. Tailscale hostname or IP (default in script: `raspberrypi`). |
 | `FINEAGE_PI_USER` | Optional. SSH user (default: `pi`). |

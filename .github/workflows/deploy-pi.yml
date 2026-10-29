@@ -32,11 +32,16 @@ jobs:
           dotnet publish src/Fineage.Zone/Fineage.Zone.csproj \
             -c Release -r linux-arm64 --self-contained true -o publish/zone
 
+      # Tailscale OAuth client (not an auth key). Create a client with writable
+      # auth_keys scope and tag:github-actions, then set repo Actions secrets
+      # TS_OAUTH_CLIENT_ID and TS_OAUTH_SECRET. ping uses FINEAGE_PI_HOST when set.
       - name: Tailscale
-        uses: tailscale/github-action@v3
+        uses: tailscale/github-action@v4
         with:
-          authkey: ${{ secrets.TAILSCALE_AUTHKEY }}
+          oauth-client-id: ${{ secrets.TS_OAUTH_CLIENT_ID }}
+          oauth-secret: ${{ secrets.TS_OAUTH_SECRET }}
           tags: tag:github-actions
+          ping: ${{ secrets.FINEAGE_PI_HOST }}
 
       - name: Configure SSH
         env:
