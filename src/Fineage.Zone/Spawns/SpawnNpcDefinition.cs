@@ -20,7 +20,10 @@ public sealed record SpawnNpcDefinition(
     int RespawnDelaySeconds,
     int RespawnRandomSeconds,
     string Title = "",
-    string NpcType = "");
+    string NpcType = "",
+    int Level = 1,
+    long Exp = 0,
+    int Sp = 0);
 
 public sealed record SpawnMapDefinition(
     string MapId,

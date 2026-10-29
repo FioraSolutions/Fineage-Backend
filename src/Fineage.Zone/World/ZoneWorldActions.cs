@@ -123,7 +123,7 @@ public sealed partial class ZoneWorld
         outbound.Add(Pack(session, MsgType.MyTargetSelected, new MyTargetSelectedMsg
         {
             ObjectId = best.ObjectId,
-            ColorHint = InterludeStatus.TargetColorHostile
+            ColorHint = InterludeStatus.TargetColor(player.Level, best.Level)
         }));
         return null;
     }

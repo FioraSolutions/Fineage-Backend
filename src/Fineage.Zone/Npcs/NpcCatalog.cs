@@ -21,7 +21,9 @@ public sealed record NpcTemplate(
     int Hp,
     int Mp,
     float RunSpeed,
-    float WalkSpeed);
+    float WalkSpeed,
+    long Exp = 0,
+    int Sp = 0);
 
 /// <summary>Loads <c>data/npcs.json</c>.</summary>
 public sealed class NpcCatalog
@@ -129,7 +131,9 @@ public sealed class NpcCatalog
                 row.Hp,
                 row.Mp,
                 row.RunSpeed,
-                row.WalkSpeed));
+                row.WalkSpeed,
+                Math.Max(0, row.Exp),
+                Math.Max(0, row.Sp)));
         }
 
         return new NpcCatalog(byId);
@@ -155,5 +159,7 @@ public sealed class NpcCatalog
         public int Mp { get; set; }
         public float RunSpeed { get; set; }
         public float WalkSpeed { get; set; }
+        public long Exp { get; set; }
+        public int Sp { get; set; }
     }
 }

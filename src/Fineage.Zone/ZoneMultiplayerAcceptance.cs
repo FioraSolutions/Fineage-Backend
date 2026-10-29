@@ -888,9 +888,23 @@ public static class ZoneMultiplayerAcceptance
             return ((MsgType)frame.Value.Type, frame.Value.Body);
         }
 
+        bool _skipRewardUserInfo;
+
         public async Task<T> ExpectAsync<T>(MsgType expected)
         {
             var (type, body) = await ReadFrameAsync().ConfigureAwait(false);
+            // Kill reward (#179): SystemMessage 95 then UserInfo. Scenarios that do not assert it skip both.
+            while (true)
+            {
+                if (type == MsgType.SystemMessage && expected != MsgType.SystemMessage
+                    && MessagePackSerializer.Deserialize<SystemMessageMsg>(body).Id == 95)
+                    _skipRewardUserInfo = true;
+                else if (type == MsgType.UserInfo && expected != MsgType.UserInfo && _skipRewardUserInfo)
+                    _skipRewardUserInfo = false;
+                else
+                    break;
+                (type, body) = await ReadFrameAsync().ConfigureAwait(false);
+            }
             if (type != expected)
             {
                 string detail = "";
