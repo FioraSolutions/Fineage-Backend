@@ -288,6 +288,32 @@ public sealed partial class SpawnItemMsg
     [Key(7)] public int Unknown { get; set; }
 }
 
+/// <summary>Same keys as <see cref="Fineage.Protocol.DropItemRequestMsg"/>.</summary>
+[MessagePackObject]
+public sealed partial class DropItemRequestMsg
+{
+    [Key(0)] public int ObjectId { get; set; }
+    [Key(1)] public int Count { get; set; } = 1;
+    [Key(2)] public int X { get; set; }
+    [Key(3)] public int Y { get; set; }
+    [Key(4)] public int Z { get; set; }
+}
+
+/// <summary>Same keys as <see cref="Fineage.Protocol.DropItemMsg"/>; zone opcode <see cref="MsgType.DropItem"/>.</summary>
+[MessagePackObject]
+public sealed partial class DropItemMsg
+{
+    [Key(0)] public int CharObjectId { get; set; }
+    [Key(1)] public int ObjectId { get; set; }
+    [Key(2)] public int ItemId { get; set; }
+    [Key(3)] public int X { get; set; }
+    [Key(4)] public int Y { get; set; }
+    [Key(5)] public int Z { get; set; }
+    [Key(6)] public bool Stackable { get; set; }
+    [Key(7)] public int Count { get; set; } = 1;
+    [Key(8)] public int Unknown { get; set; }
+}
+
 /// <summary>Same keys as <see cref="Fineage.Protocol.PartyInviteRequestMsg"/>.</summary>
 [MessagePackObject]
 public sealed partial class PartyInviteRequestMsg

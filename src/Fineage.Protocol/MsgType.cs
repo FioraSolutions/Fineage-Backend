@@ -103,6 +103,8 @@ public enum MsgType : ushort
     TradeAddItemRequest = 54,
     /// <summary>Confirm or cancel the trade window.</summary>
     TradeDoneRequest = 55,
+    /// <summary>Drop a bag item onto the ground. Body is <see cref="DropItemRequestMsg"/>.</summary>
+    DropItemRequest = 56,
     /// <summary>Olympiad status. Body is empty. See <see cref="OlympiadProtocol"/>.</summary>
     OlympiadStatusRequest = 60,
     /// <summary>Join a classed or non-classed queue. Body is <see cref="OlympiadRegisterRequestMsg"/>.</summary>
@@ -194,6 +196,11 @@ public enum MsgType : ushort
     AbnormalStatusUpdate = 1017,
     /// <summary>Ground item entered AOI. Keys match Interlude SpawnItem / client <c>SpawnItemDto</c>.</summary>
     SpawnItem = 1018,
+    /// <summary>
+    /// Ground item dropped (death loot or bag discard). Includes dropper for client throw FX.
+    /// Keys match Interlude DropItem / client <c>DropItemDto</c>.
+    /// </summary>
+    DropItem = 1019,
     /// <summary>Pending party invite (Interlude AskJoinParty).</summary>
     PartyAskJoin = 1027,
     /// <summary>Invite outcome for the requestor (Interlude JoinParty).</summary>

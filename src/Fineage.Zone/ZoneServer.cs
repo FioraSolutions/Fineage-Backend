@@ -442,6 +442,31 @@ public sealed class ZoneServer
                     ZoneLog.Info($"RX Pickup session={sessionId} object={pickup.ObjectId}");
                 break;
             }
+            case MsgType.DropItemRequest:
+            {
+                var drop = Decode<DropItemRequestMsg>(body);
+                if (drop == null)
+                {
+                    await ErrorAsync(session, "bad_request", "DropItemRequest body was not readable.", ct)
+                        .ConfigureAwait(false);
+                    break;
+                }
+
+                string? code = await _world.TryDropItemAsync(session, drop, ct).ConfigureAwait(false);
+                if (code == "world")
+                    await ErrorAsync(session, "world", "EnterWorld first.", ct).ConfigureAwait(false);
+                else if (code == InventoryProtocol.Dead)
+                    await ErrorAsync(session, InventoryProtocol.Dead, "Cannot drop while dead.", ct).ConfigureAwait(false);
+                else if (code == InventoryProtocol.NotOwned)
+                    await ErrorAsync(session, InventoryProtocol.NotOwned, "Item is not in your bag.", ct).ConfigureAwait(false);
+                else if (code == "range")
+                    await ErrorAsync(session, "range", "Drop point is too far.", ct).ConfigureAwait(false);
+                else if (code != null)
+                    await ErrorAsync(session, "bad_request", "Drop was rejected.", ct).ConfigureAwait(false);
+                else
+                    ZoneLog.Info($"RX DropItem session={sessionId} object={drop.ObjectId} count={drop.Count}");
+                break;
+            }
             case MsgType.BuffRequest:
             {
                 var buff = Decode<BuffRequestMsg>(body);

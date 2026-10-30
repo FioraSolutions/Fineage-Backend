@@ -99,6 +99,8 @@ public enum MsgType : ushort
     TradeAddItemRequest = 54,
     /// <summary>Same value as <see cref="Fineage.Protocol.MsgType.TradeDoneRequest"/>.</summary>
     TradeDoneRequest = 55,
+    /// <summary>Same value as <see cref="Fineage.Protocol.MsgType.DropItemRequest"/>.</summary>
+    DropItemRequest = 56,
     /// <summary>Same value as <see cref="Fineage.Protocol.MsgType.OlympiadStatusRequest"/>.</summary>
     OlympiadStatusRequest = 60,
     /// <summary>Same value as <see cref="Fineage.Protocol.MsgType.OlympiadRegisterRequest"/>.</summary>
@@ -164,6 +166,8 @@ public enum MsgType : ushort
     AbnormalStatusUpdate = 1017,
     /// <summary>Same value as <see cref="Fineage.Protocol.MsgType.SpawnItem"/>.</summary>
     SpawnItem = 1018,
+    /// <summary>Same value as <see cref="Fineage.Protocol.MsgType.DropItem"/>.</summary>
+    DropItem = 1019,
 
     /// <summary>Party invite prompt. See <see cref="Fineage.Protocol.MsgType.PartyAskJoin"/>.</summary>
     PartyAskJoin = 1027,

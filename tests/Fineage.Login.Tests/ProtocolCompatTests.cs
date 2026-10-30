@@ -144,6 +144,7 @@ public class ProtocolCompatTests
         Assert.Equal(1016, (ushort)MsgType.UserInfo);
         Assert.Equal(1017, (ushort)MsgType.AbnormalStatusUpdate);
         Assert.Equal(1018, (ushort)MsgType.SpawnItem);
+        Assert.Equal(1019, (ushort)MsgType.DropItem);
         Assert.Equal(1027, (ushort)MsgType.PartyAskJoin);
         Assert.Equal(1028, (ushort)MsgType.PartyJoinResult);
         Assert.Equal(1029, (ushort)MsgType.PartyMemberList);
@@ -178,6 +179,7 @@ public class ProtocolCompatTests
         Assert.Equal(53, (ushort)MsgType.AdminKillPlayer);
         Assert.Equal(54, (ushort)MsgType.TradeAddItemRequest);
         Assert.Equal(55, (ushort)MsgType.TradeDoneRequest);
+        Assert.Equal(56, (ushort)MsgType.DropItemRequest);
         Assert.Equal((ushort)MsgType.CharacterActionRequest, (ushort)Fineage.Protocol.V2.MsgType.CharacterActionRequest);
         Assert.Equal((ushort)MsgType.ReviveRequest, (ushort)Fineage.Protocol.V2.MsgType.ReviveRequest);
         Assert.Equal((ushort)MsgType.Die, (ushort)Fineage.Protocol.V2.MsgType.Die);
@@ -232,6 +234,8 @@ public class ProtocolCompatTests
         Assert.Equal((ushort)MsgType.UserInfo, (ushort)Fineage.Protocol.V2.MsgType.UserInfo);
         Assert.Equal((ushort)MsgType.AbnormalStatusUpdate, (ushort)Fineage.Protocol.V2.MsgType.AbnormalStatusUpdate);
         Assert.Equal((ushort)MsgType.SpawnItem, (ushort)Fineage.Protocol.V2.MsgType.SpawnItem);
+        Assert.Equal((ushort)MsgType.DropItem, (ushort)Fineage.Protocol.V2.MsgType.DropItem);
+        Assert.Equal((ushort)MsgType.DropItemRequest, (ushort)Fineage.Protocol.V2.MsgType.DropItemRequest);
         Assert.Equal((ushort)MsgType.PartyInviteRequest, (ushort)Fineage.Protocol.V2.MsgType.PartyInviteRequest);
         Assert.Equal((ushort)MsgType.PartyAskJoin, (ushort)Fineage.Protocol.V2.MsgType.PartyAskJoin);
         Assert.Equal((ushort)MsgType.TradeRequest, (ushort)Fineage.Protocol.V2.MsgType.TradeRequest);

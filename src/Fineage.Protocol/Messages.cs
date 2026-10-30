@@ -656,6 +656,32 @@ public sealed class SpawnItemMsg
     [Key(7)] public int Unknown { get; set; }
 }
 
+/// <summary>Opcode <see cref="MsgType.DropItemRequest"/> (56). Discard from bag onto the ground.</summary>
+[MessagePackObject]
+public sealed class DropItemRequestMsg
+{
+    [Key(0)] public int ObjectId { get; set; }
+    [Key(1)] public int Count { get; set; } = 1;
+    [Key(2)] public int X { get; set; }
+    [Key(3)] public int Y { get; set; }
+    [Key(4)] public int Z { get; set; }
+}
+
+/// <summary>Opcode <see cref="MsgType.DropItem"/> (1019). Ground drop with optional dropper for FX.</summary>
+[MessagePackObject]
+public sealed class DropItemMsg
+{
+    [Key(0)] public int CharObjectId { get; set; }
+    [Key(1)] public int ObjectId { get; set; }
+    [Key(2)] public int ItemId { get; set; }
+    [Key(3)] public int X { get; set; }
+    [Key(4)] public int Y { get; set; }
+    [Key(5)] public int Z { get; set; }
+    [Key(6)] public bool Stackable { get; set; }
+    [Key(7)] public int Count { get; set; } = 1;
+    [Key(8)] public int Unknown { get; set; }
+}
+
 /// <summary>One row of <see cref="AbnormalStatusUpdateMsg"/>. Keys match client <c>EffectHolder</c>.</summary>
 [MessagePackObject]
 public sealed class AbnormalEffectMsg
