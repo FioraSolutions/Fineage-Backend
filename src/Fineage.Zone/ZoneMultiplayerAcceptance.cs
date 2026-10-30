@@ -932,6 +932,10 @@ public static class ZoneMultiplayerAcceptance
                          MessagePackSerializer.Deserialize<StatusUpdateMsg>(body) is { } victim &&
                          _mobHitsPending.TryGetValue(victim.ObjectId, out int pendingMob) && pendingMob > 0)
                     _mobHitsPending[victim.ObjectId] = pendingMob - 1;
+                // PendingMeleeHit: HP StatusUpdate can land mid-script after Attack; ignore unless asserted.
+                else if (type == MsgType.StatusUpdate && expected != MsgType.StatusUpdate)
+                {
+                }
                 else
                     break;
                 (type, body) = await ReadFrameAsync().ConfigureAwait(false);
