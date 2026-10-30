@@ -140,6 +140,13 @@ public sealed partial class ZoneWorld
         long ddx = destX - (long)npc.ChaseDestX, ddy = destY - (long)npc.ChaseDestY;
         if (!npc.Chasing || ddx * ddx + ddy * ddy > 40L * 40L)
         {
+            if (!npc.Chasing)
+            {
+                // Mobius AttackableAI: setRunning() on attack intention -> ChangeMoveType(run),
+                // so the client chases at run speed in step with the server (not walk + lag).
+                npc.Running = true;
+                FanoutMoveType(npc, outbound);
+            }
             npc.Chasing = true;
             npc.ChaseDestX = destX;
             npc.ChaseDestY = destY;

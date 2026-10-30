@@ -1,3 +1,4 @@
+using Fineage.Zone.Combat;
 using System.Net;
 using System.Net.Sockets;
 using Fineage.Login;
@@ -330,8 +331,10 @@ public class ZoneClanTests
 
         await right.SendAsync(MsgType.AttackRequest, new AttackRequestMsg { TargetObjectId = gremlin.ObjectId });
         await right.ExpectAsync<AttackMsg>(MsgType.Attack);
-        await right.ExpectAsync<StatusUpdateMsg>(MsgType.StatusUpdate);
         await left.ExpectAsync<AttackMsg>(MsgType.Attack);
+        // Damage lands at melee hitTime, not with the Attack packet.
+        fx.Clock.Advance(TimeSpan.FromMilliseconds(ZoneCombat.PlayerMeleeHitDelayMs));
+        await right.ExpectAsync<StatusUpdateMsg>(MsgType.StatusUpdate);
         await left.ExpectAsync<StatusUpdateMsg>(MsgType.StatusUpdate);
 
         await right.SendAsync(MsgType.ClanLeaveRequest, new ClanLeaveRequestMsg());
