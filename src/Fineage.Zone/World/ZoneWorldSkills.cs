@@ -70,6 +70,8 @@ public sealed partial class ZoneWorld
             return TrySkillUseBuff(session, player, request, template, levelData, level, now, outbound);
         if (template.IsDebuffSkill)
             return TrySkillUseDebuff(session, player, request, template, levelData, level, now, outbound);
+        if (template.IsInstantSupportSkill(level))
+            return TrySkillUseSupport(session, player, request, template, levelData, level, now, outbound);
 
         return TrySkillUseAttack(session, player, request, template, levelData, level, now, outbound);
     }
@@ -132,7 +134,7 @@ public sealed partial class ZoneWorld
         long now,
         List<Pending> outbound)
     {
-        int targetId = ResolveBuffTargetId(session, player, request, template);
+        int targetId = ResolveFriendlyTargetId(session, player, request, template);
         if (targetId <= 0)
             return SkillProtocol.Target;
         if (!_byId.TryGetValue(targetId, out var target))
@@ -154,6 +156,62 @@ public sealed partial class ZoneWorld
         FanoutSkill(player, target, cast, targetStatus: null, CasterMpStatus(player), outbound);
         player.CombatUntilUnixMs = now + ClanProtocol.CombatStanceMillis;
         return null;
+    }
+
+    /// <summary>
+    /// Instant heal/utility (Elemental Heal, Heal, Self Heal, …). Datapack heal power is often 0 —
+    /// use a Mobius-ish fallback so SELF heals work with a mob selected.
+    /// </summary>
+    string? TrySkillUseSupport(
+        ZoneSession session,
+        ZoneEntity player,
+        SkillUseRequestMsg request,
+        SkillDefinition template,
+        SkillLevelData levelData,
+        int level,
+        long now,
+        List<Pending> outbound)
+    {
+        int targetId = ResolveFriendlyTargetId(session, player, request, template);
+        if (targetId <= 0)
+            return SkillProtocol.Target;
+        if (!_byId.TryGetValue(targetId, out var target))
+            return SkillProtocol.Target;
+        if (target.Kind != ZoneEntityKind.Player || target.Dead)
+            return SkillProtocol.Target;
+        if (targetId != player.ObjectId && !VisibleTo(player.ObjectId, targetId))
+            return SkillProtocol.Target;
+        if (template.CastRange > 0 &&
+            targetId != player.ObjectId &&
+            !ZoneCombat.InCastRange(player.X, player.Y, target.X, target.Y, template.CastRange))
+            return SkillProtocol.Range;
+
+        player.CurMp = Math.Max(0, player.CurMp - levelData.MpConsume);
+        if (template.ReuseDelayMs > 0)
+            player.SkillReuseUntilMs[request.SkillId] = now + template.ReuseDelayMs;
+
+        int heal = SupportHealAmount(levelData, level, player.Level);
+        if (heal > 0 && target.MaxHp > 0)
+            target.CurHp = Math.Min(target.MaxHp, target.CurHp + heal);
+
+        var cast = BuildCast(player, target, request.SkillId, level, template);
+        var hpStatus = new StatusUpdateMsg
+        {
+            ObjectId = target.ObjectId,
+            AttributeIds = [InterludeStatus.CurHp, InterludeStatus.MaxHp],
+            Values = [target.CurHp, target.MaxHp]
+        };
+        FanoutSkill(player, target, cast, hpStatus, CasterMpStatus(player), outbound);
+        player.CombatUntilUnixMs = now + ClanProtocol.CombatStanceMillis;
+        return null;
+    }
+
+    static int SupportHealAmount(SkillLevelData levelData, int skillLevel, int playerLevel)
+    {
+        if (levelData.Power > 0)
+            return levelData.Power;
+        // Datapack omitted heal power; scale by skill level and character level until import is fixed.
+        return Math.Max(25, 18 + skillLevel * 10 + Math.Max(1, playerLevel) * 4);
     }
 
     string? TrySkillUseDebuff(
@@ -190,12 +248,22 @@ public sealed partial class ZoneWorld
         return null;
     }
 
-    static int ResolveBuffTargetId(ZoneSession session, ZoneEntity player, SkillUseRequestMsg request, SkillDefinition template)
+    /// <summary>
+    /// Friendly skills: SELF always self. Otherwise prefer an explicit player target; if the client
+    /// sent a mob (selected target), fall back to self so Heal works without clearing the target.
+    /// </summary>
+    int ResolveFriendlyTargetId(ZoneSession session, ZoneEntity player, SkillUseRequestMsg request, SkillDefinition template)
     {
         if (string.Equals(template.TargetType, "SELF", StringComparison.OrdinalIgnoreCase))
             return player.ObjectId;
-        if (request.TargetObjectId > 0)
-            return request.TargetObjectId;
+
+        int requested = request.TargetObjectId > 0 ? request.TargetObjectId : session.SelectedTargetId;
+        if (requested > 0 &&
+            _byId.TryGetValue(requested, out var candidate) &&
+            candidate.Kind == ZoneEntityKind.Player &&
+            !candidate.Dead)
+            return requested;
+
         return player.ObjectId;
     }
 

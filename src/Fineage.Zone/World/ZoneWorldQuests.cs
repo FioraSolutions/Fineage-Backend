@@ -333,6 +333,31 @@ public sealed partial class ZoneWorld
             Params = [exp.ToString(System.Globalization.CultureInfo.InvariantCulture), sp.ToString(System.Globalization.CultureInfo.InvariantCulture)],
             Text = $"You have earned {exp} experience and {sp} SP."
         }));
+        // StatusUpdate carries live Exp/Sp/Level; UserInfo refreshes the full sheet (vitals + template stats).
+        outbound.Add(Pack(session, MsgType.StatusUpdate, new StatusUpdateMsg
+        {
+            ObjectId = killer.ObjectId,
+            AttributeIds =
+            [
+                InterludeStatus.Level,
+                InterludeStatus.Exp,
+                InterludeStatus.Sp,
+                InterludeStatus.CurHp,
+                InterludeStatus.MaxHp,
+                InterludeStatus.CurMp,
+                InterludeStatus.MaxMp
+            ],
+            Values =
+            [
+                killer.Level,
+                (int)Math.Min(int.MaxValue, killer.Exp),
+                killer.Sp,
+                killer.CurHp,
+                killer.MaxHp,
+                killer.CurMp,
+                killer.MaxMp
+            ]
+        }));
         outbound.Add(Pack(session, MsgType.UserInfo, UserInfo(killer)));
         SaveQuestProgress(session, killer);
     }

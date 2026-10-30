@@ -58,6 +58,32 @@ public sealed class SkillDefinition
 
     public bool IsDebuffSkill => AppliesAbnormal && IsDebuff;
 
+    /// <summary>
+    /// Instant heal/utility (A1, no abnormal). Distinguished from nukes by <see cref="SkillLevelData.Power"/> == 0
+    /// in our datapack (heal power was not imported; attack skills keep non-zero power).
+    /// </summary>
+    public bool IsInstantSupportSkill(int skillLevel)
+    {
+        if (Passive || IsDebuff || AppliesAbnormal)
+            return false;
+        if (!IsFriendlyTargetType(TargetType))
+            return false;
+        if (!TryLevelData(skillLevel, out var data))
+            return false;
+        return data.Power <= 0;
+    }
+
+    public static bool IsFriendlyTargetType(string? targetType)
+    {
+        if (string.IsNullOrWhiteSpace(targetType))
+            return false;
+        return targetType.Equals("SELF", StringComparison.OrdinalIgnoreCase)
+            || targetType.Equals("ONE", StringComparison.OrdinalIgnoreCase)
+            || targetType.Equals("PARTY", StringComparison.OrdinalIgnoreCase)
+            || targetType.Equals("SERVITOR", StringComparison.OrdinalIgnoreCase)
+            || targetType.Equals("PET", StringComparison.OrdinalIgnoreCase);
+    }
+
     public int MaxLevel => _levels.Length;
 
     public SkillLevelData LevelData(int level)

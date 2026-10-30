@@ -38,9 +38,13 @@ namespace Fineage.Protocol;
 /// <item><description>10 x, 11 y, 12 z (saved position, or the class creation point when none is saved)</description></item>
 /// <item><description>13 deleteSecondsLeft (0 when not pending; whole seconds, truncated)</description></item>
 /// <item><description>14 isLastPlayed</description></item>
+/// <item><description>15–20 curHp, maxHp, curMp, maxMp, curCp, maxCp (CharSelect vitals; from CharSelectStats)</description></item>
+/// <item><description>21 exp (int64), 22 sp, 23 karma, 24 weaponItemId (RHand paperdoll item id, 0 if unarmed)</description></item>
+/// <item><description>25 paperdoll (int[17] item ids by PaperdollSlot; 0 = empty; [7]=RHand, [9]=gloves, [10]=chest, [11]=legs, [12]=feet)</description></item>
 /// </list>
 ///
-/// <para>Readers must tolerate a longer array than they know. Extra elements are additive.</para>
+/// <para>Current login always serializes keys 0–25 (array length 26). Older clients may stop after key 14 or 24.
+/// Readers must tolerate a longer array than they know. Extra elements are additive.</para>
 ///
 /// <para>Error codes (snake_case): <see cref="CharacterNotFound"/>, <see cref="CharacterPendingDelete"/>, <see cref="DeleteFailed"/>,
 /// plus the existing <c>auth_required</c>, <c>bad_request</c>, <c>bad_slot</c>, <c>rate_limit</c>.

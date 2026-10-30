@@ -189,6 +189,11 @@ public static class ZoneMultiplayerAcceptance
         var dropRight = await observer.ExpectAsync<SpawnItemMsg>(MsgType.SpawnItem).ConfigureAwait(false);
         ExpectGroundDrop(dropLeft, dropRight, gremlin);
 
+        // Kill reward is to the killer only: SystemMessage 95, StatusUpdate (exp/sp), UserInfo.
+        _ = await attacker.ExpectAsync<SystemMessageMsg>(MsgType.SystemMessage).ConfigureAwait(false);
+        _ = await attacker.ExpectAsync<StatusUpdateMsg>(MsgType.StatusUpdate).ConfigureAwait(false);
+        _ = await attacker.ExpectAsync<UserInfoMsg>(MsgType.UserInfo).ConfigureAwait(false);
+
         await attacker.SendAsync(MsgType.Say, new SayMsg { Text = "gg", ChatType = ChatProtocol.Shout }).ConfigureAwait(false);
         ExpectSay(await attacker.ExpectAsync<CreatureSayMsg>(MsgType.CreatureSay).ConfigureAwait(false), fighter, "gg", ChatProtocol.Shout);
         ExpectSay(await observer.ExpectAsync<CreatureSayMsg>(MsgType.CreatureSay).ConfigureAwait(false), fighter, "gg", ChatProtocol.Shout);
@@ -895,12 +900,16 @@ public static class ZoneMultiplayerAcceptance
         public async Task<T> ExpectAsync<T>(MsgType expected)
         {
             var (type, body) = await ReadFrameAsync().ConfigureAwait(false);
-            // Kill reward (#179): SystemMessage 95 then UserInfo. Scenarios that do not assert it skip both.
+            // Kill reward: SystemMessage 95, StatusUpdate (exp/sp), UserInfo. Skip when not asserted.
             while (true)
             {
                 if (type == MsgType.SystemMessage && expected != MsgType.SystemMessage
                     && MessagePackSerializer.Deserialize<SystemMessageMsg>(body).Id == 95)
                     _skipRewardUserInfo = true;
+                else if (type == MsgType.StatusUpdate && expected != MsgType.StatusUpdate && _skipRewardUserInfo)
+                {
+                    /* exp/sp fan-out between SystemMessage 95 and UserInfo */
+                }
                 else if (type == MsgType.UserInfo && expected != MsgType.UserInfo && _skipRewardUserInfo)
                     _skipRewardUserInfo = false;
                 else

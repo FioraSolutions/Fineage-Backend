@@ -705,7 +705,7 @@ public sealed partial class ZoneWorld
         Running = entity.Running
     };
 
-    static UserInfoMsg UserInfo(ZoneEntity entity)
+    UserInfoMsg UserInfo(ZoneEntity entity)
     {
         if (entity.Inventory == null)
             throw new InvalidOperationException($"Player {entity.ObjectId} has no inventory.");
@@ -723,7 +723,49 @@ public sealed partial class ZoneWorld
             entity.WeaponGradePenalty,
             entity.ArmorGradePenalty,
             entity.ClanId,
-            ClanProtocol.CrestId);
+            ClanProtocol.CrestId,
+            BuildUserInfoVitals(entity));
+    }
+
+    InventoryMessages.UserInfoVitals BuildUserInfoVitals(ZoneEntity entity)
+    {
+        int level = Math.Max(1, entity.Level);
+        int maxCp = 0;
+        int str = 0, dex = 0, con = 0, intel = 0, wit = 0, men = 0;
+        int pAtk = 0, mAtk = 0, pDef = 0, mDef = 0, pAtkSpd = 0, mAtkSpd = 0, accuracy = 0, crit = 0;
+        if (PlayerClasses.TryGet(entity.ClassId, out var template) && template != null)
+        {
+            try { maxCp = template.ModifiedCp(level); }
+            catch (ArgumentOutOfRangeException) { maxCp = template.MaxCp; }
+            str = template.Str;
+            dex = template.Dex;
+            con = template.Con;
+            intel = template.Int;
+            wit = template.Wit;
+            men = template.Men;
+            pAtk = template.PAtk;
+            mAtk = template.MAtk;
+            pDef = template.PDef;
+            mDef = template.MDef;
+            pAtkSpd = template.PAtkSpd;
+            mAtkSpd = template.MAtkSpd;
+            accuracy = template.Accuracy;
+            crit = template.CritRate;
+        }
+
+        return new InventoryMessages.UserInfoVitals(
+            level,
+            entity.CurHp,
+            entity.MaxHp,
+            entity.CurMp,
+            entity.MaxMp,
+            maxCp,
+            maxCp,
+            entity.Exp,
+            entity.Sp,
+            str, dex, con, intel, wit, men,
+            pAtk, mAtk, pDef, mDef, pAtkSpd, mAtkSpd,
+            accuracy, crit);
     }
 
     static CharInfoMsg CharInfo(ZoneEntity entity) => new()

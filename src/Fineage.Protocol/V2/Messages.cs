@@ -156,8 +156,13 @@ public sealed partial class CharacterSummaryMsg
     [Key(21)] public long Exp { get; set; }
     [Key(22)] public int Sp { get; set; }
     [Key(23)] public int Karma { get; set; }
-    /// <summary>Right-hand (or two-hand) item id, 0 when unarmed.</summary>
+    /// <summary>Right-hand (or two-hand) item id, 0 when unarmed. Same as <see cref="Paperdoll"/>[7].</summary>
     [Key(24)] public int WeaponItemId { get; set; }
+    /// <summary>
+    /// Equipped item ids in paperdoll order, length 17 (Under…Hair2). Index 7 is RHand, 9 gloves, 10 chest, 11 legs, 12 feet.
+    /// Zero means empty. Older clients ignore this key.
+    /// </summary>
+    [Key(25)] public int[] Paperdoll { get; set; } = [];
 }
 
 [MessagePackObject]

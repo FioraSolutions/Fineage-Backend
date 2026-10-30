@@ -130,8 +130,13 @@ public sealed class CharacterSummaryMsg
     [Key(21)] public long Exp { get; set; }
     [Key(22)] public int Sp { get; set; }
     [Key(23)] public int Karma { get; set; }
-    /// <summary>Right-hand (or two-hand) item id, 0 when unarmed.</summary>
+    /// <summary>Right-hand (or two-hand) item id, 0 when unarmed. Same as <see cref="Paperdoll"/>[7].</summary>
     [Key(24)] public int WeaponItemId { get; set; }
+    /// <summary>
+    /// Equipped item ids in paperdoll order, length 17 (Under…Hair2). Index 7 is RHand, 9 gloves, 10 chest, 11 legs, 12 feet.
+    /// Zero means empty. Older clients ignore this key.
+    /// </summary>
+    [Key(25)] public int[] Paperdoll { get; set; } = [];
 }
 
 [MessagePackObject]
@@ -305,6 +310,30 @@ public sealed class UserInfoMsg
     [Key(13)] public int ClanId { get; set; }
     /// <summary>Pledge crest id. Always 0 until crests exist.</summary>
     [Key(14)] public int ClanCrestId { get; set; }
+    /// <summary>CharSelect/world vitals. Older clients ignore keys 15+.</summary>
+    [Key(15)] public int Level { get; set; } = 1;
+    [Key(16)] public int CurHp { get; set; }
+    [Key(17)] public int MaxHp { get; set; }
+    [Key(18)] public int CurMp { get; set; }
+    [Key(19)] public int MaxMp { get; set; }
+    [Key(20)] public int CurCp { get; set; }
+    [Key(21)] public int MaxCp { get; set; }
+    [Key(22)] public long Exp { get; set; }
+    [Key(23)] public int Sp { get; set; }
+    [Key(24)] public int Str { get; set; }
+    [Key(25)] public int Dex { get; set; }
+    [Key(26)] public int Con { get; set; }
+    [Key(27)] public int Int { get; set; }
+    [Key(28)] public int Wit { get; set; }
+    [Key(29)] public int Men { get; set; }
+    [Key(30)] public int PAtk { get; set; }
+    [Key(31)] public int MAtk { get; set; }
+    [Key(32)] public int PDef { get; set; }
+    [Key(33)] public int MDef { get; set; }
+    [Key(34)] public int PAtkSpd { get; set; }
+    [Key(35)] public int MAtkSpd { get; set; }
+    [Key(36)] public int Accuracy { get; set; }
+    [Key(37)] public int CritRate { get; set; }
 }
 
 /// <summary>One row of <see cref="ItemListMsg"/> or the item fields of <see cref="InventoryUpdateEntryMsg"/>.</summary>
@@ -496,10 +525,15 @@ public sealed class StatusUpdateMsg
 /// <summary>Interlude StatusUpdate attribute ids (see client StatusUpdate.AttributeType).</summary>
 public static class InterludeStatus
 {
+    public const int Level = 0x01;
+    public const int Exp = 0x02;
     public const int CurHp = 0x09;
     public const int MaxHp = 0x0a;
     public const int CurMp = 0x0b;
     public const int MaxMp = 0x0c;
+    public const int Sp = 0x0d;
+    public const int CurCp = 0x21;
+    public const int MaxCp = 0x22;
     public const int TargetColorHostile = 11;
 
     /// <summary>Interlude MyTargetSelected color: attacker level minus target level (L2J/Mobius).</summary>

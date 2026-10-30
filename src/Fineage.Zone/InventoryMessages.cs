@@ -8,6 +8,32 @@ public static class InventoryMessages
 {
     public const int PaperdollSlotCount = 17;
 
+    /// <summary>Vitals and class-template combat stats carried on UserInfo keys 15–37.</summary>
+    public readonly record struct UserInfoVitals(
+        int Level,
+        int CurHp,
+        int MaxHp,
+        int CurMp,
+        int MaxMp,
+        int CurCp,
+        int MaxCp,
+        long Exp,
+        int Sp,
+        int Str = 0,
+        int Dex = 0,
+        int Con = 0,
+        int Int = 0,
+        int Wit = 0,
+        int Men = 0,
+        int PAtk = 0,
+        int MAtk = 0,
+        int PDef = 0,
+        int MDef = 0,
+        int PAtkSpd = 0,
+        int MAtkSpd = 0,
+        int Accuracy = 0,
+        int CritRate = 0);
+
     public static UserInfoMsg UserInfo(
         int objectId,
         string name,
@@ -22,11 +48,12 @@ public static class InventoryMessages
         int weaponGradePenalty = 0,
         int armorGradePenalty = 0,
         int clanId = 0,
-        int clanCrestId = 0)
+        int clanCrestId = 0,
+        UserInfoVitals? vitals = null)
     {
         ArgumentNullException.ThrowIfNull(inventory);
         var penalty = new GradePenalty(weaponGradePenalty, armorGradePenalty);
-        return new UserInfoMsg
+        var msg = new UserInfoMsg
         {
             ObjectId = objectId,
             Name = name,
@@ -44,6 +71,34 @@ public static class InventoryMessages
             ClanId = clanId,
             ClanCrestId = clanCrestId
         };
+        if (vitals is { } v)
+        {
+            msg.Level = v.Level;
+            msg.CurHp = v.CurHp;
+            msg.MaxHp = v.MaxHp;
+            msg.CurMp = v.CurMp;
+            msg.MaxMp = v.MaxMp;
+            msg.CurCp = v.CurCp;
+            msg.MaxCp = v.MaxCp;
+            msg.Exp = v.Exp;
+            msg.Sp = v.Sp;
+            msg.Str = v.Str;
+            msg.Dex = v.Dex;
+            msg.Con = v.Con;
+            msg.Int = v.Int;
+            msg.Wit = v.Wit;
+            msg.Men = v.Men;
+            msg.PAtk = v.PAtk;
+            msg.MAtk = v.MAtk;
+            msg.PDef = v.PDef;
+            msg.MDef = v.MDef;
+            msg.PAtkSpd = v.PAtkSpd;
+            msg.MAtkSpd = v.MAtkSpd;
+            msg.Accuracy = v.Accuracy;
+            msg.CritRate = v.CritRate;
+        }
+
+        return msg;
     }
 
     public static ItemListMsg ItemList(PlayerInventory inventory)
