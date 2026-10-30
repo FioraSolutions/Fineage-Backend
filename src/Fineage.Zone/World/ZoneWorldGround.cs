@@ -1,3 +1,4 @@
+using Fineage.Game.Services;
 using Fineage.Protocol;
 using Fineage.Zone.Combat;
 using Fineage.Zone.Drops;
@@ -44,28 +45,77 @@ public sealed partial class ZoneWorld
         return null;
     }
 
-    void SpawnDeathDrops(int npcId, int x, int y, int z, IReadOnlyList<ZoneEntity> watchers, List<Pending> outbound)
+    /// <summary>
+    /// Death loot: Adena is auto-looted to the killer (Mobius-style — bag update, not a hard-to-see coin pile).
+    /// Other items still spawn on the corpse tile for pickup.
+    /// </summary>
+    void SpawnDeathDrops(
+        int npcId,
+        int x,
+        int y,
+        int z,
+        ZoneEntity? killer,
+        IReadOnlyList<ZoneEntity> watchers,
+        List<Pending> outbound)
     {
         if (!_dropCatalog.TryGet(npcId, out var definition))
+        {
+            ZoneLog.Info($"drop miss npc={npcId} (no droplist)");
             return;
+        }
 
         var rolls = DropRoller.RollDeath(definition, _dropRandom, _dropRates);
+        if (rolls.Count == 0)
+            ZoneLog.Info($"drop empty npc={npcId}");
+
+        int instanceId = 0;
+        if (killer != null)
+            instanceId = killer.InstanceId;
+        else if (watchers.Count > 0)
+            instanceId = watchers[0].InstanceId;
+
         foreach (var stack in rolls)
-            SpawnGroundStack(stack.ItemId, stack.Count, x, y, z, watchers, outbound);
+        {
+            if (stack.ItemId == WarehouseRules.AdenaItemId &&
+                killer is { Inventory: not null, Session: not null, Kind: ZoneEntityKind.Player })
+            {
+                var added = killer.Inventory.Add(stack.ItemId, stack.Count);
+                outbound.Add(Pack(killer.Session, MsgType.InventoryUpdate,
+                    InventoryMessages.Update(InventoryChange.Add, added)));
+                if (killer.Session != null)
+                    SaveInventory(killer.Session, killer.Inventory);
+                ZoneLog.Info($"drop adena auto object={killer.ObjectId} count={stack.Count} npc={npcId}");
+                continue;
+            }
+
+            SpawnGroundStack(stack.ItemId, stack.Count, x, y, z, instanceId, watchers, outbound);
+        }
     }
 
-    void SpawnGroundStack(int itemId, int count, int x, int y, int z, IReadOnlyList<ZoneEntity> watchers, List<Pending> outbound)
+    void SpawnGroundStack(
+        int itemId,
+        int count,
+        int x,
+        int y,
+        int z,
+        int instanceId,
+        IReadOnlyList<ZoneEntity> watchers,
+        List<Pending> outbound)
     {
         if (count <= 0)
             return;
         if (!_game.Items.TryGet(itemId, out var template))
+        {
+            ZoneLog.Info($"drop skip unknown item={itemId}");
             return;
+        }
 
         int objectId = _itemIds.Next();
         var ground = new ZoneEntity
         {
             ObjectId = objectId,
             Kind = ZoneEntityKind.GroundItem,
+            InstanceId = instanceId,
             X = x,
             Y = y,
             Z = z,
@@ -77,11 +127,10 @@ public sealed partial class ZoneWorld
         _aoi.Enter(objectId, x, y);
 
         byte[] body = MessagePackSerializer.Serialize(SpawnItem(ground));
+        // Death-drop fan-out: always notify corpse watchers (do not re-filter AOI — item just entered).
         foreach (var watcher in watchers)
         {
             if (watcher.Session == null)
-                continue;
-            if (!VisibleTo(watcher.ObjectId, objectId))
                 continue;
             watcher.Knownlist.Add(objectId);
             outbound.Add(new Pending(watcher.Session, MsgType.SpawnItem, body));

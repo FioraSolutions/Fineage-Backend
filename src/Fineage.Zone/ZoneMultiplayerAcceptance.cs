@@ -185,9 +185,9 @@ public static class ZoneMultiplayerAcceptance
         if (delLeft.ObjectId != gremlin.ObjectId || delRight.ObjectId != gremlin.ObjectId)
             throw new InvalidOperationException($"die expected {gremlin.ObjectId}");
 
-        var dropLeft = await attacker.ExpectAsync<SpawnItemMsg>(MsgType.SpawnItem).ConfigureAwait(false);
-        var dropRight = await observer.ExpectAsync<SpawnItemMsg>(MsgType.SpawnItem).ConfigureAwait(false);
-        ExpectGroundDrop(dropLeft, dropRight, gremlin);
+        // Adena auto-loots to killer inventory (no ground SpawnItem for item 57).
+        var adena = await attacker.ExpectAsync<InventoryUpdateMsg>(MsgType.InventoryUpdate).ConfigureAwait(false);
+        ExpectAdenaAutoLoot(adena);
 
         // Kill reward is to the killer only: SystemMessage 95, StatusUpdate (exp/sp), UserInfo.
         _ = await attacker.ExpectAsync<SystemMessageMsg>(MsgType.SystemMessage).ConfigureAwait(false);
@@ -242,26 +242,14 @@ public static class ZoneMultiplayerAcceptance
 
         _ = await left.ExpectAsync<DieMsg>(MsgType.Die).ConfigureAwait(false);
         _ = await right.ExpectAsync<DieMsg>(MsgType.Die).ConfigureAwait(false);
-        var dropLeft = await left.ExpectAsync<SpawnItemMsg>(MsgType.SpawnItem).ConfigureAwait(false);
-        var dropRight = await right.ExpectAsync<SpawnItemMsg>(MsgType.SpawnItem).ConfigureAwait(false);
-        ExpectGroundDrop(dropLeft, dropRight, gremlin);
-
-        await left.SendAsync(MsgType.PickupRequest, new PickupRequestMsg { ObjectId = dropLeft.ObjectId })
-            .ConfigureAwait(false);
         var update = await left.ExpectAsync<InventoryUpdateMsg>(MsgType.InventoryUpdate).ConfigureAwait(false);
-        var goneLeft = await left.ExpectAsync<DeleteObjectMsg>(MsgType.DeleteObject).ConfigureAwait(false);
-        var goneRight = await right.ExpectAsync<DeleteObjectMsg>(MsgType.DeleteObject).ConfigureAwait(false);
-        if (goneLeft.ObjectId != dropLeft.ObjectId || goneRight.ObjectId != dropLeft.ObjectId)
-            throw new InvalidOperationException($"pickup delete expected {dropLeft.ObjectId}");
-        if (update.Changes.Length != 1)
-            throw new InvalidOperationException($"expected one inventory change, got {update.Changes.Length}");
-        var row = update.Changes[0];
-        var expected = MobiusDropTestSeed.ExpectedGremlinDeathDrop();
-        if (row.Change != InventoryChange.Add || row.ItemId != expected.ItemId || row.Count != expected.Count)
-            throw new InvalidOperationException($"inventory add item={row.ItemId} count={row.Count}");
-
-        left.ExpectQuiet();
+        ExpectAdenaAutoLoot(update);
+        _ = await left.ExpectAsync<SystemMessageMsg>(MsgType.SystemMessage).ConfigureAwait(false);
+        _ = await left.ExpectAsync<StatusUpdateMsg>(MsgType.StatusUpdate).ConfigureAwait(false);
+        _ = await left.ExpectAsync<UserInfoMsg>(MsgType.UserInfo).ConfigureAwait(false);
+        // Observer must not receive the killer's adena bag update.
         right.ExpectQuiet();
+        left.ExpectQuiet();
     }
 
     public static async Task RunSpoilAdminAsync()
@@ -297,7 +285,8 @@ public static class ZoneMultiplayerAcceptance
         }
 
         _ = await peer.ExpectAsync<DieMsg>(MsgType.Die).ConfigureAwait(false);
-        _ = await peer.ExpectAsync<SpawnItemMsg>(MsgType.SpawnItem).ConfigureAwait(false);
+        // Death adena auto-loots; corpse spoil remains for sweep.
+        _ = await peer.ExpectAsync<InventoryUpdateMsg>(MsgType.InventoryUpdate).ConfigureAwait(false);
 
         await peer.SendAsync(MsgType.AdminSweepCorpse, new AdminSweepCorpseMsg { TargetObjectId = gremlin.ObjectId })
             .ConfigureAwait(false);
@@ -311,15 +300,14 @@ public static class ZoneMultiplayerAcceptance
         peer.ExpectQuiet();
     }
 
-    static void ExpectGroundDrop(SpawnItemMsg left, SpawnItemMsg right, NpcInfoMsg gremlin)
+    static void ExpectAdenaAutoLoot(InventoryUpdateMsg update)
     {
         var expected = MobiusDropTestSeed.ExpectedGremlinDeathDrop();
-        if (left.ObjectId != right.ObjectId || left.ObjectId < PlayerInventory.FirstObjectId)
-            throw new InvalidOperationException($"drop object id {left.ObjectId}/{right.ObjectId}");
-        if (left.ItemId != expected.ItemId || left.Count != expected.Count || !left.Stackable)
-            throw new InvalidOperationException($"drop item={left.ItemId} count={left.Count} stackable={left.Stackable}");
-        if (left.X != gremlin.X || left.Y != gremlin.Y || left.Z != gremlin.Z)
-            throw new InvalidOperationException($"drop @ {left.X},{left.Y},{left.Z} expected gremlin tile");
+        if (update.Changes.Length != 1)
+            throw new InvalidOperationException($"expected one inventory change, got {update.Changes.Length}");
+        var row = update.Changes[0];
+        if (row.Change != InventoryChange.Add || row.ItemId != expected.ItemId || row.Count != expected.Count)
+            throw new InvalidOperationException($"adena auto-loot item={row.ItemId} count={row.Count}");
     }
 
     public static async Task RunBuffSharedAsync()

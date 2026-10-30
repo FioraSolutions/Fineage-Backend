@@ -131,7 +131,7 @@ public sealed partial class ZoneWorld
 
         if (target.CurHp <= 0)
         {
-            RemoveDeadNpc(target, outbound);
+            RemoveDeadNpc(target, outbound, killer: player);
             GrantKillReward(player, target, outbound);
         }
 
@@ -219,7 +219,7 @@ public sealed partial class ZoneWorld
         }
     }
 
-    void RemoveDeadNpc(ZoneEntity npc, List<Pending> outbound)
+    void RemoveDeadNpc(ZoneEntity npc, List<Pending> outbound, ZoneEntity? killer = null)
     {
         // Kill quest steps are not applied here. IQuestKillHook is the later combat entry.
         int objectId = npc.ObjectId;
@@ -257,13 +257,13 @@ public sealed partial class ZoneWorld
 
         if (npc.SweepItems.Count > 0)
         {
-            SpawnDeathDrops(npcId, x, y, z, watchers, outbound);
+            SpawnDeathDrops(npcId, x, y, z, killer, watchers, outbound);
             npc.CorpseAwaitingSweep = true;
             ZoneLog.Info($"corpse object={objectId} spoiler={npc.SpoilerObjectId} sweep={npc.SweepItems.Count}");
             return;
         }
 
-        SpawnDeathDrops(npcId, x, y, z, watchers, outbound);
+        SpawnDeathDrops(npcId, x, y, z, killer, watchers, outbound);
         // Corpse lies for DEFAULT_CORPSE_TIME, then DeleteObject (TickCorpseDecay).
         npc.DecayAtMs = _clock().ToUnixTimeMilliseconds() + ZoneCombat.CorpseDecayMs;
     }

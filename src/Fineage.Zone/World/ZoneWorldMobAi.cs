@@ -49,7 +49,7 @@ public sealed partial class ZoneWorld
 
         if (target.CurHp <= 0)
         {
-            RemoveDeadNpc(target, outbound);
+            RemoveDeadNpc(target, outbound, killer: player);
             GrantKillReward(player, target, outbound);
         }
     }
