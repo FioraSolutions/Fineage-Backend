@@ -108,7 +108,6 @@ public sealed partial class ZoneWorld
             return "attack";
 
         int damage = ZoneCombat.SampleMeleeDamage;
-        target.CurHp = Math.Max(0, target.CurHp - damage);
 
         var attack = new AttackMsg
         {
@@ -122,18 +121,12 @@ public sealed partial class ZoneWorld
             TargetY = target.Y,
             TargetZ = target.Z
         };
-        var status = StatusFor(target);
 
-        FanoutCombat(player, target, attack, status, outbound);
-        AddHate(target, player);
-
-        player.CombatUntilUnixMs = _clock().ToUnixTimeMilliseconds() + ClanProtocol.CombatStanceMillis;
-
-        if (target.CurHp <= 0)
-        {
-            RemoveDeadNpc(target, outbound, killer: player);
-            GrantKillReward(player, target, outbound);
-        }
+        // Swing now; HP drops at hitTime (Mobius onHitTimer).
+        FanoutAttack(player, target, attack, outbound);
+        long now = _clock().ToUnixTimeMilliseconds();
+        player.CombatUntilUnixMs = now + ClanProtocol.CombatStanceMillis;
+        _meleeHits.Add(new PendingMeleeHit(player.ObjectId, targetId, damage, now + ZoneCombat.PlayerMeleeHitDelayMs));
 
         return null;
     }
@@ -152,6 +145,7 @@ public sealed partial class ZoneWorld
                 {
                     long now = _clock().ToUnixTimeMilliseconds();
                     TickPendingHits(now, outbound);
+                    TickMeleeHits(now, outbound);
                     TickAutoAttacks(outbound);
                     TickMobAttacks(now, outbound);
                     TickCorpseDecay(now, outbound);
@@ -198,6 +192,68 @@ public sealed partial class ZoneWorld
         AttributeIds = [InterludeStatus.CurHp, InterludeStatus.MaxHp],
         Values = [entity.CurHp, entity.MaxHp]
     };
+
+    readonly List<PendingMeleeHit> _meleeHits = new();
+
+    void FanoutAttack(ZoneEntity attacker, ZoneEntity target, AttackMsg attack, List<Pending> outbound)
+    {
+        byte[] attackBody = MessagePackSerializer.Serialize(attack);
+        foreach (var watcher in Players())
+        {
+            if (watcher.Session == null)
+                continue;
+            bool cares = ReferenceEquals(watcher, attacker) ||
+                         watcher.Knownlist.Contains(target.ObjectId) ||
+                         watcher.Knownlist.Contains(attacker.ObjectId);
+            if (cares)
+                outbound.Add(new Pending(watcher.Session, MsgType.Attack, attackBody));
+        }
+    }
+
+    void TickMeleeHits(long now, List<Pending> outbound)
+    {
+        if (_meleeHits.Count == 0)
+            return;
+        var due = _meleeHits.Where(h => h.DueUnixMs <= now).ToList();
+        if (due.Count == 0)
+            return;
+        _meleeHits.RemoveAll(h => h.DueUnixMs <= now);
+        foreach (var hit in due)
+            ResolveMeleeHit(hit, now, outbound);
+    }
+
+    void ResolveMeleeHit(PendingMeleeHit hit, long now, List<Pending> outbound)
+    {
+        if (!_byId.TryGetValue(hit.AttackerId, out var attacker) || attacker.CurHp <= 0 || attacker.Dead)
+            return;
+        if (!_byId.TryGetValue(hit.TargetId, out var target) || target.CurHp <= 0 || target.Dead)
+            return;
+
+        target.CurHp = Math.Max(0, target.CurHp - hit.Damage);
+
+        if (target.Kind == ZoneEntityKind.Npc)
+        {
+            FanoutVitals(target, StatusFor(target), outbound);
+            AddHate(target, attacker);
+            attacker.CombatUntilUnixMs = now + ClanProtocol.CombatStanceMillis;
+            if (target.CurHp <= 0)
+            {
+                RemoveDeadNpc(target, outbound, killer: attacker);
+                GrantKillReward(attacker, target, outbound);
+            }
+            return;
+        }
+
+        target.CombatUntilUnixMs = now + ClanProtocol.CombatStanceMillis;
+        FanoutVitals(target, PlayerVitalsStatus(target), outbound);
+        if (target.CurHp <= 0)
+        {
+            attacker.AggroTargetId = 0;
+            if (target.Session != null)
+                target.Session.AutoAttackTargetId = 0;
+            ApplyPlayerDeath(target, attacker.ObjectId, outbound);
+        }
+    }
 
     void FanoutCombat(ZoneEntity attacker, ZoneEntity target, AttackMsg attack, StatusUpdateMsg status, List<Pending> outbound)
     {

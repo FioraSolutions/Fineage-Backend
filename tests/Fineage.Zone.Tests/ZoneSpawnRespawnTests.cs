@@ -60,6 +60,9 @@ public sealed class ZoneSpawnRespawnTests
         {
             Assert.Null(await world.TryAttackAsync(session, new AttackRequestMsg { TargetObjectId = gremlin.ObjectId },
                 CancellationToken.None));
+            // Damage lands at melee hitTime, not on the swing packet.
+            clock.Advance(TimeSpan.FromMilliseconds(ZoneCombat.PlayerMeleeHitDelayMs));
+            await world.RunCombatTickAsync(CancellationToken.None);
         }
 
         // Corpse stays for Mobius DEFAULT_CORPSE_TIME, then decays and the respawn timer starts.

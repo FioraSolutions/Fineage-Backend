@@ -12,6 +12,10 @@ public static class ZoneCombat
     public const int MobAttackIntervalMs = 1200;
     public const int AggroForgetRange = 3000;
 
+    /// <summary>Mobius melee hitTime = attack time / 2: damage lands mid-swing (client AttackShot), not on packet.</summary>
+    public const int PlayerMeleeHitDelayMs = AutoAttackIntervalMs / 2;
+    public const int MobMeleeHitDelayMs = MobAttackIntervalMs / 2;
+
     /// <summary>Mobius NPC physical attack range 40 + collision radii (~gremlin/player). Mob walks in until this.</summary>
     public const int MobMeleeRange = 80;
     /// <summary>Mobius <c>NpcConfig.DEFAULT_CORPSE_TIME</c> = 7 s: corpse lies (death anim) before DeleteObject.</summary>

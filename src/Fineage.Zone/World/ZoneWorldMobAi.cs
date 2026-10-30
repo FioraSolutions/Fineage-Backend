@@ -18,6 +18,7 @@ public sealed partial class ZoneWorld
         {
             long now = _clock().ToUnixTimeMilliseconds();
             TickPendingHits(now, outbound);
+            TickMeleeHits(now, outbound);
             TickMobAttacks(now, outbound);
             TickCorpseDecay(now, outbound);
         }
@@ -101,7 +102,6 @@ public sealed partial class ZoneWorld
             npc.NextMobAttackMs = now + ZoneCombat.MobAttackIntervalMs;
 
             int damage = ZoneCombat.MobMeleeDamage(npc.Level);
-            player.CurHp = Math.Max(0, player.CurHp - damage);
             player.CombatUntilUnixMs = now + ClanProtocol.CombatStanceMillis;
 
             var attack = new AttackMsg
@@ -112,15 +112,9 @@ public sealed partial class ZoneWorld
                 AttackerX = npc.X, AttackerY = npc.Y, AttackerZ = npc.Z,
                 TargetX = player.X, TargetY = player.Y, TargetZ = player.Z
             };
-            FanoutCombat(npc, player, attack, PlayerVitalsStatus(player), outbound);
-
-            if (player.CurHp <= 0)
-            {
-                npc.AggroTargetId = 0;
-                if (player.Session != null)
-                    player.Session.AutoAttackTargetId = 0;
-                ApplyPlayerDeath(player, npc.ObjectId, outbound);
-            }
+            // Swing now; player HP drops at hitTime (Mobius onHitTimer).
+            FanoutAttack(npc, player, attack, outbound);
+            _meleeHits.Add(new PendingMeleeHit(npc.ObjectId, player.ObjectId, damage, now + ZoneCombat.MobMeleeHitDelayMs));
         }
     }
 

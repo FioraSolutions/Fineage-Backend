@@ -896,6 +896,18 @@ public static class ZoneMultiplayerAcceptance
         }
 
         bool _skipRewardUserInfo;
+        /// <summary>Mob retaliation swings (Attack then the victim's vitals at hitTime) interleave with scripted combat.</summary>
+        readonly Dictionary<int, int> _mobHitsPending = new();
+
+        static bool IsMobAttacker(int objectId)
+        {
+            foreach (var g in TalkingIsland.Gremlins)
+            {
+                if (g.ObjectId == objectId)
+                    return true;
+            }
+            return false;
+        }
 
         public async Task<T> ExpectAsync<T>(MsgType expected)
         {
@@ -912,10 +924,20 @@ public static class ZoneMultiplayerAcceptance
                 }
                 else if (type == MsgType.UserInfo && expected != MsgType.UserInfo && _skipRewardUserInfo)
                     _skipRewardUserInfo = false;
+                else if (type == MsgType.Attack &&
+                         MessagePackSerializer.Deserialize<AttackMsg>(body) is { } mobAtk &&
+                         IsMobAttacker(mobAtk.AttackerObjectId))
+                    _mobHitsPending[mobAtk.TargetObjectId] = _mobHitsPending.GetValueOrDefault(mobAtk.TargetObjectId) + 1;
+                else if (type == MsgType.StatusUpdate &&
+                         MessagePackSerializer.Deserialize<StatusUpdateMsg>(body) is { } victim &&
+                         _mobHitsPending.TryGetValue(victim.ObjectId, out int pendingMob) && pendingMob > 0)
+                    _mobHitsPending[victim.ObjectId] = pendingMob - 1;
                 else
                     break;
                 (type, body) = await ReadFrameAsync().ConfigureAwait(false);
             }
+            if (type == MsgType.Die)
+                _mobHitsPending.Clear(); // dead mob's queued swing never lands
             if (type != expected)
             {
                 string detail = "";
