@@ -68,7 +68,8 @@ public sealed partial class ZoneWorld
             return null;
         }
 
-        if (target.Kind != ZoneEntityKind.Npc || !target.Attackable || target.CurHp <= 0)
+        // Friendly NPCs (guides, merchants) are selectable for talk UI; Attackable is attack-only.
+        if (target.Kind != ZoneEntityKind.Npc || target.CurHp <= 0)
             return "target";
         if (!VisibleTo(session.ObjectId, targetObjectId))
             return "target";
