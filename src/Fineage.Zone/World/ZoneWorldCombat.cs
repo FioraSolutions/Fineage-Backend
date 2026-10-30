@@ -52,6 +52,22 @@ public sealed partial class ZoneWorld
             return "world";
         if (!_byId.TryGetValue(targetObjectId, out var target))
             return "target";
+
+        // Interlude: click own pawn → target self (AOI never lists the observer).
+        if (targetObjectId == session.ObjectId)
+        {
+            if (player.Dead || player.CurHp <= 0)
+                return "target";
+
+            session.SelectedTargetId = targetObjectId;
+            toSelf.Add(Pack(session, MsgType.MyTargetSelected, new MyTargetSelectedMsg
+            {
+                ObjectId = targetObjectId,
+                ColorHint = 0
+            }));
+            return null;
+        }
+
         if (target.Kind != ZoneEntityKind.Npc || !target.Attackable || target.CurHp <= 0)
             return "target";
         if (!VisibleTo(session.ObjectId, targetObjectId))

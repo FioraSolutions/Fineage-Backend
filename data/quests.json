@@ -1,8 +1,16 @@
 {
-  "reference": "Fineage smoke quest. Lifecycle matches L2J Mobius Interlude QuestState (created/started/completed, cond, one-time exit, abort deletes). Dialog text is original, not Mobius HTML.",
+  "reference": "Fineage smoke quest. Lifecycle matches L2J Mobius Interlude QuestState (created/started/completed, cond, one-time exit, abort deletes). Dialog text is original, not Mobius HTML. Quest 256 is the Mobius NewbieHelper first-talk gift journal flag (rewards applied in ZoneWorld, not dialog ops).",
   "maxActive": 25,
   "talkRange": 150,
   "quests": [
+    {
+      "id": 256,
+      "name": "Newbie Helper Gift",
+      "repeatable": false,
+      "abortable": false,
+      "questItems": [],
+      "dialogs": []
+    },
     {
       "id": 999,
       "name": "Roxxy's Message",

@@ -101,9 +101,12 @@ public sealed class NewbieGuideBuffTests
 
     static async Task<T> ReadAsync<T>(Stream stream, MsgType type)
     {
-        var frame = await FrameIO.ReadAsync(stream);
-        Assert.NotNull(frame);
-        Assert.Equal((ushort)type, frame!.Value.Type);
-        return MessagePackSerializer.Deserialize<T>(frame.Value.Body);
+        while (true)
+        {
+            var frame = await FrameIO.ReadAsync(stream);
+            Assert.NotNull(frame);
+            if (frame!.Value.Type == (ushort)type)
+                return MessagePackSerializer.Deserialize<T>(frame.Value.Body);
+        }
     }
 }

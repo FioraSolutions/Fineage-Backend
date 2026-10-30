@@ -1,5 +1,6 @@
 using Fineage.Game;
 using Fineage.Game.Quests;
+using Fineage.Game.Services;
 using Fineage.Protocol;
 using Fineage.Zone.Npcs;
 
@@ -119,6 +120,10 @@ public sealed partial class ZoneWorld
             return InventoryProtocol.Dead;
         if (!InTalkRange(player, npc))
             return "range";
+
+        // Mobius NewbieHelper onFirstTalk — before guide HTML / other quest hooks.
+        if (eventName == null)
+            TryNewbieHelperGift(session, player, npc, toSelf);
 
         outcome = eventName == null
             ? _quests.FirstTalk(player.Quests, player.Inventory!, npc.NpcId, npc.Name)
@@ -258,6 +263,53 @@ public sealed partial class ZoneWorld
         entity.Exp = record.Exp;
         entity.Sp = record.Sp;
         entity.Quests = QuestJournal.Load(record.Quests);
+    }
+
+    /// <summary>
+    /// Mobius <c>NewbieHelper.onFirstTalk</c>: one-time beginner kit under level 18.
+    /// Does not open its own HTML — the guide page still comes from <see cref="SendNpcPage"/>.
+    /// </summary>
+    void TryNewbieHelperGift(ZoneSession session, ZoneEntity player, ZoneEntity npc, List<Pending> toSelf)
+    {
+        if (!NewbieHelperGift.IsGuide(npc.NpcId))
+            return;
+        if (player.Level >= NewbieHelperGift.MaxLevelExclusive)
+            return;
+        if (player.Inventory == null)
+            return;
+
+        var prior = player.Quests.Find(NewbieHelperGift.QuestId);
+        if (prior != null && prior.Phase == QuestPhase.Completed)
+            return;
+
+        if (!_game.Items.TryGet(NewbieHelperGift.ScrollRecovery, out _) ||
+            !_game.Items.TryGet(NewbieHelperGift.TravelToken, out _) ||
+            !_game.Items.TryGet(NewbieHelperGift.SoulshotNovice, out _) ||
+            !_game.Items.TryGet(NewbieHelperGift.SpiritshotNovice, out _))
+        {
+            ZoneLog.Info($"newbie-helper-gift skipped — missing item templates (npc={npc.NpcId})");
+            return;
+        }
+
+        var (shotId, shotCount) = NewbieHelperGift.ShotForClass(_newbieBuffs, player.ClassId);
+        var changes = new List<InventoryUpdateEntryMsg>(3);
+        void Grant(int itemId, int count)
+        {
+            var added = player.Inventory.Add(itemId, count);
+            changes.Add(InventoryMessages.ChangeRow(InventoryChange.Add, added));
+        }
+
+        Grant(shotId, shotCount);
+        Grant(NewbieHelperGift.TravelToken, NewbieHelperGift.TokenCount);
+        Grant(NewbieHelperGift.ScrollRecovery, NewbieHelperGift.ScrollCount);
+
+        player.Quests.Add(NewbieHelperGift.QuestId, QuestPhase.Completed);
+        toSelf.Add(Pack(session, MsgType.InventoryUpdate, new InventoryUpdateMsg { Changes = changes.ToArray() }));
+        SaveInventory(session, player.Inventory);
+        SaveQuestProgress(session, player);
+        QueueList(session, toSelf);
+        ZoneLog.Info(
+            $"newbie-helper-gift object={session.ObjectId} npc={npc.NpcId} shot={shotId}x{shotCount}");
     }
 
     /// <summary>

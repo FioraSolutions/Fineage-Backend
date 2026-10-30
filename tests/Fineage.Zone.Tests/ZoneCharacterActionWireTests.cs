@@ -97,6 +97,24 @@ public sealed class ZoneCharacterActionWireTests
     }
 
     [Fact]
+    public async Task Select_target_self_sends_MyTargetSelected()
+    {
+        var (world, session, stream) = await LiveSessionAsync();
+        stream.SetLength(0);
+
+        Assert.Null(await world.TrySelectTargetAsync(
+            session,
+            new SelectTargetMsg { TargetObjectId = session.ObjectId },
+            CancellationToken.None));
+
+        stream.Position = 0;
+        var frame = await ReadNextAsync(stream, MsgType.MyTargetSelected);
+        var selected = MessagePackSerializer.Deserialize<MyTargetSelectedMsg>(frame.Body);
+        Assert.Equal(session.ObjectId, selected.ObjectId);
+        Assert.Equal(session.ObjectId, session.SelectedTargetId);
+    }
+
+    [Fact]
     public async Task Next_target_selects_different_gremlin()
     {
         var (world, session, stream) = await LiveSessionAsync();
