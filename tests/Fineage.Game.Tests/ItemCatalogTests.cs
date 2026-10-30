@@ -79,7 +79,9 @@ public class ItemCatalogTests
             959, 960, 961, 962, 6569, 6570, 6571, 6572, 6573, 6574, 6575, 6576, 6577, 6578,
             6360, 6361, 6362, 6388, 6651
         ];
-        Assert.Equal(starter, ids.Take(starter.Length));
+        Assert.Empty(starter.Except(ids));
+        Assert.Contains(57, ids);
         Assert.Contains(1, ids);
+        Assert.Equal(ids.Length, ids.Distinct().Count());
     }
 }
