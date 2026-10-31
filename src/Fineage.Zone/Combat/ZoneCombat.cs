@@ -3,7 +3,18 @@ namespace Fineage.Zone.Combat;
 /// <summary>Minimal melee constants — not full Interlude formulas.</summary>
 public static class ZoneCombat
 {
-    public const int MeleeRange = 900;
+    /// <summary>
+    /// Interlude player physical attack range: weapon atkRange 40 (fists/1h/2h) + collision radii
+    /// (player ~9 + NPC ~10-25). Mobius checks <c>isInsideRadius(target, physRange + collisions)</c>;
+    /// matches <see cref="MobMeleeRange"/>. Out of range the server walks the player in (moveToPawn).
+    /// </summary>
+    public const int MeleeRange = 80;
+    /// <summary>Ground pickup / interaction reach — client walks there itself, keep the old wide gate.</summary>
+    public const int PickupRange = 900;
+    /// <summary>Mobius moveToPawn offset: stop a bit inside the attack range so the swing passes the check.</summary>
+    public const int ApproachSlack = 20;
+    /// <summary>Fallback player run speed when the character has none (Interlude human fighter 115 → ~120).</summary>
+    public const float DefaultPlayerRunSpeed = 120f;
     public const int SampleMeleeDamage = 32;
     public const int AutoAttackIntervalMs = 1100;
     public const int AutoAttackTickMs = 200;
@@ -45,6 +56,13 @@ public static class ZoneCombat
         long dx = ax - (long)bx;
         long dy = ay - (long)by;
         return dx * dx + dy * dy <= (long)MeleeRange * MeleeRange;
+    }
+
+    public static bool InPickupRange(int ax, int ay, int bx, int by)
+    {
+        long dx = ax - (long)bx;
+        long dy = ay - (long)by;
+        return dx * dx + dy * dy <= (long)PickupRange * PickupRange;
     }
 
     public static bool InCastRange(int ax, int ay, int bx, int by, int castRange)
