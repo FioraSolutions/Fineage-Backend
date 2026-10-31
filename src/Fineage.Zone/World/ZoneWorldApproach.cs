@@ -23,6 +23,14 @@ public sealed partial class ZoneWorld
     {
         if (player.Sitting || player.Dead)
             return -1;
+        var session = player.Session;
+        long now = _clock().ToUnixTimeMilliseconds();
+
+        // Sticky intention: same target, still running, target has not drifted -> no re-send, same ETA.
+        if (session != null && session.ApproachTargetId == target.ObjectId && now < session.ApproachArriveUnixMs &&
+            ZoneCombat.Within(target.X, target.Y, session.ApproachTargetX, session.ApproachTargetY, ZoneCombat.ApproachRepathDistance))
+            return session.ApproachArriveUnixMs - now;
+
         double dx = target.X - player.X;
         double dy = target.Y - player.Y;
         double dist = Math.Sqrt(dx * dx + dy * dy);
@@ -30,7 +38,10 @@ public sealed partial class ZoneWorld
             return -1;
         double stopAt = Math.Max(10, range - ZoneCombat.ApproachSlack);
         if (dist <= stopAt)
+        {
+            session?.ClearApproach();
             return 0;
+        }
 
         int destX = (int)Math.Round(target.X - dx / dist * stopAt);
         int destY = (int)Math.Round(target.Y - dy / dist * stopAt);
@@ -49,28 +60,64 @@ public sealed partial class ZoneWorld
             DestX = destX, DestY = destY, DestZ = destZ,
             OriginX = player.X, OriginY = player.Y, OriginZ = player.Z
         };
-        byte[] body = MessagePackSerializer.Serialize(ack);
-        foreach (var watcher in Players())
-        {
-            if (watcher.Session == null)
-                continue;
-            if (ReferenceEquals(watcher, player) || watcher.Knownlist.Contains(player.ObjectId))
-                outbound.Add(new Pending(watcher.Session, MsgType.MoveToAck, body));
-        }
+        int originX = player.X, originY = player.Y;
 
         player.X = destX;
         player.Y = destY;
         player.Z = destZ;
-        if (player.Session != null)
+        if (session != null)
         {
-            player.Session.X = destX;
-            player.Session.Y = destY;
-            player.Session.Z = destZ;
+            session.X = destX;
+            session.Y = destY;
+            session.Z = destZ;
         }
-        _aoi.Move(player.ObjectId, destX, destY);
+        // Knownlist reconcile (CharInfo / MoveToAck / hysteresis forget) — was a bare AOI move before, which
+        // left watcher knownlists stale and let a later move DeleteObject the other PC mid-fight.
+        ReconcileKnownlist(player, ack, outbound, outbound);
 
         float speed = player.RunSpeed > 0 ? player.RunSpeed : ZoneCombat.DefaultPlayerRunSpeed;
-        return Math.Max(1, (long)Math.Ceiling((dist - stopAt) * 1000.0 / speed));
+        long ms = Math.Max(1, (long)Math.Ceiling((dist - stopAt) * 1000.0 / speed));
+        if (session != null)
+        {
+            session.ApproachTargetId = target.ObjectId;
+            session.ApproachArriveUnixMs = now + ms;
+            session.ApproachOriginX = originX;
+            session.ApproachOriginY = originY;
+            session.ApproachDestX = destX;
+            session.ApproachDestY = destY;
+            session.ApproachTargetX = target.X;
+            session.ApproachTargetY = target.Y;
+        }
+        return ms;
+    }
+
+    /// <summary>Client MoveTo that lies on the in-flight moveToPawn path is a position report, not a new order.</summary>
+    bool IsApproachSync(ZoneSession session, MoveToMsg move)
+    {
+        if (session.ApproachTargetId <= 0 || _clock().ToUnixTimeMilliseconds() >= session.ApproachArriveUnixMs)
+            return false;
+        return ZoneCombat.DistanceToSegment(move.DestX, move.DestY,
+            session.ApproachOriginX, session.ApproachOriginY,
+            session.ApproachDestX, session.ApproachDestY) <= ZoneCombat.ApproachPathTolerance;
+    }
+
+    /// <summary>Mobius: RequestMoveToLocation sets AI_INTENTION_MOVE_TO, dropping ATTACK/CAST unless still in melee.</summary>
+    void CancelAttackIntentionOnMove(ZoneSession session, MoveToMsg move)
+    {
+        int targetId = session.AutoAttackTargetId > 0 ? session.AutoAttackTargetId : session.PendingCastTargetId;
+        if (targetId <= 0)
+        {
+            session.ClearApproach();
+            return;
+        }
+        if (_byId.TryGetValue(targetId, out var target) &&
+            ZoneCombat.Within(move.DestX, move.DestY, target.X, target.Y, ZoneCombat.MeleeRange + ZoneCombat.HitRangeTolerance))
+            return; // shuffling next to the target keeps the fight
+        session.AutoAttackTargetId = 0;
+        session.PendingCastSkillId = 0;
+        session.PendingCastTargetId = 0;
+        session.PendingCastAtUnixMs = 0;
+        session.ClearApproach();
     }
 
     /// <summary>Interlude ActionFailed equivalent on V2: SystemMessage 22 so the client unlocks and shows why.</summary>

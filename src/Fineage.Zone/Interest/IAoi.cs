@@ -15,4 +15,10 @@ public interface IAoi
 
     /// <summary>Other ids visible to <paramref name="objectId"/>. Does not include itself.</summary>
     IReadOnlyCollection<int> GetVisible(int objectId);
+
+    /// <summary>
+    /// Mobius knownlist hysteresis (distanceToWatch &lt; distanceToForget): an id already known stays known
+    /// until it is past the forget radius, so chase/approach jitter at the edge never sends DeleteObject.
+    /// </summary>
+    bool StillKnown(int objectId, int otherId) => GetVisible(objectId).Contains(otherId);
 }

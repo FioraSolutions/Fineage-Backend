@@ -15,6 +15,12 @@ public static class ZoneCombat
     public const int ApproachSlack = 20;
     /// <summary>Fallback player run speed when the character has none (Interlude human fighter 115 → ~120).</summary>
     public const float DefaultPlayerRunSpeed = 120f;
+    /// <summary>Target drift that forces a fresh MoveToPawn during an approach (Mobius follow re-issue).</summary>
+    public const int ApproachRepathDistance = 40;
+    /// <summary>Tolerance at hitTime: swing lands only if attacker is still within melee range + this.</summary>
+    public const int HitRangeTolerance = 40;
+    /// <summary>Client MoveTo within this of the approach path is a position sync, not a cancel.</summary>
+    public const int ApproachPathTolerance = 80;
     public const int SampleMeleeDamage = 32;
     public const int AutoAttackIntervalMs = 1100;
     public const int AutoAttackTickMs = 200;
@@ -71,5 +77,22 @@ public static class ZoneCombat
         long dx = ax - (long)bx;
         long dy = ay - (long)by;
         return dx * dx + dy * dy <= (long)range * range;
+    }
+
+    public static bool Within(int ax, int ay, int bx, int by, int range)
+    {
+        long dx = ax - (long)bx;
+        long dy = ay - (long)by;
+        return dx * dx + dy * dy <= (long)range * range;
+    }
+
+    /// <summary>Distance from point P to segment AB (approach path).</summary>
+    public static double DistanceToSegment(int px, int py, int ax, int ay, int bx, int by)
+    {
+        double vx = bx - ax, vy = by - ay;
+        double len2 = vx * vx + vy * vy;
+        double t = len2 <= 0 ? 0 : Math.Clamp(((px - ax) * vx + (py - ay) * vy) / len2, 0, 1);
+        double cx = ax + t * vx - px, cy = ay + t * vy - py;
+        return Math.Sqrt(cx * cx + cy * cy);
     }
 }

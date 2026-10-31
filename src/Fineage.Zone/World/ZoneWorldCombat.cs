@@ -30,10 +30,17 @@ public sealed partial class ZoneWorld
 
         var outbound = new List<Pending>();
         string? error;
+        long approachMs = 0;
         lock (_gate)
         {
-            error = TryAttack(session, request.TargetObjectId, outbound, out long approachMs);
-            if (error == null)
+            int previous = session.AutoAttackTargetId;
+            long now0 = _clock().ToUnixTimeMilliseconds();
+            int requested = request.TargetObjectId > 0 ? request.TargetObjectId : session.SelectedTargetId;
+            bool alreadySwinging = previous > 0 && previous == requested && session.ApproachTargetId == 0 &&
+                session.NextAutoAttackUnixMs > now0;
+            // Re-click on the target already being hit: Mobius keeps the running attack, no extra swing.
+            error = alreadySwinging ? null : TryAttack(session, request.TargetObjectId, outbound, out approachMs);
+            if (error == null && !alreadySwinging)
             {
                 session.AutoAttackTargetId = session.SelectedTargetId;
                 // Approaching: first swing on arrival (Mobius onEvtArrived -> doAttack); else next swing after Pspd.
@@ -180,19 +187,42 @@ public sealed partial class ZoneWorld
         foreach (var player in Players().ToList())
         {
             var session = player.Session;
-            if (session == null || session.AutoAttackTargetId <= 0 || now < session.NextAutoAttackUnixMs)
+            if (session == null || session.AutoAttackTargetId <= 0)
                 continue;
             int targetId = session.AutoAttackTargetId;
             if (player.Dead || !_byId.TryGetValue(targetId, out var target) || target.CurHp <= 0 || session.SelectedTargetId != targetId)
             {
                 session.AutoAttackTargetId = 0;
+                session.ClearApproach();
                 continue;
             }
             if (!VisibleTo(player.ObjectId, targetId))
             {
                 session.AutoAttackTargetId = 0;
+                session.ClearApproach();
                 continue;
             }
+
+            // Mid-run and the pawn moved: re-send MoveToPawn toward its new spot (Mobius follow).
+            if (session.ApproachTargetId == targetId && now < session.ApproachArriveUnixMs)
+            {
+                if (!ZoneCombat.Within(target.X, target.Y, session.ApproachTargetX, session.ApproachTargetY, ZoneCombat.ApproachRepathDistance))
+                {
+                    long re = ApproachTarget(player, target, ZoneCombat.MeleeRange, outbound);
+                    if (re < 0)
+                    {
+                        session.AutoAttackTargetId = 0;
+                        session.ClearApproach();
+                        SendActionFailed(player, outbound);
+                        continue;
+                    }
+                    session.NextAutoAttackUnixMs = now + re;
+                }
+                continue;
+            }
+
+            if (now < session.NextAutoAttackUnixMs)
+                continue;
             if (!ZoneCombat.InMeleeRange(player.X, player.Y, target.X, target.Y))
             {
                 // Target moved away: Mobius re-issues moveToPawn and keeps the attack intention.
@@ -200,12 +230,14 @@ public sealed partial class ZoneWorld
                 if (ms < 0)
                 {
                     session.AutoAttackTargetId = 0;
+                    session.ClearApproach();
                     SendActionFailed(player, outbound);
                     continue;
                 }
                 session.NextAutoAttackUnixMs = now + ms;
                 continue;
             }
+            session.ClearApproach();
             session.NextAutoAttackUnixMs = now + ZoneCombat.AutoAttackIntervalMs;
             if (TryAttack(session, targetId, outbound) != null)
                 session.AutoAttackTargetId = 0;
@@ -253,6 +285,10 @@ public sealed partial class ZoneWorld
         if (!_byId.TryGetValue(hit.AttackerId, out var attacker) || attacker.CurHp <= 0 || attacker.Dead)
             return;
         if (!_byId.TryGetValue(hit.TargetId, out var target) || target.CurHp <= 0 || target.Dead)
+            return;
+        // Mobius onHitTimer: target ran out of reach during the swing -> no damage.
+        int reach = (attacker.Kind == ZoneEntityKind.Npc ? ZoneCombat.MobMeleeRange : ZoneCombat.MeleeRange) + ZoneCombat.HitRangeTolerance;
+        if (!ZoneCombat.Within(attacker.X, attacker.Y, target.X, target.Y, reach))
             return;
 
         target.CurHp = Math.Max(0, target.CurHp - hit.Damage);
