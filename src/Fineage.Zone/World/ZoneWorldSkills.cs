@@ -100,7 +100,19 @@ public sealed partial class ZoneWorld
             ? ZoneCombat.InCastRange(player.X, player.Y, target.X, target.Y, template.CastRange + 100)
             : ZoneCombat.InMeleeRange(player.X, player.Y, target.X, target.Y);
         if (!inRange)
-            return SkillProtocol.Range;
+        {
+            // Mobius AI_INTENTION_CAST: moveToPawn(target, castRange) then cast on arrival instead of refusing.
+            int reach = template.CastRange > 0 ? Math.Max(40, template.CastRange) : ZoneCombat.MeleeRange;
+            long travelMs = ApproachTarget(player, target, reach, outbound);
+            if (travelMs < 0)
+                return SkillProtocol.Range;
+            session.AutoAttackTargetId = 0;
+            session.SelectedTargetId = targetId;
+            session.PendingCastSkillId = request.SkillId;
+            session.PendingCastTargetId = targetId;
+            session.PendingCastAtUnixMs = now + travelMs;
+            return null;
+        }
 
         session.AutoAttackTargetId = 0;
         player.CurMp = Math.Max(0, player.CurMp - levelData.MpConsume);

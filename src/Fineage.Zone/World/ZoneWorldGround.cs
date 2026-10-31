@@ -49,7 +49,7 @@ public sealed partial class ZoneWorld
             return "pickup";
         if (!VisibleTo(player.ObjectId, groundObjectId))
             return "pickup";
-        if (!ZoneCombat.InMeleeRange(player.X, player.Y, ground.X, ground.Y))
+        if (!ZoneCombat.InPickupRange(player.X, player.Y, ground.X, ground.Y))
             return "pickup";
 
         var added = player.Inventory.Add(ground.GroundItemId, ground.GroundCount);
@@ -80,7 +80,7 @@ public sealed partial class ZoneWorld
         int dropX = useCoords ? request.X : player.X;
         int dropY = useCoords ? request.Y : player.Y;
         int dropZ = useCoords ? request.Z : player.Z;
-        if (!ZoneCombat.InMeleeRange(player.X, player.Y, dropX, dropY))
+        if (!ZoneCombat.InPickupRange(player.X, player.Y, dropX, dropY))
             return "range";
 
         int itemId = item.ItemId;

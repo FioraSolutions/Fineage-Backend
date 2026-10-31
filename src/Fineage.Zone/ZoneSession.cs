@@ -32,6 +32,11 @@ public sealed class ZoneSession
     public int AutoAttackTargetId { get; set; }
     public long NextAutoAttackUnixMs { get; set; }
 
+    /// <summary>Mobius AI_INTENTION_CAST after moveToPawn: skill to fire once the server-driven approach arrives.</summary>
+    public int PendingCastSkillId { get; set; }
+    public int PendingCastTargetId { get; set; }
+    public long PendingCastAtUnixMs { get; set; }
+
     /// <summary>Unix milliseconds of the last accepted say. 0 means this session has not spoken.</summary>
     public long LastChatUnixMs { get; set; }
 
@@ -62,6 +67,9 @@ public sealed class ZoneSession
         SelectedTargetId = 0;
         AutoAttackTargetId = 0;
         NextAutoAttackUnixMs = 0;
+        PendingCastSkillId = 0;
+        PendingCastTargetId = 0;
+        PendingCastAtUnixMs = 0;
         LastChatUnixMs = 0;
     }
 

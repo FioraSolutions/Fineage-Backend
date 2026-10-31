@@ -32,11 +32,13 @@ public sealed partial class ZoneWorld
         string? error;
         lock (_gate)
         {
-            error = TryAttack(session, request.TargetObjectId, outbound);
+            error = TryAttack(session, request.TargetObjectId, outbound, out long approachMs);
             if (error == null)
             {
                 session.AutoAttackTargetId = session.SelectedTargetId;
-                session.NextAutoAttackUnixMs = _clock().ToUnixTimeMilliseconds() + ZoneCombat.AutoAttackIntervalMs;
+                // Approaching: first swing on arrival (Mobius onEvtArrived -> doAttack); else next swing after Pspd.
+                session.NextAutoAttackUnixMs = _clock().ToUnixTimeMilliseconds() +
+                    (approachMs > 0 ? approachMs : ZoneCombat.AutoAttackIntervalMs);
             }
         }
         if (error != null)
@@ -83,8 +85,17 @@ public sealed partial class ZoneWorld
         return null;
     }
 
-    string? TryAttack(ZoneSession session, int requestedTargetId, List<Pending> outbound)
+    string? TryAttack(ZoneSession session, int requestedTargetId, List<Pending> outbound) =>
+        TryAttack(session, requestedTargetId, outbound, out _);
+
+    /// <summary>
+    /// Interlude RequestAttack: in range -> swing; out of range -> server moveToPawn (run to the target,
+    /// MoveToAck to self + watchers) and the swing fires from <see cref="TickAutoAttacks"/> on arrival.
+    /// <paramref name="approachMs"/> is the travel time when an approach was started, else 0.
+    /// </summary>
+    string? TryAttack(ZoneSession session, int requestedTargetId, List<Pending> outbound, out long approachMs)
     {
+        approachMs = 0;
         if (!_byId.TryGetValue(session.ObjectId, out var player) || player.Session == null)
             return "world";
         if (player.Dead)
@@ -105,7 +116,10 @@ public sealed partial class ZoneWorld
         if (!VisibleTo(player.ObjectId, targetId))
             return "attack";
         if (!ZoneCombat.InMeleeRange(player.X, player.Y, target.X, target.Y))
-            return "attack";
+        {
+            approachMs = ApproachTarget(player, target, ZoneCombat.MeleeRange, outbound);
+            return approachMs < 0 ? "attack" : null;
+        }
 
         int damage = ZoneCombat.SampleMeleeDamage;
 
@@ -147,6 +161,7 @@ public sealed partial class ZoneWorld
                     TickPendingHits(now, outbound);
                     TickMeleeHits(now, outbound);
                     TickAutoAttacks(outbound);
+                    TickPendingCasts(now, outbound);
                     TickMobAttacks(now, outbound);
                     TickCorpseDecay(now, outbound);
                 }
@@ -178,9 +193,20 @@ public sealed partial class ZoneWorld
                 session.AutoAttackTargetId = 0;
                 continue;
             }
-            session.NextAutoAttackUnixMs = now + ZoneCombat.AutoAttackIntervalMs;
             if (!ZoneCombat.InMeleeRange(player.X, player.Y, target.X, target.Y))
-                continue; // still walking in; keep the intent
+            {
+                // Target moved away: Mobius re-issues moveToPawn and keeps the attack intention.
+                long ms = ApproachTarget(player, target, ZoneCombat.MeleeRange, outbound);
+                if (ms < 0)
+                {
+                    session.AutoAttackTargetId = 0;
+                    SendActionFailed(player, outbound);
+                    continue;
+                }
+                session.NextAutoAttackUnixMs = now + ms;
+                continue;
+            }
+            session.NextAutoAttackUnixMs = now + ZoneCombat.AutoAttackIntervalMs;
             if (TryAttack(session, targetId, outbound) != null)
                 session.AutoAttackTargetId = 0;
         }
