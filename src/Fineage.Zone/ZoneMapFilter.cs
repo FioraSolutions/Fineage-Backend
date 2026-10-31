@@ -30,9 +30,12 @@ public static class ZoneMapFilter
     /// </summary>
     public static IReadOnlyList<Box> BoundsList
     {
-        get
+        get => ParseBounds(Environment.GetEnvironmentVariable("FINEAGE_ZONE_BOUNDS"));
+    }
+
+    public static IReadOnlyList<Box> ParseBounds(string? text)
+    {
         {
-            string? text = Environment.GetEnvironmentVariable("FINEAGE_ZONE_BOUNDS");
             if (string.IsNullOrWhiteSpace(text))
                 return [];
             var boxes = new List<Box>();
