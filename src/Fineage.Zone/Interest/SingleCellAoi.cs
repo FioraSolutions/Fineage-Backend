@@ -26,4 +26,6 @@ public sealed class SingleCellAoi : IAoi
 
         return visible;
     }
+
+    public bool StillKnown(int objectId, int otherId) => _ids.Contains(objectId) && _ids.Contains(otherId);
 }

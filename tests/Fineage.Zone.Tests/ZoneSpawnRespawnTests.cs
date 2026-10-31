@@ -60,8 +60,11 @@ public sealed class ZoneSpawnRespawnTests
         {
             Assert.Null(await world.TryAttackAsync(session, new AttackRequestMsg { TargetObjectId = gremlin.ObjectId },
                 CancellationToken.None));
-            // Damage lands at melee hitTime, not on the swing packet.
+            // Re-click on the target being hit keeps the running attack (no double swing);
+            // the auto-attack tick swings every Pspd interval and damage lands at hitTime.
             clock.Advance(TimeSpan.FromMilliseconds(ZoneCombat.PlayerMeleeHitDelayMs));
+            await world.RunCombatTickAsync(CancellationToken.None);
+            clock.Advance(TimeSpan.FromMilliseconds(ZoneCombat.AutoAttackIntervalMs - ZoneCombat.PlayerMeleeHitDelayMs));
             await world.RunCombatTickAsync(CancellationToken.None);
         }
 

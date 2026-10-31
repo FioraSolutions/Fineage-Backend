@@ -32,6 +32,25 @@ public sealed class ZoneSession
     public int AutoAttackTargetId { get; set; }
     public long NextAutoAttackUnixMs { get; set; }
 
+    /// <summary>
+    /// Mobius AI_INTENTION_ATTACK + moveToPawn in flight: sticky approach. While now &lt; ApproachArriveUnixMs the
+    /// pawn is running from (ApproachOriginX/Y) to (ApproachDestX/Y) toward target last seen at ApproachTargetX/Y.
+    /// </summary>
+    public int ApproachTargetId { get; set; }
+    public long ApproachArriveUnixMs { get; set; }
+    public int ApproachOriginX { get; set; }
+    public int ApproachOriginY { get; set; }
+    public int ApproachDestX { get; set; }
+    public int ApproachDestY { get; set; }
+    public int ApproachTargetX { get; set; }
+    public int ApproachTargetY { get; set; }
+
+    public void ClearApproach()
+    {
+        ApproachTargetId = 0;
+        ApproachArriveUnixMs = 0;
+    }
+
     /// <summary>Mobius AI_INTENTION_CAST after moveToPawn: skill to fire once the server-driven approach arrives.</summary>
     public int PendingCastSkillId { get; set; }
     public int PendingCastTargetId { get; set; }
@@ -70,6 +89,7 @@ public sealed class ZoneSession
         PendingCastSkillId = 0;
         PendingCastTargetId = 0;
         PendingCastAtUnixMs = 0;
+        ClearApproach();
         LastChatUnixMs = 0;
     }
 

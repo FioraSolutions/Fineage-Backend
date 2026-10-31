@@ -27,3 +27,25 @@ public sealed class ZoneCombatRangeTests
         Assert.True(ZoneCombat.InPickupRange(0, 0, 800, 0));
     }
 }
+
+public sealed class ZoneStickyApproachTests
+{
+    [Fact]
+    public void Range_aoi_keeps_known_object_inside_forget_slack()
+    {
+        var aoi = new Fineage.Zone.Interest.RangeAoi(3500);
+        aoi.Enter(1, 0, 0);
+        aoi.Enter(2, 3500 + Fineage.Zone.Interest.RangeAoi.ForgetSlack - 10, 0);
+        Assert.DoesNotContain(2, aoi.GetVisible(1));
+        Assert.True(aoi.StillKnown(1, 2));
+        aoi.Move(2, 3500 + Fineage.Zone.Interest.RangeAoi.ForgetSlack + 10, 0);
+        Assert.False(aoi.StillKnown(1, 2));
+    }
+
+    [Fact]
+    public void Approach_path_sync_detects_points_on_segment()
+    {
+        Assert.True(ZoneCombat.DistanceToSegment(50, 10, 0, 0, 100, 0) <= ZoneCombat.ApproachPathTolerance);
+        Assert.True(ZoneCombat.DistanceToSegment(50, 500, 0, 0, 100, 0) > ZoneCombat.ApproachPathTolerance);
+    }
+}

@@ -447,37 +447,60 @@ public sealed partial class ZoneWorld
             OriginZ = entity.Z
         };
 
-        var before = new HashSet<int>(entity.Knownlist);
+        if (IsApproachSync(session, move))
+        {
+            // Client reporting its run along our moveToPawn path: keep the sticky approach and server dest.
+            return null;
+        }
+        CancelAttackIntentionOnMove(session, move);
+
         entity.X = move.DestX;
         entity.Y = move.DestY;
         entity.Z = move.DestZ;
         session.X = entity.X;
         session.Y = entity.Y;
         session.Z = entity.Z;
+        ReconcileKnownlist(entity, ack, toSelf, toOthers);
+        return null;
+    }
+
+    /// <summary>
+    /// After <paramref name="entity"/> moved: AOI move, CharInfo to newly visible, MoveToAck to self + stayed,
+    /// DeleteObject only past the forget radius and never for a pair locked in combat (Mobius knownlist).
+    /// </summary>
+    void ReconcileKnownlist(ZoneEntity entity, MoveToMsg ack, List<Pending> toSelf, List<Pending> toOthers)
+    {
+        var before = new HashSet<int>(entity.Knownlist);
         _aoi.Move(entity.ObjectId, entity.X, entity.Y);
 
         var after = new HashSet<int>();
         CollectVisible(entity, after);
+        foreach (int id in before)
+        {
+            if (!after.Contains(id) && _byId.TryGetValue(id, out var other) && other.InstanceId == entity.InstanceId &&
+                (_aoi.StillKnown(entity.ObjectId, id) || CombatPinned(entity, other)))
+                after.Add(id);
+        }
 
-        toSelf.Add(Pack(session, MsgType.MoveToAck, ack));
+        if (entity.Session != null)
+            toSelf.Add(Pack(entity.Session, MsgType.MoveToAck, ack));
 
-        var entered = SortedExcept(after, before);
-        var stayed = SortedShared(after, before);
-        var left = SortedExcept(before, after);
-
-        foreach (int id in entered)
+        foreach (int id in SortedExcept(after, before))
             LinkSeen(entity, id, toSelf, toOthers);
-        foreach (int id in stayed)
+        foreach (int id in SortedShared(after, before))
         {
             if (_byId.TryGetValue(id, out var other) && other.Session != null)
                 toOthers.Add(Pack(other.Session, MsgType.MoveToAck, ack));
         }
 
-        foreach (int id in left)
+        foreach (int id in SortedExcept(before, after))
             Forget(entity, id, toSelf, toOthers);
-
-        return null;
     }
+
+    static bool CombatPinned(ZoneEntity a, ZoneEntity b) =>
+        (a.Session != null && (a.Session.AutoAttackTargetId == b.ObjectId || a.Session.SelectedTargetId == b.ObjectId)) ||
+        (b.Session != null && (b.Session.AutoAttackTargetId == a.ObjectId || b.Session.SelectedTargetId == a.ObjectId)) ||
+        a.AggroTargetId == b.ObjectId || b.AggroTargetId == a.ObjectId;
 
     void LinkSeen(ZoneEntity self, int otherId, List<Pending> toSelf, List<Pending> toOthers)
     {

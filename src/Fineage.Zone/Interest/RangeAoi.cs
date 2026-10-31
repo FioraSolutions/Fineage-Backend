@@ -5,7 +5,13 @@ namespace Fineage.Zone.Interest;
 /// </summary>
 public sealed class RangeAoi(int range) : IAoi
 {
+    /// <summary>Extra radius before a known object is forgotten (Mobius watch/forget gap).</summary>
+    public const int ForgetSlack = 500;
+
     readonly long _range2 = (long)range * range;
+    readonly long _forget2 = (long)(range + ForgetSlack) * (range + ForgetSlack);
+
+    public int Range => range;
     readonly Dictionary<int, (int X, int Y)> _pos = [];
 
     public void Enter(int objectId, int x, int y) => _pos[objectId] = (x, y);
@@ -31,5 +37,14 @@ public sealed class RangeAoi(int range) : IAoi
         }
 
         return visible;
+    }
+
+    public bool StillKnown(int objectId, int otherId)
+    {
+        if (!_pos.TryGetValue(objectId, out var me) || !_pos.TryGetValue(otherId, out var other))
+            return false;
+        long dx = me.X - (long)other.X;
+        long dy = me.Y - (long)other.Y;
+        return dx * dx + dy * dy <= _forget2;
     }
 }
