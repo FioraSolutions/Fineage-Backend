@@ -15,6 +15,25 @@ public sealed class SkillCatalogTests
         Assert.Contains(skills, row => row.SkillId == 1322 && row.Level == 1);
     }
 
+    [Theory]
+    [InlineData(94)]
+    [InlineData(13)]
+    public void Third_class_level_80_includes_skills_from_every_parent_class(int classId)
+    {
+        var data = GameData.LoadDefault();
+        var classes = data.Classes!;
+        var known = PlayerSkillBook.AutoSkills(data.SkillTrees, data.Skills, classId, 80, classes)
+            .Select(r => r.SkillId).ToHashSet();
+        var own = PlayerSkillBook.AutoSkills(data.SkillTrees, data.Skills, classId, 80);
+        Assert.True(known.Count > own.Count);
+        foreach (int cid in classes.ParentChain(classId))
+        {
+            var tree = data.SkillTrees.FindClass(cid);
+            Assert.NotNull(tree);
+            Assert.Contains(tree!.Skills, e => (e.AutoGet || e.LearnedByNpc) && e.GetLevel <= 80 && known.Contains(e.SkillId));
+        }
+    }
+
     [Fact]
     public void Power_strike_level_1_data_matches_mobius_first_rank()
     {

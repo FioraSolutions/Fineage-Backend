@@ -27,7 +27,7 @@ public sealed partial class ZoneWorld
     void RefreshKnownSkills(ZoneEntity entity)
     {
         entity.KnownSkills.Clear();
-        foreach (var row in PlayerSkillBook.AutoSkills(_game.SkillTrees, _game.Skills, entity.ClassId, entity.Level))
+        foreach (var row in PlayerSkillBook.AutoSkills(_game.SkillTrees, _game.Skills, entity.ClassId, entity.Level, _game.Classes))
             entity.KnownSkills[row.SkillId] = row.Level;
     }
 

@@ -1,3 +1,5 @@
+using Fineage.Game;
+
 namespace Fineage.Game.Skills;
 
 /// <summary>
@@ -10,7 +12,8 @@ public static class PlayerSkillBook
         SkillTreeCatalog trees,
         SkillCatalog skills,
         int classId,
-        int level)
+        int level,
+        ClassCatalog? classes = null)
     {
         ArgumentNullException.ThrowIfNull(trees);
         ArgumentNullException.ThrowIfNull(skills);
@@ -18,9 +21,14 @@ public static class PlayerSkillBook
             level = 1;
 
         var best = new Dictionary<int, int>();
-        var tree = trees.FindClass(classId);
-        if (tree != null)
+        IReadOnlyList<int> chain = classes != null && classes.TryGet(classId, out _)
+            ? classes.ParentChain(classId)
+            : [classId];
+        foreach (int chainClassId in chain)
         {
+            var tree = trees.FindClass(chainClassId);
+            if (tree == null)
+                continue;
             foreach (var entry in tree.Skills)
             {
                 if (entry.GetLevel > level)
