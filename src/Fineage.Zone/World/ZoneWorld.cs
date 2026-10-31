@@ -335,6 +335,8 @@ public sealed partial class ZoneWorld
         if (error != null)
             return error;
 
+        MaybeSavePresenceOnMove(session);
+
         await FlushSelfAsync(session, toSelf, ct).ConfigureAwait(false);
         await FlushOthersAsync(toOthers, ct).ConfigureAwait(false);
         return null;
@@ -603,6 +605,22 @@ public sealed partial class ZoneWorld
         if (PlayerClasses.TryGet(classId, out var template) && template != null)
             return (template.RunSpeed, template.WalkSpeed);
         return (120f, 80f);
+    }
+
+    const long PresenceSaveIntervalMs = 3000;
+    readonly System.Collections.Concurrent.ConcurrentDictionary<int, long> _lastPresenceSaveMs = new();
+
+    /// <summary>Throttled save of the move destination so a Zone restart mid-session keeps the player's spot.</summary>
+    void MaybeSavePresenceOnMove(ZoneSession session)
+    {
+        if (_accounts == null || session.ObjectId <= 0)
+            return;
+        long now = _clock().ToUnixTimeMilliseconds();
+        long last = _lastPresenceSaveMs.GetValueOrDefault(session.ObjectId, long.MinValue / 2);
+        if (now - last < PresenceSaveIntervalMs)
+            return;
+        _lastPresenceSaveMs[session.ObjectId] = now;
+        SavePresence(session, session.X, session.Y, session.Z, touchAccess: false);
     }
 
     void SavePresence(ZoneSession session, int x, int y, int z, bool touchAccess)
