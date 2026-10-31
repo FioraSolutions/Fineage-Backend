@@ -49,12 +49,12 @@ public sealed partial class ZoneWorld
             }
         }
 
-        var bounds = ZoneMapFilter.Bounds;
+        var bounds = ZoneMapFilter.BoundsList;
         foreach (var map in maps)
         {
             foreach (var def in map.Npcs)
             {
-                if (bounds is { } b && (def.X < b.MinX || def.X > b.MaxX || def.Y < b.MinY || def.Y > b.MaxY))
+                if (!ZoneMapFilter.Contains(bounds, def.X, def.Y))
                     continue;
                 if (_spawnSlots.ContainsKey(def.ObjectId))
                     throw new InvalidOperationException($"Duplicate spawn object id {def.ObjectId}.");
