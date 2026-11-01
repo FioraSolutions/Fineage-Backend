@@ -49,16 +49,16 @@ public static class ZoneMultiplayerAcceptance
         var leftSpawn = await left.EnterAsync(TalkingIsland.NpcCount, expectOthers: 0).ConfigureAwait(false);
         if (leftSpawn.Spawned.ObjectId != fighter.CharacterId || leftSpawn.Spawned.Name != fighter.CharacterName)
             throw new InvalidOperationException("fighter spawn mismatch");
-        ExpectGear(leftSpawn, fighter, weaponId: 2369);
+        ExpectGear(leftSpawn, fighter, weaponId: 219);
 
         var rightSpawn = await right.EnterAsync(fighter, mystic, TalkingIsland.NpcCount).ConfigureAwait(false);
-        ExpectGear(rightSpawn, mystic, weaponId: 6);
+        ExpectGear(rightSpawn, mystic, weaponId: 177);
         var seen = await left.ExpectAsync<CharInfoMsg>(MsgType.CharInfo).ConfigureAwait(false);
         ExpectChar(seen, mystic, rightSpawn.Spawned.X, rightSpawn.Spawned.Y, rightSpawn.Spawned.Z);
         ExpectChar(rightSpawn.Others[0], fighter, leftSpawn.Spawned.X, leftSpawn.Spawned.Y, leftSpawn.Spawned.Z);
-        if (seen.Paperdoll.Length != InventoryMessages.PaperdollSlotCount || seen.Paperdoll[7] != 6)
+        if (seen.Paperdoll.Length != InventoryMessages.PaperdollSlotCount || seen.Paperdoll[7] != 177)
             throw new InvalidOperationException($"mystic char paperdoll rhand={PaperdollAt(seen, 7)}");
-        if (rightSpawn.Others[0].Paperdoll.Length != InventoryMessages.PaperdollSlotCount || rightSpawn.Others[0].Paperdoll[7] != 2369)
+        if (rightSpawn.Others[0].Paperdoll.Length != InventoryMessages.PaperdollSlotCount || rightSpawn.Others[0].Paperdoll[7] != 219)
             throw new InvalidOperationException($"fighter char paperdoll rhand={PaperdollAt(rightSpawn.Others[0], 7)}");
         ExpectDistinctItems(leftSpawn, rightSpawn, fighter.CharacterId, mystic.CharacterId);
         SameGremlins(leftSpawn.Npcs, rightSpawn.Npcs);
@@ -491,7 +491,7 @@ public static class ZoneMultiplayerAcceptance
         int tradableObjectId = 0;
         foreach (var item in leftSpawn.Items.Items)
         {
-            if (item.ItemId == 5588)
+            if (item.ItemId == 4627)
             {
                 tradableObjectId = item.ObjectId;
                 break;
@@ -499,7 +499,7 @@ public static class ZoneMultiplayerAcceptance
         }
 
         if (tradableObjectId == 0)
-            throw new InvalidOperationException("fighter starter kit missing item 5588");
+            throw new InvalidOperationException("fighter starter kit missing item 4627");
 
         await left.SendAsync(MsgType.TradeRequest, new TradeRequestMsg { TargetObjectId = buyer.CharacterId })
             .ConfigureAwait(false);
@@ -533,7 +533,7 @@ public static class ZoneMultiplayerAcceptance
 
         var ownOffer = await left.ExpectAsync<TradeOfferUpdateMsg>(MsgType.TradeOfferUpdate).ConfigureAwait(false);
         var peerOffer = await right.ExpectAsync<TradeOfferUpdateMsg>(MsgType.TradeOfferUpdate).ConfigureAwait(false);
-        if (ownOffer.IsOwn != 1 || peerOffer.IsOwn != 0 || ownOffer.ItemId != 5588 || ownOffer.Count != 1)
+        if (ownOffer.IsOwn != 1 || peerOffer.IsOwn != 0 || ownOffer.ItemId != 4627 || ownOffer.Count != 1)
             throw new InvalidOperationException("TradeOfferUpdate mismatch");
 
         await left.ExpectAsync<TradeConfirmStateMsg>(MsgType.TradeConfirmState).ConfigureAwait(false);

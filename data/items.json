@@ -574,6 +574,16 @@
       "weight": 1350
     },
     {
+      "id": 87,
+      "name": "Iron Hammer",
+      "icon": "icon.weapon_iron_hammer_i00",
+      "weight": 1850,
+      "price": 188000,
+      "kind": "weapon",
+      "bodySlot": "rhand",
+      "weaponType": "blunt"
+    },
+    {
       "id": 98,
       "name": "Halberd",
       "kind": "weapon",
@@ -1157,6 +1167,15 @@
       "bodySlot": "lhand",
       "price": 12900,
       "weight": 1380
+    },
+    {
+      "id": 728,
+      "name": "Mana Potion",
+      "icon": "icon.etc_reagent_blue_i00",
+      "weight": 10,
+      "price": 2,
+      "kind": "etc",
+      "stackable": true
     },
     {
       "id": 729,
@@ -2235,6 +2254,24 @@
       "icon": "icon.etc_spell_books_assistance_i00",
       "price": 800,
       "weight": 120
+    },
+    {
+      "id": 1538,
+      "name": "Blessed Scroll of Escape",
+      "icon": "icon.etc_scroll_of_return_i01",
+      "weight": 120,
+      "price": 150000,
+      "kind": "etc",
+      "stackable": true
+    },
+    {
+      "id": 1539,
+      "name": "Greater Healing Potion",
+      "icon": "icon.etc_reagent_white_i00",
+      "weight": 5,
+      "price": 900,
+      "kind": "etc",
+      "stackable": true
     },
     {
       "id": 1661,

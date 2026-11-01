@@ -57,7 +57,7 @@ public sealed class ZoneInventoryPersistTests
         Assert.True(await world.TryEnterAsync(session, CancellationToken.None));
 
         var granted = store.FindById("alice", created.Id);
-        Assert.Contains(granted!.Items!, item => item.ItemId == 2369 && item.EquippedSlot == 7);
+        Assert.Contains(granted!.Items!, item => item.ItemId == 219 && item.EquippedSlot == 7);
         int count = granted.Items!.Count;
 
         await world.LeaveAsync(session, CancellationToken.None);
@@ -66,7 +66,7 @@ public sealed class ZoneInventoryPersistTests
         stream.Position = mark;
         var list = await ReadItemListAsync(stream);
         Assert.Equal(count, list.Items.Length);
-        Assert.Equal(1, list.Items.Count(item => item.ItemId == 2369));
+        Assert.Equal(1, list.Items.Count(item => item.ItemId == 219));
         Assert.Equal(count, store.FindById("alice", created.Id)!.Items!.Count);
     }
 

@@ -151,7 +151,8 @@ public class CharacterCreationTests
         Assert.Equal(point.X, character.X);
         Assert.Equal(point.Y, character.Y);
         Assert.Equal(point.Z, character.Z);
-        Assert.Contains(character.Items!, item => item.ItemId == 2369 && item.EquippedSlot == 7);
+        Assert.Contains(character.Items!, item => item.ItemId == 219 && item.EquippedSlot == 7);
+        Assert.Contains(character.Items!, item => item.ItemId == 26 && item.EquippedSlot == 10);
         Assert.Contains(character.Items!, item => item.ItemId == 57 && item.Count == 40 && item.EquippedSlot == -1);
 
         var mystic = service.CreateHuman("alice", "Mage", HumanClasses.Mystic);
@@ -203,12 +204,12 @@ public class CharacterCreationTests
 
         var orc = service.CreateHuman("alice", "OrcF", classId: 44, race: 3);
         Assert.True(orc.Ok, orc.Message);
-        Assert.Contains(orc.Value!.Items!, item => item.ItemId == 2368 && item.EquippedSlot == 7);
-        Assert.Contains(orc.Value.Items!, item => item.ItemId == 2369 && item.EquippedSlot == -1);
+        Assert.Contains(orc.Value!.Items!, item => item.ItemId == 257 && item.EquippedSlot == 7);
+        Assert.Contains(orc.Value.Items!, item => item.ItemId == 68 && item.EquippedSlot == -1);
 
         var dwarf = service.CreateHuman("alice", "DwarfF", classId: 53, race: 4, sex: HumanClasses.SexMale);
         Assert.True(dwarf.Ok, dwarf.Message);
-        Assert.Contains(dwarf.Value!.Items!, item => item.ItemId == 2370 && item.EquippedSlot == 7);
+        Assert.Contains(dwarf.Value!.Items!, item => item.ItemId == 87 && item.EquippedSlot == 7);
     }
 
     [Fact]
