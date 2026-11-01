@@ -425,26 +425,56 @@ namespace Fineage.Net.Contract
             w.WriteInt32(c.HairColor);
             w.WriteInt32(c.Face);
             w.WriteByte(c.PendingDelete ? (byte)1 : (byte)0);
+            w.WriteInt32(c.X);
+            w.WriteInt32(c.Y);
+            w.WriteInt32(c.Z);
+            w.WriteInt32(c.DeleteSecondsLeft);
+            w.WriteByte(c.IsLastPlayed ? (byte)1 : (byte)0);
+            w.WriteInt32(c.CurCp);
+            w.WriteInt32(c.MaxCp);
+            w.WriteInt64(c.Exp);
+            w.WriteInt32(c.Sp);
+            w.WriteInt32(c.Karma);
+            w.WriteInt32(c.WeaponItemId);
+            w.WriteInt32Array(c.Paperdoll);
         }
 
-        static CharacterSummaryNet ReadSummary(ref Reader r) => new()
+        static CharacterSummaryNet ReadSummary(ref Reader r)
         {
-            CharacterId = r.ReadInt32(),
-            Slot = r.ReadInt32(),
-            Name = r.ReadString(),
-            ClassId = r.ReadInt32(),
-            Race = r.ReadInt32(),
-            Sex = r.ReadInt32(),
-            Level = r.ReadInt32(),
-            Hp = r.ReadInt32(),
-            MaxHp = r.ReadInt32(),
-            Mp = r.ReadInt32(),
-            MaxMp = r.ReadInt32(),
-            HairStyle = r.ReadInt32(),
-            HairColor = r.ReadInt32(),
-            Face = r.ReadInt32(),
-            PendingDelete = r.ReadByte() != 0
-        };
+            var row = new CharacterSummaryNet
+            {
+                CharacterId = r.ReadInt32(),
+                Slot = r.ReadInt32(),
+                Name = r.ReadString(),
+                ClassId = r.ReadInt32(),
+                Race = r.ReadInt32(),
+                Sex = r.ReadInt32(),
+                Level = r.ReadInt32(),
+                Hp = r.ReadInt32(),
+                MaxHp = r.ReadInt32(),
+                Mp = r.ReadInt32(),
+                MaxMp = r.ReadInt32(),
+                HairStyle = r.ReadInt32(),
+                HairColor = r.ReadInt32(),
+                Face = r.ReadInt32(),
+                PendingDelete = r.ReadByte() != 0,
+                X = r.ReadInt32(),
+                Y = r.ReadInt32(),
+                Z = r.ReadInt32(),
+                DeleteSecondsLeft = r.ReadInt32(),
+                IsLastPlayed = r.ReadByte() != 0,
+                CurCp = r.ReadInt32(),
+                MaxCp = r.ReadInt32(),
+                Exp = r.ReadInt64(),
+                Sp = r.ReadInt32(),
+                Karma = r.ReadInt32(),
+                WeaponItemId = r.ReadInt32(),
+                Paperdoll = r.ReadInt32Array()
+            };
+            if (row.DeleteSecondsLeft > 0)
+                row.PendingDelete = true;
+            return row;
+        }
 
         static byte[] Write(Action<Writer> write)
         {
@@ -516,6 +546,16 @@ namespace Fineage.Net.Contract
                 Ensure(bytes.Length);
                 bytes.CopyTo(_buf.AsSpan(_len));
                 _len += bytes.Length;
+            }
+
+            public void WriteInt32Array(int[]? values)
+            {
+                values ??= Array.Empty<int>();
+                if (values.Length > 256)
+                    throw new InvalidOperationException("int array too long");
+                WriteUInt16((ushort)values.Length);
+                for (int i = 0; i < values.Length; i++)
+                    WriteInt32(values[i]);
             }
 
             public byte[] ToArray()
@@ -613,6 +653,17 @@ namespace Fineage.Net.Contract
                 string s = Utf8.GetString(_span.Slice(_i, len));
                 _i += len;
                 return s;
+            }
+
+            public int[] ReadInt32Array()
+            {
+                ushort len = ReadUInt16();
+                if (len > 256)
+                    throw new InvalidOperationException("int array too long");
+                var values = new int[len];
+                for (int i = 0; i < len; i++)
+                    values[i] = ReadInt32();
+                return values;
             }
         }
     }

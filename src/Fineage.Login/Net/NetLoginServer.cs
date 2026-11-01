@@ -223,15 +223,23 @@ public sealed class NetLoginServer
 
     CharacterRosterMsg ToRoster(IReadOnlyList<CharacterRecord> characters)
     {
+        var now = _clock();
+        int lastPlayedId = LoginService.LastPlayedId(characters);
         var rows = new CharacterSummaryNet[characters.Count];
         for (int i = 0; i < characters.Count; i++)
-            rows[i] = ToSummary(characters[i], i);
+            rows[i] = ToSummary(characters[i], i, now, lastPlayedId);
         return new CharacterRosterMsg { Characters = rows };
     }
 
-    CharacterSummaryNet ToSummary(CharacterRecord c, int slot)
+    CharacterSummaryNet ToSummary(CharacterRecord c, int slot, DateTimeOffset? now = null, int? lastPlayedId = null)
     {
+        now ??= _clock();
+        lastPlayedId ??= 0;
+        var point = c.HasPosition
+            ? new Fineage.Protocol.ClassSpawn.Point(c.X, c.Y, c.Z)
+            : ClassTemplates.Preview(c.ClassId);
         var stats = CharSelectStats.For(c);
+        int deleteSeconds = c.DeleteSecondsLeft(now.Value);
         return new CharacterSummaryNet
         {
             CharacterId = c.Id,
@@ -248,7 +256,19 @@ public sealed class NetLoginServer
             HairStyle = c.HairStyle,
             HairColor = c.HairColor,
             Face = c.Face,
-            PendingDelete = c.IsPendingDelete
+            PendingDelete = deleteSeconds > 0 || c.IsPendingDelete,
+            X = point.X,
+            Y = point.Y,
+            Z = point.Z,
+            DeleteSecondsLeft = deleteSeconds,
+            IsLastPlayed = c.Id == lastPlayedId.Value,
+            CurCp = stats.CurCp,
+            MaxCp = stats.MaxCp,
+            Exp = c.Exp,
+            Sp = c.Sp,
+            Karma = 0,
+            WeaponItemId = stats.WeaponItemId,
+            Paperdoll = stats.Paperdoll
         };
     }
 

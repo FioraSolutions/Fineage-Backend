@@ -19,6 +19,10 @@ namespace Fineage.Net.Contract
     {
     }
 
+    /// <summary>
+    /// CharSelect row (Mobius CharSelectionInfo shape). Matches V2 <c>CharacterSummaryMsg</c> fields
+    /// used by the lobby UI: vitals, CP, paperdoll[17], position, delete timer, last-played.
+    /// </summary>
     public sealed class CharacterSummaryNet
     {
         public int CharacterId { get; set; }
@@ -36,6 +40,19 @@ namespace Fineage.Net.Contract
         public int HairColor { get; set; }
         public int Face { get; set; }
         public bool PendingDelete { get; set; }
+        public int X { get; set; }
+        public int Y { get; set; }
+        public int Z { get; set; }
+        public int DeleteSecondsLeft { get; set; }
+        public bool IsLastPlayed { get; set; }
+        public int CurCp { get; set; }
+        public int MaxCp { get; set; }
+        public long Exp { get; set; }
+        public int Sp { get; set; }
+        public int Karma { get; set; }
+        public int WeaponItemId { get; set; }
+        /// <summary>Equipped item ids by paperdoll slot (length 17). Empty slot = 0.</summary>
+        public int[] Paperdoll { get; set; } = System.Array.Empty<int>();
     }
 
     public sealed class CharacterRosterMsg
