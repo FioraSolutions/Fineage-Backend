@@ -1,0 +1,10 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <TargetFramework>netstandard2.1</TargetFramework>
+    <RootNamespace>Fineage.Net.Contract</RootNamespace>
+    <Nullable>enable</Nullable>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <LangVersion>13</LangVersion>
+    <Description>Fineage Net protocol contract (PacketEnvelope). Shared by Login/Zone and Unity via source link.</Description>
+  </PropertyGroup>
+</Project>

@@ -37,3 +37,8 @@ TestResults/
 
 # Local Mobius Interlude XML SoT (sparse clone; do not commit 100MB+ dump)
 ref/
+
+# Local run artifacts
+local-data/
+local-logs/
+publish/

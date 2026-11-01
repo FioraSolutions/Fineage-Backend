@@ -10,6 +10,8 @@
     <ProjectReference Include="..\Fineage.Game\Fineage.Game.csproj" />
     <ProjectReference Include="..\Fineage.Protocol\Fineage.Protocol.csproj" />
     <ProjectReference Include="..\Fineage.Login\Fineage.Login.csproj" />
+    <ProjectReference Include="..\Fineage.Net.Contract\Fineage.Net.Contract.csproj" />
+    <ProjectReference Include="..\Fineage.Net.Host\Fineage.Net.Host.csproj" />
   </ItemGroup>
   <ItemGroup>
     <Content Include="..\..\data\items.json" Link="data\items.json" CopyToOutputDirectory="PreserveNewest" />

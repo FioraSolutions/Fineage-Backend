@@ -235,8 +235,19 @@ public sealed class JsonAccountStore : IAccountStore
     readonly string? _path;
     readonly object _gate = new();
     StoreFile _data = new();
+    Action<string>? _afterSaveSnapshot;
 
     JsonAccountStore(string? path) => _path = path;
+
+    /// <summary>
+    /// Invoked under the store lock after every successful mutation with the versioned snapshot JSON.
+    /// Handlers must not re-enter the store.
+    /// </summary>
+    public Action<string>? AfterSaveSnapshot
+    {
+        get => _afterSaveSnapshot;
+        set => _afterSaveSnapshot = value;
+    }
 
     public static JsonAccountStore InMemory() => new(null);
 
@@ -245,6 +256,20 @@ public sealed class JsonAccountStore : IAccountStore
         var store = new JsonAccountStore(path);
         store.Load();
         return store;
+    }
+
+    /// <summary>In-memory store seeded from a versioned snapshot JSON (same shape as accounts.json).</summary>
+    public static JsonAccountStore FromSnapshot(string json)
+    {
+        var store = new JsonAccountStore(null);
+        store.LoadFromJson(json);
+        return store;
+    }
+
+    public string ExportSnapshot()
+    {
+        lock (_gate)
+            return JsonSerializer.Serialize(_data, JsonOptions);
     }
 
     public bool AccountExists(string account)
@@ -951,16 +976,32 @@ public sealed class JsonAccountStore : IAccountStore
         _data = data;
     }
 
+    void LoadFromJson(string json)
+    {
+        var data = JsonSerializer.Deserialize<StoreFile>(json, JsonOptions)
+            ?? throw new InvalidDataException("empty account store snapshot");
+        if (data.Version != 1)
+            throw new InvalidDataException($"unsupported account store version {data.Version}");
+        data.Clans ??= [];
+        data.Castles ??= [];
+        data.SiegeClans ??= [];
+        _data = data;
+    }
+
     void Save()
     {
-        if (_path == null)
-            return;
-        string? dir = Path.GetDirectoryName(_path);
-        if (!string.IsNullOrEmpty(dir))
-            Directory.CreateDirectory(dir);
-        string tmp = _path + ".tmp";
-        File.WriteAllText(tmp, JsonSerializer.Serialize(_data, JsonOptions));
-        File.Move(tmp, _path, overwrite: true);
+        string snapshot = JsonSerializer.Serialize(_data, JsonOptions);
+        if (_path != null)
+        {
+            string? dir = Path.GetDirectoryName(_path);
+            if (!string.IsNullOrEmpty(dir))
+                Directory.CreateDirectory(dir);
+            string tmp = _path + ".tmp";
+            File.WriteAllText(tmp, snapshot);
+            File.Move(tmp, _path, overwrite: true);
+        }
+
+        _afterSaveSnapshot?.Invoke(snapshot);
     }
 
     static List<StoredItemDto>? CopyItems(IReadOnlyList<StoredItem>? items) =>

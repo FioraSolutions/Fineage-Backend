@@ -2,11 +2,13 @@ using System.Net;
 using Fineage.Game;
 using Fineage.Game.Mobius;
 using Fineage.Login;
+using Fineage.Net.Host;
 using Fineage.Protocol;
 using Fineage.Protocol.Net;
 using Fineage.Protocol.Telemetry;
 using Fineage.Zone;
 using Fineage.Zone.Bosses;
+using Fineage.Zone.Net;
 using Fineage.Zone.Olympiad;
 using Fineage.Zone.SevenSigns;
 
@@ -27,9 +29,10 @@ if (args.Contains("--selftest"))
     return;
 }
 
+// Net owns 9777; legacy V2 shifts to 9877 unless --port / FINEAGE_ZONE_PORT is pinned.
 string portText = Arg(args, "--port")
     ?? Environment.GetEnvironmentVariable("FINEAGE_ZONE_PORT")
-    ?? ZoneHandoff.Port.ToString();
+    ?? (NetSettings.Enabled ? NetSettings.V2ZonePort.ToString() : ZoneHandoff.Port.ToString());
 if (!int.TryParse(portText, out int port) || port is < 1 or > 65535)
 {
     Console.Error.WriteLine("invalid --port");
@@ -50,7 +53,17 @@ if (!BindAddress.TryResolve(bindText, out var bindAddress, out string bindDispla
 string storePath = Arg(args, "--store")
     ?? Environment.GetEnvironmentVariable("FINEAGE_LOGIN_STORE")
     ?? Path.Combine("data", "accounts.json");
-var accounts = JsonAccountStore.Open(storePath);
+IAccountStore accounts = AccountStoreFactory.Open(storePath);
+string storeLabel = string.Equals(
+    Environment.GetEnvironmentVariable(AccountStoreFactory.StoreEnv),
+    "postgres",
+    StringComparison.OrdinalIgnoreCase)
+    || string.Equals(
+        Environment.GetEnvironmentVariable(AccountStoreFactory.StoreEnv),
+        "pg",
+        StringComparison.OrdinalIgnoreCase)
+    ? "postgres"
+    : storePath;
 TryMobiusCatalogImportAtBoot(storePath);
 using var shutdown = new CancellationTokenSource();
 Console.CancelKeyPress += (_, e) =>
@@ -95,7 +108,7 @@ if (string.IsNullOrWhiteSpace(Environment.GetEnvironmentVariable("FINEAGE_HANDOF
     Console.WriteLine("[ZONE] warning: FINEAGE_HANDOFF_SECRET is unset. It must match Login before clients hand off from another machine.");
 }
 
-Console.WriteLine($"[ZONE] listen {bindDisplay}:{port} store={storePath} Talking Island (maxConn={maxConnections} outboundQ={outboundQueue} msgPerSec={maxMsgPerSec} interestRange={interestRange} npcs={world.NpcObjectIds.Count})");
+Console.WriteLine($"[ZONE] listen {bindDisplay}:{port} store={storeLabel} Talking Island (maxConn={maxConnections} outboundQ={outboundQueue} msgPerSec={maxMsgPerSec} interestRange={interestRange} npcs={world.NpcObjectIds.Count})");
 Console.WriteLine("[ZONE] Seven Signs period, cabal, and seal-stone scores are stored beside the account file as seven-signs.json.");
 Console.WriteLine("[ZONE] Olympiad registration and points are stored beside the account file as olympiad.json. See docs/olympiad-v2-protocol.md.");
 Console.WriteLine("[ZONE] Catacomb and necropolis gates follow that cabal. Enter is opcode 92. See docs/dungeon-access-v2-protocol.md.");
@@ -118,9 +131,24 @@ if (zoneStatus != null)
 
 await using FineageMetricsHost? metrics = FineageMetricsHost.Start("zone", Console.Out, Console.Error);
 var tcp = new TcpServer();
+Task? netTask = null;
+if (NetSettings.Enabled)
+{
+    var netZone = new NetZoneServer(HandoffTokens.FromEnvironment(), world, accounts);
+    var netTcp = new NetTcpServer();
+    Console.WriteLine($"[ZONE] net listen {bindDisplay}:{NetSettings.ZonePort} (PacketEnvelope)");
+    netTask = netTcp.RunAsync(
+        host,
+        NetSettings.ZonePort,
+        netZone.HandleAsync,
+        shutdown.Token,
+        maxConnections,
+        NetSettings.InboxCapacity);
+}
+
 try
 {
-    await tcp.RunAsync(
+    var v2 = tcp.RunAsync(
         host,
         port,
         maxConnections,
@@ -128,7 +156,11 @@ try
         "zone",
         server.HandleAsync,
         shutdown.Token,
-        ZoneOverload.RejectAsync).ConfigureAwait(false);
+        ZoneOverload.RejectAsync);
+    if (netTask != null)
+        await Task.WhenAny(v2, netTask).ConfigureAwait(false);
+    else
+        await v2.ConfigureAwait(false);
 }
 catch (Exception ex) when (ex is not OperationCanceledException)
 {
@@ -137,6 +169,7 @@ catch (Exception ex) when (ex is not OperationCanceledException)
 }
 finally
 {
+    shutdown.Cancel();
     bosses.Save();
 }
 
