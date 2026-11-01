@@ -26,9 +26,10 @@ public sealed record AccountCredential(string AccountName, string PasswordHash, 
 /// <summary>
 /// One saved stack. <see cref="EquippedSlot"/> is a paperdoll index, or -1 in the bag.
 /// <see cref="EnchantLevel"/> is 0 for a stack and for an unenchanted piece. Older saves omit it and load as 0.
+/// <see cref="ObjectId"/> is the durable Mobius-style instance id; 0 means allocate on next persist/load.
 /// Null <c>Items</c> on a character means the kit was never granted.
 /// </summary>
-public sealed record StoredItem(int ItemId, int Count, int EquippedSlot, int EnchantLevel = 0);
+public sealed record StoredItem(int ItemId, int Count, int EquippedSlot, int EnchantLevel = 0, int ObjectId = 0);
 
 public sealed record CharacterRecord(
     int Id,
@@ -249,6 +250,9 @@ public sealed class JsonAccountStore : IAccountStore
         set => _afterSaveSnapshot = value;
     }
 
+    /// <summary>When false, mutations update memory/file but skip <see cref="AfterSaveSnapshot"/> (Postgres hot paths).</summary>
+    public bool EmitSnapshots { get; set; } = true;
+
     public static JsonAccountStore InMemory() => new(null);
 
     public static JsonAccountStore Open(string path)
@@ -408,7 +412,7 @@ public sealed class JsonAccountStore : IAccountStore
                 Sp = sp,
                 Adena = adena,
                 Title = title ?? "",
-                Items = CopyItems(items),
+                Items = CopyItemsAssigningIds(items, releaseObjectIds: null),
                 Newbie = row.Characters.Count == 0,
                 CreatedAt = createdAt ?? DateTimeOffset.UtcNow
             };
@@ -428,7 +432,8 @@ public sealed class JsonAccountStore : IAccountStore
             var character = FindCharacter(account, characterId);
             if (character == null)
                 return false;
-            character.Items = CopyItems(items);
+            var release = ObjectIdSet(character.Items);
+            character.Items = CopyItemsAssigningIds(items, release);
             Save();
             return true;
         }
@@ -443,7 +448,8 @@ public sealed class JsonAccountStore : IAccountStore
             var character = FindCharacter(account, characterId);
             if (character == null)
                 return false;
-            character.Warehouse = CopyItems(items);
+            var release = ObjectIdSet(character.Warehouse);
+            character.Warehouse = CopyItemsAssigningIds(items, release);
             Save();
             return true;
         }
@@ -973,6 +979,9 @@ public sealed class JsonAccountStore : IAccountStore
         int maxClan = clanIds.Count == 0 ? 0 : clanIds.Max();
         if (data.NextClanId <= maxClan)
             data.NextClanId = maxClan + 1;
+        if (data.NextItemObjectId < PlayerInventory.FirstObjectId)
+            data.NextItemObjectId = PlayerInventory.FirstObjectId;
+        EnsureItemObjectIds(data);
         _data = data;
     }
 
@@ -985,6 +994,9 @@ public sealed class JsonAccountStore : IAccountStore
         data.Clans ??= [];
         data.Castles ??= [];
         data.SiegeClans ??= [];
+        if (data.NextItemObjectId < PlayerInventory.FirstObjectId)
+            data.NextItemObjectId = PlayerInventory.FirstObjectId;
+        EnsureItemObjectIds(data);
         _data = data;
     }
 
@@ -1001,17 +1013,125 @@ public sealed class JsonAccountStore : IAccountStore
             File.Move(tmp, _path, overwrite: true);
         }
 
-        _afterSaveSnapshot?.Invoke(snapshot);
+        if (EmitSnapshots)
+            _afterSaveSnapshot?.Invoke(snapshot);
     }
 
-    static List<StoredItemDto>? CopyItems(IReadOnlyList<StoredItem>? items) =>
-        items == null ? null : items.Select(item => new StoredItemDto
+    List<StoredItemDto>? CopyItemsAssigningIds(IReadOnlyList<StoredItem>? items, HashSet<int>? releaseObjectIds)
+    {
+        if (items == null)
+            return null;
+        var taken = AllObjectIdsUnlocked();
+        if (releaseObjectIds != null)
         {
-            ItemId = item.ItemId,
-            Count = item.Count,
-            EquippedSlot = item.EquippedSlot,
-            EnchantLevel = item.EnchantLevel
-        }).ToList();
+            foreach (int id in releaseObjectIds)
+                taken.Remove(id);
+        }
+
+        var rows = new List<StoredItemDto>(items.Count);
+        var batch = new HashSet<int>();
+        foreach (var item in items)
+        {
+            int objectId = item.ObjectId;
+            if (objectId <= 0 || taken.Contains(objectId) || batch.Contains(objectId))
+                objectId = NextItemObjectIdUnlocked(taken);
+            else if (objectId >= _data.NextItemObjectId)
+                _data.NextItemObjectId = checked(objectId + 1);
+            batch.Add(objectId);
+            taken.Add(objectId);
+            rows.Add(new StoredItemDto
+            {
+                ItemId = item.ItemId,
+                Count = item.Count,
+                EquippedSlot = item.EquippedSlot,
+                EnchantLevel = item.EnchantLevel,
+                ObjectId = objectId
+            });
+        }
+
+        return rows;
+    }
+
+    static HashSet<int> ObjectIdSet(List<StoredItemDto>? items)
+    {
+        var set = new HashSet<int>();
+        if (items == null)
+            return set;
+        foreach (var item in items)
+        {
+            if (item.ObjectId > 0)
+                set.Add(item.ObjectId);
+        }
+
+        return set;
+    }
+
+    HashSet<int> AllObjectIdsUnlocked()
+    {
+        var taken = new HashSet<int>();
+        foreach (var account in _data.Accounts)
+        {
+            foreach (var character in account.Characters)
+            {
+                foreach (int id in ObjectIdSet(character.Items))
+                    taken.Add(id);
+                foreach (int id in ObjectIdSet(character.Warehouse))
+                    taken.Add(id);
+            }
+        }
+
+        return taken;
+    }
+
+    int NextItemObjectIdUnlocked(HashSet<int>? taken = null)
+    {
+        if (_data.NextItemObjectId < PlayerInventory.FirstObjectId)
+            _data.NextItemObjectId = PlayerInventory.FirstObjectId;
+        while (taken != null && taken.Contains(_data.NextItemObjectId))
+            _data.NextItemObjectId++;
+        int id = _data.NextItemObjectId++;
+        taken?.Add(id);
+        return id;
+    }
+
+    static void EnsureItemObjectIds(StoreFile data)
+    {
+        int next = data.NextItemObjectId < PlayerInventory.FirstObjectId
+            ? PlayerInventory.FirstObjectId
+            : data.NextItemObjectId;
+        var taken = new HashSet<int>();
+        foreach (var account in data.Accounts)
+        {
+            foreach (var character in account.Characters)
+            {
+                next = AssignMissingIds(character.Items, next, taken);
+                next = AssignMissingIds(character.Warehouse, next, taken);
+            }
+        }
+
+        data.NextItemObjectId = next;
+    }
+
+    static int AssignMissingIds(List<StoredItemDto>? items, int next, HashSet<int> taken)
+    {
+        if (items == null)
+            return next;
+        foreach (var item in items)
+        {
+            if (item.ObjectId <= 0 || !taken.Add(item.ObjectId))
+            {
+                while (!taken.Add(next))
+                    next++;
+                item.ObjectId = next++;
+            }
+            else if (item.ObjectId >= next)
+            {
+                next = item.ObjectId + 1;
+            }
+        }
+
+        return next;
+    }
 
     static CharacterRecord ToRecord(string account, CharacterDto character) =>
         new(
@@ -1024,7 +1144,7 @@ public sealed class JsonAccountStore : IAccountStore
             character.Level,
             character.Items == null
                 ? null
-                : character.Items.Select(item => new StoredItem(item.ItemId, item.Count, item.EquippedSlot, item.EnchantLevel)).ToArray(),
+                : character.Items.Select(item => new StoredItem(item.ItemId, item.Count, item.EquippedSlot, item.EnchantLevel, item.ObjectId)).ToArray(),
             character.HairStyle,
             character.HairColor,
             character.Face,
@@ -1054,7 +1174,7 @@ public sealed class JsonAccountStore : IAccountStore
                     (quest.Vars ?? []).Select(variable => new QuestSaveVar(variable.Key, variable.Value)).ToArray())).ToArray(),
             character.Warehouse == null
                 ? null
-                : character.Warehouse.Select(item => new StoredItem(item.ItemId, item.Count, -1, item.EnchantLevel)).ToArray(),
+                : character.Warehouse.Select(item => new StoredItem(item.ItemId, item.Count, -1, item.EnchantLevel, item.ObjectId)).ToArray(),
             character.Newbie);
 
     sealed class StoreFile
@@ -1062,6 +1182,7 @@ public sealed class JsonAccountStore : IAccountStore
         public int Version { get; set; } = 1;
         public int NextCharacterId { get; set; } = 1;
         public int NextClanId { get; set; } = 1;
+        public int NextItemObjectId { get; set; } = PlayerInventory.FirstObjectId;
         public List<AccountDto> Accounts { get; set; } = [];
         public List<ClanDto> Clans { get; set; } = [];
         public List<CastleDto> Castles { get; set; } = [];
@@ -1174,5 +1295,6 @@ public sealed class JsonAccountStore : IAccountStore
         public int Count { get; set; }
         public int EquippedSlot { get; set; } = -1;
         public int EnchantLevel { get; set; }
+        public int ObjectId { get; set; }
     }
 }

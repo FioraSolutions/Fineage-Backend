@@ -1,12 +1,13 @@
 using System.Text.Json;
+using Fineage.Game.Quests;
 using Npgsql;
 
 namespace Fineage.Login;
 
 /// <summary>
-/// PostgreSQL-backed <see cref="IAccountStore"/>. Authoritative document lives in
-/// <c>store_snapshot</c>; mutations reuse <see cref="JsonAccountStore"/> in-process logic
-/// and flush the snapshot (plus light projections) after each write.
+/// PostgreSQL-backed <see cref="IAccountStore"/>. In-process mutations reuse
+/// <see cref="JsonAccountStore"/>; normalized character/item/quest tables are the
+/// durable character-domain source of truth. <c>store_snapshot</c> remains a backup export.
 /// </summary>
 public sealed class PostgresAccountStore : IAccountStore, IDisposable
 {
@@ -31,12 +32,12 @@ public sealed class PostgresAccountStore : IAccountStore, IDisposable
             ? JsonAccountStore.InMemory()
             : JsonAccountStore.FromSnapshot(existing);
         var store = new PostgresAccountStore(dataSource, inner);
-        if (string.IsNullOrWhiteSpace(existing))
-            store.PersistSnapshot(inner.ExportSnapshot());
+        // Ensure normalized tables match memory (assigns object ids, backfills SQL).
+        store.PersistSnapshot(inner.ExportSnapshot());
         return store;
     }
 
-    /// <summary>One-shot: validate accounts.json and replace the Postgres snapshot (restart processes after).</summary>
+    /// <summary>One-shot: validate accounts.json and replace the Postgres snapshot + normalized tables.</summary>
     public static void ImportJsonFileToDatabase(string connectionString, string jsonPath)
     {
         ArgumentException.ThrowIfNullOrWhiteSpace(connectionString);
@@ -44,8 +45,14 @@ public sealed class PostgresAccountStore : IAccountStore, IDisposable
         string snapshot = JsonAccountStore.FromSnapshot(json).ExportSnapshot();
         var dataSource = NpgsqlDataSource.Create(connectionString);
         ApplyMigrations(dataSource);
-        using var store = new PostgresAccountStore(dataSource, JsonAccountStore.InMemory());
+        using var store = new PostgresAccountStore(dataSource, JsonAccountStore.FromSnapshot(snapshot));
         store.PersistSnapshot(snapshot);
+    }
+
+    /// <summary>Re-project normalized tables from the current in-memory snapshot (CLI / recovery).</summary>
+    public void BackfillNormalizedFromSnapshot()
+    {
+        PersistSnapshot(_inner.ExportSnapshot());
     }
 
     public void Dispose() => _dataSource.Dispose();
@@ -54,7 +61,6 @@ public sealed class PostgresAccountStore : IAccountStore, IDisposable
     {
         string migrationsDir = FindMigrationsDirectory();
         using var conn = dataSource.OpenConnection();
-        // Serialize Login+Zone boot so CREATE TABLE races do not trip pg_type uniqueness.
         using (var lockCmd = conn.CreateCommand())
         {
             lockCmd.CommandText = "SELECT pg_advisory_lock(87201401)";
@@ -119,12 +125,10 @@ public sealed class PostgresAccountStore : IAccountStore, IDisposable
     {
         foreach (string part in sql.Split(';', StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries))
         {
-            string trimmed = part.Trim();
-            if (trimmed.Length == 0 || trimmed.StartsWith("--", StringComparison.Ordinal))
-                continue;
-            // Keep lines that are only comments out; allow statements that contain comment lines.
+            // Strip comment-only lines; do not skip the whole chunk when it starts with a header comment
+            // (002_normalize_characters.sql leads with comments then ALTER … hair_style).
             var meaningful = new List<string>();
-            foreach (string line in trimmed.Split('\n'))
+            foreach (string line in part.Split('\n'))
             {
                 string t = line.Trim();
                 if (t.Length == 0 || t.StartsWith("--", StringComparison.Ordinal))
@@ -152,7 +156,6 @@ public sealed class PostgresAccountStore : IAccountStore, IDisposable
             dir = Directory.GetParent(dir)?.FullName;
         }
 
-        // Source-tree fallback when running via `dotnet run` from repo.
         string src = Path.GetFullPath(Path.Combine(AppContext.BaseDirectory, "..", "..", "..", "Persistence", "Migrations"));
         if (Directory.Exists(src))
             return src;
@@ -170,7 +173,6 @@ public sealed class PostgresAccountStore : IAccountStore, IDisposable
 
     void PersistSnapshot(string snapshotJson)
     {
-        // Validate versioned document.
         using var _ = JsonDocument.Parse(snapshotJson);
 
         lock (_persistGate)
@@ -192,100 +194,48 @@ public sealed class PostgresAccountStore : IAccountStore, IDisposable
                 upsert.ExecuteNonQuery();
             }
 
-            // Best-effort projections for SQL tooling (authoritative doc remains snapshot).
-            try
-            {
-                ProjectTables(conn, tx, snapshotJson);
-            }
-            catch
-            {
-                // Projection failure must not lose the snapshot write.
-            }
-
+            NormalizedStoreWriter.UpsertFromSnapshot(conn, tx, snapshotJson);
             tx.Commit();
         }
     }
 
-    static void ProjectTables(NpgsqlConnection conn, NpgsqlTransaction tx, string snapshotJson)
+    bool RunSilent(Func<bool> mutation, Action<NpgsqlConnection> sql)
     {
-        using var wipeAccounts = conn.CreateCommand();
-        wipeAccounts.Transaction = tx;
-        wipeAccounts.CommandText = "TRUNCATE clans; TRUNCATE accounts CASCADE;";
-        wipeAccounts.ExecuteNonQuery();
-
-        using var doc = JsonDocument.Parse(snapshotJson);
-        var root = doc.RootElement;
-        if (!root.TryGetProperty("accounts", out var accounts))
-            return;
-
-        foreach (var account in accounts.EnumerateArray())
+        bool previous = _inner.EmitSnapshots;
+        _inner.EmitSnapshots = false;
+        try
         {
-            string name = account.GetProperty("name").GetString() ?? "";
-            if (string.IsNullOrEmpty(name))
-                continue;
-            using (var ins = conn.CreateCommand())
-            {
-                ins.Transaction = tx;
-                ins.CommandText =
-                    """
-                    INSERT INTO accounts (name, email, password_hash, password_salt, iterations)
-                    VALUES (@name, @email, @hash, @salt, @iter)
-                    """;
-                ins.Parameters.AddWithValue("name", name);
-                object email = account.TryGetProperty("email", out var e) && e.ValueKind == JsonValueKind.String
-                    ? e.GetString()!
-                    : DBNull.Value;
-                if (email is string es && string.IsNullOrWhiteSpace(es))
-                    email = DBNull.Value;
-                ins.Parameters.AddWithValue("email", email);
-                ins.Parameters.AddWithValue("hash", account.GetProperty("passwordHash").GetString() ?? "");
-                ins.Parameters.AddWithValue("salt", account.GetProperty("passwordSalt").GetString() ?? "");
-                ins.Parameters.AddWithValue("iter", account.GetProperty("iterations").GetInt32());
-                ins.ExecuteNonQuery();
-            }
-
-            if (!account.TryGetProperty("characters", out var characters))
-                continue;
-            foreach (var ch in characters.EnumerateArray())
-            {
-                using var insChar = conn.CreateCommand();
-                insChar.Transaction = tx;
-                insChar.CommandText =
-                    """
-                    INSERT INTO characters (id, account, name, class_id, race, sex, level, payload, updated_at)
-                    VALUES (@id, @account, @name, @classId, @race, @sex, @level, @payload::jsonb, now())
-                    """;
-                insChar.Parameters.AddWithValue("id", ch.GetProperty("id").GetInt32());
-                insChar.Parameters.AddWithValue("account", name);
-                insChar.Parameters.AddWithValue("name", ch.GetProperty("name").GetString() ?? "");
-                insChar.Parameters.AddWithValue("classId", ch.GetProperty("classId").GetInt32());
-                insChar.Parameters.AddWithValue("race", ch.TryGetProperty("race", out var race) ? race.GetInt32() : 0);
-                insChar.Parameters.AddWithValue("sex", ch.TryGetProperty("sex", out var sex) ? sex.GetInt32() : 0);
-                insChar.Parameters.AddWithValue("level", ch.TryGetProperty("level", out var level) ? level.GetInt32() : 1);
-                insChar.Parameters.AddWithValue("payload", ch.GetRawText());
-                insChar.ExecuteNonQuery();
-            }
+            if (!mutation())
+                return false;
+        }
+        finally
+        {
+            _inner.EmitSnapshots = previous;
         }
 
-        if (!root.TryGetProperty("clans", out var clans))
-            return;
-        foreach (var clan in clans.EnumerateArray())
+        // Export before taking _persistGate so we never nest with JsonAccountStore._gate.
+        string snapshot = _inner.ExportSnapshot();
+        lock (_persistGate)
         {
-            using var insClan = conn.CreateCommand();
-            insClan.Transaction = tx;
-            insClan.CommandText =
+            using var conn = _dataSource.OpenConnection();
+            sql(conn);
+            using var cmd = conn.CreateCommand();
+            cmd.CommandText =
                 """
-                INSERT INTO clans (id, name, payload)
-                VALUES (@id, @name, @payload::jsonb)
+                INSERT INTO store_snapshot (id, version, payload, updated_at)
+                VALUES (1, 1, @payload::jsonb, now())
+                ON CONFLICT (id) DO UPDATE
+                SET payload = excluded.payload,
+                    updated_at = now();
                 """;
-            insClan.Parameters.AddWithValue("id", clan.GetProperty("id").GetInt32());
-            insClan.Parameters.AddWithValue("name", clan.GetProperty("name").GetString() ?? "");
-            insClan.Parameters.AddWithValue("payload", clan.GetRawText());
-            insClan.ExecuteNonQuery();
+            cmd.Parameters.AddWithValue("payload", snapshot);
+            cmd.ExecuteNonQuery();
         }
+
+        return true;
     }
 
-    // --- IAccountStore forward ---
+    // --- IAccountStore ---
 
     public bool AccountExists(string account) => _inner.AccountExists(account);
 
@@ -329,22 +279,49 @@ public sealed class PostgresAccountStore : IAccountStore, IDisposable
             hairStyle, hairColor, face, hasPosition, x, y, z, level, maxHp, hp, maxMp, mp, sp, adena, title, maxCharacters);
 
     public bool TryReplaceItems(string account, int characterId, IReadOnlyList<StoredItem> items) =>
-        _inner.TryReplaceItems(account, characterId, items);
+        RunSilent(
+            () => _inner.TryReplaceItems(account, characterId, items),
+            conn =>
+            {
+                var record = _inner.FindById(account, characterId)
+                    ?? throw new InvalidOperationException($"Character {characterId} missing after item replace.");
+                NormalizedStoreWriter.ReplaceInventoryOnly(conn, characterId, record.Items ?? []);
+            });
 
     public bool TryReplaceWarehouse(string account, int characterId, IReadOnlyList<StoredItem> items) =>
-        _inner.TryReplaceWarehouse(account, characterId, items);
+        RunSilent(
+            () => _inner.TryReplaceWarehouse(account, characterId, items),
+            conn =>
+            {
+                var record = _inner.FindById(account, characterId)
+                    ?? throw new InvalidOperationException($"Character {characterId} missing after warehouse replace.");
+                NormalizedStoreWriter.ReplaceWarehouseOnly(conn, characterId, record.Warehouse ?? []);
+            });
 
     public bool TrySavePresence(string account, int characterId, int x, int y, int z, DateTimeOffset? lastAccess) =>
-        _inner.TrySavePresence(account, characterId, x, y, z, lastAccess);
+        RunSilent(
+            () => _inner.TrySavePresence(account, characterId, x, y, z, lastAccess),
+            conn => NormalizedStoreWriter.UpdatePresence(conn, characterId, x, y, z, lastAccess));
 
     public bool TrySaveVitals(string account, int characterId, int hp, int mp) =>
-        _inner.TrySaveVitals(account, characterId, hp, mp);
+        RunSilent(
+            () => _inner.TrySaveVitals(account, characterId, hp, mp),
+            conn => NormalizedStoreWriter.UpdateVitals(conn, characterId, hp, mp));
 
     public bool TrySaveProgress(string account, int characterId, int level, long exp, int sp, int maxHp, int hp, int maxMp, int mp) =>
-        _inner.TrySaveProgress(account, characterId, level, exp, sp, maxHp, hp, maxMp, mp);
+        RunSilent(
+            () => _inner.TrySaveProgress(account, characterId, level, exp, sp, maxHp, hp, maxMp, mp),
+            conn => NormalizedStoreWriter.UpdateProgress(conn, characterId, level, exp, sp, maxHp, hp, maxMp, mp));
 
-    public bool TryReplaceQuests(string account, int characterId, IReadOnlyList<Fineage.Game.Quests.QuestSaveRow> quests) =>
-        _inner.TryReplaceQuests(account, characterId, quests);
+    public bool TryReplaceQuests(string account, int characterId, IReadOnlyList<QuestSaveRow> quests) =>
+        RunSilent(
+            () => _inner.TryReplaceQuests(account, characterId, quests),
+            conn =>
+            {
+                using var tx = conn.BeginTransaction();
+                NormalizedStoreWriter.ReplaceQuests(conn, tx, characterId, quests);
+                tx.Commit();
+            });
 
     public bool TrySetLastAccess(string account, int characterId, DateTimeOffset when) =>
         _inner.TrySetLastAccess(account, characterId, when);

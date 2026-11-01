@@ -261,6 +261,30 @@ public sealed class PlayerInventory
         return first;
     }
 
+    /// <summary>
+    /// Restores a persisted stack/piece with a durable <paramref name="objectId"/>.
+    /// Stackable rows with a known id do not merge into another stack.
+    /// </summary>
+    public ItemInstance AddRestored(int objectId, int itemId, int count, int enchantLevel = 0)
+    {
+        if (objectId <= 0)
+            throw new ArgumentOutOfRangeException(nameof(objectId), objectId, "Object id must be positive.");
+        if (count < 1)
+            throw new ArgumentOutOfRangeException(nameof(count), count, "Count must be at least 1.");
+        CheckEnchant(enchantLevel);
+        if (Find(objectId) != null)
+            throw new InvalidOperationException($"Item object {objectId} is already in this inventory.");
+
+        var template = _catalog.Get(itemId);
+        if (template.Stackable && enchantLevel != 0)
+            throw new InvalidOperationException($"Stackable item {itemId} cannot carry an enchant level.");
+
+        _ids.Observe(objectId);
+        var item = new ItemInstance(objectId, template, count) { EnchantLevel = enchantLevel };
+        _items.Add(item);
+        return item;
+    }
+
     public void SetEnchantLevel(ItemInstance item, int level)
     {
         ArgumentNullException.ThrowIfNull(item);

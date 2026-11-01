@@ -728,10 +728,14 @@ public sealed partial class ZoneWorld
     {
         if (_accounts == null || player.Warehouse == null)
             return;
-        var rows = player.Warehouse.Rows();
-        var stored = new StoredItem[rows.Length];
-        for (int i = 0; i < rows.Length; i++)
-            stored[i] = new StoredItem(rows[i].ItemId, rows[i].Count, -1, rows[i].EnchantLevel);
+        var stacks = player.Warehouse.Items;
+        var stored = new StoredItem[stacks.Count];
+        for (int i = 0; i < stacks.Count; i++)
+        {
+            var stack = stacks[i];
+            stored[i] = new StoredItem(stack.ItemId, stack.Count, -1, stack.EnchantLevel, stack.ObjectId);
+        }
+
         _accounts.TryReplaceWarehouse(session.Account, session.ObjectId, stored);
     }
 

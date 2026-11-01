@@ -77,6 +77,25 @@ public static class Cli
             }
         }
 
+        if (cmd is "backfill-normalized")
+        {
+            if (rest.Count != 1)
+                return Usage(error);
+            string url = databaseUrl ?? AccountStoreFactory.DefaultPostgresUrl;
+            try
+            {
+                using var store = PostgresAccountStore.Open(url);
+                store.BackfillNormalizedFromSnapshot();
+                output.WriteLine("backfilled normalized character/item/quest tables from store_snapshot");
+                return 0;
+            }
+            catch (Exception ex)
+            {
+                error.WriteLine("backfill-normalized failed: " + ex.Message);
+                return 1;
+            }
+        }
+
         var handoff = MemoryHandoffStore.FromEnvironment();
         var service = new LoginService(
             AccountStoreFactory.Open(storePath),
@@ -187,6 +206,7 @@ public static class Cli
               Fineage.Login play <account> <password> <name> <fighter|mystic>
               Fineage.Login [--bind 0.0.0.0] [--port 9106] [--http-port 5080] [--store data/accounts.json]
               Fineage.Login import-json <accounts.json>   # requires FINEAGE_STORE=postgres / FINEAGE_DATABASE_URL
+              Fineage.Login backfill-normalized           # re-project characters/items/quests from store_snapshot
               # FINEAGE_STORE=postgres|json  FINEAGE_DATABASE_URL=Host=...;Database=fineage;...
               # With FINEAGE_NET_ENABLE=1: Net listens on 9106, V2 defaults to --port 9206
             """);

@@ -363,7 +363,7 @@ public sealed partial class ZoneWorld
         var vitals = LoadVitals(session);
         var warehouse = new PrivateWarehouse(_game.Items);
         if (stored?.Warehouse != null)
-            warehouse.Restore(stored.Warehouse.Select(item => new WarehouseRow(item.ItemId, item.Count, item.EnchantLevel)));
+            warehouse.Restore(stored.Warehouse.Select(item => new WarehouseRow(item.ItemId, item.Count, item.EnchantLevel, item.ObjectId)));
         RememberPenalties(session);
         var entity = new ZoneEntity
         {
