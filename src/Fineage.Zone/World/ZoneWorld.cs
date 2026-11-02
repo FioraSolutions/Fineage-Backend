@@ -84,6 +84,8 @@ sealed class ZoneEntity
     public int BaseCritical { get; init; }
     public int RandomDamage { get; init; }
     public int Dex { get; init; } = 30;
+    /// <summary>True while an abnormal with combat stat funcs is active (UserInfo refresh on change).</summary>
+    public bool HasStatAbnormal { get; set; }
     public float RunSpeed { get; init; }
     public float WalkSpeed { get; init; }
     public bool Running { get; set; } = true;
@@ -203,6 +205,8 @@ public sealed partial class ZoneWorld
     readonly Random _serviceRandom;
     /// <summary>Hit/miss, crit and damage spread rolls (Mobius Rnd in Formulas).</summary>
     readonly Random _combatRandom;
+    /// <summary>Buff/debuff combat stat funcs (Mobius skill &lt;for&gt;&lt;effect&gt;).</summary>
+    readonly SkillStatEffectCatalog _statEffects;
     readonly BuyListCatalog _buyLists;
     readonly MultiSellCatalog _multisells;
     readonly ShopStock _shopStock;
@@ -258,8 +262,10 @@ public sealed partial class ZoneWorld
         BuyListCatalog? buyLists = null,
         MultiSellCatalog? multisells = null,
         GeoEngine? geo = null,
-        Random? combatRandom = null)
+        Random? combatRandom = null,
+        SkillStatEffectCatalog? statEffects = null)
     {
+        _statEffects = statEffects ?? SkillStatEffectCatalog.LoadDefault();
         _combatRandom = combatRandom ?? Random.Shared;
         _aoi = aoi ?? new SingleCellAoi();
         _game = game ?? GameData.LoadDefault();

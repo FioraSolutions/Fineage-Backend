@@ -168,16 +168,18 @@ public sealed partial class ZoneWorld
 
     int PlayerReach(ZoneEntity player) => ZoneCombat.PlayerAttackReach(PlayerStats(player).AttackRange);
 
-    static double NpcPDef(ZoneEntity npc) => npc.PDef > 0 ? npc.PDef : Math.Max(1, npc.Level) * 40d;
+    double NpcPDef(ZoneEntity npc) =>
+        Math.Max(1d, StatMods(npc).Apply(CombatStat.PDef, npc.PDef > 0 ? npc.PDef : Math.Max(1, npc.Level) * 40d));
 
-    static int NpcPAtkSpd(ZoneEntity npc) => npc.PAtkSpd > 0 ? npc.PAtkSpd : ZoneCombat.DefaultNpcPAtkSpd;
+    int NpcPAtkSpd(ZoneEntity npc) =>
+        Math.Max(1, StatMods(npc).Apply(CombatStat.PAtkSpd, npc.PAtkSpd > 0 ? npc.PAtkSpd : ZoneCombat.DefaultNpcPAtkSpd));
 
     (int Damage, byte Flags) NpcMeleeRoll(ZoneEntity npc, ZoneEntity player)
     {
         if (npc.PAtk <= 0)
             return (ZoneCombat.MobMeleeDamage(npc.Level), 0);
         var ps = PlayerStats(player);
-        return ZoneCombat.RollMelee(_combatRandom, npc.PAtk, ps.PDef, NpcAccuracy(npc), ps.Evasion,
+        return ZoneCombat.RollMelee(_combatRandom, StatMods(npc).Apply(CombatStat.PAtk, npc.PAtk), ps.PDef, NpcAccuracy(npc), ps.Evasion,
             NpcCritPermille(npc), npc.RandomDamage);
     }
 

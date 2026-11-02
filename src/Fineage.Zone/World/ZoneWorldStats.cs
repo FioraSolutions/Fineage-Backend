@@ -70,25 +70,32 @@ public sealed partial class ZoneWorld
             }
         }
 
+        var mods = StatMods(player);
         return new PlayerCombatStats(
-            PAtk: (int)(basePAtk * str * levelMod),
-            MAtk: (int)(baseMAtk * intel * intel * levelMod * levelMod),
-            PDef: Math.Max(1, (int)(pDefBase * levelMod)),
-            MDef: Math.Max(1, (int)(mDefBase * men * levelMod)),
-            PAtkSpd: Math.Max(1, (int)(baseSpd * dex)),
-            MAtkSpd: (int)(t.MAtkSpd * wit),
-            Accuracy: (int)(Math.Sqrt(t.Dex) * 6 + level),
-            CritRate: (int)(crit * dex * 10),
+            PAtk: mods.Apply(CombatStat.PAtk, (int)(basePAtk * str * levelMod)),
+            MAtk: mods.Apply(CombatStat.MAtk, (int)(baseMAtk * intel * intel * levelMod * levelMod)),
+            PDef: Math.Max(1, mods.Apply(CombatStat.PDef, (int)(pDefBase * levelMod))),
+            MDef: Math.Max(1, mods.Apply(CombatStat.MDef, (int)(mDefBase * men * levelMod))),
+            PAtkSpd: Math.Max(1, mods.Apply(CombatStat.PAtkSpd, (int)(baseSpd * dex))),
+            MAtkSpd: Math.Max(1, mods.Apply(CombatStat.MAtkSpd, (int)(t.MAtkSpd * wit))),
+            Accuracy: mods.Apply(CombatStat.Accuracy, (int)(Math.Sqrt(t.Dex) * 6 + level)),
+            CritRate: mods.Apply(CombatStat.CritRate, (int)(crit * dex * 10)),
             AttackRange: range,
             Weapon: armed ? weapon!.WeaponType : WeaponType.None,
-            Evasion: (int)ZoneCombat.AccuracyOrEvasion(0, t.Dex, level),
+            Evasion: mods.Apply(CombatStat.Evasion, (int)ZoneCombat.AccuracyOrEvasion(0, t.Dex, level)),
             RandomDamage: armed && weapon!.RandomDamage > 0 ? weapon.RandomDamage : ZoneCombat.DefaultPlayerRandomDamage);
     }
 
-    double NpcAccuracy(ZoneEntity npc) => ZoneCombat.AccuracyOrEvasion(npc.BaseAccuracy, npc.Dex, npc.Level);
-    double NpcEvasion(ZoneEntity npc) => ZoneCombat.AccuracyOrEvasion(npc.BaseEvasion, npc.Dex, npc.Level);
+    /// <summary>Live buff/debuff stat funcs on <paramref name="entity"/> (players and NPCs).</summary>
+    internal CombatStatMods StatMods(ZoneEntity entity) =>
+        entity.Abnormals.Count == 0 ? CombatStatMods.None : _statEffects.Collect(entity.Abnormals);
+
+    double NpcAccuracy(ZoneEntity npc) =>
+        StatMods(npc).Apply(CombatStat.Accuracy, ZoneCombat.AccuracyOrEvasion(npc.BaseAccuracy, npc.Dex, npc.Level));
+    double NpcEvasion(ZoneEntity npc) =>
+        StatMods(npc).Apply(CombatStat.Evasion, ZoneCombat.AccuracyOrEvasion(npc.BaseEvasion, npc.Dex, npc.Level));
     int NpcCritPermille(ZoneEntity npc) =>
-        (int)(npc.BaseCritical * 10 * SafeBonus(PlayerClasses.StatBonuses, StatSlot.Dex, npc.Dex));
+        StatMods(npc).Apply(CombatStat.CritRate, (int)(npc.BaseCritical * 10 * SafeBonus(PlayerClasses.StatBonuses, StatSlot.Dex, npc.Dex)));
 
     static double SafeBonus(StatBonusTable table, StatSlot slot, int value)
     {

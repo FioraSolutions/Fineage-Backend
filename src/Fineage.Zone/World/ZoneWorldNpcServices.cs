@@ -599,7 +599,7 @@ public sealed partial class ZoneWorld
         if (player.Session == null)
             return;
         long now = _clock().ToUnixTimeMilliseconds();
-        ZoneAbnormals.Apply(player.Abnormals, skillId, abnormalLevel, durationSeconds, now);
+        ZoneAbnormals.Apply(player.Abnormals, skillId, abnormalLevel, durationSeconds, now, level);
         var cast = new MagicSkillUseMsg
         {
             CasterObjectId = npc.ObjectId,
