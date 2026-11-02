@@ -80,6 +80,7 @@ V2 MessagePack flushes still go to a discarded stream on the Net path. Net peers
 | Die / drop / despawn | `EntityDie` `0x0312` (death anim). `DropItem` `0x0313` (loot + known ground items). Corpse decay / pickup → `EntityDespawn` `0x030C`. |
 | Pickup | `PickupRequest` `0x0314` → `InventoryUpdate` `0x0315` (add/modify/remove rows) + `EntityDespawn` of ground object. |
 | Bag drop / gear | `DropItemRequest` `0x0316` → bag `InventoryUpdate` + world `DropItem`. `UseItem` `0x0317` / `UnequipItem` `0x0318` → `InventoryUpdate` (paperdoll modify). |
+| Chat | `Say` `0x0319` → `CreatureSay` `0x031A` (ALL local / SHOUT zone). Enter + flood notices → `SystemMessage` `0x031B`. |
 | Leave / disconnect | `EntityDespawn` of leaver to known Net peers. |
 
 AOI (who is on the knownlist):

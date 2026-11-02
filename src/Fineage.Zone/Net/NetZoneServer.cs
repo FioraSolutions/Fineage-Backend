@@ -2,6 +2,7 @@ using Fineage.Login;
 using Fineage.Net.Contract;
 using Fineage.Net.Host;
 using Fineage.Protocol;
+using Fineage.Zone.Chat;
 using Fineage.Zone.World;
 using NetHelloAck = Fineage.Net.Contract.HelloAckMsg;
 using NetReject = Fineage.Net.Contract.RejectMsg;
@@ -107,6 +108,20 @@ public sealed class NetZoneServer : INetPresenceBridge
             _ = _presence.SendAsync(watcher, NetOpcode.InventoryUpdate, payload, CancellationToken.None);
     }
 
+    void INetPresenceBridge.FanoutCreatureSay(IReadOnlyList<int> watcherObjectIds, CreatureSayNetMsg say)
+    {
+        var payload = NetCodec.EncodeCreatureSay(say);
+        foreach (int watcher in watcherObjectIds)
+            _ = _presence.SendAsync(watcher, NetOpcode.CreatureSay, payload, CancellationToken.None);
+    }
+
+    void INetPresenceBridge.FanoutSystemMessage(IReadOnlyList<int> watcherObjectIds, SystemMessageNetMsg message)
+    {
+        var payload = NetCodec.EncodeSystemMessage(message);
+        foreach (int watcher in watcherObjectIds)
+            _ = _presence.SendAsync(watcher, NetOpcode.SystemMessage, payload, CancellationToken.None);
+    }
+
     public async Task HandleAsync(NetConnection conn, CancellationToken ct)
     {
         await using var discard = new MemoryStream();
@@ -159,6 +174,9 @@ public sealed class NetZoneServer : INetPresenceBridge
                             break;
                         case NetOpcode.UnequipItem:
                             await OnUnequipItemAsync(conn, zoneSession, envelope, ct).ConfigureAwait(false);
+                            break;
+                        case NetOpcode.Say:
+                            await OnSayAsync(conn, zoneSession, envelope, ct).ConfigureAwait(false);
                             break;
                         case NetOpcode.StopMove:
                             // Authoritative stop: correct to current session position.
@@ -341,6 +359,17 @@ public sealed class NetZoneServer : INetPresenceBridge
             .ConfigureAwait(false);
         await conn.SendAsync(NetOpcode.SkillList, NetCodec.EncodeSkillList(packets.Skills), ct: ct)
             .ConfigureAwait(false);
+
+        var welcome = SayRules.Welcome(zoneSession.Name);
+        await conn.SendAsync(
+            NetOpcode.SystemMessage,
+            NetCodec.EncodeSystemMessage(new SystemMessageNetMsg
+            {
+                Id = welcome.Id,
+                Text = welcome.Text,
+                Params = welcome.Params ?? []
+            }),
+            ct: ct).ConfigureAwait(false);
 
         var known = _world.SnapshotKnownEntities(zoneSession);
         foreach (var other in known)
@@ -649,6 +678,29 @@ public sealed class NetZoneServer : INetPresenceBridge
             ct).ConfigureAwait(false);
         if (error != null)
             await RejectAsync(conn, error, "Unequip failed.", ct).ConfigureAwait(false);
+    }
+
+    async Task OnSayAsync(
+        NetConnection conn,
+        ZoneSession zoneSession,
+        PacketEnvelope envelope,
+        CancellationToken ct)
+    {
+        RequireHello(conn);
+        if (!zoneSession.Bound || !zoneSession.InWorld)
+        {
+            await RejectAsync(conn, "not_in_world", "Enter world first.", ct).ConfigureAwait(false);
+            return;
+        }
+
+        var say = NetCodec.DecodeSay(envelope.Payload);
+        string? error = await _world.TrySayAsync(
+            zoneSession,
+            new SayMsg { Text = say.Text, ChatType = say.ChatType },
+            _clock(),
+            ct).ConfigureAwait(false);
+        if (error != null)
+            await RejectAsync(conn, error, "Say failed.", ct).ConfigureAwait(false);
     }
 
     static void RequireHello(NetConnection conn)

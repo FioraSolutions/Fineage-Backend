@@ -43,5 +43,8 @@ namespace Fineage.Net.Contract
         public const ushort DropItemRequest = 0x0316;
         public const ushort UseItem = 0x0317;
         public const ushort UnequipItem = 0x0318;
+        public const ushort Say = 0x0319;
+        public const ushort CreatureSay = 0x031A;
+        public const ushort SystemMessage = 0x031B;
     }
 }

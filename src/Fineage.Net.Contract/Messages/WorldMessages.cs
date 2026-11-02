@@ -230,4 +230,25 @@ namespace Fineage.Net.Contract
     {
         public int PaperdollSlot { get; set; }
     }
+
+    public sealed class SayNetMsg
+    {
+        public string Text { get; set; } = "";
+        public int ChatType { get; set; }
+    }
+
+    public sealed class CreatureSayNetMsg
+    {
+        public int ObjectId { get; set; }
+        public string Name { get; set; } = "";
+        public string Text { get; set; } = "";
+        public int ChatType { get; set; }
+    }
+
+    public sealed class SystemMessageNetMsg
+    {
+        public int Id { get; set; }
+        public string Text { get; set; } = "";
+        public string[] Params { get; set; } = System.Array.Empty<string>();
+    }
 }

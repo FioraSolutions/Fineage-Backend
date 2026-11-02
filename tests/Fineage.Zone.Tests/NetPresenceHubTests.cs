@@ -56,6 +56,26 @@ public sealed class NetPresenceHubTests
     }
 
     [Fact]
+    public void Say_and_system_message_codec_round_trip()
+    {
+        var say = new SayNetMsg { Text = "hi", ChatType = 1 };
+        var sayAgain = NetCodec.DecodeSay(NetCodec.EncodeSay(say));
+        Assert.Equal("hi", sayAgain.Text);
+        Assert.Equal(1, sayAgain.ChatType);
+
+        var creature = new CreatureSayNetMsg { ObjectId = 3, Name = "Aria", Text = "yo", ChatType = 0 };
+        var creatureAgain = NetCodec.DecodeCreatureSay(NetCodec.EncodeCreatureSay(creature));
+        Assert.Equal("Aria", creatureAgain.Name);
+        Assert.Equal("yo", creatureAgain.Text);
+
+        var sys = new SystemMessageNetMsg { Id = 1, Text = "Welcome, Aria.", Params = ["Aria"] };
+        var sysAgain = NetCodec.DecodeSystemMessage(NetCodec.EncodeSystemMessage(sys));
+        Assert.Equal(1, sysAgain.Id);
+        Assert.Equal("Welcome, Aria.", sysAgain.Text);
+        Assert.Single(sysAgain.Params);
+    }
+
+    [Fact]
     public void Drop_use_unequip_codec_round_trip()
     {
         var drop = new DropItemRequestNetMsg { ObjectId = 5, Count = 2, X = 1, Y = 2, Z = 3 };

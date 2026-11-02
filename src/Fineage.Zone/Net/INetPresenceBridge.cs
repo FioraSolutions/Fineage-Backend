@@ -30,4 +30,8 @@ interface INetPresenceBridge
     void FanoutEntityDespawn(IReadOnlyList<int> watcherObjectIds, EntityDespawnMsg despawn);
 
     void FanoutInventoryUpdate(IReadOnlyList<int> watcherObjectIds, InventoryUpdateNetMsg update);
+
+    void FanoutCreatureSay(IReadOnlyList<int> watcherObjectIds, CreatureSayNetMsg say);
+
+    void FanoutSystemMessage(IReadOnlyList<int> watcherObjectIds, SystemMessageNetMsg message);
 }

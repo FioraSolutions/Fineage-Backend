@@ -698,6 +698,62 @@ namespace Fineage.Net.Contract
         public static UnequipItemNetMsg DecodeUnequipItem(ReadOnlySpan<byte> p) =>
             new() { PaperdollSlot = new Reader(p).ReadInt32() };
 
+        public static byte[] EncodeSay(SayNetMsg m) => Write(w =>
+        {
+            w.WriteString(m.Text ?? "");
+            w.WriteInt32(m.ChatType);
+        });
+
+        public static SayNetMsg DecodeSay(ReadOnlySpan<byte> p)
+        {
+            var r = new Reader(p);
+            return new SayNetMsg { Text = r.ReadString(), ChatType = r.ReadInt32() };
+        }
+
+        public static byte[] EncodeCreatureSay(CreatureSayNetMsg m) => Write(w =>
+        {
+            w.WriteInt32(m.ObjectId);
+            w.WriteString(m.Name ?? "");
+            w.WriteString(m.Text ?? "");
+            w.WriteInt32(m.ChatType);
+        });
+
+        public static CreatureSayNetMsg DecodeCreatureSay(ReadOnlySpan<byte> p)
+        {
+            var r = new Reader(p);
+            return new CreatureSayNetMsg
+            {
+                ObjectId = r.ReadInt32(),
+                Name = r.ReadString(),
+                Text = r.ReadString(),
+                ChatType = r.ReadInt32()
+            };
+        }
+
+        public static byte[] EncodeSystemMessage(SystemMessageNetMsg m) => Write(w =>
+        {
+            w.WriteInt32(m.Id);
+            w.WriteString(m.Text ?? "");
+            var pars = m.Params ?? Array.Empty<string>();
+            w.WriteInt32(pars.Length);
+            for (int i = 0; i < pars.Length; i++)
+                w.WriteString(pars[i] ?? "");
+        });
+
+        public static SystemMessageNetMsg DecodeSystemMessage(ReadOnlySpan<byte> p)
+        {
+            var r = new Reader(p);
+            int id = r.ReadInt32();
+            string text = r.ReadString();
+            int n = r.ReadInt32();
+            if (n < 0)
+                n = 0;
+            var pars = new string[n];
+            for (int i = 0; i < n; i++)
+                pars[i] = r.ReadString();
+            return new SystemMessageNetMsg { Id = id, Text = text, Params = pars };
+        }
+
         public static PositionCorrectionMsg DecodePositionCorrection(ReadOnlySpan<byte> p)
         {
             var r = new Reader(p);
