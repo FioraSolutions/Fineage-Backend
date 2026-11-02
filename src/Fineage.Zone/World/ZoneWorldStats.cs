@@ -6,7 +6,8 @@ namespace Fineage.Zone.World;
 /// <summary>Player physical/magic stats after Mobius base-stat, level, weapon and armor functions.</summary>
 public readonly record struct PlayerCombatStats(
     int PAtk, int MAtk, int PDef, int MDef, int PAtkSpd, int MAtkSpd, int Accuracy, int CritRate,
-    int AttackRange, WeaponType Weapon, int Evasion = 0, int RandomDamage = ZoneCombat.DefaultPlayerRandomDamage);
+    int AttackRange, WeaponType Weapon, int Evasion = 0, int RandomDamage = ZoneCombat.DefaultPlayerRandomDamage,
+    int ShieldDef = 0, double ShieldRate = 0, int Soulshots = 0, CrystalGrade WeaponGrade = CrystalGrade.None);
 
 public sealed partial class ZoneWorld
 {
@@ -70,6 +71,8 @@ public sealed partial class ZoneWorld
             }
         }
 
+        var shield = player.Inventory?.GetEquipped(PaperdollSlot.LHand)?.Template;
+        bool shielded = shield != null && shield.Kind == ItemKind.Armor && shield.ShieldDef > 0;
         var mods = StatMods(player);
         return new PlayerCombatStats(
             PAtk: mods.Apply(CombatStat.PAtk, (int)(basePAtk * str * levelMod)),
@@ -82,8 +85,12 @@ public sealed partial class ZoneWorld
             CritRate: mods.Apply(CombatStat.CritRate, (int)(crit * dex * 10)),
             AttackRange: range,
             Weapon: armed ? weapon!.WeaponType : WeaponType.None,
-            Evasion: mods.Apply(CombatStat.Evasion, (int)ZoneCombat.AccuracyOrEvasion(0, t.Dex, level)),
-            RandomDamage: armed && weapon!.RandomDamage > 0 ? weapon.RandomDamage : ZoneCombat.DefaultPlayerRandomDamage);
+            Evasion: mods.Apply(CombatStat.Evasion, (int)ZoneCombat.AccuracyOrEvasion(0, t.Dex, level) - (shielded ? shield!.ShieldEvasionPenalty : 0)),
+            RandomDamage: armed && weapon!.RandomDamage > 0 ? weapon.RandomDamage : ZoneCombat.DefaultPlayerRandomDamage,
+            ShieldDef: shielded ? shield!.ShieldDef : 0,
+            ShieldRate: shielded ? shield!.ShieldRate * dex : 0,
+            Soulshots: armed ? weapon!.Soulshots : 0,
+            WeaponGrade: armed ? weapon!.Crystal : CrystalGrade.None);
     }
 
     /// <summary>Live buff/debuff stat funcs on <paramref name="entity"/> (players and NPCs).</summary>
@@ -96,6 +103,9 @@ public sealed partial class ZoneWorld
         StatMods(npc).Apply(CombatStat.Evasion, ZoneCombat.AccuracyOrEvasion(npc.BaseEvasion, npc.Dex, npc.Level));
     int NpcCritPermille(ZoneEntity npc) =>
         StatMods(npc).Apply(CombatStat.CritRate, (int)(npc.BaseCritical * 10 * SafeBonus(PlayerClasses.StatBonuses, StatSlot.Dex, npc.Dex)));
+
+    double NpcShieldRate(ZoneEntity npc) =>
+        npc.ShieldRate * SafeBonus(PlayerClasses.StatBonuses, StatSlot.Dex, npc.Dex);
 
     static double SafeBonus(StatBonusTable table, StatSlot slot, int value)
     {

@@ -32,7 +32,9 @@ public sealed record NpcTemplate(
     double Evasion = 0,
     int Critical = 0,
     int RandomDamage = 0,
-    int Dex = 30);
+    int Dex = 30,
+    int ShieldDef = 0,
+    int ShieldRate = 0);
 
 /// <summary>Loads <c>data/npcs.json</c>.</summary>
 public sealed class NpcCatalog
@@ -151,7 +153,9 @@ public sealed class NpcCatalog
                 row.Evasion,
                 Math.Max(0, row.Critical),
                 Math.Max(0, row.RandomDamage),
-                row.Dex > 0 ? row.Dex : 30));
+                row.Dex > 0 ? row.Dex : 30,
+                Math.Max(0, row.ShieldDef),
+                Math.Max(0, row.ShieldRate)));
         }
 
         return new NpcCatalog(byId);
@@ -196,5 +200,8 @@ public sealed class NpcCatalog
         /// <summary>Mobius <c>attack random</c> damage spread in percent.</summary>
         public int RandomDamage { get; set; }
         public int Dex { get; set; }
+        /// <summary>Mobius <c>defence shield</c> / <c>shieldRate</c>.</summary>
+        public int ShieldDef { get; set; }
+        public int ShieldRate { get; set; }
     }
 }

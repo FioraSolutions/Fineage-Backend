@@ -129,7 +129,9 @@ public sealed class SpawnCatalog
                     template.Evasion,
                     template.Critical,
                     template.RandomDamage,
-                    template.Dex));
+                    template.Dex,
+                    template.ShieldDef,
+                    template.ShieldRate));
             }
 
             maps.Add(map.MapId, new SpawnMapDefinition(map.MapId, map.Enabled, npcs));

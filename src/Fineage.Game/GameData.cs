@@ -197,7 +197,13 @@ public sealed class GameData
                 Math.Max(0, row.CritRate),
                 Math.Max(0, row.AttackRange),
                 Math.Max(0, row.RandomDamage),
-                Math.Max(0, row.MDef)));
+                Math.Max(0, row.MDef),
+                Math.Max(0, row.Soulshots),
+                Math.Max(0, row.ShieldDef),
+                Math.Max(0, row.ShieldRate),
+                Math.Max(0, row.ShieldEvasionPenalty),
+                row.Soulshot,
+                ParseCrystal(row.ShotGrade, path, row.Id)));
         }
 
         try
@@ -460,6 +466,15 @@ public sealed class GameData
         public int RandomDamage { get; set; }
         /// <summary>Mobius jewel <c>add stat="mDef"</c>.</summary>
         public int MDef { get; set; }
+        /// <summary>Mobius weapon <c>soulshots</c>: shots consumed per charge.</summary>
+        public int Soulshots { get; set; }
+        /// <summary>Mobius shield <c>sDef</c> / <c>rShld</c> / <c>sub rEvas</c>.</summary>
+        public int ShieldDef { get; set; }
+        public int ShieldRate { get; set; }
+        public int ShieldEvasionPenalty { get; set; }
+        /// <summary>Mobius etc item with <c>default_action SOULSHOT</c>.</summary>
+        public bool Soulshot { get; set; }
+        public string? ShotGrade { get; set; }
     }
 
     sealed class KitFileDto

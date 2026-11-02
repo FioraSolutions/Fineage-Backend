@@ -129,8 +129,12 @@ public sealed partial class ZoneWorld
         }
 
         var ps = PlayerStats(player);
+        // Mobius doAttack: a charged weapon fires its soulshot on this swing (hit or miss) and is uncharged.
+        bool soulshot = player.SoulshotCharged;
+        player.SoulshotCharged = false;
         var (damage, flags) = ZoneCombat.RollMelee(_combatRandom, ps.PAtk, NpcPDef(target),
-            ps.Accuracy, NpcEvasion(target), ps.CritRate, ps.RandomDamage);
+            ps.Accuracy, NpcEvasion(target), ps.CritRate, ps.RandomDamage,
+            soulshot, (int)ps.WeaponGrade, NpcShieldRate(target), target.ShieldDef, ps.Weapon == Fineage.Game.WeaponType.Bow);
 
         var attack = new AttackMsg
         {
@@ -180,7 +184,7 @@ public sealed partial class ZoneWorld
             return (ZoneCombat.MobMeleeDamage(npc.Level), 0);
         var ps = PlayerStats(player);
         return ZoneCombat.RollMelee(_combatRandom, StatMods(npc).Apply(CombatStat.PAtk, npc.PAtk), ps.PDef, NpcAccuracy(npc), ps.Evasion,
-            NpcCritPermille(npc), npc.RandomDamage);
+            NpcCritPermille(npc), npc.RandomDamage, false, 0, ps.ShieldRate, ps.ShieldDef, false);
     }
 
     Task? _combatLoop;

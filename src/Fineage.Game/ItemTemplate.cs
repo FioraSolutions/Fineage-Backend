@@ -30,7 +30,13 @@ public sealed record ItemTemplate(
     int CritRate = 0,
     int AttackRange = 0,
     int RandomDamage = 0,
-    int MDef = 0)
+    int MDef = 0,
+    int Soulshots = 0,
+    int ShieldDef = 0,
+    int ShieldRate = 0,
+    int ShieldEvasionPenalty = 0,
+    bool IsSoulshot = false,
+    CrystalGrade ShotGrade = CrystalGrade.None)
 {
     public bool Equippable => BodySlot != global::Fineage.Game.BodySlot.None;
 

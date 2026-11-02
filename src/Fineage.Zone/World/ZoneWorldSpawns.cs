@@ -96,6 +96,8 @@ public sealed partial class ZoneWorld
             BaseCritical = def.Critical,
             RandomDamage = def.RandomDamage,
             Dex = def.Dex,
+            ShieldDef = def.ShieldDef,
+            ShieldRate = def.ShieldRate,
             RunSpeed = def.RunSpeed,
             WalkSpeed = def.WalkSpeed,
             MerchantCastleId = tax.CastleId,

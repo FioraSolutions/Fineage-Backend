@@ -83,6 +83,29 @@ public static class ZoneCombat
     /// <summary>Interlude Attack hit flags (client Hit.cs): 0x20 crit, 0x80 miss.</summary>
     public const byte HitFlagCrit = 0x20;
     public const byte HitFlagMiss = 0x80;
+    /// <summary>Interlude HITFLAG_USESS (0x10) | soulshot grade in the low bits.</summary>
+    public const byte HitFlagSoulshot = 0x10;
+    /// <summary>Interlude HITFLAG_SHLD: target blocked with a shield.</summary>
+    public const byte HitFlagShield = 0x40;
+    /// <summary>Mobius Config.ALT_PERFECT_SHLD_BLOCK (%).</summary>
+    public const int PerfectShieldBlockPercent = 5;
+
+    public enum ShieldResult { None, Block, Perfect }
+
+    /// <summary>
+    /// Mobius <c>Formulas.calcShldUse</c> (no facing-angle check yet): rate = rShld · DEX bonus (×1.3 vs bows);
+    /// perfect block when Rnd(100) &gt; 100 − 5, else block when rate &gt; Rnd(100).
+    /// </summary>
+    public static ShieldResult RollShield(Random rnd, double shieldRate, bool attackerBow)
+    {
+        if (shieldRate <= 1e-6)
+            return ShieldResult.None;
+        if (attackerBow)
+            shieldRate *= 1.3;
+        if (100 - PerfectShieldBlockPercent < rnd.Next(100))
+            return ShieldResult.Perfect;
+        return shieldRate > rnd.Next(100) ? ShieldResult.Block : ShieldResult.None;
+    }
     /// <summary>Mobius crit rate cap (MAX_PCRIT_RATE 500 ‰).</summary>
     public const int MaxCritPermille = 500;
     /// <summary>Mobius <c>baseRndDam</c> for every player template (fists / weapons without random_damage).</summary>
@@ -101,17 +124,34 @@ public static class ZoneCombat
     /// crit doubles; damage × (1 + Rnd[−random, random] / 100).
     /// </summary>
     public static (int Damage, byte Flags) RollMelee(Random rnd, double pAtk, double pDef, double accuracy, double evasion,
-        int critPermille, int randomPercent)
+        int critPermille, int randomPercent) =>
+        RollMelee(rnd, pAtk, pDef, accuracy, evasion, critPermille, randomPercent, false, 0, 0, 0, false);
+
+    /// <summary>
+    /// Full swing: miss → shield → crit → calcPhysDam. Soulshot doubles P.Atk (flag 0x10 | grade); shield block
+    /// adds sDef to P.Def, perfect block deals 1 (flag 0x40).
+    /// </summary>
+    public static (int Damage, byte Flags) RollMelee(Random rnd, double pAtk, double pDef, double accuracy, double evasion,
+        int critPermille, int randomPercent, bool soulshot, int shotGrade, double shieldRate, int shieldDef, bool attackerBow)
     {
+        byte ssFlags = soulshot ? (byte)(HitFlagSoulshot | (shotGrade & 0x0F)) : (byte)0;
         if (rnd.Next(1000) >= HitChancePermille(accuracy, evasion))
-            return (0, HitFlagMiss);
+            return (0, (byte)(HitFlagMiss | ssFlags));
+        var shield = RollShield(rnd, shieldRate, attackerBow);
+        byte flags = (byte)(ssFlags | (shield != ShieldResult.None ? HitFlagShield : 0));
+        if (shield == ShieldResult.Perfect)
+            return (1, flags);
         bool crit = Math.Clamp(critPermille, 0, MaxCritPermille) > rnd.Next(1000);
+        if (soulshot)
+            pAtk *= 2;
+        if (shield == ShieldResult.Block)
+            pDef += shieldDef;
         double damage = 70d * Math.Max(0d, pAtk) / Math.Max(1d, pDef);
         if (crit)
             damage *= 2;
         if (randomPercent > 0)
             damage *= 1 + rnd.Next(-randomPercent, randomPercent + 1) / 100d;
-        return (Math.Max(1, (int)damage), crit ? HitFlagCrit : (byte)0);
+        return (Math.Max(1, (int)damage), (byte)(flags | (crit ? HitFlagCrit : 0)));
     }
 
     public static int PhysicalDamage(double pAtk, double pDef) =>

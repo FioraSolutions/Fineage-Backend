@@ -84,6 +84,11 @@ sealed class ZoneEntity
     public int BaseCritical { get; init; }
     public int RandomDamage { get; init; }
     public int Dex { get; init; } = 30;
+    /// <summary>NPC Mobius shield defence / block rate (players read the equipped shield).</summary>
+    public int ShieldDef { get; init; }
+    public int ShieldRate { get; init; }
+    /// <summary>Mobius ChargedShot SOULSHOTS: weapon is charged; next swing doubles P.Atk and clears it.</summary>
+    public bool SoulshotCharged { get; set; }
     /// <summary>True while an abnormal with combat stat funcs is active (UserInfo refresh on change).</summary>
     public bool HasStatAbnormal { get; set; }
     public float RunSpeed { get; init; }

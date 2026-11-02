@@ -15,7 +15,8 @@
       "pAtkSpd": 379,
       "critRate": 8,
       "attackRange": 40,
-      "randomDamage": 10
+      "randomDamage": 10,
+      "soulshots": 1
     },
     {
       "id": 2,
@@ -31,7 +32,8 @@
       "pAtkSpd": 379,
       "critRate": 8,
       "attackRange": 40,
-      "randomDamage": 10
+      "randomDamage": 10,
+      "soulshots": 2
     },
     {
       "id": 3,
@@ -47,7 +49,8 @@
       "pAtkSpd": 379,
       "critRate": 8,
       "attackRange": 40,
-      "randomDamage": 10
+      "randomDamage": 10,
+      "soulshots": 1
     },
     {
       "id": 4,
@@ -63,7 +66,8 @@
       "pAtkSpd": 379,
       "critRate": 4,
       "attackRange": 40,
-      "randomDamage": 20
+      "randomDamage": 20,
+      "soulshots": 1
     },
     {
       "id": 5,
@@ -79,7 +83,8 @@
       "pAtkSpd": 379,
       "critRate": 4,
       "attackRange": 40,
-      "randomDamage": 20
+      "randomDamage": 20,
+      "soulshots": 1
     },
     {
       "id": 6,
@@ -97,7 +102,8 @@
       "pAtkSpd": 379,
       "critRate": 4,
       "attackRange": 40,
-      "randomDamage": 20
+      "randomDamage": 20,
+      "soulshots": 1
     },
     {
       "id": 7,
@@ -114,7 +120,8 @@
       "pAtkSpd": 379,
       "critRate": 4,
       "attackRange": 40,
-      "randomDamage": 20
+      "randomDamage": 20,
+      "soulshots": 1
     },
     {
       "id": 8,
@@ -131,7 +138,8 @@
       "pAtkSpd": 325,
       "critRate": 4,
       "attackRange": 40,
-      "randomDamage": 20
+      "randomDamage": 20,
+      "soulshots": 1
     },
     {
       "id": 9,
@@ -148,7 +156,8 @@
       "pAtkSpd": 325,
       "critRate": 4,
       "attackRange": 40,
-      "randomDamage": 20
+      "randomDamage": 20,
+      "soulshots": 2
     },
     {
       "id": 10,
@@ -165,7 +174,8 @@
       "pAtkSpd": 433,
       "critRate": 12,
       "attackRange": 40,
-      "randomDamage": 5
+      "randomDamage": 5,
+      "soulshots": 1
     },
     {
       "id": 11,
@@ -181,7 +191,8 @@
       "pAtkSpd": 433,
       "critRate": 12,
       "attackRange": 40,
-      "randomDamage": 5
+      "randomDamage": 5,
+      "soulshots": 1
     },
     {
       "id": 12,
@@ -197,7 +208,8 @@
       "pAtkSpd": 433,
       "critRate": 12,
       "attackRange": 40,
-      "randomDamage": 5
+      "randomDamage": 5,
+      "soulshots": 1
     },
     {
       "id": 13,
@@ -213,7 +225,8 @@
       "pAtkSpd": 293,
       "critRate": 12,
       "attackRange": 500,
-      "randomDamage": 5
+      "randomDamage": 5,
+      "soulshots": 1
     },
     {
       "id": 14,
@@ -229,7 +242,8 @@
       "pAtkSpd": 293,
       "critRate": 12,
       "attackRange": 500,
-      "randomDamage": 5
+      "randomDamage": 5,
+      "soulshots": 1
     },
     {
       "id": 15,
@@ -245,7 +259,8 @@
       "pAtkSpd": 325,
       "critRate": 8,
       "attackRange": 80,
-      "randomDamage": 10
+      "randomDamage": 10,
+      "soulshots": 2
     },
     {
       "id": 16,
@@ -261,7 +276,8 @@
       "pAtkSpd": 325,
       "critRate": 8,
       "attackRange": 80,
-      "randomDamage": 10
+      "randomDamage": 10,
+      "soulshots": 2
     },
     {
       "id": 17,
@@ -281,7 +297,10 @@
       "icon": "icon.shield_leather_shield_i00",
       "bodySlot": "lhand",
       "price": 30,
-      "weight": 1430
+      "weight": 1430,
+      "shieldDef": 47,
+      "shieldRate": 20,
+      "shieldEvasionPenalty": 8
     },
     {
       "id": 19,
@@ -290,7 +309,10 @@
       "icon": "icon.shield_small_shield_i00",
       "bodySlot": "lhand",
       "price": 638,
-      "weight": 1420
+      "weight": 1420,
+      "shieldDef": 56,
+      "shieldRate": 20,
+      "shieldEvasionPenalty": 8
     },
     {
       "id": 20,
@@ -299,7 +321,10 @@
       "icon": "icon.shield_buckler_i00",
       "bodySlot": "lhand",
       "price": 2780,
-      "weight": 1410
+      "weight": 1410,
+      "shieldDef": 67,
+      "shieldRate": 20,
+      "shieldEvasionPenalty": 8
     },
     {
       "id": 21,
@@ -622,7 +647,8 @@
       "pAtkSpd": 379,
       "critRate": 8,
       "attackRange": 40,
-      "randomDamage": 10
+      "randomDamage": 10,
+      "soulshots": 2
     },
     {
       "id": 67,
@@ -638,7 +664,8 @@
       "pAtkSpd": 379,
       "critRate": 8,
       "attackRange": 40,
-      "randomDamage": 10
+      "randomDamage": 10,
+      "soulshots": 2
     },
     {
       "id": 68,
@@ -654,7 +681,8 @@
       "pAtkSpd": 379,
       "critRate": 8,
       "attackRange": 40,
-      "randomDamage": 10
+      "randomDamage": 10,
+      "soulshots": 2
     },
     {
       "id": 69,
@@ -671,7 +699,8 @@
       "pAtkSpd": 379,
       "critRate": 8,
       "attackRange": 40,
-      "randomDamage": 10
+      "randomDamage": 10,
+      "soulshots": 2
     },
     {
       "id": 72,
@@ -688,7 +717,8 @@
       "pAtkSpd": 379,
       "critRate": 8,
       "attackRange": 40,
-      "randomDamage": 10
+      "randomDamage": 10,
+      "soulshots": 2
     },
     {
       "id": 73,
@@ -707,7 +737,8 @@
       "pAtkSpd": 379,
       "critRate": 8,
       "attackRange": 40,
-      "randomDamage": 10
+      "randomDamage": 10,
+      "soulshots": 2
     },
     {
       "id": 74,
@@ -724,7 +755,8 @@
       "pAtkSpd": 379,
       "critRate": 8,
       "attackRange": 40,
-      "randomDamage": 10
+      "randomDamage": 10,
+      "soulshots": 2
     },
     {
       "id": 79,
@@ -743,7 +775,8 @@
       "pAtkSpd": 379,
       "critRate": 8,
       "attackRange": 40,
-      "randomDamage": 10
+      "randomDamage": 10,
+      "soulshots": 1
     },
     {
       "id": 87,
@@ -759,7 +792,8 @@
       "pAtkSpd": 379,
       "critRate": 4,
       "attackRange": 40,
-      "randomDamage": 20
+      "randomDamage": 20,
+      "soulshots": 2
     },
     {
       "id": 98,
@@ -778,7 +812,8 @@
       "pAtkSpd": 325,
       "critRate": 8,
       "attackRange": 80,
-      "randomDamage": 10
+      "randomDamage": 10,
+      "soulshots": 1
     },
     {
       "id": 99,
@@ -795,7 +830,8 @@
       "pAtkSpd": 379,
       "critRate": 8,
       "attackRange": 40,
-      "randomDamage": 10
+      "randomDamage": 10,
+      "soulshots": 1
     },
     {
       "id": 102,
@@ -804,7 +840,10 @@
       "icon": "icon.shield_round_shield_i00",
       "bodySlot": "lhand",
       "price": 7110,
-      "weight": 1390
+      "weight": 1390,
+      "shieldDef": 79,
+      "shieldRate": 20,
+      "shieldEvasionPenalty": 8
     },
     {
       "id": 112,
@@ -880,7 +919,8 @@
       "pAtkSpd": 379,
       "critRate": 8,
       "attackRange": 40,
-      "randomDamage": 10
+      "randomDamage": 10,
+      "soulshots": 2
     },
     {
       "id": 121,
@@ -896,7 +936,8 @@
       "pAtkSpd": 379,
       "critRate": 8,
       "attackRange": 40,
-      "randomDamage": 10
+      "randomDamage": 10,
+      "soulshots": 2
     },
     {
       "id": 122,
@@ -912,7 +953,8 @@
       "pAtkSpd": 379,
       "critRate": 8,
       "attackRange": 40,
-      "randomDamage": 10
+      "randomDamage": 10,
+      "soulshots": 2
     },
     {
       "id": 123,
@@ -931,7 +973,8 @@
       "pAtkSpd": 379,
       "critRate": 8,
       "attackRange": 40,
-      "randomDamage": 10
+      "randomDamage": 10,
+      "soulshots": 2
     },
     {
       "id": 125,
@@ -948,7 +991,8 @@
       "pAtkSpd": 379,
       "critRate": 8,
       "attackRange": 40,
-      "randomDamage": 10
+      "randomDamage": 10,
+      "soulshots": 2
     },
     {
       "id": 126,
@@ -965,7 +1009,8 @@
       "pAtkSpd": 379,
       "critRate": 8,
       "attackRange": 40,
-      "randomDamage": 10
+      "randomDamage": 10,
+      "soulshots": 2
     },
     {
       "id": 127,
@@ -982,7 +1027,8 @@
       "pAtkSpd": 379,
       "critRate": 8,
       "attackRange": 40,
-      "randomDamage": 10
+      "randomDamage": 10,
+      "soulshots": 2
     },
     {
       "id": 128,
@@ -999,7 +1045,8 @@
       "pAtkSpd": 379,
       "critRate": 8,
       "attackRange": 40,
-      "randomDamage": 10
+      "randomDamage": 10,
+      "soulshots": 2
     },
     {
       "id": 129,
@@ -1016,7 +1063,8 @@
       "pAtkSpd": 379,
       "critRate": 8,
       "attackRange": 40,
-      "randomDamage": 10
+      "randomDamage": 10,
+      "soulshots": 3
     },
     {
       "id": 130,
@@ -1033,7 +1081,8 @@
       "pAtkSpd": 379,
       "critRate": 8,
       "attackRange": 40,
-      "randomDamage": 10
+      "randomDamage": 10,
+      "soulshots": 2
     },
     {
       "id": 131,
@@ -1050,7 +1099,8 @@
       "pAtkSpd": 379,
       "critRate": 8,
       "attackRange": 40,
-      "randomDamage": 10
+      "randomDamage": 10,
+      "soulshots": 2
     },
     {
       "id": 133,
@@ -1067,7 +1117,8 @@
       "pAtkSpd": 379,
       "critRate": 8,
       "attackRange": 40,
-      "randomDamage": 10
+      "randomDamage": 10,
+      "soulshots": 2
     },
     {
       "id": 152,
@@ -1083,7 +1134,8 @@
       "pAtkSpd": 379,
       "critRate": 4,
       "attackRange": 40,
-      "randomDamage": 20
+      "randomDamage": 20,
+      "soulshots": 1
     },
     {
       "id": 153,
@@ -1099,7 +1151,8 @@
       "pAtkSpd": 379,
       "critRate": 4,
       "attackRange": 40,
-      "randomDamage": 20
+      "randomDamage": 20,
+      "soulshots": 1
     },
     {
       "id": 154,
@@ -1115,7 +1168,8 @@
       "pAtkSpd": 379,
       "critRate": 4,
       "attackRange": 40,
-      "randomDamage": 20
+      "randomDamage": 20,
+      "soulshots": 2
     },
     {
       "id": 155,
@@ -1131,7 +1185,8 @@
       "pAtkSpd": 379,
       "critRate": 4,
       "attackRange": 40,
-      "randomDamage": 20
+      "randomDamage": 20,
+      "soulshots": 2
     },
     {
       "id": 176,
@@ -1148,7 +1203,8 @@
       "pAtkSpd": 325,
       "critRate": 4,
       "attackRange": 40,
-      "randomDamage": 20
+      "randomDamage": 20,
+      "soulshots": 2
     },
     {
       "id": 177,
@@ -1165,7 +1221,8 @@
       "pAtkSpd": 325,
       "critRate": 4,
       "attackRange": 40,
-      "randomDamage": 20
+      "randomDamage": 20,
+      "soulshots": 2
     },
     {
       "id": 215,
@@ -1181,7 +1238,8 @@
       "pAtkSpd": 433,
       "critRate": 12,
       "attackRange": 40,
-      "randomDamage": 5
+      "randomDamage": 5,
+      "soulshots": 1
     },
     {
       "id": 216,
@@ -1197,7 +1255,8 @@
       "pAtkSpd": 433,
       "critRate": 12,
       "attackRange": 40,
-      "randomDamage": 5
+      "randomDamage": 5,
+      "soulshots": 2
     },
     {
       "id": 217,
@@ -1213,7 +1272,8 @@
       "pAtkSpd": 433,
       "critRate": 12,
       "attackRange": 40,
-      "randomDamage": 5
+      "randomDamage": 5,
+      "soulshots": 2
     },
     {
       "id": 218,
@@ -1229,7 +1289,8 @@
       "pAtkSpd": 433,
       "critRate": 12,
       "attackRange": 40,
-      "randomDamage": 5
+      "randomDamage": 5,
+      "soulshots": 2
     },
     {
       "id": 219,
@@ -1245,7 +1306,8 @@
       "pAtkSpd": 433,
       "critRate": 12,
       "attackRange": 40,
-      "randomDamage": 5
+      "randomDamage": 5,
+      "soulshots": 2
     },
     {
       "id": 253,
@@ -1261,7 +1323,8 @@
       "pAtkSpd": 325,
       "critRate": 4,
       "attackRange": 40,
-      "randomDamage": 5
+      "randomDamage": 5,
+      "soulshots": 1
     },
     {
       "id": 254,
@@ -1277,7 +1340,8 @@
       "pAtkSpd": 325,
       "critRate": 4,
       "attackRange": 40,
-      "randomDamage": 5
+      "randomDamage": 5,
+      "soulshots": 1
     },
     {
       "id": 255,
@@ -1293,7 +1357,8 @@
       "pAtkSpd": 325,
       "critRate": 4,
       "attackRange": 40,
-      "randomDamage": 5
+      "randomDamage": 5,
+      "soulshots": 2
     },
     {
       "id": 256,
@@ -1309,7 +1374,8 @@
       "pAtkSpd": 325,
       "critRate": 4,
       "attackRange": 40,
-      "randomDamage": 5
+      "randomDamage": 5,
+      "soulshots": 2
     },
     {
       "id": 257,
@@ -1325,7 +1391,8 @@
       "pAtkSpd": 325,
       "critRate": 4,
       "attackRange": 40,
-      "randomDamage": 5
+      "randomDamage": 5,
+      "soulshots": 2
     },
     {
       "id": 271,
@@ -1341,7 +1408,8 @@
       "pAtkSpd": 293,
       "critRate": 12,
       "attackRange": 500,
-      "randomDamage": 5
+      "randomDamage": 5,
+      "soulshots": 6
     },
     {
       "id": 272,
@@ -1357,7 +1425,8 @@
       "pAtkSpd": 293,
       "critRate": 12,
       "attackRange": 500,
-      "randomDamage": 5
+      "randomDamage": 5,
+      "soulshots": 7
     },
     {
       "id": 273,
@@ -1373,7 +1442,8 @@
       "pAtkSpd": 293,
       "critRate": 12,
       "attackRange": 500,
-      "randomDamage": 5
+      "randomDamage": 5,
+      "soulshots": 7
     },
     {
       "id": 308,
@@ -1390,7 +1460,8 @@
       "pAtkSpd": 379,
       "critRate": 8,
       "attackRange": 40,
-      "randomDamage": 10
+      "randomDamage": 10,
+      "soulshots": 1
     },
     {
       "id": 309,
@@ -1407,7 +1478,8 @@
       "pAtkSpd": 379,
       "critRate": 8,
       "attackRange": 40,
-      "randomDamage": 10
+      "randomDamage": 10,
+      "soulshots": 2
     },
     {
       "id": 310,
@@ -1424,7 +1496,8 @@
       "pAtkSpd": 379,
       "critRate": 8,
       "attackRange": 40,
-      "randomDamage": 10
+      "randomDamage": 10,
+      "soulshots": 2
     },
     {
       "id": 311,
@@ -1441,7 +1514,8 @@
       "pAtkSpd": 379,
       "critRate": 8,
       "attackRange": 40,
-      "randomDamage": 10
+      "randomDamage": 10,
+      "soulshots": 2
     },
     {
       "id": 390,
@@ -1580,7 +1654,10 @@
       "icon": "icon.shield_bone_shield_i00",
       "bodySlot": "lhand",
       "price": 12900,
-      "weight": 1380
+      "weight": 1380,
+      "shieldDef": 90,
+      "shieldRate": 20,
+      "shieldEvasionPenalty": 8
     },
     {
       "id": 728,
@@ -1705,7 +1782,8 @@
       "pAtkSpd": 379,
       "critRate": 8,
       "attackRange": 40,
-      "randomDamage": 10
+      "randomDamage": 10,
+      "soulshots": 1
     },
     {
       "id": 743,
@@ -1721,7 +1799,8 @@
       "pAtkSpd": 379,
       "critRate": 8,
       "attackRange": 40,
-      "randomDamage": 10
+      "randomDamage": 10,
+      "soulshots": 1
     },
     {
       "id": 744,
@@ -1738,7 +1817,8 @@
       "pAtkSpd": 325,
       "critRate": 4,
       "attackRange": 40,
-      "randomDamage": 20
+      "randomDamage": 20,
+      "soulshots": 1
     },
     {
       "id": 747,
@@ -1755,7 +1835,8 @@
       "pAtkSpd": 379,
       "critRate": 4,
       "attackRange": 40,
-      "randomDamage": 20
+      "randomDamage": 20,
+      "soulshots": 1
     },
     {
       "id": 754,
@@ -1772,7 +1853,8 @@
       "pAtkSpd": 325,
       "critRate": 4,
       "attackRange": 40,
-      "randomDamage": 20
+      "randomDamage": 20,
+      "soulshots": 1
     },
     {
       "id": 845,
@@ -1894,7 +1976,10 @@
       "icon": "icon.shield_skeleton_buckler_i00",
       "bodySlot": "lhand",
       "price": 3440,
-      "weight": 1400
+      "weight": 1400,
+      "shieldDef": 69,
+      "shieldRate": 20,
+      "shieldEvasionPenalty": 8
     },
     {
       "id": 946,
@@ -1910,7 +1995,8 @@
       "pAtkSpd": 433,
       "critRate": 12,
       "attackRange": 40,
-      "randomDamage": 5
+      "randomDamage": 5,
+      "soulshots": 2
     },
     {
       "id": 947,
@@ -2182,7 +2268,8 @@
       "pAtkSpd": 379,
       "critRate": 8,
       "attackRange": 40,
-      "randomDamage": 10
+      "randomDamage": 10,
+      "soulshots": 1
     },
     {
       "id": 981,
@@ -2198,7 +2285,8 @@
       "pAtkSpd": 325,
       "critRate": 8,
       "attackRange": 40,
-      "randomDamage": 10
+      "randomDamage": 10,
+      "soulshots": 1
     },
     {
       "id": 989,
@@ -2214,7 +2302,8 @@
       "pAtkSpd": 433,
       "critRate": 12,
       "attackRange": 40,
-      "randomDamage": 5
+      "randomDamage": 5,
+      "soulshots": 1
     },
     {
       "id": 1048,
@@ -2524,7 +2613,8 @@
       "pAtkSpd": 325,
       "critRate": 8,
       "attackRange": 40,
-      "randomDamage": 10
+      "randomDamage": 10,
+      "soulshots": 2
     },
     {
       "id": 1341,
@@ -2725,7 +2815,8 @@
       "pAtkSpd": 379,
       "critRate": 8,
       "attackRange": 40,
-      "randomDamage": 10
+      "randomDamage": 10,
+      "soulshots": 1
     },
     {
       "id": 1511,
@@ -2741,7 +2832,8 @@
       "pAtkSpd": 379,
       "critRate": 4,
       "attackRange": 40,
-      "randomDamage": 20
+      "randomDamage": 20,
+      "soulshots": 1
     },
     {
       "id": 1513,
@@ -2879,7 +2971,9 @@
       "icon": "icon.etc_spirit_bullet_white_i00",
       "stackable": true,
       "price": 7,
-      "weight": 4
+      "weight": 4,
+      "soulshot": true,
+      "shotGrade": "none"
     },
     {
       "id": 1864,
@@ -3316,7 +3410,8 @@
       "pAtkSpd": 325,
       "critRate": 4,
       "attackRange": 40,
-      "randomDamage": 5
+      "randomDamage": 5,
+      "soulshots": 1
     },
     {
       "id": 2369,
@@ -3333,7 +3428,8 @@
       "pAtkSpd": 379,
       "critRate": 8,
       "attackRange": 40,
-      "randomDamage": 10
+      "randomDamage": 10,
+      "soulshots": 1
     },
     {
       "id": 2370,
@@ -3347,7 +3443,8 @@
       "pAtkSpd": 379,
       "critRate": 4,
       "attackRange": 40,
-      "randomDamage": 20
+      "randomDamage": 20,
+      "soulshots": 1
     },
     {
       "id": 2371,
@@ -3363,7 +3460,8 @@
       "pAtkSpd": 325,
       "critRate": 4,
       "attackRange": 40,
-      "randomDamage": 5
+      "randomDamage": 5,
+      "soulshots": 1
     },
     {
       "id": 2372,
@@ -3379,7 +3477,8 @@
       "pAtkSpd": 433,
       "critRate": 12,
       "attackRange": 40,
-      "randomDamage": 5
+      "randomDamage": 5,
+      "soulshots": 1
     },
     {
       "id": 2373,
@@ -3396,7 +3495,8 @@
       "pAtkSpd": 325,
       "critRate": 4,
       "attackRange": 40,
-      "randomDamage": 20
+      "randomDamage": 20,
+      "soulshots": 1
     },
     {
       "id": 2374,
@@ -3412,7 +3512,8 @@
       "pAtkSpd": 433,
       "critRate": 12,
       "attackRange": 40,
-      "randomDamage": 5
+      "randomDamage": 5,
+      "soulshots": 1
     },
     {
       "id": 2386,
@@ -3454,7 +3555,8 @@
       "pAtkSpd": 379,
       "critRate": 8,
       "attackRange": 40,
-      "randomDamage": 10
+      "randomDamage": 10,
+      "soulshots": 3
     },
     {
       "id": 2501,
@@ -3470,7 +3572,8 @@
       "pAtkSpd": 379,
       "critRate": 4,
       "attackRange": 40,
-      "randomDamage": 20
+      "randomDamage": 20,
+      "soulshots": 2
     },
     {
       "id": 2509,
@@ -3496,7 +3599,8 @@
       "pAtkSpd": 325,
       "critRate": 8,
       "attackRange": 40,
-      "randomDamage": 10
+      "randomDamage": 10,
+      "soulshots": 2
     },
     {
       "id": 2517,
@@ -3513,7 +3617,8 @@
       "pAtkSpd": 325,
       "critRate": 8,
       "attackRange": 40,
-      "randomDamage": 10
+      "randomDamage": 10,
+      "soulshots": 3
     },
     {
       "id": 2518,
@@ -3530,7 +3635,8 @@
       "pAtkSpd": 325,
       "critRate": 8,
       "attackRange": 40,
-      "randomDamage": 10
+      "randomDamage": 10,
+      "soulshots": 3
     },
     {
       "id": 2519,
@@ -3547,7 +3653,8 @@
       "pAtkSpd": 325,
       "critRate": 8,
       "attackRange": 40,
-      "randomDamage": 10
+      "randomDamage": 10,
+      "soulshots": 3
     },
     {
       "id": 2520,
@@ -3564,7 +3671,8 @@
       "pAtkSpd": 325,
       "critRate": 8,
       "attackRange": 40,
-      "randomDamage": 10
+      "randomDamage": 10,
+      "soulshots": 3
     },
     {
       "id": 2521,
@@ -3581,7 +3689,8 @@
       "pAtkSpd": 325,
       "critRate": 8,
       "attackRange": 40,
-      "randomDamage": 10
+      "randomDamage": 10,
+      "soulshots": 3
     },
     {
       "id": 2522,
@@ -3598,7 +3707,8 @@
       "pAtkSpd": 325,
       "critRate": 8,
       "attackRange": 40,
-      "randomDamage": 10
+      "randomDamage": 10,
+      "soulshots": 3
     },
     {
       "id": 2523,
@@ -3615,7 +3725,8 @@
       "pAtkSpd": 325,
       "critRate": 8,
       "attackRange": 40,
-      "randomDamage": 10
+      "randomDamage": 10,
+      "soulshots": 2
     },
     {
       "id": 2524,
@@ -3632,7 +3743,8 @@
       "pAtkSpd": 325,
       "critRate": 8,
       "attackRange": 40,
-      "randomDamage": 10
+      "randomDamage": 10,
+      "soulshots": 2
     },
     {
       "id": 2525,
@@ -3649,7 +3761,8 @@
       "pAtkSpd": 325,
       "critRate": 8,
       "attackRange": 40,
-      "randomDamage": 10
+      "randomDamage": 10,
+      "soulshots": 3
     },
     {
       "id": 2526,
@@ -3666,7 +3779,8 @@
       "pAtkSpd": 325,
       "critRate": 8,
       "attackRange": 40,
-      "randomDamage": 10
+      "randomDamage": 10,
+      "soulshots": 3
     },
     {
       "id": 2527,
@@ -3683,7 +3797,8 @@
       "pAtkSpd": 325,
       "critRate": 8,
       "attackRange": 40,
-      "randomDamage": 10
+      "randomDamage": 10,
+      "soulshots": 3
     },
     {
       "id": 2528,
@@ -3700,7 +3815,8 @@
       "pAtkSpd": 325,
       "critRate": 8,
       "attackRange": 40,
-      "randomDamage": 10
+      "randomDamage": 10,
+      "soulshots": 3
     },
     {
       "id": 2529,
@@ -3717,7 +3833,8 @@
       "pAtkSpd": 325,
       "critRate": 8,
       "attackRange": 40,
-      "randomDamage": 10
+      "randomDamage": 10,
+      "soulshots": 3
     },
     {
       "id": 2530,
@@ -3734,7 +3851,8 @@
       "pAtkSpd": 325,
       "critRate": 8,
       "attackRange": 40,
-      "randomDamage": 10
+      "randomDamage": 10,
+      "soulshots": 3
     },
     {
       "id": 2531,
@@ -3751,7 +3869,8 @@
       "pAtkSpd": 325,
       "critRate": 8,
       "attackRange": 40,
-      "randomDamage": 10
+      "randomDamage": 10,
+      "soulshots": 2
     },
     {
       "id": 2532,
@@ -3768,7 +3887,8 @@
       "pAtkSpd": 325,
       "critRate": 8,
       "attackRange": 40,
-      "randomDamage": 10
+      "randomDamage": 10,
+      "soulshots": 2
     },
     {
       "id": 2533,
@@ -3785,7 +3905,8 @@
       "pAtkSpd": 325,
       "critRate": 8,
       "attackRange": 40,
-      "randomDamage": 10
+      "randomDamage": 10,
+      "soulshots": 3
     },
     {
       "id": 2534,
@@ -3802,7 +3923,8 @@
       "pAtkSpd": 325,
       "critRate": 8,
       "attackRange": 40,
-      "randomDamage": 10
+      "randomDamage": 10,
+      "soulshots": 3
     },
     {
       "id": 2535,
@@ -3819,7 +3941,8 @@
       "pAtkSpd": 325,
       "critRate": 8,
       "attackRange": 40,
-      "randomDamage": 10
+      "randomDamage": 10,
+      "soulshots": 3
     },
     {
       "id": 2536,
@@ -3836,7 +3959,8 @@
       "pAtkSpd": 325,
       "critRate": 8,
       "attackRange": 40,
-      "randomDamage": 10
+      "randomDamage": 10,
+      "soulshots": 3
     },
     {
       "id": 2537,
@@ -3853,7 +3977,8 @@
       "pAtkSpd": 325,
       "critRate": 8,
       "attackRange": 40,
-      "randomDamage": 10
+      "randomDamage": 10,
+      "soulshots": 3
     },
     {
       "id": 2538,
@@ -3870,7 +3995,8 @@
       "pAtkSpd": 325,
       "critRate": 8,
       "attackRange": 40,
-      "randomDamage": 10
+      "randomDamage": 10,
+      "soulshots": 2
     },
     {
       "id": 2539,
@@ -3887,7 +4013,8 @@
       "pAtkSpd": 325,
       "critRate": 8,
       "attackRange": 40,
-      "randomDamage": 10
+      "randomDamage": 10,
+      "soulshots": 2
     },
     {
       "id": 2540,
@@ -3904,7 +4031,8 @@
       "pAtkSpd": 325,
       "critRate": 8,
       "attackRange": 40,
-      "randomDamage": 10
+      "randomDamage": 10,
+      "soulshots": 3
     },
     {
       "id": 2541,
@@ -3921,7 +4049,8 @@
       "pAtkSpd": 325,
       "critRate": 8,
       "attackRange": 40,
-      "randomDamage": 10
+      "randomDamage": 10,
+      "soulshots": 3
     },
     {
       "id": 2542,
@@ -3938,7 +4067,8 @@
       "pAtkSpd": 325,
       "critRate": 8,
       "attackRange": 40,
-      "randomDamage": 10
+      "randomDamage": 10,
+      "soulshots": 3
     },
     {
       "id": 2543,
@@ -3955,7 +4085,8 @@
       "pAtkSpd": 325,
       "critRate": 8,
       "attackRange": 40,
-      "randomDamage": 10
+      "randomDamage": 10,
+      "soulshots": 3
     },
     {
       "id": 2544,
@@ -3972,7 +4103,8 @@
       "pAtkSpd": 325,
       "critRate": 8,
       "attackRange": 40,
-      "randomDamage": 10
+      "randomDamage": 10,
+      "soulshots": 2
     },
     {
       "id": 2545,
@@ -3989,7 +4121,8 @@
       "pAtkSpd": 325,
       "critRate": 8,
       "attackRange": 40,
-      "randomDamage": 10
+      "randomDamage": 10,
+      "soulshots": 2
     },
     {
       "id": 2546,
@@ -4006,7 +4139,8 @@
       "pAtkSpd": 325,
       "critRate": 8,
       "attackRange": 40,
-      "randomDamage": 10
+      "randomDamage": 10,
+      "soulshots": 3
     },
     {
       "id": 2547,
@@ -4023,7 +4157,8 @@
       "pAtkSpd": 325,
       "critRate": 8,
       "attackRange": 40,
-      "randomDamage": 10
+      "randomDamage": 10,
+      "soulshots": 3
     },
     {
       "id": 2548,
@@ -4040,7 +4175,8 @@
       "pAtkSpd": 325,
       "critRate": 8,
       "attackRange": 40,
-      "randomDamage": 10
+      "randomDamage": 10,
+      "soulshots": 3
     },
     {
       "id": 2549,
@@ -4057,7 +4193,8 @@
       "pAtkSpd": 325,
       "critRate": 8,
       "attackRange": 40,
-      "randomDamage": 10
+      "randomDamage": 10,
+      "soulshots": 2
     },
     {
       "id": 2550,
@@ -4074,7 +4211,8 @@
       "pAtkSpd": 325,
       "critRate": 8,
       "attackRange": 40,
-      "randomDamage": 10
+      "randomDamage": 10,
+      "soulshots": 2
     },
     {
       "id": 2551,
@@ -4091,7 +4229,8 @@
       "pAtkSpd": 325,
       "critRate": 8,
       "attackRange": 40,
-      "randomDamage": 10
+      "randomDamage": 10,
+      "soulshots": 2
     },
     {
       "id": 2552,
@@ -4108,7 +4247,8 @@
       "pAtkSpd": 325,
       "critRate": 8,
       "attackRange": 40,
-      "randomDamage": 10
+      "randomDamage": 10,
+      "soulshots": 2
     },
     {
       "id": 2553,
@@ -4125,7 +4265,8 @@
       "pAtkSpd": 325,
       "critRate": 8,
       "attackRange": 40,
-      "randomDamage": 10
+      "randomDamage": 10,
+      "soulshots": 2
     },
     {
       "id": 2554,
@@ -4142,7 +4283,8 @@
       "pAtkSpd": 325,
       "critRate": 8,
       "attackRange": 40,
-      "randomDamage": 10
+      "randomDamage": 10,
+      "soulshots": 2
     },
     {
       "id": 2555,
@@ -4159,7 +4301,8 @@
       "pAtkSpd": 325,
       "critRate": 8,
       "attackRange": 40,
-      "randomDamage": 10
+      "randomDamage": 10,
+      "soulshots": 2
     },
     {
       "id": 2556,
@@ -4176,7 +4319,8 @@
       "pAtkSpd": 325,
       "critRate": 8,
       "attackRange": 40,
-      "randomDamage": 10
+      "randomDamage": 10,
+      "soulshots": 2
     },
     {
       "id": 2557,
@@ -4193,7 +4337,8 @@
       "pAtkSpd": 325,
       "critRate": 8,
       "attackRange": 40,
-      "randomDamage": 10
+      "randomDamage": 10,
+      "soulshots": 2
     },
     {
       "id": 2558,
@@ -4210,7 +4355,8 @@
       "pAtkSpd": 325,
       "critRate": 8,
       "attackRange": 40,
-      "randomDamage": 10
+      "randomDamage": 10,
+      "soulshots": 2
     },
     {
       "id": 2559,
@@ -4227,7 +4373,8 @@
       "pAtkSpd": 325,
       "critRate": 8,
       "attackRange": 40,
-      "randomDamage": 10
+      "randomDamage": 10,
+      "soulshots": 3
     },
     {
       "id": 2560,
@@ -4244,7 +4391,8 @@
       "pAtkSpd": 325,
       "critRate": 8,
       "attackRange": 40,
-      "randomDamage": 10
+      "randomDamage": 10,
+      "soulshots": 3
     },
     {
       "id": 2561,
@@ -4261,7 +4409,8 @@
       "pAtkSpd": 325,
       "critRate": 8,
       "attackRange": 40,
-      "randomDamage": 10
+      "randomDamage": 10,
+      "soulshots": 3
     },
     {
       "id": 2562,
@@ -4278,7 +4427,8 @@
       "pAtkSpd": 325,
       "critRate": 8,
       "attackRange": 40,
-      "randomDamage": 10
+      "randomDamage": 10,
+      "soulshots": 3
     },
     {
       "id": 2563,
@@ -4295,7 +4445,8 @@
       "pAtkSpd": 325,
       "critRate": 8,
       "attackRange": 40,
-      "randomDamage": 10
+      "randomDamage": 10,
+      "soulshots": 3
     },
     {
       "id": 2564,
@@ -4312,7 +4463,8 @@
       "pAtkSpd": 325,
       "critRate": 8,
       "attackRange": 40,
-      "randomDamage": 10
+      "randomDamage": 10,
+      "soulshots": 3
     },
     {
       "id": 2565,
@@ -4329,7 +4481,8 @@
       "pAtkSpd": 325,
       "critRate": 8,
       "attackRange": 40,
-      "randomDamage": 10
+      "randomDamage": 10,
+      "soulshots": 3
     },
     {
       "id": 2572,
@@ -4346,7 +4499,8 @@
       "pAtkSpd": 325,
       "critRate": 8,
       "attackRange": 40,
-      "randomDamage": 10
+      "randomDamage": 10,
+      "soulshots": 3
     },
     {
       "id": 2573,
@@ -4363,7 +4517,8 @@
       "pAtkSpd": 325,
       "critRate": 8,
       "attackRange": 40,
-      "randomDamage": 10
+      "randomDamage": 10,
+      "soulshots": 3
     },
     {
       "id": 2574,
@@ -4380,7 +4535,8 @@
       "pAtkSpd": 325,
       "critRate": 8,
       "attackRange": 40,
-      "randomDamage": 10
+      "randomDamage": 10,
+      "soulshots": 3
     },
     {
       "id": 2575,
@@ -4397,7 +4553,8 @@
       "pAtkSpd": 325,
       "critRate": 8,
       "attackRange": 40,
-      "randomDamage": 10
+      "randomDamage": 10,
+      "soulshots": 3
     },
     {
       "id": 2582,
@@ -4414,7 +4571,8 @@
       "pAtkSpd": 325,
       "critRate": 8,
       "attackRange": 40,
-      "randomDamage": 10
+      "randomDamage": 10,
+      "soulshots": 3
     },
     {
       "id": 2583,
@@ -4431,7 +4589,8 @@
       "pAtkSpd": 325,
       "critRate": 8,
       "attackRange": 40,
-      "randomDamage": 10
+      "randomDamage": 10,
+      "soulshots": 3
     },
     {
       "id": 2584,
@@ -4448,7 +4607,8 @@
       "pAtkSpd": 325,
       "critRate": 8,
       "attackRange": 40,
-      "randomDamage": 10
+      "randomDamage": 10,
+      "soulshots": 3
     },
     {
       "id": 2591,
@@ -4465,7 +4625,8 @@
       "pAtkSpd": 325,
       "critRate": 8,
       "attackRange": 40,
-      "randomDamage": 10
+      "randomDamage": 10,
+      "soulshots": 3
     },
     {
       "id": 2592,
@@ -4482,7 +4643,8 @@
       "pAtkSpd": 325,
       "critRate": 8,
       "attackRange": 40,
-      "randomDamage": 10
+      "randomDamage": 10,
+      "soulshots": 3
     },
     {
       "id": 2599,
@@ -4499,7 +4661,8 @@
       "pAtkSpd": 325,
       "critRate": 8,
       "attackRange": 40,
-      "randomDamage": 10
+      "randomDamage": 10,
+      "soulshots": 3
     },
     {
       "id": 3031,
@@ -4732,7 +4895,8 @@
       "pAtkSpd": 325,
       "critRate": 8,
       "attackRange": 40,
-      "randomDamage": 10
+      "randomDamage": 10,
+      "soulshots": 2
     },
     {
       "id": 5472,
@@ -4839,7 +5003,9 @@
       "stackable": true,
       "price": 0,
       "weight": 1,
-      "sellable": false
+      "sellable": false,
+      "soulshot": true,
+      "shotGrade": "none"
     },
     {
       "id": 5790,
@@ -4901,7 +5067,8 @@
       "pAtkSpd": 379,
       "critRate": 8,
       "attackRange": 40,
-      "randomDamage": 10
+      "randomDamage": 10,
+      "soulshots": 1
     },
     {
       "id": 6388,
@@ -5282,7 +5449,8 @@
       "pAtkSpd": 379,
       "critRate": 8,
       "attackRange": 40,
-      "randomDamage": 10
+      "randomDamage": 10,
+      "soulshots": 1
     },
     {
       "id": 6622,
