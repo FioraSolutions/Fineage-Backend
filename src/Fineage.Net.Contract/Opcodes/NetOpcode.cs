@@ -48,5 +48,8 @@ namespace Fineage.Net.Contract
         public const ushort SystemMessage = 0x031B;
         public const ushort UseSkill = 0x031C;
         public const ushort MagicSkillUse = 0x031D;
+        public const ushort ReviveRequest = 0x031E;
+        public const ushort Revive = 0x031F;
+        public const ushort TeleportToLocation = 0x0320;
     }
 }

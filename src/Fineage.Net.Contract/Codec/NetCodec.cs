@@ -796,6 +796,36 @@ namespace Fineage.Net.Contract
             };
         }
 
+        public static byte[] EncodeReviveRequest(ReviveRequestNetMsg m) => Write(w => w.WriteInt32(m.Action));
+        public static ReviveRequestNetMsg DecodeReviveRequest(ReadOnlySpan<byte> p) =>
+            new() { Action = new Reader(p).ReadInt32() };
+
+        public static byte[] EncodeRevive(ReviveNetMsg m) => Write(w => w.WriteInt32(m.ObjectId));
+        public static ReviveNetMsg DecodeRevive(ReadOnlySpan<byte> p) =>
+            new() { ObjectId = new Reader(p).ReadInt32() };
+
+        public static byte[] EncodeTeleportToLocation(TeleportToLocationNetMsg m) => Write(w =>
+        {
+            w.WriteInt32(m.ObjectId);
+            w.WriteInt32(m.X);
+            w.WriteInt32(m.Y);
+            w.WriteInt32(m.Z);
+            w.WriteInt32(m.Heading);
+        });
+
+        public static TeleportToLocationNetMsg DecodeTeleportToLocation(ReadOnlySpan<byte> p)
+        {
+            var r = new Reader(p);
+            return new TeleportToLocationNetMsg
+            {
+                ObjectId = r.ReadInt32(),
+                X = r.ReadInt32(),
+                Y = r.ReadInt32(),
+                Z = r.ReadInt32(),
+                Heading = r.ReadInt32()
+            };
+        }
+
         public static PositionCorrectionMsg DecodePositionCorrection(ReadOnlySpan<byte> p)
         {
             var r = new Reader(p);

@@ -36,4 +36,8 @@ interface INetPresenceBridge
     void FanoutSystemMessage(IReadOnlyList<int> watcherObjectIds, SystemMessageNetMsg message);
 
     void FanoutMagicSkillUse(IReadOnlyList<int> watcherObjectIds, MagicSkillUseNetMsg cast);
+
+    void FanoutRevive(IReadOnlyList<int> watcherObjectIds, ReviveNetMsg revive);
+
+    void FanoutTeleportToLocation(IReadOnlyList<int> watcherObjectIds, TeleportToLocationNetMsg teleport);
 }

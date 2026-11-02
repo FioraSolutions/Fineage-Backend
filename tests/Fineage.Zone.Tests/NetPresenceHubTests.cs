@@ -56,6 +56,20 @@ public sealed class NetPresenceHubTests
     }
 
     [Fact]
+    public void Revive_and_teleport_codec_round_trip()
+    {
+        Assert.Equal(0, NetCodec.DecodeReviveRequest(NetCodec.EncodeReviveRequest(new ReviveRequestNetMsg { Action = 0 })).Action);
+        Assert.Equal(42, NetCodec.DecodeRevive(NetCodec.EncodeRevive(new ReviveNetMsg { ObjectId = 42 })).ObjectId);
+
+        var tp = new TeleportToLocationNetMsg { ObjectId = 42, X = 1, Y = 2, Z = 3, Heading = 90 };
+        var tpAgain = NetCodec.DecodeTeleportToLocation(NetCodec.EncodeTeleportToLocation(tp));
+        Assert.Equal(1, tpAgain.X);
+        Assert.Equal(2, tpAgain.Y);
+        Assert.Equal(3, tpAgain.Z);
+        Assert.Equal(90, tpAgain.Heading);
+    }
+
+    [Fact]
     public void Use_skill_and_magic_skill_use_codec_round_trip()
     {
         var use = new UseSkillNetMsg { SkillId = 1147, TargetObjectId = 9, CtrlPressed = true };

@@ -82,6 +82,7 @@ V2 MessagePack flushes still go to a discarded stream on the Net path. Net peers
 | Bag drop / gear | `DropItemRequest` `0x0316` → bag `InventoryUpdate` + world `DropItem`. `UseItem` `0x0317` / `UnequipItem` `0x0318` → `InventoryUpdate` (paperdoll modify). |
 | Chat | `Say` `0x0319` → `CreatureSay` `0x031A` (ALL local / SHOUT zone). Enter + flood notices → `SystemMessage` `0x031B`. |
 | Skills | `UseSkill` `0x031C` → world cast; `MagicSkillUse` `0x031D` + `StatusUpdate` (MP / heal HP). Hit damage uses existing vitals fanout. |
+| Revive | `ReviveRequest` `0x031E` (village) → `Revive` `0x031F` + `TeleportToLocation` `0x0320` + vitals; AOI spawn/despawn after relocate. |
 | Leave / disconnect | `EntityDespawn` of leaver to known Net peers. |
 
 AOI (who is on the knownlist):

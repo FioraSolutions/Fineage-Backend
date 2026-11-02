@@ -268,4 +268,23 @@ namespace Fineage.Net.Contract
         public int HitTimeMs { get; set; }
         public int ReuseDelayMs { get; set; }
     }
+
+    public sealed class ReviveRequestNetMsg
+    {
+        public int Action { get; set; }
+    }
+
+    public sealed class ReviveNetMsg
+    {
+        public int ObjectId { get; set; }
+    }
+
+    public sealed class TeleportToLocationNetMsg
+    {
+        public int ObjectId { get; set; }
+        public int X { get; set; }
+        public int Y { get; set; }
+        public int Z { get; set; }
+        public int Heading { get; set; }
+    }
 }

@@ -157,8 +157,12 @@ public sealed partial class ZoneWorld
     {
         byte[] body = MessagePackSerializer.Serialize(payload);
         var session = actor.Session;
+        List<int>? netWatchers = null;
         if (session != null)
+        {
             toSelf.Add(new Pending(session, type, body));
+            netWatchers = [actor.ObjectId];
+        }
 
         foreach (var watcher in Players())
         {
@@ -167,6 +171,30 @@ public sealed partial class ZoneWorld
             if (!watcher.Knownlist.Contains(actor.ObjectId))
                 continue;
             toOthers.Add(new Pending(watcher.Session, type, body));
+            netWatchers ??= [];
+            netWatchers.Add(watcher.ObjectId);
+        }
+
+        if (netWatchers is { Count: > 0 } && NetBridge != null)
+        {
+            if (type == MsgType.Revive && payload is ReviveMsg revive)
+            {
+                NetBridge.FanoutRevive(netWatchers, new Fineage.Net.Contract.ReviveNetMsg
+                {
+                    ObjectId = revive.ObjectId
+                });
+            }
+            else if (type == MsgType.TeleportToLocation && payload is TeleportToLocationMsg teleport)
+            {
+                NetBridge.FanoutTeleportToLocation(netWatchers, new Fineage.Net.Contract.TeleportToLocationNetMsg
+                {
+                    ObjectId = teleport.ObjectId,
+                    X = teleport.X,
+                    Y = teleport.Y,
+                    Z = teleport.Z,
+                    Heading = teleport.Heading
+                });
+            }
         }
     }
 

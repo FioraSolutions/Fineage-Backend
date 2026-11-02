@@ -129,6 +129,20 @@ public sealed class NetZoneServer : INetPresenceBridge
             _ = _presence.SendAsync(watcher, NetOpcode.MagicSkillUse, payload, CancellationToken.None);
     }
 
+    void INetPresenceBridge.FanoutRevive(IReadOnlyList<int> watcherObjectIds, ReviveNetMsg revive)
+    {
+        var payload = NetCodec.EncodeRevive(revive);
+        foreach (int watcher in watcherObjectIds)
+            _ = _presence.SendAsync(watcher, NetOpcode.Revive, payload, CancellationToken.None);
+    }
+
+    void INetPresenceBridge.FanoutTeleportToLocation(IReadOnlyList<int> watcherObjectIds, TeleportToLocationNetMsg teleport)
+    {
+        var payload = NetCodec.EncodeTeleportToLocation(teleport);
+        foreach (int watcher in watcherObjectIds)
+            _ = _presence.SendAsync(watcher, NetOpcode.TeleportToLocation, payload, CancellationToken.None);
+    }
+
     public async Task HandleAsync(NetConnection conn, CancellationToken ct)
     {
         await using var discard = new MemoryStream();
@@ -187,6 +201,9 @@ public sealed class NetZoneServer : INetPresenceBridge
                             break;
                         case NetOpcode.UseSkill:
                             await OnUseSkillAsync(conn, zoneSession, envelope, ct).ConfigureAwait(false);
+                            break;
+                        case NetOpcode.ReviveRequest:
+                            await OnReviveRequestAsync(conn, zoneSession, self, envelope, ct).ConfigureAwait(false);
                             break;
                         case NetOpcode.StopMove:
                             // Authoritative stop: correct to current session position.
@@ -465,7 +482,17 @@ public sealed class NetZoneServer : INetPresenceBridge
 
         var after = _world.SnapshotKnownIds(zoneSession);
         // MoveState to self + stayed peers is fanned by ZoneWorld.ReconcileKnownlist → NetBridge.
+        await FanKnownlistDiffAsync(conn, zoneSession, self, before, after, ct).ConfigureAwait(false);
+    }
 
+    async Task FanKnownlistDiffAsync(
+        NetConnection conn,
+        ZoneSession zoneSession,
+        EntityId self,
+        HashSet<int> before,
+        HashSet<int> after,
+        CancellationToken ct)
+    {
         // Newly visible: EntitySpawn. Forgotten: EntityDespawn.
         foreach (int id in after)
         {
@@ -738,6 +765,37 @@ public sealed class NetZoneServer : INetPresenceBridge
             ct).ConfigureAwait(false);
         if (error != null)
             await RejectAsync(conn, error, "UseSkill failed.", ct).ConfigureAwait(false);
+    }
+
+    async Task OnReviveRequestAsync(
+        NetConnection conn,
+        ZoneSession zoneSession,
+        EntityId self,
+        PacketEnvelope envelope,
+        CancellationToken ct)
+    {
+        RequireHello(conn);
+        if (!zoneSession.Bound || !zoneSession.InWorld)
+        {
+            await RejectAsync(conn, "not_in_world", "Enter world first.", ct).ConfigureAwait(false);
+            return;
+        }
+
+        var before = _world.SnapshotKnownIds(zoneSession);
+        var revive = NetCodec.DecodeReviveRequest(envelope.Payload);
+        string? error = await _world.TryReviveAsync(
+            zoneSession,
+            new ReviveRequestMsg { Action = revive.Action },
+            ct).ConfigureAwait(false);
+        if (error != null)
+        {
+            await RejectAsync(conn, error, "Revive failed.", ct).ConfigureAwait(false);
+            return;
+        }
+
+        // Revive / Teleport / StatusUpdate fan via NetBridge; AOI after village relocate needs spawn/despawn.
+        var after = _world.SnapshotKnownIds(zoneSession);
+        await FanKnownlistDiffAsync(conn, zoneSession, self, before, after, ct).ConfigureAwait(false);
     }
 
     static void RequireHello(NetConnection conn)
