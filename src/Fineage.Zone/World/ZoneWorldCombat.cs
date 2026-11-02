@@ -45,7 +45,7 @@ public sealed partial class ZoneWorld
                 session.AutoAttackTargetId = session.SelectedTargetId;
                 // Approaching: first swing on arrival (Mobius onEvtArrived -> doAttack); else next swing after Pspd.
                 session.NextAutoAttackUnixMs = _clock().ToUnixTimeMilliseconds() +
-                    (approachMs > 0 ? approachMs : ZoneCombat.AutoAttackIntervalMs);
+                    (approachMs > 0 ? approachMs : PlayerAttackTimeMs(session.ObjectId));
             }
         }
         if (error != null)
@@ -128,7 +128,7 @@ public sealed partial class ZoneWorld
             return approachMs < 0 ? "attack" : null;
         }
 
-        int damage = ZoneCombat.SampleMeleeDamage;
+        int damage = ZoneCombat.PhysicalDamage(PlayerPAtk(player), NpcPDef(target));
 
         var attack = new AttackMsg
         {
@@ -147,10 +147,31 @@ public sealed partial class ZoneWorld
         FanoutAttack(player, target, attack, outbound);
         long now = _clock().ToUnixTimeMilliseconds();
         player.CombatUntilUnixMs = now + ClanProtocol.CombatStanceMillis;
-        _meleeHits.Add(new PendingMeleeHit(player.ObjectId, targetId, damage, now + ZoneCombat.PlayerMeleeHitDelayMs));
+        _meleeHits.Add(new PendingMeleeHit(player.ObjectId, targetId, damage, now + PlayerAttackTimeMs(player.ObjectId) / 2));
 
         return null;
     }
+
+    // Physical stats. Players: class template values (same as UserInfo); NPCs: Mobius npcs.json.
+    // TODO(combat parity): STR/level/weapon/armor/buff stat pipeline.
+    int PlayerPAtkSpd(ZoneEntity player) =>
+        PlayerClasses.TryGet(player.ClassId, out var t) && t != null && t.PAtkSpd > 0 ? t.PAtkSpd : ZoneCombat.DefaultPlayerPAtkSpd;
+
+    long PlayerAttackTimeMs(int objectId) =>
+        _byId.TryGetValue(objectId, out var p) ? ZoneCombat.AttackTimeMs(PlayerPAtkSpd(p)) : ZoneCombat.AutoAttackIntervalMs;
+
+    double PlayerPAtk(ZoneEntity player) =>
+        PlayerClasses.TryGet(player.ClassId, out var t) && t != null && t.PAtk > 0 ? t.PAtk : ZoneCombat.DefaultPlayerPAtk;
+
+    double PlayerPDef(ZoneEntity player) =>
+        PlayerClasses.TryGet(player.ClassId, out var t) && t != null && t.PDef > 0 ? t.PDef : ZoneCombat.DefaultPlayerPDef;
+
+    static double NpcPDef(ZoneEntity npc) => npc.PDef > 0 ? npc.PDef : Math.Max(1, npc.Level) * 40d;
+
+    static int NpcPAtkSpd(ZoneEntity npc) => npc.PAtkSpd > 0 ? npc.PAtkSpd : ZoneCombat.DefaultNpcPAtkSpd;
+
+    int NpcMeleeDamage(ZoneEntity npc, ZoneEntity player) =>
+        npc.PAtk > 0 ? ZoneCombat.PhysicalDamage(npc.PAtk, PlayerPDef(player)) : ZoneCombat.MobMeleeDamage(npc.Level);
 
     Task? _combatLoop;
 
@@ -240,7 +261,7 @@ public sealed partial class ZoneWorld
                 continue;
             }
             session.ClearApproach();
-            session.NextAutoAttackUnixMs = now + ZoneCombat.AutoAttackIntervalMs;
+            session.NextAutoAttackUnixMs = now + PlayerAttackTimeMs(player.ObjectId);
             if (TryAttack(session, targetId, outbound) != null)
                 session.AutoAttackTargetId = 0;
         }

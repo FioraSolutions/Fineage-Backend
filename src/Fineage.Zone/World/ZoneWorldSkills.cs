@@ -119,7 +119,7 @@ public sealed partial class ZoneWorld
         if (template.ReuseDelayMs > 0)
             player.SkillReuseUntilMs[request.SkillId] = now + template.ReuseDelayMs;
 
-        int damage = Math.Max(1, levelData.Power + ZoneCombat.SampleMeleeDamage / 3);
+        int damage = Math.Max(1, levelData.Power + ZoneCombat.LegacySkillDamageBonus);
         int hitTime = Math.Max(0, template.HitTimeMs);
 
         // Mobius Creature.doCast: MagicSkillUse goes out now, damage lands in onMagicHitTimer after hitTime.

@@ -121,7 +121,10 @@ public sealed class SpawnCatalog
                     template.Type,
                     Math.Max(1, template.Level),
                     template.Exp,
-                    template.Sp));
+                    template.Sp,
+                    template.PAtk,
+                    template.PDef,
+                    template.AttackSpeed));
             }
 
             maps.Add(map.MapId, new SpawnMapDefinition(map.MapId, map.Enabled, npcs));

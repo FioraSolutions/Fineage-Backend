@@ -23,7 +23,10 @@ public sealed record SpawnNpcDefinition(
     string NpcType = "",
     int Level = 1,
     long Exp = 0,
-    int Sp = 0);
+    int Sp = 0,
+    double PAtk = 0,
+    double PDef = 0,
+    int AttackSpeed = 0);
 
 public sealed record SpawnMapDefinition(
     string MapId,

@@ -65,7 +65,7 @@ public sealed partial class ZoneWorld
             return;
         npc.AggroTargetId = attacker.ObjectId;
         // Mobius: first swing after attack-speed delay, not instantly.
-        npc.NextMobAttackMs = _clock().ToUnixTimeMilliseconds() + ZoneCombat.MobAttackIntervalMs / 2;
+        npc.NextMobAttackMs = _clock().ToUnixTimeMilliseconds() + ZoneCombat.HitTimeMs(NpcPAtkSpd(npc));
     }
 
     void TickMobAttacks(long now, List<Pending> outbound)
@@ -103,9 +103,10 @@ public sealed partial class ZoneWorld
             }
             if (now < npc.NextMobAttackMs)
                 continue;
-            npc.NextMobAttackMs = now + ZoneCombat.MobAttackIntervalMs;
+            int npcAtkMs = ZoneCombat.AttackTimeMs(NpcPAtkSpd(npc));
+            npc.NextMobAttackMs = now + npcAtkMs;
 
-            int damage = ZoneCombat.MobMeleeDamage(npc.Level);
+            int damage = NpcMeleeDamage(npc, player);
             player.CombatUntilUnixMs = now + ClanProtocol.CombatStanceMillis;
 
             var attack = new AttackMsg
@@ -118,7 +119,7 @@ public sealed partial class ZoneWorld
             };
             // Swing now; player HP drops at hitTime (Mobius onHitTimer).
             FanoutAttack(npc, player, attack, outbound);
-            _meleeHits.Add(new PendingMeleeHit(npc.ObjectId, player.ObjectId, damage, now + ZoneCombat.MobMeleeHitDelayMs));
+            _meleeHits.Add(new PendingMeleeHit(npc.ObjectId, player.ObjectId, damage, now + npcAtkMs / 2));
         }
     }
 

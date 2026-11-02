@@ -21,17 +21,44 @@ public static class ZoneCombat
     public const int HitRangeTolerance = 40;
     /// <summary>Client MoveTo within this of the approach path is a position sync, not a cancel.</summary>
     public const int ApproachPathTolerance = 80;
-    public const int SampleMeleeDamage = 32;
-    public const int AutoAttackIntervalMs = 1100;
+    /// <summary>Fallback physical stats when a template has none (Interlude fighter base / Gremlin).</summary>
+    public const int DefaultPlayerPAtk = 4;
+    public const int DefaultPlayerPDef = 80;
+    public const int DefaultPlayerPAtkSpd = 300;
+    public const int DefaultNpcPAtkSpd = 253;
     public const int AutoAttackTickMs = 200;
 
-    /// <summary>Mobius default NPC Pspd 253 -> ~1.2s per swing.</summary>
-    public const int MobAttackIntervalMs = 1200;
+    /// <summary>Gremlin (20001) Mobius <c>defence physical</c>; reference for <see cref="SampleMeleeDamage"/>.</summary>
+    public const double GremlinPDef = 44.444;
+
+    /// <summary>Reference hit: base fighter (P.Atk 4) vs Gremlin through <see cref="PhysicalDamage"/> (= 6).</summary>
+    public static readonly int SampleMeleeDamage = PhysicalDamage(DefaultPlayerPAtk, GremlinPDef);
+
+    /// <summary>Flat bonus the stub skill-damage path adds on top of skill power (was SampleMeleeDamage/3).</summary>
+    public const int LegacySkillDamageBonus = 10;
+
+    /// <summary>Mobius <c>Formulas.calculateTimeBetweenAttacks</c>: 500000 / Pspd (ms), floor 100.</summary>
+    public static int AttackTimeMs(int pAtkSpd) => Math.Max(100, 500000 / Math.Max(1, pAtkSpd));
+
+    /// <summary>Mobius <c>Creature.doAttack</c>: damage lands at timeAtk / 2.</summary>
+    public static int HitTimeMs(int pAtkSpd) => AttackTimeMs(pAtkSpd) / 2;
+
+    /// <summary>
+    /// Mobius <c>Formulas.calcPhysDam</c> core (no crit/shots/random/elements yet): 70 * pAtk / pDef, min 1.
+    /// </summary>
+    public static int PhysicalDamage(double pAtk, double pDef) =>
+        Math.Max(1, (int)(70d * Math.Max(0d, pAtk) / Math.Max(1d, pDef)));
+
+    /// <summary>Default fighter swing (Pspd 300 → 1666 ms).</summary>
+    public static readonly int AutoAttackIntervalMs = AttackTimeMs(DefaultPlayerPAtkSpd);
+
+    /// <summary>Mobius default NPC Pspd 253 → 1976 ms per swing.</summary>
+    public static readonly int MobAttackIntervalMs = AttackTimeMs(DefaultNpcPAtkSpd);
     public const int AggroForgetRange = 3000;
 
     /// <summary>Mobius melee hitTime = attack time / 2: damage lands mid-swing (client AttackShot), not on packet.</summary>
-    public const int PlayerMeleeHitDelayMs = AutoAttackIntervalMs / 2;
-    public const int MobMeleeHitDelayMs = MobAttackIntervalMs / 2;
+    public static readonly int PlayerMeleeHitDelayMs = HitTimeMs(DefaultPlayerPAtkSpd);
+    public static readonly int MobMeleeHitDelayMs = HitTimeMs(DefaultNpcPAtkSpd);
 
     /// <summary>Mobius NPC physical attack range 40 + collision radii (~gremlin/player). Mob walks in until this.</summary>
     public const int MobMeleeRange = 80;

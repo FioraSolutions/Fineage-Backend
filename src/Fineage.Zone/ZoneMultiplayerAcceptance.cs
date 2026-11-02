@@ -170,9 +170,9 @@ public static class ZoneMultiplayerAcceptance
         {
             await attacker.SendAsync(MsgType.AttackRequest, new AttackRequestMsg()).ConfigureAwait(false);
             var atkLeft = await attacker.ExpectAsync<AttackMsg>(MsgType.Attack).ConfigureAwait(false);
-            var hpLeft = await attacker.ExpectAsync<StatusUpdateMsg>(MsgType.StatusUpdate).ConfigureAwait(false);
+            var hpLeft = await attacker.ExpectStatusForAsync(gremlin.ObjectId).ConfigureAwait(false);
             var atkRight = await observer.ExpectAsync<AttackMsg>(MsgType.Attack).ConfigureAwait(false);
-            var hpRight = await observer.ExpectAsync<StatusUpdateMsg>(MsgType.StatusUpdate).ConfigureAwait(false);
+            var hpRight = await observer.ExpectStatusForAsync(gremlin.ObjectId).ConfigureAwait(false);
 
             int expectedHp = TalkingIsland.GremlinMaxHp - hit * ZoneCombat.SampleMeleeDamage;
             ExpectCombat(gremlin.ObjectId, fighter.CharacterId, expectedHp, atkLeft, hpLeft);
@@ -235,9 +235,9 @@ public static class ZoneMultiplayerAcceptance
         {
             await left.SendAsync(MsgType.AttackRequest, new AttackRequestMsg()).ConfigureAwait(false);
             _ = await left.ExpectAsync<AttackMsg>(MsgType.Attack).ConfigureAwait(false);
-            _ = await left.ExpectAsync<StatusUpdateMsg>(MsgType.StatusUpdate).ConfigureAwait(false);
+            _ = await left.ExpectStatusForAsync(gremlin.ObjectId).ConfigureAwait(false);
             _ = await right.ExpectAsync<AttackMsg>(MsgType.Attack).ConfigureAwait(false);
-            _ = await right.ExpectAsync<StatusUpdateMsg>(MsgType.StatusUpdate).ConfigureAwait(false);
+            _ = await right.ExpectStatusForAsync(gremlin.ObjectId).ConfigureAwait(false);
         }
 
         _ = await left.ExpectAsync<DieMsg>(MsgType.Die).ConfigureAwait(false);
@@ -293,7 +293,7 @@ public static class ZoneMultiplayerAcceptance
         {
             await peer.SendAsync(MsgType.AttackRequest, new AttackRequestMsg()).ConfigureAwait(false);
             _ = await peer.ExpectAsync<AttackMsg>(MsgType.Attack).ConfigureAwait(false);
-            _ = await peer.ExpectAsync<StatusUpdateMsg>(MsgType.StatusUpdate).ConfigureAwait(false);
+            _ = await peer.ExpectStatusForAsync(gremlin.ObjectId).ConfigureAwait(false);
         }
 
         _ = await peer.ExpectAsync<DieMsg>(MsgType.Die).ConfigureAwait(false);
@@ -907,6 +907,17 @@ public static class ZoneMultiplayerAcceptance
                     return true;
             }
             return false;
+        }
+
+        /// <summary>HP StatusUpdate for <paramref name="objectId"/>; skips other entities' vitals (mob retaliation lands on the player).</summary>
+        public async Task<StatusUpdateMsg> ExpectStatusForAsync(int objectId)
+        {
+            while (true)
+            {
+                var status = await ExpectAsync<StatusUpdateMsg>(MsgType.StatusUpdate).ConfigureAwait(false);
+                if (status.ObjectId == objectId)
+                    return status;
+            }
         }
 
         public async Task<T> ExpectAsync<T>(MsgType expected)

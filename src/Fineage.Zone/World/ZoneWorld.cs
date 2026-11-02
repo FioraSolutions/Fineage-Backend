@@ -72,6 +72,12 @@ sealed class ZoneEntity
     public int ArmorGradePenalty { get; set; }
     /// <summary>When true, regen rates double (classic sitting rest).</summary>
     public bool Sitting { get; set; }
+    /// <summary>NPC Mobius physical attack (0 = unknown → level placeholder). Players read the class template.</summary>
+    public double PAtk { get; init; }
+    /// <summary>NPC Mobius physical defence (0 = unknown).</summary>
+    public double PDef { get; init; }
+    /// <summary>NPC Mobius attack speed (Pspd, 0 = default 253).</summary>
+    public int PAtkSpd { get; init; }
     public float RunSpeed { get; init; }
     public float WalkSpeed { get; init; }
     public bool Running { get; set; } = true;
