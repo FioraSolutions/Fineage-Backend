@@ -154,6 +154,22 @@ public static class ZoneCombat
         return (Math.Max(1, (int)damage), (byte)(flags | (crit ? HitFlagCrit : 0)));
     }
 
+    /// <summary>Mobius <c>Formulas.calcAtkSpd</c> for skills: magic time·333/Cspd, physical time·300/Pspd.</summary>
+    public static int SkillTimeMs(int baseMs, bool magic, int mAtkSpd, int pAtkSpd) =>
+        baseMs <= 0 ? 0 : (int)(magic ? baseMs * 333d / Math.Max(1, mAtkSpd) : baseMs * 300d / Math.Max(1, pAtkSpd));
+
+    /// <summary>Interlude reuse scaling: reuse·333 / (magic ? Cspd : Pspd).</summary>
+    public static int SkillReuseMs(int baseMs, bool magic, int mAtkSpd, int pAtkSpd) =>
+        baseMs <= 0 ? 0 : (int)(baseMs * 333d / Math.Max(1, magic ? mAtkSpd : pAtkSpd));
+
+    /// <summary>Interlude <c>calcPhysDam</c> with skill: 70·(pAtk·(ss?2:1) + power) / (pDef [+ sDef]).</summary>
+    public static int PhysicalSkillDamage(double pAtk, double pDef, double power, bool soulshot) =>
+        Math.Max(1, (int)(70d * (Math.Max(0, pAtk) * (soulshot ? 2 : 1) + Math.Max(0, power)) / Math.Max(1d, pDef)));
+
+    /// <summary>Interlude <c>calcMagicDam</c> core: 91·√mAtk / mDef · power (no shots / mcrit / fail yet).</summary>
+    public static int MagicDamage(double mAtk, double mDef, double power) =>
+        Math.Max(1, (int)(91d * Math.Sqrt(Math.Max(0, mAtk)) / Math.Max(1d, mDef) * Math.Max(0, power)));
+
     public static int PhysicalDamage(double pAtk, double pDef) =>
         Math.Max(1, (int)(70d * Math.Max(0d, pAtk) / Math.Max(1d, pDef)));
 

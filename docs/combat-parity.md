@@ -23,3 +23,10 @@
 6. Attack stance/AutoAttackStart/Stop packets and client Attack hit flags (crit/miss/shot) on the Net wire.
 7. Aggressive mob aggro range, social/faction help, hate list with multiple attackers.
 8. PvP/flagging melee (players attacking players).
+
+## Slice 6 — attack-skill damage and timing
+- `data/skill-combat.json` (374 Mobius skills): power/mpConsume/mpInitialConsume per level, hit/cool/reuse, castRange.
+- Physical skill: 70·(P.Atk·ss + power)/P.Def (shield roll applies); magic: 91·√M.Atk/M.Def·power.
+- Hit/cool: magic t·333/Cspd, physical t·300/Pspd; reuse t·333/speed. Initial MP at cast start, MP at launch.
+- Skills outside the catalog keep the legacy power+10 stub.
+- Gaps: magic crit/fail, spiritshots, skill crit; blow/energy use the physical formula; caster MP StatusUpdate V2-only.

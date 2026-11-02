@@ -45,7 +45,14 @@ public sealed partial class ZoneWorld
         if (!_byId.TryGetValue(hit.TargetId, out var target) || target.Kind != ZoneEntityKind.Npc || target.CurHp <= 0)
             return;
 
-        target.CurHp = Math.Max(0, target.CurHp - hit.Damage);
+        int damage = hit.Combat != null ? RollSkillDamage(player, target, hit.Combat, hit.Level) : hit.Damage;
+        if (hit.Combat != null)
+        {
+            ZoneLog.Info($"[skill] hit {hit.Combat.SkillId} lv{hit.Level} target={target.ObjectId} damage={damage}");
+            if (player.Session != null)
+                outbound.Add(Pack(player.Session, MsgType.StatusUpdate, CasterMpStatus(player)));
+        }
+        target.CurHp = Math.Max(0, target.CurHp - damage);
         FanoutVitals(target, StatusFor(target), outbound);
         AddHate(target, player);
         player.CombatUntilUnixMs = now + ClanProtocol.CombatStanceMillis;

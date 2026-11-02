@@ -112,6 +112,10 @@ public sealed class ZoneSkillWireTests
         }, CancellationToken.None));
         Assert.Null(await world.TrySelectTargetAsync(session, new SelectTargetMsg { TargetObjectId = gremlinObjectId }, CancellationToken.None));
 
+        // Mobius Power Strike: 70·(P.Atk + power)/P.Def. With the kit weapon it one-shots a 96 HP gremlin at L5,
+        // so cast bare-handed to keep the retaliation check below.
+        Assert.Null(await world.TryUnequipItemAsync(session, new UnequipItemMsg { PaperdollSlot = (int)Fineage.Game.PaperdollSlot.RHand },
+            CancellationToken.None));
         stream.SetLength(0);
         Assert.Null(await world.TrySkillUseAsync(session, new SkillUseRequestMsg
         {

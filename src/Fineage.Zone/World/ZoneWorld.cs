@@ -87,6 +87,9 @@ sealed class ZoneEntity
     /// <summary>NPC Mobius shield defence / block rate (players read the equipped shield).</summary>
     public int ShieldDef { get; init; }
     public int ShieldRate { get; init; }
+    /// <summary>NPC Mobius magic attack / defence.</summary>
+    public double MAtk { get; init; }
+    public double MDef { get; init; }
     /// <summary>Mobius ChargedShot SOULSHOTS: weapon is charged; next swing doubles P.Atk and clears it.</summary>
     public bool SoulshotCharged { get; set; }
     /// <summary>True while an abnormal with combat stat funcs is active (UserInfo refresh on change).</summary>
@@ -212,6 +215,8 @@ public sealed partial class ZoneWorld
     readonly Random _combatRandom;
     /// <summary>Buff/debuff combat stat funcs (Mobius skill &lt;for&gt;&lt;effect&gt;).</summary>
     readonly SkillStatEffectCatalog _statEffects;
+    /// <summary>Mobius attack-skill power / MP / timing (data/skill-combat.json).</summary>
+    readonly SkillCombatCatalog _skillCombat;
     readonly BuyListCatalog _buyLists;
     readonly MultiSellCatalog _multisells;
     readonly ShopStock _shopStock;
@@ -268,8 +273,10 @@ public sealed partial class ZoneWorld
         MultiSellCatalog? multisells = null,
         GeoEngine? geo = null,
         Random? combatRandom = null,
-        SkillStatEffectCatalog? statEffects = null)
+        SkillStatEffectCatalog? statEffects = null,
+        SkillCombatCatalog? skillCombat = null)
     {
+        _skillCombat = skillCombat ?? SkillCombatCatalog.LoadDefault();
         _statEffects = statEffects ?? SkillStatEffectCatalog.LoadDefault();
         _combatRandom = combatRandom ?? Random.Shared;
         _aoi = aoi ?? new SingleCellAoi();

@@ -115,10 +115,14 @@ public sealed partial class ZoneWorld
         }
 
         session.AutoAttackTargetId = 0;
+        if (_skillCombat.TryGet(request.SkillId, out var combat))
+            return CastMobiusAttack(session, player, target, request.SkillId, level, combat, now, outbound);
+
         player.CurMp = Math.Max(0, player.CurMp - levelData.MpConsume);
         if (template.ReuseDelayMs > 0)
             player.SkillReuseUntilMs[request.SkillId] = now + template.ReuseDelayMs;
 
+        // Legacy path: skills missing from skill-combat.json keep the old power stub.
         int damage = Math.Max(1, levelData.Power + ZoneCombat.LegacySkillDamageBonus);
         int hitTime = Math.Max(0, template.HitTimeMs);
 

@@ -98,6 +98,8 @@ public sealed partial class ZoneWorld
             Dex = def.Dex,
             ShieldDef = def.ShieldDef,
             ShieldRate = def.ShieldRate,
+            MAtk = def.MAtk,
+            MDef = def.MDef,
             RunSpeed = def.RunSpeed,
             WalkSpeed = def.WalkSpeed,
             MerchantCastleId = tax.CastleId,
