@@ -48,6 +48,8 @@ namespace Fineage.Net.Contract
         public bool Attackable { get; set; }
         /// <summary>Player only (Mobius CharInfo): equipped item ids per paperdoll slot; empty for NPCs / old peers.</summary>
         public int[] Paperdoll { get; set; } = System.Array.Empty<int>();
+        /// <summary>Mobius isAlikeDead: the entity is a corpse when it enters view (late observer sees it lying, not standing).</summary>
+        public bool Dead { get; set; }
     }
 
     public sealed class PlayerStatsMsg
