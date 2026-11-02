@@ -89,6 +89,7 @@ V2 MessagePack flushes still go to a discarded stream on the Net path. Net peers
 | Shop | Bypass opens `BuyList` `0x0325` / `SellList` `0x0326` / `MultiSellList` `0x0327` + `ShopBalance` `0x0328`. Buy/sell/multisell → `RequestBuyItem` `0x0329` / `RequestSellItem` `0x032A` / `RequestMultiSellChoose` `0x032B` (+ inventory / system lines). |
 | Warehouse | Bypass opens `WarehouseDepositList` `0x032C` / `WarehouseWithdrawList` `0x032D`. Confirm → `WarehouseDepositRequest` `0x032E` / `WarehouseWithdrawRequest` `0x032F`. |
 | Quests | Journal → `RequestQuestList` `0x0330` / abort → `RequestQuestAbort` `0x0331` → `QuestList` `0x0332`. Quest HTML still via `NpcHtml`. |
+| Party | Invite/answer/leave/kick → `PartyInviteRequest` `0x0333` / `PartyAnswerJoinRequest` `0x0334` / `PartyLeaveRequest` `0x0335` / `PartyKickRequest` `0x0336`. Fanout `PartyAskJoin` `0x0337` / `PartyJoinResult` `0x0338` / `PartyMemberList` `0x0339`. |
 | Leave / disconnect | `EntityDespawn` of leaver to known Net peers. |
 
 AOI (who is on the knownlist):

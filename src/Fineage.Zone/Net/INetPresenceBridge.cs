@@ -60,4 +60,10 @@ interface INetPresenceBridge
     void FanoutWarehouseWithdrawList(IReadOnlyList<int> watcherObjectIds, WarehouseWithdrawListNetMsg list);
 
     void FanoutQuestList(IReadOnlyList<int> watcherObjectIds, QuestListNetMsg list);
+
+    void FanoutPartyAskJoin(IReadOnlyList<int> watcherObjectIds, PartyAskJoinNetMsg ask);
+
+    void FanoutPartyJoinResult(IReadOnlyList<int> watcherObjectIds, PartyJoinResultNetMsg result);
+
+    void FanoutPartyMemberList(IReadOnlyList<int> watcherObjectIds, PartyMemberListNetMsg list);
 }

@@ -213,6 +213,27 @@ public sealed class NetZoneServer : INetPresenceBridge
             _ = _presence.SendAsync(watcher, NetOpcode.QuestList, payload, CancellationToken.None);
     }
 
+    void INetPresenceBridge.FanoutPartyAskJoin(IReadOnlyList<int> watcherObjectIds, PartyAskJoinNetMsg ask)
+    {
+        var payload = NetCodec.EncodePartyAskJoin(ask);
+        foreach (int watcher in watcherObjectIds)
+            _ = _presence.SendAsync(watcher, NetOpcode.PartyAskJoin, payload, CancellationToken.None);
+    }
+
+    void INetPresenceBridge.FanoutPartyJoinResult(IReadOnlyList<int> watcherObjectIds, PartyJoinResultNetMsg result)
+    {
+        var payload = NetCodec.EncodePartyJoinResult(result);
+        foreach (int watcher in watcherObjectIds)
+            _ = _presence.SendAsync(watcher, NetOpcode.PartyJoinResult, payload, CancellationToken.None);
+    }
+
+    void INetPresenceBridge.FanoutPartyMemberList(IReadOnlyList<int> watcherObjectIds, PartyMemberListNetMsg list)
+    {
+        var payload = NetCodec.EncodePartyMemberList(list);
+        foreach (int watcher in watcherObjectIds)
+            _ = _presence.SendAsync(watcher, NetOpcode.PartyMemberList, payload, CancellationToken.None);
+    }
+
     public async Task HandleAsync(NetConnection conn, CancellationToken ct)
     {
         await using var discard = new MemoryStream();
@@ -301,6 +322,18 @@ public sealed class NetZoneServer : INetPresenceBridge
                             break;
                         case NetOpcode.RequestQuestAbort:
                             await OnRequestQuestAbortAsync(conn, zoneSession, envelope, ct).ConfigureAwait(false);
+                            break;
+                        case NetOpcode.PartyInviteRequest:
+                            await OnPartyInviteAsync(conn, zoneSession, envelope, ct).ConfigureAwait(false);
+                            break;
+                        case NetOpcode.PartyAnswerJoinRequest:
+                            await OnPartyAnswerAsync(conn, zoneSession, envelope, ct).ConfigureAwait(false);
+                            break;
+                        case NetOpcode.PartyLeaveRequest:
+                            await OnPartyLeaveAsync(conn, zoneSession, ct).ConfigureAwait(false);
+                            break;
+                        case NetOpcode.PartyKickRequest:
+                            await OnPartyKickAsync(conn, zoneSession, envelope, ct).ConfigureAwait(false);
                             break;
                         case NetOpcode.StopMove:
                             // Authoritative stop: correct to current session position.
@@ -1097,6 +1130,94 @@ public sealed class NetZoneServer : INetPresenceBridge
         string? error = await _world.TryQuestAbortAsync(zoneSession, abort.QuestId, ct).ConfigureAwait(false);
         if (error != null)
             await RejectAsync(conn, error, "Quest abort failed.", ct).ConfigureAwait(false);
+    }
+
+    async Task OnPartyInviteAsync(
+        NetConnection conn,
+        ZoneSession zoneSession,
+        PacketEnvelope envelope,
+        CancellationToken ct)
+    {
+        RequireHello(conn);
+        if (!zoneSession.Bound || !zoneSession.InWorld)
+        {
+            await RejectAsync(conn, "not_in_world", "Enter world first.", ct).ConfigureAwait(false);
+            return;
+        }
+
+        var invite = NetCodec.DecodePartyInviteRequest(envelope.Payload);
+        string? error = await _world.TryPartyInviteAsync(
+            zoneSession,
+            new PartyInviteRequestMsg
+            {
+                TargetObjectId = invite.TargetObjectId,
+                ItemDistribution = invite.ItemDistribution
+            },
+            ct).ConfigureAwait(false);
+        if (error != null)
+            await RejectAsync(conn, error, "Party invite failed.", ct).ConfigureAwait(false);
+    }
+
+    async Task OnPartyAnswerAsync(
+        NetConnection conn,
+        ZoneSession zoneSession,
+        PacketEnvelope envelope,
+        CancellationToken ct)
+    {
+        RequireHello(conn);
+        if (!zoneSession.Bound || !zoneSession.InWorld)
+        {
+            await RejectAsync(conn, "not_in_world", "Enter world first.", ct).ConfigureAwait(false);
+            return;
+        }
+
+        var answer = NetCodec.DecodePartyAnswerJoinRequest(envelope.Payload);
+        string? error = await _world.TryPartyAnswerAsync(
+            zoneSession,
+            new PartyAnswerJoinRequestMsg
+            {
+                RequestorObjectId = answer.RequestorObjectId,
+                Response = answer.Response
+            },
+            ct).ConfigureAwait(false);
+        if (error != null)
+            await RejectAsync(conn, error, "Party answer failed.", ct).ConfigureAwait(false);
+    }
+
+    async Task OnPartyLeaveAsync(NetConnection conn, ZoneSession zoneSession, CancellationToken ct)
+    {
+        RequireHello(conn);
+        if (!zoneSession.Bound || !zoneSession.InWorld)
+        {
+            await RejectAsync(conn, "not_in_world", "Enter world first.", ct).ConfigureAwait(false);
+            return;
+        }
+
+        string? error = await _world.TryPartyLeaveAsync(zoneSession, ct).ConfigureAwait(false);
+        if (error != null)
+            await RejectAsync(conn, error, "Party leave failed.", ct).ConfigureAwait(false);
+    }
+
+    async Task OnPartyKickAsync(
+        NetConnection conn,
+        ZoneSession zoneSession,
+        PacketEnvelope envelope,
+        CancellationToken ct)
+    {
+        RequireHello(conn);
+        if (!zoneSession.Bound || !zoneSession.InWorld)
+        {
+            await RejectAsync(conn, "not_in_world", "Enter world first.", ct).ConfigureAwait(false);
+            return;
+        }
+
+        var kick = NetCodec.DecodePartyKickRequest(envelope.Payload);
+        string? error = await _world.TryPartyKickAsync(
+            zoneSession,
+            new PartyKickRequestMsg { TargetObjectId = kick.TargetObjectId },
+            ct).ConfigureAwait(false);
+        if (error != null)
+            await RejectAsync(conn, error, "Party kick failed.", ct).ConfigureAwait(false);
     }
 
     static void RequireHello(NetConnection conn)

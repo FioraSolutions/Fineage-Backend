@@ -69,5 +69,12 @@ namespace Fineage.Net.Contract
         public const ushort RequestQuestList = 0x0330;
         public const ushort RequestQuestAbort = 0x0331;
         public const ushort QuestList = 0x0332;
+        public const ushort PartyInviteRequest = 0x0333;
+        public const ushort PartyAnswerJoinRequest = 0x0334;
+        public const ushort PartyLeaveRequest = 0x0335;
+        public const ushort PartyKickRequest = 0x0336;
+        public const ushort PartyAskJoin = 0x0337;
+        public const ushort PartyJoinResult = 0x0338;
+        public const ushort PartyMemberList = 0x0339;
     }
 }

@@ -124,6 +124,49 @@ public sealed class NetPresenceHubTests
     }
 
     [Fact]
+    public void Party_codec_round_trip()
+    {
+        var invite = new PartyInviteRequestNetMsg { TargetObjectId = 9, ItemDistribution = 1 };
+        Assert.Equal(9, NetCodec.DecodePartyInviteRequest(NetCodec.EncodePartyInviteRequest(invite)).TargetObjectId);
+
+        var answer = new PartyAnswerJoinRequestNetMsg { RequestorObjectId = 3, Response = 1 };
+        Assert.Equal(1, NetCodec.DecodePartyAnswerJoinRequest(NetCodec.EncodePartyAnswerJoinRequest(answer)).Response);
+
+        Assert.Empty(NetCodec.EncodePartyLeaveRequest());
+        Assert.Equal(7, NetCodec.DecodePartyKickRequest(NetCodec.EncodePartyKickRequest(
+            new PartyKickRequestNetMsg { TargetObjectId = 7 })).TargetObjectId);
+
+        var ask = new PartyAskJoinNetMsg { RequestorObjectId = 2, RequestorName = "Lead", ItemDistribution = 0 };
+        Assert.Equal("Lead", NetCodec.DecodePartyAskJoin(NetCodec.EncodePartyAskJoin(ask)).RequestorName);
+        Assert.Equal(1, NetCodec.DecodePartyJoinResult(NetCodec.EncodePartyJoinResult(
+            new PartyJoinResultNetMsg { Response = 1 })).Response);
+
+        var list = new PartyMemberListNetMsg
+        {
+            LeaderObjectId = 2,
+            PartyId = 5,
+            Members =
+            [
+                new PartyMemberEntryNet
+                {
+                    ObjectId = 2,
+                    Name = "Lead",
+                    ClassId = 0,
+                    Level = 10,
+                    CurHp = 100,
+                    MaxHp = 100,
+                    CurMp = 50,
+                    MaxMp = 50
+                }
+            ]
+        };
+        var again = NetCodec.DecodePartyMemberList(NetCodec.EncodePartyMemberList(list));
+        Assert.Equal(5, again.PartyId);
+        Assert.Equal("Lead", again.Members[0].Name);
+        Assert.Equal(100, again.Members[0].MaxHp);
+    }
+
+    [Fact]
     public void Shop_codec_round_trip()
     {
         var buy = new BuyListNetMsg
