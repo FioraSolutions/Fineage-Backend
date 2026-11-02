@@ -56,6 +56,24 @@ public sealed class NetPresenceHubTests
     }
 
     [Fact]
+    public void Abnormal_status_update_codec_round_trip()
+    {
+        var update = new AbnormalStatusUpdateNetMsg
+        {
+            ObjectId = 7,
+            Effects =
+            [
+                new AbnormalEffectNet { Id = 1204, Value = 1, DurationSeconds = 1200 }
+            ]
+        };
+        var again = NetCodec.DecodeAbnormalStatusUpdate(NetCodec.EncodeAbnormalStatusUpdate(update));
+        Assert.Equal(7, again.ObjectId);
+        Assert.Single(again.Effects);
+        Assert.Equal(1204, again.Effects[0].Id);
+        Assert.Equal(1200, again.Effects[0].DurationSeconds);
+    }
+
+    [Fact]
     public void Revive_and_teleport_codec_round_trip()
     {
         Assert.Equal(0, NetCodec.DecodeReviveRequest(NetCodec.EncodeReviveRequest(new ReviveRequestNetMsg { Action = 0 })).Action);

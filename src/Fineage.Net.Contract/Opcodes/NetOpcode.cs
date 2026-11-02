@@ -51,5 +51,6 @@ namespace Fineage.Net.Contract
         public const ushort ReviveRequest = 0x031E;
         public const ushort Revive = 0x031F;
         public const ushort TeleportToLocation = 0x0320;
+        public const ushort AbnormalStatusUpdate = 0x0321;
     }
 }

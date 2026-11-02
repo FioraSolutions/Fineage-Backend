@@ -826,6 +826,41 @@ namespace Fineage.Net.Contract
             };
         }
 
+        public static byte[] EncodeAbnormalStatusUpdate(AbnormalStatusUpdateNetMsg m) => Write(w =>
+        {
+            w.WriteInt32(m.ObjectId);
+            var effects = m.Effects ?? Array.Empty<AbnormalEffectNet>();
+            w.WriteInt32(effects.Length);
+            for (int i = 0; i < effects.Length; i++)
+            {
+                var e = effects[i] ?? new AbnormalEffectNet();
+                w.WriteInt32(e.Id);
+                w.WriteInt32(e.Value);
+                w.WriteInt32(e.DurationSeconds);
+            }
+        });
+
+        public static AbnormalStatusUpdateNetMsg DecodeAbnormalStatusUpdate(ReadOnlySpan<byte> p)
+        {
+            var r = new Reader(p);
+            int objectId = r.ReadInt32();
+            int n = r.ReadInt32();
+            if (n < 0)
+                n = 0;
+            var effects = new AbnormalEffectNet[n];
+            for (int i = 0; i < n; i++)
+            {
+                effects[i] = new AbnormalEffectNet
+                {
+                    Id = r.ReadInt32(),
+                    Value = r.ReadInt32(),
+                    DurationSeconds = r.ReadInt32()
+                };
+            }
+
+            return new AbnormalStatusUpdateNetMsg { ObjectId = objectId, Effects = effects };
+        }
+
         public static PositionCorrectionMsg DecodePositionCorrection(ReadOnlySpan<byte> p)
         {
             var r = new Reader(p);

@@ -59,6 +59,7 @@ public sealed partial class ZoneWorld
     void FanoutAbnormal(ZoneEntity target, List<Pending> outbound)
     {
         var update = AbnormalFor(target);
+        List<int>? netWatchers = null;
         foreach (var watcher in Players())
         {
             if (watcher.Session == null)
@@ -67,6 +68,30 @@ public sealed partial class ZoneWorld
             if (!cares)
                 continue;
             outbound.Add(Pack(watcher.Session, MsgType.AbnormalStatusUpdate, update));
+            netWatchers ??= [];
+            netWatchers.Add(watcher.ObjectId);
+        }
+
+        if (netWatchers is { Count: > 0 } && NetBridge != null)
+        {
+            var effects = update.Effects ?? [];
+            var netEffects = new Fineage.Net.Contract.AbnormalEffectNet[effects.Length];
+            for (int i = 0; i < effects.Length; i++)
+            {
+                var src = effects[i];
+                netEffects[i] = new Fineage.Net.Contract.AbnormalEffectNet
+                {
+                    Id = src.Id,
+                    Value = src.Value,
+                    DurationSeconds = src.DurationSeconds
+                };
+            }
+
+            NetBridge.FanoutAbnormalStatusUpdate(netWatchers, new Fineage.Net.Contract.AbnormalStatusUpdateNetMsg
+            {
+                ObjectId = update.ObjectId,
+                Effects = netEffects
+            });
         }
     }
 

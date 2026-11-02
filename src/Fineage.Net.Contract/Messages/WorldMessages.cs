@@ -287,4 +287,17 @@ namespace Fineage.Net.Contract
         public int Z { get; set; }
         public int Heading { get; set; }
     }
+
+    public sealed class AbnormalEffectNet
+    {
+        public int Id { get; set; }
+        public int Value { get; set; }
+        public int DurationSeconds { get; set; }
+    }
+
+    public sealed class AbnormalStatusUpdateNetMsg
+    {
+        public int ObjectId { get; set; }
+        public AbnormalEffectNet[] Effects { get; set; } = System.Array.Empty<AbnormalEffectNet>();
+    }
 }
