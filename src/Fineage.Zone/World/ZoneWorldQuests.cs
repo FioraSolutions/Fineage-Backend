@@ -249,22 +249,42 @@ public sealed partial class ZoneWorld
         if (!TryPlayer(session, out var player))
             return;
         var list = _quests.List(player.Quests);
+        var active = list.Active.Select(entry => new QuestJournalEntryMsg
+        {
+            QuestId = entry.QuestId,
+            Name = entry.Name,
+            State = entry.State,
+            Cond = entry.Cond,
+            ProgressFlags = entry.ProgressFlags,
+            JournalWord = entry.JournalWord,
+            Repeatable = entry.Repeatable
+        }).ToArray();
         toSelf.Add(Pack(session, MsgType.QuestList, new QuestListMsg
         {
-            Active = list.Active.Select(entry => new QuestJournalEntryMsg
-            {
-                QuestId = entry.QuestId,
-                Name = entry.Name,
-                State = entry.State,
-                Cond = entry.Cond,
-                ProgressFlags = entry.ProgressFlags,
-                JournalWord = entry.JournalWord,
-                Repeatable = entry.Repeatable
-            }).ToArray(),
+            Active = active,
             CompletedMask = list.CompletedMask,
             CompletedQuestIds = list.CompletedQuestIds,
             MaxActive = list.MaxActive
         }));
+        if (NetBridge != null)
+        {
+            NetBridge.FanoutQuestList([session.ObjectId], new Fineage.Net.Contract.QuestListNetMsg
+            {
+                Active = active.Select(entry => new Fineage.Net.Contract.QuestJournalEntryNet
+                {
+                    QuestId = entry.QuestId,
+                    Name = entry.Name ?? "",
+                    State = entry.State,
+                    Cond = entry.Cond,
+                    ProgressFlags = entry.ProgressFlags,
+                    JournalWord = entry.JournalWord,
+                    Repeatable = entry.Repeatable
+                }).ToArray(),
+                CompletedMask = list.CompletedMask ?? [],
+                CompletedQuestIds = list.CompletedQuestIds ?? [],
+                MaxActive = list.MaxActive
+            });
+        }
     }
 
     void LoadQuestProgress(ZoneSession session, ZoneEntity entity)

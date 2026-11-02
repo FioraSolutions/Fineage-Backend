@@ -66,5 +66,8 @@ namespace Fineage.Net.Contract
         public const ushort WarehouseWithdrawList = 0x032D;
         public const ushort WarehouseDepositRequest = 0x032E;
         public const ushort WarehouseWithdrawRequest = 0x032F;
+        public const ushort RequestQuestList = 0x0330;
+        public const ushort RequestQuestAbort = 0x0331;
+        public const ushort QuestList = 0x0332;
     }
 }

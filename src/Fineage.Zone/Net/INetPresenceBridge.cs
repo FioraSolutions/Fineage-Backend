@@ -58,4 +58,6 @@ interface INetPresenceBridge
     void FanoutWarehouseDepositList(IReadOnlyList<int> watcherObjectIds, WarehouseDepositListNetMsg list);
 
     void FanoutWarehouseWithdrawList(IReadOnlyList<int> watcherObjectIds, WarehouseWithdrawListNetMsg list);
+
+    void FanoutQuestList(IReadOnlyList<int> watcherObjectIds, QuestListNetMsg list);
 }

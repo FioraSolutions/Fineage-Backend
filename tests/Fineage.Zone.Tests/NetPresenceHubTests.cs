@@ -89,6 +89,41 @@ public sealed class NetPresenceHubTests
     }
 
     [Fact]
+    public void Quest_list_codec_round_trip()
+    {
+        var list = new QuestListNetMsg
+        {
+            Active =
+            [
+                new QuestJournalEntryNet
+                {
+                    QuestId = 201,
+                    Name = "Tutor",
+                    State = 1,
+                    Cond = 2,
+                    ProgressFlags = 0,
+                    JournalWord = 2,
+                    Repeatable = false
+                }
+            ],
+            CompletedMask = new byte[128],
+            CompletedQuestIds = [1, 2],
+            MaxActive = 25
+        };
+        list.CompletedMask[0] = 0x03;
+        var again = NetCodec.DecodeQuestList(NetCodec.EncodeQuestList(list));
+        Assert.Equal(201, again.Active[0].QuestId);
+        Assert.Equal("Tutor", again.Active[0].Name);
+        Assert.Equal(2, again.Active[0].JournalWord);
+        Assert.Equal(0x03, again.CompletedMask[0]);
+        Assert.Equal(new[] { 1, 2 }, again.CompletedQuestIds);
+        Assert.Equal(25, again.MaxActive);
+        Assert.Equal(201, NetCodec.DecodeRequestQuestAbort(NetCodec.EncodeRequestQuestAbort(
+            new RequestQuestAbortNetMsg { QuestId = 201 })).QuestId);
+        Assert.Empty(NetCodec.EncodeRequestQuestList());
+    }
+
+    [Fact]
     public void Shop_codec_round_trip()
     {
         var buy = new BuyListNetMsg
