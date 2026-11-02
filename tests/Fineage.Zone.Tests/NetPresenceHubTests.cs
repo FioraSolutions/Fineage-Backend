@@ -56,6 +56,32 @@ public sealed class NetPresenceHubTests
     }
 
     [Fact]
+    public void Die_and_drop_codec_round_trip()
+    {
+        var die = new EntityDieMsg { EntityValue = 9001, EntityGeneration = 1, KillerObjectId = 7 };
+        var dieAgain = NetCodec.DecodeEntityDie(NetCodec.EncodeEntityDie(die));
+        Assert.Equal(9001ul, dieAgain.EntityValue);
+        Assert.Equal(7, dieAgain.KillerObjectId);
+
+        var drop = new DropItemNetMsg
+        {
+            DropperObjectId = 7,
+            EntityValue = 55,
+            EntityGeneration = 1,
+            ItemId = 57,
+            X = 1,
+            Y = 2,
+            Z = 3,
+            Stackable = true,
+            Count = 40
+        };
+        var dropAgain = NetCodec.DecodeDropItem(NetCodec.EncodeDropItem(drop));
+        Assert.Equal(57, dropAgain.ItemId);
+        Assert.Equal(40, dropAgain.Count);
+        Assert.True(dropAgain.Stackable);
+    }
+
+    [Fact]
     public void Attack_and_status_codec_round_trip()
     {
         var attack = new AttackStateMsg

@@ -380,13 +380,26 @@ public sealed partial class ZoneWorld
         npc.AggroTargetId = 0;
         npc.Chasing = false;
         byte[] dieBody = MessagePackSerializer.Serialize(new DieMsg { ObjectId = objectId });
+        List<int>? netWatchers = null;
         foreach (var watcher in watchers)
         {
             if (watcher.Session == null)
                 continue;
             outbound.Add(new Pending(watcher.Session, MsgType.Die, dieBody));
+            netWatchers ??= [];
+            netWatchers.Add(watcher.ObjectId);
             if (watcher.Session.SelectedTargetId == objectId)
                 watcher.Session.AutoAttackTargetId = 0;
+        }
+
+        if (netWatchers is { Count: > 0 } && NetBridge != null)
+        {
+            NetBridge.FanoutDie(netWatchers, new Fineage.Net.Contract.EntityDieMsg
+            {
+                EntityValue = (ulong)(uint)objectId,
+                EntityGeneration = 1,
+                KillerObjectId = killer?.ObjectId ?? 0
+            });
         }
 
         npc.SweepItems.Clear();
@@ -425,14 +438,28 @@ public sealed partial class ZoneWorld
         ScheduleRespawn(objectId);
 
         byte[] deleteBody = MessagePackSerializer.Serialize(new DeleteObjectMsg { ObjectId = objectId });
+        List<int>? netWatchers = null;
         foreach (var player in Players())
         {
             if (player.Session == null)
                 continue;
             if (player.Knownlist.Remove(objectId))
+            {
                 outbound.Add(new Pending(player.Session, MsgType.DeleteObject, deleteBody));
+                netWatchers ??= [];
+                netWatchers.Add(player.ObjectId);
+            }
             if (player.Session.SelectedTargetId == objectId)
                 player.Session.SelectedTargetId = 0;
+        }
+
+        if (netWatchers is { Count: > 0 } && NetBridge != null)
+        {
+            NetBridge.FanoutEntityDespawn(netWatchers, new Fineage.Net.Contract.EntityDespawnMsg
+            {
+                EntityValue = (ulong)(uint)objectId,
+                EntityGeneration = 1
+            });
         }
     }
 

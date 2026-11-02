@@ -199,12 +199,31 @@ public sealed partial class ZoneWorld
             Stackable = template.Stackable,
             Count = count
         });
+        List<int>? netWatchers = null;
         foreach (var watcher in watchers)
         {
             if (watcher.Session == null)
                 continue;
             watcher.Knownlist.Add(objectId);
             outbound.Add(new Pending(watcher.Session, MsgType.DropItem, body));
+            netWatchers ??= [];
+            netWatchers.Add(watcher.ObjectId);
+        }
+
+        if (netWatchers is { Count: > 0 } && NetBridge != null)
+        {
+            NetBridge.FanoutDropItem(netWatchers, new Fineage.Net.Contract.DropItemNetMsg
+            {
+                DropperObjectId = dropperObjectId,
+                EntityValue = (ulong)(uint)objectId,
+                EntityGeneration = 1,
+                ItemId = itemId,
+                X = x,
+                Y = y,
+                Z = z,
+                Stackable = template.Stackable,
+                Count = count
+            });
         }
 
         ZoneLog.Info($"drop object={objectId} item={itemId} count={count} dropper={dropperObjectId} @ {x},{y},{z}");
@@ -217,12 +236,26 @@ public sealed partial class ZoneWorld
         _byId.Remove(objectId);
 
         byte[] deleteBody = MessagePackSerializer.Serialize(new DeleteObjectMsg { ObjectId = objectId });
+        List<int>? netWatchers = null;
         foreach (var player in Players())
         {
             if (player.Session == null)
                 continue;
             if (player.Knownlist.Remove(objectId))
+            {
                 outbound.Add(new Pending(player.Session, MsgType.DeleteObject, deleteBody));
+                netWatchers ??= [];
+                netWatchers.Add(player.ObjectId);
+            }
+        }
+
+        if (netWatchers is { Count: > 0 } && NetBridge != null)
+        {
+            NetBridge.FanoutEntityDespawn(netWatchers, new Fineage.Net.Contract.EntityDespawnMsg
+            {
+                EntityValue = (ulong)(uint)objectId,
+                EntityGeneration = 1
+            });
         }
     }
 }

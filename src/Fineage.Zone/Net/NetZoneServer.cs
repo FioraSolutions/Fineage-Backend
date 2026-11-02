@@ -79,6 +79,27 @@ public sealed class NetZoneServer : INetPresenceBridge
             _ = _presence.SendAsync(watcher, NetOpcode.StatusUpdate, payload, CancellationToken.None);
     }
 
+    void INetPresenceBridge.FanoutDie(IReadOnlyList<int> watcherObjectIds, EntityDieMsg die)
+    {
+        var payload = NetCodec.EncodeEntityDie(die);
+        foreach (int watcher in watcherObjectIds)
+            _ = _presence.SendAsync(watcher, NetOpcode.EntityDie, payload, CancellationToken.None);
+    }
+
+    void INetPresenceBridge.FanoutDropItem(IReadOnlyList<int> watcherObjectIds, DropItemNetMsg drop)
+    {
+        var payload = NetCodec.EncodeDropItem(drop);
+        foreach (int watcher in watcherObjectIds)
+            _ = _presence.SendAsync(watcher, NetOpcode.DropItem, payload, CancellationToken.None);
+    }
+
+    void INetPresenceBridge.FanoutEntityDespawn(IReadOnlyList<int> watcherObjectIds, EntityDespawnMsg despawn)
+    {
+        var payload = NetCodec.EncodeEntityDespawn(despawn);
+        foreach (int watcher in watcherObjectIds)
+            _ = _presence.SendAsync(watcher, NetOpcode.EntityDespawn, payload, CancellationToken.None);
+    }
+
     public async Task HandleAsync(NetConnection conn, CancellationToken ct)
     {
         await using var discard = new MemoryStream();
@@ -306,6 +327,26 @@ public sealed class NetZoneServer : INetPresenceBridge
         foreach (var other in known)
         {
             var otherId = _ids.AllocateOrGet(other.ObjectId);
+            if (other.Kind == ZoneEntityKind.GroundItem)
+            {
+                await conn.SendAsync(
+                    NetOpcode.DropItem,
+                    NetCodec.EncodeDropItem(new DropItemNetMsg
+                    {
+                        DropperObjectId = 0,
+                        EntityValue = otherId.Value,
+                        EntityGeneration = otherId.Generation,
+                        ItemId = other.GroundItemId,
+                        X = other.X,
+                        Y = other.Y,
+                        Z = other.Z,
+                        Stackable = other.GroundStackable,
+                        Count = other.GroundCount
+                    }),
+                    ct: ct).ConfigureAwait(false);
+                continue;
+            }
+
             var remote = NetEnterWorldProjector.BuildPresenceSpawn(other, otherId);
             await conn.SendAsync(NetOpcode.EntitySpawn, NetCodec.EncodeEntitySpawn(remote), ct: ct)
                 .ConfigureAwait(false);
@@ -372,11 +413,30 @@ public sealed class NetZoneServer : INetPresenceBridge
         {
             if (before.Contains(id))
                 continue;
-            if (!_world.TryGetEntityById(id, out var newlySeen) ||
-                newlySeen.Kind == ZoneEntityKind.GroundItem)
+            if (!_world.TryGetEntityById(id, out var newlySeen))
                 continue;
 
             var otherId = _ids.AllocateOrGet(id);
+            if (newlySeen.Kind == ZoneEntityKind.GroundItem)
+            {
+                await conn.SendAsync(
+                    NetOpcode.DropItem,
+                    NetCodec.EncodeDropItem(new DropItemNetMsg
+                    {
+                        DropperObjectId = 0,
+                        EntityValue = otherId.Value,
+                        EntityGeneration = otherId.Generation,
+                        ItemId = newlySeen.GroundItemId,
+                        X = newlySeen.X,
+                        Y = newlySeen.Y,
+                        Z = newlySeen.Z,
+                        Stackable = newlySeen.GroundStackable,
+                        Count = newlySeen.GroundCount
+                    }),
+                    ct: ct).ConfigureAwait(false);
+                continue;
+            }
+
             var spawn = NetCodec.EncodeEntitySpawn(
                 NetEnterWorldProjector.BuildPresenceSpawn(newlySeen, otherId));
             await conn.SendAsync(NetOpcode.EntitySpawn, spawn, ct: ct).ConfigureAwait(false);

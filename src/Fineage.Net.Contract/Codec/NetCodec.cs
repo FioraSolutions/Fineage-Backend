@@ -577,6 +577,54 @@ namespace Fineage.Net.Contract
             };
         }
 
+        public static byte[] EncodeEntityDie(EntityDieMsg m) => Write(w =>
+        {
+            w.WriteUInt64(m.EntityValue);
+            w.WriteUInt32(m.EntityGeneration);
+            w.WriteInt32(m.KillerObjectId);
+        });
+
+        public static EntityDieMsg DecodeEntityDie(ReadOnlySpan<byte> p)
+        {
+            var r = new Reader(p);
+            return new EntityDieMsg
+            {
+                EntityValue = r.ReadUInt64(),
+                EntityGeneration = r.ReadUInt32(),
+                KillerObjectId = r.ReadInt32()
+            };
+        }
+
+        public static byte[] EncodeDropItem(DropItemNetMsg m) => Write(w =>
+        {
+            w.WriteInt32(m.DropperObjectId);
+            w.WriteUInt64(m.EntityValue);
+            w.WriteUInt32(m.EntityGeneration);
+            w.WriteInt32(m.ItemId);
+            w.WriteInt32(m.X);
+            w.WriteInt32(m.Y);
+            w.WriteInt32(m.Z);
+            w.WriteByte(m.Stackable ? (byte)1 : (byte)0);
+            w.WriteInt32(m.Count);
+        });
+
+        public static DropItemNetMsg DecodeDropItem(ReadOnlySpan<byte> p)
+        {
+            var r = new Reader(p);
+            return new DropItemNetMsg
+            {
+                DropperObjectId = r.ReadInt32(),
+                EntityValue = r.ReadUInt64(),
+                EntityGeneration = r.ReadUInt32(),
+                ItemId = r.ReadInt32(),
+                X = r.ReadInt32(),
+                Y = r.ReadInt32(),
+                Z = r.ReadInt32(),
+                Stackable = r.ReadByte() != 0,
+                Count = r.ReadInt32()
+            };
+        }
+
         public static PositionCorrectionMsg DecodePositionCorrection(ReadOnlySpan<byte> p)
         {
             var r = new Reader(p);

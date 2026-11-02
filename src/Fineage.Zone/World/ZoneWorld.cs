@@ -334,7 +334,7 @@ public sealed partial class ZoneWorld
     }
 
     /// <summary>
-    /// All live entities on the session knownlist (players + NPCs). Ground items skipped for Net Phase 1.
+    /// All live entities on the session knownlist (players + NPCs + ground items).
     /// </summary>
     internal List<ZoneEntity> SnapshotKnownEntities(ZoneSession session)
     {
@@ -347,8 +347,6 @@ public sealed partial class ZoneWorld
             foreach (int id in self.Knownlist)
             {
                 if (!_byId.TryGetValue(id, out var other) || other.InstanceId != self.InstanceId)
-                    continue;
-                if (other.Kind == ZoneEntityKind.GroundItem)
                     continue;
                 if (other.Kind == ZoneEntityKind.Player && other.Session is not { InWorld: true })
                     continue;

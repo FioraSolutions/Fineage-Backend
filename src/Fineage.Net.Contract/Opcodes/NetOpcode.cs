@@ -36,5 +36,7 @@ namespace Fineage.Net.Contract
         public const ushort TargetSelected = 0x030F;
         public const ushort AttackState = 0x0310;
         public const ushort StatusUpdate = 0x0311;
+        public const ushort EntityDie = 0x0312;
+        public const ushort DropItem = 0x0313;
     }
 }

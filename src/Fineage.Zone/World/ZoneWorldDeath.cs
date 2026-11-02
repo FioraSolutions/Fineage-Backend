@@ -121,6 +121,7 @@ public sealed partial class ZoneWorld
         };
         byte[] statusBody = MessagePackSerializer.Serialize(status);
 
+        List<int>? netWatchers = null;
         foreach (var watcher in Players())
         {
             if (watcher.Session == null)
@@ -130,6 +131,25 @@ public sealed partial class ZoneWorld
 
             outbound.Add(new Pending(watcher.Session, MsgType.Die, dieBody));
             outbound.Add(new Pending(watcher.Session, MsgType.StatusUpdate, statusBody));
+            netWatchers ??= [];
+            netWatchers.Add(watcher.ObjectId);
+        }
+
+        if (netWatchers is { Count: > 0 } && NetBridge != null)
+        {
+            NetBridge.FanoutDie(netWatchers, new Fineage.Net.Contract.EntityDieMsg
+            {
+                EntityValue = (ulong)(uint)dead.ObjectId,
+                EntityGeneration = 1,
+                KillerObjectId = killerObjectId
+            });
+            NetBridge.FanoutStatusUpdate(netWatchers, new Fineage.Net.Contract.StatusUpdateNetMsg
+            {
+                EntityValue = (ulong)(uint)dead.ObjectId,
+                EntityGeneration = 1,
+                AttributeIds = status.AttributeIds ?? [],
+                Values = status.Values ?? []
+            });
         }
     }
 

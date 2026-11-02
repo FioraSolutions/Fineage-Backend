@@ -170,4 +170,24 @@ namespace Fineage.Net.Contract
         public int[] AttributeIds { get; set; } = System.Array.Empty<int>();
         public int[] Values { get; set; } = System.Array.Empty<int>();
     }
+
+    public sealed class EntityDieMsg
+    {
+        public ulong EntityValue { get; set; }
+        public uint EntityGeneration { get; set; }
+        public int KillerObjectId { get; set; }
+    }
+
+    public sealed class DropItemNetMsg
+    {
+        public int DropperObjectId { get; set; }
+        public ulong EntityValue { get; set; }
+        public uint EntityGeneration { get; set; }
+        public int ItemId { get; set; }
+        public int X { get; set; }
+        public int Y { get; set; }
+        public int Z { get; set; }
+        public bool Stackable { get; set; }
+        public int Count { get; set; } = 1;
+    }
 }
