@@ -6,7 +6,7 @@ namespace Fineage.Zone.World;
 /// <summary>Player physical/magic stats after Mobius base-stat, level, weapon and armor functions.</summary>
 public readonly record struct PlayerCombatStats(
     int PAtk, int MAtk, int PDef, int MDef, int PAtkSpd, int MAtkSpd, int Accuracy, int CritRate,
-    int AttackRange, WeaponType Weapon);
+    int AttackRange, WeaponType Weapon, int Evasion = 0, int RandomDamage = ZoneCombat.DefaultPlayerRandomDamage);
 
 public sealed partial class ZoneWorld
 {
@@ -80,8 +80,15 @@ public sealed partial class ZoneWorld
             Accuracy: (int)(Math.Sqrt(t.Dex) * 6 + level),
             CritRate: (int)(crit * dex * 10),
             AttackRange: range,
-            Weapon: armed ? weapon!.WeaponType : WeaponType.None);
+            Weapon: armed ? weapon!.WeaponType : WeaponType.None,
+            Evasion: (int)ZoneCombat.AccuracyOrEvasion(0, t.Dex, level),
+            RandomDamage: armed && weapon!.RandomDamage > 0 ? weapon.RandomDamage : ZoneCombat.DefaultPlayerRandomDamage);
     }
+
+    double NpcAccuracy(ZoneEntity npc) => ZoneCombat.AccuracyOrEvasion(npc.BaseAccuracy, npc.Dex, npc.Level);
+    double NpcEvasion(ZoneEntity npc) => ZoneCombat.AccuracyOrEvasion(npc.BaseEvasion, npc.Dex, npc.Level);
+    int NpcCritPermille(ZoneEntity npc) =>
+        (int)(npc.BaseCritical * 10 * SafeBonus(PlayerClasses.StatBonuses, StatSlot.Dex, npc.Dex));
 
     static double SafeBonus(StatBonusTable table, StatSlot slot, int value)
     {

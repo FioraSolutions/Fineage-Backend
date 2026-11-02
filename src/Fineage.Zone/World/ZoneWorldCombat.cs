@@ -128,13 +128,16 @@ public sealed partial class ZoneWorld
             return approachMs < 0 ? "attack" : null;
         }
 
-        int damage = ZoneCombat.PhysicalDamage(PlayerPAtk(player), NpcPDef(target));
+        var ps = PlayerStats(player);
+        var (damage, flags) = ZoneCombat.RollMelee(_combatRandom, ps.PAtk, NpcPDef(target),
+            ps.Accuracy, NpcEvasion(target), ps.CritRate, ps.RandomDamage);
 
         var attack = new AttackMsg
         {
             AttackerObjectId = player.ObjectId,
             TargetObjectId = targetId,
             Damage = damage,
+            Flags = flags,
             AttackerX = player.X,
             AttackerY = player.Y,
             AttackerZ = player.Z,
@@ -169,8 +172,14 @@ public sealed partial class ZoneWorld
 
     static int NpcPAtkSpd(ZoneEntity npc) => npc.PAtkSpd > 0 ? npc.PAtkSpd : ZoneCombat.DefaultNpcPAtkSpd;
 
-    int NpcMeleeDamage(ZoneEntity npc, ZoneEntity player) =>
-        npc.PAtk > 0 ? ZoneCombat.PhysicalDamage(npc.PAtk, PlayerPDef(player)) : ZoneCombat.MobMeleeDamage(npc.Level);
+    (int Damage, byte Flags) NpcMeleeRoll(ZoneEntity npc, ZoneEntity player)
+    {
+        if (npc.PAtk <= 0)
+            return (ZoneCombat.MobMeleeDamage(npc.Level), 0);
+        var ps = PlayerStats(player);
+        return ZoneCombat.RollMelee(_combatRandom, npc.PAtk, ps.PDef, NpcAccuracy(npc), ps.Evasion,
+            NpcCritPermille(npc), npc.RandomDamage);
+    }
 
     Task? _combatLoop;
 
@@ -335,6 +344,16 @@ public sealed partial class ZoneWorld
         int reach = (attacker.Kind == ZoneEntityKind.Npc ? ZoneCombat.MobMeleeRange : PlayerReach(attacker)) + ZoneCombat.HitRangeTolerance;
         if (!ZoneCombat.Within(attacker.X, attacker.Y, target.X, target.Y, reach))
             return;
+
+        if (hit.Damage <= 0)
+        {
+            // Miss (Attack carried HitFlagMiss): no HP change / StatusUpdate, but the fight and hate still start.
+            attacker.CombatUntilUnixMs = now + ClanProtocol.CombatStanceMillis;
+            target.CombatUntilUnixMs = now + ClanProtocol.CombatStanceMillis;
+            if (target.Kind == ZoneEntityKind.Npc)
+                AddHate(target, attacker);
+            return;
+        }
 
         target.CurHp = Math.Max(0, target.CurHp - hit.Damage);
 

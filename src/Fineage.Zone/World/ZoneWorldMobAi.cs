@@ -106,7 +106,7 @@ public sealed partial class ZoneWorld
             int npcAtkMs = ZoneCombat.AttackTimeMs(NpcPAtkSpd(npc));
             npc.NextMobAttackMs = now + npcAtkMs;
 
-            int damage = NpcMeleeDamage(npc, player);
+            var (damage, flags) = NpcMeleeRoll(npc, player);
             player.CombatUntilUnixMs = now + ClanProtocol.CombatStanceMillis;
 
             var attack = new AttackMsg
@@ -114,6 +114,7 @@ public sealed partial class ZoneWorld
                 AttackerObjectId = npc.ObjectId,
                 TargetObjectId = player.ObjectId,
                 Damage = damage,
+                Flags = flags,
                 AttackerX = npc.X, AttackerY = npc.Y, AttackerZ = npc.Z,
                 TargetX = player.X, TargetY = player.Y, TargetZ = player.Z
             };

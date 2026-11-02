@@ -27,7 +27,12 @@ public sealed record NpcTemplate(
     double PAtk = 0,
     double PDef = 0,
     int AttackSpeed = 0,
-    int AttackRange = 0);
+    int AttackRange = 0,
+    double Accuracy = 0,
+    double Evasion = 0,
+    int Critical = 0,
+    int RandomDamage = 0,
+    int Dex = 30);
 
 /// <summary>Loads <c>data/npcs.json</c>.</summary>
 public sealed class NpcCatalog
@@ -141,7 +146,12 @@ public sealed class NpcCatalog
                 Math.Max(0, row.PAtk),
                 Math.Max(0, row.PDef),
                 Math.Max(0, row.AttackSpeed),
-                Math.Max(0, row.AttackRange)));
+                Math.Max(0, row.AttackRange),
+                row.Accuracy,
+                row.Evasion,
+                Math.Max(0, row.Critical),
+                Math.Max(0, row.RandomDamage),
+                row.Dex > 0 ? row.Dex : 30));
         }
 
         return new NpcCatalog(byId);
@@ -177,5 +187,14 @@ public sealed class NpcCatalog
         public int AttackSpeed { get; set; }
         /// <summary>Mobius <c>stats/attack range</c>.</summary>
         public int AttackRange { get; set; }
+        /// <summary>Mobius <c>attack accuracy</c> base (sqrt(DEX)*6 + level added at runtime).</summary>
+        public double Accuracy { get; set; }
+        /// <summary>Mobius <c>defence evasion</c> base.</summary>
+        public double Evasion { get; set; }
+        /// <summary>Mobius <c>attack critical</c> base rate (×10 × DEX bonus).</summary>
+        public int Critical { get; set; }
+        /// <summary>Mobius <c>attack random</c> damage spread in percent.</summary>
+        public int RandomDamage { get; set; }
+        public int Dex { get; set; }
     }
 }

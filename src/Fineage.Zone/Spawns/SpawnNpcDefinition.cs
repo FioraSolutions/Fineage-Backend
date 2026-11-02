@@ -26,7 +26,12 @@ public sealed record SpawnNpcDefinition(
     int Sp = 0,
     double PAtk = 0,
     double PDef = 0,
-    int AttackSpeed = 0);
+    int AttackSpeed = 0,
+    double Accuracy = 0,
+    double Evasion = 0,
+    int Critical = 0,
+    int RandomDamage = 0,
+    int Dex = 30);
 
 public sealed record SpawnMapDefinition(
     string MapId,

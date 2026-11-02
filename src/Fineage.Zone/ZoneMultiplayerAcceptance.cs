@@ -171,8 +171,15 @@ public static class ZoneMultiplayerAcceptance
         {
             await attacker.SendAsync(MsgType.AttackRequest, new AttackRequestMsg()).ConfigureAwait(false);
             var atkLeft = await attacker.ExpectAsync<AttackMsg>(MsgType.Attack).ConfigureAwait(false);
-            var hpLeft = await attacker.ExpectStatusForAsync(gremlin.ObjectId).ConfigureAwait(false);
             var atkRight = await observer.ExpectAsync<AttackMsg>(MsgType.Attack).ConfigureAwait(false);
+            // Mobius calcHitMiss: a miss carries flag 0x80, damage 0 and no StatusUpdate.
+            if (atkLeft.Flags == ZoneCombat.HitFlagMiss)
+            {
+                if (atkLeft.Damage != 0 || atkRight.Flags != ZoneCombat.HitFlagMiss)
+                    throw new InvalidOperationException($"miss mismatch d={atkLeft.Damage} f={atkRight.Flags}");
+                continue;
+            }
+            var hpLeft = await attacker.ExpectStatusForAsync(gremlin.ObjectId).ConfigureAwait(false);
             var hpRight = await observer.ExpectStatusForAsync(gremlin.ObjectId).ConfigureAwait(false);
 
             expectedHp = Math.Max(0, expectedHp - atkLeft.Damage);
@@ -234,7 +241,12 @@ public static class ZoneMultiplayerAcceptance
         for (int hp = TalkingIsland.GremlinMaxHp; hp > 0;)
         {
             await left.SendAsync(MsgType.AttackRequest, new AttackRequestMsg()).ConfigureAwait(false);
-            _ = await left.ExpectAsync<AttackMsg>(MsgType.Attack).ConfigureAwait(false);
+            var swing = await left.ExpectAsync<AttackMsg>(MsgType.Attack).ConfigureAwait(false);
+            if (swing.Flags == ZoneCombat.HitFlagMiss)
+            {
+                _ = await right.ExpectAsync<AttackMsg>(MsgType.Attack).ConfigureAwait(false);
+                continue;
+            }
             hp = (await left.ExpectStatusForAsync(gremlin.ObjectId).ConfigureAwait(false)).Values[0];
             _ = await right.ExpectAsync<AttackMsg>(MsgType.Attack).ConfigureAwait(false);
             _ = await right.ExpectStatusForAsync(gremlin.ObjectId).ConfigureAwait(false);
@@ -291,7 +303,12 @@ public static class ZoneMultiplayerAcceptance
         for (int hp = TalkingIsland.GremlinMaxHp; hp > 0;)
         {
             await peer.SendAsync(MsgType.AttackRequest, new AttackRequestMsg()).ConfigureAwait(false);
-            _ = await peer.ExpectAsync<AttackMsg>(MsgType.Attack).ConfigureAwait(false);
+            var swing = await peer.ExpectAsync<AttackMsg>(MsgType.Attack).ConfigureAwait(false);
+            if (swing.Flags == ZoneCombat.HitFlagMiss)
+            {
+                
+                continue;
+            }
             hp = (await peer.ExpectStatusForAsync(gremlin.ObjectId).ConfigureAwait(false)).Values[0];
         }
 

@@ -78,6 +78,12 @@ sealed class ZoneEntity
     public double PDef { get; init; }
     /// <summary>NPC Mobius attack speed (Pspd, 0 = default 253).</summary>
     public int PAtkSpd { get; init; }
+    /// <summary>NPC Mobius base accuracy / evasion / crit / random spread / DEX (players use the class template).</summary>
+    public double BaseAccuracy { get; init; }
+    public double BaseEvasion { get; init; }
+    public int BaseCritical { get; init; }
+    public int RandomDamage { get; init; }
+    public int Dex { get; init; } = 30;
     public float RunSpeed { get; init; }
     public float WalkSpeed { get; init; }
     public bool Running { get; set; } = true;
@@ -195,6 +201,8 @@ public sealed partial class ZoneWorld
     readonly ItemWeights _weights;
     readonly int _teleportOffset;
     readonly Random _serviceRandom;
+    /// <summary>Hit/miss, crit and damage spread rolls (Mobius Rnd in Formulas).</summary>
+    readonly Random _combatRandom;
     readonly BuyListCatalog _buyLists;
     readonly MultiSellCatalog _multisells;
     readonly ShopStock _shopStock;
@@ -249,8 +257,10 @@ public sealed partial class ZoneWorld
         Random? serviceRandom = null,
         BuyListCatalog? buyLists = null,
         MultiSellCatalog? multisells = null,
-        GeoEngine? geo = null)
+        GeoEngine? geo = null,
+        Random? combatRandom = null)
     {
+        _combatRandom = combatRandom ?? Random.Shared;
         _aoi = aoi ?? new SingleCellAoi();
         _game = game ?? GameData.LoadDefault();
         _itemIds = itemIds ?? new ItemObjectIdAllocator();

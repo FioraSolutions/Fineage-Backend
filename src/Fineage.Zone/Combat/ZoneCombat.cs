@@ -80,6 +80,40 @@ public static class ZoneCombat
     /// <summary>
     /// Mobius <c>Formulas.calcPhysDam</c> core (no crit/shots/random/elements yet): 70 * pAtk / pDef, min 1.
     /// </summary>
+    /// <summary>Interlude Attack hit flags (client Hit.cs): 0x20 crit, 0x80 miss.</summary>
+    public const byte HitFlagCrit = 0x20;
+    public const byte HitFlagMiss = 0x80;
+    /// <summary>Mobius crit rate cap (MAX_PCRIT_RATE 500 ‰).</summary>
+    public const int MaxCritPermille = 500;
+    /// <summary>Mobius <c>baseRndDam</c> for every player template (fists / weapons without random_damage).</summary>
+    public const int DefaultPlayerRandomDamage = 10;
+
+    /// <summary>Mobius <c>Formulas.calcHitMiss</c>: (80 + 2·(acc − eva))·10 ‰, clamped 200..980.</summary>
+    public static int HitChancePermille(double accuracy, double evasion) =>
+        Math.Clamp((int)((80 + 2 * (accuracy - evasion)) * 10), 200, 980);
+
+    /// <summary>Mobius FuncAtkAccuracy / FuncAtkEvasion: base + sqrt(DEX)·6 + level.</summary>
+    public static double AccuracyOrEvasion(double baseValue, int dex, int level) =>
+        baseValue + Math.Sqrt(Math.Max(0, dex)) * 6 + Math.Max(1, level);
+
+    /// <summary>
+    /// One melee swing (Mobius doAttack → calcHitMiss, calcCrit, calcPhysDam): miss → (0, Miss);
+    /// crit doubles; damage × (1 + Rnd[−random, random] / 100).
+    /// </summary>
+    public static (int Damage, byte Flags) RollMelee(Random rnd, double pAtk, double pDef, double accuracy, double evasion,
+        int critPermille, int randomPercent)
+    {
+        if (rnd.Next(1000) >= HitChancePermille(accuracy, evasion))
+            return (0, HitFlagMiss);
+        bool crit = Math.Clamp(critPermille, 0, MaxCritPermille) > rnd.Next(1000);
+        double damage = 70d * Math.Max(0d, pAtk) / Math.Max(1d, pDef);
+        if (crit)
+            damage *= 2;
+        if (randomPercent > 0)
+            damage *= 1 + rnd.Next(-randomPercent, randomPercent + 1) / 100d;
+        return (Math.Max(1, (int)damage), crit ? HitFlagCrit : (byte)0);
+    }
+
     public static int PhysicalDamage(double pAtk, double pDef) =>
         Math.Max(1, (int)(70d * Math.Max(0d, pAtk) / Math.Max(1d, pDef)));
 
