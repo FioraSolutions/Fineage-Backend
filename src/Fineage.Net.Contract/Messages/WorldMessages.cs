@@ -251,4 +251,21 @@ namespace Fineage.Net.Contract
         public string Text { get; set; } = "";
         public string[] Params { get; set; } = System.Array.Empty<string>();
     }
+
+    public sealed class UseSkillNetMsg
+    {
+        public int SkillId { get; set; }
+        public int TargetObjectId { get; set; }
+        public bool CtrlPressed { get; set; }
+    }
+
+    public sealed class MagicSkillUseNetMsg
+    {
+        public int CasterObjectId { get; set; }
+        public int TargetObjectId { get; set; }
+        public int SkillId { get; set; }
+        public int SkillLevel { get; set; }
+        public int HitTimeMs { get; set; }
+        public int ReuseDelayMs { get; set; }
+    }
 }

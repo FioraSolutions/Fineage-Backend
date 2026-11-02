@@ -46,5 +46,7 @@ namespace Fineage.Net.Contract
         public const ushort Say = 0x0319;
         public const ushort CreatureSay = 0x031A;
         public const ushort SystemMessage = 0x031B;
+        public const ushort UseSkill = 0x031C;
+        public const ushort MagicSkillUse = 0x031D;
     }
 }

@@ -122,6 +122,13 @@ public sealed class NetZoneServer : INetPresenceBridge
             _ = _presence.SendAsync(watcher, NetOpcode.SystemMessage, payload, CancellationToken.None);
     }
 
+    void INetPresenceBridge.FanoutMagicSkillUse(IReadOnlyList<int> watcherObjectIds, MagicSkillUseNetMsg cast)
+    {
+        var payload = NetCodec.EncodeMagicSkillUse(cast);
+        foreach (int watcher in watcherObjectIds)
+            _ = _presence.SendAsync(watcher, NetOpcode.MagicSkillUse, payload, CancellationToken.None);
+    }
+
     public async Task HandleAsync(NetConnection conn, CancellationToken ct)
     {
         await using var discard = new MemoryStream();
@@ -177,6 +184,9 @@ public sealed class NetZoneServer : INetPresenceBridge
                             break;
                         case NetOpcode.Say:
                             await OnSayAsync(conn, zoneSession, envelope, ct).ConfigureAwait(false);
+                            break;
+                        case NetOpcode.UseSkill:
+                            await OnUseSkillAsync(conn, zoneSession, envelope, ct).ConfigureAwait(false);
                             break;
                         case NetOpcode.StopMove:
                             // Authoritative stop: correct to current session position.
@@ -701,6 +711,33 @@ public sealed class NetZoneServer : INetPresenceBridge
             ct).ConfigureAwait(false);
         if (error != null)
             await RejectAsync(conn, error, "Say failed.", ct).ConfigureAwait(false);
+    }
+
+    async Task OnUseSkillAsync(
+        NetConnection conn,
+        ZoneSession zoneSession,
+        PacketEnvelope envelope,
+        CancellationToken ct)
+    {
+        RequireHello(conn);
+        if (!zoneSession.Bound || !zoneSession.InWorld)
+        {
+            await RejectAsync(conn, "not_in_world", "Enter world first.", ct).ConfigureAwait(false);
+            return;
+        }
+
+        var use = NetCodec.DecodeUseSkill(envelope.Payload);
+        string? error = await _world.TrySkillUseAsync(
+            zoneSession,
+            new SkillUseRequestMsg
+            {
+                SkillId = use.SkillId,
+                TargetObjectId = use.TargetObjectId,
+                CtrlPressed = use.CtrlPressed
+            },
+            ct).ConfigureAwait(false);
+        if (error != null)
+            await RejectAsync(conn, error, "UseSkill failed.", ct).ConfigureAwait(false);
     }
 
     static void RequireHello(NetConnection conn)

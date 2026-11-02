@@ -56,6 +56,30 @@ public sealed class NetPresenceHubTests
     }
 
     [Fact]
+    public void Use_skill_and_magic_skill_use_codec_round_trip()
+    {
+        var use = new UseSkillNetMsg { SkillId = 1147, TargetObjectId = 9, CtrlPressed = true };
+        var useAgain = NetCodec.DecodeUseSkill(NetCodec.EncodeUseSkill(use));
+        Assert.Equal(1147, useAgain.SkillId);
+        Assert.Equal(9, useAgain.TargetObjectId);
+        Assert.True(useAgain.CtrlPressed);
+
+        var cast = new MagicSkillUseNetMsg
+        {
+            CasterObjectId = 1,
+            TargetObjectId = 9,
+            SkillId = 1147,
+            SkillLevel = 1,
+            HitTimeMs = 1200,
+            ReuseDelayMs = 3000
+        };
+        var castAgain = NetCodec.DecodeMagicSkillUse(NetCodec.EncodeMagicSkillUse(cast));
+        Assert.Equal(1147, castAgain.SkillId);
+        Assert.Equal(1200, castAgain.HitTimeMs);
+        Assert.Equal(3000, castAgain.ReuseDelayMs);
+    }
+
+    [Fact]
     public void Say_and_system_message_codec_round_trip()
     {
         var say = new SayNetMsg { Text = "hi", ChatType = 1 };

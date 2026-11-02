@@ -313,6 +313,7 @@ public sealed partial class ZoneWorld
         byte[]? targetBody = targetStatus == null ? null : MessagePackSerializer.Serialize(targetStatus);
         byte[] mpBody = MessagePackSerializer.Serialize(casterMp);
 
+        List<int>? netWatchers = null;
         foreach (var watcher in Players())
         {
             if (watcher.Session == null)
@@ -328,6 +329,39 @@ public sealed partial class ZoneWorld
                 outbound.Add(new Pending(watcher.Session, MsgType.StatusUpdate, targetBody));
             if (ReferenceEquals(watcher, caster))
                 outbound.Add(new Pending(watcher.Session, MsgType.StatusUpdate, mpBody));
+            netWatchers ??= [];
+            netWatchers.Add(watcher.ObjectId);
+        }
+
+        if (netWatchers is { Count: > 0 } && NetBridge != null)
+        {
+            NetBridge.FanoutMagicSkillUse(netWatchers, new Fineage.Net.Contract.MagicSkillUseNetMsg
+            {
+                CasterObjectId = cast.CasterObjectId,
+                TargetObjectId = cast.TargetObjectId,
+                SkillId = cast.SkillId,
+                SkillLevel = cast.SkillLevel,
+                HitTimeMs = cast.HitTimeMs,
+                ReuseDelayMs = cast.ReuseDelayMs
+            });
+            if (targetStatus != null)
+            {
+                NetBridge.FanoutStatusUpdate(netWatchers, new Fineage.Net.Contract.StatusUpdateNetMsg
+                {
+                    EntityValue = (ulong)(uint)targetStatus.ObjectId,
+                    EntityGeneration = 1,
+                    AttributeIds = targetStatus.AttributeIds ?? [],
+                    Values = targetStatus.Values ?? []
+                });
+            }
+
+            NetBridge.FanoutStatusUpdate([caster.ObjectId], new Fineage.Net.Contract.StatusUpdateNetMsg
+            {
+                EntityValue = (ulong)(uint)casterMp.ObjectId,
+                EntityGeneration = 1,
+                AttributeIds = casterMp.AttributeIds ?? [],
+                Values = casterMp.Values ?? []
+            });
         }
     }
 }

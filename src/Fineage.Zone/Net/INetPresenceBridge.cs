@@ -34,4 +34,6 @@ interface INetPresenceBridge
     void FanoutCreatureSay(IReadOnlyList<int> watcherObjectIds, CreatureSayNetMsg say);
 
     void FanoutSystemMessage(IReadOnlyList<int> watcherObjectIds, SystemMessageNetMsg message);
+
+    void FanoutMagicSkillUse(IReadOnlyList<int> watcherObjectIds, MagicSkillUseNetMsg cast);
 }

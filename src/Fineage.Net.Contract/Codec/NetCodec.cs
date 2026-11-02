@@ -754,6 +754,48 @@ namespace Fineage.Net.Contract
             return new SystemMessageNetMsg { Id = id, Text = text, Params = pars };
         }
 
+        public static byte[] EncodeUseSkill(UseSkillNetMsg m) => Write(w =>
+        {
+            w.WriteInt32(m.SkillId);
+            w.WriteInt32(m.TargetObjectId);
+            w.WriteByte(m.CtrlPressed ? (byte)1 : (byte)0);
+        });
+
+        public static UseSkillNetMsg DecodeUseSkill(ReadOnlySpan<byte> p)
+        {
+            var r = new Reader(p);
+            return new UseSkillNetMsg
+            {
+                SkillId = r.ReadInt32(),
+                TargetObjectId = r.ReadInt32(),
+                CtrlPressed = r.ReadByte() != 0
+            };
+        }
+
+        public static byte[] EncodeMagicSkillUse(MagicSkillUseNetMsg m) => Write(w =>
+        {
+            w.WriteInt32(m.CasterObjectId);
+            w.WriteInt32(m.TargetObjectId);
+            w.WriteInt32(m.SkillId);
+            w.WriteInt32(m.SkillLevel);
+            w.WriteInt32(m.HitTimeMs);
+            w.WriteInt32(m.ReuseDelayMs);
+        });
+
+        public static MagicSkillUseNetMsg DecodeMagicSkillUse(ReadOnlySpan<byte> p)
+        {
+            var r = new Reader(p);
+            return new MagicSkillUseNetMsg
+            {
+                CasterObjectId = r.ReadInt32(),
+                TargetObjectId = r.ReadInt32(),
+                SkillId = r.ReadInt32(),
+                SkillLevel = r.ReadInt32(),
+                HitTimeMs = r.ReadInt32(),
+                ReuseDelayMs = r.ReadInt32()
+            };
+        }
+
         public static PositionCorrectionMsg DecodePositionCorrection(ReadOnlySpan<byte> p)
         {
             var r = new Reader(p);
