@@ -73,8 +73,11 @@ public sealed partial class ZoneWorld
 
         player.Shop = new ShopSession { NpcObjectId = npc.ObjectId, BuyListId = listId, SellOpen = player.Shop?.SellOpen ?? false };
         Tax(npc, out int baseTax, out int castleTax, out _);
-        toSelf.Add(Pack(session, MsgType.BuyList, BuyList(npc, list, baseTax, castleTax)));
-        toSelf.Add(Pack(session, MsgType.ShopBalance, Balance(player, npc)));
+        var buy = BuyList(npc, list, baseTax, castleTax);
+        var balance = Balance(player, npc);
+        toSelf.Add(Pack(session, MsgType.BuyList, buy));
+        toSelf.Add(Pack(session, MsgType.ShopBalance, balance));
+        FanNetBuy(session, buy, balance);
         return null;
     }
 
@@ -91,8 +94,11 @@ public sealed partial class ZoneWorld
             shop = new ShopSession { NpcObjectId = npc.ObjectId };
         shop.SellOpen = true;
         player.Shop = shop;
-        toSelf.Add(Pack(session, MsgType.SellList, SellList(npc, player)));
-        toSelf.Add(Pack(session, MsgType.ShopBalance, Balance(player, npc)));
+        var sell = SellList(npc, player);
+        var balance = Balance(player, npc);
+        toSelf.Add(Pack(session, MsgType.SellList, sell));
+        toSelf.Add(Pack(session, MsgType.ShopBalance, balance));
+        FanNetSell(session, sell, balance);
         return null;
     }
 
@@ -108,8 +114,11 @@ public sealed partial class ZoneWorld
         bool applyTax = list.ApplyTaxes && npc.MerchantCastleId > 0 && owned;
         var prepared = ShopTrade.Prepare(list, player.Inventory!, _game.Items, inventoryOnly, applyTax, castleTax);
         player.Shop = new ShopSession { NpcObjectId = npc.ObjectId, Multi = prepared, SellOpen = player.Shop?.SellOpen ?? false, BuyListId = player.Shop?.BuyListId ?? 0 };
-        toSelf.Add(Pack(session, MsgType.MultiSellList, MultiList(npc, prepared, castleTax)));
-        toSelf.Add(Pack(session, MsgType.ShopBalance, Balance(player, npc)));
+        var multi = MultiList(npc, prepared, castleTax);
+        var balance = Balance(player, npc);
+        toSelf.Add(Pack(session, MsgType.MultiSellList, multi));
+        toSelf.Add(Pack(session, MsgType.ShopBalance, balance));
+        FanNetMulti(session, multi, balance);
         return null;
     }
 
@@ -148,8 +157,11 @@ public sealed partial class ZoneWorld
 
         SendTouches(session, mutation, toSelf);
         SendComplete(session, toSelf);
-        toSelf.Add(Pack(session, MsgType.BuyList, BuyList(npc, list, baseTax, castleTax)));
-        toSelf.Add(Pack(session, MsgType.ShopBalance, Balance(player, npc)));
+        var buy = BuyList(npc, list, baseTax, castleTax);
+        var balance = Balance(player, npc);
+        toSelf.Add(Pack(session, MsgType.BuyList, buy));
+        toSelf.Add(Pack(session, MsgType.ShopBalance, balance));
+        FanNetBuy(session, buy, balance);
         SaveInventory(session, player.Inventory);
         return null;
     }
@@ -178,8 +190,11 @@ public sealed partial class ZoneWorld
 
         SendTouches(session, mutation, toSelf);
         SendComplete(session, toSelf);
-        toSelf.Add(Pack(session, MsgType.SellList, SellList(npc, player)));
-        toSelf.Add(Pack(session, MsgType.ShopBalance, Balance(player, npc)));
+        var sell = SellList(npc, player);
+        var balance = Balance(player, npc);
+        toSelf.Add(Pack(session, MsgType.SellList, sell));
+        toSelf.Add(Pack(session, MsgType.ShopBalance, balance));
+        FanNetSell(session, sell, balance);
         SaveInventory(session, player.Inventory);
         return null;
     }
@@ -211,16 +226,23 @@ public sealed partial class ZoneWorld
 
         SendTouches(session, mutation, toSelf);
         SendComplete(session, toSelf);
+        MultiSellListMsg? multi = null;
         if (player.Shop.Multi.InventoryOnly && _multisells.TryGet(request.ListId, out var list))
         {
             Tax(npc, out _, out int castleTax, out bool owned);
             bool applyTax = list.ApplyTaxes && npc.MerchantCastleId > 0 && owned;
             var prepared = ShopTrade.Prepare(list, player.Inventory, _game.Items, true, applyTax, castleTax);
             player.Shop.Multi = prepared;
-            toSelf.Add(Pack(session, MsgType.MultiSellList, MultiList(npc, prepared, castleTax)));
+            multi = MultiList(npc, prepared, castleTax);
+            toSelf.Add(Pack(session, MsgType.MultiSellList, multi));
         }
 
-        toSelf.Add(Pack(session, MsgType.ShopBalance, Balance(player, npc)));
+        var balance = Balance(player, npc);
+        toSelf.Add(Pack(session, MsgType.ShopBalance, balance));
+        if (multi != null)
+            FanNetMulti(session, multi, balance);
+        else if (NetBridge != null)
+            NetBridge.FanoutShopBalance([session.ObjectId], ToNetBalance(balance));
         SaveInventory(session, player.Inventory);
         return null;
     }
@@ -395,7 +417,7 @@ public sealed partial class ZoneWorld
         };
     }
 
-    static void SendTouches(ZoneSession session, ShopMutation mutation, List<Pending> toSelf)
+    void SendTouches(ZoneSession session, ShopMutation mutation, List<Pending> toSelf)
     {
         if (mutation.Touches.Count == 0)
             return;
@@ -412,13 +434,20 @@ public sealed partial class ZoneWorld
             changes[i] = InventoryMessages.ChangeRow(kind, touch.Item);
         }
 
-        toSelf.Add(Pack(session, MsgType.InventoryUpdate, new InventoryUpdateMsg { Changes = changes }));
+        var invUpdate = new InventoryUpdateMsg { Changes = changes };
+        toSelf.Add(Pack(session, MsgType.InventoryUpdate, invUpdate));
+        if (NetBridge != null)
+            NetBridge.FanoutInventoryUpdate([session.ObjectId], ToNetInventoryUpdate(invUpdate));
     }
 
-    static void SendComplete(ZoneSession session, List<Pending> toSelf) =>
-        toSelf.Add(Pack(session, MsgType.SystemMessage, Line(ShopProtocol.TransactionComplete, ShopProtocol.TransactionCompleteText)));
+    void SendComplete(ZoneSession session, List<Pending> toSelf)
+    {
+        var message = Line(ShopProtocol.TransactionComplete, ShopProtocol.TransactionCompleteText);
+        toSelf.Add(Pack(session, MsgType.SystemMessage, message));
+        FanNetSystem(session, message);
+    }
 
-    static void SendDeny(ZoneSession session, ShopMutation mutation, List<Pending> toSelf)
+    void SendDeny(ZoneSession session, ShopMutation mutation, List<Pending> toSelf)
     {
         SystemMessageMsg message = mutation.Deny switch
         {
@@ -437,7 +466,143 @@ public sealed partial class ZoneWorld
             _ => Line(ShopProtocol.NotTradable, ShopProtocol.NotTradableText)
         };
         toSelf.Add(Pack(session, MsgType.SystemMessage, message));
+        FanNetSystem(session, message);
     }
 
     static SystemMessageMsg Line(int id, string text) => new() { Id = id, Params = [], Text = text };
+
+    void FanNetBuy(ZoneSession session, BuyListMsg buy, ShopBalanceMsg balance)
+    {
+        if (NetBridge == null)
+            return;
+        int[] self = [session.ObjectId];
+        NetBridge.FanoutBuyList(self, ToNetBuy(buy));
+        NetBridge.FanoutShopBalance(self, ToNetBalance(balance));
+    }
+
+    void FanNetSell(ZoneSession session, SellListMsg sell, ShopBalanceMsg balance)
+    {
+        if (NetBridge == null)
+            return;
+        int[] self = [session.ObjectId];
+        NetBridge.FanoutSellList(self, ToNetSell(sell));
+        NetBridge.FanoutShopBalance(self, ToNetBalance(balance));
+    }
+
+    void FanNetMulti(ZoneSession session, MultiSellListMsg multi, ShopBalanceMsg balance)
+    {
+        if (NetBridge == null)
+            return;
+        int[] self = [session.ObjectId];
+        NetBridge.FanoutMultiSellList(self, ToNetMulti(multi));
+        NetBridge.FanoutShopBalance(self, ToNetBalance(balance));
+    }
+
+    void FanNetSystem(ZoneSession session, SystemMessageMsg message)
+    {
+        if (NetBridge == null)
+            return;
+        NetBridge.FanoutSystemMessage([session.ObjectId], new Fineage.Net.Contract.SystemMessageNetMsg
+        {
+            Id = message.Id,
+            Text = message.Text ?? "",
+            Params = message.Params ?? []
+        });
+    }
+
+    static Fineage.Net.Contract.BuyListNetMsg ToNetBuy(BuyListMsg buy)
+    {
+        var src = buy.Items ?? [];
+        var items = new Fineage.Net.Contract.BuyListItemNet[src.Length];
+        for (int i = 0; i < src.Length; i++)
+        {
+            items[i] = new Fineage.Net.Contract.BuyListItemNet
+            {
+                ItemId = src[i].ItemId,
+                Price = src[i].Price,
+                Count = src[i].Count
+            };
+        }
+
+        return new Fineage.Net.Contract.BuyListNetMsg
+        {
+            NpcObjectId = buy.NpcObjectId,
+            ListId = buy.ListId,
+            BaseTaxPercent = buy.BaseTaxPercent,
+            CastleTaxPercent = buy.CastleTaxPercent,
+            Items = items
+        };
+    }
+
+    static Fineage.Net.Contract.SellListNetMsg ToNetSell(SellListMsg sell)
+    {
+        var src = sell.Items ?? [];
+        var items = new Fineage.Net.Contract.SellListItemNet[src.Length];
+        for (int i = 0; i < src.Length; i++)
+        {
+            items[i] = new Fineage.Net.Contract.SellListItemNet
+            {
+                ObjectId = src[i].ObjectId,
+                ItemId = src[i].ItemId,
+                Count = src[i].Count,
+                Price = src[i].Price,
+                EnchantLevel = src[i].EnchantLevel
+            };
+        }
+
+        return new Fineage.Net.Contract.SellListNetMsg { NpcObjectId = sell.NpcObjectId, Items = items };
+    }
+
+    static Fineage.Net.Contract.MultiSellListNetMsg ToNetMulti(MultiSellListMsg multi)
+    {
+        var src = multi.Entries ?? [];
+        var entries = new Fineage.Net.Contract.MultiSellEntryNet[src.Length];
+        for (int i = 0; i < src.Length; i++)
+        {
+            entries[i] = new Fineage.Net.Contract.MultiSellEntryNet
+            {
+                EntryId = src[i].EntryId,
+                Ingredients = ToNetParts(src[i].Ingredients),
+                Products = ToNetParts(src[i].Products)
+            };
+        }
+
+        return new Fineage.Net.Contract.MultiSellListNetMsg
+        {
+            NpcObjectId = multi.NpcObjectId,
+            ListId = multi.ListId,
+            MaintainEnchantment = multi.MaintainEnchantment,
+            InventoryOnly = multi.InventoryOnly,
+            CastleTaxPercent = multi.CastleTaxPercent,
+            Entries = entries
+        };
+    }
+
+    static Fineage.Net.Contract.MultiSellPartNet[] ToNetParts(MultiSellPartMsg[]? parts)
+    {
+        parts ??= [];
+        var rows = new Fineage.Net.Contract.MultiSellPartNet[parts.Length];
+        for (int i = 0; i < parts.Length; i++)
+        {
+            rows[i] = new Fineage.Net.Contract.MultiSellPartNet
+            {
+                ItemId = parts[i].ItemId,
+                Count = parts[i].Count,
+                EnchantLevel = parts[i].EnchantLevel
+            };
+        }
+
+        return rows;
+    }
+
+    static Fineage.Net.Contract.ShopBalanceNetMsg ToNetBalance(ShopBalanceMsg balance) => new()
+    {
+        Adena = balance.Adena,
+        Weight = balance.Weight,
+        MaxWeight = balance.MaxWeight,
+        Slots = balance.Slots,
+        MaxSlots = balance.MaxSlots,
+        BaseTaxPercent = balance.BaseTaxPercent,
+        CastleTaxPercent = balance.CastleTaxPercent
+    };
 }

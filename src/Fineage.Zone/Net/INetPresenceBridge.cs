@@ -46,4 +46,12 @@ interface INetPresenceBridge
     void FanoutAbnormalStatusUpdate(IReadOnlyList<int> watcherObjectIds, AbnormalStatusUpdateNetMsg update);
 
     void FanoutNpcHtml(IReadOnlyList<int> watcherObjectIds, NpcHtmlNetMsg html);
+
+    void FanoutBuyList(IReadOnlyList<int> watcherObjectIds, BuyListNetMsg list);
+
+    void FanoutSellList(IReadOnlyList<int> watcherObjectIds, SellListNetMsg list);
+
+    void FanoutMultiSellList(IReadOnlyList<int> watcherObjectIds, MultiSellListNetMsg list);
+
+    void FanoutShopBalance(IReadOnlyList<int> watcherObjectIds, ShopBalanceNetMsg balance);
 }

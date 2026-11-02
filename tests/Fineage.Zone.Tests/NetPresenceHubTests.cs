@@ -56,6 +56,53 @@ public sealed class NetPresenceHubTests
     }
 
     [Fact]
+    public void Shop_codec_round_trip()
+    {
+        var buy = new BuyListNetMsg
+        {
+            NpcObjectId = 1,
+            ListId = 3001000,
+            Items = [new BuyListItemNet { ItemId = 57, Price = 1, Count = -1 }]
+        };
+        var buyAgain = NetCodec.DecodeBuyList(NetCodec.EncodeBuyList(buy));
+        Assert.Equal(3001000, buyAgain.ListId);
+        Assert.Single(buyAgain.Items);
+
+        var sell = new SellListNetMsg
+        {
+            NpcObjectId = 1,
+            Items = [new SellListItemNet { ObjectId = 9, ItemId = 1, Count = 2, Price = 3, EnchantLevel = 0 }]
+        };
+        Assert.Equal(9, NetCodec.DecodeSellList(NetCodec.EncodeSellList(sell)).Items[0].ObjectId);
+
+        var multi = new MultiSellListNetMsg
+        {
+            NpcObjectId = 1,
+            ListId = 1,
+            Entries =
+            [
+                new MultiSellEntryNet
+                {
+                    EntryId = 5,
+                    Ingredients = [new MultiSellPartNet { ItemId = 57, Count = 10 }],
+                    Products = [new MultiSellPartNet { ItemId = 17, Count = 1 }]
+                }
+            ]
+        };
+        var multiAgain = NetCodec.DecodeMultiSellList(NetCodec.EncodeMultiSellList(multi));
+        Assert.Equal(5, multiAgain.Entries[0].EntryId);
+        Assert.Equal(57, multiAgain.Entries[0].Ingredients[0].ItemId);
+
+        Assert.Equal(100, NetCodec.DecodeShopBalance(NetCodec.EncodeShopBalance(new ShopBalanceNetMsg { Adena = 100 })).Adena);
+        Assert.Equal(7, NetCodec.DecodeRequestBuyItem(NetCodec.EncodeRequestBuyItem(new RequestBuyItemNetMsg
+        {
+            NpcObjectId = 1,
+            ListId = 2,
+            Items = [new ShopCountNet { ItemId = 7, Count = 3 }]
+        })).Items[0].ItemId);
+    }
+
+    [Fact]
     public void Npc_talk_bypass_html_codec_round_trip()
     {
         Assert.Equal(9, NetCodec.DecodeNpcTalk(NetCodec.EncodeNpcTalk(new NpcTalkNetMsg { NpcObjectId = 9 })).NpcObjectId);

@@ -55,5 +55,12 @@ namespace Fineage.Net.Contract
         public const ushort NpcTalk = 0x0322;
         public const ushort BypassRequest = 0x0323;
         public const ushort NpcHtml = 0x0324;
+        public const ushort BuyList = 0x0325;
+        public const ushort SellList = 0x0326;
+        public const ushort MultiSellList = 0x0327;
+        public const ushort ShopBalance = 0x0328;
+        public const ushort RequestBuyItem = 0x0329;
+        public const ushort RequestSellItem = 0x032A;
+        public const ushort RequestMultiSellChoose = 0x032B;
     }
 }

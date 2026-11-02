@@ -164,6 +164,34 @@ public sealed class NetZoneServer : INetPresenceBridge
             _ = _presence.SendAsync(watcher, NetOpcode.NpcHtml, payload, CancellationToken.None);
     }
 
+    void INetPresenceBridge.FanoutBuyList(IReadOnlyList<int> watcherObjectIds, BuyListNetMsg list)
+    {
+        var payload = NetCodec.EncodeBuyList(list);
+        foreach (int watcher in watcherObjectIds)
+            _ = _presence.SendAsync(watcher, NetOpcode.BuyList, payload, CancellationToken.None);
+    }
+
+    void INetPresenceBridge.FanoutSellList(IReadOnlyList<int> watcherObjectIds, SellListNetMsg list)
+    {
+        var payload = NetCodec.EncodeSellList(list);
+        foreach (int watcher in watcherObjectIds)
+            _ = _presence.SendAsync(watcher, NetOpcode.SellList, payload, CancellationToken.None);
+    }
+
+    void INetPresenceBridge.FanoutMultiSellList(IReadOnlyList<int> watcherObjectIds, MultiSellListNetMsg list)
+    {
+        var payload = NetCodec.EncodeMultiSellList(list);
+        foreach (int watcher in watcherObjectIds)
+            _ = _presence.SendAsync(watcher, NetOpcode.MultiSellList, payload, CancellationToken.None);
+    }
+
+    void INetPresenceBridge.FanoutShopBalance(IReadOnlyList<int> watcherObjectIds, ShopBalanceNetMsg balance)
+    {
+        var payload = NetCodec.EncodeShopBalance(balance);
+        foreach (int watcher in watcherObjectIds)
+            _ = _presence.SendAsync(watcher, NetOpcode.ShopBalance, payload, CancellationToken.None);
+    }
+
     public async Task HandleAsync(NetConnection conn, CancellationToken ct)
     {
         await using var discard = new MemoryStream();
@@ -231,6 +259,15 @@ public sealed class NetZoneServer : INetPresenceBridge
                             break;
                         case NetOpcode.BypassRequest:
                             await OnBypassRequestAsync(conn, zoneSession, self, envelope, ct).ConfigureAwait(false);
+                            break;
+                        case NetOpcode.RequestBuyItem:
+                            await OnRequestBuyItemAsync(conn, zoneSession, envelope, ct).ConfigureAwait(false);
+                            break;
+                        case NetOpcode.RequestSellItem:
+                            await OnRequestSellItemAsync(conn, zoneSession, envelope, ct).ConfigureAwait(false);
+                            break;
+                        case NetOpcode.RequestMultiSellChoose:
+                            await OnRequestMultiSellChooseAsync(conn, zoneSession, envelope, ct).ConfigureAwait(false);
                             break;
                         case NetOpcode.StopMove:
                             // Authoritative stop: correct to current session position.
@@ -874,6 +911,80 @@ public sealed class NetZoneServer : INetPresenceBridge
         // Teleport bypass relocates; refresh AOI for Net peers.
         var after = _world.SnapshotKnownIds(zoneSession);
         await FanKnownlistDiffAsync(conn, zoneSession, self, before, after, ct).ConfigureAwait(false);
+    }
+
+    async Task OnRequestBuyItemAsync(
+        NetConnection conn,
+        ZoneSession zoneSession,
+        PacketEnvelope envelope,
+        CancellationToken ct)
+    {
+        RequireHello(conn);
+        if (!zoneSession.Bound || !zoneSession.InWorld)
+        {
+            await RejectAsync(conn, "not_in_world", "Enter world first.", ct).ConfigureAwait(false);
+            return;
+        }
+
+        var buy = NetCodec.DecodeRequestBuyItem(envelope.Payload);
+        var items = (buy.Items ?? []).Select(i => new ShopCountMsg { ItemId = i.ItemId, Count = i.Count }).ToArray();
+        string? error = await _world.TryBuyAsync(
+            zoneSession,
+            new RequestBuyItemMsg { NpcObjectId = buy.NpcObjectId, ListId = buy.ListId, Items = items },
+            ct).ConfigureAwait(false);
+        if (error != null)
+            await RejectAsync(conn, error, "Buy failed.", ct).ConfigureAwait(false);
+    }
+
+    async Task OnRequestSellItemAsync(
+        NetConnection conn,
+        ZoneSession zoneSession,
+        PacketEnvelope envelope,
+        CancellationToken ct)
+    {
+        RequireHello(conn);
+        if (!zoneSession.Bound || !zoneSession.InWorld)
+        {
+            await RejectAsync(conn, "not_in_world", "Enter world first.", ct).ConfigureAwait(false);
+            return;
+        }
+
+        var sell = NetCodec.DecodeRequestSellItem(envelope.Payload);
+        var items = (sell.Items ?? []).Select(i => new ShopObjectCountMsg { ObjectId = i.ObjectId, Count = i.Count }).ToArray();
+        string? error = await _world.TrySellAsync(
+            zoneSession,
+            new RequestSellItemMsg { NpcObjectId = sell.NpcObjectId, Items = items },
+            ct).ConfigureAwait(false);
+        if (error != null)
+            await RejectAsync(conn, error, "Sell failed.", ct).ConfigureAwait(false);
+    }
+
+    async Task OnRequestMultiSellChooseAsync(
+        NetConnection conn,
+        ZoneSession zoneSession,
+        PacketEnvelope envelope,
+        CancellationToken ct)
+    {
+        RequireHello(conn);
+        if (!zoneSession.Bound || !zoneSession.InWorld)
+        {
+            await RejectAsync(conn, "not_in_world", "Enter world first.", ct).ConfigureAwait(false);
+            return;
+        }
+
+        var choose = NetCodec.DecodeRequestMultiSellChoose(envelope.Payload);
+        string? error = await _world.TryMultiSellAsync(
+            zoneSession,
+            new RequestMultiSellChooseMsg
+            {
+                NpcObjectId = choose.NpcObjectId,
+                ListId = choose.ListId,
+                EntryId = choose.EntryId,
+                Amount = choose.Amount
+            },
+            ct).ConfigureAwait(false);
+        if (error != null)
+            await RejectAsync(conn, error, "MultiSell failed.", ct).ConfigureAwait(false);
     }
 
     static void RequireHello(NetConnection conn)
