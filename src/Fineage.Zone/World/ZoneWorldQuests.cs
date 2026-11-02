@@ -327,14 +327,15 @@ public sealed partial class ZoneWorld
 
         ApplyExpSp(killer, exp, sp);
         var session = killer.Session;
-        outbound.Add(Pack(session, MsgType.SystemMessage, new SystemMessageMsg
+        var notice = new SystemMessageMsg
         {
             Id = KillRewardMessageId,
             Params = [exp.ToString(System.Globalization.CultureInfo.InvariantCulture), sp.ToString(System.Globalization.CultureInfo.InvariantCulture)],
             Text = $"You have earned {exp} experience and {sp} SP."
-        }));
+        };
+        outbound.Add(Pack(session, MsgType.SystemMessage, notice));
         // StatusUpdate carries live Exp/Sp/Level; UserInfo refreshes the full sheet (vitals + template stats).
-        outbound.Add(Pack(session, MsgType.StatusUpdate, new StatusUpdateMsg
+        var status = new StatusUpdateMsg
         {
             ObjectId = killer.ObjectId,
             AttributeIds =
@@ -357,8 +358,43 @@ public sealed partial class ZoneWorld
                 killer.CurMp,
                 killer.MaxMp
             ]
-        }));
+        };
+        outbound.Add(Pack(session, MsgType.StatusUpdate, status));
         outbound.Add(Pack(session, MsgType.UserInfo, UserInfo(killer)));
+
+        if (NetBridge != null)
+        {
+            int[] self = [killer.ObjectId];
+            var vitals = BuildUserInfoVitals(killer);
+            NetBridge.FanoutSystemMessage(self, new Fineage.Net.Contract.SystemMessageNetMsg
+            {
+                Id = notice.Id,
+                Text = notice.Text,
+                Params = notice.Params ?? []
+            });
+            NetBridge.FanoutStatusUpdate(self, new Fineage.Net.Contract.StatusUpdateNetMsg
+            {
+                EntityValue = (ulong)(uint)status.ObjectId,
+                EntityGeneration = 1,
+                AttributeIds = status.AttributeIds ?? [],
+                Values = status.Values ?? []
+            });
+            NetBridge.FanoutPlayerStats(self, new Fineage.Net.Contract.PlayerStatsMsg
+            {
+                EntityValue = (ulong)(uint)killer.ObjectId,
+                EntityGeneration = 1,
+                Level = killer.Level,
+                Exp = killer.Exp,
+                Sp = killer.Sp,
+                Hp = killer.CurHp,
+                MaxHp = killer.MaxHp,
+                Mp = killer.CurMp,
+                MaxMp = killer.MaxMp,
+                Cp = vitals.CurCp,
+                MaxCp = vitals.MaxCp
+            });
+        }
+
         SaveQuestProgress(session, killer);
     }
 

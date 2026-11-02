@@ -40,4 +40,6 @@ interface INetPresenceBridge
     void FanoutRevive(IReadOnlyList<int> watcherObjectIds, ReviveNetMsg revive);
 
     void FanoutTeleportToLocation(IReadOnlyList<int> watcherObjectIds, TeleportToLocationNetMsg teleport);
+
+    void FanoutPlayerStats(IReadOnlyList<int> watcherObjectIds, PlayerStatsMsg stats);
 }
