@@ -74,8 +74,11 @@ public sealed partial class ZoneWorld
         var item = player.Inventory!.Find(objectId);
         if (item == null)
             return InventoryProtocol.NotOwned;
-        if (item.Template.IsSoulshot)
-            return TryChargeSoulshot(session, player, item, toSelf, toOthers);
+        if (IsShot(item.Template))
+        {
+            TryChargeShot(session, player, item, toSelf, toOthers, quiet: false);
+            return null;
+        }
         if (!item.Template.Equippable)
             return InventoryProtocol.NotEquippable;
         // Unequip skips conditions. There is no cast state, so weapon changes are not deferred.
@@ -96,7 +99,12 @@ public sealed partial class ZoneWorld
         }
 
         if (item.Template.Kind == ItemKind.Weapon)
+        {
             player.SoulshotCharged = false; // Mobius: charges live on the weapon instance
+            player.SpiritshotCharge = 0;
+            if (item.IsEquipped)
+                RechargeAutoShots(player, toSelf);
+        }
         if (!PublishGear(session, player, before, toSelf, toOthers))
             return "bad_request";
 
@@ -119,7 +127,10 @@ public sealed partial class ZoneWorld
         var before = PaperdollSnapshot(player.Inventory);
         player.Inventory.Unequip(item);
         if (item.Template.Kind == ItemKind.Weapon)
+        {
             player.SoulshotCharged = false;
+            player.SpiritshotCharge = 0;
+        }
         if (!PublishGear(session, player, before, toSelf, toOthers))
             return "bad_request";
 

@@ -97,5 +97,9 @@ namespace Fineage.Net.Contract
         public const ushort AutoAttackStart = 0x0353;
         /// <summary>Zone → client: Mobius AutoAttackStop (stance ended: 15 s without combat, or mob lost its target).</summary>
         public const ushort AutoAttackStop = 0x0354;
+        /// <summary>Client → zone: Mobius RequestAutoSoulShot (shot item id, enable/disable).</summary>
+        public const ushort RequestAutoSoulShot = 0x0355;
+        /// <summary>Zone → client: Mobius ExAutoSoulShot (shot item id, auto now on/off).</summary>
+        public const ushort AutoSoulShot = 0x0356;
     }
 }

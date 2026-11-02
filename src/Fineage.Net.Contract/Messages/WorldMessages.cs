@@ -109,6 +109,13 @@ namespace Fineage.Net.Contract
         public uint EntityGeneration { get; set; }
     }
 
+    /// <summary>Payload of <c>RequestAutoSoulShot</c> and <c>AutoSoulShot</c>.</summary>
+    public sealed class AutoSoulShotNetMsg
+    {
+        public int ItemId { get; set; }
+        public bool Enabled { get; set; }
+    }
+
     public sealed class ChangeMoveTypeNetMsg
     {
         public ulong EntityValue { get; set; }

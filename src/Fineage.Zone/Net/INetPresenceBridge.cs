@@ -33,6 +33,9 @@ interface INetPresenceBridge
     /// <summary>Mobius AutoAttackStart (<paramref name="inStance"/>) / AutoAttackStop for <paramref name="objectId"/>. Called under the ZoneWorld gate.</summary>
     void FanoutAttackStance(IReadOnlyList<int> watcherObjectIds, int objectId, bool inStance);
 
+    /// <summary>Mobius ExAutoSoulShot: auto use of shot <paramref name="itemId"/> is now on/off. Called under the ZoneWorld gate.</summary>
+    void FanoutAutoSoulShot(IReadOnlyList<int> watcherObjectIds, int itemId, bool enabled);
+
     void FanoutAttackState(IReadOnlyList<int> watcherObjectIds, AttackStateMsg attack);
 
     void FanoutStatusUpdate(IReadOnlyList<int> watcherObjectIds, StatusUpdateNetMsg status);

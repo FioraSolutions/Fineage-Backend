@@ -45,3 +45,11 @@
 - Clan help: once a second while fighting, idle same-clan mobs within clanHelpRange (minus ignoreNpcIds) join on the same target.
 - Net `AutoAttackStart` 0x0353 / `AutoAttackStop` 0x0354 (entity id): players = 15 s combat window, NPCs = has a target. The client reuses the legacy AutoAttackStart/Stop world apply.
 - Gaps: no LOS/geo check on aggro, no peace-zone or level-gap rules, no stance re-send to a watcher who comes into view mid-fight, V2 gets no stance packets, mob-vs-mob hate not modelled.
+
+## Slice 9 — auto soulshot, spiritshots / blessed spiritshots
+- Net `RequestAutoSoulShot` 0x0355 (item id, enable) → zone; `AutoSoulShot` 0x0356 (item id, on/off) → client, plus SysMsg 1433/1434.
+- Enabling charges at once; every discharge (melee swing, physical skill, magic skill) recharges from auto stacks (Mobius rechargeShots). One auto stack per kind (soul vs spirit). An empty or short stack turns auto off.
+- `items.json`: weapon `spiritshots`, shot items `spiritshot` / `blessedSpiritshot` (+ shotGrade). Spiritshot ×2, blessed ×4 M.Atk in magic damage (Mobius calcMagicDam); item_skill glow 2047/2061 (+D..S).
+- Re-equipping a weapon clears its charges and recharges from auto.
+- Client: right-click an item shortcut toggles auto; state is tracked in NetSession (no slot highlight yet).
+- Gaps: spiritshot cast-time / MP effects, magic crit, D–S shot items absent from items.json, no auto-shot slot highlight, V2 has no auto request.

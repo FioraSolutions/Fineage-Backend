@@ -489,6 +489,18 @@ namespace Fineage.Net.Contract
             return new AttackStanceNetMsg { EntityValue = r.ReadUInt64(), EntityGeneration = r.ReadUInt32() };
         }
 
+        public static byte[] EncodeAutoSoulShot(AutoSoulShotNetMsg m) => Write(w =>
+        {
+            w.WriteInt32(m.ItemId);
+            w.WriteByte(m.Enabled ? (byte)1 : (byte)0);
+        });
+
+        public static AutoSoulShotNetMsg DecodeAutoSoulShot(ReadOnlySpan<byte> p)
+        {
+            var r = new Reader(p);
+            return new AutoSoulShotNetMsg { ItemId = r.ReadInt32(), Enabled = r.ReadByte() != 0 };
+        }
+
         public static byte[] EncodeStopMove(StopMoveMsg _) => Array.Empty<byte>();
         public static StopMoveMsg DecodeStopMove(ReadOnlySpan<byte> _) => new();
 

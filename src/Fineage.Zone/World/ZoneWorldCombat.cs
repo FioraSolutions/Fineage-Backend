@@ -132,6 +132,8 @@ public sealed partial class ZoneWorld
         // Mobius doAttack: a charged weapon fires its soulshot on this swing (hit or miss) and is uncharged.
         bool soulshot = player.SoulshotCharged;
         player.SoulshotCharged = false;
+        if (soulshot)
+            RechargeAutoShots(player, outbound);
         var (damage, flags) = ZoneCombat.RollMelee(_combatRandom, ps.PAtk, NpcPDef(target),
             ps.Accuracy, NpcEvasion(target), ps.CritRate, ps.RandomDamage,
             soulshot, (int)ps.WeaponGrade, NpcShieldRate(target), target.ShieldDef, ps.Weapon == Fineage.Game.WeaponType.Bow);

@@ -4,47 +4,81 @@ using MessagePack;
 
 namespace Fineage.Zone.World;
 
-/// <summary>Mobius SoulShots item handler: charge the equipped weapon, consume on the next swing.</summary>
+/// <summary>
+/// Mobius SoulShots / SpiritShot / BlessedSpiritShot item handlers and RequestAutoSoulShot:
+/// using a shot charges the equipped weapon (consumes weapon soulshots / spiritshots count), the next swing or
+/// physical skill fires the soulshot, the next magic skill fires the spiritshot. With auto enabled the weapon is
+/// recharged right after each discharge (Mobius rechargeShots) until the stack runs out.
+/// </summary>
 public sealed partial class ZoneWorld
 {
     public const int SysMsgSoulshotGradeMismatch = 337;
     public const int SysMsgNotEnoughSoulshots = 338;
     public const int SysMsgCannotUseSoulshots = 339;
     public const int SysMsgSoulshotEnabled = 342;
-    /// <summary>Mobius item_skill per soulshot grade (No grade 2039, D 2150 … S 2154).</summary>
+    public const int SysMsgSpiritshotGradeMismatch = 530;
+    public const int SysMsgNotEnoughSpiritshots = 531;
+    public const int SysMsgCannotUseSpiritshots = 532;
+    public const int SysMsgSpiritshotEnabled = 533;
+    public const int SysMsgAutoShotOn = 1433;
+    public const int SysMsgAutoShotOff = 1434;
+    /// <summary>Spirit charge on <see cref="ZoneEntity.SpiritshotCharge"/>.</summary>
+    public const int SpiritCharge = 1, BlessedSpiritCharge = 2;
+    /// <summary>Mobius item_skill per grade (No grade, D … S).</summary>
     static readonly int[] SoulshotSkillByGrade = [2039, 2150, 2151, 2152, 2153, 2154];
+    static readonly int[] SpiritshotSkillByGrade = [2047, 2155, 2156, 2157, 2158, 2159];
+    static readonly int[] BlessedSpiritshotSkillByGrade = [2061, 2160, 2161, 2162, 2163, 2164];
 
-    string? TryChargeSoulshot(ZoneSession session, ZoneEntity player, ItemInstance shot, List<Pending> toSelf, List<Pending> toOthers)
+    internal static bool IsShot(ItemTemplate t) => t.IsSoulshot || t.IsSpiritshot || t.IsBlessedSpiritshot;
+
+    /// <summary>Charges the weapon with <paramref name="shot"/>. <paramref name="quiet"/> (auto recharge) skips the refusal notices.</summary>
+    bool TryChargeShot(ZoneSession session, ZoneEntity player, ItemInstance shot, List<Pending> toSelf, List<Pending> toOthers, bool quiet)
     {
+        var t = shot.Template;
+        bool soul = t.IsSoulshot;
         var weapon = player.Inventory!.GetEquipped(PaperdollSlot.RHand)?.Template;
-        if (weapon == null || weapon.Kind != ItemKind.Weapon || weapon.Soulshots <= 0)
+        int need = weapon == null || weapon.Kind != ItemKind.Weapon ? 0 : soul ? weapon.Soulshots : weapon.Spiritshots;
+        if (need <= 0)
         {
-            ShotNotice(session, SysMsgCannotUseSoulshots, "Cannot use soulshots.", toSelf);
-            return null;
+            if (!quiet)
+                ShotNotice(session, soul ? SysMsgCannotUseSoulshots : SysMsgCannotUseSpiritshots,
+                    soul ? "Cannot use soulshots." : "Cannot use spiritshots.", toSelf);
+            return false;
         }
-        if (weapon.Crystal != shot.Template.ShotGrade)
+        if (weapon!.Crystal != t.ShotGrade)
         {
-            ShotNotice(session, SysMsgSoulshotGradeMismatch,
-                "The soulshot you are attempting to use does not match the grade of your equipped weapon.", toSelf);
-            return null;
+            if (!quiet)
+                ShotNotice(session, soul ? SysMsgSoulshotGradeMismatch : SysMsgSpiritshotGradeMismatch,
+                    soul ? "The soulshot you are attempting to use does not match the grade of your equipped weapon."
+                         : "Your spiritshot does not match the weapon's grade.", toSelf);
+            return false;
         }
-        if (player.SoulshotCharged)
-            return null; // Mobius: already charged, nothing consumed
+        if (soul ? player.SoulshotCharged : player.SpiritshotCharge > 0)
+            return false; // Mobius: already charged, nothing consumed
 
-        if (!player.Inventory.TryConsume(shot.ItemId, weapon.Soulshots, out var stack, out bool removed) || stack == null)
+        if (!player.Inventory.TryConsume(shot.ItemId, need, out var stack, out bool removed) || stack == null)
         {
-            ShotNotice(session, SysMsgNotEnoughSoulshots, "You do not have enough soulshots for that.", toSelf);
-            return null;
+            ShotNotice(session, soul ? SysMsgNotEnoughSoulshots : SysMsgNotEnoughSpiritshots,
+                soul ? "You do not have enough soulshots for that." : "You do not have enough spiritshots for that.", toSelf);
+            // Mobius: auto use switches itself off when the stack cannot pay for a charge.
+            if (player.AutoShots.Remove(shot.ItemId))
+                SendAutoShotState(session, player, shot.ItemId, t.Name, false, toSelf);
+            return false;
         }
 
-        player.SoulshotCharged = true;
+        if (soul)
+            player.SoulshotCharged = true;
+        else
+            player.SpiritshotCharge = t.IsBlessedSpiritshot ? BlessedSpiritCharge : SpiritCharge;
         var update = InventoryMessages.Update(removed ? InventoryChange.Remove : InventoryChange.Modify, stack);
         toSelf.Add(Pack(session, MsgType.InventoryUpdate, update));
         NetBridge?.FanoutInventoryUpdate([session.ObjectId], ToNetInventoryUpdate(update));
-        ShotNotice(session, SysMsgSoulshotEnabled, "Your soulshots are enabled.", toSelf);
+        ShotNotice(session, soul ? SysMsgSoulshotEnabled : SysMsgSpiritshotEnabled,
+            soul ? "Your soulshots are enabled." : "Your spiritshot has been enabled.", toSelf);
 
         // Mobius broadcasts MagicSkillUse(item_skill) for the weapon glow.
-        int skill = SoulshotSkillByGrade[Math.Clamp((int)shot.Template.ShotGrade, 0, SoulshotSkillByGrade.Length - 1)];
+        int[] table = soul ? SoulshotSkillByGrade : t.IsBlessedSpiritshot ? BlessedSpiritshotSkillByGrade : SpiritshotSkillByGrade;
+        int skill = table[Math.Clamp((int)t.ShotGrade, 0, table.Length - 1)];
         var cast = new MagicSkillUseMsg
         {
             CasterObjectId = player.ObjectId,
@@ -71,8 +105,91 @@ public sealed partial class ZoneWorld
         });
 
         SaveInventory(session, player.Inventory);
-        ZoneLog.Info($"soulshot object={player.ObjectId} item={shot.ItemId} consumed={weapon.Soulshots} left={(removed ? 0 : stack.Count)}");
+        ZoneLog.Info($"shot object={player.ObjectId} item={shot.ItemId} consumed={need} left={(removed ? 0 : stack.Count)} auto={quiet}");
+        if (removed && player.AutoShots.Remove(shot.ItemId))
+            SendAutoShotState(session, player, shot.ItemId, t.Name, false, toSelf);
+        return true;
+    }
+
+    /// <summary>Mobius RequestAutoSoulShot (type 1 on / 0 off) for a shot item the player carries.</summary>
+    public async Task<string?> TryAutoSoulShotAsync(ZoneSession session, int itemId, bool enable, CancellationToken ct)
+    {
+        var toSelf = new List<Pending>();
+        var toOthers = new List<Pending>();
+        string? error;
+        lock (_gate)
+            error = TryAutoSoulShot(session, itemId, enable, toSelf, toOthers);
+        if (error != null)
+            return error;
+        await FlushSelfAsync(session, toSelf, ct).ConfigureAwait(false);
+        await FlushOthersAsync(toOthers, ct).ConfigureAwait(false);
         return null;
+    }
+
+    string? TryAutoSoulShot(ZoneSession session, int itemId, bool enable, List<Pending> toSelf, List<Pending> toOthers)
+    {
+        if (!TryLivePlayer(session, out var player, out var error))
+            return error;
+        var stack = player.Inventory!.FindByItemId(itemId);
+        if (!enable)
+        {
+            if (player.AutoShots.Remove(itemId))
+                SendAutoShotState(session, player, itemId, stack?.Template.Name ?? "", false, toSelf);
+            return null;
+        }
+        if (stack == null)
+            return InventoryProtocol.NotOwned;
+        if (!IsShot(stack.Template))
+            return "not_a_shot";
+        // Mobius: one auto slot per shot kind; switching grades replaces the old one.
+        foreach (int other in player.AutoShots.ToList())
+        {
+            var o = player.Inventory.FindByItemId(other)?.Template;
+            if (o == null || o.IsSoulshot == stack.Template.IsSoulshot)
+            {
+                player.AutoShots.Remove(other);
+                SendAutoShotState(session, player, other, o?.Name ?? "", false, toSelf);
+            }
+        }
+        player.AutoShots.Add(itemId);
+        SendAutoShotState(session, player, itemId, stack.Template.Name, true, toSelf);
+        TryChargeShot(session, player, stack, toSelf, toOthers, quiet: false);
+        return null;
+    }
+
+    /// <summary>Mobius rechargeShots after a discharge: charge again from each auto-enabled stack.</summary>
+    void RechargeAutoShots(ZoneEntity player, List<Pending> outbound)
+    {
+        if (player.AutoShots.Count == 0 || player.Session == null || player.Inventory == null)
+            return;
+        foreach (int itemId in player.AutoShots.ToList())
+        {
+            var stack = player.Inventory.FindByItemId(itemId);
+            if (stack == null)
+            {
+                player.AutoShots.Remove(itemId);
+                SendAutoShotState(player.Session, player, itemId, "", false, outbound);
+                continue;
+            }
+            TryChargeShot(player.Session, player, stack, outbound, outbound, quiet: true);
+        }
+    }
+
+    /// <summary>Test seam: fire the soulshot charge as a swing would, then run the auto recharge.</summary>
+    internal void DischargeSoulshot(ZoneEntity player)
+    {
+        lock (_gate)
+        {
+            player.SoulshotCharged = false;
+            RechargeAutoShots(player, new List<Pending>());
+        }
+    }
+
+    void SendAutoShotState(ZoneSession session, ZoneEntity player, int itemId, string name, bool enabled, List<Pending> toSelf)
+    {
+        NetBridge?.FanoutAutoSoulShot([player.ObjectId], itemId, enabled);
+        ShotNotice(session, enabled ? SysMsgAutoShotOn : SysMsgAutoShotOff,
+            $"The automatic use of {name} has been {(enabled ? "activated" : "deactivated")}.", toSelf);
     }
 
     void ShotNotice(ZoneSession session, int id, string text, List<Pending> toSelf)

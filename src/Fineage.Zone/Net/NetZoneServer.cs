@@ -169,6 +169,13 @@ public sealed class NetZoneServer : INetPresenceBridge
             _ = _presence.SendAsync(watcher, opcode, payload, CancellationToken.None);
     }
 
+    void INetPresenceBridge.FanoutAutoSoulShot(IReadOnlyList<int> watcherObjectIds, int itemId, bool enabled)
+    {
+        var payload = NetCodec.EncodeAutoSoulShot(new AutoSoulShotNetMsg { ItemId = itemId, Enabled = enabled });
+        foreach (int watcher in watcherObjectIds)
+            _ = _presence.SendAsync(watcher, NetOpcode.AutoSoulShot, payload, CancellationToken.None);
+    }
+
     void INetPresenceBridge.FanoutAttackState(IReadOnlyList<int> watcherObjectIds, AttackStateMsg attack)
     {
         var payload = NetCodec.EncodeAttackState(attack);
@@ -531,6 +538,16 @@ public sealed class NetZoneServer : INetPresenceBridge
                                     ct).ConfigureAwait(false);
                                 if (actionError != null)
                                     await RejectAsync(conn, actionError, "Action failed.", ct).ConfigureAwait(false);
+                            }
+
+                            break;
+                        case NetOpcode.RequestAutoSoulShot:
+                            if (zoneSession.Bound && zoneSession.InWorld)
+                            {
+                                var auto = NetCodec.DecodeAutoSoulShot(envelope.Payload);
+                                string? autoError = await _world.TryAutoSoulShotAsync(zoneSession, auto.ItemId, auto.Enabled, ct).ConfigureAwait(false);
+                                if (autoError != null)
+                                    await RejectAsync(conn, autoError, "Auto shot failed.", ct).ConfigureAwait(false);
                             }
 
                             break;

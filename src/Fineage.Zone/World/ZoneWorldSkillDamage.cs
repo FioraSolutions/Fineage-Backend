@@ -48,7 +48,7 @@ public sealed partial class ZoneWorld
     }
 
     /// <summary>Damage for a Mobius attack skill at launch; consumes mpConsume and (physical) a charged soulshot.</summary>
-    int RollSkillDamage(ZoneEntity player, ZoneEntity target, SkillCombatData combat, int level)
+    int RollSkillDamage(ZoneEntity player, ZoneEntity target, SkillCombatData combat, int level, List<Pending>? outbound = null)
     {
         player.CurMp = Math.Max(0, player.CurMp - combat.MpAt(level));
         var ps = PlayerStats(player);
@@ -56,11 +56,19 @@ public sealed partial class ZoneWorld
         if (!combat.IsPhysical)
         {
             double mDef = StatMods(target).Apply(CombatStat.MDef, target.MDef > 0 ? target.MDef : Math.Max(1, target.Level) * 30d);
-            return ZoneCombat.MagicDamage(ps.MAtk, mDef, power);
+            // Mobius calcMagicDam: blessed spiritshot ×4 M.Atk, spiritshot ×2; the charge fires on this cast.
+            int spirit = player.SpiritshotCharge;
+            player.SpiritshotCharge = 0;
+            if (spirit > 0 && outbound != null)
+                RechargeAutoShots(player, outbound);
+            double mAtk = ps.MAtk * ZoneCombat.SpiritshotMAtkMultiplier(spirit);
+            return ZoneCombat.MagicDamage(mAtk, mDef, power);
         }
 
         bool ss = player.SoulshotCharged;
         player.SoulshotCharged = false;
+        if (ss && outbound != null)
+            RechargeAutoShots(player, outbound);
         double pDef = NpcPDef(target);
         var shield = ZoneCombat.RollShield(_combatRandom, NpcShieldRate(target), ps.Weapon == Fineage.Game.WeaponType.Bow);
         if (shield == ZoneCombat.ShieldResult.Perfect)

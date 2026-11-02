@@ -203,7 +203,10 @@ public sealed class GameData
                 Math.Max(0, row.ShieldRate),
                 Math.Max(0, row.ShieldEvasionPenalty),
                 row.Soulshot,
-                ParseCrystal(row.ShotGrade, path, row.Id)));
+                ParseCrystal(row.ShotGrade, path, row.Id),
+                Math.Max(0, row.Spiritshots),
+                row.Spiritshot,
+                row.BlessedSpiritshot));
         }
 
         try
@@ -475,6 +478,10 @@ public sealed class GameData
         /// <summary>Mobius etc item with <c>default_action SOULSHOT</c>.</summary>
         public bool Soulshot { get; set; }
         public string? ShotGrade { get; set; }
+        /// <summary>Mobius weapon <c>spiritshots</c> per cast; shot items <c>handler SpiritShot / BlessedSpiritShot</c>.</summary>
+        public int Spiritshots { get; set; }
+        public bool Spiritshot { get; set; }
+        public bool BlessedSpiritshot { get; set; }
     }
 
     sealed class KitFileDto

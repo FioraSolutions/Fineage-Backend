@@ -47,7 +47,7 @@ public sealed partial class ZoneWorld
         if (!_byId.TryGetValue(hit.TargetId, out var target) || target.Kind != ZoneEntityKind.Npc || target.CurHp <= 0)
             return;
 
-        int damage = hit.Combat != null ? RollSkillDamage(player, target, hit.Combat, hit.Level) : hit.Damage;
+        int damage = hit.Combat != null ? RollSkillDamage(player, target, hit.Combat, hit.Level, outbound) : hit.Damage;
         if (hit.Combat != null)
         {
             ZoneLog.Info($"[skill] hit {hit.Combat.SkillId} lv{hit.Level} target={target.ObjectId} damage={damage}");

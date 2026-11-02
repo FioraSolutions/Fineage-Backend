@@ -107,6 +107,10 @@ sealed class ZoneEntity
     public double MDef { get; init; }
     /// <summary>Mobius ChargedShot SOULSHOTS: weapon is charged; next swing doubles P.Atk and clears it.</summary>
     public bool SoulshotCharged { get; set; }
+    /// <summary>0 none, 1 spiritshot, 2 blessed spiritshot (Mobius ShotType SPIRITSHOTS / BLESSED_SPIRITSHOTS).</summary>
+    public int SpiritshotCharge { get; set; }
+    /// <summary>Mobius auto soulshot set: shot item ids recharged after each discharge.</summary>
+    public HashSet<int> AutoShots { get; } = [];
     /// <summary>True while an abnormal with combat stat funcs is active (UserInfo refresh on change).</summary>
     public bool HasStatAbnormal { get; set; }
     public float RunSpeed { get; init; }

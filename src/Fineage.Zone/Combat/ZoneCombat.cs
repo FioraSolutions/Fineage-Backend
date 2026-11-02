@@ -167,6 +167,9 @@ public static class ZoneCombat
         Math.Max(1, (int)(70d * (Math.Max(0, pAtk) * (soulshot ? 2 : 1) + Math.Max(0, power)) / Math.Max(1d, pDef)));
 
     /// <summary>Interlude <c>calcMagicDam</c> core: 91·√mAtk / mDef · power (no shots / mcrit / fail yet).</summary>
+    /// <summary>Mobius calcMagicDam M.Atk multiplier: blessed spiritshot ×4, spiritshot ×2.</summary>
+    public static double SpiritshotMAtkMultiplier(int charge) => charge >= 2 ? 4d : charge == 1 ? 2d : 1d;
+
     public static int MagicDamage(double mAtk, double mDef, double power) =>
         Math.Max(1, (int)(91d * Math.Sqrt(Math.Max(0, mAtk)) / Math.Max(1d, mDef) * Math.Max(0, power)));
 
