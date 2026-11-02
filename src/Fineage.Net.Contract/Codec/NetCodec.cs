@@ -625,6 +625,49 @@ namespace Fineage.Net.Contract
             };
         }
 
+        public static byte[] EncodePickupRequest(PickupRequestNetMsg m) => Write(w => w.WriteInt32(m.GroundObjectId));
+        public static PickupRequestNetMsg DecodePickupRequest(ReadOnlySpan<byte> p) =>
+            new() { GroundObjectId = new Reader(p).ReadInt32() };
+
+        public static byte[] EncodeInventoryUpdate(InventoryUpdateNetMsg m) => Write(w =>
+        {
+            var rows = m.Changes ?? Array.Empty<InventoryUpdateEntryNet>();
+            w.WriteInt32(rows.Length);
+            for (int i = 0; i < rows.Length; i++)
+            {
+                var row = rows[i];
+                w.WriteInt32(row.Change);
+                w.WriteInt32(row.ObjectId);
+                w.WriteInt32(row.ItemId);
+                w.WriteInt32(row.Count);
+                w.WriteInt32(row.EnchantLevel);
+                w.WriteInt32(row.EquippedSlot);
+            }
+        });
+
+        public static InventoryUpdateNetMsg DecodeInventoryUpdate(ReadOnlySpan<byte> p)
+        {
+            var r = new Reader(p);
+            int n = r.ReadInt32();
+            if (n < 0)
+                n = 0;
+            var rows = new InventoryUpdateEntryNet[n];
+            for (int i = 0; i < n; i++)
+            {
+                rows[i] = new InventoryUpdateEntryNet
+                {
+                    Change = r.ReadInt32(),
+                    ObjectId = r.ReadInt32(),
+                    ItemId = r.ReadInt32(),
+                    Count = r.ReadInt32(),
+                    EnchantLevel = r.ReadInt32(),
+                    EquippedSlot = r.ReadInt32()
+                };
+            }
+
+            return new InventoryUpdateNetMsg { Changes = rows };
+        }
+
         public static PositionCorrectionMsg DecodePositionCorrection(ReadOnlySpan<byte> p)
         {
             var r = new Reader(p);

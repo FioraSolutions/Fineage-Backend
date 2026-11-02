@@ -1,3 +1,4 @@
+using Fineage.Net.Contract;
 using Fineage.Protocol;
 using Fineage.Zone.Combat;
 using Fineage.Zone.Drops;
@@ -53,8 +54,10 @@ public sealed partial class ZoneWorld
             return "pickup";
 
         var added = player.Inventory.Add(ground.GroundItemId, ground.GroundCount);
-        outbound.Add(Pack(session, MsgType.InventoryUpdate,
-            InventoryMessages.Update(InventoryChange.Add, added)));
+        var invUpdate = InventoryMessages.Update(InventoryChange.Add, added);
+        outbound.Add(Pack(session, MsgType.InventoryUpdate, invUpdate));
+        if (NetBridge != null)
+            NetBridge.FanoutInventoryUpdate([session.ObjectId], ToNetInventoryUpdate(invUpdate));
         RemoveGroundItem(ground, outbound);
         SaveInventory(session, player.Inventory);
         ZoneLog.Info($"pickup object={session.ObjectId} ground={groundObjectId} item={ground.GroundItemId} count={ground.GroundCount}");
@@ -87,16 +90,20 @@ public sealed partial class ZoneWorld
         if (!player.Inventory.TryReduce(item, request.Count, out bool removedEntirely))
             return "bad_request";
 
+        InventoryUpdateMsg invUpdate;
         if (removedEntirely)
         {
-            outbound.Add(Pack(session, MsgType.InventoryUpdate,
-                new InventoryUpdateMsg { Changes = [InventoryMessages.RemoveRow(item, -1)] }));
+            invUpdate = new InventoryUpdateMsg { Changes = [InventoryMessages.RemoveRow(item, -1)] };
+            outbound.Add(Pack(session, MsgType.InventoryUpdate, invUpdate));
         }
         else
         {
-            outbound.Add(Pack(session, MsgType.InventoryUpdate,
-                InventoryMessages.Update(InventoryChange.Modify, item)));
+            invUpdate = InventoryMessages.Update(InventoryChange.Modify, item);
+            outbound.Add(Pack(session, MsgType.InventoryUpdate, invUpdate));
         }
+
+        if (NetBridge != null)
+            NetBridge.FanoutInventoryUpdate([session.ObjectId], ToNetInventoryUpdate(invUpdate));
 
         SaveInventory(session, player.Inventory);
 
@@ -212,7 +219,7 @@ public sealed partial class ZoneWorld
 
         if (netWatchers is { Count: > 0 } && NetBridge != null)
         {
-            NetBridge.FanoutDropItem(netWatchers, new Fineage.Net.Contract.DropItemNetMsg
+            NetBridge.FanoutDropItem(netWatchers, new DropItemNetMsg
             {
                 DropperObjectId = dropperObjectId,
                 EntityValue = (ulong)(uint)objectId,
@@ -251,11 +258,32 @@ public sealed partial class ZoneWorld
 
         if (netWatchers is { Count: > 0 } && NetBridge != null)
         {
-            NetBridge.FanoutEntityDespawn(netWatchers, new Fineage.Net.Contract.EntityDespawnMsg
+            NetBridge.FanoutEntityDespawn(netWatchers, new EntityDespawnMsg
             {
                 EntityValue = (ulong)(uint)objectId,
                 EntityGeneration = 1
             });
         }
+    }
+
+    static InventoryUpdateNetMsg ToNetInventoryUpdate(InventoryUpdateMsg msg)
+    {
+        var src = msg.Changes ?? [];
+        var rows = new InventoryUpdateEntryNet[src.Length];
+        for (int i = 0; i < src.Length; i++)
+        {
+            var row = src[i];
+            rows[i] = new InventoryUpdateEntryNet
+            {
+                Change = row.Change,
+                ObjectId = row.ObjectId,
+                ItemId = row.ItemId,
+                Count = row.Count,
+                EnchantLevel = row.EnchantLevel,
+                EquippedSlot = row.EquippedSlot
+            };
+        }
+
+        return new InventoryUpdateNetMsg { Changes = rows };
     }
 }

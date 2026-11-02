@@ -190,4 +190,25 @@ namespace Fineage.Net.Contract
         public bool Stackable { get; set; }
         public int Count { get; set; } = 1;
     }
+
+    public sealed class PickupRequestNetMsg
+    {
+        public int GroundObjectId { get; set; }
+    }
+
+    /// <summary>0 add / 1 modify / 2 remove — same as V2 InventoryChange.</summary>
+    public sealed class InventoryUpdateEntryNet
+    {
+        public int Change { get; set; }
+        public int ObjectId { get; set; }
+        public int ItemId { get; set; }
+        public int Count { get; set; }
+        public int EnchantLevel { get; set; }
+        public int EquippedSlot { get; set; } = -1;
+    }
+
+    public sealed class InventoryUpdateNetMsg
+    {
+        public InventoryUpdateEntryNet[] Changes { get; set; } = System.Array.Empty<InventoryUpdateEntryNet>();
+    }
 }

@@ -28,4 +28,6 @@ interface INetPresenceBridge
     void FanoutDropItem(IReadOnlyList<int> watcherObjectIds, DropItemNetMsg drop);
 
     void FanoutEntityDespawn(IReadOnlyList<int> watcherObjectIds, EntityDespawnMsg despawn);
+
+    void FanoutInventoryUpdate(IReadOnlyList<int> watcherObjectIds, InventoryUpdateNetMsg update);
 }

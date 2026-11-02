@@ -56,6 +56,33 @@ public sealed class NetPresenceHubTests
     }
 
     [Fact]
+    public void Pickup_inventory_update_codec_round_trip()
+    {
+        var update = new InventoryUpdateNetMsg
+        {
+            Changes =
+            [
+                new InventoryUpdateEntryNet
+                {
+                    Change = 0,
+                    ObjectId = 11,
+                    ItemId = 57,
+                    Count = 40,
+                    EnchantLevel = 0,
+                    EquippedSlot = -1
+                }
+            ]
+        };
+        var again = NetCodec.DecodeInventoryUpdate(NetCodec.EncodeInventoryUpdate(update));
+        Assert.Single(again.Changes);
+        Assert.Equal(57, again.Changes[0].ItemId);
+        Assert.Equal(40, again.Changes[0].Count);
+
+        var pickup = new PickupRequestNetMsg { GroundObjectId = 99 };
+        Assert.Equal(99, NetCodec.DecodePickupRequest(NetCodec.EncodePickupRequest(pickup)).GroundObjectId);
+    }
+
+    [Fact]
     public void Die_and_drop_codec_round_trip()
     {
         var die = new EntityDieMsg { EntityValue = 9001, EntityGeneration = 1, KillerObjectId = 7 };

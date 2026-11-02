@@ -100,6 +100,13 @@ public sealed class NetZoneServer : INetPresenceBridge
             _ = _presence.SendAsync(watcher, NetOpcode.EntityDespawn, payload, CancellationToken.None);
     }
 
+    void INetPresenceBridge.FanoutInventoryUpdate(IReadOnlyList<int> watcherObjectIds, InventoryUpdateNetMsg update)
+    {
+        var payload = NetCodec.EncodeInventoryUpdate(update);
+        foreach (int watcher in watcherObjectIds)
+            _ = _presence.SendAsync(watcher, NetOpcode.InventoryUpdate, payload, CancellationToken.None);
+    }
+
     public async Task HandleAsync(NetConnection conn, CancellationToken ct)
     {
         await using var discard = new MemoryStream();
@@ -140,6 +147,9 @@ public sealed class NetZoneServer : INetPresenceBridge
                             break;
                         case NetOpcode.AttackRequest:
                             await OnAttackAsync(conn, zoneSession, envelope, ct).ConfigureAwait(false);
+                            break;
+                        case NetOpcode.PickupRequest:
+                            await OnPickupAsync(conn, zoneSession, envelope, ct).ConfigureAwait(false);
                             break;
                         case NetOpcode.StopMove:
                             // Authoritative stop: correct to current session position.
@@ -534,6 +544,29 @@ public sealed class NetZoneServer : INetPresenceBridge
         if (error != null)
             await RejectAsync(conn, error, "Attack failed.", ct).ConfigureAwait(false);
         // AttackState / MoveState / StatusUpdate fan out via NetBridge from ZoneWorld combat.
+    }
+
+    async Task OnPickupAsync(
+        NetConnection conn,
+        ZoneSession zoneSession,
+        PacketEnvelope envelope,
+        CancellationToken ct)
+    {
+        RequireHello(conn);
+        if (!zoneSession.Bound || !zoneSession.InWorld)
+        {
+            await RejectAsync(conn, "not_in_world", "Enter world first.", ct).ConfigureAwait(false);
+            return;
+        }
+
+        var pickup = NetCodec.DecodePickupRequest(envelope.Payload);
+        string? error = await _world.TryPickupAsync(
+            zoneSession,
+            new PickupRequestMsg { ObjectId = pickup.GroundObjectId },
+            ct).ConfigureAwait(false);
+        if (error != null)
+            await RejectAsync(conn, error, "Pickup failed.", ct).ConfigureAwait(false);
+        // InventoryUpdate + EntityDespawn fan out via NetBridge.
     }
 
     static void RequireHello(NetConnection conn)
