@@ -17,7 +17,8 @@ public enum CombatStat
     CritRate   // critRate
 }
 
-public sealed record SkillStatFunc(CombatStat Stat, char Op, double[] Values)
+/// <param name="Using">Mobius <c>&lt;using kind&gt;</c> condition (upper-case kinds); null = unconditional.</param>
+public sealed record SkillStatFunc(CombatStat Stat, char Op, double[] Values, string[]? Using = null)
 {
     public double ValueAt(int level) => Values.Length == 0 ? 0 : Values[Math.Clamp(level, 1, Values.Length) - 1];
 }
@@ -99,9 +100,36 @@ public sealed class SkillStatEffectCatalog
         return mods ?? CombatStatMods.None;
     }
 
-    public static SkillStatEffectCatalog LoadDefault()
+    /// <summary>
+    /// Folds passive skill funcs (Mobius operateType P) for the <paramref name="known"/> skill → level map into
+    /// <paramref name="mods"/>. Funcs with a <c>using</c> condition apply only when <paramref name="wearing"/> accepts it.
+    /// </summary>
+    public CombatStatMods CollectPassives(IReadOnlyDictionary<int, int> known, Func<string[], bool> wearing, CombatStatMods? mods = null)
     {
-        var path = TeleportCatalog.FindFile(FileName);
+        foreach (var (skillId, level) in known)
+        {
+            if (!_byId.TryGetValue(skillId, out var effect))
+                continue;
+            foreach (var f in effect.Funcs)
+            {
+                if (f.Using != null && !wearing(f.Using))
+                    continue;
+                mods ??= new CombatStatMods();
+                mods.Add(f, level);
+            }
+        }
+        return mods ?? CombatStatMods.None;
+    }
+
+    public static SkillStatEffectCatalog LoadPassives() => LoadFile(PassivesFileName);
+
+    public const string PassivesFileName = "skill-passives.json";
+
+    public static SkillStatEffectCatalog LoadDefault() => LoadFile(FileName);
+
+    static SkillStatEffectCatalog LoadFile(string fileName)
+    {
+        var path = TeleportCatalog.FindFile(fileName);
         return path == null ? Empty : Parse(File.ReadAllText(path), path);
     }
 
@@ -128,7 +156,10 @@ public sealed class SkillStatEffectCatalog
                 if (op == '?')
                     continue;
                 var values = e.GetProperty("values").EnumerateArray().Select(v => v.GetDouble()).ToArray();
-                funcs.Add(new SkillStatFunc(stat, op, values));
+                string[]? usingKinds = e.TryGetProperty("using", out var u)
+                    ? u.EnumerateArray().Select(k => (k.GetString() ?? "").ToUpperInvariant()).ToArray()
+                    : null;
+                funcs.Add(new SkillStatFunc(stat, op, values, usingKinds));
             }
             if (funcs.Count > 0)
                 byId[id] = new SkillStatEffect(id, name, Math.Max(1, levels), funcs);

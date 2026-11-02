@@ -347,7 +347,7 @@ public sealed partial class ZoneWorld
         if (!_byId.TryGetValue(hit.TargetId, out var target) || target.CurHp <= 0 || target.Dead)
             return;
         // Mobius onHitTimer: target ran out of reach during the swing -> no damage.
-        int reach = (attacker.Kind == ZoneEntityKind.Npc ? ZoneCombat.MobMeleeRange : PlayerReach(attacker)) + ZoneCombat.HitRangeTolerance;
+        int reach = (attacker.Kind == ZoneEntityKind.Npc ? ZoneCombat.MobAttackReach(attacker.AttackRange) : PlayerReach(attacker)) + ZoneCombat.HitRangeTolerance;
         if (!ZoneCombat.Within(attacker.X, attacker.Y, target.X, target.Y, reach))
             return;
 

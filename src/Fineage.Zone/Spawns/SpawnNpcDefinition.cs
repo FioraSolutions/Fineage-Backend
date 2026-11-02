@@ -35,7 +35,8 @@ public sealed record SpawnNpcDefinition(
     int ShieldDef = 0,
     int ShieldRate = 0,
     double MAtk = 0,
-    double MDef = 0);
+    double MDef = 0,
+    int AttackRange = 0);
 
 public sealed record SpawnMapDefinition(
     string MapId,

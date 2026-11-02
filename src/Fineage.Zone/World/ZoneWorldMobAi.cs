@@ -95,7 +95,7 @@ public sealed partial class ZoneWorld
                 continue;
             }
             npc.LastAiTickMs = now;
-            if (!ZoneCombat.InMobMeleeRange(npc.X, npc.Y, player.X, player.Y))
+            if (!ZoneCombat.InMobReach(npc.X, npc.Y, player.X, player.Y, ZoneCombat.MobAttackReach(npc.AttackRange)))
             {
                 // Mobius AttackableAI.thinkAttack -> moveToPawn(target, range): mob runs to the attacker.
                 ChaseStep(npc, player, now, outbound);
@@ -140,7 +140,7 @@ public sealed partial class ZoneWorld
         double dx = target.X - npc.X;
         double dy = target.Y - npc.Y;
         double dist = Math.Sqrt(dx * dx + dy * dy);
-        double stopAt = ZoneCombat.MobMeleeRange - 20;
+        double stopAt = ZoneCombat.MobAttackReach(npc.AttackRange) - ZoneCombat.ApproachSlack;
         if (dist <= stopAt)
             return;
 

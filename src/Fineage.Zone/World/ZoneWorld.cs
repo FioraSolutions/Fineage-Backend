@@ -78,6 +78,8 @@ sealed class ZoneEntity
     public double PDef { get; init; }
     /// <summary>NPC Mobius attack speed (Pspd, 0 = default 253).</summary>
     public int PAtkSpd { get; init; }
+    /// <summary>NPC template physical attack range (Mobius atkRange: 40 melee, 1100 archers); 0 = default.</summary>
+    public int AttackRange { get; init; }
     /// <summary>NPC Mobius base accuracy / evasion / crit / random spread / DEX (players use the class template).</summary>
     public double BaseAccuracy { get; init; }
     public double BaseEvasion { get; init; }
@@ -217,6 +219,7 @@ public sealed partial class ZoneWorld
     readonly SkillStatEffectCatalog _statEffects;
     /// <summary>Mobius attack-skill power / MP / timing (data/skill-combat.json).</summary>
     readonly SkillCombatCatalog _skillCombat;
+    readonly SkillStatEffectCatalog _passives;
     readonly BuyListCatalog _buyLists;
     readonly MultiSellCatalog _multisells;
     readonly ShopStock _shopStock;
@@ -274,10 +277,12 @@ public sealed partial class ZoneWorld
         GeoEngine? geo = null,
         Random? combatRandom = null,
         SkillStatEffectCatalog? statEffects = null,
-        SkillCombatCatalog? skillCombat = null)
+        SkillCombatCatalog? skillCombat = null,
+        SkillStatEffectCatalog? passives = null)
     {
         _skillCombat = skillCombat ?? SkillCombatCatalog.LoadDefault();
         _statEffects = statEffects ?? SkillStatEffectCatalog.LoadDefault();
+        _passives = passives ?? SkillStatEffectCatalog.LoadPassives();
         _combatRandom = combatRandom ?? Random.Shared;
         _aoi = aoi ?? new SingleCellAoi();
         _game = game ?? GameData.LoadDefault();

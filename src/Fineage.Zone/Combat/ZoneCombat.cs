@@ -191,11 +191,16 @@ public static class ZoneCombat
     /// <summary>Fallback NPC run speed when the template has none.</summary>
     public const float DefaultNpcRunSpeed = 120f;
 
-    public static bool InMobMeleeRange(int ax, int ay, int bx, int by)
+    public static bool InMobMeleeRange(int ax, int ay, int bx, int by) => InMobReach(ax, ay, bx, by, MobMeleeRange);
+
+    /// <summary>NPC reach for its template atkRange (Mobius physRange + collisions): max(40, range) + collision allowance.</summary>
+    public static int MobAttackReach(int attackRange) => PlayerAttackReach(attackRange);
+
+    public static bool InMobReach(int ax, int ay, int bx, int by, int reach)
     {
         long dx = ax - (long)bx;
         long dy = ay - (long)by;
-        return dx * dx + dy * dy <= (long)MobMeleeRange * MobMeleeRange;
+        return dx * dx + dy * dy <= (long)reach * reach;
     }
 
     /// <summary>Placeholder until NPC pAtk/pDef formulas are imported: scales with level.</summary>
