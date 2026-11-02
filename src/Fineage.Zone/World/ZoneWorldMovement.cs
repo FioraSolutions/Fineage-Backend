@@ -6,7 +6,7 @@ namespace Fineage.Zone.World;
 /// Net-path timed movement (Mobius <c>Creature.moveToLocation</c> + <c>MovementTaskManager</c>, simplified):
 /// a MoveInput starts a straight segment; the server advances the entity along it at run/walk speed
 /// every combat tick instead of teleporting to dest. Z is sanity-clamped (stub for GeoEngine / ValidatePosition).
-/// Follow-ups (not here): L2D GeoEngine heights + canMoveToTarget, pathfinding, water/doors, client ValidatePosition packet.
+/// Follow-ups (not here): L2D GeoEngine heights + canMoveToTarget, pathfinding, water/doors, client ValidatePosition drift check (see ValidateClientPosition).
 /// </summary>
 public sealed partial class ZoneWorld
 {
@@ -79,6 +79,44 @@ public sealed partial class ZoneWorld
                 StopTimedMove(e);
                 SyncSession(e, session);
             }
+        }
+    }
+
+    /// <summary>
+    /// Mobius ValidatePosition drift tolerance (L2 units, 1 Unity m ≈ 52.5u). Base XY allowance ≈ 2.9m;
+    /// while moving we add speed × <see cref="ValidateLagSeconds"/> so heartbeat/RTT lag isn't punished.
+    /// </summary>
+    internal const int ValidateMaxXyDrift = 150;
+    internal const int ValidateMaxZDrift = 256;
+    internal const double ValidateLagSeconds = 0.5;
+
+    /// <summary>
+    /// Net ValidatePosition: compare client-reported XYZ with the authoritative timed-move position.
+    /// Returns true when drift exceeds tolerance (caller sends PositionCorrection with session XYZ).
+    /// Server never adopts client XY; Z stays server-side (geo stub, next slice).
+    /// </summary>
+    internal bool ValidateClientPosition(ZoneSession session, int clientX, int clientY, int clientZ, out int dxy, out int dz)
+    {
+        dxy = 0;
+        dz = 0;
+        lock (_gate)
+        {
+            if (!_byId.TryGetValue(session.ObjectId, out var e) || e.Kind != ZoneEntityKind.Player || e.Dead)
+                return false;
+            AdvanceMove(e, _clock().ToUnixTimeMilliseconds());
+            SyncSession(e, session);
+            double dx = clientX - e.X, dy = clientY - e.Y;
+            dxy = (int)Math.Sqrt(dx * dx + dy * dy);
+            dz = Math.Abs(clientZ - e.Z);
+            double allowXy = ValidateMaxXyDrift;
+            if (e.MoveActive)
+            {
+                float speed = e.Running ? e.RunSpeed : e.WalkSpeed;
+                if (speed <= 0)
+                    speed = DefaultRunSpeed;
+                allowXy += speed * ValidateLagSeconds;
+            }
+            return dxy > allowXy || dz > ValidateMaxZDrift;
         }
     }
 

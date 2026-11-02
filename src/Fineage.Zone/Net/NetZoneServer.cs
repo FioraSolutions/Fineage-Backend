@@ -389,6 +389,30 @@ public sealed class NetZoneServer : INetPresenceBridge
                         case NetOpcode.TradeDoneRequest:
                             await OnTradeDoneAsync(conn, zoneSession, envelope, ct).ConfigureAwait(false);
                             break;
+                        case NetOpcode.ValidatePosition:
+                            if (zoneSession.Bound && zoneSession.InWorld)
+                            {
+                                var vp = NetCodec.DecodeValidatePosition(envelope.Payload);
+                                if (_world.ValidateClientPosition(zoneSession, vp.X, vp.Y, vp.Z, out int dxy, out int dz))
+                                {
+                                    Console.WriteLine(
+                                        $"[zone] ValidatePosition drift obj={zoneSession.ObjectId} dxy={dxy} dz={dz} client={vp.X},{vp.Y},{vp.Z} server={zoneSession.X},{zoneSession.Y},{zoneSession.Z} -> PositionCorrection");
+                                    await conn.SendAsync(
+                                        NetOpcode.PositionCorrection,
+                                        NetCodec.EncodePositionCorrection(new PositionCorrectionMsg
+                                        {
+                                            EntityValue = self.Value,
+                                            EntityGeneration = self.Generation,
+                                            X = zoneSession.X,
+                                            Y = zoneSession.Y,
+                                            Z = zoneSession.Z
+                                        }),
+                                        envelope.RequestSequence,
+                                        ct).ConfigureAwait(false);
+                                }
+                            }
+
+                            break;
                         case NetOpcode.StopMove:
                             // Authoritative stop: correct to current session position.
                             if (zoneSession.Bound && zoneSession.InWorld)

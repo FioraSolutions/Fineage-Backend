@@ -70,6 +70,14 @@ namespace Fineage.Net.Contract
         public int DestZ { get; set; }
     }
 
+    public sealed class ValidatePositionMsg
+    {
+        public int X { get; set; }
+        public int Y { get; set; }
+        public int Z { get; set; }
+        public int Heading { get; set; }
+    }
+
     public sealed class StopMoveMsg
     {
     }

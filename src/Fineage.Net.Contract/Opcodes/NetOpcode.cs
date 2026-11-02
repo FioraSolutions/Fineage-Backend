@@ -86,5 +86,8 @@ namespace Fineage.Net.Contract
         public const ushort TradeOfferUpdate = 0x0341;
         public const ushort TradeConfirmState = 0x0342;
         public const ushort TradeFinished = 0x0343;
+        // 0x0344..0x034F reserved (clan WIP)
+        /// <summary>Client → zone: Mobius ValidatePosition heartbeat (L2 XYZ + heading).</summary>
+        public const ushort ValidatePosition = 0x0350;
     }
 }

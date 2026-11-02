@@ -426,6 +426,20 @@ namespace Fineage.Net.Contract
             return new MoveInputMsg { DestX = r.ReadInt32(), DestY = r.ReadInt32(), DestZ = r.ReadInt32() };
         }
 
+        public static byte[] EncodeValidatePosition(ValidatePositionMsg m) => Write(w =>
+        {
+            w.WriteInt32(m.X);
+            w.WriteInt32(m.Y);
+            w.WriteInt32(m.Z);
+            w.WriteInt32(m.Heading);
+        });
+
+        public static ValidatePositionMsg DecodeValidatePosition(ReadOnlySpan<byte> p)
+        {
+            var r = new Reader(p);
+            return new ValidatePositionMsg { X = r.ReadInt32(), Y = r.ReadInt32(), Z = r.ReadInt32(), Heading = r.ReadInt32() };
+        }
+
         public static byte[] EncodeStopMove(StopMoveMsg _) => Array.Empty<byte>();
         public static StopMoveMsg DecodeStopMove(ReadOnlySpan<byte> _) => new();
 
