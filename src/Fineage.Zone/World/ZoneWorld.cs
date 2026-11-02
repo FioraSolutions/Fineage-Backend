@@ -1,3 +1,4 @@
+using Fineage.Zone.Geo;
 using Fineage.Game;
 using Fineage.Game.Quests;
 using Fineage.Login;
@@ -179,6 +180,11 @@ public sealed partial class ZoneWorld
     readonly DropCatalog _dropCatalog;
     readonly DropRates _dropRates;
     readonly object _gate = new();
+    readonly GeoEngine _geo;
+    static readonly Lazy<GeoEngine> SharedGeo = new(GeoEngine.LoadDefault);
+
+    /// <summary>Server geodata (empty when no region files are present).</summary>
+    public GeoEngine GeoData => _geo;
 
     public ZoneWorld(
         IAoi? aoi = null,
@@ -213,7 +219,8 @@ public sealed partial class ZoneWorld
         int? teleportOffset = null,
         Random? serviceRandom = null,
         BuyListCatalog? buyLists = null,
-        MultiSellCatalog? multisells = null)
+        MultiSellCatalog? multisells = null,
+        GeoEngine? geo = null)
     {
         _aoi = aoi ?? new SingleCellAoi();
         _game = game ?? GameData.LoadDefault();
@@ -249,6 +256,7 @@ public sealed partial class ZoneWorld
         _buyLists = buyLists ?? BuyListCatalog.LoadDefault();
         _multisells = multisells ?? MultiSellCatalog.LoadDefault();
         _shopStock = new ShopStock(_buyLists);
+        _geo = geo ?? SharedGeo.Value;
         BootstrapSpawns();
         BootstrapBosses();
         BootstrapQuestNpcs();

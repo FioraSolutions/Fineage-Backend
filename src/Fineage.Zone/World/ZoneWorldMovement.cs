@@ -5,8 +5,8 @@ namespace Fineage.Zone.World;
 /// <summary>
 /// Net-path timed movement (Mobius <c>Creature.moveToLocation</c> + <c>MovementTaskManager</c>, simplified):
 /// a MoveInput starts a straight segment; the server advances the entity along it at run/walk speed
-/// every combat tick instead of teleporting to dest. Z is sanity-clamped (stub for GeoEngine / ValidatePosition).
-/// Follow-ups (not here): L2D GeoEngine heights + canMoveToTarget, pathfinding, water/doors, client ValidatePosition drift check (see ValidateClientPosition).
+/// every combat tick instead of teleporting to dest. Z follows L2 geodata (<see cref="Geo.GeoEngine"/>) where region files exist, else the stub sanity clamp.
+/// Follow-ups (not here): pathfinding, water/doors, client ValidatePosition drift check (see ValidateClientPosition).
 /// </summary>
 public sealed partial class ZoneWorld
 {
@@ -29,14 +29,27 @@ public sealed partial class ZoneWorld
         long now = _clock().ToUnixTimeMilliseconds();
         AdvanceMove(entity, now);
 
-        int destZ = SanitizeDestZ(entity.X, entity.Y, entity.Z, move.DestX, move.DestY, move.DestZ);
+        int destX = move.DestX, destY = move.DestY, destZ;
+        if (_geo.HasGeo(entity.X, entity.Y))
+        {
+            // L2 geo: server Z = ground under the current XY; dest truncated before walls / steep climbs.
+            entity.Z = _geo.GetHeight(entity.X, entity.Y, entity.Z);
+            (destX, destY, destZ) = _geo.MoveCheck(entity.X, entity.Y, entity.Z, move.DestX, move.DestY, move.DestZ, out bool blocked);
+            if (blocked)
+                ZoneLog.Info($"[geo] move blocked obj={entity.ObjectId} from={entity.X},{entity.Y},{entity.Z} want={move.DestX},{move.DestY},{move.DestZ} stop={destX},{destY},{destZ}");
+        }
+        else
+        {
+            destZ = SanitizeDestZ(entity.X, entity.Y, entity.Z, move.DestX, move.DestY, move.DestZ);
+        }
+
         int curX = entity.X, curY = entity.Y, curZ = entity.Z;
 
         var ack = new MoveToMsg
         {
             ObjectId = entity.ObjectId,
-            DestX = move.DestX,
-            DestY = move.DestY,
+            DestX = destX,
+            DestY = destY,
             DestZ = destZ,
             OriginX = curX,
             OriginY = curY,
@@ -45,17 +58,17 @@ public sealed partial class ZoneWorld
 
         // AOI is evaluated at the destination (same visibility as before), then the entity is put back
         // at its real position and walks there over ticks.
-        entity.X = move.DestX;
-        entity.Y = move.DestY;
+        entity.X = destX;
+        entity.Y = destY;
         ReconcileKnownlist(entity, ack, toSelf, toOthers);
         entity.X = curX;
         entity.Y = curY;
 
-        entity.MoveDestX = move.DestX;
-        entity.MoveDestY = move.DestY;
+        entity.MoveDestX = destX;
+        entity.MoveDestY = destY;
         entity.MoveDestZ = destZ;
         entity.MoveLastTickMs = now;
-        entity.MoveActive = curX != move.DestX || curY != move.DestY;
+        entity.MoveActive = curX != destX || curY != destY;
         if (!entity.MoveActive)
             entity.Z = destZ;
         SyncSession(entity, session);
@@ -88,12 +101,14 @@ public sealed partial class ZoneWorld
     /// </summary>
     internal const int ValidateMaxXyDrift = 150;
     internal const int ValidateMaxZDrift = 256;
+    /// <summary>With real geo the server Z is ground truth, so a client below/above it by &gt; ~2.4m is corrected (temple-floor fall).</summary>
+    internal const int ValidateMaxZDriftGeo = 128;
     internal const double ValidateLagSeconds = 0.5;
 
     /// <summary>
     /// Net ValidatePosition: compare client-reported XYZ with the authoritative timed-move position.
     /// Returns true when drift exceeds tolerance (caller sends PositionCorrection with session XYZ).
-    /// Server never adopts client XY; Z stays server-side (geo stub, next slice).
+    /// Server never adopts client XY or Z; with geo the server Z is snapped to ground.
     /// </summary>
     internal bool ValidateClientPosition(ZoneSession session, int clientX, int clientY, int clientZ, out int dxy, out int dz)
     {
@@ -104,6 +119,9 @@ public sealed partial class ZoneWorld
             if (!_byId.TryGetValue(session.ObjectId, out var e) || e.Kind != ZoneEntityKind.Player || e.Dead)
                 return false;
             AdvanceMove(e, _clock().ToUnixTimeMilliseconds());
+            bool geo = _geo.HasGeo(e.X, e.Y);
+            if (geo)
+                e.Z = _geo.GetHeight(e.X, e.Y, e.Z);
             SyncSession(e, session);
             double dx = clientX - e.X, dy = clientY - e.Y;
             dxy = (int)Math.Sqrt(dx * dx + dy * dy);
@@ -116,7 +134,7 @@ public sealed partial class ZoneWorld
                     speed = DefaultRunSpeed;
                 allowXy += speed * ValidateLagSeconds;
             }
-            return dxy > allowXy || dz > ValidateMaxZDrift;
+            return dxy > allowXy || dz > (geo ? ValidateMaxZDriftGeo : ValidateMaxZDrift);
         }
     }
 
@@ -162,6 +180,8 @@ public sealed partial class ZoneWorld
             e.X += (int)Math.Round(dx * k);
             e.Y += (int)Math.Round(dy * k);
             e.Z += (int)Math.Round((e.MoveDestZ - e.Z) * k);
+            if (_geo.HasGeo(e.X, e.Y))
+                e.Z = _geo.GetHeight(e.X, e.Y, e.Z);
         }
         _aoi.Move(e.ObjectId, e.X, e.Y);
         if (e.Session != null)
