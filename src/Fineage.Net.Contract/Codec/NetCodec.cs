@@ -668,6 +668,36 @@ namespace Fineage.Net.Contract
             return new InventoryUpdateNetMsg { Changes = rows };
         }
 
+        public static byte[] EncodeDropItemRequest(DropItemRequestNetMsg m) => Write(w =>
+        {
+            w.WriteInt32(m.ObjectId);
+            w.WriteInt32(m.Count);
+            w.WriteInt32(m.X);
+            w.WriteInt32(m.Y);
+            w.WriteInt32(m.Z);
+        });
+
+        public static DropItemRequestNetMsg DecodeDropItemRequest(ReadOnlySpan<byte> p)
+        {
+            var r = new Reader(p);
+            return new DropItemRequestNetMsg
+            {
+                ObjectId = r.ReadInt32(),
+                Count = r.ReadInt32(),
+                X = r.ReadInt32(),
+                Y = r.ReadInt32(),
+                Z = r.ReadInt32()
+            };
+        }
+
+        public static byte[] EncodeUseItem(UseItemNetMsg m) => Write(w => w.WriteInt32(m.ObjectId));
+        public static UseItemNetMsg DecodeUseItem(ReadOnlySpan<byte> p) =>
+            new() { ObjectId = new Reader(p).ReadInt32() };
+
+        public static byte[] EncodeUnequipItem(UnequipItemNetMsg m) => Write(w => w.WriteInt32(m.PaperdollSlot));
+        public static UnequipItemNetMsg DecodeUnequipItem(ReadOnlySpan<byte> p) =>
+            new() { PaperdollSlot = new Reader(p).ReadInt32() };
+
         public static PositionCorrectionMsg DecodePositionCorrection(ReadOnlySpan<byte> p)
         {
             var r = new Reader(p);

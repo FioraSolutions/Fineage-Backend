@@ -211,4 +211,23 @@ namespace Fineage.Net.Contract
     {
         public InventoryUpdateEntryNet[] Changes { get; set; } = System.Array.Empty<InventoryUpdateEntryNet>();
     }
+
+    public sealed class DropItemRequestNetMsg
+    {
+        public int ObjectId { get; set; }
+        public int Count { get; set; } = 1;
+        public int X { get; set; }
+        public int Y { get; set; }
+        public int Z { get; set; }
+    }
+
+    public sealed class UseItemNetMsg
+    {
+        public int ObjectId { get; set; }
+    }
+
+    public sealed class UnequipItemNetMsg
+    {
+        public int PaperdollSlot { get; set; }
+    }
 }

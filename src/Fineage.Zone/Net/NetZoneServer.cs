@@ -151,6 +151,15 @@ public sealed class NetZoneServer : INetPresenceBridge
                         case NetOpcode.PickupRequest:
                             await OnPickupAsync(conn, zoneSession, envelope, ct).ConfigureAwait(false);
                             break;
+                        case NetOpcode.DropItemRequest:
+                            await OnDropItemAsync(conn, zoneSession, envelope, ct).ConfigureAwait(false);
+                            break;
+                        case NetOpcode.UseItem:
+                            await OnUseItemAsync(conn, zoneSession, envelope, ct).ConfigureAwait(false);
+                            break;
+                        case NetOpcode.UnequipItem:
+                            await OnUnequipItemAsync(conn, zoneSession, envelope, ct).ConfigureAwait(false);
+                            break;
                         case NetOpcode.StopMove:
                             // Authoritative stop: correct to current session position.
                             if (zoneSession.Bound && zoneSession.InWorld)
@@ -567,6 +576,79 @@ public sealed class NetZoneServer : INetPresenceBridge
         if (error != null)
             await RejectAsync(conn, error, "Pickup failed.", ct).ConfigureAwait(false);
         // InventoryUpdate + EntityDespawn fan out via NetBridge.
+    }
+
+    async Task OnDropItemAsync(
+        NetConnection conn,
+        ZoneSession zoneSession,
+        PacketEnvelope envelope,
+        CancellationToken ct)
+    {
+        RequireHello(conn);
+        if (!zoneSession.Bound || !zoneSession.InWorld)
+        {
+            await RejectAsync(conn, "not_in_world", "Enter world first.", ct).ConfigureAwait(false);
+            return;
+        }
+
+        var drop = NetCodec.DecodeDropItemRequest(envelope.Payload);
+        string? error = await _world.TryDropItemAsync(
+            zoneSession,
+            new DropItemRequestMsg
+            {
+                ObjectId = drop.ObjectId,
+                Count = drop.Count,
+                X = drop.X,
+                Y = drop.Y,
+                Z = drop.Z
+            },
+            ct).ConfigureAwait(false);
+        if (error != null)
+            await RejectAsync(conn, error, "Drop failed.", ct).ConfigureAwait(false);
+    }
+
+    async Task OnUseItemAsync(
+        NetConnection conn,
+        ZoneSession zoneSession,
+        PacketEnvelope envelope,
+        CancellationToken ct)
+    {
+        RequireHello(conn);
+        if (!zoneSession.Bound || !zoneSession.InWorld)
+        {
+            await RejectAsync(conn, "not_in_world", "Enter world first.", ct).ConfigureAwait(false);
+            return;
+        }
+
+        var use = NetCodec.DecodeUseItem(envelope.Payload);
+        string? error = await _world.TryUseItemAsync(
+            zoneSession,
+            new UseItemMsg { ObjectId = use.ObjectId },
+            ct).ConfigureAwait(false);
+        if (error != null)
+            await RejectAsync(conn, error, "UseItem failed.", ct).ConfigureAwait(false);
+    }
+
+    async Task OnUnequipItemAsync(
+        NetConnection conn,
+        ZoneSession zoneSession,
+        PacketEnvelope envelope,
+        CancellationToken ct)
+    {
+        RequireHello(conn);
+        if (!zoneSession.Bound || !zoneSession.InWorld)
+        {
+            await RejectAsync(conn, "not_in_world", "Enter world first.", ct).ConfigureAwait(false);
+            return;
+        }
+
+        var unequip = NetCodec.DecodeUnequipItem(envelope.Payload);
+        string? error = await _world.TryUnequipItemAsync(
+            zoneSession,
+            new UnequipItemMsg { PaperdollSlot = unequip.PaperdollSlot },
+            ct).ConfigureAwait(false);
+        if (error != null)
+            await RejectAsync(conn, error, "Unequip failed.", ct).ConfigureAwait(false);
     }
 
     static void RequireHello(NetConnection conn)

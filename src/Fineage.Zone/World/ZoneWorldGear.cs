@@ -1,4 +1,5 @@
 using Fineage.Game;
+using Fineage.Net.Contract;
 using Fineage.Protocol;
 using MessagePack;
 
@@ -171,8 +172,11 @@ public sealed partial class ZoneWorld
             return false;
 
         RefreshGradePenalty(player);
-        toSelf.Add(Pack(session, MsgType.InventoryUpdate, InventoryMessages.Modify(changed)));
+        var invUpdate = InventoryMessages.Modify(changed);
+        toSelf.Add(Pack(session, MsgType.InventoryUpdate, invUpdate));
         toSelf.Add(Pack(session, MsgType.UserInfo, UserInfo(player)));
+        if (NetBridge != null)
+            NetBridge.FanoutInventoryUpdate([session.ObjectId], ToNetInventoryUpdate(invUpdate));
         byte[] body = MessagePackSerializer.Serialize(CharInfo(player));
         foreach (int id in player.Knownlist)
         {

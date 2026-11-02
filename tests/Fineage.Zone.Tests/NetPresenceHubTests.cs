@@ -56,6 +56,18 @@ public sealed class NetPresenceHubTests
     }
 
     [Fact]
+    public void Drop_use_unequip_codec_round_trip()
+    {
+        var drop = new DropItemRequestNetMsg { ObjectId = 5, Count = 2, X = 1, Y = 2, Z = 3 };
+        var dropAgain = NetCodec.DecodeDropItemRequest(NetCodec.EncodeDropItemRequest(drop));
+        Assert.Equal(5, dropAgain.ObjectId);
+        Assert.Equal(2, dropAgain.Count);
+
+        Assert.Equal(9, NetCodec.DecodeUseItem(NetCodec.EncodeUseItem(new UseItemNetMsg { ObjectId = 9 })).ObjectId);
+        Assert.Equal(7, NetCodec.DecodeUnequipItem(NetCodec.EncodeUnequipItem(new UnequipItemNetMsg { PaperdollSlot = 7 })).PaperdollSlot);
+    }
+
+    [Fact]
     public void Pickup_inventory_update_codec_round_trip()
     {
         var update = new InventoryUpdateNetMsg

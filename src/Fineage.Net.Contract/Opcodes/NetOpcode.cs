@@ -40,5 +40,8 @@ namespace Fineage.Net.Contract
         public const ushort DropItem = 0x0313;
         public const ushort PickupRequest = 0x0314;
         public const ushort InventoryUpdate = 0x0315;
+        public const ushort DropItemRequest = 0x0316;
+        public const ushort UseItem = 0x0317;
+        public const ushort UnequipItem = 0x0318;
     }
 }
