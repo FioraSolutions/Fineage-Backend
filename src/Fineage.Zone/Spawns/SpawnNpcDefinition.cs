@@ -36,7 +36,12 @@ public sealed record SpawnNpcDefinition(
     int ShieldRate = 0,
     double MAtk = 0,
     double MDef = 0,
-    int AttackRange = 0);
+    int AttackRange = 0,
+    bool Aggressive = false,
+    int AggroRange = 0,
+    int ClanHelpRange = 0,
+    IReadOnlyList<string>? Clans = null,
+    IReadOnlyList<int>? IgnoreNpcIds = null);
 
 public sealed record SpawnMapDefinition(
     string MapId,

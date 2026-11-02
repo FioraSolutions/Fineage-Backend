@@ -37,3 +37,11 @@
 - `using` follows Mobius ConditionUsingItemType: weapon kinds = right-hand type; LIGHT/HEAVY/MAGIC = chest type plus matching legs unless full-body; SHIELD = left-hand shield.
 - NPC reach = max(40, template atkRange) + collision allowance (melee 80, archers 1140); chase stop and hit-timer reach use it.
 - Gaps: passive funcs with non-`using` conditions (hp, behind, zone…) and non-combat stats (atkCountMax, weight, regen) are skipped; NPC passive skills not applied.
+
+## Slice 8 — aggro range, hate list / clan help, attack stance on Net
+- `npcs.json` gains Mobius `ai` aggroRange, clanHelpRange, clans, ignoreNpcIds.
+- Aggressive mobs (isAggressive and aggroRange > 0) scan every 500 ms and attack the first live player inside aggroRange (3D).
+- AggroList: hate += damage·100/(level+7) (min 1; aggro/clan call/miss = 1). The mob attacks the most hated valid attacker; when that one dies or leaves, it switches to the next; empty list → returnHome.
+- Clan help: once a second while fighting, idle same-clan mobs within clanHelpRange (minus ignoreNpcIds) join on the same target.
+- Net `AutoAttackStart` 0x0353 / `AutoAttackStop` 0x0354 (entity id): players = 15 s combat window, NPCs = has a target. The client reuses the legacy AutoAttackStart/Stop world apply.
+- Gaps: no LOS/geo check on aggro, no peace-zone or level-gap rules, no stance re-send to a watcher who comes into view mid-fight, V2 gets no stance packets, mob-vs-mob hate not modelled.

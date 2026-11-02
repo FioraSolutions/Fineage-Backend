@@ -93,5 +93,9 @@ namespace Fineage.Net.Contract
         public const ushort RequestActionUse = 0x0351;
         /// <summary>Zone → client: Mobius ChangeMoveType + effective run/walk speed (swim speed while in water).</summary>
         public const ushort ChangeMoveType = 0x0352;
+        /// <summary>Zone → client: Mobius AutoAttackStart (entity enters attack stance).</summary>
+        public const ushort AutoAttackStart = 0x0353;
+        /// <summary>Zone → client: Mobius AutoAttackStop (stance ended: 15 s without combat, or mob lost its target).</summary>
+        public const ushort AutoAttackStop = 0x0354;
     }
 }

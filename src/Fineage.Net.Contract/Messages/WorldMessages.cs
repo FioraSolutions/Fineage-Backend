@@ -102,6 +102,13 @@ namespace Fineage.Net.Contract
         public bool ShiftPressed { get; set; }
     }
 
+    /// <summary>Payload of <c>AutoAttackStart</c> / <c>AutoAttackStop</c>.</summary>
+    public sealed class AttackStanceNetMsg
+    {
+        public ulong EntityValue { get; set; }
+        public uint EntityGeneration { get; set; }
+    }
+
     public sealed class ChangeMoveTypeNetMsg
     {
         public ulong EntityValue { get; set; }

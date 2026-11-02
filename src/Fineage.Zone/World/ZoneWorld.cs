@@ -80,6 +80,19 @@ sealed class ZoneEntity
     public int PAtkSpd { get; init; }
     /// <summary>NPC template physical attack range (Mobius atkRange: 40 melee, 1100 archers); 0 = default.</summary>
     public int AttackRange { get; init; }
+    /// <summary>Mobius <c>ai isAggressive</c>; attacks players inside <see cref="AggroRange"/> on its own.</summary>
+    public bool Aggressive { get; init; }
+    public int AggroRange { get; init; }
+    /// <summary>Mobius <c>clanHelpRange</c> + <c>clanList</c>: same-clan mobs in range join the fight.</summary>
+    public int ClanHelpRange { get; init; }
+    public IReadOnlyList<string>? Clans { get; init; }
+    public IReadOnlyList<int>? IgnoreNpcIds { get; init; }
+    /// <summary>NPC: Mobius AggroList (attacker objectId → hate). <see cref="AggroTargetId"/> is the most hated.</summary>
+    public Dictionary<int, long> HateList { get; } = [];
+    public long NextAggroScanMs { get; set; }
+    public long NextClanCallMs { get; set; }
+    /// <summary>Attack stance the watchers were last told (Mobius AutoAttackStart / AutoAttackStop).</summary>
+    public bool StanceShown { get; set; }
     /// <summary>NPC Mobius base accuracy / evasion / crit / random spread / DEX (players use the class template).</summary>
     public double BaseAccuracy { get; init; }
     public double BaseEvasion { get; init; }

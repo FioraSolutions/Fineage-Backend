@@ -48,6 +48,7 @@ public sealed partial class ZoneWorld
     void ReturnHome(ZoneEntity npc, long now, List<Pending> outbound)
     {
         npc.AggroTargetId = 0;
+        npc.HateList.Clear();
         npc.Chasing = false;
         if (!npc.HomeSet)
         {

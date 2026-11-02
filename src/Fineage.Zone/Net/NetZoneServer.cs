@@ -160,6 +160,15 @@ public sealed class NetZoneServer : INetPresenceBridge
             _ = _presence.SendAsync(watcher, NetOpcode.ChangeMoveType, payload, CancellationToken.None);
     }
 
+    void INetPresenceBridge.FanoutAttackStance(IReadOnlyList<int> watcherObjectIds, int objectId, bool inStance)
+    {
+        var id = _ids.AllocateOrGet(objectId);
+        var payload = NetCodec.EncodeAttackStance(new AttackStanceNetMsg { EntityValue = id.Value, EntityGeneration = id.Generation });
+        ushort opcode = inStance ? NetOpcode.AutoAttackStart : NetOpcode.AutoAttackStop;
+        foreach (int watcher in watcherObjectIds)
+            _ = _presence.SendAsync(watcher, opcode, payload, CancellationToken.None);
+    }
+
     void INetPresenceBridge.FanoutAttackState(IReadOnlyList<int> watcherObjectIds, AttackStateMsg attack)
     {
         var payload = NetCodec.EncodeAttackState(attack);

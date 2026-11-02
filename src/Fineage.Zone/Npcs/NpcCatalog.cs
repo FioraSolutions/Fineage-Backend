@@ -36,7 +36,11 @@ public sealed record NpcTemplate(
     int ShieldDef = 0,
     int ShieldRate = 0,
     double MAtk = 0,
-    double MDef = 0);
+    double MDef = 0,
+    int AggroRange = 0,
+    int ClanHelpRange = 0,
+    IReadOnlyList<string>? Clans = null,
+    IReadOnlyList<int>? IgnoreNpcIds = null);
 
 /// <summary>Loads <c>data/npcs.json</c>.</summary>
 public sealed class NpcCatalog
@@ -159,7 +163,11 @@ public sealed class NpcCatalog
                 Math.Max(0, row.ShieldDef),
                 Math.Max(0, row.ShieldRate),
                 Math.Max(0, row.MAtk),
-                Math.Max(0, row.MDef)));
+                Math.Max(0, row.MDef),
+                Math.Max(0, row.AggroRange),
+                Math.Max(0, row.ClanHelpRange),
+                row.Clans is { Count: > 0 } ? row.Clans : null,
+                row.IgnoreNpcIds is { Count: > 0 } ? row.IgnoreNpcIds : null));
         }
 
         return new NpcCatalog(byId);
@@ -210,5 +218,10 @@ public sealed class NpcCatalog
         /// <summary>Mobius <c>attack magical</c> / <c>defence magical</c>.</summary>
         public double MAtk { get; set; }
         public double MDef { get; set; }
+        /// <summary>Mobius <c>ai aggroRange</c> / <c>clanHelpRange</c> / <c>clanList</c>.</summary>
+        public int AggroRange { get; set; }
+        public int ClanHelpRange { get; set; }
+        public List<string>? Clans { get; set; }
+        public List<int>? IgnoreNpcIds { get; set; }
     }
 }

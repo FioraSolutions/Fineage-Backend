@@ -366,7 +366,7 @@ public sealed partial class ZoneWorld
         if (target.Kind == ZoneEntityKind.Npc)
         {
             FanoutVitals(target, StatusFor(target), outbound);
-            AddHate(target, attacker);
+            AddHate(target, attacker, DamageHate(hit.Damage, target.Level));
             attacker.CombatUntilUnixMs = now + ClanProtocol.CombatStanceMillis;
             if (target.CurHp <= 0)
             {
@@ -380,7 +380,8 @@ public sealed partial class ZoneWorld
         FanoutVitals(target, PlayerVitalsStatus(target), outbound);
         if (target.CurHp <= 0)
         {
-            attacker.AggroTargetId = 0;
+            attacker.HateList.Remove(target.ObjectId);
+            attacker.AggroTargetId = MostHated(attacker);
             if (target.Session != null)
                 target.Session.AutoAttackTargetId = 0;
             ApplyPlayerDeath(target, attacker.ObjectId, outbound);

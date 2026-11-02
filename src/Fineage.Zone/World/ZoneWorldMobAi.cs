@@ -21,8 +21,10 @@ public sealed partial class ZoneWorld
             TickNpcMovement(now, outbound);
             TickPendingHits(now, outbound);
             TickMeleeHits(now, outbound);
+            TickAggression(now);
             TickMobAttacks(now, outbound);
             TickCorpseDecay(now, outbound);
+            TickAttackStance(now);
         }
         await FlushOthersAsync(outbound, ct).ConfigureAwait(false);
     }
@@ -54,7 +56,7 @@ public sealed partial class ZoneWorld
         }
         target.CurHp = Math.Max(0, target.CurHp - damage);
         FanoutVitals(target, StatusFor(target), outbound);
-        AddHate(target, player);
+        AddHate(target, player, DamageHate(damage, target.Level));
         player.CombatUntilUnixMs = now + ClanProtocol.CombatStanceMillis;
 
         if (target.CurHp <= 0)
@@ -64,17 +66,6 @@ public sealed partial class ZoneWorld
         }
     }
 
-    void AddHate(ZoneEntity npc, ZoneEntity attacker)
-    {
-        if (npc.Kind != ZoneEntityKind.Npc || attacker.Kind != ZoneEntityKind.Player || npc.CurHp <= 0)
-            return;
-        if (npc.AggroTargetId == attacker.ObjectId)
-            return;
-        npc.AggroTargetId = attacker.ObjectId;
-        // Mobius: first swing after attack-speed delay, not instantly.
-        npc.NextMobAttackMs = _clock().ToUnixTimeMilliseconds() + ZoneCombat.HitTimeMs(NpcPAtkSpd(npc));
-    }
-
     void TickMobAttacks(long now, List<Pending> outbound)
     {
         foreach (var npc in _byId.Values.Where(e => e.Kind == ZoneEntityKind.Npc && e.AggroTargetId > 0).ToList())
@@ -82,6 +73,7 @@ public sealed partial class ZoneWorld
             if (npc.CurHp <= 0)
             {
                 npc.AggroTargetId = 0;
+                npc.HateList.Clear();
                 StopTimedMove(npc);
                 continue;
             }
@@ -90,10 +82,20 @@ public sealed partial class ZoneWorld
                 !SameInstance(npc.ObjectId, player.ObjectId) ||
                 !ZoneCombat.InAggroRange(npc.X, npc.Y, player.X, player.Y))
             {
-                // Mobius: target dead / gone / out of MAX_DRIFT -> forget and returnHome (walk back to spawn).
+                // Mobius AggroList: drop the gone target, fall to the next most hated; none left -> returnHome.
+                npc.HateList.Remove(npc.AggroTargetId);
+                int next = MostHated(npc);
+                if (next > 0)
+                {
+                    npc.AggroTargetId = next;
+                    npc.NextMobAttackMs = now + ZoneCombat.HitTimeMs(NpcPAtkSpd(npc));
+                    continue;
+                }
                 ReturnHome(npc, now, outbound);
                 continue;
             }
+            npc.AggroTargetId = MostHated(npc) is > 0 and var top ? top : npc.AggroTargetId;
+            CallClanHelp(npc, player, now);
             npc.LastAiTickMs = now;
             if (!ZoneCombat.InMobReach(npc.X, npc.Y, player.X, player.Y, ZoneCombat.MobAttackReach(npc.AttackRange)))
             {
