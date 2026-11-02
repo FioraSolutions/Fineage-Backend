@@ -78,12 +78,27 @@ public sealed partial class ZoneWorld
     void FanoutVitals(ZoneEntity subject, StatusUpdateMsg status, List<Pending> outbound)
     {
         byte[] body = MessagePackSerializer.Serialize(status);
+        List<int>? netWatchers = null;
         foreach (var watcher in Players())
         {
             if (watcher.Session == null)
                 continue;
-            if (ReferenceEquals(watcher, subject) || watcher.Knownlist.Contains(subject.ObjectId))
-                outbound.Add(new Pending(watcher.Session, MsgType.StatusUpdate, body));
+            if (!ReferenceEquals(watcher, subject) && !watcher.Knownlist.Contains(subject.ObjectId))
+                continue;
+            outbound.Add(new Pending(watcher.Session, MsgType.StatusUpdate, body));
+            netWatchers ??= [];
+            netWatchers.Add(watcher.ObjectId);
+        }
+
+        if (netWatchers is { Count: > 0 } && NetBridge != null)
+        {
+            NetBridge.FanoutStatusUpdate(netWatchers, new Fineage.Net.Contract.StatusUpdateNetMsg
+            {
+                EntityValue = (ulong)(uint)status.ObjectId,
+                EntityGeneration = 1,
+                AttributeIds = status.AttributeIds ?? [],
+                Values = status.Values ?? []
+            });
         }
     }
 

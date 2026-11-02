@@ -604,16 +604,36 @@ public sealed partial class ZoneWorld
         if (entity.Session != null)
             toSelf.Add(Pack(entity.Session, MsgType.MoveToAck, ack));
 
+        List<int>? netWatchers = null;
+        if (NetBridge != null && entity.Session != null)
+        {
+            netWatchers = [entity.ObjectId];
+        }
+
         foreach (int id in SortedExcept(after, before))
             LinkSeen(entity, id, toSelf, toOthers);
         foreach (int id in SortedShared(after, before))
         {
             if (_byId.TryGetValue(id, out var other) && other.Session != null)
+            {
                 toOthers.Add(Pack(other.Session, MsgType.MoveToAck, ack));
+                if (netWatchers != null)
+                    netWatchers.Add(other.ObjectId);
+            }
         }
 
         foreach (int id in SortedExcept(before, after))
             Forget(entity, id, toSelf, toOthers);
+
+        if (netWatchers is { Count: > 0 } && NetBridge != null)
+        {
+            NetBridge.FanoutMoveState(
+                netWatchers,
+                entity.ObjectId,
+                ack.OriginX, ack.OriginY, ack.OriginZ,
+                ack.DestX, ack.DestY, ack.DestZ,
+                entity.Running);
+        }
     }
 
     static bool CombatPinned(ZoneEntity a, ZoneEntity b) =>

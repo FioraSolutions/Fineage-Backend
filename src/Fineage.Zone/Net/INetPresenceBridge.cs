@@ -1,8 +1,10 @@
+using Fineage.Net.Contract;
+
 namespace Fineage.Zone.Net;
 
 /// <summary>
-/// ZoneWorld → Net PacketEnvelope fanout for sim ticks (NPC chase MoveState, etc.).
-/// Player enter/move fanout stays in <see cref="NetZoneServer"/>.
+/// ZoneWorld → Net PacketEnvelope fanout for sim ticks (NPC chase, attacks, vitals).
+/// Player enter/move knownlist diffs stay in <see cref="NetZoneServer"/>.
 /// </summary>
 interface INetPresenceBridge
 {
@@ -16,4 +18,8 @@ interface INetPresenceBridge
         int destY,
         int destZ,
         bool running);
+
+    void FanoutAttackState(IReadOnlyList<int> watcherObjectIds, AttackStateMsg attack);
+
+    void FanoutStatusUpdate(IReadOnlyList<int> watcherObjectIds, StatusUpdateNetMsg status);
 }

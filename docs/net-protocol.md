@@ -76,6 +76,7 @@ V2 MessagePack flushes still go to a discarded stream on the Net path. Net peers
 | Enter | Self bootstrap (above). Then `EntitySpawn` for each known **player and NPC** (`IsSelf=false`; NPC `Kind=Npc`, `TemplateId=npcId`). Entrant CharInfo-shaped spawn to Net player peers. |
 | Move | `MoveState` to self + stayed known Net **players**. Newly visible player/NPC → `EntitySpawn`. Forgotten → `EntityDespawn` `0x030C`. |
 | NPC chase (sim) | `MoveState` to Net watchers that already know the NPC (`INetPresenceBridge`). |
+| Select / Attack | `SelectTarget` `0x030D` → `TargetSelected` `0x030F`. `AttackRequest` `0x030E` → world combat; `AttackState` `0x0310` + `StatusUpdate` `0x0311` via NetBridge (incl. mob swings / hit timer). Approach uses the same MoveState bridge as player move. |
 | Leave / disconnect | `EntityDespawn` of leaver to known Net peers. |
 
 AOI (who is on the knownlist):

@@ -256,6 +256,7 @@ public sealed partial class ZoneWorld
     void FanoutAttack(ZoneEntity attacker, ZoneEntity target, AttackMsg attack, List<Pending> outbound)
     {
         byte[] attackBody = MessagePackSerializer.Serialize(attack);
+        List<int>? netWatchers = null;
         foreach (var watcher in Players())
         {
             if (watcher.Session == null)
@@ -263,8 +264,30 @@ public sealed partial class ZoneWorld
             bool cares = ReferenceEquals(watcher, attacker) ||
                          watcher.Knownlist.Contains(target.ObjectId) ||
                          watcher.Knownlist.Contains(attacker.ObjectId);
-            if (cares)
-                outbound.Add(new Pending(watcher.Session, MsgType.Attack, attackBody));
+            if (!cares)
+                continue;
+            outbound.Add(new Pending(watcher.Session, MsgType.Attack, attackBody));
+            netWatchers ??= [];
+            netWatchers.Add(watcher.ObjectId);
+        }
+
+        if (netWatchers is { Count: > 0 } && NetBridge != null)
+        {
+            NetBridge.FanoutAttackState(netWatchers, new Fineage.Net.Contract.AttackStateMsg
+            {
+                AttackerValue = (ulong)(uint)attack.AttackerObjectId,
+                AttackerGeneration = 1,
+                TargetValue = (ulong)(uint)attack.TargetObjectId,
+                TargetGeneration = 1,
+                Damage = attack.Damage,
+                Flags = attack.Flags,
+                AttackerX = attack.AttackerX,
+                AttackerY = attack.AttackerY,
+                AttackerZ = attack.AttackerZ,
+                TargetX = attack.TargetX,
+                TargetY = attack.TargetY,
+                TargetZ = attack.TargetZ
+            });
         }
     }
 

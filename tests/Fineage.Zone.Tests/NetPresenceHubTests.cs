@@ -56,6 +56,41 @@ public sealed class NetPresenceHubTests
     }
 
     [Fact]
+    public void Attack_and_status_codec_round_trip()
+    {
+        var attack = new AttackStateMsg
+        {
+            AttackerValue = 1,
+            AttackerGeneration = 1,
+            TargetValue = 9001,
+            TargetGeneration = 1,
+            Damage = 12,
+            Flags = 0,
+            AttackerX = 1,
+            AttackerY = 2,
+            AttackerZ = 3,
+            TargetX = 4,
+            TargetY = 5,
+            TargetZ = 6
+        };
+        var again = NetCodec.DecodeAttackState(NetCodec.EncodeAttackState(attack));
+        Assert.Equal(12, again.Damage);
+        Assert.Equal(9001ul, again.TargetValue);
+
+        var status = new StatusUpdateNetMsg
+        {
+            EntityValue = 9001,
+            EntityGeneration = 1,
+            AttributeIds = [9, 10],
+            Values = [80, 100]
+        };
+        var statusAgain = NetCodec.DecodeStatusUpdate(NetCodec.EncodeStatusUpdate(status));
+        Assert.Equal(2, statusAgain.AttributeIds.Length);
+        Assert.Equal(80, statusAgain.Values[0]);
+        Assert.Equal(100, statusAgain.Values[1]);
+    }
+
+    [Fact]
     public void Npc_presence_spawn_uses_npc_kind_and_template()
     {
         var entity = new ZoneEntity

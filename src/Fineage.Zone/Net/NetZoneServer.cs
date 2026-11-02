@@ -65,6 +65,20 @@ public sealed class NetZoneServer : INetPresenceBridge
             _ = _presence.SendAsync(watcher, NetOpcode.MoveState, payload, CancellationToken.None);
     }
 
+    void INetPresenceBridge.FanoutAttackState(IReadOnlyList<int> watcherObjectIds, AttackStateMsg attack)
+    {
+        var payload = NetCodec.EncodeAttackState(attack);
+        foreach (int watcher in watcherObjectIds)
+            _ = _presence.SendAsync(watcher, NetOpcode.AttackState, payload, CancellationToken.None);
+    }
+
+    void INetPresenceBridge.FanoutStatusUpdate(IReadOnlyList<int> watcherObjectIds, StatusUpdateNetMsg status)
+    {
+        var payload = NetCodec.EncodeStatusUpdate(status);
+        foreach (int watcher in watcherObjectIds)
+            _ = _presence.SendAsync(watcher, NetOpcode.StatusUpdate, payload, CancellationToken.None);
+    }
+
     public async Task HandleAsync(NetConnection conn, CancellationToken ct)
     {
         await using var discard = new MemoryStream();
@@ -99,6 +113,12 @@ public sealed class NetZoneServer : INetPresenceBridge
                             break;
                         case NetOpcode.MoveInput:
                             await OnMoveAsync(conn, zoneSession, self, envelope, ct).ConfigureAwait(false);
+                            break;
+                        case NetOpcode.SelectTarget:
+                            await OnSelectTargetAsync(conn, zoneSession, envelope, ct).ConfigureAwait(false);
+                            break;
+                        case NetOpcode.AttackRequest:
+                            await OnAttackAsync(conn, zoneSession, envelope, ct).ConfigureAwait(false);
                             break;
                         case NetOpcode.StopMove:
                             // Authoritative stop: correct to current session position.
@@ -345,45 +365,27 @@ public sealed class NetZoneServer : INetPresenceBridge
         }
 
         var after = _world.SnapshotKnownIds(zoneSession);
-        var movePayload = NetCodec.EncodeMoveState(new MoveStateMsg
-        {
-            EntityValue = self.Value,
-            EntityGeneration = self.Generation,
-            OriginX = msg.OriginX,
-            OriginY = msg.OriginY,
-            OriginZ = msg.OriginZ,
-            DestX = move.DestX,
-            DestY = move.DestY,
-            DestZ = move.DestZ,
-            Running = true
-        });
+        // MoveState to self + stayed peers is fanned by ZoneWorld.ReconcileKnownlist → NetBridge.
 
-        await conn.SendAsync(NetOpcode.MoveState, movePayload, envelope.RequestSequence, ct).ConfigureAwait(false);
-
-        // Peers that stayed known: MoveState (players only). Newly visible: EntitySpawn. Forgotten: EntityDespawn.
+        // Newly visible: EntitySpawn. Forgotten: EntityDespawn.
         foreach (int id in after)
         {
-            if (!before.Contains(id))
-            {
-                if (!_world.TryGetEntityById(id, out var newlySeen) ||
-                    newlySeen.Kind == ZoneEntityKind.GroundItem)
-                    continue;
+            if (before.Contains(id))
+                continue;
+            if (!_world.TryGetEntityById(id, out var newlySeen) ||
+                newlySeen.Kind == ZoneEntityKind.GroundItem)
+                continue;
 
-                var otherId = _ids.AllocateOrGet(id);
-                var spawn = NetCodec.EncodeEntitySpawn(
-                    NetEnterWorldProjector.BuildPresenceSpawn(newlySeen, otherId));
-                await conn.SendAsync(NetOpcode.EntitySpawn, spawn, ct: ct).ConfigureAwait(false);
-                if (newlySeen.Kind == ZoneEntityKind.Player &&
-                    _world.TryGetLivePlayer(zoneSession, out var selfEntity))
-                {
-                    var toPeer = NetCodec.EncodeEntitySpawn(
-                        NetEnterWorldProjector.BuildRemoteSpawn(selfEntity, self));
-                    await _presence.SendAsync(id, NetOpcode.EntitySpawn, toPeer, ct).ConfigureAwait(false);
-                }
-            }
-            else if (_world.TryGetLivePlayerById(id, out _))
+            var otherId = _ids.AllocateOrGet(id);
+            var spawn = NetCodec.EncodeEntitySpawn(
+                NetEnterWorldProjector.BuildPresenceSpawn(newlySeen, otherId));
+            await conn.SendAsync(NetOpcode.EntitySpawn, spawn, ct: ct).ConfigureAwait(false);
+            if (newlySeen.Kind == ZoneEntityKind.Player &&
+                _world.TryGetLivePlayer(zoneSession, out var selfEntity))
             {
-                await _presence.SendAsync(id, NetOpcode.MoveState, movePayload, ct).ConfigureAwait(false);
+                var toPeer = NetCodec.EncodeEntitySpawn(
+                    NetEnterWorldProjector.BuildRemoteSpawn(selfEntity, self));
+                await _presence.SendAsync(id, NetOpcode.EntitySpawn, toPeer, ct).ConfigureAwait(false);
             }
         }
 
@@ -408,6 +410,70 @@ public sealed class NetZoneServer : INetPresenceBridge
             if (_world.TryGetLivePlayerById(id, out _))
                 await _presence.SendAsync(id, NetOpcode.EntityDespawn, despawnSelf, ct).ConfigureAwait(false);
         }
+    }
+
+    async Task OnSelectTargetAsync(
+        NetConnection conn,
+        ZoneSession zoneSession,
+        PacketEnvelope envelope,
+        CancellationToken ct)
+    {
+        RequireHello(conn);
+        if (!zoneSession.Bound || !zoneSession.InWorld)
+        {
+            await RejectAsync(conn, "not_in_world", "Enter world first.", ct).ConfigureAwait(false);
+            return;
+        }
+
+        var select = NetCodec.DecodeSelectTarget(envelope.Payload);
+        string? error = await _world.TrySelectTargetAsync(
+            zoneSession,
+            new SelectTargetMsg { TargetObjectId = select.TargetObjectId },
+            ct).ConfigureAwait(false);
+        if (error != null)
+        {
+            await RejectAsync(conn, error, "Select target failed.", ct).ConfigureAwait(false);
+            return;
+        }
+
+        int color = 0;
+        if (_world.TryGetLivePlayer(zoneSession, out var player) &&
+            _world.TryGetEntityById(zoneSession.SelectedTargetId, out var target) &&
+            target.Kind == ZoneEntityKind.Npc)
+            color = InterludeStatus.TargetColor(player.Level, target.Level);
+
+        await conn.SendAsync(
+            NetOpcode.TargetSelected,
+            NetCodec.EncodeTargetSelected(new TargetSelectedNetMsg
+            {
+                TargetObjectId = zoneSession.SelectedTargetId,
+                ColorHint = color
+            }),
+            envelope.RequestSequence,
+            ct).ConfigureAwait(false);
+    }
+
+    async Task OnAttackAsync(
+        NetConnection conn,
+        ZoneSession zoneSession,
+        PacketEnvelope envelope,
+        CancellationToken ct)
+    {
+        RequireHello(conn);
+        if (!zoneSession.Bound || !zoneSession.InWorld)
+        {
+            await RejectAsync(conn, "not_in_world", "Enter world first.", ct).ConfigureAwait(false);
+            return;
+        }
+
+        var attack = NetCodec.DecodeAttackRequest(envelope.Payload);
+        string? error = await _world.TryAttackAsync(
+            zoneSession,
+            new AttackRequestMsg { TargetObjectId = attack.TargetObjectId },
+            ct).ConfigureAwait(false);
+        if (error != null)
+            await RejectAsync(conn, error, "Attack failed.", ct).ConfigureAwait(false);
+        // AttackState / MoveState / StatusUpdate fan out via NetBridge from ZoneWorld combat.
     }
 
     static void RequireHello(NetConnection conn)

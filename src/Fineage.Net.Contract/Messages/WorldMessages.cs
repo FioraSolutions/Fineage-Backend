@@ -130,4 +130,44 @@ namespace Fineage.Net.Contract
         public ulong EntityValue { get; set; }
         public uint EntityGeneration { get; set; }
     }
+
+    public sealed class SelectTargetNetMsg
+    {
+        public int TargetObjectId { get; set; }
+    }
+
+    public sealed class AttackRequestNetMsg
+    {
+        public int TargetObjectId { get; set; }
+    }
+
+    public sealed class TargetSelectedNetMsg
+    {
+        public int TargetObjectId { get; set; }
+        public int ColorHint { get; set; }
+    }
+
+    public sealed class AttackStateMsg
+    {
+        public ulong AttackerValue { get; set; }
+        public uint AttackerGeneration { get; set; }
+        public ulong TargetValue { get; set; }
+        public uint TargetGeneration { get; set; }
+        public int Damage { get; set; }
+        public byte Flags { get; set; }
+        public int AttackerX { get; set; }
+        public int AttackerY { get; set; }
+        public int AttackerZ { get; set; }
+        public int TargetX { get; set; }
+        public int TargetY { get; set; }
+        public int TargetZ { get; set; }
+    }
+
+    public sealed class StatusUpdateNetMsg
+    {
+        public ulong EntityValue { get; set; }
+        public uint EntityGeneration { get; set; }
+        public int[] AttributeIds { get; set; } = System.Array.Empty<int>();
+        public int[] Values { get; set; } = System.Array.Empty<int>();
+    }
 }

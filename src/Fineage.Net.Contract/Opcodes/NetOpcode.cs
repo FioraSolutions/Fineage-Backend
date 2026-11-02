@@ -31,5 +31,10 @@ namespace Fineage.Net.Contract
         public const ushort ItemList = 0x030A;
         public const ushort SkillList = 0x030B;
         public const ushort EntityDespawn = 0x030C;
+        public const ushort SelectTarget = 0x030D;
+        public const ushort AttackRequest = 0x030E;
+        public const ushort TargetSelected = 0x030F;
+        public const ushort AttackState = 0x0310;
+        public const ushort StatusUpdate = 0x0311;
     }
 }
