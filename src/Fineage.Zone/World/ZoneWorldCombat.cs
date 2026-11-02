@@ -122,11 +122,19 @@ public sealed partial class ZoneWorld
             return "attack";
         if (!VisibleTo(player.ObjectId, targetId))
             return "attack";
+        AdvanceMove(player, _clock().ToUnixTimeMilliseconds());
         if (!ZoneCombat.Within(player.X, player.Y, target.X, target.Y, PlayerReach(player)))
         {
             approachMs = ApproachTarget(player, target, PlayerReach(player), outbound);
             return approachMs < 0 ? "attack" : null;
         }
+        if (player.MoveActive)
+        {
+            // Mobius onEvtArrived: in reach -> stop the run and swing from here (no slide past the target).
+            StopTimedMove(player);
+            SyncSession(player, session);
+        }
+        session.ClearApproach();
 
         var ps = PlayerStats(player);
         // Mobius doAttack: a charged weapon fires its soulshot on this swing (hit or miss) and is uncharged.
@@ -191,6 +199,26 @@ public sealed partial class ZoneWorld
 
     Task? _combatLoop;
 
+    /// <summary>One live combat-loop tick (movement, hits, player auto-attack / approach, casts, mobs, corpses).</summary>
+    internal async Task RunPlayerCombatTickAsync(CancellationToken ct)
+    {
+        var outbound = new List<Pending>();
+        lock (_gate)
+        {
+            long now = _clock().ToUnixTimeMilliseconds();
+            TickPlayerMovement(now, outbound);
+            TickNpcMovement(now, outbound);
+            TickPendingHits(now, outbound);
+            TickMeleeHits(now, outbound);
+            TickAutoAttacks(outbound);
+            TickPendingCasts(now, outbound);
+            TickMobAttacks(now, outbound);
+            TickCorpseDecay(now, outbound);
+        }
+        if (outbound.Count > 0)
+            await FlushOthersAsync(outbound, ct).ConfigureAwait(false);
+    }
+
     async Task CombatLoopAsync(CancellationToken ct)
     {
         using var timer = new PeriodicTimer(TimeSpan.FromMilliseconds(ZoneCombat.AutoAttackTickMs));
@@ -198,21 +226,7 @@ public sealed partial class ZoneWorld
         {
             while (await timer.WaitForNextTickAsync(ct).ConfigureAwait(false))
             {
-                var outbound = new List<Pending>();
-                lock (_gate)
-                {
-                    long now = _clock().ToUnixTimeMilliseconds();
-                    TickPlayerMovement(now, outbound);
-                    TickNpcMovement(now, outbound);
-                    TickPendingHits(now, outbound);
-                    TickMeleeHits(now, outbound);
-                    TickAutoAttacks(outbound);
-                    TickPendingCasts(now, outbound);
-                    TickMobAttacks(now, outbound);
-                    TickCorpseDecay(now, outbound);
-                }
-                if (outbound.Count > 0)
-                    await FlushOthersAsync(outbound, ct).ConfigureAwait(false);
+                await RunPlayerCombatTickAsync(ct).ConfigureAwait(false);
             }
         }
         catch (OperationCanceledException)
@@ -228,6 +242,7 @@ public sealed partial class ZoneWorld
             var session = player.Session;
             if (session == null || session.AutoAttackTargetId <= 0)
                 continue;
+            AdvanceMove(player, now); // Net timed approach: measure reach from where the pawn really is now
             int targetId = session.AutoAttackTargetId;
             if (player.Dead || !_byId.TryGetValue(targetId, out var target) || target.CurHp <= 0 || session.SelectedTargetId != targetId)
             {

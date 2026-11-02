@@ -25,6 +25,8 @@ public sealed partial class ZoneWorld
             return -1;
         var session = player.Session;
         long now = _clock().ToUnixTimeMilliseconds();
+        // Net: bring the timed-move position up to date before measuring (the pawn may already be running).
+        AdvanceMove(player, now);
 
         // Sticky intention: same target, still running, target has not drifted -> no re-send, same ETA.
         if (session != null && session.ApproachTargetId == target.ObjectId && now < session.ApproachArriveUnixMs &&
@@ -62,20 +64,17 @@ public sealed partial class ZoneWorld
         };
         int originX = player.X, originY = player.Y;
 
-        player.X = destX;
-        player.Y = destY;
-        player.Z = destZ;
-        if (session != null)
+        if (NetBridge != null && session != null)
         {
-            session.X = destX;
-            session.Y = destY;
-            session.Z = destZ;
+            // Net: Mobius moveToPawn is a real timed run (MovementTaskManager), never a snap. Snapping the server
+            // position here made the next ValidatePosition send a PositionCorrection onto the mob = "teleport".
+            StartTimedMove(player, session, ack, outbound, outbound);
+            ZoneLog.Info($"[combat] approach obj={player.ObjectId} target={target.ObjectId} from={originX},{originY} to={player.MoveDestX},{player.MoveDestY} dist={(int)dist}");
         }
-        // Knownlist reconcile (CharInfo / MoveToAck / hysteresis forget) — was a bare AOI move before, which
-        // left watcher knownlists stale and let a later move DeleteObject the other PC mid-fight.
-        ReconcileKnownlist(player, ack, outbound, outbound);
+        else
+            SnapApproach(player, session, ack, destX, destY, destZ, outbound);
 
-        float speed = player.RunSpeed > 0 ? player.RunSpeed : ZoneCombat.DefaultPlayerRunSpeed;
+        float speed = MoveSpeedOf(player);
         long ms = Math.Max(1, (long)Math.Ceiling((dist - stopAt) * 1000.0 / speed));
         if (session != null)
         {
@@ -89,6 +88,23 @@ public sealed partial class ZoneWorld
             session.ApproachTargetY = target.Y;
         }
         return ms;
+    }
+
+    /// <summary>V2 legacy approach: server position jumps to the stop point, the client animates the MoveToAck.</summary>
+    void SnapApproach(ZoneEntity player, ZoneSession? session, MoveToMsg ack, int destX, int destY, int destZ, List<Pending> outbound)
+    {
+        player.X = destX;
+        player.Y = destY;
+        player.Z = destZ;
+        if (session != null)
+        {
+            session.X = destX;
+            session.Y = destY;
+            session.Z = destZ;
+        }
+        // Knownlist reconcile (CharInfo / MoveToAck / hysteresis forget) — was a bare AOI move before, which
+        // left watcher knownlists stale and let a later move DeleteObject the other PC mid-fight.
+        ReconcileKnownlist(player, ack, outbound, outbound);
     }
 
     /// <summary>Client MoveTo that lies on the in-flight moveToPawn path is a position report, not a new order.</summary>
