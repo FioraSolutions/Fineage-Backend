@@ -167,6 +167,40 @@ public sealed class NetPresenceHubTests
     }
 
     [Fact]
+    public void Trade_codec_round_trip()
+    {
+        Assert.Equal(9, NetCodec.DecodeTradeRequest(NetCodec.EncodeTradeRequest(
+            new TradeRequestNetMsg { TargetObjectId = 9 })).TargetObjectId);
+        Assert.Equal(1, NetCodec.DecodeTradeAnswerRequest(NetCodec.EncodeTradeAnswerRequest(
+            new TradeAnswerRequestNetMsg { RequestorObjectId = 2, Response = 1 })).Response);
+        Assert.Equal(5L, NetCodec.DecodeTradeAddItemRequest(NetCodec.EncodeTradeAddItemRequest(
+            new TradeAddItemRequestNetMsg { InventoryObjectId = 4, Count = 5 })).Count);
+        Assert.Equal(0, NetCodec.DecodeTradeDoneRequest(NetCodec.EncodeTradeDoneRequest(
+            new TradeDoneRequestNetMsg { Response = 0 })).Response);
+
+        Assert.Equal("Seller", NetCodec.DecodeTradeAsk(NetCodec.EncodeTradeAsk(
+            new TradeAskNetMsg { RequestorObjectId = 2, RequestorName = "Seller" })).RequestorName);
+        Assert.Equal(1, NetCodec.DecodeTradeRequestResult(NetCodec.EncodeTradeRequestResult(
+            new TradeRequestResultNetMsg { Response = 1 })).Response);
+        Assert.Equal("Buyer", NetCodec.DecodeTradeStart(NetCodec.EncodeTradeStart(
+            new TradeStartNetMsg { PartnerObjectId = 3, PartnerName = "Buyer" })).PartnerName);
+
+        var offer = new TradeOfferUpdateNetMsg
+        {
+            IsOwn = 1,
+            InventoryObjectId = 8,
+            ItemId = 57,
+            Count = 100,
+            EnchantLevel = 0
+        };
+        Assert.Equal(57, NetCodec.DecodeTradeOfferUpdate(NetCodec.EncodeTradeOfferUpdate(offer)).ItemId);
+        Assert.Equal(1, NetCodec.DecodeTradeConfirmState(NetCodec.EncodeTradeConfirmState(
+            new TradeConfirmStateNetMsg { SelfConfirmed = 1, PartnerConfirmed = 0 })).SelfConfirmed);
+        Assert.Equal(1, NetCodec.DecodeTradeFinished(NetCodec.EncodeTradeFinished(
+            new TradeFinishedNetMsg { Response = 1 })).Response);
+    }
+
+    [Fact]
     public void Shop_codec_round_trip()
     {
         var buy = new BuyListNetMsg

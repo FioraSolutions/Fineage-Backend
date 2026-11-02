@@ -137,11 +137,12 @@ public sealed partial class ZoneWorld
             return TradeProtocol.Range;
 
         _pendingTradeAsk[request.TargetObjectId] = requestor.ObjectId;
-        outbound.Add(Pack(targetEntity.Session, MsgType.TradeAsk, new TradeAskMsg
+        var ask = new TradeAskMsg
         {
             RequestorObjectId = requestor.ObjectId,
             RequestorName = requestor.Name
-        }));
+        };
+        QueueTradeAsk(targetEntity.Session, ask, outbound);
         return null;
     }
 
@@ -162,19 +163,19 @@ public sealed partial class ZoneWorld
 
         if (answer.Response != 1)
         {
-            outbound.Add(Pack(requestorEntity.Session, MsgType.TradeRequestResult, new TradeRequestResultMsg { Response = 0 }));
+            QueueTradeRequestResult(requestorEntity.Session, 0, outbound);
             return null;
         }
 
         if (_tradeByPlayer.ContainsKey(partner.ObjectId) || _tradeByPlayer.ContainsKey(answer.RequestorObjectId))
         {
-            outbound.Add(Pack(requestorEntity.Session, MsgType.TradeRequestResult, new TradeRequestResultMsg { Response = 0 }));
+            QueueTradeRequestResult(requestorEntity.Session, 0, outbound);
             return null;
         }
 
         if (!TradeInRange(answer.RequestorObjectId, partner.ObjectId))
         {
-            outbound.Add(Pack(requestorEntity.Session, MsgType.TradeRequestResult, new TradeRequestResultMsg { Response = 0 }));
+            QueueTradeRequestResult(requestorEntity.Session, 0, outbound);
             return null;
         }
 
@@ -188,7 +189,7 @@ public sealed partial class ZoneWorld
         };
         BindTradeSession(session);
 
-        outbound.Add(Pack(requestorEntity.Session, MsgType.TradeRequestResult, new TradeRequestResultMsg { Response = 1 }));
+        QueueTradeRequestResult(requestorEntity.Session, 1, outbound);
         SendTradeStart(requestorEntity, partner.ObjectId, outbound);
         SendTradeStart(partnerEntity, answer.RequestorObjectId, outbound);
         FanoutTradeConfirm(session, outbound);
@@ -318,15 +319,19 @@ public sealed partial class ZoneWorld
 
         if (requestorChanges.Count > 0)
         {
-            outbound.Add(Pack(requestor.Session, MsgType.InventoryUpdate,
-                new InventoryUpdateMsg { Changes = requestorChanges.ToArray() }));
+            var inv = new InventoryUpdateMsg { Changes = requestorChanges.ToArray() };
+            outbound.Add(Pack(requestor.Session, MsgType.InventoryUpdate, inv));
+            if (NetBridge != null)
+                NetBridge.FanoutInventoryUpdate([requestor.Session.ObjectId], ToNetInventoryUpdate(inv));
             outbound.Add(Pack(requestor.Session, MsgType.UserInfo, UserInfo(requestor)));
         }
 
         if (partnerChanges.Count > 0)
         {
-            outbound.Add(Pack(partner.Session, MsgType.InventoryUpdate,
-                new InventoryUpdateMsg { Changes = partnerChanges.ToArray() }));
+            var inv = new InventoryUpdateMsg { Changes = partnerChanges.ToArray() };
+            outbound.Add(Pack(partner.Session, MsgType.InventoryUpdate, inv));
+            if (NetBridge != null)
+                NetBridge.FanoutInventoryUpdate([partner.Session.ObjectId], ToNetInventoryUpdate(inv));
             outbound.Add(Pack(partner.Session, MsgType.UserInfo, UserInfo(partner)));
         }
 
@@ -381,11 +386,22 @@ public sealed partial class ZoneWorld
             return;
         if (!_byId.TryGetValue(partnerId, out var partner))
             return;
-        outbound.Add(Pack(viewer.Session, MsgType.TradeStart, new TradeStartMsg
+        var start = new TradeStartMsg
         {
             PartnerObjectId = partnerId,
             PartnerName = partner.Name
-        }));
+        };
+        outbound.Add(Pack(viewer.Session, MsgType.TradeStart, start));
+        if (NetBridge != null)
+        {
+            NetBridge.FanoutTradeStart(
+                [viewer.Session.ObjectId],
+                new Fineage.Net.Contract.TradeStartNetMsg
+                {
+                    PartnerObjectId = start.PartnerObjectId,
+                    PartnerName = start.PartnerName ?? ""
+                });
+        }
     }
 
     void FanoutTradeOffer(ZoneTradeSession session, int actorId, TradeOfferUpdateMsg update, List<Pending> outbound)
@@ -403,6 +419,19 @@ public sealed partial class ZoneWorld
                 IsOwn = playerId == actorId ? 1 : 0
             };
             outbound.Add(Pack(entity.Session, MsgType.TradeOfferUpdate, msg));
+            if (NetBridge != null)
+            {
+                NetBridge.FanoutTradeOfferUpdate(
+                    [entity.Session.ObjectId],
+                    new Fineage.Net.Contract.TradeOfferUpdateNetMsg
+                    {
+                        IsOwn = msg.IsOwn,
+                        InventoryObjectId = msg.InventoryObjectId,
+                        ItemId = msg.ItemId,
+                        Count = msg.Count,
+                        EnchantLevel = msg.EnchantLevel
+                    });
+            }
         }
     }
 
@@ -416,11 +445,22 @@ public sealed partial class ZoneWorld
     {
         if (!_byId.TryGetValue(viewerId, out var entity) || entity.Session == null)
             return;
-        outbound.Add(Pack(entity.Session, MsgType.TradeConfirmState, new TradeConfirmStateMsg
+        var state = new TradeConfirmStateMsg
         {
             SelfConfirmed = selfConfirmed ? 1 : 0,
             PartnerConfirmed = partnerConfirmed ? 1 : 0
-        }));
+        };
+        outbound.Add(Pack(entity.Session, MsgType.TradeConfirmState, state));
+        if (NetBridge != null)
+        {
+            NetBridge.FanoutTradeConfirmState(
+                [entity.Session.ObjectId],
+                new Fineage.Net.Contract.TradeConfirmStateNetMsg
+                {
+                    SelfConfirmed = state.SelfConfirmed,
+                    PartnerConfirmed = state.PartnerConfirmed
+                });
+        }
     }
 
     void CancelTradeSession(ZoneTradeSession session, List<Pending> outbound) =>
@@ -432,10 +472,44 @@ public sealed partial class ZoneWorld
         foreach (int playerId in new[] { session.RequestorObjectId, session.PartnerObjectId })
         {
             if (_byId.TryGetValue(playerId, out var entity) && entity.Session != null)
+            {
                 outbound.Add(Pack(entity.Session, MsgType.TradeFinished, new TradeFinishedMsg { Response = response }));
+                if (NetBridge != null)
+                {
+                    NetBridge.FanoutTradeFinished(
+                        [entity.Session.ObjectId],
+                        new Fineage.Net.Contract.TradeFinishedNetMsg { Response = response });
+                }
+            }
         }
 
         UnbindTradeSession(session);
+    }
+
+    void QueueTradeAsk(ZoneSession session, TradeAskMsg ask, List<Pending> outbound)
+    {
+        outbound.Add(Pack(session, MsgType.TradeAsk, ask));
+        if (NetBridge != null)
+        {
+            NetBridge.FanoutTradeAsk(
+                [session.ObjectId],
+                new Fineage.Net.Contract.TradeAskNetMsg
+                {
+                    RequestorObjectId = ask.RequestorObjectId,
+                    RequestorName = ask.RequestorName ?? ""
+                });
+        }
+    }
+
+    void QueueTradeRequestResult(ZoneSession session, int response, List<Pending> outbound)
+    {
+        outbound.Add(Pack(session, MsgType.TradeRequestResult, new TradeRequestResultMsg { Response = response }));
+        if (NetBridge != null)
+        {
+            NetBridge.FanoutTradeRequestResult(
+                [session.ObjectId],
+                new Fineage.Net.Contract.TradeRequestResultNetMsg { Response = response });
+        }
     }
 
     void BindTradeSession(ZoneTradeSession session)

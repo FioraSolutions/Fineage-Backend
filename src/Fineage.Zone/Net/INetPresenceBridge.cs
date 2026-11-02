@@ -66,4 +66,16 @@ interface INetPresenceBridge
     void FanoutPartyJoinResult(IReadOnlyList<int> watcherObjectIds, PartyJoinResultNetMsg result);
 
     void FanoutPartyMemberList(IReadOnlyList<int> watcherObjectIds, PartyMemberListNetMsg list);
+
+    void FanoutTradeAsk(IReadOnlyList<int> watcherObjectIds, TradeAskNetMsg ask);
+
+    void FanoutTradeRequestResult(IReadOnlyList<int> watcherObjectIds, TradeRequestResultNetMsg result);
+
+    void FanoutTradeStart(IReadOnlyList<int> watcherObjectIds, TradeStartNetMsg start);
+
+    void FanoutTradeOfferUpdate(IReadOnlyList<int> watcherObjectIds, TradeOfferUpdateNetMsg update);
+
+    void FanoutTradeConfirmState(IReadOnlyList<int> watcherObjectIds, TradeConfirmStateNetMsg state);
+
+    void FanoutTradeFinished(IReadOnlyList<int> watcherObjectIds, TradeFinishedNetMsg finished);
 }

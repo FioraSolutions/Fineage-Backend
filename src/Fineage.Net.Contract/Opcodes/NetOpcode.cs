@@ -76,5 +76,15 @@ namespace Fineage.Net.Contract
         public const ushort PartyAskJoin = 0x0337;
         public const ushort PartyJoinResult = 0x0338;
         public const ushort PartyMemberList = 0x0339;
+        public const ushort TradeRequest = 0x033A;
+        public const ushort TradeAnswerRequest = 0x033B;
+        public const ushort TradeAddItemRequest = 0x033C;
+        public const ushort TradeDoneRequest = 0x033D;
+        public const ushort TradeAsk = 0x033E;
+        public const ushort TradeRequestResult = 0x033F;
+        public const ushort TradeStart = 0x0340;
+        public const ushort TradeOfferUpdate = 0x0341;
+        public const ushort TradeConfirmState = 0x0342;
+        public const ushort TradeFinished = 0x0343;
     }
 }
