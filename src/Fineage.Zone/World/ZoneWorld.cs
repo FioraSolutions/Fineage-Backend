@@ -74,6 +74,12 @@ sealed class ZoneEntity
     public float RunSpeed { get; init; }
     public float WalkSpeed { get; init; }
     public bool Running { get; set; } = true;
+    /// <summary>Mobius MoveData: server-side move in progress (Net path). Position advances by speed each tick.</summary>
+    public bool MoveActive { get; set; }
+    public int MoveDestX { get; set; }
+    public int MoveDestY { get; set; }
+    public int MoveDestZ { get; set; }
+    public long MoveLastTickMs { get; set; }
     public ZoneSession? Session { get; init; }
     public PlayerInventory? Inventory { get; init; }
     /// <summary>
@@ -570,6 +576,9 @@ public sealed partial class ZoneWorld
             return null;
         }
         CancelAttackIntentionOnMove(session, move);
+
+        if (NetBridge != null)
+            return StartTimedMove(entity, session, move, toSelf, toOthers);
 
         entity.X = move.DestX;
         entity.Y = move.DestY;

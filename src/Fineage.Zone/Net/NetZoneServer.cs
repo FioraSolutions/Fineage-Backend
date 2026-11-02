@@ -393,6 +393,7 @@ public sealed class NetZoneServer : INetPresenceBridge
                             // Authoritative stop: correct to current session position.
                             if (zoneSession.Bound && zoneSession.InWorld)
                             {
+                                _world.StopMove(zoneSession);
                                 await conn.SendAsync(
                                     NetOpcode.PositionCorrection,
                                     NetCodec.EncodePositionCorrection(new PositionCorrectionMsg
