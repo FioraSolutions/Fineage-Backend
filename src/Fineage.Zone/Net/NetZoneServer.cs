@@ -144,6 +144,22 @@ public sealed class NetZoneServer : INetPresenceBridge
         }), CancellationToken.None);
     }
 
+    void INetPresenceBridge.FanoutChangeMoveType(IReadOnlyList<int> watcherObjectIds, int moverObjectId, bool running, float runSpeed, float walkSpeed, bool inWater)
+    {
+        var mover = _ids.AllocateOrGet(moverObjectId);
+        var payload = NetCodec.EncodeChangeMoveType(new ChangeMoveTypeNetMsg
+        {
+            EntityValue = mover.Value,
+            EntityGeneration = mover.Generation,
+            Running = running,
+            RunSpeed = runSpeed,
+            WalkSpeed = walkSpeed,
+            InWater = inWater
+        });
+        foreach (int watcher in watcherObjectIds)
+            _ = _presence.SendAsync(watcher, NetOpcode.ChangeMoveType, payload, CancellationToken.None);
+    }
+
     void INetPresenceBridge.FanoutAttackState(IReadOnlyList<int> watcherObjectIds, AttackStateMsg attack)
     {
         var payload = NetCodec.EncodeAttackState(attack);
@@ -488,6 +504,24 @@ public sealed class NetZoneServer : INetPresenceBridge
                                         envelope.RequestSequence,
                                         ct).ConfigureAwait(false);
                                 }
+                            }
+
+                            break;
+                        case NetOpcode.RequestActionUse:
+                            if (zoneSession.Bound && zoneSession.InWorld)
+                            {
+                                var use = NetCodec.DecodeActionUse(envelope.Payload);
+                                // Net renders only the walk/run toggle so far (ChangeMoveType); other action ids stay on V2.
+                                if (use.ActionId != ActionProtocol.WalkRun)
+                                {
+                                    await RejectAsync(conn, ActionProtocol.Unsupported, $"action {use.ActionId} not on Net yet", ct).ConfigureAwait(false);
+                                    break;
+                                }
+                                string? actionError = await _world.TryCharacterActionAsync(zoneSession,
+                                    new CharacterActionRequestMsg { ActionId = use.ActionId, CtrlPressed = use.CtrlPressed, ShiftPressed = use.ShiftPressed },
+                                    ct).ConfigureAwait(false);
+                                if (actionError != null)
+                                    await RejectAsync(conn, actionError, "Action failed.", ct).ConfigureAwait(false);
                             }
 
                             break;

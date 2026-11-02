@@ -95,6 +95,25 @@ namespace Fineage.Net.Contract
         public bool Running { get; set; } = true;
     }
 
+    public sealed class ActionUseNetMsg
+    {
+        public int ActionId { get; set; }
+        public bool CtrlPressed { get; set; }
+        public bool ShiftPressed { get; set; }
+    }
+
+    public sealed class ChangeMoveTypeNetMsg
+    {
+        public ulong EntityValue { get; set; }
+        public uint EntityGeneration { get; set; }
+        public bool Running { get; set; } = true;
+        /// <summary>Effective L2 run speed now (swim speed when <see cref="InWater"/>).</summary>
+        public float RunSpeed { get; set; }
+        /// <summary>Effective L2 walk speed now (swim speed when <see cref="InWater"/>).</summary>
+        public float WalkSpeed { get; set; }
+        public bool InWater { get; set; }
+    }
+
     public sealed class PositionCorrectionMsg
     {
         public ulong EntityValue { get; set; }

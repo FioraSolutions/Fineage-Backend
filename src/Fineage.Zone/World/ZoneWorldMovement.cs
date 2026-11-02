@@ -1,4 +1,5 @@
 using Fineage.Protocol;
+using Fineage.Zone.Geo;
 
 namespace Fineage.Zone.World;
 
@@ -6,7 +7,7 @@ namespace Fineage.Zone.World;
 /// Net-path timed movement (Mobius <c>Creature.moveToLocation</c> + <c>MovementTaskManager</c>, simplified):
 /// a MoveInput starts a straight segment; the server advances the entity along it at run/walk speed
 /// every combat tick instead of teleporting to dest. Z follows L2 geodata (<see cref="Geo.GeoEngine"/>) where region files exist, else the stub sanity clamp.
-/// Blocked straight moves follow an A* geo path (<see cref="Geo.GeoEngine.FindPath"/>) one MoveToLocation leg at a time. Follow-ups (not here): water/doors, client ValidatePosition drift check (see ValidateClientPosition).
+/// Blocked straight moves follow an A* geo path (<see cref="Geo.GeoEngine.FindPath"/>) one MoveToLocation leg at a time. Closed doors (<see cref="Geo.DoorTable"/>) clip every leg; inside a water zone (<see cref="Geo.WaterZones"/>) speed is the swim speed.
 /// </summary>
 public sealed partial class ZoneWorld
 {
@@ -52,6 +53,9 @@ public sealed partial class ZoneWorld
         {
             destZ = SanitizeDestZ(entity.X, entity.Y, entity.Z, move.DestX, move.DestY, move.DestZ);
         }
+
+        if (ClipDoors(entity, ref destX, ref destY, ref destZ))
+            entity.MovePath.Clear();
 
         int curX = entity.X, curY = entity.Y, curZ = entity.Z;
 
@@ -139,10 +143,7 @@ public sealed partial class ZoneWorld
             double allowXy = ValidateMaxXyDrift;
             if (e.MoveActive)
             {
-                float speed = e.Running ? e.RunSpeed : e.WalkSpeed;
-                if (speed <= 0)
-                    speed = DefaultRunSpeed;
-                allowXy += speed * ValidateLagSeconds;
+                allowXy += MoveSpeedOf(e) * ValidateLagSeconds;
             }
             return dxy > allowXy || dz > (geo ? ValidateMaxZDriftGeo : ValidateMaxZDrift);
         }
@@ -227,9 +228,7 @@ public sealed partial class ZoneWorld
             return;
         }
 
-        float speed = e.Running ? e.RunSpeed : e.WalkSpeed;
-        if (speed <= 0)
-            speed = DefaultRunSpeed;
+        float speed = MoveSpeedOf(e);
         double step = speed * dt / 1000.0;
         double dx = e.MoveDestX - e.X, dy = e.MoveDestY - e.Y;
         double dist = Math.Sqrt(dx * dx + dy * dy);
@@ -240,6 +239,12 @@ public sealed partial class ZoneWorld
             e.Y = e.MoveDestY;
             e.Z = e.MoveDestZ;
             (e.MoveDestX, e.MoveDestY, e.MoveDestZ) = e.MovePath.Dequeue();
+            int lx = e.MoveDestX, ly = e.MoveDestY, lz = e.MoveDestZ;
+            if (ClipDoors(e, ref lx, ref ly, ref lz))
+            {
+                e.MovePath.Clear();
+                (e.MoveDestX, e.MoveDestY, e.MoveDestZ) = (lx, ly, lz);
+            }
             e.MoveSegmentDirty = true;
         }
         else if (dist <= step || dist < 1)
@@ -261,6 +266,49 @@ public sealed partial class ZoneWorld
         _aoi.Move(e.ObjectId, e.X, e.Y);
         if (e.Session != null)
             SyncSession(e, e.Session);
+        UpdateWaterState(e);
+    }
+
+    /// <summary>
+    /// Mobius <c>getMoveSpeed</c>: swim speed inside a WaterZone (players: Interlude baseStats 50), else run/walk.
+    /// </summary>
+    internal static float MoveSpeedOf(ZoneEntity e)
+    {
+        if (e.InWater && e.Kind == ZoneEntityKind.Player)
+            return WaterZones.PlayerSwimSpeed;
+        float speed = e.Running ? e.RunSpeed : e.WalkSpeed;
+        return speed <= 0 ? DefaultRunSpeed : speed;
+    }
+
+    /// <summary>Mobius WaterZone onEnter/onExit for players: flip swim state and tell Net watchers the new speed.</summary>
+    void UpdateWaterState(ZoneEntity e)
+    {
+        if (e.Kind != ZoneEntityKind.Player || Water.Count == 0)
+            return;
+        bool inWater = Water.IsInWater(e.X, e.Y, e.Z);
+        if (inWater == e.InWater)
+            return;
+        e.InWater = inWater;
+        ZoneLog.Info($"[water] obj={e.ObjectId} {(inWater ? "enter" : "exit")} at={e.X},{e.Y},{e.Z} speed={MoveSpeedOf(e)}");
+        FanoutNetMoveType(e);
+    }
+
+    /// <summary>
+    /// Mobius <c>checkIfDoorsBetween</c>: truncate a leg in front of the first closed door it crosses.
+    /// Returns true when the leg was clipped (caller drops the remaining geo path).
+    /// </summary>
+    bool ClipDoors(ZoneEntity e, ref int destX, ref int destY, ref int destZ)
+    {
+        if (Doors.Count == 0)
+            return false;
+        var door = Doors.FirstBlocking(e.X, e.Y, e.Z, destX, destY, destZ, out int sx, out int sy, out int sz);
+        if (door == null)
+            return false;
+        ZoneLog.Info($"[door] move blocked obj={e.ObjectId} door={door.Id}:{door.Name} from={e.X},{e.Y},{e.Z} want={destX},{destY},{destZ} stop={sx},{sy},{sz}");
+        destX = sx;
+        destY = sy;
+        destZ = _geo.HasGeo(sx, sy) ? _geo.GetHeight(sx, sy, sz) : sz;
+        return true;
     }
 
     static void SyncSession(ZoneEntity e, ZoneSession s)

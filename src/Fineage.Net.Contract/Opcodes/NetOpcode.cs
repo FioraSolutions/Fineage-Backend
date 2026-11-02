@@ -89,5 +89,9 @@ namespace Fineage.Net.Contract
         // 0x0344..0x034F reserved (clan WIP)
         /// <summary>Client → zone: Mobius ValidatePosition heartbeat (L2 XYZ + heading).</summary>
         public const ushort ValidatePosition = 0x0350;
+        /// <summary>Client → zone: Mobius RequestActionUse (action id; Net handles 1 = walk/run toggle).</summary>
+        public const ushort RequestActionUse = 0x0351;
+        /// <summary>Zone → client: Mobius ChangeMoveType + effective run/walk speed (swim speed while in water).</summary>
+        public const ushort ChangeMoveType = 0x0352;
     }
 }

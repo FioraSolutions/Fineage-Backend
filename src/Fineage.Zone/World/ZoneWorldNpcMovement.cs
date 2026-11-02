@@ -33,6 +33,9 @@ public sealed partial class ZoneWorld
             destZ = SanitizeDestZ(npc.X, npc.Y, npc.Z, wantX, wantY, wantZ);
         }
 
+        if (ClipDoors(npc, ref destX, ref destY, ref destZ))
+            npc.MovePath.Clear();
+
         npc.MoveDestX = destX;
         npc.MoveDestY = destY;
         npc.MoveDestZ = destZ;

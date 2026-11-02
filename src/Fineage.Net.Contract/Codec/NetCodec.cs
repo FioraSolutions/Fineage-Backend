@@ -440,6 +440,43 @@ namespace Fineage.Net.Contract
             return new ValidatePositionMsg { X = r.ReadInt32(), Y = r.ReadInt32(), Z = r.ReadInt32(), Heading = r.ReadInt32() };
         }
 
+        public static byte[] EncodeActionUse(ActionUseNetMsg m) => Write(w =>
+        {
+            w.WriteInt32(m.ActionId);
+            w.WriteByte(m.CtrlPressed ? (byte)1 : (byte)0);
+            w.WriteByte(m.ShiftPressed ? (byte)1 : (byte)0);
+        });
+
+        public static ActionUseNetMsg DecodeActionUse(ReadOnlySpan<byte> p)
+        {
+            var r = new Reader(p);
+            return new ActionUseNetMsg { ActionId = r.ReadInt32(), CtrlPressed = r.ReadByte() != 0, ShiftPressed = r.ReadByte() != 0 };
+        }
+
+        public static byte[] EncodeChangeMoveType(ChangeMoveTypeNetMsg m) => Write(w =>
+        {
+            w.WriteUInt64(m.EntityValue);
+            w.WriteUInt32(m.EntityGeneration);
+            w.WriteByte(m.Running ? (byte)1 : (byte)0);
+            w.WriteFloat(m.RunSpeed);
+            w.WriteFloat(m.WalkSpeed);
+            w.WriteByte(m.InWater ? (byte)1 : (byte)0);
+        });
+
+        public static ChangeMoveTypeNetMsg DecodeChangeMoveType(ReadOnlySpan<byte> p)
+        {
+            var r = new Reader(p);
+            return new ChangeMoveTypeNetMsg
+            {
+                EntityValue = r.ReadUInt64(),
+                EntityGeneration = r.ReadUInt32(),
+                Running = r.ReadByte() != 0,
+                RunSpeed = r.ReadFloat(),
+                WalkSpeed = r.ReadFloat(),
+                InWater = r.ReadByte() != 0
+            };
+        }
+
         public static byte[] EncodeStopMove(StopMoveMsg _) => Array.Empty<byte>();
         public static StopMoveMsg DecodeStopMove(ReadOnlySpan<byte> _) => new();
 

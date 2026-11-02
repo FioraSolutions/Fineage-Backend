@@ -75,6 +75,8 @@ sealed class ZoneEntity
     public float RunSpeed { get; init; }
     public float WalkSpeed { get; init; }
     public bool Running { get; set; } = true;
+    /// <summary>Mobius isInsideZone(WATER): last water state seen by the mover (swim speed while true).</summary>
+    public bool InWater { get; set; }
     /// <summary>Mobius MoveData: server-side move in progress (Net path). Position advances by speed each tick.</summary>
     public bool MoveActive { get; set; }
     public int MoveDestX { get; set; }
@@ -196,6 +198,13 @@ public sealed partial class ZoneWorld
     readonly object _gate = new();
     readonly GeoEngine _geo;
     static readonly Lazy<GeoEngine> SharedGeo = new(GeoEngine.LoadDefault);
+    static readonly Lazy<DoorTable> SharedDoors = new(DoorTable.LoadDefault);
+    static readonly Lazy<WaterZones> SharedWater = new(WaterZones.LoadDefault);
+
+    /// <summary>Mobius DoorData (movement collision). Settable for tests.</summary>
+    internal DoorTable Doors { get; set; } = DoorTable.Empty;
+    /// <summary>Mobius WaterZone cuboids (swim speed). Settable for tests.</summary>
+    internal WaterZones Water { get; set; } = WaterZones.Empty;
 
     /// <summary>Server geodata (empty when no region files are present).</summary>
     public GeoEngine GeoData => _geo;
@@ -271,6 +280,12 @@ public sealed partial class ZoneWorld
         _multisells = multisells ?? MultiSellCatalog.LoadDefault();
         _shopStock = new ShopStock(_buyLists);
         _geo = geo ?? SharedGeo.Value;
+        if (geo == null)
+        {
+            // Production world: real datapack doors / water. Tests that inject geo keep the empty tables.
+            Doors = SharedDoors.Value;
+            Water = SharedWater.Value;
+        }
         BootstrapSpawns();
         BootstrapBosses();
         BootstrapQuestNpcs();

@@ -1,5 +1,6 @@
 using Fineage.Protocol;
 using Fineage.Zone.Clan;
+using Fineage.Zone.Geo;
 using MessagePack;
 
 namespace Fineage.Zone.World;
@@ -69,8 +70,24 @@ public sealed partial class ZoneWorld
         if (player.Sitting)
             return ActionProtocol.Blocked;
 
+        // Settle the in-flight segment at the old speed before switching gait (Mobius setWalking/setRunning).
+        long now = _clock().ToUnixTimeMilliseconds();
+        AdvanceMove(player, now);
         player.Running = !player.Running;
+        ZoneLog.Info($"[move] obj={player.ObjectId} {(player.Running ? "run" : "walk")} speed={MoveSpeedOf(player)}");
         FanoutMoveType(player, outbound);
+        if (player.MoveActive && NetBridge != null)
+        {
+            // Remote Net pawns re-target the remaining leg with the new gait.
+            var ack = new MoveToMsg
+            {
+                ObjectId = player.ObjectId,
+                DestX = player.MoveDestX, DestY = player.MoveDestY, DestZ = player.MoveDestZ,
+                OriginX = player.X, OriginY = player.Y, OriginZ = player.Z
+            };
+            NetBridge.FanoutMoveState(NetWatchersOf(player), player.ObjectId, ack.OriginX, ack.OriginY, ack.OriginZ,
+                ack.DestX, ack.DestY, ack.DestZ, player.Running);
+        }
         return null;
     }
 
@@ -145,6 +162,34 @@ public sealed partial class ZoneWorld
     {
         var msg = new ChangeMoveTypeMsg { ObjectId = player.ObjectId, Running = player.Running };
         FanoutActor(player, MsgType.ChangeMoveType, msg, outbound);
+        FanoutNetMoveType(player);
+    }
+
+    /// <summary>Self (players) + knownlist players: the Net ChangeMoveType audience.</summary>
+    List<int> NetWatchersOf(ZoneEntity actor)
+    {
+        var list = new List<int>();
+        if (actor.Session != null)
+            list.Add(actor.ObjectId);
+        foreach (int id in actor.Knownlist)
+        {
+            if (_byId.TryGetValue(id, out var w) && w.Session != null && w.Kind == ZoneEntityKind.Player)
+                list.Add(id);
+        }
+        return list;
+    }
+
+    /// <summary>Net ChangeMoveType (gait + effective run/walk speed, swim-aware) to self + watchers.</summary>
+    void FanoutNetMoveType(ZoneEntity actor)
+    {
+        if (NetBridge == null)
+            return;
+        var watchers = NetWatchersOf(actor);
+        if (watchers.Count == 0)
+            return;
+        float run = actor.InWater && actor.Kind == ZoneEntityKind.Player ? WaterZones.PlayerSwimSpeed : actor.RunSpeed;
+        float walk = actor.InWater && actor.Kind == ZoneEntityKind.Player ? WaterZones.PlayerSwimSpeed : actor.WalkSpeed;
+        NetBridge.FanoutChangeMoveType(watchers, actor.ObjectId, actor.Running, run, walk, actor.InWater);
     }
 
     void FanoutActor(ZoneEntity actor, MsgType type, object payload, List<Pending> outbound)
