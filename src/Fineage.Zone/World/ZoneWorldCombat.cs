@@ -165,7 +165,7 @@ public sealed partial class ZoneWorld
                 lock (_gate)
                 {
                     long now = _clock().ToUnixTimeMilliseconds();
-                    TickPlayerMovement(now);
+                    TickPlayerMovement(now, outbound);
                     TickPendingHits(now, outbound);
                     TickMeleeHits(now, outbound);
                     TickAutoAttacks(outbound);

@@ -75,4 +75,29 @@ public sealed class GeoEngineTests
         }
         return null;
     }
+
+    [Fact]
+    public void Blocked_move_finds_path_around_wall_end()
+    {
+        var geo = FlatWithWall(); // wall spans geo y 0..7 only
+        var path = geo.FindPath(8, 40, 96, 400, 40, 96);
+        Assert.NotNull(path);
+        Assert.True(path!.Count >= 2);
+        Assert.Equal((400, 40, 96), path[^1]);
+        int ax = 8, ay = 40, az = 96;
+        foreach (var (x, y, z) in path)
+        {
+            geo.MoveCheck(ax, ay, az, x, y, z, out bool blocked);
+            Assert.False(blocked);
+            (ax, ay, az) = (x, y, z);
+        }
+    }
+
+    [Fact]
+    public void Open_move_path_is_single_leg()
+    {
+        var geo = FlatWithWall();
+        var path = geo.FindPath(8, 40, 96, 150, 400, 96);
+        Assert.Equal([(150, 400, 96)], path!);
+    }
 }

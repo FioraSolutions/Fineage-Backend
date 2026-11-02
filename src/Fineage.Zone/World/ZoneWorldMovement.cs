@@ -6,7 +6,7 @@ namespace Fineage.Zone.World;
 /// Net-path timed movement (Mobius <c>Creature.moveToLocation</c> + <c>MovementTaskManager</c>, simplified):
 /// a MoveInput starts a straight segment; the server advances the entity along it at run/walk speed
 /// every combat tick instead of teleporting to dest. Z follows L2 geodata (<see cref="Geo.GeoEngine"/>) where region files exist, else the stub sanity clamp.
-/// Follow-ups (not here): pathfinding, water/doors, client ValidatePosition drift check (see ValidateClientPosition).
+/// Blocked straight moves follow an A* geo path (<see cref="Geo.GeoEngine.FindPath"/>) one MoveToLocation leg at a time. Follow-ups (not here): water/doors, client ValidatePosition drift check (see ValidateClientPosition).
 /// </summary>
 public sealed partial class ZoneWorld
 {
@@ -30,12 +30,22 @@ public sealed partial class ZoneWorld
         AdvanceMove(entity, now);
 
         int destX = move.DestX, destY = move.DestY, destZ;
+        entity.MovePath.Clear();
+        entity.MoveSegmentDirty = false;
         if (_geo.HasGeo(entity.X, entity.Y))
         {
             // L2 geo: server Z = ground under the current XY; dest truncated before walls / steep climbs.
             entity.Z = _geo.GetHeight(entity.X, entity.Y, entity.Z);
             (destX, destY, destZ) = _geo.MoveCheck(entity.X, entity.Y, entity.Z, move.DestX, move.DestY, move.DestZ, out bool blocked);
-            if (blocked)
+            if (blocked && _geo.FindPath(entity.X, entity.Y, entity.Z, move.DestX, move.DestY, move.DestZ) is { Count: > 0 } path)
+            {
+                // Mobius moveToLocation + geoPath: walk the first waypoint, queue the rest (moveToNextRoutePoint).
+                ZoneLog.Info($"[geo] path obj={entity.ObjectId} from={entity.X},{entity.Y},{entity.Z} want={move.DestX},{move.DestY} nodes={path.Count} {string.Join(' ', path.Select(p => $"{p.X},{p.Y},{p.Z}"))}");
+                (destX, destY, destZ) = path[0];
+                for (int i = 1; i < path.Count; i++)
+                    entity.MovePath.Enqueue(path[i]);
+            }
+            else if (blocked)
                 ZoneLog.Info($"[geo] move blocked obj={entity.ObjectId} from={entity.X},{entity.Y},{entity.Z} want={move.DestX},{move.DestY},{move.DestZ} stop={destX},{destY},{destZ}");
         }
         else
@@ -80,6 +90,8 @@ public sealed partial class ZoneWorld
     {
         AdvanceMove(entity, _clock().ToUnixTimeMilliseconds());
         entity.MoveActive = false;
+        entity.MovePath.Clear();
+        entity.MoveSegmentDirty = false;
     }
 
     /// <summary>Net StopMove: halt at the server's interpolated position so the correction is truthful.</summary>
@@ -138,12 +150,28 @@ public sealed partial class ZoneWorld
         }
     }
 
-    void TickPlayerMovement(long now)
+    void TickPlayerMovement(long now, List<Pending> outbound)
     {
         foreach (var e in _byId.Values)
         {
-            if (e.MoveActive && e.Kind == ZoneEntityKind.Player)
+            if (e.Kind != ZoneEntityKind.Player)
+                continue;
+            if (e.MoveActive)
                 AdvanceMove(e, now);
+            if (e.MoveSegmentDirty)
+            {
+                e.MoveSegmentDirty = false;
+                if (!e.MoveActive)
+                    continue;
+                // Next geo-path leg: plain MoveToLocation (MoveToAck / Net move state) from here to the waypoint.
+                var ack = new MoveToMsg
+                {
+                    ObjectId = e.ObjectId,
+                    DestX = e.MoveDestX, DestY = e.MoveDestY, DestZ = e.MoveDestZ,
+                    OriginX = e.X, OriginY = e.Y, OriginZ = e.Z
+                };
+                ReconcileKnownlist(e, ack, outbound, outbound);
+            }
         }
     }
 
@@ -167,7 +195,16 @@ public sealed partial class ZoneWorld
         double step = speed * dt / 1000.0;
         double dx = e.MoveDestX - e.X, dy = e.MoveDestY - e.Y;
         double dist = Math.Sqrt(dx * dx + dy * dy);
-        if (dist <= step || dist < 1)
+        if ((dist <= step || dist < 1) && e.MovePath.Count > 0)
+        {
+            // Reached a geo-path waypoint: snap to it and start the next leg (leftover distance is dropped, ≤1 tick).
+            e.X = e.MoveDestX;
+            e.Y = e.MoveDestY;
+            e.Z = e.MoveDestZ;
+            (e.MoveDestX, e.MoveDestY, e.MoveDestZ) = e.MovePath.Dequeue();
+            e.MoveSegmentDirty = true;
+        }
+        else if (dist <= step || dist < 1)
         {
             e.X = e.MoveDestX;
             e.Y = e.MoveDestY;

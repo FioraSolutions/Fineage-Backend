@@ -81,6 +81,10 @@ sealed class ZoneEntity
     public int MoveDestY { get; set; }
     public int MoveDestZ { get; set; }
     public long MoveLastTickMs { get; set; }
+    /// <summary>Mobius MoveData.geoPath: remaining geo-path waypoints after the current segment.</summary>
+    public Queue<(int X, int Y, int Z)> MovePath { get; } = new();
+    /// <summary>Segment switched to the next waypoint inside AdvanceMove; tick broadcasts MoveToLocation for it.</summary>
+    public bool MoveSegmentDirty { get; set; }
     public ZoneSession? Session { get; init; }
     public PlayerInventory? Inventory { get; init; }
     /// <summary>

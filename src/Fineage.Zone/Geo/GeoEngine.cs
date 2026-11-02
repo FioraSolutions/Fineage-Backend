@@ -6,7 +6,7 @@ namespace Fineage.Zone.Geo;
 /// (or <c>FINEAGE_GEODATA_DIR</c>). A region is 32768×32768 world units = 256×256 blocks of 8×8 cells, 16 units per cell.
 /// Where a region file is missing, <see cref="HasGeo"/> is false and callers keep their non-geo fallback.
 /// </summary>
-public sealed class GeoEngine
+public sealed partial class GeoEngine
 {
     public const int CellSize = 16;
     public const int RegionCells = 2048;
