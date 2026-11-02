@@ -44,6 +44,8 @@ namespace Fineage.Net.Contract
         public float RunSpeed { get; set; }
         public float WalkSpeed { get; set; }
         public bool Running { get; set; } = true;
+        /// <summary>NPC only: true when the entity is combat-attackable (mobs).</summary>
+        public bool Attackable { get; set; }
     }
 
     public sealed class PlayerStatsMsg
@@ -299,5 +301,24 @@ namespace Fineage.Net.Contract
     {
         public int ObjectId { get; set; }
         public AbnormalEffectNet[] Effects { get; set; } = System.Array.Empty<AbnormalEffectNet>();
+    }
+
+    public sealed class NpcTalkNetMsg
+    {
+        public int NpcObjectId { get; set; }
+    }
+
+    public sealed class BypassRequestNetMsg
+    {
+        public int NpcObjectId { get; set; }
+        public string Command { get; set; } = "";
+    }
+
+    public sealed class NpcHtmlNetMsg
+    {
+        public int NpcObjectId { get; set; }
+        public int NpcId { get; set; }
+        public string Html { get; set; } = "";
+        public int ItemId { get; set; }
     }
 }

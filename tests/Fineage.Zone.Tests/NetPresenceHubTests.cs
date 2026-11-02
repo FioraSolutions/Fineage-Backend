@@ -56,6 +56,35 @@ public sealed class NetPresenceHubTests
     }
 
     [Fact]
+    public void Npc_talk_bypass_html_codec_round_trip()
+    {
+        Assert.Equal(9, NetCodec.DecodeNpcTalk(NetCodec.EncodeNpcTalk(new NpcTalkNetMsg { NpcObjectId = 9 })).NpcObjectId);
+
+        var bypass = new BypassRequestNetMsg { NpcObjectId = 9, Command = "Chat 1" };
+        var bypassAgain = NetCodec.DecodeBypassRequest(NetCodec.EncodeBypassRequest(bypass));
+        Assert.Equal("Chat 1", bypassAgain.Command);
+
+        var html = new NpcHtmlNetMsg { NpcObjectId = 9, NpcId = 30006, Html = "<html/>", ItemId = 0 };
+        var htmlAgain = NetCodec.DecodeNpcHtml(NetCodec.EncodeNpcHtml(html));
+        Assert.Equal(30006, htmlAgain.NpcId);
+        Assert.Equal("<html/>", htmlAgain.Html);
+
+        var spawn = new EntitySpawnMsg
+        {
+            EntityValue = 1,
+            EntityGeneration = 1,
+            Kind = EntityKindNet.Npc,
+            Name = "Guide",
+            TemplateId = 30006,
+            Attackable = false,
+            Running = true
+        };
+        var spawnAgain = NetCodec.DecodeEntitySpawn(NetCodec.EncodeEntitySpawn(spawn));
+        Assert.False(spawnAgain.Attackable);
+        Assert.Equal(30006, spawnAgain.TemplateId);
+    }
+
+    [Fact]
     public void Abnormal_status_update_codec_round_trip()
     {
         var update = new AbnormalStatusUpdateNetMsg

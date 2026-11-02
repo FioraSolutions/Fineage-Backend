@@ -44,4 +44,6 @@ interface INetPresenceBridge
     void FanoutPlayerStats(IReadOnlyList<int> watcherObjectIds, PlayerStatsMsg stats);
 
     void FanoutAbnormalStatusUpdate(IReadOnlyList<int> watcherObjectIds, AbnormalStatusUpdateNetMsg update);
+
+    void FanoutNpcHtml(IReadOnlyList<int> watcherObjectIds, NpcHtmlNetMsg html);
 }

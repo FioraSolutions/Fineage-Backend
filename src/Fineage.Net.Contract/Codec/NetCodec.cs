@@ -279,12 +279,13 @@ namespace Fineage.Net.Contract
             w.WriteFloat(m.RunSpeed);
             w.WriteFloat(m.WalkSpeed);
             w.WriteByte(m.Running ? (byte)1 : (byte)0);
+            w.WriteByte(m.Attackable ? (byte)1 : (byte)0);
         });
 
         public static EntitySpawnMsg DecodeEntitySpawn(ReadOnlySpan<byte> p)
         {
             var r = new Reader(p);
-            return new EntitySpawnMsg
+            var msg = new EntitySpawnMsg
             {
                 EntityValue = r.ReadUInt64(),
                 EntityGeneration = r.ReadUInt32(),
@@ -303,6 +304,9 @@ namespace Fineage.Net.Contract
                 WalkSpeed = r.ReadFloat(),
                 Running = r.ReadByte() != 0
             };
+            if (r.Remaining > 0)
+                msg.Attackable = r.ReadByte() != 0;
+            return msg;
         }
 
         public static byte[] EncodePlayerStats(PlayerStatsMsg m) => Write(w =>
@@ -861,6 +865,42 @@ namespace Fineage.Net.Contract
             return new AbnormalStatusUpdateNetMsg { ObjectId = objectId, Effects = effects };
         }
 
+        public static byte[] EncodeNpcTalk(NpcTalkNetMsg m) => Write(w => w.WriteInt32(m.NpcObjectId));
+        public static NpcTalkNetMsg DecodeNpcTalk(ReadOnlySpan<byte> p) =>
+            new() { NpcObjectId = new Reader(p).ReadInt32() };
+
+        public static byte[] EncodeBypassRequest(BypassRequestNetMsg m) => Write(w =>
+        {
+            w.WriteInt32(m.NpcObjectId);
+            w.WriteString(m.Command ?? "");
+        });
+
+        public static BypassRequestNetMsg DecodeBypassRequest(ReadOnlySpan<byte> p)
+        {
+            var r = new Reader(p);
+            return new BypassRequestNetMsg { NpcObjectId = r.ReadInt32(), Command = r.ReadString() };
+        }
+
+        public static byte[] EncodeNpcHtml(NpcHtmlNetMsg m) => Write(w =>
+        {
+            w.WriteInt32(m.NpcObjectId);
+            w.WriteInt32(m.NpcId);
+            w.WriteString(m.Html ?? "");
+            w.WriteInt32(m.ItemId);
+        });
+
+        public static NpcHtmlNetMsg DecodeNpcHtml(ReadOnlySpan<byte> p)
+        {
+            var r = new Reader(p);
+            return new NpcHtmlNetMsg
+            {
+                NpcObjectId = r.ReadInt32(),
+                NpcId = r.ReadInt32(),
+                Html = r.ReadString(),
+                ItemId = r.ReadInt32()
+            };
+        }
+
         public static PositionCorrectionMsg DecodePositionCorrection(ReadOnlySpan<byte> p)
         {
             var r = new Reader(p);
@@ -1053,6 +1093,8 @@ namespace Fineage.Net.Contract
                 _span = span;
                 _i = 0;
             }
+
+            public int Remaining => _span.Length - _i;
 
             public byte ReadByte()
             {

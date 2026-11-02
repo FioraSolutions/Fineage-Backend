@@ -72,7 +72,8 @@ static class NetEnterWorldProjector
             Heading = entity.Heading,
             RunSpeed = entity.RunSpeed,
             WalkSpeed = entity.WalkSpeed,
-            Running = entity.Running
+            Running = entity.Running,
+            Attackable = entity.Attackable
         };
     }
 

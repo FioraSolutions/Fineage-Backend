@@ -85,6 +85,7 @@ V2 MessagePack flushes still go to a discarded stream on the Net path. Net peers
 | Revive | `ReviveRequest` `0x031E` (village) → `Revive` `0x031F` + `TeleportToLocation` `0x0320` + vitals; AOI spawn/despawn after relocate. |
 | Kill reward | Killer gets `SystemMessage` (id 95), `StatusUpdate`, and `PlayerStats` `0x0305` (exp/sp/level). |
 | Buffs | Skill / playtest abnormals → `AbnormalStatusUpdate` `0x0321` (full effect list). |
+| NPC dialog | `NpcTalk` `0x0322` / `BypassRequest` `0x0323` → `NpcHtml` `0x0324` (quest choice HTML reused). EntitySpawn carries `Attackable` for talk vs attack. |
 | Leave / disconnect | `EntityDespawn` of leaver to known Net peers. |
 
 AOI (who is on the knownlist):

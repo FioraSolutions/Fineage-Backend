@@ -157,21 +157,34 @@ public sealed partial class ZoneWorld
         ApplyProgress(player, outcome);
         if (outcome.Items.Count > 0 && player.Inventory != null)
         {
-            toSelf.Add(Pack(session, MsgType.InventoryUpdate, new InventoryUpdateMsg
+            var invUpdate = new InventoryUpdateMsg
             {
                 Changes = outcome.Items.Select(touch => InventoryMessages.ChangeRow((int)touch.Kind, touch.Item)).ToArray()
-            }));
+            };
+            toSelf.Add(Pack(session, MsgType.InventoryUpdate, invUpdate));
+            if (NetBridge != null)
+                NetBridge.FanoutInventoryUpdate([session.ObjectId], ToNetInventoryUpdate(invUpdate));
             SaveInventory(session, player.Inventory);
         }
 
         foreach (var line in outcome.Lines)
         {
-            toSelf.Add(Pack(session, MsgType.SystemMessage, new SystemMessageMsg
+            var notice = new SystemMessageMsg
             {
                 Id = (int)line.Notice,
                 Params = line.Params,
                 Text = line.Text
-            }));
+            };
+            toSelf.Add(Pack(session, MsgType.SystemMessage, notice));
+            if (NetBridge != null)
+            {
+                NetBridge.FanoutSystemMessage([session.ObjectId], new Fineage.Net.Contract.SystemMessageNetMsg
+                {
+                    Id = notice.Id,
+                    Text = notice.Text ?? "",
+                    Params = notice.Params ?? []
+                });
+            }
         }
 
         foreach (string sound in outcome.Sounds)
@@ -188,6 +201,8 @@ public sealed partial class ZoneWorld
                 Event = outcome.Event,
                 Html = outcome.Html
             }));
+            if (NetBridge != null && _byId.TryGetValue(npcObjectId, out var npcEntity))
+                FanoutNetHtml(session, npcEntity, outcome.Html);
         }
 
         if (outcome.JournalChanged)

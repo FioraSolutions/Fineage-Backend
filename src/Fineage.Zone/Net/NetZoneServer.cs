@@ -157,6 +157,13 @@ public sealed class NetZoneServer : INetPresenceBridge
             _ = _presence.SendAsync(watcher, NetOpcode.AbnormalStatusUpdate, payload, CancellationToken.None);
     }
 
+    void INetPresenceBridge.FanoutNpcHtml(IReadOnlyList<int> watcherObjectIds, NpcHtmlNetMsg html)
+    {
+        var payload = NetCodec.EncodeNpcHtml(html);
+        foreach (int watcher in watcherObjectIds)
+            _ = _presence.SendAsync(watcher, NetOpcode.NpcHtml, payload, CancellationToken.None);
+    }
+
     public async Task HandleAsync(NetConnection conn, CancellationToken ct)
     {
         await using var discard = new MemoryStream();
@@ -218,6 +225,12 @@ public sealed class NetZoneServer : INetPresenceBridge
                             break;
                         case NetOpcode.ReviveRequest:
                             await OnReviveRequestAsync(conn, zoneSession, self, envelope, ct).ConfigureAwait(false);
+                            break;
+                        case NetOpcode.NpcTalk:
+                            await OnNpcTalkAsync(conn, zoneSession, envelope, ct).ConfigureAwait(false);
+                            break;
+                        case NetOpcode.BypassRequest:
+                            await OnBypassRequestAsync(conn, zoneSession, self, envelope, ct).ConfigureAwait(false);
                             break;
                         case NetOpcode.StopMove:
                             // Authoritative stop: correct to current session position.
@@ -808,6 +821,57 @@ public sealed class NetZoneServer : INetPresenceBridge
         }
 
         // Revive / Teleport / StatusUpdate fan via NetBridge; AOI after village relocate needs spawn/despawn.
+        var after = _world.SnapshotKnownIds(zoneSession);
+        await FanKnownlistDiffAsync(conn, zoneSession, self, before, after, ct).ConfigureAwait(false);
+    }
+
+    async Task OnNpcTalkAsync(
+        NetConnection conn,
+        ZoneSession zoneSession,
+        PacketEnvelope envelope,
+        CancellationToken ct)
+    {
+        RequireHello(conn);
+        if (!zoneSession.Bound || !zoneSession.InWorld)
+        {
+            await RejectAsync(conn, "not_in_world", "Enter world first.", ct).ConfigureAwait(false);
+            return;
+        }
+
+        var talk = NetCodec.DecodeNpcTalk(envelope.Payload);
+        string? error = await _world.TryNpcTalkAsync(zoneSession, talk.NpcObjectId, ct).ConfigureAwait(false);
+        if (error != null)
+            await RejectAsync(conn, error, "NpcTalk failed.", ct).ConfigureAwait(false);
+    }
+
+    async Task OnBypassRequestAsync(
+        NetConnection conn,
+        ZoneSession zoneSession,
+        EntityId self,
+        PacketEnvelope envelope,
+        CancellationToken ct)
+    {
+        RequireHello(conn);
+        if (!zoneSession.Bound || !zoneSession.InWorld)
+        {
+            await RejectAsync(conn, "not_in_world", "Enter world first.", ct).ConfigureAwait(false);
+            return;
+        }
+
+        var before = _world.SnapshotKnownIds(zoneSession);
+        var bypass = NetCodec.DecodeBypassRequest(envelope.Payload);
+        string? error = await _world.TryBypassAsync(
+            zoneSession,
+            bypass.NpcObjectId,
+            bypass.Command,
+            ct).ConfigureAwait(false);
+        if (error != null)
+        {
+            await RejectAsync(conn, error, "Bypass failed.", ct).ConfigureAwait(false);
+            return;
+        }
+
+        // Teleport bypass relocates; refresh AOI for Net peers.
         var after = _world.SnapshotKnownIds(zoneSession);
         await FanKnownlistDiffAsync(conn, zoneSession, self, before, after, ct).ConfigureAwait(false);
     }
