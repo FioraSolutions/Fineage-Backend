@@ -94,4 +94,40 @@ namespace Fineage.Net.Contract
         public int Z { get; set; }
         public int Heading { get; set; }
     }
+
+    /// <summary>Mobius/V2 ItemList row (self bag + paperdoll) for Net enter.</summary>
+    public sealed class ItemListEntryNet
+    {
+        public int ObjectId { get; set; }
+        public int ItemId { get; set; }
+        public int Count { get; set; }
+        public int EnchantLevel { get; set; }
+        /// <summary>Paperdoll slot index, or -1 when in the bag.</summary>
+        public int EquippedSlot { get; set; } = -1;
+    }
+
+    public sealed class ItemListNetMsg
+    {
+        public ItemListEntryNet[] Items { get; set; } = System.Array.Empty<ItemListEntryNet>();
+    }
+
+    /// <summary>AutoSkills / known skill row (Mobius SkillList) for Net enter.</summary>
+    public sealed class SkillListEntryNet
+    {
+        public int SkillId { get; set; }
+        public int Level { get; set; }
+        public int ReuseRemainingMs { get; set; }
+    }
+
+    public sealed class SkillListNetMsg
+    {
+        public SkillListEntryNet[] Skills { get; set; } = System.Array.Empty<SkillListEntryNet>();
+    }
+
+    /// <summary>Forget / leave knownlist (Mobius DeleteObject) for Net peers.</summary>
+    public sealed class EntityDespawnMsg
+    {
+        public ulong EntityValue { get; set; }
+        public uint EntityGeneration { get; set; }
+    }
 }

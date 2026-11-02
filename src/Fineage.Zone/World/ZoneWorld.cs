@@ -5,6 +5,7 @@ using Fineage.Protocol;
 using Fineage.Zone.Chat;
 using Fineage.Zone.Combat;
 using Fineage.Zone.Interest;
+using Fineage.Zone.Net;
 using Fineage.Zone.Spawns;
 using Fineage.Zone.Drops;
 using Fineage.Zone.Bosses;
@@ -290,6 +291,122 @@ public sealed partial class ZoneWorld
 
                 return count;
             }
+        }
+    }
+
+    /// <summary>Live player entity after a successful enter (same object Net enter projects from).</summary>
+    internal bool TryGetLivePlayer(ZoneSession session, out ZoneEntity entity)
+    {
+        lock (_gate)
+            return TryGetLivePlayerUnlocked(session, out entity);
+    }
+
+    /// <summary>
+    /// Optional Net PacketEnvelope bridge for sim/AI fanout (MoveState) while V2 flushes stay on ZoneSession streams.
+    /// Set by the Net host when <c>FINEAGE_NET_ENABLE=1</c>.
+    /// </summary>
+    internal INetPresenceBridge? NetBridge { get; set; }
+
+    /// <summary>
+    /// Live players currently on <paramref name="session"/>'s knownlist (post-enter / post-move hysteresis).
+    /// Used by Net presence fanout so peers match V2 CharInfo/MoveToAck recipients.
+    /// </summary>
+    internal List<ZoneEntity> SnapshotKnownPlayers(ZoneSession session)
+    {
+        lock (_gate)
+        {
+            if (!TryGetLivePlayerUnlocked(session, out var self))
+                return [];
+
+            var players = new List<ZoneEntity>(self.Knownlist.Count);
+            foreach (int id in self.Knownlist)
+            {
+                if (_byId.TryGetValue(id, out var other) &&
+                    other.Kind == ZoneEntityKind.Player &&
+                    other.Session is { InWorld: true } &&
+                    other.InstanceId == self.InstanceId)
+                    players.Add(other);
+            }
+
+            players.Sort(static (a, b) => a.ObjectId.CompareTo(b.ObjectId));
+            return players;
+        }
+    }
+
+    /// <summary>
+    /// All live entities on the session knownlist (players + NPCs). Ground items skipped for Net Phase 1.
+    /// </summary>
+    internal List<ZoneEntity> SnapshotKnownEntities(ZoneSession session)
+    {
+        lock (_gate)
+        {
+            if (!TryGetLivePlayerUnlocked(session, out var self))
+                return [];
+
+            var list = new List<ZoneEntity>(self.Knownlist.Count);
+            foreach (int id in self.Knownlist)
+            {
+                if (!_byId.TryGetValue(id, out var other) || other.InstanceId != self.InstanceId)
+                    continue;
+                if (other.Kind == ZoneEntityKind.GroundItem)
+                    continue;
+                if (other.Kind == ZoneEntityKind.Player && other.Session is not { InWorld: true })
+                    continue;
+                list.Add(other);
+            }
+
+            list.Sort(static (a, b) => a.ObjectId.CompareTo(b.ObjectId));
+            return list;
+        }
+    }
+
+    /// <summary>Object ids on the session's knownlist (any entity kind). For move enter/leave diffs.</summary>
+    internal HashSet<int> SnapshotKnownIds(ZoneSession session)
+    {
+        lock (_gate)
+        {
+            if (!TryGetLivePlayerUnlocked(session, out var self))
+                return [];
+            return new HashSet<int>(self.Knownlist);
+        }
+    }
+
+    bool TryGetLivePlayerUnlocked(ZoneSession session, out ZoneEntity entity)
+    {
+        if (session.ObjectId != 0 &&
+            _byId.TryGetValue(session.ObjectId, out entity!) &&
+            entity.Kind == ZoneEntityKind.Player &&
+            ReferenceEquals(entity.Session, session) &&
+            session.InWorld)
+            return true;
+        entity = null!;
+        return false;
+    }
+
+    /// <summary>Live player by object id (for Net knownlist enter diffs).</summary>
+    internal bool TryGetLivePlayerById(int objectId, out ZoneEntity entity)
+    {
+        lock (_gate)
+        {
+            if (objectId != 0 &&
+                _byId.TryGetValue(objectId, out entity!) &&
+                entity.Kind == ZoneEntityKind.Player &&
+                entity.Session is { InWorld: true })
+                return true;
+            entity = null!;
+            return false;
+        }
+    }
+
+    /// <summary>Any world entity by id (player / NPC) for Net knownlist diffs.</summary>
+    internal bool TryGetEntityById(int objectId, out ZoneEntity entity)
+    {
+        lock (_gate)
+        {
+            if (objectId != 0 && _byId.TryGetValue(objectId, out entity!))
+                return true;
+            entity = null!;
+            return false;
         }
     }
 

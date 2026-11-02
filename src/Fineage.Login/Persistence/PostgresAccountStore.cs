@@ -335,17 +335,61 @@ public sealed class PostgresAccountStore : IAccountStore, IDisposable
     public bool TryHardDelete(string account, int characterId) =>
         _inner.TryHardDelete(account, characterId);
 
-    public CharacterRecord? FindById(string account, int characterId) =>
-        _inner.FindById(account, characterId);
+    public CharacterRecord? FindById(string account, int characterId)
+    {
+        using var conn = _dataSource.OpenConnection();
+        var record = NormalizedStoreReader.TryLoadById(conn, account, characterId);
+        if (record == null)
+            return null;
+        Hydrate(conn, record);
+        return record;
+    }
 
-    public CharacterRecord? FindByName(string account, string name) =>
-        _inner.FindByName(account, name);
+    public CharacterRecord? FindByName(string account, string name)
+    {
+        using var conn = _dataSource.OpenConnection();
+        var record = NormalizedStoreReader.TryLoadByName(conn, account, name);
+        if (record == null)
+            return null;
+        Hydrate(conn, record);
+        return record;
+    }
 
-    public IReadOnlyList<CharacterRecord> List(string account, DateTimeOffset now) =>
-        _inner.List(account, now);
+    public IReadOnlyList<CharacterRecord> List(string account, DateTimeOffset now)
+    {
+        using var conn = _dataSource.OpenConnection();
+        var rows = NormalizedStoreReader.ListByAccount(conn, account);
+        if (rows.Count == 0)
+            return [];
+
+        var cred = NormalizedStoreReader.TryLoadAccount(conn, account);
+        foreach (var row in rows)
+        {
+            _inner.HydrateCharacter(
+                row,
+                cred?.PasswordHash,
+                cred?.PasswordSalt,
+                cred?.Iterations ?? 0,
+                cred?.Email);
+        }
+
+        // Honour pending-delete purge rules from the in-memory store after hydrate.
+        return _inner.List(account, now);
+    }
 
     public IReadOnlyList<CharacterRecord> List(string account) =>
-        _inner.List(account);
+        List(account, DateTimeOffset.UtcNow);
+
+    void Hydrate(NpgsqlConnection conn, CharacterRecord record)
+    {
+        var cred = NormalizedStoreReader.TryLoadAccount(conn, record.Account);
+        _inner.HydrateCharacter(
+            record,
+            cred?.PasswordHash,
+            cred?.PasswordSalt,
+            cred?.Iterations ?? 0,
+            cred?.Email);
+    }
 
     public IReadOnlyList<ClanRecord> ListClans() => _inner.ListClans();
 

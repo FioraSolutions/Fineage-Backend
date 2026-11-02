@@ -19,6 +19,9 @@ public sealed class ZoneSession
     public string Account { get; private set; } = "";
     public string Name { get; private set; } = "";
     public int ClassId { get; private set; }
+    /// <summary>From handoff claims; used when store lag would otherwise default race to Human.</summary>
+    public int Race { get; private set; }
+    public int Sex { get; private set; }
     public int WireSessionId { get; set; }
     public ushort LastPacketId { get; set; }
     internal bool FailureRecorded { get; set; }
@@ -61,12 +64,14 @@ public sealed class ZoneSession
 
     public bool Bound => ObjectId != 0;
 
-    public void Bind(int objectId, string account, string name, int classId)
+    public void Bind(int objectId, string account, string name, int classId, int race = 0, int sex = 0)
     {
         ObjectId = objectId;
         Account = account;
         Name = name;
         ClassId = classId;
+        Race = race;
+        Sex = sex;
         InWorld = false;
     }
 
@@ -82,6 +87,8 @@ public sealed class ZoneSession
         Account = "";
         Name = "";
         ClassId = 0;
+        Race = 0;
+        Sex = 0;
         InWorld = false;
         SelectedTargetId = 0;
         AutoAttackTargetId = 0;

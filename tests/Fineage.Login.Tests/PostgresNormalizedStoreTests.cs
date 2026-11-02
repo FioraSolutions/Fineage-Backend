@@ -87,4 +87,39 @@ public class PostgresNormalizedStoreTests
             Assert.True(Convert.ToInt64(cmd.ExecuteScalar()) >= 12);
         }
     }
+
+    [Fact]
+    public void FindById_reads_normalized_pg_as_source_of_truth_over_stale_memory()
+    {
+        string? url = ConnectionString();
+        if (url == null)
+            return;
+
+        string suffix = Guid.NewGuid().ToString("n")[..8];
+        string account = "pgcross" + suffix;
+        string charName = "Xc" + suffix;
+
+        using var store = PostgresAccountStore.Open(url);
+        var service = new LoginService(store, new HandoffTokens(HandoffTokens.DefaultSecret));
+        Assert.True(service.Register(account, "secret1").Ok);
+        var created = service.CreateHuman(account, charName, HumanClasses.Mystic);
+        Assert.True(created.Ok, created.Message);
+        int characterId = created.Value!.Id;
+
+        // Mutate durable race without touching in-memory mirror (Zone lag scenario).
+        using (var conn = new NpgsqlConnection(url))
+        {
+            conn.Open();
+            using var cmd = conn.CreateCommand();
+            cmd.CommandText = "UPDATE characters SET race = 1 WHERE id = @id";
+            cmd.Parameters.AddWithValue("id", characterId);
+            Assert.Equal(1, cmd.ExecuteNonQuery());
+        }
+
+        var row = store.FindById(account, characterId);
+        Assert.NotNull(row);
+        Assert.Equal(1, row!.Race);
+        Assert.Equal(HumanClasses.Mystic, row.ClassId);
+        Assert.True(row.Items is { Count: > 0 });
+    }
 }

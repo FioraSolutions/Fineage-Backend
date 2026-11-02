@@ -28,5 +28,8 @@ namespace Fineage.Net.Contract
         public const ushort StopMove = 0x0307;
         public const ushort MoveState = 0x0308;
         public const ushort PositionCorrection = 0x0309;
+        public const ushort ItemList = 0x030A;
+        public const ushort SkillList = 0x030B;
+        public const ushort EntityDespawn = 0x030C;
     }
 }

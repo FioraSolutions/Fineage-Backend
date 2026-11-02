@@ -1,5 +1,6 @@
 using System;
 using System.Buffers.Binary;
+using System.IO;
 using System.Text;
 
 namespace Fineage.Net.Contract
@@ -338,6 +339,76 @@ namespace Fineage.Net.Contract
             };
         }
 
+        public static byte[] EncodeItemList(ItemListNetMsg m) => Write(w =>
+        {
+            var rows = m.Items ?? Array.Empty<ItemListEntryNet>();
+            w.WriteInt32(rows.Length);
+            for (int i = 0; i < rows.Length; i++)
+            {
+                var row = rows[i];
+                w.WriteInt32(row.ObjectId);
+                w.WriteInt32(row.ItemId);
+                w.WriteInt32(row.Count);
+                w.WriteInt32(row.EnchantLevel);
+                w.WriteInt32(row.EquippedSlot);
+            }
+        });
+
+        public static ItemListNetMsg DecodeItemList(ReadOnlySpan<byte> p)
+        {
+            var r = new Reader(p);
+            int n = r.ReadInt32();
+            if (n < 0 || n > 4096)
+                throw new InvalidDataException("item list length");
+            var rows = new ItemListEntryNet[n];
+            for (int i = 0; i < n; i++)
+            {
+                rows[i] = new ItemListEntryNet
+                {
+                    ObjectId = r.ReadInt32(),
+                    ItemId = r.ReadInt32(),
+                    Count = r.ReadInt32(),
+                    EnchantLevel = r.ReadInt32(),
+                    EquippedSlot = r.ReadInt32()
+                };
+            }
+
+            return new ItemListNetMsg { Items = rows };
+        }
+
+        public static byte[] EncodeSkillList(SkillListNetMsg m) => Write(w =>
+        {
+            var rows = m.Skills ?? Array.Empty<SkillListEntryNet>();
+            w.WriteInt32(rows.Length);
+            for (int i = 0; i < rows.Length; i++)
+            {
+                var row = rows[i];
+                w.WriteInt32(row.SkillId);
+                w.WriteInt32(row.Level);
+                w.WriteInt32(row.ReuseRemainingMs);
+            }
+        });
+
+        public static SkillListNetMsg DecodeSkillList(ReadOnlySpan<byte> p)
+        {
+            var r = new Reader(p);
+            int n = r.ReadInt32();
+            if (n < 0 || n > 4096)
+                throw new InvalidDataException("skill list length");
+            var rows = new SkillListEntryNet[n];
+            for (int i = 0; i < n; i++)
+            {
+                rows[i] = new SkillListEntryNet
+                {
+                    SkillId = r.ReadInt32(),
+                    Level = r.ReadInt32(),
+                    ReuseRemainingMs = r.ReadInt32()
+                };
+            }
+
+            return new SkillListNetMsg { Skills = rows };
+        }
+
         public static byte[] EncodeMoveInput(MoveInputMsg m) => Write(w =>
         {
             w.WriteInt32(m.DestX);
@@ -393,6 +464,22 @@ namespace Fineage.Net.Contract
             w.WriteInt32(m.Z);
             w.WriteInt32(m.Heading);
         });
+
+        public static byte[] EncodeEntityDespawn(EntityDespawnMsg m) => Write(w =>
+        {
+            w.WriteUInt64(m.EntityValue);
+            w.WriteUInt32(m.EntityGeneration);
+        });
+
+        public static EntityDespawnMsg DecodeEntityDespawn(ReadOnlySpan<byte> p)
+        {
+            var r = new Reader(p);
+            return new EntityDespawnMsg
+            {
+                EntityValue = r.ReadUInt64(),
+                EntityGeneration = r.ReadUInt32()
+            };
+        }
 
         public static PositionCorrectionMsg DecodePositionCorrection(ReadOnlySpan<byte> p)
         {

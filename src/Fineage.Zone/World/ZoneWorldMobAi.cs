@@ -178,10 +178,25 @@ public sealed partial class ZoneWorld
             DestX = destX, DestY = destY, DestZ = destZ,
             OriginX = npc.X, OriginY = npc.Y, OriginZ = npc.Z
         });
+        List<int>? netWatchers = null;
         foreach (var watcher in Players())
         {
             if (watcher.Session != null && watcher.Knownlist.Contains(npc.ObjectId))
+            {
                 outbound.Add(new Pending(watcher.Session, MsgType.MoveToAck, body));
+                netWatchers ??= [];
+                netWatchers.Add(watcher.ObjectId);
+            }
+        }
+
+        if (netWatchers is { Count: > 0 } && NetBridge != null)
+        {
+            NetBridge.FanoutMoveState(
+                netWatchers,
+                npc.ObjectId,
+                npc.X, npc.Y, npc.Z,
+                destX, destY, destZ,
+                npc.Running);
         }
     }
 
