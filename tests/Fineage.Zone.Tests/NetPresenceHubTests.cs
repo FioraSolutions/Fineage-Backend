@@ -56,6 +56,39 @@ public sealed class NetPresenceHubTests
     }
 
     [Fact]
+    public void Warehouse_codec_round_trip()
+    {
+        var deposit = new WarehouseDepositListNetMsg
+        {
+            NpcObjectId = 1,
+            FeePerLine = 30,
+            Adena = 100,
+            Items = [new ItemListEntryNet { ObjectId = 9, ItemId = 57, Count = 5, EnchantLevel = 0, EquippedSlot = -1 }]
+        };
+        var depositAgain = NetCodec.DecodeWarehouseDepositList(NetCodec.EncodeWarehouseDepositList(deposit));
+        Assert.Equal(30, depositAgain.FeePerLine);
+        Assert.Equal(57, depositAgain.Items[0].ItemId);
+
+        var withdraw = new WarehouseWithdrawListNetMsg
+        {
+            NpcObjectId = 1,
+            CurrentWeight = 10,
+            MaxWeight = 100,
+            Items = [new ItemListEntryNet { ObjectId = 3, ItemId = 1, Count = 1, EquippedSlot = -1 }]
+        };
+        Assert.Equal(10, NetCodec.DecodeWarehouseWithdrawList(NetCodec.EncodeWarehouseWithdrawList(withdraw)).CurrentWeight);
+
+        var req = new WarehouseDepositRequestNetMsg
+        {
+            NpcObjectId = 1,
+            Lines = [new ShopObjectCountNet { ObjectId = 9, Count = 2 }]
+        };
+        Assert.Equal(9, NetCodec.DecodeWarehouseDepositRequest(NetCodec.EncodeWarehouseDepositRequest(req)).Lines[0].ObjectId);
+        Assert.Equal(2, NetCodec.DecodeWarehouseWithdrawRequest(NetCodec.EncodeWarehouseWithdrawRequest(
+            new WarehouseWithdrawRequestNetMsg { NpcObjectId = 1, Lines = req.Lines })).Lines[0].Count);
+    }
+
+    [Fact]
     public void Shop_codec_round_trip()
     {
         var buy = new BuyListNetMsg

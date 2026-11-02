@@ -420,4 +420,38 @@ namespace Fineage.Net.Contract
         public int BaseTaxPercent { get; set; }
         public int CastleTaxPercent { get; set; }
     }
+
+    public sealed class WarehouseDepositListNetMsg
+    {
+        public int NpcObjectId { get; set; }
+        public int FeePerLine { get; set; }
+        public int SlotsUsed { get; set; }
+        public int SlotsMax { get; set; }
+        public int Adena { get; set; }
+        public ItemListEntryNet[] Items { get; set; } = System.Array.Empty<ItemListEntryNet>();
+    }
+
+    public sealed class WarehouseWithdrawListNetMsg
+    {
+        public int NpcObjectId { get; set; }
+        public int SlotsUsed { get; set; }
+        public int SlotsMax { get; set; }
+        public int InventorySlotsUsed { get; set; }
+        public int InventorySlotsMax { get; set; }
+        public int CurrentWeight { get; set; }
+        public int MaxWeight { get; set; }
+        public ItemListEntryNet[] Items { get; set; } = System.Array.Empty<ItemListEntryNet>();
+    }
+
+    public sealed class WarehouseDepositRequestNetMsg
+    {
+        public int NpcObjectId { get; set; }
+        public ShopObjectCountNet[] Lines { get; set; } = System.Array.Empty<ShopObjectCountNet>();
+    }
+
+    public sealed class WarehouseWithdrawRequestNetMsg
+    {
+        public int NpcObjectId { get; set; }
+        public ShopObjectCountNet[] Lines { get; set; } = System.Array.Empty<ShopObjectCountNet>();
+    }
 }

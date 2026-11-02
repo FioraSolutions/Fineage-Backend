@@ -192,6 +192,20 @@ public sealed class NetZoneServer : INetPresenceBridge
             _ = _presence.SendAsync(watcher, NetOpcode.ShopBalance, payload, CancellationToken.None);
     }
 
+    void INetPresenceBridge.FanoutWarehouseDepositList(IReadOnlyList<int> watcherObjectIds, WarehouseDepositListNetMsg list)
+    {
+        var payload = NetCodec.EncodeWarehouseDepositList(list);
+        foreach (int watcher in watcherObjectIds)
+            _ = _presence.SendAsync(watcher, NetOpcode.WarehouseDepositList, payload, CancellationToken.None);
+    }
+
+    void INetPresenceBridge.FanoutWarehouseWithdrawList(IReadOnlyList<int> watcherObjectIds, WarehouseWithdrawListNetMsg list)
+    {
+        var payload = NetCodec.EncodeWarehouseWithdrawList(list);
+        foreach (int watcher in watcherObjectIds)
+            _ = _presence.SendAsync(watcher, NetOpcode.WarehouseWithdrawList, payload, CancellationToken.None);
+    }
+
     public async Task HandleAsync(NetConnection conn, CancellationToken ct)
     {
         await using var discard = new MemoryStream();
@@ -268,6 +282,12 @@ public sealed class NetZoneServer : INetPresenceBridge
                             break;
                         case NetOpcode.RequestMultiSellChoose:
                             await OnRequestMultiSellChooseAsync(conn, zoneSession, envelope, ct).ConfigureAwait(false);
+                            break;
+                        case NetOpcode.WarehouseDepositRequest:
+                            await OnWarehouseDepositAsync(conn, zoneSession, envelope, ct).ConfigureAwait(false);
+                            break;
+                        case NetOpcode.WarehouseWithdrawRequest:
+                            await OnWarehouseWithdrawAsync(conn, zoneSession, envelope, ct).ConfigureAwait(false);
                             break;
                         case NetOpcode.StopMove:
                             // Authoritative stop: correct to current session position.
@@ -985,6 +1005,52 @@ public sealed class NetZoneServer : INetPresenceBridge
             ct).ConfigureAwait(false);
         if (error != null)
             await RejectAsync(conn, error, "MultiSell failed.", ct).ConfigureAwait(false);
+    }
+
+    async Task OnWarehouseDepositAsync(
+        NetConnection conn,
+        ZoneSession zoneSession,
+        PacketEnvelope envelope,
+        CancellationToken ct)
+    {
+        RequireHello(conn);
+        if (!zoneSession.Bound || !zoneSession.InWorld)
+        {
+            await RejectAsync(conn, "not_in_world", "Enter world first.", ct).ConfigureAwait(false);
+            return;
+        }
+
+        var req = NetCodec.DecodeWarehouseDepositRequest(envelope.Payload);
+        var lines = (req.Lines ?? []).Select(l => new WarehouseCountMsg { ObjectId = l.ObjectId, Count = l.Count }).ToArray();
+        string? error = await _world.TryWarehouseDepositAsync(
+            zoneSession,
+            new WarehouseDepositRequestMsg { NpcObjectId = req.NpcObjectId, Lines = lines },
+            ct).ConfigureAwait(false);
+        if (error != null)
+            await RejectAsync(conn, error, "Warehouse deposit failed.", ct).ConfigureAwait(false);
+    }
+
+    async Task OnWarehouseWithdrawAsync(
+        NetConnection conn,
+        ZoneSession zoneSession,
+        PacketEnvelope envelope,
+        CancellationToken ct)
+    {
+        RequireHello(conn);
+        if (!zoneSession.Bound || !zoneSession.InWorld)
+        {
+            await RejectAsync(conn, "not_in_world", "Enter world first.", ct).ConfigureAwait(false);
+            return;
+        }
+
+        var req = NetCodec.DecodeWarehouseWithdrawRequest(envelope.Payload);
+        var lines = (req.Lines ?? []).Select(l => new WarehouseCountMsg { ObjectId = l.ObjectId, Count = l.Count }).ToArray();
+        string? error = await _world.TryWarehouseWithdrawAsync(
+            zoneSession,
+            new WarehouseWithdrawRequestMsg { NpcObjectId = req.NpcObjectId, Lines = lines },
+            ct).ConfigureAwait(false);
+        if (error != null)
+            await RejectAsync(conn, error, "Warehouse withdraw failed.", ct).ConfigureAwait(false);
     }
 
     static void RequireHello(NetConnection conn)

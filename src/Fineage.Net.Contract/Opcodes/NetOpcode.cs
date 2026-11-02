@@ -62,5 +62,9 @@ namespace Fineage.Net.Contract
         public const ushort RequestBuyItem = 0x0329;
         public const ushort RequestSellItem = 0x032A;
         public const ushort RequestMultiSellChoose = 0x032B;
+        public const ushort WarehouseDepositList = 0x032C;
+        public const ushort WarehouseWithdrawList = 0x032D;
+        public const ushort WarehouseDepositRequest = 0x032E;
+        public const ushort WarehouseWithdrawRequest = 0x032F;
     }
 }

@@ -350,7 +350,7 @@ public sealed partial class ZoneWorld
             player.Warehouse.Add(taken.ItemId, count, taken.EnchantLevel, out _);
         }
 
-        toSelf.Add(Pack(session, MsgType.InventoryUpdate, new InventoryUpdateMsg { Changes = Collapse(changes) }));
+        FanInventory(session, Collapse(changes), toSelf);
         SaveInventory(session, player.Inventory);
         SaveWarehouse(session, player);
         Notice(session, NpcServiceProtocol.TransactionComplete, NpcServiceProtocol.TransactionCompleteText, toSelf);
@@ -421,7 +421,7 @@ public sealed partial class ZoneWorld
             changes.Add(InventoryMessages.ChangeRow(existed ? InventoryChange.Modify : InventoryChange.Add, added));
         }
 
-        toSelf.Add(Pack(session, MsgType.InventoryUpdate, new InventoryUpdateMsg { Changes = Collapse(changes) }));
+        FanInventory(session, Collapse(changes), toSelf);
         SaveInventory(session, player.Inventory);
         SaveWarehouse(session, player);
         Notice(session, NpcServiceProtocol.TransactionComplete, NpcServiceProtocol.TransactionCompleteText, toSelf);
@@ -523,7 +523,7 @@ public sealed partial class ZoneWorld
             }
         }
 
-        toSelf.Add(Pack(session, MsgType.WarehouseDepositList, new WarehouseDepositListMsg
+        var list = new WarehouseDepositListMsg
         {
             NpcObjectId = npc.ObjectId,
             FeePerLine = WarehouseRules.DepositFeePerLine,
@@ -531,7 +531,10 @@ public sealed partial class ZoneWorld
             SlotsMax = WarehouseRules.WarehouseSlots(player.Race),
             Adena = player.Inventory?.CountOf(WarehouseRules.AdenaItemId) ?? 0,
             Items = items.ToArray()
-        }));
+        };
+        toSelf.Add(Pack(session, MsgType.WarehouseDepositList, list));
+        if (NetBridge != null)
+            NetBridge.FanoutWarehouseDepositList([session.ObjectId], ToNetDepositList(list));
     }
 
     void SendWithdrawList(ZoneSession session, ZoneEntity player, ZoneEntity npc, List<Pending> toSelf)
@@ -543,7 +546,7 @@ public sealed partial class ZoneWorld
                 items.Add(StackEntry(stack));
         }
 
-        toSelf.Add(Pack(session, MsgType.WarehouseWithdrawList, new WarehouseWithdrawListMsg
+        var list = new WarehouseWithdrawListMsg
         {
             NpcObjectId = npc.ObjectId,
             SlotsUsed = player.Warehouse?.SlotCount ?? 0,
@@ -553,7 +556,10 @@ public sealed partial class ZoneWorld
             CurrentWeight = player.Inventory == null ? 0 : _weights.Load(player.Inventory.Items.Select(item => (item.ItemId, item.Count))),
             MaxWeight = MaxLoadOf(player),
             Items = items.ToArray()
-        }));
+        };
+        toSelf.Add(Pack(session, MsgType.WarehouseWithdrawList, list));
+        if (NetBridge != null)
+            NetBridge.FanoutWarehouseWithdrawList([session.ObjectId], ToNetWithdrawList(list));
     }
 
     ItemListEntryMsg StackEntry(WarehouseStack stack)
@@ -750,14 +756,73 @@ public sealed partial class ZoneWorld
     static bool IsWarehouse(ZoneEntity npc) =>
         string.Equals(npc.NpcType, "Warehouse", StringComparison.OrdinalIgnoreCase);
 
-    static void Notice(ZoneSession session, int id, string text, List<Pending> toSelf)
+    void Notice(ZoneSession session, int id, string text, List<Pending> toSelf)
     {
-        toSelf.Add(Pack(session, MsgType.SystemMessage, new SystemMessageMsg
+        var message = new SystemMessageMsg
         {
             Id = id,
             Params = [],
             Text = text
-        }));
+        };
+        toSelf.Add(Pack(session, MsgType.SystemMessage, message));
+        if (NetBridge != null)
+        {
+            NetBridge.FanoutSystemMessage([session.ObjectId], new Fineage.Net.Contract.SystemMessageNetMsg
+            {
+                Id = message.Id,
+                Text = message.Text ?? "",
+                Params = message.Params ?? []
+            });
+        }
+    }
+
+    void FanInventory(ZoneSession session, InventoryUpdateEntryMsg[] changes, List<Pending> toSelf)
+    {
+        var invUpdate = new InventoryUpdateMsg { Changes = changes };
+        toSelf.Add(Pack(session, MsgType.InventoryUpdate, invUpdate));
+        if (NetBridge != null)
+            NetBridge.FanoutInventoryUpdate([session.ObjectId], ToNetInventoryUpdate(invUpdate));
+    }
+
+    static Fineage.Net.Contract.WarehouseDepositListNetMsg ToNetDepositList(WarehouseDepositListMsg list) => new()
+    {
+        NpcObjectId = list.NpcObjectId,
+        FeePerLine = list.FeePerLine,
+        SlotsUsed = list.SlotsUsed,
+        SlotsMax = list.SlotsMax,
+        Adena = list.Adena,
+        Items = ToNetItemRows(list.Items)
+    };
+
+    static Fineage.Net.Contract.WarehouseWithdrawListNetMsg ToNetWithdrawList(WarehouseWithdrawListMsg list) => new()
+    {
+        NpcObjectId = list.NpcObjectId,
+        SlotsUsed = list.SlotsUsed,
+        SlotsMax = list.SlotsMax,
+        InventorySlotsUsed = list.InventorySlotsUsed,
+        InventorySlotsMax = list.InventorySlotsMax,
+        CurrentWeight = list.CurrentWeight,
+        MaxWeight = list.MaxWeight,
+        Items = ToNetItemRows(list.Items)
+    };
+
+    static Fineage.Net.Contract.ItemListEntryNet[] ToNetItemRows(ItemListEntryMsg[]? items)
+    {
+        items ??= [];
+        var rows = new Fineage.Net.Contract.ItemListEntryNet[items.Length];
+        for (int i = 0; i < items.Length; i++)
+        {
+            rows[i] = new Fineage.Net.Contract.ItemListEntryNet
+            {
+                ObjectId = items[i].ObjectId,
+                ItemId = items[i].ItemId,
+                Count = items[i].Count,
+                EnchantLevel = items[i].EnchantLevel,
+                EquippedSlot = items[i].EquippedSlot
+            };
+        }
+
+        return rows;
     }
 
     static (int Id, string Text, string Code) Refusal(NewbieBuffRefusal refusal) => refusal switch
