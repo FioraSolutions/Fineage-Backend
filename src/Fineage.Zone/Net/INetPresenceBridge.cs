@@ -19,6 +19,14 @@ interface INetPresenceBridge
         int destZ,
         bool running);
 
+    /// <summary>
+    /// Knownlist changed for <paramref name="selfObjectId"/> during a sim tick (timed move AOI refresh):
+    /// EntitySpawn/DropItem for <paramref name="added"/>, EntityDespawn for <paramref name="removed"/>, both directions for players,
+    /// plus MoveState for whichever side is mid-run so the newcomer is seen moving, not standing.
+    /// Called under the ZoneWorld gate.
+    /// </summary>
+    void FanoutKnownlistDiff(int selfObjectId, IReadOnlyList<int> added, IReadOnlyList<int> removed);
+
     void FanoutAttackState(IReadOnlyList<int> watcherObjectIds, AttackStateMsg attack);
 
     void FanoutStatusUpdate(IReadOnlyList<int> watcherObjectIds, StatusUpdateNetMsg status);

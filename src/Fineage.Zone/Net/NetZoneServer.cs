@@ -66,6 +66,84 @@ public sealed class NetZoneServer : INetPresenceBridge
             _ = _presence.SendAsync(watcher, NetOpcode.MoveState, payload, CancellationToken.None);
     }
 
+    void INetPresenceBridge.FanoutKnownlistDiff(int selfObjectId, IReadOnlyList<int> added, IReadOnlyList<int> removed)
+    {
+        if (!_world.TryGetEntityById(selfObjectId, out var selfEntity))
+            return;
+        var self = _ids.AllocateOrGet(selfObjectId);
+        var ct = CancellationToken.None;
+        byte[]? selfSpawn = null;
+        foreach (int id in added)
+        {
+            if (!_world.TryGetEntityById(id, out var seen))
+                continue;
+            var otherId = _ids.AllocateOrGet(id);
+            if (seen.Kind == ZoneEntityKind.GroundItem)
+            {
+                _ = _presence.SendAsync(selfObjectId, NetOpcode.DropItem, NetCodec.EncodeDropItem(new DropItemNetMsg
+                {
+                    DropperObjectId = 0,
+                    EntityValue = otherId.Value,
+                    EntityGeneration = otherId.Generation,
+                    ItemId = seen.GroundItemId,
+                    X = seen.X,
+                    Y = seen.Y,
+                    Z = seen.Z,
+                    Stackable = seen.GroundStackable,
+                    Count = seen.GroundCount
+                }), ct);
+                continue;
+            }
+
+            _ = _presence.SendAsync(selfObjectId, NetOpcode.EntitySpawn,
+                NetCodec.EncodeEntitySpawn(NetEnterWorldProjector.BuildPresenceSpawn(seen, otherId)), ct);
+            if (seen.MoveActive)
+                SendMoveState(selfObjectId, otherId, seen);
+            if (seen.Kind == ZoneEntityKind.Player && seen.Session is { InWorld: true })
+            {
+                selfSpawn ??= NetCodec.EncodeEntitySpawn(NetEnterWorldProjector.BuildRemoteSpawn(selfEntity, self));
+                _ = _presence.SendAsync(id, NetOpcode.EntitySpawn, selfSpawn, ct);
+                if (selfEntity.MoveActive)
+                    SendMoveState(id, self, selfEntity);
+            }
+        }
+
+        if (removed.Count == 0)
+            return;
+        var despawnSelf = NetCodec.EncodeEntityDespawn(new EntityDespawnMsg
+        {
+            EntityValue = self.Value,
+            EntityGeneration = self.Generation
+        });
+        foreach (int id in removed)
+        {
+            var forgotten = _ids.AllocateOrGet(id);
+            _ = _presence.SendAsync(selfObjectId, NetOpcode.EntityDespawn, NetCodec.EncodeEntityDespawn(new EntityDespawnMsg
+            {
+                EntityValue = forgotten.Value,
+                EntityGeneration = forgotten.Generation
+            }), ct);
+            if (_world.TryGetLivePlayerById(id, out _))
+                _ = _presence.SendAsync(id, NetOpcode.EntityDespawn, despawnSelf, ct);
+        }
+    }
+
+    void SendMoveState(int watcherObjectId, EntityId mover, ZoneEntity e)
+    {
+        _ = _presence.SendAsync(watcherObjectId, NetOpcode.MoveState, NetCodec.EncodeMoveState(new MoveStateMsg
+        {
+            EntityValue = mover.Value,
+            EntityGeneration = mover.Generation,
+            OriginX = e.X,
+            OriginY = e.Y,
+            OriginZ = e.Z,
+            DestX = e.MoveDestX,
+            DestY = e.MoveDestY,
+            DestZ = e.MoveDestZ,
+            Running = e.Running
+        }), CancellationToken.None);
+    }
+
     void INetPresenceBridge.FanoutAttackState(IReadOnlyList<int> watcherObjectIds, AttackStateMsg attack)
     {
         var payload = NetCodec.EncodeAttackState(attack);

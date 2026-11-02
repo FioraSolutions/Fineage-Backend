@@ -85,6 +85,9 @@ sealed class ZoneEntity
     public Queue<(int X, int Y, int Z)> MovePath { get; } = new();
     /// <summary>Segment switched to the next waypoint inside AdvanceMove; tick broadcasts MoveToLocation for it.</summary>
     public bool MoveSegmentDirty { get; set; }
+    /// <summary>Position of the last in-move knownlist refresh (Mobius region/knownlist revalidate while running).</summary>
+    public int AoiRefreshX { get; set; }
+    public int AoiRefreshY { get; set; }
     public ZoneSession? Session { get; init; }
     public PlayerInventory? Inventory { get; init; }
     /// <summary>
@@ -606,7 +609,7 @@ public sealed partial class ZoneWorld
     /// After <paramref name="entity"/> moved: AOI move, CharInfo to newly visible, MoveToAck to self + stayed,
     /// DeleteObject only past the forget radius and never for a pair locked in combat (Mobius knownlist).
     /// </summary>
-    void ReconcileKnownlist(ZoneEntity entity, MoveToMsg ack, List<Pending> toSelf, List<Pending> toOthers)
+    void ReconcileKnownlist(ZoneEntity entity, MoveToMsg? ack, List<Pending> toSelf, List<Pending> toOthers)
     {
         var before = new HashSet<int>(entity.Knownlist);
         _aoi.Move(entity.ObjectId, entity.X, entity.Y);
@@ -620,11 +623,11 @@ public sealed partial class ZoneWorld
                 after.Add(id);
         }
 
-        if (entity.Session != null)
+        if (entity.Session != null && ack != null)
             toSelf.Add(Pack(entity.Session, MsgType.MoveToAck, ack));
 
         List<int>? netWatchers = null;
-        if (NetBridge != null && entity.Session != null)
+        if (NetBridge != null && entity.Session != null && ack != null)
         {
             netWatchers = [entity.ObjectId];
         }
@@ -633,7 +636,7 @@ public sealed partial class ZoneWorld
             LinkSeen(entity, id, toSelf, toOthers);
         foreach (int id in SortedShared(after, before))
         {
-            if (_byId.TryGetValue(id, out var other) && other.Session != null)
+            if (ack != null && _byId.TryGetValue(id, out var other) && other.Session != null)
             {
                 toOthers.Add(Pack(other.Session, MsgType.MoveToAck, ack));
                 if (netWatchers != null)
@@ -644,7 +647,7 @@ public sealed partial class ZoneWorld
         foreach (int id in SortedExcept(before, after))
             Forget(entity, id, toSelf, toOthers);
 
-        if (netWatchers is { Count: > 0 } && NetBridge != null)
+        if (netWatchers is { Count: > 0 } && NetBridge != null && ack != null)
         {
             NetBridge.FanoutMoveState(
                 netWatchers,

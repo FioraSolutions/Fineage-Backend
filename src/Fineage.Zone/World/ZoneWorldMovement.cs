@@ -66,13 +66,11 @@ public sealed partial class ZoneWorld
             OriginZ = curZ
         };
 
-        // AOI is evaluated at the destination (same visibility as before), then the entity is put back
-        // at its real position and walks there over ticks.
-        entity.X = destX;
-        entity.Y = destY;
+        // Mobius: knownlist is evaluated at the real (current) position; TickPlayerMovement revalidates it
+        // every AoiRefreshDistance of travel so objects enter/leave as the runner passes them.
         ReconcileKnownlist(entity, ack, toSelf, toOthers);
-        entity.X = curX;
-        entity.Y = curY;
+        entity.AoiRefreshX = curX;
+        entity.AoiRefreshY = curY;
 
         entity.MoveDestX = destX;
         entity.MoveDestY = destY;
@@ -150,29 +148,69 @@ public sealed partial class ZoneWorld
         }
     }
 
+    /// <summary>
+    /// In-move knownlist revalidate distance (L2 units, ≈ 4.8m). Mobius updates the knownlist as the creature
+    /// crosses regions / on a short timer; a distance gate keeps it to ~1 refresh per 1.5s at run speed so a
+    /// long run never floods spawn/despawn while still revealing objects before they're on screen.
+    /// </summary>
+    internal const int AoiRefreshDistance = 250;
+
     void TickPlayerMovement(long now, List<Pending> outbound)
     {
         foreach (var e in _byId.Values)
         {
             if (e.Kind != ZoneEntityKind.Player)
                 continue;
+            bool wasMoving = e.MoveActive;
             if (e.MoveActive)
                 AdvanceMove(e, now);
             if (e.MoveSegmentDirty)
             {
                 e.MoveSegmentDirty = false;
-                if (!e.MoveActive)
-                    continue;
-                // Next geo-path leg: plain MoveToLocation (MoveToAck / Net move state) from here to the waypoint.
-                var ack = new MoveToMsg
+                if (e.MoveActive)
                 {
-                    ObjectId = e.ObjectId,
-                    DestX = e.MoveDestX, DestY = e.MoveDestY, DestZ = e.MoveDestZ,
-                    OriginX = e.X, OriginY = e.Y, OriginZ = e.Z
-                };
-                ReconcileKnownlist(e, ack, outbound, outbound);
+                    // Next geo-path leg: plain MoveToLocation (MoveToAck / Net move state) from here to the waypoint.
+                    var ack = new MoveToMsg
+                    {
+                        ObjectId = e.ObjectId,
+                        DestX = e.MoveDestX, DestY = e.MoveDestY, DestZ = e.MoveDestZ,
+                        OriginX = e.X, OriginY = e.Y, OriginZ = e.Z
+                    };
+                    RefreshMovingKnownlist(e, ack, outbound);
+                    continue;
+                }
             }
+            if (!wasMoving)
+                continue;
+            long dx = e.X - e.AoiRefreshX, dy = e.Y - e.AoiRefreshY;
+            // Refresh on distance travelled, and once on arrival so the final position is exact.
+            if (!e.MoveActive || dx * dx + dy * dy >= (long)AoiRefreshDistance * AoiRefreshDistance)
+                RefreshMovingKnownlist(e, null, outbound);
         }
+    }
+
+    /// <summary>Knownlist diff at the mover's current XY; Net clients get EntitySpawn/EntityDespawn (+ MoveState for runners).</summary>
+    void RefreshMovingKnownlist(ZoneEntity e, MoveToMsg? ack, List<Pending> outbound)
+    {
+        e.AoiRefreshX = e.X;
+        e.AoiRefreshY = e.Y;
+        var before = new HashSet<int>(e.Knownlist);
+        ReconcileKnownlist(e, ack, outbound, outbound);
+        if (NetBridge == null || e.Session == null)
+            return;
+        List<int>? added = null, removed = null;
+        foreach (int id in e.Knownlist)
+            if (!before.Contains(id))
+                (added ??= []).Add(id);
+        foreach (int id in before)
+            if (!e.Knownlist.Contains(id))
+                (removed ??= []).Add(id);
+        if (added == null && removed == null)
+            return;
+        added?.Sort();
+        removed?.Sort();
+        ZoneLog.Info($"[aoi] move refresh obj={e.ObjectId} at={e.X},{e.Y} +{added?.Count ?? 0} -{removed?.Count ?? 0}");
+        NetBridge.FanoutKnownlistDiff(e.ObjectId, (IReadOnlyList<int>?)added ?? [], (IReadOnlyList<int>?)removed ?? []);
     }
 
     void AdvanceMove(ZoneEntity e, long now)
