@@ -23,7 +23,14 @@ public sealed record ItemTemplate(
     EnchantScroll? Scroll = null,
     int ReferencePrice = 0,
     int Weight = 0,
-    bool Sellable = true)
+    bool Sellable = true,
+    int PAtk = 0,
+    int MAtk = 0,
+    int PAtkSpd = 0,
+    int CritRate = 0,
+    int AttackRange = 0,
+    int RandomDamage = 0,
+    int MDef = 0)
 {
     public bool Equippable => BodySlot != global::Fineage.Game.BodySlot.None;
 

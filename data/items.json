@@ -9,7 +9,13 @@
       "bodySlot": "rhand",
       "weaponType": "sword",
       "price": 768,
-      "weight": 1600
+      "weight": 1600,
+      "pAtk": 8,
+      "mAtk": 6,
+      "pAtkSpd": 379,
+      "critRate": 8,
+      "attackRange": 40,
+      "randomDamage": 10
     },
     {
       "id": 2,
@@ -19,7 +25,13 @@
       "bodySlot": "rhand",
       "weaponType": "sword",
       "price": 136000,
-      "weight": 1560
+      "weight": 1560,
+      "pAtk": 24,
+      "mAtk": 17,
+      "pAtkSpd": 379,
+      "critRate": 8,
+      "attackRange": 40,
+      "randomDamage": 10
     },
     {
       "id": 3,
@@ -29,7 +41,13 @@
       "bodySlot": "rhand",
       "weaponType": "sword",
       "price": 12500,
-      "weight": 1590
+      "weight": 1590,
+      "pAtk": 11,
+      "mAtk": 9,
+      "pAtkSpd": 379,
+      "critRate": 8,
+      "attackRange": 40,
+      "randomDamage": 10
     },
     {
       "id": 4,
@@ -39,7 +57,13 @@
       "bodySlot": "rhand",
       "weaponType": "blunt",
       "price": 768,
-      "weight": 1870
+      "weight": 1870,
+      "pAtk": 8,
+      "mAtk": 6,
+      "pAtkSpd": 379,
+      "critRate": 4,
+      "attackRange": 40,
+      "randomDamage": 20
     },
     {
       "id": 5,
@@ -49,7 +73,13 @@
       "bodySlot": "rhand",
       "weaponType": "blunt",
       "price": 12500,
-      "weight": 1880
+      "weight": 1880,
+      "pAtk": 11,
+      "mAtk": 9,
+      "pAtkSpd": 379,
+      "critRate": 4,
+      "attackRange": 40,
+      "randomDamage": 20
     },
     {
       "id": 6,
@@ -61,7 +91,13 @@
       "icon": "icon.weapon_apprentices_wand_i00",
       "price": 138,
       "weight": 1350,
-      "sellable": false
+      "sellable": false,
+      "pAtk": 5,
+      "mAtk": 7,
+      "pAtkSpd": 379,
+      "critRate": 4,
+      "attackRange": 40,
+      "randomDamage": 20
     },
     {
       "id": 7,
@@ -72,7 +108,13 @@
       "weaponType": "blunt",
       "magic": true,
       "price": 768,
-      "weight": 1330
+      "weight": 1330,
+      "pAtk": 6,
+      "mAtk": 8,
+      "pAtkSpd": 379,
+      "critRate": 4,
+      "attackRange": 40,
+      "randomDamage": 20
     },
     {
       "id": 8,
@@ -83,7 +125,13 @@
       "weaponType": "blunt",
       "magic": true,
       "price": 12500,
-      "weight": 1080
+      "weight": 1080,
+      "pAtk": 11,
+      "mAtk": 13,
+      "pAtkSpd": 325,
+      "critRate": 4,
+      "attackRange": 40,
+      "randomDamage": 20
     },
     {
       "id": 9,
@@ -94,7 +142,13 @@
       "weaponType": "blunt",
       "magic": true,
       "price": 54100,
-      "weight": 1090
+      "weight": 1090,
+      "pAtk": 16,
+      "mAtk": 18,
+      "pAtkSpd": 325,
+      "critRate": 4,
+      "attackRange": 40,
+      "randomDamage": 20
     },
     {
       "id": 10,
@@ -105,7 +159,13 @@
       "icon": "icon.weapon_dagger_i00",
       "price": 138,
       "weight": 1160,
-      "sellable": false
+      "sellable": false,
+      "pAtk": 5,
+      "mAtk": 5,
+      "pAtkSpd": 433,
+      "critRate": 12,
+      "attackRange": 40,
+      "randomDamage": 5
     },
     {
       "id": 11,
@@ -115,7 +175,13 @@
       "bodySlot": "rhand",
       "weaponType": "dagger",
       "price": 768,
-      "weight": 1150
+      "weight": 1150,
+      "pAtk": 7,
+      "mAtk": 6,
+      "pAtkSpd": 433,
+      "critRate": 12,
+      "attackRange": 40,
+      "randomDamage": 5
     },
     {
       "id": 12,
@@ -125,7 +191,13 @@
       "bodySlot": "rhand",
       "weaponType": "dagger",
       "price": 12500,
-      "weight": 1140
+      "weight": 1140,
+      "pAtk": 10,
+      "mAtk": 9,
+      "pAtkSpd": 433,
+      "critRate": 12,
+      "attackRange": 40,
+      "randomDamage": 5
     },
     {
       "id": 13,
@@ -135,7 +207,13 @@
       "bodySlot": "lrhand",
       "weaponType": "bow",
       "price": 768,
-      "weight": 1950
+      "weight": 1950,
+      "pAtk": 16,
+      "mAtk": 6,
+      "pAtkSpd": 293,
+      "critRate": 12,
+      "attackRange": 500,
+      "randomDamage": 5
     },
     {
       "id": 14,
@@ -145,7 +223,13 @@
       "bodySlot": "lrhand",
       "weaponType": "bow",
       "price": 12500,
-      "weight": 1930
+      "weight": 1930,
+      "pAtk": 23,
+      "mAtk": 9,
+      "pAtkSpd": 293,
+      "critRate": 12,
+      "attackRange": 500,
+      "randomDamage": 5
     },
     {
       "id": 15,
@@ -155,7 +239,13 @@
       "bodySlot": "lrhand",
       "weaponType": "pole",
       "price": 136000,
-      "weight": 2140
+      "weight": 2140,
+      "pAtk": 24,
+      "mAtk": 17,
+      "pAtkSpd": 325,
+      "critRate": 8,
+      "attackRange": 80,
+      "randomDamage": 10
     },
     {
       "id": 16,
@@ -165,7 +255,13 @@
       "bodySlot": "lrhand",
       "weaponType": "pole",
       "price": 244000,
-      "weight": 2120
+      "weight": 2120,
+      "pAtk": 31,
+      "mAtk": 21,
+      "pAtkSpd": 325,
+      "critRate": 8,
+      "attackRange": 80,
+      "randomDamage": 10
     },
     {
       "id": 17,
@@ -213,7 +309,8 @@
       "bodySlot": "chest",
       "armorType": "light",
       "price": 147,
-      "weight": 4830
+      "weight": 4830,
+      "pDef": 36
     },
     {
       "id": 22,
@@ -223,7 +320,8 @@
       "bodySlot": "chest",
       "armorType": "light",
       "price": 2430,
-      "weight": 4830
+      "weight": 4830,
+      "pDef": 43
     },
     {
       "id": 23,
@@ -233,7 +331,8 @@
       "bodySlot": "chest",
       "armorType": "light",
       "price": 7960,
-      "weight": 4820
+      "weight": 4820,
+      "pDef": 47
     },
     {
       "id": 24,
@@ -243,7 +342,8 @@
       "bodySlot": "chest",
       "armorType": "light",
       "price": 20300,
-      "weight": 4770
+      "weight": 4770,
+      "pDef": 50
     },
     {
       "id": 25,
@@ -253,7 +353,8 @@
       "bodySlot": "chest",
       "armorType": "heavy",
       "price": 31800,
-      "weight": 8970
+      "weight": 8970,
+      "pDef": 62
     },
     {
       "id": 26,
@@ -263,7 +364,8 @@
       "bodySlot": "chest",
       "armorType": "heavy",
       "price": 49200,
-      "weight": 8920
+      "weight": 8920,
+      "pDef": 68
     },
     {
       "id": 27,
@@ -273,7 +375,8 @@
       "bodySlot": "chest",
       "armorType": "light",
       "price": 36900,
-      "weight": 4720
+      "weight": 4720,
+      "pDef": 53
     },
     {
       "id": 28,
@@ -283,7 +386,8 @@
       "bodySlot": "legs",
       "armorType": "light",
       "price": 92,
-      "weight": 1740
+      "weight": 1740,
+      "pDef": 22
     },
     {
       "id": 29,
@@ -293,7 +397,8 @@
       "bodySlot": "legs",
       "armorType": "light",
       "price": 1520,
-      "weight": 1730
+      "weight": 1730,
+      "pDef": 27
     },
     {
       "id": 30,
@@ -303,7 +408,8 @@
       "bodySlot": "legs",
       "armorType": "light",
       "price": 4970,
-      "weight": 1700
+      "weight": 1700,
+      "pDef": 29
     },
     {
       "id": 31,
@@ -313,7 +419,8 @@
       "bodySlot": "legs",
       "armorType": "light",
       "price": 12700,
-      "weight": 1680
+      "weight": 1680,
+      "pDef": 32
     },
     {
       "id": 32,
@@ -323,7 +430,8 @@
       "bodySlot": "legs",
       "armorType": "heavy",
       "price": 19900,
-      "weight": 4020
+      "weight": 4020,
+      "pDef": 39
     },
     {
       "id": 33,
@@ -333,7 +441,8 @@
       "bodySlot": "legs",
       "armorType": "light",
       "price": 23000,
-      "weight": 1610
+      "weight": 1610,
+      "pDef": 33
     },
     {
       "id": 34,
@@ -343,7 +452,8 @@
       "bodySlot": "legs",
       "armorType": "heavy",
       "price": 30700,
-      "weight": 3960
+      "weight": 3960,
+      "pDef": 43
     },
     {
       "id": 35,
@@ -352,7 +462,8 @@
       "icon": "icon.armor_t02_b_i00",
       "bodySlot": "feet",
       "price": 37,
-      "weight": 1320
+      "weight": 1320,
+      "pDef": 9
     },
     {
       "id": 36,
@@ -361,7 +472,8 @@
       "icon": "icon.armor_t03_b_i00",
       "bodySlot": "feet",
       "price": 37,
-      "weight": 1320
+      "weight": 1320,
+      "pDef": 9
     },
     {
       "id": 37,
@@ -370,7 +482,8 @@
       "icon": "icon.armor_t05_b_i00",
       "bodySlot": "feet",
       "price": 2650,
-      "weight": 1320
+      "weight": 1320,
+      "pDef": 13
     },
     {
       "id": 38,
@@ -379,7 +492,8 @@
       "icon": "icon.armor_t32_b_i00",
       "bodySlot": "feet",
       "price": 6770,
-      "weight": 1320
+      "weight": 1320,
+      "pDef": 15
     },
     {
       "id": 39,
@@ -388,7 +502,8 @@
       "icon": "icon.armor_t30_b_i00",
       "bodySlot": "feet",
       "price": 12300,
-      "weight": 1310
+      "weight": 1310,
+      "pDef": 17
     },
     {
       "id": 41,
@@ -397,7 +512,8 @@
       "icon": "icon.armor_cloth_helmet_i00",
       "bodySlot": "head",
       "price": 55,
-      "weight": 660
+      "weight": 660,
+      "pDef": 13
     },
     {
       "id": 42,
@@ -406,7 +522,8 @@
       "icon": "icon.armor_leather_helmet_i00",
       "bodySlot": "head",
       "price": 911,
-      "weight": 660
+      "weight": 660,
+      "pDef": 16
     },
     {
       "id": 43,
@@ -415,7 +532,8 @@
       "icon": "icon.armor_leather_helmet_i00",
       "bodySlot": "head",
       "price": 3980,
-      "weight": 660
+      "weight": 660,
+      "pDef": 19
     },
     {
       "id": 44,
@@ -424,7 +542,8 @@
       "icon": "icon.armor_leather_helmet_i00",
       "bodySlot": "head",
       "price": 10200,
-      "weight": 650
+      "weight": 650,
+      "pDef": 23
     },
     {
       "id": 48,
@@ -433,7 +552,8 @@
       "icon": "icon.armor_t02_g_i00",
       "bodySlot": "gloves",
       "price": 37,
-      "weight": 660
+      "weight": 660,
+      "pDef": 9
     },
     {
       "id": 49,
@@ -442,7 +562,8 @@
       "icon": "icon.armor_t06_g_i00",
       "bodySlot": "gloves",
       "price": 2650,
-      "weight": 660
+      "weight": 660,
+      "pDef": 13
     },
     {
       "id": 50,
@@ -451,7 +572,8 @@
       "icon": "icon.armor_t32_g_i00",
       "bodySlot": "gloves",
       "price": 6770,
-      "weight": 650
+      "weight": 650,
+      "pDef": 15
     },
     {
       "id": 51,
@@ -460,7 +582,8 @@
       "icon": "icon.armor_t30_g_i00",
       "bodySlot": "gloves",
       "price": 12300,
-      "weight": 650
+      "weight": 650,
+      "pDef": 17
     },
     {
       "id": 57,
@@ -482,7 +605,8 @@
       "crystal": "d",
       "crystalCount": 332,
       "price": 183000,
-      "weight": 8670
+      "weight": 8670,
+      "pDef": 95
     },
     {
       "id": 66,
@@ -492,7 +616,13 @@
       "bodySlot": "rhand",
       "weaponType": "sword",
       "price": 54100,
-      "weight": 1570
+      "weight": 1570,
+      "pAtk": 17,
+      "mAtk": 12,
+      "pAtkSpd": 379,
+      "critRate": 8,
+      "attackRange": 40,
+      "randomDamage": 10
     },
     {
       "id": 67,
@@ -502,7 +632,13 @@
       "bodySlot": "rhand",
       "weaponType": "sword",
       "price": 54100,
-      "weight": 1570
+      "weight": 1570,
+      "pAtk": 17,
+      "mAtk": 12,
+      "pAtkSpd": 379,
+      "critRate": 8,
+      "attackRange": 40,
+      "randomDamage": 10
     },
     {
       "id": 68,
@@ -512,7 +648,13 @@
       "bodySlot": "rhand",
       "weaponType": "sword",
       "price": 244000,
-      "weight": 1530
+      "weight": 1530,
+      "pAtk": 31,
+      "mAtk": 21,
+      "pAtkSpd": 379,
+      "critRate": 8,
+      "attackRange": 40,
+      "randomDamage": 10
     },
     {
       "id": 69,
@@ -523,7 +665,13 @@
       "weaponType": "sword",
       "crystal": "d",
       "price": 644000,
-      "weight": 1510
+      "weight": 1510,
+      "pAtk": 51,
+      "mAtk": 32,
+      "pAtkSpd": 379,
+      "critRate": 8,
+      "attackRange": 40,
+      "randomDamage": 10
     },
     {
       "id": 72,
@@ -534,7 +682,13 @@
       "weaponType": "sword",
       "crystal": "c",
       "price": 2290000,
-      "weight": 1430
+      "weight": 1430,
+      "pAtk": 107,
+      "mAtk": 61,
+      "pAtkSpd": 379,
+      "critRate": 8,
+      "attackRange": 40,
+      "randomDamage": 10
     },
     {
       "id": 73,
@@ -547,7 +701,13 @@
       "crystal": "c",
       "crystalCount": 1148,
       "price": 2870000,
-      "weight": 1420
+      "weight": 1420,
+      "pAtk": 122,
+      "mAtk": 68,
+      "pAtkSpd": 379,
+      "critRate": 8,
+      "attackRange": 40,
+      "randomDamage": 10
     },
     {
       "id": 74,
@@ -558,7 +718,13 @@
       "weaponType": "sword",
       "crystal": "c",
       "price": 2870000,
-      "weight": 1420
+      "weight": 1420,
+      "pAtk": 122,
+      "mAtk": 68,
+      "pAtkSpd": 379,
+      "critRate": 8,
+      "attackRange": 40,
+      "randomDamage": 10
     },
     {
       "id": 79,
@@ -571,7 +737,13 @@
       "crystal": "b",
       "crystalCount": 1746,
       "price": 13100000,
-      "weight": 1350
+      "weight": 1350,
+      "pAtk": 194,
+      "mAtk": 99,
+      "pAtkSpd": 379,
+      "critRate": 8,
+      "attackRange": 40,
+      "randomDamage": 10
     },
     {
       "id": 87,
@@ -581,7 +753,13 @@
       "price": 188000,
       "kind": "weapon",
       "bodySlot": "rhand",
-      "weaponType": "blunt"
+      "weaponType": "blunt",
+      "pAtk": 31,
+      "mAtk": 21,
+      "pAtkSpd": 379,
+      "critRate": 4,
+      "attackRange": 40,
+      "randomDamage": 20
     },
     {
       "id": 98,
@@ -594,7 +772,13 @@
       "crystal": "a",
       "crystalCount": 1464,
       "price": 18300000,
-      "weight": 1900
+      "weight": 1900,
+      "pAtk": 213,
+      "mAtk": 107,
+      "pAtkSpd": 325,
+      "critRate": 8,
+      "attackRange": 80,
+      "randomDamage": 10
     },
     {
       "id": 99,
@@ -605,7 +789,13 @@
       "weaponType": "etc",
       "magic": true,
       "price": 12500,
-      "weight": 650
+      "weight": 650,
+      "pAtk": 9,
+      "mAtk": 12,
+      "pAtkSpd": 379,
+      "critRate": 8,
+      "attackRange": 40,
+      "randomDamage": 10
     },
     {
       "id": 102,
@@ -623,7 +813,8 @@
       "icon": "icon.accessary_apprentices_earing_i00",
       "bodySlot": "both_ears",
       "price": 49,
-      "weight": 150
+      "weight": 150,
+      "mDef": 11
     },
     {
       "id": 113,
@@ -632,7 +823,8 @@
       "icon": "icon.accessary_mage_earing_i00",
       "bodySlot": "both_ears",
       "price": 811,
-      "weight": 150
+      "weight": 150,
+      "mDef": 13
     },
     {
       "id": 114,
@@ -641,7 +833,8 @@
       "icon": "icon.accessary_earing_of_strength_i00",
       "bodySlot": "both_ears",
       "price": 3510,
-      "weight": 150
+      "weight": 150,
+      "mDef": 16
     },
     {
       "id": 115,
@@ -650,7 +843,8 @@
       "icon": "icon.accessary_earing_of_wisdom_i00",
       "bodySlot": "both_ears",
       "price": 3510,
-      "weight": 150
+      "weight": 150,
+      "mDef": 16
     },
     {
       "id": 116,
@@ -659,7 +853,8 @@
       "icon": "icon.accessary_magic_ring_i00",
       "bodySlot": "both_fingers",
       "price": 33,
-      "weight": 150
+      "weight": 150,
+      "mDef": 7
     },
     {
       "id": 118,
@@ -668,7 +863,8 @@
       "icon": "icon.accessary_necklace_of_magic_i00",
       "bodySlot": "neck",
       "price": 66,
-      "weight": 150
+      "weight": 150,
+      "mDef": 15
     },
     {
       "id": 120,
@@ -678,7 +874,13 @@
       "bodySlot": "rhand",
       "weaponType": "sword",
       "price": 136000,
-      "weight": 1550
+      "weight": 1550,
+      "pAtk": 24,
+      "mAtk": 17,
+      "pAtkSpd": 379,
+      "critRate": 8,
+      "attackRange": 40,
+      "randomDamage": 10
     },
     {
       "id": 121,
@@ -688,7 +890,13 @@
       "bodySlot": "rhand",
       "weaponType": "sword",
       "price": 136000,
-      "weight": 1540
+      "weight": 1540,
+      "pAtk": 24,
+      "mAtk": 17,
+      "pAtkSpd": 379,
+      "critRate": 8,
+      "attackRange": 40,
+      "randomDamage": 10
     },
     {
       "id": 122,
@@ -698,7 +906,13 @@
       "bodySlot": "rhand",
       "weaponType": "sword",
       "price": 54100,
-      "weight": 1570
+      "weight": 1570,
+      "pAtk": 17,
+      "mAtk": 12,
+      "pAtkSpd": 379,
+      "critRate": 8,
+      "attackRange": 40,
+      "randomDamage": 10
     },
     {
       "id": 123,
@@ -711,7 +925,13 @@
       "crystal": "d",
       "crystalCount": 743,
       "price": 409000,
-      "weight": 1520
+      "weight": 1520,
+      "pAtk": 40,
+      "mAtk": 26,
+      "pAtkSpd": 379,
+      "critRate": 8,
+      "attackRange": 40,
+      "randomDamage": 10
     },
     {
       "id": 125,
@@ -722,7 +942,13 @@
       "weaponType": "sword",
       "crystal": "d",
       "price": 644000,
-      "weight": 1510
+      "weight": 1510,
+      "pAtk": 51,
+      "mAtk": 32,
+      "pAtkSpd": 379,
+      "critRate": 8,
+      "attackRange": 40,
+      "randomDamage": 10
     },
     {
       "id": 126,
@@ -733,7 +959,13 @@
       "weaponType": "sword",
       "crystal": "d",
       "price": 644000,
-      "weight": 1500
+      "weight": 1500,
+      "pAtk": 51,
+      "mAtk": 32,
+      "pAtkSpd": 379,
+      "critRate": 8,
+      "attackRange": 40,
+      "randomDamage": 10
     },
     {
       "id": 127,
@@ -744,7 +976,13 @@
       "weaponType": "sword",
       "crystal": "d",
       "price": 967000,
-      "weight": 1490
+      "weight": 1490,
+      "pAtk": 64,
+      "mAtk": 39,
+      "pAtkSpd": 379,
+      "critRate": 8,
+      "attackRange": 40,
+      "randomDamage": 10
     },
     {
       "id": 128,
@@ -755,7 +993,13 @@
       "weaponType": "sword",
       "crystal": "d",
       "price": 644000,
-      "weight": 1500
+      "weight": 1500,
+      "pAtk": 51,
+      "mAtk": 32,
+      "pAtkSpd": 379,
+      "critRate": 8,
+      "attackRange": 40,
+      "randomDamage": 10
     },
     {
       "id": 129,
@@ -766,7 +1010,13 @@
       "weaponType": "sword",
       "crystal": "d",
       "price": 1400000,
-      "weight": 1450
+      "weight": 1450,
+      "pAtk": 79,
+      "mAtk": 47,
+      "pAtkSpd": 379,
+      "critRate": 8,
+      "attackRange": 40,
+      "randomDamage": 10
     },
     {
       "id": 130,
@@ -777,7 +1027,13 @@
       "weaponType": "sword",
       "crystal": "d",
       "price": 967000,
-      "weight": 1470
+      "weight": 1470,
+      "pAtk": 64,
+      "mAtk": 39,
+      "pAtkSpd": 379,
+      "critRate": 8,
+      "attackRange": 40,
+      "randomDamage": 10
     },
     {
       "id": 131,
@@ -788,7 +1044,13 @@
       "weaponType": "sword",
       "crystal": "c",
       "price": 2870000,
-      "weight": 1420
+      "weight": 1420,
+      "pAtk": 122,
+      "mAtk": 68,
+      "pAtkSpd": 379,
+      "critRate": 8,
+      "attackRange": 40,
+      "randomDamage": 10
     },
     {
       "id": 133,
@@ -799,7 +1061,13 @@
       "weaponType": "sword",
       "crystal": "c",
       "price": 2870000,
-      "weight": 1420
+      "weight": 1420,
+      "pAtk": 122,
+      "mAtk": 68,
+      "pAtkSpd": 379,
+      "critRate": 8,
+      "attackRange": 40,
+      "randomDamage": 10
     },
     {
       "id": 152,
@@ -809,7 +1077,13 @@
       "bodySlot": "rhand",
       "weaponType": "blunt",
       "price": 8070,
-      "weight": 1890
+      "weight": 1890,
+      "pAtk": 10,
+      "mAtk": 8,
+      "pAtkSpd": 379,
+      "critRate": 4,
+      "attackRange": 40,
+      "randomDamage": 20
     },
     {
       "id": 153,
@@ -819,7 +1093,13 @@
       "bodySlot": "rhand",
       "weaponType": "blunt",
       "price": 18500,
-      "weight": 1850
+      "weight": 1850,
+      "pAtk": 12,
+      "mAtk": 9,
+      "pAtkSpd": 379,
+      "critRate": 4,
+      "attackRange": 40,
+      "randomDamage": 20
     },
     {
       "id": 154,
@@ -829,7 +1109,13 @@
       "bodySlot": "rhand",
       "weaponType": "blunt",
       "price": 54100,
-      "weight": 1860
+      "weight": 1860,
+      "pAtk": 17,
+      "mAtk": 12,
+      "pAtkSpd": 379,
+      "critRate": 4,
+      "attackRange": 40,
+      "randomDamage": 20
     },
     {
       "id": 155,
@@ -839,7 +1125,13 @@
       "bodySlot": "rhand",
       "weaponType": "blunt",
       "price": 244000,
-      "weight": 1800
+      "weight": 1800,
+      "pAtk": 31,
+      "mAtk": 21,
+      "pAtkSpd": 379,
+      "critRate": 4,
+      "attackRange": 40,
+      "randomDamage": 20
     },
     {
       "id": 176,
@@ -850,7 +1142,13 @@
       "weaponType": "blunt",
       "magic": true,
       "price": 136000,
-      "weight": 1070
+      "weight": 1070,
+      "pAtk": 23,
+      "mAtk": 24,
+      "pAtkSpd": 325,
+      "critRate": 4,
+      "attackRange": 40,
+      "randomDamage": 20
     },
     {
       "id": 177,
@@ -861,7 +1159,13 @@
       "weaponType": "blunt",
       "magic": true,
       "price": 244000,
-      "weight": 1050
+      "weight": 1050,
+      "pAtk": 30,
+      "mAtk": 36,
+      "pAtkSpd": 325,
+      "critRate": 4,
+      "attackRange": 40,
+      "randomDamage": 20
     },
     {
       "id": 215,
@@ -871,7 +1175,13 @@
       "bodySlot": "rhand",
       "weaponType": "dagger",
       "price": 12500,
-      "weight": 1130
+      "weight": 1130,
+      "pAtk": 10,
+      "mAtk": 9,
+      "pAtkSpd": 433,
+      "critRate": 12,
+      "attackRange": 40,
+      "randomDamage": 5
     },
     {
       "id": 216,
@@ -881,7 +1191,13 @@
       "bodySlot": "rhand",
       "weaponType": "dagger",
       "price": 54100,
-      "weight": 1130
+      "weight": 1130,
+      "pAtk": 15,
+      "mAtk": 12,
+      "pAtkSpd": 433,
+      "critRate": 12,
+      "attackRange": 40,
+      "randomDamage": 5
     },
     {
       "id": 217,
@@ -891,7 +1207,13 @@
       "bodySlot": "rhand",
       "weaponType": "dagger",
       "price": 136000,
-      "weight": 1120
+      "weight": 1120,
+      "pAtk": 21,
+      "mAtk": 17,
+      "pAtkSpd": 433,
+      "critRate": 12,
+      "attackRange": 40,
+      "randomDamage": 5
     },
     {
       "id": 218,
@@ -901,7 +1223,13 @@
       "bodySlot": "rhand",
       "weaponType": "dagger",
       "price": 136000,
-      "weight": 1120
+      "weight": 1120,
+      "pAtk": 21,
+      "mAtk": 17,
+      "pAtkSpd": 433,
+      "critRate": 12,
+      "attackRange": 40,
+      "randomDamage": 5
     },
     {
       "id": 219,
@@ -911,7 +1239,13 @@
       "bodySlot": "rhand",
       "weaponType": "dagger",
       "price": 244000,
-      "weight": 1110
+      "weight": 1110,
+      "pAtk": 27,
+      "mAtk": 21,
+      "pAtkSpd": 433,
+      "critRate": 12,
+      "attackRange": 40,
+      "randomDamage": 5
     },
     {
       "id": 253,
@@ -921,7 +1255,13 @@
       "bodySlot": "lrhand",
       "weaponType": "fist",
       "price": 768,
-      "weight": 1590
+      "weight": 1590,
+      "pAtk": 10,
+      "mAtk": 6,
+      "pAtkSpd": 325,
+      "critRate": 4,
+      "attackRange": 40,
+      "randomDamage": 5
     },
     {
       "id": 254,
@@ -931,7 +1271,13 @@
       "bodySlot": "lrhand",
       "weaponType": "fist",
       "price": 12500,
-      "weight": 1580
+      "weight": 1580,
+      "pAtk": 13,
+      "mAtk": 9,
+      "pAtkSpd": 325,
+      "critRate": 4,
+      "attackRange": 40,
+      "randomDamage": 5
     },
     {
       "id": 255,
@@ -941,7 +1287,13 @@
       "bodySlot": "lrhand",
       "weaponType": "fist",
       "price": 54100,
-      "weight": 1560
+      "weight": 1560,
+      "pAtk": 21,
+      "mAtk": 12,
+      "pAtkSpd": 325,
+      "critRate": 4,
+      "attackRange": 40,
+      "randomDamage": 5
     },
     {
       "id": 256,
@@ -951,7 +1303,13 @@
       "bodySlot": "lrhand",
       "weaponType": "fist",
       "price": 136000,
-      "weight": 1570
+      "weight": 1570,
+      "pAtk": 29,
+      "mAtk": 17,
+      "pAtkSpd": 325,
+      "critRate": 4,
+      "attackRange": 40,
+      "randomDamage": 5
     },
     {
       "id": 257,
@@ -961,7 +1319,13 @@
       "bodySlot": "lrhand",
       "weaponType": "fist",
       "price": 244000,
-      "weight": 1560
+      "weight": 1560,
+      "pAtk": 38,
+      "mAtk": 21,
+      "pAtkSpd": 325,
+      "critRate": 4,
+      "attackRange": 40,
+      "randomDamage": 5
     },
     {
       "id": 271,
@@ -971,7 +1335,13 @@
       "bodySlot": "lrhand",
       "weaponType": "bow",
       "price": 54100,
-      "weight": 1910
+      "weight": 1910,
+      "pAtk": 34,
+      "mAtk": 12,
+      "pAtkSpd": 293,
+      "critRate": 12,
+      "attackRange": 500,
+      "randomDamage": 5
     },
     {
       "id": 272,
@@ -981,7 +1351,13 @@
       "bodySlot": "lrhand",
       "weaponType": "bow",
       "price": 136000,
-      "weight": 1900
+      "weight": 1900,
+      "pAtk": 49,
+      "mAtk": 17,
+      "pAtkSpd": 293,
+      "critRate": 12,
+      "attackRange": 500,
+      "randomDamage": 5
     },
     {
       "id": 273,
@@ -991,7 +1367,13 @@
       "bodySlot": "lrhand",
       "weaponType": "bow",
       "price": 244000,
-      "weight": 1880
+      "weight": 1880,
+      "pAtk": 64,
+      "mAtk": 21,
+      "pAtkSpd": 293,
+      "critRate": 12,
+      "attackRange": 500,
+      "randomDamage": 5
     },
     {
       "id": 308,
@@ -1002,7 +1384,13 @@
       "weaponType": "etc",
       "magic": true,
       "price": 6000,
-      "weight": 660
+      "weight": 660,
+      "pAtk": 6,
+      "mAtk": 8,
+      "pAtkSpd": 379,
+      "critRate": 8,
+      "attackRange": 40,
+      "randomDamage": 10
     },
     {
       "id": 309,
@@ -1013,7 +1401,13 @@
       "weaponType": "etc",
       "magic": true,
       "price": 136000,
-      "weight": 630
+      "weight": 630,
+      "pAtk": 19,
+      "mAtk": 22,
+      "pAtkSpd": 379,
+      "critRate": 8,
+      "attackRange": 40,
+      "randomDamage": 10
     },
     {
       "id": 310,
@@ -1024,7 +1418,13 @@
       "weaponType": "etc",
       "magic": true,
       "price": 136000,
-      "weight": 610
+      "weight": 610,
+      "pAtk": 19,
+      "mAtk": 22,
+      "pAtkSpd": 379,
+      "critRate": 8,
+      "attackRange": 40,
+      "randomDamage": 10
     },
     {
       "id": 311,
@@ -1035,7 +1435,13 @@
       "weaponType": "etc",
       "magic": true,
       "price": 244000,
-      "weight": 620
+      "weight": 620,
+      "pAtk": 25,
+      "mAtk": 28,
+      "pAtkSpd": 379,
+      "critRate": 8,
+      "attackRange": 40,
+      "randomDamage": 10
     },
     {
       "id": 390,
@@ -1045,7 +1451,8 @@
       "bodySlot": "chest",
       "armorType": "light",
       "price": 20300,
-      "weight": 4770
+      "weight": 4770,
+      "pDef": 50
     },
     {
       "id": 412,
@@ -1055,7 +1462,8 @@
       "bodySlot": "legs",
       "armorType": "light",
       "price": 12700,
-      "weight": 1630
+      "weight": 1630,
+      "pDef": 32
     },
     {
       "id": 425,
@@ -1086,7 +1494,8 @@
       "bodySlot": "chest",
       "armorType": "magic",
       "price": 147,
-      "weight": 2150
+      "weight": 2150,
+      "pDef": 18
     },
     {
       "id": 428,
@@ -1096,7 +1505,8 @@
       "bodySlot": "chest",
       "armorType": "magic",
       "price": 2430,
-      "weight": 2140
+      "weight": 2140,
+      "pDef": 21
     },
     {
       "id": 429,
@@ -1106,7 +1516,8 @@
       "bodySlot": "chest",
       "armorType": "magic",
       "price": 7960,
-      "weight": 2110
+      "weight": 2110,
+      "pDef": 25
     },
     {
       "id": 461,
@@ -1137,7 +1548,8 @@
       "bodySlot": "legs",
       "armorType": "magic",
       "price": 92,
-      "weight": 1080
+      "weight": 1080,
+      "pDef": 11
     },
     {
       "id": 463,
@@ -1147,7 +1559,8 @@
       "bodySlot": "legs",
       "armorType": "magic",
       "price": 1520,
-      "weight": 1070
+      "weight": 1070,
+      "pDef": 13
     },
     {
       "id": 464,
@@ -1157,7 +1570,8 @@
       "bodySlot": "legs",
       "armorType": "magic",
       "price": 4970,
-      "weight": 1020
+      "weight": 1020,
+      "pDef": 16
     },
     {
       "id": 625,
@@ -1285,7 +1699,13 @@
       "bodySlot": "rhand",
       "weaponType": "sword",
       "price": 18500,
-      "weight": 1300
+      "weight": 1300,
+      "pAtk": 12,
+      "mAtk": 9,
+      "pAtkSpd": 379,
+      "critRate": 8,
+      "attackRange": 40,
+      "randomDamage": 10
     },
     {
       "id": 743,
@@ -1295,7 +1715,13 @@
       "bodySlot": "rhand",
       "weaponType": "sword",
       "price": 33600,
-      "weight": 1300
+      "weight": 1300,
+      "pAtk": 14,
+      "mAtk": 11,
+      "pAtkSpd": 379,
+      "critRate": 8,
+      "attackRange": 40,
+      "randomDamage": 10
     },
     {
       "id": 744,
@@ -1306,7 +1732,13 @@
       "weaponType": "blunt",
       "magic": true,
       "price": 33600,
-      "weight": 1800
+      "weight": 1800,
+      "pAtk": 13,
+      "mAtk": 15,
+      "pAtkSpd": 325,
+      "critRate": 4,
+      "attackRange": 40,
+      "randomDamage": 20
     },
     {
       "id": 747,
@@ -1317,7 +1749,13 @@
       "weaponType": "blunt",
       "magic": true,
       "price": 25500,
-      "weight": 1300
+      "weight": 1300,
+      "pAtk": 11,
+      "mAtk": 13,
+      "pAtkSpd": 379,
+      "critRate": 4,
+      "attackRange": 40,
+      "randomDamage": 20
     },
     {
       "id": 754,
@@ -1328,7 +1766,13 @@
       "weaponType": "blunt",
       "magic": true,
       "price": 25500,
-      "weight": 1700
+      "weight": 1700,
+      "pAtk": 13,
+      "mAtk": 14,
+      "pAtkSpd": 325,
+      "critRate": 4,
+      "attackRange": 40,
+      "randomDamage": 20
     },
     {
       "id": 845,
@@ -1337,7 +1781,8 @@
       "icon": "icon.accessary_catseye_earing_i00",
       "bodySlot": "both_ears",
       "price": 8890,
-      "weight": 150
+      "weight": 150,
+      "mDef": 19
     },
     {
       "id": 846,
@@ -1346,7 +1791,8 @@
       "icon": "icon.accessary_coral_earing_i00",
       "bodySlot": "both_ears",
       "price": 16000,
-      "weight": 150
+      "weight": 150,
+      "mDef": 21
     },
     {
       "id": 875,
@@ -1355,7 +1801,8 @@
       "icon": "icon.accessary_ring_of_knowledge_i00",
       "bodySlot": "both_fingers",
       "price": 540,
-      "weight": 150
+      "weight": 150,
+      "mDef": 9
     },
     {
       "id": 876,
@@ -1364,7 +1811,8 @@
       "icon": "icon.accessary_ring_of_anguish_i00",
       "bodySlot": "both_fingers",
       "price": 2340,
-      "weight": 150
+      "weight": 150,
+      "mDef": 11
     },
     {
       "id": 877,
@@ -1373,7 +1821,8 @@
       "icon": "icon.accessary_ring_of_wisdom_i00",
       "bodySlot": "both_fingers",
       "price": 5920,
-      "weight": 150
+      "weight": 150,
+      "mDef": 12
     },
     {
       "id": 878,
@@ -1382,7 +1831,8 @@
       "icon": "icon.accessary_blue_coral_ring_i00",
       "bodySlot": "both_fingers",
       "price": 10700,
-      "weight": 150
+      "weight": 150,
+      "mDef": 14
     },
     {
       "id": 906,
@@ -1391,7 +1841,8 @@
       "icon": "icon.accessary_necklace_of_knowledge_i00",
       "bodySlot": "neck",
       "price": 1080,
-      "weight": 150
+      "weight": 150,
+      "mDef": 18
     },
     {
       "id": 907,
@@ -1400,7 +1851,8 @@
       "icon": "icon.accessary_necklace_of_anguish_i00",
       "bodySlot": "neck",
       "price": 4680,
-      "weight": 150
+      "weight": 150,
+      "mDef": 21
     },
     {
       "id": 908,
@@ -1409,7 +1861,8 @@
       "icon": "icon.accessary_necklace_of_wisdom_i00",
       "bodySlot": "neck",
       "price": 11900,
-      "weight": 150
+      "weight": 150,
+      "mDef": 25
     },
     {
       "id": 909,
@@ -1418,7 +1871,8 @@
       "icon": "icon.accessary_blue_diamond_necklace_i00",
       "bodySlot": "neck",
       "price": 21300,
-      "weight": 150
+      "weight": 150,
+      "mDef": 28
     },
     {
       "id": 911,
@@ -1430,7 +1884,8 @@
       "crystal": "d",
       "crystalCount": 103,
       "price": 56800,
-      "weight": 150
+      "weight": 150,
+      "mDef": 36
     },
     {
       "id": 945,
@@ -1449,7 +1904,13 @@
       "bodySlot": "rhand",
       "weaponType": "dagger",
       "price": 66600,
-      "weight": 1100
+      "weight": 1100,
+      "pAtk": 16,
+      "mAtk": 13,
+      "pAtkSpd": 433,
+      "critRate": 12,
+      "attackRange": 40,
+      "randomDamage": 5
     },
     {
       "id": 947,
@@ -1715,7 +2176,13 @@
       "bodySlot": "rhand",
       "weaponType": "sword",
       "price": 33600,
-      "weight": 1450
+      "weight": 1450,
+      "pAtk": 14,
+      "mAtk": 11,
+      "pAtkSpd": 379,
+      "critRate": 8,
+      "attackRange": 40,
+      "randomDamage": 10
     },
     {
       "id": 981,
@@ -1725,7 +2192,13 @@
       "bodySlot": "lrhand",
       "weaponType": "sword",
       "price": 25500,
-      "weight": 1300
+      "weight": 1300,
+      "pAtk": 16,
+      "mAtk": 10,
+      "pAtkSpd": 325,
+      "critRate": 8,
+      "attackRange": 40,
+      "randomDamage": 10
     },
     {
       "id": 989,
@@ -1735,7 +2208,13 @@
       "bodySlot": "rhand",
       "weaponType": "dagger",
       "price": 25500,
-      "weight": 1130
+      "weight": 1130,
+      "pAtk": 11,
+      "mAtk": 10,
+      "pAtkSpd": 433,
+      "critRate": 12,
+      "attackRange": 40,
+      "randomDamage": 5
     },
     {
       "id": 1048,
@@ -1883,7 +2362,8 @@
       "bodySlot": "chest",
       "armorType": "magic",
       "price": 2430,
-      "weight": 2120
+      "weight": 2120,
+      "pDef": 21
     },
     {
       "id": 1101,
@@ -1893,7 +2373,8 @@
       "bodySlot": "chest",
       "armorType": "magic",
       "price": 20300,
-      "weight": 2090
+      "weight": 2090,
+      "pDef": 30
     },
     {
       "id": 1102,
@@ -1903,7 +2384,8 @@
       "bodySlot": "chest",
       "armorType": "magic",
       "price": 36900,
-      "weight": 2080
+      "weight": 2080,
+      "pDef": 34
     },
     {
       "id": 1103,
@@ -1913,7 +2395,8 @@
       "bodySlot": "legs",
       "armorType": "magic",
       "price": 1520,
-      "weight": 1060
+      "weight": 1060,
+      "pDef": 13
     },
     {
       "id": 1104,
@@ -1923,7 +2406,8 @@
       "bodySlot": "legs",
       "armorType": "magic",
       "price": 12700,
-      "weight": 1040
+      "weight": 1040,
+      "pDef": 19
     },
     {
       "id": 1105,
@@ -1933,7 +2417,8 @@
       "bodySlot": "legs",
       "armorType": "magic",
       "price": 23000,
-      "weight": 1030
+      "weight": 1030,
+      "pDef": 21
     },
     {
       "id": 1119,
@@ -1942,7 +2427,8 @@
       "icon": "icon.armor_t04_g_i00",
       "bodySlot": "gloves",
       "price": 607,
-      "weight": 660
+      "weight": 660,
+      "pDef": 11
     },
     {
       "id": 1121,
@@ -1951,7 +2437,8 @@
       "icon": "icon.armor_t01_b_i00",
       "bodySlot": "feet",
       "price": 7,
-      "weight": 1320
+      "weight": 1320,
+      "pDef": 8
     },
     {
       "id": 1122,
@@ -1960,7 +2447,8 @@
       "icon": "icon.armor_t50_b_i00",
       "bodySlot": "feet",
       "price": 607,
-      "weight": 1320
+      "weight": 1320,
+      "pDef": 11
     },
     {
       "id": 1129,
@@ -1969,7 +2457,8 @@
       "icon": "icon.armor_t04_b_i00",
       "bodySlot": "feet",
       "price": 607,
-      "weight": 1320
+      "weight": 1320,
+      "pDef": 11
     },
     {
       "id": 1146,
@@ -2002,7 +2491,8 @@
       "icon": "icon.armor_leather_helmet_i00",
       "bodySlot": "head",
       "price": 18400,
-      "weight": 640
+      "weight": 640,
+      "pDef": 26
     },
     {
       "id": 1152,
@@ -2028,7 +2518,13 @@
       "bodySlot": "lrhand",
       "weaponType": "sword",
       "price": 54100,
-      "weight": 2250
+      "weight": 2250,
+      "pAtk": 21,
+      "mAtk": 12,
+      "pAtkSpd": 325,
+      "critRate": 8,
+      "attackRange": 40,
+      "randomDamage": 10
     },
     {
       "id": 1341,
@@ -2182,7 +2678,8 @@
       "icon": "icon.accessary_necklace_of_courage_i00",
       "bodySlot": "neck",
       "price": 66,
-      "weight": 150
+      "weight": 150,
+      "mDef": 15
     },
     {
       "id": 1507,
@@ -2191,7 +2688,8 @@
       "icon": "icon.accessary_necklace_of_valor_i00",
       "bodySlot": "neck",
       "price": 4680,
-      "weight": 150
+      "weight": 150,
+      "mDef": 21
     },
     {
       "id": 1508,
@@ -2200,7 +2698,8 @@
       "icon": "icon.accessary_ring_of_raccoon_i00",
       "bodySlot": "both_fingers",
       "price": 2340,
-      "weight": 150
+      "weight": 150,
+      "mDef": 11
     },
     {
       "id": 1509,
@@ -2209,7 +2708,8 @@
       "icon": "icon.accessary_ring_of_firefly_i00",
       "bodySlot": "both_fingers",
       "price": 2340,
-      "weight": 150
+      "weight": 150,
+      "mDef": 11
     },
     {
       "id": 1510,
@@ -2219,7 +2719,13 @@
       "bodySlot": "rhand",
       "weaponType": "sword",
       "price": 25500,
-      "weight": 1450
+      "weight": 1450,
+      "pAtk": 13,
+      "mAtk": 10,
+      "pAtkSpd": 379,
+      "critRate": 8,
+      "attackRange": 40,
+      "randomDamage": 10
     },
     {
       "id": 1511,
@@ -2229,7 +2735,13 @@
       "bodySlot": "rhand",
       "weaponType": "blunt",
       "price": 25500,
-      "weight": 1860
+      "weight": 1860,
+      "pAtk": 13,
+      "mAtk": 10,
+      "pAtkSpd": 379,
+      "critRate": 4,
+      "attackRange": 40,
+      "randomDamage": 20
     },
     {
       "id": 1513,
@@ -2798,7 +3310,13 @@
       "kind": "weapon",
       "bodySlot": "lrhand",
       "weaponType": "fist",
-      "icon": "icon.weapon_training_gloves_i00"
+      "icon": "icon.weapon_training_gloves_i00",
+      "pAtk": 7,
+      "mAtk": 5,
+      "pAtkSpd": 325,
+      "critRate": 4,
+      "attackRange": 40,
+      "randomDamage": 5
     },
     {
       "id": 2369,
@@ -2809,7 +3327,13 @@
       "icon": "icon.weapon_squires_sword_i00",
       "price": 138,
       "weight": 1600,
-      "sellable": false
+      "sellable": false,
+      "pAtk": 6,
+      "mAtk": 5,
+      "pAtkSpd": 379,
+      "critRate": 8,
+      "attackRange": 40,
+      "randomDamage": 10
     },
     {
       "id": 2370,
@@ -2817,7 +3341,13 @@
       "kind": "weapon",
       "bodySlot": "rhand",
       "weaponType": "blunt",
-      "icon": "icon.weapon_club_i00"
+      "icon": "icon.weapon_club_i00",
+      "pAtk": 6,
+      "mAtk": 5,
+      "pAtkSpd": 379,
+      "critRate": 4,
+      "attackRange": 40,
+      "randomDamage": 20
     },
     {
       "id": 2371,
@@ -2827,7 +3357,13 @@
       "bodySlot": "lrhand",
       "weaponType": "fist",
       "price": 25500,
-      "weight": 1400
+      "weight": 1400,
+      "pAtk": 16,
+      "mAtk": 10,
+      "pAtkSpd": 325,
+      "critRate": 4,
+      "attackRange": 40,
+      "randomDamage": 5
     },
     {
       "id": 2372,
@@ -2837,7 +3373,13 @@
       "bodySlot": "rhand",
       "weaponType": "dagger",
       "price": 25500,
-      "weight": 1050
+      "weight": 1050,
+      "pAtk": 11,
+      "mAtk": 10,
+      "pAtkSpd": 433,
+      "critRate": 12,
+      "attackRange": 40,
+      "randomDamage": 5
     },
     {
       "id": 2373,
@@ -2848,7 +3390,13 @@
       "weaponType": "blunt",
       "magic": true,
       "price": 25500,
-      "weight": 1050
+      "weight": 1050,
+      "pAtk": 13,
+      "mAtk": 13,
+      "pAtkSpd": 325,
+      "critRate": 4,
+      "attackRange": 40,
+      "randomDamage": 20
     },
     {
       "id": 2374,
@@ -2858,7 +3406,13 @@
       "bodySlot": "rhand",
       "weaponType": "dagger",
       "price": 25500,
-      "weight": 1100
+      "weight": 1100,
+      "pAtk": 11,
+      "mAtk": 10,
+      "pAtkSpd": 433,
+      "critRate": 12,
+      "attackRange": 40,
+      "randomDamage": 5
     },
     {
       "id": 2386,
@@ -2868,7 +3422,8 @@
       "bodySlot": "legs",
       "armorType": "light",
       "price": 4970,
-      "weight": 1670
+      "weight": 1670,
+      "pDef": 29
     },
     {
       "id": 2390,
@@ -2881,7 +3436,8 @@
       "crystal": "b",
       "crystalCount": 304,
       "price": 2280000,
-      "weight": 5600
+      "weight": 5600,
+      "pDef": 191
     },
     {
       "id": 2499,
@@ -2892,7 +3448,13 @@
       "weaponType": "sword",
       "crystal": "d",
       "price": 1800000,
-      "weight": 1440
+      "weight": 1440,
+      "pAtk": 92,
+      "mAtk": 54,
+      "pAtkSpd": 379,
+      "critRate": 8,
+      "attackRange": 40,
+      "randomDamage": 10
     },
     {
       "id": 2501,
@@ -2902,7 +3464,13 @@
       "bodySlot": "rhand",
       "weaponType": "blunt",
       "price": 136000,
-      "weight": 1850
+      "weight": 1850,
+      "pAtk": 24,
+      "mAtk": 17,
+      "pAtkSpd": 379,
+      "critRate": 4,
+      "attackRange": 40,
+      "randomDamage": 20
     },
     {
       "id": 2509,
@@ -2922,7 +3490,13 @@
       "weaponType": "dual",
       "crystal": "d",
       "price": 877000,
-      "weight": 2530
+      "weight": 2530,
+      "pAtk": 73,
+      "mAtk": 37,
+      "pAtkSpd": 325,
+      "critRate": 8,
+      "attackRange": 40,
+      "randomDamage": 10
     },
     {
       "id": 2517,
@@ -2933,7 +3507,13 @@
       "weaponType": "dual",
       "crystal": "d",
       "price": 1060000,
-      "weight": 2520
+      "weight": 2520,
+      "pAtk": 83,
+      "mAtk": 41,
+      "pAtkSpd": 325,
+      "critRate": 8,
+      "attackRange": 40,
+      "randomDamage": 10
     },
     {
       "id": 2518,
@@ -2944,7 +3524,13 @@
       "weaponType": "dual",
       "crystal": "d",
       "price": 1060000,
-      "weight": 2530
+      "weight": 2530,
+      "pAtk": 83,
+      "mAtk": 41,
+      "pAtkSpd": 325,
+      "critRate": 8,
+      "attackRange": 40,
+      "randomDamage": 10
     },
     {
       "id": 2519,
@@ -2955,7 +3541,13 @@
       "weaponType": "dual",
       "crystal": "d",
       "price": 1060000,
-      "weight": 2520
+      "weight": 2520,
+      "pAtk": 83,
+      "mAtk": 41,
+      "pAtkSpd": 325,
+      "critRate": 8,
+      "attackRange": 40,
+      "randomDamage": 10
     },
     {
       "id": 2520,
@@ -2966,7 +3558,13 @@
       "weaponType": "dual",
       "crystal": "d",
       "price": 1060000,
-      "weight": 2510
+      "weight": 2510,
+      "pAtk": 83,
+      "mAtk": 41,
+      "pAtkSpd": 325,
+      "critRate": 8,
+      "attackRange": 40,
+      "randomDamage": 10
     },
     {
       "id": 2521,
@@ -2977,7 +3575,13 @@
       "weaponType": "dual",
       "crystal": "d",
       "price": 1400000,
-      "weight": 2530
+      "weight": 2530,
+      "pAtk": 96,
+      "mAtk": 47,
+      "pAtkSpd": 325,
+      "critRate": 8,
+      "attackRange": 40,
+      "randomDamage": 10
     },
     {
       "id": 2522,
@@ -2988,7 +3592,13 @@
       "weaponType": "dual",
       "crystal": "d",
       "price": 1400000,
-      "weight": 2510
+      "weight": 2510,
+      "pAtk": 96,
+      "mAtk": 47,
+      "pAtkSpd": 325,
+      "critRate": 8,
+      "attackRange": 40,
+      "randomDamage": 10
     },
     {
       "id": 2523,
@@ -2999,7 +3609,13 @@
       "weaponType": "dual",
       "crystal": "c",
       "price": 1960000,
-      "weight": 2420
+      "weight": 2420,
+      "pAtk": 118,
+      "mAtk": 56,
+      "pAtkSpd": 325,
+      "critRate": 8,
+      "attackRange": 40,
+      "randomDamage": 10
     },
     {
       "id": 2524,
@@ -3010,7 +3626,13 @@
       "weaponType": "dual",
       "crystal": "c",
       "price": 2290000,
-      "weight": 2420
+      "weight": 2420,
+      "pAtk": 130,
+      "mAtk": 61,
+      "pAtkSpd": 325,
+      "critRate": 8,
+      "attackRange": 40,
+      "randomDamage": 10
     },
     {
       "id": 2525,
@@ -3021,7 +3643,13 @@
       "weaponType": "dual",
       "crystal": "d",
       "price": 1400000,
-      "weight": 2470
+      "weight": 2470,
+      "pAtk": 96,
+      "mAtk": 47,
+      "pAtkSpd": 325,
+      "critRate": 8,
+      "attackRange": 40,
+      "randomDamage": 10
     },
     {
       "id": 2526,
@@ -3032,7 +3660,13 @@
       "weaponType": "dual",
       "crystal": "d",
       "price": 1400000,
-      "weight": 2470
+      "weight": 2470,
+      "pAtk": 96,
+      "mAtk": 47,
+      "pAtkSpd": 325,
+      "critRate": 8,
+      "attackRange": 40,
+      "randomDamage": 10
     },
     {
       "id": 2527,
@@ -3043,7 +3677,13 @@
       "weaponType": "dual",
       "crystal": "d",
       "price": 1400000,
-      "weight": 2480
+      "weight": 2480,
+      "pAtk": 96,
+      "mAtk": 47,
+      "pAtkSpd": 325,
+      "critRate": 8,
+      "attackRange": 40,
+      "randomDamage": 10
     },
     {
       "id": 2528,
@@ -3054,7 +3694,13 @@
       "weaponType": "dual",
       "crystal": "d",
       "price": 1400000,
-      "weight": 2500
+      "weight": 2500,
+      "pAtk": 96,
+      "mAtk": 47,
+      "pAtkSpd": 325,
+      "critRate": 8,
+      "attackRange": 40,
+      "randomDamage": 10
     },
     {
       "id": 2529,
@@ -3065,7 +3711,13 @@
       "weaponType": "dual",
       "crystal": "d",
       "price": 1660000,
-      "weight": 2470
+      "weight": 2470,
+      "pAtk": 107,
+      "mAtk": 51,
+      "pAtkSpd": 325,
+      "critRate": 8,
+      "attackRange": 40,
+      "randomDamage": 10
     },
     {
       "id": 2530,
@@ -3076,7 +3728,13 @@
       "weaponType": "dual",
       "crystal": "d",
       "price": 1660000,
-      "weight": 2460
+      "weight": 2460,
+      "pAtk": 107,
+      "mAtk": 51,
+      "pAtkSpd": 325,
+      "critRate": 8,
+      "attackRange": 40,
+      "randomDamage": 10
     },
     {
       "id": 2531,
@@ -3087,7 +3745,13 @@
       "weaponType": "dual",
       "crystal": "c",
       "price": 2120000,
-      "weight": 2450
+      "weight": 2450,
+      "pAtk": 124,
+      "mAtk": 58,
+      "pAtkSpd": 325,
+      "critRate": 8,
+      "attackRange": 40,
+      "randomDamage": 10
     },
     {
       "id": 2532,
@@ -3098,7 +3762,13 @@
       "weaponType": "dual",
       "crystal": "c",
       "price": 2470000,
-      "weight": 2430
+      "weight": 2430,
+      "pAtk": 136,
+      "mAtk": 63,
+      "pAtkSpd": 325,
+      "critRate": 8,
+      "attackRange": 40,
+      "randomDamage": 10
     },
     {
       "id": 2533,
@@ -3109,7 +3779,13 @@
       "weaponType": "dual",
       "crystal": "d",
       "price": 1400000,
-      "weight": 2520
+      "weight": 2520,
+      "pAtk": 96,
+      "mAtk": 47,
+      "pAtkSpd": 325,
+      "critRate": 8,
+      "attackRange": 40,
+      "randomDamage": 10
     },
     {
       "id": 2534,
@@ -3120,7 +3796,13 @@
       "weaponType": "dual",
       "crystal": "d",
       "price": 1400000,
-      "weight": 2460
+      "weight": 2460,
+      "pAtk": 96,
+      "mAtk": 47,
+      "pAtkSpd": 325,
+      "critRate": 8,
+      "attackRange": 40,
+      "randomDamage": 10
     },
     {
       "id": 2535,
@@ -3131,7 +3813,13 @@
       "weaponType": "dual",
       "crystal": "d",
       "price": 1400000,
-      "weight": 2470
+      "weight": 2470,
+      "pAtk": 96,
+      "mAtk": 47,
+      "pAtkSpd": 325,
+      "critRate": 8,
+      "attackRange": 40,
+      "randomDamage": 10
     },
     {
       "id": 2536,
@@ -3142,7 +3830,13 @@
       "weaponType": "dual",
       "crystal": "d",
       "price": 1660000,
-      "weight": 2520
+      "weight": 2520,
+      "pAtk": 107,
+      "mAtk": 51,
+      "pAtkSpd": 325,
+      "critRate": 8,
+      "attackRange": 40,
+      "randomDamage": 10
     },
     {
       "id": 2537,
@@ -3153,7 +3847,13 @@
       "weaponType": "dual",
       "crystal": "d",
       "price": 1660000,
-      "weight": 2460
+      "weight": 2460,
+      "pAtk": 107,
+      "mAtk": 51,
+      "pAtkSpd": 325,
+      "critRate": 8,
+      "attackRange": 40,
+      "randomDamage": 10
     },
     {
       "id": 2538,
@@ -3164,7 +3864,13 @@
       "weaponType": "dual",
       "crystal": "c",
       "price": 2120000,
-      "weight": 2460
+      "weight": 2460,
+      "pAtk": 124,
+      "mAtk": 58,
+      "pAtkSpd": 325,
+      "critRate": 8,
+      "attackRange": 40,
+      "randomDamage": 10
     },
     {
       "id": 2539,
@@ -3175,7 +3881,13 @@
       "weaponType": "dual",
       "crystal": "c",
       "price": 2470000,
-      "weight": 2390
+      "weight": 2390,
+      "pAtk": 136,
+      "mAtk": 63,
+      "pAtkSpd": 325,
+      "critRate": 8,
+      "attackRange": 40,
+      "randomDamage": 10
     },
     {
       "id": 2540,
@@ -3186,7 +3898,13 @@
       "weaponType": "dual",
       "crystal": "d",
       "price": 1400000,
-      "weight": 2480
+      "weight": 2480,
+      "pAtk": 96,
+      "mAtk": 47,
+      "pAtkSpd": 325,
+      "critRate": 8,
+      "attackRange": 40,
+      "randomDamage": 10
     },
     {
       "id": 2541,
@@ -3197,7 +3915,13 @@
       "weaponType": "dual",
       "crystal": "d",
       "price": 1400000,
-      "weight": 2470
+      "weight": 2470,
+      "pAtk": 96,
+      "mAtk": 47,
+      "pAtkSpd": 325,
+      "critRate": 8,
+      "attackRange": 40,
+      "randomDamage": 10
     },
     {
       "id": 2542,
@@ -3208,7 +3932,13 @@
       "weaponType": "dual",
       "crystal": "d",
       "price": 1660000,
-      "weight": 2450
+      "weight": 2450,
+      "pAtk": 107,
+      "mAtk": 51,
+      "pAtkSpd": 325,
+      "critRate": 8,
+      "attackRange": 40,
+      "randomDamage": 10
     },
     {
       "id": 2543,
@@ -3219,7 +3949,13 @@
       "weaponType": "dual",
       "crystal": "d",
       "price": 1660000,
-      "weight": 2470
+      "weight": 2470,
+      "pAtk": 107,
+      "mAtk": 51,
+      "pAtkSpd": 325,
+      "critRate": 8,
+      "attackRange": 40,
+      "randomDamage": 10
     },
     {
       "id": 2544,
@@ -3230,7 +3966,13 @@
       "weaponType": "dual",
       "crystal": "c",
       "price": 2120000,
-      "weight": 2420
+      "weight": 2420,
+      "pAtk": 124,
+      "mAtk": 58,
+      "pAtkSpd": 325,
+      "critRate": 8,
+      "attackRange": 40,
+      "randomDamage": 10
     },
     {
       "id": 2545,
@@ -3241,7 +3983,13 @@
       "weaponType": "dual",
       "crystal": "c",
       "price": 2470000,
-      "weight": 2410
+      "weight": 2410,
+      "pAtk": 136,
+      "mAtk": 63,
+      "pAtkSpd": 325,
+      "critRate": 8,
+      "attackRange": 40,
+      "randomDamage": 10
     },
     {
       "id": 2546,
@@ -3252,7 +4000,13 @@
       "weaponType": "dual",
       "crystal": "d",
       "price": 1400000,
-      "weight": 2460
+      "weight": 2460,
+      "pAtk": 96,
+      "mAtk": 47,
+      "pAtkSpd": 325,
+      "critRate": 8,
+      "attackRange": 40,
+      "randomDamage": 10
     },
     {
       "id": 2547,
@@ -3263,7 +4017,13 @@
       "weaponType": "dual",
       "crystal": "d",
       "price": 1660000,
-      "weight": 2460
+      "weight": 2460,
+      "pAtk": 107,
+      "mAtk": 51,
+      "pAtkSpd": 325,
+      "critRate": 8,
+      "attackRange": 40,
+      "randomDamage": 10
     },
     {
       "id": 2548,
@@ -3274,7 +4034,13 @@
       "weaponType": "dual",
       "crystal": "d",
       "price": 1660000,
-      "weight": 2450
+      "weight": 2450,
+      "pAtk": 107,
+      "mAtk": 51,
+      "pAtkSpd": 325,
+      "critRate": 8,
+      "attackRange": 40,
+      "randomDamage": 10
     },
     {
       "id": 2549,
@@ -3285,7 +4051,13 @@
       "weaponType": "dual",
       "crystal": "c",
       "price": 2120000,
-      "weight": 2430
+      "weight": 2430,
+      "pAtk": 124,
+      "mAtk": 58,
+      "pAtkSpd": 325,
+      "critRate": 8,
+      "attackRange": 40,
+      "randomDamage": 10
     },
     {
       "id": 2550,
@@ -3296,7 +4068,13 @@
       "weaponType": "dual",
       "crystal": "c",
       "price": 2470000,
-      "weight": 2370
+      "weight": 2370,
+      "pAtk": 136,
+      "mAtk": 63,
+      "pAtkSpd": 325,
+      "critRate": 8,
+      "attackRange": 40,
+      "randomDamage": 10
     },
     {
       "id": 2551,
@@ -3307,7 +4085,13 @@
       "weaponType": "dual",
       "crystal": "c",
       "price": 1960000,
-      "weight": 2440
+      "weight": 2440,
+      "pAtk": 118,
+      "mAtk": 56,
+      "pAtkSpd": 325,
+      "critRate": 8,
+      "attackRange": 40,
+      "randomDamage": 10
     },
     {
       "id": 2552,
@@ -3318,7 +4102,13 @@
       "weaponType": "dual",
       "crystal": "c",
       "price": 1960000,
-      "weight": 2450
+      "weight": 2450,
+      "pAtk": 118,
+      "mAtk": 56,
+      "pAtkSpd": 325,
+      "critRate": 8,
+      "attackRange": 40,
+      "randomDamage": 10
     },
     {
       "id": 2553,
@@ -3329,7 +4119,13 @@
       "weaponType": "dual",
       "crystal": "c",
       "price": 2470000,
-      "weight": 2390
+      "weight": 2390,
+      "pAtk": 136,
+      "mAtk": 63,
+      "pAtkSpd": 325,
+      "critRate": 8,
+      "attackRange": 40,
+      "randomDamage": 10
     },
     {
       "id": 2554,
@@ -3340,7 +4136,13 @@
       "weaponType": "dual",
       "crystal": "c",
       "price": 2870000,
-      "weight": 2360
+      "weight": 2360,
+      "pAtk": 148,
+      "mAtk": 68,
+      "pAtkSpd": 325,
+      "critRate": 8,
+      "attackRange": 40,
+      "randomDamage": 10
     },
     {
       "id": 2555,
@@ -3351,7 +4153,13 @@
       "weaponType": "dual",
       "crystal": "c",
       "price": 1960000,
-      "weight": 2440
+      "weight": 2440,
+      "pAtk": 118,
+      "mAtk": 56,
+      "pAtkSpd": 325,
+      "critRate": 8,
+      "attackRange": 40,
+      "randomDamage": 10
     },
     {
       "id": 2556,
@@ -3362,7 +4170,13 @@
       "weaponType": "dual",
       "crystal": "c",
       "price": 2470000,
-      "weight": 2410
+      "weight": 2410,
+      "pAtk": 136,
+      "mAtk": 63,
+      "pAtkSpd": 325,
+      "critRate": 8,
+      "attackRange": 40,
+      "randomDamage": 10
     },
     {
       "id": 2557,
@@ -3373,7 +4187,13 @@
       "weaponType": "dual",
       "crystal": "c",
       "price": 2870000,
-      "weight": 2410
+      "weight": 2410,
+      "pAtk": 148,
+      "mAtk": 68,
+      "pAtkSpd": 325,
+      "critRate": 8,
+      "attackRange": 40,
+      "randomDamage": 10
     },
     {
       "id": 2558,
@@ -3384,7 +4204,13 @@
       "weaponType": "dual",
       "crystal": "c",
       "price": 2870000,
-      "weight": 2360
+      "weight": 2360,
+      "pAtk": 148,
+      "mAtk": 68,
+      "pAtkSpd": 325,
+      "critRate": 8,
+      "attackRange": 40,
+      "randomDamage": 10
     },
     {
       "id": 2559,
@@ -3395,7 +4221,13 @@
       "weaponType": "dual",
       "crystal": "c",
       "price": 3340000,
-      "weight": 2340
+      "weight": 2340,
+      "pAtk": 155,
+      "mAtk": 70,
+      "pAtkSpd": 325,
+      "critRate": 8,
+      "attackRange": 40,
+      "randomDamage": 10
     },
     {
       "id": 2560,
@@ -3406,7 +4238,13 @@
       "weaponType": "dual",
       "crystal": "c",
       "price": 3820000,
-      "weight": 2340
+      "weight": 2340,
+      "pAtk": 162,
+      "mAtk": 73,
+      "pAtkSpd": 325,
+      "critRate": 8,
+      "attackRange": 40,
+      "randomDamage": 10
     },
     {
       "id": 2561,
@@ -3417,7 +4255,13 @@
       "weaponType": "dual",
       "crystal": "c",
       "price": 4780000,
-      "weight": 2330
+      "weight": 2330,
+      "pAtk": 175,
+      "mAtk": 78,
+      "pAtkSpd": 325,
+      "critRate": 8,
+      "attackRange": 40,
+      "randomDamage": 10
     },
     {
       "id": 2562,
@@ -3428,7 +4272,13 @@
       "weaponType": "dual",
       "crystal": "c",
       "price": 5280000,
-      "weight": 2300
+      "weight": 2300,
+      "pAtk": 183,
+      "mAtk": 81,
+      "pAtkSpd": 325,
+      "critRate": 8,
+      "attackRange": 40,
+      "randomDamage": 10
     },
     {
       "id": 2563,
@@ -3439,7 +4289,13 @@
       "weaponType": "dual",
       "crystal": "c",
       "price": 5280000,
-      "weight": 2320
+      "weight": 2320,
+      "pAtk": 183,
+      "mAtk": 81,
+      "pAtkSpd": 325,
+      "critRate": 8,
+      "attackRange": 40,
+      "randomDamage": 10
     },
     {
       "id": 2564,
@@ -3450,7 +4306,13 @@
       "weaponType": "dual",
       "crystal": "c",
       "price": 5280000,
-      "weight": 2310
+      "weight": 2310,
+      "pAtk": 183,
+      "mAtk": 81,
+      "pAtkSpd": 325,
+      "critRate": 8,
+      "attackRange": 40,
+      "randomDamage": 10
     },
     {
       "id": 2565,
@@ -3461,7 +4323,13 @@
       "weaponType": "dual",
       "crystal": "c",
       "price": 5280000,
-      "weight": 2340
+      "weight": 2340,
+      "pAtk": 183,
+      "mAtk": 81,
+      "pAtkSpd": 325,
+      "critRate": 8,
+      "attackRange": 40,
+      "randomDamage": 10
     },
     {
       "id": 2572,
@@ -3472,7 +4340,13 @@
       "weaponType": "dual",
       "crystal": "c",
       "price": 6130000,
-      "weight": 2330
+      "weight": 2330,
+      "pAtk": 190,
+      "mAtk": 83,
+      "pAtkSpd": 325,
+      "critRate": 8,
+      "attackRange": 40,
+      "randomDamage": 10
     },
     {
       "id": 2573,
@@ -3483,7 +4357,13 @@
       "weaponType": "dual",
       "crystal": "c",
       "price": 6130000,
-      "weight": 2310
+      "weight": 2310,
+      "pAtk": 190,
+      "mAtk": 83,
+      "pAtkSpd": 325,
+      "critRate": 8,
+      "attackRange": 40,
+      "randomDamage": 10
     },
     {
       "id": 2574,
@@ -3494,7 +4374,13 @@
       "weaponType": "dual",
       "crystal": "c",
       "price": 6130000,
-      "weight": 2280
+      "weight": 2280,
+      "pAtk": 190,
+      "mAtk": 83,
+      "pAtkSpd": 325,
+      "critRate": 8,
+      "attackRange": 40,
+      "randomDamage": 10
     },
     {
       "id": 2575,
@@ -3505,7 +4391,13 @@
       "weaponType": "dual",
       "crystal": "c",
       "price": 6130000,
-      "weight": 2280
+      "weight": 2280,
+      "pAtk": 190,
+      "mAtk": 83,
+      "pAtkSpd": 325,
+      "critRate": 8,
+      "attackRange": 40,
+      "randomDamage": 10
     },
     {
       "id": 2582,
@@ -3516,7 +4408,13 @@
       "weaponType": "dual",
       "crystal": "c",
       "price": 6130000,
-      "weight": 2270
+      "weight": 2270,
+      "pAtk": 190,
+      "mAtk": 83,
+      "pAtkSpd": 325,
+      "critRate": 8,
+      "attackRange": 40,
+      "randomDamage": 10
     },
     {
       "id": 2583,
@@ -3527,7 +4425,13 @@
       "weaponType": "dual",
       "crystal": "c",
       "price": 6130000,
-      "weight": 2250
+      "weight": 2250,
+      "pAtk": 190,
+      "mAtk": 83,
+      "pAtkSpd": 325,
+      "critRate": 8,
+      "attackRange": 40,
+      "randomDamage": 10
     },
     {
       "id": 2584,
@@ -3538,7 +4442,13 @@
       "weaponType": "dual",
       "crystal": "c",
       "price": 6130000,
-      "weight": 2270
+      "weight": 2270,
+      "pAtk": 190,
+      "mAtk": 83,
+      "pAtkSpd": 325,
+      "critRate": 8,
+      "attackRange": 40,
+      "randomDamage": 10
     },
     {
       "id": 2591,
@@ -3549,7 +4459,13 @@
       "weaponType": "dual",
       "crystal": "c",
       "price": 6130000,
-      "weight": 2240
+      "weight": 2240,
+      "pAtk": 190,
+      "mAtk": 83,
+      "pAtkSpd": 325,
+      "critRate": 8,
+      "attackRange": 40,
+      "randomDamage": 10
     },
     {
       "id": 2592,
@@ -3560,7 +4476,13 @@
       "weaponType": "dual",
       "crystal": "c",
       "price": 6130000,
-      "weight": 2260
+      "weight": 2260,
+      "pAtk": 190,
+      "mAtk": 83,
+      "pAtkSpd": 325,
+      "critRate": 8,
+      "attackRange": 40,
+      "randomDamage": 10
     },
     {
       "id": 2599,
@@ -3571,7 +4493,13 @@
       "weaponType": "dual",
       "crystal": "c",
       "price": 6130000,
-      "weight": 2250
+      "weight": 2250,
+      "pAtk": 190,
+      "mAtk": 83,
+      "pAtkSpd": 325,
+      "critRate": 8,
+      "attackRange": 40,
+      "randomDamage": 10
     },
     {
       "id": 3031,
@@ -3798,7 +4726,13 @@
       "bodySlot": "lrhand",
       "weaponType": "sword",
       "price": 244000,
-      "weight": 1530
+      "weight": 1530,
+      "pAtk": 38,
+      "mAtk": 21,
+      "pAtkSpd": 325,
+      "critRate": 8,
+      "attackRange": 40,
+      "randomDamage": 10
     },
     {
       "id": 5472,
@@ -3961,7 +4895,13 @@
       "crystal": "s",
       "crystalCount": 2440,
       "price": 48800000,
-      "weight": 1300
+      "weight": 1300,
+      "pAtk": 281,
+      "mAtk": 132,
+      "pAtkSpd": 379,
+      "critRate": 8,
+      "attackRange": 40,
+      "randomDamage": 10
     },
     {
       "id": 6388,
@@ -4012,7 +4952,13 @@
       "bodySlot": "lrhand",
       "weaponType": "fishingrod",
       "price": 30000,
-      "weight": 1000
+      "weight": 1000,
+      "pAtk": 1,
+      "mAtk": 1,
+      "pAtkSpd": 325,
+      "critRate": 0,
+      "attackRange": 80,
+      "randomDamage": 1
     },
     {
       "id": 6530,
@@ -4023,7 +4969,13 @@
       "weaponType": "fishingrod",
       "crystal": "d",
       "price": 100000,
-      "weight": 1000
+      "weight": 1000,
+      "pAtk": 1,
+      "mAtk": 1,
+      "pAtkSpd": 325,
+      "critRate": 0,
+      "attackRange": 80,
+      "randomDamage": 1
     },
     {
       "id": 6531,
@@ -4034,7 +4986,13 @@
       "weaponType": "fishingrod",
       "crystal": "c",
       "price": 400000,
-      "weight": 1000
+      "weight": 1000,
+      "pAtk": 1,
+      "mAtk": 1,
+      "pAtkSpd": 325,
+      "critRate": 0,
+      "attackRange": 80,
+      "randomDamage": 1
     },
     {
       "id": 6532,
@@ -4045,7 +5003,13 @@
       "weaponType": "fishingrod",
       "crystal": "b",
       "price": 1200000,
-      "weight": 1000
+      "weight": 1000,
+      "pAtk": 1,
+      "mAtk": 1,
+      "pAtkSpd": 325,
+      "critRate": 0,
+      "attackRange": 80,
+      "randomDamage": 1
     },
     {
       "id": 6533,
@@ -4056,7 +5020,13 @@
       "weaponType": "fishingrod",
       "crystal": "a",
       "price": 4000000,
-      "weight": 1000
+      "weight": 1000,
+      "pAtk": 1,
+      "mAtk": 1,
+      "pAtkSpd": 325,
+      "critRate": 0,
+      "attackRange": 80,
+      "randomDamage": 1
     },
     {
       "id": 6534,
@@ -4067,7 +5037,13 @@
       "weaponType": "fishingrod",
       "crystal": "s",
       "price": 10000000,
-      "weight": 1000
+      "weight": 1000,
+      "pAtk": 1,
+      "mAtk": 1,
+      "pAtkSpd": 325,
+      "critRate": 0,
+      "attackRange": 80,
+      "randomDamage": 1
     },
     {
       "id": 6535,
@@ -4300,7 +5276,13 @@
         "hero": true
       },
       "weight": 1300,
-      "sellable": false
+      "sellable": false,
+      "pAtk": 379,
+      "mAtk": 169,
+      "pAtkSpd": 379,
+      "critRate": 8,
+      "attackRange": 40,
+      "randomDamage": 10
     },
     {
       "id": 6622,
@@ -4760,7 +5742,8 @@
         "pledgeClass": 1
       },
       "price": 76180,
-      "weight": 640
+      "weight": 640,
+      "pDef": 37
     },
     {
       "id": 7860,
@@ -4773,7 +5756,8 @@
         "pledgeClass": 4
       },
       "price": 1736800,
-      "weight": 570
+      "weight": 570,
+      "pDef": 69
     },
     {
       "id": 8193,

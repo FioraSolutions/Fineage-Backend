@@ -971,14 +971,16 @@ public sealed partial class ZoneWorld
             intel = template.Int;
             wit = template.Wit;
             men = template.Men;
-            pAtk = template.PAtk;
-            mAtk = template.MAtk;
-            pDef = template.PDef;
-            mDef = template.MDef;
-            pAtkSpd = template.PAtkSpd;
-            mAtkSpd = template.MAtkSpd;
-            accuracy = template.Accuracy;
-            crit = template.CritRate;
+            // Same pipeline combat uses (Mobius stat funcs), so the client status window matches the server.
+            var stats = PlayerStats(entity);
+            pAtk = stats.PAtk;
+            mAtk = stats.MAtk;
+            pDef = stats.PDef;
+            mDef = stats.MDef;
+            pAtkSpd = stats.PAtkSpd;
+            mAtkSpd = stats.MAtkSpd;
+            accuracy = stats.Accuracy;
+            crit = stats.CritRate;
         }
 
         return new InventoryMessages.UserInfoVitals(

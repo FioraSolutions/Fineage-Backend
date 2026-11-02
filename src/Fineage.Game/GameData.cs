@@ -190,7 +190,14 @@ public sealed class GameData
                 scroll,
                 row.Price,
                 row.Weight,
-                row.Sellable ?? true));
+                row.Sellable ?? true,
+                Math.Max(0, row.PAtk),
+                Math.Max(0, row.MAtk),
+                Math.Max(0, row.PAtkSpd),
+                Math.Max(0, row.CritRate),
+                Math.Max(0, row.AttackRange),
+                Math.Max(0, row.RandomDamage),
+                Math.Max(0, row.MDef)));
         }
 
         try
@@ -443,6 +450,16 @@ public sealed class GameData
         public int Weight { get; set; }
         /// <summary>Null when the file omits the flag. Omitted means the item can be sold.</summary>
         public bool? Sellable { get; set; }
+        /// <summary>Mobius weapon <c>set stat</c> values (replace the class fist base when equipped).</summary>
+        public int PAtk { get; set; }
+        public int MAtk { get; set; }
+        public int PAtkSpd { get; set; }
+        public int CritRate { get; set; }
+        /// <summary>Mobius <c>attack_range</c>: 40 melee, 80 polearm, 500 bow.</summary>
+        public int AttackRange { get; set; }
+        public int RandomDamage { get; set; }
+        /// <summary>Mobius jewel <c>add stat="mDef"</c>.</summary>
+        public int MDef { get; set; }
     }
 
     sealed class KitFileDto

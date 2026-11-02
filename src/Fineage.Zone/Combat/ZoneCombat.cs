@@ -28,6 +28,40 @@ public static class ZoneCombat
     public const int DefaultNpcPAtkSpd = 253;
     public const int AutoAttackTickMs = 200;
 
+    /// <summary>Fists / 1h / 2h Mobius <c>attack_range</c>.</summary>
+    public const int DefaultWeaponRange = 40;
+    /// <summary>Collision allowance added to the weapon range (player ~9 + NPC radius); 40 + 40 = <see cref="MeleeRange"/>.</summary>
+    public const int CollisionAllowance = MeleeRange - DefaultWeaponRange;
+
+    /// <summary>Player reach for an auto-attack with a weapon of <paramref name="weaponRange"/>.</summary>
+    public static int PlayerAttackReach(int weaponRange) => Math.Max(DefaultWeaponRange, weaponRange) + CollisionAllowance;
+
+    public const int NakedLegsPDef = 18;
+    public const int MysticNakedChestPDef = 15;
+    public const int MysticNakedLegsPDef = 8;
+
+    /// <summary>Mobius PlayerTemplate naked M.Def split (sum 41): ears 9, fingers 5, neck 13.</summary>
+    public static readonly (Fineage.Game.PaperdollSlot Slot, int NakedMDef)[] NakedMDefBySlot =
+    [
+        (Fineage.Game.PaperdollSlot.Lear, 9),
+        (Fineage.Game.PaperdollSlot.Rear, 9),
+        (Fineage.Game.PaperdollSlot.LFinger, 5),
+        (Fineage.Game.PaperdollSlot.RFinger, 5),
+        (Fineage.Game.PaperdollSlot.Neck, 13),
+    ];
+
+    /// <summary>Mobius PlayerTemplate naked P.Def split (sum 80): equipping a slot replaces its share.</summary>
+    public static readonly (Fineage.Game.PaperdollSlot Slot, int NakedPDef)[] NakedPDefBySlot =
+    [
+        (Fineage.Game.PaperdollSlot.Chest, 31),
+        (Fineage.Game.PaperdollSlot.Legs, NakedLegsPDef),
+        (Fineage.Game.PaperdollSlot.Head, 12),
+        (Fineage.Game.PaperdollSlot.Feet, 7),
+        (Fineage.Game.PaperdollSlot.Gloves, 8),
+        (Fineage.Game.PaperdollSlot.Under, 3),
+        (Fineage.Game.PaperdollSlot.Cloak, 1),
+    ];
+
     /// <summary>Gremlin (20001) Mobius <c>defence physical</c>; reference for <see cref="SampleMeleeDamage"/>.</summary>
     public const double GremlinPDef = 44.444;
 

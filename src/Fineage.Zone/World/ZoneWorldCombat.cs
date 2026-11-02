@@ -122,9 +122,9 @@ public sealed partial class ZoneWorld
             return "attack";
         if (!VisibleTo(player.ObjectId, targetId))
             return "attack";
-        if (!ZoneCombat.InMeleeRange(player.X, player.Y, target.X, target.Y))
+        if (!ZoneCombat.Within(player.X, player.Y, target.X, target.Y, PlayerReach(player)))
         {
-            approachMs = ApproachTarget(player, target, ZoneCombat.MeleeRange, outbound);
+            approachMs = ApproachTarget(player, target, PlayerReach(player), outbound);
             return approachMs < 0 ? "attack" : null;
         }
 
@@ -154,17 +154,16 @@ public sealed partial class ZoneWorld
 
     // Physical stats. Players: class template values (same as UserInfo); NPCs: Mobius npcs.json.
     // TODO(combat parity): STR/level/weapon/armor/buff stat pipeline.
-    int PlayerPAtkSpd(ZoneEntity player) =>
-        PlayerClasses.TryGet(player.ClassId, out var t) && t != null && t.PAtkSpd > 0 ? t.PAtkSpd : ZoneCombat.DefaultPlayerPAtkSpd;
+    int PlayerPAtkSpd(ZoneEntity player) => PlayerStats(player).PAtkSpd;
 
     long PlayerAttackTimeMs(int objectId) =>
         _byId.TryGetValue(objectId, out var p) ? ZoneCombat.AttackTimeMs(PlayerPAtkSpd(p)) : ZoneCombat.AutoAttackIntervalMs;
 
-    double PlayerPAtk(ZoneEntity player) =>
-        PlayerClasses.TryGet(player.ClassId, out var t) && t != null && t.PAtk > 0 ? t.PAtk : ZoneCombat.DefaultPlayerPAtk;
+    double PlayerPAtk(ZoneEntity player) => PlayerStats(player).PAtk;
 
-    double PlayerPDef(ZoneEntity player) =>
-        PlayerClasses.TryGet(player.ClassId, out var t) && t != null && t.PDef > 0 ? t.PDef : ZoneCombat.DefaultPlayerPDef;
+    double PlayerPDef(ZoneEntity player) => PlayerStats(player).PDef;
+
+    int PlayerReach(ZoneEntity player) => ZoneCombat.PlayerAttackReach(PlayerStats(player).AttackRange);
 
     static double NpcPDef(ZoneEntity npc) => npc.PDef > 0 ? npc.PDef : Math.Max(1, npc.Level) * 40d;
 
@@ -231,7 +230,7 @@ public sealed partial class ZoneWorld
             {
                 if (!ZoneCombat.Within(target.X, target.Y, session.ApproachTargetX, session.ApproachTargetY, ZoneCombat.ApproachRepathDistance))
                 {
-                    long re = ApproachTarget(player, target, ZoneCombat.MeleeRange, outbound);
+                    long re = ApproachTarget(player, target, PlayerReach(player), outbound);
                     if (re < 0)
                     {
                         session.AutoAttackTargetId = 0;
@@ -246,10 +245,10 @@ public sealed partial class ZoneWorld
 
             if (now < session.NextAutoAttackUnixMs)
                 continue;
-            if (!ZoneCombat.InMeleeRange(player.X, player.Y, target.X, target.Y))
+            if (!ZoneCombat.Within(player.X, player.Y, target.X, target.Y, PlayerReach(player)))
             {
                 // Target moved away: Mobius re-issues moveToPawn and keeps the attack intention.
-                long ms = ApproachTarget(player, target, ZoneCombat.MeleeRange, outbound);
+                long ms = ApproachTarget(player, target, PlayerReach(player), outbound);
                 if (ms < 0)
                 {
                     session.AutoAttackTargetId = 0;
@@ -333,7 +332,7 @@ public sealed partial class ZoneWorld
         if (!_byId.TryGetValue(hit.TargetId, out var target) || target.CurHp <= 0 || target.Dead)
             return;
         // Mobius onHitTimer: target ran out of reach during the swing -> no damage.
-        int reach = (attacker.Kind == ZoneEntityKind.Npc ? ZoneCombat.MobMeleeRange : ZoneCombat.MeleeRange) + ZoneCombat.HitRangeTolerance;
+        int reach = (attacker.Kind == ZoneEntityKind.Npc ? ZoneCombat.MobMeleeRange : PlayerReach(attacker)) + ZoneCombat.HitRangeTolerance;
         if (!ZoneCombat.Within(attacker.X, attacker.Y, target.X, target.Y, reach))
             return;
 

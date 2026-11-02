@@ -165,8 +165,9 @@ public static class ZoneMultiplayerAcceptance
         if (target.ObjectId != gremlin.ObjectId)
             throw new InvalidOperationException($"target select was {target.ObjectId}");
 
-        int hitsToKill = TalkingIsland.GremlinMaxHp / ZoneCombat.SampleMeleeDamage;
-        for (int hit = 1; hit <= hitsToKill; hit++)
+        // Damage comes from the Mobius stat pipeline (kit weapon, STR, level): swing until the gremlin hits 0.
+        int expectedHp = TalkingIsland.GremlinMaxHp;
+        while (expectedHp > 0)
         {
             await attacker.SendAsync(MsgType.AttackRequest, new AttackRequestMsg()).ConfigureAwait(false);
             var atkLeft = await attacker.ExpectAsync<AttackMsg>(MsgType.Attack).ConfigureAwait(false);
@@ -174,7 +175,7 @@ public static class ZoneMultiplayerAcceptance
             var atkRight = await observer.ExpectAsync<AttackMsg>(MsgType.Attack).ConfigureAwait(false);
             var hpRight = await observer.ExpectStatusForAsync(gremlin.ObjectId).ConfigureAwait(false);
 
-            int expectedHp = TalkingIsland.GremlinMaxHp - hit * ZoneCombat.SampleMeleeDamage;
+            expectedHp = Math.Max(0, expectedHp - atkLeft.Damage);
             ExpectCombat(gremlin.ObjectId, fighter.CharacterId, expectedHp, atkLeft, hpLeft);
             ExpectCombat(gremlin.ObjectId, fighter.CharacterId, expectedHp, atkRight, hpRight);
         }
@@ -230,12 +231,11 @@ public static class ZoneMultiplayerAcceptance
             .ConfigureAwait(false);
         _ = await left.ExpectAsync<MyTargetSelectedMsg>(MsgType.MyTargetSelected).ConfigureAwait(false);
 
-        int hitsToKill = TalkingIsland.GremlinMaxHp / ZoneCombat.SampleMeleeDamage;
-        for (int hit = 1; hit <= hitsToKill; hit++)
+        for (int hp = TalkingIsland.GremlinMaxHp; hp > 0;)
         {
             await left.SendAsync(MsgType.AttackRequest, new AttackRequestMsg()).ConfigureAwait(false);
             _ = await left.ExpectAsync<AttackMsg>(MsgType.Attack).ConfigureAwait(false);
-            _ = await left.ExpectStatusForAsync(gremlin.ObjectId).ConfigureAwait(false);
+            hp = (await left.ExpectStatusForAsync(gremlin.ObjectId).ConfigureAwait(false)).Values[0];
             _ = await right.ExpectAsync<AttackMsg>(MsgType.Attack).ConfigureAwait(false);
             _ = await right.ExpectStatusForAsync(gremlin.ObjectId).ConfigureAwait(false);
         }
@@ -288,12 +288,11 @@ public static class ZoneMultiplayerAcceptance
             .ConfigureAwait(false);
         _ = await peer.ExpectAsync<MyTargetSelectedMsg>(MsgType.MyTargetSelected).ConfigureAwait(false);
 
-        int hits = TalkingIsland.GremlinMaxHp / ZoneCombat.SampleMeleeDamage;
-        for (int hit = 0; hit < hits; hit++)
+        for (int hp = TalkingIsland.GremlinMaxHp; hp > 0;)
         {
             await peer.SendAsync(MsgType.AttackRequest, new AttackRequestMsg()).ConfigureAwait(false);
             _ = await peer.ExpectAsync<AttackMsg>(MsgType.Attack).ConfigureAwait(false);
-            _ = await peer.ExpectStatusForAsync(gremlin.ObjectId).ConfigureAwait(false);
+            hp = (await peer.ExpectStatusForAsync(gremlin.ObjectId).ConfigureAwait(false)).Values[0];
         }
 
         _ = await peer.ExpectAsync<DieMsg>(MsgType.Die).ConfigureAwait(false);
@@ -688,7 +687,7 @@ public static class ZoneMultiplayerAcceptance
     static void ExpectCombat(int targetId, int attackerId, int expectedCurHp, AttackMsg attack, StatusUpdateMsg status)
     {
         if (attack.AttackerObjectId != attackerId || attack.TargetObjectId != targetId ||
-            attack.Damage != ZoneCombat.SampleMeleeDamage)
+            attack.Damage <= 0)
             throw new InvalidOperationException($"attack mismatch a={attack.AttackerObjectId} t={attack.TargetObjectId} d={attack.Damage}");
         if (status.ObjectId != targetId || status.AttributeIds.Length != 2 ||
             status.AttributeIds[0] != InterludeStatus.CurHp || status.AttributeIds[1] != InterludeStatus.MaxHp ||

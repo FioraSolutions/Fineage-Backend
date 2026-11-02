@@ -111,7 +111,8 @@ public sealed partial class ZoneWorld
             return;
         }
         if (_byId.TryGetValue(targetId, out var target) &&
-            ZoneCombat.Within(move.DestX, move.DestY, target.X, target.Y, ZoneCombat.MeleeRange + ZoneCombat.HitRangeTolerance))
+            ZoneCombat.Within(move.DestX, move.DestY, target.X, target.Y,
+                (_byId.TryGetValue(session.ObjectId, out var self) ? PlayerReach(self) : ZoneCombat.MeleeRange) + ZoneCombat.HitRangeTolerance))
             return; // shuffling next to the target keeps the fight
         session.AutoAttackTargetId = 0;
         session.PendingCastSkillId = 0;
