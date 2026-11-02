@@ -9,6 +9,8 @@ data/*
 !data/stat-bonuses.json
 !data/quests.json
 !data/skills.json
+!data/skill-combat.json
+!data/skill-stat-effects.json
 !data/skill-trees.json
 !data/npcs.json
 !data/dungeons.json
