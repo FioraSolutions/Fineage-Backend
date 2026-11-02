@@ -9,6 +9,11 @@ CMD="${1:-start}"
 
 export FINEAGE_STORE="${FINEAGE_STORE:-postgres}"
 export FINEAGE_DATABASE_URL="${FINEAGE_DATABASE_URL:-Host=127.0.0.1;Port=5432;Database=fineage;Username=fineage;Password=fineage}"
+# Local playtest region: Elven Village / Mother Tree (Mobius ElvenTerritory + Others/Gremlins).
+# Override with FINEAGE_ZONE_MAPS=... / FINEAGE_ZONE_BOUNDS=...; set both to "" for the legacy single active map.
+export FINEAGE_ZONE_MAPS="${FINEAGE_ZONE_MAPS-elven_village,elven_starting,elven_village_quest_monsters,training_hall_gremlins}"
+export FINEAGE_ZONE_BOUNDS="${FINEAGE_ZONE_BOUNDS-20000,20000,80000,80000}"
+export COMPOSE_PROJECT_NAME="${COMPOSE_PROJECT_NAME:-fineage-backend}"
 
 stop() {
   for n in login-net zone-net; do
@@ -139,5 +144,5 @@ if [[ "$ok" != 1 ]]; then
   tail -40 local-logs/zone-net.log 2>/dev/null || true
   exit 1
 fi
-echo "Net login=9106 zone=9777 | store=${FINEAGE_STORE} | V2 login=9206 zone=9877"
+echo "Net login=9106 zone=9777 | store=${FINEAGE_STORE} | maps=${FINEAGE_ZONE_MAPS:-default} | V2 login=9206 zone=9877"
 echo "stop: ./scripts/run-local-net.sh stop"
