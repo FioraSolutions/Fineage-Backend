@@ -137,6 +137,13 @@ sealed class ZoneEntity
     public bool Chasing { get; set; }
     /// <summary>NPC: last AI tick, unix ms (movement integration).</summary>
     public long LastAiTickMs { get; set; }
+    /// <summary>NPC: spawn point captured on first aggro (Mobius <c>Attackable.returnHome</c> target).</summary>
+    public bool HomeSet { get; set; }
+    public int HomeX { get; set; }
+    public int HomeY { get; set; }
+    public int HomeZ { get; set; }
+    /// <summary>NPC: walking back to <see cref="HomeX"/>/<see cref="HomeY"/> after forgetting its target.</summary>
+    public bool ReturningHome { get; set; }
     /// <summary>NPC corpse: unix ms when DecayTaskManager removes it. 0 = alive / not scheduled.</summary>
     public long DecayAtMs { get; set; }
     /// <summary>Mobius merchant price config castle. 0 when the NPC is not in a taxed town.</summary>

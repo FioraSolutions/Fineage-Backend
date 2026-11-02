@@ -166,6 +166,7 @@ public sealed partial class ZoneWorld
                 {
                     long now = _clock().ToUnixTimeMilliseconds();
                     TickPlayerMovement(now, outbound);
+                    TickNpcMovement(now, outbound);
                     TickPendingHits(now, outbound);
                     TickMeleeHits(now, outbound);
                     TickAutoAttacks(outbound);

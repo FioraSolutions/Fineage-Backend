@@ -18,6 +18,7 @@ public sealed partial class ZoneWorld
         {
             long now = _clock().ToUnixTimeMilliseconds();
             TickPlayerMovement(now, outbound);
+            TickNpcMovement(now, outbound);
             TickPendingHits(now, outbound);
             TickMeleeHits(now, outbound);
             TickMobAttacks(now, outbound);
@@ -71,31 +72,33 @@ public sealed partial class ZoneWorld
     {
         foreach (var npc in _byId.Values.Where(e => e.Kind == ZoneEntityKind.Npc && e.AggroTargetId > 0).ToList())
         {
-            if (npc.CurHp <= 0 || !_byId.TryGetValue(npc.AggroTargetId, out var player) ||
-                player.Kind != ZoneEntityKind.Player || player.Dead || player.Session == null ||
-                !SameInstance(npc.ObjectId, player.ObjectId))
+            if (npc.CurHp <= 0)
             {
                 npc.AggroTargetId = 0;
+                StopTimedMove(npc);
                 continue;
             }
-            if (!ZoneCombat.InAggroRange(npc.X, npc.Y, player.X, player.Y))
+            if (!_byId.TryGetValue(npc.AggroTargetId, out var player) ||
+                player.Kind != ZoneEntityKind.Player || player.Dead || player.Session == null ||
+                !SameInstance(npc.ObjectId, player.ObjectId) ||
+                !ZoneCombat.InAggroRange(npc.X, npc.Y, player.X, player.Y))
             {
-                npc.AggroTargetId = 0; // Mobius: target out of MAX_DRIFT/aggro -> return home, forget
-                npc.Chasing = false;
+                // Mobius: target dead / gone / out of MAX_DRIFT -> forget and returnHome (walk back to spawn).
+                ReturnHome(npc, now, outbound);
                 continue;
             }
-            long dtMs = npc.LastAiTickMs > 0 ? Math.Clamp(now - npc.LastAiTickMs, 0, 1000) : ZoneCombat.AutoAttackTickMs;
             npc.LastAiTickMs = now;
             if (!ZoneCombat.InMobMeleeRange(npc.X, npc.Y, player.X, player.Y))
             {
                 // Mobius AttackableAI.thinkAttack -> moveToPawn(target, range): mob runs to the attacker.
-                ChaseStep(npc, player, dtMs, outbound);
+                ChaseStep(npc, player, now, outbound);
                 continue;
             }
             if (npc.Chasing)
             {
                 npc.Chasing = false;
-                // Arrived: Mobius sends a final MoveToLocation/StopMove at the reached spot.
+                // Arrived: halt at the server position; Mobius sends a final MoveToLocation/StopMove at the reached spot.
+                StopTimedMove(npc);
                 BroadcastNpcMove(npc, npc.X, npc.Y, npc.Z, outbound);
             }
             if (now < npc.NextMobAttackMs)
@@ -120,11 +123,10 @@ public sealed partial class ZoneWorld
     }
 
     /// <summary>
-    /// One AI tick of chase. Server position advances at NPC run speed; the client gets a
-    /// MoveToLocation (MoveToAck) toward the attacker only when the chase starts or the pawn moved,
-    /// so it animates a continuous run instead of 5 Hz hops.
+    /// One AI tick of chase (Mobius moveToPawn). Only (re)issues a MoveToLocation when the chase starts or the
+    /// pawn drifted; the actual travel is done by <see cref="TickNpcMovement"/> on the shared speed-tick mover.
     /// </summary>
-    void ChaseStep(ZoneEntity npc, ZoneEntity target, long dtMs, List<Pending> outbound)
+    void ChaseStep(ZoneEntity npc, ZoneEntity target, long now, List<Pending> outbound)
     {
         double dx = target.X - npc.X;
         double dy = target.Y - npc.Y;
@@ -139,36 +141,25 @@ public sealed partial class ZoneWorld
         int destZ = target.Z;
 
         long ddx = destX - (long)npc.ChaseDestX, ddy = destY - (long)npc.ChaseDestY;
-        if (!npc.Chasing || ddx * ddx + ddy * ddy > 40L * 40L)
+        if (!npc.Chasing || !npc.MoveActive || ddx * ddx + ddy * ddy > 40L * 40L)
         {
-            if (!npc.Chasing)
+            if (!npc.HomeSet)
             {
-                // Mobius AttackableAI: setRunning() on attack intention -> ChangeMoveType(run),
-                // so the client chases at run speed in step with the server (not walk + lag).
+                npc.HomeSet = true;
+                (npc.HomeX, npc.HomeY, npc.HomeZ) = (npc.X, npc.Y, npc.Z);
+            }
+            npc.ReturningHome = false;
+            if (!npc.Running)
+            {
+                // Mobius AttackableAI: setRunning() on attack intention -> ChangeMoveType(run).
                 npc.Running = true;
                 FanoutMoveType(npc, outbound);
             }
             npc.Chasing = true;
             npc.ChaseDestX = destX;
             npc.ChaseDestY = destY;
-            BroadcastNpcMove(npc, destX, destY, destZ, outbound);
+            StartNpcMove(npc, destX, destY, destZ, now, outbound);
         }
-
-        float speed = npc.RunSpeed > 0 ? npc.RunSpeed : ZoneCombat.DefaultNpcRunSpeed;
-        double step = speed * dtMs / 1000.0;
-        double remain = dist - stopAt;
-        if (step >= remain)
-        {
-            npc.X = destX;
-            npc.Y = destY;
-        }
-        else
-        {
-            npc.X = (int)Math.Round(npc.X + dx / dist * step);
-            npc.Y = (int)Math.Round(npc.Y + dy / dist * step);
-        }
-        npc.Z = destZ;
-        _aoi.Move(npc.ObjectId, npc.X, npc.Y);
     }
 
     void BroadcastNpcMove(ZoneEntity npc, int destX, int destY, int destZ, List<Pending> outbound)
