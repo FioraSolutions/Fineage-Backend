@@ -36,6 +36,12 @@ interface INetPresenceBridge
     /// <summary>Mobius ExAutoSoulShot: auto use of shot <paramref name="itemId"/> is now on/off. Called under the ZoneWorld gate.</summary>
     void FanoutAutoSoulShot(IReadOnlyList<int> watcherObjectIds, int itemId, bool enabled);
 
+    /// <summary>Mobius UserInfo to the owner (status window sheet + own paperdoll). Called under the ZoneWorld gate.</summary>
+    void FanoutUserInfo(IReadOnlyList<int> watcherObjectIds, UserInfoNetMsg info);
+
+    /// <summary>Mobius CharInfo refresh (paperdoll changed) of player <paramref name="objectId"/> to knownlist players. Called under the ZoneWorld gate.</summary>
+    void FanoutCharInfo(IReadOnlyList<int> watcherObjectIds, int objectId);
+
     void FanoutAttackState(IReadOnlyList<int> watcherObjectIds, AttackStateMsg attack);
 
     void FanoutStatusUpdate(IReadOnlyList<int> watcherObjectIds, StatusUpdateNetMsg status);

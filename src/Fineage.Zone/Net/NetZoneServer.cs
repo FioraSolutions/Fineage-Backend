@@ -176,6 +176,23 @@ public sealed class NetZoneServer : INetPresenceBridge
             _ = _presence.SendAsync(watcher, NetOpcode.AutoSoulShot, payload, CancellationToken.None);
     }
 
+    void INetPresenceBridge.FanoutUserInfo(IReadOnlyList<int> watcherObjectIds, UserInfoNetMsg info)
+    {
+        var payload = NetCodec.EncodeUserInfo(info);
+        foreach (int watcher in watcherObjectIds)
+            _ = _presence.SendAsync(watcher, NetOpcode.UserInfo, payload, CancellationToken.None);
+    }
+
+    void INetPresenceBridge.FanoutCharInfo(IReadOnlyList<int> watcherObjectIds, int objectId)
+    {
+        if (watcherObjectIds.Count == 0 || !_world.TryGetEntityById(objectId, out var entity) ||
+            entity.Kind != ZoneEntityKind.Player)
+            return;
+        var payload = NetCodec.EncodeEntitySpawn(NetEnterWorldProjector.BuildRemoteSpawn(entity, _ids.AllocateOrGet(objectId)));
+        foreach (int watcher in watcherObjectIds)
+            _ = _presence.SendAsync(watcher, NetOpcode.EntitySpawn, payload, CancellationToken.None);
+    }
+
     void INetPresenceBridge.FanoutAttackState(IReadOnlyList<int> watcherObjectIds, AttackStateMsg attack)
     {
         var payload = NetCodec.EncodeAttackState(attack);
@@ -729,6 +746,9 @@ public sealed class NetZoneServer : INetPresenceBridge
             .ConfigureAwait(false);
         await conn.SendAsync(NetOpcode.PlayerStats, NetCodec.EncodePlayerStats(packets.Stats), ct: ct)
             .ConfigureAwait(false);
+        // Mobius enter: UserInfo (full sheet + paperdoll) before ItemList so the status window and model are dressed.
+        if (_world.TryBuildNetUserInfo(zoneSession, out var userInfo))
+            await conn.SendAsync(NetOpcode.UserInfo, NetCodec.EncodeUserInfo(userInfo), ct: ct).ConfigureAwait(false);
         await conn.SendAsync(NetOpcode.ItemList, NetCodec.EncodeItemList(packets.Items), ct: ct)
             .ConfigureAwait(false);
         await conn.SendAsync(NetOpcode.SkillList, NetCodec.EncodeSkillList(packets.Skills), ct: ct)

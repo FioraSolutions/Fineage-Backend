@@ -95,7 +95,8 @@ static class NetEnterWorldProjector
             Heading = entity.Heading,
             RunSpeed = entity.RunSpeed,
             WalkSpeed = entity.WalkSpeed,
-            Running = entity.Running
+            Running = entity.Running,
+            Paperdoll = entity.Inventory == null ? [] : InventoryMessages.ItemIds(entity.Inventory)
         };
 
     static PlayerStatsMsg BuildStats(ZoneEntity entity, EntityId self, int maxCp) =>

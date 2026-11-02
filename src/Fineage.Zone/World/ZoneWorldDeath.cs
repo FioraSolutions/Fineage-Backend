@@ -103,7 +103,7 @@ public sealed partial class ZoneWorld
 
         if (player.Session != null)
         {
-            toSelf.Add(Pack(player.Session, MsgType.UserInfo, UserInfo(player)));
+            toSelf.Add(SelfUserInfo(player.Session, player));
             FanoutVitals(player, PlayerVitalsStatus(player), toSelf);
             SaveVitals(player.Session, player);
         }

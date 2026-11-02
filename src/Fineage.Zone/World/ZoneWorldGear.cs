@@ -191,15 +191,22 @@ public sealed partial class ZoneWorld
         RefreshGradePenalty(player);
         var invUpdate = InventoryMessages.Modify(changed);
         toSelf.Add(Pack(session, MsgType.InventoryUpdate, invUpdate));
-        toSelf.Add(Pack(session, MsgType.UserInfo, UserInfo(player)));
+        toSelf.Add(SelfUserInfo(session, player));
         if (NetBridge != null)
             NetBridge.FanoutInventoryUpdate([session.ObjectId], ToNetInventoryUpdate(invUpdate));
         byte[] body = MessagePackSerializer.Serialize(CharInfo(player));
+        List<int>? netPeers = null;
         foreach (int id in player.Knownlist)
         {
             if (_byId.TryGetValue(id, out var other) && other.Session != null)
+            {
                 toOthers.Add(new Pending(other.Session, MsgType.CharInfo, body));
+                (netPeers ??= []).Add(id);
+            }
         }
+        // Mobius broadcastUserInfo: peers get a fresh CharInfo (Net EntitySpawn with paperdoll) after gear changes.
+        if (netPeers != null && NetBridge != null)
+            NetBridge.FanoutCharInfo(netPeers, player.ObjectId);
 
         return true;
     }

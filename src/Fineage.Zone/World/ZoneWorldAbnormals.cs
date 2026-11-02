@@ -63,7 +63,7 @@ public sealed partial class ZoneWorld
         // Mobius: a buff/debuff that changes combat stats triggers UserInfo (status window P.Atk/P.Def/Spd).
         bool statful = target.Abnormals.Any(a => _statEffects.TryGet(a.Id, out _));
         if ((statful || target.HasStatAbnormal) && target.Kind == ZoneEntityKind.Player && target.Session != null)
-            outbound.Add(Pack(target.Session, MsgType.UserInfo, UserInfo(target)));
+            outbound.Add(SelfUserInfo(target.Session, target));
         target.HasStatAbnormal = statful;
         List<int>? netWatchers = null;
         foreach (var watcher in Players())

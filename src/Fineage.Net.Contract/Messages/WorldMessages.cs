@@ -46,6 +46,8 @@ namespace Fineage.Net.Contract
         public bool Running { get; set; } = true;
         /// <summary>NPC only: true when the entity is combat-attackable (mobs).</summary>
         public bool Attackable { get; set; }
+        /// <summary>Player only (Mobius CharInfo): equipped item ids per paperdoll slot; empty for NPCs / old peers.</summary>
+        public int[] Paperdoll { get; set; } = System.Array.Empty<int>();
     }
 
     public sealed class PlayerStatsMsg
@@ -625,5 +627,61 @@ namespace Fineage.Net.Contract
     public sealed class TradeFinishedNetMsg
     {
         public int Response { get; set; }
+    }
+
+    /// <summary>One paperdoll slot (Mobius UserInfo / CharInfo order, 17 slots, right hand = 7). Zeros when empty.</summary>
+    public sealed class PaperdollSlotNet
+    {
+        public int ObjectId { get; set; }
+        public int ItemId { get; set; }
+        public int EnchantLevel { get; set; }
+    }
+
+    /// <summary>
+    /// Mobius UserInfo for the owner: full character sheet (vitals, base stats, combat stats from the live
+    /// server stat pipeline, speeds and paperdoll). Sent on enter and whenever gear/buffs/level change the sheet.
+    /// </summary>
+    public sealed class UserInfoNetMsg
+    {
+        public ulong EntityValue { get; set; }
+        public uint EntityGeneration { get; set; }
+        public string Name { get; set; } = "";
+        public int ClassId { get; set; }
+        public int Race { get; set; }
+        public int Sex { get; set; }
+        public int X { get; set; }
+        public int Y { get; set; }
+        public int Z { get; set; }
+        public float RunSpeed { get; set; }
+        public float WalkSpeed { get; set; }
+        public bool Running { get; set; } = true;
+        public int Level { get; set; } = 1;
+        public long Exp { get; set; }
+        public int Sp { get; set; }
+        public int CurHp { get; set; }
+        public int MaxHp { get; set; }
+        public int CurMp { get; set; }
+        public int MaxMp { get; set; }
+        public int CurCp { get; set; }
+        public int MaxCp { get; set; }
+        public int Str { get; set; }
+        public int Dex { get; set; }
+        public int Con { get; set; }
+        public int Int { get; set; }
+        public int Wit { get; set; }
+        public int Men { get; set; }
+        public int PAtk { get; set; }
+        public int MAtk { get; set; }
+        public int PDef { get; set; }
+        public int MDef { get; set; }
+        public int PAtkSpd { get; set; }
+        public int MAtkSpd { get; set; }
+        public int Accuracy { get; set; }
+        public int Evasion { get; set; }
+        public int CritRate { get; set; }
+        public int WeaponGradePenalty { get; set; }
+        public int ArmorGradePenalty { get; set; }
+        public int ClanId { get; set; }
+        public PaperdollSlotNet[] Paperdoll { get; set; } = System.Array.Empty<PaperdollSlotNet>();
     }
 }

@@ -221,7 +221,7 @@ public sealed partial class ZoneWorld
         if (levelChangedWhileWorn || destroyedWhileWorn || slotChanges.Count > 0)
         {
             RefreshGradePenalty(player);
-            toSelf.Add(Pack(session, MsgType.UserInfo, UserInfo(player)));
+            toSelf.Add(SelfUserInfo(session, player));
             byte[] body = MessagePackSerializer.Serialize(CharInfo(player));
             foreach (int id in player.Knownlist)
             {

@@ -101,5 +101,7 @@ namespace Fineage.Net.Contract
         public const ushort RequestAutoSoulShot = 0x0355;
         /// <summary>Zone → client: Mobius ExAutoSoulShot (shot item id, auto now on/off).</summary>
         public const ushort AutoSoulShot = 0x0356;
+        /// <summary>Zone → client: Mobius UserInfo (owner sheet: vitals, base + combat stats, speeds, paperdoll).</summary>
+        public const ushort UserInfo = 0x0357;
     }
 }

@@ -395,7 +395,7 @@ public sealed partial class ZoneWorld
             ]
         };
         outbound.Add(Pack(session, MsgType.StatusUpdate, status));
-        outbound.Add(Pack(session, MsgType.UserInfo, UserInfo(killer)));
+        outbound.Add(SelfUserInfo(session, killer));
 
         if (NetBridge != null)
         {

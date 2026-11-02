@@ -323,7 +323,7 @@ public sealed partial class ZoneWorld
             outbound.Add(Pack(requestor.Session, MsgType.InventoryUpdate, inv));
             if (NetBridge != null)
                 NetBridge.FanoutInventoryUpdate([requestor.Session.ObjectId], ToNetInventoryUpdate(inv));
-            outbound.Add(Pack(requestor.Session, MsgType.UserInfo, UserInfo(requestor)));
+            outbound.Add(SelfUserInfo(requestor.Session, requestor));
         }
 
         if (partnerChanges.Count > 0)
@@ -332,7 +332,7 @@ public sealed partial class ZoneWorld
             outbound.Add(Pack(partner.Session, MsgType.InventoryUpdate, inv));
             if (NetBridge != null)
                 NetBridge.FanoutInventoryUpdate([partner.Session.ObjectId], ToNetInventoryUpdate(inv));
-            outbound.Add(Pack(partner.Session, MsgType.UserInfo, UserInfo(partner)));
+            outbound.Add(SelfUserInfo(partner.Session, partner));
         }
 
         FinishTradeSession(session, exchanged: true, outbound);
