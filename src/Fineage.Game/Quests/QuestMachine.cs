@@ -100,7 +100,7 @@ public sealed class QuestMachine : IQuestKillHook
         foreach (var quest in _catalog.Quests)
         {
             var dialog = Find(quest, QuestHook.Kill, npcId, "", journal.Find(quest.Id), actor, inventory);
-            if (dialog == null)
+            if (dialog == null || dialog.Party)
                 continue;
             var outcome = Apply(journal, inventory, quest, dialog, "kill");
             if (!outcome.Ok)
@@ -131,6 +131,54 @@ public sealed class QuestMachine : IQuestKillHook
             Exp = exp,
             Sp = sp
         };
+    }
+
+    /// <summary>Quests with a <c>party: true</c> kill step for this NPC (Mobius <c>getRandomPartyMember*</c> scripts).</summary>
+    public IReadOnlyList<int> PartyKillQuests(int npcId)
+    {
+        var ids = new List<int>();
+        foreach (var quest in _catalog.Quests)
+        {
+            foreach (var dialog in quest.Dialogs)
+            {
+                if (dialog.Hook == QuestHook.Kill && dialog.Party && dialog.NpcId == npcId)
+                {
+                    ids.Add(quest.Id);
+                    break;
+                }
+            }
+        }
+
+        return ids;
+    }
+
+    /// <summary>
+    /// Would this member get credit? State/cond/gates match and no capped <c>drop_item</c> is already full
+    /// (Mobius <c>checkPartyMember</c>, e.g. Q316 skips members who already hold the Varool fang).
+    /// </summary>
+    public bool PartyKillApplies(QuestJournal journal, PlayerInventory inventory, int questId, int npcId, QuestActor? actor)
+    {
+        if (_catalog.Find(questId) is not { } quest)
+            return false;
+        var dialog = Find(quest, QuestHook.Kill, npcId, "", journal.Find(quest.Id), actor, inventory);
+        if (dialog is not { Party: true })
+            return false;
+        foreach (var op in dialog.Ops)
+        {
+            if (op is DropItemOp { Limit: > 0 } drop && inventory.CountOf(drop.ItemId) >= drop.Limit)
+                return false;
+        }
+
+        return true;
+    }
+
+    public QuestOutcome OnPartyKill(QuestJournal journal, PlayerInventory inventory, int questId, int npcId, QuestActor? actor)
+    {
+        if (!PartyKillApplies(journal, inventory, questId, npcId, actor))
+            return new QuestOutcome { Hook = "kill" };
+        var quest = _catalog.Find(questId)!;
+        var dialog = Find(quest, QuestHook.Kill, npcId, "", journal.Find(quest.Id), actor, inventory)!;
+        return Apply(journal, inventory, quest, dialog, "kill");
     }
 
     public QuestListSnapshot List(QuestJournal journal)
@@ -394,6 +442,33 @@ public sealed class QuestMachine : IQuestKillHook
                         plan.Sounds.Add(QuestSounds.ItemGet);
                     }
 
+                    break;
+                }
+                case SellItemsOp sell:
+                {
+                    long pay = 0;
+                    int total = 0;
+                    foreach (var (itemId, adena) in sell.Items)
+                    {
+                        int have = inventory.CountOf(itemId) + plan.Delta.GetValueOrDefault(itemId);
+                        if (have <= 0)
+                            continue;
+                        AddDelta(inventory, plan, itemId, -have);
+                        total += have;
+                        pay += (long)have * adena;
+                    }
+
+                    if (total == 0)
+                    {
+                        failure = Fail(QuestFailure.Item, "You do not have the required item.", quest.Id, "");
+                        return false;
+                    }
+
+                    if (total >= sell.BonusMin && sell.BonusAdena > 0)
+                        pay += sell.BonusAdena;
+                    int payInt = (int)Math.Min(int.MaxValue, pay);
+                    if (payInt > 0 && AddDelta(inventory, plan, QuestCatalog.AdenaItemId, payInt))
+                        plan.Lines.Add(Line(QuestNotice.Adena, $"You have obtained {payInt} Adena.", payInt.ToString()));
                     break;
                 }
                 case ExchangeAllOp exchange:

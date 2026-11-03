@@ -566,6 +566,174 @@
       ]
     },
     {
+      "id": 316,
+      "name": "Destroy Plague Carriers",
+      "repeatable": true,
+      "abortable": true,
+      "questItems": [
+        1042,
+        1043
+      ],
+      "dialogs": [
+        {
+          "npcId": 30155,
+          "hook": "talk",
+          "when": "absent",
+          "races": [
+            1
+          ],
+          "minLevel": 18,
+          "html": "<html><body>Ellenia:<br>Sukar Wererats carry plague into our forest. Bring me their fangs, and the fang of their chief Varool Foulclaw if you can.<br><a action=\"quest_event:316:accept\">I will hunt them.</a></body></html>"
+        },
+        {
+          "npcId": 30155,
+          "hook": "talk",
+          "when": "absent",
+          "races": [
+            1
+          ],
+          "html": "<html><body>Ellenia:<br>The wererats are too strong for you yet. Come back at level 18.</body></html>"
+        },
+        {
+          "npcId": 30155,
+          "hook": "talk",
+          "when": "absent",
+          "html": "<html><body>Ellenia:<br>This task is for the children of the forest.</body></html>"
+        },
+        {
+          "npcId": 30155,
+          "hook": "event",
+          "event": "accept",
+          "when": "absent",
+          "races": [
+            1
+          ],
+          "minLevel": 18,
+          "html": "<html><body>Ellenia:<br>Hunt the Sukar Wererats and bring back their fangs.</body></html>",
+          "ops": [
+            {
+              "op": "create"
+            },
+            {
+              "op": "start"
+            }
+          ]
+        },
+        {
+          "npcId": 30155,
+          "hook": "talk",
+          "when": "started",
+          "hasItem": 1042,
+          "html": "<html><body>Ellenia:<br>Wererat fangs. Here is your payment.<br><a action=\"quest_event:316:quit\">I am done hunting.</a></body></html>",
+          "ops": [
+            {
+              "op": "sell_items",
+              "prices": [
+                {
+                  "itemId": 1042,
+                  "adena": 30
+                },
+                {
+                  "itemId": 1043,
+                  "adena": 10000
+                }
+              ],
+              "bonusMin": 10,
+              "bonusAdena": 5000
+            }
+          ]
+        },
+        {
+          "npcId": 30155,
+          "hook": "talk",
+          "when": "started",
+          "hasItem": 1043,
+          "html": "<html><body>Ellenia:<br>Varool's fang! Here is your payment.<br><a action=\"quest_event:316:quit\">I am done hunting.</a></body></html>",
+          "ops": [
+            {
+              "op": "sell_items",
+              "prices": [
+                {
+                  "itemId": 1042,
+                  "adena": 30
+                },
+                {
+                  "itemId": 1043,
+                  "adena": 10000
+                }
+              ],
+              "bonusMin": 10,
+              "bonusAdena": 5000
+            }
+          ]
+        },
+        {
+          "npcId": 30155,
+          "hook": "talk",
+          "when": "started",
+          "html": "<html><body>Ellenia:<br>No fangs yet? The wererats are waiting.<br><a action=\"quest_event:316:quit\">I am done hunting.</a></body></html>"
+        },
+        {
+          "npcId": 30155,
+          "hook": "event",
+          "event": "quit",
+          "when": "started",
+          "html": "<html><body>Ellenia:<br>Thank you for protecting the forest.</body></html>",
+          "ops": [
+            {
+              "op": "complete"
+            }
+          ]
+        },
+        {
+          "npcId": 20040,
+          "hook": "kill",
+          "when": "started",
+          "party": true,
+          "html": "",
+          "ops": [
+            {
+              "op": "drop_item",
+              "itemId": 1042,
+              "count": 2,
+              "chance": 1.0
+            }
+          ]
+        },
+        {
+          "npcId": 20047,
+          "hook": "kill",
+          "when": "started",
+          "party": true,
+          "html": "",
+          "ops": [
+            {
+              "op": "drop_item",
+              "itemId": 1042,
+              "count": 2,
+              "chance": 1.0
+            }
+          ]
+        },
+        {
+          "npcId": 27020,
+          "hook": "kill",
+          "when": "started",
+          "party": true,
+          "html": "",
+          "ops": [
+            {
+              "op": "drop_item",
+              "itemId": 1043,
+              "count": 1,
+              "chance": 1.0,
+              "limit": 1
+            }
+          ]
+        }
+      ]
+    },
+    {
       "id": 999,
       "name": "Roxxy's Message",
       "repeatable": false,

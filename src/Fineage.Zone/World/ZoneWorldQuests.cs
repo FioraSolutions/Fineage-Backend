@@ -144,7 +144,7 @@ public sealed partial class ZoneWorld
     static QuestActor QuestActorOf(ZoneEntity player) => new(player.Race, player.Level);
 
     /// <summary>
-    /// Mobius <c>Quest.onKill</c> for the killer (party share / ALT_PARTY_RANGE not yet). Quest drops go straight to the
+    /// Mobius <c>Quest.onKill</c> for the killer (killer-only steps) plus <c>party: true</c> steps shared to one random eligible member. Quest drops go straight to the
     /// bag like <c>giveItemRandomly</c>; journal / bag / sounds go out through the same Publish path as talk.
     /// </summary>
     internal void QuestKillForTest(ZoneEntity killer, int npcId)
@@ -159,11 +159,65 @@ public sealed partial class ZoneWorld
         if (killer.Inventory == null || killer.Dead || killer.Session == null)
             return;
         var outcome = _quests.OnKill(killer.Quests, killer.Inventory, npc.NpcId, QuestActorOf(killer));
-        if (outcome.QuestId == 0 || !outcome.Ok)
+        PublishKill(killer, outcome, npc, outbound);
+
+        // Mobius getRandomPartyMember(State): one random eligible member (killer included) within ALT_PARTY_RANGE.
+        foreach (int questId in _quests.PartyKillQuests(npc.NpcId))
+        {
+            var eligible = new List<ZoneEntity>();
+            foreach (var member in QuestPartyCandidates(killer))
+            {
+                if (member.Inventory != null && !member.Dead && member.Session != null &&
+                    _quests.PartyKillApplies(member.Quests, member.Inventory, questId, npc.NpcId, QuestActorOf(member)))
+                    eligible.Add(member);
+            }
+
+            if (eligible.Count == 0)
+                continue;
+            var winner = eligible[Random.Shared.Next(eligible.Count)];
+            PublishKill(winner, _quests.OnPartyKill(winner.Quests, winner.Inventory!, questId, npc.NpcId, QuestActorOf(winner)), npc, outbound);
+        }
+    }
+
+    /// <summary>L2J/Mobius <c>Config.ALT_PARTY_RANGE</c> default (Character.ini AltPartyRange = 1600).</summary>
+    public const int QuestPartyRange = 1600;
+
+    IEnumerable<ZoneEntity> QuestPartyCandidates(ZoneEntity killer)
+    {
+        yield return killer;
+        if (!_partyByPlayer.TryGetValue(killer.ObjectId, out int partyId) || !_parties.TryGetValue(partyId, out var party))
+            yield break;
+        foreach (int id in party.MemberIds)
+        {
+            if (id == killer.ObjectId || !_byId.TryGetValue(id, out var member) || member.Kind != ZoneEntityKind.Player)
+                continue;
+            long dx = member.X - killer.X, dy = member.Y - killer.Y;
+            if (dx * dx + dy * dy <= (long)QuestPartyRange * QuestPartyRange)
+                yield return member;
+        }
+    }
+
+    void PublishKill(ZoneEntity player, QuestOutcome outcome, ZoneEntity npc, List<Pending> outbound)
+    {
+        if (outcome.QuestId == 0 || !outcome.Ok || player.Session == null)
             return;
         if (outcome.Items.Count == 0 && !outcome.JournalChanged && outcome.Sounds.Count == 0)
             return;
-        Publish(killer.Session, killer, outcome, npc.ObjectId, npc.NpcId, outbound);
+        Publish(player.Session, player, outcome, npc.ObjectId, npc.NpcId, outbound);
+    }
+
+    internal void JoinPartyForTest(params ZoneEntity[] members)
+    {
+        lock (_gate)
+        {
+            var party = new ZoneParty { PartyId = _nextPartyId++, LeaderObjectId = members[0].ObjectId };
+            _parties[party.PartyId] = party;
+            foreach (var m in members)
+            {
+                party.MemberIds.Add(m.ObjectId);
+                _partyByPlayer[m.ObjectId] = party.PartyId;
+            }
+        }
     }
 
     static bool IsNpcPage(QuestOutcome outcome) =>

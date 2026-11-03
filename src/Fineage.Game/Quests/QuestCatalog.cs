@@ -164,7 +164,8 @@ public sealed class QuestCatalog
             throw new InvalidDataException($"{where} quest {questId} minLevel is above maxLevel.");
 
         return new QuestDialog(dialog.NpcId, hook, evt, when, dialog.Cond, whenVar, whenValue, html, ops,
-            races.Count == 0 ? null : races, dialog.MinLevel, dialog.MaxLevel, ReadHasItem(dialog, items, where, questId), Math.Max(1, dialog.MinCount));
+            races.Count == 0 ? null : races, dialog.MinLevel, dialog.MaxLevel, ReadHasItem(dialog, items, where, questId), Math.Max(1, dialog.MinCount),
+            dialog.Party && hook == QuestHook.Kill);
     }
 
     static int ReadHasItem(DialogDto dialog, ItemCatalog items, string where, int questId)
@@ -191,6 +192,7 @@ public sealed class QuestCatalog
             "complete" => new CompleteOp(),
             "drop_item" => ReadDrop(op, items, where, questId),
             "exchange_all" => ReadExchange(op, items, where, questId),
+            "sell_items" => ReadSell(op, items, where, questId),
             "sound" => ReadSound(op, where, questId),
             _ => throw new InvalidDataException($"{where} quest {questId} has unknown op '{op.Op}'.")
         };
@@ -206,6 +208,21 @@ public sealed class QuestCatalog
         if (chance is <= 0 or > 1 || limit < 0 || op.CondAtLimit is < 0 or > 255)
             throw new InvalidDataException($"{where} quest {questId} drop_item needs chance 0..1, limit >= 0, condAtLimit 0..255.");
         return new DropItemOp(op.ItemId, count, chance, limit, op.CondAtLimit);
+    }
+
+    static SellItemsOp ReadSell(OpDto op, ItemCatalog items, string where, int questId)
+    {
+        var rows = new List<(int, int)>();
+        foreach (var row in op.Prices ?? [])
+        {
+            if (!items.TryGet(row.ItemId, out _) || row.Adena < 0)
+                throw new InvalidDataException($"{where} quest {questId} sell_items has a bad price row.");
+            rows.Add((row.ItemId, row.Adena));
+        }
+
+        if (rows.Count == 0)
+            throw new InvalidDataException($"{where} quest {questId} sell_items needs prices.");
+        return new SellItemsOp(rows, op.BonusMin ?? 0, op.BonusAdena ?? 0);
     }
 
     static ExchangeAllOp ReadExchange(OpDto op, ItemCatalog items, string where, int questId)
@@ -351,6 +368,7 @@ public sealed class QuestCatalog
         public int MaxLevel { get; set; }
         public int HasItem { get; set; }
         public int MinCount { get; set; } = 1;
+        public bool Party { get; set; }
     }
 
     sealed class OpDto
@@ -371,5 +389,12 @@ public sealed class QuestCatalog
         public int? Per { get; set; }
         public int? BonusMin { get; set; }
         public int? BonusAdena { get; set; }
+        public List<PriceDto>? Prices { get; set; }
+    }
+
+    sealed class PriceDto
+    {
+        public int ItemId { get; set; }
+        public int Adena { get; set; }
     }
 }

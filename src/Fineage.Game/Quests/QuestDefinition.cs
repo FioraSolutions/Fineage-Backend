@@ -48,6 +48,9 @@ public sealed record DropItemOp(int ItemId, int Count, double Chance, int Limit,
 /// Hand in every <c>ItemId</c> for <c>Per</c> x <c>RewardItemId</c> each, plus <c>BonusAdena</c> when at least <c>BonusMin</c>
 /// were handed in (Mobius Q267 style <c>rewardItems(count)</c> + <c>giveAdena</c> if count &gt;= 10).
 /// </summary>
+/// <summary>Adena per handed-in item (all registered kinds), plus a bonus when the total is at least <c>BonusMin</c> (Mobius Q316).</summary>
+public sealed record SellItemsOp(IReadOnlyList<(int ItemId, int Adena)> Items, int BonusMin, int BonusAdena) : QuestOp;
+
 public sealed record ExchangeAllOp(int ItemId, int RewardItemId, int Per, int BonusMin, int BonusAdena) : QuestOp;
 
 public sealed record SoundOp(string Name) : QuestOp;
@@ -66,7 +69,8 @@ public sealed record QuestDialog(
     int MinLevel = 0,
     int MaxLevel = 0,
     int HasItem = 0,
-    int MinCount = 1);
+    int MinCount = 1,
+    bool Party = false);
 
 /// <summary>
 /// Who is talking. Mobius quest scripts branch on <c>player.getRace()</c> / <c>getLevel()</c>

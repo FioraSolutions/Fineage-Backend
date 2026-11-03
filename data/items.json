@@ -2431,6 +2431,24 @@
       "weight": 0
     },
     {
+      "id": 1042,
+      "name": "Wererat's Fang",
+      "kind": "etc",
+      "stackable": true,
+      "icon": "icon.etc_claw_i00",
+      "price": 0,
+      "weight": 0
+    },
+    {
+      "id": 1043,
+      "name": "Varool Foulclaw's Fang",
+      "kind": "etc",
+      "stackable": true,
+      "icon": "icon.etc_horn_i00",
+      "price": 0,
+      "weight": 0
+    },
+    {
       "id": 1048,
       "name": "Spellbook: Might",
       "kind": "etc",
