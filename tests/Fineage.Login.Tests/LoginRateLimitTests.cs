@@ -10,6 +10,8 @@ namespace Fineage.Login.Tests;
 
 public sealed class LoginRateLimitTests
 {
+    static readonly TimeSpan Deadline = TimeSpan.FromSeconds(5);
+
     [Fact]
     public async Task Pipeline_session_closes_after_burst_over_limit()
     {
@@ -28,18 +30,40 @@ public sealed class LoginRateLimitTests
 
         for (int i = 0; i < 2; i++)
         {
-            var ack = await FrameIO.ReadAsync(stream, CancellationToken.None);
+            var ack = await ReadFrameAsync(stream);
             Assert.NotNull(ack);
             Assert.Equal((ushort)MsgType.HelloAck, ack.Value.Type);
         }
 
-        var frame = await FrameIO.ReadAsync(stream, CancellationToken.None);
+        var frame = await ReadFrameAsync(stream);
         Assert.NotNull(frame);
         Assert.Equal((ushort)MsgType.Error, frame.Value.Type);
         var err = MessagePackSerializer.Deserialize<ErrorMsg>(frame.Value.Body);
         Assert.Equal("rate_limit", err.Code);
 
-        Assert.Null(await FrameIO.ReadAsync(stream, CancellationToken.None));
+        // The session must end. Any of EOF, a clean half-close or an RST counts as "closed": the transport
+        // spelling is not the contract, only that no frame is served after the rate-limit kick.
+        Assert.Null(await ReadFrameAsync(stream));
+    }
+
+    /// <summary>
+    /// Reads one frame, failing on deadline instead of hanging forever. A reset/closed socket reads as
+    /// "no more frames" (null): RST vs FIN is a TCP detail, not session semantics.
+    /// </summary>
+    static async Task<(ushort Type, byte[] Body)?> ReadFrameAsync(Stream stream)
+    {
+        try
+        {
+            return await FrameIO.ReadAsync(stream, CancellationToken.None).WaitAsync(Deadline);
+        }
+        catch (Exception ex) when (ex is IOException or SocketException or ObjectDisposedException)
+        {
+            return null;
+        }
+        catch (TimeoutException)
+        {
+            throw new TimeoutException($"Server did not answer within {Deadline.TotalSeconds}s.");
+        }
     }
 
     sealed class PipelineLoginHost : IAsyncDisposable
