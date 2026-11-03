@@ -132,7 +132,8 @@
    "overHit": true,
    "usingKinds": [
     "DUAL"
-   ]
+   ],
+   "effectRange": 400
   },
   {
    "skillId": 3,
@@ -182,7 +183,8 @@
    "usingKinds": [
     "SWORD",
     "BLUNT"
-   ]
+   ],
+   "effectRange": 400
   },
   {
    "skillId": 5,
@@ -294,7 +296,8 @@
    "reuseDelayMs": 3000,
    "castRange": 40,
    "baseCritRate": 0,
-   "overHit": true
+   "overHit": true,
+   "effectRange": 400
   },
   {
    "skillId": 6,
@@ -424,7 +427,8 @@
    "reuseDelayMs": 3000,
    "castRange": 600,
    "baseCritRate": 0,
-   "overHit": true
+   "overHit": true,
+   "effectRange": 1100
   },
   {
    "skillId": 7,
@@ -527,7 +531,8 @@
    "reuseDelayMs": 3000,
    "castRange": 500,
    "baseCritRate": 0,
-   "overHit": true
+   "overHit": true,
+   "effectRange": 1000
   },
   {
    "skillId": 9,
@@ -648,7 +653,8 @@
    "reuseDelayMs": 2000,
    "castRange": 40,
    "baseCritRate": 0,
-   "overHit": true
+   "overHit": true,
+   "effectRange": 1000
   },
   {
    "skillId": 16,
@@ -772,7 +778,8 @@
    "halfLethal": 0,
    "usingKinds": [
     "DAGGER"
-   ]
+   ],
+   "effectRange": 400
   },
   {
    "skillId": 17,
@@ -893,7 +900,8 @@
    "reuseDelayMs": 3000,
    "castRange": 40,
    "baseCritRate": 0,
-   "overHit": true
+   "overHit": true,
+   "effectRange": 400
   },
   {
    "skillId": 19,
@@ -1026,7 +1034,8 @@
    "overHit": true,
    "usingKinds": [
     "BOW"
-   ]
+   ],
+   "effectRange": 1400
   },
   {
    "skillId": 24,
@@ -1141,7 +1150,8 @@
    "overHit": true,
    "usingKinds": [
     "BOW"
-   ]
+   ],
+   "effectRange": 1000
   },
   {
    "skillId": 29,
@@ -1235,7 +1245,8 @@
    "overHit": true,
    "usingKinds": [
     "DUALFIST"
-   ]
+   ],
+   "effectRange": 400
   },
   {
    "skillId": 30,
@@ -1411,7 +1422,8 @@
    "overHit": false,
    "usingKinds": [
     "DAGGER"
-   ]
+   ],
+   "effectRange": 400
   },
   {
    "skillId": 35,
@@ -1514,7 +1526,8 @@
    "reuseDelayMs": 5000,
    "castRange": 500,
    "baseCritRate": 0,
-   "overHit": true
+   "overHit": true,
+   "effectRange": 1000
   },
   {
    "skillId": 36,
@@ -1877,7 +1890,8 @@
    "reuseDelayMs": 1000,
    "castRange": 400,
    "baseCritRate": 0,
-   "overHit": false
+   "overHit": false,
+   "effectRange": 900
   },
   {
    "skillId": 54,
@@ -2046,7 +2060,8 @@
    "overHit": true,
    "usingKinds": [
     "DUALFIST"
-   ]
+   ],
+   "effectRange": 1100
   },
   {
    "skillId": 56,
@@ -2140,7 +2155,8 @@
    "overHit": true,
    "usingKinds": [
     "BOW"
-   ]
+   ],
+   "effectRange": 1200
   },
   {
    "skillId": 81,
@@ -2171,7 +2187,8 @@
    "overHit": true,
    "usingKinds": [
     "DUALFIST"
-   ]
+   ],
+   "effectRange": 400
   },
   {
    "skillId": 84,
@@ -2236,7 +2253,8 @@
    "reuseDelayMs": 15000,
    "castRange": 40,
    "baseCritRate": 10,
-   "overHit": true
+   "overHit": true,
+   "effectRange": 400
   },
   {
    "skillId": 100,
@@ -2303,7 +2321,8 @@
    "overHit": true,
    "usingKinds": [
     "BLUNT"
-   ]
+   ],
+   "effectRange": 400
   },
   {
    "skillId": 101,
@@ -2445,7 +2464,8 @@
    "overHit": true,
    "usingKinds": [
     "BOW"
-   ]
+   ],
+   "effectRange": 1400
   },
   {
    "skillId": 105,
@@ -2536,7 +2556,8 @@
    "reuseDelayMs": 2000,
    "castRange": 600,
    "baseCritRate": 0,
-   "overHit": false
+   "overHit": false,
+   "effectRange": 1100
   },
   {
    "skillId": 120,
@@ -2603,7 +2624,8 @@
    "overHit": true,
    "usingKinds": [
     "DUALFIST"
-   ]
+   ],
+   "effectRange": 400
   },
   {
    "skillId": 190,
@@ -2737,7 +2759,8 @@
    "usingKinds": [
     "SWORD",
     "BLUNT"
-   ]
+   ],
+   "effectRange": 400
   },
   {
    "skillId": 223,
@@ -2908,7 +2931,8 @@
     "SWORD",
     "DAGGER",
     "DUAL"
-   ]
+   ],
+   "effectRange": 400
   },
   {
    "skillId": 245,
@@ -2975,7 +2999,8 @@
    "overHit": true,
    "usingKinds": [
     "POLE"
-   ]
+   ],
+   "effectRange": 400
   },
   {
    "skillId": 255,
@@ -3043,7 +3068,8 @@
    "usingKinds": [
     "SWORD",
     "BLUNT"
-   ]
+   ],
+   "effectRange": 400
   },
   {
    "skillId": 260,
@@ -3176,7 +3202,8 @@
    "overHit": true,
    "usingKinds": [
     "BLUNT"
-   ]
+   ],
+   "effectRange": 400
   },
   {
    "skillId": 261,
@@ -3261,7 +3288,8 @@
    "reuseDelayMs": 5000,
    "castRange": 40,
    "baseCritRate": 0,
-   "overHit": true
+   "overHit": true,
+   "effectRange": 400
   },
   {
    "skillId": 263,
@@ -3437,7 +3465,8 @@
    "halfLethal": 0,
    "usingKinds": [
     "DAGGER"
-   ]
+   ],
+   "effectRange": 400
   },
   {
    "skillId": 279,
@@ -3471,7 +3500,8 @@
    "reuseDelayMs": 15000,
    "castRange": 400,
    "baseCritRate": 0,
-   "overHit": false
+   "overHit": false,
+   "effectRange": 900
   },
   {
    "skillId": 280,
@@ -3604,7 +3634,8 @@
    "overHit": true,
    "usingKinds": [
     "DUALFIST"
-   ]
+   ],
+   "effectRange": 400
   },
   {
    "skillId": 281,
@@ -3737,7 +3768,8 @@
    "overHit": true,
    "usingKinds": [
     "DUALFIST"
-   ]
+   ],
+   "effectRange": 400
   },
   {
    "skillId": 284,
@@ -3876,7 +3908,8 @@
    "reuseDelayMs": 4000,
    "castRange": 40,
    "baseCritRate": 0,
-   "overHit": true
+   "overHit": true,
+   "effectRange": 400
   },
   {
    "skillId": 314,
@@ -3946,7 +3979,8 @@
    "overHit": true,
    "usingKinds": [
     "BOW"
-   ]
+   ],
+   "effectRange": 1400
   },
   {
    "skillId": 315,
@@ -4013,7 +4047,8 @@
    "reuseDelayMs": 7000,
    "castRange": 40,
    "baseCritRate": 15,
-   "overHit": true
+   "overHit": true,
+   "effectRange": 400
   },
   {
    "skillId": 321,
@@ -4081,7 +4116,8 @@
    "halfLethal": 1,
    "usingKinds": [
     "DAGGER"
-   ]
+   ],
+   "effectRange": 400
   },
   {
    "skillId": 325,
@@ -4103,7 +4139,8 @@
    "reuseDelayMs": 1000,
    "castRange": 40,
    "baseCritRate": 0,
-   "overHit": false
+   "overHit": false,
+   "effectRange": 400
   },
   {
    "skillId": 343,
@@ -4128,7 +4165,8 @@
    "overHit": true,
    "usingKinds": [
     "BOW"
-   ]
+   ],
+   "effectRange": 1400
   },
   {
    "skillId": 344,
@@ -4160,7 +4198,8 @@
    "halfLethal": 2,
    "usingKinds": [
     "DAGGER"
-   ]
+   ],
+   "effectRange": 400
   },
   {
    "skillId": 345,
@@ -4185,7 +4224,8 @@
    "overHit": true,
    "usingKinds": [
     "DUAL"
-   ]
+   ],
+   "effectRange": 1100
   },
   {
    "skillId": 346,
@@ -4210,7 +4250,8 @@
    "overHit": true,
    "usingKinds": [
     "DUALFIST"
-   ]
+   ],
+   "effectRange": 1100
   },
   {
    "skillId": 347,
@@ -4260,7 +4301,8 @@
    "overHit": true,
    "usingKinds": [
     "BLUNT"
-   ]
+   ],
+   "effectRange": 400
   },
   {
    "skillId": 354,
@@ -4285,7 +4327,8 @@
    "overHit": true,
    "usingKinds": [
     "BOW"
-   ]
+   ],
+   "effectRange": 1400
   },
   {
    "skillId": 361,
@@ -4310,7 +4353,8 @@
    "overHit": true,
    "usingKinds": [
     "POLE"
-   ]
+   ],
+   "effectRange": 1000
   },
   {
    "skillId": 362,
@@ -4336,7 +4380,8 @@
    "usingKinds": [
     "BLUNT",
     "SWORD"
-   ]
+   ],
+   "effectRange": 400
   },
   {
    "skillId": 369,
@@ -4361,7 +4406,8 @@
    "overHit": true,
    "usingKinds": [
     "BOW"
-   ]
+   ],
+   "effectRange": 1400
   },
   {
    "skillId": 400,
@@ -4414,7 +4460,8 @@
    "usingKinds": [
     "SWORD",
     "BLUNT"
-   ]
+   ],
+   "effectRange": 400
   },
   {
    "skillId": 401,
@@ -4467,7 +4514,8 @@
    "usingKinds": [
     "SWORD",
     "BLUNT"
-   ]
+   ],
+   "effectRange": 400
   },
   {
    "skillId": 407,
@@ -4636,7 +4684,8 @@
    "halfLethal": 3,
    "usingKinds": [
     "DAGGER"
-   ]
+   ],
+   "effectRange": 400
   },
   {
    "skillId": 1028,
@@ -4712,7 +4761,8 @@
    "reuseDelayMs": 1000,
    "castRange": 400,
    "baseCritRate": 0,
-   "overHit": false
+   "overHit": false,
+   "effectRange": 900
   },
   {
    "skillId": 1031,
@@ -4755,7 +4805,8 @@
    "reuseDelayMs": 1000,
    "castRange": 400,
    "baseCritRate": 0,
-   "overHit": false
+   "overHit": false,
+   "effectRange": 900
   },
   {
    "skillId": 1148,
@@ -4813,7 +4864,8 @@
    "reuseDelayMs": 1000,
    "castRange": 900,
    "baseCritRate": 0,
-   "overHit": false
+   "overHit": false,
+   "effectRange": 1400
   },
   {
    "skillId": 1155,
@@ -4877,7 +4929,8 @@
    "reuseDelayMs": 5000,
    "castRange": 400,
    "baseCritRate": 0,
-   "overHit": false
+   "overHit": false,
+   "effectRange": 900
   },
   {
    "skillId": 1171,
@@ -4996,7 +5049,8 @@
    "reuseDelayMs": 1000,
    "castRange": 150,
    "baseCritRate": 0,
-   "overHit": false
+   "overHit": false,
+   "effectRange": 650
   },
   {
    "skillId": 1174,
@@ -5081,7 +5135,8 @@
    "reuseDelayMs": 4000,
    "castRange": 100,
    "baseCritRate": 0,
-   "overHit": false
+   "overHit": false,
+   "effectRange": 400
   },
   {
    "skillId": 1175,
@@ -5124,7 +5179,8 @@
    "reuseDelayMs": 1000,
    "castRange": 750,
    "baseCritRate": 0,
-   "overHit": false
+   "overHit": false,
+   "effectRange": 1250
   },
   {
    "skillId": 1176,
@@ -5188,7 +5244,8 @@
    "reuseDelayMs": 4000,
    "castRange": 500,
    "baseCritRate": 0,
-   "overHit": false
+   "overHit": false,
+   "effectRange": 1000
   },
   {
    "skillId": 1177,
@@ -5222,7 +5279,8 @@
    "reuseDelayMs": 1000,
    "castRange": 600,
    "baseCritRate": 0,
-   "overHit": false
+   "overHit": false,
+   "effectRange": 1100
   },
   {
    "skillId": 1178,
@@ -5265,7 +5323,8 @@
    "reuseDelayMs": 1000,
    "castRange": 750,
    "baseCritRate": 0,
-   "overHit": false
+   "overHit": false,
+   "effectRange": 1250
   },
   {
    "skillId": 1181,
@@ -5293,7 +5352,8 @@
    "reuseDelayMs": 4000,
    "castRange": 500,
    "baseCritRate": 0,
-   "overHit": false
+   "overHit": false,
+   "effectRange": 1000
   },
   {
    "skillId": 1184,
@@ -5330,7 +5390,8 @@
    "reuseDelayMs": 2000,
    "castRange": 600,
    "baseCritRate": 0,
-   "overHit": false
+   "overHit": false,
+   "effectRange": 1100
   },
   {
    "skillId": 1220,
@@ -5373,7 +5434,8 @@
    "reuseDelayMs": 1000,
    "castRange": 750,
    "baseCritRate": 0,
-   "overHit": false
+   "overHit": false,
+   "effectRange": 1250
   },
   {
    "skillId": 1230,
@@ -5476,7 +5538,8 @@
    "reuseDelayMs": 1200,
    "castRange": 900,
    "baseCritRate": 0,
-   "overHit": false
+   "overHit": false,
+   "effectRange": 1400
   },
   {
    "skillId": 1231,
@@ -5579,7 +5642,8 @@
    "reuseDelayMs": 200,
    "castRange": 150,
    "baseCritRate": 0,
-   "overHit": false
+   "overHit": false,
+   "effectRange": 350
   },
   {
    "skillId": 1235,
@@ -5682,7 +5746,8 @@
    "reuseDelayMs": 1000,
    "castRange": 900,
    "baseCritRate": 0,
-   "overHit": false
+   "overHit": false,
+   "effectRange": 1400
   },
   {
    "skillId": 1236,
@@ -5758,7 +5823,8 @@
    "reuseDelayMs": 1000,
    "castRange": 900,
    "baseCritRate": 0,
-   "overHit": false
+   "overHit": false,
+   "effectRange": 1400
   },
   {
    "skillId": 1237,
@@ -5828,7 +5894,8 @@
    "reuseDelayMs": 1000,
    "castRange": 900,
    "baseCritRate": 0,
-   "overHit": false
+   "overHit": false,
+   "effectRange": 1400
   },
   {
    "skillId": 1239,
@@ -5931,7 +5998,8 @@
    "reuseDelayMs": 1000,
    "castRange": 900,
    "baseCritRate": 0,
-   "overHit": false
+   "overHit": false,
+   "effectRange": 1400
   },
   {
    "skillId": 1264,
@@ -5959,7 +6027,8 @@
    "reuseDelayMs": 8000,
    "castRange": 750,
    "baseCritRate": 0,
-   "overHit": true
+   "overHit": true,
+   "effectRange": 1250
   },
   {
    "skillId": 1265,
@@ -6020,7 +6089,8 @@
    "reuseDelayMs": 8000,
    "castRange": 900,
    "baseCritRate": 0,
-   "overHit": true
+   "overHit": true,
+   "effectRange": 1400
   },
   {
    "skillId": 1266,
@@ -6048,7 +6118,8 @@
    "reuseDelayMs": 8000,
    "castRange": 750,
    "baseCritRate": 0,
-   "overHit": true
+   "overHit": true,
+   "effectRange": 1250
   },
   {
    "skillId": 1267,
@@ -6109,7 +6180,8 @@
    "reuseDelayMs": 8000,
    "castRange": 900,
    "baseCritRate": 0,
-   "overHit": true
+   "overHit": true,
+   "effectRange": 1400
   },
   {
    "skillId": 1274,
@@ -6140,7 +6212,8 @@
    "reuseDelayMs": 1000,
    "castRange": 400,
    "baseCritRate": 0,
-   "overHit": false
+   "overHit": false,
+   "effectRange": 900
   },
   {
    "skillId": 1275,
@@ -6201,7 +6274,8 @@
    "reuseDelayMs": 1000,
    "castRange": 400,
    "baseCritRate": 0,
-   "overHit": false
+   "overHit": false,
+   "effectRange": 900
   },
   {
    "skillId": 1288,
@@ -6223,7 +6297,8 @@
    "reuseDelayMs": 300000,
    "castRange": 900,
    "baseCritRate": 0,
-   "overHit": false
+   "overHit": false,
+   "effectRange": 1400
   },
   {
    "skillId": 1289,
@@ -6245,7 +6320,8 @@
    "reuseDelayMs": 300000,
    "castRange": 900,
    "baseCritRate": 0,
-   "overHit": false
+   "overHit": false,
+   "effectRange": 1400
   },
   {
    "skillId": 1290,
@@ -6267,7 +6343,8 @@
    "reuseDelayMs": 300000,
    "castRange": 900,
    "baseCritRate": 0,
-   "overHit": false
+   "overHit": false,
+   "effectRange": 1400
   },
   {
    "skillId": 1291,
@@ -6289,7 +6366,8 @@
    "reuseDelayMs": 300000,
    "castRange": 900,
    "baseCritRate": 0,
-   "overHit": false
+   "overHit": false,
+   "effectRange": 1400
   },
   {
    "skillId": 1292,
@@ -6311,7 +6389,8 @@
    "reuseDelayMs": 300000,
    "castRange": 900,
    "baseCritRate": 0,
-   "overHit": true
+   "overHit": true,
+   "effectRange": 1400
   },
   {
    "skillId": 1293,
@@ -6333,7 +6412,8 @@
    "reuseDelayMs": 300000,
    "castRange": 900,
    "baseCritRate": 0,
-   "overHit": true
+   "overHit": true,
+   "effectRange": 1400
   },
   {
    "skillId": 1294,
@@ -6355,7 +6435,8 @@
    "reuseDelayMs": 300000,
    "castRange": 900,
    "baseCritRate": 0,
-   "overHit": false
+   "overHit": false,
+   "effectRange": 1400
   },
   {
    "skillId": 1295,
@@ -6401,7 +6482,8 @@
    "reuseDelayMs": 5000,
    "castRange": 500,
    "baseCritRate": 0,
-   "overHit": false
+   "overHit": false,
+   "effectRange": 1000
   },
   {
    "skillId": 1296,
@@ -6447,7 +6529,8 @@
    "reuseDelayMs": 5000,
    "castRange": 500,
    "baseCritRate": 0,
-   "overHit": false
+   "overHit": false,
+   "effectRange": 1000
   },
   {
    "skillId": 1339,
@@ -6469,7 +6552,8 @@
    "reuseDelayMs": 15000,
    "castRange": 900,
    "baseCritRate": 0,
-   "overHit": true
+   "overHit": true,
+   "effectRange": 1400
   },
   {
    "skillId": 1340,
@@ -6491,7 +6575,8 @@
    "reuseDelayMs": 15000,
    "castRange": 900,
    "baseCritRate": 0,
-   "overHit": true
+   "overHit": true,
+   "effectRange": 1400
   },
   {
    "skillId": 1341,
@@ -6513,7 +6598,8 @@
    "reuseDelayMs": 15000,
    "castRange": 900,
    "baseCritRate": 0,
-   "overHit": true
+   "overHit": true,
+   "effectRange": 1400
   },
   {
    "skillId": 1342,
@@ -6535,7 +6621,8 @@
    "reuseDelayMs": 15000,
    "castRange": 900,
    "baseCritRate": 0,
-   "overHit": false
+   "overHit": false,
+   "effectRange": 1400
   },
   {
    "skillId": 1417,
@@ -6591,7 +6678,8 @@
    "reuseDelayMs": 30000,
    "castRange": 900,
    "baseCritRate": 0,
-   "overHit": false
+   "overHit": false,
+   "effectRange": 1400
   },
   {
    "skillId": 3049,
@@ -6616,7 +6704,8 @@
    "reuseDelayMs": 0,
    "castRange": 1000,
    "baseCritRate": 0,
-   "overHit": false
+   "overHit": false,
+   "effectRange": 1500
   },
   {
    "skillId": 3165,
@@ -6665,7 +6754,8 @@
    "reuseDelayMs": 6000,
    "castRange": 900,
    "baseCritRate": 0,
-   "overHit": false
+   "overHit": false,
+   "effectRange": 1400
   },
   {
    "skillId": 3167,
@@ -6714,7 +6804,8 @@
    "reuseDelayMs": 6000,
    "castRange": 900,
    "baseCritRate": 0,
-   "overHit": false
+   "overHit": false,
+   "effectRange": 1400
   },
   {
    "skillId": 3168,
@@ -6763,7 +6854,8 @@
    "reuseDelayMs": 6000,
    "castRange": 900,
    "baseCritRate": 0,
-   "overHit": false
+   "overHit": false,
+   "effectRange": 1400
   },
   {
    "skillId": 3169,
@@ -6812,7 +6904,8 @@
    "reuseDelayMs": 6000,
    "castRange": 900,
    "baseCritRate": 0,
-   "overHit": false
+   "overHit": false,
+   "effectRange": 1400
   },
   {
    "skillId": 3170,
@@ -6861,7 +6954,8 @@
    "reuseDelayMs": 6000,
    "castRange": 900,
    "baseCritRate": 0,
-   "overHit": false
+   "overHit": false,
+   "effectRange": 1400
   },
   {
    "skillId": 3171,
@@ -6910,7 +7004,8 @@
    "reuseDelayMs": 6000,
    "castRange": 900,
    "baseCritRate": 0,
-   "overHit": false
+   "overHit": false,
+   "effectRange": 1400
   },
   {
    "skillId": 3172,
@@ -6959,7 +7054,8 @@
    "reuseDelayMs": 6000,
    "castRange": 900,
    "baseCritRate": 0,
-   "overHit": false
+   "overHit": false,
+   "effectRange": 1400
   },
   {
    "skillId": 3173,
@@ -7008,7 +7104,8 @@
    "reuseDelayMs": 15000,
    "castRange": 500,
    "baseCritRate": 0,
-   "overHit": false
+   "overHit": false,
+   "effectRange": 1000
   },
   {
    "skillId": 3174,
@@ -7057,7 +7154,8 @@
    "reuseDelayMs": 15000,
    "castRange": 500,
    "baseCritRate": 0,
-   "overHit": false
+   "overHit": false,
+   "effectRange": 1000
   },
   {
    "skillId": 3175,
@@ -7106,7 +7204,8 @@
    "reuseDelayMs": 15000,
    "castRange": 500,
    "baseCritRate": 0,
-   "overHit": false
+   "overHit": false,
+   "effectRange": 1000
   },
   {
    "skillId": 3176,
@@ -7155,7 +7254,8 @@
    "reuseDelayMs": 15000,
    "castRange": 500,
    "baseCritRate": 0,
-   "overHit": false
+   "overHit": false,
+   "effectRange": 1000
   },
   {
    "skillId": 3177,
@@ -7204,7 +7304,8 @@
    "reuseDelayMs": 15000,
    "castRange": 500,
    "baseCritRate": 0,
-   "overHit": false
+   "overHit": false,
+   "effectRange": 1000
   },
   {
    "skillId": 3178,
@@ -7253,7 +7354,8 @@
    "reuseDelayMs": 15000,
    "castRange": 500,
    "baseCritRate": 0,
-   "overHit": false
+   "overHit": false,
+   "effectRange": 1000
   },
   {
    "skillId": 3179,
@@ -7302,7 +7404,8 @@
    "reuseDelayMs": 12000,
    "castRange": 500,
    "baseCritRate": 0,
-   "overHit": false
+   "overHit": false,
+   "effectRange": 1000
   },
   {
    "skillId": 3180,
@@ -7689,7 +7792,8 @@
    "reuseDelayMs": 60000,
    "castRange": 600,
    "baseCritRate": 0,
-   "overHit": false
+   "overHit": false,
+   "effectRange": 1100
   },
   {
    "skillId": 4001,
@@ -7744,7 +7848,8 @@
    "reuseDelayMs": 8000,
    "castRange": 600,
    "baseCritRate": 0,
-   "overHit": false
+   "overHit": false,
+   "effectRange": 1100
   },
   {
    "skillId": 4017,
@@ -7788,7 +7893,8 @@
    "reuseDelayMs": 0,
    "castRange": 500,
    "baseCritRate": 0,
-   "overHit": false
+   "overHit": false,
+   "effectRange": 1000
   },
   {
    "skillId": 4026,
@@ -7810,7 +7916,8 @@
    "reuseDelayMs": 15000,
    "castRange": 900,
    "baseCritRate": 0,
-   "overHit": false
+   "overHit": false,
+   "effectRange": 1400
   },
   {
    "skillId": 4032,
@@ -7865,7 +7972,8 @@
    "reuseDelayMs": 6000,
    "castRange": 40,
    "baseCritRate": 0,
-   "overHit": false
+   "overHit": false,
+   "effectRange": 200
   },
   {
    "skillId": 4033,
@@ -7975,7 +8083,8 @@
    "reuseDelayMs": 8000,
    "castRange": 600,
    "baseCritRate": 0,
-   "overHit": false
+   "overHit": false,
+   "effectRange": 1100
   },
   {
    "skillId": 4040,
@@ -8030,7 +8139,8 @@
    "reuseDelayMs": 17000,
    "castRange": 700,
    "baseCritRate": 0,
-   "overHit": false
+   "overHit": false,
+   "effectRange": 1200
   },
   {
    "skillId": 4041,
@@ -8055,7 +8165,8 @@
    "reuseDelayMs": 0,
    "castRange": 600,
    "baseCritRate": 0,
-   "overHit": false
+   "overHit": false,
+   "effectRange": 1100
   },
   {
    "skillId": 4042,
@@ -8077,7 +8188,8 @@
    "reuseDelayMs": 0,
    "castRange": 600,
    "baseCritRate": 0,
-   "overHit": false
+   "overHit": false,
+   "effectRange": 1100
   },
   {
    "skillId": 4043,
@@ -8099,7 +8211,8 @@
    "reuseDelayMs": 15000,
    "castRange": 400,
    "baseCritRate": 0,
-   "overHit": false
+   "overHit": false,
+   "effectRange": 900
   },
   {
    "skillId": 4049,
@@ -8188,7 +8301,8 @@
    "reuseDelayMs": 0,
    "castRange": 50,
    "baseCritRate": 0,
-   "overHit": false
+   "overHit": false,
+   "effectRange": 200
   },
   {
    "skillId": 4066,
@@ -8243,7 +8357,8 @@
    "reuseDelayMs": 8000,
    "castRange": 600,
    "baseCritRate": 0,
-   "overHit": false
+   "overHit": false,
+   "effectRange": 1100
   },
   {
    "skillId": 4067,
@@ -8298,7 +8413,8 @@
    "reuseDelayMs": 6000,
    "castRange": 40,
    "baseCritRate": 0,
-   "overHit": false
+   "overHit": false,
+   "effectRange": 200
   },
   {
    "skillId": 4068,
@@ -8353,7 +8469,8 @@
    "reuseDelayMs": 6000,
    "castRange": 600,
    "baseCritRate": 0,
-   "overHit": false
+   "overHit": false,
+   "effectRange": 1100
   },
   {
    "skillId": 4069,
@@ -8408,7 +8525,8 @@
    "reuseDelayMs": 8000,
    "castRange": 600,
    "baseCritRate": 0,
-   "overHit": false
+   "overHit": false,
+   "effectRange": 1100
   },
   {
    "skillId": 4072,
@@ -8518,7 +8636,8 @@
    "reuseDelayMs": 6000,
    "castRange": 40,
    "baseCritRate": 0,
-   "overHit": false
+   "overHit": false,
+   "effectRange": 200
   },
   {
    "skillId": 4077,
@@ -8573,7 +8692,8 @@
    "reuseDelayMs": 8000,
    "castRange": 150,
    "baseCritRate": 0,
-   "overHit": false
+   "overHit": false,
+   "effectRange": 650
   },
   {
    "skillId": 4078,
@@ -8628,7 +8748,8 @@
    "reuseDelayMs": 8000,
    "castRange": 500,
    "baseCritRate": 0,
-   "overHit": false
+   "overHit": false,
+   "effectRange": 900
   },
   {
    "skillId": 4079,
@@ -8650,7 +8771,8 @@
    "reuseDelayMs": 5000,
    "castRange": 600,
    "baseCritRate": 0,
-   "overHit": false
+   "overHit": false,
+   "effectRange": 1100
   },
   {
    "skillId": 4083,
@@ -8672,7 +8794,8 @@
    "reuseDelayMs": 0,
    "castRange": 600,
    "baseCritRate": 0,
-   "overHit": false
+   "overHit": false,
+   "effectRange": 1100
   },
   {
    "skillId": 4087,
@@ -8727,7 +8850,8 @@
    "reuseDelayMs": 8000,
    "castRange": 600,
    "baseCritRate": 0,
-   "overHit": false
+   "overHit": false,
+   "effectRange": 1100
   },
   {
    "skillId": 4100,
@@ -8782,7 +8906,8 @@
    "reuseDelayMs": 8000,
    "castRange": 600,
    "baseCritRate": 0,
-   "overHit": false
+   "overHit": false,
+   "effectRange": 1100
   },
   {
    "skillId": 4101,
@@ -8892,7 +9017,8 @@
    "reuseDelayMs": 8000,
    "castRange": 600,
    "baseCritRate": 0,
-   "overHit": false
+   "overHit": false,
+   "effectRange": 1100
   },
   {
    "skillId": 4106,
@@ -8983,7 +9109,8 @@
    "reuseDelayMs": 0,
    "castRange": 1000,
    "baseCritRate": 0,
-   "overHit": false
+   "overHit": false,
+   "effectRange": 1500
   },
   {
    "skillId": 4112,
@@ -9005,7 +9132,8 @@
    "reuseDelayMs": 0,
    "castRange": 50,
    "baseCritRate": 0,
-   "overHit": false
+   "overHit": false,
+   "effectRange": 400
   },
   {
    "skillId": 4113,
@@ -9027,7 +9155,8 @@
    "reuseDelayMs": 0,
    "castRange": 50,
    "baseCritRate": 0,
-   "overHit": false
+   "overHit": false,
+   "effectRange": 400
   },
   {
    "skillId": 4114,
@@ -9049,7 +9178,8 @@
    "reuseDelayMs": 15000,
    "castRange": 1100,
    "baseCritRate": 0,
-   "overHit": false
+   "overHit": false,
+   "effectRange": 1600
   },
   {
    "skillId": 4120,
@@ -9107,7 +9237,8 @@
    "overHit": false,
    "usingKinds": [
     "BOW"
-   ]
+   ],
+   "effectRange": 1200
   },
   {
    "skillId": 4124,
@@ -9162,7 +9293,8 @@
    "reuseDelayMs": 17000,
    "castRange": 700,
    "baseCritRate": 0,
-   "overHit": false
+   "overHit": false,
+   "effectRange": 1200
   },
   {
    "skillId": 4127,
@@ -9184,7 +9316,8 @@
    "reuseDelayMs": 0,
    "castRange": 100,
    "baseCritRate": 0,
-   "overHit": false
+   "overHit": false,
+   "effectRange": 400
   },
   {
    "skillId": 4128,
@@ -9250,7 +9383,8 @@
    "reuseDelayMs": 0,
    "castRange": 900,
    "baseCritRate": 0,
-   "overHit": false
+   "overHit": false,
+   "effectRange": 1000
   },
   {
    "skillId": 4132,
@@ -9294,7 +9428,8 @@
    "reuseDelayMs": 0,
    "castRange": 1000,
    "baseCritRate": 0,
-   "overHit": false
+   "overHit": false,
+   "effectRange": 2000
   },
   {
    "skillId": 4137,
@@ -9349,7 +9484,8 @@
    "reuseDelayMs": 8000,
    "castRange": 500,
    "baseCritRate": 0,
-   "overHit": false
+   "overHit": false,
+   "effectRange": 1000
   },
   {
    "skillId": 4138,
@@ -9404,7 +9540,8 @@
    "reuseDelayMs": 8000,
    "castRange": 900,
    "baseCritRate": 0,
-   "overHit": false
+   "overHit": false,
+   "effectRange": 1400
   },
   {
    "skillId": 4139,
@@ -9514,7 +9651,8 @@
    "reuseDelayMs": 0,
    "castRange": 500,
    "baseCritRate": 0,
-   "overHit": false
+   "overHit": false,
+   "effectRange": 1000
   },
   {
    "skillId": 4142,
@@ -9569,7 +9707,8 @@
    "reuseDelayMs": 0,
    "castRange": 500,
    "baseCritRate": 0,
-   "overHit": false
+   "overHit": false,
+   "effectRange": 1000
   },
   {
    "skillId": 4143,
@@ -9877,7 +10016,8 @@
    "reuseDelayMs": 0,
    "castRange": 40,
    "baseCritRate": 0,
-   "overHit": false
+   "overHit": false,
+   "effectRange": 200
   },
   {
    "skillId": 4151,
@@ -9932,7 +10072,8 @@
    "reuseDelayMs": 0,
    "castRange": 600,
    "baseCritRate": 0,
-   "overHit": false
+   "overHit": false,
+   "effectRange": 1100
   },
   {
    "skillId": 4153,
@@ -9987,7 +10128,8 @@
    "reuseDelayMs": 0,
    "castRange": 600,
    "baseCritRate": 0,
-   "overHit": false
+   "overHit": false,
+   "effectRange": 1100
   },
   {
    "skillId": 4155,
@@ -10042,7 +10184,8 @@
    "reuseDelayMs": 0,
    "castRange": 600,
    "baseCritRate": 0,
-   "overHit": false
+   "overHit": false,
+   "effectRange": 1100
   },
   {
    "skillId": 4156,
@@ -10097,7 +10240,8 @@
    "reuseDelayMs": 0,
    "castRange": 600,
    "baseCritRate": 0,
-   "overHit": false
+   "overHit": false,
+   "effectRange": 1100
   },
   {
    "skillId": 4157,
@@ -10152,7 +10296,8 @@
    "reuseDelayMs": 0,
    "castRange": 600,
    "baseCritRate": 0,
-   "overHit": false
+   "overHit": false,
+   "effectRange": 1100
   },
   {
    "skillId": 4158,
@@ -10207,7 +10352,8 @@
    "reuseDelayMs": 0,
    "castRange": 600,
    "baseCritRate": 0,
-   "overHit": false
+   "overHit": false,
+   "effectRange": 1100
   },
   {
    "skillId": 4159,
@@ -10262,7 +10408,8 @@
    "reuseDelayMs": 0,
    "castRange": 600,
    "baseCritRate": 0,
-   "overHit": false
+   "overHit": false,
+   "effectRange": 1100
   },
   {
    "skillId": 4160,
@@ -10317,7 +10464,8 @@
    "reuseDelayMs": 0,
    "castRange": 150,
    "baseCritRate": 0,
-   "overHit": false
+   "overHit": false,
+   "effectRange": 650
   },
   {
    "skillId": 4168,
@@ -10372,7 +10520,8 @@
    "reuseDelayMs": 0,
    "castRange": 40,
    "baseCritRate": 0,
-   "overHit": false
+   "overHit": false,
+   "effectRange": 200
   },
   {
    "skillId": 4169,
@@ -10427,7 +10576,8 @@
    "reuseDelayMs": 0,
    "castRange": 40,
    "baseCritRate": 0,
-   "overHit": false
+   "overHit": false,
+   "effectRange": 200
   },
   {
    "skillId": 4170,
@@ -10482,7 +10632,8 @@
    "reuseDelayMs": 0,
    "castRange": 40,
    "baseCritRate": 0,
-   "overHit": false
+   "overHit": false,
+   "effectRange": 200
   },
   {
    "skillId": 4171,
@@ -10647,7 +10798,8 @@
    "reuseDelayMs": 0,
    "castRange": 700,
    "baseCritRate": 0,
-   "overHit": false
+   "overHit": false,
+   "effectRange": 1200
   },
   {
    "skillId": 4179,
@@ -10702,7 +10854,8 @@
    "reuseDelayMs": 0,
    "castRange": 40,
    "baseCritRate": 0,
-   "overHit": false
+   "overHit": false,
+   "effectRange": 200
   },
   {
    "skillId": 4180,
@@ -10757,7 +10910,8 @@
    "reuseDelayMs": 0,
    "castRange": 40,
    "baseCritRate": 0,
-   "overHit": false
+   "overHit": false,
+   "effectRange": 200
   },
   {
    "skillId": 4181,
@@ -10812,7 +10966,8 @@
    "reuseDelayMs": 0,
    "castRange": 40,
    "baseCritRate": 0,
-   "overHit": false
+   "overHit": false,
+   "effectRange": 200
   },
   {
    "skillId": 4191,
@@ -10867,7 +11022,8 @@
    "reuseDelayMs": 0,
    "castRange": 750,
    "baseCritRate": 0,
-   "overHit": false
+   "overHit": false,
+   "effectRange": 1250
   },
   {
    "skillId": 4194,
@@ -10922,7 +11078,8 @@
    "reuseDelayMs": 0,
    "castRange": 150,
    "baseCritRate": 0,
-   "overHit": false
+   "overHit": false,
+   "effectRange": 650
   },
   {
    "skillId": 4195,
@@ -10977,7 +11134,8 @@
    "reuseDelayMs": 0,
    "castRange": 750,
    "baseCritRate": 0,
-   "overHit": false
+   "overHit": false,
+   "effectRange": 1250
   },
   {
    "skillId": 4196,
@@ -11032,7 +11190,8 @@
    "reuseDelayMs": 0,
    "castRange": 750,
    "baseCritRate": 0,
-   "overHit": false
+   "overHit": false,
+   "effectRange": 1250
   },
   {
    "skillId": 4207,
@@ -11087,7 +11246,8 @@
    "reuseDelayMs": 0,
    "castRange": 900,
    "baseCritRate": 0,
-   "overHit": false
+   "overHit": false,
+   "effectRange": 1400
   },
   {
    "skillId": 4208,
@@ -11142,7 +11302,8 @@
    "reuseDelayMs": 0,
    "castRange": 900,
    "baseCritRate": 0,
-   "overHit": false
+   "overHit": false,
+   "effectRange": 1400
   },
   {
    "skillId": 4220,
@@ -11164,7 +11325,8 @@
    "reuseDelayMs": 0,
    "castRange": 50,
    "baseCritRate": 0,
-   "overHit": false
+   "overHit": false,
+   "effectRange": 200
   },
   {
    "skillId": 4221,
@@ -11241,7 +11403,8 @@
    "reuseDelayMs": 17000,
    "castRange": 700,
    "baseCritRate": 0,
-   "overHit": false
+   "overHit": false,
+   "effectRange": 1200
   },
   {
    "skillId": 4229,
@@ -11296,7 +11459,8 @@
    "reuseDelayMs": 17000,
    "castRange": 700,
    "baseCritRate": 0,
-   "overHit": false
+   "overHit": false,
+   "effectRange": 1200
   },
   {
    "skillId": 4230,
@@ -11318,7 +11482,8 @@
    "reuseDelayMs": 10500,
    "castRange": 2500,
    "baseCritRate": 0,
-   "overHit": false
+   "overHit": false,
+   "effectRange": 3000
   },
   {
    "skillId": 4231,
@@ -11373,7 +11538,8 @@
    "reuseDelayMs": 8000,
    "castRange": 600,
    "baseCritRate": 0,
-   "overHit": false
+   "overHit": false,
+   "effectRange": 1100
   },
   {
    "skillId": 4232,
@@ -11428,7 +11594,8 @@
    "reuseDelayMs": 6000,
    "castRange": 40,
    "baseCritRate": 0,
-   "overHit": false
+   "overHit": false,
+   "effectRange": 200
   },
   {
    "skillId": 4234,
@@ -11483,7 +11650,8 @@
    "reuseDelayMs": 0,
    "castRange": 900,
    "baseCritRate": 0,
-   "overHit": false
+   "overHit": false,
+   "effectRange": 1400
   },
   {
    "skillId": 4236,
@@ -11505,7 +11673,8 @@
    "reuseDelayMs": 75000,
    "castRange": 900,
    "baseCritRate": 0,
-   "overHit": false
+   "overHit": false,
+   "effectRange": 1400
   },
   {
    "skillId": 4237,
@@ -11527,7 +11696,8 @@
    "reuseDelayMs": 75000,
    "castRange": 40,
    "baseCritRate": 0,
-   "overHit": false
+   "overHit": false,
+   "effectRange": 400
   },
   {
    "skillId": 4244,
@@ -11582,7 +11752,8 @@
    "reuseDelayMs": 6000,
    "castRange": 40,
    "baseCritRate": 0,
-   "overHit": false
+   "overHit": false,
+   "effectRange": 200
   },
   {
    "skillId": 4247,
@@ -11637,7 +11808,8 @@
    "reuseDelayMs": 0,
    "castRange": 1000,
    "baseCritRate": 0,
-   "overHit": false
+   "overHit": false,
+   "effectRange": 1500
   },
   {
    "skillId": 4249,
@@ -11692,7 +11864,8 @@
    "reuseDelayMs": 0,
    "castRange": 1000,
    "baseCritRate": 0,
-   "overHit": false
+   "overHit": false,
+   "effectRange": 1500
   },
   {
    "skillId": 4250,
@@ -11747,7 +11920,8 @@
    "reuseDelayMs": 0,
    "castRange": 1000,
    "baseCritRate": 0,
-   "overHit": false
+   "overHit": false,
+   "effectRange": 1500
   },
   {
    "skillId": 4251,
@@ -11802,7 +11976,8 @@
    "reuseDelayMs": 0,
    "castRange": 1000,
    "baseCritRate": 0,
-   "overHit": false
+   "overHit": false,
+   "effectRange": 1500
   },
   {
    "skillId": 4252,
@@ -11857,7 +12032,8 @@
    "reuseDelayMs": 0,
    "castRange": 1000,
    "baseCritRate": 0,
-   "overHit": false
+   "overHit": false,
+   "effectRange": 1500
   },
   {
    "skillId": 4253,
@@ -11912,7 +12088,8 @@
    "reuseDelayMs": 0,
    "castRange": 1000,
    "baseCritRate": 0,
-   "overHit": false
+   "overHit": false,
+   "effectRange": 1500
   },
   {
    "skillId": 4254,
@@ -11967,7 +12144,8 @@
    "reuseDelayMs": 0,
    "castRange": 1000,
    "baseCritRate": 0,
-   "overHit": false
+   "overHit": false,
+   "effectRange": 1500
   },
   {
    "skillId": 4255,
@@ -12022,7 +12200,8 @@
    "reuseDelayMs": 0,
    "castRange": 1000,
    "baseCritRate": 0,
-   "overHit": false
+   "overHit": false,
+   "effectRange": 1500
   },
   {
    "skillId": 4257,
@@ -12077,7 +12256,8 @@
    "reuseDelayMs": 0,
    "castRange": 500,
    "baseCritRate": 0,
-   "overHit": false
+   "overHit": false,
+   "effectRange": 1000
   },
   {
    "skillId": 4261,
@@ -12132,7 +12312,8 @@
    "reuseDelayMs": 8000,
    "castRange": 600,
    "baseCritRate": 0,
-   "overHit": false
+   "overHit": false,
+   "effectRange": 1100
   },
   {
    "skillId": 4289,
@@ -12154,7 +12335,8 @@
    "reuseDelayMs": 6000,
    "castRange": 700,
    "baseCritRate": 0,
-   "overHit": false
+   "overHit": false,
+   "effectRange": 1200
   },
   {
    "skillId": 4314,
@@ -12209,7 +12391,8 @@
    "reuseDelayMs": 0,
    "castRange": 700,
    "baseCritRate": 0,
-   "overHit": false
+   "overHit": false,
+   "effectRange": 1200
   },
   {
    "skillId": 4377,
@@ -12264,7 +12447,8 @@
    "reuseDelayMs": 6000,
    "castRange": 40,
    "baseCritRate": 0,
-   "overHit": false
+   "overHit": false,
+   "effectRange": 200
   },
   {
    "skillId": 4382,
@@ -12374,7 +12558,8 @@
    "reuseDelayMs": 6000,
    "castRange": 40,
    "baseCritRate": 0,
-   "overHit": false
+   "overHit": false,
+   "effectRange": 200
   },
   {
    "skillId": 4473,
@@ -12429,7 +12614,8 @@
    "reuseDelayMs": 17000,
    "castRange": 700,
    "baseCritRate": 0,
-   "overHit": false
+   "overHit": false,
+   "effectRange": 1200
   },
   {
    "skillId": 4477,
@@ -12484,7 +12670,8 @@
    "reuseDelayMs": 15000,
    "castRange": 40,
    "baseCritRate": 0,
-   "overHit": false
+   "overHit": false,
+   "effectRange": 400
   },
   {
    "skillId": 4478,
@@ -12506,7 +12693,8 @@
    "reuseDelayMs": 0,
    "castRange": 700,
    "baseCritRate": 0,
-   "overHit": false
+   "overHit": false,
+   "effectRange": 1200
   },
   {
    "skillId": 4490,
@@ -12561,7 +12749,8 @@
    "reuseDelayMs": 15000,
    "castRange": 40,
    "baseCritRate": 0,
-   "overHit": false
+   "overHit": false,
+   "effectRange": 400
   },
   {
    "skillId": 4491,
@@ -12616,7 +12805,8 @@
    "reuseDelayMs": 25000,
    "castRange": 500,
    "baseCritRate": 0,
-   "overHit": false
+   "overHit": false,
+   "effectRange": 1000
   },
   {
    "skillId": 4492,
@@ -12671,7 +12861,8 @@
    "reuseDelayMs": 6000,
    "castRange": 40,
    "baseCritRate": 0,
-   "overHit": false
+   "overHit": false,
+   "effectRange": 200
   },
   {
    "skillId": 4495,
@@ -12726,7 +12917,8 @@
    "reuseDelayMs": 0,
    "castRange": 900,
    "baseCritRate": 0,
-   "overHit": false
+   "overHit": false,
+   "effectRange": 1400
   },
   {
    "skillId": 4496,
@@ -12781,7 +12973,8 @@
    "reuseDelayMs": 0,
    "castRange": 900,
    "baseCritRate": 0,
-   "overHit": false
+   "overHit": false,
+   "effectRange": 1400
   },
   {
    "skillId": 4529,
@@ -12858,7 +13051,8 @@
    "reuseDelayMs": 8000,
    "castRange": 150,
    "baseCritRate": 0,
-   "overHit": false
+   "overHit": false,
+   "effectRange": 650
   },
   {
    "skillId": 4561,
@@ -12913,7 +13107,8 @@
    "reuseDelayMs": 0,
    "castRange": 150,
    "baseCritRate": 0,
-   "overHit": false
+   "overHit": false,
+   "effectRange": 650
   },
   {
    "skillId": 4562,
@@ -12968,7 +13163,8 @@
    "reuseDelayMs": 30000,
    "castRange": 900,
    "baseCritRate": 0,
-   "overHit": false
+   "overHit": false,
+   "effectRange": 1400
   },
   {
    "skillId": 4563,
@@ -13023,7 +13219,8 @@
    "reuseDelayMs": 0,
    "castRange": 900,
    "baseCritRate": 0,
-   "overHit": false
+   "overHit": false,
+   "effectRange": 1400
   },
   {
    "skillId": 4564,
@@ -13078,7 +13275,8 @@
    "reuseDelayMs": 0,
    "castRange": 1000,
    "baseCritRate": 0,
-   "overHit": false
+   "overHit": false,
+   "effectRange": 1500
   },
   {
    "skillId": 4565,
@@ -13133,7 +13331,8 @@
    "reuseDelayMs": 20000,
    "castRange": 500,
    "baseCritRate": 0,
-   "overHit": false
+   "overHit": false,
+   "effectRange": 1000
   },
   {
    "skillId": 4566,
@@ -13188,7 +13387,8 @@
    "reuseDelayMs": 0,
    "castRange": 500,
    "baseCritRate": 0,
-   "overHit": false
+   "overHit": false,
+   "effectRange": 1000
   },
   {
    "skillId": 4567,
@@ -13243,7 +13443,8 @@
    "reuseDelayMs": 0,
    "castRange": 1000,
    "baseCritRate": 0,
-   "overHit": false
+   "overHit": false,
+   "effectRange": 1000
   },
   {
    "skillId": 4568,
@@ -13298,7 +13499,8 @@
    "reuseDelayMs": 30000,
    "castRange": 900,
    "baseCritRate": 0,
-   "overHit": false
+   "overHit": false,
+   "effectRange": 1400
   },
   {
    "skillId": 4569,
@@ -13353,7 +13555,8 @@
    "reuseDelayMs": 0,
    "castRange": 900,
    "baseCritRate": 0,
-   "overHit": false
+   "overHit": false,
+   "effectRange": 1400
   },
   {
    "skillId": 4570,
@@ -13408,7 +13611,8 @@
    "reuseDelayMs": 0,
    "castRange": 1000,
    "baseCritRate": 0,
-   "overHit": false
+   "overHit": false,
+   "effectRange": 1500
   },
   {
    "skillId": 4571,
@@ -13518,7 +13722,8 @@
    "reuseDelayMs": 30000,
    "castRange": 40,
    "baseCritRate": 15,
-   "overHit": false
+   "overHit": false,
+   "effectRange": 400
   },
   {
    "skillId": 4573,
@@ -13573,7 +13778,8 @@
    "reuseDelayMs": 15000,
    "castRange": 600,
    "baseCritRate": 15,
-   "overHit": false
+   "overHit": false,
+   "effectRange": 1100
   },
   {
    "skillId": 4574,
@@ -13628,7 +13834,8 @@
    "reuseDelayMs": 20000,
    "castRange": 500,
    "baseCritRate": 15,
-   "overHit": false
+   "overHit": false,
+   "effectRange": 1000
   },
   {
    "skillId": 4579,
@@ -13683,7 +13890,8 @@
    "reuseDelayMs": 6000,
    "castRange": 40,
    "baseCritRate": 0,
-   "overHit": false
+   "overHit": false,
+   "effectRange": 200
   },
   {
    "skillId": 4584,
@@ -13738,7 +13946,8 @@
    "reuseDelayMs": 6000,
    "castRange": 40,
    "baseCritRate": 0,
-   "overHit": false
+   "overHit": false,
+   "effectRange": 200
   },
   {
    "skillId": 4600,
@@ -13848,7 +14057,8 @@
    "reuseDelayMs": 8000,
    "castRange": 600,
    "baseCritRate": 0,
-   "overHit": false
+   "overHit": false,
+   "effectRange": 1100
   },
   {
    "skillId": 4604,
@@ -13903,7 +14113,8 @@
    "reuseDelayMs": 0,
    "castRange": 1000,
    "baseCritRate": 0,
-   "overHit": false
+   "overHit": false,
+   "effectRange": 1100
   },
   {
    "skillId": 4605,
@@ -13958,7 +14169,8 @@
    "reuseDelayMs": 6000,
    "castRange": 40,
    "baseCritRate": 0,
-   "overHit": false
+   "overHit": false,
+   "effectRange": 200
   },
   {
    "skillId": 4606,
@@ -14013,7 +14225,8 @@
    "reuseDelayMs": 6000,
    "castRange": 40,
    "baseCritRate": 0,
-   "overHit": false
+   "overHit": false,
+   "effectRange": 200
   },
   {
    "skillId": 4607,
@@ -14035,7 +14248,8 @@
    "reuseDelayMs": 0,
    "castRange": 600,
    "baseCritRate": 0,
-   "overHit": false
+   "overHit": false,
+   "effectRange": 1100
   },
   {
    "skillId": 4612,
@@ -14090,7 +14304,8 @@
    "reuseDelayMs": 6000,
    "castRange": 40,
    "baseCritRate": 0,
-   "overHit": false
+   "overHit": false,
+   "effectRange": 200
   },
   {
    "skillId": 4614,
@@ -14200,7 +14415,8 @@
    "reuseDelayMs": 8000,
    "castRange": 400,
    "baseCritRate": 0,
-   "overHit": false
+   "overHit": false,
+   "effectRange": 900
   },
   {
    "skillId": 4641,
@@ -14255,7 +14471,8 @@
    "reuseDelayMs": 6000,
    "castRange": 40,
    "baseCritRate": 0,
-   "overHit": false
+   "overHit": false,
+   "effectRange": 200
   },
   {
    "skillId": 4643,
@@ -14310,7 +14527,8 @@
    "reuseDelayMs": 6000,
    "castRange": 40,
    "baseCritRate": 0,
-   "overHit": false
+   "overHit": false,
+   "effectRange": 200
   },
   {
    "skillId": 4681,
@@ -14332,7 +14550,8 @@
    "reuseDelayMs": 0,
    "castRange": 50,
    "baseCritRate": 10,
-   "overHit": false
+   "overHit": false,
+   "effectRange": 400
   },
   {
    "skillId": 4682,
@@ -14354,7 +14573,8 @@
    "reuseDelayMs": 0,
    "castRange": 50,
    "baseCritRate": 10,
-   "overHit": false
+   "overHit": false,
+   "effectRange": 400
   },
   {
    "skillId": 4683,
@@ -14376,7 +14596,8 @@
    "reuseDelayMs": 0,
    "castRange": 600,
    "baseCritRate": 0,
-   "overHit": false
+   "overHit": false,
+   "effectRange": 1100
   },
   {
    "skillId": 4684,
@@ -14398,7 +14619,8 @@
    "reuseDelayMs": 0,
    "castRange": 900,
    "baseCritRate": 0,
-   "overHit": false
+   "overHit": false,
+   "effectRange": 1400
   },
   {
    "skillId": 4685,
@@ -14535,7 +14757,8 @@
    "reuseDelayMs": 10000,
    "castRange": 40,
    "baseCritRate": 0,
-   "overHit": false
+   "overHit": false,
+   "effectRange": 200
   },
   {
    "skillId": 4709,
@@ -14584,7 +14807,8 @@
    "reuseDelayMs": 10000,
    "castRange": 40,
    "baseCritRate": 10,
-   "overHit": false
+   "overHit": false,
+   "effectRange": 200
   },
   {
    "skillId": 4710,
@@ -14639,7 +14863,8 @@
    "reuseDelayMs": 12000,
    "castRange": 40,
    "baseCritRate": 0,
-   "overHit": false
+   "overHit": false,
+   "effectRange": 200
   },
   {
    "skillId": 4712,
@@ -14694,7 +14919,8 @@
    "reuseDelayMs": 0,
    "castRange": 600,
    "baseCritRate": 0,
-   "overHit": false
+   "overHit": false,
+   "effectRange": 1100
   },
   {
    "skillId": 4719,
@@ -14749,7 +14975,8 @@
    "reuseDelayMs": 0,
    "castRange": 40,
    "baseCritRate": 0,
-   "overHit": false
+   "overHit": false,
+   "effectRange": 200
   },
   {
    "skillId": 4720,
@@ -14804,7 +15031,8 @@
    "reuseDelayMs": 0,
    "castRange": 40,
    "baseCritRate": 0,
-   "overHit": false
+   "overHit": false,
+   "effectRange": 200
   },
   {
    "skillId": 4721,
@@ -14859,7 +15087,8 @@
    "reuseDelayMs": 0,
    "castRange": 40,
    "baseCritRate": 0,
-   "overHit": false
+   "overHit": false,
+   "effectRange": 200
   },
   {
    "skillId": 4722,
@@ -14914,7 +15143,8 @@
    "reuseDelayMs": 0,
    "castRange": 40,
    "baseCritRate": 0,
-   "overHit": false
+   "overHit": false,
+   "effectRange": 200
   },
   {
    "skillId": 4723,
@@ -14969,7 +15199,8 @@
    "reuseDelayMs": 0,
    "castRange": 40,
    "baseCritRate": 0,
-   "overHit": false
+   "overHit": false,
+   "effectRange": 200
   },
   {
    "skillId": 4724,
@@ -15024,7 +15255,8 @@
    "reuseDelayMs": 0,
    "castRange": 40,
    "baseCritRate": 0,
-   "overHit": false
+   "overHit": false,
+   "effectRange": 200
   },
   {
    "skillId": 4725,
@@ -15079,7 +15311,8 @@
    "reuseDelayMs": 0,
    "castRange": 40,
    "baseCritRate": 0,
-   "overHit": false
+   "overHit": false,
+   "effectRange": 200
   },
   {
    "skillId": 4726,
@@ -15134,7 +15367,8 @@
    "reuseDelayMs": 0,
    "castRange": 40,
    "baseCritRate": 0,
-   "overHit": false
+   "overHit": false,
+   "effectRange": 200
   },
   {
    "skillId": 4727,
@@ -15189,7 +15423,8 @@
    "reuseDelayMs": 0,
    "castRange": 40,
    "baseCritRate": 0,
-   "overHit": false
+   "overHit": false,
+   "effectRange": 200
   },
   {
    "skillId": 4728,
@@ -15244,7 +15479,8 @@
    "reuseDelayMs": 0,
    "castRange": 40,
    "baseCritRate": 0,
-   "overHit": false
+   "overHit": false,
+   "effectRange": 200
   },
   {
    "skillId": 4729,
@@ -15299,7 +15535,8 @@
    "reuseDelayMs": 0,
    "castRange": 40,
    "baseCritRate": 0,
-   "overHit": false
+   "overHit": false,
+   "effectRange": 200
   },
   {
    "skillId": 4730,
@@ -15354,7 +15591,8 @@
    "reuseDelayMs": 0,
    "castRange": 40,
    "baseCritRate": 0,
-   "overHit": false
+   "overHit": false,
+   "effectRange": 200
   },
   {
    "skillId": 4731,
@@ -15409,7 +15647,8 @@
    "reuseDelayMs": 0,
    "castRange": 40,
    "baseCritRate": 0,
-   "overHit": false
+   "overHit": false,
+   "effectRange": 200
   },
   {
    "skillId": 4732,
@@ -15464,7 +15703,8 @@
    "reuseDelayMs": 0,
    "castRange": 40,
    "baseCritRate": 0,
-   "overHit": false
+   "overHit": false,
+   "effectRange": 200
   },
   {
    "skillId": 4733,
@@ -15519,7 +15759,8 @@
    "reuseDelayMs": 0,
    "castRange": 40,
    "baseCritRate": 0,
-   "overHit": false
+   "overHit": false,
+   "effectRange": 200
   },
   {
    "skillId": 4734,
@@ -15849,7 +16090,8 @@
    "reuseDelayMs": 0,
    "castRange": 40,
    "baseCritRate": 0,
-   "overHit": false
+   "overHit": false,
+   "effectRange": 200
   },
   {
    "skillId": 4740,
@@ -15904,7 +16146,8 @@
    "reuseDelayMs": 0,
    "castRange": 40,
    "baseCritRate": 0,
-   "overHit": false
+   "overHit": false,
+   "effectRange": 200
   },
   {
    "skillId": 4741,
@@ -15959,7 +16202,8 @@
    "reuseDelayMs": 0,
    "castRange": 40,
    "baseCritRate": 0,
-   "overHit": false
+   "overHit": false,
+   "effectRange": 200
   },
   {
    "skillId": 4742,
@@ -16014,7 +16258,8 @@
    "reuseDelayMs": 0,
    "castRange": 40,
    "baseCritRate": 0,
-   "overHit": false
+   "overHit": false,
+   "effectRange": 200
   },
   {
    "skillId": 4743,
@@ -16069,7 +16314,8 @@
    "reuseDelayMs": 0,
    "castRange": 40,
    "baseCritRate": 0,
-   "overHit": false
+   "overHit": false,
+   "effectRange": 200
   },
   {
    "skillId": 4744,
@@ -16124,7 +16370,8 @@
    "reuseDelayMs": 0,
    "castRange": 40,
    "baseCritRate": 0,
-   "overHit": false
+   "overHit": false,
+   "effectRange": 200
   },
   {
    "skillId": 4745,
@@ -16179,7 +16426,8 @@
    "reuseDelayMs": 0,
    "castRange": 40,
    "baseCritRate": 0,
-   "overHit": false
+   "overHit": false,
+   "effectRange": 200
   },
   {
    "skillId": 4746,
@@ -16234,7 +16482,8 @@
    "reuseDelayMs": 0,
    "castRange": 40,
    "baseCritRate": 0,
-   "overHit": false
+   "overHit": false,
+   "effectRange": 200
   },
   {
    "skillId": 4747,
@@ -16289,7 +16538,8 @@
    "reuseDelayMs": 0,
    "castRange": 40,
    "baseCritRate": 0,
-   "overHit": false
+   "overHit": false,
+   "effectRange": 200
   },
   {
    "skillId": 4748,
@@ -16344,7 +16594,8 @@
    "reuseDelayMs": 0,
    "castRange": 40,
    "baseCritRate": 0,
-   "overHit": false
+   "overHit": false,
+   "effectRange": 200
   },
   {
    "skillId": 4749,
@@ -16399,7 +16650,8 @@
    "reuseDelayMs": 0,
    "castRange": 40,
    "baseCritRate": 0,
-   "overHit": false
+   "overHit": false,
+   "effectRange": 200
   },
   {
    "skillId": 4750,
@@ -16454,7 +16706,8 @@
    "reuseDelayMs": 0,
    "castRange": 40,
    "baseCritRate": 0,
-   "overHit": false
+   "overHit": false,
+   "effectRange": 200
   },
   {
    "skillId": 4751,
@@ -16509,7 +16762,8 @@
    "reuseDelayMs": 0,
    "castRange": 40,
    "baseCritRate": 0,
-   "overHit": false
+   "overHit": false,
+   "effectRange": 200
   },
   {
    "skillId": 4752,
@@ -16564,7 +16818,8 @@
    "reuseDelayMs": 0,
    "castRange": 40,
    "baseCritRate": 0,
-   "overHit": false
+   "overHit": false,
+   "effectRange": 200
   },
   {
    "skillId": 4753,
@@ -16619,7 +16874,8 @@
    "reuseDelayMs": 0,
    "castRange": 40,
    "baseCritRate": 0,
-   "overHit": false
+   "overHit": false,
+   "effectRange": 200
   },
   {
    "skillId": 4754,
@@ -16674,7 +16930,8 @@
    "reuseDelayMs": 0,
    "castRange": 900,
    "baseCritRate": 0,
-   "overHit": false
+   "overHit": false,
+   "effectRange": 1400
   },
   {
    "skillId": 4755,
@@ -16729,7 +16986,8 @@
    "reuseDelayMs": 0,
    "castRange": 900,
    "baseCritRate": 0,
-   "overHit": false
+   "overHit": false,
+   "effectRange": 1400
   },
   {
    "skillId": 4756,
@@ -16784,7 +17042,8 @@
    "reuseDelayMs": 0,
    "castRange": 900,
    "baseCritRate": 0,
-   "overHit": false
+   "overHit": false,
+   "effectRange": 1400
   },
   {
    "skillId": 4757,
@@ -16839,7 +17098,8 @@
    "reuseDelayMs": 0,
    "castRange": 900,
    "baseCritRate": 0,
-   "overHit": false
+   "overHit": false,
+   "effectRange": 1400
   },
   {
    "skillId": 4758,
@@ -16894,7 +17154,8 @@
    "reuseDelayMs": 0,
    "castRange": 900,
    "baseCritRate": 0,
-   "overHit": false
+   "overHit": false,
+   "effectRange": 1400
   },
   {
    "skillId": 4759,
@@ -16949,7 +17210,8 @@
    "reuseDelayMs": 0,
    "castRange": 900,
    "baseCritRate": 0,
-   "overHit": false
+   "overHit": false,
+   "effectRange": 1400
   },
   {
    "skillId": 4760,
@@ -17004,7 +17266,8 @@
    "reuseDelayMs": 0,
    "castRange": 900,
    "baseCritRate": 0,
-   "overHit": false
+   "overHit": false,
+   "effectRange": 1400
   },
   {
    "skillId": 4761,
@@ -17059,7 +17322,8 @@
    "reuseDelayMs": 0,
    "castRange": 900,
    "baseCritRate": 0,
-   "overHit": false
+   "overHit": false,
+   "effectRange": 1400
   },
   {
    "skillId": 4762,
@@ -17114,7 +17378,8 @@
    "reuseDelayMs": 0,
    "castRange": 900,
    "baseCritRate": 0,
-   "overHit": false
+   "overHit": false,
+   "effectRange": 1400
   },
   {
    "skillId": 4763,
@@ -17169,7 +17434,8 @@
    "reuseDelayMs": 0,
    "castRange": 900,
    "baseCritRate": 0,
-   "overHit": false
+   "overHit": false,
+   "effectRange": 1400
   },
   {
    "skillId": 4764,
@@ -17224,7 +17490,8 @@
    "reuseDelayMs": 0,
    "castRange": 900,
    "baseCritRate": 0,
-   "overHit": false
+   "overHit": false,
+   "effectRange": 1400
   },
   {
    "skillId": 4765,
@@ -17279,7 +17546,8 @@
    "reuseDelayMs": 0,
    "castRange": 900,
    "baseCritRate": 0,
-   "overHit": false
+   "overHit": false,
+   "effectRange": 1400
   },
   {
    "skillId": 4766,
@@ -17334,7 +17602,8 @@
    "reuseDelayMs": 0,
    "castRange": 900,
    "baseCritRate": 0,
-   "overHit": false
+   "overHit": false,
+   "effectRange": 1400
   },
   {
    "skillId": 4767,
@@ -17389,7 +17658,8 @@
    "reuseDelayMs": 0,
    "castRange": 900,
    "baseCritRate": 0,
-   "overHit": false
+   "overHit": false,
+   "effectRange": 1400
   },
   {
    "skillId": 4768,
@@ -17444,7 +17714,8 @@
    "reuseDelayMs": 0,
    "castRange": 900,
    "baseCritRate": 0,
-   "overHit": false
+   "overHit": false,
+   "effectRange": 1400
   },
   {
    "skillId": 4769,
@@ -17499,7 +17770,8 @@
    "reuseDelayMs": 0,
    "castRange": 900,
    "baseCritRate": 0,
-   "overHit": false
+   "overHit": false,
+   "effectRange": 1400
   },
   {
    "skillId": 4770,
@@ -17554,7 +17826,8 @@
    "reuseDelayMs": 0,
    "castRange": 900,
    "baseCritRate": 0,
-   "overHit": false
+   "overHit": false,
+   "effectRange": 1400
   },
   {
    "skillId": 4771,
@@ -17609,7 +17882,8 @@
    "reuseDelayMs": 0,
    "castRange": 900,
    "baseCritRate": 0,
-   "overHit": false
+   "overHit": false,
+   "effectRange": 1400
   },
   {
    "skillId": 4772,
@@ -17664,7 +17938,8 @@
    "reuseDelayMs": 0,
    "castRange": 900,
    "baseCritRate": 0,
-   "overHit": false
+   "overHit": false,
+   "effectRange": 1400
   },
   {
    "skillId": 4773,
@@ -17719,7 +17994,8 @@
    "reuseDelayMs": 0,
    "castRange": 900,
    "baseCritRate": 0,
-   "overHit": false
+   "overHit": false,
+   "effectRange": 1400
   },
   {
    "skillId": 4774,
@@ -17774,7 +18050,8 @@
    "reuseDelayMs": 0,
    "castRange": 900,
    "baseCritRate": 0,
-   "overHit": false
+   "overHit": false,
+   "effectRange": 1400
   },
   {
    "skillId": 4775,
@@ -17829,7 +18106,8 @@
    "reuseDelayMs": 0,
    "castRange": 900,
    "baseCritRate": 0,
-   "overHit": false
+   "overHit": false,
+   "effectRange": 1400
   },
   {
    "skillId": 4776,
@@ -17884,7 +18162,8 @@
    "reuseDelayMs": 0,
    "castRange": 900,
    "baseCritRate": 0,
-   "overHit": false
+   "overHit": false,
+   "effectRange": 1400
   },
   {
    "skillId": 4777,
@@ -17939,7 +18218,8 @@
    "reuseDelayMs": 0,
    "castRange": 900,
    "baseCritRate": 0,
-   "overHit": false
+   "overHit": false,
+   "effectRange": 1400
   },
   {
    "skillId": 4778,
@@ -17994,7 +18274,8 @@
    "reuseDelayMs": 0,
    "castRange": 900,
    "baseCritRate": 0,
-   "overHit": false
+   "overHit": false,
+   "effectRange": 1400
   },
   {
    "skillId": 4993,
@@ -18016,7 +18297,8 @@
    "reuseDelayMs": 0,
    "castRange": 40,
    "baseCritRate": 0,
-   "overHit": false
+   "overHit": false,
+   "effectRange": 200
   },
   {
    "skillId": 4994,
@@ -18038,7 +18320,8 @@
    "reuseDelayMs": 20000,
    "castRange": 500,
    "baseCritRate": 0,
-   "overHit": false
+   "overHit": false,
+   "effectRange": 1000
   },
   {
    "skillId": 5000,
@@ -18060,7 +18343,8 @@
    "reuseDelayMs": 0,
    "castRange": 1000,
    "baseCritRate": 0,
-   "overHit": false
+   "overHit": false,
+   "effectRange": 2000
   },
   {
    "skillId": 5003,
@@ -18082,7 +18366,8 @@
    "reuseDelayMs": 15000,
    "castRange": 500,
    "baseCritRate": 0,
-   "overHit": false
+   "overHit": false,
+   "effectRange": 1000
   },
   {
    "skillId": 5004,
@@ -18126,7 +18411,8 @@
    "reuseDelayMs": 0,
    "castRange": 150,
    "baseCritRate": 0,
-   "overHit": false
+   "overHit": false,
+   "effectRange": 650
   },
   {
    "skillId": 5010,
@@ -18148,7 +18434,8 @@
    "reuseDelayMs": 0,
    "castRange": 500,
    "baseCritRate": 0,
-   "overHit": false
+   "overHit": false,
+   "effectRange": 1000
   },
   {
    "skillId": 5011,
@@ -18198,7 +18485,8 @@
    "reuseDelayMs": 0,
    "castRange": 150,
    "baseCritRate": 6,
-   "overHit": false
+   "overHit": false,
+   "effectRange": 650
   },
   {
    "skillId": 5015,
@@ -18235,7 +18523,8 @@
    "reuseDelayMs": 0,
    "castRange": 150,
    "baseCritRate": 0,
-   "overHit": false
+   "overHit": false,
+   "effectRange": 650
   },
   {
    "skillId": 5018,
@@ -18370,7 +18659,8 @@
    "reuseDelayMs": 7000,
    "castRange": 1200,
    "baseCritRate": 0,
-   "overHit": false
+   "overHit": false,
+   "effectRange": 1700
   },
   {
    "skillId": 5045,
@@ -18425,7 +18715,8 @@
    "reuseDelayMs": 8000,
    "castRange": 40,
    "baseCritRate": 0,
-   "overHit": false
+   "overHit": false,
+   "effectRange": 200
   },
   {
    "skillId": 5046,
@@ -18480,7 +18771,8 @@
    "reuseDelayMs": 20000,
    "castRange": 1500,
    "baseCritRate": 0,
-   "overHit": false
+   "overHit": false,
+   "effectRange": 2100
   },
   {
    "skillId": 5051,
@@ -18590,7 +18882,8 @@
    "reuseDelayMs": 0,
    "castRange": 1500,
    "baseCritRate": 0,
-   "overHit": false
+   "overHit": false,
+   "effectRange": 2000
   },
   {
    "skillId": 5053,
@@ -18645,7 +18938,8 @@
    "reuseDelayMs": 0,
    "castRange": 1500,
    "baseCritRate": 0,
-   "overHit": false
+   "overHit": false,
+   "effectRange": 2100
   },
   {
    "skillId": 5056,
@@ -18700,7 +18994,8 @@
    "reuseDelayMs": 0,
    "castRange": 1500,
    "baseCritRate": 0,
-   "overHit": false
+   "overHit": false,
+   "effectRange": 2000
   },
   {
    "skillId": 5065,
@@ -18755,7 +19050,8 @@
    "reuseDelayMs": 0,
    "castRange": 1500,
    "baseCritRate": 0,
-   "overHit": false
+   "overHit": false,
+   "effectRange": 2100
   },
   {
    "skillId": 5073,
@@ -18810,7 +19106,8 @@
    "reuseDelayMs": 0,
    "castRange": 1500,
    "baseCritRate": 0,
-   "overHit": false
+   "overHit": false,
+   "effectRange": 1500
   },
   {
    "skillId": 5081,
@@ -18841,7 +19138,8 @@
    "reuseDelayMs": 0,
    "castRange": 40,
    "baseCritRate": 0,
-   "overHit": false
+   "overHit": false,
+   "effectRange": 200
   },
   {
    "skillId": 5082,
@@ -18903,7 +19201,8 @@
    "reuseDelayMs": 0,
    "castRange": 40,
    "baseCritRate": 0,
-   "overHit": false
+   "overHit": false,
+   "effectRange": 200
   },
   {
    "skillId": 5084,
@@ -18934,7 +19233,8 @@
    "reuseDelayMs": 0,
    "castRange": 40,
    "baseCritRate": 0,
-   "overHit": false
+   "overHit": false,
+   "effectRange": 200
   },
   {
    "skillId": 5093,
@@ -18956,7 +19256,8 @@
    "reuseDelayMs": 6000,
    "castRange": 600,
    "baseCritRate": 0,
-   "overHit": false
+   "overHit": false,
+   "effectRange": 1100
   },
   {
    "skillId": 5094,
@@ -19000,7 +19301,8 @@
    "reuseDelayMs": 0,
    "castRange": 40,
    "baseCritRate": 0,
-   "overHit": false
+   "overHit": false,
+   "effectRange": 200
   },
   {
    "skillId": 5096,
@@ -19022,7 +19324,8 @@
    "reuseDelayMs": 0,
    "castRange": 600,
    "baseCritRate": 0,
-   "overHit": false
+   "overHit": false,
+   "effectRange": 1100
   },
   {
    "skillId": 5097,
@@ -19066,7 +19369,8 @@
    "reuseDelayMs": 10500,
    "castRange": 1600,
    "baseCritRate": 0,
-   "overHit": false
+   "overHit": false,
+   "effectRange": 1600
   },
   {
    "skillId": 5111,
@@ -19088,7 +19392,8 @@
    "reuseDelayMs": 10500,
    "castRange": 2000,
    "baseCritRate": 0,
-   "overHit": false
+   "overHit": false,
+   "effectRange": 2000
   },
   {
    "skillId": 5117,
@@ -19132,7 +19437,8 @@
    "reuseDelayMs": 17000,
    "castRange": 40,
    "baseCritRate": 0,
-   "overHit": false
+   "overHit": false,
+   "effectRange": 400
   },
   {
    "skillId": 5120,
@@ -19154,7 +19460,8 @@
    "reuseDelayMs": 6000,
    "castRange": 600,
    "baseCritRate": 0,
-   "overHit": false
+   "overHit": false,
+   "effectRange": 900
   },
   {
    "skillId": 5130,
@@ -19264,7 +19571,8 @@
    "reuseDelayMs": 8000,
    "castRange": 40,
    "baseCritRate": 0,
-   "overHit": true
+   "overHit": true,
+   "effectRange": 400
   },
   {
    "skillId": 5136,
@@ -19308,7 +19616,8 @@
    "reuseDelayMs": 8000,
    "castRange": 40,
    "baseCritRate": 0,
-   "overHit": true
+   "overHit": true,
+   "effectRange": 400
   },
   {
    "skillId": 5139,
@@ -19330,7 +19639,8 @@
    "reuseDelayMs": 8000,
    "castRange": 500,
    "baseCritRate": 0,
-   "overHit": true
+   "overHit": true,
+   "effectRange": 1000
   },
   {
    "skillId": 5141,
@@ -19352,7 +19662,8 @@
    "reuseDelayMs": 8000,
    "castRange": 40,
    "baseCritRate": 0,
-   "overHit": true
+   "overHit": true,
+   "effectRange": 400
   },
   {
    "skillId": 5142,
@@ -19374,7 +19685,8 @@
    "reuseDelayMs": 20000,
    "castRange": 400,
    "baseCritRate": 0,
-   "overHit": false
+   "overHit": false,
+   "effectRange": 900
   },
   {
    "skillId": 5143,
@@ -19396,7 +19708,8 @@
    "reuseDelayMs": 0,
    "castRange": 40,
    "baseCritRate": 0,
-   "overHit": false
+   "overHit": false,
+   "effectRange": 200
   },
   {
    "skillId": 5178,
@@ -19440,7 +19753,8 @@
    "reuseDelayMs": 6000,
    "castRange": 900,
    "baseCritRate": 0,
-   "overHit": false
+   "overHit": false,
+   "effectRange": 1400
   }
  ]
 }

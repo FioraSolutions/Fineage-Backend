@@ -119,6 +119,12 @@ public sealed partial class ZoneWorld
         var session = entity.Session;
         if (session == null)
             return;
+        // Mobius teleToLocation: abortCast + intention IDLE — no hit lands across a teleport, queued cast/pickup dropped.
+        AbortCast(entity, "teleport", toSelf, notify: false);
+        session.PendingPickupId = 0;
+        session.PendingPickupAtUnixMs = 0;
+        session.AutoAttackTargetId = 0;
+        session.ClearApproach();
 
         var ack = new MoveToMsg
         {

@@ -410,6 +410,8 @@ public sealed partial class ZoneWorld
 
         target.CombatUntilUnixMs = now + ClanProtocol.CombatStanceMillis;
         FanoutVitals(target, PlayerVitalsStatus(target), outbound);
+        if (target.CurHp > 0)
+            MaybeBreakCast(target, hit.Damage, outbound);
         if (target.CurHp <= 0)
         {
             attacker.HateList.Remove(target.ObjectId);

@@ -45,7 +45,27 @@ public sealed partial class ZoneWorld
         if (hit == null || player.Dead)
             return;
         if (!_byId.TryGetValue(hit.TargetId, out var target) || target.Kind != ZoneEntityKind.Npc || target.CurHp <= 0)
+        {
+            AbortCast(player, "target-gone", outbound, notify: false);
             return;
+        }
+
+        // Mobius onMagicLaunchedTimer: target escaped (effectRange) or out of sight at launch → abortCast, mpConsume not spent.
+        if (hit.Combat != null)
+        {
+            int escape = Fineage.Game.Combat.CastRules.EscapeRange(hit.Combat.CastRange, hit.Combat.EffectRange);
+            if (escape > 0 && !ZoneCombat.InCastRange(player.X, player.Y, target.X, target.Y, escape + ZoneCombat.HitRangeTolerance))
+            {
+                AbortCast(player, "escaped", outbound, notify: false);
+                return;
+            }
+
+            if (!CanSeeTarget(player, target))
+            {
+                AbortCast(player, "no-los", outbound, notify: false);
+                return;
+            }
+        }
 
         int damage = hit.Combat != null ? RollSkillDamage(player, target, hit.Combat, hit.Level, outbound) : hit.Damage;
         if (hit.Combat != null)

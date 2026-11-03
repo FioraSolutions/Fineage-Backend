@@ -128,3 +128,13 @@ Data: `data/herbs.json` (`HerbCatalog`), from Mobius CT0 items 8600–8614 / 895
 - 60 s ground lifetime (HerbAutoDestroyTime) now uses the same catalog (8954 Blue Primeval Crystal is no longer treated as a herb).
 - Drops: 20 Elven Starting monsters (e.g. 20336 Green Dryad, 20019 Dryad Elder, 20468–20472 Kaboo orcs, 20534 Red Keltir) carry herb groups in `data/drops`; Elven Village itself has none.
 - Stubs: Herb of Speed's runSpd +33 is shown as an abnormal but not applied (runSpd is not modelled in skill-stat-effects yet, same as Wind Walk). Same-abnormalType replacement (e.g. Herb of Power vs Might) follows the existing per-skill abnormal list, not Mobius abnormalType groups. A herb stack with count > 1 applies once per pickup.
+
+## Cast interrupt / cancel at launch
+
+Rules: `Fineage.Game.Combat.CastRules`; Zone: `ZoneWorldCastInterrupt.cs` + `ResolvePendingHit`.
+
+- **Break on hit** (Mobius `Formulas.calcAtkBreak`, `AltGameCancelByHit=Cast`): a player hit by a mob melee swing while a **magic** attack skill is in flight rolls `15 + √(13·dmg) − (MEN bonus·100 − 100)`, clamped 1–99 %. On break: no hit, casting window cleared, queued cast dropped, SysMsg 27 "Your casting has been interrupted.". Physical skills (Power Strike…) are never broken (`breakCast` is magic/static only).
+- **Abort at launch** (`onMagicLaunchedTimer`): at hitTime the target must still exist and be alive, be within the skill's **effectRange** (now in `skill-combat.json`, 314 skills via `scripts/gen_skill_effect_range.py`; castRange fallback) and be in line of sight. Otherwise the cast aborts silently: no damage, `mpConsume` not spent (only `mpInitialConsume` was), reuse stays.
+- **Teleport** (`Relocate`, used by gatekeepers / dungeons / travel token): aborts the cast and clears queued cast, pickup, auto-attack and approach (Mobius `teleToLocation`).
+- Client gap: the Net contract has no `MagicSkillCanceled`, so the client's cast bar/animation runs out on its own; only SysMsg 27 tells the player. Adding the packet needs a client change (deferred).
+- Stubs / deferred: stun/sleep/paralyze interrupts (no control abnormals hit players yet; `AbortCast` is the hook), buff/debuff/support/spoil skills apply at cast start so there is nothing to interrupt, legacy non-`skill-combat` attack skills aren't interruptible, mob skills (none on players yet), full channeling, magicLvl/land-rate polish, buffs on magic crit.
