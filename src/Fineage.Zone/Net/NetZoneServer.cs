@@ -235,6 +235,13 @@ public sealed class NetZoneServer : INetPresenceBridge
             _ = _presence.SendAsync(watcher, NetOpcode.InventoryUpdate, payload, CancellationToken.None);
     }
 
+    void INetPresenceBridge.FanoutEtcStatusUpdate(IReadOnlyList<int> watcherObjectIds, EtcStatusUpdateNetMsg status)
+    {
+        var payload = NetCodec.EncodeEtcStatusUpdate(status);
+        foreach (int watcher in watcherObjectIds)
+            _ = _presence.SendAsync(watcher, NetOpcode.EtcStatusUpdate, payload, CancellationToken.None);
+    }
+
     void INetPresenceBridge.FanoutCreatureSay(IReadOnlyList<int> watcherObjectIds, CreatureSayNetMsg say)
     {
         var payload = NetCodec.EncodeCreatureSay(say);
@@ -791,6 +798,11 @@ public sealed class NetZoneServer : INetPresenceBridge
         // Mobius EnterWorld: ShortCutInit after ItemList / SkillList so item and skill icons resolve.
         await conn.SendAsync(NetOpcode.ShortCutInit, NetCodec.EncodeShortCutInit(_world.NetShortcutInit(zoneSession)), ct: ct)
             .ConfigureAwait(false);
+        // Mobius EnterWorld:401 sends EtcStatusUpdate after ItemList/ShortCutInit and after updateEffectIcons, so the
+        // overload icon appears on an otherwise fully-dressed status bar.
+        if (_world.TryBuildNetEtcStatus(zoneSession, out var etcStatus))
+            await conn.SendAsync(NetOpcode.EtcStatusUpdate, NetCodec.EncodeEtcStatusUpdate(etcStatus), ct: ct)
+                .ConfigureAwait(false);
 
         var welcome = SayRules.Welcome(zoneSession.Name);
         await conn.SendAsync(

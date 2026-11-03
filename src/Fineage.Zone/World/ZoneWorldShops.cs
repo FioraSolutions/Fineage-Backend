@@ -145,7 +145,7 @@ public sealed partial class ZoneWorld
             lines,
             baseTax,
             castleTax,
-            ShopTrade.MaxLoad(PlayerClasses, player.ClassId),
+            MaxLoadOf(player),
             ShopTrade.SlotLimit(player.Race),
             _shopStock,
             _clock().ToUnixTimeMilliseconds());
@@ -216,7 +216,7 @@ public sealed partial class ZoneWorld
             _game.Items,
             entry,
             request.Amount,
-            ShopTrade.MaxLoad(PlayerClasses, player.ClassId),
+            MaxLoadOf(player),
             ShopTrade.SlotLimit(player.Race));
         if (!mutation.Ok)
         {
@@ -409,7 +409,7 @@ public sealed partial class ZoneWorld
         {
             Adena = player.Inventory.CountOf(ShopTrade.AdenaItemId),
             Weight = weight > int.MaxValue ? int.MaxValue : (int)weight,
-            MaxWeight = ShopTrade.MaxLoad(PlayerClasses, player.ClassId),
+            MaxWeight = MaxLoadOf(player),
             Slots = player.Inventory.Items.Count,
             MaxSlots = ShopTrade.SlotLimit(player.Race),
             BaseTaxPercent = baseTax,

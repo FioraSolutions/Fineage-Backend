@@ -57,6 +57,13 @@
      ]
     },
     {
+     "stat": "regMp",
+     "op": "mul",
+     "values": [
+      1.1
+     ]
+    },
+    {
      "stat": "rEvas",
      "op": "add",
      "values": [
@@ -248,6 +255,22 @@
    ]
   },
   {
+   "skillId": 150,
+   "name": "Weight Limit",
+   "levels": 3,
+   "effects": [
+    {
+     "stat": "weightLimit",
+     "op": "mul",
+     "values": [
+      2.0,
+      3.0,
+      4.0
+     ]
+    }
+   ]
+  },
+  {
    "skillId": 153,
    "name": "Shield Mastery",
    "levels": 4,
@@ -294,6 +317,25 @@
      "values": [
       7.0,
       11.0
+     ]
+    }
+   ]
+  },
+  {
+   "skillId": 191,
+   "name": "Focus Mind",
+   "levels": 6,
+   "effects": [
+    {
+     "stat": "regMp",
+     "op": "add",
+     "values": [
+      3.1,
+      3.5,
+      3.9,
+      4.3,
+      4.7,
+      5.1
      ]
     }
    ]
@@ -567,6 +609,44 @@
    ]
   },
   {
+   "skillId": 212,
+   "name": "Fast HP Recovery",
+   "levels": 8,
+   "effects": [
+    {
+     "stat": "regHp",
+     "op": "add",
+     "values": [
+      1.1,
+      1.6,
+      1.7,
+      2.1,
+      2.6,
+      2.7,
+      3.4,
+      4.0
+     ]
+    }
+   ]
+  },
+  {
+   "skillId": 214,
+   "name": "Mana Recovery",
+   "levels": 1,
+   "effects": [
+    {
+     "stat": "regMp",
+     "op": "mul",
+     "values": [
+      1.2
+     ],
+     "using": [
+      "MAGIC"
+     ]
+    }
+   ]
+  },
+  {
    "skillId": 216,
    "name": "Polearm Mastery",
    "levels": 45,
@@ -826,6 +906,26 @@
       1.05,
       1.07,
       1.1
+     ]
+    }
+   ]
+  },
+  {
+   "skillId": 229,
+   "name": "Fast Mana Recovery",
+   "levels": 7,
+   "effects": [
+    {
+     "stat": "regMp",
+     "op": "add",
+     "values": [
+      1.1,
+      1.5,
+      1.9,
+      2.3,
+      2.7,
+      3.1,
+      3.4
      ]
     }
    ]
@@ -1271,6 +1371,16 @@
      "using": [
       "LIGHT"
      ]
+    },
+    {
+     "stat": "regMp",
+     "op": "mul",
+     "values": [
+      1.2
+     ],
+     "using": [
+      "LIGHT"
+     ]
     }
    ]
   },
@@ -1707,6 +1817,16 @@
      "using": [
       "LIGHT"
      ]
+    },
+    {
+     "stat": "regMp",
+     "op": "mul",
+     "values": [
+      1.2
+     ],
+     "using": [
+      "LIGHT"
+     ]
     }
    ]
   },
@@ -1917,6 +2037,16 @@
      "using": [
       "LIGHT"
      ]
+    },
+    {
+     "stat": "regMp",
+     "op": "mul",
+     "values": [
+      1.2
+     ],
+     "using": [
+      "LIGHT"
+     ]
     }
    ]
   },
@@ -2014,6 +2144,38 @@
      ],
      "using": [
       "LIGHT"
+     ]
+    }
+   ]
+  },
+  {
+   "skillId": 373,
+   "name": "Clan Lifeblood",
+   "levels": 3,
+   "effects": [
+    {
+     "stat": "regHp",
+     "op": "mul",
+     "values": [
+      1.03,
+      1.05,
+      1.06
+     ]
+    }
+   ]
+  },
+  {
+   "skillId": 375,
+   "name": "Clan Clarity",
+   "levels": 3,
+   "effects": [
+    {
+     "stat": "regMp",
+     "op": "mul",
+     "values": [
+      1.03,
+      1.05,
+      1.06
      ]
     }
    ]
@@ -2126,6 +2288,22 @@
       3.0,
       5.0,
       6.0
+     ]
+    }
+   ]
+  },
+  {
+   "skillId": 418,
+   "name": "Quiver of Holding",
+   "levels": 3,
+   "effects": [
+    {
+     "stat": "weightLimit",
+     "op": "mul",
+     "values": [
+      1.3,
+      1.4,
+      1.5
      ]
     }
    ]
@@ -2919,6 +3097,20 @@
    ]
   },
   {
+   "skillId": 3251,
+   "name": "Item Skill: Weight Limit",
+   "levels": 10,
+   "effects": [
+    {
+     "stat": "weightLimit",
+     "op": "mul",
+     "values": [
+      2.0
+     ]
+    }
+   ]
+  },
+  {
    "skillId": 3500,
    "name": "Wooden Set",
    "levels": 1,
@@ -2956,6 +3148,13 @@
      "op": "mul",
      "values": [
       1.1025
+     ]
+    },
+    {
+     "stat": "regMp",
+     "op": "mul",
+     "values": [
+      0.95
      ]
     }
    ]
@@ -3019,6 +3218,20 @@
      "op": "mul",
      "values": [
       1.15
+     ]
+    }
+   ]
+  },
+  {
+   "skillId": 3512,
+   "name": "Composite Heavy Armor Set",
+   "levels": 1,
+   "effects": [
+    {
+     "stat": "weightPenalty",
+     "op": "add",
+     "values": [
+      5795.0
      ]
     }
    ]
@@ -3104,6 +3317,13 @@
      "values": [
       1.0525
      ]
+    },
+    {
+     "stat": "weightPenalty",
+     "op": "add",
+     "values": [
+      5795.0
+     ]
     }
    ]
   },
@@ -3117,6 +3337,13 @@
      "op": "mul",
      "values": [
       1.1025
+     ]
+    },
+    {
+     "stat": "regMp",
+     "op": "mul",
+     "values": [
+      0.95
      ]
     }
    ]
@@ -3153,6 +3380,13 @@
      "values": [
       7.0
      ]
+    },
+    {
+     "stat": "regHp",
+     "op": "mul",
+     "values": [
+      1.0526
+     ]
     }
    ]
   },
@@ -3188,6 +3422,27 @@
      "values": [
       1.027
      ]
+    },
+    {
+     "stat": "regMp",
+     "op": "mul",
+     "values": [
+      1.025
+     ]
+    }
+   ]
+  },
+  {
+   "skillId": 3528,
+   "name": "Blue Wolf Robe Set",
+   "levels": 1,
+   "effects": [
+    {
+     "stat": "regMp",
+     "op": "mul",
+     "values": [
+      1.0524
+     ]
     }
    ]
   },
@@ -3202,6 +3457,13 @@
      "values": [
       7.0
      ]
+    },
+    {
+     "stat": "regMp",
+     "op": "mul",
+     "values": [
+      1.0526
+     ]
     }
    ]
   },
@@ -3215,6 +3477,13 @@
      "op": "mul",
      "values": [
       1.08
+     ]
+    },
+    {
+     "stat": "weightPenalty",
+     "op": "add",
+     "values": [
+      5759.0
      ]
     }
    ]
@@ -3236,6 +3505,20 @@
      "op": "mul",
      "values": [
       1.04
+     ]
+    }
+   ]
+  },
+  {
+   "skillId": 3533,
+   "name": "Tallum Light Armor Set",
+   "levels": 1,
+   "effects": [
+    {
+     "stat": "regMp",
+     "op": "mul",
+     "values": [
+      1.08
      ]
     }
    ]
@@ -3352,6 +3635,13 @@
      "using": [
       "BOW"
      ]
+    },
+    {
+     "stat": "weightPenalty",
+     "op": "add",
+     "values": [
+      5759.0
+     ]
     }
    ]
   },
@@ -3360,6 +3650,13 @@
    "name": "Nightmare Robe Set",
    "levels": 1,
    "effects": [
+    {
+     "stat": "regMp",
+     "op": "mul",
+     "values": [
+      1.04
+     ]
+    },
     {
      "stat": "mAtk",
      "op": "mul",
@@ -3379,6 +3676,13 @@
      "op": "mul",
      "values": [
       1.15
+     ]
+    },
+    {
+     "stat": "regMp",
+     "op": "mul",
+     "values": [
+      1.08
      ]
     }
    ]
@@ -3429,6 +3733,13 @@
      "values": [
       1.04
      ]
+    },
+    {
+     "stat": "weightPenalty",
+     "op": "add",
+     "values": [
+      5759.0
+     ]
     }
    ]
   },
@@ -3449,6 +3760,13 @@
      "op": "add",
      "values": [
       7.0
+     ]
+    },
+    {
+     "stat": "weightPenalty",
+     "op": "add",
+     "values": [
+      5759.0
      ]
     }
    ]
@@ -3595,6 +3913,23 @@
    ]
   },
   {
+   "skillId": 3569,
+   "name": "Special Ability: HP Regeneration",
+   "levels": 4,
+   "effects": [
+    {
+     "stat": "regHp",
+     "op": "add",
+     "values": [
+      2.04,
+      4.92,
+      5.15,
+      5.18
+     ]
+    }
+   ]
+  },
+  {
    "skillId": 3573,
    "name": "Special Ability: Guidance",
    "levels": 3,
@@ -3623,6 +3958,23 @@
       151.09,
       166.54,
       176.53
+     ]
+    }
+   ]
+  },
+  {
+   "skillId": 3576,
+   "name": "Special Ability: MP Regeneration",
+   "levels": 4,
+   "effects": [
+    {
+     "stat": "regMp",
+     "op": "add",
+     "values": [
+      0.54,
+      1.95,
+      2.04,
+      2.05
      ]
     }
    ]
@@ -3694,6 +4046,13 @@
      "values": [
       1.03
      ]
+    },
+    {
+     "stat": "regMp",
+     "op": "add",
+     "values": [
+      0.51
+     ]
     }
    ]
   },
@@ -3742,6 +4101,13 @@
      "op": "mul",
      "values": [
       1.15
+     ]
+    },
+    {
+     "stat": "regMp",
+     "op": "add",
+     "values": [
+      0.51
      ]
     }
    ]
@@ -4023,6 +4389,13 @@
    "levels": 1,
    "effects": [
     {
+     "stat": "regMp",
+     "op": "mul",
+     "values": [
+      1.05
+     ]
+    },
+    {
      "stat": "mAtkSpd",
      "op": "mul",
      "values": [
@@ -4089,6 +4462,13 @@
      "using": [
       "MAGIC"
      ]
+    },
+    {
+     "stat": "weightLimit",
+     "op": "mul",
+     "values": [
+      1.3
+     ]
     }
    ]
   },
@@ -4149,6 +4529,13 @@
      ],
      "using": [
       "MAGIC"
+     ]
+    },
+    {
+     "stat": "weightLimit",
+     "op": "mul",
+     "values": [
+      1.3
      ]
     }
    ]
@@ -4211,6 +4598,13 @@
      "using": [
       "MAGIC"
      ]
+    },
+    {
+     "stat": "weightLimit",
+     "op": "mul",
+     "values": [
+      1.3
+     ]
     }
    ]
   },
@@ -4272,6 +4666,13 @@
      "using": [
       "MAGIC"
      ]
+    },
+    {
+     "stat": "weightLimit",
+     "op": "mul",
+     "values": [
+      1.3
+     ]
     }
    ]
   },
@@ -4332,6 +4733,13 @@
      ],
      "using": [
       "MAGIC"
+     ]
+    },
+    {
+     "stat": "weightLimit",
+     "op": "mul",
+     "values": [
+      1.3
      ]
     }
    ]
@@ -4662,6 +5070,38 @@
      ]
     },
     {
+     "stat": "regHp",
+     "op": "mul",
+     "values": [
+      0.22,
+      0.19,
+      0.16,
+      0.13,
+      0.1,
+      0.1,
+      0.1,
+      0.1,
+      0.1,
+      0.1
+     ]
+    },
+    {
+     "stat": "regMp",
+     "op": "mul",
+     "values": [
+      0.22,
+      0.19,
+      0.16,
+      0.13,
+      0.1,
+      0.1,
+      0.1,
+      0.1,
+      0.1,
+      0.1
+     ]
+    },
+    {
      "stat": "accCombat",
      "op": "sub",
      "values": [
@@ -4675,6 +5115,26 @@
    "name": "Weight Penalty",
    "levels": 4,
    "effects": [
+    {
+     "stat": "regHp",
+     "op": "mul",
+     "values": [
+      0.5,
+      0.5,
+      0.5,
+      0.5
+     ]
+    },
+    {
+     "stat": "regMp",
+     "op": "mul",
+     "values": [
+      0.5,
+      0.5,
+      0.5,
+      0.5
+     ]
+    },
     {
      "stat": "runSpd",
      "op": "mul",
@@ -4711,6 +5171,72 @@
      "op": "mul",
      "values": [
       3.0
+     ]
+    }
+   ]
+  },
+  {
+   "skillId": 4408,
+   "name": "HP Increase (1x)",
+   "levels": 20,
+   "effects": [
+    {
+     "stat": "regHp",
+     "op": "mul",
+     "values": [
+      1.0,
+      1.1,
+      1.21,
+      1.33,
+      1.46,
+      1.61,
+      1.77,
+      0.25,
+      0.5,
+      2.0,
+      3.0,
+      4.0,
+      5.0,
+      6.0,
+      7.0,
+      8.0,
+      9.0,
+      10.0,
+      11.0,
+      12.0
+     ]
+    }
+   ]
+  },
+  {
+   "skillId": 4409,
+   "name": "MP Increase (1x)",
+   "levels": 20,
+   "effects": [
+    {
+     "stat": "regMp",
+     "op": "mul",
+     "values": [
+      1.0,
+      1.1,
+      1.21,
+      1.33,
+      1.46,
+      1.61,
+      1.77,
+      0.25,
+      0.5,
+      2.0,
+      3.0,
+      4.0,
+      5.0,
+      6.0,
+      7.0,
+      8.0,
+      9.0,
+      10.0,
+      11.0,
+      12.0
      ]
     }
    ]

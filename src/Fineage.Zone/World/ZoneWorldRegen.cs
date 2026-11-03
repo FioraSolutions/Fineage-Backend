@@ -48,6 +48,15 @@ public sealed partial class ZoneWorld
         }
     }
 
+    /// <summary>One simulation regen tick on demand (tests and admin diagnostics), same body the loop runs.</summary>
+    internal async Task RunRegenTickAsync(CancellationToken ct)
+    {
+        var outbound = new List<Pending>();
+        lock (_gate)
+            TickRegen(outbound);
+        await FlushOthersAsync(outbound, ct).ConfigureAwait(false);
+    }
+
     void TickRegen(List<Pending> outbound)
     {
         foreach (var entity in Players())
@@ -57,12 +66,27 @@ public sealed partial class ZoneWorld
             if (entity.CurHp >= entity.MaxHp && entity.CurMp >= entity.MaxMp)
                 continue;
 
-            int hpGain = entity.CurHp < entity.MaxHp
-                ? ZoneRegen.HpPerTick(entity.MaxHp, entity.Level, entity.Sitting)
-                : 0;
-            int mpGain = entity.CurMp < entity.MaxMp
-                ? ZoneRegen.MpPerTick(entity.MaxMp, entity.Level, entity.Sitting)
-                : 0;
+            // Mobius Formulas.calcHpRegen/calcMpRegen: (calcStat(REGENERATE_HP_RATE, max(1, init), …) * multiplier).
+            // Folding the stat means Weight Penalty 4270's regHp/regMp ×0.5 halves the rate, and the regen masteries
+            // (Fast HP Recovery, Mana Recovery, Vital Force, …) raise it, through the same pipeline as everything else.
+            var mods = PlayerStatMods(entity);
+            double hpRate = mods.Apply(CombatStat.RegHp, entity.CurHp < entity.MaxHp
+                ? (double)ZoneRegen.HpPerTick(entity.MaxHp, entity.Level, entity.Sitting)
+                : 0d);
+            double mpRate = mods.Apply(CombatStat.RegMp, entity.CurMp < entity.MaxMp
+                ? (double)ZoneRegen.MpPerTick(entity.MaxMp, entity.Level, entity.Sitting)
+                : 0d);
+
+            // Mobius keeps HP/MP as doubles, so a halved rate still accumulates. Vitals here are ints, so the
+            // fractional remainder is carried per entity instead of being truncated away every tick.
+            // A negative folded rate (a debuff subtracting more than the base) is floored at 0 rather than letting the
+            // carry drift negative and flip into healing on a later tick.
+            entity.RegenCarryHp += Math.Max(0d, hpRate);
+            entity.RegenCarryMp += Math.Max(0d, mpRate);
+            int hpGain = (int)Math.Floor(entity.RegenCarryHp);
+            int mpGain = (int)Math.Floor(entity.RegenCarryMp);
+            entity.RegenCarryHp -= hpGain;
+            entity.RegenCarryMp -= mpGain;
             if (hpGain == 0 && mpGain == 0)
                 continue;
 
@@ -70,6 +94,10 @@ public sealed partial class ZoneWorld
                 entity.CurHp = Math.Min(entity.MaxHp, entity.CurHp + hpGain);
             if (mpGain > 0)
                 entity.CurMp = Math.Min(entity.MaxMp, entity.CurMp + mpGain);
+            if (entity.CurHp >= entity.MaxHp)
+                entity.RegenCarryHp = 0;
+            if (entity.CurMp >= entity.MaxMp)
+                entity.RegenCarryMp = 0;
 
             FanoutVitals(entity, PlayerVitalsStatus(entity), outbound);
         }

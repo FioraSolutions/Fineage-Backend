@@ -27,14 +27,18 @@ public static class ShopTrade
 
     public static int SlotLimit(int race) => race == DwarfRace ? SlotsDwarf : SlotsNoDwarf;
 
-    /// <summary>Mobius <c>Creature.getMaxLoad</c> without a weight-limit skill: floor(CON bonus * 69000).</summary>
+    /// <summary>
+    /// Mobius <c>Creature.getMaxLoad</c> without a weight-limit skill: <c>floor(CON bonus * 69000 * AltWeightLimit)</c>.
+    /// Delegates to <see cref="WeightPenalty.BaseMaxLoad"/> so the shop guard and the overload level cannot drift apart;
+    /// the live server uses <c>ZoneWorld.MaxLoadOf</c>, which folds <c>Stat.WEIGHT_LIMIT</c> on top of this base.
+    /// </summary>
     public static int MaxLoad(ClassCatalog classes, int classId)
     {
         ArgumentNullException.ThrowIfNull(classes);
         if (!classes.TryGet(classId, out var template) || template == null)
             return WeightLimitBase;
         double bonus = classes.StatBonuses.Bonus(StatSlot.Con, template.Con);
-        return (int)Math.Floor(bonus * WeightLimitBase);
+        return WeightPenalty.BaseMaxLoad(bonus);
     }
 
     public static int TaxedUnitPrice(int basePrice, int baseTaxPercent, int castleTaxPercent)

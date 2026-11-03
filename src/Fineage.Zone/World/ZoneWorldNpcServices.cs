@@ -784,14 +784,6 @@ public sealed partial class ZoneWorld
         return false;
     }
 
-    int MaxLoadOf(ZoneEntity player)
-    {
-        double bonus = 1;
-        if (_game.Classes != null && PlayerClasses.TryGet(player.ClassId, out var template) && template != null)
-            bonus = _game.Classes.StatBonuses.Bonus(StatSlot.Con, template.Con);
-        return WarehouseRules.MaxLoad(bonus);
-    }
-
     int ClassLevelOf(ZoneEntity player)
     {
         if (PlayerClasses.TryGet(player.ClassId, out var template) && template != null)

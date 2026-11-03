@@ -15,7 +15,11 @@ public enum CombatStat
     Accuracy,  // accCombat
     Evasion,   // rEvas
     CritRate,  // critRate
-    RunSpd     // runSpd = Stat.MOVE_SPEED: the only speed stat; folds onto run, walk and swim bases alike
+    RunSpd,    // runSpd = Stat.MOVE_SPEED: the only speed stat; folds onto run, walk and swim bases alike
+    RegHp,     // regHp (Stat.REGENERATE_HP_RATE): HP regen multiplier
+    RegMp,     // regMp (Stat.REGENERATE_MP_RATE): MP regen multiplier
+    WeightLimit,   // weightLimit: Creature.getMaxLoad folds it over floor(CON bonus * 69000 * AltWeightLimit)
+    WeightPenalty  // weightPenalty: Creature.getBonusWeightPenalty, subtracted from the load before weightproc
 }
 
 /// <param name="Using">Mobius <c>&lt;using kind&gt;</c> condition (upper-case kinds); null = unconditional.</param>
@@ -79,7 +83,11 @@ public sealed class SkillStatEffectCatalog
     {
         ["pAtk"] = CombatStat.PAtk, ["pDef"] = CombatStat.PDef, ["mAtk"] = CombatStat.MAtk, ["mDef"] = CombatStat.MDef,
         ["pAtkSpd"] = CombatStat.PAtkSpd, ["mAtkSpd"] = CombatStat.MAtkSpd, ["accCombat"] = CombatStat.Accuracy,
-        ["rEvas"] = CombatStat.Evasion, ["critRate"] = CombatStat.CritRate, ["runSpd"] = CombatStat.RunSpd
+        ["rEvas"] = CombatStat.Evasion, ["critRate"] = CombatStat.CritRate, ["runSpd"] = CombatStat.RunSpd,
+        // Regeneration and load stats: used by Weight Penalty 4270 (regHp/regMp), Weight Limit 150, armor sets
+        // (weightLimit/weightPenalty) and the regen masteries. Regen has no other server-side consumer yet.
+        ["regHp"] = CombatStat.RegHp, ["regMp"] = CombatStat.RegMp,
+        ["weightLimit"] = CombatStat.WeightLimit, ["weightPenalty"] = CombatStat.WeightPenalty
     };
 
     readonly Dictionary<int, SkillStatEffect> _byId;

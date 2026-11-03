@@ -113,5 +113,7 @@ namespace Fineage.Net.Contract
         public const ushort ShortCutRegister = 0x035B;
         /// <summary>Zone → client: slot cleared (reply to RequestShortCutDel, rejected reg, or item gone).</summary>
         public const ushort ShortCutDelete = 0x035C;
+        /// <summary>Zone → client: Mobius EtcStatusUpdate (weight/grade penalty flags and levels).</summary>
+        public const ushort EtcStatusUpdate = 0x035D;
     }
 }

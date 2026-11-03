@@ -157,6 +157,33 @@ namespace Fineage.Net.Contract
         public bool InWater { get; set; }
     }
 
+    /// <summary>
+    /// Mobius <c>EtcStatusUpdate</c> (<c>EtcStatusUpdate.java:32-45</c>): the status-bar oddities. The client needs the
+    /// weight penalty level to draw the overload icon and HP-bar tint, and the grade-penalty flag for its own icon.
+    /// Sent to the owner only.
+    /// </summary>
+    public sealed class EtcStatusUpdateNetMsg
+    {
+        public ulong EntityValue { get; set; }
+        public uint EntityGeneration { get; set; }
+        /// <summary>1–7 increase-force charges. Always 0 until the force system exists.</summary>
+        public int Charges { get; set; }
+        /// <summary>0 none, 1 ≥50%, 2 ≥66.6%, 3 ≥80%, 4 ≥100% of the load limit (Mobius skill 4270 level).</summary>
+        public int WeightPenalty { get; set; }
+        /// <summary>Mobius writes 1 when chat is refused, banned, or in silence mode.</summary>
+        public bool ChatBlocked { get; set; }
+        /// <summary>Inside a Mobius DANGER_AREA zone.</summary>
+        public bool DangerArea { get; set; }
+        /// <summary>
+        /// Mobius writes 1 when either expertise penalty is above 0 (the packet field is a flag, not the 1–4 level).
+        /// </summary>
+        public bool GradePenalty { get; set; }
+        /// <summary>Charm of Courage: allows resurrection on the same spot during a siege.</summary>
+        public bool CharmOfCourage { get; set; }
+        /// <summary>1–15 death-penalty buff level.</summary>
+        public int DeathPenalty { get; set; }
+    }
+
     public sealed class PositionCorrectionMsg
     {
         public ulong EntityValue { get; set; }

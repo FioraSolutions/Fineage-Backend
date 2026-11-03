@@ -15,7 +15,7 @@
 - Mob AI: aggro/hate on hit, chase on timed mover, returnHome, retaliation; Die + 7 s corpse; cast hitTime + cast move lock.
 
 ## Remaining gaps (next slices)
-1. Stat pipeline leftovers: passive masteries beyond the `using` kinds (hp/behind/zone conditions), maxHp/regen/critDmg/pvp buff stats, Net PlayerStats has no combat-stat fields (Net status window not refreshed on buff), enchant bonuses, grade penalty on stats (the `runSpd` part now lands), shield P.Def/block, bow arrows consumption + bow reuse timing (Mobius bow 1500*345/Pspd), dual/pole AoE, class-transfer base stats, weight penalty (Weight Penalty 4270 is data-only — weight is not tracked yet).
+1. Stat pipeline leftovers: passive masteries beyond the `using` kinds (hp/behind/zone conditions), maxHp/regen/critDmg/pvp buff stats, Net PlayerStats has no combat-stat fields (Net status window not refreshed on buff), enchant bonuses, grade penalty on stats (the `runSpd` part now lands), shield P.Def/block, bow arrows consumption + bow reuse timing (Mobius bow 1500*345/Pspd), dual/pole AoE, class-transfer base stats. (Weight penalty 4270 is done — see slice 9.)
 2. calcPhysDam extras still missing: auto-soulshot toggle (needs client RequestAutoSoulShot wire), NPC soulshots, spiritshots/blessed, shield facing angle, position bonus (back/side crit & hit from hitConditionBonus.xml), crit SystemMessages to attacker, level-difference penalties, weapon-type vulnerabilities, crit damage stat mods.
 3. NPC attack range per template (`attackRange`, polearm/archer mobs) — still constant 80.
 4. Skills: real power formulas (pAtk/mAtk based), reuse/hit/cool times from skills.json, MP consumption parity, skill range per skill; still `power + 10` stub.
@@ -36,7 +36,7 @@
 - Known skills' passive funcs fold into the live player stat pipeline with buffs (set → mul → add).
 - `using` follows Mobius ConditionUsingItemType: weapon kinds = right-hand type; LIGHT/HEAVY/MAGIC = chest type plus matching legs unless full-body; SHIELD = left-hand shield.
 - NPC reach = max(40, template atkRange) + collision allowance (melee 80, archers 1140); chase stop and hit-timer reach use it.
-- Gaps: passive funcs with non-`using` conditions (hp, behind, zone…) and non-combat stats (atkCountMax, weight, regen) are skipped; NPC passive skills not applied.
+- Gaps: passive funcs with non-`using` conditions (hp, behind, zone…) and non-combat stats (atkCountMax) are skipped; NPC passive skills not applied. (`weightLimit`/`weightPenalty`/`regHp`/`regMp` are collected now — see slice 9.)
 
 ## Slice 8 — aggro range, hate list / clan help, attack stance on Net
 - `npcs.json` gains Mobius `ai` aggroRange, clanHelpRange, clans, ignoreNpcIds.
@@ -201,11 +201,89 @@ Fineage ports this as:
   no lower floor (0 is legal, tiny multiplier is not clamped to 1); player 250 cap vs NPC 300 uncapped and not DEX-scaled;
   `RunSpeedBoost` as a flat `+N` before the cap; `FINEAGE_RUN_SPEED_BOOST` parsing; and a 1 s travel check that the buffed
   pawn covers more ground.
-- **Still open — Weight Penalty 4270** (`Player.java:1969-2010`). Mobius recomputes it on every inventory weight change
-  (`refreshOverloaded`): `weightproc = (load - bonusWeightPenalty) * 1000 / maxLoad`, then the level by threshold
-  `< 500 → 0`, `< 666 → 1`, `< 800 → 2`, `< 1000 → 3`, else `4`, and skill 4270 `#rateSpd` applies `×1.0`, `×0.5`, `×0.5`,
-  `×0` for levels 1–4. Weight/`SpeedPenaltyRate` are not tracked yet, so the abnormal is not applied. Note that the absent
-  lower clamp is what will make it correct once implemented: level 4 yields `runSpd ×0` and 0 must stay 0.
+- **Weight Penalty 4270 — done** (`Player.java:1970-2015`). See slice 9 below; the absent lower clamp is exactly what
+  makes level 4 correct (`runSpd ×0` → 0 stays 0).
 - Also open: `Grade Penalty` 4267 is in the catalog but no player has it as a known skill (the grade-penalty slice still
   uses its own `GradePenalty` numbers); `Herb of Speed` abnormalType replacement is still per-skill; V2 clients only get the
   gait flag (`ChangeMoveTypeMsg` has no speeds — the client keeps its own run speed).
+
+## Slice 9 — inventory weight and Weight Penalty 4270
+
+Reference: `ref/mobius-ct0-interlude` — `model/actor/Player.java:1970-2015` (`refreshOverloaded`),
+`model/actor/Creature.java:6278-6309` (`getMaxLoad` / `getBonusWeightPenalty` / `getCurrentLoad`),
+`data/stats/skills/04200-04299.xml:1329-1346` (skill 4270), `model/itemcontainer/PlayerInventory.java:749-753`
+(`refreshWeight` → `_owner.refreshOverloaded()`), `network/clientpackets/EnterWorld.java:208`,
+`network/GameClient.java:493`, `network/serverpackets/EtcStatusUpdate.java:32-45`.
+
+### Formula
+
+```
+maxLoad      = floor(Stat.CON.calcBonus(creature) * 69000 * Config.ALT_WEIGHT_LIMIT)
+               then folded through calcStat(Stat.WEIGHT_LIMIT)          -- Creature.java:6284-6285
+bonusPenalty = calcStat(Stat.WEIGHT_PENALTY, 1)                          -- Creature.java:6294
+load         = inventory.getTotalWeight()                                -- Creature.java:6306
+weightproc   = (load - bonusPenalty) * 1000 / maxLoad                    -- Java int division, truncates
+```
+
+| `weightproc` | level | skill 4270 `regHp`/`regMp` | skill 4270 `runSpd` |
+|---|---|---|---|
+| `< 500` | 0 (no skill) | — | — |
+| `500..665` | 1 | ×0.5 | ×1.0 |
+| `666..799` | 2 | ×0.5 | ×0.5 |
+| `800..999` | 3 | ×0.5 | ×0.5 |
+| `>= 1000` | 4 | ×0.5 | ×0.0 |
+
+`setOverloaded(load > maxLoad)` is a separate strict comparison (`Player.java:2004`), and `_dietMode` (admin
+"ignore weight penalty", `Player.java:638`) forces level 0 — not modelled, there is no admin system yet.
+
+### Fineage port
+
+- `Fineage.Game.WeightPenalty` — pure maths: `BaseMaxLoad(conBonus, altWeightLimit)`, `Level(load, maxLoad, bonus)`,
+  `WeightPercent`, `IsOverloaded`, `SkillId = 4270`, `MaxLevel = 4`. `WarehouseRules.MaxLoad` and `ShopTrade.MaxLoad`
+  now delegate here instead of keeping their own `69000` literal, so shop/warehouse guards and the penalty share one limit.
+- `ZoneWeightSettings` — `FINEAGE_ALT_WEIGHT_LIMIT` (`Character.ini AltWeightLimit`, `Config.java:1654`, default **1**).
+  Parsed with the invariant culture, since the ini always uses a dot.
+- `ZoneWorld.MaxLoadOf` = `Stat.WEIGHT_LIMIT` folded over the CON base, so Weight Limit 150 (×2/×3/×4), Quiver of Holding
+  418 and the robe-set enchants (×1.3) all move the limit through the normal passive pipeline.
+  `ZoneWorld.BonusWeightPenaltyOf` = `Stat.WEIGHT_PENALTY` with default 1 (armor sets 3512/3521/3531/3539/3555/3556 add
+  +5759…+5795). `ZoneWorld.CurrentLoadOf` = `Inventory.TotalWeight`.
+- **Skill 4270 is folded as a virtual passive source**, not written into `ZoneEntity.KnownSkills`: that dictionary is the
+  persisted skill book and `RefreshKnownSkills` rebuilds it from the skill tree on every class change / trainer purchase,
+  which would silently drop the injected level. `ZoneWorld.FoldWeightPenalty` applies the same funcs from
+  `data/skill-passives.json` into the same `CombatStatMods`, so 4270 composes with buffs, masteries and the DEX factor in
+  one `MOVE_SPEED` evaluation (mul 20 then add 30 — Wind Walk's `+20` lands *after* the ×0.5).
+- **Recompute points.** Mobius funnels every add/remove/equip/trade through `PlayerInventory.refreshWeight()`
+  (`PlayerInventory.java:749-753`); every Fineage inventory write funnels through `ZoneWorld.SaveInventory`, so
+  `RefreshWeightPenaltyAfterInventoryChange` lives there: pickup, drop, shop buy/sell, private trade (both sides),
+  warehouse deposit/withdraw, enchant, equip/unequip, quest reward, sweep, shot consumption, olympiad grant.
+  The one add path that never calls `SaveInventory` is `GrantItemRequest` (the bag is persisted on leave), so
+  `TryGrantItem` calls the recompute explicitly — otherwise an authoritative grant across 50 % left the pawn
+  unpenalised. `TryEnterAsync` also recomputes after `RefreshKnownSkills` (so Weight Limit / armor-set passives are
+  already in `KnownSkills` when the limit and bonus are read) — that is Mobius `EnterWorld.java:208` /
+  `GameClient.java:493` running `refreshOverloaded()` before the first `UserInfo`. Nothing is persisted: the level is a
+  function of the bag.
+- **Level change** → `RefreshRunSpeedAndFanout` (recompute, then `ChangeMoveType` to self + knownlist when a gait moved)
+  and `FanoutEtcStatusUpdate` (self only, `Player.java:2011-2012`). Level 1 keeps `runSpd ×1.0`, so it legitimately sends
+  no `ChangeMoveType` — only `EtcStatusUpdate`. Levels 4 → 0 free the pawn again.
+- **Client packet** `EtcStatusUpdate` (`0x035D`, `NetOpcode`/`NetCodec`/`EtcStatusUpdateNetMsg`): Mobius field order
+  (`EtcStatusUpdate.java:39-45`) — entity, charges, weight penalty 0–4, chat-blocked, danger-area, grade-penalty *flag*,
+  charm-of-courage, death-penalty. Sent on enter (`NetZoneServer` ahead of `UserInfo`) and on every level change. Fields
+  Fineage does not model yet (force charges, chat ban, danger area, charm of courage, death penalty) go out as 0, exactly
+  like a clean Mobius character.
+- **Regen** — `TickRegen` folds `CombatStat.RegHp`/`RegMp` through `PlayerStatMods`, so 4270 halves the rate. Fineage keeps
+  vitals as ints where Mobius keeps doubles, so the fractional remainder is carried per entity (`RegenCarryHp/RegenCarryMp`):
+  a halved 1 HP/tick pays out 1 HP every second tick instead of being floored to 0 forever, and a leftover carry is not
+  discarded when the penalty clears.
+- **Config note:** `AltWeightLimit` is the only weight knob in `Character.ini`; the `Player.ini` slot caps
+  (80/100 inventory, 100/120 warehouse) are honoured by `WarehouseRules`/`ShopTrade` and are independent of the load.
+- Tests: `WeightPenaltyTests` (48) — thresholds 499→0 / 500→1 / 665→1 / 666→2 / 799→2 / 800→3 / 999→3 / 1000→4, Java
+  truncation, bonus subtraction, `maxLoad <= 0`, `IsOverloaded` strictness, CON×69000×AltWeightLimit,
+  `FINEAGE_ALT_WEIGHT_LIMIT` parsing; catalog carries the 4270 funcs; speeds ×1/×0.5/×0.5/×0 and regen ×0.5 at every level;
+  composition with Wind Walk; NPCs never penalised; live `ZoneWorld` — enter, relog, level-1 vs level-2 fanout shapes,
+  recovery, level 4 stops the pawn, give/drop/grant through the bag hooks, `MaxLoadOf` folding 150, `BonusWeightPenaltyOf`
+  folding 3512, `EtcStatusUpdate` projection + codec roundtrip, and regen halving with carry.
+- **Observation worth knowing:** the shipped starter kit (`initialEquipment.xml:33-45`: 5000 soulshots at weight 4, 50
+  Blessed Scrolls of Escape at 120, potions) weighs 46080 against an 88320 elven-fighter limit — **52%**, so a brand-new
+  character is already at weight-penalty level 1 and regenerates at half rate. That is genuine Mobius behaviour.
+- Still open here: pets (Mobius `Pet.refreshOverloaded`, `Pet.java:1205`) — no summon/pet inventory yet; `_dietMode`;
+  `EtcStatusUpdate` charges/danger-area/charm/death-penalty stay 0 until those systems exist.

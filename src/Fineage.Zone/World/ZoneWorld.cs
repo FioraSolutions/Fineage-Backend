@@ -72,6 +72,17 @@ sealed class ZoneEntity
     public int WeaponGradePenalty { get; set; }
     /// <summary>Armor expertise penalty, 0–4. Updated when gear changes and on enter.</summary>
     public int ArmorGradePenalty { get; set; }
+    /// <summary>
+    /// Weight Penalty level, 0–4 (Mobius <c>Player._curWeightPenalty</c>). Derived from the load and recomputed on
+    /// every inventory change and on enter — never stored. Skips persistence on purpose: it is a function of the bag.
+    /// </summary>
+    public int WeightPenaltyLevel { get; set; }
+    /// <summary>
+    /// Fractional HP/MP regen left over from the previous tick. Mobius keeps vitals as doubles, so a halved rate
+    /// (Weight Penalty 4270) still accumulates; here the integer vitals need the remainder carried explicitly.
+    /// </summary>
+    public double RegenCarryHp { get; set; }
+    public double RegenCarryMp { get; set; }
     /// <summary>When true, regen rates double (classic sitting rest).</summary>
     public bool Sitting { get; set; }
     /// <summary>NPC Mobius physical attack (0 = unknown → level placeholder). Players read the class template.</summary>
@@ -721,6 +732,16 @@ public sealed partial class ZoneWorld
         LoadQuestProgress(session, entity);
         LoadLearnedSkills(entity, stored);
         RefreshKnownSkills(entity);
+        // Mobius GameClient:493 / EnterWorld:208 — refreshOverloaded() runs before the first UserInfo, so a character
+        // that logs in while overloaded already carries skill 4270's level and its slowed speeds. This must come after
+        // RefreshKnownSkills: Weight Limit 150 and the armor-set weightLimit/weightPenalty passives are only in
+        // KnownSkills once the skill book is rebuilt, and they change both the limit and the bonus.
+        int penalty = WeightPenaltyLevelOf(entity);
+        if (penalty != entity.WeightPenaltyLevel)
+        {
+            entity.WeightPenaltyLevel = penalty;
+            RefreshRunSpeed(entity); // PlayerStatMods folds 4270, so the live speed needs the level first
+        }
         LoadShortcuts(entity, stored);
         SyncClanStanding(entity);
         RefreshGradePenalty(entity);
@@ -733,6 +754,8 @@ public sealed partial class ZoneWorld
         SavePresence(session, entity.X, entity.Y, entity.Z, touchAccess: true);
 
         toSelf.Add(Pack(session, MsgType.UserInfo, UserInfo(entity)));
+        // Mobius EnterWorld:401 also sends EtcStatusUpdate; that is Net-only (see NetZoneServer.OnEnterAsync), because
+        // the legacy V2 opcode table has no such packet and an unknown id would be dropped or logged by the old client.
         toSelf.Add(Pack(session, MsgType.ItemList, InventoryMessages.ItemList(inventory)));
         toSelf.Add(Pack(session, MsgType.SkillList, SkillListFor(entity)));
         toSelf.Add(Pack(session, MsgType.PlayerSpawned, Spawned(entity)));
@@ -1020,6 +1043,10 @@ public sealed partial class ZoneWorld
 
     void SaveInventory(ZoneSession session, PlayerInventory inventory)
     {
+        // Mobius PlayerInventory.refreshWeight() → _owner.refreshOverloaded(): every inventory write funnels through
+        // here, so the overload level is recomputed exactly when the load changes (pickup, drop, shop, trade,
+        // warehouse, enchant, equip/unequip, quest reward, sweep, shots).
+        RefreshWeightPenaltyAfterInventoryChange(session);
         if (_accounts == null)
             return;
         _accounts.TryReplaceItems(session.Account, session.ObjectId, CharacterInventory.Rows(inventory));

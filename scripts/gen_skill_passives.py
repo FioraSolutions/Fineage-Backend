@@ -2,7 +2,8 @@
 """Generate data/skill-passives.json from L2J Mobius CT0 Interlude passive (operateType P) skills.
 Usage: gen_skill_passives.py <mobius dist/game/data/stats/skills dir> > data/skill-passives.json"""
 import glob, json, sys, xml.etree.ElementTree as ET
-STATS = {"runSpd","pAtk","pDef","mAtk","mDef","pAtkSpd","mAtkSpd","accCombat","rEvas","critRate"}
+STATS = {"runSpd","pAtk","pDef","mAtk","mDef","pAtkSpd","mAtkSpd","accCombat","rEvas","critRate",
+         "regHp","regMp","weightLimit","weightPenalty"}
 OPS = {"add":"add","sub":"sub","mul":"mul","set":"set"}
 def kinds_of(node):
     """Returns (ok, kinds) where kinds is None for unconditional; ok False for unsupported conditions."""

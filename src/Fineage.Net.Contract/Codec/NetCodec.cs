@@ -589,12 +589,42 @@ namespace Fineage.Net.Contract
             };
         }
 
+        /// <summary>Mobius <c>EtcStatusUpdate</c> field order (<c>EtcStatusUpdate.java:39-45</c>).</summary>
+        public static byte[] EncodeEtcStatusUpdate(EtcStatusUpdateNetMsg m) => Write(w =>
+        {
+            w.WriteUInt64(m.EntityValue);
+            w.WriteUInt32(m.EntityGeneration);
+            w.WriteInt32(m.Charges);
+            w.WriteInt32(m.WeightPenalty);
+            w.WriteByte(m.ChatBlocked ? (byte)1 : (byte)0);
+            w.WriteByte(m.DangerArea ? (byte)1 : (byte)0);
+            w.WriteByte(m.GradePenalty ? (byte)1 : (byte)0);
+            w.WriteByte(m.CharmOfCourage ? (byte)1 : (byte)0);
+            w.WriteInt32(m.DeathPenalty);
+        });
+
+        public static EtcStatusUpdateNetMsg DecodeEtcStatusUpdate(ReadOnlySpan<byte> p)
+        {
+            var r = new Reader(p);
+            return new EtcStatusUpdateNetMsg
+            {
+                EntityValue = r.ReadUInt64(),
+                EntityGeneration = r.ReadUInt32(),
+                Charges = r.ReadInt32(),
+                WeightPenalty = r.ReadInt32(),
+                ChatBlocked = r.ReadByte() != 0,
+                DangerArea = r.ReadByte() != 0,
+                GradePenalty = r.ReadByte() != 0,
+                CharmOfCourage = r.ReadByte() != 0,
+                DeathPenalty = r.ReadInt32()
+            };
+        }
+
         public static byte[] EncodeAttackStance(AttackStanceNetMsg m) => Write(w =>
         {
             w.WriteUInt64(m.EntityValue);
             w.WriteUInt32(m.EntityGeneration);
         });
-
         public static AttackStanceNetMsg DecodeAttackStance(ReadOnlySpan<byte> p)
         {
             var r = new Reader(p);

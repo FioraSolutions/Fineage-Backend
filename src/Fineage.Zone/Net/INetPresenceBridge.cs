@@ -30,6 +30,12 @@ interface INetPresenceBridge
     /// <summary>Mobius ChangeMoveType (gait + effective speeds) for <paramref name="moverObjectId"/>. Called under the ZoneWorld gate.</summary>
     void FanoutChangeMoveType(IReadOnlyList<int> watcherObjectIds, int moverObjectId, bool running, float runSpeed, float walkSpeed, bool inWater);
 
+    /// <summary>
+    /// Mobius EtcStatusUpdate (weight penalty level, grade-penalty flag, force charges) to the owner.
+    /// Called under the ZoneWorld gate.
+    /// </summary>
+    void FanoutEtcStatusUpdate(IReadOnlyList<int> watcherObjectIds, EtcStatusUpdateNetMsg status);
+
     /// <summary>Mobius AutoAttackStart (<paramref name="inStance"/>) / AutoAttackStop for <paramref name="objectId"/>. Called under the ZoneWorld gate.</summary>
     void FanoutAttackStance(IReadOnlyList<int> watcherObjectIds, int objectId, bool inStance);
 
