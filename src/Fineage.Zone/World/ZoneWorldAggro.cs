@@ -69,6 +69,15 @@ public sealed partial class ZoneWorld
         return _geo.CanSeeTarget(from.X, from.Y, from.Z, to.X, to.Y, to.Z);
     }
 
+    public const int SysMsgCannotSeeTarget = 181;
+
+    void CannotSeeTarget(ZoneSession session, List<Pending> outbound)
+    {
+        session.AutoAttackTargetId = 0;
+        session.ClearApproach();
+        ShotNotice(session, SysMsgCannotSeeTarget, "Cannot see target.", outbound);
+    }
+
     void TickAggression(long now)
     {
         List<ZoneEntity>? players = null;

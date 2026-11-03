@@ -115,6 +115,12 @@ public sealed partial class ZoneWorld
         }
 
         session.AutoAttackTargetId = 0;
+        // Mobius Creature.doCast / Skill.checkCondition: target out of sight → SysMsg 181, no cast.
+        if (!CanSeeTarget(player, target))
+        {
+            CannotSeeTarget(session, outbound);
+            return null;
+        }
         if (_skillCombat.TryGet(request.SkillId, out var combat))
             return CastMobiusAttack(session, player, target, request.SkillId, level, combat, now, outbound);
 

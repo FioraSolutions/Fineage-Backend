@@ -40,7 +40,7 @@ public sealed partial class ZoneWorld
                 session.NextAutoAttackUnixMs > now0;
             // Re-click on the target already being hit: Mobius keeps the running attack, no extra swing.
             error = alreadySwinging ? null : TryAttack(session, request.TargetObjectId, outbound, out approachMs);
-            if (error == null && !alreadySwinging)
+            if (error == null && !alreadySwinging && approachMs >= 0)
             {
                 session.AutoAttackTargetId = session.SelectedTargetId;
                 // Approaching: first swing on arrival (Mobius onEvtArrived -> doAttack); else next swing after Pspd.
@@ -135,6 +135,13 @@ public sealed partial class ZoneWorld
             SyncSession(player, session);
         }
         session.ClearApproach();
+        // Mobius Creature.doAttack: no LOS → SysMsg 181 "Cannot see target.", intention ACTIVE, ActionFailed.
+        if (!CanSeeTarget(player, target))
+        {
+            CannotSeeTarget(session, outbound);
+            approachMs = -1;
+            return null;
+        }
 
         var ps = PlayerStats(player);
         // Mobius doAttack: a charged weapon fires its soulshot on this swing (hit or miss) and is uncharged.

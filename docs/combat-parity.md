@@ -78,9 +78,13 @@
 - Lethal (after damage): skipped if magicLvl < mob level − 6 or raid/grand boss; Rnd(1e6)/1e4 < full → HP 1 (SysMsg 1668), < full+half → HP ×0.5 ("Half-Kill!"). Lethal only rolls when the blow lands (Mobius effect-order nuance not verified).
 - Gaps: CRITICAL_DAMAGE / BLOW_RATE / P_SKILL_EVASION stat mods, DAGGER weapon condition, NPC blow skills (no blowChance data), trait/attribute bonuses, enchant routes, Mortal Blow MP/reuse in the existing catalog row differ from Mobius XML (kept untouched).
 
+## Slice 14 — player LOS on attack / cast; level-gap damage
+- Player melee swing (doAttack) and attack-skill cast (doCast) check the Slice 12 `canSeeTarget` port (geo + closed doors). No LOS → SysMsg 181 "Cannot see target.", attack intention and approach cleared, no swing / no MP or reuse spent. Covers auto-attack ticks and casts fired on arrival.
+- Level-gap damage penalty: Mobius CT_0 Interlude `Formulas` has none for physical/magic damage vs mobs (level gap only enters magic failure and Lethal's magicLvl gate, both modelled, plus debuff land rate, not modelled yet) — nothing to port.
+- Gaps: buffs/support skills don't check LOS; out-of-reach approach doesn't path around a blocking wall before the check (Mobius moveToPawn uses pathfinding).
+
 ## Still open (PvE priority)
 1. Physical-skill crit/evasion stat mods (CRITICAL_DAMAGE, BLOW_RATE, P_SKILL_EVASION), weapon-kind skill conditions — small/medium.
-2. Player attack/cast LOS check (SysMsg cannot see target) — small.
-3. Night game clock (GameTimeTaskManager) for the −10% dark bonus — small.
-4. magicLvl in skill-combat.json + mcrit stat mods — small.
-5. Level-gap damage penalties, weapon vulnerabilities, NPC soulshots — small/medium.
+2. Night game clock (GameTimeTaskManager) for the −10% dark bonus — small.
+3. magicLvl in skill-combat.json + mcrit stat mods — small.
+4. Weapon vulnerabilities, NPC soulshots, NPC blow/magic skills on players — small/medium.
