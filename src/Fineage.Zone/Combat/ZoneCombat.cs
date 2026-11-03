@@ -24,6 +24,10 @@ public static class ZoneCombat
     public const int ApproachSlack = 20;
     /// <summary>Fallback player run speed when the character has none (Interlude human fighter 115 → ~120).</summary>
     public const float DefaultPlayerRunSpeed = 120f;
+    /// <summary>Mobius <c>Character.ini MaxRunSpeed</c>: the stat pipeline clamps run speed (after runSpd buffs) to this.</summary>
+    public const float MaxRunSpeed = 250f;
+    /// <summary>Mobius <c>Creature.initStats</c> floor (a runSpd debuff can never leave a creature standing still).</summary>
+    public const float MinRunSpeed = 1f;
     /// <summary>Target drift that forces a fresh MoveToPawn during an approach (Mobius follow re-issue).</summary>
     public const int ApproachRepathDistance = 40;
     /// <summary>Tolerance at hitTime: swing lands only if attacker is still within melee range + this.</summary>

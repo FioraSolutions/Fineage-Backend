@@ -76,6 +76,7 @@ public sealed partial class ZoneWorld
         player.Running = false;
         player.ActiveEnchantObjectId = 0;
         player.Abnormals.Clear();
+        RefreshRunSpeed(player); // dead: buff runSpd funcs drop with the abnormals
         player.CombatUntilUnixMs = 0;
 
         if (player.Session != null)

@@ -189,6 +189,7 @@ public sealed partial class ZoneWorld
             return false;
 
         RefreshGradePenalty(player);
+        RefreshRunSpeedAndFanout(player);
         var invUpdate = InventoryMessages.Modify(changed);
         toSelf.Add(Pack(session, MsgType.InventoryUpdate, invUpdate));
         toSelf.Add(SelfUserInfo(session, player));

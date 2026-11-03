@@ -45,6 +45,9 @@ public sealed partial class ZoneWorld
             if (!entity.KnownSkills.TryGetValue(pair.Key, out int have) || have < pair.Value)
                 entity.KnownSkills[pair.Key] = pair.Value;
         }
+
+        // Passive runSpd masteries (Quick Step, Agile Movement, armor sets) are part of the live run speed.
+        RefreshRunSpeed(entity);
     }
 
     internal string? TrainerServiceForTest(ZoneSession session, string intent, int skillId = -1)

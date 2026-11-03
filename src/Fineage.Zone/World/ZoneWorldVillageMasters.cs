@@ -131,13 +131,15 @@ public sealed partial class ZoneWorld
         int previous = player.ClassId;
         player.ClassId = change.ClassId;
         session.ChangeClass(change.ClassId);
-        player.RunSpeed = template.RunSpeed;
+        player.BaseRunSpeed = template.RunSpeed;
         player.WalkSpeed = template.WalkSpeed;
         player.MaxHp = template.ModifiedHp(player.Level);
         player.MaxMp = template.ModifiedMp(player.Level);
         player.CurHp = Math.Min(player.CurHp, player.MaxHp);
         player.CurMp = Math.Min(player.CurMp, player.MaxMp);
-        RefreshKnownSkills(player);
+        RefreshKnownSkills(player); // also folds passive runSpd (Quick Step / Agile Movement) into the live speed
+        FanoutNetMoveType(player);
+        FanoutMoveType(player, toSelf);
 
         var invUpdate = new InventoryUpdateMsg
         {

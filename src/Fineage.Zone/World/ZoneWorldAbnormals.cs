@@ -60,8 +60,12 @@ public sealed partial class ZoneWorld
     void FanoutAbnormal(ZoneEntity target, List<Pending> outbound)
     {
         var update = AbnormalFor(target);
-        // Mobius: a buff/debuff that changes combat stats triggers UserInfo (status window P.Atk/P.Def/Spd).
+        // Mobius: a buff/debuff that changes combat stats triggers UserInfo (status window P.Atk/P.Def/Spd)
+        // and a fresh run speed (Wind Walk/Slow change how fast the pawn actually travels).
         bool statful = target.Abnormals.Any(a => _statEffects.TryGet(a.Id, out _));
+        bool speedChanged = RefreshRunSpeed(target);
+        if (speedChanged)
+            FanoutNetMoveType(target);
         if ((statful || target.HasStatAbnormal) && target.Kind == ZoneEntityKind.Player && target.Session != null)
             outbound.Add(SelfUserInfo(target.Session, target));
         target.HasStatAbnormal = statful;

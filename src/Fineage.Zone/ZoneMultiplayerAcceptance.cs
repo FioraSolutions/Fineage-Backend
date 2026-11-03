@@ -368,12 +368,16 @@ public static class ZoneMultiplayerAcceptance
             EffectId = ZoneBuffs.SampleWindWalk
         }).ConfigureAwait(false);
 
+        // Mobius: a buff that changes combat stats re-sends UserInfo to the owner (status window P.Atk/Spd) before
+        // the abnormal list — Wind Walk now carries its runSpd func, so the caster gets both packets.
+        _ = await left.ExpectAsync<UserInfoMsg>(MsgType.UserInfo).ConfigureAwait(false);
         var selfUpdate = await left.ExpectAsync<AbnormalStatusUpdateMsg>(MsgType.AbnormalStatusUpdate).ConfigureAwait(false);
         var peerUpdate = await right.ExpectAsync<AbnormalStatusUpdateMsg>(MsgType.AbnormalStatusUpdate).ConfigureAwait(false);
         ExpectAbnormal(selfUpdate, caster.CharacterId, ZoneBuffs.SampleWindWalk);
         ExpectAbnormal(peerUpdate, caster.CharacterId, ZoneBuffs.SampleWindWalk);
 
         await left.SendAsync(MsgType.BuffRequest, new BuffRequestMsg { Remove = true }).ConfigureAwait(false);
+        _ = await left.ExpectAsync<UserInfoMsg>(MsgType.UserInfo).ConfigureAwait(false);
         var clearedSelf = await left.ExpectAsync<AbnormalStatusUpdateMsg>(MsgType.AbnormalStatusUpdate).ConfigureAwait(false);
         var clearedPeer = await right.ExpectAsync<AbnormalStatusUpdateMsg>(MsgType.AbnormalStatusUpdate).ConfigureAwait(false);
         if (clearedSelf.ObjectId != caster.CharacterId || clearedSelf.Effects.Length != 0)

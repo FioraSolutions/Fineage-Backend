@@ -119,7 +119,31 @@ sealed class ZoneEntity
     public Dictionary<int, int> LearnedSkills { get; } = [];
     /// <summary>True while an abnormal with combat stat funcs is active (UserInfo refresh on change).</summary>
     public bool HasStatAbnormal { get; set; }
-    public float RunSpeed { get; set; }
+    /// <summary>
+    /// Base run speed (Mobius baseRunSpeed: class template / NPC template). Buffs and debuffs change the live
+    /// <see cref="RunSpeed"/> through <c>runSpd</c> stat funcs; the base is only rewritten by template / class change.
+    /// </summary>
+    public float BaseRunSpeed { get; set; }
+
+    /// <summary>
+    /// Live run speed sent on the wire. Kept denormalised on the entity: spawn / MoveState / UserInfo / ChangeMoveType
+    /// all carry it, and <see cref="RefreshRunSpeed"/> recomputes it when buffs, passives or the class change.
+    /// </summary>
+    public float RunSpeed
+    {
+        get => _runSpeed ?? BaseRunSpeed;
+        set
+        {
+            BaseRunSpeed = value;
+            _runSpeed = value;
+        }
+    }
+
+    float? _runSpeed;
+
+    /// <summary>Sets the live (buffed) run speed without touching the base template value.</summary>
+    internal void SetLiveRunSpeed(float speed) => _runSpeed = speed;
+
     public float WalkSpeed { get; set; }
     public bool Running { get; set; } = true;
     /// <summary>Mobius isInsideZone(WATER): last water state seen by the mover (swim speed while true).</summary>

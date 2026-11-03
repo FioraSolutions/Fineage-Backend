@@ -284,6 +284,21 @@
    ]
   },
   {
+   "skillId": 169,
+   "name": "Quick Step",
+   "levels": 2,
+   "effects": [
+    {
+     "stat": "runSpd",
+     "op": "add",
+     "values": [
+      7.0,
+      11.0
+     ]
+    }
+   ]
+  },
+  {
    "skillId": 198,
    "name": "Boost Evasion",
    "levels": 3,
@@ -1980,6 +1995,17 @@
    "levels": 2,
    "effects": [
     {
+     "stat": "runSpd",
+     "op": "add",
+     "values": [
+      5.0,
+      10.0
+     ],
+     "using": [
+      "LIGHT"
+     ]
+    },
+    {
      "stat": "accCombat",
      "op": "add",
      "values": [
@@ -2084,6 +2110,22 @@
       1.0,
       2.0,
       3.0
+     ]
+    }
+   ]
+  },
+  {
+   "skillId": 389,
+   "name": "Clan March",
+   "levels": 3,
+   "effects": [
+    {
+     "stat": "runSpd",
+     "op": "add",
+     "values": [
+      3.0,
+      5.0,
+      6.0
      ]
     }
    ]
@@ -2933,6 +2975,20 @@
    ]
   },
   {
+   "skillId": 3507,
+   "name": "Elven Mithril Set",
+   "levels": 1,
+   "effects": [
+    {
+     "stat": "runSpd",
+     "op": "add",
+     "values": [
+      7.0
+     ]
+    }
+   ]
+  },
+  {
    "skillId": 3508,
    "name": "Mithril Light Armor Set",
    "levels": 1,
@@ -3087,6 +3143,20 @@
    ]
   },
   {
+   "skillId": 3524,
+   "name": "Blue Wolf Heavy Armor Set",
+   "levels": 1,
+   "effects": [
+    {
+     "stat": "runSpd",
+     "op": "add",
+     "values": [
+      7.0
+     ]
+    }
+   ]
+  },
+  {
    "skillId": 3526,
    "name": "Blue Wolf Light Armor Set",
    "levels": 1,
@@ -3117,6 +3187,20 @@
      "op": "mul",
      "values": [
       1.027
+     ]
+    }
+   ]
+  },
+  {
+   "skillId": 3529,
+   "name": "Doom Robe Set",
+   "levels": 1,
+   "effects": [
+    {
+     "stat": "runSpd",
+     "op": "add",
+     "values": [
+      7.0
      ]
     }
    ]
@@ -3194,6 +3278,13 @@
      "op": "mul",
      "values": [
       1.15
+     ]
+    },
+    {
+     "stat": "runSpd",
+     "op": "add",
+     "values": [
+      7.0
      ]
     }
    ]
@@ -3351,6 +3442,13 @@
      "op": "mul",
      "values": [
       1.17
+     ]
+    },
+    {
+     "stat": "runSpd",
+     "op": "add",
+     "values": [
+      7.0
      ]
     }
    ]
@@ -3848,6 +3946,22 @@
       633.0,
       652.0,
       671.0
+     ]
+    },
+    {
+     "stat": "runSpd",
+     "op": "add",
+     "values": [
+      2.0,
+      4.0,
+      6.0,
+      8.0,
+      10.0,
+      12.0,
+      14.0,
+      16.0,
+      18.0,
+      20.0
      ]
     },
     {
@@ -4356,6 +4470,22 @@
      ]
     },
     {
+     "stat": "runSpd",
+     "op": "add",
+     "values": [
+      2.0,
+      4.0,
+      6.0,
+      8.0,
+      10.0,
+      12.0,
+      14.0,
+      16.0,
+      18.0,
+      20.0
+     ]
+    },
+    {
      "stat": "accCombat",
      "op": "add",
      "values": [
@@ -4516,10 +4646,43 @@
      ]
     },
     {
+     "stat": "runSpd",
+     "op": "mul",
+     "values": [
+      0.22,
+      0.19,
+      0.16,
+      0.13,
+      0.1,
+      0.1,
+      0.1,
+      0.1,
+      0.1,
+      0.1
+     ]
+    },
+    {
      "stat": "accCombat",
      "op": "sub",
      "values": [
       20.0
+     ]
+    }
+   ]
+  },
+  {
+   "skillId": 4270,
+   "name": "Weight Penalty",
+   "levels": 4,
+   "effects": [
+    {
+     "stat": "runSpd",
+     "op": "mul",
+     "values": [
+      1.0,
+      0.5,
+      0.5,
+      0.0
      ]
     }
    ]
@@ -5020,6 +5183,27 @@
       0.44,
       0.42,
       0.4
+     ]
+    },
+    {
+     "stat": "runSpd",
+     "op": "mul",
+     "values": [
+      0.95,
+      0.9,
+      0.87,
+      0.83,
+      0.8,
+      0.77,
+      0.74,
+      0.71,
+      0.68,
+      0.66,
+      0.64,
+      0.63,
+      0.62,
+      0.61,
+      0.6
      ]
     }
    ]

@@ -274,6 +274,8 @@ public sealed partial class ZoneWorld
 
     /// <summary>
     /// Mobius <c>getMoveSpeed</c>: swim speed inside a WaterZone (players: Interlude baseStats 50), else run/walk.
+    /// The run value is the live stat (<see cref="ZoneEntity.RunSpeed"/>, buffs/debuffs folded in by
+    /// <see cref="RefreshRunSpeed"/>), so Wind Walk/Slow/Hamstring actually change how fast a pawn travels.
     /// </summary>
     internal static float MoveSpeedOf(ZoneEntity e)
     {
@@ -281,6 +283,19 @@ public sealed partial class ZoneWorld
             return WaterZones.PlayerSwimSpeed;
         float speed = e.Running ? e.RunSpeed : e.WalkSpeed;
         return speed <= 0 ? DefaultRunSpeed : speed;
+    }
+
+    /// <summary>
+    /// Mobius <c>Creature.getStat().getRunSpeed()</c> recompute after a buff / debuff / passive / gear change;
+    /// when it changed, tell the Net watchers the new gait speed (Mobius broadcast MoveToLocation/ChangeMoveType).
+    /// Mid-run the entity keeps moving at the new speed on the next tick (no re-path needed).
+    /// </summary>
+    void RefreshRunSpeedAndFanout(ZoneEntity entity)
+    {
+        if (!RefreshRunSpeed(entity))
+            return;
+        ZoneLog.Info($"[speed] obj={entity.ObjectId} run={entity.RunSpeed} base={entity.BaseRunSpeed}");
+        FanoutNetMoveType(entity);
     }
 
     /// <summary>Mobius WaterZone onEnter/onExit for players: flip swim state and tell Net watchers the new speed.</summary>

@@ -105,8 +105,31 @@ public sealed partial class ZoneWorld
     }
 
     /// <summary>
-    /// Mobius <c>ConditionUsingItemType</c>: weapon kinds test the right-hand weapon type; armor kinds (LIGHT/HEAVY/MAGIC)
-    /// need the chest armor type and, unless the chest is full-body, matching legs; SHIELD needs a left-hand shield.
+    /// Mobius <c>Creature.getStat().getRunSpeed()</c>: base template run speed plus active buff/debuff and passive
+    /// <c>runSpd</c> funcs (Wind Walk, Quick Step, Slow, Paralyze…), clamped to Mobius <c>MaxRunSpeed</c> 250.
+    /// Walk speed has no Mobius stat, so it is never modified by buffs.
+    /// </summary>
+    internal static float RunSpeedStat(ZoneEntity entity, CombatStatMods mods)
+    {
+        float baseSpeed = entity.BaseRunSpeed > 0 ? entity.BaseRunSpeed : ZoneCombat.DefaultPlayerRunSpeed;
+        double speed = mods.Apply(CombatStat.RunSpd, baseSpeed);
+        return Math.Clamp((float)speed, ZoneCombat.MinRunSpeed, ZoneCombat.MaxRunSpeed);
+    }
+
+    /// <summary>
+    /// Recomputes the cached live <see cref="ZoneEntity.RunSpeed"/> from base + current stat funcs and reports whether it
+    /// moved, so callers can re-send ChangeMoveType (Mobius Player.updateStats → broadcast move speeds).
+    /// Players fold passive masteries too (Quick Step / Agile Movement / armor-set runSpd).
+    /// </summary>
+    internal bool RefreshRunSpeed(ZoneEntity entity)
+    {
+        float before = entity.RunSpeed;
+        var mods = entity.Kind == ZoneEntityKind.Player ? PlayerStatMods(entity) : StatMods(entity);
+        entity.SetLiveRunSpeed(RunSpeedStat(entity, mods));
+        return Math.Abs(before - entity.RunSpeed) > 0.001f;
+    }
+
+    /// <summary>Mobius <c>ConditionUsingItemType</c>: weapon kinds test the right-hand weapon type; armor kinds (LIGHT/HEAVY/MAGIC)    /// need the chest armor type and, unless the chest is full-body, matching legs; SHIELD needs a left-hand shield.
     /// </summary>
     internal static bool Wearing(ZoneEntity player, string[] kinds)
     {

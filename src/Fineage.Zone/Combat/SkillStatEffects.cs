@@ -14,7 +14,8 @@ public enum CombatStat
     MAtkSpd,   // mAtkSpd
     Accuracy,  // accCombat
     Evasion,   // rEvas
-    CritRate   // critRate
+    CritRate,  // critRate
+    RunSpd     // runSpd (Mobius has no walkSpd stat: walk speed is never buffed)
 }
 
 /// <param name="Using">Mobius <c>&lt;using kind&gt;</c> condition (upper-case kinds); null = unconditional.</param>
@@ -71,7 +72,7 @@ public sealed class SkillStatEffectCatalog
     {
         ["pAtk"] = CombatStat.PAtk, ["pDef"] = CombatStat.PDef, ["mAtk"] = CombatStat.MAtk, ["mDef"] = CombatStat.MDef,
         ["pAtkSpd"] = CombatStat.PAtkSpd, ["mAtkSpd"] = CombatStat.MAtkSpd, ["accCombat"] = CombatStat.Accuracy,
-        ["rEvas"] = CombatStat.Evasion, ["critRate"] = CombatStat.CritRate
+        ["rEvas"] = CombatStat.Evasion, ["critRate"] = CombatStat.CritRate, ["runSpd"] = CombatStat.RunSpd
     };
 
     readonly Dictionary<int, SkillStatEffect> _byId;
