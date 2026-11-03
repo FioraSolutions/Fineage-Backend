@@ -273,16 +273,22 @@ public sealed partial class ZoneWorld
     }
 
     /// <summary>
-    /// Mobius <c>getMoveSpeed</c>: swim speed inside a WaterZone (players: Interlude baseStats 50), else run/walk.
-    /// The run value is the live stat (<see cref="ZoneEntity.RunSpeed"/>, buffs/debuffs folded in by
-    /// <see cref="RefreshRunSpeed"/>), so Wind Walk/Slow/Hamstring actually change how fast a pawn travels.
+    /// Mobius <c>CreatureStat.getMoveSpeed()</c> (<c>CreatureStat.java:487-495</c>): inside a WaterZone it returns
+    /// <c>getSwimRunSpeed()</c>/<c>getSwimWalkSpeed()</c> by <c>isRunning()</c>, else <c>getRunSpeed()</c>/<c>getWalkSpeed()</c>.
+    /// All four are the same <c>runSpd</c> stat folded onto a different base, so buffs and DEX apply everywhere.
+    /// A live speed of 0 is legal (Weight Penalty 4 = <c>runSpd</c> ×0) and is not replaced by a default.
     /// </summary>
     internal static float MoveSpeedOf(ZoneEntity e)
     {
-        if (e.InWater && e.Kind == ZoneEntityKind.Player)
-            return WaterZones.PlayerSwimSpeed;
-        float speed = e.Running ? e.RunSpeed : e.WalkSpeed;
-        return speed <= 0 ? DefaultRunSpeed : speed;
+        float speed;
+        if (e.InWater)
+            speed = e.Running ? e.SwimRunSpeed : e.SwimWalkSpeed;
+        else
+            speed = e.Running ? e.RunSpeed : e.WalkSpeed;
+
+        // Only entities with no template speed at all fall back (Mobius baseRunSpd default 120).
+        bool hasBases = e.BaseRunSpeed > 0 || e.BaseWalkSpeed > 0 || e.BaseSwimRunSpeed > 0 || e.BaseSwimWalkSpeed > 0;
+        return hasBases ? speed : DefaultRunSpeed;
     }
 
     /// <summary>
@@ -307,6 +313,8 @@ public sealed partial class ZoneWorld
         if (inWater == e.InWater)
             return;
         e.InWater = inWater;
+        // Mobius onEnter/onExit recomputes the live speed for the new base pair: refresh first, then tell watchers.
+        RefreshRunSpeed(e);
         ZoneLog.Info($"[water] obj={e.ObjectId} {(inWater ? "enter" : "exit")} at={e.X},{e.Y},{e.Z} speed={MoveSpeedOf(e)}");
         FanoutNetMoveType(e);
     }

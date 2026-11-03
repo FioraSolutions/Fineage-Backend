@@ -132,7 +132,8 @@ public sealed partial class ZoneWorld
         player.ClassId = change.ClassId;
         session.ChangeClass(change.ClassId);
         player.BaseRunSpeed = template.RunSpeed;
-        player.WalkSpeed = template.WalkSpeed;
+        player.BaseWalkSpeed = template.WalkSpeed;
+        player.Dex = template.Dex;
         player.MaxHp = template.ModifiedHp(player.Level);
         player.MaxMp = template.ModifiedMp(player.Level);
         player.CurHp = Math.Min(player.CurHp, player.MaxHp);

@@ -150,15 +150,14 @@ public sealed class DoorTable
 }
 
 /// <summary>
-/// Mobius <c>WaterZone</c> cuboids from <c>data/water-zones.json</c>. Inside one, Mobius <c>getMoveSpeed</c> uses the
-/// template swim speed (Interlude baseStats slowSwim/fastSwim = 50 for every class) instead of walk/run.
-/// Breath / drowning and 3-D swim (free Z) are not modelled.
+/// Mobius <c>WaterZone</c> cuboids from <c>data/water-zones.json</c>. Inside one, Mobius <c>CreatureStat.getMoveSpeed</c>
+/// switches to the template swim bases (<c>baseMoveSpd/slowSwim</c>, <c>fastSwim</c>) instead of walk/run; the folded
+/// <c>runSpd</c> stat still applies there, so buffs and DEX change swim speed too. Breath / drowning and 3-D swim
+/// (free Z) are not modelled.
 /// </summary>
 public sealed class WaterZones
 {
     public const string FileName = "water-zones.json";
-    /// <summary>Interlude baseStats &lt;slowSwim&gt;/&lt;fastSwim&gt; — 50 for all 89 player templates.</summary>
-    public const float PlayerSwimSpeed = 50f;
     public static readonly WaterZones Empty = new([]);
 
     readonly (int MinX, int MaxX, int MinY, int MaxY, int MinZ, int MaxZ)[] _zones;

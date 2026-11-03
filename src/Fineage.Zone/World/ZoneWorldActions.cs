@@ -192,7 +192,11 @@ public sealed partial class ZoneWorld
         return list;
     }
 
-    /// <summary>Net ChangeMoveType (gait + effective run/walk speed, swim-aware) to self + watchers.</summary>
+    /// <summary>
+    /// Net ChangeMoveType (gait + effective run/walk speed, swim-aware) to self + watchers.
+    /// Both speeds are the folded <c>runSpd</c> stat (<see cref="RefreshRunSpeed"/>), so walk buffs land too; in water
+    /// the swim pair is sent, matching Mobius <c>getSwimRunSpeed()/getSwimWalkSpeed()</c>.
+    /// </summary>
     void FanoutNetMoveType(ZoneEntity actor)
     {
         if (NetBridge == null)
@@ -200,8 +204,8 @@ public sealed partial class ZoneWorld
         var watchers = NetWatchersOf(actor);
         if (watchers.Count == 0)
             return;
-        float run = actor.InWater && actor.Kind == ZoneEntityKind.Player ? WaterZones.PlayerSwimSpeed : actor.RunSpeed;
-        float walk = actor.InWater && actor.Kind == ZoneEntityKind.Player ? WaterZones.PlayerSwimSpeed : actor.WalkSpeed;
+        float run = actor.InWater ? actor.SwimRunSpeed : actor.RunSpeed;
+        float walk = actor.InWater ? actor.SwimWalkSpeed : actor.WalkSpeed;
         NetBridge.FanoutChangeMoveType(watchers, actor.ObjectId, actor.Running, run, walk, actor.InWater);
     }
 

@@ -40,6 +40,10 @@ Default resolver (when the env var is unset) looks for:
 
 Path `ref/mobius-ct0-interlude/` is listed in `.gitignore`.
 
+The Java core (the authority for formulas, not just datapack values) is checked out next to the XML at
+`ref/mobius-ct0-interlude/java` — read it when a game rule is ambiguous (see `docs/combat-parity.md` for the file/line
+references used so far).
+
 ## Mobius folder → Fineage JSON
 
 | Mobius path under datapack `data/` | Fineage tracked output | Notes |

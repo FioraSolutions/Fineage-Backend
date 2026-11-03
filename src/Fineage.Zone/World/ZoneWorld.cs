@@ -100,7 +100,11 @@ sealed class ZoneEntity
     public double BaseEvasion { get; init; }
     public int BaseCritical { get; init; }
     public int RandomDamage { get; init; }
-    public int Dex { get; init; } = 30;
+    /// <summary>
+    /// Mobius <c>getDEX()</c>: feeds <c>FuncMoveSpeed</c> (run/walk/swim speed × DEX bonus), accuracy, evasion and
+    /// crit. Players copy it from the class template and re-copy it on class change.
+    /// </summary>
+    public int Dex { get; set; } = 30;
     /// <summary>NPC Mobius shield defence / block rate (players read the equipped shield).</summary>
     public int ShieldDef { get; init; }
     public int ShieldRate { get; init; }
@@ -120,8 +124,9 @@ sealed class ZoneEntity
     /// <summary>True while an abnormal with combat stat funcs is active (UserInfo refresh on change).</summary>
     public bool HasStatAbnormal { get; set; }
     /// <summary>
-    /// Base run speed (Mobius baseRunSpeed: class template / NPC template). Buffs and debuffs change the live
-    /// <see cref="RunSpeed"/> through <c>runSpd</c> stat funcs; the base is only rewritten by template / class change.
+    /// Base run speed (Mobius <c>CreatureTemplate.baseRunSpd</c>). Buffs and debuffs change the live
+    /// <see cref="RunSpeed"/> through the <c>runSpd</c> (<c>Stat.MOVE_SPEED</c>) functions; the base is only rewritten
+    /// by a template / class change.
     /// </summary>
     public float BaseRunSpeed { get; set; }
 
@@ -144,7 +149,74 @@ sealed class ZoneEntity
     /// <summary>Sets the live (buffed) run speed without touching the base template value.</summary>
     internal void SetLiveRunSpeed(float speed) => _runSpeed = speed;
 
-    public float WalkSpeed { get; set; }
+    /// <summary>
+    /// Base walk speed (Mobius <c>CreatureTemplate.baseWalkSpd</c>). <c>Stat.MOVE_SPEED("runSpd")</c> is the one speed
+    /// stat in Mobius and <c>CreatureStat.getWalkSpeed</c> folds it onto this base, so buffs and debuffs move walk too.
+    /// </summary>
+    public float BaseWalkSpeed { get; set; }
+
+    /// <summary>
+    /// Live walk speed sent on the wire; mirrors <see cref="RunSpeed"/> and is recomputed with it.
+    /// </summary>
+    public float WalkSpeed
+    {
+        get => _walkSpeed ?? BaseWalkSpeed;
+        set
+        {
+            BaseWalkSpeed = value;
+            _walkSpeed = value;
+        }
+    }
+
+    float? _walkSpeed;
+
+    /// <summary>Sets the live (buffed) walk speed without touching the base template value.</summary>
+    internal void SetLiveWalkSpeed(float speed) => _walkSpeed = speed;
+
+    /// <summary>
+    /// Mobius <c>baseMoveSpd/fastSwim</c> (<c>CreatureTemplate.java:147</c>, falls back to <c>baseRunSpd</c>).
+    /// 0 = not in the template → use the run base, exactly like Mobius.
+    /// </summary>
+    public float BaseSwimRunSpeed { get; set; }
+
+    /// <summary>
+    /// Mobius <c>baseMoveSpd/slowSwim</c> (<c>CreatureTemplate.java:148</c>, falls back to <c>baseWalkSpd</c>).
+    /// </summary>
+    public float BaseSwimWalkSpeed { get; set; }
+
+    /// <summary>Live swim run speed (Mobius <c>getSwimRunSpeed()</c>); recomputed with the land speeds.</summary>
+    public float SwimRunSpeed
+    {
+        get => _swimRunSpeed ?? (BaseSwimRunSpeed > 0 ? BaseSwimRunSpeed : BaseRunSpeed);
+        set
+        {
+            BaseSwimRunSpeed = value;
+            _swimRunSpeed = value;
+        }
+    }
+
+    float? _swimRunSpeed;
+
+    /// <summary>Live swim walk speed (Mobius <c>getSwimWalkSpeed()</c>).</summary>
+    public float SwimWalkSpeed
+    {
+        get => _swimWalkSpeed ?? (BaseSwimWalkSpeed > 0 ? BaseSwimWalkSpeed : BaseWalkSpeed);
+        set
+        {
+            BaseSwimWalkSpeed = value;
+            _swimWalkSpeed = value;
+        }
+    }
+
+    float? _swimWalkSpeed;
+
+    /// <summary>Sets the live swim speeds without touching the base template values.</summary>
+    internal void SetLiveSwimSpeed(float run, float walk)
+    {
+        _swimRunSpeed = run;
+        _swimWalkSpeed = walk;
+    }
+
     public bool Running { get; set; } = true;
     /// <summary>Mobius isInsideZone(WATER): last water state seen by the mover (swim speed while true).</summary>
     public bool InWater { get; set; }
@@ -628,6 +700,10 @@ public sealed partial class ZoneWorld
             ClassId = session.ClassId,
             RunSpeed = MoveSpeed(session.ClassId).run,
             WalkSpeed = MoveSpeed(session.ClassId).walk,
+            Dex = DexOf(session.ClassId),
+            // Mobius player templates always declare baseMoveSpd slowSwim/fastSwim = 50.
+            BaseSwimRunSpeed = ZoneCombat.DefaultSwimSpeed,
+            BaseSwimWalkSpeed = ZoneCombat.DefaultSwimSpeed,
             Running = true,
             Session = session,
             Inventory = inventory,
@@ -890,6 +966,10 @@ public sealed partial class ZoneWorld
             return (template.RunSpeed, template.WalkSpeed);
         return (120f, 80f);
     }
+
+    /// <summary>Mobius <c>getDEX()</c> from the class template — drives the <c>FuncMoveSpeed</c> speed multiplier.</summary>
+    int DexOf(int classId) =>
+        PlayerClasses.TryGet(classId, out var template) && template != null ? template.Dex : 30;
 
     const long PresenceSaveIntervalMs = 3000;
     readonly System.Collections.Concurrent.ConcurrentDictionary<int, long> _lastPresenceSaveMs = new();

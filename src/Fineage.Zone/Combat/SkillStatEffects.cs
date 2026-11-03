@@ -15,7 +15,7 @@ public enum CombatStat
     Accuracy,  // accCombat
     Evasion,   // rEvas
     CritRate,  // critRate
-    RunSpd     // runSpd (Mobius has no walkSpd stat: walk speed is never buffed)
+    RunSpd     // runSpd = Stat.MOVE_SPEED: the only speed stat; folds onto run, walk and swim bases alike
 }
 
 /// <param name="Using">Mobius <c>&lt;using kind&gt;</c> condition (upper-case kinds); null = unconditional.</param>
@@ -27,7 +27,9 @@ public sealed record SkillStatFunc(CombatStat Stat, char Op, double[] Values, st
 public sealed record SkillStatEffect(int SkillId, string Name, int Levels, IReadOnlyList<SkillStatFunc> Funcs);
 
 /// <summary>
-/// Accumulated stat functions from active abnormals. Mobius order: set (0x08) → mul (0x30) → add/sub (0x40).
+/// Accumulated stat functions from active abnormals. Mobius order (<c>StatFunction.java:24-31</c>):
+/// <c>SET</c> 0 → <c>DIV</c>/<c>MUL</c> 20 → <c>ADD</c>/<c>SUB</c> 30, applied to the DEX-multiplied base
+/// (<c>FuncMoveSpeed</c>, order 1). <c>DIV</c> is not modelled: no Interlude skill XML uses it on a stat we collect.
 /// </summary>
 public sealed class CombatStatMods
 {
@@ -54,6 +56,11 @@ public sealed class CombatStatMods
         IsEmpty = false;
     }
 
+    /// <summary>
+    /// Folds one stat the way Mobius' <c>Calculator</c> does: <c>SET</c> replaces the value, then the product of all
+    /// <c>MUL</c>s, then the sum of signed <c>ADD</c>/<c>SUB</c>s. <paramref name="value"/> is the already DEX-multiplied
+    /// base for speed stats.
+    /// </summary>
     public double Apply(CombatStat stat, double value)
     {
         int i = (int)stat;

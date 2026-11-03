@@ -22,12 +22,20 @@ public static class ZoneCombat
     public const int DropMaxZDelta = 50;
     /// <summary>Mobius moveToPawn offset: stop a bit inside the attack range so the swing passes the check.</summary>
     public const int ApproachSlack = 20;
-    /// <summary>Fallback player run speed when the character has none (Interlude human fighter 115 → ~120).</summary>
+    /// <summary>Mobius <c>CreatureTemplate</c> default <c>baseRunSpd</c> when a template has none.</summary>
     public const float DefaultPlayerRunSpeed = 120f;
-    /// <summary>Mobius <c>Character.ini MaxRunSpeed</c>: the stat pipeline clamps run speed (after runSpd buffs) to this.</summary>
+    /// <summary>Mobius <c>CreatureTemplate</c> default <c>baseWalkSpd</c> when a template has none.</summary>
+    public const float DefaultWalkSpeed = 50f;
+    /// <summary>
+    /// Interlude <c>baseMoveSpd/slowSwim</c> and <c>fastSwim</c>: 50 in every player template. Kept as the template
+    /// default for swim bases we have no data for — swim speed still goes through the runSpd stat pipeline.
+    /// </summary>
+    public const float DefaultSwimSpeed = 50f;
+    /// <summary>
+    /// Mobius <c>Character.ini MaxRunSpeed</c> (250): <c>PlayerStat.getRunSpeed/getWalkSpeed</c> cap the result after
+    /// the stat fold and <c>Config.RUN_SPD_BOOST</c>. Players only — NPC templates (Valakas 300) are never capped.
+    /// </summary>
     public const float MaxRunSpeed = 250f;
-    /// <summary>Mobius <c>Creature.initStats</c> floor (a runSpd debuff can never leave a creature standing still).</summary>
-    public const float MinRunSpeed = 1f;
     /// <summary>Target drift that forces a fresh MoveToPawn during an approach (Mobius follow re-issue).</summary>
     public const int ApproachRepathDistance = 40;
     /// <summary>Tolerance at hitTime: swing lands only if attacker is still within melee range + this.</summary>
