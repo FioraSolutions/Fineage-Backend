@@ -89,7 +89,7 @@ public sealed partial class ZoneWorld
 
     void SendQuestList(ZoneSession session, ZoneEntity player, ZoneEntity npc, List<Pending> toSelf)
     {
-        string html = _quests.QuestChoiceHtml(player.Quests, npc.NpcId, npc.Name);
+        string html = _quests.QuestChoiceHtml(player.Quests, npc.NpcId, npc.Name, QuestActorOf(player));
         toSelf.Add(Pack(session, MsgType.QuestDialog, new QuestDialogMsg
         {
             NpcObjectId = npc.ObjectId,

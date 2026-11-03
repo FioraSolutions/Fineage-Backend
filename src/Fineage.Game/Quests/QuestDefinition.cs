@@ -49,7 +49,16 @@ public sealed record QuestDialog(
     string? WhenVar,
     string? WhenValue,
     string Html,
-    IReadOnlyList<QuestOp> Ops);
+    IReadOnlyList<QuestOp> Ops,
+    IReadOnlyList<int>? Races = null,
+    int MinLevel = 0,
+    int MaxLevel = 0);
+
+/// <summary>
+/// Who is talking. Mobius quest scripts branch on <c>player.getRace()</c> / <c>getLevel()</c>
+/// before showing the start page; dialogs carry the same gates as data (races, minLevel, maxLevel).
+/// </summary>
+public readonly record struct QuestActor(int Race, int Level);
 
 public sealed record QuestDefinition(
     int Id,

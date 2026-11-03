@@ -126,10 +126,10 @@ public sealed partial class ZoneWorld
             TryNewbieHelperGift(session, player, npc, toSelf);
 
         outcome = eventName == null
-            ? _quests.FirstTalk(player.Quests, player.Inventory!, npc.NpcId, npc.Name)
+            ? _quests.FirstTalk(player.Quests, player.Inventory!, npc.NpcId, npc.Name, QuestActorOf(player))
             : eventName.Length == 0
-                ? _quests.Talk(player.Quests, player.Inventory!, questId, npc.NpcId)
-                : _quests.AdvEvent(player.Quests, player.Inventory!, questId, npc.NpcId, eventName);
+                ? _quests.Talk(player.Quests, player.Inventory!, questId, npc.NpcId, QuestActorOf(player))
+                : _quests.AdvEvent(player.Quests, player.Inventory!, questId, npc.NpcId, eventName, QuestActorOf(player));
         if (IsNpcPage(outcome))
         {
             SendNpcPage(session, player, npc, 0, toSelf);
@@ -140,6 +140,8 @@ public sealed partial class ZoneWorld
             Publish(session, player, outcome, npc.ObjectId, npc.NpcId, toSelf);
         return outcome.Ok ? null : FailureCode(outcome.Failure);
     }
+
+    static QuestActor QuestActorOf(ZoneEntity player) => new(player.Race, player.Level);
 
     static bool IsNpcPage(QuestOutcome outcome) =>
         outcome.Ok

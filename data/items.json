@@ -2377,6 +2377,60 @@
       "spiritshots": 1
     },
     {
+      "id": 1026,
+      "name": "Silvery Spidersilk",
+      "kind": "etc",
+      "stackable": true,
+      "icon": "icon.etc_skein_white_i00",
+      "price": 0,
+      "weight": 0
+    },
+    {
+      "id": 1027,
+      "name": "Unoren's Receipt",
+      "kind": "etc",
+      "stackable": true,
+      "icon": "icon.etc_letter_white_i00",
+      "price": 0,
+      "weight": 0
+    },
+    {
+      "id": 1028,
+      "name": "Creamees's Ticket",
+      "kind": "etc",
+      "stackable": true,
+      "icon": "icon.etc_ticket_blue_i00",
+      "price": 0,
+      "weight": 0
+    },
+    {
+      "id": 1029,
+      "name": "Nightshade Leaf",
+      "kind": "etc",
+      "stackable": true,
+      "icon": "icon.etc_herb_blue_i00",
+      "price": 0,
+      "weight": 0
+    },
+    {
+      "id": 1036,
+      "name": "Andellia's Letter",
+      "kind": "etc",
+      "stackable": true,
+      "icon": "icon.etc_scroll_gray_i00",
+      "price": 0,
+      "weight": 0
+    },
+    {
+      "id": 1037,
+      "name": "Fruit of the Mother Tree",
+      "kind": "etc",
+      "stackable": true,
+      "icon": "icon.etc_fruit_green_i00",
+      "price": 0,
+      "weight": 0
+    },
+    {
       "id": 1048,
       "name": "Spellbook: Might",
       "kind": "etc",

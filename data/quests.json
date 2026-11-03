@@ -1,8 +1,366 @@
 {
-  "reference": "Fineage smoke quest. Lifecycle matches L2J Mobius Interlude QuestState (created/started/completed, cond, one-time exit, abort deletes). Dialog text is original, not Mobius HTML. Quest 256 is the Mobius NewbieHelper first-talk gift journal flag (rewards applied in ZoneWorld, not dialog ops).",
+  "reference": "Fineage smoke quest. Lifecycle matches L2J Mobius Interlude QuestState (created/started/completed, cond, one-time exit, abort deletes). Dialog text is original, not Mobius HTML. Quest 256 is the Mobius NewbieHelper first-talk gift journal flag (rewards applied in ZoneWorld, not dialog ops). Quests 160/161 are the Mobius Elven Village delivery quests (Q00160 Nerupa's Request, Q00161 Fruit of the Mother Tree): same NPCs, items, conds, race/level gates and rewards; dialog text is original.",
   "maxActive": 25,
   "talkRange": 150,
   "quests": [
+    {
+      "id": 160,
+      "name": "Nerupa's Request",
+      "repeatable": false,
+      "abortable": true,
+      "questItems": [
+        1026,
+        1027,
+        1028,
+        1029
+      ],
+      "dialogs": [
+        {
+          "npcId": 30370,
+          "hook": "talk",
+          "when": "absent",
+          "races": [
+            1
+          ],
+          "minLevel": 3,
+          "html": "<html><body>Nerupa:<br>My sisters gathered Silvery Spidersilk for a trader in the village, but I will not walk among those walls. Will you carry it for me?<br><a action=\"quest_event:160:accept\">I will deliver it.</a></body></html>"
+        },
+        {
+          "npcId": 30370,
+          "hook": "talk",
+          "when": "absent",
+          "races": [
+            1
+          ],
+          "html": "<html><body>Nerupa:<br>I have an errand for a child of the forest, but you are still too young. Come back at level 3.</body></html>"
+        },
+        {
+          "npcId": 30370,
+          "hook": "talk",
+          "when": "absent",
+          "html": "<html><body>Nerupa:<br>The forest watches you, stranger. My errands are for Elves only.</body></html>"
+        },
+        {
+          "npcId": 30370,
+          "hook": "event",
+          "event": "accept",
+          "when": "absent",
+          "races": [
+            1
+          ],
+          "minLevel": 3,
+          "html": "<html><body>Nerupa:<br>Take this Spidersilk to Unoren at the weapon and armor shop. He owes me a Nightshade Leaf in return. Bring it back to me.</body></html>",
+          "ops": [
+            {
+              "op": "create"
+            },
+            {
+              "op": "start"
+            },
+            {
+              "op": "give_item",
+              "itemId": 1026,
+              "count": 1
+            }
+          ]
+        },
+        {
+          "npcId": 30370,
+          "hook": "talk",
+          "when": "started",
+          "cond": 1,
+          "html": "<html><body>Nerupa:<br>Have you not traded with Unoren yet? I am waiting for the Nightshade Leaf.</body></html>"
+        },
+        {
+          "npcId": 30370,
+          "hook": "talk",
+          "when": "started",
+          "cond": 2,
+          "html": "<html><body>Nerupa:<br>Have you not traded with Unoren yet? I am waiting for the Nightshade Leaf.</body></html>"
+        },
+        {
+          "npcId": 30370,
+          "hook": "talk",
+          "when": "started",
+          "cond": 3,
+          "html": "<html><body>Nerupa:<br>Have you not traded with Unoren yet? I am waiting for the Nightshade Leaf.</body></html>"
+        },
+        {
+          "npcId": 30370,
+          "hook": "talk",
+          "when": "started",
+          "cond": 4,
+          "html": "<html><body>Nerupa:<br>Yes, that is nightshade. You walked far for an old forest spirit. Take this for your trouble.</body></html>",
+          "ops": [
+            {
+              "op": "take_item",
+              "itemId": 1029,
+              "count": 1
+            },
+            {
+              "op": "give_item",
+              "itemId": 1060,
+              "count": 5
+            },
+            {
+              "op": "give_exp_sp",
+              "exp": 1000,
+              "sp": 0
+            },
+            {
+              "op": "complete"
+            }
+          ]
+        },
+        {
+          "npcId": 30370,
+          "hook": "talk",
+          "when": "completed",
+          "html": "<html><body>Nerupa:<br>You already helped me. The forest remembers.</body></html>"
+        },
+        {
+          "npcId": 30147,
+          "hook": "talk",
+          "when": "started",
+          "cond": 1,
+          "html": "<html><body>Trader Unoren:<br>Nerupa's Spidersilk, at last. I do not keep the leaf myself. Show this receipt to Creamees at the grocery.</body></html>",
+          "ops": [
+            {
+              "op": "take_item",
+              "itemId": 1026,
+              "count": 1
+            },
+            {
+              "op": "give_item",
+              "itemId": 1027,
+              "count": 1
+            },
+            {
+              "op": "set_cond",
+              "cond": 2
+            }
+          ]
+        },
+        {
+          "npcId": 30147,
+          "hook": "talk",
+          "when": "started",
+          "cond": 2,
+          "html": "<html><body>Trader Unoren:<br>Creamees at the grocery has the Nightshade Leaf. Take my receipt to her.</body></html>"
+        },
+        {
+          "npcId": 30147,
+          "hook": "talk",
+          "when": "started",
+          "cond": 4,
+          "html": "<html><body>Trader Unoren:<br>You have the leaf? Then hurry back to Nerupa outside the village.</body></html>"
+        },
+        {
+          "npcId": 30149,
+          "hook": "talk",
+          "when": "started",
+          "cond": 2,
+          "html": "<html><body>Trader Creamees:<br>Unoren's order. The leaf is rare, so I stored it in the warehouse. Give this ticket to Julia.</body></html>",
+          "ops": [
+            {
+              "op": "take_item",
+              "itemId": 1027,
+              "count": 1
+            },
+            {
+              "op": "give_item",
+              "itemId": 1028,
+              "count": 1
+            },
+            {
+              "op": "set_cond",
+              "cond": 3
+            }
+          ]
+        },
+        {
+          "npcId": 30149,
+          "hook": "talk",
+          "when": "started",
+          "cond": 3,
+          "html": "<html><body>Trader Creamees:<br>Julia at the warehouse will trade the leaf for my ticket.</body></html>"
+        },
+        {
+          "npcId": 30149,
+          "hook": "talk",
+          "when": "started",
+          "cond": 4,
+          "html": "<html><body>Trader Creamees:<br>You have the leaf now. Take it to Nerupa.</body></html>"
+        },
+        {
+          "npcId": 30152,
+          "hook": "talk",
+          "when": "started",
+          "cond": 3,
+          "html": "<html><body>Warehouse Keeper Julia:<br>Creamees' herb. Here it is, sealed in glass. Carry it carefully.</body></html>",
+          "ops": [
+            {
+              "op": "take_item",
+              "itemId": 1028,
+              "count": 1
+            },
+            {
+              "op": "give_item",
+              "itemId": 1029,
+              "count": 1
+            },
+            {
+              "op": "set_cond",
+              "cond": 4
+            }
+          ]
+        },
+        {
+          "npcId": 30152,
+          "hook": "talk",
+          "when": "started",
+          "cond": 4,
+          "html": "<html><body>Warehouse Keeper Julia:<br>Is the leaf delivered yet? Nerupa is waiting.</body></html>"
+        }
+      ]
+    },
+    {
+      "id": 161,
+      "name": "Fruit of the Mother Tree",
+      "repeatable": false,
+      "abortable": true,
+      "questItems": [
+        1036,
+        1037
+      ],
+      "dialogs": [
+        {
+          "npcId": 30362,
+          "hook": "talk",
+          "when": "absent",
+          "races": [
+            1
+          ],
+          "minLevel": 3,
+          "html": "<html><body>Andellia:<br>The Mother Tree fruit harvest grows smaller every year. My sister Thalia keeps this year's fruit at Lake Iris. Will you fetch it?<br><a action=\"quest_event:161:accept\">I will go to Thalia.</a></body></html>"
+        },
+        {
+          "npcId": 30362,
+          "hook": "talk",
+          "when": "absent",
+          "races": [
+            1
+          ],
+          "html": "<html><body>Andellia:<br>I need help with the Mother Tree fruit, but the road to Lake Iris is not for the very young. Come back at level 3.</body></html>"
+        },
+        {
+          "npcId": 30362,
+          "hook": "talk",
+          "when": "absent",
+          "html": "<html><body>Andellia:<br>Welcome, guest. Rest under the Mother Tree. I do not ask favors of guests; this errand is for Elves.</body></html>"
+        },
+        {
+          "npcId": 30362,
+          "hook": "event",
+          "event": "accept",
+          "when": "absent",
+          "races": [
+            1
+          ],
+          "minLevel": 3,
+          "html": "<html><body>Andellia:<br>Take my letter to Thalia. Follow the southern path to Lake Iris; she lives in the observatory on the eastern shore. Hurry before the fruit spoils.</body></html>",
+          "ops": [
+            {
+              "op": "create"
+            },
+            {
+              "op": "start"
+            },
+            {
+              "op": "give_item",
+              "itemId": 1036,
+              "count": 1
+            }
+          ]
+        },
+        {
+          "npcId": 30362,
+          "hook": "talk",
+          "when": "started",
+          "cond": 1,
+          "html": "<html><body>Andellia:<br>Thalia is at Lake Iris, south of the village. Please bring the fruit back quickly.</body></html>"
+        },
+        {
+          "npcId": 30362,
+          "hook": "talk",
+          "when": "started",
+          "cond": 2,
+          "html": "<html><body>Andellia:<br>The fruit is still fresh. Thank you, for all the children of the forest.</body></html>",
+          "ops": [
+            {
+              "op": "take_item",
+              "itemId": 1037,
+              "count": 1
+            },
+            {
+              "op": "give_adena",
+              "count": 1000
+            },
+            {
+              "op": "give_exp_sp",
+              "exp": 1000,
+              "sp": 0
+            },
+            {
+              "op": "complete"
+            }
+          ]
+        },
+        {
+          "npcId": 30362,
+          "hook": "talk",
+          "when": "completed",
+          "html": "<html><body>Andellia:<br>Thanks to you we made this year's nectar.</body></html>"
+        },
+        {
+          "npcId": 30371,
+          "hook": "talk",
+          "when": "started",
+          "cond": 1,
+          "html": "<html><body>Thalia:<br>Andellia sent you. This is the only fruit we harvested this year. Take it to her safely.<br><a action=\"quest_event:161:lake\">Ask about Lake Iris</a></body></html>",
+          "ops": [
+            {
+              "op": "take_item",
+              "itemId": 1036,
+              "count": 1
+            },
+            {
+              "op": "give_item",
+              "itemId": 1037,
+              "count": 1
+            },
+            {
+              "op": "set_cond",
+              "cond": 2
+            }
+          ]
+        },
+        {
+          "npcId": 30371,
+          "hook": "talk",
+          "when": "started",
+          "cond": 2,
+          "html": "<html><body>Thalia:<br>Still here? Andellia needs the fruit before it spoils.<br><a action=\"quest_event:161:lake\">Ask about Lake Iris</a></body></html>"
+        },
+        {
+          "npcId": 30371,
+          "hook": "event",
+          "event": "lake",
+          "when": "started",
+          "html": "<html><body>Thalia:<br>The Elven Village lies north of the lake and the falls to the northwest. West is the Underground Elven Fortress.</body></html>"
+        }
+      ]
+    },
     {
       "id": 256,
       "name": "Newbie Helper Gift",
@@ -22,14 +380,18 @@
           "npcId": 30006,
           "hook": "first_talk",
           "when": "absent",
-          "html": "<html><body>Roxxy:<br>The training hall is open again. Tell Bitz for me.<br><a action=\"quest_event:accept\">I will tell him.</a></body></html>",
-          "ops": [{ "op": "create" }]
+          "html": "<html><body>Roxxy:<br>The training hall is open again. Tell Bitz for me.<br><a action=\"quest_event:999:accept\">I will tell him.</a></body></html>",
+          "ops": [
+            {
+              "op": "create"
+            }
+          ]
         },
         {
           "npcId": 30006,
           "hook": "first_talk",
           "when": "created",
-          "html": "<html><body>Roxxy:<br>Will you tell Bitz the hall is open?<br><a action=\"quest_event:accept\">I will tell him.</a></body></html>"
+          "html": "<html><body>Roxxy:<br>Will you tell Bitz the hall is open?<br><a action=\"quest_event:999:accept\">I will tell him.</a></body></html>"
         },
         {
           "npcId": 30006,
@@ -37,7 +399,11 @@
           "event": "accept",
           "when": "created",
           "html": "<html><body>Roxxy:<br>Thank you. Bitz is in the hall.</body></html>",
-          "ops": [{ "op": "start" }]
+          "ops": [
+            {
+              "op": "start"
+            }
+          ]
         },
         {
           "npcId": 30006,
@@ -51,7 +417,7 @@
           "hook": "first_talk",
           "when": "started",
           "cond": 1,
-          "html": "<html><body>Bitz:<br>Roxxy says the hall is open?<br><a action=\"quest_event:heard\">He has the message.</a></body></html>"
+          "html": "<html><body>Bitz:<br>Roxxy says the hall is open?<br><a action=\"quest_event:999:heard\">He has the message.</a></body></html>"
         },
         {
           "npcId": 30026,
@@ -60,7 +426,12 @@
           "when": "started",
           "cond": 1,
           "html": "<html><body>Bitz:<br>Tell Roxxy I heard her.</body></html>",
-          "ops": [{ "op": "set_cond", "cond": 2 }]
+          "ops": [
+            {
+              "op": "set_cond",
+              "cond": 2
+            }
+          ]
         },
         {
           "npcId": 30026,
@@ -74,7 +445,7 @@
           "hook": "first_talk",
           "when": "started",
           "cond": 2,
-          "html": "<html><body>Roxxy:<br>Then the hall is in good hands.<br><a action=\"quest_event:reward\">Thank you.</a></body></html>"
+          "html": "<html><body>Roxxy:<br>Then the hall is in good hands.<br><a action=\"quest_event:999:reward\">Thank you.</a></body></html>"
         },
         {
           "npcId": 30006,
@@ -84,10 +455,23 @@
           "cond": 2,
           "html": "<html><body>Roxxy:<br>Take this scroll. It will bring you home.</body></html>",
           "ops": [
-            { "op": "give_item", "itemId": 736, "count": 1 },
-            { "op": "give_adena", "count": 25 },
-            { "op": "give_exp_sp", "exp": 50, "sp": 5 },
-            { "op": "complete" }
+            {
+              "op": "give_item",
+              "itemId": 736,
+              "count": 1
+            },
+            {
+              "op": "give_adena",
+              "count": 25
+            },
+            {
+              "op": "give_exp_sp",
+              "exp": 50,
+              "sp": 5
+            },
+            {
+              "op": "complete"
+            }
           ]
         },
         {

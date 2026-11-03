@@ -21,38 +21,38 @@ public sealed class QuestMachine : IQuestKillHook
 
     public int MaxActive => _catalog.MaxActive;
 
-    public QuestOutcome FirstTalk(QuestJournal journal, PlayerInventory inventory, int npcId, string npcName)
+    public QuestOutcome FirstTalk(QuestJournal journal, PlayerInventory inventory, int npcId, string npcName, QuestActor? actor = null)
     {
         foreach (var quest in _catalog.Quests)
         {
-            var dialog = Find(quest, QuestHook.FirstTalk, npcId, "", journal.Find(quest.Id));
+            var dialog = Find(quest, QuestHook.FirstTalk, npcId, "", journal.Find(quest.Id), actor);
             if (dialog == null)
                 continue;
             return Apply(journal, inventory, quest, dialog, "first_talk");
         }
 
-        return Default(npcId, npcName, journal);
+        return Default(npcId, npcName, journal, actor);
     }
 
     /// <summary>Quest-list page for a Quest bypass with no script name. Same links as a default talk.</summary>
-    public string QuestChoiceHtml(QuestJournal journal, int npcId, string npcName) =>
-        Default(npcId, npcName, journal).Html;
+    public string QuestChoiceHtml(QuestJournal journal, int npcId, string npcName, QuestActor? actor = null) =>
+        Default(npcId, npcName, journal, actor).Html;
 
-    public QuestOutcome Talk(QuestJournal journal, PlayerInventory inventory, int questId, int npcId)
+    public QuestOutcome Talk(QuestJournal journal, PlayerInventory inventory, int questId, int npcId, QuestActor? actor = null)
     {
         if (_catalog.Find(questId) is not { } quest)
             return Fail(QuestFailure.Unknown, "That quest does not exist.", questId, "talk");
-        var dialog = Find(quest, QuestHook.Talk, npcId, "", journal.Find(quest.Id));
+        var dialog = Find(quest, QuestHook.Talk, npcId, "", journal.Find(quest.Id), actor);
         if (dialog == null)
             return Fail(QuestFailure.State, "That quest event does not apply.", questId, "talk");
         return Apply(journal, inventory, quest, dialog, "talk");
     }
 
-    public QuestOutcome AdvEvent(QuestJournal journal, PlayerInventory inventory, int questId, int npcId, string eventName)
+    public QuestOutcome AdvEvent(QuestJournal journal, PlayerInventory inventory, int questId, int npcId, string eventName, QuestActor? actor = null)
     {
         if (_catalog.Find(questId) is not { } quest)
             return Fail(QuestFailure.Unknown, "That quest does not exist.", questId, "event", eventName);
-        var dialog = Find(quest, QuestHook.Event, npcId, eventName, journal.Find(quest.Id));
+        var dialog = Find(quest, QuestHook.Event, npcId, eventName, journal.Find(quest.Id), actor);
         if (dialog == null)
             return Fail(QuestFailure.State, "That quest event does not apply.", questId, "event", eventName);
         return Apply(journal, inventory, quest, dialog, "event");
@@ -471,12 +471,12 @@ public sealed class QuestMachine : IQuestKillHook
     static int CondOf(Plan plan) =>
         plan.Vars.TryGetValue(QuestProgress.CondVar, out var text) && int.TryParse(text, out int cond) ? cond : 0;
 
-    QuestOutcome Default(int npcId, string npcName, QuestJournal journal)
+    QuestOutcome Default(int npcId, string npcName, QuestJournal journal, QuestActor? actor)
     {
         var links = new List<(int Id, string Name)>();
         foreach (var quest in _catalog.Quests)
         {
-            if (Find(quest, QuestHook.Talk, npcId, "", journal.Find(quest.Id)) != null)
+            if (Find(quest, QuestHook.Talk, npcId, "", journal.Find(quest.Id), actor) != null)
                 links.Add((quest.Id, quest.Name));
         }
 
@@ -487,7 +487,7 @@ public sealed class QuestMachine : IQuestKillHook
         };
     }
 
-    static QuestDialog? Find(QuestDefinition quest, QuestHook hook, int npcId, string eventName, QuestProgress? state)
+    static QuestDialog? Find(QuestDefinition quest, QuestHook hook, int npcId, string eventName, QuestProgress? state, QuestActor? actor = null)
     {
         foreach (var dialog in quest.Dialogs)
         {
@@ -497,10 +497,29 @@ public sealed class QuestMachine : IQuestKillHook
                 continue;
             if (!WhenMatches(dialog, state))
                 continue;
+            if (!ActorMatches(dialog, actor))
+                continue;
             return dialog;
         }
 
         return null;
+    }
+
+    /// <summary>
+    /// Race / level gates. Datapacks list the passing branch first and the refusal pages after,
+    /// mirroring Mobius <c>race != ELF ? 01 : level &lt; MIN ? 02 : 03</c>. No actor (legacy callers) skips gates.
+    /// </summary>
+    static bool ActorMatches(QuestDialog dialog, QuestActor? actor)
+    {
+        if (actor is not { } who)
+            return true;
+        if (dialog.Races is { Count: > 0 } races && !races.Contains(who.Race))
+            return false;
+        if (dialog.MinLevel > 0 && who.Level < dialog.MinLevel)
+            return false;
+        if (dialog.MaxLevel > 0 && who.Level > dialog.MaxLevel)
+            return false;
+        return true;
     }
 
     static bool WhenMatches(QuestDialog dialog, QuestProgress? state)

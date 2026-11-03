@@ -149,7 +149,22 @@ public sealed class QuestCatalog
         foreach (var op in dialog.Ops ?? [])
             ops.Add(ReadOp(op, items, where, questId));
 
-        return new QuestDialog(dialog.NpcId, hook, evt, when, dialog.Cond, whenVar, whenValue, html, ops);
+        var races = new List<int>();
+        foreach (int race in dialog.Races ?? [])
+        {
+            if (race is < 0 or > 4)
+                throw new InvalidDataException($"{where} quest {questId} race must be 0..4 (Human, Elf, Dark Elf, Orc, Dwarf).");
+            if (!races.Contains(race))
+                races.Add(race);
+        }
+
+        if (dialog.MinLevel is < 0 or > 99 || dialog.MaxLevel is < 0 or > 99)
+            throw new InvalidDataException($"{where} quest {questId} minLevel/maxLevel must be 0..99.");
+        if (dialog.MaxLevel > 0 && dialog.MinLevel > dialog.MaxLevel)
+            throw new InvalidDataException($"{where} quest {questId} minLevel is above maxLevel.");
+
+        return new QuestDialog(dialog.NpcId, hook, evt, when, dialog.Cond, whenVar, whenValue, html, ops,
+            races.Count == 0 ? null : races, dialog.MinLevel, dialog.MaxLevel);
     }
 
     static QuestOp ReadOp(OpDto op, ItemCatalog items, string where, int questId)
@@ -302,6 +317,9 @@ public sealed class QuestCatalog
         public string? WhenValue { get; set; }
         public string? Html { get; set; }
         public List<OpDto>? Ops { get; set; }
+        public List<int>? Races { get; set; }
+        public int MinLevel { get; set; }
+        public int MaxLevel { get; set; }
     }
 
     sealed class OpDto
