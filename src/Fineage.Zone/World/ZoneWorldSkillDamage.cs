@@ -62,7 +62,12 @@ public sealed partial class ZoneWorld
             if (spirit > 0 && outbound != null)
                 RechargeAutoShots(player, outbound);
             double mAtk = ps.MAtk * ZoneCombat.SpiritshotMAtkMultiplier(spirit);
-            return ZoneCombat.MagicDamage(mAtk, mDef, power);
+            // Magic level: skill-combat.json has no magicLvl yet → attacker level (Mobius fallback path).
+            var (damage, outcome) = ZoneCombat.RollMagicDamage(_combatRandom, mAtk, mDef, power,
+                player.Level, player.Level, target.Level, ps.MCritRate);
+            if (player.Session != null && outbound != null)
+                MagicOutcomeNotice(player.Session, target, combat, outcome, outbound);
+            return damage;
         }
 
         bool ss = player.SoulshotCharged;
@@ -76,5 +81,25 @@ public sealed partial class ZoneWorld
         if (shield == ZoneCombat.ShieldResult.Block)
             pDef += target.ShieldDef;
         return ZoneCombat.PhysicalSkillDamage(ps.PAtk, pDef, power, ss);
+    }
+
+    public const int SysMsgResisted = 139;
+    public const int SysMsgAttackFailed = 158;
+    public const int SysMsgMagicCritical = 1280;
+
+    void MagicOutcomeNotice(ZoneSession session, ZoneEntity target, SkillCombatData combat, ZoneCombat.MagicOutcome outcome, List<Pending> outbound)
+    {
+        switch (outcome)
+        {
+            case ZoneCombat.MagicOutcome.Critical:
+                ShotNotice(session, SysMsgMagicCritical, "Magic Critical Hit!", outbound);
+                break;
+            case ZoneCombat.MagicOutcome.HalfFail:
+                ShotNotice(session, SysMsgAttackFailed, "Your attack has failed.", outbound);
+                break;
+            case ZoneCombat.MagicOutcome.Resisted:
+                ShotNotice(session, SysMsgResisted, $"{target.Name} has resisted your {combat.Name}.", outbound);
+                break;
+        }
     }
 }

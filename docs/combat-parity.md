@@ -53,3 +53,15 @@
 - Re-equipping a weapon clears its charges and recharges from auto.
 - Client: right-click an item shortcut toggles auto; state is tracked in NetSession (no slot highlight yet).
 - Gaps: spiritshot cast-time / MP effects, magic crit, D–S shot items absent from items.json, no auto-shot slot highlight, V2 has no auto request.
+
+## Slice 10 — magic crit / magic failure (PvE)
+- Player magic skills vs mobs now follow Mobius calcMagicDam (MagicFailures=True): mcrit rolled first (`calcMCrit`, rate ‰ = (int)(1 · WIT bonus [armed only]) · 10, i.e. ~1% base); then `calcMagicSuccess` rate = 100 − round(1.3^(targetLvl − magicLvl)).
+- Failed → second roll succeeds and level gap ≤ 9 → ½ damage + SysMsg 158 "Your attack has failed."; else 1 damage + SysMsg 139 "<mob> has resisted your <skill>.". Success + mcrit → ×3 (×2.5 PvP) + SysMsg 1280 "Magic Critical Hit!".
+- Gaps: skill-combat.json has no `magicLvl` (attacker level used); no MCRITICAL_RATE buff/passive mods (Wild Magic etc.) or MAGIC_CRIT_DMG; no MAGIC_SUCCESS_RES / attribute bonus; no magic shield block; Drain 50% message variant; mobs casting at players not rolled.
+
+## Still open (PvE priority)
+1. Blow skills (calcBlowDamage, behind/side chance, lethal) — medium.
+2. Aggro LoS / peace zone / level-gap — medium.
+3. hitConditionBonus (back/side/height/night/rain) + physical crit position — small.
+4. magicLvl in skill-combat.json + mcrit stat mods — small.
+5. Level-gap damage penalties, weapon vulnerabilities, NPC soulshots — small/medium.

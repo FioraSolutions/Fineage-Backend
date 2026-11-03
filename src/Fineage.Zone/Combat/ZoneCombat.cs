@@ -166,7 +166,56 @@ public static class ZoneCombat
     public static int PhysicalSkillDamage(double pAtk, double pDef, double power, bool soulshot) =>
         Math.Max(1, (int)(70d * (Math.Max(0, pAtk) * (soulshot ? 2 : 1) + Math.Max(0, power)) / Math.Max(1d, pDef)));
 
-    /// <summary>Interlude <c>calcMagicDam</c> core: 91·√mAtk / mDef · power (no shots / mcrit / fail yet).</summary>
+    /// <summary>
+    /// Mobius <c>CreatureStat.getMCriticalHit</c>: (int)(MCRITICAL_RATE 1 · WIT bonus) · 10 ‰; FuncMAtkCritical applies
+    /// WIT only for NPCs or armed players (unarmed player stays 10 ‰).
+    /// </summary>
+    public static int PlayerMCritRate(bool armed, double witBonus) => (int)(armed ? witBonus : 1d) * 10;
+
+    /// <summary>Mobius <c>calcMCrit</c>: rate ‰ &gt; Rnd(1000).</summary>
+    public static bool RollMCrit(Random rnd, int rate) => rate > rnd.Next(1000);
+
+    /// <summary>
+    /// Mobius <c>calcMagicSuccess</c> (MAGIC_SUCCESS_RES 1): rate = 100 − round(1.3^(targetLvl − magicLvl)); success when Rnd(100) &lt; rate.
+    /// </summary>
+    public static bool RollMagicSuccess(Random rnd, int targetLevel, int magicLevel) =>
+        rnd.Next(100) < 100 - (int)Math.Round((float)Math.Pow(1.3, targetLevel - magicLevel), MidpointRounding.AwayFromZero);
+
+    public enum MagicOutcome { Normal, Critical, HalfFail, Resisted }
+
+    /// <summary>
+    /// Mobius <c>calcMagicDam</c> failure / crit branch for a player caster: failed first roll → second roll succeeds and
+    /// level gap ≤ 9 → half damage ("Your attack has failed"), else resisted → 1 damage; otherwise mcrit ×3 vs NPC (2.5 PvP).
+    /// </summary>
+    public static (int Damage, MagicOutcome Outcome) RollMagicDamage(Random rnd, double mAtk, double mDef, double power,
+        int casterLevel, int magicLevel, int targetLevel, int mCritRate, bool targetIsPlayer = false)
+    {
+        // Mobius rolls mcrit before calcMagicDam (MagicalAttack effect), then the failure check.
+        bool mcrit = RollMCrit(rnd, mCritRate);
+        double damage = 91d * Math.Sqrt(Math.Max(0, mAtk)) / Math.Max(1d, mDef) * Math.Max(0, power);
+        var outcome = MagicOutcome.Normal;
+        if (!RollMagicSuccess(rnd, targetLevel, magicLevel))
+        {
+            if (RollMagicSuccess(rnd, targetLevel, magicLevel) && targetLevel - casterLevel <= 9)
+            {
+                damage /= 2;
+                outcome = MagicOutcome.HalfFail;
+            }
+            else
+            {
+                damage = 1;
+                outcome = MagicOutcome.Resisted;
+            }
+        }
+        else if (mcrit)
+        {
+            damage *= targetIsPlayer ? 2.5 : 3;
+            outcome = MagicOutcome.Critical;
+        }
+        return (Math.Max(1, (int)damage), outcome);
+    }
+
+    /// <summary>Interlude <c>calcMagicDam</c> core: 91·√mAtk / mDef · power (no fail / crit).</summary>
     /// <summary>Mobius calcMagicDam M.Atk multiplier: blessed spiritshot ×4, spiritshot ×2.</summary>
     public static double SpiritshotMAtkMultiplier(int charge) => charge >= 2 ? 4d : charge == 1 ? 2d : 1d;
 
