@@ -21,6 +21,8 @@ public sealed record SkillCombatData(
     public int FullLethal { get; init; }
     public int HalfLethal { get; init; }
     public int[] MagicLevel { get; init; } = [];
+    /// <summary>Mobius <c>&lt;conditions&gt;&lt;using kind=..&gt;</c> (weapon/armor kinds, any matches); empty = no condition.</summary>
+    public string[] UsingKinds { get; init; } = [];
     public int MagicLevelAt(int level) => MagicLevel.Length == 0 ? 0 : At(MagicLevel, level);
 
     static T At<T>(T[] a, int level) => a[Math.Clamp(level, 1, a.Length) - 1];
@@ -81,6 +83,7 @@ public sealed class SkillCombatCatalog
                 BlowChance = r.TryGetProperty("blowChance", out var bc) ? bc.GetInt32() : 0,
                 FullLethal = r.TryGetProperty("fullLethal", out var fl) ? fl.GetInt32() : 0,
                 HalfLethal = r.TryGetProperty("halfLethal", out var hl) ? hl.GetInt32() : 0,
+                UsingKinds = r.TryGetProperty("usingKinds", out var uk) ? uk.EnumerateArray().Select(v => v.GetString() ?? "").ToArray() : [],
                 MagicLevel = r.TryGetProperty("magicLevel", out var ml) ? ml.EnumerateArray().Select(v => v.GetInt32()).ToArray() : []
             };
         }

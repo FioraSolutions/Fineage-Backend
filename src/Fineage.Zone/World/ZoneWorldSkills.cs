@@ -76,6 +76,8 @@ public sealed partial class ZoneWorld
         return TrySkillUseAttack(session, player, request, template, levelData, level, now, outbound);
     }
 
+    public const int SysMsgUnsuitableTerms = 113;
+
     string? TrySkillUseAttack(
         ZoneSession session,
         ZoneEntity player,
@@ -86,6 +88,12 @@ public sealed partial class ZoneWorld
         long now,
         List<Pending> outbound)
     {
+        // Mobius Skill.checkCondition: <using kind=..> fails → SysMsg 113 "<skill> cannot be used due to unsuitable terms."
+        if (_skillCombat.TryGet(request.SkillId, out var cond) && cond.UsingKinds.Length > 0 && !Wearing(player, cond.UsingKinds))
+        {
+            ShotNotice(session, SysMsgUnsuitableTerms, $"{cond.Name} cannot be used due to unsuitable terms.", outbound);
+            return null;
+        }
         int targetId = request.TargetObjectId > 0 ? request.TargetObjectId : session.SelectedTargetId;
         if (targetId <= 0)
             return SkillProtocol.Target;
