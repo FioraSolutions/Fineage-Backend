@@ -683,6 +683,13 @@ public sealed class QuestMachine : IQuestKillHook
                 return false;
         }
 
+        // Mobius getQuestItemsCount(id) >= n for several items at once.
+        foreach (var pair in dialog.AtLeast ?? new Dictionary<int, int>())
+        {
+            if (inventory.CountOf(pair.Key) < pair.Value)
+                return false;
+        }
+
         return true;
     }
 

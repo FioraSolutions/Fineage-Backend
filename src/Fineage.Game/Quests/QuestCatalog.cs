@@ -174,7 +174,23 @@ public sealed class QuestCatalog
             dialog.Party && hook == QuestHook.Kill,
             dialog.Classes is { Count: > 0 } classes ? classes.Distinct().ToArray() : null,
             ReadItemList(dialog.HasItems, items, where, questId, "hasItems"),
-            ReadItemList(dialog.LacksItems, items, where, questId, "lacksItems"));
+            ReadItemList(dialog.LacksItems, items, where, questId, "lacksItems"),
+            ReadAtLeast(dialog.AtLeast, items, where, questId));
+    }
+
+    static IReadOnlyDictionary<int, int>? ReadAtLeast(Dictionary<string, int>? rows, ItemCatalog items, string where, int questId)
+    {
+        if (rows is not { Count: > 0 })
+            return null;
+        var map = new Dictionary<int, int>();
+        foreach (var pair in rows)
+        {
+            if (!int.TryParse(pair.Key, out int id) || !items.TryGet(id, out _) || pair.Value < 1)
+                throw new InvalidDataException($"{where} quest {questId} atLeast '{pair.Key}' needs a known item and count >= 1.");
+            map[id] = pair.Value;
+        }
+
+        return map;
     }
 
     static IReadOnlyList<int>? ReadItemList(List<int>? ids, ItemCatalog items, string where, int questId, string field)
@@ -395,6 +411,7 @@ public sealed class QuestCatalog
         public List<int>? Classes { get; set; }
         public List<int>? HasItems { get; set; }
         public List<int>? LacksItems { get; set; }
+        public Dictionary<string, int>? AtLeast { get; set; }
     }
 
     sealed class OpDto

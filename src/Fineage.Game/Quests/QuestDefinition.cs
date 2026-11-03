@@ -75,7 +75,8 @@ public sealed record QuestDialog(
     bool Party = false,
     IReadOnlyList<int>? Classes = null,
     IReadOnlyList<int>? HasItems = null,
-    IReadOnlyList<int>? LacksItems = null);
+    IReadOnlyList<int>? LacksItems = null,
+    IReadOnlyDictionary<int, int>? AtLeast = null);
 
 /// <summary>
 /// Who is talking. Mobius quest scripts branch on <c>player.getRace()</c> / <c>getLevel()</c>
