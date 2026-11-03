@@ -159,6 +159,20 @@ public sealed partial class ZoneWorld
             if (!player.Knownlist.Add(npc.ObjectId))
                 continue;
             outbound.Add(Pack(player.Session, MsgType.NpcInfo, NpcInfo(npc)));
+            // Net clients: the respawn was added to the knownlist here, so the next move refresh sees no diff and
+            // the mob stayed invisible until the player left and re-entered view ("mobs appear late"). Push the
+            // EntitySpawn now, like Mobius Spawn.doSpawn → broadcast NpcInfo to the region.
+            NetBridge?.FanoutKnownlistDiff(player.ObjectId, [npc.ObjectId], []);
+        }
+    }
+
+    /// <summary>Test hook: despawn an NPC (corpse decay path) so its respawn timer starts.</summary>
+    internal void DespawnNpcForTests(int objectId)
+    {
+        lock (_gate)
+        {
+            if (_byId.TryGetValue(objectId, out var npc))
+                DespawnNpc(npc, []);
         }
     }
 
