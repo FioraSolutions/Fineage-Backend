@@ -35,6 +35,7 @@ public sealed partial class ZoneWorld
             HitTimeMs = hitTime,
             ReuseDelayMs = reuse
         };
+        StopForCast(player, target, now, outbound);
         FanoutSkill(player, target, cast, targetStatus: null, CasterMpStatus(player), outbound);
 
         player.CombatUntilUnixMs = now + ClanProtocol.CombatStanceMillis;

@@ -63,6 +63,12 @@ public sealed class ZoneSession
     public int PendingCastTargetId { get; set; }
     public long PendingCastAtUnixMs { get; set; }
 
+    /// <summary>Mobius saveNextIntention(MOVE_TO): move order received mid-cast, run when the cast ends.</summary>
+    public Fineage.Protocol.MoveToMsg? QueuedMove { get; set; }
+
+    /// <summary>Mobius RequestActionUse sit while moving: NextAction(EVT_ARRIVED) → sit on arrival.</summary>
+    public bool SitOnArrive { get; set; }
+
     /// <summary>Unix milliseconds of the last accepted say. 0 means this session has not spoken.</summary>
     public long LastChatUnixMs { get; set; }
 
@@ -100,6 +106,8 @@ public sealed class ZoneSession
         PendingCastSkillId = 0;
         PendingCastTargetId = 0;
         PendingCastAtUnixMs = 0;
+        QueuedMove = null;
+        SitOnArrive = false;
         ClearApproach();
         LastChatUnixMs = 0;
     }

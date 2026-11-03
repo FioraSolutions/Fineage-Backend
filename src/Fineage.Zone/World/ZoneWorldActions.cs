@@ -48,6 +48,19 @@ public sealed partial class ZoneWorld
         long now = _clock().ToUnixTimeMilliseconds();
         if (!player.Sitting && ClanRules.IsInCombat(player.CombatUntilUnixMs, now))
             return ActionProtocol.Blocked;
+        // Mobius Player.sitDown: isAttackingDisabled() (casting) → no sit.
+        if (!player.Sitting && IsCasting(player, now))
+            return ActionProtocol.Blocked;
+        if (!player.Sitting && player.MoveActive)
+        {
+            AdvanceMove(player, now);
+            if (player.MoveActive && player.Session != null)
+            {
+                // Mobius RequestActionUse case 0: moving → NextAction(EVT_ARRIVED) sit on arrival.
+                player.Session.SitOnArrive = true;
+                return null;
+            }
+        }
 
         if (player.Sitting)
         {

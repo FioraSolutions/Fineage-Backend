@@ -89,6 +89,15 @@
 - Weapon vulnerabilities (calcWeaponTraitBonus): Mobius derives NPC defence traits from NPC passive skills (no direct npcs.xml field) — not ported; needs NPC passive skill → trait data first.
 - Gaps: compound conditions, buff/debuff skill conditions, NPC soulshots.
 
+## Slice 16 — cast ↔ movement (Mobius CreatureAI.thinkCast / PlayerAI / Player.useMagic)
+- Bug: casting while running kept the Net timed move (server and client) — you could run and cast. Root cause: the cast path never called `StopTimedMove`, and range was measured from a stale (un-advanced) position.
+- Now: every cast (attack / buff / debuff / support) advances the pawn, stops the run (`clientStopMoving`), faces the target and sends watchers a zero-length MoveState; the client stops its click-to-move on MagicSkillUse (`PlayerWorldApply`).
+- Move order mid-cast (Net): saved as next intention (`session.QueuedMove`), runs when the cast ends (V2 keeps the old "casting" refuse).
+- Skill used mid-cast: queued (`setQueuedSkill`) via PendingCast, fires at `CastingUntilMs`.
+- Buff/debuff/support now hold `CastingUntilMs = hitTime` too (move/skill queue and sit block apply); their effect is still instant at cast start (Mobius applies at hitTime) — open.
+- Attack mid-cast: already waits and swings after the cast (auto-attack tick). Sit mid-cast → refused; sit while running → sits on arrival (RequestActionUse NextAction EVT_ARRIVED).
+- Open: no cast interruption by damage/stun (Interlude has no move-cancels-cast — the client simply can't move); MagicSkillCanceled on target death/out of range; channeling skills; sit blocked by combat stance (stricter than Mobius sitDown); teleport/gatekeeper doesn't clear queued cast/move; buff hitTime-delayed effect.
+
 ## Still open (PvE priority)
 1. Physical-skill crit/evasion stat mods (CRITICAL_DAMAGE, BLOW_RATE, P_SKILL_EVASION) — small/medium.
 2. Night game clock (GameTimeTaskManager) for the −10% dark bonus — small.

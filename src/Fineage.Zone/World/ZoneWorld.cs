@@ -652,7 +652,14 @@ public sealed partial class ZoneWorld
         if (entity.Sitting)
             return ActionProtocol.Sitting;
         if (entity.CastingUntilMs > _clock().ToUnixTimeMilliseconds())
-            return "casting";
+        {
+            // Mobius PlayerAI.onIntentionMoveTo: casting → ActionFailed + saveNextIntention(MOVE_TO); runs after the cast.
+            if (NetBridge == null)
+                return "casting"; // V2 legacy client keeps the old refuse
+            session.QueuedMove = move;
+            return null;
+        }
+        session.QueuedMove = null;
         if (!TalkingIsland.WithinStep(entity.X, entity.Y, move.DestX, move.DestY))
             return "range";
 

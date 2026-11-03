@@ -60,6 +60,13 @@ public sealed partial class ZoneWorld
             return SkillProtocol.Unknown;
 
         long now = _clock().ToUnixTimeMilliseconds();
+        if (IsCasting(player, now))
+        {
+            QueueSkillAfterCast(session, player, request);
+            return null;
+        }
+        // Net timed move: measure range from where the pawn really is now, not the last move order.
+        AdvanceMove(player, now);
         if (player.SkillReuseUntilMs.TryGetValue(request.SkillId, out long reuseUntil) && reuseUntil > now)
             return SkillProtocol.Reuse;
 
@@ -142,6 +149,7 @@ public sealed partial class ZoneWorld
 
         // Mobius Creature.doCast: MagicSkillUse goes out now, damage lands in onMagicHitTimer after hitTime.
         var cast = BuildCast(player, target, request.SkillId, level, template);
+        StopForCast(player, target, now, outbound);
         FanoutSkill(player, target, cast, targetStatus: null, CasterMpStatus(player), outbound);
 
         player.CombatUntilUnixMs = now + ClanProtocol.CombatStanceMillis;
@@ -183,8 +191,10 @@ public sealed partial class ZoneWorld
         ApplyAbnormalFromSkill(template, levelData, target, now, outbound);
 
         var cast = BuildCast(player, target, request.SkillId, level, template);
+        StopForCast(player, target, now, outbound);
         FanoutSkill(player, target, cast, targetStatus: null, CasterMpStatus(player), outbound);
         player.CombatUntilUnixMs = now + ClanProtocol.CombatStanceMillis;
+        player.CastingUntilMs = now + Math.Max(0, template.HitTimeMs);
         return null;
     }
 
@@ -231,8 +241,10 @@ public sealed partial class ZoneWorld
             AttributeIds = [InterludeStatus.CurHp, InterludeStatus.MaxHp],
             Values = [target.CurHp, target.MaxHp]
         };
+        StopForCast(player, target, now, outbound);
         FanoutSkill(player, target, cast, hpStatus, CasterMpStatus(player), outbound);
         player.CombatUntilUnixMs = now + ClanProtocol.CombatStanceMillis;
+        player.CastingUntilMs = now + Math.Max(0, template.HitTimeMs);
         return null;
     }
 
@@ -273,8 +285,10 @@ public sealed partial class ZoneWorld
         ApplyAbnormalFromSkill(template, levelData, target, now, outbound);
 
         var cast = BuildCast(player, target, request.SkillId, level, template);
+        StopForCast(player, target, now, outbound);
         FanoutSkill(player, target, cast, targetStatus: null, CasterMpStatus(player), outbound);
         player.CombatUntilUnixMs = now + ClanProtocol.CombatStanceMillis;
+        player.CastingUntilMs = now + Math.Max(0, template.HitTimeMs);
         return null;
     }
 
