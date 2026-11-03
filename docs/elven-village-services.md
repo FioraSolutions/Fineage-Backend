@@ -14,6 +14,39 @@ Scope: NPCs in `data/spawns/elven_village.json` only. Same pipeline scales per a
 | Kill quests | Q267 Wrath of Verdure (Treant Bremec 31853, Goblin Raider 20325, elf 4+), Q313 Collect Spores (Herbiel 30150, Spore Fungus 20509, lvl 8+) | Repeatable. Q267: 50% Goblin Club per kill, hand in all → 1 Silvery Leaf each, +600 adena at 10+, `quit` exits. Q313: 40% Spore Sac, cap 10 → cond 2, 10 sacs → 3500 adena. |
 | Party kill quest | Q316 Destroy Plague Carriers (Ellenia 30155, elf 18+) | Data + mechanism ready; Sukar Wererat 20040/20047 and Varool 27020 are **not spawned** in the loaded elven maps yet (they live outside the village area). 2 fangs per wererat, Varool fang cap 1; 30 adena/fang, 10000/Varool fang, +5000 at 10+. |
 | Newbie Helper 30400 | | Existing gift / guide buff path. |
+| Nerupa 30370 | | Q160 giver, elven newbie guide south of the newbie spawn. Page `data/html/default/30370.htm`; quest links in `data/quests.json`. |
+
+## Elven newbie spawn: Nerupa 30370 + Newbie Helper 30400
+
+Mobius CT 0 Interlude spawns both elven newbie guides from the **global**
+`dist/game/data/spawns/InterludeSpawns.xml`, not from a per-territory NPC file (`ElvenTerritory/ElvenVillageNPCs.xml`
+does not exist in this datapack). They are the only two NPCs within 1k of the elf creation point.
+
+| NPC | Mobius row (`InterludeSpawns.xml`) | Distance to elf start |
+|---|---|---|
+| Nerupa 30370 (Folk, Q160) | `x="46048" y="41200" z="-3504" heading="17000" respawnDelay="60"` | 82 (x 46045, y 41251, z -3440) |
+| Newbie Helper 30400 (Folk) | `x="46112" y="41200" z="-3504" heading="17000" respawnDelay="60"` | 106 |
+
+They stand 64 apart on the same z/heading, so both fit in one client view. Object ids: 60474 (Nerupa) and
+60475 (Helper) in the town band `[60000, 100000)`.
+
+Source of truth: `scripts/gen_elven_newbie_guides.py` reads the vendored
+`ref/mobius-ct0-interlude/data/spawns/InterludeSpawns.xml` (fallback `$MOBIUS_SRC` / `~/Downloads`), and
+inserts-or-corrects those two rows in `data/spawns/elven_village.json` by coordinates, keeping the objectId.
+It refuses to run if the two guides are not within 900 units of each other, so a Mobius change cannot silently
+split the newbie spawn. `--check` exits 1 when the JSON has drifted (CI-safe).
+
+Note on scope: the whole `elven_village.json` map is 82 rows, 81 of which match `InterludeSpawns.xml`
+row-for-row (verified against the snapshot). Only Lynn 31414 is a village-file row. A regeneration of
+`elven_village.json` through `tools/import_npc_templates.py` would drop these two rows plus the rest —
+re-run `scripts/gen_elven_newbie_guides.py` afterwards.
+
+Test: `tests/Fineage.Zone.Tests/NerupaSpawnTests.cs` asserts the coordinates/heading/respawn, that
+`scripts/run-local-net.sh` enables `elven_village` and its bounds keep her, the 64-unit helper distance, that she
+is materialised as a live `Npc` entity in the entrant's knownlist at the Mobius spot, that she is selectable and
+talkable (Q160 gate), and that the Net `EntitySpawn` frame decodes back as a visible, non-attackable
+`Nerupa`/`30370`. The test builds its own single-map world instead of setting `FINEAGE_ZONE_MAPS`, because that
+filter is process-global and xUnit runs collections in parallel.
 
 ## Quest engine additions
 - Dialog gates `races` (0 Human, 1 Elf, 2 Dark Elf, 3 Orc, 4 Dwarf), `minLevel`, `maxLevel`. List passing branch first, refusal pages after (Mobius `race != ELF ? 01 : level < MIN ? 02 : 03`).
