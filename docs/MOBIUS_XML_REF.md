@@ -119,5 +119,7 @@ Runtime Talking Island gremlins still use hard-coded `TalkingIsland.cs` until sp
 - Death loot: scatter ±70 around corpse (Mobius randDropLim), killer/party-only pickup for 15 s
   (DropProtection; others get SysMsg 145), auto-destroy after 600 s (herbs 60 s). Player discards never expire
   (Mobius DestroyPlayerDroppedItem = false).
-- Rows whose itemId is missing from data/items.json are rolled but skipped on spawn (`drop skip unknown item`):
-  herbs 8600–8614, recipes 1786–1802, craft parts 1896/1897/1922–1925/2005–2010, etc.
+- `scripts/gen_drop_items.py` appends Mobius EtcItem templates referenced by data/drops but missing from
+  data/items.json (name/icon/stackable/price/weight; herb icons pinned to textures the client ships). Run it after
+  gen_drops.py; `DropItemCoverageTests` fails if a droplist row has no template. Herbs still go to the bag —
+  Mobius auto-uses them on pickup (for_npc/immediate_effect), not ported yet.

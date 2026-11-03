@@ -17,6 +17,19 @@ public sealed class DropCatalogTests
     }
 }
 
+public sealed class DropItemCoverageTests
+{
+    [Fact]
+    public void Every_droplist_item_has_a_template_so_rolls_spawn()
+    {
+        var items = Fineage.Game.GameData.LoadDefault().Items;
+        var missing = DropCatalog.LoadDefault().ByNpcId.Values
+            .SelectMany(d => d.Death.Groups.SelectMany(g => g.Items).Concat(d.Corpse?.Items ?? []))
+            .Select(i => i.ItemId).Distinct().Where(id => !items.TryGet(id, out _)).ToList();
+        Assert.Empty(missing);
+    }
+}
+
 public sealed class DropRollerTests
 {
     [Fact]
