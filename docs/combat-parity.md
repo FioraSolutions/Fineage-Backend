@@ -137,4 +137,14 @@ Rules: `Fineage.Game.Combat.CastRules`; Zone: `ZoneWorldCastInterrupt.cs` + `Res
 - **Abort at launch** (`onMagicLaunchedTimer`): at hitTime the target must still exist and be alive, be within the skill's **effectRange** (now in `skill-combat.json`, 314 skills via `scripts/gen_skill_effect_range.py`; castRange fallback) and be in line of sight. Otherwise the cast aborts silently: no damage, `mpConsume` not spent (only `mpInitialConsume` was), reuse stays.
 - **Teleport** (`Relocate`, used by gatekeepers / dungeons / travel token): aborts the cast and clears queued cast, pickup, auto-attack and approach (Mobius `teleToLocation`).
 - Client gap: the Net contract has no `MagicSkillCanceled`, so the client's cast bar/animation runs out on its own; only SysMsg 27 tells the player. Adding the packet needs a client change (deferred).
-- Stubs / deferred: stun/sleep/paralyze interrupts (no control abnormals hit players yet; `AbortCast` is the hook), buff/debuff/support/spoil skills apply at cast start so there is nothing to interrupt, legacy non-`skill-combat` attack skills aren't interruptible, mob skills (none on players yet), full channeling, magicLvl/land-rate polish, buffs on magic crit.
+- Stubs / deferred: stun/sleep/paralyze interrupts (no control abnormals hit players yet; `AbortCast` is the hook), legacy non-`skill-combat` attack skills aren't interruptible, mob skills (none on players yet), full channeling, magicLvl/land-rate polish, buffs on magic crit.
+
+## Buff / debuff / heal / Spoil at hitTime
+
+Mobius `Creature.doCast` → `onMagicLaunchedTimer` → `onMagicHitTimer` → `callSkill`: effects land when the cast completes. Fineage now does the same for player casts of buffs, debuffs, heals/support and Spoil (`ScheduleEffect` / `ResolveDeferredEffect` in `ZoneWorldCastInterrupt.cs`).
+
+- At cast start: target/range checks, MP + reuse, MagicSkillUse fan-out, casting window. Spoil's free pre-checks (109 invalid, 357 already spoiled) stay at start.
+- At hitTime: the same launch checks as attack skills — target still alive (player target for friendly skills, NPC for bad ones), within escape range (`effectRange`, else `castRange`; self casts skip range/LoS) and in sight — then the effect (abnormal, HP heal + StatusUpdate, spoil roll + 612/139). A failed check aborts silently (MP already spent at start, as before).
+- Interrupts: `skills.json` now carries Mobius `isMagic` as `magicType` (0 physical, 1 magic, 2 static) and `effectRange` (`scripts/gen_skill_cast_meta.py`, 366 / 264 of 622 skills). `breakCast` only interrupts magic/static casts, so Shield/Might/Heal/curses can be broken by a mob hit (SysMsg 27, effect lost) while Spoil (physical) cannot.
+- Still immediate: Sweeper 42 (static, 0.5 s — loot on cast start), NPC-cast newbie buffs / blessing, herbs, playtest abnormals.
+- Deferred: full channeling model, magicLvl/land-rate polish, buffs on magic crit, client cast-bar cancel packet.

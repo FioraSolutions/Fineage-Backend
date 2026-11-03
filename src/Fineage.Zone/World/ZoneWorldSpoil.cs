@@ -188,12 +188,23 @@ public sealed partial class ZoneWorld
             return null;
         }
 
-        bool ok = sweep
-            ? ApplySweep(session, player, target, outbound)
-            : ApplySpoil(session, player, target, forced: false, request.SkillId, level, outbound);
-        // Condition failures (343/683/1247/357/109) cost nothing in Mobius; a resisted spoil still spent the cast.
-        if (!ok && (sweep || target.SpoilerObjectId != 0 || target.CurHp <= 0))
-            return null;
+        if (!sweep)
+        {
+            // Pre-cast checks cost nothing (109 / 357); the magic roll and the spoil flag land at hitTime.
+            if (target.CurHp <= 0 || target.Dead)
+            {
+                Notice(session, _spoilRules.Messages.InvalidTarget, "Invalid target.", outbound);
+                return null;
+            }
+
+            if (target.SpoilerObjectId != 0)
+            {
+                Notice(session, _spoilRules.Messages.AlreadySpoiled, "It has already been spoiled.", outbound);
+                return null;
+            }
+        }
+        else if (!ApplySweep(session, player, target, outbound))
+            return null; // Sweeper conditions (343/683/1247) cost nothing
 
         player.CurMp = Math.Max(0, player.CurMp - levelData.MpConsume);
         if (template.ReuseDelayMs > 0)
@@ -205,6 +216,13 @@ public sealed partial class ZoneWorld
             player.CombatUntilUnixMs = now + ClanProtocol.CombatStanceMillis;
         player.CastingUntilMs = now + Math.Max(0, template.HitTimeMs);
         session.SelectedTargetId = sweep ? 0 : targetId;
+        if (!sweep)
+        {
+            int skillId = request.SkillId;
+            // Mobius Spoil effect (instant, physical skill: not interrupted by hits) at hitTime 1.8 s.
+            ScheduleEffect(player, target, template, level, now, template.HitTimeMs,
+                (t, _, o) => ApplySpoil(session, player, t, forced: false, skillId, level, o), outbound);
+        }
         return null;
     }
 

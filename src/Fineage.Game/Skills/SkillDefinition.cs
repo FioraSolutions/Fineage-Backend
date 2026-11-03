@@ -33,6 +33,12 @@ public sealed class SkillDefinition
 
     public int SkillId { get; }
 
+    /// <summary>Mobius isMagic: 0 physical, 1 magic, 2 static.</summary>
+    public int MagicType { get; init; }
+
+    /// <summary>Mobius effectRange (escape range at launch); 0 = use <see cref="CastRange"/>.</summary>
+    public int EffectRange { get; init; }
+
     public string Name { get; }
 
     public bool Passive { get; }

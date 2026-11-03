@@ -297,13 +297,14 @@ public sealed partial class ZoneWorld
         if (template.ReuseDelayMs > 0)
             player.SkillReuseUntilMs[request.SkillId] = now + template.ReuseDelayMs;
 
-        ApplyAbnormalFromSkill(template, levelData, target, now, outbound);
-
         var cast = BuildCast(player, target, request.SkillId, level, template);
         StopForCast(player, target, now, outbound);
         FanoutSkill(player, target, cast, targetStatus: null, CasterMpStatus(player), outbound);
         player.CombatUntilUnixMs = now + ClanProtocol.CombatStanceMillis;
         player.CastingUntilMs = now + Math.Max(0, template.HitTimeMs);
+        // Mobius onMagicHitTimer: the buff lands at hitTime (interruptible for magic/static skills).
+        ScheduleEffect(player, target, template, level, now, template.HitTimeMs,
+            (t, at, o) => ApplyAbnormalFromSkill(template, levelData, t, at, o), outbound);
         return null;
     }
 
@@ -340,20 +341,23 @@ public sealed partial class ZoneWorld
             player.SkillReuseUntilMs[request.SkillId] = now + template.ReuseDelayMs;
 
         int heal = SupportHealAmount(levelData, level, player.Level);
-        if (heal > 0 && target.MaxHp > 0)
-            target.CurHp = Math.Min(target.MaxHp, target.CurHp + heal);
-
         var cast = BuildCast(player, target, request.SkillId, level, template);
-        var hpStatus = new StatusUpdateMsg
-        {
-            ObjectId = target.ObjectId,
-            AttributeIds = [InterludeStatus.CurHp, InterludeStatus.MaxHp],
-            Values = [target.CurHp, target.MaxHp]
-        };
         StopForCast(player, target, now, outbound);
-        FanoutSkill(player, target, cast, hpStatus, CasterMpStatus(player), outbound);
+        FanoutSkill(player, target, cast, targetStatus: null, CasterMpStatus(player), outbound);
         player.CombatUntilUnixMs = now + ClanProtocol.CombatStanceMillis;
         player.CastingUntilMs = now + Math.Max(0, template.HitTimeMs);
+        // Mobius Heal effect at hitTime: HP rises when the cast completes, not when it starts.
+        ScheduleEffect(player, target, template, level, now, template.HitTimeMs, (t, _, o) =>
+        {
+            if (heal > 0 && t.MaxHp > 0)
+                t.CurHp = Math.Min(t.MaxHp, t.CurHp + heal);
+            FanoutVitals(t, new StatusUpdateMsg
+            {
+                ObjectId = t.ObjectId,
+                AttributeIds = [InterludeStatus.CurHp, InterludeStatus.MaxHp],
+                Values = [t.CurHp, t.MaxHp]
+            }, o);
+        }, outbound);
         return null;
     }
 
@@ -391,13 +395,15 @@ public sealed partial class ZoneWorld
         if (template.ReuseDelayMs > 0)
             player.SkillReuseUntilMs[request.SkillId] = now + template.ReuseDelayMs;
 
-        ApplyAbnormalFromSkill(template, levelData, target, now, outbound);
-
         var cast = BuildCast(player, target, request.SkillId, level, template);
         StopForCast(player, target, now, outbound);
         FanoutSkill(player, target, cast, targetStatus: null, CasterMpStatus(player), outbound);
         player.CombatUntilUnixMs = now + ClanProtocol.CombatStanceMillis;
         player.CastingUntilMs = now + Math.Max(0, template.HitTimeMs);
+        session.SelectedTargetId = targetId;
+        // Mobius onMagicHitTimer: debuff lands at hitTime; a dead/escaped/hidden target aborts it.
+        ScheduleEffect(player, target, template, level, now, template.HitTimeMs,
+            (t, at, o) => ApplyAbnormalFromSkill(template, levelData, t, at, o), outbound);
         return null;
     }
 

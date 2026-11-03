@@ -1,5 +1,7 @@
 using Fineage.Game;
 using Fineage.Game.Combat;
+using Fineage.Game.Skills;
+using Fineage.Zone.Combat;
 
 namespace Fineage.Zone.World;
 
@@ -37,7 +39,10 @@ public sealed partial class ZoneWorld
     void MaybeBreakCast(ZoneEntity player, int damage, List<Pending> outbound)
     {
         var hit = player.PendingHit;
-        if (damage <= 0 || hit?.Combat == null || !CastRules.Interruptible(hit.Combat.Magic))
+        if (damage <= 0 || hit == null)
+            return;
+        bool interruptible = hit.Combat != null ? CastRules.Interruptible(hit.Combat.Magic) : CastRules.Interruptible(hit.MagicType);
+        if (!interruptible)
             return;
         if (_clock().ToUnixTimeMilliseconds() >= hit.DueUnixMs)
             return;
@@ -51,4 +56,70 @@ public sealed partial class ZoneWorld
     internal bool AbortCastForTest(ZoneEntity player) { lock (_gate) return AbortCast(player, "test", [], notify: false); }
     internal void ResolvePendingHitForTest(ZoneEntity player) { lock (_gate) ResolvePendingHit(player, _clock().ToUnixTimeMilliseconds(), []); }
     internal void HitPlayerForTest(ZoneEntity player, int damage) { lock (_gate) { player.CurHp = Math.Max(1, player.CurHp - damage); MaybeBreakCast(player, damage, []); } }
+
+    /// <summary>Effect run at hitTime for a non-damage skill (Mobius onMagicHitTimer → callSkill).</summary>
+    delegate void DeferredEffect(ZoneEntity target, long now, List<Pending> outbound);
+
+    /// <summary>
+    /// Schedule a non-damage skill: MP/reuse/MagicSkillUse already went out at cast start; the effect lands at hitTime after
+    /// the Mobius launch checks (target alive, within escape range, in sight). hitTime 0 resolves now.
+    /// </summary>
+    void ScheduleEffect(ZoneEntity player, ZoneEntity target, SkillDefinition template, int level, long now, int hitTimeMs,
+        DeferredEffect effect, List<Pending> outbound)
+    {
+        bool self = ReferenceEquals(player, target);
+        player.PendingHit = new PendingSkillHit(target.ObjectId, 0, now + Math.Max(0, hitTimeMs), null, level)
+        {
+            SkillId = template.SkillId,
+            MagicType = template.MagicType,
+            EscapeRange = self ? 0 : CastRules.EscapeRange(template.CastRange, template.EffectRange),
+            TargetIsNpc = target.Kind == ZoneEntityKind.Npc,
+            Apply = effect
+        };
+        if (hitTimeMs <= 0)
+            ResolvePendingHit(player, now, outbound);
+    }
+
+    void ResolveDeferredEffect(ZoneEntity player, PendingSkillHit hit, DeferredEffect effect, long now, List<Pending> outbound)
+    {
+        bool alive = _byId.TryGetValue(hit.TargetId, out var target) && (hit.TargetIsNpc
+            ? target.Kind == ZoneEntityKind.Npc && target.CurHp > 0 && !target.Dead
+            : target.Kind == ZoneEntityKind.Player && !target.Dead);
+        if (!alive)
+        {
+            AbortCast(player, "target-gone", outbound, notify: false);
+            return;
+        }
+
+        if (!ReferenceEquals(player, target!))
+        {
+            if (hit.EscapeRange > 0 && !ZoneCombat.InCastRange(player.X, player.Y, target!.X, target.Y, hit.EscapeRange + ZoneCombat.HitRangeTolerance))
+            {
+                AbortCast(player, "escaped", outbound, notify: false);
+                return;
+            }
+
+            if (!CanSeeTarget(player, target!))
+            {
+                AbortCast(player, "no-los", outbound, notify: false);
+                return;
+            }
+        }
+
+        ZoneLog.Info($"[skill] effect {hit.SkillId} lv{hit.Level} target={target!.ObjectId}");
+        effect(target, now, outbound);
+    }
+
+    /// <summary>Test: land the caster's in-flight skill now (as if hitTime passed) and flush the caster's frames.</summary>
+    internal async Task CompleteCastForTestAsync(ZoneSession session)
+    {
+        var outbound = new List<Pending>();
+        lock (_gate)
+        {
+            if (_byId.TryGetValue(session.ObjectId, out var player))
+                ResolvePendingHit(player, _clock().ToUnixTimeMilliseconds(), outbound);
+        }
+
+        await FlushSelfAsync(session, outbound.Where(p => ReferenceEquals(p.To, session)).ToList(), CancellationToken.None).ConfigureAwait(false);
+    }
 }

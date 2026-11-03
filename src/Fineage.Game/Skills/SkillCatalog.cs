@@ -86,7 +86,11 @@ public sealed class SkillCatalog
                 Math.Max(0, row.ReuseDelayMs),
                 Math.Max(0, row.AbnormalTimeSeconds),
                 row.IsDebuff,
-                levels));
+                levels)
+            {
+                MagicType = Math.Clamp(row.MagicType, 0, 2),
+                EffectRange = Math.Max(0, row.EffectRange)
+            });
         }
 
         return new SkillCatalog(skills);
@@ -109,6 +113,8 @@ public sealed class SkillCatalog
         public int ReuseDelayMs { get; set; }
         public int AbnormalTimeSeconds { get; set; }
         public bool IsDebuff { get; set; }
+        public int MagicType { get; set; }
+        public int EffectRange { get; set; }
         public List<LevelDto>? LevelData { get; set; }
     }
 

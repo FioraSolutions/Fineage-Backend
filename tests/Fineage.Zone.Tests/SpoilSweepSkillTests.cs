@@ -19,8 +19,12 @@ public sealed class SpoilSweepSkillTests
         return (kit, session, player, mob);
     }
 
-    static Task<string?> Cast(NetTestKit kit, ZoneSession s, int skill, int target) =>
-        kit.World.TrySkillUseAsync(s, new SkillUseRequestMsg { SkillId = skill, TargetObjectId = target }, CancellationToken.None);
+    static async Task<string?> Cast(NetTestKit kit, ZoneSession s, int skill, int target)
+    {
+        var error = await kit.World.TrySkillUseAsync(s, new SkillUseRequestMsg { SkillId = skill, TargetObjectId = target }, CancellationToken.None);
+        await kit.World.CompleteCastForTestAsync(s); // Spoil lands at hitTime
+        return error;
+    }
 
     [Fact]
     public async Task Spoil_then_sweep_gives_corpse_loot_and_consumes_the_corpse()

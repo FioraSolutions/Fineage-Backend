@@ -44,6 +44,11 @@ public sealed partial class ZoneWorld
         player.PendingHit = null;
         if (hit == null || player.Dead)
             return;
+        if (hit.Apply is DeferredEffect deferred)
+        {
+            ResolveDeferredEffect(player, hit, deferred, now, outbound);
+            return;
+        }
         if (!_byId.TryGetValue(hit.TargetId, out var target) || target.Kind != ZoneEntityKind.Npc || target.CurHp <= 0)
         {
             AbortCast(player, "target-gone", outbound, notify: false);

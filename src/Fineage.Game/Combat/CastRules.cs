@@ -22,6 +22,9 @@ public static class CastRules
     /// <summary>Creature.breakCast: only magic and static skills are interruptible; physical skills keep going.</summary>
     public static bool Interruptible(bool magic) => magic;
 
+    /// <summary>Creature.breakCast: <c>isMagic() || isStatic()</c> (isMagic 1 or 2).</summary>
+    public static bool Interruptible(int magicType) => magicType is 1 or 2;
+
     /// <summary>onMagicLaunchedTimer escape range: effectRange when set, else castRange (≤ 0 = no range check).</summary>
     public static int EscapeRange(int castRange, int effectRange) => effectRange > 0 ? effectRange : castRange;
 }
