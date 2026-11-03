@@ -114,3 +114,11 @@ To play them load `gludio,gludin` plus the hunt maps above (and widen `FINEAGE_Z
 Stubs: Q409 `replay_1` / `replay_2` set the memo state but cannot spawn the quest monsters (no quest-spawn op yet) and
 show a short note page instead; Mobius `onAttack` script values (Q407 "only the attacker who hit it", Q409 "single attacker")
 are approximated by killer credit.
+
+## Newbie helpers / village buffs (Mobius CT0 parity foundation)
+
+- **Support Magic** (`data/newbie-buffs.json`, Mobius `handlers/bypasshandlers/SupportMagic.java`): levels 8..39, refused at class level 3, **no isNewbie check** (`requireNewbie: false`). Windows: Wind Walk 4322 8–39, Shield 4323 11–39; fighter 4324 12–38 / 4325 13–38 / 4326 14–38 / 4327 15–37; mage 4328 12–38 / 4329 13–38 / 4330 14–38 / 4331 15–37; Life Cubic 4338 16–36. Too low/high serves Mobius `default/SupportMagicLowLevel.htm` / `SupportMagicHighLevel.htm`. No cooldown/once rule in Mobius (re-castable).
+- **Blessing of Protection** 5182: unchanged (≤39, refused at class level 2).
+- **Newbie Travel Token** (`travelToken` block; Mobius `ai/others/NewbieTravelToken`): Newbie Guide 30599 `Script NewbieTravelToken` shows `newbie_travel/30599.htm` (level ≥20 → `cant-travel.htm`). A destination event takes one token 8542 and teleports (DE 30600, DW 30601, EV 30599, OV 30602, TI 30598). No token → SysMsg 351 (INCORRECT_ITEM_COUNT). Destinations outside loaded maps are refused **before** the token is taken (Fineage deviation; Mobius has the whole world).
+- Stubs: `Script NpcLocationInfo` (Mobius `custom/`, not ported) still shows the unavailable page. Newbie first-talk gift (NewbieHelperGift) unchanged.
+- Play: Elven Village → talk to Newbie Guide (30599) → Support Magic at lv 8–39; Travel Token link with token 8542 in bag at lv <20.

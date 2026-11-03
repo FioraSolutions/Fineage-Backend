@@ -22,6 +22,12 @@ public sealed record NewbieBuff(
     int AbnormalLevel,
     int DurationSeconds);
 
+/// <summary>Mobius NewbieTravelToken: guide NPC id → village location, one token per trip, refused from <c>RefusedLevel</c>.</summary>
+public sealed record NewbieTravelToken(int ItemId, int RefusedLevel, IReadOnlyDictionary<int, (int X, int Y, int Z)> Destinations)
+{
+    public const string Script = "NewbieTravelToken";
+}
+
 public sealed record BlessingBuff(int SkillId, int SkillLevel, int AbnormalLevel, int DurationSeconds, int MaxLevel, int RefusedClassLevel);
 
 /// <summary>
@@ -67,6 +73,12 @@ public sealed class NewbieBuffCatalog
 
     public BlessingBuff Blessing { get; }
 
+    /// <summary>Mobius CT0 SupportMagic has no <c>isNewbie</c> check; older packs gated on it. Data flag <c>requireNewbie</c>.</summary>
+    public bool RequireNewbie { get; init; } = true;
+
+    /// <summary>Mobius NewbieTravelToken (null when the data has no travelToken block).</summary>
+    public NewbieTravelToken? TravelToken { get; init; }
+
     public bool IsMage(int classId) => _mages.Contains(classId);
 
     public bool CanBless(int level, int classLevel) =>
@@ -75,7 +87,7 @@ public sealed class NewbieBuffCatalog
     public NewbieBuffRefusal Evaluate(bool newbie, int classId, int classLevel, int level, out IReadOnlyList<NewbieBuff> buffs)
     {
         buffs = [];
-        if (!newbie)
+        if (RequireNewbie && !newbie)
             return NewbieBuffRefusal.NotNewbie;
         if (level > HighestLevel)
             return NewbieBuffRefusal.LevelHigh;
@@ -125,7 +137,28 @@ public sealed class NewbieBuffCatalog
                 Math.Max(1, file.Blessing.AbnormalLevel),
                 file.Blessing.DurationSeconds,
                 file.Blessing.MaxLevel,
-                file.Blessing.RefusedClassLevel));
+                file.Blessing.RefusedClassLevel))
+        {
+            RequireNewbie = file.RequireNewbie,
+            TravelToken = ReadTravel(file.TravelToken, source)
+        };
+    }
+
+    static NewbieTravelToken? ReadTravel(TravelDto? dto, string source)
+    {
+        if (dto == null)
+            return null;
+        var map = new Dictionary<int, (int X, int Y, int Z)>();
+        foreach (var pair in dto.Destinations ?? [])
+        {
+            if (!int.TryParse(pair.Key, out int npc) || pair.Value is not { Length: 3 } xyz)
+                throw new InvalidDataException($"{source} travelToken destination '{pair.Key}' needs [x, y, z].");
+            map[npc] = (xyz[0], xyz[1], xyz[2]);
+        }
+
+        if (dto.ItemId <= 0 || map.Count == 0)
+            throw new InvalidDataException($"{source} travelToken needs itemId and destinations.");
+        return new NewbieTravelToken(dto.ItemId, dto.RefusedLevel, map);
     }
 
     public static NewbieBuffCatalog LoadDefault()
@@ -165,8 +198,17 @@ public sealed class NewbieBuffCatalog
         public int HighestLevel { get; set; }
         public List<int>? MageClassIds { get; set; }
         public BlessingDto? Blessing { get; set; }
+        public bool RequireNewbie { get; set; } = true;
+        public TravelDto? TravelToken { get; set; }
         public List<BuffDto>? Fighter { get; set; }
         public List<BuffDto>? Mage { get; set; }
+    }
+
+    sealed class TravelDto
+    {
+        public int ItemId { get; set; }
+        public int RefusedLevel { get; set; } = 20;
+        public Dictionary<string, int[]>? Destinations { get; set; }
     }
 
     sealed class BlessingDto

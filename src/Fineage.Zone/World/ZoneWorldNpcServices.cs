@@ -502,7 +502,19 @@ public sealed partial class ZoneWorld
                 Refusal = code
             }));
             if (html)
-                SendHtml(session, player, npc, "<html><body>%npcname%:<br>" + text + "</body></html>", toSelf);
+            {
+                // Mobius SupportMagic shows default/SupportMagicHighLevel.htm / SupportMagicLowLevel.htm.
+                string? page = refusal switch
+                {
+                    NewbieBuffRefusal.LevelHigh => "default/SupportMagicHighLevel.htm",
+                    NewbieBuffRefusal.LevelLow => "default/SupportMagicLowLevel.htm",
+                    _ => null
+                };
+                SendHtml(session, player, npc, page != null && _html.TryGet(page, out var mobius)
+                    ? mobius
+                    : "<html><body>%npcname%:<br>" + text + "</body></html>", toSelf);
+            }
+
             return null;
         }
 

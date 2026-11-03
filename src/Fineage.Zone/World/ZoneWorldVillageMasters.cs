@@ -28,6 +28,9 @@ public sealed partial class ZoneWorld
 
     string? VillageMasterBypass(ZoneSession session, ZoneEntity player, ZoneEntity npc, string script, string evt, List<Pending> toSelf, List<Pending> toOthers)
     {
+        if (string.Equals(script, NewbieTravelToken.Script, StringComparison.OrdinalIgnoreCase) && _newbieBuffs.TravelToken is { } travel)
+            return NewbieTravel(session, player, npc, travel, evt, toSelf, toOthers);
+
         var masters = VillageMasters;
         if (!masters.Knows(script))
         {
@@ -53,6 +56,56 @@ public sealed partial class ZoneWorld
         }
 
         SendHtml(session, player, npc, html, toSelf);
+        return null;
+    }
+
+    /// <summary>Mobius SystemMessageId INCORRECT_ITEM_COUNT (NewbieTravelToken without a token).</summary>
+    internal const int IncorrectItemCountMessageId = 351;
+
+    /// <summary>
+    /// Mobius <c>NewbieTravelToken</c>: talk shows <c>&lt;guide&gt;.htm</c> (or <c>cant-travel.htm</c> at level 20+); a guide id event
+    /// takes one Newbie Travel Token and teleports to that village. Destinations outside the loaded maps are refused before the token is taken.
+    /// </summary>
+    string? NewbieTravel(ZoneSession session, ZoneEntity player, ZoneEntity npc, NewbieTravelToken travel, string evt, List<Pending> toSelf, List<Pending> toOthers)
+    {
+        string Page(string file) => _html.TryGet($"newbie_travel/{file}", out var h) ? h : QuestBypassHandler.Unavailable;
+        if (evt.Length == 0)
+        {
+            if (!travel.Destinations.ContainsKey(npc.NpcId))
+                return null;
+            SendHtml(session, player, npc, Page(player.Level >= travel.RefusedLevel ? "cant-travel.htm" : $"{npc.NpcId}.htm"), toSelf);
+            return null;
+        }
+
+        if (!int.TryParse(evt, out int target) || !travel.Destinations.TryGetValue(target, out var loc))
+            return null;
+        if (player.Level >= travel.RefusedLevel)
+        {
+            SendHtml(session, player, npc, Page("cant-travel.htm"), toSelf);
+            return null;
+        }
+
+        var inventory = player.Inventory!;
+        if (inventory.CountOf(travel.ItemId) <= 0)
+        {
+            Notice(session, IncorrectItemCountMessageId, "Incorrect item count.", toSelf);
+            return null;
+        }
+
+        var (x, y) = Offset(loc.X, loc.Y);
+        if (!Loaded(x, y))
+        {
+            Notice(session, NpcServiceProtocol.DestinationUnloaded, NpcServiceProtocol.DestinationUnloadedText, toSelf);
+            SendHtml(session, player, npc, "<html><body>%npcname%:<br>That destination is not on a loaded map.</body></html>", toSelf);
+            return null;
+        }
+
+        var changes = new List<InventoryUpdateEntryMsg>();
+        if (!Take(inventory, travel.ItemId, 1, changes))
+            return "bad_request";
+        FanInventory(session, Collapse(changes), toSelf);
+        SaveInventory(session, inventory);
+        Relocate(player, x, y, loc.Z, toSelf, toOthers);
         return null;
     }
 
