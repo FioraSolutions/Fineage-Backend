@@ -74,6 +74,8 @@ public sealed partial class ZoneWorld
         player.SoulshotCharged = false;
         if (ss && outbound != null)
             RechargeAutoShots(player, outbound);
+        if (combat.Kind == SkillDamageKind.Blow && combat.Blow is { } blow)
+            return RollBlow(player, target, combat, level, blow, ps, ss, outbound);
         double pDef = NpcPDef(target);
         var shield = ZoneCombat.RollShield(_combatRandom, NpcShieldRate(target), ps.Weapon == Fineage.Game.WeaponType.Bow);
         if (shield == ZoneCombat.ShieldResult.Perfect)
@@ -83,6 +85,43 @@ public sealed partial class ZoneWorld
         return ZoneCombat.PhysicalSkillDamage(ps.PAtk, pDef, power, ss);
     }
 
+    public const int SysMsgLethalSuccess = 1668;
+
+    /// <summary>Mobius FatalBlow / Backstab + Lethal effects for a player blow skill on a mob. 0 = blow failed (no damage).</summary>
+    int RollBlow(ZoneEntity player, ZoneEntity target, SkillCombatData combat, int level, BlowEffect blow,
+        PlayerCombatStats ps, bool ss, List<Pending>? outbound)
+    {
+        bool front = ZoneCombat.IsInFrontOf(player.X, player.Y, target.X, target.Y, target.Heading);
+        bool behind = ZoneCombat.IsBehind(player.X, player.Y, target.X, target.Y, target.Heading);
+        int templateDex = PlayerClasses.TryGet(player.ClassId, out var t) && t != null ? t.Dex : 0;
+        int templateStr = t?.Str ?? 0;
+        double dex = SafeBonus(PlayerClasses.StatBonuses, Fineage.Game.StatSlot.Dex, templateDex);
+        double str = SafeBonus(PlayerClasses.StatBonuses, Fineage.Game.StatSlot.Str, templateStr);
+        // Backstab.calcSuccess: !isInFrontOf; both: calcBlowSuccess.
+        if ((blow == BlowEffect.Backstab && front) || !ZoneCombat.RollBlowSuccess(_combatRandom, combat.BlowChance, dex, front, behind))
+        {
+            ZoneLog.Info($"[skill] blow {combat.SkillId} failed front={front} behind={behind}");
+            return 0;
+        }
+        var (damage, outcome) = ZoneCombat.RollBlowDamage(_combatRandom, blow, ps.PAtk, NpcPDef(target), combat.PowerAt(level), ss,
+            front, behind, ps.RandomDamage, combat.BaseCritRate, str, NpcShieldRate(target), target.ShieldDef);
+        int hpAfter = Math.Max(0, target.CurHp - damage);
+        bool lethalable = target.NpcType is not ("RaidBoss" or "GrandBoss");
+        var (extra, lethal) = ZoneCombat.RollLethal(_combatRandom, combat.FullLethal, combat.HalfLethal,
+            combat.MagicLevelAt(level), target.Level, hpAfter, lethalable);
+        if (player.Session != null && outbound != null)
+        {
+            if (outcome == ZoneCombat.BlowOutcome.Critical)
+                ShotNotice(player.Session, SysMsgCriticalHit, "Critical hit!", outbound);
+            if (lethal == ZoneCombat.LethalOutcome.Full)
+                ShotNotice(player.Session, SysMsgLethalSuccess, "Your lethal strike was successful!", outbound);
+            else if (lethal == ZoneCombat.LethalOutcome.Half)
+                ShotNotice(player.Session, 0, "Half-Kill!", outbound);
+        }
+        return damage + extra;
+    }
+
+    public const int SysMsgCriticalHit = 44;
     public const int SysMsgResisted = 139;
     public const int SysMsgAttackFailed = 158;
     public const int SysMsgMagicCritical = 1280;

@@ -71,8 +71,15 @@
 - Peace zone: Mobius default `AltMobAgroInPeaceZone = True` (and the rule needs PEACE + NO_PVP), so mobs may aggro in towns — no change needed. Level-gap aggro: Mobius Interlude has none in isAggressiveTowards — no change.
 - Gaps: no fences; silent move / fake-death / GM no-aggro not modelled; LOS not applied to player attacks/casts yet (Mobius: "Cannot see target"); getNearestZ >1000 lower-layer rule skipped.
 
+## Slice 13 — blow skills (FatalBlow / Backstab / Lethal)
+- `scripts/gen_skill_blows.py` adds Mobius blow data to `skill-combat.json` for player blows 16 Mortal Blow, 30 Backstab (new row), 263 Deadly Blow, 321 Blinding Blow, 344 Lethal Blow, 409 Critical Blow: `blowEffect`, `blowChance`, `fullLethal`/`halfLethal`, per-level `magicLevel`.
+- calcBlowSuccess: Rnd(100) < blowChance · DEX bonus · (front 1 / side 1.5 / behind 2); Backstab also fails from the front. Failed blow = no damage (MP and shot still spent).
+- calcBlowDamage: 77·(power + P.Atk·ss1.458)/P.Def · proximity (behind 1.2 / side 1.1 / front 1); Backstab: 77·(power + P.Atk)/P.Def · ss1.458 · proximity. Shield block/perfect, weapon random spread, skill crit (baseCritRate·10·STR ‰) ×2 + SysMsg 44.
+- Lethal (after damage): skipped if magicLvl < mob level − 6 or raid/grand boss; Rnd(1e6)/1e4 < full → HP 1 (SysMsg 1668), < full+half → HP ×0.5 ("Half-Kill!"). Lethal only rolls when the blow lands (Mobius effect-order nuance not verified).
+- Gaps: CRITICAL_DAMAGE / BLOW_RATE / P_SKILL_EVASION stat mods, DAGGER weapon condition, NPC blow skills (no blowChance data), trait/attribute bonuses, enchant routes, Mortal Blow MP/reuse in the existing catalog row differ from Mobius XML (kept untouched).
+
 ## Still open (PvE priority)
-1. Blow skills (calcBlowDamage, behind/side chance, lethal) — medium.
+1. Physical-skill crit/evasion stat mods (CRITICAL_DAMAGE, BLOW_RATE, P_SKILL_EVASION), weapon-kind skill conditions — small/medium.
 2. Player attack/cast LOS check (SysMsg cannot see target) — small.
 3. Night game clock (GameTimeTaskManager) for the −10% dark bonus — small.
 4. magicLvl in skill-combat.json + mcrit stat mods — small.
