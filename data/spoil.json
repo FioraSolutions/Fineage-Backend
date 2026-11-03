@@ -1,0 +1,17 @@
+{
+  "reference": "L2J Mobius CT0 Interlude: effecthandlers/Spoil.java + Sweeper.java, conditions ConditionPlayerCanSweep, Attackable.checkSpoilOwner/isOldCorpse, config/NPC.ini DefaultCorpseTime=7 SpoiledCorpseExtendTime=10 CorpseConsumeSkillAllowedTimeBeforeDecay=2000. System message ids from SystemMsg (Interlude).",
+  "spoilSkills": { "254": [10, 20, 28, 36, 43, 49, 55, 60, 64, 68, 72] },
+  "sweepSkills": [42],
+  "corpseTimeMs": 7000,
+  "spoiledCorpseExtendMs": 10000,
+  "sweepAllowedBeforeDecayMs": 2000,
+  "messages": {
+    "invalidTarget": 109,
+    "resisted": 139,
+    "sweepNotSpoiled": 343,
+    "alreadySpoiled": 357,
+    "spoilActivated": 612,
+    "noSweepRights": 683,
+    "corpseTooOld": 1247
+  }
+}

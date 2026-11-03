@@ -48,3 +48,4 @@ ref/
 local-data/
 local-logs/
 publish/
+!data/spoil.json

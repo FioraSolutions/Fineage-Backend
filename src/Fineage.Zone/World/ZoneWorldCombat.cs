@@ -489,17 +489,13 @@ public sealed partial class ZoneWorld
                 npc.SweepItems.Add(stack);
         }
 
-        if (npc.SweepItems.Count > 0)
-        {
-            SpawnDeathDrops(npcId, x, y, z, killer, watchers, outbound);
-            npc.CorpseAwaitingSweep = true;
-            ZoneLog.Info($"corpse object={objectId} spoiler={npc.SpoilerObjectId} sweep={npc.SweepItems.Count}");
-            return;
-        }
-
         SpawnDeathDrops(npcId, x, y, z, killer, watchers, outbound);
-        // Corpse lies for DEFAULT_CORPSE_TIME, then DeleteObject (TickCorpseDecay).
-        npc.DecayAtMs = _clock().ToUnixTimeMilliseconds() + ZoneCombat.CorpseDecayMs;
+        bool spoiled = npc.SpoilerObjectId != 0;
+        npc.CorpseAwaitingSweep = npc.SweepItems.Count > 0;
+        if (spoiled)
+            ZoneLog.Info($"corpse object={objectId} spoiler={npc.SpoilerObjectId} sweep={npc.SweepItems.Count}");
+        // Mobius DecayTaskManager: DefaultCorpseTime, + SpoiledCorpseExtendTime when spoiled; unswept spoil decays with the corpse.
+        npc.DecayAtMs = _clock().ToUnixTimeMilliseconds() + _spoilRules.CorpseMs(spoiled);
     }
 
     void DespawnNpc(ZoneEntity npc, List<Pending> outbound)

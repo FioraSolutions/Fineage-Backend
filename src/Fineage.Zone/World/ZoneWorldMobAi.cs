@@ -211,8 +211,6 @@ public sealed partial class ZoneWorld
         foreach (var npc in _byId.Values.Where(e => e.Kind == ZoneEntityKind.Npc && e.DecayAtMs > 0 && e.DecayAtMs <= now).ToList())
         {
             npc.DecayAtMs = 0;
-            if (npc.CorpseAwaitingSweep)
-                continue;
             DespawnNpc(npc, outbound);
         }
     }

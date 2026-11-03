@@ -103,3 +103,17 @@
 2. Night game clock (GameTimeTaskManager) for the −10% dark bonus — small.
 3. magicLvl in skill-combat.json + mcrit stat mods — small.
 4. Weapon vulnerabilities (NPC passive traits data), NPC soulshots, NPC blow/magic skills on players — medium.
+
+## Spoil / Sweeper (Mobius CT0 parity)
+
+Rules in `data/spoil.json` + `Fineage.Game.Services.SpoilRules`; applied by `ZoneWorldSpoil.cs` through the normal `SkillUse` path.
+
+| Step | Mobius | Fineage |
+|---|---|---|
+| Spoil 254 | `Spoil` effect: alive monster (109), not spoiled (357), `calcMagicSuccess` with skill magicLevel table 10…72 (resist 139), set spoiler, SysMsg 612, EVT_ATTACKED | Same; hate added to spoiler. Resisted cast still costs MP/reuse; 357/109 cost nothing. Applied at cast start (not after the 1.8 s hitTime). |
+| Death | `RollCorpse` spoil list separate from droplist | Unchanged: `data/drops` corpse entries rolled only when spoiled |
+| Corpse time | DefaultCorpseTime 7 s + SpoiledCorpseExtendTime 10 s when spoiled | Same (17 s). **Fixed:** spoiled corpses no longer wait forever; unswept spoil decays with the corpse. |
+| Sweeper 42 | `ConditionPlayerCanSweep`: spoiled (343), spoiler or looter party (683), not old corpse — ≥2 s before decay (1247), slots/weight | Same; bag full 195 / weight 196 |
+| Loot | `takeSweep` → sweeper (party: `distributeItem`) + ConsumeBody | Items to the sweeper, corpse despawned. **Stub:** party loot distribution mode not applied (party mate who sweeps keeps it). |
+
+Stubs: Spoil Festival 302 / Sweeper Festival 444 (AoE) not wired; spoil success ignores Mobius MEN/level-bonus extras (base `calcMagicSuccess` only). Admin hooks (opcodes 30/31, `FINEAGE_ZONE_ADMIN`) reuse the same core (admin spoil skips the roll and hate).

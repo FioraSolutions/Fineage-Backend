@@ -179,6 +179,9 @@ public sealed partial class ZoneWorld
         if (player.CurMp < levelData.MpConsume)
             return SkillProtocol.Mp;
 
+        if (_spoilRules.IsSpoilSkill(request.SkillId) || _spoilRules.IsSweepSkill(request.SkillId))
+            return TrySkillUseSpoilOrSweep(session, player, request, template, levelData, level, now,
+                _spoilRules.IsSweepSkill(request.SkillId), outbound);
         if (template.IsBuffSkill)
             return TrySkillUseBuff(session, player, request, template, levelData, level, now, outbound);
         if (template.IsDebuffSkill)

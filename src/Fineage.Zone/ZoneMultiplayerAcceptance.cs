@@ -297,6 +297,9 @@ public static class ZoneMultiplayerAcceptance
         await peer.MoveNearAsync(gremlin).ConfigureAwait(false);
         await peer.SendAsync(MsgType.AdminSpoilTarget, new AdminSpoilTargetMsg { TargetObjectId = gremlin.ObjectId })
             .ConfigureAwait(false);
+        var spoiled = await peer.ExpectAsync<SystemMessageMsg>(MsgType.SystemMessage).ConfigureAwait(false);
+        if (spoiled.Id != 612)
+            throw new InvalidOperationException($"spoil sysmsg {spoiled.Id}");
 
         await peer.SendAsync(MsgType.SelectTarget, new SelectTargetMsg { TargetObjectId = gremlin.ObjectId })
             .ConfigureAwait(false);
