@@ -38,6 +38,18 @@ public sealed record TakeItemOp(int ItemId, int Count) : QuestOp;
 
 public sealed record CompleteOp : QuestOp;
 
+/// <summary>
+/// Mobius <c>giveItemRandomly(player, npc, item, count, limit, chance, playSound)</c> on kill:
+/// roll <c>chance</c>, never above <c>limit</c> (0 = no cap), ItemGet sound, Middle + <c>condAtLimit</c> when the cap is reached.
+/// </summary>
+public sealed record DropItemOp(int ItemId, int Count, double Chance, int Limit, int? CondAtLimit) : QuestOp;
+
+/// <summary>
+/// Hand in every <c>ItemId</c> for <c>Per</c> x <c>RewardItemId</c> each, plus <c>BonusAdena</c> when at least <c>BonusMin</c>
+/// were handed in (Mobius Q267 style <c>rewardItems(count)</c> + <c>giveAdena</c> if count &gt;= 10).
+/// </summary>
+public sealed record ExchangeAllOp(int ItemId, int RewardItemId, int Per, int BonusMin, int BonusAdena) : QuestOp;
+
 public sealed record SoundOp(string Name) : QuestOp;
 
 public sealed record QuestDialog(
@@ -52,7 +64,9 @@ public sealed record QuestDialog(
     IReadOnlyList<QuestOp> Ops,
     IReadOnlyList<int>? Races = null,
     int MinLevel = 0,
-    int MaxLevel = 0);
+    int MaxLevel = 0,
+    int HasItem = 0,
+    int MinCount = 1);
 
 /// <summary>
 /// Who is talking. Mobius quest scripts branch on <c>player.getRace()</c> / <c>getLevel()</c>

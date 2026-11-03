@@ -13,8 +13,11 @@ public sealed class QuestMachine : IQuestKillHook
     readonly QuestCatalog _catalog;
     readonly ItemCatalog _items;
 
-    public QuestMachine(QuestCatalog catalog, ItemCatalog items)
+    readonly Func<double> _random;
+
+    public QuestMachine(QuestCatalog catalog, ItemCatalog items, Func<double>? random = null)
     {
+        _random = random ?? Random.Shared.NextDouble;
         _catalog = catalog ?? throw new ArgumentNullException(nameof(catalog));
         _items = items ?? throw new ArgumentNullException(nameof(items));
     }
@@ -25,7 +28,7 @@ public sealed class QuestMachine : IQuestKillHook
     {
         foreach (var quest in _catalog.Quests)
         {
-            var dialog = Find(quest, QuestHook.FirstTalk, npcId, "", journal.Find(quest.Id), actor);
+            var dialog = Find(quest, QuestHook.FirstTalk, npcId, "", journal.Find(quest.Id), actor, inventory);
             if (dialog == null)
                 continue;
             return Apply(journal, inventory, quest, dialog, "first_talk");
@@ -42,7 +45,7 @@ public sealed class QuestMachine : IQuestKillHook
     {
         if (_catalog.Find(questId) is not { } quest)
             return Fail(QuestFailure.Unknown, "That quest does not exist.", questId, "talk");
-        var dialog = Find(quest, QuestHook.Talk, npcId, "", journal.Find(quest.Id), actor);
+        var dialog = Find(quest, QuestHook.Talk, npcId, "", journal.Find(quest.Id), actor, inventory);
         if (dialog == null)
             return Fail(QuestFailure.State, "That quest event does not apply.", questId, "talk");
         return Apply(journal, inventory, quest, dialog, "talk");
@@ -52,7 +55,7 @@ public sealed class QuestMachine : IQuestKillHook
     {
         if (_catalog.Find(questId) is not { } quest)
             return Fail(QuestFailure.Unknown, "That quest does not exist.", questId, "event", eventName);
-        var dialog = Find(quest, QuestHook.Event, npcId, eventName, journal.Find(quest.Id), actor);
+        var dialog = Find(quest, QuestHook.Event, npcId, eventName, journal.Find(quest.Id), actor, inventory);
         if (dialog == null)
             return Fail(QuestFailure.State, "That quest event does not apply.", questId, "event", eventName);
         return Apply(journal, inventory, quest, dialog, "event");
@@ -83,7 +86,9 @@ public sealed class QuestMachine : IQuestKillHook
         return Commit(journal, inventory, quest, plan, "abort", "");
     }
 
-    public QuestOutcome OnKill(QuestJournal journal, PlayerInventory inventory, int npcId)
+    public QuestOutcome OnKill(QuestJournal journal, PlayerInventory inventory, int npcId) => OnKill(journal, inventory, npcId, null);
+
+    public QuestOutcome OnKill(QuestJournal journal, PlayerInventory inventory, int npcId, QuestActor? actor)
     {
         QuestOutcome? last = null;
         var sounds = new List<string>();
@@ -94,7 +99,7 @@ public sealed class QuestMachine : IQuestKillHook
         bool changed = false;
         foreach (var quest in _catalog.Quests)
         {
-            var dialog = Find(quest, QuestHook.Kill, npcId, "", journal.Find(quest.Id));
+            var dialog = Find(quest, QuestHook.Kill, npcId, "", journal.Find(quest.Id), actor, inventory);
             if (dialog == null)
                 continue;
             var outcome = Apply(journal, inventory, quest, dialog, "kill");
@@ -366,6 +371,59 @@ public sealed class QuestMachine : IQuestKillHook
                     plan.Sounds.Add(QuestSounds.Finish);
                     plan.Lines.Add(Line(QuestNotice.Completed, $"{quest.Name} is complete.", quest.Name));
                     break;
+                case DropItemOp drop:
+                {
+                    if (!Started(plan))
+                        break;
+                    int have = inventory.CountOf(drop.ItemId) + plan.Delta.GetValueOrDefault(drop.ItemId);
+                    if (drop.Limit > 0 && have >= drop.Limit)
+                        break;
+                    if (_random() >= drop.Chance)
+                        break;
+                    int add = drop.Limit > 0 ? Math.Min(drop.Count, drop.Limit - have) : drop.Count;
+                    if (!AddDelta(inventory, plan, drop.ItemId, add))
+                        break;
+                    if (drop.Limit > 0 && have + add >= drop.Limit)
+                    {
+                        plan.Sounds.Add(QuestSounds.Middle);
+                        if (drop.CondAtLimit is int atLimit)
+                            plan.Vars[QuestProgress.CondVar] = atLimit.ToString();
+                    }
+                    else
+                    {
+                        plan.Sounds.Add(QuestSounds.ItemGet);
+                    }
+
+                    break;
+                }
+                case ExchangeAllOp exchange:
+                {
+                    int handed = inventory.CountOf(exchange.ItemId) + plan.Delta.GetValueOrDefault(exchange.ItemId);
+                    if (handed <= 0)
+                    {
+                        failure = Fail(QuestFailure.Item, "You do not have the required item.", quest.Id, "");
+                        return false;
+                    }
+
+                    AddDelta(inventory, plan, exchange.ItemId, -handed);
+                    int reward = handed * exchange.Per;
+                    if (!AddDelta(inventory, plan, exchange.RewardItemId, reward))
+                    {
+                        failure = Fail(QuestFailure.BadRequest, "That reward does not fit in the bag.", quest.Id, "");
+                        return false;
+                    }
+
+                    string rewardName = _items.Get(exchange.RewardItemId).Name;
+                    plan.Sounds.Add(QuestSounds.ItemGet);
+                    plan.Lines.Add(Line(QuestNotice.ItemEarned, $"You have earned {rewardName} ({reward}).", rewardName, reward.ToString()));
+                    if (exchange.BonusAdena > 0 && handed >= exchange.BonusMin)
+                    {
+                        AddDelta(inventory, plan, QuestCatalog.AdenaItemId, exchange.BonusAdena);
+                        plan.Lines.Add(Line(QuestNotice.Adena, $"You have obtained {exchange.BonusAdena} Adena.", exchange.BonusAdena.ToString()));
+                    }
+
+                    break;
+                }
                 case SoundOp sound:
                     plan.Sounds.Add(sound.Name);
                     break;
@@ -384,8 +442,10 @@ public sealed class QuestMachine : IQuestKillHook
             int delta = plan.Delta[itemId];
             if (delta > 0)
             {
+                // A stack merge keeps the held objectId: the client needs Modify, not Add (same rule as pickup, 2ef5c42).
+                var before = new HashSet<int>(inventory.Items.Select(i => i.ObjectId));
                 foreach (var piece in inventory.AddPieces(itemId, delta))
-                    touches.Add(new BagTouch(BagTouchKind.Add, piece));
+                    touches.Add(new BagTouch(before.Contains(piece.ObjectId) ? BagTouchKind.Modify : BagTouchKind.Add, piece));
             }
             else if (delta < 0)
             {
@@ -487,7 +547,7 @@ public sealed class QuestMachine : IQuestKillHook
         };
     }
 
-    static QuestDialog? Find(QuestDefinition quest, QuestHook hook, int npcId, string eventName, QuestProgress? state, QuestActor? actor = null)
+    static QuestDialog? Find(QuestDefinition quest, QuestHook hook, int npcId, string eventName, QuestProgress? state, QuestActor? actor = null, PlayerInventory? inventory = null)
     {
         foreach (var dialog in quest.Dialogs)
         {
@@ -498,6 +558,8 @@ public sealed class QuestMachine : IQuestKillHook
             if (!WhenMatches(dialog, state))
                 continue;
             if (!ActorMatches(dialog, actor))
+                continue;
+            if (dialog.HasItem != 0 && inventory != null && inventory.CountOf(dialog.HasItem) < dialog.MinCount)
                 continue;
             return dialog;
         }

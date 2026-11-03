@@ -2635,6 +2635,15 @@
       "pDef": 21
     },
     {
+      "id": 1118,
+      "name": "Spore Sac",
+      "kind": "etc",
+      "stackable": true,
+      "icon": "icon.etc_pouch_brown_i00",
+      "price": 0,
+      "weight": 0
+    },
+    {
       "id": 1119,
       "name": "Short Leather Gloves",
       "kind": "armor",
@@ -2741,6 +2750,24 @@
       "randomDamage": 10,
       "soulshots": 2,
       "spiritshots": 2
+    },
+    {
+      "id": 1335,
+      "name": "Goblin Club",
+      "kind": "etc",
+      "stackable": true,
+      "icon": "icon.weapon_club_i00",
+      "price": 0,
+      "weight": 0
+    },
+    {
+      "id": 1340,
+      "name": "Silvery Leaf",
+      "kind": "etc",
+      "stackable": true,
+      "icon": "icon.etc_feather_white_i00",
+      "price": 20,
+      "weight": 3
     },
     {
       "id": 1341,

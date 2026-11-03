@@ -28,7 +28,9 @@ public sealed class TcpServer
         listener.Start();
         BoundPort = ((IPEndPoint)listener.LocalEndpoint).Port;
 
-        using var slots = new SemaphoreSlim(Math.Max(1, maxConnections));
+        // Not disposed: ServeAsync tasks may Release after the accept loop exits (test host crashed on
+        // ObjectDisposedException). SemaphoreSlim without AvailableWaitHandle holds no unmanaged state.
+        var slots = new SemaphoreSlim(Math.Max(1, maxConnections));
         try
         {
             while (!ct.IsCancellationRequested)

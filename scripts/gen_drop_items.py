@@ -20,7 +20,7 @@ for p in (ROOT / "data/drops").glob("*.json"):
 q = json.loads((ROOT / "data/quests.json").read_text())
 for quest in q.get("quests", []):
     ids = list(quest.get("questItems", []))
-    ids += [op["itemId"] for d in quest.get("dialogs", []) for op in d.get("ops", []) if op.get("itemId")]
+    ids += [op[k] for d in quest.get("dialogs", []) for op in d.get("ops", []) for k in ("itemId", "rewardItemId") if op.get(k)]
     want |= {i for i in ids if i not in have}
 
 # Mobius has no icon for for_npc herbs 8600-8607 and BranchSys2.* (i01) for 8608/8611; the client ships these

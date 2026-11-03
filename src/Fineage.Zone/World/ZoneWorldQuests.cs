@@ -143,6 +143,29 @@ public sealed partial class ZoneWorld
 
     static QuestActor QuestActorOf(ZoneEntity player) => new(player.Race, player.Level);
 
+    /// <summary>
+    /// Mobius <c>Quest.onKill</c> for the killer (party share / ALT_PARTY_RANGE not yet). Quest drops go straight to the
+    /// bag like <c>giveItemRandomly</c>; journal / bag / sounds go out through the same Publish path as talk.
+    /// </summary>
+    internal void QuestKillForTest(ZoneEntity killer, int npcId)
+    {
+        var outbound = new List<Pending>();
+        lock (_gate)
+            ApplyQuestKill(killer, new ZoneEntity { Kind = ZoneEntityKind.Npc, NpcId = npcId, ObjectId = 0 }, outbound);
+    }
+
+    void ApplyQuestKill(ZoneEntity killer, ZoneEntity npc, List<Pending> outbound)
+    {
+        if (killer.Inventory == null || killer.Dead || killer.Session == null)
+            return;
+        var outcome = _quests.OnKill(killer.Quests, killer.Inventory, npc.NpcId, QuestActorOf(killer));
+        if (outcome.QuestId == 0 || !outcome.Ok)
+            return;
+        if (outcome.Items.Count == 0 && !outcome.JournalChanged && outcome.Sounds.Count == 0)
+            return;
+        Publish(killer.Session, killer, outcome, npc.ObjectId, npc.NpcId, outbound);
+    }
+
     static bool IsNpcPage(QuestOutcome outcome) =>
         outcome.Ok
         && outcome.Hook == "default"
@@ -357,6 +380,7 @@ public sealed partial class ZoneWorld
     {
         if (killer.Kind != ZoneEntityKind.Player || killer.Session == null || npc.Kind != ZoneEntityKind.Npc)
             return;
+        ApplyQuestKill(killer, npc, outbound);
         long exp = npc.RewardExp;
         int sp = npc.RewardSp;
         if (exp <= 0 && sp <= 0)

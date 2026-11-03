@@ -370,6 +370,202 @@
       "dialogs": []
     },
     {
+      "id": 267,
+      "name": "Wrath of Verdure",
+      "repeatable": true,
+      "abortable": true,
+      "questItems": [
+        1335
+      ],
+      "dialogs": [
+        {
+          "npcId": 31853,
+          "hook": "talk",
+          "when": "absent",
+          "races": [
+            1
+          ],
+          "minLevel": 4,
+          "html": "<html><body>Treant Bremec:<br>Goblin Raiders hack at the young trees with their clubs. Take those clubs from them and I will give you Silvery Leaves for each one.<br><a action=\"quest_event:267:accept\">I will hunt the goblins.</a></body></html>"
+        },
+        {
+          "npcId": 31853,
+          "hook": "talk",
+          "when": "absent",
+          "races": [
+            1
+          ],
+          "html": "<html><body>Treant Bremec:<br>You are still a sapling. Come back at level 4.</body></html>"
+        },
+        {
+          "npcId": 31853,
+          "hook": "talk",
+          "when": "absent",
+          "html": "<html><body>Treant Bremec:<br>Only a child of the forest may help me.</body></html>"
+        },
+        {
+          "npcId": 31853,
+          "hook": "event",
+          "event": "accept",
+          "when": "absent",
+          "races": [
+            1
+          ],
+          "minLevel": 4,
+          "html": "<html><body>Treant Bremec:<br>Goblin Raiders roam the forest south of the village. Bring me their clubs.</body></html>",
+          "ops": [
+            {
+              "op": "create"
+            },
+            {
+              "op": "start"
+            }
+          ]
+        },
+        {
+          "npcId": 31853,
+          "hook": "talk",
+          "when": "started",
+          "hasItem": 1335,
+          "html": "<html><body>Treant Bremec:<br>Goblin clubs! Take these leaves. Bring at least ten at once and I will add some adena.<br><a action=\"quest_event:267:more\">I will hunt more.</a><br><a action=\"quest_event:267:quit\">I am done hunting.</a></body></html>",
+          "ops": [
+            {
+              "op": "exchange_all",
+              "itemId": 1335,
+              "rewardItemId": 1340,
+              "per": 1,
+              "bonusMin": 10,
+              "bonusAdena": 600
+            }
+          ]
+        },
+        {
+          "npcId": 31853,
+          "hook": "talk",
+          "when": "started",
+          "html": "<html><body>Treant Bremec:<br>No clubs yet? The Goblin Raiders are south of the village.<br><a action=\"quest_event:267:quit\">I am done hunting.</a></body></html>"
+        },
+        {
+          "npcId": 31853,
+          "hook": "event",
+          "event": "more",
+          "when": "started",
+          "html": "<html><body>Treant Bremec:<br>Good. The forest thanks you.</body></html>"
+        },
+        {
+          "npcId": 31853,
+          "hook": "event",
+          "event": "quit",
+          "when": "started",
+          "html": "<html><body>Treant Bremec:<br>Rest then. Come back if the goblins return.</body></html>",
+          "ops": [
+            {
+              "op": "complete"
+            }
+          ]
+        },
+        {
+          "npcId": 20325,
+          "hook": "kill",
+          "when": "started",
+          "html": "",
+          "ops": [
+            {
+              "op": "drop_item",
+              "itemId": 1335,
+              "chance": 0.5
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": 313,
+      "name": "Collect Spores",
+      "repeatable": true,
+      "abortable": true,
+      "questItems": [
+        1118
+      ],
+      "dialogs": [
+        {
+          "npcId": 30150,
+          "hook": "talk",
+          "when": "absent",
+          "minLevel": 8,
+          "html": "<html><body>Trader Herbiel:<br>I need Spore Sacs from the Spore Fungus for my potions. Bring me ten.<br><a action=\"quest_event:313:accept\">I will collect them.</a></body></html>"
+        },
+        {
+          "npcId": 30150,
+          "hook": "talk",
+          "when": "absent",
+          "html": "<html><body>Trader Herbiel:<br>The Spore Fungus is dangerous for beginners. Come back at level 8.</body></html>"
+        },
+        {
+          "npcId": 30150,
+          "hook": "event",
+          "event": "accept",
+          "when": "absent",
+          "minLevel": 8,
+          "html": "<html><body>Trader Herbiel:<br>Hunt Spore Fungus and bring ten Spore Sacs.</body></html>",
+          "ops": [
+            {
+              "op": "create"
+            },
+            {
+              "op": "start"
+            }
+          ]
+        },
+        {
+          "npcId": 30150,
+          "hook": "talk",
+          "when": "started",
+          "cond": 1,
+          "html": "<html><body>Trader Herbiel:<br>I need ten Spore Sacs. Keep hunting.</body></html>"
+        },
+        {
+          "npcId": 30150,
+          "hook": "talk",
+          "when": "started",
+          "cond": 2,
+          "hasItem": 1118,
+          "minCount": 10,
+          "html": "<html><body>Trader Herbiel:<br>Ten Spore Sacs, perfect. Here is your payment.</body></html>",
+          "ops": [
+            {
+              "op": "take_item",
+              "itemId": 1118,
+              "count": 10
+            },
+            {
+              "op": "give_adena",
+              "count": 3500
+            },
+            {
+              "op": "complete"
+            }
+          ]
+        },
+        {
+          "npcId": 20509,
+          "hook": "kill",
+          "when": "started",
+          "cond": 1,
+          "html": "",
+          "ops": [
+            {
+              "op": "drop_item",
+              "itemId": 1118,
+              "chance": 0.4,
+              "limit": 10,
+              "condAtLimit": 2
+            }
+          ]
+        }
+      ]
+    },
+    {
       "id": 999,
       "name": "Roxxy's Message",
       "repeatable": false,

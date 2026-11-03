@@ -164,7 +164,14 @@ public sealed class QuestCatalog
             throw new InvalidDataException($"{where} quest {questId} minLevel is above maxLevel.");
 
         return new QuestDialog(dialog.NpcId, hook, evt, when, dialog.Cond, whenVar, whenValue, html, ops,
-            races.Count == 0 ? null : races, dialog.MinLevel, dialog.MaxLevel);
+            races.Count == 0 ? null : races, dialog.MinLevel, dialog.MaxLevel, ReadHasItem(dialog, items, where, questId), Math.Max(1, dialog.MinCount));
+    }
+
+    static int ReadHasItem(DialogDto dialog, ItemCatalog items, string where, int questId)
+    {
+        if (dialog.HasItem != 0 && !items.TryGet(dialog.HasItem, out _))
+            throw new InvalidDataException($"{where} quest {questId} hasItem {dialog.HasItem} is unknown.");
+        return dialog.HasItem;
     }
 
     static QuestOp ReadOp(OpDto op, ItemCatalog items, string where, int questId)
@@ -182,9 +189,31 @@ public sealed class QuestCatalog
             "give_exp_sp" => ReadExp(op, where, questId),
             "take_item" => ReadTake(op, items, where, questId),
             "complete" => new CompleteOp(),
+            "drop_item" => ReadDrop(op, items, where, questId),
+            "exchange_all" => ReadExchange(op, items, where, questId),
             "sound" => ReadSound(op, where, questId),
             _ => throw new InvalidDataException($"{where} quest {questId} has unknown op '{op.Op}'.")
         };
+    }
+
+    static DropItemOp ReadDrop(OpDto op, ItemCatalog items, string where, int questId)
+    {
+        int count = op.Count ?? 1;
+        double chance = op.Chance ?? 1.0;
+        int limit = op.Limit ?? 0;
+        if (count < 1 || !items.TryGet(op.ItemId, out _) || op.ItemId == AdenaItemId)
+            throw new InvalidDataException($"{where} quest {questId} drop_item {op.ItemId} is unknown or has a bad count.");
+        if (chance is <= 0 or > 1 || limit < 0 || op.CondAtLimit is < 0 or > 255)
+            throw new InvalidDataException($"{where} quest {questId} drop_item needs chance 0..1, limit >= 0, condAtLimit 0..255.");
+        return new DropItemOp(op.ItemId, count, chance, limit, op.CondAtLimit);
+    }
+
+    static ExchangeAllOp ReadExchange(OpDto op, ItemCatalog items, string where, int questId)
+    {
+        int reward = op.RewardItemId ?? 0;
+        if (!items.TryGet(op.ItemId, out _) || !items.TryGet(reward, out _) || (op.Per ?? 1) < 1 || (op.BonusAdena ?? 0) < 0)
+            throw new InvalidDataException($"{where} quest {questId} exchange_all needs known itemId/rewardItemId and per >= 1.");
+        return new ExchangeAllOp(op.ItemId, reward, op.Per ?? 1, op.BonusMin ?? 0, op.BonusAdena ?? 0);
     }
 
     static SetCondOp ReadCond(OpDto op, string where, int questId)
@@ -320,6 +349,8 @@ public sealed class QuestCatalog
         public List<int>? Races { get; set; }
         public int MinLevel { get; set; }
         public int MaxLevel { get; set; }
+        public int HasItem { get; set; }
+        public int MinCount { get; set; } = 1;
     }
 
     sealed class OpDto
@@ -333,5 +364,12 @@ public sealed class QuestCatalog
         public long? Exp { get; set; }
         public int? Sp { get; set; }
         public string? Name { get; set; }
+        public double? Chance { get; set; }
+        public int? Limit { get; set; }
+        public int? CondAtLimit { get; set; }
+        public int? RewardItemId { get; set; }
+        public int? Per { get; set; }
+        public int? BonusMin { get; set; }
+        public int? BonusAdena { get; set; }
     }
 }
