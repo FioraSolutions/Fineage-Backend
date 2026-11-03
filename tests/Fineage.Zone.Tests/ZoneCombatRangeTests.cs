@@ -22,9 +22,13 @@ public sealed class ZoneCombatRangeTests
     }
 
     [Fact]
-    public void Pickup_keeps_wide_reach()
+    public void Pickup_and_drop_use_Mobius_150_radius()
     {
-        Assert.True(ZoneCombat.InPickupRange(0, 0, 800, 0));
+        Assert.True(ZoneCombat.InPickupRange(0, 0, 150, 0));
+        Assert.False(ZoneCombat.InPickupRange(0, 0, 800, 0));
+        Assert.True(ZoneCombat.InDropRange(0, 0, 0, 100, 0, 30));
+        Assert.False(ZoneCombat.InDropRange(0, 0, 0, 200, 0, 0));
+        Assert.False(ZoneCombat.InDropRange(0, 0, 0, 10, 0, 60));
     }
 }
 

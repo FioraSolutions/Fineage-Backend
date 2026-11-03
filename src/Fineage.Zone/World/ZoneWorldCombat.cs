@@ -224,6 +224,7 @@ public sealed partial class ZoneWorld
             TickMeleeHits(now, outbound);
             TickAutoAttacks(outbound);
             TickPendingCasts(now, outbound);
+            TickPendingPickups(now, outbound);
             TickMobAttacks(now, outbound);
             TickCorpseDecay(now, outbound);
         }

@@ -10,7 +10,16 @@ public static class ZoneCombat
     /// </summary>
     public const int MeleeRange = 80;
     /// <summary>Ground pickup / interaction reach — client walks there itself, keep the old wide gate.</summary>
-    public const int PickupRange = 900;
+    /// <summary>
+    /// Mobius doPickupItem: the pawn must stand next to the item. Farther clicks run in first (moveToPawn) —
+    /// the old 900u reach picked items up from across the screen with no walk.
+    /// </summary>
+    public const int PickupRange = 150;
+    /// <summary>Mobius AI_INTENTION_PICK_UP moveToPawn offset.</summary>
+    public const int PickupReach = 36;
+    /// <summary>Mobius RequestDropItem: isInsideRadius3D(x, y, z, 150) and |dz| &lt;= 50, else CANNOT_DISCARD_DISTANCE_TOO_FAR.</summary>
+    public const int DropRange = 150;
+    public const int DropMaxZDelta = 50;
     /// <summary>Mobius moveToPawn offset: stop a bit inside the attack range so the swing passes the check.</summary>
     public const int ApproachSlack = 20;
     /// <summary>Fallback player run speed when the character has none (Interlude human fighter 115 → ~120).</summary>
@@ -388,6 +397,14 @@ public static class ZoneCombat
         long dx = ax - (long)bx;
         long dy = ay - (long)by;
         return dx * dx + dy * dy <= (long)PickupRange * PickupRange;
+    }
+
+    public static bool InDropRange(int ax, int ay, int az, int bx, int by, int bz)
+    {
+        long dx = ax - (long)bx;
+        long dy = ay - (long)by;
+        long dz = az - (long)bz;
+        return Math.Abs(dz) <= DropMaxZDelta && dx * dx + dy * dy + dz * dz <= (long)DropRange * DropRange;
     }
 
     public static bool InCastRange(int ax, int ay, int bx, int by, int castRange)

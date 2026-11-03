@@ -40,7 +40,16 @@ public sealed partial class ZoneWorld
         return null;
     }
 
-    string? TryPickup(ZoneSession session, int groundObjectId, List<Pending> outbound)
+    /// <summary>Interlude SystemMessageId 151 CANNOT_DISCARD_DISTANCE_TOO_FAR.</summary>
+    public const int SysMsgDiscardTooFar = 151;
+    /// <summary>Interlude SystemMessageId 28/29/30: obtained adena / S2 S1 / S1.</summary>
+    public const int SysMsgObtainedAdena = 28;
+    public const int SysMsgObtainedCount = 29;
+    public const int SysMsgObtainedItem = 30;
+    /// <summary>Interlude SystemMessageId 145 FAILED_TO_PICKUP_S1.</summary>
+    public const int SysMsgFailedToPickup = 145;
+
+    string? TryPickup(ZoneSession session, int groundObjectId, List<Pending> outbound, bool allowApproach = true)
     {
         if (!_byId.TryGetValue(session.ObjectId, out var player) || player.Inventory == null)
             return "world";
@@ -50,18 +59,94 @@ public sealed partial class ZoneWorld
             return "pickup";
         if (!VisibleTo(player.ObjectId, groundObjectId))
             return "pickup";
-        if (!ZoneCombat.InPickupRange(player.X, player.Y, ground.X, ground.Y))
-            return "pickup";
+        if (player.Dead)
+            return InventoryProtocol.Dead;
 
-        var added = player.Inventory.Add(ground.GroundItemId, ground.GroundCount);
-        var invUpdate = InventoryMessages.Update(InventoryChange.Add, added);
+        long now = _clock().ToUnixTimeMilliseconds();
+        AdvanceMove(player, now);
+        if (!ZoneCombat.InPickupRange(player.X, player.Y, ground.X, ground.Y))
+        {
+            if (!allowApproach)
+            {
+                PickupFailed(session, ground, outbound);
+                return "range";
+            }
+
+            // Mobius AI_INTENTION_PICK_UP: run to the item (moveToPawn), pick it up on arrival.
+            session.AutoAttackTargetId = 0;
+            session.PendingCastSkillId = 0;
+            long ms = ApproachTarget(player, ground, ZoneCombat.PickupReach, outbound);
+            if (ms < 0)
+            {
+                PickupFailed(session, ground, outbound);
+                return "range";
+            }
+            if (ms > 0)
+            {
+                session.PendingPickupId = groundObjectId;
+                session.PendingPickupAtUnixMs = now + ms;
+                return null;
+            }
+        }
+
+        session.PendingPickupId = 0;
+        session.PendingPickupAtUnixMs = 0;
+        session.ClearApproach();
+
+        _game.Items.TryGet(ground.GroundItemId, out var template);
+        // Stack merge must be a Modify (Mobius InventoryUpdate addModifiedItem): the client ignores an Add
+        // for an objectId it already holds, so the picked-up count only showed after relog.
+        bool merged = ground.GroundStackable && player.Inventory.FindByItemId(ground.GroundItemId) != null;
+        InventoryUpdateMsg invUpdate;
+        if (ground.GroundStackable || ground.GroundCount <= 1)
+        {
+            var added = player.Inventory.Add(ground.GroundItemId, ground.GroundCount);
+            invUpdate = InventoryMessages.Update(merged ? InventoryChange.Modify : InventoryChange.Add, added);
+        }
+        else
+        {
+            var pieces = player.Inventory.AddPieces(ground.GroundItemId, ground.GroundCount);
+            invUpdate = new InventoryUpdateMsg { Changes = pieces.Select(p => InventoryMessages.Update(InventoryChange.Add, p).Changes[0]).ToArray() };
+        }
         outbound.Add(Pack(session, MsgType.InventoryUpdate, invUpdate));
         if (NetBridge != null)
             NetBridge.FanoutInventoryUpdate([session.ObjectId], ToNetInventoryUpdate(invUpdate));
         RemoveGroundItem(ground, outbound);
         SaveInventory(session, player.Inventory);
-        ZoneLog.Info($"pickup object={session.ObjectId} ground={groundObjectId} item={ground.GroundItemId} count={ground.GroundCount}");
+
+        string name = template?.Name ?? $"item {ground.GroundItemId}";
+        if (ground.GroundItemId == 57)
+            ShotNotice(session, SysMsgObtainedAdena, $"You have obtained {ground.GroundCount} adena.", outbound);
+        else if (ground.GroundCount > 1)
+            ShotNotice(session, SysMsgObtainedCount, $"You have obtained {ground.GroundCount} {name}.", outbound);
+        else
+            ShotNotice(session, SysMsgObtainedItem, $"You have obtained {name}.", outbound);
+        ZoneLog.Info($"pickup object={session.ObjectId} ground={groundObjectId} item={ground.GroundItemId} count={ground.GroundCount} merged={merged}");
         return null;
+    }
+
+    void PickupFailed(ZoneSession session, ZoneEntity ground, List<Pending> outbound)
+    {
+        session.PendingPickupId = 0;
+        session.PendingPickupAtUnixMs = 0;
+        string name = _game.Items.TryGet(ground.GroundItemId, out var t) ? t.Name : $"item {ground.GroundItemId}";
+        ShotNotice(session, SysMsgFailedToPickup, $"You have failed to pick up {name}.", outbound);
+    }
+
+    void TickPendingPickups(long now, List<Pending> outbound)
+    {
+        foreach (var player in Players().ToList())
+        {
+            var session = player.Session;
+            if (session == null || session.PendingPickupId <= 0 || now < session.PendingPickupAtUnixMs)
+                continue;
+            int id = session.PendingPickupId;
+            session.PendingPickupId = 0;
+            session.PendingPickupAtUnixMs = 0;
+            // Item may be gone (someone else took it) — that is a silent no-op like Mobius.
+            if (_byId.TryGetValue(id, out var g) && g.Kind == ZoneEntityKind.GroundItem)
+                TryPickup(session, id, outbound, allowApproach: false);
+        }
     }
 
     string? TryDropItem(ZoneSession session, DropItemRequestMsg request, List<Pending> outbound)
@@ -83,8 +168,18 @@ public sealed partial class ZoneWorld
         int dropX = useCoords ? request.X : player.X;
         int dropY = useCoords ? request.Y : player.Y;
         int dropZ = useCoords ? request.Z : player.Z;
-        if (!ZoneCombat.InPickupRange(player.X, player.Y, dropX, dropY))
+        AdvanceMove(player, _clock().ToUnixTimeMilliseconds());
+        if (useCoords && !ZoneCombat.InDropRange(player.X, player.Y, player.Z, dropX, dropY, dropZ))
+        {
+            // Mobius: CANNOT_DISCARD_DISTANCE_TOO_FAR, item stays. Re-send the row so a client that
+            // hid the slot on drag puts it back without a relog.
+            ShotNotice(session, SysMsgDiscardTooFar, "That is too far from you to discard.", outbound);
+            var keep = InventoryMessages.Update(InventoryChange.Modify, item);
+            outbound.Add(Pack(session, MsgType.InventoryUpdate, keep));
+            NetBridge?.FanoutInventoryUpdate([session.ObjectId], ToNetInventoryUpdate(keep));
+            ZoneLog.Info($"drop-bag refused far object={session.ObjectId} item={item.ItemId} player={player.X},{player.Y},{player.Z} at={dropX},{dropY},{dropZ}");
             return "range";
+        }
 
         int itemId = item.ItemId;
         if (!player.Inventory.TryReduce(item, request.Count, out bool removedEntirely))

@@ -54,6 +54,10 @@ public sealed class ZoneSession
         ApproachArriveUnixMs = 0;
     }
 
+    /// <summary>Mobius AI_INTENTION_PICK_UP after moveToPawn: ground item to pick up once the run arrives.</summary>
+    public int PendingPickupId { get; set; }
+    public long PendingPickupAtUnixMs { get; set; }
+
     /// <summary>Mobius AI_INTENTION_CAST after moveToPawn: skill to fire once the server-driven approach arrives.</summary>
     public int PendingCastSkillId { get; set; }
     public int PendingCastTargetId { get; set; }

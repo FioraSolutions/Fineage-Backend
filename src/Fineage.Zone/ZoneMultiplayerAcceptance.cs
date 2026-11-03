@@ -271,6 +271,8 @@ public static class ZoneMultiplayerAcceptance
         var expected = MobiusDropTestSeed.ExpectedGremlinDeathDrop();
         if (row.Change != InventoryChange.Add || row.ItemId != expected.ItemId || row.Count != expected.Count)
             throw new InvalidOperationException($"inventory add item={row.ItemId} count={row.Count}");
+        // Mobius "You have obtained ..." after the pickup.
+        _ = await left.ExpectAsync<SystemMessageMsg>(MsgType.SystemMessage).ConfigureAwait(false);
 
         left.ExpectQuiet();
         right.ExpectQuiet();

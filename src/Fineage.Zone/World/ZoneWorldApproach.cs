@@ -120,6 +120,9 @@ public sealed partial class ZoneWorld
     /// <summary>Mobius: RequestMoveToLocation sets AI_INTENTION_MOVE_TO, dropping ATTACK/CAST unless still in melee.</summary>
     void CancelAttackIntentionOnMove(ZoneSession session, MoveToMsg move)
     {
+        // A fresh move order also drops AI_INTENTION_PICK_UP.
+        session.PendingPickupId = 0;
+        session.PendingPickupAtUnixMs = 0;
         int targetId = session.AutoAttackTargetId > 0 ? session.AutoAttackTargetId : session.PendingCastTargetId;
         if (targetId <= 0)
         {
