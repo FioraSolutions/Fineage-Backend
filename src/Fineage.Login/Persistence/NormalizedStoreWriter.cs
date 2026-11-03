@@ -23,6 +23,7 @@ static class NormalizedStoreWriter
         // Full reproject of item/quest rows — clears global object_id PKs so memory and SQL stay aligned.
         foreach (string wipe in new[]
                  {
+                     "DELETE FROM character_skills",
                      "DELETE FROM character_shortcuts",
                      "DELETE FROM character_quest_vars",
                      "DELETE FROM character_quests",
@@ -122,6 +123,7 @@ static class NormalizedStoreWriter
         ReplaceItems(conn, tx, character.Id, character.Items, character.Warehouse);
         ReplaceQuests(conn, tx, character.Id, character.Quests);
         ReplaceShortcuts(conn, tx, character.Id, character.Shortcuts);
+        ReplaceLearnedSkills(conn, tx, character.Id, character.LearnedSkills);
     }
 
     public static void UpdatePresence(
@@ -502,6 +504,7 @@ static class NormalizedStoreWriter
         ReplaceItems(conn, tx, id, inventory, warehouse);
         ReplaceQuests(conn, tx, id, ReadQuests(ch));
         ReplaceShortcuts(conn, tx, id, ReadShortcuts(ch));
+        ReplaceLearnedSkills(conn, tx, id, ReadLearnedSkills(ch));
     }
 
     static void UpsertCharacterColumns(
@@ -656,6 +659,51 @@ static class NormalizedStoreWriter
                 ReadInt(item, "equippedSlot", -1),
                 ReadInt(item, "enchantLevel", 0),
                 ReadInt(item, "objectId", 0)));
+        }
+
+        return rows;
+    }
+
+    public static void ReplaceLearnedSkills(
+        NpgsqlConnection conn,
+        NpgsqlTransaction? tx,
+        int characterId,
+        IReadOnlyList<StoredSkill>? skills)
+    {
+        using (var del = conn.CreateCommand())
+        {
+            del.Transaction = tx;
+            del.CommandText = "DELETE FROM character_skills WHERE character_id = @id";
+            del.Parameters.AddWithValue("id", characterId);
+            del.ExecuteNonQuery();
+        }
+
+        if (skills == null)
+            return;
+        foreach (var s in skills)
+        {
+            using var ins = conn.CreateCommand();
+            ins.Transaction = tx;
+            ins.CommandText =
+                "INSERT INTO character_skills (character_id, skill_id, skill_level) VALUES (@cid, @sid, @lvl) " +
+                "ON CONFLICT (character_id, skill_id) DO UPDATE SET skill_level = excluded.skill_level";
+            ins.Parameters.AddWithValue("cid", characterId);
+            ins.Parameters.AddWithValue("sid", s.SkillId);
+            ins.Parameters.AddWithValue("lvl", s.Level);
+            ins.ExecuteNonQuery();
+        }
+    }
+
+    static List<StoredSkill>? ReadLearnedSkills(JsonElement character)
+    {
+        if (!character.TryGetProperty("learnedSkills", out var arr) || arr.ValueKind != JsonValueKind.Array)
+            return null;
+        var rows = new List<StoredSkill>();
+        foreach (var s in arr.EnumerateArray())
+        {
+            var row = new StoredSkill(ReadInt(s, "skillId", 0), ReadInt(s, "level", 0));
+            if (row.IsValid)
+                rows.Add(row);
         }
 
         return rows;

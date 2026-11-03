@@ -74,6 +74,7 @@ public sealed class BypassRegistry
             "package_deposit",
             "package_withdraw"));
         registry.Register(new BuffBypassHandler());
+        registry.Register(new TrainerBypassHandler());
         return registry;
     }
 

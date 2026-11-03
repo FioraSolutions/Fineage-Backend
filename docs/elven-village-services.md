@@ -27,6 +27,15 @@ Scope: NPCs in `data/spawns/elven_village.json` only. Same pipeline scales per a
 - Dialog gate `hasItem` + `minCount` (Mobius `hasQuestItems` / `getQuestItemsCount >=`).
 - Quest rewards that merge into a held stack are sent as `Modify` (client ignored `Add` for a held objectId).
 
+## Trainers (foundation, free mode is default)
+- `data/skill-trees.json` rows carry Mobius `levelUpSp` (`scripts/gen_skill_sp.py`, 13528 rows).
+- Learned skills persist per character: `CharacterRecord.LearnedSkills`, JSON `learnedSkills`, Postgres `character_skills` (migration 004). Loaded at enter and merged into known skills (max level wins) on top of the class tree.
+- Trainer page `SkillList` bypass (Ellenia 30155, Cobendell 30156, Greenis 30157, Esrandell 30158 pages link it) → `TrainerBypassHandler`:
+  - **Default (`FINEAGE_TRAINER_SP_LEARN` unset)**: NPC-tree skills stay free at their level, exactly as before (Wind Strike etc.). SkillList shows an HTML note with the next level that brings a new skill. `learn_skill` does nothing.
+  - **`FINEAGE_TRAINER_SP_LEARN=1`**: Mobius mode. Only autoGet rows are free; SkillList is an interim HTML list (next level per skill, getLevel reached, SP cost) with `learn_skill <id>` links. Learning spends SP, saves `character_skills`, re-sends `SkillList` (V2 + Net `FanoutSkillList`), SysMsg 277 / 278.
+- **Open question for Nikita: keep free trainer skills or switch to SP-buy?** To flip: set `FINEAGE_TRAINER_SP_LEARN=1` for Zone (e.g. in `run-local-net.sh`). Characters then lose NPC skills they have not bought; consider a one-time grant of currently-known NPC skills into `character_skills` before flipping. Real Mobius UI (AcquireSkillList / RequestAcquireSkillInfo / RequestAcquireSkill) needs Net opcodes + a client window; the HTML list is the stopgap.
+- Q316 mobs: Mobius spawns Sukar Wererats / Varool at ~(12400..12900, 75500..80200, z -4176) — the underground Elven Ruins, not the village/forest maps we load. Not spawned; needs that dungeon map first.
+
 ## Missing (next bricks, in order)
 1. More elven hunt quests (Q102 Sea of Spores Fever, Q408 Path of the Elven Wizard: multi-mob/multi-item, class-change rewards); spawn Q316 wererats when that area is loaded.
 2. **Quest items tab / quest item flag** in items (client shows them in the main bag now).

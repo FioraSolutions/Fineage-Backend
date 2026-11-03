@@ -323,6 +323,16 @@ public sealed class PostgresAccountStore : IAccountStore, IDisposable
                 tx.Commit();
             });
 
+    public bool TryReplaceLearnedSkills(string account, int characterId, IReadOnlyList<StoredSkill> skills) =>
+        RunSilent(
+            () => _inner.TryReplaceLearnedSkills(account, characterId, skills),
+            conn =>
+            {
+                using var tx = conn.BeginTransaction();
+                NormalizedStoreWriter.ReplaceLearnedSkills(conn, tx, characterId, skills);
+                tx.Commit();
+            });
+
     public bool TryReplaceShortcuts(string account, int characterId, IReadOnlyList<StoredShortcut> shortcuts) =>
         RunSilent(
             () => _inner.TryReplaceShortcuts(account, characterId, shortcuts),

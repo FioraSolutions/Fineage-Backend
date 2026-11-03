@@ -164,6 +164,7 @@ static class NormalizedStoreReader
         var warehouse = LoadItems(conn, stub.Id, NormalizedStoreWriter.LocWarehouse);
         var quests = LoadQuests(conn, stub.Id);
         var shortcuts = LoadShortcuts(conn, stub.Id);
+        var learned = LoadLearnedSkills(conn, stub.Id);
         return new CharacterRecord(
             stub.Id,
             stub.Name,
@@ -197,7 +198,8 @@ static class NormalizedStoreReader
             quests,
             warehouse,
             stub.Newbie,
-            shortcuts);
+            shortcuts,
+            learned);
     }
 
     static List<StoredItem> LoadItems(NpgsqlConnection conn, int characterId, params string[] locs)
@@ -266,6 +268,18 @@ static class NormalizedStoreReader
         if (byId.Count == 0)
             return null;
         return byId.Select(kv => new QuestSaveRow(kv.Key, kv.Value.State, kv.Value.Vars)).ToList();
+    }
+
+    static List<StoredSkill>? LoadLearnedSkills(NpgsqlConnection conn, int characterId)
+    {
+        using var cmd = conn.CreateCommand();
+        cmd.CommandText = "SELECT skill_id, skill_level FROM character_skills WHERE character_id = @cid ORDER BY skill_id";
+        cmd.Parameters.AddWithValue("cid", characterId);
+        var rows = new List<StoredSkill>();
+        using var reader = cmd.ExecuteReader();
+        while (reader.Read())
+            rows.Add(new StoredSkill(reader.GetInt32(0), reader.GetInt32(1)));
+        return rows.Count == 0 ? null : rows;
     }
 
     static List<StoredShortcut>? LoadShortcuts(NpgsqlConnection conn, int characterId)

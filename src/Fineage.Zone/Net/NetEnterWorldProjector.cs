@@ -137,7 +137,7 @@ static class NetEnterWorldProjector
         return new ItemListNetMsg { Items = rows };
     }
 
-    static SkillListNetMsg BuildSkills(ZoneEntity entity, long nowUnixMs)
+    internal static SkillListNetMsg BuildSkills(ZoneEntity entity, long nowUnixMs)
     {
         var rows = new List<SkillListEntryNet>(entity.KnownSkills.Count);
         foreach (var pair in entity.KnownSkills.OrderBy(p => p.Key))

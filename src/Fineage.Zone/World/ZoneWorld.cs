@@ -114,6 +114,8 @@ sealed class ZoneEntity
     public HashSet<int> AutoShots { get; } = [];
     /// <summary>Mobius ShortCuts keyed by world slot (slot + page * 12).</summary>
     public Dictionary<int, Fineage.Login.StoredShortcut> Shortcuts { get; } = [];
+    /// <summary>Trainer-learned skills (persisted; Mobius character_skills). Merged into KnownSkills.</summary>
+    public Dictionary<int, int> LearnedSkills { get; } = [];
     /// <summary>True while an abnormal with combat stat funcs is active (UserInfo refresh on change).</summary>
     public bool HasStatAbnormal { get; set; }
     public float RunSpeed { get; init; }
@@ -614,6 +616,7 @@ public sealed partial class ZoneWorld
             Newbie = stored?.Newbie ?? true
         };
         LoadQuestProgress(session, entity);
+        LoadLearnedSkills(entity, stored);
         RefreshKnownSkills(entity);
         LoadShortcuts(entity, stored);
         SyncClanStanding(entity);

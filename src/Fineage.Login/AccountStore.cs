@@ -56,6 +56,15 @@ public sealed record StoredShortcut(int Slot, int Page, int Type, int Id, int Le
         Id > 0 && Level >= 0;
 }
 
+/// <summary>
+/// One Mobius <c>character_skills</c> row: a skill learned from a trainer (or quest). Auto-granted skills
+/// are not stored; they are re-derived from the class tree at enter. Null <c>LearnedSkills</c> = none saved.
+/// </summary>
+public sealed record StoredSkill(int SkillId, int Level)
+{
+    public bool IsValid => SkillId > 0 && Level > 0 && Level < 1000;
+}
+
 public sealed record CharacterRecord(
     int Id,
     string Name,
@@ -89,7 +98,8 @@ public sealed record CharacterRecord(
     IReadOnlyList<QuestSaveRow>? Quests = null,
     IReadOnlyList<StoredItem>? Warehouse = null,
     bool Newbie = true,
-    IReadOnlyList<StoredShortcut>? Shortcuts = null)
+    IReadOnlyList<StoredShortcut>? Shortcuts = null,
+    IReadOnlyList<StoredSkill>? LearnedSkills = null)
 {
     /// <summary>Remaining whole seconds until hard delete. Zero when the character is not pending.</summary>
     public int DeleteSecondsLeft(DateTimeOffset now)
@@ -208,6 +218,9 @@ public interface IAccountStore
 
     /// <summary>Replaces the character's hotbar (Mobius character_shortcuts). An empty list is a real save.</summary>
     bool TryReplaceShortcuts(string account, int characterId, IReadOnlyList<StoredShortcut> shortcuts);
+
+    /// <summary>Replaces the character's learned skills (Mobius character_skills). An empty list is a real save.</summary>
+    bool TryReplaceLearnedSkills(string account, int characterId, IReadOnlyList<StoredSkill> skills);
 
     bool TrySetLastAccess(string account, int characterId, DateTimeOffset when);
 
@@ -409,7 +422,8 @@ public sealed class JsonAccountStore : IAccountStore
                 ObjectId = item.ObjectId
             }).ToList(),
             Quests = character.Quests?.Select(CopyQuest).ToList(),
-            Shortcuts = character.Shortcuts?.Select(CopyShortcut).ToList()
+            Shortcuts = character.Shortcuts?.Select(CopyShortcut).ToList(),
+            LearnedSkills = character.LearnedSkills?.Select(s => new StoredSkillDto { SkillId = s.SkillId, Level = s.Level }).ToList()
         };
 
     static StoredShortcutDto CopyShortcut(StoredShortcut s) => new()
@@ -670,6 +684,28 @@ public sealed class JsonAccountStore : IAccountStore
             if (character == null)
                 return false;
             character.Quests = quests.Select(CopyQuest).ToList();
+            Save();
+            return true;
+        }
+    }
+
+    public bool TryReplaceLearnedSkills(string account, int characterId, IReadOnlyList<StoredSkill> skills)
+    {
+        ArgumentNullException.ThrowIfNull(skills);
+        var ids = new HashSet<int>();
+        foreach (var s in skills)
+        {
+            if (s == null || !s.IsValid || !ids.Add(s.SkillId))
+                return false;
+        }
+
+        lock (_gate)
+        {
+            var character = FindCharacter(account, characterId);
+            if (character == null)
+                return false;
+            character.LearnedSkills = skills.OrderBy(s => s.SkillId)
+                .Select(s => new StoredSkillDto { SkillId = s.SkillId, Level = s.Level }).ToList();
             Save();
             return true;
         }
@@ -1350,7 +1386,10 @@ public sealed class JsonAccountStore : IAccountStore
             character.Newbie,
             character.Shortcuts == null
                 ? null
-                : character.Shortcuts.Select(s => new StoredShortcut(s.Slot, s.Page, s.Type, s.Id, s.Level)).ToArray());
+                : character.Shortcuts.Select(s => new StoredShortcut(s.Slot, s.Page, s.Type, s.Id, s.Level)).ToArray(),
+            character.LearnedSkills == null
+                ? null
+                : character.LearnedSkills.Select(s => new StoredSkill(s.SkillId, s.Level)).ToArray());
 
     sealed class StoreFile
     {
@@ -1408,6 +1447,13 @@ public sealed class JsonAccountStore : IAccountStore
         public List<StoredItemDto>? Warehouse { get; set; }
         public bool Newbie { get; set; } = true;
         public List<StoredShortcutDto>? Shortcuts { get; set; }
+        public List<StoredSkillDto>? LearnedSkills { get; set; }
+    }
+
+    sealed class StoredSkillDto
+    {
+        public int SkillId { get; set; }
+        public int Level { get; set; }
     }
 
     sealed class StoredShortcutDto

@@ -92,6 +92,10 @@ public sealed partial class ZoneWorld
                 return ShowBlessingPage(session, player, npc, toSelf);
             case NpcServiceIntent.GiveBlessing:
                 return ApplyBlessing(session, npc.ObjectId, toSelf, toOthers, html: true);
+            case NpcServiceIntent.SkillList:
+                return ShowTrainerSkills(session, player, npc, toSelf);
+            case NpcServiceIntent.LearnSkill:
+                return LearnTrainerSkill(session, player, npc, reply.ServiceId, toSelf);
             default:
                 return "bad_request";
         }

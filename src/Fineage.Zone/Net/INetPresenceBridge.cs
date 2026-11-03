@@ -84,6 +84,9 @@ interface INetPresenceBridge
 
     void FanoutQuestList(IReadOnlyList<int> watcherObjectIds, QuestListNetMsg list);
 
+    /// <summary>Full SkillList re-send after a trainer learn (Mobius sends SkillList after RequestAcquireSkill).</summary>
+    void FanoutSkillList(IReadOnlyList<int> watcherObjectIds, SkillListNetMsg list);
+
     void FanoutPartyAskJoin(IReadOnlyList<int> watcherObjectIds, PartyAskJoinNetMsg ask);
 
     void FanoutPartyJoinResult(IReadOnlyList<int> watcherObjectIds, PartyJoinResultNetMsg result);

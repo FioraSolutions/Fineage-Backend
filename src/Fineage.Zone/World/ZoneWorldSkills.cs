@@ -24,11 +24,117 @@ public sealed partial class ZoneWorld
         return null;
     }
 
+    /// <summary>
+    /// Trainer mode. false (default) keeps the pre-trainer behaviour: NPC-learned tree skills are granted free at their
+    /// level. true = Mobius: only autoGet rows are free; NPC rows must be bought with SP at a trainer (learn_skill).
+    /// Env <c>FINEAGE_TRAINER_SP_LEARN=1</c>. Learned skills are persisted either way (character_skills).
+    /// </summary>
+    public bool TrainerSpLearn { get; set; } =
+        Environment.GetEnvironmentVariable("FINEAGE_TRAINER_SP_LEARN") is "1" or "true";
+
     void RefreshKnownSkills(ZoneEntity entity)
     {
         entity.KnownSkills.Clear();
-        foreach (var row in PlayerSkillBook.AutoSkills(_game.SkillTrees, _game.Skills, entity.ClassId, entity.Level, _game.Classes))
+        foreach (var row in PlayerSkillBook.AutoSkills(_game.SkillTrees, _game.Skills, entity.ClassId, entity.Level, _game.Classes,
+                     includeNpcSkills: !TrainerSpLearn))
             entity.KnownSkills[row.SkillId] = row.Level;
+        foreach (var pair in entity.LearnedSkills)
+        {
+            if (_game.Skills.Find(pair.Key) == null)
+                continue;
+            if (!entity.KnownSkills.TryGetValue(pair.Key, out int have) || have < pair.Value)
+                entity.KnownSkills[pair.Key] = pair.Value;
+        }
+    }
+
+    internal string? TrainerServiceForTest(ZoneSession session, string intent, int skillId = -1)
+    {
+        var toSelf = new List<Pending>();
+        lock (_gate)
+        {
+            if (!_byId.TryGetValue(session.ObjectId, out var player))
+                return "world";
+            var npc = new ZoneEntity { Kind = ZoneEntityKind.Npc, NpcId = 30157, Name = "Greenis", ObjectId = 0 };
+            return intent == NpcServiceIntent.SkillList
+                ? ShowTrainerSkills(session, player, npc, toSelf)
+                : LearnTrainerSkill(session, player, npc, skillId, toSelf);
+        }
+    }
+
+    void LoadLearnedSkills(ZoneEntity entity, Fineage.Login.CharacterRecord? stored)
+    {
+        entity.LearnedSkills.Clear();
+        foreach (var s in stored?.LearnedSkills ?? [])
+        {
+            if (s.IsValid)
+                entity.LearnedSkills[s.SkillId] = s.Level;
+        }
+    }
+
+    string? ShowTrainerSkills(ZoneSession session, ZoneEntity player, ZoneEntity npc, List<Pending> toSelf)
+    {
+        var html = new System.Text.StringBuilder("<html><body>%npcname%:<br>");
+        if (!TrainerSpLearn)
+        {
+            html.Append("In this world your class skills come to you on their own when you reach their level.<br>");
+            int next = TrainerSkills.NextLearnLevel(_game.SkillTrees, player.ClassId, player.Level, _game.Classes);
+            if (next > 0)
+                html.Append("Your next new skill arrives at level ").Append(next).Append('.');
+            html.Append("</body></html>");
+            SendHtml(session, player, npc, html.ToString(), toSelf);
+            return null;
+        }
+
+        var rows = TrainerSkills.Available(_game.SkillTrees, _game.Skills, player.ClassId, player.Level, player.KnownSkills, _game.Classes);
+        if (rows.Count == 0)
+        {
+            int next = TrainerSkills.NextLearnLevel(_game.SkillTrees, player.ClassId, player.Level, _game.Classes);
+            // Mobius SystemMessage 607 "You do not have any further skills to learn. Come back when you have reached Level S1."
+            html.Append(next > 0 ? $"There is nothing more I can teach you now. Come back at level {next}." : "There is nothing more I can teach you.");
+        }
+        else
+        {
+            html.Append("SP: ").Append(player.Sp).Append("<br>");
+            foreach (var r in rows)
+            {
+                string name = _game.Skills.Find(r.SkillId)?.Name ?? $"Skill {r.SkillId}";
+                html.Append("<a action=\"bypass -h npc_%objectId%_learn_skill ").Append(r.SkillId).Append("\">")
+                    .Append(HtmlText(name)).Append(" Lv ").Append(r.Level).Append(" - ").Append(r.LevelUpSp).Append(" SP</a><br>");
+            }
+        }
+
+        html.Append("</body></html>");
+        SendHtml(session, player, npc, html.ToString(), toSelf);
+        return null;
+    }
+
+    string? LearnTrainerSkill(ZoneSession session, ZoneEntity player, ZoneEntity npc, int skillId, List<Pending> toSelf)
+    {
+        if (!TrainerSpLearn)
+            return ShowTrainerSkills(session, player, npc, toSelf);
+        var rows = TrainerSkills.Available(_game.SkillTrees, _game.Skills, player.ClassId, player.Level, player.KnownSkills, _game.Classes);
+        var row = rows.FirstOrDefault(r => r.SkillId == skillId);
+        if (row.SkillId == 0)
+            return "bad_request";
+        if (player.Sp < row.LevelUpSp)
+        {
+            // Mobius SystemMessage 278 "You do not have enough SP to learn this skill."
+            Notice(session, 278, "You do not have enough SP to learn this skill.", toSelf);
+            return ShowTrainerSkills(session, player, npc, toSelf);
+        }
+
+        player.Sp -= row.LevelUpSp;
+        player.LearnedSkills[row.SkillId] = row.Level;
+        RefreshKnownSkills(player);
+        _accounts?.TryReplaceLearnedSkills(session.Account, session.ObjectId,
+            player.LearnedSkills.Select(p => new Fineage.Login.StoredSkill(p.Key, p.Value)).ToList());
+        SaveQuestProgress(session, player); // persists exp/sp like quest rewards
+        toSelf.Add(Pack(session, MsgType.SkillList, SkillListFor(player)));
+        NetBridge?.FanoutSkillList([player.ObjectId], Fineage.Zone.Net.NetEnterWorldProjector.BuildSkills(player, _clock().ToUnixTimeMilliseconds()));
+        string skillName = _game.Skills.Find(row.SkillId)?.Name ?? $"Skill {row.SkillId}";
+        // Mobius SystemMessage 277 "You have earned $s1."
+        Notice(session, 277, $"You have earned {skillName}.", toSelf);
+        return ShowTrainerSkills(session, player, npc, toSelf);
     }
 
     SkillListMsg SkillListFor(ZoneEntity entity)

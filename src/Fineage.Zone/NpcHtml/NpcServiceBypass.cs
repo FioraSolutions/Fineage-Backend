@@ -72,3 +72,25 @@ public sealed class BuffBypassHandler : IBypassHandler
         return BypassReply.Fail("bad_request");
     }
 }
+
+/// <summary>
+/// Trainer <c>SkillList</c> (Mobius <c>Folk.showSkillList</c>) and <c>learn_skill ID</c>. Interim HTML learn list
+/// until a Net AcquireSkillList window exists; the world decides free vs SP mode.
+/// </summary>
+public sealed class TrainerBypassHandler : IBypassHandler
+{
+    public IReadOnlyList<string> Commands { get; } = ["SkillList", "learn_skill"];
+
+    public BypassReply Handle(BypassCall call)
+    {
+        var parts = call.Command.Split(' ', StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries);
+        if (parts.Length == 0)
+            return BypassReply.Fail("bad_request");
+        if (parts[0].Equals("SkillList", StringComparison.OrdinalIgnoreCase))
+            return BypassReply.ServiceCall(NpcServiceIntent.SkillList);
+        if (parts[0].Equals("learn_skill", StringComparison.OrdinalIgnoreCase) && parts.Length == 2 &&
+            int.TryParse(parts[1], out int skillId) && skillId > 0)
+            return BypassReply.ServiceCall(NpcServiceIntent.LearnSkill, "", skillId);
+        return BypassReply.Fail("bad_request");
+    }
+}

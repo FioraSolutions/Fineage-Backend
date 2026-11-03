@@ -333,6 +333,13 @@ public sealed class NetZoneServer : INetPresenceBridge
             _ = _presence.SendAsync(watcher, NetOpcode.WarehouseWithdrawList, payload, CancellationToken.None);
     }
 
+    void INetPresenceBridge.FanoutSkillList(IReadOnlyList<int> watcherObjectIds, SkillListNetMsg list)
+    {
+        var payload = NetCodec.EncodeSkillList(list);
+        foreach (int watcher in watcherObjectIds)
+            _ = _presence.SendAsync(watcher, NetOpcode.SkillList, payload, CancellationToken.None);
+    }
+
     void INetPresenceBridge.FanoutQuestList(IReadOnlyList<int> watcherObjectIds, QuestListNetMsg list)
     {
         var payload = NetCodec.EncodeQuestList(list);
