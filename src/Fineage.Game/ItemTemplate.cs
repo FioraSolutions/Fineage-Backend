@@ -39,10 +39,17 @@ public sealed record ItemTemplate(
     CrystalGrade ShotGrade = CrystalGrade.None,
     int Spiritshots = 0,
     bool IsSpiritshot = false,
-    bool IsBlessedSpiritshot = false)
+    bool IsBlessedSpiritshot = false,
+    bool QuestItem = false)
 {
+    /// <summary>
+    /// Mobius <c>is_questitem</c>: lives in the quest tab, cannot be dropped, traded, sold or stored
+    /// (Mobius quest items are not dropable/tradeable/sellable/depositable).
+    /// </summary>
+    public bool CanDropTradeStore => !QuestItem;
+
     public bool Equippable => BodySlot != global::Fineage.Game.BodySlot.None;
 
     /// <summary>Mobius reference price. Sell price is this value divided by 2.</summary>
-    public bool CanSell => Sellable && ReferencePrice / 2 >= 1;
+    public bool CanSell => Sellable && !QuestItem && ReferencePrice / 2 >= 1;
 }

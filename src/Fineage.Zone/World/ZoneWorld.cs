@@ -202,6 +202,8 @@ sealed class ZoneEntity
     public long DecayAtMs { get; set; }
     /// <summary>Mobius merchant price config castle. 0 when the NPC is not in a taxed town.</summary>
     public int MerchantCastleId { get; set; }
+    /// <summary>Town name for TerritoryStatus (%territory%); null = castle name.</summary>
+    public string? MerchantTown { get; set; }
     /// <summary>Town base tax percent from Mobius <c>MerchantPriceConfig.xml</c>. Castle tax is separate.</summary>
     public int MerchantBaseTaxPercent { get; set; }
     /// <summary>Buylist or multisell this player opened. Null until a shop bypass.</summary>

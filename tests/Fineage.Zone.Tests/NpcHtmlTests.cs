@@ -139,7 +139,7 @@ public sealed class NpcHtmlTests
         Assert.Contains("Warehouse is not implemented yet.", registry.Find("package_deposit")!.Handle(call with { Command = "package_deposit" }).Html, StringComparison.Ordinal);
         Assert.Equal(NpcServiceIntent.SupportMagic, registry.Find("SupportMagic")!.Handle(call with { Command = "SupportMagic" }).Service);
         Assert.Equal(NpcServiceIntent.GiveBlessing, registry.Find("GiveBlessing")!.Handle(call with { Command = "GiveBlessing" }).Service);
-        Assert.Null(registry.Find("TerritoryStatus"));
+        Assert.IsType<TerritoryBypassHandler>(registry.Find("TerritoryStatus"));
 
         registry.Register(new ReplacingBuy());
         Assert.Equal("<html>custom</html>", registry.Find("Buy 3")!.Handle(call with { Command = "Buy 3" }).Html);
@@ -232,7 +232,8 @@ public sealed class NpcHtmlTests
         Assert.Contains("I have nothing for you.", list.Html, StringComparison.Ordinal);
 
         await link.SendAsync(MsgType.BypassRequest, new BypassRequestMsg { NpcObjectId = MerchantObjectId, Command = "TerritoryStatus" });
-        Assert.Contains("not implemented yet.", (await link.ReadAsync<NpcHtmlMsg>(MsgType.NpcHtml)).Html, StringComparison.Ordinal);
+        // TerritoryStatus is live now (Mobius castle/lord/tax page); TI merchants belong to Gludio.
+        Assert.Contains("Gludio", (await link.ReadAsync<NpcHtmlMsg>(MsgType.NpcHtml)).Html, StringComparison.Ordinal);
         await link.CloseAsync();
     }
 

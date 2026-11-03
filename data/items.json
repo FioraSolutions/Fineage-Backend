@@ -2383,7 +2383,8 @@
       "stackable": true,
       "icon": "icon.etc_skein_white_i00",
       "price": 0,
-      "weight": 0
+      "weight": 0,
+      "quest": true
     },
     {
       "id": 1027,
@@ -2392,7 +2393,8 @@
       "stackable": true,
       "icon": "icon.etc_letter_white_i00",
       "price": 0,
-      "weight": 0
+      "weight": 0,
+      "quest": true
     },
     {
       "id": 1028,
@@ -2401,7 +2403,8 @@
       "stackable": true,
       "icon": "icon.etc_ticket_blue_i00",
       "price": 0,
-      "weight": 0
+      "weight": 0,
+      "quest": true
     },
     {
       "id": 1029,
@@ -2410,7 +2413,8 @@
       "stackable": true,
       "icon": "icon.etc_herb_blue_i00",
       "price": 0,
-      "weight": 0
+      "weight": 0,
+      "quest": true
     },
     {
       "id": 1036,
@@ -2419,7 +2423,8 @@
       "stackable": true,
       "icon": "icon.etc_scroll_gray_i00",
       "price": 0,
-      "weight": 0
+      "weight": 0,
+      "quest": true
     },
     {
       "id": 1037,
@@ -2428,7 +2433,8 @@
       "stackable": true,
       "icon": "icon.etc_fruit_green_i00",
       "price": 0,
-      "weight": 0
+      "weight": 0,
+      "quest": true
     },
     {
       "id": 1042,
@@ -2437,7 +2443,8 @@
       "stackable": true,
       "icon": "icon.etc_claw_i00",
       "price": 0,
-      "weight": 0
+      "weight": 0,
+      "quest": true
     },
     {
       "id": 1043,
@@ -2446,7 +2453,8 @@
       "stackable": true,
       "icon": "icon.etc_horn_i00",
       "price": 0,
-      "weight": 0
+      "weight": 0,
+      "quest": true
     },
     {
       "id": 1048,
@@ -2659,7 +2667,8 @@
       "stackable": true,
       "icon": "icon.etc_pouch_brown_i00",
       "price": 0,
-      "weight": 0
+      "weight": 0,
+      "quest": true
     },
     {
       "id": 1119,
@@ -2776,7 +2785,8 @@
       "stackable": true,
       "icon": "icon.weapon_club_i00",
       "price": 0,
-      "weight": 0
+      "weight": 0,
+      "quest": true
     },
     {
       "id": 1340,
@@ -6320,7 +6330,8 @@
       "kind": "etc",
       "icon": "icon.etc_potion_gold_i00",
       "stackable": true,
-      "sellable": false
+      "sellable": false,
+      "quest": true
     },
     {
       "id": 7609,

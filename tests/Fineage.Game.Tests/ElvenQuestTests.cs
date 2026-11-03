@@ -127,3 +127,18 @@ public sealed class ElvenKillQuestTests
         Assert.Null(j.Find(267));
     }
 }
+
+public sealed class QuestItemFlagTests
+{
+    [Fact]
+    public void Mobius_quest_items_are_flagged_and_locked()
+    {
+        var items = GameData.LoadDefault().Items;
+        var club = items.Get(1335);
+        Assert.True(club.QuestItem);
+        Assert.False(club.CanSell);
+        Assert.False(club.CanDropTradeStore);
+        Assert.False(items.Get(1060).QuestItem); // Lesser Healing Potion
+        Assert.True(items.Get(1060).CanDropTradeStore);
+    }
+}

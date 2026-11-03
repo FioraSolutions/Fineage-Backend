@@ -216,7 +216,7 @@ public sealed partial class ZoneWorld
         var item = entity.Inventory.Find(add.InventoryObjectId);
         if (item == null)
             return InventoryProtocol.NotOwned;
-        if (item.IsEquipped)
+        if (item.IsEquipped || !item.Template.CanDropTradeStore)
             return TradeProtocol.Item;
         if (count > item.Count)
             return TradeProtocol.Item;

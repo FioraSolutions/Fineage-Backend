@@ -100,4 +100,5 @@ public static class NpcServiceIntent
     public const string GiveBlessing = "give-blessing";
     public const string SkillList = "skill-list";
     public const string LearnSkill = "learn-skill";
+    public const string TerritoryStatus = "territory-status";
 }

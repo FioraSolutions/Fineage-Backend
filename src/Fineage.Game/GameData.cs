@@ -206,7 +206,8 @@ public sealed class GameData
                 ParseCrystal(row.ShotGrade, path, row.Id),
                 Math.Max(0, row.Spiritshots),
                 row.Spiritshot,
-                row.BlessedSpiritshot));
+                row.BlessedSpiritshot,
+                row.Quest));
         }
 
         try
@@ -459,6 +460,7 @@ public sealed class GameData
         public int Weight { get; set; }
         /// <summary>Null when the file omits the flag. Omitted means the item can be sold.</summary>
         public bool? Sellable { get; set; }
+        public bool Quest { get; set; }
         /// <summary>Mobius weapon <c>set stat</c> values (replace the class fist base when equipped).</summary>
         public int PAtk { get; set; }
         public int MAtk { get; set; }

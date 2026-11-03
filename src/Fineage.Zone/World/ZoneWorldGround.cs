@@ -215,6 +215,8 @@ public sealed partial class ZoneWorld
         var item = player.Inventory.Find(request.ObjectId);
         if (item == null || item.IsEquipped)
             return InventoryProtocol.NotOwned;
+        if (!item.Template.CanDropTradeStore)
+            return "bad_request"; // Mobius: quest items are not dropable
         if (item.Count < request.Count)
             return "bad_request";
 

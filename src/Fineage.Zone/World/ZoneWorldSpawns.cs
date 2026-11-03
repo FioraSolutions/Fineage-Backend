@@ -109,6 +109,7 @@ public sealed partial class ZoneWorld
             RunSpeed = def.RunSpeed,
             WalkSpeed = def.WalkSpeed,
             MerchantCastleId = tax.CastleId,
+            MerchantTown = MerchantTowns.TownName(mapId),
             MerchantBaseTaxPercent = tax.BaseTaxPercent
         };
         _byId.Add(entity.ObjectId, entity);

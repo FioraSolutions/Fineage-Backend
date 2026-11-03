@@ -92,6 +92,8 @@ public sealed partial class ZoneWorld
                 return ShowBlessingPage(session, player, npc, toSelf);
             case NpcServiceIntent.GiveBlessing:
                 return ApplyBlessing(session, npc.ObjectId, toSelf, toOthers, html: true);
+            case NpcServiceIntent.TerritoryStatus:
+                return ShowTerritoryStatus(session, player, npc, toSelf);
             case NpcServiceIntent.SkillList:
                 return ShowTrainerSkills(session, player, npc, toSelf);
             case NpcServiceIntent.LearnSkill:
@@ -99,6 +101,57 @@ public sealed partial class ZoneWorld
             default:
                 return "bad_request";
         }
+    }
+
+    /// <summary>Test: run one bypass command against the first spawned NPC with this template id.</summary>
+    internal string? NpcServiceForTest(ZoneSession session, int npcId, string intent, string mapId = "elven_village")
+    {
+        var toSelf = new List<Pending>();
+        var toOthers = new List<Pending>();
+        lock (_gate)
+        {
+            if (!_byId.TryGetValue(session.ObjectId, out var player))
+                return "world";
+            var npc = _byId.Values.FirstOrDefault(e => e.Kind == ZoneEntityKind.Npc && e.NpcId == npcId)
+                ?? new ZoneEntity
+                {
+                    Kind = ZoneEntityKind.Npc, NpcId = npcId, ObjectId = 0,
+                    MerchantCastleId = Fineage.Zone.Shops.MerchantTowns.For(mapId).CastleId,
+                    MerchantTown = Fineage.Zone.Shops.MerchantTowns.TownName(mapId)
+                };
+            var reply = BypassReply.ServiceCall(intent);
+            return ApplyNpcService(session, player, npc, reply, toSelf, toOthers);
+        }
+    }
+
+    string? ShowTerritoryStatus(ZoneSession session, ZoneEntity player, ZoneEntity npc, List<Pending> toSelf)
+    {
+        var template = Fineage.Zone.Siege.CastleCatalog.Find(npc.MerchantCastleId);
+        if (template == null)
+        {
+            SendHtml(session, player, npc, "<html><body>%npcname%:<br>This area belongs to no castle.</body></html>", toSelf);
+            return null;
+        }
+
+        var castle = _siege.Find(npc.MerchantCastleId);
+        bool owned = castle != null && castle.OwnerClanId > 0;
+        string file = owned ? "territorystatus.htm" : "territorynoclan.htm";
+        if (!_html.TryGet(file, out var html))
+            html = "<html><body>%castlename%</body></html>";
+        string clanName = "", leaderName = "";
+        if (owned && _clans.TryGetValue(castle!.OwnerClanId, out var clan))
+        {
+            clanName = clan.Name;
+            leaderName = clan.Members.FirstOrDefault(m => m.CharacterId == clan.LeaderId)?.Name ?? "";
+        }
+
+        html = html.Replace("%castlename%", HtmlText(template.Value.Name), StringComparison.Ordinal)
+            .Replace("%territory%", HtmlText(npc.MerchantTown ?? template.Value.Name), StringComparison.Ordinal)
+            .Replace("%clanname%", HtmlText(clanName), StringComparison.Ordinal)
+            .Replace("%clanleadername%", HtmlText(leaderName), StringComparison.Ordinal)
+            .Replace("%taxpercent%", owned ? castle!.TaxPercent.ToString() : "0", StringComparison.Ordinal);
+        SendHtml(session, player, npc, html, toSelf);
+        return null;
     }
 
     string? ShowTeleportList(ZoneSession session, ZoneEntity player, ZoneEntity npc, string listName, List<Pending> toSelf)
@@ -308,7 +361,7 @@ public sealed partial class ZoneWorld
             if (!seen.Add(line.ObjectId))
                 return "bad_request";
             var item = player.Inventory.Find(line.ObjectId);
-            if (item == null || item.IsEquipped || item.Count < line.Count)
+            if (item == null || item.IsEquipped || !item.Template.CanDropTradeStore || item.Count < line.Count)
             {
                 Notice(session, NpcServiceProtocol.CannotStore, NpcServiceProtocol.CannotStoreText, toSelf);
                 return null;
@@ -522,7 +575,7 @@ public sealed partial class ZoneWorld
         {
             foreach (var item in player.Inventory.Items)
             {
-                if (!item.IsEquipped)
+                if (!item.IsEquipped && item.Template.CanDropTradeStore)
                     items.Add(InventoryMessages.Entry(item));
             }
         }

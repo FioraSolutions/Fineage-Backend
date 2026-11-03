@@ -94,3 +94,11 @@ public sealed class TrainerBypassHandler : IBypassHandler
         return BypassReply.Fail("bad_request");
     }
 }
+
+/// <summary>Merchant <c>TerritoryStatus</c> (Mobius <c>Merchant.showTerritoryStatusWindow</c>): castle, lord and tax page.</summary>
+public sealed class TerritoryBypassHandler : IBypassHandler
+{
+    public IReadOnlyList<string> Commands { get; } = ["TerritoryStatus"];
+
+    public BypassReply Handle(BypassCall call) => BypassReply.ServiceCall(NpcServiceIntent.TerritoryStatus);
+}

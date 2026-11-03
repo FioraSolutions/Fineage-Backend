@@ -43,3 +43,10 @@ Scope: NPCs in `data/spawns/elven_village.json` only. Same pipeline scales per a
 4. Merchant extras: `Wear`, `TerritoryStatus`, `exc_multisell 003` (multisell data check).
 5. Newbie Guide 30599 multi-page / Adventure Guildsman 31780 quest list, Lottery 30991, Olympiad 31688 — leave as pages.
 6. Other areas: run `tools/import_npc_html.py data/spawns/<area>.json` + review WARN lines.
+
+## Merchant extras + quest-item flag
+
+- `TerritoryStatus` bypass is live (TerritoryBypassHandler → `territorystatus.htm` / `territorynoclan.htm` from Mobius): castle from MerchantTowns (Elven Village → Oren), owner clan + leader + tax from siege state.
+- `Wear` stays a stub: Net has no ShopPreviewList and the client has no preview UI yet.
+- Equipment exchange link `exc_multisell 003` already works (multisell 3 allows NPCs 30147–30149).
+- Items now carry `quest` (scripts/gen_quest_item_flags.py marks it from Mobius `is_questitem`; 11 items so far, including 7586 Sweet Fluid). Quest items can't be sold, dropped, traded, or put in the warehouse. The flag isn't sent over the Net wire yet, so the client has no quest tab.
