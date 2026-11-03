@@ -64,6 +64,9 @@ After handoff auth, `EnterWorld` runs **one** world join: `ZoneWorld.TryEnterAsy
 | 2 | `PlayerStats` `0x0305` | level/exp/sp, hp/mp/cp |
 | 3 | `ItemList` `0x030A` | bag + paperdoll rows (`objectId`, `itemId`, `count`, `enchant`, `equippedSlot`) |
 | 4 | `SkillList` `0x030B` | AutoSkills (`skillId`, `level`, `reuseRemainingMs`) |
+| 5 | `ShortCutInit` `0x035A` | saved hotbar: `count` + rows (`type`, `slot`, `id`, `level`) |
+
+(`UserInfo` `0x0357` goes between `PlayerStats` and `ItemList`.)
 
 Client: stash `PlayerInfo` from spawn → load tile → spawn; apply ItemList via `ZoneV2GearSession`, SkillList via existing skill apply services.
 
@@ -91,7 +94,27 @@ V2 MessagePack flushes still go to a discarded stream on the Net path. Net peers
 | Quests | Journal → `RequestQuestList` `0x0330` / abort → `RequestQuestAbort` `0x0331` → `QuestList` `0x0332`. Quest HTML still via `NpcHtml`. |
 | Party | Invite/answer/leave/kick → `PartyInviteRequest` `0x0333` / `PartyAnswerJoinRequest` `0x0334` / `PartyLeaveRequest` `0x0335` / `PartyKickRequest` `0x0336`. Fanout `PartyAskJoin` `0x0337` / `PartyJoinResult` `0x0338` / `PartyMemberList` `0x0339`. |
 | Trade | Request/answer/add/done → `TradeRequest` `0x033A` / `TradeAnswerRequest` `0x033B` / `TradeAddItemRequest` `0x033C` / `TradeDoneRequest` `0x033D`. Fanout `TradeAsk` `0x033E` / `TradeRequestResult` `0x033F` / `TradeStart` `0x0340` / `TradeOfferUpdate` `0x0341` / `TradeConfirmState` `0x0342` / `TradeFinished` `0x0343` (+ inventory on exchange). |
+| Hotbar (shortcuts) | See **Shortcuts** below. `RequestShortCutReg` `0x0358` → `ShortCutRegister` `0x035B`; `RequestShortCutDel` `0x0359` → `ShortCutDelete` `0x035C`. |
 | Leave / disconnect | `EntityDespawn` of leaver to known Net peers. |
+
+## Shortcuts (hotbar, Mobius ShortCuts)
+
+Row (`ShortCutNetMsg`, 4 × int32 LE): `type`, `slot`, `id`, `level`.
+
+- `slot` = client world slot = `slot + page * 12` (slot 0..11, page 0..9 → 0..119).
+- `type`: 1 item (`id` = item **object id**, level 0), 2 skill (`id` = skill id, `level` = known level), 3 action, 4 macro, 5 recipe.
+
+| Opcode | Dir | Payload | Notes |
+|--------|-----|---------|-------|
+| `RequestShortCutReg` `0x0358` | C→S | row | Overwrites the slot. Item must be in the bag; skill must be known (level is replaced by the known level). |
+| `RequestShortCutDel` `0x0359` | C→S | `slot` int32 | Clears the slot. |
+| `ShortCutInit` `0x035A` | S→C | `count` int32 + rows | Enter world, after `SkillList`. |
+| `ShortCutRegister` `0x035B` | S→C | row | Server truth for one slot. Reply to an accepted reg, **and** to a rejected reg when the slot already held a saved row (client rolls back). |
+| `ShortCutDelete` `0x035C` | S→C | `slot` int32 | Slot empty on the server. Reply to del, or to a rejected reg on an empty slot. |
+
+Persistence: `ZoneEntity.Shortcuts` → `IAccountStore.TryReplaceShortcuts` on every reg/del (Mobius writes `character_shortcuts` immediately). Postgres table `character_shortcuts (character_id, slot, page, type, shortcut_id, level)` from migration `003_character_shortcuts.sql`; JSON snapshot key `shortcuts`. On enter, item rows whose object is no longer in the bag are dropped and skill rows take the current known level (Mobius `ShortCuts.restoreMe`).
+
+Client: drag applies locally at once (optimistic), then the server echo (`ShortCutRegister` / `ShortCutDelete`) is applied as truth. `ShortCutInit` is held until the skillbar and the ItemList are applied.
 
 AOI (who is on the knownlist):
 

@@ -31,6 +31,31 @@ public sealed record AccountCredential(string AccountName, string PasswordHash, 
 /// </summary>
 public sealed record StoredItem(int ItemId, int Count, int EquippedSlot, int EnchantLevel = 0, int ObjectId = 0);
 
+/// <summary>
+/// One Mobius <c>character_shortcuts</c> row. <see cref="Slot"/> is 0..11 on <see cref="Page"/> 0..9.
+/// <see cref="Type"/> is 1 item (id = item object id), 2 skill (id = skill id, level = skill level),
+/// 3 action, 4 macro, 5 recipe. Null <c>Shortcuts</c> on a character means none were ever saved.
+/// </summary>
+public sealed record StoredShortcut(int Slot, int Page, int Type, int Id, int Level)
+{
+    public const int SlotsPerPage = 12;
+    public const int MaxPages = 10;
+    public const int TypeItem = 1;
+    public const int TypeSkill = 2;
+    public const int TypeAction = 3;
+    public const int TypeMacro = 4;
+    public const int TypeRecipe = 5;
+
+    /// <summary>Client world slot (slot + page * 12).</summary>
+    public int WorldSlot => Slot + Page * SlotsPerPage;
+
+    public bool IsValid =>
+        Slot >= 0 && Slot < SlotsPerPage &&
+        Page >= 0 && Page < MaxPages &&
+        Type >= TypeItem && Type <= TypeRecipe &&
+        Id > 0 && Level >= 0;
+}
+
 public sealed record CharacterRecord(
     int Id,
     string Name,
@@ -63,7 +88,8 @@ public sealed record CharacterRecord(
     long Exp = 0,
     IReadOnlyList<QuestSaveRow>? Quests = null,
     IReadOnlyList<StoredItem>? Warehouse = null,
-    bool Newbie = true)
+    bool Newbie = true,
+    IReadOnlyList<StoredShortcut>? Shortcuts = null)
 {
     /// <summary>Remaining whole seconds until hard delete. Zero when the character is not pending.</summary>
     public int DeleteSecondsLeft(DateTimeOffset now)
@@ -179,6 +205,9 @@ public interface IAccountStore
 
     /// <summary>Replaces the character's quest rows. An empty list is a real save.</summary>
     bool TryReplaceQuests(string account, int characterId, IReadOnlyList<QuestSaveRow> quests);
+
+    /// <summary>Replaces the character's hotbar (Mobius character_shortcuts). An empty list is a real save.</summary>
+    bool TryReplaceShortcuts(string account, int characterId, IReadOnlyList<StoredShortcut> shortcuts);
 
     bool TrySetLastAccess(string account, int characterId, DateTimeOffset when);
 
@@ -379,8 +408,18 @@ public sealed class JsonAccountStore : IAccountStore
                 EnchantLevel = item.EnchantLevel,
                 ObjectId = item.ObjectId
             }).ToList(),
-            Quests = character.Quests?.Select(CopyQuest).ToList()
+            Quests = character.Quests?.Select(CopyQuest).ToList(),
+            Shortcuts = character.Shortcuts?.Select(CopyShortcut).ToList()
         };
+
+    static StoredShortcutDto CopyShortcut(StoredShortcut s) => new()
+    {
+        Slot = s.Slot,
+        Page = s.Page,
+        Type = s.Type,
+        Id = s.Id,
+        Level = s.Level
+    };
 
     public string ExportSnapshot()
     {
@@ -631,6 +670,27 @@ public sealed class JsonAccountStore : IAccountStore
             if (character == null)
                 return false;
             character.Quests = quests.Select(CopyQuest).ToList();
+            Save();
+            return true;
+        }
+    }
+
+    public bool TryReplaceShortcuts(string account, int characterId, IReadOnlyList<StoredShortcut> shortcuts)
+    {
+        ArgumentNullException.ThrowIfNull(shortcuts);
+        var slots = new HashSet<int>();
+        foreach (var s in shortcuts)
+        {
+            if (s == null || !s.IsValid || !slots.Add(s.WorldSlot))
+                return false;
+        }
+
+        lock (_gate)
+        {
+            var character = FindCharacter(account, characterId);
+            if (character == null)
+                return false;
+            character.Shortcuts = shortcuts.OrderBy(s => s.WorldSlot).Select(CopyShortcut).ToList();
             Save();
             return true;
         }
@@ -1287,7 +1347,10 @@ public sealed class JsonAccountStore : IAccountStore
             character.Warehouse == null
                 ? null
                 : character.Warehouse.Select(item => new StoredItem(item.ItemId, item.Count, -1, item.EnchantLevel, item.ObjectId)).ToArray(),
-            character.Newbie);
+            character.Newbie,
+            character.Shortcuts == null
+                ? null
+                : character.Shortcuts.Select(s => new StoredShortcut(s.Slot, s.Page, s.Type, s.Id, s.Level)).ToArray());
 
     sealed class StoreFile
     {
@@ -1344,6 +1407,16 @@ public sealed class JsonAccountStore : IAccountStore
         public List<StoredItemDto>? Items { get; set; }
         public List<StoredItemDto>? Warehouse { get; set; }
         public bool Newbie { get; set; } = true;
+        public List<StoredShortcutDto>? Shortcuts { get; set; }
+    }
+
+    sealed class StoredShortcutDto
+    {
+        public int Slot { get; set; }
+        public int Page { get; set; }
+        public int Type { get; set; }
+        public int Id { get; set; }
+        public int Level { get; set; }
     }
 
     sealed class StoredQuestDto

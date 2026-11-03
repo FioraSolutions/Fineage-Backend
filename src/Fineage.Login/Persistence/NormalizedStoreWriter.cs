@@ -23,6 +23,7 @@ static class NormalizedStoreWriter
         // Full reproject of item/quest rows — clears global object_id PKs so memory and SQL stay aligned.
         foreach (string wipe in new[]
                  {
+                     "DELETE FROM character_shortcuts",
                      "DELETE FROM character_quest_vars",
                      "DELETE FROM character_quests",
                      "DELETE FROM character_items"
@@ -120,6 +121,7 @@ static class NormalizedStoreWriter
 
         ReplaceItems(conn, tx, character.Id, character.Items, character.Warehouse);
         ReplaceQuests(conn, tx, character.Id, character.Quests);
+        ReplaceShortcuts(conn, tx, character.Id, character.Shortcuts);
     }
 
     public static void UpdatePresence(
@@ -499,6 +501,7 @@ static class NormalizedStoreWriter
         var warehouse = ReadItems(ch, "warehouse");
         ReplaceItems(conn, tx, id, inventory, warehouse);
         ReplaceQuests(conn, tx, id, ReadQuests(ch));
+        ReplaceShortcuts(conn, tx, id, ReadShortcuts(ch));
     }
 
     static void UpsertCharacterColumns(
@@ -653,6 +656,64 @@ static class NormalizedStoreWriter
                 ReadInt(item, "equippedSlot", -1),
                 ReadInt(item, "enchantLevel", 0),
                 ReadInt(item, "objectId", 0)));
+        }
+
+        return rows;
+    }
+
+    public static void ReplaceShortcuts(
+        NpgsqlConnection conn,
+        NpgsqlTransaction? tx,
+        int characterId,
+        IReadOnlyList<StoredShortcut>? shortcuts)
+    {
+        using (var del = conn.CreateCommand())
+        {
+            del.Transaction = tx;
+            del.CommandText = "DELETE FROM character_shortcuts WHERE character_id = @id";
+            del.Parameters.AddWithValue("id", characterId);
+            del.ExecuteNonQuery();
+        }
+
+        if (shortcuts == null)
+            return;
+
+        foreach (var s in shortcuts)
+        {
+            using var ins = conn.CreateCommand();
+            ins.Transaction = tx;
+            ins.CommandText =
+                """
+                INSERT INTO character_shortcuts (character_id, slot, page, type, shortcut_id, level)
+                VALUES (@cid, @slot, @page, @type, @sid, @level)
+                ON CONFLICT (character_id, slot, page) DO UPDATE
+                SET type = excluded.type, shortcut_id = excluded.shortcut_id, level = excluded.level
+                """;
+            ins.Parameters.AddWithValue("cid", characterId);
+            ins.Parameters.AddWithValue("slot", s.Slot);
+            ins.Parameters.AddWithValue("page", s.Page);
+            ins.Parameters.AddWithValue("type", s.Type);
+            ins.Parameters.AddWithValue("sid", s.Id);
+            ins.Parameters.AddWithValue("level", s.Level);
+            ins.ExecuteNonQuery();
+        }
+    }
+
+    static List<StoredShortcut>? ReadShortcuts(JsonElement character)
+    {
+        if (!character.TryGetProperty("shortcuts", out var arr) || arr.ValueKind != JsonValueKind.Array)
+            return null;
+        var rows = new List<StoredShortcut>();
+        foreach (var s in arr.EnumerateArray())
+        {
+            var row = new StoredShortcut(
+                ReadInt(s, "slot", -1),
+                ReadInt(s, "page", -1),
+                ReadInt(s, "type", 0),
+                ReadInt(s, "id", 0),
+                ReadInt(s, "level", 0));
+            if (row.IsValid)
+                rows.Add(row);
         }
 
         return rows;

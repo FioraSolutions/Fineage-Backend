@@ -163,6 +163,7 @@ static class NormalizedStoreReader
         var items = LoadItems(conn, stub.Id, NormalizedStoreWriter.LocInventory, NormalizedStoreWriter.LocPaperdoll);
         var warehouse = LoadItems(conn, stub.Id, NormalizedStoreWriter.LocWarehouse);
         var quests = LoadQuests(conn, stub.Id);
+        var shortcuts = LoadShortcuts(conn, stub.Id);
         return new CharacterRecord(
             stub.Id,
             stub.Name,
@@ -195,7 +196,8 @@ static class NormalizedStoreReader
             stub.Exp,
             quests,
             warehouse,
-            stub.Newbie);
+            stub.Newbie,
+            shortcuts);
     }
 
     static List<StoredItem> LoadItems(NpgsqlConnection conn, int characterId, params string[] locs)
@@ -264,5 +266,31 @@ static class NormalizedStoreReader
         if (byId.Count == 0)
             return null;
         return byId.Select(kv => new QuestSaveRow(kv.Key, kv.Value.State, kv.Value.Vars)).ToList();
+    }
+
+    static List<StoredShortcut>? LoadShortcuts(NpgsqlConnection conn, int characterId)
+    {
+        using var cmd = conn.CreateCommand();
+        cmd.CommandText =
+            """
+            SELECT slot, page, type, shortcut_id, level
+            FROM character_shortcuts
+            WHERE character_id = @cid
+            ORDER BY page, slot
+            """;
+        cmd.Parameters.AddWithValue("cid", characterId);
+        var rows = new List<StoredShortcut>();
+        using var reader = cmd.ExecuteReader();
+        while (reader.Read())
+        {
+            rows.Add(new StoredShortcut(
+                reader.GetInt32(0),
+                reader.GetInt32(1),
+                reader.GetInt32(2),
+                reader.GetInt32(3),
+                reader.GetInt32(4)));
+        }
+
+        return rows.Count == 0 ? null : rows;
     }
 }

@@ -112,6 +112,8 @@ sealed class ZoneEntity
     public int SpiritshotCharge { get; set; }
     /// <summary>Mobius auto soulshot set: shot item ids recharged after each discharge.</summary>
     public HashSet<int> AutoShots { get; } = [];
+    /// <summary>Mobius ShortCuts keyed by world slot (slot + page * 12).</summary>
+    public Dictionary<int, Fineage.Login.StoredShortcut> Shortcuts { get; } = [];
     /// <summary>True while an abnormal with combat stat funcs is active (UserInfo refresh on change).</summary>
     public bool HasStatAbnormal { get; set; }
     public float RunSpeed { get; init; }
@@ -607,6 +609,7 @@ public sealed partial class ZoneWorld
         };
         LoadQuestProgress(session, entity);
         RefreshKnownSkills(entity);
+        LoadShortcuts(entity, stored);
         SyncClanStanding(entity);
         RefreshGradePenalty(entity);
         _byId[entity.ObjectId] = entity;

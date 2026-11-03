@@ -568,6 +568,24 @@ public sealed class NetZoneServer : INetPresenceBridge
                             }
 
                             break;
+                        case NetOpcode.RequestShortCutReg:
+                            if (zoneSession.Bound && zoneSession.InWorld)
+                            {
+                                var reg = NetCodec.DecodeShortCut(envelope.Payload);
+                                var regReply = _world.RegisterShortcut(zoneSession, reg.Type, reg.Slot, reg.Id, reg.Level);
+                                await SendShortcutReplyAsync(conn, regReply, envelope.RequestSequence, ct).ConfigureAwait(false);
+                            }
+
+                            break;
+                        case NetOpcode.RequestShortCutDel:
+                            if (zoneSession.Bound && zoneSession.InWorld)
+                            {
+                                var del = NetCodec.DecodeShortCutDel(envelope.Payload);
+                                var delReply = _world.DeleteShortcut(zoneSession, del.Slot);
+                                await SendShortcutReplyAsync(conn, delReply, envelope.RequestSequence, ct).ConfigureAwait(false);
+                            }
+
+                            break;
                         case NetOpcode.StopMove:
                             // Authoritative stop: correct to current session position.
                             if (zoneSession.Bound && zoneSession.InWorld)
@@ -718,6 +736,16 @@ public sealed class NetZoneServer : INetPresenceBridge
         return entityId;
     }
 
+    static async Task SendShortcutReplyAsync(NetConnection conn, ZoneWorld.ShortcutReply reply, uint sequence, CancellationToken ct)
+    {
+        if (reply.Register != null)
+            await conn.SendAsync(NetOpcode.ShortCutRegister, NetCodec.EncodeShortCut(reply.Register), sequence, ct).ConfigureAwait(false);
+        else if (reply.DeleteSlot is int slot)
+            await conn.SendAsync(NetOpcode.ShortCutDelete, NetCodec.EncodeShortCutDel(new ShortCutDelNetMsg { Slot = slot }), sequence, ct).ConfigureAwait(false);
+        if (reply.Error != null)
+            ZoneLog.Info($"shortcut rejected: {reply.Error}");
+    }
+
     async Task OnEnterAsync(NetConnection conn, ZoneSession zoneSession, EntityId self, CancellationToken ct)
     {
         RequireHello(conn);
@@ -752,6 +780,9 @@ public sealed class NetZoneServer : INetPresenceBridge
         await conn.SendAsync(NetOpcode.ItemList, NetCodec.EncodeItemList(packets.Items), ct: ct)
             .ConfigureAwait(false);
         await conn.SendAsync(NetOpcode.SkillList, NetCodec.EncodeSkillList(packets.Skills), ct: ct)
+            .ConfigureAwait(false);
+        // Mobius EnterWorld: ShortCutInit after ItemList / SkillList so item and skill icons resolve.
+        await conn.SendAsync(NetOpcode.ShortCutInit, NetCodec.EncodeShortCutInit(_world.NetShortcutInit(zoneSession)), ct: ct)
             .ConfigureAwait(false);
 
         var welcome = SayRules.Welcome(zoneSession.Name);

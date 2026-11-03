@@ -103,5 +103,15 @@ namespace Fineage.Net.Contract
         public const ushort AutoSoulShot = 0x0356;
         /// <summary>Zone → client: Mobius UserInfo (owner sheet: vitals, base + combat stats, speeds, paperdoll).</summary>
         public const ushort UserInfo = 0x0357;
+        /// <summary>Client → zone: Mobius RequestShortCutReg (type, world slot = slot + page*12, id, level).</summary>
+        public const ushort RequestShortCutReg = 0x0358;
+        /// <summary>Client → zone: Mobius RequestShortCutDel (world slot).</summary>
+        public const ushort RequestShortCutDel = 0x0359;
+        /// <summary>Zone → client: Mobius ShortCutInit (full hotbar on enter world, after ItemList / SkillList).</summary>
+        public const ushort ShortCutInit = 0x035A;
+        /// <summary>Zone → client: Mobius ShortCutRegister (one slot set; reply to RequestShortCutReg).</summary>
+        public const ushort ShortCutRegister = 0x035B;
+        /// <summary>Zone → client: slot cleared (reply to RequestShortCutDel, rejected reg, or item gone).</summary>
+        public const ushort ShortCutDelete = 0x035C;
     }
 }

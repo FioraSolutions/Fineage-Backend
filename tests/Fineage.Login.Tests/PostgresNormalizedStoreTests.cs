@@ -122,4 +122,43 @@ public class PostgresNormalizedStoreTests
         Assert.Equal(HumanClasses.Mystic, row.ClassId);
         Assert.True(row.Items is { Count: > 0 });
     }
+
+    [Fact]
+    public void Shortcuts_land_in_character_shortcuts_and_reload()
+    {
+        string? url = ConnectionString();
+        if (url == null)
+            return;
+
+        string suffix = Guid.NewGuid().ToString("n")[..8];
+        string account = "pgbar" + suffix;
+        int characterId;
+        using (var store = PostgresAccountStore.Open(url))
+        {
+            var service = new LoginService(store, new HandoffTokens(HandoffTokens.DefaultSecret));
+            Assert.True(service.Register(account, "secret1").Ok);
+            var created = service.CreateHuman(account, "Bar" + suffix, HumanClasses.Fighter);
+            Assert.True(created.Ok, created.Message);
+            characterId = created.Value!.Id;
+            Assert.True(store.TryReplaceShortcuts(account, characterId,
+            [
+                new StoredShortcut(0, 0, StoredShortcut.TypeSkill, 3, 1),
+                new StoredShortcut(2, 1, StoredShortcut.TypeAction, 2, 0)
+            ]));
+        }
+
+        using (var conn = new NpgsqlConnection(url))
+        {
+            conn.Open();
+            using var cmd = conn.CreateCommand();
+            cmd.CommandText = "SELECT count(*) FROM character_shortcuts WHERE character_id = @id";
+            cmd.Parameters.AddWithValue("id", characterId);
+            Assert.Equal(2L, (long)cmd.ExecuteScalar()!);
+        }
+
+        using var reopened = PostgresAccountStore.Open(url);
+        var rows = reopened.FindById(account, characterId)!.Shortcuts!;
+        Assert.Equal(2, rows.Count);
+        Assert.Contains(rows, s => s.WorldSlot == 14 && s.Type == StoredShortcut.TypeAction);
+    }
 }

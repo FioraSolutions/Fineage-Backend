@@ -120,6 +120,31 @@ namespace Fineage.Net.Contract
         public bool Enabled { get; set; }
     }
 
+    /// <summary>
+    /// One Mobius shortcut. <see cref="Slot"/> is the client world slot (slot + page * 12).
+    /// <see cref="Type"/>: 1 item (id = item object id), 2 skill (id = skill id), 3 action, 4 macro, 5 recipe.
+    /// Payload of <c>RequestShortCutReg</c> and <c>ShortCutRegister</c>; rows of <c>ShortCutInit</c>.
+    /// </summary>
+    public sealed class ShortCutNetMsg
+    {
+        public int Type { get; set; }
+        public int Slot { get; set; }
+        public int Id { get; set; }
+        public int Level { get; set; }
+    }
+
+    /// <summary>Payload of <c>ShortCutInit</c>: every saved slot for the character.</summary>
+    public sealed class ShortCutInitNetMsg
+    {
+        public ShortCutNetMsg[] Shortcuts { get; set; } = Array.Empty<ShortCutNetMsg>();
+    }
+
+    /// <summary>Payload of <c>RequestShortCutDel</c> and <c>ShortCutDelete</c> (world slot).</summary>
+    public sealed class ShortCutDelNetMsg
+    {
+        public int Slot { get; set; }
+    }
+
     public sealed class ChangeMoveTypeNetMsg
     {
         public ulong EntityValue { get; set; }

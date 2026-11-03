@@ -323,6 +323,16 @@ public sealed class PostgresAccountStore : IAccountStore, IDisposable
                 tx.Commit();
             });
 
+    public bool TryReplaceShortcuts(string account, int characterId, IReadOnlyList<StoredShortcut> shortcuts) =>
+        RunSilent(
+            () => _inner.TryReplaceShortcuts(account, characterId, shortcuts),
+            conn =>
+            {
+                using var tx = conn.BeginTransaction();
+                NormalizedStoreWriter.ReplaceShortcuts(conn, tx, characterId, shortcuts);
+                tx.Commit();
+            });
+
     public bool TrySetLastAccess(string account, int characterId, DateTimeOffset when) =>
         _inner.TrySetLastAccess(account, characterId, when);
 

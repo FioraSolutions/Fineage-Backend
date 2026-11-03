@@ -613,6 +613,58 @@ namespace Fineage.Net.Contract
             return new AutoSoulShotNetMsg { ItemId = r.ReadInt32(), Enabled = r.ReadByte() != 0 };
         }
 
+        public static byte[] EncodeShortCut(ShortCutNetMsg m) => Write(w => WriteShortCut(w, m));
+
+        public static ShortCutNetMsg DecodeShortCut(ReadOnlySpan<byte> p)
+        {
+            var r = new Reader(p);
+            return ReadShortCut(ref r);
+        }
+
+        public static byte[] EncodeShortCutInit(ShortCutInitNetMsg m) => Write(w =>
+        {
+            var rows = m.Shortcuts ?? Array.Empty<ShortCutNetMsg>();
+            w.WriteInt32(rows.Length);
+            for (int i = 0; i < rows.Length; i++)
+                WriteShortCut(w, rows[i]);
+        });
+
+        public static ShortCutInitNetMsg DecodeShortCutInit(ReadOnlySpan<byte> p)
+        {
+            var r = new Reader(p);
+            int n = r.ReadInt32();
+            if (n < 0 || n > 1024)
+                throw new InvalidDataException("shortcut list length");
+            var rows = new ShortCutNetMsg[n];
+            for (int i = 0; i < n; i++)
+                rows[i] = ReadShortCut(ref r);
+            return new ShortCutInitNetMsg { Shortcuts = rows };
+        }
+
+        public static byte[] EncodeShortCutDel(ShortCutDelNetMsg m) => Write(w => w.WriteInt32(m.Slot));
+
+        public static ShortCutDelNetMsg DecodeShortCutDel(ReadOnlySpan<byte> p)
+        {
+            var r = new Reader(p);
+            return new ShortCutDelNetMsg { Slot = r.ReadInt32() };
+        }
+
+        static void WriteShortCut(Writer w, ShortCutNetMsg m)
+        {
+            w.WriteInt32(m.Type);
+            w.WriteInt32(m.Slot);
+            w.WriteInt32(m.Id);
+            w.WriteInt32(m.Level);
+        }
+
+        static ShortCutNetMsg ReadShortCut(ref Reader r) => new ShortCutNetMsg
+        {
+            Type = r.ReadInt32(),
+            Slot = r.ReadInt32(),
+            Id = r.ReadInt32(),
+            Level = r.ReadInt32()
+        };
+
         public static byte[] EncodeStopMove(StopMoveMsg _) => Array.Empty<byte>();
         public static StopMoveMsg DecodeStopMove(ReadOnlySpan<byte> _) => new();
 
