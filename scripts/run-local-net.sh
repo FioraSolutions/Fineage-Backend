@@ -11,8 +11,8 @@ export FINEAGE_STORE="${FINEAGE_STORE:-postgres}"
 export FINEAGE_DATABASE_URL="${FINEAGE_DATABASE_URL:-Host=127.0.0.1;Port=5432;Database=fineage;Username=fineage;Password=fineage}"
 # Local playtest region: Elven Village / Mother Tree (Mobius ElvenTerritory + Others/Gremlins).
 # Override with FINEAGE_ZONE_MAPS=... / FINEAGE_ZONE_BOUNDS=...; set both to "" for the legacy single active map.
-export FINEAGE_ZONE_MAPS="${FINEAGE_ZONE_MAPS-elven_village,elven_starting,elven_village_quest_monsters,training_hall_gremlins}"
-export FINEAGE_ZONE_BOUNDS="${FINEAGE_ZONE_BOUNDS-20000,20000,80000,80000}"
+export FINEAGE_ZONE_MAPS="${FINEAGE_ZONE_MAPS-elven_village,elven_starting,elven_village_quest_monsters,elven_fortress,training_hall_gremlins}"
+export FINEAGE_ZONE_BOUNDS="${FINEAGE_ZONE_BOUNDS-20000,20000,80000,80000;5000,60000,35000,90000}"
 export COMPOSE_PROJECT_NAME="${COMPOSE_PROJECT_NAME:-fineage-backend}"
 
 stop() {

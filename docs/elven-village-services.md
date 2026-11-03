@@ -122,3 +122,12 @@ are approximated by killer credit.
 - **Newbie Travel Token** (`travelToken` block; Mobius `ai/others/NewbieTravelToken`): Newbie Guide 30599 `Script NewbieTravelToken` shows `newbie_travel/30599.htm` (level ≥20 → `cant-travel.htm`). A destination event takes one token 8542 and teleports (DE 30600, DW 30601, EV 30599, OV 30602, TI 30598). No token → SysMsg 351 (INCORRECT_ITEM_COUNT). Destinations outside loaded maps are refused **before** the token is taken (Fineage deviation; Mobius has the whole world).
 - Stubs: `Script NpcLocationInfo` (Mobius `custom/`, not ported) still shows the unavailable page. Newbie first-talk gift (NewbieHelperGift) unchanged.
 - Play: Elven Village → talk to Newbie Guide (30599) → Support Magic at lv 8–39; Travel Token link with token 8542 in bag at lv <20.
+
+## Elven Underground Fortress (Q316 / Q408 mobs)
+
+- Map `elven_fortress` (`data/spawns/elven_fortress.json`, 153 rows): the underground rows (z < -3700, x 5000..35000, y 60000..90000) of Mobius `spawns/Others/20_20.xml`, **moved** out of `others_20_20` by `scripts/gen_elven_fortress.py` (object ids kept, no duplicates; `others_20_20` keeps its 9 surface rows).
+- Mobs: Sukar Wererat 20040 ×15, Sukar Wererat Leader 20047 ×11, Varool Foulclaw 27020 ×1 (300 s respawn), plus Shade Horror, Dark/Mist Terror, Dre Vanul, Baraq Orcs, Dungeon Skeletons, Dread Soldier, Kirunak 27021.
+- `scripts/run-local-net.sh` default now loads it: `FINEAGE_ZONE_MAPS=…,elven_fortress,…` and a second bounds box `FINEAGE_ZONE_BOUNDS=20000,20000,80000,80000;5000,60000,35000,90000`. To leave it out, override `FINEAGE_ZONE_MAPS` without `elven_fortress` (the second box alone spawns nothing).
+- Play: Elven Village gatekeeper → "Elven Fortress" (820 a, 29294, 74968, -3776 — already a loaded destination), then go down into the fortress.
+- Unblocked: Q316 Destroy Plague Carriers (Ellenia 30155) — wererat fang drops from 20040/20047 and Varool's fang from 27020 (party kill credit already in place). Q408 Path of the Elven Wizard amethyst step — Sukar Wererat Leaders 20047.
+- Gaps: no server geodata for 20_20 (Z from spawn rows, same as the other elven maps); the client has 20_20 terrain but the fortress interior geometry/walkability is unverified — if the client can't render the underground, players will only see mobs at their spawn Z. No admin teleport inside yet (gatekeeper drops you at the entrance).
