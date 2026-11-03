@@ -61,6 +61,14 @@ public sealed partial class ZoneWorld
         return best;
     }
 
+    /// <summary>Mobius <c>GeoEngine.canSeeTarget(creature, target)</c>: no closed door between, then geo LOS.</summary>
+    internal bool CanSeeTarget(ZoneEntity from, ZoneEntity to)
+    {
+        if (Doors.FirstBlocking(from.X, from.Y, from.Z, to.X, to.Y, to.Z, out _, out _, out _) != null)
+            return false;
+        return _geo.CanSeeTarget(from.X, from.Y, from.Z, to.X, to.Y, to.Z);
+    }
+
     void TickAggression(long now)
     {
         List<ZoneEntity>? players = null;
@@ -77,6 +85,9 @@ public sealed partial class ZoneWorld
                     continue;
                 long dx = npc.X - (long)p.X, dy = npc.Y - (long)p.Y, dz = npc.Z - (long)p.Z;
                 if (dx * dx + dy * dy + dz * dz > (long)npc.AggroRange * npc.AggroRange)
+                    continue;
+                // Mobius isAggressiveTowards → me.isAggressive() && GeoEngine.canSeeTarget(me, target).
+                if (!CanSeeTarget(npc, p))
                     continue;
                 ZoneLog.Info($"[aggro] npc={npc.ObjectId} ({npc.Name}) aggro on player={p.ObjectId} range={npc.AggroRange}");
                 AddHate(npc, p);

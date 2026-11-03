@@ -65,9 +65,15 @@
 - Back/front use Mobius isBehind / isInFrontOf (60° cone vs target heading). Entity heading is now live: set from the move direction each movement tick and turned to the target on every swing (doAttack), so a mob fighting you faces you (front), while one walking away is hit from behind.
 - Gaps: no game clock yet → night −10% not applied (wired as a parameter); rain unsupported in Mobius too; back/side crit bonuses (blow/critical position mods) and skill hit position not applied; V2/Net heading not re-broadcast from these server-side turns.
 
+## Slice 12 — mob aggro / attack line of sight
+- Port of Mobius `GeoEngine.canSeeTarget`: 3D grid line (GridLineIterator3D) from the higher end; per cell LOS Z = nearest layer if NSWE passable (anti-corner-cut) else next higher layer; blocked when above eye line + 48 (first 2 cells: start Z + 48); diagonal steps check both orthogonal neighbours; no-geo cells see-through. Closed doors between also block (DoorData.checkIfDoorsBetween).
+- Aggressive mobs only take aggro on a player they can see (isAggressiveTowards). In thinkAttack a mob without LOS to its most hated target keeps moving to it instead of swinging.
+- Peace zone: Mobius default `AltMobAgroInPeaceZone = True` (and the rule needs PEACE + NO_PVP), so mobs may aggro in towns — no change needed. Level-gap aggro: Mobius Interlude has none in isAggressiveTowards — no change.
+- Gaps: no fences; silent move / fake-death / GM no-aggro not modelled; LOS not applied to player attacks/casts yet (Mobius: "Cannot see target"); getNearestZ >1000 lower-layer rule skipped.
+
 ## Still open (PvE priority)
 1. Blow skills (calcBlowDamage, behind/side chance, lethal) — medium.
-2. Aggro LoS / peace zone / level-gap — medium.
+2. Player attack/cast LOS check (SysMsg cannot see target) — small.
 3. Night game clock (GameTimeTaskManager) for the −10% dark bonus — small.
 4. magicLvl in skill-combat.json + mcrit stat mods — small.
 5. Level-gap damage penalties, weapon vulnerabilities, NPC soulshots — small/medium.

@@ -97,7 +97,9 @@ public sealed partial class ZoneWorld
             npc.AggroTargetId = MostHated(npc) is > 0 and var top ? top : npc.AggroTargetId;
             CallClanHelp(npc, player, now);
             npc.LastAiTickMs = now;
-            if (!ZoneCombat.InMobReach(npc.X, npc.Y, player.X, player.Y, ZoneCombat.MobAttackReach(npc.AttackRange)))
+            // Mobius thinkAttack: no LOS to the most hated → moveTo(target) instead of swinging.
+            if (!ZoneCombat.InMobReach(npc.X, npc.Y, player.X, player.Y, ZoneCombat.MobAttackReach(npc.AttackRange)) ||
+                !CanSeeTarget(npc, player))
             {
                 // Mobius AttackableAI.thinkAttack -> moveToPawn(target, range): mob runs to the attacker.
                 ChaseStep(npc, player, now, outbound);
