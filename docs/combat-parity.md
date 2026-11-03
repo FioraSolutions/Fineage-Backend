@@ -117,3 +117,14 @@ Rules in `data/spoil.json` + `Fineage.Game.Services.SpoilRules`; applied by `Zon
 | Loot | `takeSweep` → sweeper (party: `distributeItem`) + ConsumeBody | Items to the sweeper, corpse despawned. **Stub:** party loot distribution mode not applied (party mate who sweeps keeps it). |
 
 Stubs: Spoil Festival 302 / Sweeper Festival 444 (AoE) not wired; spoil success ignores Mobius MEN/level-bonus extras (base `calcMagicSuccess` only). Admin hooks (opcodes 30/31, `FINEAGE_ZONE_ADMIN`) reuse the same core (admin spoil skips the roll and hate).
+
+## Herbs (auto-use on pickup)
+
+Data: `data/herbs.json` (`HerbCatalog`), from Mobius CT0 items 8600–8614 / 8952–8953 (`immediate_effect`, `ItemSkills`) and skills 2278–2285. Handler: `ZoneWorldHerbs.cs`, hooked in `TryPickup` after the drop-protection / range / dead checks.
+
+- Mobius `Player.doPickupItem`: a herb is used on the picker and destroyed — never enters the inventory, no "You have obtained" message.
+- Herb of Life 2278 (15/25/100 % HP), Herb of Mana 2279 (11/18/100 % MP): HealPercent capped at max, SysMsg 1066 / 1068, StatusUpdate fan-out. A full-HP player still consumes it (Mobius has no refusal); dead players can't pick up.
+- Buff herbs 2280 P.Atk ×1.15, 2281 M.Atk ×1.75, 2282 Atk.Spd ×1.33, 2283 Cast.Spd ×1.3, 2284 Crit ×1.3, 2285 Speed +33 — 300 s abnormals via the shared `CastBuff` path; Warrior 8612 = 2280+2282+2284, Mystic 8613 = 2281+2283, Recovery 8614 = 100 % HP+MP.
+- 60 s ground lifetime (HerbAutoDestroyTime) now uses the same catalog (8954 Blue Primeval Crystal is no longer treated as a herb).
+- Drops: 20 Elven Starting monsters (e.g. 20336 Green Dryad, 20019 Dryad Elder, 20468–20472 Kaboo orcs, 20534 Red Keltir) carry herb groups in `data/drops`; Elven Village itself has none.
+- Stubs: Herb of Speed's runSpd +33 is shown as an abnormal but not applied (runSpd is not modelled in skill-stat-effects yet, same as Wind Walk). Same-abnormalType replacement (e.g. Herb of Power vs Might) follows the existing per-skill abnormal list, not Mobius abnormalType groups. A herb stack with count > 1 applies once per pickup.

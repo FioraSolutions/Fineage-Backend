@@ -59,7 +59,6 @@ public sealed partial class ZoneWorld
 
     readonly HashSet<int> _expiringGround = [];
 
-    static bool IsHerb(int itemId) => itemId is >= 8600 and <= 8614 or >= 8952 and <= 8954;
 
     bool CanPickupProtected(ZoneEntity player, ZoneEntity ground, long now)
     {
@@ -146,6 +145,12 @@ public sealed partial class ZoneWorld
         session.PendingPickupId = 0;
         session.PendingPickupAtUnixMs = 0;
         session.ClearApproach();
+
+        if (IsHerb(ground.GroundItemId))
+        {
+            UseHerbOnPickup(session, player, ground, outbound);
+            return null;
+        }
 
         _game.Items.TryGet(ground.GroundItemId, out var template);
         // Stack merge must be a Modify (Mobius InventoryUpdate addModifiedItem): the client ignores an Add
