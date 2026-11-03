@@ -107,10 +107,11 @@ public sealed class NpcHtmlTests
 
         Assert.True(registry.Find("Quest")!.Handle(call with { Command = "Quest" }).ShowQuestList);
         Assert.True(registry.Find("Script")!.Handle(call with { Command = "Script" }).ShowQuestList);
-        Assert.Contains(
-            "not implemented yet",
-            registry.Find("Script FirstClassTransferTalk")!.Handle(call with { Command = "Script FirstClassTransferTalk" }).Html,
-            StringComparison.Ordinal);
+        // Named Mobius scripts go to the world (village masters); unknown ones fall back to the Unavailable page there.
+        var script = registry.Find("Quest FirstClassTransferTalk 30154_mystic.html")!.Handle(call with { Command = "Quest FirstClassTransferTalk 30154_mystic.html" });
+        Assert.Equal("FirstClassTransferTalk", script.ScriptName);
+        Assert.Equal("30154_mystic.html", script.ScriptEvent);
+        Assert.Equal("", registry.Find("Script FirstClassTransferTalk")!.Handle(call with { Command = "Script FirstClassTransferTalk" }).ScriptEvent);
         Assert.True(registry.Find("questlist")!.Handle(call with { Command = "questlist" }).ShowQuestList);
         var quest = registry.Find("Quest 999 accept")!.Handle(call with { Command = "Quest 999 accept" });
         Assert.True(quest.QuestAction);

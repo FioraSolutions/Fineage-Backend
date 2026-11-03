@@ -734,6 +734,809 @@
       ]
     },
     {
+      "id": 408,
+      "name": "Path of the Elven Wizard",
+      "repeatable": false,
+      "abortable": true,
+      "questItems": [
+        1218,
+        1219,
+        1220,
+        1221,
+        1222,
+        1223,
+        1224,
+        1225,
+        1226,
+        1229,
+        1272,
+        1273,
+        1274
+      ],
+      "dialogs": [
+        {
+          "npcId": 30414,
+          "hook": "talk",
+          "when": "absent",
+          "html": "<html><body>Rosella:<br>\nElven Wizards are in the preparatory level before becoming a Spellsinger or Elemental Summoner. They aren't to be compared with the likes of the Dark Elves, who walk the path of evil.<br>\nTo become an Elven Wizard, you must learn how to communicate with the spirits. For this communication, you must find the four jewels that symbolize <font color=\"LEVEL\">water, fire, wind and earth</font> and then perform a ritual. The ritual is performed to gain understanding of the basic elements that construct the world, and to receive Eva's blessing.<br>\nJust recently, a young one of your age came and finished the ritual. What do you think? Will you take the challenge?<br>\n<a action=\"quest_event:408:ACCEPT\">Take the challenge</a><br>\n<a action=\"quest_event:408:30414-02\">Take the challenge later</a>\n</body></html>"
+        },
+        {
+          "npcId": 30414,
+          "hook": "talk",
+          "when": "completed",
+          "html": "<html><body>Rosella:<br>\nElven Wizards are in the preparatory level before becoming a Spellsinger or Elemental Summoner. They aren't to be compared with the likes of the Dark Elves, who walk the path of evil.<br>\nTo become an Elven Wizard, you must learn how to communicate with the spirits. For this communication, you must find the four jewels that symbolize <font color=\"LEVEL\">water, fire, wind and earth</font> and then perform a ritual. The ritual is performed to gain understanding of the basic elements that construct the world, and to receive Eva's blessing.<br>\nJust recently, a young one of your age came and finished the ritual. What do you think? Will you take the challenge?<br>\n<a action=\"quest_event:408:ACCEPT\">Take the challenge</a><br>\n<a action=\"quest_event:408:30414-02\">Take the challenge later</a>\n</body></html>"
+        },
+        {
+          "npcId": 30414,
+          "hook": "event",
+          "when": "absent",
+          "event": "ACCEPT",
+          "classes": [
+            25
+          ],
+          "minLevel": 18,
+          "lacksItems": [
+            1230
+          ],
+          "html": "<html><body>Rosella:<br>\nFour things are required to perform the ritual. They are <font color=\"LEVEL\">4 jewels that represent water, fire, wind and the earth.</font> If you devote the jewels to Mother Nature and perform the ritual for Eva's blessing, in return, you will be able to communicate more deeply with the spirits.<br>\nFirst, I give you this <font color=\"LEVEL\">Fertility Peridot.</font> This is the token of earth, symbolizing abundance and productivity. This is given to you, who wants to have a deeper understanding of nature, as a gift.<br>\nNow you must find the remaining three by yourself. Which one do you want to seek first?<br>\n<a action=\"quest_event:408:30414-10\">Ruby, symbol of fire</a><br>\n<a action=\"quest_event:408:30414-12\">Aquamarine, symbol of water</a><br>\n<a action=\"quest_event:408:30414-16\">Amethyst, symbol of wind</a>\n</body></html>",
+          "ops": [
+            {
+              "op": "create"
+            },
+            {
+              "op": "start"
+            },
+            {
+              "op": "give_item",
+              "itemId": 1229,
+              "count": 1
+            }
+          ]
+        },
+        {
+          "npcId": 30414,
+          "hook": "event",
+          "when": "any",
+          "event": "ACCEPT",
+          "classes": [
+            25
+          ],
+          "minLevel": 18,
+          "html": "<html><body>Rosella:<br>\nHmmm now, aren't you the one who finished the ritual? What are you waiting for? Go take a step into the wider world. Seek the High Priest. He will teach you what you must do and how to survive.<br>\nMay the protection of mother Eva be with you.\n</body></html>"
+        },
+        {
+          "npcId": 30414,
+          "hook": "event",
+          "when": "any",
+          "event": "ACCEPT",
+          "classes": [
+            25
+          ],
+          "html": "<html><body>Rogellia:<br>\nWait a moment... Youngster, I think I made a mistake. You are too young to complete the ceremony.<br>\nI cannot send an innocent soul like yours into the harsh world. See me again after you have gained more experience.<br>\n(Only characters level 18 and above may undertake this quest.)\n</body></html>"
+        },
+        {
+          "npcId": 30414,
+          "hook": "event",
+          "when": "any",
+          "event": "ACCEPT",
+          "classes": [
+            26
+          ],
+          "html": "<html><body>Rosella:<br>\nLooking again... I see you have already earned the title of Elven Wizard... Why are you trying to challenge the trial again? Leave the trial for those younger than you... You should concentrate more on the task of studying the order of mother nature.\n</body></html>"
+        },
+        {
+          "npcId": 30414,
+          "hook": "event",
+          "when": "any",
+          "event": "ACCEPT",
+          "html": "<html><body>Rosella:<br>\nOh no... At my age, my eyes are always tricking me. I'm afraid you cannot perform the ritual. Only Elven Mystics have the qualifications for it.<br>\nI must go back to my knitting. My grandson will be having his birthday soon.\n</body></html>"
+        },
+        {
+          "npcId": 30414,
+          "hook": "event",
+          "when": "any",
+          "event": "30414-02",
+          "html": "<html><body>Rosella:<br>\nWell, it is not a bad idea to savor the charm of nature a little longer and take the challenge later.\n</body></html>"
+        },
+        {
+          "npcId": 30414,
+          "hook": "event",
+          "when": "started",
+          "event": "30414-10",
+          "hasItem": 1220,
+          "html": "<html><body>Rosella:<br>\nAre you testing me? Don't you already have the <font color=\"LEVEL\">magical powersd ruby?</font>\n</body></html>"
+        },
+        {
+          "npcId": 30414,
+          "hook": "event",
+          "when": "started",
+          "event": "30414-10",
+          "hasItem": 1229,
+          "lacksItems": [
+            1220,
+            1218
+          ],
+          "html": "<html><body>Rosella:<br>\nRuby... When I look at the red hues, I feel a memory stirring the passions of my youth... If you seek the ruby, symbol of fire, go to <font color=\"LEVEL\">Magister Greenis in the Elven Village</font>. I was her godmother when she was born. She is a fine lady. Please give her this letter I wrote about you so she will help you to find the ruby.\n</body></html>",
+          "ops": [
+            {
+              "op": "give_item",
+              "itemId": 1218,
+              "count": 1
+            }
+          ]
+        },
+        {
+          "npcId": 30414,
+          "hook": "event",
+          "when": "started",
+          "event": "30414-10",
+          "hasItem": 1229,
+          "lacksItems": [
+            1220
+          ],
+          "html": "<html><body>Rosella:<br>\nRuby... When I look at the red hues, I feel a memory stirring the passions of my youth... If you seek the ruby, symbol of fire, go to <font color=\"LEVEL\">Magister Greenis in the Elven Village</font>. I was her godmother when she was born. She is a fine lady. Please give her this letter I wrote about you so she will help you to find the ruby.\n</body></html>"
+        },
+        {
+          "npcId": 30414,
+          "hook": "event",
+          "when": "started",
+          "event": "30414-12",
+          "hasItem": 1221,
+          "html": "<html><body>Rosella:<br>\nHow about learning a spell that increases memory? Haven't you already found the <font color=\"LEVEL\">Pure Aquamarine?</font> A young one like you should have a better memory!<br>\nAs I told you before, the Pure Aquamarine symbolizes water. The Elves who serve Eva always have divine protection of water. That's why the Aquamarine, which has the power of water, is the most beloved jewel among Elven Mystics.\n</body></html>"
+        },
+        {
+          "npcId": 30414,
+          "hook": "event",
+          "when": "started",
+          "event": "30414-12",
+          "hasItem": 1229,
+          "lacksItems": [
+            1221,
+            1222
+          ],
+          "html": "<html><body>Rosella:<br>\nOf course, you probably already know that water is the symbol of our mother Eva. Therefore, unlike other races, we elves receive the divine protection of mother Eva in the water. You need not go far to find the <font color=\"LEVEL\"> Pure Aquamarine,</font> that symbolizes water. It can be found in the Elven Forest. <font color=\"LEVEL\">Go to Thalia who tends the Mother Tree at Lake Iris.</font> Give this fruit to her as a give, and ask her about the jewel. She will gladly help you.<br>\nYou can reach Lake Iris if you go straight south of the Elven Village. Thalia will be at the eastern shore of the lake. Well then, good luck.\n</body></html>",
+          "ops": [
+            {
+              "op": "give_item",
+              "itemId": 1222,
+              "count": 1
+            }
+          ]
+        },
+        {
+          "npcId": 30414,
+          "hook": "event",
+          "when": "started",
+          "event": "30414-12",
+          "hasItem": 1229,
+          "lacksItems": [
+            1221
+          ],
+          "html": "<html><body>Rosella:<br>\nOf course, you probably already know that water is the symbol of our mother Eva. Therefore, unlike other races, we elves receive the divine protection of mother Eva in the water. You need not go far to find the <font color=\"LEVEL\"> Pure Aquamarine,</font> that symbolizes water. It can be found in the Elven Forest. <font color=\"LEVEL\">Go to Thalia who tends the Mother Tree at Lake Iris.</font> Give this fruit to her as a give, and ask her about the jewel. She will gladly help you.<br>\nYou can reach Lake Iris if you go straight south of the Elven Village. Thalia will be at the eastern shore of the lake. Well then, good luck.\n</body></html>"
+        },
+        {
+          "npcId": 30414,
+          "hook": "event",
+          "when": "started",
+          "event": "30414-16",
+          "hasItem": 1226,
+          "html": "<html><body>Rosella:<br>\nDon't you already have the <font color=\"LEVEL\">Magical Powers Ruby?</font> Try to find the other jewels.\n</body></html>"
+        },
+        {
+          "npcId": 30414,
+          "hook": "event",
+          "when": "started",
+          "event": "30414-16",
+          "hasItem": 1229,
+          "lacksItems": [
+            1226,
+            1224
+          ],
+          "html": "<html><body>Rosella:<br>\nThe <font color=\"LEVEL\">Nobility Amethyst</font> is the symbol of elegance and nobility and at the same time is the symbol of Sayha, the God of Wind. The force of the wind within the jewel is an important material for Mystics who study the magic of storms. Well, if you had studied the basics, you would know all this...<br>\nMeet a person by the name of <font color=\"LEVEL\">Northwind</font> at the entrance to the Underground Fortress. He may know something abouth the Amethyst. Give this book to him and he will give you aid.<br>\nTo find the Elven Fortress, first go north of the village to the Neutral Zone, cross the bridge, and enter the Elven forest. If you cross the bridge, you will immediately see the grand Elven Fortress. The entrance is at the other side of the mountain.\n</body></html>",
+          "ops": [
+            {
+              "op": "give_item",
+              "itemId": 1224,
+              "count": 1
+            }
+          ]
+        },
+        {
+          "npcId": 30414,
+          "hook": "event",
+          "when": "started",
+          "event": "30414-16",
+          "hasItem": 1229,
+          "lacksItems": [
+            1226
+          ],
+          "html": "<html><body>Rosella:<br>\nThe <font color=\"LEVEL\">Nobility Amethyst</font> is the symbol of elegance and nobility and at the same time is the symbol of Sayha, the God of Wind. The force of the wind within the jewel is an important material for Mystics who study the magic of storms. Well, if you had studied the basics, you would know all this...<br>\nMeet a person by the name of <font color=\"LEVEL\">Northwind</font> at the entrance to the Underground Fortress. He may know something abouth the Amethyst. Give this book to him and he will give you aid.<br>\nTo find the Elven Fortress, first go north of the village to the Neutral Zone, cross the bridge, and enter the Elven forest. If you cross the bridge, you will immediately see the grand Elven Fortress. The entrance is at the other side of the mountain.\n</body></html>"
+        },
+        {
+          "npcId": 30414,
+          "hook": "talk",
+          "when": "started",
+          "hasItems": [
+            1229,
+            1220,
+            1226,
+            1221
+          ],
+          "lacksItems": [
+            1218,
+            1222,
+            1224,
+            1272,
+            1273,
+            1274
+          ],
+          "minLevel": 20,
+          "html": "<html><body>Rosella:<br>\nOh! You have collected all the jewels! Now we can begin the ritual.<br>\nWater is the source of life. Mother, and eternity. Cleanse our stained souls with the Tears of Eva, purer than anything in the world, and give us your new blessing...<br>\nWith this, you have performed the ritual and earned the qualifications to become an Elven Wizard. Here, take this <font color=\"LEVEL\">Eternity Diamond.</font> If you take this to <font color=\"LEVEL\">High Priest Raymond in the Town of Gludio,</font> he will change your occupation to Elven Wizard. Of course, you can go to <font color=\"LEVEL\">High Priestess Levian in Gludin</font> as well.\n</body></html>",
+          "ops": [
+            {
+              "op": "give_adena",
+              "count": 163800
+            },
+            {
+              "op": "give_item",
+              "itemId": 1230,
+              "count": 1
+            },
+            {
+              "op": "give_exp_sp",
+              "exp": 320534,
+              "sp": 22532
+            },
+            {
+              "op": "complete"
+            }
+          ]
+        },
+        {
+          "npcId": 30414,
+          "hook": "talk",
+          "when": "started",
+          "hasItems": [
+            1229,
+            1220,
+            1226,
+            1221
+          ],
+          "lacksItems": [
+            1218,
+            1222,
+            1224,
+            1272,
+            1273,
+            1274
+          ],
+          "minLevel": 19,
+          "maxLevel": 19,
+          "html": "<html><body>Rosella:<br>\nOh! You have collected all the jewels! Now we can begin the ritual.<br>\nWater is the source of life. Mother, and eternity. Cleanse our stained souls with the Tears of Eva, purer than anything in the world, and give us your new blessing...<br>\nWith this, you have performed the ritual and earned the qualifications to become an Elven Wizard. Here, take this <font color=\"LEVEL\">Eternity Diamond.</font> If you take this to <font color=\"LEVEL\">High Priest Raymond in the Town of Gludio,</font> he will change your occupation to Elven Wizard. Of course, you can go to <font color=\"LEVEL\">High Priestess Levian in Gludin</font> as well.\n</body></html>",
+          "ops": [
+            {
+              "op": "give_adena",
+              "count": 163800
+            },
+            {
+              "op": "give_item",
+              "itemId": 1230,
+              "count": 1
+            },
+            {
+              "op": "give_exp_sp",
+              "exp": 456128,
+              "sp": 29230
+            },
+            {
+              "op": "complete"
+            }
+          ]
+        },
+        {
+          "npcId": 30414,
+          "hook": "talk",
+          "when": "started",
+          "hasItems": [
+            1229,
+            1220,
+            1226,
+            1221
+          ],
+          "lacksItems": [
+            1218,
+            1222,
+            1224,
+            1272,
+            1273,
+            1274
+          ],
+          "maxLevel": 18,
+          "html": "<html><body>Rosella:<br>\nOh! You have collected all the jewels! Now we can begin the ritual.<br>\nWater is the source of life. Mother, and eternity. Cleanse our stained souls with the Tears of Eva, purer than anything in the world, and give us your new blessing...<br>\nWith this, you have performed the ritual and earned the qualifications to become an Elven Wizard. Here, take this <font color=\"LEVEL\">Eternity Diamond.</font> If you take this to <font color=\"LEVEL\">High Priest Raymond in the Town of Gludio,</font> he will change your occupation to Elven Wizard. Of course, you can go to <font color=\"LEVEL\">High Priestess Levian in Gludin</font> as well.\n</body></html>",
+          "ops": [
+            {
+              "op": "give_adena",
+              "count": 163800
+            },
+            {
+              "op": "give_item",
+              "itemId": 1230,
+              "count": 1
+            },
+            {
+              "op": "give_exp_sp",
+              "exp": 591724,
+              "sp": 35928
+            },
+            {
+              "op": "complete"
+            }
+          ]
+        },
+        {
+          "npcId": 30414,
+          "hook": "talk",
+          "when": "started",
+          "hasItem": 1229,
+          "lacksItems": [
+            1218,
+            1222,
+            1224,
+            1272,
+            1273,
+            1274
+          ],
+          "html": "<html><body>Rosella:<br>\nIf you devote four jewels, symbolizing water, fire, wind and earth, to Mother Nature and perform the ritual for Eva's blessing, in return, you will be able to communicate more deeply with the spirits.<br>\nI already gave you the Fertility Peridot so go and find the remaining three by yourself. Which jewel do you want to seek first?<br>\n<a action=\"quest_event:408:30414-10\">Ruby, symbol of fire</a><br>\n<a action=\"quest_event:408:30414-12\">Aquamarine, symbol of water</a><br>\n<a action=\"quest_event:408:30414-16\">Amethyst, symbol of wind</a>\n</body></html>"
+        },
+        {
+          "npcId": 30414,
+          "hook": "talk",
+          "when": "started",
+          "hasItem": 1218,
+          "html": "<html><body>Rosella:<br>\nTake the letter I gave you to <font color=\"LEVEL\">Magister Greenis in the Elven Village.</font> If you ask her for help, she will tell you about the ruby that symbolizes fire.\n</body></html>"
+        },
+        {
+          "npcId": 30414,
+          "hook": "talk",
+          "when": "started",
+          "hasItem": 1219,
+          "minCount": 5,
+          "hasItems": [
+            1272
+          ],
+          "html": "<html><body>Rosella:<br>\nYou have collected <font color=\"LEVEL\">five clumps of Red Down.</font> This will be useful in manufacturing the Magical Powers Ruby. Greenis will be waiting, so go to her quickly and give her the down.\n</body></html>"
+        },
+        {
+          "npcId": 30414,
+          "hook": "talk",
+          "when": "started",
+          "hasItem": 1272,
+          "html": "<html><body>Rosella:<br>\nHave you met Magister Greenis? How is the dear child? If you do as she says, you can find the ruby.\n</body></html>"
+        },
+        {
+          "npcId": 30414,
+          "hook": "talk",
+          "when": "started",
+          "hasItem": 1222,
+          "html": "<html><body>Rosella:<br>\nGo see <font color=\"LEVEL\">Thalia,</font> who takes care of the Mother Tree on <font color=\"LEVEL\">Lake Iris.</font> She will tell you about the <font color=\"LEVEL\">Pure Aquamarine.</font><br>\nYou can reach Lake Iris if you go straight south of the Elven Village. Thalia will be at the eastern shore of the lake.\n</body></html>"
+        },
+        {
+          "npcId": 30414,
+          "hook": "talk",
+          "when": "started",
+          "hasItem": 1223,
+          "minCount": 5,
+          "hasItems": [
+            1273
+          ],
+          "html": "<html><body>Rosella:<br>\nYou have collected <font color=\"LEVEL\">five Gold Leaves</font> with no difficulty, I see. There was a time when the Elven Forest was full of these leaves... Now they are very rare because of the dryads. Thalia must be waiting for these leaves, I don't want to keep her waiting. Bring her these leaves and be quick.\n</body></html>"
+        },
+        {
+          "npcId": 30414,
+          "hook": "talk",
+          "when": "started",
+          "hasItem": 1273,
+          "html": "<html><body>Rosella:<br>\nDid Thalia tell you about the Aquamarine? She is a very clever girl. She may test your skills. Her favorite test is related to the <font color=\"LEVEL\">Gold Leaves.</font> You can usually get them from the dryad elders.\n</body></html>"
+        },
+        {
+          "npcId": 30414,
+          "hook": "talk",
+          "when": "started",
+          "hasItem": 1224,
+          "html": "<html><body>Rosella:<br>\nGive the book I gave you to Northwind. The book is called, 'Immortal Love'... A wonderful love story... So touching... He asked for the book a long time ago.<br>\nTo find the Elven Fortress, first go north of the village to the Neutral Zone, cross the bridge, and enter the Elven forest. If you cross the bridge, you will immediately see the grand Elven Fortress. The entrance is at the other side of the mountain. You will be able to meet Northwind over there.\n</body></html>"
+        },
+        {
+          "npcId": 30414,
+          "hook": "talk",
+          "when": "started",
+          "hasItem": 1225,
+          "minCount": 2,
+          "hasItems": [
+            1274
+          ],
+          "html": "<html><body>Rosella:<br>\nThis is an ordinary Amethyst. Yes, this will be fine for Northwind to make a Nobility Amethyst. Northwind has a temper, so he won't wait long. If you are late, he may go someplace else. Hurry and go find him.\n</body></html>"
+        },
+        {
+          "npcId": 30414,
+          "hook": "talk",
+          "when": "started",
+          "hasItem": 1274,
+          "html": "<html><body>Rosella:<br>\nDidn't Northwind tell you the story of the <font color=\"LEVEL\">Nobility Amethyst?</font> There is no one who can better explain about the jewel in the Elven Forest. Meet him and ask him in detail.\n</body></html>"
+        },
+        {
+          "npcId": 30157,
+          "hook": "talk",
+          "when": "started",
+          "hasItem": 1218,
+          "html": "<html><body>Magister Greenis:<br>\nOh...a letter from my godmother! How is she? I haven't seen her for ages... Hmm, I see you're searching for the Magical Powers Ruby.<br>\nIt has been the symbol of my family for 200 years; no one in all of Oren or Gludio knows it better than I do. Rubies were once mined throughout northern Gludio, but those sites all collapsed during the war with Gracia.<br>\nWe have been unable to find any trace of the original mines. Fortunately, I still have a small piece of the Magical Powers Ruby. Precious as it is, I will give it to you in exchange for a favor. What do you say?<br>\n<a action=\"quest_event:408:30157-02\">Say yes.</a>\n</body></html>"
+        },
+        {
+          "npcId": 30157,
+          "hook": "talk",
+          "when": "started",
+          "hasItem": 1219,
+          "minCount": 5,
+          "hasItems": [
+            1272
+          ],
+          "lacksItems": [
+            1220
+          ],
+          "html": "<html><body>Magister Greenis:<br>\nWell done! Now I have all I need to fashion a Magical Powers Ruby.<br>\nHere, take it!<br>\nBefore you leave, though, let me give you a word of advice. Talent will only take you so far in your Mystical studies. There is no substitute for hard work and disciplined study. The high-level Mystics of the Ivory Tower spend every waking moment in research, spurning food, sleep, recreation, love and all other distractions. Follow their example and you will advance far!\n</body></html>",
+          "ops": [
+            {
+              "op": "take_item",
+              "itemId": 1219,
+              "count": 5
+            },
+            {
+              "op": "give_item",
+              "itemId": 1220,
+              "count": 1
+            },
+            {
+              "op": "take_item",
+              "itemId": 1272,
+              "count": 1
+            }
+          ]
+        },
+        {
+          "npcId": 30157,
+          "hook": "talk",
+          "when": "started",
+          "hasItem": 1219,
+          "minCount": 5,
+          "hasItems": [
+            1272
+          ],
+          "html": "<html><body>Magister Greenis:<br>\nWell done! Now I have all I need to fashion a Magical Powers Ruby.<br>\nHere, take it!<br>\nBefore you leave, though, let me give you a word of advice. Talent will only take you so far in your Mystical studies. There is no substitute for hard work and disciplined study. The high-level Mystics of the Ivory Tower spend every waking moment in research, spurning food, sleep, recreation, love and all other distractions. Follow their example and you will advance far!\n</body></html>",
+          "ops": [
+            {
+              "op": "take_item",
+              "itemId": 1219,
+              "count": 5
+            },
+            {
+              "op": "take_item",
+              "itemId": 1272,
+              "count": 1
+            }
+          ]
+        },
+        {
+          "npcId": 30157,
+          "hook": "talk",
+          "when": "started",
+          "hasItem": 1272,
+          "html": "<html><body>Magister Greenis:<br>\n<font color=\"LEVEL\">Hunt Pincer Spiders and bring back 5 clumps of Red Down, and I will give you a Magical Powers Ruby.</font><br>\nEven Human Mystics use the ruby in their magical studies; the Wizards of the Ivory tower use the refined red dust to summon elemental spirits.\n</body></html>"
+        },
+        {
+          "npcId": 30157,
+          "hook": "event",
+          "when": "started",
+          "event": "30157-02",
+          "hasItem": 1218,
+          "lacksItems": [
+            1272
+          ],
+          "html": "<html><body>Magister Greenis:<br>\nThank you. The Magical Powers Ruby contains a fiery force immensely valuable to those of us who study Elemental Magic.<br>\nI would like to create more of these rubies, but to do so I need a vital ingredient that can only be found on the neck of a Pincer Spider: <font color=\"LEVEL\">Red Down</font>.<br>\nIf you bring me back 5 clumps of Red Down I will create a Magical Powers Ruby just for you. Here, take this. It is a talisman that has protected me from evil creatures in the past. Perhaps it will help you in this task as well.\n</body></html>",
+          "ops": [
+            {
+              "op": "take_item",
+              "itemId": 1218,
+              "count": 1
+            },
+            {
+              "op": "give_item",
+              "itemId": 1272,
+              "count": 1
+            }
+          ]
+        },
+        {
+          "npcId": 30157,
+          "hook": "event",
+          "when": "started",
+          "event": "30157-02",
+          "hasItem": 1218,
+          "html": "<html><body>Magister Greenis:<br>\nThank you. The Magical Powers Ruby contains a fiery force immensely valuable to those of us who study Elemental Magic.<br>\nI would like to create more of these rubies, but to do so I need a vital ingredient that can only be found on the neck of a Pincer Spider: <font color=\"LEVEL\">Red Down</font>.<br>\nIf you bring me back 5 clumps of Red Down I will create a Magical Powers Ruby just for you. Here, take this. It is a talisman that has protected me from evil creatures in the past. Perhaps it will help you in this task as well.\n</body></html>",
+          "ops": [
+            {
+              "op": "take_item",
+              "itemId": 1218,
+              "count": 1
+            }
+          ]
+        },
+        {
+          "npcId": 30157,
+          "hook": "event",
+          "when": "started",
+          "event": "30157-02",
+          "html": "<html><body>Magister Greenis:<br>\nThank you. The Magical Powers Ruby contains a fiery force immensely valuable to those of us who study Elemental Magic.<br>\nI would like to create more of these rubies, but to do so I need a vital ingredient that can only be found on the neck of a Pincer Spider: <font color=\"LEVEL\">Red Down</font>.<br>\nIf you bring me back 5 clumps of Red Down I will create a Magical Powers Ruby just for you. Here, take this. It is a talisman that has protected me from evil creatures in the past. Perhaps it will help you in this task as well.\n</body></html>"
+        },
+        {
+          "npcId": 30371,
+          "hook": "talk",
+          "when": "started",
+          "hasItem": 1222,
+          "html": "<html><body>Thalia:<br>\nWhat have you come here for? Oh... What a delicious looking apple! Is this for me? This reminds me of the legend of the Elven maiden who picked the apple of knowledge.<br>\nRosella sent you? Are you looking for the <font color=\"LEVEL\">Pure Aquamarine</font>? Rosella asked me before... She told me to kindly tell the whereabouts of the Aquamarine of Water, should anyone ask for it.<br>\nBut Aquamarines are not only precious, but a very valuable resource for us Elves. I cannot tell that secret to just anyone. If you perform a task for me, I shall tell you about the Aquamarine.<br>\n<a action=\"quest_event:408:30371-02\">Say you will perform the task</a>\n</body></html>"
+        },
+        {
+          "npcId": 30371,
+          "hook": "talk",
+          "when": "started",
+          "hasItem": 1223,
+          "minCount": 5,
+          "hasItems": [
+            1273
+          ],
+          "lacksItems": [
+            1221
+          ],
+          "html": "<html><body>Thalia:<br>\nYou have found all 5 Gold Leaves, I see. In return, I will tell you about the Pure Aquamarine.<br>\nThe Mother Tree normally does not have any dew, but when the roots absorb the nutrition of the golden leaves, large, beautiful drops of dew form. On rare occasions, one can find a <font color=\"LEVEL\">Pure Aquamarine</font> among the dew.<br>\nHere, take this Pure Aquamarine. I pray that you may safely pass your ritual. And do not forget... It is our responsibility to fill the forest and the plains with joyous music... When our songs fill the earth, the land will become a paradise.\n</body></html>",
+          "ops": [
+            {
+              "op": "give_item",
+              "itemId": 1221,
+              "count": 1
+            },
+            {
+              "op": "take_item",
+              "itemId": 1223,
+              "count": 5
+            },
+            {
+              "op": "take_item",
+              "itemId": 1273,
+              "count": 1
+            }
+          ]
+        },
+        {
+          "npcId": 30371,
+          "hook": "talk",
+          "when": "started",
+          "hasItem": 1223,
+          "minCount": 5,
+          "hasItems": [
+            1273
+          ],
+          "html": "<html><body>Thalia:<br>\nYou have found all 5 Gold Leaves, I see. In return, I will tell you about the Pure Aquamarine.<br>\nThe Mother Tree normally does not have any dew, but when the roots absorb the nutrition of the golden leaves, large, beautiful drops of dew form. On rare occasions, one can find a <font color=\"LEVEL\">Pure Aquamarine</font> among the dew.<br>\nHere, take this Pure Aquamarine. I pray that you may safely pass your ritual. And do not forget... It is our responsibility to fill the forest and the plains with joyous music... When our songs fill the earth, the land will become a paradise.\n</body></html>",
+          "ops": [
+            {
+              "op": "take_item",
+              "itemId": 1223,
+              "count": 5
+            },
+            {
+              "op": "take_item",
+              "itemId": 1273,
+              "count": 1
+            }
+          ]
+        },
+        {
+          "npcId": 30371,
+          "hook": "talk",
+          "when": "started",
+          "hasItem": 1273,
+          "html": "<html><body>Thalia:<br>\nYou are lacking in effort. My sisters and I have worked for hundreds of years without a day of rest to look after the Mother Trees and gather their fruit. Precious items require much work. I cannot tell you about the Aquamarine until you have gathered <font color=\"LEVEL\">5 Gold Leaves</font>.<br>\nElves serve Einhashad, Goddess of Light, along with our mother, Eva, and thus our magic possesses the properties of light. It is our responsibility to fill the forest and the plains with joyous music. This is what we ultimately seek to achieve through magic. When our songs fill the earth, the land will become a paradise.\n</body></html>"
+        },
+        {
+          "npcId": 30371,
+          "hook": "event",
+          "when": "started",
+          "event": "30371-02",
+          "hasItem": 1222,
+          "lacksItems": [
+            1273
+          ],
+          "html": "<html><body>Thalia:<br>\nMy request is not a difficult one. A special fertilizer is needed to maintain the green health of the Mother Trees that we look after. This fertilizer is made from the leaves that fall from the trees in the Elven Forest.<br>\nHave you ever seen any fallen leaves in the Elven Forest? Probably not. That is because the dryad elders collect them even before the leaves have had a chance to settle on the ground. They gather these leaves and turn them into <font color=\"LEVEL\">golden leaves.</font> Use these golden leaves as fertilizer, and the trees of the Human world will never have to be fertilized again.<br>\nTake this sap with you and slay <font color=\"LEVEL\">dryad elders</font> to obtain the golden leaf in its possession. Bring back <font color=\"LEVEL\">5 golden leaves</font> and I will tell you the whereabouts of the Aquamarine.\n</body></html>",
+          "ops": [
+            {
+              "op": "take_item",
+              "itemId": 1222,
+              "count": 1
+            },
+            {
+              "op": "give_item",
+              "itemId": 1273,
+              "count": 1
+            }
+          ]
+        },
+        {
+          "npcId": 30371,
+          "hook": "event",
+          "when": "started",
+          "event": "30371-02",
+          "hasItem": 1222,
+          "html": "<html><body>Thalia:<br>\nMy request is not a difficult one. A special fertilizer is needed to maintain the green health of the Mother Trees that we look after. This fertilizer is made from the leaves that fall from the trees in the Elven Forest.<br>\nHave you ever seen any fallen leaves in the Elven Forest? Probably not. That is because the dryad elders collect them even before the leaves have had a chance to settle on the ground. They gather these leaves and turn them into <font color=\"LEVEL\">golden leaves.</font> Use these golden leaves as fertilizer, and the trees of the Human world will never have to be fertilized again.<br>\nTake this sap with you and slay <font color=\"LEVEL\">dryad elders</font> to obtain the golden leaf in its possession. Bring back <font color=\"LEVEL\">5 golden leaves</font> and I will tell you the whereabouts of the Aquamarine.\n</body></html>",
+          "ops": [
+            {
+              "op": "take_item",
+              "itemId": 1222,
+              "count": 1
+            }
+          ]
+        },
+        {
+          "npcId": 30371,
+          "hook": "event",
+          "when": "started",
+          "event": "30371-02",
+          "html": "<html><body>Thalia:<br>\nMy request is not a difficult one. A special fertilizer is needed to maintain the green health of the Mother Trees that we look after. This fertilizer is made from the leaves that fall from the trees in the Elven Forest.<br>\nHave you ever seen any fallen leaves in the Elven Forest? Probably not. That is because the dryad elders collect them even before the leaves have had a chance to settle on the ground. They gather these leaves and turn them into <font color=\"LEVEL\">golden leaves.</font> Use these golden leaves as fertilizer, and the trees of the Human world will never have to be fertilized again.<br>\nTake this sap with you and slay <font color=\"LEVEL\">dryad elders</font> to obtain the golden leaf in its possession. Bring back <font color=\"LEVEL\">5 golden leaves</font> and I will tell you the whereabouts of the Aquamarine.\n</body></html>"
+        },
+        {
+          "npcId": 30423,
+          "hook": "talk",
+          "when": "started",
+          "hasItem": 1224,
+          "lacksItems": [
+            1274
+          ],
+          "html": "<html><body>Northwind:<br>\nOh... Rosella must have sent it. I've been begging her for a month to lend me this book. The love story in this book is very impressive. You may criticize a man that reads Romance Novels, but... Love is a truth that does not change.<br>\nHmm... Rosella has written a letter on the first page. She asks me to tell you about the <font color=\"LEVEL\">Nobility Amethyst.</font> Since you gave me the book I really wanted, and since Rosella has asked me, I will tell you how to find the Amethyst.<br>\nTo obtain the Nobility Amethyst you need <font color=\"LEVEL\">two regular Amethysts.</font> You can get the Amethysts by killing the <font color=\"LEVEL\">sukar wererat leaders</font> in the Elven Underground Fortress. The Underground Fortress is dangerous... Please be careful.<br>\nI'll lend you this for good luck. It has always given me good luck. Return it when you have found the Amethyst.\n</body></html>",
+          "ops": [
+            {
+              "op": "take_item",
+              "itemId": 1224,
+              "count": 1
+            },
+            {
+              "op": "give_item",
+              "itemId": 1274,
+              "count": 1
+            }
+          ]
+        },
+        {
+          "npcId": 30423,
+          "hook": "talk",
+          "when": "started",
+          "hasItem": 1224,
+          "html": "<html><body>Northwind:<br>\nOh... Rosella must have sent it. I've been begging her for a month to lend me this book. The love story in this book is very impressive. You may criticize a man that reads Romance Novels, but... Love is a truth that does not change.<br>\nHmm... Rosella has written a letter on the first page. She asks me to tell you about the <font color=\"LEVEL\">Nobility Amethyst.</font> Since you gave me the book I really wanted, and since Rosella has asked me, I will tell you how to find the Amethyst.<br>\nTo obtain the Nobility Amethyst you need <font color=\"LEVEL\">two regular Amethysts.</font> You can get the Amethysts by killing the <font color=\"LEVEL\">sukar wererat leaders</font> in the Elven Underground Fortress. The Underground Fortress is dangerous... Please be careful.<br>\nI'll lend you this for good luck. It has always given me good luck. Return it when you have found the Amethyst.\n</body></html>",
+          "ops": [
+            {
+              "op": "take_item",
+              "itemId": 1224,
+              "count": 1
+            }
+          ]
+        },
+        {
+          "npcId": 30423,
+          "hook": "talk",
+          "when": "started",
+          "hasItem": 1225,
+          "minCount": 2,
+          "hasItems": [
+            1274
+          ],
+          "lacksItems": [
+            1226
+          ],
+          "html": "<html><body>Northwind:<br>\nYou have tremendous abilities. I'm sorry I didn't recognize it earlier. I thought an amateur with no skills was just depending on Rosella... I guess I was wrong.<br>\nThe <font color=\"LEVEL\">Nobility Amethyst</font> can be created by blowing the wind of life into two regular ones. The wind of life is nothing else but the breath of Elves. Inheriting the life force of the Mother Tree, our breath contains the very primeval powers.<br>\nNow! Here is the <font color=\"LEVEL\">Nobility Amethyst</font> I have just made. Take this to <font color=\"LEVEL\">Rosella.</font>\n</body></html>",
+          "ops": [
+            {
+              "op": "take_item",
+              "itemId": 1225,
+              "count": 2
+            },
+            {
+              "op": "give_item",
+              "itemId": 1226,
+              "count": 1
+            },
+            {
+              "op": "take_item",
+              "itemId": 1274,
+              "count": 1
+            }
+          ]
+        },
+        {
+          "npcId": 30423,
+          "hook": "talk",
+          "when": "started",
+          "hasItem": 1225,
+          "minCount": 2,
+          "hasItems": [
+            1274
+          ],
+          "html": "<html><body>Northwind:<br>\nYou have tremendous abilities. I'm sorry I didn't recognize it earlier. I thought an amateur with no skills was just depending on Rosella... I guess I was wrong.<br>\nThe <font color=\"LEVEL\">Nobility Amethyst</font> can be created by blowing the wind of life into two regular ones. The wind of life is nothing else but the breath of Elves. Inheriting the life force of the Mother Tree, our breath contains the very primeval powers.<br>\nNow! Here is the <font color=\"LEVEL\">Nobility Amethyst</font> I have just made. Take this to <font color=\"LEVEL\">Rosella.</font>\n</body></html>",
+          "ops": [
+            {
+              "op": "take_item",
+              "itemId": 1225,
+              "count": 2
+            },
+            {
+              "op": "take_item",
+              "itemId": 1274,
+              "count": 1
+            }
+          ]
+        },
+        {
+          "npcId": 30423,
+          "hook": "talk",
+          "when": "started",
+          "hasItem": 1274,
+          "html": "<html><body>Northwind:<br>\nIf you want the Nobility Amethyst, fetch <font color=\"LEVEL\">two regular Amethysts</font> from the Underground Fortress. Defeat the <font color=\"LEVEL\">sukar wererat leaders</font> in the Underground Fortress to obtain the Amethysts. There is an old superstition that the Amethyst protects one's life. That is why I think those creatures always carry it around with them.\n</body></html>"
+        },
+        {
+          "npcId": 20019,
+          "hook": "kill",
+          "when": "started",
+          "hasItem": 1273,
+          "html": "",
+          "ops": [
+            {
+              "op": "drop_item",
+              "itemId": 1223,
+              "count": 1,
+              "chance": 0.4,
+              "limit": 5
+            }
+          ]
+        },
+        {
+          "npcId": 20047,
+          "hook": "kill",
+          "when": "started",
+          "hasItem": 1274,
+          "html": "",
+          "ops": [
+            {
+              "op": "drop_item",
+              "itemId": 1225,
+              "count": 1,
+              "chance": 0.4,
+              "limit": 2
+            }
+          ]
+        },
+        {
+          "npcId": 20466,
+          "hook": "kill",
+          "when": "started",
+          "hasItem": 1272,
+          "html": "",
+          "ops": [
+            {
+              "op": "drop_item",
+              "itemId": 1219,
+              "count": 1,
+              "chance": 0.7,
+              "limit": 5
+            }
+          ]
+        }
+      ]
+    },
+    {
       "id": 999,
       "name": "Roxxy's Message",
       "repeatable": false,

@@ -1,0 +1,41 @@
+{
+  "reference": "Mobius CT0 Interlude village_master scripts as data. transferTalk = FirstClassTransferTalk (newbie-village headmasters only talk about the first transfer). changes = ElfHumanFighterChange1 / ElfHumanWizardChange1 (Grand Masters in human towns perform the first transfer for Humans and Elves): onTalk class list by race, ClassChangeRequested gates (2nd/3rd/4th class pages, from-class, level 20, proof item), proof taken, setClassId, 15 Shadow Item Exchange Coupon (D) 8869. Page names are the Mobius suffixes; HTML lives in data/html/village_master/<script>/.",
+  "transferTalk": {
+    "script": "FirstClassTransferTalk",
+    "masters": { "30026": 0, "30031": 0, "30154": 1, "30358": 2, "30565": 3, "30520": 4, "30525": 4 },
+    "humanFighterMasters": [30026],
+    "humanMageMasters": [30031]
+  },
+  "mageRoots": [10, 25, 38, 49],
+  "changes": [
+    {
+      "script": "ElfHumanFighterChange1",
+      "npcs": [30066, 30288, 30373, 32094],
+      "group": "fighter",
+      "classList": { "0": "01", "1": "11" },
+      "mismatch": "18", "secondClass": "19", "thirdClass": "20", "fourthClassPage": "30066-41.htm",
+      "rewardItemId": 8869, "rewardCount": 15,
+      "options": [
+        { "classId": 1,  "fromClass": 0,  "proofItemId": 1145, "minLevel": 20, "pages": ["21", "22", "23", "24"] },
+        { "classId": 4,  "fromClass": 0,  "proofItemId": 1161, "minLevel": 20, "pages": ["25", "26", "27", "28"] },
+        { "classId": 7,  "fromClass": 0,  "proofItemId": 1190, "minLevel": 20, "pages": ["29", "30", "31", "32"] },
+        { "classId": 19, "fromClass": 18, "proofItemId": 1204, "minLevel": 20, "pages": ["33", "34", "35", "36"] },
+        { "classId": 22, "fromClass": 18, "proofItemId": 1217, "minLevel": 20, "pages": ["37", "38", "39", "40"] }
+      ]
+    },
+    {
+      "script": "ElfHumanWizardChange1",
+      "npcs": [30037, 30070, 30289, 32095, 32098],
+      "group": "mage",
+      "classList": { "0": "01", "1": "08" },
+      "mismatch": "15", "secondClass": "16", "thirdClass": "17", "fourthClassPage": "30037-34.htm",
+      "rewardItemId": 8869, "rewardCount": 15,
+      "options": [
+        { "classId": 11, "fromClass": 10, "proofItemId": 1292, "minLevel": 20, "pages": ["18", "19", "20", "21"] },
+        { "classId": 15, "fromClass": 10, "proofItemId": 1201, "minLevel": 20, "pages": ["22", "23", "24", "25"] },
+        { "classId": 26, "fromClass": 25, "proofItemId": 1230, "minLevel": 20, "pages": ["26", "27", "28", "29"] },
+        { "classId": 29, "fromClass": 25, "proofItemId": 1235, "minLevel": 20, "pages": ["30", "31", "32", "33"] }
+      ]
+    }
+  ]
+}

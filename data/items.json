@@ -2711,6 +2711,16 @@
       "pDef": 11
     },
     {
+      "id": 1145,
+      "name": "Medallion of Warrior",
+      "kind": "etc",
+      "stackable": true,
+      "icon": "icon.accessary_earing_of_protection_i00",
+      "price": 0,
+      "weight": 0,
+      "quest": true
+    },
+    {
       "id": 1146,
       "name": "Squire's Shirt",
       "kind": "armor",
@@ -2751,6 +2761,216 @@
       "icon": "icon.etc_spell_books_white_i00",
       "price": 100,
       "weight": 120
+    },
+    {
+      "id": 1161,
+      "name": "Sword of Ritual",
+      "kind": "etc",
+      "stackable": true,
+      "icon": "icon.weapon_flamberge_i00",
+      "price": 0,
+      "weight": 0,
+      "quest": true
+    },
+    {
+      "id": 1190,
+      "name": "Bezique's Recommendation",
+      "kind": "etc",
+      "stackable": true,
+      "icon": "icon.etc_letter_red_i00",
+      "price": 0,
+      "weight": 0,
+      "quest": true
+    },
+    {
+      "id": 1201,
+      "name": "Mark of Faith",
+      "kind": "etc",
+      "stackable": true,
+      "icon": "icon.accessary_earing_of_wisdom_i00",
+      "price": 0,
+      "weight": 0,
+      "quest": true
+    },
+    {
+      "id": 1204,
+      "name": "Elven Knight Brooch",
+      "kind": "etc",
+      "stackable": true,
+      "icon": "icon.accessary_elven_earing_i00",
+      "price": 0,
+      "weight": 0,
+      "quest": true
+    },
+    {
+      "id": 1217,
+      "name": "Reisa's Recommendation",
+      "kind": "etc",
+      "stackable": true,
+      "icon": "icon.etc_letter_blue_i00",
+      "price": 0,
+      "weight": 0,
+      "quest": true
+    },
+    {
+      "id": 1218,
+      "name": "Rosella's Letter",
+      "kind": "etc",
+      "stackable": true,
+      "icon": "icon.etc_scroll_white_i00",
+      "price": 0,
+      "weight": 0,
+      "quest": true
+    },
+    {
+      "id": 1219,
+      "name": "Red Down",
+      "kind": "etc",
+      "stackable": true,
+      "icon": "icon.etc_mane_i00",
+      "price": 0,
+      "weight": 0,
+      "quest": true
+    },
+    {
+      "id": 1220,
+      "name": "Magical Powers Ruby",
+      "kind": "etc",
+      "stackable": true,
+      "icon": "icon.etc_jewel_red_i00",
+      "price": 0,
+      "weight": 0,
+      "quest": true
+    },
+    {
+      "id": 1221,
+      "name": "Pure Aquamarine",
+      "kind": "etc",
+      "stackable": true,
+      "icon": "icon.etc_jewel_blue_i00",
+      "price": 0,
+      "weight": 0,
+      "quest": true
+    },
+    {
+      "id": 1222,
+      "name": "Appetizing Apple",
+      "kind": "etc",
+      "stackable": true,
+      "icon": "icon.etc_fruit_red_i00",
+      "price": 0,
+      "weight": 0,
+      "quest": true
+    },
+    {
+      "id": 1223,
+      "name": "Gold Leaves",
+      "kind": "etc",
+      "stackable": true,
+      "icon": "icon.etc_leaf_gold_i00",
+      "price": 0,
+      "weight": 0,
+      "quest": true
+    },
+    {
+      "id": 1224,
+      "name": "Immortal Love",
+      "kind": "etc",
+      "stackable": true,
+      "icon": "icon.etc_spell_books_blue_i00",
+      "price": 0,
+      "weight": 0,
+      "quest": true
+    },
+    {
+      "id": 1225,
+      "name": "Amethyst",
+      "kind": "etc",
+      "stackable": true,
+      "icon": "icon.etc_crystal_red_i00",
+      "price": 0,
+      "weight": 0,
+      "quest": true
+    },
+    {
+      "id": 1226,
+      "name": "Nobility Amethyst",
+      "kind": "etc",
+      "stackable": true,
+      "icon": "icon.etc_jewel_red_i00",
+      "price": 0,
+      "weight": 0,
+      "quest": true
+    },
+    {
+      "id": 1229,
+      "name": "Fertility Peridot",
+      "kind": "etc",
+      "stackable": true,
+      "icon": "icon.etc_jewel_green_i00",
+      "price": 0,
+      "weight": 0,
+      "quest": true
+    },
+    {
+      "id": 1230,
+      "name": "Eternity Diamond",
+      "kind": "etc",
+      "stackable": true,
+      "icon": "icon.etc_jewel_silver_i00",
+      "price": 0,
+      "weight": 0,
+      "quest": true
+    },
+    {
+      "id": 1235,
+      "name": "Leaf of Oracle",
+      "kind": "etc",
+      "stackable": true,
+      "icon": "icon.etc_leaf_green_i00",
+      "price": 0,
+      "weight": 0,
+      "quest": true
+    },
+    {
+      "id": 1272,
+      "name": "Greenis's Charm",
+      "kind": "etc",
+      "stackable": true,
+      "icon": "icon.accessary_aquastone_necklace_i00",
+      "price": 0,
+      "weight": 0,
+      "quest": true
+    },
+    {
+      "id": 1273,
+      "name": "Sap of the Mother Tree",
+      "kind": "etc",
+      "stackable": true,
+      "icon": "icon.etc_potion_green_i00",
+      "price": 0,
+      "weight": 0,
+      "quest": true
+    },
+    {
+      "id": 1274,
+      "name": "Lucky Potpourri",
+      "kind": "etc",
+      "stackable": true,
+      "icon": "icon.etc_oil_pot_black_i00",
+      "price": 0,
+      "weight": 0,
+      "quest": true
+    },
+    {
+      "id": 1292,
+      "name": "Bead of Season",
+      "kind": "etc",
+      "stackable": true,
+      "icon": "icon.etc_crystal_ball_green_i00",
+      "price": 0,
+      "weight": 0,
+      "quest": true
     },
     {
       "id": 1294,
@@ -6846,6 +7066,15 @@
       "crystal": "d",
       "price": 1400,
       "weight": 5
+    },
+    {
+      "id": 8869,
+      "name": "Shadow Item Exchange Coupon (D-Grade)",
+      "kind": "etc",
+      "stackable": true,
+      "icon": "icon.etc_lottery_card_i00",
+      "price": 0,
+      "weight": 0
     },
     {
       "id": 8916,

@@ -85,6 +85,9 @@ public sealed class ZoneSession
         InWorld = false;
     }
 
+    /// <summary>Mobius <c>setClassId</c> after a village-master transfer.</summary>
+    internal void ChangeClass(int classId) => ClassId = classId;
+
     internal void NoteForLog(string account)
     {
         if (!string.IsNullOrEmpty(account))

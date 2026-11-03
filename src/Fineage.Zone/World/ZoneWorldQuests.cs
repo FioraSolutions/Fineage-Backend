@@ -141,7 +141,7 @@ public sealed partial class ZoneWorld
         return outcome.Ok ? null : FailureCode(outcome.Failure);
     }
 
-    static QuestActor QuestActorOf(ZoneEntity player) => new(player.Race, player.Level);
+    static QuestActor QuestActorOf(ZoneEntity player) => new(player.Race, player.Level, player.ClassId);
 
     /// <summary>
     /// Mobius <c>Quest.onKill</c> for the killer (killer-only steps) plus <c>party: true</c> steps shared to one random eligible member. Quest drops go straight to the

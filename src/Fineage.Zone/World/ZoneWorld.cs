@@ -42,7 +42,8 @@ sealed class ZoneEntity
     public int Z { get; set; }
     /// <summary>Facing 0..65535 (Mobius heading); updated while moving and when swinging at a target.</summary>
     public int Heading { get; set; }
-    public int ClassId { get; init; }
+    /// <summary>Players: changes on class transfer (Mobius setClassId).</summary>
+    public int ClassId { get; set; }
     public int NpcId { get; init; }
     public bool Attackable { get; init; }
     public int CurHp { get; set; }
@@ -118,8 +119,8 @@ sealed class ZoneEntity
     public Dictionary<int, int> LearnedSkills { get; } = [];
     /// <summary>True while an abnormal with combat stat funcs is active (UserInfo refresh on change).</summary>
     public bool HasStatAbnormal { get; set; }
-    public float RunSpeed { get; init; }
-    public float WalkSpeed { get; init; }
+    public float RunSpeed { get; set; }
+    public float WalkSpeed { get; set; }
     public bool Running { get; set; } = true;
     /// <summary>Mobius isInsideZone(WATER): last water state seen by the mover (swim speed while true).</summary>
     public bool InWater { get; set; }

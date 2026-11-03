@@ -213,6 +213,9 @@ public interface IAccountStore
     /// <summary>Writes level, experience, SP, and the vitals that a level change may have raised.</summary>
     bool TrySaveProgress(string account, int characterId, int level, long exp, int sp, int maxHp, int hp, int maxMp, int mp);
 
+    /// <summary>Writes the class after a class transfer (Mobius setClassId / setBaseClass).</summary>
+    bool TrySaveClass(string account, int characterId, int classId);
+
     /// <summary>Replaces the character's quest rows. An empty list is a real save.</summary>
     bool TryReplaceQuests(string account, int characterId, IReadOnlyList<QuestSaveRow> quests);
 
@@ -668,6 +671,21 @@ public sealed class JsonAccountStore : IAccountStore
             character.Hp = hp;
             character.MaxMp = maxMp;
             character.Mp = mp;
+            Save();
+            return true;
+        }
+    }
+
+    public bool TrySaveClass(string account, int characterId, int classId)
+    {
+        if (classId < 0)
+            return false;
+        lock (_gate)
+        {
+            var character = FindCharacter(account, characterId);
+            if (character == null)
+                return false;
+            character.ClassId = classId;
             Save();
             return true;
         }

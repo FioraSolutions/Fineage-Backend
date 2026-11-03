@@ -11,6 +11,8 @@ public enum QuestHook
 public enum QuestWhen
 {
     Absent,
+    /// <summary>Any state (Mobius onAdvEvent pages that only branch on class / level / items).</summary>
+    Any,
     Created,
     Started,
     Completed
@@ -70,13 +72,17 @@ public sealed record QuestDialog(
     int MaxLevel = 0,
     int HasItem = 0,
     int MinCount = 1,
-    bool Party = false);
+    bool Party = false,
+    IReadOnlyList<int>? Classes = null,
+    IReadOnlyList<int>? HasItems = null,
+    IReadOnlyList<int>? LacksItems = null);
 
 /// <summary>
 /// Who is talking. Mobius quest scripts branch on <c>player.getRace()</c> / <c>getLevel()</c>
 /// before showing the start page; dialogs carry the same gates as data (races, minLevel, maxLevel).
+/// <c>ClassId</c> -1 = unknown (class gates do not match); Mobius path quests check <c>player.getClassId()</c>.
 /// </summary>
-public readonly record struct QuestActor(int Race, int Level);
+public readonly record struct QuestActor(int Race, int Level, int ClassId = -1);
 
 public sealed record QuestDefinition(
     int Id,

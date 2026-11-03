@@ -163,9 +163,31 @@ public sealed class QuestCatalog
         if (dialog.MaxLevel > 0 && dialog.MinLevel > dialog.MaxLevel)
             throw new InvalidDataException($"{where} quest {questId} minLevel is above maxLevel.");
 
+        foreach (int classId in dialog.Classes ?? [])
+        {
+            if (classId is < 0 or > 136)
+                throw new InvalidDataException($"{where} quest {questId} class id {classId} is out of range.");
+        }
+
         return new QuestDialog(dialog.NpcId, hook, evt, when, dialog.Cond, whenVar, whenValue, html, ops,
             races.Count == 0 ? null : races, dialog.MinLevel, dialog.MaxLevel, ReadHasItem(dialog, items, where, questId), Math.Max(1, dialog.MinCount),
-            dialog.Party && hook == QuestHook.Kill);
+            dialog.Party && hook == QuestHook.Kill,
+            dialog.Classes is { Count: > 0 } classes ? classes.Distinct().ToArray() : null,
+            ReadItemList(dialog.HasItems, items, where, questId, "hasItems"),
+            ReadItemList(dialog.LacksItems, items, where, questId, "lacksItems"));
+    }
+
+    static IReadOnlyList<int>? ReadItemList(List<int>? ids, ItemCatalog items, string where, int questId, string field)
+    {
+        if (ids is not { Count: > 0 })
+            return null;
+        foreach (int id in ids)
+        {
+            if (!items.TryGet(id, out _))
+                throw new InvalidDataException($"{where} quest {questId} {field} item {id} is unknown.");
+        }
+
+        return ids.Distinct().ToArray();
     }
 
     static int ReadHasItem(DialogDto dialog, ItemCatalog items, string where, int questId)
@@ -316,6 +338,7 @@ public sealed class QuestCatalog
     static QuestWhen ParseWhen(string? text, string where, int questId) => (text ?? "").Trim().ToLowerInvariant() switch
     {
         "absent" => QuestWhen.Absent,
+        "any" => QuestWhen.Any,
         "created" => QuestWhen.Created,
         "started" => QuestWhen.Started,
         "completed" => QuestWhen.Completed,
@@ -369,6 +392,9 @@ public sealed class QuestCatalog
         public int HasItem { get; set; }
         public int MinCount { get; set; } = 1;
         public bool Party { get; set; }
+        public List<int>? Classes { get; set; }
+        public List<int>? HasItems { get; set; }
+        public List<int>? LacksItems { get; set; }
     }
 
     sealed class OpDto

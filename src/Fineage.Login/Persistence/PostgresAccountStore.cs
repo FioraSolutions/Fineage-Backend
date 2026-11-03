@@ -313,6 +313,11 @@ public sealed class PostgresAccountStore : IAccountStore, IDisposable
             () => _inner.TrySaveProgress(account, characterId, level, exp, sp, maxHp, hp, maxMp, mp),
             conn => NormalizedStoreWriter.UpdateProgress(conn, characterId, level, exp, sp, maxHp, hp, maxMp, mp));
 
+    public bool TrySaveClass(string account, int characterId, int classId) =>
+        RunSilent(
+            () => _inner.TrySaveClass(account, characterId, classId),
+            conn => NormalizedStoreWriter.UpdateClass(conn, characterId, classId));
+
     public bool TryReplaceQuests(string account, int characterId, IReadOnlyList<QuestSaveRow> quests) =>
         RunSilent(
             () => _inner.TryReplaceQuests(account, characterId, quests),

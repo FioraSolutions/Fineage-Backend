@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Append Mobius CT_0_Interlude EtcItem templates referenced by data/drops/*.json or data/quests.json (questItems + give/take ops) but missing from data/items.json.
+"""Append Mobius CT_0_Interlude EtcItem templates referenced by data/drops/*.json or data/quests.json (questItems + give/take ops) or data/village-masters.json (proof + reward items) but missing from data/items.json.
 Maps name/icon/is_stackable/price/weight into our etc item shape. Existing rows are never touched.
 Usage: gen_drop_items.py [mobius items xml dir] (default ref/mobius-ct0-interlude/data/stats/items)"""
 import json, sys, pathlib
@@ -22,6 +22,12 @@ for quest in q.get("quests", []):
     ids = list(quest.get("questItems", []))
     ids += [op[k] for d in quest.get("dialogs", []) for op in d.get("ops", []) for k in ("itemId", "rewardItemId") if op.get(k)]
     want |= {i for i in ids if i not in have}
+
+vm = ROOT / "data/village-masters.json"
+if vm.exists():
+    for c in json.loads(vm.read_text()).get("changes", []):
+        ids = [c.get("rewardItemId", 0)] + [o["proofItemId"] for o in c.get("options", [])]
+        want |= {i for i in ids if i and i not in have}
 
 # Mobius has no icon for for_npc herbs 8600-8607 and BranchSys2.* (i01) for 8608/8611; the client ships these
 # textures (Fineage l2-unity SysTextures/Icon), so pin icons the client can render.

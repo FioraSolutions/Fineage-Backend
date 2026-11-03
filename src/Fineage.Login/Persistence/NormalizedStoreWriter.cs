@@ -181,6 +181,15 @@ static class NormalizedStoreWriter
         cmd.ExecuteNonQuery();
     }
 
+    public static void UpdateClass(NpgsqlConnection conn, int characterId, int classId)
+    {
+        using var cmd = conn.CreateCommand();
+        cmd.CommandText = "UPDATE characters SET class_id = @classId, updated_at = now() WHERE id = @id";
+        cmd.Parameters.AddWithValue("id", characterId);
+        cmd.Parameters.AddWithValue("classId", classId);
+        cmd.ExecuteNonQuery();
+    }
+
     public static void UpdateProgress(
         NpgsqlConnection conn,
         int characterId,

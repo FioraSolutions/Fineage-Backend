@@ -636,6 +636,8 @@ public sealed class QuestMachine : IQuestKillHook
                 continue;
             if (dialog.HasItem != 0 && inventory != null && inventory.CountOf(dialog.HasItem) < dialog.MinCount)
                 continue;
+            if (!ItemsMatch(dialog, inventory))
+                continue;
             return dialog;
         }
 
@@ -656,6 +658,31 @@ public sealed class QuestMachine : IQuestKillHook
             return false;
         if (dialog.MaxLevel > 0 && who.Level > dialog.MaxLevel)
             return false;
+        if (dialog.Classes is { Count: > 0 } classes && !classes.Contains(who.ClassId))
+            return false;
+        return true;
+    }
+
+    /// <summary>
+    /// Mobius path quests branch on <c>hasQuestItems(a, b, ...)</c> (all held) and <c>!hasAtLeastOneQuestItem(...)</c> (none held).
+    /// No inventory (quest-list probe) skips item gates, as <c>hasItem</c> does.
+    /// </summary>
+    static bool ItemsMatch(QuestDialog dialog, PlayerInventory? inventory)
+    {
+        if (inventory == null)
+            return true;
+        foreach (int id in dialog.HasItems ?? [])
+        {
+            if (inventory.CountOf(id) <= 0)
+                return false;
+        }
+
+        foreach (int id in dialog.LacksItems ?? [])
+        {
+            if (inventory.CountOf(id) > 0)
+                return false;
+        }
+
         return true;
     }
 
@@ -666,6 +693,8 @@ public sealed class QuestMachine : IQuestKillHook
             case QuestWhen.Absent:
                 if (state != null)
                     return false;
+                break;
+            case QuestWhen.Any:
                 break;
             case QuestWhen.Created:
                 if (state == null || state.Phase != QuestPhase.Created)

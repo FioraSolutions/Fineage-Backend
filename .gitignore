@@ -28,6 +28,7 @@ data/*
 !data/html/**
 !data/buylists.json
 !data/multisell.json
+!data/village-masters.json
 !data/doors.json
 !data/water-zones.json
 # Prefer converters → JSON; do not commit the full Mobius datapack (~1486+ XML files).
