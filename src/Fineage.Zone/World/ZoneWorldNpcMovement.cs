@@ -1,3 +1,5 @@
+using Fineage.Protocol;
+
 namespace Fineage.Zone.World;
 
 /// <summary>
@@ -80,6 +82,9 @@ public sealed partial class ZoneWorld
                 continue;
             }
             AdvanceMove(e, now);
+            long rdx = e.X - e.AoiRefreshX, rdy = e.Y - e.AoiRefreshY;
+            if (!e.MoveActive || rdx * rdx + rdy * rdy >= (long)AoiRefreshDistance * AoiRefreshDistance)
+                RefreshNpcWatchers(e, outbound);
             if (e.MoveSegmentDirty)
             {
                 e.MoveSegmentDirty = false;
@@ -94,6 +99,40 @@ public sealed partial class ZoneWorld
                 // Arrived: stop broadcast at the exact server spot (Mobius onEvtArrived / StopMove).
                 BroadcastNpcMove(e, e.X, e.Y, e.Z, outbound);
                 e.ReturningHome = false; // stays walking; the next chase fans ChangeMoveType(run)
+            }
+        }
+    }
+
+    /// <summary>
+    /// Moving NPC knownlist revalidate (Mobius knownlist update while the creature walks/chases): players whose view now
+    /// covers the NPC get NpcInfo / Net EntitySpawn (+ MoveState), players it left get DeleteObject / EntityDespawn.
+    /// Same hysteresis as players: StillKnown (5x5 cells) or combat pin keeps an existing link.
+    /// </summary>
+    void RefreshNpcWatchers(ZoneEntity npc, List<Pending> outbound)
+    {
+        npc.AoiRefreshX = npc.X;
+        npc.AoiRefreshY = npc.Y;
+        foreach (var player in Players())
+        {
+            if (player.Session == null)
+                continue;
+            bool known = player.Knownlist.Contains(npc.ObjectId);
+            if (!known)
+            {
+                if (!VisibleTo(player.ObjectId, npc.ObjectId))
+                    continue;
+                player.Knownlist.Add(npc.ObjectId);
+                AddPresence(outbound, player.Session, npc);
+                NetBridge?.FanoutKnownlistDiff(player.ObjectId, [npc.ObjectId], []);
+                ZoneLog.Info($"[aoi] npc enter npc={npc.ObjectId} watcher={player.ObjectId} at={npc.X},{npc.Y}");
+            }
+            else if (player.InstanceId != npc.InstanceId ||
+                     (!_aoi.StillKnown(player.ObjectId, npc.ObjectId) && !CombatPinned(player, npc)))
+            {
+                player.Knownlist.Remove(npc.ObjectId);
+                outbound.Add(Pack(player.Session, MsgType.DeleteObject, new DeleteObjectMsg { ObjectId = npc.ObjectId }));
+                NetBridge?.FanoutKnownlistDiff(player.ObjectId, [], [npc.ObjectId]);
+                ZoneLog.Info($"[aoi] npc leave npc={npc.ObjectId} watcher={player.ObjectId} at={npc.X},{npc.Y}");
             }
         }
     }
