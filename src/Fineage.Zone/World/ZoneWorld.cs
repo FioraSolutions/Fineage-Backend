@@ -146,6 +146,12 @@ sealed class ZoneEntity
     public int GroundItemId { get; set; }
     public int GroundCount { get; set; } = 1;
     public bool GroundStackable { get; set; }
+    /// <summary>Mobius DropProtection owner (killer); 0 = anyone may pick up.</summary>
+    public int GroundOwnerId { get; set; }
+    /// <summary>Unix ms until only <see cref="GroundOwnerId"/> (or their party) may pick up.</summary>
+    public long GroundProtectUntilMs { get; set; }
+    /// <summary>Mobius ItemsAutoDestroy: unix ms when the ground item is removed; 0 = never.</summary>
+    public long GroundExpireAtMs { get; set; }
     /// <summary>Mobius spoil: who activated spoil on this attackable (0 = none).</summary>
     public int SpoilerObjectId { get; set; }
     /// <summary>Pre-rolled corpse drops after death when spoiled; cleared by sweeper.</summary>

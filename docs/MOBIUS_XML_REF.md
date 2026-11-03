@@ -107,3 +107,17 @@ Do **not** commit the full Mobius tree. Prefer regenerated JSON. A slim `data/mo
 - Importer unit tests use minimal XML under `tests/Fineage.Game.Tests/Fixtures/mobius/` (no upstream clone required in CI).
 
 Runtime Talking Island gremlins still use hard-coded `TalkingIsland.cs` until spawn JSON is wired; catalog JSON is the canonical source for the next slice.
+
+## Droplists (data/drops) and ground loot
+
+- `data/drops/*.json` is the source of truth. `scripts/gen_drops.py` converts Mobius `stats/npcs/*.xml`
+  `<dropLists>` for every NPC spawned in elven_village, elven_starting, elven_village_quest_monsters and
+  training_hall_gremlins (edit `MAPS` to add zones). `<drop><group>` → `death.groups`, loose `<drop><item>` →
+  its own group, `<spoil>` → `corpse.items`. Files with `"generated": true` are rewritten on each run; remove the
+  flag to own a file by hand (npc-20001-gremlin.json is hand-written and skipped).
+- Rolls stay in `DropRoller` (group chance, weighted item, min/max, `DropRates`).
+- Death loot: scatter ±70 around corpse (Mobius randDropLim), killer/party-only pickup for 15 s
+  (DropProtection; others get SysMsg 145), auto-destroy after 600 s (herbs 60 s). Player discards never expire
+  (Mobius DestroyPlayerDroppedItem = false).
+- Rows whose itemId is missing from data/items.json are rolled but skipped on spawn (`drop skip unknown item`):
+  herbs 8600–8614, recipes 1786–1802, craft parts 1896/1897/1922–1925/2005–2010, etc.

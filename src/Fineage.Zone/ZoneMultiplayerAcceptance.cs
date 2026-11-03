@@ -336,8 +336,10 @@ public static class ZoneMultiplayerAcceptance
             throw new InvalidOperationException($"drop object id {left.ObjectId}/{right.ObjectId}");
         if (left.ItemId != expected.ItemId || left.Count != expected.Count || !left.Stackable)
             throw new InvalidOperationException($"drop item={left.ItemId} count={left.Count} stackable={left.Stackable}");
-        if (left.X != gremlin.X || left.Y != gremlin.Y || left.Z != gremlin.Z)
-            throw new InvalidOperationException($"drop @ {left.X},{left.Y},{left.Z} expected gremlin tile");
+        // Mobius randDropLim: loot scatters within ±70 of the corpse; both clients see the same spot.
+        int lim = World.ZoneWorld.DeathDropScatter;
+        if (left.X != right.X || left.Y != right.Y || Math.Abs(left.X - gremlin.X) > lim || Math.Abs(left.Y - gremlin.Y) > lim || left.Z != gremlin.Z)
+            throw new InvalidOperationException($"drop @ {left.X},{left.Y},{left.Z} expected near gremlin tile");
     }
 
     public static async Task RunBuffSharedAsync()

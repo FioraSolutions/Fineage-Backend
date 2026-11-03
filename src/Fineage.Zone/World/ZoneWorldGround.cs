@@ -48,6 +48,54 @@ public sealed partial class ZoneWorld
     public const int SysMsgObtainedItem = 30;
     /// <summary>Interlude SystemMessageId 145 FAILED_TO_PICKUP_S1.</summary>
     public const int SysMsgFailedToPickup = 145;
+    /// <summary>Mobius DropProtection.PROTECTED_MILLIS: killer-only pickup window.</summary>
+    public const long DropProtectMs = 15_000;
+    /// <summary>Mobius General AutoDestroyDroppedItemAfter = 600 s (mob loot; player discards are kept, DestroyPlayerDroppedItem = false).</summary>
+    public const long GroundItemAutoDestroyMs = 600_000;
+    /// <summary>Mobius HerbAutoDestroyTime = 60 s.</summary>
+    public const long HerbAutoDestroyMs = 60_000;
+    /// <summary>Mobius Attackable.dropItem randDropLim: loot lands within ±70 of the corpse.</summary>
+    public const int DeathDropScatter = 70;
+
+    readonly HashSet<int> _expiringGround = [];
+
+    static bool IsHerb(int itemId) => itemId is >= 8600 and <= 8614 or >= 8952 and <= 8954;
+
+    bool CanPickupProtected(ZoneEntity player, ZoneEntity ground, long now)
+    {
+        if (ground.GroundOwnerId == 0 || now >= ground.GroundProtectUntilMs || ground.GroundOwnerId == player.ObjectId)
+            return true;
+        return _partyByPlayer.TryGetValue(ground.GroundOwnerId, out int ownerParty)
+            && _partyByPlayer.TryGetValue(player.ObjectId, out int myParty)
+            && ownerParty == myParty;
+    }
+
+    /// <summary>Test hook: roll + drop death loot for <paramref name="npcId"/> as if <paramref name="killer"/> killed it here.</summary>
+    internal void DropDeathLootForTest(int npcId, int x, int y, int z, ZoneEntity killer)
+    {
+        var outbound = new List<Pending>();
+        lock (_gate)
+            SpawnDeathDrops(npcId, x, y, z, killer, [killer], outbound);
+    }
+
+    void TickGroundExpiry(long now, List<Pending> outbound)
+    {
+        if (_expiringGround.Count == 0)
+            return;
+        foreach (int id in _expiringGround.ToList())
+        {
+            if (!_byId.TryGetValue(id, out var g) || g.Kind != ZoneEntityKind.GroundItem)
+            {
+                _expiringGround.Remove(id);
+                continue;
+            }
+            if (g.GroundExpireAtMs > 0 && now >= g.GroundExpireAtMs)
+            {
+                ZoneLog.Info($"ground expire object={id} item={g.GroundItemId}");
+                RemoveGroundItem(g, outbound);
+            }
+        }
+    }
 
     string? TryPickup(ZoneSession session, int groundObjectId, List<Pending> outbound, bool allowApproach = true)
     {
@@ -63,6 +111,12 @@ public sealed partial class ZoneWorld
             return InventoryProtocol.Dead;
 
         long now = _clock().ToUnixTimeMilliseconds();
+        if (!CanPickupProtected(player, ground, now))
+        {
+            // Mobius DropProtection.tryPickUp false -> FAILED_TO_PICKUP_S1, no run-in.
+            PickupFailed(session, ground, outbound);
+            return "protected";
+        }
         AdvanceMove(player, now);
         if (!ZoneCombat.InPickupRange(player.X, player.Y, ground.X, ground.Y))
         {
@@ -248,9 +302,17 @@ public sealed partial class ZoneWorld
         int instanceId = killer?.InstanceId
             ?? (watchers.Count > 0 ? watchers[0].InstanceId : 0);
         int dropperId = killer?.ObjectId ?? 0;
+        int ownerId = killer?.Session != null ? killer.ObjectId : 0;
+        long now = _clock().ToUnixTimeMilliseconds();
 
         foreach (var stack in rolls)
-            SpawnGroundStack(stack.ItemId, stack.Count, x, y, z, instanceId, watchers, outbound, dropperId);
+        {
+            int dx = _dropRandom.Next(DeathDropScatter * 2 + 1) - DeathDropScatter;
+            int dy = _dropRandom.Next(DeathDropScatter * 2 + 1) - DeathDropScatter;
+            SpawnGroundStack(stack.ItemId, stack.Count, x + dx, y + dy, z, instanceId, watchers, outbound, dropperId,
+                ownerObjectId: ownerId,
+                expireAtMs: now + (IsHerb(stack.ItemId) ? HerbAutoDestroyMs : GroundItemAutoDestroyMs));
+        }
     }
 
     void SpawnGroundStack(
@@ -262,7 +324,9 @@ public sealed partial class ZoneWorld
         int instanceId,
         IReadOnlyList<ZoneEntity> watchers,
         List<Pending> outbound,
-        int dropperObjectId = 0)
+        int dropperObjectId = 0,
+        int ownerObjectId = 0,
+        long expireAtMs = 0)
     {
         if (count <= 0)
             return;
@@ -283,9 +347,14 @@ public sealed partial class ZoneWorld
             Z = z,
             GroundItemId = itemId,
             GroundCount = count,
-            GroundStackable = template.Stackable
+            GroundStackable = template.Stackable,
+            GroundOwnerId = ownerObjectId,
+            GroundProtectUntilMs = ownerObjectId != 0 ? _clock().ToUnixTimeMilliseconds() + DropProtectMs : 0,
+            GroundExpireAtMs = expireAtMs
         };
         _byId[objectId] = ground;
+        if (expireAtMs > 0)
+            _expiringGround.Add(objectId);
         _aoi.Enter(objectId, x, y);
 
         // DropItem carries the dropper so the client plays throw/land FX.
@@ -334,6 +403,7 @@ public sealed partial class ZoneWorld
     void RemoveGroundItem(ZoneEntity ground, List<Pending> outbound)
     {
         int objectId = ground.ObjectId;
+        _expiringGround.Remove(objectId);
         _aoi.Leave(objectId);
         _byId.Remove(objectId);
 

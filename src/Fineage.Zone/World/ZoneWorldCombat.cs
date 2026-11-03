@@ -228,6 +228,7 @@ public sealed partial class ZoneWorld
             TickPendingPickups(now, outbound);
             TickMobAttacks(now, outbound);
             TickCorpseDecay(now, outbound);
+            TickGroundExpiry(now, outbound);
         }
         if (outbound.Count > 0)
             await FlushOthersAsync(outbound, ct).ConfigureAwait(false);
