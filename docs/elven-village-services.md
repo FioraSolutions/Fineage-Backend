@@ -30,6 +30,16 @@ does not exist in this datapack). They are the only two NPCs within 1k of the el
 They stand 64 apart on the same z/heading, so both fit in one client view. Object ids: 60474 (Nerupa) and
 60475 (Helper) in the town band `[60000, 100000)`.
 
+Measured against all six `classes.json` creation points for `races[1]` (Elven Fighter 18 / Elven Mystic 25):
+Nerupa is 51..134 flat (82..149 in 3D), the Helper 47..134 flat. Both are inside one client view from every
+elf spawn, so "she is not standing at the newbie spawn" is never a spawn-coordinate problem in this map.
+
+If the Helper draws and Nerupa does not, the backend side is identical for both: same map, same
+`EntitySpawn` path, same `Folk`/`attackable=false`/level-70 template, both at the Mobius row. The only
+difference on the wire is `TemplateId` 30370 vs 30400, which the client maps to its own appearance data — so
+a client-side missing/unbound appearance for 30370 looks exactly like "NPC not spawned". Check that first
+before touching spawn data.
+
 Source of truth: `scripts/gen_elven_newbie_guides.py` reads the vendored
 `ref/mobius-ct0-interlude/data/spawns/InterludeSpawns.xml` (fallback `$MOBIUS_SRC` / `~/Downloads`), and
 inserts-or-corrects those two rows in `data/spawns/elven_village.json` by coordinates, keeping the objectId.
@@ -42,7 +52,8 @@ row-for-row (verified against the snapshot). Only Lynn 31414 is a village-file r
 re-run `scripts/gen_elven_newbie_guides.py` afterwards.
 
 Test: `tests/Fineage.Zone.Tests/NerupaSpawnTests.cs` asserts the coordinates/heading/respawn, that
-`scripts/run-local-net.sh` enables `elven_village` and its bounds keep her, the 64-unit helper distance, that she
+`scripts/run-local-net.sh` enables `elven_village` and its bounds keep her, the 64-unit helper distance, that
+she is within view of every elf creation point in `classes.json`, that she
 is materialised as a live `Npc` entity in the entrant's knownlist at the Mobius spot, that she is selectable and
 talkable (Q160 gate), and that the Net `EntitySpawn` frame decodes back as a visible, non-attackable
 `Nerupa`/`30370`. The test builds its own single-map world instead of setting `FINEAGE_ZONE_MAPS`, because that

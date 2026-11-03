@@ -64,6 +64,40 @@ public sealed class NerupaSpawnTests
     }
 
     [Fact]
+    public void She_is_in_view_from_every_elven_creation_point()
+    {
+        // The player hangs around the village and expects her "on the newbie spawn". The newbie spawn is the
+        // classes.json creation set for races[1] (Elven Fighter 18 / Elven Mystic 25), so check the real points
+        // rather than trusting the file row alone.
+        var map = SpawnCatalog.LoadDefault().GetMap("elven_village");
+        var nerupa = Assert.Single(map.Npcs, row => row.NpcId == NerupaNpcId);
+        double nerupaZ = nerupa.Z;
+
+        var points = Fineage.Login.ClassTemplates.Points(18)
+            .Concat(Fineage.Login.ClassTemplates.Points(25))
+            .Distinct()
+            .ToArray();
+        Assert.NotEmpty(points);
+
+        foreach (var point in points)
+        {
+            double dx = nerupa.X - point.X, dy = nerupa.Y - point.Y;
+            double flat = Math.Sqrt(dx * dx + dy * dy);
+            // Comfortably inside the client's view: you see her without walking, and she is not on top of you.
+            Assert.InRange(flat, 20, 400);
+            Assert.InRange(Math.Abs(nerupaZ - point.Z), 0, 200);
+        }
+
+        // Same for the helper: the two guides have to be co-visible from the spawn, not split across the map.
+        var helper = Assert.Single(map.Npcs, row => row.NpcId == NewbieHelperNpcId);
+        foreach (var point in points)
+        {
+            double dx = helper.X - point.X, dy = helper.Y - point.Y;
+            Assert.InRange(Math.Sqrt(dx * dx + dy * dy), 20, 400);
+        }
+    }
+
+    [Fact]
     public void Local_net_set_loads_the_map_and_bounds_that_hold_her()
     {
         // The local playtest set is scripts/run-local-net.sh; read its defaults instead of mutating process env
