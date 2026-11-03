@@ -142,9 +142,12 @@ public sealed partial class ZoneWorld
         player.SoulshotCharged = false;
         if (soulshot)
             RechargeAutoShots(player, outbound);
+        // Mobius doAttack turns the attacker to its target; the target's own facing decides back/side/front.
+        player.Heading = ZoneCombat.HeadingFrom(player.X, player.Y, target.X, target.Y);
         var (damage, flags) = ZoneCombat.RollMelee(_combatRandom, ps.PAtk, NpcPDef(target),
             ps.Accuracy, NpcEvasion(target), ps.CritRate, ps.RandomDamage,
-            soulshot, (int)ps.WeaponGrade, NpcShieldRate(target), target.ShieldDef, ps.Weapon == Fineage.Game.WeaponType.Bow);
+            soulshot, (int)ps.WeaponGrade, NpcShieldRate(target), target.ShieldDef, ps.Weapon == Fineage.Game.WeaponType.Bow,
+            ZoneCombat.HitConditionBonus(player.X, player.Y, player.Z, target.X, target.Y, target.Z, target.Heading));
 
         var attack = new AttackMsg
         {
@@ -193,8 +196,10 @@ public sealed partial class ZoneWorld
         if (npc.PAtk <= 0)
             return (ZoneCombat.MobMeleeDamage(npc.Level), 0);
         var ps = PlayerStats(player);
+        npc.Heading = ZoneCombat.HeadingFrom(npc.X, npc.Y, player.X, player.Y);
         return ZoneCombat.RollMelee(_combatRandom, StatMods(npc).Apply(CombatStat.PAtk, npc.PAtk), ps.PDef, NpcAccuracy(npc), ps.Evasion,
-            NpcCritPermille(npc), npc.RandomDamage, false, 0, ps.ShieldRate, ps.ShieldDef, false);
+            NpcCritPermille(npc), npc.RandomDamage, false, 0, ps.ShieldRate, ps.ShieldDef, false,
+            ZoneCombat.HitConditionBonus(npc.X, npc.Y, npc.Z, player.X, player.Y, player.Z, player.Heading));
     }
 
     Task? _combatLoop;

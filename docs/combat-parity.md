@@ -59,9 +59,15 @@
 - Failed → second roll succeeds and level gap ≤ 9 → ½ damage + SysMsg 158 "Your attack has failed."; else 1 damage + SysMsg 139 "<mob> has resisted your <skill>.". Success + mcrit → ×3 (×2.5 PvP) + SysMsg 1280 "Magic Critical Hit!".
 - Gaps: skill-combat.json has no `magicLvl` (attacker level used); no MCRITICAL_RATE buff/passive mods (Wild Magic etc.) or MAGIC_CRIT_DMG; no MAGIC_SUCCESS_RES / attribute bonus; no magic shield block; Drain 50% message variant; mobs casting at players not rolled.
 
+## Slice 11 — hitConditionBonus (position / height)
+- Mobius calcHitMiss: chance = (80 + 2·(acc − eva))·10, `chance *= HitConditionBonusData` (Java int truncation), clamp 200..980. Applies to player→mob and mob→player melee.
+- Bonus = (100 + high +3 if attacker Δz > 50 / low −3 if < −50 + back +10 / front 0 / side +5) / 100 (hitConditionBonus.xml).
+- Back/front use Mobius isBehind / isInFrontOf (60° cone vs target heading). Entity heading is now live: set from the move direction each movement tick and turned to the target on every swing (doAttack), so a mob fighting you faces you (front), while one walking away is hit from behind.
+- Gaps: no game clock yet → night −10% not applied (wired as a parameter); rain unsupported in Mobius too; back/side crit bonuses (blow/critical position mods) and skill hit position not applied; V2/Net heading not re-broadcast from these server-side turns.
+
 ## Still open (PvE priority)
 1. Blow skills (calcBlowDamage, behind/side chance, lethal) — medium.
 2. Aggro LoS / peace zone / level-gap — medium.
-3. hitConditionBonus (back/side/height/night/rain) + physical crit position — small.
+3. Night game clock (GameTimeTaskManager) for the −10% dark bonus — small.
 4. magicLvl in skill-combat.json + mcrit stat mods — small.
 5. Level-gap damage penalties, weapon vulnerabilities, NPC soulshots — small/medium.

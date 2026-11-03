@@ -112,8 +112,60 @@ public static class ZoneCombat
     public const int DefaultPlayerRandomDamage = 10;
 
     /// <summary>Mobius <c>Formulas.calcHitMiss</c>: (80 + 2·(acc − eva))·10 ‰, clamped 200..980.</summary>
-    public static int HitChancePermille(double accuracy, double evasion) =>
-        Math.Clamp((int)((80 + 2 * (accuracy - evasion)) * 10), 200, 980);
+    public static int HitChancePermille(double accuracy, double evasion) => HitChancePermille(accuracy, evasion, 1d);
+
+    /// <summary>calcHitMiss with HitConditionBonusData multiplier (Java int *= double truncates), then clamp 200..980.</summary>
+    public static int HitChancePermille(double accuracy, double evasion, double conditionBonus) =>
+        Math.Clamp((int)((int)((80 + 2 * (accuracy - evasion)) * 10) * conditionBonus), 200, 980);
+
+    // Mobius dist/game/data/stats/hitConditionBonus.xml (Interlude).
+    public const int HitBonusBack = 10, HitBonusFront = 0, HitBonusSide = 5, HitBonusHigh = 3, HitBonusLow = -3, HitBonusDark = -10;
+
+    /// <summary>Mobius <c>Util.calculateHeadingFrom</c>: atan2 angle (0..360) · 182.044444444.</summary>
+    public static int HeadingFrom(int fromX, int fromY, int toX, int toY)
+    {
+        double angle = AngleFrom(fromX, fromY, toX, toY);
+        return (int)(angle * 182.044444444);
+    }
+
+    /// <summary>Mobius <c>Util.calculateAngleFrom</c>: degrees 0..360 from (x1,y1) towards (x2,y2).</summary>
+    public static double AngleFrom(int x1, int y1, int x2, int y2)
+    {
+        double angle = Math.Atan2(y2 - y1, x2 - x1) * 180 / Math.PI;
+        return angle < 0 ? angle + 360 : angle;
+    }
+
+    static bool WithinAngle(double angleChar, int heading, double maxDiff = 60)
+    {
+        double diff = angleChar - heading / 182.044444444;
+        if (diff <= -360 + maxDiff) diff += 360;
+        if (diff >= 360 - maxDiff) diff -= 360;
+        return Math.Abs(diff) <= maxDiff;
+    }
+
+    /// <summary>Mobius <c>Creature.isBehind</c>: angle attacker→target within 60° of the target's heading.</summary>
+    public static bool IsBehind(int ax, int ay, int tx, int ty, int targetHeading) =>
+        WithinAngle(AngleFrom(ax, ay, tx, ty), targetHeading);
+
+    /// <summary>Mobius <c>Creature.isInFrontOf</c>: angle target→attacker within 60° of the target's heading.</summary>
+    public static bool IsInFrontOf(int ax, int ay, int tx, int ty, int targetHeading) =>
+        WithinAngle(AngleFrom(tx, ty, ax, ay), targetHeading);
+
+    /// <summary>
+    /// Mobius <c>HitConditionBonusData.getConditionBonus</c>: 100 + high/low (Δz &gt; ±50) + dark (night) + back/front/side, /100, min 0.
+    /// Rain is unsupported in Mobius as well.
+    /// </summary>
+    public static double HitConditionBonus(int ax, int ay, int az, int tx, int ty, int tz, int targetHeading, bool night = false)
+    {
+        double mod = 100;
+        if (az - tz > 50) mod += HitBonusHigh;
+        else if (az - tz < -50) mod += HitBonusLow;
+        if (night) mod += HitBonusDark;
+        if (IsBehind(ax, ay, tx, ty, targetHeading)) mod += HitBonusBack;
+        else if (IsInFrontOf(ax, ay, tx, ty, targetHeading)) mod += HitBonusFront;
+        else mod += HitBonusSide;
+        return Math.Max(mod / 100, 0);
+    }
 
     /// <summary>Mobius FuncAtkAccuracy / FuncAtkEvasion: base + sqrt(DEX)·6 + level.</summary>
     public static double AccuracyOrEvasion(double baseValue, int dex, int level) =>
@@ -127,15 +179,20 @@ public static class ZoneCombat
         int critPermille, int randomPercent) =>
         RollMelee(rnd, pAtk, pDef, accuracy, evasion, critPermille, randomPercent, false, 0, 0, 0, false);
 
+    public static (int Damage, byte Flags) RollMelee(Random rnd, double pAtk, double pDef, double accuracy, double evasion,
+        int critPermille, int randomPercent, bool soulshot, int shotGrade, double shieldRate, int shieldDef, bool attackerBow) =>
+        RollMelee(rnd, pAtk, pDef, accuracy, evasion, critPermille, randomPercent, soulshot, shotGrade, shieldRate, shieldDef, attackerBow, 1d);
+
     /// <summary>
     /// Full swing: miss → shield → crit → calcPhysDam. Soulshot doubles P.Atk (flag 0x10 | grade); shield block
     /// adds sDef to P.Def, perfect block deals 1 (flag 0x40).
     /// </summary>
     public static (int Damage, byte Flags) RollMelee(Random rnd, double pAtk, double pDef, double accuracy, double evasion,
-        int critPermille, int randomPercent, bool soulshot, int shotGrade, double shieldRate, int shieldDef, bool attackerBow)
+        int critPermille, int randomPercent, bool soulshot, int shotGrade, double shieldRate, int shieldDef, bool attackerBow,
+        double hitConditionBonus)
     {
         byte ssFlags = soulshot ? (byte)(HitFlagSoulshot | (shotGrade & 0x0F)) : (byte)0;
-        if (rnd.Next(1000) >= HitChancePermille(accuracy, evasion))
+        if (rnd.Next(1000) >= HitChancePermille(accuracy, evasion, hitConditionBonus))
             return (0, (byte)(HitFlagMiss | ssFlags));
         var shield = RollShield(rnd, shieldRate, attackerBow);
         byte flags = (byte)(ssFlags | (shield != ShieldResult.None ? HitFlagShield : 0));

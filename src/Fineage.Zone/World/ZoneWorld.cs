@@ -40,7 +40,8 @@ sealed class ZoneEntity
     public int X { get; set; }
     public int Y { get; set; }
     public int Z { get; set; }
-    public int Heading { get; init; }
+    /// <summary>Facing 0..65535 (Mobius heading); updated while moving and when swinging at a target.</summary>
+    public int Heading { get; set; }
     public int ClassId { get; init; }
     public int NpcId { get; init; }
     public bool Attackable { get; init; }

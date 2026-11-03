@@ -1,3 +1,4 @@
+using Fineage.Zone.Combat;
 using Fineage.Protocol;
 using Fineage.Zone.Geo;
 
@@ -232,6 +233,8 @@ public sealed partial class ZoneWorld
         double step = speed * dt / 1000.0;
         double dx = e.MoveDestX - e.X, dy = e.MoveDestY - e.Y;
         double dist = Math.Sqrt(dx * dx + dy * dy);
+        if (dist >= 1)
+            e.Heading = ZoneCombat.HeadingFrom(e.X, e.Y, e.MoveDestX, e.MoveDestY);
         if ((dist <= step || dist < 1) && e.MovePath.Count > 0)
         {
             // Reached a geo-path waypoint: snap to it and start the next leg (leftover distance is dropped, ≤1 tick).
