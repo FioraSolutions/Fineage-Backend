@@ -111,6 +111,8 @@ interface INetPresenceBridge
     /// <summary>Mobius <c>AcquireSkillInfo</c>: the confirmation page for one trainer offer. Called under the ZoneWorld gate.</summary>
     void FanoutAcquireSkillInfo(IReadOnlyList<int> watcherObjectIds, AcquireSkillInfoNetMsg info);
 
+    void FanoutEnchantResult(IReadOnlyList<int> watcherObjectIds, EnchantResultNetMsg result);
+
     void FanoutPartyAskJoin(IReadOnlyList<int> watcherObjectIds, PartyAskJoinNetMsg ask);
 
     void FanoutPartyJoinResult(IReadOnlyList<int> watcherObjectIds, PartyJoinResultNetMsg result);

@@ -62,7 +62,14 @@ public sealed partial class ZoneWorld
             return EnchantProtocol.NotScroll;
 
         player.ActiveEnchantObjectId = scroll.ObjectId;
-        toSelf.Add(Pack(session, MsgType.SystemMessage, EnchantLines.Select(scroll)));
+        var select = EnchantLines.Select(scroll);
+        toSelf.Add(Pack(session, MsgType.SystemMessage, select));
+        NetBridge?.FanoutSystemMessage([session.ObjectId], new Fineage.Net.Contract.SystemMessageNetMsg
+        {
+            Id = select.Id,
+            Text = select.Text ?? "",
+            Params = select.Params ?? []
+        });
         ZoneLog.Info($"enchant object={session.ObjectId} request scroll={scroll.ObjectId} item={scroll.ItemId}");
         return null;
     }
@@ -80,6 +87,10 @@ public sealed partial class ZoneWorld
         player.ActiveEnchantObjectId = 0;
         toSelf.Add(Pack(session, MsgType.EnchantResult, new EnchantResultMsg { Result = EnchantProtocol.ResultCancel }));
         toSelf.Add(Pack(session, MsgType.SystemMessage, EnchantLines.Cancelled()));
+        NetBridge?.FanoutEnchantResult([session.ObjectId], new Fineage.Net.Contract.EnchantResultNetMsg
+        {
+            Result = EnchantProtocol.ResultCancel
+        });
         ZoneLog.Info($"enchant object={session.ObjectId} cancel");
         return null;
     }
@@ -212,8 +223,25 @@ public sealed partial class ZoneWorld
             CrystalCount = crystalCount
         }));
         toSelf.Add(Pack(session, MsgType.InventoryUpdate, new InventoryUpdateMsg { Changes = [.. changes] }));
+        NetBridge?.FanoutInventoryUpdate([session.ObjectId], ToNetInventoryUpdate(new InventoryUpdateMsg { Changes = [.. changes] }));
+        NetBridge?.FanoutEnchantResult([session.ObjectId], new Fineage.Net.Contract.EnchantResultNetMsg
+        {
+            Result = resultCode,
+            EnchantLevel = reportedLevel,
+            ObjectId = target.ObjectId,
+            CrystalItemId = crystalId,
+            CrystalCount = crystalCount
+        });
         foreach (var line in lines)
+        {
             toSelf.Add(Pack(session, MsgType.SystemMessage, line));
+            NetBridge?.FanoutSystemMessage([session.ObjectId], new Fineage.Net.Contract.SystemMessageNetMsg
+            {
+                Id = line.Id,
+                Text = line.Text ?? "",
+                Params = line.Params ?? []
+            });
+        }
 
         bool levelChangedWhileWorn = target.IsEquipped && target.EnchantLevel != oldLevel;
         bool destroyedWhileWorn = wasEquipped && inventory.Find(target.ObjectId) == null;
