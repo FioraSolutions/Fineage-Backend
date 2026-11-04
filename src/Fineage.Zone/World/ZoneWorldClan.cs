@@ -899,81 +899,81 @@ public sealed partial class ZoneWorld
         switch (pending.Type)
         {
             case MsgType.PledgeStatusChanged:
-            {
-                var msg = MessagePackSerializer.Deserialize<PledgeStatusChangedMsg>(pending.Body);
-                NetBridge.FanoutPledgeStatus(self, new Fineage.Net.Contract.PledgeStatusNetMsg
                 {
-                    ClanId = msg.ClanId,
-                    Name = msg.Name ?? "",
-                    Level = msg.Level,
-                    LeaderObjectId = msg.LeaderObjectId,
-                    CrestId = msg.CrestId,
-                    MemberCount = msg.MemberCount,
-                    DissolvingExpiryUnixMs = msg.DissolvingExpiryUnixMs,
-                    CharPenaltyExpiryUnixMs = msg.CharPenaltyExpiryUnixMs
-                });
-                break;
-            }
-            case MsgType.PledgeMemberList:
-            {
-                var msg = MessagePackSerializer.Deserialize<PledgeMemberListMsg>(pending.Body);
-                NetBridge.FanoutPledgeMemberList(self, new Fineage.Net.Contract.PledgeMemberListNetMsg
-                {
-                    ClanId = msg.ClanId,
-                    LeaderObjectId = msg.LeaderObjectId,
-                    Members = (msg.Members ?? []).Select(entry => new Fineage.Net.Contract.PledgeMemberNet
+                    var msg = MessagePackSerializer.Deserialize<PledgeStatusChangedMsg>(pending.Body);
+                    NetBridge.FanoutPledgeStatus(self, new Fineage.Net.Contract.PledgeStatusNetMsg
                     {
-                        ObjectId = entry.ObjectId,
-                        Name = entry.Name ?? "",
-                        ClassId = entry.ClassId,
-                        Level = entry.Level,
-                        Online = entry.Online,
-                        PledgeType = entry.PledgeType
-                    }).ToArray()
-                });
-                break;
-            }
+                        ClanId = msg.ClanId,
+                        Name = msg.Name ?? "",
+                        Level = msg.Level,
+                        LeaderObjectId = msg.LeaderObjectId,
+                        CrestId = msg.CrestId,
+                        MemberCount = msg.MemberCount,
+                        DissolvingExpiryUnixMs = msg.DissolvingExpiryUnixMs,
+                        CharPenaltyExpiryUnixMs = msg.CharPenaltyExpiryUnixMs
+                    });
+                    break;
+                }
+            case MsgType.PledgeMemberList:
+                {
+                    var msg = MessagePackSerializer.Deserialize<PledgeMemberListMsg>(pending.Body);
+                    NetBridge.FanoutPledgeMemberList(self, new Fineage.Net.Contract.PledgeMemberListNetMsg
+                    {
+                        ClanId = msg.ClanId,
+                        LeaderObjectId = msg.LeaderObjectId,
+                        Members = (msg.Members ?? []).Select(entry => new Fineage.Net.Contract.PledgeMemberNet
+                        {
+                            ObjectId = entry.ObjectId,
+                            Name = entry.Name ?? "",
+                            ClassId = entry.ClassId,
+                            Level = entry.Level,
+                            Online = entry.Online,
+                            PledgeType = entry.PledgeType
+                        }).ToArray()
+                    });
+                    break;
+                }
             case MsgType.ClanAskJoin:
-            {
-                var msg = MessagePackSerializer.Deserialize<ClanAskJoinMsg>(pending.Body);
-                NetBridge.FanoutClanAskJoin(self, new Fineage.Net.Contract.ClanAskJoinNetMsg
                 {
-                    RequestorObjectId = msg.RequestorObjectId,
-                    RequestorName = msg.RequestorName ?? "",
-                    ClanId = msg.ClanId,
-                    ClanName = msg.ClanName ?? "",
-                    PledgeType = msg.PledgeType
-                });
-                break;
-            }
+                    var msg = MessagePackSerializer.Deserialize<ClanAskJoinMsg>(pending.Body);
+                    NetBridge.FanoutClanAskJoin(self, new Fineage.Net.Contract.ClanAskJoinNetMsg
+                    {
+                        RequestorObjectId = msg.RequestorObjectId,
+                        RequestorName = msg.RequestorName ?? "",
+                        ClanId = msg.ClanId,
+                        ClanName = msg.ClanName ?? "",
+                        PledgeType = msg.PledgeType
+                    });
+                    break;
+                }
             case MsgType.ClanJoinResult:
-            {
-                var msg = MessagePackSerializer.Deserialize<ClanJoinResultMsg>(pending.Body);
-                NetBridge.FanoutClanJoinResult(self, new Fineage.Net.Contract.ClanJoinResultNetMsg
                 {
-                    Response = msg.Response
-                });
-                break;
-            }
+                    var msg = MessagePackSerializer.Deserialize<ClanJoinResultMsg>(pending.Body);
+                    NetBridge.FanoutClanJoinResult(self, new Fineage.Net.Contract.ClanJoinResultNetMsg
+                    {
+                        Response = msg.Response
+                    });
+                    break;
+                }
             case MsgType.SystemMessage:
-            {
-                var msg = MessagePackSerializer.Deserialize<SystemMessageMsg>(pending.Body);
-                NetBridge.FanoutSystemMessage(self, new Fineage.Net.Contract.SystemMessageNetMsg
                 {
-                    Id = msg.Id,
-                    Text = msg.Text ?? "",
-                    Params = msg.Params ?? []
-                });
-                break;
-            }
+                    var msg = MessagePackSerializer.Deserialize<SystemMessageMsg>(pending.Body);
+                    NetBridge.FanoutSystemMessage(self, new Fineage.Net.Contract.SystemMessageNetMsg
+                    {
+                        Id = msg.Id,
+                        Text = msg.Text ?? "",
+                        Params = msg.Params ?? []
+                    });
+                    break;
+                }
             case MsgType.UserInfo:
-            {
-                // The Net sheet is built from the live entity, not from the V2 body: it also carries
-                // the combat stats and speeds the V2 message omits.
-                if (_byId.TryGetValue(pending.To.ObjectId, out var recipient) && recipient.Kind == ZoneEntityKind.Player)
-                    NetBridge.FanoutUserInfo([recipient.ObjectId], NetUserInfo(recipient));
-                break;
-            }
+                {
+                    // The Net sheet is built from the live entity, not from the V2 body: it also carries
+                    // the combat stats and speeds the V2 message omits.
+                    if (_byId.TryGetValue(pending.To.ObjectId, out var recipient) && recipient.Kind == ZoneEntityKind.Player)
+                        NetBridge.FanoutUserInfo([recipient.ObjectId], NetUserInfo(recipient));
+                    break;
+                }
         }
     }
 

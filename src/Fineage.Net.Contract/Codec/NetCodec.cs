@@ -668,7 +668,11 @@ namespace Fineage.Net.Contract
 
             return new AcquireSkillInfoNetMsg
             {
-                SkillId = id, Level = level, SpCost = sp, SkillType = type, Requirements = reqs
+                SkillId = id,
+                Level = level,
+                SpCost = sp,
+                SkillType = type,
+                Requirements = reqs
             };
         }
 
