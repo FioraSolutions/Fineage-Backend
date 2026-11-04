@@ -93,6 +93,12 @@ interface INetPresenceBridge
     /// <summary>Full SkillList re-send after a trainer learn (Mobius sends SkillList after RequestAcquireSkill).</summary>
     void FanoutSkillList(IReadOnlyList<int> watcherObjectIds, SkillListNetMsg list);
 
+    /// <summary>Mobius ChangeWaitType (sit/stand) for <paramref name="waitType"/>'s actor. Called under the ZoneWorld gate.</summary>
+    void FanoutChangeWaitType(IReadOnlyList<int> watcherObjectIds, ChangeWaitTypeNetMsg waitType);
+
+    /// <summary>Mobius SocialAction (gesture) for an actor. Called under the ZoneWorld gate.</summary>
+    void FanoutSocialAction(IReadOnlyList<int> watcherObjectIds, SocialActionNetMsg action);
+
     void FanoutPartyAskJoin(IReadOnlyList<int> watcherObjectIds, PartyAskJoinNetMsg ask);
 
     void FanoutPartyJoinResult(IReadOnlyList<int> watcherObjectIds, PartyJoinResultNetMsg result);

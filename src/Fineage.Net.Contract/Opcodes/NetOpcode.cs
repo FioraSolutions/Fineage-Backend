@@ -92,7 +92,7 @@ namespace Fineage.Net.Contract
         // 0x0344..0x034F reserved (clan WIP)
         /// <summary>Client → zone: Mobius ValidatePosition heartbeat (L2 XYZ + heading).</summary>
         public const ushort ValidatePosition = 0x0350;
-        /// <summary>Client → zone: Mobius RequestActionUse (action id; Net handles 1 = walk/run toggle).</summary>
+        /// <summary>Client → zone: Mobius RequestActionUse (0 = sit/stand, 1 = walk/run, 12–14 = social).</summary>
         public const ushort RequestActionUse = 0x0351;
         /// <summary>Zone → client: Mobius ChangeMoveType + effective run/walk speed (swim speed while in water).</summary>
         public const ushort ChangeMoveType = 0x0352;
@@ -118,5 +118,9 @@ namespace Fineage.Net.Contract
         public const ushort ShortCutDelete = 0x035C;
         /// <summary>Zone → client: Mobius EtcStatusUpdate (weight/grade penalty flags and levels).</summary>
         public const ushort EtcStatusUpdate = 0x035D;
+        /// <summary>Zone → client: Mobius ChangeWaitType (sit/stand + the pawn position).</summary>
+        public const ushort ChangeWaitType = 0x035E;
+        /// <summary>Zone → client: Mobius SocialAction (gesture id; 15 = level up).</summary>
+        public const ushort SocialAction = 0x035F;
     }
 }

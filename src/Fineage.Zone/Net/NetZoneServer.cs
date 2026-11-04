@@ -354,6 +354,20 @@ public sealed class NetZoneServer : INetPresenceBridge
             _ = _presence.SendAsync(watcher, NetOpcode.SkillList, payload, CancellationToken.None);
     }
 
+    void INetPresenceBridge.FanoutChangeWaitType(IReadOnlyList<int> watcherObjectIds, ChangeWaitTypeNetMsg waitType)
+    {
+        var payload = NetCodec.EncodeChangeWaitType(waitType);
+        foreach (int watcher in watcherObjectIds)
+            _ = _presence.SendAsync(watcher, NetOpcode.ChangeWaitType, payload, CancellationToken.None);
+    }
+
+    void INetPresenceBridge.FanoutSocialAction(IReadOnlyList<int> watcherObjectIds, SocialActionNetMsg action)
+    {
+        var payload = NetCodec.EncodeSocialAction(action);
+        foreach (int watcher in watcherObjectIds)
+            _ = _presence.SendAsync(watcher, NetOpcode.SocialAction, payload, CancellationToken.None);
+    }
+
     void INetPresenceBridge.FanoutQuestList(IReadOnlyList<int> watcherObjectIds, QuestListNetMsg list)
     {
         var payload = NetCodec.EncodeQuestList(list);
@@ -567,8 +581,10 @@ public sealed class NetZoneServer : INetPresenceBridge
                             if (zoneSession.Bound && zoneSession.InWorld)
                             {
                                 var use = NetCodec.DecodeActionUse(envelope.Payload);
-                                // Net renders only the walk/run toggle so far (ChangeMoveType); other action ids stay on V2.
-                                if (use.ActionId != ActionProtocol.WalkRun)
+                                // Net renders sit/stand (ChangeWaitType), the walk/run toggle (ChangeMoveType) and the
+                                // three social gestures (SocialAction); the rest of Mobius' action table is still V2-only.
+                                if (use.ActionId is not (ActionProtocol.SitStand or ActionProtocol.WalkRun
+                                    or ActionProtocol.SocialGreeting or ActionProtocol.SocialVictory or ActionProtocol.SocialAdvance))
                                 {
                                     await RejectAsync(conn, ActionProtocol.Unsupported, $"action {use.ActionId} not on Net yet", ct).ConfigureAwait(false);
                                     break;

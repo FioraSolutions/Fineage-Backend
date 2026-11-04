@@ -162,6 +162,17 @@ public sealed partial class ZoneWorld
     {
         var msg = new SocialActionMsg { ObjectId = player.ObjectId, ActionId = actionId };
         FanoutActor(player, MsgType.SocialAction, msg, outbound);
+        // Mobius broadcastPacket(new SocialAction(...)): self + everyone holding the actor in view.
+        if (NetBridge != null)
+        {
+            NetBridge.FanoutSocialAction(NetWatchersOf(player), new Fineage.Net.Contract.SocialActionNetMsg
+            {
+                EntityValue = (ulong)(uint)player.ObjectId,
+                EntityGeneration = 1,
+                ActionId = actionId
+            });
+        }
+
         return null;
     }
 
@@ -169,6 +180,19 @@ public sealed partial class ZoneWorld
     {
         var msg = new ChangeWaitTypeMsg { ObjectId = player.ObjectId, WaitType = waitType };
         FanoutActor(player, MsgType.ChangeWaitType, msg, outbound);
+        // Mobius Player.sitDown/standUp: broadcastPacket(new ChangeWaitType(this, ...)), self included.
+        if (NetBridge != null)
+        {
+            NetBridge.FanoutChangeWaitType(NetWatchersOf(player), new Fineage.Net.Contract.ChangeWaitTypeNetMsg
+            {
+                EntityValue = (ulong)(uint)player.ObjectId,
+                EntityGeneration = 1,
+                WaitType = waitType,
+                X = player.X,
+                Y = player.Y,
+                Z = player.Z
+            });
+        }
     }
 
     void FanoutMoveType(ZoneEntity player, List<Pending> outbound)

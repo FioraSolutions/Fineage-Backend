@@ -237,6 +237,29 @@ namespace Fineage.Net.Contract
         public SkillListEntryNet[] Skills { get; set; } = System.Array.Empty<SkillListEntryNet>();
     }
 
+    /// <summary>
+    /// Mobius <c>ChangeWaitType</c>: sit/stand. Interlude also carries the actor position, which the client uses to
+    /// settle the pawn before it plays the sitting animation.
+    /// </summary>
+    public sealed class ChangeWaitTypeNetMsg
+    {
+        public ulong EntityValue { get; set; }
+        public uint EntityGeneration { get; set; }
+        /// <summary>0 = sitting, 1 = standing (Interlude <c>ChangeWaitType.WT_SITTING/WT_STANDING</c>).</summary>
+        public int WaitType { get; set; }
+        public int X { get; set; }
+        public int Y { get; set; }
+        public int Z { get; set; }
+    }
+
+    /// <summary>Mobius <c>SocialAction</c> (gesture ids 2–14, 15 = level up).</summary>
+    public sealed class SocialActionNetMsg
+    {
+        public ulong EntityValue { get; set; }
+        public uint EntityGeneration { get; set; }
+        public int ActionId { get; set; }
+    }
+
     /// <summary>Forget / leave knownlist (Mobius DeleteObject) for Net peers.</summary>
     public sealed class EntityDespawnMsg
     {
