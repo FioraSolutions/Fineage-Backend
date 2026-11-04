@@ -9,10 +9,14 @@ CMD="${1:-start}"
 
 export FINEAGE_STORE="${FINEAGE_STORE:-postgres}"
 export FINEAGE_DATABASE_URL="${FINEAGE_DATABASE_URL:-Host=127.0.0.1;Port=5432;Database=fineage;Username=fineage;Password=fineage}"
-# Local playtest region: Elven Village / Mother Tree (Mobius ElvenTerritory + Others/Gremlins).
-# Override with FINEAGE_ZONE_MAPS=... / FINEAGE_ZONE_BOUNDS=...; set both to "" for the legacy single active map.
-export FINEAGE_ZONE_MAPS="${FINEAGE_ZONE_MAPS-elven_village,elven_starting,elven_village_quest_monsters,elven_fortress,training_hall_gremlins}"
-export FINEAGE_ZONE_BOUNDS="${FINEAGE_ZONE_BOUNDS-20000,20000,80000,80000;5000,60000,35000,90000}"
+# One world: every enabled spawn map (all of Interlude — Talking Island, Elven Village, the villages,
+# hunting grounds, catacombs). FINEAGE_ZONE_MAPS / FINEAGE_ZONE_BOUNDS are unset on purpose so nothing
+# is whitelisted; pass them only to shard this down to a single region.
+export FINEAGE_ZONE_INCLUDE_ENABLED_MAPS="${FINEAGE_ZONE_INCLUDE_ENABLED_MAPS:-1}"
+export FINEAGE_ZONE_MAPS="${FINEAGE_ZONE_MAPS-}"
+export FINEAGE_ZONE_BOUNDS="${FINEAGE_ZONE_BOUNDS-}"
+# The world is 34k NPCs, so visibility must be spatial, not "the whole zone".
+export FINEAGE_ZONE_AOI_CELL="${FINEAGE_ZONE_AOI_CELL:-3000}"
 export COMPOSE_PROJECT_NAME="${COMPOSE_PROJECT_NAME:-fineage-backend}"
 
 stop() {
@@ -27,10 +31,26 @@ stop() {
   done
   pkill -f 'Fineage.Login.dll' 2>/dev/null || true
   pkill -f 'Fineage.Zone.dll' 2>/dev/null || true
+  # A pidfile written by an earlier run can be stale, so also close the ports themselves.
+  # Kill politely first, then escalate: a lingering listener is what makes Login hand out a
+  # handoff for a zone (or a login) that is no longer the one this script started.
   for p in 5080 9106 9206 9777 9877; do
     pids=$(lsof -tiTCP:"$p" -sTCP:LISTEN 2>/dev/null || true)
     if [[ -n "${pids}" ]]; then kill ${pids} 2>/dev/null || true; fi
   done
+  for _ in $(seq 1 10); do
+    busy=0
+    for p in 5080 9106 9206 9777 9877; do
+      if [[ -n "$(lsof -tiTCP:"$p" -sTCP:LISTEN 2>/dev/null || true)" ]]; then busy=1; fi
+    done
+    [[ "$busy" == 0 ]] && break
+    sleep 0.5
+  done
+  for p in 5080 9106 9206 9777 9877; do
+    pids=$(lsof -tiTCP:"$p" -sTCP:LISTEN 2>/dev/null || true)
+    if [[ -n "${pids}" ]]; then kill -9 ${pids} 2>/dev/null || true; fi
+  done
+  sleep 0.5
 }
 
 port_open() {
@@ -123,14 +143,17 @@ export FINEAGE_NET_LOGIN_PORT=9106
 export FINEAGE_NET_ZONE_PORT=9777
 export FINEAGE_LOGIN_PORT=9206
 export FINEAGE_ZONE_PORT=9877
-export FINEAGE_ZONE_STATUS_PORT=0
+# Loopback /status so Login's /api/status can report the zone as up.
+export FINEAGE_ZONE_STATUS_PORT="${FINEAGE_ZONE_STATUS_PORT:-7780}"
 export FINEAGE_ZONE_HOST=127.0.0.1
 
+# With FINEAGE_STORE=postgres the --store path is only an anchor for the runtime sidecar files
+# (seven-signs.json, boss-schedule.json, olympiad.json) that live beside the account store.
 daemonize login-net \
-  dotnet "$LOGIN_DLL" --bind 127.0.0.1 --port 9206 --http-port 5080 --store local-data/accounts.json
+  dotnet "$LOGIN_DLL" --bind 127.0.0.1 --port 9206 --http-port 5080 --store local-data/state
 
 daemonize zone-net \
-  dotnet "$ZONE_DLL" --bind 127.0.0.1 --port 9877 --store local-data/accounts.json
+  dotnet "$ZONE_DLL" --bind 127.0.0.1 --port 9877 --store local-data/state
 
 ok=0
 for _ in 1 2 3 4 5 6 7 8 9 10 11 12 15; do

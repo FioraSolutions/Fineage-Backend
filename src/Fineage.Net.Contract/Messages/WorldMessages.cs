@@ -203,6 +203,10 @@ namespace Fineage.Net.Contract
         public int EnchantLevel { get; set; }
         /// <summary>Paperdoll slot index, or -1 when in the bag.</summary>
         public int EquippedSlot { get; set; } = -1;
+        /// <summary>Body token ("rhand", "lrhand", "chest", "none", ...). Lets the client resolve the paperdoll slot without guessing.</summary>
+        public string BodySlot { get; set; } = "";
+        /// <summary>Item kind token: "weapon", "armor", "etc", "jewel".</summary>
+        public string Kind { get; set; } = "";
     }
 
     public sealed class ItemListNetMsg

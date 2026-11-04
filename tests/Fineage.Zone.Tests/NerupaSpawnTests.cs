@@ -98,23 +98,24 @@ public sealed class NerupaSpawnTests
     }
 
     [Fact]
-    public void Local_net_set_loads_the_map_and_bounds_that_hold_her()
+    public void Local_net_set_loads_the_whole_world_so_she_is_spawned()
     {
         // The local playtest set is scripts/run-local-net.sh; read its defaults instead of mutating process env
         // (the zone filter is process-global and other tests run in parallel with this one).
         string script = File.ReadAllText(Path.Combine(RepoRoot(), "scripts", "run-local-net.sh"));
 
-        string maps = DefaultExport(script, "FINEAGE_ZONE_MAPS");
-        Assert.Contains("elven_village", maps.Split(',', StringSplitOptions.TrimEntries));
-        Assert.DoesNotContain(" ", maps, StringComparison.Ordinal);
+        // One world: every enabled spawn map, no region whitelist and no bounding box.
+        string include = DefaultExport(script, "FINEAGE_ZONE_INCLUDE_ENABLED_MAPS");
+        Assert.Equal("1", include);
+        Assert.Equal(string.Empty, DefaultExport(script, "FINEAGE_ZONE_MAPS"));
+        Assert.Equal(string.Empty, DefaultExport(script, "FINEAGE_ZONE_BOUNDS"));
 
-        string bounds = DefaultExport(script, "FINEAGE_ZONE_BOUNDS");
-        var boxes = ZoneMapFilter.ParseBounds(bounds);
-        Assert.NotEmpty(boxes);
-
+        // Empty filters keep everything, so her map and row survive the filtering the zone applies.
+        var boxes = ZoneMapFilter.ParseBounds(DefaultExport(script, "FINEAGE_ZONE_BOUNDS"));
         var map = SpawnCatalog.LoadDefault().GetMap("elven_village");
+        Assert.True(map.Enabled);
         foreach (var row in map.Npcs.Where(row => row.NpcId is NerupaNpcId or NewbieHelperNpcId))
-            Assert.True(ZoneMapFilter.Contains(boxes, row.X, row.Y), $"{row.NpcId} at {row.X},{row.Y} falls outside {bounds}");
+            Assert.True(ZoneMapFilter.Contains(boxes, row.X, row.Y), $"{row.NpcId} at {row.X},{row.Y} would be filtered out");
     }
 
     [Fact]
@@ -173,10 +174,10 @@ public sealed class NerupaSpawnTests
         return SpawnCatalog.From(new Dictionary<string, SpawnMapDefinition> { ["elven_village"] = village });
     }
 
-    /// <summary>The value of an <c>export NAME="${NAME-default}"</c> default in the local run script.</summary>
+    /// <summary>The value of an <c>export NAME="${NAME-default}"</c> / <c>${NAME:-default}</c> in the run script.</summary>
     static string DefaultExport(string script, string name)
     {
-        var match = Regex.Match(script, $@"export\s+{Regex.Escape(name)}=""\$\{{{Regex.Escape(name)}-([^}}]*)\}}""");
+        var match = Regex.Match(script, $@"export\s+{Regex.Escape(name)}=""\$\{{{Regex.Escape(name)}:?-([^}}]*)\}}""");
         Assert.True(match.Success, $"{name} default not found in scripts/run-local-net.sh");
         return match.Groups[1].Value;
     }

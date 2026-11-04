@@ -63,7 +63,14 @@ public sealed class NetZoneServer : INetPresenceBridge
             Running = running
         });
         foreach (int watcher in watcherObjectIds)
+        {
+            if (!_presence.TryGet(watcher, out _, out _))
+            {
+                ZoneLog.Info($"[move] MoveState watcher={watcher} mover={moverObjectId} NOT REGISTERED in presence hub");
+                continue;
+            }
             _ = _presence.SendAsync(watcher, NetOpcode.MoveState, payload, CancellationToken.None);
+        }
     }
 
     void INetPresenceBridge.FanoutKnownlistDiff(int selfObjectId, IReadOnlyList<int> added, IReadOnlyList<int> removed)

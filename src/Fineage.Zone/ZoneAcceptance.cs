@@ -110,7 +110,7 @@ public static class ZoneAcceptance
         int destX = nearest.X;
         int destY = nearest.Y;
         int destZ = nearest.Z;
-        if (!TalkingIsland.WithinStep(spawned.X, spawned.Y, destX, destY))
+        if (!MoveLimits.WithinStep(spawned.X, spawned.Y, destX, destY))
         {
             destX = spawned.X + 10;
             destY = spawned.Y;

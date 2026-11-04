@@ -36,7 +36,7 @@ public sealed partial class ZoneWorld
         double dx = target.X - player.X;
         double dy = target.Y - player.Y;
         double dist = Math.Sqrt(dx * dx + dy * dy);
-        if (dist > ZoneCombat.AggroForgetRange || !TalkingIsland.WithinStep(player.X, player.Y, target.X, target.Y))
+        if (dist > ZoneCombat.AggroForgetRange)
             return -1;
         double stopAt = Math.Max(10, range - ZoneCombat.ApproachSlack);
         if (dist <= stopAt)
