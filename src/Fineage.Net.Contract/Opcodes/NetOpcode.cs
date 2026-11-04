@@ -138,5 +138,27 @@ namespace Fineage.Net.Contract
         public const ushort EnchantCancel = 0x0366;
         /// <summary>Zone → client: the finished enchant roll (result, level, object id, crystals).</summary>
         public const ushort EnchantResult = 0x0367;
+        /// <summary>Client → zone: Mobius RequestCreatePledge (clan name).</summary>
+        public const ushort ClanCreateRequest = 0x0368;
+        /// <summary>Client → zone: Mobius RequestJoinPledge (leader object id).</summary>
+        public const ushort ClanInviteRequest = 0x0369;
+        /// <summary>Client → zone: Mobius RequestAnswerJoinPledge (requestor object id, response).</summary>
+        public const ushort ClanAnswerJoinRequest = 0x036A;
+        /// <summary>Client → zone: Mobius RequestWithdrawalPledge. Empty body.</summary>
+        public const ushort ClanLeaveRequest = 0x036B;
+        /// <summary>Client → zone: Mobius RequestOustPledgeMember (member object id).</summary>
+        public const ushort ClanKickRequest = 0x036C;
+        /// <summary>Client → zone: Mobius RequestDissolvePledge. Empty body.</summary>
+        public const ushort ClanDissolveRequest = 0x036D;
+        /// <summary>Client → zone: Mobius RequestCancelDissolvePledge. Empty body.</summary>
+        public const ushort ClanCancelDissolveRequest = 0x036E;
+        /// <summary>Zone → client: Mobius PledgeStatusChanged / PledgeShowInfoUpdate.</summary>
+        public const ushort PledgeStatus = 0x036F;
+        /// <summary>Zone → client: Mobius PledgeShowMemberListAll (the roster after a membership change).</summary>
+        public const ushort PledgeMemberList = 0x0370;
+        /// <summary>Zone → client: Mobius AskJoinPledge (an invite arrived).</summary>
+        public const ushort ClanAskJoin = 0x0371;
+        /// <summary>Zone → client: Mobius JoinPledge (the invite was accepted or declined).</summary>
+        public const ushort ClanJoinResult = 0x0372;
     }
 }
