@@ -1,6 +1,7 @@
 using Fineage.Login;
 using Fineage.Protocol;
 using Fineage.Zone.Clan;
+using MessagePack;
 
 namespace Fineage.Zone.World;
 
@@ -55,6 +56,7 @@ public sealed partial class ZoneWorld
         if (error != null)
             return error;
 
+        PublishClanNet(outbound);
         await FlushOthersAsync(outbound, ct).ConfigureAwait(false);
         return null;
     }
@@ -77,6 +79,7 @@ public sealed partial class ZoneWorld
         if (error != null)
             return error;
 
+        PublishClanNet(outbound);
         await FlushOthersAsync(outbound, ct).ConfigureAwait(false);
         return null;
     }
@@ -99,6 +102,7 @@ public sealed partial class ZoneWorld
         if (error != null)
             return error;
 
+        PublishClanNet(outbound);
         await FlushOthersAsync(outbound, ct).ConfigureAwait(false);
         return null;
     }
@@ -115,6 +119,7 @@ public sealed partial class ZoneWorld
         if (error != null)
             return error;
 
+        PublishClanNet(outbound);
         await FlushOthersAsync(outbound, ct).ConfigureAwait(false);
         return null;
     }
@@ -137,6 +142,7 @@ public sealed partial class ZoneWorld
         if (error != null)
             return error;
 
+        PublishClanNet(outbound);
         await FlushOthersAsync(outbound, ct).ConfigureAwait(false);
         return null;
     }
@@ -153,6 +159,7 @@ public sealed partial class ZoneWorld
         if (error != null)
             return error;
 
+        PublishClanNet(outbound);
         await FlushOthersAsync(outbound, ct).ConfigureAwait(false);
         return null;
     }
@@ -169,6 +176,7 @@ public sealed partial class ZoneWorld
         if (error != null)
             return error;
 
+        PublishClanNet(outbound);
         await FlushOthersAsync(outbound, ct).ConfigureAwait(false);
         return null;
     }
@@ -178,6 +186,7 @@ public sealed partial class ZoneWorld
         var outbound = new List<Pending>();
         lock (_gate)
             CompleteDueDissolutions(now.ToUnixTimeMilliseconds(), outbound);
+        PublishClanNet(outbound);
         await FlushOthersAsync(outbound, ct).ConfigureAwait(false);
     }
 
@@ -874,6 +883,104 @@ public sealed partial class ZoneWorld
     {
         outbound.Add(Pack(session, MsgType.PledgeStatusChanged, new PledgeStatusChangedMsg()));
         outbound.Add(Pack(session, MsgType.PledgeMemberList, new PledgeMemberListMsg()));
+    }
+
+    /// <summary>
+    /// Replays one clan <see cref="Pending"/> into the matching Net fanout. The V2 send path builds the same
+    /// payloads for every member; projecting them keeps the V2 code untouched while Net clients see the
+    /// status change, the roster, the invite, and the join result.
+    /// </summary>
+    void PublishClanNet(Pending pending)
+    {
+        if (NetBridge == null || pending.To.ObjectId <= 0)
+            return;
+
+        int[] self = [pending.To.ObjectId];
+        switch (pending.Type)
+        {
+            case MsgType.PledgeStatusChanged:
+            {
+                var msg = MessagePackSerializer.Deserialize<PledgeStatusChangedMsg>(pending.Body);
+                NetBridge.FanoutPledgeStatus(self, new Fineage.Net.Contract.PledgeStatusNetMsg
+                {
+                    ClanId = msg.ClanId,
+                    Name = msg.Name ?? "",
+                    Level = msg.Level,
+                    LeaderObjectId = msg.LeaderObjectId,
+                    CrestId = msg.CrestId,
+                    MemberCount = msg.MemberCount,
+                    DissolvingExpiryUnixMs = msg.DissolvingExpiryUnixMs,
+                    CharPenaltyExpiryUnixMs = msg.CharPenaltyExpiryUnixMs
+                });
+                break;
+            }
+            case MsgType.PledgeMemberList:
+            {
+                var msg = MessagePackSerializer.Deserialize<PledgeMemberListMsg>(pending.Body);
+                NetBridge.FanoutPledgeMemberList(self, new Fineage.Net.Contract.PledgeMemberListNetMsg
+                {
+                    ClanId = msg.ClanId,
+                    LeaderObjectId = msg.LeaderObjectId,
+                    Members = (msg.Members ?? []).Select(entry => new Fineage.Net.Contract.PledgeMemberNet
+                    {
+                        ObjectId = entry.ObjectId,
+                        Name = entry.Name ?? "",
+                        ClassId = entry.ClassId,
+                        Level = entry.Level,
+                        Online = entry.Online,
+                        PledgeType = entry.PledgeType
+                    }).ToArray()
+                });
+                break;
+            }
+            case MsgType.ClanAskJoin:
+            {
+                var msg = MessagePackSerializer.Deserialize<ClanAskJoinMsg>(pending.Body);
+                NetBridge.FanoutClanAskJoin(self, new Fineage.Net.Contract.ClanAskJoinNetMsg
+                {
+                    RequestorObjectId = msg.RequestorObjectId,
+                    RequestorName = msg.RequestorName ?? "",
+                    ClanId = msg.ClanId,
+                    ClanName = msg.ClanName ?? "",
+                    PledgeType = msg.PledgeType
+                });
+                break;
+            }
+            case MsgType.ClanJoinResult:
+            {
+                var msg = MessagePackSerializer.Deserialize<ClanJoinResultMsg>(pending.Body);
+                NetBridge.FanoutClanJoinResult(self, new Fineage.Net.Contract.ClanJoinResultNetMsg
+                {
+                    Response = msg.Response
+                });
+                break;
+            }
+            case MsgType.SystemMessage:
+            {
+                var msg = MessagePackSerializer.Deserialize<SystemMessageMsg>(pending.Body);
+                NetBridge.FanoutSystemMessage(self, new Fineage.Net.Contract.SystemMessageNetMsg
+                {
+                    Id = msg.Id,
+                    Text = msg.Text ?? "",
+                    Params = msg.Params ?? []
+                });
+                break;
+            }
+            case MsgType.UserInfo:
+            {
+                // The Net sheet is built from the live entity, not from the V2 body: it also carries
+                // the combat stats and speeds the V2 message omits.
+                if (_byId.TryGetValue(pending.To.ObjectId, out var recipient) && recipient.Kind == ZoneEntityKind.Player)
+                    NetBridge.FanoutUserInfo([recipient.ObjectId], NetUserInfo(recipient));
+                break;
+            }
+        }
+    }
+
+    void PublishClanNet(List<Pending> outbound)
+    {
+        foreach (var pending in outbound)
+            PublishClanNet(pending);
     }
 
     void SyncClanStanding(ZoneEntity entity)
