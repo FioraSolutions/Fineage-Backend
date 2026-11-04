@@ -70,6 +70,15 @@ public class NetEnterWorldProjectorTests
 
         var itemsAgain = NetCodec.DecodeItemList(NetCodec.EncodeItemList(packets.Items));
         Assert.Equal(packets.Items.Items.Length, itemsAgain.Items.Length);
+
+        // Paperdoll/icon fields drive what the client draws: they must survive the projection
+        // and the wire round-trip, not just sit in the V2 source message.
+        Assert.Contains(packets.Items.Items, i => !string.IsNullOrEmpty(i.Kind));
+        Assert.Contains(packets.Items.Items, i => !string.IsNullOrEmpty(i.BodySlot));
+        Assert.All(packets.Items.Items, i => Assert.False(string.IsNullOrEmpty(i.Icon)));
+        Assert.Contains(itemsAgain.Items, i => !string.IsNullOrEmpty(i.WeaponType));
+        Assert.Contains(itemsAgain.Items, i => !string.IsNullOrEmpty(i.ArmorType));
+
         var skillsAgain = NetCodec.DecodeSkillList(NetCodec.EncodeSkillList(packets.Skills));
         Assert.Equal(packets.Skills.Skills.Length, skillsAgain.Skills.Length);
     }
