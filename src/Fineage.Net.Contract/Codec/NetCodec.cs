@@ -192,6 +192,52 @@ namespace Fineage.Net.Contract
             };
         }
 
+        public static byte[] EncodeDeleteCharacter(DeleteCharacterMsg m) => Write(w =>
+        {
+            w.WriteInt32(m.Slot);
+            w.WriteInt32(m.CharacterId);
+        });
+
+        public static DeleteCharacterMsg DecodeDeleteCharacter(ReadOnlySpan<byte> p)
+        {
+            var r = new Reader(p);
+            return new DeleteCharacterMsg { Slot = r.ReadInt32(), CharacterId = r.ReadInt32() };
+        }
+
+        public static byte[] EncodeRestoreCharacter(RestoreCharacterMsg m) => Write(w =>
+        {
+            w.WriteInt32(m.Slot);
+            w.WriteInt32(m.CharacterId);
+        });
+
+        public static RestoreCharacterMsg DecodeRestoreCharacter(ReadOnlySpan<byte> p)
+        {
+            var r = new Reader(p);
+            return new RestoreCharacterMsg { Slot = r.ReadInt32(), CharacterId = r.ReadInt32() };
+        }
+
+        public static byte[] EncodeDeleteResult(DeleteResultMsg m) => Write(w =>
+        {
+            w.WriteByte(m.Ok ? (byte)1 : (byte)0);
+            w.WriteString(m.Code);
+            w.WriteString(m.Message);
+            w.WriteInt32(m.Slot);
+            w.WriteInt32(m.CharacterId);
+        });
+
+        public static DeleteResultMsg DecodeDeleteResult(ReadOnlySpan<byte> p)
+        {
+            var r = new Reader(p);
+            return new DeleteResultMsg
+            {
+                Ok = r.ReadByte() != 0,
+                Code = r.ReadString(),
+                Message = r.ReadString(),
+                Slot = r.ReadInt32(),
+                CharacterId = r.ReadInt32()
+            };
+        }
+
         public static byte[] EncodeHandoff(HandoffMsg m) => Write(w =>
         {
             w.WriteString(m.Account);

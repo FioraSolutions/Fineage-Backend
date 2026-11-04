@@ -86,6 +86,38 @@ namespace Fineage.Net.Contract
         public string Name { get; set; } = "";
     }
 
+    /// <summary>
+    /// Opcode <c>DeleteCharacter</c>. Delete by id (client has the id) or by slot (the roster row index);
+    /// the service resolves whichever is given. Mirrors the V2 <c>DeleteCharacterMsg</c> contract.
+    /// </summary>
+    public sealed class DeleteCharacterMsg
+    {
+        /// <summary>−1 when the client is deleting by id.</summary>
+        public int Slot { get; set; } = -1;
+        /// <summary>0 when the client is deleting by slot.</summary>
+        public int CharacterId { get; set; }
+    }
+
+    /// <summary>Opcode <c>RestoreCharacter</c>. Same keys as <see cref="DeleteCharacterMsg"/>.</summary>
+    public sealed class RestoreCharacterMsg
+    {
+        public int Slot { get; set; } = -1;
+        public int CharacterId { get; set; }
+    }
+
+    /// <summary>
+    /// Reply to <c>DeleteCharacter</c> and <c>RestoreCharacter</c>. On success the server also sends a
+    /// fresh <c>CharacterRoster</c>, so the client redraws from server truth rather than patching locally.
+    /// </summary>
+    public sealed class DeleteResultMsg
+    {
+        public bool Ok { get; set; }
+        public string Code { get; set; } = "";
+        public string Message { get; set; } = "";
+        public int Slot { get; set; } = -1;
+        public int CharacterId { get; set; }
+    }
+
     public sealed class HandoffMsg
     {
         public string Account { get; set; } = "";

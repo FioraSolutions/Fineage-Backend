@@ -54,6 +54,20 @@ FINEAGE_STORE=postgres dotnet run --project src/Fineage.Login -- backfill-normal
 
 Skills are still derived at zone enter, not listed on CharSelect.
 
+## Character delete / restore (lobby Net)
+
+`DeleteCharacter` `0x0209` and `RestoreCharacter` `0x020B` take the same body — `slot` (`-1` when deleting by id) and `characterId` (`0` when deleting by slot), matching the V2 messages. `LoginService` resolves whichever identifier is supplied.
+
+| Opcode | Dir | Payload |
+|--------|-----|---------|
+| `DeleteCharacter` `0x0209` | C→S | `slot` int32 (-1 = by id), `characterId` int32 (0 = by slot) |
+| `RestoreCharacter` `0x020B` | C→S | same body |
+| `DeleteResult` `0x020A` | S→C | `ok` byte, `code`, `message`, `slot`, `characterId` |
+
+`FINEAGE_DELETE_CHAR_AFTER_DAYS` (default `7`) decides hard vs soft delete: `0` removes the record, `> 0` sets a delete timer and the roster keeps the row flagged `pendingDelete` with `deleteSecondsLeft`. Restore clears that timer. On success the server sends `DeleteResult` then a fresh `CharacterRoster`, so the client redraws from server truth instead of patching its list locally.
+
+The char-select client currently treats delete/restore as a no-op on Net (`CharSelectWindow.DeletePressed`, `TODO(#131)`); it can now send these opcodes.
+
 ## EnterWorld (zone Net)
 
 After handoff auth, `EnterWorld` runs **one** world join: `ZoneWorld.TryEnterAsync` (same Mobius path as V2 — inventory restore, vitals, AutoSkills, AOI). Net then **projects the live `ZoneEntity`** (no second store read with Human defaults):

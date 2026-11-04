@@ -47,6 +47,12 @@ public sealed class NetLoginServer
                     case NetOpcode.SelectCharacter:
                         await OnSelectAsync(conn, account, envelope, ct).ConfigureAwait(false);
                         break;
+                    case NetOpcode.DeleteCharacter:
+                        await OnDeleteAsync(conn, account, envelope, ct).ConfigureAwait(false);
+                        break;
+                    case NetOpcode.RestoreCharacter:
+                        await OnRestoreAsync(conn, account, envelope, ct).ConfigureAwait(false);
+                        break;
                     default:
                         await RejectAsync(conn, "unknown_opcode", $"opcode 0x{envelope.Opcode:X4}", ct)
                             .ConfigureAwait(false);
@@ -219,6 +225,101 @@ public sealed class NetLoginServer
             }),
             envelope.RequestSequence,
             ct).ConfigureAwait(false);
+    }
+
+    async Task OnDeleteAsync(NetConnection conn, string? account, PacketEnvelope envelope, CancellationToken ct)
+    {
+        RequireHello(conn);
+        if (account == null)
+        {
+            await RejectAsync(conn, "auth_required", "Login required.", ct).ConfigureAwait(false);
+            return;
+        }
+
+        var req = NetCodec.DecodeDeleteCharacter(envelope.Payload);
+        var result = _service.Delete(account, req.Slot, req.CharacterId);
+        if (!result.Ok || result.Value == null)
+        {
+            await conn.SendAsync(
+                NetOpcode.DeleteResult,
+                NetCodec.EncodeDeleteResult(new DeleteResultMsg
+                {
+                    Ok = false,
+                    Code = result.Code,
+                    Message = result.Message,
+                    Slot = req.Slot,
+                    CharacterId = req.CharacterId
+                }),
+                envelope.RequestSequence,
+                ct).ConfigureAwait(false);
+            return;
+        }
+
+        // The client redraws from the roster, not from the reply, so send it after the ack.
+        await conn.SendAsync(
+            NetOpcode.DeleteResult,
+            NetCodec.EncodeDeleteResult(new DeleteResultMsg
+            {
+                Ok = true,
+                Slot = result.Value.Slot,
+                CharacterId = result.Value.CharacterId
+            }),
+            envelope.RequestSequence,
+            ct).ConfigureAwait(false);
+        await SendRosterAsync(conn, account, ct).ConfigureAwait(false);
+    }
+
+    async Task OnRestoreAsync(NetConnection conn, string? account, PacketEnvelope envelope, CancellationToken ct)
+    {
+        RequireHello(conn);
+        if (account == null)
+        {
+            await RejectAsync(conn, "auth_required", "Login required.", ct).ConfigureAwait(false);
+            return;
+        }
+
+        var req = NetCodec.DecodeRestoreCharacter(envelope.Payload);
+        var result = _service.Restore(account, req.Slot, req.CharacterId);
+        if (!result.Ok || result.Value == null)
+        {
+            await conn.SendAsync(
+                NetOpcode.DeleteResult,
+                NetCodec.EncodeDeleteResult(new DeleteResultMsg
+                {
+                    Ok = false,
+                    Code = result.Code,
+                    Message = result.Message,
+                    Slot = req.Slot,
+                    CharacterId = req.CharacterId
+                }),
+                envelope.RequestSequence,
+                ct).ConfigureAwait(false);
+            return;
+        }
+
+        await conn.SendAsync(
+            NetOpcode.DeleteResult,
+            NetCodec.EncodeDeleteResult(new DeleteResultMsg
+            {
+                Ok = true,
+                Slot = req.Slot,
+                CharacterId = req.CharacterId
+            }),
+            envelope.RequestSequence,
+            ct).ConfigureAwait(false);
+        await SendRosterAsync(conn, account, ct).ConfigureAwait(false);
+    }
+
+    Task SendRosterAsync(NetConnection conn, string account, CancellationToken ct)
+    {
+        var list = _service.List(account);
+        if (!list.Ok)
+            return RejectAsync(conn, list.Code, list.Message, ct);
+
+        return conn.SendAsync(
+            NetOpcode.CharacterRoster,
+            NetCodec.EncodeCharacterRoster(ToRoster(list.Value!)),
+            ct: ct);
     }
 
     CharacterRosterMsg ToRoster(IReadOnlyList<CharacterRecord> characters)
