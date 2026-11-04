@@ -81,4 +81,11 @@ public sealed class BypassReply
     };
 
     public static BypassReply Fail(string error) => new() { Error = error };
+
+    /// <summary>Mobius script bypass with a non-numeric name (<c>Quest FirstClassTransferTalk ...</c>, village masters).</summary>
+    public string? ScriptName { get; init; }
+
+    public string ScriptEvent { get; init; } = "";
+
+    public static BypassReply Script(string name, string? evt) => new() { ScriptName = name, ScriptEvent = evt ?? "" };
 }

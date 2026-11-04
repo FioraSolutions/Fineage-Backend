@@ -23,7 +23,25 @@ public sealed record SpawnNpcDefinition(
     string NpcType = "",
     int Level = 1,
     long Exp = 0,
-    int Sp = 0);
+    int Sp = 0,
+    double PAtk = 0,
+    double PDef = 0,
+    int AttackSpeed = 0,
+    double Accuracy = 0,
+    double Evasion = 0,
+    int Critical = 0,
+    int RandomDamage = 0,
+    int Dex = 30,
+    int ShieldDef = 0,
+    int ShieldRate = 0,
+    double MAtk = 0,
+    double MDef = 0,
+    int AttackRange = 0,
+    bool Aggressive = false,
+    int AggroRange = 0,
+    int ClanHelpRange = 0,
+    IReadOnlyList<string>? Clans = null,
+    IReadOnlyList<int>? IgnoreNpcIds = null);
 
 public sealed record SpawnMapDefinition(
     string MapId,

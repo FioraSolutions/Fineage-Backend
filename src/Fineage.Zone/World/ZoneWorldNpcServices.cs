@@ -92,9 +92,66 @@ public sealed partial class ZoneWorld
                 return ShowBlessingPage(session, player, npc, toSelf);
             case NpcServiceIntent.GiveBlessing:
                 return ApplyBlessing(session, npc.ObjectId, toSelf, toOthers, html: true);
+            case NpcServiceIntent.TerritoryStatus:
+                return ShowTerritoryStatus(session, player, npc, toSelf);
+            case NpcServiceIntent.SkillList:
+                return ShowTrainerSkills(session, player, npc, toSelf);
+            case NpcServiceIntent.LearnSkill:
+                return LearnTrainerSkill(session, player, npc, reply.ServiceId, toSelf);
             default:
                 return "bad_request";
         }
+    }
+
+    /// <summary>Test: run one bypass command against the first spawned NPC with this template id.</summary>
+    internal string? NpcServiceForTest(ZoneSession session, int npcId, string intent, string mapId = "elven_village")
+    {
+        var toSelf = new List<Pending>();
+        var toOthers = new List<Pending>();
+        lock (_gate)
+        {
+            if (!_byId.TryGetValue(session.ObjectId, out var player))
+                return "world";
+            var npc = _byId.Values.FirstOrDefault(e => e.Kind == ZoneEntityKind.Npc && e.NpcId == npcId)
+                ?? new ZoneEntity
+                {
+                    Kind = ZoneEntityKind.Npc, NpcId = npcId, ObjectId = 0,
+                    MerchantCastleId = Fineage.Zone.Shops.MerchantTowns.For(mapId).CastleId,
+                    MerchantTown = Fineage.Zone.Shops.MerchantTowns.TownName(mapId)
+                };
+            var reply = BypassReply.ServiceCall(intent);
+            return ApplyNpcService(session, player, npc, reply, toSelf, toOthers);
+        }
+    }
+
+    string? ShowTerritoryStatus(ZoneSession session, ZoneEntity player, ZoneEntity npc, List<Pending> toSelf)
+    {
+        var template = Fineage.Zone.Siege.CastleCatalog.Find(npc.MerchantCastleId);
+        if (template == null)
+        {
+            SendHtml(session, player, npc, "<html><body>%npcname%:<br>This area belongs to no castle.</body></html>", toSelf);
+            return null;
+        }
+
+        var castle = _siege.Find(npc.MerchantCastleId);
+        bool owned = castle != null && castle.OwnerClanId > 0;
+        string file = owned ? "territorystatus.htm" : "territorynoclan.htm";
+        if (!_html.TryGet(file, out var html))
+            html = "<html><body>%castlename%</body></html>";
+        string clanName = "", leaderName = "";
+        if (owned && _clans.TryGetValue(castle!.OwnerClanId, out var clan))
+        {
+            clanName = clan.Name;
+            leaderName = clan.Members.FirstOrDefault(m => m.CharacterId == clan.LeaderId)?.Name ?? "";
+        }
+
+        html = html.Replace("%castlename%", HtmlText(template.Value.Name), StringComparison.Ordinal)
+            .Replace("%territory%", HtmlText(npc.MerchantTown ?? template.Value.Name), StringComparison.Ordinal)
+            .Replace("%clanname%", HtmlText(clanName), StringComparison.Ordinal)
+            .Replace("%clanleadername%", HtmlText(leaderName), StringComparison.Ordinal)
+            .Replace("%taxpercent%", owned ? castle!.TaxPercent.ToString() : "0", StringComparison.Ordinal);
+        SendHtml(session, player, npc, html, toSelf);
+        return null;
     }
 
     string? ShowTeleportList(ZoneSession session, ZoneEntity player, ZoneEntity npc, string listName, List<Pending> toSelf)
@@ -304,7 +361,7 @@ public sealed partial class ZoneWorld
             if (!seen.Add(line.ObjectId))
                 return "bad_request";
             var item = player.Inventory.Find(line.ObjectId);
-            if (item == null || item.IsEquipped || item.Count < line.Count)
+            if (item == null || item.IsEquipped || !item.Template.CanDropTradeStore || item.Count < line.Count)
             {
                 Notice(session, NpcServiceProtocol.CannotStore, NpcServiceProtocol.CannotStoreText, toSelf);
                 return null;
@@ -350,7 +407,7 @@ public sealed partial class ZoneWorld
             player.Warehouse.Add(taken.ItemId, count, taken.EnchantLevel, out _);
         }
 
-        toSelf.Add(Pack(session, MsgType.InventoryUpdate, new InventoryUpdateMsg { Changes = Collapse(changes) }));
+        FanInventory(session, Collapse(changes), toSelf);
         SaveInventory(session, player.Inventory);
         SaveWarehouse(session, player);
         Notice(session, NpcServiceProtocol.TransactionComplete, NpcServiceProtocol.TransactionCompleteText, toSelf);
@@ -421,7 +478,7 @@ public sealed partial class ZoneWorld
             changes.Add(InventoryMessages.ChangeRow(existed ? InventoryChange.Modify : InventoryChange.Add, added));
         }
 
-        toSelf.Add(Pack(session, MsgType.InventoryUpdate, new InventoryUpdateMsg { Changes = Collapse(changes) }));
+        FanInventory(session, Collapse(changes), toSelf);
         SaveInventory(session, player.Inventory);
         SaveWarehouse(session, player);
         Notice(session, NpcServiceProtocol.TransactionComplete, NpcServiceProtocol.TransactionCompleteText, toSelf);
@@ -445,7 +502,19 @@ public sealed partial class ZoneWorld
                 Refusal = code
             }));
             if (html)
-                SendHtml(session, player, npc, "<html><body>%npcname%:<br>" + text + "</body></html>", toSelf);
+            {
+                // Mobius SupportMagic shows default/SupportMagicHighLevel.htm / SupportMagicLowLevel.htm.
+                string? page = refusal switch
+                {
+                    NewbieBuffRefusal.LevelHigh => "default/SupportMagicHighLevel.htm",
+                    NewbieBuffRefusal.LevelLow => "default/SupportMagicLowLevel.htm",
+                    _ => null
+                };
+                SendHtml(session, player, npc, page != null && _html.TryGet(page, out var mobius)
+                    ? mobius
+                    : "<html><body>%npcname%:<br>" + text + "</body></html>", toSelf);
+            }
+
             return null;
         }
 
@@ -518,12 +587,12 @@ public sealed partial class ZoneWorld
         {
             foreach (var item in player.Inventory.Items)
             {
-                if (!item.IsEquipped)
+                if (!item.IsEquipped && item.Template.CanDropTradeStore)
                     items.Add(InventoryMessages.Entry(item));
             }
         }
 
-        toSelf.Add(Pack(session, MsgType.WarehouseDepositList, new WarehouseDepositListMsg
+        var list = new WarehouseDepositListMsg
         {
             NpcObjectId = npc.ObjectId,
             FeePerLine = WarehouseRules.DepositFeePerLine,
@@ -531,7 +600,10 @@ public sealed partial class ZoneWorld
             SlotsMax = WarehouseRules.WarehouseSlots(player.Race),
             Adena = player.Inventory?.CountOf(WarehouseRules.AdenaItemId) ?? 0,
             Items = items.ToArray()
-        }));
+        };
+        toSelf.Add(Pack(session, MsgType.WarehouseDepositList, list));
+        if (NetBridge != null)
+            NetBridge.FanoutWarehouseDepositList([session.ObjectId], ToNetDepositList(list));
     }
 
     void SendWithdrawList(ZoneSession session, ZoneEntity player, ZoneEntity npc, List<Pending> toSelf)
@@ -543,7 +615,7 @@ public sealed partial class ZoneWorld
                 items.Add(StackEntry(stack));
         }
 
-        toSelf.Add(Pack(session, MsgType.WarehouseWithdrawList, new WarehouseWithdrawListMsg
+        var list = new WarehouseWithdrawListMsg
         {
             NpcObjectId = npc.ObjectId,
             SlotsUsed = player.Warehouse?.SlotCount ?? 0,
@@ -553,7 +625,10 @@ public sealed partial class ZoneWorld
             CurrentWeight = player.Inventory == null ? 0 : _weights.Load(player.Inventory.Items.Select(item => (item.ItemId, item.Count))),
             MaxWeight = MaxLoadOf(player),
             Items = items.ToArray()
-        }));
+        };
+        toSelf.Add(Pack(session, MsgType.WarehouseWithdrawList, list));
+        if (NetBridge != null)
+            NetBridge.FanoutWarehouseWithdrawList([session.ObjectId], ToNetWithdrawList(list));
     }
 
     ItemListEntryMsg StackEntry(WarehouseStack stack)
@@ -593,7 +668,7 @@ public sealed partial class ZoneWorld
         if (player.Session == null)
             return;
         long now = _clock().ToUnixTimeMilliseconds();
-        ZoneAbnormals.Apply(player.Abnormals, skillId, abnormalLevel, durationSeconds, now);
+        ZoneAbnormals.Apply(player.Abnormals, skillId, abnormalLevel, durationSeconds, now, level);
         var cast = new MagicSkillUseMsg
         {
             CasterObjectId = npc.ObjectId,
@@ -709,14 +784,6 @@ public sealed partial class ZoneWorld
         return false;
     }
 
-    int MaxLoadOf(ZoneEntity player)
-    {
-        double bonus = 1;
-        if (_game.Classes != null && PlayerClasses.TryGet(player.ClassId, out var template) && template != null)
-            bonus = _game.Classes.StatBonuses.Bonus(StatSlot.Con, template.Con);
-        return WarehouseRules.MaxLoad(bonus);
-    }
-
     int ClassLevelOf(ZoneEntity player)
     {
         if (PlayerClasses.TryGet(player.ClassId, out var template) && template != null)
@@ -728,10 +795,14 @@ public sealed partial class ZoneWorld
     {
         if (_accounts == null || player.Warehouse == null)
             return;
-        var rows = player.Warehouse.Rows();
-        var stored = new StoredItem[rows.Length];
-        for (int i = 0; i < rows.Length; i++)
-            stored[i] = new StoredItem(rows[i].ItemId, rows[i].Count, -1, rows[i].EnchantLevel);
+        var stacks = player.Warehouse.Items;
+        var stored = new StoredItem[stacks.Count];
+        for (int i = 0; i < stacks.Count; i++)
+        {
+            var stack = stacks[i];
+            stored[i] = new StoredItem(stack.ItemId, stack.Count, -1, stack.EnchantLevel, stack.ObjectId);
+        }
+
         _accounts.TryReplaceWarehouse(session.Account, session.ObjectId, stored);
     }
 
@@ -746,14 +817,73 @@ public sealed partial class ZoneWorld
     static bool IsWarehouse(ZoneEntity npc) =>
         string.Equals(npc.NpcType, "Warehouse", StringComparison.OrdinalIgnoreCase);
 
-    static void Notice(ZoneSession session, int id, string text, List<Pending> toSelf)
+    void Notice(ZoneSession session, int id, string text, List<Pending> toSelf)
     {
-        toSelf.Add(Pack(session, MsgType.SystemMessage, new SystemMessageMsg
+        var message = new SystemMessageMsg
         {
             Id = id,
             Params = [],
             Text = text
-        }));
+        };
+        toSelf.Add(Pack(session, MsgType.SystemMessage, message));
+        if (NetBridge != null)
+        {
+            NetBridge.FanoutSystemMessage([session.ObjectId], new Fineage.Net.Contract.SystemMessageNetMsg
+            {
+                Id = message.Id,
+                Text = message.Text ?? "",
+                Params = message.Params ?? []
+            });
+        }
+    }
+
+    void FanInventory(ZoneSession session, InventoryUpdateEntryMsg[] changes, List<Pending> toSelf)
+    {
+        var invUpdate = new InventoryUpdateMsg { Changes = changes };
+        toSelf.Add(Pack(session, MsgType.InventoryUpdate, invUpdate));
+        if (NetBridge != null)
+            NetBridge.FanoutInventoryUpdate([session.ObjectId], ToNetInventoryUpdate(invUpdate));
+    }
+
+    static Fineage.Net.Contract.WarehouseDepositListNetMsg ToNetDepositList(WarehouseDepositListMsg list) => new()
+    {
+        NpcObjectId = list.NpcObjectId,
+        FeePerLine = list.FeePerLine,
+        SlotsUsed = list.SlotsUsed,
+        SlotsMax = list.SlotsMax,
+        Adena = list.Adena,
+        Items = ToNetItemRows(list.Items)
+    };
+
+    static Fineage.Net.Contract.WarehouseWithdrawListNetMsg ToNetWithdrawList(WarehouseWithdrawListMsg list) => new()
+    {
+        NpcObjectId = list.NpcObjectId,
+        SlotsUsed = list.SlotsUsed,
+        SlotsMax = list.SlotsMax,
+        InventorySlotsUsed = list.InventorySlotsUsed,
+        InventorySlotsMax = list.InventorySlotsMax,
+        CurrentWeight = list.CurrentWeight,
+        MaxWeight = list.MaxWeight,
+        Items = ToNetItemRows(list.Items)
+    };
+
+    static Fineage.Net.Contract.ItemListEntryNet[] ToNetItemRows(ItemListEntryMsg[]? items)
+    {
+        items ??= [];
+        var rows = new Fineage.Net.Contract.ItemListEntryNet[items.Length];
+        for (int i = 0; i < items.Length; i++)
+        {
+            rows[i] = new Fineage.Net.Contract.ItemListEntryNet
+            {
+                ObjectId = items[i].ObjectId,
+                ItemId = items[i].ItemId,
+                Count = items[i].Count,
+                EnchantLevel = items[i].EnchantLevel,
+                EquippedSlot = items[i].EquippedSlot
+            };
+        }
+
+        return rows;
     }
 
     static (int Id, string Text, string Code) Refusal(NewbieBuffRefusal refusal) => refusal switch

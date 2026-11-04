@@ -14,6 +14,12 @@ public static class ZoneAoiSettings
 
     public static int InterestRange => ReadInt("FINEAGE_ZONE_INTEREST_RANGE", DefaultInterestRange, min: 0, max: 500_000);
 
+    /// <summary>
+    /// When &gt;0, use <see cref="GridAoi"/> with this cell size (ARCHITECTURE_NET Phase 1).
+    /// Takes precedence over <see cref="InterestRange"/>.
+    /// </summary>
+    public static int AoiCellSize => ReadInt("FINEAGE_ZONE_AOI_CELL", 0, min: 0, max: 500_000);
+
     public static ZoneWorld CreateWorld(
         IAoi? aoi = null,
         IAccountStore? accounts = null,
@@ -26,6 +32,18 @@ public static class ZoneAoiSettings
         {
             return new ZoneWorld(
                 aoi,
+                accounts: accounts,
+                sevenSigns: sevenSigns,
+                includeEnabledMaps: includeEnabledMaps,
+                bosses: bosses,
+                olympiad: olympiad);
+        }
+
+        int cell = AoiCellSize;
+        if (cell > 0)
+        {
+            return new ZoneWorld(
+                new GridAoi(cell),
                 accounts: accounts,
                 sevenSigns: sevenSigns,
                 includeEnabledMaps: includeEnabledMaps,

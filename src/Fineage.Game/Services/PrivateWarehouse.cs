@@ -124,6 +124,16 @@ public sealed class PrivateWarehouse
         {
             if (row.Count < 1 || row.ItemId <= 0)
                 throw new InvalidDataException($"Warehouse item {row.ItemId} count {row.Count} is invalid.");
+            if (row.ObjectId > 0)
+            {
+                if (Find(row.ObjectId) != null)
+                    throw new InvalidDataException($"Warehouse object id {row.ObjectId} is duplicated.");
+                if (row.ObjectId >= _nextId)
+                    _nextId = checked(row.ObjectId + 1);
+                _items.Add(new WarehouseStack(row.ObjectId, row.ItemId, row.Count, row.EnchantLevel));
+                continue;
+            }
+
             Add(row.ItemId, row.Count, row.EnchantLevel, out _);
         }
     }
@@ -134,7 +144,7 @@ public sealed class PrivateWarehouse
         for (int i = 0; i < rows.Length; i++)
         {
             var stack = _items[i];
-            rows[i] = new WarehouseRow(stack.ItemId, stack.Count, stack.EnchantLevel);
+            rows[i] = new WarehouseRow(stack.ItemId, stack.Count, stack.EnchantLevel, stack.ObjectId);
         }
 
         return rows;
@@ -142,4 +152,4 @@ public sealed class PrivateWarehouse
 }
 
 /// <summary>Persisted private-warehouse stack. Equipped slot is not stored; the bag slot is always the warehouse.</summary>
-public readonly record struct WarehouseRow(int ItemId, int Count, int EnchantLevel);
+public readonly record struct WarehouseRow(int ItemId, int Count, int EnchantLevel, int ObjectId = 0);

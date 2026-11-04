@@ -76,6 +76,7 @@ public sealed partial class ZoneWorld
         player.Running = false;
         player.ActiveEnchantObjectId = 0;
         player.Abnormals.Clear();
+        RefreshRunSpeed(player); // dead: buff runSpd funcs drop with the abnormals
         player.CombatUntilUnixMs = 0;
 
         if (player.Session != null)
@@ -103,7 +104,7 @@ public sealed partial class ZoneWorld
 
         if (player.Session != null)
         {
-            toSelf.Add(Pack(player.Session, MsgType.UserInfo, UserInfo(player)));
+            toSelf.Add(SelfUserInfo(player.Session, player));
             FanoutVitals(player, PlayerVitalsStatus(player), toSelf);
             SaveVitals(player.Session, player);
         }
@@ -121,6 +122,7 @@ public sealed partial class ZoneWorld
         };
         byte[] statusBody = MessagePackSerializer.Serialize(status);
 
+        List<int>? netWatchers = null;
         foreach (var watcher in Players())
         {
             if (watcher.Session == null)
@@ -130,6 +132,25 @@ public sealed partial class ZoneWorld
 
             outbound.Add(new Pending(watcher.Session, MsgType.Die, dieBody));
             outbound.Add(new Pending(watcher.Session, MsgType.StatusUpdate, statusBody));
+            netWatchers ??= [];
+            netWatchers.Add(watcher.ObjectId);
+        }
+
+        if (netWatchers is { Count: > 0 } && NetBridge != null)
+        {
+            NetBridge.FanoutDie(netWatchers, new Fineage.Net.Contract.EntityDieMsg
+            {
+                EntityValue = (ulong)(uint)dead.ObjectId,
+                EntityGeneration = 1,
+                KillerObjectId = killerObjectId
+            });
+            NetBridge.FanoutStatusUpdate(netWatchers, new Fineage.Net.Contract.StatusUpdateNetMsg
+            {
+                EntityValue = (ulong)(uint)dead.ObjectId,
+                EntityGeneration = 1,
+                AttributeIds = status.AttributeIds ?? [],
+                Values = status.Values ?? []
+            });
         }
     }
 
@@ -137,8 +158,12 @@ public sealed partial class ZoneWorld
     {
         byte[] body = MessagePackSerializer.Serialize(payload);
         var session = actor.Session;
+        List<int>? netWatchers = null;
         if (session != null)
+        {
             toSelf.Add(new Pending(session, type, body));
+            netWatchers = [actor.ObjectId];
+        }
 
         foreach (var watcher in Players())
         {
@@ -147,6 +172,30 @@ public sealed partial class ZoneWorld
             if (!watcher.Knownlist.Contains(actor.ObjectId))
                 continue;
             toOthers.Add(new Pending(watcher.Session, type, body));
+            netWatchers ??= [];
+            netWatchers.Add(watcher.ObjectId);
+        }
+
+        if (netWatchers is { Count: > 0 } && NetBridge != null)
+        {
+            if (type == MsgType.Revive && payload is ReviveMsg revive)
+            {
+                NetBridge.FanoutRevive(netWatchers, new Fineage.Net.Contract.ReviveNetMsg
+                {
+                    ObjectId = revive.ObjectId
+                });
+            }
+            else if (type == MsgType.TeleportToLocation && payload is TeleportToLocationMsg teleport)
+            {
+                NetBridge.FanoutTeleportToLocation(netWatchers, new Fineage.Net.Contract.TeleportToLocationNetMsg
+                {
+                    ObjectId = teleport.ObjectId,
+                    X = teleport.X,
+                    Y = teleport.Y,
+                    Z = teleport.Z,
+                    Heading = teleport.Heading
+                });
+            }
         }
     }
 

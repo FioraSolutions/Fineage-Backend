@@ -1,3 +1,4 @@
+using Fineage.Net.Contract;
 using Fineage.Protocol;
 using Fineage.Zone.Chat;
 
@@ -39,6 +40,18 @@ public sealed partial class ZoneWorld
         if (notice != null)
         {
             await session.SendAsync(MsgType.SystemMessage, notice, ct).ConfigureAwait(false);
+            if (NetBridge != null)
+            {
+                NetBridge.FanoutSystemMessage(
+                    [session.ObjectId],
+                    new SystemMessageNetMsg
+                    {
+                        Id = notice.Id,
+                        Text = notice.Text,
+                        Params = notice.Params ?? []
+                    });
+            }
+
             return null;
         }
 
@@ -58,8 +71,12 @@ public sealed partial class ZoneWorld
         };
 
         var outbound = new List<Pending>();
+        List<int>? netWatchers = null;
         if (speaker.Session != null)
+        {
             outbound.Add(Pack(speaker.Session, MsgType.CreatureSay, said));
+            netWatchers = [speaker.ObjectId];
+        }
 
         bool shout = chatType == ChatProtocol.Shout;
         foreach (var entity in Players())
@@ -67,7 +84,22 @@ public sealed partial class ZoneWorld
             if (entity.Session == null || ReferenceEquals(entity.Session, speaker.Session))
                 continue;
             if (shout || HearsLocal(speaker, entity))
+            {
                 outbound.Add(Pack(entity.Session, MsgType.CreatureSay, said));
+                netWatchers ??= [];
+                netWatchers.Add(entity.ObjectId);
+            }
+        }
+
+        if (netWatchers is { Count: > 0 } && NetBridge != null)
+        {
+            NetBridge.FanoutCreatureSay(netWatchers, new CreatureSayNetMsg
+            {
+                ObjectId = said.ObjectId,
+                Name = said.Name,
+                Text = said.Text,
+                ChatType = said.ChatType
+            });
         }
 
         return outbound;

@@ -19,6 +19,9 @@ public sealed class ZoneSession
     public string Account { get; private set; } = "";
     public string Name { get; private set; } = "";
     public int ClassId { get; private set; }
+    /// <summary>From handoff claims; used when store lag would otherwise default race to Human.</summary>
+    public int Race { get; private set; }
+    public int Sex { get; private set; }
     public int WireSessionId { get; set; }
     public ushort LastPacketId { get; set; }
     internal bool FailureRecorded { get; set; }
@@ -51,24 +54,39 @@ public sealed class ZoneSession
         ApproachArriveUnixMs = 0;
     }
 
+    /// <summary>Mobius AI_INTENTION_PICK_UP after moveToPawn: ground item to pick up once the run arrives.</summary>
+    public int PendingPickupId { get; set; }
+    public long PendingPickupAtUnixMs { get; set; }
+
     /// <summary>Mobius AI_INTENTION_CAST after moveToPawn: skill to fire once the server-driven approach arrives.</summary>
     public int PendingCastSkillId { get; set; }
     public int PendingCastTargetId { get; set; }
     public long PendingCastAtUnixMs { get; set; }
+
+    /// <summary>Mobius saveNextIntention(MOVE_TO): move order received mid-cast, run when the cast ends.</summary>
+    public Fineage.Protocol.MoveToMsg? QueuedMove { get; set; }
+
+    /// <summary>Mobius RequestActionUse sit while moving: NextAction(EVT_ARRIVED) → sit on arrival.</summary>
+    public bool SitOnArrive { get; set; }
 
     /// <summary>Unix milliseconds of the last accepted say. 0 means this session has not spoken.</summary>
     public long LastChatUnixMs { get; set; }
 
     public bool Bound => ObjectId != 0;
 
-    public void Bind(int objectId, string account, string name, int classId)
+    public void Bind(int objectId, string account, string name, int classId, int race = 0, int sex = 0)
     {
         ObjectId = objectId;
         Account = account;
         Name = name;
         ClassId = classId;
+        Race = race;
+        Sex = sex;
         InWorld = false;
     }
+
+    /// <summary>Mobius <c>setClassId</c> after a village-master transfer.</summary>
+    internal void ChangeClass(int classId) => ClassId = classId;
 
     internal void NoteForLog(string account)
     {
@@ -82,6 +100,8 @@ public sealed class ZoneSession
         Account = "";
         Name = "";
         ClassId = 0;
+        Race = 0;
+        Sex = 0;
         InWorld = false;
         SelectedTargetId = 0;
         AutoAttackTargetId = 0;
@@ -89,6 +109,8 @@ public sealed class ZoneSession
         PendingCastSkillId = 0;
         PendingCastTargetId = 0;
         PendingCastAtUnixMs = 0;
+        QueuedMove = null;
+        SitOnArrive = false;
         ClearApproach();
         LastChatUnixMs = 0;
     }

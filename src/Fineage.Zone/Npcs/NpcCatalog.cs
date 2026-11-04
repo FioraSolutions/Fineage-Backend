@@ -23,7 +23,24 @@ public sealed record NpcTemplate(
     float RunSpeed,
     float WalkSpeed,
     long Exp = 0,
-    int Sp = 0);
+    int Sp = 0,
+    double PAtk = 0,
+    double PDef = 0,
+    int AttackSpeed = 0,
+    int AttackRange = 0,
+    double Accuracy = 0,
+    double Evasion = 0,
+    int Critical = 0,
+    int RandomDamage = 0,
+    int Dex = 30,
+    int ShieldDef = 0,
+    int ShieldRate = 0,
+    double MAtk = 0,
+    double MDef = 0,
+    int AggroRange = 0,
+    int ClanHelpRange = 0,
+    IReadOnlyList<string>? Clans = null,
+    IReadOnlyList<int>? IgnoreNpcIds = null);
 
 /// <summary>Loads <c>data/npcs.json</c>.</summary>
 public sealed class NpcCatalog
@@ -133,7 +150,24 @@ public sealed class NpcCatalog
                 row.RunSpeed,
                 row.WalkSpeed,
                 Math.Max(0, row.Exp),
-                Math.Max(0, row.Sp)));
+                Math.Max(0, row.Sp),
+                Math.Max(0, row.PAtk),
+                Math.Max(0, row.PDef),
+                Math.Max(0, row.AttackSpeed),
+                Math.Max(0, row.AttackRange),
+                row.Accuracy,
+                row.Evasion,
+                Math.Max(0, row.Critical),
+                Math.Max(0, row.RandomDamage),
+                row.Dex > 0 ? row.Dex : 30,
+                Math.Max(0, row.ShieldDef),
+                Math.Max(0, row.ShieldRate),
+                Math.Max(0, row.MAtk),
+                Math.Max(0, row.MDef),
+                Math.Max(0, row.AggroRange),
+                Math.Max(0, row.ClanHelpRange),
+                row.Clans is { Count: > 0 } ? row.Clans : null,
+                row.IgnoreNpcIds is { Count: > 0 } ? row.IgnoreNpcIds : null));
         }
 
         return new NpcCatalog(byId);
@@ -161,5 +195,33 @@ public sealed class NpcCatalog
         public float WalkSpeed { get; set; }
         public long Exp { get; set; }
         public int Sp { get; set; }
+        /// <summary>Mobius <c>stats/attack physical</c> (level-scaled base P.Atk).</summary>
+        public double PAtk { get; set; }
+        /// <summary>Mobius <c>stats/defence physical</c>.</summary>
+        public double PDef { get; set; }
+        /// <summary>Mobius <c>stats/attack attackSpeed</c> (Pspd).</summary>
+        public int AttackSpeed { get; set; }
+        /// <summary>Mobius <c>stats/attack range</c>.</summary>
+        public int AttackRange { get; set; }
+        /// <summary>Mobius <c>attack accuracy</c> base (sqrt(DEX)*6 + level added at runtime).</summary>
+        public double Accuracy { get; set; }
+        /// <summary>Mobius <c>defence evasion</c> base.</summary>
+        public double Evasion { get; set; }
+        /// <summary>Mobius <c>attack critical</c> base rate (×10 × DEX bonus).</summary>
+        public int Critical { get; set; }
+        /// <summary>Mobius <c>attack random</c> damage spread in percent.</summary>
+        public int RandomDamage { get; set; }
+        public int Dex { get; set; }
+        /// <summary>Mobius <c>defence shield</c> / <c>shieldRate</c>.</summary>
+        public int ShieldDef { get; set; }
+        public int ShieldRate { get; set; }
+        /// <summary>Mobius <c>attack magical</c> / <c>defence magical</c>.</summary>
+        public double MAtk { get; set; }
+        public double MDef { get; set; }
+        /// <summary>Mobius <c>ai aggroRange</c> / <c>clanHelpRange</c> / <c>clanList</c>.</summary>
+        public int AggroRange { get; set; }
+        public int ClanHelpRange { get; set; }
+        public List<string>? Clans { get; set; }
+        public List<int>? IgnoreNpcIds { get; set; }
     }
 }

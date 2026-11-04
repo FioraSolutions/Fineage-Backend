@@ -9,6 +9,9 @@ data/*
 !data/stat-bonuses.json
 !data/quests.json
 !data/skills.json
+!data/skill-combat.json
+!data/skill-stat-effects.json
+!data/skill-passives.json
 !data/skill-trees.json
 !data/npcs.json
 !data/dungeons.json
@@ -25,6 +28,9 @@ data/*
 !data/html/**
 !data/buylists.json
 !data/multisell.json
+!data/village-masters.json
+!data/doors.json
+!data/water-zones.json
 # Prefer converters → JSON; do not commit the full Mobius datapack (~1486+ XML files).
 data/mobius-xml/
 ref/mobius-ct0-interlude/
@@ -37,3 +43,10 @@ TestResults/
 
 # Local Mobius Interlude XML SoT (sparse clone; do not commit 100MB+ dump)
 ref/
+
+# Local run artifacts
+local-data/
+local-logs/
+publish/
+!data/spoil.json
+!data/herbs.json

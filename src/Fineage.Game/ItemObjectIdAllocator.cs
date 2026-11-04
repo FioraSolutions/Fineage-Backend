@@ -26,4 +26,22 @@ public sealed class ItemObjectIdAllocator
             return id;
         }
     }
+
+    /// <summary>Raises the cursor past <paramref name="objectId"/> so later <see cref="Next"/> calls stay unique.</summary>
+    public void Observe(int objectId)
+    {
+        if (objectId <= 0)
+            return;
+        lock (_gate)
+        {
+            if (objectId >= _next)
+                _next = checked(objectId + 1);
+        }
+    }
+
+    public int PeekNext()
+    {
+        lock (_gate)
+            return _next;
+    }
 }

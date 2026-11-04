@@ -18,7 +18,8 @@ public sealed partial class ZoneWorld
             template.SkillId,
             levelData.AbnormalLevel,
             template.AbnormalTimeSeconds,
-            nowUnixMs);
+            nowUnixMs,
+            levelData.Level);
         FanoutAbnormal(target, outbound);
     }
 
@@ -59,6 +60,16 @@ public sealed partial class ZoneWorld
     void FanoutAbnormal(ZoneEntity target, List<Pending> outbound)
     {
         var update = AbnormalFor(target);
+        // Mobius: a buff/debuff that changes combat stats triggers UserInfo (status window P.Atk/P.Def/Spd)
+        // and a fresh run speed (Wind Walk/Slow change how fast the pawn actually travels).
+        bool statful = target.Abnormals.Any(a => _statEffects.TryGet(a.Id, out _));
+        bool speedChanged = RefreshRunSpeed(target);
+        if (speedChanged)
+            FanoutNetMoveType(target);
+        if ((statful || target.HasStatAbnormal) && target.Kind == ZoneEntityKind.Player && target.Session != null)
+            outbound.Add(SelfUserInfo(target.Session, target));
+        target.HasStatAbnormal = statful;
+        List<int>? netWatchers = null;
         foreach (var watcher in Players())
         {
             if (watcher.Session == null)
@@ -67,6 +78,30 @@ public sealed partial class ZoneWorld
             if (!cares)
                 continue;
             outbound.Add(Pack(watcher.Session, MsgType.AbnormalStatusUpdate, update));
+            netWatchers ??= [];
+            netWatchers.Add(watcher.ObjectId);
+        }
+
+        if (netWatchers is { Count: > 0 } && NetBridge != null)
+        {
+            var effects = update.Effects ?? [];
+            var netEffects = new Fineage.Net.Contract.AbnormalEffectNet[effects.Length];
+            for (int i = 0; i < effects.Length; i++)
+            {
+                var src = effects[i];
+                netEffects[i] = new Fineage.Net.Contract.AbnormalEffectNet
+                {
+                    Id = src.Id,
+                    Value = src.Value,
+                    DurationSeconds = src.DurationSeconds
+                };
+            }
+
+            NetBridge.FanoutAbnormalStatusUpdate(netWatchers, new Fineage.Net.Contract.AbnormalStatusUpdateNetMsg
+            {
+                ObjectId = update.ObjectId,
+                Effects = netEffects
+            });
         }
     }
 

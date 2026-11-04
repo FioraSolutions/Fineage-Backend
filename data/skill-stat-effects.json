@@ -1,0 +1,10751 @@
+{
+ "reference": "Combat stat functions (mul/add/sub/set on pAtk, pDef, mAtk, mDef, pAtkSpd, mAtkSpd, accCombat, rEvas, critRate, runSpd) inside <for><effect> of non-passive skills, transcribed from L2J Mobius CT 0 Interlude dist/game/data/stats/skills. values are per skill level (index 0 = level 1). Conditions, enchant routes and non-combat stats are not included.",
+ "skills": [
+  {
+   "skillId": 4,
+   "name": "Dash",
+   "levels": 2,
+   "effects": [
+    {
+     "stat": "runSpd",
+     "op": "add",
+     "values": [
+      40.0,
+      66.0
+     ]
+    }
+   ]
+  },
+  {
+   "skillId": 72,
+   "name": "Iron Will",
+   "levels": 3,
+   "effects": [
+    {
+     "stat": "mDef",
+     "op": "mul",
+     "values": [
+      1.15,
+      1.23,
+      1.3
+     ]
+    }
+   ]
+  },
+  {
+   "skillId": 76,
+   "name": "Bear Spirit Totem",
+   "levels": 1,
+   "effects": [
+    {
+     "stat": "pAtk",
+     "op": "mul",
+     "values": [
+      1.2
+     ]
+    },
+    {
+     "stat": "runSpd",
+     "op": "mul",
+     "values": [
+      0.7
+     ]
+    }
+   ]
+  },
+  {
+   "skillId": 77,
+   "name": "Attack Aura",
+   "levels": 2,
+   "effects": [
+    {
+     "stat": "pAtk",
+     "op": "mul",
+     "values": [
+      1.08,
+      1.12
+     ]
+    }
+   ]
+  },
+  {
+   "skillId": 78,
+   "name": "War Cry",
+   "levels": 2,
+   "effects": [
+    {
+     "stat": "pAtk",
+     "op": "mul",
+     "values": [
+      1.2,
+      1.25
+     ]
+    }
+   ]
+  },
+  {
+   "skillId": 82,
+   "name": "Majesty",
+   "levels": 3,
+   "effects": [
+    {
+     "stat": "pDef",
+     "op": "mul",
+     "values": [
+      1.07,
+      1.11,
+      1.15
+     ]
+    },
+    {
+     "stat": "rEvas",
+     "op": "sub",
+     "values": [
+      2.0,
+      4.0,
+      6.0
+     ]
+    }
+   ]
+  },
+  {
+   "skillId": 83,
+   "name": "Wolf Spirit Totem",
+   "levels": 1,
+   "effects": [
+    {
+     "stat": "runSpd",
+     "op": "mul",
+     "values": [
+      1.2
+     ]
+    },
+    {
+     "stat": "accCombat",
+     "op": "add",
+     "values": [
+      3.0
+     ]
+    }
+   ]
+  },
+  {
+   "skillId": 91,
+   "name": "Defense Aura",
+   "levels": 2,
+   "effects": [
+    {
+     "stat": "pDef",
+     "op": "mul",
+     "values": [
+      1.08,
+      1.12
+     ]
+    }
+   ]
+  },
+  {
+   "skillId": 94,
+   "name": "Rage",
+   "levels": 2,
+   "effects": [
+    {
+     "stat": "pAtk",
+     "op": "mul",
+     "values": [
+      1.2,
+      1.2
+     ]
+    },
+    {
+     "stat": "pAtk",
+     "op": "mul",
+     "values": [
+      1.21,
+      1.29
+     ]
+    },
+    {
+     "stat": "pAtk",
+     "op": "mul",
+     "values": [
+      1.07,
+      1.06
+     ]
+    },
+    {
+     "stat": "accCombat",
+     "op": "add",
+     "values": [
+      2.0,
+      4.0
+     ]
+    },
+    {
+     "stat": "pDef",
+     "op": "mul",
+     "values": [
+      0.8,
+      0.8
+     ]
+    },
+    {
+     "stat": "rEvas",
+     "op": "sub",
+     "values": [
+      3.0,
+      3.0
+     ]
+    }
+   ]
+  },
+  {
+   "skillId": 95,
+   "name": "Cripple",
+   "levels": 20,
+   "effects": [
+    {
+     "stat": "runSpd",
+     "op": "mul",
+     "values": [
+      0.8,
+      0.8,
+      0.8,
+      0.8,
+      0.8,
+      0.7,
+      0.7,
+      0.7,
+      0.7,
+      0.7,
+      0.7,
+      0.7,
+      0.7,
+      0.7,
+      0.7,
+      0.7,
+      0.7,
+      0.7,
+      0.7,
+      0.7
+     ]
+    }
+   ]
+  },
+  {
+   "skillId": 96,
+   "name": "Bleed",
+   "levels": 6,
+   "effects": [
+    {
+     "stat": "runSpd",
+     "op": "mul",
+     "values": [
+      0.8,
+      0.8,
+      0.8,
+      0.8,
+      0.8,
+      0.8
+     ]
+    }
+   ]
+  },
+  {
+   "skillId": 97,
+   "name": "Sanctuary",
+   "levels": 11,
+   "effects": [
+    {
+     "stat": "pAtk",
+     "op": "mul",
+     "values": [
+      0.77,
+      0.77,
+      0.77,
+      0.77,
+      0.77,
+      0.77,
+      0.77,
+      0.77,
+      0.77,
+      0.77,
+      0.77
+     ]
+    }
+   ]
+  },
+  {
+   "skillId": 99,
+   "name": "Rapid Shot",
+   "levels": 2,
+   "effects": [
+    {
+     "stat": "pAtkSpd",
+     "op": "mul",
+     "values": [
+      1.08,
+      1.12
+     ]
+    }
+   ]
+  },
+  {
+   "skillId": 102,
+   "name": "Entangle",
+   "levels": 16,
+   "effects": [
+    {
+     "stat": "runSpd",
+     "op": "mul",
+     "values": [
+      0.8,
+      0.7,
+      0.7,
+      0.7,
+      0.7,
+      0.7,
+      0.7,
+      0.7,
+      0.7,
+      0.7,
+      0.7,
+      0.7,
+      0.7,
+      0.7,
+      0.7,
+      0.7
+     ]
+    }
+   ]
+  },
+  {
+   "skillId": 105,
+   "name": "Freezing Strike",
+   "levels": 24,
+   "effects": [
+    {
+     "stat": "runSpd",
+     "op": "mul",
+     "values": [
+      0.8,
+      0.8,
+      0.8,
+      0.8,
+      0.8,
+      0.8,
+      0.8,
+      0.8,
+      0.8,
+      0.8,
+      0.8,
+      0.8,
+      0.8,
+      0.8,
+      0.8,
+      0.8,
+      0.8,
+      0.8,
+      0.8,
+      0.8,
+      0.8,
+      0.8,
+      0.8,
+      0.8
+     ]
+    }
+   ]
+  },
+  {
+   "skillId": 109,
+   "name": "Ogre Spirit Totem",
+   "levels": 1,
+   "effects": [
+    {
+     "stat": "pAtk",
+     "op": "mul",
+     "values": [
+      1.3
+     ]
+    },
+    {
+     "stat": "pDef",
+     "op": "mul",
+     "values": [
+      1.3
+     ]
+    },
+    {
+     "stat": "mDef",
+     "op": "mul",
+     "values": [
+      1.3
+     ]
+    }
+   ]
+  },
+  {
+   "skillId": 110,
+   "name": "Ultimate Defense",
+   "levels": 2,
+   "effects": [
+    {
+     "stat": "pDef",
+     "op": "add",
+     "values": [
+      1800.0,
+      3600.0
+     ]
+    },
+    {
+     "stat": "mDef",
+     "op": "add",
+     "values": [
+      1350.0,
+      2700.0
+     ]
+    }
+   ]
+  },
+  {
+   "skillId": 111,
+   "name": "Ultimate Evasion",
+   "levels": 2,
+   "effects": [
+    {
+     "stat": "rEvas",
+     "op": "add",
+     "values": [
+      20.0,
+      25.0
+     ]
+    }
+   ]
+  },
+  {
+   "skillId": 115,
+   "name": "Power Break",
+   "levels": 17,
+   "effects": [
+    {
+     "stat": "pAtk",
+     "op": "mul",
+     "values": [
+      0.8,
+      0.8,
+      0.77,
+      0.77,
+      0.77,
+      0.77,
+      0.77,
+      0.77,
+      0.77,
+      0.77,
+      0.77,
+      0.77,
+      0.77,
+      0.77,
+      0.77,
+      0.77,
+      0.77
+     ]
+    }
+   ]
+  },
+  {
+   "skillId": 116,
+   "name": "Howl",
+   "levels": 14,
+   "effects": [
+    {
+     "stat": "pAtk",
+     "op": "mul",
+     "values": [
+      0.77,
+      0.77,
+      0.77,
+      0.77,
+      0.77,
+      0.77,
+      0.77,
+      0.77,
+      0.77,
+      0.77,
+      0.77,
+      0.77,
+      0.77,
+      0.77
+     ]
+    }
+   ]
+  },
+  {
+   "skillId": 122,
+   "name": "Hex",
+   "levels": 15,
+   "effects": [
+    {
+     "stat": "pDef",
+     "op": "mul",
+     "values": [
+      0.77,
+      0.77,
+      0.77,
+      0.77,
+      0.77,
+      0.77,
+      0.77,
+      0.77,
+      0.77,
+      0.77,
+      0.77,
+      0.77,
+      0.77,
+      0.77,
+      0.77
+     ]
+    }
+   ]
+  },
+  {
+   "skillId": 123,
+   "name": "Spirit Barrier",
+   "levels": 3,
+   "effects": [
+    {
+     "stat": "mDef",
+     "op": "mul",
+     "values": [
+      1.15,
+      1.23,
+      1.3
+     ]
+    }
+   ]
+  },
+  {
+   "skillId": 127,
+   "name": "Hamstring",
+   "levels": 14,
+   "effects": [
+    {
+     "stat": "runSpd",
+     "op": "mul",
+     "values": [
+      0.7,
+      0.7,
+      0.7,
+      0.7,
+      0.7,
+      0.7,
+      0.7,
+      0.7,
+      0.7,
+      0.7,
+      0.7,
+      0.7,
+      0.7,
+      0.7
+     ]
+    }
+   ]
+  },
+  {
+   "skillId": 130,
+   "name": "Thrill Fight",
+   "levels": 2,
+   "effects": [
+    {
+     "stat": "runSpd",
+     "op": "mul",
+     "values": [
+      0.8,
+      0.8
+     ]
+    },
+    {
+     "stat": "pAtkSpd",
+     "op": "mul",
+     "values": [
+      1.05,
+      1.1
+     ]
+    }
+   ]
+  },
+  {
+   "skillId": 131,
+   "name": "Hawk Eye",
+   "levels": 3,
+   "effects": [
+    {
+     "stat": "accCombat",
+     "op": "add",
+     "values": [
+      6.0,
+      8.0,
+      10.0
+     ]
+    },
+    {
+     "stat": "pDef",
+     "op": "mul",
+     "values": [
+      0.9,
+      0.9,
+      0.9
+     ]
+    }
+   ]
+  },
+  {
+   "skillId": 139,
+   "name": "Guts",
+   "levels": 3,
+   "effects": [
+    {
+     "stat": "pDef",
+     "op": "mul",
+     "values": [
+      2.0,
+      2.5,
+      3.0
+     ]
+    }
+   ]
+  },
+  {
+   "skillId": 176,
+   "name": "Frenzy",
+   "levels": 3,
+   "effects": [
+    {
+     "stat": "pAtk",
+     "op": "mul",
+     "values": [
+      1.3,
+      1.4,
+      1.5
+     ]
+    },
+    {
+     "stat": "pAtk",
+     "op": "mul",
+     "values": [
+      1.54,
+      1.92,
+      2.31
+     ]
+    },
+    {
+     "stat": "pAtk",
+     "op": "mul",
+     "values": [
+      1.25,
+      1.2,
+      1.16
+     ]
+    },
+    {
+     "stat": "accCombat",
+     "op": "add",
+     "values": [
+      2.0,
+      4.0,
+      6.0
+     ]
+    }
+   ]
+  },
+  {
+   "skillId": 221,
+   "name": "Silent Move",
+   "levels": 1,
+   "effects": [
+    {
+     "stat": "runSpd",
+     "op": "mul",
+     "values": [
+      0.6
+     ]
+    }
+   ]
+  },
+  {
+   "skillId": 222,
+   "name": "Fist Fury",
+   "levels": 1,
+   "effects": [
+    {
+     "stat": "pAtkSpd",
+     "op": "mul",
+     "values": [
+      1.25
+     ]
+    }
+   ]
+  },
+  {
+   "skillId": 230,
+   "name": "Sprint",
+   "levels": 2,
+   "effects": [
+    {
+     "stat": "runSpd",
+     "op": "add",
+     "values": [
+      22.0,
+      33.0
+     ]
+    }
+   ]
+  },
+  {
+   "skillId": 256,
+   "name": "Accuracy",
+   "levels": 1,
+   "effects": [
+    {
+     "stat": "accCombat",
+     "op": "add",
+     "values": [
+      3.0
+     ]
+    }
+   ]
+  },
+  {
+   "skillId": 264,
+   "name": "Song of Earth",
+   "levels": 1,
+   "effects": [
+    {
+     "stat": "pDef",
+     "op": "mul",
+     "values": [
+      1.25
+     ]
+    }
+   ]
+  },
+  {
+   "skillId": 266,
+   "name": "Song of Water",
+   "levels": 1,
+   "effects": [
+    {
+     "stat": "rEvas",
+     "op": "add",
+     "values": [
+      3.0
+     ]
+    }
+   ]
+  },
+  {
+   "skillId": 267,
+   "name": "Song of Warding",
+   "levels": 1,
+   "effects": [
+    {
+     "stat": "mDef",
+     "op": "mul",
+     "values": [
+      1.3
+     ]
+    }
+   ]
+  },
+  {
+   "skillId": 268,
+   "name": "Song of Wind",
+   "levels": 1,
+   "effects": [
+    {
+     "stat": "runSpd",
+     "op": "add",
+     "values": [
+      20.0
+     ]
+    }
+   ]
+  },
+  {
+   "skillId": 269,
+   "name": "Song of Hunter",
+   "levels": 1,
+   "effects": [
+    {
+     "stat": "critRate",
+     "op": "mul",
+     "values": [
+      2.0
+     ]
+    }
+   ]
+  },
+  {
+   "skillId": 271,
+   "name": "Dance of the Warrior",
+   "levels": 1,
+   "effects": [
+    {
+     "stat": "pAtk",
+     "op": "mul",
+     "values": [
+      1.12
+     ]
+    }
+   ]
+  },
+  {
+   "skillId": 272,
+   "name": "Dance of Inspiration",
+   "levels": 1,
+   "effects": [
+    {
+     "stat": "accCombat",
+     "op": "add",
+     "values": [
+      4.0
+     ]
+    }
+   ]
+  },
+  {
+   "skillId": 273,
+   "name": "Dance of the Mystic",
+   "levels": 1,
+   "effects": [
+    {
+     "stat": "mAtk",
+     "op": "mul",
+     "values": [
+      1.2
+     ]
+    }
+   ]
+  },
+  {
+   "skillId": 275,
+   "name": "Dance of Fury",
+   "levels": 1,
+   "effects": [
+    {
+     "stat": "pAtkSpd",
+     "op": "mul",
+     "values": [
+      1.15
+     ]
+    }
+   ]
+  },
+  {
+   "skillId": 276,
+   "name": "Dance of Concentration",
+   "levels": 1,
+   "effects": [
+    {
+     "stat": "mAtkSpd",
+     "op": "mul",
+     "values": [
+      1.3
+     ]
+    }
+   ]
+  },
+  {
+   "skillId": 279,
+   "name": "Lightning Strike",
+   "levels": 5,
+   "effects": [
+    {
+     "stat": "pAtkSpd",
+     "op": "mul",
+     "values": [
+      0.5,
+      0.5,
+      0.5,
+      0.5,
+      0.5
+     ]
+    },
+    {
+     "stat": "runSpd",
+     "op": "mul",
+     "values": [
+      0.5,
+      0.5,
+      0.5,
+      0.5,
+      0.5
+     ]
+    },
+    {
+     "stat": "mAtkSpd",
+     "op": "mul",
+     "values": [
+      0.5,
+      0.5,
+      0.5,
+      0.5,
+      0.5
+     ]
+    }
+   ]
+  },
+  {
+   "skillId": 282,
+   "name": "Puma Spirit Totem",
+   "levels": 1,
+   "effects": [
+    {
+     "stat": "accCombat",
+     "op": "add",
+     "values": [
+      6.0
+     ]
+    },
+    {
+     "stat": "pAtkSpd",
+     "op": "mul",
+     "values": [
+      1.2
+     ]
+    }
+   ]
+  },
+  {
+   "skillId": 288,
+   "name": "Guard Stance",
+   "levels": 4,
+   "effects": [
+    {
+     "stat": "pDef",
+     "op": "add",
+     "values": [
+      121.8,
+      161.1,
+      212.1,
+      256.5
+     ]
+    }
+   ]
+  },
+  {
+   "skillId": 292,
+   "name": "Bison Spirit Totem",
+   "levels": 1,
+   "effects": [
+    {
+     "stat": "accCombat",
+     "op": "add",
+     "values": [
+      6.0
+     ]
+    },
+    {
+     "stat": "pAtk",
+     "op": "mul",
+     "values": [
+      1.1
+     ]
+    },
+    {
+     "stat": "critRate",
+     "op": "add",
+     "values": [
+      100.0
+     ]
+    },
+    {
+     "stat": "pAtk",
+     "op": "mul",
+     "values": [
+      1.3
+     ]
+    },
+    {
+     "stat": "critRate",
+     "op": "add",
+     "values": [
+      300.0
+     ]
+    }
+   ]
+  },
+  {
+   "skillId": 297,
+   "name": "Duelist Spirit",
+   "levels": 2,
+   "effects": [
+    {
+     "stat": "pAtkSpd",
+     "op": "mul",
+     "values": [
+      1.08,
+      1.12
+     ]
+    }
+   ]
+  },
+  {
+   "skillId": 298,
+   "name": "Rabbit Spirit Totem",
+   "levels": 1,
+   "effects": [
+    {
+     "stat": "pAtkSpd",
+     "op": "mul",
+     "values": [
+      1.3
+     ]
+    },
+    {
+     "stat": "runSpd",
+     "op": "mul",
+     "values": [
+      1.3
+     ]
+    },
+    {
+     "stat": "rEvas",
+     "op": "add",
+     "values": [
+      12.0
+     ]
+    }
+   ]
+  },
+  {
+   "skillId": 313,
+   "name": "Snipe",
+   "levels": 8,
+   "effects": [
+    {
+     "stat": "pAtk",
+     "op": "add",
+     "values": [
+      124.0,
+      134.0,
+      145.0,
+      155.0,
+      166.0,
+      177.0,
+      188.0,
+      199.0
+     ]
+    },
+    {
+     "stat": "accCombat",
+     "op": "add",
+     "values": [
+      3.0,
+      3.0,
+      4.0,
+      4.0,
+      5.0,
+      5.0,
+      6.0,
+      6.0
+     ]
+    },
+    {
+     "stat": "critRate",
+     "op": "mul",
+     "values": [
+      1.2,
+      1.2,
+      1.2,
+      1.2,
+      1.2,
+      1.2,
+      1.2,
+      1.2
+     ]
+    }
+   ]
+  },
+  {
+   "skillId": 317,
+   "name": "Focus Attack",
+   "levels": 5,
+   "effects": [
+    {
+     "stat": "accCombat",
+     "op": "add",
+     "values": [
+      2.0,
+      3.0,
+      4.0,
+      5.0,
+      6.0
+     ]
+    }
+   ]
+  },
+  {
+   "skillId": 327,
+   "name": "Wyvern Aegis",
+   "levels": 1,
+   "effects": [
+    {
+     "stat": "pDef",
+     "op": "add",
+     "values": [
+      7000.0
+     ]
+    },
+    {
+     "stat": "mDef",
+     "op": "add",
+     "values": [
+      6000.0
+     ]
+    }
+   ]
+  },
+  {
+   "skillId": 336,
+   "name": "Arcane Wisdom",
+   "levels": 1,
+   "effects": [
+    {
+     "stat": "mAtkSpd",
+     "op": "mul",
+     "values": [
+      0.9
+     ]
+    }
+   ]
+  },
+  {
+   "skillId": 337,
+   "name": "Arcane Power",
+   "levels": 1,
+   "effects": [
+    {
+     "stat": "mAtk",
+     "op": "mul",
+     "values": [
+      1.3
+     ]
+    }
+   ]
+  },
+  {
+   "skillId": 338,
+   "name": "Arcane Agility",
+   "levels": 1,
+   "effects": [
+    {
+     "stat": "mAtkSpd",
+     "op": "mul",
+     "values": [
+      1.2
+     ]
+    }
+   ]
+  },
+  {
+   "skillId": 339,
+   "name": "Parry Stance",
+   "levels": 1,
+   "effects": [
+    {
+     "stat": "pDef",
+     "op": "mul",
+     "values": [
+      1.25
+     ]
+    },
+    {
+     "stat": "mDef",
+     "op": "mul",
+     "values": [
+      1.25
+     ]
+    },
+    {
+     "stat": "pAtkSpd",
+     "op": "mul",
+     "values": [
+      0.8
+     ]
+    },
+    {
+     "stat": "runSpd",
+     "op": "mul",
+     "values": [
+      0.9
+     ]
+    },
+    {
+     "stat": "accCombat",
+     "op": "sub",
+     "values": [
+      4.0
+     ]
+    }
+   ]
+  },
+  {
+   "skillId": 340,
+   "name": "Riposte Stance",
+   "levels": 1,
+   "effects": [
+    {
+     "stat": "pAtkSpd",
+     "op": "mul",
+     "values": [
+      0.8
+     ]
+    },
+    {
+     "stat": "runSpd",
+     "op": "mul",
+     "values": [
+      0.9
+     ]
+    },
+    {
+     "stat": "accCombat",
+     "op": "sub",
+     "values": [
+      4.0
+     ]
+    }
+   ]
+  },
+  {
+   "skillId": 354,
+   "name": "Hamstring Shot",
+   "levels": 1,
+   "effects": [
+    {
+     "stat": "runSpd",
+     "op": "mul",
+     "values": [
+      0.7
+     ]
+    }
+   ]
+  },
+  {
+   "skillId": 355,
+   "name": "Focus Death",
+   "levels": 1,
+   "effects": [
+    {
+     "stat": "critRate",
+     "op": "mul",
+     "values": [
+      0.7
+     ]
+    }
+   ]
+  },
+  {
+   "skillId": 361,
+   "name": "Shock Blast",
+   "levels": 1,
+   "effects": [
+    {
+     "stat": "pDef",
+     "op": "mul",
+     "values": [
+      0.7
+     ]
+    },
+    {
+     "stat": "mDef",
+     "op": "mul",
+     "values": [
+      0.7
+     ]
+    }
+   ]
+  },
+  {
+   "skillId": 362,
+   "name": "Armor Crush",
+   "levels": 1,
+   "effects": [
+    {
+     "stat": "pDef",
+     "op": "mul",
+     "values": [
+      0.7
+     ]
+    },
+    {
+     "stat": "mDef",
+     "op": "mul",
+     "values": [
+      0.7
+     ]
+    }
+   ]
+  },
+  {
+   "skillId": 366,
+   "name": "Dance of Shadows",
+   "levels": 1,
+   "effects": [
+    {
+     "stat": "runSpd",
+     "op": "mul",
+     "values": [
+      0.5
+     ]
+    }
+   ]
+  },
+  {
+   "skillId": 395,
+   "name": "Heroic Miracle",
+   "levels": 1,
+   "effects": [
+    {
+     "stat": "mDef",
+     "op": "add",
+     "values": [
+      4050.0
+     ]
+    },
+    {
+     "stat": "pDef",
+     "op": "add",
+     "values": [
+      5400.0
+     ]
+    },
+    {
+     "stat": "runSpd",
+     "op": "add",
+     "values": [
+      5.0
+     ]
+    }
+   ]
+  },
+  {
+   "skillId": 396,
+   "name": "Heroic Berserker",
+   "levels": 1,
+   "effects": [
+    {
+     "stat": "accCombat",
+     "op": "add",
+     "values": [
+      8.0
+     ]
+    },
+    {
+     "stat": "mAtk",
+     "op": "add",
+     "values": [
+      500.0
+     ]
+    },
+    {
+     "stat": "mAtkSpd",
+     "op": "add",
+     "values": [
+      100.0
+     ]
+    },
+    {
+     "stat": "mDef",
+     "op": "sub",
+     "values": [
+      25.0
+     ]
+    },
+    {
+     "stat": "pAtk",
+     "op": "add",
+     "values": [
+      500.0
+     ]
+    },
+    {
+     "stat": "pAtkSpd",
+     "op": "add",
+     "values": [
+      100.0
+     ]
+    },
+    {
+     "stat": "pDef",
+     "op": "mul",
+     "values": [
+      0.75
+     ]
+    },
+    {
+     "stat": "rEvas",
+     "op": "sub",
+     "values": [
+      8.0
+     ]
+    },
+    {
+     "stat": "runSpd",
+     "op": "add",
+     "values": [
+      20.0
+     ]
+    }
+   ]
+  },
+  {
+   "skillId": 400,
+   "name": "Tribunal",
+   "levels": 10,
+   "effects": [
+    {
+     "stat": "critRate",
+     "op": "mul",
+     "values": [
+      0.7,
+      0.7,
+      0.7,
+      0.7,
+      0.7,
+      0.6,
+      0.6,
+      0.6,
+      0.6,
+      0.5
+     ]
+    }
+   ]
+  },
+  {
+   "skillId": 406,
+   "name": "Angelic Icon",
+   "levels": 3,
+   "effects": [
+    {
+     "stat": "pDef",
+     "op": "mul",
+     "values": [
+      1.5,
+      1.5,
+      1.5
+     ]
+    },
+    {
+     "stat": "mDef",
+     "op": "mul",
+     "values": [
+      1.5,
+      1.5,
+      1.5
+     ]
+    },
+    {
+     "stat": "accCombat",
+     "op": "add",
+     "values": [
+      6.0,
+      6.0,
+      6.0
+     ]
+    },
+    {
+     "stat": "runSpd",
+     "op": "add",
+     "values": [
+      10.0,
+      20.0,
+      30.0
+     ]
+    },
+    {
+     "stat": "pAtkSpd",
+     "op": "mul",
+     "values": [
+      1.1,
+      1.2,
+      1.3
+     ]
+    },
+    {
+     "stat": "critRate",
+     "op": "add",
+     "values": [
+      33.0,
+      66.0,
+      100.0
+     ]
+    }
+   ]
+  },
+  {
+   "skillId": 407,
+   "name": "Psycho Symphony",
+   "levels": 10,
+   "effects": [
+    {
+     "stat": "runSpd",
+     "op": "mul",
+     "values": [
+      0.9,
+      0.9,
+      0.9,
+      0.85,
+      0.85,
+      0.8,
+      0.8,
+      0.75,
+      0.75,
+      0.7
+     ]
+    },
+    {
+     "stat": "pAtkSpd",
+     "op": "mul",
+     "values": [
+      0.9,
+      0.9,
+      0.9,
+      0.85,
+      0.85,
+      0.8,
+      0.8,
+      0.75,
+      0.75,
+      0.7
+     ]
+    },
+    {
+     "stat": "mAtkSpd",
+     "op": "mul",
+     "values": [
+      0.9,
+      0.9,
+      0.9,
+      0.85,
+      0.85,
+      0.8,
+      0.8,
+      0.75,
+      0.75,
+      0.7
+     ]
+    }
+   ]
+  },
+  {
+   "skillId": 408,
+   "name": "Demonic Blade Dance",
+   "levels": 10,
+   "effects": [
+    {
+     "stat": "mAtk",
+     "op": "mul",
+     "values": [
+      0.9,
+      0.9,
+      0.9,
+      0.85,
+      0.85,
+      0.8,
+      0.8,
+      0.75,
+      0.75,
+      0.7
+     ]
+    },
+    {
+     "stat": "pAtk",
+     "op": "mul",
+     "values": [
+      0.9,
+      0.9,
+      0.9,
+      0.85,
+      0.85,
+      0.8,
+      0.8,
+      0.75,
+      0.75,
+      0.7
+     ]
+    }
+   ]
+  },
+  {
+   "skillId": 411,
+   "name": "Stealth",
+   "levels": 3,
+   "effects": [
+    {
+     "stat": "rEvas",
+     "op": "sub",
+     "values": [
+      12.0,
+      8.0,
+      4.0
+     ]
+    },
+    {
+     "stat": "pDef",
+     "op": "mul",
+     "values": [
+      0.55,
+      0.7,
+      0.85
+     ]
+    },
+    {
+     "stat": "mDef",
+     "op": "mul",
+     "values": [
+      0.55,
+      0.7,
+      0.85
+     ]
+    },
+    {
+     "stat": "accCombat",
+     "op": "sub",
+     "values": [
+      12.0,
+      12.0,
+      12.0
+     ]
+    },
+    {
+     "stat": "pAtk",
+     "op": "mul",
+     "values": [
+      0.55,
+      0.55,
+      0.55
+     ]
+    }
+   ]
+  },
+  {
+   "skillId": 412,
+   "name": "Sand Bomb",
+   "levels": 10,
+   "effects": [
+    {
+     "stat": "accCombat",
+     "op": "sub",
+     "values": [
+      6.0,
+      6.0,
+      6.0,
+      6.0,
+      6.0,
+      9.0,
+      9.0,
+      9.0,
+      9.0,
+      12.0
+     ]
+    }
+   ]
+  },
+  {
+   "skillId": 413,
+   "name": "Rapid Fire",
+   "levels": 8,
+   "effects": [
+    {
+     "stat": "pAtk",
+     "op": "add",
+     "values": [
+      62.0,
+      67.0,
+      73.0,
+      78.0,
+      83.0,
+      89.0,
+      94.0,
+      100.0
+     ]
+    },
+    {
+     "stat": "pAtkSpd",
+     "op": "mul",
+     "values": [
+      1.2,
+      1.2,
+      1.2,
+      1.2,
+      1.2,
+      1.2,
+      1.2,
+      1.2
+     ]
+    }
+   ]
+  },
+  {
+   "skillId": 414,
+   "name": "Dead Eye",
+   "levels": 8,
+   "effects": [
+    {
+     "stat": "pAtkSpd",
+     "op": "mul",
+     "values": [
+      0.8,
+      0.8,
+      0.8,
+      0.8,
+      0.8,
+      0.8,
+      0.8,
+      0.8
+     ]
+    },
+    {
+     "stat": "pAtk",
+     "op": "add",
+     "values": [
+      124.0,
+      134.0,
+      155.0,
+      155.0,
+      166.0,
+      177.0,
+      188.0,
+      199.0
+     ]
+    },
+    {
+     "stat": "accCombat",
+     "op": "add",
+     "values": [
+      1.0,
+      1.0,
+      2.0,
+      2.0,
+      2.0,
+      3.0,
+      3.0,
+      3.0
+     ]
+    }
+   ]
+  },
+  {
+   "skillId": 420,
+   "name": "Zealot",
+   "levels": 3,
+   "effects": [
+    {
+     "stat": "runSpd",
+     "op": "add",
+     "values": [
+      10.0,
+      20.0,
+      30.0
+     ]
+    },
+    {
+     "stat": "accCombat",
+     "op": "add",
+     "values": [
+      6.0,
+      6.0,
+      6.0
+     ]
+    },
+    {
+     "stat": "pAtkSpd",
+     "op": "mul",
+     "values": [
+      1.1,
+      1.2,
+      1.3
+     ]
+    },
+    {
+     "stat": "critRate",
+     "op": "add",
+     "values": [
+      33.0,
+      66.0,
+      100.0
+     ]
+    }
+   ]
+  },
+  {
+   "skillId": 422,
+   "name": "Polearm Accuracy",
+   "levels": 3,
+   "effects": [
+    {
+     "stat": "runSpd",
+     "op": "add",
+     "values": [
+      1.0,
+      1.0,
+      1.0
+     ]
+    },
+    {
+     "stat": "accCombat",
+     "op": "add",
+     "values": [
+      2.0,
+      3.0,
+      4.0
+     ]
+    }
+   ]
+  },
+  {
+   "skillId": 425,
+   "name": "Hawk Spirit Totem",
+   "levels": 1,
+   "effects": [
+    {
+     "stat": "accCombat",
+     "op": "add",
+     "values": [
+      6.0
+     ]
+    },
+    {
+     "stat": "critRate",
+     "op": "add",
+     "values": [
+      100.0
+     ]
+    }
+   ]
+  },
+  {
+   "skillId": 441,
+   "name": "Force Meditation",
+   "levels": 1,
+   "effects": [
+    {
+     "stat": "pDef",
+     "op": "mul",
+     "values": [
+      0.2
+     ]
+    }
+   ]
+  },
+  {
+   "skillId": 451,
+   "name": "Sonic Move",
+   "levels": 2,
+   "effects": [
+    {
+     "stat": "runSpd",
+     "op": "add",
+     "values": [
+      40.0,
+      66.0
+     ]
+    }
+   ]
+  },
+  {
+   "skillId": 1001,
+   "name": "Soul Cry",
+   "levels": 10,
+   "effects": [
+    {
+     "stat": "pAtk",
+     "op": "add",
+     "values": [
+      4.5,
+      14.0,
+      33.5,
+      66.5,
+      90.5,
+      141.5,
+      208.5,
+      247.0,
+      310.0,
+      375.5
+     ]
+    }
+   ]
+  },
+  {
+   "skillId": 1002,
+   "name": "Flame Chant",
+   "levels": 3,
+   "effects": [
+    {
+     "stat": "mAtkSpd",
+     "op": "mul",
+     "values": [
+      1.15,
+      1.23,
+      1.3
+     ]
+    }
+   ]
+  },
+  {
+   "skillId": 1003,
+   "name": "Pa'agrian Gift",
+   "levels": 3,
+   "effects": [
+    {
+     "stat": "pAtk",
+     "op": "mul",
+     "values": [
+      1.08,
+      1.12,
+      1.15
+     ]
+    }
+   ]
+  },
+  {
+   "skillId": 1004,
+   "name": "The Wisdom of Pa'agrio",
+   "levels": 3,
+   "effects": [
+    {
+     "stat": "mAtkSpd",
+     "op": "mul",
+     "values": [
+      1.15,
+      1.23,
+      1.3
+     ]
+    }
+   ]
+  },
+  {
+   "skillId": 1005,
+   "name": "Blessings of Pa'agrio",
+   "levels": 3,
+   "effects": [
+    {
+     "stat": "pDef",
+     "op": "mul",
+     "values": [
+      1.08,
+      1.12,
+      1.15
+     ]
+    }
+   ]
+  },
+  {
+   "skillId": 1006,
+   "name": "Chant of Fire",
+   "levels": 3,
+   "effects": [
+    {
+     "stat": "mDef",
+     "op": "mul",
+     "values": [
+      1.15,
+      1.23,
+      1.3
+     ]
+    }
+   ]
+  },
+  {
+   "skillId": 1007,
+   "name": "Chant of Battle",
+   "levels": 3,
+   "effects": [
+    {
+     "stat": "pAtk",
+     "op": "mul",
+     "values": [
+      1.08,
+      1.12,
+      1.15
+     ]
+    }
+   ]
+  },
+  {
+   "skillId": 1008,
+   "name": "The Glory of Pa'agrio",
+   "levels": 3,
+   "effects": [
+    {
+     "stat": "mDef",
+     "op": "mul",
+     "values": [
+      1.15,
+      1.23,
+      1.3
+     ]
+    }
+   ]
+  },
+  {
+   "skillId": 1009,
+   "name": "Chant of Shielding",
+   "levels": 3,
+   "effects": [
+    {
+     "stat": "pDef",
+     "op": "mul",
+     "values": [
+      1.08,
+      1.12,
+      1.15
+     ]
+    }
+   ]
+  },
+  {
+   "skillId": 1010,
+   "name": "Soul Shield",
+   "levels": 3,
+   "effects": [
+    {
+     "stat": "pDef",
+     "op": "mul",
+     "values": [
+      1.08,
+      1.12,
+      1.15
+     ]
+    }
+   ]
+  },
+  {
+   "skillId": 1036,
+   "name": "Magic Barrier",
+   "levels": 2,
+   "effects": [
+    {
+     "stat": "mDef",
+     "op": "mul",
+     "values": [
+      1.23,
+      1.3
+     ]
+    }
+   ]
+  },
+  {
+   "skillId": 1040,
+   "name": "Shield",
+   "levels": 3,
+   "effects": [
+    {
+     "stat": "pDef",
+     "op": "mul",
+     "values": [
+      1.08,
+      1.12,
+      1.15
+     ]
+    }
+   ]
+  },
+  {
+   "skillId": 1059,
+   "name": "Empower",
+   "levels": 3,
+   "effects": [
+    {
+     "stat": "mAtk",
+     "op": "mul",
+     "values": [
+      1.55,
+      1.65,
+      1.75
+     ]
+    }
+   ]
+  },
+  {
+   "skillId": 1062,
+   "name": "Berserker Spirit",
+   "levels": 2,
+   "effects": [
+    {
+     "stat": "mAtk",
+     "op": "mul",
+     "values": [
+      1.1,
+      1.16
+     ]
+    },
+    {
+     "stat": "pAtk",
+     "op": "mul",
+     "values": [
+      1.05,
+      1.08
+     ]
+    },
+    {
+     "stat": "mDef",
+     "op": "mul",
+     "values": [
+      0.9,
+      0.84
+     ]
+    },
+    {
+     "stat": "pDef",
+     "op": "mul",
+     "values": [
+      0.95,
+      0.92
+     ]
+    },
+    {
+     "stat": "mAtkSpd",
+     "op": "mul",
+     "values": [
+      1.05,
+      1.08
+     ]
+    },
+    {
+     "stat": "pAtkSpd",
+     "op": "mul",
+     "values": [
+      1.05,
+      1.08
+     ]
+    },
+    {
+     "stat": "runSpd",
+     "op": "add",
+     "values": [
+      5.0,
+      8.0
+     ]
+    },
+    {
+     "stat": "rEvas",
+     "op": "sub",
+     "values": [
+      2.0,
+      4.0
+     ]
+    }
+   ]
+  },
+  {
+   "skillId": 1068,
+   "name": "Might",
+   "levels": 3,
+   "effects": [
+    {
+     "stat": "pAtk",
+     "op": "mul",
+     "values": [
+      1.08,
+      1.12,
+      1.15
+     ]
+    }
+   ]
+  },
+  {
+   "skillId": 1077,
+   "name": "Focus",
+   "levels": 3,
+   "effects": [
+    {
+     "stat": "critRate",
+     "op": "mul",
+     "values": [
+      1.2,
+      1.25,
+      1.3
+     ]
+    }
+   ]
+  },
+  {
+   "skillId": 1085,
+   "name": "Acumen",
+   "levels": 3,
+   "effects": [
+    {
+     "stat": "mAtkSpd",
+     "op": "mul",
+     "values": [
+      1.15,
+      1.23,
+      1.3
+     ]
+    }
+   ]
+  },
+  {
+   "skillId": 1086,
+   "name": "Haste",
+   "levels": 2,
+   "effects": [
+    {
+     "stat": "pAtkSpd",
+     "op": "mul",
+     "values": [
+      1.15,
+      1.33
+     ]
+    }
+   ]
+  },
+  {
+   "skillId": 1087,
+   "name": "Agility",
+   "levels": 3,
+   "effects": [
+    {
+     "stat": "rEvas",
+     "op": "add",
+     "values": [
+      2.0,
+      3.0,
+      4.0
+     ]
+    }
+   ]
+  },
+  {
+   "skillId": 1096,
+   "name": "Seal of Chaos",
+   "levels": 16,
+   "effects": [
+    {
+     "stat": "accCombat",
+     "op": "sub",
+     "values": [
+      9.0,
+      9.0,
+      12.0,
+      12.0,
+      12.0,
+      12.0,
+      12.0,
+      12.0,
+      12.0,
+      12.0,
+      12.0,
+      12.0,
+      12.0,
+      12.0,
+      12.0,
+      12.0
+     ]
+    }
+   ]
+  },
+  {
+   "skillId": 1099,
+   "name": "Seal of Slow",
+   "levels": 15,
+   "effects": [
+    {
+     "stat": "runSpd",
+     "op": "mul",
+     "values": [
+      0.8,
+      0.7,
+      0.7,
+      0.7,
+      0.7,
+      0.7,
+      0.7,
+      0.7,
+      0.7,
+      0.7,
+      0.7,
+      0.7,
+      0.7,
+      0.7,
+      0.7
+     ]
+    }
+   ]
+  },
+  {
+   "skillId": 1104,
+   "name": "Seal of Winter",
+   "levels": 14,
+   "effects": [
+    {
+     "stat": "pAtkSpd",
+     "op": "mul",
+     "values": [
+      0.77,
+      0.77,
+      0.77,
+      0.77,
+      0.77,
+      0.77,
+      0.77,
+      0.77,
+      0.77,
+      0.77,
+      0.77,
+      0.77,
+      0.77,
+      0.77
+     ]
+    }
+   ]
+  },
+  {
+   "skillId": 1139,
+   "name": "Servitor Magic Shield",
+   "levels": 2,
+   "effects": [
+    {
+     "stat": "mDef",
+     "op": "mul",
+     "values": [
+      1.23,
+      1.3
+     ]
+    }
+   ]
+  },
+  {
+   "skillId": 1140,
+   "name": "Servitor Physical Shield",
+   "levels": 3,
+   "effects": [
+    {
+     "stat": "pDef",
+     "op": "mul",
+     "values": [
+      1.08,
+      1.12,
+      1.15
+     ]
+    }
+   ]
+  },
+  {
+   "skillId": 1141,
+   "name": "Servitor Haste",
+   "levels": 2,
+   "effects": [
+    {
+     "stat": "pAtkSpd",
+     "op": "mul",
+     "values": [
+      1.15,
+      1.33
+     ]
+    }
+   ]
+  },
+  {
+   "skillId": 1144,
+   "name": "Servitor Wind Walk",
+   "levels": 2,
+   "effects": [
+    {
+     "stat": "runSpd",
+     "op": "add",
+     "values": [
+      20.0,
+      33.0
+     ]
+    }
+   ]
+  },
+  {
+   "skillId": 1145,
+   "name": "Bright Servitor",
+   "levels": 3,
+   "effects": [
+    {
+     "stat": "mAtk",
+     "op": "mul",
+     "values": [
+      1.55,
+      1.65,
+      1.75
+     ]
+    }
+   ]
+  },
+  {
+   "skillId": 1146,
+   "name": "Mighty Servitor",
+   "levels": 3,
+   "effects": [
+    {
+     "stat": "pAtk",
+     "op": "mul",
+     "values": [
+      1.08,
+      1.12,
+      1.15
+     ]
+    }
+   ]
+  },
+  {
+   "skillId": 1160,
+   "name": "Slow",
+   "levels": 15,
+   "effects": [
+    {
+     "stat": "runSpd",
+     "op": "mul",
+     "values": [
+      0.8,
+      0.7,
+      0.7,
+      0.7,
+      0.7,
+      0.7,
+      0.7,
+      0.7,
+      0.7,
+      0.7,
+      0.7,
+      0.7,
+      0.7,
+      0.7,
+      0.7
+     ]
+    }
+   ]
+  },
+  {
+   "skillId": 1164,
+   "name": "Curse: Weakness",
+   "levels": 19,
+   "effects": [
+    {
+     "stat": "pAtk",
+     "op": "mul",
+     "values": [
+      0.83,
+      0.8,
+      0.8,
+      0.8,
+      0.8,
+      0.77,
+      0.77,
+      0.77,
+      0.77,
+      0.77,
+      0.77,
+      0.77,
+      0.77,
+      0.77,
+      0.77,
+      0.77,
+      0.77,
+      0.77,
+      0.77
+     ]
+    }
+   ]
+  },
+  {
+   "skillId": 1170,
+   "name": "Anchor",
+   "levels": 13,
+   "effects": [
+    {
+     "stat": "pAtkSpd",
+     "op": "mul",
+     "values": [
+      0.5,
+      0.5,
+      0.5,
+      0.5,
+      0.5,
+      0.5,
+      0.5,
+      0.5,
+      0.5,
+      0.5,
+      0.5,
+      0.5,
+      0.5
+     ]
+    },
+    {
+     "stat": "runSpd",
+     "op": "mul",
+     "values": [
+      0.5,
+      0.5,
+      0.5,
+      0.5,
+      0.5,
+      0.5,
+      0.5,
+      0.5,
+      0.5,
+      0.5,
+      0.5,
+      0.5,
+      0.5
+     ]
+    },
+    {
+     "stat": "mAtkSpd",
+     "op": "mul",
+     "values": [
+      0.5,
+      0.5,
+      0.5,
+      0.5,
+      0.5,
+      0.5,
+      0.5,
+      0.5,
+      0.5,
+      0.5,
+      0.5,
+      0.5,
+      0.5
+     ]
+    }
+   ]
+  },
+  {
+   "skillId": 1184,
+   "name": "Ice Bolt",
+   "levels": 6,
+   "effects": [
+    {
+     "stat": "runSpd",
+     "op": "mul",
+     "values": [
+      0.8,
+      0.8,
+      0.8,
+      0.8,
+      0.8,
+      0.8
+     ]
+    }
+   ]
+  },
+  {
+   "skillId": 1204,
+   "name": "Wind Walk",
+   "levels": 2,
+   "effects": [
+    {
+     "stat": "runSpd",
+     "op": "add",
+     "values": [
+      20.0,
+      33.0
+     ]
+    }
+   ]
+  },
+  {
+   "skillId": 1206,
+   "name": "Wind Shackle",
+   "levels": 19,
+   "effects": [
+    {
+     "stat": "pAtkSpd",
+     "op": "mul",
+     "values": [
+      0.83,
+      0.8,
+      0.8,
+      0.8,
+      0.8,
+      0.77,
+      0.77,
+      0.77,
+      0.77,
+      0.77,
+      0.77,
+      0.77,
+      0.77,
+      0.77,
+      0.77,
+      0.77,
+      0.77,
+      0.77,
+      0.77
+     ]
+    }
+   ]
+  },
+  {
+   "skillId": 1222,
+   "name": "Curse Chaos",
+   "levels": 15,
+   "effects": [
+    {
+     "stat": "accCombat",
+     "op": "sub",
+     "values": [
+      9.0,
+      12.0,
+      12.0,
+      12.0,
+      12.0,
+      12.0,
+      12.0,
+      12.0,
+      12.0,
+      12.0,
+      12.0,
+      12.0,
+      12.0,
+      12.0,
+      12.0
+     ]
+    }
+   ]
+  },
+  {
+   "skillId": 1236,
+   "name": "Frost Bolt",
+   "levels": 19,
+   "effects": [
+    {
+     "stat": "runSpd",
+     "op": "mul",
+     "values": [
+      0.8,
+      0.8,
+      0.8,
+      0.8,
+      0.8,
+      0.8,
+      0.8,
+      0.8,
+      0.8,
+      0.8,
+      0.8,
+      0.8,
+      0.8,
+      0.8,
+      0.8,
+      0.8,
+      0.8,
+      0.8,
+      0.8
+     ]
+    }
+   ]
+  },
+  {
+   "skillId": 1240,
+   "name": "Guidance",
+   "levels": 3,
+   "effects": [
+    {
+     "stat": "accCombat",
+     "op": "add",
+     "values": [
+      2.0,
+      3.0,
+      4.0
+     ]
+    }
+   ]
+  },
+  {
+   "skillId": 1249,
+   "name": "The Vision of Pa'agrio",
+   "levels": 3,
+   "effects": [
+    {
+     "stat": "accCombat",
+     "op": "add",
+     "values": [
+      2.0,
+      3.0,
+      4.0
+     ]
+    }
+   ]
+  },
+  {
+   "skillId": 1251,
+   "name": "Chant of Fury",
+   "levels": 2,
+   "effects": [
+    {
+     "stat": "pAtkSpd",
+     "op": "mul",
+     "values": [
+      1.15,
+      1.33
+     ]
+    }
+   ]
+  },
+  {
+   "skillId": 1252,
+   "name": "Chant of Evasion",
+   "levels": 3,
+   "effects": [
+    {
+     "stat": "rEvas",
+     "op": "add",
+     "values": [
+      2.0,
+      3.0,
+      4.0
+     ]
+    }
+   ]
+  },
+  {
+   "skillId": 1260,
+   "name": "The Tact of Pa'agrio",
+   "levels": 3,
+   "effects": [
+    {
+     "stat": "rEvas",
+     "op": "add",
+     "values": [
+      2.0,
+      3.0,
+      4.0
+     ]
+    }
+   ]
+  },
+  {
+   "skillId": 1261,
+   "name": "The Rage of Pa'agrio",
+   "levels": 2,
+   "effects": [
+    {
+     "stat": "mAtk",
+     "op": "mul",
+     "values": [
+      1.1,
+      1.16
+     ]
+    },
+    {
+     "stat": "pAtk",
+     "op": "mul",
+     "values": [
+      1.05,
+      1.08
+     ]
+    },
+    {
+     "stat": "mDef",
+     "op": "mul",
+     "values": [
+      0.9,
+      0.84
+     ]
+    },
+    {
+     "stat": "pDef",
+     "op": "mul",
+     "values": [
+      0.95,
+      0.92
+     ]
+    },
+    {
+     "stat": "mAtkSpd",
+     "op": "mul",
+     "values": [
+      1.05,
+      1.08
+     ]
+    },
+    {
+     "stat": "pAtkSpd",
+     "op": "mul",
+     "values": [
+      1.05,
+      1.08
+     ]
+    },
+    {
+     "stat": "runSpd",
+     "op": "add",
+     "values": [
+      5.0,
+      8.0
+     ]
+    },
+    {
+     "stat": "rEvas",
+     "op": "sub",
+     "values": [
+      2.0,
+      4.0
+     ]
+    }
+   ]
+  },
+  {
+   "skillId": 1263,
+   "name": "Curse Gloom",
+   "levels": 13,
+   "effects": [
+    {
+     "stat": "mDef",
+     "op": "mul",
+     "values": [
+      0.77,
+      0.77,
+      0.77,
+      0.77,
+      0.77,
+      0.77,
+      0.77,
+      0.77,
+      0.77,
+      0.77,
+      0.77,
+      0.77,
+      0.77
+     ]
+    }
+   ]
+  },
+  {
+   "skillId": 1282,
+   "name": "Pa'agrian Haste",
+   "levels": 2,
+   "effects": [
+    {
+     "stat": "runSpd",
+     "op": "add",
+     "values": [
+      20.0,
+      33.0
+     ]
+    }
+   ]
+  },
+  {
+   "skillId": 1283,
+   "name": "Soul Guard",
+   "levels": 13,
+   "effects": [
+    {
+     "stat": "pDef",
+     "op": "add",
+     "values": [
+      293.3,
+      333.2,
+      375.9,
+      421.4,
+      445.2,
+      469.7,
+      494.9,
+      520.1,
+      546.0,
+      571.9,
+      598.5,
+      625.8,
+      653.1
+     ]
+    }
+   ]
+  },
+  {
+   "skillId": 1290,
+   "name": "Blizzard",
+   "levels": 1,
+   "effects": [
+    {
+     "stat": "runSpd",
+     "op": "mul",
+     "values": [
+      0.5
+     ]
+    }
+   ]
+  },
+  {
+   "skillId": 1298,
+   "name": "Mass Slow",
+   "levels": 14,
+   "effects": [
+    {
+     "stat": "runSpd",
+     "op": "mul",
+     "values": [
+      0.7,
+      0.7,
+      0.7,
+      0.7,
+      0.7,
+      0.7,
+      0.7,
+      0.7,
+      0.7,
+      0.7,
+      0.7,
+      0.7,
+      0.7,
+      0.7
+     ]
+    }
+   ]
+  },
+  {
+   "skillId": 1299,
+   "name": "Servitor Empowerment",
+   "levels": 2,
+   "effects": [
+    {
+     "stat": "pDef",
+     "op": "add",
+     "values": [
+      1800.0,
+      3600.0
+     ]
+    },
+    {
+     "stat": "mDef",
+     "op": "add",
+     "values": [
+      1350.0,
+      2700.0
+     ]
+    }
+   ]
+  },
+  {
+   "skillId": 1308,
+   "name": "Chant of Predator",
+   "levels": 3,
+   "effects": [
+    {
+     "stat": "critRate",
+     "op": "mul",
+     "values": [
+      1.2,
+      1.25,
+      1.3
+     ]
+    }
+   ]
+  },
+  {
+   "skillId": 1309,
+   "name": "Chant of Eagle",
+   "levels": 3,
+   "effects": [
+    {
+     "stat": "accCombat",
+     "op": "add",
+     "values": [
+      2.0,
+      3.0,
+      4.0
+     ]
+    }
+   ]
+  },
+  {
+   "skillId": 1326,
+   "name": "Harmony of Noblesse",
+   "levels": 1,
+   "effects": [
+    {
+     "stat": "pDef",
+     "op": "add",
+     "values": [
+      3000.0
+     ]
+    },
+    {
+     "stat": "runSpd",
+     "op": "mul",
+     "values": [
+      1.25
+     ]
+    }
+   ]
+  },
+  {
+   "skillId": 1327,
+   "name": "Symphony of Noblesse",
+   "levels": 1,
+   "effects": [
+    {
+     "stat": "mDef",
+     "op": "add",
+     "values": [
+      4500.0
+     ]
+    },
+    {
+     "stat": "runSpd",
+     "op": "mul",
+     "values": [
+      1.25
+     ]
+    }
+   ]
+  },
+  {
+   "skillId": 1337,
+   "name": "Curse of Abyss",
+   "levels": 1,
+   "effects": [
+    {
+     "stat": "runSpd",
+     "op": "mul",
+     "values": [
+      0.9
+     ]
+    },
+    {
+     "stat": "rEvas",
+     "op": "sub",
+     "values": [
+      6.0
+     ]
+    },
+    {
+     "stat": "pDef",
+     "op": "mul",
+     "values": [
+      0.7
+     ]
+    },
+    {
+     "stat": "mAtk",
+     "op": "mul",
+     "values": [
+      0.7
+     ]
+    },
+    {
+     "stat": "mAtkSpd",
+     "op": "mul",
+     "values": [
+      0.8
+     ]
+    }
+   ]
+  },
+  {
+   "skillId": 1339,
+   "name": "Fire Vortex",
+   "levels": 1,
+   "effects": [
+    {
+     "stat": "runSpd",
+     "op": "mul",
+     "values": [
+      0.9
+     ]
+    },
+    {
+     "stat": "pAtkSpd",
+     "op": "mul",
+     "values": [
+      0.7
+     ]
+    },
+    {
+     "stat": "mAtkSpd",
+     "op": "mul",
+     "values": [
+      0.9
+     ]
+    }
+   ]
+  },
+  {
+   "skillId": 1340,
+   "name": "Ice Vortex",
+   "levels": 1,
+   "effects": [
+    {
+     "stat": "runSpd",
+     "op": "mul",
+     "values": [
+      0.7
+     ]
+    },
+    {
+     "stat": "pAtkSpd",
+     "op": "mul",
+     "values": [
+      0.9
+     ]
+    },
+    {
+     "stat": "mAtkSpd",
+     "op": "mul",
+     "values": [
+      0.9
+     ]
+    }
+   ]
+  },
+  {
+   "skillId": 1341,
+   "name": "Wind Vortex",
+   "levels": 1,
+   "effects": [
+    {
+     "stat": "runSpd",
+     "op": "mul",
+     "values": [
+      0.9
+     ]
+    },
+    {
+     "stat": "pAtkSpd",
+     "op": "mul",
+     "values": [
+      0.9
+     ]
+    },
+    {
+     "stat": "mAtkSpd",
+     "op": "mul",
+     "values": [
+      0.7
+     ]
+    }
+   ]
+  },
+  {
+   "skillId": 1342,
+   "name": "Light Vortex",
+   "levels": 1,
+   "effects": [
+    {
+     "stat": "accCombat",
+     "op": "sub",
+     "values": [
+      6.0
+     ]
+    }
+   ]
+  },
+  {
+   "skillId": 1343,
+   "name": "Dark Vortex",
+   "levels": 1,
+   "effects": [
+    {
+     "stat": "accCombat",
+     "op": "sub",
+     "values": [
+      6.0
+     ]
+    }
+   ]
+  },
+  {
+   "skillId": 1346,
+   "name": "Warrior Servitor",
+   "levels": 1,
+   "effects": [
+    {
+     "stat": "pDef",
+     "op": "mul",
+     "values": [
+      1.2
+     ]
+    },
+    {
+     "stat": "accCombat",
+     "op": "add",
+     "values": [
+      4.0
+     ]
+    },
+    {
+     "stat": "pAtk",
+     "op": "mul",
+     "values": [
+      1.1
+     ]
+    },
+    {
+     "stat": "pAtkSpd",
+     "op": "mul",
+     "values": [
+      1.2
+     ]
+    },
+    {
+     "stat": "runSpd",
+     "op": "mul",
+     "values": [
+      0.9
+     ]
+    }
+   ]
+  },
+  {
+   "skillId": 1347,
+   "name": "Wizard Servitor",
+   "levels": 1,
+   "effects": [
+    {
+     "stat": "mDef",
+     "op": "mul",
+     "values": [
+      1.2
+     ]
+    },
+    {
+     "stat": "mAtk",
+     "op": "mul",
+     "values": [
+      1.2
+     ]
+    },
+    {
+     "stat": "mAtkSpd",
+     "op": "mul",
+     "values": [
+      1.2
+     ]
+    },
+    {
+     "stat": "runSpd",
+     "op": "mul",
+     "values": [
+      0.8
+     ]
+    }
+   ]
+  },
+  {
+   "skillId": 1348,
+   "name": "Assassin Servitor",
+   "levels": 1,
+   "effects": [
+    {
+     "stat": "accCombat",
+     "op": "add",
+     "values": [
+      4.0
+     ]
+    },
+    {
+     "stat": "rEvas",
+     "op": "add",
+     "values": [
+      4.0
+     ]
+    },
+    {
+     "stat": "pAtkSpd",
+     "op": "mul",
+     "values": [
+      1.2
+     ]
+    }
+   ]
+  },
+  {
+   "skillId": 1349,
+   "name": "Final Servitor",
+   "levels": 1,
+   "effects": [
+    {
+     "stat": "critRate",
+     "op": "mul",
+     "values": [
+      1.2
+     ]
+    },
+    {
+     "stat": "pAtk",
+     "op": "mul",
+     "values": [
+      1.1
+     ]
+    },
+    {
+     "stat": "pAtkSpd",
+     "op": "mul",
+     "values": [
+      1.2
+     ]
+    },
+    {
+     "stat": "runSpd",
+     "op": "mul",
+     "values": [
+      0.8
+     ]
+    },
+    {
+     "stat": "accCombat",
+     "op": "add",
+     "values": [
+      4.0
+     ]
+    },
+    {
+     "stat": "pDef",
+     "op": "mul",
+     "values": [
+      1.2
+     ]
+    },
+    {
+     "stat": "mDef",
+     "op": "mul",
+     "values": [
+      1.2
+     ]
+    },
+    {
+     "stat": "mAtk",
+     "op": "mul",
+     "values": [
+      1.2
+     ]
+    },
+    {
+     "stat": "mAtkSpd",
+     "op": "mul",
+     "values": [
+      1.2
+     ]
+    }
+   ]
+  },
+  {
+   "skillId": 1355,
+   "name": "Prophecy of Water",
+   "levels": 1,
+   "effects": [
+    {
+     "stat": "mAtk",
+     "op": "mul",
+     "values": [
+      1.2
+     ]
+    },
+    {
+     "stat": "mDef",
+     "op": "mul",
+     "values": [
+      1.2
+     ]
+    },
+    {
+     "stat": "mAtkSpd",
+     "op": "mul",
+     "values": [
+      1.2
+     ]
+    },
+    {
+     "stat": "runSpd",
+     "op": "mul",
+     "values": [
+      0.8
+     ]
+    }
+   ]
+  },
+  {
+   "skillId": 1356,
+   "name": "Prophecy of Fire",
+   "levels": 1,
+   "effects": [
+    {
+     "stat": "pAtk",
+     "op": "mul",
+     "values": [
+      1.1
+     ]
+    },
+    {
+     "stat": "pDef",
+     "op": "mul",
+     "values": [
+      1.2
+     ]
+    },
+    {
+     "stat": "accCombat",
+     "op": "add",
+     "values": [
+      4.0
+     ]
+    },
+    {
+     "stat": "pAtkSpd",
+     "op": "mul",
+     "values": [
+      1.2
+     ]
+    },
+    {
+     "stat": "runSpd",
+     "op": "mul",
+     "values": [
+      0.9
+     ]
+    }
+   ]
+  },
+  {
+   "skillId": 1357,
+   "name": "Prophecy of Wind",
+   "levels": 1,
+   "effects": [
+    {
+     "stat": "accCombat",
+     "op": "add",
+     "values": [
+      4.0
+     ]
+    },
+    {
+     "stat": "rEvas",
+     "op": "add",
+     "values": [
+      4.0
+     ]
+    },
+    {
+     "stat": "pAtkSpd",
+     "op": "mul",
+     "values": [
+      1.2
+     ]
+    },
+    {
+     "stat": "critRate",
+     "op": "mul",
+     "values": [
+      1.2
+     ]
+    }
+   ]
+  },
+  {
+   "skillId": 1358,
+   "name": "Block Shield",
+   "levels": 1,
+   "effects": [
+    {
+     "stat": "pDef",
+     "op": "mul",
+     "values": [
+      0.9
+     ]
+    }
+   ]
+  },
+  {
+   "skillId": 1359,
+   "name": "Block Wind Walk",
+   "levels": 1,
+   "effects": [
+    {
+     "stat": "runSpd",
+     "op": "mul",
+     "values": [
+      0.9
+     ]
+    }
+   ]
+  },
+  {
+   "skillId": 1360,
+   "name": "Mass Block Shield",
+   "levels": 1,
+   "effects": [
+    {
+     "stat": "pDef",
+     "op": "mul",
+     "values": [
+      0.9
+     ]
+    }
+   ]
+  },
+  {
+   "skillId": 1361,
+   "name": "Mass Block Wind Walk",
+   "levels": 1,
+   "effects": [
+    {
+     "stat": "runSpd",
+     "op": "mul",
+     "values": [
+      0.9
+     ]
+    }
+   ]
+  },
+  {
+   "skillId": 1363,
+   "name": "Chant of Victory",
+   "levels": 1,
+   "effects": [
+    {
+     "stat": "pAtk",
+     "op": "mul",
+     "values": [
+      1.1
+     ]
+    },
+    {
+     "stat": "pDef",
+     "op": "mul",
+     "values": [
+      1.2
+     ]
+    },
+    {
+     "stat": "critRate",
+     "op": "mul",
+     "values": [
+      1.2
+     ]
+    },
+    {
+     "stat": "accCombat",
+     "op": "add",
+     "values": [
+      4.0
+     ]
+    },
+    {
+     "stat": "pAtkSpd",
+     "op": "mul",
+     "values": [
+      1.2
+     ]
+    },
+    {
+     "stat": "mAtkSpd",
+     "op": "mul",
+     "values": [
+      1.2
+     ]
+    },
+    {
+     "stat": "mAtk",
+     "op": "mul",
+     "values": [
+      1.2
+     ]
+    },
+    {
+     "stat": "mDef",
+     "op": "mul",
+     "values": [
+      1.2
+     ]
+    },
+    {
+     "stat": "runSpd",
+     "op": "mul",
+     "values": [
+      0.8
+     ]
+    }
+   ]
+  },
+  {
+   "skillId": 1364,
+   "name": "The Eye of Pa'agrio",
+   "levels": 1,
+   "effects": [
+    {
+     "stat": "accCombat",
+     "op": "add",
+     "values": [
+      4.0
+     ]
+    }
+   ]
+  },
+  {
+   "skillId": 1365,
+   "name": "The Soul of Pa'agrio",
+   "levels": 1,
+   "effects": [
+    {
+     "stat": "mAtk",
+     "op": "mul",
+     "values": [
+      1.75
+     ]
+    },
+    {
+     "stat": "mDef",
+     "op": "mul",
+     "values": [
+      1.3
+     ]
+    }
+   ]
+  },
+  {
+   "skillId": 1366,
+   "name": "Seal of Despair",
+   "levels": 1,
+   "effects": [
+    {
+     "stat": "pAtk",
+     "op": "mul",
+     "values": [
+      0.9
+     ]
+    },
+    {
+     "stat": "runSpd",
+     "op": "mul",
+     "values": [
+      0.8
+     ]
+    },
+    {
+     "stat": "mDef",
+     "op": "mul",
+     "values": [
+      0.7
+     ]
+    },
+    {
+     "stat": "pAtkSpd",
+     "op": "mul",
+     "values": [
+      0.7
+     ]
+    },
+    {
+     "stat": "critRate",
+     "op": "mul",
+     "values": [
+      0.7
+     ]
+    },
+    {
+     "stat": "accCombat",
+     "op": "sub",
+     "values": [
+      6.0
+     ]
+    }
+   ]
+  },
+  {
+   "skillId": 1374,
+   "name": "Heroic Valor",
+   "levels": 1,
+   "effects": [
+    {
+     "stat": "pAtk",
+     "op": "add",
+     "values": [
+      250.0
+     ]
+    },
+    {
+     "stat": "pDef",
+     "op": "add",
+     "values": [
+      500.0
+     ]
+    }
+   ]
+  },
+  {
+   "skillId": 1375,
+   "name": "Heroic Grandeur",
+   "levels": 1,
+   "effects": [
+    {
+     "stat": "mDef",
+     "op": "mul",
+     "values": [
+      0.5
+     ]
+    },
+    {
+     "stat": "pDef",
+     "op": "mul",
+     "values": [
+      0.5
+     ]
+    },
+    {
+     "stat": "rEvas",
+     "op": "sub",
+     "values": [
+      16.0
+     ]
+    }
+   ]
+  },
+  {
+   "skillId": 1376,
+   "name": "Heroic Dread",
+   "levels": 1,
+   "effects": [
+    {
+     "stat": "runSpd",
+     "op": "add",
+     "values": [
+      66.0
+     ]
+    }
+   ]
+  },
+  {
+   "skillId": 1382,
+   "name": "Mass Gloom",
+   "levels": 5,
+   "effects": [
+    {
+     "stat": "mDef",
+     "op": "mul",
+     "values": [
+      0.77,
+      0.77,
+      0.77,
+      0.77,
+      0.77
+     ]
+    }
+   ]
+  },
+  {
+   "skillId": 1386,
+   "name": "Arcane Disruption",
+   "levels": 10,
+   "effects": [
+    {
+     "stat": "mAtkSpd",
+     "op": "mul",
+     "values": [
+      0.77,
+      0.77,
+      0.77,
+      0.77,
+      0.77,
+      0.77,
+      0.77,
+      0.77,
+      0.77,
+      0.77
+     ]
+    }
+   ]
+  },
+  {
+   "skillId": 1388,
+   "name": "Greater Might",
+   "levels": 3,
+   "effects": [
+    {
+     "stat": "pAtk",
+     "op": "mul",
+     "values": [
+      1.04,
+      1.07,
+      1.1
+     ]
+    }
+   ]
+  },
+  {
+   "skillId": 1389,
+   "name": "Greater Shield",
+   "levels": 3,
+   "effects": [
+    {
+     "stat": "pDef",
+     "op": "mul",
+     "values": [
+      1.05,
+      1.1,
+      1.15
+     ]
+    }
+   ]
+  },
+  {
+   "skillId": 1390,
+   "name": "War Chant",
+   "levels": 3,
+   "effects": [
+    {
+     "stat": "pAtk",
+     "op": "mul",
+     "values": [
+      1.04,
+      1.07,
+      1.1
+     ]
+    }
+   ]
+  },
+  {
+   "skillId": 1391,
+   "name": "Earth Chant",
+   "levels": 3,
+   "effects": [
+    {
+     "stat": "pDef",
+     "op": "mul",
+     "values": [
+      1.05,
+      1.1,
+      1.15
+     ]
+    }
+   ]
+  },
+  {
+   "skillId": 1413,
+   "name": "Magnus' Chant",
+   "levels": 1,
+   "effects": [
+    {
+     "stat": "mAtkSpd",
+     "op": "mul",
+     "values": [
+      1.2
+     ]
+    },
+    {
+     "stat": "mDef",
+     "op": "mul",
+     "values": [
+      1.2
+     ]
+    },
+    {
+     "stat": "mAtk",
+     "op": "mul",
+     "values": [
+      1.3
+     ]
+    }
+   ]
+  },
+  {
+   "skillId": 1414,
+   "name": "Victories of Pa'agrio",
+   "levels": 1,
+   "effects": [
+    {
+     "stat": "pAtk",
+     "op": "mul",
+     "values": [
+      1.1
+     ]
+    },
+    {
+     "stat": "pDef",
+     "op": "mul",
+     "values": [
+      1.2
+     ]
+    },
+    {
+     "stat": "critRate",
+     "op": "mul",
+     "values": [
+      1.2
+     ]
+    },
+    {
+     "stat": "accCombat",
+     "op": "add",
+     "values": [
+      4.0
+     ]
+    },
+    {
+     "stat": "pAtkSpd",
+     "op": "mul",
+     "values": [
+      1.2
+     ]
+    },
+    {
+     "stat": "mAtkSpd",
+     "op": "mul",
+     "values": [
+      1.2
+     ]
+    },
+    {
+     "stat": "mAtk",
+     "op": "mul",
+     "values": [
+      1.2
+     ]
+    },
+    {
+     "stat": "mDef",
+     "op": "mul",
+     "values": [
+      1.2
+     ]
+    },
+    {
+     "stat": "runSpd",
+     "op": "mul",
+     "values": [
+      0.8
+     ]
+    }
+   ]
+  },
+  {
+   "skillId": 1430,
+   "name": "Invocation",
+   "levels": 5,
+   "effects": [
+    {
+     "stat": "pDef",
+     "op": "mul",
+     "values": [
+      0.1,
+      0.1,
+      0.1,
+      0.1,
+      0.1
+     ]
+    }
+   ]
+  },
+  {
+   "skillId": 2010,
+   "name": "Endeavor Potion",
+   "levels": 1,
+   "effects": [
+    {
+     "stat": "accCombat",
+     "op": "add",
+     "values": [
+      4.0
+     ]
+    }
+   ]
+  },
+  {
+   "skillId": 2011,
+   "name": "Haste Potion",
+   "levels": 1,
+   "effects": [
+    {
+     "stat": "runSpd",
+     "op": "add",
+     "values": [
+      20.0
+     ]
+    }
+   ]
+  },
+  {
+   "skillId": 2012,
+   "name": "Potion of Alacrity",
+   "levels": 1,
+   "effects": [
+    {
+     "stat": "pAtkSpd",
+     "op": "mul",
+     "values": [
+      1.15
+     ]
+    }
+   ]
+  },
+  {
+   "skillId": 2034,
+   "name": "Greater Haste Potion",
+   "levels": 1,
+   "effects": [
+    {
+     "stat": "runSpd",
+     "op": "add",
+     "values": [
+      33.0
+     ]
+    }
+   ]
+  },
+  {
+   "skillId": 2035,
+   "name": "Greater Swift Attack Potion",
+   "levels": 1,
+   "effects": [
+    {
+     "stat": "pAtkSpd",
+     "op": "mul",
+     "values": [
+      1.33
+     ]
+    }
+   ]
+  },
+  {
+   "skillId": 2050,
+   "name": "Scroll of Guidance",
+   "levels": 1,
+   "effects": [
+    {
+     "stat": "accCombat",
+     "op": "add",
+     "values": [
+      4.0
+     ]
+    }
+   ]
+  },
+  {
+   "skillId": 2052,
+   "name": "Scroll of Focus",
+   "levels": 1,
+   "effects": [
+    {
+     "stat": "critRate",
+     "op": "mul",
+     "values": [
+      1.3
+     ]
+    }
+   ]
+  },
+  {
+   "skillId": 2053,
+   "name": "Scroll of Greater Acumen",
+   "levels": 1,
+   "effects": [
+    {
+     "stat": "mAtkSpd",
+     "op": "mul",
+     "values": [
+      1.3
+     ]
+    }
+   ]
+  },
+  {
+   "skillId": 2054,
+   "name": "Scroll of Haste",
+   "levels": 1,
+   "effects": [
+    {
+     "stat": "pAtkSpd",
+     "op": "mul",
+     "values": [
+      1.33
+     ]
+    }
+   ]
+  },
+  {
+   "skillId": 2055,
+   "name": "Scroll of Agility",
+   "levels": 1,
+   "effects": [
+    {
+     "stat": "rEvas",
+     "op": "add",
+     "values": [
+      4.0
+     ]
+    }
+   ]
+  },
+  {
+   "skillId": 2056,
+   "name": "Scroll of Mystic Empower",
+   "levels": 1,
+   "effects": [
+    {
+     "stat": "mAtk",
+     "op": "mul",
+     "values": [
+      1.75
+     ]
+    }
+   ]
+  },
+  {
+   "skillId": 2057,
+   "name": "Scroll of Might",
+   "levels": 1,
+   "effects": [
+    {
+     "stat": "pAtk",
+     "op": "mul",
+     "values": [
+      1.15
+     ]
+    }
+   ]
+  },
+  {
+   "skillId": 2058,
+   "name": "Scroll of Wind Walk",
+   "levels": 1,
+   "effects": [
+    {
+     "stat": "runSpd",
+     "op": "add",
+     "values": [
+      33.0
+     ]
+    }
+   ]
+  },
+  {
+   "skillId": 2059,
+   "name": "Scroll of Shield",
+   "levels": 1,
+   "effects": [
+    {
+     "stat": "pDef",
+     "op": "mul",
+     "values": [
+      1.15
+     ]
+    }
+   ]
+  },
+  {
+   "skillId": 2074,
+   "name": "Potion of Critical Escape",
+   "levels": 1,
+   "effects": [
+    {
+     "stat": "runSpd",
+     "op": "mul",
+     "values": [
+      0.7
+     ]
+    }
+   ]
+  },
+  {
+   "skillId": 2077,
+   "name": "Potion of Revenge",
+   "levels": 1,
+   "effects": [
+    {
+     "stat": "pDef",
+     "op": "mul",
+     "values": [
+      0.83
+     ]
+    }
+   ]
+  },
+  {
+   "skillId": 2169,
+   "name": "Magic Haste Potion",
+   "levels": 2,
+   "effects": [
+    {
+     "stat": "mAtkSpd",
+     "op": "mul",
+     "values": [
+      1.23,
+      1.3
+     ]
+    }
+   ]
+  },
+  {
+   "skillId": 2246,
+   "name": "Herb of Power",
+   "levels": 1,
+   "effects": [
+    {
+     "stat": "pAtk",
+     "op": "mul",
+     "values": [
+      1.25
+     ]
+    },
+    {
+     "stat": "pAtk",
+     "op": "mul",
+     "values": [
+      1.15
+     ]
+    }
+   ]
+  },
+  {
+   "skillId": 2247,
+   "name": "Herb of Magic",
+   "levels": 1,
+   "effects": [
+    {
+     "stat": "mAtk",
+     "op": "mul",
+     "values": [
+      1.75
+     ]
+    }
+   ]
+  },
+  {
+   "skillId": 2280,
+   "name": "Herb of Power",
+   "levels": 1,
+   "effects": [
+    {
+     "stat": "pAtk",
+     "op": "mul",
+     "values": [
+      1.15
+     ]
+    }
+   ]
+  },
+  {
+   "skillId": 2281,
+   "name": "Herb of Magic",
+   "levels": 1,
+   "effects": [
+    {
+     "stat": "mAtk",
+     "op": "mul",
+     "values": [
+      1.75
+     ]
+    }
+   ]
+  },
+  {
+   "skillId": 2282,
+   "name": "Herb of Atk. Spd.",
+   "levels": 1,
+   "effects": [
+    {
+     "stat": "pAtkSpd",
+     "op": "mul",
+     "values": [
+      1.33
+     ]
+    }
+   ]
+  },
+  {
+   "skillId": 2283,
+   "name": "Herb of Casting Spd.",
+   "levels": 1,
+   "effects": [
+    {
+     "stat": "mAtkSpd",
+     "op": "mul",
+     "values": [
+      1.3
+     ]
+    }
+   ]
+  },
+  {
+   "skillId": 2284,
+   "name": "Herb of Critical Attack",
+   "levels": 1,
+   "effects": [
+    {
+     "stat": "critRate",
+     "op": "mul",
+     "values": [
+      1.3
+     ]
+    }
+   ]
+  },
+  {
+   "skillId": 2285,
+   "name": "Herb of Speed",
+   "levels": 1,
+   "effects": [
+    {
+     "stat": "runSpd",
+     "op": "add",
+     "values": [
+      33.0
+     ]
+    }
+   ]
+  },
+  {
+   "skillId": 2310,
+   "name": "Scroll of Guidance - Event Use",
+   "levels": 1,
+   "effects": [
+    {
+     "stat": "accCombat",
+     "op": "add",
+     "values": [
+      4.0
+     ]
+    }
+   ]
+  },
+  {
+   "skillId": 2312,
+   "name": "Scroll of Focus - Event Use",
+   "levels": 1,
+   "effects": [
+    {
+     "stat": "critRate",
+     "op": "mul",
+     "values": [
+      1.3
+     ]
+    }
+   ]
+  },
+  {
+   "skillId": 2313,
+   "name": "Scroll of Acumen - Event Use",
+   "levels": 1,
+   "effects": [
+    {
+     "stat": "mAtkSpd",
+     "op": "mul",
+     "values": [
+      1.3
+     ]
+    }
+   ]
+  },
+  {
+   "skillId": 2314,
+   "name": "Scroll of Haste - Event Use",
+   "levels": 1,
+   "effects": [
+    {
+     "stat": "pAtkSpd",
+     "op": "mul",
+     "values": [
+      1.33
+     ]
+    }
+   ]
+  },
+  {
+   "skillId": 2315,
+   "name": "Scroll of Agility - Event Use",
+   "levels": 1,
+   "effects": [
+    {
+     "stat": "rEvas",
+     "op": "add",
+     "values": [
+      4.0
+     ]
+    }
+   ]
+  },
+  {
+   "skillId": 2316,
+   "name": "Scroll of Empower - Event Use",
+   "levels": 1,
+   "effects": [
+    {
+     "stat": "mAtk",
+     "op": "mul",
+     "values": [
+      1.75
+     ]
+    }
+   ]
+  },
+  {
+   "skillId": 2317,
+   "name": "Scroll of Might - Event Use",
+   "levels": 1,
+   "effects": [
+    {
+     "stat": "pAtk",
+     "op": "mul",
+     "values": [
+      1.15
+     ]
+    }
+   ]
+  },
+  {
+   "skillId": 2318,
+   "name": "Scroll of Wind Walk - Event Use",
+   "levels": 1,
+   "effects": [
+    {
+     "stat": "runSpd",
+     "op": "add",
+     "values": [
+      33.0
+     ]
+    }
+   ]
+  },
+  {
+   "skillId": 2319,
+   "name": "Scroll of Shield - Event Use",
+   "levels": 1,
+   "effects": [
+    {
+     "stat": "pDef",
+     "op": "mul",
+     "values": [
+      1.15
+     ]
+    }
+   ]
+  },
+  {
+   "skillId": 3053,
+   "name": "Special Ability: Critical Bleed",
+   "levels": 2,
+   "effects": [
+    {
+     "stat": "runSpd",
+     "op": "mul",
+     "values": [
+      0.8,
+      0.8
+     ]
+    }
+   ]
+  },
+  {
+   "skillId": 3054,
+   "name": "Special Ability: Critical Bleed",
+   "levels": 2,
+   "effects": [
+    {
+     "stat": "runSpd",
+     "op": "mul",
+     "values": [
+      0.8,
+      0.8
+     ]
+    }
+   ]
+  },
+  {
+   "skillId": 3055,
+   "name": "Special Ability: Critical Bleed",
+   "levels": 2,
+   "effects": [
+    {
+     "stat": "runSpd",
+     "op": "mul",
+     "values": [
+      0.8,
+      0.8
+     ]
+    }
+   ]
+  },
+  {
+   "skillId": 3075,
+   "name": "Special Ability: Magic Paralyze",
+   "levels": 2,
+   "effects": [
+    {
+     "stat": "pAtkSpd",
+     "op": "mul",
+     "values": [
+      0.5,
+      0.5
+     ]
+    },
+    {
+     "stat": "runSpd",
+     "op": "mul",
+     "values": [
+      0.5,
+      0.5
+     ]
+    },
+    {
+     "stat": "mAtkSpd",
+     "op": "mul",
+     "values": [
+      0.5,
+      0.5
+     ]
+    }
+   ]
+  },
+  {
+   "skillId": 3079,
+   "name": "Special Ability: Magic Paralyze",
+   "levels": 6,
+   "effects": [
+    {
+     "stat": "pAtkSpd",
+     "op": "mul",
+     "values": [
+      0.5,
+      0.5,
+      0.5,
+      0.5,
+      0.5,
+      0.5
+     ]
+    },
+    {
+     "stat": "runSpd",
+     "op": "mul",
+     "values": [
+      0.5,
+      0.5,
+      0.5,
+      0.5,
+      0.5,
+      0.5
+     ]
+    },
+    {
+     "stat": "mAtkSpd",
+     "op": "mul",
+     "values": [
+      0.5,
+      0.5,
+      0.5,
+      0.5,
+      0.5,
+      0.5
+     ]
+    }
+   ]
+  },
+  {
+   "skillId": 3083,
+   "name": "Item Skill: Slow",
+   "levels": 10,
+   "effects": [
+    {
+     "stat": "runSpd",
+     "op": "mul",
+     "values": [
+      0.7,
+      0.7,
+      0.7,
+      0.7,
+      0.7,
+      0.7,
+      0.7,
+      0.7,
+      0.7,
+      0.7
+     ]
+    }
+   ]
+  },
+  {
+   "skillId": 3084,
+   "name": "Item Skill: Winter",
+   "levels": 10,
+   "effects": [
+    {
+     "stat": "pAtkSpd",
+     "op": "mul",
+     "values": [
+      0.77,
+      0.77,
+      0.77,
+      0.77,
+      0.77,
+      0.77,
+      0.77,
+      0.77,
+      0.77,
+      0.77
+     ]
+    }
+   ]
+  },
+  {
+   "skillId": 3088,
+   "name": "Item Skill: Paralyze",
+   "levels": 10,
+   "effects": [
+    {
+     "stat": "pAtkSpd",
+     "op": "mul",
+     "values": [
+      0.5,
+      0.5,
+      0.5,
+      0.5,
+      0.5,
+      0.5,
+      0.5,
+      0.5,
+      0.5,
+      0.5
+     ]
+    },
+    {
+     "stat": "runSpd",
+     "op": "mul",
+     "values": [
+      0.5,
+      0.5,
+      0.5,
+      0.5,
+      0.5,
+      0.5,
+      0.5,
+      0.5,
+      0.5,
+      0.5
+     ]
+    },
+    {
+     "stat": "mAtkSpd",
+     "op": "mul",
+     "values": [
+      0.5,
+      0.5,
+      0.5,
+      0.5,
+      0.5,
+      0.5,
+      0.5,
+      0.5,
+      0.5,
+      0.5
+     ]
+    }
+   ]
+  },
+  {
+   "skillId": 3096,
+   "name": "Item Skill: Slow",
+   "levels": 10,
+   "effects": [
+    {
+     "stat": "runSpd",
+     "op": "mul",
+     "values": [
+      0.7,
+      0.7,
+      0.7,
+      0.7,
+      0.7,
+      0.7,
+      0.7,
+      0.7,
+      0.7,
+      0.7
+     ]
+    }
+   ]
+  },
+  {
+   "skillId": 3097,
+   "name": "Item Skill: Winter",
+   "levels": 10,
+   "effects": [
+    {
+     "stat": "pAtkSpd",
+     "op": "mul",
+     "values": [
+      0.77,
+      0.77,
+      0.77,
+      0.77,
+      0.77,
+      0.77,
+      0.77,
+      0.77,
+      0.77,
+      0.77
+     ]
+    }
+   ]
+  },
+  {
+   "skillId": 3101,
+   "name": "Item Skill: Paralyze",
+   "levels": 10,
+   "effects": [
+    {
+     "stat": "pAtkSpd",
+     "op": "mul",
+     "values": [
+      0.5,
+      0.5,
+      0.5,
+      0.5,
+      0.5,
+      0.5,
+      0.5,
+      0.5,
+      0.5,
+      0.5
+     ]
+    },
+    {
+     "stat": "runSpd",
+     "op": "mul",
+     "values": [
+      0.5,
+      0.5,
+      0.5,
+      0.5,
+      0.5,
+      0.5,
+      0.5,
+      0.5,
+      0.5,
+      0.5
+     ]
+    },
+    {
+     "stat": "mAtkSpd",
+     "op": "mul",
+     "values": [
+      0.5,
+      0.5,
+      0.5,
+      0.5,
+      0.5,
+      0.5,
+      0.5,
+      0.5,
+      0.5,
+      0.5
+     ]
+    }
+   ]
+  },
+  {
+   "skillId": 3111,
+   "name": "Item Skill: Slow",
+   "levels": 10,
+   "effects": [
+    {
+     "stat": "runSpd",
+     "op": "mul",
+     "values": [
+      0.7,
+      0.7,
+      0.7,
+      0.7,
+      0.7,
+      0.7,
+      0.7,
+      0.7,
+      0.7,
+      0.7
+     ]
+    }
+   ]
+  },
+  {
+   "skillId": 3112,
+   "name": "Item Skill: Winter",
+   "levels": 10,
+   "effects": [
+    {
+     "stat": "pAtkSpd",
+     "op": "mul",
+     "values": [
+      0.77,
+      0.77,
+      0.77,
+      0.77,
+      0.77,
+      0.77,
+      0.77,
+      0.77,
+      0.77,
+      0.77
+     ]
+    }
+   ]
+  },
+  {
+   "skillId": 3116,
+   "name": "Item Skill: Paralyze",
+   "levels": 10,
+   "effects": [
+    {
+     "stat": "pAtkSpd",
+     "op": "mul",
+     "values": [
+      0.5,
+      0.5,
+      0.5,
+      0.5,
+      0.5,
+      0.5,
+      0.5,
+      0.5,
+      0.5,
+      0.5
+     ]
+    },
+    {
+     "stat": "runSpd",
+     "op": "mul",
+     "values": [
+      0.5,
+      0.5,
+      0.5,
+      0.5,
+      0.5,
+      0.5,
+      0.5,
+      0.5,
+      0.5,
+      0.5
+     ]
+    },
+    {
+     "stat": "mAtkSpd",
+     "op": "mul",
+     "values": [
+      0.5,
+      0.5,
+      0.5,
+      0.5,
+      0.5,
+      0.5,
+      0.5,
+      0.5,
+      0.5,
+      0.5
+     ]
+    }
+   ]
+  },
+  {
+   "skillId": 3132,
+   "name": "Item Skill: Might",
+   "levels": 10,
+   "effects": [
+    {
+     "stat": "pAtk",
+     "op": "mul",
+     "values": [
+      1.06,
+      1.07,
+      1.08,
+      1.09,
+      1.1,
+      1.11,
+      1.12,
+      1.13,
+      1.14,
+      1.15
+     ]
+    }
+   ]
+  },
+  {
+   "skillId": 3133,
+   "name": "Item Skill: Empower",
+   "levels": 10,
+   "effects": [
+    {
+     "stat": "mAtk",
+     "op": "mul",
+     "values": [
+      1.06,
+      1.07,
+      1.08,
+      1.09,
+      1.1,
+      1.11,
+      1.12,
+      1.13,
+      1.14,
+      1.15
+     ]
+    }
+   ]
+  },
+  {
+   "skillId": 3135,
+   "name": "Item Skill: Shield",
+   "levels": 10,
+   "effects": [
+    {
+     "stat": "pDef",
+     "op": "mul",
+     "values": [
+      1.06,
+      1.07,
+      1.08,
+      1.09,
+      1.1,
+      1.11,
+      1.12,
+      1.13,
+      1.14,
+      1.15
+     ]
+    }
+   ]
+  },
+  {
+   "skillId": 3136,
+   "name": "Item Skill: Magic Barrier",
+   "levels": 10,
+   "effects": [
+    {
+     "stat": "mDef",
+     "op": "mul",
+     "values": [
+      1.06,
+      1.07,
+      1.08,
+      1.09,
+      1.1,
+      1.11,
+      1.12,
+      1.13,
+      1.14,
+      1.15
+     ]
+    }
+   ]
+  },
+  {
+   "skillId": 3139,
+   "name": "Item Skill: Agility",
+   "levels": 10,
+   "effects": [
+    {
+     "stat": "rEvas",
+     "op": "add",
+     "values": [
+      1.0,
+      1.0,
+      1.0,
+      2.0,
+      2.0,
+      3.0,
+      3.0,
+      4.0,
+      4.0,
+      5.0
+     ]
+    }
+   ]
+  },
+  {
+   "skillId": 3140,
+   "name": "Item Skill: Guidance",
+   "levels": 10,
+   "effects": [
+    {
+     "stat": "accCombat",
+     "op": "add",
+     "values": [
+      1.0,
+      1.0,
+      1.0,
+      2.0,
+      2.0,
+      3.0,
+      3.0,
+      4.0,
+      4.0,
+      5.0
+     ]
+    }
+   ]
+  },
+  {
+   "skillId": 3141,
+   "name": "Item Skill: Focus",
+   "levels": 10,
+   "effects": [
+    {
+     "stat": "critRate",
+     "op": "mul",
+     "values": [
+      1.2,
+      1.23,
+      1.27,
+      1.3,
+      1.33,
+      1.37,
+      1.4,
+      1.43,
+      1.47,
+      1.5
+     ]
+    }
+   ]
+  },
+  {
+   "skillId": 3159,
+   "name": "Item Skill: Stealth",
+   "levels": 3,
+   "effects": [
+    {
+     "stat": "rEvas",
+     "op": "sub",
+     "values": [
+      12.0,
+      8.0,
+      4.0
+     ]
+    },
+    {
+     "stat": "pDef",
+     "op": "mul",
+     "values": [
+      0.55,
+      0.7,
+      0.85
+     ]
+    },
+    {
+     "stat": "mDef",
+     "op": "mul",
+     "values": [
+      0.55,
+      0.7,
+      0.85
+     ]
+    },
+    {
+     "stat": "accCombat",
+     "op": "sub",
+     "values": [
+      12.0,
+      12.0,
+      12.0
+     ]
+    },
+    {
+     "stat": "pAtk",
+     "op": "mul",
+     "values": [
+      0.55,
+      0.55,
+      0.55
+     ]
+    }
+   ]
+  },
+  {
+   "skillId": 3187,
+   "name": "Item Skill: Slow",
+   "levels": 10,
+   "effects": [
+    {
+     "stat": "runSpd",
+     "op": "mul",
+     "values": [
+      0.7,
+      0.7,
+      0.7,
+      0.7,
+      0.7,
+      0.7,
+      0.7,
+      0.7,
+      0.7,
+      0.7
+     ]
+    }
+   ]
+  },
+  {
+   "skillId": 3188,
+   "name": "Item Skill: Winter",
+   "levels": 10,
+   "effects": [
+    {
+     "stat": "pAtkSpd",
+     "op": "mul",
+     "values": [
+      0.77,
+      0.77,
+      0.77,
+      0.77,
+      0.77,
+      0.77,
+      0.77,
+      0.77,
+      0.77,
+      0.77
+     ]
+    }
+   ]
+  },
+  {
+   "skillId": 3192,
+   "name": "Item Skill: Paralyze",
+   "levels": 10,
+   "effects": [
+    {
+     "stat": "pAtkSpd",
+     "op": "mul",
+     "values": [
+      0.5,
+      0.5,
+      0.5,
+      0.5,
+      0.5,
+      0.5,
+      0.5,
+      0.5,
+      0.5,
+      0.5
+     ]
+    },
+    {
+     "stat": "runSpd",
+     "op": "mul",
+     "values": [
+      0.5,
+      0.5,
+      0.5,
+      0.5,
+      0.5,
+      0.5,
+      0.5,
+      0.5,
+      0.5,
+      0.5
+     ]
+    },
+    {
+     "stat": "mAtkSpd",
+     "op": "mul",
+     "values": [
+      0.5,
+      0.5,
+      0.5,
+      0.5,
+      0.5,
+      0.5,
+      0.5,
+      0.5,
+      0.5,
+      0.5
+     ]
+    }
+   ]
+  },
+  {
+   "skillId": 3574,
+   "name": "Special Ability: Crt. Slow",
+   "levels": 3,
+   "effects": [
+    {
+     "stat": "runSpd",
+     "op": "mul",
+     "values": [
+      0.7,
+      0.7,
+      0.7
+     ]
+    }
+   ]
+  },
+  {
+   "skillId": 3579,
+   "name": "Decrease P. Def.",
+   "levels": 1,
+   "effects": [
+    {
+     "stat": "pDef",
+     "op": "mul",
+     "values": [
+      0.77
+     ]
+    }
+   ]
+  },
+  {
+   "skillId": 3594,
+   "name": "Slow",
+   "levels": 1,
+   "effects": [
+    {
+     "stat": "runSpd",
+     "op": "mul",
+     "values": [
+      0.7
+     ]
+    }
+   ]
+  },
+  {
+   "skillId": 4018,
+   "name": "Decrease Speed",
+   "levels": 1,
+   "effects": [
+    {
+     "stat": "runSpd",
+     "op": "mul",
+     "values": [
+      0.7
+     ]
+    }
+   ]
+  },
+  {
+   "skillId": 4019,
+   "name": "Decrease Speed",
+   "levels": 1,
+   "effects": [
+    {
+     "stat": "runSpd",
+     "op": "mul",
+     "values": [
+      0.7
+     ]
+    }
+   ]
+  },
+  {
+   "skillId": 4028,
+   "name": "NPC Might",
+   "levels": 3,
+   "effects": [
+    {
+     "stat": "pAtk",
+     "op": "mul",
+     "values": [
+      1.08,
+      1.12,
+      1.15
+     ]
+    }
+   ]
+  },
+  {
+   "skillId": 4029,
+   "name": "NPC Shield",
+   "levels": 3,
+   "effects": [
+    {
+     "stat": "pDef",
+     "op": "mul",
+     "values": [
+      1.08,
+      1.12,
+      1.15
+     ]
+    }
+   ]
+  },
+  {
+   "skillId": 4030,
+   "name": "NPC Clan Might",
+   "levels": 3,
+   "effects": [
+    {
+     "stat": "pAtk",
+     "op": "mul",
+     "values": [
+      1.08,
+      1.12,
+      1.15
+     ]
+    }
+   ]
+  },
+  {
+   "skillId": 4031,
+   "name": "NPC Clan Aegis",
+   "levels": 3,
+   "effects": [
+    {
+     "stat": "pDef",
+     "op": "mul",
+     "values": [
+      1.08,
+      1.12,
+      1.15
+     ]
+    }
+   ]
+  },
+  {
+   "skillId": 4034,
+   "name": "Decrease Speed",
+   "levels": 12,
+   "effects": [
+    {
+     "stat": "runSpd",
+     "op": "mul",
+     "values": [
+      0.8,
+      0.8,
+      0.8,
+      0.8,
+      0.8,
+      0.8,
+      0.8,
+      0.8,
+      0.8,
+      0.8,
+      0.8,
+      0.8
+     ]
+    }
+   ]
+  },
+  {
+   "skillId": 4037,
+   "name": "Decrease P.Atk",
+   "levels": 3,
+   "effects": [
+    {
+     "stat": "pAtk",
+     "op": "mul",
+     "values": [
+      0.83,
+      0.8,
+      0.77
+     ]
+    }
+   ]
+  },
+  {
+   "skillId": 4038,
+   "name": "Decrease Atk.Speed",
+   "levels": 5,
+   "effects": [
+    {
+     "stat": "pAtkSpd",
+     "op": "mul",
+     "values": [
+      0.83,
+      0.8,
+      0.8,
+      0.77,
+      0.77
+     ]
+    }
+   ]
+  },
+  {
+   "skillId": 4048,
+   "name": "NPC Dash",
+   "levels": 3,
+   "effects": [
+    {
+     "stat": "runSpd",
+     "op": "mul",
+     "values": [
+      1.5,
+      1.8,
+      2.0
+     ]
+    }
+   ]
+  },
+  {
+   "skillId": 4053,
+   "name": "Decrease P.Atk",
+   "levels": 16,
+   "effects": [
+    {
+     "stat": "pAtk",
+     "op": "mul",
+     "values": [
+      0.77,
+      0.77,
+      0.77,
+      0.77,
+      0.77,
+      0.77,
+      0.77,
+      0.77,
+      0.77,
+      0.77,
+      0.77,
+      0.77,
+      0.77,
+      0.77,
+      0.77,
+      0.77
+     ]
+    }
+   ]
+  },
+  {
+   "skillId": 4054,
+   "name": "Decrease P. Def",
+   "levels": 16,
+   "effects": [
+    {
+     "stat": "pDef",
+     "op": "mul",
+     "values": [
+      0.77,
+      0.77,
+      0.77,
+      0.77,
+      0.77,
+      0.77,
+      0.77,
+      0.77,
+      0.77,
+      0.77,
+      0.77,
+      0.77,
+      0.77,
+      0.77,
+      0.77,
+      0.77
+     ]
+    }
+   ]
+  },
+  {
+   "skillId": 4055,
+   "name": "Decrease Atk.Speed",
+   "levels": 16,
+   "effects": [
+    {
+     "stat": "pAtkSpd",
+     "op": "mul",
+     "values": [
+      0.77,
+      0.77,
+      0.77,
+      0.77,
+      0.77,
+      0.77,
+      0.77,
+      0.77,
+      0.77,
+      0.77,
+      0.77,
+      0.77,
+      0.77,
+      0.77,
+      0.77,
+      0.77
+     ]
+    }
+   ]
+  },
+  {
+   "skillId": 4070,
+   "name": "Decrease Atk.Speed",
+   "levels": 1,
+   "effects": [
+    {
+     "stat": "pAtkSpd",
+     "op": "mul",
+     "values": [
+      0.77
+     ]
+    }
+   ]
+  },
+  {
+   "skillId": 4074,
+   "name": "NPC Haste",
+   "levels": 2,
+   "effects": [
+    {
+     "stat": "pAtkSpd",
+     "op": "mul",
+     "values": [
+      1.15,
+      1.33
+     ]
+    }
+   ]
+  },
+  {
+   "skillId": 4076,
+   "name": "Decrease Speed",
+   "levels": 3,
+   "effects": [
+    {
+     "stat": "runSpd",
+     "op": "mul",
+     "values": [
+      0.9,
+      0.8,
+      0.7
+     ]
+    }
+   ]
+  },
+  {
+   "skillId": 4089,
+   "name": "NPC Bear Spirit Totem",
+   "levels": 1,
+   "effects": [
+    {
+     "stat": "runSpd",
+     "op": "mul",
+     "values": [
+      0.85
+     ]
+    },
+    {
+     "stat": "pAtk",
+     "op": "mul",
+     "values": [
+      1.15
+     ]
+    }
+   ]
+  },
+  {
+   "skillId": 4090,
+   "name": "NPC Wolf Spirit Totem",
+   "levels": 1,
+   "effects": [
+    {
+     "stat": "runSpd",
+     "op": "mul",
+     "values": [
+      1.4
+     ]
+    }
+   ]
+  },
+  {
+   "skillId": 4091,
+   "name": "NPC Ogre Spirit Totem",
+   "levels": 3,
+   "effects": [
+    {
+     "stat": "runSpd",
+     "op": "mul",
+     "values": [
+      0.85,
+      0.85,
+      0.9
+     ]
+    },
+    {
+     "stat": "pAtk",
+     "op": "mul",
+     "values": [
+      1.05,
+      1.15,
+      1.15
+     ]
+    },
+    {
+     "stat": "pDef",
+     "op": "mul",
+     "values": [
+      1.1,
+      1.3,
+      1.3
+     ]
+    },
+    {
+     "stat": "rEvas",
+     "op": "sub",
+     "values": [
+      10.0,
+      10.0,
+      5.0
+     ]
+    },
+    {
+     "stat": "accCombat",
+     "op": "add",
+     "values": [
+      3.0,
+      7.0,
+      7.0
+     ]
+    }
+   ]
+  },
+  {
+   "skillId": 4092,
+   "name": "NPC Puma Spirit Totem",
+   "levels": 1,
+   "effects": [
+    {
+     "stat": "pAtkSpd",
+     "op": "mul",
+     "values": [
+      1.3
+     ]
+    },
+    {
+     "stat": "rEvas",
+     "op": "add",
+     "values": [
+      4.0
+     ]
+    },
+    {
+     "stat": "pDef",
+     "op": "mul",
+     "values": [
+      0.8
+     ]
+    }
+   ]
+  },
+  {
+   "skillId": 4096,
+   "name": "NPC Hawkeye",
+   "levels": 3,
+   "effects": [
+    {
+     "stat": "accCombat",
+     "op": "add",
+     "values": [
+      6.0,
+      8.0,
+      10.0
+     ]
+    },
+    {
+     "stat": "pDef",
+     "op": "mul",
+     "values": [
+      0.9,
+      0.9,
+      0.9
+     ]
+    }
+   ]
+  },
+  {
+   "skillId": 4099,
+   "name": "NPC Berserk",
+   "levels": 2,
+   "effects": [
+    {
+     "stat": "pAtk",
+     "op": "mul",
+     "values": [
+      1.05,
+      1.08
+     ]
+    },
+    {
+     "stat": "pAtkSpd",
+     "op": "mul",
+     "values": [
+      1.05,
+      1.08
+     ]
+    },
+    {
+     "stat": "mAtk",
+     "op": "mul",
+     "values": [
+      1.1,
+      1.16
+     ]
+    },
+    {
+     "stat": "mAtkSpd",
+     "op": "mul",
+     "values": [
+      1.05,
+      1.08
+     ]
+    },
+    {
+     "stat": "runSpd",
+     "op": "add",
+     "values": [
+      5.0,
+      8.0
+     ]
+    },
+    {
+     "stat": "pDef",
+     "op": "mul",
+     "values": [
+      0.95,
+      0.92
+     ]
+    },
+    {
+     "stat": "mDef",
+     "op": "mul",
+     "values": [
+      0.9,
+      0.84
+     ]
+    },
+    {
+     "stat": "rEvas",
+     "op": "sub",
+     "values": [
+      5.0,
+      8.0
+     ]
+    }
+   ]
+  },
+  {
+   "skillId": 4103,
+   "name": "NPC Ultimate Evasion",
+   "levels": 2,
+   "effects": [
+    {
+     "stat": "rEvas",
+     "op": "add",
+     "values": [
+      20.0,
+      25.0
+     ]
+    }
+   ]
+  },
+  {
+   "skillId": 4109,
+   "name": "Curse of Antharas",
+   "levels": 1,
+   "effects": [
+    {
+     "stat": "pAtk",
+     "op": "mul",
+     "values": [
+      0.85
+     ]
+    },
+    {
+     "stat": "mAtk",
+     "op": "mul",
+     "values": [
+      0.85
+     ]
+    },
+    {
+     "stat": "pDef",
+     "op": "mul",
+     "values": [
+      0.6
+     ]
+    },
+    {
+     "stat": "mDef",
+     "op": "mul",
+     "values": [
+      0.6
+     ]
+    },
+    {
+     "stat": "pAtkSpd",
+     "op": "mul",
+     "values": [
+      0.75
+     ]
+    },
+    {
+     "stat": "mAtkSpd",
+     "op": "mul",
+     "values": [
+      0.75
+     ]
+    },
+    {
+     "stat": "runSpd",
+     "op": "mul",
+     "values": [
+      0.5
+     ]
+    },
+    {
+     "stat": "accCombat",
+     "op": "sub",
+     "values": [
+      19.0
+     ]
+    },
+    {
+     "stat": "rEvas",
+     "op": "sub",
+     "values": [
+      19.0
+     ]
+    },
+    {
+     "stat": "critRate",
+     "op": "mul",
+     "values": [
+      1.1
+     ]
+    }
+   ]
+  },
+  {
+   "skillId": 4119,
+   "name": "Decrease Accuracy",
+   "levels": 3,
+   "effects": [
+    {
+     "stat": "accCombat",
+     "op": "sub",
+     "values": [
+      6.0,
+      9.0,
+      12.0
+     ]
+    }
+   ]
+  },
+  {
+   "skillId": 4145,
+   "name": "Decrease P. Atk.",
+   "levels": 3,
+   "effects": [
+    {
+     "stat": "pAtk",
+     "op": "mul",
+     "values": [
+      0.83,
+      0.8,
+      0.77
+     ]
+    }
+   ]
+  },
+  {
+   "skillId": 4146,
+   "name": "Decrease P. Def.",
+   "levels": 3,
+   "effects": [
+    {
+     "stat": "pDef",
+     "op": "mul",
+     "values": [
+      0.83,
+      0.8,
+      0.77
+     ]
+    }
+   ]
+  },
+  {
+   "skillId": 4153,
+   "name": "Decrease Speed",
+   "levels": 12,
+   "effects": [
+    {
+     "stat": "runSpd",
+     "op": "mul",
+     "values": [
+      0.8,
+      0.8,
+      0.8,
+      0.8,
+      0.8,
+      0.8,
+      0.8,
+      0.8,
+      0.8,
+      0.8,
+      0.8,
+      0.8
+     ]
+    }
+   ]
+  },
+  {
+   "skillId": 4162,
+   "name": "Decrease Atk. Speed",
+   "levels": 3,
+   "effects": [
+    {
+     "stat": "pAtkSpd",
+     "op": "mul",
+     "values": [
+      0.83,
+      0.8,
+      0.77
+     ]
+    }
+   ]
+  },
+  {
+   "skillId": 4164,
+   "name": "Paralysis",
+   "levels": 18,
+   "effects": [
+    {
+     "stat": "runSpd",
+     "op": "mul",
+     "values": [
+      0.5,
+      0.5,
+      0.5,
+      0.5,
+      0.5,
+      0.5,
+      0.5,
+      0.5,
+      0.5,
+      0.5,
+      0.5,
+      0.5,
+      0.5,
+      0.5,
+      0.5,
+      0.5,
+      0.5,
+      0.5
+     ]
+    },
+    {
+     "stat": "pAtkSpd",
+     "op": "mul",
+     "values": [
+      0.5,
+      0.5,
+      0.5,
+      0.5,
+      0.5,
+      0.5,
+      0.5,
+      0.5,
+      0.5,
+      0.5,
+      0.5,
+      0.5,
+      0.5,
+      0.5,
+      0.5,
+      0.5,
+      0.5,
+      0.5
+     ]
+    },
+    {
+     "stat": "mAtkSpd",
+     "op": "mul",
+     "values": [
+      0.5,
+      0.5,
+      0.5,
+      0.5,
+      0.5,
+      0.5,
+      0.5,
+      0.5,
+      0.5,
+      0.5,
+      0.5,
+      0.5,
+      0.5,
+      0.5,
+      0.5,
+      0.5,
+      0.5,
+      0.5
+     ]
+    }
+   ]
+  },
+  {
+   "skillId": 4167,
+   "name": "Curse of Fairy Mimyu",
+   "levels": 1,
+   "effects": [
+    {
+     "stat": "pAtkSpd",
+     "op": "mul",
+     "values": [
+      0.77
+     ]
+    },
+    {
+     "stat": "runSpd",
+     "op": "mul",
+     "values": [
+      0.7
+     ]
+    }
+   ]
+  },
+  {
+   "skillId": 4173,
+   "name": "BOSS Might",
+   "levels": 12,
+   "effects": [
+    {
+     "stat": "pAtk",
+     "op": "mul",
+     "values": [
+      1.5,
+      1.5,
+      1.5,
+      1.5,
+      1.5,
+      1.5,
+      1.5,
+      1.5,
+      1.5,
+      1.5,
+      1.5,
+      1.5
+     ]
+    }
+   ]
+  },
+  {
+   "skillId": 4174,
+   "name": "BOSS Shield",
+   "levels": 12,
+   "effects": [
+    {
+     "stat": "pDef",
+     "op": "mul",
+     "values": [
+      1.5,
+      1.5,
+      1.5,
+      1.5,
+      1.5,
+      1.5,
+      1.5,
+      1.5,
+      1.5,
+      1.5,
+      1.5,
+      1.5
+     ]
+    }
+   ]
+  },
+  {
+   "skillId": 4175,
+   "name": "BOSS Haste",
+   "levels": 12,
+   "effects": [
+    {
+     "stat": "pAtkSpd",
+     "op": "mul",
+     "values": [
+      1.5,
+      1.5,
+      1.5,
+      1.5,
+      1.5,
+      1.5,
+      1.5,
+      1.5,
+      1.5,
+      1.5,
+      1.5,
+      1.5
+     ]
+    }
+   ]
+  },
+  {
+   "skillId": 4183,
+   "name": "Decrease P.Atk",
+   "levels": 12,
+   "effects": [
+    {
+     "stat": "pAtk",
+     "op": "mul",
+     "values": [
+      0.83,
+      0.8,
+      0.8,
+      0.77,
+      0.77,
+      0.77,
+      0.77,
+      0.77,
+      0.77,
+      0.77,
+      0.77,
+      0.77
+     ]
+    }
+   ]
+  },
+  {
+   "skillId": 4184,
+   "name": "Decrease Atk.Speed",
+   "levels": 12,
+   "effects": [
+    {
+     "stat": "pAtkSpd",
+     "op": "mul",
+     "values": [
+      0.83,
+      0.8,
+      0.8,
+      0.77,
+      0.77,
+      0.77,
+      0.77,
+      0.77,
+      0.77,
+      0.77,
+      0.77,
+      0.77
+     ]
+    }
+   ]
+  },
+  {
+   "skillId": 4187,
+   "name": "Decrease Speed",
+   "levels": 12,
+   "effects": [
+    {
+     "stat": "runSpd",
+     "op": "mul",
+     "values": [
+      0.9,
+      0.8,
+      0.8,
+      0.7,
+      0.7,
+      0.7,
+      0.7,
+      0.7,
+      0.7,
+      0.7,
+      0.7,
+      0.7
+     ]
+    }
+   ]
+  },
+  {
+   "skillId": 4196,
+   "name": "Decrease Speed",
+   "levels": 12,
+   "effects": [
+    {
+     "stat": "runSpd",
+     "op": "mul",
+     "values": [
+      0.8,
+      0.8,
+      0.8,
+      0.8,
+      0.8,
+      0.8,
+      0.8,
+      0.8,
+      0.8,
+      0.8,
+      0.8,
+      0.8
+     ]
+    }
+   ]
+  },
+  {
+   "skillId": 4199,
+   "name": "Decrease P.Atk",
+   "levels": 12,
+   "effects": [
+    {
+     "stat": "pAtk",
+     "op": "mul",
+     "values": [
+      0.83,
+      0.8,
+      0.8,
+      0.77,
+      0.77,
+      0.77,
+      0.77,
+      0.77,
+      0.77,
+      0.77,
+      0.77,
+      0.77
+     ]
+    }
+   ]
+  },
+  {
+   "skillId": 4200,
+   "name": "Decrease Atk.Speed",
+   "levels": 12,
+   "effects": [
+    {
+     "stat": "pAtkSpd",
+     "op": "mul",
+     "values": [
+      0.83,
+      0.8,
+      0.8,
+      0.77,
+      0.77,
+      0.77,
+      0.77,
+      0.77,
+      0.77,
+      0.77,
+      0.77,
+      0.77
+     ]
+    }
+   ]
+  },
+  {
+   "skillId": 4203,
+   "name": "Decrease Speed",
+   "levels": 12,
+   "effects": [
+    {
+     "stat": "runSpd",
+     "op": "mul",
+     "values": [
+      0.9,
+      0.8,
+      0.8,
+      0.7,
+      0.7,
+      0.7,
+      0.7,
+      0.7,
+      0.7,
+      0.7,
+      0.7,
+      0.7
+     ]
+    }
+   ]
+  },
+  {
+   "skillId": 4211,
+   "name": "BOSS Might",
+   "levels": 12,
+   "effects": [
+    {
+     "stat": "pAtk",
+     "op": "mul",
+     "values": [
+      1.5,
+      1.5,
+      1.5,
+      1.5,
+      1.5,
+      1.5,
+      1.5,
+      1.5,
+      1.5,
+      1.5,
+      1.5,
+      1.5
+     ]
+    }
+   ]
+  },
+  {
+   "skillId": 4212,
+   "name": "BOSS Shield",
+   "levels": 12,
+   "effects": [
+    {
+     "stat": "pDef",
+     "op": "mul",
+     "values": [
+      1.5,
+      1.5,
+      1.5,
+      1.5,
+      1.5,
+      1.5,
+      1.5,
+      1.5,
+      1.5,
+      1.5,
+      1.5,
+      1.5
+     ]
+    }
+   ]
+  },
+  {
+   "skillId": 4213,
+   "name": "BOSS Haste",
+   "levels": 12,
+   "effects": [
+    {
+     "stat": "pAtkSpd",
+     "op": "mul",
+     "values": [
+      1.5,
+      1.5,
+      1.5,
+      1.5,
+      1.5,
+      1.5,
+      1.5,
+      1.5,
+      1.5,
+      1.5,
+      1.5,
+      1.5
+     ]
+    }
+   ]
+  },
+  {
+   "skillId": 4237,
+   "name": "Decrease Speed",
+   "levels": 1,
+   "effects": [
+    {
+     "stat": "runSpd",
+     "op": "mul",
+     "values": [
+      0.7
+     ]
+    }
+   ]
+  },
+  {
+   "skillId": 4245,
+   "name": "Mimic of Wrath",
+   "levels": 1,
+   "effects": [
+    {
+     "stat": "pAtkSpd",
+     "op": "mul",
+     "values": [
+      1.42
+     ]
+    },
+    {
+     "stat": "pDef",
+     "op": "mul",
+     "values": [
+      1.76
+     ]
+    },
+    {
+     "stat": "mDef",
+     "op": "mul",
+     "values": [
+      1.76
+     ]
+    }
+   ]
+  },
+  {
+   "skillId": 4249,
+   "name": "Decrease Speed",
+   "levels": 12,
+   "effects": [
+    {
+     "stat": "runSpd",
+     "op": "mul",
+     "values": [
+      0.8,
+      0.8,
+      0.8,
+      0.8,
+      0.8,
+      0.8,
+      0.8,
+      0.8,
+      0.8,
+      0.8,
+      0.8,
+      0.8
+     ]
+    }
+   ]
+  },
+  {
+   "skillId": 4258,
+   "name": "Hinder Strider",
+   "levels": 1,
+   "effects": [
+    {
+     "stat": "runSpd",
+     "op": "mul",
+     "values": [
+      0.7
+     ]
+    }
+   ]
+  },
+  {
+   "skillId": 4262,
+   "name": "Holiday Wind Walk",
+   "levels": 2,
+   "effects": [
+    {
+     "stat": "runSpd",
+     "op": "add",
+     "values": [
+      33.0,
+      33.0
+     ]
+    }
+   ]
+  },
+  {
+   "skillId": 4263,
+   "name": "Holiday Haste",
+   "levels": 1,
+   "effects": [
+    {
+     "stat": "pAtkSpd",
+     "op": "mul",
+     "values": [
+      1.15
+     ]
+    }
+   ]
+  },
+  {
+   "skillId": 4264,
+   "name": "Holiday Empower",
+   "levels": 1,
+   "effects": [
+    {
+     "stat": "mAtk",
+     "op": "mul",
+     "values": [
+      1.55
+     ]
+    }
+   ]
+  },
+  {
+   "skillId": 4265,
+   "name": "Holiday Might",
+   "levels": 3,
+   "effects": [
+    {
+     "stat": "pAtk",
+     "op": "mul",
+     "values": [
+      1.15,
+      1.15,
+      1.15
+     ]
+    }
+   ]
+  },
+  {
+   "skillId": 4266,
+   "name": "Holiday Shield",
+   "levels": 3,
+   "effects": [
+    {
+     "stat": "pDef",
+     "op": "mul",
+     "values": [
+      1.15,
+      1.15,
+      1.15
+     ]
+    }
+   ]
+  },
+  {
+   "skillId": 4317,
+   "name": "Increase Rage Might",
+   "levels": 5,
+   "effects": [
+    {
+     "stat": "pAtk",
+     "op": "mul",
+     "values": [
+      1.15,
+      1.2,
+      1.25,
+      1.3,
+      1.35
+     ]
+    }
+   ]
+  },
+  {
+   "skillId": 4318,
+   "name": "Ultimate Buff",
+   "levels": 1,
+   "effects": [
+    {
+     "stat": "pAtk",
+     "op": "mul",
+     "values": [
+      1.83
+     ]
+    },
+    {
+     "stat": "accCombat",
+     "op": "add",
+     "values": [
+      4.0
+     ]
+    },
+    {
+     "stat": "rEvas",
+     "op": "add",
+     "values": [
+      4.0
+     ]
+    },
+    {
+     "stat": "pDef",
+     "op": "mul",
+     "values": [
+      1.83
+     ]
+    },
+    {
+     "stat": "pAtkSpd",
+     "op": "mul",
+     "values": [
+      1.33
+     ]
+    },
+    {
+     "stat": "critRate",
+     "op": "mul",
+     "values": [
+      1.3
+     ]
+    },
+    {
+     "stat": "mDef",
+     "op": "mul",
+     "values": [
+      5.0
+     ]
+    }
+   ]
+  },
+  {
+   "skillId": 4321,
+   "name": "Decrease P. Def",
+   "levels": 1,
+   "effects": [
+    {
+     "stat": "pDef",
+     "op": "mul",
+     "values": [
+      0.34
+     ]
+    }
+   ]
+  },
+  {
+   "skillId": 4322,
+   "name": "Wind Walk for Beginners",
+   "levels": 1,
+   "effects": [
+    {
+     "stat": "runSpd",
+     "op": "add",
+     "values": [
+      33.0
+     ]
+    }
+   ]
+  },
+  {
+   "skillId": 4323,
+   "name": "Shield for Beginners",
+   "levels": 1,
+   "effects": [
+    {
+     "stat": "pDef",
+     "op": "mul",
+     "values": [
+      1.15
+     ]
+    }
+   ]
+  },
+  {
+   "skillId": 4327,
+   "name": "Haste for Beginners",
+   "levels": 1,
+   "effects": [
+    {
+     "stat": "pAtkSpd",
+     "op": "mul",
+     "values": [
+      1.15
+     ]
+    }
+   ]
+  },
+  {
+   "skillId": 4329,
+   "name": "Acumen for Beginners",
+   "levels": 1,
+   "effects": [
+    {
+     "stat": "mAtkSpd",
+     "op": "mul",
+     "values": [
+      1.3
+     ]
+    }
+   ]
+  },
+  {
+   "skillId": 4331,
+   "name": "Empower for Beginners",
+   "levels": 1,
+   "effects": [
+    {
+     "stat": "mAtk",
+     "op": "mul",
+     "values": [
+      1.55
+     ]
+    }
+   ]
+  },
+  {
+   "skillId": 4340,
+   "name": "Ultimate Buff, 2nd",
+   "levels": 1,
+   "effects": [
+    {
+     "stat": "pAtk",
+     "op": "mul",
+     "values": [
+      5.0
+     ]
+    }
+   ]
+  },
+  {
+   "skillId": 4341,
+   "name": "Ultimate Buff, 3rd",
+   "levels": 1,
+   "effects": [
+    {
+     "stat": "pDef",
+     "op": "mul",
+     "values": [
+      5.0
+     ]
+    },
+    {
+     "stat": "mDef",
+     "op": "mul",
+     "values": [
+      5.0
+     ]
+    }
+   ]
+  },
+  {
+   "skillId": 4342,
+   "name": "Wind Walk",
+   "levels": 2,
+   "effects": [
+    {
+     "stat": "runSpd",
+     "op": "add",
+     "values": [
+      20.0,
+      33.0
+     ]
+    }
+   ]
+  },
+  {
+   "skillId": 4344,
+   "name": "Shield",
+   "levels": 3,
+   "effects": [
+    {
+     "stat": "pDef",
+     "op": "mul",
+     "values": [
+      1.08,
+      1.12,
+      1.15
+     ]
+    }
+   ]
+  },
+  {
+   "skillId": 4345,
+   "name": "Might",
+   "levels": 3,
+   "effects": [
+    {
+     "stat": "pAtk",
+     "op": "mul",
+     "values": [
+      1.08,
+      1.12,
+      1.15
+     ]
+    }
+   ]
+  },
+  {
+   "skillId": 4349,
+   "name": "Magic Barrier",
+   "levels": 2,
+   "effects": [
+    {
+     "stat": "mDef",
+     "op": "mul",
+     "values": [
+      1.23,
+      1.3
+     ]
+    }
+   ]
+  },
+  {
+   "skillId": 4352,
+   "name": "Berserker Spirit",
+   "levels": 2,
+   "effects": [
+    {
+     "stat": "mAtk",
+     "op": "mul",
+     "values": [
+      1.1,
+      1.16
+     ]
+    },
+    {
+     "stat": "pAtk",
+     "op": "mul",
+     "values": [
+      1.05,
+      1.08
+     ]
+    },
+    {
+     "stat": "mDef",
+     "op": "mul",
+     "values": [
+      0.9,
+      0.84
+     ]
+    },
+    {
+     "stat": "pDef",
+     "op": "mul",
+     "values": [
+      0.95,
+      0.92
+     ]
+    },
+    {
+     "stat": "mAtkSpd",
+     "op": "mul",
+     "values": [
+      1.05,
+      1.08
+     ]
+    },
+    {
+     "stat": "pAtkSpd",
+     "op": "mul",
+     "values": [
+      1.05,
+      1.08
+     ]
+    },
+    {
+     "stat": "runSpd",
+     "op": "add",
+     "values": [
+      5.0,
+      8.0
+     ]
+    },
+    {
+     "stat": "rEvas",
+     "op": "sub",
+     "values": [
+      2.0,
+      4.0
+     ]
+    }
+   ]
+  },
+  {
+   "skillId": 4355,
+   "name": "Acumen",
+   "levels": 3,
+   "effects": [
+    {
+     "stat": "mAtkSpd",
+     "op": "mul",
+     "values": [
+      1.15,
+      1.23,
+      1.3
+     ]
+    }
+   ]
+  },
+  {
+   "skillId": 4356,
+   "name": "Empower",
+   "levels": 3,
+   "effects": [
+    {
+     "stat": "mAtk",
+     "op": "mul",
+     "values": [
+      1.55,
+      1.65,
+      1.75
+     ]
+    }
+   ]
+  },
+  {
+   "skillId": 4357,
+   "name": "Haste",
+   "levels": 2,
+   "effects": [
+    {
+     "stat": "pAtkSpd",
+     "op": "mul",
+     "values": [
+      1.15,
+      1.33
+     ]
+    }
+   ]
+  },
+  {
+   "skillId": 4358,
+   "name": "Guidance",
+   "levels": 3,
+   "effects": [
+    {
+     "stat": "accCombat",
+     "op": "add",
+     "values": [
+      2.0,
+      3.0,
+      4.0
+     ]
+    }
+   ]
+  },
+  {
+   "skillId": 4359,
+   "name": "Focus",
+   "levels": 3,
+   "effects": [
+    {
+     "stat": "critRate",
+     "op": "mul",
+     "values": [
+      1.2,
+      1.25,
+      1.3
+     ]
+    }
+   ]
+  },
+  {
+   "skillId": 4361,
+   "name": "Curse of Destruction",
+   "levels": 2,
+   "effects": [
+    {
+     "stat": "accCombat",
+     "op": "sub",
+     "values": [
+      12.0,
+      12.0
+     ]
+    }
+   ]
+  },
+  {
+   "skillId": 4362,
+   "name": "Curse of Destruction",
+   "levels": 2,
+   "effects": [
+    {
+     "stat": "mAtkSpd",
+     "op": "mul",
+     "values": [
+      0.7,
+      0.7
+     ]
+    }
+   ]
+  },
+  {
+   "skillId": 4363,
+   "name": "Curse of Destruction",
+   "levels": 1,
+   "effects": [
+    {
+     "stat": "accCombat",
+     "op": "sub",
+     "values": [
+      12.0
+     ]
+    }
+   ]
+  },
+  {
+   "skillId": 4391,
+   "name": "Wind Walk",
+   "levels": 2,
+   "effects": [
+    {
+     "stat": "runSpd",
+     "op": "add",
+     "values": [
+      20.0,
+      33.0
+     ]
+    }
+   ]
+  },
+  {
+   "skillId": 4392,
+   "name": "Shield",
+   "levels": 3,
+   "effects": [
+    {
+     "stat": "pDef",
+     "op": "mul",
+     "values": [
+      1.08,
+      1.12,
+      1.15
+     ]
+    }
+   ]
+  },
+  {
+   "skillId": 4393,
+   "name": "Might",
+   "levels": 3,
+   "effects": [
+    {
+     "stat": "pAtk",
+     "op": "mul",
+     "values": [
+      1.08,
+      1.12,
+      1.15
+     ]
+    }
+   ]
+  },
+  {
+   "skillId": 4396,
+   "name": "Magic Barrier",
+   "levels": 2,
+   "effects": [
+    {
+     "stat": "mDef",
+     "op": "mul",
+     "values": [
+      1.23,
+      1.3
+     ]
+    }
+   ]
+  },
+  {
+   "skillId": 4397,
+   "name": "Berserker Spirit",
+   "levels": 2,
+   "effects": [
+    {
+     "stat": "pAtk",
+     "op": "mul",
+     "values": [
+      1.05,
+      1.08
+     ]
+    },
+    {
+     "stat": "pAtkSpd",
+     "op": "mul",
+     "values": [
+      1.05,
+      1.08
+     ]
+    },
+    {
+     "stat": "mAtk",
+     "op": "mul",
+     "values": [
+      1.1,
+      1.16
+     ]
+    },
+    {
+     "stat": "mAtkSpd",
+     "op": "mul",
+     "values": [
+      1.05,
+      1.08
+     ]
+    },
+    {
+     "stat": "runSpd",
+     "op": "add",
+     "values": [
+      5.0,
+      8.0
+     ]
+    },
+    {
+     "stat": "rEvas",
+     "op": "sub",
+     "values": [
+      2.0,
+      4.0
+     ]
+    },
+    {
+     "stat": "mDef",
+     "op": "mul",
+     "values": [
+      0.9,
+      0.84
+     ]
+    },
+    {
+     "stat": "pDef",
+     "op": "mul",
+     "values": [
+      0.95,
+      0.92
+     ]
+    }
+   ]
+  },
+  {
+   "skillId": 4400,
+   "name": "Acumen",
+   "levels": 3,
+   "effects": [
+    {
+     "stat": "mAtkSpd",
+     "op": "mul",
+     "values": [
+      1.15,
+      1.23,
+      1.3
+     ]
+    }
+   ]
+  },
+  {
+   "skillId": 4401,
+   "name": "Empower",
+   "levels": 3,
+   "effects": [
+    {
+     "stat": "mAtk",
+     "op": "mul",
+     "values": [
+      1.55,
+      1.65,
+      1.75
+     ]
+    }
+   ]
+  },
+  {
+   "skillId": 4402,
+   "name": "Haste",
+   "levels": 2,
+   "effects": [
+    {
+     "stat": "pAtkSpd",
+     "op": "mul",
+     "values": [
+      1.15,
+      1.33
+     ]
+    }
+   ]
+  },
+  {
+   "skillId": 4403,
+   "name": "Guidance",
+   "levels": 3,
+   "effects": [
+    {
+     "stat": "accCombat",
+     "op": "add",
+     "values": [
+      2.0,
+      3.0,
+      4.0
+     ]
+    }
+   ]
+  },
+  {
+   "skillId": 4404,
+   "name": "Focus",
+   "levels": 3,
+   "effects": [
+    {
+     "stat": "critRate",
+     "op": "mul",
+     "values": [
+      1.2,
+      1.25,
+      1.3
+     ]
+    }
+   ]
+  },
+  {
+   "skillId": 4406,
+   "name": "Agility",
+   "levels": 3,
+   "effects": [
+    {
+     "stat": "rEvas",
+     "op": "add",
+     "values": [
+      2.0,
+      3.0,
+      4.0
+     ]
+    }
+   ]
+  },
+  {
+   "skillId": 4468,
+   "name": "Area Buff - Wind Walk",
+   "levels": 2,
+   "effects": [
+    {
+     "stat": "runSpd",
+     "op": "add",
+     "values": [
+      20.0,
+      33.0
+     ]
+    }
+   ]
+  },
+  {
+   "skillId": 4471,
+   "name": "NPC Anger",
+   "levels": 12,
+   "effects": [
+    {
+     "stat": "pAtk",
+     "op": "mul",
+     "values": [
+      1.15,
+      1.3,
+      1.45,
+      1.6,
+      1.9,
+      2.2,
+      2.5,
+      2.8,
+      3.1,
+      3.4,
+      3.7,
+      4.0
+     ]
+    },
+    {
+     "stat": "pDef",
+     "op": "mul",
+     "values": [
+      1.15,
+      1.3,
+      1.45,
+      1.6,
+      1.9,
+      2.2,
+      2.5,
+      2.8,
+      3.1,
+      3.4,
+      3.7,
+      4.0
+     ]
+    }
+   ]
+  },
+  {
+   "skillId": 4480,
+   "name": "Ice Fairy Curse Gloom",
+   "levels": 1,
+   "effects": [
+    {
+     "stat": "mDef",
+     "op": "mul",
+     "values": [
+      0.8
+     ]
+    }
+   ]
+  },
+  {
+   "skillId": 4481,
+   "name": "Ice Fairy Hex",
+   "levels": 1,
+   "effects": [
+    {
+     "stat": "pDef",
+     "op": "mul",
+     "values": [
+      0.7
+     ]
+    }
+   ]
+  },
+  {
+   "skillId": 4486,
+   "name": "Decrease P. Def",
+   "levels": 12,
+   "effects": [
+    {
+     "stat": "pDef",
+     "op": "mul",
+     "values": [
+      0.83,
+      0.8,
+      0.8,
+      0.77,
+      0.77,
+      0.77,
+      0.77,
+      0.77,
+      0.77,
+      0.77,
+      0.77,
+      0.77
+     ]
+    }
+   ]
+  },
+  {
+   "skillId": 4487,
+   "name": "Decrease M. Def.",
+   "levels": 12,
+   "effects": [
+    {
+     "stat": "mDef",
+     "op": "mul",
+     "values": [
+      0.83,
+      0.8,
+      0.8,
+      0.77,
+      0.77,
+      0.77,
+      0.77,
+      0.77,
+      0.77,
+      0.77,
+      0.77,
+      0.77
+     ]
+    }
+   ]
+  },
+  {
+   "skillId": 4517,
+   "name": "Quest - BOSS Defend",
+   "levels": 1,
+   "effects": [
+    {
+     "stat": "runSpd",
+     "op": "mul",
+     "values": [
+      0.5
+     ]
+    },
+    {
+     "stat": "pAtk",
+     "op": "mul",
+     "values": [
+      0.5
+     ]
+    },
+    {
+     "stat": "pDef",
+     "op": "mul",
+     "values": [
+      10.0
+     ]
+    }
+   ]
+  },
+  {
+   "skillId": 4518,
+   "name": "Quest - BOSS Rampage",
+   "levels": 1,
+   "effects": [
+    {
+     "stat": "pAtkSpd",
+     "op": "mul",
+     "values": [
+      1.3
+     ]
+    },
+    {
+     "stat": "pAtk",
+     "op": "mul",
+     "values": [
+      1.3
+     ]
+    },
+    {
+     "stat": "pDef",
+     "op": "mul",
+     "values": [
+      0.5
+     ]
+    }
+   ]
+  },
+  {
+   "skillId": 4519,
+   "name": "Quest - BOSS Defend",
+   "levels": 1,
+   "effects": [
+    {
+     "stat": "runSpd",
+     "op": "mul",
+     "values": [
+      0.5
+     ]
+    }
+   ]
+  },
+  {
+   "skillId": 4520,
+   "name": "Quest - BOSS Rampage",
+   "levels": 1,
+   "effects": [
+    {
+     "stat": "runSpd",
+     "op": "mul",
+     "values": [
+      0.7
+     ]
+    }
+   ]
+  },
+  {
+   "skillId": 4523,
+   "name": "Quest - BOSS Evasion",
+   "levels": 1,
+   "effects": [
+    {
+     "stat": "rEvas",
+     "op": "add",
+     "values": [
+      30.0
+     ]
+    }
+   ]
+  },
+  {
+   "skillId": 4525,
+   "name": "Quest - BOSS Defend",
+   "levels": 1,
+   "effects": [
+    {
+     "stat": "pDef",
+     "op": "mul",
+     "values": [
+      10.0
+     ]
+    },
+    {
+     "stat": "mDef",
+     "op": "mul",
+     "values": [
+      10.0
+     ]
+    }
+   ]
+  },
+  {
+   "skillId": 4528,
+   "name": "Quest - BOSS Movement to Summoned",
+   "levels": 1,
+   "effects": [
+    {
+     "stat": "runSpd",
+     "op": "add",
+     "values": [
+      33.0
+     ]
+    }
+   ]
+  },
+  {
+   "skillId": 4532,
+   "name": "Quest - BOSS Reflect",
+   "levels": 1,
+   "effects": [
+    {
+     "stat": "mDef",
+     "op": "mul",
+     "values": [
+      10.0
+     ]
+    }
+   ]
+  },
+  {
+   "skillId": 4533,
+   "name": "Dance of Resistance",
+   "levels": 1,
+   "effects": [
+    {
+     "stat": "runSpd",
+     "op": "mul",
+     "values": [
+      0.5
+     ]
+    },
+    {
+     "stat": "accCombat",
+     "op": "sub",
+     "values": [
+      40.0
+     ]
+    }
+   ]
+  },
+  {
+   "skillId": 4534,
+   "name": "Dance of Nihil",
+   "levels": 1,
+   "effects": [
+    {
+     "stat": "pAtkSpd",
+     "op": "mul",
+     "values": [
+      0.7
+     ]
+    },
+    {
+     "stat": "rEvas",
+     "op": "sub",
+     "values": [
+      40.0
+     ]
+    }
+   ]
+  },
+  {
+   "skillId": 4535,
+   "name": "Dance of Weakness",
+   "levels": 1,
+   "effects": [
+    {
+     "stat": "pDef",
+     "op": "mul",
+     "values": [
+      0.5
+     ]
+    },
+    {
+     "stat": "pAtk",
+     "op": "mul",
+     "values": [
+      0.5
+     ]
+    }
+   ]
+  },
+  {
+   "skillId": 4536,
+   "name": "Song of Seduce",
+   "levels": 1,
+   "effects": [
+    {
+     "stat": "runSpd",
+     "op": "mul",
+     "values": [
+      0.5
+     ]
+    },
+    {
+     "stat": "accCombat",
+     "op": "sub",
+     "values": [
+      40.0
+     ]
+    }
+   ]
+  },
+  {
+   "skillId": 4537,
+   "name": "Song of Sweet Whisper",
+   "levels": 1,
+   "effects": [
+    {
+     "stat": "pAtkSpd",
+     "op": "mul",
+     "values": [
+      0.7
+     ]
+    },
+    {
+     "stat": "rEvas",
+     "op": "sub",
+     "values": [
+      40.0
+     ]
+    }
+   ]
+  },
+  {
+   "skillId": 4538,
+   "name": "Song of Temptation",
+   "levels": 1,
+   "effects": [
+    {
+     "stat": "pDef",
+     "op": "mul",
+     "values": [
+      0.5
+     ]
+    },
+    {
+     "stat": "pAtk",
+     "op": "mul",
+     "values": [
+      0.5
+     ]
+    }
+   ]
+  },
+  {
+   "skillId": 4539,
+   "name": "Curse of Vague",
+   "levels": 1,
+   "effects": [
+    {
+     "stat": "runSpd",
+     "op": "mul",
+     "values": [
+      0.5
+     ]
+    },
+    {
+     "stat": "accCombat",
+     "op": "sub",
+     "values": [
+      40.0
+     ]
+    }
+   ]
+  },
+  {
+   "skillId": 4540,
+   "name": "Curse of Weakness",
+   "levels": 1,
+   "effects": [
+    {
+     "stat": "pDef",
+     "op": "mul",
+     "values": [
+      0.5
+     ]
+    },
+    {
+     "stat": "runSpd",
+     "op": "mul",
+     "values": [
+      0.5
+     ]
+    }
+   ]
+  },
+  {
+   "skillId": 4541,
+   "name": "Curse of Nihil",
+   "levels": 1,
+   "effects": [
+    {
+     "stat": "pAtk",
+     "op": "mul",
+     "values": [
+      0.5
+     ]
+    },
+    {
+     "stat": "pAtkSpd",
+     "op": "mul",
+     "values": [
+      0.5
+     ]
+    },
+    {
+     "stat": "mAtk",
+     "op": "mul",
+     "values": [
+      0.5
+     ]
+    }
+   ]
+  },
+  {
+   "skillId": 4544,
+   "name": "Quest - BOSS Weakness",
+   "levels": 3,
+   "effects": [
+    {
+     "stat": "pDef",
+     "op": "mul",
+     "values": [
+      0.8,
+      0.6,
+      0.7
+     ]
+    },
+    {
+     "stat": "pAtkSpd",
+     "op": "mul",
+     "values": [
+      0.9,
+      0.8,
+      0.6
+     ]
+    },
+    {
+     "stat": "pAtk",
+     "op": "mul",
+     "values": [
+      0.7,
+      0.6,
+      0.5
+     ]
+    }
+   ]
+  },
+  {
+   "skillId": 4545,
+   "name": "Quest - BOSS Reflect",
+   "levels": 1,
+   "effects": [
+    {
+     "stat": "pDef",
+     "op": "mul",
+     "values": [
+      10.0
+     ]
+    },
+    {
+     "stat": "runSpd",
+     "op": "mul",
+     "values": [
+      0.7
+     ]
+    }
+   ]
+  },
+  {
+   "skillId": 4551,
+   "name": "Hot Springs Rheumatism",
+   "levels": 10,
+   "effects": [
+    {
+     "stat": "pDef",
+     "op": "mul",
+     "values": [
+      1.0,
+      0.96,
+      0.96,
+      0.96,
+      0.92,
+      0.92,
+      0.92,
+      0.88,
+      0.88,
+      0.85
+     ]
+    },
+    {
+     "stat": "critRate",
+     "op": "add",
+     "values": [
+      30.0,
+      50.0,
+      80.0,
+      100.0,
+      50.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0
+     ]
+    }
+   ]
+  },
+  {
+   "skillId": 4552,
+   "name": "Hot Springs Cholera",
+   "levels": 10,
+   "effects": [
+    {
+     "stat": "rEvas",
+     "op": "sub",
+     "values": [
+      0.0,
+      3.0,
+      3.0,
+      3.0,
+      5.0,
+      5.0,
+      5.0,
+      8.0,
+      8.0,
+      10.0
+     ]
+    },
+    {
+     "stat": "accCombat",
+     "op": "add",
+     "values": [
+      3.0,
+      6.0,
+      8.0,
+      10.0,
+      6.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0
+     ]
+    }
+   ]
+  },
+  {
+   "skillId": 4553,
+   "name": "Hot Springs Flu",
+   "levels": 10,
+   "effects": [
+    {
+     "stat": "pAtkSpd",
+     "op": "mul",
+     "values": [
+      1.04,
+      1.08,
+      1.12,
+      1.16,
+      1.08,
+      1.0,
+      1.0,
+      1.0,
+      1.0,
+      1.0
+     ]
+    },
+    {
+     "stat": "pAtk",
+     "op": "mul",
+     "values": [
+      1.0,
+      0.96,
+      0.96,
+      0.96,
+      0.92,
+      0.92,
+      0.92,
+      0.88,
+      0.88,
+      0.85
+     ]
+    }
+   ]
+  },
+  {
+   "skillId": 4554,
+   "name": "Hot Spring Malaria",
+   "levels": 10,
+   "effects": [
+    {
+     "stat": "mAtkSpd",
+     "op": "mul",
+     "values": [
+      1.04,
+      1.08,
+      1.12,
+      1.16,
+      1.08,
+      1.0,
+      1.0,
+      1.0,
+      1.0,
+      1.0
+     ]
+    }
+   ]
+  },
+  {
+   "skillId": 4575,
+   "name": "NPC Clan Buff - Haste",
+   "levels": 2,
+   "effects": [
+    {
+     "stat": "pAtkSpd",
+     "op": "mul",
+     "values": [
+      1.15,
+      1.33
+     ]
+    }
+   ]
+  },
+  {
+   "skillId": 4577,
+   "name": "Decrease Accuracy",
+   "levels": 12,
+   "effects": [
+    {
+     "stat": "accCombat",
+     "op": "sub",
+     "values": [
+      1.0,
+      2.0,
+      3.0,
+      4.0,
+      5.0,
+      6.0,
+      7.0,
+      8.0,
+      9.0,
+      10.0,
+      11.0,
+      12.0
+     ]
+    }
+   ]
+  },
+  {
+   "skillId": 4580,
+   "name": "Decrease P.Atk",
+   "levels": 12,
+   "effects": [
+    {
+     "stat": "pAtk",
+     "op": "mul",
+     "values": [
+      0.83,
+      0.8,
+      0.8,
+      0.77,
+      0.77,
+      0.77,
+      0.77,
+      0.77,
+      0.77,
+      0.77,
+      0.77,
+      0.77
+     ]
+    }
+   ]
+  },
+  {
+   "skillId": 4583,
+   "name": "Decrease Speed",
+   "levels": 12,
+   "effects": [
+    {
+     "stat": "runSpd",
+     "op": "mul",
+     "values": [
+      0.83,
+      0.8,
+      0.8,
+      0.77,
+      0.77,
+      0.77,
+      0.77,
+      0.77,
+      0.77,
+      0.77,
+      0.77,
+      0.77
+     ]
+    }
+   ]
+  },
+  {
+   "skillId": 4584,
+   "name": "Reducing P. Def Shock",
+   "levels": 12,
+   "effects": [
+    {
+     "stat": "pDef",
+     "op": "mul",
+     "values": [
+      0.83,
+      0.8,
+      0.8,
+      0.77,
+      0.77,
+      0.77,
+      0.77,
+      0.77,
+      0.77,
+      0.77,
+      0.77,
+      0.77
+     ]
+    }
+   ]
+  },
+  {
+   "skillId": 4585,
+   "name": "NPC Clan Buff - Berserk Might",
+   "levels": 3,
+   "effects": [
+    {
+     "stat": "pAtk",
+     "op": "mul",
+     "values": [
+      1.13,
+      1.18,
+      1.24
+     ]
+    },
+    {
+     "stat": "pAtkSpd",
+     "op": "mul",
+     "values": [
+      1.05,
+      1.05,
+      1.08
+     ]
+    },
+    {
+     "stat": "mAtk",
+     "op": "mul",
+     "values": [
+      1.1,
+      1.1,
+      1.16
+     ]
+    },
+    {
+     "stat": "mAtkSpd",
+     "op": "mul",
+     "values": [
+      1.05,
+      1.05,
+      1.08
+     ]
+    },
+    {
+     "stat": "runSpd",
+     "op": "add",
+     "values": [
+      5.0,
+      5.0,
+      8.0
+     ]
+    },
+    {
+     "stat": "pDef",
+     "op": "mul",
+     "values": [
+      0.95,
+      0.95,
+      0.92
+     ]
+    },
+    {
+     "stat": "mDef",
+     "op": "mul",
+     "values": [
+      0.9,
+      0.9,
+      0.84
+     ]
+    }
+   ]
+  },
+  {
+   "skillId": 4586,
+   "name": "Decrease Evasion",
+   "levels": 12,
+   "effects": [
+    {
+     "stat": "rEvas",
+     "op": "sub",
+     "values": [
+      1.0,
+      2.0,
+      3.0,
+      4.0,
+      5.0,
+      6.0,
+      7.0,
+      8.0,
+      9.0,
+      10.0,
+      11.0,
+      12.0
+     ]
+    }
+   ]
+  },
+  {
+   "skillId": 4587,
+   "name": "Decrease P.Atk",
+   "levels": 12,
+   "effects": [
+    {
+     "stat": "pAtk",
+     "op": "mul",
+     "values": [
+      0.83,
+      0.8,
+      0.8,
+      0.77,
+      0.77,
+      0.77,
+      0.77,
+      0.77,
+      0.77,
+      0.77,
+      0.77,
+      0.77
+     ]
+    }
+   ]
+  },
+  {
+   "skillId": 4588,
+   "name": "NPC Clan Buff - Berserk Haste",
+   "levels": 2,
+   "effects": [
+    {
+     "stat": "pAtk",
+     "op": "mul",
+     "values": [
+      1.05,
+      1.08
+     ]
+    },
+    {
+     "stat": "pAtkSpd",
+     "op": "mul",
+     "values": [
+      1.2,
+      1.44
+     ]
+    },
+    {
+     "stat": "mAtk",
+     "op": "mul",
+     "values": [
+      1.1,
+      1.16
+     ]
+    },
+    {
+     "stat": "mAtkSpd",
+     "op": "mul",
+     "values": [
+      1.05,
+      1.08
+     ]
+    },
+    {
+     "stat": "runSpd",
+     "op": "add",
+     "values": [
+      5.0,
+      8.0
+     ]
+    },
+    {
+     "stat": "pDef",
+     "op": "mul",
+     "values": [
+      0.95,
+      0.92
+     ]
+    },
+    {
+     "stat": "mDef",
+     "op": "mul",
+     "values": [
+      0.9,
+      0.84
+     ]
+    }
+   ]
+  },
+  {
+   "skillId": 4589,
+   "name": "Decrease Speed",
+   "levels": 12,
+   "effects": [
+    {
+     "stat": "runSpd",
+     "op": "mul",
+     "values": [
+      0.83,
+      0.8,
+      0.8,
+      0.77,
+      0.77,
+      0.77,
+      0.77,
+      0.77,
+      0.77,
+      0.77,
+      0.77,
+      0.77
+     ]
+    }
+   ]
+  },
+  {
+   "skillId": 4590,
+   "name": "Decrease Speed",
+   "levels": 12,
+   "effects": [
+    {
+     "stat": "runSpd",
+     "op": "mul",
+     "values": [
+      0.83,
+      0.8,
+      0.8,
+      0.77,
+      0.77,
+      0.77,
+      0.77,
+      0.77,
+      0.77,
+      0.77,
+      0.77,
+      0.77
+     ]
+    }
+   ]
+  },
+  {
+   "skillId": 4591,
+   "name": "Decrease Speed",
+   "levels": 12,
+   "effects": [
+    {
+     "stat": "runSpd",
+     "op": "mul",
+     "values": [
+      0.83,
+      0.8,
+      0.8,
+      0.77,
+      0.77,
+      0.77,
+      0.77,
+      0.77,
+      0.77,
+      0.77,
+      0.77,
+      0.77
+     ]
+    }
+   ]
+  },
+  {
+   "skillId": 4592,
+   "name": "Decrease P. Def",
+   "levels": 12,
+   "effects": [
+    {
+     "stat": "pDef",
+     "op": "mul",
+     "values": [
+      0.83,
+      0.8,
+      0.8,
+      0.77,
+      0.77,
+      0.77,
+      0.77,
+      0.77,
+      0.77,
+      0.77,
+      0.77,
+      0.77
+     ]
+    }
+   ]
+  },
+  {
+   "skillId": 4593,
+   "name": "Decrease P. Def",
+   "levels": 12,
+   "effects": [
+    {
+     "stat": "pDef",
+     "op": "mul",
+     "values": [
+      0.83,
+      0.8,
+      0.8,
+      0.77,
+      0.77,
+      0.77,
+      0.77,
+      0.77,
+      0.77,
+      0.77,
+      0.77,
+      0.77
+     ]
+    }
+   ]
+  },
+  {
+   "skillId": 4594,
+   "name": "Decrease P. Def",
+   "levels": 12,
+   "effects": [
+    {
+     "stat": "pDef",
+     "op": "mul",
+     "values": [
+      0.83,
+      0.8,
+      0.8,
+      0.77,
+      0.77,
+      0.77,
+      0.77,
+      0.77,
+      0.77,
+      0.77,
+      0.77,
+      0.77
+     ]
+    }
+   ]
+  },
+  {
+   "skillId": 4595,
+   "name": "NPC Clan Buff - Acumen Shield",
+   "levels": 3,
+   "effects": [
+    {
+     "stat": "mAtkSpd",
+     "op": "mul",
+     "values": [
+      1.15,
+      1.23,
+      1.3
+     ]
+    },
+    {
+     "stat": "pDef",
+     "op": "mul",
+     "values": [
+      1.08,
+      1.12,
+      1.15
+     ]
+    }
+   ]
+  },
+  {
+   "skillId": 4599,
+   "name": "Decrease Speed",
+   "levels": 12,
+   "effects": [
+    {
+     "stat": "runSpd",
+     "op": "mul",
+     "values": [
+      0.83,
+      0.8,
+      0.8,
+      0.77,
+      0.77,
+      0.77,
+      0.77,
+      0.77,
+      0.77,
+      0.77,
+      0.77,
+      0.77
+     ]
+    }
+   ]
+  },
+  {
+   "skillId": 4600,
+   "name": "Reducing P. Def Shock",
+   "levels": 12,
+   "effects": [
+    {
+     "stat": "pDef",
+     "op": "mul",
+     "values": [
+      0.83,
+      0.8,
+      0.8,
+      0.77,
+      0.77,
+      0.77,
+      0.77,
+      0.77,
+      0.77,
+      0.77,
+      0.77,
+      0.77
+     ]
+    }
+   ]
+  },
+  {
+   "skillId": 4601,
+   "name": "NPC Clan Buff - Acumen Focus",
+   "levels": 3,
+   "effects": [
+    {
+     "stat": "critRate",
+     "op": "mul",
+     "values": [
+      1.2,
+      1.25,
+      1.3
+     ]
+    },
+    {
+     "stat": "mAtkSpd",
+     "op": "mul",
+     "values": [
+      1.15,
+      1.23,
+      1.3
+     ]
+    }
+   ]
+  },
+  {
+   "skillId": 4602,
+   "name": "Decrease P.Atk",
+   "levels": 12,
+   "effects": [
+    {
+     "stat": "pAtk",
+     "op": "mul",
+     "values": [
+      0.83,
+      0.8,
+      0.8,
+      0.77,
+      0.77,
+      0.77,
+      0.77,
+      0.77,
+      0.77,
+      0.77,
+      0.77,
+      0.77
+     ]
+    }
+   ]
+  },
+  {
+   "skillId": 4603,
+   "name": "Decrease P.Atk",
+   "levels": 12,
+   "effects": [
+    {
+     "stat": "pAtk",
+     "op": "mul",
+     "values": [
+      0.83,
+      0.8,
+      0.8,
+      0.77,
+      0.77,
+      0.77,
+      0.77,
+      0.77,
+      0.77,
+      0.77,
+      0.77,
+      0.77
+     ]
+    }
+   ]
+  },
+  {
+   "skillId": 4604,
+   "name": "Decrease P.Atk",
+   "levels": 12,
+   "effects": [
+    {
+     "stat": "pAtk",
+     "op": "mul",
+     "values": [
+      0.83,
+      0.8,
+      0.8,
+      0.77,
+      0.77,
+      0.77,
+      0.77,
+      0.77,
+      0.77,
+      0.77,
+      0.77,
+      0.77
+     ]
+    }
+   ]
+  },
+  {
+   "skillId": 4608,
+   "name": "NPC Clan Buff - Berserk",
+   "levels": 2,
+   "effects": [
+    {
+     "stat": "pAtk",
+     "op": "mul",
+     "values": [
+      1.05,
+      1.08
+     ]
+    },
+    {
+     "stat": "pAtkSpd",
+     "op": "mul",
+     "values": [
+      1.05,
+      1.08
+     ]
+    },
+    {
+     "stat": "mAtk",
+     "op": "mul",
+     "values": [
+      1.1,
+      1.16
+     ]
+    },
+    {
+     "stat": "mAtkSpd",
+     "op": "mul",
+     "values": [
+      1.05,
+      1.08
+     ]
+    },
+    {
+     "stat": "runSpd",
+     "op": "add",
+     "values": [
+      5.0,
+      8.0
+     ]
+    },
+    {
+     "stat": "pDef",
+     "op": "mul",
+     "values": [
+      0.95,
+      0.92
+     ]
+    },
+    {
+     "stat": "mDef",
+     "op": "mul",
+     "values": [
+      0.9,
+      0.84
+     ]
+    }
+   ]
+  },
+  {
+   "skillId": 4610,
+   "name": "NPC Clan Buff - Focus",
+   "levels": 3,
+   "effects": [
+    {
+     "stat": "critRate",
+     "op": "mul",
+     "values": [
+      1.2,
+      1.25,
+      1.3
+     ]
+    }
+   ]
+  },
+  {
+   "skillId": 4625,
+   "name": "Decrease Speed",
+   "levels": 12,
+   "effects": [
+    {
+     "stat": "runSpd",
+     "op": "mul",
+     "values": [
+      0.9,
+      0.8,
+      0.8,
+      0.7,
+      0.7,
+      0.7,
+      0.7,
+      0.7,
+      0.7,
+      0.7,
+      0.7,
+      0.7
+     ]
+    }
+   ]
+  },
+  {
+   "skillId": 4626,
+   "name": "NPC Buff - Physical Barrier",
+   "levels": 12,
+   "effects": [
+    {
+     "stat": "pDef",
+     "op": "mul",
+     "values": [
+      1.05,
+      1.11,
+      1.17,
+      1.25,
+      1.33,
+      1.43,
+      1.67,
+      2.0,
+      2.33,
+      2.67,
+      3.0,
+      3.33
+     ]
+    }
+   ]
+  },
+  {
+   "skillId": 4627,
+   "name": "NPC Buff - Magical Barrier",
+   "levels": 12,
+   "effects": [
+    {
+     "stat": "mDef",
+     "op": "mul",
+     "values": [
+      1.05,
+      1.11,
+      1.17,
+      1.25,
+      1.33,
+      1.43,
+      1.67,
+      2.0,
+      2.33,
+      2.67,
+      3.0,
+      3.33
+     ]
+    }
+   ]
+  },
+  {
+   "skillId": 4631,
+   "name": "NPC Buff - Acumen Shield WildMagic",
+   "levels": 3,
+   "effects": [
+    {
+     "stat": "pDef",
+     "op": "mul",
+     "values": [
+      1.8,
+      1.12,
+      1.15
+     ]
+    },
+    {
+     "stat": "mAtkSpd",
+     "op": "mul",
+     "values": [
+      1.15,
+      1.23,
+      1.3
+     ]
+    }
+   ]
+  },
+  {
+   "skillId": 4632,
+   "name": "NPC Buff - Acumen Empower WildMagic",
+   "levels": 3,
+   "effects": [
+    {
+     "stat": "mAtk",
+     "op": "mul",
+     "values": [
+      1.55,
+      1.65,
+      1.75
+     ]
+    },
+    {
+     "stat": "mAtkSpd",
+     "op": "mul",
+     "values": [
+      1.15,
+      1.23,
+      1.3
+     ]
+    }
+   ]
+  },
+  {
+   "skillId": 4633,
+   "name": "NPC Buff - Acumen Empower Berserk",
+   "levels": 3,
+   "effects": [
+    {
+     "stat": "pAtk",
+     "op": "mul",
+     "values": [
+      1.05,
+      1.05,
+      1.08
+     ]
+    },
+    {
+     "stat": "pAtkSpd",
+     "op": "mul",
+     "values": [
+      1.05,
+      1.05,
+      1.08
+     ]
+    },
+    {
+     "stat": "mAtk",
+     "op": "mul",
+     "values": [
+      1.71,
+      1.82,
+      2.03
+     ]
+    },
+    {
+     "stat": "mAtkSpd",
+     "op": "mul",
+     "values": [
+      1.21,
+      1.29,
+      1.4
+     ]
+    },
+    {
+     "stat": "runSpd",
+     "op": "add",
+     "values": [
+      5.0,
+      5.0,
+      8.0
+     ]
+    },
+    {
+     "stat": "pDef",
+     "op": "mul",
+     "values": [
+      0.95,
+      0.95,
+      0.92
+     ]
+    },
+    {
+     "stat": "mDef",
+     "op": "mul",
+     "values": [
+      0.9,
+      0.9,
+      0.84
+     ]
+    }
+   ]
+  },
+  {
+   "skillId": 4634,
+   "name": "NPC Buff - Acumen Empower DamageShield",
+   "levels": 3,
+   "effects": [
+    {
+     "stat": "mAtk",
+     "op": "mul",
+     "values": [
+      1.55,
+      1.65,
+      1.75
+     ]
+    },
+    {
+     "stat": "mAtkSpd",
+     "op": "mul",
+     "values": [
+      1.15,
+      1.23,
+      1.3
+     ]
+    }
+   ]
+  },
+  {
+   "skillId": 4635,
+   "name": "NPC Buff - Acumen Berserk WildMagic",
+   "levels": 3,
+   "effects": [
+    {
+     "stat": "pAtk",
+     "op": "mul",
+     "values": [
+      1.05,
+      1.05,
+      1.08
+     ]
+    },
+    {
+     "stat": "pAtkSpd",
+     "op": "mul",
+     "values": [
+      1.05,
+      1.05,
+      1.08
+     ]
+    },
+    {
+     "stat": "mAtk",
+     "op": "mul",
+     "values": [
+      1.1,
+      1.1,
+      1.16
+     ]
+    },
+    {
+     "stat": "mAtkSpd",
+     "op": "mul",
+     "values": [
+      1.21,
+      1.29,
+      1.4
+     ]
+    },
+    {
+     "stat": "runSpd",
+     "op": "add",
+     "values": [
+      5.0,
+      5.0,
+      8.0
+     ]
+    },
+    {
+     "stat": "pDef",
+     "op": "mul",
+     "values": [
+      0.95,
+      0.95,
+      0.92
+     ]
+    },
+    {
+     "stat": "mDef",
+     "op": "mul",
+     "values": [
+      0.9,
+      0.9,
+      0.84
+     ]
+    }
+   ]
+  },
+  {
+   "skillId": 4636,
+   "name": "NPC Buff - Acumen Berserk DamageShield",
+   "levels": 3,
+   "effects": [
+    {
+     "stat": "pAtk",
+     "op": "mul",
+     "values": [
+      1.05,
+      1.05,
+      1.08
+     ]
+    },
+    {
+     "stat": "pAtkSpd",
+     "op": "mul",
+     "values": [
+      1.05,
+      1.05,
+      1.08
+     ]
+    },
+    {
+     "stat": "mAtk",
+     "op": "mul",
+     "values": [
+      1.1,
+      1.1,
+      1.16
+     ]
+    },
+    {
+     "stat": "mAtkSpd",
+     "op": "mul",
+     "values": [
+      1.21,
+      1.29,
+      1.4
+     ]
+    },
+    {
+     "stat": "runSpd",
+     "op": "add",
+     "values": [
+      5.0,
+      5.0,
+      8.0
+     ]
+    },
+    {
+     "stat": "pDef",
+     "op": "mul",
+     "values": [
+      0.95,
+      0.95,
+      0.92
+     ]
+    },
+    {
+     "stat": "mDef",
+     "op": "mul",
+     "values": [
+      0.9,
+      0.9,
+      0.84
+     ]
+    }
+   ]
+  },
+  {
+   "skillId": 4637,
+   "name": "NPC Buff - Acumen WildMagic DamageShield",
+   "levels": 3,
+   "effects": [
+    {
+     "stat": "mAtkSpd",
+     "op": "mul",
+     "values": [
+      1.15,
+      1.23,
+      1.3
+     ]
+    }
+   ]
+  },
+  {
+   "skillId": 4638,
+   "name": "NPC Clan Buff - Acumen Empower WildMagic",
+   "levels": 3,
+   "effects": [
+    {
+     "stat": "mAtk",
+     "op": "mul",
+     "values": [
+      1.55,
+      1.65,
+      1.75
+     ]
+    },
+    {
+     "stat": "mAtkSpd",
+     "op": "mul",
+     "values": [
+      1.15,
+      1.23,
+      1.3
+     ]
+    }
+   ]
+  },
+  {
+   "skillId": 4639,
+   "name": "NPC Clan Buff - Acumen Empower Berserk",
+   "levels": 3,
+   "effects": [
+    {
+     "stat": "pAtk",
+     "op": "mul",
+     "values": [
+      1.05,
+      1.05,
+      1.08
+     ]
+    },
+    {
+     "stat": "pAtkSpd",
+     "op": "mul",
+     "values": [
+      1.05,
+      1.05,
+      1.08
+     ]
+    },
+    {
+     "stat": "mAtk",
+     "op": "mul",
+     "values": [
+      1.71,
+      1.82,
+      2.03
+     ]
+    },
+    {
+     "stat": "mAtkSpd",
+     "op": "mul",
+     "values": [
+      1.21,
+      1.29,
+      1.4
+     ]
+    },
+    {
+     "stat": "runSpd",
+     "op": "add",
+     "values": [
+      5.0,
+      5.0,
+      8.0
+     ]
+    },
+    {
+     "stat": "pDef",
+     "op": "mul",
+     "values": [
+      0.95,
+      0.95,
+      0.92
+     ]
+    },
+    {
+     "stat": "mDef",
+     "op": "mul",
+     "values": [
+      0.9,
+      0.9,
+      0.84
+     ]
+    }
+   ]
+  },
+  {
+   "skillId": 4643,
+   "name": "Decrease Speed",
+   "levels": 12,
+   "effects": [
+    {
+     "stat": "runSpd",
+     "op": "mul",
+     "values": [
+      0.85,
+      0.7,
+      0.7,
+      0.5,
+      0.5,
+      0.5,
+      0.5,
+      0.5,
+      0.5,
+      0.5,
+      0.5,
+      0.5
+     ]
+    }
+   ]
+  },
+  {
+   "skillId": 4644,
+   "name": "Area Buff - Haste",
+   "levels": 2,
+   "effects": [
+    {
+     "stat": "pAtkSpd",
+     "op": "mul",
+     "values": [
+      1.15,
+      1.33
+     ]
+    }
+   ]
+  },
+  {
+   "skillId": 4645,
+   "name": "Area Buff - Focus",
+   "levels": 3,
+   "effects": [
+    {
+     "stat": "critRate",
+     "op": "mul",
+     "values": [
+      1.15,
+      1.25,
+      1.3
+     ]
+    }
+   ]
+  },
+  {
+   "skillId": 4647,
+   "name": "Area Buff - Might",
+   "levels": 3,
+   "effects": [
+    {
+     "stat": "pAtk",
+     "op": "mul",
+     "values": [
+      1.08,
+      1.12,
+      1.15
+     ]
+    }
+   ]
+  },
+  {
+   "skillId": 4648,
+   "name": "Area Buff - Shield",
+   "levels": 3,
+   "effects": [
+    {
+     "stat": "pDef",
+     "op": "mul",
+     "values": [
+      1.08,
+      1.12,
+      1.15
+     ]
+    }
+   ]
+  },
+  {
+   "skillId": 4680,
+   "name": "Valakas Lava Skin",
+   "levels": 1,
+   "effects": [
+    {
+     "stat": "pDef",
+     "op": "mul",
+     "values": [
+      10.0
+     ]
+    },
+    {
+     "stat": "mDef",
+     "op": "mul",
+     "values": [
+      10.0
+     ]
+    }
+   ]
+  },
+  {
+   "skillId": 4694,
+   "name": "Ultimate Debuff",
+   "levels": 1,
+   "effects": [
+    {
+     "stat": "pAtk",
+     "op": "mul",
+     "values": [
+      0.55
+     ]
+    },
+    {
+     "stat": "accCombat",
+     "op": "sub",
+     "values": [
+      4.0
+     ]
+    },
+    {
+     "stat": "rEvas",
+     "op": "sub",
+     "values": [
+      4.0
+     ]
+    },
+    {
+     "stat": "pDef",
+     "op": "mul",
+     "values": [
+      0.55
+     ]
+    },
+    {
+     "stat": "pAtkSpd",
+     "op": "mul",
+     "values": [
+      0.75
+     ]
+    },
+    {
+     "stat": "critRate",
+     "op": "mul",
+     "values": [
+      0.77
+     ]
+    },
+    {
+     "stat": "mDef",
+     "op": "mul",
+     "values": [
+      0.2
+     ]
+    }
+   ]
+  },
+  {
+   "skillId": 4695,
+   "name": "Ultimate Debuff",
+   "levels": 1,
+   "effects": [
+    {
+     "stat": "pAtk",
+     "op": "mul",
+     "values": [
+      0.2
+     ]
+    }
+   ]
+  },
+  {
+   "skillId": 4696,
+   "name": "Ultimate Debuff",
+   "levels": 1,
+   "effects": [
+    {
+     "stat": "pDef",
+     "op": "mul",
+     "values": [
+      0.2
+     ]
+    },
+    {
+     "stat": "mDef",
+     "op": "mul",
+     "values": [
+      0.2
+     ]
+    }
+   ]
+  },
+  {
+   "skillId": 4699,
+   "name": "Blessing of Queen",
+   "levels": 13,
+   "effects": [
+    {
+     "stat": "critRate",
+     "op": "mul",
+     "values": [
+      1.25,
+      1.27,
+      1.3,
+      1.3,
+      1.3,
+      1.3,
+      1.3,
+      1.3,
+      1.3,
+      1.3,
+      1.3,
+      1.3,
+      1.3
+     ]
+    }
+   ]
+  },
+  {
+   "skillId": 4700,
+   "name": "Gift of Queen",
+   "levels": 13,
+   "effects": [
+    {
+     "stat": "pAtk",
+     "op": "mul",
+     "values": [
+      1.06,
+      1.08,
+      1.1,
+      1.1,
+      1.1,
+      1.1,
+      1.1,
+      1.1,
+      1.1,
+      1.1,
+      1.1,
+      1.1,
+      1.1
+     ]
+    },
+    {
+     "stat": "accCombat",
+     "op": "add",
+     "values": [
+      2.0,
+      2.0,
+      3.0,
+      3.0,
+      3.0,
+      3.0,
+      3.0,
+      3.0,
+      3.0,
+      3.0,
+      3.0,
+      3.0,
+      3.0
+     ]
+    }
+   ]
+  },
+  {
+   "skillId": 4705,
+   "name": "Curse of Shade",
+   "levels": 13,
+   "effects": [
+    {
+     "stat": "mDef",
+     "op": "mul",
+     "values": [
+      0.94,
+      0.92,
+      0.9,
+      0.9,
+      0.9,
+      0.9,
+      0.9,
+      0.9,
+      0.9,
+      0.9,
+      0.9,
+      0.9,
+      0.9
+     ]
+    },
+    {
+     "stat": "pDef",
+     "op": "mul",
+     "values": [
+      0.94,
+      0.92,
+      0.9,
+      0.9,
+      0.9,
+      0.9,
+      0.9,
+      0.9,
+      0.9,
+      0.9,
+      0.9,
+      0.9,
+      0.9
+     ]
+    }
+   ]
+  },
+  {
+   "skillId": 4706,
+   "name": "Mass Curse of Shade",
+   "levels": 13,
+   "effects": [
+    {
+     "stat": "mDef",
+     "op": "mul",
+     "values": [
+      0.94,
+      0.92,
+      0.9,
+      0.9,
+      0.9,
+      0.9,
+      0.9,
+      0.9,
+      0.9,
+      0.9,
+      0.9,
+      0.9,
+      0.9
+     ]
+    },
+    {
+     "stat": "pDef",
+     "op": "mul",
+     "values": [
+      0.94,
+      0.92,
+      0.9,
+      0.9,
+      0.9,
+      0.9,
+      0.9,
+      0.9,
+      0.9,
+      0.9,
+      0.9,
+      0.9,
+      0.9
+     ]
+    }
+   ]
+  },
+  {
+   "skillId": 4711,
+   "name": "Wild Defense",
+   "levels": 12,
+   "effects": [
+    {
+     "stat": "mDef",
+     "op": "mul",
+     "values": [
+      5.0,
+      5.0,
+      5.0,
+      5.0,
+      5.0,
+      5.0,
+      5.0,
+      5.0,
+      5.0,
+      5.0,
+      5.0,
+      5.0
+     ]
+    },
+    {
+     "stat": "pDef",
+     "op": "mul",
+     "values": [
+      5.0,
+      5.0,
+      5.0,
+      5.0,
+      5.0,
+      5.0,
+      5.0,
+      5.0,
+      5.0,
+      5.0,
+      5.0,
+      5.0
+     ]
+    },
+    {
+     "stat": "pAtkSpd",
+     "op": "mul",
+     "values": [
+      0.3,
+      0.3,
+      0.3,
+      0.3,
+      0.3,
+      0.3,
+      0.3,
+      0.3,
+      0.3,
+      0.3,
+      0.3,
+      0.3
+     ]
+    },
+    {
+     "stat": "runSpd",
+     "op": "mul",
+     "values": [
+      0.1,
+      0.1,
+      0.1,
+      0.1,
+      0.1,
+      0.1,
+      0.1,
+      0.1,
+      0.1,
+      0.1,
+      0.1,
+      0.1
+     ]
+    }
+   ]
+  },
+  {
+   "skillId": 5008,
+   "name": "Frintezza's Concert Hall Melody",
+   "levels": 5,
+   "effects": [
+    {
+     "stat": "pAtk",
+     "op": "mul",
+     "values": [
+      1.0,
+      1.0,
+      1.2,
+      1.0,
+      1.0
+     ]
+    },
+    {
+     "stat": "mAtk",
+     "op": "mul",
+     "values": [
+      1.0,
+      1.0,
+      1.2,
+      1.0,
+      1.0
+     ]
+    },
+    {
+     "stat": "pAtkSpd",
+     "op": "mul",
+     "values": [
+      1.0,
+      1.0,
+      1.2,
+      1.0,
+      1.0
+     ]
+    },
+    {
+     "stat": "mAtkSpd",
+     "op": "mul",
+     "values": [
+      1.0,
+      1.0,
+      1.2,
+      1.0,
+      1.0
+     ]
+    },
+    {
+     "stat": "runSpd",
+     "op": "add",
+     "values": [
+      1.0,
+      1.0,
+      1.2,
+      1.0,
+      1.0
+     ]
+    }
+   ]
+  },
+  {
+   "skillId": 5017,
+   "name": "Frintezza's Daemon Morph",
+   "levels": 1,
+   "effects": [
+    {
+     "stat": "runSpd",
+     "op": "mul",
+     "values": [
+      1.22
+     ]
+    }
+   ]
+  },
+  {
+   "skillId": 5044,
+   "name": "NPC Ultimate Defense",
+   "levels": 3,
+   "effects": [
+    {
+     "stat": "pDef",
+     "op": "add",
+     "values": [
+      1800.0,
+      3600.0,
+      9000.0
+     ]
+    },
+    {
+     "stat": "mDef",
+     "op": "add",
+     "values": [
+      1350.0,
+      2700.0,
+      9000.0
+     ]
+    }
+   ]
+  },
+  {
+   "skillId": 5079,
+   "name": "NPC Focused Haste",
+   "levels": 1,
+   "effects": [
+    {
+     "stat": "pAtkSpd",
+     "op": "mul",
+     "values": [
+      1.33
+     ]
+    },
+    {
+     "stat": "critRate",
+     "op": "mul",
+     "values": [
+      1.3
+     ]
+    }
+   ]
+  },
+  {
+   "skillId": 5080,
+   "name": "NPC Mighty Haste",
+   "levels": 1,
+   "effects": [
+    {
+     "stat": "pAtkSpd",
+     "op": "mul",
+     "values": [
+      1.33
+     ]
+    },
+    {
+     "stat": "pAtk",
+     "op": "mul",
+     "values": [
+      1.15
+     ]
+    }
+   ]
+  },
+  {
+   "skillId": 5087,
+   "name": "Berserk",
+   "levels": 2,
+   "effects": [
+    {
+     "stat": "pAtkSpd",
+     "op": "mul",
+     "values": [
+      1.15,
+      1.33
+     ]
+    },
+    {
+     "stat": "pAtk",
+     "op": "mul",
+     "values": [
+      1.9,
+      2.8
+     ]
+    },
+    {
+     "stat": "pDef",
+     "op": "mul",
+     "values": [
+      1.0,
+      2.8
+     ]
+    }
+   ]
+  },
+  {
+   "skillId": 5104,
+   "name": "Battle Force",
+   "levels": 3,
+   "effects": [
+    {
+     "stat": "pAtk",
+     "op": "mul",
+     "values": [
+      1.05,
+      1.1,
+      1.15
+     ]
+    }
+   ]
+  },
+  {
+   "skillId": 5105,
+   "name": "Spell Force",
+   "levels": 3,
+   "effects": [
+    {
+     "stat": "mAtk",
+     "op": "mul",
+     "values": [
+      1.05,
+      1.1,
+      1.15
+     ]
+    }
+   ]
+  },
+  {
+   "skillId": 5122,
+   "name": "Sailren Use Might",
+   "levels": 1,
+   "effects": [
+    {
+     "stat": "pAtk",
+     "op": "mul",
+     "values": [
+      1.5
+     ]
+    }
+   ]
+  },
+  {
+   "skillId": 5123,
+   "name": "Maximum Defense",
+   "levels": 1,
+   "effects": [
+    {
+     "stat": "pDef",
+     "op": "add",
+     "values": [
+      1000.0
+     ]
+    },
+    {
+     "stat": "mDef",
+     "op": "add",
+     "values": [
+      800.0
+     ]
+    }
+   ]
+  },
+  {
+   "skillId": 5127,
+   "name": "Recover Force",
+   "levels": 1,
+   "effects": [
+    {
+     "stat": "pAtk",
+     "op": "mul",
+     "values": [
+      1.2
+     ]
+    }
+   ]
+  },
+  {
+   "skillId": 5128,
+   "name": "Maximize long-range weapon use",
+   "levels": 1,
+   "effects": [
+    {
+     "stat": "pAtk",
+     "op": "mul",
+     "values": [
+      1.2
+     ]
+    },
+    {
+     "stat": "accCombat",
+     "op": "add",
+     "values": [
+      10.0
+     ]
+    }
+   ]
+  },
+  {
+   "skillId": 5129,
+   "name": "Smokescreen",
+   "levels": 1,
+   "effects": [
+    {
+     "stat": "rEvas",
+     "op": "add",
+     "values": [
+      15.0
+     ]
+    }
+   ]
+  },
+  {
+   "skillId": 5140,
+   "name": "Force Curse",
+   "levels": 1,
+   "effects": [
+    {
+     "stat": "pAtkSpd",
+     "op": "mul",
+     "values": [
+      0.77
+     ]
+    }
+   ]
+  },
+  {
+   "skillId": 5145,
+   "name": "Day of Doom",
+   "levels": 1,
+   "effects": [
+    {
+     "stat": "pAtk",
+     "op": "mul",
+     "values": [
+      0.5
+     ]
+    },
+    {
+     "stat": "pDef",
+     "op": "mul",
+     "values": [
+      0.5
+     ]
+    },
+    {
+     "stat": "runSpd",
+     "op": "mul",
+     "values": [
+      0.5
+     ]
+    }
+   ]
+  },
+  {
+   "skillId": 5154,
+   "name": "Might",
+   "levels": 10,
+   "effects": [
+    {
+     "stat": "pAtk",
+     "op": "mul",
+     "values": [
+      1.06,
+      1.07,
+      1.08,
+      1.09,
+      1.1,
+      1.11,
+      1.12,
+      1.13,
+      1.14,
+      1.15
+     ]
+    }
+   ]
+  },
+  {
+   "skillId": 5156,
+   "name": "Empower",
+   "levels": 10,
+   "effects": [
+    {
+     "stat": "mAtk",
+     "op": "mul",
+     "values": [
+      1.06,
+      1.07,
+      1.08,
+      1.09,
+      1.1,
+      1.11,
+      1.12,
+      1.13,
+      1.14,
+      1.15
+     ]
+    }
+   ]
+  },
+  {
+   "skillId": 5158,
+   "name": "Shield",
+   "levels": 10,
+   "effects": [
+    {
+     "stat": "pDef",
+     "op": "mul",
+     "values": [
+      1.06,
+      1.07,
+      1.08,
+      1.09,
+      1.1,
+      1.11,
+      1.12,
+      1.13,
+      1.14,
+      1.15
+     ]
+    }
+   ]
+  },
+  {
+   "skillId": 5159,
+   "name": "Magic Barrier",
+   "levels": 10,
+   "effects": [
+    {
+     "stat": "mDef",
+     "op": "mul",
+     "values": [
+      1.06,
+      1.07,
+      1.08,
+      1.09,
+      1.1,
+      1.11,
+      1.12,
+      1.13,
+      1.14,
+      1.15
+     ]
+    }
+   ]
+  },
+  {
+   "skillId": 5161,
+   "name": "Agility",
+   "levels": 10,
+   "effects": [
+    {
+     "stat": "rEvas",
+     "op": "add",
+     "values": [
+      1.0,
+      1.0,
+      1.0,
+      2.0,
+      2.0,
+      2.0,
+      3.0,
+      3.0,
+      3.0,
+      4.0
+     ]
+    }
+   ]
+  },
+  {
+   "skillId": 5162,
+   "name": "Guidance",
+   "levels": 10,
+   "effects": [
+    {
+     "stat": "accCombat",
+     "op": "add",
+     "values": [
+      1.0,
+      1.0,
+      1.0,
+      2.0,
+      2.0,
+      3.0,
+      3.0,
+      4.0,
+      4.0,
+      5.0
+     ]
+    }
+   ]
+  },
+  {
+   "skillId": 5163,
+   "name": "Focus",
+   "levels": 10,
+   "effects": [
+    {
+     "stat": "critRate",
+     "op": "mul",
+     "values": [
+      1.2,
+      1.23,
+      1.27,
+      1.3,
+      1.33,
+      1.37,
+      1.4,
+      1.43,
+      1.47,
+      1.5
+     ]
+    }
+   ]
+  },
+  {
+   "skillId": 5166,
+   "name": "Slow",
+   "levels": 10,
+   "effects": [
+    {
+     "stat": "runSpd",
+     "op": "mul",
+     "values": [
+      0.7,
+      0.7,
+      0.7,
+      0.7,
+      0.7,
+      0.7,
+      0.7,
+      0.7,
+      0.7,
+      0.7
+     ]
+    }
+   ]
+  },
+  {
+   "skillId": 5167,
+   "name": "Winter",
+   "levels": 10,
+   "effects": [
+    {
+     "stat": "pAtkSpd",
+     "op": "mul",
+     "values": [
+      0.77,
+      0.77,
+      0.77,
+      0.77,
+      0.77,
+      0.77,
+      0.77,
+      0.77,
+      0.77,
+      0.77
+     ]
+    }
+   ]
+  },
+  {
+   "skillId": 5186,
+   "name": "Pet Haste",
+   "levels": 2,
+   "effects": [
+    {
+     "stat": "pAtkSpd",
+     "op": "mul",
+     "values": [
+      1.15,
+      1.33
+     ]
+    }
+   ]
+  },
+  {
+   "skillId": 5191,
+   "name": "Pet Guidance",
+   "levels": 3,
+   "effects": [
+    {
+     "stat": "accCombat",
+     "op": "add",
+     "values": [
+      2.0,
+      3.0,
+      4.0
+     ]
+    }
+   ]
+  },
+  {
+   "skillId": 5192,
+   "name": "Pet Wind Walk",
+   "levels": 2,
+   "effects": [
+    {
+     "stat": "runSpd",
+     "op": "add",
+     "values": [
+      20.0,
+      33.0
+     ]
+    }
+   ]
+  },
+  {
+   "skillId": 5193,
+   "name": "Pet Acumen",
+   "levels": 3,
+   "effects": [
+    {
+     "stat": "mAtkSpd",
+     "op": "mul",
+     "values": [
+      1.15,
+      1.23,
+      1.3
+     ]
+    }
+   ]
+  },
+  {
+   "skillId": 5194,
+   "name": "Pet Empower",
+   "levels": 3,
+   "effects": [
+    {
+     "stat": "mAtk",
+     "op": "mul",
+     "values": [
+      1.55,
+      1.65,
+      1.75
+     ]
+    }
+   ]
+  },
+  {
+   "skillId": 5196,
+   "name": "Pet Wind Shackle",
+   "levels": 3,
+   "effects": [
+    {
+     "stat": "pAtkSpd",
+     "op": "mul",
+     "values": [
+      0.77,
+      0.77,
+      0.77
+     ]
+    }
+   ]
+  },
+  {
+   "skillId": 5197,
+   "name": "Pet Hex",
+   "levels": 3,
+   "effects": [
+    {
+     "stat": "pDef",
+     "op": "mul",
+     "values": [
+      0.77,
+      0.77,
+      0.77
+     ]
+    }
+   ]
+  },
+  {
+   "skillId": 5198,
+   "name": "Pet Slow",
+   "levels": 3,
+   "effects": [
+    {
+     "stat": "runSpd",
+     "op": "mul",
+     "values": [
+      0.7,
+      0.7,
+      0.7
+     ]
+    }
+   ]
+  },
+  {
+   "skillId": 5199,
+   "name": "Pet Curse Gloom",
+   "levels": 3,
+   "effects": [
+    {
+     "stat": "mDef",
+     "op": "mul",
+     "values": [
+      0.77,
+      0.77,
+      0.77
+     ]
+    }
+   ]
+  },
+  {
+   "skillId": 5206,
+   "name": "Decrease Speed",
+   "levels": 1,
+   "effects": [
+    {
+     "stat": "runSpd",
+     "op": "mul",
+     "values": [
+      0.85
+     ]
+    }
+   ]
+  },
+  {
+   "skillId": 5207,
+   "name": "Decrease Atk. Spd.",
+   "levels": 1,
+   "effects": [
+    {
+     "stat": "pAtkSpd",
+     "op": "mul",
+     "values": [
+      0.85
+     ]
+    }
+   ]
+  },
+  {
+   "skillId": 5208,
+   "name": "Golden Pig Wind Walk",
+   "levels": 1,
+   "effects": [
+    {
+     "stat": "runSpd",
+     "op": "add",
+     "values": [
+      33.0
+     ]
+    }
+   ]
+  },
+  {
+   "skillId": 5209,
+   "name": "Golden Pig Shield",
+   "levels": 1,
+   "effects": [
+    {
+     "stat": "pDef",
+     "op": "mul",
+     "values": [
+      1.15
+     ]
+    }
+   ]
+  },
+  {
+   "skillId": 5213,
+   "name": "Golden Pig Haste",
+   "levels": 1,
+   "effects": [
+    {
+     "stat": "pAtkSpd",
+     "op": "mul",
+     "values": [
+      1.15
+     ]
+    }
+   ]
+  },
+  {
+   "skillId": 5215,
+   "name": "Golden Pig Acumen",
+   "levels": 1,
+   "effects": [
+    {
+     "stat": "mAtkSpd",
+     "op": "mul",
+     "values": [
+      1.3
+     ]
+    }
+   ]
+  },
+  {
+   "skillId": 5217,
+   "name": "Golden Pig Empower",
+   "levels": 1,
+   "effects": [
+    {
+     "stat": "mAtk",
+     "op": "mul",
+     "values": [
+      1.55
+     ]
+    }
+   ]
+  },
+  {
+   "skillId": 7029,
+   "name": "Super Haste",
+   "levels": 4,
+   "effects": [
+    {
+     "stat": "pAtkSpd",
+     "op": "mul",
+     "values": [
+      2.0,
+      3.0,
+      4.0,
+      5.0
+     ]
+    },
+    {
+     "stat": "runSpd",
+     "op": "mul",
+     "values": [
+      2.0,
+      3.0,
+      4.0,
+      5.0
+     ]
+    },
+    {
+     "stat": "mAtkSpd",
+     "op": "mul",
+     "values": [
+      2.0,
+      3.0,
+      4.0,
+      5.0
+     ]
+    },
+    {
+     "stat": "pAtk",
+     "op": "mul",
+     "values": [
+      250.0,
+      500.0,
+      750.0,
+      1500.0
+     ]
+    },
+    {
+     "stat": "mAtk",
+     "op": "mul",
+     "values": [
+      250.0,
+      500.0,
+      750.0,
+      1500.0
+     ]
+    }
+   ]
+  },
+  {
+   "skillId": 7041,
+   "name": "Master's Blessing - Focus",
+   "levels": 1,
+   "effects": [
+    {
+     "stat": "critRate",
+     "op": "mul",
+     "values": [
+      1.3
+     ]
+    }
+   ]
+  },
+  {
+   "skillId": 7043,
+   "name": "Master's Blessing - Haste",
+   "levels": 1,
+   "effects": [
+    {
+     "stat": "pAtkSpd",
+     "op": "mul",
+     "values": [
+      1.33
+     ]
+    }
+   ]
+  },
+  {
+   "skillId": 7044,
+   "name": "Master's Blessing - Guidance",
+   "levels": 1,
+   "effects": [
+    {
+     "stat": "accCombat",
+     "op": "add",
+     "values": [
+      4.0
+     ]
+    }
+   ]
+  },
+  {
+   "skillId": 7047,
+   "name": "Master's Blessing - Agility",
+   "levels": 1,
+   "effects": [
+    {
+     "stat": "rEvas",
+     "op": "add",
+     "values": [
+      4.0
+     ]
+    }
+   ]
+  },
+  {
+   "skillId": 7048,
+   "name": "Master's Blessing - Acumen",
+   "levels": 1,
+   "effects": [
+    {
+     "stat": "mAtkSpd",
+     "op": "mul",
+     "values": [
+      1.3
+     ]
+    }
+   ]
+  },
+  {
+   "skillId": 7050,
+   "name": "Master's Blessing - Might",
+   "levels": 1,
+   "effects": [
+    {
+     "stat": "pAtk",
+     "op": "mul",
+     "values": [
+      1.15
+     ]
+    }
+   ]
+  },
+  {
+   "skillId": 7051,
+   "name": "Master's Blessing - Shield",
+   "levels": 1,
+   "effects": [
+    {
+     "stat": "pDef",
+     "op": "mul",
+     "values": [
+      1.15
+     ]
+    }
+   ]
+  },
+  {
+   "skillId": 7052,
+   "name": "Master's Blessing - Magic Barrier",
+   "levels": 1,
+   "effects": [
+    {
+     "stat": "mDef",
+     "op": "mul",
+     "values": [
+      1.3
+     ]
+    }
+   ]
+  },
+  {
+   "skillId": 7054,
+   "name": "Master's Blessing - Empower",
+   "levels": 1,
+   "effects": [
+    {
+     "stat": "mAtk",
+     "op": "mul",
+     "values": [
+      1.75
+     ]
+    }
+   ]
+  },
+  {
+   "skillId": 7055,
+   "name": "Master's Blessing - Wind Walk",
+   "levels": 1,
+   "effects": [
+    {
+     "stat": "runSpd",
+     "op": "add",
+     "values": [
+      33.0
+     ]
+    }
+   ]
+  },
+  {
+   "skillId": 7056,
+   "name": "Master's Blessing - Berserker Spirit",
+   "levels": 1,
+   "effects": [
+    {
+     "stat": "mAtk",
+     "op": "mul",
+     "values": [
+      1.16
+     ]
+    },
+    {
+     "stat": "pAtk",
+     "op": "mul",
+     "values": [
+      1.08
+     ]
+    },
+    {
+     "stat": "mDef",
+     "op": "mul",
+     "values": [
+      0.84
+     ]
+    },
+    {
+     "stat": "pDef",
+     "op": "mul",
+     "values": [
+      0.92
+     ]
+    },
+    {
+     "stat": "mAtkSpd",
+     "op": "mul",
+     "values": [
+      1.08
+     ]
+    },
+    {
+     "stat": "pAtkSpd",
+     "op": "mul",
+     "values": [
+      1.08
+     ]
+    },
+    {
+     "stat": "runSpd",
+     "op": "add",
+     "values": [
+      8.0
+     ]
+    },
+    {
+     "stat": "rEvas",
+     "op": "sub",
+     "values": [
+      4.0
+     ]
+    }
+   ]
+  },
+  {
+   "skillId": 7057,
+   "name": "Master's Blessing - Greater Might",
+   "levels": 1,
+   "effects": [
+    {
+     "stat": "pAtk",
+     "op": "mul",
+     "values": [
+      1.1
+     ]
+    }
+   ]
+  },
+  {
+   "skillId": 7058,
+   "name": "Master's Blessing - Greater Shield",
+   "levels": 1,
+   "effects": [
+    {
+     "stat": "pDef",
+     "op": "mul",
+     "values": [
+      1.15
+     ]
+    }
+   ]
+  },
+  {
+   "skillId": 7061,
+   "name": "Master's Blessing - Prophecy of Water",
+   "levels": 1,
+   "effects": [
+    {
+     "stat": "pAtk",
+     "op": "mul",
+     "values": [
+      1.1
+     ]
+    },
+    {
+     "stat": "pDef",
+     "op": "mul",
+     "values": [
+      1.2
+     ]
+    },
+    {
+     "stat": "pAtkSpd",
+     "op": "mul",
+     "values": [
+      1.2
+     ]
+    },
+    {
+     "stat": "mAtk",
+     "op": "mul",
+     "values": [
+      1.2
+     ]
+    },
+    {
+     "stat": "mDef",
+     "op": "mul",
+     "values": [
+      1.2
+     ]
+    },
+    {
+     "stat": "mAtkSpd",
+     "op": "mul",
+     "values": [
+      1.2
+     ]
+    },
+    {
+     "stat": "runSpd",
+     "op": "mul",
+     "values": [
+      0.8
+     ]
+    }
+   ]
+  },
+  {
+   "skillId": 7062,
+   "name": "Master's Blessing - Prophecy of Fire",
+   "levels": 1,
+   "effects": [
+    {
+     "stat": "pAtk",
+     "op": "mul",
+     "values": [
+      1.1
+     ]
+    },
+    {
+     "stat": "pDef",
+     "op": "mul",
+     "values": [
+      1.2
+     ]
+    },
+    {
+     "stat": "pAtkSpd",
+     "op": "mul",
+     "values": [
+      1.2
+     ]
+    },
+    {
+     "stat": "mAtk",
+     "op": "mul",
+     "values": [
+      1.2
+     ]
+    },
+    {
+     "stat": "mDef",
+     "op": "mul",
+     "values": [
+      1.2
+     ]
+    },
+    {
+     "stat": "mAtkSpd",
+     "op": "mul",
+     "values": [
+      1.2
+     ]
+    },
+    {
+     "stat": "accCombat",
+     "op": "add",
+     "values": [
+      4.0
+     ]
+    },
+    {
+     "stat": "runSpd",
+     "op": "mul",
+     "values": [
+      0.8
+     ]
+    }
+   ]
+  },
+  {
+   "skillId": 7063,
+   "name": "Master's Blessing - Prophecy of Wind",
+   "levels": 1,
+   "effects": [
+    {
+     "stat": "critRate",
+     "op": "mul",
+     "values": [
+      1.2
+     ]
+    },
+    {
+     "stat": "pAtk",
+     "op": "mul",
+     "values": [
+      1.1
+     ]
+    },
+    {
+     "stat": "pDef",
+     "op": "mul",
+     "values": [
+      1.2
+     ]
+    },
+    {
+     "stat": "pAtkSpd",
+     "op": "mul",
+     "values": [
+      1.2
+     ]
+    },
+    {
+     "stat": "mAtk",
+     "op": "mul",
+     "values": [
+      1.2
+     ]
+    },
+    {
+     "stat": "mDef",
+     "op": "mul",
+     "values": [
+      1.2
+     ]
+    },
+    {
+     "stat": "mAtkSpd",
+     "op": "mul",
+     "values": [
+      1.2
+     ]
+    },
+    {
+     "stat": "runSpd",
+     "op": "mul",
+     "values": [
+      0.8
+     ]
+    }
+   ]
+  },
+  {
+   "skillId": 7064,
+   "name": "Master's Blessing - Chant of Victory",
+   "levels": 1,
+   "effects": [
+    {
+     "stat": "pAtk",
+     "op": "mul",
+     "values": [
+      1.1
+     ]
+    },
+    {
+     "stat": "pDef",
+     "op": "mul",
+     "values": [
+      1.2
+     ]
+    },
+    {
+     "stat": "pAtkSpd",
+     "op": "mul",
+     "values": [
+      1.2
+     ]
+    },
+    {
+     "stat": "mAtk",
+     "op": "mul",
+     "values": [
+      1.2
+     ]
+    },
+    {
+     "stat": "mDef",
+     "op": "mul",
+     "values": [
+      1.2
+     ]
+    },
+    {
+     "stat": "mAtkSpd",
+     "op": "mul",
+     "values": [
+      1.2
+     ]
+    },
+    {
+     "stat": "accCombat",
+     "op": "add",
+     "values": [
+      4.0
+     ]
+    },
+    {
+     "stat": "runSpd",
+     "op": "mul",
+     "values": [
+      0.8
+     ]
+    }
+   ]
+  }
+ ]
+}

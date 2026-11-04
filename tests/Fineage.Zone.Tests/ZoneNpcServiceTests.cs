@@ -111,7 +111,7 @@ public sealed class ZoneNpcServiceTests
     }
 
     [Fact]
-    public async Task Newbie_helper_buffs_fighters_and_mages_and_skips_a_second_character()
+    public async Task Newbie_helper_buffs_fighters_and_mages_and_buffs_a_second_character_too()
     {
         var store = JsonAccountStore.InMemory();
         var login = new LoginService(store, new HandoffTokens(HandoffTokens.DefaultSecret));
@@ -163,16 +163,34 @@ public sealed class ZoneNpcServiceTests
         mark = stream.Length;
         Assert.Null(await world.TrySupportMagicAsync(session, GateObjectId, CancellationToken.None));
         stream.Position = mark;
-        var refused = await ReadAsync<SystemMessageMsg>(stream, MsgType.SystemMessage);
-        Assert.Equal(NpcServiceProtocol.BuffNotNewbie, refused.Id);
-        Assert.Equal("newbie", (await ReadAsync<NewbieBuffResultMsg>(stream, MsgType.NewbieBuffResult)).Refusal);
+        // Mobius CT0 SupportMagic has no isNewbie check: the second (non-newbie) character is buffed too.
+        NewbieBuffResultMsg second;
+        while (true)
+        {
+            var frame = await FrameIO.ReadAsync(stream);
+            Assert.NotNull(frame);
+            if (frame!.Value.Type != (ushort)MsgType.NewbieBuffResult)
+                continue;
+            second = MessagePackSerializer.Deserialize<NewbieBuffResultMsg>(frame.Value.Body);
+            break;
+        }
+
+        Assert.Equal("", second.Refusal);
+        Assert.Contains(4331, second.SkillIds);
 
         mark = stream.Position;
         Assert.Null(await world.TryGiveBlessingAsync(session, GateObjectId, CancellationToken.None));
         stream.Position = mark;
-        _ = await ReadAsync<MagicSkillUseMsg>(stream, MsgType.MagicSkillUse);
-        _ = await ReadAsync<AbnormalStatusUpdateMsg>(stream, MsgType.AbnormalStatusUpdate);
-        var blessing = await ReadAsync<BlessingResultMsg>(stream, MsgType.BlessingResult);
+        BlessingResultMsg blessing;
+        while (true)
+        {
+            var frame = await FrameIO.ReadAsync(stream);
+            Assert.NotNull(frame);
+            if (frame!.Value.Type != (ushort)MsgType.BlessingResult)
+                continue;
+            blessing = MessagePackSerializer.Deserialize<BlessingResultMsg>(frame.Value.Body);
+            break;
+        }
         Assert.True(blessing.Accepted);
         Assert.Equal(5182, blessing.SkillId);
     }

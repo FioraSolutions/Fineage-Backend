@@ -1,3 +1,4 @@
+using Fineage.Zone.Geo;
 using Fineage.Game;
 using Fineage.Game.Quests;
 using Fineage.Login;
@@ -5,6 +6,7 @@ using Fineage.Protocol;
 using Fineage.Zone.Chat;
 using Fineage.Zone.Combat;
 using Fineage.Zone.Interest;
+using Fineage.Zone.Net;
 using Fineage.Zone.Spawns;
 using Fineage.Zone.Drops;
 using Fineage.Zone.Bosses;
@@ -38,8 +40,10 @@ sealed class ZoneEntity
     public int X { get; set; }
     public int Y { get; set; }
     public int Z { get; set; }
-    public int Heading { get; init; }
-    public int ClassId { get; init; }
+    /// <summary>Facing 0..65535 (Mobius heading); updated while moving and when swinging at a target.</summary>
+    public int Heading { get; set; }
+    /// <summary>Players: changes on class transfer (Mobius setClassId).</summary>
+    public int ClassId { get; set; }
     public int NpcId { get; init; }
     public bool Attackable { get; init; }
     public int CurHp { get; set; }
@@ -68,11 +72,178 @@ sealed class ZoneEntity
     public int WeaponGradePenalty { get; set; }
     /// <summary>Armor expertise penalty, 0–4. Updated when gear changes and on enter.</summary>
     public int ArmorGradePenalty { get; set; }
+    /// <summary>
+    /// Weight Penalty level, 0–4 (Mobius <c>Player._curWeightPenalty</c>). Derived from the load and recomputed on
+    /// every inventory change and on enter — never stored. Skips persistence on purpose: it is a function of the bag.
+    /// </summary>
+    public int WeightPenaltyLevel { get; set; }
+    /// <summary>
+    /// Fractional HP/MP regen left over from the previous tick. Mobius keeps vitals as doubles, so a halved rate
+    /// (Weight Penalty 4270) still accumulates; here the integer vitals need the remainder carried explicitly.
+    /// </summary>
+    public double RegenCarryHp { get; set; }
+    public double RegenCarryMp { get; set; }
     /// <summary>When true, regen rates double (classic sitting rest).</summary>
     public bool Sitting { get; set; }
-    public float RunSpeed { get; init; }
-    public float WalkSpeed { get; init; }
+    /// <summary>NPC Mobius physical attack (0 = unknown → level placeholder). Players read the class template.</summary>
+    public double PAtk { get; init; }
+    /// <summary>NPC Mobius physical defence (0 = unknown).</summary>
+    public double PDef { get; init; }
+    /// <summary>NPC Mobius attack speed (Pspd, 0 = default 253).</summary>
+    public int PAtkSpd { get; init; }
+    /// <summary>NPC template physical attack range (Mobius atkRange: 40 melee, 1100 archers); 0 = default.</summary>
+    public int AttackRange { get; init; }
+    /// <summary>Mobius <c>ai isAggressive</c>; attacks players inside <see cref="AggroRange"/> on its own.</summary>
+    public bool Aggressive { get; init; }
+    public int AggroRange { get; init; }
+    /// <summary>Mobius <c>clanHelpRange</c> + <c>clanList</c>: same-clan mobs in range join the fight.</summary>
+    public int ClanHelpRange { get; init; }
+    public IReadOnlyList<string>? Clans { get; init; }
+    public IReadOnlyList<int>? IgnoreNpcIds { get; init; }
+    /// <summary>NPC: Mobius AggroList (attacker objectId → hate). <see cref="AggroTargetId"/> is the most hated.</summary>
+    public Dictionary<int, long> HateList { get; } = [];
+    public long NextAggroScanMs { get; set; }
+    public long NextClanCallMs { get; set; }
+    /// <summary>Attack stance the watchers were last told (Mobius AutoAttackStart / AutoAttackStop).</summary>
+    public bool StanceShown { get; set; }
+    /// <summary>NPC Mobius base accuracy / evasion / crit / random spread / DEX (players use the class template).</summary>
+    public double BaseAccuracy { get; init; }
+    public double BaseEvasion { get; init; }
+    public int BaseCritical { get; init; }
+    public int RandomDamage { get; init; }
+    /// <summary>
+    /// Mobius <c>getDEX()</c>: feeds <c>FuncMoveSpeed</c> (run/walk/swim speed × DEX bonus), accuracy, evasion and
+    /// crit. Players copy it from the class template and re-copy it on class change.
+    /// </summary>
+    public int Dex { get; set; } = 30;
+    /// <summary>NPC Mobius shield defence / block rate (players read the equipped shield).</summary>
+    public int ShieldDef { get; init; }
+    public int ShieldRate { get; init; }
+    /// <summary>NPC Mobius magic attack / defence.</summary>
+    public double MAtk { get; init; }
+    public double MDef { get; init; }
+    /// <summary>Mobius ChargedShot SOULSHOTS: weapon is charged; next swing doubles P.Atk and clears it.</summary>
+    public bool SoulshotCharged { get; set; }
+    /// <summary>0 none, 1 spiritshot, 2 blessed spiritshot (Mobius ShotType SPIRITSHOTS / BLESSED_SPIRITSHOTS).</summary>
+    public int SpiritshotCharge { get; set; }
+    /// <summary>Mobius auto soulshot set: shot item ids recharged after each discharge.</summary>
+    public HashSet<int> AutoShots { get; } = [];
+    /// <summary>Mobius ShortCuts keyed by world slot (slot + page * 12).</summary>
+    public Dictionary<int, Fineage.Login.StoredShortcut> Shortcuts { get; } = [];
+    /// <summary>Trainer-learned skills (persisted; Mobius character_skills). Merged into KnownSkills.</summary>
+    public Dictionary<int, int> LearnedSkills { get; } = [];
+    /// <summary>True while an abnormal with combat stat funcs is active (UserInfo refresh on change).</summary>
+    public bool HasStatAbnormal { get; set; }
+    /// <summary>
+    /// Base run speed (Mobius <c>CreatureTemplate.baseRunSpd</c>). Buffs and debuffs change the live
+    /// <see cref="RunSpeed"/> through the <c>runSpd</c> (<c>Stat.MOVE_SPEED</c>) functions; the base is only rewritten
+    /// by a template / class change.
+    /// </summary>
+    public float BaseRunSpeed { get; set; }
+
+    /// <summary>
+    /// Live run speed sent on the wire. Kept denormalised on the entity: spawn / MoveState / UserInfo / ChangeMoveType
+    /// all carry it, and <see cref="RefreshRunSpeed"/> recomputes it when buffs, passives or the class change.
+    /// </summary>
+    public float RunSpeed
+    {
+        get => _runSpeed ?? BaseRunSpeed;
+        set
+        {
+            BaseRunSpeed = value;
+            _runSpeed = value;
+        }
+    }
+
+    float? _runSpeed;
+
+    /// <summary>Sets the live (buffed) run speed without touching the base template value.</summary>
+    internal void SetLiveRunSpeed(float speed) => _runSpeed = speed;
+
+    /// <summary>
+    /// Base walk speed (Mobius <c>CreatureTemplate.baseWalkSpd</c>). <c>Stat.MOVE_SPEED("runSpd")</c> is the one speed
+    /// stat in Mobius and <c>CreatureStat.getWalkSpeed</c> folds it onto this base, so buffs and debuffs move walk too.
+    /// </summary>
+    public float BaseWalkSpeed { get; set; }
+
+    /// <summary>
+    /// Live walk speed sent on the wire; mirrors <see cref="RunSpeed"/> and is recomputed with it.
+    /// </summary>
+    public float WalkSpeed
+    {
+        get => _walkSpeed ?? BaseWalkSpeed;
+        set
+        {
+            BaseWalkSpeed = value;
+            _walkSpeed = value;
+        }
+    }
+
+    float? _walkSpeed;
+
+    /// <summary>Sets the live (buffed) walk speed without touching the base template value.</summary>
+    internal void SetLiveWalkSpeed(float speed) => _walkSpeed = speed;
+
+    /// <summary>
+    /// Mobius <c>baseMoveSpd/fastSwim</c> (<c>CreatureTemplate.java:147</c>, falls back to <c>baseRunSpd</c>).
+    /// 0 = not in the template → use the run base, exactly like Mobius.
+    /// </summary>
+    public float BaseSwimRunSpeed { get; set; }
+
+    /// <summary>
+    /// Mobius <c>baseMoveSpd/slowSwim</c> (<c>CreatureTemplate.java:148</c>, falls back to <c>baseWalkSpd</c>).
+    /// </summary>
+    public float BaseSwimWalkSpeed { get; set; }
+
+    /// <summary>Live swim run speed (Mobius <c>getSwimRunSpeed()</c>); recomputed with the land speeds.</summary>
+    public float SwimRunSpeed
+    {
+        get => _swimRunSpeed ?? (BaseSwimRunSpeed > 0 ? BaseSwimRunSpeed : BaseRunSpeed);
+        set
+        {
+            BaseSwimRunSpeed = value;
+            _swimRunSpeed = value;
+        }
+    }
+
+    float? _swimRunSpeed;
+
+    /// <summary>Live swim walk speed (Mobius <c>getSwimWalkSpeed()</c>).</summary>
+    public float SwimWalkSpeed
+    {
+        get => _swimWalkSpeed ?? (BaseSwimWalkSpeed > 0 ? BaseSwimWalkSpeed : BaseWalkSpeed);
+        set
+        {
+            BaseSwimWalkSpeed = value;
+            _swimWalkSpeed = value;
+        }
+    }
+
+    float? _swimWalkSpeed;
+
+    /// <summary>Sets the live swim speeds without touching the base template values.</summary>
+    internal void SetLiveSwimSpeed(float run, float walk)
+    {
+        _swimRunSpeed = run;
+        _swimWalkSpeed = walk;
+    }
+
     public bool Running { get; set; } = true;
+    /// <summary>Mobius isInsideZone(WATER): last water state seen by the mover (swim speed while true).</summary>
+    public bool InWater { get; set; }
+    /// <summary>Mobius MoveData: server-side move in progress (Net path). Position advances by speed each tick.</summary>
+    public bool MoveActive { get; set; }
+    public int MoveDestX { get; set; }
+    public int MoveDestY { get; set; }
+    public int MoveDestZ { get; set; }
+    public long MoveLastTickMs { get; set; }
+    /// <summary>Mobius MoveData.geoPath: remaining geo-path waypoints after the current segment.</summary>
+    public Queue<(int X, int Y, int Z)> MovePath { get; } = new();
+    /// <summary>Segment switched to the next waypoint inside AdvanceMove; tick broadcasts MoveToLocation for it.</summary>
+    public bool MoveSegmentDirty { get; set; }
+    /// <summary>Position of the last in-move knownlist refresh (Mobius region/knownlist revalidate while running).</summary>
+    public int AoiRefreshX { get; set; }
+    public int AoiRefreshY { get; set; }
     public ZoneSession? Session { get; init; }
     public PlayerInventory? Inventory { get; init; }
     /// <summary>
@@ -85,6 +256,12 @@ sealed class ZoneEntity
     public int GroundItemId { get; set; }
     public int GroundCount { get; set; } = 1;
     public bool GroundStackable { get; set; }
+    /// <summary>Mobius DropProtection owner (killer); 0 = anyone may pick up.</summary>
+    public int GroundOwnerId { get; set; }
+    /// <summary>Unix ms until only <see cref="GroundOwnerId"/> (or their party) may pick up.</summary>
+    public long GroundProtectUntilMs { get; set; }
+    /// <summary>Mobius ItemsAutoDestroy: unix ms when the ground item is removed; 0 = never.</summary>
+    public long GroundExpireAtMs { get; set; }
     /// <summary>Mobius spoil: who activated spoil on this attackable (0 = none).</summary>
     public int SpoilerObjectId { get; set; }
     /// <summary>Pre-rolled corpse drops after death when spoiled; cleared by sweeper.</summary>
@@ -122,10 +299,19 @@ sealed class ZoneEntity
     public bool Chasing { get; set; }
     /// <summary>NPC: last AI tick, unix ms (movement integration).</summary>
     public long LastAiTickMs { get; set; }
+    /// <summary>NPC: spawn point captured on first aggro (Mobius <c>Attackable.returnHome</c> target).</summary>
+    public bool HomeSet { get; set; }
+    public int HomeX { get; set; }
+    public int HomeY { get; set; }
+    public int HomeZ { get; set; }
+    /// <summary>NPC: walking back to <see cref="HomeX"/>/<see cref="HomeY"/> after forgetting its target.</summary>
+    public bool ReturningHome { get; set; }
     /// <summary>NPC corpse: unix ms when DecayTaskManager removes it. 0 = alive / not scheduled.</summary>
     public long DecayAtMs { get; set; }
     /// <summary>Mobius merchant price config castle. 0 when the NPC is not in a taxed town.</summary>
     public int MerchantCastleId { get; set; }
+    /// <summary>Town name for TerritoryStatus (%territory%); null = castle name.</summary>
+    public string? MerchantTown { get; set; }
     /// <summary>Town base tax percent from Mobius <c>MerchantPriceConfig.xml</c>. Castle tax is separate.</summary>
     public int MerchantBaseTaxPercent { get; set; }
     /// <summary>Buylist or multisell this player opened. Null until a shop bypass.</summary>
@@ -165,6 +351,13 @@ public sealed partial class ZoneWorld
     readonly ItemWeights _weights;
     readonly int _teleportOffset;
     readonly Random _serviceRandom;
+    /// <summary>Hit/miss, crit and damage spread rolls (Mobius Rnd in Formulas).</summary>
+    readonly Random _combatRandom;
+    /// <summary>Buff/debuff combat stat funcs (Mobius skill &lt;for&gt;&lt;effect&gt;).</summary>
+    readonly SkillStatEffectCatalog _statEffects;
+    /// <summary>Mobius attack-skill power / MP / timing (data/skill-combat.json).</summary>
+    readonly SkillCombatCatalog _skillCombat;
+    readonly SkillStatEffectCatalog _passives;
     readonly BuyListCatalog _buyLists;
     readonly MultiSellCatalog _multisells;
     readonly ShopStock _shopStock;
@@ -172,6 +365,18 @@ public sealed partial class ZoneWorld
     readonly DropCatalog _dropCatalog;
     readonly DropRates _dropRates;
     readonly object _gate = new();
+    readonly GeoEngine _geo;
+    static readonly Lazy<GeoEngine> SharedGeo = new(GeoEngine.LoadDefault);
+    static readonly Lazy<DoorTable> SharedDoors = new(DoorTable.LoadDefault);
+    static readonly Lazy<WaterZones> SharedWater = new(WaterZones.LoadDefault);
+
+    /// <summary>Mobius DoorData (movement collision). Settable for tests.</summary>
+    internal DoorTable Doors { get; set; } = DoorTable.Empty;
+    /// <summary>Mobius WaterZone cuboids (swim speed). Settable for tests.</summary>
+    internal WaterZones Water { get; set; } = WaterZones.Empty;
+
+    /// <summary>Server geodata (empty when no region files are present).</summary>
+    public GeoEngine GeoData => _geo;
 
     public ZoneWorld(
         IAoi? aoi = null,
@@ -206,8 +411,17 @@ public sealed partial class ZoneWorld
         int? teleportOffset = null,
         Random? serviceRandom = null,
         BuyListCatalog? buyLists = null,
-        MultiSellCatalog? multisells = null)
+        MultiSellCatalog? multisells = null,
+        GeoEngine? geo = null,
+        Random? combatRandom = null,
+        SkillStatEffectCatalog? statEffects = null,
+        SkillCombatCatalog? skillCombat = null,
+        SkillStatEffectCatalog? passives = null)
     {
+        _skillCombat = skillCombat ?? SkillCombatCatalog.LoadDefault();
+        _statEffects = statEffects ?? SkillStatEffectCatalog.LoadDefault();
+        _passives = passives ?? SkillStatEffectCatalog.LoadPassives();
+        _combatRandom = combatRandom ?? Random.Shared;
         _aoi = aoi ?? new SingleCellAoi();
         _game = game ?? GameData.LoadDefault();
         _itemIds = itemIds ?? new ItemObjectIdAllocator();
@@ -242,6 +456,13 @@ public sealed partial class ZoneWorld
         _buyLists = buyLists ?? BuyListCatalog.LoadDefault();
         _multisells = multisells ?? MultiSellCatalog.LoadDefault();
         _shopStock = new ShopStock(_buyLists);
+        _geo = geo ?? SharedGeo.Value;
+        if (geo == null)
+        {
+            // Production world: real datapack doors / water. Tests that inject geo keep the empty tables.
+            Doors = SharedDoors.Value;
+            Water = SharedWater.Value;
+        }
         BootstrapSpawns();
         BootstrapBosses();
         BootstrapQuestNpcs();
@@ -290,6 +511,120 @@ public sealed partial class ZoneWorld
 
                 return count;
             }
+        }
+    }
+
+    /// <summary>Live player entity after a successful enter (same object Net enter projects from).</summary>
+    internal bool TryGetLivePlayer(ZoneSession session, out ZoneEntity entity)
+    {
+        lock (_gate)
+            return TryGetLivePlayerUnlocked(session, out entity);
+    }
+
+    /// <summary>
+    /// Optional Net PacketEnvelope bridge for sim/AI fanout (MoveState) while V2 flushes stay on ZoneSession streams.
+    /// Set by the Net host when <c>FINEAGE_NET_ENABLE=1</c>.
+    /// </summary>
+    internal INetPresenceBridge? NetBridge { get; set; }
+
+    /// <summary>
+    /// Live players currently on <paramref name="session"/>'s knownlist (post-enter / post-move hysteresis).
+    /// Used by Net presence fanout so peers match V2 CharInfo/MoveToAck recipients.
+    /// </summary>
+    internal List<ZoneEntity> SnapshotKnownPlayers(ZoneSession session)
+    {
+        lock (_gate)
+        {
+            if (!TryGetLivePlayerUnlocked(session, out var self))
+                return [];
+
+            var players = new List<ZoneEntity>(self.Knownlist.Count);
+            foreach (int id in self.Knownlist)
+            {
+                if (_byId.TryGetValue(id, out var other) &&
+                    other.Kind == ZoneEntityKind.Player &&
+                    other.Session is { InWorld: true } &&
+                    other.InstanceId == self.InstanceId)
+                    players.Add(other);
+            }
+
+            players.Sort(static (a, b) => a.ObjectId.CompareTo(b.ObjectId));
+            return players;
+        }
+    }
+
+    /// <summary>
+    /// All live entities on the session knownlist (players + NPCs + ground items).
+    /// </summary>
+    internal List<ZoneEntity> SnapshotKnownEntities(ZoneSession session)
+    {
+        lock (_gate)
+        {
+            if (!TryGetLivePlayerUnlocked(session, out var self))
+                return [];
+
+            var list = new List<ZoneEntity>(self.Knownlist.Count);
+            foreach (int id in self.Knownlist)
+            {
+                if (!_byId.TryGetValue(id, out var other) || other.InstanceId != self.InstanceId)
+                    continue;
+                if (other.Kind == ZoneEntityKind.Player && other.Session is not { InWorld: true })
+                    continue;
+                list.Add(other);
+            }
+
+            list.Sort(static (a, b) => a.ObjectId.CompareTo(b.ObjectId));
+            return list;
+        }
+    }
+
+    /// <summary>Object ids on the session's knownlist (any entity kind). For move enter/leave diffs.</summary>
+    internal HashSet<int> SnapshotKnownIds(ZoneSession session)
+    {
+        lock (_gate)
+        {
+            if (!TryGetLivePlayerUnlocked(session, out var self))
+                return [];
+            return new HashSet<int>(self.Knownlist);
+        }
+    }
+
+    bool TryGetLivePlayerUnlocked(ZoneSession session, out ZoneEntity entity)
+    {
+        if (session.ObjectId != 0 &&
+            _byId.TryGetValue(session.ObjectId, out entity!) &&
+            entity.Kind == ZoneEntityKind.Player &&
+            ReferenceEquals(entity.Session, session) &&
+            session.InWorld)
+            return true;
+        entity = null!;
+        return false;
+    }
+
+    /// <summary>Live player by object id (for Net knownlist enter diffs).</summary>
+    internal bool TryGetLivePlayerById(int objectId, out ZoneEntity entity)
+    {
+        lock (_gate)
+        {
+            if (objectId != 0 &&
+                _byId.TryGetValue(objectId, out entity!) &&
+                entity.Kind == ZoneEntityKind.Player &&
+                entity.Session is { InWorld: true })
+                return true;
+            entity = null!;
+            return false;
+        }
+    }
+
+    /// <summary>Any world entity by id (player / NPC) for Net knownlist diffs.</summary>
+    internal bool TryGetEntityById(int objectId, out ZoneEntity entity)
+    {
+        lock (_gate)
+        {
+            if (objectId != 0 && _byId.TryGetValue(objectId, out entity!))
+                return true;
+            entity = null!;
+            return false;
         }
     }
 
@@ -363,7 +698,7 @@ public sealed partial class ZoneWorld
         var vitals = LoadVitals(session);
         var warehouse = new PrivateWarehouse(_game.Items);
         if (stored?.Warehouse != null)
-            warehouse.Restore(stored.Warehouse.Select(item => new WarehouseRow(item.ItemId, item.Count, item.EnchantLevel)));
+            warehouse.Restore(stored.Warehouse.Select(item => new WarehouseRow(item.ItemId, item.Count, item.EnchantLevel, item.ObjectId)));
         RememberPenalties(session);
         var entity = new ZoneEntity
         {
@@ -376,6 +711,10 @@ public sealed partial class ZoneWorld
             ClassId = session.ClassId,
             RunSpeed = MoveSpeed(session.ClassId).run,
             WalkSpeed = MoveSpeed(session.ClassId).walk,
+            Dex = DexOf(session.ClassId),
+            // Mobius player templates always declare baseMoveSpd slowSwim/fastSwim = 50.
+            BaseSwimRunSpeed = ZoneCombat.DefaultSwimSpeed,
+            BaseSwimWalkSpeed = ZoneCombat.DefaultSwimSpeed,
             Running = true,
             Session = session,
             Inventory = inventory,
@@ -391,7 +730,19 @@ public sealed partial class ZoneWorld
             Newbie = stored?.Newbie ?? true
         };
         LoadQuestProgress(session, entity);
+        LoadLearnedSkills(entity, stored);
         RefreshKnownSkills(entity);
+        // Mobius GameClient:493 / EnterWorld:208 — refreshOverloaded() runs before the first UserInfo, so a character
+        // that logs in while overloaded already carries skill 4270's level and its slowed speeds. This must come after
+        // RefreshKnownSkills: Weight Limit 150 and the armor-set weightLimit/weightPenalty passives are only in
+        // KnownSkills once the skill book is rebuilt, and they change both the limit and the bonus.
+        int penalty = WeightPenaltyLevelOf(entity);
+        if (penalty != entity.WeightPenaltyLevel)
+        {
+            entity.WeightPenaltyLevel = penalty;
+            RefreshRunSpeed(entity); // PlayerStatMods folds 4270, so the live speed needs the level first
+        }
+        LoadShortcuts(entity, stored);
         SyncClanStanding(entity);
         RefreshGradePenalty(entity);
         _byId[entity.ObjectId] = entity;
@@ -403,6 +754,8 @@ public sealed partial class ZoneWorld
         SavePresence(session, entity.X, entity.Y, entity.Z, touchAccess: true);
 
         toSelf.Add(Pack(session, MsgType.UserInfo, UserInfo(entity)));
+        // Mobius EnterWorld:401 also sends EtcStatusUpdate; that is Net-only (see NetZoneServer.OnEnterAsync), because
+        // the legacy V2 opcode table has no such packet and an unknown id would be dropped or logged by the old client.
         toSelf.Add(Pack(session, MsgType.ItemList, InventoryMessages.ItemList(inventory)));
         toSelf.Add(Pack(session, MsgType.SkillList, SkillListFor(entity)));
         toSelf.Add(Pack(session, MsgType.PlayerSpawned, Spawned(entity)));
@@ -434,7 +787,14 @@ public sealed partial class ZoneWorld
         if (entity.Sitting)
             return ActionProtocol.Sitting;
         if (entity.CastingUntilMs > _clock().ToUnixTimeMilliseconds())
-            return "casting";
+        {
+            // Mobius PlayerAI.onIntentionMoveTo: casting → ActionFailed + saveNextIntention(MOVE_TO); runs after the cast.
+            if (NetBridge == null)
+                return "casting"; // V2 legacy client keeps the old refuse
+            session.QueuedMove = move;
+            return null;
+        }
+        session.QueuedMove = null;
         if (!TalkingIsland.WithinStep(entity.X, entity.Y, move.DestX, move.DestY))
             return "range";
 
@@ -456,6 +816,9 @@ public sealed partial class ZoneWorld
         }
         CancelAttackIntentionOnMove(session, move);
 
+        if (NetBridge != null)
+            return StartTimedMove(entity, session, move, toSelf, toOthers);
+
         entity.X = move.DestX;
         entity.Y = move.DestY;
         entity.Z = move.DestZ;
@@ -470,7 +833,7 @@ public sealed partial class ZoneWorld
     /// After <paramref name="entity"/> moved: AOI move, CharInfo to newly visible, MoveToAck to self + stayed,
     /// DeleteObject only past the forget radius and never for a pair locked in combat (Mobius knownlist).
     /// </summary>
-    void ReconcileKnownlist(ZoneEntity entity, MoveToMsg ack, List<Pending> toSelf, List<Pending> toOthers)
+    void ReconcileKnownlist(ZoneEntity entity, MoveToMsg? ack, List<Pending> toSelf, List<Pending> toOthers)
     {
         var before = new HashSet<int>(entity.Knownlist);
         _aoi.Move(entity.ObjectId, entity.X, entity.Y);
@@ -484,19 +847,39 @@ public sealed partial class ZoneWorld
                 after.Add(id);
         }
 
-        if (entity.Session != null)
+        if (entity.Session != null && ack != null)
             toSelf.Add(Pack(entity.Session, MsgType.MoveToAck, ack));
+
+        List<int>? netWatchers = null;
+        if (NetBridge != null && entity.Session != null && ack != null)
+        {
+            netWatchers = [entity.ObjectId];
+        }
 
         foreach (int id in SortedExcept(after, before))
             LinkSeen(entity, id, toSelf, toOthers);
         foreach (int id in SortedShared(after, before))
         {
-            if (_byId.TryGetValue(id, out var other) && other.Session != null)
+            if (ack != null && _byId.TryGetValue(id, out var other) && other.Session != null)
+            {
                 toOthers.Add(Pack(other.Session, MsgType.MoveToAck, ack));
+                if (netWatchers != null)
+                    netWatchers.Add(other.ObjectId);
+            }
         }
 
         foreach (int id in SortedExcept(before, after))
             Forget(entity, id, toSelf, toOthers);
+
+        if (netWatchers is { Count: > 0 } && NetBridge != null && ack != null)
+        {
+            NetBridge.FanoutMoveState(
+                netWatchers,
+                entity.ObjectId,
+                ack.OriginX, ack.OriginY, ack.OriginZ,
+                ack.DestX, ack.DestY, ack.DestZ,
+                entity.Running);
+        }
     }
 
     static bool CombatPinned(ZoneEntity a, ZoneEntity b) =>
@@ -607,6 +990,10 @@ public sealed partial class ZoneWorld
         return (120f, 80f);
     }
 
+    /// <summary>Mobius <c>getDEX()</c> from the class template — drives the <c>FuncMoveSpeed</c> speed multiplier.</summary>
+    int DexOf(int classId) =>
+        PlayerClasses.TryGet(classId, out var template) && template != null ? template.Dex : 30;
+
     const long PresenceSaveIntervalMs = 3000;
     readonly System.Collections.Concurrent.ConcurrentDictionary<int, long> _lastPresenceSaveMs = new();
 
@@ -656,6 +1043,10 @@ public sealed partial class ZoneWorld
 
     void SaveInventory(ZoneSession session, PlayerInventory inventory)
     {
+        // Mobius PlayerInventory.refreshWeight() → _owner.refreshOverloaded(): every inventory write funnels through
+        // here, so the overload level is recomputed exactly when the load changes (pickup, drop, shop, trade,
+        // warehouse, enchant, equip/unequip, quest reward, sweep, shots).
+        RefreshWeightPenaltyAfterInventoryChange(session);
         if (_accounts == null)
             return;
         _accounts.TryReplaceItems(session.Account, session.ObjectId, CharacterInventory.Rows(inventory));
@@ -784,14 +1175,16 @@ public sealed partial class ZoneWorld
             intel = template.Int;
             wit = template.Wit;
             men = template.Men;
-            pAtk = template.PAtk;
-            mAtk = template.MAtk;
-            pDef = template.PDef;
-            mDef = template.MDef;
-            pAtkSpd = template.PAtkSpd;
-            mAtkSpd = template.MAtkSpd;
-            accuracy = template.Accuracy;
-            crit = template.CritRate;
+            // Same pipeline combat uses (Mobius stat funcs), so the client status window matches the server.
+            var stats = PlayerStats(entity);
+            pAtk = stats.PAtk;
+            mAtk = stats.MAtk;
+            pDef = stats.PDef;
+            mDef = stats.MDef;
+            pAtkSpd = stats.PAtkSpd;
+            mAtkSpd = stats.MAtkSpd;
+            accuracy = stats.Accuracy;
+            crit = stats.CritRate;
         }
 
         return new InventoryMessages.UserInfoVitals(

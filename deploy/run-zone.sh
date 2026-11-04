@@ -29,12 +29,16 @@ if [[ ! -x "$BIN" ]]; then
   exit 1
 fi
 
-if pgrep -f "$BIN" >/dev/null 2>&1; then
-  pkill -f "$BIN" || true
+# Match any running Fineage.Zone (started as ./login/... or absolute path) — an absolute-path
+# pgrep missed relative launches, so the old process kept the port and new builds never ran.
+PATTERN='(^|/)Fineage.Zone( |$)'
+if pgrep -f "$PATTERN" >/dev/null 2>&1; then
+  pkill -f "$PATTERN" || true
   for _ in $(seq 1 20); do
-    pgrep -f "$BIN" >/dev/null 2>&1 || break
+    pgrep -f "$PATTERN" >/dev/null 2>&1 || break
     sleep 0.5
   done
+  pkill -9 -f "$PATTERN" 2>/dev/null || true
 fi
 
 nohup "$BIN" \

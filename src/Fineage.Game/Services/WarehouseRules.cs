@@ -26,12 +26,9 @@ public static class WarehouseRules
     public static int InventorySlots(int race) =>
         race == RaceDwarf ? InventorySlotsDwarf : InventorySlotsOther;
 
-    public static int MaxLoad(double conBonus)
-    {
-        if (conBonus < 0)
-            throw new ArgumentOutOfRangeException(nameof(conBonus));
-        return (int)Math.Floor(conBonus * BaseMaxLoad);
-    }
+    /// <summary>Mobius <c>Creature.getMaxLoad</c> before <c>weightLimit</c> skills — see <see cref="WeightPenalty.BaseMaxLoad"/>.</summary>
+    public static int MaxLoad(double conBonus, double altWeightLimit = WeightPenalty.DefaultAltWeightLimit) =>
+        WeightPenalty.BaseMaxLoad(conBonus, altWeightLimit);
 
     public static int SlotsFor(bool stackable, bool alreadyStored, int count)
     {

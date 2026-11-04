@@ -149,7 +149,68 @@ public sealed class QuestCatalog
         foreach (var op in dialog.Ops ?? [])
             ops.Add(ReadOp(op, items, where, questId));
 
-        return new QuestDialog(dialog.NpcId, hook, evt, when, dialog.Cond, whenVar, whenValue, html, ops);
+        var races = new List<int>();
+        foreach (int race in dialog.Races ?? [])
+        {
+            if (race is < 0 or > 4)
+                throw new InvalidDataException($"{where} quest {questId} race must be 0..4 (Human, Elf, Dark Elf, Orc, Dwarf).");
+            if (!races.Contains(race))
+                races.Add(race);
+        }
+
+        if (dialog.MinLevel is < 0 or > 99 || dialog.MaxLevel is < 0 or > 99)
+            throw new InvalidDataException($"{where} quest {questId} minLevel/maxLevel must be 0..99.");
+        if (dialog.MaxLevel > 0 && dialog.MinLevel > dialog.MaxLevel)
+            throw new InvalidDataException($"{where} quest {questId} minLevel is above maxLevel.");
+
+        foreach (int classId in dialog.Classes ?? [])
+        {
+            if (classId is < 0 or > 136)
+                throw new InvalidDataException($"{where} quest {questId} class id {classId} is out of range.");
+        }
+
+        return new QuestDialog(dialog.NpcId, hook, evt, when, dialog.Cond, whenVar, whenValue, html, ops,
+            races.Count == 0 ? null : races, dialog.MinLevel, dialog.MaxLevel, ReadHasItem(dialog, items, where, questId), Math.Max(1, dialog.MinCount),
+            dialog.Party && hook == QuestHook.Kill,
+            dialog.Classes is { Count: > 0 } classes ? classes.Distinct().ToArray() : null,
+            ReadItemList(dialog.HasItems, items, where, questId, "hasItems"),
+            ReadItemList(dialog.LacksItems, items, where, questId, "lacksItems"),
+            ReadAtLeast(dialog.AtLeast, items, where, questId));
+    }
+
+    static IReadOnlyDictionary<int, int>? ReadAtLeast(Dictionary<string, int>? rows, ItemCatalog items, string where, int questId)
+    {
+        if (rows is not { Count: > 0 })
+            return null;
+        var map = new Dictionary<int, int>();
+        foreach (var pair in rows)
+        {
+            if (!int.TryParse(pair.Key, out int id) || !items.TryGet(id, out _) || pair.Value < 1)
+                throw new InvalidDataException($"{where} quest {questId} atLeast '{pair.Key}' needs a known item and count >= 1.");
+            map[id] = pair.Value;
+        }
+
+        return map;
+    }
+
+    static IReadOnlyList<int>? ReadItemList(List<int>? ids, ItemCatalog items, string where, int questId, string field)
+    {
+        if (ids is not { Count: > 0 })
+            return null;
+        foreach (int id in ids)
+        {
+            if (!items.TryGet(id, out _))
+                throw new InvalidDataException($"{where} quest {questId} {field} item {id} is unknown.");
+        }
+
+        return ids.Distinct().ToArray();
+    }
+
+    static int ReadHasItem(DialogDto dialog, ItemCatalog items, string where, int questId)
+    {
+        if (dialog.HasItem != 0 && !items.TryGet(dialog.HasItem, out _))
+            throw new InvalidDataException($"{where} quest {questId} hasItem {dialog.HasItem} is unknown.");
+        return dialog.HasItem;
     }
 
     static QuestOp ReadOp(OpDto op, ItemCatalog items, string where, int questId)
@@ -167,9 +228,47 @@ public sealed class QuestCatalog
             "give_exp_sp" => ReadExp(op, where, questId),
             "take_item" => ReadTake(op, items, where, questId),
             "complete" => new CompleteOp(),
+            "drop_item" => ReadDrop(op, items, where, questId),
+            "exchange_all" => ReadExchange(op, items, where, questId),
+            "sell_items" => ReadSell(op, items, where, questId),
             "sound" => ReadSound(op, where, questId),
             _ => throw new InvalidDataException($"{where} quest {questId} has unknown op '{op.Op}'.")
         };
+    }
+
+    static DropItemOp ReadDrop(OpDto op, ItemCatalog items, string where, int questId)
+    {
+        int count = op.Count ?? 1;
+        double chance = op.Chance ?? 1.0;
+        int limit = op.Limit ?? 0;
+        if (count < 1 || !items.TryGet(op.ItemId, out _) || op.ItemId == AdenaItemId)
+            throw new InvalidDataException($"{where} quest {questId} drop_item {op.ItemId} is unknown or has a bad count.");
+        if (chance is <= 0 or > 1 || limit < 0 || op.CondAtLimit is < 0 or > 255)
+            throw new InvalidDataException($"{where} quest {questId} drop_item needs chance 0..1, limit >= 0, condAtLimit 0..255.");
+        return new DropItemOp(op.ItemId, count, chance, limit, op.CondAtLimit);
+    }
+
+    static SellItemsOp ReadSell(OpDto op, ItemCatalog items, string where, int questId)
+    {
+        var rows = new List<(int, int)>();
+        foreach (var row in op.Prices ?? [])
+        {
+            if (!items.TryGet(row.ItemId, out _) || row.Adena < 0)
+                throw new InvalidDataException($"{where} quest {questId} sell_items has a bad price row.");
+            rows.Add((row.ItemId, row.Adena));
+        }
+
+        if (rows.Count == 0)
+            throw new InvalidDataException($"{where} quest {questId} sell_items needs prices.");
+        return new SellItemsOp(rows, op.BonusMin ?? 0, op.BonusAdena ?? 0);
+    }
+
+    static ExchangeAllOp ReadExchange(OpDto op, ItemCatalog items, string where, int questId)
+    {
+        int reward = op.RewardItemId ?? 0;
+        if (!items.TryGet(op.ItemId, out _) || !items.TryGet(reward, out _) || (op.Per ?? 1) < 1 || (op.BonusAdena ?? 0) < 0)
+            throw new InvalidDataException($"{where} quest {questId} exchange_all needs known itemId/rewardItemId and per >= 1.");
+        return new ExchangeAllOp(op.ItemId, reward, op.Per ?? 1, op.BonusMin ?? 0, op.BonusAdena ?? 0);
     }
 
     static SetCondOp ReadCond(OpDto op, string where, int questId)
@@ -255,6 +354,7 @@ public sealed class QuestCatalog
     static QuestWhen ParseWhen(string? text, string where, int questId) => (text ?? "").Trim().ToLowerInvariant() switch
     {
         "absent" => QuestWhen.Absent,
+        "any" => QuestWhen.Any,
         "created" => QuestWhen.Created,
         "started" => QuestWhen.Started,
         "completed" => QuestWhen.Completed,
@@ -302,6 +402,16 @@ public sealed class QuestCatalog
         public string? WhenValue { get; set; }
         public string? Html { get; set; }
         public List<OpDto>? Ops { get; set; }
+        public List<int>? Races { get; set; }
+        public int MinLevel { get; set; }
+        public int MaxLevel { get; set; }
+        public int HasItem { get; set; }
+        public int MinCount { get; set; } = 1;
+        public bool Party { get; set; }
+        public List<int>? Classes { get; set; }
+        public List<int>? HasItems { get; set; }
+        public List<int>? LacksItems { get; set; }
+        public Dictionary<string, int>? AtLeast { get; set; }
     }
 
     sealed class OpDto
@@ -315,5 +425,19 @@ public sealed class QuestCatalog
         public long? Exp { get; set; }
         public int? Sp { get; set; }
         public string? Name { get; set; }
+        public double? Chance { get; set; }
+        public int? Limit { get; set; }
+        public int? CondAtLimit { get; set; }
+        public int? RewardItemId { get; set; }
+        public int? Per { get; set; }
+        public int? BonusMin { get; set; }
+        public int? BonusAdena { get; set; }
+        public List<PriceDto>? Prices { get; set; }
+    }
+
+    sealed class PriceDto
+    {
+        public int ItemId { get; set; }
+        public int Adena { get; set; }
     }
 }

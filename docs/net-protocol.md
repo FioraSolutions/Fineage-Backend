@@ -1,0 +1,138 @@
+# Fineage Net (server)
+
+PacketEnvelope login/zone path. Durable accounts use PostgreSQL by default for local Net.
+
+## Ports
+
+| Stack | Login | Zone |
+|-------|-------|------|
+| Net (`FINEAGE_NET_ENABLE=1`) | 9106 | 9777 |
+| Legacy V2 MessagePack | 9206 | 9877 |
+
+## Persistence
+
+| Env | Meaning |
+|-----|---------|
+| `FINEAGE_STORE=postgres` | `PostgresAccountStore` (default in `scripts/run-local-net.sh`) |
+| `FINEAGE_DATABASE_URL` | Npgsql connection string |
+| `FINEAGE_STORE=json` | `accounts.json` via `--store` / `FINEAGE_LOGIN_STORE` |
+
+### Postgres layout (Mobius-shaped)
+
+| Table | Role |
+|-------|------|
+| `store_snapshot` | Backup / import-export document only (same JSON as `accounts.json`) — **not** runtime SoT for characters |
+| `accounts` | Credentials |
+| `characters` | Identity, appearance, `x/y/z`, vitals, level/exp/sp, clan flags |
+| `character_items` | Durable `object_id`, `item_id`, `count`, `enchant_level`, `loc` (`inventory` / `paperdoll` / `warehouse`), `loc_data` (paperdoll slot) |
+| `character_quests` + `character_quest_vars` | Quest state |
+| `clans` | Still payload jsonb until a later epic |
+| `store_meta` / sequences | `next_character_id`, `next_clan_id`, `next_item_object_id` |
+
+`PostgresAccountStore.FindById` / `List` read **normalized tables** (then hydrate the in-process mirror for hot writes). Login and Zone are separate processes; Zone must not rely on a stale JSON snapshot for enter.
+
+Hot paths (`TrySavePresence`, vitals, inventory replace) update normalized rows without truncating the whole store. Skills are still derived at zone enter (AutoSkills), not persisted.
+
+Import / repair:
+
+```bash
+docker compose up -d postgres
+FINEAGE_STORE=postgres dotnet run --project src/Fineage.Login -- import-json local-data/accounts.json
+FINEAGE_STORE=postgres dotnet run --project src/Fineage.Login -- backfill-normalized
+```
+
+## Lobby roster (CharSelect)
+
+`CharacterRoster` / `CreateResult` carry a **Mobius CharSelectionInfo-shaped** summary (same fields as V2 `CharacterSummaryMsg` keys used by the lobby UI):
+
+- identity / appearance / level
+- position `x,y,z` (saved or class spawn preview)
+- vitals `hp/maxHp`, `mp/maxMp`, `curCp/maxCp` (CP from class template)
+- `exp`, `sp`, `karma` (karma 0 until persisted)
+- `weaponItemId` + `paperdoll[17]` item ids (not the full bag)
+- `deleteSecondsLeft`, `isLastPlayed`
+
+Skills are still derived at zone enter, not listed on CharSelect.
+
+## EnterWorld (zone Net)
+
+After handoff auth, `EnterWorld` runs **one** world join: `ZoneWorld.TryEnterAsync` (same Mobius path as V2 — inventory restore, vitals, AutoSkills, AOI). Net then **projects the live `ZoneEntity`** (no second store read with Human defaults):
+
+| Order | Opcode | Payload |
+|-------|--------|---------|
+| 1 | `EntitySpawn` `0x0304` | self player: name, classId, **race/sex**, xyz, speeds |
+| 2 | `PlayerStats` `0x0305` | level/exp/sp, hp/mp/cp |
+| 3 | `ItemList` `0x030A` | bag + paperdoll rows (`objectId`, `itemId`, `count`, `enchant`, `equippedSlot`) |
+| 4 | `SkillList` `0x030B` | AutoSkills (`skillId`, `level`, `reuseRemainingMs`) |
+| 5 | `ShortCutInit` `0x035A` | saved hotbar: `count` + rows (`type`, `slot`, `id`, `level`) |
+
+(`UserInfo` `0x0357` goes between `PlayerStats` and `ItemList`.)
+
+Client: stash `PlayerInfo` from spawn → load tile → spawn; apply ItemList via `ZoneV2GearSession`, SkillList via existing skill apply services.
+
+## Presence fanout (Net multiplayer)
+
+V2 MessagePack flushes still go to a discarded stream on the Net path. Net peers get PacketEnvelope fanout via `NetPresenceHub`:
+
+| Event | Opcodes |
+|-------|---------|
+| Enter | Self bootstrap (above). Then `EntitySpawn` for each known **player and NPC** (`IsSelf=false`; NPC `Kind=Npc`, `TemplateId=npcId`). Entrant CharInfo-shaped spawn to Net player peers. |
+| Move | `MoveState` to self + stayed known Net **players**. Newly visible player/NPC → `EntitySpawn`. Forgotten → `EntityDespawn` `0x030C`. |
+| NPC chase (sim) | `MoveState` to Net watchers that already know the NPC (`INetPresenceBridge`). |
+| Select / Attack | `SelectTarget` `0x030D` → `TargetSelected` `0x030F`. `AttackRequest` `0x030E` → world combat; `AttackState` `0x0310` + `StatusUpdate` `0x0311` via NetBridge (incl. mob swings / hit timer). Approach uses the same MoveState bridge as player move. |
+| Die / drop / despawn | `EntityDie` `0x0312` (death anim). `DropItem` `0x0313` (loot + known ground items). Corpse decay / pickup → `EntityDespawn` `0x030C`. |
+| Pickup | `PickupRequest` `0x0314` → `InventoryUpdate` `0x0315` (add/modify/remove rows) + `EntityDespawn` of ground object. |
+| Bag drop / gear | `DropItemRequest` `0x0316` → bag `InventoryUpdate` + world `DropItem`. `UseItem` `0x0317` / `UnequipItem` `0x0318` → `InventoryUpdate` (paperdoll modify). |
+| Chat | `Say` `0x0319` → `CreatureSay` `0x031A` (ALL local / SHOUT zone). Enter + flood notices → `SystemMessage` `0x031B`. |
+| Skills | `UseSkill` `0x031C` → world cast; `MagicSkillUse` `0x031D` + `StatusUpdate` (MP / heal HP). Hit damage uses existing vitals fanout. |
+| Revive | `ReviveRequest` `0x031E` (village) → `Revive` `0x031F` + `TeleportToLocation` `0x0320` + vitals; AOI spawn/despawn after relocate. |
+| Kill reward | Killer gets `SystemMessage` (id 95), `StatusUpdate`, and `PlayerStats` `0x0305` (exp/sp/level). |
+| Buffs | Skill / playtest abnormals → `AbnormalStatusUpdate` `0x0321` (full effect list). |
+| NPC dialog | `NpcTalk` `0x0322` / `BypassRequest` `0x0323` → `NpcHtml` `0x0324` (quest choice HTML reused). EntitySpawn carries `Attackable` for talk vs attack. |
+| Shop | Bypass opens `BuyList` `0x0325` / `SellList` `0x0326` / `MultiSellList` `0x0327` + `ShopBalance` `0x0328`. Buy/sell/multisell → `RequestBuyItem` `0x0329` / `RequestSellItem` `0x032A` / `RequestMultiSellChoose` `0x032B` (+ inventory / system lines). |
+| Warehouse | Bypass opens `WarehouseDepositList` `0x032C` / `WarehouseWithdrawList` `0x032D`. Confirm → `WarehouseDepositRequest` `0x032E` / `WarehouseWithdrawRequest` `0x032F`. |
+| Quests | Journal → `RequestQuestList` `0x0330` / abort → `RequestQuestAbort` `0x0331` → `QuestList` `0x0332`. Quest HTML still via `NpcHtml`. |
+| Party | Invite/answer/leave/kick → `PartyInviteRequest` `0x0333` / `PartyAnswerJoinRequest` `0x0334` / `PartyLeaveRequest` `0x0335` / `PartyKickRequest` `0x0336`. Fanout `PartyAskJoin` `0x0337` / `PartyJoinResult` `0x0338` / `PartyMemberList` `0x0339`. |
+| Trade | Request/answer/add/done → `TradeRequest` `0x033A` / `TradeAnswerRequest` `0x033B` / `TradeAddItemRequest` `0x033C` / `TradeDoneRequest` `0x033D`. Fanout `TradeAsk` `0x033E` / `TradeRequestResult` `0x033F` / `TradeStart` `0x0340` / `TradeOfferUpdate` `0x0341` / `TradeConfirmState` `0x0342` / `TradeFinished` `0x0343` (+ inventory on exchange). |
+| Hotbar (shortcuts) | See **Shortcuts** below. `RequestShortCutReg` `0x0358` → `ShortCutRegister` `0x035B`; `RequestShortCutDel` `0x0359` → `ShortCutDelete` `0x035C`. |
+| Leave / disconnect | `EntityDespawn` of leaver to known Net peers. |
+
+## Shortcuts (hotbar, Mobius ShortCuts)
+
+Row (`ShortCutNetMsg`, 4 × int32 LE): `type`, `slot`, `id`, `level`.
+
+- `slot` = client world slot = `slot + page * 12` (slot 0..11, page 0..9 → 0..119).
+- `type`: 1 item (`id` = item **object id**, level 0), 2 skill (`id` = skill id, `level` = known level), 3 action, 4 macro, 5 recipe.
+
+| Opcode | Dir | Payload | Notes |
+|--------|-----|---------|-------|
+| `RequestShortCutReg` `0x0358` | C→S | row | Overwrites the slot. Item must be in the bag; skill must be known (level is replaced by the known level). |
+| `RequestShortCutDel` `0x0359` | C→S | `slot` int32 | Clears the slot. |
+| `ShortCutInit` `0x035A` | S→C | `count` int32 + rows | Enter world, after `SkillList`. |
+| `ShortCutRegister` `0x035B` | S→C | row | Server truth for one slot. Reply to an accepted reg, **and** to a rejected reg when the slot already held a saved row (client rolls back). |
+| `ShortCutDelete` `0x035C` | S→C | `slot` int32 | Slot empty on the server. Reply to del, or to a rejected reg on an empty slot. |
+
+Persistence: `ZoneEntity.Shortcuts` → `IAccountStore.TryReplaceShortcuts` on every reg/del (Mobius writes `character_shortcuts` immediately). Postgres table `character_shortcuts (character_id, slot, page, type, shortcut_id, level)` from migration `003_character_shortcuts.sql`; JSON snapshot key `shortcuts`. On enter, item rows whose object is no longer in the bag are dropped and skill rows take the current known level (Mobius `ShortCuts.restoreMe`).
+
+Client: drag applies locally at once (optimistic), then the server echo (`ShortCutRegister` / `ShortCutDelete`) is applied as truth. `ShortCutInit` is held until the skillbar and the ItemList are applied.
+
+AOI (who is on the knownlist):
+
+| Env | Effect |
+|-----|--------|
+| `FINEAGE_ZONE_AOI_CELL` &gt; 0 | `GridAoi` with that cell size (default design size 3000) |
+| else `FINEAGE_ZONE_INTEREST_RANGE` &gt; 0 | `RangeAoi` |
+| else | `SingleCellAoi` (whole zone — local village default) |
+
+## Scale seams
+
+- `IAccountStore` — Postgres (normalized character domain) now, JSON for tests
+- `IHandoffStore` / `MemoryHandoffStore` — HMAC handoff; Redis later
+- `IAoi` — SingleCell / Range / Grid (`FINEAGE_ZONE_AOI_CELL`)
+
+## Local
+
+```bash
+./scripts/run-local-net.sh start
+./scripts/run-local-net.sh status
+```

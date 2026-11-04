@@ -1,4 +1,5 @@
 using Fineage.Game;
+using Fineage.Net.Contract;
 using Fineage.Protocol;
 using MessagePack;
 
@@ -73,6 +74,11 @@ public sealed partial class ZoneWorld
         var item = player.Inventory!.Find(objectId);
         if (item == null)
             return InventoryProtocol.NotOwned;
+        if (IsShot(item.Template))
+        {
+            TryChargeShot(session, player, item, toSelf, toOthers, quiet: false);
+            return null;
+        }
         if (!item.Template.Equippable)
             return InventoryProtocol.NotEquippable;
         // Unequip skips conditions. There is no cast state, so weapon changes are not deferred.
@@ -92,6 +98,13 @@ public sealed partial class ZoneWorld
             return InventoryProtocol.Blocked;
         }
 
+        if (item.Template.Kind == ItemKind.Weapon)
+        {
+            player.SoulshotCharged = false; // Mobius: charges live on the weapon instance
+            player.SpiritshotCharge = 0;
+            if (item.IsEquipped)
+                RechargeAutoShots(player, toSelf);
+        }
         if (!PublishGear(session, player, before, toSelf, toOthers))
             return "bad_request";
 
@@ -113,6 +126,11 @@ public sealed partial class ZoneWorld
 
         var before = PaperdollSnapshot(player.Inventory);
         player.Inventory.Unequip(item);
+        if (item.Template.Kind == ItemKind.Weapon)
+        {
+            player.SoulshotCharged = false;
+            player.SpiritshotCharge = 0;
+        }
         if (!PublishGear(session, player, before, toSelf, toOthers))
             return "bad_request";
 
@@ -171,14 +189,25 @@ public sealed partial class ZoneWorld
             return false;
 
         RefreshGradePenalty(player);
-        toSelf.Add(Pack(session, MsgType.InventoryUpdate, InventoryMessages.Modify(changed)));
-        toSelf.Add(Pack(session, MsgType.UserInfo, UserInfo(player)));
+        RefreshRunSpeedAndFanout(player);
+        var invUpdate = InventoryMessages.Modify(changed);
+        toSelf.Add(Pack(session, MsgType.InventoryUpdate, invUpdate));
+        toSelf.Add(SelfUserInfo(session, player));
+        if (NetBridge != null)
+            NetBridge.FanoutInventoryUpdate([session.ObjectId], ToNetInventoryUpdate(invUpdate));
         byte[] body = MessagePackSerializer.Serialize(CharInfo(player));
+        List<int>? netPeers = null;
         foreach (int id in player.Knownlist)
         {
             if (_byId.TryGetValue(id, out var other) && other.Session != null)
+            {
                 toOthers.Add(new Pending(other.Session, MsgType.CharInfo, body));
+                (netPeers ??= []).Add(id);
+            }
         }
+        // Mobius broadcastUserInfo: peers get a fresh CharInfo (Net EntitySpawn with paperdoll) after gear changes.
+        if (netPeers != null && NetBridge != null)
+            NetBridge.FanoutCharInfo(netPeers, player.ObjectId);
 
         return true;
     }

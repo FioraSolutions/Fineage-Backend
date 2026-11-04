@@ -51,7 +51,7 @@ public sealed class ZoneItemListEnterWireTests
         Assert.NotNull(listFrame);
         Assert.Equal((ushort)MsgType.ItemList, listFrame!.Value.Type);
         var list = MessagePackSerializer.Deserialize<ItemListMsg>(listFrame.Value.Body);
-        var sword = Assert.Single(list.Items, row => row.ItemId == 2369);
+        var sword = Assert.Single(list.Items, row => row.ItemId == 219);
         Assert.Equal(7, sword.EquippedSlot);
         Assert.Equal("rhand", sword.BodySlot);
         Assert.True(sword.ObjectId >= 100_000);

@@ -62,6 +62,9 @@ public sealed partial class ZoneWorld
             return null;
         }
 
+        if (reply.ScriptName != null)
+            return VillageMasterBypass(session, player, npc, reply.ScriptName, reply.ScriptEvent, toSelf, toOthers);
+
         if (reply.QuestAction)
         {
             if (reply.QuestId <= 0 || reply.QuestEvent.Length > 64 || !EventOk(reply.QuestEvent))
@@ -89,6 +92,7 @@ public sealed partial class ZoneWorld
 
     void SendQuestList(ZoneSession session, ZoneEntity player, ZoneEntity npc, List<Pending> toSelf)
     {
+        string html = _quests.QuestChoiceHtml(player.Quests, npc.NpcId, npc.Name, QuestActorOf(player));
         toSelf.Add(Pack(session, MsgType.QuestDialog, new QuestDialogMsg
         {
             NpcObjectId = npc.ObjectId,
@@ -96,18 +100,35 @@ public sealed partial class ZoneWorld
             QuestId = 0,
             Hook = "default",
             Event = "",
-            Html = _quests.QuestChoiceHtml(player.Quests, npc.NpcId, npc.Name)
+            Html = html
         }));
+        // Net client shows quest choice as the same HTML window.
+        FanoutNetHtml(session, npc, html);
     }
 
     void SendHtml(ZoneSession session, ZoneEntity player, ZoneEntity npc, string html, List<Pending> toSelf)
     {
+        string rendered = NpcHtmlText.Apply(html, new NpcHtmlText.Tokens(npc.ObjectId, npc.NpcId, npc.Name, player.Name));
         toSelf.Add(Pack(session, MsgType.NpcHtml, new NpcHtmlMsg
         {
             NpcObjectId = npc.ObjectId,
             NpcId = npc.NpcId,
-            Html = NpcHtmlText.Apply(html, new NpcHtmlText.Tokens(npc.ObjectId, npc.NpcId, npc.Name, player.Name)),
+            Html = rendered,
             ItemId = 0
         }));
+        FanoutNetHtml(session, npc, rendered);
+    }
+
+    void FanoutNetHtml(ZoneSession session, ZoneEntity npc, string html)
+    {
+        if (NetBridge == null || session.ObjectId <= 0)
+            return;
+        NetBridge.FanoutNpcHtml([session.ObjectId], new Fineage.Net.Contract.NpcHtmlNetMsg
+        {
+            NpcObjectId = npc.ObjectId,
+            NpcId = npc.NpcId,
+            Html = html ?? "",
+            ItemId = 0
+        });
     }
 }

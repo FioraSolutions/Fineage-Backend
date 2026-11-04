@@ -5,10 +5,13 @@
     <Project Path="src/Fineage.Protocol/Fineage.Protocol.csproj" />
     <Project Path="src/Fineage.Zone/Fineage.Zone.csproj" />
     <Project Path="src/Fineage.MobiusImport/Fineage.MobiusImport.csproj" />
+    <Project Path="src/Fineage.Net.Contract/Fineage.Net.Contract.csproj" />
+    <Project Path="src/Fineage.Net.Host/Fineage.Net.Host.csproj" />
   </Folder>
   <Folder Name="/tests/">
     <Project Path="tests/Fineage.Game.Tests/Fineage.Game.Tests.csproj" />
     <Project Path="tests/Fineage.Login.Tests/Fineage.Login.Tests.csproj" />
     <Project Path="tests/Fineage.Zone.Tests/Fineage.Zone.Tests.csproj" />
+    <Project Path="tests/Fineage.Net.Tests/Fineage.Net.Tests.csproj" />
   </Folder>
 </Solution>

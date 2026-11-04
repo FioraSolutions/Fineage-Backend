@@ -40,6 +40,10 @@ Default resolver (when the env var is unset) looks for:
 
 Path `ref/mobius-ct0-interlude/` is listed in `.gitignore`.
 
+The Java core (the authority for formulas, not just datapack values) is checked out next to the XML at
+`ref/mobius-ct0-interlude/java` — read it when a game rule is ambiguous (see `docs/combat-parity.md` for the file/line
+references used so far).
+
 ## Mobius folder → Fineage JSON
 
 | Mobius path under datapack `data/` | Fineage tracked output | Notes |
@@ -107,3 +111,19 @@ Do **not** commit the full Mobius tree. Prefer regenerated JSON. A slim `data/mo
 - Importer unit tests use minimal XML under `tests/Fineage.Game.Tests/Fixtures/mobius/` (no upstream clone required in CI).
 
 Runtime Talking Island gremlins still use hard-coded `TalkingIsland.cs` until spawn JSON is wired; catalog JSON is the canonical source for the next slice.
+
+## Droplists (data/drops) and ground loot
+
+- `data/drops/*.json` is the source of truth. `scripts/gen_drops.py` converts Mobius `stats/npcs/*.xml`
+  `<dropLists>` for every NPC spawned in elven_village, elven_starting, elven_village_quest_monsters and
+  training_hall_gremlins (edit `MAPS` to add zones). `<drop><group>` → `death.groups`, loose `<drop><item>` →
+  its own group, `<spoil>` → `corpse.items`. Files with `"generated": true` are rewritten on each run; remove the
+  flag to own a file by hand (npc-20001-gremlin.json is hand-written and skipped).
+- Rolls stay in `DropRoller` (group chance, weighted item, min/max, `DropRates`).
+- Death loot: scatter ±70 around corpse (Mobius randDropLim), killer/party-only pickup for 15 s
+  (DropProtection; others get SysMsg 145), auto-destroy after 600 s (herbs 60 s). Player discards never expire
+  (Mobius DestroyPlayerDroppedItem = false).
+- `scripts/gen_drop_items.py` appends Mobius EtcItem templates referenced by data/drops but missing from
+  data/items.json (name/icon/stackable/price/weight; herb icons pinned to textures the client ships). Run it after
+  gen_drops.py; `DropItemCoverageTests` fails if a droplist row has no template. Herbs still go to the bag —
+  Mobius auto-uses them on pickup (for_npc/immediate_effect), not ported yet.

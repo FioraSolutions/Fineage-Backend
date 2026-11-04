@@ -1,5 +1,7 @@
 using System.Net;
 using System.Net.Sockets;
+using Fineage.Login.Net;
+using Fineage.Net.Host;
 using Fineage.Protocol.Net;
 using Fineage.Protocol.Telemetry;
 
@@ -15,9 +17,14 @@ public static class Cli
         string storePath = TakeOption(rest, "--store")
             ?? Environment.GetEnvironmentVariable("FINEAGE_LOGIN_STORE")
             ?? Path.Combine("data", "accounts.json");
-        string portText = TakeOption(rest, "--port")
-            ?? Environment.GetEnvironmentVariable("FINEAGE_LOGIN_PORT")
-            ?? "9106";
+        string? databaseUrl = TakeOption(rest, "--database")
+            ?? Environment.GetEnvironmentVariable(AccountStoreFactory.DatabaseUrlEnv);
+        string? portOpt = TakeOption(rest, "--port");
+        string? portEnv = Environment.GetEnvironmentVariable("FINEAGE_LOGIN_PORT");
+        // Net owns 9106; legacy V2 shifts to 9206 unless the operator pins --port / FINEAGE_LOGIN_PORT.
+        string portText = portOpt
+            ?? portEnv
+            ?? (NetSettings.Enabled ? NetSettings.V2LoginPort.ToString() : "9106");
         if (!int.TryParse(portText, out int port) || port is < 1 or > 65535)
         {
             error.WriteLine("invalid --port");
@@ -51,13 +58,50 @@ public static class Cli
         if (rest.Count == 0)
             return await ListenAsync(storePath, bindAddress, bindDisplay, port, httpPort, output, error).ConfigureAwait(false) ? 0 : 1;
 
-        var tokens = HandoffTokens.FromEnvironment();
+        string cmd = rest[0].ToLowerInvariant();
+        if (cmd is "import-json")
+        {
+            if (rest.Count != 2)
+                return Usage(error);
+            string url = databaseUrl ?? AccountStoreFactory.DefaultPostgresUrl;
+            try
+            {
+                PostgresAccountStore.ImportJsonFileToDatabase(url, rest[1]);
+                output.WriteLine($"imported {rest[1]} → postgres");
+                return 0;
+            }
+            catch (Exception ex)
+            {
+                error.WriteLine("import-json failed: " + ex.Message);
+                return 1;
+            }
+        }
+
+        if (cmd is "backfill-normalized")
+        {
+            if (rest.Count != 1)
+                return Usage(error);
+            string url = databaseUrl ?? AccountStoreFactory.DefaultPostgresUrl;
+            try
+            {
+                using var store = PostgresAccountStore.Open(url);
+                store.BackfillNormalizedFromSnapshot();
+                output.WriteLine("backfilled normalized character/item/quest tables from store_snapshot");
+                return 0;
+            }
+            catch (Exception ex)
+            {
+                error.WriteLine("backfill-normalized failed: " + ex.Message);
+                return 1;
+            }
+        }
+
+        var handoff = MemoryHandoffStore.FromEnvironment();
         var service = new LoginService(
-            JsonAccountStore.Open(storePath),
-            tokens,
+            AccountStoreFactory.Open(storePath),
+            handoff.Tokens,
             deleteAfterDays: CharacterRules.DeleteAfterDays,
             create: CharacterCreateOptions.FromEnvironment());
-        string cmd = rest[0].ToLowerInvariant();
         switch (cmd)
         {
             case "register":
@@ -161,6 +205,10 @@ public static class Cli
               Fineage.Login select <account> <password> <name>
               Fineage.Login play <account> <password> <name> <fighter|mystic>
               Fineage.Login [--bind 0.0.0.0] [--port 9106] [--http-port 5080] [--store data/accounts.json]
+              Fineage.Login import-json <accounts.json>   # requires FINEAGE_STORE=postgres / FINEAGE_DATABASE_URL
+              Fineage.Login backfill-normalized           # re-project characters/items/quests from store_snapshot
+              # FINEAGE_STORE=postgres|json  FINEAGE_DATABASE_URL=Host=...;Database=fineage;...
+              # With FINEAGE_NET_ENABLE=1: Net listens on 9106, V2 defaults to --port 9206
             """);
         return 1;
     }
@@ -174,9 +222,11 @@ public static class Cli
         TextWriter output,
         TextWriter error)
     {
+        IAccountStore accounts = AccountStoreFactory.Open(storePath);
+        var handoff = MemoryHandoffStore.FromEnvironment();
         var service = new LoginService(
-            JsonAccountStore.Open(storePath),
-            HandoffTokens.FromEnvironment(),
+            accounts,
+            handoff.Tokens,
             deleteAfterDays: CharacterRules.DeleteAfterDays,
             create: CharacterCreateOptions.FromEnvironment());
         var server = new LoginServer(service);
@@ -185,6 +235,30 @@ public static class Cli
         int maxConnections = LoginNetSettings.MaxConnections;
         int outboundQueue = LoginNetSettings.OutboundQueue;
         int maxMsgPerSec = LoginNetSettings.MaxMessagesPerSecond;
+
+        using var shutdown = new CancellationTokenSource();
+        Console.CancelKeyPress += (_, e) =>
+        {
+            e.Cancel = true;
+            shutdown.Cancel();
+        };
+
+        // Start Net TCP before HTTP so PacketEnvelope login works even if Kestrel hangs.
+        Task? netTask = null;
+        if (NetSettings.Enabled)
+        {
+            var netLogin = new NetLoginServer(service, zoneHost: ZoneHandoff.AdvertiseHost, zonePort: NetSettings.ZonePort);
+            var netTcp = new NetTcpServer();
+            output.WriteLine($"[LOGIN] net listen {bindDisplay}:{NetSettings.LoginPort} (PacketEnvelope)");
+            netTask = netTcp.RunAsync(
+                host,
+                NetSettings.LoginPort,
+                netLogin.HandleAsync,
+                shutdown.Token,
+                maxConnections,
+                NetSettings.InboxCapacity);
+        }
+
         HttpZoneStatusSource? zoneProbe = HttpZoneStatusSource.FromEnvironment(error);
         try
         {
@@ -201,8 +275,13 @@ public static class Cli
         catch (Exception ex)
         {
             zoneProbe?.Dispose();
-            error.WriteLine($"listen failed on {bindDisplay} tcp={port} http={httpPort}: {ex.Message}");
-            return false;
+            if (netTask == null)
+            {
+                error.WriteLine($"listen failed on {bindDisplay} tcp={port} http={httpPort}: {ex.Message}");
+                return false;
+            }
+
+            error.WriteLine($"[LOGIN] http {httpPort} failed ({ex.Message}); continuing with TCP/Net only");
         }
 
         if (string.IsNullOrWhiteSpace(Environment.GetEnvironmentVariable("FINEAGE_HANDOFF_SECRET")) &&
@@ -212,10 +291,14 @@ public static class Cli
         }
 
         output.WriteLine(
-            $"[LOGIN] listen tcp={bindDisplay}:{port} http={http.BaseUrl} store={storePath} (maxConn={maxConnections} outboundQ={outboundQueue} msgPerSec={maxMsgPerSec})");
-        output.WriteLine(http.ZoneStatusProbe == null
-            ? "[LOGIN] GET /api/status (zone probe disabled)"
-            : $"[LOGIN] GET /api/status (zone probe {http.ZoneStatusProbe})");
+            $"[LOGIN] listen tcp={bindDisplay}:{port} http={(http != null ? http.BaseUrl : "off")} store={StoreLabel(storePath, accounts)} (maxConn={maxConnections} outboundQ={outboundQueue} msgPerSec={maxMsgPerSec})");
+        if (http != null)
+        {
+            output.WriteLine(http.ZoneStatusProbe == null
+                ? "[LOGIN] GET /api/status (zone probe disabled)"
+                : $"[LOGIN] GET /api/status (zone probe {http.ZoneStatusProbe})");
+        }
+
         output.WriteLine($"[LOGIN] zone handoff target {ZoneHandoff.AdvertiseHost}:{ZoneHandoff.AdvertisePort}");
         if (CharacterCreateOptions.EnvironmentUsesLegacyHumanOnly())
         {
@@ -226,17 +309,11 @@ public static class Cli
         output.WriteLine("[LOGIN] creatable classes " + FormatIds(service.CreatableClassIds));
 
         await using FineageMetricsHost? metrics = FineageMetricsHost.Start("login", output, error);
-        using var shutdown = new CancellationTokenSource();
-        Console.CancelKeyPress += (_, e) =>
-        {
-            e.Cancel = true;
-            shutdown.Cancel();
-        };
-
         var tcp = new TcpServer();
+
         try
         {
-            await tcp.RunAsync(
+            var v2 = tcp.RunAsync(
                 host,
                 port,
                 maxConnections,
@@ -244,7 +321,11 @@ public static class Cli
                 "login",
                 server.HandleAsync,
                 shutdown.Token,
-                LoginOverload.RejectAsync).ConfigureAwait(false);
+                LoginOverload.RejectAsync);
+            if (netTask != null)
+                await Task.WhenAny(v2, netTask).ConfigureAwait(false);
+            else
+                await v2.ConfigureAwait(false);
         }
         catch (Exception ex) when (ex is not OperationCanceledException)
         {
@@ -253,12 +334,16 @@ public static class Cli
         }
         finally
         {
+            shutdown.Cancel();
             if (http != null)
                 await http.DisposeAsync().ConfigureAwait(false);
         }
 
         return true;
     }
+
+    static string StoreLabel(string storePath, IAccountStore accounts) =>
+        accounts is PostgresAccountStore ? "postgres" : storePath;
 
     static string? TakeOption(List<string> args, string name)
     {

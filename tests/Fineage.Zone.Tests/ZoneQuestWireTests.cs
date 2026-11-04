@@ -37,7 +37,7 @@ public sealed class ZoneQuestWireTests
         var offer = await link.ReadAsync<QuestDialogMsg>(MsgType.QuestDialog);
         Assert.Equal("first_talk", offer.Hook);
         Assert.Equal(999, offer.QuestId);
-        Assert.Contains("quest_event:accept", offer.Html, StringComparison.Ordinal);
+        Assert.Contains("quest_event:999:accept", offer.Html, StringComparison.Ordinal);
         var created = await link.ReadAsync<QuestListMsg>(MsgType.QuestList);
         Assert.Empty(created.Active);
 
@@ -55,7 +55,7 @@ public sealed class ZoneQuestWireTests
 
         await link.SendAsync(MsgType.NpcTalk, new NpcTalkMsg { NpcObjectId = bitz.ObjectId });
         var bitzPage = await link.ReadAsync<QuestDialogMsg>(MsgType.QuestDialog);
-        Assert.Contains("quest_event:heard", bitzPage.Html, StringComparison.Ordinal);
+        Assert.Contains("quest_event:999:heard", bitzPage.Html, StringComparison.Ordinal);
 
         await link.SendAsync(MsgType.QuestEvent, new QuestEventMsg { NpcObjectId = bitz.ObjectId, QuestId = 999, Event = "heard" });
         Assert.Equal(QuestSounds.Middle, (await link.ReadAsync<QuestSoundMsg>(MsgType.QuestSound)).Name);
@@ -65,13 +65,13 @@ public sealed class ZoneQuestWireTests
 
         await link.SendAsync(MsgType.NpcTalk, new NpcTalkMsg { NpcObjectId = roxxy.ObjectId });
         var rewardPage = await link.ReadAsync<QuestDialogMsg>(MsgType.QuestDialog);
-        Assert.Contains("quest_event:reward", rewardPage.Html, StringComparison.Ordinal);
+        Assert.Contains("quest_event:999:reward", rewardPage.Html, StringComparison.Ordinal);
 
         await link.SendAsync(MsgType.QuestEvent, new QuestEventMsg { NpcObjectId = roxxy.ObjectId, QuestId = 999, Event = "reward" });
         var update = await link.ReadAsync<InventoryUpdateMsg>(MsgType.InventoryUpdate);
         Assert.Equal(2, update.Changes.Length);
         Assert.Contains(update.Changes, row => row.ItemId == 57 && row.Count == 25 && row.Change == InventoryChange.Add);
-        Assert.Contains(update.Changes, row => row.ItemId == 736 && row.Count == 1 && row.Change == InventoryChange.Add);
+        Assert.Contains(update.Changes, row => row.ItemId == 736 && row.Change == InventoryChange.Modify);
         Assert.Equal(QuestProtocol.ItemEarned, (await link.ReadAsync<SystemMessageMsg>(MsgType.SystemMessage)).Id);
         Assert.Equal(QuestProtocol.Adena, (await link.ReadAsync<SystemMessageMsg>(MsgType.SystemMessage)).Id);
         Assert.Equal(QuestProtocol.ExpSp, (await link.ReadAsync<SystemMessageMsg>(MsgType.SystemMessage)).Id);
@@ -96,7 +96,7 @@ public sealed class ZoneQuestWireTests
         var quest = Assert.Single(saved.Quests!);
         Assert.Equal(999, quest.QuestId);
         Assert.Equal(QuestProtocol.CompletedState, quest.State);
-        Assert.Contains(saved.Items!, item => item.ItemId == 736 && item.Count == 1);
+        Assert.Contains(saved.Items!, item => item.ItemId == 736 && item.Count >= 1);
         Assert.Contains(saved.Items!, item => item.ItemId == 57 && item.Count == 25);
 
         await using var again = await Link.Open(server);
@@ -141,7 +141,7 @@ public sealed class ZoneQuestWireTests
 
         await link.SendAsync(MsgType.NpcTalk, new NpcTalkMsg { NpcObjectId = roxxy.ObjectId });
         var offer = await link.ReadAsync<QuestDialogMsg>(MsgType.QuestDialog);
-        Assert.Contains("quest_event:accept", offer.Html, StringComparison.Ordinal);
+        Assert.Contains("quest_event:999:accept", offer.Html, StringComparison.Ordinal);
         await link.ReadAsync<QuestListMsg>(MsgType.QuestList);
         await link.CloseAsync();
     }

@@ -126,10 +126,10 @@ public sealed partial class ZoneWorld
             TryNewbieHelperGift(session, player, npc, toSelf);
 
         outcome = eventName == null
-            ? _quests.FirstTalk(player.Quests, player.Inventory!, npc.NpcId, npc.Name)
+            ? _quests.FirstTalk(player.Quests, player.Inventory!, npc.NpcId, npc.Name, QuestActorOf(player))
             : eventName.Length == 0
-                ? _quests.Talk(player.Quests, player.Inventory!, questId, npc.NpcId)
-                : _quests.AdvEvent(player.Quests, player.Inventory!, questId, npc.NpcId, eventName);
+                ? _quests.Talk(player.Quests, player.Inventory!, questId, npc.NpcId, QuestActorOf(player))
+                : _quests.AdvEvent(player.Quests, player.Inventory!, questId, npc.NpcId, eventName, QuestActorOf(player));
         if (IsNpcPage(outcome))
         {
             SendNpcPage(session, player, npc, 0, toSelf);
@@ -139,6 +139,85 @@ public sealed partial class ZoneWorld
         if (outcome.Ok || outcome.Lines.Count > 0 || outcome.JournalChanged)
             Publish(session, player, outcome, npc.ObjectId, npc.NpcId, toSelf);
         return outcome.Ok ? null : FailureCode(outcome.Failure);
+    }
+
+    static QuestActor QuestActorOf(ZoneEntity player) => new(player.Race, player.Level, player.ClassId);
+
+    /// <summary>
+    /// Mobius <c>Quest.onKill</c> for the killer (killer-only steps) plus <c>party: true</c> steps shared to one random eligible member. Quest drops go straight to the
+    /// bag like <c>giveItemRandomly</c>; journal / bag / sounds go out through the same Publish path as talk.
+    /// </summary>
+    internal void QuestKillForTest(ZoneEntity killer, int npcId)
+    {
+        var outbound = new List<Pending>();
+        lock (_gate)
+            ApplyQuestKill(killer, new ZoneEntity { Kind = ZoneEntityKind.Npc, NpcId = npcId, ObjectId = 0 }, outbound);
+    }
+
+    void ApplyQuestKill(ZoneEntity killer, ZoneEntity npc, List<Pending> outbound)
+    {
+        if (killer.Inventory == null || killer.Dead || killer.Session == null)
+            return;
+        var outcome = _quests.OnKill(killer.Quests, killer.Inventory, npc.NpcId, QuestActorOf(killer));
+        PublishKill(killer, outcome, npc, outbound);
+
+        // Mobius getRandomPartyMember(State): one random eligible member (killer included) within ALT_PARTY_RANGE.
+        foreach (int questId in _quests.PartyKillQuests(npc.NpcId))
+        {
+            var eligible = new List<ZoneEntity>();
+            foreach (var member in QuestPartyCandidates(killer))
+            {
+                if (member.Inventory != null && !member.Dead && member.Session != null &&
+                    _quests.PartyKillApplies(member.Quests, member.Inventory, questId, npc.NpcId, QuestActorOf(member)))
+                    eligible.Add(member);
+            }
+
+            if (eligible.Count == 0)
+                continue;
+            var winner = eligible[Random.Shared.Next(eligible.Count)];
+            PublishKill(winner, _quests.OnPartyKill(winner.Quests, winner.Inventory!, questId, npc.NpcId, QuestActorOf(winner)), npc, outbound);
+        }
+    }
+
+    /// <summary>L2J/Mobius <c>Config.ALT_PARTY_RANGE</c> default (Character.ini AltPartyRange = 1600).</summary>
+    public const int QuestPartyRange = 1600;
+
+    IEnumerable<ZoneEntity> QuestPartyCandidates(ZoneEntity killer)
+    {
+        yield return killer;
+        if (!_partyByPlayer.TryGetValue(killer.ObjectId, out int partyId) || !_parties.TryGetValue(partyId, out var party))
+            yield break;
+        foreach (int id in party.MemberIds)
+        {
+            if (id == killer.ObjectId || !_byId.TryGetValue(id, out var member) || member.Kind != ZoneEntityKind.Player)
+                continue;
+            long dx = member.X - killer.X, dy = member.Y - killer.Y;
+            if (dx * dx + dy * dy <= (long)QuestPartyRange * QuestPartyRange)
+                yield return member;
+        }
+    }
+
+    void PublishKill(ZoneEntity player, QuestOutcome outcome, ZoneEntity npc, List<Pending> outbound)
+    {
+        if (outcome.QuestId == 0 || !outcome.Ok || player.Session == null)
+            return;
+        if (outcome.Items.Count == 0 && !outcome.JournalChanged && outcome.Sounds.Count == 0)
+            return;
+        Publish(player.Session, player, outcome, npc.ObjectId, npc.NpcId, outbound);
+    }
+
+    internal void JoinPartyForTest(params ZoneEntity[] members)
+    {
+        lock (_gate)
+        {
+            var party = new ZoneParty { PartyId = _nextPartyId++, LeaderObjectId = members[0].ObjectId };
+            _parties[party.PartyId] = party;
+            foreach (var m in members)
+            {
+                party.MemberIds.Add(m.ObjectId);
+                _partyByPlayer[m.ObjectId] = party.PartyId;
+            }
+        }
     }
 
     static bool IsNpcPage(QuestOutcome outcome) =>
@@ -157,21 +236,34 @@ public sealed partial class ZoneWorld
         ApplyProgress(player, outcome);
         if (outcome.Items.Count > 0 && player.Inventory != null)
         {
-            toSelf.Add(Pack(session, MsgType.InventoryUpdate, new InventoryUpdateMsg
+            var invUpdate = new InventoryUpdateMsg
             {
                 Changes = outcome.Items.Select(touch => InventoryMessages.ChangeRow((int)touch.Kind, touch.Item)).ToArray()
-            }));
+            };
+            toSelf.Add(Pack(session, MsgType.InventoryUpdate, invUpdate));
+            if (NetBridge != null)
+                NetBridge.FanoutInventoryUpdate([session.ObjectId], ToNetInventoryUpdate(invUpdate));
             SaveInventory(session, player.Inventory);
         }
 
         foreach (var line in outcome.Lines)
         {
-            toSelf.Add(Pack(session, MsgType.SystemMessage, new SystemMessageMsg
+            var notice = new SystemMessageMsg
             {
                 Id = (int)line.Notice,
                 Params = line.Params,
                 Text = line.Text
-            }));
+            };
+            toSelf.Add(Pack(session, MsgType.SystemMessage, notice));
+            if (NetBridge != null)
+            {
+                NetBridge.FanoutSystemMessage([session.ObjectId], new Fineage.Net.Contract.SystemMessageNetMsg
+                {
+                    Id = notice.Id,
+                    Text = notice.Text ?? "",
+                    Params = notice.Params ?? []
+                });
+            }
         }
 
         foreach (string sound in outcome.Sounds)
@@ -188,6 +280,8 @@ public sealed partial class ZoneWorld
                 Event = outcome.Event,
                 Html = outcome.Html
             }));
+            if (NetBridge != null && _byId.TryGetValue(npcObjectId, out var npcEntity))
+                FanoutNetHtml(session, npcEntity, outcome.Html);
         }
 
         if (outcome.JournalChanged)
@@ -234,22 +328,42 @@ public sealed partial class ZoneWorld
         if (!TryPlayer(session, out var player))
             return;
         var list = _quests.List(player.Quests);
+        var active = list.Active.Select(entry => new QuestJournalEntryMsg
+        {
+            QuestId = entry.QuestId,
+            Name = entry.Name,
+            State = entry.State,
+            Cond = entry.Cond,
+            ProgressFlags = entry.ProgressFlags,
+            JournalWord = entry.JournalWord,
+            Repeatable = entry.Repeatable
+        }).ToArray();
         toSelf.Add(Pack(session, MsgType.QuestList, new QuestListMsg
         {
-            Active = list.Active.Select(entry => new QuestJournalEntryMsg
-            {
-                QuestId = entry.QuestId,
-                Name = entry.Name,
-                State = entry.State,
-                Cond = entry.Cond,
-                ProgressFlags = entry.ProgressFlags,
-                JournalWord = entry.JournalWord,
-                Repeatable = entry.Repeatable
-            }).ToArray(),
+            Active = active,
             CompletedMask = list.CompletedMask,
             CompletedQuestIds = list.CompletedQuestIds,
             MaxActive = list.MaxActive
         }));
+        if (NetBridge != null)
+        {
+            NetBridge.FanoutQuestList([session.ObjectId], new Fineage.Net.Contract.QuestListNetMsg
+            {
+                Active = active.Select(entry => new Fineage.Net.Contract.QuestJournalEntryNet
+                {
+                    QuestId = entry.QuestId,
+                    Name = entry.Name ?? "",
+                    State = entry.State,
+                    Cond = entry.Cond,
+                    ProgressFlags = entry.ProgressFlags,
+                    JournalWord = entry.JournalWord,
+                    Repeatable = entry.Repeatable
+                }).ToArray(),
+                CompletedMask = list.CompletedMask ?? [],
+                CompletedQuestIds = list.CompletedQuestIds ?? [],
+                MaxActive = list.MaxActive
+            });
+        }
     }
 
     void LoadQuestProgress(ZoneSession session, ZoneEntity entity)
@@ -320,6 +434,7 @@ public sealed partial class ZoneWorld
     {
         if (killer.Kind != ZoneEntityKind.Player || killer.Session == null || npc.Kind != ZoneEntityKind.Npc)
             return;
+        ApplyQuestKill(killer, npc, outbound);
         long exp = npc.RewardExp;
         int sp = npc.RewardSp;
         if (exp <= 0 && sp <= 0)
@@ -327,14 +442,15 @@ public sealed partial class ZoneWorld
 
         ApplyExpSp(killer, exp, sp);
         var session = killer.Session;
-        outbound.Add(Pack(session, MsgType.SystemMessage, new SystemMessageMsg
+        var notice = new SystemMessageMsg
         {
             Id = KillRewardMessageId,
             Params = [exp.ToString(System.Globalization.CultureInfo.InvariantCulture), sp.ToString(System.Globalization.CultureInfo.InvariantCulture)],
             Text = $"You have earned {exp} experience and {sp} SP."
-        }));
+        };
+        outbound.Add(Pack(session, MsgType.SystemMessage, notice));
         // StatusUpdate carries live Exp/Sp/Level; UserInfo refreshes the full sheet (vitals + template stats).
-        outbound.Add(Pack(session, MsgType.StatusUpdate, new StatusUpdateMsg
+        var status = new StatusUpdateMsg
         {
             ObjectId = killer.ObjectId,
             AttributeIds =
@@ -357,8 +473,43 @@ public sealed partial class ZoneWorld
                 killer.CurMp,
                 killer.MaxMp
             ]
-        }));
-        outbound.Add(Pack(session, MsgType.UserInfo, UserInfo(killer)));
+        };
+        outbound.Add(Pack(session, MsgType.StatusUpdate, status));
+        outbound.Add(SelfUserInfo(session, killer));
+
+        if (NetBridge != null)
+        {
+            int[] self = [killer.ObjectId];
+            var vitals = BuildUserInfoVitals(killer);
+            NetBridge.FanoutSystemMessage(self, new Fineage.Net.Contract.SystemMessageNetMsg
+            {
+                Id = notice.Id,
+                Text = notice.Text,
+                Params = notice.Params ?? []
+            });
+            NetBridge.FanoutStatusUpdate(self, new Fineage.Net.Contract.StatusUpdateNetMsg
+            {
+                EntityValue = (ulong)(uint)status.ObjectId,
+                EntityGeneration = 1,
+                AttributeIds = status.AttributeIds ?? [],
+                Values = status.Values ?? []
+            });
+            NetBridge.FanoutPlayerStats(self, new Fineage.Net.Contract.PlayerStatsMsg
+            {
+                EntityValue = (ulong)(uint)killer.ObjectId,
+                EntityGeneration = 1,
+                Level = killer.Level,
+                Exp = killer.Exp,
+                Sp = killer.Sp,
+                Hp = killer.CurHp,
+                MaxHp = killer.MaxHp,
+                Mp = killer.CurMp,
+                MaxMp = killer.MaxMp,
+                Cp = vitals.CurCp,
+                MaxCp = vitals.MaxCp
+            });
+        }
+
         SaveQuestProgress(session, killer);
     }
 

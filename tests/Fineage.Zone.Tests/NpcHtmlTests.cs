@@ -107,10 +107,11 @@ public sealed class NpcHtmlTests
 
         Assert.True(registry.Find("Quest")!.Handle(call with { Command = "Quest" }).ShowQuestList);
         Assert.True(registry.Find("Script")!.Handle(call with { Command = "Script" }).ShowQuestList);
-        Assert.Contains(
-            "not implemented yet",
-            registry.Find("Script FirstClassTransferTalk")!.Handle(call with { Command = "Script FirstClassTransferTalk" }).Html,
-            StringComparison.Ordinal);
+        // Named Mobius scripts go to the world (village masters); unknown ones fall back to the Unavailable page there.
+        var script = registry.Find("Quest FirstClassTransferTalk 30154_mystic.html")!.Handle(call with { Command = "Quest FirstClassTransferTalk 30154_mystic.html" });
+        Assert.Equal("FirstClassTransferTalk", script.ScriptName);
+        Assert.Equal("30154_mystic.html", script.ScriptEvent);
+        Assert.Equal("", registry.Find("Script FirstClassTransferTalk")!.Handle(call with { Command = "Script FirstClassTransferTalk" }).ScriptEvent);
         Assert.True(registry.Find("questlist")!.Handle(call with { Command = "questlist" }).ShowQuestList);
         var quest = registry.Find("Quest 999 accept")!.Handle(call with { Command = "Quest 999 accept" });
         Assert.True(quest.QuestAction);
@@ -139,7 +140,7 @@ public sealed class NpcHtmlTests
         Assert.Contains("Warehouse is not implemented yet.", registry.Find("package_deposit")!.Handle(call with { Command = "package_deposit" }).Html, StringComparison.Ordinal);
         Assert.Equal(NpcServiceIntent.SupportMagic, registry.Find("SupportMagic")!.Handle(call with { Command = "SupportMagic" }).Service);
         Assert.Equal(NpcServiceIntent.GiveBlessing, registry.Find("GiveBlessing")!.Handle(call with { Command = "GiveBlessing" }).Service);
-        Assert.Null(registry.Find("TerritoryStatus"));
+        Assert.IsType<TerritoryBypassHandler>(registry.Find("TerritoryStatus"));
 
         registry.Register(new ReplacingBuy());
         Assert.Equal("<html>custom</html>", registry.Find("Buy 3")!.Handle(call with { Command = "Buy 3" }).Html);
@@ -232,7 +233,8 @@ public sealed class NpcHtmlTests
         Assert.Contains("I have nothing for you.", list.Html, StringComparison.Ordinal);
 
         await link.SendAsync(MsgType.BypassRequest, new BypassRequestMsg { NpcObjectId = MerchantObjectId, Command = "TerritoryStatus" });
-        Assert.Contains("not implemented yet.", (await link.ReadAsync<NpcHtmlMsg>(MsgType.NpcHtml)).Html, StringComparison.Ordinal);
+        // TerritoryStatus is live now (Mobius castle/lord/tax page); TI merchants belong to Gludio.
+        Assert.Contains("Gludio", (await link.ReadAsync<NpcHtmlMsg>(MsgType.NpcHtml)).Html, StringComparison.Ordinal);
         await link.CloseAsync();
     }
 

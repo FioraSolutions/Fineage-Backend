@@ -88,9 +88,28 @@ public sealed partial class ZoneWorld
             Level = def.Level,
             RewardExp = def.Exp,
             RewardSp = def.Sp,
+            PAtk = def.PAtk,
+            PDef = def.PDef,
+            PAtkSpd = def.AttackSpeed,
+            BaseAccuracy = def.Accuracy,
+            BaseEvasion = def.Evasion,
+            BaseCritical = def.Critical,
+            RandomDamage = def.RandomDamage,
+            Dex = def.Dex,
+            ShieldDef = def.ShieldDef,
+            ShieldRate = def.ShieldRate,
+            MAtk = def.MAtk,
+            MDef = def.MDef,
+            AttackRange = def.AttackRange,
+            Aggressive = def.Aggressive,
+            AggroRange = def.AggroRange,
+            ClanHelpRange = def.ClanHelpRange,
+            Clans = def.Clans,
+            IgnoreNpcIds = def.IgnoreNpcIds,
             RunSpeed = def.RunSpeed,
             WalkSpeed = def.WalkSpeed,
             MerchantCastleId = tax.CastleId,
+            MerchantTown = MerchantTowns.TownName(mapId),
             MerchantBaseTaxPercent = tax.BaseTaxPercent
         };
         _byId.Add(entity.ObjectId, entity);
@@ -141,6 +160,20 @@ public sealed partial class ZoneWorld
             if (!player.Knownlist.Add(npc.ObjectId))
                 continue;
             outbound.Add(Pack(player.Session, MsgType.NpcInfo, NpcInfo(npc)));
+            // Net clients: the respawn was added to the knownlist here, so the next move refresh sees no diff and
+            // the mob stayed invisible until the player left and re-entered view ("mobs appear late"). Push the
+            // EntitySpawn now, like Mobius Spawn.doSpawn → broadcast NpcInfo to the region.
+            NetBridge?.FanoutKnownlistDiff(player.ObjectId, [npc.ObjectId], []);
+        }
+    }
+
+    /// <summary>Test hook: despawn an NPC (corpse decay path) so its respawn timer starts.</summary>
+    internal void DespawnNpcForTests(int objectId)
+    {
+        lock (_gate)
+        {
+            if (_byId.TryGetValue(objectId, out var npc))
+                DespawnNpc(npc, []);
         }
     }
 

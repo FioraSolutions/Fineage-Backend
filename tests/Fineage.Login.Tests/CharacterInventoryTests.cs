@@ -16,18 +16,19 @@ public class CharacterInventoryTests
         Assert.True(created.Ok, created.Message);
         var items = created.Value!.Items;
         Assert.NotNull(items);
-        Assert.Contains(items, item => item.ItemId == 2369 && item.Count == 1 && item.EquippedSlot == 7);
-        Assert.Contains(items, item => item.ItemId == 1146 && item.EquippedSlot == 10);
-        Assert.Contains(items, item => item.ItemId == 1147 && item.EquippedSlot == 11);
-        Assert.Contains(items, item => item.ItemId == 10 && item.EquippedSlot == -1);
-        Assert.Contains(items, item => item.ItemId == 5588 && item.EquippedSlot == -1);
-        Assert.Equal(5, items.Count);
+        Assert.Contains(items, item => item.ItemId == 219 && item.Count == 1 && item.EquippedSlot == 7);
+        Assert.Contains(items, item => item.ItemId == 43 && item.EquippedSlot == 6);
+        Assert.Contains(items, item => item.ItemId == 26 && item.EquippedSlot == 10);
+        Assert.Contains(items, item => item.ItemId == 34 && item.EquippedSlot == 11);
+        Assert.Contains(items, item => item.ItemId == 68 && item.EquippedSlot == -1);
+        Assert.Contains(items, item => item.ItemId == 4627 && item.EquippedSlot == -1);
+        Assert.Equal(12, items.Count);
 
         var again = service.Play("alice", "secret1", "Aria", HumanClasses.Fighter);
         Assert.True(again.Ok, again.Message);
         var reloaded = store.FindById("alice", created.Value.Id);
-        Assert.Equal(5, reloaded!.Items!.Count);
-        Assert.Equal(2369, reloaded.Items[0].ItemId);
+        Assert.Equal(12, reloaded!.Items!.Count);
+        Assert.Equal(43, reloaded.Items[0].ItemId);
     }
 
     [Fact]
@@ -61,10 +62,10 @@ public class CharacterInventoryTests
             var reopened = JsonAccountStore.Open(path);
             var saved = reopened.FindById("alice", created.Value!.CharacterId);
             Assert.NotNull(saved?.Items);
-            Assert.Contains(saved.Items, item => item.ItemId == 6 && item.EquippedSlot == 7);
-            Assert.Contains(saved.Items, item => item.ItemId == 425 && item.EquippedSlot == 10);
-            Assert.Contains(saved.Items, item => item.ItemId == 461 && item.EquippedSlot == 11);
-            Assert.Contains(saved.Items, item => item.ItemId == 5588 && item.EquippedSlot == -1);
+            Assert.Contains(saved.Items, item => item.ItemId == 177 && item.EquippedSlot == 7);
+            Assert.Contains(saved.Items, item => item.ItemId == 1101 && item.EquippedSlot == 10);
+            Assert.Contains(saved.Items, item => item.ItemId == 1104 && item.EquippedSlot == 11);
+            Assert.Contains(saved.Items, item => item.ItemId == 4627 && item.EquippedSlot == -1);
         }
         finally
         {

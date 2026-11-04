@@ -201,7 +201,7 @@ public sealed class ZoneServer
                 }
 
                 await _world.LeaveAsync(session, ct).ConfigureAwait(false);
-                session.Bind(parsed.CharacterId, parsed.Account, parsed.CharacterName, parsed.ClassId);
+                session.Bind(parsed.CharacterId, parsed.Account, parsed.CharacterName, parsed.ClassId, parsed.Race, parsed.Sex);
                 ZoneLog.Info($"RX Auth session={sessionId} account={session.Account} character={session.Name}");
                 await session.SendAsync(MsgType.AuthOk, new AuthOkMsg
                 {

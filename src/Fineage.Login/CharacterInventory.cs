@@ -15,7 +15,8 @@ public static class CharacterInventory
                 item.ItemId,
                 item.Count,
                 item.EquippedSlot is { } slot ? (int)slot : -1,
-                item.EnchantLevel);
+                item.EnchantLevel,
+                item.ObjectId);
         }
 
         return rows;
@@ -30,7 +31,9 @@ public static class CharacterInventory
         var inventory = new PlayerInventory(catalog, ids);
         foreach (var row in items)
         {
-            var instance = inventory.Add(row.ItemId, row.Count, row.EnchantLevel);
+            ItemInstance instance = row.ObjectId > 0
+                ? inventory.AddRestored(row.ObjectId, row.ItemId, row.Count, row.EnchantLevel)
+                : inventory.Add(row.ItemId, row.Count, row.EnchantLevel);
             if (row.EquippedSlot >= 0 && instance.Template.Equippable)
                 inventory.Equip(instance);
         }
@@ -41,6 +44,7 @@ public static class CharacterInventory
     public static void Validate(IReadOnlyList<StoredItem> items)
     {
         ArgumentNullException.ThrowIfNull(items);
+        var seen = new HashSet<int>();
         foreach (var item in items)
         {
             if (item.ItemId <= 0)
@@ -51,6 +55,10 @@ public static class CharacterInventory
                 throw new ArgumentOutOfRangeException(nameof(items), $"Item {item.ItemId} equipped slot {item.EquippedSlot} is outside -1..16.");
             if (item.EnchantLevel < 0 || item.EnchantLevel > EnchantRules.AbsoluteMax)
                 throw new ArgumentOutOfRangeException(nameof(items), $"Item {item.ItemId} enchant {item.EnchantLevel} is outside 0..65535.");
+            if (item.ObjectId < 0)
+                throw new ArgumentOutOfRangeException(nameof(items), $"Item {item.ItemId} object id must not be negative.");
+            if (item.ObjectId > 0 && !seen.Add(item.ObjectId))
+                throw new ArgumentOutOfRangeException(nameof(items), $"Duplicate item object id {item.ObjectId}.");
         }
     }
 }

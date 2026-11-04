@@ -17,10 +17,14 @@ public sealed partial class ZoneWorld
         lock (_gate)
         {
             long now = _clock().ToUnixTimeMilliseconds();
+            TickPlayerMovement(now, outbound);
+            TickNpcMovement(now, outbound);
             TickPendingHits(now, outbound);
             TickMeleeHits(now, outbound);
+            TickAggression(now);
             TickMobAttacks(now, outbound);
             TickCorpseDecay(now, outbound);
+            TickAttackStance(now);
         }
         await FlushOthersAsync(outbound, ct).ConfigureAwait(false);
     }
@@ -40,12 +44,44 @@ public sealed partial class ZoneWorld
         player.PendingHit = null;
         if (hit == null || player.Dead)
             return;
-        if (!_byId.TryGetValue(hit.TargetId, out var target) || target.Kind != ZoneEntityKind.Npc || target.CurHp <= 0)
+        if (hit.Apply is DeferredEffect deferred)
+        {
+            ResolveDeferredEffect(player, hit, deferred, now, outbound);
             return;
+        }
+        if (!_byId.TryGetValue(hit.TargetId, out var target) || target.Kind != ZoneEntityKind.Npc || target.CurHp <= 0)
+        {
+            AbortCast(player, "target-gone", outbound, notify: false);
+            return;
+        }
 
-        target.CurHp = Math.Max(0, target.CurHp - hit.Damage);
+        // Mobius onMagicLaunchedTimer: target escaped (effectRange) or out of sight at launch → abortCast, mpConsume not spent.
+        if (hit.Combat != null)
+        {
+            int escape = Fineage.Game.Combat.CastRules.EscapeRange(hit.Combat.CastRange, hit.Combat.EffectRange);
+            if (escape > 0 && !ZoneCombat.InCastRange(player.X, player.Y, target.X, target.Y, escape + ZoneCombat.HitRangeTolerance))
+            {
+                AbortCast(player, "escaped", outbound, notify: false);
+                return;
+            }
+
+            if (!CanSeeTarget(player, target))
+            {
+                AbortCast(player, "no-los", outbound, notify: false);
+                return;
+            }
+        }
+
+        int damage = hit.Combat != null ? RollSkillDamage(player, target, hit.Combat, hit.Level, outbound) : hit.Damage;
+        if (hit.Combat != null)
+        {
+            ZoneLog.Info($"[skill] hit {hit.Combat.SkillId} lv{hit.Level} target={target.ObjectId} damage={damage}");
+            if (player.Session != null)
+                outbound.Add(Pack(player.Session, MsgType.StatusUpdate, CasterMpStatus(player)));
+        }
+        target.CurHp = Math.Max(0, target.CurHp - damage);
         FanoutVitals(target, StatusFor(target), outbound);
-        AddHate(target, player);
+        AddHate(target, player, DamageHate(damage, target.Level));
         player.CombatUntilUnixMs = now + ClanProtocol.CombatStanceMillis;
 
         if (target.CurHp <= 0)
@@ -55,53 +91,58 @@ public sealed partial class ZoneWorld
         }
     }
 
-    void AddHate(ZoneEntity npc, ZoneEntity attacker)
-    {
-        if (npc.Kind != ZoneEntityKind.Npc || attacker.Kind != ZoneEntityKind.Player || npc.CurHp <= 0)
-            return;
-        if (npc.AggroTargetId == attacker.ObjectId)
-            return;
-        npc.AggroTargetId = attacker.ObjectId;
-        // Mobius: first swing after attack-speed delay, not instantly.
-        npc.NextMobAttackMs = _clock().ToUnixTimeMilliseconds() + ZoneCombat.MobAttackIntervalMs / 2;
-    }
-
     void TickMobAttacks(long now, List<Pending> outbound)
     {
         foreach (var npc in _byId.Values.Where(e => e.Kind == ZoneEntityKind.Npc && e.AggroTargetId > 0).ToList())
         {
-            if (npc.CurHp <= 0 || !_byId.TryGetValue(npc.AggroTargetId, out var player) ||
-                player.Kind != ZoneEntityKind.Player || player.Dead || player.Session == null ||
-                !SameInstance(npc.ObjectId, player.ObjectId))
+            if (npc.CurHp <= 0)
             {
                 npc.AggroTargetId = 0;
+                npc.HateList.Clear();
+                StopTimedMove(npc);
                 continue;
             }
-            if (!ZoneCombat.InAggroRange(npc.X, npc.Y, player.X, player.Y))
+            if (!_byId.TryGetValue(npc.AggroTargetId, out var player) ||
+                player.Kind != ZoneEntityKind.Player || player.Dead || player.Session == null ||
+                !SameInstance(npc.ObjectId, player.ObjectId) ||
+                !ZoneCombat.InAggroRange(npc.X, npc.Y, player.X, player.Y))
             {
-                npc.AggroTargetId = 0; // Mobius: target out of MAX_DRIFT/aggro -> return home, forget
-                npc.Chasing = false;
+                // Mobius AggroList: drop the gone target, fall to the next most hated; none left -> returnHome.
+                npc.HateList.Remove(npc.AggroTargetId);
+                int next = MostHated(npc);
+                if (next > 0)
+                {
+                    npc.AggroTargetId = next;
+                    npc.NextMobAttackMs = now + ZoneCombat.HitTimeMs(NpcPAtkSpd(npc));
+                    continue;
+                }
+                ReturnHome(npc, now, outbound);
                 continue;
             }
-            long dtMs = npc.LastAiTickMs > 0 ? Math.Clamp(now - npc.LastAiTickMs, 0, 1000) : ZoneCombat.AutoAttackTickMs;
+            npc.AggroTargetId = MostHated(npc) is > 0 and var top ? top : npc.AggroTargetId;
+            CallClanHelp(npc, player, now);
             npc.LastAiTickMs = now;
-            if (!ZoneCombat.InMobMeleeRange(npc.X, npc.Y, player.X, player.Y))
+            // Mobius thinkAttack: no LOS to the most hated → moveTo(target) instead of swinging.
+            if (!ZoneCombat.InMobReach(npc.X, npc.Y, player.X, player.Y, ZoneCombat.MobAttackReach(npc.AttackRange)) ||
+                !CanSeeTarget(npc, player))
             {
                 // Mobius AttackableAI.thinkAttack -> moveToPawn(target, range): mob runs to the attacker.
-                ChaseStep(npc, player, dtMs, outbound);
+                ChaseStep(npc, player, now, outbound);
                 continue;
             }
             if (npc.Chasing)
             {
                 npc.Chasing = false;
-                // Arrived: Mobius sends a final MoveToLocation/StopMove at the reached spot.
+                // Arrived: halt at the server position; Mobius sends a final MoveToLocation/StopMove at the reached spot.
+                StopTimedMove(npc);
                 BroadcastNpcMove(npc, npc.X, npc.Y, npc.Z, outbound);
             }
             if (now < npc.NextMobAttackMs)
                 continue;
-            npc.NextMobAttackMs = now + ZoneCombat.MobAttackIntervalMs;
+            int npcAtkMs = ZoneCombat.AttackTimeMs(NpcPAtkSpd(npc));
+            npc.NextMobAttackMs = now + npcAtkMs;
 
-            int damage = ZoneCombat.MobMeleeDamage(npc.Level);
+            var (damage, flags) = NpcMeleeRoll(npc, player);
             player.CombatUntilUnixMs = now + ClanProtocol.CombatStanceMillis;
 
             var attack = new AttackMsg
@@ -109,26 +150,26 @@ public sealed partial class ZoneWorld
                 AttackerObjectId = npc.ObjectId,
                 TargetObjectId = player.ObjectId,
                 Damage = damage,
+                Flags = flags,
                 AttackerX = npc.X, AttackerY = npc.Y, AttackerZ = npc.Z,
                 TargetX = player.X, TargetY = player.Y, TargetZ = player.Z
             };
             // Swing now; player HP drops at hitTime (Mobius onHitTimer).
             FanoutAttack(npc, player, attack, outbound);
-            _meleeHits.Add(new PendingMeleeHit(npc.ObjectId, player.ObjectId, damage, now + ZoneCombat.MobMeleeHitDelayMs));
+            _meleeHits.Add(new PendingMeleeHit(npc.ObjectId, player.ObjectId, damage, now + npcAtkMs / 2));
         }
     }
 
     /// <summary>
-    /// One AI tick of chase. Server position advances at NPC run speed; the client gets a
-    /// MoveToLocation (MoveToAck) toward the attacker only when the chase starts or the pawn moved,
-    /// so it animates a continuous run instead of 5 Hz hops.
+    /// One AI tick of chase (Mobius moveToPawn). Only (re)issues a MoveToLocation when the chase starts or the
+    /// pawn drifted; the actual travel is done by <see cref="TickNpcMovement"/> on the shared speed-tick mover.
     /// </summary>
-    void ChaseStep(ZoneEntity npc, ZoneEntity target, long dtMs, List<Pending> outbound)
+    void ChaseStep(ZoneEntity npc, ZoneEntity target, long now, List<Pending> outbound)
     {
         double dx = target.X - npc.X;
         double dy = target.Y - npc.Y;
         double dist = Math.Sqrt(dx * dx + dy * dy);
-        double stopAt = ZoneCombat.MobMeleeRange - 20;
+        double stopAt = ZoneCombat.MobAttackReach(npc.AttackRange) - ZoneCombat.ApproachSlack;
         if (dist <= stopAt)
             return;
 
@@ -138,36 +179,25 @@ public sealed partial class ZoneWorld
         int destZ = target.Z;
 
         long ddx = destX - (long)npc.ChaseDestX, ddy = destY - (long)npc.ChaseDestY;
-        if (!npc.Chasing || ddx * ddx + ddy * ddy > 40L * 40L)
+        if (!npc.Chasing || !npc.MoveActive || ddx * ddx + ddy * ddy > 40L * 40L)
         {
-            if (!npc.Chasing)
+            if (!npc.HomeSet)
             {
-                // Mobius AttackableAI: setRunning() on attack intention -> ChangeMoveType(run),
-                // so the client chases at run speed in step with the server (not walk + lag).
+                npc.HomeSet = true;
+                (npc.HomeX, npc.HomeY, npc.HomeZ) = (npc.X, npc.Y, npc.Z);
+            }
+            npc.ReturningHome = false;
+            if (!npc.Running)
+            {
+                // Mobius AttackableAI: setRunning() on attack intention -> ChangeMoveType(run).
                 npc.Running = true;
                 FanoutMoveType(npc, outbound);
             }
             npc.Chasing = true;
             npc.ChaseDestX = destX;
             npc.ChaseDestY = destY;
-            BroadcastNpcMove(npc, destX, destY, destZ, outbound);
+            StartNpcMove(npc, destX, destY, destZ, now, outbound);
         }
-
-        float speed = npc.RunSpeed > 0 ? npc.RunSpeed : ZoneCombat.DefaultNpcRunSpeed;
-        double step = speed * dtMs / 1000.0;
-        double remain = dist - stopAt;
-        if (step >= remain)
-        {
-            npc.X = destX;
-            npc.Y = destY;
-        }
-        else
-        {
-            npc.X = (int)Math.Round(npc.X + dx / dist * step);
-            npc.Y = (int)Math.Round(npc.Y + dy / dist * step);
-        }
-        npc.Z = destZ;
-        _aoi.Move(npc.ObjectId, npc.X, npc.Y);
     }
 
     void BroadcastNpcMove(ZoneEntity npc, int destX, int destY, int destZ, List<Pending> outbound)
@@ -178,10 +208,25 @@ public sealed partial class ZoneWorld
             DestX = destX, DestY = destY, DestZ = destZ,
             OriginX = npc.X, OriginY = npc.Y, OriginZ = npc.Z
         });
+        List<int>? netWatchers = null;
         foreach (var watcher in Players())
         {
             if (watcher.Session != null && watcher.Knownlist.Contains(npc.ObjectId))
+            {
                 outbound.Add(new Pending(watcher.Session, MsgType.MoveToAck, body));
+                netWatchers ??= [];
+                netWatchers.Add(watcher.ObjectId);
+            }
+        }
+
+        if (netWatchers is { Count: > 0 } && NetBridge != null)
+        {
+            NetBridge.FanoutMoveState(
+                netWatchers,
+                npc.ObjectId,
+                npc.X, npc.Y, npc.Z,
+                destX, destY, destZ,
+                npc.Running);
         }
     }
 
@@ -191,8 +236,6 @@ public sealed partial class ZoneWorld
         foreach (var npc in _byId.Values.Where(e => e.Kind == ZoneEntityKind.Npc && e.DecayAtMs > 0 && e.DecayAtMs <= now).ToList())
         {
             npc.DecayAtMs = 0;
-            if (npc.CorpseAwaitingSweep)
-                continue;
             DespawnNpc(npc, outbound);
         }
     }

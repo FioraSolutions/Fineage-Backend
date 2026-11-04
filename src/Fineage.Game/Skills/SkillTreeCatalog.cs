@@ -69,7 +69,8 @@ public sealed class SkillTreeCatalog
                     skill.Level,
                     skill.GetLevel,
                     skill.AutoGet,
-                    skill.LearnedByNpc));
+                    skill.LearnedByNpc,
+                    Math.Max(0, skill.LevelUpSp)));
             }
 
             trees.Add(new ClassSkillTree(row.ClassId, entries));
@@ -96,6 +97,7 @@ public sealed class SkillTreeCatalog
         public int GetLevel { get; set; }
         public bool AutoGet { get; set; }
         public bool LearnedByNpc { get; set; }
+        public int LevelUpSp { get; set; }
     }
 }
 
@@ -117,4 +119,5 @@ public readonly record struct SkillTreeEntry(
     int Level,
     int GetLevel,
     bool AutoGet,
-    bool LearnedByNpc);
+    bool LearnedByNpc,
+    int LevelUpSp = 0);

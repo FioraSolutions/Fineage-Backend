@@ -53,17 +53,27 @@ public sealed class NpcServiceRulesTests
     {
         var buffs = NewbieBuffCatalog.LoadDefault();
         Assert.Equal(8, buffs.LowestLevel);
-        Assert.Equal(25, buffs.HighestLevel);
+        Assert.Equal(39, buffs.HighestLevel);
+        Assert.False(buffs.RequireNewbie);
         Assert.True(buffs.IsMage(10));
         Assert.False(buffs.IsMage(49));
         Assert.False(buffs.IsMage(0));
 
         Assert.Equal(NewbieBuffRefusal.LevelLow, buffs.Evaluate(true, 0, 0, 7, out _));
-        Assert.Equal(NewbieBuffRefusal.LevelHigh, buffs.Evaluate(true, 0, 0, 26, out _));
-        Assert.Equal(NewbieBuffRefusal.NotNewbie, buffs.Evaluate(false, 0, 0, 16, out _));
+        Assert.Equal(NewbieBuffRefusal.LevelHigh, buffs.Evaluate(true, 0, 0, 40, out _));
+        Assert.Equal(NewbieBuffRefusal.None, buffs.Evaluate(false, 0, 0, 16, out _)); // CT0: no isNewbie check
         Assert.Equal(NewbieBuffRefusal.ThirdClass, buffs.Evaluate(true, 0, 3, 16, out _));
-        Assert.Equal(NewbieBuffRefusal.NoneAvailable, buffs.Evaluate(true, 0, 0, 25, out var none));
-        Assert.Empty(none);
+        Assert.Equal(NewbieBuffRefusal.None, buffs.Evaluate(true, 0, 0, 39, out var high));
+        Assert.Equal([4322, 4323], high.Select(b => b.SkillId).Order());
+        Assert.Equal(NewbieBuffRefusal.None, buffs.Evaluate(true, 0, 0, 37, out var cubicGone));
+        Assert.DoesNotContain(cubicGone, b => b.SkillId == 4338);
+        Assert.Contains(cubicGone, b => b.SkillId == 4327);
+
+        var travel = buffs.TravelToken!;
+        Assert.Equal(8542, travel.ItemId);
+        Assert.Equal(20, travel.RefusedLevel);
+        Assert.Equal((45470, 48328, -3059), travel.Destinations[30599]);
+        Assert.Equal(5, travel.Destinations.Count);
 
         Assert.Equal(NewbieBuffRefusal.None, buffs.Evaluate(true, 0, 0, 8, out var wind));
         Assert.Equal(4322, Assert.Single(wind).SkillId);

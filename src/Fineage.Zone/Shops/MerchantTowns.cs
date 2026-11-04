@@ -8,6 +8,18 @@ public static class MerchantTowns
 {
     public readonly record struct TownTax(int BaseTaxPercent, int CastleId);
 
+    /// <summary>Mobius <c>%territory%</c> (closest town name) for the starting villages; others fall back to the castle name.</summary>
+    public static string? TownName(string? mapId)
+    {
+        var id = mapId ?? "";
+        if (id.StartsWith("elven_", StringComparison.Ordinal)) return "Elven Village";
+        if (id.StartsWith("dark_elven_", StringComparison.Ordinal) || id.StartsWith("dark_elf", StringComparison.Ordinal)) return "Dark Elven Village";
+        if (id.StartsWith("ti_", StringComparison.Ordinal)) return "Talking Island Village";
+        if (id.StartsWith("orc_", StringComparison.Ordinal)) return "Orc Village";
+        if (id.StartsWith("dwarven_", StringComparison.Ordinal)) return "Dwarven Village";
+        return null;
+    }
+
     public static TownTax For(string? mapId)
     {
         var id = mapId ?? "";

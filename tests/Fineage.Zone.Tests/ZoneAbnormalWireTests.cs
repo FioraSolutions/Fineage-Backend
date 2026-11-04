@@ -28,6 +28,7 @@ public sealed class ZoneAbnormalWireTests
 
         stream.SetLength(0);
         Assert.Null(await world.TrySkillUseAsync(session, new SkillUseRequestMsg { SkillId = 1040 }, CancellationToken.None));
+        await world.CompleteCastForTestAsync(session); // effect lands at hitTime
 
         var abnormal = await ReadNextAbnormalAsync(stream);
         Assert.Equal(ticket.Value.CharacterId, abnormal.ObjectId);
@@ -90,6 +91,7 @@ public sealed class ZoneAbnormalWireTests
             SkillId = 1164,
             TargetObjectId = gremlinObjectId
         }, CancellationToken.None));
+        await world.CompleteCastForTestAsync(session); // debuff lands at hitTime
 
         var abnormal = await ReadNextAbnormalAsync(stream);
         Assert.Equal(gremlinObjectId, abnormal.ObjectId);
