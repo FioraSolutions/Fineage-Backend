@@ -873,6 +873,9 @@ public sealed class NetZoneServer : INetPresenceBridge
         if (_world.TryBuildNetEtcStatus(zoneSession, out var etcStatus))
             await conn.SendAsync(NetOpcode.EtcStatusUpdate, NetCodec.EncodeEtcStatusUpdate(etcStatus), ct: ct)
                 .ConfigureAwait(false);
+        // Journal on enter so the quest tabs are filled before the player presses the menu button.
+        await conn.SendAsync(NetOpcode.QuestList, NetCodec.EncodeQuestList(_world.NetQuestList(zoneSession)), ct: ct)
+            .ConfigureAwait(false);
 
         var welcome = SayRules.Welcome(zoneSession.Name);
         await conn.SendAsync(

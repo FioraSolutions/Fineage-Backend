@@ -479,8 +479,39 @@ public sealed partial class ZoneWorld
         }
     }
 
-    void LoadQuestProgress(ZoneSession session, ZoneEntity entity)
+    /// <summary>
+    /// Quest journal rows for the live player, for the Net enter-world burst. Mobius sends its journal on the
+    /// first <c>RequestQuestList</c>; the Net client shows the window on the menu button, so sending it with the
+    /// rest of the enter packet leaves the tabs filled even if the player opens the window before the reply lands.
+    /// </summary>
+    internal Fineage.Net.Contract.QuestListNetMsg NetQuestList(ZoneSession session)
     {
+        lock (_gate)
+        {
+            if (!TryPlayer(session, out var player))
+                return new Fineage.Net.Contract.QuestListNetMsg();
+
+            var list = _quests.List(player.Quests);
+            return new Fineage.Net.Contract.QuestListNetMsg
+            {
+                Active = list.Active.Select(entry => new Fineage.Net.Contract.QuestJournalEntryNet
+                {
+                    QuestId = entry.QuestId,
+                    Name = entry.Name ?? "",
+                    State = entry.State,
+                    Cond = entry.Cond,
+                    ProgressFlags = entry.ProgressFlags,
+                    JournalWord = entry.JournalWord,
+                    Repeatable = entry.Repeatable
+                }).ToArray(),
+                CompletedMask = list.CompletedMask ?? [],
+                CompletedQuestIds = list.CompletedQuestIds ?? [],
+                MaxActive = list.MaxActive
+            };
+        }
+    }
+
+    void LoadQuestProgress(ZoneSession session, ZoneEntity entity)    {
         entity.Quests = new QuestJournal();
         if (_accounts == null)
             return;
