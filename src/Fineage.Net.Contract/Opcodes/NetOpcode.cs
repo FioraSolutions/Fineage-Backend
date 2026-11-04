@@ -167,5 +167,7 @@ namespace Fineage.Net.Contract
         /// Mobius sends this to the observing peers as TargetUnselected; over Net the owner needs it too.
         /// </summary>
         public const ushort TargetUnselected = 0x0374;
+        /// <summary>Client → zone: Mobius RequestDestroyItem. Body is <c>DestroyItemRequestMsg</c>.</summary>
+        public const ushort DestroyItemRequest = 0x0375;
     }
 }

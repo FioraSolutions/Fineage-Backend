@@ -24,6 +24,26 @@ public sealed partial class ZoneWorld
         return null;
     }
 
+    /// <summary>
+    /// Mobius <c>RequestDestroyItem</c>: the bag slot is deleted outright, no ground spawn. Except for the
+    /// adena/quest guards the client could bypass, this is the trash-basket action.
+    /// </summary>
+    public async Task<string?> TryDestroyItemAsync(ZoneSession session, DestroyItemRequestMsg request, CancellationToken ct)
+    {
+        if (!IsLive(session))
+            return "world";
+
+        var outbound = new List<Pending>();
+        string? error;
+        lock (_gate)
+            error = TryDestroyItem(session, request, outbound);
+        if (error != null)
+            return error;
+
+        await FlushSelfAsync(session, outbound, ct).ConfigureAwait(false);
+        return null;
+    }
+
     public async Task<string?> TryDropItemAsync(ZoneSession session, DropItemRequestMsg request, CancellationToken ct)
     {
         if (!IsLive(session))
@@ -208,9 +228,42 @@ public sealed partial class ZoneWorld
         }
     }
 
-    string? TryDropItem(ZoneSession session, DropItemRequestMsg request, List<Pending> outbound)
+    /// <summary>
+    /// Mobius <c>RequestDestroyItem</c> body. It shares the drop path's guards (owner, not equipped, not a
+    /// quest item, count available) but never spawns a ground stack and never checks distance.
+    /// </summary>
+    string? TryDestroyItem(ZoneSession session, DestroyItemRequestMsg request, List<Pending> outbound)
     {
         if (!_byId.TryGetValue(session.ObjectId, out var player) || player.Inventory == null)
+            return "world";
+        if (player.Dead)
+            return InventoryProtocol.Dead;
+        if (request.ObjectId <= 0 || request.Count < 1)
+            return "bad_request";
+
+        var item = player.Inventory.Find(request.ObjectId);
+        if (item == null || item.IsEquipped)
+            return InventoryProtocol.NotOwned;
+        if (!item.Template.CanDropTradeStore)
+            return "bad_request"; // Mobius: quest items cannot be destroyed either
+        if (item.Count < request.Count)
+            return "bad_request";
+
+        if (!player.Inventory.TryReduce(item, request.Count, out bool removedEntirely))
+            return "bad_request";
+
+        var invUpdate = removedEntirely
+            ? new InventoryUpdateMsg { Changes = [InventoryMessages.RemoveRow(item, -1)] }
+            : InventoryMessages.Update(InventoryChange.Modify, item);
+        outbound.Add(Pack(session, MsgType.InventoryUpdate, invUpdate));
+        NetBridge?.FanoutInventoryUpdate([session.ObjectId], ToNetInventoryUpdate(invUpdate));
+        SaveInventory(session, player.Inventory);
+        ZoneLog.Info($"destroy-bag object={session.ObjectId} item={item.ItemId} x{request.Count} all={removedEntirely}");
+        return null;
+    }
+
+    string? TryDropItem(ZoneSession session, DropItemRequestMsg request, List<Pending> outbound)
+    {        if (!_byId.TryGetValue(session.ObjectId, out var player) || player.Inventory == null)
             return "world";
         if (player.Dead)
             return InventoryProtocol.Dead;
