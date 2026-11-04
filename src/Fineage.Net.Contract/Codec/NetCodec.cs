@@ -587,6 +587,105 @@ namespace Fineage.Net.Contract
             return new SkillListNetMsg { Skills = rows };
         }
 
+        public static byte[] EncodeAcquireSkillList(AcquireSkillListNetMsg m) => Write(w =>
+        {
+            var rows = m.Skills ?? Array.Empty<AcquireSkillEntryNet>();
+            w.WriteInt32(m.SkillType);
+            w.WriteInt32(rows.Length);
+            for (int i = 0; i < rows.Length; i++)
+            {
+                var row = rows[i];
+                w.WriteInt32(row.SkillId);
+                w.WriteInt32(row.NextLevel);
+                w.WriteInt32(row.MaxLevel);
+                w.WriteInt32(row.SpCost);
+                w.WriteInt32(row.Requirements);
+            }
+        });
+
+        public static AcquireSkillListNetMsg DecodeAcquireSkillList(ReadOnlySpan<byte> p)
+        {
+            var r = new Reader(p);
+            int type = r.ReadInt32();
+            int n = r.ReadInt32();
+            if (n < 0 || n > 4096)
+                throw new InvalidDataException("acquire skill list length");
+            var rows = new AcquireSkillEntryNet[n];
+            for (int i = 0; i < n; i++)
+            {
+                rows[i] = new AcquireSkillEntryNet
+                {
+                    SkillId = r.ReadInt32(),
+                    NextLevel = r.ReadInt32(),
+                    MaxLevel = r.ReadInt32(),
+                    SpCost = r.ReadInt32(),
+                    Requirements = r.ReadInt32()
+                };
+            }
+
+            return new AcquireSkillListNetMsg { SkillType = type, Skills = rows };
+        }
+
+        public static byte[] EncodeAcquireSkillInfo(AcquireSkillInfoNetMsg m) => Write(w =>
+        {
+            var reqs = m.Requirements ?? Array.Empty<AcquireSkillRequirementNet>();
+            w.WriteInt32(m.SkillId);
+            w.WriteInt32(m.Level);
+            w.WriteInt32(m.SpCost);
+            w.WriteInt32(m.SkillType);
+            w.WriteInt32(reqs.Length);
+            for (int i = 0; i < reqs.Length; i++)
+            {
+                var req = reqs[i];
+                w.WriteInt32(req.Type);
+                w.WriteInt32(req.ItemId);
+                w.WriteInt64(req.Count);
+                w.WriteInt32(req.Unk);
+            }
+        });
+
+        public static AcquireSkillInfoNetMsg DecodeAcquireSkillInfo(ReadOnlySpan<byte> p)
+        {
+            var r = new Reader(p);
+            int id = r.ReadInt32();
+            int level = r.ReadInt32();
+            int sp = r.ReadInt32();
+            int type = r.ReadInt32();
+            int n = r.ReadInt32();
+            if (n < 0 || n > 1024)
+                throw new InvalidDataException("acquire skill info length");
+            var reqs = new AcquireSkillRequirementNet[n];
+            for (int i = 0; i < n; i++)
+            {
+                reqs[i] = new AcquireSkillRequirementNet
+                {
+                    Type = r.ReadInt32(),
+                    ItemId = r.ReadInt32(),
+                    Count = r.ReadInt64(),
+                    Unk = r.ReadInt32()
+                };
+            }
+
+            return new AcquireSkillInfoNetMsg
+            {
+                SkillId = id, Level = level, SpCost = sp, SkillType = type, Requirements = reqs
+            };
+        }
+
+        /// <summary>Mobius <c>RequestAcquireSkillInfo</c> / <c>RequestAcquireSkill</c>: skill id, level, skill type.</summary>
+        public static byte[] EncodeAcquireSkillRequest(int skillId, int level, int skillType) => Write(w =>
+        {
+            w.WriteInt32(skillId);
+            w.WriteInt32(level);
+            w.WriteInt32(skillType);
+        });
+
+        public static (int SkillId, int Level, int SkillType) DecodeAcquireSkillRequest(ReadOnlySpan<byte> p)
+        {
+            var r = new Reader(p);
+            return (r.ReadInt32(), r.ReadInt32(), r.ReadInt32());
+        }
+
         public static byte[] EncodeMoveInput(MoveInputMsg m) => Write(w =>
         {
             w.WriteInt32(m.DestX);

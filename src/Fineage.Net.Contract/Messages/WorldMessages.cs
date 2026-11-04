@@ -238,6 +238,47 @@ namespace Fineage.Net.Contract
     }
 
     /// <summary>
+    /// Mobius <c>AcquireSkillList</c> row: one trainer offer (skill id, next level, max level, SP price, requirement mask).
+    /// </summary>
+    public sealed class AcquireSkillEntryNet
+    {
+        public int SkillId { get; set; }
+        public int NextLevel { get; set; }
+        public int MaxLevel { get; set; }
+        public int SpCost { get; set; }
+        /// <summary>Mobius <c>requirements</c> bitmask (1 = needs the previous level, 2 = needs a book/item).</summary>
+        public int Requirements { get; set; }
+    }
+
+    /// <summary>Zone → client: Mobius <c>AcquireSkillList</c> (the trainer's learnable rows).</summary>
+    public sealed class AcquireSkillListNetMsg
+    {
+        /// <summary>Mobius <c>AcquireSkillType</c> ordinal: 0 = class, 1 = fishing, 2 = pledge.</summary>
+        public int SkillType { get; set; }
+        public AcquireSkillEntryNet[] Skills { get; set; } = System.Array.Empty<AcquireSkillEntryNet>();
+    }
+
+    /// <summary>Mobius <c>AcquireSkillInfo</c> requirement row (item or prerequisite).</summary>
+    public sealed class AcquireSkillRequirementNet
+    {
+        public int Type { get; set; }
+        public int ItemId { get; set; }
+        public long Count { get; set; }
+        public int Unk { get; set; }
+    }
+
+    /// <summary>Zone → client: Mobius <c>AcquireSkillInfo</c> (the confirmation page for one offer).</summary>
+    public sealed class AcquireSkillInfoNetMsg
+    {
+        public int SkillId { get; set; }
+        public int Level { get; set; }
+        public int SpCost { get; set; }
+        /// <summary>Mobius <c>AcquireSkillType</c> ordinal.</summary>
+        public int SkillType { get; set; }
+        public AcquireSkillRequirementNet[] Requirements { get; set; } = System.Array.Empty<AcquireSkillRequirementNet>();
+    }
+
+    /// <summary>
     /// Mobius <c>ChangeWaitType</c>: sit/stand. Interlude also carries the actor position, which the client uses to
     /// settle the pawn before it plays the sitting animation.
     /// </summary>

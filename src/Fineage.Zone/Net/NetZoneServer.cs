@@ -375,6 +375,20 @@ public sealed class NetZoneServer : INetPresenceBridge
             _ = _presence.SendAsync(watcher, NetOpcode.TargetSelected, payload, CancellationToken.None);
     }
 
+    void INetPresenceBridge.FanoutAcquireSkillList(IReadOnlyList<int> watcherObjectIds, AcquireSkillListNetMsg list)
+    {
+        var payload = NetCodec.EncodeAcquireSkillList(list);
+        foreach (int watcher in watcherObjectIds)
+            _ = _presence.SendAsync(watcher, NetOpcode.AcquireSkillList, payload, CancellationToken.None);
+    }
+
+    void INetPresenceBridge.FanoutAcquireSkillInfo(IReadOnlyList<int> watcherObjectIds, AcquireSkillInfoNetMsg info)
+    {
+        var payload = NetCodec.EncodeAcquireSkillInfo(info);
+        foreach (int watcher in watcherObjectIds)
+            _ = _presence.SendAsync(watcher, NetOpcode.AcquireSkillInfo, payload, CancellationToken.None);
+    }
+
     void INetPresenceBridge.FanoutQuestList(IReadOnlyList<int> watcherObjectIds, QuestListNetMsg list)
     {
         var payload = NetCodec.EncodeQuestList(list);
@@ -508,6 +522,12 @@ public sealed class NetZoneServer : INetPresenceBridge
                             break;
                         case NetOpcode.ReviveRequest:
                             await OnReviveRequestAsync(conn, zoneSession, self, envelope, ct).ConfigureAwait(false);
+                            break;
+                        case NetOpcode.RequestAcquireSkillInfo:
+                            await OnAcquireSkillRequestAsync(conn, zoneSession, envelope, informing: true, ct).ConfigureAwait(false);
+                            break;
+                        case NetOpcode.RequestAcquireSkill:
+                            await OnAcquireSkillRequestAsync(conn, zoneSession, envelope, informing: false, ct).ConfigureAwait(false);
                             break;
                         case NetOpcode.NpcTalk:
                             await OnNpcTalkAsync(conn, zoneSession, envelope, ct).ConfigureAwait(false);
@@ -1006,6 +1026,26 @@ public sealed class NetZoneServer : INetPresenceBridge
             if (_world.TryGetLivePlayerById(id, out _))
                 await _presence.SendAsync(id, NetOpcode.EntityDespawn, despawnSelf, ct).ConfigureAwait(false);
         }
+    }
+
+    async Task OnAcquireSkillRequestAsync(
+        NetConnection conn,
+        ZoneSession zoneSession,
+        PacketEnvelope envelope,
+        bool informing,
+        CancellationToken ct)
+    {
+        RequireHello(conn);
+        if (!zoneSession.Bound || !zoneSession.InWorld)
+        {
+            await RejectAsync(conn, "not_in_world", "Enter world first.", ct).ConfigureAwait(false);
+            return;
+        }
+
+        var (skillId, level, skillType) = NetCodec.DecodeAcquireSkillRequest(envelope.Payload);
+        string? error = await _world.TryAcquireSkillAsync(zoneSession, skillId, level, skillType, informing, ct).ConfigureAwait(false);
+        if (error != null)
+            await RejectAsync(conn, error, informing ? "Skill info failed." : "Learn failed.", ct).ConfigureAwait(false);
     }
 
     async Task OnSelectTargetAsync(
