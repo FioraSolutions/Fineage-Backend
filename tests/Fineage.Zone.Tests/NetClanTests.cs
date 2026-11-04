@@ -150,4 +150,33 @@ public sealed class NetClanTests
             leader, new ClanCreateRequestMsg { Name = "Other" }, kit.Now, default));
         Assert.Equal(published, rec.Of(nameof(INetPresenceBridge.FanoutPledgeStatus)).Count);
     }
+
+    /// <summary>
+    /// Mobius EnterWorld:561 sends the pledge sheet and roster on login. Without this snapshot a clan
+    /// member re-entering the world sat in front of an empty clan window.
+    /// </summary>
+    [Fact]
+    public async Task A_clan_member_logging_in_gets_the_status_and_roster_snapshot()
+    {
+        var (kit, _) = World();
+        var (leader, leaderEntity) = await kit.EnterAsync();
+        leaderEntity.Level = ClanCreateLevel;
+        var (member, memberEntity) = await kit.EnterAsync();
+        memberEntity.Level = ClanCreateLevel;
+        Assert.Null(await kit.World.TryClanCreateAsync(
+            leader, new ClanCreateRequestMsg { Name = "Fine" }, kit.Now, default));
+        Assert.Null(await kit.World.TryClanInviteAsync(
+            leader, new ClanInviteRequestMsg { TargetObjectId = memberEntity.ObjectId, PledgeType = 0 }, kit.Now, default));
+        Assert.Null(await kit.World.TryClanAnswerAsync(
+            member, new ClanAnswerJoinRequestMsg { RequestorObjectId = leaderEntity.ObjectId, Response = 2 }, kit.Now, default));
+
+        Assert.True(kit.World.TryBuildNetClanSnapshot(leader, out var status, out var roster));
+        Assert.Equal("Fine", status.Name);
+        Assert.Equal(leaderEntity.ObjectId, status.LeaderObjectId);
+        Assert.Equal(2, roster.Members.Length);
+
+        // A character with no clan must not produce a snapshot: an empty status would read as "clan left".
+        var (outsider, _) = await kit.EnterAsync();
+        Assert.False(kit.World.TryBuildNetClanSnapshot(outsider, out _, out _));
+    }
 }

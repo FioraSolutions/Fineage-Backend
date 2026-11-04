@@ -925,6 +925,15 @@ public sealed class NetZoneServer : INetPresenceBridge
         // Journal on enter so the quest tabs are filled before the player presses the menu button.
         await conn.SendAsync(NetOpcode.QuestList, NetCodec.EncodeQuestList(_world.NetQuestList(zoneSession)), ct: ct)
             .ConfigureAwait(false);
+        // Mobius EnterWorld:561 — a returning clan member gets the pledge sheet and roster up front,
+        // otherwise the clan window is blank until some later clan action fans a status out.
+        if (_world.TryBuildNetClanSnapshot(zoneSession, out var clanStatus, out var clanMembers))
+        {
+            await conn.SendAsync(NetOpcode.PledgeStatus, NetCodec.EncodePledgeStatus(clanStatus), ct: ct)
+                .ConfigureAwait(false);
+            await conn.SendAsync(NetOpcode.PledgeMemberList, NetCodec.EncodePledgeMemberList(clanMembers), ct: ct)
+                .ConfigureAwait(false);
+        }
 
         var welcome = SayRules.Welcome(zoneSession.Name);
         await conn.SendAsync(

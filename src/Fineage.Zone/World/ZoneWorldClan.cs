@@ -983,6 +983,65 @@ public sealed partial class ZoneWorld
             PublishClanNet(pending);
     }
 
+    /// <summary>
+    /// Mobius <c>EnterWorld</c>:561 sends <c>PledgeShowInfoUpdate</c> and <c>PledgeShowMemberListAll</c>
+    /// to a returning member. Nothing in the Net enter sequence sent them, so a clan member logging
+    /// back in saw an empty clan window until some other clan action happened to fan out a status.
+    /// </summary>
+    internal bool TryBuildNetClanSnapshot(
+        ZoneSession session,
+        out Fineage.Net.Contract.PledgeStatusNetMsg status,
+        out Fineage.Net.Contract.PledgeMemberListNetMsg members)
+    {
+        status = null!;
+        members = null!;
+        lock (_gate)
+        {
+            if (_clans.Count == 0)
+                return false;
+            var clan = ClanOf(session.ObjectId);
+            if (clan == null)
+                return false;
+
+            var v2Status = StatusOf(clan);
+            status = new Fineage.Net.Contract.PledgeStatusNetMsg
+            {
+                ClanId = v2Status.ClanId,
+                Name = v2Status.Name ?? "",
+                Level = v2Status.Level,
+                LeaderObjectId = v2Status.LeaderObjectId,
+                CrestId = v2Status.CrestId,
+                MemberCount = v2Status.MemberCount,
+                DissolvingExpiryUnixMs = v2Status.DissolvingExpiryUnixMs,
+                CharPenaltyExpiryUnixMs = v2Status.CharPenaltyExpiryUnixMs
+            };
+
+            var v2Members = MembersOf(clan);
+            var rows = new Fineage.Net.Contract.PledgeMemberNet[v2Members.Members.Length];
+            for (int i = 0; i < rows.Length; i++)
+            {
+                var src = v2Members.Members[i];
+                rows[i] = new Fineage.Net.Contract.PledgeMemberNet
+                {
+                    ObjectId = src.ObjectId,
+                    Name = src.Name ?? "",
+                    ClassId = src.ClassId,
+                    Level = src.Level,
+                    Online = src.Online,
+                    PledgeType = src.PledgeType
+                };
+            }
+
+            members = new Fineage.Net.Contract.PledgeMemberListNetMsg
+            {
+                ClanId = v2Members.ClanId,
+                LeaderObjectId = v2Members.LeaderObjectId,
+                Members = rows
+            };
+            return true;
+        }
+    }
+
     void SyncClanStanding(ZoneEntity entity)
     {
         var clan = entity.ClanId == 0 ? null : ClanOf(entity.ObjectId);
