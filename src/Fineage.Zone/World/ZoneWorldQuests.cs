@@ -368,11 +368,9 @@ public sealed partial class ZoneWorld
         RefreshGradePenalty(player);      // refreshExpertisePenalty
         RefreshWeightPenalty(player);     // refreshOverloaded (max load grew with the level)
 
-        toSelf.Add(Pack(session, MsgType.SocialAction, new SocialActionMsg
-        {
-            ObjectId = player.ObjectId,
-            ActionId = SocialLevelUp
-        }));
+        // Mobius broadcastPacket(new SocialAction(this, LEVEL_UP)): the gesture goes to self and every peer in view.
+        FanoutSocial(player, SocialLevelUp, toSelf);
+
         toSelf.Add(Pack(session, MsgType.SystemMessage, new SystemMessageMsg
         {
             Id = LevelUpMessageId,

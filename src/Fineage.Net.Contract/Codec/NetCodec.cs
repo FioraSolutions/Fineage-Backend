@@ -651,6 +651,50 @@ namespace Fineage.Net.Contract
             };
         }
 
+        /// <summary>Mobius <c>ChangeWaitType</c>: wait type + the actor position the client settles the pawn to.</summary>
+        public static byte[] EncodeChangeWaitType(ChangeWaitTypeNetMsg m) => Write(w =>
+        {
+            w.WriteUInt64(m.EntityValue);
+            w.WriteUInt32(m.EntityGeneration);
+            w.WriteInt32(m.WaitType);
+            w.WriteInt32(m.X);
+            w.WriteInt32(m.Y);
+            w.WriteInt32(m.Z);
+        });
+
+        public static ChangeWaitTypeNetMsg DecodeChangeWaitType(ReadOnlySpan<byte> p)
+        {
+            var r = new Reader(p);
+            return new ChangeWaitTypeNetMsg
+            {
+                EntityValue = r.ReadUInt64(),
+                EntityGeneration = r.ReadUInt32(),
+                WaitType = r.ReadInt32(),
+                X = r.ReadInt32(),
+                Y = r.ReadInt32(),
+                Z = r.ReadInt32()
+            };
+        }
+
+        /// <summary>Mobius <c>SocialAction</c>: actor + gesture id.</summary>
+        public static byte[] EncodeSocialAction(SocialActionNetMsg m) => Write(w =>
+        {
+            w.WriteUInt64(m.EntityValue);
+            w.WriteUInt32(m.EntityGeneration);
+            w.WriteInt32(m.ActionId);
+        });
+
+        public static SocialActionNetMsg DecodeSocialAction(ReadOnlySpan<byte> p)
+        {
+            var r = new Reader(p);
+            return new SocialActionNetMsg
+            {
+                EntityValue = r.ReadUInt64(),
+                EntityGeneration = r.ReadUInt32(),
+                ActionId = r.ReadInt32()
+            };
+        }
+
         /// <summary>Mobius <c>EtcStatusUpdate</c> field order (<c>EtcStatusUpdate.java:39-45</c>).</summary>
         public static byte[] EncodeEtcStatusUpdate(EtcStatusUpdateNetMsg m) => Write(w =>
         {
