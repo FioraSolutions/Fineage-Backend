@@ -130,5 +130,13 @@ namespace Fineage.Net.Contract
         public const ushort RequestAcquireSkillInfo = 0x0362;
         /// <summary>Client → zone: Mobius RequestAcquireSkill (skill id, level, skill type).</summary>
         public const ushort RequestAcquireSkill = 0x0363;
+        /// <summary>Client → zone: Mobius RequestEnchantItem (scroll object id) — opens the enchant window.</summary>
+        public const ushort EnchantRequest = 0x0364;
+        /// <summary>Client → zone: enchant confirm (target object id).</summary>
+        public const ushort EnchantConfirm = 0x0365;
+        /// <summary>Client → zone: enchant cancel. Empty body.</summary>
+        public const ushort EnchantCancel = 0x0366;
+        /// <summary>Zone → client: the finished enchant roll (result, level, object id, crystals).</summary>
+        public const ushort EnchantResult = 0x0367;
     }
 }

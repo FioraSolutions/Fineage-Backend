@@ -686,6 +686,44 @@ namespace Fineage.Net.Contract
             return (r.ReadInt32(), r.ReadInt32(), r.ReadInt32());
         }
 
+        public static byte[] EncodeEnchantRequest(EnchantRequestNetMsg m) => Write(w => w.WriteInt32(m.ScrollObjectId));
+
+        public static EnchantRequestNetMsg DecodeEnchantRequest(ReadOnlySpan<byte> p)
+        {
+            var r = new Reader(p);
+            return new EnchantRequestNetMsg { ScrollObjectId = r.ReadInt32() };
+        }
+
+        public static byte[] EncodeEnchantConfirm(EnchantConfirmNetMsg m) => Write(w => w.WriteInt32(m.TargetObjectId));
+
+        public static EnchantConfirmNetMsg DecodeEnchantConfirm(ReadOnlySpan<byte> p)
+        {
+            var r = new Reader(p);
+            return new EnchantConfirmNetMsg { TargetObjectId = r.ReadInt32() };
+        }
+
+        public static byte[] EncodeEnchantResult(EnchantResultNetMsg m) => Write(w =>
+        {
+            w.WriteInt32(m.Result);
+            w.WriteInt32(m.EnchantLevel);
+            w.WriteInt32(m.ObjectId);
+            w.WriteInt32(m.CrystalItemId);
+            w.WriteInt32(m.CrystalCount);
+        });
+
+        public static EnchantResultNetMsg DecodeEnchantResult(ReadOnlySpan<byte> p)
+        {
+            var r = new Reader(p);
+            return new EnchantResultNetMsg
+            {
+                Result = r.ReadInt32(),
+                EnchantLevel = r.ReadInt32(),
+                ObjectId = r.ReadInt32(),
+                CrystalItemId = r.ReadInt32(),
+                CrystalCount = r.ReadInt32()
+            };
+        }
+
         public static byte[] EncodeMoveInput(MoveInputMsg m) => Write(w =>
         {
             w.WriteInt32(m.DestX);

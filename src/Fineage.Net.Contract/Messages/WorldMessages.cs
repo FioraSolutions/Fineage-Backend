@@ -278,6 +278,34 @@ namespace Fineage.Net.Contract
         public AcquireSkillRequirementNet[] Requirements { get; set; } = System.Array.Empty<AcquireSkillRequirementNet>();
     }
 
+    /// <summary>Client → zone: a click on the scroll in the bag (Mobius <c>RequestEnchantItem</c>).</summary>
+    public sealed class EnchantRequestNetMsg
+    {
+        public int ScrollObjectId { get; set; }
+    }
+
+    /// <summary>Client → zone: the item the player placed in the enchant slot.</summary>
+    public sealed class EnchantConfirmNetMsg
+    {
+        public int TargetObjectId { get; set; }
+    }
+
+    /// <summary>
+    /// Zone → client: the finished enchant roll, mirroring <c>EnchantResultMsg</c>.
+    /// Result ordinals follow <c>EnchantProtocol</c>: 0 cancel, 1 success, 2 keep, 3 reset, 4 crystallize.
+    /// </summary>
+    public sealed class EnchantResultNetMsg
+    {
+        public int Result { get; set; }
+        /// <summary>Enchant level after the roll. 0 when the item was crystallized or reset.</summary>
+        public int EnchantLevel { get; set; }
+        /// <summary>Target object id. 0 on cancel.</summary>
+        public int ObjectId { get; set; }
+        /// <summary>Crystal item id gained from a normal failure. 0 when none are gained.</summary>
+        public int CrystalItemId { get; set; }
+        public int CrystalCount { get; set; }
+    }
+
     /// <summary>
     /// Mobius <c>ChangeWaitType</c>: sit/stand. Interlude also carries the actor position, which the client uses to
     /// settle the pawn before it plays the sitting animation.
