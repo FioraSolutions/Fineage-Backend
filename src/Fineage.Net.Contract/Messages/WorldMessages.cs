@@ -136,7 +136,7 @@ namespace Fineage.Net.Contract
     /// <summary>Payload of <c>ShortCutInit</c>: every saved slot for the character.</summary>
     public sealed class ShortCutInitNetMsg
     {
-        public ShortCutNetMsg[] Shortcuts { get; set; } = Array.Empty<ShortCutNetMsg>();
+        public ShortCutNetMsg[] Shortcuts { get; set; } = System.Array.Empty<ShortCutNetMsg>();
     }
 
     /// <summary>Payload of <c>RequestShortCutDel</c> and <c>ShortCutDelete</c> (world slot).</summary>
@@ -370,6 +370,9 @@ namespace Fineage.Net.Contract
 
     public sealed class ReviveRequestNetMsg
     {
+        /// <summary>Restart to village. Matches Backend <c>Fineage.Protocol.DeathProtocol.ReviveToVillage</c>.</summary>
+        public const int ReviveToVillage = 0;
+
         public int Action { get; set; }
     }
 
