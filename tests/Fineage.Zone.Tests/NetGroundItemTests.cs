@@ -33,6 +33,52 @@ public sealed class NetGroundItemTests
     static List<int> SysIds(NetBridgeRecorder rec) =>
         rec.Of(nameof(INetPresenceBridge.FanoutSystemMessage)).Select(a => ((SystemMessageNetMsg)a[1]!).Id).ToList();
 
+    /// <summary>
+    /// Mobius <c>RequestDestroyItem</c>: the trash-basket action. The slot is deleted outright, and unlike a
+    /// drop it must not litter a ground stack the player would then have to walk over and pick back up.
+    /// </summary>
+    [Fact]
+    public async Task Destroying_an_item_shrinks_the_stack_and_leaves_nothing_on_the_ground()
+    {
+        var (kit, session, player, rec) = await SetupAsync();
+        var stack = player.Inventory!.FindByItemId(Adena)!;
+
+        Assert.Null(await kit.World.TryDestroyItemAsync(
+            session, new DestroyItemRequestMsg { ObjectId = stack.ObjectId, Count = 400 }, CancellationToken.None));
+
+        Assert.Equal(600, stack.Count);
+        Assert.Contains(InvRows(rec), r => r.ObjectId == stack.ObjectId && r.Count == 600);
+        Assert.Empty(rec.Of(nameof(INetPresenceBridge.FanoutDropItem)));
+    }
+
+    [Fact]
+    public async Task Destroying_the_last_of_a_stack_removes_the_row()
+    {
+        var (kit, session, player, rec) = await SetupAsync();
+        var stack = player.Inventory!.FindByItemId(Adena)!;
+
+        Assert.Null(await kit.World.TryDestroyItemAsync(
+            session, new DestroyItemRequestMsg { ObjectId = stack.ObjectId, Count = 1000 }, CancellationToken.None));
+
+        Assert.Null(player.Inventory.Find(stack.ObjectId));
+        Assert.Contains(InvRows(rec), r => r.ObjectId == stack.ObjectId && r.Change == InventoryChange.Remove);
+        Assert.Empty(rec.Of(nameof(INetPresenceBridge.FanoutDropItem)));
+    }
+
+    [Fact]
+    public async Task Destroying_more_than_the_stack_holds_is_refused()
+    {
+        var (kit, session, player, rec) = await SetupAsync();
+        var stack = player.Inventory!.FindByItemId(Adena)!;
+
+        string? err = await kit.World.TryDestroyItemAsync(
+            session, new DestroyItemRequestMsg { ObjectId = stack.ObjectId, Count = 5000 }, CancellationToken.None);
+
+        Assert.NotNull(err);
+        Assert.Equal(1000, stack.Count);
+        Assert.Empty(rec.Of(nameof(INetPresenceBridge.FanoutInventoryUpdate)));
+    }
+
     [Fact]
     public async Task Far_drop_is_refused_with_151_and_bag_row_resent()
     {
