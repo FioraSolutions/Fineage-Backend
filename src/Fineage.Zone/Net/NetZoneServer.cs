@@ -368,6 +368,13 @@ public sealed class NetZoneServer : INetPresenceBridge
             _ = _presence.SendAsync(watcher, NetOpcode.SocialAction, payload, CancellationToken.None);
     }
 
+    void INetPresenceBridge.FanoutTargetSelected(IReadOnlyList<int> watcherObjectIds, TargetSelectedNetMsg selected)
+    {
+        var payload = NetCodec.EncodeTargetSelected(selected);
+        foreach (int watcher in watcherObjectIds)
+            _ = _presence.SendAsync(watcher, NetOpcode.TargetSelected, payload, CancellationToken.None);
+    }
+
     void INetPresenceBridge.FanoutQuestList(IReadOnlyList<int> watcherObjectIds, QuestListNetMsg list)
     {
         var payload = NetCodec.EncodeQuestList(list);
@@ -581,9 +588,11 @@ public sealed class NetZoneServer : INetPresenceBridge
                             if (zoneSession.Bound && zoneSession.InWorld)
                             {
                                 var use = NetCodec.DecodeActionUse(envelope.Payload);
-                                // Net renders sit/stand (ChangeWaitType), the walk/run toggle (ChangeMoveType) and the
-                                // three social gestures (SocialAction); the rest of Mobius' action table is still V2-only.
+                                // Net renders sit/stand (ChangeWaitType), the walk/run toggle (ChangeMoveType),
+                                // next-target (MyTargetSelected), panel Attack (AttackRequest) and the three social
+                                // gestures (SocialAction); the rest of Mobius' action table is still V2-only.
                                 if (use.ActionId is not (ActionProtocol.SitStand or ActionProtocol.WalkRun
+                                    or ActionProtocol.Attack or ActionProtocol.NextTarget
                                     or ActionProtocol.SocialGreeting or ActionProtocol.SocialVictory or ActionProtocol.SocialAdvance))
                                 {
                                     await RejectAsync(conn, ActionProtocol.Unsupported, $"action {use.ActionId} not on Net yet", ct).ConfigureAwait(false);
@@ -1023,21 +1032,8 @@ public sealed class NetZoneServer : INetPresenceBridge
             return;
         }
 
-        int color = 0;
-        if (_world.TryGetLivePlayer(zoneSession, out var player) &&
-            _world.TryGetEntityById(zoneSession.SelectedTargetId, out var target) &&
-            target.Kind == ZoneEntityKind.Npc)
-            color = InterludeStatus.TargetColor(player.Level, target.Level);
-
-        await conn.SendAsync(
-            NetOpcode.TargetSelected,
-            NetCodec.EncodeTargetSelected(new TargetSelectedNetMsg
-            {
-                TargetObjectId = zoneSession.SelectedTargetId,
-                ColorHint = color
-            }),
-            envelope.RequestSequence,
-            ct).ConfigureAwait(false);
+        // Nothing to answer here: the world already fanned MyTargetSelected's Net mirror (TargetSelected, id +
+        // Mobius colour), the target's StatusUpdate and the error path through INetPresenceBridge.
     }
 
     async Task OnAttackAsync(
