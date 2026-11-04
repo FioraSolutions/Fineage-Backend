@@ -419,7 +419,9 @@ public sealed class NetZoneServer : INetPresenceBridge
 
     public async Task HandleAsync(NetConnection conn, CancellationToken ct)
     {
-        await using var discard = new MemoryStream();
+        // The world layer still emits V2 frames alongside Net fanout. A MemoryStream here
+        // would grow for the whole session, so use a sink that drops every frame.
+        await using var discard = new DiscardingStream();
         var zoneSession = new ZoneSession(discard);
         EntityId self = default;
         int registeredObjectId = 0;
