@@ -36,5 +36,11 @@
     <Content Include="..\..\data\multisell.json" Link="data\multisell.json" CopyToOutputDirectory="PreserveNewest" />
     <Content Include="..\..\data\doors.json" Link="data\doors.json" CopyToOutputDirectory="PreserveNewest" />
     <Content Include="..\..\data\water-zones.json" Link="data\water-zones.json" CopyToOutputDirectory="PreserveNewest" />
+    <Content Include="..\..\data\herbs.json" Link="data\herbs.json" CopyToOutputDirectory="PreserveNewest" />
+    <Content Include="..\..\data\skill-combat.json" Link="data\skill-combat.json" CopyToOutputDirectory="PreserveNewest" />
+    <Content Include="..\..\data\skill-passives.json" Link="data\skill-passives.json" CopyToOutputDirectory="PreserveNewest" />
+    <Content Include="..\..\data\skill-stat-effects.json" Link="data\skill-stat-effects.json" CopyToOutputDirectory="PreserveNewest" />
+    <Content Include="..\..\data\spoil.json" Link="data\spoil.json" CopyToOutputDirectory="PreserveNewest" />
+    <Content Include="..\..\data\village-masters.json" Link="data\village-masters.json" CopyToOutputDirectory="PreserveNewest" />
   </ItemGroup>
 </Project>
