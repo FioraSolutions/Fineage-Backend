@@ -17,6 +17,9 @@ namespace Fineage.Net.Contract
         public const ushort CreateResult = 0x0206;
         public const ushort SelectCharacter = 0x0207;
         public const ushort Handoff = 0x0208;
+        public const ushort DeleteCharacter = 0x0209;
+        public const ushort DeleteResult = 0x020A;
+        public const ushort RestoreCharacter = 0x020B;
 
         // World 0x03xx (zone port)
         public const ushort ZoneAuth = 0x0301;
