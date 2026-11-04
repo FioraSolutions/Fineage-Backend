@@ -62,6 +62,10 @@ public class NetEnterWorldProjectorTests
         var packets = NetEnterWorldProjector.FromEntity(entity, self, DateTimeOffset.UtcNow.ToUnixTimeMilliseconds());
         Assert.Equal(1, packets.Spawn.Race);
         Assert.Equal(25, packets.Spawn.ClassId);
+        // Level/MaxHp drive the client's target colour and HP bar; they must reach the wire.
+        Assert.Equal(entity.Level, packets.Spawn.Level);
+        Assert.Equal(entity.MaxHp, packets.Spawn.MaxHp);
+        Assert.True(packets.Spawn.Level > 0);
         Assert.Equal(entity.CurHp, packets.Stats.Hp);
         Assert.Equal(entity.MaxHp, packets.Stats.MaxHp);
         Assert.True(packets.Items.Items.Length > 0);

@@ -74,7 +74,9 @@ static class NetEnterWorldProjector
             WalkSpeed = entity.WalkSpeed,
             Running = entity.Running,
             Attackable = entity.Attackable,
-            Dead = entity.CurHp <= 0
+            Dead = entity.CurHp <= 0,
+            Level = entity.Level,
+            MaxHp = entity.MaxHp
         };
     }
 
@@ -98,7 +100,9 @@ static class NetEnterWorldProjector
             WalkSpeed = entity.WalkSpeed,
             Running = entity.Running,
             Paperdoll = entity.Inventory == null ? [] : InventoryMessages.ItemIds(entity.Inventory),
-            Dead = entity.Dead
+            Dead = entity.Dead,
+            Level = entity.Level,
+            MaxHp = entity.MaxHp
         };
 
     static PlayerStatsMsg BuildStats(ZoneEntity entity, EntityId self, int maxCp) =>
