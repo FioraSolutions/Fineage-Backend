@@ -50,6 +50,10 @@ namespace Fineage.Net.Contract
         public int[] Paperdoll { get; set; } = System.Array.Empty<int>();
         /// <summary>Mobius isAlikeDead: the entity is a corpse when it enters view (late observer sees it lying, not standing).</summary>
         public bool Dead { get; set; }
+        /// <summary>Mobius level: drives NPC target colour (InterludeStatus.TargetColor) and level in the nameplate.</summary>
+        public int Level { get; set; }
+        /// <summary>Max HP so a client can size the HP bar without waiting for the first StatusUpdate.</summary>
+        public int MaxHp { get; set; }
     }
 
     public sealed class PlayerStatsMsg

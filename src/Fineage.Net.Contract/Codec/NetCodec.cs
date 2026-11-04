@@ -328,6 +328,8 @@ namespace Fineage.Net.Contract
             w.WriteByte(m.Attackable ? (byte)1 : (byte)0);
             w.WriteInt32Array(m.Paperdoll);
             w.WriteByte(m.Dead ? (byte)1 : (byte)0);
+            w.WriteInt32(m.Level);
+            w.WriteInt32(m.MaxHp);
         });
 
         public static EntitySpawnMsg DecodeEntitySpawn(ReadOnlySpan<byte> p)
@@ -358,6 +360,10 @@ namespace Fineage.Net.Contract
                 msg.Paperdoll = r.ReadInt32Array();
             if (r.Remaining > 0)
                 msg.Dead = r.ReadByte() != 0;
+            if (r.Remaining > 0)
+                msg.Level = r.ReadInt32();
+            if (r.Remaining > 0)
+                msg.MaxHp = r.ReadInt32();
             return msg;
         }
 
