@@ -506,6 +506,13 @@ namespace Fineage.Net.Contract
         public int Z { get; set; }
     }
 
+    /// <summary>Client → zone: Mobius <c>RequestDestroyItem</c>. No coordinates: the slot is just deleted.</summary>
+    public sealed class DestroyItemRequestMsg
+    {
+        public int ObjectId { get; set; }
+        public int Count { get; set; } = 1;
+    }
+
     public sealed class UseItemNetMsg
     {
         public int ObjectId { get; set; }

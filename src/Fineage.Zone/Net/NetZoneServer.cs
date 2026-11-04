@@ -543,6 +543,9 @@ public sealed class NetZoneServer : INetPresenceBridge
                         case NetOpcode.DropItemRequest:
                             await OnDropItemAsync(conn, zoneSession, envelope, ct).ConfigureAwait(false);
                             break;
+                        case NetOpcode.DestroyItemRequest:
+                            await OnDestroyItemAsync(conn, zoneSession, envelope, ct).ConfigureAwait(false);
+                            break;
                         case NetOpcode.UseItem:
                             await OnUseItemAsync(conn, zoneSession, envelope, ct).ConfigureAwait(false);
                             break;
@@ -1403,6 +1406,29 @@ public sealed class NetZoneServer : INetPresenceBridge
         if (error != null)
             await RejectAsync(conn, error, "Pickup failed.", ct).ConfigureAwait(false);
         // InventoryUpdate + EntityDespawn fan out via NetBridge.
+    }
+
+    async Task OnDestroyItemAsync(
+        NetConnection conn,
+        ZoneSession zoneSession,
+        PacketEnvelope envelope,
+        CancellationToken ct)
+    {
+        RequireHello(conn);
+        if (!zoneSession.Bound || !zoneSession.InWorld)
+        {
+            await RejectAsync(conn, "not_in_world", "Enter world first.", ct).ConfigureAwait(false);
+            return;
+        }
+
+        var destroy = NetCodec.DecodeDestroyItemRequest(envelope.Payload);
+        string? error = await _world.TryDestroyItemAsync(
+            zoneSession,
+            new DestroyItemRequestMsg { ObjectId = destroy.ObjectId, Count = destroy.Count },
+            ct).ConfigureAwait(false);
+        if (error != null)
+            await RejectAsync(conn, error, "Destroy item failed.", ct).ConfigureAwait(false);
+        // InventoryUpdate fans out from ZoneWorldGround.
     }
 
     async Task OnDropItemAsync(

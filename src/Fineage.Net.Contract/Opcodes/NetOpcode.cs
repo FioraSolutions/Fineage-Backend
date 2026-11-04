@@ -160,5 +160,7 @@ namespace Fineage.Net.Contract
         public const ushort ClanAskJoin = 0x0371;
         /// <summary>Zone → client: Mobius JoinPledge (the invite was accepted or declined).</summary>
         public const ushort ClanJoinResult = 0x0372;
+        /// <summary>Client → zone: Mobius RequestDestroyItem. Body is <c>DestroyItemRequestMsg</c>.</summary>
+        public const ushort DestroyItemRequest = 0x0375;
     }
 }
