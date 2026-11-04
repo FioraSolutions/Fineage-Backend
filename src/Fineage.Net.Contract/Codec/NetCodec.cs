@@ -1155,6 +1155,17 @@ namespace Fineage.Net.Contract
             return new TargetSelectedNetMsg { TargetObjectId = r.ReadInt32(), ColorHint = r.ReadInt32() };
         }
 
+        public static byte[] EncodeTargetUnselected(TargetUnselectedNetMsg m) => Write(w =>
+        {
+            w.WriteInt32(m.TargetObjectId);
+        });
+
+        public static TargetUnselectedNetMsg DecodeTargetUnselected(ReadOnlySpan<byte> p)
+        {
+            var r = new Reader(p);
+            return new TargetUnselectedNetMsg { TargetObjectId = r.ReadInt32() };
+        }
+
         public static byte[] EncodeAttackState(AttackStateMsg m) => Write(w =>
         {
             w.WriteUInt64(m.AttackerValue);

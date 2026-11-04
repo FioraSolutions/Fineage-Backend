@@ -160,5 +160,12 @@ namespace Fineage.Net.Contract
         public const ushort ClanAskJoin = 0x0371;
         /// <summary>Zone → client: Mobius JoinPledge (the invite was accepted or declined).</summary>
         public const ushort ClanJoinResult = 0x0372;
+        /// <summary>Client → zone: Mobius RequestTargetCanceld. Empty body.</summary>
+        public const ushort TargetCancelRequest = 0x0373;
+        /// <summary>
+        /// Zone → client: the selection was dropped, so the target window and the nameplate close.
+        /// Mobius sends this to the observing peers as TargetUnselected; over Net the owner needs it too.
+        /// </summary>
+        public const ushort TargetUnselected = 0x0374;
     }
 }
