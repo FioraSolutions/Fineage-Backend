@@ -776,6 +776,14 @@ public sealed partial class ZoneWorld
         return true;
     }
 
+    /// <summary>
+    /// Sanity clamp for one client move request (L2 units). This is a "is the packet plausible" guard,
+    /// not a region boundary: click-to-move crosses a whole village, and every spawn map shares it.
+    /// See <see cref="MoveLimits"/>.
+    /// </summary>
+    static bool WithinMoveRequest(int fromX, int fromY, int toX, int toY) =>
+        MoveLimits.WithinStep(fromX, fromY, toX, toY);
+
     string? TryMove(ZoneSession session, MoveToMsg move, List<Pending> toSelf, List<Pending> toOthers)
     {
         if (!IsLive(session))
@@ -795,7 +803,9 @@ public sealed partial class ZoneWorld
             return null;
         }
         session.QueuedMove = null;
-        if (!TalkingIsland.WithinStep(entity.X, entity.Y, move.DestX, move.DestY))
+        // Sanity clamp for a single client move request, not a region gate: a click can be far away
+        // (click-to-move across a village) and the same code runs for every spawn map.
+        if (!WithinMoveRequest(entity.X, entity.Y, move.DestX, move.DestY))
             return "range";
 
         var ack = new MoveToMsg

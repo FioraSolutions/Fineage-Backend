@@ -513,6 +513,8 @@ namespace Fineage.Net.Contract
                 w.WriteInt32(row.Count);
                 w.WriteInt32(row.EnchantLevel);
                 w.WriteInt32(row.EquippedSlot);
+                w.WriteString(row.BodySlot ?? "");
+                w.WriteString(row.Kind ?? "");
             }
         });
 
@@ -1465,6 +1467,8 @@ namespace Fineage.Net.Contract
                 w.WriteInt32(row.Count);
                 w.WriteInt32(row.EnchantLevel);
                 w.WriteInt32(row.EquippedSlot);
+                w.WriteString(row.BodySlot ?? "");
+                w.WriteString(row.Kind ?? "");
             }
         }
 
@@ -1481,7 +1485,9 @@ namespace Fineage.Net.Contract
                     ItemId = r.ReadInt32(),
                     Count = r.ReadInt32(),
                     EnchantLevel = r.ReadInt32(),
-                    EquippedSlot = r.ReadInt32()
+                    EquippedSlot = r.ReadInt32(),
+                    BodySlot = r.ReadString(),
+                    Kind = r.ReadString()
                 };
             }
             return rows;

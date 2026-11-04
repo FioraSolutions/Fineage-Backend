@@ -114,13 +114,13 @@ public static class ZoneMultiplayerAcceptance
 
         await left.SendAsync(MsgType.MoveTo, new MoveToMsg
         {
-            DestX = leftSpawn.Spawned.X + TalkingIsland.MaxStep,
+            DestX = leftSpawn.Spawned.X + MoveLimits.MaxStep,
             DestY = leftSpawn.Spawned.Y,
             DestZ = leftSpawn.Spawned.Z
         }).ConfigureAwait(false);
 
         var ack = await left.ExpectAsync<MoveToMsg>(MsgType.MoveToAck).ConfigureAwait(false);
-        if (ack.ObjectId != fighter.CharacterId || ack.DestX != leftSpawn.Spawned.X + TalkingIsland.MaxStep)
+        if (ack.ObjectId != fighter.CharacterId || ack.DestX != leftSpawn.Spawned.X + MoveLimits.MaxStep)
             throw new InvalidOperationException("aoi move ack mismatch");
 
         var dropped = new List<int>();
@@ -622,7 +622,7 @@ public static class ZoneMultiplayerAcceptance
 
     static (int X, int Y, int Z) StepToward(int fromX, int fromY, int fromZ, int toX, int toY, int toZ)
     {
-        if (TalkingIsland.WithinStep(fromX, fromY, toX, toY))
+        if (MoveLimits.WithinStep(fromX, fromY, toX, toY))
             return (toX, toY, toZ);
 
         long dx = toX - (long)fromX;
@@ -631,18 +631,18 @@ public static class ZoneMultiplayerAcceptance
         if (dist < 1)
             return (toX, toY, toZ);
 
-        double scale = TalkingIsland.MaxStep / dist;
+        double scale = MoveLimits.MaxStep / dist;
         int stepX = fromX + (int)Math.Floor(dx * scale);
         int stepY = fromY + (int)Math.Floor(dy * scale);
-        if (!TalkingIsland.WithinStep(fromX, fromY, stepX, stepY))
+        if (!MoveLimits.WithinStep(fromX, fromY, stepX, stepY))
         {
-            scale = (TalkingIsland.MaxStep - 1) / dist;
+            scale = (MoveLimits.MaxStep - 1) / dist;
             stepX = fromX + (int)Math.Floor(dx * scale);
             stepY = fromY + (int)Math.Floor(dy * scale);
         }
 
         int stepZ = fromZ;
-        if (dist <= TalkingIsland.MaxStep)
+        if (dist <= MoveLimits.MaxStep)
             stepZ = toZ;
         else
             stepZ = fromZ + (int)Math.Floor((toZ - (long)fromZ) * scale);

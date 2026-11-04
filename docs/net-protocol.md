@@ -37,7 +37,7 @@ Import / repair:
 
 ```bash
 docker compose up -d postgres
-FINEAGE_STORE=postgres dotnet run --project src/Fineage.Login -- import-json local-data/accounts.json
+FINEAGE_STORE=postgres dotnet run --project src/Fineage.Login -- import-json /path/to/legacy-accounts.json
 FINEAGE_STORE=postgres dotnet run --project src/Fineage.Login -- backfill-normalized
 ```
 
@@ -136,7 +136,20 @@ AOI (who is on the knownlist):
 |-----|--------|
 | `FINEAGE_ZONE_AOI_CELL` &gt; 0 | `GridAoi` with that cell size (default design size 3000) |
 | else `FINEAGE_ZONE_INTEREST_RANGE` &gt; 0 | `RangeAoi` |
-| else | `SingleCellAoi` (whole zone — local village default) |
+| else | `SingleCellAoi` (whole zone — only sane for one village map) |
+
+How much of the datapack is spawned:
+
+| Env | Effect |
+|-----|--------|
+| `FINEAGE_ZONE_INCLUDE_ENABLED_MAPS=1` | every `enabled` map under `data/spawns/` — the whole Interlude world (~34k NPCs) |
+| `FINEAGE_ZONE_MAPS=a,b` | whitelist: only those spawn maps |
+| `FINEAGE_ZONE_BOUNDS=x1,y1,x2,y2[;...]` | keep only rows inside those XY boxes |
+| none of the above | the single legacy active map (`ti_cedric`) |
+
+`scripts/run-local-net.sh` starts the whole world with `GridAoi(3000)`, so visibility stays spatial: a
+player only receives the NPCs around them, not all 34k. Do not pair the whole world with
+`SingleCellAoi` — that would put every NPC on every knownlist.
 
 ## Scale seams
 
