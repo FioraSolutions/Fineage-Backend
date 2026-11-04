@@ -105,6 +105,11 @@ interface INetPresenceBridge
     /// </summary>
     void FanoutTargetSelected(IReadOnlyList<int> watcherObjectIds, TargetSelectedNetMsg selected);
 
+    /// <summary>
+    /// Mobius <c>TargetUnselected</c>: the selection was dropped. Called under the ZoneWorld gate.
+    /// </summary>
+    void FanoutTargetUnselected(IReadOnlyList<int> watcherObjectIds, TargetUnselectedNetMsg unselected);
+
     /// <summary>Mobius <c>AcquireSkillList</c>: the trainer's learnable rows. Called under the ZoneWorld gate.</summary>
     void FanoutAcquireSkillList(IReadOnlyList<int> watcherObjectIds, AcquireSkillListNetMsg list);
 

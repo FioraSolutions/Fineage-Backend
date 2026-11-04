@@ -23,6 +23,32 @@ public sealed partial class ZoneWorld
         return null;
     }
 
+    public async Task<string?> TryCancelTargetAsync(ZoneSession session, CancellationToken ct)
+    {
+        if (!IsLive(session))
+            return "world";
+
+        var toSelf = new List<Pending>();
+        lock (_gate)
+        {
+            if (!_byId.TryGetValue(session.ObjectId, out _))
+                return "world";
+
+            int previous = session.SelectedTargetId;
+            session.SelectedTargetId = 0;
+            session.AutoAttackTargetId = 0;
+            session.ClearApproach();
+            toSelf.Add(Pack(session, MsgType.MyTargetSelected, new MyTargetSelectedMsg { ObjectId = 0, ColorHint = 0 }));
+            NetBridge?.FanoutTargetUnselected([session.ObjectId], new Fineage.Net.Contract.TargetUnselectedNetMsg
+            {
+                TargetObjectId = previous
+            });
+        }
+
+        await FlushSelfAsync(session, toSelf, ct).ConfigureAwait(false);
+        return null;
+    }
+
     public async Task<string?> TryAttackAsync(ZoneSession session, AttackRequestMsg request, CancellationToken ct)
     {
         if (!IsLive(session))

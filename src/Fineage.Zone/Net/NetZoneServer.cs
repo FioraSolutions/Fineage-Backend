@@ -375,6 +375,13 @@ public sealed class NetZoneServer : INetPresenceBridge
             _ = _presence.SendAsync(watcher, NetOpcode.TargetSelected, payload, CancellationToken.None);
     }
 
+    void INetPresenceBridge.FanoutTargetUnselected(IReadOnlyList<int> watcherObjectIds, TargetUnselectedNetMsg unselected)
+    {
+        var payload = NetCodec.EncodeTargetUnselected(unselected);
+        foreach (int watcher in watcherObjectIds)
+            _ = _presence.SendAsync(watcher, NetOpcode.TargetUnselected, payload, CancellationToken.None);
+    }
+
     void INetPresenceBridge.FanoutAcquireSkillList(IReadOnlyList<int> watcherObjectIds, AcquireSkillListNetMsg list)
     {
         var payload = NetCodec.EncodeAcquireSkillList(list);
@@ -533,6 +540,9 @@ public sealed class NetZoneServer : INetPresenceBridge
                             break;
                         case NetOpcode.SelectTarget:
                             await OnSelectTargetAsync(conn, zoneSession, envelope, ct).ConfigureAwait(false);
+                            break;
+                        case NetOpcode.TargetCancelRequest:
+                            await OnTargetCancelAsync(conn, zoneSession, ct).ConfigureAwait(false);
                             break;
                         case NetOpcode.AttackRequest:
                             await OnAttackAsync(conn, zoneSession, envelope, ct).ConfigureAwait(false);
@@ -1359,12 +1369,29 @@ public sealed class NetZoneServer : INetPresenceBridge
         // Mobius colour), the target's StatusUpdate and the error path through INetPresenceBridge.
     }
 
+    async Task OnTargetCancelAsync(
+        NetConnection conn,
+        ZoneSession zoneSession,
+        CancellationToken ct)
+    {
+        RequireHello(conn);
+        if (!zoneSession.Bound || !zoneSession.InWorld)
+        {
+            await RejectAsync(conn, "not_in_world", "Enter world first.", ct).ConfigureAwait(false);
+            return;
+        }
+
+        string? error = await _world.TryCancelTargetAsync(zoneSession, ct).ConfigureAwait(false);
+        if (error != null)
+            await RejectAsync(conn, error, "Target cancel failed.", ct).ConfigureAwait(false);
+        // The world already fanned TargetUnselected, so nothing to answer here.
+    }
+
     async Task OnAttackAsync(
         NetConnection conn,
         ZoneSession zoneSession,
         PacketEnvelope envelope,
-        CancellationToken ct)
-    {
+        CancellationToken ct)    {
         RequireHello(conn);
         if (!zoneSession.Bound || !zoneSession.InWorld)
         {

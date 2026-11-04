@@ -117,4 +117,46 @@ public sealed class NetTargetSelectTests
 
         Assert.NotNull(error);
     }
+
+    /// <summary>
+    /// Mobius <c>RequestTargetCanceld</c>. Before this the client cleared its own selection and the zone
+    /// kept the old one, so a skill or attack with no explicit target still aimed at whatever was clicked last.
+    /// </summary>
+    [Fact]
+    public async Task Cancelling_the_target_clears_the_zone_selection_and_announces_it()
+    {
+        var (kit, session, player, rec) = await SetupAsync();
+        Assert.Null(await kit.World.TrySelectTargetAsync(
+            session, new SelectTargetMsg { TargetObjectId = MobId }, default));
+        Assert.Equal(MobId, session.SelectedTargetId);
+
+        Assert.Null(await kit.World.TryCancelTargetAsync(session, default));
+
+        Assert.Equal(0, session.SelectedTargetId);
+        Assert.Equal(0, session.AutoAttackTargetId);
+        var unselected = Assert.IsType<TargetUnselectedNetMsg>(
+            Assert.Single(rec.Of(nameof(INetPresenceBridge.FanoutTargetUnselected)))[1]);
+        Assert.Equal(MobId, unselected.TargetObjectId);
+
+        // A second cancel has nothing to unselect and must not upset the client with a stale id.
+        Assert.Null(await kit.World.TryCancelTargetAsync(session, default));
+        var again = Assert.IsType<TargetUnselectedNetMsg>(
+            rec.Of(nameof(INetPresenceBridge.FanoutTargetUnselected)).Last()[1]);
+        Assert.Equal(0, again.TargetObjectId);
+    }
+
+    /// <summary>Cancelling also stops the auto-attack, or the next swing would re-target the dropped mob.</summary>
+    [Fact]
+    public async Task Cancelling_the_target_stops_the_running_auto_attack()
+    {
+        var (kit, session, player, rec) = await SetupAsync();
+
+        Assert.Null(await kit.World.TrySelectTargetAsync(
+            session, new SelectTargetMsg { TargetObjectId = MobId }, default));
+        session.AutoAttackTargetId = MobId;
+
+        Assert.Null(await kit.World.TryCancelTargetAsync(session, default));
+
+        Assert.Equal(0, session.AutoAttackTargetId);
+    }
 }

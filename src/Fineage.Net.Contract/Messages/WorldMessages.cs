@@ -432,6 +432,15 @@ namespace Fineage.Net.Contract
         public int ColorHint { get; set; }
     }
 
+    /// <summary>
+    /// Zone → client: the player's selection was dropped (Mobius <c>TargetUnselected</c>), so the target
+    /// window and nameplate close. Carries the object id that was unselected, 0 when there was none.
+    /// </summary>
+    public sealed class TargetUnselectedNetMsg
+    {
+        public int TargetObjectId { get; set; }
+    }
+
     public sealed class AttackStateMsg
     {
         public ulong AttackerValue { get; set; }
