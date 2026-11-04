@@ -99,7 +99,10 @@ public sealed partial class ZoneWorld
             TalkingIslandRestart.Heading);
 
         FanoutDeathEvent(player, MsgType.Revive, revive, toSelf, toOthers);
-        Relocate(player, TalkingIslandRestart.X, TalkingIslandRestart.Y, TalkingIslandRestart.Z, toSelf, toOthers);
+        // Relocate fans the Net TeleportToLocation itself (owner + peers in view); the V2 frame stays explicit
+        // so the FanoutDeathEvent relay must not fan it a second time.
+        Relocate(player, TalkingIslandRestart.X, TalkingIslandRestart.Y, TalkingIslandRestart.Z, toSelf, toOthers,
+            heading: TalkingIslandRestart.Heading, netTeleport: false);
         FanoutDeathEvent(player, MsgType.TeleportToLocation, teleport, toSelf, toOthers);
 
         if (player.Session != null)

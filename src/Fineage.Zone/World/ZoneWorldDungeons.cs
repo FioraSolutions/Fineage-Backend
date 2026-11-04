@@ -114,13 +114,19 @@ public sealed partial class ZoneWorld
         }
     }
 
-    void Relocate(ZoneEntity entity, int x, int y, int z, List<Pending> toSelf, List<Pending> toOthers, int? instanceId = null, bool persist = true)
+    /// <summary>
+    /// Mobius teleToLocation + knownlist reconcile. <paramref name="netTeleport"/> is false only when the
+    /// caller fans the same relocation itself (the revive path already emits a TeleportToLocation event).
+    /// </summary>
+    void Relocate(ZoneEntity entity, int x, int y, int z, List<Pending> toSelf, List<Pending> toOthers, int? instanceId = null, bool persist = true, int? heading = null, bool netTeleport = true)
     {
         var session = entity.Session;
         if (session == null)
             return;
         // Mobius teleToLocation: abortCast + intention IDLE — no hit lands across a teleport, queued cast/pickup dropped.
         AbortCast(entity, "teleport", toSelf, notify: false);
+        if (heading is int face)
+            entity.Heading = face;
         session.PendingPickupId = 0;
         session.PendingPickupAtUnixMs = 0;
         session.AutoAttackTargetId = 0;
@@ -154,16 +160,34 @@ public sealed partial class ZoneWorld
         CollectVisible(entity, after);
 
         toSelf.Add(Pack(session, MsgType.MoveToAck, ack));
+        // Net: Mobius TeleportToLocation to the owner and every peer that held it in view.
+        // MoveToAck above only reaches the (dormant) V2 stream, so Net needed its own relocation.
+        var netWatchers = new List<int> { entity.ObjectId };
         foreach (int id in SortedExcept(after, before))
             LinkSeen(entity, id, toSelf, toOthers);
         foreach (int id in SortedShared(after, before))
         {
             if (_byId.TryGetValue(id, out var other) && other.Session != null)
+            {
                 toOthers.Add(Pack(other.Session, MsgType.MoveToAck, ack));
+                netWatchers.Add(id);
+            }
         }
 
         foreach (int id in SortedExcept(before, after))
             Forget(entity, id, toSelf, toOthers);
+
+        if (netTeleport)
+        {
+            NetBridge?.FanoutTeleportToLocation(netWatchers, new Fineage.Net.Contract.TeleportToLocationNetMsg
+            {
+                ObjectId = entity.ObjectId,
+                X = x,
+                Y = y,
+                Z = z,
+                Heading = entity.Heading
+            });
+        }
     }
 
     static DungeonEnteredMsg Entered(DungeonSite site, bool inside, int action) => new()
