@@ -122,5 +122,13 @@ namespace Fineage.Net.Contract
         public const ushort ChangeWaitType = 0x035E;
         /// <summary>Zone → client: Mobius SocialAction (gesture id; 15 = level up).</summary>
         public const ushort SocialAction = 0x035F;
+        /// <summary>Zone → client: Mobius AcquireSkillList (the trainer's learnable rows).</summary>
+        public const ushort AcquireSkillList = 0x0360;
+        /// <summary>Zone → client: Mobius AcquireSkillInfo (confirmation page for one trainer offer).</summary>
+        public const ushort AcquireSkillInfo = 0x0361;
+        /// <summary>Client → zone: Mobius RequestAcquireSkillInfo (skill id, level, skill type).</summary>
+        public const ushort RequestAcquireSkillInfo = 0x0362;
+        /// <summary>Client → zone: Mobius RequestAcquireSkill (skill id, level, skill type).</summary>
+        public const ushort RequestAcquireSkill = 0x0363;
     }
 }

@@ -64,6 +64,46 @@ public sealed partial class ZoneWorld
         }
     }
 
+    /// <summary>
+    /// Mobius <c>RequestAcquireSkillInfo</c> (the confirmation page) and <c>RequestAcquireSkill</c> (the purchase)
+    /// straight from the trainer window, without a bypass round trip.
+    /// </summary>
+    public async Task<string?> TryAcquireSkillAsync(ZoneSession session, int skillId, int level, int skillType, bool informing, CancellationToken ct)
+    {
+        if (!IsLive(session))
+            return "world";
+        if (skillId <= 0 || level <= 0)
+            return "bad_request";
+
+        var toSelf = new List<Pending>();
+        string? error = null;
+        lock (_gate)
+        {
+            if (!_byId.TryGetValue(session.ObjectId, out var player) || player.Session == null)
+                return "world";
+            if (player.Dead)
+                return InventoryProtocol.Dead;
+            if (informing)
+                PublishAcquireSkillInfo(session, player, skillId, level, skillType);
+            else
+                error = LearnTrainerSkill(session, player, TrainerNpcOf(player), skillId, toSelf);
+        }
+
+        if (error != null)
+            return error;
+        await FlushSelfAsync(session, toSelf, ct).ConfigureAwait(false);
+        return null;
+    }
+
+    /// <summary>The trainer the window was opened from, or a stand-in so the gate does not need the NPC in range.</summary>
+    ZoneEntity TrainerNpcOf(ZoneEntity player) =>
+        _byId.TryGetValue(_trainerNpcId, out var npc) && npc.Kind == ZoneEntityKind.Npc
+            ? npc
+            : new ZoneEntity { Kind = ZoneEntityKind.Npc, NpcId = 0, Name = "Trainer", ObjectId = 0 };
+
+    /// <summary>Last NPC that opened the trainer window, so a window-driven purchase can echo the same page.</summary>
+    int _trainerNpcId;
+
     void LoadLearnedSkills(ZoneEntity entity, Fineage.Login.CharacterRecord? stored)
     {
         entity.LearnedSkills.Clear();
@@ -76,10 +116,11 @@ public sealed partial class ZoneWorld
 
     string? ShowTrainerSkills(ZoneSession session, ZoneEntity player, ZoneEntity npc, List<Pending> toSelf)
     {
-        var html = new System.Text.StringBuilder("<html><body>%npcname%:<br>");
-        if (!TrainerSpLearn)
+        var rows = TrainerSkills.Available(_game.SkillTrees, _game.Skills, player.ClassId, player.Level, player.KnownSkills, _game.Classes);
+        if (!TrainerSpLearn && rows.Count == 0)
         {
-            html.Append("In this world your class skills come to you on their own when you reach their level.<br>");
+            var html = new System.Text.StringBuilder("<html><body>%npcname%:<br>");
+            html.Append("In this world your class skills come to you on their own when they reach their level.<br>");
             int next = TrainerSkills.NextLearnLevel(_game.SkillTrees, player.ClassId, player.Level, _game.Classes);
             if (next > 0)
                 html.Append("Your next new skill arrives at level ").Append(next).Append('.');
@@ -88,42 +129,142 @@ public sealed partial class ZoneWorld
             return null;
         }
 
-        var rows = TrainerSkills.Available(_game.SkillTrees, _game.Skills, player.ClassId, player.Level, player.KnownSkills, _game.Classes);
+        // Mobius Folk.showSkillList -> AcquireSkillList: the trainer window is the primary surface on Net.
+        _trainerNpcId = npc.ObjectId;
+        PublishAcquireSkillList(session, player, rows);
         if (rows.Count == 0)
         {
             int next = TrainerSkills.NextLearnLevel(_game.SkillTrees, player.ClassId, player.Level, _game.Classes);
             // Mobius SystemMessage 607 "You do not have any further skills to learn. Come back when you have reached Level S1."
-            html.Append(next > 0 ? $"There is nothing more I can teach you now. Come back at level {next}." : "There is nothing more I can teach you.");
+            SendHtml(session, player, npc, NothingToLearnHtml(next), toSelf);
+            return null;
         }
-        else
+
+        // The HTML list stays for clients without the acquire window; it links the same learn_skill bypass.
+        SendHtml(session, player, npc, TrainerListHtml(player, rows), toSelf);
+        return null;
+    }
+
+    static string NothingToLearnHtml(int nextLevel) =>
+        new System.Text.StringBuilder("<html><body>%npcname%:<br>")
+            .Append(nextLevel > 0
+                ? $"There is nothing more I can teach you now. Come back at level {nextLevel}."
+                : "There is nothing more I can teach you.")
+            .Append("</body></html>")
+            .ToString();
+
+    string TrainerListHtml(ZoneEntity player, IReadOnlyList<LearnableSkill> rows)
+    {
+        var html = new System.Text.StringBuilder("<html><body>%npcname%:<br>");
+        html.Append("SP: ").Append(player.Sp).Append("<br>");
+        foreach (var r in rows)
         {
-            html.Append("SP: ").Append(player.Sp).Append("<br>");
-            foreach (var r in rows)
-            {
-                string name = _game.Skills.Find(r.SkillId)?.Name ?? $"Skill {r.SkillId}";
-                html.Append("<a action=\"bypass -h npc_%objectId%_learn_skill ").Append(r.SkillId).Append("\">")
-                    .Append(HtmlText(name)).Append(" Lv ").Append(r.Level).Append(" - ").Append(r.LevelUpSp).Append(" SP</a><br>");
-            }
+            string name = _game.Skills.Find(r.SkillId)?.Name ?? $"Skill {r.SkillId}";
+            html.Append("<a action=\"bypass -h npc_%objectId%_learn_skill ").Append(r.SkillId).Append("\">")
+                .Append(HtmlText(name)).Append(" Lv ").Append(r.Level).Append(" - ").Append(r.LevelUpSp).Append(" SP</a><br>");
         }
 
         html.Append("</body></html>");
-        SendHtml(session, player, npc, html.ToString(), toSelf);
-        return null;
+        return html.ToString();
+    }
+
+    /// <summary>
+    /// Mobius <c>AcquireSkillList</c> (<c>AcquireSkillType.USUAL</c>): one row per offer with the next level, the
+    /// skill's highest level in the class tree and the SP price. Requirement bit 1 is Mobius' "previous level learned".
+    /// </summary>
+    void PublishAcquireSkillList(ZoneSession session, ZoneEntity player, IReadOnlyList<LearnableSkill> rows)
+    {
+        if (NetBridge == null || session.ObjectId <= 0)
+            return;
+        var entries = new Fineage.Net.Contract.AcquireSkillEntryNet[rows.Count];
+        for (int i = 0; i < rows.Count; i++)
+        {
+            var row = rows[i];
+            entries[i] = new Fineage.Net.Contract.AcquireSkillEntryNet
+            {
+                SkillId = row.SkillId,
+                NextLevel = row.Level,
+                MaxLevel = MaxTreeLevel(player.ClassId, row.SkillId, row.Level),
+                SpCost = row.LevelUpSp,
+                Requirements = 1
+            };
+        }
+
+        NetBridge.FanoutAcquireSkillList([player.ObjectId], new Fineage.Net.Contract.AcquireSkillListNetMsg
+        {
+            SkillType = AcquireSkillTypeUsual,
+            Skills = entries
+        });
+    }
+
+    /// <summary>Mobius <c>AcquireSkillType.USUAL</c> ordinal.</summary>
+    internal const int AcquireSkillTypeUsual = 0;
+
+    /// <summary>Highest <c>level</c> the class chain's tree lists for this skill (Mobius <c>getMaxLevel</c>).</summary>
+    int MaxTreeLevel(int classId, int skillId, int fallback)
+    {
+        int max = fallback;
+        IReadOnlyList<int> chain = _game.Classes != null && _game.Classes.TryGet(classId, out _)
+            ? _game.Classes.ParentChain(classId)
+            : [classId];
+        foreach (int chainClassId in chain)
+        {
+            var tree = _game.SkillTrees.FindClass(chainClassId);
+            if (tree == null)
+                continue;
+            foreach (var e in tree.Skills)
+            {
+                if (e.SkillId == skillId && e.Level > max)
+                    max = e.Level;
+            }
+        }
+
+        return max;
+    }
+
+    /// <summary>
+    /// Mobius <c>AcquireSkillInfo</c>: the confirmation page for one offer. Class skills need no items, so the
+    /// requirement list is empty (Mobius only fills it for pledge skills and holy-book rows).
+    /// </summary>
+    void PublishAcquireSkillInfo(ZoneSession session, ZoneEntity player, int skillId, int level, int skillType)
+    {
+        if (NetBridge == null || session.ObjectId <= 0)
+            return;
+        var rows = TrainerSkills.Available(_game.SkillTrees, _game.Skills, player.ClassId, player.Level, player.KnownSkills, _game.Classes);
+        var row = rows.FirstOrDefault(r => r.SkillId == skillId && r.Level == level);
+        if (row.SkillId == 0)
+            return;
+
+        NetBridge.FanoutAcquireSkillInfo([player.ObjectId], new Fineage.Net.Contract.AcquireSkillInfoNetMsg
+        {
+            SkillId = row.SkillId,
+            Level = row.Level,
+            SpCost = row.LevelUpSp,
+            SkillType = skillType,
+            Requirements = []
+        });
     }
 
     string? LearnTrainerSkill(ZoneSession session, ZoneEntity player, ZoneEntity npc, int skillId, List<Pending> toSelf)
     {
+        // Free-skill world: nothing is for sale, so a learn request just re-shows the page (Mobius showSkillList).
         if (!TrainerSpLearn)
             return ShowTrainerSkills(session, player, npc, toSelf);
+
         var rows = TrainerSkills.Available(_game.SkillTrees, _game.Skills, player.ClassId, player.Level, player.KnownSkills, _game.Classes);
         var row = rows.FirstOrDefault(r => r.SkillId == skillId);
         if (row.SkillId == 0)
+        {
+            // Mobius RequestAcquireSkill refuses a row that is not on offer and re-sends the list.
+            PublishAcquireSkillList(session, player, rows);
             return "bad_request";
+        }
         if (player.Sp < row.LevelUpSp)
         {
             // Mobius SystemMessage 278 "You do not have enough SP to learn this skill."
             Notice(session, 278, "You do not have enough SP to learn this skill.", toSelf);
-            return ShowTrainerSkills(session, player, npc, toSelf);
+            PublishAcquireSkillList(session, player, rows);
+            return null;
         }
 
         player.Sp -= row.LevelUpSp;
@@ -137,7 +278,14 @@ public sealed partial class ZoneWorld
         string skillName = _game.Skills.Find(row.SkillId)?.Name ?? $"Skill {row.SkillId}";
         // Mobius SystemMessage 277 "You have earned $s1."
         Notice(session, 277, $"You have earned {skillName}.", toSelf);
-        return ShowTrainerSkills(session, player, npc, toSelf);
+
+        // Mobius re-sends the list after a learn so the bought row leaves the window.
+        var remaining = TrainerSkills.Available(_game.SkillTrees, _game.Skills, player.ClassId, player.Level, player.KnownSkills, _game.Classes);
+        PublishAcquireSkillList(session, player, remaining);
+        if (remaining.Count > 0 || TrainerSpLearn)
+            SendHtml(session, player, npc,
+                remaining.Count > 0 ? TrainerListHtml(player, remaining) : NothingToLearnHtml(0), toSelf);
+        return null;
     }
 
     SkillListMsg SkillListFor(ZoneEntity entity)
