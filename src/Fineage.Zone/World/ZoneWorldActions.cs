@@ -150,11 +150,7 @@ public sealed partial class ZoneWorld
             return "target";
 
         session.SelectedTargetId = best.ObjectId;
-        outbound.Add(Pack(session, MsgType.MyTargetSelected, new MyTargetSelectedMsg
-        {
-            ObjectId = best.ObjectId,
-            ColorHint = InterludeStatus.TargetColor(player.Level, best.Level)
-        }));
+        PublishTargetSelection(session, player, best, outbound);
         return null;
     }
 

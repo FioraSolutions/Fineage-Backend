@@ -84,12 +84,48 @@ public sealed partial class ZoneWorld
             return "target";
 
         session.SelectedTargetId = targetObjectId;
+        PublishTargetSelection(session, player, target, toSelf);
+        return null;
+    }
+
+    /// <summary>
+    /// Mobius <c>Player.setTarget</c>: a click on a creature is answered with the nameplate colour
+    /// (<c>MyTargetSelected</c>, colour 0 for anything the player cannot auto-attack) and the target's HP for the
+    /// target window (<c>StatusUpdate</c> MAX_HP + CUR_HP). Peers also learn what this player is aiming at
+    /// (<c>TargetSelected</c> broadcast), so a nearby client can show the aim marker.
+    /// </summary>
+    void PublishTargetSelection(ZoneSession session, ZoneEntity player, ZoneEntity target, List<Pending> toSelf)
+    {
         toSelf.Add(Pack(session, MsgType.MyTargetSelected, new MyTargetSelectedMsg
         {
-            ObjectId = targetObjectId,
-            ColorHint = InterludeStatus.TargetColor(player.Level, target.Level)
+            ObjectId = target.ObjectId,
+            ColorHint = InterludeStatus.TargetColor(player.Level, target.Level, target.Attackable)
         }));
-        return null;
+        toSelf.Add(Pack(session, MsgType.StatusUpdate, new StatusUpdateMsg
+        {
+            ObjectId = target.ObjectId,
+            AttributeIds = [InterludeStatus.MaxHp, InterludeStatus.CurHp],
+            Values = [target.MaxHp, target.CurHp]
+        }));
+
+        if (NetBridge == null)
+            return;
+
+        int[] self = [player.ObjectId];
+        NetBridge.FanoutStatusUpdate(self, new Fineage.Net.Contract.StatusUpdateNetMsg
+        {
+            EntityValue = (ulong)(uint)target.ObjectId,
+            EntityGeneration = 1,
+            AttributeIds = [InterludeStatus.MaxHp, InterludeStatus.CurHp],
+            Values = [target.MaxHp, target.CurHp]
+        });
+        // Net has no MyTargetSelected opcode: TargetSelected (0x030F) is its self-side mirror, so it carries the
+        // same id + colour. Mobius also broadcasts TargetSelected to peers; that fanout stays out of scope here.
+        NetBridge.FanoutTargetSelected(self, new Fineage.Net.Contract.TargetSelectedNetMsg
+        {
+            TargetObjectId = target.ObjectId,
+            ColorHint = InterludeStatus.TargetColor(player.Level, target.Level, target.Attackable)
+        });
     }
 
     string? TryAttack(ZoneSession session, int requestedTargetId, List<Pending> outbound) =>

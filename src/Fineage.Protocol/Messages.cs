@@ -538,6 +538,13 @@ public static class InterludeStatus
 
     /// <summary>Interlude MyTargetSelected color: attacker level minus target level (L2J/Mobius).</summary>
     public static int TargetColor(int attackerLevel, int targetLevel) => attackerLevel - targetLevel;
+
+    /// <summary>
+    /// Mobius <c>MyTargetSelected(Player, Creature)</c>: <c>target.isAutoAttackable(player) ? player.getLevel() - target.getLevel() : 0</c>.
+    /// A friendly NPC (merchant, guide, village master) therefore comes back as 0 (white), never as a level delta.
+    /// </summary>
+    public static int TargetColor(int attackerLevel, int targetLevel, bool autoAttackable) =>
+        autoAttackable ? TargetColor(attackerLevel, targetLevel) : 0;
 }
 
 /// <summary>Opcode <see cref="MsgType.GrantItemRequest"/> (13). Adds items to the requesting player's bag.</summary>

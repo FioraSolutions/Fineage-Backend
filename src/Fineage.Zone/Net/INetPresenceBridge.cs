@@ -99,6 +99,12 @@ interface INetPresenceBridge
     /// <summary>Mobius SocialAction (gesture) for an actor. Called under the ZoneWorld gate.</summary>
     void FanoutSocialAction(IReadOnlyList<int> watcherObjectIds, SocialActionNetMsg action);
 
+    /// <summary>
+    /// Mobius <c>MyTargetSelected</c>: the owner's own click answer (nameplate colour for the target window).
+    /// Called under the ZoneWorld gate.
+    /// </summary>
+    void FanoutTargetSelected(IReadOnlyList<int> watcherObjectIds, TargetSelectedNetMsg selected);
+
     void FanoutPartyAskJoin(IReadOnlyList<int> watcherObjectIds, PartyAskJoinNetMsg ask);
 
     void FanoutPartyJoinResult(IReadOnlyList<int> watcherObjectIds, PartyJoinResultNetMsg result);
