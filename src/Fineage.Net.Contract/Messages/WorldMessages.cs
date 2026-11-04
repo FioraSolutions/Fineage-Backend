@@ -207,6 +207,12 @@ namespace Fineage.Net.Contract
         public string BodySlot { get; set; } = "";
         /// <summary>Item kind token: "weapon", "armor", "etc", "jewel".</summary>
         public string Kind { get; set; } = "";
+        /// <summary>Client icon key from the item template (icon.weapon_..._i00).</summary>
+        public string Icon { get; set; } = "";
+        /// <summary>Weapon token ("sword", "dagger", "blunt", ...), empty when not a weapon.</summary>
+        public string WeaponType { get; set; } = "";
+        /// <summary>Armor token ("light", "heavy", "magic"), empty when not armor.</summary>
+        public string ArmorType { get; set; } = "";
     }
 
     public sealed class ItemListNetMsg

@@ -132,7 +132,10 @@ static class NetEnterWorldProjector
                 EnchantLevel = src.EnchantLevel,
                 EquippedSlot = src.EquippedSlot,
                 BodySlot = src.BodySlot ?? "",
-                Kind = src.Kind ?? ""
+                Kind = src.Kind ?? "",
+                Icon = src.Icon ?? "",
+                WeaponType = src.WeaponType ?? "",
+                ArmorType = src.ArmorType ?? ""
             };
         }
 
