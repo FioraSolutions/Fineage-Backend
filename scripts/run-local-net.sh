@@ -1,5 +1,6 @@
 #!/usr/bin/env bash
-# Local Login+Zone: Net on 9106/9777; legacy V2 on 9206/9877; Postgres by default.
+# Local Login+Zone: Net on 9106/9777 (the only protocol); Postgres by default.
+# Set FINEAGE_LEGACY_V2_ENABLE=1 to also serve the retired 9206/9877 listeners.
 # Usage: scripts/run-local-net.sh [start|stop|status]
 set -euo pipefail
 ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
@@ -34,19 +35,19 @@ stop() {
   # A pidfile written by an earlier run can be stale, so also close the ports themselves.
   # Kill politely first, then escalate: a lingering listener is what makes Login hand out a
   # handoff for a zone (or a login) that is no longer the one this script started.
-  for p in 5080 9106 9206 9777 9877; do
+  for p in 5080 9106 9777; do
     pids=$(lsof -tiTCP:"$p" -sTCP:LISTEN 2>/dev/null || true)
     if [[ -n "${pids}" ]]; then kill ${pids} 2>/dev/null || true; fi
   done
   for _ in $(seq 1 10); do
     busy=0
-    for p in 5080 9106 9206 9777 9877; do
+    for p in 5080 9106 9777; do
       if [[ -n "$(lsof -tiTCP:"$p" -sTCP:LISTEN 2>/dev/null || true)" ]]; then busy=1; fi
     done
     [[ "$busy" == 0 ]] && break
     sleep 0.5
   done
-  for p in 5080 9106 9206 9777 9877; do
+  for p in 5080 9106 9777; do
     pids=$(lsof -tiTCP:"$p" -sTCP:LISTEN 2>/dev/null || true)
     if [[ -n "${pids}" ]]; then kill -9 ${pids} 2>/dev/null || true; fi
   done
@@ -111,7 +112,7 @@ ensure_postgres() {
 case "$CMD" in
   stop) stop; echo stopped; exit 0;;
   status)
-    for p in 9106 9206 9777 9877; do
+    for p in 9106 9777; do
       if port_open "$p"; then echo "$p open"; else echo "$p closed"; fi
     done
     for n in login-net zone-net; do
@@ -138,11 +139,8 @@ if [[ ! -f "$LOGIN_DLL" || ! -f "$ZONE_DLL" ]]; then
   exit 1
 fi
 
-export FINEAGE_NET_ENABLE=1
 export FINEAGE_NET_LOGIN_PORT=9106
 export FINEAGE_NET_ZONE_PORT=9777
-export FINEAGE_LOGIN_PORT=9206
-export FINEAGE_ZONE_PORT=9877
 # Loopback /status so Login's /api/status can report the zone as up.
 export FINEAGE_ZONE_STATUS_PORT="${FINEAGE_ZONE_STATUS_PORT:-7780}"
 export FINEAGE_ZONE_HOST=127.0.0.1
@@ -150,10 +148,10 @@ export FINEAGE_ZONE_HOST=127.0.0.1
 # With FINEAGE_STORE=postgres the --store path is only an anchor for the runtime sidecar files
 # (seven-signs.json, boss-schedule.json, olympiad.json) that live beside the account store.
 daemonize login-net \
-  dotnet "$LOGIN_DLL" --bind 127.0.0.1 --port 9206 --http-port 5080 --store local-data/state
+  dotnet "$LOGIN_DLL" --bind 127.0.0.1 --http-port 5080 --store local-data/state
 
 daemonize zone-net \
-  dotnet "$ZONE_DLL" --bind 127.0.0.1 --port 9877 --store local-data/state
+  dotnet "$ZONE_DLL" --bind 127.0.0.1 --store local-data/state
 
 ok=0
 for _ in 1 2 3 4 5 6 7 8 9 10 11 12 15; do
@@ -167,5 +165,5 @@ if [[ "$ok" != 1 ]]; then
   tail -40 local-logs/zone-net.log 2>/dev/null || true
   exit 1
 fi
-echo "Net login=9106 zone=9777 | store=${FINEAGE_STORE} | maps=${FINEAGE_ZONE_MAPS:-default} | V2 login=9206 zone=9877"
+echo "Net login=9106 zone=9777 | store=${FINEAGE_STORE} | maps=${FINEAGE_ZONE_MAPS:-default}"
 echo "stop: ./scripts/run-local-net.sh stop"

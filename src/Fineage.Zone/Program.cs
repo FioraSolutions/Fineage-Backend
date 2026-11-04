@@ -29,10 +29,10 @@ if (args.Contains("--selftest"))
     return;
 }
 
-// Net owns 9777; legacy V2 shifts to 9877 unless --port / FINEAGE_ZONE_PORT is pinned.
+// Net owns 9777; the legacy V2 port defaults to 9877 and only listens when FINEAGE_LEGACY_V2_ENABLE is set.
 string portText = Arg(args, "--port")
     ?? Environment.GetEnvironmentVariable("FINEAGE_ZONE_PORT")
-    ?? (NetSettings.Enabled ? NetSettings.V2ZonePort.ToString() : ZoneHandoff.Port.ToString());
+    ?? NetSettings.V2ZonePort.ToString();
 if (!int.TryParse(portText, out int port) || port is < 1 or > 65535)
 {
     Console.Error.WriteLine("invalid --port");
@@ -109,7 +109,7 @@ if (string.IsNullOrWhiteSpace(Environment.GetEnvironmentVariable("FINEAGE_HANDOF
 }
 
 string worldLabel = includeEnabledMaps ? "whole world (all enabled spawn maps)" : "single spawn map";
-Console.WriteLine($"[ZONE] listen {bindDisplay}:{port} store={storeLabel} {worldLabel} (maxConn={maxConnections} outboundQ={outboundQueue} msgPerSec={maxMsgPerSec} interestRange={interestRange} npcs={world.NpcObjectIds.Count})");
+Console.WriteLine($"[ZONE] world {storeLabel} {worldLabel} (maxConn={maxConnections} outboundQ={outboundQueue} msgPerSec={maxMsgPerSec} interestRange={interestRange} npcs={world.NpcObjectIds.Count})");
 Console.WriteLine("[ZONE] Seven Signs period, cabal, and seal-stone scores are stored beside the account file as seven-signs.json.");
 Console.WriteLine("[ZONE] Olympiad registration and points are stored beside the account file as olympiad.json. See docs/olympiad-v2-protocol.md.");
 Console.WriteLine("[ZONE] Catacomb and necropolis gates follow that cabal. Enter is opcode 92. See docs/dungeon-access-v2-protocol.md.");
@@ -131,25 +131,22 @@ if (zoneStatus != null)
     Console.WriteLine($"[ZONE] status {zoneStatus.Url}");
 
 await using FineageMetricsHost? metrics = FineageMetricsHost.Start("zone", Console.Out, Console.Error);
-var tcp = new TcpServer();
-Task? netTask = null;
-if (NetSettings.Enabled)
-{
-    var netZone = new NetZoneServer(HandoffTokens.FromEnvironment(), world, accounts);
-    var netTcp = new NetTcpServer();
-    Console.WriteLine($"[ZONE] net listen {bindDisplay}:{NetSettings.ZonePort} (PacketEnvelope)");
-    netTask = netTcp.RunAsync(
-        host,
-        NetSettings.ZonePort,
-        netZone.HandleAsync,
-        shutdown.Token,
-        maxConnections,
-        NetSettings.InboxCapacity);
-}
+var netZone = new NetZoneServer(HandoffTokens.FromEnvironment(), world, accounts);
+var netTcp = new NetTcpServer();
+Console.WriteLine($"[ZONE] net listen {bindDisplay}:{NetSettings.ZonePort} (PacketEnvelope)");
+Task netTask = netTcp.RunAsync(
+    host,
+    NetSettings.ZonePort,
+    netZone.HandleAsync,
+    shutdown.Token,
+    maxConnections,
+    NetSettings.InboxCapacity);
 
-try
+Task? legacyTask = null;
+if (NetSettings.LegacyV2Enabled)
 {
-    var v2 = tcp.RunAsync(
+    Console.WriteLine($"[ZONE] legacy V2 listen {bindDisplay}:{port} (MessagePack, opt-in)");
+    legacyTask = new TcpServer().RunAsync(
         host,
         port,
         maxConnections,
@@ -158,14 +155,19 @@ try
         server.HandleAsync,
         shutdown.Token,
         ZoneOverload.RejectAsync);
-    if (netTask != null)
-        await Task.WhenAny(v2, netTask).ConfigureAwait(false);
-    else
-        await v2.ConfigureAwait(false);
+}
+else
+{
+    Console.WriteLine("[ZONE] legacy V2 listeners are off (FINEAGE_LEGACY_V2_ENABLE=1 to serve them)");
+}
+
+try
+{
+    await (legacyTask == null ? netTask : Task.WhenAny(netTask, legacyTask)).ConfigureAwait(false);
 }
 catch (Exception ex) when (ex is not OperationCanceledException)
 {
-    Console.Error.WriteLine($"listen failed on {bindDisplay}:{port}: {ex.Message}");
+    Console.Error.WriteLine($"listen failed on {bindDisplay}:{NetSettings.ZonePort}: {ex.Message}");
     Environment.ExitCode = 1;
 }
 finally

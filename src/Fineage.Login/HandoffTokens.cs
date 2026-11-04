@@ -194,9 +194,8 @@ public static class ZoneHandoff
             string? text = Environment.GetEnvironmentVariable("FINEAGE_ZONE_PORT");
             if (int.TryParse(text, out int port) && port is >= 1 and <= 65535)
                 return port;
-            if (Fineage.Net.Host.NetSettings.Enabled)
-                return Fineage.Net.Host.NetSettings.V2ZonePort;
-            return Port;
+            // Handoff points at the Net zone: it is the only transport the client speaks.
+            return Fineage.Net.Host.NetSettings.ZonePort;
         }
     }
 }

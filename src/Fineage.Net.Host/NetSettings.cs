@@ -2,18 +2,25 @@ namespace Fineage.Net.Host;
 
 public static class NetSettings
 {
-    /// <summary>Forwarded / playtest login port — Net owns these; V2 moves to <see cref="V2LoginPort"/>.</summary>
+    /// <summary>Login port. The Net protocol is the only client protocol.</summary>
     public const int DefaultLoginPort = 9106;
-    /// <summary>Forwarded / playtest zone port — Net owns these; V2 moves to <see cref="V2ZonePort"/>.</summary>
+    /// <summary>Zone port. The Net protocol is the only client protocol.</summary>
     public const int DefaultZonePort = 9777;
 
-    /// <summary>Legacy MessagePack V2 login when Net is enabled on the primary ports.</summary>
+    /// <summary>Legacy MessagePack V2 login, only served when <see cref="LegacyV2Enabled"/> is set.</summary>
     public const int V2LoginPort = 9206;
-    /// <summary>Legacy MessagePack V2 zone when Net is enabled on the primary ports.</summary>
+    /// <summary>Legacy MessagePack V2 zone, only served when <see cref="LegacyV2Enabled"/> is set.</summary>
     public const int V2ZonePort = 9877;
 
-    public static bool Enabled =>
-        IsTruthy(Environment.GetEnvironmentVariable("FINEAGE_NET_ENABLE"));
+    /// <summary>Net is the only client transport; the flag stays for compatibility with older run scripts.</summary>
+    public static bool Enabled => true;
+
+    /// <summary>
+    /// Legacy V2 MessagePack listeners. Off by default: the Unity client dropped V2 and only speaks Net.
+    /// Set <c>FINEAGE_LEGACY_V2_ENABLE=1</c> to bring the old ports back for a regression comparison.
+    /// </summary>
+    public static bool LegacyV2Enabled =>
+        IsTruthy(Environment.GetEnvironmentVariable("FINEAGE_LEGACY_V2_ENABLE"));
 
     public static int LoginPort =>
         ParsePort(Environment.GetEnvironmentVariable("FINEAGE_NET_LOGIN_PORT"), DefaultLoginPort);

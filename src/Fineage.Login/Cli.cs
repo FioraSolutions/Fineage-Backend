@@ -24,7 +24,7 @@ public static class Cli
         // Net owns 9106; legacy V2 shifts to 9206 unless the operator pins --port / FINEAGE_LOGIN_PORT.
         string portText = portOpt
             ?? portEnv
-            ?? (NetSettings.Enabled ? NetSettings.V2LoginPort.ToString() : "9106");
+            ?? NetSettings.V2LoginPort.ToString();
         if (!int.TryParse(portText, out int port) || port is < 1 or > 65535)
         {
             error.WriteLine("invalid --port");
@@ -309,11 +309,12 @@ public static class Cli
         output.WriteLine("[LOGIN] creatable classes " + FormatIds(service.CreatableClassIds));
 
         await using FineageMetricsHost? metrics = FineageMetricsHost.Start("login", output, error);
-        var tcp = new TcpServer();
 
-        try
+        Task? legacyTask = null;
+        if (NetSettings.LegacyV2Enabled)
         {
-            var v2 = tcp.RunAsync(
+            output.WriteLine($"[LOGIN] legacy V2 listen {bindDisplay}:{port} (MessagePack, opt-in)");
+            legacyTask = new TcpServer().RunAsync(
                 host,
                 port,
                 maxConnections,
@@ -322,10 +323,24 @@ public static class Cli
                 server.HandleAsync,
                 shutdown.Token,
                 LoginOverload.RejectAsync);
-            if (netTask != null)
-                await Task.WhenAny(v2, netTask).ConfigureAwait(false);
-            else
-                await v2.ConfigureAwait(false);
+        }
+        else
+        {
+            output.WriteLine("[LOGIN] legacy V2 listeners are off (FINEAGE_LEGACY_V2_ENABLE=1 to serve them)");
+        }
+
+        if (netTask == null && legacyTask == null)
+        {
+            error.WriteLine("[LOGIN] nothing to serve: Net is always on, this should be unreachable");
+            return false;
+        }
+
+        try
+        {
+            await (legacyTask == null
+                    ? netTask!
+                    : Task.WhenAny(netTask ?? legacyTask, legacyTask))
+                .ConfigureAwait(false);
         }
         catch (Exception ex) when (ex is not OperationCanceledException)
         {
