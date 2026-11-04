@@ -154,6 +154,19 @@ public sealed partial class ZoneWorld
             ApplyQuestKill(killer, new ZoneEntity { Kind = ZoneEntityKind.Npc, NpcId = npcId, ObjectId = 0 }, outbound);
     }
 
+    /// <summary>Test hook: run the exp/sp → level-up pipeline the way a kill reward does.</summary>
+    internal void GrantExpForTest(ZoneEntity killer, long exp, int sp)
+    {
+        var outbound = new List<Pending>();
+        lock (_gate)
+        {
+            if (!ApplyExpSp(killer, exp, sp))
+                return;
+            if (killer.Session != null)
+                ApplyLevelUp(killer.Session, killer, outbound);
+        }
+    }
+
     void ApplyQuestKill(ZoneEntity killer, ZoneEntity npc, List<Pending> outbound)
     {
         if (killer.Inventory == null || killer.Dead || killer.Session == null)
@@ -233,7 +246,7 @@ public sealed partial class ZoneWorld
 
     void Publish(ZoneSession session, ZoneEntity player, QuestOutcome outcome, int npcObjectId, int npcId, List<Pending> toSelf)
     {
-        ApplyProgress(player, outcome);
+        bool levelled = ApplyProgress(player, outcome);
         if (outcome.Items.Count > 0 && player.Inventory != null)
         {
             var invUpdate = new InventoryUpdateMsg
@@ -287,23 +300,33 @@ public sealed partial class ZoneWorld
         if (outcome.JournalChanged)
             QueueList(session, toSelf);
 
+        // Mobius addLevel runs after the exp/sp that caused it, so the level packets follow the quest reward lines.
+        if (levelled)
+            ApplyLevelUp(session, player, toSelf);
+
         if (outcome.JournalChanged || outcome.Exp != 0 || outcome.Sp != 0)
             SaveQuestProgress(session, player);
     }
 
-    void ApplyProgress(ZoneEntity player, QuestOutcome outcome) => ApplyExpSp(player, outcome.Exp, outcome.Sp);
+    /// <summary>Applies quest exp/sp and reports whether the character gained a level (Mobius <c>addLevel</c>).</summary>
+    bool ApplyProgress(ZoneEntity player, QuestOutcome outcome) => ApplyExpSp(player, outcome.Exp, outcome.Sp);
 
-    void ApplyExpSp(ZoneEntity player, long exp, int sp)
+    /// <summary>
+    /// Mobius <c>PlayerStat.addExpAndSp</c> → <c>addExp</c> → <c>addLevel</c>: rolls the exp counter, and when it crosses
+    /// a row also raises level, refreshes max HP/MP and refills them. Returns true on a level gain so the caller can run
+    /// <see cref="ApplyLevelUp"/> (rewardSkills, penalties, packets).
+    /// </summary>
+    bool ApplyExpSp(ZoneEntity player, long exp, int sp)
     {
         if (exp == 0 && sp == 0)
-            return;
+            return false;
 
         var table = _game.Classes?.Experience;
         if (table == null)
         {
             player.Exp = exp > long.MaxValue - player.Exp ? long.MaxValue : player.Exp + exp;
             player.Sp = sp > int.MaxValue - player.Sp ? int.MaxValue : player.Sp + sp;
-            return;
+            return false;
         }
 
         int previous = player.Level;
@@ -313,7 +336,7 @@ public sealed partial class ZoneWorld
         if (progress.Level == previous || _game.Classes == null || !_game.Classes.TryGet(player.ClassId, out var template) || template == null)
         {
             player.Level = progress.Level;
-            return;
+            return progress.Level != previous;
         }
 
         player.Level = progress.Level;
@@ -321,6 +344,98 @@ public sealed partial class ZoneWorld
         player.MaxMp = template.ModifiedMp(progress.Level);
         player.CurHp = player.MaxHp;
         player.CurMp = player.MaxMp;
+        return true;
+    }
+
+    /// <summary>Mobius SystemMessageId 96 <c>YOUR_LEVEL_HAS_INCREASED</c>.</summary>
+    internal const int LevelUpMessageId = 96;
+
+    /// <summary>Mobius <c>SocialAction.LEVEL_UP</c> (interlude id 15).</summary>
+    internal const int SocialLevelUp = 15;
+
+    /// <summary>
+    /// Mobius <c>PlayerStat.addLevel</c>: <c>rewardSkills()</c> (auto-learn the rows the new level unlocked, AutoLearnSkills
+    /// is on in Interlude), <c>broadcastPacket(SocialAction.LEVEL_UP)</c>, <c>YOUR_LEVEL_HAS_INCREASED</c>,
+    /// <c>refreshOverloaded()</c> + <c>refreshExpertisePenalty()</c>, then a LEVEL/MAX_CP/MAX_HP/MAX_MP StatusUpdate and a
+    /// full UserInfo. The new SkillList is what puts the freshly learned skill on the client skill window — without it the
+    /// character levels up and still has the old book.
+    /// </summary>
+    void ApplyLevelUp(ZoneSession session, ZoneEntity player, List<Pending> toSelf)
+    {
+        // rewardSkills: rebuild the book from the tree at the new level. RefreshRunSpeed inside also folds any
+        // passive mastery the new rows brought (Quick Step / Agile Movement), so the live speed is correct.
+        RefreshKnownSkills(player);
+        RefreshGradePenalty(player);      // refreshExpertisePenalty
+        RefreshWeightPenalty(player);     // refreshOverloaded (max load grew with the level)
+
+        toSelf.Add(Pack(session, MsgType.SocialAction, new SocialActionMsg
+        {
+            ObjectId = player.ObjectId,
+            ActionId = SocialLevelUp
+        }));
+        toSelf.Add(Pack(session, MsgType.SystemMessage, new SystemMessageMsg
+        {
+            Id = LevelUpMessageId,
+            Params = [],
+            Text = "Your level has increased!"
+        }));
+
+        var status = new StatusUpdateMsg
+        {
+            ObjectId = player.ObjectId,
+            AttributeIds =
+            [
+                InterludeStatus.Level,
+                InterludeStatus.MaxCp,
+                InterludeStatus.MaxHp,
+                InterludeStatus.MaxMp
+            ],
+            Values =
+            [
+                player.Level,
+                BuildUserInfoVitals(player).MaxCp,
+                player.MaxHp,
+                player.MaxMp
+            ]
+        };
+        toSelf.Add(Pack(session, MsgType.StatusUpdate, status));
+
+        toSelf.Add(Pack(session, MsgType.SkillList, SkillListFor(player)));
+        toSelf.Add(SelfUserInfo(session, player));
+
+        if (NetBridge != null)
+        {
+            int[] self = [player.ObjectId];
+            NetBridge.FanoutSystemMessage(self, new Fineage.Net.Contract.SystemMessageNetMsg
+            {
+                Id = LevelUpMessageId,
+                Text = "Your level has increased!",
+                Params = []
+            });
+            NetBridge.FanoutStatusUpdate(self, new Fineage.Net.Contract.StatusUpdateNetMsg
+            {
+                EntityValue = (ulong)(uint)status.ObjectId,
+                EntityGeneration = 1,
+                AttributeIds = status.AttributeIds ?? [],
+                Values = status.Values ?? []
+            });
+            NetBridge.FanoutSkillList(self,
+                Fineage.Zone.Net.NetEnterWorldProjector.BuildSkills(player, _clock().ToUnixTimeMilliseconds()));
+            NetBridge.FanoutPlayerStats(self, new Fineage.Net.Contract.PlayerStatsMsg
+            {
+                EntityValue = (ulong)(uint)player.ObjectId,
+                EntityGeneration = 1,
+                Level = player.Level,
+                Exp = player.Exp,
+                Sp = player.Sp,
+                Hp = player.CurHp,
+                MaxHp = player.MaxHp,
+                Mp = player.CurMp,
+                MaxMp = player.MaxMp,
+                Cp = BuildUserInfoVitals(player).CurCp,
+                MaxCp = BuildUserInfoVitals(player).MaxCp
+            });
+        }
     }
 
     void QueueList(ZoneSession session, List<Pending> toSelf)
@@ -440,7 +555,7 @@ public sealed partial class ZoneWorld
         if (exp <= 0 && sp <= 0)
             return;
 
-        ApplyExpSp(killer, exp, sp);
+        bool levelled = ApplyExpSp(killer, exp, sp);
         var session = killer.Session;
         var notice = new SystemMessageMsg
         {
@@ -511,6 +626,10 @@ public sealed partial class ZoneWorld
         }
 
         SaveQuestProgress(session, killer);
+
+        // Mobius addExpAndSp → addLevel: level up after the exp notice so the client sees "earned exp", then level up.
+        if (levelled)
+            ApplyLevelUp(session, killer, outbound);
     }
 
     internal const int KillRewardMessageId = 95;
