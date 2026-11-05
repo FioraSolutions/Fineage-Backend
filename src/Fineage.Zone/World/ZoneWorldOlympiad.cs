@@ -197,7 +197,10 @@ public sealed partial class ZoneWorld
         if (!_game.Items.TryGet(grant.ItemId, out _))
             return;
         var added = entity.Inventory.Add(grant.ItemId, grant.Count);
-        outbound.Add(Pack(entity.Session, MsgType.InventoryUpdate, InventoryMessages.Update(InventoryChange.Add, added)));
+        var update = InventoryMessages.Update(InventoryChange.Add, added);
+        outbound.Add(Pack(entity.Session, MsgType.InventoryUpdate, update));
+        // The Gate Pass lands in the bag, so Net clients need the same row the V2 frame carries.
+        NetBridge?.FanoutInventoryUpdate([entity.ObjectId], ToNetInventoryUpdate(update));
         SaveInventory(entity.Session, entity.Inventory);
     }
 
@@ -211,17 +214,25 @@ public sealed partial class ZoneWorld
         };
         if (notice.CharacterId == 0)
         {
+            var live = new List<int>();
             foreach (var player in Players())
             {
                 if (player.Session != null)
+                {
                     outbound.Add(Pack(player.Session, MsgType.SystemMessage, message));
+                    live.Add(player.ObjectId);
+                }
             }
-
+            if (live.Count > 0)
+                NetBridge?.FanoutSystemMessage(live, ToNetOlympiadLine(message));
             return;
         }
 
         if (_byId.TryGetValue(notice.CharacterId, out var target) && target.Session != null)
+        {
             outbound.Add(Pack(target.Session, MsgType.SystemMessage, message));
+            NetBridge?.FanoutSystemMessage([target.ObjectId], ToNetOlympiadLine(message));
+        }
     }
 
     void QueueMatch(OlympiadMatchNote note, List<Pending> outbound)
@@ -240,6 +251,19 @@ public sealed partial class ZoneWorld
             InstanceId = note.InstanceId
         };
         SendBoth(note.PlayerOneId, note.PlayerTwoId, MsgType.OlympiadMatch, message, outbound);
+        FanOlympiadBoth(note.PlayerOneId, note.PlayerTwoId, match: new Fineage.Net.Contract.OlympiadMatchNetMsg
+        {
+            MatchId = message.MatchId,
+            StadiumId = message.StadiumId,
+            ZoneId = message.ZoneId,
+            Classed = message.Classed,
+            Phase = message.Phase,
+            PlayerOneId = message.PlayerOneId,
+            PlayerTwoId = message.PlayerTwoId,
+            PlayerOneName = message.PlayerOneName,
+            PlayerTwoName = message.PlayerTwoName,
+            InstanceId = message.InstanceId
+        });
     }
 
     void QueueCountdown(OlympiadCountdownNote note, List<Pending> outbound)
@@ -257,7 +281,14 @@ public sealed partial class ZoneWorld
             Text = OlympiadLines.CountdownText(note.Kind, note.Seconds)
         };
         SendBoth(note.PlayerOneId, note.PlayerTwoId, MsgType.OlympiadCountdown, packet, outbound);
+        FanOlympiadBoth(note.PlayerOneId, note.PlayerTwoId, countdown: new Fineage.Net.Contract.OlympiadCountdownNetMsg
+        {
+            MatchId = packet.MatchId,
+            Kind = packet.Kind,
+            Seconds = packet.Seconds
+        });
         SendBoth(note.PlayerOneId, note.PlayerTwoId, MsgType.SystemMessage, line, outbound);
+        FanOlympiadBoth(note.PlayerOneId, note.PlayerTwoId, line: ToNetOlympiadLine(line));
     }
 
     void QueueResult(OlympiadResultNote note, List<Pending> outbound)
@@ -277,12 +308,26 @@ public sealed partial class ZoneWorld
             CompetitionsDoneTwo = note.CompetitionsDoneTwo
         };
         SendBoth(note.PlayerOneId, note.PlayerTwoId, MsgType.OlympiadResult, message, outbound);
+        FanOlympiadBoth(note.PlayerOneId, note.PlayerTwoId, result: new Fineage.Net.Contract.OlympiadResultNetMsg
+        {
+            MatchId = message.MatchId,
+            Outcome = message.Outcome,
+            WinnerObjectId = message.WinnerObjectId,
+            PointsOne = message.PointsOne,
+            PointsTwo = message.PointsTwo,
+            DeltaOne = message.DeltaOne,
+            DeltaTwo = message.DeltaTwo,
+            RewardItemId = message.RewardItemId,
+            RewardCount = message.RewardCount,
+            CompetitionsDoneOne = message.CompetitionsDoneOne,
+            CompetitionsDoneTwo = message.CompetitionsDoneTwo
+        });
     }
 
     void QueueOlympiadStatus(ZoneSession session, long nowUnixMs, List<Pending> outbound)
     {
         var view = _olympiad.View(session.ObjectId, nowUnixMs);
-        outbound.Add(Pack(session, MsgType.OlympiadStatus, new OlympiadStatusMsg
+        var message = new OlympiadStatusMsg
         {
             Period = view.Period,
             Cycle = view.Cycle,
@@ -303,7 +348,67 @@ public sealed partial class ZoneWorld
             MatchId = view.MatchId,
             StadiumId = view.StadiumId,
             ClassId = view.ClassId
-        }));
+        };
+        outbound.Add(Pack(session, MsgType.OlympiadStatus, message));
+        NetBridge?.FanoutOlympiadStatus([session.ObjectId], ToNetOlympiadStatus(message));
+    }
+
+    static Fineage.Net.Contract.OlympiadStatusNetMsg ToNetOlympiadStatus(OlympiadStatusMsg s) => new()
+    {
+        Period = s.Period,
+        Cycle = s.Cycle,
+        InCompetition = s.InCompetition,
+        CompetitionStartUnixMs = s.CompetitionStartUnixMs,
+        CompetitionEndUnixMs = s.CompetitionEndUnixMs,
+        OlympiadEndUnixMs = s.OlympiadEndUnixMs,
+        ValidationEndUnixMs = s.ValidationEndUnixMs,
+        NextWeeklyUnixMs = s.NextWeeklyUnixMs,
+        RegistrationOpen = s.RegistrationOpen,
+        Noble = s.Noble,
+        Points = s.Points,
+        CompetitionsDone = s.CompetitionsDone,
+        Won = s.Won,
+        Lost = s.Lost,
+        Drawn = s.Drawn,
+        Queue = s.Queue,
+        MatchId = s.MatchId,
+        StadiumId = s.StadiumId,
+        ClassId = s.ClassId
+    };
+
+    static Fineage.Net.Contract.SystemMessageNetMsg ToNetOlympiadLine(SystemMessageMsg line) => new()
+    {
+        Id = line.Id,
+        Text = line.Text,
+        Params = line.Params
+    };
+
+    /// <summary>Both match participants get one Net message per event, exactly as <c>SendBoth</c> does for V2.</summary>
+    void FanOlympiadBoth(
+        int one,
+        int two,
+        Fineage.Net.Contract.OlympiadMatchNetMsg? match = null,
+        Fineage.Net.Contract.OlympiadCountdownNetMsg? countdown = null,
+        Fineage.Net.Contract.OlympiadResultNetMsg? result = null,
+        Fineage.Net.Contract.SystemMessageNetMsg? line = null)
+    {
+        if (NetBridge == null)
+            return;
+        var watchers = new List<int>(2);
+        if (_byId.TryGetValue(one, out var first) && first.Session is { InWorld: true })
+            watchers.Add(one);
+        if (two != one && _byId.TryGetValue(two, out var second) && second.Session is { InWorld: true })
+            watchers.Add(two);
+        if (watchers.Count == 0)
+            return;
+        if (match != null)
+            NetBridge.FanoutOlympiadMatch(watchers, match);
+        if (countdown != null)
+            NetBridge.FanoutOlympiadCountdown(watchers, countdown);
+        if (result != null)
+            NetBridge.FanoutOlympiadResult(watchers, result);
+        if (line != null)
+            NetBridge.FanoutSystemMessage(watchers, line);
     }
 
     void SendBoth<T>(int one, int two, MsgType type, T message, List<Pending> outbound)

@@ -185,5 +185,23 @@ namespace Fineage.Net.Contract
         public const ushort AdminCaptureCastle = 0x037C;
         /// <summary>Zone → client: the castle and its registrations, also the reply to a list request.</summary>
         public const ushort SiegeInfo = 0x037D;
+        /// <summary>Client → zone: ask for the Olympiad sheet. Empty body.</summary>
+        public const ushort OlympiadStatusRequest = 0x037E;
+        /// <summary>Client → zone: join the classed (1) or non-classed (0) queue.</summary>
+        public const ushort OlympiadRegisterRequest = 0x037F;
+        /// <summary>Client → zone: leave the queue. Empty body.</summary>
+        public const ushort OlympiadUnregisterRequest = 0x0380;
+        /// <summary>Client → zone: leave the running match (a loss). Empty body.</summary>
+        public const ushort OlympiadLeaveRequest = 0x0381;
+        /// <summary>Client → zone: admin match report. Gated by FINEAGE_ZONE_ADMIN.</summary>
+        public const ushort AdminReportOlympiadResult = 0x0382;
+        /// <summary>Zone → client: period, standing, queue and match slot.</summary>
+        public const ushort OlympiadStatus = 0x0383;
+        /// <summary>Zone → client: the match both participants were placed in.</summary>
+        public const ushort OlympiadMatch = 0x0384;
+        /// <summary>Zone → client: one countdown step.</summary>
+        public const ushort OlympiadCountdown = 0x0385;
+        /// <summary>Zone → client: the finished match and its reward.</summary>
+        public const ushort OlympiadResult = 0x0386;
     }
 }

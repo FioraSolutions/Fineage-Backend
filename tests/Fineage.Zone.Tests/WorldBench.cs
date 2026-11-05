@@ -34,7 +34,8 @@ internal sealed class WorldBench
         Fineage.Game.Services.TeleportCatalog? teleports = null,
         int? teleportOffset = null,
         Fineage.Zone.Bosses.BossSchedule? bosses = null,
-        Fineage.Zone.Siege.SiegeSettings? siege = null)
+        Fineage.Zone.Siege.SiegeSettings? siege = null,
+        Fineage.Zone.Olympiad.OlympiadSettings? olympiadSettings = null)
     {
         Game = game ?? GameData.LoadDefault();
         Store = JsonAccountStore.InMemory();
@@ -59,7 +60,8 @@ internal sealed class WorldBench
             teleports: teleports,
             teleportOffset: teleportOffset,
             bosses: bosses,
-            siege: siege);
+            siege: siege,
+            olympiadSettings: olympiadSettings);
         (Bridge, Rec) = NetBridgeRecorder.Create();
         World.NetBridge = Bridge;
     }
