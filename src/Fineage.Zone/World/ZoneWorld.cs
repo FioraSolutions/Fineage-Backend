@@ -114,6 +114,11 @@ sealed class ZoneEntity
     public IReadOnlyList<int>? IgnoreNpcIds { get; init; }
     /// <summary>NPC: Mobius AggroList (attacker objectId → hate). <see cref="AggroTargetId"/> is the most hated.</summary>
     public Dictionary<int, long> HateList { get; } = [];
+    /// <summary>
+    /// NPC: damage dealt per attacker (Mobius <c>AggroInfo.getDamage</c>). Exp/SP are paid as a share of this, so a
+    /// kill belongs to everyone who hit the mob, not only to the last blow.
+    /// </summary>
+    public Dictionary<int, long> DamageBy { get; } = [];
     public long NextAggroScanMs { get; set; }
     public long NextClanCallMs { get; set; }
     /// <summary>Attack stance the watchers were last told (Mobius AutoAttackStart / AutoAttackStop).</summary>

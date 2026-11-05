@@ -475,6 +475,7 @@ public sealed partial class ZoneWorld
         if (target.Kind == ZoneEntityKind.Npc)
         {
             FanoutVitals(target, StatusFor(target), outbound);
+            RecordDamage(target, attacker, hit.Damage);
             AddHate(target, attacker, DamageHate(hit.Damage, target.Level));
             attacker.CombatUntilUnixMs = now + ClanProtocol.CombatStanceMillis;
             if (target.CurHp <= 0)
