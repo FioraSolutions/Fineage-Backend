@@ -75,4 +75,23 @@ public sealed class NetActionUseTests
         Assert.Equal(ActionProtocol.SocialVictory, msg.ActionId);
         Assert.Equal(elf.ObjectId, (int)msg.EntityValue);
     }
+
+    [Fact]
+    public async Task Walk_run_toggle_fans_ChangeMoveType_to_self_and_peers()
+    {
+        var kit = await KitWithBridgeAsync();
+        var rec = (NetBridgeRecorder)(object)kit.World.NetBridge!;
+        var (session, elf) = await kit.EnterAsync();
+        Assert.True(elf.Running);
+
+        Assert.Null(await kit.World.TryCharacterActionAsync(session,
+            new CharacterActionRequestMsg { ActionId = ActionProtocol.WalkRun }, default));
+
+        Assert.False(elf.Running);
+        var call = Assert.Single(rec.Of(nameof(INetPresenceBridge.FanoutChangeMoveType)));
+        var watchers = Assert.IsAssignableFrom<IReadOnlyList<int>>(call[0]);
+        Assert.Contains(elf.ObjectId, watchers);
+        Assert.Equal(elf.ObjectId, (int)call[1]!);
+        Assert.False((bool)call[2]!);
+    }
 }

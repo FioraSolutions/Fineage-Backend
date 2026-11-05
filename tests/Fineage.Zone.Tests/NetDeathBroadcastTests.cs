@@ -82,4 +82,27 @@ public sealed class NetDeathBroadcastTests
         Assert.True(kit.World.TryGetEntityById(MobId, out var mob));
         Assert.False(NetEnterWorldProjector.BuildPresenceSpawn(mob, EntityId.FromObjectId(MobId, 1)).Dead);
     }
+
+    [Fact]
+    public async Task Admin_kill_fans_die_and_a_zero_hp_bar_to_the_victim()
+    {
+        var kit = new NetTestKit();
+        var (bridge, rec) = NetBridgeRecorder.Create();
+        kit.World.NetBridge = bridge;
+        var (session, elf) = await kit.EnterAsync();
+
+        Assert.Null(await kit.World.TryAdminKillPlayerAsync(session, CancellationToken.None));
+        Assert.True(elf.Dead);
+        Assert.Equal(0, elf.CurHp);
+
+        // The victim knows itself, so it is a watcher of its own die + status fanout.
+        var die = Assert.Single(rec.Of(nameof(INetPresenceBridge.FanoutDie)));
+        Assert.Contains(elf.ObjectId, (IReadOnlyList<int>)die[0]!);
+        Assert.Equal((ulong)(uint)elf.ObjectId, ((EntityDieMsg)die[1]!).EntityValue);
+
+        Assert.Contains(rec.Of(nameof(INetPresenceBridge.FanoutStatusUpdate)), s =>
+            ((IReadOnlyList<int>)s[0]!).Contains(elf.ObjectId) &&
+            ((StatusUpdateNetMsg)s[1]!).EntityValue == (ulong)(uint)elf.ObjectId &&
+            ((StatusUpdateNetMsg)s[1]!).Values[0] == 0);
+    }
 }
