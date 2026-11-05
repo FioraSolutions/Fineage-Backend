@@ -20,6 +20,20 @@ public static class ZoneAoiSettings
     /// </summary>
     public static int AoiCellSize => ReadInt("FINEAGE_ZONE_AOI_CELL", 0, min: 0, max: 500_000);
 
+    /// <summary>
+    /// The AOI the world will actually be built with, as one banner-safe token (grid:3000 / range:3500 /
+    /// single-cell). <see cref="AoiCellSize"/> wins over <see cref="InterestRange"/>, so reporting the raw
+    /// range alone would claim "whole zone" while a grid is live.
+    /// </summary>
+    public static string DescribeEffective()
+    {
+        int cell = AoiCellSize;
+        if (cell > 0)
+            return $"grid:{cell}";
+        int range = InterestRange;
+        return range > 0 ? $"range:{range}" : "single-cell";
+    }
+
     public static ZoneWorld CreateWorld(
         IAoi? aoi = null,
         IAccountStore? accounts = null,
