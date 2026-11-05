@@ -1,3 +1,4 @@
+using Fineage.Game;
 using Fineage.Protocol;
 using Fineage.Zone.Combat;
 using Fineage.Zone.Drops;
@@ -221,6 +222,19 @@ public sealed partial class ZoneWorld
         }
 
         var ps = PlayerStats(player);
+        // Mobius doAttack: a bow fires only with an arrow of the matching grade equipped; the arrow is spent on the
+        // shot itself (hit or miss) — Creature.canUseRangeWeapon -> checkAndEquipArrows, doAttackHitByBow ->
+        // reduceArrowCount.
+        if (ps.Weapon == Fineage.Game.WeaponType.Bow)
+        {
+            var bow = player.Inventory?.GetEquipped(PaperdollSlot.RHand)?.Template;
+            if (bow != null && EnsureBowArrow(player, bow, outbound) == null)
+            {
+                OutOfArrows(session, outbound);
+                approachMs = -1;
+                return null;
+            }
+        }
         // Mobius doAttack: a charged weapon fires its soulshot on this swing (hit or miss) and is uncharged.
         bool soulshot = player.SoulshotCharged;
         player.SoulshotCharged = false;
@@ -249,6 +263,8 @@ public sealed partial class ZoneWorld
 
         // Swing now; HP drops at hitTime (Mobius onHitTimer).
         FanoutAttack(player, target, attack, outbound);
+        if (ps.Weapon == Fineage.Game.WeaponType.Bow)
+            ConsumeBowArrow(player, outbound);
         long now = _clock().ToUnixTimeMilliseconds();
         player.CombatUntilUnixMs = now + ClanProtocol.CombatStanceMillis;
         _meleeHits.Add(new PendingMeleeHit(player.ObjectId, targetId, damage, now + PlayerAttackTimeMs(player.ObjectId) / 2));
