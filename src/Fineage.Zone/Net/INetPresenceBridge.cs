@@ -143,4 +143,7 @@ interface INetPresenceBridge
     void FanoutTradeConfirmState(IReadOnlyList<int> watcherObjectIds, TradeConfirmStateNetMsg state);
 
     void FanoutTradeFinished(IReadOnlyList<int> watcherObjectIds, TradeFinishedNetMsg finished);
+
+    /// <summary>Boss schedule rows, the reply to a <c>BossStatusRequest</c>.</summary>
+    void FanoutBossStatus(IReadOnlyList<int> watcherObjectIds, BossStatusNetMsg status);
 }

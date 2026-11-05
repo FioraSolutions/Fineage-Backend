@@ -169,5 +169,11 @@ namespace Fineage.Net.Contract
         public const ushort TargetUnselected = 0x0374;
         /// <summary>Client → zone: Mobius RequestDestroyItem. Body is <c>DestroyItemRequestMsg</c>.</summary>
         public const ushort DestroyItemRequest = 0x0375;
+        /// <summary>Client → zone: one boss row, or every row when the body's npc id is 0.</summary>
+        public const ushort BossStatusRequest = 0x0376;
+        /// <summary>Zone → client: the boss schedule rows (raid and grand), sorted by npc id.</summary>
+        public const ushort BossStatus = 0x0377;
+        /// <summary>Client → zone: admin boss schedule edit (dead / force spawn). Gated by FINEAGE_ZONE_ADMIN.</summary>
+        public const ushort AdminBossSchedule = 0x0378;
     }
 }

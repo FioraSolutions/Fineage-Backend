@@ -23,6 +23,7 @@ public sealed class NetZoneServer : INetPresenceBridge
     readonly Func<DateTimeOffset> _clock;
     readonly int _maxMessagesPerSecond;
     readonly TimeSpan _idleTimeout;
+    readonly bool _adminCommands;
 
     public NetZoneServer(
         HandoffTokens tokens,
@@ -31,7 +32,8 @@ public sealed class NetZoneServer : INetPresenceBridge
         Func<DateTimeOffset>? clock = null,
         NetPresenceHub? presence = null,
         int? maxMessagesPerSecond = null,
-        TimeSpan? idleTimeout = null)
+        TimeSpan? idleTimeout = null,
+        ZoneServerOptions? options = null)
     {
         _tokens = tokens;
         _world = world;
@@ -41,6 +43,7 @@ public sealed class NetZoneServer : INetPresenceBridge
         _clock = clock ?? (() => DateTimeOffset.UtcNow);
         _maxMessagesPerSecond = maxMessagesPerSecond ?? ZoneNetSettings.MaxMessagesPerSecond;
         _idleTimeout = idleTimeout ?? TcpSessionSettings.IdleTimeout;
+        _adminCommands = options?.AdminCommands ?? ZoneAdmin.Enabled;
         _world.NetBridge = this;
     }
 
@@ -507,6 +510,13 @@ public sealed class NetZoneServer : INetPresenceBridge
             _presence.TrySend(watcher, NetOpcode.TradeFinished, payload);
     }
 
+    void INetPresenceBridge.FanoutBossStatus(IReadOnlyList<int> watcherObjectIds, BossStatusNetMsg status)
+    {
+        var payload = NetCodec.EncodeBossStatus(status);
+        foreach (int watcher in watcherObjectIds)
+            _presence.TrySend(watcher, NetOpcode.BossStatus, payload);
+    }
+
     public async Task HandleAsync(NetConnection conn, CancellationToken ct)
     {
         // The world layer still emits V2 frames alongside Net fanout. A MemoryStream here
@@ -751,6 +761,12 @@ public sealed class NetZoneServer : INetPresenceBridge
                                 await SendShortcutReplyAsync(conn, delReply, envelope.RequestSequence, ct).ConfigureAwait(false);
                             }
 
+                            break;
+                        case NetOpcode.BossStatusRequest:
+                            await OnBossStatusAsync(conn, zoneSession, envelope, ct).ConfigureAwait(false);
+                            break;
+                        case NetOpcode.AdminBossSchedule:
+                            await OnAdminBossAsync(conn, zoneSession, envelope, ct).ConfigureAwait(false);
                             break;
                         case NetOpcode.StopMove:
                             // Authoritative stop: correct to current session position.
@@ -1424,6 +1440,52 @@ public sealed class NetZoneServer : INetPresenceBridge
         if (error != null)
             await RejectAsync(conn, error, "Target cancel failed.", ct).ConfigureAwait(false);
         // The world already fanned TargetUnselected, so nothing to answer here.
+    }
+
+    async Task OnBossStatusAsync(
+        NetConnection conn,
+        ZoneSession zoneSession,
+        PacketEnvelope envelope,
+        CancellationToken ct)
+    {
+        RequireHello(conn);
+        if (!zoneSession.Bound || !zoneSession.InWorld)
+        {
+            await RejectAsync(conn, "not_in_world", "Enter world first.", ct).ConfigureAwait(false);
+            return;
+        }
+
+        var request = NetCodec.DecodeBossStatusRequest(envelope.Payload);
+        string? error = await _world.TryBossStatusAsync(zoneSession, request.NpcId, ct).ConfigureAwait(false);
+        if (error != null)
+            await RejectAsync(conn, error, "Boss status failed.", ct).ConfigureAwait(false);
+        // The rows themselves go out as BossStatus fanout, so the reply body is empty on purpose.
+    }
+
+    async Task OnAdminBossAsync(
+        NetConnection conn,
+        ZoneSession zoneSession,
+        PacketEnvelope envelope,
+        CancellationToken ct)
+    {
+        RequireHello(conn);
+        if (!zoneSession.Bound || !zoneSession.InWorld)
+        {
+            await RejectAsync(conn, "not_in_world", "Enter world first.", ct).ConfigureAwait(false);
+            return;
+        }
+
+        // Same gate the V2 listener used: the env flag is the only authority, not the request body.
+        if (!_adminCommands)
+        {
+            await RejectAsync(conn, InventoryProtocol.Forbidden, "AdminBossSchedule is disabled.", ct).ConfigureAwait(false);
+            return;
+        }
+
+        var request = NetCodec.DecodeAdminBossSchedule(envelope.Payload);
+        string? error = await _world.TryAdminBossNetAsync(zoneSession, request, ct).ConfigureAwait(false);
+        if (error != null)
+            await RejectAsync(conn, error, "AdminBossSchedule was rejected.", ct).ConfigureAwait(false);
     }
 
     async Task OnAttackAsync(

@@ -64,13 +64,17 @@ public sealed partial class ZoneWorld
             return "bad_request";
 
         BossStatusMsg? message;
+        Fineage.Net.Contract.BossStatusNetMsg? net;
         string? error;
         lock (_gate)
-            error = BuildBossStatus(npcId, out message);
+            error = BuildBossStatus(npcId, out message, out net);
         if (error != null)
             return error;
 
         await session.SendAsync(MsgType.BossStatus, message!, ct).ConfigureAwait(false);
+        // The schedule is read-only state: Net clients ask with a request opcode and get the rows back here.
+        if (net != null)
+            NetBridge?.FanoutBossStatus([session.ObjectId], net);
         return null;
     }
 
@@ -89,6 +93,13 @@ public sealed partial class ZoneWorld
         await FlushOthersAsync(outbound, ct).ConfigureAwait(false);
         return null;
     }
+
+    /// <summary>Admin actions run through <see cref="TryAdminBossAsync"/> after the Net gate has checked the env flag.</summary>
+    public async Task<string?> TryAdminBossNetAsync(ZoneSession session, Fineage.Net.Contract.AdminBossScheduleNetMsg request, CancellationToken ct) =>
+        await TryAdminBossAsync(
+            session,
+            new AdminBossScheduleMsg { NpcId = request.NpcId, Action = request.Action },
+            ct).ConfigureAwait(false);
 
     /// <summary>Test hook: run the boss respawn tick without the simulation loop.</summary>
     internal void AdvanceBossesForTests()
@@ -141,29 +152,51 @@ public sealed partial class ZoneWorld
         return null;
     }
 
-    string? BuildBossStatus(int npcId, out BossStatusMsg? message)
+    string? BuildBossStatus(int npcId, out BossStatusMsg? message, out Fineage.Net.Contract.BossStatusNetMsg? net)
     {
         if (npcId == 0)
         {
             var views = _bosses.Views();
             var entries = new BossStatusEntryMsg[views.Count];
+            var netEntries = new Fineage.Net.Contract.BossStatusEntryNet[views.Count];
             for (int i = 0; i < views.Count; i++)
+            {
                 entries[i] = Entry(views[i]);
+                netEntries[i] = NetEntry(views[i]);
+            }
             message = new BossStatusMsg { Bosses = entries };
+            net = new Fineage.Net.Contract.BossStatusNetMsg { Bosses = netEntries };
             return null;
         }
 
         if (!_bosses.TryView(npcId, out var view))
         {
             message = null;
+            net = null;
             return BossProtocol.UnknownBoss;
         }
 
         message = new BossStatusMsg { Bosses = [Entry(view)] };
+        net = new Fineage.Net.Contract.BossStatusNetMsg { Bosses = [NetEntry(view)] };
         return null;
     }
 
     BossStatusEntryMsg Entry(BossView view) => new()
+    {
+        NpcId = view.NpcId,
+        ObjectId = view.ObjectId,
+        Kind = (int)view.Kind,
+        Status = (int)view.Status,
+        RespawnUnixMs = view.RespawnUnixMs,
+        CurrentHp = view.CurrentHp,
+        MaxHp = view.MaxHp,
+        CurrentMp = view.CurrentMp,
+        MaxMp = view.MaxMp,
+        Enabled = view.Enabled,
+        Spawned = _byId.ContainsKey(view.ObjectId)
+    };
+
+    Fineage.Net.Contract.BossStatusEntryNet NetEntry(BossView view) => new()
     {
         NpcId = view.NpcId,
         ObjectId = view.ObjectId,

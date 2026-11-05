@@ -32,7 +32,8 @@ internal sealed class WorldBench
         Fineage.Zone.NpcHtml.NpcHtmlCatalog? html = null,
         Fineage.Zone.NpcHtml.BypassRegistry? bypasses = null,
         Fineage.Game.Services.TeleportCatalog? teleports = null,
-        int? teleportOffset = null)
+        int? teleportOffset = null,
+        Fineage.Zone.Bosses.BossSchedule? bosses = null)
     {
         Game = game ?? GameData.LoadDefault();
         Store = JsonAccountStore.InMemory();
@@ -55,7 +56,8 @@ internal sealed class WorldBench
             html: html,
             bypasses: bypasses,
             teleports: teleports,
-            teleportOffset: teleportOffset);
+            teleportOffset: teleportOffset,
+            bosses: bosses);
         (Bridge, Rec) = NetBridgeRecorder.Create();
         World.NetBridge = Bridge;
     }

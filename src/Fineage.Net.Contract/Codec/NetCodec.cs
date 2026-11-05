@@ -2198,6 +2198,70 @@ namespace Fineage.Net.Contract
         public static TradeFinishedNetMsg DecodeTradeFinished(ReadOnlySpan<byte> p) =>
             new() { Response = new Reader(p).ReadInt32() };
 
+        public static byte[] EncodeBossStatusRequest(BossStatusRequestNetMsg m) => Write(w => w.WriteInt32(m.NpcId));
+
+        public static BossStatusRequestNetMsg DecodeBossStatusRequest(ReadOnlySpan<byte> p) =>
+            new() { NpcId = new Reader(p).ReadInt32() };
+
+        public static byte[] EncodeAdminBossSchedule(AdminBossScheduleNetMsg m) => Write(w =>
+        {
+            w.WriteInt32(m.NpcId);
+            w.WriteInt32(m.Action);
+        });
+
+        public static AdminBossScheduleNetMsg DecodeAdminBossSchedule(ReadOnlySpan<byte> p)
+        {
+            var r = new Reader(p);
+            return new AdminBossScheduleNetMsg { NpcId = r.ReadInt32(), Action = r.ReadInt32() };
+        }
+
+        public static byte[] EncodeBossStatus(BossStatusNetMsg m) => Write(w =>
+        {
+            var rows = m.Bosses ?? System.Array.Empty<BossStatusEntryNet>();
+            w.WriteInt32(rows.Length);
+            for (int i = 0; i < rows.Length; i++)
+            {
+                var row = rows[i] ?? new BossStatusEntryNet();
+                w.WriteInt32(row.NpcId);
+                w.WriteInt32(row.ObjectId);
+                w.WriteInt32(row.Kind);
+                w.WriteInt32(row.Status);
+                w.WriteInt64(row.RespawnUnixMs);
+                w.WriteInt32(row.CurrentHp);
+                w.WriteInt32(row.MaxHp);
+                w.WriteInt32(row.CurrentMp);
+                w.WriteInt32(row.MaxMp);
+                w.WriteByte(row.Enabled ? (byte)1 : (byte)0);
+                w.WriteByte(row.Spawned ? (byte)1 : (byte)0);
+            }
+        });
+
+        public static BossStatusNetMsg DecodeBossStatus(ReadOnlySpan<byte> p)
+        {
+            var r = new Reader(p);
+            int n = r.ReadInt32();
+            if (n < 0) n = 0;
+            var rows = new BossStatusEntryNet[n];
+            for (int i = 0; i < n; i++)
+            {
+                rows[i] = new BossStatusEntryNet
+                {
+                    NpcId = r.ReadInt32(),
+                    ObjectId = r.ReadInt32(),
+                    Kind = r.ReadInt32(),
+                    Status = r.ReadInt32(),
+                    RespawnUnixMs = r.ReadInt64(),
+                    CurrentHp = r.ReadInt32(),
+                    MaxHp = r.ReadInt32(),
+                    CurrentMp = r.ReadInt32(),
+                    MaxMp = r.ReadInt32(),
+                    Enabled = r.ReadByte() != 0,
+                    Spawned = r.ReadByte() != 0
+                };
+            }
+            return new BossStatusNetMsg { Bosses = rows };
+        }
+
         public static PositionCorrectionMsg DecodePositionCorrection(ReadOnlySpan<byte> p)
         {
             var r = new Reader(p);
