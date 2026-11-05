@@ -19,6 +19,17 @@ public sealed partial class ZoneWorld
     /// <summary>Mobius hate for <paramref name="damage"/> dealt to an NPC of <paramref name="npcLevel"/>.</summary>
     internal static long DamageHate(int damage, int npcLevel) => Math.Max(1, (long)damage * 100 / (Math.Max(1, npcLevel) + 7));
 
+    /// <summary>
+    /// Mobius <c>Attackable.addDamageHate</c> bookkeeping of <c>AggroInfo.getDamage()</c>: the kill reward is shared
+    /// over every attacker in proportion to what it actually dealt.
+    /// </summary>
+    static void RecordDamage(ZoneEntity npc, ZoneEntity attacker, int damage)
+    {
+        if (npc.Kind != ZoneEntityKind.Npc || attacker.Kind != ZoneEntityKind.Player || damage <= 0)
+            return;
+        npc.DamageBy[attacker.ObjectId] = npc.DamageBy.GetValueOrDefault(attacker.ObjectId) + damage;
+    }
+
     void AddHate(ZoneEntity npc, ZoneEntity attacker, long hate = 1)
     {
         if (npc.Kind != ZoneEntityKind.Npc || attacker.Kind != ZoneEntityKind.Player || npc.CurHp <= 0)

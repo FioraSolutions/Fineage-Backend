@@ -550,24 +550,30 @@ Hate-модель: `Attackable.addDamageHate` (`Attackable.java:740`), `getMostH
 
 ### У нас
 
-`GrantKillReward` (`src/Fineage.Zone/World/ZoneWorldQuests.cs:433`): берёт `RewardExp`/`RewardSp`
-из шаблона NPC (`ZoneEntity.RewardExp/RewardSp`, заполняются в
-`src/Fineage.Zone/World/ZoneWorldSpawns.cs:89`–`:90` из `data/npcs.json`, где `exp` заполнен у 2707
-из 6519), вызывает `ApplyExpSp` (`:296`) → `ExperienceTable.Add`, шлёт `SystemMessage 95`,
-`StatusUpdate`, `UserInfo`, `PlayerStats` и сохраняет прогресс. Вызывается из `ResolveMeleeHit`
-(`ZoneWorldCombat.cs:406`) и `ResolvePendingHit` (`ZoneWorldMobAi.cs:90`).
+`GrantKillReward` (`src/Fineage.Zone/World/ZoneWorldQuests.cs:589`) → `DistributeKillReward` (`:601`):
+суммирует `ZoneEntity.DamageBy` (заполняется в `RecordDamage`, `ZoneWorldAggro.cs:26`, из
+`ResolveMeleeHit` и `ResolvePendingHit`), отбрасывает урон ≤ 1, мёртвых и цели дальше
+`QuestPartyRange` = 1600 (`ALT_PARTY_RANGE`). `KillRewardFormula.CalculateExpAndSp`
+(`src/Fineage.Zone/Rewards/KillRewardFormula.cs:47`) повторяет Mobius: доля урона в целочисленной
+арифметике, отсечка `±MonsterExpMaxLevelDifference` (`ZoneRewardSettings`, `Rates.ini` = 40, env
+`FINEAGE_MONSTER_EXP_MAX_LEVEL_DIFFERENCE`), множители 0.97…0.03 для 85+ на серых мобах. Партия
+считается в `SharePartyKill` (`:646`) — бонус `Party.BONUS_EXP_SP`, деление `level² / Σ level²`,
+отсечка `PartyXpCutoffLevel` = 20. Каждому получателю `SendKillReward` (`:705`) шлёт
+`SystemMessage 95`, `StatusUpdate`, `UserInfo`, `PlayerStats`, сохраняет прогресс и запускает
+`ApplyLevelUp`. Вызывается из `ResolveMeleeHit` (`ZoneWorldCombat.cs:484`) и `ResolvePendingHit`
+(`ZoneWorldMobAi.cs:90`).
 
 ### Расхождение
 
 - ~~`D40`~~ **снято** — награда есть, гейм-луп «фарм мобов» работает.
-- `D41` **`medium`** — вся награда уходит добившему: `GrantKillReward(killer, npc, …)` передаёт
-  одного `killer`, `totalDamage`/`maxDealer`/отсечки по дистанции нет. В соло незаметно, в группе
-  награду забирает последний удар.
-- `D42` **`medium`** — нет штрафа/бонуса за разницу уровней: поиск `LevelDifference`, `LevelGap`,
-  `MONSTER_EXP`, `ExpPenalty` по `src/` пуст. Гриф на серых мобах не ограничен.
-- `D43` **`medium`** — нет партийного распределения exp/SP и лута: `ZoneParty`
-  (`src/Fineage.Zone/World/ZoneWorldParty.cs:15`–`:21`) содержит только `ItemDistribution`, который
-  хранится и ни на что не влияет; `Exp`, `Loot`, `Damage` в файле отсутствуют.
+- ~~`D41`~~ **снято** — exp/SP делятся по доле урона (`DamageBy`, отсечка 1600 по дистанции),
+  последний удар больше ничего не решает.
+- ~~`D42`~~ **снято** — отсечка `MonsterExpMaxLevelDifference` и множители для 85+ на серых мобах
+  есть в `KillRewardFormula`, юнит-тесты в `tests/Fineage.Zone.Tests/KillRewardTests.cs`.
+- ~~`D43`~~ **снято** для exp/SP — партийный пул с бонусом `Party.BONUS_EXP_SP`, делением по
+  `level²` и `PartyXpCutoffLevel` есть (`SharePartyKill`). Остаток: партийного распределения лута
+  (`ItemDistribution` по-прежнему только хранится), over-hit бонуса, `EXPSP_RATE`/премиум-множителей
+  и саммон-пенальти нет.
 
 ---
 

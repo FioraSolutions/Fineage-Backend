@@ -2,7 +2,9 @@ using Fineage.Game;
 using Fineage.Game.Quests;
 using Fineage.Game.Services;
 using Fineage.Protocol;
+using Fineage.Zone.Combat;
 using Fineage.Zone.Npcs;
+using Fineage.Zone.Rewards;
 
 namespace Fineage.Zone.World;
 
@@ -165,6 +167,14 @@ public sealed partial class ZoneWorld
             if (killer.Session != null)
                 ApplyLevelUp(killer.Session, killer, outbound);
         }
+    }
+
+    /// <summary>Test hook: run the kill-reward split exactly like a dying mob does (reads <see cref="ZoneEntity.DamageBy"/>).</summary>
+    internal void GrantKillRewardForTest(ZoneEntity killer, ZoneEntity npc)
+    {
+        var outbound = new List<Pending>();
+        lock (_gate)
+            GrantKillReward(killer, npc, outbound);
     }
 
     void ApplyQuestKill(ZoneEntity killer, ZoneEntity npc, List<Pending> outbound)
@@ -571,21 +581,135 @@ public sealed partial class ZoneWorld
     }
 
     /// <summary>
-    /// Mobius-style solo kill reward: template acquire exp/sp to the killer, then UserInfo and
-    /// SystemMessage 95 ("You have earned $s1 experience and $s2 SP.").
+    /// Mobius-style kill reward. <c>Attackable.calculateRewards</c> splits the template exp/SP between every attacker
+    /// inside <c>ALT_PARTY_RANGE</c> by its share of the damage; a party pools its damage, takes the
+    /// <c>Party.BONUS_EXP_SP</c> bonus and divides the pool by level². Each rewarded player then gets
+    /// SystemMessage 95, a StatusUpdate and a full UserInfo.
     /// </summary>
     void GrantKillReward(ZoneEntity killer, ZoneEntity npc, List<Pending> outbound)
     {
         if (killer.Kind != ZoneEntityKind.Player || killer.Session == null || npc.Kind != ZoneEntityKind.Npc)
             return;
         ApplyQuestKill(killer, npc, outbound);
-        long exp = npc.RewardExp;
-        int sp = npc.RewardSp;
+        DistributeKillReward(npc, outbound);
+    }
+
+    /// <summary>
+    /// Mobius <c>Attackable.calculateRewards</c>: exp/SP come from the monster template and are shared by the damage
+    /// share (not paid to the last hit). Zero outside <c>MonsterExpMaxLevelDifference</c>.
+    /// </summary>
+    void DistributeKillReward(ZoneEntity npc, List<Pending> outbound)
+    {
+        long rewardExp = npc.RewardExp;
+        int rewardSp = npc.RewardSp;
+        if (rewardExp <= 0 && rewardSp <= 0)
+            return;
+
+        // Mobius: damage above 1 counts, and the attacker has to be in ALT_PARTY_RANGE of the corpse.
+        var damage = new Dictionary<int, long>();
+        long totalDamage = 0;
+        foreach (var (id, dealt) in npc.DamageBy)
+        {
+            if (dealt <= 1 || !_byId.TryGetValue(id, out var attacker) || attacker.Kind != ZoneEntityKind.Player ||
+                attacker.Session == null || attacker.Dead)
+                continue;
+            if (!ZoneCombat.Within(npc.X, npc.Y, attacker.X, attacker.Y, QuestPartyRange))
+                continue;
+            damage[id] = dealt;
+            totalDamage += dealt;
+        }
+
+        if (totalDamage <= 0)
+            return;
+
+        int maxLevelDifference = ZoneRewardSettings.MonsterExpMaxLevelDifference;
+        var settled = new HashSet<int>();
+        foreach (var (id, dealt) in damage)
+        {
+            if (settled.Contains(id) || !_byId.TryGetValue(id, out var attacker) || attacker.Session == null)
+                continue;
+
+            if (_partyByPlayer.TryGetValue(id, out int partyId) && _parties.TryGetValue(partyId, out var party))
+            {
+                SharePartyKill(party, npc, damage, totalDamage, rewardExp, rewardSp, maxLevelDifference, settled, outbound);
+                continue;
+            }
+
+            settled.Add(id);
+            var share = KillRewardFormula.CalculateExpAndSp(
+                attacker.Level, npc.Level, rewardExp, rewardSp, dealt, totalDamage, maxLevelDifference);
+            SendKillReward(attacker.Session, attacker, share.Exp, share.Sp, outbound);
+        }
+    }
+
+    /// <summary>Mobius <c>Party.distributeXpAndSp</c> over the members of one party that took part in the kill.</summary>
+    void SharePartyKill(
+        ZoneParty party,
+        ZoneEntity npc,
+        Dictionary<int, long> damage,
+        long totalDamage,
+        long rewardExp,
+        int rewardSp,
+        int maxLevelDifference,
+        HashSet<int> settled,
+        List<Pending> outbound)
+    {
+        var members = new List<ZoneEntity>(party.MemberIds.Count);
+        long partyDamage = 0;
+        int partyLevel = 0;
+        foreach (int memberId in party.MemberIds)
+        {
+            if (!_byId.TryGetValue(memberId, out var member) || member.Kind != ZoneEntityKind.Player ||
+                member.Session == null || member.Dead)
+                continue;
+            if (!ZoneCombat.Within(npc.X, npc.Y, member.X, member.Y, QuestPartyRange))
+                continue;
+            members.Add(member);
+            settled.Add(memberId);
+            partyDamage += damage.GetValueOrDefault(memberId);
+            partyLevel = Math.Max(partyLevel, member.Level);
+        }
+
+        if (members.Count == 0 || partyDamage <= 0)
+            return;
+
+        // Mobius PartyXpCutoffMethod = level: members more than PartyXpCutoffLevel below the top level earn nothing.
+        var valid = members.Where(m => partyLevel - m.Level <= KillRewardFormula.PartyXpCutoffLevel).ToList();
+        if (valid.Count == 0)
+            return;
+
+        double partyMul = partyDamage < totalDamage ? (double)partyDamage / totalDamage : 1;
+        var pool = KillRewardFormula.CalculateExpAndSp(
+            partyLevel, npc.Level, rewardExp, rewardSp, partyDamage, totalDamage, maxLevelDifference);
+        double bonus = KillRewardFormula.PartyBonus(valid.Count);
+        double expPool = pool.Exp * partyMul * bonus;
+        double spPool = pool.Sp * partyMul * bonus;
+
+        long sqLevelSum = 0;
+        foreach (var member in valid)
+            sqLevelSum += (long)member.Level * member.Level;
+        if (sqLevelSum <= 0)
+            return;
+
+        foreach (var member in valid)
+        {
+            double share = (double)((long)member.Level * member.Level) / sqLevelSum;
+            SendKillReward(member.Session!, member, expPool * share, spPool * share, outbound);
+        }
+    }
+
+    /// <summary>
+    /// Pays one player's share: exp/SP into the counter, SystemMessage 95, StatusUpdate and UserInfo, save, then the
+    /// level-up packets when the exp crossed a row.
+    /// </summary>
+    void SendKillReward(ZoneSession session, ZoneEntity player, double rawExp, double rawSp, List<Pending> outbound)
+    {
+        long exp = KillRewardFormula.Round(rawExp);
+        int sp = (int)Math.Min(int.MaxValue, KillRewardFormula.Round(rawSp));
         if (exp <= 0 && sp <= 0)
             return;
 
-        bool levelled = ApplyExpSp(killer, exp, sp);
-        var session = killer.Session;
+        bool levelled = ApplyExpSp(player, exp, sp);
         var notice = new SystemMessageMsg
         {
             Id = KillRewardMessageId,
@@ -596,7 +720,7 @@ public sealed partial class ZoneWorld
         // StatusUpdate carries live Exp/Sp/Level; UserInfo refreshes the full sheet (vitals + template stats).
         var status = new StatusUpdateMsg
         {
-            ObjectId = killer.ObjectId,
+            ObjectId = player.ObjectId,
             AttributeIds =
             [
                 InterludeStatus.Level,
@@ -609,22 +733,22 @@ public sealed partial class ZoneWorld
             ],
             Values =
             [
-                killer.Level,
-                (int)Math.Min(int.MaxValue, killer.Exp),
-                killer.Sp,
-                killer.CurHp,
-                killer.MaxHp,
-                killer.CurMp,
-                killer.MaxMp
+                player.Level,
+                (int)Math.Min(int.MaxValue, player.Exp),
+                player.Sp,
+                player.CurHp,
+                player.MaxHp,
+                player.CurMp,
+                player.MaxMp
             ]
         };
         outbound.Add(Pack(session, MsgType.StatusUpdate, status));
-        outbound.Add(SelfUserInfo(session, killer));
+        outbound.Add(SelfUserInfo(session, player));
 
         if (NetBridge != null)
         {
-            int[] self = [killer.ObjectId];
-            var vitals = BuildUserInfoVitals(killer);
+            int[] self = [player.ObjectId];
+            var vitals = BuildUserInfoVitals(player);
             NetBridge.FanoutSystemMessage(self, new Fineage.Net.Contract.SystemMessageNetMsg
             {
                 Id = notice.Id,
@@ -640,25 +764,25 @@ public sealed partial class ZoneWorld
             });
             NetBridge.FanoutPlayerStats(self, new Fineage.Net.Contract.PlayerStatsMsg
             {
-                EntityValue = (ulong)(uint)killer.ObjectId,
+                EntityValue = (ulong)(uint)player.ObjectId,
                 EntityGeneration = 1,
-                Level = killer.Level,
-                Exp = killer.Exp,
-                Sp = killer.Sp,
-                Hp = killer.CurHp,
-                MaxHp = killer.MaxHp,
-                Mp = killer.CurMp,
-                MaxMp = killer.MaxMp,
+                Level = player.Level,
+                Exp = player.Exp,
+                Sp = player.Sp,
+                Hp = player.CurHp,
+                MaxHp = player.MaxHp,
+                Mp = player.CurMp,
+                MaxMp = player.MaxMp,
                 Cp = vitals.CurCp,
                 MaxCp = vitals.MaxCp
             });
         }
 
-        SaveQuestProgress(session, killer);
+        SaveQuestProgress(session, player);
 
         // Mobius addExpAndSp → addLevel: level up after the exp notice so the client sees "earned exp", then level up.
         if (levelled)
-            ApplyLevelUp(session, killer, outbound);
+            ApplyLevelUp(session, player, outbound);
     }
 
     internal const int KillRewardMessageId = 95;
