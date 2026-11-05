@@ -1,5 +1,6 @@
 using System.Diagnostics;
 using Fineage.Login;
+using Fineage.Net.Host;
 using Fineage.Protocol;
 using Fineage.Protocol.Net;
 using Fineage.Zone.World;

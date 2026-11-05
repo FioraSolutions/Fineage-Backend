@@ -1,4 +1,4 @@
-namespace Fineage.Protocol.Net;
+namespace Fineage.Net.Host;
 
 /// <summary>Fixed one-second window. One instance per connection, used on the read loop only.</summary>
 public sealed class MessageRateGate

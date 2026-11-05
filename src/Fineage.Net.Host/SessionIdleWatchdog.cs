@@ -1,4 +1,4 @@
-namespace Fineage.Protocol.Net;
+namespace Fineage.Net.Host;
 
 /// <summary>Cancels a linked token when no <see cref="Touch"/> arrives within the timeout.</summary>
 public sealed class SessionIdleWatchdog : IDisposable
