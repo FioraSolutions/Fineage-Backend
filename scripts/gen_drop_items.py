@@ -23,6 +23,12 @@ for quest in q.get("quests", []):
     ids += [op[k] for d in quest.get("dialogs", []) for op in d.get("ops", []) for k in ("itemId", "rewardItemId") if op.get(k)]
     want |= {i for i in ids if i not in have}
 
+trees = ROOT / "data/skill-trees.json"
+if trees.exists():
+    for tree in json.loads(trees.read_text()).get("trees", []):
+        for row in tree.get("skills", []):
+            want |= {i["itemId"] for i in row.get("requiredItems", []) if i["itemId"] not in have}
+
 vm = ROOT / "data/village-masters.json"
 if vm.exists():
     for c in json.loads(vm.read_text()).get("changes", []):

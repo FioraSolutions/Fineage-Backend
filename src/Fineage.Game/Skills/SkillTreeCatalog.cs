@@ -70,13 +70,45 @@ public sealed class SkillTreeCatalog
                     skill.GetLevel,
                     skill.AutoGet,
                     skill.LearnedByNpc,
-                    Math.Max(0, skill.LevelUpSp)));
+                    Math.Max(0, skill.LevelUpSp),
+                    ParseItems(where, row.ClassId, skill),
+                    ParsePrerequisites(where, row.ClassId, skill)));
             }
 
             trees.Add(new ClassSkillTree(row.ClassId, entries));
         }
 
         return new SkillTreeCatalog(trees);
+    }
+
+    static IReadOnlyList<SkillLearnItem>? ParseItems(string where, int classId, EntryDto skill)
+    {
+        if (skill.RequiredItems is not { Count: > 0 } rows)
+            return null;
+        var items = new List<SkillLearnItem>(rows.Count);
+        foreach (var row in rows)
+        {
+            if (row.ItemId <= 0 || row.Count <= 0)
+                throw new InvalidDataException($"{where} class {classId} skill {skill.SkillId} has a bad required item.");
+            items.Add(new SkillLearnItem(row.ItemId, row.Count));
+        }
+
+        return items;
+    }
+
+    static IReadOnlyList<SkillLearnPrerequisite>? ParsePrerequisites(string where, int classId, EntryDto skill)
+    {
+        if (skill.PreReqSkills is not { Count: > 0 } rows)
+            return null;
+        var prereqs = new List<SkillLearnPrerequisite>(rows.Count);
+        foreach (var row in rows)
+        {
+            if (row.SkillId <= 0 || row.Level <= 0)
+                throw new InvalidDataException($"{where} class {classId} skill {skill.SkillId} has a bad prerequisite.");
+            prereqs.Add(new SkillLearnPrerequisite(row.SkillId, row.Level));
+        }
+
+        return prereqs;
     }
 
     sealed class TreeFileDto
@@ -98,6 +130,20 @@ public sealed class SkillTreeCatalog
         public bool AutoGet { get; set; }
         public bool LearnedByNpc { get; set; }
         public int LevelUpSp { get; set; }
+        public List<ItemDto>? RequiredItems { get; set; }
+        public List<PrereqDto>? PreReqSkills { get; set; }
+    }
+
+    sealed class ItemDto
+    {
+        public int ItemId { get; set; }
+        public int Count { get; set; }
+    }
+
+    sealed class PrereqDto
+    {
+        public int SkillId { get; set; }
+        public int Level { get; set; }
     }
 }
 
@@ -114,10 +160,25 @@ public sealed class ClassSkillTree
     public IReadOnlyList<SkillTreeEntry> Skills { get; }
 }
 
+/// <summary>One item a Mobius learn row consumes (skill tree <c>&lt;item id count/&gt;</c>).</summary>
+public readonly record struct SkillLearnItem(int ItemId, int Count);
+
+/// <summary>One skill that must already be known (skill tree <c>&lt;preRequisiteSkill id lvl/&gt;</c>).</summary>
+public readonly record struct SkillLearnPrerequisite(int SkillId, int Level);
+
 public readonly record struct SkillTreeEntry(
     int SkillId,
     int Level,
     int GetLevel,
     bool AutoGet,
     bool LearnedByNpc,
-    int LevelUpSp = 0);
+    int LevelUpSp = 0,
+    IReadOnlyList<SkillLearnItem>? RequiredItems = null,
+    IReadOnlyList<SkillLearnPrerequisite>? PreReqSkills = null)
+{
+    /// <summary>Mobius <c>AcquireSkillInfo</c> requirement rows: the books a class skill consumes.</summary>
+    public IReadOnlyList<SkillLearnItem> Items => RequiredItems ?? [];
+
+    /// <summary>Mobius <c>checkPlayerSkill</c>: every listed prerequisite must already be known at that level.</summary>
+    public IReadOnlyList<SkillLearnPrerequisite> Prerequisites => PreReqSkills ?? [];
+}
