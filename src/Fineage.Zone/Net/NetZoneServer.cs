@@ -546,7 +546,7 @@ public sealed class NetZoneServer : INetPresenceBridge
                             if (self.Value != 0 && zoneSession.Bound)
                             {
                                 if (registeredObjectId != 0 && registeredObjectId != zoneSession.ObjectId)
-                                    _presence.Unregister(registeredObjectId);
+                                    _presence.Unregister(registeredObjectId, conn);
                                 _presence.Register(zoneSession.ObjectId, conn, self);
                                 registeredObjectId = zoneSession.ObjectId;
                             }
@@ -786,11 +786,11 @@ public sealed class NetZoneServer : INetPresenceBridge
         }
         finally
         {
-            await LeaveNetAsync(zoneSession, self, registeredObjectId).ConfigureAwait(false);
+            await LeaveNetAsync(zoneSession, self, registeredObjectId, conn).ConfigureAwait(false);
         }
     }
 
-    async Task LeaveNetAsync(ZoneSession zoneSession, EntityId self, int registeredObjectId)
+    async Task LeaveNetAsync(ZoneSession zoneSession, EntityId self, int registeredObjectId, NetConnection conn)
     {
         try
         {
@@ -813,7 +813,7 @@ public sealed class NetZoneServer : INetPresenceBridge
         }
 
         if (registeredObjectId != 0)
-            _presence.Unregister(registeredObjectId);
+            _presence.Unregister(registeredObjectId, conn);
 
         try
         {
