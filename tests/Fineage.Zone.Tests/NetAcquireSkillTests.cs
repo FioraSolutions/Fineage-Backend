@@ -124,4 +124,34 @@ public sealed class NetAcquireSkillTests
         Assert.NotNull(await kit.World.TryAcquireSkillAsync(
             session, 999_999, 1, ZoneWorld.AcquireSkillTypeUsual, informing: false, default));
     }
+
+    /// <summary>
+    /// The trainer NPC used to be one field on the world. Two players in the same zone share that world,
+    /// so player B opening a trainer window silently re-pointed player A's purchase at B's trainer —
+    /// A's learn request then echoed the wrong NPC's page back to A.
+    /// </summary>
+    [Fact]
+    public async Task Two_players_keep_their_own_trainer()
+    {
+        var (kit, session, elf, rec) = await SetupAsync();
+        var (otherSession, otherElf) = await kit.EnterAsync();
+        elf.Level = 20;
+        elf.KnownSkills.Clear();
+        otherElf.Level = 20;
+        otherElf.KnownSkills.Clear();
+
+        kit.World.TrainerServiceForTest(session, NpcServiceIntent.SkillList, npcObjectId: 300_001);
+        kit.World.TrainerServiceForTest(otherSession, NpcServiceIntent.SkillList, npcObjectId: 300_002);
+
+        // Both opened a window; each session must remember its own trainer, not the last one seen.
+        Assert.Equal(300_001, session.TrainerNpcId);
+        Assert.Equal(300_002, otherSession.TrainerNpcId);
+
+        // A purchase from the first player must still resolve against the first player's trainer.
+        var offer = LastList(rec).Skills[0];
+        elf.Sp = offer.SpCost + 1;
+        Assert.Null(await kit.World.TryAcquireSkillAsync(
+            session, offer.SkillId, offer.NextLevel, ZoneWorld.AcquireSkillTypeUsual, informing: false, default));
+        Assert.True(elf.KnownSkills.ContainsKey(offer.SkillId));
+    }
 }

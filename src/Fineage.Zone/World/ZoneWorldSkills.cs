@@ -50,14 +50,14 @@ public sealed partial class ZoneWorld
         RefreshRunSpeed(entity);
     }
 
-    internal string? TrainerServiceForTest(ZoneSession session, string intent, int skillId = -1)
+    internal string? TrainerServiceForTest(ZoneSession session, string intent, int skillId = -1, int npcObjectId = 0)
     {
         var toSelf = new List<Pending>();
         lock (_gate)
         {
             if (!_byId.TryGetValue(session.ObjectId, out var player))
                 return "world";
-            var npc = new ZoneEntity { Kind = ZoneEntityKind.Npc, NpcId = 30157, Name = "Greenis", ObjectId = 0 };
+            var npc = new ZoneEntity { Kind = ZoneEntityKind.Npc, NpcId = 30157, Name = "Greenis", ObjectId = npcObjectId };
             return intent == NpcServiceIntent.SkillList
                 ? ShowTrainerSkills(session, player, npc, toSelf)
                 : LearnTrainerSkill(session, player, npc, skillId, toSelf);
@@ -86,7 +86,7 @@ public sealed partial class ZoneWorld
             if (informing)
                 PublishAcquireSkillInfo(session, player, skillId, level, skillType);
             else
-                error = LearnTrainerSkill(session, player, TrainerNpcOf(player), skillId, toSelf);
+                error = LearnTrainerSkill(session, player, TrainerNpcOf(session), skillId, toSelf);
         }
 
         if (error != null)
@@ -95,14 +95,11 @@ public sealed partial class ZoneWorld
         return null;
     }
 
-    /// <summary>The trainer the window was opened from, or a stand-in so the gate does not need the NPC in range.</summary>
-    ZoneEntity TrainerNpcOf(ZoneEntity player) =>
-        _byId.TryGetValue(_trainerNpcId, out var npc) && npc.Kind == ZoneEntityKind.Npc
+    /// <summary>The trainer this player last opened, or a stand-in so the gate does not need the NPC in range.</summary>
+    ZoneEntity TrainerNpcOf(ZoneSession session) =>
+        _byId.TryGetValue(session.TrainerNpcId, out var npc) && npc.Kind == ZoneEntityKind.Npc
             ? npc
             : new ZoneEntity { Kind = ZoneEntityKind.Npc, NpcId = 0, Name = "Trainer", ObjectId = 0 };
-
-    /// <summary>Last NPC that opened the trainer window, so a window-driven purchase can echo the same page.</summary>
-    int _trainerNpcId;
 
     void LoadLearnedSkills(ZoneEntity entity, Fineage.Login.CharacterRecord? stored)
     {
@@ -130,7 +127,7 @@ public sealed partial class ZoneWorld
         }
 
         // Mobius Folk.showSkillList -> AcquireSkillList: the trainer window is the primary surface on Net.
-        _trainerNpcId = npc.ObjectId;
+        session.TrainerNpcId = npc.ObjectId;
         PublishAcquireSkillList(session, player, rows);
         if (rows.Count == 0)
         {
