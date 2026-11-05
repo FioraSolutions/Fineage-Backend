@@ -31,6 +31,13 @@ public sealed class ZoneSession
     public int Z { get; internal set; }
     public int SelectedTargetId { get; set; }
 
+    /// <summary>
+    /// The trainer NPC whose window this player last opened. It lives on the session, not the world:
+    /// a single world-wide value let one player opening a trainer decide which NPC answered
+    /// <b>everyone's</b> learn-skill request until someone else opened a window.
+    /// </summary>
+    public int TrainerNpcId { get; set; }
+
     /// <summary>Interlude-style auto attack: target kept swinging at until it dies or the player stops.</summary>
     public int AutoAttackTargetId { get; set; }
     public long NextAutoAttackUnixMs { get; set; }
@@ -104,6 +111,7 @@ public sealed class ZoneSession
         Sex = 0;
         InWorld = false;
         SelectedTargetId = 0;
+        TrainerNpcId = 0;
         AutoAttackTargetId = 0;
         NextAutoAttackUnixMs = 0;
         PendingCastSkillId = 0;
