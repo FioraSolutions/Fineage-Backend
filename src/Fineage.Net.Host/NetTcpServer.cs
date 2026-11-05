@@ -7,6 +7,9 @@ public sealed class NetTcpServer
 {
     public int BoundPort { get; private set; }
 
+    /// <summary>Telemetry <c>endpoint</c> tag for this listener (<c>login</c> or <c>zone</c>).</summary>
+    public string Endpoint { get; init; } = "net";
+
     public async Task RunAsync(
         string host,
         int port,
@@ -40,15 +43,17 @@ public sealed class NetTcpServer
 
                 if (!slots.Wait(0))
                 {
+                    NetTelemetry.ConnectionRejected(Endpoint);
                     client.Dispose();
                     continue;
                 }
 
                 _ = Task.Run(async () =>
                 {
+                    NetTelemetry.ConnectionOpened(Endpoint);
                     try
                     {
-                        await using var conn = new NetConnection(client, inboxCapacity);
+                        await using var conn = new NetConnection(client, inboxCapacity, Endpoint);
                         using var linked = CancellationTokenSource.CreateLinkedTokenSource(ct);
                         var read = conn.RunReadLoopAsync(linked.Token);
                         try
@@ -67,6 +72,7 @@ public sealed class NetTcpServer
                     }
                     finally
                     {
+                        NetTelemetry.ConnectionClosed(Endpoint);
                         try { slots.Release(); } catch (ObjectDisposedException) { /* accept loop ended */ }
                     }
                 }, CancellationToken.None);

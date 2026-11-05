@@ -11,10 +11,12 @@ public sealed class NetConnection : IAsyncDisposable
     readonly Channel<PacketEnvelope> _inbox;
     readonly SemaphoreSlim _send = new(1, 1);
     readonly CommandDeduper _deduper = new();
+    readonly string _endpoint;
 
-    public NetConnection(TcpClient client, int inboxCapacity)
+    public NetConnection(TcpClient client, int inboxCapacity, string endpoint = "net")
     {
         _client = client;
+        _endpoint = endpoint;
         _stream = client.GetStream();
         _inbox = Channel.CreateBounded<PacketEnvelope>(new BoundedChannelOptions(inboxCapacity)
         {
@@ -56,6 +58,8 @@ public sealed class NetConnection : IAsyncDisposable
                 if (!_deduper.TryAccept(envelope.RequestSequence))
                     continue;
 
+                NetTelemetry.FrameIn(_endpoint, envelope.Payload.Length);
+
                 await _inbox.Writer.WriteAsync(envelope, ct).ConfigureAwait(false);
             }
         }
@@ -87,6 +91,7 @@ public sealed class NetConnection : IAsyncDisposable
         try
         {
             await NetFraming.WriteAsync(_stream, envelope, ct).ConfigureAwait(false);
+            NetTelemetry.FrameOut(_endpoint, envelope.Payload.Length);
         }
         finally
         {

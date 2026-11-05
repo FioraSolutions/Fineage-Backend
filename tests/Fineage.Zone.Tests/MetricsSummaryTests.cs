@@ -1,7 +1,7 @@
 using System.Globalization;
 using System.Net;
 using System.Net.Sockets;
-using Fineage.Protocol.Net;
+using Fineage.Net.Host;
 using Fineage.Protocol.Telemetry;
 using Xunit;
 
@@ -147,11 +147,11 @@ public sealed class MetricsCollectorTests
     {
         string endpoint = "metrics" + Guid.NewGuid().ToString("N");
         using var collector = new MetricsCollector();
-        PipelineTelemetry.FrameIn(endpoint, 48);
-        PipelineTelemetry.FrameOut(endpoint, 16);
-        PipelineTelemetry.PacketRejected(endpoint);
-        PipelineTelemetry.PacketErrored(endpoint);
-        PipelineTelemetry.Handler(endpoint, 1.5);
+        NetTelemetry.FrameIn(endpoint, 48);
+        NetTelemetry.FrameOut(endpoint, 16);
+        NetTelemetry.PacketRejected(endpoint);
+        NetTelemetry.PacketErrored(endpoint);
+        NetTelemetry.Handler(endpoint, 1.5);
         FineageTelemetry.Connections.Add(1, new KeyValuePair<string, object?>("endpoint", endpoint));
 
         MetricsSnapshot snapshot = collector.Snapshot();

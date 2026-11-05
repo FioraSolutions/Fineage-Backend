@@ -1,5 +1,6 @@
 using System.IO.Pipelines;
 using System.Threading.Channels;
+using Fineage.Protocol.Telemetry;
 
 namespace Fineage.Protocol.Net;
 
@@ -52,7 +53,7 @@ public sealed class PipelineConnection : IAsyncDisposable
         if (_outbound.Writer.TryWrite(frame))
             return true;
 
-        PipelineTelemetry.OutboundDropped(_endpoint);
+        FineageTelemetry.OutboundDropped.Add(1, new KeyValuePair<string, object?>("endpoint", _endpoint));
         return false;
     }
 
@@ -80,7 +81,8 @@ public sealed class PipelineConnection : IAsyncDisposable
         {
             await foreach (byte[] frame in _outbound.Reader.ReadAllAsync(ct).ConfigureAwait(false))
             {
-                PipelineTelemetry.FrameOut(_endpoint, frame.Length);
+                FineageTelemetry.FramesOut.Add(1, new KeyValuePair<string, object?>("endpoint", _endpoint));
+                FineageTelemetry.BytesOut.Add(frame.Length, new KeyValuePair<string, object?>("endpoint", _endpoint));
                 FlushResult flush = await _writer.WriteAsync(frame, ct).ConfigureAwait(false);
                 if (flush.IsCompleted)
                     break;

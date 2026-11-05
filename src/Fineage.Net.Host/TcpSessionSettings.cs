@@ -1,4 +1,4 @@
-namespace Fineage.Protocol.Net;
+namespace Fineage.Net.Host;
 
 public static class TcpSessionSettings
 {

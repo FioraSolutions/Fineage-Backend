@@ -21,13 +21,17 @@ public sealed class NetZoneServer : INetPresenceBridge
     readonly EntityIdMap _ids = new();
     readonly NetPresenceHub _presence;
     readonly Func<DateTimeOffset> _clock;
+    readonly int _maxMessagesPerSecond;
+    readonly TimeSpan _idleTimeout;
 
     public NetZoneServer(
         HandoffTokens tokens,
         ZoneWorld world,
         IAccountStore? accounts = null,
         Func<DateTimeOffset>? clock = null,
-        NetPresenceHub? presence = null)
+        NetPresenceHub? presence = null,
+        int? maxMessagesPerSecond = null,
+        TimeSpan? idleTimeout = null)
     {
         _tokens = tokens;
         _world = world;
@@ -35,6 +39,8 @@ public sealed class NetZoneServer : INetPresenceBridge
         _ = accounts;
         _presence = presence ?? new NetPresenceHub();
         _clock = clock ?? (() => DateTimeOffset.UtcNow);
+        _maxMessagesPerSecond = maxMessagesPerSecond ?? ZoneNetSettings.MaxMessagesPerSecond;
+        _idleTimeout = idleTimeout ?? TcpSessionSettings.IdleTimeout;
         _world.NetBridge = this;
     }
 
@@ -510,10 +516,24 @@ public sealed class NetZoneServer : INetPresenceBridge
         EntityId self = default;
         int registeredObjectId = 0;
 
+        // Same read-loop guards the V2 listener had: a silent client and a flooding client both
+        // close instead of occupying a slot forever. Touch on every frame, gate on the fixed window.
+        using var idle = new SessionIdleWatchdog(ct, _idleTimeout);
+        var rate = new MessageRateGate(_maxMessagesPerSecond);
+        CancellationToken readCt = idle.Token;
+
         try
         {
-            await foreach (var envelope in conn.Inbox.ReadAllAsync(ct).ConfigureAwait(false))
+            await foreach (var envelope in conn.Inbox.ReadAllAsync(readCt).ConfigureAwait(false))
             {
+                if (!rate.TryConsume())
+                {
+                    await RejectAsync(conn, "rate_limit", "Too many messages per second.", readCt)
+                        .ConfigureAwait(false);
+                    break;
+                }
+
+                idle.Touch();
                 try
                 {
                     switch (envelope.Opcode)
@@ -2006,6 +2026,9 @@ public sealed class NetZoneServer : INetPresenceBridge
             throw new InvalidOperationException("hello_required");
     }
 
-    static Task RejectAsync(NetConnection conn, string code, string message, CancellationToken ct) =>
-        conn.SendAsync(NetOpcode.Reject, NetCodec.EncodeReject(new NetReject { Code = code, Message = message }), ct: ct);
+    static Task RejectAsync(NetConnection conn, string code, string message, CancellationToken ct)
+    {
+        NetTelemetry.PacketRejected("zone");
+        return conn.SendAsync(NetOpcode.Reject, NetCodec.EncodeReject(new NetReject { Code = code, Message = message }), ct: ct);
+    }
 }

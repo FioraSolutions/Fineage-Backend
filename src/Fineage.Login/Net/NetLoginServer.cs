@@ -10,24 +10,43 @@ public sealed class NetLoginServer
     readonly Func<DateTimeOffset> _clock;
     readonly string _zoneHost;
     readonly int _zonePort;
+    readonly int _maxMessagesPerSecond;
+    readonly TimeSpan _idleTimeout;
 
     public NetLoginServer(
         LoginService service,
         string? zoneHost = null,
         int? zonePort = null,
-        Func<DateTimeOffset>? clock = null)
+        Func<DateTimeOffset>? clock = null,
+        int? maxMessagesPerSecond = null,
+        TimeSpan? idleTimeout = null)
     {
         _service = service;
         _clock = clock ?? (() => DateTimeOffset.UtcNow);
         _zoneHost = string.IsNullOrWhiteSpace(zoneHost) ? "127.0.0.1" : zoneHost.Trim();
         _zonePort = zonePort is > 0 and <= 65535 ? zonePort.Value : NetSettings.ZonePort;
+        _maxMessagesPerSecond = maxMessagesPerSecond ?? LoginNetSettings.MaxMessagesPerSecond;
+        _idleTimeout = idleTimeout ?? TcpSessionSettings.IdleTimeout;
     }
 
     public async Task HandleAsync(NetConnection conn, CancellationToken ct)
     {
         string? account = null;
-        await foreach (var envelope in conn.Inbox.ReadAllAsync(ct).ConfigureAwait(false))
+
+        // Same guards the retired V2 lobby listener had: an idle or flooding client loses the slot.
+        using var idle = new SessionIdleWatchdog(ct, _idleTimeout);
+        var rate = new MessageRateGate(_maxMessagesPerSecond);
+        CancellationToken readCt = idle.Token;
+
+        await foreach (var envelope in conn.Inbox.ReadAllAsync(readCt).ConfigureAwait(false))
         {
+            if (!rate.TryConsume())
+            {
+                await RejectAsync(conn, "rate_limit", "Too many messages per second.", readCt).ConfigureAwait(false);
+                break;
+            }
+
+            idle.Touch();
             try
             {
                 switch (envelope.Opcode)
@@ -379,6 +398,9 @@ public sealed class NetLoginServer
             throw new InvalidOperationException("hello_required");
     }
 
-    static Task RejectAsync(NetConnection conn, string code, string message, CancellationToken ct) =>
-        conn.SendAsync(NetOpcode.Reject, NetCodec.EncodeReject(new RejectMsg { Code = code, Message = message }), ct: ct);
+    static Task RejectAsync(NetConnection conn, string code, string message, CancellationToken ct)
+    {
+        NetTelemetry.PacketRejected("login");
+        return conn.SendAsync(NetOpcode.Reject, NetCodec.EncodeReject(new RejectMsg { Code = code, Message = message }), ct: ct);
+    }
 }
