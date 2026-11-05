@@ -5,7 +5,7 @@ namespace Fineage.Zone.Net;
 
 /// <summary>
 /// Maps live Zone object ids to Net connections for presence fanout
-/// (MoveState / EntitySpawn / EntityDespawn). V2 MessagePack flushes stay on ZoneSession streams.
+/// (MoveState / EntitySpawn / EntityDespawn). The hub is the only fan-out path: ZoneSession carries no stream.
 /// </summary>
 public sealed class NetPresenceHub
 {

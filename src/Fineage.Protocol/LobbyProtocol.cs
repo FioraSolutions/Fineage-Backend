@@ -3,7 +3,7 @@ namespace Fineage.Protocol;
 /// <summary>
 /// Login TCP lobby on port 9106. The Unity client (<c>FineageLoginSession</c> on <c>dev</c>)
 /// speaks this set: opcodes 20–25 and 1020–1026, plus shared <see cref="MsgType.Error"/> 1099.
-/// MessagePack keys are appended only. Do not renumber an existing key or opcode.
+/// Net key numbers are appended only. Do not renumber an existing key or opcode.
 ///
 /// <para>Client → server</para>
 /// <list type="bullet">

@@ -1,39 +1,10 @@
 using Fineage.Protocol;
-using MessagePack;
 using Xunit;
 
 namespace Fineage.Login.Tests;
 
 public class ProtocolCompatTests
 {
-    [Fact]
-    public void AuthMsg_MatchesZoneServerBytes()
-    {
-        var msg = new AuthMsg { Account = "hero", Password = "tok" };
-        Assert.Equal("92A46865726FA3746F6B", Convert.ToHexString(MessagePackSerializer.Serialize(msg)));
-    }
-
-    [Fact]
-    public void HelloMsg_MatchesZoneServerBytes()
-    {
-        var msg = new HelloMsg { ProtocolVersion = 1, ClientBuild = "selftest" };
-        Assert.Equal("9201A873656C6674657374", Convert.ToHexString(MessagePackSerializer.Serialize(msg)));
-    }
-
-    [Fact]
-    public void ErrorMsg_MatchesZoneServerBytes()
-    {
-        var msg = new ErrorMsg { Code = "auth", Message = "Auth required" };
-        Assert.Equal("92A461757468AD41757468207265717569726564", Convert.ToHexString(MessagePackSerializer.Serialize(msg)));
-    }
-
-    [Fact]
-    public void AuthOkMsg_MatchesZoneServerBytes()
-    {
-        var msg = new AuthOkMsg { SessionId = 7, CharacterName = "Test" };
-        Assert.Equal("9207A454657374", Convert.ToHexString(MessagePackSerializer.Serialize(msg)));
-    }
-
     [Fact]
     public void ZoneOpcodes_MatchFineageZoneServer()
     {
@@ -210,114 +181,6 @@ public class ProtocolCompatTests
     }
 
     [Fact]
-    public void GiveItem_omitted_count_defaults_to_one()
-    {
-        byte[] oneKey = [0x91, 0x39];
-        var msg = MessagePackSerializer.Deserialize<GiveItemMsg>(oneKey);
-        Assert.Equal(57, msg.ItemId);
-        Assert.Equal(1, msg.Count);
-
-        var round = MessagePackSerializer.Deserialize<GiveItemMsg>(
-            MessagePackSerializer.Serialize(new GiveItemMsg { ItemId = 2369, Count = 2 }));
-        Assert.Equal(2369, round.ItemId);
-        Assert.Equal(2, round.Count);
-
-        var use = MessagePackSerializer.Deserialize<UseItemMsg>(MessagePackSerializer.Serialize(new UseItemMsg { ObjectId = 100_000 }));
-        Assert.Equal(100_000, use.ObjectId);
-        var slot = MessagePackSerializer.Deserialize<UnequipItemMsg>(MessagePackSerializer.Serialize(new UnequipItemMsg { PaperdollSlot = 7 }));
-        Assert.Equal(7, slot.PaperdollSlot);
-    }
-
-    [Fact]
-    public void CombatMsgs_RoundTrip()
-    {
-        var status = new StatusUpdateMsg
-        {
-            ObjectId = 50_001,
-            AttributeIds = [InterludeStatus.CurHp, InterludeStatus.MaxHp],
-            Values = [64, 96]
-        };
-        var attack = new AttackMsg { AttackerObjectId = 1, TargetObjectId = 50_001, Damage = 32 };
-        Assert.Equal(64,
-            MessagePackSerializer.Deserialize<StatusUpdateMsg>(MessagePackSerializer.Serialize(status)).Values[0]);
-        Assert.Equal(32,
-            MessagePackSerializer.Deserialize<AttackMsg>(MessagePackSerializer.Serialize(attack)).Damage);
-    }
-
-    [Fact]
-    public void Chat_messages_round_trip()
-    {
-        var say = MessagePackSerializer.Deserialize<SayMsg>(
-            MessagePackSerializer.Serialize(new SayMsg { Text = "hi", ChatType = 0 }));
-        Assert.Equal("hi", say.Text);
-        Assert.Equal(0, say.ChatType);
-
-        var heard = MessagePackSerializer.Deserialize<CreatureSayMsg>(
-            MessagePackSerializer.Serialize(new CreatureSayMsg
-            {
-                ObjectId = 4,
-                Name = "Aria",
-                Text = "hi",
-                ChatType = 0
-            }));
-        Assert.Equal(4, heard.ObjectId);
-        Assert.Equal("Aria", heard.Name);
-        Assert.Equal("hi", heard.Text);
-    }
-
-    [Fact]
-    public void SystemMessage_round_trips()
-    {
-        Assert.Equal(1040, (ushort)MsgType.SystemMessage);
-        Assert.Equal(8, (ushort)MsgType.Say);
-        Assert.Equal(1012, (ushort)MsgType.CreatureSay);
-
-        var round = MessagePackSerializer.Deserialize<SystemMessageMsg>(
-            MessagePackSerializer.Serialize(new SystemMessageMsg
-            {
-                Id = ChatProtocol.Welcome,
-                Params = ["Aria"],
-                Text = "Welcome, Aria."
-            }));
-        Assert.Equal(ChatProtocol.Welcome, round.Id);
-        Assert.Equal("Aria", Assert.Single(round.Params));
-        Assert.Equal("Welcome, Aria.", round.Text);
-    }
-
-    [Fact]
-    public void DeleteObject_and_Die_round_trip()
-    {
-        var gone = MessagePackSerializer.Deserialize<DeleteObjectMsg>(
-            MessagePackSerializer.Serialize(new DeleteObjectMsg { ObjectId = 9001 }));
-        Assert.Equal(9001, gone.ObjectId);
-
-        var die = MessagePackSerializer.Deserialize<DieMsg>(
-            MessagePackSerializer.Serialize(new DieMsg { ObjectId = 42, KillerObjectId = 7 }));
-        Assert.Equal(42, die.ObjectId);
-        Assert.Equal(7, die.KillerObjectId);
-    }
-
-    [Fact]
-    public void SpawnItem_round_trips()
-    {
-        var round = MessagePackSerializer.Deserialize<SpawnItemMsg>(
-            MessagePackSerializer.Serialize(new SpawnItemMsg
-            {
-                ObjectId = 100_001,
-                ItemId = 57,
-                X = 1,
-                Y = 2,
-                Z = 3,
-                Stackable = true,
-                Count = 25
-            }));
-        Assert.Equal(100_001, round.ObjectId);
-        Assert.Equal(57, round.ItemId);
-        Assert.Equal(25, round.Count);
-        Assert.True(round.Stackable);
-    }
-
-    [Fact]
     public void LoginOpcodes_DoNotReuseZoneOpcodes()
     {
         ushort[] zone =
@@ -350,51 +213,7 @@ public class ProtocolCompatTests
     public void LobbyOpcodes_DoNotCollideWithZoneOrInventory()
     {
         var lobby = LobbyProtocol.ClientToServer.Concat(LobbyProtocol.ServerToClient).ToArray();
-        Assert.Equal(lobby, LobbyProtocol.ClientToServer.Concat(LobbyProtocol.ServerToClient).Distinct().ToArray());
+        Assert.Equal(lobby, lobby.Distinct().ToArray());
         Assert.All(lobby, op => Assert.DoesNotContain(op, LobbyProtocol.ZoneAndInventory));
-
-    }
-
-    [Fact]
-    public void Clan_messages_round_trip()
-    {
-        var ask = MessagePackSerializer.Deserialize<ClanAskJoinMsg>(
-            MessagePackSerializer.Serialize(new ClanAskJoinMsg
-            {
-                RequestorObjectId = 4,
-                RequestorName = "Aria",
-                ClanId = 2,
-                ClanName = "Fine",
-                PledgeType = 0
-            }));
-        Assert.Equal(4, ask.RequestorObjectId);
-        Assert.Equal("Fine", ask.ClanName);
-
-        var info = new CharInfoMsg
-        {
-            ObjectId = 4,
-            Name = "Aria",
-            X = 1,
-            Y = 2,
-            Z = 3,
-            ClassId = 0,
-            Paperdoll = new int[17],
-            ClanId = 9,
-            ClanCrestId = 0
-        };
-        var round = MessagePackSerializer.Deserialize<CharInfoMsg>(MessagePackSerializer.Serialize(info));
-        Assert.Equal(9, round.ClanId);
-        Assert.Equal(0, round.ClanCrestId);
-        Assert.Equal(17, round.Paperdoll.Length);
-
-        var user = MessagePackSerializer.Deserialize<UserInfoMsg>(MessagePackSerializer.Serialize(new UserInfoMsg
-        {
-            ObjectId = 4,
-            Name = "Aria",
-            ClanId = 9,
-            ClanCrestId = 0
-        }));
-        Assert.Equal(9, user.ClanId);
-        Assert.Equal(0, user.ClanCrestId);
     }
 }

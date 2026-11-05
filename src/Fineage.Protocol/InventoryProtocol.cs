@@ -3,7 +3,7 @@ namespace Fineage.Protocol;
 /// <summary>
 /// Zone inventory requests. Opcodes sit after <see cref="MsgType.PickupRequest"/> (14)
 /// and before lobby <see cref="MsgType.Register"/> (20). They are not login opcodes.
-/// MessagePack keys are appended only.
+/// Net key numbers are appended only.
 ///
 /// <para>Client → server</para>
 /// <list type="bullet">

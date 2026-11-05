@@ -1,6 +1,5 @@
 using Fineage.Protocol;
 using Fineage.Zone.Bosses;
-using MessagePack;
 using Xunit;
 
 namespace Fineage.Zone.Tests;
@@ -178,13 +177,13 @@ public sealed class BossScheduleTests
     }
 
     [Fact]
-    public void Boss_status_message_round_trips_keys()
+    public void Boss_status_message_round_trips_through_the_net_codec()
     {
-        var message = new BossStatusMsg
+        var message = new Fineage.Net.Contract.BossStatusNetMsg
         {
             Bosses =
             [
-                new BossStatusEntryMsg
+                new Fineage.Net.Contract.BossStatusEntryNet
                 {
                     NpcId = GrandId,
                     ObjectId = 80100,
@@ -201,7 +200,8 @@ public sealed class BossScheduleTests
             ]
         };
 
-        var copy = MessagePackSerializer.Deserialize<BossStatusMsg>(MessagePackSerializer.Serialize(message));
+        var copy = Fineage.Net.Contract.NetCodec.DecodeBossStatus(
+            Fineage.Net.Contract.NetCodec.EncodeBossStatus(message));
         var row = Assert.Single(copy.Bosses);
         Assert.Equal(GrandId, row.NpcId);
         Assert.Equal(80100, row.ObjectId);
