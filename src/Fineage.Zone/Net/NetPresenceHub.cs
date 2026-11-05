@@ -50,19 +50,23 @@ public sealed class NetPresenceHub
     {
         if (!TryGet(objectId, out var conn, out _))
             return;
-        try
-        {
-            await conn.SendAsync(opcode, payload, ct: ct).ConfigureAwait(false);
-        }
-        catch (Exception ex) when (ex is IOException or ObjectDisposedException or OperationCanceledException)
-        {
-            /* peer gone */
-        }
+        await conn.SendAsync(opcode, payload, ct: ct).ConfigureAwait(false);
     }
 
-    public async Task BroadcastAsync(IEnumerable<int> objectIds, ushort opcode, byte[] payload, CancellationToken ct)
+    /// <summary>
+    /// Fanout path: never waits. A full outbound queue drops the frame and counts
+    /// <c>fineage.outbound.dropped</c> instead of stalling the tick.
+    /// </summary>
+    public void TrySend(int objectId, ushort opcode, byte[] payload)
+    {
+        if (!TryGet(objectId, out var conn, out _))
+            return;
+        conn.TrySend(opcode, payload);
+    }
+
+    public void TryBroadcast(IEnumerable<int> objectIds, ushort opcode, byte[] payload)
     {
         foreach (int id in objectIds)
-            await SendAsync(id, opcode, payload, ct).ConfigureAwait(false);
+            TrySend(id, opcode, payload);
     }
 }

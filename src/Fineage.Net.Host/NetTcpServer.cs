@@ -16,7 +16,8 @@ public sealed class NetTcpServer
         Func<NetConnection, CancellationToken, Task> handler,
         CancellationToken ct,
         int maxConnections = 128,
-        int inboxCapacity = 256)
+        int inboxCapacity = 256,
+        int outboundCapacity = NetConnection.DefaultOutboundCapacity)
     {
         IPAddress address = host is "0.0.0.0" or "*" or ""
             ? IPAddress.Any
@@ -53,7 +54,7 @@ public sealed class NetTcpServer
                     NetTelemetry.ConnectionOpened(Endpoint);
                     try
                     {
-                        await using var conn = new NetConnection(client, inboxCapacity, Endpoint);
+                        await using var conn = new NetConnection(client, inboxCapacity, Endpoint, outboundCapacity);
                         using var linked = CancellationTokenSource.CreateLinkedTokenSource(ct);
                         var read = conn.RunReadLoopAsync(linked.Token);
                         try
