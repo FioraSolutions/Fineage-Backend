@@ -154,4 +154,48 @@ public sealed class NetAcquireSkillTests
             session, offer.SkillId, offer.NextLevel, ZoneWorld.AcquireSkillTypeUsual, informing: false, default));
         Assert.True(elf.KnownSkills.ContainsKey(offer.SkillId));
     }
+
+    /// <summary>
+    /// Mobius gates Divine Inspiration (1405) behind the Ancient Book items (8618/8619/8620/8621), one per level.
+    /// The confirmation page must list the book, and a purchase without it must fail with SysMsg 276.
+    /// </summary>
+    [Fact]
+    public async Task Book_skill_needs_the_item_and_lists_it_on_the_confirmation_page()
+    {
+        var (kit, session, elf, rec) = await SetupAsync();
+        elf.Level = 52;
+        elf.KnownSkills.Clear();
+
+        kit.World.TrainerServiceForTest(session, NpcServiceIntent.SkillList);
+        var offer = Assert.Single(LastList(rec).Skills, row => row.SkillId == 1405 && row.NextLevel == 1);
+        Assert.Equal(2, offer.Requirements); // Mobius marks a book row as "has a requirement"
+
+        Assert.Null(await kit.World.TryAcquireSkillAsync(
+            session, 1405, 1, ZoneWorld.AcquireSkillTypeUsual, informing: true, default));
+        var info = Assert.IsType<AcquireSkillInfoNetMsg>(
+            Assert.Single(rec.Of(nameof(INetPresenceBridge.FanoutAcquireSkillInfo)))[1]);
+        var req = Assert.Single(info.Requirements);
+        Assert.Equal(99, req.Type);
+        Assert.Equal(8618, req.ItemId);
+        Assert.Equal(1, req.Count);
+
+        // Without the book the purchase is refused and the row stays on the list.
+        elf.Sp = 10_000_000;
+        Assert.Null(await kit.World.TryAcquireSkillAsync(
+            session, 1405, 1, ZoneWorld.AcquireSkillTypeUsual, informing: false, default));
+        Assert.False(elf.KnownSkills.ContainsKey(1405));
+        Assert.Equal(276, Assert.IsType<SystemMessageNetMsg>(
+            Assert.Single(rec.Of(nameof(INetPresenceBridge.FanoutSystemMessage)))[1]).Id);
+        Assert.Contains(LastList(rec).Skills, row => row.SkillId == 1405 && row.NextLevel == 1);
+
+        // With the book the skill is learned and the book leaves the bag.
+        elf.Inventory!.Add(8618, 1);
+        var spBefore = elf.Sp;
+        Assert.Null(await kit.World.TryAcquireSkillAsync(
+            session, 1405, 1, ZoneWorld.AcquireSkillTypeUsual, informing: false, default));
+        Assert.Equal(1, elf.KnownSkills[1405]);
+        Assert.Equal(0, elf.Inventory.CountOf(8618));
+        Assert.Equal(spBefore - offer.SpCost, elf.Sp);
+        Assert.NotEmpty(rec.Of(nameof(INetPresenceBridge.FanoutInventoryUpdate)));
+    }
 }

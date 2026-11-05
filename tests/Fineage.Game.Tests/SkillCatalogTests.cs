@@ -67,4 +67,62 @@ public sealed class SkillCatalogTests
         Assert.True(skill!.IsDebuffSkill);
         Assert.Equal(15, skill.AbnormalTimeSeconds);
     }
+
+    /// <summary>
+    /// Mobius lists Divine Inspiration (1405) with one Ancient Book per level (8618/8619/8620/8621).
+    /// The tree must carry those items so the trainer can list and consume them.
+    /// </summary>
+    [Fact]
+    public void Divine_inspiration_rows_carry_their_ancient_books()
+    {
+        var data = GameData.LoadDefault();
+        var rows = data.SkillTrees.FindClass(25)!.Skills.Where(e => e.SkillId == 1405).ToDictionary(e => e.Level);
+        Assert.Equal(8618, Assert.Single(rows[1].Items).ItemId);
+        Assert.Equal(8619, Assert.Single(rows[2].Items).ItemId);
+        Assert.Equal(8620, Assert.Single(rows[3].Items).ItemId);
+        Assert.Equal(8621, Assert.Single(rows[4].Items).ItemId);
+        foreach (int level in new[] { 1, 2, 3, 4 })
+        {
+            Assert.True(data.Items.TryGet(rows[level].Items[0].ItemId, out _));
+            Assert.Empty(rows[level].Prerequisites);
+        }
+    }
+
+    [Fact]
+    public void Trainer_check_follows_mobius_order_level_sp_prerequisite_items()
+    {
+        var data = GameData.LoadDefault();
+        var row = new LearnableSkill(1405, 1, 52, 1000,
+            [new SkillLearnItem(8618, 1)], [new SkillLearnPrerequisite(239, 2)]);
+        var known = new Dictionary<int, int> { [239] = 2 };
+        Func<int, int> noBook = _ => 0;
+        Func<int, int> withBook = id => id == 8618 ? 1 : 0;
+
+        Assert.Equal(LearnBlock.Level, TrainerSkills.Check(row, 51, 5000, known, withBook));
+        Assert.Equal(LearnBlock.Sp, TrainerSkills.Check(row, 52, 999, known, withBook));
+        Assert.Equal(LearnBlock.Prerequisite, TrainerSkills.Check(row, 52, 5000, new Dictionary<int, int>(), withBook));
+        Assert.Equal(LearnBlock.Items, TrainerSkills.Check(row, 52, 5000, known, noBook));
+        Assert.Equal(LearnBlock.None, TrainerSkills.Check(row, 52, 5000, known, withBook));
+    }
+
+    [Fact]
+    public void Every_tree_item_requirement_names_a_known_item()
+    {
+        var data = GameData.LoadDefault();
+        foreach (var tree in data.SkillTrees.Trees)
+        {
+            foreach (var entry in tree.Skills)
+            {
+                foreach (var item in entry.Items)
+                {
+                    Assert.True(item.Count > 0);
+                    Assert.True(data.Items.TryGet(item.ItemId, out _),
+                        $"class {tree.ClassId} skill {entry.SkillId} needs unknown item {item.ItemId}");
+                }
+
+                foreach (var prereq in entry.Prerequisites)
+                    Assert.True(prereq.Level > 0 && prereq.SkillId > 0);
+            }
+        }
+    }
 }

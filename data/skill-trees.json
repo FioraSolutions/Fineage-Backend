@@ -106986,7 +106986,13 @@
           "level": 1,
           "getLevel": 52,
           "autoGet": false,
-          "learnedByNpc": true
+          "learnedByNpc": true,
+          "requiredItems": [
+            {
+              "itemId": 8618,
+              "count": 1
+            }
+          ]
         },
         {
           "skillId": 1320,
@@ -107007,7 +107013,13 @@
           "level": 2,
           "getLevel": 61,
           "autoGet": false,
-          "learnedByNpc": true
+          "learnedByNpc": true,
+          "requiredItems": [
+            {
+              "itemId": 8619,
+              "count": 1
+            }
+          ]
         },
         {
           "skillId": 1320,
@@ -107035,14 +107047,26 @@
           "level": 3,
           "getLevel": 76,
           "autoGet": false,
-          "learnedByNpc": true
+          "learnedByNpc": true,
+          "requiredItems": [
+            {
+              "itemId": 8620,
+              "count": 1
+            }
+          ]
         },
         {
           "skillId": 1405,
           "level": 4,
           "getLevel": 76,
           "autoGet": false,
-          "learnedByNpc": true
+          "learnedByNpc": true,
+          "requiredItems": [
+            {
+              "itemId": 8621,
+              "count": 1
+            }
+          ]
         }
       ]
     },
@@ -107454,7 +107478,13 @@
           "level": 1,
           "getLevel": 52,
           "autoGet": false,
-          "learnedByNpc": true
+          "learnedByNpc": true,
+          "requiredItems": [
+            {
+              "itemId": 8618,
+              "count": 1
+            }
+          ]
         },
         {
           "skillId": 1320,
@@ -107475,7 +107505,13 @@
           "level": 2,
           "getLevel": 61,
           "autoGet": false,
-          "learnedByNpc": true
+          "learnedByNpc": true,
+          "requiredItems": [
+            {
+              "itemId": 8619,
+              "count": 1
+            }
+          ]
         },
         {
           "skillId": 1320,
@@ -107503,14 +107539,26 @@
           "level": 3,
           "getLevel": 76,
           "autoGet": false,
-          "learnedByNpc": true
+          "learnedByNpc": true,
+          "requiredItems": [
+            {
+              "itemId": 8620,
+              "count": 1
+            }
+          ]
         },
         {
           "skillId": 1405,
           "level": 4,
           "getLevel": 76,
           "autoGet": false,
-          "learnedByNpc": true
+          "learnedByNpc": true,
+          "requiredItems": [
+            {
+              "itemId": 8621,
+              "count": 1
+            }
+          ]
         }
       ]
     },
@@ -107742,7 +107790,13 @@
           "level": 1,
           "getLevel": 52,
           "autoGet": false,
-          "learnedByNpc": true
+          "learnedByNpc": true,
+          "requiredItems": [
+            {
+              "itemId": 8618,
+              "count": 1
+            }
+          ]
         },
         {
           "skillId": 1320,
@@ -107770,7 +107824,13 @@
           "level": 2,
           "getLevel": 61,
           "autoGet": false,
-          "learnedByNpc": true
+          "learnedByNpc": true,
+          "requiredItems": [
+            {
+              "itemId": 8619,
+              "count": 1
+            }
+          ]
         },
         {
           "skillId": 1320,
@@ -107805,14 +107865,26 @@
           "level": 3,
           "getLevel": 76,
           "autoGet": false,
-          "learnedByNpc": true
+          "learnedByNpc": true,
+          "requiredItems": [
+            {
+              "itemId": 8620,
+              "count": 1
+            }
+          ]
         },
         {
           "skillId": 1405,
           "level": 4,
           "getLevel": 76,
           "autoGet": false,
-          "learnedByNpc": true
+          "learnedByNpc": true,
+          "requiredItems": [
+            {
+              "itemId": 8621,
+              "count": 1
+            }
+          ]
         }
       ]
     },
@@ -108221,7 +108293,13 @@
           "level": 1,
           "getLevel": 52,
           "autoGet": false,
-          "learnedByNpc": true
+          "learnedByNpc": true,
+          "requiredItems": [
+            {
+              "itemId": 8618,
+              "count": 1
+            }
+          ]
         },
         {
           "skillId": 1320,
@@ -108242,7 +108320,13 @@
           "level": 2,
           "getLevel": 61,
           "autoGet": false,
-          "learnedByNpc": true
+          "learnedByNpc": true,
+          "requiredItems": [
+            {
+              "itemId": 8619,
+              "count": 1
+            }
+          ]
         },
         {
           "skillId": 1320,
@@ -108270,14 +108354,26 @@
           "level": 3,
           "getLevel": 76,
           "autoGet": false,
-          "learnedByNpc": true
+          "learnedByNpc": true,
+          "requiredItems": [
+            {
+              "itemId": 8620,
+              "count": 1
+            }
+          ]
         },
         {
           "skillId": 1405,
           "level": 4,
           "getLevel": 76,
           "autoGet": false,
-          "learnedByNpc": true
+          "learnedByNpc": true,
+          "requiredItems": [
+            {
+              "itemId": 8621,
+              "count": 1
+            }
+          ]
         }
       ]
     },
@@ -108673,7 +108769,13 @@
           "level": 1,
           "getLevel": 52,
           "autoGet": false,
-          "learnedByNpc": true
+          "learnedByNpc": true,
+          "requiredItems": [
+            {
+              "itemId": 8618,
+              "count": 1
+            }
+          ]
         },
         {
           "skillId": 1320,
@@ -108694,7 +108796,13 @@
           "level": 2,
           "getLevel": 61,
           "autoGet": false,
-          "learnedByNpc": true
+          "learnedByNpc": true,
+          "requiredItems": [
+            {
+              "itemId": 8619,
+              "count": 1
+            }
+          ]
         },
         {
           "skillId": 1320,
@@ -108722,14 +108830,26 @@
           "level": 3,
           "getLevel": 76,
           "autoGet": false,
-          "learnedByNpc": true
+          "learnedByNpc": true,
+          "requiredItems": [
+            {
+              "itemId": 8620,
+              "count": 1
+            }
+          ]
         },
         {
           "skillId": 1405,
           "level": 4,
           "getLevel": 76,
           "autoGet": false,
-          "learnedByNpc": true
+          "learnedByNpc": true,
+          "requiredItems": [
+            {
+              "itemId": 8621,
+              "count": 1
+            }
+          ]
         }
       ]
     },
@@ -109106,7 +109226,13 @@
           "level": 1,
           "getLevel": 52,
           "autoGet": false,
-          "learnedByNpc": true
+          "learnedByNpc": true,
+          "requiredItems": [
+            {
+              "itemId": 8618,
+              "count": 1
+            }
+          ]
         },
         {
           "skillId": 1320,
@@ -109127,7 +109253,13 @@
           "level": 2,
           "getLevel": 61,
           "autoGet": false,
-          "learnedByNpc": true
+          "learnedByNpc": true,
+          "requiredItems": [
+            {
+              "itemId": 8619,
+              "count": 1
+            }
+          ]
         },
         {
           "skillId": 1320,
@@ -109155,14 +109287,26 @@
           "level": 3,
           "getLevel": 76,
           "autoGet": false,
-          "learnedByNpc": true
+          "learnedByNpc": true,
+          "requiredItems": [
+            {
+              "itemId": 8620,
+              "count": 1
+            }
+          ]
         },
         {
           "skillId": 1405,
           "level": 4,
           "getLevel": 76,
           "autoGet": false,
-          "learnedByNpc": true
+          "learnedByNpc": true,
+          "requiredItems": [
+            {
+              "itemId": 8621,
+              "count": 1
+            }
+          ]
         }
       ]
     },
@@ -109574,7 +109718,13 @@
           "level": 1,
           "getLevel": 52,
           "autoGet": false,
-          "learnedByNpc": true
+          "learnedByNpc": true,
+          "requiredItems": [
+            {
+              "itemId": 8618,
+              "count": 1
+            }
+          ]
         },
         {
           "skillId": 1320,
@@ -109595,7 +109745,13 @@
           "level": 2,
           "getLevel": 61,
           "autoGet": false,
-          "learnedByNpc": true
+          "learnedByNpc": true,
+          "requiredItems": [
+            {
+              "itemId": 8619,
+              "count": 1
+            }
+          ]
         },
         {
           "skillId": 1320,
@@ -109623,14 +109779,26 @@
           "level": 3,
           "getLevel": 76,
           "autoGet": false,
-          "learnedByNpc": true
+          "learnedByNpc": true,
+          "requiredItems": [
+            {
+              "itemId": 8620,
+              "count": 1
+            }
+          ]
         },
         {
           "skillId": 1405,
           "level": 4,
           "getLevel": 76,
           "autoGet": false,
-          "learnedByNpc": true
+          "learnedByNpc": true,
+          "requiredItems": [
+            {
+              "itemId": 8621,
+              "count": 1
+            }
+          ]
         }
       ]
     },
@@ -109950,7 +110118,13 @@
           "level": 1,
           "getLevel": 52,
           "autoGet": false,
-          "learnedByNpc": true
+          "learnedByNpc": true,
+          "requiredItems": [
+            {
+              "itemId": 8618,
+              "count": 1
+            }
+          ]
         },
         {
           "skillId": 1320,
@@ -109971,7 +110145,13 @@
           "level": 2,
           "getLevel": 61,
           "autoGet": false,
-          "learnedByNpc": true
+          "learnedByNpc": true,
+          "requiredItems": [
+            {
+              "itemId": 8619,
+              "count": 1
+            }
+          ]
         },
         {
           "skillId": 1320,
@@ -109999,14 +110179,26 @@
           "level": 3,
           "getLevel": 76,
           "autoGet": false,
-          "learnedByNpc": true
+          "learnedByNpc": true,
+          "requiredItems": [
+            {
+              "itemId": 8620,
+              "count": 1
+            }
+          ]
         },
         {
           "skillId": 1405,
           "level": 4,
           "getLevel": 76,
           "autoGet": false,
-          "learnedByNpc": true
+          "learnedByNpc": true,
+          "requiredItems": [
+            {
+              "itemId": 8621,
+              "count": 1
+            }
+          ]
         }
       ]
     },
@@ -110353,7 +110545,13 @@
           "level": 1,
           "getLevel": 52,
           "autoGet": false,
-          "learnedByNpc": true
+          "learnedByNpc": true,
+          "requiredItems": [
+            {
+              "itemId": 8618,
+              "count": 1
+            }
+          ]
         },
         {
           "skillId": 1320,
@@ -110374,7 +110572,13 @@
           "level": 2,
           "getLevel": 61,
           "autoGet": false,
-          "learnedByNpc": true
+          "learnedByNpc": true,
+          "requiredItems": [
+            {
+              "itemId": 8619,
+              "count": 1
+            }
+          ]
         },
         {
           "skillId": 1320,
@@ -110402,14 +110606,26 @@
           "level": 3,
           "getLevel": 76,
           "autoGet": false,
-          "learnedByNpc": true
+          "learnedByNpc": true,
+          "requiredItems": [
+            {
+              "itemId": 8620,
+              "count": 1
+            }
+          ]
         },
         {
           "skillId": 1405,
           "level": 4,
           "getLevel": 76,
           "autoGet": false,
-          "learnedByNpc": true
+          "learnedByNpc": true,
+          "requiredItems": [
+            {
+              "itemId": 8621,
+              "count": 1
+            }
+          ]
         }
       ]
     }

@@ -1,3 +1,4 @@
+using Fineage.Game.Quests;
 using Fineage.Game.Skills;
 using Fineage.Protocol;
 using Fineage.Zone.Combat;
@@ -183,7 +184,8 @@ public sealed partial class ZoneWorld
                 NextLevel = row.Level,
                 MaxLevel = MaxTreeLevel(player.ClassId, row.SkillId, row.Level),
                 SpCost = row.LevelUpSp,
-                Requirements = 1
+                // Mobius Folk.showSkillList passes 0; the previous-level rule is the client's own display hint.
+                Requirements = row.Items.Count > 0 ? 2 : 0
             };
         }
 
@@ -196,6 +198,12 @@ public sealed partial class ZoneWorld
 
     /// <summary>Mobius <c>AcquireSkillType.USUAL</c> ordinal.</summary>
     internal const int AcquireSkillTypeUsual = 0;
+
+    /// <summary>SystemMessage 276 "You do not have the necessary materials or prerequisites to learn this skill."</summary>
+    internal const int PrerequisiteMessageId = 276;
+
+    /// <summary>SystemMessage 2208 "You do not meet the skill level requirements."</summary>
+    internal const int SkillLevelRequirementMessageId = 2208;
 
     /// <summary>Highest <c>level</c> the class chain's tree lists for this skill (Mobius <c>getMaxLevel</c>).</summary>
     int MaxTreeLevel(int classId, int skillId, int fallback)
@@ -232,13 +240,24 @@ public sealed partial class ZoneWorld
         if (row.SkillId == 0)
             return;
 
+        // Mobius AcquireSkillInfo fills one requirement row per book (type 99, count, unk 50).
+        var requirements = row.Items
+            .Select(item => new Fineage.Net.Contract.AcquireSkillRequirementNet
+            {
+                Type = 99,
+                ItemId = item.ItemId,
+                Count = item.Count,
+                Unk = 50
+            })
+            .ToArray();
+
         NetBridge.FanoutAcquireSkillInfo([player.ObjectId], new Fineage.Net.Contract.AcquireSkillInfoNetMsg
         {
             SkillId = row.SkillId,
             Level = row.Level,
             SpCost = row.LevelUpSp,
             SkillType = skillType,
-            Requirements = []
+            Requirements = requirements
         });
     }
 
@@ -256,12 +275,29 @@ public sealed partial class ZoneWorld
             PublishAcquireSkillList(session, player, rows);
             return "bad_request";
         }
-        if (player.Sp < row.LevelUpSp)
+
+        var inventory = player.Inventory!;
+        var block = TrainerSkills.Check(row, player.Level, player.Sp, player.KnownSkills, inventory.CountOf);
+        if (block != LearnBlock.None)
         {
-            // Mobius SystemMessage 278 "You do not have enough SP to learn this skill."
-            Notice(session, 278, "You do not have enough SP to learn this skill.", toSelf);
+            // Mobius checkPlayerSkill order: 278 for SP, 276 for a missing prerequisite or item.
+            if (block == LearnBlock.Level)
+                Notice(session, SkillLevelRequirementMessageId, "You do not meet the skill level requirements.", toSelf);
+            else if (block == LearnBlock.Sp)
+                Notice(session, 278, "You do not have enough SP to learn this skill.", toSelf);
+            else
+                Notice(session, PrerequisiteMessageId,
+                    "You do not have the necessary materials or prerequisites to learn this skill.", toSelf);
             PublishAcquireSkillList(session, player, rows);
             return null;
+        }
+
+        // Mobius consumes the books before SP; the bag update rides with the skill list.
+        var touches = new List<BagTouch>();
+        foreach (var item in row.Items)
+        {
+            if (!inventory.TryTake(item.ItemId, item.Count, touches))
+                return "bad_request";
         }
 
         player.Sp -= row.LevelUpSp;
@@ -275,6 +311,17 @@ public sealed partial class ZoneWorld
         string skillName = _game.Skills.Find(row.SkillId)?.Name ?? $"Skill {row.SkillId}";
         // Mobius SystemMessage 277 "You have earned $s1."
         Notice(session, 277, $"You have earned {skillName}.", toSelf);
+        if (touches.Count > 0)
+        {
+            // Mobius destroyItemByItemId per book: the bag drops before the trainer window re-opens.
+            var invUpdate = new InventoryUpdateMsg
+            {
+                Changes = touches.Select(touch => InventoryMessages.ChangeRow((int)touch.Kind, touch.Item)).ToArray()
+            };
+            toSelf.Add(Pack(session, MsgType.InventoryUpdate, invUpdate));
+            NetBridge?.FanoutInventoryUpdate([session.ObjectId], ToNetInventoryUpdate(invUpdate));
+            SaveInventory(session, player.Inventory!);
+        }
 
         // Mobius re-sends the list after a learn so the bought row leaves the window.
         var remaining = TrainerSkills.Available(_game.SkillTrees, _game.Skills, player.ClassId, player.Level, player.KnownSkills, _game.Classes);

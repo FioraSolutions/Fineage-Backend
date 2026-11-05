@@ -64,7 +64,32 @@ public static class PlayerSkillBook
 public readonly record struct KnownSkill(int SkillId, int Level);
 
 /// <summary>One row a trainer can teach now (Mobius <c>SkillTreeData.getAvailableSkills</c>: next level only, getLevel reached).</summary>
-public readonly record struct LearnableSkill(int SkillId, int Level, int GetLevel, int LevelUpSp);
+public readonly record struct LearnableSkill(
+    int SkillId,
+    int Level,
+    int GetLevel,
+    int LevelUpSp,
+    IReadOnlyList<SkillLearnItem>? RequiredItems = null,
+    IReadOnlyList<SkillLearnPrerequisite>? PreReqSkills = null)
+{
+    public IReadOnlyList<SkillLearnItem> Items => RequiredItems ?? [];
+
+    public IReadOnlyList<SkillLearnPrerequisite> Prerequisites => PreReqSkills ?? [];
+}
+
+/// <summary>Mobius <c>RequestAcquireSkill.checkPlayerSkill</c> outcome; the zone turns it into SysMsg 276/278.</summary>
+public enum LearnBlock
+{
+    None = 0,
+    /// <summary>Mobius <c>YOU_DO_NOT_MEET_THE_SKILL_LEVEL_REQUIREMENTS</c> (a forged request below getLevel).</summary>
+    Level = 1,
+    /// <summary>SystemMessage 278: the SP price is above the player's SP.</summary>
+    Sp = 2,
+    /// <summary>SystemMessage 276: a prerequisite skill is missing or too low.</summary>
+    Prerequisite = 3,
+    /// <summary>SystemMessage 276: required items are missing from the bag.</summary>
+    Items = 4
+}
 
 public static class TrainerSkills
 {
@@ -92,11 +117,45 @@ public static class TrainerSkills
                 if (e.Level != have + 1)
                     continue;
                 if (!best.ContainsKey(e.SkillId))
-                    best[e.SkillId] = new LearnableSkill(e.SkillId, e.Level, e.GetLevel, e.LevelUpSp);
+                    best[e.SkillId] = new LearnableSkill(e.SkillId, e.Level, e.GetLevel, e.LevelUpSp,
+                        e.RequiredItems, e.PreReqSkills);
             }
         }
 
         return best.Values.OrderBy(s => s.SkillId).ToList();
+    }
+
+    /// <summary>
+    /// Mobius <c>RequestAcquireSkill.checkPlayerSkill</c> in wire order: level, SP, prerequisites, then items.
+    /// <paramref name="countOf"/> is the bag count for an item id (the zone passes the live inventory).
+    /// </summary>
+    public static LearnBlock Check(
+        LearnableSkill row,
+        int playerLevel,
+        int playerSp,
+        IReadOnlyDictionary<int, int> known,
+        Func<int, int> countOf)
+    {
+        ArgumentNullException.ThrowIfNull(known);
+        ArgumentNullException.ThrowIfNull(countOf);
+        if (row.GetLevel > playerLevel)
+            return LearnBlock.Level;
+        if (row.LevelUpSp > 0 && row.LevelUpSp > playerSp)
+            return LearnBlock.Sp;
+        foreach (var prereq in row.Prerequisites)
+        {
+            int have = known.TryGetValue(prereq.SkillId, out int level) ? level : 0;
+            if (have < prereq.Level)
+                return LearnBlock.Prerequisite;
+        }
+
+        foreach (var item in row.Items)
+        {
+            if (countOf(item.ItemId) < item.Count)
+                return LearnBlock.Items;
+        }
+
+        return LearnBlock.None;
     }
 
     /// <summary>NPC-learned rows still above the character level (shown as "coming at level N").</summary>

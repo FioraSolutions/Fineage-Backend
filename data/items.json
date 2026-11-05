@@ -7552,6 +7552,33 @@
       "weight": 0
     },
     {
+      "id": 8618,
+      "name": "Ancient Book: Divine Inspiration (Modern Language Version)",
+      "kind": "etc",
+      "stackable": true,
+      "icon": "icon.etc_add_buffslot_i00",
+      "price": 0,
+      "weight": 120
+    },
+    {
+      "id": 8619,
+      "name": "Ancient Book: Divine Inspiration (Original Language Version)",
+      "kind": "etc",
+      "stackable": true,
+      "icon": "icon.etc_add_buffslot_i01",
+      "price": 500000,
+      "weight": 120
+    },
+    {
+      "id": 8620,
+      "name": "Ancient Book: Divine Inspiration (Manuscript)",
+      "kind": "etc",
+      "stackable": true,
+      "icon": "icon.etc_add_buffslot_i02",
+      "price": 500000,
+      "weight": 120
+    },
+    {
       "id": 8621,
       "name": "Ancient Book - Divine Inspiration (Original Version)",
       "kind": "etc",
