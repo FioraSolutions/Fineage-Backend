@@ -103,8 +103,9 @@ public sealed partial class ZoneWorld
             return null;
         }
 
-        // Friendly NPCs (guides, merchants) are selectable for talk UI; Attackable is attack-only.
-        if (target.Kind != ZoneEntityKind.Npc || target.CurHp <= 0)
+        // Mobius setTarget accepts any live Creature: friendly NPCs (guides, merchants) select for talk UI,
+        // Attackable is attack-only, and other players select so their nameplate and target window work.
+        if (target.Kind is not (ZoneEntityKind.Npc or ZoneEntityKind.Player) || target.CurHp <= 0)
             return "target";
         if (!VisibleTo(session.ObjectId, targetObjectId))
             return "target";
@@ -122,10 +123,11 @@ public sealed partial class ZoneWorld
     /// </summary>
     void PublishTargetSelection(ZoneSession session, ZoneEntity player, ZoneEntity target, List<Pending> toSelf)
     {
+        int colour = InterludeStatus.TargetColor(player.Level, target.Level, IsAutoAttackable(target));
         toSelf.Add(Pack(session, MsgType.MyTargetSelected, new MyTargetSelectedMsg
         {
             ObjectId = target.ObjectId,
-            ColorHint = InterludeStatus.TargetColor(player.Level, target.Level, target.Attackable)
+            ColorHint = colour
         }));
         toSelf.Add(Pack(session, MsgType.StatusUpdate, new StatusUpdateMsg
         {
@@ -150,9 +152,22 @@ public sealed partial class ZoneWorld
         NetBridge.FanoutTargetSelected(self, new Fineage.Net.Contract.TargetSelectedNetMsg
         {
             TargetObjectId = target.ObjectId,
-            ColorHint = InterludeStatus.TargetColor(player.Level, target.Level, target.Attackable)
+            ColorHint = colour
         });
     }
+
+    /// <summary>
+    /// Mobius <c>Creature.isAutoAttackable(Player)</c> for the entities this zone carries: NPCs follow their
+    /// template flag; a player is only auto-attackable when hostile (PvP-flagged or carrying karma). Everything
+    /// else is not, so merchants, guides and friendly players all come back white (colour 0).
+    /// </summary>
+    static bool IsAutoAttackable(ZoneEntity target) =>
+        target.Kind switch
+        {
+            ZoneEntityKind.Npc => target.Attackable,
+            ZoneEntityKind.Player => target.PvpFlagged || target.PkKills > 0,
+            _ => false
+        };
 
     string? TryAttack(ZoneSession session, int requestedTargetId, List<Pending> outbound) =>
         TryAttack(session, requestedTargetId, outbound, out _);

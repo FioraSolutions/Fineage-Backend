@@ -79,6 +79,49 @@ public sealed class NetTargetSelectTests
         Assert.Equal(0, selected.ColorHint);
     }
 
+    /// <summary>
+    /// Players are selectable like any other creature in Mobius. Blocking them left the client unable to
+    /// target another player, so their nameplate, level and HP window never opened in multiplayer.
+    /// </summary>
+    [Fact]
+    public async Task A_pvp_flagged_player_is_selectable_with_the_level_delta_colour()
+    {
+        var (kit, session, player, rec) = await SetupAsync();
+        var (otherSession, otherPlayer) = await kit.EnterAsync();
+        otherPlayer.Level = player.Level + 4;
+        otherPlayer.PvpFlagged = true;
+
+        Assert.Null(await kit.World.TrySelectTargetAsync(
+            session, new SelectTargetMsg { TargetObjectId = otherSession.ObjectId }, default));
+
+        Assert.Equal(otherSession.ObjectId, session.SelectedTargetId);
+        var selected = Assert.IsType<TargetSelectedNetMsg>(
+            Assert.Single(rec.Of(nameof(INetPresenceBridge.FanoutTargetSelected)))[1]);
+        Assert.Equal(otherSession.ObjectId, selected.TargetObjectId);
+        // A flagged player is auto-attackable, so the colour is the level delta rather than the friendly 0.
+        Assert.Equal(-4, selected.ColorHint);
+
+        var hp = Assert.IsType<StatusUpdateNetMsg>(
+            Assert.Single(rec.Of(nameof(INetPresenceBridge.FanoutStatusUpdate)))[1]);
+        Assert.Equal(otherSession.ObjectId, (int)hp.EntityValue);
+    }
+
+    [Fact]
+    public async Task An_unflagged_player_is_selectable_and_white()
+    {
+        var (kit, session, player, rec) = await SetupAsync();
+        var (otherSession, otherPlayer) = await kit.EnterAsync();
+        otherPlayer.Level = player.Level + 4;
+
+        Assert.Null(await kit.World.TrySelectTargetAsync(
+            session, new SelectTargetMsg { TargetObjectId = otherSession.ObjectId }, default));
+
+        Assert.Equal(otherSession.ObjectId, session.SelectedTargetId);
+        var selected = Assert.IsType<TargetSelectedNetMsg>(
+            Assert.Single(rec.Of(nameof(INetPresenceBridge.FanoutTargetSelected)))[1]);
+        Assert.Equal(0, selected.ColorHint);
+    }
+
     [Fact]
     public async Task Selecting_yourself_is_colour_zero()
     {
