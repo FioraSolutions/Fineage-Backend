@@ -88,7 +88,7 @@ $ git ls-tree -r --name-only main -- src/Fineage.Net.Contract | wc -l   # 0
 | 2. Физ. урон | `Formulas.calcPhysDam` + miss/crit/shield/ss/position | `70·PAtk/PDef`, miss, crit, shield, соулшоты, spread; стрел нет | есть, без стрел | `medium` |
 | 3. Маг. урон и блоу | `calcMagicDam`, `calcBlowDamage`, `calcMagicSuccess` | `91·√MAtk/MDef·power`, блоу, lethal, mcrit/fail; легаси-фолбэк | есть, частично | `low` |
 | 4. Скиллы и каст | `onMagicLaunchedTimer`/`onMagicHitTimer`, `calcAtkBreak` | hitTime + coolTime + перезарядка по статам + прерывание; нет peace zone | есть, частично | `low` |
-| 5. Стат-пайплайн | `CreatureStat.calcStat` + `Calculator` | SET→MUL→ADD, баффы, пассивы `using`, вес 4270 | есть, кроме 4267 и 5076 | `high` |
+| 5. Стат-пайплайн | `CreatureStat.calcStat` + `Calculator` | SET→MUL→ADD, баффы, пассивы `using`, вес 4270, грейд 4267 | есть, кроме 5076 | `high` |
 | 6. Реген | `calcHpRegen`/`calcMpRegen`, зоны, осада, кланхолл, CP | `maxHp/64 + level/12`, стат-фолд, только игроки | частично | `medium` |
 | 7. Агро и ИИ | `AttackableAI`: hate, aggro range, LOS, return home, clan help | всё перечисленное, кроме миньонов и `_globalAggro` | есть, частично | `medium` |
 | 8. Награды за убийство | `calculateRewards` → exp/SP по урону и партии | exp/SP убийце, квест-кредит по партии | частично | `medium` |
@@ -401,13 +401,16 @@ add/sub → mul/div → нелинейные.
   (`ZoneWorldCombat.cs:148`), в `RollSkillDamage` (`ZoneWorldSkillDamage.cs:55`), в
   `NpcMeleeRoll` (`ZoneWorldCombat.cs:207`–`:209`) и в `BuildUserInfoVitals`
   (`ZoneWorld.cs:1179`). Персонаж 1-го и 40-го уровня бьют по-разному.
-- `D26` **`high`** *(переписано)* — grade penalty считается и уходит клиенту, но **не применяется
-  к статам**. `RefreshGradePenalty` (`ZoneWorldGear.cs:262`) записывает `WeaponGradePenalty`/
-  `ArmorGradePenalty`, они идут в `UserInfo` и в `EtcStatusUpdate` (`ZoneWorldWeight.cs:136`), но
-  скилл `4267` не фолдится: `data/skill-passives.json:5004` содержит полный набор функций
-  (`pAtkSpd`, `mAtkSpd`, `rEvas`, `runSpd`, `regHp` ×0.22…×0.1 по уровням), а поиск `4267` по
-  `src/Fineage.Zone` пуст. TODO всё ещё висит в `src/Fineage.Game/GradePenalty.cs:10`–`:15`.
-  Правка ровно такая же, как уже сделанная для 4270 (`FoldWeightPenalty`).
+- ~~`D26`~~ **снято** — Grade Penalty 4267 теперь **применяется к статам**. `RefreshGradePenalty`
+  (`ZoneWorldGear.cs:262`) пишет `WeaponGradePenalty`/`ArmorGradePenalty` и вычисленный из них
+  `GradePenaltyLevel` (`max(weapon, armor)`, как `addSkill(4267, …)` в `Player.java:2059`), а
+  `FoldGradePenalty` (`ZoneWorldWeight.cs`) фолдит функции 4267 в общий `CombatStatMods`-пайплайн —
+  ровно так же, как это уже было сделано для 4270 (`FoldWeightPenalty`). Уровни 1–4 множат
+  `pAtkSpd`/`mAtkSpd`/`rEvas`/`runSpd`/`regHp`/`regMp` на 0.22/0.19/0.16/0.13 и вычитают 20 accuracy,
+  поэтому персонаж в не по чину высоком грейде реально замедляется и слабеет. Пересчёт идёт на
+  надевании/снятии (`ZoneWorldGear.cs:191`), на заточке (`ZoneWorldEnchant.cs:251`), на входе в мир
+  (`ZoneWorld.cs:753`) и на левелапе (`ZoneWorldQuests.cs:368`). Тесты —
+  `tests/Fineage.Zone.Tests/GradePenaltySkillTests.cs`.
 - `D27` **`low`** *(было `medium`)* — бонусы экипировки **суммируются** (`ZoneWorldStats.cs:44`–`:72`),
   `pAtk` заполнен у всех 152 оружий, `pDef` — у 55 из 87 броней. Остаток: наполнить `pDef` у 32
   броней и `mDef` у украшений, иначе нагие доли отрабатывают вместо реальных значений.
@@ -882,9 +885,8 @@ Hate-модель: `Attackable.addDamageHate` (`Attackable.java:740`), `getMostH
 1. **`D4` — PvP-урон.** Один снятый фильтр `Kind != Npc` в `TryAttack` и в скиллах открывает дуэли,
    осадный бой (`M6`) и матчи Олимпиады (`M5`), где уже готовы матчмейкинг, стадионы и очки. Без
    него три системы стоят на месте.
-2. **`D26` — grade penalty 4267.** Данные импортированы (`skill-passives.json:5004`), механизм
-   фолда уже написан для 4270 (`FoldWeightPenalty`) — нужно повторить его для 4267. Штраф грейда
-   сегодня только рисуется в окне.
+2. ~~**`D26` — grade penalty 4267.**~~ **Сделано.** `FoldGradePenalty` фолдит 4267 так же, как 4270;
+   штраф грейда теперь режет скорость, темп атаки, уклонение и реген.
 3. **`D1`, `D2` — потеря опыта и Death Penalty 5076.** Данные 5076 тоже уже есть
    (`skill-passives.json:5542`) и не фолдятся. Сейчас смерть почти бесплатна.
 4. **`D3`, `D32` — CP как реальный пул.** Счётчик в `ZoneEntity`, урон по CP, реген, восстановление

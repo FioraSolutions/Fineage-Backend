@@ -96,8 +96,9 @@ public sealed partial class ZoneWorld
 
     /// <summary>
     /// Buffs plus passive masteries (Mobius operateType P) whose <c>using</c> condition matches the gear, plus the
-    /// virtual Weight Penalty 4270 source (<see cref="FoldWeightPenalty"/>). Internal so tests can assert the fold
-    /// that the speed/regen/load getters share.
+    /// virtual Weight Penalty 4270 (<see cref="FoldWeightPenalty"/>) and Grade Penalty 4267
+    /// (<see cref="FoldGradePenalty"/>) sources. Internal so tests can assert the folds that the speed/regen/load
+    /// getters share.
     /// </summary>
     internal CombatStatMods PlayerStatMods(ZoneEntity player)
     {
@@ -105,8 +106,10 @@ public sealed partial class ZoneWorld
         if (mods != null && ReferenceEquals(mods, CombatStatMods.None))
             mods = null;
         mods = player.KnownSkills.Count == 0 ? mods : _passives.CollectPassives(player.KnownSkills, kinds => Wearing(player, kinds), mods);
-        // Weight Penalty 4270 is added by refreshOverloaded instead of the skill book, so it is folded here.
-        return FoldWeightPenalty(player, mods);
+        // Weight Penalty 4270 is added by refreshOverloaded instead of the skill book, so it is folded here; Grade
+        // Penalty 4267 comes from refreshExpertisePenalty the same way.
+        mods = FoldWeightPenalty(player, mods);
+        return FoldGradePenalty(player, mods);
     }
 
     /// <summary>
