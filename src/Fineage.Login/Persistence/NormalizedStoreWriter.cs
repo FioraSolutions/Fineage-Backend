@@ -116,6 +116,7 @@ static class NormalizedStoreWriter
             character.ClanId,
             character.ClanJoinExpiryUnixMs,
             character.ClanCreateExpiryUnixMs,
+            character.DeathPenaltyLevel,
             character.CreatedAt,
             character.LastAccess,
             character.DeleteAt);
@@ -187,6 +188,16 @@ static class NormalizedStoreWriter
         cmd.CommandText = "UPDATE characters SET class_id = @classId, updated_at = now() WHERE id = @id";
         cmd.Parameters.AddWithValue("id", characterId);
         cmd.Parameters.AddWithValue("classId", classId);
+        cmd.ExecuteNonQuery();
+    }
+
+    /// <summary>Mobius <c>characters.death_penalty_level</c> (<c>Player.java:337</c>).</summary>
+    public static void UpdateDeathPenalty(NpgsqlConnection conn, int characterId, int level)
+    {
+        using var cmd = conn.CreateCommand();
+        cmd.CommandText = "UPDATE characters SET death_penalty_level = @level, updated_at = now() WHERE id = @id";
+        cmd.Parameters.AddWithValue("id", characterId);
+        cmd.Parameters.AddWithValue("level", level);
         cmd.ExecuteNonQuery();
     }
 
@@ -504,6 +515,7 @@ static class NormalizedStoreWriter
             ReadInt(ch, "clanId", 0),
             ReadLong(ch, "clanJoinExpiryUnixMs", 0),
             ReadLong(ch, "clanCreateExpiryUnixMs", 0),
+            ReadInt(ch, "deathPenaltyLevel", 0),
             ReadDate(ch, "createdAt") ?? DateTimeOffset.UtcNow,
             ReadDate(ch, "lastAccess"),
             ReadDate(ch, "deleteAt"));
@@ -544,6 +556,7 @@ static class NormalizedStoreWriter
         int clanId,
         long clanJoinExpiry,
         long clanCreateExpiry,
+        int deathPenaltyLevel,
         DateTimeOffset createdAt,
         DateTimeOffset? lastAccess,
         DateTimeOffset? deleteAt)
@@ -557,12 +570,14 @@ static class NormalizedStoreWriter
                 hair_style, hair_color, face, has_position, x, y, z, heading,
                 exp, sp, title, newbie, max_hp, hp, max_mp, mp,
                 clan_id, clan_join_expiry_unix_ms, clan_create_expiry_unix_ms,
+                death_penalty_level,
                 created_at, last_access, delete_at, payload, updated_at)
             VALUES (
                 @id, @account, @name, @classId, @race, @sex, @level,
                 @hairStyle, @hairColor, @face, @hasPosition, @x, @y, @z, 0,
                 @exp, @sp, @title, @newbie, @maxHp, @hp, @maxMp, @mp,
                 @clanId, @clanJoin, @clanCreate,
+                @deathPenalty,
                 @createdAt, @lastAccess, @deleteAt, '{}'::jsonb, now())
             ON CONFLICT (id) DO UPDATE SET
                 account = EXCLUDED.account,
@@ -589,6 +604,7 @@ static class NormalizedStoreWriter
                 clan_id = EXCLUDED.clan_id,
                 clan_join_expiry_unix_ms = EXCLUDED.clan_join_expiry_unix_ms,
                 clan_create_expiry_unix_ms = EXCLUDED.clan_create_expiry_unix_ms,
+                death_penalty_level = EXCLUDED.death_penalty_level,
                 created_at = EXCLUDED.created_at,
                 last_access = EXCLUDED.last_access,
                 delete_at = EXCLUDED.delete_at,
@@ -619,6 +635,7 @@ static class NormalizedStoreWriter
         cmd.Parameters.AddWithValue("clanId", clanId);
         cmd.Parameters.AddWithValue("clanJoin", clanJoinExpiry);
         cmd.Parameters.AddWithValue("clanCreate", clanCreateExpiry);
+        cmd.Parameters.AddWithValue("deathPenalty", deathPenaltyLevel);
         cmd.Parameters.AddWithValue("createdAt", createdAt.UtcDateTime);
         cmd.Parameters.AddWithValue("lastAccess", (object?)lastAccess?.UtcDateTime ?? DBNull.Value);
         cmd.Parameters.AddWithValue("deleteAt", (object?)deleteAt?.UtcDateTime ?? DBNull.Value);

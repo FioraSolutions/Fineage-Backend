@@ -135,7 +135,7 @@ public sealed partial class ZoneWorld
         // Mobius writes 1 when either expertise penalty is above zero, not the level itself.
         GradePenalty = player.WeaponGradePenalty > 0 || player.ArmorGradePenalty > 0,
         CharmOfCourage = false,
-        DeathPenalty = 0
+        DeathPenalty = player.DeathPenaltyLevel
     };
 
     /// <summary>
@@ -167,6 +167,26 @@ public sealed partial class ZoneWorld
     {
         int level = player.GradePenaltyLevel;
         if (level <= 0 || !_passives.TryGet(GradePenalty.SkillId, out var effect))
+            return mods ?? CombatStatMods.None;
+
+        var target = mods == null || ReferenceEquals(mods, CombatStatMods.None) ? new CombatStatMods() : mods;
+        foreach (var func in effect.Funcs)
+            target.Add(func, level);
+        return target;
+    }
+
+    /// <summary>
+    /// Folds skill 5076 at <see cref="ZoneEntity.DeathPenaltyLevel"/> into <paramref name="mods"/>
+    /// (Mobius <c>Player.increaseDeathPenaltyBuffLevel</c> → <c>addSkill(DEATH_PENALTY, level)</c>,
+    /// <c>Player.java:11718-11730</c>). Unlike 4267/4270 this one is a real entry in the skill book on live Mobius,
+    /// but it is stored outside the trainer list, so it is added as a virtual source here exactly like the other two.
+    /// Levels 1–15 scale <c>pAtk</c>/<c>pAtkSpd</c>/<c>mAtk</c>/<c>mAtkSpd</c>/<c>runSpd</c> down, <c>pDef</c>/<c>mDef</c>
+    /// down, and subtract <c>accCombat</c>/<c>rEvas</c>.
+    /// </summary>
+    CombatStatMods FoldDeathPenalty(ZoneEntity player, CombatStatMods? mods)
+    {
+        int level = Math.Clamp(player.DeathPenaltyLevel, 0, DeathRuleCatalog.MaxDeathPenaltyLevel);
+        if (level <= 0 || !_passives.TryGet(DeathPenalty.SkillId, out var effect))
             return mods ?? CombatStatMods.None;
 
         var target = mods == null || ReferenceEquals(mods, CombatStatMods.None) ? new CombatStatMods() : mods;

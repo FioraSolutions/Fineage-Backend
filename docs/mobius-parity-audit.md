@@ -98,16 +98,16 @@ $ git ls-tree -r --name-only main -- src/Fineage.Net.Contract | wc -l   # 0
 | 12. Дроп и спойл | `calculateDrops`, spoil/sweep, `DropProtection` | всё перечисленное работает | **есть** | — |
 | 13. Спавны | `SpawnTable` + территории + `WalkingManager` | плоский JSON, территории игнорируются | частично | `stub` |
 
-**Итого актуальных расхождений: 57** — из них `high` **6**, `medium` **28**, `low` **20**,
+**Итого актуальных расхождений: 54** — из них `high` **4**, `medium` **27**, `low` **20**,
 `stub` **3**.
 
-Разбивка: внутри механик (`D`-пункты + `N1`/`N2`) открыто **37** (`high` 4, `medium` 17,
+Разбивка: внутри механик (`D`-пункты + `N1`/`N2`) открыто **34** (`high` 2, `medium` 16,
 `low` 15, `stub` 1), и ещё **20** систем целиком (`M1`–`M20`: `high` 2, `medium` 11, `low` 5,
 `stub` 2).
 
-Полностью закрыто **28** пунктов `D`: `D8`, `D9`, `D10`, `D11`, `D14`, `D18`, `D19`, `D20`, `D21`,
-`D23`, `D24`, `D25`, `D28`, `D33`, `D34`, `D35`, `D37`, `D40`, `D44`, `D45`, `D46`, `D49`, `D50`,
-`D52`, `D57`, `D58`, `D60`, `D63`.
+Полностью закрыто **31** пункт `D`: `D1`, `D2`, `D5`, `D8`, `D9`, `D10`, `D11`, `D14`, `D18`,
+`D19`, `D20`, `D21`, `D23`, `D24`, `D25`, `D28`, `D33`, `D34`, `D35`, `D37`, `D40`, `D44`, `D45`,
+`D46`, `D49`, `D50`, `D52`, `D57`, `D58`, `D60`, `D63`.
 
 ---
 
@@ -157,16 +157,25 @@ $ git ls-tree -r --name-only main -- src/Fineage.Net.Contract | wc -l   # 0
 
 ### Расхождение
 
-- `D1` **`high`** — потери опыта при смерти нет: `calculateDeathExpPenalty` не портирован.
-  Искал `ExpBeforeDeath`, `restoreExp`, `removeExp`, `DeathExpPenalty`, `ExpPenalty` по `src/` —
-  ни одного совпадения.
-- `D2` **`high`** *(переписано)* — дебафф Death Penalty не применяется. В отличие от прошлой
-  версии, **данные для него уже импортированы**: `data/skill-passives.json:5542` содержит
-  `{"skillId": 5076, "name": "Death Penalty", "levels": 15}` с функциями `pAtk`, `pAtkSpd`, `mAtk`,
-  `mAtkSpd` ×0.9…×0.25 по уровням. Но: скилл не фолдится — поиск `5076` по `src/` даёт только
-  не связанный hex-литерал в `BlowfishEngine.cs:67`; `EtcStatusUpdateNetMsg.DeathPenalty` всегда
-  пишется нулём (`src/Fineage.Zone/World/ZoneWorldWeight.cs:138`). То есть игрок после смерти не
-  слабее, чем до.
+- ~~`D1`~~ **снято** — потеря опыта при смерти портирована: `DeathRuleCatalog`
+  (`src/Fineage.Game/DeathRuleCatalog.cs`) читает `data/xp-percent-lost.json`, транспонированный из
+  `playerXpPercentLost.xml` скриптом `scripts/gen_xp_percent_lost.py`. `ApplyDeathExpLoss`
+  (`src/Fineage.Zone/World/ZoneWorldDeathRules.cs`) повторяет `Player.calculateDeathExpPenalty`
+  (`Player.java:5318-5363`): процент берётся от полосы
+  `expForLevel(level + 1) - expForLevel(level)`, а не от абсолютного опыта; `removeExp`
+  (`PlayableStat.java:94-124`) не пускает опыт ниже нуля и снижает уровень, когда полоса
+  проваливается. Delevel пересчитывает `MaxHp`/`MaxMp`, книгу скиллов
+  (`checkPlayerSkills`, `Player.java:12602-12640`), grade/weight penalty и шлёт StatusUpdate + UserInfo.
+- ~~`D2`~~ **снято** — Death Penalty применяется. `RollDeathPenalty` (`ZoneWorldDeathRules.cs`)
+  повторяет `Player.calculateDeathPenaltyBuffLevel` (`:11690-11720`): бросок
+  `Rnd.get(1, 100) <= DeathPenaltyChance` только от смерти по мобу, затем
+  `increaseDeathPenaltyBuffLevel` (`:11722-11743`) поднимает уровень до 15, шлёт `EtcStatusUpdate`
+  с новым значением и SystemMessage 1916. Уровень фолдится как пассивный источник 5076
+  (`FoldDeathPenalty`, `ZoneWorldWeight.cs`; `PlayerStatMods` → `ZoneWorldStats.cs:111-113`), поэтому
+  `pAtk`/`pAtkSpd`/`mAtk`/`mAtkSpd`/`pDef`/`mDef`/`runSpd`/`accCombat`/`rEvas` реально падают, а
+  `EtcStatusUpdateNetMsg.DeathPenalty` теперь несёт уровень, а не 0. Уровень переживает релог:
+  колонка `characters.death_penalty_level` (миграция `005_character_death_penalty.sql`,
+  `Player.java:337`/`:6578`), `IAccountStore.TrySaveDeathPenalty`.
 - `D3` **`medium`** — CP существует только как поле отображения: `CurCp` всегда равен `MaxCp`
   (`ZoneWorld.cs:1196`–`:1197`, `NetEnterWorldProjector.cs:115`–`:116`), в `ZoneEntity` нет счётчика
   CP, урон по CP не идёт, CP-регена нет. Колонка в окне есть, механики нет.
@@ -177,8 +186,11 @@ $ git ls-tree -r --name-only main -- src/Fineage.Net.Contract | wc -l   # 0
   (`ZoneWorldGear.cs:254`), но нигде не выставляется в `true` по бою; кармы/PK нет. Ветка игрока в
   `ResolveMeleeHit` (`:411`–`:421`) достижима только со стороны NPC (моб бьёт игрока). Ни дуэлей,
   ни осадного боя, ни PvP-флага.
-- `D5` **`medium`** — респавн 100% HP/MP вместо долей `RespawnRestoreHP`/`RespawnRestoreMP`/
-  `RespawnRestoreCP` (`config/Character.ini`). Лечится правкой двух строк (`ZoneWorldDeath.cs:93`–`:94`).
+- ~~`D5`~~ **снято** — респавн восстанавливает доли из `Character.ini`: `RestoreShare`
+  (`ZoneWorldDeath.cs`) повторяет `Creature.doRevive` (`Creature.java:2524-2553`) — бар поднимается до
+  `max * share`, только если он ещё ниже цели, поэтому «воскрешение», уже вылечившее больше, не
+  обрезается. Значения (`RespawnRestoreHP = 65`, `RespawnRestoreMP = 0`) читаются из того же
+  `data/xp-percent-lost.json`, а не зашиты в код.
 - `D6` **`medium`** — один restart point вместо шести видов: `TryRevive` принимает только
   `DeathProtocol.ReviveToVillage` и отвергает остальное (`ZoneWorldDeath.cs:60`), сама константа —
   единственный action (`src/Fineage.Protocol/DeathProtocol.cs:18`). Нет кланхолла, замка, siege
