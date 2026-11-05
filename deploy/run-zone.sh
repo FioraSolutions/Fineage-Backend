@@ -20,7 +20,7 @@ if [[ -z "${FINEAGE_HANDOFF_SECRET:-}" && -f "$ROOT/handoff.secret" ]]; then
   FINEAGE_HANDOFF_SECRET="$(tr -d '\n\r' < "$ROOT/handoff.secret")"
 fi
 
-STORE="${FINEAGE_LOGIN_STORE:-$ROOT/data/accounts.json}"
+STATE_DIR="${FINEAGE_STATE_DIR:-$ROOT/data}"
 BIND="${FINEAGE_BIND:-0.0.0.0}"
 NET_ZONE_PORT="${FINEAGE_NET_ZONE_PORT:-9777}"
 
@@ -44,7 +44,7 @@ fi
 
 nohup "$BIN" \
   --bind "$BIND" \
-  --store "$STORE" \
+  --state-dir "$STATE_DIR" \
   >>"$ROOT/logs/zone.log" 2>&1 &
 echo $! >"$ROOT/logs/zone.pid"
 echo "Fineage.Zone pid $(cat "$ROOT/logs/zone.pid") net ${BIND}:${NET_ZONE_PORT}"

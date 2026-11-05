@@ -16,7 +16,7 @@ public class CharSelectWeaponTests
     [InlineData(53)] // Dwarf Fighter
     public void LobbyWire_WeaponItemId_matches_equipped_RHand(int classId)
     {
-        var store = JsonAccountStore.InMemory();
+        var store = MemoryAccountStore.InMemory();
         var service = new LoginService(store, new HandoffTokens(HandoffTokens.DefaultSecret));
         Assert.True(service.Register("weapontest" + classId, "pass1234").Ok);
         int race = classId switch

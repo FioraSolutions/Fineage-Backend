@@ -84,7 +84,7 @@ public class CharacterCreationTests
     [Fact]
     public void Duplicate_name_is_case_insensitive_and_concurrent_creates_succeed_once()
     {
-        var store = JsonAccountStore.InMemory();
+        var store = MemoryAccountStore.InMemory();
         var service = Service(store);
         Assert.True(service.Register("alice", "secret1").Ok);
         Assert.True(service.Register("bob", "secret1").Ok);
@@ -129,7 +129,7 @@ public class CharacterCreationTests
     public void Create_persists_appearance_sex_time_position_vitals_and_starter_kit()
     {
         var now = DateTimeOffset.UnixEpoch.AddHours(2);
-        var store = JsonAccountStore.InMemory();
+        var store = MemoryAccountStore.InMemory();
         var service = Service(store, () => now, create: new CharacterCreateOptions { StartingAdena = 40, StartingSp = 0 });
         Assert.True(service.Register("alice", "secret1").Ok);
 
@@ -316,5 +316,5 @@ public class CharacterCreationTests
         int? deleteAfterDays = null,
         CharacterCreateOptions? create = null,
         Action<string>? warn = null) =>
-        new(store ?? JsonAccountStore.InMemory(), new HandoffTokens(HandoffTokens.DefaultSecret), clock, deleteAfterDays: deleteAfterDays, create: create, warn: warn);
+        new(store ?? MemoryAccountStore.InMemory(), new HandoffTokens(HandoffTokens.DefaultSecret), clock, deleteAfterDays: deleteAfterDays, create: create, warn: warn);
 }

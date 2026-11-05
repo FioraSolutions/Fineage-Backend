@@ -78,7 +78,7 @@ public sealed class NetZoneGuardTests
         {
             var cts = new CancellationTokenSource();
             var tokens = new HandoffTokens(HandoffTokens.DefaultSecret);
-            var world = new ZoneWorld(accounts: JsonAccountStore.InMemory());
+            var world = new ZoneWorld(accounts: MemoryAccountStore.InMemory());
             var zone = new NetZoneServer(
                 tokens,
                 world,

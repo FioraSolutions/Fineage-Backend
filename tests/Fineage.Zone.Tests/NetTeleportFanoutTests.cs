@@ -61,7 +61,7 @@ public sealed class NetTeleportFanoutTests
 
     static async Task<(ZoneWorld World, ZoneSession Session)> GatekeeperWorldAsync()
     {
-        var store = JsonAccountStore.InMemory();
+        var store = MemoryAccountStore.InMemory();
         var login = new LoginService(store, new HandoffTokens(HandoffTokens.DefaultSecret));
         var ticket = login.Play("gate", "secret1", "Rook", HumanClasses.Fighter);
         Assert.True(ticket.Ok && ticket.Value != null);

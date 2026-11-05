@@ -39,7 +39,7 @@ public sealed class ZoneSpawnRespawnTests
             clock: () => clock.Now,
             spawnRandom: new Random(0));
 
-        var login = new LoginService(JsonAccountStore.InMemory(), new HandoffTokens(HandoffTokens.DefaultSecret));
+        var login = new LoginService(MemoryAccountStore.InMemory(), new HandoffTokens(HandoffTokens.DefaultSecret));
         var ticket = login.Play("spawn", "secret1", "Hero", HumanClasses.Fighter).Value!;
         var session = new ZoneSession();
         session.Bind(ticket.CharacterId, ticket.Account, ticket.CharacterName, ticket.ClassId);

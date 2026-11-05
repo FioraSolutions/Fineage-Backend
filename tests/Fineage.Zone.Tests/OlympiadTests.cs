@@ -276,7 +276,7 @@ public class OlympiadTests
     [Fact]
     public async Task World_ports_the_pair_and_report_pays_the_pass_then_sends_them_home()
     {
-        var store = JsonAccountStore.InMemory();
+        var store = MemoryAccountStore.InMemory();
         Assert.True(new LoginService(store, new HandoffTokens("test")).Register("ann", "secret1").Ok);
         Assert.True(new LoginService(store, new HandoffTokens("test")).Register("bea", "secret2").Ok);
         Assert.Equal(CreateCharacterStatus.Ok, store.TryAddCharacter("ann", "Ann", HumanClasses.Fighter, 0, 0, out var ann));
@@ -332,7 +332,7 @@ public class OlympiadTests
     [Fact]
     public async Task Disconnect_during_the_countdown_defaults_the_noble()
     {
-        var store = JsonAccountStore.InMemory();
+        var store = MemoryAccountStore.InMemory();
         var login = new LoginService(store, new HandoffTokens("test"));
         Assert.True(login.Register("ann", "secret1").Ok);
         Assert.True(login.Register("bea", "secret2").Ok);

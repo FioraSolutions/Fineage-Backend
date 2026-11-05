@@ -59,7 +59,7 @@ public static class LoginAcceptance
 
     static HandoffTicket RunMystic(HandoffTokens tokens)
     {
-        var service = new LoginService(JsonAccountStore.InMemory(), tokens);
+        var service = new LoginService(MemoryAccountStore.InMemory(), tokens);
         var result = service.Play("selftest2", "pass1234", "HumanTwo", HumanClasses.Mystic);
         if (!result.Ok || result.Value == null)
             throw new InvalidOperationException($"mystic play failed: {result.Code} {result.Message}");
@@ -68,7 +68,7 @@ public static class LoginAcceptance
 
     static async Task<HandoffMsg> RunFighterOverNetAsync(HandoffTokens tokens)
     {
-        var service = new LoginService(JsonAccountStore.InMemory(), tokens);
+        var service = new LoginService(MemoryAccountStore.InMemory(), tokens);
         // Net has no Register opcode: the lobby authenticates existing accounts only, so the
         // selftest account is seeded directly in the store before the socket opens.
         if (!service.Register("selftest", "pass1234").Ok)

@@ -89,7 +89,7 @@ Failures also send `Error` **1099**. When the retail gate shows a system line or
 
 ## Kick on period change
 
-Passing the gate sets a runtime dungeon id, the same role as Mobius `Player.setIn7sDungeon`. It is not written to `accounts.json`. The saved position is the entrance or the exit.
+Passing the gate sets a runtime dungeon id, the same role as Mobius `Player.setIn7sDungeon`. It is not persisted. The saved position is the entrance or the exit.
 
 When the Seven Signs period actually changes, anyone whose `CanEnter` would now fail is moved to that dungeon's exit, the id is cleared, and they receive system message **138** or **139** plus `DungeonEntered` action **3**. Fee and death do not evict someone who already passed. `MoveToAck` **1004** carries the move.
 

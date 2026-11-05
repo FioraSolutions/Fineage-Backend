@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# Local Login+Zone: Net on 9106/9777 (the only protocol); Postgres by default.
+# Local Login+Zone: Net on 9106/9777 (the only protocol); PostgreSQL is the only account store.
 # Usage: scripts/run-local-net.sh [start|stop|status]
 set -euo pipefail
 ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
@@ -7,7 +7,6 @@ cd "$ROOT"
 mkdir -p local-logs local-data
 CMD="${1:-start}"
 
-export FINEAGE_STORE="${FINEAGE_STORE:-postgres}"
 export FINEAGE_DATABASE_URL="${FINEAGE_DATABASE_URL:-Host=127.0.0.1;Port=5432;Database=fineage;Username=fineage;Password=fineage}"
 # One world: every enabled spawn map (all of Interlude — Talking Island, Elven Village, the villages,
 # hunting grounds, catacombs). FINEAGE_ZONE_MAPS / FINEAGE_ZONE_BOUNDS are unset on purpose so nothing
@@ -90,11 +89,8 @@ PY
 }
 
 ensure_postgres() {
-  if [[ "${FINEAGE_STORE}" != "postgres" && "${FINEAGE_STORE}" != "pg" ]]; then
-    return 0
-  fi
   if ! command -v docker >/dev/null 2>&1; then
-    echo "docker not found; start Postgres yourself or FINEAGE_STORE=json" >&2
+    echo "docker not found; PostgreSQL is required (docker compose up -d postgres)" >&2
     return 1
   fi
   docker compose -f "$ROOT/docker-compose.yml" up -d postgres >/dev/null
@@ -122,7 +118,7 @@ case "$CMD" in
         echo "$n no-pid"
       fi
     done
-    echo "FINEAGE_STORE=${FINEAGE_STORE}"
+    echo "store=postgres"
     exit 0;;
 esac
 
@@ -144,13 +140,12 @@ export FINEAGE_NET_ZONE_PORT=9777
 export FINEAGE_ZONE_STATUS_PORT="${FINEAGE_ZONE_STATUS_PORT:-7780}"
 export FINEAGE_ZONE_HOST=127.0.0.1
 
-# With FINEAGE_STORE=postgres the --store path is only an anchor for the runtime sidecar files
-# (seven-signs.json, boss-schedule.json, olympiad.json) that live beside the account store.
+# World sidecars (seven-signs.json, boss-schedule.json, olympiad.json) live in local-data.
 daemonize login-net \
-  dotnet "$LOGIN_DLL" --bind 127.0.0.1 --http-port 5080 --store local-data/state
+  dotnet "$LOGIN_DLL" --bind 127.0.0.1 --http-port 5080
 
 daemonize zone-net \
-  dotnet "$ZONE_DLL" --bind 127.0.0.1 --store local-data/state
+  dotnet "$ZONE_DLL" --bind 127.0.0.1 --state-dir local-data
 
 ok=0
 for _ in 1 2 3 4 5 6 7 8 9 10 11 12 15; do
@@ -164,5 +159,5 @@ if [[ "$ok" != 1 ]]; then
   tail -40 local-logs/zone-net.log 2>/dev/null || true
   exit 1
 fi
-echo "Net login=9106 zone=9777 | store=${FINEAGE_STORE} | maps=${FINEAGE_ZONE_MAPS:-default}"
+echo "Net login=9106 zone=9777 | store=postgres | maps=${FINEAGE_ZONE_MAPS:-default}"
 echo "stop: ./scripts/run-local-net.sh stop"

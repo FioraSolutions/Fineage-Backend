@@ -16,7 +16,7 @@ public class NetEnterWorldProjectorTests
     [Fact]
     public async Task Enter_projector_uses_entity_race_inventory_and_skills()
     {
-        var store = JsonAccountStore.InMemory();
+        var store = MemoryAccountStore.InMemory();
         Assert.Equal(AddAccountStatus.Created, store.TryAddAccount("netenter", "hash", "salt", 1, null));
         var game = GameData.LoadDefault();
         var kit = CharacterInventory.Rows(game.CreateStarterInventory(25));

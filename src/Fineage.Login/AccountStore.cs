@@ -274,8 +274,12 @@ public interface IAccountStore
     bool SaveSiege(IReadOnlyList<CastleSave> castles, IReadOnlyList<SiegeClanSave> clans, IReadOnlyDictionary<int, int> clanCastleIds);
 }
 
-/// <summary>JSON file store. Pass a null path for process memory only.</summary>
-public sealed class JsonAccountStore : IAccountStore
+/// <summary>
+/// In-memory working set behind <see cref="PostgresAccountStore"/> and the unit tests.
+/// There is no file-backed mode: PostgreSQL owns durability (<c>characters</c>, <c>character_items</c>,
+/// <c>character_quests</c>, <c>character_skills</c>, <c>character_shortcuts</c>).
+/// </summary>
+public sealed class MemoryAccountStore : IAccountStore
 {
     static readonly JsonSerializerOptions JsonOptions = new()
     {
@@ -285,12 +289,13 @@ public sealed class JsonAccountStore : IAccountStore
         DefaultIgnoreCondition = JsonIgnoreCondition.WhenWritingNull
     };
 
-    readonly string? _path;
     readonly object _gate = new();
     StoreFile _data = new();
     Action<string>? _afterSaveSnapshot;
 
-    JsonAccountStore(string? path) => _path = path;
+    MemoryAccountStore()
+    {
+    }
 
     /// <summary>
     /// Invoked under the store lock after every successful mutation with the versioned snapshot JSON.
@@ -302,22 +307,15 @@ public sealed class JsonAccountStore : IAccountStore
         set => _afterSaveSnapshot = value;
     }
 
-    /// <summary>When false, mutations update memory/file but skip <see cref="AfterSaveSnapshot"/> (Postgres hot paths).</summary>
+    /// <summary>When false, mutations skip <see cref="AfterSaveSnapshot"/> (Postgres hot paths).</summary>
     public bool EmitSnapshots { get; set; } = true;
 
-    public static JsonAccountStore InMemory() => new(null);
+    public static MemoryAccountStore InMemory() => new();
 
-    public static JsonAccountStore Open(string path)
+    /// <summary>In-memory store seeded from a versioned snapshot JSON (the <c>store_snapshot</c> payload).</summary>
+    public static MemoryAccountStore FromSnapshot(string json)
     {
-        var store = new JsonAccountStore(path);
-        store.Load();
-        return store;
-    }
-
-    /// <summary>In-memory store seeded from a versioned snapshot JSON (same shape as accounts.json).</summary>
-    public static JsonAccountStore FromSnapshot(string json)
-    {
-        var store = new JsonAccountStore(null);
+        var store = new MemoryAccountStore();
         store.LoadFromJson(json);
         return store;
     }
@@ -1173,67 +1171,6 @@ public sealed class JsonAccountStore : IAccountStore
             member.PledgeType)).ToArray(),
         clan.CastleId);
 
-    void Load()
-    {
-        if (_path == null || !File.Exists(_path))
-        {
-            _data = new StoreFile();
-            return;
-        }
-
-        string json = File.ReadAllText(_path);
-        var data = JsonSerializer.Deserialize<StoreFile>(json, JsonOptions)
-            ?? throw new InvalidDataException($"empty account store: {_path}");
-        if (data.Version != 1)
-            throw new InvalidDataException($"unsupported account store version {data.Version}");
-
-        data.Clans ??= [];
-        data.Castles ??= [];
-        data.SiegeClans ??= [];
-        var names = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
-        var ids = new HashSet<int>();
-        foreach (var account in data.Accounts)
-        {
-            if (!names.Add(account.Name))
-                throw new InvalidDataException($"duplicate account {account.Name}");
-            foreach (var character in account.Characters)
-            {
-                if (!ids.Add(character.Id))
-                    throw new InvalidDataException($"duplicate character id {character.Id}");
-            }
-        }
-
-        var clanIds = new HashSet<int>();
-        var clanNames = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
-        var memberIds = new HashSet<int>();
-        foreach (var clan in data.Clans)
-        {
-            clan.Members ??= [];
-            if (clan.Id <= 0 || !clanIds.Add(clan.Id))
-                throw new InvalidDataException($"duplicate clan id {clan.Id}");
-            if (string.IsNullOrWhiteSpace(clan.Name) || !clanNames.Add(clan.Name))
-                throw new InvalidDataException($"duplicate clan name {clan.Name}");
-            foreach (var member in clan.Members)
-            {
-                if (!memberIds.Add(member.CharacterId))
-                    throw new InvalidDataException($"character {member.CharacterId} is in two clans");
-                if (!ids.Contains(member.CharacterId))
-                    throw new InvalidDataException($"clan member {member.CharacterId} has no character");
-            }
-        }
-
-        int maxId = ids.Count == 0 ? 0 : ids.Max();
-        if (data.NextCharacterId <= maxId)
-            data.NextCharacterId = maxId + 1;
-        int maxClan = clanIds.Count == 0 ? 0 : clanIds.Max();
-        if (data.NextClanId <= maxClan)
-            data.NextClanId = maxClan + 1;
-        if (data.NextItemObjectId < PlayerInventory.FirstObjectId)
-            data.NextItemObjectId = PlayerInventory.FirstObjectId;
-        EnsureItemObjectIds(data);
-        _data = data;
-    }
-
     void LoadFromJson(string json)
     {
         var data = JsonSerializer.Deserialize<StoreFile>(json, JsonOptions)
@@ -1252,16 +1189,6 @@ public sealed class JsonAccountStore : IAccountStore
     void Save()
     {
         string snapshot = JsonSerializer.Serialize(_data, JsonOptions);
-        if (_path != null)
-        {
-            string? dir = Path.GetDirectoryName(_path);
-            if (!string.IsNullOrEmpty(dir))
-                Directory.CreateDirectory(dir);
-            string tmp = _path + ".tmp";
-            File.WriteAllText(tmp, snapshot);
-            File.Move(tmp, _path, overwrite: true);
-        }
-
         if (EmitSnapshots)
             _afterSaveSnapshot?.Invoke(snapshot);
     }

@@ -81,10 +81,10 @@ public sealed class NetZoneBoundaryTests
         readonly TcpClient _client;
         readonly NetworkStream _stream;
         readonly Task _serve;
-        readonly JsonAccountStore _store;
+        readonly MemoryAccountStore _store;
         uint _sequence;
 
-        NetZoneLink(CancellationTokenSource cts, TcpClient client, NetworkStream stream, Task serve, JsonAccountStore store)
+        NetZoneLink(CancellationTokenSource cts, TcpClient client, NetworkStream stream, Task serve, MemoryAccountStore store)
         {
             _cts = cts;
             _client = client;
@@ -96,7 +96,7 @@ public sealed class NetZoneBoundaryTests
         public static async Task<NetZoneLink> OpenAsync()
         {
             var cts = new CancellationTokenSource();
-            var store = JsonAccountStore.InMemory();
+            var store = MemoryAccountStore.InMemory();
             var zone = new NetZoneServer(new HandoffTokens(HandoffTokens.DefaultSecret), new ZoneWorld(accounts: store), store);
             var server = new NetTcpServer();
             var serve = Task.Run(

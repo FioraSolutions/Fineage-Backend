@@ -1,6 +1,7 @@
 bin/
 obj/
-# Runtime files such as accounts.json, boss-schedule.json, and olympiad.json. The game catalogs are tracked JSON (not Mobius XML).
+# Runtime sidecars such as boss-schedule.json and olympiad.json. Accounts live in PostgreSQL.
+# The game catalogs are tracked JSON (not Mobius XML).
 data/*
 !data/items.json
 !data/starter-kits.json

@@ -6,16 +6,16 @@ namespace Fineage.Login;
 
 /// <summary>
 /// PostgreSQL-backed <see cref="IAccountStore"/>. In-process mutations reuse
-/// <see cref="JsonAccountStore"/>; normalized character/item/quest tables are the
+/// <see cref="MemoryAccountStore"/>; normalized character/item/quest tables are the
 /// durable character-domain source of truth. <c>store_snapshot</c> remains a backup export.
 /// </summary>
 public sealed class PostgresAccountStore : IAccountStore, IDisposable
 {
     readonly NpgsqlDataSource _dataSource;
-    readonly JsonAccountStore _inner;
+    readonly MemoryAccountStore _inner;
     readonly object _persistGate = new();
 
-    PostgresAccountStore(NpgsqlDataSource dataSource, JsonAccountStore inner)
+    PostgresAccountStore(NpgsqlDataSource dataSource, MemoryAccountStore inner)
     {
         _dataSource = dataSource;
         _inner = inner;
@@ -26,27 +26,23 @@ public sealed class PostgresAccountStore : IAccountStore, IDisposable
     {
         ArgumentException.ThrowIfNullOrWhiteSpace(connectionString);
         var dataSource = NpgsqlDataSource.Create(connectionString);
-        ApplyMigrations(dataSource);
-        string? existing = LoadSnapshot(dataSource);
-        var inner = string.IsNullOrWhiteSpace(existing)
-            ? JsonAccountStore.InMemory()
-            : JsonAccountStore.FromSnapshot(existing);
-        var store = new PostgresAccountStore(dataSource, inner);
-        // Ensure normalized tables match memory (assigns object ids, backfills SQL).
-        store.PersistSnapshot(inner.ExportSnapshot());
-        return store;
-    }
-
-    /// <summary>One-shot: validate accounts.json and replace the Postgres snapshot + normalized tables.</summary>
-    public static void ImportJsonFileToDatabase(string connectionString, string jsonPath)
-    {
-        ArgumentException.ThrowIfNullOrWhiteSpace(connectionString);
-        string json = File.ReadAllText(jsonPath);
-        string snapshot = JsonAccountStore.FromSnapshot(json).ExportSnapshot();
-        var dataSource = NpgsqlDataSource.Create(connectionString);
-        ApplyMigrations(dataSource);
-        using var store = new PostgresAccountStore(dataSource, JsonAccountStore.FromSnapshot(snapshot));
-        store.PersistSnapshot(snapshot);
+        try
+        {
+            ApplyMigrations(dataSource);
+            string? existing = LoadSnapshot(dataSource);
+            var inner = string.IsNullOrWhiteSpace(existing)
+                ? MemoryAccountStore.InMemory()
+                : MemoryAccountStore.FromSnapshot(existing);
+            var store = new PostgresAccountStore(dataSource, inner);
+            // Ensure normalized tables match memory (assigns object ids, backfills SQL).
+            store.PersistSnapshot(inner.ExportSnapshot());
+            return store;
+        }
+        catch
+        {
+            dataSource.Dispose();
+            throw;
+        }
     }
 
     /// <summary>Re-project normalized tables from the current in-memory snapshot (CLI / recovery).</summary>
@@ -213,7 +209,7 @@ public sealed class PostgresAccountStore : IAccountStore, IDisposable
             _inner.EmitSnapshots = previous;
         }
 
-        // Export before taking _persistGate so we never nest with JsonAccountStore._gate.
+        // Export before taking _persistGate so we never nest with MemoryAccountStore._gate.
         string snapshot = _inner.ExportSnapshot();
         lock (_persistGate)
         {

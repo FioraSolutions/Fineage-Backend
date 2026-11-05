@@ -57,10 +57,10 @@ public sealed class SevenSignsEngine
         get { lock (_gate) return _nextChange; }
     }
 
-    public static SevenSignsEngine OpenBesideAccounts(string accountStorePath, IGameClock? clock = null)
+    /// <summary>Opens <c>seven-signs.json</c> inside <paramref name="stateDirectory"/> (default <c>data</c>).</summary>
+    public static SevenSignsEngine OpenInStateDirectory(string stateDirectory, IGameClock? clock = null)
     {
-        string? dir = Path.GetDirectoryName(Path.GetFullPath(accountStorePath));
-        string path = Path.Combine(string.IsNullOrEmpty(dir) ? "data" : dir, "seven-signs.json");
+        string path = Path.Combine(string.IsNullOrWhiteSpace(stateDirectory) ? "data" : stateDirectory, "seven-signs.json");
         return new SevenSignsEngine(
             clock ?? new SystemGameClock(),
             SevenSignsOptions.FromEnvironment(),

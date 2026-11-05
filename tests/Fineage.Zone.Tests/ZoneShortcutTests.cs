@@ -8,7 +8,7 @@ namespace Fineage.Zone.Tests;
 /// <summary>Mobius ShortCuts on Net: register / delete persist per character and come back in ShortCutInit.</summary>
 public sealed class ZoneShortcutTests
 {
-    static async Task<(ZoneWorld World, ZoneSession Session, ZoneEntity Player)> Enter(JsonAccountStore store, int characterId, string account, string name)
+    static async Task<(ZoneWorld World, ZoneSession Session, ZoneEntity Player)> Enter(MemoryAccountStore store, int characterId, string account, string name)
     {
         var world = new ZoneWorld(accounts: store);
         var session = new ZoneSession();
@@ -18,9 +18,9 @@ public sealed class ZoneShortcutTests
         return (world, session, player);
     }
 
-    static (JsonAccountStore Store, int CharacterId) NewCharacter()
+    static (MemoryAccountStore Store, int CharacterId) NewCharacter()
     {
-        var store = JsonAccountStore.InMemory();
+        var store = MemoryAccountStore.InMemory();
         var login = new LoginService(store, new HandoffTokens(HandoffTokens.DefaultSecret));
         Assert.True(login.Register("bar", "pass1234").Ok);
         var created = login.CreateHuman("bar", "Hotbar", HumanClasses.Fighter);
@@ -108,7 +108,7 @@ public sealed class ZoneShortcutTests
         Assert.False(store.TryReplaceShortcuts("bar", id,
             [new StoredShortcut(0, 0, 3, 1, 0), new StoredShortcut(0, 0, 3, 2, 0)]));
 
-        var reloaded = JsonAccountStore.FromSnapshot(store.ExportSnapshot());
+        var reloaded = MemoryAccountStore.FromSnapshot(store.ExportSnapshot());
         var rows = reloaded.FindById("bar", id)!.Shortcuts!;
         Assert.Equal(2, rows.Count);
         Assert.Equal(59, rows[1].WorldSlot);

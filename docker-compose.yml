@@ -1,4 +1,4 @@
-# Local Fineage foundation: PostgreSQL for IAccountStore (FINEAGE_STORE=postgres).
+# Local Fineage foundation: the only account store is PostgreSQL.
 services:
   postgres:
     image: postgres:16-alpine

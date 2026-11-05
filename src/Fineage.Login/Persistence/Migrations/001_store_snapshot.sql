@@ -1,5 +1,5 @@
 -- Fineage durable account store (foundation).
--- store_snapshot.payload is the authoritative versioned document (same shape as accounts.json).
+-- store_snapshot.payload is the authoritative versioned document (full account-store JSON).
 -- Projection tables are updated on each save for SQL inspection / future normalize splits.
 
 CREATE TABLE IF NOT EXISTS schema_migrations (

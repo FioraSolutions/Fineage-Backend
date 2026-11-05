@@ -184,10 +184,9 @@ public class LoginHttpTests
     [Fact]
     public async Task HttpAccount_IsTheTcpStore_IncludingShortTcpPasswords()
     {
-        string dir = Path.Combine(Path.GetTempPath(), "fineage-login-http-" + Guid.NewGuid().ToString("n"));
-        string path = Path.Combine(dir, "accounts.json");
         var tokens = new HandoffTokens(HandoffTokens.DefaultSecret);
-        var service = new LoginService(JsonAccountStore.Open(path), tokens);
+        var store = MemoryAccountStore.InMemory();
+        var service = new LoginService(store, tokens);
         Assert.True(service.Register("carol", "secret1").Ok);
 
         await using var host = await LoginHttpHost.StartAsync(service, IPAddress.Loopback, 0);
@@ -205,17 +204,17 @@ public class LoginHttpTests
         });
         Assert.Equal(HttpStatusCode.Created, created.Status);
 
-        var reloaded = new LoginService(JsonAccountStore.Open(path), tokens);
+        var json = store.ExportSnapshot();
+        var reloaded = new LoginService(MemoryAccountStore.FromSnapshot(json), tokens);
         Assert.Equal("dave_1", reloaded.Login("dave_1", "password123").Value);
         Assert.Equal("dave_1", reloaded.Login("dave@example.com", "password123").Value);
-        string json = File.ReadAllText(path);
         Assert.Contains("dave@example.com", json);
         Assert.DoesNotContain("password123", json);
         Assert.DoesNotContain("secret1", json);
     }
 
     static Task<LoginHttpHost> Start() =>
-        LoginHttpHost.StartAsync(new LoginService(JsonAccountStore.InMemory(), new HandoffTokens(HandoffTokens.DefaultSecret)), IPAddress.Loopback, 0);
+        LoginHttpHost.StartAsync(new LoginService(MemoryAccountStore.InMemory(), new HandoffTokens(HandoffTokens.DefaultSecret)), IPAddress.Loopback, 0);
 
     static HttpClient Client(LoginHttpHost host) =>
         new() { BaseAddress = new Uri(host.BaseUrl + "/") };

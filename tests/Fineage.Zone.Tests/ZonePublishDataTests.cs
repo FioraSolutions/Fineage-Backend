@@ -25,7 +25,6 @@ public sealed class ZonePublishDataTests
         "boss-schedule.json",
         "olympiad.json",
         "seven-signs.json",
-        "accounts.json",
     };
 
     [Fact]

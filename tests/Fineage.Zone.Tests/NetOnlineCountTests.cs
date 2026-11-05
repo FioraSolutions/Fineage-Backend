@@ -48,7 +48,7 @@ public sealed class NetOnlineCountTests
         Assert.NotNull(zoneStatus);
         var probe = new HttpZoneStatusSource(new Uri(zoneStatus.Url), TimeSpan.FromSeconds(2));
         await using var http = await LoginHttpHost.StartAsync(
-            new LoginService(JsonAccountStore.InMemory(), host.Tokens),
+            new LoginService(MemoryAccountStore.InMemory(), host.Tokens),
             IPAddress.Loopback,
             0,
             zoneStatus: probe);

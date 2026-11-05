@@ -53,10 +53,10 @@ public sealed class OlympiadBoard
 
     public OlympiadStadiumCatalog Stadiums { get; }
 
-    public static OlympiadBoard OpenBesideAccounts(string accountStorePath, DateTimeOffset now, OlympiadSettings? settings = null)
+    /// <summary>Opens <c>olympiad.json</c> inside <paramref name="stateDirectory"/> (default <c>data</c>).</summary>
+    public static OlympiadBoard OpenInStateDirectory(string stateDirectory, DateTimeOffset now, OlympiadSettings? settings = null)
     {
-        string? dir = Path.GetDirectoryName(Path.GetFullPath(accountStorePath));
-        string path = Path.Combine(string.IsNullOrEmpty(dir) ? "data" : dir, "olympiad.json");
+        string path = Path.Combine(string.IsNullOrWhiteSpace(stateDirectory) ? "data" : stateDirectory, "olympiad.json");
         return new OlympiadBoard(now, settings ?? OlympiadSettings.FromEnvironment(), new JsonOlympiadStore(path));
     }
 

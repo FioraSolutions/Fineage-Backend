@@ -11,7 +11,7 @@ public sealed class ZoneAutoShotTests
 {
     static async Task<(ZoneWorld World, ZoneSession Session, ZoneEntity Player)> Enter()
     {
-        var store = JsonAccountStore.InMemory();
+        var store = MemoryAccountStore.InMemory();
         var login = new LoginService(store, new HandoffTokens(HandoffTokens.DefaultSecret));
         Assert.True(login.Register("shots", "pass1234").Ok);
         var created = login.CreateHuman("shots", "Shooter", HumanClasses.Fighter);

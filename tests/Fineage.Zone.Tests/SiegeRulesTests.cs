@@ -203,43 +203,38 @@ public class SiegeRulesTests
     [Fact]
     public void Castle_rows_and_hasCastle_round_trip_and_capture_updates_the_clan()
     {
-        string path = Path.Combine(Path.GetTempPath(), $"fineage-siege-{Guid.NewGuid():N}.json");
-        try
-        {
-            var store = JsonAccountStore.Open(path);
-            Assert.True(new LoginService(store, new HandoffTokens(HandoffTokens.DefaultSecret)).Register("leader", "secret1").Ok);
-            Assert.Equal(CreateCharacterStatus.Ok, store.TryAddCharacter(
-                "leader", "Leader", HumanClasses.Fighter, 0, 0, out var leader, level: 40));
-            var clan = store.InsertClan(new ClanRecord(
-                0, "Siege", 4, leader!.Id, 0, 0, 0,
-                [new ClanMemberRecord(leader.Id, "leader", "Leader", HumanClasses.Fighter, 40, 0)]),
-                new CharacterClanState("leader", leader.Id, 0, 0, 0));
-            Assert.NotNull(clan);
+        var store = MemoryAccountStore.InMemory();
+        Assert.True(new LoginService(store, new HandoffTokens(HandoffTokens.DefaultSecret)).Register("leader", "secret1").Ok);
+        Assert.Equal(CreateCharacterStatus.Ok, store.TryAddCharacter(
+            "leader", "Leader", HumanClasses.Fighter, 0, 0, out var leader, level: 40));
+        var clan = store.InsertClan(new ClanRecord(
+            0, "Siege", 4, leader!.Id, 0, 0, 0,
+            [new ClanMemberRecord(leader.Id, "leader", "Leader", HumanClasses.Fighter, 40, 0)]),
+            new CharacterClanState("leader", leader.Id, 0, 0, 0));
+        Assert.NotNull(clan);
 
-            var world = new ZoneWorld(accounts: store, clock: () => Now, siege: SiegeSettings.Mobius);
-            Assert.Null(world.Sieges.Register(
-                new SiegeActor(leader.Id),
-                new SiegeClanInfo { Id = clan!.Id, Level = 4, LeaderId = leader.Id },
-                1, true, NowMs));
-            world.Sieges.Find(1)!.TaxPercent = 0;
-            long start = world.Sieges.Find(1)!.SiegeUnixMs;
-            Assert.Equal(SiegeStartKind.Started, world.StartSiege(1, DateTimeOffset.FromUnixTimeMilliseconds(start)));
-            Assert.Null(world.CaptureCastle(clan.Id, DateTimeOffset.FromUnixTimeMilliseconds(start + 60_000)));
+        var world = new ZoneWorld(accounts: store, clock: () => Now, siege: SiegeSettings.Mobius);
+        Assert.Null(world.Sieges.Register(
+            new SiegeActor(leader.Id),
+            new SiegeClanInfo { Id = clan!.Id, Level = 4, LeaderId = leader.Id },
+            1, true, NowMs));
+        world.Sieges.Find(1)!.TaxPercent = 0;
+        long start = world.Sieges.Find(1)!.SiegeUnixMs;
+        Assert.Equal(SiegeStartKind.Started, world.StartSiege(1, DateTimeOffset.FromUnixTimeMilliseconds(start)));
+        Assert.Null(world.CaptureCastle(clan.Id, DateTimeOffset.FromUnixTimeMilliseconds(start + 60_000)));
 
-            Assert.Equal(clan.Id, store.FindClan(clan.Id)!.CastleId);
-            Assert.Equal(clan.Id, store.ListCastles().Single(castle => castle.Id == 1).OwnerClanId);
-            Assert.Equal(0, store.ListCastles().Single(castle => castle.Id == 1).TaxPercent);
-            Assert.Empty(store.ListSiegeClans());
+        Assert.Equal(clan.Id, store.FindClan(clan.Id)!.CastleId);
+        Assert.Equal(clan.Id, store.ListCastles().Single(castle => castle.Id == 1).OwnerClanId);
+        Assert.Equal(0, store.ListCastles().Single(castle => castle.Id == 1).TaxPercent);
+        Assert.Empty(store.ListSiegeClans());
 
-            var reloaded = new ZoneWorld(accounts: JsonAccountStore.Open(path), clock: () => Now, siege: SiegeSettings.Mobius);
-            Assert.Equal(clan.Id, reloaded.Sieges.Find(1)!.OwnerClanId);
-            Assert.Equal(clan.Id, reloaded.Sieges.CastleOwnedBy(clan.Id));
-        }
-        finally
-        {
-            if (File.Exists(path))
-                File.Delete(path);
-        }
+        // Postgres restores the same graph from store_snapshot on boot.
+        var reloaded = new ZoneWorld(
+            accounts: MemoryAccountStore.FromSnapshot(store.ExportSnapshot()),
+            clock: () => Now,
+            siege: SiegeSettings.Mobius);
+        Assert.Equal(clan.Id, reloaded.Sieges.Find(1)!.OwnerClanId);
+        Assert.Equal(clan.Id, reloaded.Sieges.CastleOwnedBy(clan.Id));
     }
 
     static SiegeClanInfo Clan(int id, int level, long dissolving = 0) => new()

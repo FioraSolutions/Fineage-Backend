@@ -10,7 +10,7 @@ public sealed class CharacterPresenceTests
     [Fact]
     public async Task Enter_saves_last_access_and_leave_keeps_the_moved_position()
     {
-        var store = JsonAccountStore.InMemory();
+        var store = MemoryAccountStore.InMemory();
         var login = new LoginService(store, new HandoffTokens(HandoffTokens.DefaultSecret));
         var ticket = login.Play("alice", "secret1", "Aria", HumanClasses.Fighter).Value!;
         var world = new ZoneWorld(accounts: store, spawnRandom: new Random(1));
@@ -48,7 +48,7 @@ public sealed class CharacterPresenceTests
     [Fact]
     public async Task Enter_while_already_online_stores_the_previous_session_first()
     {
-        var store = JsonAccountStore.InMemory();
+        var store = MemoryAccountStore.InMemory();
         var login = new LoginService(store, new HandoffTokens(HandoffTokens.DefaultSecret));
         var ticket = login.Play("alice", "secret1", "Aria", HumanClasses.Fighter).Value!;
         var world = new ZoneWorld(accounts: store, spawnRandom: new Random(2));

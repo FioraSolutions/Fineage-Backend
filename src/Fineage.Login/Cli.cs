@@ -8,14 +8,15 @@ namespace Fineage.Login;
 
 public static class Cli
 {
-    public static async Task<int> RunAsync(string[] args, TextWriter? output = null, TextWriter? error = null)
+    public static async Task<int> RunAsync(
+        string[] args,
+        TextWriter? output = null,
+        TextWriter? error = null,
+        IAccountStore? store = null)
     {
         output ??= Console.Out;
         error ??= Console.Error;
         var rest = new List<string>(args);
-        string storePath = TakeOption(rest, "--store")
-            ?? Environment.GetEnvironmentVariable("FINEAGE_LOGIN_STORE")
-            ?? Path.Combine("data", "accounts.json");
         string? databaseUrl = TakeOption(rest, "--database")
             ?? Environment.GetEnvironmentVariable(AccountStoreFactory.DatabaseUrlEnv);
         string? httpPortText = TakeOption(rest, "--http-port")
@@ -37,36 +38,20 @@ public static class Cli
         }
 
         if (rest.Count == 0)
-            return await ListenAsync(storePath, bindAddress, bindDisplay, httpPort, output, error).ConfigureAwait(false) ? 0 : 1;
+            return await ListenAsync(store, databaseUrl, bindAddress, bindDisplay, httpPort, output, error).ConfigureAwait(false) ? 0 : 1;
 
         string cmd = rest[0].ToLowerInvariant();
-        if (cmd is "import-json")
-        {
-            if (rest.Count != 2)
-                return Usage(error);
-            string url = databaseUrl ?? AccountStoreFactory.DefaultPostgresUrl;
-            try
-            {
-                PostgresAccountStore.ImportJsonFileToDatabase(url, rest[1]);
-                output.WriteLine($"imported {rest[1]} → postgres");
-                return 0;
-            }
-            catch (Exception ex)
-            {
-                error.WriteLine("import-json failed: " + ex.Message);
-                return 1;
-            }
-        }
+        if (cmd is not ("register" or "login" or "create" or "select" or "play" or "backfill-normalized"))
+            return Usage(error);
 
         if (cmd is "backfill-normalized")
         {
             if (rest.Count != 1)
                 return Usage(error);
-            string url = databaseUrl ?? AccountStoreFactory.DefaultPostgresUrl;
             try
             {
-                using var store = PostgresAccountStore.Open(url);
-                store.BackfillNormalizedFromSnapshot();
+                using var opened = store == null ? AccountStoreFactory.Open(databaseUrl) : null;
+                (opened ?? (PostgresAccountStore)store!).BackfillNormalizedFromSnapshot();
                 output.WriteLine("backfilled normalized character/item/quest tables from store_snapshot");
                 return 0;
             }
@@ -77,9 +62,20 @@ public static class Cli
             }
         }
 
+        IAccountStore accounts;
+        try
+        {
+            accounts = store ?? AccountStoreFactory.Open(databaseUrl);
+        }
+        catch (Exception ex)
+        {
+            error.WriteLine(ex.Message);
+            return 1;
+        }
+
         var handoff = MemoryHandoffStore.FromEnvironment();
         var service = new LoginService(
-            AccountStoreFactory.Open(storePath),
+            accounts,
             handoff.Tokens,
             deleteAfterDays: CharacterRules.DeleteAfterDays,
             create: CharacterCreateOptions.FromEnvironment());
@@ -185,24 +181,34 @@ public static class Cli
               Fineage.Login create <account> <password> <name> <fighter|mystic>
               Fineage.Login select <account> <password> <name>
               Fineage.Login play <account> <password> <name> <fighter|mystic>
-              Fineage.Login [--bind 0.0.0.0] [--http-port 5080] [--store data/accounts.json]
-              Fineage.Login import-json <accounts.json>   # requires FINEAGE_STORE=postgres / FINEAGE_DATABASE_URL
+              Fineage.Login [--bind 0.0.0.0] [--http-port 5080] [--database <conn>]
               Fineage.Login backfill-normalized           # re-project characters/items/quests from store_snapshot
-              # FINEAGE_STORE=postgres|json  FINEAGE_DATABASE_URL=Host=...;Database=fineage;...
+              # PostgreSQL only. FINEAGE_DATABASE_URL=Host=...;Database=fineage;...
               # Net TCP login port: FINEAGE_NET_LOGIN_PORT (default 9106)
             """);
         return 1;
     }
 
     static async Task<bool> ListenAsync(
-        string storePath,
+        IAccountStore? store,
+        string? databaseUrl,
         IPAddress bindAddress,
         string bindDisplay,
         int httpPort,
         TextWriter output,
         TextWriter error)
     {
-        IAccountStore accounts = AccountStoreFactory.Open(storePath);
+        IAccountStore accounts;
+        try
+        {
+            accounts = store ?? AccountStoreFactory.Open(databaseUrl);
+        }
+        catch (Exception ex)
+        {
+            error.WriteLine($"[LOGIN] {ex.Message}");
+            return false;
+        }
+
         var handoff = MemoryHandoffStore.FromEnvironment();
         var service = new LoginService(
             accounts,
@@ -266,7 +272,7 @@ public static class Cli
         }
 
         output.WriteLine(
-            $"[LOGIN] listen net={bindDisplay}:{NetSettings.LoginPort} http={(http != null ? http.BaseUrl : "off")} store={StoreLabel(storePath, accounts)} (maxConn={maxConnections} msgPerSec={maxMsgPerSec})");
+            $"[LOGIN] listen net={bindDisplay}:{NetSettings.LoginPort} http={(http != null ? http.BaseUrl : "off")} store=postgres (maxConn={maxConnections} msgPerSec={maxMsgPerSec})");
         if (http != null)
         {
             output.WriteLine(http.ZoneStatusProbe == null
@@ -309,9 +315,6 @@ public static class Cli
 
         return true;
     }
-
-    static string StoreLabel(string storePath, IAccountStore accounts) =>
-        accounts is PostgresAccountStore ? "postgres" : storePath;
 
     static string? TakeOption(List<string> args, string name)
     {

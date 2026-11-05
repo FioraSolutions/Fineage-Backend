@@ -11,7 +11,7 @@ public class NetCharSelectRosterTests
     [Fact]
     public void Net_roster_summary_includes_paperdoll_cp_and_roundtrips_codec()
     {
-        var store = JsonAccountStore.InMemory();
+        var store = MemoryAccountStore.InMemory();
         var service = new LoginService(store, new HandoffTokens(HandoffTokens.DefaultSecret));
         Assert.True(service.Register("netroster", "pass1234").Ok);
         var created = service.CreateHuman("netroster", "Aria", HumanClasses.Fighter);

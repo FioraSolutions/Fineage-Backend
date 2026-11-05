@@ -8,7 +8,7 @@ public class CharacterInventoryTests
     [Fact]
     public void Create_stores_the_starter_kit_once()
     {
-        var store = JsonAccountStore.InMemory();
+        var store = MemoryAccountStore.InMemory();
         var service = new LoginService(store, new HandoffTokens(HandoffTokens.DefaultSecret));
         Assert.True(service.Register("alice", "secret1").Ok);
 
@@ -34,7 +34,7 @@ public class CharacterInventoryTests
     [Fact]
     public void Existing_character_is_not_given_a_second_kit()
     {
-        var store = JsonAccountStore.InMemory();
+        var store = MemoryAccountStore.InMemory();
         var service = new LoginService(store, new HandoffTokens(HandoffTokens.DefaultSecret));
         var created = service.Play("alice", "secret1", "Aria", HumanClasses.Fighter);
         Assert.True(created.Ok, created.Message);
@@ -50,27 +50,19 @@ public class CharacterInventoryTests
     }
 
     [Fact]
-    public void Kit_roundtrips_through_the_account_file()
+    public void Kit_roundtrips_through_the_persisted_snapshot()
     {
-        var path = Path.Combine(Path.GetTempPath(), "fineage-accounts-" + Guid.NewGuid().ToString("n") + ".json");
-        try
-        {
-            var service = new LoginService(JsonAccountStore.Open(path), new HandoffTokens(HandoffTokens.DefaultSecret));
-            var created = service.Play("alice", "secret1", "MageOne", HumanClasses.Mystic);
-            Assert.True(created.Ok, created.Message);
+        var store = MemoryAccountStore.InMemory();
+        var service = new LoginService(store, new HandoffTokens(HandoffTokens.DefaultSecret));
+        var created = service.Play("alice", "secret1", "MageOne", HumanClasses.Mystic);
+        Assert.True(created.Ok, created.Message);
 
-            var reopened = JsonAccountStore.Open(path);
-            var saved = reopened.FindById("alice", created.Value!.CharacterId);
-            Assert.NotNull(saved?.Items);
-            Assert.Contains(saved.Items, item => item.ItemId == 177 && item.EquippedSlot == 7);
-            Assert.Contains(saved.Items, item => item.ItemId == 1101 && item.EquippedSlot == 10);
-            Assert.Contains(saved.Items, item => item.ItemId == 1104 && item.EquippedSlot == 11);
-            Assert.Contains(saved.Items, item => item.ItemId == 4627 && item.EquippedSlot == -1);
-        }
-        finally
-        {
-            if (File.Exists(path))
-                File.Delete(path);
-        }
+        var reopened = MemoryAccountStore.FromSnapshot(store.ExportSnapshot());
+        var saved = reopened.FindById("alice", created.Value!.CharacterId);
+        Assert.NotNull(saved?.Items);
+        Assert.Contains(saved.Items, item => item.ItemId == 177 && item.EquippedSlot == 7);
+        Assert.Contains(saved.Items, item => item.ItemId == 1101 && item.EquippedSlot == 10);
+        Assert.Contains(saved.Items, item => item.ItemId == 1104 && item.EquippedSlot == 11);
+        Assert.Contains(saved.Items, item => item.ItemId == 4627 && item.EquippedSlot == -1);
     }
 }

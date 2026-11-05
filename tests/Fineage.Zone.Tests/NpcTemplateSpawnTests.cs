@@ -211,7 +211,7 @@ public sealed class NpcTemplateSpawnTests
         Assert.Equal((info.X, info.Y, info.Z), (presence.X, presence.Y, presence.Z));
         Assert.Equal(info.Heading, presence.Heading);
         Assert.False(presence.Attackable);
-        var login = new LoginService(JsonAccountStore.InMemory(), new HandoffTokens(HandoffTokens.DefaultSecret));
+        var login = new LoginService(MemoryAccountStore.InMemory(), new HandoffTokens(HandoffTokens.DefaultSecret));
         var ticket = login.Play("merchant", "secret1", "Buyer", HumanClasses.Fighter).Value!;
         var session = new ZoneSession();
         session.Bind(ticket.CharacterId, ticket.Account, ticket.CharacterName, ticket.ClassId);

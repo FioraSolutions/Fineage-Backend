@@ -19,7 +19,7 @@ public sealed class LoginHandoffTtlEnvTests
             Environment.SetEnvironmentVariable("FINEAGE_HANDOFF_TTL_SECONDS", "120");
             var tokens = HandoffTokens.FromEnvironment();
             var now = DateTimeOffset.UnixEpoch;
-            var service = new LoginService(JsonAccountStore.InMemory(), tokens, () => now);
+            var service = new LoginService(MemoryAccountStore.InMemory(), tokens, () => now);
             var ticket = service.Play("bob", "secret1", "Bob", HumanClasses.Fighter).Value!;
             Assert.Equal(now.ToUnixTimeSeconds() + 120, ticket.ExpiresUnixSeconds);
         }

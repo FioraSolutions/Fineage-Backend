@@ -33,7 +33,7 @@ public sealed class NetEnchantRulesTests
     /// <summary>A world whose enchant roll replays <paramref name="values"/>, with the Net fanout recorded.</summary>
     sealed class Bench
     {
-        public JsonAccountStore Store { get; } = JsonAccountStore.InMemory();
+        public MemoryAccountStore Store { get; } = MemoryAccountStore.InMemory();
         public ZoneWorld World { get; private set; } = null!;
         public NetBridgeRecorder Rec { get; private set; } = null!;
 

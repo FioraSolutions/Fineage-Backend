@@ -18,7 +18,7 @@ internal sealed class NetZoneHost : IAsyncDisposable
     readonly CancellationTokenSource _cts;
     readonly Task _serve;
 
-    NetZoneHost(CancellationTokenSource cts, Task serve, int port, JsonAccountStore store, HandoffTokens tokens, ZoneWorld world)
+    NetZoneHost(CancellationTokenSource cts, Task serve, int port, MemoryAccountStore store, HandoffTokens tokens, ZoneWorld world)
     {
         _cts = cts;
         _serve = serve;
@@ -29,20 +29,20 @@ internal sealed class NetZoneHost : IAsyncDisposable
     }
 
     public int Port { get; }
-    public JsonAccountStore Store { get; }
+    public MemoryAccountStore Store { get; }
     public HandoffTokens Tokens { get; }
     public ZoneWorld World { get; }
 
     public static async Task<NetZoneHost> StartAsync(
         ZoneWorld? world = null,
-        JsonAccountStore? store = null,
+        MemoryAccountStore? store = null,
         HandoffTokens? tokens = null,
         Func<DateTimeOffset>? clock = null,
         int maxMessagesPerSecond = 120,
         int idleSeconds = 1800)
     {
         tokens ??= new HandoffTokens(HandoffTokens.DefaultSecret);
-        store ??= JsonAccountStore.InMemory();
+        store ??= MemoryAccountStore.InMemory();
         world ??= new ZoneWorld(accounts: store);
         var cts = new CancellationTokenSource();
         var zone = new NetZoneServer(
@@ -114,7 +114,7 @@ internal sealed class NetZoneSession : IAsyncDisposable
 
     /// <summary>Raw socket, for assertions that intentionally read past the helper's expect loop.</summary>
     public NetworkStream Stream => _stream;
-    public JsonAccountStore Store => Host.Store;
+    public MemoryAccountStore Store => Host.Store;
     public HandoffTokens Tokens => Host.Tokens;
 
     /// <summary>Name carried by the self <c>EntitySpawn</c> of the last enter burst.</summary>

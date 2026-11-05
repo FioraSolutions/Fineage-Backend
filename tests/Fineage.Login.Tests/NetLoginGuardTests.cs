@@ -71,7 +71,7 @@ public sealed class NetLoginGuardTests
         public static async Task<LoginLink> OpenAsync(int maxMessagesPerSecond, int idleSeconds)
         {
             var cts = new CancellationTokenSource();
-            var service = new LoginService(JsonAccountStore.InMemory(), new HandoffTokens(HandoffTokens.DefaultSecret));
+            var service = new LoginService(MemoryAccountStore.InMemory(), new HandoffTokens(HandoffTokens.DefaultSecret));
             var lobby = new NetLoginServer(
                 service,
                 maxMessagesPerSecond: maxMessagesPerSecond,
