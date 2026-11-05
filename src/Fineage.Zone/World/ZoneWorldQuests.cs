@@ -572,7 +572,10 @@ public sealed partial class ZoneWorld
         Grant(NewbieHelperGift.ScrollRecovery, NewbieHelperGift.ScrollCount);
 
         player.Quests.Add(NewbieHelperGift.QuestId, QuestPhase.Completed);
-        toSelf.Add(Pack(session, MsgType.InventoryUpdate, new InventoryUpdateMsg { Changes = changes.ToArray() }));
+        var update = new InventoryUpdateMsg { Changes = changes.ToArray() };
+        toSelf.Add(Pack(session, MsgType.InventoryUpdate, update));
+        // Net clients only learn about the kit from the bridge; without this they get the page but never the items.
+        NetBridge?.FanoutInventoryUpdate([session.ObjectId], ToNetInventoryUpdate(update));
         SaveInventory(session, player.Inventory);
         SaveQuestProgress(session, player);
         QueueList(session, toSelf);

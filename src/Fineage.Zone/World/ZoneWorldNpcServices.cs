@@ -679,6 +679,16 @@ public sealed partial class ZoneWorld
             ReuseDelayMs = 0
         };
         toSelf.Add(Pack(player.Session, MsgType.MagicSkillUse, cast));
+        // Net clients only see the gesture through the bridge; the abnormal row alone leaves the pawn silent.
+        NetBridge?.FanoutMagicSkillUse([player.ObjectId], new Fineage.Net.Contract.MagicSkillUseNetMsg
+        {
+            CasterObjectId = cast.CasterObjectId,
+            TargetObjectId = cast.TargetObjectId,
+            SkillId = cast.SkillId,
+            SkillLevel = cast.SkillLevel,
+            HitTimeMs = cast.HitTimeMs,
+            ReuseDelayMs = cast.ReuseDelayMs
+        });
         foreach (var other in Players())
         {
             if (other.Session == null || ReferenceEquals(other, player))
