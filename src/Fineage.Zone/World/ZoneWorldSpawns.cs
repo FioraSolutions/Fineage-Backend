@@ -85,10 +85,14 @@ public sealed partial class ZoneWorld
             Attackable = def.Attackable,
             MaxHp = def.MaxHp,
             CurHp = def.MaxHp,
+            MaxMp = def.MaxMp,
+            CurMp = def.MaxMp,
             Level = def.Level,
             RewardExp = def.Exp,
             RewardSp = def.Sp,
             PAtk = def.PAtk,
+            HpRegen = def.HpRegen,
+            MpRegen = def.MpRegen,
             PDef = def.PDef,
             PAtkSpd = def.AttackSpeed,
             BaseAccuracy = def.Accuracy,
@@ -108,6 +112,12 @@ public sealed partial class ZoneWorld
             IgnoreNpcIds = def.IgnoreNpcIds,
             RunSpeed = def.RunSpeed,
             WalkSpeed = def.WalkSpeed,
+            // Mobius Spawn location is the returnHome target; captured at spawn, not at first aggro, so a mob that
+            // drifted before being attacked still walks back to the real spawn point.
+            HomeSet = true,
+            HomeX = def.X,
+            HomeY = def.Y,
+            HomeZ = def.Z,
             MerchantCastleId = tax.CastleId,
             MerchantTown = MerchantTowns.TownName(mapId),
             MerchantBaseTaxPercent = tax.BaseTaxPercent

@@ -139,7 +139,10 @@ public sealed class SpawnCatalog
                     template.AggroRange,
                     template.ClanHelpRange,
                     template.Clans,
-                    template.IgnoreNpcIds));
+                    template.IgnoreNpcIds,
+                    template.HpRegen,
+                    template.MpRegen,
+                    Math.Max(0, template.Mp)));
             }
 
             maps.Add(map.MapId, new SpawnMapDefinition(map.MapId, map.Enabled, npcs));

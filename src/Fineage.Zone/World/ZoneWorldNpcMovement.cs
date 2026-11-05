@@ -46,11 +46,18 @@ public sealed partial class ZoneWorld
         BroadcastNpcMove(npc, destX, destY, destZ, outbound);
     }
 
-    /// <summary>Mobius returnHome: forget target, walk back to the spawn point on the timed mover.</summary>
+    /// <summary>
+    /// Mobius <c>Attackable.returnHome</c> (<c>Attackable.java:1685</c>): <c>clearAggroList()</c> and walk back to the
+    /// spawn point. It does <b>not</b> heal — only the distance leash reset does (see
+    /// <see cref="TryLeashReset"/>); a mob that simply lost its target heals through the normal regen tick.
+    /// </summary>
     void ReturnHome(ZoneEntity npc, long now, List<Pending> outbound)
     {
         npc.AggroTargetId = 0;
         npc.HateList.Clear();
+        // Mobius clearAggroList drops the whole AggroList, damage shares included: a mob that disengaged must not
+        // pay the old attacker's damage to whoever kills it next.
+        npc.DamageBy.Clear();
         npc.Chasing = false;
         if (!npc.HomeSet)
         {
@@ -67,6 +74,66 @@ public sealed partial class ZoneWorld
         ZoneLog.Info($"[npc] return home obj={npc.ObjectId} from={npc.X},{npc.Y} home={npc.HomeX},{npc.HomeY}");
         StartNpcMove(npc, npc.HomeX, npc.HomeY, npc.HomeZ, now, outbound);
     }
+
+    /// <summary>
+    /// Mobius <c>AttackableAI.thinkAttack</c> distance leash (<c>AttackableAI.java:740</c>): a monster dragged further
+    /// than <c>AggroDistanceCheckRange</c> (2000, raids 4000) from its spawn drops the fight and walks home. With
+    /// <c>AggroDistanceCheckRestoreLife</c> it also refills HP/MP (the only Mobius full heal for a monster).
+    /// <para>
+    /// The shipped CT0 Interlude <c>NPC.ini</c> has <c>AggroDistanceCheckEnabled = False</c>, so this tick does nothing
+    /// unless the operator turns it on — plain <c>returnHome</c> never heals.
+    /// </para>
+    /// </summary>
+    void TickLeash(long now, List<Pending> outbound)
+    {
+        if (!ZoneNpcSettings.AggroDistanceCheckEnabled)
+            return;
+        int range = ZoneNpcSettings.AggroDistanceCheckRange;
+        int raidRange = ZoneNpcSettings.AggroDistanceCheckRaidRange;
+        bool raids = ZoneNpcSettings.AggroDistanceCheckRaids;
+        bool restoreLife = ZoneNpcSettings.AggroDistanceCheckRestoreLife;
+        foreach (var npc in _byId.Values)
+        {
+            if (npc.Kind != ZoneEntityKind.Npc || npc.CurHp <= 0 || npc.AggroTargetId <= 0 || !npc.HomeSet)
+                continue;
+            TryLeashReset(npc, range, raidRange, raids, restoreLife, outbound);
+        }
+    }
+
+    /// <summary>
+    /// Leash test for one monster. Returns true when the mob was reset and sent home.
+    /// </summary>
+    bool TryLeashReset(ZoneEntity npc, int range, int raidRange, bool checkRaids, bool restoreLife,
+        List<Pending> outbound)
+    {
+        // Mobius skips GrandBosses and walkers; instance gating matches AGGRO_DISTANCE_CHECK_INSTANCES = False.
+        if (npc.NpcType == "GrandBoss" || npc.InstanceId != 0 || !npc.HomeSet || npc.AggroTargetId <= 0)
+            return false;
+        bool raid = npc.NpcType == "RaidBoss";
+        if (raid && !checkRaids)
+            return false;
+
+        long dx = npc.X - (long)npc.HomeX, dy = npc.Y - (long)npc.HomeY;
+        int leash = Math.Max(ZoneNpcSettings.MaxDriftRange, raid ? raidRange : range);
+        if (dx * dx + dy * dy <= (long)leash * leash)
+            return false;
+
+        if (restoreLife)
+        {
+            npc.CurHp = npc.MaxHp;
+            npc.CurMp = npc.MaxMp;
+            npc.RegenCarryHp = 0;
+            npc.RegenCarryMp = 0;
+            FanoutVitals(npc, StatusFor(npc), outbound);
+        }
+        ZoneLog.Info($"[aggro] leash reset npc={npc.ObjectId} from={npc.X},{npc.Y} home={npc.HomeX},{npc.HomeY} restore={restoreLife}");
+        ReturnHome(npc, _clock().ToUnixTimeMilliseconds(), outbound);
+        return true;
+    }
+
+    /// <summary>Test seam: run the leash check with explicit ini values and no outbound buffer.</summary>
+    internal bool LeashResetForTest(ZoneEntity npc, int range, int raidRange, bool checkRaids, bool restoreLife) =>
+        TryLeashReset(npc, range, raidRange, checkRaids, restoreLife, []);
 
     /// <summary>Advance every moving NPC at walk/run speed; announce new path legs and the final stop.</summary>
     void TickNpcMovement(long now, List<Pending> outbound)

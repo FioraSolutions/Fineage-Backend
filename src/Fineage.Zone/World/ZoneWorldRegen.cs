@@ -65,7 +65,6 @@ public sealed partial class ZoneWorld
                 continue;
             if (entity.CurHp >= entity.MaxHp && entity.CurMp >= entity.MaxMp)
                 continue;
-
             // Mobius Formulas.calcHpRegen/calcMpRegen: (calcStat(REGENERATE_HP_RATE, max(1, init), …) * multiplier).
             // Folding the stat means Weight Penalty 4270's regHp/regMp ×0.5 halves the rate, and the regen masteries
             // (Fast HP Recovery, Mana Recovery, Vital Force, …) raise it, through the same pipeline as everything else.
@@ -100,6 +99,46 @@ public sealed partial class ZoneWorld
                 entity.RegenCarryMp = 0;
 
             FanoutVitals(entity, PlayerVitalsStatus(entity), outbound);
+        }
+
+        TickNpcRegen(outbound);
+    }
+
+    /// <summary>
+    /// Mobius <c>NPCStatus.doRegeneration</c>: a wounded NPC heals
+    /// <c>max(1, hpRegen)</c> HP / <c>max(1, mpRegen)</c> MP per 3 s tick, capped at the maximums. Without it a
+    /// mob that survived a fight stayed wounded forever until it died (audit <c>D30</c>).
+    /// </summary>
+    void TickNpcRegen(List<Pending> outbound)
+    {
+        if (!_npcRegen)
+            return;
+        foreach (var npc in _byId.Values)
+        {
+            if (npc.Kind != ZoneEntityKind.Npc || npc.Dead || npc.CurHp <= 0)
+                continue;
+            if (npc.CurHp >= npc.MaxHp && npc.CurMp >= npc.MaxMp)
+                continue;
+
+            npc.RegenCarryHp += npc.CurHp < npc.MaxHp ? Math.Max(1d, npc.HpRegen) : 0d;
+            npc.RegenCarryMp += npc.CurMp < npc.MaxMp ? Math.Max(1d, npc.MpRegen) : 0d;
+            int hpGain = (int)Math.Floor(npc.RegenCarryHp);
+            int mpGain = (int)Math.Floor(npc.RegenCarryMp);
+            npc.RegenCarryHp -= hpGain;
+            npc.RegenCarryMp -= mpGain;
+            if (hpGain == 0 && mpGain == 0)
+                continue;
+
+            if (hpGain > 0)
+                npc.CurHp = Math.Min(npc.MaxHp, npc.CurHp + hpGain);
+            if (mpGain > 0)
+                npc.CurMp = Math.Min(npc.MaxMp, npc.CurMp + mpGain);
+            if (npc.CurHp >= npc.MaxHp)
+                npc.RegenCarryHp = 0;
+            if (npc.CurMp >= npc.MaxMp)
+                npc.RegenCarryMp = 0;
+
+            FanoutVitals(npc, StatusFor(npc), outbound);
         }
     }
 
