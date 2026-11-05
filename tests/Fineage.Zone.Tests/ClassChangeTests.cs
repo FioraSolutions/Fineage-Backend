@@ -66,4 +66,57 @@ public sealed class ClassChangeTests
         Assert.Equal(0, elf.Inventory.CountOf(proof));
         Assert.Equal(to, kit.Store.FindById(session.Account, session.ObjectId)!.ClassId);
     }
+
+    [Fact]
+    public async Task Second_class_transfer_needs_all_three_marks_and_gives_c_grade_coupons()
+    {
+        int[] marks = [2627, 2734, 2762]; // Challenger, Trust, Duelist -> Gladiator
+        foreach (int mark in marks.AsSpan(0, 2).ToArray())
+        {
+            var partial = new NetTestKit();
+            var (session, player) = await partial.EnterAsync(classId: 1);
+            player.Level = 40;
+            foreach (int have in marks)
+            {
+                if (have != mark)
+                    player.Inventory!.Add(have, 1);
+            }
+
+            Assert.Null(partial.World.VillageMasterForTest(session, 30109, "ElfHumanFighterChange2", "2", out var html));
+            Assert.Contains("mark", html, StringComparison.OrdinalIgnoreCase);
+            Assert.Equal(1, player.ClassId);
+            Assert.Equal(2, marks.Count(id => player.Inventory.CountOf(id) > 0));
+        }
+
+        var kit = new NetTestKit();
+        var (ok, warrior) = await kit.EnterAsync(classId: 1);
+        warrior.Level = 40;
+        foreach (int mark in marks)
+            warrior.Inventory!.Add(mark, 2); // Mobius takeItems(mark, -1): the whole stack goes
+
+        Assert.Null(kit.World.VillageMasterForTest(ok, 30109, "ElfHumanFighterChange2", "2", out var success));
+        Assert.Contains("Congratulations", success);
+        Assert.Equal(2, warrior.ClassId);
+        Assert.Equal(2, ok.ClassId);
+        foreach (int mark in marks)
+            Assert.Equal(0, warrior.Inventory.CountOf(mark));
+        Assert.Equal(15, warrior.Inventory.CountOf(8870));
+        Assert.Equal(2, kit.Store.FindById(ok.Account, ok.ObjectId)!.ClassId);
+        Assert.Equal(kit.Game.Classes!.Get(2).ModifiedHp(40), warrior.MaxHp);
+    }
+
+    [Fact]
+    public async Task Second_class_transfer_refuses_level_39()
+    {
+        var kit = new NetTestKit();
+        var (session, warrior) = await kit.EnterAsync(classId: 1);
+        warrior.Level = 39;
+        foreach (int mark in new[] { 2627, 2734, 2762 })
+            warrior.Inventory!.Add(mark, 1);
+
+        Assert.Null(kit.World.VillageMasterForTest(session, 30109, "ElfHumanFighterChange2", "2", out var html));
+        Assert.Contains("must be over 40", html);
+        Assert.Equal(1, warrior.ClassId);
+        Assert.Equal(1, warrior.Inventory.CountOf(2627));
+    }
 }

@@ -114,13 +114,16 @@ public sealed partial class ZoneWorld
         var inventory = player.Inventory!;
         if (!PlayerClasses.TryGet(change.ClassId, out var template) || template == null)
             return false;
-        int proof = inventory.CountOf(change.ProofItemId);
-        if (proof <= 0)
-            return false;
-
+        // Mobius takeItems(item, -1) for every proof: the whole stack of each mark leaves the bag.
         var touches = new List<BagTouch>();
-        if (!inventory.TryTake(change.ProofItemId, proof, touches))
-            return false;
+        foreach (int itemId in change.ProofItemIds)
+        {
+            int have = inventory.CountOf(itemId);
+            if (have <= 0)
+                return false; // all marks are required; the catalog already told the player which page to see
+            if (!inventory.TryTake(itemId, have, touches))
+                return false;
+        }
         if (rewardItemId > 0 && rewardCount > 0 && _game.Items.TryGet(rewardItemId, out _))
         {
             var before = new HashSet<int>(inventory.Items.Select(i => i.ObjectId));
@@ -172,7 +175,8 @@ public sealed partial class ZoneWorld
         _accounts?.TrySaveClass(session.Account, session.ObjectId, change.ClassId);
         SaveInventory(session, inventory);
         SaveQuestProgress(session, player);
-        ZoneLog.Info($"class-change object={session.ObjectId} {previous}->{change.ClassId} proof={change.ProofItemId}x{proof}");
+        ZoneLog.Info($"class-change object={session.ObjectId} {previous}->{change.ClassId} " +
+                     $"proof={string.Join(",", change.ProofItemIds)}");
         return true;
     }
 

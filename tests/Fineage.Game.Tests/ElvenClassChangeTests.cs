@@ -183,9 +183,52 @@ public sealed class VillageMasterTests
     {
         foreach (var change in Masters.Changes)
         {
-            Assert.True(Data.Items.TryGet(change.RewardItemId, out _));
+            if (change.RewardItemId > 0)
+                Assert.True(Data.Items.TryGet(change.RewardItemId, out _));
             foreach (var option in change.Options)
-                Assert.True(Data.Items.TryGet(option.ProofItemId, out _));
+                foreach (int proof in option.ProofItemIds)
+                    Assert.True(Data.Items.TryGet(proof, out _));
         }
+    }
+
+    [Fact]
+    public void Second_class_master_needs_all_marks_and_pays_c_grade()
+    {
+        int[] marks = [2627, 2734, 2762];
+        Func<int, int> all = id => marks.Contains(id) ? 1 : 0;
+        Func<int, int> two = id => id == 2734 || id == 2762 ? 1 : 0;
+
+        var warrior = Who(0, 1, 40);
+        Assert.Equal("30109-02.htm", Masters.Talk("ElfHumanFighterChange2", 30109, warrior)!.Page);
+        Assert.Equal("30109-43.htm", Masters.Event("ElfHumanFighterChange2", 30109, "2", warrior, two)!.Page); // no proof
+        Assert.Equal("30109-40.htm", Masters.Event("ElfHumanFighterChange2", 30109, "2", Who(0, 1, 39), all)!.Page); // low level
+        Assert.Equal("30109-41.htm", Masters.Event("ElfHumanFighterChange2", 30109, "2", Who(0, 1, 39), two)!.Page);
+
+        var ok = Masters.Event("ElfHumanFighterChange2", 30109, "2", warrior, all)!;
+        Assert.Equal("30109-42.htm", ok.Page);
+        Assert.Equal(2, ok.Change!.ClassId);
+        Assert.Equal(8870, ok.RewardItemId);
+        Assert.Equal(15, ok.RewardCount);
+    }
+
+    [Fact]
+    public void Second_class_master_redirects_characters_that_already_moved_on()
+    {
+        // Mobius guards run before the class branch: a 3rd-class fighter is told so, not transferred.
+        Assert.Equal("30109-39.htm", Masters.Event("ElfHumanFighterChange2", 30109, "2", Who(0, 2, 40), _ => 1)!.Page);
+        Assert.Equal("30109-01.htm", Masters.Talk("ElfHumanFighterChange2", 30109, Who(0, 88, 76))!.Page);
+        Assert.Equal("30109-38.htm", Masters.Talk("ElfHumanFighterChange2", 30109, Who(1, 25, 40))!.Page); // a mystic
+        Assert.Equal("30109-37.htm", Masters.Talk("ElfHumanFighterChange2", 30109, Who(0, 0, 40))!.Page); // still a base class
+    }
+
+    [Fact]
+    public void Dark_elf_masters_use_their_own_table_indexes()
+    {
+        Assert.Equal("30462-18.html", Masters.Event("DarkElfChange1", 30462, "0", Who(2, 31, 20), id => id == 1244 ? 1 : 0)!.Page);
+        Assert.Equal("30462-17.html", Masters.Event("DarkElfChange1", 30462, "0", Who(2, 31, 20), _ => 0)!.Page);
+        Assert.Equal("30462-15.html", Masters.Event("DarkElfChange1", 30462, "0", Who(2, 31, 19), _ => 0)!.Page);
+        Assert.Equal("30462-32.html", Masters.Talk("DarkElfChange1", 30462, Who(2, 32, 20))!.Page);
+        Assert.Equal("30462-33.html", Masters.Talk("DarkElfChange1", 30462, Who(0, 1, 20))!.Page);
+        Assert.Null(Masters.Event("DarkElfChange1", 30462, "9", Who(2, 31, 20), _ => 1)); // no such option
     }
 }
