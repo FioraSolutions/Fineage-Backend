@@ -2,60 +2,50 @@ using Fineage.Game;
 using Fineage.Protocol;
 using Fineage.Zone.Combat;
 using Fineage.Zone.Drops;
-using MessagePack;
 
 namespace Fineage.Zone.World;
 
 public sealed partial class ZoneWorld
 {
-    public async Task<string?> TrySelectTargetAsync(ZoneSession session, SelectTargetMsg select, CancellationToken ct)
+    public Task<string?> TrySelectTargetAsync(ZoneSession session, SelectTargetMsg select, CancellationToken ct)
     {
         if (!IsLive(session))
-            return "world";
+            return Task.FromResult<string?>("world");
 
-        var toSelf = new List<Pending>();
         string? error;
         lock (_gate)
-            error = TrySelectTarget(session, select.TargetObjectId, toSelf);
-        if (error != null)
-            return error;
-
-        await FlushSelfAsync(session, toSelf, ct).ConfigureAwait(false);
-        return null;
+            error = TrySelectTarget(session, select.TargetObjectId);
+        return Task.FromResult<string?>(error);
     }
 
-    public async Task<string?> TryCancelTargetAsync(ZoneSession session, CancellationToken ct)
+    public Task<string?> TryCancelTargetAsync(ZoneSession session, CancellationToken ct)
     {
         if (!IsLive(session))
-            return "world";
+            return Task.FromResult<string?>("world");
 
-        var toSelf = new List<Pending>();
         lock (_gate)
         {
             if (!_byId.TryGetValue(session.ObjectId, out _))
-                return "world";
+                return Task.FromResult<string?>("world");
 
             int previous = session.SelectedTargetId;
             session.SelectedTargetId = 0;
             session.AutoAttackTargetId = 0;
             session.ClearApproach();
-            toSelf.Add(Pack(session, MsgType.MyTargetSelected, new MyTargetSelectedMsg { ObjectId = 0, ColorHint = 0 }));
             NetBridge?.FanoutTargetUnselected([session.ObjectId], new Fineage.Net.Contract.TargetUnselectedNetMsg
             {
                 TargetObjectId = previous
             });
         }
 
-        await FlushSelfAsync(session, toSelf, ct).ConfigureAwait(false);
-        return null;
+        return Task.FromResult<string?>(null);
     }
 
-    public async Task<string?> TryAttackAsync(ZoneSession session, AttackRequestMsg request, CancellationToken ct)
+    public Task<string?> TryAttackAsync(ZoneSession session, AttackRequestMsg request, CancellationToken ct)
     {
         if (!IsLive(session))
-            return "world";
+            return Task.FromResult<string?>("world");
 
-        var outbound = new List<Pending>();
         string? error;
         long approachMs = 0;
         lock (_gate)
@@ -66,7 +56,7 @@ public sealed partial class ZoneWorld
             bool alreadySwinging = previous > 0 && previous == requested && session.ApproachTargetId == 0 &&
                 session.NextAutoAttackUnixMs > now0;
             // Re-click on the target already being hit: Mobius keeps the running attack, no extra swing.
-            error = alreadySwinging ? null : TryAttack(session, request.TargetObjectId, outbound, out approachMs);
+            error = alreadySwinging ? null : TryAttack(session, request.TargetObjectId, out approachMs);
             if (error == null && !alreadySwinging && approachMs >= 0)
             {
                 session.AutoAttackTargetId = session.SelectedTargetId;
@@ -75,14 +65,10 @@ public sealed partial class ZoneWorld
                     (approachMs > 0 ? approachMs : PlayerAttackTimeMs(session.ObjectId));
             }
         }
-        if (error != null)
-            return error;
-
-        await FlushSelfAsync(session, outbound, ct).ConfigureAwait(false);
-        return null;
+        return Task.FromResult<string?>(error);
     }
 
-    string? TrySelectTarget(ZoneSession session, int targetObjectId, List<Pending> toSelf)
+    string? TrySelectTarget(ZoneSession session, int targetObjectId)
     {
         if (!_byId.TryGetValue(session.ObjectId, out var player))
             return "world";
@@ -95,12 +81,9 @@ public sealed partial class ZoneWorld
             if (player.Dead || player.CurHp <= 0)
                 return "target";
 
+            // Own pawn: the client already draws itself; Mobius sends colour 0 with no HP block and Net has no
+            // self-target frame, so nothing is fanned.
             session.SelectedTargetId = targetObjectId;
-            toSelf.Add(Pack(session, MsgType.MyTargetSelected, new MyTargetSelectedMsg
-            {
-                ObjectId = targetObjectId,
-                ColorHint = 0
-            }));
             return null;
         }
 
@@ -112,7 +95,7 @@ public sealed partial class ZoneWorld
             return "target";
 
         session.SelectedTargetId = targetObjectId;
-        PublishTargetSelection(session, player, target, toSelf);
+        PublishTargetSelection(session, player, target);
         return null;
     }
 
@@ -122,20 +105,9 @@ public sealed partial class ZoneWorld
     /// target window (<c>StatusUpdate</c> MAX_HP + CUR_HP). Peers also learn what this player is aiming at
     /// (<c>TargetSelected</c> broadcast), so a nearby client can show the aim marker.
     /// </summary>
-    void PublishTargetSelection(ZoneSession session, ZoneEntity player, ZoneEntity target, List<Pending> toSelf)
+    void PublishTargetSelection(ZoneSession session, ZoneEntity player, ZoneEntity target)
     {
         int colour = InterludeStatus.TargetColor(player.Level, target.Level, IsAutoAttackable(target));
-        toSelf.Add(Pack(session, MsgType.MyTargetSelected, new MyTargetSelectedMsg
-        {
-            ObjectId = target.ObjectId,
-            ColorHint = colour
-        }));
-        toSelf.Add(Pack(session, MsgType.StatusUpdate, new StatusUpdateMsg
-        {
-            ObjectId = target.ObjectId,
-            AttributeIds = [InterludeStatus.MaxHp, InterludeStatus.CurHp],
-            Values = [target.MaxHp, target.CurHp]
-        }));
 
         if (NetBridge == null)
             return;
@@ -187,15 +159,15 @@ public sealed partial class ZoneWorld
         };
     }
 
-    string? TryAttack(ZoneSession session, int requestedTargetId, List<Pending> outbound) =>
-        TryAttack(session, requestedTargetId, outbound, out _);
+    string? TryAttack(ZoneSession session, int requestedTargetId) =>
+        TryAttack(session, requestedTargetId, out _);
 
     /// <summary>
     /// Interlude RequestAttack: in range -> swing; out of range -> server moveToPawn (run to the target,
     /// MoveToAck to self + watchers) and the swing fires from <see cref="TickAutoAttacks"/> on arrival.
     /// <paramref name="approachMs"/> is the travel time when an approach was started, else 0.
     /// </summary>
-    string? TryAttack(ZoneSession session, int requestedTargetId, List<Pending> outbound, out long approachMs)
+    string? TryAttack(ZoneSession session, int requestedTargetId, out long approachMs)
     {
         approachMs = 0;
         if (!_byId.TryGetValue(session.ObjectId, out var player) || player.Session == null)
@@ -220,7 +192,7 @@ public sealed partial class ZoneWorld
         AdvanceMove(player, _clock().ToUnixTimeMilliseconds());
         if (!ZoneCombat.Within(player.X, player.Y, target.X, target.Y, PlayerReach(player)))
         {
-            approachMs = ApproachTarget(player, target, PlayerReach(player), outbound);
+            approachMs = ApproachTarget(player, target, PlayerReach(player));
             return approachMs < 0 ? "attack" : null;
         }
         if (player.MoveActive)
@@ -233,7 +205,7 @@ public sealed partial class ZoneWorld
         // Mobius Creature.doAttack: no LOS → SysMsg 181 "Cannot see target.", intention ACTIVE, ActionFailed.
         if (!CanSeeTarget(player, target))
         {
-            CannotSeeTarget(session, outbound);
+            CannotSeeTarget(session);
             approachMs = -1;
             return null;
         }
@@ -245,9 +217,9 @@ public sealed partial class ZoneWorld
         if (ps.Weapon == Fineage.Game.WeaponType.Bow)
         {
             var bow = player.Inventory?.GetEquipped(PaperdollSlot.RHand)?.Template;
-            if (bow != null && EnsureBowArrow(player, bow, outbound) == null)
+            if (bow != null && EnsureBowArrow(player, bow) == null)
             {
-                OutOfArrows(session, outbound);
+                OutOfArrows(session);
                 approachMs = -1;
                 return null;
             }
@@ -256,7 +228,7 @@ public sealed partial class ZoneWorld
         bool soulshot = player.SoulshotCharged;
         player.SoulshotCharged = false;
         if (soulshot)
-            RechargeAutoShots(player, outbound);
+            RechargeAutoShots(player);
         // Mobius doAttack turns the attacker to its target; the target's own facing decides back/side/front.
         player.Heading = ZoneCombat.HeadingFrom(player.X, player.Y, target.X, target.Y);
         var (damage, flags) = RollPlayerMelee(player, ps, target, soulshot);
@@ -276,10 +248,10 @@ public sealed partial class ZoneWorld
         };
 
         // Swing now; HP drops at hitTime (Mobius onHitTimer).
-        FanoutAttack(player, target, attack, outbound);
+        FanoutAttack(player, target, attack);
         QueueAttackerDamageLine(player, target, damage);
         if (ps.Weapon == Fineage.Game.WeaponType.Bow)
-            ConsumeBowArrow(player, outbound);
+            ConsumeBowArrow(player);
         long now = _clock().ToUnixTimeMilliseconds();
         player.CombatUntilUnixMs = now + ClanProtocol.CombatStanceMillis;
         _meleeHits.Add(new PendingMeleeHit(player.ObjectId, targetId, damage, now + PlayerAttackTimeMs(player.ObjectId) / 2));
@@ -356,24 +328,22 @@ public sealed partial class ZoneWorld
     /// <summary>One live combat-loop tick (movement, hits, player auto-attack / approach, casts, mobs, corpses).</summary>
     internal async Task RunPlayerCombatTickAsync(CancellationToken ct)
     {
-        var outbound = new List<Pending>();
         lock (_gate)
         {
             long now = _clock().ToUnixTimeMilliseconds();
-            TickPlayerMovement(now, outbound);
-            TickNpcMovement(now, outbound);
-            TickPendingHits(now, outbound);
-            TickMeleeHits(now, outbound);
-            TickAutoAttacks(outbound);
-            TickPendingCasts(now, outbound);
-            TickQueuedMoves(now, outbound);
-            TickPendingPickups(now, outbound);
-            TickMobAttacks(now, outbound);
-            TickCorpseDecay(now, outbound);
-            TickGroundExpiry(now, outbound);
+            TickPlayerMovement(now);
+            TickNpcMovement(now);
+            TickPendingHits(now);
+            TickMeleeHits(now);
+            TickAutoAttacks();
+            TickPendingCasts(now);
+            TickQueuedMoves(now);
+            TickPendingPickups(now);
+            TickMobAttacks(now);
+            TickCorpseDecay(now);
+            TickGroundExpiry(now);
         }
-        if (outbound.Count > 0)
-            await FlushOthersAsync(outbound, ct).ConfigureAwait(false);
+        await Task.CompletedTask.ConfigureAwait(false);
     }
 
     async Task CombatLoopAsync(CancellationToken ct)
@@ -391,7 +361,7 @@ public sealed partial class ZoneWorld
         }
     }
 
-    void TickAutoAttacks(List<Pending> outbound)
+    void TickAutoAttacks()
     {
         long now = _clock().ToUnixTimeMilliseconds();
         foreach (var player in Players().ToList())
@@ -419,12 +389,12 @@ public sealed partial class ZoneWorld
             {
                 if (!ZoneCombat.Within(target.X, target.Y, session.ApproachTargetX, session.ApproachTargetY, ZoneCombat.ApproachRepathDistance))
                 {
-                    long re = ApproachTarget(player, target, PlayerReach(player), outbound);
+                    long re = ApproachTarget(player, target, PlayerReach(player));
                     if (re < 0)
                     {
                         session.AutoAttackTargetId = 0;
                         session.ClearApproach();
-                        SendActionFailed(player, outbound);
+                        SendActionFailed(player);
                         continue;
                     }
                     session.NextAutoAttackUnixMs = now + re;
@@ -437,12 +407,12 @@ public sealed partial class ZoneWorld
             if (!ZoneCombat.Within(player.X, player.Y, target.X, target.Y, PlayerReach(player)))
             {
                 // Target moved away: Mobius re-issues moveToPawn and keeps the attack intention.
-                long ms = ApproachTarget(player, target, PlayerReach(player), outbound);
+                long ms = ApproachTarget(player, target, PlayerReach(player));
                 if (ms < 0)
                 {
                     session.AutoAttackTargetId = 0;
                     session.ClearApproach();
-                    SendActionFailed(player, outbound);
+                    SendActionFailed(player);
                     continue;
                 }
                 session.NextAutoAttackUnixMs = now + ms;
@@ -450,7 +420,7 @@ public sealed partial class ZoneWorld
             }
             session.ClearApproach();
             session.NextAutoAttackUnixMs = now + PlayerAttackTimeMs(player.ObjectId);
-            if (TryAttack(session, targetId, outbound) != null)
+            if (TryAttack(session, targetId) != null)
                 session.AutoAttackTargetId = 0;
         }
     }
@@ -475,9 +445,8 @@ public sealed partial class ZoneWorld
             CombatLines.ToNet(CombatLines.HitTarget(target.Name, damage)));
     }
 
-    void FanoutAttack(ZoneEntity attacker, ZoneEntity target, AttackMsg attack, List<Pending> outbound)
+    void FanoutAttack(ZoneEntity attacker, ZoneEntity target, AttackMsg attack)
     {
-        byte[] attackBody = MessagePackSerializer.Serialize(attack);
         List<int>? netWatchers = null;
         foreach (var watcher in Players())
         {
@@ -488,7 +457,6 @@ public sealed partial class ZoneWorld
                          watcher.Knownlist.Contains(attacker.ObjectId);
             if (!cares)
                 continue;
-            outbound.Add(new Pending(watcher.Session, MsgType.Attack, attackBody));
             netWatchers ??= [];
             netWatchers.Add(watcher.ObjectId);
         }
@@ -513,7 +481,7 @@ public sealed partial class ZoneWorld
         }
     }
 
-    void TickMeleeHits(long now, List<Pending> outbound)
+    void TickMeleeHits(long now)
     {
         if (_meleeHits.Count == 0)
             return;
@@ -522,10 +490,10 @@ public sealed partial class ZoneWorld
             return;
         _meleeHits.RemoveAll(h => h.DueUnixMs <= now);
         foreach (var hit in due)
-            ResolveMeleeHit(hit, now, outbound);
+            ResolveMeleeHit(hit, now);
     }
 
-    void ResolveMeleeHit(PendingMeleeHit hit, long now, List<Pending> outbound)
+    void ResolveMeleeHit(PendingMeleeHit hit, long now)
     {
         if (!_byId.TryGetValue(hit.AttackerId, out var attacker) || attacker.CurHp <= 0 || attacker.Dead)
             return;
@@ -550,53 +518,33 @@ public sealed partial class ZoneWorld
 
         if (target.Kind == ZoneEntityKind.Npc)
         {
-            FanoutVitals(target, StatusFor(target), outbound);
+            FanoutVitals(target, StatusFor(target));
             RecordDamage(target, attacker, hit.Damage);
             AddHate(target, attacker, DamageHate(hit.Damage, target.Level));
             attacker.CombatUntilUnixMs = now + ClanProtocol.CombatStanceMillis;
             if (target.CurHp <= 0)
             {
-                RemoveDeadNpc(target, outbound, killer: attacker);
-                GrantKillReward(attacker, target, outbound);
+                RemoveDeadNpc(target, killer: attacker);
+                GrantKillReward(attacker, target);
             }
             return;
         }
 
         target.CombatUntilUnixMs = now + ClanProtocol.CombatStanceMillis;
-        FanoutVitals(target, PlayerVitalsStatus(target), outbound);
+        FanoutVitals(target, PlayerVitalsStatus(target));
         if (target.CurHp > 0)
-            MaybeBreakCast(target, hit.Damage, outbound);
+            MaybeBreakCast(target, hit.Damage);
         if (target.CurHp <= 0)
         {
             attacker.HateList.Remove(target.ObjectId);
             attacker.AggroTargetId = MostHated(attacker);
             if (target.Session != null)
                 target.Session.AutoAttackTargetId = 0;
-            ApplyPlayerDeath(target, attacker.ObjectId, outbound);
+            ApplyPlayerDeath(target, attacker.ObjectId);
         }
     }
 
-    void FanoutCombat(ZoneEntity attacker, ZoneEntity target, AttackMsg attack, StatusUpdateMsg status, List<Pending> outbound)
-    {
-        byte[] attackBody = MessagePackSerializer.Serialize(attack);
-        byte[] statusBody = MessagePackSerializer.Serialize(status);
-
-        foreach (var watcher in Players())
-        {
-            if (watcher.Session == null)
-                continue;
-            bool cares = ReferenceEquals(watcher, attacker) ||
-                         watcher.Knownlist.Contains(target.ObjectId) ||
-                         watcher.Knownlist.Contains(attacker.ObjectId);
-            if (!cares)
-                continue;
-
-            outbound.Add(new Pending(watcher.Session, MsgType.Attack, attackBody));
-            outbound.Add(new Pending(watcher.Session, MsgType.StatusUpdate, statusBody));
-        }
-    }
-
-    void RemoveDeadNpc(ZoneEntity npc, List<Pending> outbound, ZoneEntity? killer = null)
+    void RemoveDeadNpc(ZoneEntity npc, ZoneEntity? killer = null)
     {
         // Kill quest steps are not applied here. IQuestKillHook is the later combat entry.
         int objectId = npc.ObjectId;
@@ -615,13 +563,11 @@ public sealed partial class ZoneWorld
         // Mobius Creature.doDie -> broadcastPacket(new Die(this)): client plays the death animation.
         npc.AggroTargetId = 0;
         npc.Chasing = false;
-        byte[] dieBody = MessagePackSerializer.Serialize(new DieMsg { ObjectId = objectId });
         List<int>? netWatchers = null;
         foreach (var watcher in watchers)
         {
             if (watcher.Session == null)
                 continue;
-            outbound.Add(new Pending(watcher.Session, MsgType.Die, dieBody));
             netWatchers ??= [];
             netWatchers.Add(watcher.ObjectId);
             if (watcher.Session.SelectedTargetId == objectId)
@@ -645,7 +591,7 @@ public sealed partial class ZoneWorld
                 npc.SweepItems.Add(stack);
         }
 
-        SpawnDeathDrops(npcId, x, y, z, killer, watchers, outbound);
+        SpawnDeathDrops(npcId, x, y, z, killer, watchers);
         bool spoiled = npc.SpoilerObjectId != 0;
         npc.CorpseAwaitingSweep = npc.SweepItems.Count > 0;
         if (spoiled)
@@ -654,7 +600,7 @@ public sealed partial class ZoneWorld
         npc.DecayAtMs = _clock().ToUnixTimeMilliseconds() + _spoilRules.CorpseMs(spoiled);
     }
 
-    void DespawnNpc(ZoneEntity npc, List<Pending> outbound)
+    void DespawnNpc(ZoneEntity npc)
     {
         int objectId = npc.ObjectId;
 
@@ -669,7 +615,6 @@ public sealed partial class ZoneWorld
         npc.LastAiTickMs = 0;
         ScheduleRespawn(objectId);
 
-        byte[] deleteBody = MessagePackSerializer.Serialize(new DeleteObjectMsg { ObjectId = objectId });
         List<int>? netWatchers = null;
         foreach (var player in Players())
         {
@@ -677,7 +622,6 @@ public sealed partial class ZoneWorld
                 continue;
             if (player.Knownlist.Remove(objectId))
             {
-                outbound.Add(new Pending(player.Session, MsgType.DeleteObject, deleteBody));
                 netWatchers ??= [];
                 netWatchers.Add(player.ObjectId);
             }

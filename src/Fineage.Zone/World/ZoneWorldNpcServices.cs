@@ -9,95 +9,74 @@ namespace Fineage.Zone.World;
 
 public sealed partial class ZoneWorld
 {
-    public async Task<string?> TryTeleportSelectAsync(ZoneSession session, TeleportSelectRequestMsg request, CancellationToken ct)
+    public Task<string?> TryTeleportSelectAsync(ZoneSession session, TeleportSelectRequestMsg request, CancellationToken ct)
     {
-        var toSelf = new List<Pending>();
-        var toOthers = new List<Pending>();
         string? error;
         lock (_gate)
-            error = TeleportTo(session, request.NpcObjectId, request.ListName, request.LocationId, toSelf, toOthers, html: false);
-        await FlushSelfAsync(session, toSelf, ct).ConfigureAwait(false);
-        if (toOthers.Count > 0)
-            await FlushOthersAsync(toOthers, ct).ConfigureAwait(false);
-        return error;
+            error = TeleportTo(session, request.NpcObjectId, request.ListName, request.LocationId, html: false);
+        return Task.FromResult<string?>(error);
     }
 
-    public async Task<string?> TryWarehouseDepositAsync(ZoneSession session, WarehouseDepositRequestMsg request, CancellationToken ct)
+    public Task<string?> TryWarehouseDepositAsync(ZoneSession session, WarehouseDepositRequestMsg request, CancellationToken ct)
     {
-        var toSelf = new List<Pending>();
         string? error;
         lock (_gate)
-            error = DepositPrivate(session, request.NpcObjectId, request.Lines, toSelf, html: false);
-        await FlushSelfAsync(session, toSelf, ct).ConfigureAwait(false);
-        return error;
+            error = DepositPrivate(session, request.NpcObjectId, request.Lines, html: false);
+        return Task.FromResult<string?>(error);
     }
 
-    public async Task<string?> TryWarehouseWithdrawAsync(ZoneSession session, WarehouseWithdrawRequestMsg request, CancellationToken ct)
+    public Task<string?> TryWarehouseWithdrawAsync(ZoneSession session, WarehouseWithdrawRequestMsg request, CancellationToken ct)
     {
-        var toSelf = new List<Pending>();
         string? error;
         lock (_gate)
-            error = WithdrawPrivate(session, request.NpcObjectId, request.Lines, toSelf, html: false);
-        await FlushSelfAsync(session, toSelf, ct).ConfigureAwait(false);
-        return error;
+            error = WithdrawPrivate(session, request.NpcObjectId, request.Lines, html: false);
+        return Task.FromResult<string?>(error);
     }
 
-    public async Task<string?> TrySupportMagicAsync(ZoneSession session, int npcObjectId, CancellationToken ct)
+    public Task<string?> TrySupportMagicAsync(ZoneSession session, int npcObjectId, CancellationToken ct)
     {
-        var toSelf = new List<Pending>();
-        var toOthers = new List<Pending>();
         string? error;
         lock (_gate)
-            error = ApplySupportMagic(session, npcObjectId, toSelf, toOthers, html: false);
-        await FlushSelfAsync(session, toSelf, ct).ConfigureAwait(false);
-        if (toOthers.Count > 0)
-            await FlushOthersAsync(toOthers, ct).ConfigureAwait(false);
-        return error;
+            error = ApplySupportMagic(session, npcObjectId, html: false);
+        return Task.FromResult<string?>(error);
     }
 
-    public async Task<string?> TryGiveBlessingAsync(ZoneSession session, int npcObjectId, CancellationToken ct)
+    public Task<string?> TryGiveBlessingAsync(ZoneSession session, int npcObjectId, CancellationToken ct)
     {
-        var toSelf = new List<Pending>();
-        var toOthers = new List<Pending>();
         string? error;
         lock (_gate)
-            error = ApplyBlessing(session, npcObjectId, toSelf, toOthers, html: false);
-        await FlushSelfAsync(session, toSelf, ct).ConfigureAwait(false);
-        if (toOthers.Count > 0)
-            await FlushOthersAsync(toOthers, ct).ConfigureAwait(false);
-        return error;
+            error = ApplyBlessing(session, npcObjectId, html: false);
+        return Task.FromResult<string?>(error);
     }
 
     string? ApplyNpcService(
         ZoneSession session,
         ZoneEntity player,
         ZoneEntity npc,
-        BypassReply reply,
-        List<Pending> toSelf,
-        List<Pending> toOthers)
+        BypassReply reply)
     {
         switch (reply.Service)
         {
             case NpcServiceIntent.TeleportList:
-                return ShowTeleportList(session, player, npc, reply.ServiceArg, toSelf);
+                return ShowTeleportList(session, player, npc, reply.ServiceArg);
             case NpcServiceIntent.Teleport:
-                return TeleportTo(session, npc.ObjectId, reply.ServiceArg, reply.ServiceId, toSelf, toOthers, html: true);
+                return TeleportTo(session, npc.ObjectId, reply.ServiceArg, reply.ServiceId, html: true);
             case NpcServiceIntent.Deposit:
-                return OpenDeposit(session, player, npc, toSelf);
+                return OpenDeposit(session, player, npc);
             case NpcServiceIntent.Withdraw:
-                return OpenWithdraw(session, player, npc, toSelf);
+                return OpenWithdraw(session, player, npc);
             case NpcServiceIntent.SupportMagic:
-                return ApplySupportMagic(session, npc.ObjectId, toSelf, toOthers, html: true);
+                return ApplySupportMagic(session, npc.ObjectId, html: true);
             case NpcServiceIntent.SupportBlessing:
-                return ShowBlessingPage(session, player, npc, toSelf);
+                return ShowBlessingPage(session, player, npc);
             case NpcServiceIntent.GiveBlessing:
-                return ApplyBlessing(session, npc.ObjectId, toSelf, toOthers, html: true);
+                return ApplyBlessing(session, npc.ObjectId, html: true);
             case NpcServiceIntent.TerritoryStatus:
-                return ShowTerritoryStatus(session, player, npc, toSelf);
+                return ShowTerritoryStatus(session, player, npc);
             case NpcServiceIntent.SkillList:
-                return ShowTrainerSkills(session, player, npc, toSelf);
+                return ShowTrainerSkills(session, player, npc);
             case NpcServiceIntent.LearnSkill:
-                return LearnTrainerSkill(session, player, npc, reply.ServiceId, toSelf);
+                return LearnTrainerSkill(session, player, npc, reply.ServiceId);
             default:
                 return "bad_request";
         }
@@ -106,8 +85,6 @@ public sealed partial class ZoneWorld
     /// <summary>Test: run one bypass command against the first spawned NPC with this template id.</summary>
     internal string? NpcServiceForTest(ZoneSession session, int npcId, string intent, string mapId = "elven_village")
     {
-        var toSelf = new List<Pending>();
-        var toOthers = new List<Pending>();
         lock (_gate)
         {
             if (!_byId.TryGetValue(session.ObjectId, out var player))
@@ -120,16 +97,16 @@ public sealed partial class ZoneWorld
                     MerchantTown = Fineage.Zone.Shops.MerchantTowns.TownName(mapId)
                 };
             var reply = BypassReply.ServiceCall(intent);
-            return ApplyNpcService(session, player, npc, reply, toSelf, toOthers);
+            return ApplyNpcService(session, player, npc, reply);
         }
     }
 
-    string? ShowTerritoryStatus(ZoneSession session, ZoneEntity player, ZoneEntity npc, List<Pending> toSelf)
+    string? ShowTerritoryStatus(ZoneSession session, ZoneEntity player, ZoneEntity npc)
     {
         var template = Fineage.Zone.Siege.CastleCatalog.Find(npc.MerchantCastleId);
         if (template == null)
         {
-            SendHtml(session, player, npc, "<html><body>%npcname%:<br>This area belongs to no castle.</body></html>", toSelf);
+            SendHtml(session, player, npc, "<html><body>%npcname%:<br>This area belongs to no castle.</body></html>");
             return null;
         }
 
@@ -150,24 +127,24 @@ public sealed partial class ZoneWorld
             .Replace("%clanname%", HtmlText(clanName), StringComparison.Ordinal)
             .Replace("%clanleadername%", HtmlText(leaderName), StringComparison.Ordinal)
             .Replace("%taxpercent%", owned ? castle!.TaxPercent.ToString() : "0", StringComparison.Ordinal);
-        SendHtml(session, player, npc, html, toSelf);
+        SendHtml(session, player, npc, html);
         return null;
     }
 
-    string? ShowTeleportList(ZoneSession session, ZoneEntity player, ZoneEntity npc, string listName, List<Pending> toSelf)
+    string? ShowTeleportList(ZoneSession session, ZoneEntity player, ZoneEntity npc, string listName)
     {
         var list = _teleports.Find(npc.NpcId, string.IsNullOrWhiteSpace(listName) ? TeleportRules.Normal : listName);
         if (list == null)
         {
-            Notice(session, NpcServiceProtocol.UnknownTeleport, NpcServiceProtocol.UnknownTeleportText, toSelf);
-            SendHtml(session, player, npc, "<html><body>%npcname%:<br>That teleport is not available.</body></html>", toSelf);
+            Notice(session, NpcServiceProtocol.UnknownTeleport, NpcServiceProtocol.UnknownTeleportText);
+            SendHtml(session, player, npc, "<html><body>%npcname%:<br>That teleport is not available.</body></html>");
             return null;
         }
 
         if (TeleportRules.IsNobles(list.Type))
         {
-            Notice(session, NpcServiceProtocol.NoblesDeferred, NpcServiceProtocol.NoblesDeferredText, toSelf);
-            SendHtml(session, player, npc, "<html><body>%npcname%:<br>Noblesse teleport is not available yet.</body></html>", toSelf);
+            Notice(session, NpcServiceProtocol.NoblesDeferred, NpcServiceProtocol.NoblesDeferredText);
+            SendHtml(session, player, npc, "<html><body>%npcname%:<br>Noblesse teleport is not available yet.</body></html>");
             return null;
         }
 
@@ -202,14 +179,7 @@ public sealed partial class ZoneWorld
         }
 
         html.Append("</body></html>");
-        toSelf.Add(Pack(session, MsgType.TeleportList, new TeleportListMsg
-        {
-            NpcObjectId = npc.ObjectId,
-            ListName = list.Name,
-            ListType = list.Type,
-            Locations = rows
-        }));
-        SendHtml(session, player, npc, html.ToString(), toSelf);
+        SendHtml(session, player, npc, html.ToString());
         return null;
     }
 
@@ -218,8 +188,6 @@ public sealed partial class ZoneWorld
         int npcObjectId,
         string listName,
         int locationId,
-        List<Pending> toSelf,
-        List<Pending> toOthers,
         bool html)
     {
         if (!TryServicePair(session, npcObjectId, out var player, out var npc, out var error))
@@ -232,35 +200,35 @@ public sealed partial class ZoneWorld
         {
             int id = list != null ? NpcServiceProtocol.NoblesDeferred : NpcServiceProtocol.UnknownTeleport;
             string text = list != null ? NpcServiceProtocol.NoblesDeferredText : NpcServiceProtocol.UnknownTeleportText;
-            Notice(session, id, text, toSelf);
+            Notice(session, id, text);
             if (html)
-                SendHtml(session, player, npc, "<html><body>%npcname%:<br>" + text + "</body></html>", toSelf);
+                SendHtml(session, player, npc, "<html><body>%npcname%:<br>" + text + "</body></html>");
             return null;
         }
 
         var loc = list.Find(locationId);
         if (loc == null)
         {
-            Notice(session, NpcServiceProtocol.UnknownTeleport, NpcServiceProtocol.UnknownTeleportText, toSelf);
+            Notice(session, NpcServiceProtocol.UnknownTeleport, NpcServiceProtocol.UnknownTeleportText);
             if (html)
-                SendHtml(session, player, npc, "<html><body>%npcname%:<br>That teleport is not available.</body></html>", toSelf);
+                SendHtml(session, player, npc, "<html><body>%npcname%:<br>That teleport is not available.</body></html>");
             return null;
         }
 
         if (SiegeBlocks(loc))
         {
-            Notice(session, NpcServiceProtocol.SiegeBlocked, NpcServiceProtocol.SiegeBlockedText, toSelf);
+            Notice(session, NpcServiceProtocol.SiegeBlocked, NpcServiceProtocol.SiegeBlockedText);
             if (html)
-                SendHtml(session, player, npc, "<html><body>%npcname%:<br>You cannot teleport while that castle is under siege.</body></html>", toSelf);
+                SendHtml(session, player, npc, "<html><body>%npcname%:<br>You cannot teleport while that castle is under siege.</body></html>");
             return null;
         }
 
         var (x, y) = Offset(loc.X, loc.Y);
         if (!Loaded(x, y))
         {
-            Notice(session, NpcServiceProtocol.DestinationUnloaded, NpcServiceProtocol.DestinationUnloadedText, toSelf);
+            Notice(session, NpcServiceProtocol.DestinationUnloaded, NpcServiceProtocol.DestinationUnloadedText);
             if (html)
-                SendHtml(session, player, npc, "<html><body>%npcname%:<br>That destination is not on a loaded map.</body></html>", toSelf);
+                SendHtml(session, player, npc, "<html><body>%npcname%:<br>That destination is not on a loaded map.</body></html>");
             return null;
         }
 
@@ -272,66 +240,65 @@ public sealed partial class ZoneWorld
             Notice(
                 session,
                 NpcServiceProtocol.NotEnoughAdena,
-                adena ? NpcServiceProtocol.NotEnoughAdenaText : NpcServiceProtocol.NotEnoughFeeText,
-                toSelf);
+                adena ? NpcServiceProtocol.NotEnoughAdenaText : NpcServiceProtocol.NotEnoughFeeText);
             if (html)
-                SendHtml(session, player, npc, "<html><body>%npcname%:<br>" + (adena ? NpcServiceProtocol.NotEnoughAdenaText : NpcServiceProtocol.NotEnoughFeeText) + "</body></html>", toSelf);
+                SendHtml(session, player, npc, "<html><body>%npcname%:<br>" + (adena ? NpcServiceProtocol.NotEnoughAdenaText : NpcServiceProtocol.NotEnoughFeeText) + "</body></html>");
             return null;
         }
 
         if (changes.Count > 0)
         {
             // The fare is a bag change like any other, and Net clients only see it through the bridge.
-            FanInventory(session, Collapse(changes), toSelf);
+            FanInventory(session, Collapse(changes));
             SaveInventory(session, player.Inventory);
         }
 
-        Relocate(player, x, y, loc.Z, toSelf, toOthers);
-        Notice(session, NpcServiceProtocol.Teleported, NpcServiceProtocol.TeleportedText, toSelf);
+        Relocate(player, x, y, loc.Z);
+        Notice(session, NpcServiceProtocol.Teleported, NpcServiceProtocol.TeleportedText);
         return null;
     }
 
-    string? OpenDeposit(ZoneSession session, ZoneEntity player, ZoneEntity npc, List<Pending> toSelf)
+    string? OpenDeposit(ZoneSession session, ZoneEntity player, ZoneEntity npc)
     {
         if (!IsWarehouse(npc))
         {
-            SendHtml(session, player, npc, "<html><body>%npcname%:<br>" + NpcServiceProtocol.NotWarehouseText + "</body></html>", toSelf);
+            SendHtml(session, player, npc, "<html><body>%npcname%:<br>" + NpcServiceProtocol.NotWarehouseText + "</body></html>");
             return null;
         }
 
         if (player.ActiveEnchantObjectId != 0)
         {
-            Notice(session, NpcServiceProtocol.EnchantOpen, NpcServiceProtocol.EnchantOpenText, toSelf);
-            SendHtml(session, player, npc, "<html><body>%npcname%:<br>" + NpcServiceProtocol.EnchantOpenText + "</body></html>", toSelf);
+            Notice(session, NpcServiceProtocol.EnchantOpen, NpcServiceProtocol.EnchantOpenText);
+            SendHtml(session, player, npc, "<html><body>%npcname%:<br>" + NpcServiceProtocol.EnchantOpenText + "</body></html>");
             return null;
         }
 
-        SendDepositList(session, player, npc, toSelf);
-        SendHtml(session, player, npc, "<html><body>%npcname%:<br>Deposit an item. The fee is 30 adena per item.</body></html>", toSelf);
+        SendDepositList(session, player, npc);
+        SendHtml(session, player, npc, "<html><body>%npcname%:<br>Deposit an item. The fee is 30 adena per item.</body></html>");
         return null;
     }
 
-    string? OpenWithdraw(ZoneSession session, ZoneEntity player, ZoneEntity npc, List<Pending> toSelf)
+    string? OpenWithdraw(ZoneSession session, ZoneEntity player, ZoneEntity npc)
     {
         if (!IsWarehouse(npc))
         {
-            SendHtml(session, player, npc, "<html><body>%npcname%:<br>" + NpcServiceProtocol.NotWarehouseText + "</body></html>", toSelf);
+            SendHtml(session, player, npc, "<html><body>%npcname%:<br>" + NpcServiceProtocol.NotWarehouseText + "</body></html>");
             return null;
         }
 
         if (player.ActiveEnchantObjectId != 0)
         {
-            Notice(session, NpcServiceProtocol.EnchantOpen, NpcServiceProtocol.EnchantOpenText, toSelf);
-            SendHtml(session, player, npc, "<html><body>%npcname%:<br>" + NpcServiceProtocol.EnchantOpenText + "</body></html>", toSelf);
+            Notice(session, NpcServiceProtocol.EnchantOpen, NpcServiceProtocol.EnchantOpenText);
+            SendHtml(session, player, npc, "<html><body>%npcname%:<br>" + NpcServiceProtocol.EnchantOpenText + "</body></html>");
             return null;
         }
 
-        SendWithdrawList(session, player, npc, toSelf);
-        SendHtml(session, player, npc, "<html><body>%npcname%:<br>Withdraw an item from your private warehouse.</body></html>", toSelf);
+        SendWithdrawList(session, player, npc);
+        SendHtml(session, player, npc, "<html><body>%npcname%:<br>Withdraw an item from your private warehouse.</body></html>");
         return null;
     }
 
-    string? DepositPrivate(ZoneSession session, int npcObjectId, WarehouseCountMsg[]? lines, List<Pending> toSelf, bool html)
+    string? DepositPrivate(ZoneSession session, int npcObjectId, WarehouseCountMsg[]? lines, bool html)
     {
         if (!TryServicePair(session, npcObjectId, out var player, out var npc, out var error))
             return error;
@@ -340,13 +307,13 @@ public sealed partial class ZoneWorld
         if (!IsWarehouse(npc))
         {
             if (html)
-                SendHtml(session, player, npc, "<html><body>%npcname%:<br>" + NpcServiceProtocol.NotWarehouseText + "</body></html>", toSelf);
+                SendHtml(session, player, npc, "<html><body>%npcname%:<br>" + NpcServiceProtocol.NotWarehouseText + "</body></html>");
             return "bad_request";
         }
 
         if (player.ActiveEnchantObjectId != 0)
         {
-            Notice(session, NpcServiceProtocol.EnchantOpen, NpcServiceProtocol.EnchantOpenText, toSelf);
+            Notice(session, NpcServiceProtocol.EnchantOpen, NpcServiceProtocol.EnchantOpenText);
             return null;
         }
 
@@ -364,7 +331,7 @@ public sealed partial class ZoneWorld
             var item = player.Inventory.Find(line.ObjectId);
             if (item == null || item.IsEquipped || !item.Template.CanDropTradeStore || item.Count < line.Count)
             {
-                Notice(session, NpcServiceProtocol.CannotStore, NpcServiceProtocol.CannotStoreText, toSelf);
+                Notice(session, NpcServiceProtocol.CannotStore, NpcServiceProtocol.CannotStoreText);
                 return null;
             }
 
@@ -379,7 +346,7 @@ public sealed partial class ZoneWorld
 
         if (player.Warehouse.SlotCount + slots > WarehouseRules.WarehouseSlots(player.Race))
         {
-            Notice(session, NpcServiceProtocol.WarehouseFull, NpcServiceProtocol.WarehouseFullText, toSelf);
+            Notice(session, NpcServiceProtocol.WarehouseFull, NpcServiceProtocol.WarehouseFullText);
             return null;
         }
 
@@ -387,14 +354,14 @@ public sealed partial class ZoneWorld
         int adena = player.Inventory.CountOf(WarehouseRules.AdenaItemId);
         if (!WarehouseRules.FeeCovered(adena, depositedAdena, fee))
         {
-            Notice(session, NpcServiceProtocol.WarehouseAdena, NpcServiceProtocol.NotEnoughAdenaText, toSelf);
+            Notice(session, NpcServiceProtocol.WarehouseAdena, NpcServiceProtocol.NotEnoughAdenaText);
             return null;
         }
 
         var changes = new List<InventoryUpdateEntryMsg>();
         if (fee > 0 && !Take(player.Inventory, WarehouseRules.AdenaItemId, fee, changes))
         {
-            Notice(session, NpcServiceProtocol.WarehouseAdena, NpcServiceProtocol.NotEnoughAdenaText, toSelf);
+            Notice(session, NpcServiceProtocol.WarehouseAdena, NpcServiceProtocol.NotEnoughAdenaText);
             return null;
         }
 
@@ -408,14 +375,14 @@ public sealed partial class ZoneWorld
             player.Warehouse.Add(taken.ItemId, count, taken.EnchantLevel, out _);
         }
 
-        FanInventory(session, Collapse(changes), toSelf);
+        FanInventory(session, Collapse(changes));
         SaveInventory(session, player.Inventory);
         SaveWarehouse(session, player);
-        Notice(session, NpcServiceProtocol.TransactionComplete, NpcServiceProtocol.TransactionCompleteText, toSelf);
+        Notice(session, NpcServiceProtocol.TransactionComplete, NpcServiceProtocol.TransactionCompleteText);
         return null;
     }
 
-    string? WithdrawPrivate(ZoneSession session, int npcObjectId, WarehouseCountMsg[]? lines, List<Pending> toSelf, bool html)
+    string? WithdrawPrivate(ZoneSession session, int npcObjectId, WarehouseCountMsg[]? lines, bool html)
     {
         if (!TryServicePair(session, npcObjectId, out var player, out var npc, out var error))
             return error;
@@ -424,13 +391,13 @@ public sealed partial class ZoneWorld
         if (!IsWarehouse(npc))
         {
             if (html)
-                SendHtml(session, player, npc, "<html><body>%npcname%:<br>" + NpcServiceProtocol.NotWarehouseText + "</body></html>", toSelf);
+                SendHtml(session, player, npc, "<html><body>%npcname%:<br>" + NpcServiceProtocol.NotWarehouseText + "</body></html>");
             return "bad_request";
         }
 
         if (player.ActiveEnchantObjectId != 0)
         {
-            Notice(session, NpcServiceProtocol.EnchantOpen, NpcServiceProtocol.EnchantOpenText, toSelf);
+            Notice(session, NpcServiceProtocol.EnchantOpen, NpcServiceProtocol.EnchantOpenText);
             return null;
         }
 
@@ -458,14 +425,14 @@ public sealed partial class ZoneWorld
 
         if (player.Inventory.Items.Count + slots > WarehouseRules.InventorySlots(player.Race))
         {
-            Notice(session, NpcServiceProtocol.InventoryFull, NpcServiceProtocol.InventoryFullText, toSelf);
+            Notice(session, NpcServiceProtocol.InventoryFull, NpcServiceProtocol.InventoryFullText);
             return null;
         }
 
         int carried = _weights.Load(player.Inventory.Items.Select(item => (item.ItemId, item.Count)));
         if ((long)carried + incomingWeight > MaxLoadOf(player))
         {
-            Notice(session, NpcServiceProtocol.WeightLimit, NpcServiceProtocol.WeightLimitText, toSelf);
+            Notice(session, NpcServiceProtocol.WeightLimit, NpcServiceProtocol.WeightLimitText);
             return null;
         }
 
@@ -479,14 +446,14 @@ public sealed partial class ZoneWorld
             changes.Add(InventoryMessages.ChangeRow(existed ? InventoryChange.Modify : InventoryChange.Add, added));
         }
 
-        FanInventory(session, Collapse(changes), toSelf);
+        FanInventory(session, Collapse(changes));
         SaveInventory(session, player.Inventory);
         SaveWarehouse(session, player);
-        Notice(session, NpcServiceProtocol.TransactionComplete, NpcServiceProtocol.TransactionCompleteText, toSelf);
+        Notice(session, NpcServiceProtocol.TransactionComplete, NpcServiceProtocol.TransactionCompleteText);
         return null;
     }
 
-    string? ApplySupportMagic(ZoneSession session, int npcObjectId, List<Pending> toSelf, List<Pending> toOthers, bool html)
+    string? ApplySupportMagic(ZoneSession session, int npcObjectId, bool html)
     {
         if (!TryServicePair(session, npcObjectId, out var player, out var npc, out var error))
             return error;
@@ -495,13 +462,7 @@ public sealed partial class ZoneWorld
         if (refusal != NewbieBuffRefusal.None)
         {
             var (id, text, code) = Refusal(refusal);
-            Notice(session, id, text, toSelf);
-            toSelf.Add(Pack(session, MsgType.NewbieBuffResult, new NewbieBuffResultMsg
-            {
-                NpcObjectId = npc.ObjectId,
-                SkillIds = [],
-                Refusal = code
-            }));
+            Notice(session, id, text);
             if (html)
             {
                 // Mobius SupportMagic shows default/SupportMagicHighLevel.htm / SupportMagicLowLevel.htm.
@@ -513,7 +474,7 @@ public sealed partial class ZoneWorld
                 };
                 SendHtml(session, player, npc, page != null && _html.TryGet(page, out var mobius)
                     ? mobius
-                    : "<html><body>%npcname%:<br>" + text + "</body></html>", toSelf);
+                    : "<html><body>%npcname%:<br>" + text + "</body></html>");
             }
 
             return null;
@@ -524,31 +485,25 @@ public sealed partial class ZoneWorld
         {
             var buff = buffs[i];
             ids[i] = buff.SkillId;
-            CastBuff(npc, player, buff.SkillId, buff.SkillLevel, buff.AbnormalLevel, buff.DurationSeconds, toSelf, toOthers);
+            CastBuff(npc, player, buff.SkillId, buff.SkillLevel, buff.AbnormalLevel, buff.DurationSeconds);
         }
 
-        FanoutAbnormal(player, toSelf);
-        toSelf.Add(Pack(session, MsgType.NewbieBuffResult, new NewbieBuffResultMsg
-        {
-            NpcObjectId = npc.ObjectId,
-            SkillIds = ids,
-            Refusal = ""
-        }));
+        FanoutAbnormal(player);
         if (html)
-            SendHtml(session, player, npc, "<html><body>%npcname%:<br>Supplemental magic has been granted.</body></html>", toSelf);
+            SendHtml(session, player, npc, "<html><body>%npcname%:<br>Supplemental magic has been granted.</body></html>");
         return null;
     }
 
-    string? ShowBlessingPage(ZoneSession session, ZoneEntity player, ZoneEntity npc, List<Pending> toSelf)
+    string? ShowBlessingPage(ZoneSession session, ZoneEntity player, ZoneEntity npc)
     {
         string page = _html.TryGet("default/BlessingOfProtection.htm", out var html)
             ? html
             : "<html><body>%npcname%:<br><a action=\"bypass -h npc_%objectId%_GiveBlessing\">Receive the Blessing of Protection.</a></body></html>";
-        SendHtml(session, player, npc, page, toSelf);
+        SendHtml(session, player, npc, page);
         return null;
     }
 
-    string? ApplyBlessing(ZoneSession session, int npcObjectId, List<Pending> toSelf, List<Pending> toOthers, bool html)
+    string? ApplyBlessing(ZoneSession session, int npcObjectId, bool html)
     {
         if (!TryServicePair(session, npcObjectId, out var player, out var npc, out var error))
             return error;
@@ -556,32 +511,20 @@ public sealed partial class ZoneWorld
         var blessing = _newbieBuffs.Blessing;
         if (!_newbieBuffs.CanBless(player.Level, ClassLevelOf(player)))
         {
-            Notice(session, NpcServiceProtocol.BlessingRefused, NpcServiceProtocol.BlessingRefusedText, toSelf);
-            toSelf.Add(Pack(session, MsgType.BlessingResult, new BlessingResultMsg
-            {
-                NpcObjectId = npc.ObjectId,
-                SkillId = 0,
-                Accepted = false
-            }));
+            Notice(session, NpcServiceProtocol.BlessingRefused, NpcServiceProtocol.BlessingRefusedText);
             if (html)
-                SendHtml(session, player, npc, "<html><body>%npcname%:<br>" + NpcServiceProtocol.BlessingRefusedText + "</body></html>", toSelf);
+                SendHtml(session, player, npc, "<html><body>%npcname%:<br>" + NpcServiceProtocol.BlessingRefusedText + "</body></html>");
             return null;
         }
 
-        CastBuff(npc, player, blessing.SkillId, blessing.SkillLevel, blessing.AbnormalLevel, blessing.DurationSeconds, toSelf, toOthers);
-        FanoutAbnormal(player, toSelf);
-        toSelf.Add(Pack(session, MsgType.BlessingResult, new BlessingResultMsg
-        {
-            NpcObjectId = npc.ObjectId,
-            SkillId = blessing.SkillId,
-            Accepted = true
-        }));
+        CastBuff(npc, player, blessing.SkillId, blessing.SkillLevel, blessing.AbnormalLevel, blessing.DurationSeconds);
+        FanoutAbnormal(player);
         if (html)
-            SendHtml(session, player, npc, "<html><body>%npcname%:<br>The Blessing of Protection is upon you.</body></html>", toSelf);
+            SendHtml(session, player, npc, "<html><body>%npcname%:<br>The Blessing of Protection is upon you.</body></html>");
         return null;
     }
 
-    void SendDepositList(ZoneSession session, ZoneEntity player, ZoneEntity npc, List<Pending> toSelf)
+    void SendDepositList(ZoneSession session, ZoneEntity player, ZoneEntity npc)
     {
         var items = new List<ItemListEntryMsg>();
         if (player.Inventory != null)
@@ -602,12 +545,11 @@ public sealed partial class ZoneWorld
             Adena = player.Inventory?.CountOf(WarehouseRules.AdenaItemId) ?? 0,
             Items = items.ToArray()
         };
-        toSelf.Add(Pack(session, MsgType.WarehouseDepositList, list));
         if (NetBridge != null)
             NetBridge.FanoutWarehouseDepositList([session.ObjectId], ToNetDepositList(list));
     }
 
-    void SendWithdrawList(ZoneSession session, ZoneEntity player, ZoneEntity npc, List<Pending> toSelf)
+    void SendWithdrawList(ZoneSession session, ZoneEntity player, ZoneEntity npc)
     {
         var items = new List<ItemListEntryMsg>();
         if (player.Warehouse != null)
@@ -627,7 +569,6 @@ public sealed partial class ZoneWorld
             MaxWeight = MaxLoadOf(player),
             Items = items.ToArray()
         };
-        toSelf.Add(Pack(session, MsgType.WarehouseWithdrawList, list));
         if (NetBridge != null)
             NetBridge.FanoutWarehouseWithdrawList([session.ObjectId], ToNetWithdrawList(list));
     }
@@ -662,9 +603,7 @@ public sealed partial class ZoneWorld
         int skillId,
         int level,
         int abnormalLevel,
-        int durationSeconds,
-        List<Pending> toSelf,
-        List<Pending> toOthers)
+        int durationSeconds)
     {
         if (player.Session == null)
             return;
@@ -679,8 +618,7 @@ public sealed partial class ZoneWorld
             HitTimeMs = 0,
             ReuseDelayMs = 0
         };
-        toSelf.Add(Pack(player.Session, MsgType.MagicSkillUse, cast));
-        // Net clients only see the gesture through the bridge; the abnormal row alone leaves the pawn silent.
+                // Net clients only see the gesture through the bridge; the abnormal row alone leaves the pawn silent.
         NetBridge?.FanoutMagicSkillUse([player.ObjectId], new Fineage.Net.Contract.MagicSkillUseNetMsg
         {
             CasterObjectId = cast.CasterObjectId,
@@ -696,7 +634,6 @@ public sealed partial class ZoneWorld
                 continue;
             if (!other.Knownlist.Contains(player.ObjectId) && !other.Knownlist.Contains(npc.ObjectId))
                 continue;
-            toOthers.Add(Pack(other.Session, MsgType.MagicSkillUse, cast));
         }
     }
 
@@ -828,7 +765,7 @@ public sealed partial class ZoneWorld
     static bool IsWarehouse(ZoneEntity npc) =>
         string.Equals(npc.NpcType, "Warehouse", StringComparison.OrdinalIgnoreCase);
 
-    void Notice(ZoneSession session, int id, string text, List<Pending> toSelf)
+    void Notice(ZoneSession session, int id, string text)
     {
         var message = new SystemMessageMsg
         {
@@ -836,7 +773,6 @@ public sealed partial class ZoneWorld
             Params = [],
             Text = text
         };
-        toSelf.Add(Pack(session, MsgType.SystemMessage, message));
         if (NetBridge != null)
         {
             NetBridge.FanoutSystemMessage([session.ObjectId], new Fineage.Net.Contract.SystemMessageNetMsg
@@ -848,10 +784,9 @@ public sealed partial class ZoneWorld
         }
     }
 
-    void FanInventory(ZoneSession session, InventoryUpdateEntryMsg[] changes, List<Pending> toSelf)
+    void FanInventory(ZoneSession session, InventoryUpdateEntryMsg[] changes)
     {
         var invUpdate = new InventoryUpdateMsg { Changes = changes };
-        toSelf.Add(Pack(session, MsgType.InventoryUpdate, invUpdate));
         if (NetBridge != null)
             NetBridge.FanoutInventoryUpdate([session.ObjectId], ToNetInventoryUpdate(invUpdate));
     }

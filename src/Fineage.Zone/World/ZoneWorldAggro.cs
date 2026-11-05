@@ -82,11 +82,11 @@ public sealed partial class ZoneWorld
 
     public const int SysMsgCannotSeeTarget = 181;
 
-    void CannotSeeTarget(ZoneSession session, List<Pending> outbound)
+    void CannotSeeTarget(ZoneSession session)
     {
         session.AutoAttackTargetId = 0;
         session.ClearApproach();
-        ShotNotice(session, SysMsgCannotSeeTarget, "Cannot see target.", outbound);
+        ShotNotice(session, SysMsgCannotSeeTarget, "Cannot see target.");
     }
 
     void TickAggression(long now)

@@ -206,15 +206,9 @@ public sealed class NpcTemplateSpawnTests
         Assert.Equal(info.Title, roundTrip.Title);
         Assert.Equal(info.NpcType, roundTrip.NpcType);
         Assert.False(roundTrip.Attackable);
-        var v2 = MessagePackSerializer.Deserialize<Fineage.Protocol.V2.NpcInfoMsg>(bytes);
-        Assert.Equal("Trader", v2.Title);
-        Assert.Equal("Merchant", v2.NpcType);
-        Assert.False(v2.Attackable);
-
         var login = new LoginService(JsonAccountStore.InMemory(), new HandoffTokens(HandoffTokens.DefaultSecret));
         var ticket = login.Play("merchant", "secret1", "Buyer", HumanClasses.Fighter).Value!;
-        await using var stream = new MemoryStream();
-        var session = new ZoneSession(stream);
+        var session = new ZoneSession();
         session.Bind(ticket.CharacterId, ticket.Account, ticket.CharacterName, ticket.ClassId);
         Assert.True(await world.TryEnterAsync(session, CancellationToken.None));
         // Non-attackable NPCs must still be selectable (talk / target frame); combat stays blocked.

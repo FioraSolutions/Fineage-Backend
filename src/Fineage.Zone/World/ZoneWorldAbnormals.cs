@@ -10,8 +10,7 @@ public sealed partial class ZoneWorld
         SkillDefinition template,
         SkillLevelData levelData,
         ZoneEntity target,
-        long nowUnixMs,
-        List<Pending> outbound)
+        long nowUnixMs)
     {
         ZoneAbnormals.Apply(
             target.Abnormals,
@@ -20,7 +19,7 @@ public sealed partial class ZoneWorld
             template.AbnormalTimeSeconds,
             nowUnixMs,
             levelData.Level);
-        FanoutAbnormal(target, outbound);
+        FanoutAbnormal(target);
     }
 
     void ApplyAbnormalPlaytest(
@@ -28,14 +27,13 @@ public sealed partial class ZoneWorld
         int effectId,
         int value,
         int durationSeconds,
-        long nowUnixMs,
-        List<Pending> outbound)
+        long nowUnixMs)
     {
         ZoneAbnormals.Apply(target.Abnormals, effectId, value, durationSeconds, nowUnixMs);
-        FanoutAbnormal(target, outbound);
+        FanoutAbnormal(target);
     }
 
-    void TickAbnormals(List<Pending> outbound)
+    void TickAbnormals()
     {
         long now = _clock().ToUnixTimeMilliseconds();
         foreach (var entity in _byId.Values)
@@ -44,20 +42,19 @@ public sealed partial class ZoneWorld
                 continue;
             if (!ZoneAbnormals.TickExpired(entity.Abnormals, now))
                 continue;
-            FanoutAbnormal(entity, outbound);
+            FanoutAbnormal(entity);
         }
     }
 
     /// <summary>Test hook: run one abnormal expiry pass and fan-out clears.</summary>
-    internal async Task RunAbnormalTickAsync(CancellationToken ct)
+    internal Task RunAbnormalTickAsync(CancellationToken ct)
     {
-        var outbound = new List<Pending>();
         lock (_gate)
-            TickAbnormals(outbound);
-        await FlushOthersAsync(outbound, ct).ConfigureAwait(false);
+            TickAbnormals();
+        return Task.CompletedTask;
     }
 
-    void FanoutAbnormal(ZoneEntity target, List<Pending> outbound)
+    void FanoutAbnormal(ZoneEntity target)
     {
         var update = AbnormalFor(target);
         // Mobius: a buff/debuff that changes combat stats triggers UserInfo (status window P.Atk/P.Def/Spd)
@@ -77,7 +74,6 @@ public sealed partial class ZoneWorld
             bool cares = ReferenceEquals(watcher, target) || watcher.Knownlist.Contains(target.ObjectId);
             if (!cares)
                 continue;
-            outbound.Add(Pack(watcher.Session, MsgType.AbnormalStatusUpdate, update));
             netWatchers ??= [];
             netWatchers.Add(watcher.ObjectId);
         }

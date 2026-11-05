@@ -1,53 +1,44 @@
 using Fineage.Game;
 using Fineage.Protocol;
-using MessagePack;
 
 namespace Fineage.Zone.World;
 
 public sealed partial class ZoneWorld
 {
-    public async Task<string?> TryEnchantRequestAsync(ZoneSession session, EnchantRequestMsg request, CancellationToken ct)
+    public Task<string?> TryEnchantRequestAsync(ZoneSession session, EnchantRequestMsg request, CancellationToken ct)
     {
-        var toSelf = new List<Pending>();
         string? error;
         lock (_gate)
-            error = TryEnchantRequest(session, request.ObjectId, toSelf);
+            error = TryEnchantRequest(session, request.ObjectId);
         if (error != null)
-            return error;
+            return Task.FromResult<string?>(error);
 
-        await FlushSelfAsync(session, toSelf, ct).ConfigureAwait(false);
-        return null;
+        return Task.FromResult<string?>(null);
     }
 
-    public async Task<string?> TryEnchantConfirmAsync(ZoneSession session, EnchantConfirmMsg request, CancellationToken ct)
+    public Task<string?> TryEnchantConfirmAsync(ZoneSession session, EnchantConfirmMsg request, CancellationToken ct)
     {
-        var toSelf = new List<Pending>();
-        var toOthers = new List<Pending>();
         string? error;
         lock (_gate)
-            error = TryEnchantConfirm(session, request.ObjectId, toSelf, toOthers);
+            error = TryEnchantConfirm(session, request.ObjectId);
         if (error != null)
-            return error;
+            return Task.FromResult<string?>(error);
 
-        await FlushSelfAsync(session, toSelf, ct).ConfigureAwait(false);
-        await FlushOthersAsync(toOthers, ct).ConfigureAwait(false);
-        return null;
+        return Task.FromResult<string?>(null);
     }
 
-    public async Task<string?> TryEnchantCancelAsync(ZoneSession session, CancellationToken ct)
+    public Task<string?> TryEnchantCancelAsync(ZoneSession session, CancellationToken ct)
     {
-        var toSelf = new List<Pending>();
         string? error;
         lock (_gate)
-            error = TryEnchantCancel(session, toSelf);
+            error = TryEnchantCancel(session);
         if (error != null)
-            return error;
+            return Task.FromResult<string?>(error);
 
-        await FlushSelfAsync(session, toSelf, ct).ConfigureAwait(false);
-        return null;
+        return Task.FromResult<string?>(null);
     }
 
-    string? TryEnchantRequest(ZoneSession session, int objectId, List<Pending> toSelf)
+    string? TryEnchantRequest(ZoneSession session, int objectId)
     {
         if (!TryLivePlayer(session, out var player, out var error))
         {
@@ -63,7 +54,6 @@ public sealed partial class ZoneWorld
 
         player.ActiveEnchantObjectId = scroll.ObjectId;
         var select = EnchantLines.Select(scroll);
-        toSelf.Add(Pack(session, MsgType.SystemMessage, select));
         NetBridge?.FanoutSystemMessage([session.ObjectId], new Fineage.Net.Contract.SystemMessageNetMsg
         {
             Id = select.Id,
@@ -74,7 +64,7 @@ public sealed partial class ZoneWorld
         return null;
     }
 
-    string? TryEnchantCancel(ZoneSession session, List<Pending> toSelf)
+    string? TryEnchantCancel(ZoneSession session)
     {
         if (!TryLivePlayer(session, out var player, out var error))
         {
@@ -85,9 +75,7 @@ public sealed partial class ZoneWorld
             return EnchantProtocol.NoRequest;
 
         player.ActiveEnchantObjectId = 0;
-        toSelf.Add(Pack(session, MsgType.EnchantResult, new EnchantResultMsg { Result = EnchantProtocol.ResultCancel }));
         var cancelled = EnchantLines.Cancelled();
-        toSelf.Add(Pack(session, MsgType.SystemMessage, cancelled));
         NetBridge?.FanoutEnchantResult([session.ObjectId], new Fineage.Net.Contract.EnchantResultNetMsg
         {
             Result = EnchantProtocol.ResultCancel
@@ -102,7 +90,7 @@ public sealed partial class ZoneWorld
         return null;
     }
 
-    string? TryEnchantConfirm(ZoneSession session, int objectId, List<Pending> toSelf, List<Pending> toOthers)
+    string? TryEnchantConfirm(ZoneSession session, int objectId)
     {
         if (!TryLivePlayer(session, out var player, out var error))
         {
@@ -221,15 +209,6 @@ public sealed partial class ZoneWorld
             changes.Add(InventoryMessages.ChangeRow(InventoryChange.Modify, other));
         }
 
-        toSelf.Add(Pack(session, MsgType.EnchantResult, new EnchantResultMsg
-        {
-            Result = resultCode,
-            EnchantLevel = reportedLevel,
-            ObjectId = target.ObjectId,
-            CrystalItemId = crystalId,
-            CrystalCount = crystalCount
-        }));
-        toSelf.Add(Pack(session, MsgType.InventoryUpdate, new InventoryUpdateMsg { Changes = [.. changes] }));
         NetBridge?.FanoutInventoryUpdate([session.ObjectId], ToNetInventoryUpdate(new InventoryUpdateMsg { Changes = [.. changes] }));
         NetBridge?.FanoutEnchantResult([session.ObjectId], new Fineage.Net.Contract.EnchantResultNetMsg
         {
@@ -241,7 +220,6 @@ public sealed partial class ZoneWorld
         });
         foreach (var line in lines)
         {
-            toSelf.Add(Pack(session, MsgType.SystemMessage, line));
             NetBridge?.FanoutSystemMessage([session.ObjectId], new Fineage.Net.Contract.SystemMessageNetMsg
             {
                 Id = line.Id,
@@ -259,13 +237,11 @@ public sealed partial class ZoneWorld
             SelfUserInfo(player);
             // Mobius broadcastUserInfo: peers must see the new paperdoll after an equip change, so this has to
             // reach Net too — the V2 Pending fanout alone left Net peers looking at the pre-enchant gear.
-            byte[] body = MessagePackSerializer.Serialize(CharInfo(player));
             List<int>? netPeers = null;
             foreach (int id in player.Knownlist)
             {
                 if (_byId.TryGetValue(id, out var other) && other.Session != null)
                 {
-                    toOthers.Add(new Pending(other.Session, MsgType.CharInfo, body));
                     (netPeers ??= []).Add(id);
                 }
             }

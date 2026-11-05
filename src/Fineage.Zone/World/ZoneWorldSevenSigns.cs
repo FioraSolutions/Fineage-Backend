@@ -9,46 +9,36 @@ public sealed partial class ZoneWorld
 {
     public SevenSignsEngine SevenSigns => _sevenSigns;
 
-    public async Task<string?> TrySevenSignsStatusAsync(ZoneSession session, CancellationToken ct)
+    public Task<string?> TrySevenSignsStatusAsync(ZoneSession session, CancellationToken ct)
     {
         if (!IsLive(session))
-            return "world";
+            return Task.FromResult<string?>("world");
 
-        var toSelf = new List<Pending>();
         lock (_gate)
-            QueueRecord(session, toSelf);
-        await FlushSelfAsync(session, toSelf, ct).ConfigureAwait(false);
-        return null;
+            QueueRecord(session);
+        return Task.FromResult<string?>(null);
     }
 
-    public async Task<string?> TrySevenSignsActionAsync(ZoneSession session, SevenSignsActionRequestMsg request, CancellationToken ct)
+    public Task<string?> TrySevenSignsActionAsync(ZoneSession session, SevenSignsActionRequestMsg request, CancellationToken ct)
     {
         if (!IsLive(session))
-            return "world";
+            return Task.FromResult<string?>("world");
 
-        var toSelf = new List<Pending>();
         string? error;
         lock (_gate)
-            error = ApplySevenSigns(session, request, toSelf);
-        if (error != null)
-            return error;
-
-        await FlushSelfAsync(session, toSelf, ct).ConfigureAwait(false);
-        return null;
+            error = ApplySevenSigns(session, request);
+        return Task.FromResult<string?>(error);
     }
 
-    public async Task<bool> AdvanceSevenSignsAsync(CancellationToken ct)
+    public Task<bool> AdvanceSevenSignsAsync(CancellationToken ct)
     {
-        var outbound = new List<Pending>();
         bool advanced;
         lock (_gate)
-            advanced = TickSevenSigns(outbound);
-        if (advanced)
-            await FlushOthersAsync(outbound, ct).ConfigureAwait(false);
-        return advanced;
+            advanced = TickSevenSigns();
+        return Task.FromResult(advanced);
     }
 
-    bool TickSevenSigns(List<Pending> outbound)
+    bool TickSevenSigns()
     {
         var notices = new List<SevenSignsNotice>();
         if (!_sevenSigns.AdvanceDue(notices))
@@ -61,9 +51,6 @@ public sealed partial class ZoneWorld
             if (player.Session == null)
                 continue;
             live.Add(player.ObjectId);
-            foreach (var notice in notices)
-                outbound.Add(Pack(player.Session, MsgType.SystemMessage, ToSystem(notice)));
-            outbound.Add(Pack(player.Session, MsgType.SevenSignsSky, sky));
         }
 
         if (live.Count > 0)
@@ -73,11 +60,11 @@ public sealed partial class ZoneWorld
             NetBridge?.FanoutSevenSignsSky(live, ToNet(sky));
         }
 
-        EvictDungeonLosers(outbound);
+        EvictDungeonLosers();
         return true;
     }
 
-    string? ApplySevenSigns(ZoneSession session, SevenSignsActionRequestMsg request, List<Pending> toSelf)
+    string? ApplySevenSigns(ZoneSession session, SevenSignsActionRequestMsg request)
     {
         if (!_byId.TryGetValue(session.ObjectId, out var player) || player.Inventory == null)
             return "world";
@@ -85,8 +72,8 @@ public sealed partial class ZoneWorld
         var notices = new List<SevenSignsNotice>();
         string? error = request.Action switch
         {
-            SevenSignsProtocol.ActionJoin => Join(session, player, request, notices, toSelf),
-            SevenSignsProtocol.ActionContribute => Contribute(session, player.Inventory, request, toSelf),
+            SevenSignsProtocol.ActionJoin => Join(session, player, request, notices),
+            SevenSignsProtocol.ActionContribute => Contribute(session, player.Inventory, request),
             _ => "bad_request"
         };
         if (error != null)
@@ -94,10 +81,9 @@ public sealed partial class ZoneWorld
 
         foreach (var notice in notices)
         {
-            toSelf.Add(Pack(session, MsgType.SystemMessage, ToSystem(notice)));
             NetBridge?.FanoutSystemMessage([session.ObjectId], ToNet(notice));
         }
-        QueueRecord(session, toSelf);
+        QueueRecord(session);
         return null;
     }
 
@@ -105,8 +91,7 @@ public sealed partial class ZoneWorld
         ZoneSession session,
         ZoneEntity player,
         SevenSignsActionRequestMsg request,
-        List<SevenSignsNotice> notices,
-        List<Pending> toSelf)
+        List<SevenSignsNotice> notices)
     {
         if (player.Inventory == null)
             return "world";
@@ -133,7 +118,6 @@ public sealed partial class ZoneWorld
         if (changes.Count > 0)
         {
             var update = new InventoryUpdateMsg { Changes = changes.ToArray() };
-            toSelf.Add(Pack(session, MsgType.InventoryUpdate, update));
             NetBridge?.FanoutInventoryUpdate([session.ObjectId], ToNetInventoryUpdate(update));
             SaveInventory(session, inventory);
         }
@@ -144,8 +128,7 @@ public sealed partial class ZoneWorld
     string? Contribute(
         ZoneSession session,
         PlayerInventory inventory,
-        SevenSignsActionRequestMsg request,
-        List<Pending> toSelf)
+        SevenSignsActionRequestMsg request)
     {
         if (request.BlueStones < 0 || request.GreenStones < 0 || request.RedStones < 0)
             return "bad_request";
@@ -165,7 +148,6 @@ public sealed partial class ZoneWorld
         if (changes.Count > 0)
         {
             var update = new InventoryUpdateMsg { Changes = changes.ToArray() };
-            toSelf.Add(Pack(session, MsgType.InventoryUpdate, update));
             NetBridge?.FanoutInventoryUpdate([session.ObjectId], ToNetInventoryUpdate(update));
             SaveInventory(session, inventory);
         }
@@ -173,12 +155,10 @@ public sealed partial class ZoneWorld
         return null;
     }
 
-    void QueueRecord(ZoneSession session, List<Pending> toSelf)
+    void QueueRecord(ZoneSession session)
     {
         var status = _sevenSigns.StatusFor(session.ObjectId);
         var sky = _sevenSigns.Sky();
-        toSelf.Add(Pack(session, MsgType.SevenSignsStatus, status));
-        toSelf.Add(Pack(session, MsgType.SevenSignsSky, sky));
         NetBridge?.FanoutSevenSignsStatus([session.ObjectId], ToNet(status));
         NetBridge?.FanoutSevenSignsSky([session.ObjectId], ToNet(sky));
     }

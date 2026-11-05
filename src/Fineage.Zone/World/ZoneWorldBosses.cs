@@ -29,14 +29,14 @@ public sealed partial class ZoneWorld
             MaterializeBoss(order);
     }
 
-    void TickBosses(List<Pending> outbound)
+    void TickBosses()
     {
         foreach (var order in _bosses.CollectDue())
         {
             if (!MaterializeBoss(order))
                 continue;
             if (_byId.TryGetValue(order.ObjectId, out var npc))
-                FanoutNewNpc(npc, outbound);
+                FanoutNewNpc(npc);
         }
     }
 
@@ -47,21 +47,16 @@ public sealed partial class ZoneWorld
     /// </summary>
     public bool OnBossKilled(int npcId)
     {
-        var outbound = new List<Pending>();
-        bool known;
         lock (_gate)
-            known = KillBossLocked(npcId, outbound);
-        if (known && outbound.Count > 0)
-            FlushOthersAsync(outbound, CancellationToken.None).GetAwaiter().GetResult();
-        return known;
+            return KillBossLocked(npcId);
     }
 
-    public async Task<string?> TryBossStatusAsync(ZoneSession session, int npcId, CancellationToken ct)
+    public Task<string?> TryBossStatusAsync(ZoneSession session, int npcId, CancellationToken ct)
     {
         if (!IsLive(session))
-            return "world";
+            return Task.FromResult<string?>("world");
         if (npcId < 0)
-            return "bad_request";
+            return Task.FromResult<string?>("bad_request");
 
         BossStatusMsg? message;
         Fineage.Net.Contract.BossStatusNetMsg? net;
@@ -69,29 +64,27 @@ public sealed partial class ZoneWorld
         lock (_gate)
             error = BuildBossStatus(npcId, out message, out net);
         if (error != null)
-            return error;
+            return Task.FromResult<string?>(error);
 
-        await session.SendAsync(MsgType.BossStatus, message!, ct).ConfigureAwait(false);
+        _ = message;
         // The schedule is read-only state: Net clients ask with a request opcode and get the rows back here.
         if (net != null)
             NetBridge?.FanoutBossStatus([session.ObjectId], net);
-        return null;
+        return Task.FromResult<string?>(null);
     }
 
-    public async Task<string?> TryAdminBossAsync(ZoneSession session, AdminBossScheduleMsg request, CancellationToken ct)
+    public Task<string?> TryAdminBossAsync(ZoneSession session, AdminBossScheduleMsg request, CancellationToken ct)
     {
         if (!IsLive(session))
-            return "world";
+            return Task.FromResult<string?>("world");
 
-        var outbound = new List<Pending>();
         string? error;
         lock (_gate)
-            error = ApplyAdminBoss(request, outbound);
+            error = ApplyAdminBoss(request);
         if (error != null)
-            return error;
+            return Task.FromResult<string?>(error);
 
-        await FlushOthersAsync(outbound, ct).ConfigureAwait(false);
-        return null;
+        return Task.FromResult<string?>(null);
     }
 
     /// <summary>Admin actions run through <see cref="TryAdminBossAsync"/> after the Net gate has checked the env flag.</summary>
@@ -105,7 +98,7 @@ public sealed partial class ZoneWorld
     internal void AdvanceBossesForTests()
     {
         lock (_gate)
-            TickBosses([]);
+            TickBosses();
     }
 
     internal void SaveBosses() => _bosses.Save();
@@ -121,7 +114,7 @@ public sealed partial class ZoneWorld
         }
     }
 
-    bool KillBossLocked(int npcId, List<Pending> outbound)
+    bool KillBossLocked(int npcId)
     {
         if (!_bosses.OnBossKilled(npcId))
             return false;
@@ -130,16 +123,16 @@ public sealed partial class ZoneWorld
             && _byId.TryGetValue(definition.ObjectId, out var entity)
             && entity.Kind == ZoneEntityKind.Npc)
         {
-            DespawnNpc(entity, outbound);
+            DespawnNpc(entity);
         }
 
         return true;
     }
 
-    string? ApplyAdminBoss(AdminBossScheduleMsg request, List<Pending> outbound)
+    string? ApplyAdminBoss(AdminBossScheduleMsg request)
     {
         if (request.Action == BossProtocol.ActionMarkDead)
-            return KillBossLocked(request.NpcId, outbound) ? null : BossProtocol.UnknownBoss;
+            return KillBossLocked(request.NpcId) ? null : BossProtocol.UnknownBoss;
 
         if (request.Action != BossProtocol.ActionForceSpawn)
             return "bad_request";
@@ -148,7 +141,7 @@ public sealed partial class ZoneWorld
             return BossProtocol.UnknownBoss;
 
         if (MaterializeBoss(order) && _byId.TryGetValue(order.ObjectId, out var npc))
-            FanoutNewNpc(npc, outbound);
+            FanoutNewNpc(npc);
         return null;
     }
 

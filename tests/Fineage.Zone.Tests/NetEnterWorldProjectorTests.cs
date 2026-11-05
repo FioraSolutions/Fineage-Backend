@@ -46,8 +46,7 @@ public class NetEnterWorldProjectorTests
         Assert.Equal(25, ch.ClassId);
 
         var world = new ZoneWorld(game: game, accounts: store);
-        await using var discard = new MemoryStream();
-        var session = new ZoneSession(discard);
+        var session = new ZoneSession();
         session.Bind(ch.Id, ch.Account, ch.Name, ch.ClassId);
 
         Assert.True(await world.TryEnterAsync(session, CancellationToken.None));

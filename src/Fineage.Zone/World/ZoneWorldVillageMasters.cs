@@ -3,7 +3,6 @@ using Fineage.Game.Quests;
 using Fineage.Game.Services;
 using Fineage.Protocol;
 using Fineage.Zone.NpcHtml;
-using MessagePack;
 
 namespace Fineage.Zone.World;
 
@@ -26,15 +25,15 @@ public sealed partial class ZoneWorld
     /// <summary>Mobius SystemMessageId 1308 CONGRATULATIONS_YOU_VE_COMPLETED_THE_CLASS_TRANSFER (sent by setClassId).</summary>
     internal const int ClassTransferMessageId = 1308;
 
-    string? VillageMasterBypass(ZoneSession session, ZoneEntity player, ZoneEntity npc, string script, string evt, List<Pending> toSelf, List<Pending> toOthers)
+    string? VillageMasterBypass(ZoneSession session, ZoneEntity player, ZoneEntity npc, string script, string evt)
     {
         if (string.Equals(script, NewbieTravelToken.Script, StringComparison.OrdinalIgnoreCase) && _newbieBuffs.TravelToken is { } travel)
-            return NewbieTravel(session, player, npc, travel, evt, toSelf, toOthers);
+            return NewbieTravel(session, player, npc, travel, evt);
 
         var masters = VillageMasters;
         if (!masters.Knows(script))
         {
-            SendHtml(session, player, npc, QuestBypassHandler.Unavailable, toSelf);
+            SendHtml(session, player, npc, QuestBypassHandler.Unavailable);
             return null;
         }
 
@@ -46,7 +45,7 @@ public sealed partial class ZoneWorld
         if (result == null)
             return null; // Mobius: script returned no page.
 
-        if (result.Change is { } change && !ApplyClassChange(session, player, change, result.RewardItemId, result.RewardCount, toSelf, toOthers))
+        if (result.Change is { } change && !ApplyClassChange(session, player, change, result.RewardItemId, result.RewardCount))
             return "bad_request";
 
         if (!_html.TryGet(result.HtmlPath, out var html))
@@ -55,7 +54,7 @@ public sealed partial class ZoneWorld
             html = QuestBypassHandler.Unavailable;
         }
 
-        SendHtml(session, player, npc, html, toSelf);
+        SendHtml(session, player, npc, html);
         return null;
     }
 
@@ -66,14 +65,14 @@ public sealed partial class ZoneWorld
     /// Mobius <c>NewbieTravelToken</c>: talk shows <c>&lt;guide&gt;.htm</c> (or <c>cant-travel.htm</c> at level 20+); a guide id event
     /// takes one Newbie Travel Token and teleports to that village. Destinations outside the loaded maps are refused before the token is taken.
     /// </summary>
-    string? NewbieTravel(ZoneSession session, ZoneEntity player, ZoneEntity npc, NewbieTravelToken travel, string evt, List<Pending> toSelf, List<Pending> toOthers)
+    string? NewbieTravel(ZoneSession session, ZoneEntity player, ZoneEntity npc, NewbieTravelToken travel, string evt)
     {
         string Page(string file) => _html.TryGet($"newbie_travel/{file}", out var h) ? h : QuestBypassHandler.Unavailable;
         if (evt.Length == 0)
         {
             if (!travel.Destinations.ContainsKey(npc.NpcId))
                 return null;
-            SendHtml(session, player, npc, Page(player.Level >= travel.RefusedLevel ? "cant-travel.htm" : $"{npc.NpcId}.htm"), toSelf);
+            SendHtml(session, player, npc, Page(player.Level >= travel.RefusedLevel ? "cant-travel.htm" : $"{npc.NpcId}.htm"));
             return null;
         }
 
@@ -81,35 +80,35 @@ public sealed partial class ZoneWorld
             return null;
         if (player.Level >= travel.RefusedLevel)
         {
-            SendHtml(session, player, npc, Page("cant-travel.htm"), toSelf);
+            SendHtml(session, player, npc, Page("cant-travel.htm"));
             return null;
         }
 
         var inventory = player.Inventory!;
         if (inventory.CountOf(travel.ItemId) <= 0)
         {
-            Notice(session, IncorrectItemCountMessageId, "Incorrect item count.", toSelf);
+            Notice(session, IncorrectItemCountMessageId, "Incorrect item count.");
             return null;
         }
 
         var (x, y) = Offset(loc.X, loc.Y);
         if (!Loaded(x, y))
         {
-            Notice(session, NpcServiceProtocol.DestinationUnloaded, NpcServiceProtocol.DestinationUnloadedText, toSelf);
-            SendHtml(session, player, npc, "<html><body>%npcname%:<br>That destination is not on a loaded map.</body></html>", toSelf);
+            Notice(session, NpcServiceProtocol.DestinationUnloaded, NpcServiceProtocol.DestinationUnloadedText);
+            SendHtml(session, player, npc, "<html><body>%npcname%:<br>That destination is not on a loaded map.</body></html>");
             return null;
         }
 
         var changes = new List<InventoryUpdateEntryMsg>();
         if (!Take(inventory, travel.ItemId, 1, changes))
             return "bad_request";
-        FanInventory(session, Collapse(changes), toSelf);
+        FanInventory(session, Collapse(changes));
         SaveInventory(session, inventory);
-        Relocate(player, x, y, loc.Z, toSelf, toOthers);
+        Relocate(player, x, y, loc.Z);
         return null;
     }
 
-    bool ApplyClassChange(ZoneSession session, ZoneEntity player, ClassChangeOption change, int rewardItemId, int rewardCount, List<Pending> toSelf, List<Pending> toOthers)
+    bool ApplyClassChange(ZoneSession session, ZoneEntity player, ClassChangeOption change, int rewardItemId, int rewardCount)
     {
         var inventory = player.Inventory!;
         if (!PlayerClasses.TryGet(change.ClassId, out var template) || template == null)
@@ -143,30 +142,24 @@ public sealed partial class ZoneWorld
         player.CurMp = Math.Min(player.CurMp, player.MaxMp);
         RefreshKnownSkills(player); // also folds passive runSpd (Quick Step / Agile Movement) into the live speed
         FanoutNetMoveType(player);
-        FanoutMoveType(player, toSelf);
+        FanoutMoveType(player);
 
         var invUpdate = new InventoryUpdateMsg
         {
             Changes = touches.Select(touch => InventoryMessages.ChangeRow((int)touch.Kind, touch.Item)).ToArray()
         };
-        toSelf.Add(Pack(session, MsgType.InventoryUpdate, invUpdate));
         NetBridge?.FanoutInventoryUpdate([session.ObjectId], ToNetInventoryUpdate(invUpdate));
 
-        Notice(session, ClassTransferMessageId, "Congratulations. You have completed the class transfer.", toSelf);
-        toSelf.Add(Pack(session, MsgType.SkillList, SkillListFor(player)));
+        Notice(session, ClassTransferMessageId, "Congratulations. You have completed the class transfer.");
         NetBridge?.FanoutSkillList([player.ObjectId], Fineage.Zone.Net.NetEnterWorldProjector.BuildSkills(player, _clock().ToUnixTimeMilliseconds()));
         SelfUserInfo(player);
 
         // Mobius broadcastUserInfo: peers see the new class.
-        byte[] body = MessagePackSerializer.Serialize(CharInfo(player));
         List<int>? netPeers = null;
         foreach (int id in player.Knownlist)
         {
             if (_byId.TryGetValue(id, out var other) && other.Session != null)
-            {
-                toOthers.Add(new Pending(other.Session, MsgType.CharInfo, body));
                 (netPeers ??= []).Add(id);
-            }
         }
 
         if (netPeers != null)
@@ -181,23 +174,19 @@ public sealed partial class ZoneWorld
     }
 
     /// <summary>Test hook: run a village-master bypass against a stand-in NPC.</summary>
+    /// <summary>Last HTML rendered by <see cref="SendHtml"/>: the test seam that replaced reading a V2 frame.</summary>
+    internal string? LastNpcHtmlForTest { get; private set; }
+
     internal string? VillageMasterForTest(ZoneSession session, int npcId, string script, string evt, out string html)
     {
-        var toSelf = new List<Pending>();
-        var toOthers = new List<Pending>();
         html = "";
         lock (_gate)
         {
             if (!TryPlayer(session, out var player))
                 return "world";
             var npc = new ZoneEntity { Kind = ZoneEntityKind.Npc, NpcId = npcId, Name = "Master", ObjectId = 0 };
-            var error = VillageMasterBypass(session, player, npc, script, evt, toSelf, toOthers);
-            foreach (var p in toSelf)
-            {
-                if (p.Type == MsgType.NpcHtml)
-                    html = MessagePackSerializer.Deserialize<NpcHtmlMsg>(p.Body).Html ?? "";
-            }
-
+            var error = VillageMasterBypass(session, player, npc, script, evt);
+            html = LastNpcHtmlForTest ?? "";
             return error;
         }
     }

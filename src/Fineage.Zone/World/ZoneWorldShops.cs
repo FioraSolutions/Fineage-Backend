@@ -7,67 +7,51 @@ namespace Fineage.Zone.World;
 
 public sealed partial class ZoneWorld
 {
-    public async Task<string?> TryBuyAsync(ZoneSession session, RequestBuyItemMsg request, CancellationToken ct)
+    public Task<string?> TryBuyAsync(ZoneSession session, RequestBuyItemMsg request, CancellationToken ct)
     {
         if (!IsLive(session))
-            return "world";
-        var toSelf = new List<Pending>();
+            return Task.FromResult<string?>("world");
         string? error;
         lock (_gate)
-            error = Buy(session, request, toSelf);
-        if (error != null)
-            return error;
-        await FlushSelfAsync(session, toSelf, ct).ConfigureAwait(false);
-        return null;
+            error = Buy(session, request);
+        return Task.FromResult<string?>(error);
     }
 
-    public async Task<string?> TrySellAsync(ZoneSession session, RequestSellItemMsg request, CancellationToken ct)
+    public Task<string?> TrySellAsync(ZoneSession session, RequestSellItemMsg request, CancellationToken ct)
     {
         if (!IsLive(session))
-            return "world";
-        var toSelf = new List<Pending>();
+            return Task.FromResult<string?>("world");
         string? error;
         lock (_gate)
-            error = Sell(session, request, toSelf);
-        if (error != null)
-            return error;
-        await FlushSelfAsync(session, toSelf, ct).ConfigureAwait(false);
-        return null;
+            error = Sell(session, request);
+        return Task.FromResult<string?>(error);
     }
 
-    public async Task<string?> TryMultiSellAsync(ZoneSession session, RequestMultiSellChooseMsg request, CancellationToken ct)
+    public Task<string?> TryMultiSellAsync(ZoneSession session, RequestMultiSellChooseMsg request, CancellationToken ct)
     {
         if (!IsLive(session))
-            return "world";
-        var toSelf = new List<Pending>();
+            return Task.FromResult<string?>("world");
         string? error;
         lock (_gate)
-            error = ChooseMultiSell(session, request, toSelf);
-        if (error != null)
-            return error;
-        await FlushSelfAsync(session, toSelf, ct).ConfigureAwait(false);
-        return null;
+            error = ChooseMultiSell(session, request);
+        return Task.FromResult<string?>(error);
     }
 
-    public async Task<string?> TryPreviewAsync(ZoneSession session, RequestPreviewItemMsg request, CancellationToken ct)
+    public Task<string?> TryPreviewAsync(ZoneSession session, RequestPreviewItemMsg request, CancellationToken ct)
     {
         if (!IsLive(session))
-            return "world";
-        var toSelf = new List<Pending>();
+            return Task.FromResult<string?>("world");
         string? error;
         lock (_gate)
-            error = Preview(session, request, toSelf);
-        if (error != null)
-            return error;
-        await FlushSelfAsync(session, toSelf, ct).ConfigureAwait(false);
-        return null;
+            error = Preview(session, request);
+        return Task.FromResult<string?>(error);
     }
 
-    string? OpenBuyList(ZoneSession session, ZoneEntity player, ZoneEntity npc, int listId, List<Pending> toSelf)
+    string? OpenBuyList(ZoneSession session, ZoneEntity player, ZoneEntity npc, int listId)
     {
         if (!_buyLists.TryGet(listId, out var list) || !list.Allows(npc.NpcId))
         {
-            SendHtml(session, player, npc, ShopProtocol.NoListHtml, toSelf);
+            SendHtml(session, player, npc, ShopProtocol.NoListHtml);
             return null;
         }
 
@@ -75,17 +59,15 @@ public sealed partial class ZoneWorld
         Tax(npc, out int baseTax, out int castleTax, out _);
         var buy = BuyList(npc, list, baseTax, castleTax);
         var balance = Balance(player, npc);
-        toSelf.Add(Pack(session, MsgType.BuyList, buy));
-        toSelf.Add(Pack(session, MsgType.ShopBalance, balance));
         FanNetBuy(session, buy, balance);
         return null;
     }
 
-    string? OpenSellList(ZoneSession session, ZoneEntity player, ZoneEntity npc, List<Pending> toSelf)
+    string? OpenSellList(ZoneSession session, ZoneEntity player, ZoneEntity npc)
     {
         if (!CanSell(npc))
         {
-            SendHtml(session, player, npc, ShopProtocol.NotMerchantHtml, toSelf);
+            SendHtml(session, player, npc, ShopProtocol.NotMerchantHtml);
             return null;
         }
 
@@ -96,17 +78,15 @@ public sealed partial class ZoneWorld
         player.Shop = shop;
         var sell = SellList(npc, player);
         var balance = Balance(player, npc);
-        toSelf.Add(Pack(session, MsgType.SellList, sell));
-        toSelf.Add(Pack(session, MsgType.ShopBalance, balance));
         FanNetSell(session, sell, balance);
         return null;
     }
 
-    string? OpenMultiSell(ZoneSession session, ZoneEntity player, ZoneEntity npc, int listId, bool inventoryOnly, List<Pending> toSelf)
+    string? OpenMultiSell(ZoneSession session, ZoneEntity player, ZoneEntity npc, int listId, bool inventoryOnly)
     {
         if (!_multisells.TryGet(listId, out var list) || !list.Allows(npc.NpcId))
         {
-            SendHtml(session, player, npc, ShopProtocol.NoListHtml, toSelf);
+            SendHtml(session, player, npc, ShopProtocol.NoListHtml);
             return null;
         }
 
@@ -116,13 +96,11 @@ public sealed partial class ZoneWorld
         player.Shop = new ShopSession { NpcObjectId = npc.ObjectId, Multi = prepared, SellOpen = player.Shop?.SellOpen ?? false, BuyListId = player.Shop?.BuyListId ?? 0 };
         var multi = MultiList(npc, prepared, castleTax);
         var balance = Balance(player, npc);
-        toSelf.Add(Pack(session, MsgType.MultiSellList, multi));
-        toSelf.Add(Pack(session, MsgType.ShopBalance, balance));
         FanNetMulti(session, multi, balance);
         return null;
     }
 
-    string? Buy(ZoneSession session, RequestBuyItemMsg request, List<Pending> toSelf)
+    string? Buy(ZoneSession session, RequestBuyItemMsg request)
     {
         if (request.Items == null)
             return "bad_request";
@@ -151,22 +129,20 @@ public sealed partial class ZoneWorld
             _clock().ToUnixTimeMilliseconds());
         if (!mutation.Ok)
         {
-            SendDeny(session, mutation, toSelf);
+            SendDeny(session, mutation);
             return null;
         }
 
-        SendTouches(session, mutation, toSelf);
-        SendComplete(session, toSelf);
+        SendTouches(session, mutation);
+        SendComplete(session);
         var buy = BuyList(npc, list, baseTax, castleTax);
         var balance = Balance(player, npc);
-        toSelf.Add(Pack(session, MsgType.BuyList, buy));
-        toSelf.Add(Pack(session, MsgType.ShopBalance, balance));
         FanNetBuy(session, buy, balance);
         SaveInventory(session, player.Inventory);
         return null;
     }
 
-    string? Sell(ZoneSession session, RequestSellItemMsg request, List<Pending> toSelf)
+    string? Sell(ZoneSession session, RequestSellItemMsg request)
     {
         if (request.Items == null)
             return "bad_request";
@@ -184,22 +160,20 @@ public sealed partial class ZoneWorld
         var mutation = ShopTrade.Sell(player.Inventory, lines);
         if (!mutation.Ok)
         {
-            SendDeny(session, mutation, toSelf);
+            SendDeny(session, mutation);
             return null;
         }
 
-        SendTouches(session, mutation, toSelf);
-        SendComplete(session, toSelf);
+        SendTouches(session, mutation);
+        SendComplete(session);
         var sell = SellList(npc, player);
         var balance = Balance(player, npc);
-        toSelf.Add(Pack(session, MsgType.SellList, sell));
-        toSelf.Add(Pack(session, MsgType.ShopBalance, balance));
         FanNetSell(session, sell, balance);
         SaveInventory(session, player.Inventory);
         return null;
     }
 
-    string? ChooseMultiSell(ZoneSession session, RequestMultiSellChooseMsg request, List<Pending> toSelf)
+    string? ChooseMultiSell(ZoneSession session, RequestMultiSellChooseMsg request)
     {
         if (!TryShopNpc(session, request.NpcObjectId, out var player, out var npc, out var error))
             return error;
@@ -220,12 +194,12 @@ public sealed partial class ZoneWorld
             ShopTrade.SlotLimit(player.Race));
         if (!mutation.Ok)
         {
-            SendDeny(session, mutation, toSelf);
+            SendDeny(session, mutation);
             return null;
         }
 
-        SendTouches(session, mutation, toSelf);
-        SendComplete(session, toSelf);
+        SendTouches(session, mutation);
+        SendComplete(session);
         MultiSellListMsg? multi = null;
         if (player.Shop.Multi.InventoryOnly && _multisells.TryGet(request.ListId, out var list))
         {
@@ -234,11 +208,9 @@ public sealed partial class ZoneWorld
             var prepared = ShopTrade.Prepare(list, player.Inventory, _game.Items, true, applyTax, castleTax);
             player.Shop.Multi = prepared;
             multi = MultiList(npc, prepared, castleTax);
-            toSelf.Add(Pack(session, MsgType.MultiSellList, multi));
         }
 
         var balance = Balance(player, npc);
-        toSelf.Add(Pack(session, MsgType.ShopBalance, balance));
         if (multi != null)
             FanNetMulti(session, multi, balance);
         else if (NetBridge != null)
@@ -247,11 +219,10 @@ public sealed partial class ZoneWorld
         return null;
     }
 
-    string? Preview(ZoneSession session, RequestPreviewItemMsg request, List<Pending> toSelf)
+    string? Preview(ZoneSession session, RequestPreviewItemMsg request)
     {
         if (!TryShopNpc(session, request.NpcObjectId, out _, out _, out var error))
             return error;
-        toSelf.Add(Pack(session, MsgType.SystemMessage, Line(ShopProtocol.WearUnavailable, ShopProtocol.WearUnavailableText)));
         return null;
     }
 
@@ -417,7 +388,7 @@ public sealed partial class ZoneWorld
         };
     }
 
-    void SendTouches(ZoneSession session, ShopMutation mutation, List<Pending> toSelf)
+    void SendTouches(ZoneSession session, ShopMutation mutation)
     {
         if (mutation.Touches.Count == 0)
             return;
@@ -435,19 +406,17 @@ public sealed partial class ZoneWorld
         }
 
         var invUpdate = new InventoryUpdateMsg { Changes = changes };
-        toSelf.Add(Pack(session, MsgType.InventoryUpdate, invUpdate));
         if (NetBridge != null)
             NetBridge.FanoutInventoryUpdate([session.ObjectId], ToNetInventoryUpdate(invUpdate));
     }
 
-    void SendComplete(ZoneSession session, List<Pending> toSelf)
+    void SendComplete(ZoneSession session)
     {
         var message = Line(ShopProtocol.TransactionComplete, ShopProtocol.TransactionCompleteText);
-        toSelf.Add(Pack(session, MsgType.SystemMessage, message));
         FanNetSystem(session, message);
     }
 
-    void SendDeny(ZoneSession session, ShopMutation mutation, List<Pending> toSelf)
+    void SendDeny(ZoneSession session, ShopMutation mutation)
     {
         SystemMessageMsg message = mutation.Deny switch
         {
@@ -465,7 +434,6 @@ public sealed partial class ZoneWorld
             },
             _ => Line(ShopProtocol.NotTradable, ShopProtocol.NotTradableText)
         };
-        toSelf.Add(Pack(session, MsgType.SystemMessage, message));
         FanNetSystem(session, message);
     }
 

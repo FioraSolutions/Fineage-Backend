@@ -11,8 +11,8 @@ namespace Fineage.Zone.Net;
 
 /// <summary>
 /// Fineage Net zone path. Reuses <see cref="ZoneWorld.TryEnterAsync"/> / <see cref="ZoneWorld.TryMoveAsync"/>;
-/// V2 wire flushes go to a discarded stream so Net packets are the client-facing truth.
-/// Presence (spawn / move / despawn) is fanned out via <see cref="NetPresenceHub"/>.
+/// Net packets are the only client-facing transport; presence (spawn / move / despawn) is fanned out via
+/// <see cref="NetPresenceHub"/>.
 /// </summary>
 public sealed class NetZoneServer : INetPresenceBridge
 {
@@ -33,7 +33,7 @@ public sealed class NetZoneServer : INetPresenceBridge
         NetPresenceHub? presence = null,
         int? maxMessagesPerSecond = null,
         TimeSpan? idleTimeout = null,
-        ZoneServerOptions? options = null)
+        bool? adminCommands = null)
     {
         _tokens = tokens;
         _world = world;
@@ -43,7 +43,7 @@ public sealed class NetZoneServer : INetPresenceBridge
         _clock = clock ?? (() => DateTimeOffset.UtcNow);
         _maxMessagesPerSecond = maxMessagesPerSecond ?? ZoneNetSettings.MaxMessagesPerSecond;
         _idleTimeout = idleTimeout ?? TcpSessionSettings.IdleTimeout;
-        _adminCommands = options?.AdminCommands ?? ZoneAdmin.Enabled;
+        _adminCommands = adminCommands ?? ZoneAdmin.Enabled;
         _world.NetBridge = this;
     }
 
@@ -575,10 +575,7 @@ public sealed class NetZoneServer : INetPresenceBridge
 
     public async Task HandleAsync(NetConnection conn, CancellationToken ct)
     {
-        // The world layer still emits V2 frames alongside Net fanout. A MemoryStream here
-        // would grow for the whole session, so use a sink that drops every frame.
-        await using var discard = new DiscardingStream();
-        var zoneSession = new ZoneSession(discard);
+        var zoneSession = new ZoneSession();
         EntityId self = default;
         int registeredObjectId = 0;
 

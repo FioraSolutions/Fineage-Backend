@@ -34,7 +34,7 @@ public sealed partial class ZoneWorld
             return Task.FromResult<string?>("bad_request");
 
         lock (_gate)
-            return Task.FromResult(TryPartyInvite(session, invite));
+            return Task.FromResult<string?>(TryPartyInvite(session, invite));
     }
 
     public Task<string?> TryPartyAnswerAsync(ZoneSession session, PartyAnswerJoinRequestMsg answer, CancellationToken ct)
@@ -45,7 +45,7 @@ public sealed partial class ZoneWorld
             return Task.FromResult<string?>("world");
 
         lock (_gate)
-            return Task.FromResult(TryPartyAnswer(session, answer));
+            return Task.FromResult<string?>(TryPartyAnswer(session, answer));
     }
 
     public Task<string?> TryPartyLeaveAsync(ZoneSession session, CancellationToken ct)
@@ -54,7 +54,7 @@ public sealed partial class ZoneWorld
             return Task.FromResult<string?>("world");
 
         lock (_gate)
-            return Task.FromResult(TryPartyLeave(session.ObjectId));
+            return Task.FromResult<string?>(TryPartyLeave(session.ObjectId));
     }
 
     public Task<string?> TryPartyKickAsync(ZoneSession session, PartyKickRequestMsg kick, CancellationToken ct)
@@ -65,7 +65,7 @@ public sealed partial class ZoneWorld
             return Task.FromResult<string?>("world");
 
         lock (_gate)
-            return Task.FromResult(TryPartyKick(session, kick.TargetObjectId));
+            return Task.FromResult<string?>(TryPartyKick(session, kick.TargetObjectId));
     }
 
     void PartyPlayerLeftWorld(int objectId)

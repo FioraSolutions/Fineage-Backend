@@ -1,7 +1,6 @@
 using Fineage.Game;
 using Fineage.Game.Skills;
 using Fineage.Protocol;
-using MessagePack;
 
 namespace Fineage.Zone.World;
 
@@ -21,7 +20,7 @@ public sealed partial class ZoneWorld
     /// current level's bar, then rolls the Death Penalty buff. Both are skipped when nothing killed the character
     /// (admin kill, scripted death), exactly like Mobius, which warns and returns on a null killer.
     /// </summary>
-    void ApplyDeathConsequences(ZoneEntity player, int killerObjectId, List<Pending> outbound)
+    void ApplyDeathConsequences(ZoneEntity player, int killerObjectId)
     {
         if (player.Session == null || killerObjectId <= 0)
             return;
@@ -34,8 +33,8 @@ public sealed partial class ZoneWorld
         if (killer.Kind != ZoneEntityKind.Npc)
             return;
 
-        ApplyDeathExpLoss(player, outbound);
-        RollDeathPenalty(player, killer, outbound);
+        ApplyDeathExpLoss(player);
+        RollDeathPenalty(player, killer);
     }
 
     /// <summary>
@@ -43,7 +42,7 @@ public sealed partial class ZoneWorld
     /// taken from, so the loss follows the level table and not the absolute exp. The exp never goes below the start
     /// of the level, and <c>PlayableStat.removeExp</c> delevels when the bar underflows.
     /// </summary>
-    void ApplyDeathExpLoss(ZoneEntity player, List<Pending> outbound)
+    void ApplyDeathExpLoss(ZoneEntity player)
     {
         if (player.Session == null)
             return;
@@ -95,7 +94,7 @@ public sealed partial class ZoneWorld
             (deleveled ? $" delevel={delevelAmount}" : ""));
 
         if (player.Session is { } session)
-            SendExpStatus(session, player, outbound, deleveled);
+            SendExpStatus(session, player, deleveled);
     }
 
     /// <summary>
@@ -103,7 +102,7 @@ public sealed partial class ZoneWorld
     /// a monster death adds one Death Penalty level, and <c>increaseDeathPenaltyBuffLevel</c> then applies skill 5076,
     /// sends <c>EtcStatusUpdate</c> and message 1916.
     /// </summary>
-    void RollDeathPenalty(ZoneEntity player, ZoneEntity killer, List<Pending> outbound)
+    void RollDeathPenalty(ZoneEntity player, ZoneEntity killer)
     {
         if (player.DeathPenaltyLevel >= DeathPenalty.MaxLevel)
             return;
@@ -127,12 +126,6 @@ public sealed partial class ZoneWorld
 
         if (player.Session is not { } session)
             return;
-        outbound.Add(Pack(session, MsgType.SystemMessage, new SystemMessageMsg
-        {
-            Id = DeathPenaltyMessageId,
-            Params = [level.ToString(System.Globalization.CultureInfo.InvariantCulture)],
-            Text = $"Your Death Penalty is now level {level}."
-        }));
         NetBridge?.FanoutSystemMessage([player.ObjectId], new Fineage.Net.Contract.SystemMessageNetMsg
         {
             Id = DeathPenaltyMessageId,
@@ -147,7 +140,7 @@ public sealed partial class ZoneWorld
     /// Exp / level sheet after a death loss. Mobius sends <c>UserInfo</c> from <c>PlayerStat.addLevel</c>; the
     /// StatusUpdate is what the client's exp bar actually redraws from, so both go out.
     /// </summary>
-    void SendExpStatus(ZoneSession session, ZoneEntity player, List<Pending> outbound, bool deleveled)
+    void SendExpStatus(ZoneSession session, ZoneEntity player, bool deleveled)
     {
         var status = new StatusUpdateMsg
         {
@@ -167,11 +160,7 @@ public sealed partial class ZoneWorld
                 player.MaxMp
             ]
         };
-        outbound.Add(Pack(session, MsgType.StatusUpdate, status));
         SelfUserInfo(player);
-        if (deleveled)
-            outbound.Add(Pack(session, MsgType.SkillList, SkillListFor(player)));
-
         if (NetBridge == null)
             return;
         int[] self = [player.ObjectId];

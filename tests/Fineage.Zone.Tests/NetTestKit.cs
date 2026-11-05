@@ -66,7 +66,7 @@ internal sealed class NetTestKit
 
     public async Task<(ZoneSession Session, ZoneEntity Entity)> EnterAsync(Character who)
     {
-        var session = new ZoneSession(new MemoryStream());
+        var session = new ZoneSession();
         session.Bind(who.CharacterId, who.Account, who.Name, who.ClassId);
         Assert.True(await World.TryEnterAsync(session, CancellationToken.None));
         Assert.True(World.TryGetLivePlayer(session, out var entity));

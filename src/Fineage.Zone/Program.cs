@@ -4,7 +4,6 @@ using Fineage.Game.Mobius;
 using Fineage.Login;
 using Fineage.Net.Host;
 using Fineage.Protocol;
-using Fineage.Protocol.Net;
 using Fineage.Protocol.Telemetry;
 using Fineage.Zone;
 using Fineage.Zone.Bosses;
@@ -17,7 +16,6 @@ if (args.Contains("--selftest"))
     try
     {
         await ZoneAcceptance.RunAsync();
-        await ZoneMultiplayerAcceptance.RunAsync();
         ZoneAcceptance.Write(Console.Out);
     }
     catch (Exception ex)

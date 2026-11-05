@@ -46,7 +46,7 @@ public sealed class NetGrantItemTests
     public async Task Grant_before_enter_is_refused()
     {
         var bench = new WorldBench();
-        var session = new ZoneSession(new MemoryStream());
+        var session = new ZoneSession();
 
         Assert.Equal("world", await bench.World.TryGrantItemAsync(
             session,

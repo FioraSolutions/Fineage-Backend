@@ -12,21 +12,15 @@ public sealed partial class ZoneWorld
             return _byId.TryGetValue(objectId, out var entity) ? entity.DungeonId : 0;
     }
 
-    public async Task<string?> TryDungeonAsync(ZoneSession session, DungeonEnterRequestMsg request, CancellationToken ct)
+    public Task<string?> TryDungeonAsync(ZoneSession session, DungeonEnterRequestMsg request, CancellationToken ct)
     {
-        var toSelf = new List<Pending>();
-        var toOthers = new List<Pending>();
         string? error;
         lock (_gate)
-            error = ApplyDungeon(session, request, toSelf, toOthers);
-        if (toSelf.Count > 0)
-            await FlushSelfAsync(session, toSelf, ct).ConfigureAwait(false);
-        if (toOthers.Count > 0)
-            await FlushOthersAsync(toOthers, ct).ConfigureAwait(false);
-        return error;
+            error = ApplyDungeon(session, request);
+        return Task.FromResult<string?>(error);
     }
 
-    string? ApplyDungeon(ZoneSession session, DungeonEnterRequestMsg request, List<Pending> toSelf, List<Pending> toOthers)
+    string? ApplyDungeon(ZoneSession session, DungeonEnterRequestMsg request)
     {
         if (!IsLive(session) || !_byId.TryGetValue(session.ObjectId, out var player) || player.Inventory == null)
             return "world";
@@ -39,10 +33,9 @@ public sealed partial class ZoneWorld
         {
             if (player.Dead)
                 return InventoryProtocol.Dead;
-            Relocate(player, site.ExitX, site.ExitY, site.ExitZ, toSelf, toOthers);
+            Relocate(player, site.ExitX, site.ExitY, site.ExitZ);
             player.DungeonId = 0;
             var left = Entered(site, inside: false, DungeonProtocol.ActionExit);
-            toSelf.Add(Pack(session, MsgType.DungeonEntered, left));
             NetBridge?.FanoutDungeonEntered([session.ObjectId], ToNet(left));
             return null;
         }
@@ -55,7 +48,7 @@ public sealed partial class ZoneWorld
         var code = _dungeonAccess.CanEnter(character, site.Id);
         if (code != DungeonAccessCode.Allowed)
         {
-            QueueNotices(session, _dungeonAccess.RefusalLines(code, site.Id), toSelf);
+            QueueNotices(session, _dungeonAccess.RefusalLines(code, site.Id));
             return DungeonAccess.ToWire(code);
         }
 
@@ -64,28 +57,26 @@ public sealed partial class ZoneWorld
             var changes = new List<InventoryUpdateEntryMsg>();
             if (!Take(player.Inventory, site.FeeItemId, site.FeeCount, changes))
             {
-                QueueNotices(session, _dungeonAccess.RefusalLines(DungeonAccessCode.FeeRequired, site.Id), toSelf);
+                QueueNotices(session, _dungeonAccess.RefusalLines(DungeonAccessCode.FeeRequired, site.Id));
                 return DungeonProtocol.Fee;
             }
 
             if (changes.Count > 0)
             {
                 var update = new InventoryUpdateMsg { Changes = changes.ToArray() };
-                toSelf.Add(Pack(session, MsgType.InventoryUpdate, update));
                 NetBridge?.FanoutInventoryUpdate([session.ObjectId], ToNetInventoryUpdate(update));
                 SaveInventory(session, player.Inventory);
             }
         }
 
-        Relocate(player, site.EntranceX, site.EntranceY, site.EntranceZ, toSelf, toOthers);
+        Relocate(player, site.EntranceX, site.EntranceY, site.EntranceZ);
         player.DungeonId = site.Id;
         var inside = Entered(site, inside: true, DungeonProtocol.ActionEnter);
-        toSelf.Add(Pack(session, MsgType.DungeonEntered, inside));
         NetBridge?.FanoutDungeonEntered([session.ObjectId], ToNet(inside));
         return null;
     }
 
-    void EvictDungeonLosers(List<Pending> outbound)
+    void EvictDungeonLosers()
     {
         _dungeonAccess.Observe(_sevenSigns);
         var period = _sevenSigns.Period;
@@ -103,9 +94,7 @@ public sealed partial class ZoneWorld
                 continue;
             }
 
-            var toSelf = new List<Pending>();
-            var toOthers = new List<Pending>();
-            Relocate(player, site.ExitX, site.ExitY, site.ExitZ, toSelf, toOthers);
+            Relocate(player, site.ExitX, site.ExitY, site.ExitZ);
             player.DungeonId = 0;
             var line = new SystemMessageMsg
             {
@@ -113,13 +102,9 @@ public sealed partial class ZoneWorld
                 Params = [],
                 Text = notice.Text
             };
-            toSelf.Add(Pack(player.Session, MsgType.SystemMessage, line));
             var kicked = Entered(site, inside: false, DungeonProtocol.ActionKick);
-            toSelf.Add(Pack(player.Session, MsgType.DungeonEntered, kicked));
             NetBridge?.FanoutSystemMessage([player.ObjectId], ToNet(line));
             NetBridge?.FanoutDungeonEntered([player.ObjectId], ToNet(kicked));
-            outbound.AddRange(toSelf);
-            outbound.AddRange(toOthers);
             ZoneLog.Info($"dungeon kick object={player.ObjectId} dungeon={site.Id} -> {site.ExitX},{site.ExitY},{site.ExitZ}");
         }
     }
@@ -128,13 +113,13 @@ public sealed partial class ZoneWorld
     /// Mobius teleToLocation + knownlist reconcile. <paramref name="netTeleport"/> is false only when the
     /// caller fans the same relocation itself (the revive path already emits a TeleportToLocation event).
     /// </summary>
-    void Relocate(ZoneEntity entity, int x, int y, int z, List<Pending> toSelf, List<Pending> toOthers, int? instanceId = null, bool persist = true, int? heading = null, bool netTeleport = true)
+    void Relocate(ZoneEntity entity, int x, int y, int z, int? instanceId = null, bool persist = true, int? heading = null, bool netTeleport = true)
     {
         var session = entity.Session;
         if (session == null)
             return;
         // Mobius teleToLocation: abortCast + intention IDLE — no hit lands across a teleport, queued cast/pickup dropped.
-        AbortCast(entity, "teleport", toSelf, notify: false);
+        AbortCast(entity, "teleport", notify: false);
         if (heading is int face)
             entity.Heading = face;
         session.PendingPickupId = 0;
@@ -169,23 +154,21 @@ public sealed partial class ZoneWorld
         var after = new HashSet<int>();
         CollectVisible(entity, after);
 
-        toSelf.Add(Pack(session, MsgType.MoveToAck, ack));
         // Net: Mobius TeleportToLocation to the owner and every peer that held it in view.
         // MoveToAck above only reaches the (dormant) V2 stream, so Net needed its own relocation.
         var netWatchers = new List<int> { entity.ObjectId };
         foreach (int id in SortedExcept(after, before))
-            LinkSeen(entity, id, toSelf, toOthers);
+            LinkSeen(entity, id);
         foreach (int id in SortedShared(after, before))
         {
             if (_byId.TryGetValue(id, out var other) && other.Session != null)
             {
-                toOthers.Add(Pack(other.Session, MsgType.MoveToAck, ack));
                 netWatchers.Add(id);
             }
         }
 
         foreach (int id in SortedExcept(before, after))
-            Forget(entity, id, toSelf, toOthers);
+            Forget(entity, id);
 
         if (netTeleport)
         {
@@ -227,7 +210,7 @@ public sealed partial class ZoneWorld
         Action = action
     };
 
-    void QueueNotices(ZoneSession session, IReadOnlyList<DungeonNotice> notices, List<Pending> toSelf)
+    void QueueNotices(ZoneSession session, IReadOnlyList<DungeonNotice> notices)
     {
         foreach (var notice in notices)
         {
@@ -237,7 +220,6 @@ public sealed partial class ZoneWorld
                 Params = [],
                 Text = notice.Text
             };
-            toSelf.Add(Pack(session, MsgType.SystemMessage, line));
             NetBridge?.FanoutSystemMessage([session.ObjectId], ToNet(line));
         }
     }

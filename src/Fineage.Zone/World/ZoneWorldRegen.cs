@@ -4,7 +4,6 @@ using Fineage.Login;
 using Fineage.Protocol;
 using Fineage.Protocol.Telemetry;
 using Fineage.Zone.Combat;
-using MessagePack;
 
 namespace Fineage.Zone.World;
 
@@ -29,18 +28,17 @@ public sealed partial class ZoneWorld
             while (await timer.WaitForNextTickAsync(ct).ConfigureAwait(false))
             {
                 long started = Stopwatch.GetTimestamp();
-                var outbound = new List<Pending>();
                 lock (_gate)
                 {
-                    TickRegen(outbound);
-                    TickSpawns(outbound);
-                    TickAbnormals(outbound);
-                    TickBosses(outbound);
+                    TickRegen();
+                    TickSpawns();
+                    TickAbnormals();
+                    TickBosses();
                     CompleteDueDissolutions(_clock().ToUnixTimeMilliseconds());
-                    TickSevenSigns(outbound);
-                    TickOlympiad(outbound);
+                    TickSevenSigns();
+                    TickOlympiad();
                 }
-                await FlushOthersAsync(outbound, ct).ConfigureAwait(false);
+                await Task.CompletedTask.ConfigureAwait(false);
                 FineageTelemetry.TickMilliseconds.Record(Stopwatch.GetElapsedTime(started).TotalMilliseconds);
             }
         }
@@ -52,10 +50,9 @@ public sealed partial class ZoneWorld
     /// <summary>One simulation regen tick on demand (tests and admin diagnostics), same body the loop runs.</summary>
     internal async Task RunRegenTickAsync(CancellationToken ct)
     {
-        var outbound = new List<Pending>();
         lock (_gate)
-            TickRegen(outbound);
-        await FlushOthersAsync(outbound, ct).ConfigureAwait(false);
+            TickRegen();
+        await Task.CompletedTask.ConfigureAwait(false);
     }
 
     /// <summary>
@@ -85,7 +82,7 @@ public sealed partial class ZoneWorld
             mods.Apply(CombatStat.RegMp, ZoneRegen.MpPerTick(player.Level, menBonus, posture)));
     }
 
-    void TickRegen(List<Pending> outbound)
+    void TickRegen()
     {
         foreach (var entity in Players())
         {
@@ -128,10 +125,10 @@ public sealed partial class ZoneWorld
             if (entity.CurMp >= entity.MaxMp)
                 entity.RegenCarryMp = 0;
 
-            FanoutVitals(entity, PlayerVitalsStatus(entity), outbound);
+            FanoutVitals(entity, PlayerVitalsStatus(entity));
         }
 
-        TickNpcRegen(outbound);
+        TickNpcRegen();
     }
 
     /// <summary>
@@ -157,7 +154,7 @@ public sealed partial class ZoneWorld
         catch (ArgumentOutOfRangeException) { return 1d; }
     }
 
-    void TickNpcRegen(List<Pending> outbound)
+    void TickNpcRegen()
     {
         if (!_npcRegen)
             return;
@@ -186,13 +183,12 @@ public sealed partial class ZoneWorld
             if (npc.CurMp >= npc.MaxMp)
                 npc.RegenCarryMp = 0;
 
-            FanoutVitals(npc, StatusFor(npc), outbound);
+            FanoutVitals(npc, StatusFor(npc));
         }
     }
 
-    void FanoutVitals(ZoneEntity subject, StatusUpdateMsg status, List<Pending> outbound)
+    void FanoutVitals(ZoneEntity subject, StatusUpdateMsg status)
     {
-        byte[] body = MessagePackSerializer.Serialize(status);
         List<int>? netWatchers = null;
         foreach (var watcher in Players())
         {
@@ -200,7 +196,6 @@ public sealed partial class ZoneWorld
                 continue;
             if (!ReferenceEquals(watcher, subject) && !watcher.Knownlist.Contains(subject.ObjectId))
                 continue;
-            outbound.Add(new Pending(watcher.Session, MsgType.StatusUpdate, body));
             netWatchers ??= [];
             netWatchers.Add(watcher.ObjectId);
         }

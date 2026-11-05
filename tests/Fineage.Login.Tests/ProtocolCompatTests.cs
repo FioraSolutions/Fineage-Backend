@@ -80,11 +80,6 @@ public class ProtocolCompatTests
         Assert.Equal(62, (ushort)MsgType.OlympiadUnregisterRequest);
         Assert.Equal(63, (ushort)MsgType.OlympiadLeaveRequest);
         Assert.Equal(64, (ushort)MsgType.AdminReportOlympiadResult);
-        Assert.Equal((ushort)MsgType.OlympiadStatusRequest, (ushort)Fineage.Protocol.V2.MsgType.OlympiadStatusRequest);
-        Assert.Equal((ushort)MsgType.AdminReportOlympiadResult, (ushort)Fineage.Protocol.V2.MsgType.AdminReportOlympiadResult);
-        Assert.Equal((ushort)MsgType.SiegeRegisterRequest, (ushort)Fineage.Protocol.V2.MsgType.SiegeRegisterRequest);
-        Assert.Equal((ushort)MsgType.AdminCaptureCastle, (ushort)Fineage.Protocol.V2.MsgType.AdminCaptureCastle);
-        Assert.Equal((ushort)MsgType.SkillUseRequest, (ushort)Fineage.Protocol.V2.MsgType.SkillUseRequest);
         Assert.Equal(95, (ushort)MsgType.BypassRequest);
         Assert.Equal(96, (ushort)MsgType.RequestBuyItem);
         Assert.Equal(97, (ushort)MsgType.RequestSellItem);
@@ -92,34 +87,15 @@ public class ProtocolCompatTests
         Assert.Equal(99, (ushort)MsgType.RequestPreviewItem);
         Assert.Equal(ShopProtocol.BuyRequest, (ushort)MsgType.RequestBuyItem);
         Assert.Equal(ShopProtocol.Balance, (ushort)MsgType.ShopBalance);
-        Assert.Equal((ushort)MsgType.RequestBuyItem, (ushort)Fineage.Protocol.V2.MsgType.RequestBuyItem);
-        Assert.Equal((ushort)MsgType.RequestSellItem, (ushort)Fineage.Protocol.V2.MsgType.RequestSellItem);
-        Assert.Equal((ushort)MsgType.RequestMultiSellChoose, (ushort)Fineage.Protocol.V2.MsgType.RequestMultiSellChoose);
-        Assert.Equal((ushort)MsgType.RequestPreviewItem, (ushort)Fineage.Protocol.V2.MsgType.RequestPreviewItem);
-        Assert.Equal((ushort)MsgType.BuyList, (ushort)Fineage.Protocol.V2.MsgType.BuyList);
-        Assert.Equal((ushort)MsgType.ShopBalance, (ushort)Fineage.Protocol.V2.MsgType.ShopBalance);
         Assert.Equal(105, (ushort)MsgType.TeleportSelectRequest);
         Assert.Equal(106, (ushort)MsgType.WarehouseDepositRequest);
         Assert.Equal(107, (ushort)MsgType.WarehouseWithdrawRequest);
         Assert.Equal(108, (ushort)MsgType.SupportMagicRequest);
         Assert.Equal(109, (ushort)MsgType.GiveBlessingRequest);
         Assert.Equal(NpcServiceProtocol.TeleportSelect, (ushort)MsgType.TeleportSelectRequest);
-        Assert.Equal((ushort)MsgType.TeleportSelectRequest, (ushort)Fineage.Protocol.V2.MsgType.TeleportSelectRequest);
-        Assert.Equal((ushort)MsgType.WarehouseDepositRequest, (ushort)Fineage.Protocol.V2.MsgType.WarehouseDepositRequest);
-        Assert.Equal((ushort)MsgType.GiveBlessingRequest, (ushort)Fineage.Protocol.V2.MsgType.GiveBlessingRequest);
         Assert.Equal(NpcHtmlProtocol.Bypass, (ushort)MsgType.BypassRequest);
         Assert.Equal(NpcHtmlProtocol.Html, (ushort)MsgType.NpcHtml);
         Assert.Equal(NpcHtmlProtocol.InteractionDistance, QuestProtocol.TalkRange);
-        Assert.Equal((ushort)MsgType.RequestQuestList, (ushort)Fineage.Protocol.V2.MsgType.RequestQuestList);
-        Assert.Equal((ushort)MsgType.BypassRequest, (ushort)Fineage.Protocol.V2.MsgType.BypassRequest);
-        Assert.Equal((ushort)MsgType.NpcHtml, (ushort)Fineage.Protocol.V2.MsgType.NpcHtml);
-        Assert.Equal((ushort)MsgType.QuestEvent, (ushort)Fineage.Protocol.V2.MsgType.QuestEvent);
-        Assert.Equal((ushort)MsgType.EnchantRequest, (ushort)Fineage.Protocol.V2.MsgType.EnchantRequest);
-        Assert.Equal((ushort)MsgType.EnchantConfirm, (ushort)Fineage.Protocol.V2.MsgType.EnchantConfirm);
-        Assert.Equal((ushort)MsgType.EnchantCancel, (ushort)Fineage.Protocol.V2.MsgType.EnchantCancel);
-        Assert.Equal((ushort)MsgType.UseItem, (ushort)Fineage.Protocol.V2.MsgType.UseItem);
-        Assert.Equal((ushort)MsgType.UnequipItem, (ushort)Fineage.Protocol.V2.MsgType.UnequipItem);
-        Assert.Equal((ushort)MsgType.GiveItem, (ushort)Fineage.Protocol.V2.MsgType.GiveItem);
         Assert.Equal(InventoryProtocol.NotOwned, "not_owned");
         Assert.Equal(InventoryProtocol.NotEquippable, "not_equippable");
         Assert.Equal(InventoryProtocol.Dead, "dead");
@@ -154,8 +130,6 @@ public class ProtocolCompatTests
         Assert.Equal(1052, (ushort)MsgType.PledgeMemberList);
         Assert.Equal(1053, (ushort)MsgType.ClanJoinResult);
         Assert.Equal(ClanProtocol.BandFirst, (ushort)MsgType.ClanAskJoin);
-        Assert.Equal((ushort)MsgType.ClanAskJoin, (ushort)Fineage.Protocol.V2.MsgType.ClanAskJoin);
-        Assert.Equal((ushort)MsgType.PledgeMemberList, (ushort)Fineage.Protocol.V2.MsgType.PledgeMemberList);
         Assert.Equal(1060, (ushort)MsgType.EnchantResult);
         Assert.Equal(1061, (ushort)MsgType.QuestList);
         Assert.Equal(1062, (ushort)MsgType.QuestDialog);
@@ -180,25 +154,12 @@ public class ProtocolCompatTests
         Assert.Equal(54, (ushort)MsgType.TradeAddItemRequest);
         Assert.Equal(55, (ushort)MsgType.TradeDoneRequest);
         Assert.Equal(56, (ushort)MsgType.DropItemRequest);
-        Assert.Equal((ushort)MsgType.CharacterActionRequest, (ushort)Fineage.Protocol.V2.MsgType.CharacterActionRequest);
-        Assert.Equal((ushort)MsgType.ReviveRequest, (ushort)Fineage.Protocol.V2.MsgType.ReviveRequest);
-        Assert.Equal((ushort)MsgType.Die, (ushort)Fineage.Protocol.V2.MsgType.Die);
-        Assert.Equal((ushort)MsgType.Revive, (ushort)Fineage.Protocol.V2.MsgType.Revive);
-        Assert.Equal((ushort)MsgType.TeleportToLocation, (ushort)Fineage.Protocol.V2.MsgType.TeleportToLocation);
-        Assert.Equal((ushort)MsgType.ChangeWaitType, (ushort)Fineage.Protocol.V2.MsgType.ChangeWaitType);
-        Assert.Equal((ushort)MsgType.SocialAction, (ushort)Fineage.Protocol.V2.MsgType.SocialAction);
-        Assert.Equal((ushort)MsgType.ChangeMoveType, (ushort)Fineage.Protocol.V2.MsgType.ChangeMoveType);
         Assert.Equal(ActionProtocol.SitStand, 0);
         Assert.Equal(ActionProtocol.WalkRun, 1);
-        Assert.Equal((ushort)MsgType.SiegeInfo, (ushort)Fineage.Protocol.V2.MsgType.SiegeInfo);
-        Assert.Equal((ushort)MsgType.SkillList, (ushort)Fineage.Protocol.V2.MsgType.SkillList);
         Assert.Equal(1070, (ushort)MsgType.OlympiadStatus);
         Assert.Equal(1071, (ushort)MsgType.OlympiadMatch);
         Assert.Equal(1072, (ushort)MsgType.OlympiadResult);
         Assert.Equal(1073, (ushort)MsgType.OlympiadCountdown);
-        Assert.Equal((ushort)MsgType.OlympiadStatus, (ushort)Fineage.Protocol.V2.MsgType.OlympiadStatus);
-        Assert.Equal((ushort)MsgType.OlympiadResult, (ushort)Fineage.Protocol.V2.MsgType.OlympiadResult);
-        Assert.Equal((ushort)MsgType.SiegeInfo, (ushort)Fineage.Protocol.V2.MsgType.SiegeInfo);
         Assert.Equal(OlympiadProtocol.StartHour, 18);
         Assert.Equal(OlympiadProtocol.ClassedMin, 5);
         Assert.Equal(OlympiadProtocol.NonClassedMin, 9);
@@ -220,26 +181,10 @@ public class ProtocolCompatTests
         Assert.Equal(1108, (ushort)MsgType.NewbieBuffResult);
         Assert.Equal(1109, (ushort)MsgType.BlessingResult);
         Assert.Equal(NpcServiceProtocol.TeleportList, (ushort)MsgType.TeleportList);
-        Assert.Equal((ushort)MsgType.TeleportList, (ushort)Fineage.Protocol.V2.MsgType.TeleportList);
-        Assert.Equal((ushort)MsgType.BlessingResult, (ushort)Fineage.Protocol.V2.MsgType.BlessingResult);
-        Assert.Equal((ushort)MsgType.QuestList, (ushort)Fineage.Protocol.V2.MsgType.QuestList);
         Assert.Equal(QuestProtocol.Acquired, 30);
         Assert.Equal(QuestProtocol.NotAbortable, 38);
         Assert.Equal(QuestProtocol.MaxActive, 25);
-        Assert.Equal((ushort)MsgType.EnchantResult, (ushort)Fineage.Protocol.V2.MsgType.EnchantResult);
         Assert.Equal(ChatProtocol.ChatBandFirst, (ushort)MsgType.SystemMessage);
-        Assert.Equal((ushort)MsgType.SystemMessage, (ushort)Fineage.Protocol.V2.MsgType.SystemMessage);
-        Assert.Equal((ushort)MsgType.ItemList, (ushort)Fineage.Protocol.V2.MsgType.ItemList);
-        Assert.Equal((ushort)MsgType.InventoryUpdate, (ushort)Fineage.Protocol.V2.MsgType.InventoryUpdate);
-        Assert.Equal((ushort)MsgType.UserInfo, (ushort)Fineage.Protocol.V2.MsgType.UserInfo);
-        Assert.Equal((ushort)MsgType.AbnormalStatusUpdate, (ushort)Fineage.Protocol.V2.MsgType.AbnormalStatusUpdate);
-        Assert.Equal((ushort)MsgType.SpawnItem, (ushort)Fineage.Protocol.V2.MsgType.SpawnItem);
-        Assert.Equal((ushort)MsgType.DropItem, (ushort)Fineage.Protocol.V2.MsgType.DropItem);
-        Assert.Equal((ushort)MsgType.DropItemRequest, (ushort)Fineage.Protocol.V2.MsgType.DropItemRequest);
-        Assert.Equal((ushort)MsgType.PartyInviteRequest, (ushort)Fineage.Protocol.V2.MsgType.PartyInviteRequest);
-        Assert.Equal((ushort)MsgType.PartyAskJoin, (ushort)Fineage.Protocol.V2.MsgType.PartyAskJoin);
-        Assert.Equal((ushort)MsgType.TradeRequest, (ushort)Fineage.Protocol.V2.MsgType.TradeRequest);
-        Assert.Equal((ushort)MsgType.TradeFinished, (ushort)Fineage.Protocol.V2.MsgType.TradeFinished);
         Assert.Equal(TradeProtocol.Distance, QuestProtocol.TalkRange);
         Assert.Equal(90, (ushort)MsgType.SevenSignsStatusRequest);
         Assert.Equal(91, (ushort)MsgType.SevenSignsActionRequest);
@@ -247,14 +192,11 @@ public class ProtocolCompatTests
         Assert.Equal(1090, (ushort)MsgType.SevenSignsStatus);
         Assert.Equal(1091, (ushort)MsgType.SevenSignsSky);
         Assert.Equal(1092, (ushort)MsgType.DungeonEntered);
-        Assert.Equal((ushort)MsgType.DungeonEnterRequest, (ushort)Fineage.Protocol.V2.MsgType.DungeonEnterRequest);
-        Assert.Equal((ushort)MsgType.DungeonEntered, (ushort)Fineage.Protocol.V2.MsgType.DungeonEntered);
         Assert.Equal(DungeonProtocol.DawnOnlyMessage, 1301);
         Assert.Equal(DungeonProtocol.DuskOnlyMessage, 1302);
         Assert.Equal(DungeonProtocol.GateRefusedMessage, 137);
         Assert.Equal(1099, (ushort)MsgType.Error);
         AssertUnique<MsgType>();
-        AssertUnique<Fineage.Protocol.V2.MsgType>();
     }
 
     static void AssertUnique<T>() where T : struct, Enum
@@ -303,109 +245,76 @@ public class ProtocolCompatTests
     }
 
     [Fact]
-    public void Say_MatchesProtocolV2Layout()
+    public void Chat_messages_round_trip()
     {
-        Assert.Equal((ushort)MsgType.Say, (ushort)Fineage.Protocol.V2.MsgType.Say);
-        Assert.Equal((ushort)MsgType.CreatureSay, (ushort)Fineage.Protocol.V2.MsgType.CreatureSay);
+        var say = MessagePackSerializer.Deserialize<SayMsg>(
+            MessagePackSerializer.Serialize(new SayMsg { Text = "hi", ChatType = 0 }));
+        Assert.Equal("hi", say.Text);
+        Assert.Equal(0, say.ChatType);
 
-        byte[] say = MessagePackSerializer.Serialize(new SayMsg { Text = "hi", ChatType = 0 });
-        byte[] sayV2 = MessagePackSerializer.Serialize(new Fineage.Protocol.V2.SayMsg { Text = "hi", ChatType = 0 });
-        Assert.Equal(say, sayV2);
-
-        byte[] heard = MessagePackSerializer.Serialize(new CreatureSayMsg
-        {
-            ObjectId = 4,
-            Name = "Aria",
-            Text = "hi",
-            ChatType = 0
-        });
-        byte[] heardV2 = MessagePackSerializer.Serialize(new Fineage.Protocol.V2.CreatureSayMsg
-        {
-            ObjectId = 4,
-            Name = "Aria",
-            Text = "hi",
-            ChatType = 0
-        });
-        Assert.Equal(heard, heardV2);
+        var heard = MessagePackSerializer.Deserialize<CreatureSayMsg>(
+            MessagePackSerializer.Serialize(new CreatureSayMsg
+            {
+                ObjectId = 4,
+                Name = "Aria",
+                Text = "hi",
+                ChatType = 0
+            }));
+        Assert.Equal(4, heard.ObjectId);
+        Assert.Equal("Aria", heard.Name);
+        Assert.Equal("hi", heard.Text);
     }
 
     [Fact]
-    public void SystemMessage_MatchesProtocolV2Layout()
+    public void SystemMessage_round_trips()
     {
         Assert.Equal(1040, (ushort)MsgType.SystemMessage);
-        Assert.Equal((ushort)MsgType.SystemMessage, (ushort)Fineage.Protocol.V2.MsgType.SystemMessage);
         Assert.Equal(8, (ushort)MsgType.Say);
         Assert.Equal(1012, (ushort)MsgType.CreatureSay);
 
-        var msg = new SystemMessageMsg
-        {
-            Id = ChatProtocol.Welcome,
-            Params = ["Aria"],
-            Text = "Welcome, Aria."
-        };
-        byte[] legacy = MessagePackSerializer.Serialize(msg);
-        byte[] v2 = MessagePackSerializer.Serialize(new Fineage.Protocol.V2.SystemMessageMsg
-        {
-            Id = ChatProtocol.Welcome,
-            Params = ["Aria"],
-            Text = "Welcome, Aria."
-        });
-        Assert.Equal(legacy, v2);
-        var round = MessagePackSerializer.Deserialize<SystemMessageMsg>(legacy);
+        var round = MessagePackSerializer.Deserialize<SystemMessageMsg>(
+            MessagePackSerializer.Serialize(new SystemMessageMsg
+            {
+                Id = ChatProtocol.Welcome,
+                Params = ["Aria"],
+                Text = "Welcome, Aria."
+            }));
         Assert.Equal(ChatProtocol.Welcome, round.Id);
         Assert.Equal("Aria", Assert.Single(round.Params));
         Assert.Equal("Welcome, Aria.", round.Text);
     }
 
     [Fact]
-    public void DeleteObject_MatchesProtocolV2Layout()
+    public void DeleteObject_and_Die_round_trip()
     {
-        Assert.Equal((ushort)MsgType.DeleteObject, (ushort)Fineage.Protocol.V2.MsgType.DeleteObject);
-        Assert.Equal((ushort)MsgType.CharInfo, (ushort)Fineage.Protocol.V2.MsgType.CharInfo);
-        Assert.Equal((ushort)MsgType.NpcInfo, (ushort)Fineage.Protocol.V2.MsgType.NpcInfo);
+        var gone = MessagePackSerializer.Deserialize<DeleteObjectMsg>(
+            MessagePackSerializer.Serialize(new DeleteObjectMsg { ObjectId = 9001 }));
+        Assert.Equal(9001, gone.ObjectId);
 
-        byte[] legacy = MessagePackSerializer.Serialize(new DeleteObjectMsg { ObjectId = 9001 });
-        byte[] v2 = MessagePackSerializer.Serialize(new Fineage.Protocol.V2.DeleteObjectMsg { ObjectId = 9001 });
-        Assert.Equal(legacy, v2);
-
-        byte[] entityLeft = MessagePackSerializer.Serialize(new Fineage.Protocol.V2.EntityLeftMsg { ObjectId = 9001 });
-        Assert.Equal(legacy, entityLeft);
+        var die = MessagePackSerializer.Deserialize<DieMsg>(
+            MessagePackSerializer.Serialize(new DieMsg { ObjectId = 42, KillerObjectId = 7 }));
+        Assert.Equal(42, die.ObjectId);
+        Assert.Equal(7, die.KillerObjectId);
     }
 
     [Fact]
-    public void Die_MatchesProtocolV2Layout()
+    public void SpawnItem_round_trips()
     {
-        Assert.Equal((ushort)MsgType.Die, (ushort)Fineage.Protocol.V2.MsgType.Die);
-        byte[] legacy = MessagePackSerializer.Serialize(new DieMsg { ObjectId = 42, KillerObjectId = 7 });
-        byte[] v2 = MessagePackSerializer.Serialize(new Fineage.Protocol.V2.DieMsg { ObjectId = 42, KillerObjectId = 7 });
-        Assert.Equal(legacy, v2);
-    }
-
-    [Fact]
-    public void SpawnItem_MatchesProtocolV2Layout()
-    {
-        var msg = new SpawnItemMsg
-        {
-            ObjectId = 100_001,
-            ItemId = 57,
-            X = 1,
-            Y = 2,
-            Z = 3,
-            Stackable = true,
-            Count = 25
-        };
-        byte[] legacy = MessagePackSerializer.Serialize(msg);
-        byte[] v2 = MessagePackSerializer.Serialize(new Fineage.Protocol.V2.SpawnItemMsg
-        {
-            ObjectId = 100_001,
-            ItemId = 57,
-            X = 1,
-            Y = 2,
-            Z = 3,
-            Stackable = true,
-            Count = 25
-        });
-        Assert.Equal(legacy, v2);
+        var round = MessagePackSerializer.Deserialize<SpawnItemMsg>(
+            MessagePackSerializer.Serialize(new SpawnItemMsg
+            {
+                ObjectId = 100_001,
+                ItemId = 57,
+                X = 1,
+                Y = 2,
+                Z = 3,
+                Stackable = true,
+                Count = 25
+            }));
+        Assert.Equal(100_001, round.ObjectId);
+        Assert.Equal(57, round.ItemId);
+        Assert.Equal(25, round.Count);
+        Assert.True(round.Stackable);
     }
 
     [Fact]
@@ -444,56 +353,22 @@ public class ProtocolCompatTests
         Assert.Equal(lobby, LobbyProtocol.ClientToServer.Concat(LobbyProtocol.ServerToClient).Distinct().ToArray());
         Assert.All(lobby, op => Assert.DoesNotContain(op, LobbyProtocol.ZoneAndInventory));
 
-        Assert.Equal(1005, (ushort)Fineage.Protocol.V2.MsgType.CharInfo);
-        Assert.Equal(1006, (ushort)Fineage.Protocol.V2.MsgType.NpcInfo);
-        Assert.Equal(1007, (ushort)Fineage.Protocol.V2.MsgType.DeleteObject);
-        Assert.Equal(1030, (ushort)Fineage.Protocol.V2.MsgType.CharacterRoster);
-        Assert.Equal(1031, (ushort)Fineage.Protocol.V2.MsgType.CreateCharacterResult);
-        Assert.Equal(1032, (ushort)Fineage.Protocol.V2.MsgType.EntityLeft);
-        Assert.Equal(1033, (ushort)Fineage.Protocol.V2.MsgType.ServerList);
-        Assert.Equal(1011, (ushort)Fineage.Protocol.V2.MsgType.PlayToken);
-        Assert.DoesNotContain((ushort)Fineage.Protocol.V2.MsgType.CharacterRoster, LobbyProtocol.ZoneAndInventory);
-        Assert.DoesNotContain((ushort)Fineage.Protocol.V2.MsgType.CreateCharacterResult, LobbyProtocol.ZoneAndInventory);
-        Assert.DoesNotContain((ushort)Fineage.Protocol.V2.MsgType.EntityLeft, LobbyProtocol.ZoneAndInventory);
-        Assert.DoesNotContain((ushort)Fineage.Protocol.V2.MsgType.ServerList, LobbyProtocol.ZoneAndInventory);
-        Assert.NotEqual((ushort)Fineage.Protocol.V2.MsgType.CharacterRoster, (ushort)Fineage.Protocol.V2.MsgType.CharInfo);
-        Assert.NotEqual((ushort)Fineage.Protocol.V2.MsgType.ServerList, (ushort)MsgType.StatusUpdate);
     }
 
     [Fact]
-    public async Task Frame_RoundTripsLengthPrefixedBody()
+    public void Clan_messages_round_trip()
     {
-        using var stream = new MemoryStream();
-        byte[] body = [1, 2, 3, 4];
-        await FrameIO.SendAsync(stream, (ushort)MsgType.Auth, body);
-        stream.Position = 0;
-        var frame = await FrameIO.ReadAsync(stream);
-        Assert.NotNull(frame);
-        Assert.Equal((ushort)MsgType.Auth, frame!.Value.Type);
-        Assert.Equal(body, frame.Value.Body);
-        Assert.Equal(8, stream.Length);
-    }
-
-    [Fact]
-    public void ClanMessages_MatchProtocolV2Layout()
-    {
-        byte[] ask = MessagePackSerializer.Serialize(new ClanAskJoinMsg
-        {
-            RequestorObjectId = 4,
-            RequestorName = "Aria",
-            ClanId = 2,
-            ClanName = "Fine",
-            PledgeType = 0
-        });
-        byte[] askV2 = MessagePackSerializer.Serialize(new Fineage.Protocol.V2.ClanAskJoinMsg
-        {
-            RequestorObjectId = 4,
-            RequestorName = "Aria",
-            ClanId = 2,
-            ClanName = "Fine",
-            PledgeType = 0
-        });
-        Assert.Equal(ask, askV2);
+        var ask = MessagePackSerializer.Deserialize<ClanAskJoinMsg>(
+            MessagePackSerializer.Serialize(new ClanAskJoinMsg
+            {
+                RequestorObjectId = 4,
+                RequestorName = "Aria",
+                ClanId = 2,
+                ClanName = "Fine",
+                PledgeType = 0
+            }));
+        Assert.Equal(4, ask.RequestorObjectId);
+        Assert.Equal("Fine", ask.ClanName);
 
         var info = new CharInfoMsg
         {

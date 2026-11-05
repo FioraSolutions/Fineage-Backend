@@ -18,7 +18,6 @@ using Fineage.Zone.Dungeons;
 using Fineage.Zone.Siege;
 using Fineage.Zone.Olympiad;
 using Fineage.Game.Services;
-using MessagePack;
 
 namespace Fineage.Zone.World;
 
@@ -366,7 +365,6 @@ public sealed partial class ZoneWorld
     readonly NpcHtmlCatalog _html;
     readonly BypassRegistry _bypasses;
     readonly OlympiadBoard _olympiad;
-    readonly List<Pending> _olympiadHeld = [];
     readonly TeleportCatalog _teleports;
     readonly NewbieBuffCatalog _newbieBuffs;
     readonly ItemWeights _weights;
@@ -666,9 +664,8 @@ public sealed partial class ZoneWorld
     /// </summary>
     internal void KillPlayerByNpcForTest(ZoneEntity player, ZoneEntity killer)
     {
-        var outbound = new List<Pending>();
         lock (_gate)
-            ApplyPlayerDeath(player, killer.ObjectId, outbound);
+            ApplyPlayerDeath(player, killer.ObjectId);
     }
 
     /// <summary>Test hook: rebuild the book after a test mutates <see cref="ZoneEntity.LearnedSkills"/>.</summary>
@@ -685,56 +682,46 @@ public sealed partial class ZoneWorld
             DecreaseSkillsOnDelevel(player);
     }
 
-    public async Task<bool> TryEnterAsync(ZoneSession session, CancellationToken ct)
+    public Task<bool> TryEnterAsync(ZoneSession session, CancellationToken ct)
     {
-        var toSelf = new List<Pending>();
-        var toOthers = new List<Pending>();
         bool ok;
         int known;
         lock (_gate)
-            ok = TryEnter(session, toSelf, toOthers, out known);
+            ok = TryEnter(session, out known);
         if (!ok)
-            return false;
+            return Task.FromResult(false);
 
         ZoneLog.EnterWorld(session, known);
-        await FlushSelfAsync(session, toSelf, ct).ConfigureAwait(false);
-        await FlushOthersAsync(toOthers, ct).ConfigureAwait(false);
-        return true;
+        return Task.FromResult(true);
     }
 
-    public async Task LeaveAsync(ZoneSession session, CancellationToken ct)
+    public Task LeaveAsync(ZoneSession session, CancellationToken ct)
     {
-        var toOthers = new List<Pending>();
         bool removed;
         lock (_gate)
-            removed = Unlink(session, toOthers);
+            removed = Unlink(session);
         if (!removed)
-            return;
+            return Task.CompletedTask;
 
         _sevenSigns.Save();
         _bosses.Save();
         ZoneLog.LeaveWorld(session);
-        await FlushOthersAsync(toOthers, ct).ConfigureAwait(false);
+        return Task.CompletedTask;
     }
 
-    public async Task<string?> TryMoveAsync(ZoneSession session, MoveToMsg move, CancellationToken ct)
+    public Task<string?> TryMoveAsync(ZoneSession session, MoveToMsg move, CancellationToken ct)
     {
-        var toSelf = new List<Pending>();
-        var toOthers = new List<Pending>();
         string? error;
         lock (_gate)
-            error = TryMove(session, move, toSelf, toOthers);
+            error = TryMove(session, move);
         if (error != null)
-            return error;
+            return Task.FromResult<string?>(error);
 
         MaybeSavePresenceOnMove(session);
-
-        await FlushSelfAsync(session, toSelf, ct).ConfigureAwait(false);
-        await FlushOthersAsync(toOthers, ct).ConfigureAwait(false);
-        return null;
+        return Task.FromResult<string?>(null);
     }
 
-    bool TryEnter(ZoneSession session, List<Pending> toSelf, List<Pending> toOthers, out int known)
+    bool TryEnter(ZoneSession session, out int known)
     {
         known = 0;
         if (session.ObjectId <= 0)
@@ -743,11 +730,11 @@ public sealed partial class ZoneWorld
             return false;
 
         if (session.InWorld)
-            Unlink(session, toOthers);
+            Unlink(session);
         else if (_byId.TryGetValue(session.ObjectId, out var current) &&
                  current.Session != null &&
                  !ReferenceEquals(current.Session, session))
-            Unlink(current.Session, toOthers);
+            Unlink(current.Session);
 
         var spawn = SpawnFor(session);
         var inventory = LoadInventory(session);
@@ -812,25 +799,16 @@ public sealed partial class ZoneWorld
         session.Z = entity.Z;
         SavePresence(session, entity.X, entity.Y, entity.Z, touchAccess: true);
 
-        toSelf.Add(Pack(session, MsgType.UserInfo, UserInfo(entity)));
-        // Mobius EnterWorld:401 also sends EtcStatusUpdate; that is Net-only (see NetZoneServer.OnEnterAsync), because
-        // the legacy V2 opcode table has no such packet and an unknown id would be dropped or logged by the old client.
-        toSelf.Add(Pack(session, MsgType.ItemList, InventoryMessages.ItemList(inventory)));
-        toSelf.Add(Pack(session, MsgType.SkillList, SkillListFor(entity)));
-        toSelf.Add(Pack(session, MsgType.PlayerSpawned, Spawned(entity)));
+        // The enter sequence itself (UserInfo, ItemList, SkillList, spawns) is Net-only and lives in
+        // NetZoneServer.OnEnterAsync; the knownlist is still built here because the sim owns it.
         foreach (var other in OrderedVisible(entity.ObjectId))
         {
             entity.Knownlist.Add(other.ObjectId);
-            AddPresence(toSelf, session, other);
             if (other.Session != null)
-            {
                 other.Knownlist.Add(entity.ObjectId);
-                toOthers.Add(Pack(other.Session, MsgType.CharInfo, CharInfo(entity)));
-            }
         }
 
         AnnounceClanEnter(entity);
-        toSelf.Add(Pack(session, MsgType.SystemMessage, SayRules.Welcome(session.Name)));
         known = entity.Knownlist.Count;
         return true;
     }
@@ -843,7 +821,7 @@ public sealed partial class ZoneWorld
     static bool WithinMoveRequest(int fromX, int fromY, int toX, int toY) =>
         MoveLimits.WithinStep(fromX, fromY, toX, toY);
 
-    string? TryMove(ZoneSession session, MoveToMsg move, List<Pending> toSelf, List<Pending> toOthers)
+    string? TryMove(ZoneSession session, MoveToMsg move)
     {
         if (!IsLive(session))
             return "world";
@@ -856,8 +834,6 @@ public sealed partial class ZoneWorld
         if (entity.CastingUntilMs > _clock().ToUnixTimeMilliseconds())
         {
             // Mobius PlayerAI.onIntentionMoveTo: casting → ActionFailed + saveNextIntention(MOVE_TO); runs after the cast.
-            if (NetBridge == null)
-                return "casting"; // V2 legacy client keeps the old refuse
             session.QueuedMove = move;
             return null;
         }
@@ -867,34 +843,23 @@ public sealed partial class ZoneWorld
         if (!WithinMoveRequest(entity.X, entity.Y, move.DestX, move.DestY))
             return "range";
 
-        var ack = new MoveToMsg
-        {
-            ObjectId = entity.ObjectId,
-            DestX = move.DestX,
-            DestY = move.DestY,
-            DestZ = move.DestZ,
-            OriginX = entity.X,
-            OriginY = entity.Y,
-            OriginZ = entity.Z
-        };
-
         if (IsApproachSync(session, move))
         {
             // Client reporting its run along our moveToPawn path: keep the sticky approach and server dest.
             return null;
         }
         CancelAttackIntentionOnMove(session, move);
-
         if (NetBridge != null)
-            return StartTimedMove(entity, session, move, toSelf, toOthers);
+            return StartTimedMove(entity, session, move);
 
+        // No Net client attached (unit-level world / selftest): keep the old snap so the caller's position is final.
         entity.X = move.DestX;
         entity.Y = move.DestY;
         entity.Z = move.DestZ;
         session.X = entity.X;
         session.Y = entity.Y;
         session.Z = entity.Z;
-        ReconcileKnownlist(entity, ack, toSelf, toOthers);
+        ReconcileKnownlist(entity, ack: null);
         return null;
     }
 
@@ -902,7 +867,7 @@ public sealed partial class ZoneWorld
     /// After <paramref name="entity"/> moved: AOI move, CharInfo to newly visible, MoveToAck to self + stayed,
     /// DeleteObject only past the forget radius and never for a pair locked in combat (Mobius knownlist).
     /// </summary>
-    void ReconcileKnownlist(ZoneEntity entity, MoveToMsg? ack, List<Pending> toSelf, List<Pending> toOthers)
+    void ReconcileKnownlist(ZoneEntity entity, MoveToMsg? ack)
     {
         var before = new HashSet<int>(entity.Knownlist);
         _aoi.Move(entity.ObjectId, entity.X, entity.Y);
@@ -916,9 +881,6 @@ public sealed partial class ZoneWorld
                 after.Add(id);
         }
 
-        if (entity.Session != null && ack != null)
-            toSelf.Add(Pack(entity.Session, MsgType.MoveToAck, ack));
-
         List<int>? netWatchers = null;
         if (NetBridge != null && entity.Session != null && ack != null)
         {
@@ -926,19 +888,15 @@ public sealed partial class ZoneWorld
         }
 
         foreach (int id in SortedExcept(after, before))
-            LinkSeen(entity, id, toSelf, toOthers);
+            LinkSeen(entity, id);
         foreach (int id in SortedShared(after, before))
         {
             if (ack != null && _byId.TryGetValue(id, out var other) && other.Session != null)
-            {
-                toOthers.Add(Pack(other.Session, MsgType.MoveToAck, ack));
-                if (netWatchers != null)
-                    netWatchers.Add(other.ObjectId);
-            }
+                netWatchers?.Add(other.ObjectId);
         }
 
         foreach (int id in SortedExcept(before, after))
-            Forget(entity, id, toSelf, toOthers);
+            Forget(entity, id);
 
         if (netWatchers is { Count: > 0 } && NetBridge != null && ack != null)
         {
@@ -956,36 +914,27 @@ public sealed partial class ZoneWorld
         (b.Session != null && (b.Session.AutoAttackTargetId == a.ObjectId || b.Session.SelectedTargetId == a.ObjectId)) ||
         a.AggroTargetId == b.ObjectId || b.AggroTargetId == a.ObjectId;
 
-    void LinkSeen(ZoneEntity self, int otherId, List<Pending> toSelf, List<Pending> toOthers)
+    void LinkSeen(ZoneEntity self, int otherId)
     {
         if (self.Session == null || !_byId.TryGetValue(otherId, out var other))
             return;
 
         self.Knownlist.Add(otherId);
-        AddPresence(toSelf, self.Session, other);
         if (other.Session != null)
-        {
             other.Knownlist.Add(self.ObjectId);
-            toOthers.Add(Pack(other.Session, MsgType.CharInfo, CharInfo(self)));
-        }
     }
 
-    void Forget(ZoneEntity self, int otherId, List<Pending> toSelf, List<Pending> toOthers)
+    void Forget(ZoneEntity self, int otherId)
     {
         if (self.Session == null)
             return;
 
         self.Knownlist.Remove(otherId);
-        toSelf.Add(Pack(self.Session, MsgType.DeleteObject, new DeleteObjectMsg { ObjectId = otherId }));
         if (_byId.TryGetValue(otherId, out var other))
-        {
             other.Knownlist.Remove(self.ObjectId);
-            if (other.Session != null)
-                toOthers.Add(Pack(other.Session, MsgType.DeleteObject, new DeleteObjectMsg { ObjectId = self.ObjectId }));
-        }
     }
 
-    bool Unlink(ZoneSession session, List<Pending> toOthers)
+    bool Unlink(ZoneSession session)
     {
         if (session.ObjectId == 0 || !_byId.TryGetValue(session.ObjectId, out var entity))
         {
@@ -1009,9 +958,7 @@ public sealed partial class ZoneWorld
                 watchers.Add(other.Session);
         }
 
-        var olympiadOutbound = new List<Pending>();
-        NoteOlympiadDisconnect(entity, olympiadOutbound);
-        toOthers.AddRange(olympiadOutbound);
+        NoteOlympiadDisconnect(entity);
 
         if (entity.Inventory != null)
             SaveInventory(session, entity.Inventory);
@@ -1029,9 +976,9 @@ public sealed partial class ZoneWorld
         TradePlayerLeftWorld(session.ObjectId);
         ClanPlayerLeftWorld(session.ObjectId, session.Name);
 
-        byte[] body = MessagePackSerializer.Serialize(new DeleteObjectMsg { ObjectId = session.ObjectId });
-        foreach (var watcher in watchers)
-            toOthers.Add(new Pending(watcher, MsgType.DeleteObject, body));
+        // The Net despawn for the leaver is owned by NetZoneServer.LeaveNetAsync (it knows the connection's
+        // EntityId and unregisters the presence); fanning it here too would double-remove the same entity.
+        _ = watchers;
         return true;
     }
 
@@ -1184,56 +1131,12 @@ public sealed partial class ZoneWorld
         return ids;
     }
 
-    static void AddPresence(List<Pending> target, ZoneSession to, ZoneEntity entity)
-    {
-        if (entity.Kind == ZoneEntityKind.Npc)
-            target.Add(Pack(to, MsgType.NpcInfo, NpcInfo(entity)));
-        else if (entity.Kind == ZoneEntityKind.GroundItem)
-            target.Add(Pack(to, MsgType.SpawnItem, SpawnItem(entity)));
-        else
-            target.Add(Pack(to, MsgType.CharInfo, CharInfo(entity)));
-    }
-
-    static PlayerSpawnedMsg Spawned(ZoneEntity entity) => new()
-    {
-        ObjectId = entity.ObjectId,
-        Name = entity.Name,
-        X = entity.X,
-        Y = entity.Y,
-        Z = entity.Z,
-        RunSpeed = entity.RunSpeed,
-        WalkSpeed = entity.WalkSpeed,
-        Running = entity.Running
-    };
-
-    UserInfoMsg UserInfo(ZoneEntity entity)
-    {
-        if (entity.Inventory == null)
-            throw new InvalidOperationException($"Player {entity.ObjectId} has no inventory.");
-        return InventoryMessages.UserInfo(
-            entity.ObjectId,
-            entity.Name,
-            entity.ClassId,
-            entity.X,
-            entity.Y,
-            entity.Z,
-            entity.RunSpeed,
-            entity.WalkSpeed,
-            entity.Running,
-            entity.Inventory,
-            entity.WeaponGradePenalty,
-            entity.ArmorGradePenalty,
-            entity.ClanId,
-            ClanProtocol.CrestId,
-            BuildUserInfoVitals(entity));
-    }
-
     InventoryMessages.UserInfoVitals BuildUserInfoVitals(ZoneEntity entity)
     {
         int level = Math.Max(1, entity.Level);
         int maxCp = 0;
         int str = 0, dex = 0, con = 0, intel = 0, wit = 0, men = 0;
-        int pAtk = 0, mAtk = 0, pDef = 0, mDef = 0, pAtkSpd = 0, mAtkSpd = 0, accuracy = 0, crit = 0;
+        int pAtk = 0, mAtk = 0, pDef = 0, mDef = 0, pAtkSpd = 0, mAtkSpd = 0, accuracy = 0, crit = 0, evasion = 0;
         if (PlayerClasses.TryGet(entity.ClassId, out var template) && template != null)
         {
             try { maxCp = template.ModifiedCp(level); }
@@ -1254,6 +1157,7 @@ public sealed partial class ZoneWorld
             mAtkSpd = stats.MAtkSpd;
             accuracy = stats.Accuracy;
             crit = stats.CritRate;
+            evasion = stats.Evasion;
         }
 
         return new InventoryMessages.UserInfoVitals(
@@ -1268,26 +1172,8 @@ public sealed partial class ZoneWorld
             entity.Sp,
             str, dex, con, intel, wit, men,
             pAtk, mAtk, pDef, mDef, pAtkSpd, mAtkSpd,
-            accuracy, crit);
+            accuracy, crit, evasion);
     }
-
-    static CharInfoMsg CharInfo(ZoneEntity entity) => new()
-    {
-        ObjectId = entity.ObjectId,
-        Name = entity.Name,
-        X = entity.X,
-        Y = entity.Y,
-        Z = entity.Z,
-        ClassId = entity.ClassId,
-        Paperdoll = entity.Inventory == null
-            ? new int[InventoryMessages.PaperdollSlotCount]
-            : InventoryMessages.ItemIds(entity.Inventory),
-        ClanId = entity.ClanId,
-        ClanCrestId = entity.ClanId == 0 ? 0 : ClanProtocol.CrestId,
-        Enchant = entity.Inventory == null
-            ? new int[InventoryMessages.PaperdollSlotCount]
-            : InventoryMessages.EnchantLevels(entity.Inventory)
-    };
 
     static NpcInfoMsg NpcInfo(ZoneEntity entity) => new()
     {
@@ -1357,39 +1243,4 @@ public sealed partial class ZoneWorld
         Count = entity.GroundCount
     };
 
-    static Pending Pack<T>(ZoneSession to, MsgType type, T message) =>
-        new(to, type, MessagePackSerializer.Serialize(message));
-
-    static async Task FlushSelfAsync(ZoneSession self, List<Pending> messages, CancellationToken ct)
-    {
-        foreach (var message in messages)
-        {
-            if (ReferenceEquals(message.To, self))
-                await self.SendFrameAsync((ushort)message.Type, message.Body, ct).ConfigureAwait(false);
-            else
-                await TrySendAsync(message, ct).ConfigureAwait(false);
-        }
-    }
-
-    static async Task FlushOthersAsync(List<Pending> messages, CancellationToken ct)
-    {
-        foreach (var message in messages)
-            await TrySendAsync(message, ct).ConfigureAwait(false);
-    }
-
-    static async Task TrySendAsync(Pending message, CancellationToken ct)
-    {
-        using var timeout = CancellationTokenSource.CreateLinkedTokenSource(ct);
-        timeout.CancelAfter(FanoutTimeout);
-        try
-        {
-            await message.To.SendFrameAsync((ushort)message.Type, message.Body, timeout.Token).ConfigureAwait(false);
-        }
-        catch (Exception ex) when (ex is IOException or OperationCanceledException or ObjectDisposedException)
-        {
-            ZoneLog.Info($"TX drop object={message.To.ObjectId} {ex.GetType().Name}");
-        }
-    }
-
-    readonly record struct Pending(ZoneSession To, MsgType Type, byte[] Body);
 }

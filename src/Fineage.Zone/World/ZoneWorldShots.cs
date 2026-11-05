@@ -1,6 +1,5 @@
 using Fineage.Game;
 using Fineage.Protocol;
-using MessagePack;
 
 namespace Fineage.Zone.World;
 
@@ -32,7 +31,7 @@ public sealed partial class ZoneWorld
     internal static bool IsShot(ItemTemplate t) => t.IsSoulshot || t.IsSpiritshot || t.IsBlessedSpiritshot;
 
     /// <summary>Charges the weapon with <paramref name="shot"/>. <paramref name="quiet"/> (auto recharge) skips the refusal notices.</summary>
-    bool TryChargeShot(ZoneSession session, ZoneEntity player, ItemInstance shot, List<Pending> toSelf, List<Pending> toOthers, bool quiet)
+    bool TryChargeShot(ZoneSession session, ZoneEntity player, ItemInstance shot, bool quiet)
     {
         var t = shot.Template;
         bool soul = t.IsSoulshot;
@@ -42,7 +41,7 @@ public sealed partial class ZoneWorld
         {
             if (!quiet)
                 ShotNotice(session, soul ? SysMsgCannotUseSoulshots : SysMsgCannotUseSpiritshots,
-                    soul ? "Cannot use soulshots." : "Cannot use spiritshots.", toSelf);
+                    soul ? "Cannot use soulshots." : "Cannot use spiritshots.");
             return false;
         }
         if (weapon!.Crystal != t.ShotGrade)
@@ -50,7 +49,7 @@ public sealed partial class ZoneWorld
             if (!quiet)
                 ShotNotice(session, soul ? SysMsgSoulshotGradeMismatch : SysMsgSpiritshotGradeMismatch,
                     soul ? "The soulshot you are attempting to use does not match the grade of your equipped weapon."
-                         : "Your spiritshot does not match the weapon's grade.", toSelf);
+                         : "Your spiritshot does not match the weapon's grade.");
             return false;
         }
         if (soul ? player.SoulshotCharged : player.SpiritshotCharge > 0)
@@ -59,10 +58,10 @@ public sealed partial class ZoneWorld
         if (!player.Inventory.TryConsume(shot.ItemId, need, out var stack, out bool removed) || stack == null)
         {
             ShotNotice(session, soul ? SysMsgNotEnoughSoulshots : SysMsgNotEnoughSpiritshots,
-                soul ? "You do not have enough soulshots for that." : "You do not have enough spiritshots for that.", toSelf);
+                soul ? "You do not have enough soulshots for that." : "You do not have enough spiritshots for that.");
             // Mobius: auto use switches itself off when the stack cannot pay for a charge.
             if (player.AutoShots.Remove(shot.ItemId))
-                SendAutoShotState(session, player, shot.ItemId, t.Name, false, toSelf);
+                SendAutoShotState(session, player, shot.ItemId, t.Name, false);
             return false;
         }
 
@@ -71,10 +70,9 @@ public sealed partial class ZoneWorld
         else
             player.SpiritshotCharge = t.IsBlessedSpiritshot ? BlessedSpiritCharge : SpiritCharge;
         var update = InventoryMessages.Update(removed ? InventoryChange.Remove : InventoryChange.Modify, stack);
-        toSelf.Add(Pack(session, MsgType.InventoryUpdate, update));
         NetBridge?.FanoutInventoryUpdate([session.ObjectId], ToNetInventoryUpdate(update));
         ShotNotice(session, soul ? SysMsgSoulshotEnabled : SysMsgSpiritshotEnabled,
-            soul ? "Your soulshots are enabled." : "Your spiritshot has been enabled.", toSelf);
+            soul ? "Your soulshots are enabled." : "Your spiritshot has been enabled.");
 
         // Mobius broadcasts MagicSkillUse(item_skill) for the weapon glow.
         int[] table = soul ? SoulshotSkillByGrade : t.IsBlessedSpiritshot ? BlessedSpiritshotSkillByGrade : SpiritshotSkillByGrade;
@@ -86,14 +84,11 @@ public sealed partial class ZoneWorld
             SkillId = skill,
             SkillLevel = 1
         };
-        byte[] body = MessagePackSerializer.Serialize(cast);
         List<int> netWatchers = [player.ObjectId];
-        toSelf.Add(new Pending(session, MsgType.MagicSkillUse, body));
         foreach (var watcher in Players())
         {
             if (watcher.Session == null || ReferenceEquals(watcher, player) || !watcher.Knownlist.Contains(player.ObjectId))
                 continue;
-            toOthers.Add(new Pending(watcher.Session, MsgType.MagicSkillUse, body));
             netWatchers.Add(watcher.ObjectId);
         }
         NetBridge?.FanoutMagicSkillUse(netWatchers, new Fineage.Net.Contract.MagicSkillUseNetMsg
@@ -107,26 +102,22 @@ public sealed partial class ZoneWorld
         SaveInventory(session, player.Inventory);
         ZoneLog.Info($"shot object={player.ObjectId} item={shot.ItemId} consumed={need} left={(removed ? 0 : stack.Count)} auto={quiet}");
         if (removed && player.AutoShots.Remove(shot.ItemId))
-            SendAutoShotState(session, player, shot.ItemId, t.Name, false, toSelf);
+            SendAutoShotState(session, player, shot.ItemId, t.Name, false);
         return true;
     }
 
     /// <summary>Mobius RequestAutoSoulShot (type 1 on / 0 off) for a shot item the player carries.</summary>
-    public async Task<string?> TryAutoSoulShotAsync(ZoneSession session, int itemId, bool enable, CancellationToken ct)
+    public Task<string?> TryAutoSoulShotAsync(ZoneSession session, int itemId, bool enable, CancellationToken ct)
     {
-        var toSelf = new List<Pending>();
-        var toOthers = new List<Pending>();
         string? error;
         lock (_gate)
-            error = TryAutoSoulShot(session, itemId, enable, toSelf, toOthers);
+            error = TryAutoSoulShot(session, itemId, enable);
         if (error != null)
-            return error;
-        await FlushSelfAsync(session, toSelf, ct).ConfigureAwait(false);
-        await FlushOthersAsync(toOthers, ct).ConfigureAwait(false);
-        return null;
+            return Task.FromResult<string?>(error);
+        return Task.FromResult<string?>(null);
     }
 
-    string? TryAutoSoulShot(ZoneSession session, int itemId, bool enable, List<Pending> toSelf, List<Pending> toOthers)
+    string? TryAutoSoulShot(ZoneSession session, int itemId, bool enable)
     {
         if (!TryLivePlayer(session, out var player, out var error))
             return error;
@@ -134,7 +125,7 @@ public sealed partial class ZoneWorld
         if (!enable)
         {
             if (player.AutoShots.Remove(itemId))
-                SendAutoShotState(session, player, itemId, stack?.Template.Name ?? "", false, toSelf);
+                SendAutoShotState(session, player, itemId, stack?.Template.Name ?? "", false);
             return null;
         }
         if (stack == null)
@@ -148,17 +139,17 @@ public sealed partial class ZoneWorld
             if (o == null || o.IsSoulshot == stack.Template.IsSoulshot)
             {
                 player.AutoShots.Remove(other);
-                SendAutoShotState(session, player, other, o?.Name ?? "", false, toSelf);
+                SendAutoShotState(session, player, other, o?.Name ?? "", false);
             }
         }
         player.AutoShots.Add(itemId);
-        SendAutoShotState(session, player, itemId, stack.Template.Name, true, toSelf);
-        TryChargeShot(session, player, stack, toSelf, toOthers, quiet: false);
+        SendAutoShotState(session, player, itemId, stack.Template.Name, true);
+        TryChargeShot(session, player, stack, quiet: false);
         return null;
     }
 
     /// <summary>Mobius rechargeShots after a discharge: charge again from each auto-enabled stack.</summary>
-    void RechargeAutoShots(ZoneEntity player, List<Pending> outbound)
+    void RechargeAutoShots(ZoneEntity player)
     {
         if (player.AutoShots.Count == 0 || player.Session == null || player.Inventory == null)
             return;
@@ -168,10 +159,10 @@ public sealed partial class ZoneWorld
             if (stack == null)
             {
                 player.AutoShots.Remove(itemId);
-                SendAutoShotState(player.Session, player, itemId, "", false, outbound);
+                SendAutoShotState(player.Session, player, itemId, "", false);
                 continue;
             }
-            TryChargeShot(player.Session, player, stack, outbound, outbound, quiet: true);
+            TryChargeShot(player.Session, player, stack, quiet: true);
         }
     }
 
@@ -181,20 +172,19 @@ public sealed partial class ZoneWorld
         lock (_gate)
         {
             player.SoulshotCharged = false;
-            RechargeAutoShots(player, new List<Pending>());
+            RechargeAutoShots(player);
         }
     }
 
-    void SendAutoShotState(ZoneSession session, ZoneEntity player, int itemId, string name, bool enabled, List<Pending> toSelf)
+    void SendAutoShotState(ZoneSession session, ZoneEntity player, int itemId, string name, bool enabled)
     {
         NetBridge?.FanoutAutoSoulShot([player.ObjectId], itemId, enabled);
         ShotNotice(session, enabled ? SysMsgAutoShotOn : SysMsgAutoShotOff,
-            $"The automatic use of {name} has been {(enabled ? "activated" : "deactivated")}.", toSelf);
+            $"The automatic use of {name} has been {(enabled ? "activated" : "deactivated")}.");
     }
 
-    void ShotNotice(ZoneSession session, int id, string text, List<Pending> toSelf)
+    void ShotNotice(ZoneSession session, int id, string text)
     {
-        toSelf.Add(Pack(session, MsgType.SystemMessage, new SystemMessageMsg { Id = id, Params = [], Text = text }));
         NetBridge?.FanoutSystemMessage([session.ObjectId], new Fineage.Net.Contract.SystemMessageNetMsg
         {
             Id = id,

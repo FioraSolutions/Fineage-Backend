@@ -78,6 +78,7 @@ public sealed partial class ZoneWorld
             PAtkSpd = vitals.PAtkSpd,
             MAtkSpd = vitals.MAtkSpd,
             Accuracy = vitals.Accuracy,
+            Evasion = vitals.Evasion,
             CritRate = vitals.CritRate,
             WeaponGradePenalty = e.WeaponGradePenalty,
             ArmorGradePenalty = e.ArmorGradePenalty,

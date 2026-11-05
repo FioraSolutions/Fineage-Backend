@@ -218,8 +218,6 @@ public sealed class BossScheduleTests
         Assert.Equal(93, (int)MsgType.BossStatusRequest);
         Assert.Equal(94, (int)MsgType.AdminBossSchedule);
         Assert.Equal(1093, (int)MsgType.BossStatus);
-        Assert.Equal((ushort)MsgType.BossStatusRequest, (ushort)Fineage.Protocol.V2.MsgType.BossStatusRequest);
-        Assert.Equal((ushort)MsgType.BossStatus, (ushort)Fineage.Protocol.V2.MsgType.BossStatus);
     }
 
     static BossSchedule Schedule(

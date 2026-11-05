@@ -132,7 +132,7 @@ internal sealed class WorldBench
         Assert.True(play.Ok && play.Value != null, play.Message);
         HandoffTicket ticket = play.Value!;
 
-        var session = new ZoneSession(new MemoryStream());
+        var session = new ZoneSession();
         session.Bind(ticket.CharacterId, ticket.Account, ticket.CharacterName, ticket.ClassId, ticket.Race, ticket.Sex);
         Assert.True(await World.TryEnterAsync(session, CancellationToken.None));
         Assert.True(World.TryGetLivePlayer(session, out var player));

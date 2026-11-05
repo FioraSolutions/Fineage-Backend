@@ -15,8 +15,7 @@ public sealed class CharacterPresenceTests
         var ticket = login.Play("alice", "secret1", "Aria", HumanClasses.Fighter).Value!;
         var world = new ZoneWorld(accounts: store, spawnRandom: new Random(1));
 
-        await using var stream = new MemoryStream();
-        var session = new ZoneSession(stream);
+        var session = new ZoneSession();
         session.Bind(ticket.CharacterId, ticket.Account, ticket.CharacterName, ticket.ClassId);
         Assert.True(await world.TryEnterAsync(session, CancellationToken.None));
         Assert.Contains(new ClassSpawn.Point(session.X, session.Y, session.Z), ClassTemplates.Points(HumanClasses.Fighter));
@@ -54,10 +53,8 @@ public sealed class CharacterPresenceTests
         var ticket = login.Play("alice", "secret1", "Aria", HumanClasses.Fighter).Value!;
         var world = new ZoneWorld(accounts: store, spawnRandom: new Random(2));
 
-        await using var firstStream = new MemoryStream();
-        await using var secondStream = new MemoryStream();
-        var first = new ZoneSession(firstStream);
-        var second = new ZoneSession(secondStream);
+        var first = new ZoneSession();
+        var second = new ZoneSession();
         first.Bind(ticket.CharacterId, ticket.Account, ticket.CharacterName, ticket.ClassId);
         second.Bind(ticket.CharacterId, ticket.Account, ticket.CharacterName, ticket.ClassId);
 

@@ -29,7 +29,7 @@ public sealed class NetQuestJournalTests
     public void Unbound_session_gets_an_empty_journal_instead_of_throwing()
     {
         var kit = new NetTestKit();
-        var stranger = new ZoneSession(new System.IO.MemoryStream());
+        var stranger = new ZoneSession();
 
         QuestListNetMsg list = kit.World.NetQuestList(stranger);
 
