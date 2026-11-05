@@ -1,6 +1,7 @@
 #!/usr/bin/env bash
 # Restart Fineage Login on the live Pi layout (/home/pi/fineage-backend).
-# Public ports: TCP 2106, HTTP 5080 (override with FINEAGE_LOGIN_PORT / FINEAGE_LOGIN_HTTP_PORT).
+# Public ports: Net TCP 9106 (FINEAGE_NET_LOGIN_PORT), HTTP 5080 (FINEAGE_LOGIN_HTTP_PORT).
+# The legacy MessagePack V2 listener (--port) is only started when FINEAGE_LEGACY_V2_ENABLE=1.
 set -euo pipefail
 
 ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
@@ -20,9 +21,17 @@ if [[ -z "${FINEAGE_HANDOFF_SECRET:-}" && -f "$ROOT/handoff.secret" ]]; then
 fi
 
 STORE="${FINEAGE_LOGIN_STORE:-$ROOT/data/accounts.json}"
-LOGIN_PORT="${FINEAGE_LOGIN_PORT:-2106}"
 HTTP_PORT="${FINEAGE_LOGIN_HTTP_PORT:-5080}"
 BIND="${FINEAGE_BIND:-0.0.0.0}"
+LEGACY_V2="${FINEAGE_LEGACY_V2_ENABLE:-0}"
+NET_LOGIN_PORT="${FINEAGE_NET_LOGIN_PORT:-9106}"
+
+# --port is the legacy MessagePack V2 listener only. Net owns NET_LOGIN_PORT, so a stale
+# FINEAGE_LOGIN_PORT=9106 in fineage.env must not be handed to the V2 socket (bind conflict).
+LOGIN_PORT="${FINEAGE_LEGACY_LOGIN_PORT:-${FINEAGE_LOGIN_PORT:-9206}}"
+if [[ "$LOGIN_PORT" == "$NET_LOGIN_PORT" ]]; then
+  LOGIN_PORT=9206
+fi
 
 BIN="$ROOT/login/Fineage.Login"
 if [[ ! -x "$BIN" ]]; then
@@ -49,4 +58,4 @@ nohup "$BIN" \
   --store "$STORE" \
   >>"$ROOT/logs/login.log" 2>&1 &
 echo $! >"$ROOT/logs/login.pid"
-echo "Fineage.Login pid $(cat "$ROOT/logs/login.pid") on ${BIND}:${LOGIN_PORT} http ${HTTP_PORT}"
+echo "Fineage.Login pid $(cat "$ROOT/logs/login.pid") net ${BIND}:${NET_LOGIN_PORT} http ${HTTP_PORT} legacyV2=${LEGACY_V2}/${LOGIN_PORT}"

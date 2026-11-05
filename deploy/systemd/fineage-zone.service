@@ -1,5 +1,5 @@
 [Unit]
-Description=Fineage Zone (V2 TCP 9777, Talking Island)
+Description=Fineage Zone (Net TCP 9777, Talking Island)
 After=network-online.target fineage-login.service
 Wants=network-online.target
 
