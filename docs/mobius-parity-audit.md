@@ -257,12 +257,15 @@ target»), поворот атакующего к цели (`:152`), затем 
 - ~~`D11`~~ **снято** — щиты есть: `RollShield` (`ZoneCombat.cs:120`), блок добавляет `sDef` к
   `PDef`, perfect block даёт 1 урона, флаг `0x40`. И у игрока (`ZoneWorldCombat.cs:156`), и у
   NPC (`:207`–`:208`).
-- `D12` **`medium`** *(переписано)* — **соулшоты есть, стрел нет**. Соулшоты: `ZoneWorldShots.cs`
+- ~~`D12`~~ **снято** — соулшоты и стрелы на паритете. Соулшоты: `ZoneWorldShots.cs`
   (`TryChargeShot` `:35`) — зарядка по грейду оружия, расход `weapon.Soulshots`, `×2 P.Atk` на
   следующий удар, флаг `0x10|grade`, авто-перезарядка (`RequestAutoSoulShot`, opcode `0x0355`),
   спириты `×2` / blessed `×4` M.Atk в `RollSkillDamage` (`ZoneWorldSkillDamage.cs:64`–`:68`).
-  Осталось: **расход стрел для лука** — поиск `Arrow` по `src/Fineage.Zone` пуст, лук стреляет
-  бесконечно.
+  Стрелы: `ZoneWorldArrows.cs` — `checkAndEquipArrows` (поиск стрелы того же грейда, что и лук,
+  авто-надевание в левую руку + `InventoryUpdate`), отсутствие стрелы → `SysMsg 112`
+  «You have run out of arrows.» и сброс автоатаки, `reduceArrowCount` — 1 стрела за выстрел,
+  последняя стрела уничтожает стак, снимает левую руку и пересылает `ItemList`
+  (`ZoneWorldCombat.cs:225`–`:238`, `:329`).
 - `D13` **`low`** *(было `medium`)* — позиция частично работает: `HitConditionBonus` влияет на шанс
   попадания (back/side/front, перепад Z, ночь) и на блоу (`RollBlowDamage` proximity 1.2/1.1/1).
   Нет: позиционного множителя урона в обычном `calcPhysDam` (1.2/1.1), trait/attribute
@@ -850,7 +853,7 @@ Hate-модель: `Attackable.addDamageHate` (`Attackable.java:740`), `getMostH
 | `D9` | «промахов нет» | `HitChancePermille` + флаг `0x80` (`ZoneCombat.cs:139`, `ZoneWorldCombat.cs:386`) — **снято** |
 | `D10` | «критов нет» | crit в `RollMelee`, cap 500 ‰, флаг `0x20` — **снято** |
 | `D11` | «щитов нет» | `RollShield`, perfect block 5%, `sDef`, флаг `0x40` — **снято** |
-| `D12` | «soulshot нет, множителя ×2 нет» | соулшоты/спириты работают (`ZoneWorldShots.cs:35`, `ZoneWorldSkillDamage.cs:64`); остались только **стрелы** — `medium` |
+| `D12` | «soulshot нет, множителя ×2 нет» | соулшоты/спириты работают (`ZoneWorldShots.cs:35`, `ZoneWorldSkillDamage.cs:64`), стрелы расходуются (`ZoneWorldArrows.cs`) — **снято** |
 | `D14` | «интервал — глобальная константа» | `500000/Pspd` (`ZoneCombat.cs:96`) — **снято** |
 | `D19` | «прерывания каста нет» | `calcAtkBreak` + SysMsg 27 (`CastRules.cs:14`, `ZoneWorldCastInterrupt.cs:39`) — **снято** |
 | `D20` | «нет `coolTime`» | `coolTimeMs` в данных, `hitTime + coolTime` (`ZoneWorldSkillDamage.cs:42`) — **снято** |
