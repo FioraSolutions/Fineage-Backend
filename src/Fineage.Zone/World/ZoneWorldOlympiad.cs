@@ -20,7 +20,7 @@ public sealed partial class ZoneWorld
             var step = _olympiad.Report(matchId, winnerObjectId, (now ?? _clock()).ToUnixTimeMilliseconds());
             if (step.Error != null)
                 return step.Error;
-            ApplyOlympiad(step, _olympiadHeld);
+            ApplyOlympiad(step);
             return null;
         }
     }
@@ -31,137 +31,122 @@ public sealed partial class ZoneWorld
             return _olympiad.GrantNoblesse(characterId);
     }
 
-    public async Task AdvanceOlympiadAsync(CancellationToken ct = default)
+    public Task AdvanceOlympiadAsync(CancellationToken ct = default)
     {
-        var outbound = new List<Pending>();
         lock (_gate)
-            TickOlympiad(outbound);
-        await FlushOthersAsync(outbound, ct).ConfigureAwait(false);
+            TickOlympiad();
+        return Task.CompletedTask;
     }
 
-    public async Task<string?> TryOlympiadStatusAsync(ZoneSession session, CancellationToken ct)
+    public Task<string?> TryOlympiadStatusAsync(ZoneSession session, CancellationToken ct)
     {
         if (!IsLive(session))
-            return "world";
-        var outbound = new List<Pending>();
+            return Task.FromResult<string?>("world");
         lock (_gate)
         {
             long now = _clock().ToUnixTimeMilliseconds();
             var step = _olympiad.Advance(now, LookupOlympiad);
-            ApplyOlympiad(step, outbound);
+            ApplyOlympiad(step);
             if (!step.RefreshAll && !step.RefreshStatus.Contains(session.ObjectId))
-                QueueOlympiadStatus(session, now, outbound);
+                QueueOlympiadStatus(session, now);
         }
 
-        await FlushOthersAsync(outbound, ct).ConfigureAwait(false);
-        return null;
+        return Task.FromResult<string?>(null);
     }
 
-    public async Task<string?> TryOlympiadRegisterAsync(ZoneSession session, OlympiadRegisterRequestMsg request, CancellationToken ct)
+    public Task<string?> TryOlympiadRegisterAsync(ZoneSession session, OlympiadRegisterRequestMsg request, CancellationToken ct)
     {
         if (request == null)
-            return "bad_request";
+            return Task.FromResult<string?>("bad_request");
         if (!IsLive(session))
-            return "world";
-        return await RunOlympiadAsync(session, ct, now =>
+            return Task.FromResult<string?>("world");
+        return RunOlympiadAsync(now =>
         {
             var player = _byId[session.ObjectId];
             return _olympiad.Register(ActorFor(player), request.Classed == 1, now);
-        }).ConfigureAwait(false);
+        });
     }
 
-    public async Task<string?> TryOlympiadUnregisterAsync(ZoneSession session, CancellationToken ct)
+    public Task<string?> TryOlympiadUnregisterAsync(ZoneSession session, CancellationToken ct)
     {
         if (!IsLive(session))
-            return "world";
-        return await RunOlympiadAsync(session, ct, now =>
-            _olympiad.Unregister(ActorFor(_byId[session.ObjectId]), now)).ConfigureAwait(false);
+            return Task.FromResult<string?>("world");
+        return RunOlympiadAsync(now => _olympiad.Unregister(ActorFor(_byId[session.ObjectId]), now));
     }
 
-    public async Task<string?> TryOlympiadLeaveAsync(ZoneSession session, CancellationToken ct)
+    public Task<string?> TryOlympiadLeaveAsync(ZoneSession session, CancellationToken ct)
     {
         if (!IsLive(session))
-            return "world";
-        return await RunOlympiadAsync(session, ct, now =>
-            _olympiad.Leave(session.ObjectId, now, LookupOlympiad)).ConfigureAwait(false);
+            return Task.FromResult<string?>("world");
+        return RunOlympiadAsync(now => _olympiad.Leave(session.ObjectId, now, LookupOlympiad));
     }
 
-    public async Task<string?> TryAdminReportOlympiadAsync(ZoneSession session, int matchId, int winnerObjectId, CancellationToken ct)
+    public Task<string?> TryAdminReportOlympiadAsync(ZoneSession session, int matchId, int winnerObjectId, CancellationToken ct)
     {
         if (!IsLive(session))
-            return "world";
-        var outbound = new List<Pending>();
+            return Task.FromResult<string?>("world");
         string? error;
         lock (_gate)
         {
             var step = _olympiad.Report(matchId, winnerObjectId, _clock().ToUnixTimeMilliseconds());
             error = step.Error;
             if (error == null)
-                ApplyOlympiad(step, outbound);
+                ApplyOlympiad(step);
         }
 
-        if (error == null)
-            await FlushOthersAsync(outbound, ct).ConfigureAwait(false);
-        return error;
+        return Task.FromResult<string?>(error);
     }
 
-    void TickOlympiad(List<Pending> outbound)
+    void TickOlympiad()
     {
         var step = _olympiad.Advance(_clock().ToUnixTimeMilliseconds(), LookupOlympiad, announce: false);
-        ApplyOlympiad(step, outbound);
-        if (_olympiadHeld.Count > 0)
-        {
-            outbound.AddRange(_olympiadHeld);
-            _olympiadHeld.Clear();
-        }
+        ApplyOlympiad(step);
     }
 
-    void NoteOlympiadDisconnect(ZoneEntity entity, List<Pending> outbound)
+    void NoteOlympiadDisconnect(ZoneEntity entity)
     {
         if (entity.Kind != ZoneEntityKind.Player)
             return;
         var step = _olympiad.Disconnect(entity.ObjectId, _clock().ToUnixTimeMilliseconds(), LookupOlympiad);
-        ApplyOlympiad(step, outbound);
+        ApplyOlympiad(step);
     }
 
-    async Task<string?> RunOlympiadAsync(ZoneSession session, CancellationToken ct, Func<long, OlympiadStep> action)
+    Task<string?> RunOlympiadAsync(Func<long, OlympiadStep> action)
     {
-        var outbound = new List<Pending>();
         string? error;
         lock (_gate)
         {
             long now = _clock().ToUnixTimeMilliseconds();
             var step = action(now);
             error = step.Error;
-            ApplyOlympiad(step, outbound);
+            ApplyOlympiad(step);
         }
 
-        await FlushOthersAsync(outbound, ct).ConfigureAwait(false);
-        return error;
+        return Task.FromResult(error);
     }
 
-    void ApplyOlympiad(OlympiadStep step, List<Pending> outbound)
+    void ApplyOlympiad(OlympiadStep step)
     {
         long now = _clock().ToUnixTimeMilliseconds();
         foreach (var notice in step.Notices)
-            QueueNotice(notice, outbound);
+            QueueNotice(notice);
         foreach (var move in step.Moves)
-            QueueMove(move, outbound);
+            QueueMove(move);
         foreach (var grant in step.Grants)
-            QueueGrant(grant, outbound);
+            QueueGrant(grant);
         foreach (var match in step.Matches)
-            QueueMatch(match, outbound);
+            QueueMatch(match);
         foreach (var countdown in step.Countdowns)
-            QueueCountdown(countdown, outbound);
+            QueueCountdown(countdown);
         foreach (var result in step.Results)
-            QueueResult(result, outbound);
+            QueueResult(result);
 
         if (step.RefreshAll)
         {
             foreach (var player in Players())
             {
                 if (player.Session != null)
-                    QueueOlympiadStatus(player.Session, now, outbound);
+                    QueueOlympiadStatus(player.Session, now);
             }
         }
         else
@@ -169,39 +154,37 @@ public sealed partial class ZoneWorld
             foreach (int id in step.RefreshStatus)
             {
                 if (_byId.TryGetValue(id, out var player) && player.Session != null)
-                    QueueOlympiadStatus(player.Session, now, outbound);
+                    QueueOlympiadStatus(player.Session, now);
             }
         }
     }
 
-    void QueueMove(OlympiadMove move, List<Pending> outbound)
+    void QueueMove(OlympiadMove move)
     {
         if (!_byId.TryGetValue(move.CharacterId, out var entity) || entity.Session == null)
             return;
         int savedX = entity.X;
         int savedY = entity.Y;
         int savedZ = entity.Z;
-        var toSelf = new List<Pending>();
-        var toOthers = new List<Pending>();
-        Relocate(entity, move.X, move.Y, move.Z, toSelf, toOthers, move.InstanceId, move.Persist);
+        Relocate(entity, move.X, move.Y, move.Z, move.InstanceId, move.Persist);
         if (!move.Persist)
             SavePresence(entity.Session, savedX, savedY, savedZ, touchAccess: false);
-        outbound.AddRange(toSelf);
-        outbound.AddRange(toOthers);
     }
 
-    void QueueGrant(OlympiadGrant grant, List<Pending> outbound)
+    void QueueGrant(OlympiadGrant grant)
     {
         if (!_byId.TryGetValue(grant.CharacterId, out var entity) || entity.Session == null || entity.Inventory == null)
             return;
         if (!_game.Items.TryGet(grant.ItemId, out _))
             return;
         var added = entity.Inventory.Add(grant.ItemId, grant.Count);
-        outbound.Add(Pack(entity.Session, MsgType.InventoryUpdate, InventoryMessages.Update(InventoryChange.Add, added)));
+        var update = InventoryMessages.Update(InventoryChange.Add, added);
+        // The Gate Pass lands in the bag, so Net clients need the same row the V2 frame carries.
+        NetBridge?.FanoutInventoryUpdate([entity.ObjectId], ToNetInventoryUpdate(update));
         SaveInventory(entity.Session, entity.Inventory);
     }
 
-    void QueueNotice(OlympiadNotice notice, List<Pending> outbound)
+    void QueueNotice(OlympiadNotice notice)
     {
         var message = new SystemMessageMsg
         {
@@ -211,20 +194,26 @@ public sealed partial class ZoneWorld
         };
         if (notice.CharacterId == 0)
         {
+            var live = new List<int>();
             foreach (var player in Players())
             {
                 if (player.Session != null)
-                    outbound.Add(Pack(player.Session, MsgType.SystemMessage, message));
+                {
+                    live.Add(player.ObjectId);
+                }
             }
-
+            if (live.Count > 0)
+                NetBridge?.FanoutSystemMessage(live, ToNetOlympiadLine(message));
             return;
         }
 
         if (_byId.TryGetValue(notice.CharacterId, out var target) && target.Session != null)
-            outbound.Add(Pack(target.Session, MsgType.SystemMessage, message));
+        {
+            NetBridge?.FanoutSystemMessage([target.ObjectId], ToNetOlympiadLine(message));
+        }
     }
 
-    void QueueMatch(OlympiadMatchNote note, List<Pending> outbound)
+    void QueueMatch(OlympiadMatchNote note)
     {
         var message = new OlympiadMatchMsg
         {
@@ -239,10 +228,22 @@ public sealed partial class ZoneWorld
             PlayerTwoName = note.PlayerTwoName,
             InstanceId = note.InstanceId
         };
-        SendBoth(note.PlayerOneId, note.PlayerTwoId, MsgType.OlympiadMatch, message, outbound);
+        FanOlympiadBoth(note.PlayerOneId, note.PlayerTwoId, match: new Fineage.Net.Contract.OlympiadMatchNetMsg
+        {
+            MatchId = message.MatchId,
+            StadiumId = message.StadiumId,
+            ZoneId = message.ZoneId,
+            Classed = message.Classed,
+            Phase = message.Phase,
+            PlayerOneId = message.PlayerOneId,
+            PlayerTwoId = message.PlayerTwoId,
+            PlayerOneName = message.PlayerOneName,
+            PlayerTwoName = message.PlayerTwoName,
+            InstanceId = message.InstanceId
+        });
     }
 
-    void QueueCountdown(OlympiadCountdownNote note, List<Pending> outbound)
+    void QueueCountdown(OlympiadCountdownNote note)
     {
         var packet = new OlympiadCountdownMsg
         {
@@ -256,11 +257,16 @@ public sealed partial class ZoneWorld
             Params = [note.Kind.ToString(), note.Seconds.ToString()],
             Text = OlympiadLines.CountdownText(note.Kind, note.Seconds)
         };
-        SendBoth(note.PlayerOneId, note.PlayerTwoId, MsgType.OlympiadCountdown, packet, outbound);
-        SendBoth(note.PlayerOneId, note.PlayerTwoId, MsgType.SystemMessage, line, outbound);
+        FanOlympiadBoth(note.PlayerOneId, note.PlayerTwoId, countdown: new Fineage.Net.Contract.OlympiadCountdownNetMsg
+        {
+            MatchId = packet.MatchId,
+            Kind = packet.Kind,
+            Seconds = packet.Seconds
+        });
+        FanOlympiadBoth(note.PlayerOneId, note.PlayerTwoId, line: ToNetOlympiadLine(line));
     }
 
-    void QueueResult(OlympiadResultNote note, List<Pending> outbound)
+    void QueueResult(OlympiadResultNote note)
     {
         var message = new OlympiadResultMsg
         {
@@ -276,13 +282,26 @@ public sealed partial class ZoneWorld
             CompetitionsDoneOne = note.CompetitionsDoneOne,
             CompetitionsDoneTwo = note.CompetitionsDoneTwo
         };
-        SendBoth(note.PlayerOneId, note.PlayerTwoId, MsgType.OlympiadResult, message, outbound);
+        FanOlympiadBoth(note.PlayerOneId, note.PlayerTwoId, result: new Fineage.Net.Contract.OlympiadResultNetMsg
+        {
+            MatchId = message.MatchId,
+            Outcome = message.Outcome,
+            WinnerObjectId = message.WinnerObjectId,
+            PointsOne = message.PointsOne,
+            PointsTwo = message.PointsTwo,
+            DeltaOne = message.DeltaOne,
+            DeltaTwo = message.DeltaTwo,
+            RewardItemId = message.RewardItemId,
+            RewardCount = message.RewardCount,
+            CompetitionsDoneOne = message.CompetitionsDoneOne,
+            CompetitionsDoneTwo = message.CompetitionsDoneTwo
+        });
     }
 
-    void QueueOlympiadStatus(ZoneSession session, long nowUnixMs, List<Pending> outbound)
+    void QueueOlympiadStatus(ZoneSession session, long nowUnixMs)
     {
         var view = _olympiad.View(session.ObjectId, nowUnixMs);
-        outbound.Add(Pack(session, MsgType.OlympiadStatus, new OlympiadStatusMsg
+        var message = new OlympiadStatusMsg
         {
             Period = view.Period,
             Cycle = view.Cycle,
@@ -303,15 +322,66 @@ public sealed partial class ZoneWorld
             MatchId = view.MatchId,
             StadiumId = view.StadiumId,
             ClassId = view.ClassId
-        }));
+        };
+        NetBridge?.FanoutOlympiadStatus([session.ObjectId], ToNetOlympiadStatus(message));
     }
 
-    void SendBoth<T>(int one, int two, MsgType type, T message, List<Pending> outbound)
+    static Fineage.Net.Contract.OlympiadStatusNetMsg ToNetOlympiadStatus(OlympiadStatusMsg s) => new()
     {
-        if (_byId.TryGetValue(one, out var first) && first.Session != null)
-            outbound.Add(Pack(first.Session, type, message));
-        if (two != one && _byId.TryGetValue(two, out var second) && second.Session != null)
-            outbound.Add(Pack(second.Session, type, message));
+        Period = s.Period,
+        Cycle = s.Cycle,
+        InCompetition = s.InCompetition,
+        CompetitionStartUnixMs = s.CompetitionStartUnixMs,
+        CompetitionEndUnixMs = s.CompetitionEndUnixMs,
+        OlympiadEndUnixMs = s.OlympiadEndUnixMs,
+        ValidationEndUnixMs = s.ValidationEndUnixMs,
+        NextWeeklyUnixMs = s.NextWeeklyUnixMs,
+        RegistrationOpen = s.RegistrationOpen,
+        Noble = s.Noble,
+        Points = s.Points,
+        CompetitionsDone = s.CompetitionsDone,
+        Won = s.Won,
+        Lost = s.Lost,
+        Drawn = s.Drawn,
+        Queue = s.Queue,
+        MatchId = s.MatchId,
+        StadiumId = s.StadiumId,
+        ClassId = s.ClassId
+    };
+
+    static Fineage.Net.Contract.SystemMessageNetMsg ToNetOlympiadLine(SystemMessageMsg line) => new()
+    {
+        Id = line.Id,
+        Text = line.Text,
+        Params = line.Params
+    };
+
+    /// <summary>Both match participants get one Net message per event, exactly as <c>SendBoth</c> does for V2.</summary>
+    void FanOlympiadBoth(
+        int one,
+        int two,
+        Fineage.Net.Contract.OlympiadMatchNetMsg? match = null,
+        Fineage.Net.Contract.OlympiadCountdownNetMsg? countdown = null,
+        Fineage.Net.Contract.OlympiadResultNetMsg? result = null,
+        Fineage.Net.Contract.SystemMessageNetMsg? line = null)
+    {
+        if (NetBridge == null)
+            return;
+        var watchers = new List<int>(2);
+        if (_byId.TryGetValue(one, out var first) && first.Session is { InWorld: true })
+            watchers.Add(one);
+        if (two != one && _byId.TryGetValue(two, out var second) && second.Session is { InWorld: true })
+            watchers.Add(two);
+        if (watchers.Count == 0)
+            return;
+        if (match != null)
+            NetBridge.FanoutOlympiadMatch(watchers, match);
+        if (countdown != null)
+            NetBridge.FanoutOlympiadCountdown(watchers, countdown);
+        if (result != null)
+            NetBridge.FanoutOlympiadResult(watchers, result);
+        if (line != null)
+            NetBridge.FanoutSystemMessage(watchers, line);
     }
 
     OlympiadPresence? LookupOlympiad(int characterId)

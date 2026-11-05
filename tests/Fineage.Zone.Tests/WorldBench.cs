@@ -28,7 +28,17 @@ internal sealed class WorldBench
         Fineage.Zone.Spawns.SpawnCatalog? spawns = null,
         string? mapId = null,
         Fineage.Game.Shops.BuyListCatalog? buyLists = null,
-        Fineage.Game.Shops.MultiSellCatalog? multisells = null)
+        Fineage.Game.Shops.MultiSellCatalog? multisells = null,
+        Fineage.Zone.NpcHtml.NpcHtmlCatalog? html = null,
+        Fineage.Zone.NpcHtml.BypassRegistry? bypasses = null,
+        Fineage.Game.Services.TeleportCatalog? teleports = null,
+        int? teleportOffset = null,
+        Fineage.Zone.Bosses.BossSchedule? bosses = null,
+        Fineage.Zone.Siege.SiegeSettings? siege = null,
+        Fineage.Zone.Olympiad.OlympiadSettings? olympiadSettings = null,
+        Fineage.Zone.SevenSigns.SevenSignsEngine? sevenSigns = null,
+        Fineage.Zone.Dungeons.DungeonCatalog? dungeons = null,
+        Fineage.Zone.Dungeons.DungeonAccessOptions? dungeonAccess = null)
     {
         Game = game ?? GameData.LoadDefault();
         Store = JsonAccountStore.InMemory();
@@ -47,7 +57,17 @@ internal sealed class WorldBench
             spawnCatalog: spawns,
             activeMapId: mapId,
             buyLists: buyLists,
-            multisells: multisells);
+            multisells: multisells,
+            html: html,
+            bypasses: bypasses,
+            teleports: teleports,
+            teleportOffset: teleportOffset,
+            bosses: bosses,
+            siege: siege,
+            olympiadSettings: olympiadSettings,
+            sevenSigns: sevenSigns,
+            dungeons: dungeons,
+            dungeonAccess: dungeonAccess);
         (Bridge, Rec) = NetBridgeRecorder.Create();
         World.NetBridge = Bridge;
     }
@@ -112,7 +132,7 @@ internal sealed class WorldBench
         Assert.True(play.Ok && play.Value != null, play.Message);
         HandoffTicket ticket = play.Value!;
 
-        var session = new ZoneSession(new MemoryStream());
+        var session = new ZoneSession();
         session.Bind(ticket.CharacterId, ticket.Account, ticket.CharacterName, ticket.ClassId, ticket.Race, ticket.Sex);
         Assert.True(await World.TryEnterAsync(session, CancellationToken.None));
         Assert.True(World.TryGetLivePlayer(session, out var player));
@@ -142,6 +162,9 @@ internal sealed class BenchPlayer
     public HandoffTicket Ticket { get; }
 
     public int ObjectId => Session.ObjectId;
+
+    /// <summary>Clan the player leads, when a suite seeds one directly in the store.</summary>
+    public int ClanId { get; set; }
     public PlayerInventory Inventory => Player.Inventory!;
 
     /// <summary>Object id of the single bag row holding <paramref name="itemId"/>.</summary>
@@ -152,11 +175,34 @@ internal sealed class BenchPlayer
     /// <summary>Item rows as persisted, so a test can prove the write happened before leave.</summary>
     public IReadOnlyList<StoredItem> Saved() => Store.FindById(Ticket.Account, Ticket.CharacterId)!.Items!;
 
+    /// <summary>The whole persisted record, for progress and journal assertions.</summary>
+    public CharacterRecord SavedRecord() => Store.FindById(Ticket.Account, Ticket.CharacterId)!;
+
     public Task<string?> Use(int objectId) =>
         World.TryUseItemAsync(Session, new UseItemMsg { ObjectId = objectId }, CancellationToken.None);
 
     public Task<string?> Unequip(int paperdollSlot) =>
         World.TryUnequipItemAsync(Session, new UnequipItemMsg { PaperdollSlot = paperdollSlot }, CancellationToken.None);
+
+    /// <summary>Teleports without the walk, for tests that only care about being in talk range.</summary>
+    public void MoveTo(int x, int y, int z)
+    {
+        Player.X = x;
+        Player.Y = y;
+        Player.Z = z;
+        Session.X = x;
+        Session.Y = y;
+        Session.Z = z;
+    }
+
+    public Task<string?> Talk(int npcObjectId) =>
+        World.TryNpcTalkAsync(Session, npcObjectId, CancellationToken.None);
+
+    public Task<string?> QuestEvent(int npcObjectId, int questId, string eventName) =>
+        World.TryQuestEventAsync(Session, npcObjectId, questId, eventName, CancellationToken.None);
+
+    public Task<string?> AbortQuest(int questId) =>
+        World.TryQuestAbortAsync(Session, questId, CancellationToken.None);
 
     public Task<string?> BypassAsync(int npcObjectId, string command) =>
         World.TryBypassAsync(Session, npcObjectId, command, CancellationToken.None);
@@ -190,4 +236,35 @@ internal sealed class BenchPlayer
                 Amount = amount
             },
             CancellationToken.None);
+
+    /// <summary>Picks a gatekeeper destination, the same call the teleport page's link lands on.</summary>
+    public Task<string?> Teleport(int npcObjectId, string listName, int locationId) =>
+        World.TryTeleportSelectAsync(
+            Session,
+            new TeleportSelectRequestMsg { NpcObjectId = npcObjectId, ListName = listName, LocationId = locationId },
+            CancellationToken.None);
+
+    public Task<string?> Deposit(int npcObjectId, params (int ObjectId, int Count)[] rows)
+    {
+        var lines = rows.Select(row => new WarehouseCountMsg { ObjectId = row.ObjectId, Count = row.Count }).ToArray();
+        return World.TryWarehouseDepositAsync(
+            Session,
+            new WarehouseDepositRequestMsg { NpcObjectId = npcObjectId, Lines = lines },
+            CancellationToken.None);
+    }
+
+    public Task<string?> Withdraw(int npcObjectId, params (int ObjectId, int Count)[] rows)
+    {
+        var lines = rows.Select(row => new WarehouseCountMsg { ObjectId = row.ObjectId, Count = row.Count }).ToArray();
+        return World.TryWarehouseWithdrawAsync(
+            Session,
+            new WarehouseWithdrawRequestMsg { NpcObjectId = npcObjectId, Lines = lines },
+            CancellationToken.None);
+    }
+
+    public Task<string?> SupportMagic(int npcObjectId) =>
+        World.TrySupportMagicAsync(Session, npcObjectId, CancellationToken.None);
+
+    public Task<string?> GiveBlessing(int npcObjectId) =>
+        World.TryGiveBlessingAsync(Session, npcObjectId, CancellationToken.None);
 }

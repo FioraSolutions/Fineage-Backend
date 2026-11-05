@@ -1,6 +1,5 @@
 using Fineage.Protocol;
 using Fineage.Zone.Combat;
-using MessagePack;
 
 namespace Fineage.Zone.World;
 
@@ -19,7 +18,7 @@ public sealed partial class ZoneWorld
     /// of <paramref name="target"/>. Returns travel time in ms, or -1 when the target is unreachable.
     /// Server position snaps to the stop point immediately (same model as <c>TryMove</c>).
     /// </summary>
-    long ApproachTarget(ZoneEntity player, ZoneEntity target, int range, List<Pending> outbound)
+    long ApproachTarget(ZoneEntity player, ZoneEntity target, int range)
     {
         if (player.Sitting || player.Dead)
             return -1;
@@ -53,7 +52,7 @@ public sealed partial class ZoneWorld
         {
             // Mobius: attack intention forces setRunning() -> ChangeMoveType so others see a run, not a walk.
             player.Running = true;
-            FanoutMoveType(player, outbound);
+            FanoutMoveType(player);
         }
 
         var ack = new MoveToMsg
@@ -64,15 +63,11 @@ public sealed partial class ZoneWorld
         };
         int originX = player.X, originY = player.Y;
 
-        if (NetBridge != null && session != null)
-        {
-            // Net: Mobius moveToPawn is a real timed run (MovementTaskManager), never a snap. Snapping the server
-            // position here made the next ValidatePosition send a PositionCorrection onto the mob = "teleport".
-            StartTimedMove(player, session, ack, outbound, outbound);
-            ZoneLog.Info($"[combat] approach obj={player.ObjectId} target={target.ObjectId} from={originX},{originY} to={player.MoveDestX},{player.MoveDestY} dist={(int)dist}");
-        }
-        else
-            SnapApproach(player, session, ack, destX, destY, destZ, outbound);
+        // Net: Mobius moveToPawn is a real timed run (MovementTaskManager), never a snap. Snapping the server
+        // position here made the next ValidatePosition send a PositionCorrection onto the mob = "teleport".
+        if (session != null)
+            StartTimedMove(player, session, ack);
+        ZoneLog.Info($"[combat] approach obj={player.ObjectId} target={target.ObjectId} from={originX},{originY} to={player.MoveDestX},{player.MoveDestY} dist={(int)dist}");
 
         float speed = MoveSpeedOf(player);
         long ms = Math.Max(1, (long)Math.Ceiling((dist - stopAt) * 1000.0 / speed));
@@ -88,23 +83,6 @@ public sealed partial class ZoneWorld
             session.ApproachTargetY = target.Y;
         }
         return ms;
-    }
-
-    /// <summary>V2 legacy approach: server position jumps to the stop point, the client animates the MoveToAck.</summary>
-    void SnapApproach(ZoneEntity player, ZoneSession? session, MoveToMsg ack, int destX, int destY, int destZ, List<Pending> outbound)
-    {
-        player.X = destX;
-        player.Y = destY;
-        player.Z = destZ;
-        if (session != null)
-        {
-            session.X = destX;
-            session.Y = destY;
-            session.Z = destZ;
-        }
-        // Knownlist reconcile (CharInfo / MoveToAck / hysteresis forget) — was a bare AOI move before, which
-        // left watcher knownlists stale and let a later move DeleteObject the other PC mid-fight.
-        ReconcileKnownlist(player, ack, outbound, outbound);
     }
 
     /// <summary>Client MoveTo that lies on the in-flight moveToPawn path is a position report, not a new order.</summary>
@@ -141,19 +119,14 @@ public sealed partial class ZoneWorld
     }
 
     /// <summary>Interlude ActionFailed equivalent on V2: SystemMessage 22 so the client unlocks and shows why.</summary>
-    void SendActionFailed(ZoneEntity player, List<Pending> outbound)
+    void SendActionFailed(ZoneEntity player)
     {
         if (player.Session == null)
             return;
-        byte[] body = MessagePackSerializer.Serialize(new SystemMessageMsg
-        {
-            Id = SysMsgTargetOutOfRange,
-            Text = "Your target is out of range."
-        });
-        outbound.Add(new Pending(player.Session, MsgType.SystemMessage, body));
+        NotifyLine(player.ObjectId, SysMsgTargetOutOfRange, "Your target is out of range.");
     }
 
-    void TickPendingCasts(long now, List<Pending> outbound)
+    void TickPendingCasts(long now)
     {
         foreach (var player in Players().ToList())
         {
@@ -168,8 +141,8 @@ public sealed partial class ZoneWorld
             session.PendingCastSkillId = 0;
             session.PendingCastTargetId = 0;
             session.PendingCastAtUnixMs = 0;
-            if (TrySkillUse(session, request, outbound) != null)
-                SendActionFailed(player, outbound);
+            if (TrySkillUse(session, request) != null)
+                SendActionFailed(player);
         }
     }
 }

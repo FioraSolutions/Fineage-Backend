@@ -13,7 +13,7 @@ public sealed partial class ZoneWorld
     public string? CaptureCastle(int clanId, DateTimeOffset? now = null)
     {
         lock (_gate)
-            return CaptureLocked(clanId, 0, (now ?? _clock()).ToUnixTimeMilliseconds(), outbound: null);
+            return CaptureLocked(clanId, 0, (now ?? _clock()).ToUnixTimeMilliseconds());
     }
 
     public SiegeStartKind StartSiege(int castleId, DateTimeOffset? now = null)
@@ -40,19 +40,18 @@ public sealed partial class ZoneWorld
         }
     }
 
-    public async Task<string?> TrySiegeRegisterAsync(ZoneSession session, SiegeRegisterRequestMsg request, CancellationToken ct)
+    public Task<string?> TrySiegeRegisterAsync(ZoneSession session, SiegeRegisterRequestMsg request, CancellationToken ct)
     {
         if (request == null)
-            return "bad_request";
+            return Task.FromResult<string?>("bad_request");
         if (!session.InWorld)
-            return "world";
+            return Task.FromResult<string?>("world");
 
-        var outbound = new List<Pending>();
         string? error;
         lock (_gate)
         {
             long now = _clock().ToUnixTimeMilliseconds();
-            AnnounceClosed(now, outbound);
+            AnnounceClosed(now);
             bool joining = request.Joining == 1;
             bool attacker = request.Attacker == 1;
             var clan = ClanInfoFor(session.ObjectId);
@@ -67,30 +66,28 @@ public sealed partial class ZoneWorld
                 var line = joining
                     ? attacker ? SiegeLines.RegisteredAttacker(name) : SiegeLines.RegisteredDefender(name)
                     : SiegeLines.Unregistered(name);
-                outbound.Add(Pack(session, MsgType.SystemMessage, line));
-                QueueSiegeInfo(session, request.CastleId, now, outbound);
+                FanSystemLine(session, line);
+                QueueSiegeInfo(session, request.CastleId, now);
             }
         }
 
         if (error != null)
-            return error;
-        await FlushOthersAsync(outbound, ct).ConfigureAwait(false);
-        return null;
+            return Task.FromResult<string?>(error);
+        return Task.FromResult<string?>(null);
     }
 
-    public async Task<string?> TrySiegeAnswerAsync(ZoneSession session, SiegeDefenderAnswerRequestMsg request, CancellationToken ct)
+    public Task<string?> TrySiegeAnswerAsync(ZoneSession session, SiegeDefenderAnswerRequestMsg request, CancellationToken ct)
     {
         if (request == null)
-            return "bad_request";
+            return Task.FromResult<string?>("bad_request");
         if (!session.InWorld)
-            return "world";
+            return Task.FromResult<string?>("world");
 
-        var outbound = new List<Pending>();
         string? error;
         lock (_gate)
         {
             long now = _clock().ToUnixTimeMilliseconds();
-            AnnounceClosed(now, outbound);
+            AnnounceClosed(now);
             error = _siege.AnswerDefender(
                 new SiegeActor(session.ObjectId),
                 ClanInfoFor(session.ObjectId),
@@ -105,57 +102,52 @@ public sealed partial class ZoneWorld
                 var line = request.Approved == 1
                     ? SiegeLines.DefenderApproved(name)
                     : SiegeLines.DefenderRefused(name);
-                outbound.Add(Pack(session, MsgType.SystemMessage, line));
-                QueueSiegeInfo(session, request.CastleId, now, outbound);
+                FanSystemLine(session, line);
+                QueueSiegeInfo(session, request.CastleId, now);
             }
         }
 
         if (error != null)
-            return error;
-        await FlushOthersAsync(outbound, ct).ConfigureAwait(false);
-        return null;
+            return Task.FromResult<string?>(error);
+        return Task.FromResult<string?>(null);
     }
 
-    public async Task<string?> TrySiegeListAsync(ZoneSession session, int castleId, CancellationToken ct)
+    public Task<string?> TrySiegeListAsync(ZoneSession session, int castleId, CancellationToken ct)
     {
         if (!session.InWorld)
-            return "world";
+            return Task.FromResult<string?>("world");
 
-        var outbound = new List<Pending>();
         string? error;
         lock (_gate)
         {
             long now = _clock().ToUnixTimeMilliseconds();
-            AnnounceClosed(now, outbound);
+            AnnounceClosed(now);
             if (_siege.List(castleId, now) == null)
                 error = SiegeProtocol.Castle;
             else
             {
                 error = null;
-                QueueSiegeInfo(session, castleId, now, outbound);
+                QueueSiegeInfo(session, castleId, now);
             }
         }
 
         if (error != null)
-            return error;
-        await FlushOthersAsync(outbound, ct).ConfigureAwait(false);
-        return null;
+            return Task.FromResult<string?>(error);
+        return Task.FromResult<string?>(null);
     }
 
-    public async Task<string?> TryAdminCaptureAsync(ZoneSession session, int castleId, int clanId, CancellationToken ct)
+    public Task<string?> TryAdminCaptureAsync(ZoneSession session, int castleId, int clanId, CancellationToken ct)
     {
         if (!session.InWorld)
-            return "world";
+            return Task.FromResult<string?>("world");
 
-        var outbound = new List<Pending>();
         string? error;
         lock (_gate)
-            error = CaptureLocked(clanId, castleId, _clock().ToUnixTimeMilliseconds(), outbound, session);
+            error = CaptureLocked(clanId, castleId, _clock().ToUnixTimeMilliseconds(), session);
 
         if (error != null)
-            return error;
-        await FlushOthersAsync(outbound, ct).ConfigureAwait(false);
-        return null;
+            return Task.FromResult<string?>(error);
+        return Task.FromResult<string?>(null);
     }
 
     void LoadSiege()
@@ -190,9 +182,9 @@ public sealed partial class ZoneWorld
         PersistSiege();
     }
 
-    string? CaptureLocked(int clanId, int castleId, long nowUnixMs, List<Pending>? outbound, ZoneSession? actor = null)
+    string? CaptureLocked(int clanId, int castleId, long nowUnixMs, ZoneSession? actor = null)
     {
-        AnnounceClosed(nowUnixMs, outbound);
+        AnnounceClosed(nowUnixMs);
         string? error = castleId == 0
             ? _siege.CaptureCastle(clanId, nowUnixMs)
             : _siege.CaptureCastle(clanId, castleId, nowUnixMs);
@@ -205,27 +197,25 @@ public sealed partial class ZoneWorld
         if (!PersistSiege())
             return SiegeProtocol.Store;
 
-        if (castle != null && outbound != null)
+        if (castle != null)
         {
-            Broadcast(SiegeLines.CastleCaptured(castle.Name), outbound);
+            Broadcast(SiegeLines.CastleCaptured(castle.Name));
             if (!castle.InProgress)
-                Broadcast(SiegeLines.SiegeFinished(castle.Name), outbound);
+                Broadcast(SiegeLines.SiegeFinished(castle.Name));
             if (actor != null)
-                QueueSiegeInfo(actor, castle.Id, nowUnixMs, outbound);
+                QueueSiegeInfo(actor, castle.Id, nowUnixMs);
         }
 
         return null;
     }
 
-    void AnnounceClosed(long nowUnixMs, List<Pending>? outbound)
+    void AnnounceClosed(long nowUnixMs)
     {
-        if (outbound == null)
-            return;
         foreach (int castleId in _siege.Refresh(nowUnixMs))
         {
             var castle = _siege.Find(castleId);
             if (castle != null)
-                Broadcast(SiegeLines.RegistrationEnded(castle.Name), outbound);
+                Broadcast(SiegeLines.RegistrationEnded(castle.Name));
         }
     }
 
@@ -264,12 +254,12 @@ public sealed partial class ZoneWorld
         };
     }
 
-    void QueueSiegeInfo(ZoneSession session, int castleId, long nowUnixMs, List<Pending> outbound)
+    void QueueSiegeInfo(ZoneSession session, int castleId, long nowUnixMs)
     {
         var list = _siege.List(castleId, nowUnixMs);
         if (list == null)
             return;
-        outbound.Add(Pack(session, MsgType.SiegeInfo, new SiegeInfoMsg
+        var msg = new SiegeInfoMsg
         {
             CastleId = list.CastleId,
             Name = list.Name,
@@ -281,15 +271,53 @@ public sealed partial class ZoneWorld
             InProgress = list.InProgress,
             EndsUnixMs = list.EndsUnixMs,
             Clans = list.Clans.Select(row => new SiegeClanMsg { ClanId = row.ClanId, Side = row.Side }).ToArray()
-        }));
+        };
+        // Siege state is per-castle, so the requester is the only watcher: no broadcast, just this session.
+        NetBridge?.FanoutSiegeInfo([session.ObjectId], ToNetSiegeInfo(msg));
     }
 
-    void Broadcast(SystemMessageMsg line, List<Pending> outbound)
+    static Fineage.Net.Contract.SiegeInfoNetMsg ToNetSiegeInfo(SiegeInfoMsg info) => new()
     {
+        CastleId = info.CastleId,
+        Name = info.Name,
+        OwnerClanId = info.OwnerClanId,
+        TaxPercent = info.TaxPercent,
+        SiegeUnixMs = info.SiegeUnixMs,
+        RegistrationDeadlineUnixMs = info.RegistrationDeadlineUnixMs,
+        RegistrationClosed = info.RegistrationClosed,
+        InProgress = info.InProgress,
+        EndsUnixMs = info.EndsUnixMs,
+        Clans = info.Clans
+            .Select(row => new Fineage.Net.Contract.SiegeClanNet { ClanId = row.ClanId, Side = row.Side })
+            .ToArray()
+    };
+
+    /// <summary>Net admin entry point: the listener checks the flag before calling this.</summary>
+    public async Task<string?> TryAdminCaptureNetAsync(ZoneSession session, Fineage.Net.Contract.AdminCaptureCastleNetMsg request, CancellationToken ct) =>
+        await TryAdminCaptureAsync(session, request.CastleId, request.ClanId, ct).ConfigureAwait(false);
+
+    void Broadcast(SystemMessageMsg line)
+    {
+        var live = new List<int>();
         foreach (var entity in _byId.Values.OrderBy(entity => entity.ObjectId))
         {
             if (entity.Session is { InWorld: true } session)
-                outbound.Add(Pack(session, MsgType.SystemMessage, line));
+            if (entity.Session is { InWorld: true })
+                live.Add(entity.ObjectId);
         }
+        // Castle capture and the end of a siege are server-wide news, not a per-session reply.
+        if (live.Count > 0)
+            NetBridge?.FanoutSystemMessage(live, ToNetSystemLine(line));
     }
+
+    /// <summary>One siege line to one session over Net, next to the V2 frame the same call queues.</summary>
+    void FanSystemLine(ZoneSession session, SystemMessageMsg line) =>
+        NetBridge?.FanoutSystemMessage([session.ObjectId], ToNetSystemLine(line));
+
+    static Fineage.Net.Contract.SystemMessageNetMsg ToNetSystemLine(SystemMessageMsg line) => new()
+    {
+        Id = line.Id,
+        Text = line.Text,
+        Params = line.Params
+    };
 }

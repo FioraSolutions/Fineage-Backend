@@ -1,73 +1,60 @@
 using Fineage.Game.Services;
-using Fineage.Login;
+using Fineage.Net.Contract;
 using Fineage.Protocol;
 using Fineage.Zone.Spawns;
-using Fineage.Zone.World;
-using MessagePack;
 using Xunit;
 
 namespace Fineage.Zone.Tests;
 
+/// <summary>
+/// The talking-island helper hands a new character its kit once, on the first talk. Ported off the V2 wire; the gift
+/// and the page are read from the recorded Net fanout.
+/// </summary>
 public sealed class NewbieHelperGiftTests
 {
+    const int GuideNpcId = 30598;
+
     [Fact]
     public async Task Talking_island_guide_gives_soothers_shots_and_tokens_once()
     {
-        var store = JsonAccountStore.InMemory();
-        var login = new LoginService(store, new HandoffTokens(HandoffTokens.DefaultSecret));
-        var ticket = login.Play("gift", "secret1", "Gifted", HumanClasses.Fighter);
-        Assert.True(ticket.Ok && ticket.Value != null);
-        Assert.True(store.TrySaveProgress(ticket.Value.Account, ticket.Value.CharacterId, 5, 0, 0, 0, 0, 0, 0));
+        var guide = Assert.Single(
+            SpawnCatalog.LoadDefault().GetMap(SpawnCatalog.TalkingIslandVillageMapId).Npcs,
+            row => row.NpcId == GuideNpcId);
+        var bench = Open();
+        // Start on top of the guide: talk needs the 150 unit radius, and the village is far from the default spawn.
+        BenchPlayer actor = await bench.EnterAsync("gift", "Gifted", level: 5, x: guide.X, y: guide.Y, z: guide.Z);
 
-        var village = SpawnCatalog.LoadDefault().GetMap(SpawnCatalog.TalkingIslandVillageMapId);
-        var guide = Assert.Single(village.Npcs, row => row.NpcId == 30598);
-        Assert.True(store.TrySavePresence(ticket.Value.Account, ticket.Value.CharacterId, guide.X, guide.Y, guide.Z, null));
+        Assert.Null(await actor.Talk(guide.ObjectId));
 
-        var world = new ZoneWorld(
-            spawnCatalog: SpawnCatalog.From(new Dictionary<string, SpawnMapDefinition>
-            {
-                [SpawnCatalog.TalkingIslandVillageMapId] = village
-            }),
-            activeMapId: SpawnCatalog.TalkingIslandVillageMapId,
-            accounts: store);
-        await using var stream = new MemoryStream();
-        var session = new ZoneSession(stream);
-        session.Bind(ticket.Value.CharacterId, ticket.Value.Account, ticket.Value.CharacterName, ticket.Value.ClassId);
-        Assert.True(await world.TryEnterAsync(session, CancellationToken.None));
-
-        long mark = stream.Length;
-        Assert.Null(await world.TryNpcTalkAsync(session, guide.ObjectId, CancellationToken.None));
-        stream.Position = mark;
-
-        var inventory = await ReadAsync<InventoryUpdateMsg>(stream, MsgType.InventoryUpdate);
+        var inventory = Assert.IsType<InventoryUpdateNetMsg>(
+            bench.Rec.Of(nameof(FanoutInventoryUpdate)).Last()[1]);
         Assert.Contains(inventory.Changes, row => row.ItemId == NewbieHelperGift.SoulshotNovice && row.Count == NewbieHelperGift.SoulshotCount);
         Assert.Contains(inventory.Changes, row => row.ItemId == NewbieHelperGift.TravelToken && row.Count == NewbieHelperGift.TokenCount);
         Assert.Contains(inventory.Changes, row => row.ItemId == NewbieHelperGift.ScrollRecovery && row.Count == NewbieHelperGift.ScrollCount);
 
-        var html = await ReadAsync<NpcHtmlMsg>(stream, MsgType.NpcHtml);
-        Assert.Contains("SupportMagic.htm", html.Html, StringComparison.Ordinal);
+        Assert.Contains("SupportMagic.htm", LastHtml(bench), StringComparison.Ordinal);
 
-        mark = stream.Length;
-        Assert.Null(await world.TryNpcTalkAsync(session, guide.ObjectId, CancellationToken.None));
-        stream.Position = mark;
-        // Second talk: HTML only, no second kit.
-        _ = await ReadAsync<NpcHtmlMsg>(stream, MsgType.NpcHtml);
-        while (stream.Position < stream.Length)
-        {
-            var frame = await FrameIO.ReadAsync(stream);
-            Assert.NotNull(frame);
-            Assert.NotEqual((ushort)MsgType.InventoryUpdate, frame!.Value.Type);
-        }
+        // Second talk: the page again, but no second kit.
+        bench.Rec.Calls.Clear();
+        Assert.Null(await actor.Talk(guide.ObjectId));
+        Assert.Empty(bench.Rec.Of(nameof(FanoutInventoryUpdate)));
+        Assert.Contains("SupportMagic.htm", LastHtml(bench), StringComparison.Ordinal);
     }
 
-    static async Task<T> ReadAsync<T>(MemoryStream stream, MsgType type)
+    static WorldBench Open()
     {
-        while (true)
-        {
-            var frame = await FrameIO.ReadAsync(stream);
-            Assert.NotNull(frame);
-            if (frame!.Value.Type == (ushort)type)
-                return MessagePackSerializer.Deserialize<T>(frame.Value.Body);
-        }
+        var village = SpawnCatalog.LoadDefault().GetMap(SpawnCatalog.TalkingIslandVillageMapId);
+        return new WorldBench(
+            spawns: SpawnCatalog.From(new Dictionary<string, SpawnMapDefinition>
+            {
+                [SpawnCatalog.TalkingIslandVillageMapId] = village
+            }),
+            mapId: SpawnCatalog.TalkingIslandVillageMapId);
     }
+
+    static string LastHtml(WorldBench bench) =>
+        Assert.IsType<NpcHtmlNetMsg>(bench.Rec.Of(nameof(FanoutNpcHtml)).Last()[1]).Html;
+
+    const string FanoutNpcHtml = "FanoutNpcHtml";
+    const string FanoutInventoryUpdate = "FanoutInventoryUpdate";
 }

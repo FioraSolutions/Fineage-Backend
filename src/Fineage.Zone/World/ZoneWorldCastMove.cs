@@ -17,7 +17,7 @@ public sealed partial class ZoneWorld
     bool IsCasting(ZoneEntity player, long now) => player.CastingUntilMs > now;
 
     /// <summary>Mobius thinkCast: clientStopMoving(null) + doCast heading. Watchers get a zero-length move = stop.</summary>
-    void StopForCast(ZoneEntity player, ZoneEntity target, long now, List<Pending> outbound)
+    void StopForCast(ZoneEntity player, ZoneEntity target, long now)
     {
         var session = player.Session;
         if (session != null)
@@ -60,7 +60,7 @@ public sealed partial class ZoneWorld
     }
 
     /// <summary>PlayerAI.onIntentionMoveTo while casting: saveNextIntention(MOVE_TO) and run it after the cast.</summary>
-    void TickQueuedMoves(long now, List<Pending> outbound)
+    void TickQueuedMoves(long now)
     {
         foreach (var player in Players().ToList())
         {
@@ -72,13 +72,13 @@ public sealed partial class ZoneWorld
                 var move = session.QueuedMove;
                 session.QueuedMove = null;
                 if (!player.Dead)
-                    TryMove(session, move, outbound, outbound);
+                    TryMove(session, move);
             }
             if (session.SitOnArrive && !player.MoveActive)
             {
                 session.SitOnArrive = false;
                 if (!player.Sitting && !player.Dead)
-                    ToggleSitStand(player, outbound);
+                    ToggleSitStand(player);
             }
         }
     }

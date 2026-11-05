@@ -1,11 +1,11 @@
-using Fineage.Protocol;
+using Fineage.Game;
 
 namespace Fineage.Zone.World;
 
 /// <summary>
-/// Net projection of Mobius UserInfo: the same sheet V2 <see cref="UserInfoMsg"/> carries (vitals, base stats,
-/// live combat stats from <see cref="PlayerStats"/>, speeds, paperdoll) so the Net status window and the
-/// owner's model match the server. Every self UserInfo refresh goes through <see cref="SelfUserInfo"/>.
+/// Net projection of Mobius UserInfo: vitals, base stats, live combat stats from <see cref="PlayerStats"/>,
+/// speeds, paperdoll, so the Net status window and the owner's model match the server.
+/// Every self UserInfo refresh goes through <see cref="SelfUserInfo"/>.
 /// </summary>
 public sealed partial class ZoneWorld
 {
@@ -26,69 +26,68 @@ public sealed partial class ZoneWorld
 
     internal Fineage.Net.Contract.UserInfoNetMsg NetUserInfo(ZoneEntity e)
     {
-        var v2 = UserInfo(e);
-        var stats = PlayerClasses.TryGet(e.ClassId, out var template) && template != null ? PlayerStats(e) : default;
-        var slots = new Fineage.Net.Contract.PaperdollSlotNet[v2.Paperdoll.Length];
-        for (int i = 0; i < slots.Length; i++)
+        var vitals = BuildUserInfoVitals(e);
+        var slots = new Fineage.Net.Contract.PaperdollSlotNet[InventoryMessages.PaperdollSlotCount];
+        if (e.Inventory != null)
         {
-            var src = v2.Paperdoll[i];
-            slots[i] = new Fineage.Net.Contract.PaperdollSlotNet
+            for (int i = 0; i < slots.Length; i++)
             {
-                ObjectId = src?.ObjectId ?? 0,
-                ItemId = src?.ItemId ?? 0,
-                EnchantLevel = src?.EnchantLevel ?? 0
-            };
+                var item = e.Inventory.GetEquipped((PaperdollSlot)i);
+                slots[i] = new Fineage.Net.Contract.PaperdollSlotNet
+                {
+                    ObjectId = item?.ObjectId ?? 0,
+                    ItemId = item?.ItemId ?? 0,
+                    EnchantLevel = item?.EnchantLevel ?? 0
+                };
+            }
         }
 
         return new Fineage.Net.Contract.UserInfoNetMsg
         {
             EntityValue = (ulong)(uint)e.ObjectId,
             EntityGeneration = 1,
-            Name = v2.Name,
-            ClassId = v2.ClassId,
+            Name = e.Name,
+            ClassId = e.ClassId,
             Race = e.Race,
             Sex = e.Sex,
-            X = v2.X,
-            Y = v2.Y,
-            Z = v2.Z,
-            RunSpeed = v2.RunSpeed,
-            WalkSpeed = v2.WalkSpeed,
-            Running = v2.Running,
-            Level = v2.Level,
-            Exp = v2.Exp,
-            Sp = v2.Sp,
-            CurHp = v2.CurHp,
-            MaxHp = v2.MaxHp,
-            CurMp = v2.CurMp,
-            MaxMp = v2.MaxMp,
-            CurCp = v2.CurCp,
-            MaxCp = v2.MaxCp,
-            Str = v2.Str,
-            Dex = v2.Dex,
-            Con = v2.Con,
-            Int = v2.Int,
-            Wit = v2.Wit,
-            Men = v2.Men,
-            PAtk = v2.PAtk,
-            MAtk = v2.MAtk,
-            PDef = v2.PDef,
-            MDef = v2.MDef,
-            PAtkSpd = v2.PAtkSpd,
-            MAtkSpd = v2.MAtkSpd,
-            Accuracy = v2.Accuracy,
-            Evasion = stats.Evasion,
-            CritRate = v2.CritRate,
-            WeaponGradePenalty = v2.WeaponGradePenalty,
-            ArmorGradePenalty = v2.ArmorGradePenalty,
-            ClanId = v2.ClanId,
+            X = e.X,
+            Y = e.Y,
+            Z = e.Z,
+            RunSpeed = e.RunSpeed,
+            WalkSpeed = e.WalkSpeed,
+            Running = e.Running,
+            Level = vitals.Level,
+            Exp = vitals.Exp,
+            Sp = vitals.Sp,
+            CurHp = vitals.CurHp,
+            MaxHp = vitals.MaxHp,
+            CurMp = vitals.CurMp,
+            MaxMp = vitals.MaxMp,
+            CurCp = vitals.CurCp,
+            MaxCp = vitals.MaxCp,
+            Str = vitals.Str,
+            Dex = vitals.Dex,
+            Con = vitals.Con,
+            Int = vitals.Int,
+            Wit = vitals.Wit,
+            Men = vitals.Men,
+            PAtk = vitals.PAtk,
+            MAtk = vitals.MAtk,
+            PDef = vitals.PDef,
+            MDef = vitals.MDef,
+            PAtkSpd = vitals.PAtkSpd,
+            MAtkSpd = vitals.MAtkSpd,
+            Accuracy = vitals.Accuracy,
+            Evasion = vitals.Evasion,
+            CritRate = vitals.CritRate,
+            WeaponGradePenalty = e.WeaponGradePenalty,
+            ArmorGradePenalty = e.ArmorGradePenalty,
+            ClanId = e.ClanId,
             Paperdoll = slots
         };
     }
 
-    /// <summary>V2 UserInfo to <paramref name="session"/> and the same sheet to its Net client (Mobius sendPacket(new UserInfo)).</summary>
-    Pending SelfUserInfo(ZoneSession session, ZoneEntity entity)
-    {
+    /// <summary>Mobius <c>sendPacket(new UserInfo)</c>: the owner's sheet only, straight to its Net client.</summary>
+    void SelfUserInfo(ZoneEntity entity) =>
         NetBridge?.FanoutUserInfo([entity.ObjectId], NetUserInfo(entity));
-        return Pack(session, MsgType.UserInfo, UserInfo(entity));
-    }
 }

@@ -72,12 +72,3 @@ public sealed class ZoneRegenFormulaTests
         Assert.Equal(1.0, idle, 6);
     }
 }
-
-public sealed class ZoneRegenSharedTests
-{
-    [Fact]
-    public async Task Two_clients_see_same_regen_StatusUpdate()
-    {
-        await ZoneMultiplayerAcceptance.RunRegenSharedAsync();
-    }
-}

@@ -26,7 +26,7 @@ public sealed partial class ZoneWorld
         return Math.Abs(destZ - curZ) > allowed ? curZ : destZ;
     }
 
-    string? StartTimedMove(ZoneEntity entity, ZoneSession session, MoveToMsg move, List<Pending> toSelf, List<Pending> toOthers)
+    string? StartTimedMove(ZoneEntity entity, ZoneSession session, MoveToMsg move)
     {
         long now = _clock().ToUnixTimeMilliseconds();
         AdvanceMove(entity, now);
@@ -73,7 +73,7 @@ public sealed partial class ZoneWorld
 
         // Mobius: knownlist is evaluated at the real (current) position; TickPlayerMovement revalidates it
         // every AoiRefreshDistance of travel so objects enter/leave as the runner passes them.
-        ReconcileKnownlist(entity, ack, toSelf, toOthers);
+        ReconcileKnownlist(entity, ack);
         entity.AoiRefreshX = curX;
         entity.AoiRefreshY = curY;
 
@@ -157,7 +157,7 @@ public sealed partial class ZoneWorld
     /// </summary>
     internal const int AoiRefreshDistance = 250;
 
-    void TickPlayerMovement(long now, List<Pending> outbound)
+    void TickPlayerMovement(long now)
     {
         foreach (var e in _byId.Values)
         {
@@ -178,7 +178,7 @@ public sealed partial class ZoneWorld
                         DestX = e.MoveDestX, DestY = e.MoveDestY, DestZ = e.MoveDestZ,
                         OriginX = e.X, OriginY = e.Y, OriginZ = e.Z
                     };
-                    RefreshMovingKnownlist(e, ack, outbound);
+                    RefreshMovingKnownlist(e, ack);
                     continue;
                 }
             }
@@ -187,17 +187,17 @@ public sealed partial class ZoneWorld
             long dx = e.X - e.AoiRefreshX, dy = e.Y - e.AoiRefreshY;
             // Refresh on distance travelled, and once on arrival so the final position is exact.
             if (!e.MoveActive || dx * dx + dy * dy >= (long)AoiRefreshDistance * AoiRefreshDistance)
-                RefreshMovingKnownlist(e, null, outbound);
+                RefreshMovingKnownlist(e, null);
         }
     }
 
     /// <summary>Knownlist diff at the mover's current XY; Net clients get EntitySpawn/EntityDespawn (+ MoveState for runners).</summary>
-    void RefreshMovingKnownlist(ZoneEntity e, MoveToMsg? ack, List<Pending> outbound)
+    void RefreshMovingKnownlist(ZoneEntity e, MoveToMsg? ack)
     {
         e.AoiRefreshX = e.X;
         e.AoiRefreshY = e.Y;
         var before = new HashSet<int>(e.Knownlist);
-        ReconcileKnownlist(e, ack, outbound, outbound);
+        ReconcileKnownlist(e, ack);
         if (NetBridge == null || e.Session == null)
             return;
         List<int>? added = null, removed = null;

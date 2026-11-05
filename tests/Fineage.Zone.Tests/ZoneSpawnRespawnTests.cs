@@ -41,8 +41,7 @@ public sealed class ZoneSpawnRespawnTests
 
         var login = new LoginService(JsonAccountStore.InMemory(), new HandoffTokens(HandoffTokens.DefaultSecret));
         var ticket = login.Play("spawn", "secret1", "Hero", HumanClasses.Fighter).Value!;
-        await using var stream = new MemoryStream();
-        var session = new ZoneSession(stream);
+        var session = new ZoneSession();
         session.Bind(ticket.CharacterId, ticket.Account, ticket.CharacterName, ticket.ClassId);
         Assert.True(await world.TryEnterAsync(session, CancellationToken.None));
 

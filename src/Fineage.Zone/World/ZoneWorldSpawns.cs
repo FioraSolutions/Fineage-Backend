@@ -139,7 +139,7 @@ public sealed partial class ZoneWorld
         slot.RespawnAt = _clock().AddSeconds(Math.Max(1, delaySeconds));
     }
 
-    void TickSpawns(List<Pending> outbound)
+    void TickSpawns()
     {
         var now = _clock();
         foreach (var slot in _spawnSlots.Values)
@@ -155,11 +155,11 @@ public sealed partial class ZoneWorld
             MaterializeSpawn(slot.Definition, slot.MapId);
             slot.RespawnAt = null;
             if (_byId.TryGetValue(slot.Definition.ObjectId, out var npc))
-                FanoutNewNpc(npc, outbound);
+                FanoutNewNpc(npc);
         }
     }
 
-    void FanoutNewNpc(ZoneEntity npc, List<Pending> outbound)
+    void FanoutNewNpc(ZoneEntity npc)
     {
         foreach (var player in Players())
         {
@@ -169,7 +169,6 @@ public sealed partial class ZoneWorld
                 continue;
             if (!player.Knownlist.Add(npc.ObjectId))
                 continue;
-            outbound.Add(Pack(player.Session, MsgType.NpcInfo, NpcInfo(npc)));
             // Net clients: the respawn was added to the knownlist here, so the next move refresh sees no diff and
             // the mob stayed invisible until the player left and re-entered view ("mobs appear late"). Push the
             // EntitySpawn now, like Mobius Spawn.doSpawn → broadcast NpcInfo to the region.
@@ -183,7 +182,7 @@ public sealed partial class ZoneWorld
         lock (_gate)
         {
             if (_byId.TryGetValue(objectId, out var npc))
-                DespawnNpc(npc, []);
+                DespawnNpc(npc);
         }
     }
 
@@ -192,8 +191,8 @@ public sealed partial class ZoneWorld
     {
         lock (_gate)
         {
-            TickCorpseDecay(_clock().ToUnixTimeMilliseconds(), []);
-            TickSpawns([]);
+            TickCorpseDecay(_clock().ToUnixTimeMilliseconds());
+            TickSpawns();
         }
     }
 }

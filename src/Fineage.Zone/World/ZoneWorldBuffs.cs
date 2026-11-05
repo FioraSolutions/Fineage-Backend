@@ -5,23 +5,21 @@ namespace Fineage.Zone.World;
 
 public sealed partial class ZoneWorld
 {
-    public async Task<string?> TryBuffRequestAsync(ZoneSession session, BuffRequestMsg request, CancellationToken ct)
+    public Task<string?> TryBuffRequestAsync(ZoneSession session, BuffRequestMsg request, CancellationToken ct)
     {
         if (!IsLive(session))
-            return "world";
+            return Task.FromResult<string?>("world");
 
-        var outbound = new List<Pending>();
         string? error;
         lock (_gate)
-            error = TryBuffRequest(session, targetId: request.TargetObjectId > 0 ? request.TargetObjectId : session.ObjectId, request, outbound);
+            error = TryBuffRequest(session, targetId: request.TargetObjectId > 0 ? request.TargetObjectId : session.ObjectId, request);
         if (error != null)
-            return error;
+            return Task.FromResult<string?>(error);
 
-        await FlushSelfAsync(session, outbound, ct).ConfigureAwait(false);
-        return null;
+        return Task.FromResult<string?>(null);
     }
 
-    string? TryBuffRequest(ZoneSession session, int targetId, BuffRequestMsg request, List<Pending> outbound)
+    string? TryBuffRequest(ZoneSession session, int targetId, BuffRequestMsg request)
     {
         if (!_byId.TryGetValue(targetId, out var target))
             return "target";
@@ -49,12 +47,12 @@ public sealed partial class ZoneWorld
             int effectId = request.EffectId > 0 ? request.EffectId : ZoneBuffs.SampleWindWalk;
             int value = ResolveAbnormalValue(effectId, ZoneBuffs.SampleEffectValue);
             int duration = ResolveAbnormalDurationSeconds(effectId, ZoneBuffs.SampleDurationSeconds);
-            ApplyAbnormalPlaytest(target, effectId, value, duration, now, outbound);
+            ApplyAbnormalPlaytest(target, effectId, value, duration, now);
             ZoneLog.Info($"buff object={targetId} count={target.Abnormals.Count} remove={request.Remove}");
             return null;
         }
 
-        FanoutAbnormal(target, outbound);
+        FanoutAbnormal(target);
         ZoneLog.Info($"buff object={targetId} count={target.Abnormals.Count} remove={request.Remove}");
         return null;
     }

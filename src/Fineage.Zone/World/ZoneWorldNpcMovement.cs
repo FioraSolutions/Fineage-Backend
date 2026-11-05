@@ -10,7 +10,7 @@ namespace Fineage.Zone.World;
 public sealed partial class ZoneWorld
 {
     /// <summary>Start (or re-target) a timed NPC move to dest and broadcast the first leg to watchers.</summary>
-    void StartNpcMove(ZoneEntity npc, int wantX, int wantY, int wantZ, long now, List<Pending> outbound)
+    void StartNpcMove(ZoneEntity npc, int wantX, int wantY, int wantZ, long now)
     {
         AdvanceMove(npc, now);
         npc.MovePath.Clear();
@@ -43,7 +43,7 @@ public sealed partial class ZoneWorld
         npc.MoveDestZ = destZ;
         npc.MoveLastTickMs = now;
         npc.MoveActive = npc.X != destX || npc.Y != destY;
-        BroadcastNpcMove(npc, destX, destY, destZ, outbound);
+        BroadcastNpcMove(npc, destX, destY, destZ);
     }
 
     /// <summary>
@@ -51,7 +51,7 @@ public sealed partial class ZoneWorld
     /// spawn point. It does <b>not</b> heal — only the distance leash reset does (see
     /// <see cref="TryLeashReset"/>); a mob that simply lost its target heals through the normal regen tick.
     /// </summary>
-    void ReturnHome(ZoneEntity npc, long now, List<Pending> outbound)
+    void ReturnHome(ZoneEntity npc, long now)
     {
         npc.AggroTargetId = 0;
         npc.HateList.Clear();
@@ -62,17 +62,17 @@ public sealed partial class ZoneWorld
         if (!npc.HomeSet)
         {
             StopTimedMove(npc);
-            BroadcastNpcMove(npc, npc.X, npc.Y, npc.Z, outbound);
+            BroadcastNpcMove(npc, npc.X, npc.Y, npc.Z);
             return;
         }
         npc.ReturningHome = true;
         if (npc.Running)
         {
             npc.Running = false;
-            FanoutMoveType(npc, outbound);
+            FanoutMoveType(npc);
         }
         ZoneLog.Info($"[npc] return home obj={npc.ObjectId} from={npc.X},{npc.Y} home={npc.HomeX},{npc.HomeY}");
-        StartNpcMove(npc, npc.HomeX, npc.HomeY, npc.HomeZ, now, outbound);
+        StartNpcMove(npc, npc.HomeX, npc.HomeY, npc.HomeZ, now);
     }
 
     /// <summary>
@@ -84,7 +84,7 @@ public sealed partial class ZoneWorld
     /// unless the operator turns it on — plain <c>returnHome</c> never heals.
     /// </para>
     /// </summary>
-    void TickLeash(long now, List<Pending> outbound)
+    void TickLeash(long now)
     {
         if (!ZoneNpcSettings.AggroDistanceCheckEnabled)
             return;
@@ -96,15 +96,14 @@ public sealed partial class ZoneWorld
         {
             if (npc.Kind != ZoneEntityKind.Npc || npc.CurHp <= 0 || npc.AggroTargetId <= 0 || !npc.HomeSet)
                 continue;
-            TryLeashReset(npc, range, raidRange, raids, restoreLife, outbound);
+            TryLeashReset(npc, range, raidRange, raids, restoreLife);
         }
     }
 
     /// <summary>
     /// Leash test for one monster. Returns true when the mob was reset and sent home.
     /// </summary>
-    bool TryLeashReset(ZoneEntity npc, int range, int raidRange, bool checkRaids, bool restoreLife,
-        List<Pending> outbound)
+    bool TryLeashReset(ZoneEntity npc, int range, int raidRange, bool checkRaids, bool restoreLife)
     {
         // Mobius skips GrandBosses and walkers; instance gating matches AGGRO_DISTANCE_CHECK_INSTANCES = False.
         if (npc.NpcType == "GrandBoss" || npc.InstanceId != 0 || !npc.HomeSet || npc.AggroTargetId <= 0)
@@ -124,19 +123,19 @@ public sealed partial class ZoneWorld
             npc.CurMp = npc.MaxMp;
             npc.RegenCarryHp = 0;
             npc.RegenCarryMp = 0;
-            FanoutVitals(npc, StatusFor(npc), outbound);
+            FanoutVitals(npc, StatusFor(npc));
         }
         ZoneLog.Info($"[aggro] leash reset npc={npc.ObjectId} from={npc.X},{npc.Y} home={npc.HomeX},{npc.HomeY} restore={restoreLife}");
-        ReturnHome(npc, _clock().ToUnixTimeMilliseconds(), outbound);
+        ReturnHome(npc, _clock().ToUnixTimeMilliseconds());
         return true;
     }
 
     /// <summary>Test seam: run the leash check with explicit ini values and no outbound buffer.</summary>
     internal bool LeashResetForTest(ZoneEntity npc, int range, int raidRange, bool checkRaids, bool restoreLife) =>
-        TryLeashReset(npc, range, raidRange, checkRaids, restoreLife, []);
+        TryLeashReset(npc, range, raidRange, checkRaids, restoreLife);
 
     /// <summary>Advance every moving NPC at walk/run speed; announce new path legs and the final stop.</summary>
-    void TickNpcMovement(long now, List<Pending> outbound)
+    void TickNpcMovement(long now)
     {
         foreach (var e in _byId.Values)
         {
@@ -151,20 +150,20 @@ public sealed partial class ZoneWorld
             AdvanceMove(e, now);
             long rdx = e.X - e.AoiRefreshX, rdy = e.Y - e.AoiRefreshY;
             if (!e.MoveActive || rdx * rdx + rdy * rdy >= (long)AoiRefreshDistance * AoiRefreshDistance)
-                RefreshNpcWatchers(e, outbound);
+                RefreshNpcWatchers(e);
             if (e.MoveSegmentDirty)
             {
                 e.MoveSegmentDirty = false;
                 if (e.MoveActive)
                 {
-                    BroadcastNpcMove(e, e.MoveDestX, e.MoveDestY, e.MoveDestZ, outbound);
+                    BroadcastNpcMove(e, e.MoveDestX, e.MoveDestY, e.MoveDestZ);
                     continue;
                 }
             }
             if (!e.MoveActive)
             {
                 // Arrived: stop broadcast at the exact server spot (Mobius onEvtArrived / StopMove).
-                BroadcastNpcMove(e, e.X, e.Y, e.Z, outbound);
+                BroadcastNpcMove(e, e.X, e.Y, e.Z);
                 e.ReturningHome = false; // stays walking; the next chase fans ChangeMoveType(run)
             }
         }
@@ -175,7 +174,7 @@ public sealed partial class ZoneWorld
     /// covers the NPC get NpcInfo / Net EntitySpawn (+ MoveState), players it left get DeleteObject / EntityDespawn.
     /// Same hysteresis as players: StillKnown (5x5 cells) or combat pin keeps an existing link.
     /// </summary>
-    void RefreshNpcWatchers(ZoneEntity npc, List<Pending> outbound)
+    void RefreshNpcWatchers(ZoneEntity npc)
     {
         npc.AoiRefreshX = npc.X;
         npc.AoiRefreshY = npc.Y;
@@ -189,7 +188,6 @@ public sealed partial class ZoneWorld
                 if (!VisibleTo(player.ObjectId, npc.ObjectId))
                     continue;
                 player.Knownlist.Add(npc.ObjectId);
-                AddPresence(outbound, player.Session, npc);
                 NetBridge?.FanoutKnownlistDiff(player.ObjectId, [npc.ObjectId], []);
                 ZoneLog.Info($"[aoi] npc enter npc={npc.ObjectId} watcher={player.ObjectId} at={npc.X},{npc.Y}");
             }
@@ -197,7 +195,6 @@ public sealed partial class ZoneWorld
                      (!_aoi.StillKnown(player.ObjectId, npc.ObjectId) && !CombatPinned(player, npc)))
             {
                 player.Knownlist.Remove(npc.ObjectId);
-                outbound.Add(Pack(player.Session, MsgType.DeleteObject, new DeleteObjectMsg { ObjectId = npc.ObjectId }));
                 NetBridge?.FanoutKnownlistDiff(player.ObjectId, [], [npc.ObjectId]);
                 ZoneLog.Info($"[aoi] npc leave npc={npc.ObjectId} watcher={player.ObjectId} at={npc.X},{npc.Y}");
             }

@@ -6,23 +6,21 @@ public sealed partial class ZoneWorld
 {
     public const int MaxGrantCount = 10_000;
 
-    public async Task<string?> TryGrantItemAsync(ZoneSession session, GrantItemRequestMsg request, CancellationToken ct)
+    public Task<string?> TryGrantItemAsync(ZoneSession session, GrantItemRequestMsg request, CancellationToken ct)
     {
         if (!IsLive(session))
-            return "world";
+            return Task.FromResult<string?>("world");
 
-        var toSelf = new List<Pending>();
         string? error;
         lock (_gate)
-            error = TryGrantItem(session, request, toSelf);
+            error = TryGrantItem(session, request);
         if (error != null)
-            return error;
+            return Task.FromResult<string?>(error);
 
-        await FlushSelfAsync(session, toSelf, ct).ConfigureAwait(false);
-        return null;
+        return Task.FromResult<string?>(null);
     }
 
-    string? TryGrantItem(ZoneSession session, GrantItemRequestMsg request, List<Pending> toSelf)
+    string? TryGrantItem(ZoneSession session, GrantItemRequestMsg request)
     {
         if (!_byId.TryGetValue(session.ObjectId, out var player) || player.Inventory == null)
             return "world";
@@ -32,8 +30,6 @@ public sealed partial class ZoneWorld
             return "bad_request";
 
         var added = player.Inventory.Add(request.ItemId, request.Count);
-        toSelf.Add(Pack(session, MsgType.InventoryUpdate,
-            InventoryMessages.Update(InventoryChange.Add, added)));
         // Same reasoning as GiveItem: the Net client would otherwise never learn the row appeared.
         NetBridge?.FanoutInventoryUpdate(
             [session.ObjectId],

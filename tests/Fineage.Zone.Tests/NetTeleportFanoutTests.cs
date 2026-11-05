@@ -78,7 +78,7 @@ public sealed class NetTeleportFanoutTests
             teleports: FreeTeleports(),
             teleportOffset: 0);
 
-        var session = new ZoneSession(new MemoryStream());
+        var session = new ZoneSession();
         session.Bind(ticket.Value.CharacterId, ticket.Value.Account, ticket.Value.CharacterName, ticket.Value.ClassId);
         Assert.True(await world.TryEnterAsync(session, CancellationToken.None));
         return (world, session);

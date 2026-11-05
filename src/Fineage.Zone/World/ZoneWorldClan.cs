@@ -1,7 +1,6 @@
 using Fineage.Login;
 using Fineage.Protocol;
 using Fineage.Zone.Clan;
-using MessagePack;
 
 namespace Fineage.Zone.World;
 
@@ -49,16 +48,10 @@ public sealed partial class ZoneWorld
         if (!session.InWorld)
             return "world";
 
-        var outbound = new List<Pending>();
         string? error;
         lock (_gate)
-            error = TryClanCreate(session, request.Name, now.ToUnixTimeMilliseconds(), outbound);
-        if (error != null)
-            return error;
-
-        PublishClanNet(outbound);
-        await FlushOthersAsync(outbound, ct).ConfigureAwait(false);
-        return null;
+            error = TryClanCreate(session, request.Name, now.ToUnixTimeMilliseconds());
+        return error;
     }
 
     public async Task<string?> TryClanInviteAsync(
@@ -72,16 +65,10 @@ public sealed partial class ZoneWorld
         if (!session.InWorld)
             return "world";
 
-        var outbound = new List<Pending>();
         string? error;
         lock (_gate)
-            error = TryClanInvite(session, invite, now.ToUnixTimeMilliseconds(), outbound);
-        if (error != null)
-            return error;
-
-        PublishClanNet(outbound);
-        await FlushOthersAsync(outbound, ct).ConfigureAwait(false);
-        return null;
+            error = TryClanInvite(session, invite, now.ToUnixTimeMilliseconds());
+        return error;
     }
 
     public async Task<string?> TryClanAnswerAsync(
@@ -95,16 +82,10 @@ public sealed partial class ZoneWorld
         if (!session.InWorld)
             return "world";
 
-        var outbound = new List<Pending>();
         string? error;
         lock (_gate)
-            error = TryClanAnswer(session, answer, now.ToUnixTimeMilliseconds(), outbound);
-        if (error != null)
-            return error;
-
-        PublishClanNet(outbound);
-        await FlushOthersAsync(outbound, ct).ConfigureAwait(false);
-        return null;
+            error = TryClanAnswer(session, answer, now.ToUnixTimeMilliseconds());
+        return error;
     }
 
     public async Task<string?> TryClanLeaveAsync(ZoneSession session, DateTimeOffset now, CancellationToken ct)
@@ -112,16 +93,10 @@ public sealed partial class ZoneWorld
         if (!session.InWorld)
             return "world";
 
-        var outbound = new List<Pending>();
         string? error;
         lock (_gate)
-            error = TryClanLeave(session, now.ToUnixTimeMilliseconds(), outbound);
-        if (error != null)
-            return error;
-
-        PublishClanNet(outbound);
-        await FlushOthersAsync(outbound, ct).ConfigureAwait(false);
-        return null;
+            error = TryClanLeave(session, now.ToUnixTimeMilliseconds());
+        return error;
     }
 
     public async Task<string?> TryClanKickAsync(
@@ -135,16 +110,10 @@ public sealed partial class ZoneWorld
         if (!session.InWorld)
             return "world";
 
-        var outbound = new List<Pending>();
         string? error;
         lock (_gate)
-            error = TryClanKick(session, kick.TargetObjectId, now.ToUnixTimeMilliseconds(), outbound);
-        if (error != null)
-            return error;
-
-        PublishClanNet(outbound);
-        await FlushOthersAsync(outbound, ct).ConfigureAwait(false);
-        return null;
+            error = TryClanKick(session, kick.TargetObjectId, now.ToUnixTimeMilliseconds());
+        return error;
     }
 
     public async Task<string?> TryClanDissolveAsync(ZoneSession session, DateTimeOffset now, CancellationToken ct)
@@ -152,16 +121,10 @@ public sealed partial class ZoneWorld
         if (!session.InWorld)
             return "world";
 
-        var outbound = new List<Pending>();
         string? error;
         lock (_gate)
-            error = TryClanDissolve(session, now.ToUnixTimeMilliseconds(), outbound);
-        if (error != null)
-            return error;
-
-        PublishClanNet(outbound);
-        await FlushOthersAsync(outbound, ct).ConfigureAwait(false);
-        return null;
+            error = TryClanDissolve(session, now.ToUnixTimeMilliseconds());
+        return error;
     }
 
     public async Task<string?> TryClanCancelDissolveAsync(ZoneSession session, DateTimeOffset now, CancellationToken ct)
@@ -169,30 +132,20 @@ public sealed partial class ZoneWorld
         if (!session.InWorld)
             return "world";
 
-        var outbound = new List<Pending>();
         string? error;
         lock (_gate)
-            error = TryClanCancelDissolve(session, now.ToUnixTimeMilliseconds(), outbound);
-        if (error != null)
-            return error;
-
-        PublishClanNet(outbound);
-        await FlushOthersAsync(outbound, ct).ConfigureAwait(false);
-        return null;
+            error = TryClanCancelDissolve(session, now.ToUnixTimeMilliseconds());
+        return error;
     }
 
-    public async Task CompleteDueDissolutionsAsync(DateTimeOffset now, CancellationToken ct)
+    public void CompleteDueDissolutions(DateTimeOffset now)
     {
-        var outbound = new List<Pending>();
         lock (_gate)
-            CompleteDueDissolutions(now.ToUnixTimeMilliseconds(), outbound);
-        PublishClanNet(outbound);
-        await FlushOthersAsync(outbound, ct).ConfigureAwait(false);
+            CompleteDueDissolutions(now.ToUnixTimeMilliseconds());
     }
 
     void LoadClans()
-    {
-        if (_accounts == null)
+    {        if (_accounts == null)
             return;
 
         foreach (var record in _accounts.ListClans())
@@ -203,10 +156,22 @@ public sealed partial class ZoneWorld
                 _clanByPlayer[member.CharacterId] = clan.Id;
         }
 
-        CompleteDueDissolutions(_clock().ToUnixTimeMilliseconds(), []);
+        CompleteDueDissolutions(_clock().ToUnixTimeMilliseconds());
     }
 
-    void CompleteDueDissolutions(long nowMs, List<Pending> outbound)
+    /// <summary>Test hook: reread clan rows the store gained after boot (siege registration reads this cache).</summary>
+    internal bool ReloadClansForTests()
+    {
+        lock (_gate)
+        {
+            _clans.Clear();
+            _clanByPlayer.Clear();
+            LoadClans();
+            return _clans.Count > 0;
+        }
+    }
+
+    void CompleteDueDissolutions(long nowMs)
     {
         var due = new List<int>();
         foreach (var clan in _clans.Values)
@@ -216,7 +181,7 @@ public sealed partial class ZoneWorld
         }
 
         foreach (int id in due)
-            DestroyClan(id, nowMs, outbound);
+            DestroyClan(id, nowMs);
     }
 
     void RememberPenalties(ZoneSession session)
@@ -240,7 +205,7 @@ public sealed partial class ZoneWorld
             record.ClanCreateExpiryUnixMs));
     }
 
-    void AnnounceClanEnter(ZoneEntity entity, List<Pending> toSelf, List<Pending> toOthers)
+    void AnnounceClanEnter(ZoneEntity entity)
     {
         if (entity.ClanId == 0 || entity.Session == null)
             return;
@@ -248,24 +213,22 @@ public sealed partial class ZoneWorld
             return;
 
         RefreshOnlineMember(entity);
-        toSelf.Add(Pack(entity.Session, MsgType.PledgeStatusChanged, StatusOf(clan)));
-        toSelf.Add(Pack(entity.Session, MsgType.PledgeMemberList, MembersOf(clan)));
-        var list = MembersOf(clan);
-        foreach (var other in OnlineMembers(clan))
-        {
-            if (other.ObjectId == entity.ObjectId)
-                continue;
-            toOthers.Add(Pack(other, MsgType.PledgeMemberList, list));
-        }
+        FanPledgeStatus([entity.ObjectId], clan);
+        FanMemberList([entity.ObjectId], clan);
+        var others = OnlineMembers(clan)
+            .Where(other => other.ObjectId != entity.ObjectId)
+            .Select(other => other.ObjectId)
+            .ToArray();
+        FanMemberList(others, clan);
     }
 
-    void ClanPlayerLeftWorld(int objectId, string name, List<Pending> outbound)
+    void ClanPlayerLeftWorld(int objectId, string name)
     {
         if (_pendingClanInvites.Remove(objectId, out var pending) &&
             Online(pending.InviterObjectId) is { } inviter)
         {
-            outbound.Add(Pack(inviter, MsgType.SystemMessage, ClanLines.InviteDeclinedRequestor(name)));
-            outbound.Add(Pack(inviter, MsgType.ClanJoinResult, new ClanJoinResultMsg()));
+            FanLine([inviter.ObjectId], ClanLines.InviteDeclinedRequestor(name));
+            FanJoinResult([inviter.ObjectId], 0);
         }
 
         foreach (var pair in _pendingClanInvites.ToList())
@@ -275,14 +238,10 @@ public sealed partial class ZoneWorld
         }
 
         if (ClanOf(objectId) is { } clan)
-        {
-            var list = MembersOf(clan);
-            foreach (var other in OnlineMembers(clan))
-                outbound.Add(Pack(other, MsgType.PledgeMemberList, list));
-        }
+            FanMemberList(OnlineMembers(clan).Select(other => other.ObjectId).ToArray(), clan);
     }
 
-    string? TryClanCreate(ZoneSession session, string? name, long nowMs, List<Pending> outbound)
+    string? TryClanCreate(ZoneSession session, string? name, long nowMs)
     {
         if (!IsLive(session) || !_byId.TryGetValue(session.ObjectId, out var entity))
             return "world";
@@ -324,15 +283,16 @@ public sealed partial class ZoneWorld
         entity.ClanId = clan.Id;
         SyncClanStanding(entity);
 
-        outbound.Add(Pack(session, MsgType.SystemMessage, ClanLines.Created()));
-        outbound.Add(Pack(session, MsgType.PledgeStatusChanged, StatusOf(clan)));
-        outbound.Add(Pack(session, MsgType.PledgeMemberList, MembersOf(clan)));
-        outbound.Add(Pack(session, MsgType.UserInfo, UserInfo(entity)));
-        QueueCharInfo(entity, outbound);
+        int[] self = [session.ObjectId];
+        FanLine(self, ClanLines.Created());
+        FanPledgeStatus(self, clan);
+        FanMemberList(self, clan);
+        FanUserInfo(entity);
+        QueueCharInfo(entity);
         return null;
     }
 
-    string? TryClanInvite(ZoneSession session, ClanInviteRequestMsg invite, long nowMs, List<Pending> outbound)
+    string? TryClanInvite(ZoneSession session, ClanInviteRequestMsg invite, long nowMs)
     {
         if (!IsLive(session))
             return "world";
@@ -362,18 +322,18 @@ public sealed partial class ZoneWorld
             clan!.Id,
             ClanRules.InviteDeadline(nowMs));
         var target = _byId[invite.TargetObjectId].Session!;
-        outbound.Add(Pack(target, MsgType.ClanAskJoin, new ClanAskJoinMsg
+        NetBridge?.FanoutClanAskJoin([target.ObjectId], new Fineage.Net.Contract.ClanAskJoinNetMsg
         {
             RequestorObjectId = session.ObjectId,
             RequestorName = session.Name,
             ClanId = clan.Id,
             ClanName = clan.Name,
             PledgeType = ClanProtocol.MainPledge
-        }));
+        });
         return null;
     }
 
-    string? TryClanAnswer(ZoneSession session, ClanAnswerJoinRequestMsg answer, long nowMs, List<Pending> outbound)
+    string? TryClanAnswer(ZoneSession session, ClanAnswerJoinRequestMsg answer, long nowMs)
     {
         if (!IsLive(session) || !_byId.TryGetValue(session.ObjectId, out var entity))
             return "world";
@@ -390,12 +350,12 @@ public sealed partial class ZoneWorld
 
         if (answer.Response == 0)
         {
-            outbound.Add(Pack(session, MsgType.SystemMessage, ClanLines.InviteDeclinedSelf(
-                requestorOnline ? requestorEntity!.Name : "")));
+            FanLine([session.ObjectId], ClanLines.InviteDeclinedSelf(
+                requestorOnline ? requestorEntity!.Name : ""));
             if (requestorOnline)
             {
-                outbound.Add(Pack(requestorEntity!.Session!, MsgType.SystemMessage, ClanLines.InviteDeclinedRequestor(session.Name)));
-                outbound.Add(Pack(requestorEntity.Session!, MsgType.ClanJoinResult, new ClanJoinResultMsg { Response = 0 }));
+                FanLine([requestorEntity!.ObjectId], ClanLines.InviteDeclinedRequestor(session.Name));
+                FanJoinResult([requestorEntity.ObjectId], 0);
             }
 
             return null;
@@ -439,23 +399,24 @@ public sealed partial class ZoneWorld
         entity.ClanId = clan.Id;
         SyncClanStanding(entity);
 
-        outbound.Add(Pack(requestorEntity!.Session!, MsgType.ClanJoinResult, new ClanJoinResultMsg { Response = answer.Response }));
+        FanJoinResult([requestorEntity!.ObjectId], answer.Response);
         var joined = ClanLines.MemberJoined(session.Name);
-        foreach (var online in OnlineMembers(clan))
+        int[] online = OnlineMembers(clan).Select(member => member.ObjectId).ToArray();
+        foreach (int id in online)
         {
-            if (online.ObjectId == session.ObjectId)
-                outbound.Add(Pack(online, MsgType.SystemMessage, ClanLines.Entered(clan.Name)));
-            outbound.Add(Pack(online, MsgType.SystemMessage, joined));
-            outbound.Add(Pack(online, MsgType.PledgeStatusChanged, StatusOf(clan)));
-            outbound.Add(Pack(online, MsgType.PledgeMemberList, MembersOf(clan)));
+            if (id == session.ObjectId)
+                FanLine([id], ClanLines.Entered(clan.Name));
+            FanLine([id], joined);
         }
 
-        outbound.Add(Pack(session, MsgType.UserInfo, UserInfo(entity)));
-        QueueCharInfo(entity, outbound);
+        FanPledgeStatus(online, clan);
+        FanMemberList(online, clan);
+        FanUserInfo(entity);
+        QueueCharInfo(entity);
         return null;
     }
 
-    string? TryClanLeave(ZoneSession session, long nowMs, List<Pending> outbound)
+    string? TryClanLeave(ZoneSession session, long nowMs)
     {
         if (!IsLive(session) || !_byId.TryGetValue(session.ObjectId, out var entity))
             return "world";
@@ -482,26 +443,21 @@ public sealed partial class ZoneWorld
         entity.ClanId = 0;
         SyncClanStanding(entity);
 
-        outbound.Add(Pack(session, MsgType.SystemMessage, ClanLines.Withdrawn()));
-        outbound.Add(Pack(session, MsgType.SystemMessage, ClanLines.JoinWait()));
-        QueueClearPledge(session, outbound);
-        outbound.Add(Pack(session, MsgType.UserInfo, UserInfo(entity)));
+        int[] self = [session.ObjectId];
+        FanLine(self, ClanLines.Withdrawn());
+        FanLine(self, ClanLines.JoinWait());
+        QueueClearPledge(session);
+        FanUserInfo(entity);
 
-        var left = ClanLines.MemberWithdrawn(member.Name);
-        var status = StatusOf(clan);
-        var list = MembersOf(clan);
-        foreach (var online in OnlineMembers(clan))
-        {
-            outbound.Add(Pack(online, MsgType.SystemMessage, left));
-            outbound.Add(Pack(online, MsgType.PledgeStatusChanged, status));
-            outbound.Add(Pack(online, MsgType.PledgeMemberList, list));
-        }
-
-        QueueCharInfo(entity, outbound);
+        int[] rest = OnlineMembers(clan).Select(member => member.ObjectId).ToArray();
+        FanLine(rest, ClanLines.MemberWithdrawn(member.Name));
+        FanPledgeStatus(rest, clan);
+        FanMemberList(rest, clan);
+        QueueCharInfo(entity);
         return null;
     }
 
-    string? TryClanKick(ZoneSession session, int targetObjectId, long nowMs, List<Pending> outbound)
+    string? TryClanKick(ZoneSession session, int targetObjectId, long nowMs)
     {
         if (!IsLive(session))
             return "world";
@@ -543,34 +499,33 @@ public sealed partial class ZoneWorld
 
         if (targetEntity?.Session is { InWorld: true } targetSession)
         {
-            outbound.Add(Pack(targetSession, MsgType.SystemMessage, ClanLines.Dismissed()));
-            outbound.Add(Pack(targetSession, MsgType.SystemMessage, ClanLines.JoinWait()));
-            QueueClearPledge(targetSession, outbound);
-            outbound.Add(Pack(targetSession, MsgType.UserInfo, UserInfo(targetEntity)));
+            int[] kicked = [targetSession.ObjectId];
+            FanLine(kicked, ClanLines.Dismissed());
+            FanLine(kicked, ClanLines.JoinWait());
+            QueueClearPledge(targetSession);
+            FanUserInfo(targetEntity);
         }
 
         var expelled = ClanLines.Expelled(targetMember.Name);
-        var status = StatusOf(clan);
-        var list = MembersOf(clan);
-        foreach (var online in OnlineMembers(clan))
+        int[] online = OnlineMembers(clan).Select(member => member.ObjectId).ToArray();
+        foreach (int id in online)
         {
-            outbound.Add(Pack(online, MsgType.SystemMessage, expelled));
-            if (online.ObjectId == session.ObjectId)
+            FanLine([id], expelled);
+            if (id == session.ObjectId)
             {
-                outbound.Add(Pack(online, MsgType.SystemMessage, ClanLines.ExpelledLeader()));
-                outbound.Add(Pack(online, MsgType.SystemMessage, ClanLines.RecruitWait()));
+                FanLine([id], ClanLines.ExpelledLeader());
+                FanLine([id], ClanLines.RecruitWait());
             }
-
-            outbound.Add(Pack(online, MsgType.PledgeStatusChanged, status));
-            outbound.Add(Pack(online, MsgType.PledgeMemberList, list));
         }
 
+        FanPledgeStatus(online, clan);
+        FanMemberList(online, clan);
         if (targetEntity != null)
-            QueueCharInfo(targetEntity, outbound);
+            QueueCharInfo(targetEntity);
         return null;
     }
 
-    string? TryClanDissolve(ZoneSession session, long nowMs, List<Pending> outbound)
+    string? TryClanDissolve(ZoneSession session, long nowMs)
     {
         if (!IsLive(session))
             return "world";
@@ -590,17 +545,15 @@ public sealed partial class ZoneWorld
 
         clan.DissolvingExpiryUnixMs = expiry;
         var line = ClanLines.DissolveRequested();
-        var status = StatusOf(clan);
-        foreach (var online in OnlineMembers(clan))
-        {
-            outbound.Add(Pack(online, MsgType.SystemMessage, line));
-            outbound.Add(Pack(online, MsgType.PledgeStatusChanged, status));
-        }
+        int[] online = OnlineMembers(clan).Select(member => member.ObjectId).ToArray();
+        foreach (int id in online)
+            FanLine([id], line);
+        FanPledgeStatus(online, clan);
 
         return null;
     }
 
-    string? TryClanCancelDissolve(ZoneSession session, long nowMs, List<Pending> outbound)
+    string? TryClanCancelDissolve(ZoneSession session, long nowMs)
     {
         if (!IsLive(session))
             return "world";
@@ -620,17 +573,15 @@ public sealed partial class ZoneWorld
 
         clan.DissolvingExpiryUnixMs = 0;
         var line = ClanLines.DissolveCancelled();
-        var status = StatusOf(clan);
-        foreach (var online in OnlineMembers(clan))
-        {
-            outbound.Add(Pack(online, MsgType.SystemMessage, line));
-            outbound.Add(Pack(online, MsgType.PledgeStatusChanged, status));
-        }
+        int[] online = OnlineMembers(clan).Select(member => member.ObjectId).ToArray();
+        foreach (int id in online)
+            FanLine([id], line);
+        FanPledgeStatus(online, clan);
 
         return null;
     }
 
-    void DestroyClan(int clanId, long nowMs, List<Pending> outbound)
+    void DestroyClan(int clanId, long nowMs)
     {
         if (!_clans.TryGetValue(clanId, out var clan))
             return;
@@ -672,13 +623,13 @@ public sealed partial class ZoneWorld
             entity.ClanId = 0;
             SyncClanStanding(entity);
             var session = entity.Session!;
-            outbound.Add(Pack(session, MsgType.SystemMessage, line));
-            QueueClearPledge(session, outbound);
-            outbound.Add(Pack(session, MsgType.UserInfo, UserInfo(entity)));
+            FanLine([entity.ObjectId], line);
+            QueueClearPledge(session);
+            FanUserInfo(entity);
         }
 
         foreach (var entity in online.OrderBy(e => e.ObjectId))
-            QueueCharInfo(entity, outbound);
+            QueueCharInfo(entity);
     }
 
     void RefreshOnlineMember(ZoneEntity entity)
@@ -852,7 +803,7 @@ public sealed partial class ZoneWorld
             ClanProtocol.MainPledge)).ToArray(),
         clan.CastleId);
 
-    PledgeStatusChangedMsg StatusOf(ZoneClan clan) => new()
+    Fineage.Net.Contract.PledgeStatusNetMsg StatusOf(ZoneClan clan) => new()
     {
         ClanId = clan.Id,
         Name = clan.Name,
@@ -864,11 +815,11 @@ public sealed partial class ZoneWorld
         CharPenaltyExpiryUnixMs = clan.CharPenaltyExpiryUnixMs
     };
 
-    PledgeMemberListMsg MembersOf(ZoneClan clan) => new()
+    Fineage.Net.Contract.PledgeMemberListNetMsg MembersOf(ZoneClan clan) => new()
     {
         ClanId = clan.Id,
         LeaderObjectId = clan.LeaderId,
-        Members = clan.Members.Select(member => new PledgeMemberEntryMsg
+        Members = clan.Members.Select(member => new Fineage.Net.Contract.PledgeMemberNet
         {
             ObjectId = member.CharacterId,
             Name = member.Name,
@@ -879,109 +830,38 @@ public sealed partial class ZoneWorld
         }).ToArray()
     };
 
-    static void QueueClearPledge(ZoneSession session, List<Pending> outbound)
-    {
-        outbound.Add(Pack(session, MsgType.PledgeStatusChanged, new PledgeStatusChangedMsg()));
-        outbound.Add(Pack(session, MsgType.PledgeMemberList, new PledgeMemberListMsg()));
-    }
+    void FanPledgeStatus(IReadOnlyList<int> watchers, ZoneClan clan) =>
+        NetBridge?.FanoutPledgeStatus(watchers, StatusOf(clan));
 
-    /// <summary>
-    /// Replays one clan <see cref="Pending"/> into the matching Net fanout. The V2 send path builds the same
-    /// payloads for every member; projecting them keeps the V2 code untouched while Net clients see the
-    /// status change, the roster, the invite, and the join result.
-    /// </summary>
-    void PublishClanNet(Pending pending)
-    {
-        if (NetBridge == null || pending.To.ObjectId <= 0)
-            return;
+    void FanMemberList(IReadOnlyList<int> watchers, ZoneClan clan) =>
+        NetBridge?.FanoutPledgeMemberList(watchers, MembersOf(clan));
 
-        int[] self = [pending.To.ObjectId];
-        switch (pending.Type)
+    void FanLine(IReadOnlyList<int> watchers, SystemMessageMsg line) =>
+        NetBridge?.FanoutSystemMessage(watchers, new Fineage.Net.Contract.SystemMessageNetMsg
         {
-            case MsgType.PledgeStatusChanged:
-                {
-                    var msg = MessagePackSerializer.Deserialize<PledgeStatusChangedMsg>(pending.Body);
-                    NetBridge.FanoutPledgeStatus(self, new Fineage.Net.Contract.PledgeStatusNetMsg
-                    {
-                        ClanId = msg.ClanId,
-                        Name = msg.Name ?? "",
-                        Level = msg.Level,
-                        LeaderObjectId = msg.LeaderObjectId,
-                        CrestId = msg.CrestId,
-                        MemberCount = msg.MemberCount,
-                        DissolvingExpiryUnixMs = msg.DissolvingExpiryUnixMs,
-                        CharPenaltyExpiryUnixMs = msg.CharPenaltyExpiryUnixMs
-                    });
-                    break;
-                }
-            case MsgType.PledgeMemberList:
-                {
-                    var msg = MessagePackSerializer.Deserialize<PledgeMemberListMsg>(pending.Body);
-                    NetBridge.FanoutPledgeMemberList(self, new Fineage.Net.Contract.PledgeMemberListNetMsg
-                    {
-                        ClanId = msg.ClanId,
-                        LeaderObjectId = msg.LeaderObjectId,
-                        Members = (msg.Members ?? []).Select(entry => new Fineage.Net.Contract.PledgeMemberNet
-                        {
-                            ObjectId = entry.ObjectId,
-                            Name = entry.Name ?? "",
-                            ClassId = entry.ClassId,
-                            Level = entry.Level,
-                            Online = entry.Online,
-                            PledgeType = entry.PledgeType
-                        }).ToArray()
-                    });
-                    break;
-                }
-            case MsgType.ClanAskJoin:
-                {
-                    var msg = MessagePackSerializer.Deserialize<ClanAskJoinMsg>(pending.Body);
-                    NetBridge.FanoutClanAskJoin(self, new Fineage.Net.Contract.ClanAskJoinNetMsg
-                    {
-                        RequestorObjectId = msg.RequestorObjectId,
-                        RequestorName = msg.RequestorName ?? "",
-                        ClanId = msg.ClanId,
-                        ClanName = msg.ClanName ?? "",
-                        PledgeType = msg.PledgeType
-                    });
-                    break;
-                }
-            case MsgType.ClanJoinResult:
-                {
-                    var msg = MessagePackSerializer.Deserialize<ClanJoinResultMsg>(pending.Body);
-                    NetBridge.FanoutClanJoinResult(self, new Fineage.Net.Contract.ClanJoinResultNetMsg
-                    {
-                        Response = msg.Response
-                    });
-                    break;
-                }
-            case MsgType.SystemMessage:
-                {
-                    var msg = MessagePackSerializer.Deserialize<SystemMessageMsg>(pending.Body);
-                    NetBridge.FanoutSystemMessage(self, new Fineage.Net.Contract.SystemMessageNetMsg
-                    {
-                        Id = msg.Id,
-                        Text = msg.Text ?? "",
-                        Params = msg.Params ?? []
-                    });
-                    break;
-                }
-            case MsgType.UserInfo:
-                {
-                    // The Net sheet is built from the live entity, not from the V2 body: it also carries
-                    // the combat stats and speeds the V2 message omits.
-                    if (_byId.TryGetValue(pending.To.ObjectId, out var recipient) && recipient.Kind == ZoneEntityKind.Player)
-                        NetBridge.FanoutUserInfo([recipient.ObjectId], NetUserInfo(recipient));
-                    break;
-                }
-        }
+            Id = line.Id,
+            Text = line.Text ?? "",
+            Params = line.Params ?? []
+        });
+
+    void FanJoinResult(IReadOnlyList<int> watchers, int response) =>
+        NetBridge?.FanoutClanJoinResult(watchers, new Fineage.Net.Contract.ClanJoinResultNetMsg
+        {
+            Response = response
+        });
+
+    /// <summary>The Net sheet comes from the live entity: it also carries the combat stats the V2 row omitted.</summary>
+    void FanUserInfo(ZoneEntity entity) =>
+        NetBridge?.FanoutUserInfo([entity.ObjectId], NetUserInfo(entity));
+
+    /// <summary>Mobius sends an empty pledge status and roster when a player leaves a clan.</summary>
+    void QueueClearPledge(ZoneSession session)
+    {
+        int[] self = [session.ObjectId];
+        NetBridge?.FanoutPledgeStatus(self, new Fineage.Net.Contract.PledgeStatusNetMsg());
+        NetBridge?.FanoutPledgeMemberList(self, new Fineage.Net.Contract.PledgeMemberListNetMsg());
     }
 
-    void PublishClanNet(List<Pending> outbound)
-    {
-        foreach (var pending in outbound)
-            PublishClanNet(pending);
-    }
 
     /// <summary>
     /// Mobius <c>EnterWorld</c>:561 sends <c>PledgeShowInfoUpdate</c> and <c>PledgeShowMemberListAll</c>
@@ -1050,13 +930,7 @@ public sealed partial class ZoneWorld
         entity.CastleId = clan?.CastleId ?? 0;
     }
 
-    void QueueCharInfo(ZoneEntity player, List<Pending> outbound)
-    {
-        byte[] body = MessagePack.MessagePackSerializer.Serialize(CharInfo(player));
-        foreach (int id in player.Knownlist.OrderBy(value => value))
-        {
-            if (_byId.TryGetValue(id, out var other) && other.Session != null)
-                outbound.Add(new Pending(other.Session, MsgType.CharInfo, body));
-        }
-    }
+    /// <summary>The crest and clan name ride on the spawn row, so every watcher needs it again.</summary>
+    void QueueCharInfo(ZoneEntity player) =>
+        NetBridge?.FanoutCharInfo([.. player.Knownlist.OrderBy(value => value)], player.ObjectId);
 }

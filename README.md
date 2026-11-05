@@ -1,12 +1,12 @@
 # Fineage-Backend
 
-Fineage C# Login+Zone game server (V2 MessagePack primary, Interlude bridge).
+Fineage C# Login+Zone game server (Net `PacketEnvelope` wire only).
 
-C# login and zone servers for Fineage. V2 MessagePack is the primary wire. The Unity client’s Interlude listener stays in [Fineage `tools/login-stub`](https://github.com/FioraSolutions/Fineage/tree/dev/tools/login-stub) (Blowfish on `2106` / `7777`, loopback only). This repo does not speak that wire.
+C# login and zone servers for Fineage. The Net `PacketEnvelope` wire is the only client transport: the MessagePack V2 listener, its `ZoneServer`, and `Fineage.Protocol/V2` are deleted, so nothing in this repo can turn V2 back on. The Unity client’s Interlude listener stays in [Fineage `tools/login-stub`](https://github.com/FioraSolutions/Fineage/tree/dev/tools/login-stub) (Blowfish on `2106` / `7777`, loopback only). This repo does not speak that wire.
 
-`src/Fineage.Protocol` holds the shared codecs (V2 MessagePack, pipeline TCP helpers, Interlude Blowfish).
+`src/Fineage.Protocol` holds the shared opcode table, message DTOs, Interlude Blowfish, and the status/telemetry helpers. `src/Fineage.Net.Contract` + `src/Fineage.Net.Host` hold the live client codec and TCP host.
 
-Login issues an HMAC handoff token. The zone on **9777** accepts it as `Auth.Password` (`Auth.Account` is the account) and checks it with `HandoffTokens.TryValidate`. Both processes share `FINEAGE_HANDOFF_SECRET` (dev default `FineageLoginHandoffV1`).
+Login issues an HMAC handoff token. The zone on **9777** accepts it in the Net `ZoneAuth` payload and checks it with `HandoffTokens.TryValidate`. Both processes share `FINEAGE_HANDOFF_SECRET` (dev default `FineageLoginHandoffV1`).
 
 ## Flow
 
@@ -84,8 +84,8 @@ The **live** public stack on Tailscale host `raspberrypi` (`100.123.81.1`) runs 
 | Port | Process | Role |
 |------|---------|------|
 | 5080 | `Fineage.Login` | HTTP register/login and `GET /api/status`. Playtest tunnel `https://api.fineage.evpoint.by` forwards here |
-| 2106 | `Fineage.Login` | V2 MessagePack login (public remap; dev default **9106**) |
-| 7777 | `Fineage.Zone` | V2 zone (Talking Island; public remap; dev default **9777**) |
+| 2106 | `Fineage.Login` | Net `PacketEnvelope` login (public remap; dev default **9106**, `FINEAGE_NET_LOGIN_PORT`) |
+| 7777 | `Fineage.Zone` | Net `PacketEnvelope` zone (Talking Island; public remap; dev default **9777**, `FINEAGE_NET_ZONE_PORT`) |
 
 Zone also binds **127.0.0.1:7780** for `GET /status` (`{"playersOnline": n}` from `ZoneWorld.OnlinePlayerCount`). Login's `GET /api/status` reads it. That listener is loopback only and is not a public port.
 
@@ -169,7 +169,7 @@ CI is `.github/workflows/build-and-test.yml` (`dotnet test` on pull requests and
 
 ### Auto-deploy to the Pi (GitHub Actions)
 
-Pushes to **`main`** run `.github/workflows/deploy-pi.yml`: `dotnet test`, Release **linux-arm64** self-contained publish for Login and Zone, Tailscale into the fineage tailnet, SSH to the Pi, rsync binaries into **`/home/pi/fineage-backend/login`** and **`.../zone`** (does **not** overwrite `data/`, `fineage.env`, or `handoff.secret`), refresh `run-login.sh` / `run-zone.sh`, restart both processes, and fail unless **2106**, **7777**, and **5080** listen on the Pi. Trigger manually via **Actions → deploy-pi → Run workflow**. Pull requests never run the deploy job.
+Pushes to **`main`** run `.github/workflows/deploy-pi.yml`: `dotnet test`, Release **linux-arm64** self-contained publish for Login and Zone, Tailscale into the fineage tailnet, SSH to the Pi, rsync binaries into **`/home/pi/fineage-backend/login`** and **`.../zone`** (does **not** overwrite `data/`, `fineage.env`, or `handoff.secret`), refresh `run-login.sh` / `run-zone.sh`, restart both processes, and fail unless **9106**, **9777**, and **5080** listen on the Pi (the deploy remaps the WAN-facing 2106 / 7777 onto the Net defaults). Trigger manually via **Actions → deploy-pi → Run workflow**. Pull requests never run the deploy job.
 
 Configure these **repository secrets** (names only — never commit values):
 

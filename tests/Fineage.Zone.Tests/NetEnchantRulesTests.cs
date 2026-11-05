@@ -68,7 +68,7 @@ public sealed class NetEnchantRulesTests
             if (items.Length > 0)
                 Assert.True(Store.TryReplaceItems(ticket.Value.Account, ticket.Value.CharacterId, items));
 
-            var session = new ZoneSession(new MemoryStream());
+            var session = new ZoneSession();
             session.Bind(ticket.Value.CharacterId, ticket.Value.Account, ticket.Value.CharacterName, ticket.Value.ClassId);
             Assert.True(await World.TryEnterAsync(session, CancellationToken.None));
             Assert.True(World.TryGetLivePlayer(session, out var player));

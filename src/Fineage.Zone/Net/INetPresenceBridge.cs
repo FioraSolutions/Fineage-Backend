@@ -143,4 +143,31 @@ interface INetPresenceBridge
     void FanoutTradeConfirmState(IReadOnlyList<int> watcherObjectIds, TradeConfirmStateNetMsg state);
 
     void FanoutTradeFinished(IReadOnlyList<int> watcherObjectIds, TradeFinishedNetMsg finished);
+
+    /// <summary>Boss schedule rows, the reply to a <c>BossStatusRequest</c>.</summary>
+    void FanoutBossStatus(IReadOnlyList<int> watcherObjectIds, BossStatusNetMsg status);
+
+    /// <summary>One castle's siege state, the reply to a <c>SiegeListRequest</c> and the echo after a change.</summary>
+    void FanoutSiegeInfo(IReadOnlyList<int> watcherObjectIds, SiegeInfoNetMsg info);
+
+    /// <summary>Olympiad period, standing, queue and match slot.</summary>
+    void FanoutOlympiadStatus(IReadOnlyList<int> watcherObjectIds, OlympiadStatusNetMsg status);
+
+    /// <summary>The match both participants were placed in.</summary>
+    void FanoutOlympiadMatch(IReadOnlyList<int> watcherObjectIds, OlympiadMatchNetMsg match);
+
+    /// <summary>One countdown step for both participants.</summary>
+    void FanoutOlympiadCountdown(IReadOnlyList<int> watcherObjectIds, OlympiadCountdownNetMsg countdown);
+
+    /// <summary>The finished match and its reward.</summary>
+    void FanoutOlympiadResult(IReadOnlyList<int> watcherObjectIds, OlympiadResultNetMsg result);
+
+    /// <summary>The Seven Signs record, also the reply to a status request.</summary>
+    void FanoutSevenSignsStatus(IReadOnlyList<int> watcherObjectIds, SevenSignsStatusNetMsg status);
+
+    /// <summary>The sky tint the record implies, so the client can recolour without polling.</summary>
+    void FanoutSevenSignsSky(IReadOnlyList<int> watcherObjectIds, SevenSignsSkyNetMsg sky);
+
+    /// <summary>The catacomb/necropolis result, also the validation kick.</summary>
+    void FanoutDungeonEntered(IReadOnlyList<int> watcherObjectIds, DungeonEnteredNetMsg entered);
 }

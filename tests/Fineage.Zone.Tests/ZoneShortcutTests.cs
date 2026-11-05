@@ -11,7 +11,7 @@ public sealed class ZoneShortcutTests
     static async Task<(ZoneWorld World, ZoneSession Session, ZoneEntity Player)> Enter(JsonAccountStore store, int characterId, string account, string name)
     {
         var world = new ZoneWorld(accounts: store);
-        var session = new ZoneSession(new MemoryStream());
+        var session = new ZoneSession();
         session.Bind(characterId, account, name, HumanClasses.Fighter);
         Assert.True(await world.TryEnterAsync(session, CancellationToken.None));
         Assert.True(world.TryGetLivePlayer(session, out var player));

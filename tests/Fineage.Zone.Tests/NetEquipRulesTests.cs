@@ -286,7 +286,7 @@ public sealed class NetEquipRulesTests
         Assert.Equal(InventoryProtocol.BadSlot, await actor.Unequip(17));
         Assert.Equal(InventoryProtocol.Empty, await actor.Unequip(7));
 
-        var idle = new ZoneSession(new MemoryStream());
+        var idle = new ZoneSession();
         idle.Bind(actor.Ticket.CharacterId, actor.Ticket.Account, actor.Ticket.CharacterName, actor.Ticket.ClassId);
         Assert.Equal("world", await bench.World.TryUseItemAsync(idle, new UseItemMsg { ObjectId = 1 }, CancellationToken.None));
         Assert.Equal("world", await bench.World.TryUnequipItemAsync(idle, new UnequipItemMsg { PaperdollSlot = 0 }, CancellationToken.None));
@@ -318,11 +318,11 @@ public sealed class NetEquipRulesTests
         BenchPlayer actor = await bench.EnterAsync("gear", "Alden", [Stack(Adena, 10)]);
 
         Assert.Equal("world", await bench.World.TryGiveItemAsync(
-            new ZoneSession(new MemoryStream()),
+            new ZoneSession(),
             new GiveItemMsg { ItemId = Adena, Count = 1 },
             CancellationToken.None));
 
-        var unbound = new ZoneSession(new MemoryStream());
+        var unbound = new ZoneSession();
         unbound.Bind(50, "missing", "Nope", HumanClasses.Fighter);
         Assert.Equal("world", await bench.World.TryGiveItemAsync(unbound, new GiveItemMsg { ItemId = Adena, Count = 1 }, CancellationToken.None));
 

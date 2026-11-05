@@ -3,8 +3,8 @@ namespace Fineage.Net.Host;
 /// <summary>
 /// Listeners and framing for the Net protocol, the only client transport.
 /// <para>
-/// The legacy MessagePack V2 transport (login 9206 / zone 9877) has been removed. Ports 2106 and 7777 that the old
-/// playtest clients dialled are gone with it; nothing in this repo can turn V2 back on.
+/// The legacy MessagePack V2 transport is deleted from the repo. The 2106 / 7777 listeners that old playtest
+/// clients dialled are gone with it; only the Net ports below exist.
 /// </para>
 /// </summary>
 public static class NetSettings

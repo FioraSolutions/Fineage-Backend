@@ -1,21 +1,21 @@
-using System.Net;
-using System.Net.Sockets;
-using Fineage.Login;
+using Fineage.Game;
+using Fineage.Net.Contract;
 using Fineage.Protocol;
 using Fineage.Zone.NpcHtml;
 using Fineage.Zone.Spawns;
-using Fineage.Zone.World;
-using MessagePack;
 using Xunit;
 
 namespace Fineage.Zone.Tests;
 
+/// <summary>
+/// Talking to an NPC and following a bypass link: the page the client receives, the range gate, the refusals, and
+/// the merchant stubs. Ported off the V2 wire; the world is driven through <see cref="WorldBench"/> and the pages
+/// read from the recorded <see cref="Fineage.Zone.Net.INetPresenceBridge"/> fanout.
+/// </summary>
 public sealed class NpcHtmlTests
 {
     const int MerchantObjectId = 61000;
-    const int MerchantX = -70938;
-    const int MerchantY = 258271;
-    const int MerchantZ = -3104;
+    const int MerchantNpcId = 30001;
 
     [Fact]
     public void Substitution_replaces_the_window_tokens()
@@ -91,7 +91,7 @@ public sealed class NpcHtmlTests
         var call = new BypassCall
         {
             NpcObjectId = MerchantObjectId,
-            NpcId = 30001,
+            NpcId = MerchantNpcId,
             NpcName = "Lector",
             NpcType = "Merchant",
             PlayerName = "Talker",
@@ -158,106 +158,107 @@ public sealed class NpcHtmlTests
     }
 
     [Fact]
-    public async Task Talk_and_bypass_use_range_html_and_stubs()
+    public async Task Talk_renders_the_page_and_bypass_follows_the_links()
     {
-        var catalog = SampleCatalog();
-        var registry = BypassRegistry.CreateDefault(catalog);
-        var server = new ZoneServer(new HandoffTokens(HandoffTokens.DefaultSecret), MerchantWorld(catalog, registry));
-        var login = new LoginService(JsonAccountStore.InMemory(), new HandoffTokens(HandoffTokens.DefaultSecret));
-        var ticket = login.Play("talker", "pass1234", "Talker", HumanClasses.Fighter);
-        Assert.True(ticket.Ok && ticket.Value != null);
+        var bench = Open();
+        BenchPlayer actor = await bench.EnterAsync("talker", "Talker");
 
-        await using var link = await Link.Open(server, npcPackets: 3);
-        await link.EnterAsync(ticket.Value!);
-
-        await link.SendAsync(MsgType.NpcTalk, new NpcTalkMsg { NpcObjectId = MerchantObjectId });
-        var far = await link.ReadAsync<ErrorMsg>(MsgType.Error);
-        Assert.Equal("range", far.Code);
-
-        await link.SendAsync(MsgType.MoveTo, new MoveToMsg { DestX = MerchantX, DestY = MerchantY, DestZ = MerchantZ });
-        await link.ReadAsync<MoveToMsg>(MsgType.MoveToAck);
-
-        await link.SendAsync(MsgType.NpcTalk, new NpcTalkMsg { NpcObjectId = MerchantObjectId });
-        var page = await link.ReadAsync<NpcHtmlMsg>(MsgType.NpcHtml);
+        Assert.Null(await actor.Talk(MerchantObjectId));
+        var page = Assert.IsType<NpcHtmlNetMsg>(Bench(bench, FanoutHtml).Last()[1]);
         Assert.Equal(MerchantObjectId, page.NpcObjectId);
-        Assert.Equal(30001, page.NpcId);
+        Assert.Equal(MerchantNpcId, page.NpcId);
         Assert.Equal(0, page.ItemId);
-        Assert.Contains("61000", page.Html, StringComparison.Ordinal);
+        // Tokens are substituted before the page leaves the world; the raw template markers never reach a client.
+        Assert.Contains(MerchantObjectId.ToString(), page.Html, StringComparison.Ordinal);
         Assert.Contains("Lector", page.Html, StringComparison.Ordinal);
         Assert.Contains("Talker", page.Html, StringComparison.Ordinal);
         Assert.DoesNotContain("%objectId%", page.Html, StringComparison.Ordinal);
 
-        await link.SendAsync(MsgType.BypassRequest, new BypassRequestMsg { NpcObjectId = MerchantObjectId, Command = "Buy 1" });
-        var shop = await link.ReadAsync<NpcHtmlMsg>(MsgType.NpcHtml);
-        Assert.Contains("Lector", shop.Html, StringComparison.Ordinal);
-        Assert.Contains("I have no such list.", shop.Html, StringComparison.Ordinal);
+        Assert.Null(await actor.BypassAsync(MerchantObjectId, "Buy 1"));
+        Assert.Contains("I have no such list.", LastHtml(bench), StringComparison.Ordinal);
 
-        await link.SendAsync(MsgType.BypassRequest, new BypassRequestMsg
-        {
-            NpcObjectId = 0,
-            Command = $"bypass -h npc_{MerchantObjectId}_goto 15"
-        });
-        var gateNotice = await link.ReadAsync<SystemMessageMsg>(MsgType.SystemMessage);
+        // Anonymous bypass (no target NPC) still resolves the id out of the Mobius prefix.
+        Assert.Null(await actor.BypassAsync(0, $"bypass -h npc_{MerchantObjectId}_goto 15"));
+        var gateNotice = Assert.IsType<SystemMessageNetMsg>(Bench(bench, FanoutSystemMessage).Last()[1]);
         Assert.Equal(NpcServiceProtocol.UnknownTeleport, gateNotice.Id);
-        var gate = await link.ReadAsync<NpcHtmlMsg>(MsgType.NpcHtml);
-        Assert.Contains("not available", gate.Html, StringComparison.Ordinal);
+        Assert.Contains("not available", LastHtml(bench), StringComparison.Ordinal);
 
-        await link.SendAsync(MsgType.BypassRequest, new BypassRequestMsg { NpcObjectId = MerchantObjectId, Command = "DepositP" });
-        Assert.Contains("warehouse keeper", (await link.ReadAsync<NpcHtmlMsg>(MsgType.NpcHtml)).Html, StringComparison.OrdinalIgnoreCase);
+        Assert.Null(await actor.BypassAsync(MerchantObjectId, "DepositP"));
+        Assert.Contains("warehouse keeper", LastHtml(bench), StringComparison.OrdinalIgnoreCase);
 
-        await link.SendAsync(MsgType.BypassRequest, new BypassRequestMsg { NpcObjectId = MerchantObjectId, Command = "SupportMagic" });
-        var buffNotice = await link.ReadAsync<SystemMessageMsg>(MsgType.SystemMessage);
+        Assert.Null(await actor.BypassAsync(MerchantObjectId, "SupportMagic"));
+        var buffNotice = Assert.IsType<SystemMessageNetMsg>(Bench(bench, FanoutSystemMessage).Last()[1]);
         Assert.Equal(NpcServiceProtocol.BuffLevelLow, buffNotice.Id);
-        var buffResult = await link.ReadAsync<NewbieBuffResultMsg>(MsgType.NewbieBuffResult);
-        Assert.Equal("low", buffResult.Refusal);
-        Assert.Contains("low level", (await link.ReadAsync<NpcHtmlMsg>(MsgType.NpcHtml)).Html, StringComparison.OrdinalIgnoreCase);
+        Assert.Contains("low level", LastHtml(bench), StringComparison.OrdinalIgnoreCase);
 
-        await link.SendAsync(MsgType.BypassRequest, new BypassRequestMsg { NpcObjectId = MerchantObjectId, Command = "Chat 1" });
-        Assert.Contains("page-one", (await link.ReadAsync<NpcHtmlMsg>(MsgType.NpcHtml)).Html, StringComparison.Ordinal);
+        Assert.Null(await actor.BypassAsync(MerchantObjectId, "Chat 1"));
+        Assert.Contains("page-one", LastHtml(bench), StringComparison.Ordinal);
 
-        await link.SendAsync(MsgType.BypassRequest, new BypassRequestMsg
-        {
-            NpcObjectId = MerchantObjectId,
-            Command = "Link common/crafting_01.htm"
-        });
-        var craft = await link.ReadAsync<NpcHtmlMsg>(MsgType.NpcHtml);
-        Assert.Contains("craft Lector", craft.Html, StringComparison.Ordinal);
+        Assert.Null(await actor.BypassAsync(MerchantObjectId, "Link common/crafting_01.htm"));
+        Assert.Contains("craft Lector", LastHtml(bench), StringComparison.Ordinal);
 
-        await link.SendAsync(MsgType.BypassRequest, new BypassRequestMsg { NpcObjectId = MerchantObjectId, Command = "Link ../secret.htm" });
-        Assert.Equal("bad_request", (await link.ReadAsync<ErrorMsg>(MsgType.Error)).Code);
+        // A relative link may not escape the html folder.
+        Assert.Equal("bad_request", await actor.BypassAsync(MerchantObjectId, "Link ../secret.htm"));
 
-        await link.SendAsync(MsgType.BypassRequest, new BypassRequestMsg { NpcObjectId = MerchantObjectId, Command = "Quest" });
-        var list = await link.ReadAsync<QuestDialogMsg>(MsgType.QuestDialog);
-        Assert.Equal("default", list.Hook);
-        Assert.Equal(0, list.QuestId);
-        Assert.Contains("I have nothing for you.", list.Html, StringComparison.Ordinal);
+        Assert.Null(await actor.BypassAsync(MerchantObjectId, "Quest"));
+        Assert.Contains("I have nothing for you.", LastHtml(bench), StringComparison.Ordinal);
+    }
 
-        await link.SendAsync(MsgType.BypassRequest, new BypassRequestMsg { NpcObjectId = MerchantObjectId, Command = "TerritoryStatus" });
-        // TerritoryStatus is live now (Mobius castle/lord/tax page); TI merchants belong to Gludio.
-        Assert.Contains("Gludio", (await link.ReadAsync<NpcHtmlMsg>(MsgType.NpcHtml)).Html, StringComparison.Ordinal);
-        await link.CloseAsync();
+    [Fact]
+    public async Task Territory_status_opens_the_live_castle_page()
+    {
+        var bench = Open();
+        BenchPlayer actor = await bench.EnterAsync("talker", "Talker");
+
+        Assert.Null(await actor.BypassAsync(MerchantObjectId, "TerritoryStatus"));
+        // TerritoryStatus is live now (Mobius castle/lord/tax page); the test merchant's town resolves to Gludio.
+        Assert.Contains("Gludio", LastHtml(bench), StringComparison.Ordinal);
+    }
+
+    [Fact]
+    public async Task Talk_out_of_range_is_refused()
+    {
+        var bench = Open();
+        BenchPlayer actor = await bench.EnterAsync("talker", "Talker");
+        // Well outside the 150 unit talk radius without moving the pawn through the world.
+        actor.MoveTo(Spawns.HumanStartX + 1_000, Spawns.HumanStartY, Spawns.HumanStartZ);
+
+        Assert.Equal("range", await actor.Talk(MerchantObjectId));
+        Assert.Equal("range", await actor.BypassAsync(MerchantObjectId, "Buy 1"));
+        Assert.Empty(Bench(bench, FanoutHtml));
     }
 
     [Fact]
     public async Task Attackable_npc_does_not_open_html()
     {
-        var tokens = new HandoffTokens(HandoffTokens.DefaultSecret);
-        var server = new ZoneServer(tokens, new ZoneWorld());
-        var login = new LoginService(JsonAccountStore.InMemory(), tokens);
-        var ticket = login.Play("hunter", "pass1234", "Hunter", HumanClasses.Fighter);
-        Assert.True(ticket.Ok && ticket.Value != null);
-
-        await using var link = await Link.Open(server, TalkingIsland.NpcCount);
-        await link.EnterAsync(ticket.Value!);
+        var bench = new WorldBench(spawns: SpawnCatalog.LoadDefault());
         var gremlin = TalkingIsland.Gremlins[0];
+        BenchPlayer actor = await bench.EnterAsync(
+            "hunter", "Hunter", x: gremlin.X, y: gremlin.Y, z: gremlin.Z);
+
         Assert.True(gremlin.Attackable);
-        await link.SendAsync(MsgType.MoveTo, new MoveToMsg { DestX = gremlin.X, DestY = gremlin.Y, DestZ = gremlin.Z });
-        await link.ReadAsync<MoveToMsg>(MsgType.MoveToAck);
-        await link.SendAsync(MsgType.NpcTalk, new NpcTalkMsg { NpcObjectId = gremlin.ObjectId });
-        var error = await link.ReadAsync<ErrorMsg>(MsgType.Error);
-        Assert.Equal(NpcHtmlProtocol.Attackable, error.Code);
-        await link.CloseAsync();
+        Assert.Equal(NpcHtmlProtocol.Attackable, await actor.Talk(gremlin.ObjectId));
+        Assert.Empty(Bench(bench, FanoutHtml));
     }
+
+    /// <summary>A world whose only NPC is the sample merchant, standing where the bench puts a human.</summary>
+    static WorldBench Open()
+    {
+        var catalog = SampleCatalog();
+        return new WorldBench(
+            spawns: MerchantAt(Spawns.HumanStartX, Spawns.HumanStartY, Spawns.HumanStartZ),
+            html: catalog,
+            bypasses: BypassRegistry.CreateDefault(catalog));
+    }
+
+    static List<object?[]> Bench(WorldBench bench, string method) => bench.Rec.Of(method);
+
+    static string LastHtml(WorldBench bench) =>
+        Assert.IsType<NpcHtmlNetMsg>(Bench(bench, FanoutHtml).Last()[1]).Html;
+
+    // The recorder is keyed by interface method name, so spell them once instead of scattering strings.
+    const string FanoutHtml = "FanoutNpcHtml";
+    const string FanoutSystemMessage = "FanoutSystemMessage";
 
     static NpcHtmlCatalog SampleCatalog() => NpcHtmlCatalog.FromDocuments(new Dictionary<string, string>
     {
@@ -266,34 +267,12 @@ public sealed class NpcHtmlTests
         ["common/crafting_01.htm"] = "<html><body>craft %npcname%</body></html>"
     });
 
-    static ZoneWorld MerchantWorld(NpcHtmlCatalog catalog, BypassRegistry registry)
+    static SpawnCatalog MerchantAt(int x, int y, int z)
     {
-        var map = new SpawnMapDefinition(
-            SpawnCatalog.DefaultMapId,
-            true,
-            [
-                new SpawnNpcDefinition(
-                    MerchantObjectId,
-                    30001,
-                    "Lector",
-                    MerchantX,
-                    MerchantY,
-                    MerchantZ,
-                    0,
-                    false,
-                    100,
-                    80f,
-                    40f,
-                    60,
-                    0,
-                    "Trader",
-                    "Merchant")
-            ]);
-        var spawns = SpawnCatalog.From(new Dictionary<string, SpawnMapDefinition>
-        {
-            [SpawnCatalog.DefaultMapId] = map
-        });
-        return new ZoneWorld(spawnCatalog: spawns, html: catalog, bypasses: registry);
+        var npc = new SpawnNpcDefinition(
+            MerchantObjectId, MerchantNpcId, "Lector", x, y, z, 0, false, 100, 80f, 40f, 60, 0, "Trader", "Merchant");
+        var map = new SpawnMapDefinition(SpawnCatalog.DefaultMapId, true, [npc]);
+        return SpawnCatalog.From(new Dictionary<string, SpawnMapDefinition> { [SpawnCatalog.DefaultMapId] = map });
     }
 
     sealed class ReplacingBuy : IBypassHandler
@@ -301,90 +280,5 @@ public sealed class NpcHtmlTests
         public IReadOnlyList<string> Commands { get; } = ["Buy"];
 
         public BypassReply Handle(BypassCall call) => BypassReply.Page("<html>custom</html>");
-    }
-
-    sealed class Link : IAsyncDisposable
-    {
-        readonly TcpClient _client;
-        readonly NetworkStream _stream;
-        readonly CancellationTokenSource _cts;
-        readonly Task _server;
-        readonly int _npcPackets;
-
-        Link(TcpClient client, NetworkStream stream, CancellationTokenSource cts, Task server, int npcPackets)
-        {
-            _client = client;
-            _stream = stream;
-            _cts = cts;
-            _server = server;
-            _npcPackets = npcPackets;
-        }
-
-        public static async Task<Link> Open(ZoneServer server, int npcPackets)
-        {
-            var listener = new TcpListener(IPAddress.Loopback, 0);
-            listener.Start();
-            int port = ((IPEndPoint)listener.LocalEndpoint).Port;
-            var cts = new CancellationTokenSource();
-            var accept = Task.Run(async () =>
-            {
-                using var accepted = await listener.AcceptTcpClientAsync(cts.Token);
-                listener.Stop();
-                await using var stream = accepted.GetStream();
-                await server.HandleAsync(stream, cts.Token);
-            });
-            var client = new TcpClient();
-            await client.ConnectAsync(IPAddress.Loopback, port);
-            return new Link(client, client.GetStream(), cts, accept, npcPackets);
-        }
-
-        public async Task EnterAsync(HandoffTicket ticket)
-        {
-            await SendAsync(MsgType.Hello, new HelloMsg());
-            await ReadAsync<HelloAckMsg>(MsgType.HelloAck);
-            await SendAsync(MsgType.Auth, ticket.ToZoneAuth());
-            await ReadAsync<AuthOkMsg>(MsgType.AuthOk);
-            await SendAsync(MsgType.EnterWorld, new EnterWorldMsg());
-            await ReadAsync<UserInfoMsg>(MsgType.UserInfo);
-            await ReadAsync<ItemListMsg>(MsgType.ItemList);
-            await ReadAsync<SkillListMsg>(MsgType.SkillList);
-            await ReadAsync<PlayerSpawnedMsg>(MsgType.PlayerSpawned);
-            for (int i = 0; i < _npcPackets; i++)
-                await ReadAsync<NpcInfoMsg>(MsgType.NpcInfo);
-            var welcome = await ReadAsync<SystemMessageMsg>(MsgType.SystemMessage);
-            Assert.Equal(ChatProtocol.Welcome, welcome.Id);
-        }
-
-        public async Task SendAsync<T>(MsgType type, T message) =>
-            await FrameIO.SendAsync(_stream, (ushort)type, MessagePackSerializer.Serialize(message));
-
-        public async Task<T> ReadAsync<T>(MsgType type)
-        {
-            var frame = await FrameIO.ReadAsync(_stream);
-            Assert.NotNull(frame);
-            Assert.Equal((ushort)type, frame!.Value.Type);
-            return MessagePackSerializer.Deserialize<T>(frame.Value.Body);
-        }
-
-        public async Task CloseAsync()
-        {
-            _client.Close();
-            await _server.WaitAsync(TimeSpan.FromSeconds(5));
-        }
-
-        public async ValueTask DisposeAsync()
-        {
-            _client.Dispose();
-            await _cts.CancelAsync();
-            try
-            {
-                await _server.WaitAsync(TimeSpan.FromSeconds(5));
-            }
-            catch (Exception ex) when (ex is OperationCanceledException or TimeoutException)
-            {
-            }
-
-            _cts.Dispose();
-        }
     }
 }
