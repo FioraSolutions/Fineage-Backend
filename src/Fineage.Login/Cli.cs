@@ -210,7 +210,6 @@ public static class Cli
             handoff.Tokens,
             deleteAfterDays: CharacterRules.DeleteAfterDays,
             create: CharacterCreateOptions.FromEnvironment());
-        var server = new LoginServer(service);
         LoginHttpHost? http = null;
         string host = bindAddress.Equals(IPAddress.Any) ? "0.0.0.0" : bindDisplay;
         int maxConnections = LoginNetSettings.MaxConnections;

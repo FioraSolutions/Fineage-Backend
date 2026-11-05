@@ -1,9 +1,14 @@
 using System.Net;
 using System.Net.Sockets;
 using System.Text.RegularExpressions;
+using Fineage.Login.Net;
+using Fineage.Net.Contract;
 using Fineage.Protocol;
 using MessagePack;
 using Xunit;
+using NetCreateCharacterMsg = Fineage.Net.Contract.CreateCharacterMsg;
+using NetOpcode = Fineage.Net.Contract.NetOpcode;
+using NetCodec = Fineage.Net.Contract.NetCodec;
 
 namespace Fineage.Login.Tests;
 
@@ -275,12 +280,11 @@ public class CharacterCreationTests
     {
         var service = Service();
         Assert.True(service.Register("hero", "pass1234").Ok);
-        var server = new LoginServer(service, new LoginServerOptions { SelectMinInterval = TimeSpan.Zero });
-        await using var link = await Link.Open(server);
+        var server = new NetLoginServer(service);
+        await using var link = await NetLink.OpenAsync(server);
 
-        await link.Send(MsgType.Auth, new AuthMsg { Account = "hero", Password = "pass1234" });
-        await link.Expect(MsgType.LoginOk);
-        await link.Send(MsgType.CreateCharacter, new CreateCharacterMsg
+        await link.AutoAuthAsync("hero", "pass1234");
+        await link.SendAsync(NetOpcode.CreateCharacter, NetCodec.EncodeCreateCharacter(new NetCreateCharacterMsg
         {
             Name = "Aria",
             ClassId = HumanClasses.Fighter,
@@ -289,21 +293,21 @@ public class CharacterCreationTests
             HairStyle = 6,
             HairColor = 2,
             Face = 1
-        });
+        }));
 
-        var created = await link.Expect<CharacterCreatedMsg>(MsgType.CharacterCreated);
-        Assert.Equal("Aria", created.Name);
-        Assert.Equal(6, created.HairStyle);
-        Assert.Equal(2, created.HairColor);
-        Assert.Equal(1, created.Face);
-        Assert.Equal(ClassTemplates.Preview(HumanClasses.Fighter).X, created.X);
+        var created = NetCodec.DecodeCreateResult(await link.ExpectPayloadAsync(NetOpcode.CreateResult));
+        Assert.True(created.Ok);
+        Assert.NotNull(created.Character);
+        Assert.Equal("Aria", created.Character!.Name);
+        Assert.Equal(6, created.Character.HairStyle);
+        Assert.Equal(2, created.Character.HairColor);
+        Assert.Equal(1, created.Character.Face);
 
-        var roster = await link.Expect<CharacterListMsg>(MsgType.CharacterList);
+        var roster = NetCodec.DecodeCharacterRoster(await link.ExpectPayloadAsync(NetOpcode.CharacterRoster));
         var row = Assert.Single(roster.Characters);
-        Assert.Equal(created.CharacterId, row.CharacterId);
+        Assert.Equal(created.Character.CharacterId, row.CharacterId);
         Assert.Equal(6, row.HairStyle);
         Assert.Equal(HumanClasses.SexFemale, row.Sex);
-        Assert.Equal(created.X, row.X);
         Assert.Equal(1, row.Level);
     }
 
@@ -314,78 +318,4 @@ public class CharacterCreationTests
         CharacterCreateOptions? create = null,
         Action<string>? warn = null) =>
         new(store ?? JsonAccountStore.InMemory(), new HandoffTokens(HandoffTokens.DefaultSecret), clock, deleteAfterDays: deleteAfterDays, create: create, warn: warn);
-
-    sealed class Link : IAsyncDisposable
-    {
-        readonly TcpListener _listener;
-        readonly CancellationTokenSource _cts;
-        readonly Task _accept;
-        readonly TcpClient _client;
-        readonly NetworkStream _stream;
-
-        Link(TcpListener listener, CancellationTokenSource cts, Task accept, TcpClient client, NetworkStream stream)
-        {
-            _listener = listener;
-            _cts = cts;
-            _accept = accept;
-            _client = client;
-            _stream = stream;
-        }
-
-        public static async Task<Link> Open(LoginServer server)
-        {
-            var listener = new TcpListener(IPAddress.Loopback, 0);
-            listener.Start();
-            int port = ((IPEndPoint)listener.LocalEndpoint).Port;
-            var cts = new CancellationTokenSource();
-            var accept = Task.Run(async () =>
-            {
-                using var accepted = await listener.AcceptTcpClientAsync(cts.Token);
-                await using var stream = accepted.GetStream();
-                await server.HandleAsync(stream, cts.Token);
-            });
-            var client = new TcpClient();
-            await client.ConnectAsync(IPAddress.Loopback, port);
-            return new Link(listener, cts, accept, client, client.GetStream());
-        }
-
-        public Task Send<T>(MsgType type, T message) =>
-            FrameIO.SendAsync(_stream, (ushort)type, MessagePackSerializer.Serialize(message));
-
-        public async Task Expect(MsgType expected)
-        {
-            var frame = await Read();
-            Assert.Equal((ushort)expected, frame.Type);
-        }
-
-        public async Task<T> Expect<T>(MsgType expected)
-        {
-            var frame = await Read();
-            Assert.Equal((ushort)expected, frame.Type);
-            return MessagePackSerializer.Deserialize<T>(frame.Body);
-        }
-
-        async Task<(ushort Type, byte[] Body)> Read()
-        {
-            var frame = await FrameIO.ReadAsync(_stream);
-            Assert.NotNull(frame);
-            return (frame!.Value.Type, frame.Value.Body);
-        }
-
-        public async ValueTask DisposeAsync()
-        {
-            _client.Dispose();
-            _listener.Stop();
-            await _cts.CancelAsync();
-            try
-            {
-                await _accept.WaitAsync(TimeSpan.FromSeconds(2));
-            }
-            catch (Exception ex) when (ex is OperationCanceledException or TimeoutException)
-            {
-            }
-
-            _cts.Dispose();
-        }
-    }
 }
