@@ -277,6 +277,7 @@ public sealed partial class ZoneWorld
 
         // Swing now; HP drops at hitTime (Mobius onHitTimer).
         FanoutAttack(player, target, attack, outbound);
+        QueueAttackerDamageLine(player, target, damage);
         if (ps.Weapon == Fineage.Game.WeaponType.Bow)
             ConsumeBowArrow(player, outbound);
         long now = _clock().ToUnixTimeMilliseconds();
@@ -462,6 +463,17 @@ public sealed partial class ZoneWorld
     };
 
     readonly List<PendingMeleeHit> _meleeHits = new();
+
+    void QueueAttackerDamageLine(ZoneEntity attacker, ZoneEntity target, int damage)
+    {
+        // Mobius YOU_HIT_S1_FOR_S2_DAMAGE goes to the attacker only, never to watchers.
+        if (damage <= 0 || attacker.Session == null || NetBridge == null)
+            return;
+
+        NetBridge.FanoutSystemMessage(
+            [attacker.ObjectId],
+            CombatLines.ToNet(CombatLines.HitTarget(target.Name, damage)));
+    }
 
     void FanoutAttack(ZoneEntity attacker, ZoneEntity target, AttackMsg attack, List<Pending> outbound)
     {
