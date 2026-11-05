@@ -41,7 +41,7 @@ internal sealed class WorldBench
         Fineage.Zone.Dungeons.DungeonAccessOptions? dungeonAccess = null)
     {
         Game = game ?? GameData.LoadDefault();
-        Store = JsonAccountStore.InMemory();
+        Store = MemoryAccountStore.InMemory();
         Now = clock ?? (() => DateTimeOffset.FromUnixTimeMilliseconds(1_800_000_000_000));
         World = new ZoneWorld(
             aoi ?? new RangeAoi(1_000),
@@ -73,7 +73,7 @@ internal sealed class WorldBench
     }
 
     public GameData Game { get; }
-    public JsonAccountStore Store { get; }
+    public MemoryAccountStore Store { get; }
     public ZoneWorld World { get; }
     public INetPresenceBridge Bridge { get; }
     public NetBridgeRecorder Rec { get; }
@@ -146,7 +146,7 @@ internal sealed class WorldBench
 /// <summary>One entered player plus the store, for save/restore assertions.</summary>
 internal sealed class BenchPlayer
 {
-    public BenchPlayer(ZoneWorld world, JsonAccountStore store, ZoneSession session, ZoneEntity player, HandoffTicket ticket)
+    public BenchPlayer(ZoneWorld world, MemoryAccountStore store, ZoneSession session, ZoneEntity player, HandoffTicket ticket)
     {
         World = world;
         Store = store;
@@ -156,7 +156,7 @@ internal sealed class BenchPlayer
     }
 
     public ZoneWorld World { get; }
-    public JsonAccountStore Store { get; }
+    public MemoryAccountStore Store { get; }
     public ZoneSession Session { get; }
     public ZoneEntity Player { get; }
     public HandoffTicket Ticket { get; }

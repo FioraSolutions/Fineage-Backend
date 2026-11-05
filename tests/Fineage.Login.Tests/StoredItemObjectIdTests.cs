@@ -9,7 +9,7 @@ public class StoredItemObjectIdTests
     [Fact]
     public void Create_assigns_durable_object_ids_and_restore_keeps_them()
     {
-        var store = JsonAccountStore.InMemory();
+        var store = MemoryAccountStore.InMemory();
         var service = new LoginService(store, new HandoffTokens(HandoffTokens.DefaultSecret));
         Assert.True(service.Register("alice", "secret1").Ok);
 
@@ -29,7 +29,7 @@ public class StoredItemObjectIdTests
     [Fact]
     public void Replace_items_without_object_id_allocates_once()
     {
-        var store = JsonAccountStore.InMemory();
+        var store = MemoryAccountStore.InMemory();
         var service = new LoginService(store, new HandoffTokens(HandoffTokens.DefaultSecret));
         Assert.True(service.Register("alice", "secret1").Ok);
         var created = service.CreateHuman("alice", "Aria", HumanClasses.Fighter);

@@ -122,7 +122,7 @@ public sealed class CharacterCreateAllowEnvTests
 
     static LoginService Service(CharacterCreateOptions fromEnv) =>
         new(
-            JsonAccountStore.InMemory(),
+            MemoryAccountStore.InMemory(),
             new HandoffTokens(HandoffTokens.DefaultSecret),
             create: new CharacterCreateOptions
             {

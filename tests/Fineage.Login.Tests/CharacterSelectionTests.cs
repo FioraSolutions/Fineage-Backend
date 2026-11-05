@@ -20,7 +20,7 @@ public class CharacterSelectionTests
     public void Roster_is_creation_order_with_slot_preview_position_and_appearance()
     {
         var now = DateTimeOffset.UnixEpoch;
-        var store = JsonAccountStore.InMemory();
+        var store = MemoryAccountStore.InMemory();
         var service = Service(store, () => now);
         Assert.True(service.Register("alice", "secret1").Ok);
         Assert.Equal(CreateCharacterStatus.Ok, store.TryAddCharacter(
@@ -54,7 +54,7 @@ public class CharacterSelectionTests
     public void Saved_position_replaces_the_creation_point_on_the_roster()
     {
         var now = DateTimeOffset.UnixEpoch;
-        var store = JsonAccountStore.InMemory();
+        var store = MemoryAccountStore.InMemory();
         var service = Service(store, () => now);
         var created = service.Play("alice", "secret1", "Aria", HumanClasses.Fighter).Value!;
         Assert.True(store.TrySavePresence("alice", created.CharacterId, -70000, 250000, -3000, now.AddMinutes(1)));
@@ -71,7 +71,7 @@ public class CharacterSelectionTests
     public void Select_by_slot_or_id_rejects_foreign_unknown_and_pending()
     {
         var now = DateTimeOffset.UnixEpoch;
-        var store = JsonAccountStore.InMemory();
+        var store = MemoryAccountStore.InMemory();
         var service = Service(store, () => now, deleteAfterDays: 7);
         Assert.True(service.Register("alice", "secret1").Ok);
         Assert.True(service.Register("bob", "secret1").Ok);
@@ -134,7 +134,7 @@ public class CharacterSelectionTests
     [Fact]
     public void Delete_at_zero_days_removes_the_character_and_items_and_frees_the_name()
     {
-        var store = JsonAccountStore.InMemory();
+        var store = MemoryAccountStore.InMemory();
         var service = Service(store, deleteAfterDays: 0);
         var created = service.Play("alice", "secret1", "Aria", HumanClasses.Fighter).Value!;
         Assert.True(store.TryReplaceItems("alice", created.CharacterId, [new StoredItem(57, 40, -1)]));
@@ -155,7 +155,7 @@ public class CharacterSelectionTests
     public void Expired_characters_are_purged_on_roster_load_and_the_name_is_free()
     {
         var now = DateTimeOffset.UnixEpoch;
-        var store = JsonAccountStore.InMemory();
+        var store = MemoryAccountStore.InMemory();
         var service = Service(store, () => now, deleteAfterDays: 7);
         var created = service.Play("alice", "secret1", "Aria", HumanClasses.Fighter).Value!;
         Assert.True(store.TryReplaceItems("alice", created.CharacterId, [new StoredItem(57, 40, -1)]));
@@ -202,33 +202,24 @@ public class CharacterSelectionTests
     }
 
     [Fact]
-    public void Delete_fields_roundtrip_through_the_account_file()
+    public void Delete_fields_roundtrip_through_the_persisted_snapshot()
     {
         var now = DateTimeOffset.UnixEpoch.AddHours(3);
-        string path = Path.Combine(Path.GetTempPath(), "fineage-select-" + Guid.NewGuid().ToString("n") + ".json");
-        try
-        {
-            var store = JsonAccountStore.Open(path);
-            var service = Service(store, () => now, deleteAfterDays: 7);
-            var created = service.Play("alice", "secret1", "Aria", HumanClasses.Fighter).Value!;
-            Assert.True(service.Delete("alice", characterId: created.CharacterId).Ok);
-            Assert.True(store.TrySavePresence("alice", created.CharacterId, 1, 2, 3, now));
+        var store = MemoryAccountStore.InMemory();
+        var service = Service(store, () => now, deleteAfterDays: 7);
+        var created = service.Play("alice", "secret1", "Aria", HumanClasses.Fighter).Value!;
+        Assert.True(service.Delete("alice", characterId: created.CharacterId).Ok);
+        Assert.True(store.TrySavePresence("alice", created.CharacterId, 1, 2, 3, now));
 
-            var reloaded = JsonAccountStore.Open(path).FindById("alice", created.CharacterId);
-            Assert.NotNull(reloaded);
-            Assert.Equal(now.AddDays(7), reloaded.DeleteAt);
-            Assert.Equal(now, reloaded.LastAccess);
-            Assert.Equal(now, reloaded.CreatedAt);
-            Assert.True(reloaded.HasPosition);
-            Assert.Equal(1, reloaded.X);
-            Assert.Equal(2, reloaded.Y);
-            Assert.Equal(3, reloaded.Z);
-        }
-        finally
-        {
-            if (File.Exists(path))
-                File.Delete(path);
-        }
+        var reloaded = MemoryAccountStore.FromSnapshot(store.ExportSnapshot()).FindById("alice", created.CharacterId);
+        Assert.NotNull(reloaded);
+        Assert.Equal(now.AddDays(7), reloaded.DeleteAt);
+        Assert.Equal(now, reloaded.LastAccess);
+        Assert.Equal(now, reloaded.CreatedAt);
+        Assert.True(reloaded.HasPosition);
+        Assert.Equal(1, reloaded.X);
+        Assert.Equal(2, reloaded.Y);
+        Assert.Equal(3, reloaded.Z);
     }
 
     [Fact]
@@ -291,7 +282,7 @@ public class CharacterSelectionTests
     [Fact]
     public void TrySaveVitals_persists_current_hp_and_mp()
     {
-        var store = JsonAccountStore.InMemory();
+        var store = MemoryAccountStore.InMemory();
         var service = Service(store);
         Assert.True(service.Register("alice", "secret1").Ok);
         Assert.Equal(CreateCharacterStatus.Ok,
@@ -304,7 +295,7 @@ public class CharacterSelectionTests
     }
 
     static LoginService Service(IAccountStore? store = null, Func<DateTimeOffset>? clock = null, int? deleteAfterDays = null) =>
-        new(store ?? JsonAccountStore.InMemory(), new HandoffTokens(HandoffTokens.DefaultSecret), clock, deleteAfterDays: deleteAfterDays);
+        new(store ?? MemoryAccountStore.InMemory(), new HandoffTokens(HandoffTokens.DefaultSecret), clock, deleteAfterDays: deleteAfterDays);
 
     /// <summary>Pre-slot select payload: the wire carried only id and name.</summary>
     public sealed class OldSelectMsg

@@ -15,7 +15,7 @@ public sealed class LoginStatusTests
     {
         var zone = new MutableZone();
         await using var host = await LoginHttpHost.StartAsync(
-            new LoginService(JsonAccountStore.InMemory(), new HandoffTokens(HandoffTokens.DefaultSecret)),
+            new LoginService(MemoryAccountStore.InMemory(), new HandoffTokens(HandoffTokens.DefaultSecret)),
             IPAddress.Loopback,
             0,
             zoneStatus: zone);

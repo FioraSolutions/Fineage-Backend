@@ -41,7 +41,7 @@ Quest requests are **42–45** (`RequestQuestList`, `RequestQuestAbort`, `NpcTal
 
 `NpcInfo` (**1006**) keys 0–9 are unchanged: objectId, npcId, name, x, y, z, heading, attackable, runSpeed, walkSpeed. Appended keys, not renumbered: **10** `title`, **11** `npcType` (the Mobius instance, such as Merchant, Guard, Teleporter, or Monster). The same keys are on the V2 `NpcInfo` message. Templates are `data/npcs.json` (Mobius `stats/npcs`: id, name, title, type, level, collision, attackable, aggressive, hp, mp, speeds). A spawn row that omits name, attackable, hp, or speeds takes them from that template. Inline Cedric gremlin rows still win, so those three stay attackable with their own hp and speeds. The zone process materializes every enabled spawn map, so Talking Island village (`data/spawns/ti_village.json`) stands with the Cedric gremlins, the island's outdoor monsters, and the quest villagers. Interlude towns and starting villages are enabled, including Goddard, Rune, and Schuttgart, so a gatekeeper square within 8000 of a spawned NPC loads. `new ZoneWorld()` still loads only the active map. Character ids stay below **50000**. Legacy NPC rows, including the quest villagers, use **50000–59999**. Town NPC rows use **60000–99999**. Item object ids start at **100000**.
 
-Item object ids start at **100000** and are unique across the zone. Creating a character stores the starter kit once (item id, count, equipped slot) on that character in `accounts.json`. The zone loads it on enter. A character saved before kits existed is granted the kit once, then saved. Disconnect writes the bag back. Zone uses the same `--store` / `FINEAGE_LOGIN_STORE` path as login (default `data/accounts.json`). Starter kits follow Mobius `initialEquipment.xml` (fighter sword **2369**, orc training gloves **2368**, dwarf club **2370**, mystic wand **6**, shared squire shirt/pants **1146** / **1147**).
+Item object ids start at **100000** and are unique across the zone. Creating a character stores the starter kit once (item id, count, equipped slot) on that character in PostgreSQL (`character_items`). The zone loads it on enter. A character saved before kits existed is granted the kit once, then saved. Disconnect writes the bag back. Login and Zone share the same PostgreSQL database (`FINEAGE_DATABASE_URL`). Starter kits follow Mobius `initialEquipment.xml` (fighter sword **2369**, orc training gloves **2368**, dwarf club **2370**, mystic wand **6**, shared squire shirt/pants **1146** / **1147**).
 
 ### Enter-world gear
 
@@ -55,11 +55,11 @@ MessagePack keys are additive. `CharInfo` keys 0–5 are unchanged; key **6** is
 
 `CharInfo` (1005) key `6` is an `int[17]` of item ids in the same paperdoll order. **0** means empty. Key `7` is clanId and key `8` is clanCrestId (0). Other clients still read keys 0–5.
 
-Clan create, invite, leave, dismiss, and dissolution use opcodes **32–38** (admin spoil/sweep stay **30–31**) and **1050–1053**. Level 10, a 2–16 character alphanumeric name, and the Mobius day penalties (join 1, create 10, dissolve 7) are in `docs/clan-v2-protocol.md`. Membership is stored in `accounts.json` with the character.
+Clan create, invite, leave, dismiss, and dissolution use opcodes **32–38** (admin spoil/sweep stay **30–31**) and **1050–1053**. Level 10, a 2–16 character alphanumeric name, and the Mobius day penalties (join 1, create 10, dissolve 7) are in `docs/clan-v2-protocol.md`. Membership and penalties are stored in PostgreSQL with the character.
 
 Catacomb and necropolis gates use **92** (`DungeonEnterRequest`) and **1092** (`DungeonEntered`). The eight necropolises and six catacombs, with Ziggurat entrance and exit coordinates, are in `data/dungeons.json`. Competition admits either cabal. Seal validation admits the winning cabal only when that cabal also holds Avarice (necropolis) or Gnosis (catacomb). A period change teleports anyone who lost access out to the surface exit. Layout: `docs/dungeon-access-v2-protocol.md`.
 
-`Handoff.Token` is the zone session key. Login TCP listens on **9106**. The same process serves play-landing HTTP on **5080** (`POST /api/auth/register`, `POST /api/auth/login`, `GET /api/status`) against that store. Zone listens on **9777**. Both bind **0.0.0.0** unless `--bind` / `FINEAGE_BIND` says otherwise. Accounts live in `data/accounts.json` (`--store` / `FINEAGE_LOGIN_STORE`), including the email from HTTP register.
+`Handoff.Token` is the zone session key. Login TCP listens on **9106**. The same process serves play-landing HTTP on **5080** (`POST /api/auth/register`, `POST /api/auth/login`, `GET /api/status`) against that store. Zone listens on **9777**. Both bind **0.0.0.0** unless `--bind` / `FINEAGE_BIND` says otherwise. Accounts live in PostgreSQL (see [`docs/net-protocol.md`](docs/net-protocol.md)), including the email from HTTP register.
 
 ## Run
 
@@ -89,7 +89,7 @@ The **live** public stack on Tailscale host `raspberrypi` (`100.123.81.1`) runs 
 
 Zone also binds **127.0.0.1:7780** for `GET /status` (`{"playersOnline": n}` from `ZoneWorld.OnlinePlayerCount`). Login's `GET /api/status` reads it. That listener is loopback only and is not a public port.
 
-Set `FINEAGE_ZONE_HOST` in `fineage.env` (or the environment) to the address clients dial for the zone. Put the shared handoff secret in `handoff.secret` or `FINEAGE_HANDOFF_SECRET`. Accounts and world state stay in `data/accounts.json` (and sibling files under `data/`); deploy never deletes that tree.
+Set `FINEAGE_ZONE_HOST` in `fineage.env` (or the environment) to the address clients dial for the zone. Put the shared handoff secret in `handoff.secret` or `FINEAGE_HANDOFF_SECRET`. Accounts live in PostgreSQL; world sidecars (`seven-signs.json`, `olympiad.json`, `boss-schedule.json`) live in `FINEAGE_STATE_DIR` (default `data/`), and deploy never deletes that tree.
 
 Optional **systemd** under `/opt/fineage` with user `fineage` is documented below for greenfield installs; **GitHub Actions deploy** targets the live `fineage-backend` layout only. Point the landing Worker’s `FINEAGE_LOGIN_API_URL` at `http://<pi>:5080` on a path the Worker can reach. This repo does not change Cloudflare or DNS.
 

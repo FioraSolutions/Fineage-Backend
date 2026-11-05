@@ -10,7 +10,7 @@ public sealed class LoginHandoffValidationTests
     {
         var issuedAt = DateTimeOffset.UnixEpoch.AddDays(10);
         var tokens = new HandoffTokens(HandoffTokens.DefaultSecret);
-        var service = new LoginService(JsonAccountStore.InMemory(), tokens, () => issuedAt);
+        var service = new LoginService(MemoryAccountStore.InMemory(), tokens, () => issuedAt);
         var ticket = service.Play("alice", "secret1", "Aria", HumanClasses.Fighter).Value!;
 
         Assert.False(tokens.TryValidate(ticket.Token + "x", issuedAt, out _));

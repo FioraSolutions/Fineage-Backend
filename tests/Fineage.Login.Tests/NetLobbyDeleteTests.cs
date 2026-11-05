@@ -188,7 +188,7 @@ public class NetLobbyDeleteTests
             bool startWithTwoCharacters,
             int deleteAfterDays = 0)
         {
-            var store = JsonAccountStore.InMemory();
+            var store = MemoryAccountStore.InMemory();
             var service = new LoginService(
                 store,
                 new HandoffTokens(HandoffTokens.DefaultSecret),

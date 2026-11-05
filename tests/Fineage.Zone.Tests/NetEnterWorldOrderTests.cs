@@ -20,7 +20,7 @@ public sealed class NetEnterWorldOrderTests
     public async Task Etc_status_is_sent_after_item_list_and_shortcut_init()
     {
         using var timeout = new CancellationTokenSource(TimeSpan.FromSeconds(20));
-        var store = JsonAccountStore.InMemory();
+        var store = MemoryAccountStore.InMemory();
         var tokens = new HandoffTokens(HandoffTokens.DefaultSecret);
         var login = new LoginService(store, tokens);
         var ticket = login.Play("wireorder", "pass1234", "Orderly", HumanClasses.Fighter);

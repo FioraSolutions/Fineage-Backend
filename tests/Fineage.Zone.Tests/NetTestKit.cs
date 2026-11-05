@@ -36,15 +36,15 @@ public class NetBridgeRecorder : DispatchProxy
 internal sealed class NetTestKit
 {
     public const int ElfX = 46045, ElfY = 41251, ElfZ = -3440;
-    public JsonAccountStore Store { get; }
+    public MemoryAccountStore Store { get; }
     public GameData Game { get; } = GameData.LoadDefault();
     public ZoneWorld World { get; }
     public DateTimeOffset Now { get; set; } = DateTimeOffset.FromUnixTimeMilliseconds(1_800_000_000_000);
     int _n;
 
-    public NetTestKit(Fineage.Zone.Spawns.SpawnCatalog? spawns = null, string? map = null, Fineage.Zone.Geo.GeoEngine? geo = null, Fineage.Zone.Interest.IAoi? aoi = null, Random? deathRandom = null, Fineage.Game.DeathRuleCatalog? deathRules = null, Fineage.Game.Services.ItemWeights? weights = null, JsonAccountStore? store = null)
+    public NetTestKit(Fineage.Zone.Spawns.SpawnCatalog? spawns = null, string? map = null, Fineage.Zone.Geo.GeoEngine? geo = null, Fineage.Zone.Interest.IAoi? aoi = null, Random? deathRandom = null, Fineage.Game.DeathRuleCatalog? deathRules = null, Fineage.Game.Services.ItemWeights? weights = null, MemoryAccountStore? store = null)
     {
-        Store = store ?? JsonAccountStore.InMemory();
+        Store = store ?? MemoryAccountStore.InMemory();
         World = new ZoneWorld(aoi, game: Game, accounts: Store, clock: () => Now, spawnCatalog: spawns, activeMapId: map, geo: geo,
             deathRules: deathRules, deathRandom: deathRandom, weights: weights);
     }

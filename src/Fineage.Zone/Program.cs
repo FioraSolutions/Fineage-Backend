@@ -48,21 +48,24 @@ if (!BindAddress.TryResolve(bindText, out var bindAddress, out string bindDispla
     return;
 }
 
-string storePath = Arg(args, "--store")
-    ?? Environment.GetEnvironmentVariable("FINEAGE_LOGIN_STORE")
-    ?? Path.Combine("data", "accounts.json");
-IAccountStore accounts = AccountStoreFactory.Open(storePath);
-string storeLabel = string.Equals(
-    Environment.GetEnvironmentVariable(AccountStoreFactory.StoreEnv),
-    "postgres",
-    StringComparison.OrdinalIgnoreCase)
-    || string.Equals(
-        Environment.GetEnvironmentVariable(AccountStoreFactory.StoreEnv),
-        "pg",
-        StringComparison.OrdinalIgnoreCase)
-    ? "postgres"
-    : storePath;
-TryMobiusCatalogImportAtBoot(storePath);
+// Accounts are PostgreSQL-only. --state-dir (default data/) holds the world sidecar files:
+// seven-signs.json, olympiad.json, boss-schedule.json.
+string stateDir = Arg(args, "--state-dir")
+    ?? Environment.GetEnvironmentVariable("FINEAGE_STATE_DIR")
+    ?? Path.Combine("data");
+IAccountStore accounts;
+try
+{
+    accounts = AccountStoreFactory.Open(Arg(args, "--database"));
+}
+catch (Exception ex)
+{
+    Console.Error.WriteLine($"[ZONE] {ex.Message}");
+    Environment.ExitCode = 1;
+    return;
+}
+string storeLabel = "postgres";
+TryMobiusCatalogImportAtBoot(stateDir);
 using var shutdown = new CancellationTokenSource();
 Console.CancelKeyPress += (_, e) =>
 {
@@ -70,9 +73,9 @@ Console.CancelKeyPress += (_, e) =>
     shutdown.Cancel();
 };
 
-var sevenSigns = SevenSignsEngine.OpenBesideAccounts(storePath);
-var bosses = BossSchedule.OpenBesideAccounts(storePath);
-var olympiad = OlympiadBoard.OpenBesideAccounts(storePath, DateTimeOffset.UtcNow);
+var sevenSigns = SevenSignsEngine.OpenInStateDirectory(stateDir);
+var bosses = BossSchedule.OpenInStateDirectory(stateDir);
+var olympiad = OlympiadBoard.OpenInStateDirectory(stateDir, DateTimeOffset.UtcNow);
 bool includeEnabledMaps = string.Equals(
     Environment.GetEnvironmentVariable("FINEAGE_ZONE_INCLUDE_ENABLED_MAPS"),
     "1",
@@ -98,10 +101,10 @@ if (string.IsNullOrWhiteSpace(Environment.GetEnvironmentVariable("FINEAGE_HANDOF
 
 string worldLabel = includeEnabledMaps ? "whole world (all enabled spawn maps)" : "single spawn map";
 Console.WriteLine($"[ZONE] world {storeLabel} {worldLabel} (maxConn={maxConnections} outboundQ={outboundQueue} interestRange={interestRange} npcs={world.NpcObjectIds.Count})");
-Console.WriteLine("[ZONE] Seven Signs period, cabal, and seal-stone scores are stored beside the account file as seven-signs.json.");
-Console.WriteLine("[ZONE] Olympiad registration and points are stored beside the account file as olympiad.json.");
+Console.WriteLine("[ZONE] Seven Signs period, cabal, and seal-stone scores are stored as seven-signs.json in the state directory.");
+Console.WriteLine("[ZONE] Olympiad registration and points are stored as olympiad.json in the state directory.");
 Console.WriteLine("[ZONE] Catacomb and necropolis gates follow that cabal.");
-Console.WriteLine("[ZONE] Raid and grand boss respawn state is stored beside the account file as boss-schedule.json.");
+Console.WriteLine("[ZONE] Raid and grand boss respawn state is stored as boss-schedule.json in the state directory.");
 if (adminCommands)
     Console.WriteLine("[ZONE] admin commands enabled (GiveItem, AdminCaptureCastle, AdminBossSchedule, AdminReportOlympiadResult, AdminKillPlayer).");
 
@@ -152,13 +155,13 @@ static string? Arg(string[] args, string name)
     return args[i + 1];
 }
 
-static void TryMobiusCatalogImportAtBoot(string storePath)
+static void TryMobiusCatalogImportAtBoot(string stateDirectory)
 {
     if (string.IsNullOrWhiteSpace(Environment.GetEnvironmentVariable(MobiusXmlRoot.EnvVar)) &&
         !IsTruthy(Environment.GetEnvironmentVariable("FINEAGE_MOBIUS_IMPORT_ON_BOOT")))
         return;
 
-    var dataDir = GameData.FindDataDirectory(Path.GetDirectoryName(Path.GetFullPath(storePath)) ?? Directory.GetCurrentDirectory())
+    var dataDir = GameData.FindDataDirectory(stateDirectory)
         ?? GameData.FindDataDirectory(Directory.GetCurrentDirectory());
     if (dataDir == null)
     {

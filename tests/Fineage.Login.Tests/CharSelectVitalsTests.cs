@@ -8,7 +8,7 @@ public class CharSelectVitalsTests
     [Fact]
     public void LobbyWire_summary_carries_vitals_and_paperdoll_through_the_net_roster_codec()
     {
-        var store = JsonAccountStore.InMemory();
+        var store = MemoryAccountStore.InMemory();
         var service = new LoginService(store, new HandoffTokens(HandoffTokens.DefaultSecret));
         Assert.True(service.Register("vitalstest", "pass1234").Ok);
         var created = service.CreateHuman("vitalstest", "MageOne", HumanClasses.Mystic);

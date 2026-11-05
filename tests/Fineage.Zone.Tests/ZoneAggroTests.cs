@@ -31,7 +31,7 @@ public sealed class ZoneAggroTests
     [Fact]
     public async Task Aggressive_mob_attacks_in_range_calls_clan_and_sends_stance()
     {
-        var store = JsonAccountStore.InMemory();
+        var store = MemoryAccountStore.InMemory();
         var login = new LoginService(store, new HandoffTokens(HandoffTokens.DefaultSecret));
         Assert.True(login.Register("aggro", "pass1234").Ok);
         var created = login.CreateHuman("aggro", "Bait", HumanClasses.Fighter);

@@ -69,11 +69,15 @@ public sealed class BossSchedule
             clock,
             new InclusiveBossRandom(random ?? Random.Shared));
 
-    public static BossSchedule OpenBesideAccounts(string accountStorePath, Func<DateTimeOffset>? clock = null, Random? random = null)
+    /// <summary>
+    /// Opens the respawn schedule in <paramref name="stateDirectory"/> unless <c>FINEAGE_BOSS_STORE</c>
+    /// names an explicit file.
+    /// </summary>
+    public static BossSchedule OpenInStateDirectory(string stateDirectory, Func<DateTimeOffset>? clock = null, Random? random = null)
     {
         string? configured = Environment.GetEnvironmentVariable("FINEAGE_BOSS_STORE");
         string path = string.IsNullOrWhiteSpace(configured)
-            ? Path.Combine(StoreDirectory(accountStorePath), "boss-schedule.json")
+            ? Path.Combine(string.IsNullOrWhiteSpace(stateDirectory) ? "data" : stateDirectory, "boss-schedule.json")
             : configured.Trim();
         return new BossSchedule(
             BossCatalog.LoadDefault(),
@@ -395,12 +399,6 @@ public sealed class BossSchedule
         if (string.IsNullOrWhiteSpace(text) || !double.TryParse(text, System.Globalization.NumberStyles.Float, System.Globalization.CultureInfo.InvariantCulture, out double value))
             return fallback;
         return value < 0 ? fallback : value;
-    }
-
-    static string StoreDirectory(string accountStorePath)
-    {
-        string? dir = Path.GetDirectoryName(Path.GetFullPath(accountStorePath));
-        return string.IsNullOrEmpty(dir) ? "data" : dir;
     }
 
     sealed class BossState

@@ -10,17 +10,21 @@ PacketEnvelope login/zone path. Durable accounts use PostgreSQL by default for l
 
 ## Persistence
 
+PostgreSQL is the only account store. There is no file-backed mode: `--store`, `FINEAGE_LOGIN_STORE`,
+and `FINEAGE_STORE` are gone, and a JSON file is never read or written at runtime.
+
 | Env | Meaning |
 |-----|---------|
-| `FINEAGE_STORE=postgres` | `PostgresAccountStore` (default in `scripts/run-local-net.sh`) |
-| `FINEAGE_DATABASE_URL` | Npgsql connection string |
-| `FINEAGE_STORE=json` | `accounts.json` via `--store` / `FINEAGE_LOGIN_STORE` |
+| `FINEAGE_DATABASE_URL` | Npgsql connection string (default `Host=127.0.0.1;Port=5432;Database=fineage;Username=fineage;Password=fineage`) |
+| `FINEAGE_STATE_DIR` | Directory for world sidecars: `seven-signs.json`, `olympiad.json`, `boss-schedule.json` (default `data`) |
+
+Login and Zone both fail fast at boot with a readable message when PostgreSQL is unreachable.
 
 ### Postgres layout (Mobius-shaped)
 
 | Table | Role |
 |-------|------|
-| `store_snapshot` | Backup / import-export document only (same JSON as `accounts.json`) — **not** runtime SoT for characters |
+| `store_snapshot` | Backup / import-export document only (full JSON document) — **not** runtime SoT for characters |
 | `accounts` | Credentials |
 | `characters` | Identity, appearance, `x/y/z`, vitals, level/exp/sp, clan flags |
 | `character_items` | Durable `object_id`, `item_id`, `count`, `enchant_level`, `loc` (`inventory` / `paperdoll` / `warehouse`), `loc_data` (paperdoll slot) |
@@ -28,16 +32,15 @@ PacketEnvelope login/zone path. Durable accounts use PostgreSQL by default for l
 | `clans` | Still payload jsonb until a later epic |
 | `store_meta` / sequences | `next_character_id`, `next_clan_id`, `next_item_object_id` |
 
-`PostgresAccountStore.FindById` / `List` read **normalized tables** (then hydrate the in-process mirror for hot writes). Login and Zone are separate processes; Zone must not rely on a stale JSON snapshot for enter.
+`PostgresAccountStore.FindById` / `List` read **normalized tables** (then hydrate the in-process mirror for hot writes). Login and Zone are separate processes, and both read the same database.
 
 Hot paths (`TrySavePresence`, vitals, inventory replace) update normalized rows without truncating the whole store. Skills are still derived at zone enter (AutoSkills), not persisted.
 
-Import / repair:
+Repair:
 
 ```bash
 docker compose up -d postgres
-FINEAGE_STORE=postgres dotnet run --project src/Fineage.Login -- import-json /path/to/legacy-accounts.json
-FINEAGE_STORE=postgres dotnet run --project src/Fineage.Login -- backfill-normalized
+dotnet run --project src/Fineage.Login -- backfill-normalized
 ```
 
 ## Lobby roster (CharSelect)

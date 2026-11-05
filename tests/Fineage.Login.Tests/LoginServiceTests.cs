@@ -7,7 +7,7 @@ namespace Fineage.Login.Tests;
 public class LoginServiceTests
 {
     static LoginService NewService(IAccountStore? store = null, DateTimeOffset? now = null) =>
-        new(store ?? JsonAccountStore.InMemory(), new HandoffTokens(HandoffTokens.DefaultSecret), () => now ?? DateTimeOffset.UnixEpoch);
+        new(store ?? MemoryAccountStore.InMemory(), new HandoffTokens(HandoffTokens.DefaultSecret), () => now ?? DateTimeOffset.UnixEpoch);
 
     [Fact]
     public void Play_RegistersHumanFighter_AndIssuesZoneToken()
@@ -78,9 +78,8 @@ public class LoginServiceTests
         Assert.Null(LandingAuth.ValidateEmail("A@Example.com", out string canonical));
         Assert.Equal("a@example.com", canonical);
 
-        string dir = Path.Combine(Path.GetTempPath(), "fineage-login-no-email-" + Guid.NewGuid().ToString("n"));
-        string path = Path.Combine(dir, "accounts.json");
-        var service = new LoginService(JsonAccountStore.Open(path), new HandoffTokens(HandoffTokens.DefaultSecret));
+        var store = MemoryAccountStore.InMemory();
+        var service = new LoginService(store, new HandoffTokens(HandoffTokens.DefaultSecret));
 
         var missing = service.RegisterLanding("NoMail", null, "password123");
         Assert.True(missing.Ok, missing.Message);
@@ -103,7 +102,7 @@ public class LoginServiceTests
         Assert.Equal("invalid_credentials", service.Login("missing@example.com", "password123").Code);
         Assert.Equal("email_taken", service.RegisterLanding("other", "has@example.com", "password123").Code);
 
-        using var doc = JsonDocument.Parse(File.ReadAllText(path));
+        using var doc = JsonDocument.Parse(store.ExportSnapshot());
         var byName = doc.RootElement.GetProperty("accounts").EnumerateArray()
             .ToDictionary(account => account.GetProperty("name").GetString()!, account => account);
         Assert.False(byName.ContainsKey("bad_mail"));
@@ -165,7 +164,7 @@ public class LoginServiceTests
     {
         var now = DateTimeOffset.UnixEpoch.AddHours(5);
         var tokens = new HandoffTokens(HandoffTokens.DefaultSecret, TimeSpan.FromSeconds(90));
-        var service = new LoginService(JsonAccountStore.InMemory(), tokens, () => now);
+        var service = new LoginService(MemoryAccountStore.InMemory(), tokens, () => now);
         var ticket = service.Play("alice", "secret1", "Aria", HumanClasses.Fighter).Value!;
 
         Assert.Equal(now.ToUnixTimeSeconds() + 90, ticket.ExpiresUnixSeconds);
@@ -176,16 +175,15 @@ public class LoginServiceTests
     [Fact]
     public void Store_ReloadsAccounts_WithoutPlaintextPassword()
     {
-        string dir = Path.Combine(Path.GetTempPath(), "fineage-login-" + Guid.NewGuid().ToString("n"));
-        string path = Path.Combine(dir, "accounts.json");
         var tokens = new HandoffTokens(HandoffTokens.DefaultSecret);
-        var service = new LoginService(JsonAccountStore.Open(path), tokens);
+        var store = MemoryAccountStore.InMemory();
+        var service = new LoginService(store, tokens);
         Assert.True(service.Play("alice", "secret1", "Aria", HumanClasses.Fighter).Ok);
 
-        string json = File.ReadAllText(path);
+        string json = store.ExportSnapshot();
         Assert.DoesNotContain("secret1", json);
 
-        var reloaded = new LoginService(JsonAccountStore.Open(path), tokens);
+        var reloaded = new LoginService(MemoryAccountStore.FromSnapshot(json), tokens);
         Assert.True(reloaded.Login("alice", "secret1").Ok);
         Assert.False(reloaded.Login("alice", "secret2").Ok);
         var listed = reloaded.List("alice");
@@ -196,12 +194,13 @@ public class LoginServiceTests
     [Fact]
     public async Task CliPlay_PrintsHandoff()
     {
-        string dir = Path.Combine(Path.GetTempPath(), "fineage-login-" + Guid.NewGuid().ToString("n"));
-        Directory.CreateDirectory(dir);
-        string path = Path.Combine(dir, "accounts.json");
         var output = new StringWriter();
         var error = new StringWriter();
-        int code = await Cli.RunAsync(["--store", path, "play", "alice", "secret1", "Aria", "mystic"], output, error);
+        int code = await Cli.RunAsync(
+            ["play", "alice", "secret1", "Aria", "mystic"],
+            output,
+            error,
+            MemoryAccountStore.InMemory());
         Assert.Equal(0, code);
         string text = output.ToString();
         Assert.Contains("HANDOFF", text);
