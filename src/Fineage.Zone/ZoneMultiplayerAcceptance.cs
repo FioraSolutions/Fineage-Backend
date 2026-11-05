@@ -36,7 +36,7 @@ public static class ZoneMultiplayerAcceptance
         if (!npcIds.SequenceEqual(again) || !npcIds.SequenceEqual(sharedNpcs))
             throw new InvalidOperationException("npc object ids are not one shared set");
 
-        await using var zone = ZoneHost.Start(tokens, world);
+        await using var zone = ZoneHost.StartV2(tokens, world);
         await using var left = await ZonePeer.ConnectAsync(zone.Port).ConfigureAwait(false);
         await using var right = await ZonePeer.ConnectAsync(zone.Port).ConfigureAwait(false);
 
@@ -103,7 +103,7 @@ public static class ZoneMultiplayerAcceptance
         var other = Play(login, "selftest2", "HumanTwo", HumanClasses.Fighter);
         var world = new ZoneWorld(new RangeAoi(1000));
 
-        await using var zone = ZoneHost.Start(tokens, world);
+        await using var zone = ZoneHost.StartV2(tokens, world);
         await using var left = await ZonePeer.ConnectAsync(zone.Port).ConfigureAwait(false);
         await using var right = await ZonePeer.ConnectAsync(zone.Port).ConfigureAwait(false);
         await left.AuthAsync(fighter).ConfigureAwait(false);
@@ -148,7 +148,7 @@ public static class ZoneMultiplayerAcceptance
             // The scripted loop below accounts for mob HP swing by swing; passive monster regen (D30) would
             // interleave 3 s heals into that bookkeeping. Regen itself is covered by NpcRegenTests.
             npcRegen: false);
-        await using var zone = ZoneHost.Start(tokens, world);
+        await using var zone = ZoneHost.StartV2(tokens, world);
         await using var attacker = await ZonePeer.ConnectAsync(zone.Port).ConfigureAwait(false);
         await using var observer = await ZonePeer.ConnectAsync(zone.Port).ConfigureAwait(false);
 
@@ -226,7 +226,7 @@ public static class ZoneMultiplayerAcceptance
             // The scripted loop below accounts for mob HP swing by swing; passive monster regen (D30) would
             // interleave 3 s heals into that bookkeeping. Regen itself is covered by NpcRegenTests.
             npcRegen: false);
-        await using var zone = ZoneHost.Start(tokens, world);
+        await using var zone = ZoneHost.StartV2(tokens, world);
         await using var left = await ZonePeer.ConnectAsync(zone.Port).ConfigureAwait(false);
         await using var right = await ZonePeer.ConnectAsync(zone.Port).ConfigureAwait(false);
 
@@ -294,7 +294,7 @@ public static class ZoneMultiplayerAcceptance
         var fighter = Play(login, "spoil1", "Spoiler", HumanClasses.Fighter);
 
         var world = new ZoneWorld(spawnRandom: new Random(901), dropRandom: new Random(901), npcRegen: false);
-        await using var zone = ZoneHost.Start(tokens, world);
+        await using var zone = ZoneHost.StartV2(tokens, world);
         await using var peer = await ZonePeer.ConnectAsync(zone.Port).ConfigureAwait(false);
         await peer.AuthAsync(fighter).ConfigureAwait(false);
         await peer.EnterAsync(TalkingIsland.NpcCount, expectOthers: 0).ConfigureAwait(false);
@@ -359,7 +359,7 @@ public static class ZoneMultiplayerAcceptance
         var observer = Play(login, "buff2", "Looker", HumanClasses.Mystic);
 
         var world = new ZoneWorld();
-        await using var zone = ZoneHost.Start(tokens, world);
+        await using var zone = ZoneHost.StartV2(tokens, world);
         await using var left = await ZonePeer.ConnectAsync(zone.Port).ConfigureAwait(false);
         await using var right = await ZonePeer.ConnectAsync(zone.Port).ConfigureAwait(false);
 
@@ -411,7 +411,7 @@ public static class ZoneMultiplayerAcceptance
                 throw new InvalidOperationException("failed to seed wounded vitals");
 
             var world = new ZoneWorld(accounts: store);
-            await using var zone = ZoneHost.Start(tokens, world);
+            await using var zone = ZoneHost.StartV2(tokens, world);
             await using var left = await ZonePeer.ConnectAsync(zone.Port).ConfigureAwait(false);
             await using var right = await ZonePeer.ConnectAsync(zone.Port).ConfigureAwait(false);
 
@@ -445,7 +445,7 @@ public static class ZoneMultiplayerAcceptance
             throw new InvalidOperationException("party selftest ids collided");
 
         var world = new ZoneWorld();
-        await using var zone = ZoneHost.Start(tokens, world);
+        await using var zone = ZoneHost.StartV2(tokens, world);
         await using var left = await ZonePeer.ConnectAsync(zone.Port).ConfigureAwait(false);
         await using var right = await ZonePeer.ConnectAsync(zone.Port).ConfigureAwait(false);
 
@@ -501,7 +501,7 @@ public static class ZoneMultiplayerAcceptance
             throw new InvalidOperationException("trade selftest ids collided");
 
         var world = new ZoneWorld();
-        await using var zone = ZoneHost.Start(tokens, world);
+        await using var zone = ZoneHost.StartV2(tokens, world);
         await using var left = await ZonePeer.ConnectAsync(zone.Port).ConfigureAwait(false);
         await using var right = await ZonePeer.ConnectAsync(zone.Port).ConfigureAwait(false);
 

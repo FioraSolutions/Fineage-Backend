@@ -13,7 +13,7 @@ public static class ZoneAcceptance
         var login = await LoginAcceptance.RunAsync().ConfigureAwait(false);
         var tokens = new HandoffTokens(HandoffTokens.DefaultSecret);
 
-        await using (var zone = ZoneHost.Start(tokens))
+        await using (var zone = ZoneHost.StartNet(tokens))
         {
             await PlayAsync(zone.Port, login.Fighter.Account, login.Fighter.Token, login.Fighter.CharacterId, login.Fighter.CharacterName)
                 .ConfigureAwait(false);
