@@ -26,7 +26,9 @@ for quest in q.get("quests", []):
 vm = ROOT / "data/village-masters.json"
 if vm.exists():
     for c in json.loads(vm.read_text()).get("changes", []):
-        ids = [c.get("rewardItemId", 0)] + [o["proofItemId"] for o in c.get("options", [])]
+        ids = [c.get("rewardItemId", 0)]
+        for o in c.get("options", []):
+            ids += o.get("proofItemIds", [])
         want |= {i for i in ids if i and i not in have}
 
 # Mobius has no icon for for_npc herbs 8600-8607 and BranchSys2.* (i01) for 8608/8611; the client ships these

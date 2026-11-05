@@ -3113,6 +3113,46 @@
       "quest": true
     },
     {
+      "id": 1244,
+      "name": "Gaze of Abyss",
+      "kind": "etc",
+      "stackable": true,
+      "icon": "icon.etc_eyeball_i00",
+      "price": 0,
+      "weight": 0,
+      "quest": true
+    },
+    {
+      "id": 1252,
+      "name": "Iron Heart",
+      "kind": "etc",
+      "stackable": true,
+      "icon": "icon.accessary_earing_of_mana_i00",
+      "price": 0,
+      "weight": 0,
+      "quest": true
+    },
+    {
+      "id": 1261,
+      "name": "Dark Jewel",
+      "kind": "etc",
+      "stackable": true,
+      "icon": "icon.accessary_necklace_of_phantom_i00",
+      "price": 0,
+      "weight": 0,
+      "quest": true
+    },
+    {
+      "id": 1270,
+      "name": "Orb of Abyss",
+      "kind": "etc",
+      "stackable": true,
+      "icon": "icon.etc_bead_blue_i00",
+      "price": 0,
+      "weight": 0,
+      "quest": true
+    },
+    {
       "id": 1272,
       "name": "Greenis's Charm",
       "kind": "etc",
@@ -3489,6 +3529,56 @@
       "price": 900,
       "kind": "etc",
       "stackable": true
+    },
+    {
+      "id": 1592,
+      "name": "Mark of Raider",
+      "kind": "etc",
+      "stackable": true,
+      "icon": "icon.accessary_earing_of_black_ore_i00",
+      "price": 0,
+      "weight": 0,
+      "quest": true
+    },
+    {
+      "id": 1615,
+      "name": "Khavatari Totem",
+      "kind": "etc",
+      "stackable": true,
+      "icon": "icon.etc_orcish_talisman_i00",
+      "price": 0,
+      "weight": 0,
+      "quest": true
+    },
+    {
+      "id": 1631,
+      "name": "Mask of Medium",
+      "kind": "etc",
+      "stackable": true,
+      "icon": "icon.etc_skull_red_i00",
+      "price": 0,
+      "weight": 0,
+      "quest": true
+    },
+    {
+      "id": 1635,
+      "name": "Final Pass Certificate",
+      "kind": "etc",
+      "stackable": true,
+      "icon": "icon.etc_letter_blue_i00",
+      "price": 0,
+      "weight": 0,
+      "quest": true
+    },
+    {
+      "id": 1642,
+      "name": "Ring of Raven",
+      "kind": "etc",
+      "stackable": true,
+      "icon": "icon.accessary_ring_of_raccoon_i00",
+      "price": 0,
+      "weight": 0,
+      "quest": true
     },
     {
       "id": 1661,
@@ -5592,6 +5682,136 @@
       "spiritshots": 3
     },
     {
+      "id": 2627,
+      "name": "Mark of Challenger",
+      "kind": "etc",
+      "stackable": true,
+      "icon": "icon.etc_jewel_silver_i00",
+      "price": 0,
+      "weight": 0,
+      "quest": true
+    },
+    {
+      "id": 2633,
+      "name": "Mark of Duty",
+      "kind": "etc",
+      "stackable": true,
+      "icon": "icon.accessary_necklace_of_holy_spirit_i00",
+      "price": 0,
+      "weight": 0,
+      "quest": true
+    },
+    {
+      "id": 2673,
+      "name": "Mark of Seeker",
+      "kind": "etc",
+      "stackable": true,
+      "icon": "icon.etc_jewel_green_i00",
+      "price": 0,
+      "weight": 0,
+      "quest": true
+    },
+    {
+      "id": 2674,
+      "name": "Mark of Scholar",
+      "kind": "etc",
+      "stackable": true,
+      "icon": "icon.etc_jewel_blue_i00",
+      "price": 0,
+      "weight": 0,
+      "quest": true
+    },
+    {
+      "id": 2721,
+      "name": "Mark of Pilgrim",
+      "kind": "etc",
+      "stackable": true,
+      "icon": "icon.etc_jewel_silver_i00",
+      "price": 0,
+      "weight": 0,
+      "quest": true
+    },
+    {
+      "id": 2734,
+      "name": "Mark of Trust",
+      "kind": "etc",
+      "stackable": true,
+      "icon": "icon.etc_jewel_green_i00",
+      "price": 0,
+      "weight": 0,
+      "quest": true
+    },
+    {
+      "id": 2762,
+      "name": "Mark of Duelist",
+      "kind": "etc",
+      "stackable": true,
+      "icon": "icon.etc_jewel_red_i00",
+      "price": 0,
+      "weight": 0,
+      "quest": true
+    },
+    {
+      "id": 2809,
+      "name": "Mark of Searcher",
+      "kind": "etc",
+      "stackable": true,
+      "icon": "icon.etc_badge_gold_i00",
+      "price": 0,
+      "weight": 0,
+      "quest": true
+    },
+    {
+      "id": 2820,
+      "name": "Mark of Healer",
+      "kind": "etc",
+      "stackable": true,
+      "icon": "icon.etc_jewel_white_i00",
+      "price": 0,
+      "weight": 0,
+      "quest": true
+    },
+    {
+      "id": 2821,
+      "name": "Mark of Reformer",
+      "kind": "etc",
+      "stackable": true,
+      "icon": "icon.etc_jewel_gold_i00",
+      "price": 0,
+      "weight": 0,
+      "quest": true
+    },
+    {
+      "id": 2840,
+      "name": "Mark of Magus",
+      "kind": "etc",
+      "stackable": true,
+      "icon": "icon.etc_mark_yellow_i00",
+      "price": 0,
+      "weight": 0,
+      "quest": true
+    },
+    {
+      "id": 2867,
+      "name": "Mark of Maestro",
+      "kind": "etc",
+      "stackable": true,
+      "icon": "icon.etc_badge_silver_i00",
+      "price": 0,
+      "weight": 0,
+      "quest": true
+    },
+    {
+      "id": 2879,
+      "name": "Mark of Warspirit",
+      "kind": "etc",
+      "stackable": true,
+      "icon": "icon.etc_jewel_red_i00",
+      "price": 0,
+      "weight": 0,
+      "quest": true
+    },
+    {
       "id": 3031,
       "name": "Spirit Ore",
       "kind": "etc",
@@ -5607,6 +5827,106 @@
       "icon": "icon.etc_plan_i00",
       "price": 1550,
       "weight": 120
+    },
+    {
+      "id": 3119,
+      "name": "Mark of Guildsman",
+      "kind": "etc",
+      "stackable": true,
+      "icon": "icon.etc_badge_gold_i00",
+      "price": 0,
+      "weight": 0,
+      "quest": true
+    },
+    {
+      "id": 3140,
+      "name": "Mark of Life",
+      "kind": "etc",
+      "stackable": true,
+      "icon": "icon.etc_herb_green_i00",
+      "price": 0,
+      "weight": 0,
+      "quest": true
+    },
+    {
+      "id": 3172,
+      "name": "Mark of Fate",
+      "kind": "etc",
+      "stackable": true,
+      "icon": "icon.etc_jewel_blue_i00",
+      "price": 0,
+      "weight": 0,
+      "quest": true
+    },
+    {
+      "id": 3203,
+      "name": "Mark of Glory",
+      "kind": "etc",
+      "stackable": true,
+      "icon": "icon.etc_badge_gold_i00",
+      "price": 0,
+      "weight": 0,
+      "quest": true
+    },
+    {
+      "id": 3238,
+      "name": "Mark of Prosperity",
+      "kind": "etc",
+      "stackable": true,
+      "icon": "icon.etc_coins_gold_i00",
+      "price": 0,
+      "weight": 0,
+      "quest": true
+    },
+    {
+      "id": 3276,
+      "name": "Mark of Champion",
+      "kind": "etc",
+      "stackable": true,
+      "icon": "icon.etc_jewel_gold_i00",
+      "price": 0,
+      "weight": 0,
+      "quest": true
+    },
+    {
+      "id": 3293,
+      "name": "Mark of Sagittarius",
+      "kind": "etc",
+      "stackable": true,
+      "icon": "icon.weapon_wooden_arrow_i01",
+      "price": 0,
+      "weight": 0,
+      "quest": true
+    },
+    {
+      "id": 3307,
+      "name": "Mark of Witchcraft",
+      "kind": "etc",
+      "stackable": true,
+      "icon": "icon.etc_skull_white_i00",
+      "price": 0,
+      "weight": 0,
+      "quest": true
+    },
+    {
+      "id": 3336,
+      "name": "Mark of Summoner",
+      "kind": "etc",
+      "stackable": true,
+      "icon": "icon.weapon_apprentices_rod_i01",
+      "price": 0,
+      "weight": 0,
+      "quest": true
+    },
+    {
+      "id": 3390,
+      "name": "Mark of Lord",
+      "kind": "etc",
+      "stackable": true,
+      "icon": "icon.etc_orcish_talisman_i00",
+      "price": 0,
+      "weight": 0,
+      "quest": true
     },
     {
       "id": 3945,
@@ -7280,6 +7600,15 @@
     {
       "id": 8869,
       "name": "Shadow Item Exchange Coupon (D-Grade)",
+      "kind": "etc",
+      "stackable": true,
+      "icon": "icon.etc_lottery_card_i00",
+      "price": 0,
+      "weight": 0
+    },
+    {
+      "id": 8870,
+      "name": "Shadow Item Exchange Coupon (C-Grade)",
       "kind": "etc",
       "stackable": true,
       "icon": "icon.etc_lottery_card_i00",

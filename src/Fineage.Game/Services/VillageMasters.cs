@@ -5,30 +5,44 @@ namespace Fineage.Game.Services;
 /// <summary>Who stands in front of the village master (Mobius <c>player.getRace / getClassId / getLevel</c>).</summary>
 public readonly record struct ClassActor(int Race, int ClassId, int ClassLevel, bool Mage, int Level);
 
-/// <summary>One first-transfer choice (Mobius <c>ClassChangeRequested</c> branch).</summary>
+/// <summary>One profession change (Mobius <c>ClassChangeRequested</c> branch).</summary>
 public sealed record ClassChangeOption(
+    string Event,
     int ClassId,
     int FromClass,
-    int ProofItemId,
+    IReadOnlyList<int> ProofItemIds,
     int MinLevel,
     string LowLevel,
     string LowLevelNoProof,
     string Success,
     string NoProof);
 
-/// <summary>Mobius <c>ElfHumanFighterChange1</c> / <c>ElfHumanWizardChange1</c> as data.</summary>
+/// <summary>Mobius <c>isInCategory</c> branch of a talk or a change request.</summary>
+public sealed record CategoryGuard(IReadOnlyList<string> Categories, string Page);
+
+/// <summary>One <c>onTalk</c> rule: the first match wins (Mobius if/else tree).</summary>
+public sealed record TalkRule(
+    string Page,
+    IReadOnlyList<int> Races,
+    IReadOnlyList<int> Classes,
+    IReadOnlyList<int> ClassLevels,
+    IReadOnlyList<string> Categories,
+    IReadOnlyList<string> AnyCategory)
+{
+    public bool IsElse => Races.Count == 0 && Classes.Count == 0 && ClassLevels.Count == 0 && Categories.Count == 0 && AnyCategory.Count == 0;
+}
+
+/// <summary>Mobius one village_master script (<c>ElfHumanFighterChange2</c>, ...) as data.</summary>
 public sealed record ClassChangeScript(
     string Script,
     IReadOnlyList<int> Npcs,
-    bool MageGroup,
-    IReadOnlyDictionary<int, string> ClassList,
-    string Mismatch,
-    string SecondClass,
-    string ThirdClass,
-    string FourthClassPage,
+    string PagePrefix,
+    IReadOnlyList<CategoryGuard> Guards,
+    IReadOnlyList<ClassChangeOption> Options,
+    IReadOnlyList<TalkRule> Talk,
+    IReadOnlyList<string> EventPages,
     int RewardItemId,
-    int RewardCount,
-    IReadOnlyList<ClassChangeOption> Options);
+    int RewardCount);
 
 /// <summary>
 /// What the world does after a village-master bypass: show <see cref="Page"/> (a file under
@@ -40,13 +54,16 @@ public sealed record VillageMasterResult(string Script, string Page, ClassChange
 }
 
 /// <summary>
-/// Mobius village_master first-transfer logic (FirstClassTransferTalk + Elf/Human Change1) driven by
+/// Mobius village_master logic (FirstClassTransferTalk + every *Change1/*Change2 script) driven by
 /// <c>data/village-masters.json</c>. Pure decisions; the zone applies them.
 /// </summary>
 public sealed class VillageMasterCatalog
 {
     public const string FileName = "village-masters.json";
     public const string TransferTalkScript = "FirstClassTransferTalk";
+
+    /// <summary>Placeholder the generator leaves where a script names the page after the master NPC.</summary>
+    public const string NpcPlaceholder = "{npc}";
 
     static readonly JsonSerializerOptions JsonOptions = new()
     {
@@ -60,18 +77,21 @@ public sealed class VillageMasterCatalog
     readonly HashSet<int> _humanFighterMasters;
     readonly HashSet<int> _humanMageMasters;
     readonly Dictionary<string, ClassChangeScript> _changes;
+    readonly Dictionary<string, HashSet<int>> _categories;
 
     VillageMasterCatalog(Dictionary<int, int> talk, HashSet<int> fighter, HashSet<int> mage, IReadOnlySet<int> mageRoots,
-        Dictionary<string, ClassChangeScript> changes)
+        Dictionary<string, ClassChangeScript> changes, Dictionary<string, HashSet<int>> categories)
     {
         _talkMasters = talk;
         _humanFighterMasters = fighter;
         _humanMageMasters = mage;
         MageRoots = mageRoots;
         _changes = changes;
+        _categories = categories;
     }
 
-    public static VillageMasterCatalog Empty { get; } = new([], [], [], new HashSet<int>(), new(StringComparer.OrdinalIgnoreCase));
+    public static VillageMasterCatalog Empty { get; } =
+        new([], [], [], new HashSet<int>(), new(StringComparer.OrdinalIgnoreCase), new(StringComparer.OrdinalIgnoreCase));
 
     /// <summary>Base mystic classes (Mobius <c>isMageClass</c> roots). A class is in the mage group when its root is here.</summary>
     public IReadOnlySet<int> MageRoots { get; }
@@ -81,6 +101,10 @@ public sealed class VillageMasterCatalog
     public bool Knows(string script) =>
         string.Equals(script, TransferTalkScript, StringComparison.OrdinalIgnoreCase) || _changes.ContainsKey(script);
 
+    /// <summary>Mobius <c>isInCategory(CategoryType.X, classId)</c> from CategoryData.xml.</summary>
+    public bool InCategory(string category, int classId) =>
+        _categories.TryGetValue(category, out var members) && members.Contains(classId);
+
     /// <summary>Mobius <c>onTalk</c> (bypass <c>Quest &lt;script&gt;</c> with no event). Null = script does not serve this NPC.</summary>
     public VillageMasterResult? Talk(string script, int npcId, ClassActor who)
     {
@@ -88,8 +112,13 @@ public sealed class VillageMasterCatalog
             return TransferTalk(npcId, who);
         if (!_changes.TryGetValue(script, out var change) || !change.Npcs.Contains(npcId))
             return null;
-        string suffix = who.Mage == change.MageGroup && change.ClassList.TryGetValue(who.Race, out var list) ? list : change.Mismatch;
-        return new VillageMasterResult(change.Script, $"{npcId}-{suffix}.htm");
+        foreach (var rule in change.Talk)
+        {
+            if (Matches(rule, who, this))
+                return new VillageMasterResult(change.Script, Page(change, npcId, rule.Page));
+        }
+
+        return null; // Mobius: the if/else tree always ends in an else, so this cannot happen with real data.
     }
 
     /// <summary>Mobius <c>onAdvEvent</c>: a page name of this NPC, or a class id to transfer to.</summary>
@@ -100,47 +129,79 @@ public sealed class VillageMasterCatalog
         if (string.Equals(script, TransferTalkScript, StringComparison.OrdinalIgnoreCase))
         {
             // Mobius returns the event as the page: only that master's own "<npc>_*.html" pages.
-            if (!_talkMasters.ContainsKey(npcId) || !evt.StartsWith($"{npcId}_", StringComparison.Ordinal) || !SafePage(evt))
+            if (!_talkMasters.ContainsKey(npcId) || !evt.StartsWith($"{npcId}_", StringComparison.Ordinal) || !SafePageName(evt))
                 return null;
             return new VillageMasterResult(TransferTalkScript, evt);
         }
 
         if (!_changes.TryGetValue(script, out var change) || !change.Npcs.Contains(npcId))
             return null;
-        if (int.TryParse(evt, out int classId))
-            return Request(change, npcId, classId, who, countOf);
 
-        // Static info pages: "<npc>-NN.htm" below the mismatch page (Mobius case list 01..17 / 01..14).
-        if (evt.Length == npcId.ToString().Length + 7 && evt.StartsWith($"{npcId}-", StringComparison.Ordinal) && evt.EndsWith(".htm", StringComparison.Ordinal)
-            && int.TryParse(evt.AsSpan(npcId.ToString().Length + 1, 2), out int number)
-            && int.TryParse(change.Mismatch, out int mismatch) && number >= 1 && number < mismatch)
+        // Mobius keeps two shapes: DarkElf*/DwarfChange1 send a table index, the rest send the class id.
+        bool byIndex = change.Options.Any(o => !string.Equals(o.Event, o.ClassId.ToString(System.Globalization.CultureInfo.InvariantCulture), StringComparison.Ordinal));
+        var option = byIndex
+            ? change.Options.FirstOrDefault(o => string.Equals(o.Event, evt, StringComparison.Ordinal))
+            : (int.TryParse(evt, out int classId) ? change.Options.FirstOrDefault(o => o.ClassId == classId) : null);
+        if (option != null)
+            return Request(change, npcId, option, who, countOf);
+
+        // Static info pages: Mobius only echoes the page names its own switch lists.
+        if (change.EventPages.Contains(evt, StringComparer.Ordinal))
             return new VillageMasterResult(change.Script, evt);
         return null;
     }
-
-    static VillageMasterResult? Request(ClassChangeScript change, int npcId, int classId, ClassActor who, Func<int, int> countOf)
+    static bool SafePageName(string page)
     {
-        string Page(string suffix) => $"{npcId}-{suffix}.htm";
-        if (who.ClassLevel == 1)
-            return new VillageMasterResult(change.Script, Page(change.SecondClass));
-        if (who.ClassLevel == 2)
-            return new VillageMasterResult(change.Script, Page(change.ThirdClass));
-        if (who.ClassLevel >= 3)
-            return new VillageMasterResult(change.Script, change.FourthClassPage);
-        foreach (var option in change.Options)
+        if (page.Length is < 3 or > 64 || page.Contains("..", StringComparison.Ordinal))
+            return false;
+        foreach (char c in page)
         {
-            if (option.ClassId != classId || option.FromClass != who.ClassId)
-                continue;
-            bool proof = countOf(option.ProofItemId) > 0;
-            if (who.Level < option.MinLevel)
-                return new VillageMasterResult(change.Script, Page(proof ? option.LowLevel : option.LowLevelNoProof));
-            if (!proof)
-                return new VillageMasterResult(change.Script, Page(option.NoProof));
-            return new VillageMasterResult(change.Script, Page(option.Success), option, change.RewardItemId, change.RewardCount);
+            if (c is not ((>= 'A' and <= 'Z') or (>= 'a' and <= 'z') or (>= '0' and <= '9') or '_' or '-' or '.'))
+                return false;
         }
 
-        // Mobius returns null (no page) for a class the player cannot take.
-        return null;
+        return true;
+    }
+
+    VillageMasterResult? Request(ClassChangeScript change, int npcId, ClassChangeOption option, ClassActor who, Func<int, int> countOf)
+    {
+        // Mobius runs the category guards before the per-class branch: a character that already
+        // made the next change is told so instead of transferring again.
+        foreach (var guard in change.Guards)
+        {
+            if (guard.Categories.Count > 0 && guard.Categories.All(category => InCategory(category, who.ClassId)))
+                return new VillageMasterResult(change.Script, Page(change, npcId, guard.Page));
+        }
+
+        if (option.FromClass != who.ClassId)
+            return null; // Mobius: no page for a class the player cannot take.
+
+        int proofs = option.ProofItemIds.Count;
+        int have = option.ProofItemIds.Count(item => countOf(item) > 0);
+        bool allProofs = have == proofs;
+        if (who.Level < option.MinLevel)
+            return new VillageMasterResult(change.Script, Page(change, npcId, allProofs ? option.LowLevel : option.LowLevelNoProof));
+        if (!allProofs)
+            return new VillageMasterResult(change.Script, Page(change, npcId, option.NoProof));
+        return new VillageMasterResult(change.Script, Page(change, npcId, option.Success), option, change.RewardItemId, change.RewardCount);
+    }
+
+    static bool Matches(TalkRule rule, ClassActor who, VillageMasterCatalog catalog)
+    {
+        if (rule.IsElse)
+            return true; // the trailing `else`
+        if (rule.Races.Count > 0 && !rule.Races.Contains(who.Race))
+            return false;
+        if (rule.Classes.Count > 0 && !rule.Classes.Contains(who.ClassId))
+            return false;
+        if (rule.ClassLevels.Count > 0 && !rule.ClassLevels.Contains(who.ClassLevel))
+            return false;
+        // `categories` must all hold (Mobius `a && b`); `anyCategory` is the `a || b` branch.
+        if (rule.Categories.Count > 0 && !rule.Categories.All(category => catalog.InCategory(category, who.ClassId)))
+            return false;
+        if (rule.AnyCategory.Count > 0 && !rule.AnyCategory.Any(category => catalog.InCategory(category, who.ClassId)))
+            return false;
+        return true;
     }
 
     VillageMasterResult? TransferTalk(int npcId, ClassActor who)
@@ -167,18 +228,8 @@ public sealed class VillageMasterCatalog
         return new VillageMasterResult(TransferTalkScript, Page(who.Mage ? "mystic" : "fighter"));
     }
 
-    static bool SafePage(string page)
-    {
-        if (page.Length is < 3 or > 64 || !page.EndsWith(".html", StringComparison.Ordinal))
-            return false;
-        foreach (char c in page)
-        {
-            if (c is not ((>= 'A' and <= 'Z') or (>= 'a' and <= 'z') or (>= '0' and <= '9') or '_' or '-' or '.'))
-                return false;
-        }
-
-        return !page.Contains("..", StringComparison.Ordinal);
-    }
+    static string Page(ClassChangeScript change, int npcId, string page) =>
+        page.Replace("{npc}", npcId.ToString(System.Globalization.CultureInfo.InvariantCulture), StringComparison.Ordinal);
 
     /// <summary>Class level and mage group from the class tree (Mobius CategoryType FIRST..FOURTH_CLASS_GROUP, MAGE_GROUP).</summary>
     public ClassActor Actor(ClassCatalog? classes, int race, int classId, int level)
@@ -213,34 +264,45 @@ public sealed class VillageMasterCatalog
             talk[npc] = pair.Value;
         }
 
+        var categories = new Dictionary<string, HashSet<int>>(StringComparer.OrdinalIgnoreCase);
+        foreach (var (name, ids) in file.Categories ?? [])
+            categories[name] = [.. ids];
+
         var changes = new Dictionary<string, ClassChangeScript>(StringComparer.OrdinalIgnoreCase);
         foreach (var c in file.Changes ?? [])
         {
             if (string.IsNullOrWhiteSpace(c.Script) || c.Npcs is not { Count: > 0 } || c.Options is not { Count: > 0 })
                 throw new InvalidDataException($"{where} change script needs script, npcs, options.");
-            var list = new Dictionary<int, string>();
-            foreach (var pair in c.ClassList ?? [])
-                list[int.Parse(pair.Key)] = pair.Value;
             var options = c.Options.Select(o =>
             {
-                if (o.Pages is not { Count: 4 } p || o.ProofItemId <= 0 || o.ClassId <= 0)
-                    throw new InvalidDataException($"{where} {c.Script} option {o.ClassId} needs proofItemId and 4 pages.");
-                return new ClassChangeOption(o.ClassId, o.FromClass, o.ProofItemId, o.MinLevel, p[0], p[1], p[2], p[3]);
+                if (o.ClassId <= 0 || o.ProofItemIds is not { Count: > 0 } || string.IsNullOrWhiteSpace(o.Event))
+                    throw new InvalidDataException($"{where} {c.Script} option {o.ClassId} needs event, classId and proofItemIds.");
+                if (string.IsNullOrWhiteSpace(o.Low) || string.IsNullOrWhiteSpace(o.LowNoProof) ||
+                    string.IsNullOrWhiteSpace(o.Success) || string.IsNullOrWhiteSpace(o.NoProof))
+                    throw new InvalidDataException($"{where} {c.Script} option {o.ClassId} needs four pages.");
+
+                return new ClassChangeOption(o.Event.Trim(), o.ClassId, o.FromClass, o.ProofItemIds.ToArray(), o.MinLevel,
+                    o.Low, o.LowNoProof, o.Success, o.NoProof);
             }).ToArray();
-            changes[c.Script.Trim()] = new ClassChangeScript(c.Script.Trim(), c.Npcs.ToArray(),
-                string.Equals(c.Group, "mage", StringComparison.OrdinalIgnoreCase), list,
-                c.Mismatch ?? "", c.SecondClass ?? "", c.ThirdClass ?? "", c.FourthClassPage ?? "",
-                c.RewardItemId, c.RewardCount, options);
+
+            var guards = (c.Guards ?? []).Select(g => new CategoryGuard(g.Categories ?? [], g.Page ?? "")).ToArray();
+            var rules = (c.Talk ?? []).Select(t => new TalkRule(t.Page ?? "", t.Races ?? [], t.Classes ?? [], t.ClassLevels ?? [],
+                t.Categories ?? [], t.AnyCategory ?? [])).ToArray();
+            if (rules.Length == 0)
+                throw new InvalidDataException($"{where} {c.Script} needs at least one talk rule.");
+            changes[c.Script.Trim()] = new ClassChangeScript(c.Script.Trim(), c.Npcs.ToArray(), c.PagePrefix ?? "", guards,
+                options, rules, (c.EventPages ?? []).ToArray(), c.RewardItemId, c.RewardCount);
         }
 
         return new VillageMasterCatalog(talk, (file.TransferTalk?.HumanFighterMasters ?? []).ToHashSet(),
-            (file.TransferTalk?.HumanMageMasters ?? []).ToHashSet(), (file.MageRoots ?? []).ToHashSet(), changes);
+            (file.TransferTalk?.HumanMageMasters ?? []).ToHashSet(), (file.MageRoots ?? []).ToHashSet(), changes, categories);
     }
 
     sealed class FileDto
     {
         public TalkDto? TransferTalk { get; set; }
         public List<int>? MageRoots { get; set; }
+        public Dictionary<string, List<int>>? Categories { get; set; }
         public List<ChangeDto>? Changes { get; set; }
     }
 
@@ -255,23 +317,41 @@ public sealed class VillageMasterCatalog
     {
         public string? Script { get; set; }
         public List<int>? Npcs { get; set; }
-        public string? Group { get; set; }
-        public Dictionary<string, string>? ClassList { get; set; }
-        public string? Mismatch { get; set; }
-        public string? SecondClass { get; set; }
-        public string? ThirdClass { get; set; }
-        public string? FourthClassPage { get; set; }
+        public string? PagePrefix { get; set; }
         public int RewardItemId { get; set; }
         public int RewardCount { get; set; }
+        public List<GuardDto>? Guards { get; set; }
         public List<OptionDto>? Options { get; set; }
+        public List<string>? EventPages { get; set; }
+        public List<TalkDto2>? Talk { get; set; }
+    }
+
+    sealed class GuardDto
+    {
+        public List<string>? Categories { get; set; }
+        public string? Page { get; set; }
     }
 
     sealed class OptionDto
     {
+        public string? Event { get; set; }
         public int ClassId { get; set; }
         public int FromClass { get; set; }
-        public int ProofItemId { get; set; }
+        public List<int>? ProofItemIds { get; set; }
         public int MinLevel { get; set; }
-        public List<string>? Pages { get; set; }
+        public string? Low { get; set; }
+        public string? LowNoProof { get; set; }
+        public string? Success { get; set; }
+        public string? NoProof { get; set; }
+    }
+
+    sealed class TalkDto2
+    {
+        public string? Page { get; set; }
+        public List<int>? Races { get; set; }
+        public List<int>? Classes { get; set; }
+        public List<int>? ClassLevels { get; set; }
+        public List<string>? Categories { get; set; }
+        public List<string>? AnyCategory { get; set; }
     }
 }
