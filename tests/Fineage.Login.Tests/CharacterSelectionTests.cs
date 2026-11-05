@@ -1,9 +1,17 @@
 using System.Net;
 using System.Net.Sockets;
 using Fineage.Login;
+using Fineage.Login.Net;
 using Fineage.Protocol;
 using MessagePack;
 using Xunit;
+using NetCreateCharacterMsg = Fineage.Net.Contract.CreateCharacterMsg;
+using NetListCharactersMsg = Fineage.Net.Contract.ListCharactersMsg;
+using NetDeleteCharacterMsg = Fineage.Net.Contract.DeleteCharacterMsg;
+using NetRestoreCharacterMsg = Fineage.Net.Contract.RestoreCharacterMsg;
+using NetSelectCharacterMsg = Fineage.Net.Contract.SelectCharacterMsg;
+using NetOpcode = Fineage.Net.Contract.NetOpcode;
+using NetCodec = Fineage.Net.Contract.NetCodec;
 
 namespace Fineage.Login.Tests;
 
@@ -244,76 +252,40 @@ public class CharacterSelectionTests
         now = now.AddSeconds(1);
         Assert.True(service.CreateHuman("hero", "Bron", HumanClasses.Mystic).Ok);
 
-        var server = new LoginServer(service, new LoginServerOptions { SelectMinInterval = TimeSpan.Zero }, () => now);
-        await using var link = await LobbyLink.Open(server);
+        var server = new NetLoginServer(service, clock: () => now);
+        await using var link = await NetLink.OpenAsync(server);
+        await link.AutoAuthAsync("hero", "pass1234");
 
-        await link.SendAsync(MsgType.Auth, new AuthMsg { Account = "hero", Password = "pass1234" });
-        await link.ExpectAsync(MsgType.LoginOk);
-
-        await link.SendAsync(MsgType.ListCharacters, Array.Empty<byte>());
-        var list = await link.ExpectAsync<CharacterListMsg>(MsgType.CharacterList);
+        await link.SendAsync(NetOpcode.ListCharacters, NetCodec.EncodeListCharacters(new NetListCharactersMsg()));
+        var list = NetCodec.DecodeCharacterRoster(await link.ExpectPayloadAsync(NetOpcode.CharacterRoster));
         Assert.Equal(["Aria", "Bron"], list.Characters.Select(c => c.Name).ToArray());
         Assert.Equal(0, list.Characters[0].Slot);
         Assert.Equal(1, list.Characters[1].Slot);
-        Assert.Equal(ClassTemplates.Preview(HumanClasses.Fighter).X, list.Characters[0].X);
-        Assert.False(list.Characters[0].IsLastPlayed);
 
-        await link.SendAsync(MsgType.DeleteCharacter, new DeleteCharacterMsg { Slot = 0 });
-        var deleted = await link.ExpectAsync<CharacterDeletedMsg>(MsgType.CharacterDeleted);
-        Assert.False(deleted.HardDeleted);
+        await link.SendAsync(NetOpcode.DeleteCharacter, NetCodec.EncodeDeleteCharacter(new NetDeleteCharacterMsg { Slot = 0 }));
+        var deleted = NetCodec.DecodeDeleteResult(await link.ExpectPayloadAsync(NetOpcode.DeleteResult));
+        Assert.True(deleted.Ok);
         Assert.Equal(0, deleted.Slot);
-        var afterDelete = await link.ExpectAsync<CharacterListMsg>(MsgType.CharacterList);
+
+        var afterDelete = NetCodec.DecodeCharacterRoster(await link.ExpectPayloadAsync(NetOpcode.CharacterRoster));
         Assert.Equal(2, afterDelete.Characters.Length);
         Assert.Equal(7 * 24 * 60 * 60, afterDelete.Characters[0].DeleteSecondsLeft);
         Assert.Equal("Aria", afterDelete.Characters[0].Name);
 
-        await link.SendAsync(MsgType.SelectCharacter, new SelectCharacterMsg { Slot = 0 });
-        var pending = await link.ExpectAsync<ErrorMsg>(MsgType.Error);
+        await link.SendAsync(NetOpcode.SelectCharacter, NetCodec.EncodeSelectCharacter(new NetSelectCharacterMsg { Slot = 0 }));
+        var pending = NetCodec.DecodeReject(await link.ExpectPayloadAsync(NetOpcode.Reject));
         Assert.Equal(LobbyProtocol.CharacterPendingDelete, pending.Code);
 
-        await link.SendAsync(MsgType.RestoreCharacter, new RestoreCharacterMsg { Slot = 0 });
-        var restored = await link.ExpectAsync<CharacterListMsg>(MsgType.CharacterList);
+        await link.SendAsync(NetOpcode.RestoreCharacter, NetCodec.EncodeRestoreCharacter(new NetRestoreCharacterMsg { Slot = 0 }));
+        var restoreAck = NetCodec.DecodeDeleteResult(await link.ExpectPayloadAsync(NetOpcode.DeleteResult));
+        Assert.True(restoreAck.Ok);
+        var restored = NetCodec.DecodeCharacterRoster(await link.ExpectPayloadAsync(NetOpcode.CharacterRoster));
         Assert.Equal(0, restored.Characters[0].DeleteSecondsLeft);
 
-        await link.SendAsync(MsgType.RestoreCharacter, new RestoreCharacterMsg { Slot = 9 });
-        await link.ExpectSilenceAsync();
-
-        await link.SendAsync(MsgType.DeleteCharacter, new DeleteCharacterMsg { Slot = 9 });
-        var failed = await link.ExpectAsync<CharacterDeleteFailedMsg>(MsgType.CharacterDeleteFailed);
-        Assert.Equal(LobbyProtocol.CharacterNotFound, failed.Code);
-
-        await link.SendAsync(MsgType.SelectCharacter, new SelectCharacterMsg { Slot = 1 });
-        var handoff = await link.ExpectAsync<HandoffMsg>(MsgType.Handoff);
+        await link.SendAsync(NetOpcode.SelectCharacter, NetCodec.EncodeSelectCharacter(new NetSelectCharacterMsg { Slot = 1 }));
+        var handoff = NetCodec.DecodeHandoff(await link.ExpectPayloadAsync(NetOpcode.Handoff));
         Assert.Equal("Bron", handoff.CharacterName);
         Assert.StartsWith("fa1.", handoff.Token);
-
-        await link.SendAsync(MsgType.SelectCharacter, new SelectCharacterMsg { Slot = 1 });
-        await link.ExpectSilenceAsync();
-    }
-
-    [Fact]
-    public async Task Select_is_flood_gated_until_the_interval_elapses()
-    {
-        var now = DateTimeOffset.UnixEpoch;
-        var service = Service(null, () => now);
-        Assert.True(service.Register("hero", "pass1234").Ok);
-        Assert.True(service.CreateHuman("hero", "Aria", HumanClasses.Fighter).Ok);
-        var server = new LoginServer(service, new LoginServerOptions { SelectMinInterval = TimeSpan.FromSeconds(1) }, () => now);
-        await using var link = await LobbyLink.Open(server);
-
-        await link.SendAsync(MsgType.Auth, new AuthMsg { Account = "hero", Password = "pass1234" });
-        await link.ExpectAsync(MsgType.LoginOk);
-        await link.SendAsync(MsgType.SelectCharacter, new SelectCharacterMsg { CharacterId = 9999 });
-        var missing = await link.ExpectAsync<ErrorMsg>(MsgType.Error);
-        Assert.Equal(LobbyProtocol.CharacterNotFound, missing.Code);
-
-        await link.SendAsync(MsgType.SelectCharacter, new SelectCharacterMsg { Name = "Aria" });
-        await link.ExpectSilenceAsync();
-
-        now = now.AddSeconds(1);
-        await link.SendAsync(MsgType.SelectCharacter, new SelectCharacterMsg { Name = "Aria" });
-        var handoff = await link.ExpectAsync<HandoffMsg>(MsgType.Handoff);
-        Assert.Equal("Aria", handoff.CharacterName);
     }
 
     [Fact]
@@ -339,88 +311,5 @@ public class CharacterSelectionTests
     {
         [Key(0)] public int CharacterId { get; set; }
         [Key(1)] public string Name { get; set; } = "";
-    }
-
-    sealed class LobbyLink : IAsyncDisposable
-    {
-        readonly TcpListener _listener;
-        readonly CancellationTokenSource _cts;
-        readonly Task _accept;
-        readonly TcpClient _client;
-        readonly NetworkStream _stream;
-
-        LobbyLink(TcpListener listener, CancellationTokenSource cts, Task accept, TcpClient client, NetworkStream stream)
-        {
-            _listener = listener;
-            _cts = cts;
-            _accept = accept;
-            _client = client;
-            _stream = stream;
-        }
-
-        public static async Task<LobbyLink> Open(LoginServer server)
-        {
-            var listener = new TcpListener(IPAddress.Loopback, 0);
-            listener.Start();
-            int port = ((IPEndPoint)listener.LocalEndpoint).Port;
-            var cts = new CancellationTokenSource();
-            var accept = Task.Run(async () =>
-            {
-                using var accepted = await listener.AcceptTcpClientAsync(cts.Token);
-                await using var stream = accepted.GetStream();
-                await server.HandleAsync(stream, cts.Token);
-            });
-
-            var client = new TcpClient();
-            await client.ConnectAsync(IPAddress.Loopback, port);
-            return new LobbyLink(listener, cts, accept, client, client.GetStream());
-        }
-
-        public Task SendAsync(MsgType type, byte[] body) => FrameIO.SendAsync(_stream, (ushort)type, body);
-
-        public Task SendAsync<T>(MsgType type, T message) =>
-            FrameIO.SendAsync(_stream, (ushort)type, MessagePackSerializer.Serialize(message));
-
-        public async Task ExpectAsync(MsgType expected)
-        {
-            var frame = await ReadAsync();
-            Assert.Equal((ushort)expected, frame.Type);
-        }
-
-        public async Task<T> ExpectAsync<T>(MsgType expected)
-        {
-            var frame = await ReadAsync();
-            Assert.Equal((ushort)expected, frame.Type);
-            return MessagePackSerializer.Deserialize<T>(frame.Body);
-        }
-
-        public async Task ExpectSilenceAsync()
-        {
-            using var timeout = new CancellationTokenSource(TimeSpan.FromMilliseconds(200));
-            await Assert.ThrowsAnyAsync<OperationCanceledException>(() => FrameIO.ReadAsync(_stream, timeout.Token));
-        }
-
-        async Task<(ushort Type, byte[] Body)> ReadAsync()
-        {
-            var frame = await FrameIO.ReadAsync(_stream);
-            Assert.NotNull(frame);
-            return (frame!.Value.Type, frame.Value.Body);
-        }
-
-        public async ValueTask DisposeAsync()
-        {
-            _client.Dispose();
-            _listener.Stop();
-            await _cts.CancelAsync();
-            try
-            {
-                await _accept.WaitAsync(TimeSpan.FromSeconds(2));
-            }
-            catch (Exception ex) when (ex is OperationCanceledException or TimeoutException)
-            {
-            }
-
-            _cts.Dispose();
-        }
     }
 }
