@@ -34,6 +34,10 @@ public sealed partial class ZoneWorld
         var added = player.Inventory.Add(request.ItemId, request.Count);
         toSelf.Add(Pack(session, MsgType.InventoryUpdate,
             InventoryMessages.Update(InventoryChange.Add, added)));
+        // Same reasoning as GiveItem: the Net client would otherwise never learn the row appeared.
+        NetBridge?.FanoutInventoryUpdate(
+            [session.ObjectId],
+            ToNetInventoryUpdate(InventoryMessages.Update(InventoryChange.Add, added)));
         // Grant is the one add path that does not call SaveInventory (the bag is persisted on leave), so the overload
         // recompute has to be explicit here — otherwise a grant that crosses 50% leaves the pawn unpenalised.
         RefreshWeightPenaltyAfterInventoryChange(session);
