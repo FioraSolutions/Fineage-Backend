@@ -144,7 +144,10 @@ public static class ZoneMultiplayerAcceptance
 
         var world = new ZoneWorld(
             spawnRandom: new Random(MobiusDropTestSeed.DefaultSeed),
-            dropRandom: new Random(MobiusDropTestSeed.DefaultSeed));
+            dropRandom: new Random(MobiusDropTestSeed.DefaultSeed),
+            // The scripted loop below accounts for mob HP swing by swing; passive monster regen (D30) would
+            // interleave 3 s heals into that bookkeeping. Regen itself is covered by NpcRegenTests.
+            npcRegen: false);
         await using var zone = ZoneHost.Start(tokens, world);
         await using var attacker = await ZonePeer.ConnectAsync(zone.Port).ConfigureAwait(false);
         await using var observer = await ZonePeer.ConnectAsync(zone.Port).ConfigureAwait(false);
@@ -219,7 +222,10 @@ public static class ZoneMultiplayerAcceptance
 
         var world = new ZoneWorld(
             spawnRandom: new Random(MobiusDropTestSeed.DefaultSeed),
-            dropRandom: new Random(MobiusDropTestSeed.DefaultSeed));
+            dropRandom: new Random(MobiusDropTestSeed.DefaultSeed),
+            // The scripted loop below accounts for mob HP swing by swing; passive monster regen (D30) would
+            // interleave 3 s heals into that bookkeeping. Regen itself is covered by NpcRegenTests.
+            npcRegen: false);
         await using var zone = ZoneHost.Start(tokens, world);
         await using var left = await ZonePeer.ConnectAsync(zone.Port).ConfigureAwait(false);
         await using var right = await ZonePeer.ConnectAsync(zone.Port).ConfigureAwait(false);
@@ -287,7 +293,7 @@ public static class ZoneMultiplayerAcceptance
         var login = new LoginService(JsonAccountStore.InMemory(), tokens);
         var fighter = Play(login, "spoil1", "Spoiler", HumanClasses.Fighter);
 
-        var world = new ZoneWorld(spawnRandom: new Random(901), dropRandom: new Random(901));
+        var world = new ZoneWorld(spawnRandom: new Random(901), dropRandom: new Random(901), npcRegen: false);
         await using var zone = ZoneHost.Start(tokens, world);
         await using var peer = await ZonePeer.ConnectAsync(zone.Port).ConfigureAwait(false);
         await peer.AuthAsync(fighter).ConfigureAwait(false);

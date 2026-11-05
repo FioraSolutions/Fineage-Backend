@@ -40,7 +40,9 @@ public sealed record NpcTemplate(
     int AggroRange = 0,
     int ClanHelpRange = 0,
     IReadOnlyList<string>? Clans = null,
-    IReadOnlyList<int>? IgnoreNpcIds = null);
+    IReadOnlyList<int>? IgnoreNpcIds = null,
+    double HpRegen = 0,
+    double MpRegen = 0);
 
 /// <summary>Loads <c>data/npcs.json</c>.</summary>
 public sealed class NpcCatalog
@@ -167,7 +169,9 @@ public sealed class NpcCatalog
                 Math.Max(0, row.AggroRange),
                 Math.Max(0, row.ClanHelpRange),
                 row.Clans is { Count: > 0 } ? row.Clans : null,
-                row.IgnoreNpcIds is { Count: > 0 } ? row.IgnoreNpcIds : null));
+                row.IgnoreNpcIds is { Count: > 0 } ? row.IgnoreNpcIds : null,
+                Math.Max(0, row.HpRegen),
+                Math.Max(0, row.MpRegen)));
         }
 
         return new NpcCatalog(byId);
@@ -223,5 +227,9 @@ public sealed class NpcCatalog
         public int ClanHelpRange { get; set; }
         public List<string>? Clans { get; set; }
         public List<int>? IgnoreNpcIds { get; set; }
+        /// <summary>Mobius <c>vitals hpRegen</c>: HP restored per 3 s regen tick.</summary>
+        public double HpRegen { get; set; }
+        /// <summary>Mobius <c>vitals mpRegen</c>: MP restored per 3 s regen tick.</summary>
+        public double MpRegen { get; set; }
     }
 }

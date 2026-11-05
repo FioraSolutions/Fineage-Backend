@@ -463,10 +463,13 @@ add/sub → mul/div → нелинейные.
 
 ### Расхождение
 
-- `D30` **`medium`** *(было `high`)* — мобы и боссы не регенерируются вообще: цикл идёт только по
-  `Players()` (`ZoneWorldRegen.cs:62`). Раненый моб остаётся раненым навсегда, пока не умрёт.
-  Дополнительно: `ReturnHome` (`ZoneWorldNpcMovement.cs:50`) **не** восстанавливает HP/MP при
-  возврате домой, хотя Mobius это делает.
+- ~~`D30`~~ **снято** — реген мобов есть: `TickNpcRegen` (`ZoneWorldRegen.cs:107`) в том же 3-секундном
+  тике, ставки `hpRegen`/`mpRegen` берутся из `<vitals>` Mobius-датапака (`data/npcs.json`, поля
+  `hpRegen`/`mpRegen`, импортёр `tools/import_npc_templates.py`), `max(1, rate)` на тик, потолок —
+  максимумы, дробный остаток переносится (`RegenCarryHp/Mp`). Раненый моб больше не остаётся
+  раненым навсегда. Полное лечение при возврате домой — отдельно: Mobius лечит только на
+  leash-ресете (`AttackableAI.java:749`), а `Attackable.returnHome()` (`:1685`) не лечит; теперь так же
+  (`TickLeash`/`TryLeashReset`, `ZoneNpcSettings`). Выключить можно `FINEAGE_NPC_REGEN_ENABLED=false`.
 - `D31` **`medium`** *(переписано)* — базовая формула по-прежнему `maxHp/64 + level/12`
   (`ZoneRegen.cs:11`), без CON/MEN, зон, осады и кланхолла. Но баффы и мастери теперь на неё
   влияют через стат-фолд, и Weight Penalty 4270 честно режет реген вдвое. Осталось: остановка
@@ -526,9 +529,12 @@ Hate-модель: `Attackable.addDamageHate` (`Attackable.java:740`), `getMostH
   и LOS, флаг `Aggressive` действительно читается. Остаток не про агро, а про дискриминацию
   целей: guard/friendly/chaos/peace zone не различаются (`M3`).
 - `D36` **`low`** *(было `medium`)* — погоня, домашняя точка и возврат домой есть
-  (`ChaseStep` `:167`, `HomeSet` `:184`, `ReturnHome` `ZoneWorldNpcMovement.cs:50`). Остаток:
-  «поводок» — `AggroForgetRange = 3000` (`ZoneCombat.cs:365`) вместо `MAX_DRIFT_RANGE` = 300, и
-  при возврате домой HP/MP не восстанавливаются.
+  (`ChaseStep` `:167`, `HomeSet` теперь ставится на спавне (`ZoneWorldSpawns.cs:116`),
+  `ReturnHome` `ZoneWorldNpcMovement.cs:50`). Поводок по расстоянию сделан
+  (`TickLeash`/`TryLeashReset`, `ZoneNpcSettings`): `AggroDistanceCheckRange` 2000, рейды 4000,
+  GrandBoss пропускается, на ресете HP/MP по `AggroDistanceCheckRestoreLife`. Но в шипнутом
+  `NPC.ini` `AggroDistanceCheckEnabled = False`, поэтому по умолчанию он выключен — как в Mobius;
+  остаётся `AggroForgetRange = 3000` (`ZoneCombat.cs:365`) как радиус «забывания» цели.
 - ~~`D37`~~ **снято** — помощь клана есть (`CallClanHelp`, `ZoneWorldAggro.cs:109`) с
   `clanHelpRange`, списком кланов и `IgnoreNpcIds`.
 - `D38` **`medium`** — миньонов нет: поиск `Minion` по `src/` пуст, нет `onAssist`/`onMinionDie`/
@@ -924,5 +930,5 @@ Hate-модель: `Attackable.addDamageHate` (`Attackable.java:740`), `getMostH
     в одном месте (`BypassRegistry.cs:71`–`:78`); это половина экономики Interlude.
 
 Отдельно, дешёвые правки без новой механики: `D5` (доли респавна вместо 100%), `N2` (левелап
-добавляет дельту, а не лечит), `D30` (реген мобов в существующий `TickRegen`), `D31` (остановка
-регена в бою по `CombatUntilUnixMs`), `D12` (расход стрел), `D36` (поводок 300 вместо 3000).
+добавляет дельту, а не лечит), `D31` (остановка регена в бою по `CombatUntilUnixMs`), `D12` (расход
+стрел).

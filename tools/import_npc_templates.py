@@ -242,6 +242,11 @@ def load_templates(npc_dir: Path) -> list[dict]:
                 "aggressive": aggressive,
                 "hp": hp_stat(None if vitals is None else vitals.attrib.get("hp")),
                 "mp": hp_stat(None if vitals is None else vitals.attrib.get("mp")),
+                # Mobius NpcData <vitals hpRegen/mpRegen>: NPCStatus.doRegeneration adds
+                # calcStat(REGENERATE_HP_RATE, max(1, baseHpReg)) every 3000 ms, so a damaged
+                # mob heals back instead of staying wounded forever.
+                "hpRegen": combat_float(vitals, "hpRegen", 3),
+                "mpRegen": combat_float(vitals, "mpRegen", 3),
                 "runSpeed": positive_stat(None if run is None else run.attrib.get("ground"), 0.1),
                 "walkSpeed": positive_stat(None if walk is None else walk.attrib.get("ground"), 0.1),
                 "exp": exp,
@@ -298,6 +303,8 @@ COMBAT_FIELDS: tuple[str, ...] = (
     "evasion",
     "shieldDef",
     "shieldRate",
+    "hpRegen",
+    "mpRegen",
 )
 
 

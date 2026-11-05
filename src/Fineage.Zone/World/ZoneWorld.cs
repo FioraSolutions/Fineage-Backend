@@ -99,6 +99,10 @@ sealed class ZoneEntity
     public bool Sitting { get; set; }
     /// <summary>NPC Mobius physical attack (0 = unknown → level placeholder). Players read the class template.</summary>
     public double PAtk { get; init; }
+    /// <summary>NPC Mobius <c>vitals hpRegen</c>: HP restored per 3 s regen tick (players use the class table).</summary>
+    public double HpRegen { get; init; }
+    /// <summary>NPC Mobius <c>vitals mpRegen</c>: MP restored per 3 s regen tick.</summary>
+    public double MpRegen { get; init; }
     /// <summary>NPC Mobius physical defence (0 = unknown).</summary>
     public double PDef { get; init; }
     /// <summary>NPC Mobius attack speed (Pspd, 0 = default 253).</summary>
@@ -386,6 +390,7 @@ public sealed partial class ZoneWorld
     readonly DropCatalog _dropCatalog;
     readonly DropRates _dropRates;
     readonly object _gate = new();
+    readonly bool _npcRegen;
     readonly GeoEngine _geo;
     static readonly Lazy<GeoEngine> SharedGeo = new(GeoEngine.LoadDefault);
     static readonly Lazy<DoorTable> SharedDoors = new(DoorTable.LoadDefault);
@@ -439,8 +444,10 @@ public sealed partial class ZoneWorld
         SkillCombatCatalog? skillCombat = null,
         SkillStatEffectCatalog? passives = null,
         DeathRuleCatalog? deathRules = null,
-        Random? deathRandom = null)
+        Random? deathRandom = null,
+        bool? npcRegen = null)
     {
+        _npcRegen = npcRegen ?? ZoneNpcSettings.NpcRegenEnabled;
         _skillCombat = skillCombat ?? SkillCombatCatalog.LoadDefault();
         _statEffects = statEffects ?? SkillStatEffectCatalog.LoadDefault();
         _passives = passives ?? SkillStatEffectCatalog.LoadPassives();
