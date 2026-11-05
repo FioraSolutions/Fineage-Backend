@@ -33,6 +33,9 @@ public static class NetTelemetry
             FineageTelemetry.BytesOut.Add(bytes, tag);
     }
 
+    public static void OutboundDropped(string endpoint) =>
+        FineageTelemetry.OutboundDropped.Add(1, Tag(endpoint));
+
     public static void PacketRejected(string endpoint) =>
         FineageTelemetry.PacketsRejected.Add(1, Tag(endpoint));
 
