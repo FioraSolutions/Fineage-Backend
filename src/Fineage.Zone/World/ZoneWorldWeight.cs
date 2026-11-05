@@ -155,4 +155,23 @@ public sealed partial class ZoneWorld
             target.Add(func, level);
         return target;
     }
+
+    /// <summary>
+    /// Folds skill 4267 at <see cref="ZoneEntity.GradePenaltyLevel"/> into <paramref name="mods"/>
+    /// (Mobius <c>Player.refreshExpertisePenalty</c> → <c>addSkill(GRADE_PENALTY, max(weapon, armor))</c>,
+    /// <c>Player.java:2059</c>). Levels 1–4 scale <c>pAtkSpd</c>, <c>mAtkSpd</c>, <c>rEvas</c>, <c>runSpd</c>,
+    /// <c>regHp</c> and <c>regMp</c> by 0.22 / 0.19 / 0.16 / 0.13 and subtract 20 accuracy, so gear worn above your
+    /// expertise really does slow and weaken the character instead of only drawing a flag in the window.
+    /// </summary>
+    CombatStatMods FoldGradePenalty(ZoneEntity player, CombatStatMods? mods)
+    {
+        int level = player.GradePenaltyLevel;
+        if (level <= 0 || !_passives.TryGet(GradePenalty.SkillId, out var effect))
+            return mods ?? CombatStatMods.None;
+
+        var target = mods == null || ReferenceEquals(mods, CombatStatMods.None) ? new CombatStatMods() : mods;
+        foreach (var func in effect.Funcs)
+            target.Add(func, level);
+        return target;
+    }
 }

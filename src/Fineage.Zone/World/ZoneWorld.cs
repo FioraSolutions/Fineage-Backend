@@ -73,6 +73,12 @@ sealed class ZoneEntity
     /// <summary>Armor expertise penalty, 0–4. Updated when gear changes and on enter.</summary>
     public int ArmorGradePenalty { get; set; }
     /// <summary>
+    /// Grade Penalty level, 0–4 — the level skill 4267 is added at (Mobius
+    /// <c>addSkill(4267, max(weaponPenalty, armorPenalty))</c>). The stat fold needs this single level, not the two raw
+    /// penalties. Derived from gear, so never persisted.
+    /// </summary>
+    public int GradePenaltyLevel { get; set; }
+    /// <summary>
     /// Weight Penalty level, 0–4 (Mobius <c>Player._curWeightPenalty</c>). Derived from the load and recomputed on
     /// every inventory change and on enter — never stored. Skips persistence on purpose: it is a function of the bag.
     /// </summary>

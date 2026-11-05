@@ -270,6 +270,7 @@ public sealed partial class ZoneWorld
             _expertisePenalty);
         player.WeaponGradePenalty = penalty.Weapon;
         player.ArmorGradePenalty = penalty.Armor;
+        player.GradePenaltyLevel = penalty.SkillLevel;
     }
 
     static string? Restriction(ZoneEntity player, ItemInstance item)

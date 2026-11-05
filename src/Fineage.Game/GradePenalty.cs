@@ -7,11 +7,9 @@ namespace Fineage.Game;
 /// Expertise rank, separately for weapons and for everything else, minus that rank
 /// and any penalty bonus. Arrows are ignored. Equipping is still allowed.
 /// <para>
-/// TODO: skill 4267 (Grade Penalty) is not applied to stats. At penalty levels 1–4
-/// Mobius multiplies physical/magic attack speed, evasion, exp, run speed, and
-/// HP/CP/MP regen by 0.22, 0.19, 0.16, and 0.13, and subtracts 20 accuracy.
-/// This server has no stat sheet for those, so combat, movement, and regen are unchanged.
-/// <see cref="SkillLevel"/> is the level that skill would be added at.
+/// <see cref="SkillLevel"/> is the level skill 4267 is added at
+/// (<c>Player.java:2059</c>: <c>addSkill(4267, Math.max(weaponPenalty, armorPenalty))</c>), and the zone folds that
+/// skill's funcs into the stat pipeline, so the penalty reaches attack speed, evasion, movement and regen.
 /// </para>
 /// </summary>
 public readonly record struct GradePenalty(int Weapon, int Armor)
