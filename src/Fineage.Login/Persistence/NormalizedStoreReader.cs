@@ -79,6 +79,7 @@ static class NormalizedStoreReader
                c.hair_style, c.hair_color, c.face, c.has_position, c.x, c.y, c.z,
                c.exp, c.sp, c.title, c.newbie, c.max_hp, c.hp, c.max_mp, c.mp,
                c.clan_id, c.clan_join_expiry_unix_ms, c.clan_create_expiry_unix_ms,
+               c.death_penalty_level,
                c.created_at, c.last_access, c.delete_at
         FROM characters c
         """;
@@ -109,6 +110,7 @@ static class NormalizedStoreReader
         int ClanId,
         long ClanJoinExpiryUnixMs,
         long ClanCreateExpiryUnixMs,
+        int DeathPenaltyLevel,
         DateTimeOffset CreatedAt,
         DateTimeOffset LastAccess,
         DateTimeOffset? DeleteAt);
@@ -150,13 +152,14 @@ static class NormalizedStoreReader
             reader.GetInt32(22),
             reader.GetInt64(23),
             reader.GetInt64(24),
-            new DateTimeOffset(DateTime.SpecifyKind(reader.GetDateTime(25), DateTimeKind.Utc)),
-            reader.IsDBNull(26)
-                ? default
-                : new DateTimeOffset(DateTime.SpecifyKind(reader.GetDateTime(26), DateTimeKind.Utc)),
+            reader.GetInt32(25),
+            new DateTimeOffset(DateTime.SpecifyKind(reader.GetDateTime(26), DateTimeKind.Utc)),
             reader.IsDBNull(27)
+                ? default
+                : new DateTimeOffset(DateTime.SpecifyKind(reader.GetDateTime(27), DateTimeKind.Utc)),
+            reader.IsDBNull(28)
                 ? null
-                : new DateTimeOffset(DateTime.SpecifyKind(reader.GetDateTime(27), DateTimeKind.Utc)));
+                : new DateTimeOffset(DateTime.SpecifyKind(reader.GetDateTime(28), DateTimeKind.Utc)));
 
     static CharacterRecord Materialize(NpgsqlConnection conn, CharacterStub stub)
     {
@@ -199,7 +202,8 @@ static class NormalizedStoreReader
             warehouse,
             stub.Newbie,
             shortcuts,
-            learned);
+            learned,
+            stub.DeathPenaltyLevel);
     }
 
     static List<StoredItem> LoadItems(NpgsqlConnection conn, int characterId, params string[] locs)

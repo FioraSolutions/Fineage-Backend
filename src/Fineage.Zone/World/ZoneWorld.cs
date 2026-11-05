@@ -79,6 +79,12 @@ sealed class ZoneEntity
     /// </summary>
     public int GradePenaltyLevel { get; set; }
     /// <summary>
+    /// Death Penalty level, 0–15 (Mobius <c>Player._deathPenaltyBuffLevel</c>). Persisted: it survives logout and
+    /// shrinks only on its own recovery rules. Folds skill 5076 into the stats and is reported on
+    /// <c>EtcStatusUpdate</c>.
+    /// </summary>
+    public int DeathPenaltyLevel { get; set; }
+    /// <summary>
     /// Weight Penalty level, 0–4 (Mobius <c>Player._curWeightPenalty</c>). Derived from the load and recomputed on
     /// every inventory change and on enter — never stored. Skips persistence on purpose: it is a function of the bag.
     /// </summary>
@@ -367,6 +373,10 @@ public sealed partial class ZoneWorld
     readonly BuyListCatalog _buyLists;
     readonly MultiSellCatalog _multisells;
     readonly ShopStock _shopStock;
+    /// <summary>Mobius death rules: exp-bar share lost, Death Penalty chance, respawn vitals restore.</summary>
+    readonly DeathRuleCatalog _deathRules;
+    /// <summary>Mobius <c>Rnd.get</c> for the Death Penalty roll (separate from the damage rolls).</summary>
+    readonly Random _deathRandom;
     readonly Dictionary<int, ZoneEntity> _byId = [];
     readonly DropCatalog _dropCatalog;
     readonly DropRates _dropRates;
@@ -422,7 +432,9 @@ public sealed partial class ZoneWorld
         Random? combatRandom = null,
         SkillStatEffectCatalog? statEffects = null,
         SkillCombatCatalog? skillCombat = null,
-        SkillStatEffectCatalog? passives = null)
+        SkillStatEffectCatalog? passives = null,
+        DeathRuleCatalog? deathRules = null,
+        Random? deathRandom = null)
     {
         _skillCombat = skillCombat ?? SkillCombatCatalog.LoadDefault();
         _statEffects = statEffects ?? SkillStatEffectCatalog.LoadDefault();
@@ -462,6 +474,8 @@ public sealed partial class ZoneWorld
         _buyLists = buyLists ?? BuyListCatalog.LoadDefault();
         _multisells = multisells ?? MultiSellCatalog.LoadDefault();
         _shopStock = new ShopStock(_buyLists);
+        _deathRules = deathRules ?? DeathRuleCatalog.LoadDefault();
+        _deathRandom = deathRandom ?? Random.Shared;
         _geo = geo ?? SharedGeo.Value;
         if (geo == null)
         {
@@ -634,6 +648,31 @@ public sealed partial class ZoneWorld
         }
     }
 
+    /// <summary>
+    /// Test hook: kill <paramref name="player"/> as if <paramref name="killer"/> had landed the final blow, so the
+    /// exp loss and Death Penalty roll run through the production path.
+    /// </summary>
+    internal void KillPlayerByNpcForTest(ZoneEntity player, ZoneEntity killer)
+    {
+        var outbound = new List<Pending>();
+        lock (_gate)
+            ApplyPlayerDeath(player, killer.ObjectId, outbound);
+    }
+
+    /// <summary>Test hook: rebuild the book after a test mutates <see cref="ZoneEntity.LearnedSkills"/>.</summary>
+    internal void RefreshKnownSkillsForTest(ZoneEntity player)
+    {
+        lock (_gate)
+            RefreshKnownSkills(player);
+    }
+
+    /// <summary>Test hook: run Mobius <c>checkPlayerSkills</c> without going through a death.</summary>
+    internal void DecreaseSkillsOnDelevelForTest(ZoneEntity player)
+    {
+        lock (_gate)
+            DecreaseSkillsOnDelevel(player);
+    }
+
     public async Task<bool> TryEnterAsync(ZoneSession session, CancellationToken ct)
     {
         var toSelf = new List<Pending>();
@@ -733,7 +772,9 @@ public sealed partial class ZoneWorld
             Sex = vitals.sex,
             ClanId = ClanIdFor(session.ObjectId),
             Warehouse = warehouse,
-            Newbie = stored?.Newbie ?? true
+            Newbie = stored?.Newbie ?? true,
+            // Mobius Player.loadCharFromDB:6578 restores _deathPenaltyBuffLevel, so the debuff outlives the session.
+            DeathPenaltyLevel = Math.Clamp(stored?.DeathPenaltyLevel ?? 0, 0, DeathPenalty.MaxLevel)
         };
         LoadQuestProgress(session, entity);
         LoadLearnedSkills(entity, stored);

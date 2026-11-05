@@ -99,7 +99,8 @@ public sealed record CharacterRecord(
     IReadOnlyList<StoredItem>? Warehouse = null,
     bool Newbie = true,
     IReadOnlyList<StoredShortcut>? Shortcuts = null,
-    IReadOnlyList<StoredSkill>? LearnedSkills = null)
+    IReadOnlyList<StoredSkill>? LearnedSkills = null,
+    int DeathPenaltyLevel = 0)
 {
     /// <summary>Remaining whole seconds until hard delete. Zero when the character is not pending.</summary>
     public int DeleteSecondsLeft(DateTimeOffset now)
@@ -215,6 +216,12 @@ public interface IAccountStore
 
     /// <summary>Writes the class after a class transfer (Mobius setClassId / setBaseClass).</summary>
     bool TrySaveClass(string account, int characterId, int classId);
+
+    /// <summary>
+    /// Writes the Death Penalty level (Mobius <c>characters.death_penalty_level</c>, <c>Player.java:337</c>). It
+    /// outlives the session, so the zone writes it the moment a death rolls it up.
+    /// </summary>
+    bool TrySaveDeathPenalty(string account, int characterId, int level);
 
     /// <summary>Replaces the character's quest rows. An empty list is a real save.</summary>
     bool TryReplaceQuests(string account, int characterId, IReadOnlyList<QuestSaveRow> quests);
@@ -426,7 +433,8 @@ public sealed class JsonAccountStore : IAccountStore
             }).ToList(),
             Quests = character.Quests?.Select(CopyQuest).ToList(),
             Shortcuts = character.Shortcuts?.Select(CopyShortcut).ToList(),
-            LearnedSkills = character.LearnedSkills?.Select(s => new StoredSkillDto { SkillId = s.SkillId, Level = s.Level }).ToList()
+            LearnedSkills = character.LearnedSkills?.Select(s => new StoredSkillDto { SkillId = s.SkillId, Level = s.Level }).ToList(),
+            DeathPenaltyLevel = character.DeathPenaltyLevel
         };
 
     static StoredShortcutDto CopyShortcut(StoredShortcut s) => new()
@@ -686,6 +694,21 @@ public sealed class JsonAccountStore : IAccountStore
             if (character == null)
                 return false;
             character.ClassId = classId;
+            Save();
+            return true;
+        }
+    }
+
+    public bool TrySaveDeathPenalty(string account, int characterId, int level)
+    {
+        if (level < 0)
+            return false;
+        lock (_gate)
+        {
+            var character = FindCharacter(account, characterId);
+            if (character == null)
+                return false;
+            character.DeathPenaltyLevel = level;
             Save();
             return true;
         }
@@ -1407,7 +1430,8 @@ public sealed class JsonAccountStore : IAccountStore
                 : character.Shortcuts.Select(s => new StoredShortcut(s.Slot, s.Page, s.Type, s.Id, s.Level)).ToArray(),
             character.LearnedSkills == null
                 ? null
-                : character.LearnedSkills.Select(s => new StoredSkill(s.SkillId, s.Level)).ToArray());
+                : character.LearnedSkills.Select(s => new StoredSkill(s.SkillId, s.Level)).ToArray(),
+            character.DeathPenaltyLevel);
 
     sealed class StoreFile
     {
@@ -1466,6 +1490,7 @@ public sealed class JsonAccountStore : IAccountStore
         public bool Newbie { get; set; } = true;
         public List<StoredShortcutDto>? Shortcuts { get; set; }
         public List<StoredSkillDto>? LearnedSkills { get; set; }
+        public int DeathPenaltyLevel { get; set; }
     }
 
     sealed class StoredSkillDto

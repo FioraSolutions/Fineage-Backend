@@ -318,6 +318,11 @@ public sealed class PostgresAccountStore : IAccountStore, IDisposable
             () => _inner.TrySaveClass(account, characterId, classId),
             conn => NormalizedStoreWriter.UpdateClass(conn, characterId, classId));
 
+    public bool TrySaveDeathPenalty(string account, int characterId, int level) =>
+        RunSilent(
+            () => _inner.TrySaveDeathPenalty(account, characterId, level),
+            conn => NormalizedStoreWriter.UpdateDeathPenalty(conn, characterId, level));
+
     public bool TryReplaceQuests(string account, int characterId, IReadOnlyList<QuestSaveRow> quests) =>
         RunSilent(
             () => _inner.TryReplaceQuests(account, characterId, quests),

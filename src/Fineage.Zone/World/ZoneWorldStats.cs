@@ -107,9 +107,11 @@ public sealed partial class ZoneWorld
             mods = null;
         mods = player.KnownSkills.Count == 0 ? mods : _passives.CollectPassives(player.KnownSkills, kinds => Wearing(player, kinds), mods);
         // Weight Penalty 4270 is added by refreshOverloaded instead of the skill book, so it is folded here; Grade
-        // Penalty 4267 comes from refreshExpertisePenalty the same way.
+        // Penalty 4267 comes from refreshExpertisePenalty the same way, and Death Penalty 5076 from
+        // increaseDeathPenaltyBuffLevel — none of the three live in the trainer skill book.
         mods = FoldWeightPenalty(player, mods);
-        return FoldGradePenalty(player, mods);
+        mods = FoldGradePenalty(player, mods);
+        return FoldDeathPenalty(player, mods);
     }
 
     /// <summary>

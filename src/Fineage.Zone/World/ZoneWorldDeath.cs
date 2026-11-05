@@ -82,16 +82,25 @@ public sealed partial class ZoneWorld
         if (player.Session != null)
             player.Session.SelectedTargetId = 0;
 
+        // Mobius Player.onDeath runs the exp penalty before the Die packet goes out, so the client's exp bar and the
+        // Death Penalty level are already the post-death values on the death screen.
+        ApplyDeathConsequences(player, killerObjectId, outbound);
+
         FanoutPlayerDeath(player, killerObjectId, outbound);
         if (player.Session != null)
             SaveVitals(player.Session, player);
     }
 
+    /// <summary>
+    /// Mobius <c>Creature.doRevive</c> (<c>:2524-2553</c>): the revive only lifts the bars to the configured share of
+    /// the maxima when they are still below it — with <c>RespawnRestoreHP = 65</c> and <c>RespawnRestoreMP = 0</c> the
+    /// character comes back on two thirds of the health bar and an empty mana bar, not on full vitals.
+    /// </summary>
     void ReviveAtVillage(ZoneEntity player, List<Pending> toSelf, List<Pending> toOthers)
     {
         player.Dead = false;
-        player.CurHp = player.MaxHp;
-        player.CurMp = player.MaxMp;
+        player.CurHp = RestoreShare(player.CurHp, player.MaxHp, _deathRules.RespawnRestoreHp);
+        player.CurMp = RestoreShare(player.CurMp, player.MaxMp, _deathRules.RespawnRestoreMp);
         player.Running = true;
 
         var revive = new ReviveMsg { ObjectId = player.ObjectId };
@@ -210,4 +219,17 @@ public sealed partial class ZoneWorld
         Z = z,
         Heading = heading
     };
+
+    /// <summary>
+    /// One bar of <c>Creature.doRevive</c>: the restore only lifts a bar that is below its target share (so a
+    /// resurrection spell that already restored more is never lowered), and the target is floored like Mobius'
+    /// double-to-int assignment of <c>maxHp * share</c>.
+    /// </summary>
+    static int RestoreShare(int current, int max, double share)
+    {
+        if (share <= 0d || max <= 0)
+            return current;
+        int target = (int)(max * share);
+        return current < target ? target : current;
+    }
 }
