@@ -28,7 +28,9 @@ internal sealed class WorldBench
         Fineage.Zone.Spawns.SpawnCatalog? spawns = null,
         string? mapId = null,
         Fineage.Game.Shops.BuyListCatalog? buyLists = null,
-        Fineage.Game.Shops.MultiSellCatalog? multisells = null)
+        Fineage.Game.Shops.MultiSellCatalog? multisells = null,
+        Fineage.Zone.NpcHtml.NpcHtmlCatalog? html = null,
+        Fineage.Zone.NpcHtml.BypassRegistry? bypasses = null)
     {
         Game = game ?? GameData.LoadDefault();
         Store = JsonAccountStore.InMemory();
@@ -47,7 +49,9 @@ internal sealed class WorldBench
             spawnCatalog: spawns,
             activeMapId: mapId,
             buyLists: buyLists,
-            multisells: multisells);
+            multisells: multisells,
+            html: html,
+            bypasses: bypasses);
         (Bridge, Rec) = NetBridgeRecorder.Create();
         World.NetBridge = Bridge;
     }
