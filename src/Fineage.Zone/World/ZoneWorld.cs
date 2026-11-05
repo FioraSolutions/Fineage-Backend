@@ -1305,6 +1305,28 @@ public sealed partial class ZoneWorld
         NpcType = entity.NpcType
     };
 
+    /// <summary>
+    /// Moves a live player to <paramref name="level"/> and runs the same reward-skills refresh a level up does, so a
+    /// test can assert the book and the SkillList fanout without grinding exp.
+    /// </summary>
+    internal bool TrySetPlayerLevelForTests(ZoneSession session, int level)
+    {
+        ZoneEntity player;
+        lock (_gate)
+        {
+            if (!_byId.TryGetValue(session.ObjectId, out var entity) || entity.Inventory == null)
+                return false;
+            entity.Level = Math.Max(1, level);
+            RefreshKnownSkills(entity);
+            player = entity;
+        }
+
+        // The client only learns the new book from a SkillList, exactly as a level up sends it.
+        NetBridge?.FanoutSkillList([session.ObjectId],
+            Fineage.Zone.Net.NetEnterWorldProjector.BuildSkills(player, _clock().ToUnixTimeMilliseconds()));
+        return true;
+    }
+
     internal NpcInfoMsg NpcInfoByTemplateForTests(int npcId)
     {
         lock (_gate)

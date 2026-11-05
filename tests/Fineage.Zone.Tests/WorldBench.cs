@@ -152,11 +152,34 @@ internal sealed class BenchPlayer
     /// <summary>Item rows as persisted, so a test can prove the write happened before leave.</summary>
     public IReadOnlyList<StoredItem> Saved() => Store.FindById(Ticket.Account, Ticket.CharacterId)!.Items!;
 
+    /// <summary>The whole persisted record, for progress and journal assertions.</summary>
+    public CharacterRecord SavedRecord() => Store.FindById(Ticket.Account, Ticket.CharacterId)!;
+
     public Task<string?> Use(int objectId) =>
         World.TryUseItemAsync(Session, new UseItemMsg { ObjectId = objectId }, CancellationToken.None);
 
     public Task<string?> Unequip(int paperdollSlot) =>
         World.TryUnequipItemAsync(Session, new UnequipItemMsg { PaperdollSlot = paperdollSlot }, CancellationToken.None);
+
+    /// <summary>Teleports without the walk, for tests that only care about being in talk range.</summary>
+    public void MoveTo(int x, int y, int z)
+    {
+        Player.X = x;
+        Player.Y = y;
+        Player.Z = z;
+        Session.X = x;
+        Session.Y = y;
+        Session.Z = z;
+    }
+
+    public Task<string?> Talk(int npcObjectId) =>
+        World.TryNpcTalkAsync(Session, npcObjectId, CancellationToken.None);
+
+    public Task<string?> QuestEvent(int npcObjectId, int questId, string eventName) =>
+        World.TryQuestEventAsync(Session, npcObjectId, questId, eventName, CancellationToken.None);
+
+    public Task<string?> AbortQuest(int questId) =>
+        World.TryQuestAbortAsync(Session, questId, CancellationToken.None);
 
     public Task<string?> BypassAsync(int npcObjectId, string command) =>
         World.TryBypassAsync(Session, npcObjectId, command, CancellationToken.None);
