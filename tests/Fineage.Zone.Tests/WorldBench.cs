@@ -33,7 +33,8 @@ internal sealed class WorldBench
         Fineage.Zone.NpcHtml.BypassRegistry? bypasses = null,
         Fineage.Game.Services.TeleportCatalog? teleports = null,
         int? teleportOffset = null,
-        Fineage.Zone.Bosses.BossSchedule? bosses = null)
+        Fineage.Zone.Bosses.BossSchedule? bosses = null,
+        Fineage.Zone.Siege.SiegeSettings? siege = null)
     {
         Game = game ?? GameData.LoadDefault();
         Store = JsonAccountStore.InMemory();
@@ -57,7 +58,8 @@ internal sealed class WorldBench
             bypasses: bypasses,
             teleports: teleports,
             teleportOffset: teleportOffset,
-            bosses: bosses);
+            bosses: bosses,
+            siege: siege);
         (Bridge, Rec) = NetBridgeRecorder.Create();
         World.NetBridge = Bridge;
     }
@@ -152,6 +154,9 @@ internal sealed class BenchPlayer
     public HandoffTicket Ticket { get; }
 
     public int ObjectId => Session.ObjectId;
+
+    /// <summary>Clan the player leads, when a suite seeds one directly in the store.</summary>
+    public int ClanId { get; set; }
     public PlayerInventory Inventory => Player.Inventory!;
 
     /// <summary>Object id of the single bag row holding <paramref name="itemId"/>.</summary>

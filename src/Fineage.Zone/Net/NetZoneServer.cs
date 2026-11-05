@@ -517,6 +517,13 @@ public sealed class NetZoneServer : INetPresenceBridge
             _presence.TrySend(watcher, NetOpcode.BossStatus, payload);
     }
 
+    void INetPresenceBridge.FanoutSiegeInfo(IReadOnlyList<int> watcherObjectIds, SiegeInfoNetMsg info)
+    {
+        var payload = NetCodec.EncodeSiegeInfo(info);
+        foreach (int watcher in watcherObjectIds)
+            _presence.TrySend(watcher, NetOpcode.SiegeInfo, payload);
+    }
+
     public async Task HandleAsync(NetConnection conn, CancellationToken ct)
     {
         // The world layer still emits V2 frames alongside Net fanout. A MemoryStream here
@@ -767,6 +774,18 @@ public sealed class NetZoneServer : INetPresenceBridge
                             break;
                         case NetOpcode.AdminBossSchedule:
                             await OnAdminBossAsync(conn, zoneSession, envelope, ct).ConfigureAwait(false);
+                            break;
+                        case NetOpcode.SiegeListRequest:
+                            await OnSiegeListAsync(conn, zoneSession, envelope, ct).ConfigureAwait(false);
+                            break;
+                        case NetOpcode.SiegeRegisterRequest:
+                            await OnSiegeRegisterAsync(conn, zoneSession, envelope, ct).ConfigureAwait(false);
+                            break;
+                        case NetOpcode.SiegeDefenderAnswerRequest:
+                            await OnSiegeAnswerAsync(conn, zoneSession, envelope, ct).ConfigureAwait(false);
+                            break;
+                        case NetOpcode.AdminCaptureCastle:
+                            await OnAdminCaptureCastleAsync(conn, zoneSession, envelope, ct).ConfigureAwait(false);
                             break;
                         case NetOpcode.StopMove:
                             // Authoritative stop: correct to current session position.
@@ -1486,6 +1505,105 @@ public sealed class NetZoneServer : INetPresenceBridge
         string? error = await _world.TryAdminBossNetAsync(zoneSession, request, ct).ConfigureAwait(false);
         if (error != null)
             await RejectAsync(conn, error, "AdminBossSchedule was rejected.", ct).ConfigureAwait(false);
+    }
+
+    async Task OnSiegeListAsync(
+        NetConnection conn,
+        ZoneSession zoneSession,
+        PacketEnvelope envelope,
+        CancellationToken ct)
+    {
+        RequireHello(conn);
+        if (!zoneSession.Bound || !zoneSession.InWorld)
+        {
+            await RejectAsync(conn, "not_in_world", "Enter world first.", ct).ConfigureAwait(false);
+            return;
+        }
+
+        var request = NetCodec.DecodeSiegeListRequest(envelope.Payload);
+        string? error = await _world.TrySiegeListAsync(zoneSession, request.CastleId, ct).ConfigureAwait(false);
+        if (error != null)
+            await RejectAsync(conn, error, "Siege list failed.", ct).ConfigureAwait(false);
+        // SiegeInfo goes out as fanout, so the reply body is empty on purpose.
+    }
+
+    async Task OnSiegeRegisterAsync(
+        NetConnection conn,
+        ZoneSession zoneSession,
+        PacketEnvelope envelope,
+        CancellationToken ct)
+    {
+        RequireHello(conn);
+        if (!zoneSession.Bound || !zoneSession.InWorld)
+        {
+            await RejectAsync(conn, "not_in_world", "Enter world first.", ct).ConfigureAwait(false);
+            return;
+        }
+
+        var request = NetCodec.DecodeSiegeRegisterRequest(envelope.Payload);
+        string? error = await _world.TrySiegeRegisterAsync(
+            zoneSession,
+            new SiegeRegisterRequestMsg
+            {
+                CastleId = request.CastleId,
+                Attacker = request.Attacker,
+                Joining = request.Joining
+            },
+            ct).ConfigureAwait(false);
+        if (error != null)
+            await RejectAsync(conn, error, "Siege registration was rejected.", ct).ConfigureAwait(false);
+    }
+
+    async Task OnSiegeAnswerAsync(
+        NetConnection conn,
+        ZoneSession zoneSession,
+        PacketEnvelope envelope,
+        CancellationToken ct)
+    {
+        RequireHello(conn);
+        if (!zoneSession.Bound || !zoneSession.InWorld)
+        {
+            await RejectAsync(conn, "not_in_world", "Enter world first.", ct).ConfigureAwait(false);
+            return;
+        }
+
+        var request = NetCodec.DecodeSiegeDefenderAnswerRequest(envelope.Payload);
+        string? error = await _world.TrySiegeAnswerAsync(
+            zoneSession,
+            new SiegeDefenderAnswerRequestMsg
+            {
+                CastleId = request.CastleId,
+                ClanId = request.ClanId,
+                Approved = request.Approved
+            },
+            ct).ConfigureAwait(false);
+        if (error != null)
+            await RejectAsync(conn, error, "Siege answer was rejected.", ct).ConfigureAwait(false);
+    }
+
+    async Task OnAdminCaptureCastleAsync(
+        NetConnection conn,
+        ZoneSession zoneSession,
+        PacketEnvelope envelope,
+        CancellationToken ct)
+    {
+        RequireHello(conn);
+        if (!zoneSession.Bound || !zoneSession.InWorld)
+        {
+            await RejectAsync(conn, "not_in_world", "Enter world first.", ct).ConfigureAwait(false);
+            return;
+        }
+
+        if (!_adminCommands)
+        {
+            await RejectAsync(conn, InventoryProtocol.Forbidden, "AdminCaptureCastle is disabled.", ct).ConfigureAwait(false);
+            return;
+        }
+
+        var request = NetCodec.DecodeAdminCaptureCastle(envelope.Payload);
+        string? error = await _world.TryAdminCaptureNetAsync(zoneSession, request, ct).ConfigureAwait(false);
+        if (error != null)
+            await RejectAsync(conn, error, "AdminCaptureCastle was rejected.", ct).ConfigureAwait(false);
     }
 
     async Task OnAttackAsync(

@@ -68,6 +68,7 @@ public sealed partial class ZoneWorld
                     ? attacker ? SiegeLines.RegisteredAttacker(name) : SiegeLines.RegisteredDefender(name)
                     : SiegeLines.Unregistered(name);
                 outbound.Add(Pack(session, MsgType.SystemMessage, line));
+                FanSystemLine(session, line);
                 QueueSiegeInfo(session, request.CastleId, now, outbound);
             }
         }
@@ -106,6 +107,7 @@ public sealed partial class ZoneWorld
                     ? SiegeLines.DefenderApproved(name)
                     : SiegeLines.DefenderRefused(name);
                 outbound.Add(Pack(session, MsgType.SystemMessage, line));
+                FanSystemLine(session, line);
                 QueueSiegeInfo(session, request.CastleId, now, outbound);
             }
         }
@@ -269,7 +271,7 @@ public sealed partial class ZoneWorld
         var list = _siege.List(castleId, nowUnixMs);
         if (list == null)
             return;
-        outbound.Add(Pack(session, MsgType.SiegeInfo, new SiegeInfoMsg
+        var msg = new SiegeInfoMsg
         {
             CastleId = list.CastleId,
             Name = list.Name,
@@ -281,15 +283,55 @@ public sealed partial class ZoneWorld
             InProgress = list.InProgress,
             EndsUnixMs = list.EndsUnixMs,
             Clans = list.Clans.Select(row => new SiegeClanMsg { ClanId = row.ClanId, Side = row.Side }).ToArray()
-        }));
+        };
+        outbound.Add(Pack(session, MsgType.SiegeInfo, msg));
+        // Siege state is per-castle, so the requester is the only watcher: no broadcast, just this session.
+        NetBridge?.FanoutSiegeInfo([session.ObjectId], ToNetSiegeInfo(msg));
     }
+
+    static Fineage.Net.Contract.SiegeInfoNetMsg ToNetSiegeInfo(SiegeInfoMsg info) => new()
+    {
+        CastleId = info.CastleId,
+        Name = info.Name,
+        OwnerClanId = info.OwnerClanId,
+        TaxPercent = info.TaxPercent,
+        SiegeUnixMs = info.SiegeUnixMs,
+        RegistrationDeadlineUnixMs = info.RegistrationDeadlineUnixMs,
+        RegistrationClosed = info.RegistrationClosed,
+        InProgress = info.InProgress,
+        EndsUnixMs = info.EndsUnixMs,
+        Clans = info.Clans
+            .Select(row => new Fineage.Net.Contract.SiegeClanNet { ClanId = row.ClanId, Side = row.Side })
+            .ToArray()
+    };
+
+    /// <summary>Net admin entry point: the listener checks the flag before calling this.</summary>
+    public async Task<string?> TryAdminCaptureNetAsync(ZoneSession session, Fineage.Net.Contract.AdminCaptureCastleNetMsg request, CancellationToken ct) =>
+        await TryAdminCaptureAsync(session, request.CastleId, request.ClanId, ct).ConfigureAwait(false);
 
     void Broadcast(SystemMessageMsg line, List<Pending> outbound)
     {
+        var live = new List<int>();
         foreach (var entity in _byId.Values.OrderBy(entity => entity.ObjectId))
         {
             if (entity.Session is { InWorld: true } session)
                 outbound.Add(Pack(session, MsgType.SystemMessage, line));
+            if (entity.Session is { InWorld: true })
+                live.Add(entity.ObjectId);
         }
+        // Castle capture and the end of a siege are server-wide news, not a per-session reply.
+        if (live.Count > 0)
+            NetBridge?.FanoutSystemMessage(live, ToNetSystemLine(line));
     }
+
+    /// <summary>One siege line to one session over Net, next to the V2 frame the same call queues.</summary>
+    void FanSystemLine(ZoneSession session, SystemMessageMsg line) =>
+        NetBridge?.FanoutSystemMessage([session.ObjectId], ToNetSystemLine(line));
+
+    static Fineage.Net.Contract.SystemMessageNetMsg ToNetSystemLine(SystemMessageMsg line) => new()
+    {
+        Id = line.Id,
+        Text = line.Text,
+        Params = line.Params
+    };
 }

@@ -175,5 +175,15 @@ namespace Fineage.Net.Contract
         public const ushort BossStatus = 0x0377;
         /// <summary>Client → zone: admin boss schedule edit (dead / force spawn). Gated by FINEAGE_ZONE_ADMIN.</summary>
         public const ushort AdminBossSchedule = 0x0378;
+        /// <summary>Client → zone: ask for one castle's siege state.</summary>
+        public const ushort SiegeListRequest = 0x0379;
+        /// <summary>Client → zone: register or withdraw from a siege.</summary>
+        public const ushort SiegeRegisterRequest = 0x037A;
+        /// <summary>Client → zone: the castle owner answers a waiting defender.</summary>
+        public const ushort SiegeDefenderAnswerRequest = 0x037B;
+        /// <summary>Client → zone: admin capture. Gated by FINEAGE_ZONE_ADMIN.</summary>
+        public const ushort AdminCaptureCastle = 0x037C;
+        /// <summary>Zone → client: the castle and its registrations, also the reply to a list request.</summary>
+        public const ushort SiegeInfo = 0x037D;
     }
 }

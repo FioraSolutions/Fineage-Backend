@@ -149,7 +149,10 @@ public sealed partial class ZoneWorld
         foreach (var stack in target.SweepItems)
         {
             var added = inventory.Add(stack.ItemId, stack.Count);
-            outbound.Add(Pack(session, MsgType.InventoryUpdate, InventoryMessages.Update(InventoryChange.Add, added)));
+            var update = InventoryMessages.Update(InventoryChange.Add, added);
+            outbound.Add(Pack(session, MsgType.InventoryUpdate, update));
+            // Swept loot is a bag change like any other, so Net clients need the same row the V2 frame carries.
+            NetBridge?.FanoutInventoryUpdate([session.ObjectId], ToNetInventoryUpdate(update));
         }
 
         if (target.SweepItems.Count > 0)

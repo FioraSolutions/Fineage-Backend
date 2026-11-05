@@ -191,8 +191,7 @@ public sealed partial class ZoneWorld
     }
 
     void LoadClans()
-    {
-        if (_accounts == null)
+    {        if (_accounts == null)
             return;
 
         foreach (var record in _accounts.ListClans())
@@ -204,6 +203,18 @@ public sealed partial class ZoneWorld
         }
 
         CompleteDueDissolutions(_clock().ToUnixTimeMilliseconds(), []);
+    }
+
+    /// <summary>Test hook: reread clan rows the store gained after boot (siege registration reads this cache).</summary>
+    internal bool ReloadClansForTests()
+    {
+        lock (_gate)
+        {
+            _clans.Clear();
+            _clanByPlayer.Clear();
+            LoadClans();
+            return _clans.Count > 0;
+        }
     }
 
     void CompleteDueDissolutions(long nowMs, List<Pending> outbound)
