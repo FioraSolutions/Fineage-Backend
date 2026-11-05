@@ -851,7 +851,23 @@ public sealed class NetZoneServer : INetPresenceBridge
         CancellationToken ct)
     {
         RequireHello(conn);
+
+        // A session authenticates once. Re-authing would silently swap a live character for another
+        // handoff inside the same connection, so refuse it the way the retired V2 listener did.
+        if (zoneSession.Bound)
+        {
+            await RejectAsync(conn, "already_authenticated", "This session already completed zone auth.", ct)
+                .ConfigureAwait(false);
+            return default;
+        }
+
         var auth = NetCodec.DecodeZoneAuth(envelope.Payload);
+        if (string.IsNullOrWhiteSpace(auth.Account))
+        {
+            await RejectAsync(conn, "bad_request", "Auth account is required.", ct).ConfigureAwait(false);
+            return default;
+        }
+
         var status = _tokens.Validate(auth.Token, _clock(), out var parsed);
         if (status == HandoffTokens.ValidateStatus.Expired)
         {

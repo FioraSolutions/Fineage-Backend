@@ -152,6 +152,11 @@ public sealed partial class ZoneWorld
 
         var added = player.Inventory.Add(request.ItemId, request.Count);
         toSelf.Add(Pack(session, MsgType.InventoryUpdate, InventoryMessages.Update(InventoryChange.Add, added)));
+        // Net clients only read the PacketEnvelope path, so the V2 frame alone would leave the bag
+        // stale for an admin GiveItem.
+        NetBridge?.FanoutInventoryUpdate(
+            [session.ObjectId],
+            ToNetInventoryUpdate(InventoryMessages.Update(InventoryChange.Add, added)));
         SaveInventory(session, player.Inventory);
         ZoneLog.Info($"give object={session.ObjectId} item={request.ItemId} count={request.Count}");
         return null;
@@ -268,9 +273,14 @@ public sealed partial class ZoneWorld
             Expertise.ForLevel(player.Level),
             player.ExpertiseBonus,
             _expertisePenalty);
+        bool changed = penalty.Weapon != player.WeaponGradePenalty || penalty.Armor != player.ArmorGradePenalty;
         player.WeaponGradePenalty = penalty.Weapon;
         player.ArmorGradePenalty = penalty.Armor;
         player.GradePenaltyLevel = penalty.SkillLevel;
+        // Mobius refreshExpertisePenalty ends with sendPacket(new EtcStatusUpdate(this)). Without it the Net client
+        // keeps the previous grade-penalty flag, so the icon disagrees with the penalty UserInfo now reports.
+        if (changed)
+            FanoutNetEtcStatus(player);
     }
 
     static string? Restriction(ZoneEntity player, ItemInstance item)
