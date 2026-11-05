@@ -7,14 +7,31 @@ This script does not copy GPL source.
 
 Mobius references (L2J_Mobius_CT_0_Interlude):
   dist/game/data/stats/npcs/*.xml
-    NpcData parses <status attackable> (default true) and <ai isAggressive>
+    10|    NpcData parses <status attackable> (default true) and <ai isAggressive>
     (default true). See NpcTemplate.set.
+    Combat stats come from the same files (NpcData.parseStats / parseAI):
+      <stats attack physical magical random critical accuracy attackSpeed range type>
+      <stats defence physical magical evasion shield shieldRate>
+      <stats dex> and <ai aggroRange clanHelpRange>
+      <ai clanList><clan>TEXT</clan><ignoreNpcId>ID</ignoreNpcId></ai>
+    `clan` and `ignoreNpcId` are siblings inside <clanList>; both are emitted,
+    as separate keys (`clans`, `ignoreNpcIds`), never mixed into one list.
   dist/game/data/spawns/<territory>/*NPCs.xml and *VillageNPCs.xml
     SpawnData reads npc id, x, y, z, heading, respawnDelay, respawnRandom.
     Spawn.setRespawnDelay treats those numbers as seconds.
 
+Combat fields are REQUIRED output. A run that emits zero `pAtk > 0` rows has
+lost the combat transcription and aborts before touching data/npcs.json
+(see check_combat_coverage) — regenerate with the combat block intact.
+
 Usage:
   python3 tools/import_npc_templates.py /path/to/L2J_Mobius_CT_0_Interlude
+  python3 tools/import_npc_templates.py /path/to/L2J_Mobius_CT_0_Interlude --check
+
+`--check` regenerates templates in memory only (no data/ writes, no spawn tree
+needed) and compares them with the committed data/npcs.json. It exits non-zero
+when any combat field drifts, which is the reproducibility contract for the
+zone's damage/aggro data.
 """
 
 from __future__ import annotations
@@ -107,6 +124,58 @@ def hp_stat(text: str | None) -> int:
     return max(1, rounded)
 
 
+def attribute(node: ET.Element | None, key: str) -> str | None:
+    if node is None:
+        return None
+    value = node.attrib.get(key)
+    return None if value is None or value.strip() == "" else value
+
+
+def combat_float(node: ET.Element | None, key: str, digits: int, fallback: float = 0.0) -> float:
+    """P.Atk/P.Def style stat: always a float, rounded for a stable JSON diff.
+
+    data/npcs.json stores pAtk/mAtk/pDef/mDef with 3 decimals and accuracy/evasion
+    with 2. Keeping them floats matters: 0 must print as 0.0, not 0. Values are
+    also clamped to the 3-decimal form because the zone reads them from JSON.
+    """
+    text = attribute(node, key)
+    if text is None:
+        return round(fallback, digits)
+    value = float(text)
+    if not math.isfinite(value):
+        return round(fallback, digits)
+    return round(value, digits)
+
+
+def combat_int(node: ET.Element | None, key: str, fallback: int = 0) -> int:
+    text = attribute(node, key)
+    if text is None:
+        return fallback
+    value = float(text)
+    if not math.isfinite(value):
+        return fallback
+    return int(math.floor(value + 0.5))
+
+
+def clan_list(ai: ET.Element | None) -> tuple[list[str], list[int]]:
+    """<ai><clanList> holds <clan> names and <ignoreNpcId> ids as siblings."""
+    clans: list[str] = []
+    ignores: list[int] = []
+    node = child(ai, "clanList") if ai is not None else None
+    if node is None:
+        return clans, ignores
+    for item in node:
+        text = (item.text or "").strip()
+        if not text:
+            continue
+        tag = local(item.tag)
+        if tag == "clan":
+            clans.append(text)
+        elif tag == "ignoreNpcId":
+            ignores.append(int(text))
+    return clans, ignores
+
+
 def load_templates(npc_dir: Path) -> list[dict]:
     templates: dict[int, dict] = {}
     files = sorted(npc_dir.glob("*.xml"))
@@ -127,6 +196,8 @@ def load_templates(npc_dir: Path) -> list[dict]:
             stats = child(node, "stats")
             vitals = child(stats, "vitals") if stats is not None else None
             speed = child(stats, "speed") if stats is not None else None
+            attack = child(stats, "attack") if stats is not None else None
+            defence = child(stats, "defence") if stats is not None else None
             walk = None
             run = None
             if speed is not None:
@@ -152,10 +223,14 @@ def load_templates(npc_dir: Path) -> list[dict]:
             attackable = parse_bool(None if status is None else status.attrib.get("attackable"), True)
             aggressive = parse_bool(None if ai is None else ai.attrib.get("isAggressive"), True)
             level = int(node.attrib.get("level", "70"))
+            acquire = child(node, "acquire")
+            exp = int(float(acquire.attrib.get("exp", "0"))) if acquire is not None else 0
+            sp = int(float(acquire.attrib.get("sp", "0"))) if acquire is not None else 0
             # Mobius allows an empty name (doors, effect points). Town spawns do not use those.
             name = (node.attrib.get("name") or "").strip()
+            clans, ignore_npc_ids = clan_list(ai)
 
-            templates[npc_id] = {
+            row: dict = {
                 "npcId": npc_id,
                 "name": name,
                 "title": (node.attrib.get("title") or "").strip(),
@@ -167,11 +242,122 @@ def load_templates(npc_dir: Path) -> list[dict]:
                 "aggressive": aggressive,
                 "hp": hp_stat(None if vitals is None else vitals.attrib.get("hp")),
                 "mp": hp_stat(None if vitals is None else vitals.attrib.get("mp")),
+                # Mobius NpcData <vitals hpRegen/mpRegen>: NPCStatus.doRegeneration adds
+                # calcStat(REGENERATE_HP_RATE, max(1, baseHpReg)) every 3000 ms, so a damaged
+                # mob heals back instead of staying wounded forever.
+                "hpRegen": combat_float(vitals, "hpRegen", 3),
+                "mpRegen": combat_float(vitals, "mpRegen", 3),
                 "runSpeed": positive_stat(None if run is None else run.attrib.get("ground"), 0.1),
                 "walkSpeed": positive_stat(None if walk is None else walk.attrib.get("ground"), 0.1),
+                "exp": exp,
+                "sp": sp,
+                # Combat stats, key order matches the committed data/npcs.json so
+                # a regeneration stays a byte-identical diff. Transcribed values.
+                "pAtk": combat_float(attack, "physical", 3),
+                "pDef": combat_float(defence, "physical", 3),
+                "attackSpeed": combat_int(attack, "attackSpeed"),
+                "attackRange": combat_int(attack, "range"),
+                "accuracy": combat_float(attack, "accuracy", 2),
+                "evasion": combat_float(defence, "evasion", 2),
+                "critical": combat_int(attack, "critical"),
+                "randomDamage": combat_int(attack, "random"),
+                "dex": combat_int(stats, "dex"),
             }
+            # Shields only exist when <stats defence> carries `shield`; `shieldRate`
+            # defaults to 0 there (the attribute is absent for 25 of 277 NPCs).
+            if attribute(defence, "shield") is not None:
+                row["shieldDef"] = combat_int(defence, "shield")
+                row["shieldRate"] = combat_int(defence, "shieldRate")
+            row["mAtk"] = combat_float(attack, "magical", 3)
+            row["mDef"] = combat_float(defence, "magical", 3)
+            if attribute(ai, "aggroRange") is not None:
+                row["aggroRange"] = combat_int(ai, "aggroRange")
+            if attribute(ai, "clanHelpRange") is not None:
+                row["clanHelpRange"] = combat_int(ai, "clanHelpRange")
+            if clans:
+                row["clans"] = clans
+            if ignore_npc_ids:
+                row["ignoreNpcIds"] = ignore_npc_ids
+            templates[npc_id] = row
 
     return [templates[npc_id] for npc_id in sorted(templates)]
+
+
+# Fields the zone reads for combat parity. They are the ones a "templates only"
+# regression would silently erase, so --check compares just these.
+COMBAT_FIELDS: tuple[str, ...] = (
+    "pAtk",
+    "mAtk",
+    "pDef",
+    "mDef",
+    "critical",
+    "accuracy",
+    "randomDamage",
+    "attackSpeed",
+    "attackRange",
+    "dex",
+    "aggroRange",
+    "clanHelpRange",
+    "clans",
+    "ignoreNpcIds",
+    "evasion",
+    "shieldDef",
+    "shieldRate",
+    "hpRegen",
+    "mpRegen",
+)
+
+
+def check_combat_coverage(templates: list[dict]) -> None:
+    """Refuse to overwrite data/npcs.json with combat stats stripped.
+
+    The zone reads pAtk/pDef/aggroRange/clans from here; an importer that silently
+    drops <stats attack>/<stats defence> would zero out every mob's damage. This
+    guards the shape, not the values: a real datapack has thousands of rows with
+    pAtk > 0, so zero means the transcription broke.
+    """
+    if not templates:
+        raise SystemExit("no npc templates parsed")
+    with_attack = sum(1 for row in templates if row["pAtk"] > 0)
+    if with_attack == 0:
+        raise SystemExit(
+            "refusing to write npcs.json: no NPC has pAtk > 0 — "
+            "combat stats (stats/attack, stats/defence) are not being read"
+        )
+    if not any("aggroRange" in row for row in templates):
+        raise SystemExit("refusing to write npcs.json: no NPC has aggroRange (ai/aggroRange not read)")
+    if not any(row.get("clans") for row in templates):
+        raise SystemExit("refusing to write npcs.json: no NPC has clans (ai/clanList/clan not read)")
+
+
+def compare_with_committed(templates: list[dict], committed: dict[int, dict]) -> list[str]:
+    """Field-level diff of the combat block against the committed data/npcs.json.
+
+    Floats are compared with a tolerance of 0.0005 because pAtk/mAtk/pDef/mDef are
+    stored with 3 decimals while the datapack carries more; everything else must
+    match exactly. Returns human-readable mismatch lines (empty means reproducible).
+    """
+    problems: list[str] = []
+    for row in templates:
+        npc_id = row["npcId"]
+        old = committed.get(npc_id)
+        if old is None:
+            problems.append(f"npc {npc_id}: missing from data/npcs.json")
+            continue
+        for field in COMBAT_FIELDS:
+            want = old.get(field, "<absent>")
+            got = row.get(field, "<absent>")
+            if isinstance(want, list) or isinstance(got, list):
+                if want != got:
+                    problems.append(f"npc {npc_id}: {field} {want!r} != {got!r}")
+            elif isinstance(want, (int, float)) and isinstance(got, (int, float)):
+                if abs(float(want) - float(got)) > 0.0005:
+                    problems.append(f"npc {npc_id}: {field} {want!r} != {got!r}")
+            elif want != got:
+                problems.append(f"npc {npc_id}: {field} {want!r} != {got!r}")
+    for npc_id in sorted(set(committed) - {row["npcId"] for row in templates}):
+        problems.append(f"npc {npc_id}: present in data/npcs.json but not in the datapack")
+    return problems
 
 
 def spawn_rows(path: Path) -> list[dict]:
@@ -268,17 +454,53 @@ def write_towns(repo: Path, templates: dict[int, dict], spawns_dir: Path) -> lis
     return summary
 
 
+def datapack_dir(root: Path, relative: str) -> Path:
+    """Locate a datapack folder in either the release or the sparse-clone layout.
+
+    A full L2J_Mobius checkout keeps files under `dist/game/data/...`; the local
+    ref/ sparse clone keeps the same tree rooted at `data/...`.
+    """
+    for candidate in (root / "dist" / "game" / "data" / relative, root / "data" / relative):
+        if candidate.is_dir():
+            return candidate
+    return root / "dist" / "game" / "data" / relative
+
+
 def main() -> None:
-    if len(sys.argv) != 2:
-        raise SystemExit("usage: import_npc_templates.py /path/to/L2J_Mobius_CT_0_Interlude")
-    root = Path(sys.argv[1])
-    npc_dir = root / "dist" / "game" / "data" / "stats" / "npcs"
-    spawns_dir = root / "dist" / "game" / "data" / "spawns"
-    if not npc_dir.is_dir() or not spawns_dir.is_dir():
+    argv = sys.argv[1:]
+    check_only = "--check" in argv
+    if check_only:
+        argv = [a for a in argv if a != "--check"]
+    if len(argv) != 1:
+        raise SystemExit(
+            "usage: import_npc_templates.py /path/to/L2J_Mobius_CT_0_Interlude [--check]"
+        )
+    root = Path(argv[0])
+    npc_dir = datapack_dir(root, "stats/npcs")
+    spawns_dir = datapack_dir(root, "spawns")
+    if not npc_dir.is_dir():
+        raise SystemExit(f"{root} has no stats/npcs (looked for dist/game/data and data)")
+    if not check_only and not spawns_dir.is_dir():
         raise SystemExit(f"{root} is not an L2J_Mobius_CT_0_Interlude datapack root")
 
     repo = Path(__file__).resolve().parents[1]
     templates = load_templates(npc_dir)
+    check_combat_coverage(templates)
+
+    if check_only:
+        path = repo / "data" / "npcs.json"
+        committed = {row["npcId"]: row for row in json.loads(path.read_text(encoding="utf-8"))["npcs"]}
+        problems = compare_with_committed(templates, committed)
+        with_attack = sum(1 for row in templates if row["pAtk"] > 0)
+        print(f"templates {len(templates)} pAtk>0 rows {with_attack}")
+        if problems:
+            print(f"COMBAT DRIFT {len(problems)}")
+            for line in problems:
+                print("  " + line)
+            raise SystemExit(1)
+        print("combat fields reproducible: 0 mismatches")
+        return
+
     write_templates(repo, templates)
     by_id = {row["npcId"]: row for row in templates}
     summary = write_towns(repo, by_id, spawns_dir)

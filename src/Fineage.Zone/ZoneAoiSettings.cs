@@ -1,6 +1,7 @@
 using Fineage.Login;
 using Fineage.Zone.Bosses;
 using Fineage.Zone.Interest;
+using Fineage.Zone.Olympiad;
 using Fineage.Zone.SevenSigns;
 using Fineage.Zone.World;
 
@@ -13,12 +14,19 @@ public static class ZoneAoiSettings
 
     public static int InterestRange => ReadInt("FINEAGE_ZONE_INTEREST_RANGE", DefaultInterestRange, min: 0, max: 500_000);
 
+    /// <summary>
+    /// When &gt;0, use <see cref="GridAoi"/> with this cell size (ARCHITECTURE_NET Phase 1).
+    /// Takes precedence over <see cref="InterestRange"/>.
+    /// </summary>
+    public static int AoiCellSize => ReadInt("FINEAGE_ZONE_AOI_CELL", 0, min: 0, max: 500_000);
+
     public static ZoneWorld CreateWorld(
         IAoi? aoi = null,
         IAccountStore? accounts = null,
         SevenSignsEngine? sevenSigns = null,
         bool includeEnabledMaps = false,
-        BossSchedule? bosses = null)
+        BossSchedule? bosses = null,
+        OlympiadBoard? olympiad = null)
     {
         if (aoi != null)
         {
@@ -27,13 +35,26 @@ public static class ZoneAoiSettings
                 accounts: accounts,
                 sevenSigns: sevenSigns,
                 includeEnabledMaps: includeEnabledMaps,
-                bosses: bosses);
+                bosses: bosses,
+                olympiad: olympiad);
+        }
+
+        int cell = AoiCellSize;
+        if (cell > 0)
+        {
+            return new ZoneWorld(
+                new GridAoi(cell),
+                accounts: accounts,
+                sevenSigns: sevenSigns,
+                includeEnabledMaps: includeEnabledMaps,
+                bosses: bosses,
+                olympiad: olympiad);
         }
 
         int range = InterestRange;
         return range <= 0
-            ? new ZoneWorld(accounts: accounts, sevenSigns: sevenSigns, includeEnabledMaps: includeEnabledMaps, bosses: bosses)
-            : new ZoneWorld(new RangeAoi(range), accounts: accounts, sevenSigns: sevenSigns, includeEnabledMaps: includeEnabledMaps, bosses: bosses);
+            ? new ZoneWorld(accounts: accounts, sevenSigns: sevenSigns, includeEnabledMaps: includeEnabledMaps, bosses: bosses, olympiad: olympiad)
+            : new ZoneWorld(new RangeAoi(range), accounts: accounts, sevenSigns: sevenSigns, includeEnabledMaps: includeEnabledMaps, bosses: bosses, olympiad: olympiad);
     }
 
     static int ReadInt(string name, int fallback, int min, int max)

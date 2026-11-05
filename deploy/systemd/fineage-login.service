@@ -1,5 +1,5 @@
 [Unit]
-Description=Fineage Login (V2 TCP 9106 and HTTP auth 5080)
+Description=Fineage Login (Net TCP 9106 and HTTP auth 5080)
 After=network-online.target
 Wants=network-online.target
 

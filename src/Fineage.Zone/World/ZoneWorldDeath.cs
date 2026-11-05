@@ -76,21 +76,31 @@ public sealed partial class ZoneWorld
         player.Running = false;
         player.ActiveEnchantObjectId = 0;
         player.Abnormals.Clear();
+        RefreshRunSpeed(player); // dead: buff runSpd funcs drop with the abnormals
         player.CombatUntilUnixMs = 0;
 
         if (player.Session != null)
             player.Session.SelectedTargetId = 0;
+
+        // Mobius Player.onDeath runs the exp penalty before the Die packet goes out, so the client's exp bar and the
+        // Death Penalty level are already the post-death values on the death screen.
+        ApplyDeathConsequences(player, killerObjectId, outbound);
 
         FanoutPlayerDeath(player, killerObjectId, outbound);
         if (player.Session != null)
             SaveVitals(player.Session, player);
     }
 
+    /// <summary>
+    /// Mobius <c>Creature.doRevive</c> (<c>:2524-2553</c>): the revive only lifts the bars to the configured share of
+    /// the maxima when they are still below it — with <c>RespawnRestoreHP = 65</c> and <c>RespawnRestoreMP = 0</c> the
+    /// character comes back on two thirds of the health bar and an empty mana bar, not on full vitals.
+    /// </summary>
     void ReviveAtVillage(ZoneEntity player, List<Pending> toSelf, List<Pending> toOthers)
     {
         player.Dead = false;
-        player.CurHp = player.MaxHp;
-        player.CurMp = player.MaxMp;
+        player.CurHp = RestoreShare(player.CurHp, player.MaxHp, _deathRules.RespawnRestoreHp);
+        player.CurMp = RestoreShare(player.CurMp, player.MaxMp, _deathRules.RespawnRestoreMp);
         player.Running = true;
 
         var revive = new ReviveMsg { ObjectId = player.ObjectId };
@@ -98,12 +108,15 @@ public sealed partial class ZoneWorld
             TalkingIslandRestart.Heading);
 
         FanoutDeathEvent(player, MsgType.Revive, revive, toSelf, toOthers);
-        Relocate(player, TalkingIslandRestart.X, TalkingIslandRestart.Y, TalkingIslandRestart.Z, toSelf, toOthers);
+        // Relocate fans the Net TeleportToLocation itself (owner + peers in view); the V2 frame stays explicit
+        // so the FanoutDeathEvent relay must not fan it a second time.
+        Relocate(player, TalkingIslandRestart.X, TalkingIslandRestart.Y, TalkingIslandRestart.Z, toSelf, toOthers,
+            heading: TalkingIslandRestart.Heading, netTeleport: false);
         FanoutDeathEvent(player, MsgType.TeleportToLocation, teleport, toSelf, toOthers);
 
         if (player.Session != null)
         {
-            toSelf.Add(Pack(player.Session, MsgType.UserInfo, UserInfo(player)));
+            toSelf.Add(SelfUserInfo(player.Session, player));
             FanoutVitals(player, PlayerVitalsStatus(player), toSelf);
             SaveVitals(player.Session, player);
         }
@@ -121,6 +134,7 @@ public sealed partial class ZoneWorld
         };
         byte[] statusBody = MessagePackSerializer.Serialize(status);
 
+        List<int>? netWatchers = null;
         foreach (var watcher in Players())
         {
             if (watcher.Session == null)
@@ -130,6 +144,25 @@ public sealed partial class ZoneWorld
 
             outbound.Add(new Pending(watcher.Session, MsgType.Die, dieBody));
             outbound.Add(new Pending(watcher.Session, MsgType.StatusUpdate, statusBody));
+            netWatchers ??= [];
+            netWatchers.Add(watcher.ObjectId);
+        }
+
+        if (netWatchers is { Count: > 0 } && NetBridge != null)
+        {
+            NetBridge.FanoutDie(netWatchers, new Fineage.Net.Contract.EntityDieMsg
+            {
+                EntityValue = (ulong)(uint)dead.ObjectId,
+                EntityGeneration = 1,
+                KillerObjectId = killerObjectId
+            });
+            NetBridge.FanoutStatusUpdate(netWatchers, new Fineage.Net.Contract.StatusUpdateNetMsg
+            {
+                EntityValue = (ulong)(uint)dead.ObjectId,
+                EntityGeneration = 1,
+                AttributeIds = status.AttributeIds ?? [],
+                Values = status.Values ?? []
+            });
         }
     }
 
@@ -137,8 +170,12 @@ public sealed partial class ZoneWorld
     {
         byte[] body = MessagePackSerializer.Serialize(payload);
         var session = actor.Session;
+        List<int>? netWatchers = null;
         if (session != null)
+        {
             toSelf.Add(new Pending(session, type, body));
+            netWatchers = [actor.ObjectId];
+        }
 
         foreach (var watcher in Players())
         {
@@ -147,6 +184,30 @@ public sealed partial class ZoneWorld
             if (!watcher.Knownlist.Contains(actor.ObjectId))
                 continue;
             toOthers.Add(new Pending(watcher.Session, type, body));
+            netWatchers ??= [];
+            netWatchers.Add(watcher.ObjectId);
+        }
+
+        if (netWatchers is { Count: > 0 } && NetBridge != null)
+        {
+            if (type == MsgType.Revive && payload is ReviveMsg revive)
+            {
+                NetBridge.FanoutRevive(netWatchers, new Fineage.Net.Contract.ReviveNetMsg
+                {
+                    ObjectId = revive.ObjectId
+                });
+            }
+            else if (type == MsgType.TeleportToLocation && payload is TeleportToLocationMsg teleport)
+            {
+                NetBridge.FanoutTeleportToLocation(netWatchers, new Fineage.Net.Contract.TeleportToLocationNetMsg
+                {
+                    ObjectId = teleport.ObjectId,
+                    X = teleport.X,
+                    Y = teleport.Y,
+                    Z = teleport.Z,
+                    Heading = teleport.Heading
+                });
+            }
         }
     }
 
@@ -158,4 +219,17 @@ public sealed partial class ZoneWorld
         Z = z,
         Heading = heading
     };
+
+    /// <summary>
+    /// One bar of <c>Creature.doRevive</c>: the restore only lifts a bar that is below its target share (so a
+    /// resurrection spell that already restored more is never lowered), and the target is floored like Mobius'
+    /// double-to-int assignment of <c>maxHp * share</c>.
+    /// </summary>
+    static int RestoreShare(int current, int max, double share)
+    {
+        if (share <= 0d || max <= 0)
+            return current;
+        int target = (int)(max * share);
+        return current < target ? target : current;
+    }
 }

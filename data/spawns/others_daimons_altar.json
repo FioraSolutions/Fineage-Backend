@@ -1,0 +1,17 @@
+{
+  "mapId": "others_daimons_altar",
+  "enabled": true,
+  "comment": "Mobius CT 0 Interlude spawns/Others/DaimonsAltar.xml. Fixed rows keep Mobius x/y/z/heading. Territory rows are one spawn per count, placed inside the polygon at minZ (no geodata). Day and night rows are both present. Raid bosses are left to data/raidbosses.json. Name, title, type, attackable, hp, and speeds come from data/npcs.json.",
+  "npcs": [
+    {
+      "objectId": 93109,
+      "npcId": 31541,
+      "x": 186304,
+      "y": -43744,
+      "z": -3193,
+      "heading": 57000,
+      "respawnDelaySeconds": 129600,
+      "respawnRandomSeconds": 0
+    }
+  ]
+}

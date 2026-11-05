@@ -6,6 +6,8 @@ Folder: L2J_Mobius_CT_0_Interlude/dist/game/data/html
 
 Scope: Talking Island village NPC templates in data/spawns/ti_village.json,
 plus Chat pages and Link targets those dialogs reference.
+Elven Village (data/spawns/elven_village.json) added by tools/import_npc_html.py with the same rule;
+gatekeeper `goto <legacy id>` links are rewritten to `teleport <LIST> <index>` of data/teleports.json.
 HTML text only. Java sources were not copied.
 
 Reference classes (rules, not copied):

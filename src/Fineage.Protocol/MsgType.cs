@@ -103,6 +103,21 @@ public enum MsgType : ushort
     TradeAddItemRequest = 54,
     /// <summary>Confirm or cancel the trade window.</summary>
     TradeDoneRequest = 55,
+    /// <summary>Drop a bag item onto the ground. Body is <see cref="DropItemRequestMsg"/>.</summary>
+    DropItemRequest = 56,
+    /// <summary>Olympiad status. Body is empty. See <see cref="OlympiadProtocol"/>.</summary>
+    OlympiadStatusRequest = 60,
+    /// <summary>Join a classed or non-classed queue. Body is <see cref="OlympiadRegisterRequestMsg"/>.</summary>
+    OlympiadRegisterRequest = 61,
+    /// <summary>Leave the waiting list. Empty body.</summary>
+    OlympiadUnregisterRequest = 62,
+    /// <summary>Leave a match. A loss, using the Mobius default or disconnect rule. Empty body.</summary>
+    OlympiadLeaveRequest = 63,
+    /// <summary>
+    /// Admin/test hook for <c>ReportOlympiadResult</c>. Off unless <c>FINEAGE_ZONE_ADMIN</c> is set.
+    /// Body is <see cref="AdminReportOlympiadResultMsg"/>.
+    /// </summary>
+    AdminReportOlympiadResult = 64,
     /// <summary>Seven Signs status snapshot. See <see cref="SevenSignsProtocol"/>.</summary>
     SevenSignsStatusRequest = 90,
     /// <summary>Seven Signs join or seal-stone contribution. See <see cref="SevenSignsProtocol"/>.</summary>
@@ -123,6 +138,24 @@ public enum MsgType : ushort
     /// Mobius <c>RequestBypassToServer</c>. See <see cref="NpcHtmlProtocol"/>.
     /// </summary>
     BypassRequest = 95,
+    /// <summary>Buy from the open buylist. Body is <see cref="RequestBuyItemMsg"/>. See <see cref="ShopProtocol"/>.</summary>
+    RequestBuyItem = 96,
+    /// <summary>Sell bag items to the open merchant. Body is <see cref="RequestSellItemMsg"/>.</summary>
+    RequestSellItem = 97,
+    /// <summary>Choose one prepared multisell row. Body is <see cref="RequestMultiSellChooseMsg"/>.</summary>
+    RequestMultiSellChoose = 98,
+    /// <summary>Wear preview. The service stays stubbed. Body is <see cref="RequestPreviewItemMsg"/>.</summary>
+    RequestPreviewItem = 99,
+    /// <summary>Pick a gatekeeper destination. See <see cref="NpcServiceProtocol"/>.</summary>
+    TeleportSelectRequest = 105,
+    /// <summary>Deposit lines into the private warehouse.</summary>
+    WarehouseDepositRequest = 106,
+    /// <summary>Withdraw lines from the private warehouse.</summary>
+    WarehouseWithdrawRequest = 107,
+    /// <summary>Ask the Newbie Helper for supplemental magic.</summary>
+    SupportMagicRequest = 108,
+    /// <summary>Ask the Newbie Helper for the Blessing of Protection.</summary>
+    GiveBlessingRequest = 109,
     /// <summary>Keepalive from client. Server answers with <see cref="Pong"/>.</summary>
     Ping = 9,
     /// <summary>Zone chat. Fan-out is <see cref="CreatureSay"/>. See <see cref="ChatProtocol"/>.</summary>
@@ -163,6 +196,11 @@ public enum MsgType : ushort
     AbnormalStatusUpdate = 1017,
     /// <summary>Ground item entered AOI. Keys match Interlude SpawnItem / client <c>SpawnItemDto</c>.</summary>
     SpawnItem = 1018,
+    /// <summary>
+    /// Ground item dropped (death loot or bag discard). Includes dropper for client throw FX.
+    /// Keys match Interlude DropItem / client <c>DropItemDto</c>.
+    /// </summary>
+    DropItem = 1019,
     /// <summary>Pending party invite (Interlude AskJoinParty).</summary>
     PartyAskJoin = 1027,
     /// <summary>Invite outcome for the requestor (Interlude JoinParty).</summary>
@@ -205,24 +243,32 @@ public enum MsgType : ushort
     SocialAction = 1068,
     /// <summary>Walk / run on actor. See <see cref="ActionProtocol"/>.</summary>
     ChangeMoveType = 1069,
+    /// <summary>Olympiad period, points, and queue. See <see cref="OlympiadProtocol"/>.</summary>
+    OlympiadStatus = 1070,
+    /// <summary>Current match, stadium, and phase.</summary>
+    OlympiadMatch = 1071,
+    /// <summary>Match points, winner, and gate-pass reward.</summary>
+    OlympiadResult = 1072,
+    /// <summary>Stadium, fight, or return countdown.</summary>
+    OlympiadCountdown = 1073,
     /// <summary>Creature died. See <see cref="DeathProtocol"/>.</summary>
-    Die = 1070,
+    Die = 1074,
     /// <summary>Creature revived from death state. See <see cref="DeathProtocol"/>.</summary>
-    Revive = 1071,
+    Revive = 1075,
     /// <summary>Instant relocation fan-out. See <see cref="DeathProtocol"/>.</summary>
-    TeleportToLocation = 1072,
-    /// <summary>Pending trade ask (Interlude TradeRequest).</summary>
-    TradeAsk = 1073,
+    TeleportToLocation = 1076,
+    /// <summary>Pending trade ask (Interlude TradeRequest). Band 1077–1082; see <see cref="TradeProtocol"/>.</summary>
+    TradeAsk = 1077,
     /// <summary>Ask outcome for the requestor.</summary>
-    TradeRequestResult = 1074,
+    TradeRequestResult = 1078,
     /// <summary>Trade window opened; names the partner.</summary>
-    TradeStart = 1075,
+    TradeStart = 1079,
     /// <summary>One offer row for self or partner column.</summary>
-    TradeOfferUpdate = 1076,
+    TradeOfferUpdate = 1080,
     /// <summary>Confirm flags from this client's view.</summary>
-    TradeConfirmState = 1077,
+    TradeConfirmState = 1081,
     /// <summary>Trade closed. 1 exchanged, 0 cancelled.</summary>
-    TradeFinished = 1078,
+    TradeFinished = 1082,
     /// <summary>Seven Signs record (SSQStatus analogue). See <see cref="SevenSignsProtocol"/>.</summary>
     SevenSignsStatus = 1090,
     /// <summary>Seven Signs sky tint (SignsSky analogue). See <see cref="SevenSignsProtocol"/>.</summary>
@@ -236,6 +282,24 @@ public enum MsgType : ushort
     /// Quest steps stay on <see cref="QuestDialog"/>. See <see cref="NpcHtmlProtocol"/>.
     /// </summary>
     NpcHtml = 1094,
+    /// <summary>Merchant buylist. Body is <see cref="BuyListMsg"/>. See <see cref="ShopProtocol"/>.</summary>
+    BuyList = 1095,
+    /// <summary>Items the merchant will buy. Body is <see cref="SellListMsg"/>.</summary>
+    SellList = 1096,
+    /// <summary>Prepared multisell. Body is <see cref="MultiSellListMsg"/>.</summary>
+    MultiSellList = 1097,
+    /// <summary>Adena, weight, and slots after a shop window or a trade. Body is <see cref="ShopBalanceMsg"/>.</summary>
+    ShopBalance = 1098,
+    /// <summary>Gatekeeper destinations. See <see cref="NpcServiceProtocol"/>.</summary>
+    TeleportList = 1105,
+    /// <summary>Items the player may deposit, plus the fee and slot counts.</summary>
+    WarehouseDepositList = 1106,
+    /// <summary>Private warehouse contents.</summary>
+    WarehouseWithdrawList = 1107,
+    /// <summary>Supplemental magic that was applied.</summary>
+    NewbieBuffResult = 1108,
+    /// <summary>Blessing of Protection result.</summary>
+    BlessingResult = 1109,
 
     // Login S → C. Canonical lobby set; see LobbyProtocol.
     RegisterOk = 1020,

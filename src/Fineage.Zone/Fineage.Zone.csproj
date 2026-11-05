@@ -10,6 +10,8 @@
     <ProjectReference Include="..\Fineage.Game\Fineage.Game.csproj" />
     <ProjectReference Include="..\Fineage.Protocol\Fineage.Protocol.csproj" />
     <ProjectReference Include="..\Fineage.Login\Fineage.Login.csproj" />
+    <ProjectReference Include="..\Fineage.Net.Contract\Fineage.Net.Contract.csproj" />
+    <ProjectReference Include="..\Fineage.Net.Host\Fineage.Net.Host.csproj" />
   </ItemGroup>
   <ItemGroup>
     <Content Include="..\..\data\items.json" Link="data\items.json" CopyToOutputDirectory="PreserveNewest" />
@@ -26,5 +28,20 @@
     <Content Include="..\..\data\drops\**\*.json" Link="data\drops\%(RecursiveDir)%(Filename)%(Extension)" CopyToOutputDirectory="PreserveNewest" />
     <Content Include="..\..\data\dungeons.json" Link="data\dungeons.json" CopyToOutputDirectory="PreserveNewest" />
     <Content Include="..\..\data\html\**\*.*" Link="data\html\%(RecursiveDir)%(Filename)%(Extension)" CopyToOutputDirectory="PreserveNewest" />
+    <Content Include="..\..\data\olympiad-stadiums.json" Link="data\olympiad-stadiums.json" CopyToOutputDirectory="PreserveNewest" />
+    <Content Include="..\..\data\teleports.json" Link="data\teleports.json" CopyToOutputDirectory="PreserveNewest" />
+    <Content Include="..\..\data\village-masters.json" Link="data\village-masters.json" CopyToOutputDirectory="PreserveNewest" />
+    <Content Include="..\..\data\newbie-buffs.json" Link="data\newbie-buffs.json" CopyToOutputDirectory="PreserveNewest" />
+    <Content Include="..\..\data\item-weights.json" Link="data\item-weights.json" CopyToOutputDirectory="PreserveNewest" />
+    <Content Include="..\..\data\buylists.json" Link="data\buylists.json" CopyToOutputDirectory="PreserveNewest" />
+    <Content Include="..\..\data\multisell.json" Link="data\multisell.json" CopyToOutputDirectory="PreserveNewest" />
+    <Content Include="..\..\data\doors.json" Link="data\doors.json" CopyToOutputDirectory="PreserveNewest" />
+    <Content Include="..\..\data\water-zones.json" Link="data\water-zones.json" CopyToOutputDirectory="PreserveNewest" />
+    <Content Include="..\..\data\xp-percent-lost.json" Link="data\xp-percent-lost.json" CopyToOutputDirectory="PreserveNewest" />
+    <Content Include="..\..\data\herbs.json" Link="data\herbs.json" CopyToOutputDirectory="PreserveNewest" />
+    <Content Include="..\..\data\skill-combat.json" Link="data\skill-combat.json" CopyToOutputDirectory="PreserveNewest" />
+    <Content Include="..\..\data\skill-passives.json" Link="data\skill-passives.json" CopyToOutputDirectory="PreserveNewest" />
+    <Content Include="..\..\data\skill-stat-effects.json" Link="data\skill-stat-effects.json" CopyToOutputDirectory="PreserveNewest" />
+    <Content Include="..\..\data\spoil.json" Link="data\spoil.json" CopyToOutputDirectory="PreserveNewest" />
   </ItemGroup>
 </Project>

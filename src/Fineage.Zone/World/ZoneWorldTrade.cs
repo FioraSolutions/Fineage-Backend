@@ -1,4 +1,5 @@
 using Fineage.Game;
+using Fineage.Game.Services;
 using Fineage.Protocol;
 
 namespace Fineage.Zone.World;
@@ -137,11 +138,12 @@ public sealed partial class ZoneWorld
             return TradeProtocol.Range;
 
         _pendingTradeAsk[request.TargetObjectId] = requestor.ObjectId;
-        outbound.Add(Pack(targetEntity.Session, MsgType.TradeAsk, new TradeAskMsg
+        var ask = new TradeAskMsg
         {
             RequestorObjectId = requestor.ObjectId,
             RequestorName = requestor.Name
-        }));
+        };
+        QueueTradeAsk(targetEntity.Session, ask, outbound);
         return null;
     }
 
@@ -162,19 +164,19 @@ public sealed partial class ZoneWorld
 
         if (answer.Response != 1)
         {
-            outbound.Add(Pack(requestorEntity.Session, MsgType.TradeRequestResult, new TradeRequestResultMsg { Response = 0 }));
+            QueueTradeRequestResult(requestorEntity.Session, 0, outbound);
             return null;
         }
 
         if (_tradeByPlayer.ContainsKey(partner.ObjectId) || _tradeByPlayer.ContainsKey(answer.RequestorObjectId))
         {
-            outbound.Add(Pack(requestorEntity.Session, MsgType.TradeRequestResult, new TradeRequestResultMsg { Response = 0 }));
+            QueueTradeRequestResult(requestorEntity.Session, 0, outbound);
             return null;
         }
 
         if (!TradeInRange(answer.RequestorObjectId, partner.ObjectId))
         {
-            outbound.Add(Pack(requestorEntity.Session, MsgType.TradeRequestResult, new TradeRequestResultMsg { Response = 0 }));
+            QueueTradeRequestResult(requestorEntity.Session, 0, outbound);
             return null;
         }
 
@@ -188,7 +190,7 @@ public sealed partial class ZoneWorld
         };
         BindTradeSession(session);
 
-        outbound.Add(Pack(requestorEntity.Session, MsgType.TradeRequestResult, new TradeRequestResultMsg { Response = 1 }));
+        QueueTradeRequestResult(requestorEntity.Session, 1, outbound);
         SendTradeStart(requestorEntity, partner.ObjectId, outbound);
         SendTradeStart(partnerEntity, answer.RequestorObjectId, outbound);
         FanoutTradeConfirm(session, outbound);
@@ -215,7 +217,7 @@ public sealed partial class ZoneWorld
         var item = entity.Inventory.Find(add.InventoryObjectId);
         if (item == null)
             return InventoryProtocol.NotOwned;
-        if (item.IsEquipped)
+        if (item.IsEquipped || !item.Template.CanDropTradeStore)
             return TradeProtocol.Item;
         if (count > item.Count)
             return TradeProtocol.Item;
@@ -305,6 +307,18 @@ public sealed partial class ZoneWorld
             !ValidateOffers(partner.Inventory, session.PartnerOffers))
             return false;
 
+        // Mobius TradeList.doExchange (TradeList.java:574-583): each receiver is checked separately, weight before
+        // slots, and both players get the same message. A trade that would overload the receiver or overflow their bag
+        // is refused outright instead of the transfer half-applying.
+        var deny = IncomingDenyOf(requestor, session.PartnerOffers);
+        if (deny == TradeIncomingDeny.None)
+            deny = IncomingDenyOf(partner, session.RequestorOffers);
+        if (deny != TradeIncomingDeny.None)
+        {
+            DenyIncomingTrade(requestor, partner, deny, outbound);
+            return false;
+        }
+
         var requestorChanges = new List<InventoryUpdateEntryMsg>();
         var partnerChanges = new List<InventoryUpdateEntryMsg>();
 
@@ -318,16 +332,20 @@ public sealed partial class ZoneWorld
 
         if (requestorChanges.Count > 0)
         {
-            outbound.Add(Pack(requestor.Session, MsgType.InventoryUpdate,
-                new InventoryUpdateMsg { Changes = requestorChanges.ToArray() }));
-            outbound.Add(Pack(requestor.Session, MsgType.UserInfo, UserInfo(requestor)));
+            var inv = new InventoryUpdateMsg { Changes = requestorChanges.ToArray() };
+            outbound.Add(Pack(requestor.Session, MsgType.InventoryUpdate, inv));
+            if (NetBridge != null)
+                NetBridge.FanoutInventoryUpdate([requestor.Session.ObjectId], ToNetInventoryUpdate(inv));
+            outbound.Add(SelfUserInfo(requestor.Session, requestor));
         }
 
         if (partnerChanges.Count > 0)
         {
-            outbound.Add(Pack(partner.Session, MsgType.InventoryUpdate,
-                new InventoryUpdateMsg { Changes = partnerChanges.ToArray() }));
-            outbound.Add(Pack(partner.Session, MsgType.UserInfo, UserInfo(partner)));
+            var inv = new InventoryUpdateMsg { Changes = partnerChanges.ToArray() };
+            outbound.Add(Pack(partner.Session, MsgType.InventoryUpdate, inv));
+            if (NetBridge != null)
+                NetBridge.FanoutInventoryUpdate([partner.Session.ObjectId], ToNetInventoryUpdate(inv));
+            outbound.Add(SelfUserInfo(partner.Session, partner));
         }
 
         FinishTradeSession(session, exchanged: true, outbound);
@@ -346,6 +364,51 @@ public sealed partial class ZoneWorld
         }
 
         return true;
+    }
+
+    /// <summary>Which message <see cref="TradeIncomingDeny"/> wants. Ordered the way Mobius reports it: weight first.</summary>
+    enum TradeIncomingDeny
+    {
+        None = 0,
+        Weight = 1,
+        Slots = 2
+    }
+
+    /// <summary>
+    /// Mobius <c>TradeList.doExchange</c>: <c>validateWeight(partnerList.calcItemsWeight())</c> then
+    /// <c>validateCapacity(partnerList.countItemsSlots(owner))</c> against the receiving side.
+    /// </summary>
+    TradeIncomingDeny IncomingDenyOf(ZoneEntity receiver, List<TradeOfferRow> offers)
+    {
+        if (receiver.Inventory == null || offers.Count == 0)
+            return TradeIncomingDeny.None;
+
+        long incoming = 0;
+        int slots = 0;
+        foreach (var row in offers)
+        {
+            incoming = checked(incoming + (long)_weights.Of(row.ItemId) * row.Count);
+            bool alreadyCarried = receiver.Inventory.FindByItemId(row.ItemId) != null;
+            bool stackable = _game.Items.TryGet(row.ItemId, out var template) && template != null && template.Stackable;
+            slots += WarehouseRules.SlotsFor(stackable, alreadyCarried, (int)Math.Min(int.MaxValue, row.Count));
+        }
+
+        if (receiver.Inventory.TotalWeight + incoming > MaxLoadOf(receiver))
+            return TradeIncomingDeny.Weight;
+        if (receiver.Inventory.Items.Count + slots > WarehouseRules.InventorySlots(receiver.Race))
+            return TradeIncomingDeny.Slots;
+        return TradeIncomingDeny.None;
+    }
+
+    /// <summary>Mobius sends the same reply to both trade partners, whichever side actually overflowed.</summary>
+    void DenyIncomingTrade(ZoneEntity requestor, ZoneEntity partner, TradeIncomingDeny reason, List<Pending> outbound)
+    {
+        int id = reason == TradeIncomingDeny.Slots ? SysMsgInventoryFull : SysMsgWeightLimit;
+        string text = reason == TradeIncomingDeny.Slots ? "Your inventory is full." : "You have exceeded the weight limit.";
+        if (requestor.Session != null)
+            ShotNotice(requestor.Session, id, text, outbound);
+        if (partner.Session != null)
+            ShotNotice(partner.Session, id, text, outbound);
     }
 
     static void TransferOfferRow(
@@ -381,11 +444,22 @@ public sealed partial class ZoneWorld
             return;
         if (!_byId.TryGetValue(partnerId, out var partner))
             return;
-        outbound.Add(Pack(viewer.Session, MsgType.TradeStart, new TradeStartMsg
+        var start = new TradeStartMsg
         {
             PartnerObjectId = partnerId,
             PartnerName = partner.Name
-        }));
+        };
+        outbound.Add(Pack(viewer.Session, MsgType.TradeStart, start));
+        if (NetBridge != null)
+        {
+            NetBridge.FanoutTradeStart(
+                [viewer.Session.ObjectId],
+                new Fineage.Net.Contract.TradeStartNetMsg
+                {
+                    PartnerObjectId = start.PartnerObjectId,
+                    PartnerName = start.PartnerName ?? ""
+                });
+        }
     }
 
     void FanoutTradeOffer(ZoneTradeSession session, int actorId, TradeOfferUpdateMsg update, List<Pending> outbound)
@@ -403,6 +477,19 @@ public sealed partial class ZoneWorld
                 IsOwn = playerId == actorId ? 1 : 0
             };
             outbound.Add(Pack(entity.Session, MsgType.TradeOfferUpdate, msg));
+            if (NetBridge != null)
+            {
+                NetBridge.FanoutTradeOfferUpdate(
+                    [entity.Session.ObjectId],
+                    new Fineage.Net.Contract.TradeOfferUpdateNetMsg
+                    {
+                        IsOwn = msg.IsOwn,
+                        InventoryObjectId = msg.InventoryObjectId,
+                        ItemId = msg.ItemId,
+                        Count = msg.Count,
+                        EnchantLevel = msg.EnchantLevel
+                    });
+            }
         }
     }
 
@@ -416,11 +503,22 @@ public sealed partial class ZoneWorld
     {
         if (!_byId.TryGetValue(viewerId, out var entity) || entity.Session == null)
             return;
-        outbound.Add(Pack(entity.Session, MsgType.TradeConfirmState, new TradeConfirmStateMsg
+        var state = new TradeConfirmStateMsg
         {
             SelfConfirmed = selfConfirmed ? 1 : 0,
             PartnerConfirmed = partnerConfirmed ? 1 : 0
-        }));
+        };
+        outbound.Add(Pack(entity.Session, MsgType.TradeConfirmState, state));
+        if (NetBridge != null)
+        {
+            NetBridge.FanoutTradeConfirmState(
+                [entity.Session.ObjectId],
+                new Fineage.Net.Contract.TradeConfirmStateNetMsg
+                {
+                    SelfConfirmed = state.SelfConfirmed,
+                    PartnerConfirmed = state.PartnerConfirmed
+                });
+        }
     }
 
     void CancelTradeSession(ZoneTradeSession session, List<Pending> outbound) =>
@@ -432,10 +530,44 @@ public sealed partial class ZoneWorld
         foreach (int playerId in new[] { session.RequestorObjectId, session.PartnerObjectId })
         {
             if (_byId.TryGetValue(playerId, out var entity) && entity.Session != null)
+            {
                 outbound.Add(Pack(entity.Session, MsgType.TradeFinished, new TradeFinishedMsg { Response = response }));
+                if (NetBridge != null)
+                {
+                    NetBridge.FanoutTradeFinished(
+                        [entity.Session.ObjectId],
+                        new Fineage.Net.Contract.TradeFinishedNetMsg { Response = response });
+                }
+            }
         }
 
         UnbindTradeSession(session);
+    }
+
+    void QueueTradeAsk(ZoneSession session, TradeAskMsg ask, List<Pending> outbound)
+    {
+        outbound.Add(Pack(session, MsgType.TradeAsk, ask));
+        if (NetBridge != null)
+        {
+            NetBridge.FanoutTradeAsk(
+                [session.ObjectId],
+                new Fineage.Net.Contract.TradeAskNetMsg
+                {
+                    RequestorObjectId = ask.RequestorObjectId,
+                    RequestorName = ask.RequestorName ?? ""
+                });
+        }
+    }
+
+    void QueueTradeRequestResult(ZoneSession session, int response, List<Pending> outbound)
+    {
+        outbound.Add(Pack(session, MsgType.TradeRequestResult, new TradeRequestResultMsg { Response = response }));
+        if (NetBridge != null)
+        {
+            NetBridge.FanoutTradeRequestResult(
+                [session.ObjectId],
+                new Fineage.Net.Contract.TradeRequestResultNetMsg { Response = response });
+        }
     }
 
     void BindTradeSession(ZoneTradeSession session)

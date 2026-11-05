@@ -1,0 +1,87 @@
+{
+  "mapId": "others_22_18",
+  "enabled": true,
+  "comment": "Mobius CT 0 Interlude spawns/Others/22_18.xml. Fixed rows keep Mobius x/y/z/heading. Territory rows are one spawn per count, placed inside the polygon at minZ (no geodata). Day and night rows are both present. Raid bosses are left to data/raidbosses.json. Name, title, type, attackable, hp, and speeds come from data/npcs.json.",
+  "npcs": [
+    {
+      "objectId": 91808,
+      "npcId": 27096,
+      "x": 69580,
+      "y": 10394,
+      "z": -3692,
+      "heading": 0,
+      "respawnDelaySeconds": 180,
+      "respawnRandomSeconds": 0
+    },
+    {
+      "objectId": 91809,
+      "npcId": 27096,
+      "x": 69781,
+      "y": 10394,
+      "z": -3692,
+      "heading": 0,
+      "respawnDelaySeconds": 180,
+      "respawnRandomSeconds": 0
+    },
+    {
+      "objectId": 91810,
+      "npcId": 27096,
+      "x": 69883,
+      "y": 10928,
+      "z": -3692,
+      "heading": 0,
+      "respawnDelaySeconds": 180,
+      "respawnRandomSeconds": 0
+    },
+    {
+      "objectId": 91811,
+      "npcId": 30738,
+      "x": 69836,
+      "y": 18108,
+      "z": -3664,
+      "heading": 0,
+      "respawnDelaySeconds": 60,
+      "respawnRandomSeconds": 0
+    },
+    {
+      "objectId": 91812,
+      "npcId": 30757,
+      "x": 95348,
+      "y": 22298,
+      "z": -2882,
+      "heading": 0,
+      "respawnDelaySeconds": 60,
+      "respawnRandomSeconds": 0
+    },
+    {
+      "objectId": 91813,
+      "npcId": 30759,
+      "x": 95359,
+      "y": 22208,
+      "z": -2879,
+      "heading": 4096,
+      "respawnDelaySeconds": 60,
+      "respawnRandomSeconds": 0
+    },
+    {
+      "objectId": 91814,
+      "npcId": 30934,
+      "x": 85881,
+      "y": 14126,
+      "z": -5257,
+      "heading": 46752,
+      "respawnDelaySeconds": 60,
+      "respawnRandomSeconds": 0
+    },
+    {
+      "objectId": 91815,
+      "npcId": 30935,
+      "x": 82234,
+      "y": 22257,
+      "z": -5257,
+      "heading": 54112,
+      "respawnDelaySeconds": 60,
+      "respawnRandomSeconds": 0
+    }
+  ]
+}

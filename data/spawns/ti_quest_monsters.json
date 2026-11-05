@@ -1,0 +1,37 @@
+{
+  "mapId": "ti_quest_monsters",
+  "enabled": true,
+  "comment": "Mobius CT 0 Interlude spawns/TalkingIsland/TalkingIslandQuestMonsters.xml. Fixed rows keep Mobius x/y/z/heading. Territory rows are one spawn per count, placed inside the polygon at minZ (no geodata). Day and night rows are both present. Raid bosses are left to data/raidbosses.json. Name, title, type, attackable, hp, and speeds come from data/npcs.json.",
+  "npcs": [
+    {
+      "objectId": 97573,
+      "npcId": 27004,
+      "x": -99679,
+      "y": 235855,
+      "z": -3384,
+      "heading": 0,
+      "respawnDelaySeconds": 180,
+      "respawnRandomSeconds": 0
+    },
+    {
+      "objectId": 97574,
+      "npcId": 27005,
+      "x": -121206,
+      "y": 235888,
+      "z": -3672,
+      "heading": 62660,
+      "respawnDelaySeconds": 180,
+      "respawnRandomSeconds": 0
+    },
+    {
+      "objectId": 97575,
+      "npcId": 27102,
+      "x": -118589,
+      "y": 233309,
+      "z": -2912,
+      "heading": 0,
+      "respawnDelaySeconds": 180,
+      "respawnRandomSeconds": 0
+    }
+  ]
+}

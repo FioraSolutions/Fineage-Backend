@@ -15,7 +15,6 @@ public static class TalkingIsland
     public const int SpawnZ = TalkingIslandSpawn.Z;
     public const int GremlinNpcId = 20001;
     public const int GremlinMaxHp = 96;
-    public const int MaxStep = 8000;
 
     public static readonly NpcInfoMsg[] Gremlins = LoadGremlins();
 
@@ -41,13 +40,6 @@ public static class TalkingIsland
         RunSpeed = 80f,
         WalkSpeed = 40f
     };
-
-    public static bool WithinStep(int fromX, int fromY, int toX, int toY)
-    {
-        long dx = fromX - (long)toX;
-        long dy = fromY - (long)toY;
-        return dx * dx + dy * dy <= (long)MaxStep * MaxStep;
-    }
 
     static NpcInfoMsg[] LoadGremlins()
     {

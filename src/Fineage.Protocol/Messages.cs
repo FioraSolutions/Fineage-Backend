@@ -67,9 +67,12 @@ public sealed class LoginOkMsg
 public sealed class CreateCharacterMsg
 {
     [Key(0)] public string Name { get; set; } = "";
-    /// <summary>0 Human Fighter, 10 Human Mystic. Other classes are rejected.</summary>
+    /// <summary>
+    /// Interlude base class. Human 0/10, Elf 18/25, Dark Elf 31/38, Orc 44/49, Dwarf 53.
+    /// A non-base class is rejected.
+    /// </summary>
     [Key(1)] public int ClassId { get; set; }
-    /// <summary>0 Human. Other races are rejected.</summary>
+    /// <summary>0 Human, 1 Elf, 2 Dark Elf, 3 Orc, 4 Dwarf. Must match the class.</summary>
     [Key(2)] public int Race { get; set; }
     /// <summary>0 male, 1 female.</summary>
     [Key(3)] public int Sex { get; set; }
@@ -117,6 +120,23 @@ public sealed class CharacterSummaryMsg
     /// <summary>Whole seconds until hard delete, or 0 when the character is not pending.</summary>
     [Key(13)] public int DeleteSecondsLeft { get; set; }
     [Key(14)] public bool IsLastPlayed { get; set; }
+    /// <summary>CharSelect vitals and progress (Mobius CharSelectionInfo). Older clients ignore these keys.</summary>
+    [Key(15)] public int CurHp { get; set; }
+    [Key(16)] public int MaxHp { get; set; }
+    [Key(17)] public int CurMp { get; set; }
+    [Key(18)] public int MaxMp { get; set; }
+    [Key(19)] public int CurCp { get; set; }
+    [Key(20)] public int MaxCp { get; set; }
+    [Key(21)] public long Exp { get; set; }
+    [Key(22)] public int Sp { get; set; }
+    [Key(23)] public int Karma { get; set; }
+    /// <summary>Right-hand (or two-hand) item id, 0 when unarmed. Same as <see cref="Paperdoll"/>[7].</summary>
+    [Key(24)] public int WeaponItemId { get; set; }
+    /// <summary>
+    /// Equipped item ids in paperdoll order, length 17 (Under…Hair2). Index 7 is RHand, 9 gloves, 10 chest, 11 legs, 12 feet.
+    /// Zero means empty. Older clients ignore this key.
+    /// </summary>
+    [Key(25)] public int[] Paperdoll { get; set; } = [];
 }
 
 [MessagePackObject]
@@ -290,6 +310,30 @@ public sealed class UserInfoMsg
     [Key(13)] public int ClanId { get; set; }
     /// <summary>Pledge crest id. Always 0 until crests exist.</summary>
     [Key(14)] public int ClanCrestId { get; set; }
+    /// <summary>CharSelect/world vitals. Older clients ignore keys 15+.</summary>
+    [Key(15)] public int Level { get; set; } = 1;
+    [Key(16)] public int CurHp { get; set; }
+    [Key(17)] public int MaxHp { get; set; }
+    [Key(18)] public int CurMp { get; set; }
+    [Key(19)] public int MaxMp { get; set; }
+    [Key(20)] public int CurCp { get; set; }
+    [Key(21)] public int MaxCp { get; set; }
+    [Key(22)] public long Exp { get; set; }
+    [Key(23)] public int Sp { get; set; }
+    [Key(24)] public int Str { get; set; }
+    [Key(25)] public int Dex { get; set; }
+    [Key(26)] public int Con { get; set; }
+    [Key(27)] public int Int { get; set; }
+    [Key(28)] public int Wit { get; set; }
+    [Key(29)] public int Men { get; set; }
+    [Key(30)] public int PAtk { get; set; }
+    [Key(31)] public int MAtk { get; set; }
+    [Key(32)] public int PDef { get; set; }
+    [Key(33)] public int MDef { get; set; }
+    [Key(34)] public int PAtkSpd { get; set; }
+    [Key(35)] public int MAtkSpd { get; set; }
+    [Key(36)] public int Accuracy { get; set; }
+    [Key(37)] public int CritRate { get; set; }
 }
 
 /// <summary>One row of <see cref="ItemListMsg"/> or the item fields of <see cref="InventoryUpdateEntryMsg"/>.</summary>
@@ -481,11 +525,26 @@ public sealed class StatusUpdateMsg
 /// <summary>Interlude StatusUpdate attribute ids (see client StatusUpdate.AttributeType).</summary>
 public static class InterludeStatus
 {
+    public const int Level = 0x01;
+    public const int Exp = 0x02;
     public const int CurHp = 0x09;
     public const int MaxHp = 0x0a;
     public const int CurMp = 0x0b;
     public const int MaxMp = 0x0c;
+    public const int Sp = 0x0d;
+    public const int CurCp = 0x21;
+    public const int MaxCp = 0x22;
     public const int TargetColorHostile = 11;
+
+    /// <summary>Interlude MyTargetSelected color: attacker level minus target level (L2J/Mobius).</summary>
+    public static int TargetColor(int attackerLevel, int targetLevel) => attackerLevel - targetLevel;
+
+    /// <summary>
+    /// Mobius <c>MyTargetSelected(Player, Creature)</c>: <c>target.isAutoAttackable(player) ? player.getLevel() - target.getLevel() : 0</c>.
+    /// A friendly NPC (merchant, guide, village master) therefore comes back as 0 (white), never as a level delta.
+    /// </summary>
+    public static int TargetColor(int attackerLevel, int targetLevel, bool autoAttackable) =>
+        autoAttackable ? TargetColor(attackerLevel, targetLevel) : 0;
 }
 
 /// <summary>Opcode <see cref="MsgType.GrantItemRequest"/> (13). Adds items to the requesting player's bag.</summary>
@@ -602,6 +661,32 @@ public sealed class SpawnItemMsg
     [Key(5)] public bool Stackable { get; set; }
     [Key(6)] public int Count { get; set; } = 1;
     [Key(7)] public int Unknown { get; set; }
+}
+
+/// <summary>Opcode <see cref="MsgType.DropItemRequest"/> (56). Discard from bag onto the ground.</summary>
+[MessagePackObject]
+public sealed class DropItemRequestMsg
+{
+    [Key(0)] public int ObjectId { get; set; }
+    [Key(1)] public int Count { get; set; } = 1;
+    [Key(2)] public int X { get; set; }
+    [Key(3)] public int Y { get; set; }
+    [Key(4)] public int Z { get; set; }
+}
+
+/// <summary>Opcode <see cref="MsgType.DropItem"/> (1019). Ground drop with optional dropper for FX.</summary>
+[MessagePackObject]
+public sealed class DropItemMsg
+{
+    [Key(0)] public int CharObjectId { get; set; }
+    [Key(1)] public int ObjectId { get; set; }
+    [Key(2)] public int ItemId { get; set; }
+    [Key(3)] public int X { get; set; }
+    [Key(4)] public int Y { get; set; }
+    [Key(5)] public int Z { get; set; }
+    [Key(6)] public bool Stackable { get; set; }
+    [Key(7)] public int Count { get; set; } = 1;
+    [Key(8)] public int Unknown { get; set; }
 }
 
 /// <summary>One row of <see cref="AbnormalStatusUpdateMsg"/>. Keys match client <c>EffectHolder</c>.</summary>
@@ -930,7 +1015,7 @@ public sealed class ReviveRequestMsg
 [MessagePackObject]
 public sealed class AdminKillPlayerMsg;
 
-/// <summary>Opcode <see cref="MsgType.Die"/> (1070). Creature died; corpse stays in world for players.</summary>
+/// <summary>Opcode <see cref="MsgType.Die"/> (1074). Creature died; corpse stays in world for players.</summary>
 [MessagePackObject]
 public sealed class DieMsg
 {
@@ -938,14 +1023,14 @@ public sealed class DieMsg
     [Key(1)] public int KillerObjectId { get; set; }
 }
 
-/// <summary>Opcode <see cref="MsgType.Revive"/> (1071).</summary>
+/// <summary>Opcode <see cref="MsgType.Revive"/> (1075).</summary>
 [MessagePackObject]
 public sealed class ReviveMsg
 {
     [Key(0)] public int ObjectId { get; set; }
 }
 
-/// <summary>Opcode <see cref="MsgType.TeleportToLocation"/> (1072). Instant move (respawn, dungeon, …).</summary>
+/// <summary>Opcode <see cref="MsgType.TeleportToLocation"/> (1076). Instant move (respawn, dungeon, …).</summary>
 [MessagePackObject]
 public sealed class TeleportToLocationMsg
 {
@@ -1309,4 +1394,371 @@ public sealed class BossStatusEntryMsg
     [Key(8)] public int MaxMp { get; set; }
     [Key(9)] public bool Enabled { get; set; }
     [Key(10)] public bool Spawned { get; set; }
+}
+
+/// <summary>Opcode <see cref="MsgType.OlympiadStatusRequest"/> (60). Empty body.</summary>
+[MessagePackObject]
+public sealed class OlympiadStatusRequestMsg
+{
+}
+
+/// <summary>
+/// Opcode <see cref="MsgType.OlympiadRegisterRequest"/> (61).
+/// <see cref="Classed"/> 1 is the class queue. 0 is the non-classed queue.
+/// </summary>
+[MessagePackObject]
+public sealed class OlympiadRegisterRequestMsg
+{
+    [Key(0)] public int Classed { get; set; }
+}
+
+/// <summary>Opcode <see cref="MsgType.OlympiadUnregisterRequest"/> (62). Empty body.</summary>
+[MessagePackObject]
+public sealed class OlympiadUnregisterRequestMsg
+{
+}
+
+/// <summary>Opcode <see cref="MsgType.OlympiadLeaveRequest"/> (63). Empty body. Leaving a match is a loss.</summary>
+[MessagePackObject]
+public sealed class OlympiadLeaveRequestMsg
+{
+}
+
+/// <summary>
+/// Opcode <see cref="MsgType.AdminReportOlympiadResult"/> (64). Off unless <c>FINEAGE_ZONE_ADMIN</c> is set.
+/// <see cref="WinnerObjectId"/> 0 is a draw. Combat calls <c>ReportOlympiadResult</c> with the same pair.
+/// </summary>
+[MessagePackObject]
+public sealed class AdminReportOlympiadResultMsg
+{
+    [Key(0)] public int MatchId { get; set; }
+    [Key(1)] public int WinnerObjectId { get; set; }
+}
+
+/// <summary>Opcode <see cref="MsgType.OlympiadStatus"/> (1070).</summary>
+[MessagePackObject]
+public sealed class OlympiadStatusMsg
+{
+    [Key(0)] public int Period { get; set; }
+    [Key(1)] public int Cycle { get; set; }
+    [Key(2)] public bool InCompetition { get; set; }
+    [Key(3)] public long CompetitionStartUnixMs { get; set; }
+    [Key(4)] public long CompetitionEndUnixMs { get; set; }
+    [Key(5)] public long OlympiadEndUnixMs { get; set; }
+    [Key(6)] public long ValidationEndUnixMs { get; set; }
+    [Key(7)] public long NextWeeklyUnixMs { get; set; }
+    [Key(8)] public bool RegistrationOpen { get; set; }
+    [Key(9)] public bool Noble { get; set; }
+    [Key(10)] public int Points { get; set; }
+    [Key(11)] public int CompetitionsDone { get; set; }
+    [Key(12)] public int Won { get; set; }
+    [Key(13)] public int Lost { get; set; }
+    [Key(14)] public int Drawn { get; set; }
+    /// <summary>0 none, 1 classed queue, 2 non-classed queue.</summary>
+    [Key(15)] public int Queue { get; set; }
+    [Key(16)] public int MatchId { get; set; }
+    /// <summary>Stadium index, or -1 when this character is not in a match.</summary>
+    [Key(17)] public int StadiumId { get; set; }
+    [Key(18)] public int ClassId { get; set; }
+}
+
+/// <summary>Opcode <see cref="MsgType.OlympiadMatch"/> (1071). Sent to both participants.</summary>
+[MessagePackObject]
+public sealed class OlympiadMatchMsg
+{
+    [Key(0)] public int MatchId { get; set; }
+    [Key(1)] public int StadiumId { get; set; }
+    [Key(2)] public int ZoneId { get; set; }
+    [Key(3)] public bool Classed { get; set; }
+    /// <summary>0 countdown, 1 pause, 2 battle countdown, 3 fighting, 4 returning.</summary>
+    [Key(4)] public int Phase { get; set; }
+    [Key(5)] public int PlayerOneId { get; set; }
+    [Key(6)] public int PlayerTwoId { get; set; }
+    [Key(7)] public string PlayerOneName { get; set; } = "";
+    [Key(8)] public string PlayerTwoName { get; set; } = "";
+    [Key(9)] public int InstanceId { get; set; }
+}
+
+/// <summary>Opcode <see cref="MsgType.OlympiadResult"/> (1072).</summary>
+[MessagePackObject]
+public sealed class OlympiadResultMsg
+{
+    [Key(0)] public int MatchId { get; set; }
+    /// <summary>0 tie, 1 player one won, 2 player two won, 3 player one disconnected, 4 player two disconnected, 5 both disconnected, 6 player one defaulted, 7 player two defaulted, 8 both defaulted.</summary>
+    [Key(1)] public int Outcome { get; set; }
+    /// <summary>0 when there is no single winner (tie, both crashed, or a default).</summary>
+    [Key(2)] public int WinnerObjectId { get; set; }
+    [Key(3)] public int PointsOne { get; set; }
+    [Key(4)] public int PointsTwo { get; set; }
+    [Key(5)] public int DeltaOne { get; set; }
+    [Key(6)] public int DeltaTwo { get; set; }
+    [Key(7)] public int RewardItemId { get; set; }
+    [Key(8)] public int RewardCount { get; set; }
+    [Key(9)] public int CompetitionsDoneOne { get; set; }
+    [Key(10)] public int CompetitionsDoneTwo { get; set; }
+}
+
+/// <summary>
+/// Opcode <see cref="MsgType.OlympiadCountdown"/> (1073).
+/// <see cref="Kind"/> 1 is the stadium teleport, 2 is the fight start, 3 is the return to town.
+/// </summary>
+[MessagePackObject]
+public sealed class OlympiadCountdownMsg
+{
+    [Key(0)] public int MatchId { get; set; }
+    [Key(1)] public int Kind { get; set; }
+    [Key(2)] public int Seconds { get; set; }
+}
+
+/// <summary>Opcode <see cref="MsgType.TeleportSelectRequest"/> (105).</summary>
+[MessagePackObject]
+public sealed class TeleportSelectRequestMsg
+{
+    [Key(0)] public int NpcObjectId { get; set; }
+    [Key(1)] public string ListName { get; set; } = "";
+    [Key(2)] public int LocationId { get; set; }
+}
+
+/// <summary>One deposit or withdraw line. Object id is the inventory or warehouse instance.</summary>
+[MessagePackObject]
+public sealed class WarehouseCountMsg
+{
+    [Key(0)] public int ObjectId { get; set; }
+    [Key(1)] public int Count { get; set; }
+}
+
+/// <summary>Opcode <see cref="MsgType.WarehouseDepositRequest"/> (106).</summary>
+[MessagePackObject]
+public sealed class WarehouseDepositRequestMsg
+{
+    [Key(0)] public int NpcObjectId { get; set; }
+    [Key(1)] public WarehouseCountMsg[] Lines { get; set; } = [];
+}
+
+/// <summary>Opcode <see cref="MsgType.WarehouseWithdrawRequest"/> (107).</summary>
+[MessagePackObject]
+public sealed class WarehouseWithdrawRequestMsg
+{
+    [Key(0)] public int NpcObjectId { get; set; }
+    [Key(1)] public WarehouseCountMsg[] Lines { get; set; } = [];
+}
+
+/// <summary>Opcode <see cref="MsgType.SupportMagicRequest"/> (108).</summary>
+[MessagePackObject]
+public sealed class SupportMagicRequestMsg
+{
+    [Key(0)] public int NpcObjectId { get; set; }
+}
+
+/// <summary>Opcode <see cref="MsgType.GiveBlessingRequest"/> (109).</summary>
+[MessagePackObject]
+public sealed class GiveBlessingRequestMsg
+{
+    [Key(0)] public int NpcObjectId { get; set; }
+}
+
+/// <summary>One row of <see cref="TeleportListMsg"/>.</summary>
+[MessagePackObject]
+public sealed class TeleportLocationMsg
+{
+    [Key(0)] public int Id { get; set; }
+    [Key(1)] public string Name { get; set; } = "";
+    [Key(2)] public int X { get; set; }
+    [Key(3)] public int Y { get; set; }
+    [Key(4)] public int Z { get; set; }
+    [Key(5)] public int FeeItemId { get; set; }
+    /// <summary>What this player pays now, after the free-level and evening discount rules. 0 is free.</summary>
+    [Key(6)] public int FeeCount { get; set; }
+}
+
+/// <summary>Opcode <see cref="MsgType.TeleportList"/> (1105).</summary>
+[MessagePackObject]
+public sealed class TeleportListMsg
+{
+    [Key(0)] public int NpcObjectId { get; set; }
+    [Key(1)] public string ListName { get; set; } = "";
+    [Key(2)] public string ListType { get; set; } = "";
+    [Key(3)] public TeleportLocationMsg[] Locations { get; set; } = [];
+}
+
+/// <summary>Opcode <see cref="MsgType.WarehouseDepositList"/> (1106).</summary>
+[MessagePackObject]
+public sealed class WarehouseDepositListMsg
+{
+    [Key(0)] public int NpcObjectId { get; set; }
+    [Key(1)] public int FeePerLine { get; set; }
+    [Key(2)] public int SlotsUsed { get; set; }
+    [Key(3)] public int SlotsMax { get; set; }
+    [Key(4)] public int Adena { get; set; }
+    [Key(5)] public ItemListEntryMsg[] Items { get; set; } = [];
+}
+
+/// <summary>Opcode <see cref="MsgType.WarehouseWithdrawList"/> (1107).</summary>
+[MessagePackObject]
+public sealed class WarehouseWithdrawListMsg
+{
+    [Key(0)] public int NpcObjectId { get; set; }
+    [Key(1)] public int SlotsUsed { get; set; }
+    [Key(2)] public int SlotsMax { get; set; }
+    [Key(3)] public int InventorySlotsUsed { get; set; }
+    [Key(4)] public int InventorySlotsMax { get; set; }
+    [Key(5)] public int CurrentWeight { get; set; }
+    [Key(6)] public int MaxWeight { get; set; }
+    [Key(7)] public ItemListEntryMsg[] Items { get; set; } = [];
+}
+
+/// <summary>Opcode <see cref="MsgType.NewbieBuffResult"/> (1108).</summary>
+[MessagePackObject]
+public sealed class NewbieBuffResultMsg
+{
+    [Key(0)] public int NpcObjectId { get; set; }
+    [Key(1)] public int[] SkillIds { get; set; } = [];
+    /// <summary>Empty when buffs were applied. Otherwise <see cref="NewbieBuffRefusal"/> name is not used; this is a short code: low, high, newbie, class, none.</summary>
+    [Key(2)] public string Refusal { get; set; } = "";
+}
+
+/// <summary>Opcode <see cref="MsgType.BlessingResult"/> (1109).</summary>
+[MessagePackObject]
+public sealed class BlessingResultMsg
+{
+    [Key(0)] public int NpcObjectId { get; set; }
+    [Key(1)] public int SkillId { get; set; }
+    [Key(2)] public bool Accepted { get; set; }
+}
+
+/// <summary>Opcode <see cref="MsgType.RequestBuyItem"/> (96). Counts are template counts, not object ids.</summary>
+[MessagePackObject]
+public sealed class RequestBuyItemMsg
+{
+    [Key(0)] public int NpcObjectId { get; set; }
+    [Key(1)] public int ListId { get; set; }
+    [Key(2)] public ShopCountMsg[] Items { get; set; } = [];
+}
+
+/// <summary>One template id and count on <see cref="RequestBuyItemMsg"/>.</summary>
+[MessagePackObject]
+public sealed class ShopCountMsg
+{
+    [Key(0)] public int ItemId { get; set; }
+    [Key(1)] public int Count { get; set; }
+}
+
+/// <summary>Opcode <see cref="MsgType.RequestSellItem"/> (97). Counts come off one object id.</summary>
+[MessagePackObject]
+public sealed class RequestSellItemMsg
+{
+    [Key(0)] public int NpcObjectId { get; set; }
+    [Key(1)] public ShopObjectCountMsg[] Items { get; set; } = [];
+}
+
+/// <summary>One bag object and count on <see cref="RequestSellItemMsg"/>.</summary>
+[MessagePackObject]
+public sealed class ShopObjectCountMsg
+{
+    [Key(0)] public int ObjectId { get; set; }
+    [Key(1)] public int Count { get; set; }
+}
+
+/// <summary>
+/// Opcode <see cref="MsgType.RequestMultiSellChoose"/> (98).
+/// <see cref="EntryId"/> is the prepared id from <see cref="MultiSellEntryMsg"/>, not the template id.
+/// </summary>
+[MessagePackObject]
+public sealed class RequestMultiSellChooseMsg
+{
+    [Key(0)] public int NpcObjectId { get; set; }
+    [Key(1)] public int ListId { get; set; }
+    [Key(2)] public int EntryId { get; set; }
+    [Key(3)] public int Amount { get; set; }
+}
+
+/// <summary>Opcode <see cref="MsgType.RequestPreviewItem"/> (99). Wear stays stubbed.</summary>
+[MessagePackObject]
+public sealed class RequestPreviewItemMsg
+{
+    [Key(0)] public int NpcObjectId { get; set; }
+    [Key(1)] public int ListId { get; set; }
+    [Key(2)] public int ItemId { get; set; }
+}
+
+/// <summary>Opcode <see cref="MsgType.BuyList"/> (1095). <see cref="Price"/> is the taxed unit price.</summary>
+[MessagePackObject]
+public sealed class BuyListMsg
+{
+    [Key(0)] public int NpcObjectId { get; set; }
+    [Key(1)] public int ListId { get; set; }
+    [Key(2)] public int BaseTaxPercent { get; set; }
+    [Key(3)] public int CastleTaxPercent { get; set; }
+    [Key(4)] public BuyListItemMsg[] Items { get; set; } = [];
+}
+
+/// <summary>One buylist row. <see cref="Count"/> below 0 means the stock is not limited.</summary>
+[MessagePackObject]
+public sealed class BuyListItemMsg
+{
+    [Key(0)] public int ItemId { get; set; }
+    [Key(1)] public int Price { get; set; }
+    [Key(2)] public int Count { get; set; } = -1;
+}
+
+/// <summary>Opcode <see cref="MsgType.SellList"/> (1096). Only unequipped items the merchant will buy.</summary>
+[MessagePackObject]
+public sealed class SellListMsg
+{
+    [Key(0)] public int NpcObjectId { get; set; }
+    [Key(1)] public SellListItemMsg[] Items { get; set; } = [];
+}
+
+/// <summary>One sellable stack. <see cref="Price"/> is the reference price divided by 2.</summary>
+[MessagePackObject]
+public sealed class SellListItemMsg
+{
+    [Key(0)] public int ObjectId { get; set; }
+    [Key(1)] public int ItemId { get; set; }
+    [Key(2)] public int Count { get; set; }
+    [Key(3)] public int Price { get; set; }
+    [Key(4)] public int EnchantLevel { get; set; }
+}
+
+/// <summary>Opcode <see cref="MsgType.MultiSellList"/> (1097).</summary>
+[MessagePackObject]
+public sealed class MultiSellListMsg
+{
+    [Key(0)] public int NpcObjectId { get; set; }
+    [Key(1)] public int ListId { get; set; }
+    [Key(2)] public bool MaintainEnchantment { get; set; }
+    [Key(3)] public bool InventoryOnly { get; set; }
+    [Key(4)] public int CastleTaxPercent { get; set; }
+    [Key(5)] public MultiSellEntryMsg[] Entries { get; set; } = [];
+}
+
+/// <summary>One prepared row. <see cref="EntryId"/> is what <see cref="RequestMultiSellChooseMsg"/> sends back.</summary>
+[MessagePackObject]
+public sealed class MultiSellEntryMsg
+{
+    [Key(0)] public int EntryId { get; set; }
+    [Key(1)] public MultiSellPartMsg[] Ingredients { get; set; } = [];
+    [Key(2)] public MultiSellPartMsg[] Products { get; set; } = [];
+}
+
+/// <summary>One ingredient or product. <see cref="EnchantLevel"/> is 0 when the row does not keep enchant.</summary>
+[MessagePackObject]
+public sealed class MultiSellPartMsg
+{
+    [Key(0)] public int ItemId { get; set; }
+    [Key(1)] public int Count { get; set; }
+    [Key(2)] public int EnchantLevel { get; set; }
+}
+
+/// <summary>Opcode <see cref="MsgType.ShopBalance"/> (1098). Castle tax is 0 when that castle has no owner.</summary>
+[MessagePackObject]
+public sealed class ShopBalanceMsg
+{
+    [Key(0)] public int Adena { get; set; }
+    [Key(1)] public int Weight { get; set; }
+    [Key(2)] public int MaxWeight { get; set; }
+    [Key(3)] public int Slots { get; set; }
+    [Key(4)] public int MaxSlots { get; set; }
+    [Key(5)] public int BaseTaxPercent { get; set; }
+    [Key(6)] public int CastleTaxPercent { get; set; }
 }

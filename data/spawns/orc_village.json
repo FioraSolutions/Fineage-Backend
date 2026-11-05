@@ -1,6 +1,6 @@
 {
   "mapId": "orc_village",
-  "enabled": false,
+  "enabled": true,
   "comment": "Mobius CT 0 Interlude OrcTerritory/OrcVillageNPCs.xml. Rows reference data/npcs.json by npcId. Name, title, type, attackable, hp, and speeds come from the template.",
   "npcs": [
     {

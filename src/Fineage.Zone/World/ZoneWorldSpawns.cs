@@ -1,4 +1,5 @@
 using Fineage.Protocol;
+using Fineage.Zone.Shops;
 using Fineage.Zone.Spawns;
 
 namespace Fineage.Zone.World;
@@ -14,43 +15,61 @@ public sealed partial class ZoneWorld
     sealed class SpawnSlotState
     {
         public required SpawnNpcDefinition Definition { get; init; }
+        public required string MapId { get; init; }
         public DateTimeOffset? RespawnAt { get; set; }
     }
 
     void BootstrapSpawns()
     {
-        var active = _spawnCatalog.GetMap(_activeMapId);
-        if (!active.Enabled)
-            throw new InvalidOperationException($"Active spawn map '{_activeMapId}' is disabled in datapack.");
-
-        var maps = new List<SpawnMapDefinition> { active };
-        if (_includeEnabledMaps)
+        var maps = new List<SpawnMapDefinition>();
+        var whitelist = ZoneMapFilter.Maps;
+        if (whitelist.Count > 0)
         {
-            foreach (var map in _spawnCatalog.Maps.Values.OrderBy(map => map.MapId, StringComparer.Ordinal))
+            foreach (string id in whitelist)
             {
-                if (!map.Enabled || map.MapId == _activeMapId)
-                    continue;
+                if (!_spawnCatalog.Maps.TryGetValue(id, out var map))
+                    throw new InvalidOperationException($"FINEAGE_ZONE_MAPS references unknown spawn map '{id}'.");
                 maps.Add(map);
             }
         }
+        else
+        {
+            var active = _spawnCatalog.GetMap(_activeMapId);
+            if (!active.Enabled)
+                throw new InvalidOperationException($"Active spawn map '{_activeMapId}' is disabled in datapack.");
+            maps.Add(active);
+            if (_includeEnabledMaps)
+            {
+                foreach (var map in _spawnCatalog.Maps.Values.OrderBy(map => map.MapId, StringComparer.Ordinal))
+                {
+                    if (!map.Enabled || map.MapId == _activeMapId)
+                        continue;
+                    maps.Add(map);
+                }
+            }
+        }
 
+        var bounds = ZoneMapFilter.BoundsList;
         foreach (var map in maps)
         {
             foreach (var def in map.Npcs)
             {
+                if (!ZoneMapFilter.Contains(bounds, def.X, def.Y))
+                    continue;
                 if (_spawnSlots.ContainsKey(def.ObjectId))
                     throw new InvalidOperationException($"Duplicate spawn object id {def.ObjectId}.");
-                _spawnSlots.Add(def.ObjectId, new SpawnSlotState { Definition = def });
-                MaterializeSpawn(def);
+                _spawnSlots.Add(def.ObjectId, new SpawnSlotState { Definition = def, MapId = map.MapId });
+                MaterializeSpawn(def, map.MapId);
             }
         }
     }
 
-    void MaterializeSpawn(SpawnNpcDefinition def)
+    void MaterializeSpawn(SpawnNpcDefinition def, string mapId)
     {
         if (_byId.ContainsKey(def.ObjectId))
             return;
 
+        var tax = MerchantTowns.For(mapId);
         var entity = new ZoneEntity
         {
             ObjectId = def.ObjectId,
@@ -66,8 +85,42 @@ public sealed partial class ZoneWorld
             Attackable = def.Attackable,
             MaxHp = def.MaxHp,
             CurHp = def.MaxHp,
+            MaxMp = def.MaxMp,
+            CurMp = def.MaxMp,
+            Level = def.Level,
+            RewardExp = def.Exp,
+            RewardSp = def.Sp,
+            PAtk = def.PAtk,
+            HpRegen = def.HpRegen,
+            MpRegen = def.MpRegen,
+            PDef = def.PDef,
+            PAtkSpd = def.AttackSpeed,
+            BaseAccuracy = def.Accuracy,
+            BaseEvasion = def.Evasion,
+            BaseCritical = def.Critical,
+            RandomDamage = def.RandomDamage,
+            Dex = def.Dex,
+            ShieldDef = def.ShieldDef,
+            ShieldRate = def.ShieldRate,
+            MAtk = def.MAtk,
+            MDef = def.MDef,
+            AttackRange = def.AttackRange,
+            Aggressive = def.Aggressive,
+            AggroRange = def.AggroRange,
+            ClanHelpRange = def.ClanHelpRange,
+            Clans = def.Clans,
+            IgnoreNpcIds = def.IgnoreNpcIds,
             RunSpeed = def.RunSpeed,
-            WalkSpeed = def.WalkSpeed
+            WalkSpeed = def.WalkSpeed,
+            // Mobius Spawn location is the returnHome target; captured at spawn, not at first aggro, so a mob that
+            // drifted before being attacked still walks back to the real spawn point.
+            HomeSet = true,
+            HomeX = def.X,
+            HomeY = def.Y,
+            HomeZ = def.Z,
+            MerchantCastleId = tax.CastleId,
+            MerchantTown = MerchantTowns.TownName(mapId),
+            MerchantBaseTaxPercent = tax.BaseTaxPercent
         };
         _byId.Add(entity.ObjectId, entity);
         _aoi.Enter(entity.ObjectId, entity.X, entity.Y);
@@ -99,7 +152,7 @@ public sealed partial class ZoneWorld
                 continue;
             }
 
-            MaterializeSpawn(slot.Definition);
+            MaterializeSpawn(slot.Definition, slot.MapId);
             slot.RespawnAt = null;
             if (_byId.TryGetValue(slot.Definition.ObjectId, out var npc))
                 FanoutNewNpc(npc, outbound);
@@ -117,6 +170,20 @@ public sealed partial class ZoneWorld
             if (!player.Knownlist.Add(npc.ObjectId))
                 continue;
             outbound.Add(Pack(player.Session, MsgType.NpcInfo, NpcInfo(npc)));
+            // Net clients: the respawn was added to the knownlist here, so the next move refresh sees no diff and
+            // the mob stayed invisible until the player left and re-entered view ("mobs appear late"). Push the
+            // EntitySpawn now, like Mobius Spawn.doSpawn → broadcast NpcInfo to the region.
+            NetBridge?.FanoutKnownlistDiff(player.ObjectId, [npc.ObjectId], []);
+        }
+    }
+
+    /// <summary>Test hook: despawn an NPC (corpse decay path) so its respawn timer starts.</summary>
+    internal void DespawnNpcForTests(int objectId)
+    {
+        lock (_gate)
+        {
+            if (_byId.TryGetValue(objectId, out var npc))
+                DespawnNpc(npc, []);
         }
     }
 
@@ -124,6 +191,9 @@ public sealed partial class ZoneWorld
     internal void AdvanceSpawnsForTests()
     {
         lock (_gate)
+        {
+            TickCorpseDecay(_clock().ToUnixTimeMilliseconds(), []);
             TickSpawns([]);
+        }
     }
 }

@@ -22,6 +22,10 @@ public sealed class ItemCatalog
                 throw new ArgumentOutOfRangeException(nameof(templates), $"Item {template.Id} pDef cannot be negative.");
             if (template.CrystalCount < 0)
                 throw new ArgumentOutOfRangeException(nameof(templates), $"Item {template.Id} crystal count cannot be negative.");
+            if (template.ReferencePrice < 0)
+                throw new ArgumentOutOfRangeException(nameof(templates), $"Item {template.Id} price cannot be negative.");
+            if (template.Weight < 0)
+                throw new ArgumentOutOfRangeException(nameof(templates), $"Item {template.Id} weight cannot be negative.");
             if (template.Scroll != null)
             {
                 if (template.Kind != ItemKind.Etc || template.Enchantable || template.Equippable)

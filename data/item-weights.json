@@ -1,0 +1,6 @@
+{
+  "reference": "Item weight in Mobius units (the integer template weight, not the client display divided by 1000). Adena is 0. Ids omitted from this file weigh 0, so a withdraw of an unlisted item does not trip the load check. AltWeightLimit is 1. Max load is floor(CON bonus * 69000).",
+  "weights": {
+    "57": 0
+  }
+}

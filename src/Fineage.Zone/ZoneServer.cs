@@ -201,7 +201,7 @@ public sealed class ZoneServer
                 }
 
                 await _world.LeaveAsync(session, ct).ConfigureAwait(false);
-                session.Bind(parsed.CharacterId, parsed.Account, parsed.CharacterName, parsed.ClassId);
+                session.Bind(parsed.CharacterId, parsed.Account, parsed.CharacterName, parsed.ClassId, parsed.Race, parsed.Sex);
                 ZoneLog.Info($"RX Auth session={sessionId} account={session.Account} character={session.Name}");
                 await session.SendAsync(MsgType.AuthOk, new AuthOkMsg
                 {
@@ -440,6 +440,31 @@ public sealed class ZoneServer
                     await ErrorAsync(session, "bad_request", "Pickup was rejected.", ct).ConfigureAwait(false);
                 else
                     ZoneLog.Info($"RX Pickup session={sessionId} object={pickup.ObjectId}");
+                break;
+            }
+            case MsgType.DropItemRequest:
+            {
+                var drop = Decode<DropItemRequestMsg>(body);
+                if (drop == null)
+                {
+                    await ErrorAsync(session, "bad_request", "DropItemRequest body was not readable.", ct)
+                        .ConfigureAwait(false);
+                    break;
+                }
+
+                string? code = await _world.TryDropItemAsync(session, drop, ct).ConfigureAwait(false);
+                if (code == "world")
+                    await ErrorAsync(session, "world", "EnterWorld first.", ct).ConfigureAwait(false);
+                else if (code == InventoryProtocol.Dead)
+                    await ErrorAsync(session, InventoryProtocol.Dead, "Cannot drop while dead.", ct).ConfigureAwait(false);
+                else if (code == InventoryProtocol.NotOwned)
+                    await ErrorAsync(session, InventoryProtocol.NotOwned, "Item is not in your bag.", ct).ConfigureAwait(false);
+                else if (code == "range")
+                    await ErrorAsync(session, "range", "Drop point is too far.", ct).ConfigureAwait(false);
+                else if (code != null)
+                    await ErrorAsync(session, "bad_request", "Drop was rejected.", ct).ConfigureAwait(false);
+                else
+                    ZoneLog.Info($"RX DropItem session={sessionId} object={drop.ObjectId} count={drop.Count}");
                 break;
             }
             case MsgType.BuffRequest:
@@ -826,6 +851,64 @@ public sealed class ZoneServer
                     ZoneLog.Info($"RX Bypass session={sessionId} npc={bypass.NpcObjectId}");
                 break;
             }
+            case MsgType.RequestBuyItem:
+            {
+                var buy = Decode<RequestBuyItemMsg>(body);
+                if (buy == null)
+                {
+                    await ErrorAsync(session, "bad_request", "RequestBuyItem body was not readable.", ct).ConfigureAwait(false);
+                    break;
+                }
+
+                string? code = await _world.TryBuyAsync(session, buy, ct).ConfigureAwait(false);
+                await ShopErrorAsync(session, code, ct).ConfigureAwait(false);
+                if (code == null)
+                    ZoneLog.Info($"RX Buy session={sessionId} list={buy.ListId} npc={buy.NpcObjectId}");
+                break;
+            }
+            case MsgType.RequestSellItem:
+            {
+                var sell = Decode<RequestSellItemMsg>(body);
+                if (sell == null)
+                {
+                    await ErrorAsync(session, "bad_request", "RequestSellItem body was not readable.", ct).ConfigureAwait(false);
+                    break;
+                }
+
+                string? code = await _world.TrySellAsync(session, sell, ct).ConfigureAwait(false);
+                await ShopErrorAsync(session, code, ct).ConfigureAwait(false);
+                if (code == null)
+                    ZoneLog.Info($"RX Sell session={sessionId} npc={sell.NpcObjectId}");
+                break;
+            }
+            case MsgType.RequestMultiSellChoose:
+            {
+                var choose = Decode<RequestMultiSellChooseMsg>(body);
+                if (choose == null)
+                {
+                    await ErrorAsync(session, "bad_request", "RequestMultiSellChoose body was not readable.", ct).ConfigureAwait(false);
+                    break;
+                }
+
+                string? code = await _world.TryMultiSellAsync(session, choose, ct).ConfigureAwait(false);
+                await ShopErrorAsync(session, code, ct).ConfigureAwait(false);
+                if (code == null)
+                    ZoneLog.Info($"RX MultiSell session={sessionId} list={choose.ListId} entry={choose.EntryId}");
+                break;
+            }
+            case MsgType.RequestPreviewItem:
+            {
+                var preview = Decode<RequestPreviewItemMsg>(body);
+                if (preview == null)
+                {
+                    await ErrorAsync(session, "bad_request", "RequestPreviewItem body was not readable.", ct).ConfigureAwait(false);
+                    break;
+                }
+
+                string? code = await _world.TryPreviewAsync(session, preview, ct).ConfigureAwait(false);
+                await ShopErrorAsync(session, code, ct).ConfigureAwait(false);
+                break;
+            }
             case MsgType.QuestEvent:
             {
                 var questEvent = Decode<QuestEventMsg>(body);
@@ -973,6 +1056,142 @@ public sealed class ZoneServer
                 await DeathErrorAsync(session, code, ct).ConfigureAwait(false);
                 if (code == null)
                     ZoneLog.Info($"RX AdminKillPlayer session={sessionId}");
+                break;
+            }
+            case MsgType.OlympiadStatusRequest:
+            {
+                string? code = await _world.TryOlympiadStatusAsync(session, ct).ConfigureAwait(false);
+                await OlympiadErrorAsync(session, code, ct).ConfigureAwait(false);
+                if (code == null)
+                    ZoneLog.Info($"RX OlympiadStatus session={sessionId}");
+                break;
+            }
+            case MsgType.OlympiadRegisterRequest:
+            {
+                var register = Decode<OlympiadRegisterRequestMsg>(body);
+                if (register == null)
+                {
+                    await ErrorAsync(session, "bad_request", "OlympiadRegisterRequest body was not readable.", ct).ConfigureAwait(false);
+                    break;
+                }
+
+                string? code = await _world.TryOlympiadRegisterAsync(session, register, ct).ConfigureAwait(false);
+                await OlympiadErrorAsync(session, code, ct).ConfigureAwait(false);
+                if (code == null)
+                    ZoneLog.Info($"RX OlympiadRegister session={sessionId} classed={register.Classed}");
+                break;
+            }
+            case MsgType.OlympiadUnregisterRequest:
+            {
+                string? code = await _world.TryOlympiadUnregisterAsync(session, ct).ConfigureAwait(false);
+                await OlympiadErrorAsync(session, code, ct).ConfigureAwait(false);
+                if (code == null)
+                    ZoneLog.Info($"RX OlympiadUnregister session={sessionId}");
+                break;
+            }
+            case MsgType.OlympiadLeaveRequest:
+            {
+                string? code = await _world.TryOlympiadLeaveAsync(session, ct).ConfigureAwait(false);
+                await OlympiadErrorAsync(session, code, ct).ConfigureAwait(false);
+                if (code == null)
+                    ZoneLog.Info($"RX OlympiadLeave session={sessionId}");
+                break;
+            }
+            case MsgType.AdminReportOlympiadResult:
+            {
+                if (!_adminCommands)
+                {
+                    await ErrorAsync(session, InventoryProtocol.Forbidden, "AdminReportOlympiadResult is disabled.", ct)
+                        .ConfigureAwait(false);
+                    break;
+                }
+
+                var report = Decode<AdminReportOlympiadResultMsg>(body);
+                if (report == null)
+                {
+                    await ErrorAsync(session, "bad_request", "AdminReportOlympiadResult body was not readable.", ct).ConfigureAwait(false);
+                    break;
+                }
+
+                string? code = await _world.TryAdminReportOlympiadAsync(session, report.MatchId, report.WinnerObjectId, ct).ConfigureAwait(false);
+                await OlympiadErrorAsync(session, code, ct).ConfigureAwait(false);
+                if (code == null)
+                    ZoneLog.Info($"RX AdminReportOlympiadResult session={sessionId} match={report.MatchId} winner={report.WinnerObjectId}");
+                break;
+            }
+            case MsgType.TeleportSelectRequest:
+            {
+                var teleport = Decode<TeleportSelectRequestMsg>(body);
+                if (teleport == null)
+                {
+                    await ErrorAsync(session, "bad_request", "TeleportSelectRequest body was not readable.", ct).ConfigureAwait(false);
+                    break;
+                }
+
+                string? code = await _world.TryTeleportSelectAsync(session, teleport, ct).ConfigureAwait(false);
+                await NpcDialogErrorAsync(session, code, ct).ConfigureAwait(false);
+                if (code == null)
+                    ZoneLog.Info($"RX TeleportSelect session={sessionId} npc={teleport.NpcObjectId}");
+                break;
+            }
+            case MsgType.WarehouseDepositRequest:
+            {
+                var deposit = Decode<WarehouseDepositRequestMsg>(body);
+                if (deposit == null)
+                {
+                    await ErrorAsync(session, "bad_request", "WarehouseDepositRequest body was not readable.", ct).ConfigureAwait(false);
+                    break;
+                }
+
+                string? code = await _world.TryWarehouseDepositAsync(session, deposit, ct).ConfigureAwait(false);
+                await NpcDialogErrorAsync(session, code, ct).ConfigureAwait(false);
+                if (code == null)
+                    ZoneLog.Info($"RX WarehouseDeposit session={sessionId} npc={deposit.NpcObjectId}");
+                break;
+            }
+            case MsgType.WarehouseWithdrawRequest:
+            {
+                var withdraw = Decode<WarehouseWithdrawRequestMsg>(body);
+                if (withdraw == null)
+                {
+                    await ErrorAsync(session, "bad_request", "WarehouseWithdrawRequest body was not readable.", ct).ConfigureAwait(false);
+                    break;
+                }
+
+                string? code = await _world.TryWarehouseWithdrawAsync(session, withdraw, ct).ConfigureAwait(false);
+                await NpcDialogErrorAsync(session, code, ct).ConfigureAwait(false);
+                if (code == null)
+                    ZoneLog.Info($"RX WarehouseWithdraw session={sessionId} npc={withdraw.NpcObjectId}");
+                break;
+            }
+            case MsgType.SupportMagicRequest:
+            {
+                var magic = Decode<SupportMagicRequestMsg>(body);
+                if (magic == null)
+                {
+                    await ErrorAsync(session, "bad_request", "SupportMagicRequest body was not readable.", ct).ConfigureAwait(false);
+                    break;
+                }
+
+                string? code = await _world.TrySupportMagicAsync(session, magic.NpcObjectId, ct).ConfigureAwait(false);
+                await NpcDialogErrorAsync(session, code, ct).ConfigureAwait(false);
+                if (code == null)
+                    ZoneLog.Info($"RX SupportMagic session={sessionId} npc={magic.NpcObjectId}");
+                break;
+            }
+            case MsgType.GiveBlessingRequest:
+            {
+                var blessing = Decode<GiveBlessingRequestMsg>(body);
+                if (blessing == null)
+                {
+                    await ErrorAsync(session, "bad_request", "GiveBlessingRequest body was not readable.", ct).ConfigureAwait(false);
+                    break;
+                }
+
+                string? code = await _world.TryGiveBlessingAsync(session, blessing.NpcObjectId, ct).ConfigureAwait(false);
+                await NpcDialogErrorAsync(session, code, ct).ConfigureAwait(false);
+                if (code == null)
+                    ZoneLog.Info($"RX GiveBlessing session={sessionId} npc={blessing.NpcObjectId}");
                 break;
             }
             case MsgType.EnchantCancel:
@@ -1226,6 +1445,23 @@ public sealed class ZoneServer
         };
     }
 
+    static Task ShopErrorAsync(ZoneSession session, string? code, CancellationToken ct)
+    {
+        if (code == null)
+            return Task.CompletedTask;
+        string message = code switch
+        {
+            "world" => "EnterWorld first.",
+            "bad_request" => "Shop request was rejected.",
+            "range" => "You are too far away.",
+            InventoryProtocol.Dead => "You cannot do that while dead.",
+            QuestProtocol.Npc => "That NPC is not here.",
+            NpcHtmlProtocol.Attackable => "That NPC will not trade.",
+            _ => "Shop request was rejected."
+        };
+        return ErrorAsync(session, code, message, ct);
+    }
+
     static Task DungeonErrorAsync(ZoneSession session, string? code, CancellationToken ct)
     {
         if (code == null)
@@ -1311,6 +1547,35 @@ public sealed class ZoneServer
             SiegeProtocol.NotAttacker => "That clan is not attacking the castle.",
             SiegeProtocol.Store => "The siege could not be saved.",
             _ => "Siege request was rejected."
+        };
+        return ErrorAsync(session, code, message, ct);
+    }
+
+    static Task OlympiadErrorAsync(ZoneSession session, string? code, CancellationToken ct)
+    {
+        if (code == null)
+            return Task.CompletedTask;
+        string message = code switch
+        {
+            "world" => "EnterWorld first.",
+            "bad_request" => "Olympiad request was rejected.",
+            OlympiadProtocol.Disabled => "The Olympiad is disabled.",
+            OlympiadProtocol.Period => "The Grand Olympiad Games are not currently in progress.",
+            OlympiadProtocol.Noble => "Only noblesse can participate in the Olympiad.",
+            OlympiadProtocol.Subclass => "A subclass cannot enter the Olympiad.",
+            OlympiadProtocol.Cursed => "A cursed weapon cannot enter the Olympiad.",
+            OlympiadProtocol.Inventory => "Your inventory is too full for the Olympiad.",
+            OlympiadProtocol.Late => "Olympiad registration is closed for the last 10 minutes.",
+            OlympiadProtocol.Classed => "You are already on the classed waiting list.",
+            OlympiadProtocol.Registered => "You are already registered for the Olympiad.",
+            OlympiadProtocol.Points => "You do not have enough Olympiad points.",
+            OlympiadProtocol.Selected => "You are already selected for an Olympiad match.",
+            OlympiadProtocol.None => "You are not on an Olympiad waiting list.",
+            OlympiadProtocol.MatchMissing => "You are not in an Olympiad match.",
+            OlympiadProtocol.Phase => "That Olympiad match is not in progress.",
+            OlympiadProtocol.Winner => "That character is not in the match.",
+            OlympiadProtocol.Store => "The Olympiad could not be saved.",
+            _ => "Olympiad request was rejected."
         };
         return ErrorAsync(session, code, message, ct);
     }

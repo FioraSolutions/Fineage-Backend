@@ -1,19 +1,20 @@
 using System.Net;
 using System.Net.Sockets;
-using Fineage.Protocol;
-using MessagePack;
+using Fineage.Net.Contract;
+using Fineage.Net.Host;
+using Fineage.Login.Net;
 
 namespace Fineage.Login;
 
 public sealed record AcceptanceResult(HandoffMsg Fighter, HandoffTicket Mystic);
 
-/// <summary>Register → Human create → zone handoff, over the V2 frame and in-process.</summary>
+/// <summary>Register → Human create → zone handoff, over the Net (PacketEnvelope) frame and in-process.</summary>
 public static class LoginAcceptance
 {
     public static async Task<AcceptanceResult> RunAsync()
     {
         var tokens = new HandoffTokens(HandoffTokens.DefaultSecret);
-        var fighter = await RunFighterOverTcpAsync(tokens).ConfigureAwait(false);
+        var fighter = await RunFighterOverNetAsync(tokens).ConfigureAwait(false);
         var mystic = RunMystic(tokens);
         if (!tokens.TryValidate(fighter.Token, DateTimeOffset.UtcNow, out var fighterClaims))
             throw new InvalidOperationException("fighter handoff token did not validate");
@@ -26,9 +27,8 @@ public static class LoginAcceptance
             throw new InvalidOperationException("mystic handoff token did not validate");
 
         var zoneAuth = mystic.ToZoneAuth();
-        var roundTrip = MessagePackSerializer.Deserialize<AuthMsg>(MessagePackSerializer.Serialize(zoneAuth));
-        if (roundTrip.Account != mystic.Account || roundTrip.Password != mystic.Token)
-            throw new InvalidOperationException("zone AuthMsg did not round-trip the handoff token");
+        if (zoneAuth.Account != mystic.Account || zoneAuth.Password != mystic.Token)
+            throw new InvalidOperationException("zone auth did not carry the handoff token");
 
         return new AcceptanceResult(fighter, mystic);
     }
@@ -66,82 +66,111 @@ public static class LoginAcceptance
         return result.Value;
     }
 
-    static async Task<HandoffMsg> RunFighterOverTcpAsync(HandoffTokens tokens)
+    static async Task<HandoffMsg> RunFighterOverNetAsync(HandoffTokens tokens)
     {
         var service = new LoginService(JsonAccountStore.InMemory(), tokens);
-        var server = new LoginServer(service);
+        // Net has no Register opcode: the lobby authenticates existing accounts only, so the
+        // selftest account is seeded directly in the store before the socket opens.
+        if (!service.Register("selftest", "pass1234").Ok)
+            throw new InvalidOperationException("selftest account could not be registered");
+        var server = new NetLoginServer(service);
         var listener = new TcpListener(IPAddress.Loopback, 0);
         listener.Start();
         int port = ((IPEndPoint)listener.LocalEndpoint).Port;
+        using var cts = new CancellationTokenSource(TimeSpan.FromSeconds(20));
+
         var serverTask = Task.Run(async () =>
         {
-            using var accepted = await listener.AcceptTcpClientAsync().ConfigureAwait(false);
-            await using var acceptedStream = accepted.GetStream();
-            await server.HandleAsync(acceptedStream, CancellationToken.None).ConfigureAwait(false);
+            using var accepted = await listener.AcceptTcpClientAsync(cts.Token).ConfigureAwait(false);
+            await using var conn = new NetConnection(accepted, 256);
+            Task read = conn.RunReadLoopAsync(cts.Token);
+            try
+            {
+                await server.HandleAsync(conn, cts.Token).ConfigureAwait(false);
+            }
+            finally
+            {
+                try { await read.ConfigureAwait(false); } catch { /* shutdown */ }
+            }
         });
 
         try
         {
             using var client = new TcpClient();
-            await client.ConnectAsync(IPAddress.Loopback, port).ConfigureAwait(false);
-            await using var stream = client.GetStream();
-
-            await SendAsync(stream, MsgType.Hello, new HelloMsg { ProtocolVersion = 1, ClientBuild = "selftest" })
-                .ConfigureAwait(false);
-            await ExpectAsync(stream, MsgType.HelloAck).ConfigureAwait(false);
-
-            await SendAsync(stream, MsgType.Register, new RegisterMsg { Account = "selftest", Password = "pass1234" })
-                .ConfigureAwait(false);
-            await ExpectAsync(stream, MsgType.RegisterOk).ConfigureAwait(false);
-
-            await SendAsync(stream, MsgType.CreateCharacter, new CreateCharacterMsg
+            await client.ConnectAsync(IPAddress.Loopback, port, cts.Token).ConfigureAwait(false);
+            await using var conn = new NetConnection(client, 256);
+            Task read = conn.RunReadLoopAsync(cts.Token);
+            try
             {
-                Name = "HumanOne",
-                ClassId = HumanClasses.Fighter,
-                Race = HumanClasses.RaceHuman,
-                Sex = HumanClasses.SexMale
-            }).ConfigureAwait(false);
-            var createdBody = await ExpectAsync(stream, MsgType.CharacterCreated).ConfigureAwait(false);
-            var created = MessagePackSerializer.Deserialize<CharacterCreatedMsg>(createdBody);
-            if (created.ClassId != HumanClasses.Fighter || created.Name != "HumanOne")
-                throw new InvalidOperationException("created character was not the Human fighter");
-            await ExpectAsync(stream, MsgType.CharacterList).ConfigureAwait(false);
+                var link = new NetLink(conn);
+                await link.SendAsync(NetOpcode.Hello, NetCodec.EncodeHello(new HelloMsg
+                {
+                    Major = 1,
+                    Minor = 0,
+                    ClientName = "selftest",
+                    FeatureFlags = ProtocolCapabilities.FeatureSession | ProtocolCapabilities.FeatureLobby
+                })).ConfigureAwait(false);
+                await link.ExpectAsync(NetOpcode.HelloAck).ConfigureAwait(false);
 
-            await SendAsync(stream, MsgType.SelectCharacter, new SelectCharacterMsg { CharacterId = created.CharacterId })
-                .ConfigureAwait(false);
-            var handoffBody = await ExpectAsync(stream, MsgType.Handoff).ConfigureAwait(false);
-            return MessagePackSerializer.Deserialize<HandoffMsg>(handoffBody);
+                await link.SendAsync(NetOpcode.Auth, NetCodec.EncodeAuth(new AuthMsg
+                {
+                    Account = "selftest",
+                    Password = "pass1234"
+                })).ConfigureAwait(false);
+                if (!NetCodec.DecodeAuthResult(await link.ExpectAsync(NetOpcode.AuthResult).ConfigureAwait(false)).Ok)
+                    throw new InvalidOperationException("selftest auth was rejected");
+
+                await link.SendAsync(NetOpcode.CreateCharacter, NetCodec.EncodeCreateCharacter(new CreateCharacterMsg
+                {
+                    Name = "HumanOne",
+                    ClassId = HumanClasses.Fighter,
+                    Race = HumanClasses.RaceHuman,
+                    Sex = HumanClasses.SexMale
+                })).ConfigureAwait(false);
+                var created = NetCodec.DecodeCreateResult(await link.ExpectAsync(NetOpcode.CreateResult).ConfigureAwait(false));
+                if (!created.Ok || created.Character == null)
+                    throw new InvalidOperationException($"create failed: {created.Code} {created.Message}");
+                if (created.Character.ClassId != HumanClasses.Fighter || created.Character.Name != "HumanOne")
+                    throw new InvalidOperationException("created character was not the Human fighter");
+                await link.ExpectAsync(NetOpcode.CharacterRoster).ConfigureAwait(false);
+
+                await link.SendAsync(NetOpcode.SelectCharacter, NetCodec.EncodeSelectCharacter(new SelectCharacterMsg
+                {
+                    CharacterId = created.Character.CharacterId
+                })).ConfigureAwait(false);
+                return NetCodec.DecodeHandoff(await link.ExpectAsync(NetOpcode.Handoff).ConfigureAwait(false));
+            }
+            finally
+            {
+                try { await read.ConfigureAwait(false); } catch { /* shutdown */ }
+            }
         }
         finally
         {
+            cts.Cancel();
             listener.Stop();
-            await serverTask.ConfigureAwait(false);
+            try { await serverTask.ConfigureAwait(false); } catch { /* shutdown */ }
         }
     }
 
-    static async Task SendAsync<T>(NetworkStream stream, MsgType type, T msg)
+    /// <summary>Minimal request/response client over <see cref="NetConnection"/> for the selftest.</summary>
+    sealed class NetLink(NetConnection conn)
     {
-        byte[] body = MessagePackSerializer.Serialize(msg);
-        await FrameIO.SendAsync(stream, (ushort)type, body).ConfigureAwait(false);
-    }
+        public Task SendAsync(ushort opcode, byte[] payload) =>
+            conn.SendAsync(opcode, payload, ct: CancellationToken.None);
 
-    static async Task<byte[]> ExpectAsync(NetworkStream stream, MsgType expected)
-    {
-        var frame = await FrameIO.ReadAsync(stream).ConfigureAwait(false);
-        if (frame == null)
-            throw new InvalidOperationException($"expected {expected}, got EOF");
-        if (frame.Value.Type != (ushort)expected)
+        public async Task<byte[]> ExpectAsync(ushort expected)
         {
-            string detail = "";
-            if (frame.Value.Type == (ushort)MsgType.Error)
+            PacketEnvelope envelope = await conn.Inbox.ReadAsync().ConfigureAwait(false);
+            if (envelope.Opcode != expected)
             {
-                var err = MessagePackSerializer.Deserialize<ErrorMsg>(frame.Value.Body);
-                detail = $" {err.Code} {err.Message}";
+                string detail = envelope.Opcode == NetOpcode.Reject
+                    ? " " + NetCodec.DecodeReject(envelope.Payload).Code
+                    : "";
+                throw new InvalidOperationException($"expected opcode 0x{expected:X4}, got 0x{envelope.Opcode:X4}{detail}");
             }
 
-            throw new InvalidOperationException($"expected {expected}, got {(MsgType)frame.Value.Type}{detail}");
+            return envelope.Payload;
         }
-
-        return frame.Value.Body;
     }
 }

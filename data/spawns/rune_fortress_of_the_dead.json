@@ -1,0 +1,67 @@
+{
+  "mapId": "rune_fortress_of_the_dead",
+  "enabled": true,
+  "comment": "Mobius CT 0 Interlude spawns/Rune/FortressOfTheDead.xml. Fixed rows keep Mobius x/y/z/heading. Territory rows are one spawn per count, placed inside the polygon at minZ (no geodata). Day and night rows are both present. Raid bosses are left to data/raidbosses.json. Name, title, type, attackable, hp, and speeds come from data/npcs.json.",
+  "npcs": [
+    {
+      "objectId": 94295,
+      "npcId": 35638,
+      "x": 56736,
+      "y": -26400,
+      "z": 568,
+      "heading": 49000,
+      "respawnDelaySeconds": 60,
+      "respawnRandomSeconds": 0
+    },
+    {
+      "objectId": 94296,
+      "npcId": 35639,
+      "x": 58128,
+      "y": -32000,
+      "z": 301,
+      "heading": 0,
+      "respawnDelaySeconds": 60,
+      "respawnRandomSeconds": 0
+    },
+    {
+      "objectId": 94297,
+      "npcId": 35640,
+      "x": 58024,
+      "y": -25744,
+      "z": 592,
+      "heading": 49000,
+      "respawnDelaySeconds": 60,
+      "respawnRandomSeconds": 0
+    },
+    {
+      "objectId": 94298,
+      "npcId": 35641,
+      "x": 58080,
+      "y": -29552,
+      "z": 568,
+      "heading": 49000,
+      "respawnDelaySeconds": 60,
+      "respawnRandomSeconds": 0
+    },
+    {
+      "objectId": 94299,
+      "npcId": 35641,
+      "x": 58137,
+      "y": -29223,
+      "z": 568,
+      "heading": 16500,
+      "respawnDelaySeconds": 60,
+      "respawnRandomSeconds": 0
+    },
+    {
+      "objectId": 94300,
+      "npcId": 35642,
+      "x": 58024,
+      "y": -26456,
+      "z": 592,
+      "heading": 49000,
+      "respawnDelaySeconds": 60,
+      "respawnRandomSeconds": 0
+    }
+  ]
+}

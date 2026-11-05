@@ -85,7 +85,12 @@ public sealed class QuestBypassHandler : IBypassHandler
         if (args.Length <= 1)
             return BypassReply.QuestList();
         if (!int.TryParse(args[1], out int questId) || questId <= 0)
+        {
+            // Named Mobius script (village_master etc.). The world serves the ones it knows and falls back to Unavailable.
+            if (args[1].Length <= 64 && args[1].All(c => char.IsAsciiLetterOrDigit(c) || c == '_'))
+                return BypassReply.Script(args[1], args.Length > 2 ? args[2] : "");
             return BypassReply.Page(Unavailable);
+        }
         if (args.Length == 2)
             return BypassReply.Quest(questId, "");
         return BypassReply.Quest(questId, args[2]);

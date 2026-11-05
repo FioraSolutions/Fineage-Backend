@@ -55,13 +55,23 @@ public sealed class ZoneSpawnRespawnTests
         Assert.Null(await world.TrySelectTargetAsync(session, new SelectTargetMsg { TargetObjectId = gremlin.ObjectId },
             CancellationToken.None));
 
-        int hits = TalkingIsland.GremlinMaxHp / ZoneCombat.SampleMeleeDamage;
-        for (int hit = 0; hit < hits; hit++)
+        // Damage is Mobius 70*pAtk/pDef now; swing until the gremlin is dead (attack refused).
+        for (int hit = 0; hit < TalkingIsland.GremlinMaxHp; hit++)
         {
-            Assert.Null(await world.TryAttackAsync(session, new AttackRequestMsg { TargetObjectId = gremlin.ObjectId },
-                CancellationToken.None));
+            if (await world.TryAttackAsync(session, new AttackRequestMsg { TargetObjectId = gremlin.ObjectId },
+                    CancellationToken.None) != null)
+                break;
+            // Re-click on the target being hit keeps the running attack (no double swing);
+            // the auto-attack tick swings every Pspd interval and damage lands at hitTime.
+            clock.Advance(TimeSpan.FromMilliseconds(ZoneCombat.PlayerMeleeHitDelayMs));
+            await world.RunCombatTickAsync(CancellationToken.None);
+            clock.Advance(TimeSpan.FromMilliseconds(ZoneCombat.AutoAttackIntervalMs - ZoneCombat.PlayerMeleeHitDelayMs));
+            await world.RunCombatTickAsync(CancellationToken.None);
         }
 
+        // Corpse stays for Mobius DEFAULT_CORPSE_TIME, then decays and the respawn timer starts.
+        clock.Advance(TimeSpan.FromMilliseconds(ZoneCombat.CorpseDecayMs));
+        world.AdvanceSpawnsForTests();
         Assert.DoesNotContain(gremlin.ObjectId, world.NpcObjectIds);
 
         clock.Advance(TimeSpan.FromSeconds(2));

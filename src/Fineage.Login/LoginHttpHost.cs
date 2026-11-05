@@ -14,24 +14,39 @@ public sealed record AuthOkBody(bool Ok, string Username, string Mode);
 
 public sealed record AuthErrBody(bool Ok, string Error);
 
+/// <summary>
+/// Play-landing status. <paramref name="Ok"/> and <paramref name="Login"/> are true when this process answers.
+/// <paramref name="Zone"/> is Zone reachability. <paramref name="PlayersOnline"/> is the live count, or 0 when Zone is down.
+/// </summary>
+public sealed record StatusBody(bool Ok, bool Login, bool Zone, int PlayersOnline);
+
 /// <summary>Kestrel surface for the play-landing auth contract. Same <see cref="LoginService"/> as TCP login.</summary>
 public sealed class LoginHttpHost : IAsyncDisposable
 {
-    readonly WebApplication _app;
+    static readonly JsonSerializerOptions StatusJson = new(JsonSerializerDefaults.Web);
 
-    LoginHttpHost(WebApplication app, string baseUrl)
+    readonly WebApplication _app;
+    readonly IZoneStatusSource _zoneStatus;
+
+    LoginHttpHost(WebApplication app, string baseUrl, IZoneStatusSource zoneStatus, string? zoneStatusProbe)
     {
         _app = app;
+        _zoneStatus = zoneStatus;
         BaseUrl = baseUrl;
+        ZoneStatusProbe = zoneStatusProbe;
     }
 
     public string BaseUrl { get; }
+
+    /// <summary>Absolute zone status URL, or null when the probe is disabled.</summary>
+    public string? ZoneStatusProbe { get; }
 
     public static async Task<LoginHttpHost> StartAsync(
         LoginService service,
         IPAddress address,
         int port,
-        CancellationToken ct = default)
+        CancellationToken ct = default,
+        IZoneStatusSource? zoneStatus = null)
     {
         var builder = WebApplication.CreateBuilder(new WebApplicationOptions
         {
@@ -41,10 +56,32 @@ public sealed class LoginHttpHost : IAsyncDisposable
         builder.Logging.ClearProviders();
         builder.WebHost.UseUrls(Url(address, port));
         var app = builder.Build();
+        IZoneStatusSource source = zoneStatus ?? (IZoneStatusSource?)HttpZoneStatusSource.FromEnvironment() ?? UnavailableZoneStatus.Instance;
+        string? probeUrl = source is HttpZoneStatusSource http ? http.Url.AbsoluteUri : null;
         app.Use(async (ctx, next) =>
         {
             ctx.Response.Headers.CacheControl = "no-store";
             await next().ConfigureAwait(false);
+        });
+        app.MapGet("/api/status", async (HttpContext http, CancellationToken token) =>
+        {
+            http.Response.Headers.CacheControl = "no-store";
+            ZoneStatusReading reading;
+            try
+            {
+                reading = await source.ReadAsync(token).ConfigureAwait(false);
+            }
+            catch (OperationCanceledException) when (token.IsCancellationRequested)
+            {
+                throw;
+            }
+            catch (Exception)
+            {
+                reading = ZoneStatusReading.Down;
+            }
+
+            int players = reading.Reachable ? Math.Max(0, reading.PlayersOnline) : 0;
+            return Results.Json(new StatusBody(true, true, reading.Reachable, players), StatusJson);
         });
         app.MapPost("/api/auth/register", (HttpRequest request, CancellationToken token) =>
             HandleAsync(request, token, (user, email, password) => service.RegisterLanding(user, email, password), successStatus: 201));
@@ -58,19 +95,23 @@ public sealed class LoginHttpHost : IAsyncDisposable
         catch
         {
             await app.DisposeAsync().ConfigureAwait(false);
+            if (source is IDisposable disposable)
+                disposable.Dispose();
             throw;
         }
 
         string bound = app.Urls.FirstOrDefault()
             ?? app.Services.GetRequiredService<IServer>().Features.Get<IServerAddressesFeature>()?.Addresses.FirstOrDefault()
             ?? throw new InvalidOperationException("HTTP listener did not bind.");
-        return new LoginHttpHost(app, bound.TrimEnd('/'));
+        return new LoginHttpHost(app, bound.TrimEnd('/'), source, probeUrl);
     }
 
     public async ValueTask DisposeAsync()
     {
         await _app.StopAsync().ConfigureAwait(false);
         await _app.DisposeAsync().ConfigureAwait(false);
+        if (_zoneStatus is IDisposable disposable)
+            disposable.Dispose();
     }
 
     static string Url(IPAddress address, int port)

@@ -92,14 +92,16 @@ Maps conceptually: `0x15`, `0x40`, `0x16`, `0x17`. **Omitted:** separate trade i
 
 #### Zone → client (S→C)
 
-| MsgType | Name | MessagePack keys |
-|---------|------|------------------|
-| **1073** | `TradeAsk` | `[0]` requestorObjectId, `[1]` requestorName |
-| **1074** | `TradeRequestResult` | `[0]` response (`1` accepted, `0` declined) — to requestor |
-| **1075** | `TradeStart` | `[0]` partnerObjectId, `[1]` partnerName |
-| **1076** | `TradeOfferUpdate` | `[0]` isOwn (`1` self column, `0` partner), `[1]` inventoryObjectId, `[2]` itemId, `[3]` count, `[4]` enchantLevel |
-| **1077** | `TradeConfirmState` | `[0]` selfConfirmed, `[1]` partnerConfirmed |
-| **1078** | `TradeFinished` | `[0]` response (`1` exchanged, `0` cancelled) |
+On **`main`**, **1073–1076** are Olympiad/death/teleport; trade uses **1077–1082** (see `docs/trade-v2-protocol.md`). **`dev`** uses **1073–1078** for the same message names.
+
+| MsgType (`main`) | Name | MessagePack keys |
+|------------------|------|------------------|
+| **1077** | `TradeAsk` | `[0]` requestorObjectId, `[1]` requestorName |
+| **1078** | `TradeRequestResult` | `[0]` response (`1` accepted, `0` declined) — to requestor |
+| **1079** | `TradeStart` | `[0]` partnerObjectId, `[1]` partnerName |
+| **1080** | `TradeOfferUpdate` | `[0]` isOwn (`1` self column, `0` partner), `[1]` inventoryObjectId, `[2]` itemId, `[3]` count, `[4]` enchantLevel |
+| **1081** | `TradeConfirmState` | `[0]` selfConfirmed, `[1]` partnerConfirmed |
+| **1082** | `TradeFinished` | `[0]` response (`1` exchanged, `0` cancelled) |
 
 **TradeOfferUpdate** replaces **TradeOwnAdd** / **TradeOtherAdd** for the minimal server (one shape; `isOwn` selects column). Full **TradeUpdate** refresh can be added later.
 
@@ -107,11 +109,11 @@ Maps conceptually: `0x15`, `0x40`, `0x16`, `0x17`. **Omitted:** separate trade i
 
 | Zone V2 RX | Interlude apply target |
 |------------|-------------------------|
-| `TradeAsk` (1073) | `SendTradeRequest` prompt |
-| `TradeStart` (1075) | `TradeStart` window open |
-| `TradeOfferUpdate` (1076) | `TradeOwnAdd` or `TradeOtherAdd` by `isOwn` |
-| `TradeConfirmState` (1077) | `TradePressOwnOk` / `TradePressOtherOk` synthesis |
-| `TradeFinished` (1078) | `TradeDone` close |
+| `TradeAsk` (1077 on `main`) | `SendTradeRequest` prompt |
+| `TradeStart` (1079) | `TradeStart` window open |
+| `TradeOfferUpdate` (1080) | `TradeOwnAdd` or `TradeOtherAdd` by `isOwn` |
+| `TradeConfirmState` (1081) | `TradePressOwnOk` / `TradePressOtherOk` synthesis |
+| `TradeFinished` (1082) | `TradeDone` close |
 
 | Zone V2 TX | Maps from UI |
 |------------|----------------|
@@ -131,4 +133,4 @@ Maps conceptually: `0x15`, `0x40`, `0x16`, `0x17`. **Omitted:** separate trade i
 
 ---
 
-*Last updated: 2026-10-28 (trade C→S **28/29/54/55**, S→C **1073–1078** on Backend **`dev`** slice #131).*
+*Last updated: 2026-10-29 (trade C→S **28/29/54/55**; S→C **1077–1082** on Backend **`main`** #131; **`dev`** S→C band **1073–1078**).*

@@ -24,7 +24,8 @@ public static class ZoneAbnormals
         int effectId,
         int value,
         int durationSeconds,
-        long nowUnixMs)
+        long nowUnixMs,
+        int skillLevel = 0)
     {
         if (effectId <= 0 || durationSeconds <= 0)
             return;
@@ -34,6 +35,7 @@ public static class ZoneAbnormals
         if (index >= 0)
         {
             list[index].Value = value;
+            list[index].SkillLevel = skillLevel;
             list[index].ExpiresAtUnixMs = expires;
         }
         else
@@ -42,6 +44,7 @@ public static class ZoneAbnormals
             {
                 Id = effectId,
                 Value = value,
+                SkillLevel = skillLevel,
                 ExpiresAtUnixMs = expires
             });
         }

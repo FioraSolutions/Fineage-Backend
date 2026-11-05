@@ -26,9 +26,44 @@ public sealed record AccountCredential(string AccountName, string PasswordHash, 
 /// <summary>
 /// One saved stack. <see cref="EquippedSlot"/> is a paperdoll index, or -1 in the bag.
 /// <see cref="EnchantLevel"/> is 0 for a stack and for an unenchanted piece. Older saves omit it and load as 0.
+/// <see cref="ObjectId"/> is the durable Mobius-style instance id; 0 means allocate on next persist/load.
 /// Null <c>Items</c> on a character means the kit was never granted.
 /// </summary>
-public sealed record StoredItem(int ItemId, int Count, int EquippedSlot, int EnchantLevel = 0);
+public sealed record StoredItem(int ItemId, int Count, int EquippedSlot, int EnchantLevel = 0, int ObjectId = 0);
+
+/// <summary>
+/// One Mobius <c>character_shortcuts</c> row. <see cref="Slot"/> is 0..11 on <see cref="Page"/> 0..9.
+/// <see cref="Type"/> is 1 item (id = item object id), 2 skill (id = skill id, level = skill level),
+/// 3 action, 4 macro, 5 recipe. Null <c>Shortcuts</c> on a character means none were ever saved.
+/// </summary>
+public sealed record StoredShortcut(int Slot, int Page, int Type, int Id, int Level)
+{
+    public const int SlotsPerPage = 12;
+    public const int MaxPages = 10;
+    public const int TypeItem = 1;
+    public const int TypeSkill = 2;
+    public const int TypeAction = 3;
+    public const int TypeMacro = 4;
+    public const int TypeRecipe = 5;
+
+    /// <summary>Client world slot (slot + page * 12).</summary>
+    public int WorldSlot => Slot + Page * SlotsPerPage;
+
+    public bool IsValid =>
+        Slot >= 0 && Slot < SlotsPerPage &&
+        Page >= 0 && Page < MaxPages &&
+        Type >= TypeItem && Type <= TypeRecipe &&
+        Id > 0 && Level >= 0;
+}
+
+/// <summary>
+/// One Mobius <c>character_skills</c> row: a skill learned from a trainer (or quest). Auto-granted skills
+/// are not stored; they are re-derived from the class tree at enter. Null <c>LearnedSkills</c> = none saved.
+/// </summary>
+public sealed record StoredSkill(int SkillId, int Level)
+{
+    public bool IsValid => SkillId > 0 && Level > 0 && Level < 1000;
+}
 
 public sealed record CharacterRecord(
     int Id,
@@ -60,7 +95,12 @@ public sealed record CharacterRecord(
     long ClanJoinExpiryUnixMs = 0,
     long ClanCreateExpiryUnixMs = 0,
     long Exp = 0,
-    IReadOnlyList<QuestSaveRow>? Quests = null)
+    IReadOnlyList<QuestSaveRow>? Quests = null,
+    IReadOnlyList<StoredItem>? Warehouse = null,
+    bool Newbie = true,
+    IReadOnlyList<StoredShortcut>? Shortcuts = null,
+    IReadOnlyList<StoredSkill>? LearnedSkills = null,
+    int DeathPenaltyLevel = 0)
 {
     /// <summary>Remaining whole seconds until hard delete. Zero when the character is not pending.</summary>
     public int DeleteSecondsLeft(DateTimeOffset now)
@@ -162,6 +202,9 @@ public interface IAccountStore
     /// <summary>Replaces the saved bag. An empty list is a real save; it does not mean "grant the kit".</summary>
     bool TryReplaceItems(string account, int characterId, IReadOnlyList<StoredItem> items);
 
+    /// <summary>Replaces the private warehouse. An empty list is an empty warehouse.</summary>
+    bool TryReplaceWarehouse(string account, int characterId, IReadOnlyList<StoredItem> items);
+
     /// <summary>Writes the last world position. When <paramref name="lastAccess"/> is set and later than the stored value, updates last played.</summary>
     bool TrySavePresence(string account, int characterId, int x, int y, int z, DateTimeOffset? lastAccess);
 
@@ -171,8 +214,23 @@ public interface IAccountStore
     /// <summary>Writes level, experience, SP, and the vitals that a level change may have raised.</summary>
     bool TrySaveProgress(string account, int characterId, int level, long exp, int sp, int maxHp, int hp, int maxMp, int mp);
 
+    /// <summary>Writes the class after a class transfer (Mobius setClassId / setBaseClass).</summary>
+    bool TrySaveClass(string account, int characterId, int classId);
+
+    /// <summary>
+    /// Writes the Death Penalty level (Mobius <c>characters.death_penalty_level</c>, <c>Player.java:337</c>). It
+    /// outlives the session, so the zone writes it the moment a death rolls it up.
+    /// </summary>
+    bool TrySaveDeathPenalty(string account, int characterId, int level);
+
     /// <summary>Replaces the character's quest rows. An empty list is a real save.</summary>
     bool TryReplaceQuests(string account, int characterId, IReadOnlyList<QuestSaveRow> quests);
+
+    /// <summary>Replaces the character's hotbar (Mobius character_shortcuts). An empty list is a real save.</summary>
+    bool TryReplaceShortcuts(string account, int characterId, IReadOnlyList<StoredShortcut> shortcuts);
+
+    /// <summary>Replaces the character's learned skills (Mobius character_skills). An empty list is a real save.</summary>
+    bool TryReplaceLearnedSkills(string account, int characterId, IReadOnlyList<StoredSkill> skills);
 
     bool TrySetLastAccess(string account, int characterId, DateTimeOffset when);
 
@@ -230,8 +288,22 @@ public sealed class JsonAccountStore : IAccountStore
     readonly string? _path;
     readonly object _gate = new();
     StoreFile _data = new();
+    Action<string>? _afterSaveSnapshot;
 
     JsonAccountStore(string? path) => _path = path;
+
+    /// <summary>
+    /// Invoked under the store lock after every successful mutation with the versioned snapshot JSON.
+    /// Handlers must not re-enter the store.
+    /// </summary>
+    public Action<string>? AfterSaveSnapshot
+    {
+        get => _afterSaveSnapshot;
+        set => _afterSaveSnapshot = value;
+    }
+
+    /// <summary>When false, mutations update memory/file but skip <see cref="AfterSaveSnapshot"/> (Postgres hot paths).</summary>
+    public bool EmitSnapshots { get; set; } = true;
 
     public static JsonAccountStore InMemory() => new(null);
 
@@ -240,6 +312,144 @@ public sealed class JsonAccountStore : IAccountStore
         var store = new JsonAccountStore(path);
         store.Load();
         return store;
+    }
+
+    /// <summary>In-memory store seeded from a versioned snapshot JSON (same shape as accounts.json).</summary>
+    public static JsonAccountStore FromSnapshot(string json)
+    {
+        var store = new JsonAccountStore(null);
+        store.LoadFromJson(json);
+        return store;
+    }
+
+    /// <summary>
+    /// Replace in-memory state from a durable snapshot (import / recovery). Does not emit <see cref="AfterSaveSnapshot"/>.
+    /// </summary>
+    public void ReloadFromSnapshot(string json)
+    {
+        lock (_gate)
+            LoadFromJson(json);
+    }
+
+    /// <summary>
+    /// Merge a normalized PG character into the in-memory mirror so subsequent hot writes hit the same row.
+    /// Does not emit <see cref="AfterSaveSnapshot"/> (caller owns durable write).
+    /// </summary>
+    public void HydrateCharacter(
+        CharacterRecord character,
+        string? passwordHash = null,
+        string? passwordSalt = null,
+        int iterations = 0,
+        string? email = null)
+    {
+        ArgumentNullException.ThrowIfNull(character);
+        lock (_gate)
+        {
+            var account = FindAccount(character.Account);
+            if (account == null)
+            {
+                account = new AccountDto
+                {
+                    Name = character.Account,
+                    Email = string.IsNullOrWhiteSpace(email) ? null : email.Trim().ToLowerInvariant(),
+                    PasswordHash = passwordHash ?? "",
+                    PasswordSalt = passwordSalt ?? "",
+                    Iterations = iterations
+                };
+                _data.Accounts.Add(account);
+            }
+            else if (!string.IsNullOrEmpty(passwordHash))
+            {
+                account.PasswordHash = passwordHash;
+                account.PasswordSalt = passwordSalt ?? account.PasswordSalt;
+                account.Iterations = iterations > 0 ? iterations : account.Iterations;
+                if (!string.IsNullOrWhiteSpace(email))
+                    account.Email = email.Trim().ToLowerInvariant();
+            }
+
+            var dto = ToDto(character);
+            int index = account.Characters.FindIndex(c => c.Id == character.Id);
+            if (index >= 0)
+                account.Characters[index] = dto;
+            else
+                account.Characters.Add(dto);
+
+            if (character.Id >= _data.NextCharacterId)
+                _data.NextCharacterId = character.Id + 1;
+            foreach (var item in (character.Items ?? []).Concat(character.Warehouse ?? []))
+            {
+                if (item.ObjectId >= _data.NextItemObjectId)
+                    _data.NextItemObjectId = item.ObjectId + 1;
+            }
+        }
+    }
+
+    static CharacterDto ToDto(CharacterRecord character) =>
+        new()
+        {
+            Id = character.Id,
+            Name = character.Name,
+            ClassId = character.ClassId,
+            Race = character.Race,
+            Sex = character.Sex,
+            Level = character.Level <= 0 ? 1 : character.Level,
+            HairStyle = character.HairStyle,
+            HairColor = character.HairColor,
+            Face = character.Face,
+            HasPosition = character.HasPosition,
+            X = character.X,
+            Y = character.Y,
+            Z = character.Z,
+            CreatedAt = character.CreatedAt,
+            LastAccess = character.LastAccess,
+            DeleteAt = character.DeleteAt,
+            MaxHp = character.MaxHp,
+            Hp = character.Hp,
+            MaxMp = character.MaxMp,
+            Mp = character.Mp,
+            Sp = character.Sp,
+            Adena = character.Adena,
+            Title = character.Title ?? "",
+            ClanId = character.ClanId,
+            ClanJoinExpiryUnixMs = character.ClanJoinExpiryUnixMs,
+            ClanCreateExpiryUnixMs = character.ClanCreateExpiryUnixMs,
+            Exp = character.Exp,
+            Newbie = character.Newbie,
+            Items = character.Items?.Select(item => new StoredItemDto
+            {
+                ItemId = item.ItemId,
+                Count = item.Count,
+                EquippedSlot = item.EquippedSlot,
+                EnchantLevel = item.EnchantLevel,
+                ObjectId = item.ObjectId
+            }).ToList(),
+            Warehouse = character.Warehouse?.Select(item => new StoredItemDto
+            {
+                ItemId = item.ItemId,
+                Count = item.Count,
+                EquippedSlot = -1,
+                EnchantLevel = item.EnchantLevel,
+                ObjectId = item.ObjectId
+            }).ToList(),
+            Quests = character.Quests?.Select(CopyQuest).ToList(),
+            Shortcuts = character.Shortcuts?.Select(CopyShortcut).ToList(),
+            LearnedSkills = character.LearnedSkills?.Select(s => new StoredSkillDto { SkillId = s.SkillId, Level = s.Level }).ToList(),
+            DeathPenaltyLevel = character.DeathPenaltyLevel
+        };
+
+    static StoredShortcutDto CopyShortcut(StoredShortcut s) => new()
+    {
+        Slot = s.Slot,
+        Page = s.Page,
+        Type = s.Type,
+        Id = s.Id,
+        Level = s.Level
+    };
+
+    public string ExportSnapshot()
+    {
+        lock (_gate)
+            return JsonSerializer.Serialize(_data, JsonOptions);
     }
 
     public bool AccountExists(string account)
@@ -378,7 +588,8 @@ public sealed class JsonAccountStore : IAccountStore
                 Sp = sp,
                 Adena = adena,
                 Title = title ?? "",
-                Items = CopyItems(items),
+                Items = CopyItemsAssigningIds(items, releaseObjectIds: null),
+                Newbie = row.Characters.Count == 0,
                 CreatedAt = createdAt ?? DateTimeOffset.UtcNow
             };
             row.Characters.Add(character);
@@ -397,7 +608,24 @@ public sealed class JsonAccountStore : IAccountStore
             var character = FindCharacter(account, characterId);
             if (character == null)
                 return false;
-            character.Items = CopyItems(items);
+            var release = ObjectIdSet(character.Items);
+            character.Items = CopyItemsAssigningIds(items, release);
+            Save();
+            return true;
+        }
+    }
+
+    public bool TryReplaceWarehouse(string account, int characterId, IReadOnlyList<StoredItem> items)
+    {
+        ArgumentNullException.ThrowIfNull(items);
+        CharacterInventory.Validate(items);
+        lock (_gate)
+        {
+            var character = FindCharacter(account, characterId);
+            if (character == null)
+                return false;
+            var release = ObjectIdSet(character.Warehouse);
+            character.Warehouse = CopyItemsAssigningIds(items, release);
             Save();
             return true;
         }
@@ -456,6 +684,36 @@ public sealed class JsonAccountStore : IAccountStore
         }
     }
 
+    public bool TrySaveClass(string account, int characterId, int classId)
+    {
+        if (classId < 0)
+            return false;
+        lock (_gate)
+        {
+            var character = FindCharacter(account, characterId);
+            if (character == null)
+                return false;
+            character.ClassId = classId;
+            Save();
+            return true;
+        }
+    }
+
+    public bool TrySaveDeathPenalty(string account, int characterId, int level)
+    {
+        if (level < 0)
+            return false;
+        lock (_gate)
+        {
+            var character = FindCharacter(account, characterId);
+            if (character == null)
+                return false;
+            character.DeathPenaltyLevel = level;
+            Save();
+            return true;
+        }
+    }
+
     public bool TryReplaceQuests(string account, int characterId, IReadOnlyList<QuestSaveRow> quests)
     {
         ArgumentNullException.ThrowIfNull(quests);
@@ -467,6 +725,49 @@ public sealed class JsonAccountStore : IAccountStore
             if (character == null)
                 return false;
             character.Quests = quests.Select(CopyQuest).ToList();
+            Save();
+            return true;
+        }
+    }
+
+    public bool TryReplaceLearnedSkills(string account, int characterId, IReadOnlyList<StoredSkill> skills)
+    {
+        ArgumentNullException.ThrowIfNull(skills);
+        var ids = new HashSet<int>();
+        foreach (var s in skills)
+        {
+            if (s == null || !s.IsValid || !ids.Add(s.SkillId))
+                return false;
+        }
+
+        lock (_gate)
+        {
+            var character = FindCharacter(account, characterId);
+            if (character == null)
+                return false;
+            character.LearnedSkills = skills.OrderBy(s => s.SkillId)
+                .Select(s => new StoredSkillDto { SkillId = s.SkillId, Level = s.Level }).ToList();
+            Save();
+            return true;
+        }
+    }
+
+    public bool TryReplaceShortcuts(string account, int characterId, IReadOnlyList<StoredShortcut> shortcuts)
+    {
+        ArgumentNullException.ThrowIfNull(shortcuts);
+        var slots = new HashSet<int>();
+        foreach (var s in shortcuts)
+        {
+            if (s == null || !s.IsValid || !slots.Add(s.WorldSlot))
+                return false;
+        }
+
+        lock (_gate)
+        {
+            var character = FindCharacter(account, characterId);
+            if (character == null)
+                return false;
+            character.Shortcuts = shortcuts.OrderBy(s => s.WorldSlot).Select(CopyShortcut).ToList();
             Save();
             return true;
         }
@@ -927,29 +1228,159 @@ public sealed class JsonAccountStore : IAccountStore
         int maxClan = clanIds.Count == 0 ? 0 : clanIds.Max();
         if (data.NextClanId <= maxClan)
             data.NextClanId = maxClan + 1;
+        if (data.NextItemObjectId < PlayerInventory.FirstObjectId)
+            data.NextItemObjectId = PlayerInventory.FirstObjectId;
+        EnsureItemObjectIds(data);
+        _data = data;
+    }
+
+    void LoadFromJson(string json)
+    {
+        var data = JsonSerializer.Deserialize<StoreFile>(json, JsonOptions)
+            ?? throw new InvalidDataException("empty account store snapshot");
+        if (data.Version != 1)
+            throw new InvalidDataException($"unsupported account store version {data.Version}");
+        data.Clans ??= [];
+        data.Castles ??= [];
+        data.SiegeClans ??= [];
+        if (data.NextItemObjectId < PlayerInventory.FirstObjectId)
+            data.NextItemObjectId = PlayerInventory.FirstObjectId;
+        EnsureItemObjectIds(data);
         _data = data;
     }
 
     void Save()
     {
-        if (_path == null)
-            return;
-        string? dir = Path.GetDirectoryName(_path);
-        if (!string.IsNullOrEmpty(dir))
-            Directory.CreateDirectory(dir);
-        string tmp = _path + ".tmp";
-        File.WriteAllText(tmp, JsonSerializer.Serialize(_data, JsonOptions));
-        File.Move(tmp, _path, overwrite: true);
+        string snapshot = JsonSerializer.Serialize(_data, JsonOptions);
+        if (_path != null)
+        {
+            string? dir = Path.GetDirectoryName(_path);
+            if (!string.IsNullOrEmpty(dir))
+                Directory.CreateDirectory(dir);
+            string tmp = _path + ".tmp";
+            File.WriteAllText(tmp, snapshot);
+            File.Move(tmp, _path, overwrite: true);
+        }
+
+        if (EmitSnapshots)
+            _afterSaveSnapshot?.Invoke(snapshot);
     }
 
-    static List<StoredItemDto>? CopyItems(IReadOnlyList<StoredItem>? items) =>
-        items == null ? null : items.Select(item => new StoredItemDto
+    List<StoredItemDto>? CopyItemsAssigningIds(IReadOnlyList<StoredItem>? items, HashSet<int>? releaseObjectIds)
+    {
+        if (items == null)
+            return null;
+        var taken = AllObjectIdsUnlocked();
+        if (releaseObjectIds != null)
         {
-            ItemId = item.ItemId,
-            Count = item.Count,
-            EquippedSlot = item.EquippedSlot,
-            EnchantLevel = item.EnchantLevel
-        }).ToList();
+            foreach (int id in releaseObjectIds)
+                taken.Remove(id);
+        }
+
+        var rows = new List<StoredItemDto>(items.Count);
+        var batch = new HashSet<int>();
+        foreach (var item in items)
+        {
+            int objectId = item.ObjectId;
+            if (objectId <= 0 || taken.Contains(objectId) || batch.Contains(objectId))
+                objectId = NextItemObjectIdUnlocked(taken);
+            else if (objectId >= _data.NextItemObjectId)
+                _data.NextItemObjectId = checked(objectId + 1);
+            batch.Add(objectId);
+            taken.Add(objectId);
+            rows.Add(new StoredItemDto
+            {
+                ItemId = item.ItemId,
+                Count = item.Count,
+                EquippedSlot = item.EquippedSlot,
+                EnchantLevel = item.EnchantLevel,
+                ObjectId = objectId
+            });
+        }
+
+        return rows;
+    }
+
+    static HashSet<int> ObjectIdSet(List<StoredItemDto>? items)
+    {
+        var set = new HashSet<int>();
+        if (items == null)
+            return set;
+        foreach (var item in items)
+        {
+            if (item.ObjectId > 0)
+                set.Add(item.ObjectId);
+        }
+
+        return set;
+    }
+
+    HashSet<int> AllObjectIdsUnlocked()
+    {
+        var taken = new HashSet<int>();
+        foreach (var account in _data.Accounts)
+        {
+            foreach (var character in account.Characters)
+            {
+                foreach (int id in ObjectIdSet(character.Items))
+                    taken.Add(id);
+                foreach (int id in ObjectIdSet(character.Warehouse))
+                    taken.Add(id);
+            }
+        }
+
+        return taken;
+    }
+
+    int NextItemObjectIdUnlocked(HashSet<int>? taken = null)
+    {
+        if (_data.NextItemObjectId < PlayerInventory.FirstObjectId)
+            _data.NextItemObjectId = PlayerInventory.FirstObjectId;
+        while (taken != null && taken.Contains(_data.NextItemObjectId))
+            _data.NextItemObjectId++;
+        int id = _data.NextItemObjectId++;
+        taken?.Add(id);
+        return id;
+    }
+
+    static void EnsureItemObjectIds(StoreFile data)
+    {
+        int next = data.NextItemObjectId < PlayerInventory.FirstObjectId
+            ? PlayerInventory.FirstObjectId
+            : data.NextItemObjectId;
+        var taken = new HashSet<int>();
+        foreach (var account in data.Accounts)
+        {
+            foreach (var character in account.Characters)
+            {
+                next = AssignMissingIds(character.Items, next, taken);
+                next = AssignMissingIds(character.Warehouse, next, taken);
+            }
+        }
+
+        data.NextItemObjectId = next;
+    }
+
+    static int AssignMissingIds(List<StoredItemDto>? items, int next, HashSet<int> taken)
+    {
+        if (items == null)
+            return next;
+        foreach (var item in items)
+        {
+            if (item.ObjectId <= 0 || !taken.Add(item.ObjectId))
+            {
+                while (!taken.Add(next))
+                    next++;
+                item.ObjectId = next++;
+            }
+            else if (item.ObjectId >= next)
+            {
+                next = item.ObjectId + 1;
+            }
+        }
+
+        return next;
+    }
 
     static CharacterRecord ToRecord(string account, CharacterDto character) =>
         new(
@@ -962,7 +1393,7 @@ public sealed class JsonAccountStore : IAccountStore
             character.Level,
             character.Items == null
                 ? null
-                : character.Items.Select(item => new StoredItem(item.ItemId, item.Count, item.EquippedSlot, item.EnchantLevel)).ToArray(),
+                : character.Items.Select(item => new StoredItem(item.ItemId, item.Count, item.EquippedSlot, item.EnchantLevel, item.ObjectId)).ToArray(),
             character.HairStyle,
             character.HairColor,
             character.Face,
@@ -989,13 +1420,25 @@ public sealed class JsonAccountStore : IAccountStore
                 : character.Quests.Select(quest => new QuestSaveRow(
                     quest.QuestId,
                     quest.State,
-                    (quest.Vars ?? []).Select(variable => new QuestSaveVar(variable.Key, variable.Value)).ToArray())).ToArray());
+                    (quest.Vars ?? []).Select(variable => new QuestSaveVar(variable.Key, variable.Value)).ToArray())).ToArray(),
+            character.Warehouse == null
+                ? null
+                : character.Warehouse.Select(item => new StoredItem(item.ItemId, item.Count, -1, item.EnchantLevel, item.ObjectId)).ToArray(),
+            character.Newbie,
+            character.Shortcuts == null
+                ? null
+                : character.Shortcuts.Select(s => new StoredShortcut(s.Slot, s.Page, s.Type, s.Id, s.Level)).ToArray(),
+            character.LearnedSkills == null
+                ? null
+                : character.LearnedSkills.Select(s => new StoredSkill(s.SkillId, s.Level)).ToArray(),
+            character.DeathPenaltyLevel);
 
     sealed class StoreFile
     {
         public int Version { get; set; } = 1;
         public int NextCharacterId { get; set; } = 1;
         public int NextClanId { get; set; } = 1;
+        public int NextItemObjectId { get; set; } = PlayerInventory.FirstObjectId;
         public List<AccountDto> Accounts { get; set; } = [];
         public List<ClanDto> Clans { get; set; } = [];
         public List<CastleDto> Castles { get; set; } = [];
@@ -1043,6 +1486,26 @@ public sealed class JsonAccountStore : IAccountStore
         public long Exp { get; set; }
         public List<StoredQuestDto>? Quests { get; set; }
         public List<StoredItemDto>? Items { get; set; }
+        public List<StoredItemDto>? Warehouse { get; set; }
+        public bool Newbie { get; set; } = true;
+        public List<StoredShortcutDto>? Shortcuts { get; set; }
+        public List<StoredSkillDto>? LearnedSkills { get; set; }
+        public int DeathPenaltyLevel { get; set; }
+    }
+
+    sealed class StoredSkillDto
+    {
+        public int SkillId { get; set; }
+        public int Level { get; set; }
+    }
+
+    sealed class StoredShortcutDto
+    {
+        public int Slot { get; set; }
+        public int Page { get; set; }
+        public int Type { get; set; }
+        public int Id { get; set; }
+        public int Level { get; set; }
     }
 
     sealed class StoredQuestDto
@@ -1106,5 +1569,6 @@ public sealed class JsonAccountStore : IAccountStore
         public int Count { get; set; }
         public int EquippedSlot { get; set; } = -1;
         public int EnchantLevel { get; set; }
+        public int ObjectId { get; set; }
     }
 }

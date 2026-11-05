@@ -36,8 +36,38 @@ public sealed class BypassReply
     public int QuestId { get; init; }
     public string QuestEvent { get; init; } = "";
     public string? Error { get; init; }
+    public int? BuyListId { get; init; }
+    public bool OpenSell { get; init; }
+    public int? MultiSellListId { get; init; }
+    public bool MultiSellInventoryOnly { get; init; }
+
+    /// <summary>World-applied service. See <see cref="Fineage.Protocol.NpcServiceIntent"/>.</summary>
+    public string? Service { get; init; }
+
+    /// <summary>List name for a teleport. Empty for other services.</summary>
+    public string ServiceArg { get; init; } = "";
+
+    /// <summary>Location id for a teleport. -1 when unused.</summary>
+    public int ServiceId { get; init; } = -1;
 
     public static BypassReply Page(string html) => new() { Html = html };
+
+    public static BypassReply ServiceCall(string service, string arg = "", int id = -1) => new()
+    {
+        Service = service,
+        ServiceArg = arg ?? "",
+        ServiceId = id
+    };
+
+    public static BypassReply Buy(int listId) => new() { BuyListId = listId };
+
+    public static BypassReply Sell() => new() { OpenSell = true };
+
+    public static BypassReply MultiSell(int listId, bool inventoryOnly) => new()
+    {
+        MultiSellListId = listId,
+        MultiSellInventoryOnly = inventoryOnly
+    };
 
     public static BypassReply TalkAgain() => new() { ReplayTalk = true };
 
@@ -51,4 +81,11 @@ public sealed class BypassReply
     };
 
     public static BypassReply Fail(string error) => new() { Error = error };
+
+    /// <summary>Mobius script bypass with a non-numeric name (<c>Quest FirstClassTransferTalk ...</c>, village masters).</summary>
+    public string? ScriptName { get; init; }
+
+    public string ScriptEvent { get; init; } = "";
+
+    public static BypassReply Script(string name, string? evt) => new() { ScriptName = name, ScriptEvent = evt ?? "" };
 }

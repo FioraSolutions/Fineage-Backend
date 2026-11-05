@@ -65,18 +65,110 @@ public sealed class PlayerInventory
     }
 
     /// <summary>Stackable items return the merged stack. Other items return every new piece.</summary>
-    public IReadOnlyList<ItemInstance> AddPieces(int itemId, int count)
+    public IReadOnlyList<ItemInstance> AddPieces(int itemId, int count, int enchantLevel = 0)
     {
         if (count < 1)
             throw new ArgumentOutOfRangeException(nameof(count));
         var template = _catalog.Get(itemId);
         if (template.Stackable)
-            return [Add(itemId, count)];
+            return [Add(itemId, count, enchantLevel)];
 
         var created = new List<ItemInstance>(count);
         for (int i = 0; i < count; i++)
-            created.Add(Add(itemId, 1));
+            created.Add(Add(itemId, 1, enchantLevel));
         return created;
+    }
+
+    /// <summary>Sum of template weight times count. Equipped pieces are included.</summary>
+    public long TotalWeight
+    {
+        get
+        {
+            long total = 0;
+            foreach (var item in _items)
+                total += (long)item.Template.Weight * item.Count;
+            return total;
+        }
+    }
+
+    /// <summary>
+    /// Removes unequipped pieces of <paramref name="itemId"/>.
+    /// <paramref name="enchantLevel"/> below 0 matches every enchant and, for single pieces, takes the lowest enchant first.
+    /// Returns false and changes nothing when the bag is short.
+    /// </summary>
+    public bool TryTakeUnequipped(int itemId, int count, int enchantLevel, ICollection<ItemInstance> touched)
+    {
+        ArgumentNullException.ThrowIfNull(touched);
+        if (count < 1)
+            return false;
+
+        var pool = new List<ItemInstance>();
+        foreach (var item in _items)
+        {
+            if (item.ItemId != itemId || item.IsEquipped)
+                continue;
+            if (enchantLevel >= 0 && item.EnchantLevel != enchantLevel)
+                continue;
+            pool.Add(item);
+        }
+
+        if (pool.Count == 0)
+            return false;
+
+        if (pool[0].Template.Stackable)
+        {
+            var stack = pool[0];
+            if (stack.Count < count)
+                return false;
+            if (stack.Count == count)
+            {
+                stack.Count = 0;
+                _items.Remove(stack);
+            }
+            else
+            {
+                stack.Count -= count;
+            }
+
+            touched.Add(stack);
+            return true;
+        }
+
+        if (enchantLevel < 0)
+            pool.Sort(static (left, right) => left.EnchantLevel.CompareTo(right.EnchantLevel));
+        if (pool.Count < count)
+            return false;
+
+        for (int i = 0; i < count; i++)
+        {
+            var piece = pool[i];
+            piece.Count = 0;
+            _items.Remove(piece);
+            touched.Add(piece);
+        }
+
+        return true;
+    }
+
+    /// <summary>
+    /// Removes <paramref name="count"/> from one unequipped stack or piece.
+    /// Returns false and changes nothing when the object is missing, worn, or short.
+    /// </summary>
+    public bool TryReduce(ItemInstance item, int count, out bool removed)
+    {
+        removed = false;
+        if (count < 1 || item.IsEquipped || !ReferenceEquals(Find(item.ObjectId), item) || item.Count < count)
+            return false;
+        if (item.Count == count)
+        {
+            item.Count = 0;
+            _items.Remove(item);
+            removed = true;
+            return true;
+        }
+
+        item.Count -= count;
+        return true;
     }
 
     /// <summary>
@@ -167,6 +259,30 @@ public sealed class PlayerInventory
         for (var i = 1; i < count; i++)
             _items.Add(Create(template, 1, enchantLevel));
         return first;
+    }
+
+    /// <summary>
+    /// Restores a persisted stack/piece with a durable <paramref name="objectId"/>.
+    /// Stackable rows with a known id do not merge into another stack.
+    /// </summary>
+    public ItemInstance AddRestored(int objectId, int itemId, int count, int enchantLevel = 0)
+    {
+        if (objectId <= 0)
+            throw new ArgumentOutOfRangeException(nameof(objectId), objectId, "Object id must be positive.");
+        if (count < 1)
+            throw new ArgumentOutOfRangeException(nameof(count), count, "Count must be at least 1.");
+        CheckEnchant(enchantLevel);
+        if (Find(objectId) != null)
+            throw new InvalidOperationException($"Item object {objectId} is already in this inventory.");
+
+        var template = _catalog.Get(itemId);
+        if (template.Stackable && enchantLevel != 0)
+            throw new InvalidOperationException($"Stackable item {itemId} cannot carry an enchant level.");
+
+        _ids.Observe(objectId);
+        var item = new ItemInstance(objectId, template, count) { EnchantLevel = enchantLevel };
+        _items.Add(item);
+        return item;
     }
 
     public void SetEnchantLevel(ItemInstance item, int level)
@@ -330,6 +446,34 @@ public sealed class PlayerInventory
     /// <paramref name="removed"/> is true when the stack is gone; <paramref name="stack"/> is that row with count 0.
     /// Otherwise <paramref name="stack"/> is the reduced stack.
     /// </summary>
+    /// <summary>
+    /// Removes <paramref name="count"/> from the stack with this object id.
+    /// An equipped piece is left in place and the call returns false.
+    /// <paramref name="removed"/> is true when the stack is gone; <paramref name="item"/> then has count 0.
+    /// </summary>
+    public bool TryTakeFrom(int objectId, int count, out ItemInstance? item, out bool removed)
+    {
+        item = null;
+        removed = false;
+        if (count < 1)
+            return false;
+        var found = Find(objectId);
+        if (found == null || found.IsEquipped || found.Count < count)
+            return false;
+        if (found.Count == count)
+        {
+            found.Count = 0;
+            _items.Remove(found);
+            item = found;
+            removed = true;
+            return true;
+        }
+
+        found.Count -= count;
+        item = found;
+        return true;
+    }
+
     public bool TryConsume(int itemId, int count, out ItemInstance? stack, out bool removed)
     {
         stack = null;

@@ -5,8 +5,9 @@ namespace Fineage.Login;
 /// <summary>
 /// Play-landing account rules shared with the Worker at fineage.evpoint.by.
 /// Username: a letter, then letters, digits, or underscore, 3–24 characters, stored lowercase.
-/// Email: stored lowercase, at most 254 characters.
-/// Register password: 8–72 characters, no whitespace, not equal to the username or email.
+/// Email is optional on register. When present it is stored lowercase, at most 254 characters.
+/// A missing or blank address is omitted (null), not replaced with a placeholder.
+/// Register password: 8–72 characters, no whitespace, not equal to the username or a supplied email.
 /// </summary>
 public static partial class LandingAuth
 {
@@ -30,13 +31,18 @@ public static partial class LandingAuth
         return null;
     }
 
+    /// <summary>
+    /// Checks an email address. Null, empty, and whitespace are omitted:
+    /// <paramref name="canonical"/> is empty and the result is success.
+    /// A non-blank value must match the address pattern and is returned lowercase.
+    /// </summary>
     public static string? ValidateEmail(string? raw, out string canonical)
     {
         canonical = "";
-        if (raw == null)
-            return "invalid_email";
+        if (string.IsNullOrWhiteSpace(raw))
+            return null;
         string trimmed = raw.Trim().ToLowerInvariant();
-        if (trimmed.Length is < 1 or > 254 || !EmailPattern().IsMatch(trimmed))
+        if (trimmed.Length > 254 || !EmailPattern().IsMatch(trimmed))
             return "invalid_email";
         canonical = trimmed;
         return null;

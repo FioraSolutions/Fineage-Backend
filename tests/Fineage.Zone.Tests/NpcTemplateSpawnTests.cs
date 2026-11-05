@@ -78,7 +78,7 @@ public sealed class NpcTemplateSpawnTests
     }
 
     [Fact]
-    public void Talking_Island_village_matches_Mobius_and_other_towns_stay_disabled()
+    public void Talking_Island_village_matches_Mobius_and_towns_are_enabled()
     {
         var spawns = SpawnCatalog.LoadDefault();
         var village = spawns.GetMap(SpawnCatalog.TalkingIslandVillageMapId);
@@ -146,11 +146,13 @@ public sealed class NpcTemplateSpawnTests
         foreach (var (mapId, count) in expected)
         {
             var map = spawns.GetMap(mapId);
-            Assert.False(map.Enabled);
+            Assert.True(map.Enabled, mapId);
             Assert.Equal(count, map.Npcs.Count);
             Assert.All(map.Npcs, row =>
                 Assert.InRange(row.ObjectId, NpcObjectIdAllocator.First, NpcObjectIdAllocator.ExclusiveEnd - 1));
         }
+
+        Assert.False(spawns.GetMap("ti_village_road").Enabled);
     }
 
     [Fact]
@@ -168,7 +170,11 @@ public sealed class NpcTemplateSpawnTests
     {
         var baseline = new ZoneWorld().NpcObjectIds;
         var world = new ZoneWorld(includeEnabledMaps: true);
-        Assert.Equal(baseline.Count + TalkingIslandNpcCount, world.NpcObjectIds.Count);
+        int extra = SpawnCatalog.LoadDefault().Maps.Values
+            .Where(map => map.Enabled && map.MapId != SpawnCatalog.DefaultMapId)
+            .Sum(map => map.Npcs.Count);
+        Assert.True(extra > TalkingIslandNpcCount);
+        Assert.Equal(baseline.Count + extra, world.NpcObjectIds.Count);
         foreach (int id in baseline)
             Assert.Contains(id, world.NpcObjectIds);
         Assert.Contains(60013, world.NpcObjectIds);
@@ -211,7 +217,9 @@ public sealed class NpcTemplateSpawnTests
         var session = new ZoneSession(stream);
         session.Bind(ticket.CharacterId, ticket.Account, ticket.CharacterName, ticket.ClassId);
         Assert.True(await world.TryEnterAsync(session, CancellationToken.None));
-        Assert.Equal("target", await world.TrySelectTargetAsync(session, new SelectTargetMsg { TargetObjectId = info.ObjectId }, CancellationToken.None));
+        // Non-attackable NPCs must still be selectable (talk / target frame); combat stays blocked.
+        Assert.Null(await world.TrySelectTargetAsync(session, new SelectTargetMsg { TargetObjectId = info.ObjectId }, CancellationToken.None));
+        Assert.Equal(info.ObjectId, session.SelectedTargetId);
         Assert.Equal("attack", await world.TryAttackAsync(session, new AttackRequestMsg { TargetObjectId = info.ObjectId }, CancellationToken.None));
     }
 

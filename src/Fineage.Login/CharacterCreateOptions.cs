@@ -5,9 +5,32 @@ namespace Fineage.Login;
 /// <summary>
 /// Character-create policy. Defaults match Mobius Interlude character limits and name rules.
 /// A null class or race set means every base class in the datapack (and the races those classes use).
+/// That default is the permanent Fineage playtest: all five Interlude races and the nine starter classes.
 /// </summary>
 public sealed class CharacterCreateOptions
 {
+    /// <summary>
+    /// Human-only values written when create was still the fighter/mystic MVP.
+    /// <see cref="FromEnvironment"/> treats these as unset so they cannot hide the other races.
+    /// </summary>
+    static readonly HashSet<int> LegacyHumanRaces = [HumanClasses.RaceHuman];
+
+    static readonly HashSet<int> LegacyHumanClasses = [HumanClasses.Fighter, HumanClasses.Mystic];
+
+    /// <summary>Interlude create pairs the live lobby must accept. Dwarf has no mystic.</summary>
+    public static readonly (int ClassId, int Race)[] PlaytestStarters =
+    [
+        (HumanClasses.Fighter, HumanClasses.RaceHuman),
+        (HumanClasses.Mystic, HumanClasses.RaceHuman),
+        (18, 1),
+        (25, 1),
+        (31, 2),
+        (38, 2),
+        (44, 3),
+        (49, 3),
+        (53, 4)
+    ];
+
     public static IReadOnlyList<string> DefaultForbiddenNames { get; } =
         ["annou", "ammou", "amnou", "anmou", "anou", "amou"];
 
@@ -42,8 +65,8 @@ public sealed class CharacterCreateOptions
             CharMaxNumber = ReadInt("FINEAGE_CHAR_MAX_NUMBER", HumanClasses.MaxCharactersPerAccount, 0, 100),
             ForbiddenNames = ReadForbidden(Environment.GetEnvironmentVariable("FINEAGE_FORBIDDEN_NAMES")),
             NameTemplate = ReadTemplate(Environment.GetEnvironmentVariable("FINEAGE_CNAME_TEMPLATE")),
-            AllowedRaces = ReadIdSet("FINEAGE_ALLOWED_RACES"),
-            AllowedClasses = ReadIdSet("FINEAGE_ALLOWED_CLASSES"),
+            AllowedRaces = ReadIdSet("FINEAGE_ALLOWED_RACES", LegacyHumanRaces),
+            AllowedClasses = ReadIdSet("FINEAGE_ALLOWED_CLASSES", LegacyHumanClasses),
             StartingAdena = ReadLong("FINEAGE_STARTING_ADENA", 0),
             StartingLevel = ReadInt("FINEAGE_STARTING_LEVEL", 1, 1, 80),
             StartingSp = ReadInt("FINEAGE_STARTING_SP", 0, 0, int.MaxValue)
@@ -79,9 +102,23 @@ public sealed class CharacterCreateOptions
         }
     }
 
-    static IReadOnlySet<int>? ReadIdSet(string name)
+    /// <summary>
+    /// True when the process env still names the Human-only MVP
+    /// (<c>FINEAGE_ALLOWED_RACES=0</c> and/or <c>FINEAGE_ALLOWED_CLASSES=0,10</c>).
+    /// Those values are ignored; create stays open for every datapack base class.
+    /// </summary>
+    public static bool EnvironmentUsesLegacyHumanOnly() =>
+        IsLegacySet(Environment.GetEnvironmentVariable("FINEAGE_ALLOWED_RACES"), LegacyHumanRaces) ||
+        IsLegacySet(Environment.GetEnvironmentVariable("FINEAGE_ALLOWED_CLASSES"), LegacyHumanClasses);
+
+    static bool IsLegacySet(string? text, HashSet<int> legacy)
     {
-        string? text = Environment.GetEnvironmentVariable(name);
+        var ids = ParseIds(text);
+        return ids != null && ids.SetEquals(legacy);
+    }
+
+    static HashSet<int>? ParseIds(string? text)
+    {
         if (string.IsNullOrWhiteSpace(text))
             return null;
         var ids = new HashSet<int>();
@@ -91,8 +128,20 @@ public sealed class CharacterCreateOptions
                 ids.Add(id);
         }
 
-        if (ids.Count == 0)
+        return ids.Count == 0 ? null : ids;
+    }
+
+    static IReadOnlySet<int>? ReadIdSet(string name, HashSet<int> legacyHumanOnly)
+    {
+        string? text = Environment.GetEnvironmentVariable(name);
+        if (string.IsNullOrWhiteSpace(text))
+            return null;
+        var ids = ParseIds(text);
+        if (ids == null)
             throw new InvalidOperationException($"{name} did not contain an id.");
+        // Stuck Human-only MVP flag: open every base race/class instead of keeping the temporary list.
+        if (ids.SetEquals(legacyHumanOnly))
+            return null;
         return ids;
     }
 

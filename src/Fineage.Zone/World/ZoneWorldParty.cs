@@ -146,6 +146,7 @@ public sealed partial class ZoneWorld
             ItemDistribution = distribution
         };
         outbound.Add(Pack(targetEntity.Session, MsgType.PartyAskJoin, ask));
+        FanNetPartyAsk(targetEntity.Session.ObjectId, ask);
         return null;
     }
 
@@ -168,7 +169,7 @@ public sealed partial class ZoneWorld
 
         if (answer.Response != 1)
         {
-            outbound.Add(Pack(requestorEntity.Session, MsgType.PartyJoinResult, new PartyJoinResultMsg { Response = 0 }));
+            QueuePartyJoinResult(requestorEntity.Session, 0, outbound);
             return null;
         }
 
@@ -182,7 +183,7 @@ public sealed partial class ZoneWorld
                 return "party";
             if (party.MemberIds.Count >= MaxPartyMembers)
             {
-                outbound.Add(Pack(requestorEntity.Session, MsgType.PartyJoinResult, new PartyJoinResultMsg { Response = 0 }));
+                QueuePartyJoinResult(requestorEntity.Session, 0, outbound);
                 return null;
             }
         }
@@ -202,7 +203,7 @@ public sealed partial class ZoneWorld
         party.MemberIds.Add(invitee.ObjectId);
         _partyByPlayer[invitee.ObjectId] = party.PartyId;
 
-        outbound.Add(Pack(requestorEntity.Session, MsgType.PartyJoinResult, new PartyJoinResultMsg { Response = 1 }));
+        QueuePartyJoinResult(requestorEntity.Session, 1, outbound);
         FanoutPartyList(party, outbound);
         return null;
     }
@@ -236,12 +237,12 @@ public sealed partial class ZoneWorld
             _parties.Remove(partyId);
             if (_byId.TryGetValue(lastId, out var lastEntity) && lastEntity.Session != null)
             {
-                outbound.Add(Pack(lastEntity.Session, MsgType.PartyMemberList, new PartyMemberListMsg
+                QueuePartyMemberList(lastEntity.Session, new PartyMemberListMsg
                 {
                     LeaderObjectId = 0,
                     PartyId = 0,
                     Members = []
-                }));
+                }, outbound);
             }
 
             return null;
@@ -273,8 +274,68 @@ public sealed partial class ZoneWorld
         {
             if (!_byId.TryGetValue(memberId, out var entity) || entity.Session == null)
                 continue;
-            outbound.Add(Pack(entity.Session, MsgType.PartyMemberList, list));
+            QueuePartyMemberList(entity.Session, list, outbound);
         }
+    }
+
+    void QueuePartyJoinResult(ZoneSession session, int response, List<Pending> outbound)
+    {
+        var result = new PartyJoinResultMsg { Response = response };
+        outbound.Add(Pack(session, MsgType.PartyJoinResult, result));
+        if (NetBridge != null)
+        {
+            NetBridge.FanoutPartyJoinResult(
+                [session.ObjectId],
+                new Fineage.Net.Contract.PartyJoinResultNetMsg { Response = response });
+        }
+    }
+
+    void QueuePartyMemberList(ZoneSession session, PartyMemberListMsg list, List<Pending> outbound)
+    {
+        outbound.Add(Pack(session, MsgType.PartyMemberList, list));
+        if (NetBridge != null)
+            NetBridge.FanoutPartyMemberList([session.ObjectId], ToNetPartyMemberList(list));
+    }
+
+    void FanNetPartyAsk(int targetObjectId, PartyAskJoinMsg ask)
+    {
+        if (NetBridge == null)
+            return;
+        NetBridge.FanoutPartyAskJoin(
+            [targetObjectId],
+            new Fineage.Net.Contract.PartyAskJoinNetMsg
+            {
+                RequestorObjectId = ask.RequestorObjectId,
+                RequestorName = ask.RequestorName ?? "",
+                ItemDistribution = ask.ItemDistribution
+            });
+    }
+
+    static Fineage.Net.Contract.PartyMemberListNetMsg ToNetPartyMemberList(PartyMemberListMsg list)
+    {
+        var members = list.Members ?? [];
+        var rows = new Fineage.Net.Contract.PartyMemberEntryNet[members.Length];
+        for (int i = 0; i < members.Length; i++)
+        {
+            rows[i] = new Fineage.Net.Contract.PartyMemberEntryNet
+            {
+                ObjectId = members[i].ObjectId,
+                Name = members[i].Name ?? "",
+                ClassId = members[i].ClassId,
+                Level = members[i].Level,
+                CurHp = members[i].CurHp,
+                MaxHp = members[i].MaxHp,
+                CurMp = members[i].CurMp,
+                MaxMp = members[i].MaxMp
+            };
+        }
+
+        return new Fineage.Net.Contract.PartyMemberListNetMsg
+        {
+            LeaderObjectId = list.LeaderObjectId,
+            PartyId = list.PartyId,
+            Members = rows
+        };
     }
 
     PartyMemberListMsg BuildPartyMemberList(ZoneParty party)

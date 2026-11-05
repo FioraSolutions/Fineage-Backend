@@ -1,6 +1,6 @@
 {
   "mapId": "heine",
-  "enabled": false,
+  "enabled": true,
   "comment": "Mobius CT 0 Interlude Innadril/HeineNPCs.xml. Rows reference data/npcs.json by npcId. Name, title, type, attackable, hp, and speeds come from the template.",
   "npcs": [
     {

@@ -1,6 +1,7 @@
 #!/usr/bin/env bash
 # Restart Fineage Zone on the live Pi layout (/home/pi/fineage-backend).
-# Public port: TCP 7777 (override with FINEAGE_ZONE_PORT).
+# Public port: Net TCP 9777 (FINEAGE_NET_ZONE_PORT). Net (PacketEnvelope) is the only client
+# transport; the legacy MessagePack V2 listener is gone.
 set -euo pipefail
 
 ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
@@ -20,8 +21,8 @@ if [[ -z "${FINEAGE_HANDOFF_SECRET:-}" && -f "$ROOT/handoff.secret" ]]; then
 fi
 
 STORE="${FINEAGE_LOGIN_STORE:-$ROOT/data/accounts.json}"
-ZONE_PORT="${FINEAGE_ZONE_PORT:-7777}"
 BIND="${FINEAGE_BIND:-0.0.0.0}"
+NET_ZONE_PORT="${FINEAGE_NET_ZONE_PORT:-9777}"
 
 BIN="$ROOT/zone/Fineage.Zone"
 if [[ ! -x "$BIN" ]]; then
@@ -29,18 +30,21 @@ if [[ ! -x "$BIN" ]]; then
   exit 1
 fi
 
-if pgrep -f "$BIN" >/dev/null 2>&1; then
-  pkill -f "$BIN" || true
+# Match any running Fineage.Zone (started as ./zone/... or absolute path) — an absolute-path
+# pgrep missed relative launches, so the old process kept the port and new builds never ran.
+PATTERN='(^|/)Fineage.Zone( |$)'
+if pgrep -f "$PATTERN" >/dev/null 2>&1; then
+  pkill -f "$PATTERN" || true
   for _ in $(seq 1 20); do
-    pgrep -f "$BIN" >/dev/null 2>&1 || break
+    pgrep -f "$PATTERN" >/dev/null 2>&1 || break
     sleep 0.5
   done
+  pkill -9 -f "$PATTERN" 2>/dev/null || true
 fi
 
 nohup "$BIN" \
   --bind "$BIND" \
-  --port "$ZONE_PORT" \
   --store "$STORE" \
   >>"$ROOT/logs/zone.log" 2>&1 &
 echo $! >"$ROOT/logs/zone.pid"
-echo "Fineage.Zone pid $(cat "$ROOT/logs/zone.pid") on ${BIND}:${ZONE_PORT}"
+echo "Fineage.Zone pid $(cat "$ROOT/logs/zone.pid") net ${BIND}:${NET_ZONE_PORT}"

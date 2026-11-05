@@ -1,0 +1,240 @@
+{
+  "reference": "L2J Mobius CT0 Interlude: stats/items 08600-08699 + 08952/08953 (immediate_effect, handler ItemSkills, item_skill) and stats/skills 2278-2285. Player.doPickupItem: herbs are used on pickup (ItemSkills) and destroyed, never added to the inventory. HealPercent/ManaHealPercent send SysMsg 1066/1068; buffs are 300 s abnormals (stats via skill-stat-effects.json).",
+  "hpRestoredMessage": 1066,
+  "mpRestoredMessage": 1068,
+  "items": [
+    {
+      "itemId": 8600,
+      "skills": [
+        {
+          "skillId": 2278,
+          "level": 1
+        }
+      ]
+    },
+    {
+      "itemId": 8601,
+      "skills": [
+        {
+          "skillId": 2278,
+          "level": 2
+        }
+      ]
+    },
+    {
+      "itemId": 8602,
+      "skills": [
+        {
+          "skillId": 2278,
+          "level": 3
+        }
+      ]
+    },
+    {
+      "itemId": 8603,
+      "skills": [
+        {
+          "skillId": 2279,
+          "level": 1
+        }
+      ]
+    },
+    {
+      "itemId": 8604,
+      "skills": [
+        {
+          "skillId": 2279,
+          "level": 2
+        }
+      ]
+    },
+    {
+      "itemId": 8605,
+      "skills": [
+        {
+          "skillId": 2279,
+          "level": 3
+        }
+      ]
+    },
+    {
+      "itemId": 8606,
+      "skills": [
+        {
+          "skillId": 2280,
+          "level": 1
+        }
+      ]
+    },
+    {
+      "itemId": 8607,
+      "skills": [
+        {
+          "skillId": 2281,
+          "level": 1
+        }
+      ]
+    },
+    {
+      "itemId": 8608,
+      "skills": [
+        {
+          "skillId": 2282,
+          "level": 1
+        }
+      ]
+    },
+    {
+      "itemId": 8609,
+      "skills": [
+        {
+          "skillId": 2283,
+          "level": 1
+        }
+      ]
+    },
+    {
+      "itemId": 8610,
+      "skills": [
+        {
+          "skillId": 2284,
+          "level": 1
+        }
+      ]
+    },
+    {
+      "itemId": 8611,
+      "skills": [
+        {
+          "skillId": 2285,
+          "level": 1
+        }
+      ]
+    },
+    {
+      "itemId": 8612,
+      "skills": [
+        {
+          "skillId": 2280,
+          "level": 1
+        },
+        {
+          "skillId": 2282,
+          "level": 1
+        },
+        {
+          "skillId": 2284,
+          "level": 1
+        }
+      ]
+    },
+    {
+      "itemId": 8613,
+      "skills": [
+        {
+          "skillId": 2281,
+          "level": 1
+        },
+        {
+          "skillId": 2283,
+          "level": 1
+        }
+      ]
+    },
+    {
+      "itemId": 8614,
+      "skills": [
+        {
+          "skillId": 2278,
+          "level": 3
+        },
+        {
+          "skillId": 2279,
+          "level": 3
+        }
+      ]
+    },
+    {
+      "itemId": 8952,
+      "skills": [
+        {
+          "skillId": 2278,
+          "level": 2
+        }
+      ]
+    },
+    {
+      "itemId": 8953,
+      "skills": [
+        {
+          "skillId": 2279,
+          "level": 2
+        }
+      ]
+    }
+  ],
+  "skills": [
+    {
+      "skillId": 2278,
+      "name": "Herb of Life",
+      "kind": "hpPercent",
+      "amount": [
+        15,
+        25,
+        100
+      ]
+    },
+    {
+      "skillId": 2279,
+      "name": "Herb of Mana",
+      "kind": "mpPercent",
+      "amount": [
+        11,
+        18,
+        100
+      ]
+    },
+    {
+      "skillId": 2280,
+      "name": "Herb of Power",
+      "kind": "buff",
+      "abnormalLevel": 3,
+      "durationSeconds": 300
+    },
+    {
+      "skillId": 2281,
+      "name": "Herb of Magic",
+      "kind": "buff",
+      "abnormalLevel": 3,
+      "durationSeconds": 300
+    },
+    {
+      "skillId": 2282,
+      "name": "Herb of Atk. Spd.",
+      "kind": "buff",
+      "abnormalLevel": 2,
+      "durationSeconds": 300
+    },
+    {
+      "skillId": 2283,
+      "name": "Herb of Casting Spd.",
+      "kind": "buff",
+      "abnormalLevel": 3,
+      "durationSeconds": 300
+    },
+    {
+      "skillId": 2284,
+      "name": "Herb of Critical Attack",
+      "kind": "buff",
+      "abnormalLevel": 3,
+      "durationSeconds": 300
+    },
+    {
+      "skillId": 2285,
+      "name": "Herb of Speed",
+      "kind": "buff",
+      "abnormalLevel": 2,
+      "durationSeconds": 300
+    }
+  ]
+}

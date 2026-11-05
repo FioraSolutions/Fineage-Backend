@@ -182,13 +182,20 @@ public static class ZoneHandoff
         }
     }
 
-    /// <summary>Zone TCP port written into the handoff ticket. <c>FINEAGE_ZONE_PORT</c>, otherwise <see cref="Port"/>.</summary>
+    /// <summary>
+    /// Zone TCP port written into the V2 handoff ticket.
+    /// <c>FINEAGE_ZONE_PORT</c> wins; with Net enabled the V2 listener defaults to 9877.
+    /// Net handoff uses <c>FINEAGE_NET_ZONE_PORT</c> / 9777 separately.
+    /// </summary>
     public static int AdvertisePort
     {
         get
         {
             string? text = Environment.GetEnvironmentVariable("FINEAGE_ZONE_PORT");
-            return int.TryParse(text, out int port) && port is >= 1 and <= 65535 ? port : Port;
+            if (int.TryParse(text, out int port) && port is >= 1 and <= 65535)
+                return port;
+            // Handoff points at the Net zone: it is the only transport the client speaks.
+            return Fineage.Net.Host.NetSettings.ZonePort;
         }
     }
 }

@@ -26,5 +26,7 @@
     <Content Include="Fixtures\**\*" CopyToOutputDirectory="PreserveNewest" />
     <Content Include="..\..\data\skills.json" Link="data/skills.json" CopyToOutputDirectory="PreserveNewest" />
     <Content Include="..\..\data\skill-trees.json" Link="data/skill-trees.json" CopyToOutputDirectory="PreserveNewest" />
+    <Content Include="..\..\data\buylists.json" Link="data\buylists.json" CopyToOutputDirectory="PreserveNewest" />
+    <Content Include="..\..\data\multisell.json" Link="data\multisell.json" CopyToOutputDirectory="PreserveNewest" />
   </ItemGroup>
 </Project>

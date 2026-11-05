@@ -166,6 +166,10 @@ public sealed class GameData
                 throw new InvalidDataException($"{path} item {row.Id} is a scroll but is not etc.");
             if (row.Enchantable && kind == ItemKind.Etc)
                 throw new InvalidDataException($"{path} item {row.Id} is etc and cannot be enchantable.");
+            if (row.Price < 0)
+                throw new InvalidDataException($"{path} item {row.Id} has a negative price.");
+            if (row.Weight < 0)
+                throw new InvalidDataException($"{path} item {row.Id} has a negative weight.");
 
             templates.Add(new ItemTemplate(
                 row.Id,
@@ -183,7 +187,27 @@ public sealed class GameData
                 equip,
                 row.CrystalCount,
                 row.Enchantable,
-                scroll));
+                scroll,
+                row.Price,
+                row.Weight,
+                row.Sellable ?? true,
+                Math.Max(0, row.PAtk),
+                Math.Max(0, row.MAtk),
+                Math.Max(0, row.PAtkSpd),
+                Math.Max(0, row.CritRate),
+                Math.Max(0, row.AttackRange),
+                Math.Max(0, row.RandomDamage),
+                Math.Max(0, row.MDef),
+                Math.Max(0, row.Soulshots),
+                Math.Max(0, row.ShieldDef),
+                Math.Max(0, row.ShieldRate),
+                Math.Max(0, row.ShieldEvasionPenalty),
+                row.Soulshot,
+                ParseCrystal(row.ShotGrade, path, row.Id),
+                Math.Max(0, row.Spiritshots),
+                row.Spiritshot,
+                row.BlessedSpiritshot,
+                row.Quest));
         }
 
         try
@@ -432,6 +456,34 @@ public sealed class GameData
         public bool Enchantable { get; set; }
         public JsonElement Equip { get; set; }
         public JsonElement Scroll { get; set; }
+        public int Price { get; set; }
+        public int Weight { get; set; }
+        /// <summary>Null when the file omits the flag. Omitted means the item can be sold.</summary>
+        public bool? Sellable { get; set; }
+        public bool Quest { get; set; }
+        /// <summary>Mobius weapon <c>set stat</c> values (replace the class fist base when equipped).</summary>
+        public int PAtk { get; set; }
+        public int MAtk { get; set; }
+        public int PAtkSpd { get; set; }
+        public int CritRate { get; set; }
+        /// <summary>Mobius <c>attack_range</c>: 40 melee, 80 polearm, 500 bow.</summary>
+        public int AttackRange { get; set; }
+        public int RandomDamage { get; set; }
+        /// <summary>Mobius jewel <c>add stat="mDef"</c>.</summary>
+        public int MDef { get; set; }
+        /// <summary>Mobius weapon <c>soulshots</c>: shots consumed per charge.</summary>
+        public int Soulshots { get; set; }
+        /// <summary>Mobius shield <c>sDef</c> / <c>rShld</c> / <c>sub rEvas</c>.</summary>
+        public int ShieldDef { get; set; }
+        public int ShieldRate { get; set; }
+        public int ShieldEvasionPenalty { get; set; }
+        /// <summary>Mobius etc item with <c>default_action SOULSHOT</c>.</summary>
+        public bool Soulshot { get; set; }
+        public string? ShotGrade { get; set; }
+        /// <summary>Mobius weapon <c>spiritshots</c> per cast; shot items <c>handler SpiritShot / BlessedSpiritShot</c>.</summary>
+        public int Spiritshots { get; set; }
+        public bool Spiritshot { get; set; }
+        public bool BlessedSpiritshot { get; set; }
     }
 
     sealed class KitFileDto

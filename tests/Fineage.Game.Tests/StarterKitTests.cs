@@ -5,58 +5,89 @@ namespace Fineage.Game.Tests;
 
 public class StarterKitTests
 {
+    static readonly int[] FighterBagIds =
+    [
+        43, 26, 34, 219, 68, 1835, 1538, 4627, 1539, 728, 736, 737
+    ];
+
+    static readonly int[] MysticBagIds =
+    [
+        44, 1101, 1104, 177, 3947, 1538, 4627, 1539, 728, 736, 737
+    ];
+
     [Fact]
-    public void Human_fighter_wears_sword_shirt_and_pants()
+    public void Human_fighter_matches_mobius_initial_equipment()
     {
         var data = GameData.LoadDefault();
         var kit = data.StarterKits.ForClass(0);
         Assert.Equal(
             [
-                new StarterKitEntry(2369, 1, true),
-                new StarterKitEntry(10, 1, false),
-                new StarterKitEntry(1146, 1, true),
-                new StarterKitEntry(1147, 1, true),
-                new StarterKitEntry(5588, 1, false)
+                new StarterKitEntry(43, 1, true),
+                new StarterKitEntry(26, 1, true),
+                new StarterKitEntry(34, 1, true),
+                new StarterKitEntry(219, 1, true),
+                new StarterKitEntry(68, 1, false),
+                new StarterKitEntry(1835, 5000, false),
+                new StarterKitEntry(1538, 50, false),
+                new StarterKitEntry(4627, 1, false),
+                new StarterKitEntry(1539, 100, false),
+                new StarterKitEntry(728, 100, false),
+                new StarterKitEntry(736, 10, false),
+                new StarterKitEntry(737, 10, false)
             ],
             kit.Entries);
 
         var inventory = data.CreateStarterInventory(0);
-        Assert.Equal([2369, 10, 1146, 1147, 5588], inventory.Items.Select(item => item.ItemId).ToArray());
+        Assert.Equal(FighterBagIds, inventory.Items.Select(item => item.ItemId).ToArray());
         Assert.Equal(PlayerInventory.FirstObjectId, inventory.Items[0].ObjectId);
         Assert.Equal(inventory.Items.Select(item => item.ObjectId).Distinct().Count(), inventory.Items.Count);
 
-        var sword = inventory.GetEquipped(PaperdollSlot.RHand);
-        var shirt = inventory.GetEquipped(PaperdollSlot.Chest);
-        var pants = inventory.GetEquipped(PaperdollSlot.Legs);
-        Assert.Equal(2369, sword!.ItemId);
-        Assert.Equal(PaperdollSlot.RHand, sword.EquippedSlot);
-        Assert.Equal(1146, shirt!.ItemId);
-        Assert.Equal(1147, pants!.ItemId);
-        Assert.Null(inventory.Items.Single(item => item.ItemId == 10).EquippedSlot);
-        Assert.Null(inventory.Items.Single(item => item.ItemId == 5588).EquippedSlot);
+        Assert.Equal(219, inventory.GetEquipped(PaperdollSlot.RHand)!.ItemId);
+        Assert.Equal(43, inventory.GetEquipped(PaperdollSlot.Head)!.ItemId);
+        Assert.Equal(26, inventory.GetEquipped(PaperdollSlot.Chest)!.ItemId);
+        Assert.Equal(34, inventory.GetEquipped(PaperdollSlot.Legs)!.ItemId);
+        Assert.Null(inventory.Items.Single(item => item.ItemId == 68).EquippedSlot);
+        Assert.Null(inventory.Items.Single(item => item.ItemId == 4627).EquippedSlot);
         Assert.Null(inventory.GetEquipped(PaperdollSlot.LHand));
     }
 
     [Fact]
-    public void Human_mystic_wears_wand_tunic_and_stockings()
+    public void Human_mystic_matches_mobius_initial_equipment()
     {
         var inventory = GameData.LoadDefault().CreateStarterInventory(10);
-        Assert.Equal([6, 425, 461, 5588], inventory.Items.Select(item => item.ItemId).ToArray());
-        Assert.Equal(6, inventory.GetEquipped(PaperdollSlot.RHand)!.ItemId);
+        Assert.Equal(MysticBagIds, inventory.Items.Select(item => item.ItemId).ToArray());
+        Assert.Equal(177, inventory.GetEquipped(PaperdollSlot.RHand)!.ItemId);
         Assert.True(inventory.GetEquipped(PaperdollSlot.RHand)!.Template.MagicWeapon);
-        Assert.Equal(425, inventory.GetEquipped(PaperdollSlot.Chest)!.ItemId);
-        Assert.Equal(17, inventory.GetEquipped(PaperdollSlot.Chest)!.Template.PDef);
-        Assert.Equal(461, inventory.GetEquipped(PaperdollSlot.Legs)!.ItemId);
-        Assert.Equal(10, inventory.GetEquipped(PaperdollSlot.Legs)!.Template.PDef);
-        Assert.Null(inventory.Items.Single(item => item.ItemId == 5588).EquippedSlot);
+        Assert.Equal(BodySlot.LrHand, inventory.GetEquipped(PaperdollSlot.RHand)!.Template.BodySlot);
+        Assert.Equal(44, inventory.GetEquipped(PaperdollSlot.Head)!.ItemId);
+        Assert.Equal(1101, inventory.GetEquipped(PaperdollSlot.Chest)!.ItemId);
+        Assert.Equal(1104, inventory.GetEquipped(PaperdollSlot.Legs)!.ItemId);
+        Assert.Null(inventory.Items.Single(item => item.ItemId == 4627).EquippedSlot);
+    }
+
+    [Fact]
+    public void Orc_fighter_equips_viper_fang_and_keeps_falchion_in_bag()
+    {
+        var inventory = GameData.LoadDefault().CreateStarterInventory(44);
+        Assert.Equal(257, inventory.GetEquipped(PaperdollSlot.RHand)!.ItemId);
+        Assert.Equal(BodySlot.LrHand, inventory.GetEquipped(PaperdollSlot.RHand)!.Template.BodySlot);
+        Assert.Equal(26, inventory.GetEquipped(PaperdollSlot.Chest)!.ItemId);
+        Assert.Null(inventory.Items.Single(item => item.ItemId == 68).EquippedSlot);
+    }
+
+    [Fact]
+    public void Dwarf_fighter_equips_iron_hammer()
+    {
+        var inventory = GameData.LoadDefault().CreateStarterInventory(53);
+        Assert.Equal(87, inventory.GetEquipped(PaperdollSlot.RHand)!.ItemId);
+        Assert.Equal(43, inventory.GetEquipped(PaperdollSlot.Head)!.ItemId);
     }
 
     [Theory]
     [InlineData(-1)]
     [InlineData(1)]
-    [InlineData(18)]
-    [InlineData(44)]
-    public void Unknown_class_gets_an_empty_kit(int classId)
+    [InlineData(19)]
+    public void Non_base_class_gets_an_empty_kit(int classId)
     {
         var data = GameData.LoadDefault();
         var kit = data.StarterKits.ForClass(classId);
@@ -81,9 +112,10 @@ public class StarterKitTests
     }
 
     [Fact]
-    public void Defined_kits_are_only_human_fighter_and_mystic()
+    public void Defined_kits_cover_every_base_class()
     {
-        var ids = GameData.LoadDefault().StarterKits.All.Select(kit => kit.ClassId).ToArray();
-        Assert.Equal([0, 10], ids);
+        var catalog = GameData.LoadDefault().Classes!;
+        var ids = GameData.LoadDefault().StarterKits.All.Select(kit => kit.ClassId).OrderBy(id => id).ToArray();
+        Assert.Equal(catalog.BaseClassIds, ids);
     }
 }

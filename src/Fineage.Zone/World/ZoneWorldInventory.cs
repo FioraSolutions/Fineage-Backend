@@ -34,6 +34,9 @@ public sealed partial class ZoneWorld
         var added = player.Inventory.Add(request.ItemId, request.Count);
         toSelf.Add(Pack(session, MsgType.InventoryUpdate,
             InventoryMessages.Update(InventoryChange.Add, added)));
+        // Grant is the one add path that does not call SaveInventory (the bag is persisted on leave), so the overload
+        // recompute has to be explicit here — otherwise a grant that crosses 50% leaves the pawn unpenalised.
+        RefreshWeightPenaltyAfterInventoryChange(session);
         ZoneLog.Info($"grant object={session.ObjectId} item={request.ItemId} count={request.Count}");
         return null;
     }

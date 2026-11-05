@@ -107,10 +107,11 @@ public sealed class NpcHtmlTests
 
         Assert.True(registry.Find("Quest")!.Handle(call with { Command = "Quest" }).ShowQuestList);
         Assert.True(registry.Find("Script")!.Handle(call with { Command = "Script" }).ShowQuestList);
-        Assert.Contains(
-            "not implemented yet",
-            registry.Find("Script FirstClassTransferTalk")!.Handle(call with { Command = "Script FirstClassTransferTalk" }).Html,
-            StringComparison.Ordinal);
+        // Named Mobius scripts go to the world (village masters); unknown ones fall back to the Unavailable page there.
+        var script = registry.Find("Quest FirstClassTransferTalk 30154_mystic.html")!.Handle(call with { Command = "Quest FirstClassTransferTalk 30154_mystic.html" });
+        Assert.Equal("FirstClassTransferTalk", script.ScriptName);
+        Assert.Equal("30154_mystic.html", script.ScriptEvent);
+        Assert.Equal("", registry.Find("Script FirstClassTransferTalk")!.Handle(call with { Command = "Script FirstClassTransferTalk" }).ScriptEvent);
         Assert.True(registry.Find("questlist")!.Handle(call with { Command = "questlist" }).ShowQuestList);
         var quest = registry.Find("Quest 999 accept")!.Handle(call with { Command = "Quest 999 accept" });
         Assert.True(quest.QuestAction);
@@ -121,18 +122,29 @@ public sealed class NpcHtmlTests
         Assert.Equal(999, talk.QuestId);
         Assert.Equal("", talk.QuestEvent);
 
-        Assert.Contains("Shop is not implemented yet.", registry.Find("Buy 1")!.Handle(call with { Command = "Buy 1" }).Html, StringComparison.Ordinal);
-        Assert.Contains("Teleport is not implemented yet.", registry.Find("goto 15")!.Handle(call with { Command = "goto 15" }).Html, StringComparison.Ordinal);
-        Assert.Contains("Teleport is not implemented yet.", registry.Find("showTeleports")!.Handle(call with { Command = "showTeleports" }).Html, StringComparison.Ordinal);
-        Assert.Contains("Shop is not implemented yet.", registry.Find("exc_multisell 003")!.Handle(call with { Command = "exc_multisell 003" }).Html, StringComparison.Ordinal);
-        Assert.Contains("Warehouse is not implemented yet.", registry.Find("DepositP")!.Handle(call with { Command = "DepositP" }).Html, StringComparison.Ordinal);
+        Assert.Equal(1, registry.Find("Buy 1")!.Handle(call with { Command = "Buy 1" }).BuyListId);
+        Assert.Equal(NpcServiceIntent.Teleport, registry.Find("goto 15")!.Handle(call with { Command = "goto 15" }).Service);
+        Assert.Equal("NORMAL", registry.Find("goto 15")!.Handle(call with { Command = "goto 15" }).ServiceArg);
+        Assert.Equal(15, registry.Find("goto 15")!.Handle(call with { Command = "goto 15" }).ServiceId);
+        Assert.Equal(NpcServiceIntent.TeleportList, registry.Find("showTeleports")!.Handle(call with { Command = "showTeleports" }).Service);
+        Assert.Equal(NpcServiceIntent.Teleport, registry.Find("teleport OTHER 0")!.Handle(call with { Command = "teleport OTHER 0" }).Service);
+        Assert.Equal("OTHER", registry.Find("teleport OTHER 0")!.Handle(call with { Command = "teleport OTHER 0" }).ServiceArg);
+        Assert.Equal(0, registry.Find("teleport OTHER 0")!.Handle(call with { Command = "teleport OTHER 0" }).ServiceId);
+        Assert.Contains("Teleport is not implemented yet.", registry.Find("showNoblesSelect")!.Handle(call with { Command = "showNoblesSelect" }).Html, StringComparison.Ordinal);
+        var exchange = registry.Find("exc_multisell 003")!.Handle(call with { Command = "exc_multisell 003" });
+        Assert.Equal(3, exchange.MultiSellListId);
+        Assert.True(exchange.MultiSellInventoryOnly);
+        Assert.Contains("Wear is not implemented yet.", registry.Find("Wear 3000100")!.Handle(call with { Command = "Wear 3000100" }).Html, StringComparison.Ordinal);
+        Assert.Equal(NpcServiceIntent.Deposit, registry.Find("DepositP")!.Handle(call with { Command = "DepositP" }).Service);
+        Assert.Equal(NpcServiceIntent.Withdraw, registry.Find("WithdrawP")!.Handle(call with { Command = "WithdrawP" }).Service);
         Assert.Contains("Warehouse is not implemented yet.", registry.Find("package_deposit")!.Handle(call with { Command = "package_deposit" }).Html, StringComparison.Ordinal);
-        Assert.Contains("Buff is not implemented yet.", registry.Find("SupportMagic")!.Handle(call with { Command = "SupportMagic" }).Html, StringComparison.Ordinal);
-        Assert.Null(registry.Find("TerritoryStatus"));
+        Assert.Equal(NpcServiceIntent.SupportMagic, registry.Find("SupportMagic")!.Handle(call with { Command = "SupportMagic" }).Service);
+        Assert.Equal(NpcServiceIntent.GiveBlessing, registry.Find("GiveBlessing")!.Handle(call with { Command = "GiveBlessing" }).Service);
+        Assert.IsType<TerritoryBypassHandler>(registry.Find("TerritoryStatus"));
 
         registry.Register(new ReplacingBuy());
         Assert.Equal("<html>custom</html>", registry.Find("Buy 3")!.Handle(call with { Command = "Buy 3" }).Html);
-        Assert.Contains("Shop is not implemented yet.", registry.Find("Sell")!.Handle(call with { Command = "Sell" }).Html, StringComparison.Ordinal);
+        Assert.True(registry.Find("Sell")!.Handle(call with { Command = "Sell" }).OpenSell);
     }
 
     [Fact]
@@ -178,21 +190,27 @@ public sealed class NpcHtmlTests
         await link.SendAsync(MsgType.BypassRequest, new BypassRequestMsg { NpcObjectId = MerchantObjectId, Command = "Buy 1" });
         var shop = await link.ReadAsync<NpcHtmlMsg>(MsgType.NpcHtml);
         Assert.Contains("Lector", shop.Html, StringComparison.Ordinal);
-        Assert.Contains("Shop is not implemented yet.", shop.Html, StringComparison.Ordinal);
+        Assert.Contains("I have no such list.", shop.Html, StringComparison.Ordinal);
 
         await link.SendAsync(MsgType.BypassRequest, new BypassRequestMsg
         {
             NpcObjectId = 0,
             Command = $"bypass -h npc_{MerchantObjectId}_goto 15"
         });
+        var gateNotice = await link.ReadAsync<SystemMessageMsg>(MsgType.SystemMessage);
+        Assert.Equal(NpcServiceProtocol.UnknownTeleport, gateNotice.Id);
         var gate = await link.ReadAsync<NpcHtmlMsg>(MsgType.NpcHtml);
-        Assert.Contains("Teleport is not implemented yet.", gate.Html, StringComparison.Ordinal);
+        Assert.Contains("not available", gate.Html, StringComparison.Ordinal);
 
         await link.SendAsync(MsgType.BypassRequest, new BypassRequestMsg { NpcObjectId = MerchantObjectId, Command = "DepositP" });
-        Assert.Contains("Warehouse is not implemented yet.", (await link.ReadAsync<NpcHtmlMsg>(MsgType.NpcHtml)).Html, StringComparison.Ordinal);
+        Assert.Contains("warehouse keeper", (await link.ReadAsync<NpcHtmlMsg>(MsgType.NpcHtml)).Html, StringComparison.OrdinalIgnoreCase);
 
         await link.SendAsync(MsgType.BypassRequest, new BypassRequestMsg { NpcObjectId = MerchantObjectId, Command = "SupportMagic" });
-        Assert.Contains("Buff is not implemented yet.", (await link.ReadAsync<NpcHtmlMsg>(MsgType.NpcHtml)).Html, StringComparison.Ordinal);
+        var buffNotice = await link.ReadAsync<SystemMessageMsg>(MsgType.SystemMessage);
+        Assert.Equal(NpcServiceProtocol.BuffLevelLow, buffNotice.Id);
+        var buffResult = await link.ReadAsync<NewbieBuffResultMsg>(MsgType.NewbieBuffResult);
+        Assert.Equal("low", buffResult.Refusal);
+        Assert.Contains("low level", (await link.ReadAsync<NpcHtmlMsg>(MsgType.NpcHtml)).Html, StringComparison.OrdinalIgnoreCase);
 
         await link.SendAsync(MsgType.BypassRequest, new BypassRequestMsg { NpcObjectId = MerchantObjectId, Command = "Chat 1" });
         Assert.Contains("page-one", (await link.ReadAsync<NpcHtmlMsg>(MsgType.NpcHtml)).Html, StringComparison.Ordinal);
@@ -215,7 +233,8 @@ public sealed class NpcHtmlTests
         Assert.Contains("I have nothing for you.", list.Html, StringComparison.Ordinal);
 
         await link.SendAsync(MsgType.BypassRequest, new BypassRequestMsg { NpcObjectId = MerchantObjectId, Command = "TerritoryStatus" });
-        Assert.Contains("not implemented yet.", (await link.ReadAsync<NpcHtmlMsg>(MsgType.NpcHtml)).Html, StringComparison.Ordinal);
+        // TerritoryStatus is live now (Mobius castle/lord/tax page); TI merchants belong to Gludio.
+        Assert.Contains("Gludio", (await link.ReadAsync<NpcHtmlMsg>(MsgType.NpcHtml)).Html, StringComparison.Ordinal);
         await link.CloseAsync();
     }
 

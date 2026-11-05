@@ -58,6 +58,25 @@ public sealed class LoginService
             if (!_classes.BaseRaceSet.Contains(race))
                 throw new InvalidDataException($"Race {race} is not a creatable race.");
         }
+
+        EnsurePlaytestTemplates();
+    }
+
+    /// <summary>
+    /// The nine Interlude starters must exist even when an allow-list is narrower.
+    /// A missing template or starter kit is a datapack error, not a silent Human-only create.
+    /// </summary>
+    void EnsurePlaytestTemplates()
+    {
+        foreach (var (classId, race) in CharacterCreateOptions.PlaytestStarters)
+        {
+            if (!_classes.TryGet(classId, out var template) || template == null || !template.IsBase || template.Race != race)
+                throw new InvalidDataException($"Interlude starter class {classId} (race {race}) is missing from the datapack.");
+            if (template.Spawns.Count == 0 || template.MaxHp <= 0 || template.MaxMp <= 0)
+                throw new InvalidDataException($"Interlude starter class {classId} has no level-1 stats or creation point.");
+            if (_game.StarterKits.ForClass(classId).IsEmpty)
+                throw new InvalidDataException($"Interlude starter class {classId} has no starter kit.");
+        }
     }
 
     /// <summary>Class ids this service will create. Defaults to every datapack base class.</summary>
@@ -80,7 +99,10 @@ public sealed class LoginService
         return LoginResult<string>.Success(cred.AccountName);
     }
 
-    /// <summary>Landing HTTP register. Username and email are stored in canonical form.</summary>
+    /// <summary>
+    /// Landing HTTP register. Username is required. A supplied email is stored in canonical form;
+    /// a missing or blank email is stored as null.
+    /// </summary>
     public LoginResult<string> RegisterLanding(string? username, string? email, string? password)
     {
         if (LandingAuth.ValidateUsername(username, out string user) is { } userError)
@@ -91,7 +113,8 @@ public sealed class LoginService
             return LoginResult<string>.Fail(passwordError, "Password was rejected.");
 
         var (hash, salt, iterations) = PasswordHasher.Hash(password!);
-        var status = _store.TryAddAccount(user, hash, salt, iterations, mail);
+        string? storedEmail = mail.Length == 0 ? null : mail;
+        var status = _store.TryAddAccount(user, hash, salt, iterations, storedEmail);
         return status switch
         {
             AddAccountStatus.Created => LoginResult<string>.Success(user),

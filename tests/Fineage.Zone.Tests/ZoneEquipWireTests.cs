@@ -44,10 +44,10 @@ public sealed class ZoneEquipWireTests
         Assert.Equal(0, entered.User.WeaponGradePenalty);
         Assert.Equal(0, entered.User.ArmorGradePenalty);
         Assert.Equal(0, entered.User.GradePenalty);
-        int sword = entered.Items.Items.Single(item => item.ItemId == 2369).ObjectId;
-        int dagger = entered.Items.Items.Single(item => item.ItemId == 10).ObjectId;
-        int guide = entered.Items.Items.Single(item => item.ItemId == 5588).ObjectId;
-        Assert.Equal(7, entered.Items.Items.Single(item => item.ItemId == 2369).EquippedSlot);
+        int sword = entered.Items.Items.Single(item => item.ItemId == 219).ObjectId;
+        int falchion = entered.Items.Items.Single(item => item.ItemId == 68).ObjectId;
+        int dice = entered.Items.Items.Single(item => item.ItemId == 4627).ObjectId;
+        Assert.Equal(7, entered.Items.Items.Single(item => item.ItemId == 219).EquippedSlot);
 
         await actor.SendRawAsync((ushort)MsgType.UseItem, []);
         Assert.Equal("bad_request", (await actor.ExpectErrorAsync()).Code);
@@ -55,7 +55,7 @@ public sealed class ZoneEquipWireTests
         await actor.SendAsync(MsgType.UseItem, new UseItemMsg { ObjectId = 42 });
         Assert.Equal(InventoryProtocol.NotOwned, (await actor.ExpectErrorAsync()).Code);
 
-        await actor.SendAsync(MsgType.UseItem, new UseItemMsg { ObjectId = guide });
+        await actor.SendAsync(MsgType.UseItem, new UseItemMsg { ObjectId = dice });
         Assert.Equal(InventoryProtocol.NotEquippable, (await actor.ExpectErrorAsync()).Code);
 
         await actor.SendAsync(MsgType.UnequipItem, new UnequipItemMsg { PaperdollSlot = 17 });
@@ -64,29 +64,29 @@ public sealed class ZoneEquipWireTests
         await actor.SendAsync(MsgType.UnequipItem, new UnequipItemMsg { PaperdollSlot = 8 });
         Assert.Equal(InventoryProtocol.Empty, (await actor.ExpectErrorAsync()).Code);
 
-        await actor.SendAsync(MsgType.UseItem, new UseItemMsg { ObjectId = dagger });
+        await actor.SendAsync(MsgType.UseItem, new UseItemMsg { ObjectId = falchion });
         var update = await actor.ExpectAsync<InventoryUpdateMsg>(MsgType.InventoryUpdate);
         var user = await actor.ExpectAsync<UserInfoMsg>(MsgType.UserInfo);
-        Assert.Contains(update.Changes, row => row.Change == InventoryChange.Modify && row.ObjectId == dagger && row.EquippedSlot == 7 && row.ItemId == 10);
-        Assert.Contains(update.Changes, row => row.Change == InventoryChange.Modify && row.ObjectId == sword && row.EquippedSlot == -1 && row.ItemId == 2369);
-        Assert.Equal(10, user.Paperdoll[7].ItemId);
-        Assert.Equal(dagger, user.Paperdoll[7].ObjectId);
-        Assert.Equal(1146, user.Paperdoll[10].ItemId);
+        Assert.Contains(update.Changes, row => row.Change == InventoryChange.Modify && row.ObjectId == falchion && row.EquippedSlot == 7 && row.ItemId == 68);
+        Assert.Contains(update.Changes, row => row.Change == InventoryChange.Modify && row.ObjectId == sword && row.EquippedSlot == -1 && row.ItemId == 219);
+        Assert.Equal(68, user.Paperdoll[7].ItemId);
+        Assert.Equal(falchion, user.Paperdoll[7].ObjectId);
+        Assert.Equal(26, user.Paperdoll[10].ItemId);
 
         var saved = host.Store.FindById(ticket.Value.Account, ticket.Value.CharacterId);
-        Assert.Contains(saved!.Items!, item => item.ItemId == 10 && item.EquippedSlot == 7);
-        Assert.Contains(saved.Items!, item => item.ItemId == 2369 && item.EquippedSlot == -1);
+        Assert.Contains(saved!.Items!, item => item.ItemId == 68 && item.EquippedSlot == 7);
+        Assert.Contains(saved.Items!, item => item.ItemId == 219 && item.EquippedSlot == -1);
 
-        await actor.SendAsync(MsgType.UseItem, new UseItemMsg { ObjectId = dagger });
+        await actor.SendAsync(MsgType.UseItem, new UseItemMsg { ObjectId = falchion });
         update = await actor.ExpectAsync<InventoryUpdateMsg>(MsgType.InventoryUpdate);
         user = await actor.ExpectAsync<UserInfoMsg>(MsgType.UserInfo);
-        Assert.Contains(update.Changes, row => row.ObjectId == dagger && row.EquippedSlot == -1);
+        Assert.Contains(update.Changes, row => row.ObjectId == falchion && row.EquippedSlot == -1);
         Assert.Equal(0, user.Paperdoll[7].ItemId);
 
         Assert.True(host.World.TrySetPlayerDead(ticket.Value.CharacterId, true));
         await actor.SendAsync(MsgType.UnequipItem, new UnequipItemMsg { PaperdollSlot = 10 });
         Assert.Equal(InventoryProtocol.Dead, (await actor.ExpectErrorAsync()).Code);
-        Assert.Contains(host.Store.FindById(ticket.Value.Account, ticket.Value.CharacterId)!.Items!, item => item.ItemId == 1146 && item.EquippedSlot == 10);
+        Assert.Contains(host.Store.FindById(ticket.Value.Account, ticket.Value.CharacterId)!.Items!, item => item.ItemId == 26 && item.EquippedSlot == 10);
     }
 
     [Fact]
@@ -107,20 +107,20 @@ public sealed class ZoneEquipWireTests
         var arrived = await left.ExpectAsync<CharInfoMsg>(MsgType.CharInfo);
         Assert.Equal(mystic.Value.CharacterId, arrived.ObjectId);
 
-        int dagger = leftEnter.Items.Items.Single(item => item.ItemId == 10).ObjectId;
-        await left.SendAsync(MsgType.UseItem, new UseItemMsg { ObjectId = dagger });
+        int falchion = leftEnter.Items.Items.Single(item => item.ItemId == 68).ObjectId;
+        await left.SendAsync(MsgType.UseItem, new UseItemMsg { ObjectId = falchion });
         await left.ExpectAsync<InventoryUpdateMsg>(MsgType.InventoryUpdate);
         var user = await left.ExpectAsync<UserInfoMsg>(MsgType.UserInfo);
         var seen = await right.ExpectAsync<CharInfoMsg>(MsgType.CharInfo);
 
         Assert.Equal(fighter.Value.CharacterId, seen.ObjectId);
         Assert.Equal(17, seen.Paperdoll.Length);
-        Assert.Equal(10, seen.Paperdoll[7]);
-        Assert.Equal(1146, seen.Paperdoll[10]);
-        Assert.Equal(1147, seen.Paperdoll[11]);
-        Assert.Equal(10, user.Paperdoll[7].ItemId);
-        Assert.Equal(6, rightEnter.User.Paperdoll[7].ItemId);
-        Assert.Equal(6, arrived.Paperdoll[7]);
+        Assert.Equal(68, seen.Paperdoll[7]);
+        Assert.Equal(26, seen.Paperdoll[10]);
+        Assert.Equal(34, seen.Paperdoll[11]);
+        Assert.Equal(68, user.Paperdoll[7].ItemId);
+        Assert.Equal(177, rightEnter.User.Paperdoll[7].ItemId);
+        Assert.Equal(177, arrived.Paperdoll[7]);
     }
 
     [Fact]

@@ -1,9 +1,11 @@
+using Fineage.Zone.Combat;
 using System.Net;
 using System.Net.Sockets;
 using Fineage.Login;
 using Fineage.Protocol;
 using Fineage.Zone.Clan;
 using Fineage.Zone.Interest;
+using Fineage.Zone.Spawns;
 using Fineage.Zone.World;
 using MessagePack;
 using Xunit;
@@ -306,34 +308,81 @@ public class ZoneClanTests
         Assert.Equal(ClanProtocol.RecruitPenalty, (await ka.ExpectErrorAsync()).Code);
     }
 
+    /// <summary>Object id of the training dummy the combat-stance test swings at.</summary>
+    const int CombatDummyId = 9_000_101;
+    const int CombatDummyMaxHp = 1_000_000;
+
+    /// <summary>
+    /// One-spawn map for the combat-stance test, standing where Cedric's first gremlin would be: a dummy that
+    /// outlives a level-10 swing (<see cref="CombatDummyMaxHp"/>), never swings back (Pspd 1 → first retaliation
+    /// 250 s out), is not aggressive, calls no clan help and drops nothing. The stance test asserts on the clan
+    /// packet sequence, so the target must not manufacture Die / Attack / kill-reward packets of its own.
+    /// </summary>
+    static SpawnCatalog CombatDummyMap(int x, int y, int z) =>
+        SpawnCatalog.From(new Dictionary<string, SpawnMapDefinition>
+        {
+            [SpawnCatalog.DefaultMapId] = new(SpawnCatalog.DefaultMapId, Enabled: true,
+            [
+                new SpawnNpcDefinition(CombatDummyId, TalkingIsland.GremlinNpcId, "Training Dummy", x, y, z, 0,
+                    Attackable: true, MaxHp: CombatDummyMaxHp, RunSpeed: 80f, WalkSpeed: 40f,
+                    RespawnDelaySeconds: 60, RespawnRandomSeconds: 0,
+                    Level: 1, PDef: 44.444, AttackSpeed: 1,
+                    Aggressive: false, AggroRange: 0, ClanHelpRange: 0)
+            ])
+        });
+
+    /// <summary>Pinned combat rolls: <c>Next(1000)</c> 0 always lands (0 &lt; hit chance) and the damage spread is 1.0.</summary>
+    sealed class AlwaysHitRandom : Random
+    {
+        public override int Next(int maxValue) => 0;
+        public override int Next(int minValue, int maxValue) => 0;
+    }
+
     [Fact]
     public async Task Combat_blocks_leave_and_dismiss_until_the_stance_ends()
     {
         await using var fx = await ClanFixture.Open();
         var leader = fx.LevelTen("leader", "Leader", HumanClasses.Fighter);
         var member = fx.LevelTen("member", "Member", HumanClasses.Mystic);
-        var gremlin = TalkingIsland.Gremlins[0];
-        Assert.True(fx.Store.TrySavePresence(member.Account, member.CharacterId, gremlin.X, gremlin.Y, gremlin.Z, null));
-        Assert.True(fx.Store.TrySavePresence(leader.Account, leader.CharacterId, gremlin.X, gremlin.Y, gremlin.Z, null));
-        await using var host = fx.Host();
+        var spot = TalkingIsland.Gremlins[0];
+        Assert.True(fx.Store.TrySavePresence(member.Account, member.CharacterId, spot.X, spot.Y, spot.Z, null));
+        Assert.True(fx.Store.TrySavePresence(leader.Account, leader.CharacterId, spot.X, spot.Y, spot.Z, null));
+        var world = new ZoneWorld(
+            accounts: fx.Store,
+            clock: fx.Clock.Read,
+            spawnCatalog: CombatDummyMap(spot.X, spot.Y, spot.Z),
+            combatRandom: new AlwaysHitRandom());
+        await using var host = fx.Host(world);
         await using var left = await ClanPeer.ConnectAsync(host.Port);
         await using var right = await ClanPeer.ConnectAsync(host.Port);
         await left.AuthAsync(leader);
         await right.AuthAsync(member);
-        await left.EnterAsync();
-        await right.EnterAsync(others: 1);
+        // The custom map has the dummy plus the two bootstrapped villagers.
+        int npcs = 1 + TalkingIsland.Villagers.Length;
+        await left.EnterAsync(npcs: npcs);
+        await right.EnterAsync(npcs: npcs, others: 1);
         await left.ExpectAsync<CharInfoMsg>(MsgType.CharInfo);
         await left.SendAsync(MsgType.ClanCreateRequest, new ClanCreateRequestMsg { Name = "Fine" });
         await left.ReadCreate();
         await right.ExpectAsync<CharInfoMsg>(MsgType.CharInfo);
         await InviteAccept(left, right, leader.CharacterId);
 
-        await right.SendAsync(MsgType.AttackRequest, new AttackRequestMsg { TargetObjectId = gremlin.ObjectId });
-        await right.ExpectAsync<AttackMsg>(MsgType.Attack);
-        await right.ExpectAsync<StatusUpdateMsg>(MsgType.StatusUpdate);
-        await right.ExpectAsync<SystemMessageMsg>(MsgType.SystemMessage);
+        await right.SendAsync(MsgType.AttackRequest, new AttackRequestMsg { TargetObjectId = CombatDummyId });
+        var swing = await right.ExpectAsync<AttackMsg>(MsgType.Attack);
         await left.ExpectAsync<AttackMsg>(MsgType.Attack);
+        Assert.Equal(CombatDummyId, swing.TargetObjectId);
+        Assert.NotEqual(ZoneCombat.HitFlagMiss, swing.Flags);
+        // Damage lands at melee hitTime, not with the Attack packet.
+        fx.Clock.Advance(TimeSpan.FromMilliseconds(ZoneCombat.PlayerMeleeHitDelayMs));
+        var hp = await right.ExpectAsync<StatusUpdateMsg>(MsgType.StatusUpdate);
         await left.ExpectAsync<StatusUpdateMsg>(MsgType.StatusUpdate);
+        Assert.Equal(CombatDummyId, hp.ObjectId);
+        Assert.True(hp.Values[0] < CombatDummyMaxHp && hp.Values[0] > 0);
+
+        // Drop the running auto-attack before the clock jumps past the stance: ticking 15 s with the intention
+        // still set would make the fighter swing again and interleave Attack/StatusUpdate with the clan packets.
+        await right.SendAsync(MsgType.SelectTarget, new SelectTargetMsg { TargetObjectId = member.CharacterId });
+        await right.ExpectAsync<MyTargetSelectedMsg>(MsgType.MyTargetSelected);
 
         await right.SendAsync(MsgType.ClanLeaveRequest, new ClanLeaveRequestMsg());
         Assert.Equal(ClanProtocol.Combat, (await right.ExpectErrorAsync()).Code);

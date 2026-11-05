@@ -49,16 +49,16 @@ public static class ZoneMultiplayerAcceptance
         var leftSpawn = await left.EnterAsync(TalkingIsland.NpcCount, expectOthers: 0).ConfigureAwait(false);
         if (leftSpawn.Spawned.ObjectId != fighter.CharacterId || leftSpawn.Spawned.Name != fighter.CharacterName)
             throw new InvalidOperationException("fighter spawn mismatch");
-        ExpectGear(leftSpawn, fighter, weaponId: 2369);
+        ExpectGear(leftSpawn, fighter, weaponId: 219);
 
         var rightSpawn = await right.EnterAsync(fighter, mystic, TalkingIsland.NpcCount).ConfigureAwait(false);
-        ExpectGear(rightSpawn, mystic, weaponId: 6);
+        ExpectGear(rightSpawn, mystic, weaponId: 177);
         var seen = await left.ExpectAsync<CharInfoMsg>(MsgType.CharInfo).ConfigureAwait(false);
         ExpectChar(seen, mystic, rightSpawn.Spawned.X, rightSpawn.Spawned.Y, rightSpawn.Spawned.Z);
         ExpectChar(rightSpawn.Others[0], fighter, leftSpawn.Spawned.X, leftSpawn.Spawned.Y, leftSpawn.Spawned.Z);
-        if (seen.Paperdoll.Length != InventoryMessages.PaperdollSlotCount || seen.Paperdoll[7] != 6)
+        if (seen.Paperdoll.Length != InventoryMessages.PaperdollSlotCount || seen.Paperdoll[7] != 177)
             throw new InvalidOperationException($"mystic char paperdoll rhand={PaperdollAt(seen, 7)}");
-        if (rightSpawn.Others[0].Paperdoll.Length != InventoryMessages.PaperdollSlotCount || rightSpawn.Others[0].Paperdoll[7] != 2369)
+        if (rightSpawn.Others[0].Paperdoll.Length != InventoryMessages.PaperdollSlotCount || rightSpawn.Others[0].Paperdoll[7] != 219)
             throw new InvalidOperationException($"fighter char paperdoll rhand={PaperdollAt(rightSpawn.Others[0], 7)}");
         ExpectDistinctItems(leftSpawn, rightSpawn, fighter.CharacterId, mystic.CharacterId);
         SameGremlins(leftSpawn.Npcs, rightSpawn.Npcs);
@@ -114,13 +114,13 @@ public static class ZoneMultiplayerAcceptance
 
         await left.SendAsync(MsgType.MoveTo, new MoveToMsg
         {
-            DestX = leftSpawn.Spawned.X + TalkingIsland.MaxStep,
+            DestX = leftSpawn.Spawned.X + MoveLimits.MaxStep,
             DestY = leftSpawn.Spawned.Y,
             DestZ = leftSpawn.Spawned.Z
         }).ConfigureAwait(false);
 
         var ack = await left.ExpectAsync<MoveToMsg>(MsgType.MoveToAck).ConfigureAwait(false);
-        if (ack.ObjectId != fighter.CharacterId || ack.DestX != leftSpawn.Spawned.X + TalkingIsland.MaxStep)
+        if (ack.ObjectId != fighter.CharacterId || ack.DestX != leftSpawn.Spawned.X + MoveLimits.MaxStep)
             throw new InvalidOperationException("aoi move ack mismatch");
 
         var dropped = new List<int>();
@@ -144,7 +144,10 @@ public static class ZoneMultiplayerAcceptance
 
         var world = new ZoneWorld(
             spawnRandom: new Random(MobiusDropTestSeed.DefaultSeed),
-            dropRandom: new Random(MobiusDropTestSeed.DefaultSeed));
+            dropRandom: new Random(MobiusDropTestSeed.DefaultSeed),
+            // The scripted loop below accounts for mob HP swing by swing; passive monster regen (D30) would
+            // interleave 3 s heals into that bookkeeping. Regen itself is covered by NpcRegenTests.
+            npcRegen: false);
         await using var zone = ZoneHost.Start(tokens, world);
         await using var attacker = await ZonePeer.ConnectAsync(zone.Port).ConfigureAwait(false);
         await using var observer = await ZonePeer.ConnectAsync(zone.Port).ConfigureAwait(false);
@@ -165,30 +168,42 @@ public static class ZoneMultiplayerAcceptance
         if (target.ObjectId != gremlin.ObjectId)
             throw new InvalidOperationException($"target select was {target.ObjectId}");
 
-        int hitsToKill = TalkingIsland.GremlinMaxHp / ZoneCombat.SampleMeleeDamage;
-        for (int hit = 1; hit <= hitsToKill; hit++)
+        // Damage comes from the Mobius stat pipeline (kit weapon, STR, level): swing until the gremlin hits 0.
+        int expectedHp = TalkingIsland.GremlinMaxHp;
+        while (expectedHp > 0)
         {
             await attacker.SendAsync(MsgType.AttackRequest, new AttackRequestMsg()).ConfigureAwait(false);
             var atkLeft = await attacker.ExpectAsync<AttackMsg>(MsgType.Attack).ConfigureAwait(false);
-            var hpLeft = await attacker.ExpectAsync<StatusUpdateMsg>(MsgType.StatusUpdate).ConfigureAwait(false);
-            var dmgLeft = await attacker.ExpectAsync<SystemMessageMsg>(MsgType.SystemMessage).ConfigureAwait(false);
             var atkRight = await observer.ExpectAsync<AttackMsg>(MsgType.Attack).ConfigureAwait(false);
-            var hpRight = await observer.ExpectAsync<StatusUpdateMsg>(MsgType.StatusUpdate).ConfigureAwait(false);
+            // Mobius calcHitMiss: a miss carries flag 0x80, damage 0 and no StatusUpdate.
+            if (atkLeft.Flags == ZoneCombat.HitFlagMiss)
+            {
+                if (atkLeft.Damage != 0 || atkRight.Flags != ZoneCombat.HitFlagMiss)
+                    throw new InvalidOperationException($"miss mismatch d={atkLeft.Damage} f={atkRight.Flags}");
+                continue;
+            }
+            var hpLeft = await attacker.ExpectStatusForAsync(gremlin.ObjectId).ConfigureAwait(false);
+            var hpRight = await observer.ExpectStatusForAsync(gremlin.ObjectId).ConfigureAwait(false);
 
-            int expectedHp = TalkingIsland.GremlinMaxHp - hit * ZoneCombat.SampleMeleeDamage;
+            expectedHp = Math.Max(0, expectedHp - atkLeft.Damage);
             ExpectCombat(gremlin.ObjectId, fighter.CharacterId, expectedHp, atkLeft, hpLeft);
             ExpectCombat(gremlin.ObjectId, fighter.CharacterId, expectedHp, atkRight, hpRight);
-            ExpectDamageLine(dmgLeft, ZoneCombat.SampleMeleeDamage);
         }
 
-        var delLeft = await attacker.ExpectAsync<DeleteObjectMsg>(MsgType.DeleteObject).ConfigureAwait(false);
-        var delRight = await observer.ExpectAsync<DeleteObjectMsg>(MsgType.DeleteObject).ConfigureAwait(false);
+        // Mobius doDie: Die broadcast (death anim); corpse DeleteObject comes after DEFAULT_CORPSE_TIME.
+        var delLeft = await attacker.ExpectAsync<DieMsg>(MsgType.Die).ConfigureAwait(false);
+        var delRight = await observer.ExpectAsync<DieMsg>(MsgType.Die).ConfigureAwait(false);
         if (delLeft.ObjectId != gremlin.ObjectId || delRight.ObjectId != gremlin.ObjectId)
-            throw new InvalidOperationException($"delete expected {gremlin.ObjectId}");
+            throw new InvalidOperationException($"die expected {gremlin.ObjectId}");
 
-        var dropLeft = await attacker.ExpectAsync<SpawnItemMsg>(MsgType.SpawnItem).ConfigureAwait(false);
-        var dropRight = await observer.ExpectAsync<SpawnItemMsg>(MsgType.SpawnItem).ConfigureAwait(false);
+        var dropLeft = await attacker.ExpectAsync<DropItemMsg>(MsgType.DropItem).ConfigureAwait(false);
+        var dropRight = await observer.ExpectAsync<DropItemMsg>(MsgType.DropItem).ConfigureAwait(false);
         ExpectGroundDrop(dropLeft, dropRight, gremlin);
+
+        // Kill reward is to the killer only: SystemMessage 95, StatusUpdate (exp/sp), UserInfo.
+        _ = await attacker.ExpectAsync<SystemMessageMsg>(MsgType.SystemMessage).ConfigureAwait(false);
+        _ = await attacker.ExpectAsync<StatusUpdateMsg>(MsgType.StatusUpdate).ConfigureAwait(false);
+        _ = await attacker.ExpectAsync<UserInfoMsg>(MsgType.UserInfo).ConfigureAwait(false);
 
         await attacker.SendAsync(MsgType.Say, new SayMsg { Text = "gg", ChatType = ChatProtocol.Shout }).ConfigureAwait(false);
         ExpectSay(await attacker.ExpectAsync<CreatureSayMsg>(MsgType.CreatureSay).ConfigureAwait(false), fighter, "gg", ChatProtocol.Shout);
@@ -207,7 +222,10 @@ public static class ZoneMultiplayerAcceptance
 
         var world = new ZoneWorld(
             spawnRandom: new Random(MobiusDropTestSeed.DefaultSeed),
-            dropRandom: new Random(MobiusDropTestSeed.DefaultSeed));
+            dropRandom: new Random(MobiusDropTestSeed.DefaultSeed),
+            // The scripted loop below accounts for mob HP swing by swing; passive monster regen (D30) would
+            // interleave 3 s heals into that bookkeeping. Regen itself is covered by NpcRegenTests.
+            npcRegen: false);
         await using var zone = ZoneHost.Start(tokens, world);
         await using var left = await ZonePeer.ConnectAsync(zone.Port).ConfigureAwait(false);
         await using var right = await ZonePeer.ConnectAsync(zone.Port).ConfigureAwait(false);
@@ -226,21 +244,24 @@ public static class ZoneMultiplayerAcceptance
             .ConfigureAwait(false);
         _ = await left.ExpectAsync<MyTargetSelectedMsg>(MsgType.MyTargetSelected).ConfigureAwait(false);
 
-        int hitsToKill = TalkingIsland.GremlinMaxHp / ZoneCombat.SampleMeleeDamage;
-        for (int hit = 1; hit <= hitsToKill; hit++)
+        for (int hp = TalkingIsland.GremlinMaxHp; hp > 0;)
         {
             await left.SendAsync(MsgType.AttackRequest, new AttackRequestMsg()).ConfigureAwait(false);
-            _ = await left.ExpectAsync<AttackMsg>(MsgType.Attack).ConfigureAwait(false);
-            _ = await left.ExpectAsync<StatusUpdateMsg>(MsgType.StatusUpdate).ConfigureAwait(false);
-            _ = await left.ExpectAsync<SystemMessageMsg>(MsgType.SystemMessage).ConfigureAwait(false);
+            var swing = await left.ExpectAsync<AttackMsg>(MsgType.Attack).ConfigureAwait(false);
+            if (swing.Flags == ZoneCombat.HitFlagMiss)
+            {
+                _ = await right.ExpectAsync<AttackMsg>(MsgType.Attack).ConfigureAwait(false);
+                continue;
+            }
+            hp = (await left.ExpectStatusForAsync(gremlin.ObjectId).ConfigureAwait(false)).Values[0];
             _ = await right.ExpectAsync<AttackMsg>(MsgType.Attack).ConfigureAwait(false);
-            _ = await right.ExpectAsync<StatusUpdateMsg>(MsgType.StatusUpdate).ConfigureAwait(false);
+            _ = await right.ExpectStatusForAsync(gremlin.ObjectId).ConfigureAwait(false);
         }
 
-        _ = await left.ExpectAsync<DeleteObjectMsg>(MsgType.DeleteObject).ConfigureAwait(false);
-        _ = await right.ExpectAsync<DeleteObjectMsg>(MsgType.DeleteObject).ConfigureAwait(false);
-        var dropLeft = await left.ExpectAsync<SpawnItemMsg>(MsgType.SpawnItem).ConfigureAwait(false);
-        var dropRight = await right.ExpectAsync<SpawnItemMsg>(MsgType.SpawnItem).ConfigureAwait(false);
+        _ = await left.ExpectAsync<DieMsg>(MsgType.Die).ConfigureAwait(false);
+        _ = await right.ExpectAsync<DieMsg>(MsgType.Die).ConfigureAwait(false);
+        var dropLeft = await left.ExpectAsync<DropItemMsg>(MsgType.DropItem).ConfigureAwait(false);
+        var dropRight = await right.ExpectAsync<DropItemMsg>(MsgType.DropItem).ConfigureAwait(false);
         ExpectGroundDrop(dropLeft, dropRight, gremlin);
 
         await left.SendAsync(MsgType.PickupRequest, new PickupRequestMsg { ObjectId = dropLeft.ObjectId })
@@ -256,6 +277,8 @@ public static class ZoneMultiplayerAcceptance
         var expected = MobiusDropTestSeed.ExpectedGremlinDeathDrop();
         if (row.Change != InventoryChange.Add || row.ItemId != expected.ItemId || row.Count != expected.Count)
             throw new InvalidOperationException($"inventory add item={row.ItemId} count={row.Count}");
+        // Mobius "You have obtained ..." after the pickup.
+        _ = await left.ExpectAsync<SystemMessageMsg>(MsgType.SystemMessage).ConfigureAwait(false);
 
         left.ExpectQuiet();
         right.ExpectQuiet();
@@ -270,7 +293,7 @@ public static class ZoneMultiplayerAcceptance
         var login = new LoginService(JsonAccountStore.InMemory(), tokens);
         var fighter = Play(login, "spoil1", "Spoiler", HumanClasses.Fighter);
 
-        var world = new ZoneWorld(spawnRandom: new Random(901), dropRandom: new Random(901));
+        var world = new ZoneWorld(spawnRandom: new Random(901), dropRandom: new Random(901), npcRegen: false);
         await using var zone = ZoneHost.Start(tokens, world);
         await using var peer = await ZonePeer.ConnectAsync(zone.Port).ConfigureAwait(false);
         await peer.AuthAsync(fighter).ConfigureAwait(false);
@@ -280,21 +303,28 @@ public static class ZoneMultiplayerAcceptance
         await peer.MoveNearAsync(gremlin).ConfigureAwait(false);
         await peer.SendAsync(MsgType.AdminSpoilTarget, new AdminSpoilTargetMsg { TargetObjectId = gremlin.ObjectId })
             .ConfigureAwait(false);
+        var spoiled = await peer.ExpectAsync<SystemMessageMsg>(MsgType.SystemMessage).ConfigureAwait(false);
+        if (spoiled.Id != 612)
+            throw new InvalidOperationException($"spoil sysmsg {spoiled.Id}");
 
         await peer.SendAsync(MsgType.SelectTarget, new SelectTargetMsg { TargetObjectId = gremlin.ObjectId })
             .ConfigureAwait(false);
         _ = await peer.ExpectAsync<MyTargetSelectedMsg>(MsgType.MyTargetSelected).ConfigureAwait(false);
 
-        int hits = TalkingIsland.GremlinMaxHp / ZoneCombat.SampleMeleeDamage;
-        for (int hit = 0; hit < hits; hit++)
+        for (int hp = TalkingIsland.GremlinMaxHp; hp > 0;)
         {
             await peer.SendAsync(MsgType.AttackRequest, new AttackRequestMsg()).ConfigureAwait(false);
-            _ = await peer.ExpectAsync<AttackMsg>(MsgType.Attack).ConfigureAwait(false);
-            _ = await peer.ExpectAsync<StatusUpdateMsg>(MsgType.StatusUpdate).ConfigureAwait(false);
-            _ = await peer.ExpectAsync<SystemMessageMsg>(MsgType.SystemMessage).ConfigureAwait(false);
+            var swing = await peer.ExpectAsync<AttackMsg>(MsgType.Attack).ConfigureAwait(false);
+            if (swing.Flags == ZoneCombat.HitFlagMiss)
+            {
+                
+                continue;
+            }
+            hp = (await peer.ExpectStatusForAsync(gremlin.ObjectId).ConfigureAwait(false)).Values[0];
         }
 
-        _ = await peer.ExpectAsync<SpawnItemMsg>(MsgType.SpawnItem).ConfigureAwait(false);
+        _ = await peer.ExpectAsync<DieMsg>(MsgType.Die).ConfigureAwait(false);
+        _ = await peer.ExpectAsync<DropItemMsg>(MsgType.DropItem).ConfigureAwait(false);
 
         await peer.SendAsync(MsgType.AdminSweepCorpse, new AdminSweepCorpseMsg { TargetObjectId = gremlin.ObjectId })
             .ConfigureAwait(false);
@@ -308,15 +338,17 @@ public static class ZoneMultiplayerAcceptance
         peer.ExpectQuiet();
     }
 
-    static void ExpectGroundDrop(SpawnItemMsg left, SpawnItemMsg right, NpcInfoMsg gremlin)
+    static void ExpectGroundDrop(DropItemMsg left, DropItemMsg right, NpcInfoMsg gremlin)
     {
         var expected = MobiusDropTestSeed.ExpectedGremlinDeathDrop();
         if (left.ObjectId != right.ObjectId || left.ObjectId < PlayerInventory.FirstObjectId)
             throw new InvalidOperationException($"drop object id {left.ObjectId}/{right.ObjectId}");
         if (left.ItemId != expected.ItemId || left.Count != expected.Count || !left.Stackable)
             throw new InvalidOperationException($"drop item={left.ItemId} count={left.Count} stackable={left.Stackable}");
-        if (left.X != gremlin.X || left.Y != gremlin.Y || left.Z != gremlin.Z)
-            throw new InvalidOperationException($"drop @ {left.X},{left.Y},{left.Z} expected gremlin tile");
+        // Mobius randDropLim: loot scatters within ±70 of the corpse; both clients see the same spot.
+        int lim = World.ZoneWorld.DeathDropScatter;
+        if (left.X != right.X || left.Y != right.Y || Math.Abs(left.X - gremlin.X) > lim || Math.Abs(left.Y - gremlin.Y) > lim || left.Z != gremlin.Z)
+            throw new InvalidOperationException($"drop @ {left.X},{left.Y},{left.Z} expected near gremlin tile");
     }
 
     public static async Task RunBuffSharedAsync()
@@ -342,12 +374,16 @@ public static class ZoneMultiplayerAcceptance
             EffectId = ZoneBuffs.SampleWindWalk
         }).ConfigureAwait(false);
 
+        // Mobius: a buff that changes combat stats re-sends UserInfo to the owner (status window P.Atk/Spd) before
+        // the abnormal list — Wind Walk now carries its runSpd func, so the caster gets both packets.
+        _ = await left.ExpectAsync<UserInfoMsg>(MsgType.UserInfo).ConfigureAwait(false);
         var selfUpdate = await left.ExpectAsync<AbnormalStatusUpdateMsg>(MsgType.AbnormalStatusUpdate).ConfigureAwait(false);
         var peerUpdate = await right.ExpectAsync<AbnormalStatusUpdateMsg>(MsgType.AbnormalStatusUpdate).ConfigureAwait(false);
         ExpectAbnormal(selfUpdate, caster.CharacterId, ZoneBuffs.SampleWindWalk);
         ExpectAbnormal(peerUpdate, caster.CharacterId, ZoneBuffs.SampleWindWalk);
 
         await left.SendAsync(MsgType.BuffRequest, new BuffRequestMsg { Remove = true }).ConfigureAwait(false);
+        _ = await left.ExpectAsync<UserInfoMsg>(MsgType.UserInfo).ConfigureAwait(false);
         var clearedSelf = await left.ExpectAsync<AbnormalStatusUpdateMsg>(MsgType.AbnormalStatusUpdate).ConfigureAwait(false);
         var clearedPeer = await right.ExpectAsync<AbnormalStatusUpdateMsg>(MsgType.AbnormalStatusUpdate).ConfigureAwait(false);
         if (clearedSelf.ObjectId != caster.CharacterId || clearedSelf.Effects.Length != 0)
@@ -488,7 +524,7 @@ public static class ZoneMultiplayerAcceptance
         int tradableObjectId = 0;
         foreach (var item in leftSpawn.Items.Items)
         {
-            if (item.ItemId == 5588)
+            if (item.ItemId == 4627)
             {
                 tradableObjectId = item.ObjectId;
                 break;
@@ -496,7 +532,7 @@ public static class ZoneMultiplayerAcceptance
         }
 
         if (tradableObjectId == 0)
-            throw new InvalidOperationException("fighter starter kit missing item 5588");
+            throw new InvalidOperationException("fighter starter kit missing item 4627");
 
         await left.SendAsync(MsgType.TradeRequest, new TradeRequestMsg { TargetObjectId = buyer.CharacterId })
             .ConfigureAwait(false);
@@ -530,7 +566,7 @@ public static class ZoneMultiplayerAcceptance
 
         var ownOffer = await left.ExpectAsync<TradeOfferUpdateMsg>(MsgType.TradeOfferUpdate).ConfigureAwait(false);
         var peerOffer = await right.ExpectAsync<TradeOfferUpdateMsg>(MsgType.TradeOfferUpdate).ConfigureAwait(false);
-        if (ownOffer.IsOwn != 1 || peerOffer.IsOwn != 0 || ownOffer.ItemId != 5588 || ownOffer.Count != 1)
+        if (ownOffer.IsOwn != 1 || peerOffer.IsOwn != 0 || ownOffer.ItemId != 4627 || ownOffer.Count != 1)
             throw new InvalidOperationException("TradeOfferUpdate mismatch");
 
         await left.ExpectAsync<TradeConfirmStateMsg>(MsgType.TradeConfirmState).ConfigureAwait(false);
@@ -592,7 +628,7 @@ public static class ZoneMultiplayerAcceptance
 
     static (int X, int Y, int Z) StepToward(int fromX, int fromY, int fromZ, int toX, int toY, int toZ)
     {
-        if (TalkingIsland.WithinStep(fromX, fromY, toX, toY))
+        if (MoveLimits.WithinStep(fromX, fromY, toX, toY))
             return (toX, toY, toZ);
 
         long dx = toX - (long)fromX;
@@ -601,18 +637,18 @@ public static class ZoneMultiplayerAcceptance
         if (dist < 1)
             return (toX, toY, toZ);
 
-        double scale = TalkingIsland.MaxStep / dist;
+        double scale = MoveLimits.MaxStep / dist;
         int stepX = fromX + (int)Math.Floor(dx * scale);
         int stepY = fromY + (int)Math.Floor(dy * scale);
-        if (!TalkingIsland.WithinStep(fromX, fromY, stepX, stepY))
+        if (!MoveLimits.WithinStep(fromX, fromY, stepX, stepY))
         {
-            scale = (TalkingIsland.MaxStep - 1) / dist;
+            scale = (MoveLimits.MaxStep - 1) / dist;
             stepX = fromX + (int)Math.Floor(dx * scale);
             stepY = fromY + (int)Math.Floor(dy * scale);
         }
 
         int stepZ = fromZ;
-        if (dist <= TalkingIsland.MaxStep)
+        if (dist <= MoveLimits.MaxStep)
             stepZ = toZ;
         else
             stepZ = fromZ + (int)Math.Floor((toZ - (long)fromZ) * scale);
@@ -685,7 +721,7 @@ public static class ZoneMultiplayerAcceptance
     static void ExpectCombat(int targetId, int attackerId, int expectedCurHp, AttackMsg attack, StatusUpdateMsg status)
     {
         if (attack.AttackerObjectId != attackerId || attack.TargetObjectId != targetId ||
-            attack.Damage != ZoneCombat.SampleMeleeDamage)
+            attack.Damage <= 0)
             throw new InvalidOperationException($"attack mismatch a={attack.AttackerObjectId} t={attack.TargetObjectId} d={attack.Damage}");
         if (status.ObjectId != targetId || status.AttributeIds.Length != 2 ||
             status.AttributeIds[0] != InterludeStatus.CurHp || status.AttributeIds[1] != InterludeStatus.MaxHp ||
@@ -693,13 +729,6 @@ public static class ZoneMultiplayerAcceptance
             status.Values[1] != TalkingIsland.GremlinMaxHp)
             throw new InvalidOperationException(
                 $"status mismatch id={status.ObjectId} hp={status.Values[0]}/{status.Values[1]} expected={expectedCurHp}");
-    }
-
-    static void ExpectDamageLine(SystemMessageMsg line, int damage)
-    {
-        if (line.Id != CombatProtocol.HitTargetForDamage || line.Params.Length != 2 ||
-            line.Params[1] != damage.ToString() || !line.Text.Contains(damage.ToString(), StringComparison.Ordinal))
-            throw new InvalidOperationException($"damage line id={line.Id} text={line.Text}");
     }
 
     static HandoffTicket Play(LoginService login, string account, string name, int classId)
@@ -899,9 +928,64 @@ public static class ZoneMultiplayerAcceptance
             return ((MsgType)frame.Value.Type, frame.Value.Body);
         }
 
+        bool _skipRewardUserInfo;
+        /// <summary>Mob retaliation swings (Attack then the victim's vitals at hitTime) interleave with scripted combat.</summary>
+        readonly Dictionary<int, int> _mobHitsPending = new();
+
+        static bool IsMobAttacker(int objectId)
+        {
+            foreach (var g in TalkingIsland.Gremlins)
+            {
+                if (g.ObjectId == objectId)
+                    return true;
+            }
+            return false;
+        }
+
+        /// <summary>HP StatusUpdate for <paramref name="objectId"/>; skips other entities' vitals (mob retaliation lands on the player).</summary>
+        public async Task<StatusUpdateMsg> ExpectStatusForAsync(int objectId)
+        {
+            while (true)
+            {
+                var status = await ExpectAsync<StatusUpdateMsg>(MsgType.StatusUpdate).ConfigureAwait(false);
+                if (status.ObjectId == objectId)
+                    return status;
+            }
+        }
+
         public async Task<T> ExpectAsync<T>(MsgType expected)
         {
             var (type, body) = await ReadFrameAsync().ConfigureAwait(false);
+            // Kill reward: SystemMessage 95, StatusUpdate (exp/sp), UserInfo. Skip when not asserted.
+            while (true)
+            {
+                if (type == MsgType.SystemMessage && expected != MsgType.SystemMessage
+                    && MessagePackSerializer.Deserialize<SystemMessageMsg>(body).Id == 95)
+                    _skipRewardUserInfo = true;
+                else if (type == MsgType.StatusUpdate && expected != MsgType.StatusUpdate && _skipRewardUserInfo)
+                {
+                    /* exp/sp fan-out between SystemMessage 95 and UserInfo */
+                }
+                else if (type == MsgType.UserInfo && expected != MsgType.UserInfo && _skipRewardUserInfo)
+                    _skipRewardUserInfo = false;
+                else if (type == MsgType.Attack &&
+                         MessagePackSerializer.Deserialize<AttackMsg>(body) is { } mobAtk &&
+                         IsMobAttacker(mobAtk.AttackerObjectId))
+                    _mobHitsPending[mobAtk.TargetObjectId] = _mobHitsPending.GetValueOrDefault(mobAtk.TargetObjectId) + 1;
+                else if (type == MsgType.StatusUpdate &&
+                         MessagePackSerializer.Deserialize<StatusUpdateMsg>(body) is { } victim &&
+                         _mobHitsPending.TryGetValue(victim.ObjectId, out int pendingMob) && pendingMob > 0)
+                    _mobHitsPending[victim.ObjectId] = pendingMob - 1;
+                // PendingMeleeHit: HP StatusUpdate can land mid-script after Attack; ignore unless asserted.
+                else if (type == MsgType.StatusUpdate && expected != MsgType.StatusUpdate)
+                {
+                }
+                else
+                    break;
+                (type, body) = await ReadFrameAsync().ConfigureAwait(false);
+            }
+            if (type == MsgType.Die)
+                _mobHitsPending.Clear(); // dead mob's queued swing never lands
             if (type != expected)
             {
                 string detail = "";

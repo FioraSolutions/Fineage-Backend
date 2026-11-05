@@ -1,6 +1,6 @@
 bin/
 obj/
-# Runtime files such as accounts.json and boss-schedule.json. The game catalogs are tracked JSON (not Mobius XML).
+# Runtime files such as accounts.json, boss-schedule.json, and olympiad.json. The game catalogs are tracked JSON (not Mobius XML).
 data/*
 !data/items.json
 !data/starter-kits.json
@@ -9,16 +9,28 @@ data/*
 !data/stat-bonuses.json
 !data/quests.json
 !data/skills.json
+!data/skill-combat.json
+!data/skill-stat-effects.json
+!data/skill-passives.json
 !data/skill-trees.json
 !data/npcs.json
 !data/dungeons.json
+!data/olympiad-stadiums.json
 !data/raidbosses.json
+!data/teleports.json
+!data/newbie-buffs.json
+!data/item-weights.json
 !data/spawns/
 !data/spawns/**
 !data/drops/
 !data/drops/**
 !data/html/
 !data/html/**
+!data/buylists.json
+!data/multisell.json
+!data/village-masters.json
+!data/doors.json
+!data/water-zones.json
 # Prefer converters → JSON; do not commit the full Mobius datapack (~1486+ XML files).
 data/mobius-xml/
 ref/mobius-ct0-interlude/
@@ -28,3 +40,14 @@ TestResults/
 .idea/
 *.user
 *.suo
+
+# Local Mobius Interlude XML SoT (sparse clone; do not commit 100MB+ dump)
+ref/
+
+# Local run artifacts
+local-data/
+local-logs/
+publish/
+!data/spoil.json
+!data/herbs.json
+!data/xp-percent-lost.json

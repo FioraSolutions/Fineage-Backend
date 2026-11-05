@@ -1,6 +1,6 @@
 {
   "mapId": "oren",
-  "enabled": false,
+  "enabled": true,
   "comment": "Mobius CT 0 Interlude Oren/OrenNPCs.xml. Rows reference data/npcs.json by npcId. Name, title, type, attackable, hp, and speeds come from the template.",
   "npcs": [
     {

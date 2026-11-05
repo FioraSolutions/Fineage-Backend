@@ -1,0 +1,97 @@
+{
+  "mapId": "others_19_18",
+  "enabled": true,
+  "comment": "Mobius CT 0 Interlude spawns/Others/19_18.xml. Fixed rows keep Mobius x/y/z/heading. Territory rows are one spawn per count, placed inside the polygon at minZ (no geodata). Day and night rows are both present. Raid bosses are left to data/raidbosses.json. Name, title, type, attackable, hp, and speeds come from data/npcs.json.",
+  "npcs": [
+    {
+      "objectId": 87709,
+      "npcId": 20015,
+      "x": -17472,
+      "y": 32449,
+      "z": -3712,
+      "heading": 45301,
+      "respawnDelaySeconds": 16,
+      "respawnRandomSeconds": 0
+    },
+    {
+      "objectId": 87710,
+      "npcId": 20015,
+      "x": -17132,
+      "y": 31836,
+      "z": -3680,
+      "heading": 40739,
+      "respawnDelaySeconds": 16,
+      "respawnRandomSeconds": 0
+    },
+    {
+      "objectId": 87711,
+      "npcId": 20015,
+      "x": -16830,
+      "y": 31715,
+      "z": -3672,
+      "heading": 8645,
+      "respawnDelaySeconds": 16,
+      "respawnRandomSeconds": 0
+    },
+    {
+      "objectId": 87712,
+      "npcId": 20433,
+      "x": -18183,
+      "y": 32476,
+      "z": -3664,
+      "heading": 65235,
+      "respawnDelaySeconds": 16,
+      "respawnRandomSeconds": 0
+    },
+    {
+      "objectId": 87713,
+      "npcId": 20433,
+      "x": -17982,
+      "y": 32422,
+      "z": -3688,
+      "heading": 27298,
+      "respawnDelaySeconds": 16,
+      "respawnRandomSeconds": 0
+    },
+    {
+      "objectId": 87714,
+      "npcId": 20433,
+      "x": -17201,
+      "y": 32459,
+      "z": -3712,
+      "heading": 22319,
+      "respawnDelaySeconds": 16,
+      "respawnRandomSeconds": 0
+    },
+    {
+      "objectId": 87715,
+      "npcId": 20433,
+      "x": -16732,
+      "y": 32250,
+      "z": -3712,
+      "heading": 43927,
+      "respawnDelaySeconds": 16,
+      "respawnRandomSeconds": 0
+    },
+    {
+      "objectId": 87716,
+      "npcId": 20433,
+      "x": -16244,
+      "y": 31883,
+      "z": -3712,
+      "heading": 50642,
+      "respawnDelaySeconds": 16,
+      "respawnRandomSeconds": 0
+    },
+    {
+      "objectId": 87717,
+      "npcId": 20433,
+      "x": -14465,
+      "y": 32076,
+      "z": -3448,
+      "heading": 53054,
+      "respawnDelaySeconds": 16,
+      "respawnRandomSeconds": 0
+    }
+  ]
+}
