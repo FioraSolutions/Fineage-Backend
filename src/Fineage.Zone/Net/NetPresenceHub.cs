@@ -23,6 +23,25 @@ public sealed class NetPresenceHub
             _byObjectId[objectId] = new Entry(conn, entityId);
     }
 
+    /// <summary>
+    /// Removes the entry only when it still belongs to <paramref name="owner"/>. World object ids are reused as
+    /// soon as a player leaves, so a connection that is still tearing down must never unregister the entry a
+    /// newer connection has just claimed — that silently dropped the newcomer's presence fanout (MoveState
+    /// "NOT REGISTERED in presence hub") until its client gave up.
+    /// </summary>
+    public bool Unregister(int objectId, NetConnection owner)
+    {
+        ArgumentNullException.ThrowIfNull(owner);
+        lock (_gate)
+        {
+            if (!_byObjectId.TryGetValue(objectId, out var entry) || !ReferenceEquals(entry.Conn, owner))
+                return false;
+            _byObjectId.Remove(objectId);
+            return true;
+        }
+    }
+
+    /// <summary>Force-removes the entry without an ownership check (world reset / tests). The server uses the owner overload.</summary>
     public void Unregister(int objectId)
     {
         lock (_gate)
@@ -50,19 +69,23 @@ public sealed class NetPresenceHub
     {
         if (!TryGet(objectId, out var conn, out _))
             return;
-        try
-        {
-            await conn.SendAsync(opcode, payload, ct: ct).ConfigureAwait(false);
-        }
-        catch (Exception ex) when (ex is IOException or ObjectDisposedException or OperationCanceledException)
-        {
-            /* peer gone */
-        }
+        await conn.SendAsync(opcode, payload, ct: ct).ConfigureAwait(false);
     }
 
-    public async Task BroadcastAsync(IEnumerable<int> objectIds, ushort opcode, byte[] payload, CancellationToken ct)
+    /// <summary>
+    /// Fanout path: never waits. A full outbound queue drops the frame and counts
+    /// <c>fineage.outbound.dropped</c> instead of stalling the tick.
+    /// </summary>
+    public void TrySend(int objectId, ushort opcode, byte[] payload)
+    {
+        if (!TryGet(objectId, out var conn, out _))
+            return;
+        conn.TrySend(opcode, payload);
+    }
+
+    public void TryBroadcast(IEnumerable<int> objectIds, ushort opcode, byte[] payload)
     {
         foreach (int id in objectIds)
-            await SendAsync(id, opcode, payload, ct).ConfigureAwait(false);
+            TrySend(id, opcode, payload);
     }
 }

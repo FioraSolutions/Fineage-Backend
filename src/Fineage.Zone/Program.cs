@@ -121,7 +121,7 @@ if (zoneStatus != null)
 
 await using FineageMetricsHost? metrics = FineageMetricsHost.Start("zone", Console.Out, Console.Error);
 var netZone = new NetZoneServer(HandoffTokens.FromEnvironment(), world, accounts);
-var netTcp = new NetTcpServer();
+var netTcp = new NetTcpServer { Endpoint = "zone" };
 Console.WriteLine($"[ZONE] net listen {bindDisplay}:{NetSettings.ZonePort} (PacketEnvelope)");
 Task netTask = netTcp.RunAsync(
     host,

@@ -1,10 +1,21 @@
 using Fineage.Protocol.Telemetry;
 
-namespace Fineage.Protocol.Net;
+namespace Fineage.Net.Host;
 
-public static class PipelineTelemetry
+/// <summary>
+/// Transport counters for the Net path, the same instrument set the retired V2 pipeline published so
+/// dashboards keep working. TCP instruments carry the <c>endpoint</c> tag (<c>login</c> or <c>zone</c>).
+/// </summary>
+public static class NetTelemetry
 {
-    public static void FrameIn(string endpoint) => FrameIn(endpoint, 0);
+    public static void ConnectionOpened(string endpoint) =>
+        FineageTelemetry.Connections.Add(1, Tag(endpoint));
+
+    public static void ConnectionClosed(string endpoint) =>
+        FineageTelemetry.Connections.Add(-1, Tag(endpoint));
+
+    public static void ConnectionRejected(string endpoint) =>
+        FineageTelemetry.ConnectionsRejected.Add(1, Tag(endpoint));
 
     public static void FrameIn(string endpoint, int bytes)
     {
@@ -13,8 +24,6 @@ public static class PipelineTelemetry
         if (bytes > 0)
             FineageTelemetry.BytesIn.Add(bytes, tag);
     }
-
-    public static void FrameOut(string endpoint) => FrameOut(endpoint, 0);
 
     public static void FrameOut(string endpoint, int bytes)
     {

@@ -1,7 +1,9 @@
 using System.Diagnostics;
 using Fineage.Login;
+using Fineage.Net.Host;
 using Fineage.Protocol;
 using Fineage.Protocol.Net;
+using Fineage.Protocol.Telemetry;
 using Fineage.Zone.World;
 using MessagePack;
 
@@ -79,7 +81,8 @@ public sealed class ZoneServer
                 if (frame == null)
                     return;
 
-                PipelineTelemetry.FrameIn("zone", FrameIO.HeaderSize + frame.Value.Body.Length);
+                FineageTelemetry.FramesIn.Add(1, new KeyValuePair<string, object?>("endpoint", "zone"));
+                FineageTelemetry.BytesIn.Add(FrameIO.HeaderSize + frame.Value.Body.Length, new KeyValuePair<string, object?>("endpoint", "zone"));
                 idleWatch.Touch();
                 if (!await HandleFrameAsync(session, sessionId, frame.Value.Type, frame.Value.Body, readCt, rate).ConfigureAwait(false))
                     return;
@@ -118,7 +121,7 @@ public sealed class ZoneServer
             if (!session.FailureRecorded)
             {
                 session.FailureRecorded = true;
-                PipelineTelemetry.PacketErrored("zone");
+                FineageTelemetry.PacketsErrored.Add(1, new KeyValuePair<string, object?>("endpoint", "zone"));
             }
 
             ZoneLog.Fault(session, type, ex);
@@ -126,7 +129,9 @@ public sealed class ZoneServer
         }
         finally
         {
-            PipelineTelemetry.Handler("zone", Stopwatch.GetElapsedTime(started).TotalMilliseconds);
+            FineageTelemetry.HandlerMilliseconds.Record(
+                Stopwatch.GetElapsedTime(started).TotalMilliseconds,
+                new KeyValuePair<string, object?>("endpoint", "zone"));
         }
     }
 
@@ -1335,9 +1340,9 @@ public sealed class ZoneServer
         {
             session.FailureRecorded = true;
             if (code is "rate_limit" or "unknown" or "wrong_port")
-                PipelineTelemetry.PacketRejected("zone");
+                FineageTelemetry.PacketsRejected.Add(1, new KeyValuePair<string, object?>("endpoint", "zone"));
             else
-                PipelineTelemetry.PacketErrored("zone");
+                FineageTelemetry.PacketsErrored.Add(1, new KeyValuePair<string, object?>("endpoint", "zone"));
         }
 
         ZoneLog.Packet(session, code, code is "rate_limit" or "unknown" or "wrong_port");
