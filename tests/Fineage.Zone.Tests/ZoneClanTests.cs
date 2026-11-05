@@ -382,7 +382,7 @@ public class ZoneClanTests
         // Drop the running auto-attack before the clock jumps past the stance: ticking 15 s with the intention
         // still set would make the fighter swing again and interleave Attack/StatusUpdate with the clan packets.
         await right.SendAsync(MsgType.SelectTarget, new SelectTargetMsg { TargetObjectId = member.CharacterId });
-        await right.ExpectAsync<MyTargetSelectedMsg>(MsgType.MyTargetSelected);
+        await right.ExpectSkippingStatusAsync<MyTargetSelectedMsg>(MsgType.MyTargetSelected);
 
         await right.SendAsync(MsgType.ClanLeaveRequest, new ClanLeaveRequestMsg());
         Assert.Equal(ClanProtocol.Combat, (await right.ExpectErrorAsync()).Code);
@@ -701,6 +701,36 @@ public class ZoneClanTests
             }
 
             return MessagePackSerializer.Deserialize<T>(frame.Value.Body);
+        }
+
+        /// <summary>
+        /// Waits for <paramref name="expected"/>, skipping the <see cref="MsgType.StatusUpdate"/> fanout a running
+        /// auto-attack keeps pushing. Those bars are timing dependent under load, so a strict next-frame match turns
+        /// an otherwise deterministic assertion into a flake.
+        /// </summary>
+        public async Task<T> ExpectSkippingStatusAsync<T>(MsgType expected)
+        {
+            using var cts = new CancellationTokenSource(TimeSpan.FromSeconds(5));
+            while (true)
+            {
+                var frame = await FrameIO.ReadAsync(_stream, cts.Token);
+                Assert.NotNull(frame);
+                if (frame!.Value.Type == (ushort)MsgType.StatusUpdate)
+                    continue;
+                if (frame.Value.Type != (ushort)expected)
+                {
+                    string detail = "";
+                    if (frame.Value.Type == (ushort)MsgType.Error)
+                    {
+                        var err = MessagePackSerializer.Deserialize<ErrorMsg>(frame.Value.Body);
+                        detail = $" {err.Code} {err.Message}";
+                    }
+
+                    Assert.Fail($"expected {expected}, got {(MsgType)frame.Value.Type}{detail}");
+                }
+
+                return MessagePackSerializer.Deserialize<T>(frame.Value.Body);
+            }
         }
 
         public async Task<ErrorMsg> ExpectErrorAsync() => await ExpectAsync<ErrorMsg>(MsgType.Error);
