@@ -42,10 +42,10 @@ internal sealed class NetTestKit
     public DateTimeOffset Now { get; set; } = DateTimeOffset.FromUnixTimeMilliseconds(1_800_000_000_000);
     int _n;
 
-    public NetTestKit(Fineage.Zone.Spawns.SpawnCatalog? spawns = null, string? map = null, Fineage.Zone.Geo.GeoEngine? geo = null, Fineage.Zone.Interest.IAoi? aoi = null, Random? deathRandom = null, Fineage.Game.DeathRuleCatalog? deathRules = null)
+    public NetTestKit(Fineage.Zone.Spawns.SpawnCatalog? spawns = null, string? map = null, Fineage.Zone.Geo.GeoEngine? geo = null, Fineage.Zone.Interest.IAoi? aoi = null, Random? deathRandom = null, Fineage.Game.DeathRuleCatalog? deathRules = null, Fineage.Game.Services.ItemWeights? weights = null)
     {
         World = new ZoneWorld(aoi, game: Game, accounts: Store, clock: () => Now, spawnCatalog: spawns, activeMapId: map, geo: geo,
-            deathRules: deathRules, deathRandom: deathRandom);
+            deathRules: deathRules, deathRandom: deathRandom, weights: weights);
     }
 
     public async Task<(ZoneSession Session, ZoneEntity Entity)> EnterAsync(int classId = 25, int race = 1, int x = ElfX, int y = ElfY, int z = ElfZ)
