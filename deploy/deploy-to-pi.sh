@@ -43,26 +43,40 @@ chmod +x "${APP_ROOT}/login/Fineage.Login" "${APP_ROOT}/zone/Fineage.Zone" \
 rm -rf "${STAGING}"
 
 cd "${APP_ROOT}"
+# run-*.sh source fineage.env in their own process; this shell needs the same overrides or the
+# probe below checks the defaults while the servers listen on an operator-pinned port.
+if [[ -f "${APP_ROOT}/fineage.env" ]]; then
+  set -a
+  # shellcheck disable=SC1091
+  source "${APP_ROOT}/fineage.env"
+  set +a
+fi
+
 ./run-login.sh
 ./run-zone.sh
+
+# Net owns the public listeners now: 9106 login, 9777 zone, 5080 login HTTP.
+LOGIN_PORT="${FINEAGE_NET_LOGIN_PORT:-9106}"
+ZONE_PORT="${FINEAGE_NET_ZONE_PORT:-9777}"
+HTTP_PORT="${FINEAGE_LOGIN_HTTP_PORT:-5080}"
 
 deadline=$((SECONDS + 60))
 while (( SECONDS < deadline )); do
   ok=true
-  for port in 2106 7777 5080; do
+  for port in "$LOGIN_PORT" "$ZONE_PORT" "$HTTP_PORT"; do
     if ! timeout 2 bash -c "echo >/dev/tcp/127.0.0.1/${port}" 2>/dev/null; then
       ok=false
       break
     fi
   done
   if $ok; then
-    echo "Deploy OK: listeners on 127.0.0.1:2106 (login TCP), 7777 (zone), 5080 (login HTTP)."
+    echo "Deploy OK: listeners on 127.0.0.1:${LOGIN_PORT} (login Net), ${ZONE_PORT} (zone Net), ${HTTP_PORT} (login HTTP)."
     exit 0
   fi
   sleep 2
 done
 
-echo "health check failed: expected listeners on 127.0.0.1:2106, 7777, and 5080" >&2
+echo "health check failed: expected listeners on 127.0.0.1:${LOGIN_PORT}, ${ZONE_PORT}, and ${HTTP_PORT}" >&2
 echo "--- login.log (tail) ---" >&2
 tail -n 40 "${APP_ROOT}/logs/login.log" >&2 || true
 echo "--- zone.log (tail) ---" >&2
