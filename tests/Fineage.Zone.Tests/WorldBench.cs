@@ -24,7 +24,11 @@ internal sealed class WorldBench
         Fineage.Game.DeathRuleCatalog? deathRules = null,
         Fineage.Game.Services.ItemWeights? weights = null,
         Fineage.Game.IEnchantRandom? enchantRandom = null,
-        bool? expertisePenalty = null)
+        bool? expertisePenalty = null,
+        Fineage.Zone.Spawns.SpawnCatalog? spawns = null,
+        string? mapId = null,
+        Fineage.Game.Shops.BuyListCatalog? buyLists = null,
+        Fineage.Game.Shops.MultiSellCatalog? multisells = null)
     {
         Game = game ?? GameData.LoadDefault();
         Store = JsonAccountStore.InMemory();
@@ -39,7 +43,11 @@ internal sealed class WorldBench
             deathRandom: deathRandom,
             weights: weights,
             enchantRandom: enchantRandom,
-            expertisePenalty: expertisePenalty);
+            expertisePenalty: expertisePenalty,
+            spawnCatalog: spawns,
+            activeMapId: mapId,
+            buyLists: buyLists,
+            multisells: multisells);
         (Bridge, Rec) = NetBridgeRecorder.Create();
         World.NetBridge = Bridge;
     }
@@ -149,4 +157,37 @@ internal sealed class BenchPlayer
 
     public Task<string?> Unequip(int paperdollSlot) =>
         World.TryUnequipItemAsync(Session, new UnequipItemMsg { PaperdollSlot = paperdollSlot }, CancellationToken.None);
+
+    public Task<string?> BypassAsync(int npcObjectId, string command) =>
+        World.TryBypassAsync(Session, npcObjectId, command, CancellationToken.None);
+
+    public Task<string?> Buy(int npcObjectId, int listId, params (int ItemId, int Count)[] rows)
+    {
+        var items = rows.Select(row => new ShopCountMsg { ItemId = row.ItemId, Count = row.Count }).ToArray();
+        return World.TryBuyAsync(
+            Session,
+            new RequestBuyItemMsg { NpcObjectId = npcObjectId, ListId = listId, Items = items },
+            CancellationToken.None);
+    }
+
+    public Task<string?> Sell(int npcObjectId, params (int ObjectId, int Count)[] rows)
+    {
+        var items = rows.Select(row => new ShopObjectCountMsg { ObjectId = row.ObjectId, Count = row.Count }).ToArray();
+        return World.TrySellAsync(
+            Session,
+            new RequestSellItemMsg { NpcObjectId = npcObjectId, Items = items },
+            CancellationToken.None);
+    }
+
+    public Task<string?> MultiSell(int npcObjectId, int listId, int entryId, int amount) =>
+        World.TryMultiSellAsync(
+            Session,
+            new RequestMultiSellChooseMsg
+            {
+                NpcObjectId = npcObjectId,
+                ListId = listId,
+                EntryId = entryId,
+                Amount = amount
+            },
+            CancellationToken.None);
 }
