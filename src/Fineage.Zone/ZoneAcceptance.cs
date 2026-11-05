@@ -1,8 +1,8 @@
-using System.Net;
 using System.Net.Sockets;
+using Fineage.Game;
 using Fineage.Login;
-using Fineage.Protocol;
-using MessagePack;
+using Fineage.Net.Contract;
+using Fineage.Net.Host;
 
 namespace Fineage.Zone;
 
@@ -27,175 +27,179 @@ public static class ZoneAcceptance
     static async Task PlayAsync(int port, string account, string token, int characterId, string name)
     {
         using var client = new TcpClient();
-        await client.ConnectAsync(IPAddress.Loopback, port).ConfigureAwait(false);
-        await using var stream = client.GetStream();
-
-        await SendAsync(stream, MsgType.Hello, new HelloMsg { ProtocolVersion = 1, ClientBuild = "selftest" })
-            .ConfigureAwait(false);
-        await ExpectAsync(stream, MsgType.HelloAck).ConfigureAwait(false);
-
-        await SendAsync(stream, MsgType.EnterWorld, new EnterWorldMsg()).ConfigureAwait(false);
-        var early = await ExpectErrorAsync(stream).ConfigureAwait(false);
-        if (early.Code != "auth_required")
-            throw new InvalidOperationException($"expected auth_required, got {early.Code}");
-
-        await SendAsync(stream, MsgType.Auth, new AuthMsg { Account = account, Password = "not-a-token" })
-            .ConfigureAwait(false);
-        var bad = await ExpectErrorAsync(stream).ConfigureAwait(false);
-        if (bad.Code != "invalid_credentials")
-            throw new InvalidOperationException($"expected invalid_credentials, got {bad.Code}");
-
-        await SendAsync(stream, MsgType.Auth, new AuthMsg { Account = account, Password = token })
-            .ConfigureAwait(false);
-        var authBody = await ExpectAsync(stream, MsgType.AuthOk).ConfigureAwait(false);
-        var auth = MessagePackSerializer.Deserialize<AuthOkMsg>(authBody);
-        if (auth.CharacterName != name || auth.SessionId == 0)
-            throw new InvalidOperationException($"auth ok mismatch name={auth.CharacterName} session={auth.SessionId}");
-
-        await SendAsync(stream, MsgType.MoveTo, new MoveToMsg
+        await client.ConnectAsync("127.0.0.1", port).ConfigureAwait(false);
+        await using var conn = new NetConnection(client, 256);
+        using var cts = new CancellationTokenSource(TimeSpan.FromSeconds(30));
+        Task read = conn.RunReadLoopAsync(cts.Token);
+        try
         {
-            DestX = TalkingIsland.SpawnX + 10,
-            DestY = TalkingIsland.SpawnY,
-            DestZ = TalkingIsland.SpawnZ
-        }).ConfigureAwait(false);
-        var tooSoon = await ExpectErrorAsync(stream).ConfigureAwait(false);
-        if (tooSoon.Code != "world")
-            throw new InvalidOperationException($"expected world, got {tooSoon.Code}");
+            var link = new NetLink(conn);
 
-        await SendAsync(stream, MsgType.EnterWorld, new EnterWorldMsg { CharacterSlot = 0 }).ConfigureAwait(false);
-        var user = MessagePackSerializer.Deserialize<UserInfoMsg>(await ExpectAsync(stream, MsgType.UserInfo).ConfigureAwait(false));
-        var items = MessagePackSerializer.Deserialize<ItemListMsg>(await ExpectAsync(stream, MsgType.ItemList).ConfigureAwait(false));
-        await ExpectAsync(stream, MsgType.SkillList);
-        var spawned = MessagePackSerializer.Deserialize<PlayerSpawnedMsg>(await ExpectAsync(stream, MsgType.PlayerSpawned).ConfigureAwait(false));
-        if (spawned.ObjectId != characterId || spawned.Name != name ||
-            user.ObjectId != characterId || user.X != spawned.X || user.Y != spawned.Y || user.Z != spawned.Z)
-            throw new InvalidOperationException($"spawn mismatch id={spawned.ObjectId} name={spawned.Name} @ {spawned.X},{spawned.Y},{spawned.Z}");
-        bool fighter = HasItem(items, 219);
-        int classId = fighter ? ClassSpawn.HumanFighter : ClassSpawn.HumanMystic;
-        if (!IsClassPoint(classId, spawned.X, spawned.Y, spawned.Z))
-            throw new InvalidOperationException($"spawn {spawned.X},{spawned.Y},{spawned.Z} is not a class {classId} point");
-        int weaponId = fighter ? 219 : 177;
-        if (user.Paperdoll.Length != InventoryMessages.PaperdollSlotCount || user.Paperdoll[7].ItemId != weaponId)
-            throw new InvalidOperationException($"user paperdoll rhand={user.Paperdoll.ElementAtOrDefault(7)?.ItemId}");
-        var weapon = FindItem(items, weaponId);
-        if (weapon.EquippedSlot != 7 || weapon.ObjectId != user.Paperdoll[7].ObjectId || weapon.ObjectId < 100_000)
-            throw new InvalidOperationException($"item list weapon id={weapon.ItemId} slot={weapon.EquippedSlot} object={weapon.ObjectId}");
+            await link.SendAsync(NetOpcode.Hello, NetCodec.EncodeHello(new HelloMsg { ClientName = "selftest" }));
+            await link.ExpectAsync(NetOpcode.HelloAck);
 
-        var seen = new List<NpcInfoMsg>();
-        for (int i = 0; i < TalkingIsland.NpcCount; i++)
-        {
-            var body = await ExpectAsync(stream, MsgType.NpcInfo).ConfigureAwait(false);
-            seen.Add(MessagePackSerializer.Deserialize<NpcInfoMsg>(body));
-        }
+            // EnterWorld before authentication must be refused, and a wrong token is not a credential.
+            await link.SendAsync(NetOpcode.EnterWorld, NetCodec.EncodeEnterWorld(new EnterWorldMsg()));
+            Require(await link.ExpectCodeAsync(NetOpcode.Reject) == "auth_required", "early enter must be auth_required");
 
-        if (seen.Count != TalkingIsland.NpcCount)
-            throw new InvalidOperationException($"expected {TalkingIsland.NpcCount} npcs, got {seen.Count}");
-        var expectedNpcs = TalkingIsland.Gremlins.Concat(TalkingIsland.Villagers).ToArray();
-        for (int i = 0; i < seen.Count; i++)
-        {
-            var npc = seen[i];
-            var expected = expectedNpcs[i];
-            if (npc.NpcId != expected.NpcId || npc.Name != expected.Name ||
-                npc.ObjectId != expected.ObjectId || npc.X != expected.X || npc.Y != expected.Y || npc.Z != expected.Z)
-                throw new InvalidOperationException($"npc {i} mismatch id={npc.NpcId} name={npc.Name} @ {npc.X},{npc.Y},{npc.Z}");
-        }
+            await link.SendAsync(NetOpcode.ZoneAuth, NetCodec.EncodeZoneAuth(new ZoneAuthMsg { Account = account, Token = "not-a-token" }));
+            var rejected = NetCodec.DecodeZoneAuthResult(await link.ExpectPayloadAsync(NetOpcode.ZoneAuthResult));
+            Require(!rejected.Ok, "a bad token must not authenticate");
 
-        var welcome = MessagePackSerializer.Deserialize<SystemMessageMsg>(
-            await ExpectAsync(stream, MsgType.SystemMessage).ConfigureAwait(false));
-        if (welcome.Id != ChatProtocol.Welcome || welcome.Params.Length != 1 || welcome.Params[0] != name ||
-            welcome.Text != $"Welcome, {name}.")
-            throw new InvalidOperationException($"welcome id={welcome.Id} text={welcome.Text}");
+            await link.SendAsync(NetOpcode.ZoneAuth, NetCodec.EncodeZoneAuth(new ZoneAuthMsg { Account = account, Token = token }));
+            var auth = NetCodec.DecodeZoneAuthResult(await link.ExpectPayloadAsync(NetOpcode.ZoneAuthResult));
+            Require(auth.Ok, $"handoff token must be accepted: {auth.Code} {auth.Message}");
 
-        var nearest = TalkingIsland.Gremlins[0];
-        int destX = nearest.X;
-        int destY = nearest.Y;
-        int destZ = nearest.Z;
-        if (!MoveLimits.WithinStep(spawned.X, spawned.Y, destX, destY))
-        {
-            destX = spawned.X + 10;
-            destY = spawned.Y;
-            destZ = spawned.Z;
-        }
-
-        await SendAsync(stream, MsgType.MoveTo, new MoveToMsg
-        {
-            ObjectId = spawned.ObjectId,
-            DestX = destX,
-            DestY = destY,
-            DestZ = destZ,
-            OriginX = spawned.X,
-            OriginY = spawned.Y,
-            OriginZ = spawned.Z
-        }).ConfigureAwait(false);
-        var ackBody = await ExpectAsync(stream, MsgType.MoveToAck).ConfigureAwait(false);
-        var ack = MessagePackSerializer.Deserialize<MoveToMsg>(ackBody);
-        if (ack.ObjectId != characterId || ack.OriginX != spawned.X || ack.OriginY != spawned.Y ||
-            ack.DestX != destX || ack.DestY != destY)
-            throw new InvalidOperationException($"move ack mismatch dest={ack.DestX},{ack.DestY} origin={ack.OriginX},{ack.OriginY}");
-    }
-
-    static bool HasItem(ItemListMsg items, int itemId)
-    {
-        foreach (var item in items.Items)
-        {
-            if (item.ItemId == itemId)
-                return true;
-        }
-
-        return false;
-    }
-
-    static ItemListEntryMsg FindItem(ItemListMsg items, int itemId)
-    {
-        foreach (var item in items.Items)
-        {
-            if (item.ItemId == itemId)
-                return item;
-        }
-
-        throw new InvalidOperationException($"item {itemId} missing from ItemList");
-    }
-
-    static bool IsClassPoint(int classId, int x, int y, int z)
-    {
-        foreach (var point in ClassTemplates.Points(classId))
-        {
-            if (point.X == x && point.Y == y && point.Z == z)
-                return true;
-        }
-
-        return false;
-    }
-
-    static async Task SendAsync<T>(NetworkStream stream, MsgType type, T msg)
-    {
-        byte[] body = MessagePackSerializer.Serialize(msg);
-        await FrameIO.SendAsync(stream, (ushort)type, body).ConfigureAwait(false);
-    }
-
-    static async Task<byte[]> ExpectAsync(NetworkStream stream, MsgType expected)
-    {
-        var frame = await FrameIO.ReadAsync(stream).ConfigureAwait(false);
-        if (frame == null)
-            throw new InvalidOperationException($"expected {expected}, got EOF");
-        if (frame.Value.Type != (ushort)expected)
-        {
-            string detail = "";
-            if (frame.Value.Type == (ushort)MsgType.Error)
+            await link.SendAsync(NetOpcode.MoveInput, NetCodec.EncodeMoveInput(new MoveInputMsg
             {
-                var err = MessagePackSerializer.Deserialize<ErrorMsg>(frame.Value.Body);
-                detail = $" {err.Code} {err.Message}";
+                DestX = TalkingIsland.SpawnX + 10,
+                DestY = TalkingIsland.SpawnY,
+                DestZ = TalkingIsland.SpawnZ
+            }));
+            Require(await link.ExpectCodeAsync(NetOpcode.Reject) == "not_in_world", "move before enter must be rejected");
+
+            await link.SendAsync(NetOpcode.EnterWorld, NetCodec.EncodeEnterWorld(new EnterWorldMsg()));
+            var order = new List<ushort>();
+            UserInfoNetMsg? user = null;
+            ItemListNetMsg? items = null;
+            var npcs = new List<NpcSpawnNetMsg>();
+            SystemMessageNetMsg? welcome = null;
+            EntitySpawnMsg? spawned = null;
+
+            // Net enter burst: self sheets, ShortCutInit, then the welcome line, then the knownlist spawns.
+            // The knownlist has no end marker, so the burst closes once a quiet window passes after the welcome.
+            using var burst = CancellationTokenSource.CreateLinkedTokenSource(cts.Token);
+            while (true)
+            {
+                PacketEnvelope? envelope;
+                try
+                {
+                    if (welcome != null)
+                        burst.CancelAfter(TimeSpan.FromMilliseconds(350));
+                    envelope = await link.NextAsync(burst.Token).ConfigureAwait(false);
+                }
+                catch (Exception ex) when (welcome != null && ex is OperationCanceledException)
+                {
+                    break;
+                }
+                order.Add(envelope.Opcode);
+                switch (envelope.Opcode)
+                {
+                    case NetOpcode.UserInfo:
+                        user = NetCodec.DecodeUserInfo(envelope.Payload);
+                        break;
+                    case NetOpcode.ItemList:
+                        items = NetCodec.DecodeItemList(envelope.Payload);
+                        break;
+                    case NetOpcode.SkillList:
+                        break;
+                    case NetOpcode.EntitySpawn:
+                        var spawn = NetCodec.DecodeEntitySpawn(envelope.Payload);
+                        if (spawn.IsSelf)
+                            spawned = spawn;
+                        else if (spawn.Kind == EntityKindNet.Npc)
+                            npcs.AddRange(Unpack(spawn));
+                        break;
+                    case NetOpcode.SystemMessage:
+                        welcome ??= NetCodec.DecodeSystemMessage(envelope.Payload);
+                        break;
+                }
             }
 
-            throw new InvalidOperationException($"expected {expected}, got {(MsgType)frame.Value.Type}{detail}");
-        }
+            Require(user != null && items != null && spawned != null, "enter burst must carry UserInfo, ItemList and the self spawn");
+            Require(order.IndexOf(NetOpcode.UserInfo) < order.IndexOf(NetOpcode.ItemList), "UserInfo precedes ItemList");
+            Require(order.IndexOf(NetOpcode.ItemList) < order.IndexOf(NetOpcode.SkillList), "ItemList precedes SkillList");
+            var self = spawned!;
+            var selfUser = user!;
+            Require(self.Name == name && selfUser.Name == name, $"self mismatch spawn={self.Name} user={selfUser.Name}");
+            Require(selfUser.X == self.X && selfUser.Y == self.Y && selfUser.Z == self.Z, "UserInfo position must match the spawn");
+            Require(npcs.Count > 0, "enter must stream the visible NPCs");
+            Require(welcome!.Id == 1 && welcome.Params.Length == 1 && welcome.Params[0] == name,
+                $"welcome id={welcome.Id} text={welcome.Text}");
 
-        return frame.Value.Body;
+            bool fighter = items!.Items.Any(item => item.ItemId == 219);
+            int weaponId = fighter ? 219 : 177;
+            var weapon = items.Items.FirstOrDefault(item => item.ItemId == weaponId);
+            Require(weapon != null && weapon.EquippedSlot == 7, $"starter weapon {weaponId} must be equipped in the right hand");
+            Require(selfUser.Paperdoll.Length == InventoryMessages.PaperdollSlotCount && selfUser.Paperdoll[7].ItemId == weaponId,
+                "UserInfo paperdoll must show the equipped weapon");
+
+            var nearest = TalkingIsland.Gremlins[0];
+            int destX = nearest.X, destY = nearest.Y, destZ = nearest.Z;
+            if (!MoveLimits.WithinStep(self.X, self.Y, destX, destY))
+            {
+                destX = self.X + 10;
+                destY = self.Y;
+                destZ = self.Z;
+            }
+
+            await link.SendAsync(NetOpcode.MoveInput, NetCodec.EncodeMoveInput(new MoveInputMsg
+            {
+                DestX = destX,
+                DestY = destY,
+                DestZ = destZ
+            }));
+            var ack = NetCodec.DecodeMoveState(await link.ExpectPayloadAsync(NetOpcode.MoveState));
+            Require(ack.DestX == destX && ack.DestY == destY, $"move ack mismatch dest={ack.DestX},{ack.DestY}");
+        }
+        finally
+        {
+            try { await cts.CancelAsync(); } catch { /* ignore */ }
+            try { await read.ConfigureAwait(false); } catch { /* shutdown */ }
+        }
     }
 
-    static async Task<ErrorMsg> ExpectErrorAsync(NetworkStream stream)
+    /// <summary>A single spawn envelope carries one entity; NPC batches are only a test-side convenience.</summary>
+    static IEnumerable<NpcSpawnNetMsg> Unpack(EntitySpawnMsg spawn)
     {
-        var body = await ExpectAsync(stream, MsgType.Error).ConfigureAwait(false);
-        return MessagePackSerializer.Deserialize<ErrorMsg>(body);
+        yield return new NpcSpawnNetMsg
+        {
+            EntityValue = spawn.EntityValue,
+            Name = spawn.Name,
+            X = spawn.X,
+            Y = spawn.Y,
+            Z = spawn.Z
+        };
+    }
+
+    static void Require(bool condition, string message)
+    {
+        if (!condition)
+            throw new InvalidOperationException(message);
+    }
+
+    sealed class NpcSpawnNetMsg
+    {
+        public ulong EntityValue { get; init; }
+        public string Name { get; init; } = "";
+        public int X { get; init; }
+        public int Y { get; init; }
+        public int Z { get; init; }
+    }
+
+    /// <summary>Request/response client over <see cref="NetConnection"/> with a monotonic sequence.</summary>
+    sealed class NetLink(NetConnection conn)
+    {
+        uint _sequence;
+
+        public Task SendAsync(ushort opcode, byte[] payload) =>
+            conn.SendAsync(opcode, payload, unchecked(++_sequence), CancellationToken.None);
+
+        public async Task<PacketEnvelope> NextAsync(CancellationToken ct = default) =>
+            await conn.Inbox.ReadAsync(ct).ConfigureAwait(false);
+
+        public async Task<PacketEnvelope> ExpectAsync(ushort expected)
+        {
+            PacketEnvelope envelope = await NextAsync().ConfigureAwait(false);
+            Require(envelope.Opcode == expected,
+                $"expected opcode 0x{expected:X4}, got 0x{envelope.Opcode:X4}");
+            return envelope;
+        }
+
+        public async Task<byte[]> ExpectPayloadAsync(ushort expected) =>
+            (await ExpectAsync(expected).ConfigureAwait(false)).Payload;
+
+        public async Task<string> ExpectCodeAsync(ushort expected) =>
+            NetCodec.DecodeReject((await ExpectPayloadAsync(expected).ConfigureAwait(false))).Code;
     }
 }

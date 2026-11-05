@@ -1,87 +1,54 @@
 using System.Net;
-using System.Net.Sockets;
 using Fineage.Login;
+using Fineage.Net.Host;
+using Fineage.Zone.Net;
 using Fineage.Zone.World;
 
 namespace Fineage.Zone;
 
+/// <summary>
+/// Loopback zone listener for the selftest and tests: starts a <see cref="NetZoneServer"/> on an ephemeral
+/// port and the world simulation beside it. Net (PacketEnvelope) is the only zone transport.
+/// </summary>
 sealed class ZoneHost : IAsyncDisposable
 {
-    readonly TcpListener _listener;
+    readonly NetTcpServer _server;
     readonly CancellationTokenSource _cts;
-    readonly Task _loop;
 
-    ZoneHost(TcpListener listener, CancellationTokenSource cts, Task loop)
+    ZoneHost(NetTcpServer server, CancellationTokenSource cts, int port)
     {
-        _listener = listener;
+        _server = server;
         _cts = cts;
-        _loop = loop;
-        Port = ((IPEndPoint)listener.LocalEndpoint).Port;
+        Port = port;
     }
 
     public int Port { get; }
 
-    public static ZoneHost Start(HandoffTokens tokens, ZoneWorld? world = null, Func<DateTimeOffset>? clock = null, ZoneServerOptions? options = null)
+    public static ZoneHost Start(HandoffTokens tokens, ZoneWorld? world = null, IAccountStore? accounts = null)
     {
-        var listener = new TcpListener(IPAddress.Loopback, 0);
-        listener.Start();
         var cts = new CancellationTokenSource();
-        var created = world ?? ZoneAoiSettings.CreateWorld();
-        var server = new ZoneServer(tokens, created, clock, options);
+        var created = world ?? ZoneAoiSettings.CreateWorld(accounts: accounts);
         created.StartSimulation(cts.Token);
-        var loop = Task.Run(async () =>
+        var netZone = new NetZoneServer(tokens, created, accounts);
+        var server = new NetTcpServer();
+        _ = server.RunAsync("127.0.0.1", 0, netZone.HandleAsync, cts.Token, maxConnections: 16, inboxCapacity: 64);
+
+        int port = 0;
+        for (int i = 0; i < 200 && port == 0; i++)
         {
-            try
-            {
-                while (!cts.IsCancellationRequested)
-                {
-                    TcpClient client;
-                    try
-                    {
-                        client = await listener.AcceptTcpClientAsync(cts.Token).ConfigureAwait(false);
-                    }
-                    catch (Exception ex) when (ex is OperationCanceledException or SocketException or ObjectDisposedException)
-                    {
-                        break;
-                    }
+            Thread.Sleep(10);
+            port = server.BoundPort;
+        }
 
-                    _ = Task.Run(async () =>
-                    {
-                        try
-                        {
-                            await using var stream = client.GetStream();
-                            await server.HandleAsync(stream, cts.Token).ConfigureAwait(false);
-                        }
-                        catch (Exception ex) when (ex is IOException or OperationCanceledException or ObjectDisposedException)
-                        {
-                        }
-                        finally
-                        {
-                            client.Dispose();
-                        }
-                    });
-                }
-            }
-            catch (ObjectDisposedException)
-            {
-            }
-        });
+        if (port == 0)
+            throw new InvalidOperationException("zone net server did not bind a port");
 
-        return new ZoneHost(listener, cts, loop);
+        return new ZoneHost(server, cts, port);
     }
 
     public async ValueTask DisposeAsync()
     {
         await _cts.CancelAsync().ConfigureAwait(false);
-        _listener.Stop();
-        try
-        {
-            await _loop.WaitAsync(TimeSpan.FromSeconds(2)).ConfigureAwait(false);
-        }
-        catch (TimeoutException)
-        {
-        }
-
         _cts.Dispose();
     }
 }
