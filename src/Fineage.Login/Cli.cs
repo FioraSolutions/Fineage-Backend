@@ -225,7 +225,7 @@ public static class Cli
 
         // Start Net TCP before HTTP so PacketEnvelope login works even if Kestrel hangs.
         var netLogin = new NetLoginServer(service, zoneHost: ZoneHandoff.AdvertiseHost, zonePort: NetSettings.ZonePort);
-        var netTcp = new NetTcpServer();
+        var netTcp = new NetTcpServer { Endpoint = "login" };
         output.WriteLine($"[LOGIN] net listen {bindDisplay}:{NetSettings.LoginPort} (PacketEnvelope)");
         Task netTask = netTcp.RunAsync(
             host,

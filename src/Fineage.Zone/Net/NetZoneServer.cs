@@ -2026,6 +2026,9 @@ public sealed class NetZoneServer : INetPresenceBridge
             throw new InvalidOperationException("hello_required");
     }
 
-    static Task RejectAsync(NetConnection conn, string code, string message, CancellationToken ct) =>
-        conn.SendAsync(NetOpcode.Reject, NetCodec.EncodeReject(new NetReject { Code = code, Message = message }), ct: ct);
+    static Task RejectAsync(NetConnection conn, string code, string message, CancellationToken ct)
+    {
+        NetTelemetry.PacketRejected("zone");
+        return conn.SendAsync(NetOpcode.Reject, NetCodec.EncodeReject(new NetReject { Code = code, Message = message }), ct: ct);
+    }
 }

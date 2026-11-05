@@ -398,6 +398,9 @@ public sealed class NetLoginServer
             throw new InvalidOperationException("hello_required");
     }
 
-    static Task RejectAsync(NetConnection conn, string code, string message, CancellationToken ct) =>
-        conn.SendAsync(NetOpcode.Reject, NetCodec.EncodeReject(new RejectMsg { Code = code, Message = message }), ct: ct);
+    static Task RejectAsync(NetConnection conn, string code, string message, CancellationToken ct)
+    {
+        NetTelemetry.PacketRejected("login");
+        return conn.SendAsync(NetOpcode.Reject, NetCodec.EncodeReject(new RejectMsg { Code = code, Message = message }), ct: ct);
+    }
 }
