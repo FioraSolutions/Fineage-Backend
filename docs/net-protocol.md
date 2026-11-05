@@ -6,8 +6,7 @@ PacketEnvelope login/zone path. Durable accounts use PostgreSQL by default for l
 
 | Stack | Login | Zone |
 |-------|-------|------|
-| Net (`FINEAGE_NET_ENABLE=1`) | 9106 | 9777 |
-| Legacy V2 MessagePack | 9206 | 9877 |
+| Net (`PacketEnvelope`) | 9106 | 9777 |
 
 ## Persistence
 

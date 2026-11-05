@@ -555,7 +555,7 @@ public sealed partial class ZoneWorld
 
     /// <summary>
     /// Optional Net PacketEnvelope bridge for sim/AI fanout (MoveState) while V2 flushes stay on ZoneSession streams.
-    /// Set by the Net host when <c>FINEAGE_NET_ENABLE=1</c>.
+    /// Set by the Net host when it owns the zone session.
     /// </summary>
     internal INetPresenceBridge? NetBridge { get; set; }
 

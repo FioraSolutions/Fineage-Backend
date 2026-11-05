@@ -1,6 +1,5 @@
 #!/usr/bin/env bash
 # Local Login+Zone: Net on 9106/9777 (the only protocol); Postgres by default.
-# Set FINEAGE_LEGACY_V2_ENABLE=1 to also serve the retired 9206/9877 listeners.
 # Usage: scripts/run-local-net.sh [start|stop|status]
 set -euo pipefail
 ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
