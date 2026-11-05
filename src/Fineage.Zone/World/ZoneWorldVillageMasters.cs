@@ -155,7 +155,7 @@ public sealed partial class ZoneWorld
         Notice(session, ClassTransferMessageId, "Congratulations. You have completed the class transfer.", toSelf);
         toSelf.Add(Pack(session, MsgType.SkillList, SkillListFor(player)));
         NetBridge?.FanoutSkillList([player.ObjectId], Fineage.Zone.Net.NetEnterWorldProjector.BuildSkills(player, _clock().ToUnixTimeMilliseconds()));
-        toSelf.Add(SelfUserInfo(session, player));
+        SelfUserInfo(player);
 
         // Mobius broadcastUserInfo: peers see the new class.
         byte[] body = MessagePackSerializer.Serialize(CharInfo(player));

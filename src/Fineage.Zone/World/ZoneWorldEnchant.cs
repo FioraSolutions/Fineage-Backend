@@ -256,7 +256,7 @@ public sealed partial class ZoneWorld
         if (levelChangedWhileWorn || destroyedWhileWorn || slotChanges.Count > 0)
         {
             RefreshGradePenalty(player);
-            toSelf.Add(SelfUserInfo(session, player));
+            SelfUserInfo(player);
             // Mobius broadcastUserInfo: peers must see the new paperdoll after an equip change, so this has to
             // reach Net too — the V2 Pending fanout alone left Net peers looking at the pre-enchant gear.
             byte[] body = MessagePackSerializer.Serialize(CharInfo(player));

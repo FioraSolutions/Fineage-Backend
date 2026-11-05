@@ -67,7 +67,7 @@ public sealed partial class ZoneWorld
         if (speedChanged)
             FanoutNetMoveType(target);
         if ((statful || target.HasStatAbnormal) && target.Kind == ZoneEntityKind.Player && target.Session != null)
-            outbound.Add(SelfUserInfo(target.Session, target));
+            SelfUserInfo(target);
         target.HasStatAbnormal = statful;
         List<int>? netWatchers = null;
         foreach (var watcher in Players())

@@ -168,7 +168,7 @@ public sealed partial class ZoneWorld
             ]
         };
         outbound.Add(Pack(session, MsgType.StatusUpdate, status));
-        outbound.Add(SelfUserInfo(session, player));
+        SelfUserInfo(player);
         if (deleveled)
             outbound.Add(Pack(session, MsgType.SkillList, SkillListFor(player)));
 

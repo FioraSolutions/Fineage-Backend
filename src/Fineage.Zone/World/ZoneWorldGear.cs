@@ -197,7 +197,7 @@ public sealed partial class ZoneWorld
         RefreshRunSpeedAndFanout(player);
         var invUpdate = InventoryMessages.Modify(changed);
         toSelf.Add(Pack(session, MsgType.InventoryUpdate, invUpdate));
-        toSelf.Add(SelfUserInfo(session, player));
+        SelfUserInfo(player);
         if (NetBridge != null)
             NetBridge.FanoutInventoryUpdate([session.ObjectId], ToNetInventoryUpdate(invUpdate));
         byte[] body = MessagePackSerializer.Serialize(CharInfo(player));
