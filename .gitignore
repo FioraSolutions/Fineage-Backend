@@ -50,3 +50,4 @@ local-logs/
 publish/
 !data/spoil.json
 !data/herbs.json
+!data/xp-percent-lost.json
