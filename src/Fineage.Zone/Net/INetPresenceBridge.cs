@@ -161,4 +161,10 @@ interface INetPresenceBridge
 
     /// <summary>The finished match and its reward.</summary>
     void FanoutOlympiadResult(IReadOnlyList<int> watcherObjectIds, OlympiadResultNetMsg result);
+
+    /// <summary>The Seven Signs record, also the reply to a status request.</summary>
+    void FanoutSevenSignsStatus(IReadOnlyList<int> watcherObjectIds, SevenSignsStatusNetMsg status);
+
+    /// <summary>The sky tint the record implies, so the client can recolour without polling.</summary>
+    void FanoutSevenSignsSky(IReadOnlyList<int> watcherObjectIds, SevenSignsSkyNetMsg sky);
 }

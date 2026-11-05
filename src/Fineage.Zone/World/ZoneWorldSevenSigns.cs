@@ -55,13 +55,22 @@ public sealed partial class ZoneWorld
             return false;
 
         var sky = _sevenSigns.Sky();
+        var live = new List<int>();
         foreach (var player in Players())
         {
             if (player.Session == null)
                 continue;
+            live.Add(player.ObjectId);
             foreach (var notice in notices)
                 outbound.Add(Pack(player.Session, MsgType.SystemMessage, ToSystem(notice)));
             outbound.Add(Pack(player.Session, MsgType.SevenSignsSky, sky));
+        }
+
+        if (live.Count > 0)
+        {
+            foreach (var notice in notices)
+                NetBridge?.FanoutSystemMessage(live, ToNet(notice));
+            NetBridge?.FanoutSevenSignsSky(live, ToNet(sky));
         }
 
         EvictDungeonLosers(outbound);
@@ -84,7 +93,10 @@ public sealed partial class ZoneWorld
             return error;
 
         foreach (var notice in notices)
+        {
             toSelf.Add(Pack(session, MsgType.SystemMessage, ToSystem(notice)));
+            NetBridge?.FanoutSystemMessage([session.ObjectId], ToNet(notice));
+        }
         QueueRecord(session, toSelf);
         return null;
     }
@@ -120,7 +132,9 @@ public sealed partial class ZoneWorld
 
         if (changes.Count > 0)
         {
-            toSelf.Add(Pack(session, MsgType.InventoryUpdate, new InventoryUpdateMsg { Changes = changes.ToArray() }));
+            var update = new InventoryUpdateMsg { Changes = changes.ToArray() };
+            toSelf.Add(Pack(session, MsgType.InventoryUpdate, update));
+            NetBridge?.FanoutInventoryUpdate([session.ObjectId], ToNetInventoryUpdate(update));
             SaveInventory(session, inventory);
         }
 
@@ -150,7 +164,9 @@ public sealed partial class ZoneWorld
         Take(inventory, SevenSignsProtocol.RedSealStoneId, request.RedStones, changes);
         if (changes.Count > 0)
         {
-            toSelf.Add(Pack(session, MsgType.InventoryUpdate, new InventoryUpdateMsg { Changes = changes.ToArray() }));
+            var update = new InventoryUpdateMsg { Changes = changes.ToArray() };
+            toSelf.Add(Pack(session, MsgType.InventoryUpdate, update));
+            NetBridge?.FanoutInventoryUpdate([session.ObjectId], ToNetInventoryUpdate(update));
             SaveInventory(session, inventory);
         }
 
@@ -159,8 +175,12 @@ public sealed partial class ZoneWorld
 
     void QueueRecord(ZoneSession session, List<Pending> toSelf)
     {
-        toSelf.Add(Pack(session, MsgType.SevenSignsStatus, _sevenSigns.StatusFor(session.ObjectId)));
-        toSelf.Add(Pack(session, MsgType.SevenSignsSky, _sevenSigns.Sky()));
+        var status = _sevenSigns.StatusFor(session.ObjectId);
+        var sky = _sevenSigns.Sky();
+        toSelf.Add(Pack(session, MsgType.SevenSignsStatus, status));
+        toSelf.Add(Pack(session, MsgType.SevenSignsSky, sky));
+        NetBridge?.FanoutSevenSignsStatus([session.ObjectId], ToNet(status));
+        NetBridge?.FanoutSevenSignsSky([session.ObjectId], ToNet(sky));
     }
 
     bool Pay(PlayerInventory inventory, SevenSignsJoinCost cost, List<InventoryUpdateEntryMsg> changes)
@@ -190,5 +210,51 @@ public sealed partial class ZoneWorld
         Id = notice.Id,
         Params = [],
         Text = notice.Text
+    };
+
+    static Fineage.Net.Contract.SystemMessageNetMsg ToNet(SevenSignsNotice notice) => new()
+    {
+        Id = notice.Id,
+        Params = [],
+        Text = notice.Text
+    };
+
+    static Fineage.Net.Contract.SevenSignsSkyNetMsg ToNet(SevenSignsSkyMsg sky) => new()
+    {
+        State = sky.State,
+        Period = sky.Period,
+        WinningCabal = sky.WinningCabal
+    };
+
+    static Fineage.Net.Contract.SevenSignsStatusNetMsg ToNet(SevenSignsStatusMsg s) => new()
+    {
+        Period = s.Period,
+        Cycle = s.Cycle,
+        PlayerCabal = s.PlayerCabal,
+        PlayerSeal = s.PlayerSeal,
+        PlayerStoneCount = s.PlayerStoneCount,
+        PlayerAncientAdena = s.PlayerAncientAdena,
+        PlayerContribution = s.PlayerContribution,
+        DawnScore = s.DawnScore,
+        DuskScore = s.DuskScore,
+        DawnFestivalScore = s.DawnFestivalScore,
+        DuskFestivalScore = s.DuskFestivalScore,
+        DawnStonePoints = s.DawnStonePoints,
+        DuskStonePoints = s.DuskStonePoints,
+        AvariceOwner = s.AvariceOwner,
+        GnosisOwner = s.GnosisOwner,
+        StrifeOwner = s.StrifeOwner,
+        DawnMembers = s.DawnMembers,
+        DuskMembers = s.DuskMembers,
+        WinningCabal = s.WinningCabal,
+        NextChangeUnixMs = s.NextChangeUnixMs,
+        SkyState = s.SkyState,
+        DawnAvarice = s.DawnAvarice,
+        DawnGnosis = s.DawnGnosis,
+        DawnStrife = s.DawnStrife,
+        DuskAvarice = s.DuskAvarice,
+        DuskGnosis = s.DuskGnosis,
+        DuskStrife = s.DuskStrife,
+        PreviousWinner = s.PreviousWinner
     };
 }

@@ -203,5 +203,13 @@ namespace Fineage.Net.Contract
         public const ushort OlympiadCountdown = 0x0385;
         /// <summary>Zone → client: the finished match and its reward.</summary>
         public const ushort OlympiadResult = 0x0386;
+        /// <summary>Client → zone: ask for the Seven Signs record. Empty body.</summary>
+        public const ushort SevenSignsStatusRequest = 0x0387;
+        /// <summary>Client → zone: join a cabal or hand in seal stones.</summary>
+        public const ushort SevenSignsActionRequest = 0x0388;
+        /// <summary>Zone → client: the Seven Signs record.</summary>
+        public const ushort SevenSignsStatus = 0x0389;
+        /// <summary>Zone → client: the sky tint the record implies.</summary>
+        public const ushort SevenSignsSky = 0x038A;
     }
 }
