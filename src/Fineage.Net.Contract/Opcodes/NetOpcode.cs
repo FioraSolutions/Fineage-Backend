@@ -211,5 +211,9 @@ namespace Fineage.Net.Contract
         public const ushort SevenSignsStatus = 0x0389;
         /// <summary>Zone → client: the sky tint the record implies.</summary>
         public const ushort SevenSignsSky = 0x038A;
+        /// <summary>Client → zone: enter or leave a catacomb or necropolis.</summary>
+        public const ushort DungeonEnterRequest = 0x038B;
+        /// <summary>Zone → client: the catacomb/necropolis teleport result and the validation kick.</summary>
+        public const ushort DungeonEntered = 0x038C;
     }
 }

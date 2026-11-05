@@ -36,7 +36,9 @@ internal sealed class WorldBench
         Fineage.Zone.Bosses.BossSchedule? bosses = null,
         Fineage.Zone.Siege.SiegeSettings? siege = null,
         Fineage.Zone.Olympiad.OlympiadSettings? olympiadSettings = null,
-        Fineage.Zone.SevenSigns.SevenSignsEngine? sevenSigns = null)
+        Fineage.Zone.SevenSigns.SevenSignsEngine? sevenSigns = null,
+        Fineage.Zone.Dungeons.DungeonCatalog? dungeons = null,
+        Fineage.Zone.Dungeons.DungeonAccessOptions? dungeonAccess = null)
     {
         Game = game ?? GameData.LoadDefault();
         Store = JsonAccountStore.InMemory();
@@ -63,7 +65,9 @@ internal sealed class WorldBench
             bosses: bosses,
             siege: siege,
             olympiadSettings: olympiadSettings,
-            sevenSigns: sevenSigns);
+            sevenSigns: sevenSigns,
+            dungeons: dungeons,
+            dungeonAccess: dungeonAccess);
         (Bridge, Rec) = NetBridgeRecorder.Create();
         World.NetBridge = Bridge;
     }

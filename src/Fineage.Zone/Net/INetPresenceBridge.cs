@@ -167,4 +167,7 @@ interface INetPresenceBridge
 
     /// <summary>The sky tint the record implies, so the client can recolour without polling.</summary>
     void FanoutSevenSignsSky(IReadOnlyList<int> watcherObjectIds, SevenSignsSkyNetMsg sky);
+
+    /// <summary>The catacomb/necropolis result, also the validation kick.</summary>
+    void FanoutDungeonEntered(IReadOnlyList<int> watcherObjectIds, DungeonEnteredNetMsg entered);
 }

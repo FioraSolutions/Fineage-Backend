@@ -41,7 +41,9 @@ public sealed partial class ZoneWorld
                 return InventoryProtocol.Dead;
             Relocate(player, site.ExitX, site.ExitY, site.ExitZ, toSelf, toOthers);
             player.DungeonId = 0;
-            toSelf.Add(Pack(session, MsgType.DungeonEntered, Entered(site, inside: false, DungeonProtocol.ActionExit)));
+            var left = Entered(site, inside: false, DungeonProtocol.ActionExit);
+            toSelf.Add(Pack(session, MsgType.DungeonEntered, left));
+            NetBridge?.FanoutDungeonEntered([session.ObjectId], ToNet(left));
             return null;
         }
 
@@ -68,14 +70,18 @@ public sealed partial class ZoneWorld
 
             if (changes.Count > 0)
             {
-                toSelf.Add(Pack(session, MsgType.InventoryUpdate, new InventoryUpdateMsg { Changes = changes.ToArray() }));
+                var update = new InventoryUpdateMsg { Changes = changes.ToArray() };
+                toSelf.Add(Pack(session, MsgType.InventoryUpdate, update));
+                NetBridge?.FanoutInventoryUpdate([session.ObjectId], ToNetInventoryUpdate(update));
                 SaveInventory(session, player.Inventory);
             }
         }
 
         Relocate(player, site.EntranceX, site.EntranceY, site.EntranceZ, toSelf, toOthers);
         player.DungeonId = site.Id;
-        toSelf.Add(Pack(session, MsgType.DungeonEntered, Entered(site, inside: true, DungeonProtocol.ActionEnter)));
+        var inside = Entered(site, inside: true, DungeonProtocol.ActionEnter);
+        toSelf.Add(Pack(session, MsgType.DungeonEntered, inside));
+        NetBridge?.FanoutDungeonEntered([session.ObjectId], ToNet(inside));
         return null;
     }
 
@@ -101,13 +107,17 @@ public sealed partial class ZoneWorld
             var toOthers = new List<Pending>();
             Relocate(player, site.ExitX, site.ExitY, site.ExitZ, toSelf, toOthers);
             player.DungeonId = 0;
-            toSelf.Add(Pack(player.Session, MsgType.SystemMessage, new SystemMessageMsg
+            var line = new SystemMessageMsg
             {
                 Id = notice.Id,
                 Params = [],
                 Text = notice.Text
-            }));
-            toSelf.Add(Pack(player.Session, MsgType.DungeonEntered, Entered(site, inside: false, DungeonProtocol.ActionKick)));
+            };
+            toSelf.Add(Pack(player.Session, MsgType.SystemMessage, line));
+            var kicked = Entered(site, inside: false, DungeonProtocol.ActionKick);
+            toSelf.Add(Pack(player.Session, MsgType.DungeonEntered, kicked));
+            NetBridge?.FanoutSystemMessage([player.ObjectId], ToNet(line));
+            NetBridge?.FanoutDungeonEntered([player.ObjectId], ToNet(kicked));
             outbound.AddRange(toSelf);
             outbound.AddRange(toOthers);
             ZoneLog.Info($"dungeon kick object={player.ObjectId} dungeon={site.Id} -> {site.ExitX},{site.ExitY},{site.ExitZ}");
@@ -190,6 +200,23 @@ public sealed partial class ZoneWorld
         }
     }
 
+    static Fineage.Net.Contract.SystemMessageNetMsg ToNet(SystemMessageMsg line) => new()
+    {
+        Id = line.Id,
+        Params = line.Params,
+        Text = line.Text
+    };
+
+    static Fineage.Net.Contract.DungeonEnteredNetMsg ToNet(DungeonEnteredMsg entered) => new()
+    {
+        DungeonId = entered.DungeonId,
+        X = entered.X,
+        Y = entered.Y,
+        Z = entered.Z,
+        Inside = entered.Inside,
+        Action = entered.Action
+    };
+
     static DungeonEnteredMsg Entered(DungeonSite site, bool inside, int action) => new()
     {
         DungeonId = site.Id,
@@ -200,16 +227,18 @@ public sealed partial class ZoneWorld
         Action = action
     };
 
-    static void QueueNotices(ZoneSession session, IReadOnlyList<DungeonNotice> notices, List<Pending> toSelf)
+    void QueueNotices(ZoneSession session, IReadOnlyList<DungeonNotice> notices, List<Pending> toSelf)
     {
         foreach (var notice in notices)
         {
-            toSelf.Add(Pack(session, MsgType.SystemMessage, new SystemMessageMsg
+            var line = new SystemMessageMsg
             {
                 Id = notice.Id,
                 Params = [],
                 Text = notice.Text
-            }));
+            };
+            toSelf.Add(Pack(session, MsgType.SystemMessage, line));
+            NetBridge?.FanoutSystemMessage([session.ObjectId], ToNet(line));
         }
     }
 }

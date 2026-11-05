@@ -829,7 +829,7 @@ public sealed partial class ZoneWorld
             }
         }
 
-        AnnounceClanEnter(entity, toSelf, toOthers);
+        AnnounceClanEnter(entity);
         toSelf.Add(Pack(session, MsgType.SystemMessage, SayRules.Welcome(session.Name)));
         known = entity.Knownlist.Count;
         return true;
@@ -1027,7 +1027,7 @@ public sealed partial class ZoneWorld
 
         PartyPlayerLeftWorld(session.ObjectId, toOthers);
         TradePlayerLeftWorld(session.ObjectId, toOthers);
-        ClanPlayerLeftWorld(session.ObjectId, session.Name, toOthers);
+        ClanPlayerLeftWorld(session.ObjectId, session.Name);
 
         byte[] body = MessagePackSerializer.Serialize(new DeleteObjectMsg { ObjectId = session.ObjectId });
         foreach (var watcher in watchers)

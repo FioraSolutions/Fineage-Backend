@@ -36,7 +36,7 @@ public sealed partial class ZoneWorld
                     TickSpawns(outbound);
                     TickAbnormals(outbound);
                     TickBosses(outbound);
-                    CompleteDueDissolutions(_clock().ToUnixTimeMilliseconds(), outbound);
+                    CompleteDueDissolutions(_clock().ToUnixTimeMilliseconds());
                     TickSevenSigns(outbound);
                     TickOlympiad(outbound);
                 }

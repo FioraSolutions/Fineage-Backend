@@ -566,6 +566,13 @@ public sealed class NetZoneServer : INetPresenceBridge
             _presence.TrySend(watcher, NetOpcode.SevenSignsSky, payload);
     }
 
+    void INetPresenceBridge.FanoutDungeonEntered(IReadOnlyList<int> watcherObjectIds, DungeonEnteredNetMsg entered)
+    {
+        var payload = NetCodec.EncodeDungeonEntered(entered);
+        foreach (int watcher in watcherObjectIds)
+            _presence.TrySend(watcher, NetOpcode.DungeonEntered, payload);
+    }
+
     public async Task HandleAsync(NetConnection conn, CancellationToken ct)
     {
         // The world layer still emits V2 frames alongside Net fanout. A MemoryStream here
@@ -849,6 +856,9 @@ public sealed class NetZoneServer : INetPresenceBridge
                             break;
                         case NetOpcode.SevenSignsActionRequest:
                             await OnSevenSignsActionAsync(conn, zoneSession, envelope, ct).ConfigureAwait(false);
+                            break;
+                        case NetOpcode.DungeonEnterRequest:
+                            await OnDungeonAsync(conn, zoneSession, envelope, ct).ConfigureAwait(false);
                             break;
                         case NetOpcode.StopMove:
                             // Authoritative stop: correct to current session position.
@@ -1810,6 +1820,29 @@ public sealed class NetZoneServer : INetPresenceBridge
             ct).ConfigureAwait(false);
         if (error != null)
             await RejectAsync(conn, error, "SevenSigns action was rejected.", ct).ConfigureAwait(false);
+    }
+
+    async Task OnDungeonAsync(
+        NetConnection conn,
+        ZoneSession zoneSession,
+        PacketEnvelope envelope,
+        CancellationToken ct)
+    {
+        RequireHello(conn);
+        if (!zoneSession.Bound || !zoneSession.InWorld)
+        {
+            await RejectAsync(conn, "not_in_world", "Enter world first.", ct).ConfigureAwait(false);
+            return;
+        }
+
+        var request = NetCodec.DecodeDungeonEnterRequest(envelope.Payload);
+        string? error = await _world.TryDungeonAsync(
+            zoneSession,
+            new DungeonEnterRequestMsg { DungeonId = request.DungeonId, Action = request.Action },
+            ct).ConfigureAwait(false);
+        if (error != null)
+            await RejectAsync(conn, error, "Dungeon request was rejected.", ct).ConfigureAwait(false);
+        // DungeonEntered goes out as fanout, so the reply body is empty on purpose.
     }
 
     async Task OnAttackAsync(

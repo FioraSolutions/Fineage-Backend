@@ -2512,6 +2512,42 @@ namespace Fineage.Net.Contract
             };
         }
 
+        public static byte[] EncodeDungeonEnterRequest(DungeonEnterRequestNetMsg m) => Write(w =>
+        {
+            w.WriteInt32(m.DungeonId);
+            w.WriteInt32(m.Action);
+        });
+
+        public static DungeonEnterRequestNetMsg DecodeDungeonEnterRequest(ReadOnlySpan<byte> p)
+        {
+            var r = new Reader(p);
+            return new DungeonEnterRequestNetMsg { DungeonId = r.ReadInt32(), Action = r.ReadInt32() };
+        }
+
+        public static byte[] EncodeDungeonEntered(DungeonEnteredNetMsg m) => Write(w =>
+        {
+            w.WriteInt32(m.DungeonId);
+            w.WriteInt32(m.X);
+            w.WriteInt32(m.Y);
+            w.WriteInt32(m.Z);
+            w.WriteByte(m.Inside ? (byte)1 : (byte)0);
+            w.WriteInt32(m.Action);
+        });
+
+        public static DungeonEnteredNetMsg DecodeDungeonEntered(ReadOnlySpan<byte> p)
+        {
+            var r = new Reader(p);
+            return new DungeonEnteredNetMsg
+            {
+                DungeonId = r.ReadInt32(),
+                X = r.ReadInt32(),
+                Y = r.ReadInt32(),
+                Z = r.ReadInt32(),
+                Inside = r.ReadByte() != 0,
+                Action = r.ReadInt32()
+            };
+        }
+
         public static byte[] EncodeSevenSignsActionRequest(SevenSignsActionRequestNetMsg m) => Write(w =>
         {
             w.WriteInt32(m.Action);
