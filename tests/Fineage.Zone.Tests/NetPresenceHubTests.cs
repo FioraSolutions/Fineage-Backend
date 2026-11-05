@@ -1,4 +1,7 @@
+using System.Net;
+using System.Net.Sockets;
 using Fineage.Net.Contract;
+using Fineage.Net.Host;
 using Fineage.Zone.Net;
 using Fineage.Zone.World;
 using Xunit;
@@ -53,6 +56,54 @@ public sealed class NetPresenceHubTests
         // Without a live socket we only assert Unregister is safe.
         hub.Unregister(1);
         Assert.False(hub.TryGet(1, out _, out _));
+    }
+
+    [Fact]
+    public void Stale_connection_cannot_unregister_the_object_id_a_newer_connection_owns()
+    {
+        // World object ids are reused the moment a player leaves. A connection still tearing down must not
+        // remove the entry a newer connection just claimed, or the newcomer stops receiving presence fanout.
+        using var oldSide = new SocketPair();
+        using var newSide = new SocketPair();
+        var hub = new NetPresenceHub();
+        var entityId = EntityId.FromObjectId(1);
+
+        hub.Register(1, oldSide.Connection, entityId);
+        hub.Register(1, newSide.Connection, entityId);
+
+        Assert.False(hub.Unregister(1, oldSide.Connection));
+        Assert.True(hub.TryGet(1, out var conn, out _));
+        Assert.Same(newSide.Connection, conn);
+
+        Assert.True(hub.Unregister(1, newSide.Connection));
+        Assert.False(hub.TryGet(1, out _, out _));
+    }
+
+    /// <summary>Two loopback sockets whose server ends back a <see cref="NetConnection"/>.</summary>
+    sealed class SocketPair : IDisposable
+    {
+        readonly TcpListener _listener;
+        readonly TcpClient _serverSide;
+
+        public SocketPair()
+        {
+            _listener = new TcpListener(IPAddress.Loopback, 0);
+            _listener.Start();
+            ClientSide = new TcpClient();
+            ClientSide.Connect((IPEndPoint)_listener.LocalEndpoint);
+            _serverSide = _listener.AcceptTcpClient();
+            Connection = new NetConnection(_serverSide, 8);
+        }
+
+        public TcpClient ClientSide { get; }
+        public NetConnection Connection { get; }
+
+        public void Dispose()
+        {
+            Connection.DisposeAsync().AsTask().GetAwaiter().GetResult();
+            ClientSide.Dispose();
+            _listener.Stop();
+        }
     }
 
     [Fact]
