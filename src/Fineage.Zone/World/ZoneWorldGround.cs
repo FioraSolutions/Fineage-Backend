@@ -1,3 +1,4 @@
+using Fineage.Game.Services;
 using Fineage.Net.Contract;
 using Fineage.Protocol;
 using Fineage.Zone.Combat;
@@ -68,6 +69,10 @@ public sealed partial class ZoneWorld
     public const int SysMsgObtainedItem = 30;
     /// <summary>Interlude SystemMessageId 145 FAILED_TO_PICKUP_S1.</summary>
     public const int SysMsgFailedToPickup = 145;
+    /// <summary>Mobius SystemMessageId 129 YOUR_INVENTORY_IS_FULL.</summary>
+    public const int SysMsgInventoryFull = 129;
+    /// <summary>Mobius SystemMessageId 422 YOU_HAVE_EXCEEDED_THE_WEIGHT_LIMIT.</summary>
+    public const int SysMsgWeightLimit = 422;
     /// <summary>Mobius DropProtection.PROTECTED_MILLIS: killer-only pickup window.</summary>
     public const long DropProtectMs = 15_000;
     /// <summary>Mobius General AutoDestroyDroppedItemAfter = 600 s (mob loot; player discards are kept, DestroyPlayerDroppedItem = false).</summary>
@@ -87,6 +92,20 @@ public sealed partial class ZoneWorld
         return _partyByPlayer.TryGetValue(ground.GroundOwnerId, out int ownerParty)
             && _partyByPlayer.TryGetValue(player.ObjectId, out int myParty)
             && ownerParty == myParty;
+    }
+
+    /// <summary>
+    /// Mobius <c>PlayerInventory.validateCapacity(Item)</c> (<c>PlayerInventory.java:834-842</c>): a stackable item that
+    /// is already carried takes no new slot, everything else needs one. Herbs are excluded because Mobius consumes them
+    /// on the spot (<c>hasExImmediateEffect</c>) and never stores them.
+    /// </summary>
+    bool HasRoomForGroundItem(ZoneEntity player, ZoneEntity ground)
+    {
+        if (player.Inventory == null || IsHerb(ground.GroundItemId))
+            return true;
+        bool alreadyCarried = player.Inventory.FindByItemId(ground.GroundItemId) != null;
+        int slots = WarehouseRules.SlotsFor(ground.GroundStackable, alreadyCarried, ground.GroundCount);
+        return player.Inventory.Items.Count + slots <= WarehouseRules.InventorySlots(player.Race);
     }
 
     /// <summary>Test hook: roll + drop death loot for <paramref name="npcId"/> as if <paramref name="killer"/> killed it here.</summary>
@@ -135,6 +154,17 @@ public sealed partial class ZoneWorld
             // Mobius DropProtection.tryPickUp false -> FAILED_TO_PICKUP_S1, no run-in.
             PickupFailed(session, ground, outbound);
             return "protected";
+        }
+        // Mobius Player.doPickupItem: after drop protection and before the run-in, RequestPickupItem calls
+        // Inventory.validateCapacity(target) and answers YOUR_INVENTORY_IS_FULL. Mobius deliberately does *not*
+        // weight-check a pickup (validateWeight is only on buy / withdraw / trade), so an overloaded character may
+        // still loot and simply carries the weight penalty — matching the reference means slots-only here.
+        if (!HasRoomForGroundItem(player, ground))
+        {
+            session.PendingPickupId = 0;
+            session.PendingPickupAtUnixMs = 0;
+            ShotNotice(session, SysMsgInventoryFull, "Your inventory is full.", outbound);
+            return "slots";
         }
         AdvanceMove(player, now);
         if (!ZoneCombat.InPickupRange(player.X, player.Y, ground.X, ground.Y))

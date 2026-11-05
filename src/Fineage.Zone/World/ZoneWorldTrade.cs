@@ -1,4 +1,5 @@
 using Fineage.Game;
+using Fineage.Game.Services;
 using Fineage.Protocol;
 
 namespace Fineage.Zone.World;
@@ -306,6 +307,18 @@ public sealed partial class ZoneWorld
             !ValidateOffers(partner.Inventory, session.PartnerOffers))
             return false;
 
+        // Mobius TradeList.doExchange (TradeList.java:574-583): each receiver is checked separately, weight before
+        // slots, and both players get the same message. A trade that would overload the receiver or overflow their bag
+        // is refused outright instead of the transfer half-applying.
+        var deny = IncomingDenyOf(requestor, session.PartnerOffers);
+        if (deny == TradeIncomingDeny.None)
+            deny = IncomingDenyOf(partner, session.RequestorOffers);
+        if (deny != TradeIncomingDeny.None)
+        {
+            DenyIncomingTrade(requestor, partner, deny, outbound);
+            return false;
+        }
+
         var requestorChanges = new List<InventoryUpdateEntryMsg>();
         var partnerChanges = new List<InventoryUpdateEntryMsg>();
 
@@ -351,6 +364,51 @@ public sealed partial class ZoneWorld
         }
 
         return true;
+    }
+
+    /// <summary>Which message <see cref="TradeIncomingDeny"/> wants. Ordered the way Mobius reports it: weight first.</summary>
+    enum TradeIncomingDeny
+    {
+        None = 0,
+        Weight = 1,
+        Slots = 2
+    }
+
+    /// <summary>
+    /// Mobius <c>TradeList.doExchange</c>: <c>validateWeight(partnerList.calcItemsWeight())</c> then
+    /// <c>validateCapacity(partnerList.countItemsSlots(owner))</c> against the receiving side.
+    /// </summary>
+    TradeIncomingDeny IncomingDenyOf(ZoneEntity receiver, List<TradeOfferRow> offers)
+    {
+        if (receiver.Inventory == null || offers.Count == 0)
+            return TradeIncomingDeny.None;
+
+        long incoming = 0;
+        int slots = 0;
+        foreach (var row in offers)
+        {
+            incoming = checked(incoming + (long)_weights.Of(row.ItemId) * row.Count);
+            bool alreadyCarried = receiver.Inventory.FindByItemId(row.ItemId) != null;
+            bool stackable = _game.Items.TryGet(row.ItemId, out var template) && template != null && template.Stackable;
+            slots += WarehouseRules.SlotsFor(stackable, alreadyCarried, (int)Math.Min(int.MaxValue, row.Count));
+        }
+
+        if (receiver.Inventory.TotalWeight + incoming > MaxLoadOf(receiver))
+            return TradeIncomingDeny.Weight;
+        if (receiver.Inventory.Items.Count + slots > WarehouseRules.InventorySlots(receiver.Race))
+            return TradeIncomingDeny.Slots;
+        return TradeIncomingDeny.None;
+    }
+
+    /// <summary>Mobius sends the same reply to both trade partners, whichever side actually overflowed.</summary>
+    void DenyIncomingTrade(ZoneEntity requestor, ZoneEntity partner, TradeIncomingDeny reason, List<Pending> outbound)
+    {
+        int id = reason == TradeIncomingDeny.Slots ? SysMsgInventoryFull : SysMsgWeightLimit;
+        string text = reason == TradeIncomingDeny.Slots ? "Your inventory is full." : "You have exceeded the weight limit.";
+        if (requestor.Session != null)
+            ShotNotice(requestor.Session, id, text, outbound);
+        if (partner.Session != null)
+            ShotNotice(partner.Session, id, text, outbound);
     }
 
     static void TransferOfferRow(
