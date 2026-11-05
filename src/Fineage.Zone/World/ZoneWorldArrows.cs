@@ -38,7 +38,7 @@ public sealed partial class ZoneWorld
     /// matching arrow is taken from the bag and equipped (the client sees the paperdoll change). Null = out of arrows,
     /// the caller must refuse the shot and say <see cref="SysMsgRunOutOfArrows"/>.
     /// </summary>
-    ItemInstance? EnsureBowArrow(ZoneEntity player, ItemTemplate bow, List<Pending> toSelf)
+    ItemInstance? EnsureBowArrow(ZoneEntity player, ItemTemplate bow)
     {
         var bag = player.Inventory;
         if (bag == null)
@@ -60,7 +60,6 @@ public sealed partial class ZoneWorld
         }
         var update = InventoryMessages.Modify([arrow]);
         if (player.Session != null)
-            toSelf.Add(Pack(player.Session, MsgType.InventoryUpdate, update));
         NetBridge?.FanoutInventoryUpdate([player.ObjectId], ToNetInventoryUpdate(update));
         return arrow;
     }
@@ -69,7 +68,7 @@ public sealed partial class ZoneWorld
     /// Mobius <c>Player.reduceArrowCount</c>: one arrow per shot. The last arrow destroys the stack, frees the left hand
     /// and sends a fresh item list so the client drops the paperdoll entry.
     /// </summary>
-    void ConsumeBowArrow(ZoneEntity player, List<Pending> toSelf)
+    void ConsumeBowArrow(ZoneEntity player)
     {
         var bag = player.Inventory;
         var arrow = bag?.GetEquipped(PaperdollSlot.LHand);
@@ -78,25 +77,18 @@ public sealed partial class ZoneWorld
 
         int left = bag.TakeOne(arrow);
         var update = InventoryMessages.Update(left > 0 ? InventoryChange.Modify : InventoryChange.Remove, arrow);
-        toSelf.Add(Pack(player.Session, MsgType.InventoryUpdate, update));
         NetBridge?.FanoutInventoryUpdate([player.ObjectId], ToNetInventoryUpdate(update));
         if (left == 0)
         {
-            toSelf.Add(Pack(player.Session, MsgType.ItemList, InventoryMessages.ItemList(bag)));
             ZoneLog.Info($"bow object={player.ObjectId} arrows exhausted item={arrow.ItemId}");
         }
     }
 
     /// <summary>Mobius: no arrow for the bow → ActionFailed + SysMsg 112 and the attack intention is dropped.</summary>
-    void OutOfArrows(ZoneSession session, List<Pending> outbound)
+    void OutOfArrows(ZoneSession session)
     {
         session.AutoAttackTargetId = 0;
         session.ClearApproach();
-        outbound.Add(Pack(session, MsgType.SystemMessage, new SystemMessageMsg
-        {
-            Id = SysMsgRunOutOfArrows,
-            Text = "You have run out of arrows."
-        }));
         NetBridge?.FanoutSystemMessage([session.ObjectId], new Fineage.Net.Contract.SystemMessageNetMsg
         {
             Id = SysMsgRunOutOfArrows,

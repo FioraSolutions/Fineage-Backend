@@ -169,5 +169,51 @@ namespace Fineage.Net.Contract
         public const ushort TargetUnselected = 0x0374;
         /// <summary>Client → zone: Mobius RequestDestroyItem. Body is <c>DestroyItemRequestMsg</c>.</summary>
         public const ushort DestroyItemRequest = 0x0375;
+        /// <summary>Client → zone: one boss row, or every row when the body's npc id is 0.</summary>
+        public const ushort BossStatusRequest = 0x0376;
+        /// <summary>Zone → client: the boss schedule rows (raid and grand), sorted by npc id.</summary>
+        public const ushort BossStatus = 0x0377;
+        /// <summary>Client → zone: admin boss schedule edit (dead / force spawn). Gated by FINEAGE_ZONE_ADMIN.</summary>
+        public const ushort AdminBossSchedule = 0x0378;
+        /// <summary>Client → zone: ask for one castle's siege state.</summary>
+        public const ushort SiegeListRequest = 0x0379;
+        /// <summary>Client → zone: register or withdraw from a siege.</summary>
+        public const ushort SiegeRegisterRequest = 0x037A;
+        /// <summary>Client → zone: the castle owner answers a waiting defender.</summary>
+        public const ushort SiegeDefenderAnswerRequest = 0x037B;
+        /// <summary>Client → zone: admin capture. Gated by FINEAGE_ZONE_ADMIN.</summary>
+        public const ushort AdminCaptureCastle = 0x037C;
+        /// <summary>Zone → client: the castle and its registrations, also the reply to a list request.</summary>
+        public const ushort SiegeInfo = 0x037D;
+        /// <summary>Client → zone: ask for the Olympiad sheet. Empty body.</summary>
+        public const ushort OlympiadStatusRequest = 0x037E;
+        /// <summary>Client → zone: join the classed (1) or non-classed (0) queue.</summary>
+        public const ushort OlympiadRegisterRequest = 0x037F;
+        /// <summary>Client → zone: leave the queue. Empty body.</summary>
+        public const ushort OlympiadUnregisterRequest = 0x0380;
+        /// <summary>Client → zone: leave the running match (a loss). Empty body.</summary>
+        public const ushort OlympiadLeaveRequest = 0x0381;
+        /// <summary>Client → zone: admin match report. Gated by FINEAGE_ZONE_ADMIN.</summary>
+        public const ushort AdminReportOlympiadResult = 0x0382;
+        /// <summary>Zone → client: period, standing, queue and match slot.</summary>
+        public const ushort OlympiadStatus = 0x0383;
+        /// <summary>Zone → client: the match both participants were placed in.</summary>
+        public const ushort OlympiadMatch = 0x0384;
+        /// <summary>Zone → client: one countdown step.</summary>
+        public const ushort OlympiadCountdown = 0x0385;
+        /// <summary>Zone → client: the finished match and its reward.</summary>
+        public const ushort OlympiadResult = 0x0386;
+        /// <summary>Client → zone: ask for the Seven Signs record. Empty body.</summary>
+        public const ushort SevenSignsStatusRequest = 0x0387;
+        /// <summary>Client → zone: join a cabal or hand in seal stones.</summary>
+        public const ushort SevenSignsActionRequest = 0x0388;
+        /// <summary>Zone → client: the Seven Signs record.</summary>
+        public const ushort SevenSignsStatus = 0x0389;
+        /// <summary>Zone → client: the sky tint the record implies.</summary>
+        public const ushort SevenSignsSky = 0x038A;
+        /// <summary>Client → zone: enter or leave a catacomb or necropolis.</summary>
+        public const ushort DungeonEnterRequest = 0x038B;
+        /// <summary>Zone → client: the catacomb/necropolis teleport result and the validation kick.</summary>
+        public const ushort DungeonEntered = 0x038C;
     }
 }

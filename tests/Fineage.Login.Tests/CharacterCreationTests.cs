@@ -4,7 +4,6 @@ using System.Text.RegularExpressions;
 using Fineage.Login.Net;
 using Fineage.Net.Contract;
 using Fineage.Protocol;
-using MessagePack;
 using Xunit;
 using NetCreateCharacterMsg = Fineage.Net.Contract.CreateCharacterMsg;
 using NetOpcode = Fineage.Net.Contract.NetOpcode;

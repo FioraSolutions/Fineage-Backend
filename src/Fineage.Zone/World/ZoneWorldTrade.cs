@@ -36,15 +36,10 @@ public sealed partial class ZoneWorld
         if (request.TargetObjectId == session.ObjectId)
             return "bad_request";
 
-        var outbound = new List<Pending>();
         string? error;
         lock (_gate)
-            error = TryTradeRequest(session, request, outbound);
-        if (error != null)
-            return error;
-
-        await FlushTradeAsync(outbound, ct).ConfigureAwait(false);
-        return null;
+            error = TryTradeRequest(session, request);
+        return error;
     }
 
     public async Task<string?> TryTradeAnswerAsync(ZoneSession session, TradeAnswerRequestMsg answer, CancellationToken ct)
@@ -54,15 +49,10 @@ public sealed partial class ZoneWorld
         if (!session.InWorld)
             return "world";
 
-        var outbound = new List<Pending>();
         string? error;
         lock (_gate)
-            error = TryTradeAnswer(session, answer, outbound);
-        if (error != null)
-            return error;
-
-        await FlushTradeAsync(outbound, ct).ConfigureAwait(false);
-        return null;
+            error = TryTradeAnswer(session, answer);
+        return error;
     }
 
     public async Task<string?> TryTradeAddItemAsync(ZoneSession session, TradeAddItemRequestMsg add, CancellationToken ct)
@@ -72,15 +62,10 @@ public sealed partial class ZoneWorld
         if (!session.InWorld)
             return "world";
 
-        var outbound = new List<Pending>();
         string? error;
         lock (_gate)
-            error = TryTradeAddItem(session, add, outbound);
-        if (error != null)
-            return error;
-
-        await FlushTradeAsync(outbound, ct).ConfigureAwait(false);
-        return null;
+            error = TryTradeAddItem(session, add);
+        return error;
     }
 
     public async Task<string?> TryTradeDoneAsync(ZoneSession session, TradeDoneRequestMsg done, CancellationToken ct)
@@ -90,18 +75,13 @@ public sealed partial class ZoneWorld
         if (!session.InWorld)
             return "world";
 
-        var outbound = new List<Pending>();
         string? error;
         lock (_gate)
-            error = TryTradeDone(session, done, outbound);
-        if (error != null)
-            return error;
-
-        await FlushTradeAsync(outbound, ct).ConfigureAwait(false);
-        return null;
+            error = TryTradeDone(session, done);
+        return error;
     }
 
-    void TradePlayerLeftWorld(int objectId, List<Pending> outbound)
+    void TradePlayerLeftWorld(int objectId)
     {
         _pendingTradeAsk.Remove(objectId);
         foreach (var (targetId, requestorId) in _pendingTradeAsk.ToList())
@@ -113,10 +93,10 @@ public sealed partial class ZoneWorld
         if (!_tradeByPlayer.TryGetValue(objectId, out var session))
             return;
 
-        CancelTradeSession(session, outbound);
+        CancelTradeSession(session);
     }
 
-    string? TryTradeRequest(ZoneSession requestor, TradeRequestMsg request, List<Pending> outbound)
+    string? TryTradeRequest(ZoneSession requestor, TradeRequestMsg request)
     {
         if (!IsLive(requestor))
             return "world";
@@ -143,11 +123,11 @@ public sealed partial class ZoneWorld
             RequestorObjectId = requestor.ObjectId,
             RequestorName = requestor.Name
         };
-        QueueTradeAsk(targetEntity.Session, ask, outbound);
+        QueueTradeAsk(targetEntity, ask);
         return null;
     }
 
-    string? TryTradeAnswer(ZoneSession partner, TradeAnswerRequestMsg answer, List<Pending> outbound)
+    string? TryTradeAnswer(ZoneSession partner, TradeAnswerRequestMsg answer)
     {
         if (!IsLive(partner))
             return "world";
@@ -164,19 +144,19 @@ public sealed partial class ZoneWorld
 
         if (answer.Response != 1)
         {
-            QueueTradeRequestResult(requestorEntity.Session, 0, outbound);
+            QueueTradeRequestResult(requestorEntity, 0);
             return null;
         }
 
         if (_tradeByPlayer.ContainsKey(partner.ObjectId) || _tradeByPlayer.ContainsKey(answer.RequestorObjectId))
         {
-            QueueTradeRequestResult(requestorEntity.Session, 0, outbound);
+            QueueTradeRequestResult(requestorEntity, 0);
             return null;
         }
 
         if (!TradeInRange(answer.RequestorObjectId, partner.ObjectId))
         {
-            QueueTradeRequestResult(requestorEntity.Session, 0, outbound);
+            QueueTradeRequestResult(requestorEntity, 0);
             return null;
         }
 
@@ -190,14 +170,14 @@ public sealed partial class ZoneWorld
         };
         BindTradeSession(session);
 
-        QueueTradeRequestResult(requestorEntity.Session, 1, outbound);
-        SendTradeStart(requestorEntity, partner.ObjectId, outbound);
-        SendTradeStart(partnerEntity, answer.RequestorObjectId, outbound);
-        FanoutTradeConfirm(session, outbound);
+        QueueTradeRequestResult(requestorEntity, 1);
+        SendTradeStart(requestorEntity, partner.ObjectId);
+        SendTradeStart(partnerEntity, answer.RequestorObjectId);
+        FanoutTradeConfirm(session);
         return null;
     }
 
-    string? TryTradeAddItem(ZoneSession actor, TradeAddItemRequestMsg add, List<Pending> outbound)
+    string? TryTradeAddItem(ZoneSession actor, TradeAddItemRequestMsg add)
     {
         if (!IsLive(actor))
             return "world";
@@ -206,7 +186,7 @@ public sealed partial class ZoneWorld
 
         if (!TradeInRange(session.RequestorObjectId, session.PartnerObjectId))
         {
-            CancelTradeSession(session, outbound);
+            CancelTradeSession(session);
             return TradeProtocol.Range;
         }
 
@@ -251,12 +231,12 @@ public sealed partial class ZoneWorld
             Count = row.Count,
             EnchantLevel = row.EnchantLevel
         };
-        FanoutTradeOffer(session, actor.ObjectId, update, outbound);
-        FanoutTradeConfirm(session, outbound);
+        FanoutTradeOffer(session, actor.ObjectId, update);
+        FanoutTradeConfirm(session);
         return null;
     }
 
-    string? TryTradeDone(ZoneSession actor, TradeDoneRequestMsg done, List<Pending> outbound)
+    string? TryTradeDone(ZoneSession actor, TradeDoneRequestMsg done)
     {
         if (!IsLive(actor))
             return "world";
@@ -265,13 +245,13 @@ public sealed partial class ZoneWorld
 
         if (done.Response == 0)
         {
-            CancelTradeSession(session, outbound);
+            CancelTradeSession(session);
             return null;
         }
 
         if (!TradeInRange(session.RequestorObjectId, session.PartnerObjectId))
         {
-            CancelTradeSession(session, outbound);
+            CancelTradeSession(session);
             return TradeProtocol.Range;
         }
 
@@ -280,18 +260,18 @@ public sealed partial class ZoneWorld
         else
             session.PartnerConfirmed = true;
 
-        FanoutTradeConfirm(session, outbound);
+        FanoutTradeConfirm(session);
 
         if (!session.RequestorConfirmed || !session.PartnerConfirmed)
             return null;
 
-        if (!TryExecuteTrade(session, outbound))
-            CancelTradeSession(session, outbound);
+        if (!TryExecuteTrade(session))
+            CancelTradeSession(session);
 
         return null;
     }
 
-    bool TryExecuteTrade(ZoneTradeSession session, List<Pending> outbound)
+    bool TryExecuteTrade(ZoneTradeSession session)
     {
         if (!_byId.TryGetValue(session.RequestorObjectId, out var requestor) ||
             !_byId.TryGetValue(session.PartnerObjectId, out var partner) ||
@@ -315,7 +295,7 @@ public sealed partial class ZoneWorld
             deny = IncomingDenyOf(partner, session.RequestorOffers);
         if (deny != TradeIncomingDeny.None)
         {
-            DenyIncomingTrade(requestor, partner, deny, outbound);
+            DenyIncomingTrade(requestor, partner, deny);
             return false;
         }
 
@@ -333,22 +313,18 @@ public sealed partial class ZoneWorld
         if (requestorChanges.Count > 0)
         {
             var inv = new InventoryUpdateMsg { Changes = requestorChanges.ToArray() };
-            outbound.Add(Pack(requestor.Session, MsgType.InventoryUpdate, inv));
-            if (NetBridge != null)
-                NetBridge.FanoutInventoryUpdate([requestor.Session.ObjectId], ToNetInventoryUpdate(inv));
-            outbound.Add(SelfUserInfo(requestor.Session, requestor));
+            NetBridge?.FanoutInventoryUpdate([requestor.ObjectId], ToNetInventoryUpdate(inv));
+            SelfUserInfo(requestor);
         }
 
         if (partnerChanges.Count > 0)
         {
             var inv = new InventoryUpdateMsg { Changes = partnerChanges.ToArray() };
-            outbound.Add(Pack(partner.Session, MsgType.InventoryUpdate, inv));
-            if (NetBridge != null)
-                NetBridge.FanoutInventoryUpdate([partner.Session.ObjectId], ToNetInventoryUpdate(inv));
-            outbound.Add(SelfUserInfo(partner.Session, partner));
+            NetBridge?.FanoutInventoryUpdate([partner.ObjectId], ToNetInventoryUpdate(inv));
+            SelfUserInfo(partner);
         }
 
-        FinishTradeSession(session, exchanged: true, outbound);
+        FinishTradeSession(session, exchanged: true);
         return true;
     }
 
@@ -401,14 +377,12 @@ public sealed partial class ZoneWorld
     }
 
     /// <summary>Mobius sends the same reply to both trade partners, whichever side actually overflowed.</summary>
-    void DenyIncomingTrade(ZoneEntity requestor, ZoneEntity partner, TradeIncomingDeny reason, List<Pending> outbound)
+    void DenyIncomingTrade(ZoneEntity requestor, ZoneEntity partner, TradeIncomingDeny reason)
     {
         int id = reason == TradeIncomingDeny.Slots ? SysMsgInventoryFull : SysMsgWeightLimit;
         string text = reason == TradeIncomingDeny.Slots ? "Your inventory is full." : "You have exceeded the weight limit.";
-        if (requestor.Session != null)
-            ShotNotice(requestor.Session, id, text, outbound);
-        if (partner.Session != null)
-            ShotNotice(partner.Session, id, text, outbound);
+        NotifyLine(requestor.ObjectId, id, text);
+        NotifyLine(partner.ObjectId, id, text);
     }
 
     static void TransferOfferRow(
@@ -438,7 +412,7 @@ public sealed partial class ZoneWorld
         toChanges.Add(InventoryMessages.ChangeRow(change, received));
     }
 
-    void SendTradeStart(ZoneEntity viewer, int partnerId, List<Pending> outbound)
+    void SendTradeStart(ZoneEntity viewer, int partnerId)
     {
         if (viewer.Session == null)
             return;
@@ -449,125 +423,79 @@ public sealed partial class ZoneWorld
             PartnerObjectId = partnerId,
             PartnerName = partner.Name
         };
-        outbound.Add(Pack(viewer.Session, MsgType.TradeStart, start));
-        if (NetBridge != null)
+        NetBridge?.FanoutTradeStart([viewer.ObjectId], new Fineage.Net.Contract.TradeStartNetMsg
         {
-            NetBridge.FanoutTradeStart(
-                [viewer.Session.ObjectId],
-                new Fineage.Net.Contract.TradeStartNetMsg
-                {
-                    PartnerObjectId = start.PartnerObjectId,
-                    PartnerName = start.PartnerName ?? ""
-                });
-        }
+            PartnerObjectId = partnerId,
+            PartnerName = partner.Name
+        });
     }
 
-    void FanoutTradeOffer(ZoneTradeSession session, int actorId, TradeOfferUpdateMsg update, List<Pending> outbound)
+    void FanoutTradeOffer(ZoneTradeSession session, int actorId, TradeOfferUpdateMsg update)
     {
         foreach (int playerId in new[] { session.RequestorObjectId, session.PartnerObjectId })
         {
             if (!_byId.TryGetValue(playerId, out var entity) || entity.Session == null)
                 continue;
-            var msg = new TradeOfferUpdateMsg
-            {
-                InventoryObjectId = update.InventoryObjectId,
-                ItemId = update.ItemId,
-                Count = update.Count,
-                EnchantLevel = update.EnchantLevel,
-                IsOwn = playerId == actorId ? 1 : 0
-            };
-            outbound.Add(Pack(entity.Session, MsgType.TradeOfferUpdate, msg));
-            if (NetBridge != null)
-            {
-                NetBridge.FanoutTradeOfferUpdate(
-                    [entity.Session.ObjectId],
-                    new Fineage.Net.Contract.TradeOfferUpdateNetMsg
-                    {
-                        IsOwn = msg.IsOwn,
-                        InventoryObjectId = msg.InventoryObjectId,
-                        ItemId = msg.ItemId,
-                        Count = msg.Count,
-                        EnchantLevel = msg.EnchantLevel
-                    });
-            }
-        }
-    }
-
-    void FanoutTradeConfirm(ZoneTradeSession session, List<Pending> outbound)
-    {
-        SendTradeConfirm(session.RequestorObjectId, session.RequestorConfirmed, session.PartnerConfirmed, outbound);
-        SendTradeConfirm(session.PartnerObjectId, session.PartnerConfirmed, session.RequestorConfirmed, outbound);
-    }
-
-    void SendTradeConfirm(int viewerId, bool selfConfirmed, bool partnerConfirmed, List<Pending> outbound)
-    {
-        if (!_byId.TryGetValue(viewerId, out var entity) || entity.Session == null)
-            return;
-        var state = new TradeConfirmStateMsg
-        {
-            SelfConfirmed = selfConfirmed ? 1 : 0,
-            PartnerConfirmed = partnerConfirmed ? 1 : 0
-        };
-        outbound.Add(Pack(entity.Session, MsgType.TradeConfirmState, state));
-        if (NetBridge != null)
-        {
-            NetBridge.FanoutTradeConfirmState(
-                [entity.Session.ObjectId],
-                new Fineage.Net.Contract.TradeConfirmStateNetMsg
+            NetBridge?.FanoutTradeOfferUpdate([entity.ObjectId],
+                new Fineage.Net.Contract.TradeOfferUpdateNetMsg
                 {
-                    SelfConfirmed = state.SelfConfirmed,
-                    PartnerConfirmed = state.PartnerConfirmed
+                    IsOwn = playerId == actorId ? 1 : 0,
+                    InventoryObjectId = update.InventoryObjectId,
+                    ItemId = update.ItemId,
+                    Count = update.Count,
+                    EnchantLevel = update.EnchantLevel
                 });
         }
     }
 
-    void CancelTradeSession(ZoneTradeSession session, List<Pending> outbound) =>
-        FinishTradeSession(session, exchanged: false, outbound);
+    void FanoutTradeConfirm(ZoneTradeSession session)
+    {
+        SendTradeConfirm(session.RequestorObjectId, session.RequestorConfirmed, session.PartnerConfirmed);
+        SendTradeConfirm(session.PartnerObjectId, session.PartnerConfirmed, session.RequestorConfirmed);
+    }
 
-    void FinishTradeSession(ZoneTradeSession session, bool exchanged, List<Pending> outbound)
+    void SendTradeConfirm(int viewerId, bool selfConfirmed, bool partnerConfirmed)
+    {
+        if (!_byId.TryGetValue(viewerId, out var entity) || entity.Session == null)
+            return;
+        NetBridge?.FanoutTradeConfirmState([viewerId], new Fineage.Net.Contract.TradeConfirmStateNetMsg
+        {
+            SelfConfirmed = selfConfirmed ? 1 : 0,
+            PartnerConfirmed = partnerConfirmed ? 1 : 0
+        });
+    }
+
+    void CancelTradeSession(ZoneTradeSession session) =>
+        FinishTradeSession(session, exchanged: false);
+
+    void FinishTradeSession(ZoneTradeSession session, bool exchanged)
     {
         int response = exchanged ? 1 : 0;
         foreach (int playerId in new[] { session.RequestorObjectId, session.PartnerObjectId })
         {
             if (_byId.TryGetValue(playerId, out var entity) && entity.Session != null)
-            {
-                outbound.Add(Pack(entity.Session, MsgType.TradeFinished, new TradeFinishedMsg { Response = response }));
-                if (NetBridge != null)
+                NetBridge?.FanoutTradeFinished([playerId], new Fineage.Net.Contract.TradeFinishedNetMsg
                 {
-                    NetBridge.FanoutTradeFinished(
-                        [entity.Session.ObjectId],
-                        new Fineage.Net.Contract.TradeFinishedNetMsg { Response = response });
-                }
-            }
+                    Response = response
+                });
         }
 
         UnbindTradeSession(session);
     }
 
-    void QueueTradeAsk(ZoneSession session, TradeAskMsg ask, List<Pending> outbound)
+    void QueueTradeAsk(ZoneEntity target, TradeAskMsg ask)
     {
-        outbound.Add(Pack(session, MsgType.TradeAsk, ask));
-        if (NetBridge != null)
+        NetBridge?.FanoutTradeAsk([target.ObjectId], new Fineage.Net.Contract.TradeAskNetMsg
         {
-            NetBridge.FanoutTradeAsk(
-                [session.ObjectId],
-                new Fineage.Net.Contract.TradeAskNetMsg
-                {
-                    RequestorObjectId = ask.RequestorObjectId,
-                    RequestorName = ask.RequestorName ?? ""
-                });
-        }
+            RequestorObjectId = ask.RequestorObjectId,
+            RequestorName = ask.RequestorName ?? ""
+        });
     }
 
-    void QueueTradeRequestResult(ZoneSession session, int response, List<Pending> outbound)
+    void QueueTradeRequestResult(ZoneEntity requestor, int response)
     {
-        outbound.Add(Pack(session, MsgType.TradeRequestResult, new TradeRequestResultMsg { Response = response }));
-        if (NetBridge != null)
-        {
-            NetBridge.FanoutTradeRequestResult(
-                [session.ObjectId],
-                new Fineage.Net.Contract.TradeRequestResultNetMsg { Response = response });
-        }
+        NetBridge?.FanoutTradeRequestResult([requestor.ObjectId],
+            new Fineage.Net.Contract.TradeRequestResultNetMsg { Response = response });
     }
 
     void BindTradeSession(ZoneTradeSession session)
@@ -587,11 +515,5 @@ public sealed partial class ZoneWorld
         if (!_byId.TryGetValue(objectIdA, out var a) || !_byId.TryGetValue(objectIdB, out var b))
             return false;
         return NpcHtmlProtocol.InRange(a.X, a.Y, a.Z, b.X, b.Y, b.Z, TradeProtocol.Distance);
-    }
-
-    static async Task FlushTradeAsync(List<Pending> messages, CancellationToken ct)
-    {
-        foreach (var message in messages)
-            await TrySendAsync(message, ct).ConfigureAwait(false);
     }
 }

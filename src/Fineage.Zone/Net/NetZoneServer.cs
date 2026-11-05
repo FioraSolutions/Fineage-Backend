@@ -11,8 +11,8 @@ namespace Fineage.Zone.Net;
 
 /// <summary>
 /// Fineage Net zone path. Reuses <see cref="ZoneWorld.TryEnterAsync"/> / <see cref="ZoneWorld.TryMoveAsync"/>;
-/// V2 wire flushes go to a discarded stream so Net packets are the client-facing truth.
-/// Presence (spawn / move / despawn) is fanned out via <see cref="NetPresenceHub"/>.
+/// Net packets are the only client-facing transport; presence (spawn / move / despawn) is fanned out via
+/// <see cref="NetPresenceHub"/>.
 /// </summary>
 public sealed class NetZoneServer : INetPresenceBridge
 {
@@ -23,6 +23,7 @@ public sealed class NetZoneServer : INetPresenceBridge
     readonly Func<DateTimeOffset> _clock;
     readonly int _maxMessagesPerSecond;
     readonly TimeSpan _idleTimeout;
+    readonly bool _adminCommands;
 
     public NetZoneServer(
         HandoffTokens tokens,
@@ -31,7 +32,8 @@ public sealed class NetZoneServer : INetPresenceBridge
         Func<DateTimeOffset>? clock = null,
         NetPresenceHub? presence = null,
         int? maxMessagesPerSecond = null,
-        TimeSpan? idleTimeout = null)
+        TimeSpan? idleTimeout = null,
+        bool? adminCommands = null)
     {
         _tokens = tokens;
         _world = world;
@@ -41,6 +43,7 @@ public sealed class NetZoneServer : INetPresenceBridge
         _clock = clock ?? (() => DateTimeOffset.UtcNow);
         _maxMessagesPerSecond = maxMessagesPerSecond ?? ZoneNetSettings.MaxMessagesPerSecond;
         _idleTimeout = idleTimeout ?? TcpSessionSettings.IdleTimeout;
+        _adminCommands = adminCommands ?? ZoneAdmin.Enabled;
         _world.NetBridge = this;
     }
 
@@ -507,12 +510,72 @@ public sealed class NetZoneServer : INetPresenceBridge
             _presence.TrySend(watcher, NetOpcode.TradeFinished, payload);
     }
 
+    void INetPresenceBridge.FanoutBossStatus(IReadOnlyList<int> watcherObjectIds, BossStatusNetMsg status)
+    {
+        var payload = NetCodec.EncodeBossStatus(status);
+        foreach (int watcher in watcherObjectIds)
+            _presence.TrySend(watcher, NetOpcode.BossStatus, payload);
+    }
+
+    void INetPresenceBridge.FanoutSiegeInfo(IReadOnlyList<int> watcherObjectIds, SiegeInfoNetMsg info)
+    {
+        var payload = NetCodec.EncodeSiegeInfo(info);
+        foreach (int watcher in watcherObjectIds)
+            _presence.TrySend(watcher, NetOpcode.SiegeInfo, payload);
+    }
+
+    void INetPresenceBridge.FanoutOlympiadStatus(IReadOnlyList<int> watcherObjectIds, OlympiadStatusNetMsg status)
+    {
+        var payload = NetCodec.EncodeOlympiadStatus(status);
+        foreach (int watcher in watcherObjectIds)
+            _presence.TrySend(watcher, NetOpcode.OlympiadStatus, payload);
+    }
+
+    void INetPresenceBridge.FanoutOlympiadMatch(IReadOnlyList<int> watcherObjectIds, OlympiadMatchNetMsg match)
+    {
+        var payload = NetCodec.EncodeOlympiadMatch(match);
+        foreach (int watcher in watcherObjectIds)
+            _presence.TrySend(watcher, NetOpcode.OlympiadMatch, payload);
+    }
+
+    void INetPresenceBridge.FanoutOlympiadCountdown(IReadOnlyList<int> watcherObjectIds, OlympiadCountdownNetMsg countdown)
+    {
+        var payload = NetCodec.EncodeOlympiadCountdown(countdown);
+        foreach (int watcher in watcherObjectIds)
+            _presence.TrySend(watcher, NetOpcode.OlympiadCountdown, payload);
+    }
+
+    void INetPresenceBridge.FanoutOlympiadResult(IReadOnlyList<int> watcherObjectIds, OlympiadResultNetMsg result)
+    {
+        var payload = NetCodec.EncodeOlympiadResult(result);
+        foreach (int watcher in watcherObjectIds)
+            _presence.TrySend(watcher, NetOpcode.OlympiadResult, payload);
+    }
+
+    void INetPresenceBridge.FanoutSevenSignsStatus(IReadOnlyList<int> watcherObjectIds, SevenSignsStatusNetMsg status)
+    {
+        var payload = NetCodec.EncodeSevenSignsStatus(status);
+        foreach (int watcher in watcherObjectIds)
+            _presence.TrySend(watcher, NetOpcode.SevenSignsStatus, payload);
+    }
+
+    void INetPresenceBridge.FanoutSevenSignsSky(IReadOnlyList<int> watcherObjectIds, SevenSignsSkyNetMsg sky)
+    {
+        var payload = NetCodec.EncodeSevenSignsSky(sky);
+        foreach (int watcher in watcherObjectIds)
+            _presence.TrySend(watcher, NetOpcode.SevenSignsSky, payload);
+    }
+
+    void INetPresenceBridge.FanoutDungeonEntered(IReadOnlyList<int> watcherObjectIds, DungeonEnteredNetMsg entered)
+    {
+        var payload = NetCodec.EncodeDungeonEntered(entered);
+        foreach (int watcher in watcherObjectIds)
+            _presence.TrySend(watcher, NetOpcode.DungeonEntered, payload);
+    }
+
     public async Task HandleAsync(NetConnection conn, CancellationToken ct)
     {
-        // The world layer still emits V2 frames alongside Net fanout. A MemoryStream here
-        // would grow for the whole session, so use a sink that drops every frame.
-        await using var discard = new DiscardingStream();
-        var zoneSession = new ZoneSession(discard);
+        var zoneSession = new ZoneSession();
         EntityId self = default;
         int registeredObjectId = 0;
 
@@ -752,6 +815,48 @@ public sealed class NetZoneServer : INetPresenceBridge
                             }
 
                             break;
+                        case NetOpcode.BossStatusRequest:
+                            await OnBossStatusAsync(conn, zoneSession, envelope, ct).ConfigureAwait(false);
+                            break;
+                        case NetOpcode.AdminBossSchedule:
+                            await OnAdminBossAsync(conn, zoneSession, envelope, ct).ConfigureAwait(false);
+                            break;
+                        case NetOpcode.SiegeListRequest:
+                            await OnSiegeListAsync(conn, zoneSession, envelope, ct).ConfigureAwait(false);
+                            break;
+                        case NetOpcode.SiegeRegisterRequest:
+                            await OnSiegeRegisterAsync(conn, zoneSession, envelope, ct).ConfigureAwait(false);
+                            break;
+                        case NetOpcode.SiegeDefenderAnswerRequest:
+                            await OnSiegeAnswerAsync(conn, zoneSession, envelope, ct).ConfigureAwait(false);
+                            break;
+                        case NetOpcode.AdminCaptureCastle:
+                            await OnAdminCaptureCastleAsync(conn, zoneSession, envelope, ct).ConfigureAwait(false);
+                            break;
+                        case NetOpcode.OlympiadStatusRequest:
+                            await OnOlympiadStatusAsync(conn, zoneSession, ct).ConfigureAwait(false);
+                            break;
+                        case NetOpcode.OlympiadRegisterRequest:
+                            await OnOlympiadRegisterAsync(conn, zoneSession, envelope, ct).ConfigureAwait(false);
+                            break;
+                        case NetOpcode.OlympiadUnregisterRequest:
+                            await OnOlympiadUnregisterAsync(conn, zoneSession, ct).ConfigureAwait(false);
+                            break;
+                        case NetOpcode.OlympiadLeaveRequest:
+                            await OnOlympiadLeaveAsync(conn, zoneSession, ct).ConfigureAwait(false);
+                            break;
+                        case NetOpcode.AdminReportOlympiadResult:
+                            await OnAdminReportOlympiadAsync(conn, zoneSession, envelope, ct).ConfigureAwait(false);
+                            break;
+                        case NetOpcode.SevenSignsStatusRequest:
+                            await OnSevenSignsStatusAsync(conn, zoneSession, envelope, ct).ConfigureAwait(false);
+                            break;
+                        case NetOpcode.SevenSignsActionRequest:
+                            await OnSevenSignsActionAsync(conn, zoneSession, envelope, ct).ConfigureAwait(false);
+                            break;
+                        case NetOpcode.DungeonEnterRequest:
+                            await OnDungeonAsync(conn, zoneSession, envelope, ct).ConfigureAwait(false);
+                            break;
                         case NetOpcode.StopMove:
                             // Authoritative stop: correct to current session position.
                             if (zoneSession.Bound && zoneSession.InWorld)
@@ -851,7 +956,23 @@ public sealed class NetZoneServer : INetPresenceBridge
         CancellationToken ct)
     {
         RequireHello(conn);
+
+        // A session authenticates once. Re-authing would silently swap a live character for another
+        // handoff inside the same connection, so refuse it the way the retired V2 listener did.
+        if (zoneSession.Bound)
+        {
+            await RejectAsync(conn, "already_authenticated", "This session already completed zone auth.", ct)
+                .ConfigureAwait(false);
+            return default;
+        }
+
         var auth = NetCodec.DecodeZoneAuth(envelope.Payload);
+        if (string.IsNullOrWhiteSpace(auth.Account))
+        {
+            await RejectAsync(conn, "bad_request", "Auth account is required.", ct).ConfigureAwait(false);
+            return default;
+        }
+
         var status = _tokens.Validate(auth.Token, _clock(), out var parsed);
         if (status == HandoffTokens.ValidateStatus.Expired)
         {
@@ -1408,6 +1529,317 @@ public sealed class NetZoneServer : INetPresenceBridge
         if (error != null)
             await RejectAsync(conn, error, "Target cancel failed.", ct).ConfigureAwait(false);
         // The world already fanned TargetUnselected, so nothing to answer here.
+    }
+
+    async Task OnBossStatusAsync(
+        NetConnection conn,
+        ZoneSession zoneSession,
+        PacketEnvelope envelope,
+        CancellationToken ct)
+    {
+        RequireHello(conn);
+        if (!zoneSession.Bound || !zoneSession.InWorld)
+        {
+            await RejectAsync(conn, "not_in_world", "Enter world first.", ct).ConfigureAwait(false);
+            return;
+        }
+
+        var request = NetCodec.DecodeBossStatusRequest(envelope.Payload);
+        string? error = await _world.TryBossStatusAsync(zoneSession, request.NpcId, ct).ConfigureAwait(false);
+        if (error != null)
+            await RejectAsync(conn, error, "Boss status failed.", ct).ConfigureAwait(false);
+        // The rows themselves go out as BossStatus fanout, so the reply body is empty on purpose.
+    }
+
+    async Task OnAdminBossAsync(
+        NetConnection conn,
+        ZoneSession zoneSession,
+        PacketEnvelope envelope,
+        CancellationToken ct)
+    {
+        RequireHello(conn);
+        if (!zoneSession.Bound || !zoneSession.InWorld)
+        {
+            await RejectAsync(conn, "not_in_world", "Enter world first.", ct).ConfigureAwait(false);
+            return;
+        }
+
+        // Same gate the V2 listener used: the env flag is the only authority, not the request body.
+        if (!_adminCommands)
+        {
+            await RejectAsync(conn, InventoryProtocol.Forbidden, "AdminBossSchedule is disabled.", ct).ConfigureAwait(false);
+            return;
+        }
+
+        var request = NetCodec.DecodeAdminBossSchedule(envelope.Payload);
+        string? error = await _world.TryAdminBossNetAsync(zoneSession, request, ct).ConfigureAwait(false);
+        if (error != null)
+            await RejectAsync(conn, error, "AdminBossSchedule was rejected.", ct).ConfigureAwait(false);
+    }
+
+    async Task OnSiegeListAsync(
+        NetConnection conn,
+        ZoneSession zoneSession,
+        PacketEnvelope envelope,
+        CancellationToken ct)
+    {
+        RequireHello(conn);
+        if (!zoneSession.Bound || !zoneSession.InWorld)
+        {
+            await RejectAsync(conn, "not_in_world", "Enter world first.", ct).ConfigureAwait(false);
+            return;
+        }
+
+        var request = NetCodec.DecodeSiegeListRequest(envelope.Payload);
+        string? error = await _world.TrySiegeListAsync(zoneSession, request.CastleId, ct).ConfigureAwait(false);
+        if (error != null)
+            await RejectAsync(conn, error, "Siege list failed.", ct).ConfigureAwait(false);
+        // SiegeInfo goes out as fanout, so the reply body is empty on purpose.
+    }
+
+    async Task OnSiegeRegisterAsync(
+        NetConnection conn,
+        ZoneSession zoneSession,
+        PacketEnvelope envelope,
+        CancellationToken ct)
+    {
+        RequireHello(conn);
+        if (!zoneSession.Bound || !zoneSession.InWorld)
+        {
+            await RejectAsync(conn, "not_in_world", "Enter world first.", ct).ConfigureAwait(false);
+            return;
+        }
+
+        var request = NetCodec.DecodeSiegeRegisterRequest(envelope.Payload);
+        string? error = await _world.TrySiegeRegisterAsync(
+            zoneSession,
+            new SiegeRegisterRequestMsg
+            {
+                CastleId = request.CastleId,
+                Attacker = request.Attacker,
+                Joining = request.Joining
+            },
+            ct).ConfigureAwait(false);
+        if (error != null)
+            await RejectAsync(conn, error, "Siege registration was rejected.", ct).ConfigureAwait(false);
+    }
+
+    async Task OnSiegeAnswerAsync(
+        NetConnection conn,
+        ZoneSession zoneSession,
+        PacketEnvelope envelope,
+        CancellationToken ct)
+    {
+        RequireHello(conn);
+        if (!zoneSession.Bound || !zoneSession.InWorld)
+        {
+            await RejectAsync(conn, "not_in_world", "Enter world first.", ct).ConfigureAwait(false);
+            return;
+        }
+
+        var request = NetCodec.DecodeSiegeDefenderAnswerRequest(envelope.Payload);
+        string? error = await _world.TrySiegeAnswerAsync(
+            zoneSession,
+            new SiegeDefenderAnswerRequestMsg
+            {
+                CastleId = request.CastleId,
+                ClanId = request.ClanId,
+                Approved = request.Approved
+            },
+            ct).ConfigureAwait(false);
+        if (error != null)
+            await RejectAsync(conn, error, "Siege answer was rejected.", ct).ConfigureAwait(false);
+    }
+
+    async Task OnAdminCaptureCastleAsync(
+        NetConnection conn,
+        ZoneSession zoneSession,
+        PacketEnvelope envelope,
+        CancellationToken ct)
+    {
+        RequireHello(conn);
+        if (!zoneSession.Bound || !zoneSession.InWorld)
+        {
+            await RejectAsync(conn, "not_in_world", "Enter world first.", ct).ConfigureAwait(false);
+            return;
+        }
+
+        if (!_adminCommands)
+        {
+            await RejectAsync(conn, InventoryProtocol.Forbidden, "AdminCaptureCastle is disabled.", ct).ConfigureAwait(false);
+            return;
+        }
+
+        var request = NetCodec.DecodeAdminCaptureCastle(envelope.Payload);
+        string? error = await _world.TryAdminCaptureNetAsync(zoneSession, request, ct).ConfigureAwait(false);
+        if (error != null)
+            await RejectAsync(conn, error, "AdminCaptureCastle was rejected.", ct).ConfigureAwait(false);
+    }
+
+    async Task OnOlympiadStatusAsync(NetConnection conn, ZoneSession zoneSession, CancellationToken ct)
+    {
+        RequireHello(conn);
+        if (!zoneSession.Bound || !zoneSession.InWorld)
+        {
+            await RejectAsync(conn, "not_in_world", "Enter world first.", ct).ConfigureAwait(false);
+            return;
+        }
+
+        string? error = await _world.TryOlympiadStatusAsync(zoneSession, ct).ConfigureAwait(false);
+        if (error != null)
+            await RejectAsync(conn, error, "Olympiad status failed.", ct).ConfigureAwait(false);
+        // OlympiadStatus goes out as fanout, so the reply body is empty on purpose.
+    }
+
+    async Task OnOlympiadRegisterAsync(
+        NetConnection conn,
+        ZoneSession zoneSession,
+        PacketEnvelope envelope,
+        CancellationToken ct)
+    {
+        RequireHello(conn);
+        if (!zoneSession.Bound || !zoneSession.InWorld)
+        {
+            await RejectAsync(conn, "not_in_world", "Enter world first.", ct).ConfigureAwait(false);
+            return;
+        }
+
+        var request = NetCodec.DecodeOlympiadRegisterRequest(envelope.Payload);
+        string? error = await _world.TryOlympiadRegisterAsync(
+            zoneSession,
+            new OlympiadRegisterRequestMsg { Classed = request.Classed },
+            ct).ConfigureAwait(false);
+        if (error != null)
+            await RejectAsync(conn, error, "Olympiad registration was rejected.", ct).ConfigureAwait(false);
+    }
+
+    async Task OnOlympiadUnregisterAsync(NetConnection conn, ZoneSession zoneSession, CancellationToken ct)
+    {
+        RequireHello(conn);
+        if (!zoneSession.Bound || !zoneSession.InWorld)
+        {
+            await RejectAsync(conn, "not_in_world", "Enter world first.", ct).ConfigureAwait(false);
+            return;
+        }
+
+        string? error = await _world.TryOlympiadUnregisterAsync(zoneSession, ct).ConfigureAwait(false);
+        if (error != null)
+            await RejectAsync(conn, error, "Olympiad unregister was rejected.", ct).ConfigureAwait(false);
+    }
+
+    async Task OnOlympiadLeaveAsync(NetConnection conn, ZoneSession zoneSession, CancellationToken ct)
+    {
+        RequireHello(conn);
+        if (!zoneSession.Bound || !zoneSession.InWorld)
+        {
+            await RejectAsync(conn, "not_in_world", "Enter world first.", ct).ConfigureAwait(false);
+            return;
+        }
+
+        string? error = await _world.TryOlympiadLeaveAsync(zoneSession, ct).ConfigureAwait(false);
+        if (error != null)
+            await RejectAsync(conn, error, "Olympiad leave was rejected.", ct).ConfigureAwait(false);
+    }
+
+    async Task OnAdminReportOlympiadAsync(
+        NetConnection conn,
+        ZoneSession zoneSession,
+        PacketEnvelope envelope,
+        CancellationToken ct)
+    {
+        RequireHello(conn);
+        if (!zoneSession.Bound || !zoneSession.InWorld)
+        {
+            await RejectAsync(conn, "not_in_world", "Enter world first.", ct).ConfigureAwait(false);
+            return;
+        }
+
+        if (!_adminCommands)
+        {
+            await RejectAsync(conn, InventoryProtocol.Forbidden, "AdminReportOlympiadResult is disabled.", ct).ConfigureAwait(false);
+            return;
+        }
+
+        var request = NetCodec.DecodeAdminReportOlympiadResult(envelope.Payload);
+        string? error = await _world.TryAdminReportOlympiadAsync(
+            zoneSession,
+            request.MatchId,
+            request.WinnerObjectId,
+            ct).ConfigureAwait(false);
+        if (error != null)
+            await RejectAsync(conn, error, "AdminReportOlympiadResult was rejected.", ct).ConfigureAwait(false);
+    }
+
+    async Task OnSevenSignsStatusAsync(
+        NetConnection conn,
+        ZoneSession zoneSession,
+        PacketEnvelope envelope,
+        CancellationToken ct)
+    {
+        RequireHello(conn);
+        if (!zoneSession.Bound || !zoneSession.InWorld)
+        {
+            await RejectAsync(conn, "not_in_world", "Enter world first.", ct).ConfigureAwait(false);
+            return;
+        }
+
+        string? error = await _world.TrySevenSignsStatusAsync(zoneSession, ct).ConfigureAwait(false);
+        if (error != null)
+            await RejectAsync(conn, error, "SevenSigns status failed.", ct).ConfigureAwait(false);
+        // The record and the sky go out as fanout, so the reply body is empty on purpose.
+    }
+
+    async Task OnSevenSignsActionAsync(
+        NetConnection conn,
+        ZoneSession zoneSession,
+        PacketEnvelope envelope,
+        CancellationToken ct)
+    {
+        RequireHello(conn);
+        if (!zoneSession.Bound || !zoneSession.InWorld)
+        {
+            await RejectAsync(conn, "not_in_world", "Enter world first.", ct).ConfigureAwait(false);
+            return;
+        }
+
+        var request = NetCodec.DecodeSevenSignsActionRequest(envelope.Payload);
+        string? error = await _world.TrySevenSignsActionAsync(
+            zoneSession,
+            new SevenSignsActionRequestMsg
+            {
+                Action = request.Action,
+                Cabal = request.Cabal,
+                Seal = request.Seal,
+                BlueStones = request.BlueStones,
+                GreenStones = request.GreenStones,
+                RedStones = request.RedStones
+            },
+            ct).ConfigureAwait(false);
+        if (error != null)
+            await RejectAsync(conn, error, "SevenSigns action was rejected.", ct).ConfigureAwait(false);
+    }
+
+    async Task OnDungeonAsync(
+        NetConnection conn,
+        ZoneSession zoneSession,
+        PacketEnvelope envelope,
+        CancellationToken ct)
+    {
+        RequireHello(conn);
+        if (!zoneSession.Bound || !zoneSession.InWorld)
+        {
+            await RejectAsync(conn, "not_in_world", "Enter world first.", ct).ConfigureAwait(false);
+            return;
+        }
+
+        var request = NetCodec.DecodeDungeonEnterRequest(envelope.Payload);
+        string? error = await _world.TryDungeonAsync(
+            zoneSession,
+            new DungeonEnterRequestMsg { DungeonId = request.DungeonId, Action = request.Action },
+            ct).ConfigureAwait(false);
+        if (error != null)
+            await RejectAsync(conn, error, "Dungeon request was rejected.", ct).ConfigureAwait(false);
+        // DungeonEntered goes out as fanout, so the reply body is empty on purpose.
     }
 
     async Task OnAttackAsync(

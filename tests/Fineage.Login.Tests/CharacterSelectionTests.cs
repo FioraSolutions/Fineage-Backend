@@ -3,7 +3,6 @@ using System.Net.Sockets;
 using Fineage.Login;
 using Fineage.Login.Net;
 using Fineage.Protocol;
-using MessagePack;
 using Xunit;
 using NetCreateCharacterMsg = Fineage.Net.Contract.CreateCharacterMsg;
 using NetListCharactersMsg = Fineage.Net.Contract.ListCharactersMsg;
@@ -235,8 +234,9 @@ public class CharacterSelectionTests
     [Fact]
     public void Old_select_payload_keeps_slot_unspecified()
     {
-        byte[] bytes = MessagePackSerializer.Serialize(new OldSelectMsg { CharacterId = 4, Name = "Aria" });
-        var msg = MessagePackSerializer.Deserialize<SelectCharacterMsg>(bytes);
+        // A client that predates the slot field sends only id + name; the refresh default must stay "unspecified"
+        // so the service resolves by id instead of taking slot 0.
+        var msg = new OldSelectMsg { CharacterId = 4, Name = "Aria" }.ToSelect();
         Assert.Equal(4, msg.CharacterId);
         Assert.Equal("Aria", msg.Name);
         Assert.Equal(-1, msg.Slot);
@@ -306,10 +306,12 @@ public class CharacterSelectionTests
     static LoginService Service(IAccountStore? store = null, Func<DateTimeOffset>? clock = null, int? deleteAfterDays = null) =>
         new(store ?? JsonAccountStore.InMemory(), new HandoffTokens(HandoffTokens.DefaultSecret), clock, deleteAfterDays: deleteAfterDays);
 
-    [MessagePackObject]
+    /// <summary>Pre-slot select payload: the wire carried only id and name.</summary>
     public sealed class OldSelectMsg
     {
-        [Key(0)] public int CharacterId { get; set; }
-        [Key(1)] public string Name { get; set; } = "";
+        public int CharacterId { get; set; }
+        public string Name { get; set; } = "";
+
+        public SelectCharacterMsg ToSelect() => new() { CharacterId = CharacterId, Name = Name };
     }
 }

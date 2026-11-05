@@ -361,7 +361,7 @@ public class OlympiadTests
 
     static async Task<ZoneSession> Enter(ZoneWorld world, string account, CharacterRecord character)
     {
-        var session = new ZoneSession(new MemoryStream());
+        var session = new ZoneSession();
         session.Bind(character.Id, account, character.Name, character.ClassId);
         Assert.True(await world.TryEnterAsync(session, CancellationToken.None));
         return session;

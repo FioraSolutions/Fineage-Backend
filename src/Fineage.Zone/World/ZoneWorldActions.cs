@@ -1,29 +1,22 @@
 using Fineage.Protocol;
 using Fineage.Zone.Clan;
-using Fineage.Zone.Geo;
-using MessagePack;
 
 namespace Fineage.Zone.World;
 
 public sealed partial class ZoneWorld
 {
-    public async Task<string?> TryCharacterActionAsync(ZoneSession session, CharacterActionRequestMsg request, CancellationToken ct)
+    public Task<string?> TryCharacterActionAsync(ZoneSession session, CharacterActionRequestMsg request, CancellationToken ct)
     {
         if (!IsLive(session))
-            return "world";
+            return Task.FromResult<string?>("world");
 
-        var outbound = new List<Pending>();
         string? error;
         lock (_gate)
-            error = TryCharacterAction(session, request, outbound);
-        if (error != null)
-            return error;
-
-        await FlushSelfAsync(session, outbound, ct).ConfigureAwait(false);
-        return null;
+            error = TryCharacterAction(session, request);
+        return Task.FromResult<string?>(error);
     }
 
-    string? TryCharacterAction(ZoneSession session, CharacterActionRequestMsg request, List<Pending> outbound)
+    string? TryCharacterAction(ZoneSession session, CharacterActionRequestMsg request)
     {
         if (!_byId.TryGetValue(session.ObjectId, out var player) || player.Session == null)
             return "world";
@@ -32,18 +25,18 @@ public sealed partial class ZoneWorld
 
         return request.ActionId switch
         {
-            ActionProtocol.SitStand => ToggleSitStand(player, outbound),
-            ActionProtocol.WalkRun => ToggleWalkRun(player, outbound),
-            ActionProtocol.Attack => TryAttack(session, request.TargetObjectId, outbound),
-            ActionProtocol.NextTarget => TryNextTarget(session, player, outbound),
+            ActionProtocol.SitStand => ToggleSitStand(player),
+            ActionProtocol.WalkRun => ToggleWalkRun(player),
+            ActionProtocol.Attack => TryAttack(session, request.TargetObjectId),
+            ActionProtocol.NextTarget => TryNextTarget(session, player),
             ActionProtocol.SocialGreeting or ActionProtocol.SocialVictory or ActionProtocol.SocialAdvance
-                => FanoutSocial(player, request.ActionId, outbound),
+                => FanoutSocial(player, request.ActionId),
             >= 10 and <= 61 => ActionProtocol.Unsupported,
             _ => ActionProtocol.Unknown
         };
     }
 
-    string? ToggleSitStand(ZoneEntity player, List<Pending> outbound)
+    string? ToggleSitStand(ZoneEntity player)
     {
         long now = _clock().ToUnixTimeMilliseconds();
         if (!player.Sitting && ClanRules.IsInCombat(player.CombatUntilUnixMs, now))
@@ -65,20 +58,20 @@ public sealed partial class ZoneWorld
         if (player.Sitting)
         {
             player.Sitting = false;
-            FanoutWaitType(player, ActionProtocol.WaitStanding, outbound);
+            FanoutWaitType(player, ActionProtocol.WaitStanding);
         }
         else
         {
             player.Sitting = true;
             player.Running = false;
-            FanoutWaitType(player, ActionProtocol.WaitSitting, outbound);
-            FanoutMoveType(player, outbound);
+            FanoutWaitType(player, ActionProtocol.WaitSitting);
+            FanoutMoveType(player);
         }
 
         return null;
     }
 
-    string? ToggleWalkRun(ZoneEntity player, List<Pending> outbound)
+    string? ToggleWalkRun(ZoneEntity player)
     {
         if (player.Sitting)
             return ActionProtocol.Blocked;
@@ -88,23 +81,18 @@ public sealed partial class ZoneWorld
         AdvanceMove(player, now);
         player.Running = !player.Running;
         ZoneLog.Info($"[move] obj={player.ObjectId} {(player.Running ? "run" : "walk")} speed={MoveSpeedOf(player)}");
-        FanoutMoveType(player, outbound);
+        FanoutMoveType(player);
         if (player.MoveActive && NetBridge != null)
         {
             // Remote Net pawns re-target the remaining leg with the new gait.
-            var ack = new MoveToMsg
-            {
-                ObjectId = player.ObjectId,
-                DestX = player.MoveDestX, DestY = player.MoveDestY, DestZ = player.MoveDestZ,
-                OriginX = player.X, OriginY = player.Y, OriginZ = player.Z
-            };
-            NetBridge.FanoutMoveState(NetWatchersOf(player), player.ObjectId, ack.OriginX, ack.OriginY, ack.OriginZ,
-                ack.DestX, ack.DestY, ack.DestZ, player.Running);
+            NetBridge.FanoutMoveState(NetWatchersOf(player), player.ObjectId,
+                player.X, player.Y, player.Z,
+                player.MoveDestX, player.MoveDestY, player.MoveDestZ, player.Running);
         }
         return null;
     }
 
-    string? TryNextTarget(ZoneSession session, ZoneEntity player, List<Pending> outbound)
+    string? TryNextTarget(ZoneSession session, ZoneEntity player)
     {
         int current = session.SelectedTargetId;
         ZoneEntity? best = null;
@@ -150,53 +138,38 @@ public sealed partial class ZoneWorld
             return "target";
 
         session.SelectedTargetId = best.ObjectId;
-        PublishTargetSelection(session, player, best, outbound);
+        PublishTargetSelection(session, player, best);
         return null;
     }
 
-    string? FanoutSocial(ZoneEntity player, int actionId, List<Pending> outbound)
+    string? FanoutSocial(ZoneEntity player, int actionId)
     {
-        var msg = new SocialActionMsg { ObjectId = player.ObjectId, ActionId = actionId };
-        FanoutActor(player, MsgType.SocialAction, msg, outbound);
         // Mobius broadcastPacket(new SocialAction(...)): self + everyone holding the actor in view.
-        if (NetBridge != null)
+        NetBridge?.FanoutSocialAction(NetWatchersOf(player), new Fineage.Net.Contract.SocialActionNetMsg
         {
-            NetBridge.FanoutSocialAction(NetWatchersOf(player), new Fineage.Net.Contract.SocialActionNetMsg
-            {
-                EntityValue = (ulong)(uint)player.ObjectId,
-                EntityGeneration = 1,
-                ActionId = actionId
-            });
-        }
+            EntityValue = (ulong)(uint)player.ObjectId,
+            EntityGeneration = 1,
+            ActionId = actionId
+        });
 
         return null;
     }
 
-    void FanoutWaitType(ZoneEntity player, int waitType, List<Pending> outbound)
+    void FanoutWaitType(ZoneEntity player, int waitType)
     {
-        var msg = new ChangeWaitTypeMsg { ObjectId = player.ObjectId, WaitType = waitType };
-        FanoutActor(player, MsgType.ChangeWaitType, msg, outbound);
         // Mobius Player.sitDown/standUp: broadcastPacket(new ChangeWaitType(this, ...)), self included.
-        if (NetBridge != null)
+        NetBridge?.FanoutChangeWaitType(NetWatchersOf(player), new Fineage.Net.Contract.ChangeWaitTypeNetMsg
         {
-            NetBridge.FanoutChangeWaitType(NetWatchersOf(player), new Fineage.Net.Contract.ChangeWaitTypeNetMsg
-            {
-                EntityValue = (ulong)(uint)player.ObjectId,
-                EntityGeneration = 1,
-                WaitType = waitType,
-                X = player.X,
-                Y = player.Y,
-                Z = player.Z
-            });
-        }
+            EntityValue = (ulong)(uint)player.ObjectId,
+            EntityGeneration = 1,
+            WaitType = waitType,
+            X = player.X,
+            Y = player.Y,
+            Z = player.Z
+        });
     }
 
-    void FanoutMoveType(ZoneEntity player, List<Pending> outbound)
-    {
-        var msg = new ChangeMoveTypeMsg { ObjectId = player.ObjectId, Running = player.Running };
-        FanoutActor(player, MsgType.ChangeMoveType, msg, outbound);
-        FanoutNetMoveType(player);
-    }
+    void FanoutMoveType(ZoneEntity player) => FanoutNetMoveType(player);
 
     /// <summary>Self (players) + knownlist players: the Net ChangeMoveType audience.</summary>
     List<int> NetWatchersOf(ZoneEntity actor)
@@ -227,18 +200,5 @@ public sealed partial class ZoneWorld
         float run = actor.InWater ? actor.SwimRunSpeed : actor.RunSpeed;
         float walk = actor.InWater ? actor.SwimWalkSpeed : actor.WalkSpeed;
         NetBridge.FanoutChangeMoveType(watchers, actor.ObjectId, actor.Running, run, walk, actor.InWater);
-    }
-
-    void FanoutActor(ZoneEntity actor, MsgType type, object payload, List<Pending> outbound)
-    {
-        byte[] body = MessagePackSerializer.Serialize(payload);
-        foreach (var watcher in Players())
-        {
-            if (watcher.Session == null)
-                continue;
-            if (!ReferenceEquals(watcher, actor) && !watcher.Knownlist.Contains(actor.ObjectId))
-                continue;
-            outbound.Add(new Pending(watcher.Session, type, body));
-        }
     }
 }

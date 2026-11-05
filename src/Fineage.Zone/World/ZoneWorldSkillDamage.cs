@@ -11,7 +11,7 @@ namespace Fineage.Zone.World;
 public sealed partial class ZoneWorld
 {
     string? CastMobiusAttack(ZoneSession session, ZoneEntity player, ZoneEntity target, int skillId, int level,
-        SkillCombatData combat, long now, List<Pending> outbound)
+        SkillCombatData combat, long now)
     {
         int mpInitial = combat.MpInitialAt(level);
         if (player.CurMp < mpInitial + combat.MpAt(level))
@@ -35,8 +35,8 @@ public sealed partial class ZoneWorld
             HitTimeMs = hitTime,
             ReuseDelayMs = reuse
         };
-        StopForCast(player, target, now, outbound);
-        FanoutSkill(player, target, cast, targetStatus: null, CasterMpStatus(player), outbound);
+        StopForCast(player, target, now);
+        FanoutSkill(player, target, cast, targetStatus: null, CasterMpStatus(player));
 
         player.CombatUntilUnixMs = now + ClanProtocol.CombatStanceMillis;
         session.SelectedTargetId = target.ObjectId;
@@ -44,12 +44,12 @@ public sealed partial class ZoneWorld
         player.PendingHit = new PendingSkillHit(target.ObjectId, 0, now + hitTime, combat, level);
         ZoneLog.Info($"[skill] cast {skillId} lv{level} kind={combat.Kind} hit={hitTime}ms cool={coolTime}ms reuse={reuse}ms");
         if (hitTime == 0)
-            ResolvePendingHit(player, now, outbound);
+            ResolvePendingHit(player, now);
         return null;
     }
 
     /// <summary>Damage for a Mobius attack skill at launch; consumes mpConsume and (physical) a charged soulshot.</summary>
-    int RollSkillDamage(ZoneEntity player, ZoneEntity target, SkillCombatData combat, int level, List<Pending>? outbound = null)
+    int RollSkillDamage(ZoneEntity player, ZoneEntity target, SkillCombatData combat, int level)
     {
         player.CurMp = Math.Max(0, player.CurMp - combat.MpAt(level));
         var ps = PlayerStats(player);
@@ -60,23 +60,23 @@ public sealed partial class ZoneWorld
             // Mobius calcMagicDam: blessed spiritshot ×4 M.Atk, spiritshot ×2; the charge fires on this cast.
             int spirit = player.SpiritshotCharge;
             player.SpiritshotCharge = 0;
-            if (spirit > 0 && outbound != null)
-                RechargeAutoShots(player, outbound);
+            if (spirit > 0)
+                RechargeAutoShots(player);
             double mAtk = ps.MAtk * ZoneCombat.SpiritshotMAtkMultiplier(spirit);
             // Magic level: skill-combat.json has no magicLvl yet → attacker level (Mobius fallback path).
             var (damage, outcome) = ZoneCombat.RollMagicDamage(_combatRandom, mAtk, mDef, power,
                 player.Level, player.Level, target.Level, ps.MCritRate);
-            if (player.Session != null && outbound != null)
-                MagicOutcomeNotice(player.Session, target, combat, outcome, outbound);
+            if (player.Session != null)
+                MagicOutcomeNotice(player.Session, target, combat, outcome);
             return damage;
         }
 
         bool ss = player.SoulshotCharged;
         player.SoulshotCharged = false;
-        if (ss && outbound != null)
-            RechargeAutoShots(player, outbound);
+        if (ss)
+            RechargeAutoShots(player);
         if (combat.Kind == SkillDamageKind.Blow && combat.Blow is { } blow)
-            return RollBlow(player, target, combat, level, blow, ps, ss, outbound);
+            return RollBlow(player, target, combat, level, blow, ps, ss);
         double pDef = NpcPDef(target);
         var shield = ZoneCombat.RollShield(_combatRandom, NpcShieldRate(target), ps.Weapon == Fineage.Game.WeaponType.Bow);
         if (shield == ZoneCombat.ShieldResult.Perfect)
@@ -90,7 +90,7 @@ public sealed partial class ZoneWorld
 
     /// <summary>Mobius FatalBlow / Backstab + Lethal effects for a player blow skill on a mob. 0 = blow failed (no damage).</summary>
     int RollBlow(ZoneEntity player, ZoneEntity target, SkillCombatData combat, int level, BlowEffect blow,
-        PlayerCombatStats ps, bool ss, List<Pending>? outbound)
+        PlayerCombatStats ps, bool ss)
     {
         bool front = ZoneCombat.IsInFrontOf(player.X, player.Y, target.X, target.Y, target.Heading);
         bool behind = ZoneCombat.IsBehind(player.X, player.Y, target.X, target.Y, target.Heading);
@@ -110,14 +110,14 @@ public sealed partial class ZoneWorld
         bool lethalable = target.NpcType is not ("RaidBoss" or "GrandBoss");
         var (extra, lethal) = ZoneCombat.RollLethal(_combatRandom, combat.FullLethal, combat.HalfLethal,
             combat.MagicLevelAt(level), target.Level, hpAfter, lethalable);
-        if (player.Session != null && outbound != null)
+        if (player.Session != null)
         {
             if (outcome == ZoneCombat.BlowOutcome.Critical)
-                ShotNotice(player.Session, SysMsgCriticalHit, "Critical hit!", outbound);
+                ShotNotice(player.Session, SysMsgCriticalHit, "Critical hit!");
             if (lethal == ZoneCombat.LethalOutcome.Full)
-                ShotNotice(player.Session, SysMsgLethalSuccess, "Your lethal strike was successful!", outbound);
+                ShotNotice(player.Session, SysMsgLethalSuccess, "Your lethal strike was successful!");
             else if (lethal == ZoneCombat.LethalOutcome.Half)
-                ShotNotice(player.Session, 0, "Half-Kill!", outbound);
+                ShotNotice(player.Session, 0, "Half-Kill!");
         }
         return damage + extra;
     }
@@ -127,18 +127,18 @@ public sealed partial class ZoneWorld
     public const int SysMsgAttackFailed = 158;
     public const int SysMsgMagicCritical = 1280;
 
-    void MagicOutcomeNotice(ZoneSession session, ZoneEntity target, SkillCombatData combat, ZoneCombat.MagicOutcome outcome, List<Pending> outbound)
+    void MagicOutcomeNotice(ZoneSession session, ZoneEntity target, SkillCombatData combat, ZoneCombat.MagicOutcome outcome)
     {
         switch (outcome)
         {
             case ZoneCombat.MagicOutcome.Critical:
-                ShotNotice(session, SysMsgMagicCritical, "Magic Critical Hit!", outbound);
+                ShotNotice(session, SysMsgMagicCritical, "Magic Critical Hit!");
                 break;
             case ZoneCombat.MagicOutcome.HalfFail:
-                ShotNotice(session, SysMsgAttackFailed, "Your attack has failed.", outbound);
+                ShotNotice(session, SysMsgAttackFailed, "Your attack has failed.");
                 break;
             case ZoneCombat.MagicOutcome.Resisted:
-                ShotNotice(session, SysMsgResisted, $"{target.Name} has resisted your {combat.Name}.", outbound);
+                ShotNotice(session, SysMsgResisted, $"{target.Name} has resisted your {combat.Name}.");
                 break;
         }
     }

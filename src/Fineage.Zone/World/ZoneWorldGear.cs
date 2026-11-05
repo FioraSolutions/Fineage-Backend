@@ -1,7 +1,6 @@
 using Fineage.Game;
 using Fineage.Net.Contract;
 using Fineage.Protocol;
-using MessagePack;
 
 namespace Fineage.Zone.World;
 
@@ -23,50 +22,40 @@ public sealed partial class ZoneWorld
         }
     }
 
-    public async Task<string?> TryUseItemAsync(ZoneSession session, UseItemMsg request, CancellationToken ct)
+    public Task<string?> TryUseItemAsync(ZoneSession session, UseItemMsg request, CancellationToken ct)
     {
-        var toSelf = new List<Pending>();
-        var toOthers = new List<Pending>();
         string? error;
         lock (_gate)
-            error = TryUseItem(session, request.ObjectId, toSelf, toOthers);
+            error = TryUseItem(session, request.ObjectId);
         if (error != null)
-            return error;
+            return Task.FromResult<string?>(error);
 
-        await FlushSelfAsync(session, toSelf, ct).ConfigureAwait(false);
-        await FlushOthersAsync(toOthers, ct).ConfigureAwait(false);
-        return null;
+        return Task.FromResult<string?>(null);
     }
 
-    public async Task<string?> TryUnequipItemAsync(ZoneSession session, UnequipItemMsg request, CancellationToken ct)
+    public Task<string?> TryUnequipItemAsync(ZoneSession session, UnequipItemMsg request, CancellationToken ct)
     {
-        var toSelf = new List<Pending>();
-        var toOthers = new List<Pending>();
         string? error;
         lock (_gate)
-            error = TryUnequipItem(session, request.PaperdollSlot, toSelf, toOthers);
+            error = TryUnequipItem(session, request.PaperdollSlot);
         if (error != null)
-            return error;
+            return Task.FromResult<string?>(error);
 
-        await FlushSelfAsync(session, toSelf, ct).ConfigureAwait(false);
-        await FlushOthersAsync(toOthers, ct).ConfigureAwait(false);
-        return null;
+        return Task.FromResult<string?>(null);
     }
 
-    public async Task<string?> TryGiveItemAsync(ZoneSession session, GiveItemMsg request, CancellationToken ct)
+    public Task<string?> TryGiveItemAsync(ZoneSession session, GiveItemMsg request, CancellationToken ct)
     {
-        var toSelf = new List<Pending>();
         string? error;
         lock (_gate)
-            error = TryGiveItem(session, request, toSelf);
+            error = TryGiveItem(session, request);
         if (error != null)
-            return error;
+            return Task.FromResult<string?>(error);
 
-        await FlushSelfAsync(session, toSelf, ct).ConfigureAwait(false);
-        return null;
+        return Task.FromResult<string?>(null);
     }
 
-    string? TryUseItem(ZoneSession session, int objectId, List<Pending> toSelf, List<Pending> toOthers)
+    string? TryUseItem(ZoneSession session, int objectId)
     {
         if (!TryLivePlayer(session, out var player, out var error))
             return error;
@@ -76,7 +65,7 @@ public sealed partial class ZoneWorld
             return InventoryProtocol.NotOwned;
         if (IsShot(item.Template))
         {
-            TryChargeShot(session, player, item, toSelf, toOthers, quiet: false);
+            TryChargeShot(session, player, item, quiet: false);
             return null;
         }
         if (!item.Template.Equippable)
@@ -103,9 +92,9 @@ public sealed partial class ZoneWorld
             player.SoulshotCharged = false; // Mobius: charges live on the weapon instance
             player.SpiritshotCharge = 0;
             if (item.IsEquipped)
-                RechargeAutoShots(player, toSelf);
+                RechargeAutoShots(player);
         }
-        if (!PublishGear(session, player, before, toSelf, toOthers))
+        if (!PublishGear(session, player, before))
             return "bad_request";
 
         SaveInventory(session, player.Inventory);
@@ -113,7 +102,7 @@ public sealed partial class ZoneWorld
         return null;
     }
 
-    string? TryUnequipItem(ZoneSession session, int paperdollSlot, List<Pending> toSelf, List<Pending> toOthers)
+    string? TryUnequipItem(ZoneSession session, int paperdollSlot)
     {
         if (!TryLivePlayer(session, out var player, out var error))
             return error;
@@ -131,7 +120,7 @@ public sealed partial class ZoneWorld
             player.SoulshotCharged = false;
             player.SpiritshotCharge = 0;
         }
-        if (!PublishGear(session, player, before, toSelf, toOthers))
+        if (!PublishGear(session, player, before))
             return "bad_request";
 
         SaveInventory(session, player.Inventory);
@@ -139,7 +128,7 @@ public sealed partial class ZoneWorld
         return null;
     }
 
-    string? TryGiveItem(ZoneSession session, GiveItemMsg request, List<Pending> toSelf)
+    string? TryGiveItem(ZoneSession session, GiveItemMsg request)
     {
         if (!IsLive(session))
             return "world";
@@ -151,7 +140,11 @@ public sealed partial class ZoneWorld
             return "bad_request";
 
         var added = player.Inventory.Add(request.ItemId, request.Count);
-        toSelf.Add(Pack(session, MsgType.InventoryUpdate, InventoryMessages.Update(InventoryChange.Add, added)));
+        // Net clients only read the PacketEnvelope path, so the V2 frame alone would leave the bag
+        // stale for an admin GiveItem.
+        NetBridge?.FanoutInventoryUpdate(
+            [session.ObjectId],
+            ToNetInventoryUpdate(InventoryMessages.Update(InventoryChange.Add, added)));
         SaveInventory(session, player.Inventory);
         ZoneLog.Info($"give object={session.ObjectId} item={request.ItemId} count={request.Count}");
         return null;
@@ -180,9 +173,7 @@ public sealed partial class ZoneWorld
     bool PublishGear(
         ZoneSession session,
         ZoneEntity player,
-        Dictionary<int, int> before,
-        List<Pending> toSelf,
-        List<Pending> toOthers)
+        Dictionary<int, int> before)
     {
         var changed = PaperdollChanges(player.Inventory!, before);
         if (changed.Count == 0)
@@ -191,17 +182,14 @@ public sealed partial class ZoneWorld
         RefreshGradePenalty(player);
         RefreshRunSpeedAndFanout(player);
         var invUpdate = InventoryMessages.Modify(changed);
-        toSelf.Add(Pack(session, MsgType.InventoryUpdate, invUpdate));
-        toSelf.Add(SelfUserInfo(session, player));
+        SelfUserInfo(player);
         if (NetBridge != null)
             NetBridge.FanoutInventoryUpdate([session.ObjectId], ToNetInventoryUpdate(invUpdate));
-        byte[] body = MessagePackSerializer.Serialize(CharInfo(player));
         List<int>? netPeers = null;
         foreach (int id in player.Knownlist)
         {
             if (_byId.TryGetValue(id, out var other) && other.Session != null)
             {
-                toOthers.Add(new Pending(other.Session, MsgType.CharInfo, body));
                 (netPeers ??= []).Add(id);
             }
         }
@@ -268,9 +256,14 @@ public sealed partial class ZoneWorld
             Expertise.ForLevel(player.Level),
             player.ExpertiseBonus,
             _expertisePenalty);
+        bool changed = penalty.Weapon != player.WeaponGradePenalty || penalty.Armor != player.ArmorGradePenalty;
         player.WeaponGradePenalty = penalty.Weapon;
         player.ArmorGradePenalty = penalty.Armor;
         player.GradePenaltyLevel = penalty.SkillLevel;
+        // Mobius refreshExpertisePenalty ends with sendPacket(new EtcStatusUpdate(this)). Without it the Net client
+        // keeps the previous grade-penalty flag, so the icon disagrees with the penalty UserInfo now reports.
+        if (changed)
+            FanoutNetEtcStatus(player);
     }
 
     static string? Restriction(ZoneEntity player, ItemInstance item)

@@ -5,23 +5,18 @@ namespace Fineage.Zone.World;
 
 public sealed partial class ZoneWorld
 {
-    public async Task<string?> TryBypassAsync(ZoneSession session, int npcObjectId, string? command, CancellationToken ct)
+    public Task<string?> TryBypassAsync(ZoneSession session, int npcObjectId, string? command, CancellationToken ct)
     {
         if (!IsLive(session))
-            return "world";
+            return Task.FromResult<string?>("world");
 
         string? error;
-        var toSelf = new List<Pending>();
-        var toOthers = new List<Pending>();
         lock (_gate)
-            error = Bypass(session, npcObjectId, command, toSelf, toOthers);
-        await FlushSelfAsync(session, toSelf, ct).ConfigureAwait(false);
-        if (toOthers.Count > 0)
-            await FlushOthersAsync(toOthers, ct).ConfigureAwait(false);
-        return error;
+            error = Bypass(session, npcObjectId, command);
+        return Task.FromResult<string?>(error);
     }
 
-    string? Bypass(ZoneSession session, int npcObjectId, string? command, List<Pending> toSelf, List<Pending> toOthers)
+    string? Bypass(ZoneSession session, int npcObjectId, string? command)
     {
         if (!TryPlayer(session, out var player))
             return "world";
@@ -39,7 +34,7 @@ public sealed partial class ZoneWorld
         var handler = _bypasses.Find(verb);
         if (handler == null)
         {
-            SendHtml(session, player, npc, BypassRegistry.NotImplemented, toSelf);
+            SendHtml(session, player, npc, BypassRegistry.NotImplemented);
             return null;
         }
 
@@ -55,67 +50,52 @@ public sealed partial class ZoneWorld
         if (reply.Error != null)
             return reply.Error;
         if (reply.ReplayTalk)
-            return Talk(session, npc.ObjectId, questId: 0, eventName: null, toSelf, out _);
+            return Talk(session, npc.ObjectId, questId: 0, eventName: null, out _);
         if (reply.ShowQuestList)
         {
-            SendQuestList(session, player, npc, toSelf);
+            SendQuestList(session, player, npc);
             return null;
         }
 
         if (reply.ScriptName != null)
-            return VillageMasterBypass(session, player, npc, reply.ScriptName, reply.ScriptEvent, toSelf, toOthers);
+            return VillageMasterBypass(session, player, npc, reply.ScriptName, reply.ScriptEvent);
 
         if (reply.QuestAction)
         {
             if (reply.QuestId <= 0 || reply.QuestEvent.Length > 64 || !EventOk(reply.QuestEvent))
                 return "bad_request";
-            return Talk(session, npc.ObjectId, reply.QuestId, reply.QuestEvent, toSelf, out _);
+            return Talk(session, npc.ObjectId, reply.QuestId, reply.QuestEvent, out _);
         }
 
         if (reply.BuyListId is int buyListId)
-            return OpenBuyList(session, player, npc, buyListId, toSelf);
+            return OpenBuyList(session, player, npc, buyListId);
         if (reply.OpenSell)
-            return OpenSellList(session, player, npc, toSelf);
+            return OpenSellList(session, player, npc);
         if (reply.MultiSellListId is int multiListId)
-            return OpenMultiSell(session, player, npc, multiListId, reply.MultiSellInventoryOnly, toSelf);
+            return OpenMultiSell(session, player, npc, multiListId, reply.MultiSellInventoryOnly);
         if (reply.Service != null)
-            return ApplyNpcService(session, player, npc, reply, toSelf, toOthers);
+            return ApplyNpcService(session, player, npc, reply);
 
-        SendHtml(session, player, npc, reply.Html ?? NpcHtmlText.NothingToSay, toSelf);
+        SendHtml(session, player, npc, reply.Html ?? NpcHtmlText.NothingToSay);
         return null;
     }
 
-    void SendNpcPage(ZoneSession session, ZoneEntity player, ZoneEntity npc, int page, List<Pending> toSelf)
+    void SendNpcPage(ZoneSession session, ZoneEntity player, ZoneEntity npc, int page)
     {
-        SendHtml(session, player, npc, NpcHtmlPaths.Read(_html, npc.NpcType, npc.NpcId, page), toSelf);
+        SendHtml(session, player, npc, NpcHtmlPaths.Read(_html, npc.NpcType, npc.NpcId, page));
     }
 
-    void SendQuestList(ZoneSession session, ZoneEntity player, ZoneEntity npc, List<Pending> toSelf)
+    void SendQuestList(ZoneSession session, ZoneEntity player, ZoneEntity npc)
     {
         string html = _quests.QuestChoiceHtml(player.Quests, npc.NpcId, npc.Name, QuestActorOf(player));
-        toSelf.Add(Pack(session, MsgType.QuestDialog, new QuestDialogMsg
-        {
-            NpcObjectId = npc.ObjectId,
-            NpcId = npc.NpcId,
-            QuestId = 0,
-            Hook = "default",
-            Event = "",
-            Html = html
-        }));
         // Net client shows quest choice as the same HTML window.
         FanoutNetHtml(session, npc, html);
     }
 
-    void SendHtml(ZoneSession session, ZoneEntity player, ZoneEntity npc, string html, List<Pending> toSelf)
+    void SendHtml(ZoneSession session, ZoneEntity player, ZoneEntity npc, string html)
     {
         string rendered = NpcHtmlText.Apply(html, new NpcHtmlText.Tokens(npc.ObjectId, npc.NpcId, npc.Name, player.Name));
-        toSelf.Add(Pack(session, MsgType.NpcHtml, new NpcHtmlMsg
-        {
-            NpcObjectId = npc.ObjectId,
-            NpcId = npc.NpcId,
-            Html = rendered,
-            ItemId = 0
-        }));
+        LastNpcHtmlForTest = rendered;
         FanoutNetHtml(session, npc, rendered);
     }
 

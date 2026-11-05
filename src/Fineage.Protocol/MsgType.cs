@@ -1,7 +1,7 @@
 namespace Fineage.Protocol;
 
 /// <summary>
-/// V2 opcodes. Zone values match Fineage <c>tools/zone-server/Wire/MsgType.cs</c>
+/// Fineage wire opcodes. Zone values match <c>tools/zone-server/Wire/MsgType.cs</c>
 /// (including combat ids, which this login process does not implement).
 /// Login ids sit in the gaps so a client can speak both without a second numbering scheme.
 /// </summary>
@@ -186,13 +186,13 @@ public enum MsgType : ushort
     CreatureSay = 1012,
     /// <summary>Keepalive reply (echoes <see cref="PingMsg"/> timestamp).</summary>
     Pong = 1013,
-    /// <summary>Full inventory on enter world. Same value as <see cref="V2.MsgType.ItemList"/>.</summary>
+    /// <summary>Full inventory on enter world.</summary>
     ItemList = 1014,
-    /// <summary>Add, modify, or remove inventory rows. Same value as <see cref="V2.MsgType.InventoryUpdate"/>.</summary>
+    /// <summary>Add, modify, or remove inventory rows.</summary>
     InventoryUpdate = 1015,
-    /// <summary>Own character, including paperdoll. Same value as <see cref="V2.MsgType.UserInfo"/>.</summary>
+    /// <summary>Own character, including paperdoll.</summary>
     UserInfo = 1016,
-    /// <summary>Active abnormal effects on a creature. Same value as <see cref="V2.MsgType.AbnormalStatusUpdate"/>.</summary>
+    /// <summary>Active abnormal effects on a creature.</summary>
     AbnormalStatusUpdate = 1017,
     /// <summary>Ground item entered AOI. Keys match Interlude SpawnItem / client <c>SpawnItemDto</c>.</summary>
     SpawnItem = 1018,

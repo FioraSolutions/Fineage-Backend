@@ -1,10 +1,11 @@
 using Fineage.Game;
 using Fineage.Login;
+using Fineage.Net.Contract;
+using Fineage.Zone.Net;
 using Fineage.Protocol;
 using Fineage.Zone.Npcs;
 using Fineage.Zone.Spawns;
 using Fineage.Zone.World;
-using MessagePack;
 using Xunit;
 
 namespace Fineage.Zone.Tests;
@@ -201,20 +202,18 @@ public sealed class NpcTemplateSpawnTests
         Assert.Equal(50f, info.WalkSpeed);
         Assert.InRange(info.ObjectId, NpcObjectIdAllocator.First, NpcObjectIdAllocator.ExclusiveEnd - 1);
 
-        byte[] bytes = MessagePackSerializer.Serialize(info);
-        var roundTrip = MessagePackSerializer.Deserialize<NpcInfoMsg>(bytes);
-        Assert.Equal(info.Title, roundTrip.Title);
-        Assert.Equal(info.NpcType, roundTrip.NpcType);
-        Assert.False(roundTrip.Attackable);
-        var v2 = MessagePackSerializer.Deserialize<Fineage.Protocol.V2.NpcInfoMsg>(bytes);
-        Assert.Equal("Trader", v2.Title);
-        Assert.Equal("Merchant", v2.NpcType);
-        Assert.False(v2.Attackable);
-
+        // The Net wire shape the client builds the merchant model from.
+        Assert.True(world.TryGetEntityById(info.ObjectId, out var entity), "Silvia is not materialised.");
+        var presence = NetEnterWorldProjector.BuildPresenceSpawn(entity, EntityId.FromObjectId(info.ObjectId, 1));
+        Assert.Equal(EntityKindNet.Npc, presence.Kind);
+        Assert.Equal("Silvia", presence.Name);
+        Assert.Equal(30003, presence.TemplateId);
+        Assert.Equal((info.X, info.Y, info.Z), (presence.X, presence.Y, presence.Z));
+        Assert.Equal(info.Heading, presence.Heading);
+        Assert.False(presence.Attackable);
         var login = new LoginService(JsonAccountStore.InMemory(), new HandoffTokens(HandoffTokens.DefaultSecret));
         var ticket = login.Play("merchant", "secret1", "Buyer", HumanClasses.Fighter).Value!;
-        await using var stream = new MemoryStream();
-        var session = new ZoneSession(stream);
+        var session = new ZoneSession();
         session.Bind(ticket.CharacterId, ticket.Account, ticket.CharacterName, ticket.ClassId);
         Assert.True(await world.TryEnterAsync(session, CancellationToken.None));
         // Non-attackable NPCs must still be selectable (talk / target frame); combat stays blocked.

@@ -2,7 +2,6 @@ using System.Net;
 using System.Net.Sockets;
 using Fineage.Login.Net;
 using Fineage.Net.Host;
-using Fineage.Protocol.Net;
 using Fineage.Protocol.Telemetry;
 
 namespace Fineage.Login;

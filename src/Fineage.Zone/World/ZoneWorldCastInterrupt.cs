@@ -13,7 +13,7 @@ namespace Fineage.Zone.World;
 public sealed partial class ZoneWorld
 {
     /// <summary>Drop the in-flight skill: no hit, casting window closed, queued cast cleared. Returns whether something was cast.</summary>
-    bool AbortCast(ZoneEntity player, string reason, List<Pending> outbound, bool notify)
+    bool AbortCast(ZoneEntity player, string reason, bool notify)
     {
         long now = _clock().ToUnixTimeMilliseconds();
         bool casting = player.PendingHit != null || player.CastingUntilMs > now;
@@ -28,7 +28,7 @@ public sealed partial class ZoneWorld
             session.PendingCastTargetId = 0;
             session.PendingCastAtUnixMs = 0;
             if (notify)
-                Notice(session, CastRules.CastingInterruptedMessage, "Your casting has been interrupted.", outbound);
+                Notice(session, CastRules.CastingInterruptedMessage, "Your casting has been interrupted.");
         }
 
         ZoneLog.Info($"[cast] abort obj={player.ObjectId} skill={skill} reason={reason}");
@@ -36,7 +36,7 @@ public sealed partial class ZoneWorld
     }
 
     /// <summary>Mobius Creature.onHit → calcAtkBreak → breakCast for a player hit while casting a magic skill.</summary>
-    void MaybeBreakCast(ZoneEntity player, int damage, List<Pending> outbound)
+    void MaybeBreakCast(ZoneEntity player, int damage)
     {
         var hit = player.PendingHit;
         if (damage <= 0 || hit == null)
@@ -50,22 +50,22 @@ public sealed partial class ZoneWorld
         if (PlayerClasses.TryGet(player.ClassId, out var t) && t != null)
             men = SafeBonus(PlayerClasses.StatBonuses, StatSlot.Men, t.Men);
         if (CastRules.RollAttackBreak(_combatRandom, damage, men))
-            AbortCast(player, "hit", outbound, notify: true);
+            AbortCast(player, "hit", notify: true);
     }
 
-    internal bool AbortCastForTest(ZoneEntity player) { lock (_gate) return AbortCast(player, "test", [], notify: false); }
-    internal void ResolvePendingHitForTest(ZoneEntity player) { lock (_gate) ResolvePendingHit(player, _clock().ToUnixTimeMilliseconds(), []); }
-    internal void HitPlayerForTest(ZoneEntity player, int damage) { lock (_gate) { player.CurHp = Math.Max(1, player.CurHp - damage); MaybeBreakCast(player, damage, []); } }
+    internal bool AbortCastForTest(ZoneEntity player) { lock (_gate) return AbortCast(player, "test", notify: false); }
+    internal void ResolvePendingHitForTest(ZoneEntity player) { lock (_gate) ResolvePendingHit(player, _clock().ToUnixTimeMilliseconds()); }
+    internal void HitPlayerForTest(ZoneEntity player, int damage) { lock (_gate) { player.CurHp = Math.Max(1, player.CurHp - damage); MaybeBreakCast(player, damage); } }
 
     /// <summary>Effect run at hitTime for a non-damage skill (Mobius onMagicHitTimer → callSkill).</summary>
-    delegate void DeferredEffect(ZoneEntity target, long now, List<Pending> outbound);
+    delegate void DeferredEffect(ZoneEntity target, long now);
 
     /// <summary>
     /// Schedule a non-damage skill: MP/reuse/MagicSkillUse already went out at cast start; the effect lands at hitTime after
     /// the Mobius launch checks (target alive, within escape range, in sight). hitTime 0 resolves now.
     /// </summary>
     void ScheduleEffect(ZoneEntity player, ZoneEntity target, SkillDefinition template, int level, long now, int hitTimeMs,
-        DeferredEffect effect, List<Pending> outbound)
+        DeferredEffect effect)
     {
         bool self = ReferenceEquals(player, target);
         player.PendingHit = new PendingSkillHit(target.ObjectId, 0, now + Math.Max(0, hitTimeMs), null, level)
@@ -77,17 +77,17 @@ public sealed partial class ZoneWorld
             Apply = effect
         };
         if (hitTimeMs <= 0)
-            ResolvePendingHit(player, now, outbound);
+            ResolvePendingHit(player, now);
     }
 
-    void ResolveDeferredEffect(ZoneEntity player, PendingSkillHit hit, DeferredEffect effect, long now, List<Pending> outbound)
+    void ResolveDeferredEffect(ZoneEntity player, PendingSkillHit hit, DeferredEffect effect, long now)
     {
         bool alive = _byId.TryGetValue(hit.TargetId, out var target) && (hit.TargetIsNpc
             ? target.Kind == ZoneEntityKind.Npc && target.CurHp > 0 && !target.Dead
             : target.Kind == ZoneEntityKind.Player && !target.Dead);
         if (!alive)
         {
-            AbortCast(player, "target-gone", outbound, notify: false);
+            AbortCast(player, "target-gone", notify: false);
             return;
         }
 
@@ -95,31 +95,30 @@ public sealed partial class ZoneWorld
         {
             if (hit.EscapeRange > 0 && !ZoneCombat.InCastRange(player.X, player.Y, target!.X, target.Y, hit.EscapeRange + ZoneCombat.HitRangeTolerance))
             {
-                AbortCast(player, "escaped", outbound, notify: false);
+                AbortCast(player, "escaped", notify: false);
                 return;
             }
 
             if (!CanSeeTarget(player, target!))
             {
-                AbortCast(player, "no-los", outbound, notify: false);
+                AbortCast(player, "no-los", notify: false);
                 return;
             }
         }
 
         ZoneLog.Info($"[skill] effect {hit.SkillId} lv{hit.Level} target={target!.ObjectId}");
-        effect(target, now, outbound);
+        effect(target, now);
     }
 
     /// <summary>Test: land the caster's in-flight skill now (as if hitTime passed) and flush the caster's frames.</summary>
-    internal async Task CompleteCastForTestAsync(ZoneSession session)
+    internal Task CompleteCastForTestAsync(ZoneSession session)
     {
-        var outbound = new List<Pending>();
         lock (_gate)
         {
             if (_byId.TryGetValue(session.ObjectId, out var player))
-                ResolvePendingHit(player, _clock().ToUnixTimeMilliseconds(), outbound);
+                ResolvePendingHit(player, _clock().ToUnixTimeMilliseconds());
         }
 
-        await FlushSelfAsync(session, outbound.Where(p => ReferenceEquals(p.To, session)).ToList(), CancellationToken.None).ConfigureAwait(false);
+        return Task.CompletedTask;
     }
 }

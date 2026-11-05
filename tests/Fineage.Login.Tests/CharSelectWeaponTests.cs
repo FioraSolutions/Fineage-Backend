@@ -1,7 +1,7 @@
 using Fineage.Game;
 using Fineage.Login;
+using Fineage.Net.Contract;
 using Fineage.Protocol;
-using MessagePack;
 using Xunit;
 using Xunit.Abstractions;
 
@@ -49,10 +49,27 @@ public class CharSelectWeaponTests
         Assert.True(row.Paperdoll[(int)PaperdollSlot.Chest] > 0, "starter kit must equip chest for CharSelect paperdoll");
         Assert.True(row.Paperdoll[(int)PaperdollSlot.Legs] > 0, "starter kit must equip legs for CharSelect paperdoll");
 
-        byte[] body = MessagePackSerializer.Serialize(new CharacterListMsg { Characters = [row] });
-        var round = MessagePackSerializer.Deserialize<CharacterListMsg>(body);
-        Assert.Equal(row.WeaponItemId, round.Characters[0].WeaponItemId);
-        Assert.Equal(row.Paperdoll[(int)PaperdollSlot.RHand], round.Characters[0].Paperdoll[(int)PaperdollSlot.RHand]);
-        Assert.Equal(row.Paperdoll[(int)PaperdollSlot.Chest], round.Characters[0].Paperdoll[(int)PaperdollSlot.Chest]);
+        var roster = NetCodec.DecodeCharacterRoster(NetCodec.EncodeCharacterRoster(new CharacterRosterMsg
+        {
+            Characters =
+            [
+                new CharacterSummaryNet
+                {
+                    CharacterId = row.CharacterId,
+                    Name = row.Name,
+                    ClassId = row.ClassId,
+                    Race = row.Race,
+                    Sex = row.Sex,
+                    Level = row.Level,
+                    Slot = row.Slot,
+                    WeaponItemId = row.WeaponItemId,
+                    Paperdoll = row.Paperdoll
+                }
+            ]
+        }));
+        var round = roster.Characters[0];
+        Assert.Equal(row.WeaponItemId, round.WeaponItemId);
+        Assert.Equal(row.Paperdoll[(int)PaperdollSlot.RHand], round.Paperdoll[(int)PaperdollSlot.RHand]);
+        Assert.Equal(row.Paperdoll[(int)PaperdollSlot.Chest], round.Paperdoll[(int)PaperdollSlot.Chest]);
     }
 }

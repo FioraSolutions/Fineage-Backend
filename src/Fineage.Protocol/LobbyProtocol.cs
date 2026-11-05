@@ -3,7 +3,7 @@ namespace Fineage.Protocol;
 /// <summary>
 /// Login TCP lobby on port 9106. The Unity client (<c>FineageLoginSession</c> on <c>dev</c>)
 /// speaks this set: opcodes 20–25 and 1020–1026, plus shared <see cref="MsgType.Error"/> 1099.
-/// MessagePack keys are appended only. Do not renumber an existing key or opcode.
+/// Net key numbers are appended only. Do not renumber an existing key or opcode.
 ///
 /// <para>Client → server</para>
 /// <list type="bullet">
@@ -54,9 +54,8 @@ namespace Fineage.Protocol;
 /// Selects are also flood-gated (default 1 second). A gated repeat sends nothing.
 /// A character already in the zone is stored and removed from the world when that character enters again.</para>
 ///
-/// <para>V2 lobby replies that used to share ids with zone traffic now live at 1030–1033.
-/// See <see cref="V2.MsgType"/>. The Unity client does not send those V2 lobby opcodes;
-/// 1005/1006/1007 on the client are <c>CharInfo</c>, <c>NpcInfo</c>, and <c>DeleteObject</c>.</para>
+/// <para>The Unity client reads zone ids 1005/1006/1007 as <c>CharInfo</c>, <c>NpcInfo</c>, and <c>DeleteObject</c>,
+/// which is why the lobby replies never reuse them.</para>
 /// </summary>
 public static class LobbyProtocol
 {

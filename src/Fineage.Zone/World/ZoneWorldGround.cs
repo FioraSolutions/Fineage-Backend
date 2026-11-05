@@ -3,62 +3,55 @@ using Fineage.Net.Contract;
 using Fineage.Protocol;
 using Fineage.Zone.Combat;
 using Fineage.Zone.Drops;
-using MessagePack;
 
 namespace Fineage.Zone.World;
 
 public sealed partial class ZoneWorld
 {
-    public async Task<string?> TryPickupAsync(ZoneSession session, PickupRequestMsg request, CancellationToken ct)
+    public Task<string?> TryPickupAsync(ZoneSession session, PickupRequestMsg request, CancellationToken ct)
     {
         if (!IsLive(session))
-            return "world";
+            return Task.FromResult<string?>("world");
 
-        var outbound = new List<Pending>();
         string? error;
         lock (_gate)
-            error = TryPickup(session, request.ObjectId, outbound);
+            error = TryPickup(session, request.ObjectId);
         if (error != null)
-            return error;
+            return Task.FromResult<string?>(error);
 
-        await FlushSelfAsync(session, outbound, ct).ConfigureAwait(false);
-        return null;
+        return Task.FromResult<string?>(null);
     }
 
     /// <summary>
     /// Mobius <c>RequestDestroyItem</c>: the bag slot is deleted outright, no ground spawn. Except for the
     /// adena/quest guards the client could bypass, this is the trash-basket action.
     /// </summary>
-    public async Task<string?> TryDestroyItemAsync(ZoneSession session, DestroyItemRequestMsg request, CancellationToken ct)
+    public Task<string?> TryDestroyItemAsync(ZoneSession session, DestroyItemRequestMsg request, CancellationToken ct)
     {
         if (!IsLive(session))
-            return "world";
+            return Task.FromResult<string?>("world");
 
-        var outbound = new List<Pending>();
         string? error;
         lock (_gate)
-            error = TryDestroyItem(session, request, outbound);
+            error = TryDestroyItem(session, request);
         if (error != null)
-            return error;
+            return Task.FromResult<string?>(error);
 
-        await FlushSelfAsync(session, outbound, ct).ConfigureAwait(false);
-        return null;
+        return Task.FromResult<string?>(null);
     }
 
-    public async Task<string?> TryDropItemAsync(ZoneSession session, DropItemRequestMsg request, CancellationToken ct)
+    public Task<string?> TryDropItemAsync(ZoneSession session, DropItemRequestMsg request, CancellationToken ct)
     {
         if (!IsLive(session))
-            return "world";
+            return Task.FromResult<string?>("world");
 
-        var outbound = new List<Pending>();
         string? error;
         lock (_gate)
-            error = TryDropItem(session, request, outbound);
+            error = TryDropItem(session, request);
         if (error != null)
-            return error;
+            return Task.FromResult<string?>(error);
 
-        await FlushSelfAsync(session, outbound, ct).ConfigureAwait(false);
-        return null;
+        return Task.FromResult<string?>(null);
     }
 
     /// <summary>Interlude SystemMessageId 151 CANNOT_DISCARD_DISTANCE_TOO_FAR.</summary>
@@ -111,12 +104,11 @@ public sealed partial class ZoneWorld
     /// <summary>Test hook: roll + drop death loot for <paramref name="npcId"/> as if <paramref name="killer"/> killed it here.</summary>
     internal void DropDeathLootForTest(int npcId, int x, int y, int z, ZoneEntity killer)
     {
-        var outbound = new List<Pending>();
         lock (_gate)
-            SpawnDeathDrops(npcId, x, y, z, killer, [killer], outbound);
+            SpawnDeathDrops(npcId, x, y, z, killer, [killer]);
     }
 
-    void TickGroundExpiry(long now, List<Pending> outbound)
+    void TickGroundExpiry(long now)
     {
         if (_expiringGround.Count == 0)
             return;
@@ -130,12 +122,12 @@ public sealed partial class ZoneWorld
             if (g.GroundExpireAtMs > 0 && now >= g.GroundExpireAtMs)
             {
                 ZoneLog.Info($"ground expire object={id} item={g.GroundItemId}");
-                RemoveGroundItem(g, outbound);
+                RemoveGroundItem(g);
             }
         }
     }
 
-    string? TryPickup(ZoneSession session, int groundObjectId, List<Pending> outbound, bool allowApproach = true)
+    string? TryPickup(ZoneSession session, int groundObjectId, bool allowApproach = true)
     {
         if (!_byId.TryGetValue(session.ObjectId, out var player) || player.Inventory == null)
             return "world";
@@ -152,7 +144,7 @@ public sealed partial class ZoneWorld
         if (!CanPickupProtected(player, ground, now))
         {
             // Mobius DropProtection.tryPickUp false -> FAILED_TO_PICKUP_S1, no run-in.
-            PickupFailed(session, ground, outbound);
+            PickupFailed(session, ground);
             return "protected";
         }
         // Mobius Player.doPickupItem: after drop protection and before the run-in, RequestPickupItem calls
@@ -163,7 +155,7 @@ public sealed partial class ZoneWorld
         {
             session.PendingPickupId = 0;
             session.PendingPickupAtUnixMs = 0;
-            ShotNotice(session, SysMsgInventoryFull, "Your inventory is full.", outbound);
+            ShotNotice(session, SysMsgInventoryFull, "Your inventory is full.");
             return "slots";
         }
         AdvanceMove(player, now);
@@ -171,17 +163,17 @@ public sealed partial class ZoneWorld
         {
             if (!allowApproach)
             {
-                PickupFailed(session, ground, outbound);
+                PickupFailed(session, ground);
                 return "range";
             }
 
             // Mobius AI_INTENTION_PICK_UP: run to the item (moveToPawn), pick it up on arrival.
             session.AutoAttackTargetId = 0;
             session.PendingCastSkillId = 0;
-            long ms = ApproachTarget(player, ground, ZoneCombat.PickupReach, outbound);
+            long ms = ApproachTarget(player, ground, ZoneCombat.PickupReach);
             if (ms < 0)
             {
-                PickupFailed(session, ground, outbound);
+                PickupFailed(session, ground);
                 return "range";
             }
             if (ms > 0)
@@ -198,7 +190,7 @@ public sealed partial class ZoneWorld
 
         if (IsHerb(ground.GroundItemId))
         {
-            UseHerbOnPickup(session, player, ground, outbound);
+            UseHerbOnPickup(session, player, ground);
             return null;
         }
 
@@ -217,32 +209,31 @@ public sealed partial class ZoneWorld
             var pieces = player.Inventory.AddPieces(ground.GroundItemId, ground.GroundCount);
             invUpdate = new InventoryUpdateMsg { Changes = pieces.Select(p => InventoryMessages.Update(InventoryChange.Add, p).Changes[0]).ToArray() };
         }
-        outbound.Add(Pack(session, MsgType.InventoryUpdate, invUpdate));
         if (NetBridge != null)
             NetBridge.FanoutInventoryUpdate([session.ObjectId], ToNetInventoryUpdate(invUpdate));
-        RemoveGroundItem(ground, outbound);
+        RemoveGroundItem(ground);
         SaveInventory(session, player.Inventory);
 
         string name = template?.Name ?? $"item {ground.GroundItemId}";
         if (ground.GroundItemId == 57)
-            ShotNotice(session, SysMsgObtainedAdena, $"You have obtained {ground.GroundCount} adena.", outbound);
+            ShotNotice(session, SysMsgObtainedAdena, $"You have obtained {ground.GroundCount} adena.");
         else if (ground.GroundCount > 1)
-            ShotNotice(session, SysMsgObtainedCount, $"You have obtained {ground.GroundCount} {name}.", outbound);
+            ShotNotice(session, SysMsgObtainedCount, $"You have obtained {ground.GroundCount} {name}.");
         else
-            ShotNotice(session, SysMsgObtainedItem, $"You have obtained {name}.", outbound);
+            ShotNotice(session, SysMsgObtainedItem, $"You have obtained {name}.");
         ZoneLog.Info($"pickup object={session.ObjectId} ground={groundObjectId} item={ground.GroundItemId} count={ground.GroundCount} merged={merged}");
         return null;
     }
 
-    void PickupFailed(ZoneSession session, ZoneEntity ground, List<Pending> outbound)
+    void PickupFailed(ZoneSession session, ZoneEntity ground)
     {
         session.PendingPickupId = 0;
         session.PendingPickupAtUnixMs = 0;
         string name = _game.Items.TryGet(ground.GroundItemId, out var t) ? t.Name : $"item {ground.GroundItemId}";
-        ShotNotice(session, SysMsgFailedToPickup, $"You have failed to pick up {name}.", outbound);
+        ShotNotice(session, SysMsgFailedToPickup, $"You have failed to pick up {name}.");
     }
 
-    void TickPendingPickups(long now, List<Pending> outbound)
+    void TickPendingPickups(long now)
     {
         foreach (var player in Players().ToList())
         {
@@ -254,7 +245,7 @@ public sealed partial class ZoneWorld
             session.PendingPickupAtUnixMs = 0;
             // Item may be gone (someone else took it) — that is a silent no-op like Mobius.
             if (_byId.TryGetValue(id, out var g) && g.Kind == ZoneEntityKind.GroundItem)
-                TryPickup(session, id, outbound, allowApproach: false);
+                TryPickup(session, id, allowApproach: false);
         }
     }
 
@@ -262,7 +253,7 @@ public sealed partial class ZoneWorld
     /// Mobius <c>RequestDestroyItem</c> body. It shares the drop path's guards (owner, not equipped, not a
     /// quest item, count available) but never spawns a ground stack and never checks distance.
     /// </summary>
-    string? TryDestroyItem(ZoneSession session, DestroyItemRequestMsg request, List<Pending> outbound)
+    string? TryDestroyItem(ZoneSession session, DestroyItemRequestMsg request)
     {
         if (!_byId.TryGetValue(session.ObjectId, out var player) || player.Inventory == null)
             return "world";
@@ -285,14 +276,13 @@ public sealed partial class ZoneWorld
         var invUpdate = removedEntirely
             ? new InventoryUpdateMsg { Changes = [InventoryMessages.RemoveRow(item, -1)] }
             : InventoryMessages.Update(InventoryChange.Modify, item);
-        outbound.Add(Pack(session, MsgType.InventoryUpdate, invUpdate));
         NetBridge?.FanoutInventoryUpdate([session.ObjectId], ToNetInventoryUpdate(invUpdate));
         SaveInventory(session, player.Inventory);
         ZoneLog.Info($"destroy-bag object={session.ObjectId} item={item.ItemId} x{request.Count} all={removedEntirely}");
         return null;
     }
 
-    string? TryDropItem(ZoneSession session, DropItemRequestMsg request, List<Pending> outbound)
+    string? TryDropItem(ZoneSession session, DropItemRequestMsg request)
     {        if (!_byId.TryGetValue(session.ObjectId, out var player) || player.Inventory == null)
             return "world";
         if (player.Dead)
@@ -317,9 +307,8 @@ public sealed partial class ZoneWorld
         {
             // Mobius: CANNOT_DISCARD_DISTANCE_TOO_FAR, item stays. Re-send the row so a client that
             // hid the slot on drag puts it back without a relog.
-            ShotNotice(session, SysMsgDiscardTooFar, "That is too far from you to discard.", outbound);
+            ShotNotice(session, SysMsgDiscardTooFar, "That is too far from you to discard.");
             var keep = InventoryMessages.Update(InventoryChange.Modify, item);
-            outbound.Add(Pack(session, MsgType.InventoryUpdate, keep));
             NetBridge?.FanoutInventoryUpdate([session.ObjectId], ToNetInventoryUpdate(keep));
             ZoneLog.Info($"drop-bag refused far object={session.ObjectId} item={item.ItemId} player={player.X},{player.Y},{player.Z} at={dropX},{dropY},{dropZ}");
             return "range";
@@ -333,12 +322,10 @@ public sealed partial class ZoneWorld
         if (removedEntirely)
         {
             invUpdate = new InventoryUpdateMsg { Changes = [InventoryMessages.RemoveRow(item, -1)] };
-            outbound.Add(Pack(session, MsgType.InventoryUpdate, invUpdate));
         }
         else
         {
             invUpdate = InventoryMessages.Update(InventoryChange.Modify, item);
-            outbound.Add(Pack(session, MsgType.InventoryUpdate, invUpdate));
         }
 
         if (NetBridge != null)
@@ -363,7 +350,6 @@ public sealed partial class ZoneWorld
             dropZ,
             player.InstanceId,
             watchers,
-            outbound,
             dropperObjectId: player.ObjectId);
         ZoneLog.Info($"drop-bag object={session.ObjectId} item={itemId} count={request.Count} @ {dropX},{dropY},{dropZ}");
         return null;
@@ -376,8 +362,7 @@ public sealed partial class ZoneWorld
         int y,
         int z,
         ZoneEntity? killer,
-        IReadOnlyList<ZoneEntity> watchers,
-        List<Pending> outbound)
+        IReadOnlyList<ZoneEntity> watchers)
     {
         if (!_dropCatalog.TryGet(npcId, out var definition))
         {
@@ -399,7 +384,7 @@ public sealed partial class ZoneWorld
         {
             int dx = _dropRandom.Next(DeathDropScatter * 2 + 1) - DeathDropScatter;
             int dy = _dropRandom.Next(DeathDropScatter * 2 + 1) - DeathDropScatter;
-            SpawnGroundStack(stack.ItemId, stack.Count, x + dx, y + dy, z, instanceId, watchers, outbound, dropperId,
+            SpawnGroundStack(stack.ItemId, stack.Count, x + dx, y + dy, z, instanceId, watchers, dropperId,
                 ownerObjectId: ownerId,
                 expireAtMs: now + (IsHerb(stack.ItemId) ? HerbAutoDestroyMs : GroundItemAutoDestroyMs));
         }
@@ -413,7 +398,6 @@ public sealed partial class ZoneWorld
         int z,
         int instanceId,
         IReadOnlyList<ZoneEntity> watchers,
-        List<Pending> outbound,
         int dropperObjectId = 0,
         int ownerObjectId = 0,
         long expireAtMs = 0)
@@ -449,24 +433,12 @@ public sealed partial class ZoneWorld
 
         // DropItem carries the dropper so the client plays throw/land FX.
         // AOI enter for late observers still uses SpawnItem via AddPresence.
-        byte[] body = MessagePackSerializer.Serialize(new DropItemMsg
-        {
-            CharObjectId = dropperObjectId,
-            ObjectId = objectId,
-            ItemId = itemId,
-            X = x,
-            Y = y,
-            Z = z,
-            Stackable = template.Stackable,
-            Count = count
-        });
         List<int>? netWatchers = null;
         foreach (var watcher in watchers)
         {
             if (watcher.Session == null)
                 continue;
             watcher.Knownlist.Add(objectId);
-            outbound.Add(new Pending(watcher.Session, MsgType.DropItem, body));
             netWatchers ??= [];
             netWatchers.Add(watcher.ObjectId);
         }
@@ -490,14 +462,13 @@ public sealed partial class ZoneWorld
         ZoneLog.Info($"drop object={objectId} item={itemId} count={count} dropper={dropperObjectId} @ {x},{y},{z}");
     }
 
-    void RemoveGroundItem(ZoneEntity ground, List<Pending> outbound)
+    void RemoveGroundItem(ZoneEntity ground)
     {
         int objectId = ground.ObjectId;
         _expiringGround.Remove(objectId);
         _aoi.Leave(objectId);
         _byId.Remove(objectId);
 
-        byte[] deleteBody = MessagePackSerializer.Serialize(new DeleteObjectMsg { ObjectId = objectId });
         List<int>? netWatchers = null;
         foreach (var player in Players())
         {
@@ -505,7 +476,6 @@ public sealed partial class ZoneWorld
                 continue;
             if (player.Knownlist.Remove(objectId))
             {
-                outbound.Add(new Pending(player.Session, MsgType.DeleteObject, deleteBody));
                 netWatchers ??= [];
                 netWatchers.Add(player.ObjectId);
             }

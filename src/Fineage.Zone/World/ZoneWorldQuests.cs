@@ -10,71 +10,63 @@ namespace Fineage.Zone.World;
 
 public sealed partial class ZoneWorld
 {
-    public async Task<string?> TryQuestListAsync(ZoneSession session, CancellationToken ct)
+    public Task<string?> TryQuestListAsync(ZoneSession session, CancellationToken ct)
     {
         if (!IsLive(session))
-            return "world";
+            return Task.FromResult<string?>("world");
 
-        var toSelf = new List<Pending>();
         lock (_gate)
-            QueueList(session, toSelf);
-        await FlushSelfAsync(session, toSelf, ct).ConfigureAwait(false);
-        return null;
+            QueueList(session);
+        return Task.FromResult<string?>(null);
     }
 
-    public async Task<string?> TryQuestAbortAsync(ZoneSession session, int questId, CancellationToken ct)
+    public Task<string?> TryQuestAbortAsync(ZoneSession session, int questId, CancellationToken ct)
     {
         if (!IsLive(session))
-            return "world";
+            return Task.FromResult<string?>("world");
         if (questId <= 0)
-            return "bad_request";
+            return Task.FromResult<string?>("bad_request");
 
         QuestOutcome outcome;
-        var toSelf = new List<Pending>();
         lock (_gate)
         {
             if (!TryPlayer(session, out var player))
-                return "world";
+                return Task.FromResult<string?>("world");
             outcome = _quests.Abort(player.Quests, player.Inventory!, questId);
             if (outcome.Ok || outcome.Lines.Count > 0)
-                Publish(session, player, outcome, npcObjectId: 0, npcId: 0, toSelf);
+                Publish(session, player, outcome, npcObjectId: 0, npcId: 0);
         }
 
-        await FlushSelfAsync(session, toSelf, ct).ConfigureAwait(false);
-        return outcome.Ok ? null : FailureCode(outcome.Failure);
+        return Task.FromResult<string?>(outcome.Ok ? null : FailureCode(outcome.Failure));
     }
 
-    public async Task<string?> TryNpcTalkAsync(ZoneSession session, int npcObjectId, CancellationToken ct)
+    public Task<string?> TryNpcTalkAsync(ZoneSession session, int npcObjectId, CancellationToken ct)
     {
         if (!IsLive(session))
-            return "world";
+            return Task.FromResult<string?>("world");
         if (npcObjectId <= 0)
-            return "bad_request";
+            return Task.FromResult<string?>("bad_request");
 
         string? error;
-        var toSelf = new List<Pending>();
         lock (_gate)
-            error = Talk(session, npcObjectId, questId: 0, eventName: null, toSelf, out _);
-        await FlushSelfAsync(session, toSelf, ct).ConfigureAwait(false);
-        return error;
+            error = Talk(session, npcObjectId, questId: 0, eventName: null, out _);
+        return Task.FromResult<string?>(error);
     }
 
-    public async Task<string?> TryQuestEventAsync(ZoneSession session, int npcObjectId, int questId, string? eventName, CancellationToken ct)
+    public Task<string?> TryQuestEventAsync(ZoneSession session, int npcObjectId, int questId, string? eventName, CancellationToken ct)
     {
         if (!IsLive(session))
-            return "world";
+            return Task.FromResult<string?>("world");
         if (npcObjectId <= 0 || questId <= 0)
-            return "bad_request";
+            return Task.FromResult<string?>("bad_request");
         eventName ??= "";
         if (eventName.Length > 64 || !EventOk(eventName))
-            return "bad_request";
+            return Task.FromResult<string?>("bad_request");
 
         string? error;
-        var toSelf = new List<Pending>();
         lock (_gate)
-            error = Talk(session, npcObjectId, questId, eventName, toSelf, out _);
-        await FlushSelfAsync(session, toSelf, ct).ConfigureAwait(false);
-        return error;
+            error = Talk(session, npcObjectId, questId, eventName, out _);
+        return Task.FromResult<string?>(error);
     }
 
     void BootstrapQuestNpcs()
@@ -109,7 +101,7 @@ public sealed partial class ZoneWorld
         }
     }
 
-    string? Talk(ZoneSession session, int npcObjectId, int questId, string? eventName, List<Pending> toSelf, out QuestOutcome? outcome)
+    string? Talk(ZoneSession session, int npcObjectId, int questId, string? eventName, out QuestOutcome? outcome)
     {
         outcome = null;
         if (!TryPlayer(session, out var player))
@@ -125,7 +117,7 @@ public sealed partial class ZoneWorld
 
         // Mobius NewbieHelper onFirstTalk — before guide HTML / other quest hooks.
         if (eventName == null)
-            TryNewbieHelperGift(session, player, npc, toSelf);
+            TryNewbieHelperGift(session, player, npc);
 
         outcome = eventName == null
             ? _quests.FirstTalk(player.Quests, player.Inventory!, npc.NpcId, npc.Name, QuestActorOf(player))
@@ -134,12 +126,12 @@ public sealed partial class ZoneWorld
                 : _quests.AdvEvent(player.Quests, player.Inventory!, questId, npc.NpcId, eventName, QuestActorOf(player));
         if (IsNpcPage(outcome))
         {
-            SendNpcPage(session, player, npc, 0, toSelf);
+            SendNpcPage(session, player, npc, 0);
             return null;
         }
 
         if (outcome.Ok || outcome.Lines.Count > 0 || outcome.JournalChanged)
-            Publish(session, player, outcome, npc.ObjectId, npc.NpcId, toSelf);
+            Publish(session, player, outcome, npc.ObjectId, npc.NpcId);
         return outcome.Ok ? null : FailureCode(outcome.Failure);
     }
 
@@ -151,38 +143,35 @@ public sealed partial class ZoneWorld
     /// </summary>
     internal void QuestKillForTest(ZoneEntity killer, int npcId)
     {
-        var outbound = new List<Pending>();
         lock (_gate)
-            ApplyQuestKill(killer, new ZoneEntity { Kind = ZoneEntityKind.Npc, NpcId = npcId, ObjectId = 0 }, outbound);
+            ApplyQuestKill(killer, new ZoneEntity { Kind = ZoneEntityKind.Npc, NpcId = npcId, ObjectId = 0 });
     }
 
     /// <summary>Test hook: run the exp/sp → level-up pipeline the way a kill reward does.</summary>
     internal void GrantExpForTest(ZoneEntity killer, long exp, int sp)
     {
-        var outbound = new List<Pending>();
         lock (_gate)
         {
             if (!ApplyExpSp(killer, exp, sp))
                 return;
             if (killer.Session != null)
-                ApplyLevelUp(killer.Session, killer, outbound);
+                ApplyLevelUp(killer.Session, killer);
         }
     }
 
     /// <summary>Test hook: run the kill-reward split exactly like a dying mob does (reads <see cref="ZoneEntity.DamageBy"/>).</summary>
     internal void GrantKillRewardForTest(ZoneEntity killer, ZoneEntity npc)
     {
-        var outbound = new List<Pending>();
         lock (_gate)
-            GrantKillReward(killer, npc, outbound);
+            GrantKillReward(killer, npc);
     }
 
-    void ApplyQuestKill(ZoneEntity killer, ZoneEntity npc, List<Pending> outbound)
+    void ApplyQuestKill(ZoneEntity killer, ZoneEntity npc)
     {
         if (killer.Inventory == null || killer.Dead || killer.Session == null)
             return;
         var outcome = _quests.OnKill(killer.Quests, killer.Inventory, npc.NpcId, QuestActorOf(killer));
-        PublishKill(killer, outcome, npc, outbound);
+        PublishKill(killer, outcome, npc);
 
         // Mobius getRandomPartyMember(State): one random eligible member (killer included) within ALT_PARTY_RANGE.
         foreach (int questId in _quests.PartyKillQuests(npc.NpcId))
@@ -198,7 +187,7 @@ public sealed partial class ZoneWorld
             if (eligible.Count == 0)
                 continue;
             var winner = eligible[Random.Shared.Next(eligible.Count)];
-            PublishKill(winner, _quests.OnPartyKill(winner.Quests, winner.Inventory!, questId, npc.NpcId, QuestActorOf(winner)), npc, outbound);
+            PublishKill(winner, _quests.OnPartyKill(winner.Quests, winner.Inventory!, questId, npc.NpcId, QuestActorOf(winner)), npc);
         }
     }
 
@@ -220,13 +209,13 @@ public sealed partial class ZoneWorld
         }
     }
 
-    void PublishKill(ZoneEntity player, QuestOutcome outcome, ZoneEntity npc, List<Pending> outbound)
+    void PublishKill(ZoneEntity player, QuestOutcome outcome, ZoneEntity npc)
     {
         if (outcome.QuestId == 0 || !outcome.Ok || player.Session == null)
             return;
         if (outcome.Items.Count == 0 && !outcome.JournalChanged && outcome.Sounds.Count == 0)
             return;
-        Publish(player.Session, player, outcome, npc.ObjectId, npc.NpcId, outbound);
+        Publish(player.Session, player, outcome, npc.ObjectId, npc.NpcId);
     }
 
     internal void JoinPartyForTest(params ZoneEntity[] members)
@@ -254,7 +243,7 @@ public sealed partial class ZoneWorld
         && outcome.Exp == 0
         && outcome.Sp == 0;
 
-    void Publish(ZoneSession session, ZoneEntity player, QuestOutcome outcome, int npcObjectId, int npcId, List<Pending> toSelf)
+    void Publish(ZoneSession session, ZoneEntity player, QuestOutcome outcome, int npcObjectId, int npcId)
     {
         bool levelled = ApplyProgress(player, outcome);
         if (outcome.Items.Count > 0 && player.Inventory != null)
@@ -263,7 +252,6 @@ public sealed partial class ZoneWorld
             {
                 Changes = outcome.Items.Select(touch => InventoryMessages.ChangeRow((int)touch.Kind, touch.Item)).ToArray()
             };
-            toSelf.Add(Pack(session, MsgType.InventoryUpdate, invUpdate));
             if (NetBridge != null)
                 NetBridge.FanoutInventoryUpdate([session.ObjectId], ToNetInventoryUpdate(invUpdate));
             SaveInventory(session, player.Inventory);
@@ -277,7 +265,6 @@ public sealed partial class ZoneWorld
                 Params = line.Params,
                 Text = line.Text
             };
-            toSelf.Add(Pack(session, MsgType.SystemMessage, notice));
             if (NetBridge != null)
             {
                 NetBridge.FanoutSystemMessage([session.ObjectId], new Fineage.Net.Contract.SystemMessageNetMsg
@@ -289,30 +276,20 @@ public sealed partial class ZoneWorld
             }
         }
 
-        foreach (string sound in outcome.Sounds)
-            toSelf.Add(Pack(session, MsgType.QuestSound, new QuestSoundMsg { Name = sound }));
+        // outcome.Sounds had no Net frame; the V2 QuestSound notice is retired with the rest of V2.
 
         if (outcome.Html.Length > 0)
         {
-            toSelf.Add(Pack(session, MsgType.QuestDialog, new QuestDialogMsg
-            {
-                NpcObjectId = npcObjectId,
-                NpcId = npcId,
-                QuestId = outcome.QuestId,
-                Hook = outcome.Hook,
-                Event = outcome.Event,
-                Html = outcome.Html
-            }));
-            if (NetBridge != null && _byId.TryGetValue(npcObjectId, out var npcEntity))
+            if (_byId.TryGetValue(npcObjectId, out var npcEntity))
                 FanoutNetHtml(session, npcEntity, outcome.Html);
         }
 
         if (outcome.JournalChanged)
-            QueueList(session, toSelf);
+            QueueList(session);
 
         // Mobius addLevel runs after the exp/sp that caused it, so the level packets follow the quest reward lines.
         if (levelled)
-            ApplyLevelUp(session, player, toSelf);
+            ApplyLevelUp(session, player);
 
         if (outcome.JournalChanged || outcome.Exp != 0 || outcome.Sp != 0)
             SaveQuestProgress(session, player);
@@ -370,7 +347,7 @@ public sealed partial class ZoneWorld
     /// full UserInfo. The new SkillList is what puts the freshly learned skill on the client skill window — without it the
     /// character levels up and still has the old book.
     /// </summary>
-    void ApplyLevelUp(ZoneSession session, ZoneEntity player, List<Pending> toSelf)
+    void ApplyLevelUp(ZoneSession session, ZoneEntity player)
     {
         // rewardSkills: rebuild the book from the tree at the new level. RefreshRunSpeed inside also folds any
         // passive mastery the new rows brought (Quick Step / Agile Movement), so the live speed is correct.
@@ -379,14 +356,7 @@ public sealed partial class ZoneWorld
         RefreshWeightPenalty(player);     // refreshOverloaded (max load grew with the level)
 
         // Mobius broadcastPacket(new SocialAction(this, LEVEL_UP)): the gesture goes to self and every peer in view.
-        FanoutSocial(player, SocialLevelUp, toSelf);
-
-        toSelf.Add(Pack(session, MsgType.SystemMessage, new SystemMessageMsg
-        {
-            Id = LevelUpMessageId,
-            Params = [],
-            Text = "Your level has increased!"
-        }));
+        FanoutSocial(player, SocialLevelUp);
 
         var status = new StatusUpdateMsg
         {
@@ -406,10 +376,7 @@ public sealed partial class ZoneWorld
                 player.MaxMp
             ]
         };
-        toSelf.Add(Pack(session, MsgType.StatusUpdate, status));
-
-        toSelf.Add(Pack(session, MsgType.SkillList, SkillListFor(player)));
-        toSelf.Add(SelfUserInfo(session, player));
+        SelfUserInfo(player);
 
         if (NetBridge != null)
         {
@@ -446,7 +413,7 @@ public sealed partial class ZoneWorld
         }
     }
 
-    void QueueList(ZoneSession session, List<Pending> toSelf)
+    void QueueList(ZoneSession session)
     {
         if (!TryPlayer(session, out var player))
             return;
@@ -461,13 +428,6 @@ public sealed partial class ZoneWorld
             JournalWord = entry.JournalWord,
             Repeatable = entry.Repeatable
         }).ToArray();
-        toSelf.Add(Pack(session, MsgType.QuestList, new QuestListMsg
-        {
-            Active = active,
-            CompletedMask = list.CompletedMask,
-            CompletedQuestIds = list.CompletedQuestIds,
-            MaxActive = list.MaxActive
-        }));
         if (NetBridge != null)
         {
             NetBridge.FanoutQuestList([session.ObjectId], new Fineage.Net.Contract.QuestListNetMsg
@@ -537,7 +497,7 @@ public sealed partial class ZoneWorld
     /// Mobius <c>NewbieHelper.onFirstTalk</c>: one-time beginner kit under level 18.
     /// Does not open its own HTML — the guide page still comes from <see cref="SendNpcPage"/>.
     /// </summary>
-    void TryNewbieHelperGift(ZoneSession session, ZoneEntity player, ZoneEntity npc, List<Pending> toSelf)
+    void TryNewbieHelperGift(ZoneSession session, ZoneEntity player, ZoneEntity npc)
     {
         if (!NewbieHelperGift.IsGuide(npc.NpcId))
             return;
@@ -572,10 +532,12 @@ public sealed partial class ZoneWorld
         Grant(NewbieHelperGift.ScrollRecovery, NewbieHelperGift.ScrollCount);
 
         player.Quests.Add(NewbieHelperGift.QuestId, QuestPhase.Completed);
-        toSelf.Add(Pack(session, MsgType.InventoryUpdate, new InventoryUpdateMsg { Changes = changes.ToArray() }));
+        var update = new InventoryUpdateMsg { Changes = changes.ToArray() };
+        // Net clients only learn about the kit from the bridge; without this they get the page but never the items.
+        NetBridge?.FanoutInventoryUpdate([session.ObjectId], ToNetInventoryUpdate(update));
         SaveInventory(session, player.Inventory);
         SaveQuestProgress(session, player);
-        QueueList(session, toSelf);
+        QueueList(session);
         ZoneLog.Info(
             $"newbie-helper-gift object={session.ObjectId} npc={npc.NpcId} shot={shotId}x{shotCount}");
     }
@@ -586,19 +548,19 @@ public sealed partial class ZoneWorld
     /// <c>Party.BONUS_EXP_SP</c> bonus and divides the pool by level². Each rewarded player then gets
     /// SystemMessage 95, a StatusUpdate and a full UserInfo.
     /// </summary>
-    void GrantKillReward(ZoneEntity killer, ZoneEntity npc, List<Pending> outbound)
+    void GrantKillReward(ZoneEntity killer, ZoneEntity npc)
     {
         if (killer.Kind != ZoneEntityKind.Player || killer.Session == null || npc.Kind != ZoneEntityKind.Npc)
             return;
-        ApplyQuestKill(killer, npc, outbound);
-        DistributeKillReward(npc, outbound);
+        ApplyQuestKill(killer, npc);
+        DistributeKillReward(npc);
     }
 
     /// <summary>
     /// Mobius <c>Attackable.calculateRewards</c>: exp/SP come from the monster template and are shared by the damage
     /// share (not paid to the last hit). Zero outside <c>MonsterExpMaxLevelDifference</c>.
     /// </summary>
-    void DistributeKillReward(ZoneEntity npc, List<Pending> outbound)
+    void DistributeKillReward(ZoneEntity npc)
     {
         long rewardExp = npc.RewardExp;
         int rewardSp = npc.RewardSp;
@@ -631,14 +593,14 @@ public sealed partial class ZoneWorld
 
             if (_partyByPlayer.TryGetValue(id, out int partyId) && _parties.TryGetValue(partyId, out var party))
             {
-                SharePartyKill(party, npc, damage, totalDamage, rewardExp, rewardSp, maxLevelDifference, settled, outbound);
+                SharePartyKill(party, npc, damage, totalDamage, rewardExp, rewardSp, maxLevelDifference, settled);
                 continue;
             }
 
             settled.Add(id);
             var share = KillRewardFormula.CalculateExpAndSp(
                 attacker.Level, npc.Level, rewardExp, rewardSp, dealt, totalDamage, maxLevelDifference);
-            SendKillReward(attacker.Session, attacker, share.Exp, share.Sp, outbound);
+            SendKillReward(attacker.Session, attacker, share.Exp, share.Sp);
         }
     }
 
@@ -651,8 +613,7 @@ public sealed partial class ZoneWorld
         long rewardExp,
         int rewardSp,
         int maxLevelDifference,
-        HashSet<int> settled,
-        List<Pending> outbound)
+        HashSet<int> settled)
     {
         var members = new List<ZoneEntity>(party.MemberIds.Count);
         long partyDamage = 0;
@@ -694,7 +655,7 @@ public sealed partial class ZoneWorld
         foreach (var member in valid)
         {
             double share = (double)((long)member.Level * member.Level) / sqLevelSum;
-            SendKillReward(member.Session!, member, expPool * share, spPool * share, outbound);
+            SendKillReward(member.Session!, member, expPool * share, spPool * share);
         }
     }
 
@@ -702,7 +663,7 @@ public sealed partial class ZoneWorld
     /// Pays one player's share: exp/SP into the counter, SystemMessage 95, StatusUpdate and UserInfo, save, then the
     /// level-up packets when the exp crossed a row.
     /// </summary>
-    void SendKillReward(ZoneSession session, ZoneEntity player, double rawExp, double rawSp, List<Pending> outbound)
+    void SendKillReward(ZoneSession session, ZoneEntity player, double rawExp, double rawSp)
     {
         long exp = KillRewardFormula.Round(rawExp);
         int sp = (int)Math.Min(int.MaxValue, KillRewardFormula.Round(rawSp));
@@ -716,7 +677,6 @@ public sealed partial class ZoneWorld
             Params = [exp.ToString(System.Globalization.CultureInfo.InvariantCulture), sp.ToString(System.Globalization.CultureInfo.InvariantCulture)],
             Text = $"You have earned {exp} experience and {sp} SP."
         };
-        outbound.Add(Pack(session, MsgType.SystemMessage, notice));
         // StatusUpdate carries live Exp/Sp/Level; UserInfo refreshes the full sheet (vitals + template stats).
         var status = new StatusUpdateMsg
         {
@@ -742,8 +702,7 @@ public sealed partial class ZoneWorld
                 player.MaxMp
             ]
         };
-        outbound.Add(Pack(session, MsgType.StatusUpdate, status));
-        outbound.Add(SelfUserInfo(session, player));
+        SelfUserInfo(player);
 
         if (NetBridge != null)
         {
@@ -782,7 +741,7 @@ public sealed partial class ZoneWorld
 
         // Mobius addExpAndSp → addLevel: level up after the exp notice so the client sees "earned exp", then level up.
         if (levelled)
-            ApplyLevelUp(session, player, outbound);
+            ApplyLevelUp(session, player);
     }
 
     internal const int KillRewardMessageId = 95;

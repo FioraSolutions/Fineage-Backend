@@ -9,66 +9,62 @@ public sealed partial class ZoneWorld
 {
     public SevenSignsEngine SevenSigns => _sevenSigns;
 
-    public async Task<string?> TrySevenSignsStatusAsync(ZoneSession session, CancellationToken ct)
+    public Task<string?> TrySevenSignsStatusAsync(ZoneSession session, CancellationToken ct)
     {
         if (!IsLive(session))
-            return "world";
+            return Task.FromResult<string?>("world");
 
-        var toSelf = new List<Pending>();
         lock (_gate)
-            QueueRecord(session, toSelf);
-        await FlushSelfAsync(session, toSelf, ct).ConfigureAwait(false);
-        return null;
+            QueueRecord(session);
+        return Task.FromResult<string?>(null);
     }
 
-    public async Task<string?> TrySevenSignsActionAsync(ZoneSession session, SevenSignsActionRequestMsg request, CancellationToken ct)
+    public Task<string?> TrySevenSignsActionAsync(ZoneSession session, SevenSignsActionRequestMsg request, CancellationToken ct)
     {
         if (!IsLive(session))
-            return "world";
+            return Task.FromResult<string?>("world");
 
-        var toSelf = new List<Pending>();
         string? error;
         lock (_gate)
-            error = ApplySevenSigns(session, request, toSelf);
-        if (error != null)
-            return error;
-
-        await FlushSelfAsync(session, toSelf, ct).ConfigureAwait(false);
-        return null;
+            error = ApplySevenSigns(session, request);
+        return Task.FromResult<string?>(error);
     }
 
-    public async Task<bool> AdvanceSevenSignsAsync(CancellationToken ct)
+    public Task<bool> AdvanceSevenSignsAsync(CancellationToken ct)
     {
-        var outbound = new List<Pending>();
         bool advanced;
         lock (_gate)
-            advanced = TickSevenSigns(outbound);
-        if (advanced)
-            await FlushOthersAsync(outbound, ct).ConfigureAwait(false);
-        return advanced;
+            advanced = TickSevenSigns();
+        return Task.FromResult(advanced);
     }
 
-    bool TickSevenSigns(List<Pending> outbound)
+    bool TickSevenSigns()
     {
         var notices = new List<SevenSignsNotice>();
         if (!_sevenSigns.AdvanceDue(notices))
             return false;
 
         var sky = _sevenSigns.Sky();
+        var live = new List<int>();
         foreach (var player in Players())
         {
             if (player.Session == null)
                 continue;
-            foreach (var notice in notices)
-                outbound.Add(Pack(player.Session, MsgType.SystemMessage, ToSystem(notice)));
-            outbound.Add(Pack(player.Session, MsgType.SevenSignsSky, sky));
+            live.Add(player.ObjectId);
         }
 
-        EvictDungeonLosers(outbound);
+        if (live.Count > 0)
+        {
+            foreach (var notice in notices)
+                NetBridge?.FanoutSystemMessage(live, ToNet(notice));
+            NetBridge?.FanoutSevenSignsSky(live, ToNet(sky));
+        }
+
+        EvictDungeonLosers();
         return true;
     }
 
-    string? ApplySevenSigns(ZoneSession session, SevenSignsActionRequestMsg request, List<Pending> toSelf)
+    string? ApplySevenSigns(ZoneSession session, SevenSignsActionRequestMsg request)
     {
         if (!_byId.TryGetValue(session.ObjectId, out var player) || player.Inventory == null)
             return "world";
@@ -76,16 +72,18 @@ public sealed partial class ZoneWorld
         var notices = new List<SevenSignsNotice>();
         string? error = request.Action switch
         {
-            SevenSignsProtocol.ActionJoin => Join(session, player, request, notices, toSelf),
-            SevenSignsProtocol.ActionContribute => Contribute(session, player.Inventory, request, toSelf),
+            SevenSignsProtocol.ActionJoin => Join(session, player, request, notices),
+            SevenSignsProtocol.ActionContribute => Contribute(session, player.Inventory, request),
             _ => "bad_request"
         };
         if (error != null)
             return error;
 
         foreach (var notice in notices)
-            toSelf.Add(Pack(session, MsgType.SystemMessage, ToSystem(notice)));
-        QueueRecord(session, toSelf);
+        {
+            NetBridge?.FanoutSystemMessage([session.ObjectId], ToNet(notice));
+        }
+        QueueRecord(session);
         return null;
     }
 
@@ -93,8 +91,7 @@ public sealed partial class ZoneWorld
         ZoneSession session,
         ZoneEntity player,
         SevenSignsActionRequestMsg request,
-        List<SevenSignsNotice> notices,
-        List<Pending> toSelf)
+        List<SevenSignsNotice> notices)
     {
         if (player.Inventory == null)
             return "world";
@@ -120,7 +117,8 @@ public sealed partial class ZoneWorld
 
         if (changes.Count > 0)
         {
-            toSelf.Add(Pack(session, MsgType.InventoryUpdate, new InventoryUpdateMsg { Changes = changes.ToArray() }));
+            var update = new InventoryUpdateMsg { Changes = changes.ToArray() };
+            NetBridge?.FanoutInventoryUpdate([session.ObjectId], ToNetInventoryUpdate(update));
             SaveInventory(session, inventory);
         }
 
@@ -130,8 +128,7 @@ public sealed partial class ZoneWorld
     string? Contribute(
         ZoneSession session,
         PlayerInventory inventory,
-        SevenSignsActionRequestMsg request,
-        List<Pending> toSelf)
+        SevenSignsActionRequestMsg request)
     {
         if (request.BlueStones < 0 || request.GreenStones < 0 || request.RedStones < 0)
             return "bad_request";
@@ -150,17 +147,20 @@ public sealed partial class ZoneWorld
         Take(inventory, SevenSignsProtocol.RedSealStoneId, request.RedStones, changes);
         if (changes.Count > 0)
         {
-            toSelf.Add(Pack(session, MsgType.InventoryUpdate, new InventoryUpdateMsg { Changes = changes.ToArray() }));
+            var update = new InventoryUpdateMsg { Changes = changes.ToArray() };
+            NetBridge?.FanoutInventoryUpdate([session.ObjectId], ToNetInventoryUpdate(update));
             SaveInventory(session, inventory);
         }
 
         return null;
     }
 
-    void QueueRecord(ZoneSession session, List<Pending> toSelf)
+    void QueueRecord(ZoneSession session)
     {
-        toSelf.Add(Pack(session, MsgType.SevenSignsStatus, _sevenSigns.StatusFor(session.ObjectId)));
-        toSelf.Add(Pack(session, MsgType.SevenSignsSky, _sevenSigns.Sky()));
+        var status = _sevenSigns.StatusFor(session.ObjectId);
+        var sky = _sevenSigns.Sky();
+        NetBridge?.FanoutSevenSignsStatus([session.ObjectId], ToNet(status));
+        NetBridge?.FanoutSevenSignsSky([session.ObjectId], ToNet(sky));
     }
 
     bool Pay(PlayerInventory inventory, SevenSignsJoinCost cost, List<InventoryUpdateEntryMsg> changes)
@@ -190,5 +190,51 @@ public sealed partial class ZoneWorld
         Id = notice.Id,
         Params = [],
         Text = notice.Text
+    };
+
+    static Fineage.Net.Contract.SystemMessageNetMsg ToNet(SevenSignsNotice notice) => new()
+    {
+        Id = notice.Id,
+        Params = [],
+        Text = notice.Text
+    };
+
+    static Fineage.Net.Contract.SevenSignsSkyNetMsg ToNet(SevenSignsSkyMsg sky) => new()
+    {
+        State = sky.State,
+        Period = sky.Period,
+        WinningCabal = sky.WinningCabal
+    };
+
+    static Fineage.Net.Contract.SevenSignsStatusNetMsg ToNet(SevenSignsStatusMsg s) => new()
+    {
+        Period = s.Period,
+        Cycle = s.Cycle,
+        PlayerCabal = s.PlayerCabal,
+        PlayerSeal = s.PlayerSeal,
+        PlayerStoneCount = s.PlayerStoneCount,
+        PlayerAncientAdena = s.PlayerAncientAdena,
+        PlayerContribution = s.PlayerContribution,
+        DawnScore = s.DawnScore,
+        DuskScore = s.DuskScore,
+        DawnFestivalScore = s.DawnFestivalScore,
+        DuskFestivalScore = s.DuskFestivalScore,
+        DawnStonePoints = s.DawnStonePoints,
+        DuskStonePoints = s.DuskStonePoints,
+        AvariceOwner = s.AvariceOwner,
+        GnosisOwner = s.GnosisOwner,
+        StrifeOwner = s.StrifeOwner,
+        DawnMembers = s.DawnMembers,
+        DuskMembers = s.DuskMembers,
+        WinningCabal = s.WinningCabal,
+        NextChangeUnixMs = s.NextChangeUnixMs,
+        SkyState = s.SkyState,
+        DawnAvarice = s.DawnAvarice,
+        DawnGnosis = s.DawnGnosis,
+        DawnStrife = s.DawnStrife,
+        DuskAvarice = s.DuskAvarice,
+        DuskGnosis = s.DuskGnosis,
+        DuskStrife = s.DuskStrife,
+        PreviousWinner = s.PreviousWinner
     };
 }

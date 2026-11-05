@@ -1,6 +1,5 @@
 using System.Text.Json;
 using Fineage.Protocol;
-using MessagePack;
 using Xunit;
 
 namespace Fineage.Login.Tests;
@@ -34,10 +33,10 @@ public class LoginServiceTests
         Assert.Equal(HumanClasses.Fighter, claims.ClassId);
 
         var auth = ticket.ToZoneAuth();
-        var decoded = MessagePackSerializer.Deserialize<AuthMsg>(MessagePackSerializer.Serialize(auth));
+        var decoded = Fineage.Net.Contract.NetCodec.DecodeZoneAuth(Fineage.Net.Contract.NetCodec.EncodeZoneAuth(
+            new Fineage.Net.Contract.ZoneAuthMsg { Account = auth.Account, Token = auth.Password }));
         Assert.Equal("alice", decoded.Account);
-        Assert.Equal(ticket.Token, decoded.Password);
-        Assert.Equal(0x92, MessagePackSerializer.Serialize(auth)[0]);
+        Assert.Equal(ticket.Token, decoded.Token);
     }
 
     [Fact]

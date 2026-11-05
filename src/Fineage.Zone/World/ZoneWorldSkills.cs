@@ -3,26 +3,23 @@ using Fineage.Game.Skills;
 using Fineage.Protocol;
 using Fineage.Zone.Combat;
 using Fineage.Zone.Skills;
-using MessagePack;
 
 namespace Fineage.Zone.World;
 
 public sealed partial class ZoneWorld
 {
-    public async Task<string?> TrySkillUseAsync(ZoneSession session, SkillUseRequestMsg request, CancellationToken ct)
+    public Task<string?> TrySkillUseAsync(ZoneSession session, SkillUseRequestMsg request, CancellationToken ct)
     {
         if (!IsLive(session))
-            return "world";
+            return Task.FromResult<string?>("world");
 
-        var outbound = new List<Pending>();
         string? error;
         lock (_gate)
-            error = TrySkillUse(session, request, outbound);
+            error = TrySkillUse(session, request);
         if (error != null)
-            return error;
+            return Task.FromResult<string?>(error);
 
-        await FlushSelfAsync(session, outbound, ct).ConfigureAwait(false);
-        return null;
+        return Task.FromResult<string?>(null);
     }
 
     /// <summary>
@@ -53,15 +50,14 @@ public sealed partial class ZoneWorld
 
     internal string? TrainerServiceForTest(ZoneSession session, string intent, int skillId = -1, int npcObjectId = 0)
     {
-        var toSelf = new List<Pending>();
         lock (_gate)
         {
             if (!_byId.TryGetValue(session.ObjectId, out var player))
                 return "world";
             var npc = new ZoneEntity { Kind = ZoneEntityKind.Npc, NpcId = 30157, Name = "Greenis", ObjectId = npcObjectId };
             return intent == NpcServiceIntent.SkillList
-                ? ShowTrainerSkills(session, player, npc, toSelf)
-                : LearnTrainerSkill(session, player, npc, skillId, toSelf);
+                ? ShowTrainerSkills(session, player, npc)
+                : LearnTrainerSkill(session, player, npc, skillId);
         }
     }
 
@@ -69,31 +65,29 @@ public sealed partial class ZoneWorld
     /// Mobius <c>RequestAcquireSkillInfo</c> (the confirmation page) and <c>RequestAcquireSkill</c> (the purchase)
     /// straight from the trainer window, without a bypass round trip.
     /// </summary>
-    public async Task<string?> TryAcquireSkillAsync(ZoneSession session, int skillId, int level, int skillType, bool informing, CancellationToken ct)
+    public Task<string?> TryAcquireSkillAsync(ZoneSession session, int skillId, int level, int skillType, bool informing, CancellationToken ct)
     {
         if (!IsLive(session))
-            return "world";
+            return Task.FromResult<string?>("world");
         if (skillId <= 0 || level <= 0)
-            return "bad_request";
+            return Task.FromResult<string?>("bad_request");
 
-        var toSelf = new List<Pending>();
         string? error = null;
         lock (_gate)
         {
             if (!_byId.TryGetValue(session.ObjectId, out var player) || player.Session == null)
-                return "world";
+                return Task.FromResult<string?>("world");
             if (player.Dead)
-                return InventoryProtocol.Dead;
+                return Task.FromResult<string?>(InventoryProtocol.Dead);
             if (informing)
                 PublishAcquireSkillInfo(session, player, skillId, level, skillType);
             else
-                error = LearnTrainerSkill(session, player, TrainerNpcOf(session), skillId, toSelf);
+                error = LearnTrainerSkill(session, player, TrainerNpcOf(session), skillId);
         }
 
         if (error != null)
-            return error;
-        await FlushSelfAsync(session, toSelf, ct).ConfigureAwait(false);
-        return null;
+            return Task.FromResult<string?>(error);
+        return Task.FromResult<string?>(null);
     }
 
     /// <summary>The trainer this player last opened, or a stand-in so the gate does not need the NPC in range.</summary>
@@ -112,7 +106,7 @@ public sealed partial class ZoneWorld
         }
     }
 
-    string? ShowTrainerSkills(ZoneSession session, ZoneEntity player, ZoneEntity npc, List<Pending> toSelf)
+    string? ShowTrainerSkills(ZoneSession session, ZoneEntity player, ZoneEntity npc)
     {
         var rows = TrainerSkills.Available(_game.SkillTrees, _game.Skills, player.ClassId, player.Level, player.KnownSkills, _game.Classes);
         if (!TrainerSpLearn && rows.Count == 0)
@@ -123,7 +117,7 @@ public sealed partial class ZoneWorld
             if (next > 0)
                 html.Append("Your next new skill arrives at level ").Append(next).Append('.');
             html.Append("</body></html>");
-            SendHtml(session, player, npc, html.ToString(), toSelf);
+            SendHtml(session, player, npc, html.ToString());
             return null;
         }
 
@@ -134,12 +128,12 @@ public sealed partial class ZoneWorld
         {
             int next = TrainerSkills.NextLearnLevel(_game.SkillTrees, player.ClassId, player.Level, _game.Classes);
             // Mobius SystemMessage 607 "You do not have any further skills to learn. Come back when you have reached Level S1."
-            SendHtml(session, player, npc, NothingToLearnHtml(next), toSelf);
+            SendHtml(session, player, npc, NothingToLearnHtml(next));
             return null;
         }
 
         // The HTML list stays for clients without the acquire window; it links the same learn_skill bypass.
-        SendHtml(session, player, npc, TrainerListHtml(player, rows), toSelf);
+        SendHtml(session, player, npc, TrainerListHtml(player, rows));
         return null;
     }
 
@@ -261,11 +255,11 @@ public sealed partial class ZoneWorld
         });
     }
 
-    string? LearnTrainerSkill(ZoneSession session, ZoneEntity player, ZoneEntity npc, int skillId, List<Pending> toSelf)
+    string? LearnTrainerSkill(ZoneSession session, ZoneEntity player, ZoneEntity npc, int skillId)
     {
         // Free-skill world: nothing is for sale, so a learn request just re-shows the page (Mobius showSkillList).
         if (!TrainerSpLearn)
-            return ShowTrainerSkills(session, player, npc, toSelf);
+            return ShowTrainerSkills(session, player, npc);
 
         var rows = TrainerSkills.Available(_game.SkillTrees, _game.Skills, player.ClassId, player.Level, player.KnownSkills, _game.Classes);
         var row = rows.FirstOrDefault(r => r.SkillId == skillId);
@@ -282,12 +276,12 @@ public sealed partial class ZoneWorld
         {
             // Mobius checkPlayerSkill order: 278 for SP, 276 for a missing prerequisite or item.
             if (block == LearnBlock.Level)
-                Notice(session, SkillLevelRequirementMessageId, "You do not meet the skill level requirements.", toSelf);
+                Notice(session, SkillLevelRequirementMessageId, "You do not meet the skill level requirements.");
             else if (block == LearnBlock.Sp)
-                Notice(session, 278, "You do not have enough SP to learn this skill.", toSelf);
+                Notice(session, 278, "You do not have enough SP to learn this skill.");
             else
                 Notice(session, PrerequisiteMessageId,
-                    "You do not have the necessary materials or prerequisites to learn this skill.", toSelf);
+                    "You do not have the necessary materials or prerequisites to learn this skill.");
             PublishAcquireSkillList(session, player, rows);
             return null;
         }
@@ -306,11 +300,10 @@ public sealed partial class ZoneWorld
         _accounts?.TryReplaceLearnedSkills(session.Account, session.ObjectId,
             player.LearnedSkills.Select(p => new Fineage.Login.StoredSkill(p.Key, p.Value)).ToList());
         SaveQuestProgress(session, player); // persists exp/sp like quest rewards
-        toSelf.Add(Pack(session, MsgType.SkillList, SkillListFor(player)));
         NetBridge?.FanoutSkillList([player.ObjectId], Fineage.Zone.Net.NetEnterWorldProjector.BuildSkills(player, _clock().ToUnixTimeMilliseconds()));
         string skillName = _game.Skills.Find(row.SkillId)?.Name ?? $"Skill {row.SkillId}";
         // Mobius SystemMessage 277 "You have earned $s1."
-        Notice(session, 277, $"You have earned {skillName}.", toSelf);
+        Notice(session, 277, $"You have earned {skillName}.");
         if (touches.Count > 0)
         {
             // Mobius destroyItemByItemId per book: the bag drops before the trainer window re-opens.
@@ -318,7 +311,6 @@ public sealed partial class ZoneWorld
             {
                 Changes = touches.Select(touch => InventoryMessages.ChangeRow((int)touch.Kind, touch.Item)).ToArray()
             };
-            toSelf.Add(Pack(session, MsgType.InventoryUpdate, invUpdate));
             NetBridge?.FanoutInventoryUpdate([session.ObjectId], ToNetInventoryUpdate(invUpdate));
             SaveInventory(session, player.Inventory!);
         }
@@ -328,7 +320,7 @@ public sealed partial class ZoneWorld
         PublishAcquireSkillList(session, player, remaining);
         if (remaining.Count > 0 || TrainerSpLearn)
             SendHtml(session, player, npc,
-                remaining.Count > 0 ? TrainerListHtml(player, remaining) : NothingToLearnHtml(0), toSelf);
+                remaining.Count > 0 ? TrainerListHtml(player, remaining) : NothingToLearnHtml(0));
         return null;
     }
 
@@ -342,7 +334,7 @@ public sealed partial class ZoneWorld
         return SkillMessages.List(rows, entity.SkillReuseUntilMs, now);
     }
 
-    string? TrySkillUse(ZoneSession session, SkillUseRequestMsg request, List<Pending> outbound)
+    string? TrySkillUse(ZoneSession session, SkillUseRequestMsg request)
     {
         if (!_byId.TryGetValue(session.ObjectId, out var player) || player.Session == null)
             return "world";
@@ -376,15 +368,15 @@ public sealed partial class ZoneWorld
 
         if (_spoilRules.IsSpoilSkill(request.SkillId) || _spoilRules.IsSweepSkill(request.SkillId))
             return TrySkillUseSpoilOrSweep(session, player, request, template, levelData, level, now,
-                _spoilRules.IsSweepSkill(request.SkillId), outbound);
+                _spoilRules.IsSweepSkill(request.SkillId));
         if (template.IsBuffSkill)
-            return TrySkillUseBuff(session, player, request, template, levelData, level, now, outbound);
+            return TrySkillUseBuff(session, player, request, template, levelData, level, now);
         if (template.IsDebuffSkill)
-            return TrySkillUseDebuff(session, player, request, template, levelData, level, now, outbound);
+            return TrySkillUseDebuff(session, player, request, template, levelData, level, now);
         if (template.IsInstantSupportSkill(level))
-            return TrySkillUseSupport(session, player, request, template, levelData, level, now, outbound);
+            return TrySkillUseSupport(session, player, request, template, levelData, level, now);
 
-        return TrySkillUseAttack(session, player, request, template, levelData, level, now, outbound);
+        return TrySkillUseAttack(session, player, request, template, levelData, level, now);
     }
 
     public const int SysMsgUnsuitableTerms = 113;
@@ -396,13 +388,12 @@ public sealed partial class ZoneWorld
         SkillDefinition template,
         SkillLevelData levelData,
         int level,
-        long now,
-        List<Pending> outbound)
+        long now)
     {
         // Mobius Skill.checkCondition: <using kind=..> fails → SysMsg 113 "<skill> cannot be used due to unsuitable terms."
         if (_skillCombat.TryGet(request.SkillId, out var cond) && cond.UsingKinds.Length > 0 && !Wearing(player, cond.UsingKinds))
         {
-            ShotNotice(session, SysMsgUnsuitableTerms, $"{cond.Name} cannot be used due to unsuitable terms.", outbound);
+            ShotNotice(session, SysMsgUnsuitableTerms, $"{cond.Name} cannot be used due to unsuitable terms.");
             return null;
         }
         int targetId = request.TargetObjectId > 0 ? request.TargetObjectId : session.SelectedTargetId;
@@ -422,7 +413,7 @@ public sealed partial class ZoneWorld
         {
             // Mobius AI_INTENTION_CAST: moveToPawn(target, castRange) then cast on arrival instead of refusing.
             int reach = template.CastRange > 0 ? Math.Max(40, template.CastRange) : ZoneCombat.MeleeRange;
-            long travelMs = ApproachTarget(player, target, reach, outbound);
+            long travelMs = ApproachTarget(player, target, reach);
             if (travelMs < 0)
                 return SkillProtocol.Range;
             session.AutoAttackTargetId = 0;
@@ -437,11 +428,11 @@ public sealed partial class ZoneWorld
         // Mobius Creature.doCast / Skill.checkCondition: target out of sight → SysMsg 181, no cast.
         if (!CanSeeTarget(player, target))
         {
-            CannotSeeTarget(session, outbound);
+            CannotSeeTarget(session);
             return null;
         }
         if (_skillCombat.TryGet(request.SkillId, out var combat))
-            return CastMobiusAttack(session, player, target, request.SkillId, level, combat, now, outbound);
+            return CastMobiusAttack(session, player, target, request.SkillId, level, combat, now);
 
         player.CurMp = Math.Max(0, player.CurMp - levelData.MpConsume);
         if (template.ReuseDelayMs > 0)
@@ -453,15 +444,15 @@ public sealed partial class ZoneWorld
 
         // Mobius Creature.doCast: MagicSkillUse goes out now, damage lands in onMagicHitTimer after hitTime.
         var cast = BuildCast(player, target, request.SkillId, level, template);
-        StopForCast(player, target, now, outbound);
-        FanoutSkill(player, target, cast, targetStatus: null, CasterMpStatus(player), outbound);
+        StopForCast(player, target, now);
+        FanoutSkill(player, target, cast, targetStatus: null, CasterMpStatus(player));
 
         player.CombatUntilUnixMs = now + ClanProtocol.CombatStanceMillis;
         session.SelectedTargetId = targetId;
         player.CastingUntilMs = now + hitTime;
         player.PendingHit = new PendingSkillHit(targetId, damage, now + hitTime);
         if (hitTime == 0)
-            ResolvePendingHit(player, now, outbound);
+            ResolvePendingHit(player, now);
 
         return null;
     }
@@ -473,8 +464,7 @@ public sealed partial class ZoneWorld
         SkillDefinition template,
         SkillLevelData levelData,
         int level,
-        long now,
-        List<Pending> outbound)
+        long now)
     {
         int targetId = ResolveFriendlyTargetId(session, player, request, template);
         if (targetId <= 0)
@@ -493,13 +483,13 @@ public sealed partial class ZoneWorld
             player.SkillReuseUntilMs[request.SkillId] = now + template.ReuseDelayMs;
 
         var cast = BuildCast(player, target, request.SkillId, level, template);
-        StopForCast(player, target, now, outbound);
-        FanoutSkill(player, target, cast, targetStatus: null, CasterMpStatus(player), outbound);
+        StopForCast(player, target, now);
+        FanoutSkill(player, target, cast, targetStatus: null, CasterMpStatus(player));
         player.CombatUntilUnixMs = now + ClanProtocol.CombatStanceMillis;
         player.CastingUntilMs = now + Math.Max(0, template.HitTimeMs);
         // Mobius onMagicHitTimer: the buff lands at hitTime (interruptible for magic/static skills).
         ScheduleEffect(player, target, template, level, now, template.HitTimeMs,
-            (t, at, o) => ApplyAbnormalFromSkill(template, levelData, t, at, o), outbound);
+            (t, at) => ApplyAbnormalFromSkill(template, levelData, t, at));
         return null;
     }
 
@@ -514,8 +504,7 @@ public sealed partial class ZoneWorld
         SkillDefinition template,
         SkillLevelData levelData,
         int level,
-        long now,
-        List<Pending> outbound)
+        long now)
     {
         int targetId = ResolveFriendlyTargetId(session, player, request, template);
         if (targetId <= 0)
@@ -537,12 +526,12 @@ public sealed partial class ZoneWorld
 
         int heal = SupportHealAmount(levelData, level, player.Level);
         var cast = BuildCast(player, target, request.SkillId, level, template);
-        StopForCast(player, target, now, outbound);
-        FanoutSkill(player, target, cast, targetStatus: null, CasterMpStatus(player), outbound);
+        StopForCast(player, target, now);
+        FanoutSkill(player, target, cast, targetStatus: null, CasterMpStatus(player));
         player.CombatUntilUnixMs = now + ClanProtocol.CombatStanceMillis;
         player.CastingUntilMs = now + Math.Max(0, template.HitTimeMs);
         // Mobius Heal effect at hitTime: HP rises when the cast completes, not when it starts.
-        ScheduleEffect(player, target, template, level, now, template.HitTimeMs, (t, _, o) =>
+        ScheduleEffect(player, target, template, level, now, template.HitTimeMs, (t, _) =>
         {
             if (heal > 0 && t.MaxHp > 0)
                 t.CurHp = Math.Min(t.MaxHp, t.CurHp + heal);
@@ -551,8 +540,8 @@ public sealed partial class ZoneWorld
                 ObjectId = t.ObjectId,
                 AttributeIds = [InterludeStatus.CurHp, InterludeStatus.MaxHp],
                 Values = [t.CurHp, t.MaxHp]
-            }, o);
-        }, outbound);
+            });
+        });
         return null;
     }
 
@@ -571,8 +560,7 @@ public sealed partial class ZoneWorld
         SkillDefinition template,
         SkillLevelData levelData,
         int level,
-        long now,
-        List<Pending> outbound)
+        long now)
     {
         int targetId = request.TargetObjectId > 0 ? request.TargetObjectId : session.SelectedTargetId;
         if (targetId <= 0)
@@ -591,14 +579,14 @@ public sealed partial class ZoneWorld
             player.SkillReuseUntilMs[request.SkillId] = now + template.ReuseDelayMs;
 
         var cast = BuildCast(player, target, request.SkillId, level, template);
-        StopForCast(player, target, now, outbound);
-        FanoutSkill(player, target, cast, targetStatus: null, CasterMpStatus(player), outbound);
+        StopForCast(player, target, now);
+        FanoutSkill(player, target, cast, targetStatus: null, CasterMpStatus(player));
         player.CombatUntilUnixMs = now + ClanProtocol.CombatStanceMillis;
         player.CastingUntilMs = now + Math.Max(0, template.HitTimeMs);
         session.SelectedTargetId = targetId;
         // Mobius onMagicHitTimer: debuff lands at hitTime; a dead/escaped/hidden target aborts it.
         ScheduleEffect(player, target, template, level, now, template.HitTimeMs,
-            (t, at, o) => ApplyAbnormalFromSkill(template, levelData, t, at, o), outbound);
+            (t, at) => ApplyAbnormalFromSkill(template, levelData, t, at));
         return null;
     }
 
@@ -648,13 +636,8 @@ public sealed partial class ZoneWorld
         ZoneEntity target,
         MagicSkillUseMsg cast,
         StatusUpdateMsg? targetStatus,
-        StatusUpdateMsg casterMp,
-        List<Pending> outbound)
+        StatusUpdateMsg casterMp)
     {
-        byte[] castBody = MessagePackSerializer.Serialize(cast);
-        byte[]? targetBody = targetStatus == null ? null : MessagePackSerializer.Serialize(targetStatus);
-        byte[] mpBody = MessagePackSerializer.Serialize(casterMp);
-
         List<int>? netWatchers = null;
         foreach (var watcher in Players())
         {
@@ -666,11 +649,6 @@ public sealed partial class ZoneWorld
             if (!cares)
                 continue;
 
-            outbound.Add(new Pending(watcher.Session, MsgType.MagicSkillUse, castBody));
-            if (targetBody != null)
-                outbound.Add(new Pending(watcher.Session, MsgType.StatusUpdate, targetBody));
-            if (ReferenceEquals(watcher, caster))
-                outbound.Add(new Pending(watcher.Session, MsgType.StatusUpdate, mpBody));
             netWatchers ??= [];
             netWatchers.Add(watcher.ObjectId);
         }

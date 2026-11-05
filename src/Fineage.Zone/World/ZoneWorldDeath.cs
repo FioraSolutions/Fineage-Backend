@@ -1,57 +1,50 @@
 using Fineage.Protocol;
-using MessagePack;
 
 namespace Fineage.Zone.World;
 
 public sealed partial class ZoneWorld
 {
-    public async Task<string?> TryReviveAsync(ZoneSession session, ReviveRequestMsg request, CancellationToken ct)
+    public Task<string?> TryReviveAsync(ZoneSession session, ReviveRequestMsg request, CancellationToken ct)
     {
         if (!IsLive(session))
-            return "world";
+            return Task.FromResult<string?>("world");
 
-        var toSelf = new List<Pending>();
-        var toOthers = new List<Pending>();
         string? error;
         lock (_gate)
-            error = TryRevive(session, request, toSelf, toOthers);
+            error = TryRevive(session, request);
         if (error != null)
-            return error;
+            return Task.FromResult<string?>(error);
 
-        await FlushSelfAsync(session, toSelf, ct).ConfigureAwait(false);
-        await FlushOthersAsync(toOthers, ct).ConfigureAwait(false);
-        return null;
+        return Task.FromResult<string?>(null);
     }
 
-    public async Task<string?> TryAdminKillPlayerAsync(ZoneSession session, CancellationToken ct)
+    public Task<string?> TryAdminKillPlayerAsync(ZoneSession session, CancellationToken ct)
     {
         if (!IsLive(session))
-            return "world";
+            return Task.FromResult<string?>("world");
 
-        var outbound = new List<Pending>();
         string? error;
         lock (_gate)
-            error = TryAdminKillPlayer(session, outbound);
+            error = TryAdminKillPlayer(session);
         if (error != null)
-            return error;
+            return Task.FromResult<string?>(error);
 
-        await FlushSelfAsync(session, outbound, ct).ConfigureAwait(false);
-        return null;
+        return Task.FromResult<string?>(null);
     }
 
-    string? TryAdminKillPlayer(ZoneSession session, List<Pending> outbound)
+    string? TryAdminKillPlayer(ZoneSession session)
     {
         if (!_byId.TryGetValue(session.ObjectId, out var player) || player.Session == null)
             return "world";
         if (player.Dead)
             return DeathProtocol.AlreadyDead;
 
-        ApplyPlayerDeath(player, killerObjectId: 0, outbound);
+        ApplyPlayerDeath(player, killerObjectId: 0);
         ZoneLog.Info($"death object={player.ObjectId} admin_kill");
         return null;
     }
 
-    string? TryRevive(ZoneSession session, ReviveRequestMsg request, List<Pending> toSelf, List<Pending> toOthers)
+    string? TryRevive(ZoneSession session, ReviveRequestMsg request)
     {
         if (!_byId.TryGetValue(session.ObjectId, out var player) || player.Session == null)
             return "world";
@@ -60,12 +53,12 @@ public sealed partial class ZoneWorld
         if (request.Action != DeathProtocol.ReviveToVillage)
             return DeathProtocol.Unsupported;
 
-        ReviveAtVillage(player, toSelf, toOthers);
+        ReviveAtVillage(player);
         ZoneLog.Info($"revive object={player.ObjectId} -> {TalkingIslandRestart.X},{TalkingIslandRestart.Y},{TalkingIslandRestart.Z}");
         return null;
     }
 
-    void ApplyPlayerDeath(ZoneEntity player, int killerObjectId, List<Pending> outbound)
+    void ApplyPlayerDeath(ZoneEntity player, int killerObjectId)
     {
         if (player.Kind != ZoneEntityKind.Player || player.Dead)
             return;
@@ -84,9 +77,9 @@ public sealed partial class ZoneWorld
 
         // Mobius Player.onDeath runs the exp penalty before the Die packet goes out, so the client's exp bar and the
         // Death Penalty level are already the post-death values on the death screen.
-        ApplyDeathConsequences(player, killerObjectId, outbound);
+        ApplyDeathConsequences(player, killerObjectId);
 
-        FanoutPlayerDeath(player, killerObjectId, outbound);
+        FanoutPlayerDeath(player, killerObjectId);
         if (player.Session != null)
             SaveVitals(player.Session, player);
     }
@@ -96,43 +89,34 @@ public sealed partial class ZoneWorld
     /// the maxima when they are still below it — with <c>RespawnRestoreHP = 65</c> and <c>RespawnRestoreMP = 0</c> the
     /// character comes back on two thirds of the health bar and an empty mana bar, not on full vitals.
     /// </summary>
-    void ReviveAtVillage(ZoneEntity player, List<Pending> toSelf, List<Pending> toOthers)
+    void ReviveAtVillage(ZoneEntity player)
     {
         player.Dead = false;
         player.CurHp = RestoreShare(player.CurHp, player.MaxHp, _deathRules.RespawnRestoreHp);
         player.CurMp = RestoreShare(player.CurMp, player.MaxMp, _deathRules.RespawnRestoreMp);
         player.Running = true;
 
-        var revive = new ReviveMsg { ObjectId = player.ObjectId };
-        var teleport = TeleportMsg(player.ObjectId, TalkingIslandRestart.X, TalkingIslandRestart.Y, TalkingIslandRestart.Z,
-            TalkingIslandRestart.Heading);
-
-        FanoutDeathEvent(player, MsgType.Revive, revive, toSelf, toOthers);
-        // Relocate fans the Net TeleportToLocation itself (owner + peers in view); the V2 frame stays explicit
-        // so the FanoutDeathEvent relay must not fan it a second time.
-        Relocate(player, TalkingIslandRestart.X, TalkingIslandRestart.Y, TalkingIslandRestart.Z, toSelf, toOthers,
-            heading: TalkingIslandRestart.Heading, netTeleport: false);
-        FanoutDeathEvent(player, MsgType.TeleportToLocation, teleport, toSelf, toOthers);
+        FanoutRevive(player);
+        // Relocate fans TeleportToLocation to the owner and every peer that held it in view.
+        Relocate(player, TalkingIslandRestart.X, TalkingIslandRestart.Y, TalkingIslandRestart.Z,
+            heading: TalkingIslandRestart.Heading);
 
         if (player.Session != null)
         {
-            toSelf.Add(SelfUserInfo(player.Session, player));
-            FanoutVitals(player, PlayerVitalsStatus(player), toSelf);
+            SelfUserInfo(player);
+            FanoutVitals(player, PlayerVitalsStatus(player));
             SaveVitals(player.Session, player);
         }
     }
 
-    void FanoutPlayerDeath(ZoneEntity dead, int killerObjectId, List<Pending> outbound)
+    void FanoutPlayerDeath(ZoneEntity dead, int killerObjectId)
     {
-        var die = new DieMsg { ObjectId = dead.ObjectId, KillerObjectId = killerObjectId };
-        byte[] dieBody = MessagePackSerializer.Serialize(die);
         var status = new StatusUpdateMsg
         {
             ObjectId = dead.ObjectId,
             AttributeIds = [InterludeStatus.CurHp, InterludeStatus.MaxHp],
             Values = [0, dead.MaxHp]
         };
-        byte[] statusBody = MessagePackSerializer.Serialize(status);
 
         List<int>? netWatchers = null;
         foreach (var watcher in Players())
@@ -142,8 +126,6 @@ public sealed partial class ZoneWorld
             if (!ReferenceEquals(watcher, dead) && !watcher.Knownlist.Contains(dead.ObjectId))
                 continue;
 
-            outbound.Add(new Pending(watcher.Session, MsgType.Die, dieBody));
-            outbound.Add(new Pending(watcher.Session, MsgType.StatusUpdate, statusBody));
             netWatchers ??= [];
             netWatchers.Add(watcher.ObjectId);
         }
@@ -166,16 +148,11 @@ public sealed partial class ZoneWorld
         }
     }
 
-    void FanoutDeathEvent(ZoneEntity actor, MsgType type, object payload, List<Pending> toSelf, List<Pending> toOthers)
+    void FanoutRevive(ZoneEntity actor)
     {
-        byte[] body = MessagePackSerializer.Serialize(payload);
-        var session = actor.Session;
         List<int>? netWatchers = null;
-        if (session != null)
-        {
-            toSelf.Add(new Pending(session, type, body));
+        if (actor.Session != null)
             netWatchers = [actor.ObjectId];
-        }
 
         foreach (var watcher in Players())
         {
@@ -183,42 +160,18 @@ public sealed partial class ZoneWorld
                 continue;
             if (!watcher.Knownlist.Contains(actor.ObjectId))
                 continue;
-            toOthers.Add(new Pending(watcher.Session, type, body));
             netWatchers ??= [];
             netWatchers.Add(watcher.ObjectId);
         }
 
-        if (netWatchers is { Count: > 0 } && NetBridge != null)
+        if (netWatchers is { Count: > 0 })
         {
-            if (type == MsgType.Revive && payload is ReviveMsg revive)
+            NetBridge?.FanoutRevive(netWatchers, new Fineage.Net.Contract.ReviveNetMsg
             {
-                NetBridge.FanoutRevive(netWatchers, new Fineage.Net.Contract.ReviveNetMsg
-                {
-                    ObjectId = revive.ObjectId
-                });
-            }
-            else if (type == MsgType.TeleportToLocation && payload is TeleportToLocationMsg teleport)
-            {
-                NetBridge.FanoutTeleportToLocation(netWatchers, new Fineage.Net.Contract.TeleportToLocationNetMsg
-                {
-                    ObjectId = teleport.ObjectId,
-                    X = teleport.X,
-                    Y = teleport.Y,
-                    Z = teleport.Z,
-                    Heading = teleport.Heading
-                });
-            }
+                ObjectId = actor.ObjectId
+            });
         }
     }
-
-    static TeleportToLocationMsg TeleportMsg(int objectId, int x, int y, int z, int heading) => new()
-    {
-        ObjectId = objectId,
-        X = x,
-        Y = y,
-        Z = z,
-        Heading = heading
-    };
 
     /// <summary>
     /// One bar of <c>Creature.doRevive</c>: the restore only lifts a bar that is below its target share (so a

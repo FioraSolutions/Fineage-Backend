@@ -32,7 +32,8 @@ public static class InventoryMessages
         int PAtkSpd = 0,
         int MAtkSpd = 0,
         int Accuracy = 0,
-        int CritRate = 0);
+        int CritRate = 0,
+        int Evasion = 0);
 
     public static UserInfoMsg UserInfo(
         int objectId,
