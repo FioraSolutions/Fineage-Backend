@@ -84,12 +84,12 @@ $ git ls-tree -r --name-only main -- src/Fineage.Net.Contract | wc -l   # 0
 
 | Механика | Mobius | У нас на `feat/net-foundation` | Расхождение | Критичность |
 |---|---|---|---|---|
-| 1. Смерть и респавн | `Player.doDie` → lost-exp, дебафф 5076, CP, дроп вещей | смерть от боя есть, потерь/дебаффа/CP нет | частично | `high` |
-| 2. Физ. урон | `Formulas.calcPhysDam` + miss/crit/shield/ss/position | `70·PAtk/PDef`, miss, crit, shield, соулшоты, spread; стрел нет | есть, без стрел | `medium` |
+| 1. Смерть и респавн | `Player.doDie` → lost-exp, дебафф 5076, CP, дроп вещей | смерть, lost-exp, 5076, респавн 65%; нет CP и дропа вещей | частично | `medium` |
+| 2. Физ. урон | `Formulas.calcPhysDam` + miss/crit/shield/ss/position | `70·PAtk/PDef`, miss, crit, shield, соулшоты, стрелы, spread, PvP по статам цели | есть | `low` |
 | 3. Маг. урон и блоу | `calcMagicDam`, `calcBlowDamage`, `calcMagicSuccess` | `91·√MAtk/MDef·power`, блоу, lethal, mcrit/fail; легаси-фолбэк | есть, частично | `low` |
 | 4. Скиллы и каст | `onMagicLaunchedTimer`/`onMagicHitTimer`, `calcAtkBreak` | hitTime + coolTime + перезарядка по статам + прерывание; нет peace zone | есть, частично | `low` |
 | 5. Стат-пайплайн | `CreatureStat.calcStat` + `Calculator` | SET→MUL→ADD, баффы, пассивы `using`, вес 4270, грейд 4267 | есть, кроме 5076 | `high` |
-| 6. Реген | `calcHpRegen`/`calcMpRegen`, зоны, осада, кланхолл, CP | `maxHp/64 + level/12`, стат-фолд, только игроки | частично | `medium` |
+| 6. Реген | `calcHpRegen`/`calcMpRegen`, зоны, осада, кланхолл, CP | формула Mobius (шаблон × levelMod × CON/MEN × поза), стат-фолд; нет зон и CP | есть, кроме зон | `low` |
 | 7. Агро и ИИ | `AttackableAI`: hate, aggro range, LOS, return home, clan help | всё перечисленное, кроме миньонов и `_globalAggro` | есть, частично | `medium` |
 | 8. Награды за убийство | `calculateRewards` → exp/SP по урону и партии | exp/SP убийце, квест-кредит по партии | частично | `medium` |
 | 9. Квесты | `Quest.notifyKill`/`onTalk` + party-кредит | `onKill` подключён, партийный кредит, `drop_item` | **есть** | — |
@@ -98,15 +98,15 @@ $ git ls-tree -r --name-only main -- src/Fineage.Net.Contract | wc -l   # 0
 | 12. Дроп и спойл | `calculateDrops`, spoil/sweep, `DropProtection` | всё перечисленное работает | **есть** | — |
 | 13. Спавны | `SpawnTable` + территории + `WalkingManager` | плоский JSON, территории игнорируются | частично | `stub` |
 
-**Итого актуальных расхождений: 54** — из них `high` **4**, `medium` **27**, `low` **20**,
+**Итого актуальных расхождений: 49** — из них `high` **1**, `medium` **26**, `low` **19**,
 `stub` **3**.
 
-Разбивка: внутри механик (`D`-пункты + `N1`/`N2`) открыто **34** (`high` 2, `medium` 16,
-`low` 15, `stub` 1), и ещё **20** систем целиком (`M1`–`M20`: `high` 2, `medium` 11, `low` 5,
+Разбивка: внутри механик (`D`-пункты + `N1`/`N2`) открыто **29** (`high` 0, `medium` 15,
+`low` 13, `stub` 1), и ещё **20** систем целиком (`M1`–`M20`: `high` 1, `medium` 11, `low` 6,
 `stub` 2).
 
-Полностью закрыто **31** пункт `D`: `D1`, `D2`, `D5`, `D8`, `D9`, `D10`, `D11`, `D14`, `D18`,
-`D19`, `D20`, `D21`, `D23`, `D24`, `D25`, `D28`, `D33`, `D34`, `D35`, `D37`, `D40`, `D44`, `D45`,
+Полностью закрыто **34** пункта `D`: `D1`, `D2`, `D4`, `D5`, `D8`, `D9`, `D10`, `D11`, `D14`, `D18`,
+`D19`, `D20`, `D21`, `D23`, `D24`, `D25`, `D28`, `D31`, `D33`, `D34`, `D35`, `D37`, `D40`, `D44`, `D45`,
 `D46`, `D49`, `D50`, `D52`, `D57`, `D58`, `D60`, `D63`.
 
 ---
@@ -179,13 +179,15 @@ $ git ls-tree -r --name-only main -- src/Fineage.Net.Contract | wc -l   # 0
 - `D3` **`medium`** — CP существует только как поле отображения: `CurCp` всегда равен `MaxCp`
   (`ZoneWorld.cs:1196`–`:1197`, `NetEnterWorldProjector.cs:115`–`:116`), в `ZoneEntity` нет счётчика
   CP, урон по CP не идёт, CP-регена нет. Колонка в окне есть, механики нет.
-- `D4` **`high`** — **PvP-урона нет**. `TryAttack` отбрасывает не-NPC цель
-  (`src/Fineage.Zone/World/ZoneWorldCombat.cs:121`: `target.Kind != ZoneEntityKind.Npc ||
-  !target.Attackable`); то же в атакующих скиллах (`ZoneWorldSkills.cs:221` и `:390`) и в дебаффах
-  (`:390`). `PvpFlagged` есть у сущности (`ZoneWorld.cs:68`) и копируется из состояния экипировки
-  (`ZoneWorldGear.cs:254`), но нигде не выставляется в `true` по бою; кармы/PK нет. Ветка игрока в
-  `ResolveMeleeHit` (`:411`–`:421`) достижима только со стороны NPC (моб бьёт игрока). Ни дуэлей,
-  ни осадного боя, ни PvP-флага.
+- ~~`D4`~~ **снято (урон)** — **PvP-урон работает**. Гейт `target.Kind != ZoneEntityKind.Npc`
+  заменён на `IsAttackable` (`ZoneWorldCombat.cs`): NPC по флагу шаблона, игрок — по Mobius
+  `isAutoAttackable(Player)` (`PvpFlagged || PkKills > 0`), себя бить нельзя. Тот же гейт стоит в
+  атакующих скиллах и дебаффах (`ZoneWorldSkills.cs`). Свинг по игроку считается той же
+  `RollMelee`, но против его собственных `P.Def`/`Evasion`/`ShieldRate` из общего стат-пайплайна
+  (`RollPlayerMelee`), а не по NPC-статам. Смерть идёт обычным путём `ApplyPlayerDeath`.
+  <br/>Осталось вне паритета и вынесено отдельными пунктами: PvP-флаг сам не выставляется по бою
+  (`PvpFlagged` нигде не становится `true`), кармы/PK нет, нет дуэлей и осад, нет
+  `PVP_PHYSICAL_DMG`-множителей и CP-поглощения (`D3`).
 - ~~`D5`~~ **снято** — респавн восстанавливает доли из `Character.ini`: `RestoreShare`
   (`ZoneWorldDeath.cs`) повторяет `Creature.doRevive` (`Creature.java:2524-2553`) — бар поднимается до
   `max * share`, только если он ещё ниже цели, поэтому «воскрешение», уже вылечившее больше, не
@@ -437,9 +439,11 @@ add/sub → mul/div → нелинейные.
   пересчёт при левелапе `ZoneWorldQuests.cs:320`–`:321`, при смене класса
   `ZoneWorldVillageMasters.cs:137`–`:138`). `CombatStat` не содержит `MaxHp`, поэтому бафф на
   максимум HP невозможен.
-- `N2` **`low`** — при левелапе HP/MP выставляются в новый максимум
-  (`player.CurHp = player.MaxHp; player.CurMp = player.MaxMp`, `ZoneWorldQuests.cs:322`–`:323`).
-  У Mobius левелап добавляет дельту максимума к текущему значению, а не лечит до полного.
+- ~~`N2`~~ **снято, аудит ошибался** — при левелапе HP/MP выставляются в новый максимум
+  (`player.CurHp = player.MaxHp; player.CurMp = player.MaxMp`, `ZoneWorldQuests.cs`), и это
+  ровно поведение Mobius: `PlayableStat.addLevel` (`PlayableStat.java:175`–`:176`) делает
+  `setCurrentHp(getMaxHp())` / `setCurrentMp(getMaxMp())`. Дельта максимума вместо полного лечения —
+  это `N2` из другого хроники/сборки; в CT 0 Interlude левелап лечит до полного.
 
 ---
 
@@ -473,11 +477,18 @@ add/sub → mul/div → нелинейные.
   раненым навсегда. Полное лечение при возврате домой — отдельно: Mobius лечит только на
   leash-ресете (`AttackableAI.java:749`), а `Attackable.returnHome()` (`:1685`) не лечит; теперь так же
   (`TickLeash`/`TryLeashReset`, `ZoneNpcSettings`). Выключить можно `FINEAGE_NPC_REGEN_ENABLED=false`.
-- `D31` **`medium`** *(переписано)* — базовая формула по-прежнему `maxHp/64 + level/12`
-  (`ZoneRegen.cs:11`), без CON/MEN, зон, осады и кланхолла. Но баффы и мастери теперь на неё
-  влияют через стат-фолд, и Weight Penalty 4270 честно режет реген вдвое. Осталось: остановка
-  регена в бою — `TickRegen` не смотрит `CombatUntilUnixMs` (поиск по `ZoneWorldRegen.cs` пуст),
-  поэтому раненый в бою игрок лечится тем же тиком.
+- ~~`D31`~~ **снято** — реген считается по формулам Mobius (`ZoneRegen.cs`):
+  `init = hpRegen[level] × (level + 89) / 100 × CON/MEN bonus`, затем `max(1, init)` и множитель
+  позы (`sitting ×1.5`, `standing ×1.1`, `running ×0.7`; идущий шагом не получает множителя —
+  так же, как в `Formulas.java:313`–`:326`). `hpRegen`/`mpRegen` берутся из датапака; во всех 89
+  шаблонах таблица одна, поэтому она лежит в `ZoneRegen` одной копией, а не 89×160 дублей в
+  `classes.json`. Сверху — стат-фолд: баффы, мастери, Weight Penalty 4270 ×0.5.
+  <br/>Реген в бою **не** останавливается, и это паритет, а не пропуск: Mobius зовёт
+  `stopHpMpRegeneration()` только на смерти и при достижении максимума
+  (`CreatureStatus.setCurrentHp`, `PlayerStatus.reduceHp`), а `calcHpRegen` боевого множителя не
+  имеет. В аудите это было записано как расхождение — оно снято по коду.
+  <br/>Осталось вне паритета: зоны (Mother Tree, кланхолл, осада), `HP_REGEN_MULTIPLIER` из конфига и
+  CP-реген (CP как счётчика нет, см. `D3`).
 - `D32` **`low`** — CP-регена нет (CP как счётчика нет, см. `D3`).
 - ~~`D33`~~ **снято** — штраф перегруза на реген работает: `FoldWeightPenalty`
   (`src/Fineage.Zone/World/ZoneWorldWeight.cs:146`) добавляет функции 4270 (`regHp`/`regMp` ×0.5) в

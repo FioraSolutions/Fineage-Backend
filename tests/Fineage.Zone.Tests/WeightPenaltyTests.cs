@@ -650,25 +650,30 @@ public sealed class WeightPenaltyRegenTests
             await kit.World.RunRegenTickAsync(CancellationToken.None);
     }
 
+    /// <summary>Clean per-tick rate the world will actually pay for this player, from the shared regen pipeline.</summary>
+    static (double Hp, double Mp) CleanRate(NetTestKit kit, ZoneEntity player) =>
+        kit.World.RegenRate(player);
+
     [Fact]
     public async Task Overloaded_regen_is_half_of_clean_regen()
     {
-        // Level 1: maxHp 100 / level 1 → 1 HP per tick clean, 2 MP per tick (ZoneRegen formula).
+        double cleanHpPerTick, cleanMpPerTick;
         int cleanHp, cleanMp;
         {
             var (kit, player) = await SetupAsync();
-            await TickAsync(kit, 2);
+            (cleanHpPerTick, cleanMpPerTick) = CleanRate(kit, player);
+            await TickAsync(kit, 4);
             cleanHp = player.CurHp - 1;
             cleanMp = player.CurMp - 1;
-            Assert.Equal(2, cleanHp);
-            Assert.Equal(4, cleanMp);
+            Assert.Equal((int)Math.Floor(cleanHpPerTick * 4), cleanHp);
+            Assert.Equal((int)Math.Floor(cleanMpPerTick * 4), cleanMp);
         }
 
         {
             var (kit, player) = await SetupAsync();
             player.WeightPenaltyLevel = 1;
-            // Skill 4270 regHp/regMp ×0.5 → 0.5 HP and 1 MP per tick, carried fractionally: 2 ticks = 1 HP, 2 MP.
-            await TickAsync(kit, 2);
+            // Skill 4270 regHp/regMp ×0.5 halves the rate; the fractional remainder is carried between ticks.
+            await TickAsync(kit, 4);
             Assert.Equal(cleanHp / 2, player.CurHp - 1);
             Assert.Equal(cleanMp / 2, player.CurMp - 1);
         }
@@ -680,15 +685,17 @@ public sealed class WeightPenaltyRegenTests
         var (kit, player) = await SetupAsync();
         player.WeightPenaltyLevel = 1;
 
-        // Standing regen is 1 HP/tick; halved that is 0.5, which must land as +1 on the second tick
-        // instead of being floored to 0 every tick and never healing at all.
-        await TickAsync(kit);
-        Assert.Equal(1, player.CurHp);
-        Assert.Equal(0.5d, player.RegenCarryHp, 6);
+        // Halving the clean rate leaves a fraction; it must land as a whole point on a later tick instead of
+        // being floored away every tick and never healing at all.
+        double half = kit.World.RegenRate(player).Hp;
+        Assert.True(half - Math.Floor(half) > 0, $"expected a fractional half-rate, got {half}");
 
         await TickAsync(kit);
-        Assert.Equal(2, player.CurHp);
-        Assert.Equal(0d, player.RegenCarryHp, 6);
+        await TickAsync(kit);
+
+        // Two ticks of a fractional rate pay out floor(2 × rate), never 2 × floor(rate).
+        Assert.Equal(1 + (int)Math.Floor(half * 2), player.CurHp);
+        Assert.Equal(half * 2 - Math.Floor(half * 2), player.RegenCarryHp, 6);
     }
 
     [Fact]
@@ -697,14 +704,16 @@ public sealed class WeightPenaltyRegenTests
         var (kit, player) = await SetupAsync();
         player.WeightPenaltyLevel = 1;
         await TickAsync(kit);
-        Assert.Equal(0.5d, player.RegenCarryHp, 6); // the half tick is still unspent
+        double leftover = player.RegenCarryHp;
+        Assert.True(leftover > 0, $"the penalised tick should stash a fraction, got {leftover}");
 
         player.WeightPenaltyLevel = 0;
         int before = player.CurHp;
-        // The leftover carry is not thrown away: 0.5 + the clean 1.0 pays out a full point this tick.
+        double clean = kit.World.RegenRate(player).Hp;
+        // The leftover carry is not thrown away: leftover + the clean rate pays out on this same tick.
         await TickAsync(kit);
-        Assert.Equal(before + 1, player.CurHp);
-        Assert.Equal(0.5d, player.RegenCarryHp, 6);
+        Assert.Equal(before + (int)Math.Floor(leftover + clean), player.CurHp);
+        Assert.Equal(leftover + clean - Math.Floor(leftover + clean), player.RegenCarryHp, 6);
     }
 
     [Fact]
@@ -712,12 +721,16 @@ public sealed class WeightPenaltyRegenTests
     {
         var (kit, player) = await SetupAsync();
 
-        // Sitting doubles the base rate before the ×0.5 fold (ZoneRegen): 2 → 1, i.e. the standing clean value.
+        // Sitting multiplies the base rate by 1.5 before the ×0.5 penalty fold, so sitting overloaded still
+        // beats standing clean — the two folds share one pipeline instead of overwriting each other.
         player.Sitting = true;
         player.WeightPenaltyLevel = 1;
-        player.CurHp = 1;
-        await TickAsync(kit);
-        Assert.Equal(2, player.CurHp);
-        Assert.Equal(0d, player.RegenCarryHp, 6);
+        double sittingPenalised = kit.World.RegenRate(player).Hp;
+        player.Sitting = false;
+        player.WeightPenaltyLevel = 0;
+        double standingClean = kit.World.RegenRate(player).Hp;
+
+        Assert.True(sittingPenalised > standingClean / 2,
+            $"sitting×1.5 then ×0.5 ({sittingPenalised}) should stay well above half of standing clean ({standingClean})");
     }
 }

@@ -1,4 +1,5 @@
 using System.Diagnostics;
+using Fineage.Game;
 using Fineage.Login;
 using Fineage.Protocol;
 using Fineage.Protocol.Telemetry;
@@ -57,6 +58,33 @@ public sealed partial class ZoneWorld
         await FlushOthersAsync(outbound, ct).ConfigureAwait(false);
     }
 
+    /// <summary>
+    /// Mobius <c>CreatureStatus.doRegeneration</c> posture for a player: <c>isSitting</c> first, then <c>!isMoving</c>,
+    /// then <c>isRunning</c>. A moving walker matches no branch, so Mobius gives it no multiplier.
+    /// </summary>
+    static ZoneRegen.Posture RegenPosture(ZoneEntity entity)
+    {
+        if (entity.Sitting)
+            return ZoneRegen.Posture.Sitting;
+        if (!entity.MoveActive)
+            return ZoneRegen.Posture.Standing;
+        return entity.Running ? ZoneRegen.Posture.Running : ZoneRegen.Posture.Walking;
+    }
+
+    /// <summary>
+    /// Per-tick HP/MP this player regenerates right now, fed through the same folds <see cref="TickRegen"/> uses.
+    /// Tests read the real rate instead of hard-coding it, so a formula change cannot leave them stale.
+    /// </summary>
+    internal (double Hp, double Mp) RegenRate(ZoneEntity player)
+    {
+        var mods = PlayerStatMods(player);
+        var posture = RegenPosture(player);
+        var (conBonus, menBonus) = RegenStatBonuses(player);
+        return (
+            mods.Apply(CombatStat.RegHp, ZoneRegen.HpPerTick(player.Level, conBonus, posture)),
+            mods.Apply(CombatStat.RegMp, ZoneRegen.MpPerTick(player.Level, menBonus, posture)));
+    }
+
     void TickRegen(List<Pending> outbound)
     {
         foreach (var entity in Players())
@@ -69,11 +97,13 @@ public sealed partial class ZoneWorld
             // Folding the stat means Weight Penalty 4270's regHp/regMp ×0.5 halves the rate, and the regen masteries
             // (Fast HP Recovery, Mana Recovery, Vital Force, …) raise it, through the same pipeline as everything else.
             var mods = PlayerStatMods(entity);
+            var posture = RegenPosture(entity);
+            var (conBonus, menBonus) = RegenStatBonuses(entity);
             double hpRate = mods.Apply(CombatStat.RegHp, entity.CurHp < entity.MaxHp
-                ? (double)ZoneRegen.HpPerTick(entity.MaxHp, entity.Level, entity.Sitting)
+                ? ZoneRegen.HpPerTick(entity.Level, conBonus, posture)
                 : 0d);
             double mpRate = mods.Apply(CombatStat.RegMp, entity.CurMp < entity.MaxMp
-                ? (double)ZoneRegen.MpPerTick(entity.MaxMp, entity.Level, entity.Sitting)
+                ? ZoneRegen.MpPerTick(entity.Level, menBonus, posture)
                 : 0d);
 
             // Mobius keeps HP/MP as doubles, so a halved rate still accumulates. Vitals here are ints, so the
@@ -109,6 +139,24 @@ public sealed partial class ZoneWorld
     /// <c>max(1, hpRegen)</c> HP / <c>max(1, mpRegen)</c> MP per 3 s tick, capped at the maximums. Without it a
     /// mob that survived a fight stayed wounded forever until it died (audit <c>D30</c>).
     /// </summary>
+    /// <summary>
+    /// Mobius <c>BaseStat.CON.calcBonus</c> / <c>MEN.calcBonus</c> for this player's class, read from
+    /// <c>data/stat-bonuses.json</c>. 1 when the class or the stat value is outside the table.
+    /// </summary>
+    internal (double Con, double Men) RegenStatBonuses(ZoneEntity entity)
+    {
+        if (PlayerClasses == null || !PlayerClasses.TryGet(entity.ClassId, out var template) || template == null)
+            return (1d, 1d);
+        var table = PlayerClasses.StatBonuses;
+        return (BonusOrOne(table, StatSlot.Con, template.Con), BonusOrOne(table, StatSlot.Men, template.Men));
+    }
+
+    static double BonusOrOne(StatBonusTable table, StatSlot slot, int value)
+    {
+        try { return table.Bonus(slot, value); }
+        catch (ArgumentOutOfRangeException) { return 1d; }
+    }
+
     void TickNpcRegen(List<Pending> outbound)
     {
         if (!_npcRegen)
