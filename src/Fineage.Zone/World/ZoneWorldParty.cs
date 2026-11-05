@@ -1,5 +1,5 @@
+using Fineage.Net.Contract;
 using Fineage.Protocol;
-using MessagePack;
 
 namespace Fineage.Zone.World;
 
@@ -22,81 +22,53 @@ public sealed partial class ZoneWorld
 
     readonly record struct PendingPartyInvite(int InviterObjectId, int ItemDistribution);
 
-    public async Task<string?> TryPartyInviteAsync(ZoneSession session, PartyInviteRequestMsg invite, CancellationToken ct)
+    public Task<string?> TryPartyInviteAsync(ZoneSession session, PartyInviteRequestMsg invite, CancellationToken ct)
     {
         if (invite == null)
-            return "bad_request";
+            return Task.FromResult<string?>("bad_request");
         if (!session.InWorld)
-            return "world";
+            return Task.FromResult<string?>("world");
         if (invite.TargetObjectId == session.ObjectId)
-            return "bad_request";
+            return Task.FromResult<string?>("bad_request");
         if (invite.ItemDistribution is < 0 or > 3)
-            return "bad_request";
+            return Task.FromResult<string?>("bad_request");
 
-        var outbound = new List<Pending>();
-        string? error;
         lock (_gate)
-            error = TryPartyInvite(session, invite, outbound);
-        if (error != null)
-            return error;
-
-        await FlushPartyAsync(outbound, ct).ConfigureAwait(false);
-        return null;
+            return Task.FromResult(TryPartyInvite(session, invite));
     }
 
-    public async Task<string?> TryPartyAnswerAsync(ZoneSession session, PartyAnswerJoinRequestMsg answer, CancellationToken ct)
+    public Task<string?> TryPartyAnswerAsync(ZoneSession session, PartyAnswerJoinRequestMsg answer, CancellationToken ct)
     {
         if (answer == null)
-            return "bad_request";
+            return Task.FromResult<string?>("bad_request");
         if (!session.InWorld)
-            return "world";
+            return Task.FromResult<string?>("world");
 
-        var outbound = new List<Pending>();
-        string? error;
         lock (_gate)
-            error = TryPartyAnswer(session, answer, outbound);
-        if (error != null)
-            return error;
-
-        await FlushPartyAsync(outbound, ct).ConfigureAwait(false);
-        return null;
+            return Task.FromResult(TryPartyAnswer(session, answer));
     }
 
-    public async Task<string?> TryPartyLeaveAsync(ZoneSession session, CancellationToken ct)
+    public Task<string?> TryPartyLeaveAsync(ZoneSession session, CancellationToken ct)
     {
         if (!session.InWorld)
-            return "world";
+            return Task.FromResult<string?>("world");
 
-        var outbound = new List<Pending>();
-        string? error;
         lock (_gate)
-            error = TryPartyLeave(session.ObjectId, outbound);
-        if (error != null)
-            return error;
-
-        await FlushPartyAsync(outbound, ct).ConfigureAwait(false);
-        return null;
+            return Task.FromResult(TryPartyLeave(session.ObjectId));
     }
 
-    public async Task<string?> TryPartyKickAsync(ZoneSession session, PartyKickRequestMsg kick, CancellationToken ct)
+    public Task<string?> TryPartyKickAsync(ZoneSession session, PartyKickRequestMsg kick, CancellationToken ct)
     {
         if (kick == null)
-            return "bad_request";
+            return Task.FromResult<string?>("bad_request");
         if (!session.InWorld)
-            return "world";
+            return Task.FromResult<string?>("world");
 
-        var outbound = new List<Pending>();
-        string? error;
         lock (_gate)
-            error = TryPartyKick(session, kick.TargetObjectId, outbound);
-        if (error != null)
-            return error;
-
-        await FlushPartyAsync(outbound, ct).ConfigureAwait(false);
-        return null;
+            return Task.FromResult(TryPartyKick(session, kick.TargetObjectId));
     }
 
-    void PartyPlayerLeftWorld(int objectId, List<Pending> outbound)
+    void PartyPlayerLeftWorld(int objectId)
     {
         _pendingInvites.Remove(objectId);
         foreach (var (inviteeId, pending) in _pendingInvites.ToList())
@@ -108,10 +80,10 @@ public sealed partial class ZoneWorld
         if (!_partyByPlayer.ContainsKey(objectId))
             return;
 
-        TryPartyLeave(objectId, outbound);
+        TryPartyLeave(objectId);
     }
 
-    string? TryPartyInvite(ZoneSession inviter, PartyInviteRequestMsg invite, List<Pending> outbound)
+    string? TryPartyInvite(ZoneSession inviter, PartyInviteRequestMsg invite)
     {
         if (!IsLive(inviter))
             return "world";
@@ -139,18 +111,16 @@ public sealed partial class ZoneWorld
         }
 
         _pendingInvites[invite.TargetObjectId] = new PendingPartyInvite(inviter.ObjectId, distribution);
-        var ask = new PartyAskJoinMsg
+        FanPartyAsk([targetEntity.ObjectId], new PartyAskJoinNetMsg
         {
             RequestorObjectId = inviter.ObjectId,
             RequestorName = inviter.Name,
             ItemDistribution = distribution
-        };
-        outbound.Add(Pack(targetEntity.Session, MsgType.PartyAskJoin, ask));
-        FanNetPartyAsk(targetEntity.Session.ObjectId, ask);
+        });
         return null;
     }
 
-    string? TryPartyAnswer(ZoneSession invitee, PartyAnswerJoinRequestMsg answer, List<Pending> outbound)
+    string? TryPartyAnswer(ZoneSession invitee, PartyAnswerJoinRequestMsg answer)
     {
         if (!IsLive(invitee))
             return "world";
@@ -169,7 +139,7 @@ public sealed partial class ZoneWorld
 
         if (answer.Response != 1)
         {
-            QueuePartyJoinResult(requestorEntity.Session, 0, outbound);
+            FanPartyJoinResult([requestorEntity.ObjectId], 0);
             return null;
         }
 
@@ -183,7 +153,7 @@ public sealed partial class ZoneWorld
                 return "party";
             if (party.MemberIds.Count >= MaxPartyMembers)
             {
-                QueuePartyJoinResult(requestorEntity.Session, 0, outbound);
+                FanPartyJoinResult([requestorEntity.ObjectId], 0);
                 return null;
             }
         }
@@ -203,12 +173,12 @@ public sealed partial class ZoneWorld
         party.MemberIds.Add(invitee.ObjectId);
         _partyByPlayer[invitee.ObjectId] = party.PartyId;
 
-        QueuePartyJoinResult(requestorEntity.Session, 1, outbound);
-        FanoutPartyList(party, outbound);
+        FanPartyJoinResult([requestorEntity.ObjectId], 1);
+        FanPartyList(party);
         return null;
     }
 
-    string? TryPartyLeave(int objectId, List<Pending> outbound)
+    string? TryPartyLeave(int objectId)
     {
         if (!_partyByPlayer.TryGetValue(objectId, out int partyId) ||
             !_parties.TryGetValue(partyId, out var party))
@@ -235,24 +205,16 @@ public sealed partial class ZoneWorld
             party.MemberIds.RemoveAt(0);
             _partyByPlayer.Remove(lastId);
             _parties.Remove(partyId);
-            if (_byId.TryGetValue(lastId, out var lastEntity) && lastEntity.Session != null)
-            {
-                QueuePartyMemberList(lastEntity.Session, new PartyMemberListMsg
-                {
-                    LeaderObjectId = 0,
-                    PartyId = 0,
-                    Members = []
-                }, outbound);
-            }
-
+            // Mobius sends an empty list so the last member's window closes.
+            FanPartyList([lastId], 0, 0, []);
             return null;
         }
 
-        FanoutPartyList(party, outbound);
+        FanPartyList(party);
         return null;
     }
 
-    string? TryPartyKick(ZoneSession leader, int targetObjectId, List<Pending> outbound)
+    string? TryPartyKick(ZoneSession leader, int targetObjectId)
     {
         if (!IsLive(leader))
             return "world";
@@ -264,93 +226,43 @@ public sealed partial class ZoneWorld
         if (!_partyByPlayer.TryGetValue(targetObjectId, out int targetPartyId) || targetPartyId != partyId)
             return "target";
 
-        return TryPartyLeave(targetObjectId, outbound);
+        return TryPartyLeave(targetObjectId);
     }
 
-    void FanoutPartyList(ZoneParty party, List<Pending> outbound)
-    {
-        var list = BuildPartyMemberList(party);
-        foreach (int memberId in party.MemberIds)
+    void FanPartyList(ZoneParty party) =>
+        FanPartyList(
+            party.MemberIds.Where(id => Online(id) != null).ToArray(),
+            party.LeaderObjectId,
+            party.PartyId,
+            BuildPartyRows(party));
+
+    void FanPartyList(IReadOnlyList<int> members, int leaderObjectId, int partyId, PartyMemberEntryNet[] rows) =>
+        NetBridge?.FanoutPartyMemberList(members, new PartyMemberListNetMsg
         {
-            if (!_byId.TryGetValue(memberId, out var entity) || entity.Session == null)
-                continue;
-            QueuePartyMemberList(entity.Session, list, outbound);
-        }
-    }
-
-    void QueuePartyJoinResult(ZoneSession session, int response, List<Pending> outbound)
-    {
-        var result = new PartyJoinResultMsg { Response = response };
-        outbound.Add(Pack(session, MsgType.PartyJoinResult, result));
-        if (NetBridge != null)
-        {
-            NetBridge.FanoutPartyJoinResult(
-                [session.ObjectId],
-                new Fineage.Net.Contract.PartyJoinResultNetMsg { Response = response });
-        }
-    }
-
-    void QueuePartyMemberList(ZoneSession session, PartyMemberListMsg list, List<Pending> outbound)
-    {
-        outbound.Add(Pack(session, MsgType.PartyMemberList, list));
-        if (NetBridge != null)
-            NetBridge.FanoutPartyMemberList([session.ObjectId], ToNetPartyMemberList(list));
-    }
-
-    void FanNetPartyAsk(int targetObjectId, PartyAskJoinMsg ask)
-    {
-        if (NetBridge == null)
-            return;
-        NetBridge.FanoutPartyAskJoin(
-            [targetObjectId],
-            new Fineage.Net.Contract.PartyAskJoinNetMsg
-            {
-                RequestorObjectId = ask.RequestorObjectId,
-                RequestorName = ask.RequestorName ?? "",
-                ItemDistribution = ask.ItemDistribution
-            });
-    }
-
-    static Fineage.Net.Contract.PartyMemberListNetMsg ToNetPartyMemberList(PartyMemberListMsg list)
-    {
-        var members = list.Members ?? [];
-        var rows = new Fineage.Net.Contract.PartyMemberEntryNet[members.Length];
-        for (int i = 0; i < members.Length; i++)
-        {
-            rows[i] = new Fineage.Net.Contract.PartyMemberEntryNet
-            {
-                ObjectId = members[i].ObjectId,
-                Name = members[i].Name ?? "",
-                ClassId = members[i].ClassId,
-                Level = members[i].Level,
-                CurHp = members[i].CurHp,
-                MaxHp = members[i].MaxHp,
-                CurMp = members[i].CurMp,
-                MaxMp = members[i].MaxMp
-            };
-        }
-
-        return new Fineage.Net.Contract.PartyMemberListNetMsg
-        {
-            LeaderObjectId = list.LeaderObjectId,
-            PartyId = list.PartyId,
+            LeaderObjectId = leaderObjectId,
+            PartyId = partyId,
             Members = rows
-        };
-    }
+        });
 
-    PartyMemberListMsg BuildPartyMemberList(ZoneParty party)
+    void FanPartyJoinResult(IReadOnlyList<int> watchers, int response) =>
+        NetBridge?.FanoutPartyJoinResult(watchers, new PartyJoinResultNetMsg { Response = response });
+
+    void FanPartyAsk(IReadOnlyList<int> watchers, PartyAskJoinNetMsg ask) =>
+        NetBridge?.FanoutPartyAskJoin(watchers, ask);
+
+    PartyMemberEntryNet[] BuildPartyRows(ZoneParty party)
     {
-        var members = new PartyMemberEntryMsg[party.MemberIds.Count];
+        var members = new PartyMemberEntryNet[party.MemberIds.Count];
         for (int i = 0; i < party.MemberIds.Count; i++)
         {
             int id = party.MemberIds[i];
             if (!_byId.TryGetValue(id, out var entity))
             {
-                members[i] = new PartyMemberEntryMsg { ObjectId = id };
+                members[i] = new PartyMemberEntryNet { ObjectId = id };
                 continue;
             }
 
-            members[i] = new PartyMemberEntryMsg
+            members[i] = new PartyMemberEntryNet
             {
                 ObjectId = entity.ObjectId,
                 Name = entity.Name,
@@ -363,17 +275,6 @@ public sealed partial class ZoneWorld
             };
         }
 
-        return new PartyMemberListMsg
-        {
-            LeaderObjectId = party.LeaderObjectId,
-            PartyId = party.PartyId,
-            Members = members
-        };
-    }
-
-    static async Task FlushPartyAsync(List<Pending> messages, CancellationToken ct)
-    {
-        foreach (var message in messages)
-            await TrySendAsync(message, ct).ConfigureAwait(false);
+        return members;
     }
 }

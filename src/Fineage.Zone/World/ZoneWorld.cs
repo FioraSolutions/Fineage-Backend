@@ -1025,7 +1025,7 @@ public sealed partial class ZoneWorld
         _byId.Remove(session.ObjectId);
         session.InWorld = false;
 
-        PartyPlayerLeftWorld(session.ObjectId, toOthers);
+        PartyPlayerLeftWorld(session.ObjectId);
         TradePlayerLeftWorld(session.ObjectId, toOthers);
         ClanPlayerLeftWorld(session.ObjectId, session.Name);
 
