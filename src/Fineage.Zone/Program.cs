@@ -29,10 +29,10 @@ if (args.Contains("--selftest"))
     return;
 }
 
-// Net owns 9777; the legacy V2 port defaults to 9877 and only listens when FINEAGE_LEGACY_V2_ENABLE is set.
+// Net owns 9777 and is the only client transport; the MessagePack V2 listener is gone.
 string portText = Arg(args, "--port")
     ?? Environment.GetEnvironmentVariable("FINEAGE_ZONE_PORT")
-    ?? NetSettings.V2ZonePort.ToString();
+    ?? NetSettings.DefaultZonePort.ToString();
 if (!int.TryParse(portText, out int port) || port is < 1 or > 65535)
 {
     Console.Error.WriteLine("invalid --port");
@@ -92,16 +92,6 @@ int outboundQueue = ZoneNetSettings.OutboundQueue;
 int maxMsgPerSec = ZoneNetSettings.MaxMessagesPerSecond;
 int interestRange = ZoneAoiSettings.InterestRange;
 bool adminCommands = ZoneAdmin.Enabled;
-var server = new ZoneServer(
-    HandoffTokens.FromEnvironment(),
-    world,
-    clock: null,
-    new ZoneServerOptions
-    {
-        MaxMessagesPerSecond = maxMsgPerSec,
-        AdminCommands = adminCommands
-    });
-
 if (string.IsNullOrWhiteSpace(Environment.GetEnvironmentVariable("FINEAGE_HANDOFF_SECRET")) &&
     !IPAddress.IsLoopback(bindAddress))
 {
@@ -109,12 +99,11 @@ if (string.IsNullOrWhiteSpace(Environment.GetEnvironmentVariable("FINEAGE_HANDOF
 }
 
 string worldLabel = includeEnabledMaps ? "whole world (all enabled spawn maps)" : "single spawn map";
-Console.WriteLine($"[ZONE] world {storeLabel} {worldLabel} (maxConn={maxConnections} outboundQ={outboundQueue} msgPerSec={maxMsgPerSec} interestRange={interestRange} npcs={world.NpcObjectIds.Count})");
+Console.WriteLine($"[ZONE] world {storeLabel} {worldLabel} (maxConn={maxConnections} outboundQ={outboundQueue} interestRange={interestRange} npcs={world.NpcObjectIds.Count})");
 Console.WriteLine("[ZONE] Seven Signs period, cabal, and seal-stone scores are stored beside the account file as seven-signs.json.");
-Console.WriteLine("[ZONE] Olympiad registration and points are stored beside the account file as olympiad.json. See docs/olympiad-v2-protocol.md.");
-Console.WriteLine("[ZONE] Catacomb and necropolis gates follow that cabal. Enter is opcode 92. See docs/dungeon-access-v2-protocol.md.");
+Console.WriteLine("[ZONE] Olympiad registration and points are stored beside the account file as olympiad.json.");
+Console.WriteLine("[ZONE] Catacomb and necropolis gates follow that cabal.");
 Console.WriteLine("[ZONE] Raid and grand boss respawn state is stored beside the account file as boss-schedule.json.");
-Console.WriteLine("[ZONE] Auth.Password is the login handoff token. EnterWorld sends UserInfo, ItemList, the village, then a welcome SystemMessage. Say ALL is local; SHOUT is the zone.");
 if (adminCommands)
     Console.WriteLine("[ZONE] admin commands enabled (GiveItem, AdminCaptureCastle, AdminBossSchedule, AdminReportOlympiadResult, AdminKillPlayer).");
 
@@ -142,28 +131,9 @@ Task netTask = netTcp.RunAsync(
     maxConnections,
     NetSettings.InboxCapacity);
 
-Task? legacyTask = null;
-if (NetSettings.LegacyV2Enabled)
-{
-    Console.WriteLine($"[ZONE] legacy V2 listen {bindDisplay}:{port} (MessagePack, opt-in)");
-    legacyTask = new TcpServer().RunAsync(
-        host,
-        port,
-        maxConnections,
-        outboundQueue,
-        "zone",
-        server.HandleAsync,
-        shutdown.Token,
-        ZoneOverload.RejectAsync);
-}
-else
-{
-    Console.WriteLine("[ZONE] legacy V2 listeners are off (FINEAGE_LEGACY_V2_ENABLE=1 to serve them)");
-}
-
 try
 {
-    await (legacyTask == null ? netTask : Task.WhenAny(netTask, legacyTask)).ConfigureAwait(false);
+    await netTask.ConfigureAwait(false);
 }
 catch (Exception ex) when (ex is not OperationCanceledException)
 {

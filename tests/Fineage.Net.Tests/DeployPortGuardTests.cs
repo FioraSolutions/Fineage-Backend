@@ -22,19 +22,21 @@ public sealed class DeployPortGuardTests
     }
 
     [Fact]
-    public void Run_scripts_keep_the_legacy_V2_port_off_the_Net_port()
+    public void Run_scripts_start_clean_without_any_V2_port()
     {
         string root = RepoRoot();
 
         string login = File.ReadAllText(Path.Combine(root, "deploy", "run-login.sh"));
-        Assert.Contains("FINEAGE_LEGACY_V2_ENABLE", login, StringComparison.Ordinal);
         Assert.Contains("NET_LOGIN_PORT=\"${FINEAGE_NET_LOGIN_PORT:-9106}\"", login, StringComparison.Ordinal);
-        Assert.Contains("if [[ \"$LOGIN_PORT\" == \"$NET_LOGIN_PORT\" ]]", login, StringComparison.Ordinal);
+        Assert.DoesNotContain("--port", login, StringComparison.Ordinal);
+        Assert.DoesNotContain("FINEAGE_LEGACY", login, StringComparison.Ordinal);
+        Assert.DoesNotContain("9206", login, StringComparison.Ordinal);
 
         string zone = File.ReadAllText(Path.Combine(root, "deploy", "run-zone.sh"));
-        Assert.Contains("FINEAGE_LEGACY_V2_ENABLE", zone, StringComparison.Ordinal);
         Assert.Contains("NET_ZONE_PORT=\"${FINEAGE_NET_ZONE_PORT:-9777}\"", zone, StringComparison.Ordinal);
-        Assert.Contains("if [[ \"$ZONE_PORT\" == \"$NET_ZONE_PORT\" ]]", zone, StringComparison.Ordinal);
+        Assert.DoesNotContain("--port", zone, StringComparison.Ordinal);
+        Assert.DoesNotContain("FINEAGE_LEGACY", zone, StringComparison.Ordinal);
+        Assert.DoesNotContain("9877", zone, StringComparison.Ordinal);
     }
 
     static string RepoRoot()

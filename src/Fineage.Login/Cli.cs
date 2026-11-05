@@ -19,30 +19,12 @@ public static class Cli
             ?? Path.Combine("data", "accounts.json");
         string? databaseUrl = TakeOption(rest, "--database")
             ?? Environment.GetEnvironmentVariable(AccountStoreFactory.DatabaseUrlEnv);
-        string? portOpt = TakeOption(rest, "--port");
-        string? portEnv = Environment.GetEnvironmentVariable("FINEAGE_LOGIN_PORT");
-        // Net owns 9106; legacy V2 shifts to 9206 unless the operator pins --port / FINEAGE_LOGIN_PORT.
-        string portText = portOpt
-            ?? portEnv
-            ?? NetSettings.V2LoginPort.ToString();
-        if (!int.TryParse(portText, out int port) || port is < 1 or > 65535)
-        {
-            error.WriteLine("invalid --port");
-            return 1;
-        }
-
-        string httpPortText = TakeOption(rest, "--http-port")
+        string? httpPortText = TakeOption(rest, "--http-port")
             ?? Environment.GetEnvironmentVariable("FINEAGE_LOGIN_HTTP_PORT")
             ?? "5080";
         if (!int.TryParse(httpPortText, out int httpPort) || httpPort is < 1 or > 65535)
         {
             error.WriteLine("invalid --http-port");
-            return 1;
-        }
-
-        if (httpPort == port)
-        {
-            error.WriteLine("http port must differ from the TCP login port");
             return 1;
         }
 
@@ -56,7 +38,7 @@ public static class Cli
         }
 
         if (rest.Count == 0)
-            return await ListenAsync(storePath, bindAddress, bindDisplay, port, httpPort, output, error).ConfigureAwait(false) ? 0 : 1;
+            return await ListenAsync(storePath, bindAddress, bindDisplay, httpPort, output, error).ConfigureAwait(false) ? 0 : 1;
 
         string cmd = rest[0].ToLowerInvariant();
         if (cmd is "import-json")
@@ -204,11 +186,11 @@ public static class Cli
               Fineage.Login create <account> <password> <name> <fighter|mystic>
               Fineage.Login select <account> <password> <name>
               Fineage.Login play <account> <password> <name> <fighter|mystic>
-              Fineage.Login [--bind 0.0.0.0] [--port 9106] [--http-port 5080] [--store data/accounts.json]
+              Fineage.Login [--bind 0.0.0.0] [--http-port 5080] [--store data/accounts.json]
               Fineage.Login import-json <accounts.json>   # requires FINEAGE_STORE=postgres / FINEAGE_DATABASE_URL
               Fineage.Login backfill-normalized           # re-project characters/items/quests from store_snapshot
               # FINEAGE_STORE=postgres|json  FINEAGE_DATABASE_URL=Host=...;Database=fineage;...
-              # With FINEAGE_NET_ENABLE=1: Net listens on 9106, V2 defaults to --port 9206
+              # Net TCP login port: FINEAGE_NET_LOGIN_PORT (default 9106)
             """);
         return 1;
     }
@@ -217,7 +199,6 @@ public static class Cli
         string storePath,
         IPAddress bindAddress,
         string bindDisplay,
-        int port,
         int httpPort,
         TextWriter output,
         TextWriter error)
@@ -244,20 +225,16 @@ public static class Cli
         };
 
         // Start Net TCP before HTTP so PacketEnvelope login works even if Kestrel hangs.
-        Task? netTask = null;
-        if (NetSettings.Enabled)
-        {
-            var netLogin = new NetLoginServer(service, zoneHost: ZoneHandoff.AdvertiseHost, zonePort: NetSettings.ZonePort);
-            var netTcp = new NetTcpServer();
-            output.WriteLine($"[LOGIN] net listen {bindDisplay}:{NetSettings.LoginPort} (PacketEnvelope)");
-            netTask = netTcp.RunAsync(
-                host,
-                NetSettings.LoginPort,
-                netLogin.HandleAsync,
-                shutdown.Token,
-                maxConnections,
-                NetSettings.InboxCapacity);
-        }
+        var netLogin = new NetLoginServer(service, zoneHost: ZoneHandoff.AdvertiseHost, zonePort: NetSettings.ZonePort);
+        var netTcp = new NetTcpServer();
+        output.WriteLine($"[LOGIN] net listen {bindDisplay}:{NetSettings.LoginPort} (PacketEnvelope)");
+        Task netTask = netTcp.RunAsync(
+            host,
+            NetSettings.LoginPort,
+            netLogin.HandleAsync,
+            shutdown.Token,
+            maxConnections,
+            NetSettings.InboxCapacity);
 
         HttpZoneStatusSource? zoneProbe = HttpZoneStatusSource.FromEnvironment(error);
         try
@@ -277,11 +254,11 @@ public static class Cli
             zoneProbe?.Dispose();
             if (netTask == null)
             {
-                error.WriteLine($"listen failed on {bindDisplay} tcp={port} http={httpPort}: {ex.Message}");
+                error.WriteLine($"listen failed on {bindDisplay} http={httpPort}: {ex.Message}");
                 return false;
             }
 
-            error.WriteLine($"[LOGIN] http {httpPort} failed ({ex.Message}); continuing with TCP/Net only");
+            error.WriteLine($"[LOGIN] http {httpPort} failed ({ex.Message}); continuing with Net only");
         }
 
         if (string.IsNullOrWhiteSpace(Environment.GetEnvironmentVariable("FINEAGE_HANDOFF_SECRET")) &&
@@ -291,7 +268,7 @@ public static class Cli
         }
 
         output.WriteLine(
-            $"[LOGIN] listen tcp={bindDisplay}:{port} http={(http != null ? http.BaseUrl : "off")} store={StoreLabel(storePath, accounts)} (maxConn={maxConnections} outboundQ={outboundQueue} msgPerSec={maxMsgPerSec})");
+            $"[LOGIN] listen net={bindDisplay}:{NetSettings.LoginPort} http={(http != null ? http.BaseUrl : "off")} store={StoreLabel(storePath, accounts)} (maxConn={maxConnections} msgPerSec={maxMsgPerSec})");
         if (http != null)
         {
             output.WriteLine(http.ZoneStatusProbe == null
@@ -310,26 +287,7 @@ public static class Cli
 
         await using FineageMetricsHost? metrics = FineageMetricsHost.Start("login", output, error);
 
-        Task? legacyTask = null;
-        if (NetSettings.LegacyV2Enabled)
-        {
-            output.WriteLine($"[LOGIN] legacy V2 listen {bindDisplay}:{port} (MessagePack, opt-in)");
-            legacyTask = new TcpServer().RunAsync(
-                host,
-                port,
-                maxConnections,
-                outboundQueue,
-                "login",
-                server.HandleAsync,
-                shutdown.Token,
-                LoginOverload.RejectAsync);
-        }
-        else
-        {
-            output.WriteLine("[LOGIN] legacy V2 listeners are off (FINEAGE_LEGACY_V2_ENABLE=1 to serve them)");
-        }
-
-        if (netTask == null && legacyTask == null)
+        if (netTask == null)
         {
             error.WriteLine("[LOGIN] nothing to serve: Net is always on, this should be unreachable");
             return false;
@@ -337,14 +295,11 @@ public static class Cli
 
         try
         {
-            await (legacyTask == null
-                    ? netTask!
-                    : Task.WhenAny(netTask ?? legacyTask, legacyTask))
-                .ConfigureAwait(false);
+            await netTask.ConfigureAwait(false);
         }
         catch (Exception ex) when (ex is not OperationCanceledException)
         {
-            error.WriteLine($"listen failed on {bindDisplay} tcp={port}: {ex.Message}");
+            error.WriteLine($"listen failed on {bindDisplay}: {ex.Message}");
             return false;
         }
         finally
