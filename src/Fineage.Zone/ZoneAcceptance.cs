@@ -139,7 +139,7 @@ public static class ZoneAcceptance
                 DestY = destY,
                 DestZ = destZ
             }));
-            var ack = NetCodec.DecodeMoveState(await link.ExpectPayloadAsync(NetOpcode.MoveState));
+            var ack = NetCodec.DecodeMoveState((await link.ExpectNextAsync(NetOpcode.MoveState).ConfigureAwait(false)).Payload);
             Require(ack.DestX == destX && ack.DestY == destY, $"move ack mismatch dest={ack.DestX},{ack.DestY}");
         }
         finally
@@ -194,6 +194,24 @@ public static class ZoneAcceptance
             Require(envelope.Opcode == expected,
                 $"expected opcode 0x{expected:X4}, got 0x{envelope.Opcode:X4}");
             return envelope;
+        }
+
+        /// <summary>
+        /// Waits for <paramref name="expected"/>, skipping unrelated fanout. The server pushes presence and
+        /// status frames that have nothing to do with the request being asserted, and their timing is load
+        /// dependent, so a strict next-frame match turns those into flakes.
+        /// </summary>
+        public async Task<PacketEnvelope> ExpectNextAsync(ushort expected)
+        {
+            while (true)
+            {
+                PacketEnvelope envelope = await NextAsync().ConfigureAwait(false);
+                if (envelope.Opcode == expected)
+                    return envelope;
+
+                Require(envelope.Opcode != NetOpcode.Reject,
+                    $"unexpected reject while waiting for 0x{expected:X4}: {NetCodec.DecodeReject(envelope.Payload).Code}");
+            }
         }
 
         public async Task<byte[]> ExpectPayloadAsync(ushort expected) =>
