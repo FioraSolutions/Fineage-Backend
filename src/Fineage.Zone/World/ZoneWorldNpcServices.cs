@@ -281,7 +281,8 @@ public sealed partial class ZoneWorld
 
         if (changes.Count > 0)
         {
-            toSelf.Add(Pack(session, MsgType.InventoryUpdate, new InventoryUpdateMsg { Changes = Collapse(changes) }));
+            // The fare is a bag change like any other, and Net clients only see it through the bridge.
+            FanInventory(session, Collapse(changes), toSelf);
             SaveInventory(session, player.Inventory);
         }
 

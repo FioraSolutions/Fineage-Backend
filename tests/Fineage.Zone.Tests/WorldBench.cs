@@ -30,7 +30,9 @@ internal sealed class WorldBench
         Fineage.Game.Shops.BuyListCatalog? buyLists = null,
         Fineage.Game.Shops.MultiSellCatalog? multisells = null,
         Fineage.Zone.NpcHtml.NpcHtmlCatalog? html = null,
-        Fineage.Zone.NpcHtml.BypassRegistry? bypasses = null)
+        Fineage.Zone.NpcHtml.BypassRegistry? bypasses = null,
+        Fineage.Game.Services.TeleportCatalog? teleports = null,
+        int? teleportOffset = null)
     {
         Game = game ?? GameData.LoadDefault();
         Store = JsonAccountStore.InMemory();
@@ -51,7 +53,9 @@ internal sealed class WorldBench
             buyLists: buyLists,
             multisells: multisells,
             html: html,
-            bypasses: bypasses);
+            bypasses: bypasses,
+            teleports: teleports,
+            teleportOffset: teleportOffset);
         (Bridge, Rec) = NetBridgeRecorder.Create();
         World.NetBridge = Bridge;
     }
@@ -217,4 +221,35 @@ internal sealed class BenchPlayer
                 Amount = amount
             },
             CancellationToken.None);
+
+    /// <summary>Picks a gatekeeper destination, the same call the teleport page's link lands on.</summary>
+    public Task<string?> Teleport(int npcObjectId, string listName, int locationId) =>
+        World.TryTeleportSelectAsync(
+            Session,
+            new TeleportSelectRequestMsg { NpcObjectId = npcObjectId, ListName = listName, LocationId = locationId },
+            CancellationToken.None);
+
+    public Task<string?> Deposit(int npcObjectId, params (int ObjectId, int Count)[] rows)
+    {
+        var lines = rows.Select(row => new WarehouseCountMsg { ObjectId = row.ObjectId, Count = row.Count }).ToArray();
+        return World.TryWarehouseDepositAsync(
+            Session,
+            new WarehouseDepositRequestMsg { NpcObjectId = npcObjectId, Lines = lines },
+            CancellationToken.None);
+    }
+
+    public Task<string?> Withdraw(int npcObjectId, params (int ObjectId, int Count)[] rows)
+    {
+        var lines = rows.Select(row => new WarehouseCountMsg { ObjectId = row.ObjectId, Count = row.Count }).ToArray();
+        return World.TryWarehouseWithdrawAsync(
+            Session,
+            new WarehouseWithdrawRequestMsg { NpcObjectId = npcObjectId, Lines = lines },
+            CancellationToken.None);
+    }
+
+    public Task<string?> SupportMagic(int npcObjectId) =>
+        World.TrySupportMagicAsync(Session, npcObjectId, CancellationToken.None);
+
+    public Task<string?> GiveBlessing(int npcObjectId) =>
+        World.TryGiveBlessingAsync(Session, npcObjectId, CancellationToken.None);
 }
