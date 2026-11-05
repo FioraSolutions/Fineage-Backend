@@ -410,7 +410,7 @@ public sealed partial class ZoneWorld
             return SkillProtocol.Target;
         if (!_byId.TryGetValue(targetId, out var target))
             return SkillProtocol.Target;
-        if (target.Kind != ZoneEntityKind.Npc || !target.Attackable || target.CurHp <= 0)
+        if (!IsAttackable(player, target))
             return SkillProtocol.Target;
         if (!VisibleTo(player.ObjectId, targetId))
             return SkillProtocol.Target;
@@ -579,7 +579,7 @@ public sealed partial class ZoneWorld
             return SkillProtocol.Target;
         if (!_byId.TryGetValue(targetId, out var target))
             return SkillProtocol.Target;
-        if (target.Kind != ZoneEntityKind.Npc || !target.Attackable || target.CurHp <= 0)
+        if (!IsAttackable(player, target))
             return SkillProtocol.Target;
         if (!VisibleTo(player.ObjectId, targetId))
             return SkillProtocol.Target;

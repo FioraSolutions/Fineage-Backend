@@ -170,6 +170,23 @@ public sealed partial class ZoneWorld
             _ => false
         };
 
+    /// <summary>
+    /// Mobius <c>Creature.isAttackable</c> for a player's swing. NPCs follow the template flag; another player is
+    /// attackable only while PvP-flagged or carrying karma (Mobius <c>isAutoAttackable(Player)</c>), and never the
+    /// attacker itself. This is the gate <c>D4</c> was missing: it used to reject every non-NPC outright.
+    /// </summary>
+    static bool IsAttackable(ZoneEntity attacker, ZoneEntity target)
+    {
+        if (target.Dead || target.CurHp <= 0)
+            return false;
+        return target.Kind switch
+        {
+            ZoneEntityKind.Npc => target.Attackable,
+            ZoneEntityKind.Player => !ReferenceEquals(attacker, target) && IsAutoAttackable(target),
+            _ => false
+        };
+    }
+
     string? TryAttack(ZoneSession session, int requestedTargetId, List<Pending> outbound) =>
         TryAttack(session, requestedTargetId, outbound, out _);
 
@@ -196,7 +213,7 @@ public sealed partial class ZoneWorld
 
         if (!_byId.TryGetValue(targetId, out var target))
             return "attack";
-        if (target.Kind != ZoneEntityKind.Npc || !target.Attackable || target.CurHp <= 0)
+        if (!IsAttackable(player, target))
             return "attack";
         if (!VisibleTo(player.ObjectId, targetId))
             return "attack";
@@ -242,10 +259,7 @@ public sealed partial class ZoneWorld
             RechargeAutoShots(player, outbound);
         // Mobius doAttack turns the attacker to its target; the target's own facing decides back/side/front.
         player.Heading = ZoneCombat.HeadingFrom(player.X, player.Y, target.X, target.Y);
-        var (damage, flags) = ZoneCombat.RollMelee(_combatRandom, ps.PAtk, NpcPDef(target),
-            ps.Accuracy, NpcEvasion(target), ps.CritRate, ps.RandomDamage,
-            soulshot, (int)ps.WeaponGrade, NpcShieldRate(target), target.ShieldDef, ps.Weapon == Fineage.Game.WeaponType.Bow,
-            ZoneCombat.HitConditionBonus(player.X, player.Y, player.Z, target.X, target.Y, target.Z, target.Heading));
+        var (damage, flags) = RollPlayerMelee(player, ps, target, soulshot);
 
         var attack = new AttackMsg
         {
@@ -284,6 +298,40 @@ public sealed partial class ZoneWorld
     double PlayerPDef(ZoneEntity player) => PlayerStats(player).PDef;
 
     int PlayerReach(ZoneEntity player) => ZoneCombat.PlayerAttackReach(PlayerStats(player).AttackRange);
+
+    /// <summary>
+    /// One physical swing from a player. A monster target rolls against its template P.Def / evasion / shield; a player
+    /// target rolls against the same player stat pipeline an incoming mob swing uses (<see cref="PlayerStats"/>), so a
+    /// duel is the same math as PvE with the target's own defence. Mobius applies the same
+    /// <c>calcPhysicalDam</c>, only the stats behind it change.
+    /// </summary>
+    (int Damage, byte Flags) RollPlayerMelee(ZoneEntity player, PlayerCombatStats ps, ZoneEntity target, bool soulshot)
+    {
+        double pDef;
+        double evasion;
+        double shieldRate;
+        int shieldDef;
+        if (target.Kind == ZoneEntityKind.Npc)
+        {
+            pDef = NpcPDef(target);
+            evasion = NpcEvasion(target);
+            shieldRate = NpcShieldRate(target);
+            shieldDef = target.ShieldDef;
+        }
+        else
+        {
+            var ts = PlayerStats(target);
+            pDef = Math.Max(1d, ts.PDef);
+            evasion = ts.Evasion;
+            shieldRate = ts.ShieldRate;
+            shieldDef = ts.ShieldDef;
+        }
+
+        return ZoneCombat.RollMelee(_combatRandom, ps.PAtk, pDef,
+            ps.Accuracy, evasion, ps.CritRate, ps.RandomDamage,
+            soulshot, (int)ps.WeaponGrade, shieldRate, shieldDef, ps.Weapon == Fineage.Game.WeaponType.Bow,
+            ZoneCombat.HitConditionBonus(player.X, player.Y, player.Z, target.X, target.Y, target.Z, target.Heading));
+    }
 
     double NpcPDef(ZoneEntity npc) =>
         Math.Max(1d, StatMods(npc).Apply(CombatStat.PDef, npc.PDef > 0 ? npc.PDef : Math.Max(1, npc.Level) * 40d));
