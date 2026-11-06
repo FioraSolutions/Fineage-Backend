@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Q408 Path of the Elven Wizard -> data/quests.json (replaces quest 408 in place).
+"""Q408 Path of the Elven Wizard -> data/quests/ pack (questio.upsert) (replaces quest 408 in place).
 Transcribes Mobius CT0 Interlude Q00408_PathOfTheElvenWizard.java branch for branch as dialog gates
 (classes / minLevel / maxLevel / hasItem+minCount / hasItems / lacksItems) and its HTML (links rewritten to
 quest_event:408:<event>, '.htm(l)' dropped from event names). Run scripts/gen_drop_items.py and
@@ -7,6 +7,10 @@ scripts/gen_quest_item_flags.py afterwards so the quest items exist and carry th
 import json, pathlib, re
 
 ROOT = pathlib.Path(__file__).resolve().parent.parent
+import sys
+
+sys.path.insert(0, str(pathlib.Path(__file__).resolve().parent))
+import questio
 SRC = ROOT / "ref/mobius-ct0-interlude/data/scripts/quests/Q00408_PathOfTheElvenWizard"
 Q = 408
 ROSSELA, GREENIS, THALIA, NORTHWIND = 30414, 30157, 30371, 30423
@@ -127,9 +131,5 @@ quest = {
     "questItems": [LETTER, RED_DOWN, RUBY, AQUAMARINE, APPLE, GOLD_LEAVES, LOVE, AMETHYST, NOBILITY, PERIDOT, CHARM, SAP, POTPOURRI],
     "dialogs": dialogs,
 }
-path = ROOT / "data/quests.json"
-data = json.loads(path.read_text())
-data["quests"] = [q for q in data["quests"] if q["id"] != Q] + [quest]
-data["quests"].sort(key=lambda q: q["id"])
-path.write_text(json.dumps(data, indent=2, ensure_ascii=False) + "\n")
+questio.upsert_quest(quest)
 print(f"quest {Q}: {len(dialogs)} dialogs")

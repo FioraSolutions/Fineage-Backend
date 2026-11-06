@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Q406 Path of the Elven Knight, Q407 Path of the Elven Scout, Q409 Path of the Elven Oracle -> data/quests.json
+"""Q406 Path of the Elven Knight, Q407 Path of the Elven Scout, Q409 Path of the Elven Oracle -> data/quests/ pack (questio.upsert)
 (replaces those ids in place). Same pattern as gen_q408.py: Mobius CT0 Interlude onAdvEvent/onTalk/onKill branches
 transcribed in order as dialog gates (classes, minLevel/maxLevel, hasItem+minCount, hasItems, lacksItems, atLeast,
 whenVar) and the Mobius HTML with links rewritten to quest_event:<id>:<event> ('.htm(l)' dropped).
@@ -7,7 +7,13 @@ Run scripts/gen_drop_items.py and scripts/gen_quest_item_flags.py afterwards."""
 import json, pathlib, re
 
 ROOT = pathlib.Path(__file__).resolve().parent.parent
-QDIR = ROOT / "ref/mobius-ct0-interlude/data/scripts/quests"
+import sys
+
+sys.path.insert(0, str(pathlib.Path(__file__).resolve().parent))
+import questio
+QDIR = ROOT / "ref/mobius-ct0-interlude/dist/game/data/scripts/quests"
+if not QDIR.is_dir():
+    QDIR = ROOT / "ref/mobius-ct0-interlude/data/scripts/quests"
 
 
 class Gen:
@@ -63,6 +69,7 @@ give = lambda i, c=1: {"op": "give_item", "itemId": i, "count": c}
 take = lambda i, c=1: {"op": "take_item", "itemId": i, "count": c}
 cond = lambda c: {"op": "set_cond", "cond": c}
 setv = lambda k, v: {"op": "set", "key": k, "value": str(v)}
+spawn = lambda npc: {"op": "spawn_npc", "npcId": npc}
 START = [{"op": "create"}, {"op": "start"}]
 ELVEN_FIGHTER, ELVEN_KNIGHT, ELVEN_SCOUT, ELVEN_MAGE, ORACLE = 18, 19, 22, 25, 29
 
@@ -136,7 +143,6 @@ def q409():
     MANUEL, ALLANA, PERRIN = 30293, 30424, 30428
     MEDAL, MONEY, DIARY, ORDER, LEAF, HALF, NECK = 1231, 1232, 1233, 1234, 1235, 1236, 1275
     m = lambda v: dict(whenVar="memo", whenValue=str(v))
-    no_spawn = lambda who: f"<html><body>{who}:<br>(The quest monsters for this step are not spawned on this server yet.)</body></html>"
     g.d(MANUEL, "talk", "30293-01.htm", when="absent", lacksItems=[LEAF])
     g.d(MANUEL, "talk", "30293-04.htm", when="absent")
     g.d(MANUEL, "talk", "30293-01.htm", when="completed", lacksItems=[LEAF])
@@ -158,27 +164,25 @@ def q409():
     for ev in ("30424-08", "30424-09"):
         g.d(ALLANA, "event", ev + ".html", event=ev)
     g.d(ALLANA, "event", "30424-07.html", event="30424-07", **m(1))
-    # Mobius replay_1 spawns Lizardman Warrior/Scout/Soldier 27032-27034 at Allana; no quest-spawn op yet.
-    g.d(ALLANA, "event", None, event="replay_1", raw=no_spawn("Allana"), ops=[setv("memo", 2)])
+    # Mobius replay_1: setMemoState(2) + addSpawn lizardmen 27032-27034 at Allana (no HTML).
+    g.d(ALLANA, "event", None, event="replay_1", raw="",
+        ops=[setv("memo", 2), spawn(27032), spawn(27033), spawn(27034)])
     g.d(PERRIN, "talk", "30428-04.html", hasItems=[MEDAL, ORDER, HALF, NECK], ops=[give(MONEY), take(NECK), cond(6)])
     g.d(PERRIN, "talk", "30428-05.html", hasItems=[MEDAL, ORDER, HALF, MONEY])
     g.d(PERRIN, "talk", "30428-06.html", hasItems=[MEDAL, ORDER, HALF], **m(3))
     g.d(PERRIN, "talk", "30428-01.html", hasItems=[MEDAL, ORDER, HALF])
     for ev in ("30428-02", "30428-03"):
         g.d(PERRIN, "event", ev + ".html", event=ev, **m(2))
-    # Mobius replay_2 spawns Tamil 27035 at Perrin.
-    g.d(PERRIN, "event", None, event="replay_2", raw=no_spawn("Perrin"), ops=[setv("memo", 3)], **m(2))
+    # Mobius replay_2: setMemoState(3) + addSpawn Tamil 27035 at Perrin (no HTML).
+    g.d(PERRIN, "event", None, event="replay_2", raw="",
+        ops=[setv("memo", 3), spawn(27035)], **m(2))
     for mob in (27032, 27033, 27034):
         g.d(mob, "kill", None, lacksItems=[ORDER], ops=[give(ORDER), cond(3)])
     g.d(27035, "kill", None, lacksItems=[NECK], ops=[give(NECK), cond(5)])
     return g.quest("Path of the Elven Oracle", [MEDAL, MONEY, DIARY, ORDER, HALF, NECK])
 
 
-path = ROOT / "data/quests.json"
-data = json.loads(path.read_text())
 new = [q406(), q407(), q409()]
-ids = {q["id"] for q in new}
-data["quests"] = sorted([q for q in data["quests"] if q["id"] not in ids] + new, key=lambda q: q["id"])
-path.write_text(json.dumps(data, indent=2, ensure_ascii=False) + "\n")
+questio.upsert_quests(new)
 for q in new:
     print(f"quest {q['id']}: {len(q['dialogs'])} dialogs")

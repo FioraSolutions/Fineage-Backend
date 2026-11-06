@@ -1,0 +1,168 @@
+{
+  "id": 7,
+  "name": "A Trip Begins",
+  "repeatable": false,
+  "abortable": true,
+  "questItems": [
+    7572
+  ],
+  "dialogs": [
+    {
+      "npcId": 30146,
+      "hook": "talk",
+      "when": "absent",
+      "races": [
+        1
+      ],
+      "minLevel": 3,
+      "htmlFile": "30146-talk-000.htm"
+    },
+    {
+      "npcId": 30146,
+      "hook": "talk",
+      "when": "absent",
+      "races": [
+        1
+      ],
+      "htmlFile": "30146-talk-001.htm"
+    },
+    {
+      "npcId": 30146,
+      "hook": "event",
+      "when": "absent",
+      "event": "30146-03",
+      "races": [
+        1
+      ],
+      "minLevel": 3,
+      "ops": [
+        {
+          "op": "create"
+        },
+        {
+          "op": "start"
+        },
+        {
+          "op": "set_cond",
+          "cond": 1
+        }
+      ],
+      "htmlFile": "30146-event-30146-03-002.htm"
+    },
+    {
+      "npcId": 30146,
+      "hook": "event",
+      "when": "started",
+      "event": "30146-06",
+      "cond": 3,
+      "ops": [
+        {
+          "op": "give_item",
+          "itemId": 7559,
+          "count": 1
+        },
+        {
+          "op": "give_item",
+          "itemId": 7570,
+          "count": 1
+        },
+        {
+          "op": "complete"
+        }
+      ],
+      "htmlFile": "30146-event-30146-06-c3-003.htm"
+    },
+    {
+      "npcId": 30148,
+      "hook": "event",
+      "when": "started",
+      "event": "30148-02",
+      "cond": 1,
+      "ops": [
+        {
+          "op": "set_cond",
+          "cond": 2
+        },
+        {
+          "op": "give_item",
+          "itemId": 7572,
+          "count": 1
+        }
+      ],
+      "htmlFile": "30148-event-30148-02-c1-004.htm"
+    },
+    {
+      "npcId": 30154,
+      "hook": "event",
+      "when": "started",
+      "event": "30154-02",
+      "cond": 2,
+      "hasItem": 7572,
+      "ops": [
+        {
+          "op": "take_item",
+          "itemId": 7572,
+          "count": 1
+        },
+        {
+          "op": "set_cond",
+          "cond": 3
+        }
+      ],
+      "htmlFile": "30154-event-30154-02-c2-005.htm"
+    },
+    {
+      "npcId": 30146,
+      "hook": "talk",
+      "when": "started",
+      "cond": 1,
+      "htmlFile": "30146-talk-c1-006.htm"
+    },
+    {
+      "npcId": 30146,
+      "hook": "talk",
+      "when": "started",
+      "cond": 3,
+      "htmlFile": "30146-talk-c3-007.htm"
+    },
+    {
+      "npcId": 30148,
+      "hook": "talk",
+      "when": "started",
+      "cond": 1,
+      "htmlFile": "30148-talk-c1-008.htm"
+    },
+    {
+      "npcId": 30148,
+      "hook": "talk",
+      "when": "started",
+      "cond": 2,
+      "htmlFile": "30148-talk-c2-009.htm"
+    },
+    {
+      "npcId": 30154,
+      "hook": "talk",
+      "when": "started",
+      "cond": 2,
+      "htmlFile": "30154-talk-c2-010.htm"
+    },
+    {
+      "npcId": 30154,
+      "hook": "talk",
+      "when": "started",
+      "cond": 3,
+      "htmlFile": "30154-talk-c3-011.htm"
+    },
+    {
+      "npcId": 30154,
+      "hook": "event",
+      "when": "started",
+      "event": "30154-02",
+      "cond": 2,
+      "lacksItems": [
+        7572
+      ],
+      "htmlFile": "30154-event-30154-02-c2-012.htm"
+    }
+  ]
+}

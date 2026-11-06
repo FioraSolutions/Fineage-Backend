@@ -1,0 +1,196 @@
+{
+  "id": 163,
+  "name": "Legacy of the Poet",
+  "repeatable": false,
+  "abortable": true,
+  "questItems": [
+    1038,
+    1039,
+    1040,
+    1041
+  ],
+  "dialogs": [
+    {
+      "npcId": 30220,
+      "hook": "talk",
+      "when": "absent",
+      "races": [
+        0,
+        1,
+        3,
+        4
+      ],
+      "minLevel": 11,
+      "htmlFile": "30220-talk-000.htm"
+    },
+    {
+      "npcId": 30220,
+      "hook": "talk",
+      "when": "absent",
+      "races": [
+        0,
+        1,
+        3,
+        4
+      ],
+      "htmlFile": "30220-talk-001.htm"
+    },
+    {
+      "npcId": 30220,
+      "hook": "talk",
+      "when": "absent",
+      "races": [
+        2
+      ],
+      "htmlFile": "30220-talk-002.htm"
+    },
+    {
+      "npcId": 30220,
+      "hook": "event",
+      "when": "any",
+      "event": "30220-03",
+      "htmlFile": "30220-event-30220-03-003.htm"
+    },
+    {
+      "npcId": 30220,
+      "hook": "event",
+      "when": "any",
+      "event": "30220-04",
+      "htmlFile": "30220-event-30220-04-004.htm"
+    },
+    {
+      "npcId": 30220,
+      "hook": "event",
+      "when": "absent",
+      "event": "30220-05",
+      "races": [
+        0,
+        1,
+        3,
+        4
+      ],
+      "minLevel": 11,
+      "ops": [
+        {
+          "op": "create"
+        },
+        {
+          "op": "start"
+        },
+        {
+          "op": "set_cond",
+          "cond": 1
+        }
+      ],
+      "htmlFile": "30220-event-30220-05-005.htm"
+    },
+    {
+      "npcId": 30220,
+      "hook": "talk",
+      "when": "started",
+      "cond": 1,
+      "hasItems": [
+        1038,
+        1039,
+        1040,
+        1041
+      ],
+      "ops": [
+        {
+          "op": "give_exp_sp",
+          "exp": 21643,
+          "sp": 943
+        },
+        {
+          "op": "give_adena",
+          "count": 13890
+        },
+        {
+          "op": "complete"
+        }
+      ],
+      "htmlFile": "30220-talk-c1-006.htm"
+    },
+    {
+      "npcId": 30220,
+      "hook": "talk",
+      "when": "started",
+      "cond": 1,
+      "htmlFile": "30220-talk-c1-007.htm"
+    },
+    {
+      "npcId": 20372,
+      "hook": "kill",
+      "when": "started",
+      "cond": 1,
+      "html": "",
+      "ops": [
+        {
+          "op": "drop_item",
+          "itemId": 1038,
+          "count": 1,
+          "chance": 0.1,
+          "limit": 1
+        },
+        {
+          "op": "drop_item",
+          "itemId": 1039,
+          "count": 1,
+          "chance": 0.2,
+          "limit": 1
+        },
+        {
+          "op": "drop_item",
+          "itemId": 1040,
+          "count": 1,
+          "chance": 0.2,
+          "limit": 1
+        },
+        {
+          "op": "drop_item",
+          "itemId": 1041,
+          "count": 1,
+          "chance": 0.4,
+          "limit": 1
+        }
+      ]
+    },
+    {
+      "npcId": 20373,
+      "hook": "kill",
+      "when": "started",
+      "cond": 1,
+      "html": "",
+      "ops": [
+        {
+          "op": "drop_item",
+          "itemId": 1038,
+          "count": 1,
+          "chance": 0.1,
+          "limit": 1
+        },
+        {
+          "op": "drop_item",
+          "itemId": 1039,
+          "count": 1,
+          "chance": 0.2,
+          "limit": 1
+        },
+        {
+          "op": "drop_item",
+          "itemId": 1040,
+          "count": 1,
+          "chance": 0.2,
+          "limit": 1
+        },
+        {
+          "op": "drop_item",
+          "itemId": 1041,
+          "count": 1,
+          "chance": 0.4,
+          "limit": 1
+        }
+      ]
+    }
+  ]
+}

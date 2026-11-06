@@ -1,0 +1,168 @@
+{
+  "id": 316,
+  "name": "Destroy Plague Carriers",
+  "repeatable": true,
+  "abortable": true,
+  "questItems": [
+    1042,
+    1043
+  ],
+  "dialogs": [
+    {
+      "npcId": 30155,
+      "hook": "talk",
+      "when": "absent",
+      "races": [
+        1
+      ],
+      "minLevel": 18,
+      "htmlFile": "30155-talk-000.htm"
+    },
+    {
+      "npcId": 30155,
+      "hook": "talk",
+      "when": "absent",
+      "races": [
+        1
+      ],
+      "htmlFile": "30155-talk-001.htm"
+    },
+    {
+      "npcId": 30155,
+      "hook": "talk",
+      "when": "absent",
+      "htmlFile": "30155-talk-002.htm"
+    },
+    {
+      "npcId": 30155,
+      "hook": "event",
+      "event": "accept",
+      "when": "absent",
+      "races": [
+        1
+      ],
+      "minLevel": 18,
+      "ops": [
+        {
+          "op": "create"
+        },
+        {
+          "op": "start"
+        }
+      ],
+      "htmlFile": "30155-event-accept-003.htm"
+    },
+    {
+      "npcId": 30155,
+      "hook": "talk",
+      "when": "started",
+      "hasItem": 1042,
+      "ops": [
+        {
+          "op": "sell_items",
+          "prices": [
+            {
+              "itemId": 1042,
+              "adena": 30
+            },
+            {
+              "itemId": 1043,
+              "adena": 10000
+            }
+          ],
+          "bonusMin": 10,
+          "bonusAdena": 5000
+        }
+      ],
+      "htmlFile": "30155-talk-004.htm"
+    },
+    {
+      "npcId": 30155,
+      "hook": "talk",
+      "when": "started",
+      "hasItem": 1043,
+      "ops": [
+        {
+          "op": "sell_items",
+          "prices": [
+            {
+              "itemId": 1042,
+              "adena": 30
+            },
+            {
+              "itemId": 1043,
+              "adena": 10000
+            }
+          ],
+          "bonusMin": 10,
+          "bonusAdena": 5000
+        }
+      ],
+      "htmlFile": "30155-talk-005.htm"
+    },
+    {
+      "npcId": 30155,
+      "hook": "talk",
+      "when": "started",
+      "htmlFile": "30155-talk-006.htm"
+    },
+    {
+      "npcId": 30155,
+      "hook": "event",
+      "event": "quit",
+      "when": "started",
+      "ops": [
+        {
+          "op": "complete"
+        }
+      ],
+      "htmlFile": "30155-event-quit-007.htm"
+    },
+    {
+      "npcId": 20040,
+      "hook": "kill",
+      "when": "started",
+      "party": true,
+      "html": "",
+      "ops": [
+        {
+          "op": "drop_item",
+          "itemId": 1042,
+          "count": 2,
+          "chance": 1.0
+        }
+      ]
+    },
+    {
+      "npcId": 20047,
+      "hook": "kill",
+      "when": "started",
+      "party": true,
+      "html": "",
+      "ops": [
+        {
+          "op": "drop_item",
+          "itemId": 1042,
+          "count": 2,
+          "chance": 1.0
+        }
+      ]
+    },
+    {
+      "npcId": 27020,
+      "hook": "kill",
+      "when": "started",
+      "party": true,
+      "html": "",
+      "ops": [
+        {
+          "op": "drop_item",
+          "itemId": 1043,
+          "count": 1,
+          "chance": 1.0,
+          "limit": 1
+        }
+      ]
+    }
+  ]
+}

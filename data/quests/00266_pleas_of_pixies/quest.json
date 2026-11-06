@@ -1,0 +1,174 @@
+{
+  "id": 266,
+  "name": "Pleas of Pixies",
+  "repeatable": false,
+  "abortable": true,
+  "questItems": [
+    1334
+  ],
+  "dialogs": [
+    {
+      "npcId": 31852,
+      "hook": "talk",
+      "when": "absent",
+      "races": [
+        0,
+        2,
+        3,
+        4
+      ],
+      "htmlFile": "31852-talk-000.htm"
+    },
+    {
+      "npcId": 31852,
+      "hook": "talk",
+      "when": "absent",
+      "races": [
+        1
+      ],
+      "maxLevel": 2,
+      "htmlFile": "31852-talk-001.htm"
+    },
+    {
+      "npcId": 31852,
+      "hook": "talk",
+      "when": "absent",
+      "races": [
+        1
+      ],
+      "minLevel": 3,
+      "htmlFile": "31852-talk-002.htm"
+    },
+    {
+      "npcId": 31852,
+      "hook": "event",
+      "when": "absent",
+      "event": "31852-04",
+      "races": [
+        1
+      ],
+      "minLevel": 3,
+      "ops": [
+        {
+          "op": "create"
+        },
+        {
+          "op": "start"
+        },
+        {
+          "op": "set_cond",
+          "cond": 1
+        }
+      ],
+      "htmlFile": "31852-event-31852-04-003.htm"
+    },
+    {
+      "npcId": 31852,
+      "hook": "talk",
+      "when": "started",
+      "cond": 1,
+      "htmlFile": "31852-talk-c1-004.htm"
+    },
+    {
+      "npcId": 31852,
+      "hook": "talk",
+      "when": "started",
+      "cond": 2,
+      "atLeast": {
+        "1334": 100
+      },
+      "ops": [
+        {
+          "op": "give_item",
+          "itemId": 1336,
+          "count": 1
+        },
+        {
+          "op": "give_item",
+          "itemId": 1060,
+          "count": 1
+        },
+        {
+          "op": "complete"
+        }
+      ],
+      "htmlFile": "31852-talk-c2-005.htm"
+    },
+    {
+      "npcId": 20537,
+      "hook": "kill",
+      "when": "started",
+      "cond": 1,
+      "html": "",
+      "ops": [
+        {
+          "op": "drop_item",
+          "itemId": 1334,
+          "count": 1,
+          "chance": 0.2,
+          "limit": 100,
+          "condAtLimit": 2
+        }
+      ]
+    },
+    {
+      "npcId": 20525,
+      "hook": "kill",
+      "when": "started",
+      "cond": 1,
+      "html": "",
+      "ops": [
+        {
+          "op": "drop_item",
+          "itemId": 1334,
+          "count": 1,
+          "chance": 0.2,
+          "limit": 100,
+          "condAtLimit": 2
+        },
+        {
+          "op": "drop_item",
+          "itemId": 1334,
+          "count": 1,
+          "chance": 0.1,
+          "limit": 100,
+          "condAtLimit": 2
+        }
+      ]
+    },
+    {
+      "npcId": 20534,
+      "hook": "kill",
+      "when": "started",
+      "cond": 1,
+      "html": "",
+      "ops": [
+        {
+          "op": "drop_item",
+          "itemId": 1334,
+          "count": 1,
+          "chance": 0.6,
+          "limit": 100,
+          "condAtLimit": 2
+        }
+      ]
+    },
+    {
+      "npcId": 20530,
+      "hook": "kill",
+      "when": "started",
+      "cond": 1,
+      "html": "",
+      "ops": [
+        {
+          "op": "drop_item",
+          "itemId": 1334,
+          "count": 1,
+          "chance": 0.8,
+          "limit": 100,
+          "condAtLimit": 2
+        }
+      ]
+    }
+  ]
+}

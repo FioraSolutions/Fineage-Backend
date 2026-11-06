@@ -1,0 +1,666 @@
+{
+  "id": 409,
+  "name": "Path of the Elven Oracle",
+  "repeatable": false,
+  "abortable": true,
+  "questItems": [
+    1231,
+    1232,
+    1233,
+    1234,
+    1236,
+    1275
+  ],
+  "dialogs": [
+    {
+      "npcId": 30293,
+      "hook": "talk",
+      "when": "absent",
+      "lacksItems": [
+        1235
+      ],
+      "htmlFile": "30293-talk-000.htm"
+    },
+    {
+      "npcId": 30293,
+      "hook": "talk",
+      "when": "absent",
+      "htmlFile": "30293-talk-001.htm"
+    },
+    {
+      "npcId": 30293,
+      "hook": "talk",
+      "when": "completed",
+      "lacksItems": [
+        1235
+      ],
+      "htmlFile": "30293-talk-002.htm"
+    },
+    {
+      "npcId": 30293,
+      "hook": "talk",
+      "when": "completed",
+      "htmlFile": "30293-talk-003.htm"
+    },
+    {
+      "npcId": 30293,
+      "hook": "event",
+      "when": "absent",
+      "event": "ACCEPT",
+      "classes": [
+        25
+      ],
+      "minLevel": 18,
+      "lacksItems": [
+        1235
+      ],
+      "ops": [
+        {
+          "op": "create"
+        },
+        {
+          "op": "start"
+        },
+        {
+          "op": "set",
+          "key": "memo",
+          "value": "1"
+        },
+        {
+          "op": "give_item",
+          "itemId": 1231,
+          "count": 1
+        }
+      ],
+      "htmlFile": "30293-event-ACCEPT-004.htm"
+    },
+    {
+      "npcId": 30293,
+      "hook": "event",
+      "when": "any",
+      "event": "ACCEPT",
+      "classes": [
+        25
+      ],
+      "minLevel": 18,
+      "htmlFile": "30293-event-ACCEPT-005.htm"
+    },
+    {
+      "npcId": 30293,
+      "hook": "event",
+      "when": "any",
+      "event": "ACCEPT",
+      "classes": [
+        25
+      ],
+      "htmlFile": "30293-event-ACCEPT-006.htm"
+    },
+    {
+      "npcId": 30293,
+      "hook": "event",
+      "when": "any",
+      "event": "ACCEPT",
+      "classes": [
+        29
+      ],
+      "htmlFile": "30293-event-ACCEPT-007.htm"
+    },
+    {
+      "npcId": 30293,
+      "hook": "event",
+      "when": "any",
+      "event": "ACCEPT",
+      "htmlFile": "30293-event-ACCEPT-008.htm"
+    },
+    {
+      "npcId": 30293,
+      "hook": "talk",
+      "when": "started",
+      "hasItem": 1231,
+      "lacksItems": [
+        1232,
+        1233,
+        1234,
+        1236
+      ],
+      "whenVar": "memo",
+      "whenValue": "2",
+      "ops": [
+        {
+          "op": "set",
+          "key": "memo",
+          "value": "1"
+        },
+        {
+          "op": "set_cond",
+          "cond": 8
+        }
+      ],
+      "htmlFile": "30293-talk-009.htm"
+    },
+    {
+      "npcId": 30293,
+      "hook": "talk",
+      "when": "started",
+      "hasItem": 1231,
+      "lacksItems": [
+        1232,
+        1233,
+        1234,
+        1236
+      ],
+      "ops": [
+        {
+          "op": "set",
+          "key": "memo",
+          "value": "1"
+        }
+      ],
+      "htmlFile": "30293-talk-010.htm"
+    },
+    {
+      "npcId": 30293,
+      "hook": "talk",
+      "when": "started",
+      "hasItem": 1231,
+      "hasItems": [
+        1232,
+        1233,
+        1234
+      ],
+      "lacksItems": [
+        1236
+      ],
+      "minLevel": 20,
+      "ops": [
+        {
+          "op": "give_adena",
+          "count": 163800
+        },
+        {
+          "op": "give_item",
+          "itemId": 1235,
+          "count": 1
+        },
+        {
+          "op": "give_exp_sp",
+          "exp": 320534,
+          "sp": 20392
+        },
+        {
+          "op": "complete"
+        }
+      ],
+      "htmlFile": "30293-talk-011.htm"
+    },
+    {
+      "npcId": 30293,
+      "hook": "talk",
+      "when": "started",
+      "hasItem": 1231,
+      "hasItems": [
+        1232,
+        1233,
+        1234
+      ],
+      "lacksItems": [
+        1236
+      ],
+      "minLevel": 19,
+      "maxLevel": 19,
+      "ops": [
+        {
+          "op": "give_adena",
+          "count": 163800
+        },
+        {
+          "op": "give_item",
+          "itemId": 1235,
+          "count": 1
+        },
+        {
+          "op": "give_exp_sp",
+          "exp": 456128,
+          "sp": 27090
+        },
+        {
+          "op": "complete"
+        }
+      ],
+      "htmlFile": "30293-talk-012.htm"
+    },
+    {
+      "npcId": 30293,
+      "hook": "talk",
+      "when": "started",
+      "hasItem": 1231,
+      "hasItems": [
+        1232,
+        1233,
+        1234
+      ],
+      "lacksItems": [
+        1236
+      ],
+      "maxLevel": 18,
+      "ops": [
+        {
+          "op": "give_adena",
+          "count": 163800
+        },
+        {
+          "op": "give_item",
+          "itemId": 1235,
+          "count": 1
+        },
+        {
+          "op": "give_exp_sp",
+          "exp": 591724,
+          "sp": 33788
+        },
+        {
+          "op": "complete"
+        }
+      ],
+      "htmlFile": "30293-talk-013.htm"
+    },
+    {
+      "npcId": 30293,
+      "hook": "talk",
+      "when": "started",
+      "hasItem": 1231,
+      "htmlFile": "30293-talk-014.htm"
+    },
+    {
+      "npcId": 30424,
+      "hook": "talk",
+      "when": "started",
+      "hasItem": 1231,
+      "lacksItems": [
+        1232,
+        1233,
+        1234,
+        1236
+      ],
+      "whenVar": "memo",
+      "whenValue": "2",
+      "htmlFile": "30424-talk-015.htm"
+    },
+    {
+      "npcId": 30424,
+      "hook": "talk",
+      "when": "started",
+      "hasItem": 1231,
+      "lacksItems": [
+        1232,
+        1233,
+        1234,
+        1236
+      ],
+      "whenVar": "memo",
+      "whenValue": "1",
+      "ops": [
+        {
+          "op": "set_cond",
+          "cond": 2
+        }
+      ],
+      "htmlFile": "30424-talk-016.htm"
+    },
+    {
+      "npcId": 30424,
+      "hook": "talk",
+      "when": "started",
+      "hasItems": [
+        1231,
+        1234
+      ],
+      "lacksItems": [
+        1232,
+        1233,
+        1236
+      ],
+      "ops": [
+        {
+          "op": "set",
+          "key": "memo",
+          "value": "2"
+        },
+        {
+          "op": "give_item",
+          "itemId": 1236,
+          "count": 1
+        },
+        {
+          "op": "set_cond",
+          "cond": 4
+        }
+      ],
+      "htmlFile": "30424-talk-017.htm"
+    },
+    {
+      "npcId": 30424,
+      "hook": "talk",
+      "when": "started",
+      "hasItems": [
+        1231,
+        1234,
+        1236
+      ],
+      "lacksItems": [
+        1232,
+        1233,
+        1275
+      ],
+      "whenVar": "memo",
+      "whenValue": "3",
+      "ops": [
+        {
+          "op": "set",
+          "key": "memo",
+          "value": "2"
+        },
+        {
+          "op": "set_cond",
+          "cond": 4
+        }
+      ],
+      "htmlFile": "30424-talk-018.htm"
+    },
+    {
+      "npcId": 30424,
+      "hook": "talk",
+      "when": "started",
+      "hasItems": [
+        1231,
+        1234,
+        1236
+      ],
+      "lacksItems": [
+        1232,
+        1233
+      ],
+      "htmlFile": "30424-talk-019.htm"
+    },
+    {
+      "npcId": 30424,
+      "hook": "talk",
+      "when": "started",
+      "hasItems": [
+        1231,
+        1232,
+        1234,
+        1236
+      ],
+      "lacksItems": [
+        1233
+      ],
+      "ops": [
+        {
+          "op": "give_item",
+          "itemId": 1233,
+          "count": 1
+        },
+        {
+          "op": "take_item",
+          "itemId": 1236,
+          "count": 1
+        },
+        {
+          "op": "set_cond",
+          "cond": 9
+        }
+      ],
+      "htmlFile": "30424-talk-020.htm"
+    },
+    {
+      "npcId": 30424,
+      "hook": "talk",
+      "when": "started",
+      "hasItems": [
+        1231,
+        1232,
+        1234,
+        1233
+      ],
+      "ops": [
+        {
+          "op": "set_cond",
+          "cond": 7
+        }
+      ],
+      "htmlFile": "30424-talk-021.htm"
+    },
+    {
+      "npcId": 30424,
+      "hook": "event",
+      "when": "started",
+      "event": "30424-08",
+      "htmlFile": "30424-event-30424-08-022.htm"
+    },
+    {
+      "npcId": 30424,
+      "hook": "event",
+      "when": "started",
+      "event": "30424-09",
+      "htmlFile": "30424-event-30424-09-023.htm"
+    },
+    {
+      "npcId": 30424,
+      "hook": "event",
+      "when": "started",
+      "event": "30424-07",
+      "whenVar": "memo",
+      "whenValue": "1",
+      "htmlFile": "30424-event-30424-07-024.htm"
+    },
+    {
+      "npcId": 30424,
+      "hook": "event",
+      "when": "started",
+      "event": "replay_1",
+      "html": "",
+      "ops": [
+        {
+          "op": "set",
+          "key": "memo",
+          "value": "2"
+        },
+        {
+          "op": "spawn_npc",
+          "npcId": 27032
+        },
+        {
+          "op": "spawn_npc",
+          "npcId": 27033
+        },
+        {
+          "op": "spawn_npc",
+          "npcId": 27034
+        }
+      ]
+    },
+    {
+      "npcId": 30428,
+      "hook": "talk",
+      "when": "started",
+      "hasItems": [
+        1231,
+        1234,
+        1236,
+        1275
+      ],
+      "ops": [
+        {
+          "op": "give_item",
+          "itemId": 1232,
+          "count": 1
+        },
+        {
+          "op": "take_item",
+          "itemId": 1275,
+          "count": 1
+        },
+        {
+          "op": "set_cond",
+          "cond": 6
+        }
+      ],
+      "htmlFile": "30428-talk-026.htm"
+    },
+    {
+      "npcId": 30428,
+      "hook": "talk",
+      "when": "started",
+      "hasItems": [
+        1231,
+        1234,
+        1236,
+        1232
+      ],
+      "htmlFile": "30428-talk-027.htm"
+    },
+    {
+      "npcId": 30428,
+      "hook": "talk",
+      "when": "started",
+      "hasItems": [
+        1231,
+        1234,
+        1236
+      ],
+      "whenVar": "memo",
+      "whenValue": "3",
+      "htmlFile": "30428-talk-028.htm"
+    },
+    {
+      "npcId": 30428,
+      "hook": "talk",
+      "when": "started",
+      "hasItems": [
+        1231,
+        1234,
+        1236
+      ],
+      "htmlFile": "30428-talk-029.htm"
+    },
+    {
+      "npcId": 30428,
+      "hook": "event",
+      "when": "started",
+      "event": "30428-02",
+      "whenVar": "memo",
+      "whenValue": "2",
+      "htmlFile": "30428-event-30428-02-030.htm"
+    },
+    {
+      "npcId": 30428,
+      "hook": "event",
+      "when": "started",
+      "event": "30428-03",
+      "whenVar": "memo",
+      "whenValue": "2",
+      "htmlFile": "30428-event-30428-03-031.htm"
+    },
+    {
+      "npcId": 30428,
+      "hook": "event",
+      "when": "started",
+      "event": "replay_2",
+      "whenVar": "memo",
+      "whenValue": "2",
+      "html": "",
+      "ops": [
+        {
+          "op": "set",
+          "key": "memo",
+          "value": "3"
+        },
+        {
+          "op": "spawn_npc",
+          "npcId": 27035
+        }
+      ]
+    },
+    {
+      "npcId": 27032,
+      "hook": "kill",
+      "when": "started",
+      "lacksItems": [
+        1234
+      ],
+      "html": "",
+      "ops": [
+        {
+          "op": "give_item",
+          "itemId": 1234,
+          "count": 1
+        },
+        {
+          "op": "set_cond",
+          "cond": 3
+        }
+      ]
+    },
+    {
+      "npcId": 27033,
+      "hook": "kill",
+      "when": "started",
+      "lacksItems": [
+        1234
+      ],
+      "html": "",
+      "ops": [
+        {
+          "op": "give_item",
+          "itemId": 1234,
+          "count": 1
+        },
+        {
+          "op": "set_cond",
+          "cond": 3
+        }
+      ]
+    },
+    {
+      "npcId": 27034,
+      "hook": "kill",
+      "when": "started",
+      "lacksItems": [
+        1234
+      ],
+      "html": "",
+      "ops": [
+        {
+          "op": "give_item",
+          "itemId": 1234,
+          "count": 1
+        },
+        {
+          "op": "set_cond",
+          "cond": 3
+        }
+      ]
+    },
+    {
+      "npcId": 27035,
+      "hook": "kill",
+      "when": "started",
+      "lacksItems": [
+        1275
+      ],
+      "html": "",
+      "ops": [
+        {
+          "op": "give_item",
+          "itemId": 1275,
+          "count": 1
+        },
+        {
+          "op": "set_cond",
+          "cond": 5
+        }
+      ]
+    }
+  ]
+}

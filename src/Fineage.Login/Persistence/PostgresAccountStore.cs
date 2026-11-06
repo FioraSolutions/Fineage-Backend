@@ -1,3 +1,4 @@
+using System.Text;
 using System.Text.Json;
 using Fineage.Game.Quests;
 using Npgsql;
@@ -119,22 +120,23 @@ public sealed class PostgresAccountStore : IAccountStore, IDisposable
 
     static IEnumerable<string> SplitSqlStatements(string sql)
     {
-        foreach (string part in sql.Split(';', StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries))
+        // Strip -- comments before splitting on ';' so a semicolon inside a header comment
+        // (e.g. "JSON mirror first; table later") cannot leak as a fake statement.
+        var withoutComments = new StringBuilder(sql.Length);
+        foreach (string line in sql.Split('\n'))
         {
-            // Strip comment-only lines; do not skip the whole chunk when it starts with a header comment
-            // (002_normalize_characters.sql leads with comments then ALTER … hair_style).
-            var meaningful = new List<string>();
-            foreach (string line in part.Split('\n'))
-            {
-                string t = line.Trim();
-                if (t.Length == 0 || t.StartsWith("--", StringComparison.Ordinal))
-                    continue;
-                meaningful.Add(line);
-            }
-
-            if (meaningful.Count == 0)
+            string t = line.TrimStart();
+            if (t.StartsWith("--", StringComparison.Ordinal))
                 continue;
-            yield return string.Join('\n', meaningful);
+            withoutComments.AppendLine(line);
+        }
+
+        foreach (string part in withoutComments.ToString()
+                     .Split(';', StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries))
+        {
+            if (part.Length == 0)
+                continue;
+            yield return part;
         }
     }
 

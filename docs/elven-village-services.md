@@ -1,7 +1,7 @@
 # Elven Village services on Net (foundation brick)
 
 Scope: NPCs in `data/spawns/elven_village.json` only. Same pipeline scales per area:
-`tools/import_npc_html.py <spawn file>` → `data/html`, quests in `data/quests.json`, items via `scripts/gen_drop_items.py`.
+`tools/import_npc_html.py <spawn file>` → `data/html`, quests in `data/quests/` (see [`quests-pack.md`](quests-pack.md)), items via `scripts/gen_drop_items.py`.
 
 ## Works (data + server, Net `NpcTalk 0x0322` / `BypassRequest 0x0323` → `NpcHtml 0x0324`)
 | Service | NPCs | Notes |
@@ -11,10 +11,10 @@ Scope: NPCs in `data/spawns/elven_village.json` only. Same pipeline scales per a
 | Shops | Unoren 30147, Ariel 30148, Creamees 30149, Herbiel 30150, Lynn 31414, Perelin 31563 | `Buy <list>` → `BuyList 0x0325`, `Sell` → `SellList 0x0326`. Buylists already in `buylists.json`. |
 | Warehouse | Chad 30151, Julia 30152, Markius 30153 | Private deposit/withdraw (`DepositP`/`WithdrawP`). |
 | Quests | Q160 Nerupa's Request (Nerupa→Unoren→Creamees→Julia→Nerupa), Q161 Fruit of the Mother Tree (Andellia→Thalia→Andellia) | Mobius conds, items 1026-1029/1036-1037, rewards (5 Lesser Healing Potion + 1000 xp / 1000 adena + 1000 xp). Elf + level 3 gate via new dialog `races`/`minLevel`/`maxLevel`. Flow: talk → `Quest` link → `quest_talk:<id>` → `quest_event:<id>:<event>`. |
-| Kill quests | Q267 Wrath of Verdure (Treant Bremec 31853, Goblin Raider 20325, elf 4+), Q313 Collect Spores (Herbiel 30150, Spore Fungus 20509, lvl 8+) | Repeatable. Q267: 50% Goblin Club per kill, hand in all → 1 Silvery Leaf each, +600 adena at 10+, `quit` exits. Q313: 40% Spore Sac, cap 10 → cond 2, 10 sacs → 3500 adena. |
-| Party kill quest | Q316 Destroy Plague Carriers (Ellenia 30155, elf 18+) | Data + mechanism ready; Sukar Wererat 20040/20047 and Varool 27020 are **not spawned** in the loaded elven maps yet (they live outside the village area). 2 fangs per wererat, Varool fang cap 1; 30 adena/fang, 10000/Varool fang, +5000 at 10+. |
+| Kill quests | Q267 Wrath of Verdure, Q313 Collect Spores, **Q102** Sea of Spores Fever, **Q105** Skirmish with Orcs (Kendell 30218, elf 10+), **Q159** Protect the Water Source (Asterios 30154, elf 12+), **Q162** Curse of the Underground Fortress (Unoren 30147, non-DE 12+), **Q163** Legacy of the Poet (Starden 30220, non-DE 11+) | Q267/Q313 repeatable. Q102: Dryad tears → medicines → Sword/Staff. Q105 linearized to 1st→5th Kaboo order (Mobius random order pick is a follow-up). Q159 two-phase plague dust. Q162 bone/skull dual counters. Q163 four poems. |
+| Party kill quest | Q316 Destroy Plague Carriers (Ellenia 30155, elf 18+) | Live with `elven_fortress` wererats/Varool. 2 fangs per wererat, Varool fang cap 1; 30 adena/fang, 10000/Varool fang, +5000 at 10+. |
 | Newbie Helper 30400 | | Existing gift / guide buff path. |
-| Nerupa 30370 | | Q160 giver, elven newbie guide south of the newbie spawn. Page `data/html/default/30370.htm`; quest links in `data/quests.json`. |
+| Nerupa 30370 | | Q160 giver, elven newbie guide south of the newbie spawn. Page `data/html/default/30370.htm`; quest links in `data/quests/00160_*/quest.json`. |
 
 ## Elven newbie spawn: Nerupa 30370 + Newbie Helper 30400
 
@@ -81,12 +81,13 @@ filter is process-global and xUnit runs collections in parallel.
 - Q316 mobs: Mobius spawns Sukar Wererats / Varool at ~(12400..12900, 75500..80200, z -4176) — the underground Elven Ruins, not the village/forest maps we load. Not spawned; needs that dungeon map first.
 
 ## Missing (next bricks, in order)
-1. More elven hunt quests (Q102 Sea of Spores Fever); spawn Q316 / Q408 wererats when the Elven Ruins are loaded; quest-spawn op for Q409.
-2. **Quest items tab / quest item flag** in items (client shows them in the main bag now).
-3. Trainers 30155-30158 (`SkillList` learn on Net). Hierarch 30154 + first class change: foundation landed (see below).
-4. Merchant extras: `Wear`, `TerritoryStatus`, `exc_multisell 003` (multisell data check).
-5. Newbie Guide 30599 multi-page / Adventure Guildsman 31780 quest list, Lottery 30991, Olympiad 31688 — leave as pages.
-6. Other areas: run `tools/import_npc_html.py data/spawns/<area>.json` + review WARN lines.
+1. **All-race early quest coverage** (not only elven village): full Mobius CT0 slice with MIN_LEVEL≤21 is tracked in [`early-quests-checklist.md`](early-quests-checklist.md) ([#299](https://github.com/FioraSolutions/Fineage-Backend/issues/299)). The elf-area table above is a subset; parity target is the checklist + matrix row 29.
+2. More elven hunt quests beyond Q102/Q105/Q159/Q162/Q163/Q267/Q313/Q316 (#299). Q105 still approximates Mobius random Kaboo order pick as fixed 1st→5th.
+3. **Quest items tab / quest item flag** in items (client shows them in the main bag now).
+4. Trainers 30155-30158 (`SkillList` learn on Net). Hierarch 30154 + first class change: foundation landed (see below).
+5. Merchant extras: `Wear`, `TerritoryStatus`, `exc_multisell 003` (multisell data check).
+6. Newbie Guide 30599 multi-page / Adventure Guildsman 31780 quest list, Lottery 30991, Olympiad 31688 — leave as pages.
+7. Other areas: run `tools/import_npc_html.py data/spawns/<area>.json` + review WARN lines.
 
 ## Merchant extras + quest-item flag
 
@@ -123,14 +124,12 @@ On Net:
   Dryad Elder 20019 → Gold Leaves (40%, 5), Sukar Wererat Leader 20047 → Amethyst (40%, 2). Reward 163800 adena,
   Eternity Diamond, exp/sp by level (18: 591724/35928, 19: 456128/29230, 20+: 320534/22532).
 
-Play reachability with the default local maps (elven_village, elven_starting, ...):
-- Asterios dialogs: yes. Q408 start, ruby (Pincer Spiders) and aquamarine (Dryad Elders) branches: yes.
-- Amethyst branch: **blocked** — Sukar Wererat Leaders are in the Elven Ruins (not loaded), as for Q316.
-- The actual transfer NPCs live in Gludin/Gludio/Dion, outside the default `FINEAGE_ZONE_MAPS`. Server path is covered by
-  tests; to try it in Play load a town map with a Grand Master (e.g. add `gludio` and widen `FINEAGE_ZONE_BOUNDS`).
+Play reachability (hosted / `run-local-net.sh` default = **every enabled spawn map**):
+- Asterios dialogs: yes. Q408 all branches: yes (`elven_fortress` carries Sukar Wererat Leaders).
+- Grand Masters in Gludio/Gludin/Dion: yes when maps are enabled (default).
+- Path quests Q406/Q407/Q409: Gludio/Gludin + `others_*` hunt maps are in the default full-world load.
 
 Not done / next:
-- Elven Ruins map for wererats (Q408 amethyst).
 - Mobius `setClassId` extras: MagicSkillUse 5103 class-change effect broadcast, party/clan member-list refresh,
   `checkPlayerSkills` (drop skills above the new tree), sub-class / `setBaseClass` (we only have one class id).
 - Net client has no dedicated class-change UI: everything is NpcHtml + UserInfo/SkillList it already handles.
@@ -151,13 +150,9 @@ items at once); Mobius quest vars map to `whenVar` (`variable` for Q407, `memo` 
 Rewards like Mobius: 163800 adena + proof + exp/sp by level (Q406 18/19/20+: 591724/33328, 456128/29850, 320534/23152;
 Q407: 591724/33328, 456128/26630, 320534/19932; Q409: 591724/33788, 456128/27090, 320534/20392).
 
-**Play reachability:** as in Mobius, none of these three paths has an NPC or a mob in the Elven Village maps — all start in
-Gludio/Gludin and hunt in the Gludio-area `others_*` maps. With the default `FINEAGE_ZONE_MAPS` they are data + tests only.
-To play them load `gludio,gludin` plus the hunt maps above (and widen `FINEAGE_ZONE_BOUNDS`); this slice does not change the maps.
-
-Stubs: Q409 `replay_1` / `replay_2` set the memo state but cannot spawn the quest monsters (no quest-spawn op yet) and
-show a short note page instead; Mobius `onAttack` script values (Q407 "only the attacker who hit it", Q409 "single attacker")
-are approximated by killer credit.
+**Play reachability:** path NPCs/mobs live in Gludio/Gludin/`others_*` — loaded by the default full-world Zone.
+Q409 `replay_1` / `replay_2` use quest op `spawn_npc` (Mobius `addSpawn` + `addAttackDesire`) near Allana/Perrin.
+Mobius `onAttack` script values (Q407 "only the attacker who hit it", Q409 "single attacker") are approximated by killer credit.
 
 ## Newbie helpers / village buffs (Mobius CT0 parity foundation)
 

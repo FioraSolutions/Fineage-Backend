@@ -1,0 +1,146 @@
+{
+  "id": 271,
+  "name": "Proof of Valor",
+  "repeatable": true,
+  "abortable": true,
+  "questItems": [
+    1473
+  ],
+  "dialogs": [
+    {
+      "npcId": 30577,
+      "hook": "talk",
+      "when": "absent",
+      "races": [
+        0,
+        1,
+        2,
+        4
+      ],
+      "htmlFile": "30577-talk-000.htm"
+    },
+    {
+      "npcId": 30577,
+      "hook": "talk",
+      "when": "absent",
+      "races": [
+        3
+      ],
+      "maxLevel": 3,
+      "htmlFile": "30577-talk-001.htm"
+    },
+    {
+      "npcId": 30577,
+      "hook": "talk",
+      "when": "absent",
+      "races": [
+        3
+      ],
+      "hasAny": [
+        1506,
+        1507
+      ],
+      "htmlFile": "30577-talk-002.htm"
+    },
+    {
+      "npcId": 30577,
+      "hook": "talk",
+      "when": "absent",
+      "races": [
+        3
+      ],
+      "minLevel": 4,
+      "lacksItems": [
+        1506,
+        1507
+      ],
+      "htmlFile": "30577-talk-003.htm"
+    },
+    {
+      "npcId": 30577,
+      "hook": "event",
+      "when": "absent",
+      "event": "30577-04",
+      "races": [
+        3
+      ],
+      "minLevel": 4,
+      "hasAny": [
+        1506,
+        1507
+      ],
+      "htmlFile": "30577-event-30577-04-004.htm"
+    },
+    {
+      "npcId": 30577,
+      "hook": "event",
+      "when": "absent",
+      "event": "30577-04",
+      "races": [
+        3
+      ],
+      "minLevel": 4,
+      "lacksItems": [
+        1506,
+        1507
+      ],
+      "ops": [
+        {
+          "op": "create"
+        },
+        {
+          "op": "start"
+        },
+        {
+          "op": "set_cond",
+          "cond": 1
+        }
+      ],
+      "htmlFile": "30577-event-30577-04-005.htm"
+    },
+    {
+      "npcId": 30577,
+      "hook": "talk",
+      "when": "started",
+      "cond": 1,
+      "htmlFile": "30577-talk-c1-006.htm"
+    },
+    {
+      "npcId": 30577,
+      "hook": "talk",
+      "when": "started",
+      "cond": 2,
+      "atLeast": {
+        "1473": 50
+      },
+      "ops": [
+        {
+          "op": "give_item",
+          "itemId": 1506,
+          "count": 1
+        },
+        {
+          "op": "complete"
+        }
+      ],
+      "htmlFile": "30577-talk-c2-007.htm"
+    },
+    {
+      "npcId": 20475,
+      "hook": "kill",
+      "when": "started",
+      "cond": 1,
+      "html": "",
+      "ops": [
+        {
+          "op": "drop_item",
+          "itemId": 1473,
+          "count": 1,
+          "chance": 1.0,
+          "limit": 50,
+          "condAtLimit": 2
+        }
+      ]
+    }
+  ]
+}

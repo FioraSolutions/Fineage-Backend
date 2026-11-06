@@ -1,0 +1,212 @@
+{
+  "id": 162,
+  "name": "Curse of the Underground Fortress",
+  "repeatable": false,
+  "abortable": true,
+  "questItems": [
+    1158,
+    1159
+  ],
+  "dialogs": [
+    {
+      "npcId": 30147,
+      "hook": "talk",
+      "when": "absent",
+      "races": [
+        0,
+        1,
+        3,
+        4
+      ],
+      "minLevel": 12,
+      "htmlFile": "30147-talk-000.htm"
+    },
+    {
+      "npcId": 30147,
+      "hook": "talk",
+      "when": "absent",
+      "races": [
+        0,
+        1,
+        3,
+        4
+      ],
+      "htmlFile": "30147-talk-001.htm"
+    },
+    {
+      "npcId": 30147,
+      "hook": "talk",
+      "when": "absent",
+      "races": [
+        2
+      ],
+      "htmlFile": "30147-talk-002.htm"
+    },
+    {
+      "npcId": 30147,
+      "hook": "event",
+      "when": "any",
+      "event": "30147-03",
+      "htmlFile": "30147-event-30147-03-003.htm"
+    },
+    {
+      "npcId": 30147,
+      "hook": "event",
+      "when": "absent",
+      "event": "30147-04",
+      "races": [
+        0,
+        1,
+        3,
+        4
+      ],
+      "minLevel": 12,
+      "ops": [
+        {
+          "op": "create"
+        },
+        {
+          "op": "start"
+        },
+        {
+          "op": "set_cond",
+          "cond": 1
+        }
+      ],
+      "htmlFile": "30147-event-30147-04-004.htm"
+    },
+    {
+      "npcId": 30147,
+      "hook": "talk",
+      "when": "started",
+      "cond": 1,
+      "atLeast": {
+        "1158": 10,
+        "1159": 3
+      },
+      "ops": [
+        {
+          "op": "give_item",
+          "itemId": 625,
+          "count": 1
+        },
+        {
+          "op": "give_exp_sp",
+          "exp": 22652,
+          "sp": 1004
+        },
+        {
+          "op": "give_adena",
+          "count": 24000
+        },
+        {
+          "op": "complete"
+        }
+      ],
+      "htmlFile": "30147-talk-c1-005.htm"
+    },
+    {
+      "npcId": 30147,
+      "hook": "talk",
+      "when": "started",
+      "cond": 1,
+      "htmlFile": "30147-talk-c1-006.htm"
+    },
+    {
+      "npcId": 20033,
+      "hook": "kill",
+      "when": "started",
+      "cond": 1,
+      "html": "",
+      "ops": [
+        {
+          "op": "drop_item",
+          "itemId": 1159,
+          "count": 1,
+          "chance": 0.25,
+          "limit": 3
+        }
+      ]
+    },
+    {
+      "npcId": 20345,
+      "hook": "kill",
+      "when": "started",
+      "cond": 1,
+      "html": "",
+      "ops": [
+        {
+          "op": "drop_item",
+          "itemId": 1159,
+          "count": 1,
+          "chance": 0.26,
+          "limit": 3
+        }
+      ]
+    },
+    {
+      "npcId": 20371,
+      "hook": "kill",
+      "when": "started",
+      "cond": 1,
+      "html": "",
+      "ops": [
+        {
+          "op": "drop_item",
+          "itemId": 1159,
+          "count": 1,
+          "chance": 0.23,
+          "limit": 3
+        }
+      ]
+    },
+    {
+      "npcId": 20463,
+      "hook": "kill",
+      "when": "started",
+      "cond": 1,
+      "html": "",
+      "ops": [
+        {
+          "op": "drop_item",
+          "itemId": 1158,
+          "count": 1,
+          "chance": 0.25,
+          "limit": 10
+        }
+      ]
+    },
+    {
+      "npcId": 20464,
+      "hook": "kill",
+      "when": "started",
+      "cond": 1,
+      "html": "",
+      "ops": [
+        {
+          "op": "drop_item",
+          "itemId": 1158,
+          "count": 1,
+          "chance": 0.23,
+          "limit": 10
+        }
+      ]
+    },
+    {
+      "npcId": 20504,
+      "hook": "kill",
+      "when": "started",
+      "cond": 1,
+      "html": "",
+      "ops": [
+        {
+          "op": "drop_item",
+          "itemId": 1158,
+          "count": 1,
+          "chance": 0.26,
+          "limit": 10
+        }
+      ]
+    }
+  ]
+}

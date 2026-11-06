@@ -1,0 +1,176 @@
+{
+  "id": 151,
+  "name": "Cure for Fever",
+  "repeatable": false,
+  "abortable": true,
+  "questItems": [
+    703,
+    704
+  ],
+  "dialogs": [
+    {
+      "npcId": 30050,
+      "hook": "talk",
+      "when": "absent",
+      "maxLevel": 14,
+      "htmlFile": "30050-talk-000.htm"
+    },
+    {
+      "npcId": 30050,
+      "hook": "talk",
+      "when": "absent",
+      "minLevel": 15,
+      "htmlFile": "30050-talk-001.htm"
+    },
+    {
+      "npcId": 30050,
+      "hook": "event",
+      "when": "absent",
+      "event": "30050-03",
+      "minLevel": 15,
+      "ops": [
+        {
+          "op": "create"
+        },
+        {
+          "op": "start"
+        },
+        {
+          "op": "set_cond",
+          "cond": 1
+        }
+      ],
+      "htmlFile": "30050-event-30050-03-002.htm"
+    },
+    {
+      "npcId": 30050,
+      "hook": "talk",
+      "when": "started",
+      "cond": 1,
+      "htmlFile": "30050-talk-c1-003.htm"
+    },
+    {
+      "npcId": 30050,
+      "hook": "talk",
+      "when": "started",
+      "cond": 1,
+      "hasItem": 703,
+      "htmlFile": "30050-talk-c1-004.htm"
+    },
+    {
+      "npcId": 30050,
+      "hook": "talk",
+      "when": "started",
+      "cond": 3,
+      "hasItem": 704,
+      "ops": [
+        {
+          "op": "give_item",
+          "itemId": 102,
+          "count": 1
+        },
+        {
+          "op": "give_exp_sp",
+          "exp": 13106,
+          "sp": 613
+        },
+        {
+          "op": "complete"
+        }
+      ],
+      "htmlFile": "30050-talk-c3-005.htm"
+    },
+    {
+      "npcId": 30032,
+      "hook": "talk",
+      "when": "started",
+      "cond": 2,
+      "hasItem": 703,
+      "ops": [
+        {
+          "op": "take_item",
+          "itemId": 703,
+          "count": 1
+        },
+        {
+          "op": "give_item",
+          "itemId": 704,
+          "count": 1
+        },
+        {
+          "op": "set_cond",
+          "cond": 3
+        }
+      ],
+      "htmlFile": "30032-talk-c2-006.htm"
+    },
+    {
+      "npcId": 30032,
+      "hook": "talk",
+      "when": "started",
+      "cond": 3,
+      "hasItem": 704,
+      "htmlFile": "30032-talk-c3-007.htm"
+    },
+    {
+      "npcId": 20103,
+      "hook": "kill",
+      "when": "started",
+      "cond": 1,
+      "lacksItems": [
+        703
+      ],
+      "html": "",
+      "ops": [
+        {
+          "op": "drop_item",
+          "itemId": 703,
+          "count": 1,
+          "chance": 0.2,
+          "limit": 1,
+          "condAtLimit": 2
+        }
+      ]
+    },
+    {
+      "npcId": 20106,
+      "hook": "kill",
+      "when": "started",
+      "cond": 1,
+      "lacksItems": [
+        703
+      ],
+      "html": "",
+      "ops": [
+        {
+          "op": "drop_item",
+          "itemId": 703,
+          "count": 1,
+          "chance": 0.2,
+          "limit": 1,
+          "condAtLimit": 2
+        }
+      ]
+    },
+    {
+      "npcId": 20108,
+      "hook": "kill",
+      "when": "started",
+      "cond": 1,
+      "lacksItems": [
+        703
+      ],
+      "html": "",
+      "ops": [
+        {
+          "op": "drop_item",
+          "itemId": 703,
+          "count": 1,
+          "chance": 0.2,
+          "limit": 1,
+          "condAtLimit": 2
+        }
+      ]
+    }
+  ]
+}

@@ -1,0 +1,111 @@
+{
+  "id": 264,
+  "name": "Keen Claws",
+  "repeatable": false,
+  "abortable": true,
+  "questItems": [
+    1367
+  ],
+  "dialogs": [
+    {
+      "npcId": 30136,
+      "hook": "talk",
+      "when": "absent",
+      "maxLevel": 2,
+      "htmlFile": "30136-talk-000.htm"
+    },
+    {
+      "npcId": 30136,
+      "hook": "talk",
+      "when": "absent",
+      "minLevel": 3,
+      "htmlFile": "30136-talk-001.htm"
+    },
+    {
+      "npcId": 30136,
+      "hook": "event",
+      "when": "absent",
+      "event": "30136-03",
+      "minLevel": 3,
+      "ops": [
+        {
+          "op": "create"
+        },
+        {
+          "op": "start"
+        },
+        {
+          "op": "set_cond",
+          "cond": 1
+        }
+      ],
+      "htmlFile": "30136-event-30136-03-002.htm"
+    },
+    {
+      "npcId": 30136,
+      "hook": "talk",
+      "when": "started",
+      "cond": 1,
+      "htmlFile": "30136-talk-c1-003.htm"
+    },
+    {
+      "npcId": 30136,
+      "hook": "talk",
+      "when": "started",
+      "cond": 2,
+      "atLeast": {
+        "1367": 50
+      },
+      "ops": [
+        {
+          "op": "give_item",
+          "itemId": 1336,
+          "count": 1
+        },
+        {
+          "op": "give_item",
+          "itemId": 1060,
+          "count": 1
+        },
+        {
+          "op": "complete"
+        }
+      ],
+      "htmlFile": "30136-talk-c2-004.htm"
+    },
+    {
+      "npcId": 20003,
+      "hook": "kill",
+      "when": "started",
+      "cond": 1,
+      "html": "",
+      "ops": [
+        {
+          "op": "drop_item",
+          "itemId": 1367,
+          "count": 1,
+          "chance": 0.45,
+          "limit": 50,
+          "condAtLimit": 2
+        }
+      ]
+    },
+    {
+      "npcId": 20456,
+      "hook": "kill",
+      "when": "started",
+      "cond": 1,
+      "html": "",
+      "ops": [
+        {
+          "op": "drop_item",
+          "itemId": 1367,
+          "count": 1,
+          "chance": 0.6,
+          "limit": 50,
+          "condAtLimit": 2
+        }
+      ]
+    }
+  ]
+}

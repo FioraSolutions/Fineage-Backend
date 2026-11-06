@@ -1,0 +1,299 @@
+{
+  "id": 168,
+  "name": "Deliver Supplies",
+  "repeatable": false,
+  "abortable": true,
+  "questItems": [
+    1153,
+    1154,
+    1155,
+    1156,
+    1157
+  ],
+  "dialogs": [
+    {
+      "npcId": 30349,
+      "hook": "talk",
+      "when": "absent",
+      "races": [
+        2
+      ],
+      "minLevel": 3,
+      "htmlFile": "30349-talk-000.htm"
+    },
+    {
+      "npcId": 30349,
+      "hook": "talk",
+      "when": "absent",
+      "races": [
+        2
+      ],
+      "htmlFile": "30349-talk-001.htm"
+    },
+    {
+      "npcId": 30349,
+      "hook": "talk",
+      "when": "absent",
+      "htmlFile": "30349-talk-002.htm"
+    },
+    {
+      "npcId": 30349,
+      "hook": "event",
+      "when": "absent",
+      "event": "30349-03",
+      "races": [
+        2
+      ],
+      "minLevel": 3,
+      "ops": [
+        {
+          "op": "create"
+        },
+        {
+          "op": "start"
+        },
+        {
+          "op": "give_item",
+          "itemId": 1153,
+          "count": 1
+        },
+        {
+          "op": "set_cond",
+          "cond": 1
+        }
+      ],
+      "htmlFile": "30349-event-30349-03-003.htm"
+    },
+    {
+      "npcId": 30349,
+      "hook": "talk",
+      "when": "started",
+      "cond": 1,
+      "hasItem": 1153,
+      "htmlFile": "30349-talk-c1-004.htm"
+    },
+    {
+      "npcId": 30349,
+      "hook": "talk",
+      "when": "started",
+      "cond": 2,
+      "hasItems": [
+        1154,
+        1155,
+        1156
+      ],
+      "ops": [
+        {
+          "op": "take_item",
+          "itemId": 1154,
+          "count": 1
+        },
+        {
+          "op": "set_cond",
+          "cond": 3
+        }
+      ],
+      "htmlFile": "30349-talk-c2-005.htm"
+    },
+    {
+      "npcId": 30349,
+      "hook": "talk",
+      "when": "started",
+      "cond": 3,
+      "hasAny": [
+        1155,
+        1156
+      ],
+      "htmlFile": "30349-talk-c3-006.htm"
+    },
+    {
+      "npcId": 30349,
+      "hook": "talk",
+      "when": "started",
+      "cond": 4,
+      "atLeast": {
+        "1157": 2
+      },
+      "ops": [
+        {
+          "op": "take_item",
+          "itemId": 1157,
+          "count": 2
+        },
+        {
+          "op": "give_adena",
+          "count": 820
+        },
+        {
+          "op": "complete"
+        }
+      ],
+      "htmlFile": "30349-talk-c4-007.htm"
+    },
+    {
+      "npcId": 30360,
+      "hook": "talk",
+      "when": "started",
+      "cond": 1,
+      "hasItem": 1153,
+      "ops": [
+        {
+          "op": "take_item",
+          "itemId": 1153,
+          "count": 1
+        },
+        {
+          "op": "give_item",
+          "itemId": 1154,
+          "count": 1
+        },
+        {
+          "op": "give_item",
+          "itemId": 1155,
+          "count": 1
+        },
+        {
+          "op": "give_item",
+          "itemId": 1156,
+          "count": 1
+        },
+        {
+          "op": "set_cond",
+          "cond": 2
+        }
+      ],
+      "htmlFile": "30360-talk-c1-008.htm"
+    },
+    {
+      "npcId": 30360,
+      "hook": "talk",
+      "when": "started",
+      "cond": 2,
+      "htmlFile": "30360-talk-c2-009.htm"
+    },
+    {
+      "npcId": 30355,
+      "hook": "talk",
+      "when": "started",
+      "cond": 3,
+      "hasItem": 1155,
+      "hasItems": [
+        1156,
+        1157
+      ],
+      "ops": [
+        {
+          "op": "take_item",
+          "itemId": 1155,
+          "count": 1
+        },
+        {
+          "op": "give_item",
+          "itemId": 1157,
+          "count": 1
+        },
+        {
+          "op": "set_cond",
+          "cond": 4
+        }
+      ],
+      "htmlFile": "30355-talk-c3-010.htm"
+    },
+    {
+      "npcId": 30357,
+      "hook": "talk",
+      "when": "started",
+      "cond": 3,
+      "hasItem": 1156,
+      "hasItems": [
+        1155,
+        1157
+      ],
+      "ops": [
+        {
+          "op": "take_item",
+          "itemId": 1156,
+          "count": 1
+        },
+        {
+          "op": "give_item",
+          "itemId": 1157,
+          "count": 1
+        },
+        {
+          "op": "set_cond",
+          "cond": 4
+        }
+      ],
+      "htmlFile": "30357-talk-c3-011.htm"
+    },
+    {
+      "npcId": 30355,
+      "hook": "talk",
+      "when": "started",
+      "cond": 3,
+      "hasItem": 1155,
+      "lacksItems": [
+        1157
+      ],
+      "ops": [
+        {
+          "op": "take_item",
+          "itemId": 1155,
+          "count": 1
+        },
+        {
+          "op": "give_item",
+          "itemId": 1157,
+          "count": 1
+        }
+      ],
+      "htmlFile": "30355-talk-c3-012.htm"
+    },
+    {
+      "npcId": 30357,
+      "hook": "talk",
+      "when": "started",
+      "cond": 3,
+      "hasItem": 1156,
+      "lacksItems": [
+        1157
+      ],
+      "ops": [
+        {
+          "op": "take_item",
+          "itemId": 1156,
+          "count": 1
+        },
+        {
+          "op": "give_item",
+          "itemId": 1157,
+          "count": 1
+        }
+      ],
+      "htmlFile": "30357-talk-c3-013.htm"
+    },
+    {
+      "npcId": 30355,
+      "hook": "talk",
+      "when": "started",
+      "cond": 3,
+      "lacksItems": [
+        1155
+      ],
+      "hasItem": 1157,
+      "htmlFile": "30355-talk-c3-014.htm"
+    },
+    {
+      "npcId": 30357,
+      "hook": "talk",
+      "when": "started",
+      "cond": 3,
+      "lacksItems": [
+        1156
+      ],
+      "hasItem": 1157,
+      "htmlFile": "30357-talk-c3-015.htm"
+    }
+  ]
+}

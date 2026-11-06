@@ -82,20 +82,19 @@ public sealed class NetPvpTests
     }
 
     [Fact]
-    public async Task An_unflagged_player_is_not_attackable()
+    public async Task Forced_attack_on_a_white_player_flags_the_attacker()
     {
         var (kit, session, player, other, otherPlayer, rec) = await SetupAsync();
         otherPlayer.MaxHp = 100_000;
         otherPlayer.CurHp = 100_000;
 
-        // Mobius isAutoAttackable(Player): white name, no karma → the request is refused, not merely harmless.
-        string? error = await kit.World.TryAttackAsync(
-            session, new AttackRequestMsg { TargetObjectId = other.ObjectId }, CancellationToken.None);
+        // Mobius: white nameplate (not auto-attackable) but Ctrl/forced swing is still allowed and raises PvP flag.
+        // ZoneWorldCombat.IsAttackable mirrors that; IsAutoAttackable stays false until flagged/karma.
+        Assert.Null(await kit.World.TryAttackAsync(
+            session, new AttackRequestMsg { TargetObjectId = other.ObjectId }, CancellationToken.None));
 
-        Assert.NotNull(error);
-        await SwingAsync(kit);
-        await SwingAsync(kit);
-        Assert.Equal(100_000, otherPlayer.CurHp);
+        await SwingUntilAsync(kit, session, other.ObjectId, () => player.PvpFlagged || otherPlayer.CurHp < 100_000);
+        Assert.True(player.PvpFlagged, "attacking a white player must raise the attacker's PvP flag");
     }
 
     [Fact]

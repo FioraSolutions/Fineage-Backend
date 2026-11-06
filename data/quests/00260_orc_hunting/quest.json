@@ -1,0 +1,221 @@
+{
+  "id": 260,
+  "name": "Orc Hunting",
+  "repeatable": true,
+  "abortable": true,
+  "questItems": [
+    1114,
+    1115
+  ],
+  "dialogs": [
+    {
+      "npcId": 30221,
+      "hook": "talk",
+      "when": "absent",
+      "races": [
+        0,
+        2,
+        3,
+        4
+      ],
+      "htmlFile": "30221-talk-000.htm"
+    },
+    {
+      "npcId": 30221,
+      "hook": "talk",
+      "when": "absent",
+      "races": [
+        1
+      ],
+      "maxLevel": 5,
+      "htmlFile": "30221-talk-001.htm"
+    },
+    {
+      "npcId": 30221,
+      "hook": "talk",
+      "when": "absent",
+      "races": [
+        1
+      ],
+      "minLevel": 6,
+      "htmlFile": "30221-talk-002.htm"
+    },
+    {
+      "npcId": 30221,
+      "hook": "event",
+      "when": "absent",
+      "event": "30221-04",
+      "races": [
+        1
+      ],
+      "minLevel": 6,
+      "ops": [
+        {
+          "op": "create"
+        },
+        {
+          "op": "start"
+        },
+        {
+          "op": "set_cond",
+          "cond": 1
+        }
+      ],
+      "htmlFile": "30221-event-30221-04-003.htm"
+    },
+    {
+      "npcId": 30221,
+      "hook": "event",
+      "when": "started",
+      "event": "30221-07",
+      "ops": [
+        {
+          "op": "complete"
+        }
+      ],
+      "htmlFile": "30221-event-30221-07-004.htm"
+    },
+    {
+      "npcId": 30221,
+      "hook": "event",
+      "when": "started",
+      "event": "30221-08",
+      "htmlFile": "30221-event-30221-08-005.htm"
+    },
+    {
+      "npcId": 30221,
+      "hook": "talk",
+      "when": "started",
+      "cond": 1,
+      "lacksItems": [
+        1114,
+        1115
+      ],
+      "htmlFile": "30221-talk-c1-006.htm"
+    },
+    {
+      "npcId": 30221,
+      "hook": "talk",
+      "when": "started",
+      "cond": 1,
+      "hasAny": [
+        1114,
+        1115
+      ],
+      "ops": [
+        {
+          "op": "sell_items",
+          "prices": [
+            {
+              "itemId": 1114,
+              "adena": 12
+            },
+            {
+              "itemId": 1115,
+              "adena": 30
+            }
+          ],
+          "bonusMin": 10,
+          "bonusAdena": 1000
+        }
+      ],
+      "htmlFile": "30221-talk-c1-007.htm"
+    },
+    {
+      "npcId": 20468,
+      "hook": "kill",
+      "when": "started",
+      "cond": 1,
+      "html": "",
+      "ops": [
+        {
+          "op": "drop_item",
+          "itemId": 1114,
+          "count": 1,
+          "chance": 0.5,
+          "limit": 0
+        }
+      ]
+    },
+    {
+      "npcId": 20469,
+      "hook": "kill",
+      "when": "started",
+      "cond": 1,
+      "html": "",
+      "ops": [
+        {
+          "op": "drop_item",
+          "itemId": 1114,
+          "count": 1,
+          "chance": 0.5,
+          "limit": 0
+        }
+      ]
+    },
+    {
+      "npcId": 20470,
+      "hook": "kill",
+      "when": "started",
+      "cond": 1,
+      "html": "",
+      "ops": [
+        {
+          "op": "drop_item",
+          "itemId": 1114,
+          "count": 1,
+          "chance": 0.5,
+          "limit": 0
+        }
+      ]
+    },
+    {
+      "npcId": 20471,
+      "hook": "kill",
+      "when": "started",
+      "cond": 1,
+      "html": "",
+      "ops": [
+        {
+          "op": "drop_item",
+          "itemId": 1115,
+          "count": 1,
+          "chance": 0.5,
+          "limit": 0
+        }
+      ]
+    },
+    {
+      "npcId": 20472,
+      "hook": "kill",
+      "when": "started",
+      "cond": 1,
+      "html": "",
+      "ops": [
+        {
+          "op": "drop_item",
+          "itemId": 1115,
+          "count": 1,
+          "chance": 0.5,
+          "limit": 0
+        }
+      ]
+    },
+    {
+      "npcId": 20473,
+      "hook": "kill",
+      "when": "started",
+      "cond": 1,
+      "html": "",
+      "ops": [
+        {
+          "op": "drop_item",
+          "itemId": 1115,
+          "count": 1,
+          "chance": 0.5,
+          "limit": 0
+        }
+      ]
+    }
+  ]
+}

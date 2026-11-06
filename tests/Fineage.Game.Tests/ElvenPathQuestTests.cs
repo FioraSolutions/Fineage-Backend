@@ -99,12 +99,16 @@ public sealed class ElvenPathQuestTests
         Assert.True(m.AdvEvent(j, bag, 409, 30293, "ACCEPT", me).Ok);
         Assert.Equal(1, bag.CountOf(1231));
         Assert.True(m.Talk(j, bag, 409, 30424, me).Ok); // Allana, memo 1 -> cond 2
-        Assert.True(m.AdvEvent(j, bag, 409, 30424, "replay_1", me).Ok);
-        m.OnKill(j, bag, 27032, me);                     // lizardman (spawned by replay_1 in Mobius)
+        var replay1 = m.AdvEvent(j, bag, 409, 30424, "replay_1", me);
+        Assert.True(replay1.Ok);
+        Assert.Equal([27032, 27033, 27034], replay1.Spawns);
+        m.OnKill(j, bag, 27032, me);                     // lizardman (spawned by replay_1)
         Assert.Equal(1, bag.CountOf(1234));
         Assert.True(m.Talk(j, bag, 409, 30424, me).Ok);
         Assert.Equal(1, bag.CountOf(1236));
-        Assert.True(m.AdvEvent(j, bag, 409, 30428, "replay_2", me).Ok);
+        var replay2 = m.AdvEvent(j, bag, 409, 30428, "replay_2", me);
+        Assert.True(replay2.Ok);
+        Assert.Equal([27035], replay2.Spawns);
         m.OnKill(j, bag, 27035, me);                     // Tamil
         Assert.True(m.Talk(j, bag, 409, 30428, me).Ok);
         Assert.Equal(1, bag.CountOf(1232));

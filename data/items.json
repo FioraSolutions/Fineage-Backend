@@ -1722,6 +1722,72 @@
       "shieldEvasionPenalty": 8
     },
     {
+      "id": 687,
+      "name": "Darin's Letter",
+      "kind": "etc",
+      "icon": "icon.etc_scroll_gray_i00",
+      "price": 0,
+      "weight": 0,
+      "quest": true
+    },
+    {
+      "id": 688,
+      "name": "Roxxy's Kerchief",
+      "kind": "etc",
+      "icon": "icon.etc_piece_of_cloth_white_i00",
+      "price": 0,
+      "weight": 0,
+      "quest": true
+    },
+    {
+      "id": 689,
+      "name": "Poetry Book",
+      "kind": "etc",
+      "icon": "icon.etc_spell_books_red_i00",
+      "price": 0,
+      "weight": 0,
+      "quest": true
+    },
+    {
+      "id": 693,
+      "name": "Greenis's Letter",
+      "kind": "etc",
+      "icon": "icon.etc_letter_white_i00",
+      "price": 0,
+      "weight": 0,
+      "quest": true
+    },
+    {
+      "id": 702,
+      "name": "Wolf Pelt",
+      "kind": "etc",
+      "stackable": true,
+      "icon": "icon.etc_leather_brown_i00",
+      "price": 0,
+      "weight": 0,
+      "quest": true
+    },
+    {
+      "id": 703,
+      "name": "Giant Spider's Poison Sac",
+      "kind": "etc",
+      "stackable": true,
+      "icon": "icon.etc_pouch_gray_i00",
+      "price": 0,
+      "weight": 0,
+      "quest": true
+    },
+    {
+      "id": 704,
+      "name": "Fever Medicine",
+      "kind": "etc",
+      "stackable": true,
+      "icon": "icon.etc_lesser_potion_purple_i00",
+      "price": 0,
+      "weight": 0,
+      "quest": true
+    },
+    {
       "id": 728,
       "name": "Mana Potion",
       "icon": "icon.etc_reagent_blue_i00",
@@ -1886,6 +1952,16 @@
       "spiritshots": 1
     },
     {
+      "id": 746,
+      "name": "Alberius's List",
+      "kind": "etc",
+      "stackable": true,
+      "icon": "icon.etc_piece_of_paper_white_i00",
+      "price": 0,
+      "weight": 0,
+      "quest": true
+    },
+    {
       "id": 747,
       "name": "Wand of Adept",
       "kind": "weapon",
@@ -1903,6 +1979,16 @@
       "randomDamage": 20,
       "soulshots": 1,
       "spiritshots": 1
+    },
+    {
+      "id": 752,
+      "name": "Orc Amulet",
+      "kind": "etc",
+      "stackable": true,
+      "icon": "icon.etc_feather_gold_i00",
+      "price": 0,
+      "weight": 0,
+      "quest": true
     },
     {
       "id": 754,
@@ -2323,6 +2409,36 @@
       "sellable": false
     },
     {
+      "id": 964,
+      "name": "Alberius's Letter",
+      "kind": "etc",
+      "stackable": true,
+      "icon": "icon.etc_scroll_white_i00",
+      "price": 0,
+      "weight": 0,
+      "quest": true
+    },
+    {
+      "id": 965,
+      "name": "Evergreen Amulet",
+      "kind": "etc",
+      "stackable": true,
+      "icon": "icon.accessary_near_forest_necklace_i00",
+      "price": 0,
+      "weight": 0,
+      "quest": true
+    },
+    {
+      "id": 966,
+      "name": "Dryad's Tears",
+      "kind": "etc",
+      "stackable": true,
+      "icon": "icon.etc_crystal_ball_green_i00",
+      "price": 0,
+      "weight": 0,
+      "quest": true
+    },
+    {
       "id": 975,
       "name": "Blood Saber",
       "kind": "weapon",
@@ -2377,6 +2493,136 @@
       "spiritshots": 1
     },
     {
+      "id": 1008,
+      "name": "Harrys's 1st Receipt",
+      "kind": "etc",
+      "stackable": true,
+      "icon": "icon.etc_letter_white_i00",
+      "price": 0,
+      "weight": 0,
+      "quest": true
+    },
+    {
+      "id": 1009,
+      "name": "Harrys's 2nd Receipt",
+      "kind": "etc",
+      "stackable": true,
+      "icon": "icon.etc_letter_white_i00",
+      "price": 0,
+      "weight": 0,
+      "quest": true
+    },
+    {
+      "id": 1010,
+      "name": "Golem Shard",
+      "kind": "etc",
+      "stackable": true,
+      "icon": "icon.etc_lump_black_i00",
+      "price": 0,
+      "weight": 0,
+      "quest": true
+    },
+    {
+      "id": 1011,
+      "name": "Tool Box",
+      "kind": "etc",
+      "stackable": true,
+      "icon": "icon.etc_jewel_box_i00",
+      "price": 0,
+      "weight": 0,
+      "quest": true
+    },
+    {
+      "id": 1012,
+      "name": "Delivery List",
+      "kind": "etc",
+      "stackable": true,
+      "icon": "icon.etc_piece_of_paper_white_i00",
+      "price": 0,
+      "weight": 0,
+      "quest": true
+    },
+    {
+      "id": 1013,
+      "name": "Heavy Wood Box",
+      "kind": "etc",
+      "stackable": true,
+      "icon": "icon.etc_jewel_box_i00",
+      "price": 0,
+      "weight": 0,
+      "quest": true
+    },
+    {
+      "id": 1014,
+      "name": "Cloth Bundle",
+      "kind": "etc",
+      "stackable": true,
+      "icon": "icon.etc_piece_of_cloth_blue_i00",
+      "price": 0,
+      "weight": 0,
+      "quest": true
+    },
+    {
+      "id": 1015,
+      "name": "Clay Pot",
+      "kind": "etc",
+      "stackable": true,
+      "icon": "icon.etc_oil_pot_white_i00",
+      "price": 0,
+      "weight": 0,
+      "quest": true
+    },
+    {
+      "id": 1016,
+      "name": "Jackson's Receipt",
+      "kind": "etc",
+      "stackable": true,
+      "icon": "icon.etc_letter_red_i00",
+      "price": 0,
+      "weight": 0,
+      "quest": true
+    },
+    {
+      "id": 1017,
+      "name": "Silvia's Receipt",
+      "kind": "etc",
+      "stackable": true,
+      "icon": "icon.etc_letter_blue_i00",
+      "price": 0,
+      "weight": 0,
+      "quest": true
+    },
+    {
+      "id": 1018,
+      "name": "Rant's Receipt",
+      "kind": "etc",
+      "stackable": true,
+      "icon": "icon.etc_letter_white_i00",
+      "price": 0,
+      "weight": 0,
+      "quest": true
+    },
+    {
+      "id": 1019,
+      "name": "Official Letter",
+      "kind": "etc",
+      "stackable": true,
+      "icon": "icon.etc_letter_red_i00",
+      "price": 0,
+      "weight": 0,
+      "quest": true
+    },
+    {
+      "id": 1024,
+      "name": "Adamantite Ore",
+      "kind": "etc",
+      "stackable": true,
+      "icon": "icon.etc_plate_blue_i00",
+      "price": 0,
+      "weight": 0,
+      "quest": true
+    },
+    {
       "id": 1026,
       "name": "Silvery Spidersilk",
       "kind": "etc",
@@ -2417,6 +2663,36 @@
       "quest": true
     },
     {
+      "id": 1030,
+      "name": "Cracked Skull",
+      "kind": "etc",
+      "stackable": true,
+      "icon": "icon.etc_skull_black_i00",
+      "price": 0,
+      "weight": 0,
+      "quest": true
+    },
+    {
+      "id": 1031,
+      "name": "Perfect Skull",
+      "kind": "etc",
+      "stackable": true,
+      "icon": "icon.etc_skull_white_i00",
+      "price": 0,
+      "weight": 0,
+      "quest": true
+    },
+    {
+      "id": 1035,
+      "name": "Plague Dust",
+      "kind": "etc",
+      "stackable": true,
+      "icon": "icon.etc_powder_red_i00",
+      "price": 0,
+      "weight": 0,
+      "quest": true
+    },
+    {
       "id": 1036,
       "name": "Andellia's Letter",
       "kind": "etc",
@@ -2437,6 +2713,46 @@
       "quest": true
     },
     {
+      "id": 1038,
+      "name": "Rumiel's 1st Poem",
+      "kind": "etc",
+      "stackable": true,
+      "icon": "icon.etc_piece_of_paper_black_i00",
+      "price": 0,
+      "weight": 0,
+      "quest": true
+    },
+    {
+      "id": 1039,
+      "name": "Rumiel's 2nd Poem",
+      "kind": "etc",
+      "stackable": true,
+      "icon": "icon.etc_piece_of_paper_black_i00",
+      "price": 0,
+      "weight": 0,
+      "quest": true
+    },
+    {
+      "id": 1040,
+      "name": "Rumiel's 3rd Poem",
+      "kind": "etc",
+      "stackable": true,
+      "icon": "icon.etc_piece_of_paper_black_i00",
+      "price": 0,
+      "weight": 0,
+      "quest": true
+    },
+    {
+      "id": 1041,
+      "name": "Rumiel's 4th Poem",
+      "kind": "etc",
+      "stackable": true,
+      "icon": "icon.etc_piece_of_paper_black_i00",
+      "price": 0,
+      "weight": 0,
+      "quest": true
+    },
+    {
       "id": 1042,
       "name": "Wererat's Fang",
       "kind": "etc",
@@ -2452,6 +2768,26 @@
       "kind": "etc",
       "stackable": true,
       "icon": "icon.etc_horn_i00",
+      "price": 0,
+      "weight": 0,
+      "quest": true
+    },
+    {
+      "id": 1044,
+      "name": "Kirunak Skull",
+      "kind": "etc",
+      "stackable": true,
+      "icon": "icon.etc_skull_red_i00",
+      "price": 0,
+      "weight": 0,
+      "quest": true
+    },
+    {
+      "id": 1046,
+      "name": "Nightmare Crystal",
+      "kind": "etc",
+      "stackable": true,
+      "icon": "icon.etc_totem_black_i00",
       "price": 0,
       "weight": 0,
       "quest": true
@@ -2546,6 +2882,26 @@
       "weight": 5
     },
     {
+      "id": 1071,
+      "name": "Hyacinth Charm",
+      "kind": "etc",
+      "stackable": true,
+      "icon": "icon.etc_jewel_green_i00",
+      "price": 0,
+      "weight": 0,
+      "quest": true
+    },
+    {
+      "id": 1072,
+      "name": "Hyacinth Charm",
+      "kind": "etc",
+      "stackable": true,
+      "icon": "icon.etc_jewel_green_i00",
+      "price": 0,
+      "weight": 0,
+      "quest": true
+    },
+    {
       "id": 1074,
       "name": "Boat Ticket: Talking Island to Gludin",
       "kind": "etc",
@@ -2553,6 +2909,126 @@
       "stackable": true,
       "price": 1000,
       "weight": 20
+    },
+    {
+      "id": 1079,
+      "name": "Darin's Receipt",
+      "kind": "etc",
+      "stackable": true,
+      "icon": "icon.etc_piece_of_paper_white_i00",
+      "price": 0,
+      "weight": 0,
+      "quest": true
+    },
+    {
+      "id": 1080,
+      "name": "Baulro's Potion",
+      "kind": "etc",
+      "stackable": true,
+      "icon": "icon.etc_lesser_potion_blue_i00",
+      "price": 0,
+      "weight": 0,
+      "quest": true
+    },
+    {
+      "id": 1084,
+      "name": "Gludio Lord's Mark",
+      "kind": "etc",
+      "stackable": true,
+      "icon": "icon.etc_jewel_gold_i00",
+      "price": 0,
+      "weight": 0,
+      "quest": true
+    },
+    {
+      "id": 1085,
+      "name": "Orc's Necklace",
+      "kind": "etc",
+      "stackable": true,
+      "icon": "icon.accessary_necklace_of_anguish_i00",
+      "price": 0,
+      "weight": 0,
+      "quest": true
+    },
+    {
+      "id": 1086,
+      "name": "Werewolf's Fang",
+      "kind": "etc",
+      "stackable": true,
+      "icon": "icon.etc_claw_i00",
+      "price": 0,
+      "weight": 0,
+      "quest": true
+    },
+    {
+      "id": 1088,
+      "name": "Undrias's Letter",
+      "kind": "etc",
+      "stackable": true,
+      "icon": "icon.etc_scroll_gray_i00",
+      "price": 0,
+      "weight": 0,
+      "quest": true
+    },
+    {
+      "id": 1089,
+      "name": "Ceremonial Dagger",
+      "kind": "etc",
+      "stackable": true,
+      "icon": "icon.weapon_mystic_knife_i00",
+      "price": 0,
+      "weight": 0,
+      "quest": true
+    },
+    {
+      "id": 1090,
+      "name": "Dreviant Wine",
+      "kind": "etc",
+      "stackable": true,
+      "icon": "icon.etc_lesser_potion_purple_i00",
+      "price": 0,
+      "weight": 0,
+      "quest": true
+    },
+    {
+      "id": 1091,
+      "name": "Garmiel's Scripture",
+      "kind": "etc",
+      "stackable": true,
+      "icon": "icon.etc_spell_books_red_i00",
+      "price": 0,
+      "weight": 0,
+      "quest": true
+    },
+    {
+      "id": 1092,
+      "name": "Arujien's Letter",
+      "kind": "etc",
+      "stackable": true,
+      "icon": "icon.etc_scroll_gray_i00",
+      "price": 0,
+      "weight": 0,
+      "quest": true
+    },
+    {
+      "id": 1093,
+      "name": "Arujien's Letter",
+      "kind": "etc",
+      "stackable": true,
+      "icon": "icon.etc_scroll_gray_i00",
+      "price": 0,
+      "weight": 0,
+      "quest": true
+    },
+    {
+      "id": 1094,
+      "name": "Arujien's Letter",
+      "kind": "etc",
+      "stackable": true,
+      "icon": "icon.etc_piece_of_paper_white_i00",
+      "price": 0,
+      "weight": 0,
+      "quest": true
     },
     {
       "id": 1095,
@@ -2661,6 +3137,46 @@
       "pDef": 21
     },
     {
+      "id": 1114,
+      "name": "Orc Amulet",
+      "kind": "etc",
+      "stackable": true,
+      "icon": "icon.etc_feather_gold_i00",
+      "price": 0,
+      "weight": 0,
+      "quest": true
+    },
+    {
+      "id": 1115,
+      "name": "Orc's Necklace",
+      "kind": "etc",
+      "stackable": true,
+      "icon": "icon.accessary_necklace_of_anguish_i00",
+      "price": 0,
+      "weight": 0,
+      "quest": true
+    },
+    {
+      "id": 1116,
+      "name": "Orc Amulet",
+      "kind": "etc",
+      "stackable": true,
+      "icon": "icon.etc_feather_gold_i00",
+      "price": 0,
+      "weight": 0,
+      "quest": true
+    },
+    {
+      "id": 1117,
+      "name": "Orc's Necklace",
+      "kind": "etc",
+      "stackable": true,
+      "icon": "icon.accessary_necklace_of_anguish_i00",
+      "price": 0,
+      "weight": 0,
+      "quest": true
+    },
+    {
       "id": 1118,
       "name": "Spore Sac",
       "kind": "etc",
@@ -2709,6 +3225,56 @@
       "price": 607,
       "weight": 1320,
       "pDef": 11
+    },
+    {
+      "id": 1130,
+      "name": "Cobendell's Medicine",
+      "kind": "etc",
+      "stackable": true,
+      "icon": "icon.etc_lesser_potion_green_i00",
+      "price": 0,
+      "weight": 0,
+      "quest": true
+    },
+    {
+      "id": 1131,
+      "name": "Cobendell's Medicine",
+      "kind": "etc",
+      "stackable": true,
+      "icon": "icon.etc_lesser_potion_green_i00",
+      "price": 0,
+      "weight": 0,
+      "quest": true
+    },
+    {
+      "id": 1132,
+      "name": "Cobendell's Medicine",
+      "kind": "etc",
+      "stackable": true,
+      "icon": "icon.etc_lesser_potion_green_i00",
+      "price": 0,
+      "weight": 0,
+      "quest": true
+    },
+    {
+      "id": 1133,
+      "name": "Cobendell's Medicine",
+      "kind": "etc",
+      "stackable": true,
+      "icon": "icon.etc_lesser_potion_green_i00",
+      "price": 0,
+      "weight": 0,
+      "quest": true
+    },
+    {
+      "id": 1134,
+      "name": "Cobendell's Medicine",
+      "kind": "etc",
+      "stackable": true,
+      "icon": "icon.etc_lesser_potion_green_i00",
+      "price": 0,
+      "weight": 0,
+      "quest": true
     },
     {
       "id": 1145,
@@ -2761,6 +3327,86 @@
       "icon": "icon.etc_spell_books_white_i00",
       "price": 100,
       "weight": 120
+    },
+    {
+      "id": 1153,
+      "name": "Jenna's Letter",
+      "kind": "etc",
+      "stackable": true,
+      "icon": "icon.etc_scroll_white_i00",
+      "price": 0,
+      "weight": 0,
+      "quest": true
+    },
+    {
+      "id": 1154,
+      "name": "Sentry Blade",
+      "kind": "etc",
+      "stackable": true,
+      "icon": "icon.weapon_bastard_sword_i00",
+      "price": 0,
+      "weight": 0,
+      "quest": true
+    },
+    {
+      "id": 1155,
+      "name": "Sentry Blade",
+      "kind": "etc",
+      "stackable": true,
+      "icon": "icon.weapon_bastard_sword_i00",
+      "price": 0,
+      "weight": 0,
+      "quest": true
+    },
+    {
+      "id": 1156,
+      "name": "Sentry Blade",
+      "kind": "etc",
+      "stackable": true,
+      "icon": "icon.weapon_bastard_sword_i00",
+      "price": 0,
+      "weight": 0,
+      "quest": true
+    },
+    {
+      "id": 1157,
+      "name": "Old Bronze Sword",
+      "kind": "etc",
+      "stackable": true,
+      "icon": "icon.weapon_crimson_sword_i00",
+      "price": 0,
+      "weight": 0,
+      "quest": true
+    },
+    {
+      "id": 1158,
+      "name": "Bone Fragment",
+      "kind": "etc",
+      "stackable": true,
+      "icon": "icon.etc_piece_bone_red_i00",
+      "price": 0,
+      "weight": 0,
+      "quest": true
+    },
+    {
+      "id": 1159,
+      "name": "Elf Skull",
+      "kind": "etc",
+      "stackable": true,
+      "icon": "icon.etc_skull_black_i00",
+      "price": 0,
+      "weight": 0,
+      "quest": true
+    },
+    {
+      "id": 1160,
+      "name": "Dark Bezoar",
+      "kind": "etc",
+      "stackable": true,
+      "icon": "icon.etc_bead_gold_i00",
+      "price": 0,
+      "weight": 0,
+      "quest": true
     },
     {
       "id": 1161,
@@ -3249,6 +3895,16 @@
       "spiritshots": 2
     },
     {
+      "id": 1334,
+      "name": "Predator's Fang",
+      "kind": "etc",
+      "stackable": true,
+      "icon": "icon.etc_claw_i00",
+      "price": 0,
+      "weight": 0,
+      "quest": true
+    },
+    {
       "id": 1335,
       "name": "Goblin Club",
       "kind": "etc",
@@ -3257,6 +3913,15 @@
       "price": 0,
       "weight": 0,
       "quest": true
+    },
+    {
+      "id": 1336,
+      "name": "Glass Shard",
+      "kind": "etc",
+      "stackable": true,
+      "icon": "icon.etc_crystal_ball_blue_i00",
+      "price": 200,
+      "weight": 80
     },
     {
       "id": 1340,
@@ -3278,6 +3943,26 @@
       "crystal": "d",
       "price": 3,
       "weight": 5
+    },
+    {
+      "id": 1367,
+      "name": "Wolf Claw",
+      "kind": "etc",
+      "stackable": true,
+      "icon": "icon.etc_claw_i00",
+      "price": 0,
+      "weight": 0,
+      "quest": true
+    },
+    {
+      "id": 1368,
+      "name": "Imp Shackles",
+      "kind": "etc",
+      "stackable": true,
+      "icon": "icon.accessary_cerberuss_earing_i00",
+      "price": 0,
+      "weight": 0,
+      "quest": true
     },
     {
       "id": 1370,
@@ -3413,6 +4098,65 @@
       "price": 25000
     },
     {
+      "id": 1473,
+      "name": "Kasha Wolf Fang",
+      "kind": "etc",
+      "stackable": true,
+      "icon": "icon.etc_claw_i00",
+      "price": 0,
+      "weight": 0,
+      "quest": true
+    },
+    {
+      "id": 1474,
+      "name": "Grave Robber's Head",
+      "kind": "etc",
+      "stackable": true,
+      "icon": "icon.etc_skull_black_i00",
+      "price": 0,
+      "weight": 0,
+      "quest": true
+    },
+    {
+      "id": 1475,
+      "name": "Black Soulstone",
+      "kind": "etc",
+      "stackable": true,
+      "icon": "icon.etc_bead_gold_i00",
+      "price": 0,
+      "weight": 0,
+      "quest": true
+    },
+    {
+      "id": 1476,
+      "name": "Red Soulstone",
+      "kind": "etc",
+      "stackable": true,
+      "icon": "icon.etc_crystal_ball_red_i00",
+      "price": 0,
+      "weight": 0,
+      "quest": true
+    },
+    {
+      "id": 1477,
+      "name": "Maraku Werewolf Head",
+      "kind": "etc",
+      "stackable": true,
+      "icon": "icon.etc_skull_red_i00",
+      "price": 0,
+      "weight": 0,
+      "quest": true
+    },
+    {
+      "id": 1501,
+      "name": "Maraku Werewolf Totem",
+      "kind": "etc",
+      "stackable": true,
+      "icon": "icon.etc_totem_green_i00",
+      "price": 1200,
+      "weight": 10
+    },
+    {
       "id": 1506,
       "name": "Necklace of Courage",
       "kind": "armor",
@@ -3529,6 +4273,126 @@
       "price": 900,
       "kind": "etc",
       "stackable": true
+    },
+    {
+      "id": 1541,
+      "name": "Honey Khandar",
+      "kind": "etc",
+      "stackable": true,
+      "icon": "icon.etc_potion_gold_i00",
+      "price": 0,
+      "weight": 0,
+      "quest": true
+    },
+    {
+      "id": 1542,
+      "name": "Bear Fur Cloak",
+      "kind": "etc",
+      "stackable": true,
+      "icon": "icon.etc_piece_of_cloth_black_i00",
+      "price": 0,
+      "weight": 0,
+      "quest": true
+    },
+    {
+      "id": 1543,
+      "name": "Bloody Axe",
+      "kind": "etc",
+      "stackable": true,
+      "icon": "icon.weapon_tomahawk_i00",
+      "price": 0,
+      "weight": 0,
+      "quest": true
+    },
+    {
+      "id": 1544,
+      "name": "Ancestor Skull",
+      "kind": "etc",
+      "stackable": true,
+      "icon": "icon.etc_skull_black_i00",
+      "price": 0,
+      "weight": 0,
+      "quest": true
+    },
+    {
+      "id": 1545,
+      "name": "Spider Dust",
+      "kind": "etc",
+      "stackable": true,
+      "icon": "icon.etc_powder_white_i00",
+      "price": 0,
+      "weight": 0,
+      "quest": true
+    },
+    {
+      "id": 1546,
+      "name": "Deep Sea Orb",
+      "kind": "etc",
+      "stackable": true,
+      "icon": "icon.etc_crystal_ball_silver_i00",
+      "price": 0,
+      "weight": 0,
+      "quest": true
+    },
+    {
+      "id": 1547,
+      "name": "Bolter's List",
+      "kind": "etc",
+      "stackable": true,
+      "icon": "icon.etc_piece_of_paper_white_i00",
+      "price": 0,
+      "weight": 0,
+      "quest": true
+    },
+    {
+      "id": 1548,
+      "name": "Mining Boots",
+      "kind": "etc",
+      "stackable": true,
+      "icon": "icon.armor_apprentices_shoes_i00",
+      "price": 0,
+      "weight": 0,
+      "quest": true
+    },
+    {
+      "id": 1549,
+      "name": "Miner's Pick",
+      "kind": "etc",
+      "stackable": true,
+      "icon": "icon.weapon_guard_spear_i00",
+      "price": 0,
+      "weight": 0,
+      "quest": true
+    },
+    {
+      "id": 1550,
+      "name": "Boomboom Powder",
+      "kind": "etc",
+      "stackable": true,
+      "icon": "icon.etc_powder_black_i00",
+      "price": 0,
+      "weight": 0,
+      "quest": true
+    },
+    {
+      "id": 1551,
+      "name": "Redstone Beer",
+      "kind": "etc",
+      "stackable": true,
+      "icon": "icon.etc_potion_scarlet_i00",
+      "price": 0,
+      "weight": 0,
+      "quest": true
+    },
+    {
+      "id": 1552,
+      "name": "Bolter's Smelly Socks",
+      "kind": "etc",
+      "stackable": true,
+      "icon": "icon.armor_cotton_shoes_i00",
+      "price": 0,
+      "weight": 0,
+      "quest": true
     },
     {
       "id": 1592,
@@ -3803,6 +4667,106 @@
       "weight": 4,
       "soulshot": true,
       "shotGrade": "none"
+    },
+    {
+      "id": 1836,
+      "name": "Kendell's 1st Order",
+      "kind": "etc",
+      "stackable": true,
+      "icon": "icon.etc_recipe_blue_i00",
+      "price": 0,
+      "weight": 0,
+      "quest": true
+    },
+    {
+      "id": 1837,
+      "name": "Kendell's 2nd Order",
+      "kind": "etc",
+      "stackable": true,
+      "icon": "icon.etc_recipe_blue_i00",
+      "price": 0,
+      "weight": 0,
+      "quest": true
+    },
+    {
+      "id": 1838,
+      "name": "Kendell's 3rd Order",
+      "kind": "etc",
+      "stackable": true,
+      "icon": "icon.etc_recipe_blue_i00",
+      "price": 0,
+      "weight": 0,
+      "quest": true
+    },
+    {
+      "id": 1839,
+      "name": "Kendell's 4th Order",
+      "kind": "etc",
+      "stackable": true,
+      "icon": "icon.etc_recipe_blue_i00",
+      "price": 0,
+      "weight": 0,
+      "quest": true
+    },
+    {
+      "id": 1840,
+      "name": "Kendell's 5th Order",
+      "kind": "etc",
+      "stackable": true,
+      "icon": "icon.etc_recipe_red_i00",
+      "price": 0,
+      "weight": 0,
+      "quest": true
+    },
+    {
+      "id": 1841,
+      "name": "Kendell's 6th Order",
+      "kind": "etc",
+      "stackable": true,
+      "icon": "icon.etc_recipe_red_i00",
+      "price": 0,
+      "weight": 0,
+      "quest": true
+    },
+    {
+      "id": 1842,
+      "name": "Kendell's 7th Order",
+      "kind": "etc",
+      "stackable": true,
+      "icon": "icon.etc_recipe_red_i00",
+      "price": 0,
+      "weight": 0,
+      "quest": true
+    },
+    {
+      "id": 1843,
+      "name": "Kendell's 8th Order",
+      "kind": "etc",
+      "stackable": true,
+      "icon": "icon.etc_recipe_red_i00",
+      "price": 0,
+      "weight": 0,
+      "quest": true
+    },
+    {
+      "id": 1844,
+      "name": "Kaboo Chief's 1st Torque",
+      "kind": "etc",
+      "stackable": true,
+      "icon": "icon.accessary_necklace_of_black_ore_i00",
+      "price": 0,
+      "weight": 0,
+      "quest": true
+    },
+    {
+      "id": 1845,
+      "name": "Kaboo Chief's 2nd Torque",
+      "kind": "etc",
+      "stackable": true,
+      "icon": "icon.accessary_necklace_of_black_ore_i00",
+      "price": 0,
+      "weight": 0,
+      "quest": true
     },
     {
       "id": 1864,
@@ -6012,6 +6976,51 @@
       "weight": 2
     },
     {
+      "id": 4412,
+      "name": "Echo Crystal - Theme of Battle",
+      "kind": "etc",
+      "stackable": true,
+      "icon": "icon.etc_echo_crystal_i01",
+      "price": 0,
+      "weight": 10
+    },
+    {
+      "id": 4413,
+      "name": "Echo Crystal - Theme of Love",
+      "kind": "etc",
+      "stackable": true,
+      "icon": "icon.etc_echo_crystal_i02",
+      "price": 0,
+      "weight": 10
+    },
+    {
+      "id": 4414,
+      "name": "Echo Crystal - Theme of Solitude",
+      "kind": "etc",
+      "stackable": true,
+      "icon": "icon.etc_echo_crystal_i03",
+      "price": 0,
+      "weight": 10
+    },
+    {
+      "id": 4415,
+      "name": "Echo Crystal - Theme of the Feast",
+      "kind": "etc",
+      "stackable": true,
+      "icon": "icon.etc_echo_crystal_i04",
+      "price": 0,
+      "weight": 10
+    },
+    {
+      "id": 4416,
+      "name": "Echo Crystal - Theme of Celebration",
+      "kind": "etc",
+      "stackable": true,
+      "icon": "icon.etc_echo_crystal_i00",
+      "price": 0,
+      "weight": 10
+    },
+    {
       "id": 4625,
       "name": "Dice (Heart)",
       "kind": "etc",
@@ -7059,6 +8068,14 @@
       "weight": 30
     },
     {
+      "id": 7559,
+      "name": "Scroll of Escape: Town of Giran",
+      "kind": "etc",
+      "icon": "icon.etc_scroll_of_return_i00",
+      "price": 0,
+      "weight": 0
+    },
+    {
       "id": 7561,
       "name": "Fishing Manual",
       "kind": "etc",
@@ -7073,6 +8090,56 @@
       "icon": "icon.etc_gem_clear_i00",
       "stackable": true,
       "sellable": false
+    },
+    {
+      "id": 7570,
+      "name": "Mark of Traveler",
+      "kind": "etc",
+      "stackable": true,
+      "icon": "icon.etc_crest_yellow_i00",
+      "price": 0,
+      "weight": 0,
+      "quest": true
+    },
+    {
+      "id": 7571,
+      "name": "Baulro's Letter",
+      "kind": "etc",
+      "stackable": true,
+      "icon": "icon.etc_letter_white_i00",
+      "price": 0,
+      "weight": 0,
+      "quest": true
+    },
+    {
+      "id": 7572,
+      "name": "Ariel's Recommendation",
+      "kind": "etc",
+      "stackable": true,
+      "icon": "icon.etc_letter_white_i00",
+      "price": 0,
+      "weight": 0,
+      "quest": true
+    },
+    {
+      "id": 7573,
+      "name": "Roselyn's Note",
+      "kind": "etc",
+      "stackable": true,
+      "icon": "icon.etc_paper_black_i00",
+      "price": 0,
+      "weight": 0,
+      "quest": true
+    },
+    {
+      "id": 7574,
+      "name": "Very Expensive Necklace",
+      "kind": "etc",
+      "stackable": true,
+      "icon": "icon.accessary_necklace_of_devotion_i00",
+      "price": 0,
+      "weight": 0,
+      "quest": true
     },
     {
       "id": 7586,
