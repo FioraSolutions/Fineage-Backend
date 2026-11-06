@@ -3,7 +3,9 @@
   "name": "LinnaeusSpecialBait",
   "repeatable": false,
   "abortable": true,
-  "questItems": [],
+  "questItems": [
+    7624
+  ],
   "dialogs": [
     {
       "npcId": 31577,
@@ -54,6 +56,11 @@
       "when": "absent",
       "event": "31577-3",
       "ops": [
+        {
+          "op": "give_item",
+          "itemId": 7613,
+          "count": 4
+        },
         {
           "op": "complete"
         }

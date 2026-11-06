@@ -3,13 +3,28 @@
   "name": "Sword of Solidarity",
   "repeatable": false,
   "abortable": true,
-  "questItems": [],
+  "questItems": [
+    739,
+    740,
+    741,
+    742,
+    796,
+    937
+  ],
   "dialogs": [
     {
       "npcId": 30008,
       "hook": "talk",
       "when": "absent",
       "htmlFile": "30008-event-30008-04-014.htm"
+    },
+    {
+      "npcId": 30008,
+      "hook": "talk",
+      "when": "started",
+      "cond": 1,
+      "hasItem": 796,
+      "htmlFile": "30008-talk-c1-000.htm"
     },
     {
       "npcId": 30008,
@@ -22,8 +37,60 @@
       "npcId": 30008,
       "hook": "talk",
       "when": "started",
+      "cond": 2,
+      "hasItem": 937,
+      "htmlFile": "30008-talk-c2-002.htm"
+    },
+    {
+      "npcId": 30008,
+      "hook": "talk",
+      "when": "started",
       "cond": 3,
+      "hasItems": [
+        740,
+        741
+      ],
       "htmlFile": "30008-talk-c3-003.htm"
+    },
+    {
+      "npcId": 30008,
+      "hook": "talk",
+      "when": "started",
+      "cond": 4,
+      "hasItem": 742,
+      "ops": [
+        {
+          "op": "take_item",
+          "itemId": 742,
+          "count": 1
+        },
+        {
+          "op": "give_item",
+          "itemId": 739,
+          "count": 1
+        },
+        {
+          "op": "set_cond",
+          "cond": 5
+        }
+      ],
+      "htmlFile": "30008-talk-c4-004.htm"
+    },
+    {
+      "npcId": 30008,
+      "hook": "talk",
+      "when": "started",
+      "cond": 5,
+      "hasItem": 739,
+      "htmlFile": "30008-talk-c5-005.htm"
+    },
+    {
+      "npcId": 30283,
+      "hook": "talk",
+      "when": "started",
+      "cond": 1,
+      "hasItem": 796,
+      "htmlFile": "30283-talk-c1-006.htm"
     },
     {
       "npcId": 30283,
@@ -36,14 +103,47 @@
       "npcId": 30283,
       "hook": "talk",
       "when": "started",
+      "cond": 2,
+      "hasItem": 937,
+      "htmlFile": "30283-talk-c2-008.htm"
+    },
+    {
+      "npcId": 30283,
+      "hook": "talk",
+      "when": "started",
       "cond": 3,
+      "hasItems": [
+        740,
+        741
+      ],
       "ops": [
+        {
+          "op": "give_item",
+          "itemId": 742,
+          "count": 1
+        },
         {
           "op": "set_cond",
           "cond": 4
         }
       ],
       "htmlFile": "30283-talk-c3-009.htm"
+    },
+    {
+      "npcId": 30283,
+      "hook": "talk",
+      "when": "started",
+      "cond": 4,
+      "hasItem": 742,
+      "htmlFile": "30283-talk-c4-010.htm"
+    },
+    {
+      "npcId": 30283,
+      "hook": "talk",
+      "when": "started",
+      "cond": 5,
+      "hasItem": 739,
+      "htmlFile": "30283-talk-c5-011.htm"
     },
     {
       "npcId": 30008,
@@ -72,11 +172,62 @@
           "op": "start"
         },
         {
+          "op": "give_item",
+          "itemId": 796,
+          "count": 1
+        },
+        {
           "op": "set_cond",
           "cond": 1
         }
       ],
       "htmlFile": "30008-event-30008-04-014.htm"
+    },
+    {
+      "npcId": 30008,
+      "hook": "event",
+      "when": "absent",
+      "event": "30283-02",
+      "hasItem": 796,
+      "ops": [
+        {
+          "op": "take_item",
+          "itemId": 796,
+          "count": 1
+        },
+        {
+          "op": "give_item",
+          "itemId": 937,
+          "count": 1
+        },
+        {
+          "op": "set_cond",
+          "cond": 2
+        }
+      ],
+      "htmlFile": "30008-event-30283-02-015.htm"
+    },
+    {
+      "npcId": 30008,
+      "hook": "event",
+      "when": "absent",
+      "event": "30283-07",
+      "hasItem": 739,
+      "ops": [
+        {
+          "op": "give_adena",
+          "count": 10981
+        },
+        {
+          "op": "give_exp_sp",
+          "exp": 25747,
+          "sp": 2171
+        },
+        {
+          "op": "complete"
+        }
+      ],
+      "htmlFile": "30008-event-30283-07-016.htm"
     }
   ]
 }

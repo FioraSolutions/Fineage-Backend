@@ -3,7 +3,9 @@
   "name": "Warehouse Keeper's Pastime",
   "repeatable": true,
   "abortable": true,
-  "questItems": [],
+  "questItems": [
+    5964
+  ],
   "dialogs": [
     {
       "npcId": 30182,

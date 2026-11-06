@@ -3,7 +3,14 @@
   "name": "Pavel's Last Research",
   "repeatable": false,
   "abortable": true,
-  "questItems": [],
+  "questItems": [
+    8058,
+    8059,
+    8060,
+    8290,
+    8291,
+    8292
+  ],
   "dialogs": [
     {
       "npcId": 32046,
@@ -47,6 +54,11 @@
       "event": "32046-11",
       "ops": [
         {
+          "op": "set",
+          "key": "memoState",
+          "value": "2"
+        },
+        {
           "op": "set_cond",
           "cond": 2
         }
@@ -66,6 +78,16 @@
       "when": "absent",
       "event": "32046-15",
       "ops": [
+        {
+          "op": "give_item",
+          "itemId": 8290,
+          "count": 1
+        },
+        {
+          "op": "set",
+          "key": "memoState",
+          "value": "4"
+        },
         {
           "op": "set_cond",
           "cond": 6
@@ -128,6 +150,11 @@
       "when": "absent",
       "event": "32046-25",
       "ops": [
+        {
+          "op": "set",
+          "key": "memoState",
+          "value": "8"
+        },
         {
           "op": "set_cond",
           "cond": 10
@@ -198,6 +225,11 @@
       "event": "32046-35",
       "ops": [
         {
+          "op": "set",
+          "key": "memoState",
+          "value": "12"
+        },
+        {
           "op": "set_cond",
           "cond": 13
         }
@@ -232,6 +264,11 @@
       "event": "32046-41",
       "ops": [
         {
+          "op": "set",
+          "key": "memoState",
+          "value": "20"
+        },
+        {
           "op": "set_cond",
           "cond": 20
         }
@@ -244,6 +281,16 @@
       "when": "absent",
       "event": "32046-44",
       "ops": [
+        {
+          "op": "give_item",
+          "itemId": 8291,
+          "count": 1
+        },
+        {
+          "op": "set",
+          "key": "memoState",
+          "value": "23"
+        },
         {
           "op": "set_cond",
           "cond": 23
@@ -286,11 +333,48 @@
       "event": "32047-06",
       "ops": [
         {
+          "op": "set",
+          "key": "memoState",
+          "value": "3"
+        },
+        {
           "op": "set_cond",
           "cond": 5
         }
       ],
       "htmlFile": "32046-event-32047-06-034.htm"
+    },
+    {
+      "npcId": 32046,
+      "hook": "event",
+      "when": "absent",
+      "event": "32047-09",
+      "hasItem": 8290,
+      "htmlFile": "32046-event-32047-09-035.htm"
+    },
+    {
+      "npcId": 32046,
+      "hook": "event",
+      "when": "absent",
+      "event": "32047-10",
+      "hasItem": 8290,
+      "ops": [
+        {
+          "op": "take_item",
+          "itemId": 8290,
+          "count": 1
+        },
+        {
+          "op": "set",
+          "key": "memoState",
+          "value": "5"
+        },
+        {
+          "op": "set_cond",
+          "cond": 7
+        }
+      ],
+      "htmlFile": "32046-event-32047-10-036.htm"
     },
     {
       "npcId": 32046,
@@ -313,6 +397,11 @@
       "event": "32047-15",
       "ops": [
         {
+          "op": "set",
+          "key": "memoState",
+          "value": "7"
+        },
+        {
           "op": "set_cond",
           "cond": 9
         }
@@ -333,11 +422,72 @@
       "event": "32047-19",
       "ops": [
         {
+          "op": "set",
+          "key": "memoState",
+          "value": "13"
+        },
+        {
           "op": "set_cond",
           "cond": 14
         }
       ],
       "htmlFile": "32046-event-32047-19-041.htm"
+    },
+    {
+      "npcId": 32046,
+      "hook": "event",
+      "when": "absent",
+      "event": "32047-23",
+      "hasItem": 8291,
+      "htmlFile": "32046-event-32047-23-042.htm"
+    },
+    {
+      "npcId": 32046,
+      "hook": "event",
+      "when": "absent",
+      "event": "32047-24",
+      "hasItem": 8291,
+      "htmlFile": "32046-event-32047-24-043.htm"
+    },
+    {
+      "npcId": 32046,
+      "hook": "event",
+      "when": "absent",
+      "event": "32047-25",
+      "hasItem": 8291,
+      "htmlFile": "32046-event-32047-25-044.htm"
+    },
+    {
+      "npcId": 32046,
+      "hook": "event",
+      "when": "absent",
+      "event": "32047-26",
+      "hasItem": 8291,
+      "htmlFile": "32046-event-32047-26-045.htm"
+    },
+    {
+      "npcId": 32046,
+      "hook": "event",
+      "when": "absent",
+      "event": "32047-27",
+      "hasItem": 8291,
+      "ops": [
+        {
+          "op": "take_item",
+          "itemId": 8291,
+          "count": 1
+        },
+        {
+          "op": "set",
+          "key": "memoState",
+          "value": "24"
+        },
+        {
+          "op": "set_cond",
+          "cond": 24
+        }
+      ],
+      "htmlFile": "32046-event-32047-27-046.htm"
     },
     {
       "npcId": 32046,
@@ -358,6 +508,13 @@
       "hook": "event",
       "when": "absent",
       "event": "32047-30",
+      "ops": [
+        {
+          "op": "set",
+          "key": "memoState",
+          "value": "25"
+        }
+      ],
       "htmlFile": "32046-event-32047-30-049.htm"
     },
     {
@@ -380,6 +537,16 @@
       "when": "absent",
       "event": "32047-33",
       "ops": [
+        {
+          "op": "give_item",
+          "itemId": 8292,
+          "count": 1
+        },
+        {
+          "op": "set",
+          "key": "memoState",
+          "value": "26"
+        },
         {
           "op": "set_cond",
           "cond": 25
@@ -455,6 +622,11 @@
       "event": "32041-13",
       "ops": [
         {
+          "op": "set",
+          "key": "memoState",
+          "value": "6"
+        },
+        {
           "op": "set_cond",
           "cond": 8
         }
@@ -465,7 +637,43 @@
       "npcId": 32046,
       "hook": "event",
       "when": "absent",
+      "event": "32041-16",
+      "hasItem": 8058,
+      "htmlFile": "32046-event-32041-16-061.htm"
+    },
+    {
+      "npcId": 32046,
+      "hook": "event",
+      "when": "absent",
+      "event": "32041-17",
+      "hasItem": 8058,
+      "ops": [
+        {
+          "op": "give_item",
+          "itemId": 8060,
+          "count": 1
+        },
+        {
+          "op": "set",
+          "key": "memoState",
+          "value": "15"
+        },
+        {
+          "op": "set_cond",
+          "cond": 16
+        }
+      ],
+      "htmlFile": "32046-event-32041-17-062.htm"
+    },
+    {
+      "npcId": 32046,
+      "hook": "event",
+      "when": "absent",
       "event": "32041-20",
+      "hasItems": [
+        8059,
+        8060
+      ],
       "htmlFile": "32046-event-32041-20-063.htm"
     },
     {
@@ -473,13 +681,115 @@
       "hook": "event",
       "when": "absent",
       "event": "32041-23",
+      "hasItems": [
+        8059,
+        8060
+      ],
       "ops": [
+        {
+          "op": "take_item",
+          "itemId": 8060,
+          "count": 1
+        },
+        {
+          "op": "set",
+          "key": "memoState",
+          "value": "16"
+        },
         {
           "op": "set_cond",
           "cond": 17
         }
       ],
       "htmlFile": "32046-event-32041-23-064.htm"
+    },
+    {
+      "npcId": 32046,
+      "hook": "event",
+      "when": "absent",
+      "event": "32041-24",
+      "hasItem": 8059,
+      "htmlFile": "32046-event-32041-24-065.htm"
+    },
+    {
+      "npcId": 32046,
+      "hook": "event",
+      "when": "absent",
+      "event": "32041-26",
+      "hasItem": 8059,
+      "htmlFile": "32046-event-32041-26-066.htm"
+    },
+    {
+      "npcId": 32046,
+      "hook": "event",
+      "when": "absent",
+      "event": "32041-29",
+      "hasItem": 8292,
+      "htmlFile": "32046-event-32041-29-067.htm"
+    },
+    {
+      "npcId": 32046,
+      "hook": "event",
+      "when": "absent",
+      "event": "32041-30",
+      "hasItem": 8292,
+      "htmlFile": "32046-event-32041-30-068.htm"
+    },
+    {
+      "npcId": 32046,
+      "hook": "event",
+      "when": "absent",
+      "event": "32041-31",
+      "hasItem": 8292,
+      "htmlFile": "32046-event-32041-31-069.htm"
+    },
+    {
+      "npcId": 32046,
+      "hook": "event",
+      "when": "absent",
+      "event": "32041-32",
+      "hasItem": 8292,
+      "htmlFile": "32046-event-32041-32-070.htm"
+    },
+    {
+      "npcId": 32046,
+      "hook": "event",
+      "when": "absent",
+      "event": "32041-33",
+      "hasItem": 8292,
+      "htmlFile": "32046-event-32041-33-071.htm"
+    },
+    {
+      "npcId": 32046,
+      "hook": "event",
+      "when": "absent",
+      "event": "32041-34",
+      "hasItem": 8292,
+      "ops": [
+        {
+          "op": "take_item",
+          "itemId": 8292,
+          "count": 1
+        },
+        {
+          "op": "give_item",
+          "itemId": 6324,
+          "count": 1
+        },
+        {
+          "op": "give_adena",
+          "count": 783720
+        },
+        {
+          "op": "give_exp_sp",
+          "exp": 3447315,
+          "sp": 272615
+        },
+        {
+          "op": "complete"
+        }
+      ],
+      "htmlFile": "32046-event-32041-34-072.htm"
     },
     {
       "npcId": 32046,
@@ -514,6 +824,13 @@
       "hook": "event",
       "when": "absent",
       "event": "32042-08",
+      "ops": [
+        {
+          "op": "set",
+          "key": "memoState",
+          "value": "10"
+        }
+      ],
       "htmlFile": "32046-event-32042-08-077.htm"
     },
     {
@@ -543,6 +860,11 @@
       "when": "absent",
       "event": "32042-14",
       "ops": [
+        {
+          "op": "set",
+          "key": "memoState",
+          "value": "11"
+        },
         {
           "op": "set_cond",
           "cond": 12
@@ -611,6 +933,13 @@
       "hook": "event",
       "when": "absent",
       "event": "32043-09",
+      "ops": [
+        {
+          "op": "set",
+          "key": "memoState",
+          "value": "18"
+        }
+      ],
       "htmlFile": "32046-event-32043-09-090.htm"
     },
     {
@@ -675,6 +1004,11 @@
       "when": "absent",
       "event": "32043-22",
       "ops": [
+        {
+          "op": "set",
+          "key": "memoState",
+          "value": "19"
+        },
         {
           "op": "set_cond",
           "cond": 19
@@ -766,6 +1100,11 @@
       "event": "32044-20",
       "ops": [
         {
+          "op": "set",
+          "key": "memoState",
+          "value": "22"
+        },
+        {
           "op": "set_cond",
           "cond": 22
         }
@@ -785,6 +1124,16 @@
       "when": "absent",
       "event": "32045-02",
       "ops": [
+        {
+          "op": "give_item",
+          "itemId": 8058,
+          "count": 1
+        },
+        {
+          "op": "set",
+          "key": "memoState",
+          "value": "14"
+        },
         {
           "op": "set_cond",
           "cond": 15

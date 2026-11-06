@@ -3,7 +3,9 @@
   "name": "Shrieks of Ghosts",
   "repeatable": true,
   "abortable": true,
-  "questItems": [],
+  "questItems": [
+    5903
+  ],
   "dialogs": [
     {
       "npcId": 30867,
@@ -42,6 +44,13 @@
       "hook": "event",
       "when": "absent",
       "event": "30867-05",
+      "ops": [
+        {
+          "op": "take_item",
+          "itemId": 5903,
+          "count": 1
+        }
+      ],
       "htmlFile": "30867-event-30867-05-003.htm"
     },
     {
@@ -82,6 +91,9 @@
       "hook": "event",
       "when": "absent",
       "event": "30929-03",
+      "lacksItems": [
+        6002
+      ],
       "htmlFile": "30867-event-30929-03-008.htm"
     },
     {
@@ -89,6 +101,13 @@
       "hook": "event",
       "when": "absent",
       "event": "30929-03",
+      "ops": [
+        {
+          "op": "give_item",
+          "itemId": 6003,
+          "count": 1
+        }
+      ],
       "htmlFile": "30867-event-30929-03-009.htm"
     },
     {
@@ -96,6 +115,13 @@
       "hook": "event",
       "when": "absent",
       "event": "30929-03",
+      "ops": [
+        {
+          "op": "give_item",
+          "itemId": 6004,
+          "count": 1
+        }
+      ],
       "htmlFile": "30867-event-30929-03-010.htm"
     },
     {
@@ -103,6 +129,13 @@
       "hook": "event",
       "when": "absent",
       "event": "30929-03",
+      "ops": [
+        {
+          "op": "give_item",
+          "itemId": 6005,
+          "count": 1
+        }
+      ],
       "htmlFile": "30867-event-30929-03-011.htm"
     },
     {
@@ -110,6 +143,13 @@
       "hook": "event",
       "when": "absent",
       "event": "30929-03",
+      "ops": [
+        {
+          "op": "give_item",
+          "itemId": 6006,
+          "count": 1
+        }
+      ],
       "htmlFile": "30867-event-30929-03-012.htm"
     }
   ]

@@ -3,7 +3,9 @@
   "name": "1000 years, the End of Lamentation",
   "repeatable": true,
   "abortable": true,
-  "questItems": [],
+  "questItems": [
+    4269
+  ],
   "dialogs": [
     {
       "npcId": 30754,
@@ -67,7 +69,56 @@
       "hook": "event",
       "when": "absent",
       "event": "30754-08",
+      "ops": [
+        {
+          "op": "set",
+          "key": "memoState",
+          "value": "1"
+        }
+      ],
       "htmlFile": "30754-event-30754-08-007.htm"
+    },
+    {
+      "npcId": 30754,
+      "hook": "event",
+      "when": "absent",
+      "event": "30754-08",
+      "ops": [
+        {
+          "op": "set",
+          "key": "memoState",
+          "value": "2"
+        }
+      ],
+      "htmlFile": "30754-event-30754-08-008.htm"
+    },
+    {
+      "npcId": 30754,
+      "hook": "event",
+      "when": "absent",
+      "event": "30754-08",
+      "ops": [
+        {
+          "op": "set",
+          "key": "memoState",
+          "value": "3"
+        }
+      ],
+      "htmlFile": "30754-event-30754-08-009.htm"
+    },
+    {
+      "npcId": 30754,
+      "hook": "event",
+      "when": "absent",
+      "event": "30754-08",
+      "ops": [
+        {
+          "op": "set",
+          "key": "memoState",
+          "value": "4"
+        }
+      ],
+      "htmlFile": "30754-event-30754-08-010.htm"
     },
     {
       "npcId": 30754,
@@ -79,35 +130,43 @@
           "op": "complete"
         }
       ],
-      "htmlFile": "30754-event-30754-17-008.htm"
+      "htmlFile": "30754-event-30754-17-011.htm"
     },
     {
       "npcId": 30754,
       "hook": "event",
-      "when": "absent",
+      "when": "started",
       "event": "relic_info",
-      "htmlFile": "30754-event-relic_info-009.htm"
-    },
-    {
-      "npcId": 30754,
-      "hook": "event",
-      "when": "absent",
-      "event": "relic_info",
-      "htmlFile": "30754-event-relic_info-010.htm"
-    },
-    {
-      "npcId": 30754,
-      "hook": "event",
-      "when": "absent",
-      "event": "relic_info",
-      "htmlFile": "30754-event-relic_info-011.htm"
-    },
-    {
-      "npcId": 30754,
-      "hook": "event",
-      "when": "absent",
-      "event": "relic_info",
+      "whenVar": "memoState",
+      "whenValue": "1",
       "htmlFile": "30754-event-relic_info-012.htm"
+    },
+    {
+      "npcId": 30754,
+      "hook": "event",
+      "when": "started",
+      "event": "relic_info",
+      "whenVar": "memoState",
+      "whenValue": "2",
+      "htmlFile": "30754-event-relic_info-013.htm"
+    },
+    {
+      "npcId": 30754,
+      "hook": "event",
+      "when": "started",
+      "event": "relic_info",
+      "whenVar": "memoState",
+      "whenValue": "3",
+      "htmlFile": "30754-event-relic_info-014.htm"
+    },
+    {
+      "npcId": 30754,
+      "hook": "event",
+      "when": "started",
+      "event": "relic_info",
+      "whenVar": "memoState",
+      "whenValue": "4",
+      "htmlFile": "30754-event-relic_info-015.htm"
     }
   ]
 }

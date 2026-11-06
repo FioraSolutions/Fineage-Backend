@@ -3,7 +3,9 @@
   "name": "Collect Arrowheads",
   "repeatable": true,
   "abortable": true,
-  "questItems": [],
+  "questItems": [
+    963
+  ],
   "dialogs": [
     {
       "npcId": 30029,

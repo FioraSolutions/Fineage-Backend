@@ -27,6 +27,13 @@
       "npcId": 31453,
       "hook": "talk",
       "when": "started",
+      "hasItem": 7262,
+      "htmlFile": "31453-talk-003.htm"
+    },
+    {
+      "npcId": 31453,
+      "hook": "talk",
+      "when": "started",
       "htmlFile": "31453-talk-004.htm"
     },
     {
@@ -101,6 +108,20 @@
         }
       ],
       "htmlFile": "31453-event-31453-11-011.htm"
+    },
+    {
+      "npcId": 31453,
+      "hook": "event",
+      "when": "absent",
+      "event": "32009-04",
+      "hasItem": 7262,
+      "ops": [
+        {
+          "op": "set_cond",
+          "cond": 2
+        }
+      ],
+      "htmlFile": "31453-event-32009-04-012.htm"
     }
   ]
 }

@@ -3,7 +3,11 @@
   "name": "Aiding the Floran Village",
   "repeatable": true,
   "abortable": true,
-  "questItems": [],
+  "questItems": [
+    8074,
+    8075,
+    8076
+  ],
   "dialogs": [
     {
       "npcId": 30608,

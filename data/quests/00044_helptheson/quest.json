@@ -3,7 +3,10 @@
   "name": "HelpTheSon",
   "repeatable": false,
   "abortable": true,
-  "questItems": [],
+  "questItems": [
+    7552,
+    7553
+  ],
   "dialogs": [
     {
       "npcId": 30827,
@@ -82,8 +85,37 @@
       "npcId": 30827,
       "hook": "event",
       "when": "absent",
+      "event": "30827-03",
+      "hasItem": 168,
+      "ops": [
+        {
+          "op": "take_item",
+          "itemId": 168,
+          "count": 1
+        },
+        {
+          "op": "set_cond",
+          "cond": 2
+        }
+      ],
+      "htmlFile": "30827-event-30827-03-009.htm"
+    },
+    {
+      "npcId": 30827,
+      "hook": "event",
+      "when": "absent",
       "event": "30827-06",
       "ops": [
+        {
+          "op": "take_item",
+          "itemId": 7552,
+          "count": 1
+        },
+        {
+          "op": "give_item",
+          "itemId": 7553,
+          "count": 1
+        },
         {
           "op": "set_cond",
           "cond": 4
@@ -95,8 +127,32 @@
       "npcId": 30827,
       "hook": "event",
       "when": "absent",
+      "event": "30505-02",
+      "hasItem": 7553,
+      "ops": [
+        {
+          "op": "take_item",
+          "itemId": 7553,
+          "count": 1
+        },
+        {
+          "op": "set_cond",
+          "cond": 5
+        }
+      ],
+      "htmlFile": "30827-event-30505-02-011.htm"
+    },
+    {
+      "npcId": 30827,
+      "hook": "event",
+      "when": "absent",
       "event": "30827-09",
       "ops": [
+        {
+          "op": "give_item",
+          "itemId": 7585,
+          "count": 1
+        },
         {
           "op": "complete"
         }

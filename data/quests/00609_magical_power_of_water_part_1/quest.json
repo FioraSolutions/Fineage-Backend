@@ -3,7 +3,9 @@
   "name": "Magical Power of Water - Part 1",
   "repeatable": true,
   "abortable": true,
-  "questItems": [],
+  "questItems": [
+    7237
+  ],
   "dialogs": [
     {
       "npcId": 31371,
@@ -37,6 +39,16 @@
       "when": "started",
       "cond": 3,
       "ops": [
+        {
+          "op": "give_item",
+          "itemId": 7238,
+          "count": 1
+        },
+        {
+          "op": "give_item",
+          "itemId": 7081,
+          "count": 1
+        },
         {
           "op": "complete"
         }

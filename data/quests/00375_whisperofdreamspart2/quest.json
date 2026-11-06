@@ -3,7 +3,10 @@
   "name": "WhisperOfDreamsPart2",
   "repeatable": true,
   "abortable": true,
-  "questItems": [],
+  "questItems": [
+    5888,
+    5889
+  ],
   "dialogs": [
     {
       "npcId": 30515,
@@ -23,6 +26,23 @@
       "npcId": 30515,
       "hook": "talk",
       "when": "started",
+      "ops": [
+        {
+          "op": "take_item",
+          "itemId": 5888,
+          "count": 100
+        },
+        {
+          "op": "take_item",
+          "itemId": 5889,
+          "count": 100
+        },
+        {
+          "op": "give_item",
+          "itemId": 5348,
+          "count": 1
+        }
+      ],
       "htmlFile": "30515-talk-002.htm"
     }
   ]

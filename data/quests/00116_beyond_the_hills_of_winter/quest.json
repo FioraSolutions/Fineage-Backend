@@ -3,7 +3,9 @@
   "name": "Beyond the Hills of Winter",
   "repeatable": false,
   "abortable": true,
-  "questItems": [],
+  "questItems": [
+    8098
+  ],
   "dialogs": [
     {
       "npcId": 30535,
@@ -36,6 +38,13 @@
       "htmlFile": "30535-talk-004.htm"
     },
     {
+      "npcId": 32052,
+      "hook": "talk",
+      "when": "started",
+      "hasItem": 8098,
+      "htmlFile": "32052-talk-005.htm"
+    },
+    {
       "npcId": 30535,
       "hook": "event",
       "when": "absent",
@@ -46,6 +55,11 @@
         },
         {
           "op": "start"
+        },
+        {
+          "op": "set",
+          "key": "memoState",
+          "value": "1"
         },
         {
           "op": "set_cond",
@@ -60,6 +74,16 @@
       "when": "absent",
       "event": "30535-05",
       "ops": [
+        {
+          "op": "give_item",
+          "itemId": 8098,
+          "count": 1
+        },
+        {
+          "op": "set",
+          "key": "memoState",
+          "value": "2"
+        },
         {
           "op": "set_cond",
           "cond": 2
@@ -80,6 +104,11 @@
       "when": "absent",
       "event": "MATERIAL",
       "ops": [
+        {
+          "op": "give_item",
+          "itemId": 1463,
+          "count": 1740
+        },
         {
           "op": "give_exp_sp",
           "exp": 82792,

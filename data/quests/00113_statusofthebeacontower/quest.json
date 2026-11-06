@@ -3,7 +3,9 @@
   "name": "StatusOfTheBeaconTower",
   "repeatable": false,
   "abortable": true,
-  "questItems": [],
+  "questItems": [
+    8086
+  ],
   "dialogs": [
     {
       "npcId": 31979,

@@ -3,7 +3,9 @@
   "name": "Slay the Enemy Commander! (Ketra)",
   "repeatable": true,
   "abortable": true,
-  "questItems": [],
+  "questItems": [
+    7236
+  ],
   "dialogs": [
     {
       "npcId": 31370,
@@ -41,6 +43,29 @@
         }
       ],
       "htmlFile": "31370-event-31370-04-002.htm"
+    },
+    {
+      "npcId": 31370,
+      "hook": "event",
+      "when": "absent",
+      "event": "31370-07",
+      "hasItem": 7236,
+      "ops": [
+        {
+          "op": "give_item",
+          "itemId": 7220,
+          "count": 1
+        },
+        {
+          "op": "give_exp_sp",
+          "exp": 10000,
+          "sp": 0
+        },
+        {
+          "op": "complete"
+        }
+      ],
+      "htmlFile": "31370-event-31370-07-003.htm"
     }
   ]
 }

@@ -3,30 +3,50 @@
   "name": "The Ocean of Distant Stars",
   "repeatable": false,
   "abortable": true,
-  "questItems": [],
+  "questItems": [
+    8488,
+    8495
+  ],
   "dialogs": [
     {
       "npcId": 32053,
       "hook": "talk",
-      "when": "absent",
+      "when": "started",
+      "whenVar": "memoState",
+      "whenValue": "1",
       "htmlFile": "32053-talk-000.htm"
     },
     {
       "npcId": 32053,
       "hook": "talk",
-      "when": "absent",
+      "when": "started",
+      "whenVar": "memoState",
+      "whenValue": "3",
       "htmlFile": "32053-talk-001.htm"
     },
     {
       "npcId": 32053,
       "hook": "talk",
-      "when": "absent",
+      "when": "started",
+      "whenVar": "memoState",
+      "whenValue": "4",
       "htmlFile": "32053-talk-002.htm"
     },
     {
       "npcId": 32053,
       "hook": "talk",
-      "when": "absent",
+      "when": "started",
+      "hasItem": 8488,
+      "whenVar": "memoState",
+      "whenValue": "5",
+      "htmlFile": "32053-talk-003.htm"
+    },
+    {
+      "npcId": 32053,
+      "hook": "talk",
+      "when": "started",
+      "whenVar": "memoState",
+      "whenValue": "6",
       "htmlFile": "32053-talk-004.htm"
     },
     {
@@ -38,25 +58,33 @@
     {
       "npcId": 32055,
       "hook": "talk",
-      "when": "absent",
+      "when": "started",
+      "whenVar": "memoState",
+      "whenValue": "1",
       "htmlFile": "32055-talk-006.htm"
     },
     {
       "npcId": 32055,
       "hook": "talk",
-      "when": "absent",
+      "when": "started",
+      "whenVar": "memoState",
+      "whenValue": "2",
       "htmlFile": "32055-talk-007.htm"
     },
     {
       "npcId": 32055,
       "hook": "talk",
-      "when": "absent",
+      "when": "started",
+      "whenVar": "memoState",
+      "whenValue": "8",
       "htmlFile": "32055-talk-008.htm"
     },
     {
       "npcId": 32055,
       "hook": "talk",
-      "when": "absent",
+      "when": "started",
+      "whenVar": "memoState",
+      "whenValue": "9",
       "htmlFile": "32055-talk-009.htm"
     },
     {
@@ -74,25 +102,33 @@
     {
       "npcId": 32052,
       "hook": "talk",
-      "when": "absent",
+      "when": "started",
+      "whenVar": "memoState",
+      "whenValue": "2",
       "htmlFile": "32052-talk-012.htm"
     },
     {
       "npcId": 32052,
       "hook": "talk",
-      "when": "absent",
+      "when": "started",
+      "whenVar": "memoState",
+      "whenValue": "3",
       "htmlFile": "32052-talk-013.htm"
     },
     {
       "npcId": 32052,
       "hook": "talk",
-      "when": "absent",
+      "when": "started",
+      "whenVar": "memoState",
+      "whenValue": "6",
       "htmlFile": "32052-talk-014.htm"
     },
     {
       "npcId": 32052,
       "hook": "talk",
-      "when": "absent",
+      "when": "started",
+      "whenVar": "memoState",
+      "whenValue": "8",
       "htmlFile": "32052-talk-015.htm"
     },
     {
@@ -108,6 +144,11 @@
           "op": "start"
         },
         {
+          "op": "set",
+          "key": "memoState",
+          "value": "1"
+        },
+        {
           "op": "set_cond",
           "cond": 1
         }
@@ -121,11 +162,35 @@
       "event": "32053-06",
       "ops": [
         {
+          "op": "set",
+          "key": "memoState",
+          "value": "4"
+        },
+        {
           "op": "set_cond",
           "cond": 4
         }
       ],
       "htmlFile": "32053-event-32053-06-017.htm"
+    },
+    {
+      "npcId": 32053,
+      "hook": "event",
+      "when": "absent",
+      "event": "32053-09",
+      "hasItem": 8488,
+      "ops": [
+        {
+          "op": "set",
+          "key": "memoState",
+          "value": "6"
+        },
+        {
+          "op": "set_cond",
+          "cond": 6
+        }
+      ],
+      "htmlFile": "32053-event-32053-09-018.htm"
     },
     {
       "npcId": 32053,
@@ -162,6 +227,11 @@
       "event": "32055-02",
       "ops": [
         {
+          "op": "set",
+          "key": "memoState",
+          "value": "2"
+        },
+        {
           "op": "set_cond",
           "cond": 2
         }
@@ -172,8 +242,42 @@
       "npcId": 32053,
       "hook": "event",
       "when": "absent",
+      "event": "32055-05",
+      "hasItem": 8488,
+      "ops": [
+        {
+          "op": "take_item",
+          "itemId": 8488,
+          "count": 1
+        },
+        {
+          "op": "set",
+          "key": "memoState",
+          "value": "9"
+        },
+        {
+          "op": "set_cond",
+          "cond": 10
+        }
+      ],
+      "htmlFile": "32053-event-32055-05-022.htm"
+    },
+    {
+      "npcId": 32053,
+      "hook": "event",
+      "when": "absent",
       "event": "32076-02",
       "ops": [
+        {
+          "op": "give_item",
+          "itemId": 8488,
+          "count": 1
+        },
+        {
+          "op": "set",
+          "key": "memoState",
+          "value": "5"
+        },
         {
           "op": "set_cond",
           "cond": 5
@@ -188,6 +292,11 @@
       "event": "32052-02",
       "ops": [
         {
+          "op": "set",
+          "key": "memoState",
+          "value": "3"
+        },
+        {
           "op": "set_cond",
           "cond": 3
         }
@@ -201,11 +310,40 @@
       "event": "32052-05",
       "ops": [
         {
+          "op": "set",
+          "key": "memoState",
+          "value": "7"
+        },
+        {
           "op": "set_cond",
           "cond": 7
         }
       ],
       "htmlFile": "32053-event-32052-05-025.htm"
+    },
+    {
+      "npcId": 32053,
+      "hook": "event",
+      "when": "absent",
+      "event": "32052-07",
+      "hasItem": 8495,
+      "ops": [
+        {
+          "op": "take_item",
+          "itemId": 8495,
+          "count": 1
+        },
+        {
+          "op": "set",
+          "key": "memoState",
+          "value": "8"
+        },
+        {
+          "op": "set_cond",
+          "cond": 9
+        }
+      ],
+      "htmlFile": "32053-event-32052-07-026.htm"
     }
   ]
 }

@@ -3,8 +3,18 @@
   "name": "ChestCaughtWithABaitOfEarth",
   "repeatable": false,
   "abortable": true,
-  "questItems": [],
+  "questItems": [
+    7627
+  ],
   "dialogs": [
+    {
+      "npcId": 31574,
+      "hook": "talk",
+      "when": "started",
+      "cond": 1,
+      "hasItem": 6507,
+      "htmlFile": "31574-talk-c1-000.htm"
+    },
     {
       "npcId": 31574,
       "hook": "talk",
@@ -24,6 +34,41 @@
       "when": "absent",
       "event": "31574-04",
       "htmlFile": "31574-event-31574-04-003.htm"
+    },
+    {
+      "npcId": 31574,
+      "hook": "event",
+      "when": "absent",
+      "event": "31574-08",
+      "hasItem": 6507,
+      "ops": [
+        {
+          "op": "take_item",
+          "itemId": 6507,
+          "count": 1
+        },
+        {
+          "op": "give_item",
+          "itemId": 7627,
+          "count": 1
+        }
+      ],
+      "htmlFile": "31574-event-31574-08-004.htm"
+    },
+    {
+      "npcId": 31574,
+      "hook": "event",
+      "when": "absent",
+      "event": "30909-03",
+      "hasItem": 7627,
+      "ops": [
+        {
+          "op": "give_item",
+          "itemId": 2455,
+          "count": 1
+        }
+      ],
+      "htmlFile": "31574-event-30909-03-005.htm"
     }
   ]
 }

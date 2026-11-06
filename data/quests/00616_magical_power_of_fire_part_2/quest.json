@@ -3,7 +3,10 @@
   "name": "Magical Power of Fire - Part 2",
   "repeatable": true,
   "abortable": true,
-  "questItems": [],
+  "questItems": [
+    7243,
+    7244
+  ],
   "dialogs": [
     {
       "npcId": 31379,
@@ -55,6 +58,24 @@
         }
       ],
       "htmlFile": "31379-event-31379-02-004.htm"
+    },
+    {
+      "npcId": 31379,
+      "hook": "event",
+      "when": "absent",
+      "event": "give_heart",
+      "hasItem": 7244,
+      "ops": [
+        {
+          "op": "give_exp_sp",
+          "exp": 10000,
+          "sp": 0
+        },
+        {
+          "op": "complete"
+        }
+      ],
+      "htmlFile": "31379-event-give_heart-005.htm"
     }
   ]
 }

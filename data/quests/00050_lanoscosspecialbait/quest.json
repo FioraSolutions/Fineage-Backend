@@ -3,7 +3,9 @@
   "name": "LanoscosSpecialBait",
   "repeatable": false,
   "abortable": true,
-  "questItems": [],
+  "questItems": [
+    7621
+  ],
   "dialogs": [
     {
       "npcId": 31570,
@@ -48,6 +50,11 @@
       "when": "absent",
       "event": "31570-07",
       "ops": [
+        {
+          "op": "give_item",
+          "itemId": 7610,
+          "count": 4
+        },
         {
           "op": "complete"
         }

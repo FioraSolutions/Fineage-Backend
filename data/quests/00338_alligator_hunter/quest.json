@@ -3,7 +3,9 @@
   "name": "Alligator Hunter",
   "repeatable": true,
   "abortable": true,
-  "questItems": [],
+  "questItems": [
+    4337
+  ],
   "dialogs": [
     {
       "npcId": 30892,
@@ -41,6 +43,9 @@
       "hook": "event",
       "when": "absent",
       "event": "30892-06",
+      "lacksItems": [
+        4337
+      ],
       "htmlFile": "30892-event-30892-06-003.htm"
     },
     {

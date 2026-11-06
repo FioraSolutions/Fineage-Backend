@@ -3,7 +3,9 @@
   "name": "SecretMeetingWithVarkaSilenos",
   "repeatable": false,
   "abortable": true,
-  "questItems": [],
+  "questItems": [
+    7232
+  ],
   "dialogs": [
     {
       "npcId": 31296,
@@ -67,11 +69,34 @@
       "event": "31258-02",
       "ops": [
         {
+          "op": "give_item",
+          "itemId": 7232,
+          "count": 1
+        },
+        {
           "op": "set_cond",
           "cond": 2
         }
       ],
       "htmlFile": "31296-event-31258-02-007.htm"
+    },
+    {
+      "npcId": 31296,
+      "hook": "event",
+      "when": "absent",
+      "event": "31378-02",
+      "hasItem": 7232,
+      "ops": [
+        {
+          "op": "give_exp_sp",
+          "exp": 233125,
+          "sp": 18142
+        },
+        {
+          "op": "complete"
+        }
+      ],
+      "htmlFile": "31296-event-31378-02-008.htm"
     }
   ]
 }

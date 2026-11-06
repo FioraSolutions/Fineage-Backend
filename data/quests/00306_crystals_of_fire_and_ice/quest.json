@@ -3,7 +3,10 @@
   "name": "Crystals of Fire and Ice",
   "repeatable": true,
   "abortable": true,
-  "questItems": [],
+  "questItems": [
+    1020,
+    1021
+  ],
   "dialogs": [
     {
       "npcId": 30004,

@@ -3,7 +3,9 @@
   "name": "Find Glittering Jewelry",
   "repeatable": false,
   "abortable": true,
-  "questItems": [],
+  "questItems": [
+    7162
+  ],
   "dialogs": [
     {
       "npcId": 30091,
@@ -117,6 +119,11 @@
           "op": "take_item",
           "itemId": 4044,
           "count": 150
+        },
+        {
+          "op": "give_item",
+          "itemId": 7077,
+          "count": 1
         },
         {
           "op": "complete"

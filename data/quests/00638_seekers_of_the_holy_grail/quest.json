@@ -3,7 +3,9 @@
   "name": "Seekers Of The Holy Grail",
   "repeatable": true,
   "abortable": true,
-  "questItems": [],
+  "questItems": [
+    8068
+  ],
   "dialogs": [
     {
       "npcId": 31328,

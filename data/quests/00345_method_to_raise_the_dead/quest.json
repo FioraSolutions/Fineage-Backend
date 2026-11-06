@@ -3,72 +3,123 @@
   "name": "Method to Raise the Dead",
   "repeatable": true,
   "abortable": true,
-  "questItems": [],
+  "questItems": [
+    4274,
+    4275,
+    4276,
+    4277,
+    4278,
+    4280,
+    4281
+  ],
   "dialogs": [
     {
       "npcId": 30970,
       "hook": "talk",
-      "when": "absent",
+      "when": "started",
+      "whenVar": "memoState",
+      "whenValue": "0",
+      "ops": [
+        {
+          "op": "set",
+          "key": "memoState",
+          "value": "1"
+        }
+      ],
       "htmlFile": "30970-talk-000.htm"
     },
     {
       "npcId": 30970,
       "hook": "talk",
-      "when": "absent",
+      "when": "started",
+      "whenVar": "memoState",
+      "whenValue": "1",
       "htmlFile": "30970-talk-001.htm"
     },
     {
       "npcId": 30970,
       "hook": "talk",
-      "when": "absent",
+      "when": "started",
+      "whenVar": "memoState",
+      "whenValue": "1",
       "htmlFile": "30970-talk-002.htm"
     },
     {
       "npcId": 30970,
       "hook": "talk",
-      "when": "absent",
+      "when": "started",
+      "whenVar": "memoState",
+      "whenValue": "2",
       "htmlFile": "30970-talk-003.htm"
     },
     {
       "npcId": 30970,
       "hook": "talk",
-      "when": "absent",
+      "when": "started",
+      "whenVar": "memoState",
+      "whenValue": "3",
       "htmlFile": "30970-talk-004.htm"
     },
     {
       "npcId": 30970,
       "hook": "talk",
-      "when": "absent",
+      "when": "started",
+      "whenVar": "memoState",
+      "whenValue": "7",
       "htmlFile": "30970-talk-005.htm"
     },
     {
       "npcId": 30970,
       "hook": "talk",
-      "when": "absent",
+      "when": "started",
+      "whenVar": "memoState",
+      "whenValue": "8",
+      "ops": [
+        {
+          "op": "give_item",
+          "itemId": 4407,
+          "count": 3
+        }
+      ],
       "htmlFile": "30970-talk-006.htm"
+    },
+    {
+      "npcId": 30971,
+      "hook": "talk",
+      "when": "absent",
+      "hasItem": 4280,
+      "htmlFile": "30971-talk-007.htm"
     },
     {
       "npcId": 30973,
       "hook": "talk",
-      "when": "absent",
+      "when": "started",
+      "whenVar": "memoState",
+      "whenValue": "7",
       "htmlFile": "30973-talk-008.htm"
     },
     {
       "npcId": 30973,
       "hook": "talk",
-      "when": "absent",
+      "when": "started",
+      "whenVar": "memoState",
+      "whenValue": "7",
       "htmlFile": "30973-talk-009.htm"
     },
     {
       "npcId": 30973,
       "hook": "talk",
-      "when": "absent",
+      "when": "started",
+      "whenVar": "memoState",
+      "whenValue": "7",
       "htmlFile": "30973-talk-010.htm"
     },
     {
       "npcId": 30973,
       "hook": "talk",
-      "when": "absent",
+      "when": "started",
+      "whenVar": "memoState",
+      "whenValue": "8",
       "htmlFile": "30973-talk-011.htm"
     },
     {
@@ -107,6 +158,13 @@
       "hook": "event",
       "when": "absent",
       "event": "30970-03",
+      "ops": [
+        {
+          "op": "set",
+          "key": "memoState",
+          "value": "1"
+        }
+      ],
       "htmlFile": "30970-event-30970-03-015.htm"
     },
     {
@@ -114,7 +172,19 @@
       "hook": "event",
       "when": "absent",
       "event": "30970-07",
+      "hasItems": [
+        4274,
+        4275,
+        4276,
+        4277,
+        4278
+      ],
       "ops": [
+        {
+          "op": "set",
+          "key": "memoState",
+          "value": "2"
+        },
         {
           "op": "set_cond",
           "cond": 2
@@ -141,6 +211,13 @@
       "hook": "event",
       "when": "absent",
       "event": "30971-03",
+      "ops": [
+        {
+          "op": "take_item",
+          "itemId": 4280,
+          "count": 1
+        }
+      ],
       "htmlFile": "30970-event-30971-03-019.htm"
     },
     {
@@ -171,6 +248,11 @@
       "event": "30973-03",
       "ops": [
         {
+          "op": "set",
+          "key": "memoState",
+          "value": "8"
+        },
+        {
           "op": "set_cond",
           "cond": 6
         }
@@ -184,6 +266,11 @@
       "event": "30973-05",
       "ops": [
         {
+          "op": "set",
+          "key": "memoState",
+          "value": "8"
+        },
+        {
           "op": "set_cond",
           "cond": 6
         }
@@ -196,6 +283,11 @@
       "when": "absent",
       "event": "30973-07",
       "ops": [
+        {
+          "op": "set",
+          "key": "memoState",
+          "value": "8"
+        },
         {
           "op": "set_cond",
           "cond": 7
@@ -216,6 +308,16 @@
       "when": "absent",
       "event": "30912-03",
       "ops": [
+        {
+          "op": "give_item",
+          "itemId": 4281,
+          "count": 1
+        },
+        {
+          "op": "set",
+          "key": "memoState",
+          "value": "3"
+        },
         {
           "op": "set_cond",
           "cond": 3

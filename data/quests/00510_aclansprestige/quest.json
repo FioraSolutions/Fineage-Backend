@@ -3,7 +3,9 @@
   "name": "AClansPrestige",
   "repeatable": true,
   "abortable": true,
-  "questItems": [],
+  "questItems": [
+    8767
+  ],
   "dialogs": [
     {
       "npcId": 31331,
@@ -22,6 +24,13 @@
       "npcId": 31331,
       "hook": "talk",
       "when": "started",
+      "ops": [
+        {
+          "op": "take_item",
+          "itemId": 8767,
+          "count": 1
+        }
+      ],
       "htmlFile": "31331-talk-002.htm"
     }
   ]

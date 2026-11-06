@@ -3,7 +3,9 @@
   "name": "Seed of Evil",
   "repeatable": false,
   "abortable": true,
-  "questItems": [],
+  "questItems": [
+    1025
+  ],
   "dialogs": [
     {
       "npcId": 30031,
@@ -22,6 +24,32 @@
       "hook": "talk",
       "when": "started",
       "htmlFile": "30031-talk-002.htm"
+    },
+    {
+      "npcId": 30031,
+      "hook": "talk",
+      "when": "started",
+      "hasItem": 1025,
+      "ops": [
+        {
+          "op": "give_item",
+          "itemId": 956,
+          "count": 1
+        },
+        {
+          "op": "give_adena",
+          "count": 1495
+        },
+        {
+          "op": "give_exp_sp",
+          "exp": 17818,
+          "sp": 927
+        },
+        {
+          "op": "complete"
+        }
+      ],
+      "htmlFile": "30031-talk-003.htm"
     }
   ]
 }

@@ -3,7 +3,14 @@
   "name": "Inhabitants of the Forest of the Dead",
   "repeatable": false,
   "abortable": true,
-  "questItems": [],
+  "questItems": [
+    7065,
+    7148,
+    7151,
+    7152,
+    7153,
+    7154
+  ],
   "dialogs": [
     {
       "npcId": 31389,
@@ -72,6 +79,13 @@
       "hook": "talk",
       "when": "started",
       "cond": 7,
+      "ops": [
+        {
+          "op": "give_item",
+          "itemId": 7148,
+          "count": 1
+        }
+      ],
       "htmlFile": "31389-talk-c7-009.htm"
     },
     {
@@ -185,6 +199,13 @@
       "when": "absent",
       "event": "31389-02",
       "minLevel": 65,
+      "ops": [
+        {
+          "op": "give_item",
+          "itemId": 7152,
+          "count": 1
+        }
+      ],
       "htmlFile": "31389-event-31389-02-026.htm"
     },
     {
@@ -199,6 +220,13 @@
       "hook": "event",
       "when": "absent",
       "event": "31389-13",
+      "ops": [
+        {
+          "op": "give_item",
+          "itemId": 7153,
+          "count": 1
+        }
+      ],
       "htmlFile": "31389-event-31389-13-028.htm"
     },
     {
@@ -213,6 +241,9 @@
       "hook": "event",
       "when": "absent",
       "event": "31389-19",
+      "lacksItems": [
+        7154
+      ],
       "htmlFile": "31389-event-31389-19-030.htm"
     },
     {
@@ -269,6 +300,13 @@
       "hook": "event",
       "when": "absent",
       "event": "31532-04",
+      "ops": [
+        {
+          "op": "give_item",
+          "itemId": 7065,
+          "count": 1
+        }
+      ],
       "htmlFile": "31389-event-31532-04-038.htm"
     },
     {
@@ -276,6 +314,10 @@
       "hook": "event",
       "when": "absent",
       "event": "31532-07",
+      "lacksItems": [
+        7148,
+        7065
+      ],
       "htmlFile": "31389-event-31532-07-039.htm"
     },
     {
@@ -374,6 +416,9 @@
       "hook": "event",
       "when": "absent",
       "event": "31522-03",
+      "lacksItems": [
+        7151
+      ],
       "htmlFile": "31389-event-31522-03-053.htm"
     },
     {
@@ -396,6 +441,11 @@
       "when": "absent",
       "event": "31522-21",
       "ops": [
+        {
+          "op": "give_item",
+          "itemId": 7156,
+          "count": 1
+        },
         {
           "op": "give_exp_sp",
           "exp": 242105,
@@ -500,6 +550,9 @@
       "hook": "event",
       "when": "absent",
       "event": "31531-02",
+      "lacksItems": [
+        7152
+      ],
       "htmlFile": "31389-event-31531-02-070.htm"
     }
   ]

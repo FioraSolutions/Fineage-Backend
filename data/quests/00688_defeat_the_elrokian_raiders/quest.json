@@ -3,7 +3,9 @@
   "name": "Defeat the Elrokian Raiders!",
   "repeatable": true,
   "abortable": true,
-  "questItems": [],
+  "questItems": [
+    8785
+  ],
   "dialogs": [
     {
       "npcId": 32105,
@@ -54,6 +56,21 @@
       "npcId": 32105,
       "hook": "event",
       "when": "absent",
+      "event": "32105-06",
+      "hasItem": 8785,
+      "ops": [
+        {
+          "op": "take_item",
+          "itemId": 8785,
+          "count": 1
+        }
+      ],
+      "htmlFile": "32105-event-32105-06-005.htm"
+    },
+    {
+      "npcId": 32105,
+      "hook": "event",
+      "when": "absent",
       "event": "donation",
       "htmlFile": "32105-event-donation-006.htm"
     },
@@ -69,6 +86,14 @@
         }
       ],
       "htmlFile": "32105-event-donation-007.htm"
+    },
+    {
+      "npcId": 32105,
+      "hook": "event",
+      "when": "absent",
+      "event": "32105-11",
+      "hasItem": 8785,
+      "htmlFile": "32105-event-32105-11-008.htm"
     }
   ]
 }

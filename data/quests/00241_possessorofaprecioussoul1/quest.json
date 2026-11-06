@@ -220,6 +220,13 @@
       "npcId": 31272,
       "hook": "talk",
       "when": "started",
+      "hasItem": 6033,
+      "htmlFile": "31272-talk-035.htm"
+    },
+    {
+      "npcId": 31272,
+      "hook": "talk",
+      "when": "started",
       "htmlFile": "31272-talk-036.htm"
     }
   ]

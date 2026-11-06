@@ -16,25 +16,38 @@
       "npcId": 30846,
       "hook": "talk",
       "when": "started",
+      "whenVar": "memoState",
+      "whenValue": "4",
       "htmlFile": "30846-talk-000.htm"
     },
     {
       "npcId": 30846,
       "hook": "talk",
       "when": "started",
+      "whenVar": "memoState",
+      "whenValue": "5",
       "htmlFile": "30846-talk-001.htm"
     },
     {
       "npcId": 30846,
       "hook": "talk",
       "when": "started",
+      "whenVar": "memoState",
+      "whenValue": "6",
       "htmlFile": "30846-talk-002.htm"
     },
     {
       "npcId": 30846,
       "hook": "talk",
       "when": "started",
+      "whenVar": "memoState",
+      "whenValue": "7",
       "ops": [
+        {
+          "op": "set",
+          "key": "memoState",
+          "value": "1"
+        },
         {
           "op": "give_adena",
           "count": 2384000
@@ -62,6 +75,11 @@
         },
         {
           "op": "start"
+        },
+        {
+          "op": "set",
+          "key": "memoState",
+          "value": "1"
         },
         {
           "op": "set_cond",
@@ -95,8 +113,33 @@
       "npcId": 30846,
       "hook": "event",
       "when": "absent",
+      "event": "30846-09",
+      "hasItem": 8766,
+      "ops": [
+        {
+          "op": "take_item",
+          "itemId": 8766,
+          "count": 50
+        },
+        {
+          "op": "set",
+          "key": "memoState",
+          "value": "5"
+        }
+      ],
+      "htmlFile": "30846-event-30846-09-009.htm"
+    },
+    {
+      "npcId": 30846,
+      "hook": "event",
+      "when": "absent",
       "event": "30846-14",
       "ops": [
+        {
+          "op": "set",
+          "key": "memoState",
+          "value": "4"
+        },
         {
           "op": "give_adena",
           "count": 2384000
@@ -109,6 +152,13 @@
       "hook": "event",
       "when": "absent",
       "event": "30846-19",
+      "ops": [
+        {
+          "op": "set",
+          "key": "memoState",
+          "value": "1"
+        }
+      ],
       "htmlFile": "30846-event-30846-19-011.htm"
     },
     {
@@ -201,6 +251,26 @@
       "npcId": 30846,
       "hook": "event",
       "when": "absent",
+      "event": "30846-22",
+      "hasItem": 8766,
+      "ops": [
+        {
+          "op": "take_item",
+          "itemId": 8766,
+          "count": 1
+        },
+        {
+          "op": "set",
+          "key": "memoState",
+          "value": "1005"
+        }
+      ],
+      "htmlFile": "30846-event-30846-22-020.htm"
+    },
+    {
+      "npcId": 30846,
+      "hook": "event",
+      "when": "absent",
       "event": "30846-25",
       "htmlFile": "30846-event-30846-25-021.htm"
     },
@@ -210,6 +280,11 @@
       "when": "absent",
       "event": "30846-25",
       "ops": [
+        {
+          "op": "set",
+          "key": "memoState",
+          "value": "1"
+        },
         {
           "op": "give_adena",
           "count": 800
@@ -222,6 +297,13 @@
       "hook": "event",
       "when": "absent",
       "event": "30846-29",
+      "ops": [
+        {
+          "op": "set",
+          "key": "memoState",
+          "value": "1"
+        }
+      ],
       "htmlFile": "30846-event-30846-29-023.htm"
     },
     {

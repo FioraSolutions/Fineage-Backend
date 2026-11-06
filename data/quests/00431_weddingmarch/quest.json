@@ -3,7 +3,9 @@
   "name": "WeddingMarch",
   "repeatable": true,
   "abortable": true,
-  "questItems": [],
+  "questItems": [
+    7540
+  ],
   "dialogs": [
     {
       "npcId": 31042,

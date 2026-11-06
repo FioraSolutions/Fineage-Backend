@@ -3,7 +3,10 @@
   "name": "Dig Up the Sea of Spores!",
   "repeatable": true,
   "abortable": true,
-  "questItems": [],
+  "questItems": [
+    5865,
+    5866
+  ],
   "dialogs": [
     {
       "npcId": 30717,
@@ -83,6 +86,16 @@
       "when": "absent",
       "event": "30717-09",
       "ops": [
+        {
+          "op": "take_item",
+          "itemId": 5865,
+          "count": 1
+        },
+        {
+          "op": "take_item",
+          "itemId": 5866,
+          "count": 1
+        },
         {
           "op": "give_exp_sp",
           "exp": 31850,

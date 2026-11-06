@@ -3,7 +3,10 @@
   "name": "Magical Power of Water - Part 2",
   "repeatable": true,
   "abortable": true,
-  "questItems": [],
+  "questItems": [
+    7238,
+    7239
+  ],
   "dialogs": [
     {
       "npcId": 31372,
@@ -55,6 +58,24 @@
         }
       ],
       "htmlFile": "31372-event-31372-02-004.htm"
+    },
+    {
+      "npcId": 31372,
+      "hook": "event",
+      "when": "absent",
+      "event": "give_heart",
+      "hasItem": 7239,
+      "ops": [
+        {
+          "op": "give_exp_sp",
+          "exp": 10000,
+          "sp": 0
+        },
+        {
+          "op": "complete"
+        }
+      ],
+      "htmlFile": "31372-event-give_heart-005.htm"
     }
   ]
 }

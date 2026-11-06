@@ -3,13 +3,23 @@
   "name": "Trespassing into the Holy Ground",
   "repeatable": true,
   "abortable": true,
-  "questItems": [],
+  "questItems": [
+    5881
+  ],
   "dialogs": [
     {
       "npcId": 30926,
       "hook": "talk",
       "when": "absent",
-      "htmlFile": "30926-event-30926-02-001.htm"
+      "hasItem": 5881,
+      "ops": [
+        {
+          "op": "take_item",
+          "itemId": 5881,
+          "count": 1
+        }
+      ],
+      "htmlFile": "30926-talk-000.htm"
     },
     {
       "npcId": 30926,

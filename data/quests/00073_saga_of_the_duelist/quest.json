@@ -9,6 +9,16 @@
       "npcId": 31537,
       "hook": "talk",
       "when": "absent",
+      "lacksItems": [
+        7546
+      ],
+      "ops": [
+        {
+          "op": "give_item",
+          "itemId": 7546,
+          "count": 1
+        }
+      ],
       "htmlFile": "31537-talk-000.htm"
     }
   ]

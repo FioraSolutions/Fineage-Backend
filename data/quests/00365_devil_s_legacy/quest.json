@@ -3,13 +3,23 @@
   "name": "Devil's Legacy",
   "repeatable": true,
   "abortable": true,
-  "questItems": [],
+  "questItems": [
+    5873
+  ],
   "dialogs": [
     {
       "npcId": 30095,
       "hook": "talk",
       "when": "absent",
-      "htmlFile": "30095-event-30095-02-001.htm"
+      "hasItem": 5873,
+      "ops": [
+        {
+          "op": "take_item",
+          "itemId": 5873,
+          "count": 1
+        }
+      ],
+      "htmlFile": "30095-talk-000.htm"
     },
     {
       "npcId": 30095,
@@ -22,6 +32,11 @@
         },
         {
           "op": "start"
+        },
+        {
+          "op": "set",
+          "key": "memoState",
+          "value": "1"
         },
         {
           "op": "set_cond",
@@ -61,6 +76,9 @@
       "hook": "event",
       "when": "absent",
       "event": "REWARD",
+      "lacksItems": [
+        5873
+      ],
       "htmlFile": "30095-event-REWARD-005.htm"
     },
     {

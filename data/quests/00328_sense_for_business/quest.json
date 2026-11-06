@@ -3,7 +3,11 @@
   "name": "Sense for Business",
   "repeatable": true,
   "abortable": true,
-  "questItems": [],
+  "questItems": [
+    1347,
+    1348,
+    1366
+  ],
   "dialogs": [
     {
       "npcId": 30436,

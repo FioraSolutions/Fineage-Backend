@@ -3,7 +3,9 @@
   "name": "MeetingWithTheGoldenRam",
   "repeatable": false,
   "abortable": true,
-  "questItems": [],
+  "questItems": [
+    7245
+  ],
   "dialogs": [
     {
       "npcId": 31314,
@@ -28,6 +30,13 @@
       "hook": "talk",
       "when": "started",
       "htmlFile": "31314-talk-003.htm"
+    },
+    {
+      "npcId": 31314,
+      "hook": "talk",
+      "when": "started",
+      "hasItem": 7245,
+      "htmlFile": "31314-talk-004.htm"
     },
     {
       "npcId": 31314,
@@ -56,11 +65,38 @@
       "event": "31315-02",
       "ops": [
         {
+          "op": "give_item",
+          "itemId": 7245,
+          "count": 1
+        },
+        {
           "op": "set_cond",
           "cond": 2
         }
       ],
       "htmlFile": "31314-event-31315-02-006.htm"
+    },
+    {
+      "npcId": 31314,
+      "hook": "event",
+      "when": "absent",
+      "event": "31555-02",
+      "hasItem": 7245,
+      "ops": [
+        {
+          "op": "give_adena",
+          "count": 40000
+        },
+        {
+          "op": "give_exp_sp",
+          "exp": 126668,
+          "sp": 11731
+        },
+        {
+          "op": "complete"
+        }
+      ],
+      "htmlFile": "31314-event-31555-02-007.htm"
     }
   ]
 }

@@ -3,7 +3,11 @@
   "name": "Heart in Search of Power",
   "repeatable": true,
   "abortable": true,
-  "questItems": [],
+  "questItems": [
+    7170,
+    7171,
+    7172
+  ],
   "dialogs": [
     {
       "npcId": 31518,
@@ -84,6 +88,30 @@
       "when": "absent",
       "event": "31518-06",
       "htmlFile": "31518-event-31518-06-009.htm"
+    },
+    {
+      "npcId": 31518,
+      "hook": "event",
+      "when": "absent",
+      "event": "31519-02",
+      "hasItem": 7170,
+      "ops": [
+        {
+          "op": "take_item",
+          "itemId": 7170,
+          "count": 1
+        },
+        {
+          "op": "give_item",
+          "itemId": 7172,
+          "count": 1
+        },
+        {
+          "op": "set_cond",
+          "cond": 4
+        }
+      ],
+      "htmlFile": "31518-event-31519-02-010.htm"
     },
     {
       "npcId": 31518,

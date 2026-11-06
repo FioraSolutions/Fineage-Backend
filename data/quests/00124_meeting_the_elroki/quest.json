@@ -3,7 +3,9 @@
   "name": "Meeting the Elroki",
   "repeatable": false,
   "abortable": true,
-  "questItems": [],
+  "questItems": [
+    8778
+  ],
   "dialogs": [
     {
       "npcId": 32113,
@@ -102,6 +104,28 @@
       "when": "started",
       "cond": 5,
       "htmlFile": "32115-talk-c5-013.htm"
+    },
+    {
+      "npcId": 32115,
+      "hook": "talk",
+      "when": "started",
+      "cond": 6,
+      "hasItem": 8778,
+      "ops": [
+        {
+          "op": "give_adena",
+          "count": 100013
+        },
+        {
+          "op": "give_exp_sp",
+          "exp": 301922,
+          "sp": 30294
+        },
+        {
+          "op": "complete"
+        }
+      ],
+      "htmlFile": "32115-talk-c6-014.htm"
     },
     {
       "npcId": 32117,
@@ -264,6 +288,11 @@
       "when": "absent",
       "event": "32118-04",
       "ops": [
+        {
+          "op": "give_item",
+          "itemId": 8778,
+          "count": 1
+        },
         {
           "op": "set_cond",
           "cond": 6

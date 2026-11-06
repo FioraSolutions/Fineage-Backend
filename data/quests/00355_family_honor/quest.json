@@ -3,13 +3,22 @@
   "name": "Family Honor",
   "repeatable": true,
   "abortable": true,
-  "questItems": [],
+  "questItems": [
+    4252
+  ],
   "dialogs": [
     {
       "npcId": 30181,
       "hook": "talk",
       "when": "absent",
       "htmlFile": "30181-talk-000.htm"
+    },
+    {
+      "npcId": 30181,
+      "hook": "talk",
+      "when": "absent",
+      "hasItem": 4350,
+      "htmlFile": "30181-talk-001.htm"
     },
     {
       "npcId": 30181,
@@ -70,6 +79,13 @@
       "hook": "event",
       "when": "absent",
       "event": "30181-06",
+      "ops": [
+        {
+          "op": "take_item",
+          "itemId": 4252,
+          "count": 1
+        }
+      ],
       "htmlFile": "30181-event-30181-06-008.htm"
     },
     {
@@ -84,6 +100,73 @@
       "hook": "event",
       "when": "absent",
       "event": "30929-03",
+      "hasItem": 4350,
+      "ops": [
+        {
+          "op": "give_item",
+          "itemId": 4351,
+          "count": 1
+        }
+      ],
+      "htmlFile": "30181-event-30929-03-010.htm"
+    },
+    {
+      "npcId": 30181,
+      "hook": "event",
+      "when": "absent",
+      "event": "30929-03",
+      "hasItem": 4350,
+      "ops": [
+        {
+          "op": "give_item",
+          "itemId": 4352,
+          "count": 1
+        }
+      ],
+      "htmlFile": "30181-event-30929-03-011.htm"
+    },
+    {
+      "npcId": 30181,
+      "hook": "event",
+      "when": "absent",
+      "event": "30929-03",
+      "hasItem": 4350,
+      "ops": [
+        {
+          "op": "give_item",
+          "itemId": 4353,
+          "count": 1
+        }
+      ],
+      "htmlFile": "30181-event-30929-03-012.htm"
+    },
+    {
+      "npcId": 30181,
+      "hook": "event",
+      "when": "absent",
+      "event": "30929-03",
+      "hasItem": 4350,
+      "ops": [
+        {
+          "op": "give_item",
+          "itemId": 4354,
+          "count": 1
+        }
+      ],
+      "htmlFile": "30181-event-30929-03-013.htm"
+    },
+    {
+      "npcId": 30181,
+      "hook": "event",
+      "when": "absent",
+      "event": "30929-03",
+      "ops": [
+        {
+          "op": "give_item",
+          "itemId": 4351,
+          "count": 1
+        }
+      ],
       "htmlFile": "30181-event-30929-03-014.htm"
     },
     {
@@ -91,6 +174,13 @@
       "hook": "event",
       "when": "absent",
       "event": "30929-03",
+      "ops": [
+        {
+          "op": "give_item",
+          "itemId": 4352,
+          "count": 1
+        }
+      ],
       "htmlFile": "30181-event-30929-03-015.htm"
     },
     {
@@ -98,6 +188,13 @@
       "hook": "event",
       "when": "absent",
       "event": "30929-03",
+      "ops": [
+        {
+          "op": "give_item",
+          "itemId": 4353,
+          "count": 1
+        }
+      ],
       "htmlFile": "30181-event-30929-03-016.htm"
     },
     {
@@ -105,6 +202,13 @@
       "hook": "event",
       "when": "absent",
       "event": "30929-03",
+      "ops": [
+        {
+          "op": "give_item",
+          "itemId": 4354,
+          "count": 1
+        }
+      ],
       "htmlFile": "30181-event-30929-03-017.htm"
     }
   ]

@@ -16,6 +16,9 @@
       "npcId": 30890,
       "hook": "talk",
       "when": "absent",
+      "lacksItems": [
+        5915
+      ],
       "htmlFile": "30890-talk-001.htm"
     },
     {
@@ -47,8 +50,52 @@
       "npcId": 30890,
       "hook": "event",
       "when": "absent",
+      "event": "30890-05",
+      "hasItem": 5915,
+      "ops": [
+        {
+          "op": "take_item",
+          "itemId": 5915,
+          "count": 1
+        },
+        {
+          "op": "give_adena",
+          "count": 1000
+        }
+      ],
+      "htmlFile": "30890-event-30890-05-006.htm"
+    },
+    {
+      "npcId": 30890,
+      "hook": "event",
+      "when": "absent",
       "event": "30890-06",
       "htmlFile": "30890-event-30890-06-007.htm"
+    },
+    {
+      "npcId": 30890,
+      "hook": "event",
+      "when": "absent",
+      "event": "30890-07",
+      "hasItem": 5915,
+      "ops": [
+        {
+          "op": "create"
+        },
+        {
+          "op": "start"
+        },
+        {
+          "op": "take_item",
+          "itemId": 5915,
+          "count": 1
+        },
+        {
+          "op": "set_cond",
+          "cond": 1
+        }
+      ],
+      "htmlFile": "30890-event-30890-07-008.htm"
     },
     {
       "npcId": 30890,

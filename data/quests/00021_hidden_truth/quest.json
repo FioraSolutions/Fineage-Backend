@@ -3,7 +3,9 @@
   "name": "Hidden Truth",
   "repeatable": false,
   "abortable": true,
-  "questItems": [],
+  "questItems": [
+    7140
+  ],
   "dialogs": [
     {
       "npcId": 31522,
@@ -101,6 +103,26 @@
       "npcId": 31348,
       "hook": "talk",
       "when": "absent",
+      "hasItem": 7140,
+      "ops": [
+        {
+          "op": "set_cond",
+          "cond": 7
+        }
+      ],
+      "htmlFile": "31348-talk-012.htm"
+    },
+    {
+      "npcId": 31348,
+      "hook": "talk",
+      "when": "absent",
+      "hasItem": 7140,
+      "htmlFile": "31348-talk-013.htm"
+    },
+    {
+      "npcId": 31348,
+      "hook": "talk",
+      "when": "absent",
       "ops": [
         {
           "op": "set_cond",
@@ -120,6 +142,26 @@
       "hook": "talk",
       "when": "absent",
       "htmlFile": "31348-talk-016.htm"
+    },
+    {
+      "npcId": 31349,
+      "hook": "talk",
+      "when": "absent",
+      "hasItem": 7140,
+      "ops": [
+        {
+          "op": "set_cond",
+          "cond": 7
+        }
+      ],
+      "htmlFile": "31349-talk-017.htm"
+    },
+    {
+      "npcId": 31349,
+      "hook": "talk",
+      "when": "absent",
+      "hasItem": 7140,
+      "htmlFile": "31349-talk-018.htm"
     },
     {
       "npcId": 31349,
@@ -149,6 +191,26 @@
       "npcId": 31350,
       "hook": "talk",
       "when": "absent",
+      "hasItem": 7140,
+      "ops": [
+        {
+          "op": "set_cond",
+          "cond": 7
+        }
+      ],
+      "htmlFile": "31350-talk-022.htm"
+    },
+    {
+      "npcId": 31350,
+      "hook": "talk",
+      "when": "absent",
+      "hasItem": 7140,
+      "htmlFile": "31350-talk-023.htm"
+    },
+    {
+      "npcId": 31350,
+      "hook": "talk",
+      "when": "absent",
       "ops": [
         {
           "op": "set_cond",
@@ -168,6 +230,13 @@
       "hook": "talk",
       "when": "absent",
       "htmlFile": "31350-talk-026.htm"
+    },
+    {
+      "npcId": 31328,
+      "hook": "talk",
+      "when": "absent",
+      "hasItem": 7140,
+      "htmlFile": "31328-talk-027.htm"
     },
     {
       "npcId": 31328,
@@ -301,6 +370,11 @@
       "event": "31328-05",
       "ops": [
         {
+          "op": "give_item",
+          "itemId": 7141,
+          "count": 1
+        },
+        {
           "op": "give_exp_sp",
           "exp": 131228,
           "sp": 11978
@@ -382,6 +456,11 @@
       "when": "absent",
       "event": "31526-14",
       "ops": [
+        {
+          "op": "give_item",
+          "itemId": 7140,
+          "count": 1
+        },
         {
           "op": "set_cond",
           "cond": 6

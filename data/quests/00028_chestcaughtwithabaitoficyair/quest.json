@@ -3,8 +3,18 @@
   "name": "ChestCaughtWithABaitOfIcyAir",
   "repeatable": false,
   "abortable": true,
-  "questItems": [],
+  "questItems": [
+    7626
+  ],
   "dialogs": [
+    {
+      "npcId": 31572,
+      "hook": "talk",
+      "when": "started",
+      "cond": 1,
+      "hasItem": 6503,
+      "htmlFile": "31572-talk-c1-000.htm"
+    },
     {
       "npcId": 31572,
       "hook": "talk",
@@ -24,6 +34,41 @@
       "when": "absent",
       "event": "31572-04",
       "htmlFile": "31572-event-31572-04-003.htm"
+    },
+    {
+      "npcId": 31572,
+      "hook": "event",
+      "when": "absent",
+      "event": "31572-08",
+      "hasItem": 6503,
+      "ops": [
+        {
+          "op": "take_item",
+          "itemId": 6503,
+          "count": 1
+        },
+        {
+          "op": "give_item",
+          "itemId": 7626,
+          "count": 1
+        }
+      ],
+      "htmlFile": "31572-event-31572-08-004.htm"
+    },
+    {
+      "npcId": 31572,
+      "hook": "event",
+      "when": "absent",
+      "event": "31442-03",
+      "hasItem": 7626,
+      "ops": [
+        {
+          "op": "give_item",
+          "itemId": 881,
+          "count": 1
+        }
+      ],
+      "htmlFile": "31572-event-31442-03-005.htm"
     }
   ]
 }

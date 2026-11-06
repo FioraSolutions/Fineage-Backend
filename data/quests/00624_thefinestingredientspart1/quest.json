@@ -3,7 +3,11 @@
   "name": "TheFinestIngredientsPart1",
   "repeatable": true,
   "abortable": true,
-  "questItems": [],
+  "questItems": [
+    7202,
+    7203,
+    7204
+  ],
   "dialogs": [
     {
       "npcId": 31521,
@@ -56,6 +60,16 @@
       "when": "absent",
       "event": "31521-05",
       "ops": [
+        {
+          "op": "give_item",
+          "itemId": 7080,
+          "count": 1
+        },
+        {
+          "op": "give_item",
+          "itemId": 7205,
+          "count": 1
+        },
         {
           "op": "complete"
         }

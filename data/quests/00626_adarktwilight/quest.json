@@ -3,7 +3,9 @@
   "name": "ADarkTwilight",
   "repeatable": true,
   "abortable": true,
-  "questItems": [],
+  "questItems": [
+    7169
+  ],
   "dialogs": [
     {
       "npcId": 31517,

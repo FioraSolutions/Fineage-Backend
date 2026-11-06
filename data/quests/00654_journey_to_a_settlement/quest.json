@@ -3,7 +3,9 @@
   "name": "Journey to a Settlement",
   "repeatable": true,
   "abortable": true,
-  "questItems": [],
+  "questItems": [
+    8072
+  ],
   "dialogs": [
     {
       "npcId": 31453,
@@ -22,6 +24,11 @@
       "hook": "talk",
       "when": "absent",
       "ops": [
+        {
+          "op": "set",
+          "key": "memoState",
+          "value": "2"
+        },
         {
           "op": "set_cond",
           "cond": 2
@@ -42,6 +49,11 @@
           "op": "start"
         },
         {
+          "op": "set",
+          "key": "memoState",
+          "value": "1"
+        },
+        {
           "op": "set_cond",
           "cond": 1
         }
@@ -55,11 +67,34 @@
       "event": "31453-03",
       "ops": [
         {
+          "op": "set",
+          "key": "memoState",
+          "value": "2"
+        },
+        {
           "op": "set_cond",
           "cond": 2
         }
       ],
       "htmlFile": "31453-event-31453-03-004.htm"
+    },
+    {
+      "npcId": 31453,
+      "hook": "event",
+      "when": "absent",
+      "event": "31453-07",
+      "hasItem": 8072,
+      "ops": [
+        {
+          "op": "give_item",
+          "itemId": 8073,
+          "count": 1
+        },
+        {
+          "op": "complete"
+        }
+      ],
+      "htmlFile": "31453-event-31453-07-005.htm"
     }
   ]
 }

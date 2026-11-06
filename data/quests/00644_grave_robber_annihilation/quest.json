@@ -3,7 +3,9 @@
   "name": "Grave Robber Annihilation",
   "repeatable": true,
   "abortable": true,
-  "questItems": [],
+  "questItems": [
+    8088
+  ],
   "dialogs": [
     {
       "npcId": 32017,

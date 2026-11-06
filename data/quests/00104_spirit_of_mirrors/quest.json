@@ -3,12 +3,22 @@
   "name": "Spirit of Mirrors",
   "repeatable": false,
   "abortable": true,
-  "questItems": [],
+  "questItems": [
+    748,
+    1135,
+    1136,
+    1137
+  ],
   "dialogs": [
     {
       "npcId": 30017,
       "hook": "talk",
       "when": "started",
+      "hasItems": [
+        1135,
+        1136,
+        1137
+      ],
       "ops": [
         {
           "op": "give_adena",

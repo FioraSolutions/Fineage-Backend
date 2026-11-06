@@ -3,7 +3,10 @@
   "name": "Conquest of Alligator Island",
   "repeatable": true,
   "abortable": true,
-  "questItems": [],
+  "questItems": [
+    5863,
+    5864
+  ],
   "dialogs": [
     {
       "npcId": 30895,
@@ -56,6 +59,13 @@
       "hook": "event",
       "when": "absent",
       "event": "ADENA",
+      "ops": [
+        {
+          "op": "take_item",
+          "itemId": 5863,
+          "count": 1
+        }
+      ],
       "htmlFile": "30895-event-ADENA-004.htm"
     },
     {
@@ -63,6 +73,13 @@
       "hook": "event",
       "when": "absent",
       "event": "ADENA",
+      "ops": [
+        {
+          "op": "take_item",
+          "itemId": 5863,
+          "count": 1
+        }
+      ],
       "htmlFile": "30895-event-ADENA-005.htm"
     },
     {
@@ -82,6 +99,18 @@
       "hook": "event",
       "when": "absent",
       "event": "REWARD",
+      "ops": [
+        {
+          "op": "take_item",
+          "itemId": 5864,
+          "count": 10
+        },
+        {
+          "op": "give_item",
+          "itemId": 5915,
+          "count": 1
+        }
+      ],
       "htmlFile": "30895-event-REWARD-007.htm"
     },
     {

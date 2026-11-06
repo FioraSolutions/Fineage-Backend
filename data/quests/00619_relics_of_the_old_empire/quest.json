@@ -3,7 +3,9 @@
   "name": "Relics of the Old Empire",
   "repeatable": true,
   "abortable": true,
-  "questItems": [],
+  "questItems": [
+    7254
+  ],
   "dialogs": [
     {
       "npcId": 31538,
@@ -42,6 +44,18 @@
       "hook": "event",
       "when": "absent",
       "event": "31538-06",
+      "ops": [
+        {
+          "op": "take_item",
+          "itemId": 7254,
+          "count": 1000
+        },
+        {
+          "op": "give_item",
+          "itemId": 6881,
+          "count": 1
+        }
+      ],
       "htmlFile": "31538-event-31538-06-002.htm"
     },
     {

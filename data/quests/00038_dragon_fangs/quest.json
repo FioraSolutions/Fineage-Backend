@@ -99,6 +99,11 @@
       "event": "30386-06",
       "ops": [
         {
+          "op": "give_item",
+          "itemId": 7174,
+          "count": 1
+        },
+        {
           "op": "set_cond",
           "cond": 3
         }
@@ -109,8 +114,56 @@
       "npcId": 30386,
       "hook": "event",
       "when": "absent",
+      "event": "30034-02",
+      "hasItem": 7174,
+      "ops": [
+        {
+          "op": "take_item",
+          "itemId": 7174,
+          "count": 1
+        },
+        {
+          "op": "give_item",
+          "itemId": 7176,
+          "count": 1
+        },
+        {
+          "op": "set_cond",
+          "cond": 4
+        }
+      ],
+      "htmlFile": "30386-event-30034-02-012.htm"
+    },
+    {
+      "npcId": 30386,
+      "hook": "event",
+      "when": "absent",
+      "event": "30034-06",
+      "hasItem": 7177,
+      "ops": [
+        {
+          "op": "take_item",
+          "itemId": 7177,
+          "count": 1
+        },
+        {
+          "op": "set_cond",
+          "cond": 6
+        }
+      ],
+      "htmlFile": "30386-event-30034-06-013.htm"
+    },
+    {
+      "npcId": 30386,
+      "hook": "event",
+      "when": "absent",
       "event": "30034-10",
       "ops": [
+        {
+          "op": "give_item",
+          "itemId": 45,
+          "count": 1
+        },
         {
           "op": "give_adena",
           "count": 5200
@@ -125,6 +178,11 @@
       "event": "30034-10",
       "ops": [
         {
+          "op": "give_item",
+          "itemId": 627,
+          "count": 1
+        },
+        {
           "op": "give_adena",
           "count": 1500
         }
@@ -137,6 +195,11 @@
       "when": "absent",
       "event": "30034-10",
       "ops": [
+        {
+          "op": "give_item",
+          "itemId": 1123,
+          "count": 1
+        },
         {
           "op": "give_adena",
           "count": 3200
@@ -151,11 +214,40 @@
       "event": "30034-10",
       "ops": [
         {
+          "op": "give_item",
+          "itemId": 605,
+          "count": 1
+        },
+        {
           "op": "give_adena",
           "count": 3200
         }
       ],
       "htmlFile": "30386-event-30034-10-017.htm"
+    },
+    {
+      "npcId": 30386,
+      "hook": "event",
+      "when": "absent",
+      "event": "30344-02",
+      "hasItem": 7176,
+      "ops": [
+        {
+          "op": "take_item",
+          "itemId": 7176,
+          "count": 1
+        },
+        {
+          "op": "give_item",
+          "itemId": 7177,
+          "count": 1
+        },
+        {
+          "op": "set_cond",
+          "cond": 5
+        }
+      ],
+      "htmlFile": "30386-event-30344-02-018.htm"
     },
     {
       "npcId": 20357,

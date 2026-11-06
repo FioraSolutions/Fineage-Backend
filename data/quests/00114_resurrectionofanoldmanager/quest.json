@@ -3,7 +3,13 @@
   "name": "ResurrectionOfAnOldManager",
   "repeatable": false,
   "abortable": true,
-  "questItems": [],
+  "questItems": [
+    8090,
+    8091,
+    8287,
+    8288,
+    8289
+  ],
   "dialogs": [
     {
       "npcId": 32041,
@@ -606,6 +612,11 @@
       "event": "32041-31",
       "ops": [
         {
+          "op": "give_item",
+          "itemId": 8090,
+          "count": 1
+        },
+        {
           "op": "set_cond",
           "cond": 17
         }
@@ -617,6 +628,13 @@
       "hook": "event",
       "when": "absent",
       "event": "32041-34",
+      "ops": [
+        {
+          "op": "take_item",
+          "itemId": 8091,
+          "count": 1
+        }
+      ],
       "htmlFile": "32041-event-32041-34-078.htm"
     },
     {
@@ -645,6 +663,11 @@
       "when": "absent",
       "event": "32041-40",
       "ops": [
+        {
+          "op": "give_item",
+          "itemId": 8288,
+          "count": 1
+        },
         {
           "op": "set_cond",
           "cond": 21
@@ -860,6 +883,11 @@
       "event": "32047-23c",
       "ops": [
         {
+          "op": "take_item",
+          "itemId": 8287,
+          "count": 1
+        },
+        {
           "op": "set_cond",
           "cond": 15
         }
@@ -872,6 +900,11 @@
       "when": "absent",
       "event": "32047-29c",
       "ops": [
+        {
+          "op": "give_item",
+          "itemId": 8289,
+          "count": 1
+        },
         {
           "op": "set_cond",
           "cond": 26
@@ -900,6 +933,11 @@
       "event": "32050-03",
       "ops": [
         {
+          "op": "give_item",
+          "itemId": 8287,
+          "count": 1
+        },
+        {
           "op": "set_cond",
           "cond": 14
         }
@@ -913,6 +951,11 @@
       "event": "32050-05",
       "ops": [
         {
+          "op": "give_item",
+          "itemId": 8289,
+          "count": 1
+        },
+        {
           "op": "set_cond",
           "cond": 24
         }
@@ -925,6 +968,16 @@
       "when": "absent",
       "event": "31961-02",
       "ops": [
+        {
+          "op": "take_item",
+          "itemId": 8288,
+          "count": 1
+        },
+        {
+          "op": "give_item",
+          "itemId": 8289,
+          "count": 1
+        },
         {
           "op": "set_cond",
           "cond": 22

@@ -3,7 +3,10 @@
   "name": "To Lead And Be Led",
   "repeatable": false,
   "abortable": true,
-  "questItems": [],
+  "questItems": [
+    8062,
+    8063
+  ],
   "dialogs": [
     {
       "npcId": 30298,
@@ -66,6 +69,11 @@
       "when": "started",
       "ops": [
         {
+          "op": "set",
+          "key": "memoState",
+          "value": "4"
+        },
+        {
           "op": "set_cond",
           "cond": 7
         }
@@ -109,8 +117,10 @@
     {
       "npcId": 30298,
       "hook": "event",
-      "when": "absent",
+      "when": "started",
       "event": "30298-10",
+      "whenVar": "memoState",
+      "whenValue": "1",
       "ops": [
         {
           "op": "take_item",
@@ -123,8 +133,10 @@
     {
       "npcId": 30298,
       "hook": "event",
-      "when": "absent",
+      "when": "started",
       "event": "30298-10",
+      "whenVar": "memoState",
+      "whenValue": "2",
       "ops": [
         {
           "op": "take_item",
@@ -133,6 +145,22 @@
         }
       ],
       "htmlFile": "30298-event-30298-10-016.htm"
+    },
+    {
+      "npcId": 30298,
+      "hook": "event",
+      "when": "started",
+      "event": "30298-10",
+      "whenVar": "memoState",
+      "whenValue": "3",
+      "ops": [
+        {
+          "op": "take_item",
+          "itemId": 1458,
+          "count": 771
+        }
+      ],
+      "htmlFile": "30298-event-30298-10-017.htm"
     },
     {
       "npcId": 30298,
@@ -147,39 +175,44 @@
           "op": "start"
         },
         {
+          "op": "set",
+          "key": "memoState",
+          "value": "1"
+        },
+        {
           "op": "set_cond",
           "cond": 1
         }
       ],
-      "htmlFile": "30298-event-30298-03-017.htm"
+      "htmlFile": "30298-event-30298-03-018.htm"
     },
     {
       "npcId": 30298,
       "hook": "event",
       "when": "absent",
       "event": "30298-05a",
-      "htmlFile": "30298-event-30298-05a-018.htm"
+      "htmlFile": "30298-event-30298-05a-019.htm"
     },
     {
       "npcId": 30298,
       "hook": "event",
       "when": "absent",
       "event": "30298-05b",
-      "htmlFile": "30298-event-30298-05b-019.htm"
+      "htmlFile": "30298-event-30298-05b-020.htm"
     },
     {
       "npcId": 30298,
       "hook": "event",
       "when": "absent",
       "event": "30298-05c",
-      "htmlFile": "30298-event-30298-05c-020.htm"
+      "htmlFile": "30298-event-30298-05c-021.htm"
     },
     {
       "npcId": 30298,
       "hook": "event",
       "when": "absent",
       "event": "30298-05g",
-      "htmlFile": "30298-event-30298-05g-021.htm"
+      "htmlFile": "30298-event-30298-05g-022.htm"
     },
     {
       "npcId": 30298,
@@ -188,11 +221,21 @@
       "event": "30298-05d",
       "ops": [
         {
+          "op": "take_item",
+          "itemId": 8062,
+          "count": 1
+        },
+        {
+          "op": "set",
+          "key": "memoState",
+          "value": "2"
+        },
+        {
           "op": "set_cond",
           "cond": 3
         }
       ],
-      "htmlFile": "30298-event-30298-05d-022.htm"
+      "htmlFile": "30298-event-30298-05d-023.htm"
     },
     {
       "npcId": 30298,
@@ -201,11 +244,21 @@
       "event": "30298-05e",
       "ops": [
         {
+          "op": "take_item",
+          "itemId": 8062,
+          "count": 1
+        },
+        {
+          "op": "set",
+          "key": "memoState",
+          "value": "2"
+        },
+        {
           "op": "set_cond",
           "cond": 4
         }
       ],
-      "htmlFile": "30298-event-30298-05e-023.htm"
+      "htmlFile": "30298-event-30298-05e-024.htm"
     },
     {
       "npcId": 30298,
@@ -214,11 +267,21 @@
       "event": "30298-05f",
       "ops": [
         {
+          "op": "take_item",
+          "itemId": 8062,
+          "count": 1
+        },
+        {
+          "op": "set",
+          "key": "memoState",
+          "value": "2"
+        },
+        {
           "op": "set_cond",
           "cond": 5
         }
       ],
-      "htmlFile": "30298-event-30298-05f-024.htm"
+      "htmlFile": "30298-event-30298-05f-025.htm"
     },
     {
       "npcId": 20919,

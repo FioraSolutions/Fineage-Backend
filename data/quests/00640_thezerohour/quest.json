@@ -3,7 +3,9 @@
   "name": "TheZeroHour",
   "repeatable": true,
   "abortable": true,
-  "questItems": [],
+  "questItems": [
+    8085
+  ],
   "dialogs": [
     {
       "npcId": 31554,

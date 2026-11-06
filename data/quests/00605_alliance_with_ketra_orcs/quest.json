@@ -3,7 +3,11 @@
   "name": "Alliance with Ketra Orcs",
   "repeatable": true,
   "abortable": true,
-  "questItems": [],
+  "questItems": [
+    7216,
+    7217,
+    7218
+  ],
   "dialogs": [
     {
       "npcId": 31371,
@@ -85,6 +89,14 @@
     },
     {
       "npcId": 31371,
+      "hook": "talk",
+      "when": "started",
+      "cond": 6,
+      "hasItem": 7213,
+      "htmlFile": "31371-talk-c6-011.htm"
+    },
+    {
+      "npcId": 31371,
       "hook": "event",
       "when": "absent",
       "event": "31371-12a",
@@ -144,6 +156,9 @@
       "hook": "event",
       "when": "absent",
       "event": "31371-21",
+      "lacksItems": [
+        7219
+      ],
       "htmlFile": "31371-event-31371-21-020.htm"
     },
     {

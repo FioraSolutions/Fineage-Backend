@@ -3,7 +3,11 @@
   "name": "Black Swan",
   "repeatable": true,
   "abortable": true,
-  "questItems": [],
+  "questItems": [
+    4296,
+    4297,
+    4298
+  ],
   "dialogs": [
     {
       "npcId": 30916,
@@ -90,6 +94,11 @@
           "op": "start"
         },
         {
+          "op": "give_item",
+          "itemId": 4296,
+          "count": 1
+        },
+        {
           "op": "set_cond",
           "cond": 1
         }
@@ -109,6 +118,11 @@
           "op": "start"
         },
         {
+          "op": "give_item",
+          "itemId": 4296,
+          "count": 1
+        },
+        {
           "op": "set_cond",
           "cond": 1
         }
@@ -126,6 +140,11 @@
         },
         {
           "op": "start"
+        },
+        {
+          "op": "give_item",
+          "itemId": 4296,
+          "count": 1
         },
         {
           "op": "set_cond",

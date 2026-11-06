@@ -9,6 +9,11 @@
       "npcId": 31329,
       "hook": "talk",
       "when": "absent",
+      "hasAny": [
+        8064,
+        8065,
+        8067
+      ],
       "ops": [
         {
           "op": "complete"

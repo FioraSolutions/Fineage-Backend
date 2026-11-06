@@ -3,7 +3,13 @@
   "name": "Trial of the Challenger",
   "repeatable": false,
   "abortable": true,
-  "questItems": [],
+  "questItems": [
+    2628,
+    2629,
+    2630,
+    2631,
+    2632
+  ],
   "dialogs": [
     {
       "npcId": 30644,
@@ -11,6 +17,38 @@
       "when": "started",
       "cond": 1,
       "htmlFile": "30644-talk-c1-000.htm"
+    },
+    {
+      "npcId": 30644,
+      "hook": "talk",
+      "when": "started",
+      "cond": 2,
+      "hasItem": 2631,
+      "ops": [
+        {
+          "op": "take_item",
+          "itemId": 2631,
+          "count": 1
+        },
+        {
+          "op": "give_item",
+          "itemId": 2628,
+          "count": 1
+        },
+        {
+          "op": "set_cond",
+          "cond": 3
+        }
+      ],
+      "htmlFile": "30644-talk-c2-001.htm"
+    },
+    {
+      "npcId": 30644,
+      "hook": "talk",
+      "when": "started",
+      "cond": 3,
+      "hasItem": 2628,
+      "htmlFile": "30644-talk-c3-002.htm"
     },
     {
       "npcId": 30644,
@@ -37,8 +75,35 @@
       "npcId": 30645,
       "hook": "talk",
       "when": "started",
+      "cond": 3,
+      "hasItem": 2628,
+      "htmlFile": "30645-talk-c3-006.htm"
+    },
+    {
+      "npcId": 30645,
+      "hook": "talk",
+      "when": "started",
       "cond": 4,
       "htmlFile": "30645-talk-c4-007.htm"
+    },
+    {
+      "npcId": 30645,
+      "hook": "talk",
+      "when": "started",
+      "cond": 5,
+      "hasItem": 2629,
+      "ops": [
+        {
+          "op": "take_item",
+          "itemId": 2629,
+          "count": 1
+        },
+        {
+          "op": "set_cond",
+          "cond": 6
+        }
+      ],
+      "htmlFile": "30645-talk-c5-008.htm"
     },
     {
       "npcId": 30645,
@@ -73,6 +138,14 @@
       "hook": "talk",
       "when": "absent",
       "htmlFile": "30647-talk-013.htm"
+    },
+    {
+      "npcId": 30646,
+      "hook": "talk",
+      "when": "started",
+      "cond": 7,
+      "hasItem": 2630,
+      "htmlFile": "30646-talk-c7-014.htm"
     },
     {
       "npcId": 30646,
@@ -155,6 +228,103 @@
       "hook": "event",
       "when": "absent",
       "event": "30647-02",
+      "hasItem": 2632,
+      "ops": [
+        {
+          "op": "give_item",
+          "itemId": 2918,
+          "count": 1
+        },
+        {
+          "op": "give_item",
+          "itemId": 2927,
+          "count": 1
+        },
+        {
+          "op": "give_item",
+          "itemId": 1943,
+          "count": 1
+        },
+        {
+          "op": "give_item",
+          "itemId": 1946,
+          "count": 1
+        },
+        {
+          "op": "give_item",
+          "itemId": 1940,
+          "count": 1
+        }
+      ],
+      "htmlFile": "30644-event-30647-02-025.htm"
+    },
+    {
+      "npcId": 30644,
+      "hook": "event",
+      "when": "absent",
+      "event": "30647-02",
+      "hasItem": 2632,
+      "ops": [
+        {
+          "op": "give_item",
+          "itemId": 2030,
+          "count": 1
+        },
+        {
+          "op": "give_item",
+          "itemId": 1904,
+          "count": 1
+        }
+      ],
+      "htmlFile": "30644-event-30647-02-026.htm"
+    },
+    {
+      "npcId": 30644,
+      "hook": "event",
+      "when": "absent",
+      "event": "30647-02",
+      "hasItem": 2632,
+      "ops": [
+        {
+          "op": "give_item",
+          "itemId": 1936,
+          "count": 1
+        }
+      ],
+      "htmlFile": "30644-event-30647-02-027.htm"
+    },
+    {
+      "npcId": 30644,
+      "hook": "event",
+      "when": "absent",
+      "event": "30647-02",
+      "ops": [
+        {
+          "op": "give_item",
+          "itemId": 2918,
+          "count": 1
+        },
+        {
+          "op": "give_item",
+          "itemId": 2927,
+          "count": 1
+        },
+        {
+          "op": "give_item",
+          "itemId": 1943,
+          "count": 1
+        },
+        {
+          "op": "give_item",
+          "itemId": 1946,
+          "count": 1
+        },
+        {
+          "op": "give_item",
+          "itemId": 1940,
+          "count": 1
+        }
+      ],
       "htmlFile": "30644-event-30647-02-028.htm"
     },
     {
@@ -162,6 +332,18 @@
       "hook": "event",
       "when": "absent",
       "event": "30647-02",
+      "ops": [
+        {
+          "op": "give_item",
+          "itemId": 2030,
+          "count": 1
+        },
+        {
+          "op": "give_item",
+          "itemId": 1904,
+          "count": 1
+        }
+      ],
       "htmlFile": "30644-event-30647-02-029.htm"
     },
     {
@@ -169,13 +351,79 @@
       "hook": "event",
       "when": "absent",
       "event": "30647-02",
+      "ops": [
+        {
+          "op": "give_item",
+          "itemId": 1936,
+          "count": 1
+        }
+      ],
       "htmlFile": "30644-event-30647-02-030.htm"
+    },
+    {
+      "npcId": 30644,
+      "hook": "event",
+      "when": "absent",
+      "event": "30645-02",
+      "hasItem": 2628,
+      "ops": [
+        {
+          "op": "set_cond",
+          "cond": 4
+        }
+      ],
+      "htmlFile": "30644-event-30645-02-031.htm"
+    },
+    {
+      "npcId": 30644,
+      "hook": "event",
+      "when": "absent",
+      "event": "30646-04",
+      "hasItem": 2630,
+      "ops": [
+        {
+          "op": "take_item",
+          "itemId": 2630,
+          "count": 1
+        },
+        {
+          "op": "set_cond",
+          "cond": 8
+        }
+      ],
+      "htmlFile": "30644-event-30646-04-032.htm"
+    },
+    {
+      "npcId": 30644,
+      "hook": "event",
+      "when": "absent",
+      "event": "30646-05",
+      "hasItem": 2630,
+      "ops": [
+        {
+          "op": "take_item",
+          "itemId": 2630,
+          "count": 1
+        },
+        {
+          "op": "set_cond",
+          "cond": 8
+        }
+      ],
+      "htmlFile": "30644-event-30646-05-033.htm"
     },
     {
       "npcId": 27112,
       "hook": "kill",
       "when": "started",
       "ops": [
+        {
+          "op": "drop_item",
+          "itemId": 2629,
+          "count": 1,
+          "chance": 1.0,
+          "limit": 1
+        },
         {
           "op": "set_cond",
           "cond": 5

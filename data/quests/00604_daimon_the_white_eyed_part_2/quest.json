@@ -3,7 +3,10 @@
   "name": "Daimon the White-Eyed - Part 2",
   "repeatable": true,
   "abortable": true,
-  "questItems": [],
+  "questItems": [
+    7193,
+    7194
+  ],
   "dialogs": [
     {
       "npcId": 31683,
@@ -16,6 +19,9 @@
       "npcId": 31683,
       "hook": "talk",
       "when": "absent",
+      "lacksItems": [
+        7192
+      ],
       "htmlFile": "31683-talk-001.htm"
     },
     {
@@ -35,6 +41,13 @@
       "hook": "talk",
       "when": "absent",
       "htmlFile": "31683-talk-004.htm"
+    },
+    {
+      "npcId": 31683,
+      "hook": "talk",
+      "when": "absent",
+      "hasItem": 7193,
+      "htmlFile": "31683-talk-005.htm"
     },
     {
       "npcId": 31683,
@@ -67,11 +80,34 @@
           "op": "start"
         },
         {
+          "op": "take_item",
+          "itemId": 7192,
+          "count": 1
+        },
+        {
+          "op": "give_item",
+          "itemId": 7193,
+          "count": 1
+        },
+        {
+          "op": "set",
+          "key": "memoState",
+          "value": "11"
+        },
+        {
           "op": "set_cond",
           "cond": 1
         }
       ],
       "htmlFile": "31683-event-31683-04-008.htm"
+    },
+    {
+      "npcId": 31683,
+      "hook": "event",
+      "when": "absent",
+      "event": "31683-07",
+      "hasItem": 7194,
+      "htmlFile": "31683-event-31683-07-009.htm"
     },
     {
       "npcId": 31683,
@@ -85,7 +121,45 @@
       "hook": "event",
       "when": "absent",
       "event": "31541-02",
+      "hasItem": 7193,
       "ops": [
+        {
+          "op": "take_item",
+          "itemId": 7193,
+          "count": 1
+        },
+        {
+          "op": "set",
+          "key": "memoState",
+          "value": "21"
+        },
+        {
+          "op": "set_cond",
+          "cond": 2
+        },
+        {
+          "op": "spawn_npc",
+          "npcId": 25290
+        }
+      ],
+      "htmlFile": "31683-event-31541-02-011.htm"
+    },
+    {
+      "npcId": 31683,
+      "hook": "event",
+      "when": "absent",
+      "event": "31541-02",
+      "ops": [
+        {
+          "op": "take_item",
+          "itemId": 7193,
+          "count": 1
+        },
+        {
+          "op": "set",
+          "key": "memoState",
+          "value": "21"
+        },
         {
           "op": "set_cond",
           "cond": 2

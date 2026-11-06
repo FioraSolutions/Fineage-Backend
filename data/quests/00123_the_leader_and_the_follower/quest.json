@@ -3,7 +3,10 @@
   "name": "The Leader And The Follower",
   "repeatable": false,
   "abortable": true,
-  "questItems": [],
+  "questItems": [
+    8549,
+    8550
+  ],
   "dialogs": [
     {
       "npcId": 31961,
@@ -54,6 +57,11 @@
       "when": "started",
       "ops": [
         {
+          "op": "set",
+          "key": "memoState",
+          "value": "4"
+        },
+        {
           "op": "set_cond",
           "cond": 7
         }
@@ -97,8 +105,10 @@
     {
       "npcId": 31961,
       "hook": "event",
-      "when": "absent",
+      "when": "started",
       "event": "31961-10",
+      "whenVar": "memoState",
+      "whenValue": "1",
       "ops": [
         {
           "op": "take_item",
@@ -111,8 +121,10 @@
     {
       "npcId": 31961,
       "hook": "event",
-      "when": "absent",
+      "when": "started",
       "event": "31961-10",
+      "whenVar": "memoState",
+      "whenValue": "2",
       "ops": [
         {
           "op": "take_item",
@@ -121,6 +133,22 @@
         }
       ],
       "htmlFile": "31961-event-31961-10-014.htm"
+    },
+    {
+      "npcId": 31961,
+      "hook": "event",
+      "when": "started",
+      "event": "31961-10",
+      "whenVar": "memoState",
+      "whenValue": "3",
+      "ops": [
+        {
+          "op": "take_item",
+          "itemId": 1458,
+          "count": 771
+        }
+      ],
+      "htmlFile": "31961-event-31961-10-015.htm"
     },
     {
       "npcId": 31961,
@@ -135,39 +163,44 @@
           "op": "start"
         },
         {
+          "op": "set",
+          "key": "memoState",
+          "value": "1"
+        },
+        {
           "op": "set_cond",
           "cond": 1
         }
       ],
-      "htmlFile": "31961-event-31961-03-015.htm"
+      "htmlFile": "31961-event-31961-03-016.htm"
     },
     {
       "npcId": 31961,
       "hook": "event",
       "when": "absent",
       "event": "31961-05a",
-      "htmlFile": "31961-event-31961-05a-016.htm"
+      "htmlFile": "31961-event-31961-05a-017.htm"
     },
     {
       "npcId": 31961,
       "hook": "event",
       "when": "absent",
       "event": "31961-05b",
-      "htmlFile": "31961-event-31961-05b-017.htm"
+      "htmlFile": "31961-event-31961-05b-018.htm"
     },
     {
       "npcId": 31961,
       "hook": "event",
       "when": "absent",
       "event": "31961-05c",
-      "htmlFile": "31961-event-31961-05c-018.htm"
+      "htmlFile": "31961-event-31961-05c-019.htm"
     },
     {
       "npcId": 31961,
       "hook": "event",
       "when": "absent",
       "event": "31961-05g",
-      "htmlFile": "31961-event-31961-05g-019.htm"
+      "htmlFile": "31961-event-31961-05g-020.htm"
     },
     {
       "npcId": 31961,
@@ -176,11 +209,21 @@
       "event": "31961-05d",
       "ops": [
         {
+          "op": "take_item",
+          "itemId": 8549,
+          "count": 1
+        },
+        {
+          "op": "set",
+          "key": "memoState",
+          "value": "2"
+        },
+        {
           "op": "set_cond",
           "cond": 3
         }
       ],
-      "htmlFile": "31961-event-31961-05d-020.htm"
+      "htmlFile": "31961-event-31961-05d-021.htm"
     },
     {
       "npcId": 31961,
@@ -189,11 +232,21 @@
       "event": "31961-05e",
       "ops": [
         {
+          "op": "take_item",
+          "itemId": 8549,
+          "count": 1
+        },
+        {
+          "op": "set",
+          "key": "memoState",
+          "value": "2"
+        },
+        {
           "op": "set_cond",
           "cond": 4
         }
       ],
-      "htmlFile": "31961-event-31961-05e-021.htm"
+      "htmlFile": "31961-event-31961-05e-022.htm"
     },
     {
       "npcId": 31961,
@@ -202,11 +255,21 @@
       "event": "31961-05f",
       "ops": [
         {
+          "op": "take_item",
+          "itemId": 8549,
+          "count": 1
+        },
+        {
+          "op": "set",
+          "key": "memoState",
+          "value": "2"
+        },
+        {
           "op": "set_cond",
           "cond": 5
         }
       ],
-      "htmlFile": "31961-event-31961-05f-022.htm"
+      "htmlFile": "31961-event-31961-05f-023.htm"
     },
     {
       "npcId": 27321,

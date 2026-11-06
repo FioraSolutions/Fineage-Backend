@@ -3,7 +3,11 @@
   "name": "Will the Seal be Broken?",
   "repeatable": false,
   "abortable": true,
-  "questItems": [],
+  "questItems": [
+    1081,
+    1082,
+    1083
+  ],
   "dialogs": [
     {
       "npcId": 30141,

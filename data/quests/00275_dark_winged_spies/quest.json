@@ -3,7 +3,10 @@
   "name": "Dark Winged Spies",
   "repeatable": true,
   "abortable": true,
-  "questItems": [],
+  "questItems": [
+    1478,
+    1479
+  ],
   "dialogs": [
     {
       "npcId": 30567,
@@ -40,6 +43,28 @@
       "npcId": 20316,
       "hook": "kill",
       "when": "started",
+      "ops": [
+        {
+          "op": "drop_item",
+          "itemId": 1479,
+          "count": 1,
+          "chance": 1.0,
+          "limit": 1
+        }
+      ],
+      "html": ""
+    },
+    {
+      "npcId": 27043,
+      "hook": "kill",
+      "when": "started",
+      "hasItem": 1479,
+      "ops": [
+        {
+          "op": "set_cond",
+          "cond": 2
+        }
+      ],
       "html": ""
     },
     {

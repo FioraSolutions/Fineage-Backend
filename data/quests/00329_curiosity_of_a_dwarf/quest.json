@@ -3,7 +3,10 @@
   "name": "Curiosity Of A Dwarf",
   "repeatable": true,
   "abortable": true,
-  "questItems": [],
+  "questItems": [
+    1346,
+    1365
+  ],
   "dialogs": [
     {
       "npcId": 30437,

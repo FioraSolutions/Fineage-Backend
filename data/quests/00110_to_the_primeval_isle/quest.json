@@ -3,7 +3,9 @@
   "name": "To the Primeval Isle",
   "repeatable": false,
   "abortable": true,
-  "questItems": [],
+  "questItems": [
+    8777
+  ],
   "dialogs": [
     {
       "npcId": 31338,
@@ -42,6 +44,11 @@
         },
         {
           "op": "start"
+        },
+        {
+          "op": "give_item",
+          "itemId": 8777,
+          "count": 1
         },
         {
           "op": "set_cond",

@@ -3,7 +3,9 @@
   "name": "Warehouse Keeper's Ambition",
   "repeatable": true,
   "abortable": true,
-  "questItems": [],
+  "questItems": [
+    5867
+  ],
   "dialogs": [
     {
       "npcId": 30686,
@@ -63,6 +65,13 @@
       "hook": "event",
       "when": "absent",
       "event": "30686-11",
+      "ops": [
+        {
+          "op": "take_item",
+          "itemId": 5867,
+          "count": 1
+        }
+      ],
       "htmlFile": "30686-event-30686-11-006.htm"
     }
   ]

@@ -54,6 +54,13 @@
       "hook": "event",
       "when": "absent",
       "event": "30844-07a",
+      "ops": [
+        {
+          "op": "give_item",
+          "itemId": 5496,
+          "count": 1
+        }
+      ],
       "htmlFile": "30844-event-30844-07a-004.htm"
     },
     {
@@ -61,6 +68,13 @@
       "hook": "event",
       "when": "absent",
       "event": "30844-07a",
+      "ops": [
+        {
+          "op": "give_item",
+          "itemId": 5508,
+          "count": 1
+        }
+      ],
       "htmlFile": "30844-event-30844-07a-005.htm"
     },
     {
@@ -68,6 +82,13 @@
       "hook": "event",
       "when": "absent",
       "event": "30844-07a",
+      "ops": [
+        {
+          "op": "give_item",
+          "itemId": 5525,
+          "count": 1
+        }
+      ],
       "htmlFile": "30844-event-30844-07a-006.htm"
     },
     {
@@ -75,6 +96,23 @@
       "hook": "event",
       "when": "absent",
       "event": "30844-07a",
+      "ops": [
+        {
+          "op": "give_item",
+          "itemId": 5496,
+          "count": 1
+        },
+        {
+          "op": "give_item",
+          "itemId": 5508,
+          "count": 1
+        },
+        {
+          "op": "give_item",
+          "itemId": 5525,
+          "count": 1
+        }
+      ],
       "htmlFile": "30844-event-30844-07a-007.htm"
     },
     {
@@ -82,6 +120,13 @@
       "hook": "event",
       "when": "absent",
       "event": "30844-07a",
+      "ops": [
+        {
+          "op": "give_item",
+          "itemId": 5368,
+          "count": 1
+        }
+      ],
       "htmlFile": "30844-event-30844-07a-008.htm"
     },
     {
@@ -89,6 +134,13 @@
       "hook": "event",
       "when": "absent",
       "event": "30844-07a",
+      "ops": [
+        {
+          "op": "give_item",
+          "itemId": 5392,
+          "count": 1
+        }
+      ],
       "htmlFile": "30844-event-30844-07a-009.htm"
     },
     {
@@ -96,6 +148,13 @@
       "hook": "event",
       "when": "absent",
       "event": "30844-07a",
+      "ops": [
+        {
+          "op": "give_item",
+          "itemId": 5426,
+          "count": 1
+        }
+      ],
       "htmlFile": "30844-event-30844-07a-010.htm"
     },
     {
@@ -103,6 +162,23 @@
       "hook": "event",
       "when": "absent",
       "event": "30844-07a",
+      "ops": [
+        {
+          "op": "give_item",
+          "itemId": 5368,
+          "count": 1
+        },
+        {
+          "op": "give_item",
+          "itemId": 5392,
+          "count": 1
+        },
+        {
+          "op": "give_item",
+          "itemId": 5426,
+          "count": 1
+        }
+      ],
       "htmlFile": "30844-event-30844-07a-011.htm"
     },
     {
@@ -110,6 +186,13 @@
       "hook": "event",
       "when": "absent",
       "event": "30844-07b",
+      "ops": [
+        {
+          "op": "give_item",
+          "itemId": 5497,
+          "count": 1
+        }
+      ],
       "htmlFile": "30844-event-30844-07b-012.htm"
     },
     {
@@ -117,6 +200,13 @@
       "hook": "event",
       "when": "absent",
       "event": "30844-07b",
+      "ops": [
+        {
+          "op": "give_item",
+          "itemId": 5509,
+          "count": 1
+        }
+      ],
       "htmlFile": "30844-event-30844-07b-013.htm"
     },
     {
@@ -124,6 +214,13 @@
       "hook": "event",
       "when": "absent",
       "event": "30844-07b",
+      "ops": [
+        {
+          "op": "give_item",
+          "itemId": 5526,
+          "count": 1
+        }
+      ],
       "htmlFile": "30844-event-30844-07b-014.htm"
     },
     {
@@ -131,6 +228,23 @@
       "hook": "event",
       "when": "absent",
       "event": "30844-07b",
+      "ops": [
+        {
+          "op": "give_item",
+          "itemId": 5497,
+          "count": 1
+        },
+        {
+          "op": "give_item",
+          "itemId": 5509,
+          "count": 1
+        },
+        {
+          "op": "give_item",
+          "itemId": 5526,
+          "count": 1
+        }
+      ],
       "htmlFile": "30844-event-30844-07b-015.htm"
     },
     {
@@ -138,6 +252,13 @@
       "hook": "event",
       "when": "absent",
       "event": "30844-07b",
+      "ops": [
+        {
+          "op": "give_item",
+          "itemId": 5370,
+          "count": 1
+        }
+      ],
       "htmlFile": "30844-event-30844-07b-016.htm"
     },
     {
@@ -145,6 +266,13 @@
       "hook": "event",
       "when": "absent",
       "event": "30844-07b",
+      "ops": [
+        {
+          "op": "give_item",
+          "itemId": 5394,
+          "count": 1
+        }
+      ],
       "htmlFile": "30844-event-30844-07b-017.htm"
     },
     {
@@ -152,6 +280,13 @@
       "hook": "event",
       "when": "absent",
       "event": "30844-07b",
+      "ops": [
+        {
+          "op": "give_item",
+          "itemId": 5428,
+          "count": 1
+        }
+      ],
       "htmlFile": "30844-event-30844-07b-018.htm"
     },
     {
@@ -159,6 +294,23 @@
       "hook": "event",
       "when": "absent",
       "event": "30844-07b",
+      "ops": [
+        {
+          "op": "give_item",
+          "itemId": 5370,
+          "count": 1
+        },
+        {
+          "op": "give_item",
+          "itemId": 5394,
+          "count": 1
+        },
+        {
+          "op": "give_item",
+          "itemId": 5428,
+          "count": 1
+        }
+      ],
       "htmlFile": "30844-event-30844-07b-019.htm"
     },
     {
@@ -166,6 +318,13 @@
       "hook": "event",
       "when": "absent",
       "event": "30844-07c",
+      "ops": [
+        {
+          "op": "give_item",
+          "itemId": 5502,
+          "count": 1
+        }
+      ],
       "htmlFile": "30844-event-30844-07c-020.htm"
     },
     {
@@ -173,6 +332,13 @@
       "hook": "event",
       "when": "absent",
       "event": "30844-07c",
+      "ops": [
+        {
+          "op": "give_item",
+          "itemId": 5514,
+          "count": 1
+        }
+      ],
       "htmlFile": "30844-event-30844-07c-021.htm"
     },
     {
@@ -180,6 +346,13 @@
       "hook": "event",
       "when": "absent",
       "event": "30844-07c",
+      "ops": [
+        {
+          "op": "give_item",
+          "itemId": 5527,
+          "count": 1
+        }
+      ],
       "htmlFile": "30844-event-30844-07c-022.htm"
     },
     {
@@ -187,6 +360,23 @@
       "hook": "event",
       "when": "absent",
       "event": "30844-07c",
+      "ops": [
+        {
+          "op": "give_item",
+          "itemId": 5502,
+          "count": 1
+        },
+        {
+          "op": "give_item",
+          "itemId": 5514,
+          "count": 1
+        },
+        {
+          "op": "give_item",
+          "itemId": 5527,
+          "count": 1
+        }
+      ],
       "htmlFile": "30844-event-30844-07c-023.htm"
     },
     {
@@ -194,6 +384,13 @@
       "hook": "event",
       "when": "absent",
       "event": "30844-07c",
+      "ops": [
+        {
+          "op": "give_item",
+          "itemId": 5380,
+          "count": 1
+        }
+      ],
       "htmlFile": "30844-event-30844-07c-024.htm"
     },
     {
@@ -201,6 +398,13 @@
       "hook": "event",
       "when": "absent",
       "event": "30844-07c",
+      "ops": [
+        {
+          "op": "give_item",
+          "itemId": 5404,
+          "count": 1
+        }
+      ],
       "htmlFile": "30844-event-30844-07c-025.htm"
     },
     {
@@ -208,6 +412,13 @@
       "hook": "event",
       "when": "absent",
       "event": "30844-07c",
+      "ops": [
+        {
+          "op": "give_item",
+          "itemId": 5430,
+          "count": 1
+        }
+      ],
       "htmlFile": "30844-event-30844-07c-026.htm"
     },
     {
@@ -215,6 +426,23 @@
       "hook": "event",
       "when": "absent",
       "event": "30844-07c",
+      "ops": [
+        {
+          "op": "give_item",
+          "itemId": 5380,
+          "count": 1
+        },
+        {
+          "op": "give_item",
+          "itemId": 5404,
+          "count": 1
+        },
+        {
+          "op": "give_item",
+          "itemId": 5430,
+          "count": 1
+        }
+      ],
       "htmlFile": "30844-event-30844-07c-027.htm"
     },
     {
@@ -222,6 +450,13 @@
       "hook": "event",
       "when": "absent",
       "event": "30844-07d",
+      "ops": [
+        {
+          "op": "give_item",
+          "itemId": 5503,
+          "count": 1
+        }
+      ],
       "htmlFile": "30844-event-30844-07d-028.htm"
     },
     {
@@ -229,6 +464,13 @@
       "hook": "event",
       "when": "absent",
       "event": "30844-07d",
+      "ops": [
+        {
+          "op": "give_item",
+          "itemId": 5515,
+          "count": 1
+        }
+      ],
       "htmlFile": "30844-event-30844-07d-029.htm"
     },
     {
@@ -236,6 +478,13 @@
       "hook": "event",
       "when": "absent",
       "event": "30844-07d",
+      "ops": [
+        {
+          "op": "give_item",
+          "itemId": 5528,
+          "count": 1
+        }
+      ],
       "htmlFile": "30844-event-30844-07d-030.htm"
     },
     {
@@ -243,6 +492,23 @@
       "hook": "event",
       "when": "absent",
       "event": "30844-07d",
+      "ops": [
+        {
+          "op": "give_item",
+          "itemId": 5503,
+          "count": 1
+        },
+        {
+          "op": "give_item",
+          "itemId": 5515,
+          "count": 1
+        },
+        {
+          "op": "give_item",
+          "itemId": 5528,
+          "count": 1
+        }
+      ],
       "htmlFile": "30844-event-30844-07d-031.htm"
     },
     {
@@ -250,6 +516,13 @@
       "hook": "event",
       "when": "absent",
       "event": "30844-07d",
+      "ops": [
+        {
+          "op": "give_item",
+          "itemId": 5382,
+          "count": 1
+        }
+      ],
       "htmlFile": "30844-event-30844-07d-032.htm"
     },
     {
@@ -257,6 +530,13 @@
       "hook": "event",
       "when": "absent",
       "event": "30844-07d",
+      "ops": [
+        {
+          "op": "give_item",
+          "itemId": 5406,
+          "count": 1
+        }
+      ],
       "htmlFile": "30844-event-30844-07d-033.htm"
     },
     {
@@ -264,6 +544,13 @@
       "hook": "event",
       "when": "absent",
       "event": "30844-07d",
+      "ops": [
+        {
+          "op": "give_item",
+          "itemId": 5432,
+          "count": 1
+        }
+      ],
       "htmlFile": "30844-event-30844-07d-034.htm"
     },
     {
@@ -271,6 +558,23 @@
       "hook": "event",
       "when": "absent",
       "event": "30844-07d",
+      "ops": [
+        {
+          "op": "give_item",
+          "itemId": 5382,
+          "count": 1
+        },
+        {
+          "op": "give_item",
+          "itemId": 5406,
+          "count": 1
+        },
+        {
+          "op": "give_item",
+          "itemId": 5432,
+          "count": 1
+        }
+      ],
       "htmlFile": "30844-event-30844-07d-035.htm"
     },
     {

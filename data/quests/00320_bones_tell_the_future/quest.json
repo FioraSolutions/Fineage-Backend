@@ -3,7 +3,9 @@
   "name": "Bones Tell The Future",
   "repeatable": true,
   "abortable": true,
-  "questItems": [],
+  "questItems": [
+    809
+  ],
   "dialogs": [
     {
       "npcId": 30359,

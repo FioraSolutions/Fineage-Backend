@@ -3,7 +3,9 @@
   "name": "ShadowOfLight",
   "repeatable": true,
   "abortable": true,
-  "questItems": [],
+  "questItems": [
+    7189
+  ],
   "dialogs": [
     {
       "npcId": 31683,

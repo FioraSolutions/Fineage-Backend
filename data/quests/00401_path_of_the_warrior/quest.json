@@ -3,13 +3,46 @@
   "name": "Path Of The Warrior",
   "repeatable": false,
   "abortable": true,
-  "questItems": [],
+  "questItems": [
+    1138,
+    1139,
+    1140,
+    1141,
+    1142,
+    1143,
+    1144
+  ],
   "dialogs": [
     {
       "npcId": 30010,
       "hook": "talk",
       "when": "absent",
+      "hasItem": 1138,
+      "htmlFile": "30010-talk-000.htm"
+    },
+    {
+      "npcId": 30010,
+      "hook": "talk",
+      "when": "absent",
+      "hasItem": 1139,
+      "htmlFile": "30010-talk-001.htm"
+    },
+    {
+      "npcId": 30010,
+      "hook": "talk",
+      "when": "absent",
+      "hasItems": [
+        1143,
+        1141
+      ],
       "htmlFile": "30010-talk-002.htm"
+    },
+    {
+      "npcId": 30010,
+      "hook": "talk",
+      "when": "absent",
+      "hasItem": 1142,
+      "htmlFile": "30010-talk-003.htm"
     },
     {
       "npcId": 30010,
@@ -21,6 +54,33 @@
       "npcId": 30253,
       "hook": "talk",
       "when": "absent",
+      "hasItem": 1138,
+      "htmlFile": "30253-talk-005.htm"
+    },
+    {
+      "npcId": 30253,
+      "hook": "talk",
+      "when": "absent",
+      "hasItem": 1139,
+      "lacksItems": [
+        1140
+      ],
+      "htmlFile": "30253-talk-006.htm"
+    },
+    {
+      "npcId": 30253,
+      "hook": "talk",
+      "when": "absent",
+      "hasItem": 1139,
+      "htmlFile": "30253-talk-007.htm"
+    },
+    {
+      "npcId": 30253,
+      "hook": "talk",
+      "when": "absent",
+      "lacksItems": [
+        1140
+      ],
       "htmlFile": "30253-talk-008.htm"
     },
     {
@@ -28,6 +88,13 @@
       "hook": "talk",
       "when": "absent",
       "htmlFile": "30253-talk-009.htm"
+    },
+    {
+      "npcId": 30253,
+      "hook": "talk",
+      "when": "absent",
+      "hasItem": 1143,
+      "htmlFile": "30253-talk-010.htm"
     },
     {
       "npcId": 30010,
@@ -58,12 +125,20 @@
       "hook": "event",
       "when": "absent",
       "event": "30010-06",
+      "lacksItems": [
+        1138
+      ],
       "ops": [
         {
           "op": "create"
         },
         {
           "op": "start"
+        },
+        {
+          "op": "give_item",
+          "itemId": 1138,
+          "count": 1
         },
         {
           "op": "set_cond",
@@ -84,7 +159,26 @@
       "hook": "event",
       "when": "absent",
       "event": "30010-11",
+      "hasItems": [
+        1143,
+        1141
+      ],
       "ops": [
+        {
+          "op": "take_item",
+          "itemId": 1141,
+          "count": 1
+        },
+        {
+          "op": "take_item",
+          "itemId": 1143,
+          "count": 1
+        },
+        {
+          "op": "give_item",
+          "itemId": 1142,
+          "count": 1
+        },
         {
           "op": "set_cond",
           "cond": 5
@@ -93,9 +187,59 @@
       "htmlFile": "30010-event-30010-11-016.htm"
     },
     {
+      "npcId": 30010,
+      "hook": "event",
+      "when": "absent",
+      "event": "30253-02",
+      "hasItem": 1138,
+      "ops": [
+        {
+          "op": "take_item",
+          "itemId": 1138,
+          "count": 1
+        },
+        {
+          "op": "give_item",
+          "itemId": 1139,
+          "count": 1
+        },
+        {
+          "op": "set_cond",
+          "cond": 2
+        }
+      ],
+      "htmlFile": "30010-event-30253-02-017.htm"
+    },
+    {
       "npcId": 20035,
       "hook": "kill",
       "when": "started",
+      "hasItem": 1139,
+      "ops": [
+        {
+          "op": "set_cond",
+          "cond": 3
+        }
+      ],
+      "html": ""
+    },
+    {
+      "npcId": 20035,
+      "hook": "kill",
+      "when": "started",
+      "ops": [
+        {
+          "op": "set_cond",
+          "cond": 3
+        }
+      ],
+      "html": ""
+    },
+    {
+      "npcId": 20042,
+      "hook": "kill",
+      "when": "started",
+      "hasItem": 1139,
       "ops": [
         {
           "op": "set_cond",

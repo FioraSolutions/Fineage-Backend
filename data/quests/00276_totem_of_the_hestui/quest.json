@@ -3,7 +3,10 @@
   "name": "Totem of the Hestui",
   "repeatable": true,
   "abortable": true,
-  "questItems": [],
+  "questItems": [
+    1480,
+    1481
+  ],
   "dialogs": [
     {
       "npcId": 30571,
@@ -11,6 +14,19 @@
       "when": "started",
       "cond": 1,
       "htmlFile": "30571-talk-c1-000.htm"
+    },
+    {
+      "npcId": 30571,
+      "hook": "talk",
+      "when": "started",
+      "cond": 2,
+      "hasItem": 1481,
+      "ops": [
+        {
+          "op": "complete"
+        }
+      ],
+      "htmlFile": "30571-talk-c2-001.htm"
     },
     {
       "npcId": 27044,

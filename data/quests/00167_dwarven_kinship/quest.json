@@ -3,13 +3,61 @@
   "name": "Dwarven Kinship",
   "repeatable": false,
   "abortable": true,
-  "questItems": [],
+  "questItems": [
+    1076,
+    1106
+  ],
   "dialogs": [
     {
       "npcId": 30350,
       "hook": "talk",
       "when": "absent",
       "htmlFile": "30350-talk-000.htm"
+    },
+    {
+      "npcId": 30350,
+      "hook": "talk",
+      "when": "started",
+      "hasItem": 1076,
+      "htmlFile": "30350-talk-001.htm"
+    },
+    {
+      "npcId": 30255,
+      "hook": "talk",
+      "when": "absent",
+      "hasItem": 1076,
+      "htmlFile": "30255-talk-002.htm"
+    },
+    {
+      "npcId": 30255,
+      "hook": "talk",
+      "when": "absent",
+      "hasItem": 1106,
+      "htmlFile": "30255-talk-003.htm"
+    },
+    {
+      "npcId": 30210,
+      "hook": "talk",
+      "when": "absent",
+      "hasItem": 1106,
+      "htmlFile": "30210-talk-004.htm"
+    },
+    {
+      "npcId": 30350,
+      "hook": "event",
+      "when": "absent",
+      "event": "30210-02",
+      "hasItem": 1106,
+      "ops": [
+        {
+          "op": "give_adena",
+          "count": 20000
+        },
+        {
+          "op": "complete"
+        }
+      ],
+      "htmlFile": "30350-event-30210-02-005.htm"
     },
     {
       "npcId": 30350,
@@ -22,6 +70,51 @@
       "npcId": 30350,
       "hook": "event",
       "when": "absent",
+      "event": "30255-03",
+      "hasItem": 1076,
+      "ops": [
+        {
+          "op": "take_item",
+          "itemId": 1076,
+          "count": 1
+        },
+        {
+          "op": "give_item",
+          "itemId": 1106,
+          "count": 1
+        },
+        {
+          "op": "set_cond",
+          "cond": 2
+        },
+        {
+          "op": "give_adena",
+          "count": 2000
+        }
+      ],
+      "htmlFile": "30350-event-30255-03-007.htm"
+    },
+    {
+      "npcId": 30350,
+      "hook": "event",
+      "when": "absent",
+      "event": "30255-04",
+      "hasItem": 1076,
+      "ops": [
+        {
+          "op": "give_adena",
+          "count": 15000
+        },
+        {
+          "op": "complete"
+        }
+      ],
+      "htmlFile": "30350-event-30255-04-008.htm"
+    },
+    {
+      "npcId": 30350,
+      "hook": "event",
+      "when": "absent",
       "event": "30350-03",
       "ops": [
         {
@@ -29,6 +122,11 @@
         },
         {
           "op": "start"
+        },
+        {
+          "op": "give_item",
+          "itemId": 1076,
+          "count": 1
         },
         {
           "op": "set_cond",

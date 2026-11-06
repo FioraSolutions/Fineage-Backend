@@ -3,43 +3,149 @@
   "name": "Path Of The Human Wizard",
   "repeatable": false,
   "abortable": true,
-  "questItems": [],
+  "questItems": [
+    1280,
+    1281,
+    1282,
+    1283,
+    1284,
+    1285,
+    1286,
+    1287,
+    1288,
+    1289,
+    1290,
+    1291
+  ],
   "dialogs": [
     {
       "npcId": 30391,
       "hook": "talk",
       "when": "absent",
+      "lacksItems": [
+        1282,
+        1285,
+        1288,
+        1291
+      ],
       "htmlFile": "30391-talk-000.htm"
     },
     {
       "npcId": 30409,
       "hook": "talk",
       "when": "absent",
+      "hasItem": 1289,
+      "lacksItems": [
+        1290
+      ],
+      "htmlFile": "30409-talk-001.htm"
+    },
+    {
+      "npcId": 30409,
+      "hook": "talk",
+      "when": "absent",
+      "lacksItems": [
+        1290
+      ],
       "htmlFile": "30409-talk-002.htm"
+    },
+    {
+      "npcId": 30409,
+      "hook": "talk",
+      "when": "absent",
+      "hasItem": 1291,
+      "htmlFile": "30409-talk-003.htm"
     },
     {
       "npcId": 30410,
       "hook": "talk",
       "when": "absent",
+      "hasItem": 1283,
+      "lacksItems": [
+        1284
+      ],
+      "htmlFile": "30410-talk-004.htm"
+    },
+    {
+      "npcId": 30410,
+      "hook": "talk",
+      "when": "absent",
+      "lacksItems": [
+        1284
+      ],
       "htmlFile": "30410-talk-005.htm"
     },
     {
       "npcId": 30411,
       "hook": "talk",
       "when": "absent",
+      "hasItem": 1280,
+      "lacksItems": [
+        1281
+      ],
+      "htmlFile": "30411-talk-006.htm"
+    },
+    {
+      "npcId": 30411,
+      "hook": "talk",
+      "when": "absent",
+      "lacksItems": [
+        1281
+      ],
       "htmlFile": "30411-talk-007.htm"
+    },
+    {
+      "npcId": 30411,
+      "hook": "talk",
+      "when": "absent",
+      "hasItem": 1282,
+      "htmlFile": "30411-talk-008.htm"
     },
     {
       "npcId": 30412,
       "hook": "talk",
       "when": "absent",
+      "hasItem": 1283,
+      "lacksItems": [
+        1284
+      ],
+      "htmlFile": "30412-talk-009.htm"
+    },
+    {
+      "npcId": 30412,
+      "hook": "talk",
+      "when": "absent",
+      "lacksItems": [
+        1284
+      ],
       "htmlFile": "30412-talk-010.htm"
+    },
+    {
+      "npcId": 30412,
+      "hook": "talk",
+      "when": "absent",
+      "hasItem": 1285,
+      "htmlFile": "30412-talk-011.htm"
+    },
+    {
+      "npcId": 30413,
+      "hook": "talk",
+      "when": "absent",
+      "hasItem": 1286,
+      "htmlFile": "30413-talk-012.htm"
     },
     {
       "npcId": 30413,
       "hook": "talk",
       "when": "absent",
       "htmlFile": "30413-talk-013.htm"
+    },
+    {
+      "npcId": 30413,
+      "hook": "talk",
+      "when": "absent",
+      "hasItem": 1288,
+      "htmlFile": "30413-talk-014.htm"
     },
     {
       "npcId": 30391,
@@ -79,11 +185,75 @@
       "event": "30410-03",
       "ops": [
         {
+          "op": "give_item",
+          "itemId": 1284,
+          "count": 1
+        },
+        {
           "op": "set_cond",
           "cond": 6
         }
       ],
       "htmlFile": "30391-event-30410-03-019.htm"
+    },
+    {
+      "npcId": 20021,
+      "hook": "kill",
+      "when": "started",
+      "hasItem": 1289,
+      "lacksItems": [
+        1290
+      ],
+      "ops": [
+        {
+          "op": "drop_item",
+          "itemId": 1290,
+          "count": 1,
+          "chance": 1.0,
+          "limit": 1
+        },
+        {
+          "op": "set_cond",
+          "cond": 12
+        }
+      ],
+      "html": ""
+    },
+    {
+      "npcId": 20359,
+      "hook": "kill",
+      "when": "started",
+      "hasItem": 1280,
+      "lacksItems": [
+        1281
+      ],
+      "ops": [
+        {
+          "op": "drop_item",
+          "itemId": 1281,
+          "count": 1,
+          "chance": 1.0,
+          "limit": 1
+        },
+        {
+          "op": "set_cond",
+          "cond": 3
+        }
+      ],
+      "html": ""
+    },
+    {
+      "npcId": 27030,
+      "hook": "kill",
+      "when": "started",
+      "hasItem": 1286,
+      "ops": [
+        {
+          "op": "set_cond",
+          "cond": 9
+        }
+      ],
+      "html": ""
     },
     {
       "npcId": 27030,
