@@ -25,6 +25,7 @@ public sealed record SkillCombatData(
     public string[] UsingKinds { get; init; } = [];
     /// <summary>Mobius effectRange (escape range at launch); 0 = use CastRange.</summary>
     public int EffectRange { get; init; }
+    /// <summary>Mobius skill magicLevel at <paramref name="level"/>; 0 when the catalog row has no table.</summary>
     public int MagicLevelAt(int level) => MagicLevel.Length == 0 ? 0 : At(MagicLevel, level);
 
     static T At<T>(T[] a, int level) => a[Math.Clamp(level, 1, a.Length) - 1];

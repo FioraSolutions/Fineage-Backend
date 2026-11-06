@@ -55,9 +55,11 @@
 - Gaps: spiritshot cast-time / MP effects, magic crit, D–S shot items absent from items.json, no auto-shot slot highlight, V2 has no auto request.
 
 ## Slice 10 — magic crit / magic failure (PvE)
-- Player magic skills vs mobs now follow Mobius calcMagicDam (MagicFailures=True): mcrit rolled first (`calcMCrit`, rate ‰ = (int)(1 · WIT bonus [armed only]) · 10, i.e. ~1% base); then `calcMagicSuccess` rate = 100 − round(1.3^(targetLvl − magicLvl)).
-- Failed → second roll succeeds and level gap ≤ 9 → ½ damage + SysMsg 158 "Your attack has failed."; else 1 damage + SysMsg 139 "<mob> has resisted your <skill>.". Success + mcrit → ×3 (×2.5 PvP) + SysMsg 1280 "Magic Critical Hit!".
-- Gaps: skill-combat.json has no `magicLvl` (attacker level used); no MCRITICAL_RATE buff/passive mods (Wild Magic etc.) or MAGIC_CRIT_DMG; no MAGIC_SUCCESS_RES / attribute bonus; no magic shield block; Drain 50% message variant; mobs casting at players not rolled.
+- Player magic skills vs mobs now follow Mobius calcMagicDam (MagicFailures=True): mcrit rolled first (`calcMCrit`, rate ‰ = (int)(mCritRate fold · WIT bonus [armed only]) · 10, i.e. ~1% base without buffs); then `calcMagicSuccess` rate = 100 − round(1.3^(targetLvl − magicLvl)).
+- Failed → second roll succeeds and level gap ≤ 9 → ½ damage + SysMsg 158 "Your attack has failed."; else 1 damage + SysMsg 139 "<mob> has resisted your <skill>.". Success + mcrit → ×3 (×2.5 PvP) · `MAGIC_CRIT_DMG` (`mCritPower`) + SysMsg 1280 "Magic Critical Hit!".
+- `skill-combat.json` carries Mobius per-level `magicLevel` for all 375 combat skills (`scripts/gen_skill_magic_levels.py`); missing table still falls back to attacker level.
+- Buff/passive `mCritRate` / `mCritPower` fold through `CombatStat.MCritRate` / `MagicCritDmg` (Wild Magic 1303, item Wild Magic, Valakas necklace…).
+- Gaps: no MAGIC_SUCCESS_RES / attribute bonus; no magic shield block; Drain 50% message variant; mobs casting at players not rolled; Fineage keeps the simplified WIT·10 ‰ base (Mobius `FuncMAtkCritical` also ·10 inside the calculator before the final ·10 — not ported).
 
 ## Slice 11 — hitConditionBonus (position / height)
 - Mobius calcHitMiss: chance = (80 + 2·(acc − eva))·10, `chance *= HitConditionBonusData` (Java int truncation), clamp 200..980. Applies to player→mob and mob→player melee.
@@ -101,7 +103,7 @@
 ## Still open (PvE priority)
 1. Physical-skill crit/evasion stat mods (CRITICAL_DAMAGE, BLOW_RATE, P_SKILL_EVASION) — small/medium.
 2. Night game clock (GameTimeTaskManager) for the −10% dark bonus — small.
-3. magicLvl in skill-combat.json + mcrit stat mods — small.
+3. ~~magicLvl in skill-combat.json + mcrit stat mods~~ — done (slice 10 follow-up).
 4. Weapon vulnerabilities (NPC passive traits data), NPC soulshots, NPC blow/magic skills on players — medium.
 
 ## Spoil / Sweeper (Mobius CT0 parity)

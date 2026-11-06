@@ -247,10 +247,16 @@ public static class ZoneCombat
         Math.Max(1, (int)(70d * (Math.Max(0, pAtk) * (soulshot ? 2 : 1) + Math.Max(0, power)) / Math.Max(1d, pDef)));
 
     /// <summary>
-    /// Mobius <c>CreatureStat.getMCriticalHit</c>: (int)(MCRITICAL_RATE 1 · WIT bonus) · 10 ‰; FuncMAtkCritical applies
-    /// WIT only for NPCs or armed players (unarmed player stays 10 ‰).
+    /// Mobius <c>CreatureStat.getMCriticalHit</c> / <c>FuncMAtkCritical</c> (WIT only when armed), then skill
+    /// <c>mCritRate</c> set→mul→add folded over that base, truncated and ·10 for ‰. Unarmed with no buffs stays 10 ‰.
     /// </summary>
-    public static int PlayerMCritRate(bool armed, double witBonus) => (int)(armed ? witBonus : 1d) * 10;
+    public static int PlayerMCritRate(bool armed, double witBonus, CombatStatMods? mods = null)
+    {
+        double rate = armed ? witBonus : 1d;
+        if (mods != null && !ReferenceEquals(mods, CombatStatMods.None))
+            rate = mods.Apply(CombatStat.MCritRate, rate);
+        return (int)rate * 10;
+    }
 
     /// <summary>Mobius <c>calcMCrit</c>: rate ‰ &gt; Rnd(1000).</summary>
     public static bool RollMCrit(Random rnd, int rate) => rate > rnd.Next(1000);
@@ -265,10 +271,12 @@ public static class ZoneCombat
 
     /// <summary>
     /// Mobius <c>calcMagicDam</c> failure / crit branch for a player caster: failed first roll → second roll succeeds and
-    /// level gap ≤ 9 → half damage ("Your attack has failed"), else resisted → 1 damage; otherwise mcrit ×3 vs NPC (2.5 PvP).
+    /// level gap ≤ 9 → half damage ("Your attack has failed"), else resisted → 1 damage; otherwise mcrit ×3 vs NPC (2.5 PvP)
+    /// then <c>Stat.MAGIC_CRIT_DMG</c> (<paramref name="magicCritDmg"/>, default 1).
     /// </summary>
     public static (int Damage, MagicOutcome Outcome) RollMagicDamage(Random rnd, double mAtk, double mDef, double power,
-        int casterLevel, int magicLevel, int targetLevel, int mCritRate, bool targetIsPlayer = false)
+        int casterLevel, int magicLevel, int targetLevel, int mCritRate, bool targetIsPlayer = false,
+        double magicCritDmg = 1d)
     {
         // Mobius rolls mcrit before calcMagicDam (MagicalAttack effect), then the failure check.
         bool mcrit = RollMCrit(rnd, mCritRate);
@@ -290,6 +298,7 @@ public static class ZoneCombat
         else if (mcrit)
         {
             damage *= targetIsPlayer ? 2.5 : 3;
+            damage *= Math.Max(0, magicCritDmg);
             outcome = MagicOutcome.Critical;
         }
         return (Math.Max(1, (int)damage), outcome);

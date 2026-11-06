@@ -63,9 +63,12 @@ public sealed partial class ZoneWorld
             if (spirit > 0)
                 RechargeAutoShots(player);
             double mAtk = ps.MAtk * ZoneCombat.SpiritshotMAtkMultiplier(spirit);
-            // Magic level: skill-combat.json has no magicLvl yet → attacker level (Mobius fallback path).
+            // Mobius skill magicLevel (skill-combat.json); missing table → attacker level.
+            int magicLevel = combat.MagicLevelAt(level);
+            if (magicLevel <= 0)
+                magicLevel = player.Level;
             var (damage, outcome) = ZoneCombat.RollMagicDamage(_combatRandom, mAtk, mDef, power,
-                player.Level, player.Level, target.Level, ps.MCritRate);
+                player.Level, magicLevel, target.Level, ps.MCritRate, magicCritDmg: ps.MagicCritDmg);
             if (player.Session != null)
                 MagicOutcomeNotice(player.Session, target, combat, outcome);
             return damage;

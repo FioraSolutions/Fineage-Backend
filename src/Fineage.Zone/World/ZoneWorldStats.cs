@@ -7,7 +7,8 @@ namespace Fineage.Zone.World;
 public readonly record struct PlayerCombatStats(
     int PAtk, int MAtk, int PDef, int MDef, int PAtkSpd, int MAtkSpd, int Accuracy, int CritRate,
     int AttackRange, WeaponType Weapon, int Evasion = 0, int RandomDamage = ZoneCombat.DefaultPlayerRandomDamage,
-    int ShieldDef = 0, double ShieldRate = 0, int Soulshots = 0, CrystalGrade WeaponGrade = CrystalGrade.None, int MCritRate = 0);
+    int ShieldDef = 0, double ShieldRate = 0, int Soulshots = 0, CrystalGrade WeaponGrade = CrystalGrade.None,
+    int MCritRate = 0, double MagicCritDmg = 1d);
 
 public sealed partial class ZoneWorld
 {
@@ -91,7 +92,8 @@ public sealed partial class ZoneWorld
             ShieldRate: shielded ? shield!.ShieldRate * dex : 0,
             Soulshots: armed ? weapon!.Soulshots : 0,
             WeaponGrade: armed ? weapon!.Crystal : CrystalGrade.None,
-            MCritRate: ZoneCombat.PlayerMCritRate(armed, wit));
+            MCritRate: ZoneCombat.PlayerMCritRate(armed, wit, mods),
+            MagicCritDmg: mods.Apply(CombatStat.MagicCritDmg, 1d));
     }
 
     /// <summary>

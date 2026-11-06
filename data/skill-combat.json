@@ -133,7 +133,46 @@
    "usingKinds": [
     "DUAL"
    ],
-   "effectRange": 400
+   "effectRange": 400,
+   "magicLevel": [
+    38,
+    39,
+    40,
+    41,
+    42,
+    43,
+    44,
+    45,
+    46,
+    47,
+    48,
+    49,
+    50,
+    51,
+    52,
+    53,
+    54,
+    55,
+    56,
+    57,
+    58,
+    59,
+    60,
+    61,
+    62,
+    63,
+    64,
+    65,
+    66,
+    67,
+    68,
+    69,
+    70,
+    71,
+    72,
+    73,
+    74
+   ]
   },
   {
    "skillId": 3,
@@ -184,7 +223,18 @@
     "SWORD",
     "BLUNT"
    ],
-   "effectRange": 400
+   "effectRange": 400,
+   "magicLevel": [
+    3,
+    4,
+    5,
+    8,
+    9,
+    10,
+    13,
+    14,
+    15
+   ]
   },
   {
    "skillId": 5,
@@ -297,7 +347,40 @@
    "castRange": 40,
    "baseCritRate": 0,
    "overHit": true,
-   "effectRange": 400
+   "effectRange": 400,
+   "magicLevel": [
+    44,
+    45,
+    46,
+    47,
+    48,
+    49,
+    50,
+    51,
+    52,
+    53,
+    54,
+    55,
+    56,
+    57,
+    58,
+    59,
+    60,
+    61,
+    62,
+    63,
+    64,
+    65,
+    66,
+    67,
+    68,
+    69,
+    70,
+    71,
+    72,
+    73,
+    74
+   ]
   },
   {
    "skillId": 6,
@@ -428,7 +511,46 @@
    "castRange": 600,
    "baseCritRate": 0,
    "overHit": true,
-   "effectRange": 1100
+   "effectRange": 1100,
+   "magicLevel": [
+    38,
+    39,
+    40,
+    41,
+    42,
+    43,
+    44,
+    45,
+    46,
+    47,
+    48,
+    49,
+    50,
+    51,
+    52,
+    53,
+    54,
+    55,
+    56,
+    57,
+    58,
+    59,
+    60,
+    61,
+    62,
+    63,
+    64,
+    65,
+    66,
+    67,
+    68,
+    69,
+    70,
+    71,
+    72,
+    73,
+    74
+   ]
   },
   {
    "skillId": 7,
@@ -532,7 +654,37 @@
    "castRange": 500,
    "baseCritRate": 0,
    "overHit": true,
-   "effectRange": 1000
+   "effectRange": 1000,
+   "magicLevel": [
+    47,
+    48,
+    49,
+    50,
+    51,
+    52,
+    53,
+    54,
+    55,
+    56,
+    57,
+    58,
+    59,
+    60,
+    61,
+    62,
+    63,
+    64,
+    65,
+    66,
+    67,
+    68,
+    69,
+    70,
+    71,
+    72,
+    73,
+    74
+   ]
   },
   {
    "skillId": 9,
@@ -654,7 +806,43 @@
    "castRange": 40,
    "baseCritRate": 0,
    "overHit": true,
-   "effectRange": 1000
+   "effectRange": 1000,
+   "magicLevel": [
+    41,
+    42,
+    43,
+    44,
+    45,
+    46,
+    47,
+    48,
+    49,
+    50,
+    51,
+    52,
+    53,
+    54,
+    55,
+    56,
+    57,
+    58,
+    59,
+    60,
+    61,
+    62,
+    63,
+    64,
+    65,
+    66,
+    67,
+    68,
+    69,
+    70,
+    71,
+    72,
+    73,
+    74
+   ]
   },
   {
    "skillId": 16,
@@ -901,7 +1089,43 @@
    "castRange": 40,
    "baseCritRate": 0,
    "overHit": true,
-   "effectRange": 400
+   "effectRange": 400,
+   "magicLevel": [
+    41,
+    42,
+    43,
+    44,
+    45,
+    46,
+    47,
+    48,
+    49,
+    50,
+    51,
+    52,
+    53,
+    54,
+    55,
+    56,
+    57,
+    58,
+    59,
+    60,
+    61,
+    62,
+    63,
+    64,
+    65,
+    66,
+    67,
+    68,
+    69,
+    70,
+    71,
+    72,
+    73,
+    74
+   ]
   },
   {
    "skillId": 19,
@@ -1035,7 +1259,46 @@
    "usingKinds": [
     "BOW"
    ],
-   "effectRange": 1400
+   "effectRange": 1400,
+   "magicLevel": [
+    38,
+    39,
+    40,
+    41,
+    42,
+    43,
+    44,
+    45,
+    46,
+    47,
+    48,
+    49,
+    50,
+    51,
+    52,
+    53,
+    54,
+    55,
+    56,
+    57,
+    58,
+    59,
+    60,
+    61,
+    62,
+    63,
+    64,
+    65,
+    66,
+    67,
+    68,
+    69,
+    70,
+    71,
+    72,
+    73,
+    74
+   ]
   },
   {
    "skillId": 24,
@@ -1151,7 +1414,40 @@
    "usingKinds": [
     "BOW"
    ],
-   "effectRange": 1000
+   "effectRange": 1000,
+   "magicLevel": [
+    44,
+    45,
+    46,
+    47,
+    48,
+    49,
+    50,
+    51,
+    52,
+    53,
+    54,
+    55,
+    56,
+    57,
+    58,
+    59,
+    60,
+    61,
+    62,
+    63,
+    64,
+    65,
+    66,
+    67,
+    68,
+    69,
+    70,
+    71,
+    72,
+    73,
+    74
+   ]
   },
   {
    "skillId": 29,
@@ -1246,7 +1542,33 @@
    "usingKinds": [
     "DUALFIST"
    ],
-   "effectRange": 400
+   "effectRange": 400,
+   "magicLevel": [
+    3,
+    4,
+    5,
+    8,
+    9,
+    10,
+    13,
+    14,
+    15,
+    18,
+    19,
+    20,
+    22,
+    23,
+    24,
+    26,
+    27,
+    28,
+    30,
+    31,
+    32,
+    34,
+    35,
+    36
+   ]
   },
   {
    "skillId": 30,
@@ -1527,7 +1849,37 @@
    "castRange": 500,
    "baseCritRate": 0,
    "overHit": true,
-   "effectRange": 1000
+   "effectRange": 1000,
+   "magicLevel": [
+    47,
+    48,
+    49,
+    50,
+    51,
+    52,
+    53,
+    54,
+    55,
+    56,
+    57,
+    58,
+    59,
+    60,
+    61,
+    62,
+    63,
+    64,
+    65,
+    66,
+    67,
+    68,
+    69,
+    70,
+    71,
+    72,
+    73,
+    74
+   ]
   },
   {
    "skillId": 36,
@@ -1660,6 +2012,45 @@
    "overHit": true,
    "usingKinds": [
     "POLE"
+   ],
+   "magicLevel": [
+    38,
+    39,
+    40,
+    41,
+    42,
+    43,
+    44,
+    45,
+    46,
+    47,
+    48,
+    49,
+    50,
+    51,
+    52,
+    53,
+    54,
+    55,
+    56,
+    57,
+    58,
+    59,
+    60,
+    61,
+    62,
+    63,
+    64,
+    65,
+    66,
+    67,
+    68,
+    69,
+    70,
+    71,
+    72,
+    73,
+    74
    ]
   },
   {
@@ -1793,6 +2184,45 @@
    "overHit": true,
    "usingKinds": [
     "POLE"
+   ],
+   "magicLevel": [
+    38,
+    39,
+    40,
+    41,
+    42,
+    43,
+    44,
+    45,
+    46,
+    47,
+    48,
+    49,
+    50,
+    51,
+    52,
+    53,
+    54,
+    55,
+    56,
+    57,
+    58,
+    59,
+    60,
+    61,
+    62,
+    63,
+    64,
+    65,
+    66,
+    67,
+    68,
+    69,
+    70,
+    71,
+    72,
+    73,
+    74
    ]
   },
   {
@@ -1891,7 +2321,35 @@
    "castRange": 400,
    "baseCritRate": 0,
    "overHit": false,
-   "effectRange": 900
+   "effectRange": 900,
+   "magicLevel": [
+    44,
+    46,
+    47,
+    49,
+    50,
+    52,
+    53,
+    55,
+    56,
+    58,
+    59,
+    60,
+    61,
+    62,
+    63,
+    64,
+    65,
+    66,
+    67,
+    68,
+    69,
+    70,
+    71,
+    72,
+    73,
+    74
+   ]
   },
   {
    "skillId": 54,
@@ -2061,7 +2519,58 @@
    "usingKinds": [
     "DUALFIST"
    ],
-   "effectRange": 1100
+   "effectRange": 1100,
+   "magicLevel": [
+    22,
+    23,
+    24,
+    26,
+    27,
+    28,
+    30,
+    31,
+    32,
+    34,
+    35,
+    36,
+    38,
+    39,
+    40,
+    41,
+    42,
+    43,
+    44,
+    45,
+    46,
+    47,
+    48,
+    49,
+    50,
+    51,
+    52,
+    53,
+    54,
+    55,
+    56,
+    57,
+    58,
+    59,
+    60,
+    61,
+    62,
+    63,
+    64,
+    65,
+    66,
+    67,
+    68,
+    69,
+    70,
+    71,
+    72,
+    73,
+    74
+   ]
   },
   {
    "skillId": 56,
@@ -2156,7 +2665,33 @@
    "usingKinds": [
     "BOW"
    ],
-   "effectRange": 1200
+   "effectRange": 1200,
+   "magicLevel": [
+    3,
+    4,
+    5,
+    8,
+    9,
+    10,
+    13,
+    14,
+    15,
+    18,
+    19,
+    20,
+    22,
+    23,
+    24,
+    26,
+    27,
+    28,
+    30,
+    31,
+    32,
+    34,
+    35,
+    36
+   ]
   },
   {
    "skillId": 81,
@@ -2188,7 +2723,12 @@
    "usingKinds": [
     "DUALFIST"
    ],
-   "effectRange": 400
+   "effectRange": 400,
+   "magicLevel": [
+    55,
+    64,
+    74
+   ]
   },
   {
    "skillId": 84,
@@ -2219,6 +2759,11 @@
    "overHit": false,
    "usingKinds": [
     "DUAL"
+   ],
+   "magicLevel": [
+    55,
+    60,
+    72
    ]
   },
   {
@@ -2254,7 +2799,14 @@
    "castRange": 40,
    "baseCritRate": 10,
    "overHit": true,
-   "effectRange": 400
+   "effectRange": 400,
+   "magicLevel": [
+    55,
+    60,
+    64,
+    68,
+    72
+   ]
   },
   {
    "skillId": 100,
@@ -2322,7 +2874,24 @@
    "usingKinds": [
     "BLUNT"
    ],
-   "effectRange": 400
+   "effectRange": 400,
+   "magicLevel": [
+    18,
+    19,
+    20,
+    22,
+    23,
+    24,
+    26,
+    27,
+    28,
+    30,
+    31,
+    32,
+    34,
+    35,
+    36
+   ]
   },
   {
    "skillId": 101,
@@ -2465,7 +3034,49 @@
    "usingKinds": [
     "BOW"
    ],
-   "effectRange": 1400
+   "effectRange": 1400,
+   "magicLevel": [
+    34,
+    35,
+    36,
+    38,
+    39,
+    40,
+    41,
+    42,
+    43,
+    44,
+    45,
+    46,
+    47,
+    48,
+    49,
+    50,
+    51,
+    52,
+    53,
+    54,
+    55,
+    56,
+    57,
+    58,
+    59,
+    60,
+    61,
+    62,
+    63,
+    64,
+    65,
+    66,
+    67,
+    68,
+    69,
+    70,
+    71,
+    72,
+    73,
+    74
+   ]
   },
   {
    "skillId": 105,
@@ -2557,7 +3168,33 @@
    "castRange": 600,
    "baseCritRate": 0,
    "overHit": false,
-   "effectRange": 1100
+   "effectRange": 1100,
+   "magicLevel": [
+    34,
+    36,
+    38,
+    40,
+    42,
+    43,
+    45,
+    46,
+    48,
+    49,
+    51,
+    52,
+    54,
+    55,
+    57,
+    58,
+    60,
+    62,
+    64,
+    66,
+    68,
+    70,
+    72,
+    74
+   ]
   },
   {
    "skillId": 120,
@@ -2625,7 +3262,24 @@
    "usingKinds": [
     "DUALFIST"
    ],
-   "effectRange": 400
+   "effectRange": 400,
+   "magicLevel": [
+    18,
+    19,
+    20,
+    22,
+    23,
+    24,
+    26,
+    27,
+    28,
+    30,
+    31,
+    32,
+    34,
+    35,
+    36
+   ]
   },
   {
    "skillId": 190,
@@ -2760,7 +3414,46 @@
     "SWORD",
     "BLUNT"
    ],
-   "effectRange": 400
+   "effectRange": 400,
+   "magicLevel": [
+    38,
+    39,
+    40,
+    41,
+    42,
+    43,
+    44,
+    45,
+    46,
+    47,
+    48,
+    49,
+    50,
+    51,
+    52,
+    53,
+    54,
+    55,
+    56,
+    57,
+    58,
+    59,
+    60,
+    61,
+    62,
+    63,
+    64,
+    65,
+    66,
+    67,
+    68,
+    69,
+    70,
+    71,
+    72,
+    73,
+    74
+   ]
   },
   {
    "skillId": 223,
@@ -2932,7 +3625,58 @@
     "DAGGER",
     "DUAL"
    ],
-   "effectRange": 400
+   "effectRange": 400,
+   "magicLevel": [
+    22,
+    23,
+    24,
+    26,
+    27,
+    28,
+    30,
+    31,
+    32,
+    34,
+    35,
+    36,
+    38,
+    39,
+    40,
+    41,
+    42,
+    43,
+    44,
+    45,
+    46,
+    47,
+    48,
+    49,
+    50,
+    51,
+    52,
+    54,
+    54,
+    55,
+    56,
+    57,
+    58,
+    59,
+    60,
+    61,
+    62,
+    63,
+    64,
+    65,
+    66,
+    67,
+    68,
+    69,
+    70,
+    71,
+    72,
+    73,
+    74
+   ]
   },
   {
    "skillId": 245,
@@ -3000,7 +3744,24 @@
    "usingKinds": [
     "POLE"
    ],
-   "effectRange": 400
+   "effectRange": 400,
+   "magicLevel": [
+    18,
+    19,
+    20,
+    22,
+    23,
+    24,
+    26,
+    27,
+    28,
+    30,
+    31,
+    32,
+    34,
+    35,
+    36
+   ]
   },
   {
    "skillId": 255,
@@ -3069,7 +3830,24 @@
     "SWORD",
     "BLUNT"
    ],
-   "effectRange": 400
+   "effectRange": 400,
+   "magicLevel": [
+    18,
+    19,
+    20,
+    22,
+    23,
+    24,
+    26,
+    27,
+    28,
+    30,
+    31,
+    32,
+    34,
+    35,
+    36
+   ]
   },
   {
    "skillId": 260,
@@ -3203,7 +3981,46 @@
    "usingKinds": [
     "BLUNT"
    ],
-   "effectRange": 400
+   "effectRange": 400,
+   "magicLevel": [
+    38,
+    39,
+    40,
+    41,
+    42,
+    43,
+    44,
+    45,
+    46,
+    47,
+    48,
+    49,
+    50,
+    51,
+    52,
+    53,
+    54,
+    55,
+    56,
+    57,
+    58,
+    59,
+    60,
+    61,
+    62,
+    63,
+    64,
+    65,
+    66,
+    67,
+    68,
+    69,
+    70,
+    71,
+    72,
+    73,
+    74
+   ]
   },
   {
    "skillId": 261,
@@ -3289,7 +4106,31 @@
    "castRange": 40,
    "baseCritRate": 0,
    "overHit": true,
-   "effectRange": 400
+   "effectRange": 400,
+   "magicLevel": [
+    53,
+    54,
+    55,
+    56,
+    57,
+    58,
+    59,
+    60,
+    61,
+    62,
+    63,
+    64,
+    65,
+    66,
+    67,
+    68,
+    69,
+    70,
+    71,
+    72,
+    73,
+    74
+   ]
   },
   {
    "skillId": 263,
@@ -3501,7 +4342,14 @@
    "castRange": 400,
    "baseCritRate": 0,
    "overHit": false,
-   "effectRange": 900
+   "effectRange": 900,
+   "magicLevel": [
+    58,
+    62,
+    66,
+    70,
+    74
+   ]
   },
   {
    "skillId": 280,
@@ -3635,7 +4483,46 @@
    "usingKinds": [
     "DUALFIST"
    ],
-   "effectRange": 400
+   "effectRange": 400,
+   "magicLevel": [
+    38,
+    39,
+    40,
+    41,
+    42,
+    43,
+    44,
+    45,
+    46,
+    47,
+    48,
+    49,
+    50,
+    51,
+    52,
+    53,
+    54,
+    55,
+    56,
+    57,
+    58,
+    59,
+    60,
+    61,
+    62,
+    63,
+    64,
+    65,
+    66,
+    67,
+    68,
+    69,
+    70,
+    71,
+    72,
+    73,
+    74
+   ]
   },
   {
    "skillId": 281,
@@ -3769,7 +4656,46 @@
    "usingKinds": [
     "DUALFIST"
    ],
-   "effectRange": 400
+   "effectRange": 400,
+   "magicLevel": [
+    38,
+    39,
+    40,
+    41,
+    42,
+    43,
+    44,
+    45,
+    46,
+    47,
+    48,
+    49,
+    50,
+    51,
+    52,
+    53,
+    54,
+    55,
+    56,
+    57,
+    58,
+    59,
+    60,
+    61,
+    62,
+    63,
+    64,
+    65,
+    66,
+    67,
+    68,
+    69,
+    70,
+    71,
+    72,
+    73,
+    74
+   ]
   },
   {
    "skillId": 284,
@@ -3909,7 +4835,49 @@
    "castRange": 40,
    "baseCritRate": 0,
    "overHit": true,
-   "effectRange": 400
+   "effectRange": 400,
+   "magicLevel": [
+    34,
+    35,
+    36,
+    38,
+    39,
+    40,
+    41,
+    42,
+    43,
+    44,
+    45,
+    46,
+    47,
+    48,
+    49,
+    50,
+    51,
+    52,
+    53,
+    54,
+    55,
+    56,
+    57,
+    58,
+    59,
+    60,
+    61,
+    62,
+    63,
+    64,
+    65,
+    66,
+    67,
+    68,
+    69,
+    70,
+    71,
+    72,
+    73,
+    74
+   ]
   },
   {
    "skillId": 314,
@@ -3980,7 +4948,25 @@
    "usingKinds": [
     "BOW"
    ],
-   "effectRange": 1400
+   "effectRange": 1400,
+   "magicLevel": [
+    59,
+    60,
+    61,
+    62,
+    63,
+    64,
+    65,
+    66,
+    67,
+    68,
+    69,
+    70,
+    71,
+    72,
+    73,
+    74
+   ]
   },
   {
    "skillId": 315,
@@ -4048,7 +5034,25 @@
    "castRange": 40,
    "baseCritRate": 15,
    "overHit": true,
-   "effectRange": 400
+   "effectRange": 400,
+   "magicLevel": [
+    59,
+    60,
+    61,
+    62,
+    63,
+    64,
+    65,
+    66,
+    67,
+    68,
+    69,
+    70,
+    71,
+    72,
+    73,
+    74
+   ]
   },
   {
    "skillId": 321,
@@ -4140,7 +5144,10 @@
    "castRange": 40,
    "baseCritRate": 0,
    "overHit": false,
-   "effectRange": 400
+   "effectRange": 400,
+   "magicLevel": [
+    -1
+   ]
   },
   {
    "skillId": 343,
@@ -4166,7 +5173,10 @@
    "usingKinds": [
     "BOW"
    ],
-   "effectRange": 1400
+   "effectRange": 1400,
+   "magicLevel": [
+    76
+   ]
   },
   {
    "skillId": 344,
@@ -4225,7 +5235,10 @@
    "usingKinds": [
     "DUAL"
    ],
-   "effectRange": 1100
+   "effectRange": 1100,
+   "magicLevel": [
+    78
+   ]
   },
   {
    "skillId": 346,
@@ -4251,7 +5264,10 @@
    "usingKinds": [
     "DUALFIST"
    ],
-   "effectRange": 1100
+   "effectRange": 1100,
+   "magicLevel": [
+    78
+   ]
   },
   {
    "skillId": 347,
@@ -4276,6 +5292,9 @@
    "overHit": true,
    "usingKinds": [
     "POLE"
+   ],
+   "magicLevel": [
+    78
    ]
   },
   {
@@ -4302,7 +5321,10 @@
    "usingKinds": [
     "BLUNT"
    ],
-   "effectRange": 400
+   "effectRange": 400,
+   "magicLevel": [
+    76
+   ]
   },
   {
    "skillId": 354,
@@ -4328,7 +5350,10 @@
    "usingKinds": [
     "BOW"
    ],
-   "effectRange": 1400
+   "effectRange": 1400,
+   "magicLevel": [
+    77
+   ]
   },
   {
    "skillId": 361,
@@ -4354,7 +5379,10 @@
    "usingKinds": [
     "POLE"
    ],
-   "effectRange": 1000
+   "effectRange": 1000,
+   "magicLevel": [
+    77
+   ]
   },
   {
    "skillId": 362,
@@ -4381,7 +5409,10 @@
     "BLUNT",
     "SWORD"
    ],
-   "effectRange": 400
+   "effectRange": 400,
+   "magicLevel": [
+    77
+   ]
   },
   {
    "skillId": 369,
@@ -4407,7 +5438,10 @@
    "usingKinds": [
     "BOW"
    ],
-   "effectRange": 1400
+   "effectRange": 1400,
+   "magicLevel": [
+    78
+   ]
   },
   {
    "skillId": 400,
@@ -4461,7 +5495,19 @@
     "SWORD",
     "BLUNT"
    ],
-   "effectRange": 400
+   "effectRange": 400,
+   "magicLevel": [
+    55,
+    58,
+    60,
+    62,
+    64,
+    66,
+    68,
+    70,
+    72,
+    74
+   ]
   },
   {
    "skillId": 401,
@@ -4515,7 +5561,19 @@
     "SWORD",
     "BLUNT"
    ],
-   "effectRange": 400
+   "effectRange": 400,
+   "magicLevel": [
+    55,
+    58,
+    60,
+    62,
+    64,
+    66,
+    68,
+    70,
+    72,
+    74
+   ]
   },
   {
    "skillId": 407,
@@ -4564,7 +5622,19 @@
    "reuseDelayMs": 15000,
    "castRange": -1,
    "baseCritRate": 10,
-   "overHit": true
+   "overHit": true,
+   "magicLevel": [
+    55,
+    58,
+    60,
+    62,
+    64,
+    66,
+    68,
+    70,
+    72,
+    74
+   ]
   },
   {
    "skillId": 408,
@@ -4616,6 +5686,18 @@
    "overHit": true,
    "usingKinds": [
     "DUAL"
+   ],
+   "magicLevel": [
+    55,
+    58,
+    60,
+    62,
+    64,
+    66,
+    68,
+    70,
+    72,
+    74
    ]
   },
   {
@@ -4762,7 +5844,28 @@
    "castRange": 400,
    "baseCritRate": 0,
    "overHit": false,
-   "effectRange": 900
+   "effectRange": 900,
+   "magicLevel": [
+    38,
+    40,
+    42,
+    44,
+    46,
+    48,
+    50,
+    52,
+    54,
+    56,
+    58,
+    60,
+    62,
+    64,
+    66,
+    68,
+    70,
+    72,
+    74
+   ]
   },
   {
    "skillId": 1031,
@@ -4806,7 +5909,17 @@
    "castRange": 400,
    "baseCritRate": 0,
    "overHit": false,
-   "effectRange": 900
+   "effectRange": 900,
+   "magicLevel": [
+    17,
+    20,
+    23,
+    25,
+    28,
+    30,
+    33,
+    35
+   ]
   },
   {
    "skillId": 1148,
@@ -4865,7 +5978,22 @@
    "castRange": 900,
    "baseCritRate": 0,
    "overHit": false,
-   "effectRange": 1400
+   "effectRange": 1400,
+   "magicLevel": [
+    44,
+    48,
+    52,
+    56,
+    58,
+    60,
+    62,
+    64,
+    66,
+    68,
+    70,
+    72,
+    74
+   ]
   },
   {
    "skillId": 1155,
@@ -4930,7 +6058,24 @@
    "castRange": 400,
    "baseCritRate": 0,
    "overHit": false,
-   "effectRange": 900
+   "effectRange": 900,
+   "magicLevel": [
+    46,
+    48,
+    50,
+    52,
+    54,
+    56,
+    58,
+    60,
+    62,
+    64,
+    66,
+    68,
+    70,
+    72,
+    74
+   ]
   },
   {
    "skillId": 1171,
@@ -5006,7 +6151,28 @@
    "reuseDelayMs": 4000,
    "castRange": -1,
    "baseCritRate": 0,
-   "overHit": false
+   "overHit": false,
+   "magicLevel": [
+    38,
+    40,
+    42,
+    44,
+    46,
+    48,
+    50,
+    52,
+    54,
+    56,
+    58,
+    60,
+    62,
+    64,
+    66,
+    68,
+    70,
+    72,
+    74
+   ]
   },
   {
    "skillId": 1172,
@@ -5050,7 +6216,17 @@
    "castRange": 150,
    "baseCritRate": 0,
    "overHit": false,
-   "effectRange": 650
+   "effectRange": 650,
+   "magicLevel": [
+    17,
+    20,
+    23,
+    25,
+    28,
+    30,
+    33,
+    35
+   ]
   },
   {
    "skillId": 1174,
@@ -5136,7 +6312,31 @@
    "castRange": 100,
    "baseCritRate": 0,
    "overHit": false,
-   "effectRange": 400
+   "effectRange": 400,
+   "magicLevel": [
+    50,
+    52,
+    54,
+    56,
+    57,
+    58,
+    59,
+    60,
+    61,
+    62,
+    63,
+    64,
+    65,
+    66,
+    67,
+    68,
+    69,
+    70,
+    71,
+    72,
+    73,
+    74
+   ]
   },
   {
    "skillId": 1175,
@@ -5180,7 +6380,17 @@
    "castRange": 750,
    "baseCritRate": 0,
    "overHit": false,
-   "effectRange": 1250
+   "effectRange": 1250,
+   "magicLevel": [
+    17,
+    20,
+    23,
+    25,
+    28,
+    30,
+    33,
+    35
+   ]
   },
   {
    "skillId": 1176,
@@ -5245,7 +6455,24 @@
    "castRange": 500,
    "baseCritRate": 0,
    "overHit": false,
-   "effectRange": 1000
+   "effectRange": 1000,
+   "magicLevel": [
+    46,
+    48,
+    50,
+    52,
+    54,
+    56,
+    58,
+    60,
+    62,
+    64,
+    66,
+    68,
+    70,
+    72,
+    74
+   ]
   },
   {
    "skillId": 1177,
@@ -5280,7 +6507,14 @@
    "castRange": 600,
    "baseCritRate": 0,
    "overHit": false,
-   "effectRange": 1100
+   "effectRange": 1100,
+   "magicLevel": [
+    1,
+    4,
+    7,
+    11,
+    14
+   ]
   },
   {
    "skillId": 1178,
@@ -5324,7 +6558,17 @@
    "castRange": 750,
    "baseCritRate": 0,
    "overHit": false,
-   "effectRange": 1250
+   "effectRange": 1250,
+   "magicLevel": [
+    17,
+    20,
+    23,
+    25,
+    28,
+    30,
+    33,
+    35
+   ]
   },
   {
    "skillId": 1181,
@@ -5353,7 +6597,12 @@
    "castRange": 500,
    "baseCritRate": 0,
    "overHit": false,
-   "effectRange": 1000
+   "effectRange": 1000,
+   "magicLevel": [
+    20,
+    25,
+    30
+   ]
   },
   {
    "skillId": 1184,
@@ -5391,7 +6640,15 @@
    "castRange": 600,
    "baseCritRate": 0,
    "overHit": false,
-   "effectRange": 1100
+   "effectRange": 1100,
+   "magicLevel": [
+    4,
+    7,
+    11,
+    14,
+    17,
+    20
+   ]
   },
   {
    "skillId": 1220,
@@ -5435,7 +6692,17 @@
    "castRange": 750,
    "baseCritRate": 0,
    "overHit": false,
-   "effectRange": 1250
+   "effectRange": 1250,
+   "magicLevel": [
+    17,
+    20,
+    23,
+    25,
+    28,
+    30,
+    33,
+    35
+   ]
   },
   {
    "skillId": 1230,
@@ -5539,7 +6806,37 @@
    "castRange": 900,
    "baseCritRate": 0,
    "overHit": false,
-   "effectRange": 1400
+   "effectRange": 1400,
+   "magicLevel": [
+    38,
+    40,
+    42,
+    44,
+    46,
+    48,
+    50,
+    52,
+    54,
+    56,
+    57,
+    58,
+    59,
+    60,
+    61,
+    62,
+    63,
+    64,
+    65,
+    66,
+    67,
+    68,
+    69,
+    70,
+    71,
+    72,
+    73,
+    74
+   ]
   },
   {
    "skillId": 1231,
@@ -5643,7 +6940,37 @@
    "castRange": 150,
    "baseCritRate": 0,
    "overHit": false,
-   "effectRange": 350
+   "effectRange": 350,
+   "magicLevel": [
+    38,
+    40,
+    42,
+    44,
+    46,
+    48,
+    50,
+    52,
+    54,
+    56,
+    57,
+    58,
+    59,
+    60,
+    61,
+    62,
+    63,
+    64,
+    65,
+    66,
+    67,
+    68,
+    69,
+    70,
+    71,
+    72,
+    73,
+    74
+   ]
   },
   {
    "skillId": 1235,
@@ -5747,7 +7074,37 @@
    "castRange": 900,
    "baseCritRate": 0,
    "overHit": false,
-   "effectRange": 1400
+   "effectRange": 1400,
+   "magicLevel": [
+    38,
+    40,
+    42,
+    44,
+    46,
+    48,
+    50,
+    52,
+    54,
+    56,
+    57,
+    58,
+    59,
+    60,
+    61,
+    62,
+    63,
+    64,
+    65,
+    66,
+    67,
+    68,
+    69,
+    70,
+    71,
+    72,
+    73,
+    74
+   ]
   },
   {
    "skillId": 1236,
@@ -5824,7 +7181,28 @@
    "castRange": 900,
    "baseCritRate": 0,
    "overHit": false,
-   "effectRange": 1400
+   "effectRange": 1400,
+   "magicLevel": [
+    38,
+    40,
+    42,
+    44,
+    46,
+    48,
+    50,
+    52,
+    54,
+    56,
+    58,
+    60,
+    62,
+    64,
+    66,
+    68,
+    70,
+    72,
+    74
+   ]
   },
   {
    "skillId": 1237,
@@ -5895,7 +7273,26 @@
    "castRange": 900,
    "baseCritRate": 0,
    "overHit": false,
-   "effectRange": 1400
+   "effectRange": 1400,
+   "magicLevel": [
+    42,
+    44,
+    46,
+    48,
+    50,
+    52,
+    54,
+    56,
+    58,
+    60,
+    62,
+    64,
+    66,
+    68,
+    70,
+    72,
+    74
+   ]
   },
   {
    "skillId": 1239,
@@ -5999,7 +7396,37 @@
    "castRange": 900,
    "baseCritRate": 0,
    "overHit": false,
-   "effectRange": 1400
+   "effectRange": 1400,
+   "magicLevel": [
+    38,
+    40,
+    42,
+    44,
+    46,
+    48,
+    50,
+    52,
+    54,
+    56,
+    57,
+    58,
+    59,
+    60,
+    61,
+    62,
+    63,
+    64,
+    65,
+    66,
+    67,
+    68,
+    69,
+    70,
+    71,
+    72,
+    73,
+    74
+   ]
   },
   {
    "skillId": 1264,
@@ -6028,7 +7455,12 @@
    "castRange": 750,
    "baseCritRate": 0,
    "overHit": true,
-   "effectRange": 1250
+   "effectRange": 1250,
+   "magicLevel": [
+    25,
+    30,
+    35
+   ]
   },
   {
    "skillId": 1265,
@@ -6090,7 +7522,23 @@
    "castRange": 900,
    "baseCritRate": 0,
    "overHit": true,
-   "effectRange": 1400
+   "effectRange": 1400,
+   "magicLevel": [
+    40,
+    44,
+    48,
+    52,
+    56,
+    58,
+    60,
+    62,
+    64,
+    66,
+    68,
+    70,
+    72,
+    74
+   ]
   },
   {
    "skillId": 1266,
@@ -6119,7 +7567,12 @@
    "castRange": 750,
    "baseCritRate": 0,
    "overHit": true,
-   "effectRange": 1250
+   "effectRange": 1250,
+   "magicLevel": [
+    25,
+    30,
+    35
+   ]
   },
   {
    "skillId": 1267,
@@ -6181,7 +7634,23 @@
    "castRange": 900,
    "baseCritRate": 0,
    "overHit": true,
-   "effectRange": 1400
+   "effectRange": 1400,
+   "magicLevel": [
+    40,
+    44,
+    48,
+    52,
+    56,
+    58,
+    60,
+    62,
+    64,
+    66,
+    68,
+    70,
+    72,
+    74
+   ]
   },
   {
    "skillId": 1274,
@@ -6213,7 +7682,13 @@
    "castRange": 400,
    "baseCritRate": 0,
    "overHit": false,
-   "effectRange": 900
+   "effectRange": 900,
+   "magicLevel": [
+    20,
+    25,
+    30,
+    35
+   ]
   },
   {
    "skillId": 1275,
@@ -6275,7 +7750,23 @@
    "castRange": 400,
    "baseCritRate": 0,
    "overHit": false,
-   "effectRange": 900
+   "effectRange": 900,
+   "magicLevel": [
+    40,
+    44,
+    48,
+    52,
+    56,
+    58,
+    60,
+    62,
+    64,
+    66,
+    68,
+    70,
+    72,
+    74
+   ]
   },
   {
    "skillId": 1288,
@@ -6298,7 +7789,10 @@
    "castRange": 900,
    "baseCritRate": 0,
    "overHit": false,
-   "effectRange": 1400
+   "effectRange": 1400,
+   "magicLevel": [
+    68
+   ]
   },
   {
    "skillId": 1289,
@@ -6321,7 +7815,10 @@
    "castRange": 900,
    "baseCritRate": 0,
    "overHit": false,
-   "effectRange": 1400
+   "effectRange": 1400,
+   "magicLevel": [
+    70
+   ]
   },
   {
    "skillId": 1290,
@@ -6344,7 +7841,10 @@
    "castRange": 900,
    "baseCritRate": 0,
    "overHit": false,
-   "effectRange": 1400
+   "effectRange": 1400,
+   "magicLevel": [
+    70
+   ]
   },
   {
    "skillId": 1291,
@@ -6367,7 +7867,10 @@
    "castRange": 900,
    "baseCritRate": 0,
    "overHit": false,
-   "effectRange": 1400
+   "effectRange": 1400,
+   "magicLevel": [
+    70
+   ]
   },
   {
    "skillId": 1292,
@@ -6390,7 +7893,10 @@
    "castRange": 900,
    "baseCritRate": 0,
    "overHit": true,
-   "effectRange": 1400
+   "effectRange": 1400,
+   "magicLevel": [
+    72
+   ]
   },
   {
    "skillId": 1293,
@@ -6413,7 +7919,10 @@
    "castRange": 900,
    "baseCritRate": 0,
    "overHit": true,
-   "effectRange": 1400
+   "effectRange": 1400,
+   "magicLevel": [
+    72
+   ]
   },
   {
    "skillId": 1294,
@@ -6436,7 +7945,10 @@
    "castRange": 900,
    "baseCritRate": 0,
    "overHit": false,
-   "effectRange": 1400
+   "effectRange": 1400,
+   "magicLevel": [
+    72
+   ]
   },
   {
    "skillId": 1295,
@@ -6483,7 +7995,18 @@
    "castRange": 500,
    "baseCritRate": 0,
    "overHit": false,
-   "effectRange": 1000
+   "effectRange": 1000,
+   "magicLevel": [
+    58,
+    60,
+    62,
+    64,
+    66,
+    68,
+    70,
+    72,
+    74
+   ]
   },
   {
    "skillId": 1296,
@@ -6530,7 +8053,18 @@
    "castRange": 500,
    "baseCritRate": 0,
    "overHit": false,
-   "effectRange": 1000
+   "effectRange": 1000,
+   "magicLevel": [
+    58,
+    60,
+    62,
+    64,
+    66,
+    68,
+    70,
+    72,
+    74
+   ]
   },
   {
    "skillId": 1339,
@@ -6553,7 +8087,10 @@
    "castRange": 900,
    "baseCritRate": 0,
    "overHit": true,
-   "effectRange": 1400
+   "effectRange": 1400,
+   "magicLevel": [
+    77
+   ]
   },
   {
    "skillId": 1340,
@@ -6576,7 +8113,10 @@
    "castRange": 900,
    "baseCritRate": 0,
    "overHit": true,
-   "effectRange": 1400
+   "effectRange": 1400,
+   "magicLevel": [
+    77
+   ]
   },
   {
    "skillId": 1341,
@@ -6599,7 +8139,10 @@
    "castRange": 900,
    "baseCritRate": 0,
    "overHit": true,
-   "effectRange": 1400
+   "effectRange": 1400,
+   "magicLevel": [
+    77
+   ]
   },
   {
    "skillId": 1342,
@@ -6622,7 +8165,10 @@
    "castRange": 900,
    "baseCritRate": 0,
    "overHit": false,
-   "effectRange": 1400
+   "effectRange": 1400,
+   "magicLevel": [
+    76
+   ]
   },
   {
    "skillId": 1417,
@@ -6656,7 +8202,14 @@
    "reuseDelayMs": 8000,
    "castRange": -1,
    "baseCritRate": 0,
-   "overHit": false
+   "overHit": false,
+   "magicLevel": [
+    58,
+    62,
+    66,
+    70,
+    74
+   ]
   },
   {
    "skillId": 2234,
@@ -6679,7 +8232,10 @@
    "castRange": 900,
    "baseCritRate": 0,
    "overHit": false,
-   "effectRange": 1400
+   "effectRange": 1400,
+   "magicLevel": [
+    85
+   ]
   },
   {
    "skillId": 3049,
@@ -6705,7 +8261,11 @@
    "castRange": 1000,
    "baseCritRate": 0,
    "overHit": false,
-   "effectRange": 1500
+   "effectRange": 1500,
+   "magicLevel": [
+    64,
+    67
+   ]
   },
   {
    "skillId": 3165,
@@ -6755,7 +8315,19 @@
    "castRange": 900,
    "baseCritRate": 0,
    "overHit": false,
-   "effectRange": 1400
+   "effectRange": 1400,
+   "magicLevel": [
+    46,
+    49,
+    52,
+    55,
+    58,
+    61,
+    64,
+    67,
+    70,
+    75
+   ]
   },
   {
    "skillId": 3167,
@@ -6805,7 +8377,19 @@
    "castRange": 900,
    "baseCritRate": 0,
    "overHit": false,
-   "effectRange": 1400
+   "effectRange": 1400,
+   "magicLevel": [
+    46,
+    49,
+    52,
+    55,
+    58,
+    61,
+    64,
+    67,
+    70,
+    75
+   ]
   },
   {
    "skillId": 3168,
@@ -6855,7 +8439,19 @@
    "castRange": 900,
    "baseCritRate": 0,
    "overHit": false,
-   "effectRange": 1400
+   "effectRange": 1400,
+   "magicLevel": [
+    46,
+    49,
+    52,
+    55,
+    58,
+    61,
+    64,
+    67,
+    70,
+    75
+   ]
   },
   {
    "skillId": 3169,
@@ -6905,7 +8501,19 @@
    "castRange": 900,
    "baseCritRate": 0,
    "overHit": false,
-   "effectRange": 1400
+   "effectRange": 1400,
+   "magicLevel": [
+    46,
+    49,
+    52,
+    55,
+    58,
+    61,
+    64,
+    67,
+    70,
+    75
+   ]
   },
   {
    "skillId": 3170,
@@ -6955,7 +8563,19 @@
    "castRange": 900,
    "baseCritRate": 0,
    "overHit": false,
-   "effectRange": 1400
+   "effectRange": 1400,
+   "magicLevel": [
+    46,
+    49,
+    52,
+    55,
+    58,
+    61,
+    64,
+    67,
+    70,
+    75
+   ]
   },
   {
    "skillId": 3171,
@@ -7005,7 +8625,19 @@
    "castRange": 900,
    "baseCritRate": 0,
    "overHit": false,
-   "effectRange": 1400
+   "effectRange": 1400,
+   "magicLevel": [
+    46,
+    49,
+    52,
+    55,
+    58,
+    61,
+    64,
+    67,
+    70,
+    75
+   ]
   },
   {
    "skillId": 3172,
@@ -7055,7 +8687,19 @@
    "castRange": 900,
    "baseCritRate": 0,
    "overHit": false,
-   "effectRange": 1400
+   "effectRange": 1400,
+   "magicLevel": [
+    46,
+    49,
+    52,
+    55,
+    58,
+    61,
+    64,
+    67,
+    70,
+    75
+   ]
   },
   {
    "skillId": 3173,
@@ -7105,7 +8749,19 @@
    "castRange": 500,
    "baseCritRate": 0,
    "overHit": false,
-   "effectRange": 1000
+   "effectRange": 1000,
+   "magicLevel": [
+    46,
+    49,
+    52,
+    55,
+    58,
+    61,
+    64,
+    67,
+    70,
+    75
+   ]
   },
   {
    "skillId": 3174,
@@ -7155,7 +8811,19 @@
    "castRange": 500,
    "baseCritRate": 0,
    "overHit": false,
-   "effectRange": 1000
+   "effectRange": 1000,
+   "magicLevel": [
+    46,
+    49,
+    52,
+    55,
+    58,
+    61,
+    64,
+    67,
+    70,
+    75
+   ]
   },
   {
    "skillId": 3175,
@@ -7205,7 +8873,19 @@
    "castRange": 500,
    "baseCritRate": 0,
    "overHit": false,
-   "effectRange": 1000
+   "effectRange": 1000,
+   "magicLevel": [
+    46,
+    49,
+    52,
+    55,
+    58,
+    61,
+    64,
+    67,
+    70,
+    75
+   ]
   },
   {
    "skillId": 3176,
@@ -7255,7 +8935,19 @@
    "castRange": 500,
    "baseCritRate": 0,
    "overHit": false,
-   "effectRange": 1000
+   "effectRange": 1000,
+   "magicLevel": [
+    46,
+    49,
+    52,
+    55,
+    58,
+    61,
+    64,
+    67,
+    70,
+    75
+   ]
   },
   {
    "skillId": 3177,
@@ -7305,7 +8997,19 @@
    "castRange": 500,
    "baseCritRate": 0,
    "overHit": false,
-   "effectRange": 1000
+   "effectRange": 1000,
+   "magicLevel": [
+    46,
+    49,
+    52,
+    55,
+    58,
+    61,
+    64,
+    67,
+    70,
+    75
+   ]
   },
   {
    "skillId": 3178,
@@ -7355,7 +9059,19 @@
    "castRange": 500,
    "baseCritRate": 0,
    "overHit": false,
-   "effectRange": 1000
+   "effectRange": 1000,
+   "magicLevel": [
+    46,
+    49,
+    52,
+    55,
+    58,
+    61,
+    64,
+    67,
+    70,
+    75
+   ]
   },
   {
    "skillId": 3179,
@@ -7405,7 +9121,19 @@
    "castRange": 500,
    "baseCritRate": 0,
    "overHit": false,
-   "effectRange": 1000
+   "effectRange": 1000,
+   "magicLevel": [
+    46,
+    49,
+    52,
+    55,
+    58,
+    61,
+    64,
+    67,
+    70,
+    75
+   ]
   },
   {
    "skillId": 3180,
@@ -7454,7 +9182,19 @@
    "reuseDelayMs": 15000,
    "castRange": -1,
    "baseCritRate": 0,
-   "overHit": false
+   "overHit": false,
+   "magicLevel": [
+    46,
+    49,
+    52,
+    55,
+    58,
+    61,
+    64,
+    67,
+    70,
+    75
+   ]
   },
   {
    "skillId": 3181,
@@ -7503,7 +9243,19 @@
    "reuseDelayMs": 15000,
    "castRange": -1,
    "baseCritRate": 0,
-   "overHit": false
+   "overHit": false,
+   "magicLevel": [
+    46,
+    49,
+    52,
+    55,
+    58,
+    61,
+    64,
+    67,
+    70,
+    75
+   ]
   },
   {
    "skillId": 3182,
@@ -7552,7 +9304,19 @@
    "reuseDelayMs": 15000,
    "castRange": -1,
    "baseCritRate": 0,
-   "overHit": false
+   "overHit": false,
+   "magicLevel": [
+    46,
+    49,
+    52,
+    55,
+    58,
+    61,
+    64,
+    67,
+    70,
+    75
+   ]
   },
   {
    "skillId": 3183,
@@ -7601,7 +9365,19 @@
    "reuseDelayMs": 15000,
    "castRange": -1,
    "baseCritRate": 0,
-   "overHit": false
+   "overHit": false,
+   "magicLevel": [
+    46,
+    49,
+    52,
+    55,
+    58,
+    61,
+    64,
+    67,
+    70,
+    75
+   ]
   },
   {
    "skillId": 3184,
@@ -7650,7 +9426,19 @@
    "reuseDelayMs": 15000,
    "castRange": -1,
    "baseCritRate": 0,
-   "overHit": false
+   "overHit": false,
+   "magicLevel": [
+    46,
+    49,
+    52,
+    55,
+    58,
+    61,
+    64,
+    67,
+    70,
+    75
+   ]
   },
   {
    "skillId": 3185,
@@ -7699,7 +9487,19 @@
    "reuseDelayMs": 15000,
    "castRange": -1,
    "baseCritRate": 0,
-   "overHit": false
+   "overHit": false,
+   "magicLevel": [
+    46,
+    49,
+    52,
+    55,
+    58,
+    61,
+    64,
+    67,
+    70,
+    75
+   ]
   },
   {
    "skillId": 3186,
@@ -7748,7 +9548,19 @@
    "reuseDelayMs": 12000,
    "castRange": -1,
    "baseCritRate": 0,
-   "overHit": false
+   "overHit": false,
+   "magicLevel": [
+    46,
+    49,
+    52,
+    55,
+    58,
+    61,
+    64,
+    67,
+    70,
+    75
+   ]
   },
   {
    "skillId": 3630,
@@ -7770,7 +9582,10 @@
    "reuseDelayMs": 60000,
    "castRange": -1,
    "baseCritRate": 0,
-   "overHit": false
+   "overHit": false,
+   "magicLevel": [
+    78
+   ]
   },
   {
    "skillId": 3631,
@@ -7793,7 +9608,10 @@
    "castRange": 600,
    "baseCritRate": 0,
    "overHit": false,
-   "effectRange": 1100
+   "effectRange": 1100,
+   "magicLevel": [
+    78
+   ]
   },
   {
    "skillId": 4001,
@@ -7849,7 +9667,21 @@
    "castRange": 600,
    "baseCritRate": 0,
    "overHit": false,
-   "effectRange": 1100
+   "effectRange": 1100,
+   "magicLevel": [
+    10,
+    20,
+    30,
+    40,
+    50,
+    60,
+    70,
+    75,
+    80,
+    85,
+    90,
+    95
+   ]
   },
   {
    "skillId": 4017,
@@ -7871,7 +9703,10 @@
    "reuseDelayMs": 0,
    "castRange": -1,
    "baseCritRate": 0,
-   "overHit": false
+   "overHit": false,
+   "magicLevel": [
+    40
+   ]
   },
   {
    "skillId": 4018,
@@ -7894,7 +9729,10 @@
    "castRange": 500,
    "baseCritRate": 0,
    "overHit": false,
-   "effectRange": 1000
+   "effectRange": 1000,
+   "magicLevel": [
+    40
+   ]
   },
   {
    "skillId": 4026,
@@ -7917,7 +9755,10 @@
    "castRange": 900,
    "baseCritRate": 0,
    "overHit": false,
-   "effectRange": 1400
+   "effectRange": 1400,
+   "magicLevel": [
+    60
+   ]
   },
   {
    "skillId": 4032,
@@ -7973,7 +9814,21 @@
    "castRange": 40,
    "baseCritRate": 0,
    "overHit": false,
-   "effectRange": 200
+   "effectRange": 200,
+   "magicLevel": [
+    10,
+    20,
+    30,
+    40,
+    50,
+    60,
+    70,
+    75,
+    80,
+    85,
+    90,
+    95
+   ]
   },
   {
    "skillId": 4033,
@@ -8028,7 +9883,21 @@
    "reuseDelayMs": 8000,
    "castRange": -1,
    "baseCritRate": 0,
-   "overHit": false
+   "overHit": false,
+   "magicLevel": [
+    10,
+    20,
+    30,
+    40,
+    50,
+    60,
+    70,
+    75,
+    80,
+    85,
+    90,
+    95
+   ]
   },
   {
    "skillId": 4034,
@@ -8084,7 +9953,21 @@
    "castRange": 600,
    "baseCritRate": 0,
    "overHit": false,
-   "effectRange": 1100
+   "effectRange": 1100,
+   "magicLevel": [
+    10,
+    20,
+    30,
+    40,
+    50,
+    60,
+    70,
+    75,
+    80,
+    85,
+    90,
+    95
+   ]
   },
   {
    "skillId": 4040,
@@ -8140,7 +10023,21 @@
    "castRange": 700,
    "baseCritRate": 0,
    "overHit": false,
-   "effectRange": 1200
+   "effectRange": 1200,
+   "magicLevel": [
+    10,
+    20,
+    30,
+    40,
+    50,
+    60,
+    70,
+    75,
+    80,
+    85,
+    90,
+    95
+   ]
   },
   {
    "skillId": 4041,
@@ -8166,7 +10063,11 @@
    "castRange": 600,
    "baseCritRate": 0,
    "overHit": false,
-   "effectRange": 1100
+   "effectRange": 1100,
+   "magicLevel": [
+    45,
+    50
+   ]
   },
   {
    "skillId": 4042,
@@ -8189,7 +10090,10 @@
    "castRange": 600,
    "baseCritRate": 0,
    "overHit": false,
-   "effectRange": 1100
+   "effectRange": 1100,
+   "magicLevel": [
+    45
+   ]
   },
   {
    "skillId": 4043,
@@ -8212,7 +10116,10 @@
    "castRange": 400,
    "baseCritRate": 0,
    "overHit": false,
-   "effectRange": 900
+   "effectRange": 900,
+   "magicLevel": [
+    45
+   ]
   },
   {
    "skillId": 4049,
@@ -8279,7 +10186,25 @@
    "reuseDelayMs": 0,
    "castRange": -1,
    "baseCritRate": 0,
-   "overHit": false
+   "overHit": false,
+   "magicLevel": [
+    40,
+    46,
+    52,
+    58,
+    62,
+    66,
+    70,
+    74,
+    76,
+    78,
+    80,
+    81,
+    82,
+    83,
+    84,
+    85
+   ]
   },
   {
    "skillId": 4063,
@@ -8302,7 +10227,10 @@
    "castRange": 50,
    "baseCritRate": 0,
    "overHit": false,
-   "effectRange": 200
+   "effectRange": 200,
+   "magicLevel": [
+    50
+   ]
   },
   {
    "skillId": 4066,
@@ -8358,7 +10286,21 @@
    "castRange": 600,
    "baseCritRate": 0,
    "overHit": false,
-   "effectRange": 1100
+   "effectRange": 1100,
+   "magicLevel": [
+    10,
+    20,
+    30,
+    40,
+    50,
+    60,
+    70,
+    75,
+    80,
+    85,
+    90,
+    95
+   ]
   },
   {
    "skillId": 4067,
@@ -8414,7 +10356,21 @@
    "castRange": 40,
    "baseCritRate": 0,
    "overHit": false,
-   "effectRange": 200
+   "effectRange": 200,
+   "magicLevel": [
+    10,
+    20,
+    30,
+    40,
+    50,
+    60,
+    70,
+    75,
+    80,
+    85,
+    90,
+    95
+   ]
   },
   {
    "skillId": 4068,
@@ -8470,7 +10426,21 @@
    "castRange": 600,
    "baseCritRate": 0,
    "overHit": false,
-   "effectRange": 1100
+   "effectRange": 1100,
+   "magicLevel": [
+    10,
+    20,
+    30,
+    40,
+    50,
+    60,
+    70,
+    75,
+    80,
+    85,
+    90,
+    95
+   ]
   },
   {
    "skillId": 4069,
@@ -8526,7 +10496,21 @@
    "castRange": 600,
    "baseCritRate": 0,
    "overHit": false,
-   "effectRange": 1100
+   "effectRange": 1100,
+   "magicLevel": [
+    10,
+    20,
+    30,
+    40,
+    50,
+    60,
+    70,
+    75,
+    80,
+    85,
+    90,
+    95
+   ]
   },
   {
    "skillId": 4072,
@@ -8581,7 +10565,21 @@
    "reuseDelayMs": 6000,
    "castRange": -1,
    "baseCritRate": 0,
-   "overHit": false
+   "overHit": false,
+   "magicLevel": [
+    10,
+    20,
+    30,
+    40,
+    50,
+    60,
+    70,
+    75,
+    80,
+    85,
+    90,
+    95
+   ]
   },
   {
    "skillId": 4073,
@@ -8637,7 +10635,21 @@
    "castRange": 40,
    "baseCritRate": 0,
    "overHit": false,
-   "effectRange": 200
+   "effectRange": 200,
+   "magicLevel": [
+    10,
+    20,
+    30,
+    40,
+    50,
+    60,
+    70,
+    75,
+    80,
+    85,
+    90,
+    95
+   ]
   },
   {
    "skillId": 4077,
@@ -8693,7 +10705,21 @@
    "castRange": 150,
    "baseCritRate": 0,
    "overHit": false,
-   "effectRange": 650
+   "effectRange": 650,
+   "magicLevel": [
+    10,
+    20,
+    30,
+    40,
+    50,
+    60,
+    70,
+    75,
+    80,
+    85,
+    90,
+    95
+   ]
   },
   {
    "skillId": 4078,
@@ -8749,7 +10775,21 @@
    "castRange": 500,
    "baseCritRate": 0,
    "overHit": false,
-   "effectRange": 900
+   "effectRange": 900,
+   "magicLevel": [
+    10,
+    20,
+    30,
+    40,
+    50,
+    60,
+    70,
+    75,
+    80,
+    85,
+    90,
+    95
+   ]
   },
   {
    "skillId": 4079,
@@ -8772,7 +10812,10 @@
    "castRange": 600,
    "baseCritRate": 0,
    "overHit": false,
-   "effectRange": 1100
+   "effectRange": 1100,
+   "magicLevel": [
+    49
+   ]
   },
   {
    "skillId": 4083,
@@ -8795,7 +10838,10 @@
    "castRange": 600,
    "baseCritRate": 0,
    "overHit": false,
-   "effectRange": 1100
+   "effectRange": 1100,
+   "magicLevel": [
+    70
+   ]
   },
   {
    "skillId": 4087,
@@ -8851,7 +10897,21 @@
    "castRange": 600,
    "baseCritRate": 0,
    "overHit": false,
-   "effectRange": 1100
+   "effectRange": 1100,
+   "magicLevel": [
+    10,
+    20,
+    30,
+    40,
+    50,
+    60,
+    70,
+    75,
+    80,
+    85,
+    90,
+    95
+   ]
   },
   {
    "skillId": 4100,
@@ -8907,7 +10967,21 @@
    "castRange": 600,
    "baseCritRate": 0,
    "overHit": false,
-   "effectRange": 1100
+   "effectRange": 1100,
+   "magicLevel": [
+    10,
+    20,
+    30,
+    40,
+    50,
+    60,
+    70,
+    75,
+    80,
+    85,
+    90,
+    95
+   ]
   },
   {
    "skillId": 4101,
@@ -8962,7 +11036,21 @@
    "reuseDelayMs": 6000,
    "castRange": -1,
    "baseCritRate": 0,
-   "overHit": false
+   "overHit": false,
+   "magicLevel": [
+    10,
+    20,
+    30,
+    40,
+    50,
+    60,
+    70,
+    75,
+    80,
+    85,
+    90,
+    95
+   ]
   },
   {
    "skillId": 4105,
@@ -9018,7 +11106,21 @@
    "castRange": 600,
    "baseCritRate": 0,
    "overHit": false,
-   "effectRange": 1100
+   "effectRange": 1100,
+   "magicLevel": [
+    10,
+    20,
+    30,
+    40,
+    50,
+    60,
+    70,
+    75,
+    80,
+    85,
+    90,
+    95
+   ]
   },
   {
    "skillId": 4106,
@@ -9040,7 +11142,10 @@
    "reuseDelayMs": 0,
    "castRange": -1,
    "baseCritRate": 0,
-   "overHit": false
+   "overHit": false,
+   "magicLevel": [
+    85
+   ]
   },
   {
    "skillId": 4107,
@@ -9062,7 +11167,10 @@
    "reuseDelayMs": 0,
    "castRange": -1,
    "baseCritRate": 0,
-   "overHit": false
+   "overHit": false,
+   "magicLevel": [
+    85
+   ]
   },
   {
    "skillId": 4110,
@@ -9087,7 +11195,11 @@
    "reuseDelayMs": 0,
    "castRange": 500,
    "baseCritRate": 0,
-   "overHit": false
+   "overHit": false,
+   "magicLevel": [
+    85,
+    85
+   ]
   },
   {
    "skillId": 4111,
@@ -9110,7 +11222,10 @@
    "castRange": 1000,
    "baseCritRate": 0,
    "overHit": false,
-   "effectRange": 1500
+   "effectRange": 1500,
+   "magicLevel": [
+    85
+   ]
   },
   {
    "skillId": 4112,
@@ -9133,7 +11248,10 @@
    "castRange": 50,
    "baseCritRate": 0,
    "overHit": false,
-   "effectRange": 400
+   "effectRange": 400,
+   "magicLevel": [
+    85
+   ]
   },
   {
    "skillId": 4113,
@@ -9156,7 +11274,10 @@
    "castRange": 50,
    "baseCritRate": 0,
    "overHit": false,
-   "effectRange": 400
+   "effectRange": 400,
+   "magicLevel": [
+    85
+   ]
   },
   {
    "skillId": 4114,
@@ -9179,7 +11300,10 @@
    "castRange": 1100,
    "baseCritRate": 0,
    "overHit": false,
-   "effectRange": 1600
+   "effectRange": 1600,
+   "magicLevel": [
+    65
+   ]
   },
   {
    "skillId": 4120,
@@ -9238,7 +11362,21 @@
    "usingKinds": [
     "BOW"
    ],
-   "effectRange": 1200
+   "effectRange": 1200,
+   "magicLevel": [
+    10,
+    20,
+    30,
+    40,
+    50,
+    60,
+    70,
+    75,
+    80,
+    85,
+    90,
+    95
+   ]
   },
   {
    "skillId": 4124,
@@ -9294,7 +11432,21 @@
    "castRange": 700,
    "baseCritRate": 0,
    "overHit": false,
-   "effectRange": 1200
+   "effectRange": 1200,
+   "magicLevel": [
+    10,
+    20,
+    30,
+    40,
+    50,
+    60,
+    70,
+    75,
+    80,
+    85,
+    90,
+    95
+   ]
   },
   {
    "skillId": 4127,
@@ -9317,7 +11469,10 @@
    "castRange": 100,
    "baseCritRate": 0,
    "overHit": false,
-   "effectRange": 400
+   "effectRange": 400,
+   "magicLevel": [
+    75
+   ]
   },
   {
    "skillId": 4128,
@@ -9339,7 +11494,10 @@
    "reuseDelayMs": 0,
    "castRange": -1,
    "baseCritRate": 0,
-   "overHit": false
+   "overHit": false,
+   "magicLevel": [
+    75
+   ]
   },
   {
    "skillId": 4129,
@@ -9361,7 +11519,10 @@
    "reuseDelayMs": 0,
    "castRange": -1,
    "baseCritRate": 0,
-   "overHit": false
+   "overHit": false,
+   "magicLevel": [
+    75
+   ]
   },
   {
    "skillId": 4130,
@@ -9384,7 +11545,10 @@
    "castRange": 900,
    "baseCritRate": 0,
    "overHit": false,
-   "effectRange": 1000
+   "effectRange": 1000,
+   "magicLevel": [
+    75
+   ]
   },
   {
    "skillId": 4132,
@@ -9406,7 +11570,10 @@
    "reuseDelayMs": 0,
    "castRange": -1,
    "baseCritRate": 0,
-   "overHit": false
+   "overHit": false,
+   "magicLevel": [
+    75
+   ]
   },
   {
    "skillId": 4136,
@@ -9429,7 +11596,10 @@
    "castRange": 1000,
    "baseCritRate": 0,
    "overHit": false,
-   "effectRange": 2000
+   "effectRange": 2000,
+   "magicLevel": [
+    75
+   ]
   },
   {
    "skillId": 4137,
@@ -9485,7 +11655,21 @@
    "castRange": 500,
    "baseCritRate": 0,
    "overHit": false,
-   "effectRange": 1000
+   "effectRange": 1000,
+   "magicLevel": [
+    10,
+    20,
+    30,
+    40,
+    50,
+    60,
+    70,
+    75,
+    80,
+    85,
+    90,
+    95
+   ]
   },
   {
    "skillId": 4138,
@@ -9541,7 +11725,21 @@
    "castRange": 900,
    "baseCritRate": 0,
    "overHit": false,
-   "effectRange": 1400
+   "effectRange": 1400,
+   "magicLevel": [
+    10,
+    20,
+    30,
+    40,
+    50,
+    60,
+    70,
+    75,
+    80,
+    85,
+    90,
+    95
+   ]
   },
   {
    "skillId": 4139,
@@ -9596,7 +11794,21 @@
    "reuseDelayMs": 8000,
    "castRange": -1,
    "baseCritRate": 0,
-   "overHit": false
+   "overHit": false,
+   "magicLevel": [
+    10,
+    20,
+    30,
+    40,
+    50,
+    60,
+    70,
+    75,
+    80,
+    85,
+    90,
+    95
+   ]
   },
   {
    "skillId": 4141,
@@ -9652,7 +11864,21 @@
    "castRange": 500,
    "baseCritRate": 0,
    "overHit": false,
-   "effectRange": 1000
+   "effectRange": 1000,
+   "magicLevel": [
+    10,
+    20,
+    30,
+    40,
+    50,
+    60,
+    70,
+    75,
+    80,
+    85,
+    90,
+    95
+   ]
   },
   {
    "skillId": 4142,
@@ -9708,7 +11934,21 @@
    "castRange": 500,
    "baseCritRate": 0,
    "overHit": false,
-   "effectRange": 1000
+   "effectRange": 1000,
+   "magicLevel": [
+    10,
+    20,
+    30,
+    40,
+    50,
+    60,
+    70,
+    75,
+    80,
+    85,
+    90,
+    95
+   ]
   },
   {
    "skillId": 4143,
@@ -9757,7 +11997,19 @@
    "reuseDelayMs": 0,
    "castRange": -1,
    "baseCritRate": 0,
-   "overHit": false
+   "overHit": false,
+   "magicLevel": [
+    5,
+    15,
+    25,
+    35,
+    45,
+    55,
+    65,
+    75,
+    85,
+    95
+   ]
   },
   {
    "skillId": 4144,
@@ -10017,7 +12269,89 @@
    "castRange": 40,
    "baseCritRate": 0,
    "overHit": false,
-   "effectRange": 200
+   "effectRange": 200,
+   "magicLevel": [
+    1,
+    2,
+    3,
+    4,
+    5,
+    6,
+    7,
+    8,
+    9,
+    10,
+    11,
+    12,
+    13,
+    14,
+    15,
+    16,
+    17,
+    18,
+    19,
+    20,
+    21,
+    22,
+    23,
+    24,
+    25,
+    26,
+    27,
+    28,
+    29,
+    30,
+    31,
+    32,
+    33,
+    34,
+    35,
+    36,
+    37,
+    38,
+    39,
+    40,
+    41,
+    42,
+    43,
+    44,
+    45,
+    46,
+    47,
+    48,
+    49,
+    50,
+    51,
+    52,
+    53,
+    54,
+    55,
+    56,
+    57,
+    58,
+    59,
+    60,
+    61,
+    62,
+    63,
+    64,
+    65,
+    66,
+    67,
+    68,
+    69,
+    70,
+    71,
+    72,
+    73,
+    74,
+    75,
+    76,
+    77,
+    78,
+    79,
+    80
+   ]
   },
   {
    "skillId": 4151,
@@ -10073,7 +12407,21 @@
    "castRange": 600,
    "baseCritRate": 0,
    "overHit": false,
-   "effectRange": 1100
+   "effectRange": 1100,
+   "magicLevel": [
+    10,
+    20,
+    30,
+    40,
+    50,
+    60,
+    70,
+    75,
+    80,
+    85,
+    90,
+    95
+   ]
   },
   {
    "skillId": 4153,
@@ -10129,7 +12477,21 @@
    "castRange": 600,
    "baseCritRate": 0,
    "overHit": false,
-   "effectRange": 1100
+   "effectRange": 1100,
+   "magicLevel": [
+    10,
+    20,
+    30,
+    40,
+    50,
+    60,
+    70,
+    75,
+    80,
+    85,
+    90,
+    95
+   ]
   },
   {
    "skillId": 4155,
@@ -10185,7 +12547,21 @@
    "castRange": 600,
    "baseCritRate": 0,
    "overHit": false,
-   "effectRange": 1100
+   "effectRange": 1100,
+   "magicLevel": [
+    10,
+    20,
+    30,
+    40,
+    50,
+    60,
+    70,
+    75,
+    80,
+    85,
+    90,
+    95
+   ]
   },
   {
    "skillId": 4156,
@@ -10241,7 +12617,21 @@
    "castRange": 600,
    "baseCritRate": 0,
    "overHit": false,
-   "effectRange": 1100
+   "effectRange": 1100,
+   "magicLevel": [
+    10,
+    20,
+    30,
+    40,
+    50,
+    60,
+    70,
+    75,
+    80,
+    85,
+    90,
+    95
+   ]
   },
   {
    "skillId": 4157,
@@ -10297,7 +12687,21 @@
    "castRange": 600,
    "baseCritRate": 0,
    "overHit": false,
-   "effectRange": 1100
+   "effectRange": 1100,
+   "magicLevel": [
+    10,
+    20,
+    30,
+    40,
+    50,
+    60,
+    70,
+    75,
+    80,
+    85,
+    90,
+    95
+   ]
   },
   {
    "skillId": 4158,
@@ -10353,7 +12757,21 @@
    "castRange": 600,
    "baseCritRate": 0,
    "overHit": false,
-   "effectRange": 1100
+   "effectRange": 1100,
+   "magicLevel": [
+    10,
+    20,
+    30,
+    40,
+    50,
+    60,
+    70,
+    75,
+    80,
+    85,
+    90,
+    95
+   ]
   },
   {
    "skillId": 4159,
@@ -10409,7 +12827,21 @@
    "castRange": 600,
    "baseCritRate": 0,
    "overHit": false,
-   "effectRange": 1100
+   "effectRange": 1100,
+   "magicLevel": [
+    10,
+    20,
+    30,
+    40,
+    50,
+    60,
+    70,
+    75,
+    80,
+    85,
+    90,
+    95
+   ]
   },
   {
    "skillId": 4160,
@@ -10465,7 +12897,21 @@
    "castRange": 150,
    "baseCritRate": 0,
    "overHit": false,
-   "effectRange": 650
+   "effectRange": 650,
+   "magicLevel": [
+    10,
+    20,
+    30,
+    40,
+    50,
+    60,
+    70,
+    75,
+    80,
+    85,
+    90,
+    95
+   ]
   },
   {
    "skillId": 4168,
@@ -10521,7 +12967,21 @@
    "castRange": 40,
    "baseCritRate": 0,
    "overHit": false,
-   "effectRange": 200
+   "effectRange": 200,
+   "magicLevel": [
+    14,
+    24,
+    34,
+    44,
+    54,
+    64,
+    74,
+    79,
+    84,
+    89,
+    94,
+    99
+   ]
   },
   {
    "skillId": 4169,
@@ -10577,7 +13037,21 @@
    "castRange": 40,
    "baseCritRate": 0,
    "overHit": false,
-   "effectRange": 200
+   "effectRange": 200,
+   "magicLevel": [
+    14,
+    24,
+    34,
+    44,
+    54,
+    64,
+    74,
+    79,
+    84,
+    89,
+    94,
+    99
+   ]
   },
   {
    "skillId": 4170,
@@ -10633,7 +13107,21 @@
    "castRange": 40,
    "baseCritRate": 0,
    "overHit": false,
-   "effectRange": 200
+   "effectRange": 200,
+   "magicLevel": [
+    14,
+    24,
+    34,
+    44,
+    54,
+    64,
+    74,
+    79,
+    84,
+    89,
+    94,
+    99
+   ]
   },
   {
    "skillId": 4171,
@@ -10688,7 +13176,21 @@
    "reuseDelayMs": 0,
    "castRange": -1,
    "baseCritRate": 0,
-   "overHit": false
+   "overHit": false,
+   "magicLevel": [
+    14,
+    24,
+    34,
+    44,
+    54,
+    64,
+    74,
+    79,
+    84,
+    89,
+    94,
+    99
+   ]
   },
   {
    "skillId": 4172,
@@ -10743,7 +13245,21 @@
    "reuseDelayMs": 0,
    "castRange": -1,
    "baseCritRate": 0,
-   "overHit": false
+   "overHit": false,
+   "magicLevel": [
+    14,
+    24,
+    34,
+    44,
+    54,
+    64,
+    74,
+    79,
+    84,
+    89,
+    94,
+    99
+   ]
   },
   {
    "skillId": 4178,
@@ -10799,7 +13315,21 @@
    "castRange": 700,
    "baseCritRate": 0,
    "overHit": false,
-   "effectRange": 1200
+   "effectRange": 1200,
+   "magicLevel": [
+    14,
+    24,
+    34,
+    44,
+    54,
+    64,
+    74,
+    79,
+    84,
+    89,
+    94,
+    99
+   ]
   },
   {
    "skillId": 4179,
@@ -10855,7 +13385,21 @@
    "castRange": 40,
    "baseCritRate": 0,
    "overHit": false,
-   "effectRange": 200
+   "effectRange": 200,
+   "magicLevel": [
+    14,
+    24,
+    34,
+    44,
+    54,
+    64,
+    74,
+    79,
+    84,
+    89,
+    94,
+    99
+   ]
   },
   {
    "skillId": 4180,
@@ -10911,7 +13455,21 @@
    "castRange": 40,
    "baseCritRate": 0,
    "overHit": false,
-   "effectRange": 200
+   "effectRange": 200,
+   "magicLevel": [
+    14,
+    24,
+    34,
+    44,
+    54,
+    64,
+    74,
+    79,
+    84,
+    89,
+    94,
+    99
+   ]
   },
   {
    "skillId": 4181,
@@ -10967,7 +13525,21 @@
    "castRange": 40,
    "baseCritRate": 0,
    "overHit": false,
-   "effectRange": 200
+   "effectRange": 200,
+   "magicLevel": [
+    14,
+    24,
+    34,
+    44,
+    54,
+    64,
+    74,
+    79,
+    84,
+    89,
+    94,
+    99
+   ]
   },
   {
    "skillId": 4191,
@@ -11023,7 +13595,21 @@
    "castRange": 750,
    "baseCritRate": 0,
    "overHit": false,
-   "effectRange": 1250
+   "effectRange": 1250,
+   "magicLevel": [
+    14,
+    24,
+    34,
+    44,
+    54,
+    64,
+    74,
+    79,
+    84,
+    89,
+    94,
+    99
+   ]
   },
   {
    "skillId": 4194,
@@ -11079,7 +13665,21 @@
    "castRange": 150,
    "baseCritRate": 0,
    "overHit": false,
-   "effectRange": 650
+   "effectRange": 650,
+   "magicLevel": [
+    14,
+    24,
+    34,
+    44,
+    54,
+    64,
+    74,
+    79,
+    84,
+    89,
+    94,
+    99
+   ]
   },
   {
    "skillId": 4195,
@@ -11135,7 +13735,21 @@
    "castRange": 750,
    "baseCritRate": 0,
    "overHit": false,
-   "effectRange": 1250
+   "effectRange": 1250,
+   "magicLevel": [
+    14,
+    24,
+    34,
+    44,
+    54,
+    64,
+    74,
+    79,
+    84,
+    89,
+    94,
+    99
+   ]
   },
   {
    "skillId": 4196,
@@ -11191,7 +13805,21 @@
    "castRange": 750,
    "baseCritRate": 0,
    "overHit": false,
-   "effectRange": 1250
+   "effectRange": 1250,
+   "magicLevel": [
+    14,
+    24,
+    34,
+    44,
+    54,
+    64,
+    74,
+    79,
+    84,
+    89,
+    94,
+    99
+   ]
   },
   {
    "skillId": 4207,
@@ -11247,7 +13875,21 @@
    "castRange": 900,
    "baseCritRate": 0,
    "overHit": false,
-   "effectRange": 1400
+   "effectRange": 1400,
+   "magicLevel": [
+    14,
+    24,
+    34,
+    44,
+    54,
+    64,
+    74,
+    79,
+    84,
+    89,
+    94,
+    99
+   ]
   },
   {
    "skillId": 4208,
@@ -11303,7 +13945,21 @@
    "castRange": 900,
    "baseCritRate": 0,
    "overHit": false,
-   "effectRange": 1400
+   "effectRange": 1400,
+   "magicLevel": [
+    14,
+    24,
+    34,
+    44,
+    54,
+    64,
+    74,
+    79,
+    84,
+    89,
+    94,
+    99
+   ]
   },
   {
    "skillId": 4220,
@@ -11326,7 +13982,10 @@
    "castRange": 50,
    "baseCritRate": 0,
    "overHit": false,
-   "effectRange": 200
+   "effectRange": 200,
+   "magicLevel": [
+    60
+   ]
   },
   {
    "skillId": 4221,
@@ -11348,7 +14007,10 @@
    "reuseDelayMs": 0,
    "castRange": -1,
    "baseCritRate": 0,
-   "overHit": false
+   "overHit": false,
+   "magicLevel": [
+    60
+   ]
   },
   {
    "skillId": 4228,
@@ -11404,7 +14066,21 @@
    "castRange": 700,
    "baseCritRate": 0,
    "overHit": false,
-   "effectRange": 1200
+   "effectRange": 1200,
+   "magicLevel": [
+    10,
+    20,
+    30,
+    40,
+    50,
+    60,
+    70,
+    75,
+    80,
+    85,
+    90,
+    95
+   ]
   },
   {
    "skillId": 4229,
@@ -11460,7 +14136,21 @@
    "castRange": 700,
    "baseCritRate": 0,
    "overHit": false,
-   "effectRange": 1200
+   "effectRange": 1200,
+   "magicLevel": [
+    10,
+    20,
+    30,
+    40,
+    50,
+    60,
+    70,
+    75,
+    80,
+    85,
+    90,
+    95
+   ]
   },
   {
    "skillId": 4230,
@@ -11483,7 +14173,10 @@
    "castRange": 2500,
    "baseCritRate": 0,
    "overHit": false,
-   "effectRange": 3000
+   "effectRange": 3000,
+   "magicLevel": [
+    70
+   ]
   },
   {
    "skillId": 4231,
@@ -11539,7 +14232,21 @@
    "castRange": 600,
    "baseCritRate": 0,
    "overHit": false,
-   "effectRange": 1100
+   "effectRange": 1100,
+   "magicLevel": [
+    10,
+    20,
+    30,
+    40,
+    50,
+    60,
+    70,
+    75,
+    80,
+    85,
+    90,
+    95
+   ]
   },
   {
    "skillId": 4232,
@@ -11595,7 +14302,21 @@
    "castRange": 40,
    "baseCritRate": 0,
    "overHit": false,
-   "effectRange": 200
+   "effectRange": 200,
+   "magicLevel": [
+    10,
+    20,
+    30,
+    40,
+    50,
+    60,
+    70,
+    75,
+    80,
+    85,
+    90,
+    95
+   ]
   },
   {
    "skillId": 4234,
@@ -11651,7 +14372,21 @@
    "castRange": 900,
    "baseCritRate": 0,
    "overHit": false,
-   "effectRange": 1400
+   "effectRange": 1400,
+   "magicLevel": [
+    14,
+    24,
+    34,
+    44,
+    54,
+    64,
+    74,
+    79,
+    84,
+    89,
+    94,
+    99
+   ]
   },
   {
    "skillId": 4236,
@@ -11674,7 +14409,10 @@
    "castRange": 900,
    "baseCritRate": 0,
    "overHit": false,
-   "effectRange": 1400
+   "effectRange": 1400,
+   "magicLevel": [
+    70
+   ]
   },
   {
    "skillId": 4237,
@@ -11697,7 +14435,10 @@
    "castRange": 40,
    "baseCritRate": 0,
    "overHit": false,
-   "effectRange": 400
+   "effectRange": 400,
+   "magicLevel": [
+    70
+   ]
   },
   {
    "skillId": 4244,
@@ -11753,7 +14494,21 @@
    "castRange": 40,
    "baseCritRate": 0,
    "overHit": false,
-   "effectRange": 200
+   "effectRange": 200,
+   "magicLevel": [
+    10,
+    20,
+    30,
+    40,
+    50,
+    60,
+    70,
+    75,
+    80,
+    85,
+    90,
+    95
+   ]
   },
   {
    "skillId": 4247,
@@ -11809,7 +14564,21 @@
    "castRange": 1000,
    "baseCritRate": 0,
    "overHit": false,
-   "effectRange": 1500
+   "effectRange": 1500,
+   "magicLevel": [
+    10,
+    20,
+    30,
+    40,
+    50,
+    60,
+    70,
+    75,
+    80,
+    85,
+    90,
+    95
+   ]
   },
   {
    "skillId": 4249,
@@ -11865,7 +14634,21 @@
    "castRange": 1000,
    "baseCritRate": 0,
    "overHit": false,
-   "effectRange": 1500
+   "effectRange": 1500,
+   "magicLevel": [
+    10,
+    20,
+    30,
+    40,
+    50,
+    60,
+    70,
+    75,
+    80,
+    85,
+    90,
+    95
+   ]
   },
   {
    "skillId": 4250,
@@ -11921,7 +14704,21 @@
    "castRange": 1000,
    "baseCritRate": 0,
    "overHit": false,
-   "effectRange": 1500
+   "effectRange": 1500,
+   "magicLevel": [
+    10,
+    20,
+    30,
+    40,
+    50,
+    60,
+    70,
+    75,
+    80,
+    85,
+    90,
+    95
+   ]
   },
   {
    "skillId": 4251,
@@ -11977,7 +14774,21 @@
    "castRange": 1000,
    "baseCritRate": 0,
    "overHit": false,
-   "effectRange": 1500
+   "effectRange": 1500,
+   "magicLevel": [
+    10,
+    20,
+    30,
+    40,
+    50,
+    60,
+    70,
+    75,
+    80,
+    85,
+    90,
+    95
+   ]
   },
   {
    "skillId": 4252,
@@ -12033,7 +14844,21 @@
    "castRange": 1000,
    "baseCritRate": 0,
    "overHit": false,
-   "effectRange": 1500
+   "effectRange": 1500,
+   "magicLevel": [
+    10,
+    20,
+    30,
+    40,
+    50,
+    60,
+    70,
+    75,
+    80,
+    85,
+    90,
+    95
+   ]
   },
   {
    "skillId": 4253,
@@ -12089,7 +14914,21 @@
    "castRange": 1000,
    "baseCritRate": 0,
    "overHit": false,
-   "effectRange": 1500
+   "effectRange": 1500,
+   "magicLevel": [
+    10,
+    20,
+    30,
+    40,
+    50,
+    60,
+    70,
+    75,
+    80,
+    85,
+    90,
+    95
+   ]
   },
   {
    "skillId": 4254,
@@ -12145,7 +14984,21 @@
    "castRange": 1000,
    "baseCritRate": 0,
    "overHit": false,
-   "effectRange": 1500
+   "effectRange": 1500,
+   "magicLevel": [
+    10,
+    20,
+    30,
+    40,
+    50,
+    60,
+    70,
+    75,
+    80,
+    85,
+    90,
+    95
+   ]
   },
   {
    "skillId": 4255,
@@ -12201,7 +15054,21 @@
    "castRange": 1000,
    "baseCritRate": 0,
    "overHit": false,
-   "effectRange": 1500
+   "effectRange": 1500,
+   "magicLevel": [
+    10,
+    20,
+    30,
+    40,
+    50,
+    60,
+    70,
+    75,
+    80,
+    85,
+    90,
+    95
+   ]
   },
   {
    "skillId": 4257,
@@ -12257,7 +15124,21 @@
    "castRange": 500,
    "baseCritRate": 0,
    "overHit": false,
-   "effectRange": 1000
+   "effectRange": 1000,
+   "magicLevel": [
+    10,
+    20,
+    30,
+    40,
+    50,
+    60,
+    70,
+    75,
+    80,
+    85,
+    90,
+    95
+   ]
   },
   {
    "skillId": 4261,
@@ -12313,7 +15194,21 @@
    "castRange": 600,
    "baseCritRate": 0,
    "overHit": false,
-   "effectRange": 1100
+   "effectRange": 1100,
+   "magicLevel": [
+    10,
+    20,
+    30,
+    40,
+    50,
+    60,
+    70,
+    75,
+    80,
+    85,
+    90,
+    95
+   ]
   },
   {
    "skillId": 4289,
@@ -12336,7 +15231,10 @@
    "castRange": 700,
    "baseCritRate": 0,
    "overHit": false,
-   "effectRange": 1200
+   "effectRange": 1200,
+   "magicLevel": [
+    60
+   ]
   },
   {
    "skillId": 4314,
@@ -12392,7 +15290,21 @@
    "castRange": 700,
    "baseCritRate": 0,
    "overHit": false,
-   "effectRange": 1200
+   "effectRange": 1200,
+   "magicLevel": [
+    14,
+    24,
+    34,
+    44,
+    54,
+    64,
+    74,
+    79,
+    84,
+    89,
+    94,
+    99
+   ]
   },
   {
    "skillId": 4377,
@@ -12448,7 +15360,21 @@
    "castRange": 40,
    "baseCritRate": 0,
    "overHit": false,
-   "effectRange": 200
+   "effectRange": 200,
+   "magicLevel": [
+    10,
+    20,
+    30,
+    40,
+    50,
+    60,
+    70,
+    75,
+    80,
+    85,
+    90,
+    95
+   ]
   },
   {
    "skillId": 4382,
@@ -12503,7 +15429,21 @@
    "reuseDelayMs": 0,
    "castRange": 40,
    "baseCritRate": 0,
-   "overHit": false
+   "overHit": false,
+   "magicLevel": [
+    10,
+    20,
+    30,
+    40,
+    50,
+    60,
+    70,
+    75,
+    80,
+    85,
+    90,
+    95
+   ]
   },
   {
    "skillId": 4472,
@@ -12559,7 +15499,21 @@
    "castRange": 40,
    "baseCritRate": 0,
    "overHit": false,
-   "effectRange": 200
+   "effectRange": 200,
+   "magicLevel": [
+    10,
+    20,
+    30,
+    40,
+    50,
+    60,
+    70,
+    75,
+    80,
+    85,
+    90,
+    95
+   ]
   },
   {
    "skillId": 4473,
@@ -12615,7 +15569,21 @@
    "castRange": 700,
    "baseCritRate": 0,
    "overHit": false,
-   "effectRange": 1200
+   "effectRange": 1200,
+   "magicLevel": [
+    10,
+    20,
+    30,
+    40,
+    50,
+    60,
+    70,
+    75,
+    80,
+    85,
+    90,
+    95
+   ]
   },
   {
    "skillId": 4477,
@@ -12671,7 +15639,21 @@
    "castRange": 40,
    "baseCritRate": 0,
    "overHit": false,
-   "effectRange": 400
+   "effectRange": 400,
+   "magicLevel": [
+    10,
+    20,
+    30,
+    40,
+    50,
+    60,
+    70,
+    75,
+    80,
+    85,
+    90,
+    95
+   ]
   },
   {
    "skillId": 4478,
@@ -12694,7 +15676,10 @@
    "castRange": 700,
    "baseCritRate": 0,
    "overHit": false,
-   "effectRange": 1200
+   "effectRange": 1200,
+   "magicLevel": [
+    64
+   ]
   },
   {
    "skillId": 4490,
@@ -12750,7 +15735,21 @@
    "castRange": 40,
    "baseCritRate": 0,
    "overHit": false,
-   "effectRange": 400
+   "effectRange": 400,
+   "magicLevel": [
+    10,
+    20,
+    30,
+    40,
+    50,
+    60,
+    70,
+    75,
+    80,
+    85,
+    90,
+    95
+   ]
   },
   {
    "skillId": 4491,
@@ -12806,7 +15805,21 @@
    "castRange": 500,
    "baseCritRate": 0,
    "overHit": false,
-   "effectRange": 1000
+   "effectRange": 1000,
+   "magicLevel": [
+    -1,
+    -1,
+    -1,
+    -1,
+    -1,
+    -1,
+    -1,
+    -1,
+    -1,
+    -1,
+    -1,
+    -1
+   ]
   },
   {
    "skillId": 4492,
@@ -12862,7 +15875,21 @@
    "castRange": 40,
    "baseCritRate": 0,
    "overHit": false,
-   "effectRange": 200
+   "effectRange": 200,
+   "magicLevel": [
+    10,
+    20,
+    30,
+    40,
+    50,
+    60,
+    70,
+    75,
+    80,
+    85,
+    90,
+    95
+   ]
   },
   {
    "skillId": 4495,
@@ -12918,7 +15945,21 @@
    "castRange": 900,
    "baseCritRate": 0,
    "overHit": false,
-   "effectRange": 1400
+   "effectRange": 1400,
+   "magicLevel": [
+    14,
+    24,
+    34,
+    44,
+    54,
+    64,
+    74,
+    79,
+    84,
+    89,
+    94,
+    99
+   ]
   },
   {
    "skillId": 4496,
@@ -12974,7 +16015,21 @@
    "castRange": 900,
    "baseCritRate": 0,
    "overHit": false,
-   "effectRange": 1400
+   "effectRange": 1400,
+   "magicLevel": [
+    14,
+    24,
+    34,
+    44,
+    54,
+    64,
+    74,
+    79,
+    84,
+    89,
+    94,
+    99
+   ]
   },
   {
    "skillId": 4529,
@@ -12996,7 +16051,10 @@
    "reuseDelayMs": 8000,
    "castRange": -1,
    "baseCritRate": 0,
-   "overHit": false
+   "overHit": false,
+   "magicLevel": [
+    76
+   ]
   },
   {
    "skillId": 4560,
@@ -13052,7 +16110,21 @@
    "castRange": 150,
    "baseCritRate": 0,
    "overHit": false,
-   "effectRange": 650
+   "effectRange": 650,
+   "magicLevel": [
+    10,
+    20,
+    30,
+    40,
+    50,
+    60,
+    70,
+    75,
+    80,
+    85,
+    90,
+    95
+   ]
   },
   {
    "skillId": 4561,
@@ -13108,7 +16180,21 @@
    "castRange": 150,
    "baseCritRate": 0,
    "overHit": false,
-   "effectRange": 650
+   "effectRange": 650,
+   "magicLevel": [
+    10,
+    20,
+    30,
+    40,
+    50,
+    60,
+    70,
+    75,
+    80,
+    85,
+    90,
+    95
+   ]
   },
   {
    "skillId": 4562,
@@ -13164,7 +16250,21 @@
    "castRange": 900,
    "baseCritRate": 0,
    "overHit": false,
-   "effectRange": 1400
+   "effectRange": 1400,
+   "magicLevel": [
+    10,
+    20,
+    30,
+    40,
+    50,
+    60,
+    70,
+    75,
+    80,
+    85,
+    90,
+    95
+   ]
   },
   {
    "skillId": 4563,
@@ -13220,7 +16320,21 @@
    "castRange": 900,
    "baseCritRate": 0,
    "overHit": false,
-   "effectRange": 1400
+   "effectRange": 1400,
+   "magicLevel": [
+    10,
+    20,
+    30,
+    40,
+    50,
+    60,
+    70,
+    75,
+    80,
+    85,
+    90,
+    95
+   ]
   },
   {
    "skillId": 4564,
@@ -13276,7 +16390,21 @@
    "castRange": 1000,
    "baseCritRate": 0,
    "overHit": false,
-   "effectRange": 1500
+   "effectRange": 1500,
+   "magicLevel": [
+    10,
+    20,
+    30,
+    40,
+    50,
+    60,
+    70,
+    75,
+    80,
+    85,
+    90,
+    95
+   ]
   },
   {
    "skillId": 4565,
@@ -13332,7 +16460,21 @@
    "castRange": 500,
    "baseCritRate": 0,
    "overHit": false,
-   "effectRange": 1000
+   "effectRange": 1000,
+   "magicLevel": [
+    10,
+    20,
+    30,
+    40,
+    50,
+    60,
+    70,
+    75,
+    80,
+    85,
+    90,
+    95
+   ]
   },
   {
    "skillId": 4566,
@@ -13388,7 +16530,21 @@
    "castRange": 500,
    "baseCritRate": 0,
    "overHit": false,
-   "effectRange": 1000
+   "effectRange": 1000,
+   "magicLevel": [
+    10,
+    20,
+    30,
+    40,
+    50,
+    60,
+    70,
+    75,
+    80,
+    85,
+    90,
+    95
+   ]
   },
   {
    "skillId": 4567,
@@ -13444,7 +16600,21 @@
    "castRange": 1000,
    "baseCritRate": 0,
    "overHit": false,
-   "effectRange": 1000
+   "effectRange": 1000,
+   "magicLevel": [
+    10,
+    20,
+    30,
+    40,
+    50,
+    60,
+    70,
+    75,
+    80,
+    85,
+    90,
+    95
+   ]
   },
   {
    "skillId": 4568,
@@ -13500,7 +16670,21 @@
    "castRange": 900,
    "baseCritRate": 0,
    "overHit": false,
-   "effectRange": 1400
+   "effectRange": 1400,
+   "magicLevel": [
+    10,
+    20,
+    30,
+    40,
+    50,
+    60,
+    70,
+    75,
+    80,
+    85,
+    90,
+    95
+   ]
   },
   {
    "skillId": 4569,
@@ -13556,7 +16740,21 @@
    "castRange": 900,
    "baseCritRate": 0,
    "overHit": false,
-   "effectRange": 1400
+   "effectRange": 1400,
+   "magicLevel": [
+    10,
+    20,
+    30,
+    40,
+    50,
+    60,
+    70,
+    75,
+    80,
+    85,
+    90,
+    95
+   ]
   },
   {
    "skillId": 4570,
@@ -13612,7 +16810,21 @@
    "castRange": 1000,
    "baseCritRate": 0,
    "overHit": false,
-   "effectRange": 1500
+   "effectRange": 1500,
+   "magicLevel": [
+    10,
+    20,
+    30,
+    40,
+    50,
+    60,
+    70,
+    75,
+    80,
+    85,
+    90,
+    95
+   ]
   },
   {
    "skillId": 4571,
@@ -13667,7 +16879,21 @@
    "reuseDelayMs": 15000,
    "castRange": -1,
    "baseCritRate": 0,
-   "overHit": false
+   "overHit": false,
+   "magicLevel": [
+    10,
+    20,
+    30,
+    40,
+    50,
+    60,
+    70,
+    75,
+    80,
+    85,
+    90,
+    95
+   ]
   },
   {
    "skillId": 4572,
@@ -13723,7 +16949,21 @@
    "castRange": 40,
    "baseCritRate": 15,
    "overHit": false,
-   "effectRange": 400
+   "effectRange": 400,
+   "magicLevel": [
+    10,
+    20,
+    30,
+    40,
+    50,
+    60,
+    70,
+    75,
+    80,
+    85,
+    90,
+    95
+   ]
   },
   {
    "skillId": 4573,
@@ -13779,7 +17019,21 @@
    "castRange": 600,
    "baseCritRate": 15,
    "overHit": false,
-   "effectRange": 1100
+   "effectRange": 1100,
+   "magicLevel": [
+    10,
+    20,
+    30,
+    40,
+    50,
+    60,
+    70,
+    75,
+    80,
+    85,
+    90,
+    95
+   ]
   },
   {
    "skillId": 4574,
@@ -13835,7 +17089,21 @@
    "castRange": 500,
    "baseCritRate": 15,
    "overHit": false,
-   "effectRange": 1000
+   "effectRange": 1000,
+   "magicLevel": [
+    10,
+    20,
+    30,
+    40,
+    50,
+    60,
+    70,
+    75,
+    80,
+    85,
+    90,
+    95
+   ]
   },
   {
    "skillId": 4579,
@@ -13891,7 +17159,21 @@
    "castRange": 40,
    "baseCritRate": 0,
    "overHit": false,
-   "effectRange": 200
+   "effectRange": 200,
+   "magicLevel": [
+    10,
+    20,
+    30,
+    40,
+    50,
+    60,
+    70,
+    75,
+    80,
+    85,
+    90,
+    95
+   ]
   },
   {
    "skillId": 4584,
@@ -13947,7 +17229,21 @@
    "castRange": 40,
    "baseCritRate": 0,
    "overHit": false,
-   "effectRange": 200
+   "effectRange": 200,
+   "magicLevel": [
+    10,
+    20,
+    30,
+    40,
+    50,
+    60,
+    70,
+    75,
+    80,
+    85,
+    90,
+    95
+   ]
   },
   {
    "skillId": 4600,
@@ -14002,7 +17298,21 @@
    "reuseDelayMs": 6000,
    "castRange": -1,
    "baseCritRate": 0,
-   "overHit": false
+   "overHit": false,
+   "magicLevel": [
+    10,
+    20,
+    30,
+    40,
+    50,
+    60,
+    70,
+    75,
+    80,
+    85,
+    90,
+    95
+   ]
   },
   {
    "skillId": 4602,
@@ -14058,7 +17368,21 @@
    "castRange": 600,
    "baseCritRate": 0,
    "overHit": false,
-   "effectRange": 1100
+   "effectRange": 1100,
+   "magicLevel": [
+    10,
+    20,
+    30,
+    40,
+    50,
+    60,
+    70,
+    75,
+    80,
+    85,
+    90,
+    95
+   ]
   },
   {
    "skillId": 4604,
@@ -14114,7 +17438,21 @@
    "castRange": 1000,
    "baseCritRate": 0,
    "overHit": false,
-   "effectRange": 1100
+   "effectRange": 1100,
+   "magicLevel": [
+    10,
+    20,
+    30,
+    40,
+    50,
+    60,
+    70,
+    75,
+    80,
+    85,
+    90,
+    95
+   ]
   },
   {
    "skillId": 4605,
@@ -14170,7 +17508,21 @@
    "castRange": 40,
    "baseCritRate": 0,
    "overHit": false,
-   "effectRange": 200
+   "effectRange": 200,
+   "magicLevel": [
+    10,
+    20,
+    30,
+    40,
+    50,
+    60,
+    70,
+    75,
+    80,
+    85,
+    90,
+    95
+   ]
   },
   {
    "skillId": 4606,
@@ -14226,7 +17578,21 @@
    "castRange": 40,
    "baseCritRate": 0,
    "overHit": false,
-   "effectRange": 200
+   "effectRange": 200,
+   "magicLevel": [
+    10,
+    20,
+    30,
+    40,
+    50,
+    60,
+    70,
+    75,
+    80,
+    85,
+    90,
+    95
+   ]
   },
   {
    "skillId": 4607,
@@ -14249,7 +17615,10 @@
    "castRange": 600,
    "baseCritRate": 0,
    "overHit": false,
-   "effectRange": 1100
+   "effectRange": 1100,
+   "magicLevel": [
+    80
+   ]
   },
   {
    "skillId": 4612,
@@ -14305,7 +17674,21 @@
    "castRange": 40,
    "baseCritRate": 0,
    "overHit": false,
-   "effectRange": 200
+   "effectRange": 200,
+   "magicLevel": [
+    10,
+    20,
+    30,
+    40,
+    50,
+    60,
+    70,
+    75,
+    80,
+    85,
+    90,
+    95
+   ]
   },
   {
    "skillId": 4614,
@@ -14360,7 +17743,21 @@
    "reuseDelayMs": 0,
    "castRange": -1,
    "baseCritRate": 0,
-   "overHit": false
+   "overHit": false,
+   "magicLevel": [
+    10,
+    20,
+    30,
+    40,
+    50,
+    60,
+    70,
+    75,
+    80,
+    85,
+    90,
+    95
+   ]
   },
   {
    "skillId": 4630,
@@ -14416,7 +17813,21 @@
    "castRange": 400,
    "baseCritRate": 0,
    "overHit": false,
-   "effectRange": 900
+   "effectRange": 900,
+   "magicLevel": [
+    10,
+    20,
+    30,
+    40,
+    50,
+    60,
+    70,
+    75,
+    80,
+    85,
+    90,
+    95
+   ]
   },
   {
    "skillId": 4641,
@@ -14472,7 +17883,21 @@
    "castRange": 40,
    "baseCritRate": 0,
    "overHit": false,
-   "effectRange": 200
+   "effectRange": 200,
+   "magicLevel": [
+    10,
+    20,
+    30,
+    40,
+    50,
+    60,
+    70,
+    75,
+    80,
+    85,
+    90,
+    95
+   ]
   },
   {
    "skillId": 4643,
@@ -14528,7 +17953,21 @@
    "castRange": 40,
    "baseCritRate": 0,
    "overHit": false,
-   "effectRange": 200
+   "effectRange": 200,
+   "magicLevel": [
+    10,
+    20,
+    30,
+    40,
+    50,
+    60,
+    70,
+    75,
+    80,
+    85,
+    90,
+    95
+   ]
   },
   {
    "skillId": 4681,
@@ -14551,7 +17990,10 @@
    "castRange": 50,
    "baseCritRate": 10,
    "overHit": false,
-   "effectRange": 400
+   "effectRange": 400,
+   "magicLevel": [
+    85
+   ]
   },
   {
    "skillId": 4682,
@@ -14574,7 +18016,10 @@
    "castRange": 50,
    "baseCritRate": 10,
    "overHit": false,
-   "effectRange": 400
+   "effectRange": 400,
+   "magicLevel": [
+    85
+   ]
   },
   {
    "skillId": 4683,
@@ -14597,7 +18042,10 @@
    "castRange": 600,
    "baseCritRate": 0,
    "overHit": false,
-   "effectRange": 1100
+   "effectRange": 1100,
+   "magicLevel": [
+    85
+   ]
   },
   {
    "skillId": 4684,
@@ -14620,7 +18068,10 @@
    "castRange": 900,
    "baseCritRate": 0,
    "overHit": false,
-   "effectRange": 1400
+   "effectRange": 1400,
+   "magicLevel": [
+    85
+   ]
   },
   {
    "skillId": 4685,
@@ -14642,7 +18093,10 @@
    "reuseDelayMs": 0,
    "castRange": -1,
    "baseCritRate": 10,
-   "overHit": false
+   "overHit": false,
+   "magicLevel": [
+    85
+   ]
   },
   {
    "skillId": 4686,
@@ -14664,7 +18118,10 @@
    "reuseDelayMs": 0,
    "castRange": -1,
    "baseCritRate": 0,
-   "overHit": false
+   "overHit": false,
+   "magicLevel": [
+    85
+   ]
   },
   {
    "skillId": 4688,
@@ -14686,7 +18143,10 @@
    "reuseDelayMs": 0,
    "castRange": -1,
    "baseCritRate": 10,
-   "overHit": false
+   "overHit": false,
+   "magicLevel": [
+    85
+   ]
   },
   {
    "skillId": 4690,
@@ -14708,7 +18168,10 @@
    "reuseDelayMs": 0,
    "castRange": -1,
    "baseCritRate": 0,
-   "overHit": false
+   "overHit": false,
+   "magicLevel": [
+    85
+   ]
   },
   {
    "skillId": 4708,
@@ -14758,7 +18221,19 @@
    "castRange": 40,
    "baseCritRate": 0,
    "overHit": false,
-   "effectRange": 200
+   "effectRange": 200,
+   "magicLevel": [
+    58,
+    62,
+    66,
+    70,
+    72,
+    74,
+    76,
+    78,
+    79,
+    80
+   ]
   },
   {
    "skillId": 4709,
@@ -14808,7 +18283,19 @@
    "castRange": 40,
    "baseCritRate": 10,
    "overHit": false,
-   "effectRange": 200
+   "effectRange": 200,
+   "magicLevel": [
+    58,
+    62,
+    66,
+    70,
+    72,
+    74,
+    76,
+    78,
+    79,
+    80
+   ]
   },
   {
    "skillId": 4710,
@@ -14864,7 +18351,21 @@
    "castRange": 40,
    "baseCritRate": 0,
    "overHit": false,
-   "effectRange": 200
+   "effectRange": 200,
+   "magicLevel": [
+    10,
+    20,
+    30,
+    40,
+    50,
+    60,
+    70,
+    75,
+    80,
+    85,
+    90,
+    95
+   ]
   },
   {
    "skillId": 4712,
@@ -14920,7 +18421,21 @@
    "castRange": 600,
    "baseCritRate": 0,
    "overHit": false,
-   "effectRange": 1100
+   "effectRange": 1100,
+   "magicLevel": [
+    10,
+    20,
+    30,
+    40,
+    50,
+    60,
+    70,
+    75,
+    80,
+    85,
+    90,
+    95
+   ]
   },
   {
    "skillId": 4719,
@@ -14976,7 +18491,21 @@
    "castRange": 40,
    "baseCritRate": 0,
    "overHit": false,
-   "effectRange": 200
+   "effectRange": 200,
+   "magicLevel": [
+    14,
+    24,
+    34,
+    44,
+    54,
+    64,
+    74,
+    79,
+    84,
+    89,
+    94,
+    99
+   ]
   },
   {
    "skillId": 4720,
@@ -15032,7 +18561,21 @@
    "castRange": 40,
    "baseCritRate": 0,
    "overHit": false,
-   "effectRange": 200
+   "effectRange": 200,
+   "magicLevel": [
+    14,
+    24,
+    34,
+    44,
+    54,
+    64,
+    74,
+    79,
+    84,
+    89,
+    94,
+    99
+   ]
   },
   {
    "skillId": 4721,
@@ -15088,7 +18631,21 @@
    "castRange": 40,
    "baseCritRate": 0,
    "overHit": false,
-   "effectRange": 200
+   "effectRange": 200,
+   "magicLevel": [
+    14,
+    24,
+    34,
+    44,
+    54,
+    64,
+    74,
+    79,
+    84,
+    89,
+    94,
+    99
+   ]
   },
   {
    "skillId": 4722,
@@ -15144,7 +18701,21 @@
    "castRange": 40,
    "baseCritRate": 0,
    "overHit": false,
-   "effectRange": 200
+   "effectRange": 200,
+   "magicLevel": [
+    14,
+    24,
+    34,
+    44,
+    54,
+    64,
+    74,
+    79,
+    84,
+    89,
+    94,
+    99
+   ]
   },
   {
    "skillId": 4723,
@@ -15200,7 +18771,21 @@
    "castRange": 40,
    "baseCritRate": 0,
    "overHit": false,
-   "effectRange": 200
+   "effectRange": 200,
+   "magicLevel": [
+    14,
+    24,
+    34,
+    44,
+    54,
+    64,
+    74,
+    79,
+    84,
+    89,
+    94,
+    99
+   ]
   },
   {
    "skillId": 4724,
@@ -15256,7 +18841,21 @@
    "castRange": 40,
    "baseCritRate": 0,
    "overHit": false,
-   "effectRange": 200
+   "effectRange": 200,
+   "magicLevel": [
+    14,
+    24,
+    34,
+    44,
+    54,
+    64,
+    74,
+    79,
+    84,
+    89,
+    94,
+    99
+   ]
   },
   {
    "skillId": 4725,
@@ -15312,7 +18911,21 @@
    "castRange": 40,
    "baseCritRate": 0,
    "overHit": false,
-   "effectRange": 200
+   "effectRange": 200,
+   "magicLevel": [
+    14,
+    24,
+    34,
+    44,
+    54,
+    64,
+    74,
+    79,
+    84,
+    89,
+    94,
+    99
+   ]
   },
   {
    "skillId": 4726,
@@ -15368,7 +18981,21 @@
    "castRange": 40,
    "baseCritRate": 0,
    "overHit": false,
-   "effectRange": 200
+   "effectRange": 200,
+   "magicLevel": [
+    14,
+    24,
+    34,
+    44,
+    54,
+    64,
+    74,
+    79,
+    84,
+    89,
+    94,
+    99
+   ]
   },
   {
    "skillId": 4727,
@@ -15424,7 +19051,21 @@
    "castRange": 40,
    "baseCritRate": 0,
    "overHit": false,
-   "effectRange": 200
+   "effectRange": 200,
+   "magicLevel": [
+    14,
+    24,
+    34,
+    44,
+    54,
+    64,
+    74,
+    79,
+    84,
+    89,
+    94,
+    99
+   ]
   },
   {
    "skillId": 4728,
@@ -15480,7 +19121,21 @@
    "castRange": 40,
    "baseCritRate": 0,
    "overHit": false,
-   "effectRange": 200
+   "effectRange": 200,
+   "magicLevel": [
+    14,
+    24,
+    34,
+    44,
+    54,
+    64,
+    74,
+    79,
+    84,
+    89,
+    94,
+    99
+   ]
   },
   {
    "skillId": 4729,
@@ -15536,7 +19191,21 @@
    "castRange": 40,
    "baseCritRate": 0,
    "overHit": false,
-   "effectRange": 200
+   "effectRange": 200,
+   "magicLevel": [
+    14,
+    24,
+    34,
+    44,
+    54,
+    64,
+    74,
+    79,
+    84,
+    89,
+    94,
+    99
+   ]
   },
   {
    "skillId": 4730,
@@ -15592,7 +19261,21 @@
    "castRange": 40,
    "baseCritRate": 0,
    "overHit": false,
-   "effectRange": 200
+   "effectRange": 200,
+   "magicLevel": [
+    14,
+    24,
+    34,
+    44,
+    54,
+    64,
+    74,
+    79,
+    84,
+    89,
+    94,
+    99
+   ]
   },
   {
    "skillId": 4731,
@@ -15648,7 +19331,21 @@
    "castRange": 40,
    "baseCritRate": 0,
    "overHit": false,
-   "effectRange": 200
+   "effectRange": 200,
+   "magicLevel": [
+    14,
+    24,
+    34,
+    44,
+    54,
+    64,
+    74,
+    79,
+    84,
+    89,
+    94,
+    99
+   ]
   },
   {
    "skillId": 4732,
@@ -15704,7 +19401,21 @@
    "castRange": 40,
    "baseCritRate": 0,
    "overHit": false,
-   "effectRange": 200
+   "effectRange": 200,
+   "magicLevel": [
+    14,
+    24,
+    34,
+    44,
+    54,
+    64,
+    74,
+    79,
+    84,
+    89,
+    94,
+    99
+   ]
   },
   {
    "skillId": 4733,
@@ -15760,7 +19471,21 @@
    "castRange": 40,
    "baseCritRate": 0,
    "overHit": false,
-   "effectRange": 200
+   "effectRange": 200,
+   "magicLevel": [
+    14,
+    24,
+    34,
+    44,
+    54,
+    64,
+    74,
+    79,
+    84,
+    89,
+    94,
+    99
+   ]
   },
   {
    "skillId": 4734,
@@ -15815,7 +19540,21 @@
    "reuseDelayMs": 0,
    "castRange": -1,
    "baseCritRate": 0,
-   "overHit": false
+   "overHit": false,
+   "magicLevel": [
+    14,
+    24,
+    34,
+    44,
+    54,
+    64,
+    74,
+    79,
+    84,
+    89,
+    94,
+    99
+   ]
   },
   {
    "skillId": 4735,
@@ -15870,7 +19609,21 @@
    "reuseDelayMs": 0,
    "castRange": -1,
    "baseCritRate": 0,
-   "overHit": false
+   "overHit": false,
+   "magicLevel": [
+    14,
+    24,
+    34,
+    44,
+    54,
+    64,
+    74,
+    79,
+    84,
+    89,
+    94,
+    99
+   ]
   },
   {
    "skillId": 4736,
@@ -15925,7 +19678,21 @@
    "reuseDelayMs": 0,
    "castRange": -1,
    "baseCritRate": 0,
-   "overHit": false
+   "overHit": false,
+   "magicLevel": [
+    14,
+    24,
+    34,
+    44,
+    54,
+    64,
+    74,
+    79,
+    84,
+    89,
+    94,
+    99
+   ]
   },
   {
    "skillId": 4737,
@@ -15980,7 +19747,21 @@
    "reuseDelayMs": 0,
    "castRange": -1,
    "baseCritRate": 0,
-   "overHit": false
+   "overHit": false,
+   "magicLevel": [
+    14,
+    24,
+    34,
+    44,
+    54,
+    64,
+    74,
+    79,
+    84,
+    89,
+    94,
+    99
+   ]
   },
   {
    "skillId": 4738,
@@ -16035,7 +19816,21 @@
    "reuseDelayMs": 0,
    "castRange": -1,
    "baseCritRate": 0,
-   "overHit": false
+   "overHit": false,
+   "magicLevel": [
+    14,
+    24,
+    34,
+    44,
+    54,
+    64,
+    74,
+    79,
+    84,
+    89,
+    94,
+    99
+   ]
   },
   {
    "skillId": 4739,
@@ -16091,7 +19886,21 @@
    "castRange": 40,
    "baseCritRate": 0,
    "overHit": false,
-   "effectRange": 200
+   "effectRange": 200,
+   "magicLevel": [
+    14,
+    24,
+    34,
+    44,
+    54,
+    64,
+    74,
+    79,
+    84,
+    89,
+    94,
+    99
+   ]
   },
   {
    "skillId": 4740,
@@ -16147,7 +19956,21 @@
    "castRange": 40,
    "baseCritRate": 0,
    "overHit": false,
-   "effectRange": 200
+   "effectRange": 200,
+   "magicLevel": [
+    14,
+    24,
+    34,
+    44,
+    54,
+    64,
+    74,
+    79,
+    84,
+    89,
+    94,
+    99
+   ]
   },
   {
    "skillId": 4741,
@@ -16203,7 +20026,21 @@
    "castRange": 40,
    "baseCritRate": 0,
    "overHit": false,
-   "effectRange": 200
+   "effectRange": 200,
+   "magicLevel": [
+    14,
+    24,
+    34,
+    44,
+    54,
+    64,
+    74,
+    79,
+    84,
+    89,
+    94,
+    99
+   ]
   },
   {
    "skillId": 4742,
@@ -16259,7 +20096,21 @@
    "castRange": 40,
    "baseCritRate": 0,
    "overHit": false,
-   "effectRange": 200
+   "effectRange": 200,
+   "magicLevel": [
+    14,
+    24,
+    34,
+    44,
+    54,
+    64,
+    74,
+    79,
+    84,
+    89,
+    94,
+    99
+   ]
   },
   {
    "skillId": 4743,
@@ -16315,7 +20166,21 @@
    "castRange": 40,
    "baseCritRate": 0,
    "overHit": false,
-   "effectRange": 200
+   "effectRange": 200,
+   "magicLevel": [
+    14,
+    24,
+    34,
+    44,
+    54,
+    64,
+    74,
+    79,
+    84,
+    89,
+    94,
+    99
+   ]
   },
   {
    "skillId": 4744,
@@ -16371,7 +20236,21 @@
    "castRange": 40,
    "baseCritRate": 0,
    "overHit": false,
-   "effectRange": 200
+   "effectRange": 200,
+   "magicLevel": [
+    14,
+    24,
+    34,
+    44,
+    54,
+    64,
+    74,
+    79,
+    84,
+    89,
+    94,
+    99
+   ]
   },
   {
    "skillId": 4745,
@@ -16427,7 +20306,21 @@
    "castRange": 40,
    "baseCritRate": 0,
    "overHit": false,
-   "effectRange": 200
+   "effectRange": 200,
+   "magicLevel": [
+    14,
+    24,
+    34,
+    44,
+    54,
+    64,
+    74,
+    79,
+    84,
+    89,
+    94,
+    99
+   ]
   },
   {
    "skillId": 4746,
@@ -16483,7 +20376,21 @@
    "castRange": 40,
    "baseCritRate": 0,
    "overHit": false,
-   "effectRange": 200
+   "effectRange": 200,
+   "magicLevel": [
+    14,
+    24,
+    34,
+    44,
+    54,
+    64,
+    74,
+    79,
+    84,
+    89,
+    94,
+    99
+   ]
   },
   {
    "skillId": 4747,
@@ -16539,7 +20446,21 @@
    "castRange": 40,
    "baseCritRate": 0,
    "overHit": false,
-   "effectRange": 200
+   "effectRange": 200,
+   "magicLevel": [
+    14,
+    24,
+    34,
+    44,
+    54,
+    64,
+    74,
+    79,
+    84,
+    89,
+    94,
+    99
+   ]
   },
   {
    "skillId": 4748,
@@ -16595,7 +20516,21 @@
    "castRange": 40,
    "baseCritRate": 0,
    "overHit": false,
-   "effectRange": 200
+   "effectRange": 200,
+   "magicLevel": [
+    14,
+    24,
+    34,
+    44,
+    54,
+    64,
+    74,
+    79,
+    84,
+    89,
+    94,
+    99
+   ]
   },
   {
    "skillId": 4749,
@@ -16651,7 +20586,21 @@
    "castRange": 40,
    "baseCritRate": 0,
    "overHit": false,
-   "effectRange": 200
+   "effectRange": 200,
+   "magicLevel": [
+    14,
+    24,
+    34,
+    44,
+    54,
+    64,
+    74,
+    79,
+    84,
+    89,
+    94,
+    99
+   ]
   },
   {
    "skillId": 4750,
@@ -16707,7 +20656,21 @@
    "castRange": 40,
    "baseCritRate": 0,
    "overHit": false,
-   "effectRange": 200
+   "effectRange": 200,
+   "magicLevel": [
+    14,
+    24,
+    34,
+    44,
+    54,
+    64,
+    74,
+    79,
+    84,
+    89,
+    94,
+    99
+   ]
   },
   {
    "skillId": 4751,
@@ -16763,7 +20726,21 @@
    "castRange": 40,
    "baseCritRate": 0,
    "overHit": false,
-   "effectRange": 200
+   "effectRange": 200,
+   "magicLevel": [
+    14,
+    24,
+    34,
+    44,
+    54,
+    64,
+    74,
+    79,
+    84,
+    89,
+    94,
+    99
+   ]
   },
   {
    "skillId": 4752,
@@ -16819,7 +20796,21 @@
    "castRange": 40,
    "baseCritRate": 0,
    "overHit": false,
-   "effectRange": 200
+   "effectRange": 200,
+   "magicLevel": [
+    14,
+    24,
+    34,
+    44,
+    54,
+    64,
+    74,
+    79,
+    84,
+    89,
+    94,
+    99
+   ]
   },
   {
    "skillId": 4753,
@@ -16875,7 +20866,21 @@
    "castRange": 40,
    "baseCritRate": 0,
    "overHit": false,
-   "effectRange": 200
+   "effectRange": 200,
+   "magicLevel": [
+    14,
+    24,
+    34,
+    44,
+    54,
+    64,
+    74,
+    79,
+    84,
+    89,
+    94,
+    99
+   ]
   },
   {
    "skillId": 4754,
@@ -16931,7 +20936,21 @@
    "castRange": 900,
    "baseCritRate": 0,
    "overHit": false,
-   "effectRange": 1400
+   "effectRange": 1400,
+   "magicLevel": [
+    14,
+    24,
+    34,
+    44,
+    54,
+    64,
+    74,
+    79,
+    84,
+    89,
+    94,
+    99
+   ]
   },
   {
    "skillId": 4755,
@@ -16987,7 +21006,21 @@
    "castRange": 900,
    "baseCritRate": 0,
    "overHit": false,
-   "effectRange": 1400
+   "effectRange": 1400,
+   "magicLevel": [
+    14,
+    24,
+    34,
+    44,
+    54,
+    64,
+    74,
+    79,
+    84,
+    89,
+    94,
+    99
+   ]
   },
   {
    "skillId": 4756,
@@ -17043,7 +21076,21 @@
    "castRange": 900,
    "baseCritRate": 0,
    "overHit": false,
-   "effectRange": 1400
+   "effectRange": 1400,
+   "magicLevel": [
+    14,
+    24,
+    34,
+    44,
+    54,
+    64,
+    74,
+    79,
+    84,
+    89,
+    94,
+    99
+   ]
   },
   {
    "skillId": 4757,
@@ -17099,7 +21146,21 @@
    "castRange": 900,
    "baseCritRate": 0,
    "overHit": false,
-   "effectRange": 1400
+   "effectRange": 1400,
+   "magicLevel": [
+    14,
+    24,
+    34,
+    44,
+    54,
+    64,
+    74,
+    79,
+    84,
+    89,
+    94,
+    99
+   ]
   },
   {
    "skillId": 4758,
@@ -17155,7 +21216,21 @@
    "castRange": 900,
    "baseCritRate": 0,
    "overHit": false,
-   "effectRange": 1400
+   "effectRange": 1400,
+   "magicLevel": [
+    14,
+    24,
+    34,
+    44,
+    54,
+    64,
+    74,
+    79,
+    84,
+    89,
+    94,
+    99
+   ]
   },
   {
    "skillId": 4759,
@@ -17211,7 +21286,21 @@
    "castRange": 900,
    "baseCritRate": 0,
    "overHit": false,
-   "effectRange": 1400
+   "effectRange": 1400,
+   "magicLevel": [
+    14,
+    24,
+    34,
+    44,
+    54,
+    64,
+    74,
+    79,
+    84,
+    89,
+    94,
+    99
+   ]
   },
   {
    "skillId": 4760,
@@ -17267,7 +21356,21 @@
    "castRange": 900,
    "baseCritRate": 0,
    "overHit": false,
-   "effectRange": 1400
+   "effectRange": 1400,
+   "magicLevel": [
+    14,
+    24,
+    34,
+    44,
+    54,
+    64,
+    74,
+    79,
+    84,
+    89,
+    94,
+    99
+   ]
   },
   {
    "skillId": 4761,
@@ -17323,7 +21426,21 @@
    "castRange": 900,
    "baseCritRate": 0,
    "overHit": false,
-   "effectRange": 1400
+   "effectRange": 1400,
+   "magicLevel": [
+    14,
+    24,
+    34,
+    44,
+    54,
+    64,
+    74,
+    79,
+    84,
+    89,
+    94,
+    99
+   ]
   },
   {
    "skillId": 4762,
@@ -17379,7 +21496,21 @@
    "castRange": 900,
    "baseCritRate": 0,
    "overHit": false,
-   "effectRange": 1400
+   "effectRange": 1400,
+   "magicLevel": [
+    14,
+    24,
+    34,
+    44,
+    54,
+    64,
+    74,
+    79,
+    84,
+    89,
+    94,
+    99
+   ]
   },
   {
    "skillId": 4763,
@@ -17435,7 +21566,21 @@
    "castRange": 900,
    "baseCritRate": 0,
    "overHit": false,
-   "effectRange": 1400
+   "effectRange": 1400,
+   "magicLevel": [
+    14,
+    24,
+    34,
+    44,
+    54,
+    64,
+    74,
+    79,
+    84,
+    89,
+    94,
+    99
+   ]
   },
   {
    "skillId": 4764,
@@ -17491,7 +21636,21 @@
    "castRange": 900,
    "baseCritRate": 0,
    "overHit": false,
-   "effectRange": 1400
+   "effectRange": 1400,
+   "magicLevel": [
+    14,
+    24,
+    34,
+    44,
+    54,
+    64,
+    74,
+    79,
+    84,
+    89,
+    94,
+    99
+   ]
   },
   {
    "skillId": 4765,
@@ -17547,7 +21706,21 @@
    "castRange": 900,
    "baseCritRate": 0,
    "overHit": false,
-   "effectRange": 1400
+   "effectRange": 1400,
+   "magicLevel": [
+    14,
+    24,
+    34,
+    44,
+    54,
+    64,
+    74,
+    79,
+    84,
+    89,
+    94,
+    99
+   ]
   },
   {
    "skillId": 4766,
@@ -17603,7 +21776,21 @@
    "castRange": 900,
    "baseCritRate": 0,
    "overHit": false,
-   "effectRange": 1400
+   "effectRange": 1400,
+   "magicLevel": [
+    14,
+    24,
+    34,
+    44,
+    54,
+    64,
+    74,
+    79,
+    84,
+    89,
+    94,
+    99
+   ]
   },
   {
    "skillId": 4767,
@@ -17659,7 +21846,21 @@
    "castRange": 900,
    "baseCritRate": 0,
    "overHit": false,
-   "effectRange": 1400
+   "effectRange": 1400,
+   "magicLevel": [
+    14,
+    24,
+    34,
+    44,
+    54,
+    64,
+    74,
+    79,
+    84,
+    89,
+    94,
+    99
+   ]
   },
   {
    "skillId": 4768,
@@ -17715,7 +21916,21 @@
    "castRange": 900,
    "baseCritRate": 0,
    "overHit": false,
-   "effectRange": 1400
+   "effectRange": 1400,
+   "magicLevel": [
+    14,
+    24,
+    34,
+    44,
+    54,
+    64,
+    74,
+    79,
+    84,
+    89,
+    94,
+    99
+   ]
   },
   {
    "skillId": 4769,
@@ -17771,7 +21986,21 @@
    "castRange": 900,
    "baseCritRate": 0,
    "overHit": false,
-   "effectRange": 1400
+   "effectRange": 1400,
+   "magicLevel": [
+    14,
+    24,
+    34,
+    44,
+    54,
+    64,
+    74,
+    79,
+    84,
+    89,
+    94,
+    99
+   ]
   },
   {
    "skillId": 4770,
@@ -17827,7 +22056,21 @@
    "castRange": 900,
    "baseCritRate": 0,
    "overHit": false,
-   "effectRange": 1400
+   "effectRange": 1400,
+   "magicLevel": [
+    14,
+    24,
+    34,
+    44,
+    54,
+    64,
+    74,
+    79,
+    84,
+    89,
+    94,
+    99
+   ]
   },
   {
    "skillId": 4771,
@@ -17883,7 +22126,21 @@
    "castRange": 900,
    "baseCritRate": 0,
    "overHit": false,
-   "effectRange": 1400
+   "effectRange": 1400,
+   "magicLevel": [
+    14,
+    24,
+    34,
+    44,
+    54,
+    64,
+    74,
+    79,
+    84,
+    89,
+    94,
+    99
+   ]
   },
   {
    "skillId": 4772,
@@ -17939,7 +22196,21 @@
    "castRange": 900,
    "baseCritRate": 0,
    "overHit": false,
-   "effectRange": 1400
+   "effectRange": 1400,
+   "magicLevel": [
+    14,
+    24,
+    34,
+    44,
+    54,
+    64,
+    74,
+    79,
+    84,
+    89,
+    94,
+    99
+   ]
   },
   {
    "skillId": 4773,
@@ -17995,7 +22266,21 @@
    "castRange": 900,
    "baseCritRate": 0,
    "overHit": false,
-   "effectRange": 1400
+   "effectRange": 1400,
+   "magicLevel": [
+    14,
+    24,
+    34,
+    44,
+    54,
+    64,
+    74,
+    79,
+    84,
+    89,
+    94,
+    99
+   ]
   },
   {
    "skillId": 4774,
@@ -18051,7 +22336,21 @@
    "castRange": 900,
    "baseCritRate": 0,
    "overHit": false,
-   "effectRange": 1400
+   "effectRange": 1400,
+   "magicLevel": [
+    14,
+    24,
+    34,
+    44,
+    54,
+    64,
+    74,
+    79,
+    84,
+    89,
+    94,
+    99
+   ]
   },
   {
    "skillId": 4775,
@@ -18107,7 +22406,21 @@
    "castRange": 900,
    "baseCritRate": 0,
    "overHit": false,
-   "effectRange": 1400
+   "effectRange": 1400,
+   "magicLevel": [
+    14,
+    24,
+    34,
+    44,
+    54,
+    64,
+    74,
+    79,
+    84,
+    89,
+    94,
+    99
+   ]
   },
   {
    "skillId": 4776,
@@ -18163,7 +22476,21 @@
    "castRange": 900,
    "baseCritRate": 0,
    "overHit": false,
-   "effectRange": 1400
+   "effectRange": 1400,
+   "magicLevel": [
+    14,
+    24,
+    34,
+    44,
+    54,
+    64,
+    74,
+    79,
+    84,
+    89,
+    94,
+    99
+   ]
   },
   {
    "skillId": 4777,
@@ -18219,7 +22546,21 @@
    "castRange": 900,
    "baseCritRate": 0,
    "overHit": false,
-   "effectRange": 1400
+   "effectRange": 1400,
+   "magicLevel": [
+    14,
+    24,
+    34,
+    44,
+    54,
+    64,
+    74,
+    79,
+    84,
+    89,
+    94,
+    99
+   ]
   },
   {
    "skillId": 4778,
@@ -18275,7 +22616,21 @@
    "castRange": 900,
    "baseCritRate": 0,
    "overHit": false,
-   "effectRange": 1400
+   "effectRange": 1400,
+   "magicLevel": [
+    14,
+    24,
+    34,
+    44,
+    54,
+    64,
+    74,
+    79,
+    84,
+    89,
+    94,
+    99
+   ]
   },
   {
    "skillId": 4993,
@@ -18298,7 +22653,10 @@
    "castRange": 40,
    "baseCritRate": 0,
    "overHit": false,
-   "effectRange": 200
+   "effectRange": 200,
+   "magicLevel": [
+    79
+   ]
   },
   {
    "skillId": 4994,
@@ -18321,7 +22679,10 @@
    "castRange": 500,
    "baseCritRate": 0,
    "overHit": false,
-   "effectRange": 1000
+   "effectRange": 1000,
+   "magicLevel": [
+    79
+   ]
   },
   {
    "skillId": 5000,
@@ -18344,7 +22705,10 @@
    "castRange": 1000,
    "baseCritRate": 0,
    "overHit": false,
-   "effectRange": 2000
+   "effectRange": 2000,
+   "magicLevel": [
+    76
+   ]
   },
   {
    "skillId": 5003,
@@ -18367,7 +22731,10 @@
    "castRange": 500,
    "baseCritRate": 0,
    "overHit": false,
-   "effectRange": 1000
+   "effectRange": 1000,
+   "magicLevel": [
+    76
+   ]
   },
   {
    "skillId": 5004,
@@ -18389,7 +22756,10 @@
    "reuseDelayMs": 0,
    "castRange": -1,
    "baseCritRate": 0,
-   "overHit": false
+   "overHit": false,
+   "magicLevel": [
+    85
+   ]
   },
   {
    "skillId": 5009,
@@ -18412,7 +22782,10 @@
    "castRange": 150,
    "baseCritRate": 0,
    "overHit": false,
-   "effectRange": 650
+   "effectRange": 650,
+   "magicLevel": [
+    85
+   ]
   },
   {
    "skillId": 5010,
@@ -18435,7 +22808,10 @@
    "castRange": 500,
    "baseCritRate": 0,
    "overHit": false,
-   "effectRange": 1000
+   "effectRange": 1000,
+   "magicLevel": [
+    85
+   ]
   },
   {
    "skillId": 5011,
@@ -18457,7 +22833,10 @@
    "reuseDelayMs": 0,
    "castRange": -1,
    "baseCritRate": 0,
-   "overHit": false
+   "overHit": false,
+   "magicLevel": [
+    85
+   ]
   },
   {
    "skillId": 5014,
@@ -18486,7 +22865,12 @@
    "castRange": 150,
    "baseCritRate": 6,
    "overHit": false,
-   "effectRange": 650
+   "effectRange": 650,
+   "magicLevel": [
+    85,
+    85,
+    90
+   ]
   },
   {
    "skillId": 5015,
@@ -18524,7 +22908,15 @@
    "castRange": 150,
    "baseCritRate": 0,
    "overHit": false,
-   "effectRange": 650
+   "effectRange": 650,
+   "magicLevel": [
+    85,
+    85,
+    85,
+    85,
+    85,
+    85
+   ]
   },
   {
    "skillId": 5018,
@@ -18549,7 +22941,11 @@
    "reuseDelayMs": 0,
    "castRange": -1,
    "baseCritRate": 0,
-   "overHit": false
+   "overHit": false,
+   "magicLevel": [
+    85,
+    85
+   ]
   },
   {
    "skillId": 5042,
@@ -18604,7 +23000,21 @@
    "reuseDelayMs": 0,
    "castRange": -1,
    "baseCritRate": 0,
-   "overHit": false
+   "overHit": false,
+   "magicLevel": [
+    10,
+    20,
+    30,
+    40,
+    50,
+    60,
+    70,
+    75,
+    80,
+    85,
+    90,
+    95
+   ]
   },
   {
    "skillId": 5043,
@@ -18660,7 +23070,21 @@
    "castRange": 1200,
    "baseCritRate": 0,
    "overHit": false,
-   "effectRange": 1700
+   "effectRange": 1700,
+   "magicLevel": [
+    10,
+    20,
+    30,
+    40,
+    50,
+    60,
+    70,
+    75,
+    80,
+    85,
+    90,
+    95
+   ]
   },
   {
    "skillId": 5045,
@@ -18716,7 +23140,21 @@
    "castRange": 40,
    "baseCritRate": 0,
    "overHit": false,
-   "effectRange": 200
+   "effectRange": 200,
+   "magicLevel": [
+    40,
+    45,
+    50,
+    55,
+    60,
+    65,
+    70,
+    75,
+    80,
+    85,
+    90,
+    95
+   ]
   },
   {
    "skillId": 5046,
@@ -18772,7 +23210,21 @@
    "castRange": 1500,
    "baseCritRate": 0,
    "overHit": false,
-   "effectRange": 2100
+   "effectRange": 2100,
+   "magicLevel": [
+    40,
+    45,
+    50,
+    55,
+    60,
+    65,
+    70,
+    75,
+    80,
+    85,
+    90,
+    95
+   ]
   },
   {
    "skillId": 5051,
@@ -18827,7 +23279,21 @@
    "reuseDelayMs": 0,
    "castRange": -1,
    "baseCritRate": 0,
-   "overHit": false
+   "overHit": false,
+   "magicLevel": [
+    40,
+    45,
+    50,
+    55,
+    60,
+    65,
+    70,
+    75,
+    80,
+    85,
+    90,
+    95
+   ]
   },
   {
    "skillId": 5052,
@@ -18883,7 +23349,21 @@
    "castRange": 1500,
    "baseCritRate": 0,
    "overHit": false,
-   "effectRange": 2000
+   "effectRange": 2000,
+   "magicLevel": [
+    40,
+    45,
+    50,
+    55,
+    60,
+    65,
+    70,
+    75,
+    80,
+    85,
+    90,
+    95
+   ]
   },
   {
    "skillId": 5053,
@@ -18939,7 +23419,21 @@
    "castRange": 1500,
    "baseCritRate": 0,
    "overHit": false,
-   "effectRange": 2100
+   "effectRange": 2100,
+   "magicLevel": [
+    40,
+    45,
+    50,
+    55,
+    60,
+    65,
+    70,
+    75,
+    80,
+    85,
+    90,
+    95
+   ]
   },
   {
    "skillId": 5056,
@@ -18995,7 +23489,21 @@
    "castRange": 1500,
    "baseCritRate": 0,
    "overHit": false,
-   "effectRange": 2000
+   "effectRange": 2000,
+   "magicLevel": [
+    40,
+    45,
+    50,
+    55,
+    60,
+    65,
+    70,
+    75,
+    80,
+    85,
+    90,
+    95
+   ]
   },
   {
    "skillId": 5065,
@@ -19051,7 +23559,21 @@
    "castRange": 1500,
    "baseCritRate": 0,
    "overHit": false,
-   "effectRange": 2100
+   "effectRange": 2100,
+   "magicLevel": [
+    40,
+    45,
+    50,
+    55,
+    60,
+    65,
+    70,
+    75,
+    80,
+    85,
+    90,
+    95
+   ]
   },
   {
    "skillId": 5073,
@@ -19107,7 +23629,21 @@
    "castRange": 1500,
    "baseCritRate": 0,
    "overHit": false,
-   "effectRange": 1500
+   "effectRange": 1500,
+   "magicLevel": [
+    10,
+    20,
+    30,
+    40,
+    50,
+    60,
+    70,
+    75,
+    80,
+    85,
+    90,
+    95
+   ]
   },
   {
    "skillId": 5081,
@@ -19139,7 +23675,13 @@
    "castRange": 40,
    "baseCritRate": 0,
    "overHit": false,
-   "effectRange": 200
+   "effectRange": 200,
+   "magicLevel": [
+    85,
+    85,
+    85,
+    85
+   ]
   },
   {
    "skillId": 5082,
@@ -19170,7 +23712,13 @@
    "reuseDelayMs": 0,
    "castRange": -1,
    "baseCritRate": 0,
-   "overHit": false
+   "overHit": false,
+   "magicLevel": [
+    85,
+    85,
+    85,
+    85
+   ]
   },
   {
    "skillId": 5083,
@@ -19202,7 +23750,13 @@
    "castRange": 40,
    "baseCritRate": 0,
    "overHit": false,
-   "effectRange": 200
+   "effectRange": 200,
+   "magicLevel": [
+    85,
+    85,
+    85,
+    85
+   ]
   },
   {
    "skillId": 5084,
@@ -19234,7 +23788,13 @@
    "castRange": 40,
    "baseCritRate": 0,
    "overHit": false,
-   "effectRange": 200
+   "effectRange": 200,
+   "magicLevel": [
+    85,
+    85,
+    85,
+    85
+   ]
   },
   {
    "skillId": 5093,
@@ -19257,7 +23817,10 @@
    "castRange": 600,
    "baseCritRate": 0,
    "overHit": false,
-   "effectRange": 1100
+   "effectRange": 1100,
+   "magicLevel": [
+    85
+   ]
   },
   {
    "skillId": 5094,
@@ -19279,7 +23842,10 @@
    "reuseDelayMs": 0,
    "castRange": -1,
    "baseCritRate": 0,
-   "overHit": false
+   "overHit": false,
+   "magicLevel": [
+    85
+   ]
   },
   {
    "skillId": 5095,
@@ -19302,7 +23868,10 @@
    "castRange": 40,
    "baseCritRate": 0,
    "overHit": false,
-   "effectRange": 200
+   "effectRange": 200,
+   "magicLevel": [
+    85
+   ]
   },
   {
    "skillId": 5096,
@@ -19325,7 +23894,10 @@
    "castRange": 600,
    "baseCritRate": 0,
    "overHit": false,
-   "effectRange": 1100
+   "effectRange": 1100,
+   "magicLevel": [
+    85
+   ]
   },
   {
    "skillId": 5097,
@@ -19347,7 +23919,10 @@
    "reuseDelayMs": 0,
    "castRange": -1,
    "baseCritRate": 0,
-   "overHit": false
+   "overHit": false,
+   "magicLevel": [
+    85
+   ]
   },
   {
    "skillId": 5110,
@@ -19370,7 +23945,10 @@
    "castRange": 1600,
    "baseCritRate": 0,
    "overHit": false,
-   "effectRange": 1600
+   "effectRange": 1600,
+   "magicLevel": [
+    70
+   ]
   },
   {
    "skillId": 5111,
@@ -19393,7 +23971,10 @@
    "castRange": 2000,
    "baseCritRate": 0,
    "overHit": false,
-   "effectRange": 2000
+   "effectRange": 2000,
+   "magicLevel": [
+    70
+   ]
   },
   {
    "skillId": 5117,
@@ -19415,7 +23996,10 @@
    "reuseDelayMs": 6000,
    "castRange": -1,
    "baseCritRate": 0,
-   "overHit": false
+   "overHit": false,
+   "magicLevel": [
+    90
+   ]
   },
   {
    "skillId": 5119,
@@ -19438,7 +24022,10 @@
    "castRange": 40,
    "baseCritRate": 0,
    "overHit": false,
-   "effectRange": 400
+   "effectRange": 400,
+   "magicLevel": [
+    90
+   ]
   },
   {
    "skillId": 5120,
@@ -19461,7 +24048,10 @@
    "castRange": 600,
    "baseCritRate": 0,
    "overHit": false,
-   "effectRange": 900
+   "effectRange": 900,
+   "magicLevel": [
+    85
+   ]
   },
   {
    "skillId": 5130,
@@ -19483,7 +24073,10 @@
    "reuseDelayMs": 0,
    "castRange": -1,
    "baseCritRate": 0,
-   "overHit": false
+   "overHit": false,
+   "magicLevel": [
+    80
+   ]
   },
   {
    "skillId": 5131,
@@ -19505,7 +24098,10 @@
    "reuseDelayMs": 0,
    "castRange": -1,
    "baseCritRate": 0,
-   "overHit": false
+   "overHit": false,
+   "magicLevel": [
+    80
+   ]
   },
   {
    "skillId": 5132,
@@ -19527,7 +24123,10 @@
    "reuseDelayMs": 0,
    "castRange": -1,
    "baseCritRate": 0,
-   "overHit": false
+   "overHit": false,
+   "magicLevel": [
+    80
+   ]
   },
   {
    "skillId": 5133,
@@ -19549,7 +24148,10 @@
    "reuseDelayMs": 0,
    "castRange": -1,
    "baseCritRate": 0,
-   "overHit": false
+   "overHit": false,
+   "magicLevel": [
+    80
+   ]
   },
   {
    "skillId": 5135,
@@ -19572,7 +24174,10 @@
    "castRange": 40,
    "baseCritRate": 0,
    "overHit": true,
-   "effectRange": 400
+   "effectRange": 400,
+   "magicLevel": [
+    80
+   ]
   },
   {
    "skillId": 5136,
@@ -19594,7 +24199,10 @@
    "reuseDelayMs": 17000,
    "castRange": -1,
    "baseCritRate": 0,
-   "overHit": true
+   "overHit": true,
+   "magicLevel": [
+    80
+   ]
   },
   {
    "skillId": 5138,
@@ -19617,7 +24225,10 @@
    "castRange": 40,
    "baseCritRate": 0,
    "overHit": true,
-   "effectRange": 400
+   "effectRange": 400,
+   "magicLevel": [
+    80
+   ]
   },
   {
    "skillId": 5139,
@@ -19640,7 +24251,10 @@
    "castRange": 500,
    "baseCritRate": 0,
    "overHit": true,
-   "effectRange": 1000
+   "effectRange": 1000,
+   "magicLevel": [
+    80
+   ]
   },
   {
    "skillId": 5141,
@@ -19663,7 +24277,10 @@
    "castRange": 40,
    "baseCritRate": 0,
    "overHit": true,
-   "effectRange": 400
+   "effectRange": 400,
+   "magicLevel": [
+    80
+   ]
   },
   {
    "skillId": 5142,
@@ -19686,7 +24303,10 @@
    "castRange": 400,
    "baseCritRate": 0,
    "overHit": false,
-   "effectRange": 900
+   "effectRange": 900,
+   "magicLevel": [
+    80
+   ]
   },
   {
    "skillId": 5143,
@@ -19709,7 +24329,10 @@
    "castRange": 40,
    "baseCritRate": 0,
    "overHit": false,
-   "effectRange": 200
+   "effectRange": 200,
+   "magicLevel": [
+    89
+   ]
   },
   {
    "skillId": 5178,
@@ -19731,7 +24354,10 @@
    "reuseDelayMs": 0,
    "castRange": -1,
    "baseCritRate": 0,
-   "overHit": false
+   "overHit": false,
+   "magicLevel": [
+    85
+   ]
   },
   {
    "skillId": 5185,
@@ -19754,7 +24380,10 @@
    "castRange": 900,
    "baseCritRate": 0,
    "overHit": false,
-   "effectRange": 1400
+   "effectRange": 1400,
+   "magicLevel": [
+    75
+   ]
   }
  ]
 }
