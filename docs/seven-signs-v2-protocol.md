@@ -1,5 +1,8 @@
 # Zone V2 Seven Signs wire
 
+> **Wire status:** Live client transport is Fineage Net (`NetOpcode` / `PacketEnvelope`). Opcode **numbers** in this file are legacy MessagePack `MsgType` ids for semantics reference only. On-wire tables: [`net-protocol.md`](net-protocol.md).
+
+
 Period state, cabal membership, seal-stone scores, and the sky tint. Priest dialogs are not on this wire yet. Joining and contributing use a request packet.
 
 Reference rules (not copied code): L2J Mobius CT 0 Interlude `SevenSigns`, `SignsPriest` (Dawn fee and castle checks), `SSQStatus`, and `Feature.ini` Seven Signs keys. The sky tint follows the Interlude SignsSky states. Mobius comments out the `SSQInfo` broadcast in the period task; this server still sends `SevenSignsSky` when the period changes and when status is requested.

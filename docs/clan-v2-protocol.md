@@ -1,5 +1,8 @@
 # Zone V2 clan wire
 
+> **Wire status:** Live client transport is Fineage Net (`NetOpcode` / `PacketEnvelope`). Opcode **numbers** in this file are legacy MessagePack `MsgType` ids for semantics reference only. On-wire tables: [`net-protocol.md`](net-protocol.md).
+
+
 Basic pledge lifecycle for issue #103. Client UI is #104.
 
 Interlude rules and defaults are in `Fineage.Protocol.ClanProtocol` (Mobius `ClanTable.createClan`, `L2Clan.checkClanJoinCondition`, `L2Clan.getMaxNrOfMembers`, `RequestJoinPledge`, `RequestAnswerJoinPledge`, `RequestWithdrawalPledge`, `RequestOustPledgeMember`, `L2Clan.removeClanMember`, `L2Request` 15s timeout, `Character.properties` day counts). This server does not copy those classes.

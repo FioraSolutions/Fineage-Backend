@@ -1,5 +1,8 @@
 # Zone V2 siege wire
 
+> **Wire status:** Live client transport is Fineage Net (`NetOpcode` / `PacketEnvelope`). Opcode **numbers** in this file are legacy MessagePack `MsgType` ids for semantics reference only. On-wire tables: [`net-protocol.md`](net-protocol.md).
+
+
 Castle registration and ownership for Fineage issue #106. Combat, control towers, and artifact casting are not on this wire. `CaptureCastle(clanId)` is the domain hook those systems call when an attacker clan takes the castle.
 
 Interlude rules and defaults are in `Fineage.Protocol.SiegeProtocol` and `Fineage.Zone.Siege`. This server does not copy the Java classes. Reference (L2J Mobius CT 0 Interlude, `org.l2jmobius`):

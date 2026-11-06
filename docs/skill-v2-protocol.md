@@ -1,5 +1,8 @@
 # Zone V2 skill protocol (Backend #137 slice 1)
 
+> **Wire status:** Live client transport is Fineage Net (`NetOpcode` / `PacketEnvelope`). Opcode **numbers** in this file are legacy MessagePack `MsgType` ids for semantics reference only. On-wire tables: [`net-protocol.md`](net-protocol.md).
+
+
 Mobius Interlude references: `SkillList` on enter, `RequestMagicSkillUse`, fan-out `MagicSkillUse`. Catalog: `data/skills.json`, `data/skill-trees.json` (import: `tools/import_skills.py`).
 
 ## Opcodes

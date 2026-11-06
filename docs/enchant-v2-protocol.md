@@ -1,5 +1,8 @@
 # Zone enchant wire
 
+> **Wire status:** Live client transport is Fineage Net (`NetOpcode` / `PacketEnvelope`). Opcode **numbers** in this file are legacy MessagePack `MsgType` ids for semantics reference only. On-wire tables: [`net-protocol.md`](net-protocol.md).
+
+
 A player selects a scroll, puts an item in the window, and the server rolls. Cancel closes the window. This is the server side of client issue #69.
 
 Opcodes already in use elsewhere (do not reuse): equip **15–17**, chat **8 / 1012 / 1040**, party **18–19 / 26–27 / 1027–1029**, spoil **30–31**, clan **32–38 / 1050–1059**, lobby **20–25 / 1020–1026 / 1030–1033**, presence **1005–1007**, combat **1008–1010 / 1017**, inventory **1014–1016**. **1019**, **1034–1039**, and **1041–1049** stay free.

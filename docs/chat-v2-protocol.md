@@ -1,5 +1,8 @@
 # Zone V2 chat wire
 
+> **Wire status:** Live client transport is Fineage Net (`NetOpcode` / `PacketEnvelope`). Opcode **numbers** in this file are legacy MessagePack `MsgType` ids for semantics reference only. On-wire tables: [`net-protocol.md`](net-protocol.md).
+
+
 Local say shows up as `CreatureSay` for the speaker and for nearby players. Shout reaches the whole zone. Everything else is a system line to the speaker. Tell, party, and clan are not delivered.
 
 Opcodes already in use elsewhere (do not reuse): zone presence **1005–1007**, combat **1008–1010** and **1017**, inventory **1014–1016**, party **1027–1029**, lobby **1020–1026** and **1030–1033**. Chat replies sit in **1040–1049**. **1041–1049** are reserved and unused. **1019** is intentionally left free.

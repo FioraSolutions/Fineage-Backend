@@ -1,5 +1,8 @@
 # Zone V2 boss schedule wire
 
+> **Wire status:** Live client transport is Fineage Net (`NetOpcode` / `PacketEnvelope`). Opcode **numbers** in this file are legacy MessagePack `MsgType` ids for semantics reference only. On-wire tables: [`net-protocol.md`](net-protocol.md).
+
+
 Respawn schedule for Interlude raid bosses and the eight grand bosses. This does not implement boss AI, combat, or drops. Combat calls `ZoneWorld.OnBossKilled(npcId)` after the boss dies.
 
 Reference rules (not copied code): L2J Mobius CT 0 Interlude `RaidBossSpawnManager`, `Spawn.setRespawnDelay`, `Rnd.get`, `NPC.ini` `RaidMinRespawnMultiplier` / `RaidMaxRespawnMultiplier`, `GrandBossManager`, `GrandBoss.ini`, `raidboss_spawnlist`, and `grandboss_data`. Grand-boss hour windows follow `QueenAnt`, `Core`, `Orfen`, `Zaken`, `Baium`, `Antharas`, `Valakas`, and `Frintezza` (`interval + getRandom(-random, +random)` hours).

@@ -1,5 +1,8 @@
 # Zone V2 catacomb and necropolis gates
 
+> **Wire status:** Live client transport is Fineage Net (`NetOpcode` / `PacketEnvelope`). Opcode **numbers** in this file are legacy MessagePack `MsgType` ids for semantics reference only. On-wire tables: [`net-protocol.md`](net-protocol.md).
+
+
 Entrance and exit for the eight Interlude necropolises and six catacombs. The gate reads the Seven Signs period, cabal, and seal owners from the service in `docs/seven-signs-v2-protocol.md`. Priest dialogs and the town hunting-ground menu are not on this wire.
 
 Opcodes are the next free ids after Seven Signs **90–91** / **1090–1091**. Re-check before merging if another branch has taken **92** or **1092**.

@@ -1,5 +1,8 @@
 # Zone V2 trade wire (minimal)
 
+> **Wire status:** Live client transport is Fineage Net (`NetOpcode` / `PacketEnvelope`). Opcode **numbers** in this file are legacy MessagePack `MsgType` ids for semantics reference only. On-wire tables: [`net-protocol.md`](net-protocol.md).
+
+
 Interlude reference and Fineage client mapping live in **`docs/trade-java-l2.md`**.
 
 ## Opcodes
