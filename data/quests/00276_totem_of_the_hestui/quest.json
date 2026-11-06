@@ -11,9 +11,64 @@
     {
       "npcId": 30571,
       "hook": "talk",
+      "when": "absent",
+      "races": [
+        0,
+        1,
+        2,
+        4
+      ],
+      "htmlFile": "30571-talk-000.htm"
+    },
+    {
+      "npcId": 30571,
+      "hook": "talk",
+      "when": "absent",
+      "races": [
+        3
+      ],
+      "maxLevel": 14,
+      "htmlFile": "30571-talk-001.htm"
+    },
+    {
+      "npcId": 30571,
+      "hook": "talk",
+      "when": "absent",
+      "races": [
+        3
+      ],
+      "minLevel": 15,
+      "htmlFile": "30571-talk-002.htm"
+    },
+    {
+      "npcId": 30571,
+      "hook": "event",
+      "when": "absent",
+      "event": "30571-03",
+      "races": [
+        3
+      ],
+      "minLevel": 15,
+      "ops": [
+        {
+          "op": "create"
+        },
+        {
+          "op": "start"
+        },
+        {
+          "op": "set_cond",
+          "cond": 1
+        }
+      ],
+      "htmlFile": "30571-event-30571-03-003.htm"
+    },
+    {
+      "npcId": 30571,
+      "hook": "talk",
       "when": "started",
       "cond": 1,
-      "htmlFile": "30571-talk-c1-000.htm"
+      "htmlFile": "30571-talk-c1-004.htm"
     },
     {
       "npcId": 30571,
@@ -23,22 +78,84 @@
       "hasItem": 1481,
       "ops": [
         {
+          "op": "give_item",
+          "itemId": 29,
+          "count": 1
+        },
+        {
+          "op": "give_item",
+          "itemId": 1500,
+          "count": 1
+        },
+        {
           "op": "complete"
         }
       ],
-      "htmlFile": "30571-talk-c2-001.htm"
+      "htmlFile": "30571-talk-c2-005.htm"
+    },
+    {
+      "npcId": 20479,
+      "hook": "kill",
+      "when": "started",
+      "cond": 1,
+      "atLeast": {
+        "1480": 50
+      },
+      "lacksItems": [
+        1481
+      ],
+      "html": "",
+      "ops": [
+        {
+          "op": "spawn_npc",
+          "npcId": 27044
+        },
+        {
+          "op": "take_item",
+          "itemId": 1480,
+          "count": 50
+        }
+      ]
+    },
+    {
+      "npcId": 20479,
+      "hook": "kill",
+      "when": "started",
+      "cond": 1,
+      "lacksItems": [
+        1481
+      ],
+      "html": "",
+      "ops": [
+        {
+          "op": "drop_item",
+          "itemId": 1480,
+          "count": 1,
+          "chance": 1.0,
+          "limit": 0
+        }
+      ]
     },
     {
       "npcId": 27044,
       "hook": "kill",
       "when": "started",
+      "cond": 1,
+      "lacksItems": [
+        1481
+      ],
+      "html": "",
       "ops": [
+        {
+          "op": "give_item",
+          "itemId": 1481,
+          "count": 1
+        },
         {
           "op": "set_cond",
           "cond": 2
         }
-      ],
-      "html": ""
+      ]
     }
   ]
 }
