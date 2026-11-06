@@ -24,6 +24,16 @@ public sealed class PartyLootRulesTests
     }
 
     [Fact]
+    public void Random_redistributes_ground_pickup()
+    {
+        int last = 0;
+        var rnd = new Seq(1);
+        int looter = PartyLootRules.ActualLooter(10, PartyDistributionType.Random, spoil: false,
+            [10, 20, 30], _ => true, ref last, rnd);
+        Assert.Equal(20, looter);
+    }
+
+    [Fact]
     public void RandomIncludingSpoil_picks_eligible_member()
     {
         int last = 0;

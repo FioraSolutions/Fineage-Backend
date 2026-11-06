@@ -18,7 +18,7 @@ Legend: ✅ done · 🟡 partial · ❌ missing · stub = shell only.
 | 8 | Magic: mcrit / fail / magicLevel / mCritRate / mCritPower | Combat | ✅ | `#255` |
 | 9 | Phys skill crit / CritDmg / BlowRate / pSkillEvas | Combat | ✅ | `#256` |
 | 10 | Blow / Lethal | Combat | ✅ | |
-| 11 | Spoil / Sweep | Combat | 🟡 | `#260` party loot modes on sweep; ground pickup party loot still open |
+| 11 | Spoil / Sweep | Combat | ✅ | `#260` sweep + ground pickup party `distributeItem` |
 | 12 | Mob AI aggro/hate/clan/LOS | Combat | ✅ | |
 | 13 | NPC soulshots | Combat | 🟡 | `#257` stock+chance on melee; no SS glow packet yet; spiritshots unused (no NPC magic cast) |
 | 14 | Weapon trait / NPC defence traits | Combat | ✅ | `#261` gen_npc_weapon_traits → defenceTraits; race weakness traits still open |
@@ -32,7 +32,7 @@ Legend: ✅ done · 🟡 partial · ❌ missing · stub = shell only.
 | 22 | Player trade | Economy | ✅ | |
 | 23 | Private store / craft | Economy | ❌ | |
 | 24 | Enchant | Economy | 🟡 | Backend; client UI partial |
-| 25 | Party invite/leave + exp share | Social | 🟡 | Sweep `distributeItem` loot modes done (#260); ground pickup party loot still open |
+| 25 | Party invite/leave + exp share | Social | 🟡 | Invite/leave + exp; loot modes on sweep + ground pickup (#260 follow-up) |
 | 26 | Clan basic | Social | 🟡 | No crest/war/ally |
 | 27 | Friends / block | Social | ❌ | |
 | 28 | NPC HTML + bypass + teleports + newbie buffs | Content | ✅ | |
@@ -44,11 +44,10 @@ Legend: ✅ done · 🟡 partial · ❌ missing · stub = shell only.
 ## Next backend slices (priority)
 
 1. **NPC magic/blow skills vs players** (finish scopes / heal / buff) — [#259](https://github.com/FioraSolutions/Fineage-Backend/issues/259)
-2. Ground pickup party `distributeItem` (non-spoil) — follow-up to #260.
-3. **Private store** (needs Net + client — coordinate).
-4. **Geodata pathfinding** for approach (medium).
-5. Race / construct weakness traits (`calcAttackTraitBonus` type-2) — follow-up to `#261`.
-6. PvP flagging / karma persist (feeds death-drop karma rates) — follow-up to `#258`.
+2. **Private store** (needs Net + client — coordinate).
+3. **Geodata pathfinding** for approach (medium).
+4. Race / construct weakness traits (`calcAttackTraitBonus` type-2) — follow-up to `#261`.
+5. PvP flagging / karma persist (feeds death-drop karma rates) — follow-up to `#258`.
 
 ## Docs
 

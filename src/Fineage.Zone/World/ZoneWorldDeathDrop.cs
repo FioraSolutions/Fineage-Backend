@@ -117,4 +117,18 @@ public sealed partial class ZoneWorld
         lock (_gate)
             return _byId.Values.Count(e => e.Kind == ZoneEntityKind.GroundItem);
     }
+
+    /// <summary>ObjectId of the first live ground stack (test helper).</summary>
+    internal int FindGroundObjectIdForTest()
+    {
+        lock (_gate)
+        {
+            foreach (var e in _byId.Values)
+            {
+                if (e.Kind == ZoneEntityKind.GroundItem)
+                    return e.ObjectId;
+            }
+        }
+        return 0;
+    }
 }
