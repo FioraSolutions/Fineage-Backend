@@ -6336,6 +6336,16 @@
       "quest": true
     },
     {
+      "id": 1482,
+      "name": "Black Wolf Pelt",
+      "kind": "etc",
+      "icon": "icon.etc_leather_gray_i00",
+      "price": 0,
+      "weight": 0,
+      "stackable": true,
+      "quest": true
+    },
+    {
       "id": 1483,
       "name": "Goblin Necklace",
       "kind": "etc",
@@ -6416,6 +6426,16 @@
       "quest": true
     },
     {
+      "id": 1491,
+      "name": "Bat Fang",
+      "kind": "etc",
+      "icon": "icon.etc_claw_i00",
+      "price": 0,
+      "weight": 0,
+      "stackable": true,
+      "quest": true
+    },
+    {
       "id": 1493,
       "name": "Tarantula Spider Silk",
       "kind": "etc",
@@ -6473,6 +6493,15 @@
       "icon": "icon.etc_totem_green_i00",
       "price": 1200,
       "weight": 10
+    },
+    {
+      "id": 1505,
+      "name": "Grandma's Hairpin",
+      "kind": "etc",
+      "icon": "icon.etc_jewel_white_i00",
+      "price": 200,
+      "weight": 10,
+      "stackable": true
     },
     {
       "id": 1506,
