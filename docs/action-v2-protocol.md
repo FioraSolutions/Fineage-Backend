@@ -1,5 +1,8 @@
 # Zone V2 character actions (Backend #141)
 
+> **Wire status:** Live client transport is Fineage Net (`NetOpcode` / `PacketEnvelope`). Opcode **numbers** in this file are legacy MessagePack `MsgType` ids for semantics reference only. On-wire tables: [`net-protocol.md`](net-protocol.md).
+
+
 Mobius Interlude references: client `RequestActionUse` (opcode 0x56), server fan-out `ChangeWaitType`, `SocialAction`, and movement mode on the actor. Fineage uses MessagePack opcodes instead of binary Interlude packets; action **ids** match the Mobius action table for the MVP set below.
 
 ## Opcodes

@@ -1,5 +1,8 @@
 # Zone V2 Olympiad wire
 
+> **Wire status:** Live client transport is Fineage Net (`NetOpcode` / `PacketEnvelope`). Opcode **numbers** in this file are legacy MessagePack `MsgType` ids for semantics reference only. On-wire tables: [`net-protocol.md`](net-protocol.md).
+
+
 Registration, matchmaking, stadium teleport, and noble points for Fineage issue #92. Damage, death, and the blow-by-blow fight are not on this wire. `ReportOlympiadResult(matchId, winnerObjectId)` is the hook combat calls when the fight is decided. `winnerObjectId` 0 is a draw.
 
 Interlude rules and defaults are in `Fineage.Protocol.OlympiadProtocol` and `Fineage.Zone.Olympiad`. This server does not copy the Java classes. Reference (L2J Mobius CT 0 Interlude, `org.l2jmobius`):

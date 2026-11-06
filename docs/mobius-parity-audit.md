@@ -1,5 +1,10 @@
 # Сверка с L2J Mobius CT0 Interlude
 
+> **SNAPSHOT** — сверка на коммите `a52304d` / ветке `feat/net-foundation` (2026-11-03).
+> Не считать актуальным для текущего `dev` без повторного прогона.
+> Документ ссылается на `Fineage.Protocol/V2/` как живой транспорт — **удалён**; live wire = Fineage Net (`docs/net-protocol.md`).
+> Doc triage: client [`Docs/DOC_CANON.md`](https://github.com/FioraSolutions/Fineage/blob/dev/Docs/DOC_CANON.md).
+
 Сверка логики сервера против эталонного L2J Mobius CT0 Interlude.
 Документ фиксирует только расхождения. Это не план рефакторинга.
 

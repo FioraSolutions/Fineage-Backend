@@ -1,5 +1,8 @@
 # Zone V2 shops
 
+> **Wire status:** Live client transport is Fineage Net (`NetOpcode` / `PacketEnvelope`). Opcode **numbers** in this file are legacy MessagePack `MsgType` ids for semantics reference only. On-wire tables: [`net-protocol.md`](net-protocol.md).
+
+
 Buy from a merchant buylist, sell back at half the reference price, and exchange through a multisell. The NPC window is still `BypassRequest` (95) from `docs/npc-html-v2-protocol.md`. This page is the trade that follows `Buy`, `Sell`, `Multisell`, `exc_multisell`, and `Exchange`.
 
 Opcodes already taken include NPC HTML **95** / **1094**. Olympiad is reserved at **60–64** / **1070–1073** / system messages **160–179**. Teleport, warehouse, and newbie buffs are reserved at **105–109** / **1105–1109** / **190–209**. This block is the next free shop range: requests **96–99**, replies **1095–1098**, system messages **180–189**. **1099** stays `Error`.

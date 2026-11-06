@@ -1,5 +1,8 @@
 # Zone V2 NPC HTML
 
+> **Wire status:** Live client transport is Fineage Net (`NetOpcode` / `PacketEnvelope`). Opcode **numbers** in this file are legacy MessagePack `MsgType` ids for semantics reference only. On-wire tables: [`net-protocol.md`](net-protocol.md).
+
+
 Talk to a non-attackable NPC, and follow the links in its window. Quest steps from `docs/quest-v2-protocol.md` stay on `NpcTalk` (44), `QuestEvent` (45), and `QuestDialog` (1062). This page is the Mobius `NpcHtmlMessage` / `RequestBypassToServer` path those quest packets do not cover.
 
 Opcodes already taken include Seven Signs **90–91** / **1090–1091**, dungeon access **92** / **1092**, boss status **93** / **1093**, admin boss schedule **94**, siege info **1064**, skills **1065–1066**, and character actions **1067–1069**. This block is the next free pair: **95** and **1094**. **1099** stays `Error`.

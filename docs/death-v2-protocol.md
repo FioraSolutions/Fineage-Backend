@@ -1,5 +1,8 @@
 # Zone V2 player death and respawn (Backend #139)
 
+> **Wire status:** Live client transport is Fineage Net (`NetOpcode` / `PacketEnvelope`). Opcode **numbers** in this file are legacy MessagePack `MsgType` ids for semantics reference only. On-wire tables: [`net-protocol.md`](net-protocol.md).
+
+
 Mobius Interlude references: server `Die`, `Revive`, `TeleportToLocation`; client restart to the nearest village restart point. Player death is **`ZoneEntity.Dead`**, not low `CurHp` (regen still heals wounded living players).
 
 ## Opcodes

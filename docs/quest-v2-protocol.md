@@ -1,5 +1,8 @@
 # Zone V2 quest wire
 
+> **Wire status:** Live client transport is Fineage Net (`NetOpcode` / `PacketEnvelope`). Opcode **numbers** in this file are legacy MessagePack `MsgType` ids for semantics reference only. On-wire tables: [`net-protocol.md`](net-protocol.md).
+
+
 Quest state follows L2J Mobius Interlude rules: `Quest` / `QuestState` phases CREATED, STARTED, and COMPLETED; `cond` plus arbitrary variables (including `__compltdStateFlags`); one-time quests stay COMPLETED; repeatable completion and `RequestQuestAbort` delete the row (`exitQuest(true)`); the active cap is 25 (`MaxQuestCount`); `QuestList` is the started set plus a 128-byte one-time mask; NPC hooks are first-talk, talk, and adv-event. `IQuestKillHook.OnKill` is the later kill entry. Melee does not call it.
 
 Opcodes already taken: equip **15–17**, party **18–19** / **26–27**, spoil **30–31**, clan **32–38**, enchant **39–41** and **1060**, chat **1040–1049**, clan replies **1050–1059**. This block is **42–45** and **1061–1063**. Siege uses **46–49** and **1064** (`docs/siege-v2-protocol.md`). Skills use **50** and **1065–1066** (`docs/skill-v2-protocol.md`). Character actions use **51** and **1067–1069** (`docs/action-v2-protocol.md`).
