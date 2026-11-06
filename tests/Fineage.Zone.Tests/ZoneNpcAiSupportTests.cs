@@ -1,4 +1,6 @@
+using Fineage.Protocol;
 using Fineage.Zone.Npcs;
+using Fineage.Zone.World;
 using Xunit;
 
 namespace Fineage.Zone.Tests;
@@ -75,5 +77,51 @@ public sealed class ZoneNpcAiSupportTests
 
         Assert.True(kit.World.CastNpcSupportForTest(mob, player, skill, "debuff"));
         Assert.Contains(player.Abnormals, a => a.Id == 4038);
+    }
+
+    [Fact]
+    public void Catalog_loads_grave_lich_sleep()
+    {
+        var row = NpcAiSupportCatalog.LoadDefault().Get(21003);
+        Assert.Contains(row!.Value.Immobilize!, s => s.SkillId == 4046 && s.Slot == "SLEEP");
+    }
+
+    [Fact]
+    public async Task Npc_sleep_blocks_player_move_and_skills()
+    {
+        var kit = new NetTestKit(Fineage.Zone.Spawns.SpawnCatalog.LoadDefault(), "elven_starting");
+        var mob = kit.World.AttackableForTest()!;
+        var (session, player) = await kit.EnterAsync(classId: 54, race: 4, x: mob.X + 10, y: mob.Y, z: mob.Z);
+        player.KnownSkills[4032] = 1;
+        var skill = new NpcAiSupportSkill(4046, 5, HitTimeMs: 0, ReuseDelayMs: 8000, Mp: 45, MpInitial: 0,
+            AbnormalTimeSeconds: 30, AbnormalLevel: 1, Slot: "SLEEP");
+        mob.CurMp = mob.MaxMp;
+
+        Assert.True(kit.World.CastNpcSupportForTest(mob, player, skill, "immobilize"));
+        Assert.True(ZoneWorld.IsImmobilized(player));
+        Assert.Equal(ActionProtocol.Immobilized,
+            await kit.World.TryMoveAsync(session, new MoveToMsg { DestX = player.X + 200, DestY = player.Y, DestZ = player.Z }, default));
+        Assert.Equal(SkillProtocol.Muted,
+            await kit.World.TrySkillUseAsync(session, new SkillUseRequestMsg { SkillId = 4032, TargetObjectId = mob.ObjectId }, default));
+    }
+
+    [Fact]
+    public async Task Npc_heal_can_restore_another_npc()
+    {
+        var kit = new NetTestKit(Fineage.Zone.Spawns.SpawnCatalog.LoadDefault(), "elven_starting");
+        var mobs = kit.World.AttackablesForTest(2);
+        Assert.True(mobs.Count >= 2);
+        var healer = mobs[0];
+        var mate = mobs[1];
+        mate.X = healer.X + 50;
+        mate.Y = healer.Y;
+        mate.Z = healer.Z;
+        mate.CurHp = Math.Max(1, mate.MaxHp / 5);
+        healer.CurMp = healer.MaxMp;
+        var skill = new NpcAiSupportSkill(4065, 5, HitTimeMs: 0, ReuseDelayMs: 8000, Mp: 64, MpInitial: 16, Amount: 494);
+
+        int before = mate.CurHp;
+        Assert.True(kit.World.CastNpcSupportForTest(healer, mate, skill, "heal"));
+        Assert.True(mate.CurHp > before);
     }
 }

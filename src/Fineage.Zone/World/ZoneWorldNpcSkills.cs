@@ -11,23 +11,46 @@ namespace Fineage.Zone.World;
 public sealed partial class ZoneWorld
 {
     /// <summary>
-    /// Mobius HEAL scope: when <c>Rnd(100) &lt; (100 - hp%) / 3</c>, self-cast one heal skill.
+    /// Mobius HEAL scope: self-heal when wounded, else heal a wounded same-clan NPC in cast range.
     /// </summary>
     bool TryNpcHealSkill(ZoneEntity npc, long now)
     {
         if (npc.AiHealSkills is not { Count: > 0 } || npc.CastingUntilMs > now || npc.PendingHit != null)
-            return false;
-        if (npc.MaxHp <= 0 || npc.CurHp >= npc.MaxHp)
-            return false;
-        double pct = npc.CurHp * 100d / npc.MaxHp;
-        if (_combatRandom.Next(100) >= (int)((100d - pct) / 3d))
             return false;
 
         var ready = ReadySupportSkills(npc, npc.AiHealSkills, now);
         if (ready.Count == 0)
             return false;
         var pick = ready[_combatRandom.Next(ready.Count)];
-        return CastNpcSupportSkill(npc, npc, pick, NpcSupportKind.Heal, now);
+
+        // Self heal: Rnd(100) < (100 - hp%) / 3
+        if (npc.MaxHp > 0 && npc.CurHp < npc.MaxHp)
+        {
+            double pct = npc.CurHp * 100d / npc.MaxHp;
+            if (_combatRandom.Next(100) < (int)((100d - pct) / 3d))
+                return CastNpcSupportSkill(npc, npc, pick, NpcSupportKind.Heal, now);
+        }
+
+        // Clan heal: living wounded clan mate, Rnd(100) < (100 - hp%) / 10
+        if (npc.Clans is not { Count: > 0 })
+            return false;
+        const int healRange = 600;
+        foreach (var other in _byId.Values)
+        {
+            if (other.Kind != ZoneEntityKind.Npc || ReferenceEquals(other, npc) || other.CurHp <= 0 || other.Dead
+                || other.MaxHp <= 0 || other.CurHp >= other.MaxHp
+                || other.Clans == null || !other.Clans.Any(c => npc.Clans.Contains(c))
+                || !SameInstance(npc.ObjectId, other.ObjectId)
+                || !ZoneCombat.Within(npc.X, npc.Y, other.X, other.Y, healRange))
+                continue;
+            double matePct = other.CurHp * 100d / other.MaxHp;
+            if (_combatRandom.Next(100) >= (int)((100d - matePct) / 10d))
+                continue;
+            if (!CanSeeTarget(npc, other))
+                continue;
+            return CastNpcSupportSkill(npc, other, pick, NpcSupportKind.Heal, now);
+        }
+        return false;
     }
 
     /// <summary>Mobius BUFF scope (self): cast when the NPC is not already affected by that skill id.</summary>
@@ -49,16 +72,43 @@ public sealed partial class ZoneWorld
         return CastNpcSupportSkill(npc, npc, pick, NpcSupportKind.Buff, now);
     }
 
+    /// <summary>Mobius IMMOBILIZE scope: ~15% chance (sleep/root/stun/paralyze).</summary>
+    bool TryNpcImmobilizeSkill(ZoneEntity npc, ZoneEntity player, long now)
+    {
+        if (IsImmobilized(player))
+            return false;
+        return TryNpcControlSkill(npc, player, npc.AiImmobilizeSkills, chancePercent: 15, NpcSupportKind.Immobilize, now);
+    }
+
+    /// <summary>Mobius COT silence scope: ~20% chance.</summary>
+    bool TryNpcSilenceSkill(ZoneEntity npc, ZoneEntity player, long now)
+    {
+        if (IsSilenced(player))
+            return false;
+        return TryNpcControlSkill(npc, player, npc.AiSilenceSkills, chancePercent: 20, NpcSupportKind.Silence, now);
+    }
+
     /// <summary>Mobius DEBUFF scope: ~30% chance to land one debuff on the hate target.</summary>
     bool TryNpcDebuffSkill(ZoneEntity npc, ZoneEntity player, long now)
     {
-        if (npc.AiDebuffSkills is not { Count: > 0 } || npc.CastingUntilMs > now || npc.PendingHit != null)
+        return TryNpcControlSkill(npc, player, npc.AiDebuffSkills, chancePercent: 30, NpcSupportKind.Debuff, now);
+    }
+
+    bool TryNpcControlSkill(
+        ZoneEntity npc,
+        ZoneEntity player,
+        IReadOnlyList<NpcAiSupportSkill>? skills,
+        int chancePercent,
+        NpcSupportKind kind,
+        long now)
+    {
+        if (skills is not { Count: > 0 } || npc.CastingUntilMs > now || npc.PendingHit != null)
             return false;
-        if (_combatRandom.Next(100) >= 30)
+        if (_combatRandom.Next(100) >= chancePercent)
             return false;
 
         var ready = new List<NpcAiSupportSkill>();
-        foreach (var skill in ReadySupportSkills(npc, npc.AiDebuffSkills, now))
+        foreach (var skill in ReadySupportSkills(npc, skills, now))
         {
             if (player.Abnormals.Any(a => a.Id == skill.SkillId))
                 continue;
@@ -67,7 +117,7 @@ public sealed partial class ZoneWorld
         if (ready.Count == 0)
             return false;
         var pick = ready[_combatRandom.Next(ready.Count)];
-        return CastNpcSupportSkill(npc, player, pick, NpcSupportKind.Debuff, now);
+        return CastNpcSupportSkill(npc, player, pick, kind, now);
     }
 
     static List<NpcAiSupportSkill> ReadySupportSkills(
@@ -87,7 +137,32 @@ public sealed partial class ZoneWorld
         return ready;
     }
 
-    enum NpcSupportKind { Heal, Buff, Debuff }
+    enum NpcSupportKind { Heal, Buff, Debuff, Immobilize, Silence }
+
+    internal static readonly HashSet<string> ImmobilizeSlots = new(StringComparer.OrdinalIgnoreCase)
+    {
+        "SLEEP", "ROOT_MAGICALLY", "ROOT_PHYSICALLY", "STUN", "PARALYZE"
+    };
+
+    /// <summary>Slots that also block skill use (root still allows casting).</summary>
+    internal static readonly HashSet<string> ActionBlockSlots = new(StringComparer.OrdinalIgnoreCase)
+    {
+        "SLEEP", "STUN", "PARALYZE"
+    };
+
+    internal static readonly HashSet<string> SilenceSlots = new(StringComparer.OrdinalIgnoreCase)
+    {
+        "SILENCE", "SILENCE_PHYSICAL", "SILENCE_ALL"
+    };
+
+    internal static bool IsImmobilized(ZoneEntity entity) =>
+        entity.Abnormals.Any(a => a.Slot.Length > 0 && ImmobilizeSlots.Contains(a.Slot));
+
+    internal static bool IsActionBlocked(ZoneEntity entity) =>
+        entity.Abnormals.Any(a => a.Slot.Length > 0 && ActionBlockSlots.Contains(a.Slot));
+
+    internal static bool IsSilenced(ZoneEntity entity) =>
+        entity.Abnormals.Any(a => a.Slot.Length > 0 && SilenceSlots.Contains(a.Slot));
 
     bool CastNpcSupportSkill(
         ZoneEntity npc,
@@ -139,6 +214,8 @@ public sealed partial class ZoneWorld
                 break;
             case NpcSupportKind.Buff:
             case NpcSupportKind.Debuff:
+            case NpcSupportKind.Immobilize:
+            case NpcSupportKind.Silence:
                 if (skill.AbnormalTimeSeconds <= 0)
                     return;
                 int abnormal = skill.AbnormalLevel > 0 ? skill.AbnormalLevel : skill.Level;
@@ -148,10 +225,13 @@ public sealed partial class ZoneWorld
                     abnormal,
                     skill.AbnormalTimeSeconds,
                     now,
-                    skill.Level);
+                    skill.Level,
+                    skill.Slot);
+                if (kind is NpcSupportKind.Immobilize or NpcSupportKind.Silence)
+                    StopTimedMove(target);
                 FanoutAbnormal(target);
                 ZoneLog.Info(
-                    $"[npc-support] {(kind == NpcSupportKind.Buff ? "buff" : "debuff")} {skill.SkillId} lv{skill.Level} on={target.ObjectId}");
+                    $"[npc-support] {kind} {skill.SkillId} lv{skill.Level} slot={skill.Slot} on={target.ObjectId}");
                 break;
         }
     }
@@ -342,6 +422,8 @@ public sealed partial class ZoneWorld
                 "heal" => NpcSupportKind.Heal,
                 "buff" => NpcSupportKind.Buff,
                 "debuff" => NpcSupportKind.Debuff,
+                "immobilize" => NpcSupportKind.Immobilize,
+                "silence" => NpcSupportKind.Silence,
                 _ => throw new ArgumentOutOfRangeException(nameof(kind))
             };
             return CastNpcSupportSkill(npc, target, skill, k, _clock().ToUnixTimeMilliseconds());

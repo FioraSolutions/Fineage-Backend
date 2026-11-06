@@ -2,7 +2,7 @@ using System.Text.Json;
 
 namespace Fineage.Zone.Npcs;
 
-/// <summary>One Mobius AISkillScope HEAL / BUFF / DEBUFF row for NPC AI.</summary>
+/// <summary>One Mobius AISkillScope support row for NPC AI (heal / buff / debuff / control).</summary>
 public readonly record struct NpcAiSupportSkill(
     int SkillId,
     int Level,
@@ -12,9 +12,10 @@ public readonly record struct NpcAiSupportSkill(
     int MpInitial,
     int Amount = 0,
     int AbnormalTimeSeconds = 0,
-    int AbnormalLevel = 0);
+    int AbnormalLevel = 0,
+    string Slot = "");
 
-/// <summary>Per-NPC support skill lists (heal / buff / debuff) from <c>data/npc-ai-support.json</c>.</summary>
+/// <summary>Per-NPC support skill lists from <c>data/npc-ai-support.json</c>.</summary>
 public sealed class NpcAiSupportCatalog
 {
     public const string FileName = "npc-ai-support.json";
@@ -65,7 +66,6 @@ public sealed class NpcAiSupportCatalog
         }
     }
 
-    /// <summary>Empty catalog for tests that do not need support skills.</summary>
     public static NpcAiSupportCatalog Empty { get; } = new(new Dictionary<int, NpcAiSupportRow>());
 
     static NpcAiSupportCatalog Read(string path)
@@ -80,7 +80,9 @@ public sealed class NpcAiSupportCatalog
             byId[row.NpcId] = new NpcAiSupportRow(
                 Parse(row.Heal),
                 Parse(row.Buff),
-                Parse(row.Debuff));
+                Parse(row.Debuff),
+                Parse(row.Immobilize),
+                Parse(row.Silence));
         }
         return new NpcAiSupportCatalog(byId);
     }
@@ -103,7 +105,8 @@ public sealed class NpcAiSupportCatalog
                 Math.Max(0, r.MpInitial),
                 Math.Max(0, r.Amount),
                 Math.Max(0, r.AbnormalTimeSeconds),
-                Math.Max(0, r.AbnormalLevel)));
+                Math.Max(0, r.AbnormalLevel),
+                (r.Slot ?? "").Trim()));
         }
         return list.Count > 0 ? list : null;
     }
@@ -111,7 +114,9 @@ public sealed class NpcAiSupportCatalog
     public readonly record struct NpcAiSupportRow(
         IReadOnlyList<NpcAiSupportSkill>? Heal,
         IReadOnlyList<NpcAiSupportSkill>? Buff,
-        IReadOnlyList<NpcAiSupportSkill>? Debuff);
+        IReadOnlyList<NpcAiSupportSkill>? Debuff,
+        IReadOnlyList<NpcAiSupportSkill>? Immobilize,
+        IReadOnlyList<NpcAiSupportSkill>? Silence);
 
     sealed class FileDto
     {
@@ -124,6 +129,8 @@ public sealed class NpcAiSupportCatalog
         public List<SkillDto>? Heal { get; set; }
         public List<SkillDto>? Buff { get; set; }
         public List<SkillDto>? Debuff { get; set; }
+        public List<SkillDto>? Immobilize { get; set; }
+        public List<SkillDto>? Silence { get; set; }
     }
 
     sealed class SkillDto
@@ -137,5 +144,6 @@ public sealed class NpcAiSupportCatalog
         public int Amount { get; set; }
         public int AbnormalTimeSeconds { get; set; }
         public int AbnormalLevel { get; set; }
+        public string? Slot { get; set; }
     }
 }

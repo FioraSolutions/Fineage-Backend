@@ -340,6 +340,8 @@ public sealed partial class ZoneWorld
             return "world";
         if (player.Dead)
             return SkillProtocol.Dead;
+        if (IsActionBlocked(player) || IsSilenced(player))
+            return SkillProtocol.Muted;
         if (request.SkillId <= 0)
             return "bad_request";
 

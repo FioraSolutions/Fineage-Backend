@@ -106,7 +106,7 @@
 3. ~~magicLvl in skill-combat.json + mcrit stat mods~~ — done (slice 10 follow-up).
 4. ~~NPC soulshots~~ — stock + chance on melee (`gen_npc_shots.py`); spiritshots / SS glow / boss materialize still open.
 5. ~~Weapon vulnerabilities (NPC passive traits)~~ — done (#261).
-6. NPC blow/magic skills on players (#259): attack skills via `gen_npc_ai_skills.py`; HEAL/BUFF/DEBUFF via `gen_npc_ai_support.py` → `npc-ai-support.json`. Clan heal / RES / suicide / immobilize still open.
+6. NPC blow/magic skills on players (#259): attack via `gen_npc_ai_skills.py`; HEAL/BUFF/DEBUFF/IMMOBILIZE/silence + clan heal via `gen_npc_ai_support.py`. Sleep/stun/paralyze block move+skills; root blocks move; silence blocks skills. RES / suicide still open.
 
 ## Slice — NPC soulshots (Mobius `Npc.rechargeShots`)
 

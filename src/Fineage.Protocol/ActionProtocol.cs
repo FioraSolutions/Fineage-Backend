@@ -45,6 +45,8 @@ public static class ActionProtocol
     public const int WaitStanding = 1;
 
     public const string Dead = "action_dead";
+    /// <summary>Player cannot move (sleep/root/stun/paralyze).</summary>
+    public const string Immobilized = "action_immobilized";
     public const string Blocked = "action_blocked";
     public const string Sitting = "action_sitting";
     public const string Unknown = "action_unknown";

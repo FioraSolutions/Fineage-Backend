@@ -159,12 +159,16 @@ sealed class ZoneEntity
     public IReadOnlyDictionary<string, double>? DefenceTraits { get; init; }
     /// <summary>Mobius AI attack skills (skillList ∩ skill-combat); null = melee only.</summary>
     public IReadOnlyList<Fineage.Zone.Npcs.NpcAiSkill>? AiSkills { get; init; }
-    /// <summary>Mobius AISkillScope.HEAL rows (self heal when wounded).</summary>
+    /// <summary>Mobius AISkillScope.HEAL rows (self/clan heal when wounded).</summary>
     public IReadOnlyList<Fineage.Zone.Npcs.NpcAiSupportSkill>? AiHealSkills { get; set; }
     /// <summary>Mobius AISkillScope.BUFF rows (self buff when missing).</summary>
     public IReadOnlyList<Fineage.Zone.Npcs.NpcAiSupportSkill>? AiBuffSkills { get; set; }
     /// <summary>Mobius AISkillScope.DEBUFF rows (debuff hate target).</summary>
     public IReadOnlyList<Fineage.Zone.Npcs.NpcAiSupportSkill>? AiDebuffSkills { get; set; }
+    /// <summary>Mobius AISkillScope.IMMOBILIZE (sleep/root/stun/paralyze).</summary>
+    public IReadOnlyList<Fineage.Zone.Npcs.NpcAiSupportSkill>? AiImmobilizeSkills { get; set; }
+    /// <summary>Mobius AISkillScope.COT silence.</summary>
+    public IReadOnlyList<Fineage.Zone.Npcs.NpcAiSupportSkill>? AiSilenceSkills { get; set; }
     public int MinSkillChance { get; init; } = 7;
     public int MaxSkillChance { get; init; } = 15;
     /// <summary>Mobius auto soulshot set: shot item ids recharged after each discharge.</summary>
@@ -875,6 +879,8 @@ public sealed partial class ZoneWorld
         var entity = _byId[session.ObjectId];
         if (entity.Dead)
             return InventoryProtocol.Dead;
+        if (IsImmobilized(entity))
+            return ActionProtocol.Immobilized;
         if (entity.Sitting)
             return ActionProtocol.Sitting;
         if (entity.CastingUntilMs > _clock().ToUnixTimeMilliseconds())

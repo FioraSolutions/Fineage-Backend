@@ -321,6 +321,16 @@ public sealed partial class ZoneWorld
             return _byId.Values.FirstOrDefault(e => e.Kind == ZoneEntityKind.Npc && e.Attackable && e.CurHp > 0);
     }
 
+    /// <summary>Test hook: up to <paramref name="take"/> living attackable NPCs.</summary>
+    internal List<ZoneEntity> AttackablesForTest(int take = 2)
+    {
+        lock (_gate)
+            return _byId.Values
+                .Where(e => e.Kind == ZoneEntityKind.Npc && e.Attackable && e.CurHp > 0)
+                .Take(take)
+                .ToList();
+    }
+
     /// <summary>Test: kill an NPC through the normal death path (corpse, drops, spoil roll, decay timer).</summary>
     internal void KillForTest(ZoneEntity npc, ZoneEntity killer)
     {
