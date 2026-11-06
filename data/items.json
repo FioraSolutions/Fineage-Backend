@@ -6496,6 +6496,15 @@
       "quest": true
     },
     {
+      "id": 1500,
+      "name": "Totem of Hestui",
+      "kind": "etc",
+      "icon": "icon.etc_totem_black_i00",
+      "price": 11000,
+      "weight": 10,
+      "stackable": true
+    },
+    {
       "id": 1501,
       "name": "Maraku Werewolf Totem",
       "kind": "etc",

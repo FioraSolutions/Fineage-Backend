@@ -12,13 +12,22 @@
       "npcId": 30519,
       "hook": "talk",
       "when": "absent",
-      "htmlFile": "30519-event-30519-03-000.htm"
+      "maxLevel": 14,
+      "htmlFile": "30519-talk-000.htm"
+    },
+    {
+      "npcId": 30519,
+      "hook": "talk",
+      "when": "absent",
+      "minLevel": 15,
+      "htmlFile": "30519-talk-001.htm"
     },
     {
       "npcId": 30519,
       "hook": "event",
       "when": "absent",
       "event": "30519-03",
+      "minLevel": 15,
       "ops": [
         {
           "op": "create"
@@ -31,41 +40,153 @@
           "cond": 1
         }
       ],
-      "htmlFile": "30519-event-30519-03-000.htm"
+      "htmlFile": "30519-event-30519-03-002.htm"
     },
     {
       "npcId": 30519,
       "hook": "event",
-      "when": "absent",
+      "when": "started",
       "event": "30519-06",
       "ops": [
         {
           "op": "complete"
         }
       ],
-      "htmlFile": "30519-event-30519-06-001.htm"
+      "htmlFile": "30519-event-30519-06-003.htm"
     },
     {
       "npcId": 30519,
       "hook": "event",
-      "when": "absent",
+      "when": "started",
       "event": "30519-07",
-      "htmlFile": "30519-event-30519-07-002.htm"
+      "htmlFile": "30519-event-30519-07-004.htm"
     },
     {
       "npcId": 30519,
+      "hook": "talk",
+      "when": "started",
+      "hasItem": 1493,
+      "ops": [
+        {
+          "op": "sell_items",
+          "prices": [
+            {
+              "itemId": 1493,
+              "adena": 30
+            }
+          ],
+          "bonusMin": 10,
+          "bonusAdena": 2000
+        }
+      ],
+      "htmlFile": "30519-talk-005.htm"
+    },
+    {
+      "npcId": 30519,
+      "hook": "talk",
+      "when": "started",
+      "lacksItems": [
+        1493
+      ],
+      "htmlFile": "30519-talk-006.htm"
+    },
+    {
+      "npcId": 30548,
+      "hook": "talk",
+      "when": "started",
+      "htmlFile": "30548-talk-007.htm"
+    },
+    {
+      "npcId": 30548,
       "hook": "event",
-      "when": "absent",
+      "when": "started",
       "event": "30548-03",
       "hasItem": 1494,
       "ops": [
         {
-          "op": "take_item",
+          "op": "exchange_all",
           "itemId": 1494,
-          "count": 1
+          "rewardItemId": 1493,
+          "per": 19
         }
       ],
-      "htmlFile": "30519-event-30548-03-003.htm"
+      "htmlFile": "30548-event-30548-03-008.htm"
+    },
+    {
+      "npcId": 30548,
+      "hook": "event",
+      "when": "started",
+      "event": "30548-03",
+      "lacksItems": [
+        1494
+      ],
+      "htmlFile": "30548-event-30548-03-009.htm"
+    },
+    {
+      "npcId": 20394,
+      "hook": "kill",
+      "when": "started",
+      "html": "",
+      "ops": [
+        {
+          "op": "drop_item",
+          "itemId": 1494,
+          "count": 1,
+          "chance": 0.05,
+          "limit": 0
+        },
+        {
+          "op": "drop_item",
+          "itemId": 1493,
+          "count": 1,
+          "chance": 0.5,
+          "limit": 0
+        }
+      ]
+    },
+    {
+      "npcId": 20403,
+      "hook": "kill",
+      "when": "started",
+      "html": "",
+      "ops": [
+        {
+          "op": "drop_item",
+          "itemId": 1494,
+          "count": 1,
+          "chance": 0.05,
+          "limit": 0
+        },
+        {
+          "op": "drop_item",
+          "itemId": 1493,
+          "count": 1,
+          "chance": 0.5,
+          "limit": 0
+        }
+      ]
+    },
+    {
+      "npcId": 20508,
+      "hook": "kill",
+      "when": "started",
+      "html": "",
+      "ops": [
+        {
+          "op": "drop_item",
+          "itemId": 1494,
+          "count": 1,
+          "chance": 0.05,
+          "limit": 0
+        },
+        {
+          "op": "drop_item",
+          "itemId": 1493,
+          "count": 1,
+          "chance": 0.5,
+          "limit": 0
+        }
+      ]
     }
   ]
 }
