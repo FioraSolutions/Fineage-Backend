@@ -1,0 +1,95 @@
+{
+  "id": 354,
+  "name": "Conquest of Alligator Island",
+  "repeatable": true,
+  "abortable": true,
+  "questItems": [],
+  "dialogs": [
+    {
+      "npcId": 30895,
+      "hook": "talk",
+      "when": "absent",
+      "htmlFile": "30895-event-30895-02-003.htm"
+    },
+    {
+      "npcId": 30895,
+      "hook": "event",
+      "when": "absent",
+      "event": "30895-04",
+      "htmlFile": "30895-event-30895-04-000.htm"
+    },
+    {
+      "npcId": 30895,
+      "hook": "event",
+      "when": "absent",
+      "event": "30895-05",
+      "htmlFile": "30895-event-30895-05-001.htm"
+    },
+    {
+      "npcId": 30895,
+      "hook": "event",
+      "when": "absent",
+      "event": "30895-09",
+      "htmlFile": "30895-event-30895-09-002.htm"
+    },
+    {
+      "npcId": 30895,
+      "hook": "event",
+      "when": "absent",
+      "event": "30895-02",
+      "ops": [
+        {
+          "op": "create"
+        },
+        {
+          "op": "start"
+        },
+        {
+          "op": "set_cond",
+          "cond": 1
+        }
+      ],
+      "htmlFile": "30895-event-30895-02-003.htm"
+    },
+    {
+      "npcId": 30895,
+      "hook": "event",
+      "when": "absent",
+      "event": "ADENA",
+      "htmlFile": "30895-event-ADENA-004.htm"
+    },
+    {
+      "npcId": 30895,
+      "hook": "event",
+      "when": "absent",
+      "event": "ADENA",
+      "htmlFile": "30895-event-ADENA-005.htm"
+    },
+    {
+      "npcId": 30895,
+      "hook": "event",
+      "when": "absent",
+      "event": "30895-10",
+      "ops": [
+        {
+          "op": "complete"
+        }
+      ],
+      "htmlFile": "30895-event-30895-10-006.htm"
+    },
+    {
+      "npcId": 30895,
+      "hook": "event",
+      "when": "absent",
+      "event": "REWARD",
+      "htmlFile": "30895-event-REWARD-007.htm"
+    },
+    {
+      "npcId": 30895,
+      "hook": "event",
+      "when": "absent",
+      "event": "REWARD",
+      "htmlFile": "30895-event-REWARD-008.htm"
+    }
+  ]
+}

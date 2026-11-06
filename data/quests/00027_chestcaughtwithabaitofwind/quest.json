@@ -1,0 +1,22 @@
+{
+  "id": 27,
+  "name": "ChestCaughtWithABaitOfWind",
+  "repeatable": false,
+  "abortable": true,
+  "questItems": [],
+  "dialogs": [
+    {
+      "npcId": 31434,
+      "hook": "talk",
+      "when": "started",
+      "htmlFile": "31434-talk-001.htm"
+    },
+    {
+      "npcId": 31570,
+      "hook": "event",
+      "when": "absent",
+      "event": "31570-03",
+      "htmlFile": "31570-event-31570-03-002.htm"
+    }
+  ]
+}

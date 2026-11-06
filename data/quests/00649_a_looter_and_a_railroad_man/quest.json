@@ -1,0 +1,52 @@
+{
+  "id": 649,
+  "name": "A Looter And A Railroad Man",
+  "repeatable": true,
+  "abortable": true,
+  "questItems": [],
+  "dialogs": [
+    {
+      "npcId": 32052,
+      "hook": "talk",
+      "when": "absent",
+      "htmlFile": "32052-talk-000.htm"
+    },
+    {
+      "npcId": 32052,
+      "hook": "talk",
+      "when": "absent",
+      "htmlFile": "32052-talk-001.htm"
+    },
+    {
+      "npcId": 32052,
+      "hook": "talk",
+      "when": "started",
+      "htmlFile": "32052-talk-002.htm"
+    },
+    {
+      "npcId": 32052,
+      "hook": "talk",
+      "when": "started",
+      "htmlFile": "32052-talk-003.htm"
+    },
+    {
+      "npcId": 32052,
+      "hook": "event",
+      "when": "absent",
+      "event": "32052-03",
+      "ops": [
+        {
+          "op": "create"
+        },
+        {
+          "op": "start"
+        },
+        {
+          "op": "set_cond",
+          "cond": 1
+        }
+      ],
+      "htmlFile": "32052-event-32052-03-004.htm"
+    }
+  ]
+}

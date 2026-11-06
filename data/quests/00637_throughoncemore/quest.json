@@ -1,0 +1,20 @@
+{
+  "id": 637,
+  "name": "ThroughOnceMore",
+  "repeatable": true,
+  "abortable": true,
+  "questItems": [],
+  "dialogs": [
+    {
+      "npcId": 32010,
+      "hook": "talk",
+      "when": "absent",
+      "ops": [
+        {
+          "op": "complete"
+        }
+      ],
+      "htmlFile": "32010-talk-003.htm"
+    }
+  ]
+}

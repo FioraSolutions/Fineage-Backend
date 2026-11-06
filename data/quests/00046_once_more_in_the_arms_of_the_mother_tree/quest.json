@@ -1,0 +1,63 @@
+{
+  "id": 46,
+  "name": "Once More In The Arms Of The Mother Tree",
+  "repeatable": false,
+  "abortable": true,
+  "questItems": [],
+  "dialogs": [
+    {
+      "npcId": 30097,
+      "hook": "talk",
+      "when": "absent",
+      "maxLevel": 2,
+      "htmlFile": "30097-talk-000.htm"
+    },
+    {
+      "npcId": 30097,
+      "hook": "talk",
+      "when": "absent",
+      "hasItem": 7570,
+      "htmlFile": "30097-talk-001.htm"
+    },
+    {
+      "npcId": 30097,
+      "hook": "talk",
+      "when": "started",
+      "cond": 1,
+      "htmlFile": "30097-talk-c1-002.htm"
+    },
+    {
+      "npcId": 30097,
+      "hook": "talk",
+      "when": "started",
+      "cond": 3,
+      "htmlFile": "30097-talk-c3-004.htm"
+    },
+    {
+      "npcId": 30097,
+      "hook": "talk",
+      "when": "started",
+      "cond": 5,
+      "htmlFile": "30097-talk-c5-006.htm"
+    },
+    {
+      "npcId": 30097,
+      "hook": "event",
+      "when": "absent",
+      "event": "30097-04",
+      "ops": [
+        {
+          "op": "create"
+        },
+        {
+          "op": "start"
+        },
+        {
+          "op": "set_cond",
+          "cond": 1
+        }
+      ],
+      "htmlFile": "30097-event-30097-04-008.htm"
+    }
+  ]
+}

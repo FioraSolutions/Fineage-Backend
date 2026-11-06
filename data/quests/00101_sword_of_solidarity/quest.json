@@ -1,0 +1,82 @@
+{
+  "id": 101,
+  "name": "Sword of Solidarity",
+  "repeatable": false,
+  "abortable": true,
+  "questItems": [],
+  "dialogs": [
+    {
+      "npcId": 30008,
+      "hook": "talk",
+      "when": "absent",
+      "htmlFile": "30008-event-30008-04-014.htm"
+    },
+    {
+      "npcId": 30008,
+      "hook": "talk",
+      "when": "started",
+      "cond": 2,
+      "htmlFile": "30008-talk-c2-001.htm"
+    },
+    {
+      "npcId": 30008,
+      "hook": "talk",
+      "when": "started",
+      "cond": 3,
+      "htmlFile": "30008-talk-c3-003.htm"
+    },
+    {
+      "npcId": 30283,
+      "hook": "talk",
+      "when": "started",
+      "cond": 2,
+      "htmlFile": "30283-talk-c2-007.htm"
+    },
+    {
+      "npcId": 30283,
+      "hook": "talk",
+      "when": "started",
+      "cond": 3,
+      "ops": [
+        {
+          "op": "set_cond",
+          "cond": 4
+        }
+      ],
+      "htmlFile": "30283-talk-c3-009.htm"
+    },
+    {
+      "npcId": 30008,
+      "hook": "event",
+      "when": "absent",
+      "event": "30008-03",
+      "htmlFile": "30008-event-30008-03-012.htm"
+    },
+    {
+      "npcId": 30008,
+      "hook": "event",
+      "when": "absent",
+      "event": "30008-09",
+      "htmlFile": "30008-event-30008-09-013.htm"
+    },
+    {
+      "npcId": 30008,
+      "hook": "event",
+      "when": "absent",
+      "event": "30008-04",
+      "ops": [
+        {
+          "op": "create"
+        },
+        {
+          "op": "start"
+        },
+        {
+          "op": "set_cond",
+          "cond": 1
+        }
+      ],
+      "htmlFile": "30008-event-30008-04-014.htm"
+    }
+  ]
+}

@@ -1,0 +1,106 @@
+{
+  "id": 107,
+  "name": "Merciless Punishment",
+  "repeatable": true,
+  "abortable": true,
+  "questItems": [],
+  "dialogs": [
+    {
+      "npcId": 30568,
+      "hook": "talk",
+      "when": "absent",
+      "htmlFile": "30568-talk-000.htm"
+    },
+    {
+      "npcId": 30568,
+      "hook": "talk",
+      "when": "absent",
+      "maxLevel": 9,
+      "htmlFile": "30568-talk-001.htm"
+    },
+    {
+      "npcId": 30568,
+      "hook": "talk",
+      "when": "started",
+      "cond": 3,
+      "htmlFile": "30568-talk-c3-004.htm"
+    },
+    {
+      "npcId": 30568,
+      "hook": "talk",
+      "when": "started",
+      "cond": 4,
+      "htmlFile": "30568-talk-c4-005.htm"
+    },
+    {
+      "npcId": 30568,
+      "hook": "talk",
+      "when": "started",
+      "cond": 5,
+      "htmlFile": "30568-talk-c5-006.htm"
+    },
+    {
+      "npcId": 30568,
+      "hook": "talk",
+      "when": "started",
+      "cond": 6,
+      "htmlFile": "30568-talk-c6-007.htm"
+    },
+    {
+      "npcId": 30568,
+      "hook": "talk",
+      "when": "started",
+      "cond": 7,
+      "ops": [
+        {
+          "op": "give_adena",
+          "count": 14666
+        },
+        {
+          "op": "give_exp_sp",
+          "exp": 34565,
+          "sp": 2962
+        },
+        {
+          "op": "complete"
+        }
+      ],
+      "htmlFile": "30568-talk-c7-008.htm"
+    },
+    {
+      "npcId": 30568,
+      "hook": "event",
+      "when": "absent",
+      "event": "30568-04",
+      "ops": [
+        {
+          "op": "create"
+        },
+        {
+          "op": "start"
+        },
+        {
+          "op": "set_cond",
+          "cond": 1
+        }
+      ],
+      "htmlFile": "30568-event-30568-04-010.htm"
+    },
+    {
+      "npcId": 30568,
+      "hook": "event",
+      "when": "absent",
+      "event": "30568-07",
+      "ops": [
+        {
+          "op": "give_adena",
+          "count": 200
+        },
+        {
+          "op": "complete"
+        }
+      ],
+      "htmlFile": "30568-event-30568-07-011.htm"
+    }
+  ]
+}

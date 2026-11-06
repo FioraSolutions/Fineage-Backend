@@ -1,0 +1,65 @@
+{
+  "id": 654,
+  "name": "Journey to a Settlement",
+  "repeatable": true,
+  "abortable": true,
+  "questItems": [],
+  "dialogs": [
+    {
+      "npcId": 31453,
+      "hook": "talk",
+      "when": "absent",
+      "htmlFile": "31453-talk-000.htm"
+    },
+    {
+      "npcId": 31453,
+      "hook": "talk",
+      "when": "absent",
+      "htmlFile": "31453-talk-001.htm"
+    },
+    {
+      "npcId": 31453,
+      "hook": "talk",
+      "when": "absent",
+      "ops": [
+        {
+          "op": "set_cond",
+          "cond": 2
+        }
+      ],
+      "htmlFile": "31453-talk-002.htm"
+    },
+    {
+      "npcId": 31453,
+      "hook": "event",
+      "when": "absent",
+      "event": "31453-02",
+      "ops": [
+        {
+          "op": "create"
+        },
+        {
+          "op": "start"
+        },
+        {
+          "op": "set_cond",
+          "cond": 1
+        }
+      ],
+      "htmlFile": "31453-event-31453-02-003.htm"
+    },
+    {
+      "npcId": 31453,
+      "hook": "event",
+      "when": "absent",
+      "event": "31453-03",
+      "ops": [
+        {
+          "op": "set_cond",
+          "cond": 2
+        }
+      ],
+      "htmlFile": "31453-event-31453-03-004.htm"
+    }
+  ]
+}

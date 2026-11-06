@@ -1,0 +1,52 @@
+{
+  "id": 328,
+  "name": "Sense for Business",
+  "repeatable": true,
+  "abortable": true,
+  "questItems": [],
+  "dialogs": [
+    {
+      "npcId": 30436,
+      "hook": "talk",
+      "when": "absent",
+      "htmlFile": "30436-event-30436-03-001.htm"
+    },
+    {
+      "npcId": 30436,
+      "hook": "talk",
+      "when": "started",
+      "htmlFile": "30436-talk-000.htm"
+    },
+    {
+      "npcId": 30436,
+      "hook": "event",
+      "when": "absent",
+      "event": "30436-03",
+      "ops": [
+        {
+          "op": "create"
+        },
+        {
+          "op": "start"
+        },
+        {
+          "op": "set_cond",
+          "cond": 1
+        }
+      ],
+      "htmlFile": "30436-event-30436-03-001.htm"
+    },
+    {
+      "npcId": 30436,
+      "hook": "event",
+      "when": "absent",
+      "event": "30436-06",
+      "ops": [
+        {
+          "op": "complete"
+        }
+      ],
+      "htmlFile": "30436-event-30436-06-002.htm"
+    }
+  ]
+}

@@ -1,0 +1,35 @@
+{
+  "id": 645,
+  "name": "GhostsOfBatur",
+  "repeatable": true,
+  "abortable": true,
+  "questItems": [],
+  "dialogs": [
+    {
+      "npcId": 32017,
+      "hook": "talk",
+      "when": "absent",
+      "maxLevel": 22,
+      "htmlFile": "32017-talk-000.htm"
+    },
+    {
+      "npcId": 32017,
+      "hook": "talk",
+      "when": "absent",
+      "minLevel": 23,
+      "htmlFile": "32017-talk-001.htm"
+    },
+    {
+      "npcId": 32017,
+      "hook": "talk",
+      "when": "started",
+      "htmlFile": "32017-talk-002.htm"
+    },
+    {
+      "npcId": 32017,
+      "hook": "talk",
+      "when": "started",
+      "htmlFile": "32017-talk-003.htm"
+    }
+  ]
+}

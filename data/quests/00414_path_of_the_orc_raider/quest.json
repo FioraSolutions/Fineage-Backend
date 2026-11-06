@@ -1,0 +1,125 @@
+{
+  "id": 414,
+  "name": "Path Of The Orc Raider",
+  "repeatable": false,
+  "abortable": true,
+  "questItems": [],
+  "dialogs": [
+    {
+      "npcId": 30570,
+      "hook": "talk",
+      "when": "absent",
+      "htmlFile": "30570-talk-002.htm"
+    },
+    {
+      "npcId": 30570,
+      "hook": "talk",
+      "when": "absent",
+      "htmlFile": "30570-talk-004.htm"
+    },
+    {
+      "npcId": 30501,
+      "hook": "talk",
+      "when": "absent",
+      "htmlFile": "30501-talk-005.htm"
+    },
+    {
+      "npcId": 30501,
+      "hook": "talk",
+      "when": "absent",
+      "htmlFile": "30501-talk-006.htm"
+    },
+    {
+      "npcId": 31978,
+      "hook": "talk",
+      "when": "absent",
+      "htmlFile": "31978-talk-007.htm"
+    },
+    {
+      "npcId": 31978,
+      "hook": "talk",
+      "when": "absent",
+      "htmlFile": "31978-talk-008.htm"
+    },
+    {
+      "npcId": 30570,
+      "hook": "event",
+      "when": "absent",
+      "event": "ACCEPT",
+      "minLevel": 18,
+      "hasItem": 1592,
+      "htmlFile": "30570-event-ACCEPT-009.htm"
+    },
+    {
+      "npcId": 30570,
+      "hook": "event",
+      "when": "absent",
+      "event": "ACCEPT",
+      "hasItem": 1592,
+      "htmlFile": "30570-event-ACCEPT-010.htm"
+    },
+    {
+      "npcId": 30570,
+      "hook": "event",
+      "when": "absent",
+      "event": "ACCEPT",
+      "htmlFile": "30570-event-ACCEPT-011.htm"
+    },
+    {
+      "npcId": 30570,
+      "hook": "event",
+      "when": "absent",
+      "event": "31978-04",
+      "htmlFile": "30570-event-31978-04-014.htm"
+    },
+    {
+      "npcId": 30570,
+      "hook": "event",
+      "when": "absent",
+      "event": "31978-02",
+      "ops": [
+        {
+          "op": "set_cond",
+          "cond": 6
+        }
+      ],
+      "htmlFile": "30570-event-31978-02-015.htm"
+    },
+    {
+      "npcId": 27045,
+      "hook": "kill",
+      "when": "started",
+      "ops": [
+        {
+          "op": "set_cond",
+          "cond": 2
+        }
+      ],
+      "html": ""
+    },
+    {
+      "npcId": 27054,
+      "hook": "kill",
+      "when": "started",
+      "ops": [
+        {
+          "op": "set_cond",
+          "cond": 4
+        }
+      ],
+      "html": ""
+    },
+    {
+      "npcId": 27320,
+      "hook": "kill",
+      "when": "started",
+      "ops": [
+        {
+          "op": "set_cond",
+          "cond": 7
+        }
+      ],
+      "html": ""
+    }
+  ]
+}

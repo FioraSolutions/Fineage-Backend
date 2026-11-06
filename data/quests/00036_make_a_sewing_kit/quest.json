@@ -1,0 +1,91 @@
+{
+  "id": 36,
+  "name": "Make a Sewing Kit",
+  "repeatable": false,
+  "abortable": true,
+  "questItems": [],
+  "dialogs": [
+    {
+      "npcId": 30847,
+      "hook": "talk",
+      "when": "absent",
+      "htmlFile": "30847-talk-000.htm"
+    },
+    {
+      "npcId": 30847,
+      "hook": "talk",
+      "when": "started",
+      "cond": 1,
+      "htmlFile": "30847-talk-c1-001.htm"
+    },
+    {
+      "npcId": 30847,
+      "hook": "talk",
+      "when": "started",
+      "cond": 2,
+      "htmlFile": "30847-talk-c2-002.htm"
+    },
+    {
+      "npcId": 30847,
+      "hook": "talk",
+      "when": "started",
+      "cond": 3,
+      "htmlFile": "30847-talk-c3-003.htm"
+    },
+    {
+      "npcId": 30847,
+      "hook": "talk",
+      "when": "started",
+      "cond": 3,
+      "htmlFile": "30847-talk-c3-004.htm"
+    },
+    {
+      "npcId": 30847,
+      "hook": "event",
+      "when": "absent",
+      "event": "30847-03",
+      "ops": [
+        {
+          "op": "create"
+        },
+        {
+          "op": "start"
+        },
+        {
+          "op": "set_cond",
+          "cond": 1
+        }
+      ],
+      "htmlFile": "30847-event-30847-03-005.htm"
+    },
+    {
+      "npcId": 30847,
+      "hook": "event",
+      "when": "absent",
+      "event": "30847-06",
+      "htmlFile": "30847-event-30847-06-006.htm"
+    },
+    {
+      "npcId": 30847,
+      "hook": "event",
+      "when": "absent",
+      "event": "30847-09",
+      "ops": [
+        {
+          "op": "take_item",
+          "itemId": 1891,
+          "count": 10
+        },
+        {
+          "op": "take_item",
+          "itemId": 1893,
+          "count": 10
+        },
+        {
+          "op": "complete"
+        }
+      ],
+      "htmlFile": "30847-event-30847-09-007.htm"
+    }
+  ]
+}

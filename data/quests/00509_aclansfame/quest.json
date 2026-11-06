@@ -1,0 +1,22 @@
+{
+  "id": 509,
+  "name": "AClansFame",
+  "repeatable": true,
+  "abortable": true,
+  "questItems": [],
+  "dialogs": [
+    {
+      "npcId": 31331,
+      "hook": "talk",
+      "when": "absent",
+      "htmlFile": "31331-talk-000.htm"
+    },
+    {
+      "npcId": 31331,
+      "hook": "talk",
+      "when": "absent",
+      "maxLevel": 5,
+      "htmlFile": "31331-talk-001.htm"
+    }
+  ]
+}

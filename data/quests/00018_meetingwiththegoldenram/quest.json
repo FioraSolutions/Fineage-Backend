@@ -1,0 +1,66 @@
+{
+  "id": 18,
+  "name": "MeetingWithTheGoldenRam",
+  "repeatable": false,
+  "abortable": true,
+  "questItems": [],
+  "dialogs": [
+    {
+      "npcId": 31314,
+      "hook": "talk",
+      "when": "absent",
+      "htmlFile": "31314-talk-000.htm"
+    },
+    {
+      "npcId": 31314,
+      "hook": "talk",
+      "when": "started",
+      "htmlFile": "31314-talk-001.htm"
+    },
+    {
+      "npcId": 31314,
+      "hook": "talk",
+      "when": "started",
+      "htmlFile": "31314-talk-002.htm"
+    },
+    {
+      "npcId": 31314,
+      "hook": "talk",
+      "when": "started",
+      "htmlFile": "31314-talk-003.htm"
+    },
+    {
+      "npcId": 31314,
+      "hook": "event",
+      "when": "absent",
+      "event": "31314-03",
+      "minLevel": 66,
+      "ops": [
+        {
+          "op": "create"
+        },
+        {
+          "op": "start"
+        },
+        {
+          "op": "set_cond",
+          "cond": 1
+        }
+      ],
+      "htmlFile": "31314-event-31314-03-005.htm"
+    },
+    {
+      "npcId": 31314,
+      "hook": "event",
+      "when": "absent",
+      "event": "31315-02",
+      "ops": [
+        {
+          "op": "set_cond",
+          "cond": 2
+        }
+      ],
+      "htmlFile": "31314-event-31315-02-006.htm"
+    }
+  ]
+}

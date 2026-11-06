@@ -1,0 +1,57 @@
+{
+  "id": 246,
+  "name": "PossessorOfAPreciousSoul3",
+  "repeatable": true,
+  "abortable": true,
+  "questItems": [],
+  "dialogs": [
+    {
+      "npcId": 31740,
+      "hook": "talk",
+      "when": "absent",
+      "maxLevel": 64,
+      "htmlFile": "31740-talk-001.htm"
+    },
+    {
+      "npcId": 31740,
+      "hook": "talk",
+      "when": "started",
+      "htmlFile": "31740-talk-002.htm"
+    },
+    {
+      "npcId": 31741,
+      "hook": "talk",
+      "when": "started",
+      "cond": 1,
+      "htmlFile": "31741-talk-c1-003.htm"
+    },
+    {
+      "npcId": 31741,
+      "hook": "talk",
+      "when": "started",
+      "cond": 2,
+      "htmlFile": "31741-talk-c2-004.htm"
+    },
+    {
+      "npcId": 31741,
+      "hook": "talk",
+      "when": "started",
+      "cond": 3,
+      "htmlFile": "31741-talk-c3-005.htm"
+    },
+    {
+      "npcId": 31741,
+      "hook": "talk",
+      "when": "started",
+      "cond": 4,
+      "htmlFile": "31741-talk-c4-006.htm"
+    },
+    {
+      "npcId": 31741,
+      "hook": "talk",
+      "when": "started",
+      "cond": 6,
+      "htmlFile": "31741-talk-c6-008.htm"
+    }
+  ]
+}

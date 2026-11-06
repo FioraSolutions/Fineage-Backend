@@ -1,0 +1,101 @@
+{
+  "id": 404,
+  "name": "Path Of The Human Wizard",
+  "repeatable": false,
+  "abortable": true,
+  "questItems": [],
+  "dialogs": [
+    {
+      "npcId": 30391,
+      "hook": "talk",
+      "when": "absent",
+      "htmlFile": "30391-talk-000.htm"
+    },
+    {
+      "npcId": 30409,
+      "hook": "talk",
+      "when": "absent",
+      "htmlFile": "30409-talk-002.htm"
+    },
+    {
+      "npcId": 30410,
+      "hook": "talk",
+      "when": "absent",
+      "htmlFile": "30410-talk-005.htm"
+    },
+    {
+      "npcId": 30411,
+      "hook": "talk",
+      "when": "absent",
+      "htmlFile": "30411-talk-007.htm"
+    },
+    {
+      "npcId": 30412,
+      "hook": "talk",
+      "when": "absent",
+      "htmlFile": "30412-talk-010.htm"
+    },
+    {
+      "npcId": 30413,
+      "hook": "talk",
+      "when": "absent",
+      "htmlFile": "30413-talk-013.htm"
+    },
+    {
+      "npcId": 30391,
+      "hook": "event",
+      "when": "absent",
+      "event": "ACCEPT",
+      "minLevel": 18,
+      "hasItem": 1292,
+      "htmlFile": "30391-event-ACCEPT-015.htm"
+    },
+    {
+      "npcId": 30391,
+      "hook": "event",
+      "when": "absent",
+      "event": "ACCEPT",
+      "hasItem": 1292,
+      "htmlFile": "30391-event-ACCEPT-016.htm"
+    },
+    {
+      "npcId": 30391,
+      "hook": "event",
+      "when": "absent",
+      "event": "ACCEPT",
+      "htmlFile": "30391-event-ACCEPT-017.htm"
+    },
+    {
+      "npcId": 30391,
+      "hook": "event",
+      "when": "absent",
+      "event": "30410-02",
+      "htmlFile": "30391-event-30410-02-018.htm"
+    },
+    {
+      "npcId": 30391,
+      "hook": "event",
+      "when": "absent",
+      "event": "30410-03",
+      "ops": [
+        {
+          "op": "set_cond",
+          "cond": 6
+        }
+      ],
+      "htmlFile": "30391-event-30410-03-019.htm"
+    },
+    {
+      "npcId": 27030,
+      "hook": "kill",
+      "when": "started",
+      "ops": [
+        {
+          "op": "set_cond",
+          "cond": 9
+        }
+      ],
+      "html": ""
+    }
+  ]
+}

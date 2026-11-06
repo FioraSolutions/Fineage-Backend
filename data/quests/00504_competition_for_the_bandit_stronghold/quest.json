@@ -1,0 +1,21 @@
+{
+  "id": 504,
+  "name": "Competition for the Bandit Stronghold",
+  "repeatable": true,
+  "abortable": true,
+  "questItems": [],
+  "dialogs": [
+    {
+      "npcId": 35437,
+      "hook": "talk",
+      "when": "started",
+      "htmlFile": "35437-talk-000.htm"
+    },
+    {
+      "npcId": 35437,
+      "hook": "talk",
+      "when": "completed",
+      "htmlFile": "35437-talk-001.htm"
+    }
+  ]
+}

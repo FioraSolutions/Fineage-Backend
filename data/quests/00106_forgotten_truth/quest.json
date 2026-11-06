@@ -1,0 +1,60 @@
+{
+  "id": 106,
+  "name": "Forgotten Truth",
+  "repeatable": false,
+  "abortable": true,
+  "questItems": [],
+  "dialogs": [
+    {
+      "npcId": 30358,
+      "hook": "talk",
+      "when": "absent",
+      "htmlFile": "30358-event-30358-05-007.htm"
+    },
+    {
+      "npcId": 30358,
+      "hook": "talk",
+      "when": "started",
+      "htmlFile": "30358-talk-000.htm"
+    },
+    {
+      "npcId": 30133,
+      "hook": "talk",
+      "when": "started",
+      "cond": 3,
+      "ops": [
+        {
+          "op": "set_cond",
+          "cond": 4
+        }
+      ],
+      "htmlFile": "30133-talk-c3-004.htm"
+    },
+    {
+      "npcId": 30358,
+      "hook": "event",
+      "when": "absent",
+      "event": "30358-04",
+      "htmlFile": "30358-event-30358-04-006.htm"
+    },
+    {
+      "npcId": 30358,
+      "hook": "event",
+      "when": "absent",
+      "event": "30358-05",
+      "ops": [
+        {
+          "op": "create"
+        },
+        {
+          "op": "start"
+        },
+        {
+          "op": "set_cond",
+          "cond": 1
+        }
+      ],
+      "htmlFile": "30358-event-30358-05-007.htm"
+    }
+  ]
+}

@@ -1,0 +1,232 @@
+{
+  "id": 402,
+  "name": "Path Of The Human Knight",
+  "repeatable": false,
+  "abortable": true,
+  "questItems": [],
+  "dialogs": [
+    {
+      "npcId": 30417,
+      "hook": "talk",
+      "when": "absent",
+      "htmlFile": "30417-talk-003.htm"
+    },
+    {
+      "npcId": 30417,
+      "hook": "talk",
+      "when": "absent",
+      "htmlFile": "30417-talk-004.htm"
+    },
+    {
+      "npcId": 30417,
+      "hook": "talk",
+      "when": "absent",
+      "htmlFile": "30417-talk-005.htm"
+    },
+    {
+      "npcId": 30031,
+      "hook": "talk",
+      "when": "absent",
+      "htmlFile": "30031-talk-008.htm"
+    },
+    {
+      "npcId": 30037,
+      "hook": "talk",
+      "when": "absent",
+      "htmlFile": "30037-talk-012.htm"
+    },
+    {
+      "npcId": 30289,
+      "hook": "talk",
+      "when": "absent",
+      "htmlFile": "30289-talk-016.htm"
+    },
+    {
+      "npcId": 30039,
+      "hook": "talk",
+      "when": "absent",
+      "htmlFile": "30039-talk-020.htm"
+    },
+    {
+      "npcId": 30379,
+      "hook": "talk",
+      "when": "absent",
+      "htmlFile": "30379-talk-024.htm"
+    },
+    {
+      "npcId": 30332,
+      "hook": "talk",
+      "when": "absent",
+      "htmlFile": "30332-talk-028.htm"
+    },
+    {
+      "npcId": 30417,
+      "hook": "event",
+      "when": "absent",
+      "event": "ACCEPT",
+      "minLevel": 18,
+      "hasItem": 1161,
+      "htmlFile": "30417-event-ACCEPT-031.htm"
+    },
+    {
+      "npcId": 30417,
+      "hook": "event",
+      "when": "absent",
+      "event": "ACCEPT",
+      "hasItem": 1161,
+      "htmlFile": "30417-event-ACCEPT-032.htm"
+    },
+    {
+      "npcId": 30417,
+      "hook": "event",
+      "when": "absent",
+      "event": "ACCEPT",
+      "htmlFile": "30417-event-ACCEPT-033.htm"
+    },
+    {
+      "npcId": 30417,
+      "hook": "event",
+      "when": "absent",
+      "event": "30417-08",
+      "ops": [
+        {
+          "op": "create"
+        },
+        {
+          "op": "start"
+        },
+        {
+          "op": "set_cond",
+          "cond": 1
+        }
+      ],
+      "htmlFile": "30417-event-30417-08-034.htm"
+    },
+    {
+      "npcId": 30417,
+      "hook": "event",
+      "when": "absent",
+      "event": "30289-02",
+      "htmlFile": "30417-event-30289-02-035.htm"
+    },
+    {
+      "npcId": 30417,
+      "hook": "event",
+      "when": "absent",
+      "event": "30417-06",
+      "htmlFile": "30417-event-30417-06-036.htm"
+    },
+    {
+      "npcId": 30417,
+      "hook": "event",
+      "when": "absent",
+      "event": "30417-07",
+      "htmlFile": "30417-event-30417-07-037.htm"
+    },
+    {
+      "npcId": 30417,
+      "hook": "event",
+      "when": "absent",
+      "event": "30417-15",
+      "htmlFile": "30417-event-30417-15-038.htm"
+    },
+    {
+      "npcId": 30417,
+      "hook": "event",
+      "when": "absent",
+      "event": "30417-13",
+      "ops": [
+        {
+          "op": "give_exp_sp",
+          "exp": 160267,
+          "sp": 11576
+        }
+      ],
+      "htmlFile": "30417-event-30417-13-041.htm"
+    },
+    {
+      "npcId": 30417,
+      "hook": "event",
+      "when": "absent",
+      "event": "30417-13",
+      "ops": [
+        {
+          "op": "give_exp_sp",
+          "exp": 228064,
+          "sp": 14925
+        }
+      ],
+      "htmlFile": "30417-event-30417-13-042.htm"
+    },
+    {
+      "npcId": 30417,
+      "hook": "event",
+      "when": "absent",
+      "event": "30417-14",
+      "ops": [
+        {
+          "op": "give_exp_sp",
+          "exp": 160267,
+          "sp": 11576
+        }
+      ],
+      "htmlFile": "30417-event-30417-14-045.htm"
+    },
+    {
+      "npcId": 30417,
+      "hook": "event",
+      "when": "absent",
+      "event": "30417-14",
+      "ops": [
+        {
+          "op": "give_exp_sp",
+          "exp": 228064,
+          "sp": 14925
+        }
+      ],
+      "htmlFile": "30417-event-30417-14-046.htm"
+    },
+    {
+      "npcId": 30417,
+      "hook": "event",
+      "when": "absent",
+      "event": "30031-02",
+      "htmlFile": "30417-event-30031-02-047.htm"
+    },
+    {
+      "npcId": 30417,
+      "hook": "event",
+      "when": "absent",
+      "event": "30037-02",
+      "htmlFile": "30417-event-30037-02-048.htm"
+    },
+    {
+      "npcId": 30417,
+      "hook": "event",
+      "when": "absent",
+      "event": "30289-03",
+      "htmlFile": "30417-event-30289-03-049.htm"
+    },
+    {
+      "npcId": 30417,
+      "hook": "event",
+      "when": "absent",
+      "event": "30039-02",
+      "htmlFile": "30417-event-30039-02-050.htm"
+    },
+    {
+      "npcId": 30417,
+      "hook": "event",
+      "when": "absent",
+      "event": "30379-02",
+      "htmlFile": "30417-event-30379-02-051.htm"
+    },
+    {
+      "npcId": 30417,
+      "hook": "event",
+      "when": "absent",
+      "event": "30332-02",
+      "htmlFile": "30417-event-30332-02-052.htm"
+    }
+  ]
+}

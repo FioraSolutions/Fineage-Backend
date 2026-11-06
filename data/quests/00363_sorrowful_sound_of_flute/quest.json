@@ -1,0 +1,192 @@
+{
+  "id": 363,
+  "name": "Sorrowful Sound of Flute",
+  "repeatable": true,
+  "abortable": true,
+  "questItems": [],
+  "dialogs": [
+    {
+      "npcId": 30956,
+      "hook": "talk",
+      "when": "absent",
+      "htmlFile": "30956-talk-000.htm"
+    },
+    {
+      "npcId": 30956,
+      "hook": "talk",
+      "when": "started",
+      "htmlFile": "30956-talk-001.htm"
+    },
+    {
+      "npcId": 30956,
+      "hook": "talk",
+      "when": "started",
+      "htmlFile": "30956-talk-002.htm"
+    },
+    {
+      "npcId": 30956,
+      "hook": "talk",
+      "when": "started",
+      "ops": [
+        {
+          "op": "complete"
+        }
+      ],
+      "htmlFile": "30956-talk-003.htm"
+    },
+    {
+      "npcId": 30956,
+      "hook": "talk",
+      "when": "started",
+      "ops": [
+        {
+          "op": "complete"
+        }
+      ],
+      "htmlFile": "30956-talk-004.htm"
+    },
+    {
+      "npcId": 30458,
+      "hook": "talk",
+      "when": "started",
+      "htmlFile": "30458-talk-005.htm"
+    },
+    {
+      "npcId": 30594,
+      "hook": "talk",
+      "when": "started",
+      "htmlFile": "30594-talk-006.htm"
+    },
+    {
+      "npcId": 30594,
+      "hook": "talk",
+      "when": "started",
+      "htmlFile": "30594-talk-007.htm"
+    },
+    {
+      "npcId": 30594,
+      "hook": "talk",
+      "when": "started",
+      "htmlFile": "30594-talk-008.htm"
+    },
+    {
+      "npcId": 30057,
+      "hook": "talk",
+      "when": "started",
+      "htmlFile": "30057-talk-009.htm"
+    },
+    {
+      "npcId": 30057,
+      "hook": "talk",
+      "when": "started",
+      "htmlFile": "30057-talk-010.htm"
+    },
+    {
+      "npcId": 30057,
+      "hook": "talk",
+      "when": "started",
+      "htmlFile": "30057-talk-011.htm"
+    },
+    {
+      "npcId": 30058,
+      "hook": "talk",
+      "when": "started",
+      "htmlFile": "30058-talk-012.htm"
+    },
+    {
+      "npcId": 30058,
+      "hook": "talk",
+      "when": "started",
+      "htmlFile": "30058-talk-013.htm"
+    },
+    {
+      "npcId": 30058,
+      "hook": "talk",
+      "when": "started",
+      "htmlFile": "30058-talk-014.htm"
+    },
+    {
+      "npcId": 30595,
+      "hook": "talk",
+      "when": "started",
+      "htmlFile": "30595-talk-015.htm"
+    },
+    {
+      "npcId": 30595,
+      "hook": "talk",
+      "when": "started",
+      "htmlFile": "30595-talk-016.htm"
+    },
+    {
+      "npcId": 30595,
+      "hook": "talk",
+      "when": "started",
+      "htmlFile": "30595-talk-017.htm"
+    },
+    {
+      "npcId": 30959,
+      "hook": "talk",
+      "when": "started",
+      "htmlFile": "30959-talk-018.htm"
+    },
+    {
+      "npcId": 30956,
+      "hook": "event",
+      "when": "absent",
+      "event": "START",
+      "minLevel": 15,
+      "ops": [
+        {
+          "op": "create"
+        },
+        {
+          "op": "start"
+        },
+        {
+          "op": "set_cond",
+          "cond": 1
+        }
+      ],
+      "htmlFile": "30956-event-START-019.htm"
+    },
+    {
+      "npcId": 30956,
+      "hook": "event",
+      "when": "absent",
+      "event": "30956-05",
+      "ops": [
+        {
+          "op": "set_cond",
+          "cond": 3
+        }
+      ],
+      "htmlFile": "30956-event-30956-05-020.htm"
+    },
+    {
+      "npcId": 30956,
+      "hook": "event",
+      "when": "absent",
+      "event": "30956-06",
+      "ops": [
+        {
+          "op": "set_cond",
+          "cond": 3
+        }
+      ],
+      "htmlFile": "30956-event-30956-06-021.htm"
+    },
+    {
+      "npcId": 30956,
+      "hook": "event",
+      "when": "absent",
+      "event": "30956-07",
+      "ops": [
+        {
+          "op": "set_cond",
+          "cond": 3
+        }
+      ],
+      "htmlFile": "30956-event-30956-07-022.htm"
+    }
+  ]
+}

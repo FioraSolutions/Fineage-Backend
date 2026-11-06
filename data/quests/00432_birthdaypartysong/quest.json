@@ -1,0 +1,47 @@
+{
+  "id": 432,
+  "name": "BirthdayPartySong",
+  "repeatable": true,
+  "abortable": true,
+  "questItems": [],
+  "dialogs": [
+    {
+      "npcId": 31043,
+      "hook": "talk",
+      "when": "absent",
+      "htmlFile": "31043-talk-000.htm"
+    },
+    {
+      "npcId": 31043,
+      "hook": "talk",
+      "when": "absent",
+      "htmlFile": "31043-talk-001.htm"
+    },
+    {
+      "npcId": 31043,
+      "hook": "event",
+      "when": "absent",
+      "event": "31043-02",
+      "ops": [
+        {
+          "op": "create"
+        },
+        {
+          "op": "start"
+        },
+        {
+          "op": "set_cond",
+          "cond": 1
+        }
+      ],
+      "htmlFile": "31043-event-31043-02-002.htm"
+    },
+    {
+      "npcId": 31043,
+      "hook": "event",
+      "when": "absent",
+      "event": "31043-05",
+      "htmlFile": "31043-event-31043-05-003.htm"
+    }
+  ]
+}

@@ -1,0 +1,21 @@
+{
+  "id": 431,
+  "name": "WeddingMarch",
+  "repeatable": true,
+  "abortable": true,
+  "questItems": [],
+  "dialogs": [
+    {
+      "npcId": 31042,
+      "hook": "talk",
+      "when": "absent",
+      "htmlFile": "31042-talk-000.htm"
+    },
+    {
+      "npcId": 31042,
+      "hook": "talk",
+      "when": "absent",
+      "htmlFile": "31042-talk-001.htm"
+    }
+  ]
+}

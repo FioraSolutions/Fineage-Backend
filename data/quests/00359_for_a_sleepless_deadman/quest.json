@@ -1,0 +1,79 @@
+{
+  "id": 359,
+  "name": "For a Sleepless Deadman",
+  "repeatable": true,
+  "abortable": true,
+  "questItems": [],
+  "dialogs": [
+    {
+      "npcId": 30857,
+      "hook": "talk",
+      "when": "absent",
+      "htmlFile": "30857-talk-000.htm"
+    },
+    {
+      "npcId": 30857,
+      "hook": "talk",
+      "when": "absent",
+      "htmlFile": "30857-talk-001.htm"
+    },
+    {
+      "npcId": 30857,
+      "hook": "talk",
+      "when": "absent",
+      "htmlFile": "30857-talk-002.htm"
+    },
+    {
+      "npcId": 30857,
+      "hook": "event",
+      "when": "absent",
+      "event": "30857-02",
+      "htmlFile": "30857-event-30857-02-003.htm"
+    },
+    {
+      "npcId": 30857,
+      "hook": "event",
+      "when": "absent",
+      "event": "30857-03",
+      "htmlFile": "30857-event-30857-03-004.htm"
+    },
+    {
+      "npcId": 30857,
+      "hook": "event",
+      "when": "absent",
+      "event": "30857-04",
+      "htmlFile": "30857-event-30857-04-005.htm"
+    },
+    {
+      "npcId": 30857,
+      "hook": "event",
+      "when": "absent",
+      "event": "30857-05",
+      "ops": [
+        {
+          "op": "create"
+        },
+        {
+          "op": "start"
+        },
+        {
+          "op": "set_cond",
+          "cond": 1
+        }
+      ],
+      "htmlFile": "30857-event-30857-05-006.htm"
+    },
+    {
+      "npcId": 30857,
+      "hook": "event",
+      "when": "absent",
+      "event": "30857-10",
+      "ops": [
+        {
+          "op": "complete"
+        }
+      ],
+      "htmlFile": "30857-event-30857-10-007.htm"
+    }
+  ]
+}

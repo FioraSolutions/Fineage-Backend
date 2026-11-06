@@ -1,0 +1,96 @@
+{
+  "id": 609,
+  "name": "Magical Power of Water - Part 1",
+  "repeatable": true,
+  "abortable": true,
+  "questItems": [],
+  "dialogs": [
+    {
+      "npcId": 31371,
+      "hook": "talk",
+      "when": "started",
+      "htmlFile": "31371-talk-000.htm"
+    },
+    {
+      "npcId": 31372,
+      "hook": "talk",
+      "when": "started",
+      "cond": 1,
+      "ops": [
+        {
+          "op": "set_cond",
+          "cond": 2
+        }
+      ],
+      "htmlFile": "31372-talk-c1-001.htm"
+    },
+    {
+      "npcId": 31372,
+      "hook": "talk",
+      "when": "started",
+      "cond": 2,
+      "htmlFile": "31372-talk-c2-002.htm"
+    },
+    {
+      "npcId": 31372,
+      "hook": "talk",
+      "when": "started",
+      "cond": 3,
+      "ops": [
+        {
+          "op": "complete"
+        }
+      ],
+      "htmlFile": "31372-talk-c3-003.htm"
+    },
+    {
+      "npcId": 31561,
+      "hook": "talk",
+      "when": "absent",
+      "htmlFile": "31561-talk-004.htm"
+    },
+    {
+      "npcId": 31371,
+      "hook": "event",
+      "when": "absent",
+      "event": "31371-02",
+      "ops": [
+        {
+          "op": "create"
+        },
+        {
+          "op": "start"
+        },
+        {
+          "op": "set_cond",
+          "cond": 1
+        }
+      ],
+      "htmlFile": "31371-event-31371-02-005.htm"
+    },
+    {
+      "npcId": 31371,
+      "hook": "event",
+      "when": "absent",
+      "event": "open_box",
+      "lacksItems": [
+        1661
+      ],
+      "htmlFile": "31371-event-open_box-006.htm"
+    },
+    {
+      "npcId": 31371,
+      "hook": "event",
+      "when": "absent",
+      "event": "open_box",
+      "ops": [
+        {
+          "op": "take_item",
+          "itemId": 1661,
+          "count": 1
+        }
+      ],
+      "htmlFile": "31371-event-open_box-007.htm"
+    }
+  ]
+}

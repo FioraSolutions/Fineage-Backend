@@ -1,0 +1,119 @@
+{
+  "id": 644,
+  "name": "Grave Robber Annihilation",
+  "repeatable": true,
+  "abortable": true,
+  "questItems": [],
+  "dialogs": [
+    {
+      "npcId": 32017,
+      "hook": "talk",
+      "when": "absent",
+      "htmlFile": "32017-event-32017-03-001.htm"
+    },
+    {
+      "npcId": 32017,
+      "hook": "talk",
+      "when": "started",
+      "htmlFile": "32017-talk-000.htm"
+    },
+    {
+      "npcId": 32017,
+      "hook": "event",
+      "when": "absent",
+      "event": "32017-03",
+      "ops": [
+        {
+          "op": "create"
+        },
+        {
+          "op": "start"
+        },
+        {
+          "op": "set_cond",
+          "cond": 1
+        }
+      ],
+      "htmlFile": "32017-event-32017-03-001.htm"
+    },
+    {
+      "npcId": 32017,
+      "hook": "event",
+      "when": "absent",
+      "event": "32017-06",
+      "htmlFile": "32017-event-32017-06-002.htm"
+    },
+    {
+      "npcId": 32017,
+      "hook": "event",
+      "when": "absent",
+      "event": "varnish",
+      "ops": [
+        {
+          "op": "complete"
+        }
+      ],
+      "htmlFile": "32017-event-varnish-003.htm"
+    },
+    {
+      "npcId": 32017,
+      "hook": "event",
+      "when": "absent",
+      "event": "animalskin",
+      "ops": [
+        {
+          "op": "complete"
+        }
+      ],
+      "htmlFile": "32017-event-animalskin-004.htm"
+    },
+    {
+      "npcId": 32017,
+      "hook": "event",
+      "when": "absent",
+      "event": "animalbone",
+      "ops": [
+        {
+          "op": "complete"
+        }
+      ],
+      "htmlFile": "32017-event-animalbone-005.htm"
+    },
+    {
+      "npcId": 32017,
+      "hook": "event",
+      "when": "absent",
+      "event": "charcoal",
+      "ops": [
+        {
+          "op": "complete"
+        }
+      ],
+      "htmlFile": "32017-event-charcoal-006.htm"
+    },
+    {
+      "npcId": 32017,
+      "hook": "event",
+      "when": "absent",
+      "event": "coal",
+      "ops": [
+        {
+          "op": "complete"
+        }
+      ],
+      "htmlFile": "32017-event-coal-007.htm"
+    },
+    {
+      "npcId": 32017,
+      "hook": "event",
+      "when": "absent",
+      "event": "ironore",
+      "ops": [
+        {
+          "op": "complete"
+        }
+      ],
+      "htmlFile": "32017-event-ironore-008.htm"
+    }
+  ]
+}

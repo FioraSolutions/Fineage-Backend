@@ -1,0 +1,67 @@
+{
+  "id": 655,
+  "name": "A Grand Plan for Taming Wild Beasts",
+  "repeatable": true,
+  "abortable": true,
+  "questItems": [],
+  "dialogs": [
+    {
+      "npcId": 35627,
+      "hook": "talk",
+      "when": "absent",
+      "minLevel": 4,
+      "htmlFile": "35627-talk-000.htm"
+    },
+    {
+      "npcId": 35627,
+      "hook": "talk",
+      "when": "absent",
+      "ops": [
+        {
+          "op": "complete"
+        }
+      ],
+      "htmlFile": "35627-talk-001.htm"
+    },
+    {
+      "npcId": 35627,
+      "hook": "talk",
+      "when": "absent",
+      "htmlFile": "35627-talk-003.htm"
+    },
+    {
+      "npcId": 35627,
+      "hook": "event",
+      "when": "absent",
+      "event": "35627-06",
+      "minLevel": 4,
+      "ops": [
+        {
+          "op": "create"
+        },
+        {
+          "op": "start"
+        },
+        {
+          "op": "set_cond",
+          "cond": 1
+        }
+      ],
+      "htmlFile": "35627-event-35627-06-004.htm"
+    },
+    {
+      "npcId": 35627,
+      "hook": "event",
+      "when": "absent",
+      "event": "35627-06a",
+      "htmlFile": "35627-event-35627-06a-005.htm"
+    },
+    {
+      "npcId": 35627,
+      "hook": "event",
+      "when": "absent",
+      "event": "35627-11",
+      "htmlFile": "35627-event-35627-11-006.htm"
+    }
+  ]
+}

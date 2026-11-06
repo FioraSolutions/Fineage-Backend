@@ -1,0 +1,144 @@
+{
+  "id": 401,
+  "name": "Path Of The Warrior",
+  "repeatable": false,
+  "abortable": true,
+  "questItems": [],
+  "dialogs": [
+    {
+      "npcId": 30010,
+      "hook": "talk",
+      "when": "absent",
+      "htmlFile": "30010-talk-002.htm"
+    },
+    {
+      "npcId": 30010,
+      "hook": "talk",
+      "when": "absent",
+      "htmlFile": "30010-talk-004.htm"
+    },
+    {
+      "npcId": 30253,
+      "hook": "talk",
+      "when": "absent",
+      "htmlFile": "30253-talk-008.htm"
+    },
+    {
+      "npcId": 30253,
+      "hook": "talk",
+      "when": "absent",
+      "htmlFile": "30253-talk-009.htm"
+    },
+    {
+      "npcId": 30010,
+      "hook": "event",
+      "when": "absent",
+      "event": "ACCEPT",
+      "minLevel": 18,
+      "hasItem": 1145,
+      "htmlFile": "30010-event-ACCEPT-011.htm"
+    },
+    {
+      "npcId": 30010,
+      "hook": "event",
+      "when": "absent",
+      "event": "ACCEPT",
+      "hasItem": 1145,
+      "htmlFile": "30010-event-ACCEPT-012.htm"
+    },
+    {
+      "npcId": 30010,
+      "hook": "event",
+      "when": "absent",
+      "event": "ACCEPT",
+      "htmlFile": "30010-event-ACCEPT-013.htm"
+    },
+    {
+      "npcId": 30010,
+      "hook": "event",
+      "when": "absent",
+      "event": "30010-06",
+      "ops": [
+        {
+          "op": "create"
+        },
+        {
+          "op": "start"
+        },
+        {
+          "op": "set_cond",
+          "cond": 1
+        }
+      ],
+      "htmlFile": "30010-event-30010-06-014.htm"
+    },
+    {
+      "npcId": 30010,
+      "hook": "event",
+      "when": "absent",
+      "event": "30010-10",
+      "htmlFile": "30010-event-30010-10-015.htm"
+    },
+    {
+      "npcId": 30010,
+      "hook": "event",
+      "when": "absent",
+      "event": "30010-11",
+      "ops": [
+        {
+          "op": "set_cond",
+          "cond": 5
+        }
+      ],
+      "htmlFile": "30010-event-30010-11-016.htm"
+    },
+    {
+      "npcId": 20035,
+      "hook": "kill",
+      "when": "started",
+      "ops": [
+        {
+          "op": "set_cond",
+          "cond": 3
+        }
+      ],
+      "html": ""
+    },
+    {
+      "npcId": 20042,
+      "hook": "kill",
+      "when": "started",
+      "ops": [
+        {
+          "op": "set_cond",
+          "cond": 3
+        }
+      ],
+      "html": ""
+    },
+    {
+      "npcId": 20038,
+      "hook": "kill",
+      "when": "started",
+      "ops": [
+        {
+          "op": "set_cond",
+          "cond": 6
+        }
+      ],
+      "html": ""
+    },
+    {
+      "npcId": 20043,
+      "hook": "kill",
+      "when": "started",
+      "ops": [
+        {
+          "op": "set_cond",
+          "cond": 6
+        }
+      ],
+      "html": ""
+    }
+  ]
+}

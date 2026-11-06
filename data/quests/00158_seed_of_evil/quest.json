@@ -1,0 +1,27 @@
+{
+  "id": 158,
+  "name": "Seed of Evil",
+  "repeatable": false,
+  "abortable": true,
+  "questItems": [],
+  "dialogs": [
+    {
+      "npcId": 30031,
+      "hook": "talk",
+      "when": "absent",
+      "htmlFile": "30031-talk-000.htm"
+    },
+    {
+      "npcId": 30031,
+      "hook": "talk",
+      "when": "absent",
+      "htmlFile": "30031-talk-001.htm"
+    },
+    {
+      "npcId": 30031,
+      "hook": "talk",
+      "when": "started",
+      "htmlFile": "30031-talk-002.htm"
+    }
+  ]
+}

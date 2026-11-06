@@ -1,0 +1,54 @@
+{
+  "id": 14,
+  "name": "WhereaboutsOfTheArchaeologist",
+  "repeatable": false,
+  "abortable": true,
+  "questItems": [],
+  "dialogs": [
+    {
+      "npcId": 31263,
+      "hook": "talk",
+      "when": "absent",
+      "maxLevel": 73,
+      "htmlFile": "31263-talk-000.htm"
+    },
+    {
+      "npcId": 31263,
+      "hook": "talk",
+      "when": "absent",
+      "minLevel": 74,
+      "htmlFile": "31263-talk-001.htm"
+    },
+    {
+      "npcId": 31263,
+      "hook": "talk",
+      "when": "started",
+      "htmlFile": "31263-talk-002.htm"
+    },
+    {
+      "npcId": 31263,
+      "hook": "talk",
+      "when": "started",
+      "htmlFile": "31263-talk-003.htm"
+    },
+    {
+      "npcId": 31263,
+      "hook": "event",
+      "when": "absent",
+      "event": "31263-02",
+      "ops": [
+        {
+          "op": "create"
+        },
+        {
+          "op": "start"
+        },
+        {
+          "op": "set_cond",
+          "cond": 1
+        }
+      ],
+      "htmlFile": "31263-event-31263-02-004.htm"
+    }
+  ]
+}

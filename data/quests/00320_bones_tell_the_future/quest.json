@@ -1,0 +1,24 @@
+{
+  "id": 320,
+  "name": "Bones Tell The Future",
+  "repeatable": true,
+  "abortable": true,
+  "questItems": [],
+  "dialogs": [
+    {
+      "npcId": 30359,
+      "hook": "talk",
+      "when": "started",
+      "ops": [
+        {
+          "op": "give_adena",
+          "count": 8470
+        },
+        {
+          "op": "complete"
+        }
+      ],
+      "htmlFile": "30359-talk-000.htm"
+    }
+  ]
+}

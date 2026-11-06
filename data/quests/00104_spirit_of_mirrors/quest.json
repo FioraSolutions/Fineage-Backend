@@ -1,0 +1,29 @@
+{
+  "id": 104,
+  "name": "Spirit of Mirrors",
+  "repeatable": false,
+  "abortable": true,
+  "questItems": [],
+  "dialogs": [
+    {
+      "npcId": 30017,
+      "hook": "talk",
+      "when": "started",
+      "ops": [
+        {
+          "op": "give_adena",
+          "count": 16866
+        },
+        {
+          "op": "give_exp_sp",
+          "exp": 39750,
+          "sp": 3407
+        },
+        {
+          "op": "complete"
+        }
+      ],
+      "htmlFile": "30017-talk-000.htm"
+    }
+  ]
+}

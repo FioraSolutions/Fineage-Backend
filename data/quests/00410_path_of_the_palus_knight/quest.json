@@ -1,0 +1,162 @@
+{
+  "id": 410,
+  "name": "Path Of The Palus Knight",
+  "repeatable": false,
+  "abortable": true,
+  "questItems": [],
+  "dialogs": [
+    {
+      "npcId": 30329,
+      "hook": "talk",
+      "when": "absent",
+      "htmlFile": "30329-talk-001.htm"
+    },
+    {
+      "npcId": 30329,
+      "hook": "talk",
+      "when": "absent",
+      "htmlFile": "30329-talk-002.htm"
+    },
+    {
+      "npcId": 30329,
+      "hook": "talk",
+      "when": "absent",
+      "htmlFile": "30329-talk-004.htm"
+    },
+    {
+      "npcId": 30422,
+      "hook": "talk",
+      "when": "absent",
+      "htmlFile": "30422-talk-007.htm"
+    },
+    {
+      "npcId": 30422,
+      "hook": "talk",
+      "when": "absent",
+      "htmlFile": "30422-talk-008.htm"
+    },
+    {
+      "npcId": 30422,
+      "hook": "talk",
+      "when": "absent",
+      "htmlFile": "30422-talk-009.htm"
+    },
+    {
+      "npcId": 30422,
+      "hook": "talk",
+      "when": "absent",
+      "htmlFile": "30422-talk-010.htm"
+    },
+    {
+      "npcId": 30422,
+      "hook": "talk",
+      "when": "absent",
+      "htmlFile": "30422-talk-013.htm"
+    },
+    {
+      "npcId": 30329,
+      "hook": "event",
+      "when": "absent",
+      "event": "ACCEPT",
+      "minLevel": 18,
+      "hasItem": 1244,
+      "htmlFile": "30329-event-ACCEPT-015.htm"
+    },
+    {
+      "npcId": 30329,
+      "hook": "event",
+      "when": "absent",
+      "event": "ACCEPT",
+      "hasItem": 1244,
+      "htmlFile": "30329-event-ACCEPT-016.htm"
+    },
+    {
+      "npcId": 30329,
+      "hook": "event",
+      "when": "absent",
+      "event": "ACCEPT",
+      "htmlFile": "30329-event-ACCEPT-017.htm"
+    },
+    {
+      "npcId": 30329,
+      "hook": "event",
+      "when": "absent",
+      "event": "30329-06",
+      "ops": [
+        {
+          "op": "create"
+        },
+        {
+          "op": "start"
+        },
+        {
+          "op": "set_cond",
+          "cond": 1
+        }
+      ],
+      "htmlFile": "30329-event-30329-06-018.htm"
+    },
+    {
+      "npcId": 30329,
+      "hook": "event",
+      "when": "absent",
+      "event": "30329-10",
+      "ops": [
+        {
+          "op": "set_cond",
+          "cond": 3
+        }
+      ],
+      "htmlFile": "30329-event-30329-10-019.htm"
+    },
+    {
+      "npcId": 30329,
+      "hook": "event",
+      "when": "absent",
+      "event": "30422-06",
+      "ops": [
+        {
+          "op": "set_cond",
+          "cond": 6
+        }
+      ],
+      "htmlFile": "30329-event-30422-06-021.htm"
+    },
+    {
+      "npcId": 20038,
+      "hook": "kill",
+      "when": "started",
+      "ops": [
+        {
+          "op": "set_cond",
+          "cond": 5
+        }
+      ],
+      "html": ""
+    },
+    {
+      "npcId": 20043,
+      "hook": "kill",
+      "when": "started",
+      "ops": [
+        {
+          "op": "set_cond",
+          "cond": 5
+        }
+      ],
+      "html": ""
+    },
+    {
+      "npcId": 20049,
+      "hook": "kill",
+      "when": "started",
+      "ops": [
+        {
+          "op": "set_cond",
+          "cond": 2
+        }
+      ],
+      "html": ""
+    }
+  ]
+}

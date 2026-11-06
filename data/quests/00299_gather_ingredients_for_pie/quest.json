@@ -1,0 +1,80 @@
+{
+  "id": 299,
+  "name": "Gather Ingredients for Pie",
+  "repeatable": true,
+  "abortable": true,
+  "questItems": [],
+  "dialogs": [
+    {
+      "npcId": 30620,
+      "hook": "talk",
+      "when": "absent",
+      "htmlFile": "30620-event-30620-03-002.htm"
+    },
+    {
+      "npcId": 30620,
+      "hook": "event",
+      "when": "absent",
+      "event": "30063-02",
+      "ops": [
+        {
+          "op": "set_cond",
+          "cond": 4
+        }
+      ],
+      "htmlFile": "30620-event-30063-02-000.htm"
+    },
+    {
+      "npcId": 30620,
+      "hook": "event",
+      "when": "absent",
+      "event": "30466-02",
+      "ops": [
+        {
+          "op": "set_cond",
+          "cond": 6
+        }
+      ],
+      "htmlFile": "30620-event-30466-02-001.htm"
+    },
+    {
+      "npcId": 30620,
+      "hook": "event",
+      "when": "absent",
+      "event": "30620-03",
+      "ops": [
+        {
+          "op": "create"
+        },
+        {
+          "op": "start"
+        },
+        {
+          "op": "set_cond",
+          "cond": 1
+        }
+      ],
+      "htmlFile": "30620-event-30620-03-002.htm"
+    },
+    {
+      "npcId": 30620,
+      "hook": "event",
+      "when": "absent",
+      "event": "30620-06",
+      "ops": [
+        {
+          "op": "set_cond",
+          "cond": 3
+        }
+      ],
+      "htmlFile": "30620-event-30620-06-003.htm"
+    },
+    {
+      "npcId": 30620,
+      "hook": "event",
+      "when": "absent",
+      "event": "30620-14",
+      "htmlFile": "30620-event-30620-14-006.htm"
+    }
+  ]
+}

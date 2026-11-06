@@ -1,0 +1,157 @@
+{
+  "id": 413,
+  "name": "Path Of The Shillien Oracle",
+  "repeatable": false,
+  "abortable": true,
+  "questItems": [],
+  "dialogs": [
+    {
+      "npcId": 30330,
+      "hook": "talk",
+      "when": "absent",
+      "htmlFile": "30330-talk-001.htm"
+    },
+    {
+      "npcId": 30330,
+      "hook": "talk",
+      "when": "absent",
+      "htmlFile": "30330-talk-002.htm"
+    },
+    {
+      "npcId": 30375,
+      "hook": "talk",
+      "when": "absent",
+      "htmlFile": "30375-talk-005.htm"
+    },
+    {
+      "npcId": 30377,
+      "hook": "talk",
+      "when": "absent",
+      "htmlFile": "30377-talk-009.htm"
+    },
+    {
+      "npcId": 30377,
+      "hook": "talk",
+      "when": "absent",
+      "htmlFile": "30377-talk-012.htm"
+    },
+    {
+      "npcId": 30377,
+      "hook": "talk",
+      "when": "absent",
+      "htmlFile": "30377-talk-013.htm"
+    },
+    {
+      "npcId": 30330,
+      "hook": "event",
+      "when": "absent",
+      "event": "ACCEPT",
+      "minLevel": 18,
+      "hasItem": 1270,
+      "htmlFile": "30330-event-ACCEPT-014.htm"
+    },
+    {
+      "npcId": 30330,
+      "hook": "event",
+      "when": "absent",
+      "event": "ACCEPT",
+      "hasItem": 1270,
+      "htmlFile": "30330-event-ACCEPT-015.htm"
+    },
+    {
+      "npcId": 30330,
+      "hook": "event",
+      "when": "absent",
+      "event": "ACCEPT",
+      "htmlFile": "30330-event-ACCEPT-016.htm"
+    },
+    {
+      "npcId": 30330,
+      "hook": "event",
+      "when": "absent",
+      "event": "30330-06",
+      "htmlFile": "30330-event-30330-06-017.htm"
+    },
+    {
+      "npcId": 30330,
+      "hook": "event",
+      "when": "absent",
+      "event": "30330-06a",
+      "htmlFile": "30330-event-30330-06a-018.htm"
+    },
+    {
+      "npcId": 30330,
+      "hook": "event",
+      "when": "absent",
+      "event": "30375-02",
+      "htmlFile": "30330-event-30375-02-019.htm"
+    },
+    {
+      "npcId": 30330,
+      "hook": "event",
+      "when": "absent",
+      "event": "30375-03",
+      "htmlFile": "30330-event-30375-03-020.htm"
+    },
+    {
+      "npcId": 20457,
+      "hook": "kill",
+      "when": "started",
+      "ops": [
+        {
+          "op": "set_cond",
+          "cond": 6
+        }
+      ],
+      "html": ""
+    },
+    {
+      "npcId": 20458,
+      "hook": "kill",
+      "when": "started",
+      "ops": [
+        {
+          "op": "set_cond",
+          "cond": 6
+        }
+      ],
+      "html": ""
+    },
+    {
+      "npcId": 20514,
+      "hook": "kill",
+      "when": "started",
+      "ops": [
+        {
+          "op": "set_cond",
+          "cond": 6
+        }
+      ],
+      "html": ""
+    },
+    {
+      "npcId": 20515,
+      "hook": "kill",
+      "when": "started",
+      "ops": [
+        {
+          "op": "set_cond",
+          "cond": 6
+        }
+      ],
+      "html": ""
+    },
+    {
+      "npcId": 20776,
+      "hook": "kill",
+      "when": "started",
+      "ops": [
+        {
+          "op": "set_cond",
+          "cond": 3
+        }
+      ],
+      "html": ""
+    }
+  ]
+}

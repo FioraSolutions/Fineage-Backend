@@ -1,0 +1,29 @@
+{
+  "id": 353,
+  "name": "PowerOfDarkness",
+  "repeatable": true,
+  "abortable": true,
+  "questItems": [],
+  "dialogs": [
+    {
+      "npcId": 31044,
+      "hook": "talk",
+      "when": "absent",
+      "maxLevel": 54,
+      "htmlFile": "31044-talk-000.htm"
+    },
+    {
+      "npcId": 31044,
+      "hook": "talk",
+      "when": "absent",
+      "minLevel": 55,
+      "htmlFile": "31044-talk-001.htm"
+    },
+    {
+      "npcId": 31044,
+      "hook": "talk",
+      "when": "started",
+      "htmlFile": "31044-talk-002.htm"
+    }
+  ]
+}

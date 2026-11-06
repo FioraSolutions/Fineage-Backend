@@ -1,0 +1,60 @@
+{
+  "id": 619,
+  "name": "Relics of the Old Empire",
+  "repeatable": true,
+  "abortable": true,
+  "questItems": [],
+  "dialogs": [
+    {
+      "npcId": 31538,
+      "hook": "talk",
+      "when": "absent",
+      "htmlFile": "31538-event-31538-02-000.htm"
+    },
+    {
+      "npcId": 31538,
+      "hook": "event",
+      "when": "absent",
+      "event": "31538-02",
+      "ops": [
+        {
+          "op": "create"
+        },
+        {
+          "op": "start"
+        },
+        {
+          "op": "set_cond",
+          "cond": 1
+        }
+      ],
+      "htmlFile": "31538-event-31538-02-000.htm"
+    },
+    {
+      "npcId": 31538,
+      "hook": "event",
+      "when": "absent",
+      "event": "31538-05",
+      "htmlFile": "31538-event-31538-05-001.htm"
+    },
+    {
+      "npcId": 31538,
+      "hook": "event",
+      "when": "absent",
+      "event": "31538-06",
+      "htmlFile": "31538-event-31538-06-002.htm"
+    },
+    {
+      "npcId": 31538,
+      "hook": "event",
+      "when": "absent",
+      "event": "31538-08",
+      "ops": [
+        {
+          "op": "complete"
+        }
+      ],
+      "htmlFile": "31538-event-31538-08-003.htm"
+    }
+  ]
+}

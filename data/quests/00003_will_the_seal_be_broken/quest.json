@@ -1,0 +1,53 @@
+{
+  "id": 3,
+  "name": "Will the Seal be Broken?",
+  "repeatable": false,
+  "abortable": true,
+  "questItems": [],
+  "dialogs": [
+    {
+      "npcId": 30141,
+      "hook": "talk",
+      "when": "absent",
+      "htmlFile": "30141-talk-000.htm"
+    },
+    {
+      "npcId": 30141,
+      "hook": "talk",
+      "when": "absent",
+      "htmlFile": "30141-talk-001.htm"
+    },
+    {
+      "npcId": 30141,
+      "hook": "talk",
+      "when": "started",
+      "htmlFile": "30141-talk-002.htm"
+    },
+    {
+      "npcId": 30141,
+      "hook": "event",
+      "when": "absent",
+      "event": "30141-03",
+      "ops": [
+        {
+          "op": "create"
+        },
+        {
+          "op": "start"
+        },
+        {
+          "op": "set_cond",
+          "cond": 1
+        }
+      ],
+      "htmlFile": "30141-event-30141-03-003.htm"
+    },
+    {
+      "npcId": 30141,
+      "hook": "event",
+      "when": "absent",
+      "event": "30141-05",
+      "htmlFile": "30141-event-30141-05-004.htm"
+    }
+  ]
+}

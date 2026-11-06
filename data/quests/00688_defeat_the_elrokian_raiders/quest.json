@@ -1,0 +1,74 @@
+{
+  "id": 688,
+  "name": "Defeat the Elrokian Raiders!",
+  "repeatable": true,
+  "abortable": true,
+  "questItems": [],
+  "dialogs": [
+    {
+      "npcId": 32105,
+      "hook": "talk",
+      "when": "absent",
+      "htmlFile": "32105-talk-000.htm"
+    },
+    {
+      "npcId": 32105,
+      "hook": "talk",
+      "when": "absent",
+      "htmlFile": "32105-talk-001.htm"
+    },
+    {
+      "npcId": 32105,
+      "hook": "event",
+      "when": "absent",
+      "event": "32105-02",
+      "htmlFile": "32105-event-32105-02-002.htm"
+    },
+    {
+      "npcId": 32105,
+      "hook": "event",
+      "when": "absent",
+      "event": "32105-10",
+      "htmlFile": "32105-event-32105-10-003.htm"
+    },
+    {
+      "npcId": 32105,
+      "hook": "event",
+      "when": "absent",
+      "event": "32105-03",
+      "ops": [
+        {
+          "op": "create"
+        },
+        {
+          "op": "start"
+        },
+        {
+          "op": "set_cond",
+          "cond": 1
+        }
+      ],
+      "htmlFile": "32105-event-32105-03-004.htm"
+    },
+    {
+      "npcId": 32105,
+      "hook": "event",
+      "when": "absent",
+      "event": "donation",
+      "htmlFile": "32105-event-donation-006.htm"
+    },
+    {
+      "npcId": 32105,
+      "hook": "event",
+      "when": "absent",
+      "event": "donation",
+      "ops": [
+        {
+          "op": "give_adena",
+          "count": 450000
+        }
+      ],
+      "htmlFile": "32105-event-donation-007.htm"
+    }
+  ]
+}

@@ -1,0 +1,92 @@
+{
+  "id": 623,
+  "name": "The Finest Food",
+  "repeatable": true,
+  "abortable": true,
+  "questItems": [],
+  "dialogs": [
+    {
+      "npcId": 31521,
+      "hook": "talk",
+      "when": "absent",
+      "htmlFile": "31521-event-31521-03-002.htm"
+    },
+    {
+      "npcId": 31521,
+      "hook": "talk",
+      "when": "started",
+      "cond": 1,
+      "htmlFile": "31521-talk-c1-000.htm"
+    },
+    {
+      "npcId": 31521,
+      "hook": "talk",
+      "when": "started",
+      "cond": 2,
+      "htmlFile": "31521-talk-c2-001.htm"
+    },
+    {
+      "npcId": 31521,
+      "hook": "event",
+      "when": "absent",
+      "event": "31521-03",
+      "ops": [
+        {
+          "op": "create"
+        },
+        {
+          "op": "start"
+        },
+        {
+          "op": "set_cond",
+          "cond": 1
+        }
+      ],
+      "htmlFile": "31521-event-31521-03-002.htm"
+    },
+    {
+      "npcId": 31521,
+      "hook": "event",
+      "when": "absent",
+      "event": "31521-06",
+      "ops": [
+        {
+          "op": "give_adena",
+          "count": 25000
+        }
+      ],
+      "htmlFile": "31521-event-31521-06-003.htm"
+    },
+    {
+      "npcId": 31521,
+      "hook": "event",
+      "when": "absent",
+      "event": "31521-06",
+      "ops": [
+        {
+          "op": "give_adena",
+          "count": 65000
+        }
+      ],
+      "htmlFile": "31521-event-31521-06-004.htm"
+    },
+    {
+      "npcId": 31521,
+      "hook": "event",
+      "when": "absent",
+      "event": "31521-06",
+      "ops": [
+        {
+          "op": "give_adena",
+          "count": 73000
+        },
+        {
+          "op": "give_exp_sp",
+          "exp": 230000,
+          "sp": 18200
+        }
+      ],
+      "htmlFile": "31521-event-31521-06-005.htm"
+    }
+  ]
+}

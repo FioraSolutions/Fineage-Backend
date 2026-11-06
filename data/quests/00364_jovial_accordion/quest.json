@@ -1,0 +1,147 @@
+{
+  "id": 364,
+  "name": "Jovial Accordion",
+  "repeatable": true,
+  "abortable": true,
+  "questItems": [],
+  "dialogs": [
+    {
+      "npcId": 30959,
+      "hook": "talk",
+      "when": "absent",
+      "htmlFile": "30959-talk-000.htm"
+    },
+    {
+      "npcId": 30959,
+      "hook": "talk",
+      "when": "started",
+      "htmlFile": "30959-talk-001.htm"
+    },
+    {
+      "npcId": 30959,
+      "hook": "talk",
+      "when": "started",
+      "ops": [
+        {
+          "op": "complete"
+        }
+      ],
+      "htmlFile": "30959-talk-002.htm"
+    },
+    {
+      "npcId": 30960,
+      "hook": "talk",
+      "when": "started",
+      "htmlFile": "30960-talk-003.htm"
+    },
+    {
+      "npcId": 30961,
+      "hook": "talk",
+      "when": "started",
+      "htmlFile": "30961-talk-004.htm"
+    },
+    {
+      "npcId": 30957,
+      "hook": "talk",
+      "when": "started",
+      "htmlFile": "30957-talk-005.htm"
+    },
+    {
+      "npcId": 30957,
+      "hook": "talk",
+      "when": "started",
+      "htmlFile": "30957-talk-006.htm"
+    },
+    {
+      "npcId": 30957,
+      "hook": "talk",
+      "when": "started",
+      "ops": [
+        {
+          "op": "complete"
+        }
+      ],
+      "htmlFile": "30957-talk-007.htm"
+    },
+    {
+      "npcId": 30957,
+      "hook": "talk",
+      "when": "started",
+      "ops": [
+        {
+          "op": "complete"
+        }
+      ],
+      "htmlFile": "30957-talk-008.htm"
+    },
+    {
+      "npcId": 30957,
+      "hook": "talk",
+      "when": "started",
+      "ops": [
+        {
+          "op": "set_cond",
+          "cond": 3
+        },
+        {
+          "op": "give_adena",
+          "count": 100
+        }
+      ],
+      "htmlFile": "30957-talk-009.htm"
+    },
+    {
+      "npcId": 30957,
+      "hook": "talk",
+      "when": "started",
+      "htmlFile": "30957-talk-010.htm"
+    },
+    {
+      "npcId": 30959,
+      "hook": "event",
+      "when": "absent",
+      "event": "START",
+      "minLevel": 15,
+      "ops": [
+        {
+          "op": "create"
+        },
+        {
+          "op": "start"
+        },
+        {
+          "op": "set_cond",
+          "cond": 1
+        }
+      ],
+      "htmlFile": "30959-event-START-011.htm"
+    },
+    {
+      "npcId": 30959,
+      "hook": "event",
+      "when": "absent",
+      "event": "OPEN_CHEST",
+      "htmlFile": "30959-event-OPEN_CHEST-013.htm"
+    },
+    {
+      "npcId": 30959,
+      "hook": "event",
+      "when": "absent",
+      "event": "OPEN_CLOTH_CHEST",
+      "htmlFile": "30959-event-OPEN_CLOTH_CHEST-015.htm"
+    },
+    {
+      "npcId": 30959,
+      "hook": "event",
+      "when": "absent",
+      "event": "30957-02",
+      "ops": [
+        {
+          "op": "set_cond",
+          "cond": 2
+        }
+      ],
+      "htmlFile": "30959-event-30957-02-016.htm"
+    }
+  ]
+}

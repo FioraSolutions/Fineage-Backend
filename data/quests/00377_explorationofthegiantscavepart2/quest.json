@@ -1,0 +1,44 @@
+{
+  "id": 377,
+  "name": "ExplorationOfTheGiantsCavePart2",
+  "repeatable": true,
+  "abortable": true,
+  "questItems": [],
+  "dialogs": [
+    {
+      "npcId": 31147,
+      "hook": "talk",
+      "when": "absent",
+      "maxLevel": 56,
+      "htmlFile": "31147-talk-000.htm"
+    },
+    {
+      "npcId": 31147,
+      "hook": "talk",
+      "when": "absent",
+      "minLevel": 57,
+      "htmlFile": "31147-talk-001.htm"
+    },
+    {
+      "npcId": 31147,
+      "hook": "event",
+      "when": "absent",
+      "event": "31147-03",
+      "htmlFile": "31147-event-31147-03-002.htm"
+    },
+    {
+      "npcId": 31147,
+      "hook": "event",
+      "when": "absent",
+      "event": "31147-04",
+      "htmlFile": "31147-event-31147-04-003.htm"
+    },
+    {
+      "npcId": 31147,
+      "hook": "event",
+      "when": "absent",
+      "event": "31147-07",
+      "htmlFile": "31147-event-31147-07-004.htm"
+    }
+  ]
+}

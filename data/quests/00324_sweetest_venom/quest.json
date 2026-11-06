@@ -1,0 +1,24 @@
+{
+  "id": 324,
+  "name": "Sweetest Venom",
+  "repeatable": true,
+  "abortable": true,
+  "questItems": [],
+  "dialogs": [
+    {
+      "npcId": 30351,
+      "hook": "talk",
+      "when": "started",
+      "ops": [
+        {
+          "op": "give_adena",
+          "count": 5810
+        },
+        {
+          "op": "complete"
+        }
+      ],
+      "htmlFile": "30351-talk-000.htm"
+    }
+  ]
+}

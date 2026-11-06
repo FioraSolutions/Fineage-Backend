@@ -1,0 +1,69 @@
+{
+  "id": 626,
+  "name": "ADarkTwilight",
+  "repeatable": true,
+  "abortable": true,
+  "questItems": [],
+  "dialogs": [
+    {
+      "npcId": 31517,
+      "hook": "talk",
+      "when": "absent",
+      "htmlFile": "31517-talk-000.htm"
+    },
+    {
+      "npcId": 31517,
+      "hook": "talk",
+      "when": "started",
+      "cond": 1,
+      "htmlFile": "31517-talk-c1-001.htm"
+    },
+    {
+      "npcId": 31517,
+      "hook": "talk",
+      "when": "started",
+      "cond": 2,
+      "htmlFile": "31517-talk-c2-002.htm"
+    },
+    {
+      "npcId": 31517,
+      "hook": "event",
+      "when": "absent",
+      "event": "31517-05",
+      "htmlFile": "31517-event-31517-05-003.htm"
+    },
+    {
+      "npcId": 31517,
+      "hook": "event",
+      "when": "absent",
+      "event": "31517-02",
+      "ops": [
+        {
+          "op": "create"
+        },
+        {
+          "op": "start"
+        },
+        {
+          "op": "set_cond",
+          "cond": 1
+        }
+      ],
+      "htmlFile": "31517-event-31517-02-004.htm"
+    },
+    {
+      "npcId": 31517,
+      "hook": "event",
+      "when": "absent",
+      "event": "Exp",
+      "htmlFile": "31517-event-Exp-005.htm"
+    },
+    {
+      "npcId": 31517,
+      "hook": "event",
+      "when": "absent",
+      "event": "Adena",
+      "htmlFile": "31517-event-Adena-006.htm"
+    }
+  ]
+}

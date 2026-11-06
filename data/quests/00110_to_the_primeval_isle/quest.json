@@ -1,0 +1,96 @@
+{
+  "id": 110,
+  "name": "To the Primeval Isle",
+  "repeatable": false,
+  "abortable": true,
+  "questItems": [],
+  "dialogs": [
+    {
+      "npcId": 31338,
+      "hook": "talk",
+      "when": "absent",
+      "maxLevel": 74,
+      "htmlFile": "31338-talk-000.htm"
+    },
+    {
+      "npcId": 31338,
+      "hook": "talk",
+      "when": "absent",
+      "minLevel": 75,
+      "htmlFile": "31338-talk-001.htm"
+    },
+    {
+      "npcId": 31338,
+      "hook": "talk",
+      "when": "started",
+      "htmlFile": "31338-talk-002.htm"
+    },
+    {
+      "npcId": 32113,
+      "hook": "talk",
+      "when": "absent",
+      "htmlFile": "32113-talk-003.htm"
+    },
+    {
+      "npcId": 31338,
+      "hook": "event",
+      "when": "absent",
+      "event": "31338-1",
+      "ops": [
+        {
+          "op": "create"
+        },
+        {
+          "op": "start"
+        },
+        {
+          "op": "set_cond",
+          "cond": 1
+        }
+      ],
+      "htmlFile": "31338-event-31338-1-004.htm"
+    },
+    {
+      "npcId": 31338,
+      "hook": "event",
+      "when": "absent",
+      "event": "32113-2",
+      "ops": [
+        {
+          "op": "give_adena",
+          "count": 191678
+        },
+        {
+          "op": "give_exp_sp",
+          "exp": 251602,
+          "sp": 25245
+        },
+        {
+          "op": "complete"
+        }
+      ],
+      "htmlFile": "31338-event-32113-2-005.htm"
+    },
+    {
+      "npcId": 31338,
+      "hook": "event",
+      "when": "absent",
+      "event": "32113-2a",
+      "ops": [
+        {
+          "op": "give_adena",
+          "count": 191678
+        },
+        {
+          "op": "give_exp_sp",
+          "exp": 251602,
+          "sp": 25245
+        },
+        {
+          "op": "complete"
+        }
+      ],
+      "htmlFile": "31338-event-32113-2a-006.htm"
+    }
+  ]
+}

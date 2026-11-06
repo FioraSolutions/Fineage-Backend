@@ -1,0 +1,187 @@
+{
+  "id": 211,
+  "name": "Trial of the Challenger",
+  "repeatable": false,
+  "abortable": true,
+  "questItems": [],
+  "dialogs": [
+    {
+      "npcId": 30644,
+      "hook": "talk",
+      "when": "started",
+      "cond": 1,
+      "htmlFile": "30644-talk-c1-000.htm"
+    },
+    {
+      "npcId": 30644,
+      "hook": "talk",
+      "when": "started",
+      "cond": 8,
+      "htmlFile": "30644-talk-c8-003.htm"
+    },
+    {
+      "npcId": 30644,
+      "hook": "talk",
+      "when": "started",
+      "cond": 9,
+      "htmlFile": "30644-talk-c9-004.htm"
+    },
+    {
+      "npcId": 30644,
+      "hook": "talk",
+      "when": "started",
+      "cond": 10,
+      "htmlFile": "30644-talk-c10-005.htm"
+    },
+    {
+      "npcId": 30645,
+      "hook": "talk",
+      "when": "started",
+      "cond": 4,
+      "htmlFile": "30645-talk-c4-007.htm"
+    },
+    {
+      "npcId": 30645,
+      "hook": "talk",
+      "when": "started",
+      "cond": 6,
+      "htmlFile": "30645-talk-c6-009.htm"
+    },
+    {
+      "npcId": 30645,
+      "hook": "talk",
+      "when": "started",
+      "cond": 7,
+      "htmlFile": "30645-talk-c7-010.htm"
+    },
+    {
+      "npcId": 30645,
+      "hook": "talk",
+      "when": "started",
+      "cond": 8,
+      "htmlFile": "30645-talk-c8-011.htm"
+    },
+    {
+      "npcId": 30645,
+      "hook": "talk",
+      "when": "started",
+      "cond": 9,
+      "htmlFile": "30645-talk-c9-012.htm"
+    },
+    {
+      "npcId": 30647,
+      "hook": "talk",
+      "when": "absent",
+      "htmlFile": "30647-talk-013.htm"
+    },
+    {
+      "npcId": 30646,
+      "hook": "talk",
+      "when": "started",
+      "cond": 8,
+      "htmlFile": "30646-talk-c8-015.htm"
+    },
+    {
+      "npcId": 30535,
+      "hook": "talk",
+      "when": "started",
+      "cond": 8,
+      "ops": [
+        {
+          "op": "set_cond",
+          "cond": 9
+        }
+      ],
+      "htmlFile": "30535-talk-c8-016.htm"
+    },
+    {
+      "npcId": 30535,
+      "hook": "talk",
+      "when": "started",
+      "cond": 9,
+      "htmlFile": "30535-talk-c9-017.htm"
+    },
+    {
+      "npcId": 30535,
+      "hook": "talk",
+      "when": "started",
+      "cond": 10,
+      "htmlFile": "30535-talk-c10-018.htm"
+    },
+    {
+      "npcId": 30644,
+      "hook": "event",
+      "when": "absent",
+      "event": "30644-04",
+      "htmlFile": "30644-event-30644-04-019.htm"
+    },
+    {
+      "npcId": 30644,
+      "hook": "event",
+      "when": "absent",
+      "event": "30645-07",
+      "htmlFile": "30644-event-30645-07-020.htm"
+    },
+    {
+      "npcId": 30644,
+      "hook": "event",
+      "when": "absent",
+      "event": "30645-08",
+      "htmlFile": "30644-event-30645-08-021.htm"
+    },
+    {
+      "npcId": 30644,
+      "hook": "event",
+      "when": "absent",
+      "event": "30646-02",
+      "htmlFile": "30644-event-30646-02-022.htm"
+    },
+    {
+      "npcId": 30644,
+      "hook": "event",
+      "when": "absent",
+      "event": "30646-03",
+      "htmlFile": "30644-event-30646-03-023.htm"
+    },
+    {
+      "npcId": 30644,
+      "hook": "event",
+      "when": "absent",
+      "event": "30644-06",
+      "htmlFile": "30644-event-30644-06-024.htm"
+    },
+    {
+      "npcId": 30644,
+      "hook": "event",
+      "when": "absent",
+      "event": "30647-02",
+      "htmlFile": "30644-event-30647-02-028.htm"
+    },
+    {
+      "npcId": 30644,
+      "hook": "event",
+      "when": "absent",
+      "event": "30647-02",
+      "htmlFile": "30644-event-30647-02-029.htm"
+    },
+    {
+      "npcId": 30644,
+      "hook": "event",
+      "when": "absent",
+      "event": "30647-02",
+      "htmlFile": "30644-event-30647-02-030.htm"
+    },
+    {
+      "npcId": 27112,
+      "hook": "kill",
+      "when": "started",
+      "ops": [
+        {
+          "op": "set_cond",
+          "cond": 5
+        }
+      ],
+      "html": ""
+    }
+  ]
+}

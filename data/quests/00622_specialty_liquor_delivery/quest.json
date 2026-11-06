@@ -1,0 +1,99 @@
+{
+  "id": 622,
+  "name": "Specialty Liquor Delivery",
+  "repeatable": true,
+  "abortable": true,
+  "questItems": [],
+  "dialogs": [
+    {
+      "npcId": 31521,
+      "hook": "talk",
+      "when": "absent",
+      "htmlFile": "31521-talk-000.htm"
+    },
+    {
+      "npcId": 31521,
+      "hook": "talk",
+      "when": "absent",
+      "htmlFile": "31521-talk-001.htm"
+    },
+    {
+      "npcId": 31521,
+      "hook": "talk",
+      "when": "started",
+      "cond": 1,
+      "htmlFile": "31521-talk-c1-002.htm"
+    },
+    {
+      "npcId": 31521,
+      "hook": "talk",
+      "when": "started",
+      "cond": 7,
+      "htmlFile": "31521-talk-c7-004.htm"
+    },
+    {
+      "npcId": 31547,
+      "hook": "talk",
+      "when": "started",
+      "cond": 2,
+      "htmlFile": "31547-talk-c2-006.htm"
+    },
+    {
+      "npcId": 31267,
+      "hook": "talk",
+      "when": "absent",
+      "htmlFile": "31267-talk-007.htm"
+    },
+    {
+      "npcId": 31521,
+      "hook": "event",
+      "when": "absent",
+      "event": "31521-03",
+      "ops": [
+        {
+          "op": "create"
+        },
+        {
+          "op": "start"
+        },
+        {
+          "op": "set_cond",
+          "cond": 1
+        }
+      ],
+      "htmlFile": "31521-event-31521-03-008.htm"
+    },
+    {
+      "npcId": 31521,
+      "hook": "event",
+      "when": "absent",
+      "event": "31267-02",
+      "ops": [
+        {
+          "op": "give_item",
+          "itemId": 734,
+          "count": 1
+        },
+        {
+          "op": "give_adena",
+          "count": 18800
+        }
+      ],
+      "htmlFile": "31521-event-31267-02-015.htm"
+    },
+    {
+      "npcId": 31521,
+      "hook": "event",
+      "when": "absent",
+      "event": "31267-02",
+      "htmlFile": "31521-event-31267-02-016.htm"
+    },
+    {
+      "npcId": 31521,
+      "hook": "event",
+      "when": "absent",
+      "event": "31267-02",
+      "htmlFile": "31521-event-31267-02-017.htm"
+    }
+  ]
+}

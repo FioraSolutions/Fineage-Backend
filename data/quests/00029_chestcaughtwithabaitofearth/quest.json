@@ -1,0 +1,29 @@
+{
+  "id": 29,
+  "name": "ChestCaughtWithABaitOfEarth",
+  "repeatable": false,
+  "abortable": true,
+  "questItems": [],
+  "dialogs": [
+    {
+      "npcId": 31574,
+      "hook": "talk",
+      "when": "started",
+      "cond": 2,
+      "htmlFile": "31574-talk-c2-001.htm"
+    },
+    {
+      "npcId": 31574,
+      "hook": "talk",
+      "when": "started",
+      "htmlFile": "31574-talk-002.htm"
+    },
+    {
+      "npcId": 31574,
+      "hook": "event",
+      "when": "absent",
+      "event": "31574-04",
+      "htmlFile": "31574-event-31574-04-003.htm"
+    }
+  ]
+}

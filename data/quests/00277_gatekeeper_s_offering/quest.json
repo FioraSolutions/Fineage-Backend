@@ -1,0 +1,32 @@
+{
+  "id": 277,
+  "name": "Gatekeeper's Offering",
+  "repeatable": true,
+  "abortable": true,
+  "questItems": [],
+  "dialogs": [
+    {
+      "npcId": 30576,
+      "hook": "talk",
+      "when": "absent",
+      "htmlFile": "30576-talk-000.htm"
+    },
+    {
+      "npcId": 30576,
+      "hook": "talk",
+      "when": "started",
+      "htmlFile": "30576-talk-001.htm"
+    },
+    {
+      "npcId": 30576,
+      "hook": "talk",
+      "when": "started",
+      "ops": [
+        {
+          "op": "complete"
+        }
+      ],
+      "htmlFile": "30576-talk-002.htm"
+    }
+  ]
+}

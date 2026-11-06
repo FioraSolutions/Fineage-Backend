@@ -1,0 +1,101 @@
+{
+  "id": 633,
+  "name": "In The Forgotten Village",
+  "repeatable": true,
+  "abortable": true,
+  "questItems": [],
+  "dialogs": [
+    {
+      "npcId": 31388,
+      "hook": "talk",
+      "when": "absent",
+      "htmlFile": "31388-event-31388-03-000.htm"
+    },
+    {
+      "npcId": 31388,
+      "hook": "event",
+      "when": "absent",
+      "event": "31388-03",
+      "ops": [
+        {
+          "op": "create"
+        },
+        {
+          "op": "start"
+        },
+        {
+          "op": "set_cond",
+          "cond": 1
+        }
+      ],
+      "htmlFile": "31388-event-31388-03-000.htm"
+    },
+    {
+      "npcId": 31388,
+      "hook": "event",
+      "when": "absent",
+      "event": "31388-04",
+      "htmlFile": "31388-event-31388-04-001.htm"
+    },
+    {
+      "npcId": 31388,
+      "hook": "event",
+      "when": "absent",
+      "event": "31388-05",
+      "htmlFile": "31388-event-31388-05-002.htm"
+    },
+    {
+      "npcId": 31388,
+      "hook": "event",
+      "when": "absent",
+      "event": "31388-06",
+      "htmlFile": "31388-event-31388-06-003.htm"
+    },
+    {
+      "npcId": 31388,
+      "hook": "event",
+      "when": "absent",
+      "event": "31388-07",
+      "ops": [
+        {
+          "op": "set_cond",
+          "cond": 1
+        },
+        {
+          "op": "give_adena",
+          "count": 25000
+        },
+        {
+          "op": "give_exp_sp",
+          "exp": 305235,
+          "sp": 0
+        }
+      ],
+      "htmlFile": "31388-event-31388-07-004.htm"
+    },
+    {
+      "npcId": 31388,
+      "hook": "event",
+      "when": "absent",
+      "event": "31388-09",
+      "ops": [
+        {
+          "op": "complete"
+        }
+      ],
+      "htmlFile": "31388-event-31388-09-005.htm"
+    },
+    {
+      "npcId": 7544,
+      "hook": "kill",
+      "when": "started",
+      "ops": [
+        {
+          "op": "set_cond",
+          "cond": 2
+        }
+      ],
+      "html": ""
+    }
+  ]
+}

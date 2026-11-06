@@ -1,0 +1,227 @@
+{
+  "id": 345,
+  "name": "Method to Raise the Dead",
+  "repeatable": true,
+  "abortable": true,
+  "questItems": [],
+  "dialogs": [
+    {
+      "npcId": 30970,
+      "hook": "talk",
+      "when": "absent",
+      "htmlFile": "30970-talk-000.htm"
+    },
+    {
+      "npcId": 30970,
+      "hook": "talk",
+      "when": "absent",
+      "htmlFile": "30970-talk-001.htm"
+    },
+    {
+      "npcId": 30970,
+      "hook": "talk",
+      "when": "absent",
+      "htmlFile": "30970-talk-002.htm"
+    },
+    {
+      "npcId": 30970,
+      "hook": "talk",
+      "when": "absent",
+      "htmlFile": "30970-talk-003.htm"
+    },
+    {
+      "npcId": 30970,
+      "hook": "talk",
+      "when": "absent",
+      "htmlFile": "30970-talk-004.htm"
+    },
+    {
+      "npcId": 30970,
+      "hook": "talk",
+      "when": "absent",
+      "htmlFile": "30970-talk-005.htm"
+    },
+    {
+      "npcId": 30970,
+      "hook": "talk",
+      "when": "absent",
+      "htmlFile": "30970-talk-006.htm"
+    },
+    {
+      "npcId": 30973,
+      "hook": "talk",
+      "when": "absent",
+      "htmlFile": "30973-talk-008.htm"
+    },
+    {
+      "npcId": 30973,
+      "hook": "talk",
+      "when": "absent",
+      "htmlFile": "30973-talk-009.htm"
+    },
+    {
+      "npcId": 30973,
+      "hook": "talk",
+      "when": "absent",
+      "htmlFile": "30973-talk-010.htm"
+    },
+    {
+      "npcId": 30973,
+      "hook": "talk",
+      "when": "absent",
+      "htmlFile": "30973-talk-011.htm"
+    },
+    {
+      "npcId": 30912,
+      "hook": "talk",
+      "when": "absent",
+      "htmlFile": "30912-talk-012.htm"
+    },
+    {
+      "npcId": 30912,
+      "hook": "talk",
+      "when": "absent",
+      "htmlFile": "30912-talk-013.htm"
+    },
+    {
+      "npcId": 30970,
+      "hook": "event",
+      "when": "absent",
+      "event": "30970-02",
+      "ops": [
+        {
+          "op": "create"
+        },
+        {
+          "op": "start"
+        },
+        {
+          "op": "set_cond",
+          "cond": 1
+        }
+      ],
+      "htmlFile": "30970-event-30970-02-014.htm"
+    },
+    {
+      "npcId": 30970,
+      "hook": "event",
+      "when": "absent",
+      "event": "30970-03",
+      "htmlFile": "30970-event-30970-03-015.htm"
+    },
+    {
+      "npcId": 30970,
+      "hook": "event",
+      "when": "absent",
+      "event": "30970-07",
+      "ops": [
+        {
+          "op": "set_cond",
+          "cond": 2
+        }
+      ],
+      "htmlFile": "30970-event-30970-07-016.htm"
+    },
+    {
+      "npcId": 30970,
+      "hook": "event",
+      "when": "absent",
+      "event": "30971-02",
+      "htmlFile": "30970-event-30971-02-017.htm"
+    },
+    {
+      "npcId": 30970,
+      "hook": "event",
+      "when": "absent",
+      "event": "30912-05",
+      "htmlFile": "30970-event-30912-05-018.htm"
+    },
+    {
+      "npcId": 30970,
+      "hook": "event",
+      "when": "absent",
+      "event": "30971-03",
+      "htmlFile": "30970-event-30971-03-019.htm"
+    },
+    {
+      "npcId": 30970,
+      "hook": "event",
+      "when": "absent",
+      "event": "30973-02",
+      "htmlFile": "30970-event-30973-02-020.htm"
+    },
+    {
+      "npcId": 30970,
+      "hook": "event",
+      "when": "absent",
+      "event": "30973-02",
+      "htmlFile": "30970-event-30973-02-021.htm"
+    },
+    {
+      "npcId": 30970,
+      "hook": "event",
+      "when": "absent",
+      "event": "30973-02",
+      "htmlFile": "30970-event-30973-02-022.htm"
+    },
+    {
+      "npcId": 30970,
+      "hook": "event",
+      "when": "absent",
+      "event": "30973-03",
+      "ops": [
+        {
+          "op": "set_cond",
+          "cond": 6
+        }
+      ],
+      "htmlFile": "30970-event-30973-03-023.htm"
+    },
+    {
+      "npcId": 30970,
+      "hook": "event",
+      "when": "absent",
+      "event": "30973-05",
+      "ops": [
+        {
+          "op": "set_cond",
+          "cond": 6
+        }
+      ],
+      "htmlFile": "30970-event-30973-05-024.htm"
+    },
+    {
+      "npcId": 30970,
+      "hook": "event",
+      "when": "absent",
+      "event": "30973-07",
+      "ops": [
+        {
+          "op": "set_cond",
+          "cond": 7
+        }
+      ],
+      "htmlFile": "30970-event-30973-07-025.htm"
+    },
+    {
+      "npcId": 30970,
+      "hook": "event",
+      "when": "absent",
+      "event": "30912-02",
+      "htmlFile": "30970-event-30912-02-026.htm"
+    },
+    {
+      "npcId": 30970,
+      "hook": "event",
+      "when": "absent",
+      "event": "30912-03",
+      "ops": [
+        {
+          "op": "set_cond",
+          "cond": 3
+        }
+      ],
+      "htmlFile": "30970-event-30912-03-027.htm"
+    }
+  ]
+}

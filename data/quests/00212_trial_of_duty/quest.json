@@ -1,0 +1,153 @@
+{
+  "id": 212,
+  "name": "Trial of Duty",
+  "repeatable": false,
+  "abortable": true,
+  "questItems": [],
+  "dialogs": [
+    {
+      "npcId": 27119,
+      "hook": "kill",
+      "when": "started",
+      "ops": [
+        {
+          "op": "set_cond",
+          "cond": 3
+        }
+      ],
+      "html": ""
+    },
+    {
+      "npcId": 20200,
+      "hook": "kill",
+      "when": "started",
+      "ops": [
+        {
+          "op": "set_cond",
+          "cond": 6
+        }
+      ],
+      "html": ""
+    },
+    {
+      "npcId": 20201,
+      "hook": "kill",
+      "when": "started",
+      "ops": [
+        {
+          "op": "set_cond",
+          "cond": 6
+        }
+      ],
+      "html": ""
+    },
+    {
+      "npcId": 20144,
+      "hook": "kill",
+      "when": "started",
+      "ops": [
+        {
+          "op": "set_cond",
+          "cond": 8
+        }
+      ],
+      "html": ""
+    },
+    {
+      "npcId": 20577,
+      "hook": "kill",
+      "when": "started",
+      "ops": [
+        {
+          "op": "set_cond",
+          "cond": 12
+        }
+      ],
+      "html": ""
+    },
+    {
+      "npcId": 20578,
+      "hook": "kill",
+      "when": "started",
+      "ops": [
+        {
+          "op": "set_cond",
+          "cond": 12
+        }
+      ],
+      "html": ""
+    },
+    {
+      "npcId": 20579,
+      "hook": "kill",
+      "when": "started",
+      "ops": [
+        {
+          "op": "set_cond",
+          "cond": 12
+        }
+      ],
+      "html": ""
+    },
+    {
+      "npcId": 20580,
+      "hook": "kill",
+      "when": "started",
+      "ops": [
+        {
+          "op": "set_cond",
+          "cond": 12
+        }
+      ],
+      "html": ""
+    },
+    {
+      "npcId": 20581,
+      "hook": "kill",
+      "when": "started",
+      "ops": [
+        {
+          "op": "set_cond",
+          "cond": 12
+        }
+      ],
+      "html": ""
+    },
+    {
+      "npcId": 20582,
+      "hook": "kill",
+      "when": "started",
+      "ops": [
+        {
+          "op": "set_cond",
+          "cond": 12
+        }
+      ],
+      "html": ""
+    },
+    {
+      "npcId": 20270,
+      "hook": "kill",
+      "when": "started",
+      "html": ""
+    },
+    {
+      "npcId": 20270,
+      "hook": "kill",
+      "when": "started",
+      "html": ""
+    },
+    {
+      "npcId": 20270,
+      "hook": "kill",
+      "when": "started",
+      "ops": [
+        {
+          "op": "set_cond",
+          "cond": 15
+        }
+      ],
+      "html": ""
+    }
+  ]
+}

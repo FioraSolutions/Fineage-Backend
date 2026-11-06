@@ -1,0 +1,209 @@
+{
+  "id": 38,
+  "name": "Dragon Fangs",
+  "repeatable": false,
+  "abortable": true,
+  "questItems": [],
+  "dialogs": [
+    {
+      "npcId": 30034,
+      "hook": "talk",
+      "when": "started",
+      "cond": 3,
+      "htmlFile": "30034-talk-c3-000.htm"
+    },
+    {
+      "npcId": 30034,
+      "hook": "talk",
+      "when": "started",
+      "cond": 4,
+      "htmlFile": "30034-talk-c4-001.htm"
+    },
+    {
+      "npcId": 30034,
+      "hook": "talk",
+      "when": "started",
+      "cond": 5,
+      "htmlFile": "30034-talk-c5-002.htm"
+    },
+    {
+      "npcId": 30034,
+      "hook": "talk",
+      "when": "started",
+      "cond": 6,
+      "htmlFile": "30034-talk-c6-003.htm"
+    },
+    {
+      "npcId": 30034,
+      "hook": "talk",
+      "when": "started",
+      "cond": 7,
+      "htmlFile": "30034-talk-c7-004.htm"
+    },
+    {
+      "npcId": 30344,
+      "hook": "talk",
+      "when": "absent",
+      "htmlFile": "30344-talk-005.htm"
+    },
+    {
+      "npcId": 30344,
+      "hook": "talk",
+      "when": "absent",
+      "htmlFile": "30344-talk-006.htm"
+    },
+    {
+      "npcId": 30386,
+      "hook": "talk",
+      "when": "started",
+      "cond": 1,
+      "htmlFile": "30386-talk-c1-007.htm"
+    },
+    {
+      "npcId": 30386,
+      "hook": "talk",
+      "when": "started",
+      "cond": 2,
+      "htmlFile": "30386-talk-c2-008.htm"
+    },
+    {
+      "npcId": 30386,
+      "hook": "talk",
+      "when": "started",
+      "cond": 3,
+      "htmlFile": "30386-talk-c3-009.htm"
+    },
+    {
+      "npcId": 30386,
+      "hook": "event",
+      "when": "absent",
+      "event": "30386-03",
+      "ops": [
+        {
+          "op": "create"
+        },
+        {
+          "op": "start"
+        },
+        {
+          "op": "set_cond",
+          "cond": 1
+        }
+      ],
+      "htmlFile": "30386-event-30386-03-010.htm"
+    },
+    {
+      "npcId": 30386,
+      "hook": "event",
+      "when": "absent",
+      "event": "30386-06",
+      "ops": [
+        {
+          "op": "set_cond",
+          "cond": 3
+        }
+      ],
+      "htmlFile": "30386-event-30386-06-011.htm"
+    },
+    {
+      "npcId": 30386,
+      "hook": "event",
+      "when": "absent",
+      "event": "30034-10",
+      "ops": [
+        {
+          "op": "give_adena",
+          "count": 5200
+        }
+      ],
+      "htmlFile": "30386-event-30034-10-014.htm"
+    },
+    {
+      "npcId": 30386,
+      "hook": "event",
+      "when": "absent",
+      "event": "30034-10",
+      "ops": [
+        {
+          "op": "give_adena",
+          "count": 1500
+        }
+      ],
+      "htmlFile": "30386-event-30034-10-015.htm"
+    },
+    {
+      "npcId": 30386,
+      "hook": "event",
+      "when": "absent",
+      "event": "30034-10",
+      "ops": [
+        {
+          "op": "give_adena",
+          "count": 3200
+        }
+      ],
+      "htmlFile": "30386-event-30034-10-016.htm"
+    },
+    {
+      "npcId": 30386,
+      "hook": "event",
+      "when": "absent",
+      "event": "30034-10",
+      "ops": [
+        {
+          "op": "give_adena",
+          "count": 3200
+        }
+      ],
+      "htmlFile": "30386-event-30034-10-017.htm"
+    },
+    {
+      "npcId": 20357,
+      "hook": "kill",
+      "when": "started",
+      "ops": [
+        {
+          "op": "set_cond",
+          "cond": 2
+        }
+      ],
+      "html": ""
+    },
+    {
+      "npcId": 21100,
+      "hook": "kill",
+      "when": "started",
+      "ops": [
+        {
+          "op": "set_cond",
+          "cond": 2
+        }
+      ],
+      "html": ""
+    },
+    {
+      "npcId": 20356,
+      "hook": "kill",
+      "when": "started",
+      "ops": [
+        {
+          "op": "set_cond",
+          "cond": 7
+        }
+      ],
+      "html": ""
+    },
+    {
+      "npcId": 21101,
+      "hook": "kill",
+      "when": "started",
+      "ops": [
+        {
+          "op": "set_cond",
+          "cond": 7
+        }
+      ],
+      "html": ""
+    }
+  ]
+}

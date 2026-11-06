@@ -1,0 +1,115 @@
+{
+  "id": 259,
+  "name": "Request from the Farm Owner",
+  "repeatable": true,
+  "abortable": true,
+  "questItems": [],
+  "dialogs": [
+    {
+      "npcId": 30497,
+      "hook": "talk",
+      "when": "absent",
+      "htmlFile": "30497-talk-000.htm"
+    },
+    {
+      "npcId": 30405,
+      "hook": "talk",
+      "when": "absent",
+      "htmlFile": "30405-talk-002.htm"
+    },
+    {
+      "npcId": 30497,
+      "hook": "event",
+      "when": "absent",
+      "event": "30405-03",
+      "htmlFile": "30497-event-30405-03-003.htm"
+    },
+    {
+      "npcId": 30497,
+      "hook": "event",
+      "when": "absent",
+      "event": "30405-05b",
+      "htmlFile": "30497-event-30405-05b-004.htm"
+    },
+    {
+      "npcId": 30497,
+      "hook": "event",
+      "when": "absent",
+      "event": "30405-05d",
+      "htmlFile": "30497-event-30405-05d-005.htm"
+    },
+    {
+      "npcId": 30497,
+      "hook": "event",
+      "when": "absent",
+      "event": "30497-07",
+      "htmlFile": "30497-event-30497-07-006.htm"
+    },
+    {
+      "npcId": 30497,
+      "hook": "event",
+      "when": "absent",
+      "event": "30405-04",
+      "htmlFile": "30497-event-30405-04-007.htm"
+    },
+    {
+      "npcId": 30497,
+      "hook": "event",
+      "when": "absent",
+      "event": "30405-05",
+      "htmlFile": "30497-event-30405-05-008.htm"
+    },
+    {
+      "npcId": 30497,
+      "hook": "event",
+      "when": "absent",
+      "event": "30405-05a",
+      "htmlFile": "30497-event-30405-05a-009.htm"
+    },
+    {
+      "npcId": 30497,
+      "hook": "event",
+      "when": "absent",
+      "event": "30405-05c",
+      "htmlFile": "30497-event-30405-05c-010.htm"
+    },
+    {
+      "npcId": 30497,
+      "hook": "event",
+      "when": "absent",
+      "event": "30405-06",
+      "htmlFile": "30497-event-30405-06-011.htm"
+    },
+    {
+      "npcId": 30497,
+      "hook": "event",
+      "when": "absent",
+      "event": "30497-03",
+      "ops": [
+        {
+          "op": "create"
+        },
+        {
+          "op": "start"
+        },
+        {
+          "op": "set_cond",
+          "cond": 1
+        }
+      ],
+      "htmlFile": "30497-event-30497-03-012.htm"
+    },
+    {
+      "npcId": 30497,
+      "hook": "event",
+      "when": "absent",
+      "event": "30497-06",
+      "ops": [
+        {
+          "op": "complete"
+        }
+      ],
+      "htmlFile": "30497-event-30497-06-013.htm"
+    }
+  ]
+}

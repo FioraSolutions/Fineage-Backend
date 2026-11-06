@@ -1,0 +1,113 @@
+{
+  "id": 344,
+  "name": "1000 years, the End of Lamentation",
+  "repeatable": true,
+  "abortable": true,
+  "questItems": [],
+  "dialogs": [
+    {
+      "npcId": 30754,
+      "hook": "talk",
+      "when": "absent",
+      "htmlFile": "30754-talk-000.htm"
+    },
+    {
+      "npcId": 30754,
+      "hook": "talk",
+      "when": "absent",
+      "htmlFile": "30754-talk-001.htm"
+    },
+    {
+      "npcId": 30754,
+      "hook": "talk",
+      "when": "absent",
+      "htmlFile": "30754-talk-002.htm"
+    },
+    {
+      "npcId": 30754,
+      "hook": "talk",
+      "when": "absent",
+      "htmlFile": "30754-talk-003.htm"
+    },
+    {
+      "npcId": 30754,
+      "hook": "event",
+      "when": "absent",
+      "event": "30754-03",
+      "htmlFile": "30754-event-30754-03-004.htm"
+    },
+    {
+      "npcId": 30754,
+      "hook": "event",
+      "when": "absent",
+      "event": "30754-16",
+      "htmlFile": "30754-event-30754-16-005.htm"
+    },
+    {
+      "npcId": 30754,
+      "hook": "event",
+      "when": "absent",
+      "event": "30754-04",
+      "ops": [
+        {
+          "op": "create"
+        },
+        {
+          "op": "start"
+        },
+        {
+          "op": "set_cond",
+          "cond": 1
+        }
+      ],
+      "htmlFile": "30754-event-30754-04-006.htm"
+    },
+    {
+      "npcId": 30754,
+      "hook": "event",
+      "when": "absent",
+      "event": "30754-08",
+      "htmlFile": "30754-event-30754-08-007.htm"
+    },
+    {
+      "npcId": 30754,
+      "hook": "event",
+      "when": "absent",
+      "event": "30754-17",
+      "ops": [
+        {
+          "op": "complete"
+        }
+      ],
+      "htmlFile": "30754-event-30754-17-008.htm"
+    },
+    {
+      "npcId": 30754,
+      "hook": "event",
+      "when": "absent",
+      "event": "relic_info",
+      "htmlFile": "30754-event-relic_info-009.htm"
+    },
+    {
+      "npcId": 30754,
+      "hook": "event",
+      "when": "absent",
+      "event": "relic_info",
+      "htmlFile": "30754-event-relic_info-010.htm"
+    },
+    {
+      "npcId": 30754,
+      "hook": "event",
+      "when": "absent",
+      "event": "relic_info",
+      "htmlFile": "30754-event-relic_info-011.htm"
+    },
+    {
+      "npcId": 30754,
+      "hook": "event",
+      "when": "absent",
+      "event": "relic_info",
+      "htmlFile": "30754-event-relic_info-012.htm"
+    }
+  ]
+}

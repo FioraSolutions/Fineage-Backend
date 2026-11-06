@@ -1,0 +1,61 @@
+{
+  "id": 300,
+  "name": "Hunting Leto Lizardman",
+  "repeatable": true,
+  "abortable": true,
+  "questItems": [],
+  "dialogs": [
+    {
+      "npcId": 30126,
+      "hook": "talk",
+      "when": "absent",
+      "htmlFile": "30126-talk-000.htm"
+    },
+    {
+      "npcId": 30126,
+      "hook": "talk",
+      "when": "absent",
+      "htmlFile": "30126-talk-001.htm"
+    },
+    {
+      "npcId": 30126,
+      "hook": "talk",
+      "when": "started",
+      "cond": 1,
+      "htmlFile": "30126-talk-c1-002.htm"
+    },
+    {
+      "npcId": 30126,
+      "hook": "talk",
+      "when": "started",
+      "cond": 2,
+      "htmlFile": "30126-talk-c2-003.htm"
+    },
+    {
+      "npcId": 30126,
+      "hook": "event",
+      "when": "absent",
+      "event": "30126-03",
+      "ops": [
+        {
+          "op": "create"
+        },
+        {
+          "op": "start"
+        },
+        {
+          "op": "set_cond",
+          "cond": 1
+        }
+      ],
+      "htmlFile": "30126-event-30126-03-004.htm"
+    },
+    {
+      "npcId": 30126,
+      "hook": "event",
+      "when": "absent",
+      "event": "30126-06",
+      "htmlFile": "30126-event-30126-06-005.htm"
+    }
+  ]
+}

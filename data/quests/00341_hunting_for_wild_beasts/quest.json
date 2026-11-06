@@ -1,0 +1,56 @@
+{
+  "id": 341,
+  "name": "Hunting for Wild Beasts",
+  "repeatable": true,
+  "abortable": true,
+  "questItems": [],
+  "dialogs": [
+    {
+      "npcId": 30078,
+      "hook": "talk",
+      "when": "absent",
+      "htmlFile": "30078-event-30078-04-002.htm"
+    },
+    {
+      "npcId": 30078,
+      "hook": "talk",
+      "when": "started",
+      "ops": [
+        {
+          "op": "give_adena",
+          "count": 3710
+        },
+        {
+          "op": "complete"
+        }
+      ],
+      "htmlFile": "30078-talk-000.htm"
+    },
+    {
+      "npcId": 30078,
+      "hook": "event",
+      "when": "absent",
+      "event": "30078-03",
+      "htmlFile": "30078-event-30078-03-001.htm"
+    },
+    {
+      "npcId": 30078,
+      "hook": "event",
+      "when": "absent",
+      "event": "30078-04",
+      "ops": [
+        {
+          "op": "create"
+        },
+        {
+          "op": "start"
+        },
+        {
+          "op": "set_cond",
+          "cond": 1
+        }
+      ],
+      "htmlFile": "30078-event-30078-04-002.htm"
+    }
+  ]
+}

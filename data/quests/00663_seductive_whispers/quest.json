@@ -1,0 +1,254 @@
+{
+  "id": 663,
+  "name": "Seductive Whispers",
+  "repeatable": true,
+  "abortable": true,
+  "questItems": [],
+  "dialogs": [
+    {
+      "npcId": 30846,
+      "hook": "talk",
+      "when": "absent",
+      "htmlFile": "30846-event-30846-03-005.htm",
+      "minLevel": 50
+    },
+    {
+      "npcId": 30846,
+      "hook": "talk",
+      "when": "started",
+      "htmlFile": "30846-talk-000.htm"
+    },
+    {
+      "npcId": 30846,
+      "hook": "talk",
+      "when": "started",
+      "htmlFile": "30846-talk-001.htm"
+    },
+    {
+      "npcId": 30846,
+      "hook": "talk",
+      "when": "started",
+      "htmlFile": "30846-talk-002.htm"
+    },
+    {
+      "npcId": 30846,
+      "hook": "talk",
+      "when": "started",
+      "ops": [
+        {
+          "op": "give_adena",
+          "count": 2384000
+        }
+      ],
+      "htmlFile": "30846-talk-003.htm"
+    },
+    {
+      "npcId": 30846,
+      "hook": "event",
+      "when": "absent",
+      "event": "30846-01a",
+      "minLevel": 50,
+      "htmlFile": "30846-event-30846-01a-004.htm"
+    },
+    {
+      "npcId": 30846,
+      "hook": "event",
+      "when": "absent",
+      "event": "30846-03",
+      "minLevel": 50,
+      "ops": [
+        {
+          "op": "create"
+        },
+        {
+          "op": "start"
+        },
+        {
+          "op": "set_cond",
+          "cond": 1
+        }
+      ],
+      "htmlFile": "30846-event-30846-03-005.htm"
+    },
+    {
+      "npcId": 30846,
+      "hook": "event",
+      "when": "absent",
+      "event": "30846-06",
+      "htmlFile": "30846-event-30846-06-006.htm"
+    },
+    {
+      "npcId": 30846,
+      "hook": "event",
+      "when": "absent",
+      "event": "30846-07",
+      "htmlFile": "30846-event-30846-07-007.htm"
+    },
+    {
+      "npcId": 30846,
+      "hook": "event",
+      "when": "absent",
+      "event": "30846-08",
+      "htmlFile": "30846-event-30846-08-008.htm"
+    },
+    {
+      "npcId": 30846,
+      "hook": "event",
+      "when": "absent",
+      "event": "30846-14",
+      "ops": [
+        {
+          "op": "give_adena",
+          "count": 2384000
+        }
+      ],
+      "htmlFile": "30846-event-30846-14-010.htm"
+    },
+    {
+      "npcId": 30846,
+      "hook": "event",
+      "when": "absent",
+      "event": "30846-19",
+      "htmlFile": "30846-event-30846-19-011.htm"
+    },
+    {
+      "npcId": 30846,
+      "hook": "event",
+      "when": "absent",
+      "event": "30846-20",
+      "htmlFile": "30846-event-30846-20-012.htm"
+    },
+    {
+      "npcId": 30846,
+      "hook": "event",
+      "when": "absent",
+      "event": "30846-21",
+      "ops": [
+        {
+          "op": "give_adena",
+          "count": 40000
+        }
+      ],
+      "htmlFile": "30846-event-30846-21-013.htm"
+    },
+    {
+      "npcId": 30846,
+      "hook": "event",
+      "when": "absent",
+      "event": "30846-21",
+      "ops": [
+        {
+          "op": "give_adena",
+          "count": 80000
+        }
+      ],
+      "htmlFile": "30846-event-30846-21-014.htm"
+    },
+    {
+      "npcId": 30846,
+      "hook": "event",
+      "when": "absent",
+      "event": "30846-21",
+      "ops": [
+        {
+          "op": "give_adena",
+          "count": 110000
+        }
+      ],
+      "htmlFile": "30846-event-30846-21-015.htm"
+    },
+    {
+      "npcId": 30846,
+      "hook": "event",
+      "when": "absent",
+      "event": "30846-21",
+      "ops": [
+        {
+          "op": "give_adena",
+          "count": 199000
+        }
+      ],
+      "htmlFile": "30846-event-30846-21-016.htm"
+    },
+    {
+      "npcId": 30846,
+      "hook": "event",
+      "when": "absent",
+      "event": "30846-21",
+      "htmlFile": "30846-event-30846-21-017.htm"
+    },
+    {
+      "npcId": 30846,
+      "hook": "event",
+      "when": "absent",
+      "event": "30846-21",
+      "ops": [
+        {
+          "op": "give_adena",
+          "count": 1284000
+        }
+      ],
+      "htmlFile": "30846-event-30846-21-018.htm"
+    },
+    {
+      "npcId": 30846,
+      "hook": "event",
+      "when": "absent",
+      "event": "30846-21a",
+      "htmlFile": "30846-event-30846-21a-019.htm"
+    },
+    {
+      "npcId": 30846,
+      "hook": "event",
+      "when": "absent",
+      "event": "30846-25",
+      "htmlFile": "30846-event-30846-25-021.htm"
+    },
+    {
+      "npcId": 30846,
+      "hook": "event",
+      "when": "absent",
+      "event": "30846-25",
+      "ops": [
+        {
+          "op": "give_adena",
+          "count": 800
+        }
+      ],
+      "htmlFile": "30846-event-30846-25-022.htm"
+    },
+    {
+      "npcId": 30846,
+      "hook": "event",
+      "when": "absent",
+      "event": "30846-29",
+      "htmlFile": "30846-event-30846-29-023.htm"
+    },
+    {
+      "npcId": 30846,
+      "hook": "event",
+      "when": "absent",
+      "event": "30846-30",
+      "ops": [
+        {
+          "op": "complete"
+        }
+      ],
+      "htmlFile": "30846-event-30846-30-024.htm"
+    },
+    {
+      "npcId": 30846,
+      "hook": "event",
+      "when": "absent",
+      "event": "30846-31",
+      "htmlFile": "30846-event-30846-31-025.htm"
+    },
+    {
+      "npcId": 30846,
+      "hook": "event",
+      "when": "absent",
+      "event": "30846-32",
+      "htmlFile": "30846-event-30846-32-026.htm"
+    }
+  ]
+}

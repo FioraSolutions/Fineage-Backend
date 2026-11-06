@@ -1,0 +1,283 @@
+{
+  "id": 216,
+  "name": "Trial Of The Guildsman",
+  "repeatable": false,
+  "abortable": true,
+  "questItems": [],
+  "dialogs": [
+    {
+      "npcId": 30103,
+      "hook": "talk",
+      "when": "absent",
+      "htmlFile": "30103-talk-002.htm"
+    },
+    {
+      "npcId": 30210,
+      "hook": "talk",
+      "when": "absent",
+      "htmlFile": "30210-talk-003.htm"
+    },
+    {
+      "npcId": 30210,
+      "hook": "talk",
+      "when": "absent",
+      "htmlFile": "30210-talk-004.htm"
+    },
+    {
+      "npcId": 30210,
+      "hook": "talk",
+      "when": "absent",
+      "htmlFile": "30210-talk-005.htm"
+    },
+    {
+      "npcId": 30210,
+      "hook": "talk",
+      "when": "absent",
+      "htmlFile": "30210-talk-006.htm"
+    },
+    {
+      "npcId": 30210,
+      "hook": "talk",
+      "when": "absent",
+      "htmlFile": "30210-talk-009.htm"
+    },
+    {
+      "npcId": 30210,
+      "hook": "talk",
+      "when": "absent",
+      "htmlFile": "30210-talk-010.htm"
+    },
+    {
+      "npcId": 30210,
+      "hook": "talk",
+      "when": "absent",
+      "htmlFile": "30210-talk-012.htm"
+    },
+    {
+      "npcId": 30283,
+      "hook": "talk",
+      "when": "absent",
+      "ops": [
+        {
+          "op": "set_cond",
+          "cond": 2
+        }
+      ],
+      "htmlFile": "30283-talk-014.htm"
+    },
+    {
+      "npcId": 30283,
+      "hook": "talk",
+      "when": "absent",
+      "htmlFile": "30283-talk-016.htm"
+    },
+    {
+      "npcId": 30298,
+      "hook": "talk",
+      "when": "absent",
+      "htmlFile": "30298-talk-017.htm"
+    },
+    {
+      "npcId": 30298,
+      "hook": "talk",
+      "when": "absent",
+      "htmlFile": "30298-talk-018.htm"
+    },
+    {
+      "npcId": 30298,
+      "hook": "talk",
+      "when": "absent",
+      "htmlFile": "30298-talk-023.htm"
+    },
+    {
+      "npcId": 30298,
+      "hook": "talk",
+      "when": "absent",
+      "htmlFile": "30298-talk-024.htm"
+    },
+    {
+      "npcId": 30688,
+      "hook": "talk",
+      "when": "absent",
+      "htmlFile": "30688-talk-025.htm"
+    },
+    {
+      "npcId": 30688,
+      "hook": "talk",
+      "when": "absent",
+      "htmlFile": "30688-talk-026.htm"
+    },
+    {
+      "npcId": 30688,
+      "hook": "talk",
+      "when": "absent",
+      "htmlFile": "30688-talk-027.htm"
+    },
+    {
+      "npcId": 30688,
+      "hook": "talk",
+      "when": "absent",
+      "htmlFile": "30688-talk-030.htm"
+    },
+    {
+      "npcId": 30103,
+      "hook": "event",
+      "when": "absent",
+      "event": "ACCEPT",
+      "ops": [
+        {
+          "op": "give_item",
+          "itemId": 7562,
+          "count": 85
+        }
+      ],
+      "htmlFile": "30103-event-ACCEPT-032.htm"
+    },
+    {
+      "npcId": 30103,
+      "hook": "event",
+      "when": "absent",
+      "event": "30103-04",
+      "htmlFile": "30103-event-30103-04-033.htm"
+    },
+    {
+      "npcId": 30103,
+      "hook": "event",
+      "when": "absent",
+      "event": "30103-05",
+      "htmlFile": "30103-event-30103-05-034.htm"
+    },
+    {
+      "npcId": 30103,
+      "hook": "event",
+      "when": "absent",
+      "event": "30103-05a",
+      "htmlFile": "30103-event-30103-05a-035.htm"
+    },
+    {
+      "npcId": 30103,
+      "hook": "event",
+      "when": "absent",
+      "event": "30103-06a",
+      "htmlFile": "30103-event-30103-06a-036.htm"
+    },
+    {
+      "npcId": 30103,
+      "hook": "event",
+      "when": "absent",
+      "event": "30103-06b",
+      "htmlFile": "30103-event-30103-06b-037.htm"
+    },
+    {
+      "npcId": 30103,
+      "hook": "event",
+      "when": "absent",
+      "event": "30103-06c",
+      "htmlFile": "30103-event-30103-06c-038.htm"
+    },
+    {
+      "npcId": 30103,
+      "hook": "event",
+      "when": "absent",
+      "event": "30103-07a",
+      "htmlFile": "30103-event-30103-07a-039.htm"
+    },
+    {
+      "npcId": 30103,
+      "hook": "event",
+      "when": "absent",
+      "event": "30103-07b",
+      "htmlFile": "30103-event-30103-07b-040.htm"
+    },
+    {
+      "npcId": 30103,
+      "hook": "event",
+      "when": "absent",
+      "event": "30103-07c",
+      "htmlFile": "30103-event-30103-07c-041.htm"
+    },
+    {
+      "npcId": 30103,
+      "hook": "event",
+      "when": "absent",
+      "event": "30210-02",
+      "htmlFile": "30103-event-30210-02-042.htm"
+    },
+    {
+      "npcId": 30103,
+      "hook": "event",
+      "when": "absent",
+      "event": "30210-03",
+      "htmlFile": "30103-event-30210-03-043.htm"
+    },
+    {
+      "npcId": 30103,
+      "hook": "event",
+      "when": "absent",
+      "event": "30210-08",
+      "htmlFile": "30103-event-30210-08-044.htm"
+    },
+    {
+      "npcId": 30103,
+      "hook": "event",
+      "when": "absent",
+      "event": "30210-09",
+      "htmlFile": "30103-event-30210-09-045.htm"
+    },
+    {
+      "npcId": 30103,
+      "hook": "event",
+      "when": "absent",
+      "event": "30210-11a",
+      "htmlFile": "30103-event-30210-11a-046.htm"
+    },
+    {
+      "npcId": 30103,
+      "hook": "event",
+      "when": "absent",
+      "event": "30283-03a",
+      "htmlFile": "30103-event-30283-03a-047.htm"
+    },
+    {
+      "npcId": 30103,
+      "hook": "event",
+      "when": "absent",
+      "event": "30283-03b",
+      "htmlFile": "30103-event-30283-03b-048.htm"
+    },
+    {
+      "npcId": 30103,
+      "hook": "event",
+      "when": "absent",
+      "event": "30283-04",
+      "htmlFile": "30103-event-30283-04-049.htm"
+    },
+    {
+      "npcId": 30103,
+      "hook": "event",
+      "when": "absent",
+      "event": "30298-03",
+      "htmlFile": "30103-event-30298-03-050.htm"
+    },
+    {
+      "npcId": 30103,
+      "hook": "event",
+      "when": "absent",
+      "event": "30298-05a",
+      "htmlFile": "30103-event-30298-05a-051.htm"
+    },
+    {
+      "npcId": 30103,
+      "hook": "event",
+      "when": "absent",
+      "event": "30283-03",
+      "ops": [
+        {
+          "op": "set_cond",
+          "cond": 5
+        }
+      ],
+      "htmlFile": "30103-event-30283-03-056.htm"
+    }
+  ]
+}

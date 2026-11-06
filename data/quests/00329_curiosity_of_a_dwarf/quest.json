@@ -1,0 +1,59 @@
+{
+  "id": 329,
+  "name": "Curiosity Of A Dwarf",
+  "repeatable": true,
+  "abortable": true,
+  "questItems": [],
+  "dialogs": [
+    {
+      "npcId": 30437,
+      "hook": "talk",
+      "when": "absent",
+      "htmlFile": "30437-event-30437-03-001.htm"
+    },
+    {
+      "npcId": 30437,
+      "hook": "talk",
+      "when": "started",
+      "htmlFile": "30437-talk-000.htm"
+    },
+    {
+      "npcId": 30437,
+      "hook": "event",
+      "when": "absent",
+      "event": "30437-03",
+      "ops": [
+        {
+          "op": "create"
+        },
+        {
+          "op": "start"
+        },
+        {
+          "op": "set_cond",
+          "cond": 1
+        }
+      ],
+      "htmlFile": "30437-event-30437-03-001.htm"
+    },
+    {
+      "npcId": 30437,
+      "hook": "event",
+      "when": "absent",
+      "event": "30437-06",
+      "ops": [
+        {
+          "op": "complete"
+        }
+      ],
+      "htmlFile": "30437-event-30437-06-002.htm"
+    },
+    {
+      "npcId": 30437,
+      "hook": "event",
+      "when": "absent",
+      "event": "30437-07",
+      "htmlFile": "30437-event-30437-07-003.htm"
+    }
+  ]
+}

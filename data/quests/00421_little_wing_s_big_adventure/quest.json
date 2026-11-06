@@ -1,0 +1,132 @@
+{
+  "id": 421,
+  "name": "Little Wing's Big Adventure",
+  "repeatable": true,
+  "abortable": true,
+  "questItems": [],
+  "dialogs": [
+    {
+      "npcId": 30610,
+      "hook": "talk",
+      "when": "absent",
+      "maxLevel": 44,
+      "htmlFile": "30610-talk-000.htm"
+    },
+    {
+      "npcId": 30610,
+      "hook": "talk",
+      "when": "absent",
+      "htmlFile": "30610-talk-001.htm"
+    },
+    {
+      "npcId": 30610,
+      "hook": "talk",
+      "when": "started",
+      "htmlFile": "30610-talk-002.htm"
+    },
+    {
+      "npcId": 30747,
+      "hook": "talk",
+      "when": "absent",
+      "htmlFile": "30747-talk-003.htm"
+    },
+    {
+      "npcId": 30747,
+      "hook": "talk",
+      "when": "absent",
+      "htmlFile": "30747-talk-004.htm"
+    },
+    {
+      "npcId": 30747,
+      "hook": "talk",
+      "when": "absent",
+      "htmlFile": "30747-talk-005.htm"
+    },
+    {
+      "npcId": 30747,
+      "hook": "talk",
+      "when": "absent",
+      "htmlFile": "30747-talk-006.htm"
+    },
+    {
+      "npcId": 30747,
+      "hook": "talk",
+      "when": "absent",
+      "htmlFile": "30747-talk-008.htm"
+    },
+    {
+      "npcId": 30747,
+      "hook": "talk",
+      "when": "absent",
+      "htmlFile": "30747-talk-009.htm"
+    },
+    {
+      "npcId": 30747,
+      "hook": "talk",
+      "when": "absent",
+      "htmlFile": "30747-talk-010.htm"
+    },
+    {
+      "npcId": 30747,
+      "hook": "talk",
+      "when": "absent",
+      "htmlFile": "30747-talk-011.htm"
+    },
+    {
+      "npcId": 30610,
+      "hook": "event",
+      "when": "absent",
+      "event": "30610-05",
+      "htmlFile": "30610-event-30610-05-012.htm"
+    },
+    {
+      "npcId": 30610,
+      "hook": "event",
+      "when": "absent",
+      "event": "30747-04",
+      "htmlFile": "30610-event-30747-04-013.htm"
+    },
+    {
+      "npcId": 30610,
+      "hook": "event",
+      "when": "absent",
+      "event": "30747-04",
+      "htmlFile": "30610-event-30747-04-014.htm"
+    },
+    {
+      "npcId": 30610,
+      "hook": "event",
+      "when": "absent",
+      "event": "30747-05",
+      "htmlFile": "30610-event-30747-05-015.htm"
+    },
+    {
+      "npcId": 30610,
+      "hook": "event",
+      "when": "absent",
+      "event": "30747-07",
+      "htmlFile": "30610-event-30747-07-016.htm"
+    },
+    {
+      "npcId": 30610,
+      "hook": "event",
+      "when": "absent",
+      "event": "30747-08",
+      "htmlFile": "30610-event-30747-08-017.htm"
+    },
+    {
+      "npcId": 30610,
+      "hook": "event",
+      "when": "absent",
+      "event": "30747-09",
+      "htmlFile": "30610-event-30747-09-018.htm"
+    },
+    {
+      "npcId": 30610,
+      "hook": "event",
+      "when": "absent",
+      "event": "30747-10",
+      "htmlFile": "30610-event-30747-10-019.htm"
+    }
+  ]
+}

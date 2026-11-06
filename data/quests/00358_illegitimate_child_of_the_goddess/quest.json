@@ -1,0 +1,48 @@
+{
+  "id": 358,
+  "name": "Illegitimate Child of the Goddess",
+  "repeatable": true,
+  "abortable": true,
+  "questItems": [],
+  "dialogs": [
+    {
+      "npcId": 30862,
+      "hook": "talk",
+      "when": "absent",
+      "htmlFile": "30862-talk-000.htm"
+    },
+    {
+      "npcId": 30862,
+      "hook": "event",
+      "when": "absent",
+      "event": "30862-02",
+      "htmlFile": "30862-event-30862-02-001.htm"
+    },
+    {
+      "npcId": 30862,
+      "hook": "event",
+      "when": "absent",
+      "event": "30862-03",
+      "htmlFile": "30862-event-30862-03-002.htm"
+    },
+    {
+      "npcId": 30862,
+      "hook": "event",
+      "when": "absent",
+      "event": "30862-04",
+      "ops": [
+        {
+          "op": "create"
+        },
+        {
+          "op": "start"
+        },
+        {
+          "op": "set_cond",
+          "cond": 1
+        }
+      ],
+      "htmlFile": "30862-event-30862-04-003.htm"
+    }
+  ]
+}

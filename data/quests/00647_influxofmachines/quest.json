@@ -1,0 +1,35 @@
+{
+  "id": 647,
+  "name": "InfluxOfMachines",
+  "repeatable": true,
+  "abortable": true,
+  "questItems": [],
+  "dialogs": [
+    {
+      "npcId": 32069,
+      "hook": "talk",
+      "when": "absent",
+      "maxLevel": 45,
+      "htmlFile": "32069-talk-000.htm"
+    },
+    {
+      "npcId": 32069,
+      "hook": "talk",
+      "when": "absent",
+      "minLevel": 46,
+      "htmlFile": "32069-talk-001.htm"
+    },
+    {
+      "npcId": 32069,
+      "hook": "talk",
+      "when": "started",
+      "htmlFile": "32069-talk-002.htm"
+    },
+    {
+      "npcId": 32069,
+      "hook": "talk",
+      "when": "started",
+      "htmlFile": "32069-talk-003.htm"
+    }
+  ]
+}

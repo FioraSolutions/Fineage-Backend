@@ -1,0 +1,128 @@
+{
+  "id": 35,
+  "name": "Find Glittering Jewelry",
+  "repeatable": false,
+  "abortable": true,
+  "questItems": [],
+  "dialogs": [
+    {
+      "npcId": 30091,
+      "hook": "talk",
+      "when": "absent",
+      "htmlFile": "30091-talk-000.htm"
+    },
+    {
+      "npcId": 30091,
+      "hook": "talk",
+      "when": "started",
+      "cond": 1,
+      "htmlFile": "30091-talk-c1-001.htm"
+    },
+    {
+      "npcId": 30091,
+      "hook": "talk",
+      "when": "started",
+      "cond": 3,
+      "htmlFile": "30091-talk-c3-002.htm"
+    },
+    {
+      "npcId": 30091,
+      "hook": "talk",
+      "when": "started",
+      "cond": 3,
+      "htmlFile": "30091-talk-c3-003.htm"
+    },
+    {
+      "npcId": 30091,
+      "hook": "talk",
+      "when": "started",
+      "cond": 4,
+      "htmlFile": "30091-talk-c4-004.htm"
+    },
+    {
+      "npcId": 30091,
+      "hook": "talk",
+      "when": "started",
+      "cond": 4,
+      "htmlFile": "30091-talk-c4-005.htm"
+    },
+    {
+      "npcId": 30879,
+      "hook": "talk",
+      "when": "absent",
+      "htmlFile": "30879-talk-006.htm"
+    },
+    {
+      "npcId": 30879,
+      "hook": "talk",
+      "when": "absent",
+      "htmlFile": "30879-talk-007.htm"
+    },
+    {
+      "npcId": 30091,
+      "hook": "event",
+      "when": "absent",
+      "event": "30091-03",
+      "ops": [
+        {
+          "op": "create"
+        },
+        {
+          "op": "start"
+        },
+        {
+          "op": "set_cond",
+          "cond": 1
+        }
+      ],
+      "htmlFile": "30091-event-30091-03-008.htm"
+    },
+    {
+      "npcId": 30091,
+      "hook": "event",
+      "when": "absent",
+      "event": "30879-02",
+      "ops": [
+        {
+          "op": "set_cond",
+          "cond": 2
+        }
+      ],
+      "htmlFile": "30091-event-30879-02-009.htm"
+    },
+    {
+      "npcId": 30091,
+      "hook": "event",
+      "when": "absent",
+      "event": "30091-07",
+      "htmlFile": "30091-event-30091-07-010.htm"
+    },
+    {
+      "npcId": 30091,
+      "hook": "event",
+      "when": "absent",
+      "event": "30091-11",
+      "ops": [
+        {
+          "op": "take_item",
+          "itemId": 1893,
+          "count": 5
+        },
+        {
+          "op": "take_item",
+          "itemId": 1873,
+          "count": 500
+        },
+        {
+          "op": "take_item",
+          "itemId": 4044,
+          "count": 150
+        },
+        {
+          "op": "complete"
+        }
+      ],
+      "htmlFile": "30091-event-30091-11-011.htm"
+    }
+  ]
+}

@@ -1,0 +1,35 @@
+{
+  "id": 113,
+  "name": "StatusOfTheBeaconTower",
+  "repeatable": false,
+  "abortable": true,
+  "questItems": [],
+  "dialogs": [
+    {
+      "npcId": 31979,
+      "hook": "talk",
+      "when": "absent",
+      "maxLevel": 39,
+      "htmlFile": "31979-talk-000.htm"
+    },
+    {
+      "npcId": 31979,
+      "hook": "talk",
+      "when": "absent",
+      "minLevel": 40,
+      "htmlFile": "31979-talk-001.htm"
+    },
+    {
+      "npcId": 31979,
+      "hook": "talk",
+      "when": "started",
+      "htmlFile": "31979-talk-002.htm"
+    },
+    {
+      "npcId": 32016,
+      "hook": "talk",
+      "when": "started",
+      "htmlFile": "32016-talk-003.htm"
+    }
+  ]
+}
