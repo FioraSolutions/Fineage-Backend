@@ -510,6 +510,20 @@ public sealed class NetZoneServer : INetPresenceBridge
             _presence.TrySend(watcher, NetOpcode.TradeFinished, payload);
     }
 
+    void INetPresenceBridge.FanoutPrivateStoreInfo(IReadOnlyList<int> watcherObjectIds, PrivateStoreInfoNetMsg info)
+    {
+        var payload = NetCodec.EncodePrivateStoreInfo(info);
+        foreach (int watcher in watcherObjectIds)
+            _presence.TrySend(watcher, NetOpcode.PrivateStoreInfo, payload);
+    }
+
+    void INetPresenceBridge.FanoutPrivateStoreListSell(IReadOnlyList<int> watcherObjectIds, PrivateStoreListSellNetMsg list)
+    {
+        var payload = NetCodec.EncodePrivateStoreListSell(list);
+        foreach (int watcher in watcherObjectIds)
+            _presence.TrySend(watcher, NetOpcode.PrivateStoreListSell, payload);
+    }
+
     void INetPresenceBridge.FanoutBossStatus(IReadOnlyList<int> watcherObjectIds, BossStatusNetMsg status)
     {
         var payload = NetCodec.EncodeBossStatus(status);
@@ -856,6 +870,18 @@ public sealed class NetZoneServer : INetPresenceBridge
                             break;
                         case NetOpcode.DungeonEnterRequest:
                             await OnDungeonAsync(conn, zoneSession, envelope, ct).ConfigureAwait(false);
+                            break;
+                        case NetOpcode.SetPrivateStoreSell:
+                            await OnSetPrivateStoreSellAsync(conn, zoneSession, envelope, ct).ConfigureAwait(false);
+                            break;
+                        case NetOpcode.PrivateStoreQuit:
+                            await OnPrivateStoreQuitAsync(conn, zoneSession, ct).ConfigureAwait(false);
+                            break;
+                        case NetOpcode.PrivateStoreListRequest:
+                            await OnPrivateStoreListAsync(conn, zoneSession, envelope, ct).ConfigureAwait(false);
+                            break;
+                        case NetOpcode.PrivateStoreBuy:
+                            await OnPrivateStoreBuyAsync(conn, zoneSession, envelope, ct).ConfigureAwait(false);
                             break;
                         case NetOpcode.StopMove:
                             // Authoritative stop: correct to current session position.
@@ -2450,6 +2476,98 @@ public sealed class NetZoneServer : INetPresenceBridge
             ct).ConfigureAwait(false);
         if (error != null)
             await RejectAsync(conn, error, "Trade done failed.", ct).ConfigureAwait(false);
+    }
+
+    async Task OnSetPrivateStoreSellAsync(
+        NetConnection conn,
+        ZoneSession zoneSession,
+        PacketEnvelope envelope,
+        CancellationToken ct)
+    {
+        RequireHello(conn);
+        if (!zoneSession.Bound || !zoneSession.InWorld)
+        {
+            await RejectAsync(conn, "not_in_world", "Enter world first.", ct).ConfigureAwait(false);
+            return;
+        }
+
+        var req = NetCodec.DecodeSetPrivateStoreSell(envelope.Payload);
+        var items = (req.Items ?? []).Select(row => new PrivateStoreSellRowMsg
+        {
+            InventoryObjectId = row.InventoryObjectId,
+            Count = row.Count,
+            Price = row.Price
+        }).ToArray();
+        string? error = await _world.TrySetPrivateStoreSellAsync(
+            zoneSession,
+            new SetPrivateStoreSellMsg { Message = req.Message ?? "", Items = items },
+            ct).ConfigureAwait(false);
+        if (error != null)
+            await RejectAsync(conn, error, "Private store sell failed.", ct).ConfigureAwait(false);
+    }
+
+    async Task OnPrivateStoreQuitAsync(NetConnection conn, ZoneSession zoneSession, CancellationToken ct)
+    {
+        RequireHello(conn);
+        if (!zoneSession.Bound || !zoneSession.InWorld)
+        {
+            await RejectAsync(conn, "not_in_world", "Enter world first.", ct).ConfigureAwait(false);
+            return;
+        }
+
+        string? error = await _world.TryPrivateStoreQuitAsync(zoneSession, ct).ConfigureAwait(false);
+        if (error != null)
+            await RejectAsync(conn, error, "Private store quit failed.", ct).ConfigureAwait(false);
+    }
+
+    async Task OnPrivateStoreListAsync(
+        NetConnection conn,
+        ZoneSession zoneSession,
+        PacketEnvelope envelope,
+        CancellationToken ct)
+    {
+        RequireHello(conn);
+        if (!zoneSession.Bound || !zoneSession.InWorld)
+        {
+            await RejectAsync(conn, "not_in_world", "Enter world first.", ct).ConfigureAwait(false);
+            return;
+        }
+
+        var req = NetCodec.DecodePrivateStoreListRequest(envelope.Payload);
+        string? error = await _world.TryPrivateStoreListAsync(
+            zoneSession,
+            new PrivateStoreListRequestMsg { StoreObjectId = req.StoreObjectId },
+            ct).ConfigureAwait(false);
+        if (error != null)
+            await RejectAsync(conn, error, "Private store list failed.", ct).ConfigureAwait(false);
+    }
+
+    async Task OnPrivateStoreBuyAsync(
+        NetConnection conn,
+        ZoneSession zoneSession,
+        PacketEnvelope envelope,
+        CancellationToken ct)
+    {
+        RequireHello(conn);
+        if (!zoneSession.Bound || !zoneSession.InWorld)
+        {
+            await RejectAsync(conn, "not_in_world", "Enter world first.", ct).ConfigureAwait(false);
+            return;
+        }
+
+        var req = NetCodec.DecodePrivateStoreBuy(envelope.Payload);
+        var items = (req.Items ?? []).Select(row => new PrivateStoreSellRowMsg
+        {
+            InventoryObjectId = row.InventoryObjectId,
+            Count = row.Count,
+            Price = row.Price
+        }).ToArray();
+        string? error = await _world.TryPrivateStoreBuyAsync(
+            zoneSession,
+            new PrivateStoreBuyMsg { StoreObjectId = req.StoreObjectId, Items = items },
+            ct).ConfigureAwait(false);
+        if (error != null)
+            await RejectAsync(conn, error, "Private store buy failed.", ct).ConfigureAwait(false);
     }
 
     static void RequireHello(NetConnection conn)

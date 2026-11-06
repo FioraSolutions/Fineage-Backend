@@ -144,6 +144,12 @@ interface INetPresenceBridge
 
     void FanoutTradeFinished(IReadOnlyList<int> watcherObjectIds, TradeFinishedNetMsg finished);
 
+    /// <summary>Private store type + title for a pawn (self + knownlist).</summary>
+    void FanoutPrivateStoreInfo(IReadOnlyList<int> watcherObjectIds, PrivateStoreInfoNetMsg info);
+
+    /// <summary>Sell list window for a buyer who clicked a store pawn.</summary>
+    void FanoutPrivateStoreListSell(IReadOnlyList<int> watcherObjectIds, PrivateStoreListSellNetMsg list);
+
     /// <summary>Boss schedule rows, the reply to a <c>BossStatusRequest</c>.</summary>
     void FanoutBossStatus(IReadOnlyList<int> watcherObjectIds, BossStatusNetMsg status);
 

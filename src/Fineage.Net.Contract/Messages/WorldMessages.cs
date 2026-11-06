@@ -888,6 +888,49 @@ namespace Fineage.Net.Contract
         public int Response { get; set; }
     }
 
+    public sealed class PrivateStoreSellRowNet
+    {
+        public int InventoryObjectId { get; set; }
+        public int ItemId { get; set; }
+        public long Count { get; set; } = 1;
+        public long Price { get; set; }
+        public int EnchantLevel { get; set; }
+    }
+
+    public sealed class SetPrivateStoreSellNetMsg
+    {
+        public string Message { get; set; } = "";
+        public PrivateStoreSellRowNet[] Items { get; set; } = System.Array.Empty<PrivateStoreSellRowNet>();
+    }
+
+    public sealed class PrivateStoreListRequestNetMsg
+    {
+        public int StoreObjectId { get; set; }
+    }
+
+    public sealed class PrivateStoreBuyNetMsg
+    {
+        public int StoreObjectId { get; set; }
+        public PrivateStoreSellRowNet[] Items { get; set; } = System.Array.Empty<PrivateStoreSellRowNet>();
+    }
+
+    /// <summary>Broadcast store type + title (Mobius PrivateStoreMsgSell / UserInfo store bit).</summary>
+    public sealed class PrivateStoreInfoNetMsg
+    {
+        public int ObjectId { get; set; }
+        public int StoreType { get; set; }
+        public string Message { get; set; } = "";
+    }
+
+    public sealed class PrivateStoreListSellNetMsg
+    {
+        public int StoreObjectId { get; set; }
+        public string StoreName { get; set; } = "";
+        public string Message { get; set; } = "";
+        public long BuyerAdena { get; set; }
+        public PrivateStoreSellRowNet[] Items { get; set; } = System.Array.Empty<PrivateStoreSellRowNet>();
+    }
+
     /// <summary>One paperdoll slot (Mobius UserInfo / CharInfo order, 17 slots, right hand = 7). Zeros when empty.</summary>
     public sealed class PaperdollSlotNet
     {

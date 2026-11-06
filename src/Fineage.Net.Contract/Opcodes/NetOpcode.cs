@@ -215,5 +215,17 @@ namespace Fineage.Net.Contract
         public const ushort DungeonEnterRequest = 0x038B;
         /// <summary>Zone → client: the catacomb/necropolis teleport result and the validation kick.</summary>
         public const ushort DungeonEntered = 0x038C;
+        /// <summary>Client → zone: Mobius SetPrivateStoreListSell (open / refresh sell store).</summary>
+        public const ushort SetPrivateStoreSell = 0x038D;
+        /// <summary>Client → zone: Mobius RequestPrivateStoreQuitSell. Empty body.</summary>
+        public const ushort PrivateStoreQuit = 0x038E;
+        /// <summary>Client → zone: request another player's sell list.</summary>
+        public const ushort PrivateStoreListRequest = 0x038F;
+        /// <summary>Client → zone: Mobius RequestPrivateStoreBuy.</summary>
+        public const ushort PrivateStoreBuy = 0x0390;
+        /// <summary>Zone → client: store type + message for a pawn (knownlist / self).</summary>
+        public const ushort PrivateStoreInfo = 0x0391;
+        /// <summary>Zone → client: sell list window for the buyer.</summary>
+        public const ushort PrivateStoreListSell = 0x0392;
     }
 }

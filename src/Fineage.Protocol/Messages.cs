@@ -790,6 +790,39 @@ public sealed class TradeFinishedMsg
     public int Response { get; set; }
 }
 
+/// <summary>One sell-store listing row (Mobius TradeList sell item).</summary>
+public sealed class PrivateStoreSellRowMsg
+{
+    public int InventoryObjectId { get; set; }
+    public long Count { get; set; } = 1;
+    public long Price { get; set; }
+}
+
+/// <summary>Open or refresh a private sell store (Mobius SetPrivateStoreListSell).</summary>
+public sealed class SetPrivateStoreSellMsg
+{
+    public string Message { get; set; } = "";
+    public PrivateStoreSellRowMsg[] Items { get; set; } = [];
+}
+
+/// <summary>Close the active private store (Mobius RequestPrivateStoreQuitSell).</summary>
+public sealed class PrivateStoreQuitMsg
+{
+}
+
+/// <summary>Ask for a player's sell list (Mobius action on a store pawn → PrivateStoreListSell).</summary>
+public sealed class PrivateStoreListRequestMsg
+{
+    public int StoreObjectId { get; set; }
+}
+
+/// <summary>Buy from a sell store (Mobius RequestPrivateStoreBuy).</summary>
+public sealed class PrivateStoreBuyMsg
+{
+    public int StoreObjectId { get; set; }
+    public PrivateStoreSellRowMsg[] Items { get; set; } = [];
+}
+
 /// <summary>Opcode <see cref="MsgType.RequestQuestList"/> (42). Empty body.</summary>
 public sealed class RequestQuestListMsg
 {

@@ -65,6 +65,7 @@ public sealed partial class ZoneWorld
 
         player.Dead = true;
         player.CurHp = 0;
+        ClosePrivateStore(player.ObjectId, standUp: false);
         player.Sitting = false;
         player.Running = false;
         player.ActiveEnchantObjectId = 0;
