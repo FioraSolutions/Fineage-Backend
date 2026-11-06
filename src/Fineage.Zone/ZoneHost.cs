@@ -1,5 +1,6 @@
 using Fineage.Login;
 using Fineage.Net.Host;
+using Fineage.Zone.Interest;
 using Fineage.Zone.Net;
 using Fineage.Zone.World;
 
@@ -26,8 +27,11 @@ sealed class ZoneHost : IAsyncDisposable
     public static ZoneHost StartNet(HandoffTokens tokens, ZoneWorld? world = null, IAccountStore? accounts = null)
     {
         var cts = new CancellationTokenSource();
-        // Loopback selftest keeps the Cedric smoke map; Program hosts the full datapack.
-        var created = world ?? ZoneAoiSettings.CreateWorld(accounts: accounts, includeEnabledMaps: false);
+        // Loopback selftest: Cedric smoke map + whole-zone AOI. Program hosts the full datapack with GridAoi.
+        var created = world ?? ZoneAoiSettings.CreateWorld(
+            aoi: new SingleCellAoi(),
+            accounts: accounts,
+            includeEnabledMaps: false);
         created.StartSimulation(cts.Token);
         var server = new NetTcpServer();
         var netZone = new NetZoneServer(tokens, created, accounts);
