@@ -114,6 +114,8 @@ public static class ZoneAcceptance
             Require(self.Name == name && selfUser.Name == name, $"self mismatch spawn={self.Name} user={selfUser.Name}");
             Require(selfUser.X == self.X && selfUser.Y == self.Y && selfUser.Z == self.Z, "UserInfo position must match the spawn");
             Require(npcs.Count > 0, "enter must stream the visible NPCs");
+            Require(npcs.Any(n => string.Equals(n.Name, "Gremlin", StringComparison.OrdinalIgnoreCase)),
+                "enter knownlist must include a Gremlin (#138 smoke)");
             Require(welcome!.Id == 1 && welcome.Params.Length == 1 && welcome.Params[0] == name,
                 $"welcome id={welcome.Id} text={welcome.Text}");
 
