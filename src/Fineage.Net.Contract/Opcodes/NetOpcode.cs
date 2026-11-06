@@ -241,5 +241,15 @@ namespace Fineage.Net.Contract
         public const ushort RecipeBookList = 0x0398;
         /// <summary>Zone → client: craft result (success / fail / materials).</summary>
         public const ushort RecipeItemMakeInfo = 0x0399;
+        /// <summary>Client → zone: Mobius RequestRecipeShopListSet (open manufacture).</summary>
+        public const ushort SetRecipeShop = 0x039A;
+        /// <summary>Client → zone: Mobius RequestRecipeShopMakeInfo.</summary>
+        public const ushort RecipeShopMakeInfo = 0x039B;
+        /// <summary>Client → zone: Mobius RequestRecipeShopMakeItem.</summary>
+        public const ushort RecipeShopMakeItem = 0x039C;
+        /// <summary>Zone → client: manufacture recipe list for a visitor.</summary>
+        public const ushort RecipeShopSellList = 0x039D;
+        /// <summary>Zone → client: manufacturer MP + recipe after make-info / make-item.</summary>
+        public const ushort RecipeShopItemInfo = 0x039E;
     }
 }

@@ -6,7 +6,7 @@ namespace Fineage.Zone.World;
 
 /// <summary>
 /// Mobius self-craft (#281): learn recipe scrolls into the book, open book, make-self
-/// (materials + MP + create-skill level + success rate). Manufacture shop deferred.
+/// (materials + MP + create-skill level + success rate). Manufacture → <c>ZoneWorldManufacture</c>.
 /// </summary>
 public sealed partial class ZoneWorld
 {

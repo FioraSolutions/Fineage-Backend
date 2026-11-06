@@ -159,6 +159,12 @@ interface INetPresenceBridge
     /// <summary>Self-craft result after RequestRecipeItemMakeSelf.</summary>
     void FanoutRecipeItemMakeInfo(IReadOnlyList<int> watcherObjectIds, RecipeItemMakeInfoNetMsg info);
 
+    /// <summary>Manufacture recipe list for a visitor who clicked a workshop pawn.</summary>
+    void FanoutRecipeShopSellList(IReadOnlyList<int> watcherObjectIds, RecipeShopSellListNetMsg list);
+
+    /// <summary>Manufacturer MP + recipe after make-info / make-item.</summary>
+    void FanoutRecipeShopItemInfo(IReadOnlyList<int> watcherObjectIds, RecipeShopItemInfoNetMsg info);
+
     /// <summary>Boss schedule rows, the reply to a <c>BossStatusRequest</c>.</summary>
     void FanoutBossStatus(IReadOnlyList<int> watcherObjectIds, BossStatusNetMsg status);
 

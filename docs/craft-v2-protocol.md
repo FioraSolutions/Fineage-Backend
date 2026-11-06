@@ -7,9 +7,9 @@
 
 | In | Out |
 |----|-----|
-| Learn recipe scroll on use | Manufacture / recipe shop |
-| Recipe book open (dwarven / common tabs) | Rare production / altStatChange XP |
-| Make-self: materials, MP, create skill level, success rate | Normalized Postgres recipe table (JSON mirror for now) |
+| Learn recipe scroll on use | Rare production / altStatChange XP |
+| Recipe book open (dwarven / common tabs) | Normalized Postgres recipe table (JSON mirror for now) |
+| Make-self: materials, MP, create skill level, success rate | Manufacture shop → [`craft-manufacture-v2-protocol.md`](craft-manufacture-v2-protocol.md) (#283) |
 
 ## Opcodes
 

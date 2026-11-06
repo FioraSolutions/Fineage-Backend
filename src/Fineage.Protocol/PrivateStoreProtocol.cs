@@ -25,6 +25,8 @@ public static class PrivateStoreProtocol
     public const byte TypeBuy = 2;
     /// <summary>Mobius <c>PACKAGE_SELL</c>: visitor must buy every listed row in one request.</summary>
     public const byte TypePackageSell = 3;
+    /// <summary>Mobius <c>MANUFACTURE</c> (id 5): recipe workshop.</summary>
+    public const byte TypeManufacture = 5;
 
     public const string Busy = "store_busy";
     public const string Combat = "store_combat";

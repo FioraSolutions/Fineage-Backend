@@ -30,7 +30,7 @@ Legend: ✅ done · 🟡 partial · ❌ missing · stub = shell only.
 | 20 | Inventory / equip / warehouse private | Economy | ✅ | Clan/freight ❌ |
 | 21 | Shops buy/sell/multisell | Economy | ✅ | Wear preview stub |
 | 22 | Player trade | Economy | ✅ | |
-| 23 | Private store / craft | Economy | 🟡 | Sell/buy/package (#275–#279); self-craft (#281); manufacture shop / client UI follow-up |
+| 23 | Private store / craft | Economy | 🟡 | Sell/buy/package (#275–#279); self-craft (#281); manufacture (#283); client UI follow-up |
 | 24 | Enchant | Economy | 🟡 | Backend; client UI partial |
 | 25 | Party invite/leave + exp share | Social | 🟡 | Invite/leave + exp; loot modes on sweep + ground pickup (#260 follow-up) |
 | 26 | Clan basic | Social | 🟡 | No crest/war/ally |
@@ -43,8 +43,8 @@ Legend: ✅ done · 🟡 partial · ❌ missing · stub = shell only.
 
 ## Next backend slices (priority)
 
-1. **Manufacture shop / recipe shop** (self-craft #281 done; client UI still needed).
-2. **Pets / summons** or **friends / block**.
+1. **Pets / summons** or **friends / block**.
+2. Client craft / private-store / manufacture UI (server #281/#283 done).
 
 ## Docs
 

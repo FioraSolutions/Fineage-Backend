@@ -109,6 +109,8 @@ sealed class ZoneEntity
     public List<PrivateStoreSellListing> PrivateSellList { get; } = [];
     /// <summary>Active buy listings while <see cref="PrivateStoreType"/> is Buy (by template id).</summary>
     public List<PrivateStoreBuyListing> PrivateBuyList { get; } = [];
+    /// <summary>Active manufacture listings while <see cref="PrivateStoreType"/> is Manufacture.</summary>
+    public List<ManufactureListing> ManufactureList { get; } = [];
     /// <summary>Mobius recipe book: known <c>RecipeList</c> ids (make-self / book open).</summary>
     public HashSet<int> KnownRecipes { get; } = [];
     /// <summary>NPC Mobius physical attack (0 = unknown → level placeholder). Players read the class template.</summary>

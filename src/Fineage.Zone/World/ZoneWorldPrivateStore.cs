@@ -23,8 +23,15 @@ public sealed class PrivateStoreBuyListing
     public long Price { get; set; }
 }
 
+/// <summary>One manufacture workshop row (Mobius <c>ManufactureItem</c>).</summary>
+public sealed class ManufactureListing
+{
+    public int RecipeId { get; set; }
+    public long Price { get; set; }
+}
+
 /// <summary>
-/// Mobius private store: sell (#275), buy (#277), package-sell (#279). Manufacture deferred.
+/// Mobius private store: sell (#275), buy (#277), package-sell (#279). Manufacture → <c>ZoneWorldManufacture</c>.
 /// </summary>
 public sealed partial class ZoneWorld
 {
@@ -178,6 +185,7 @@ public sealed partial class ZoneWorld
         }
 
         player.PrivateBuyList.Clear();
+        player.ManufactureList.Clear();
         player.PrivateSellList.Clear();
         player.PrivateSellList.AddRange(listings);
         byte type = request.Packaged ? PrivateStoreProtocol.TypePackageSell : PrivateStoreProtocol.TypeSell;
@@ -236,6 +244,7 @@ public sealed partial class ZoneWorld
             return PrivateStoreProtocol.Adena;
 
         player.PrivateSellList.Clear();
+        player.ManufactureList.Clear();
         player.PrivateBuyList.Clear();
         player.PrivateBuyList.AddRange(listings);
         ActivatePrivateStore(player, PrivateStoreProtocol.TypeBuy, request.Message);
@@ -259,6 +268,11 @@ public sealed partial class ZoneWorld
         if (store.PrivateStoreType == PrivateStoreProtocol.TypeBuy && store.PrivateBuyList.Count > 0)
         {
             SendPrivateStoreListBuy(visitor, store);
+            return null;
+        }
+        if (store.PrivateStoreType == PrivateStoreProtocol.TypeManufacture && store.ManufactureList.Count > 0)
+        {
+            SendRecipeShopSellList(visitor, store);
             return null;
         }
         return PrivateStoreProtocol.Closed;
@@ -497,12 +511,14 @@ public sealed partial class ZoneWorld
             return;
         if (player.PrivateStoreType == PrivateStoreProtocol.TypeNone
             && player.PrivateSellList.Count == 0
-            && player.PrivateBuyList.Count == 0)
+            && player.PrivateBuyList.Count == 0
+            && player.ManufactureList.Count == 0)
             return;
         player.PrivateStoreType = PrivateStoreProtocol.TypeNone;
         player.PrivateStoreMessage = "";
         player.PrivateSellList.Clear();
         player.PrivateBuyList.Clear();
+        player.ManufactureList.Clear();
         if (standUp && player.Sitting)
         {
             player.Sitting = false;

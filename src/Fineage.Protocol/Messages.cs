@@ -859,6 +859,34 @@ public sealed class RecipeMakeSelfMsg
     public int RecipeId { get; set; }
 }
 
+/// <summary>One manufacture listing (Mobius <c>ManufactureItem</c>: recipe list id + fee).</summary>
+public sealed class RecipeShopRowMsg
+{
+    public int RecipeId { get; set; }
+    public long Price { get; set; }
+}
+
+/// <summary>Open or refresh a manufacture shop (Mobius RequestRecipeShopListSet).</summary>
+public sealed class SetRecipeShopMsg
+{
+    public string Message { get; set; } = "";
+    public RecipeShopRowMsg[] Items { get; set; } = [];
+}
+
+/// <summary>Ask manufacturer MP / recipe status (Mobius RequestRecipeShopMakeInfo).</summary>
+public sealed class RecipeShopMakeInfoMsg
+{
+    public int ManufacturerObjectId { get; set; }
+    public int RecipeId { get; set; }
+}
+
+/// <summary>Request manufacture of one recipe (Mobius RequestRecipeShopMakeItem).</summary>
+public sealed class RecipeShopMakeItemMsg
+{
+    public int ManufacturerObjectId { get; set; }
+    public int RecipeId { get; set; }
+}
+
 /// <summary>Opcode <see cref="MsgType.RequestQuestList"/> (42). Empty body.</summary>
 public sealed class RequestQuestListMsg
 {
