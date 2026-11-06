@@ -88,7 +88,7 @@
 ## Slice 15 — skill weapon conditions
 - `scripts/gen_skill_conditions.py` copies plain Mobius `<conditions><using kind=".."/></conditions>` into `skill-combat.json` `usingKinds` (41 skills: DAGGER blows, BOW, DUALFIST, SWORD/BLUNT Power Strike…; 10 compound and/or/not conditions skipped).
 - Attack-skill use checks them with the passive-mastery `Wearing` rules (ConditionUsingItemType); mismatch → SysMsg 113 "<skill> cannot be used due to unsuitable terms.", no cast / MP / reuse.
-- Weapon vulnerabilities (calcWeaponTraitBonus): done — `scripts/gen_npc_weapon_traits.py` folds NPC skillList `DefenceTrait` passives into `npcs.json` `defenceTraits`; melee / phys skill / blow multiply by `ZoneCombat.WeaponTraitBonus`.
+- Weapon + race vulnerabilities (`calcAttackTraitBonus`): done — `scripts/gen_npc_weapon_traits.py` folds NPC skillList `DefenceTrait` passives (weapon + type-2 weakness) into `npcs.json` `defenceTraits`; melee / phys skill / blow multiply by `ZoneCombat.AttackTraitBonus` (weapon × Detect Weakness AttackTrait product).
 - Gaps: compound conditions, buff/debuff skill conditions, NPC soulshots.
 
 ## Slice 16 — cast ↔ movement (Mobius CreatureAI.thinkCast / PlayerAI / Player.useMagic)

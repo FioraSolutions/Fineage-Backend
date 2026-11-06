@@ -100,8 +100,10 @@ public sealed partial class ZoneWorld
         bool crit = ZoneCombat.RollSkillCrit(_combatRandom, combat.BaseCritRate, str);
         if (crit && player.Session != null)
             ShotNotice(player.Session, SysMsgCriticalHit, "Critical hit!");
+        var defenceTraits = target.Kind == ZoneEntityKind.Npc ? target.DefenceTraits : null;
+        var attackTraits = AttackTraitCatalog.FromAbnormals(player.Abnormals.Select(a => (a.Id, a.SkillLevel)));
         return ZoneCombat.PhysicalSkillDamage(ps.PAtk, pDef, power, ss, crit, ps.CritDmg,
-            ZoneCombat.WeaponTraitBonus(ps.Weapon, target.Kind == ZoneEntityKind.Npc ? target.DefenceTraits : null));
+            ZoneCombat.AttackTraitBonus(ps.Weapon, defenceTraits, attackTraits));
     }
 
     public const int SysMsgLethalSuccess = 1668;
@@ -123,9 +125,10 @@ public sealed partial class ZoneWorld
             ZoneLog.Info($"[skill] blow {combat.SkillId} failed front={front} behind={behind}");
             return 0;
         }
+        var attackTraits = AttackTraitCatalog.FromAbnormals(player.Abnormals.Select(a => (a.Id, a.SkillLevel)));
         var (damage, outcome) = ZoneCombat.RollBlowDamage(_combatRandom, blow, ps.PAtk, NpcPDef(target), combat.PowerAt(level), ss,
             front, behind, ps.RandomDamage, combat.BaseCritRate, str, NpcShieldRate(target), target.ShieldDef, ps.CritDmg,
-            ZoneCombat.WeaponTraitBonus(ps.Weapon, target.DefenceTraits));
+            ZoneCombat.AttackTraitBonus(ps.Weapon, target.DefenceTraits, attackTraits));
         int hpAfter = Math.Max(0, target.CurHp - damage);
         bool lethalable = target.NpcType is not ("RaidBoss" or "GrandBoss");
         var (extra, lethal) = ZoneCombat.RollLethal(_combatRandom, combat.FullLethal, combat.HalfLethal,

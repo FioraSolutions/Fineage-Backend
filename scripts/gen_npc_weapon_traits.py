@@ -1,9 +1,11 @@
 #!/usr/bin/env python3
-"""Patch data/npcs.json with Mobius weapon defence traits.
+"""Patch data/npcs.json with Mobius weapon + race defence traits.
 
 Mobius has no npcs.xml defence-trait field: Npc skillList passives apply
-DefenceTrait effects (Formulas.calcWeaponTraitBonus). We resolve those
-passives offline and store the folded _defenceTraits multipliers (default 1).
+DefenceTrait effects (Formulas.calcWeaponTraitBonus / calcAttackTraitBonus type-2).
+We resolve those passives offline and store the folded _defenceTraits multipliers
+(default 1). Weapon keys feed calcWeaponTraitBonus; *Weakness / valakas keys feed
+type-2 weakness when the attacker also has AttackTrait (Detect Weakness buffs).
 
 Usage: gen_npc_weapon_traits.py <mobius dist/game/data>
   expects <root>/stats/skills/*.xml and <root>/stats/npcs/*.xml
@@ -30,7 +32,21 @@ WEAPON = {
     "DUALDAGGER",
 }
 
-# Fineage JSON keys (camelCase tokens matching WeaponType).
+# Mobius TraitType type=2 (weakness) used by calcAttackTraitBonus.
+RACE = {
+    "BUG_WEAKNESS",
+    "ANIMAL_WEAKNESS",
+    "PLANT_WEAKNESS",
+    "BEAST_WEAKNESS",
+    "DRAGON_WEAKNESS",
+    "GIANT_WEAKNESS",
+    "CONSTRUCT_WEAKNESS",
+    "VALAKAS",
+}
+
+TRAITS = WEAPON | RACE
+
+# Fineage JSON keys (camelCase).
 KEY = {
     "SWORD": "sword",
     "BLUNT": "blunt",
@@ -42,11 +58,19 @@ KEY = {
     "DUAL": "dual",
     "DUALFIST": "dualfist",
     "DUALDAGGER": "dualdagger",
+    "BUG_WEAKNESS": "bugWeakness",
+    "ANIMAL_WEAKNESS": "animalWeakness",
+    "PLANT_WEAKNESS": "plantWeakness",
+    "BEAST_WEAKNESS": "beastWeakness",
+    "DRAGON_WEAKNESS": "dragonWeakness",
+    "GIANT_WEAKNESS": "giantWeakness",
+    "CONSTRUCT_WEAKNESS": "constructWeakness",
+    "VALAKAS": "valakas",
 }
 
 
 def load_skill_traits(skills_dir: pathlib.Path) -> dict[int, list[dict[str, float]]]:
-    """skillId → per-level map of weapon trait → Mobius defenceTraits multiplier."""
+    """skillId → per-level map of trait → Mobius defenceTraits multiplier."""
     out: dict[int, list[dict[str, float]]] = {}
     for f in sorted(skills_dir.glob("*.xml")):
         root = ET.parse(f).getroot()
@@ -66,7 +90,7 @@ def load_skill_traits(skills_dir: pathlib.Path) -> dict[int, list[dict[str, floa
                     if param.tag != "param":
                         continue
                     for name, raw_s in param.attrib.items():
-                        if name not in WEAPON:
+                        if name not in TRAITS:
                             continue
                         found = True
                         if raw_s.startswith("#"):
@@ -124,12 +148,15 @@ def main() -> None:
     path = pathlib.Path(__file__).resolve().parent.parent / "data" / "npcs.json"
     data = json.loads(path.read_text())
     n = 0
+    race_n = 0
     for npc in data["npcs"]:
         npc.pop("defenceTraits", None)
         patch = by_id.get(npc["npcId"])
         if patch:
             npc["defenceTraits"] = patch
             n += 1
+            if any(k.endswith("Weakness") or k == "valakas" for k in patch):
+                race_n += 1
 
     lines = ["{", f'  "source": {json.dumps(data.get("source", ""))},', '  "npcs": [']
     for i, npc in enumerate(data["npcs"]):
@@ -140,7 +167,7 @@ def main() -> None:
     path.write_text("\n".join(lines) + "\n")
     print(
         f"defenceTraits on {n}/{len(data['npcs'])} npcs "
-        f"({len(by_id)} in Mobius XML, {len(skills)} DefenceTrait skills)"
+        f"(race/valakas={race_n}, {len(by_id)} in Mobius XML, {len(skills)} DefenceTrait skills)"
     )
 
 

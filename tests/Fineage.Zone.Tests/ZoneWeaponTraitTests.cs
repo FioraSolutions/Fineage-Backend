@@ -76,6 +76,33 @@ public sealed class ZoneWeaponTraitTests
         Assert.Equal(70, dmg);
     }
 
+    [Fact]
+    public void AttackTraitBonus_detect_insect_vs_bug_weak_point()
+    {
+        // Detect Insect Weakness (×1.30) vs Insect Weak Point (−15 → 0.85): (1.30−0.85)+1 = 1.45
+        var defence = new Dictionary<string, double> { ["bugWeakness"] = 0.85 };
+        var attack = AttackTraitCatalog.FromAbnormals([(75, 1)]);
+        Assert.Equal(1.45, ZoneCombat.AttackTraitBonus(WeaponType.Sword, defence, attack), 3);
+        // Without Detect buff, type-2 requires both sides → 1.0
+        Assert.Equal(1.0, ZoneCombat.AttackTraitBonus(WeaponType.Sword, defence, null), 3);
+    }
+
+    [Fact]
+    public void Catalog_loads_animal_weakness_on_wolf()
+    {
+        var npc = NpcCatalog.LoadDefault().Get(12077);
+        Assert.Equal(0.85, npc.DefenceTraits!["animalWeakness"], 3);
+    }
+
+    [Fact]
+    public void AttackTraitBonus_multiplies_weapon_and_race()
+    {
+        // Bow weak 0.89 → weapon 1.11; Detect Animal 1.30 vs animal 0.85 → 1.45; product ≈ 1.6095
+        var defence = new Dictionary<string, double> { ["bow"] = 0.89, ["animalWeakness"] = 0.85 };
+        var attack = AttackTraitCatalog.FromAbnormals([(87, 1)]);
+        Assert.Equal(1.11 * 1.45, ZoneCombat.AttackTraitBonus(WeaponType.Bow, defence, attack), 3);
+    }
+
     /// <summary>Deterministic Random: Next(1000) then Next for shield/crit/random as needed.</summary>
     sealed class Seq : Random
     {

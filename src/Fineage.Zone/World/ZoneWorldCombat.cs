@@ -300,12 +300,14 @@ public sealed partial class ZoneWorld
             shieldDef = ts.ShieldDef;
         }
 
+        var defenceTraits = target.Kind == ZoneEntityKind.Npc ? target.DefenceTraits : null;
+        var attackTraits = AttackTraitCatalog.FromAbnormals(player.Abnormals.Select(a => (a.Id, a.SkillLevel)));
         return ZoneCombat.RollMelee(_combatRandom, ps.PAtk, pDef,
             ps.Accuracy, evasion, ps.CritRate, ps.RandomDamage,
             soulshot, (int)ps.WeaponGrade, shieldRate, shieldDef, ps.Weapon == Fineage.Game.WeaponType.Bow,
             ZoneCombat.HitConditionBonus(player.X, player.Y, player.Z, target.X, target.Y, target.Z, target.Heading, IsNight),
             ps.CritDmg,
-            ZoneCombat.WeaponTraitBonus(ps.Weapon, target.Kind == ZoneEntityKind.Npc ? target.DefenceTraits : null));
+            ZoneCombat.AttackTraitBonus(ps.Weapon, defenceTraits, attackTraits));
     }
 
     double NpcPDef(ZoneEntity npc) =>

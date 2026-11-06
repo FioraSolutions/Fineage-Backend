@@ -282,6 +282,50 @@ public static class ZoneCombat
         return 1d - (defence - 1d);
     }
 
+    /// <summary>Mobius <c>TraitType</c> type=2 keys stored in <c>defenceTraits</c> / attack-trait maps.</summary>
+    public static readonly string[] RaceWeaknessKeys =
+    [
+        "bugWeakness", "animalWeakness", "plantWeakness", "beastWeakness",
+        "dragonWeakness", "giantWeakness", "constructWeakness", "valakas"
+    ];
+
+    /// <summary>
+    /// Mobius <c>Formulas.calcGeneralTraitBonus</c> for type=2: both sides must have the trait;
+    /// <c>(attack − defence) + 1</c> clamped to [0.05, 2].
+    /// </summary>
+    public static double GeneralWeaknessBonus(
+        IReadOnlyDictionary<string, double>? attackTraits,
+        IReadOnlyDictionary<string, double>? defenceTraits,
+        string key)
+    {
+        if (attackTraits is not { Count: > 0 } || defenceTraits is not { Count: > 0 })
+            return 1d;
+        if (!attackTraits.TryGetValue(key, out var attack) || !defenceTraits.TryGetValue(key, out var defence))
+            return 1d;
+        return Math.Clamp((attack - defence) + 1d, 0.05, 2d);
+    }
+
+    /// <summary>
+    /// Mobius <c>Formulas.calcAttackTraitBonus</c>: weapon trait × product of type-2 weakness bonuses.
+    /// </summary>
+    public static double AttackTraitBonus(
+        Fineage.Game.WeaponType weapon,
+        IReadOnlyDictionary<string, double>? defenceTraits,
+        IReadOnlyDictionary<string, double>? attackTraits = null)
+    {
+        double weaponBonus = WeaponTraitBonus(weapon, defenceTraits);
+        if (weaponBonus == 0)
+            return 0;
+        double weakness = 1d;
+        foreach (var key in RaceWeaknessKeys)
+        {
+            weakness *= GeneralWeaknessBonus(attackTraits, defenceTraits, key);
+            if (weakness == 0)
+                return 0;
+        }
+        return Math.Clamp(weaponBonus * weakness, 0.05, 2d);
+    }
+
     /// <summary>Mobius <c>Formulas.calcAtkSpd</c> for skills: magic time·333/Cspd, physical time·300/Pspd.</summary>
     public static int SkillTimeMs(int baseMs, bool magic, int mAtkSpd, int pAtkSpd) =>
         baseMs <= 0 ? 0 : (int)(magic ? baseMs * 333d / Math.Max(1, mAtkSpd) : baseMs * 300d / Math.Max(1, pAtkSpd));
