@@ -178,6 +178,14 @@ public sealed partial class ZoneWorld
                         DestX = e.MoveDestX, DestY = e.MoveDestY, DestZ = e.MoveDestZ,
                         OriginX = e.X, OriginY = e.Y, OriginZ = e.Z
                     };
+                    // Keep approach sync on the current leg so client mid-path reports are not treated as cancel.
+                    if (e.Session is { ApproachTargetId: > 0 } session)
+                    {
+                        session.ApproachOriginX = e.X;
+                        session.ApproachOriginY = e.Y;
+                        session.ApproachDestX = e.MoveDestX;
+                        session.ApproachDestY = e.MoveDestY;
+                    }
                     RefreshMovingKnownlist(e, ack);
                     continue;
                 }

@@ -42,11 +42,20 @@ internal sealed class NetTestKit
     public DateTimeOffset Now { get; set; } = DateTimeOffset.FromUnixTimeMilliseconds(1_800_000_000_000);
     int _n;
 
-    public NetTestKit(Fineage.Zone.Spawns.SpawnCatalog? spawns = null, string? map = null, Fineage.Zone.Geo.GeoEngine? geo = null, Fineage.Zone.Interest.IAoi? aoi = null, Random? deathRandom = null, Fineage.Game.DeathRuleCatalog? deathRules = null, Fineage.Game.Services.ItemWeights? weights = null, MemoryAccountStore? store = null)
+    public NetTestKit(
+        Fineage.Zone.Spawns.SpawnCatalog? spawns = null,
+        string? map = null,
+        Fineage.Zone.Geo.GeoEngine? geo = null,
+        Fineage.Zone.Interest.IAoi? aoi = null,
+        Random? deathRandom = null,
+        Fineage.Game.DeathRuleCatalog? deathRules = null,
+        Fineage.Game.Services.DeathDropRules? deathDrop = null,
+        Fineage.Game.Services.ItemWeights? weights = null,
+        MemoryAccountStore? store = null)
     {
         Store = store ?? MemoryAccountStore.InMemory();
         World = new ZoneWorld(aoi, game: Game, accounts: Store, clock: () => Now, spawnCatalog: spawns, activeMapId: map, geo: geo,
-            deathRules: deathRules, deathRandom: deathRandom, weights: weights);
+            deathRules: deathRules, deathDrop: deathDrop, deathRandom: deathRandom, weights: weights);
     }
 
     /// <summary>One stored character row, without entering the world. Use <see cref="EnterAsync(Character)"/> to log in.</summary>

@@ -218,11 +218,19 @@ public sealed partial class ZoneWorld
         Publish(player.Session, player, outcome, npc.ObjectId, npc.NpcId);
     }
 
-    internal void JoinPartyForTest(params ZoneEntity[] members)
+    internal void JoinPartyForTest(params ZoneEntity[] members) =>
+        JoinPartyForTest(Fineage.Game.Services.PartyDistributionType.FindersKeepers, members);
+
+    internal void JoinPartyForTest(Fineage.Game.Services.PartyDistributionType distribution, params ZoneEntity[] members)
     {
         lock (_gate)
         {
-            var party = new ZoneParty { PartyId = _nextPartyId++, LeaderObjectId = members[0].ObjectId };
+            var party = new ZoneParty
+            {
+                PartyId = _nextPartyId++,
+                LeaderObjectId = members[0].ObjectId,
+                ItemDistribution = (int)distribution
+            };
             _parties[party.PartyId] = party;
             foreach (var m in members)
             {

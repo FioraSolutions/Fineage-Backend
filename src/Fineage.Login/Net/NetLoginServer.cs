@@ -386,7 +386,7 @@ public sealed class NetLoginServer
             MaxCp = stats.MaxCp,
             Exp = c.Exp,
             Sp = c.Sp,
-            Karma = 0,
+            Karma = c.Karma,
             WeaponItemId = stats.WeaponItemId,
             Paperdoll = stats.Paperdoll
         };

@@ -2198,6 +2198,544 @@ namespace Fineage.Net.Contract
         public static TradeFinishedNetMsg DecodeTradeFinished(ReadOnlySpan<byte> p) =>
             new() { Response = new Reader(p).ReadInt32() };
 
+        public static byte[] EncodeSetPrivateStoreSell(SetPrivateStoreSellNetMsg m) => Write(w =>
+        {
+            w.WriteString(m.Message ?? "");
+            w.WriteInt32(m.Packaged);
+            var items = m.Items ?? System.Array.Empty<PrivateStoreSellRowNet>();
+            w.WriteInt32(items.Length);
+            for (int i = 0; i < items.Length; i++)
+            {
+                var row = items[i] ?? new PrivateStoreSellRowNet();
+                w.WriteInt32(row.InventoryObjectId);
+                w.WriteInt32(row.ItemId);
+                w.WriteInt64(row.Count);
+                w.WriteInt64(row.Price);
+                w.WriteInt32(row.EnchantLevel);
+            }
+        });
+        public static SetPrivateStoreSellNetMsg DecodeSetPrivateStoreSell(ReadOnlySpan<byte> p)
+        {
+            var r = new Reader(p);
+            string message = r.ReadString();
+            int packaged = r.ReadInt32();
+            int n = r.ReadInt32();
+            if (n < 0) n = 0;
+            var items = new PrivateStoreSellRowNet[n];
+            for (int i = 0; i < n; i++)
+            {
+                items[i] = new PrivateStoreSellRowNet
+                {
+                    InventoryObjectId = r.ReadInt32(),
+                    ItemId = r.ReadInt32(),
+                    Count = r.ReadInt64(),
+                    Price = r.ReadInt64(),
+                    EnchantLevel = r.ReadInt32()
+                };
+            }
+            return new SetPrivateStoreSellNetMsg { Message = message, Packaged = packaged, Items = items };
+        }
+
+        public static byte[] EncodePrivateStoreListRequest(PrivateStoreListRequestNetMsg m) =>
+            Write(w => w.WriteInt32(m.StoreObjectId));
+        public static PrivateStoreListRequestNetMsg DecodePrivateStoreListRequest(ReadOnlySpan<byte> p) =>
+            new() { StoreObjectId = new Reader(p).ReadInt32() };
+
+        public static byte[] EncodePrivateStoreBuy(PrivateStoreBuyNetMsg m) => Write(w =>
+        {
+            w.WriteInt32(m.StoreObjectId);
+            var items = m.Items ?? System.Array.Empty<PrivateStoreSellRowNet>();
+            w.WriteInt32(items.Length);
+            for (int i = 0; i < items.Length; i++)
+            {
+                var row = items[i] ?? new PrivateStoreSellRowNet();
+                w.WriteInt32(row.InventoryObjectId);
+                w.WriteInt64(row.Count);
+                w.WriteInt64(row.Price);
+            }
+        });
+        public static PrivateStoreBuyNetMsg DecodePrivateStoreBuy(ReadOnlySpan<byte> p)
+        {
+            var r = new Reader(p);
+            int storeId = r.ReadInt32();
+            int n = r.ReadInt32();
+            if (n < 0) n = 0;
+            var items = new PrivateStoreSellRowNet[n];
+            for (int i = 0; i < n; i++)
+            {
+                items[i] = new PrivateStoreSellRowNet
+                {
+                    InventoryObjectId = r.ReadInt32(),
+                    Count = r.ReadInt64(),
+                    Price = r.ReadInt64()
+                };
+            }
+            return new PrivateStoreBuyNetMsg { StoreObjectId = storeId, Items = items };
+        }
+
+        public static byte[] EncodePrivateStoreInfo(PrivateStoreInfoNetMsg m) => Write(w =>
+        {
+            w.WriteInt32(m.ObjectId);
+            w.WriteInt32(m.StoreType);
+            w.WriteString(m.Message ?? "");
+        });
+        public static PrivateStoreInfoNetMsg DecodePrivateStoreInfo(ReadOnlySpan<byte> p)
+        {
+            var r = new Reader(p);
+            return new PrivateStoreInfoNetMsg
+            {
+                ObjectId = r.ReadInt32(),
+                StoreType = r.ReadInt32(),
+                Message = r.ReadString()
+            };
+        }
+
+        public static byte[] EncodePrivateStoreListSell(PrivateStoreListSellNetMsg m) => Write(w =>
+        {
+            w.WriteInt32(m.StoreObjectId);
+            w.WriteString(m.StoreName ?? "");
+            w.WriteString(m.Message ?? "");
+            w.WriteInt32(m.Packaged);
+            w.WriteInt64(m.BuyerAdena);
+            var items = m.Items ?? System.Array.Empty<PrivateStoreSellRowNet>();
+            w.WriteInt32(items.Length);
+            for (int i = 0; i < items.Length; i++)
+            {
+                var row = items[i] ?? new PrivateStoreSellRowNet();
+                w.WriteInt32(row.InventoryObjectId);
+                w.WriteInt32(row.ItemId);
+                w.WriteInt64(row.Count);
+                w.WriteInt64(row.Price);
+                w.WriteInt32(row.EnchantLevel);
+            }
+        });
+        public static PrivateStoreListSellNetMsg DecodePrivateStoreListSell(ReadOnlySpan<byte> p)
+        {
+            var r = new Reader(p);
+            int storeId = r.ReadInt32();
+            string name = r.ReadString();
+            string message = r.ReadString();
+            int packaged = r.ReadInt32();
+            long adena = r.ReadInt64();
+            int n = r.ReadInt32();
+            if (n < 0) n = 0;
+            var items = new PrivateStoreSellRowNet[n];
+            for (int i = 0; i < n; i++)
+            {
+                items[i] = new PrivateStoreSellRowNet
+                {
+                    InventoryObjectId = r.ReadInt32(),
+                    ItemId = r.ReadInt32(),
+                    Count = r.ReadInt64(),
+                    Price = r.ReadInt64(),
+                    EnchantLevel = r.ReadInt32()
+                };
+            }
+            return new PrivateStoreListSellNetMsg
+            {
+                StoreObjectId = storeId,
+                StoreName = name,
+                Message = message,
+                Packaged = packaged,
+                BuyerAdena = adena,
+                Items = items
+            };
+        }
+
+        public static byte[] EncodeSetPrivateStoreBuy(SetPrivateStoreBuyNetMsg m) => Write(w =>
+        {
+            w.WriteString(m.Message ?? "");
+            var items = m.Items ?? System.Array.Empty<PrivateStoreBuyRowNet>();
+            w.WriteInt32(items.Length);
+            for (int i = 0; i < items.Length; i++)
+            {
+                var row = items[i] ?? new PrivateStoreBuyRowNet();
+                w.WriteInt32(row.ItemId);
+                w.WriteInt64(row.Count);
+                w.WriteInt64(row.Price);
+            }
+        });
+        public static SetPrivateStoreBuyNetMsg DecodeSetPrivateStoreBuy(ReadOnlySpan<byte> p)
+        {
+            var r = new Reader(p);
+            string message = r.ReadString();
+            int n = r.ReadInt32();
+            if (n < 0) n = 0;
+            var items = new PrivateStoreBuyRowNet[n];
+            for (int i = 0; i < n; i++)
+            {
+                items[i] = new PrivateStoreBuyRowNet
+                {
+                    ItemId = r.ReadInt32(),
+                    Count = r.ReadInt64(),
+                    Price = r.ReadInt64()
+                };
+            }
+            return new SetPrivateStoreBuyNetMsg { Message = message, Items = items };
+        }
+
+        public static byte[] EncodePrivateStoreSellTo(PrivateStoreSellToNetMsg m) => Write(w =>
+        {
+            w.WriteInt32(m.StoreObjectId);
+            var items = m.Items ?? System.Array.Empty<PrivateStoreSellRowNet>();
+            w.WriteInt32(items.Length);
+            for (int i = 0; i < items.Length; i++)
+            {
+                var row = items[i] ?? new PrivateStoreSellRowNet();
+                w.WriteInt32(row.InventoryObjectId);
+                w.WriteInt32(row.ItemId);
+                w.WriteInt64(row.Count);
+                w.WriteInt64(row.Price);
+            }
+        });
+        public static PrivateStoreSellToNetMsg DecodePrivateStoreSellTo(ReadOnlySpan<byte> p)
+        {
+            var r = new Reader(p);
+            int storeId = r.ReadInt32();
+            int n = r.ReadInt32();
+            if (n < 0) n = 0;
+            var items = new PrivateStoreSellRowNet[n];
+            for (int i = 0; i < n; i++)
+            {
+                items[i] = new PrivateStoreSellRowNet
+                {
+                    InventoryObjectId = r.ReadInt32(),
+                    ItemId = r.ReadInt32(),
+                    Count = r.ReadInt64(),
+                    Price = r.ReadInt64()
+                };
+            }
+            return new PrivateStoreSellToNetMsg { StoreObjectId = storeId, Items = items };
+        }
+
+        public static byte[] EncodePrivateStoreListBuy(PrivateStoreListBuyNetMsg m) => Write(w =>
+        {
+            w.WriteInt32(m.StoreObjectId);
+            w.WriteString(m.StoreName ?? "");
+            w.WriteString(m.Message ?? "");
+            w.WriteInt64(m.StoreAdena);
+            var items = m.Items ?? System.Array.Empty<PrivateStoreBuyRowNet>();
+            w.WriteInt32(items.Length);
+            for (int i = 0; i < items.Length; i++)
+            {
+                var row = items[i] ?? new PrivateStoreBuyRowNet();
+                w.WriteInt32(row.ItemId);
+                w.WriteInt64(row.Count);
+                w.WriteInt64(row.Price);
+            }
+        });
+        public static PrivateStoreListBuyNetMsg DecodePrivateStoreListBuy(ReadOnlySpan<byte> p)
+        {
+            var r = new Reader(p);
+            int storeId = r.ReadInt32();
+            string name = r.ReadString();
+            string message = r.ReadString();
+            long adena = r.ReadInt64();
+            int n = r.ReadInt32();
+            if (n < 0) n = 0;
+            var items = new PrivateStoreBuyRowNet[n];
+            for (int i = 0; i < n; i++)
+            {
+                items[i] = new PrivateStoreBuyRowNet
+                {
+                    ItemId = r.ReadInt32(),
+                    Count = r.ReadInt64(),
+                    Price = r.ReadInt64()
+                };
+            }
+            return new PrivateStoreListBuyNetMsg
+            {
+                StoreObjectId = storeId,
+                StoreName = name,
+                Message = message,
+                StoreAdena = adena,
+                Items = items
+            };
+        }
+
+        public static byte[] EncodeRecipeBookOpen(RecipeBookOpenNetMsg m) => Write(w => w.WriteInt32(m.Dwarven));
+        public static RecipeBookOpenNetMsg DecodeRecipeBookOpen(ReadOnlySpan<byte> p) =>
+            new() { Dwarven = new Reader(p).ReadInt32() };
+
+        public static byte[] EncodeRecipeMakeSelf(RecipeMakeSelfNetMsg m) => Write(w => w.WriteInt32(m.RecipeId));
+        public static RecipeMakeSelfNetMsg DecodeRecipeMakeSelf(ReadOnlySpan<byte> p) =>
+            new() { RecipeId = new Reader(p).ReadInt32() };
+
+        public static byte[] EncodeRecipeBookList(RecipeBookListNetMsg m) => Write(w =>
+        {
+            w.WriteInt32(m.Dwarven);
+            var ids = m.RecipeIds ?? System.Array.Empty<int>();
+            w.WriteInt32(ids.Length);
+            for (int i = 0; i < ids.Length; i++)
+                w.WriteInt32(ids[i]);
+        });
+        public static RecipeBookListNetMsg DecodeRecipeBookList(ReadOnlySpan<byte> p)
+        {
+            var r = new Reader(p);
+            int dwarven = r.ReadInt32();
+            int n = r.ReadInt32();
+            if (n < 0) n = 0;
+            var ids = new int[n];
+            for (int i = 0; i < n; i++)
+                ids[i] = r.ReadInt32();
+            return new RecipeBookListNetMsg { Dwarven = dwarven, RecipeIds = ids };
+        }
+
+        public static byte[] EncodeRecipeItemMakeInfo(RecipeItemMakeInfoNetMsg m) => Write(w =>
+        {
+            w.WriteInt32(m.RecipeId);
+            w.WriteInt32(m.Result);
+            w.WriteInt32(m.CurrentMp);
+            w.WriteInt32(m.MaxMp);
+        });
+        public static RecipeItemMakeInfoNetMsg DecodeRecipeItemMakeInfo(ReadOnlySpan<byte> p)
+        {
+            var r = new Reader(p);
+            return new RecipeItemMakeInfoNetMsg
+            {
+                RecipeId = r.ReadInt32(),
+                Result = r.ReadInt32(),
+                CurrentMp = r.ReadInt32(),
+                MaxMp = r.ReadInt32()
+            };
+        }
+
+        public static byte[] EncodeSetRecipeShop(SetRecipeShopNetMsg m) => Write(w =>
+        {
+            w.WriteString(m.Message ?? "");
+            var items = m.Items ?? System.Array.Empty<RecipeShopRowNet>();
+            w.WriteInt32(items.Length);
+            for (int i = 0; i < items.Length; i++)
+            {
+                var row = items[i] ?? new RecipeShopRowNet();
+                w.WriteInt32(row.RecipeId);
+                w.WriteInt64(row.Price);
+            }
+        });
+        public static SetRecipeShopNetMsg DecodeSetRecipeShop(ReadOnlySpan<byte> p)
+        {
+            var r = new Reader(p);
+            string message = r.ReadString();
+            int n = r.ReadInt32();
+            if (n < 0) n = 0;
+            var items = new RecipeShopRowNet[n];
+            for (int i = 0; i < n; i++)
+            {
+                items[i] = new RecipeShopRowNet
+                {
+                    RecipeId = r.ReadInt32(),
+                    Price = r.ReadInt64()
+                };
+            }
+            return new SetRecipeShopNetMsg { Message = message, Items = items };
+        }
+
+        public static byte[] EncodeRecipeShopMakeInfo(RecipeShopMakeInfoNetMsg m) => Write(w =>
+        {
+            w.WriteInt32(m.ManufacturerObjectId);
+            w.WriteInt32(m.RecipeId);
+        });
+        public static RecipeShopMakeInfoNetMsg DecodeRecipeShopMakeInfo(ReadOnlySpan<byte> p)
+        {
+            var r = new Reader(p);
+            return new RecipeShopMakeInfoNetMsg
+            {
+                ManufacturerObjectId = r.ReadInt32(),
+                RecipeId = r.ReadInt32()
+            };
+        }
+
+        public static byte[] EncodeRecipeShopMakeItem(RecipeShopMakeItemNetMsg m) => Write(w =>
+        {
+            w.WriteInt32(m.ManufacturerObjectId);
+            w.WriteInt32(m.RecipeId);
+        });
+        public static RecipeShopMakeItemNetMsg DecodeRecipeShopMakeItem(ReadOnlySpan<byte> p)
+        {
+            var r = new Reader(p);
+            return new RecipeShopMakeItemNetMsg
+            {
+                ManufacturerObjectId = r.ReadInt32(),
+                RecipeId = r.ReadInt32()
+            };
+        }
+
+        public static byte[] EncodeRecipeShopSellList(RecipeShopSellListNetMsg m) => Write(w =>
+        {
+            w.WriteInt32(m.ManufacturerObjectId);
+            w.WriteInt32(m.CurrentMp);
+            w.WriteInt32(m.MaxMp);
+            w.WriteInt64(m.BuyerAdena);
+            var items = m.Items ?? System.Array.Empty<RecipeShopRowNet>();
+            w.WriteInt32(items.Length);
+            for (int i = 0; i < items.Length; i++)
+            {
+                var row = items[i] ?? new RecipeShopRowNet();
+                w.WriteInt32(row.RecipeId);
+                w.WriteInt64(row.Price);
+            }
+        });
+        public static RecipeShopSellListNetMsg DecodeRecipeShopSellList(ReadOnlySpan<byte> p)
+        {
+            var r = new Reader(p);
+            int manufacturer = r.ReadInt32();
+            int curMp = r.ReadInt32();
+            int maxMp = r.ReadInt32();
+            long adena = r.ReadInt64();
+            int n = r.ReadInt32();
+            if (n < 0) n = 0;
+            var items = new RecipeShopRowNet[n];
+            for (int i = 0; i < n; i++)
+            {
+                items[i] = new RecipeShopRowNet
+                {
+                    RecipeId = r.ReadInt32(),
+                    Price = r.ReadInt64()
+                };
+            }
+            return new RecipeShopSellListNetMsg
+            {
+                ManufacturerObjectId = manufacturer,
+                CurrentMp = curMp,
+                MaxMp = maxMp,
+                BuyerAdena = adena,
+                Items = items
+            };
+        }
+
+        public static byte[] EncodeRecipeShopItemInfo(RecipeShopItemInfoNetMsg m) => Write(w =>
+        {
+            w.WriteInt32(m.ManufacturerObjectId);
+            w.WriteInt32(m.RecipeId);
+            w.WriteInt32(m.CurrentMp);
+            w.WriteInt32(m.MaxMp);
+            w.WriteInt32(m.Result);
+        });
+        public static RecipeShopItemInfoNetMsg DecodeRecipeShopItemInfo(ReadOnlySpan<byte> p)
+        {
+            var r = new Reader(p);
+            return new RecipeShopItemInfoNetMsg
+            {
+                ManufacturerObjectId = r.ReadInt32(),
+                RecipeId = r.ReadInt32(),
+                CurrentMp = r.ReadInt32(),
+                MaxMp = r.ReadInt32(),
+                Result = r.ReadInt32()
+            };
+        }
+
+        public static byte[] EncodeFriendInvite(FriendInviteNetMsg m) =>
+            Write(w => w.WriteString(m.Name ?? ""));
+        public static FriendInviteNetMsg DecodeFriendInvite(ReadOnlySpan<byte> p) =>
+            new() { Name = new Reader(p).ReadString() };
+
+        public static byte[] EncodeFriendAnswer(FriendAnswerNetMsg m) =>
+            Write(w => w.WriteInt32(m.Response));
+        public static FriendAnswerNetMsg DecodeFriendAnswer(ReadOnlySpan<byte> p) =>
+            new() { Response = new Reader(p).ReadInt32() };
+
+        public static byte[] EncodeFriendDelete(FriendDeleteNetMsg m) =>
+            Write(w => w.WriteString(m.Name ?? ""));
+        public static FriendDeleteNetMsg DecodeFriendDelete(ReadOnlySpan<byte> p) =>
+            new() { Name = new Reader(p).ReadString() };
+
+        public static byte[] EncodeBlockRequest(BlockRequestNetMsg m) => Write(w =>
+        {
+            w.WriteInt32(m.Type);
+            w.WriteString(m.Name ?? "");
+        });
+        public static BlockRequestNetMsg DecodeBlockRequest(ReadOnlySpan<byte> p)
+        {
+            var r = new Reader(p);
+            return new BlockRequestNetMsg { Type = r.ReadInt32(), Name = r.ReadString() };
+        }
+
+        public static byte[] EncodeFriendInviteAsk(FriendInviteAskNetMsg m) =>
+            Write(w => w.WriteString(m.RequestorName ?? ""));
+        public static FriendInviteAskNetMsg DecodeFriendInviteAsk(ReadOnlySpan<byte> p) =>
+            new() { RequestorName = new Reader(p).ReadString() };
+
+        public static byte[] EncodeFriendList(FriendListNetMsg m) => Write(w =>
+        {
+            var rows = m.Friends ?? System.Array.Empty<FriendRowNet>();
+            w.WriteInt32(rows.Length);
+            for (int i = 0; i < rows.Length; i++)
+            {
+                var row = rows[i] ?? new FriendRowNet();
+                w.WriteInt32(row.ObjectId);
+                w.WriteString(row.Name ?? "");
+                w.WriteInt32(row.Online);
+            }
+        });
+        public static FriendListNetMsg DecodeFriendList(ReadOnlySpan<byte> p)
+        {
+            var r = new Reader(p);
+            int n = r.ReadInt32();
+            if (n < 0) n = 0;
+            var rows = new FriendRowNet[n];
+            for (int i = 0; i < n; i++)
+            {
+                rows[i] = new FriendRowNet
+                {
+                    ObjectId = r.ReadInt32(),
+                    Name = r.ReadString(),
+                    Online = r.ReadInt32()
+                };
+            }
+            return new FriendListNetMsg { Friends = rows };
+        }
+
+        public static byte[] EncodeFriendUpdate(FriendUpdateNetMsg m) => Write(w =>
+        {
+            w.WriteInt32(m.Added);
+            w.WriteInt32(m.ObjectId);
+            w.WriteString(m.Name ?? "");
+            w.WriteInt32(m.Online);
+        });
+        public static FriendUpdateNetMsg DecodeFriendUpdate(ReadOnlySpan<byte> p)
+        {
+            var r = new Reader(p);
+            return new FriendUpdateNetMsg
+            {
+                Added = r.ReadInt32(),
+                ObjectId = r.ReadInt32(),
+                Name = r.ReadString(),
+                Online = r.ReadInt32()
+            };
+        }
+
+        public static byte[] EncodeBlockList(BlockListNetMsg m) => Write(w =>
+        {
+            w.WriteInt32(m.BlockAll);
+            var rows = m.Blocked ?? System.Array.Empty<FriendRowNet>();
+            w.WriteInt32(rows.Length);
+            for (int i = 0; i < rows.Length; i++)
+            {
+                var row = rows[i] ?? new FriendRowNet();
+                w.WriteInt32(row.ObjectId);
+                w.WriteString(row.Name ?? "");
+                w.WriteInt32(row.Online);
+            }
+        });
+        public static BlockListNetMsg DecodeBlockList(ReadOnlySpan<byte> p)
+        {
+            var r = new Reader(p);
+            int blockAll = r.ReadInt32();
+            int n = r.ReadInt32();
+            if (n < 0) n = 0;
+            var rows = new FriendRowNet[n];
+            for (int i = 0; i < n; i++)
+            {
+                rows[i] = new FriendRowNet
+                {
+                    ObjectId = r.ReadInt32(),
+                    Name = r.ReadString(),
+                    Online = r.ReadInt32()
+                };
+            }
+            return new BlockListNetMsg { BlockAll = blockAll, Blocked = rows };
+        }
+
         public static byte[] EncodeBossStatusRequest(BossStatusRequestNetMsg m) => Write(w => w.WriteInt32(m.NpcId));
 
         public static BossStatusRequestNetMsg DecodeBossStatusRequest(ReadOnlySpan<byte> p) =>

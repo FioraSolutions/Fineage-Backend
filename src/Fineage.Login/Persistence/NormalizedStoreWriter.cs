@@ -117,6 +117,9 @@ static class NormalizedStoreWriter
             character.ClanJoinExpiryUnixMs,
             character.ClanCreateExpiryUnixMs,
             character.DeathPenaltyLevel,
+            character.Karma,
+            character.PkKills,
+            character.PvpKills,
             character.CreatedAt,
             character.LastAccess,
             character.DeleteAt);
@@ -198,6 +201,23 @@ static class NormalizedStoreWriter
         cmd.CommandText = "UPDATE characters SET death_penalty_level = @level, updated_at = now() WHERE id = @id";
         cmd.Parameters.AddWithValue("id", characterId);
         cmd.Parameters.AddWithValue("level", level);
+        cmd.ExecuteNonQuery();
+    }
+
+    /// <summary>Mobius <c>characters.karma|pkkills|pvpkills</c>.</summary>
+    public static void UpdateKarmaPk(NpgsqlConnection conn, int characterId, int karma, int pkKills, int pvpKills)
+    {
+        using var cmd = conn.CreateCommand();
+        cmd.CommandText =
+            """
+            UPDATE characters
+            SET karma = @karma, pk_kills = @pk, pvp_kills = @pvp, updated_at = now()
+            WHERE id = @id
+            """;
+        cmd.Parameters.AddWithValue("id", characterId);
+        cmd.Parameters.AddWithValue("karma", Math.Max(0, karma));
+        cmd.Parameters.AddWithValue("pk", Math.Max(0, pkKills));
+        cmd.Parameters.AddWithValue("pvp", Math.Max(0, pvpKills));
         cmd.ExecuteNonQuery();
     }
 
@@ -516,6 +536,9 @@ static class NormalizedStoreWriter
             ReadLong(ch, "clanJoinExpiryUnixMs", 0),
             ReadLong(ch, "clanCreateExpiryUnixMs", 0),
             ReadInt(ch, "deathPenaltyLevel", 0),
+            ReadInt(ch, "karma", 0),
+            ReadInt(ch, "pkKills", 0),
+            ReadInt(ch, "pvpKills", 0),
             ReadDate(ch, "createdAt") ?? DateTimeOffset.UtcNow,
             ReadDate(ch, "lastAccess"),
             ReadDate(ch, "deleteAt"));
@@ -557,6 +580,9 @@ static class NormalizedStoreWriter
         long clanJoinExpiry,
         long clanCreateExpiry,
         int deathPenaltyLevel,
+        int karma,
+        int pkKills,
+        int pvpKills,
         DateTimeOffset createdAt,
         DateTimeOffset? lastAccess,
         DateTimeOffset? deleteAt)
@@ -570,14 +596,14 @@ static class NormalizedStoreWriter
                 hair_style, hair_color, face, has_position, x, y, z, heading,
                 exp, sp, title, newbie, max_hp, hp, max_mp, mp,
                 clan_id, clan_join_expiry_unix_ms, clan_create_expiry_unix_ms,
-                death_penalty_level,
+                death_penalty_level, karma, pk_kills, pvp_kills,
                 created_at, last_access, delete_at, payload, updated_at)
             VALUES (
                 @id, @account, @name, @classId, @race, @sex, @level,
                 @hairStyle, @hairColor, @face, @hasPosition, @x, @y, @z, 0,
                 @exp, @sp, @title, @newbie, @maxHp, @hp, @maxMp, @mp,
                 @clanId, @clanJoin, @clanCreate,
-                @deathPenalty,
+                @deathPenalty, @karma, @pk, @pvp,
                 @createdAt, @lastAccess, @deleteAt, '{}'::jsonb, now())
             ON CONFLICT (id) DO UPDATE SET
                 account = EXCLUDED.account,
@@ -605,6 +631,9 @@ static class NormalizedStoreWriter
                 clan_join_expiry_unix_ms = EXCLUDED.clan_join_expiry_unix_ms,
                 clan_create_expiry_unix_ms = EXCLUDED.clan_create_expiry_unix_ms,
                 death_penalty_level = EXCLUDED.death_penalty_level,
+                karma = EXCLUDED.karma,
+                pk_kills = EXCLUDED.pk_kills,
+                pvp_kills = EXCLUDED.pvp_kills,
                 created_at = EXCLUDED.created_at,
                 last_access = EXCLUDED.last_access,
                 delete_at = EXCLUDED.delete_at,
@@ -636,6 +665,9 @@ static class NormalizedStoreWriter
         cmd.Parameters.AddWithValue("clanJoin", clanJoinExpiry);
         cmd.Parameters.AddWithValue("clanCreate", clanCreateExpiry);
         cmd.Parameters.AddWithValue("deathPenalty", deathPenaltyLevel);
+        cmd.Parameters.AddWithValue("karma", Math.Max(0, karma));
+        cmd.Parameters.AddWithValue("pk", Math.Max(0, pkKills));
+        cmd.Parameters.AddWithValue("pvp", Math.Max(0, pvpKills));
         cmd.Parameters.AddWithValue("createdAt", createdAt.UtcDateTime);
         cmd.Parameters.AddWithValue("lastAccess", (object?)lastAccess?.UtcDateTime ?? DBNull.Value);
         cmd.Parameters.AddWithValue("deleteAt", (object?)deleteAt?.UtcDateTime ?? DBNull.Value);

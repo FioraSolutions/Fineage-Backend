@@ -102,6 +102,9 @@ public sealed partial class ZoneWorld
             return "world";
         if (_tradeByPlayer.ContainsKey(requestor.ObjectId) || _pendingTradeAsk.ContainsKey(requestor.ObjectId))
             return TradeProtocol.Busy;
+        if (_byId.TryGetValue(requestor.ObjectId, out var self) &&
+            self.PrivateStoreType != PrivateStoreProtocol.TypeNone)
+            return TradeProtocol.Busy;
 
         if (!_byId.TryGetValue(request.TargetObjectId, out var targetEntity) ||
             targetEntity.Kind != ZoneEntityKind.Player ||
@@ -112,6 +115,8 @@ public sealed partial class ZoneWorld
         if (targetEntity.Dead)
             return "target";
         if (_tradeByPlayer.ContainsKey(request.TargetObjectId) || _pendingTradeAsk.ContainsKey(request.TargetObjectId))
+            return TradeProtocol.Busy;
+        if (targetEntity.PrivateStoreType != PrivateStoreProtocol.TypeNone)
             return TradeProtocol.Busy;
 
         if (!TradeInRange(requestor.ObjectId, request.TargetObjectId))

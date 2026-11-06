@@ -4,6 +4,7 @@ obj/
 # The game catalogs are tracked JSON (not Mobius XML).
 data/*
 !data/items.json
+!data/recipes.json
 !data/starter-kits.json
 !data/classes.json
 !data/experience.json
@@ -34,16 +35,14 @@ data/*
 !data/water-zones.json
 # Prefer converters → JSON; do not commit the full Mobius datapack (~1486+ XML files).
 data/mobius-xml/
-ref/mobius-ct0-interlude/
-ref/
+# Local Mobius CT0 tree (SoT for agents; do not commit dump). Keep pointer README.
+ref/**
+!ref/README.md
 TestResults/
 .vs/
 .idea/
 *.user
 *.suo
-
-# Local Mobius Interlude XML SoT (sparse clone; do not commit 100MB+ dump)
-ref/
 
 # Local run artifacts
 local-data/
@@ -54,3 +53,5 @@ publish/
 !data/xp-percent-lost.json
 !data/item-skills.json
 !data/map-regions.json
+!data/death-drop.json
+!data/npc-ai-support.json

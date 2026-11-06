@@ -36,6 +36,11 @@ public sealed partial class ZoneWorld
             if (player.PendingHit != null && player.PendingHit.DueUnixMs <= now)
                 ResolvePendingHit(player, now);
         }
+        foreach (var npc in _byId.Values.Where(e => e.Kind == ZoneEntityKind.Npc && e.PendingHit != null).ToList())
+        {
+            if (npc.PendingHit!.DueUnixMs <= now)
+                ResolveNpcPendingHit(npc, now);
+        }
     }
 
     void ResolvePendingHit(ZoneEntity player, long now)
@@ -136,7 +141,23 @@ public sealed partial class ZoneWorld
                 StopTimedMove(npc);
                 BroadcastNpcMove(npc, npc.X, npc.Y, npc.Z);
             }
-            if (now < npc.NextMobAttackMs)
+            if (now < npc.NextMobAttackMs || npc.CastingUntilMs > now)
+                continue;
+            // Mobius thinkAttack: SUICIDE (HP&lt;30%), then HEAL/BUFF/control/debuff, then ATTACK skill chance.
+            if (TryNpcSuicideSkill(npc, player, now))
+                continue;
+            if (TryNpcHealSkill(npc, now))
+                continue;
+            if (TryNpcSelfBuffSkill(npc, now))
+                continue;
+            if (TryNpcImmobilizeSkill(npc, player, now))
+                continue;
+            if (TryNpcSilenceSkill(npc, player, now))
+                continue;
+            if (TryNpcDebuffSkill(npc, player, now))
+                continue;
+            // Mobius AttackableAI: skill chance before the melee swing.
+            if (TryNpcSkillInsteadOfMelee(npc, player, now))
                 continue;
             int npcAtkMs = ZoneCombat.AttackTimeMs(NpcPAtkSpd(npc));
             npc.NextMobAttackMs = now + npcAtkMs;

@@ -131,21 +131,20 @@ public sealed partial class ZoneWorld
 
     /// <summary>
     /// Mobius <c>Creature.isAutoAttackable(Player)</c> for the entities this zone carries: NPCs follow their
-    /// template flag; a player is only auto-attackable when hostile (PvP-flagged or carrying karma). Everything
-    /// else is not, so merchants, guides and friendly players all come back white (colour 0).
+    /// template flag; a player is hostile (coloured nameplate) when PvP-flagged or carrying karma. Everything
+    /// else is white (colour 0). Ctrl-attack of a white player is still allowed via <see cref="IsAttackable"/>.
     /// </summary>
     static bool IsAutoAttackable(ZoneEntity target) =>
         target.Kind switch
         {
             ZoneEntityKind.Npc => target.Attackable,
-            ZoneEntityKind.Player => target.PvpFlagged || target.PkKills > 0,
+            ZoneEntityKind.Player => target.PvpFlagged || target.Karma > 0,
             _ => false
         };
 
     /// <summary>
-    /// Mobius <c>Creature.isAttackable</c> for a player's swing. NPCs follow the template flag; another player is
-    /// attackable only while PvP-flagged or carrying karma (Mobius <c>isAutoAttackable(Player)</c>), and never the
-    /// attacker itself. This is the gate <c>D4</c> was missing: it used to reject every non-NPC outright.
+    /// Mobius attack gate: NPCs follow the template flag; another living player is always swingable
+    /// (peace zones not imported). Attacking a white player raises the attacker's PvP flag.
     /// </summary>
     static bool IsAttackable(ZoneEntity attacker, ZoneEntity target)
     {
@@ -154,7 +153,7 @@ public sealed partial class ZoneWorld
         return target.Kind switch
         {
             ZoneEntityKind.Npc => target.Attackable,
-            ZoneEntityKind.Player => !ReferenceEquals(attacker, target) && IsAutoAttackable(target),
+            ZoneEntityKind.Player => !ReferenceEquals(attacker, target),
             _ => false
         };
     }
@@ -300,10 +299,14 @@ public sealed partial class ZoneWorld
             shieldDef = ts.ShieldDef;
         }
 
+        var defenceTraits = target.Kind == ZoneEntityKind.Npc ? target.DefenceTraits : null;
+        var attackTraits = AttackTraitCatalog.FromAbnormals(player.Abnormals.Select(a => (a.Id, a.SkillLevel)));
         return ZoneCombat.RollMelee(_combatRandom, ps.PAtk, pDef,
             ps.Accuracy, evasion, ps.CritRate, ps.RandomDamage,
             soulshot, (int)ps.WeaponGrade, shieldRate, shieldDef, ps.Weapon == Fineage.Game.WeaponType.Bow,
-            ZoneCombat.HitConditionBonus(player.X, player.Y, player.Z, target.X, target.Y, target.Z, target.Heading));
+            ZoneCombat.HitConditionBonus(player.X, player.Y, player.Z, target.X, target.Y, target.Z, target.Heading, IsNight),
+            ps.CritDmg,
+            ZoneCombat.AttackTraitBonus(ps.Weapon, defenceTraits, attackTraits));
     }
 
     double NpcPDef(ZoneEntity npc) =>
@@ -318,9 +321,23 @@ public sealed partial class ZoneWorld
             return (ZoneCombat.MobMeleeDamage(npc.Level), 0);
         var ps = PlayerStats(player);
         npc.Heading = ZoneCombat.HeadingFrom(npc.X, npc.Y, player.X, player.Y);
+        // Mobius Npc.rechargeShots(physical): chance vs SoulShotRate, then stock--; charged for this swing.
+        bool ss = TryNpcSoulshot(npc);
         return ZoneCombat.RollMelee(_combatRandom, StatMods(npc).Apply(CombatStat.PAtk, npc.PAtk), ps.PDef, NpcAccuracy(npc), ps.Evasion,
-            NpcCritPermille(npc), npc.RandomDamage, false, 0, ps.ShieldRate, ps.ShieldDef, false,
-            ZoneCombat.HitConditionBonus(npc.X, npc.Y, npc.Z, player.X, player.Y, player.Z, player.Heading));
+            NpcCritPermille(npc), npc.RandomDamage, ss, 0, ps.ShieldRate, ps.ShieldDef, false,
+            ZoneCombat.HitConditionBonus(npc.X, npc.Y, npc.Z, player.X, player.Y, player.Z, player.Heading, IsNight),
+            StatMods(npc).Apply(CombatStat.CritDmg, 1d));
+    }
+
+    /// <summary>Mobius <c>Npc.rechargeShots(true, false)</c>: fire one soulshot if stock and chance allow.</summary>
+    bool TryNpcSoulshot(ZoneEntity npc)
+    {
+        if (npc.NpcSoulShotLeft <= 0 || npc.NpcSoulShotChance <= 0)
+            return false;
+        if (_combatRandom.Next(100) >= npc.NpcSoulShotChance)
+            return false;
+        npc.NpcSoulShotLeft--;
+        return true;
     }
 
     Task? _combatLoop;
@@ -335,6 +352,7 @@ public sealed partial class ZoneWorld
             TickNpcMovement(now);
             TickPendingHits(now);
             TickMeleeHits(now);
+            TickPvpFlags(now);
             TickAutoAttacks();
             TickPendingCasts(now);
             TickQueuedMoves(now);
@@ -384,10 +402,14 @@ public sealed partial class ZoneWorld
                 continue;
             }
 
-            // Mid-run and the pawn moved: re-send MoveToPawn toward its new spot (Mobius follow).
+            // Mid-run: repath if the target drifted, or if we stopped short of reach (geo wall / failed path).
             if (session.ApproachTargetId == targetId && now < session.ApproachArriveUnixMs)
             {
-                if (!ZoneCombat.Within(target.X, target.Y, session.ApproachTargetX, session.ApproachTargetY, ZoneCombat.ApproachRepathDistance))
+                bool targetMoved = !ZoneCombat.Within(target.X, target.Y, session.ApproachTargetX, session.ApproachTargetY,
+                    ZoneCombat.ApproachRepathDistance);
+                bool stuckShort = !player.MoveActive
+                    && !ZoneCombat.Within(player.X, player.Y, target.X, target.Y, PlayerReach(player));
+                if (targetMoved || stuckShort)
                 {
                     long re = ApproachTarget(player, target, PlayerReach(player));
                     if (re < 0)
@@ -532,6 +554,8 @@ public sealed partial class ZoneWorld
 
         target.CombatUntilUnixMs = now + ClanProtocol.CombatStanceMillis;
         FanoutVitals(target, PlayerVitalsStatus(target));
+        if (attacker.Kind == ZoneEntityKind.Player && hit.Damage > 0)
+            UpdatePvPStatus(attacker, target, now);
         if (target.CurHp > 0)
             MaybeBreakCast(target, hit.Damage);
         if (target.CurHp <= 0)

@@ -65,7 +65,12 @@ sealed class ZoneEntity
     public int CastleId { get; set; }
     public int HideoutId { get; set; }
     public bool PvpFlagged { get; set; }
+    /// <summary>Unix ms when the PvP flag expires (Mobius <c>_pvpFlagLasts</c>).</summary>
+    public long PvpFlagUntilMs { get; set; }
     public int PkKills { get; set; }
+    public int PvpKills { get; set; }
+    /// <summary>Mobius karma (Chaotic); death item drop uses karma rates when &gt; 0 and PK ≥ limit.</summary>
+    public int Karma { get; set; }
     public int ExpertiseBonus { get; set; }
     /// <summary>Weapon expertise penalty, 0–4. Updated when gear changes and on enter.</summary>
     public int WeaponGradePenalty { get; set; }
@@ -96,6 +101,24 @@ sealed class ZoneEntity
     public double RegenCarryMp { get; set; }
     /// <summary>When true, regen rates double (classic sitting rest).</summary>
     public bool Sitting { get; set; }
+    /// <summary>Mobius <c>PrivateStoreType</c> (None / Sell / Buy).</summary>
+    public byte PrivateStoreType { get; set; }
+    /// <summary>Store title shown above the sitting pawn (Mobius PrivateStoreMsgSell/Buy).</summary>
+    public string PrivateStoreMessage { get; set; } = "";
+    /// <summary>Active sell listings while <see cref="PrivateStoreType"/> is Sell.</summary>
+    public List<PrivateStoreSellListing> PrivateSellList { get; } = [];
+    /// <summary>Active buy listings while <see cref="PrivateStoreType"/> is Buy (by template id).</summary>
+    public List<PrivateStoreBuyListing> PrivateBuyList { get; } = [];
+    /// <summary>Active manufacture listings while <see cref="PrivateStoreType"/> is Manufacture.</summary>
+    public List<ManufactureListing> ManufactureList { get; } = [];
+    /// <summary>Mobius recipe book: known <c>RecipeList</c> ids (make-self / book open).</summary>
+    public HashSet<int> KnownRecipes { get; } = [];
+    /// <summary>Friend objectId → name snapshot (Mobius friend list).</summary>
+    public Dictionary<int, string> Friends { get; } = [];
+    /// <summary>Blocked objectId → name snapshot (Mobius ignore list).</summary>
+    public Dictionary<int, string> Blocked { get; } = [];
+    /// <summary>Mobius block-all / message refusal mode.</summary>
+    public bool BlockAll { get; set; }
     /// <summary>NPC Mobius physical attack (0 = unknown → level placeholder). Players read the class template.</summary>
     public double PAtk { get; init; }
     /// <summary>NPC Mobius <c>vitals hpRegen</c>: HP restored per 3 s regen tick (players use the class table).</summary>
@@ -146,6 +169,31 @@ sealed class ZoneEntity
     public bool SoulshotCharged { get; set; }
     /// <summary>0 none, 1 spiritshot, 2 blessed spiritshot (Mobius ShotType SPIRITSHOTS / BLESSED_SPIRITSHOTS).</summary>
     public int SpiritshotCharge { get; set; }
+    /// <summary>NPC remaining Mobius SoulShot stock (template starting count; decremented on fire).</summary>
+    public int NpcSoulShotLeft { get; set; }
+    /// <summary>NPC SoulShotRate % (template).</summary>
+    public int NpcSoulShotChance { get; set; }
+    /// <summary>NPC remaining SpiritShot stock.</summary>
+    public int NpcSpiritShotLeft { get; set; }
+    public int NpcSpiritShotChance { get; set; }
+    /// <summary>Mobius weapon <c>_defenceTraits</c> multipliers (sword/bow/…); null = all 1.0.</summary>
+    public IReadOnlyDictionary<string, double>? DefenceTraits { get; init; }
+    /// <summary>Mobius AI attack skills (skillList ∩ skill-combat); null = melee only.</summary>
+    public IReadOnlyList<Fineage.Zone.Npcs.NpcAiSkill>? AiSkills { get; init; }
+    /// <summary>Mobius AISkillScope.HEAL rows (self/clan heal when wounded).</summary>
+    public IReadOnlyList<Fineage.Zone.Npcs.NpcAiSupportSkill>? AiHealSkills { get; set; }
+    /// <summary>Mobius AISkillScope.BUFF rows (self buff when missing).</summary>
+    public IReadOnlyList<Fineage.Zone.Npcs.NpcAiSupportSkill>? AiBuffSkills { get; set; }
+    /// <summary>Mobius AISkillScope.DEBUFF rows (debuff hate target).</summary>
+    public IReadOnlyList<Fineage.Zone.Npcs.NpcAiSupportSkill>? AiDebuffSkills { get; set; }
+    /// <summary>Mobius AISkillScope.IMMOBILIZE (sleep/root/stun/paralyze).</summary>
+    public IReadOnlyList<Fineage.Zone.Npcs.NpcAiSupportSkill>? AiImmobilizeSkills { get; set; }
+    /// <summary>Mobius AISkillScope.COT silence.</summary>
+    public IReadOnlyList<Fineage.Zone.Npcs.NpcAiSupportSkill>? AiSilenceSkills { get; set; }
+    /// <summary>Mobius AISkillScope.SUICIDE (Death Bomb when HP &lt; 30%).</summary>
+    public IReadOnlyList<Fineage.Zone.Npcs.NpcAiSupportSkill>? AiSuicideSkills { get; set; }
+    public int MinSkillChance { get; init; } = 7;
+    public int MaxSkillChance { get; init; } = 15;
     /// <summary>Mobius auto soulshot set: shot item ids recharged after each discharge.</summary>
     public HashSet<int> AutoShots { get; } = [];
     /// <summary>Mobius ShortCuts keyed by world slot (slot + page * 12).</summary>
@@ -381,16 +429,22 @@ public sealed partial class ZoneWorld
     readonly Random _serviceRandom;
     /// <summary>Hit/miss, crit and damage spread rolls (Mobius Rnd in Formulas).</summary>
     readonly Random _combatRandom;
+    /// <summary>Mobius GameTimeTaskManager (IG day / night for HitConditionBonus dark).</summary>
+    readonly ZoneGameTime _gameTime;
     /// <summary>Buff/debuff combat stat funcs (Mobius skill &lt;for&gt;&lt;effect&gt;).</summary>
     readonly SkillStatEffectCatalog _statEffects;
     /// <summary>Mobius attack-skill power / MP / timing (data/skill-combat.json).</summary>
     readonly SkillCombatCatalog _skillCombat;
+    /// <summary>Mobius AISkillScope HEAL/BUFF/DEBUFF rows (data/npc-ai-support.json).</summary>
+    readonly Fineage.Zone.Npcs.NpcAiSupportCatalog _npcAiSupport;
     readonly SkillStatEffectCatalog _passives;
     readonly BuyListCatalog _buyLists;
     readonly MultiSellCatalog _multisells;
     readonly ShopStock _shopStock;
     /// <summary>Mobius death rules: exp-bar share lost, Death Penalty chance, respawn vitals restore.</summary>
     readonly DeathRuleCatalog _deathRules;
+    /// <summary>Mobius <c>Player.onDieDropItem</c> rates (data/death-drop.json).</summary>
+    readonly Fineage.Game.Services.DeathDropRules _deathDrop;
     /// <summary>Mobius <c>Rnd.get</c> for the Death Penalty roll (separate from the damage rolls).</summary>
     readonly Random _deathRandom;
     readonly Dictionary<int, ZoneEntity> _byId = [];
@@ -449,18 +503,23 @@ public sealed partial class ZoneWorld
         Random? combatRandom = null,
         SkillStatEffectCatalog? statEffects = null,
         SkillCombatCatalog? skillCombat = null,
+        Fineage.Zone.Npcs.NpcAiSupportCatalog? npcAiSupport = null,
         SkillStatEffectCatalog? passives = null,
         DeathRuleCatalog? deathRules = null,
+        Fineage.Game.Services.DeathDropRules? deathDrop = null,
         Random? deathRandom = null,
         bool? npcRegen = null,
         Fineage.Game.Services.ItemSkillCatalog? itemSkills = null,
-        Fineage.Game.Services.MapRegionCatalog? mapRegions = null)
+        Fineage.Game.Services.MapRegionCatalog? mapRegions = null,
+        ZoneGameTime? gameTime = null)
     {
         _npcRegen = npcRegen ?? ZoneNpcSettings.NpcRegenEnabled;
         _skillCombat = skillCombat ?? SkillCombatCatalog.LoadDefault();
+        _npcAiSupport = npcAiSupport ?? Fineage.Zone.Npcs.NpcAiSupportCatalog.LoadDefault();
         _statEffects = statEffects ?? SkillStatEffectCatalog.LoadDefault();
         _passives = passives ?? SkillStatEffectCatalog.LoadPassives();
         _combatRandom = combatRandom ?? Random.Shared;
+        _gameTime = gameTime ?? ZoneGameTime.FromLocalMidnight();
         _aoi = aoi ?? new SingleCellAoi();
         _game = game ?? GameData.LoadDefault();
         _itemIds = itemIds ?? new ItemObjectIdAllocator();
@@ -496,6 +555,7 @@ public sealed partial class ZoneWorld
         _multisells = multisells ?? MultiSellCatalog.LoadDefault();
         _shopStock = new ShopStock(_buyLists);
         _deathRules = deathRules ?? DeathRuleCatalog.LoadDefault();
+        _deathDrop = deathDrop ?? Fineage.Game.Services.DeathDropRules.LoadDefault();
         _deathRandom = deathRandom ?? Random.Shared;
         _itemSkills = itemSkills ?? Fineage.Game.Services.ItemSkillCatalog.LoadDefault();
         _mapRegions = mapRegions ?? Fineage.Game.Services.MapRegionCatalog.LoadDefault();
@@ -786,10 +846,15 @@ public sealed partial class ZoneWorld
             Warehouse = warehouse,
             Newbie = stored?.Newbie ?? true,
             // Mobius Player.loadCharFromDB:6578 restores _deathPenaltyBuffLevel, so the debuff outlives the session.
-            DeathPenaltyLevel = Math.Clamp(stored?.DeathPenaltyLevel ?? 0, 0, DeathPenalty.MaxLevel)
+            DeathPenaltyLevel = Math.Clamp(stored?.DeathPenaltyLevel ?? 0, 0, DeathPenalty.MaxLevel),
+            Karma = Math.Max(0, stored?.Karma ?? 0),
+            PkKills = Math.Max(0, stored?.PkKills ?? 0),
+            PvpKills = Math.Max(0, stored?.PvpKills ?? 0)
         };
         LoadQuestProgress(session, entity);
         LoadLearnedSkills(entity, stored);
+        LoadKnownRecipes(entity, stored);
+        LoadSocialLists(entity, stored);
         RefreshKnownSkills(entity);
         // Mobius GameClient:493 / EnterWorld:208 — refreshOverloaded() runs before the first UserInfo, so a character
         // that logs in while overloaded already carries skill 4270's level and its slowed speeds. This must come after
@@ -822,6 +887,7 @@ public sealed partial class ZoneWorld
         }
 
         AnnounceClanEnter(entity);
+        FriendPlayerEnteredWorld(entity);
         known = entity.Knownlist.Count;
         return true;
     }
@@ -842,6 +908,8 @@ public sealed partial class ZoneWorld
         var entity = _byId[session.ObjectId];
         if (entity.Dead)
             return InventoryProtocol.Dead;
+        if (IsImmobilized(entity))
+            return ActionProtocol.Immobilized;
         if (entity.Sitting)
             return ActionProtocol.Sitting;
         if (entity.CastingUntilMs > _clock().ToUnixTimeMilliseconds())
@@ -987,6 +1055,8 @@ public sealed partial class ZoneWorld
 
         PartyPlayerLeftWorld(session.ObjectId);
         TradePlayerLeftWorld(session.ObjectId);
+        PrivateStorePlayerLeftWorld(session.ObjectId);
+        FriendPlayerLeftWorld(session.ObjectId);
         ClanPlayerLeftWorld(session.ObjectId, session.Name);
 
         // The Net despawn for the leaver is owned by NetZoneServer.LeaveNetAsync (it knows the connection's

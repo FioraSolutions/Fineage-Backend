@@ -15,6 +15,7 @@
   </ItemGroup>
   <ItemGroup>
     <Content Include="..\..\data\items.json" Link="data\items.json" CopyToOutputDirectory="PreserveNewest" />
+    <Content Include="..\..\data\recipes.json" Link="data\recipes.json" CopyToOutputDirectory="PreserveNewest" />
     <Content Include="..\..\data\starter-kits.json" Link="data\starter-kits.json" CopyToOutputDirectory="PreserveNewest" />
     <Content Include="..\..\data\classes.json" Link="data\classes.json" CopyToOutputDirectory="PreserveNewest" />
     <Content Include="..\..\data\experience.json" Link="data\experience.json" CopyToOutputDirectory="PreserveNewest" />
@@ -38,6 +39,8 @@
     <Content Include="..\..\data\doors.json" Link="data\doors.json" CopyToOutputDirectory="PreserveNewest" />
     <Content Include="..\..\data\water-zones.json" Link="data\water-zones.json" CopyToOutputDirectory="PreserveNewest" />
     <Content Include="..\..\data\xp-percent-lost.json" Link="data\xp-percent-lost.json" CopyToOutputDirectory="PreserveNewest" />
+    <Content Include="..\..\data\death-drop.json" Link="data\death-drop.json" CopyToOutputDirectory="PreserveNewest" />
+    <Content Include="..\..\data\npc-ai-support.json" Link="data\npc-ai-support.json" CopyToOutputDirectory="PreserveNewest" />
     <Content Include="..\..\data\herbs.json" Link="data\herbs.json" CopyToOutputDirectory="PreserveNewest" />
     <Content Include="..\..\data\skill-combat.json" Link="data\skill-combat.json" CopyToOutputDirectory="PreserveNewest" />
     <Content Include="..\..\data\skill-passives.json" Link="data\skill-passives.json" CopyToOutputDirectory="PreserveNewest" />

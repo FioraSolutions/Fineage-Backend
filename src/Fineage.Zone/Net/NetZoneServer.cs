@@ -510,6 +510,83 @@ public sealed class NetZoneServer : INetPresenceBridge
             _presence.TrySend(watcher, NetOpcode.TradeFinished, payload);
     }
 
+    void INetPresenceBridge.FanoutPrivateStoreInfo(IReadOnlyList<int> watcherObjectIds, PrivateStoreInfoNetMsg info)
+    {
+        var payload = NetCodec.EncodePrivateStoreInfo(info);
+        foreach (int watcher in watcherObjectIds)
+            _presence.TrySend(watcher, NetOpcode.PrivateStoreInfo, payload);
+    }
+
+    void INetPresenceBridge.FanoutPrivateStoreListSell(IReadOnlyList<int> watcherObjectIds, PrivateStoreListSellNetMsg list)
+    {
+        var payload = NetCodec.EncodePrivateStoreListSell(list);
+        foreach (int watcher in watcherObjectIds)
+            _presence.TrySend(watcher, NetOpcode.PrivateStoreListSell, payload);
+    }
+
+    void INetPresenceBridge.FanoutPrivateStoreListBuy(IReadOnlyList<int> watcherObjectIds, PrivateStoreListBuyNetMsg list)
+    {
+        var payload = NetCodec.EncodePrivateStoreListBuy(list);
+        foreach (int watcher in watcherObjectIds)
+            _presence.TrySend(watcher, NetOpcode.PrivateStoreListBuy, payload);
+    }
+
+    void INetPresenceBridge.FanoutRecipeBookList(IReadOnlyList<int> watcherObjectIds, RecipeBookListNetMsg list)
+    {
+        var payload = NetCodec.EncodeRecipeBookList(list);
+        foreach (int watcher in watcherObjectIds)
+            _presence.TrySend(watcher, NetOpcode.RecipeBookList, payload);
+    }
+
+    void INetPresenceBridge.FanoutRecipeItemMakeInfo(IReadOnlyList<int> watcherObjectIds, RecipeItemMakeInfoNetMsg info)
+    {
+        var payload = NetCodec.EncodeRecipeItemMakeInfo(info);
+        foreach (int watcher in watcherObjectIds)
+            _presence.TrySend(watcher, NetOpcode.RecipeItemMakeInfo, payload);
+    }
+
+    void INetPresenceBridge.FanoutRecipeShopSellList(IReadOnlyList<int> watcherObjectIds, RecipeShopSellListNetMsg list)
+    {
+        var payload = NetCodec.EncodeRecipeShopSellList(list);
+        foreach (int watcher in watcherObjectIds)
+            _presence.TrySend(watcher, NetOpcode.RecipeShopSellList, payload);
+    }
+
+    void INetPresenceBridge.FanoutRecipeShopItemInfo(IReadOnlyList<int> watcherObjectIds, RecipeShopItemInfoNetMsg info)
+    {
+        var payload = NetCodec.EncodeRecipeShopItemInfo(info);
+        foreach (int watcher in watcherObjectIds)
+            _presence.TrySend(watcher, NetOpcode.RecipeShopItemInfo, payload);
+    }
+
+    void INetPresenceBridge.FanoutFriendInviteAsk(IReadOnlyList<int> watcherObjectIds, FriendInviteAskNetMsg ask)
+    {
+        var payload = NetCodec.EncodeFriendInviteAsk(ask);
+        foreach (int watcher in watcherObjectIds)
+            _presence.TrySend(watcher, NetOpcode.FriendInviteAsk, payload);
+    }
+
+    void INetPresenceBridge.FanoutFriendList(IReadOnlyList<int> watcherObjectIds, FriendListNetMsg list)
+    {
+        var payload = NetCodec.EncodeFriendList(list);
+        foreach (int watcher in watcherObjectIds)
+            _presence.TrySend(watcher, NetOpcode.FriendList, payload);
+    }
+
+    void INetPresenceBridge.FanoutFriendUpdate(IReadOnlyList<int> watcherObjectIds, FriendUpdateNetMsg update)
+    {
+        var payload = NetCodec.EncodeFriendUpdate(update);
+        foreach (int watcher in watcherObjectIds)
+            _presence.TrySend(watcher, NetOpcode.FriendUpdate, payload);
+    }
+
+    void INetPresenceBridge.FanoutBlockList(IReadOnlyList<int> watcherObjectIds, BlockListNetMsg list)
+    {
+        var payload = NetCodec.EncodeBlockList(list);
+        foreach (int watcher in watcherObjectIds)
+            _presence.TrySend(watcher, NetOpcode.BlockList, payload);
+    }
+
     void INetPresenceBridge.FanoutBossStatus(IReadOnlyList<int> watcherObjectIds, BossStatusNetMsg status)
     {
         var payload = NetCodec.EncodeBossStatus(status);
@@ -856,6 +933,54 @@ public sealed class NetZoneServer : INetPresenceBridge
                             break;
                         case NetOpcode.DungeonEnterRequest:
                             await OnDungeonAsync(conn, zoneSession, envelope, ct).ConfigureAwait(false);
+                            break;
+                        case NetOpcode.SetPrivateStoreSell:
+                            await OnSetPrivateStoreSellAsync(conn, zoneSession, envelope, ct).ConfigureAwait(false);
+                            break;
+                        case NetOpcode.PrivateStoreQuit:
+                            await OnPrivateStoreQuitAsync(conn, zoneSession, ct).ConfigureAwait(false);
+                            break;
+                        case NetOpcode.PrivateStoreListRequest:
+                            await OnPrivateStoreListAsync(conn, zoneSession, envelope, ct).ConfigureAwait(false);
+                            break;
+                        case NetOpcode.PrivateStoreBuy:
+                            await OnPrivateStoreBuyAsync(conn, zoneSession, envelope, ct).ConfigureAwait(false);
+                            break;
+                        case NetOpcode.SetPrivateStoreBuy:
+                            await OnSetPrivateStoreBuyAsync(conn, zoneSession, envelope, ct).ConfigureAwait(false);
+                            break;
+                        case NetOpcode.PrivateStoreSellTo:
+                            await OnPrivateStoreSellToAsync(conn, zoneSession, envelope, ct).ConfigureAwait(false);
+                            break;
+                        case NetOpcode.RecipeBookOpen:
+                            await OnRecipeBookOpenAsync(conn, zoneSession, envelope, ct).ConfigureAwait(false);
+                            break;
+                        case NetOpcode.RecipeMakeSelf:
+                            await OnRecipeMakeSelfAsync(conn, zoneSession, envelope, ct).ConfigureAwait(false);
+                            break;
+                        case NetOpcode.SetRecipeShop:
+                            await OnSetRecipeShopAsync(conn, zoneSession, envelope, ct).ConfigureAwait(false);
+                            break;
+                        case NetOpcode.RecipeShopMakeInfo:
+                            await OnRecipeShopMakeInfoAsync(conn, zoneSession, envelope, ct).ConfigureAwait(false);
+                            break;
+                        case NetOpcode.RecipeShopMakeItem:
+                            await OnRecipeShopMakeItemAsync(conn, zoneSession, envelope, ct).ConfigureAwait(false);
+                            break;
+                        case NetOpcode.FriendInvite:
+                            await OnFriendInviteAsync(conn, zoneSession, envelope, ct).ConfigureAwait(false);
+                            break;
+                        case NetOpcode.FriendAnswer:
+                            await OnFriendAnswerAsync(conn, zoneSession, envelope, ct).ConfigureAwait(false);
+                            break;
+                        case NetOpcode.FriendListRequest:
+                            await OnFriendListRequestAsync(conn, zoneSession, ct).ConfigureAwait(false);
+                            break;
+                        case NetOpcode.FriendDelete:
+                            await OnFriendDeleteAsync(conn, zoneSession, envelope, ct).ConfigureAwait(false);
+                            break;
+                        case NetOpcode.BlockRequest:
+                            await OnBlockRequestAsync(conn, zoneSession, envelope, ct).ConfigureAwait(false);
                             break;
                         case NetOpcode.StopMove:
                             // Authoritative stop: correct to current session position.
@@ -2450,6 +2575,384 @@ public sealed class NetZoneServer : INetPresenceBridge
             ct).ConfigureAwait(false);
         if (error != null)
             await RejectAsync(conn, error, "Trade done failed.", ct).ConfigureAwait(false);
+    }
+
+    async Task OnSetPrivateStoreSellAsync(
+        NetConnection conn,
+        ZoneSession zoneSession,
+        PacketEnvelope envelope,
+        CancellationToken ct)
+    {
+        RequireHello(conn);
+        if (!zoneSession.Bound || !zoneSession.InWorld)
+        {
+            await RejectAsync(conn, "not_in_world", "Enter world first.", ct).ConfigureAwait(false);
+            return;
+        }
+
+        var req = NetCodec.DecodeSetPrivateStoreSell(envelope.Payload);
+        var items = (req.Items ?? []).Select(row => new PrivateStoreSellRowMsg
+        {
+            InventoryObjectId = row.InventoryObjectId,
+            Count = row.Count,
+            Price = row.Price
+        }).ToArray();
+        string? error = await _world.TrySetPrivateStoreSellAsync(
+            zoneSession,
+            new SetPrivateStoreSellMsg
+            {
+                Message = req.Message ?? "",
+                Packaged = req.Packaged != 0,
+                Items = items
+            },
+            ct).ConfigureAwait(false);
+        if (error != null)
+            await RejectAsync(conn, error, "Private store sell failed.", ct).ConfigureAwait(false);
+    }
+
+    async Task OnPrivateStoreQuitAsync(NetConnection conn, ZoneSession zoneSession, CancellationToken ct)
+    {
+        RequireHello(conn);
+        if (!zoneSession.Bound || !zoneSession.InWorld)
+        {
+            await RejectAsync(conn, "not_in_world", "Enter world first.", ct).ConfigureAwait(false);
+            return;
+        }
+
+        string? error = await _world.TryPrivateStoreQuitAsync(zoneSession, ct).ConfigureAwait(false);
+        if (error != null)
+            await RejectAsync(conn, error, "Private store quit failed.", ct).ConfigureAwait(false);
+    }
+
+    async Task OnPrivateStoreListAsync(
+        NetConnection conn,
+        ZoneSession zoneSession,
+        PacketEnvelope envelope,
+        CancellationToken ct)
+    {
+        RequireHello(conn);
+        if (!zoneSession.Bound || !zoneSession.InWorld)
+        {
+            await RejectAsync(conn, "not_in_world", "Enter world first.", ct).ConfigureAwait(false);
+            return;
+        }
+
+        var req = NetCodec.DecodePrivateStoreListRequest(envelope.Payload);
+        string? error = await _world.TryPrivateStoreListAsync(
+            zoneSession,
+            new PrivateStoreListRequestMsg { StoreObjectId = req.StoreObjectId },
+            ct).ConfigureAwait(false);
+        if (error != null)
+            await RejectAsync(conn, error, "Private store list failed.", ct).ConfigureAwait(false);
+    }
+
+    async Task OnPrivateStoreBuyAsync(
+        NetConnection conn,
+        ZoneSession zoneSession,
+        PacketEnvelope envelope,
+        CancellationToken ct)
+    {
+        RequireHello(conn);
+        if (!zoneSession.Bound || !zoneSession.InWorld)
+        {
+            await RejectAsync(conn, "not_in_world", "Enter world first.", ct).ConfigureAwait(false);
+            return;
+        }
+
+        var req = NetCodec.DecodePrivateStoreBuy(envelope.Payload);
+        var items = (req.Items ?? []).Select(row => new PrivateStoreSellRowMsg
+        {
+            InventoryObjectId = row.InventoryObjectId,
+            Count = row.Count,
+            Price = row.Price
+        }).ToArray();
+        string? error = await _world.TryPrivateStoreBuyAsync(
+            zoneSession,
+            new PrivateStoreBuyMsg { StoreObjectId = req.StoreObjectId, Items = items },
+            ct).ConfigureAwait(false);
+        if (error != null)
+            await RejectAsync(conn, error, "Private store buy failed.", ct).ConfigureAwait(false);
+    }
+
+    async Task OnSetPrivateStoreBuyAsync(
+        NetConnection conn,
+        ZoneSession zoneSession,
+        PacketEnvelope envelope,
+        CancellationToken ct)
+    {
+        RequireHello(conn);
+        if (!zoneSession.Bound || !zoneSession.InWorld)
+        {
+            await RejectAsync(conn, "not_in_world", "Enter world first.", ct).ConfigureAwait(false);
+            return;
+        }
+
+        var req = NetCodec.DecodeSetPrivateStoreBuy(envelope.Payload);
+        var items = (req.Items ?? []).Select(row => new PrivateStoreBuyRowMsg
+        {
+            ItemId = row.ItemId,
+            Count = row.Count,
+            Price = row.Price
+        }).ToArray();
+        string? error = await _world.TrySetPrivateStoreBuyAsync(
+            zoneSession,
+            new SetPrivateStoreBuyMsg { Message = req.Message ?? "", Items = items },
+            ct).ConfigureAwait(false);
+        if (error != null)
+            await RejectAsync(conn, error, "Private store buy open failed.", ct).ConfigureAwait(false);
+    }
+
+    async Task OnPrivateStoreSellToAsync(
+        NetConnection conn,
+        ZoneSession zoneSession,
+        PacketEnvelope envelope,
+        CancellationToken ct)
+    {
+        RequireHello(conn);
+        if (!zoneSession.Bound || !zoneSession.InWorld)
+        {
+            await RejectAsync(conn, "not_in_world", "Enter world first.", ct).ConfigureAwait(false);
+            return;
+        }
+
+        var req = NetCodec.DecodePrivateStoreSellTo(envelope.Payload);
+        var items = (req.Items ?? []).Select(row => new PrivateStoreSellRowMsg
+        {
+            InventoryObjectId = row.InventoryObjectId,
+            Count = row.Count,
+            Price = row.Price
+        }).ToArray();
+        string? error = await _world.TryPrivateStoreSellToAsync(
+            zoneSession,
+            new PrivateStoreSellToMsg { StoreObjectId = req.StoreObjectId, Items = items },
+            ct).ConfigureAwait(false);
+        if (error != null)
+            await RejectAsync(conn, error, "Private store sell-to failed.", ct).ConfigureAwait(false);
+    }
+
+    async Task OnRecipeBookOpenAsync(
+        NetConnection conn,
+        ZoneSession zoneSession,
+        PacketEnvelope envelope,
+        CancellationToken ct)
+    {
+        RequireHello(conn);
+        if (!zoneSession.Bound || !zoneSession.InWorld)
+        {
+            await RejectAsync(conn, "not_in_world", "Enter world first.", ct).ConfigureAwait(false);
+            return;
+        }
+
+        var req = NetCodec.DecodeRecipeBookOpen(envelope.Payload);
+        string? error = await _world.TryRecipeBookOpenAsync(
+            zoneSession,
+            new RecipeBookOpenMsg { Dwarven = req.Dwarven != 0 },
+            ct).ConfigureAwait(false);
+        if (error != null)
+            await RejectAsync(conn, error, "Recipe book open failed.", ct).ConfigureAwait(false);
+    }
+
+    async Task OnRecipeMakeSelfAsync(
+        NetConnection conn,
+        ZoneSession zoneSession,
+        PacketEnvelope envelope,
+        CancellationToken ct)
+    {
+        RequireHello(conn);
+        if (!zoneSession.Bound || !zoneSession.InWorld)
+        {
+            await RejectAsync(conn, "not_in_world", "Enter world first.", ct).ConfigureAwait(false);
+            return;
+        }
+
+        var req = NetCodec.DecodeRecipeMakeSelf(envelope.Payload);
+        string? error = await _world.TryRecipeMakeSelfAsync(
+            zoneSession,
+            new RecipeMakeSelfMsg { RecipeId = req.RecipeId },
+            ct).ConfigureAwait(false);
+        if (error != null)
+            await RejectAsync(conn, error, "Recipe make self failed.", ct).ConfigureAwait(false);
+    }
+
+    async Task OnSetRecipeShopAsync(
+        NetConnection conn,
+        ZoneSession zoneSession,
+        PacketEnvelope envelope,
+        CancellationToken ct)
+    {
+        RequireHello(conn);
+        if (!zoneSession.Bound || !zoneSession.InWorld)
+        {
+            await RejectAsync(conn, "not_in_world", "Enter world first.", ct).ConfigureAwait(false);
+            return;
+        }
+
+        var req = NetCodec.DecodeSetRecipeShop(envelope.Payload);
+        var items = (req.Items ?? []).Select(row => new RecipeShopRowMsg
+        {
+            RecipeId = row.RecipeId,
+            Price = row.Price
+        }).ToArray();
+        string? error = await _world.TrySetRecipeShopAsync(
+            zoneSession,
+            new SetRecipeShopMsg { Message = req.Message ?? "", Items = items },
+            ct).ConfigureAwait(false);
+        if (error != null)
+            await RejectAsync(conn, error, "Recipe shop open failed.", ct).ConfigureAwait(false);
+    }
+
+    async Task OnRecipeShopMakeInfoAsync(
+        NetConnection conn,
+        ZoneSession zoneSession,
+        PacketEnvelope envelope,
+        CancellationToken ct)
+    {
+        RequireHello(conn);
+        if (!zoneSession.Bound || !zoneSession.InWorld)
+        {
+            await RejectAsync(conn, "not_in_world", "Enter world first.", ct).ConfigureAwait(false);
+            return;
+        }
+
+        var req = NetCodec.DecodeRecipeShopMakeInfo(envelope.Payload);
+        string? error = await _world.TryRecipeShopMakeInfoAsync(
+            zoneSession,
+            new RecipeShopMakeInfoMsg
+            {
+                ManufacturerObjectId = req.ManufacturerObjectId,
+                RecipeId = req.RecipeId
+            },
+            ct).ConfigureAwait(false);
+        if (error != null)
+            await RejectAsync(conn, error, "Recipe shop make info failed.", ct).ConfigureAwait(false);
+    }
+
+    async Task OnRecipeShopMakeItemAsync(
+        NetConnection conn,
+        ZoneSession zoneSession,
+        PacketEnvelope envelope,
+        CancellationToken ct)
+    {
+        RequireHello(conn);
+        if (!zoneSession.Bound || !zoneSession.InWorld)
+        {
+            await RejectAsync(conn, "not_in_world", "Enter world first.", ct).ConfigureAwait(false);
+            return;
+        }
+
+        var req = NetCodec.DecodeRecipeShopMakeItem(envelope.Payload);
+        string? error = await _world.TryRecipeShopMakeItemAsync(
+            zoneSession,
+            new RecipeShopMakeItemMsg
+            {
+                ManufacturerObjectId = req.ManufacturerObjectId,
+                RecipeId = req.RecipeId
+            },
+            ct).ConfigureAwait(false);
+        if (error != null)
+            await RejectAsync(conn, error, "Recipe shop make item failed.", ct).ConfigureAwait(false);
+    }
+
+    async Task OnFriendInviteAsync(
+        NetConnection conn,
+        ZoneSession zoneSession,
+        PacketEnvelope envelope,
+        CancellationToken ct)
+    {
+        RequireHello(conn);
+        if (!zoneSession.Bound || !zoneSession.InWorld)
+        {
+            await RejectAsync(conn, "not_in_world", "Enter world first.", ct).ConfigureAwait(false);
+            return;
+        }
+
+        var req = NetCodec.DecodeFriendInvite(envelope.Payload);
+        string? error = await _world.TryFriendInviteAsync(
+            zoneSession,
+            new FriendInviteMsg { Name = req.Name ?? "" },
+            ct).ConfigureAwait(false);
+        if (error != null)
+            await RejectAsync(conn, error, "Friend invite failed.", ct).ConfigureAwait(false);
+    }
+
+    async Task OnFriendAnswerAsync(
+        NetConnection conn,
+        ZoneSession zoneSession,
+        PacketEnvelope envelope,
+        CancellationToken ct)
+    {
+        RequireHello(conn);
+        if (!zoneSession.Bound || !zoneSession.InWorld)
+        {
+            await RejectAsync(conn, "not_in_world", "Enter world first.", ct).ConfigureAwait(false);
+            return;
+        }
+
+        var req = NetCodec.DecodeFriendAnswer(envelope.Payload);
+        string? error = await _world.TryFriendAnswerAsync(
+            zoneSession,
+            new FriendAnswerMsg { Response = req.Response },
+            ct).ConfigureAwait(false);
+        if (error != null)
+            await RejectAsync(conn, error, "Friend answer failed.", ct).ConfigureAwait(false);
+    }
+
+    async Task OnFriendListRequestAsync(NetConnection conn, ZoneSession zoneSession, CancellationToken ct)
+    {
+        RequireHello(conn);
+        if (!zoneSession.Bound || !zoneSession.InWorld)
+        {
+            await RejectAsync(conn, "not_in_world", "Enter world first.", ct).ConfigureAwait(false);
+            return;
+        }
+
+        string? error = await _world.TryFriendListAsync(zoneSession, ct).ConfigureAwait(false);
+        if (error != null)
+            await RejectAsync(conn, error, "Friend list failed.", ct).ConfigureAwait(false);
+    }
+
+    async Task OnFriendDeleteAsync(
+        NetConnection conn,
+        ZoneSession zoneSession,
+        PacketEnvelope envelope,
+        CancellationToken ct)
+    {
+        RequireHello(conn);
+        if (!zoneSession.Bound || !zoneSession.InWorld)
+        {
+            await RejectAsync(conn, "not_in_world", "Enter world first.", ct).ConfigureAwait(false);
+            return;
+        }
+
+        var req = NetCodec.DecodeFriendDelete(envelope.Payload);
+        string? error = await _world.TryFriendDeleteAsync(
+            zoneSession,
+            new FriendDeleteMsg { Name = req.Name ?? "" },
+            ct).ConfigureAwait(false);
+        if (error != null)
+            await RejectAsync(conn, error, "Friend delete failed.", ct).ConfigureAwait(false);
+    }
+
+    async Task OnBlockRequestAsync(
+        NetConnection conn,
+        ZoneSession zoneSession,
+        PacketEnvelope envelope,
+        CancellationToken ct)
+    {
+        RequireHello(conn);
+        if (!zoneSession.Bound || !zoneSession.InWorld)
+        {
+            await RejectAsync(conn, "not_in_world", "Enter world first.", ct).ConfigureAwait(false);
+            return;
+        }
+
+        var req = NetCodec.DecodeBlockRequest(envelope.Payload);
+        string? error = await _world.TryBlockRequestAsync(
+            zoneSession,
+            new BlockRequestMsg { Type = req.Type, Name = req.Name ?? "" },
+            ct).ConfigureAwait(false);
+        if (error != null)
+            await RejectAsync(conn, error, "Block request failed.", ct).ConfigureAwait(false);
     }
 
     static void RequireHello(NetConnection conn)

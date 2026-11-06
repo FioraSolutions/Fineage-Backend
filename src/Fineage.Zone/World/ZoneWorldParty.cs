@@ -17,6 +17,8 @@ public sealed partial class ZoneWorld
         public required int PartyId { get; init; }
         public int LeaderObjectId { get; set; }
         public int ItemDistribution { get; set; }
+        /// <summary>Mobius <c>Party._itemLastLoot</c> cursor for BY_TURN* modes.</summary>
+        public int ItemLastLoot { get; set; }
         public List<int> MemberIds { get; } = [];
     }
 
@@ -30,7 +32,7 @@ public sealed partial class ZoneWorld
             return Task.FromResult<string?>("world");
         if (invite.TargetObjectId == session.ObjectId)
             return Task.FromResult<string?>("bad_request");
-        if (invite.ItemDistribution is < 0 or > 3)
+        if (!Fineage.Game.Services.PartyLootRules.IsValidDistribution(invite.ItemDistribution))
             return Task.FromResult<string?>("bad_request");
 
         lock (_gate)

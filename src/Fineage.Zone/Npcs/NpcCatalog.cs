@@ -42,7 +42,27 @@ public sealed record NpcTemplate(
     IReadOnlyList<string>? Clans = null,
     IReadOnlyList<int>? IgnoreNpcIds = null,
     double HpRegen = 0,
-    double MpRegen = 0);
+    double MpRegen = 0,
+    /// <summary>Mobius <c>SoulShot</c> starting stock (Npc.rechargeShots).</summary>
+    int SoulShot = 0,
+    /// <summary>Mobius <c>SoulShotRate</c> % chance to fire a soulshot when stock remains.</summary>
+    int SoulShotChance = 0,
+    int SpiritShot = 0,
+    int SpiritShotChance = 0,
+    /// <summary>
+    /// Folded Mobius <c>CreatureStat._defenceTraits</c> for weapon types (keys <c>sword</c>/<c>bow</c>/…),
+    /// resolved from NPC skillList <c>DefenceTrait</c> passives. Missing key = 1.0.
+    /// </summary>
+    IReadOnlyDictionary<string, double>? DefenceTraits = null,
+    /// <summary>Mobius skillList ∩ skill-combat.json attack skills (PhysicalSpecial / DDMagic / …).</summary>
+    IReadOnlyList<NpcAiSkill>? AiSkills = null,
+    /// <summary>Mobius <c>ai skill minChance</c> (default 7).</summary>
+    int MinSkillChance = 7,
+    /// <summary>Mobius <c>ai skill maxChance</c> (default 15).</summary>
+    int MaxSkillChance = 15);
+
+/// <summary>One active Mobius NPC AI attack skill (id + level from skillList).</summary>
+public readonly record struct NpcAiSkill(int SkillId, int Level);
 
 /// <summary>Loads <c>data/npcs.json</c>.</summary>
 public sealed class NpcCatalog
@@ -171,8 +191,29 @@ public sealed class NpcCatalog
                 row.Clans is { Count: > 0 } ? row.Clans : null,
                 row.IgnoreNpcIds is { Count: > 0 } ? row.IgnoreNpcIds : null,
                 Math.Max(0, row.HpRegen),
-                Math.Max(0, row.MpRegen)));
+                Math.Max(0, row.MpRegen),
+                Math.Max(0, row.SoulShot),
+                Math.Max(0, row.SoulShotChance),
+                Math.Max(0, row.SpiritShot),
+                Math.Max(0, row.SpiritShotChance),
+                row.DefenceTraits is { Count: > 0 } ? row.DefenceTraits : null,
+                ParseAiSkills(row.AiSkills),
+                row.MinSkillChance > 0 ? row.MinSkillChance : 7,
+                row.MaxSkillChance > 0 ? row.MaxSkillChance : 15));
         }
+
+    static IReadOnlyList<NpcAiSkill>? ParseAiSkills(List<AiSkillDto>? rows)
+    {
+        if (rows is not { Count: > 0 })
+            return null;
+        var list = new List<NpcAiSkill>(rows.Count);
+        foreach (var r in rows)
+        {
+            if (r.Id > 0 && r.Level > 0)
+                list.Add(new NpcAiSkill(r.Id, r.Level));
+        }
+        return list.Count > 0 ? list : null;
+    }
 
         return new NpcCatalog(byId);
     }
@@ -231,5 +272,20 @@ public sealed class NpcCatalog
         public double HpRegen { get; set; }
         /// <summary>Mobius <c>vitals mpRegen</c>: MP restored per 3 s regen tick.</summary>
         public double MpRegen { get; set; }
+        public int SoulShot { get; set; }
+        public int SoulShotChance { get; set; }
+        public int SpiritShot { get; set; }
+        public int SpiritShotChance { get; set; }
+        /// <summary>Mobius weapon defenceTraits multipliers (sword/bow/…).</summary>
+        public Dictionary<string, double>? DefenceTraits { get; set; }
+        public List<AiSkillDto>? AiSkills { get; set; }
+        public int MinSkillChance { get; set; }
+        public int MaxSkillChance { get; set; }
+    }
+
+    sealed class AiSkillDto
+    {
+        public int Id { get; set; }
+        public int Level { get; set; }
     }
 }
