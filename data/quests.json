@@ -597,6 +597,372 @@
       ]
     },
     {
+      "id": 105,
+      "name": "Skirmish with Orcs",
+      "repeatable": false,
+      "abortable": true,
+      "questItems": [
+        1836,
+        1837,
+        1838,
+        1839,
+        1840,
+        1841,
+        1842,
+        1843,
+        1844,
+        1845
+      ],
+      "dialogs": [
+        {
+          "npcId": 30218,
+          "hook": "talk",
+          "when": "absent",
+          "races": [
+            1
+          ],
+          "minLevel": 10,
+          "html": "<html><body>Sentinel Kendell:<br>\nRecently the <font color=\"LEVEL\">orcs</font> of Fog Mountain have become bold, and have attacked our beautiful woods in large groups. Orcs have invaded our forests before, but never in such large numbers.<br>\nWe Elven fighters plan to take this opportunity to strike back at those orcs that invade our homes, so that they will never again try to take over the Elven Forest. Will you face the orcs as a member of the guardians?<br>\n<a action=\"quest_event:105:30218-04\">Say that you will fight the orcs</a>\n</body></html>"
+        },
+        {
+          "npcId": 30218,
+          "hook": "talk",
+          "when": "absent",
+          "races": [
+            1
+          ],
+          "html": "<html><body>Sentinel Kendell:<br>\nLooking at young Elves today, I think that they are like fragile flowers growing under the shade of the Mother Tree. Granted, they learn the use of The Bow or arrow from many fine masters, or magic to command the elementals from wise sorcerors, but that is purely academic, and I worry that they may not be able to perform well in actual battle. Thus, I have always advocated that young Elves need to actively go into the battlefield and receive actual training.<br>\nI'm sure you also want to see the results of your training, and also receive acknowledgement of your skills? Soon the Orc tribes from the Misty Mountains and our Elven Fighters will be having a skirmish. When the time comes, I will give you the chance to participate in battle.<br>\n(Quest for Elven characters level 10 and above.)\n</body></html>"
+        },
+        {
+          "npcId": 30218,
+          "hook": "talk",
+          "when": "absent",
+          "html": "<html><body>Sentinel Kendell:<br>\nTraveller of a foreign race, the Elves are currently engaged in war with the kaboo Orc tribe. If you plan on travelling outside the village, take care not to become involved in the battle or you shall be hurt.<br>\n(Quest for Elven characters.)\n</body></html>"
+        },
+        {
+          "npcId": 30218,
+          "hook": "event",
+          "when": "absent",
+          "event": "30218-04",
+          "races": [
+            1
+          ],
+          "minLevel": 10,
+          "html": "<html><body>Sentinel Kendell:<br>\nMy young friend, I advise you to take this opportunity to prove your bravery. Now I will tell you exactly what role you must play from this moment on.<br>\n<a action=\"quest_event:105:30218-05\">Listen to the explanation about the role</a>\n</body></html>",
+          "ops": [
+            {
+              "op": "create"
+            },
+            {
+              "op": "start"
+            },
+            {
+              "op": "give_item",
+              "itemId": 1836,
+              "count": 1
+            },
+            {
+              "op": "set_cond",
+              "cond": 1
+            }
+          ]
+        },
+        {
+          "npcId": 30218,
+          "hook": "event",
+          "when": "any",
+          "event": "30218-05",
+          "html": "<html><body>Sentinel Kendell:<br>\nAs you know, the Elven fighting method is to form many squadrons and weaken the opponent's strength slowly through repeated attacks and retreats, rather than rely on a full scale clash between large armies. Bear this in mind. A retreat is not a shameful thing. If we retreat without overextending the fight, the opportunity for victory will always seek us out.<br>\nYour task is to throw the opponents into turmoil by slaying their leaders. This decree lists which Orc leaders you must slay and where their locations are. The information has been written based on the reports of scouts, and is surely valid. Slay the targets and bring back <font color=\"LEVEL\">proof</font> of their deaths.<br>\nWell, go on now. May the blessings of Eva be with you.\n</body></html>"
+        },
+        {
+          "npcId": 30218,
+          "hook": "talk",
+          "when": "started",
+          "cond": 1,
+          "hasAny": [
+            1836,
+            1837,
+            1838,
+            1839
+          ],
+          "html": "<html><body>Sentinel Kendell:<br>\nYoung friend, why have you not left yet? We must spare no time in defeating the kaboo orcs that invade our beautiful woods!<br>\nThe orders I have given you list which Orc leaders you must slay and where their locations are. Slay the targets and bring back <font color=\"LEVEL\">proof</font> of their deaths. As your opponent is an Orc leader, take extra caution.<br>\nWell, go on now. May the blessings of Eva be with you.\n</body></html>"
+        },
+        {
+          "npcId": 30218,
+          "hook": "talk",
+          "when": "started",
+          "cond": 2,
+          "hasItem": 1844,
+          "html": "<html><body>Sentinel Kendell:<br>\nWell done indeed, my young friend. I have received reports that the kaboo orcs, having lost their leader, have scattered. Now it is only a matter of time before we can completely drive the scattered orcs out of our woods. May the souls of our brothers slain by the orcs be comforted through this...<br>\nBut the battle is not over yet. I have received reports that the Orc army is amassing near <font color=\"LEVEL\">Lake Iris</font>, south of the village. Your second task is to defeat one of the leaders of that army. This order contains details about the target you must face. Bear this in mind. An animal becomes violent if cornered. Be extra careful.\n</body></html>",
+          "ops": [
+            {
+              "op": "take_item",
+              "itemId": 1836,
+              "count": 1
+            },
+            {
+              "op": "take_item",
+              "itemId": 1844,
+              "count": 1
+            },
+            {
+              "op": "give_item",
+              "itemId": 1840,
+              "count": 1
+            },
+            {
+              "op": "set_cond",
+              "cond": 3
+            }
+          ]
+        },
+        {
+          "npcId": 30218,
+          "hook": "talk",
+          "when": "started",
+          "cond": 3,
+          "hasItem": 1840,
+          "html": "<html><body>Sentinel Kendell:<br>\nYoung friend, have you not left the village yet? The target you must slay is written on the orders I gave you. Slay him and bring back <font color=\"LEVEL\">proof</font> of his death.<br>\nAnd take heed. An animal becomes violent if cornered. Be extra careful.\n</body></html>"
+        },
+        {
+          "npcId": 30218,
+          "hook": "talk",
+          "when": "started",
+          "cond": 4,
+          "hasItem": 1845,
+          "html": "<html><body>Sentinel Kendell:<br>\nBy the looks of that amulet, I see that you have delivered Bhato Bloodspear to the eternal rest of the deep lake. I'm sure Shilen has taken his bloody soul.<br>\nMy comrade, you have fought well for the brothers of the woods. There is nothing more you need to do now. I have received word that the Orc army has retreated back to the Misty Mountains. I'm sure their severe defeat this time will be a lesson to them, and they will not attempt to take over our woods again. There are still orcs lurking in the woods, but they are mere stragglers that have strayed from their army.<br>\nTo commemorate your achievement in this battle, I will present you with this. This is a weapon used by our <font color=\"LEVEL\">Red Sunset Brothers</font> who fought alongside Alberius during the battle with the Elves. That clan has been disbanded now, but the swords and staffs they used are presented even now to talented youth that fight for the glory of our race.<br>\nMy young brother, until the day we meet again, may the brilliance of Mithril shine on the woods, lakes, and in your soul.\n</body></html>",
+          "ops": [
+            {
+              "op": "give_adena",
+              "count": 17599
+            },
+            {
+              "op": "give_exp_sp",
+              "exp": 41478,
+              "sp": 3555
+            },
+            {
+              "op": "complete"
+            }
+          ]
+        },
+        {
+          "npcId": 27059,
+          "hook": "kill",
+          "when": "started",
+          "cond": 1,
+          "hasItem": 1836,
+          "html": "",
+          "ops": [
+            {
+              "op": "give_item",
+              "itemId": 1844,
+              "count": 1
+            },
+            {
+              "op": "set_cond",
+              "cond": 2
+            }
+          ]
+        },
+        {
+          "npcId": 27064,
+          "hook": "kill",
+          "when": "started",
+          "cond": 3,
+          "hasItem": 1840,
+          "html": "",
+          "ops": [
+            {
+              "op": "give_item",
+              "itemId": 1845,
+              "count": 1
+            },
+            {
+              "op": "set_cond",
+              "cond": 4
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": 159,
+      "name": "Protect the Water Source",
+      "repeatable": false,
+      "abortable": true,
+      "questItems": [
+        1035,
+        1071,
+        1072
+      ],
+      "dialogs": [
+        {
+          "npcId": 30154,
+          "hook": "talk",
+          "when": "absent",
+          "races": [
+            1
+          ],
+          "minLevel": 12,
+          "html": "<html><body>Hierarch Asterios:<br>\nI don't know if you've noticed, but the Mother Tree in the middle of the village has been slowly withering. The progress of the blight is so slow that it is hard to notice unless one possesses high magic powers. We do not wish to worry our brothers, and only a few of us know this secret. None of our ancestors' records show any incident of the Mother Tree withering. I cannot shake the dread that something is terribly wrong.<br>\nAs a result of my research, I discovered that the Mother Tree is withering because the water is full of contaminants that dry up the tree's roots. It is my guess that someone is polluting the water source of the river that flows into the village.<br>\nBut I cannot guess who that someone is. That someone would dare to pollute our life source, our water, in this chaotic time of war against the Misty Mountain orcs ... This cannot be left alone, it must be dealt with. The sentinels cannot be spared, as they must defend the village, and all of our Rangers have been sent to the woods in preparation for our battle with the orcs. You must go to the water source and find out the reason behind the pollution.<br>\n<a action=\"quest_event:159:30154-04\">Say you will help</a>\n</body></html>"
+        },
+        {
+          "npcId": 30154,
+          "hook": "talk",
+          "when": "absent",
+          "races": [
+            1
+          ],
+          "html": "<html><body>Hierarch Asterios:<br>\nHave you felt anything strange lately while walking around the village? I recently saw yellow, withered leaves on the surface of the pond in the middle of the village, under the Mother Tree. I don't know why a tree that has grown for thousands of years should suddenly drop discolored, withered leaves. I am very worried. I will delve deeper into this, but if further investigation is necessary, I may have to ask you to aid me in investigating this matter.<br>\n(Quest for Elven characters level 12 and above.)\n</body></html>"
+        },
+        {
+          "npcId": 30154,
+          "hook": "talk",
+          "when": "absent",
+          "html": "<html><body>Hierarch Asterios:<br>\nYoung traveler of a foreign race, there is nothing you can do for me. Listen to the beautiful music of the woods and enjoy life under the shade of the Mother Tree, and rest your weary body.<br>\n(Quest for Elves only.)\n</body></html>"
+        },
+        {
+          "npcId": 30154,
+          "hook": "event",
+          "when": "absent",
+          "event": "30154-04",
+          "races": [
+            1
+          ],
+          "minLevel": 12,
+          "html": "<html><body>Hierarch Asterios:<br>\nYou can reach the <font color=\"LEVEL\">water source</font> by following the river that flows into the village and travelling north. If you find anything that is even slightly suspicious, please investigate it. And bring back proof so that I can examine it.<br>\nTake this charm. It will protect you from the contaminants that have fouled our water. Please hurry. May the blessings of Eva be with you ...\n</body></html>",
+          "ops": [
+            {
+              "op": "create"
+            },
+            {
+              "op": "start"
+            },
+            {
+              "op": "give_item",
+              "itemId": 1071,
+              "count": 1
+            },
+            {
+              "op": "set_cond",
+              "cond": 1
+            }
+          ]
+        },
+        {
+          "npcId": 30154,
+          "hook": "talk",
+          "when": "started",
+          "cond": 1,
+          "hasItem": 1071,
+          "lacksItems": [
+            1035
+          ],
+          "html": "<html><body>Hierarch Asterios:<br>\nWhat are you doing still here? Go north and follow the river to find the water's source, and find out who is contaminating our water.<br>\nThe Mother Tree is dying! Any more delays, and our very lives may be threatened.\n</body></html>"
+        },
+        {
+          "npcId": 30154,
+          "hook": "talk",
+          "when": "started",
+          "cond": 2,
+          "hasItems": [
+            1071,
+            1035
+          ],
+          "html": "<html><body>Hierarch Asterios:<br>\nThis ...! The undead you came across at the water source are called <font color=\"LEVEL\">Plague Zombies</font>, and are those creatures who were killed by plagues and that have been resurrected with black magic. The fine powder that falls from their decomposing bodies is this <font color=\"LEVEL\">Plague Dust</font> ... This is the substance that has been polluting our water. You would have been infected by the plague if you had not taken the Hyacinth Charm ...<br>\nHmm ... This is definitely the doing of the Dark Elves! They cannot be forgiven! But first, we must revive the dying Mother Tree. To do that, we must purify the polluted waters ...<br>\nI will need more <font color=\"LEVEL\">Plague Dust</font> to research a purification spell. Please go back to the water source and obtain this cursed powder for me. I need at least <font color=\"LEVEL\">five handfuls</font>.\n</body></html>",
+          "ops": [
+            {
+              "op": "take_item",
+              "itemId": 1071,
+              "count": 1
+            },
+            {
+              "op": "take_item",
+              "itemId": 1035,
+              "count": 1
+            },
+            {
+              "op": "give_item",
+              "itemId": 1072,
+              "count": 1
+            },
+            {
+              "op": "set_cond",
+              "cond": 3
+            }
+          ]
+        },
+        {
+          "npcId": 30154,
+          "hook": "talk",
+          "when": "started",
+          "cond": 3,
+          "hasItem": 1072,
+          "html": "<html><body>Hierarch Asterios:<br>\nGo and bring me <font color=\"LEVEL\">five handfuls of Plague Dust</font> from those zombies that are polluting our water source. Go north and follow the river that flows into the village. The Mother Tree is dying! Hurry! May the blessings of Eva be with you ...!\n</body></html>"
+        },
+        {
+          "npcId": 30154,
+          "hook": "talk",
+          "when": "started",
+          "cond": 4,
+          "hasItem": 1072,
+          "atLeast": {
+            "1035": 5
+          },
+          "html": "<html><body>Hierarch Asterios:<br>\nWell done. This will be enough to research the purification magic. As soon as the magic is complete, I will travel under the protection of the sentinels to the water source and perform the purification spell, and eradicate any Plague Zombies that may yet remain.<br>\nMy young kinsman, you have performed a great deed for our sacred Mother Tree Glade and for the Elven race. I will give you this as a tribute to your brave deed. It may not seem like much, but it will come in handy one day, so keep it well.<br>\nMay the splendor of Mithril forever shine on the forest and lake!\n</body></html>",
+          "ops": [
+            {
+              "op": "give_adena",
+              "count": 18250
+            },
+            {
+              "op": "complete"
+            }
+          ]
+        },
+        {
+          "npcId": 27017,
+          "hook": "kill",
+          "when": "started",
+          "cond": 1,
+          "hasItem": 1071,
+          "lacksItems": [
+            1035
+          ],
+          "html": "",
+          "ops": [
+            {
+              "op": "drop_item",
+              "itemId": 1035,
+              "count": 1,
+              "chance": 0.4,
+              "limit": 1,
+              "condAtLimit": 2
+            }
+          ]
+        },
+        {
+          "npcId": 27017,
+          "hook": "kill",
+          "when": "started",
+          "cond": 3,
+          "hasItem": 1072,
+          "html": "",
+          "ops": [
+            {
+              "op": "drop_item",
+              "itemId": 1035,
+              "count": 1,
+              "chance": 0.4,
+              "limit": 5,
+              "condAtLimit": 4
+            }
+          ]
+        }
+      ]
+    },
+    {
       "id": 160,
       "name": "Nerupa's Request",
       "repeatable": false,
@@ -951,6 +1317,414 @@
           "event": "lake",
           "when": "started",
           "html": "<html><body>Thalia:<br>The Elven Village lies north of the lake and the falls to the northwest. West is the Underground Elven Fortress.</body></html>"
+        }
+      ]
+    },
+    {
+      "id": 162,
+      "name": "Curse of the Underground Fortress",
+      "repeatable": false,
+      "abortable": true,
+      "questItems": [
+        1158,
+        1159
+      ],
+      "dialogs": [
+        {
+          "npcId": 30147,
+          "hook": "talk",
+          "when": "absent",
+          "races": [
+            0,
+            1,
+            3,
+            4
+          ],
+          "minLevel": 12,
+          "html": "<html><body>Trader Unoren:<br>\nDid you know? The most intense battle against the evil Dark Elves took place in the Underground Fortress, which is now full of monsters. I was there when the last battle took place and still remember it vividly. I was so frightened that I thought only of my own safety, and left behind my screaming fellow soldiers as I ran away from the battle.<br>\nThe deep sorrow and tears of those who died then acted as a powerful curse, and the corpses resurrected as undead. I should have chosen death like my fellow soldiers ... I am so ashamed that I am still alive ... I am so ashamed that I cannot even look up at the heavens ...<br>\nI wished to break the curse so that my friends could peacefully rest in the afterlife, and I have spent a long time with my old friend Magister Esrandell, researching <font color=\"LEVEL\">ways to counter the curse of the Underground Fortress</font>. We have only recently discovered a method.<br>\n<a action=\"quest_event:162:30147-03\">Ask about the studies</a>\n</body></html>"
+        },
+        {
+          "npcId": 30147,
+          "hook": "talk",
+          "when": "absent",
+          "races": [
+            0,
+            1,
+            3,
+            4
+          ],
+          "html": "<html><body>Trader Unoren:<br>\nDid you know? The most intense battle against the evil Dark Elves took place in the Underground Fortress, which is now full of monsters. I was there when the last battle took place and still remember it vividly. I was so frightened that I thought only of my own safety, and left behind my screaming fellow soldiers as I ran away from the battle.<br>\nThe deep sorrow and tears of those who died then acted as a powerful curse, and the corpses resurrected as undead. I should have chosen death like my fellow soldiers ... I am so ashamed that I am still alive ... I am so ashamed that I cannot even look up at the heavens ...<br>\nI wish to break the curse so that my friends may rest in peace in the afterlife. I will still not be forgiven for my sins against them, but I don't think I could ever live without doing something. Along with Magister Esrandell, my long time friend, we are researching methods to counter the curse of the Underground Fortress, but we have yet to find an answer. When we find a method in the future, I would like to ask your help.<br>\n(Quest for all characters, except Dark Elves, level 12 and above.)\n</body></html>"
+        },
+        {
+          "npcId": 30147,
+          "hook": "talk",
+          "when": "absent",
+          "races": [
+            2
+          ],
+          "html": "<html><body>Trader Unoren:<br>\nYou should be careful while walking the streets of this town, young Dark Elf. Though no harm will reach you thanks to the truce agreement, remember that my comrades will not look kindly upon you. We have not forgiven the race of dark for the cruel acts committed a thousand years ago to our race.<br>\n(Not available for Dark Elven characters.)\n</body></html>"
+        },
+        {
+          "npcId": 30147,
+          "hook": "event",
+          "when": "any",
+          "event": "30147-03",
+          "html": "<html><body>Trader Unoren:<br>\nAccording to my friend Magister Esrandell, the curse originated from the despair of the dead soldiers. But the curse continued because of the power of black magic that surrounds the Underground Fortress. They say that the residual black magic of those dirty Dark Elves, and the power of the dark spirits that they summoned, seeped into the foundations of the fortress. There are even preposterous rumors that our proud Elven Mystics of light also used forbidden black magic in order to achieve victory over the Dark Elves ...<br>\nAnyhow, strong black magic powers still surround that place. After a long period of research, we have found an answer. If this force is neutralized, we should be able to counter the curse. First, my long time friend Magister Esrandell says that he needs a Complete Skeleton of an undead monster in order to identify the black energy that abounds in the fortress. I would like you to travel to the abandoned Underground Fortress and bring me <font color=\"LEVEL\">Bone Fragments and skulls of the undead</font>. If you would help me lessen my burden, I will reward you handsomely.<br>\n<a action=\"quest_event:162:30147-04\">Say you will do the favor</a>\n</body></html>"
+        },
+        {
+          "npcId": 30147,
+          "hook": "event",
+          "when": "absent",
+          "event": "30147-04",
+          "races": [
+            0,
+            1,
+            3,
+            4
+          ],
+          "minLevel": 12,
+          "html": "<html><body>Trader Unoren:<br>\nI give you my deepest gratitude. Go immediately to the <font color=\"LEVEL\">Underground Fortress</font> and bring me <font color=\"LEVEL\">ten undead Bone Fragments and three Elf Skulls</font>. The skulls must be whole and intact, with no flaws. According to Magister Esrandell, flawless and unscarred Elf Skulls may only be obtained from the monsters called the <font color=\"LEVEL\">dark terrors</font>. Dark terror, mist terror and shade horror ... they are all related.<br>\nI wish to present my fellow soldiers, who have suffered long enough, with eternal peace as soon as possible. Please. Hurry.\n</body></html>",
+          "ops": [
+            {
+              "op": "create"
+            },
+            {
+              "op": "start"
+            },
+            {
+              "op": "set_cond",
+              "cond": 1
+            }
+          ]
+        },
+        {
+          "npcId": 30147,
+          "hook": "talk",
+          "when": "started",
+          "cond": 1,
+          "atLeast": {
+            "1158": 10,
+            "1159": 3
+          },
+          "html": "<html><body>Trader Unoren:<br>\nThank you. Now all that is left is to figure out the origin of the black magic energy from the fortress. My old friend Magister Esrandell will also thank you, I'm sure. Please pray that we may send the souls of my fallen fellows into the arms of Eva.<br>\nPlease, take this. This is in gratitude for your work to bring eternal peace to our brothers who died for the future of our race. May honor and the spirits of the forest guide you on your path.\n</body></html>",
+          "ops": [
+            {
+              "op": "give_item",
+              "itemId": 625,
+              "count": 1
+            },
+            {
+              "op": "give_exp_sp",
+              "exp": 22652,
+              "sp": 1004
+            },
+            {
+              "op": "give_adena",
+              "count": 24000
+            },
+            {
+              "op": "complete"
+            }
+          ]
+        },
+        {
+          "npcId": 30147,
+          "hook": "talk",
+          "when": "started",
+          "cond": 1,
+          "html": "<html><body>Trader Unoren:<br>\nI wish to present my fellow soldiers, who have suffered long enough, with eternal peace as soon as possible. Go to the Elven Underground Fortress to hunt the undead monsters, and bring me ten Bone Fragments and three Elf Skulls. Please. Hurry.\n</body></html>"
+        },
+        {
+          "npcId": 20033,
+          "hook": "kill",
+          "when": "started",
+          "cond": 1,
+          "html": "",
+          "ops": [
+            {
+              "op": "drop_item",
+              "itemId": 1159,
+              "count": 1,
+              "chance": 0.25,
+              "limit": 3
+            }
+          ]
+        },
+        {
+          "npcId": 20345,
+          "hook": "kill",
+          "when": "started",
+          "cond": 1,
+          "html": "",
+          "ops": [
+            {
+              "op": "drop_item",
+              "itemId": 1159,
+              "count": 1,
+              "chance": 0.26,
+              "limit": 3
+            }
+          ]
+        },
+        {
+          "npcId": 20371,
+          "hook": "kill",
+          "when": "started",
+          "cond": 1,
+          "html": "",
+          "ops": [
+            {
+              "op": "drop_item",
+              "itemId": 1159,
+              "count": 1,
+              "chance": 0.23,
+              "limit": 3
+            }
+          ]
+        },
+        {
+          "npcId": 20463,
+          "hook": "kill",
+          "when": "started",
+          "cond": 1,
+          "html": "",
+          "ops": [
+            {
+              "op": "drop_item",
+              "itemId": 1158,
+              "count": 1,
+              "chance": 0.25,
+              "limit": 10
+            }
+          ]
+        },
+        {
+          "npcId": 20464,
+          "hook": "kill",
+          "when": "started",
+          "cond": 1,
+          "html": "",
+          "ops": [
+            {
+              "op": "drop_item",
+              "itemId": 1158,
+              "count": 1,
+              "chance": 0.23,
+              "limit": 10
+            }
+          ]
+        },
+        {
+          "npcId": 20504,
+          "hook": "kill",
+          "when": "started",
+          "cond": 1,
+          "html": "",
+          "ops": [
+            {
+              "op": "drop_item",
+              "itemId": 1158,
+              "count": 1,
+              "chance": 0.26,
+              "limit": 10
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": 163,
+      "name": "Legacy of the Poet",
+      "repeatable": false,
+      "abortable": true,
+      "questItems": [
+        1038,
+        1039,
+        1040,
+        1041
+      ],
+      "dialogs": [
+        {
+          "npcId": 30220,
+          "hook": "talk",
+          "when": "absent",
+          "races": [
+            0,
+            1,
+            3,
+            4
+          ],
+          "minLevel": 11,
+          "html": "<html><body>Sentinel Starden:<br>\nAccording to legend, the Eldarin of the beginning of the world -- or the 'Gods,' as the Humans call them, created various races and gave each race different knowledge. The Orcs received the art of war from Pa'agrio, the Dwarves trade and craftsmanship from Maphr, and we received poetry and songs from Eva. The other races hold our Elven magic and archery in high regard, but I think that the greatest achievement of the brothers of the forest is the culture and music that we have developed over thousands of years.<br>\nI have been trained as a Sentinel, protector of the forest, but I spend my spare time composing and writing poetry. Though my poems are not good enough to recite to others. But it was a different case for my old time friend and colleague, <font color=\"LEVEL\">Rumiel Moonshine</font>. He was a warrior with the heart of a poet. The short poems that he recorded in the life and death situations of the battlefield were a great comfort to our sentinel brothers who were weary of fighting. His voice, which sang of the beauty of the forest, the wind and the springs, made us remember what we were fighting for.<br>\n<a action=\"quest_event:163:30220-03\">Ask about Rumiel</a>\n</body></html>"
+        },
+        {
+          "npcId": 30220,
+          "hook": "talk",
+          "when": "absent",
+          "races": [
+            0,
+            1,
+            3,
+            4
+          ],
+          "html": "<html><body>Sentinel Starden:<br>\nI am one of the warriors who fought in the underground dungeon battle during the war with the Dark Elves. My long time friend and companion, Rumiel, was killed in that battle. Not only was he an excellent warrior, but he was also a marvelous poet. Sadly, the beautiful poetry he wrote on the battlefield was lost during the last battle in the underground dungeons.<br>\nOne day I plan to go to the abandoned dungeon and recover my friend's legacy. It would be nice if you could help.<br>\n(This quest may be undertaken by any character (other than Dark Elf characters) of level 11 or higher.)\n</body></html>"
+        },
+        {
+          "npcId": 30220,
+          "hook": "talk",
+          "when": "absent",
+          "races": [
+            2
+          ],
+          "html": "<html><body>Sentinel Starden:<br>\nIf not for the peace talks, I would slay Dark Elves like yourself with a single blow! Child of darkness, beware! We Sentinels will be watching your every move!<br>\n(Not available for Dark Elven characters.)\n</body></html>"
+        },
+        {
+          "npcId": 30220,
+          "hook": "event",
+          "when": "any",
+          "event": "30220-03",
+          "html": "<html><body>Sentinel Starden:<br>\nDuring the fiercest battle with the Dark Elves, Rumiel and I, along with a few dozen sentinel brothers, faced the Dark Elves that had surrounded our fortress. The Dark Elves did not engage in direct battle but used hit and run tactics, slowly tiring us out. Rumiel was in the most pain during that time. The battle had deeply scarred his sensitive soul.<br>\nDuring the siege in the Underground Fortress, Rumiel composed <font color=\"LEVEL\">five poems</font>. It was the most beautiful poetry I had ever heard -- poems that turned the fear and despair of that time into verses.<br>\n<a action=\"quest_event:163:30220-04\">Ask about the five poems</a>\n</body></html>"
+        },
+        {
+          "npcId": 30220,
+          "hook": "event",
+          "when": "any",
+          "event": "30220-04",
+          "html": "<html><body>Sentinel Starden:<br>\nUnfortunately all of those five poems were lost. We were defeated in the siege of the Underground Fortress, and three Sentinels, including myself, barely managed to escape with our lives. But Rumiel was killed in that battle. The sheepskin scrolls where his poems were written were lost, along with him.<br>\nSome time ago I went to the abandoned dungeons to recover my friend's work. But I only managed to find one of Rumiel's five scrolls. I want to go to the dungeons again to look for the rest of the scrolls, but I cannot leave my post due to the recent battles with the Orcs of the Misty Mountains. I desperately want to recover my friend's legacy, and am frustrated because I cannot.<br>\nDo you think you could go to the Underground Fortress and find the <font color=\"LEVEL\">scrolls where Rumiel wrote his poems</font>?<br>\n<a action=\"quest_event:163:30220-05\">Say you will do the favor</a>\n</body></html>"
+        },
+        {
+          "npcId": 30220,
+          "hook": "event",
+          "when": "absent",
+          "event": "30220-05",
+          "races": [
+            0,
+            1,
+            3,
+            4
+          ],
+          "minLevel": 11,
+          "html": "<html><body>Sentinel Starden:<br>\nThank you. Go to the <font color=\"LEVEL\">Elven Underground Fortress</font> and find the remaining four scrolls. I have discovered his second poem already. What you must find are the scrolls containing his first, third, fourth and fifth poems. I think that the foolish <font color=\"LEVEL\">baraq orcs</font> that live in the ruins may have mistaken Rumiel's scrolls for magic scrolls and hidden them.<br>\nI implore you! I am certain that the cultural wealth of our race will become richer with the recovery of Rumiel's poems.\n</body></html>",
+          "ops": [
+            {
+              "op": "create"
+            },
+            {
+              "op": "start"
+            },
+            {
+              "op": "set_cond",
+              "cond": 1
+            }
+          ]
+        },
+        {
+          "npcId": 30220,
+          "hook": "talk",
+          "when": "started",
+          "cond": 1,
+          "hasItems": [
+            1038,
+            1039,
+            1040,
+            1041
+          ],
+          "html": "<html><body>Sentinel Starden:<br>\nSo you have recovered all of Rumiel's poems. Now I can read my friend's poetry once again.<br>\nI plan to put these together with the other poems that Rumiel wrote and publish a Poetry Book. Now my Elven brothers may also enjoy Rumiel's fine poetry. This is the only thing I can do for Rumiel, whom I could not save in battle.<br>\nPlease accept this. This is for your work in recovering the scrolls. May the blessings of the starlight fall upon you.\n</body></html>",
+          "ops": [
+            {
+              "op": "give_exp_sp",
+              "exp": 21643,
+              "sp": 943
+            },
+            {
+              "op": "give_adena",
+              "count": 13890
+            },
+            {
+              "op": "complete"
+            }
+          ]
+        },
+        {
+          "npcId": 30220,
+          "hook": "talk",
+          "when": "started",
+          "cond": 1,
+          "html": "<html><body>Sentinel Starden:<br>\nI see, so you haven't recovered all of Rumiel's poems yet. Travel along the southwestern path of the village and you will reach the Underground Fortress. Please recover Rumiel's four scrolls from the lowly race that lives there. I implore you!\n</body></html>"
+        },
+        {
+          "npcId": 20372,
+          "hook": "kill",
+          "when": "started",
+          "cond": 1,
+          "html": "",
+          "ops": [
+            {
+              "op": "drop_item",
+              "itemId": 1038,
+              "count": 1,
+              "chance": 0.1,
+              "limit": 1
+            },
+            {
+              "op": "drop_item",
+              "itemId": 1039,
+              "count": 1,
+              "chance": 0.2,
+              "limit": 1
+            },
+            {
+              "op": "drop_item",
+              "itemId": 1040,
+              "count": 1,
+              "chance": 0.2,
+              "limit": 1
+            },
+            {
+              "op": "drop_item",
+              "itemId": 1041,
+              "count": 1,
+              "chance": 0.4,
+              "limit": 1
+            }
+          ]
+        },
+        {
+          "npcId": 20373,
+          "hook": "kill",
+          "when": "started",
+          "cond": 1,
+          "html": "",
+          "ops": [
+            {
+              "op": "drop_item",
+              "itemId": 1038,
+              "count": 1,
+              "chance": 0.1,
+              "limit": 1
+            },
+            {
+              "op": "drop_item",
+              "itemId": 1039,
+              "count": 1,
+              "chance": 0.2,
+              "limit": 1
+            },
+            {
+              "op": "drop_item",
+              "itemId": 1040,
+              "count": 1,
+              "chance": 0.2,
+              "limit": 1
+            },
+            {
+              "op": "drop_item",
+              "itemId": 1041,
+              "count": 1,
+              "chance": 0.4,
+              "limit": 1
+            }
+          ]
         }
       ]
     },

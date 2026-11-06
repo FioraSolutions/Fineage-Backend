@@ -2457,6 +2457,16 @@
       "quest": true
     },
     {
+      "id": 1035,
+      "name": "Plague Dust",
+      "kind": "etc",
+      "stackable": true,
+      "icon": "icon.etc_powder_red_i00",
+      "price": 0,
+      "weight": 0,
+      "quest": true
+    },
+    {
       "id": 1036,
       "name": "Andellia's Letter",
       "kind": "etc",
@@ -2472,6 +2482,46 @@
       "kind": "etc",
       "stackable": true,
       "icon": "icon.etc_fruit_green_i00",
+      "price": 0,
+      "weight": 0,
+      "quest": true
+    },
+    {
+      "id": 1038,
+      "name": "Rumiel's 1st Poem",
+      "kind": "etc",
+      "stackable": true,
+      "icon": "icon.etc_piece_of_paper_black_i00",
+      "price": 0,
+      "weight": 0,
+      "quest": true
+    },
+    {
+      "id": 1039,
+      "name": "Rumiel's 2nd Poem",
+      "kind": "etc",
+      "stackable": true,
+      "icon": "icon.etc_piece_of_paper_black_i00",
+      "price": 0,
+      "weight": 0,
+      "quest": true
+    },
+    {
+      "id": 1040,
+      "name": "Rumiel's 3rd Poem",
+      "kind": "etc",
+      "stackable": true,
+      "icon": "icon.etc_piece_of_paper_black_i00",
+      "price": 0,
+      "weight": 0,
+      "quest": true
+    },
+    {
+      "id": 1041,
+      "name": "Rumiel's 4th Poem",
+      "kind": "etc",
+      "stackable": true,
+      "icon": "icon.etc_piece_of_paper_black_i00",
       "price": 0,
       "weight": 0,
       "quest": true
@@ -2584,6 +2634,26 @@
       "stackable": true,
       "price": 90,
       "weight": 5
+    },
+    {
+      "id": 1071,
+      "name": "Hyacinth Charm",
+      "kind": "etc",
+      "stackable": true,
+      "icon": "icon.etc_jewel_green_i00",
+      "price": 0,
+      "weight": 0,
+      "quest": true
+    },
+    {
+      "id": 1072,
+      "name": "Hyacinth Charm",
+      "kind": "etc",
+      "stackable": true,
+      "icon": "icon.etc_jewel_green_i00",
+      "price": 0,
+      "weight": 0,
+      "quest": true
     },
     {
       "id": 1074,
@@ -2851,6 +2921,26 @@
       "icon": "icon.etc_spell_books_white_i00",
       "price": 100,
       "weight": 120
+    },
+    {
+      "id": 1158,
+      "name": "Bone Fragment",
+      "kind": "etc",
+      "stackable": true,
+      "icon": "icon.etc_piece_bone_red_i00",
+      "price": 0,
+      "weight": 0,
+      "quest": true
+    },
+    {
+      "id": 1159,
+      "name": "Elf Skull",
+      "kind": "etc",
+      "stackable": true,
+      "icon": "icon.etc_skull_black_i00",
+      "price": 0,
+      "weight": 0,
+      "quest": true
     },
     {
       "id": 1161,
@@ -3893,6 +3983,106 @@
       "weight": 4,
       "soulshot": true,
       "shotGrade": "none"
+    },
+    {
+      "id": 1836,
+      "name": "Kendell's 1st Order",
+      "kind": "etc",
+      "stackable": true,
+      "icon": "icon.etc_recipe_blue_i00",
+      "price": 0,
+      "weight": 0,
+      "quest": true
+    },
+    {
+      "id": 1837,
+      "name": "Kendell's 2nd Order",
+      "kind": "etc",
+      "stackable": true,
+      "icon": "icon.etc_recipe_blue_i00",
+      "price": 0,
+      "weight": 0,
+      "quest": true
+    },
+    {
+      "id": 1838,
+      "name": "Kendell's 3rd Order",
+      "kind": "etc",
+      "stackable": true,
+      "icon": "icon.etc_recipe_blue_i00",
+      "price": 0,
+      "weight": 0,
+      "quest": true
+    },
+    {
+      "id": 1839,
+      "name": "Kendell's 4th Order",
+      "kind": "etc",
+      "stackable": true,
+      "icon": "icon.etc_recipe_blue_i00",
+      "price": 0,
+      "weight": 0,
+      "quest": true
+    },
+    {
+      "id": 1840,
+      "name": "Kendell's 5th Order",
+      "kind": "etc",
+      "stackable": true,
+      "icon": "icon.etc_recipe_red_i00",
+      "price": 0,
+      "weight": 0,
+      "quest": true
+    },
+    {
+      "id": 1841,
+      "name": "Kendell's 6th Order",
+      "kind": "etc",
+      "stackable": true,
+      "icon": "icon.etc_recipe_red_i00",
+      "price": 0,
+      "weight": 0,
+      "quest": true
+    },
+    {
+      "id": 1842,
+      "name": "Kendell's 7th Order",
+      "kind": "etc",
+      "stackable": true,
+      "icon": "icon.etc_recipe_red_i00",
+      "price": 0,
+      "weight": 0,
+      "quest": true
+    },
+    {
+      "id": 1843,
+      "name": "Kendell's 8th Order",
+      "kind": "etc",
+      "stackable": true,
+      "icon": "icon.etc_recipe_red_i00",
+      "price": 0,
+      "weight": 0,
+      "quest": true
+    },
+    {
+      "id": 1844,
+      "name": "Kaboo Chief's 1st Torque",
+      "kind": "etc",
+      "stackable": true,
+      "icon": "icon.accessary_necklace_of_black_ore_i00",
+      "price": 0,
+      "weight": 0,
+      "quest": true
+    },
+    {
+      "id": 1845,
+      "name": "Kaboo Chief's 2nd Torque",
+      "kind": "etc",
+      "stackable": true,
+      "icon": "icon.accessary_necklace_of_black_ore_i00",
+      "price": 0,
+      "weight": 0,
+      "quest": true
     },
     {
       "id": 1864,
