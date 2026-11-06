@@ -36,9 +36,9 @@ Legend: ✅ done · 🟡 partial · ❌ missing · stub = shell only.
 | 26 | Clan basic | Social | 🟡 | Crest/war/ally → [#293](https://github.com/FioraSolutions/Fineage-Backend/issues/293) |
 | 27 | Friends / block | Social | 🟡 | List/block #285 done; friend chat → [#289](https://github.com/FioraSolutions/Fineage-Backend/issues/289) |
 | 28 | NPC HTML + bypass + teleports + newbie buffs | Content | ✅ | |
-| 29 | Quests (engine + elven paths) | Content | 🟡 | Many scripts; ruins/quest-spawn gaps |
-| 30 | Class change 1st (elven paths) | Content | 🟡 | Foundation; Gludio masters outside default maps |
-| 31 | Raid / Seven Signs / Siege / Olympiad | Content | 🟡 | Shells only → [#295](https://github.com/FioraSolutions/Fineage-Backend/issues/295) |
+| 29 | Quests (engine + elven paths) | Content | 🟡 | Ruins/quest-spawn gaps → [#299](https://github.com/FioraSolutions/Fineage-Backend/issues/299) |
+| 30 | Class change 1st (elven paths) | Content | 🟡 | Foundation; playable maps → [#298](https://github.com/FioraSolutions/Fineage-Backend/issues/298) |
+| 31 | Raid / Seven Signs / Siege / Olympiad | Content | 🟡 | Shells; **late** → [#295](https://github.com/FioraSolutions/Fineage-Backend/issues/295) |
 | 32 | Chat channels beyond say/shout/system | Social | 🟡 | |
 
 ## Landed slices (close the cards)
@@ -54,19 +54,21 @@ Legend: ✅ done · 🟡 partial · ❌ missing · stub = shell only.
 | #283 manufacture | `1aa1186` → `#287` |
 | #285 friends + block | `64dde12` → `#287` |
 
-## Next backend slices (priority)
+## Next slices — PvE / leveling first
 
-| Priority | Issue | Matrix |
-|----------|-------|--------|
-| 1 | [#288](https://github.com/FioraSolutions/Fineage-Backend/issues/288) pets / summons | #17 |
-| 2 | [#289](https://github.com/FioraSolutions/Fineage-Backend/issues/289) friend chat type 12 | #27 |
-| 3 | [#296](https://github.com/FioraSolutions/Fineage-Backend/issues/296) client store/craft UI | #23 |
-| 4 | [#290](https://github.com/FioraSolutions/Fineage-Backend/issues/290) drop `power+10` stub | #6 |
-| 5 | [#291](https://github.com/FioraSolutions/Fineage-Backend/issues/291) NPC SS glow | #13 |
-| 6 | [#292](https://github.com/FioraSolutions/Fineage-Backend/issues/292) day/night spawns | #4 |
-| 7 | [#293](https://github.com/FioraSolutions/Fineage-Backend/issues/293) clan crest/war/ally | #26 |
-| 8 | [#294](https://github.com/FioraSolutions/Fineage-Backend/issues/294) clan/freight warehouse | #20 |
-| 9 | [#295](https://github.com/FioraSolutions/Fineage-Backend/issues/295) raid/SS/siege/olympiad content | #31 |
+Order is **character progression and hunt combat**, then polish/social, then clan / siege / oly / alliances last.
+
+| Priority | Issue | Why |
+|----------|-------|-----|
+| 1 | [#298](https://github.com/FioraSolutions/Fineage-Backend/issues/298) 1st class change playable | Unlocks progression past lvl 20 |
+| 2 | [#299](https://github.com/FioraSolutions/Fineage-Backend/issues/299) elven quests + ruins spawns | Leveling loops |
+| 3 | [#290](https://github.com/FioraSolutions/Fineage-Backend/issues/290) drop `power+10` skill stub | Correct skill damage while hunting |
+| 4 | [#288](https://github.com/FioraSolutions/Fineage-Backend/issues/288) pets / summons | Pet/summoner class PvE |
+| 5 | [#292](https://github.com/FioraSolutions/Fineage-Backend/issues/292) day/night spawn modes | Hunt roster fidelity |
+| 6 | [#296](https://github.com/FioraSolutions/Fineage-Backend/issues/296) client store/craft UI | Gear via craft/stores |
+| 7 | [#291](https://github.com/FioraSolutions/Fineage-Backend/issues/291) NPC SS glow | Cosmetic |
+| 8 | [#289](https://github.com/FioraSolutions/Fineage-Backend/issues/289) friend chat | Social |
+| **Last** | [#294](https://github.com/FioraSolutions/Fineage-Backend/issues/294) clan/freight WH · [#293](https://github.com/FioraSolutions/Fineage-Backend/issues/293) crest/war/ally · [#295](https://github.com/FioraSolutions/Fineage-Backend/issues/295) SS/siege/oly | Endgame social / territory |
 
 Combat polish backlog (not separate matrix rows): see [`combat-parity.md`](combat-parity.md) § Remaining gaps.
 
