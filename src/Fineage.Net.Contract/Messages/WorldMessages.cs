@@ -931,6 +931,34 @@ namespace Fineage.Net.Contract
         public PrivateStoreSellRowNet[] Items { get; set; } = System.Array.Empty<PrivateStoreSellRowNet>();
     }
 
+    public sealed class PrivateStoreBuyRowNet
+    {
+        public int ItemId { get; set; }
+        public long Count { get; set; } = 1;
+        public long Price { get; set; }
+    }
+
+    public sealed class SetPrivateStoreBuyNetMsg
+    {
+        public string Message { get; set; } = "";
+        public PrivateStoreBuyRowNet[] Items { get; set; } = System.Array.Empty<PrivateStoreBuyRowNet>();
+    }
+
+    public sealed class PrivateStoreSellToNetMsg
+    {
+        public int StoreObjectId { get; set; }
+        public PrivateStoreSellRowNet[] Items { get; set; } = System.Array.Empty<PrivateStoreSellRowNet>();
+    }
+
+    public sealed class PrivateStoreListBuyNetMsg
+    {
+        public int StoreObjectId { get; set; }
+        public string StoreName { get; set; } = "";
+        public string Message { get; set; } = "";
+        public long StoreAdena { get; set; }
+        public PrivateStoreBuyRowNet[] Items { get; set; } = System.Array.Empty<PrivateStoreBuyRowNet>();
+    }
+
     /// <summary>One paperdoll slot (Mobius UserInfo / CharInfo order, 17 slots, right hand = 7). Zeros when empty.</summary>
     public sealed class PaperdollSlotNet
     {

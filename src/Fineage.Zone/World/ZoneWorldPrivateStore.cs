@@ -15,9 +15,16 @@ public sealed class PrivateStoreSellListing
     public int EnchantLevel { get; set; }
 }
 
+/// <summary>One row in a player's private buy list (Mobius TradeList buy wish).</summary>
+public sealed class PrivateStoreBuyListing
+{
+    public int ItemId { get; set; }
+    public long Count { get; set; }
+    public long Price { get; set; }
+}
+
 /// <summary>
-/// Mobius private sell store: SetPrivateStoreListSell / RequestPrivateStoreBuy / Quit.
-/// Buy-store, package-sell, and manufacture are out of scope for #275.
+/// Mobius private store: sell (#275) and buy (#277). Package-sell and manufacture deferred.
 /// </summary>
 public sealed partial class ZoneWorld
 {
@@ -30,6 +37,18 @@ public sealed partial class ZoneWorld
         string? error;
         lock (_gate)
             error = TrySetPrivateStoreSell(session, request);
+        return error;
+    }
+
+    public async Task<string?> TrySetPrivateStoreBuyAsync(ZoneSession session, SetPrivateStoreBuyMsg request, CancellationToken ct)
+    {
+        if (request == null)
+            return "bad_request";
+        if (!session.InWorld)
+            return "world";
+        string? error;
+        lock (_gate)
+            error = TrySetPrivateStoreBuy(session, request);
         return error;
     }
 
@@ -66,12 +85,22 @@ public sealed partial class ZoneWorld
         return error;
     }
 
+    public async Task<string?> TryPrivateStoreSellToAsync(ZoneSession session, PrivateStoreSellToMsg request, CancellationToken ct)
+    {
+        if (request == null)
+            return "bad_request";
+        if (!session.InWorld)
+            return "world";
+        string? error;
+        lock (_gate)
+            error = TryPrivateStoreSellTo(session, request);
+        return error;
+    }
+
     void PrivateStorePlayerLeftWorld(int objectId) => ClosePrivateStore(objectId, standUp: false);
 
-    string? TrySetPrivateStoreSell(ZoneSession session, SetPrivateStoreSellMsg request)
+    string? GuardOpenPrivateStore(ZoneEntity player)
     {
-        if (!IsLive(session) || !_byId.TryGetValue(session.ObjectId, out var player) || player.Inventory == null)
-            return "world";
         if (player.Dead)
             return InventoryProtocol.Dead;
         long now = _clock().ToUnixTimeMilliseconds();
@@ -81,6 +110,29 @@ public sealed partial class ZoneWorld
             return PrivateStoreProtocol.Busy;
         if (player.MoveActive)
             return PrivateStoreProtocol.Busy;
+        return null;
+    }
+
+    void ActivatePrivateStore(ZoneEntity player, byte type, string? message)
+    {
+        player.PrivateStoreType = type;
+        player.PrivateStoreMessage = TruncateStoreMessage(message);
+        if (!player.Sitting)
+        {
+            player.Sitting = true;
+            player.Running = false;
+            FanoutWaitType(player, ActionProtocol.WaitSitting);
+            FanoutMoveType(player);
+        }
+        FanoutPrivateStoreInfo(player);
+    }
+
+    string? TrySetPrivateStoreSell(ZoneSession session, SetPrivateStoreSellMsg request)
+    {
+        if (!IsLive(session) || !_byId.TryGetValue(session.ObjectId, out var player) || player.Inventory == null)
+            return "world";
+        if (GuardOpenPrivateStore(player) is { } blocked)
+            return blocked;
 
         var rows = request.Items ?? [];
         if (rows.Length == 0)
@@ -125,36 +177,90 @@ public sealed partial class ZoneWorld
             });
         }
 
+        player.PrivateBuyList.Clear();
         player.PrivateSellList.Clear();
         player.PrivateSellList.AddRange(listings);
-        player.PrivateStoreType = PrivateStoreProtocol.TypeSell;
-        player.PrivateStoreMessage = TruncateStoreMessage(request.Message);
+        ActivatePrivateStore(player, PrivateStoreProtocol.TypeSell, request.Message);
+        return null;
+    }
 
-        if (!player.Sitting)
+    string? TrySetPrivateStoreBuy(ZoneSession session, SetPrivateStoreBuyMsg request)
+    {
+        if (!IsLive(session) || !_byId.TryGetValue(session.ObjectId, out var player) || player.Inventory == null)
+            return "world";
+        if (GuardOpenPrivateStore(player) is { } blocked)
+            return blocked;
+
+        var rows = request.Items ?? [];
+        if (rows.Length == 0)
         {
-            player.Sitting = true;
-            player.Running = false;
-            FanoutWaitType(player, ActionProtocol.WaitSitting);
-            FanoutMoveType(player);
+            ClosePrivateStore(player.ObjectId, standUp: false);
+            return null;
         }
 
-        FanoutPrivateStoreInfo(player);
+        int limit = PrivateStoreProtocol.BuySlotLimit(player.Race);
+        if (rows.Length > limit)
+            return PrivateStoreProtocol.Limit;
+
+        var listings = new List<PrivateStoreBuyListing>(rows.Length);
+        long totalCost = 0;
+        var seen = new HashSet<int>();
+        foreach (var row in rows)
+        {
+            if (row.Count < 1 || row.Price < 0 || row.ItemId < 1)
+                return PrivateStoreProtocol.Item;
+            if (row.ItemId == ShopTrade.AdenaItemId)
+                return PrivateStoreProtocol.Item;
+            if (!seen.Add(row.ItemId))
+                return PrivateStoreProtocol.Item;
+            if (!_game.Items.TryGet(row.ItemId, out var template) || template == null || !template.CanDropTradeStore)
+                return PrivateStoreProtocol.Item;
+            if (!template.Stackable && row.Count != 1)
+                return PrivateStoreProtocol.Item;
+            long line = checked(row.Price * row.Count);
+            if (line > ShopTrade.MaxAdena)
+                return PrivateStoreProtocol.Adena;
+            totalCost = checked(totalCost + line);
+            if (totalCost > ShopTrade.MaxAdena)
+                return PrivateStoreProtocol.Adena;
+            listings.Add(new PrivateStoreBuyListing
+            {
+                ItemId = row.ItemId,
+                Count = row.Count,
+                Price = row.Price
+            });
+        }
+
+        if (player.Inventory.CountOf(ShopTrade.AdenaItemId) < totalCost)
+            return PrivateStoreProtocol.Adena;
+
+        player.PrivateSellList.Clear();
+        player.PrivateBuyList.Clear();
+        player.PrivateBuyList.AddRange(listings);
+        ActivatePrivateStore(player, PrivateStoreProtocol.TypeBuy, request.Message);
         return null;
     }
 
     string? TryPrivateStoreList(ZoneSession session, PrivateStoreListRequestMsg request)
     {
-        if (!IsLive(session) || !_byId.TryGetValue(session.ObjectId, out var buyer) || buyer.Inventory == null)
+        if (!IsLive(session) || !_byId.TryGetValue(session.ObjectId, out var visitor) || visitor.Inventory == null)
             return "world";
         if (!_byId.TryGetValue(request.StoreObjectId, out var store) || store.Kind != ZoneEntityKind.Player)
             return PrivateStoreProtocol.Closed;
-        if (store.PrivateStoreType != PrivateStoreProtocol.TypeSell || store.PrivateSellList.Count == 0)
-            return PrivateStoreProtocol.Closed;
-        if (!StoreInRange(buyer, store))
+        if (!StoreInRange(visitor, store))
             return PrivateStoreProtocol.Range;
 
-        SendPrivateStoreList(buyer, store);
-        return null;
+        if (store.PrivateStoreType == PrivateStoreProtocol.TypeSell && store.PrivateSellList.Count > 0)
+        {
+            SendPrivateStoreListSell(visitor, store);
+            return null;
+        }
+        if (store.PrivateStoreType == PrivateStoreProtocol.TypeBuy && store.PrivateBuyList.Count > 0)
+        {
+            SendPrivateStoreListBuy(visitor, store);
+            return null;
+        }
+        return PrivateStoreProtocol.Closed;
     }
 
     string? TryPrivateStoreBuy(ZoneSession session, PrivateStoreBuyMsg request)
@@ -260,7 +366,115 @@ public sealed partial class ZoneWorld
         else
         {
             FanoutPrivateStoreInfo(store);
-            SendPrivateStoreList(buyer, store);
+            SendPrivateStoreListSell(buyer, store);
+        }
+
+        return null;
+    }
+
+    string? TryPrivateStoreSellTo(ZoneSession session, PrivateStoreSellToMsg request)
+    {
+        if (!IsLive(session) || !_byId.TryGetValue(session.ObjectId, out var seller) || seller.Inventory == null)
+            return "world";
+        if (seller.Dead)
+            return InventoryProtocol.Dead;
+        if (!_byId.TryGetValue(request.StoreObjectId, out var store) || store.Kind != ZoneEntityKind.Player || store.Inventory == null)
+            return PrivateStoreProtocol.Closed;
+        if (store.ObjectId == seller.ObjectId)
+            return "bad_request";
+        if (store.PrivateStoreType != PrivateStoreProtocol.TypeBuy || store.PrivateBuyList.Count == 0)
+            return PrivateStoreProtocol.Closed;
+        if (!StoreInRange(seller, store))
+            return PrivateStoreProtocol.Range;
+
+        var offers = request.Items ?? [];
+        if (offers.Length == 0)
+            return PrivateStoreProtocol.Item;
+
+        long payout = 0;
+        var transfers = new List<(PrivateStoreBuyListing Listing, ItemInstance Stock, long Count)>();
+        foreach (var offer in offers)
+        {
+            if (offer.Count < 1 || offer.Price < 0 || offer.InventoryObjectId < 1)
+                return PrivateStoreProtocol.Item;
+            var stock = seller.Inventory.Find(offer.InventoryObjectId);
+            if (stock == null || stock.IsEquipped || !stock.Template.CanDropTradeStore || stock.Count < offer.Count)
+                return PrivateStoreProtocol.Item;
+            if (stock.ItemId == ShopTrade.AdenaItemId)
+                return PrivateStoreProtocol.Item;
+            var listing = store.PrivateBuyList.FirstOrDefault(row => row.ItemId == stock.ItemId && row.Price == offer.Price);
+            if (listing == null || listing.Count < offer.Count)
+                return PrivateStoreProtocol.Item;
+            payout = checked(payout + listing.Price * offer.Count);
+            if (payout > ShopTrade.MaxAdena)
+                return PrivateStoreProtocol.Adena;
+            transfers.Add((listing, stock, offer.Count));
+        }
+
+        if (store.Inventory.CountOf(ShopTrade.AdenaItemId) < payout)
+            return PrivateStoreProtocol.Adena;
+        long sellerAdena = seller.Inventory.CountOf(ShopTrade.AdenaItemId);
+        if (sellerAdena + payout > ShopTrade.MaxAdena)
+            return PrivateStoreProtocol.Adena;
+
+        var offerProxy = transfers.Select(t => new TradeOfferRow
+        {
+            InventoryObjectId = t.Stock.ObjectId,
+            ItemId = t.Stock.ItemId,
+            Count = t.Count,
+            EnchantLevel = t.Stock.EnchantLevel
+        }).ToList();
+        var deny = IncomingDenyOf(store, offerProxy);
+        if (deny == TradeIncomingDeny.Weight)
+            return PrivateStoreProtocol.Weight;
+        if (deny == TradeIncomingDeny.Slots)
+            return PrivateStoreProtocol.Slots;
+
+        var sellerChanges = new List<InventoryUpdateEntryMsg>();
+        var storeChanges = new List<InventoryUpdateEntryMsg>();
+
+        if (!TransferAdena(store.Inventory, seller.Inventory, (int)payout, storeChanges, sellerChanges))
+            return PrivateStoreProtocol.Adena;
+
+        foreach (var (listing, stock, count) in transfers)
+        {
+            TransferOfferRow(seller.Inventory, store.Inventory,
+                new TradeOfferRow
+                {
+                    InventoryObjectId = stock.ObjectId,
+                    ItemId = stock.ItemId,
+                    Count = count,
+                    EnchantLevel = stock.EnchantLevel
+                },
+                sellerChanges, storeChanges);
+            listing.Count -= count;
+            if (listing.Count <= 0)
+                store.PrivateBuyList.Remove(listing);
+        }
+
+        if (store.Session != null)
+            SaveInventory(store.Session, store.Inventory);
+        SaveInventory(session, seller.Inventory);
+
+        if (sellerChanges.Count > 0)
+        {
+            NetBridge?.FanoutInventoryUpdate([seller.ObjectId],
+                ToNetInventoryUpdate(new InventoryUpdateMsg { Changes = sellerChanges.ToArray() }));
+            SelfUserInfo(seller);
+        }
+        if (storeChanges.Count > 0)
+        {
+            NetBridge?.FanoutInventoryUpdate([store.ObjectId],
+                ToNetInventoryUpdate(new InventoryUpdateMsg { Changes = storeChanges.ToArray() }));
+            SelfUserInfo(store);
+        }
+
+        if (store.PrivateBuyList.Count == 0)
+            ClosePrivateStore(store.ObjectId, standUp: false);
+        else
+        {
+            FanoutPrivateStoreInfo(store);
+            SendPrivateStoreListBuy(seller, store);
         }
 
         return null;
@@ -270,11 +484,14 @@ public sealed partial class ZoneWorld
     {
         if (!_byId.TryGetValue(objectId, out var player) || player.Kind != ZoneEntityKind.Player)
             return;
-        if (player.PrivateStoreType == PrivateStoreProtocol.TypeNone && player.PrivateSellList.Count == 0)
+        if (player.PrivateStoreType == PrivateStoreProtocol.TypeNone
+            && player.PrivateSellList.Count == 0
+            && player.PrivateBuyList.Count == 0)
             return;
         player.PrivateStoreType = PrivateStoreProtocol.TypeNone;
         player.PrivateStoreMessage = "";
         player.PrivateSellList.Clear();
+        player.PrivateBuyList.Clear();
         if (standUp && player.Sitting)
         {
             player.Sitting = false;
@@ -304,9 +521,9 @@ public sealed partial class ZoneWorld
         NetBridge?.FanoutPrivateStoreInfo(NetWatchersOf(player), msg);
     }
 
-    void SendPrivateStoreList(ZoneEntity buyer, ZoneEntity store)
+    void SendPrivateStoreListSell(ZoneEntity visitor, ZoneEntity store)
     {
-        if (buyer.Session == null || buyer.Inventory == null)
+        if (visitor.Session == null || visitor.Inventory == null)
             return;
         var items = store.PrivateSellList.Select(row => new Fineage.Net.Contract.PrivateStoreSellRowNet
         {
@@ -316,12 +533,32 @@ public sealed partial class ZoneWorld
             Price = row.Price,
             EnchantLevel = row.EnchantLevel
         }).ToArray();
-        NetBridge?.FanoutPrivateStoreListSell([buyer.ObjectId], new Fineage.Net.Contract.PrivateStoreListSellNetMsg
+        NetBridge?.FanoutPrivateStoreListSell([visitor.ObjectId], new Fineage.Net.Contract.PrivateStoreListSellNetMsg
         {
             StoreObjectId = store.ObjectId,
             StoreName = store.Name,
             Message = store.PrivateStoreMessage,
-            BuyerAdena = buyer.Inventory.CountOf(ShopTrade.AdenaItemId),
+            BuyerAdena = visitor.Inventory.CountOf(ShopTrade.AdenaItemId),
+            Items = items
+        });
+    }
+
+    void SendPrivateStoreListBuy(ZoneEntity visitor, ZoneEntity store)
+    {
+        if (visitor.Session == null || store.Inventory == null)
+            return;
+        var items = store.PrivateBuyList.Select(row => new Fineage.Net.Contract.PrivateStoreBuyRowNet
+        {
+            ItemId = row.ItemId,
+            Count = row.Count,
+            Price = row.Price
+        }).ToArray();
+        NetBridge?.FanoutPrivateStoreListBuy([visitor.ObjectId], new Fineage.Net.Contract.PrivateStoreListBuyNetMsg
+        {
+            StoreObjectId = store.ObjectId,
+            StoreName = store.Name,
+            Message = store.PrivateStoreMessage,
+            StoreAdena = store.Inventory.CountOf(ShopTrade.AdenaItemId),
             Items = items
         });
     }

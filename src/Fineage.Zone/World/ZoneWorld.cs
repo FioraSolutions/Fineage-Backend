@@ -101,12 +101,14 @@ sealed class ZoneEntity
     public double RegenCarryMp { get; set; }
     /// <summary>When true, regen rates double (classic sitting rest).</summary>
     public bool Sitting { get; set; }
-    /// <summary>Mobius <c>PrivateStoreType</c> (<see cref="Fineage.Protocol.PrivateStoreProtocol.TypeNone"/> / Sell).</summary>
+    /// <summary>Mobius <c>PrivateStoreType</c> (None / Sell / Buy).</summary>
     public byte PrivateStoreType { get; set; }
-    /// <summary>Store title shown above the sitting pawn (Mobius PrivateStoreMsgSell).</summary>
+    /// <summary>Store title shown above the sitting pawn (Mobius PrivateStoreMsgSell/Buy).</summary>
     public string PrivateStoreMessage { get; set; } = "";
     /// <summary>Active sell listings while <see cref="PrivateStoreType"/> is Sell.</summary>
     public List<PrivateStoreSellListing> PrivateSellList { get; } = [];
+    /// <summary>Active buy listings while <see cref="PrivateStoreType"/> is Buy (by template id).</summary>
+    public List<PrivateStoreBuyListing> PrivateBuyList { get; } = [];
     /// <summary>NPC Mobius physical attack (0 = unknown → level placeholder). Players read the class template.</summary>
     public double PAtk { get; init; }
     /// <summary>NPC Mobius <c>vitals hpRegen</c>: HP restored per 3 s regen tick (players use the class table).</summary>

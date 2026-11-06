@@ -134,4 +134,62 @@ public sealed class NetPrivateStoreTests
         }, default));
         Assert.Equal(PrivateStoreProtocol.TypeSell, sellerEntity.PrivateStoreType);
     }
+
+    [Fact]
+    public async Task Buyer_opens_store_and_visitor_sells_into_it()
+    {
+        var (kit, rec) = World();
+        // Fighter starter bag has unequipped tradables; mystic (1) often does not.
+        var (seller, sellerEntity) = await kit.EnterAsync(classId: 0);
+        var (buyer, buyerEntity) = await kit.EnterAsync(classId: 1);
+
+        var offered = Tradable(sellerEntity);
+        int itemId = offered.ItemId;
+        int objectId = offered.ObjectId;
+        const long price = 75;
+        GiveAdena(buyerEntity, 500);
+
+        Assert.Equal(PrivateStoreProtocol.Adena, await kit.World.TrySetPrivateStoreBuyAsync(buyer, new SetPrivateStoreBuyMsg
+        {
+            Message = "WTB",
+            Items = [new PrivateStoreBuyRowMsg { ItemId = itemId, Count = 1, Price = 600 }]
+        }, default));
+
+        Assert.Null(await kit.World.TrySetPrivateStoreBuyAsync(buyer, new SetPrivateStoreBuyMsg
+        {
+            Message = "WTB",
+            Items = [new PrivateStoreBuyRowMsg { ItemId = itemId, Count = 1, Price = price }]
+        }, default));
+
+        Assert.Equal(PrivateStoreProtocol.TypeBuy, buyerEntity.PrivateStoreType);
+        Assert.True(buyerEntity.Sitting);
+        Assert.Empty(buyerEntity.PrivateSellList);
+        Assert.Single(buyerEntity.PrivateBuyList);
+
+        Assert.Null(await kit.World.TryPrivateStoreListAsync(seller, new PrivateStoreListRequestMsg
+        {
+            StoreObjectId = buyerEntity.ObjectId
+        }, default));
+
+        var list = Assert.IsType<Fineage.Net.Contract.PrivateStoreListBuyNetMsg>(
+            Last(rec, nameof(INetPresenceBridge.FanoutPrivateStoreListBuy)));
+        Assert.Equal(buyerEntity.ObjectId, list.StoreObjectId);
+        Assert.Equal(itemId, Assert.Single(list.Items).ItemId);
+
+        Assert.Null(await kit.World.TryPrivateStoreSellToAsync(seller, new PrivateStoreSellToMsg
+        {
+            StoreObjectId = buyerEntity.ObjectId,
+            Items =
+            [
+                new PrivateStoreSellRowMsg { InventoryObjectId = objectId, Count = 1, Price = price }
+            ]
+        }, default));
+
+        Assert.DoesNotContain(sellerEntity.Inventory!.Items, item => item.ObjectId == objectId);
+        Assert.Contains(buyerEntity.Inventory!.Items, item => item.ItemId == itemId);
+        Assert.Equal(425, buyerEntity.Inventory.CountOf(ShopTrade.AdenaItemId));
+        Assert.True(sellerEntity.Inventory.CountOf(ShopTrade.AdenaItemId) >= price);
+        Assert.Equal(PrivateStoreProtocol.TypeNone, buyerEntity.PrivateStoreType);
+        Assert.Empty(buyerEntity.PrivateBuyList);
+    }
 }

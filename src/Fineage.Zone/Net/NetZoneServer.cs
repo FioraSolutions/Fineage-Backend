@@ -524,6 +524,13 @@ public sealed class NetZoneServer : INetPresenceBridge
             _presence.TrySend(watcher, NetOpcode.PrivateStoreListSell, payload);
     }
 
+    void INetPresenceBridge.FanoutPrivateStoreListBuy(IReadOnlyList<int> watcherObjectIds, PrivateStoreListBuyNetMsg list)
+    {
+        var payload = NetCodec.EncodePrivateStoreListBuy(list);
+        foreach (int watcher in watcherObjectIds)
+            _presence.TrySend(watcher, NetOpcode.PrivateStoreListBuy, payload);
+    }
+
     void INetPresenceBridge.FanoutBossStatus(IReadOnlyList<int> watcherObjectIds, BossStatusNetMsg status)
     {
         var payload = NetCodec.EncodeBossStatus(status);
@@ -882,6 +889,12 @@ public sealed class NetZoneServer : INetPresenceBridge
                             break;
                         case NetOpcode.PrivateStoreBuy:
                             await OnPrivateStoreBuyAsync(conn, zoneSession, envelope, ct).ConfigureAwait(false);
+                            break;
+                        case NetOpcode.SetPrivateStoreBuy:
+                            await OnSetPrivateStoreBuyAsync(conn, zoneSession, envelope, ct).ConfigureAwait(false);
+                            break;
+                        case NetOpcode.PrivateStoreSellTo:
+                            await OnPrivateStoreSellToAsync(conn, zoneSession, envelope, ct).ConfigureAwait(false);
                             break;
                         case NetOpcode.StopMove:
                             // Authoritative stop: correct to current session position.
@@ -2568,6 +2581,62 @@ public sealed class NetZoneServer : INetPresenceBridge
             ct).ConfigureAwait(false);
         if (error != null)
             await RejectAsync(conn, error, "Private store buy failed.", ct).ConfigureAwait(false);
+    }
+
+    async Task OnSetPrivateStoreBuyAsync(
+        NetConnection conn,
+        ZoneSession zoneSession,
+        PacketEnvelope envelope,
+        CancellationToken ct)
+    {
+        RequireHello(conn);
+        if (!zoneSession.Bound || !zoneSession.InWorld)
+        {
+            await RejectAsync(conn, "not_in_world", "Enter world first.", ct).ConfigureAwait(false);
+            return;
+        }
+
+        var req = NetCodec.DecodeSetPrivateStoreBuy(envelope.Payload);
+        var items = (req.Items ?? []).Select(row => new PrivateStoreBuyRowMsg
+        {
+            ItemId = row.ItemId,
+            Count = row.Count,
+            Price = row.Price
+        }).ToArray();
+        string? error = await _world.TrySetPrivateStoreBuyAsync(
+            zoneSession,
+            new SetPrivateStoreBuyMsg { Message = req.Message ?? "", Items = items },
+            ct).ConfigureAwait(false);
+        if (error != null)
+            await RejectAsync(conn, error, "Private store buy open failed.", ct).ConfigureAwait(false);
+    }
+
+    async Task OnPrivateStoreSellToAsync(
+        NetConnection conn,
+        ZoneSession zoneSession,
+        PacketEnvelope envelope,
+        CancellationToken ct)
+    {
+        RequireHello(conn);
+        if (!zoneSession.Bound || !zoneSession.InWorld)
+        {
+            await RejectAsync(conn, "not_in_world", "Enter world first.", ct).ConfigureAwait(false);
+            return;
+        }
+
+        var req = NetCodec.DecodePrivateStoreSellTo(envelope.Payload);
+        var items = (req.Items ?? []).Select(row => new PrivateStoreSellRowMsg
+        {
+            InventoryObjectId = row.InventoryObjectId,
+            Count = row.Count,
+            Price = row.Price
+        }).ToArray();
+        string? error = await _world.TryPrivateStoreSellToAsync(
+            zoneSession,
+            new PrivateStoreSellToMsg { StoreObjectId = req.StoreObjectId, Items = items },
+            ct).ConfigureAwait(false);
+        if (error != null)
+            await RejectAsync(conn, error, "Private store sell-to failed.", ct).ConfigureAwait(false);
     }
 
     static void RequireHello(NetConnection conn)

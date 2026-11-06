@@ -1,6 +1,6 @@
 namespace Fineage.Protocol;
 
-/// <summary>Player private store (Mobius <c>PrivateStoreType</c>). Sell slice first (#275).</summary>
+/// <summary>Player private store (Mobius <c>PrivateStoreType</c>). Sell #275, buy #277.</summary>
 public static class PrivateStoreProtocol
 {
     /// <summary>Mobius INTERACTION_DISTANCE for opening / buying from a store.</summary>
@@ -12,10 +12,17 @@ public static class PrivateStoreProtocol
     /// <summary>Config.MAX_PVTSTORESELL_SLOTS_DWARF.</summary>
     public const int SellSlotsDwarf = 4;
 
+    /// <summary>Config.MAX_PVTSTOREBUY_SLOTS_OTHER.</summary>
+    public const int BuySlotsOther = 4;
+
+    /// <summary>Config.MAX_PVTSTOREBUY_SLOTS_DWARF.</summary>
+    public const int BuySlotsDwarf = 5;
+
     public const int DwarfRace = 4;
 
     public const byte TypeNone = 0;
     public const byte TypeSell = 1;
+    public const byte TypeBuy = 2;
 
     public const string Busy = "store_busy";
     public const string Combat = "store_combat";
@@ -29,4 +36,7 @@ public static class PrivateStoreProtocol
 
     public static int SellSlotLimit(int race) =>
         race == DwarfRace ? SellSlotsDwarf : SellSlotsOther;
+
+    public static int BuySlotLimit(int race) =>
+        race == DwarfRace ? BuySlotsDwarf : BuySlotsOther;
 }

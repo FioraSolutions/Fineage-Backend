@@ -30,7 +30,7 @@ Legend: ✅ done · 🟡 partial · ❌ missing · stub = shell only.
 | 20 | Inventory / equip / warehouse private | Economy | ✅ | Clan/freight ❌ |
 | 21 | Shops buy/sell/multisell | Economy | ✅ | Wear preview stub |
 | 22 | Player trade | Economy | ✅ | |
-| 23 | Private store / craft | Economy | 🟡 | Sell store Net+zone (#275); buy-store / package / craft ❌ |
+| 23 | Private store / craft | Economy | 🟡 | Sell (#275) + buy (#277); package / craft ❌; client UI follow-up |
 | 24 | Enchant | Economy | 🟡 | Backend; client UI partial |
 | 25 | Party invite/leave + exp share | Social | 🟡 | Invite/leave + exp; loot modes on sweep + ground pickup (#260 follow-up) |
 | 26 | Clan basic | Social | 🟡 | No crest/war/ally |
@@ -43,7 +43,7 @@ Legend: ✅ done · 🟡 partial · ❌ missing · stub = shell only.
 
 ## Next backend slices (priority)
 
-1. **Private store buy / package / craft** (sell done #275; client UI still needed).
+1. **Package sell / craft** (sell+buy done; client UI still needed).
 2. **Pets / summons** or **friends / block**.
 
 ## Docs

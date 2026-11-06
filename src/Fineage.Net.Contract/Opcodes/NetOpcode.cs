@@ -227,5 +227,11 @@ namespace Fineage.Net.Contract
         public const ushort PrivateStoreInfo = 0x0391;
         /// <summary>Zone → client: sell list window for the buyer.</summary>
         public const ushort PrivateStoreListSell = 0x0392;
+        /// <summary>Client → zone: Mobius SetPrivateStoreListBuy.</summary>
+        public const ushort SetPrivateStoreBuy = 0x0393;
+        /// <summary>Client → zone: Mobius RequestPrivateStoreSell (sell into a buy store).</summary>
+        public const ushort PrivateStoreSellTo = 0x0394;
+        /// <summary>Zone → client: buy list window for a visitor.</summary>
+        public const ushort PrivateStoreListBuy = 0x0395;
     }
 }

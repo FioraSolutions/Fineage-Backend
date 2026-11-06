@@ -823,6 +823,28 @@ public sealed class PrivateStoreBuyMsg
     public PrivateStoreSellRowMsg[] Items { get; set; } = [];
 }
 
+/// <summary>One buy-store wish row (Mobius TradeList buy item — template id, not bag object).</summary>
+public sealed class PrivateStoreBuyRowMsg
+{
+    public int ItemId { get; set; }
+    public long Count { get; set; } = 1;
+    public long Price { get; set; }
+}
+
+/// <summary>Open or refresh a private buy store (Mobius SetPrivateStoreListBuy).</summary>
+public sealed class SetPrivateStoreBuyMsg
+{
+    public string Message { get; set; } = "";
+    public PrivateStoreBuyRowMsg[] Items { get; set; } = [];
+}
+
+/// <summary>Sell items into a buy store (Mobius RequestPrivateStoreSell).</summary>
+public sealed class PrivateStoreSellToMsg
+{
+    public int StoreObjectId { get; set; }
+    public PrivateStoreSellRowMsg[] Items { get; set; } = [];
+}
+
 /// <summary>Opcode <see cref="MsgType.RequestQuestList"/> (42). Empty body.</summary>
 public sealed class RequestQuestListMsg
 {

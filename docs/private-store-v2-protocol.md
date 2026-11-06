@@ -1,16 +1,17 @@
-# Zone Net private store (sell slice)
+# Zone Net private store (sell + buy)
 
-> Mobius Interlude `PrivateStoreType.SELL` / `SetPrivateStoreListSell` / `RequestPrivateStoreBuy`.
-> Issue [#275](https://github.com/FioraSolutions/Fineage-Backend/issues/275). Live opcodes: [`net-protocol.md`](net-protocol.md).
+> Mobius Interlude `PrivateStoreType.SELL` / `BUY`.
+> Issues [#275](https://github.com/FioraSolutions/Fineage-Backend/issues/275) (sell), [#277](https://github.com/FioraSolutions/Fineage-Backend/issues/277) (buy).
+> Live opcodes: [`net-protocol.md`](net-protocol.md).
 
 ## Scope
 
 | In | Out (follow-up) |
 |----|-----------------|
-| Open / refresh sell list, sit, title message | Buy-store |
-| Buyer list + purchase | Package sell |
-| Quit / death / stand / leave close store | Manufacture / craft |
-| Weight / slots / MaxAdena checks | Offline traders, NO_STORE zones |
+| Open / refresh sell or buy list, sit, title | Package sell |
+| Visitor list + buy-from-sell / sell-into-buy | Manufacture / craft |
+| Quit / death / stand / leave close store | Offline traders, NO_STORE zones |
+| Weight / slots / MaxAdena checks | Client manage UI |
 
 ## Opcodes
 
@@ -19,19 +20,17 @@
 | C→S | `0x038D` | `SetPrivateStoreSell` |
 | C→S | `0x038E` | `PrivateStoreQuit` (empty) |
 | C→S | `0x038F` | `PrivateStoreListRequest` |
-| C→S | `0x0390` | `PrivateStoreBuy` |
+| C→S | `0x0390` | `PrivateStoreBuy` (buy from sell store) |
 | S→C | `0x0391` | `PrivateStoreInfo` |
 | S→C | `0x0392` | `PrivateStoreListSell` |
-
-Codec: `NetCodec.Encode/Decode*PrivateStore*`. Zone API: `ZoneWorld.TrySetPrivateStoreSellAsync` / `TryPrivateStoreBuyAsync` / …
+| C→S | `0x0393` | `SetPrivateStoreBuy` |
+| C→S | `0x0394` | `PrivateStoreSellTo` (sell into buy store) |
+| S→C | `0x0395` | `PrivateStoreListBuy` |
 
 ## Limits
 
-- Interaction range **150** (Mobius `INTERACTION_DISTANCE`).
-- Sell slots: **3** (other) / **4** (dwarf race).
+- Interaction range **150**.
+- Sell slots: **3** / **4** (dwarf). Buy slots: **4** / **5** (dwarf).
+- Opening a buy store requires bag adena ≥ total wish cost.
 - Title truncated to **29** chars.
-- Adena cap `ShopTrade.MaxAdena` (2e9) on line and seller total.
-
-## Client
-
-Backend is ready; Fineage client UI for manage / store title / buy window is a coordinated follow-up.
+- Adena cap `ShopTrade.MaxAdena` (2e9).
