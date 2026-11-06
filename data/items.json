@@ -2148,8 +2148,7 @@
       "kind": "etc",
       "icon": "icon.weapon_club_i00",
       "price": 3800,
-      "weight": 1350,
-      "quest": true
+      "weight": 1350
     },
     {
       "id": 752,
@@ -4008,8 +4007,7 @@
       "kind": "etc",
       "icon": "icon.weapon_broad_sword_i00",
       "price": 116000,
-      "weight": 1400,
-      "quest": true
+      "weight": 1400
     },
     {
       "id": 1143,
@@ -4369,8 +4367,7 @@
       "kind": "etc",
       "icon": "icon.weapon_bow_i00",
       "price": 0,
-      "weight": 1850,
-      "quest": true
+      "weight": 1850
     },
     {
       "id": 1182,
@@ -4378,8 +4375,7 @@
       "kind": "etc",
       "icon": "icon.weapon_knife_i00",
       "price": 0,
-      "weight": 1000,
-      "quest": true
+      "weight": 1000
     },
     {
       "id": 1183,
@@ -6476,8 +6472,7 @@
       "stackable": true,
       "icon": "icon.etc_totem_green_i00",
       "price": 1200,
-      "weight": 10,
-      "quest": true
+      "weight": 10
     },
     {
       "id": 1506,
@@ -12934,8 +12929,7 @@
       "icon": "icon.etc_recipe_blue_i00",
       "price": 0,
       "weight": 30,
-      "stackable": true,
-      "quest": true
+      "stackable": true
     },
     {
       "id": 3024,
@@ -12944,8 +12938,7 @@
       "icon": "icon.etc_recipe_blue_i00",
       "price": 0,
       "weight": 30,
-      "stackable": true,
-      "quest": true
+      "stackable": true
     },
     {
       "id": 3025,
@@ -12954,8 +12947,7 @@
       "icon": "icon.etc_recipe_blue_i00",
       "price": 0,
       "weight": 30,
-      "stackable": true,
-      "quest": true
+      "stackable": true
     },
     {
       "id": 3026,
@@ -12963,8 +12955,7 @@
       "kind": "etc",
       "icon": "icon.weapon_short_spear_i00",
       "price": 105000,
-      "weight": 800,
-      "quest": true
+      "weight": 800
     },
     {
       "id": 3028,
@@ -12972,8 +12963,7 @@
       "kind": "etc",
       "icon": "icon.weapon_short_bow_i00",
       "price": 41600,
-      "weight": 600,
-      "quest": true
+      "weight": 600
     },
     {
       "id": 3029,
@@ -12981,8 +12971,7 @@
       "kind": "etc",
       "icon": "icon.weapon_gladius_i00",
       "price": 41600,
-      "weight": 1200,
-      "quest": true
+      "weight": 1200
     },
     {
       "id": 3030,
@@ -12991,8 +12980,7 @@
       "icon": "icon.etc_key_i00",
       "price": 0,
       "weight": 10,
-      "stackable": true,
-      "quest": true
+      "stackable": true
     },
     {
       "id": 3031,
@@ -16128,8 +16116,7 @@
       "icon": "icon.etc_jewel_box_i00",
       "price": 10,
       "weight": 20,
-      "stackable": true,
-      "quest": true
+      "stackable": true
     },
     {
       "id": 3441,
@@ -16138,8 +16125,7 @@
       "icon": "icon.etc_jewel_box_i00",
       "price": 10,
       "weight": 20,
-      "stackable": true,
-      "quest": true
+      "stackable": true
     },
     {
       "id": 3442,
@@ -16148,8 +16134,7 @@
       "icon": "icon.etc_jewel_box_i00",
       "price": 10,
       "weight": 20,
-      "stackable": true,
-      "quest": true
+      "stackable": true
     },
     {
       "id": 3443,
@@ -16158,8 +16143,7 @@
       "icon": "icon.etc_jewel_box_i00",
       "price": 10,
       "weight": 20,
-      "stackable": true,
-      "quest": true
+      "stackable": true
     },
     {
       "id": 3444,
@@ -16249,8 +16233,7 @@
       "icon": "icon.etc_stone_gray_i00",
       "price": 2000,
       "weight": 20,
-      "stackable": true,
-      "quest": true
+      "stackable": true
     },
     {
       "id": 3458,
@@ -16259,8 +16242,7 @@
       "icon": "icon.etc_debris_i00",
       "price": 2000,
       "weight": 20,
-      "stackable": true,
-      "quest": true
+      "stackable": true
     },
     {
       "id": 3459,
@@ -16269,8 +16251,7 @@
       "icon": "icon.etc_gargoyle_claw_i00",
       "price": 2000,
       "weight": 20,
-      "stackable": true,
-      "quest": true
+      "stackable": true
     },
     {
       "id": 3460,
@@ -16279,8 +16260,7 @@
       "icon": "icon.etc_stone_black_i00",
       "price": 2000,
       "weight": 20,
-      "stackable": true,
-      "quest": true
+      "stackable": true
     },
     {
       "id": 3461,
@@ -16289,8 +16269,7 @@
       "icon": "icon.etc_statue_of_einhasad_bronze_i00",
       "price": 20000,
       "weight": 20,
-      "stackable": true,
-      "quest": true
+      "stackable": true
     },
     {
       "id": 3462,
@@ -16299,8 +16278,7 @@
       "icon": "icon.etc_plate_silver_i00",
       "price": 2000,
       "weight": 20,
-      "stackable": true,
-      "quest": true
+      "stackable": true
     },
     {
       "id": 3463,
@@ -16309,8 +16287,7 @@
       "icon": "icon.etc_plate_silver_i00",
       "price": 2000,
       "weight": 20,
-      "stackable": true,
-      "quest": true
+      "stackable": true
     },
     {
       "id": 3464,
@@ -16319,8 +16296,7 @@
       "icon": "icon.etc_plate_silver_i00",
       "price": 2000,
       "weight": 20,
-      "stackable": true,
-      "quest": true
+      "stackable": true
     },
     {
       "id": 3465,
@@ -16329,8 +16305,7 @@
       "icon": "icon.etc_plate_silver_i00",
       "price": 2000,
       "weight": 20,
-      "stackable": true,
-      "quest": true
+      "stackable": true
     },
     {
       "id": 3466,
@@ -16339,8 +16314,7 @@
       "icon": "icon.etc_ancient_tablet_i00",
       "price": 20000,
       "weight": 20,
-      "stackable": true,
-      "quest": true
+      "stackable": true
     },
     {
       "id": 3467,
@@ -16348,8 +16322,7 @@
       "kind": "etc",
       "icon": "icon.etc_lesser_potion_blue_i00",
       "price": 10,
-      "weight": 60,
-      "quest": true
+      "weight": 60
     },
     {
       "id": 3471,
@@ -16357,8 +16330,7 @@
       "kind": "etc",
       "icon": "icon.weapon_doomed_dagger_i00",
       "price": 0,
-      "weight": 400,
-      "quest": true
+      "weight": 400
     },
     {
       "id": 3473,
@@ -16582,8 +16554,7 @@
       "kind": "etc",
       "icon": "icon.etc_powder_orange_i00",
       "price": 10000,
-      "weight": 0,
-      "quest": true
+      "weight": 0
     },
     {
       "id": 3671,
@@ -18201,8 +18172,7 @@
       "kind": "etc",
       "icon": "icon.etc_herb_red_i00",
       "price": 0,
-      "weight": 0,
-      "quest": true
+      "weight": 0
     },
     {
       "id": 3833,
@@ -18210,8 +18180,7 @@
       "kind": "etc",
       "icon": "icon.etc_herb_green_i00",
       "price": 0,
-      "weight": 0,
-      "quest": true
+      "weight": 0
     },
     {
       "id": 3834,
@@ -18219,8 +18188,7 @@
       "kind": "etc",
       "icon": "icon.etc_herb_blue_i00",
       "price": 0,
-      "weight": 0,
-      "quest": true
+      "weight": 0
     },
     {
       "id": 3835,
@@ -18228,8 +18196,7 @@
       "kind": "etc",
       "icon": "icon.etc_dragon_blood_i00",
       "price": 0,
-      "weight": 0,
-      "quest": true
+      "weight": 0
     },
     {
       "id": 3836,
@@ -18237,8 +18204,7 @@
       "kind": "etc",
       "icon": "icon.etc_coins_gold_i00",
       "price": 0,
-      "weight": 0,
-      "quest": true
+      "weight": 0
     },
     {
       "id": 3837,
@@ -18246,8 +18212,7 @@
       "kind": "etc",
       "icon": "icon.etc_jewel_red_i00",
       "price": 0,
-      "weight": 0,
-      "quest": true
+      "weight": 0
     },
     {
       "id": 3838,
@@ -18265,8 +18230,7 @@
       "icon": "icon.etc_dragon_egg_i02",
       "price": 0,
       "weight": 0,
-      "stackable": true,
-      "quest": true
+      "stackable": true
     },
     {
       "id": 3840,
@@ -18275,8 +18239,7 @@
       "icon": "icon.etc_dragon_egg_i01",
       "price": 0,
       "weight": 0,
-      "stackable": true,
-      "quest": true
+      "stackable": true
     },
     {
       "id": 3841,
@@ -18285,8 +18248,7 @@
       "icon": "icon.etc_dragon_egg_i00",
       "price": 0,
       "weight": 0,
-      "stackable": true,
-      "quest": true
+      "stackable": true
     },
     {
       "id": 3842,
@@ -18295,8 +18257,7 @@
       "icon": "icon.etc_dragon_egg_i03",
       "price": 0,
       "weight": 0,
-      "stackable": true,
-      "quest": true
+      "stackable": true
     },
     {
       "id": 3843,
@@ -18304,8 +18265,7 @@
       "kind": "etc",
       "icon": "icon.etc_feather_black_i00",
       "price": 1000,
-      "weight": 0,
-      "quest": true
+      "weight": 0
     },
     {
       "id": 3844,
@@ -18314,8 +18274,7 @@
       "icon": "icon.etc_crystal_red_i00",
       "price": 0,
       "weight": 0,
-      "stackable": true,
-      "quest": true
+      "stackable": true
     },
     {
       "id": 3845,
@@ -18324,8 +18283,7 @@
       "icon": "icon.etc_instrument_i00",
       "price": 500,
       "weight": 0,
-      "stackable": true,
-      "quest": true
+      "stackable": true
     },
     {
       "id": 3846,
@@ -18334,8 +18292,7 @@
       "icon": "icon.etc_mechanic_box_i00",
       "price": 0,
       "weight": 0,
-      "stackable": true,
-      "quest": true
+      "stackable": true
     },
     {
       "id": 3847,
@@ -18344,8 +18301,7 @@
       "icon": "icon.etc_key_i00",
       "price": 0,
       "weight": 0,
-      "stackable": true,
-      "quest": true
+      "stackable": true
     },
     {
       "id": 3848,
@@ -19363,8 +19319,7 @@
       "kind": "etc",
       "icon": "icon.etc_spellbook_gray_i00",
       "price": 0,
-      "weight": 20,
-      "quest": true
+      "weight": 20
     },
     {
       "id": 4398,
@@ -19372,8 +19327,7 @@
       "kind": "etc",
       "icon": "icon.etc_dragons_blood_i00",
       "price": 0,
-      "weight": 20,
-      "quest": true
+      "weight": 20
     },
     {
       "id": 4399,
@@ -19381,8 +19335,7 @@
       "kind": "etc",
       "icon": "icon.etc_branch_gold_i00",
       "price": 0,
-      "weight": 20,
-      "quest": true
+      "weight": 20
     },
     {
       "id": 4400,
@@ -19391,8 +19344,7 @@
       "icon": "icon.etc_piece_of_cloth_white_i00",
       "price": 0,
       "weight": 0,
-      "stackable": true,
-      "quest": true
+      "stackable": true
     },
     {
       "id": 4407,
@@ -19481,8 +19433,7 @@
       "kind": "etc",
       "icon": "icon.etc_leash_i00",
       "price": 0,
-      "weight": 800,
-      "quest": true
+      "weight": 800
     },
     {
       "id": 4426,
@@ -19526,8 +19477,7 @@
       "kind": "etc",
       "icon": "icon.weapon_knife_i00",
       "price": 0,
-      "weight": 1140,
-      "quest": true
+      "weight": 1140
     },
     {
       "id": 4666,
@@ -20563,8 +20513,7 @@
       "icon": "icon.etc_irongate_medal_i00",
       "price": 100,
       "weight": 0,
-      "stackable": true,
-      "quest": true
+      "stackable": true
     },
     {
       "id": 6002,
@@ -20644,8 +20593,7 @@
       "kind": "etc",
       "icon": "icon.etc_spellbook_red_i00",
       "price": 1,
-      "weight": 20,
-      "quest": true
+      "weight": 20
     },
     {
       "id": 6318,
@@ -20712,8 +20660,7 @@
       "stackable": true,
       "icon": "icon.etc_crystal_blue_i00",
       "price": 0,
-      "weight": 0,
-      "quest": true
+      "weight": 0
     },
     {
       "id": 6360,
@@ -21392,8 +21339,7 @@
       "kind": "etc",
       "icon": "icon.etc_spellbook_blue_i00",
       "price": 0,
-      "weight": 1,
-      "quest": true
+      "weight": 1
     },
     {
       "id": 7065,
@@ -21401,8 +21347,7 @@
       "kind": "etc",
       "icon": "icon.etc_letter_red_i00",
       "price": 0,
-      "weight": 1,
-      "quest": true
+      "weight": 1
     },
     {
       "id": 7066,
@@ -21410,8 +21355,7 @@
       "kind": "etc",
       "icon": "icon.etc_permit_card_i00",
       "price": 0,
-      "weight": 1,
-      "quest": true
+      "weight": 1
     },
     {
       "id": 7076,
@@ -23391,8 +23335,7 @@
       "icon": "icon.etc_lesser_potion_clear_i00",
       "price": 0,
       "weight": 0,
-      "stackable": true,
-      "quest": true
+      "stackable": true
     },
     {
       "id": 8058,
@@ -23401,8 +23344,7 @@
       "icon": "icon.etc_magic_book_blue_i00",
       "price": 0,
       "weight": 0,
-      "stackable": true,
-      "quest": true
+      "stackable": true
     },
     {
       "id": 8059,
@@ -23411,8 +23353,7 @@
       "icon": "icon.etc_magic_book_blue_i00",
       "price": 0,
       "weight": 0,
-      "stackable": true,
-      "quest": true
+      "stackable": true
     },
     {
       "id": 8060,
@@ -23421,8 +23362,7 @@
       "icon": "icon.etc_key_i00",
       "price": 0,
       "weight": 0,
-      "stackable": true,
-      "quest": true
+      "stackable": true
     },
     {
       "id": 8062,
@@ -23661,8 +23601,7 @@
       "icon": "icon.etc_fang_red_i00",
       "price": 0,
       "weight": 0,
-      "stackable": true,
-      "quest": true
+      "stackable": true
     },
     {
       "id": 8086,
