@@ -11,41 +11,22 @@
       "npcId": 30138,
       "hook": "talk",
       "when": "absent",
-      "htmlFile": "30138-event-30138-04-002.htm"
+      "maxLevel": 10,
+      "htmlFile": "30138-talk-000.htm"
     },
     {
       "npcId": 30138,
       "hook": "talk",
-      "when": "started",
-      "cond": 1,
-      "htmlFile": "30138-talk-c1-000.htm"
-    },
-    {
-      "npcId": 30138,
-      "hook": "talk",
-      "when": "started",
-      "cond": 2,
-      "ops": [
-        {
-          "op": "take_item",
-          "itemId": 1045,
-          "count": 1
-        },
-        {
-          "op": "give_adena",
-          "count": 3350
-        },
-        {
-          "op": "complete"
-        }
-      ],
-      "htmlFile": "30138-talk-c2-001.htm"
+      "when": "absent",
+      "minLevel": 11,
+      "htmlFile": "30138-talk-001.htm"
     },
     {
       "npcId": 30138,
       "hook": "event",
       "when": "absent",
       "event": "30138-04",
+      "minLevel": 11,
       "ops": [
         {
           "op": "create"
@@ -59,6 +40,71 @@
         }
       ],
       "htmlFile": "30138-event-30138-04-002.htm"
+    },
+    {
+      "npcId": 30138,
+      "hook": "talk",
+      "when": "started",
+      "cond": 1,
+      "htmlFile": "30138-talk-c1-003.htm"
+    },
+    {
+      "npcId": 30138,
+      "hook": "talk",
+      "when": "started",
+      "cond": 2,
+      "atLeast": {
+        "1045": 5
+      },
+      "ops": [
+        {
+          "op": "give_adena",
+          "count": 3350
+        },
+        {
+          "op": "give_item",
+          "itemId": 1060,
+          "count": 1
+        },
+        {
+          "op": "complete"
+        }
+      ],
+      "htmlFile": "30138-talk-c2-004.htm"
+    },
+    {
+      "npcId": 20015,
+      "hook": "kill",
+      "when": "started",
+      "cond": 1,
+      "html": "",
+      "ops": [
+        {
+          "op": "drop_item",
+          "itemId": 1045,
+          "count": 1,
+          "chance": 0.2,
+          "limit": 5,
+          "condAtLimit": 2
+        }
+      ]
+    },
+    {
+      "npcId": 20020,
+      "hook": "kill",
+      "when": "started",
+      "cond": 1,
+      "html": "",
+      "ops": [
+        {
+          "op": "drop_item",
+          "itemId": 1045,
+          "count": 1,
+          "chance": 0.2,
+          "limit": 5,
+          "condAtLimit": 2
+        }
+      ]
     }
   ]
 }

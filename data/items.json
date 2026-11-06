@@ -6436,6 +6436,16 @@
       "quest": true
     },
     {
+      "id": 1492,
+      "name": "Floating Stone",
+      "kind": "etc",
+      "icon": "icon.etc_crystal_ball_blue_i00",
+      "price": 0,
+      "weight": 0,
+      "stackable": true,
+      "quest": true
+    },
+    {
       "id": 1493,
       "name": "Tarantula Spider Silk",
       "kind": "etc",
