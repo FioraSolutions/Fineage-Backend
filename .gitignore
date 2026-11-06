@@ -53,3 +53,4 @@ publish/
 !data/item-skills.json
 !data/map-regions.json
 !data/death-drop.json
+!data/npc-ai-support.json

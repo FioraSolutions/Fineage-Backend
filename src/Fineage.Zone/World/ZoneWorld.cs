@@ -159,6 +159,12 @@ sealed class ZoneEntity
     public IReadOnlyDictionary<string, double>? DefenceTraits { get; init; }
     /// <summary>Mobius AI attack skills (skillList ∩ skill-combat); null = melee only.</summary>
     public IReadOnlyList<Fineage.Zone.Npcs.NpcAiSkill>? AiSkills { get; init; }
+    /// <summary>Mobius AISkillScope.HEAL rows (self heal when wounded).</summary>
+    public IReadOnlyList<Fineage.Zone.Npcs.NpcAiSupportSkill>? AiHealSkills { get; set; }
+    /// <summary>Mobius AISkillScope.BUFF rows (self buff when missing).</summary>
+    public IReadOnlyList<Fineage.Zone.Npcs.NpcAiSupportSkill>? AiBuffSkills { get; set; }
+    /// <summary>Mobius AISkillScope.DEBUFF rows (debuff hate target).</summary>
+    public IReadOnlyList<Fineage.Zone.Npcs.NpcAiSupportSkill>? AiDebuffSkills { get; set; }
     public int MinSkillChance { get; init; } = 7;
     public int MaxSkillChance { get; init; } = 15;
     /// <summary>Mobius auto soulshot set: shot item ids recharged after each discharge.</summary>
@@ -402,6 +408,8 @@ public sealed partial class ZoneWorld
     readonly SkillStatEffectCatalog _statEffects;
     /// <summary>Mobius attack-skill power / MP / timing (data/skill-combat.json).</summary>
     readonly SkillCombatCatalog _skillCombat;
+    /// <summary>Mobius AISkillScope HEAL/BUFF/DEBUFF rows (data/npc-ai-support.json).</summary>
+    readonly Fineage.Zone.Npcs.NpcAiSupportCatalog _npcAiSupport;
     readonly SkillStatEffectCatalog _passives;
     readonly BuyListCatalog _buyLists;
     readonly MultiSellCatalog _multisells;
@@ -468,6 +476,7 @@ public sealed partial class ZoneWorld
         Random? combatRandom = null,
         SkillStatEffectCatalog? statEffects = null,
         SkillCombatCatalog? skillCombat = null,
+        Fineage.Zone.Npcs.NpcAiSupportCatalog? npcAiSupport = null,
         SkillStatEffectCatalog? passives = null,
         DeathRuleCatalog? deathRules = null,
         Fineage.Game.Services.DeathDropRules? deathDrop = null,
@@ -479,6 +488,7 @@ public sealed partial class ZoneWorld
     {
         _npcRegen = npcRegen ?? ZoneNpcSettings.NpcRegenEnabled;
         _skillCombat = skillCombat ?? SkillCombatCatalog.LoadDefault();
+        _npcAiSupport = npcAiSupport ?? Fineage.Zone.Npcs.NpcAiSupportCatalog.LoadDefault();
         _statEffects = statEffects ?? SkillStatEffectCatalog.LoadDefault();
         _passives = passives ?? SkillStatEffectCatalog.LoadPassives();
         _combatRandom = combatRandom ?? Random.Shared;

@@ -5,12 +5,157 @@ using Fineage.Zone.Npcs;
 namespace Fineage.Zone.World;
 
 /// <summary>
-/// Mobius AttackableAI skill cast (first slice): chance vs min/maxSkillChance, then one skillList
-/// attack skill from <see cref="ZoneEntity.AiSkills"/> through the existing skill-combat formulas
-/// against the hate target.
+/// Mobius AttackableAI skill cast: HEAL / BUFF / DEBUFF scopes plus ATTACK chance vs min/maxSkillChance
+/// through skill-combat formulas against the hate target.
 /// </summary>
 public sealed partial class ZoneWorld
 {
+    /// <summary>
+    /// Mobius HEAL scope: when <c>Rnd(100) &lt; (100 - hp%) / 3</c>, self-cast one heal skill.
+    /// </summary>
+    bool TryNpcHealSkill(ZoneEntity npc, long now)
+    {
+        if (npc.AiHealSkills is not { Count: > 0 } || npc.CastingUntilMs > now || npc.PendingHit != null)
+            return false;
+        if (npc.MaxHp <= 0 || npc.CurHp >= npc.MaxHp)
+            return false;
+        double pct = npc.CurHp * 100d / npc.MaxHp;
+        if (_combatRandom.Next(100) >= (int)((100d - pct) / 3d))
+            return false;
+
+        var ready = ReadySupportSkills(npc, npc.AiHealSkills, now);
+        if (ready.Count == 0)
+            return false;
+        var pick = ready[_combatRandom.Next(ready.Count)];
+        return CastNpcSupportSkill(npc, npc, pick, NpcSupportKind.Heal, now);
+    }
+
+    /// <summary>Mobius BUFF scope (self): cast when the NPC is not already affected by that skill id.</summary>
+    bool TryNpcSelfBuffSkill(ZoneEntity npc, long now)
+    {
+        if (npc.AiBuffSkills is not { Count: > 0 } || npc.CastingUntilMs > now || npc.PendingHit != null)
+            return false;
+
+        var ready = new List<NpcAiSupportSkill>();
+        foreach (var skill in ReadySupportSkills(npc, npc.AiBuffSkills, now))
+        {
+            if (npc.Abnormals.Any(a => a.Id == skill.SkillId))
+                continue;
+            ready.Add(skill);
+        }
+        if (ready.Count == 0)
+            return false;
+        var pick = ready[_combatRandom.Next(ready.Count)];
+        return CastNpcSupportSkill(npc, npc, pick, NpcSupportKind.Buff, now);
+    }
+
+    /// <summary>Mobius DEBUFF scope: ~30% chance to land one debuff on the hate target.</summary>
+    bool TryNpcDebuffSkill(ZoneEntity npc, ZoneEntity player, long now)
+    {
+        if (npc.AiDebuffSkills is not { Count: > 0 } || npc.CastingUntilMs > now || npc.PendingHit != null)
+            return false;
+        if (_combatRandom.Next(100) >= 30)
+            return false;
+
+        var ready = new List<NpcAiSupportSkill>();
+        foreach (var skill in ReadySupportSkills(npc, npc.AiDebuffSkills, now))
+        {
+            if (player.Abnormals.Any(a => a.Id == skill.SkillId))
+                continue;
+            ready.Add(skill);
+        }
+        if (ready.Count == 0)
+            return false;
+        var pick = ready[_combatRandom.Next(ready.Count)];
+        return CastNpcSupportSkill(npc, player, pick, NpcSupportKind.Debuff, now);
+    }
+
+    static List<NpcAiSupportSkill> ReadySupportSkills(
+        ZoneEntity npc,
+        IReadOnlyList<NpcAiSupportSkill> skills,
+        long now)
+    {
+        var ready = new List<NpcAiSupportSkill>(skills.Count);
+        foreach (var skill in skills)
+        {
+            if (npc.SkillReuseUntilMs.TryGetValue(skill.SkillId, out long until) && until > now)
+                continue;
+            if (npc.CurMp < skill.MpInitial + skill.Mp)
+                continue;
+            ready.Add(skill);
+        }
+        return ready;
+    }
+
+    enum NpcSupportKind { Heal, Buff, Debuff }
+
+    bool CastNpcSupportSkill(
+        ZoneEntity npc,
+        ZoneEntity target,
+        NpcAiSupportSkill skill,
+        NpcSupportKind kind,
+        long now)
+    {
+        npc.CurMp = Math.Max(0, npc.CurMp - skill.MpInitial);
+        int hitTime = Math.Max(0, skill.HitTimeMs);
+        if (skill.ReuseDelayMs > 0)
+            npc.SkillReuseUntilMs[skill.SkillId] = now + skill.ReuseDelayMs;
+
+        npc.Heading = ZoneCombat.HeadingFrom(npc.X, npc.Y, target.X, target.Y);
+        FanoutNpcMagicSkillUse(npc, target, skill.SkillId, skill.Level, hitTime, skill.ReuseDelayMs);
+        npc.CastingUntilMs = now + hitTime;
+        npc.NextMobAttackMs = npc.CastingUntilMs;
+        npc.PendingHit = new PendingSkillHit(target.ObjectId, 0, now + hitTime, null, skill.Level)
+        {
+            SkillId = skill.SkillId,
+            EscapeRange = ReferenceEquals(npc, target) ? 0 : 600,
+            TargetIsNpc = target.Kind == ZoneEntityKind.Npc,
+            Apply = (Action<ZoneEntity, long>)((t, at) => ApplyNpcSupportEffect(npc, t, skill, kind, at))
+        };
+        ZoneLog.Info(
+            $"[npc-support] cast {kind} {skill.SkillId} lv{skill.Level} npc={npc.NpcId} → {target.ObjectId} hit={hitTime}ms");
+        if (hitTime == 0)
+            ResolveNpcPendingHit(npc, now);
+        return true;
+    }
+
+    void ApplyNpcSupportEffect(
+        ZoneEntity caster,
+        ZoneEntity target,
+        NpcAiSupportSkill skill,
+        NpcSupportKind kind,
+        long now)
+    {
+        caster.CurMp = Math.Max(0, caster.CurMp - skill.Mp);
+        switch (kind)
+        {
+            case NpcSupportKind.Heal:
+                if (target.MaxHp <= 0 || skill.Amount <= 0)
+                    return;
+                int before = target.CurHp;
+                target.CurHp = Math.Min(target.MaxHp, target.CurHp + skill.Amount);
+                ZoneLog.Info(
+                    $"[npc-support] heal {skill.SkillId} npc={caster.NpcId} {before}->{target.CurHp} (+{skill.Amount})");
+                break;
+            case NpcSupportKind.Buff:
+            case NpcSupportKind.Debuff:
+                if (skill.AbnormalTimeSeconds <= 0)
+                    return;
+                int abnormal = skill.AbnormalLevel > 0 ? skill.AbnormalLevel : skill.Level;
+                ZoneAbnormals.Apply(
+                    target.Abnormals,
+                    skill.SkillId,
+                    abnormal,
+                    skill.AbnormalTimeSeconds,
+                    now,
+                    skill.Level);
+                FanoutAbnormal(target);
+                ZoneLog.Info(
+                    $"[npc-support] {(kind == NpcSupportKind.Buff ? "buff" : "debuff")} {skill.SkillId} lv{skill.Level} on={target.ObjectId}");
+                break;
+        }
+    }
+
     /// <summary>
     /// Mobius <c>Npc.isSkillChance()</c>: <c>Rnd(100) &lt; Rnd(min, max)</c>. When true, try to cast
     /// instead of the melee swing.
@@ -76,9 +221,24 @@ public sealed partial class ZoneWorld
     {
         var hit = npc.PendingHit;
         npc.PendingHit = null;
-        if (hit == null || npc.Dead || hit.Combat == null)
+        if (hit == null || npc.Dead)
             return;
-        if (!_byId.TryGetValue(hit.TargetId, out var target) || target.Kind != ZoneEntityKind.Player || target.Dead)
+        if (!_byId.TryGetValue(hit.TargetId, out var target) || target.Dead)
+            return;
+
+        // Support skills (heal/buff/debuff) carry Apply; attack skills carry Combat.
+        if (hit.Apply is Action<ZoneEntity, long> apply)
+        {
+            if (hit.EscapeRange > 0
+                && !ZoneCombat.InCastRange(npc.X, npc.Y, target.X, target.Y, hit.EscapeRange + ZoneCombat.HitRangeTolerance))
+                return;
+            if (!ReferenceEquals(npc, target) && !CanSeeTarget(npc, target))
+                return;
+            apply(target, now);
+            return;
+        }
+
+        if (hit.Combat == null || target.Kind != ZoneEntityKind.Player)
             return;
 
         int escape = Fineage.Game.Combat.CastRules.EscapeRange(hit.Combat.CastRange, hit.Combat.EffectRange);
@@ -143,16 +303,16 @@ public sealed partial class ZoneWorld
         return true;
     }
 
-    void FanoutNpcMagicSkillUse(ZoneEntity npc, ZoneEntity player, int skillId, int level, int hitTime, int reuse)
+    void FanoutNpcMagicSkillUse(ZoneEntity npc, ZoneEntity target, int skillId, int level, int hitTime, int reuse)
     {
         List<int>? netWatchers = null;
         foreach (var watcher in Players())
         {
             if (watcher.Session == null)
                 continue;
-            if (ReferenceEquals(watcher, player) ||
+            if (ReferenceEquals(watcher, target) ||
                 watcher.Knownlist.Contains(npc.ObjectId) ||
-                watcher.Knownlist.Contains(player.ObjectId))
+                watcher.Knownlist.Contains(target.ObjectId))
             {
                 netWatchers ??= [];
                 netWatchers.Add(watcher.ObjectId);
@@ -163,12 +323,28 @@ public sealed partial class ZoneWorld
             NetBridge?.FanoutMagicSkillUse(netWatchers, new Fineage.Net.Contract.MagicSkillUseNetMsg
             {
                 CasterObjectId = npc.ObjectId,
-                TargetObjectId = player.ObjectId,
+                TargetObjectId = target.ObjectId,
                 SkillId = skillId,
                 SkillLevel = level,
                 HitTimeMs = hitTime,
                 ReuseDelayMs = reuse
             });
+        }
+    }
+
+    /// <summary>Test hook: force a support cast (heal/buff/debuff) ignoring AI chance gates.</summary>
+    internal bool CastNpcSupportForTest(ZoneEntity npc, ZoneEntity target, NpcAiSupportSkill skill, string kind)
+    {
+        lock (_gate)
+        {
+            var k = kind.ToLowerInvariant() switch
+            {
+                "heal" => NpcSupportKind.Heal,
+                "buff" => NpcSupportKind.Buff,
+                "debuff" => NpcSupportKind.Debuff,
+                _ => throw new ArgumentOutOfRangeException(nameof(kind))
+            };
+            return CastNpcSupportSkill(npc, target, skill, k, _clock().ToUnixTimeMilliseconds());
         }
     }
 }

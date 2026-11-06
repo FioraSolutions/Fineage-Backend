@@ -122,6 +122,9 @@ public sealed partial class ZoneWorld
             AiSkills = def.AiSkills,
             MinSkillChance = def.MinSkillChance,
             MaxSkillChance = def.MaxSkillChance,
+            AiHealSkills = _npcAiSupport.Get(def.NpcId)?.Heal,
+            AiBuffSkills = _npcAiSupport.Get(def.NpcId)?.Buff,
+            AiDebuffSkills = _npcAiSupport.Get(def.NpcId)?.Debuff,
             RunSpeed = def.RunSpeed,
             WalkSpeed = def.WalkSpeed,
             // Mobius Spawn location is the returnHome target; captured at spawn, not at first aggro, so a mob that

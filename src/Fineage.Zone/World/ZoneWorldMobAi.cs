@@ -143,6 +143,13 @@ public sealed partial class ZoneWorld
             }
             if (now < npc.NextMobAttackMs || npc.CastingUntilMs > now)
                 continue;
+            // Mobius thinkAttack: HEAL when wounded, then self BUFF, then DEBUFF chance, then ATTACK skill chance.
+            if (TryNpcHealSkill(npc, now))
+                continue;
+            if (TryNpcSelfBuffSkill(npc, now))
+                continue;
+            if (TryNpcDebuffSkill(npc, player, now))
+                continue;
             // Mobius AttackableAI: skill chance before the melee swing.
             if (TryNpcSkillInsteadOfMelee(npc, player, now))
                 continue;

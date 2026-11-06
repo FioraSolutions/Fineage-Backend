@@ -39,6 +39,7 @@
     <Content Include="..\..\data\water-zones.json" Link="data\water-zones.json" CopyToOutputDirectory="PreserveNewest" />
     <Content Include="..\..\data\xp-percent-lost.json" Link="data\xp-percent-lost.json" CopyToOutputDirectory="PreserveNewest" />
     <Content Include="..\..\data\death-drop.json" Link="data\death-drop.json" CopyToOutputDirectory="PreserveNewest" />
+    <Content Include="..\..\data\npc-ai-support.json" Link="data\npc-ai-support.json" CopyToOutputDirectory="PreserveNewest" />
     <Content Include="..\..\data\herbs.json" Link="data\herbs.json" CopyToOutputDirectory="PreserveNewest" />
     <Content Include="..\..\data\skill-combat.json" Link="data\skill-combat.json" CopyToOutputDirectory="PreserveNewest" />
     <Content Include="..\..\data\skill-passives.json" Link="data\skill-passives.json" CopyToOutputDirectory="PreserveNewest" />
