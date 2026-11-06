@@ -4,80 +4,111 @@
   "repeatable": true,
   "abortable": true,
   "questItems": [
-    1478,
-    1479
+    1478
   ],
   "dialogs": [
     {
       "npcId": 30567,
       "hook": "talk",
+      "when": "absent",
+      "races": [
+        0,
+        1,
+        2,
+        4
+      ],
+      "htmlFile": "30567-talk-000.htm"
+    },
+    {
+      "npcId": 30567,
+      "hook": "talk",
+      "when": "absent",
+      "races": [
+        3
+      ],
+      "maxLevel": 10,
+      "htmlFile": "30567-talk-001.htm"
+    },
+    {
+      "npcId": 30567,
+      "hook": "talk",
+      "when": "absent",
+      "races": [
+        3
+      ],
+      "minLevel": 11,
+      "htmlFile": "30567-talk-002.htm"
+    },
+    {
+      "npcId": 30567,
+      "hook": "event",
+      "when": "absent",
+      "event": "30567-03",
+      "races": [
+        3
+      ],
+      "minLevel": 11,
+      "ops": [
+        {
+          "op": "create"
+        },
+        {
+          "op": "start"
+        },
+        {
+          "op": "set_cond",
+          "cond": 1
+        }
+      ],
+      "htmlFile": "30567-event-30567-03-003.htm"
+    },
+    {
+      "npcId": 30567,
+      "hook": "talk",
       "when": "started",
       "cond": 1,
-      "htmlFile": "30567-talk-c1-000.htm"
+      "htmlFile": "30567-talk-c1-004.htm"
     },
     {
       "npcId": 30567,
       "hook": "talk",
       "when": "started",
       "cond": 2,
+      "atLeast": {
+        "1478": 70
+      },
       "ops": [
+        {
+          "op": "sell_items",
+          "prices": [
+            {
+              "itemId": 1478,
+              "adena": 60
+            }
+          ]
+        },
         {
           "op": "complete"
         }
       ],
-      "htmlFile": "30567-talk-c2-001.htm"
+      "htmlFile": "30567-talk-c2-005.htm"
     },
     {
       "npcId": 20316,
       "hook": "kill",
       "when": "started",
-      "ops": [
-        {
-          "op": "set_cond",
-          "cond": 2
-        }
-      ],
-      "html": ""
-    },
-    {
-      "npcId": 20316,
-      "hook": "kill",
-      "when": "started",
+      "cond": 1,
+      "html": "",
       "ops": [
         {
           "op": "drop_item",
-          "itemId": 1479,
+          "itemId": 1478,
           "count": 1,
           "chance": 1.0,
-          "limit": 1
+          "limit": 70,
+          "condAtLimit": 2
         }
-      ],
-      "html": ""
-    },
-    {
-      "npcId": 27043,
-      "hook": "kill",
-      "when": "started",
-      "hasItem": 1479,
-      "ops": [
-        {
-          "op": "set_cond",
-          "cond": 2
-        }
-      ],
-      "html": ""
-    },
-    {
-      "npcId": 27043,
-      "hook": "kill",
-      "when": "started",
-      "ops": [
-        {
-          "op": "set_cond",
-          "cond": 2
-        }
-      ],
-      "html": ""
+      ]
     }
   ]
 }
