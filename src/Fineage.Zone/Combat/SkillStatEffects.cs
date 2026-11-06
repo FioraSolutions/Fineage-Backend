@@ -21,7 +21,10 @@ public enum CombatStat
     WeightLimit,   // weightLimit: Creature.getMaxLoad folds it over floor(CON bonus * 69000 * AltWeightLimit)
     WeightPenalty, // weightPenalty: Creature.getBonusWeightPenalty, subtracted from the load before weightproc
     MCritRate,     // mCritRate (Stat.MCRITICAL_RATE): folded before WIT·10 → ‰
-    MagicCritDmg   // mCritPower (Stat.MAGIC_CRIT_DMG): multiplies damage on a magic crit
+    MagicCritDmg,  // mCritPower (Stat.MAGIC_CRIT_DMG): multiplies damage on a magic crit
+    CritDmg,       // critDmg (Stat.CRITICAL_DAMAGE): multiplies physical / blow crit damage
+    BlowRate,      // blowRate (Stat.BLOW_RATE): folded over calcBlowSuccess base rate
+    PSkillEvasion  // pSkillEvas (Stat.P_SKILL_EVASION): % chance target dodges a physical skill
 }
 
 /// <param name="Using">Mobius <c>&lt;using kind&gt;</c> condition (upper-case kinds); null = unconditional.</param>
@@ -91,7 +94,9 @@ public sealed class SkillStatEffectCatalog
         ["regHp"] = CombatStat.RegHp, ["regMp"] = CombatStat.RegMp,
         ["weightLimit"] = CombatStat.WeightLimit, ["weightPenalty"] = CombatStat.WeightPenalty,
         // Magic crit: Wild Magic etc. (mCritRate) and MAGIC_CRIT_DMG (mCritPower) from Mobius Stat.java.
-        ["mCritRate"] = CombatStat.MCritRate, ["mCritPower"] = CombatStat.MagicCritDmg
+        ["mCritRate"] = CombatStat.MCritRate, ["mCritPower"] = CombatStat.MagicCritDmg,
+        ["critDmg"] = CombatStat.CritDmg, ["blowRate"] = CombatStat.BlowRate,
+        ["pSkillEvas"] = CombatStat.PSkillEvasion
     };
 
     readonly Dictionary<int, SkillStatEffect> _byId;

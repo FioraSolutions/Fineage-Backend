@@ -303,7 +303,8 @@ public sealed partial class ZoneWorld
         return ZoneCombat.RollMelee(_combatRandom, ps.PAtk, pDef,
             ps.Accuracy, evasion, ps.CritRate, ps.RandomDamage,
             soulshot, (int)ps.WeaponGrade, shieldRate, shieldDef, ps.Weapon == Fineage.Game.WeaponType.Bow,
-            ZoneCombat.HitConditionBonus(player.X, player.Y, player.Z, target.X, target.Y, target.Z, target.Heading));
+            ZoneCombat.HitConditionBonus(player.X, player.Y, player.Z, target.X, target.Y, target.Z, target.Heading, IsNight),
+            ps.CritDmg);
     }
 
     double NpcPDef(ZoneEntity npc) =>
@@ -320,7 +321,8 @@ public sealed partial class ZoneWorld
         npc.Heading = ZoneCombat.HeadingFrom(npc.X, npc.Y, player.X, player.Y);
         return ZoneCombat.RollMelee(_combatRandom, StatMods(npc).Apply(CombatStat.PAtk, npc.PAtk), ps.PDef, NpcAccuracy(npc), ps.Evasion,
             NpcCritPermille(npc), npc.RandomDamage, false, 0, ps.ShieldRate, ps.ShieldDef, false,
-            ZoneCombat.HitConditionBonus(npc.X, npc.Y, npc.Z, player.X, player.Y, player.Z, player.Heading));
+            ZoneCombat.HitConditionBonus(npc.X, npc.Y, npc.Z, player.X, player.Y, player.Z, player.Heading, IsNight),
+            StatMods(npc).Apply(CombatStat.CritDmg, 1d));
     }
 
     Task? _combatLoop;
