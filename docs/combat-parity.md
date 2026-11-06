@@ -99,10 +99,17 @@
 - Open: no cast interruption by damage/stun (Interlude has no move-cancels-cast — the client simply can't move); MagicSkillCanceled on target death/out of range; channeling skills; sit blocked by combat stance (stricter than Mobius sitDown); teleport/gatekeeper doesn't clear queued cast/move; buff hitTime-delayed effect.
 
 ## Still open (PvE priority)
-1. Physical-skill crit/evasion stat mods (CRITICAL_DAMAGE, BLOW_RATE, P_SKILL_EVASION) — small/medium.
-2. Night game clock (GameTimeTaskManager) for the −10% dark bonus — small.
-3. magicLvl in skill-combat.json + mcrit stat mods — small.
+1. ~~Physical-skill crit/evasion stat mods (CRITICAL_DAMAGE, BLOW_RATE, P_SKILL_EVASION)~~ — done (see below).
+2. ~~Night game clock (GameTimeTaskManager) for the −10% dark bonus~~ — done (`ZoneGameTime`, HitConditionBonus night).
+3. magicLvl in skill-combat.json + mcrit stat mods — small (tracked separately if not yet on `dev`).
 4. Weapon vulnerabilities (NPC passive traits data), NPC soulshots, NPC blow/magic skills on players — medium.
+
+## Slice — CRITICAL_DAMAGE / BLOW_RATE / P_SKILL_EVASION + IG night
+
+- `CombatStat.CritDmg` / `BlowRate` / `PSkillEvasion` from Mobius `critDmg` / `blowRate` / `pSkillEvas` (buff + passive catalogs regenerated).
+- Melee crit and blow skill-crit damage · `CRITICAL_DAMAGE`; blow success folds `BLOW_RATE` over chance·DEX·side.
+- Physical attack skills (incl. blows): `calcPhysicalSkillEvasion` before damage; non-blow skills with `baseCritRate` roll STR crit ·2 · CritDmg (Mobius `PhysicalAttack`).
+- `ZoneGameTime`: 6 IG days / real day, night while IG hour &lt; 6; wired into `HitConditionBonus(..., night: IsNight)`.
 
 ## Spoil / Sweeper (Mobius CT0 parity)
 

@@ -206,13 +206,20 @@ public static class ZoneCombat
         int critPermille, int randomPercent, bool soulshot, int shotGrade, double shieldRate, int shieldDef, bool attackerBow) =>
         RollMelee(rnd, pAtk, pDef, accuracy, evasion, critPermille, randomPercent, soulshot, shotGrade, shieldRate, shieldDef, attackerBow, 1d);
 
+    public static (int Damage, byte Flags) RollMelee(Random rnd, double pAtk, double pDef, double accuracy, double evasion,
+        int critPermille, int randomPercent, bool soulshot, int shotGrade, double shieldRate, int shieldDef, bool attackerBow,
+        double hitConditionBonus) =>
+        RollMelee(rnd, pAtk, pDef, accuracy, evasion, critPermille, randomPercent, soulshot, shotGrade, shieldRate, shieldDef,
+            attackerBow, hitConditionBonus, 1d);
+
     /// <summary>
     /// Full swing: miss → shield → crit → calcPhysDam. Soulshot doubles P.Atk (flag 0x10 | grade); shield block
-    /// adds sDef to P.Def, perfect block deals 1 (flag 0x40).
+    /// adds sDef to P.Def, perfect block deals 1 (flag 0x40). Crit damage · <paramref name="critDamageMod"/>
+    /// (<c>Stat.CRITICAL_DAMAGE</c>, default 1).
     /// </summary>
     public static (int Damage, byte Flags) RollMelee(Random rnd, double pAtk, double pDef, double accuracy, double evasion,
         int critPermille, int randomPercent, bool soulshot, int shotGrade, double shieldRate, int shieldDef, bool attackerBow,
-        double hitConditionBonus)
+        double hitConditionBonus, double critDamageMod)
     {
         byte ssFlags = soulshot ? (byte)(HitFlagSoulshot | (shotGrade & 0x0F)) : (byte)0;
         if (rnd.Next(1000) >= HitChancePermille(accuracy, evasion, hitConditionBonus))
@@ -228,7 +235,7 @@ public static class ZoneCombat
             pDef += shieldDef;
         double damage = 70d * Math.Max(0d, pAtk) / Math.Max(1d, pDef);
         if (crit)
-            damage *= 2;
+            damage *= 2 * Math.Max(0, critDamageMod);
         if (randomPercent > 0)
             damage *= 1 + rnd.Next(-randomPercent, randomPercent + 1) / 100d;
         return (Math.Max(1, (int)damage), (byte)(flags | (crit ? HitFlagCrit : 0)));
@@ -244,7 +251,28 @@ public static class ZoneCombat
 
     /// <summary>Interlude <c>calcPhysDam</c> with skill: 70·(pAtk·(ss?2:1) + power) / (pDef [+ sDef]).</summary>
     public static int PhysicalSkillDamage(double pAtk, double pDef, double power, bool soulshot) =>
-        Math.Max(1, (int)(70d * (Math.Max(0, pAtk) * (soulshot ? 2 : 1) + Math.Max(0, power)) / Math.Max(1d, pDef)));
+        PhysicalSkillDamage(pAtk, pDef, power, soulshot, crit: false);
+
+    /// <summary>
+    /// Physical skill damage; on crit Mobius <c>PhysicalAttack</c> ·2 then Fineage also folds
+    /// <paramref name="critDamageMod"/> (<c>CRITICAL_DAMAGE</c>).
+    /// </summary>
+    public static int PhysicalSkillDamage(double pAtk, double pDef, double power, bool soulshot, bool crit,
+        double critDamageMod = 1d)
+    {
+        double damage = 70d * (Math.Max(0, pAtk) * (soulshot ? 2 : 1) + Math.Max(0, power)) / Math.Max(1d, pDef);
+        if (crit)
+            damage *= 2 * Math.Max(0, critDamageMod);
+        return Math.Max(1, (int)damage);
+    }
+
+    /// <summary>Mobius <c>calcPhysicalSkillEvasion</c>: Rnd(100) &lt; target pSkillEvas % (physical non-debuff only).</summary>
+    public static bool RollPhysicalSkillEvasion(Random rnd, double pSkillEvasionPercent) =>
+        pSkillEvasionPercent > 0 && rnd.Next(100) < pSkillEvasionPercent;
+
+    /// <summary>Mobius <c>calcCrit</c> for a skill: baseCritRate · 10 · STR bonus ‰.</summary>
+    public static bool RollSkillCrit(Random rnd, int baseCritRate, double strBonus) =>
+        baseCritRate > 0 && baseCritRate * 10 * strBonus > rnd.Next(1000);
 
     /// <summary>
     /// Mobius <c>CreatureStat.getMCriticalHit</c>: (int)(MCRITICAL_RATE 1 · WIT bonus) · 10 ‰; FuncMAtkCritical applies
@@ -301,9 +329,10 @@ public static class ZoneCombat
     /// <summary>Mobius blow position factor: front 1, side 1.5, behind 2 (calcBlowSuccess sideMod).</summary>
     public static double BlowSideMod(bool front, bool behind) => front ? 1 : behind ? 2 : 1.5;
 
-    /// <summary>Mobius calcBlowSuccess: Rnd(100) &lt; blowChance · DEX bonus · sideMod.</summary>
-    public static bool RollBlowSuccess(Random rnd, int blowChance, double dexBonus, bool front, bool behind) =>
-        rnd.Next(100) < blowChance * dexBonus * BlowSideMod(front, behind);
+    /// <summary>Mobius calcBlowSuccess: Rnd(100) &lt; calcStat(BLOW_RATE, blowChance · DEX · sideMod).</summary>
+    public static bool RollBlowSuccess(Random rnd, int blowChance, double dexBonus, bool front, bool behind,
+        double blowRateMod = 1d) =>
+        rnd.Next(100) < blowChance * dexBonus * BlowSideMod(front, behind) * Math.Max(0, blowRateMod);
 
     /// <summary>
     /// Mobius calcBlowDamage (FatalBlow): 77·(power + pAtk·ss1.458)/pDef · proximity (behind 1.2, side 1.1, front 1).
@@ -312,7 +341,7 @@ public static class ZoneCombat
     /// </summary>
     public static (int Damage, BlowOutcome Outcome) RollBlowDamage(Random rnd, BlowEffect effect, double pAtk, double pDef,
         double power, bool soulshot, bool front, bool behind, int randomPercent, int baseCritRate, double strBonus,
-        double shieldRate = 0, int shieldDef = 0)
+        double shieldRate = 0, int shieldDef = 0, double critDamageMod = 1d)
     {
         var shield = RollShield(rnd, shieldRate, false);
         if (shield == ShieldResult.Perfect)
@@ -325,9 +354,9 @@ public static class ZoneCombat
             : 77d * (power + pAtk * ss) / def * proximity;
         if (randomPercent > 0)
             damage *= 1 + rnd.Next(-randomPercent, randomPercent + 1) / 100d;
-        bool crit = baseCritRate * 10 * strBonus > rnd.Next(1000);
+        bool crit = RollSkillCrit(rnd, baseCritRate, strBonus);
         if (crit)
-            damage *= 2;
+            damage *= 2 * Math.Max(0, critDamageMod);
         return (Math.Max(1, (int)damage), crit ? BlowOutcome.Critical : BlowOutcome.Hit);
     }
 

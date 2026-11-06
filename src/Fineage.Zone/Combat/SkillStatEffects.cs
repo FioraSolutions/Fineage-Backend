@@ -19,7 +19,10 @@ public enum CombatStat
     RegHp,     // regHp (Stat.REGENERATE_HP_RATE): HP regen multiplier
     RegMp,     // regMp (Stat.REGENERATE_MP_RATE): MP regen multiplier
     WeightLimit,   // weightLimit: Creature.getMaxLoad folds it over floor(CON bonus * 69000 * AltWeightLimit)
-    WeightPenalty  // weightPenalty: Creature.getBonusWeightPenalty, subtracted from the load before weightproc
+    WeightPenalty, // weightPenalty: Creature.getBonusWeightPenalty, subtracted from the load before weightproc
+    CritDmg,       // critDmg (Stat.CRITICAL_DAMAGE): multiplies physical / blow crit damage
+    BlowRate,      // blowRate (Stat.BLOW_RATE): folded over calcBlowSuccess base rate
+    PSkillEvasion  // pSkillEvas (Stat.P_SKILL_EVASION): % chance target dodges a physical skill
 }
 
 /// <param name="Using">Mobius <c>&lt;using kind&gt;</c> condition (upper-case kinds); null = unconditional.</param>
@@ -87,7 +90,9 @@ public sealed class SkillStatEffectCatalog
         // Regeneration and load stats: used by Weight Penalty 4270 (regHp/regMp), Weight Limit 150, armor sets
         // (weightLimit/weightPenalty) and the regen masteries. Regen has no other server-side consumer yet.
         ["regHp"] = CombatStat.RegHp, ["regMp"] = CombatStat.RegMp,
-        ["weightLimit"] = CombatStat.WeightLimit, ["weightPenalty"] = CombatStat.WeightPenalty
+        ["weightLimit"] = CombatStat.WeightLimit, ["weightPenalty"] = CombatStat.WeightPenalty,
+        ["critDmg"] = CombatStat.CritDmg, ["blowRate"] = CombatStat.BlowRate,
+        ["pSkillEvas"] = CombatStat.PSkillEvasion
     };
 
     readonly Dictionary<int, SkillStatEffect> _byId;

@@ -381,6 +381,8 @@ public sealed partial class ZoneWorld
     readonly Random _serviceRandom;
     /// <summary>Hit/miss, crit and damage spread rolls (Mobius Rnd in Formulas).</summary>
     readonly Random _combatRandom;
+    /// <summary>Mobius GameTimeTaskManager (IG day / night for HitConditionBonus dark).</summary>
+    readonly ZoneGameTime _gameTime;
     /// <summary>Buff/debuff combat stat funcs (Mobius skill &lt;for&gt;&lt;effect&gt;).</summary>
     readonly SkillStatEffectCatalog _statEffects;
     /// <summary>Mobius attack-skill power / MP / timing (data/skill-combat.json).</summary>
@@ -454,13 +456,15 @@ public sealed partial class ZoneWorld
         Random? deathRandom = null,
         bool? npcRegen = null,
         Fineage.Game.Services.ItemSkillCatalog? itemSkills = null,
-        Fineage.Game.Services.MapRegionCatalog? mapRegions = null)
+        Fineage.Game.Services.MapRegionCatalog? mapRegions = null,
+        ZoneGameTime? gameTime = null)
     {
         _npcRegen = npcRegen ?? ZoneNpcSettings.NpcRegenEnabled;
         _skillCombat = skillCombat ?? SkillCombatCatalog.LoadDefault();
         _statEffects = statEffects ?? SkillStatEffectCatalog.LoadDefault();
         _passives = passives ?? SkillStatEffectCatalog.LoadPassives();
         _combatRandom = combatRandom ?? Random.Shared;
+        _gameTime = gameTime ?? ZoneGameTime.FromLocalMidnight();
         _aoi = aoi ?? new SingleCellAoi();
         _game = game ?? GameData.LoadDefault();
         _itemIds = itemIds ?? new ItemObjectIdAllocator();

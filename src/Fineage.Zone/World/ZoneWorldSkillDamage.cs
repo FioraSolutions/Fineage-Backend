@@ -75,6 +75,15 @@ public sealed partial class ZoneWorld
         player.SoulshotCharged = false;
         if (ss)
             RechargeAutoShots(player);
+        // Mobius calcPhysicalSkillEvasion on PhysicalAttack / FatalBlow / Backstab / EnergyAttack.
+        double targetEvas = (target.Kind == ZoneEntityKind.Player ? PlayerStatMods(target) : StatMods(target))
+            .Apply(CombatStat.PSkillEvasion, 0d);
+        if (ZoneCombat.RollPhysicalSkillEvasion(_combatRandom, targetEvas))
+        {
+            if (player.Session != null)
+                ShotNotice(player.Session, SysMsgSkillDodged, $"{target.Name} dodges the attack.");
+            return 0;
+        }
         if (combat.Kind == SkillDamageKind.Blow && combat.Blow is { } blow)
             return RollBlow(player, target, combat, level, blow, ps, ss);
         double pDef = NpcPDef(target);
@@ -83,7 +92,12 @@ public sealed partial class ZoneWorld
             return 1;
         if (shield == ZoneCombat.ShieldResult.Block)
             pDef += target.ShieldDef;
-        return ZoneCombat.PhysicalSkillDamage(ps.PAtk, pDef, power, ss);
+        int templateStr = PlayerClasses.TryGet(player.ClassId, out var cls) && cls != null ? cls.Str : 0;
+        double str = SafeBonus(PlayerClasses.StatBonuses, Fineage.Game.StatSlot.Str, templateStr);
+        bool crit = ZoneCombat.RollSkillCrit(_combatRandom, combat.BaseCritRate, str);
+        if (crit && player.Session != null)
+            ShotNotice(player.Session, SysMsgCriticalHit, "Critical hit!");
+        return ZoneCombat.PhysicalSkillDamage(ps.PAtk, pDef, power, ss, crit, ps.CritDmg);
     }
 
     public const int SysMsgLethalSuccess = 1668;
@@ -98,14 +112,15 @@ public sealed partial class ZoneWorld
         int templateStr = t?.Str ?? 0;
         double dex = SafeBonus(PlayerClasses.StatBonuses, Fineage.Game.StatSlot.Dex, templateDex);
         double str = SafeBonus(PlayerClasses.StatBonuses, Fineage.Game.StatSlot.Str, templateStr);
-        // Backstab.calcSuccess: !isInFrontOf; both: calcBlowSuccess.
-        if ((blow == BlowEffect.Backstab && front) || !ZoneCombat.RollBlowSuccess(_combatRandom, combat.BlowChance, dex, front, behind))
+        // Backstab.calcSuccess: !isInFrontOf; both: calcBlowSuccess (+ BLOW_RATE fold).
+        if ((blow == BlowEffect.Backstab && front) ||
+            !ZoneCombat.RollBlowSuccess(_combatRandom, combat.BlowChance, dex, front, behind, ps.BlowRate))
         {
             ZoneLog.Info($"[skill] blow {combat.SkillId} failed front={front} behind={behind}");
             return 0;
         }
         var (damage, outcome) = ZoneCombat.RollBlowDamage(_combatRandom, blow, ps.PAtk, NpcPDef(target), combat.PowerAt(level), ss,
-            front, behind, ps.RandomDamage, combat.BaseCritRate, str, NpcShieldRate(target), target.ShieldDef);
+            front, behind, ps.RandomDamage, combat.BaseCritRate, str, NpcShieldRate(target), target.ShieldDef, ps.CritDmg);
         int hpAfter = Math.Max(0, target.CurHp - damage);
         bool lethalable = target.NpcType is not ("RaidBoss" or "GrandBoss");
         var (extra, lethal) = ZoneCombat.RollLethal(_combatRandom, combat.FullLethal, combat.HalfLethal,
@@ -126,6 +141,8 @@ public sealed partial class ZoneWorld
     public const int SysMsgResisted = 139;
     public const int SysMsgAttackFailed = 158;
     public const int SysMsgMagicCritical = 1280;
+    /// <summary>Mobius <c>C1_DODGES_THE_ATTACK</c> (physical skill evasion).</summary>
+    public const int SysMsgSkillDodged = 1999;
 
     void MagicOutcomeNotice(ZoneSession session, ZoneEntity target, SkillCombatData combat, ZoneCombat.MagicOutcome outcome)
     {
