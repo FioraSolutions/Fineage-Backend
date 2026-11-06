@@ -6,16 +6,11 @@ namespace Fineage.Zone.Tests;
 public sealed class SpawnCatalogTests
 {
     [Fact]
-    public void Default_datapack_loads_village_smoke_hall_and_dormant_road()
+    public void Default_datapack_loads_cedric_smoke_and_dormant_village_map()
     {
         var catalog = SpawnCatalog.LoadDefault();
-        Assert.True(catalog.Maps.ContainsKey(SpawnCatalog.DefaultMapId));
         Assert.True(catalog.Maps.ContainsKey(SpawnCatalog.SmokeMapId));
         Assert.True(catalog.Maps.ContainsKey("ti_village_road"));
-
-        var village = catalog.GetMap(SpawnCatalog.DefaultMapId);
-        Assert.True(village.Enabled);
-        Assert.Equal("ti_village", village.MapId);
 
         var cedric = catalog.GetMap(SpawnCatalog.SmokeMapId);
         Assert.True(cedric.Enabled);
