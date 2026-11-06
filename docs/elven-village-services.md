@@ -1,7 +1,7 @@
 # Elven Village services on Net (foundation brick)
 
 Scope: NPCs in `data/spawns/elven_village.json` only. Same pipeline scales per area:
-`tools/import_npc_html.py <spawn file>` → `data/html`, quests in `data/quests.json`, items via `scripts/gen_drop_items.py`.
+`tools/import_npc_html.py <spawn file>` → `data/html`, quests in `data/quests/` (see [`quests-pack.md`](quests-pack.md)), items via `scripts/gen_drop_items.py`.
 
 ## Works (data + server, Net `NpcTalk 0x0322` / `BypassRequest 0x0323` → `NpcHtml 0x0324`)
 | Service | NPCs | Notes |
@@ -14,7 +14,7 @@ Scope: NPCs in `data/spawns/elven_village.json` only. Same pipeline scales per a
 | Kill quests | Q267 Wrath of Verdure, Q313 Collect Spores, **Q102** Sea of Spores Fever, **Q105** Skirmish with Orcs (Kendell 30218, elf 10+), **Q159** Protect the Water Source (Asterios 30154, elf 12+), **Q162** Curse of the Underground Fortress (Unoren 30147, non-DE 12+), **Q163** Legacy of the Poet (Starden 30220, non-DE 11+) | Q267/Q313 repeatable. Q102: Dryad tears → medicines → Sword/Staff. Q105 linearized to 1st→5th Kaboo order (Mobius random order pick is a follow-up). Q159 two-phase plague dust. Q162 bone/skull dual counters. Q163 four poems. |
 | Party kill quest | Q316 Destroy Plague Carriers (Ellenia 30155, elf 18+) | Live with `elven_fortress` wererats/Varool. 2 fangs per wererat, Varool fang cap 1; 30 adena/fang, 10000/Varool fang, +5000 at 10+. |
 | Newbie Helper 30400 | | Existing gift / guide buff path. |
-| Nerupa 30370 | | Q160 giver, elven newbie guide south of the newbie spawn. Page `data/html/default/30370.htm`; quest links in `data/quests.json`. |
+| Nerupa 30370 | | Q160 giver, elven newbie guide south of the newbie spawn. Page `data/html/default/30370.htm`; quest links in `data/quests/00160_*/quest.json`. |
 
 ## Elven newbie spawn: Nerupa 30370 + Newbie Helper 30400
 

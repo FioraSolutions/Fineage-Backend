@@ -1,0 +1,176 @@
+{
+  "id": 159,
+  "name": "Protect the Water Source",
+  "repeatable": false,
+  "abortable": true,
+  "questItems": [
+    1035,
+    1071,
+    1072
+  ],
+  "dialogs": [
+    {
+      "npcId": 30154,
+      "hook": "talk",
+      "when": "absent",
+      "races": [
+        1
+      ],
+      "minLevel": 12,
+      "htmlFile": "30154-talk-000.htm"
+    },
+    {
+      "npcId": 30154,
+      "hook": "talk",
+      "when": "absent",
+      "races": [
+        1
+      ],
+      "htmlFile": "30154-talk-001.htm"
+    },
+    {
+      "npcId": 30154,
+      "hook": "talk",
+      "when": "absent",
+      "htmlFile": "30154-talk-002.htm"
+    },
+    {
+      "npcId": 30154,
+      "hook": "event",
+      "when": "absent",
+      "event": "30154-04",
+      "races": [
+        1
+      ],
+      "minLevel": 12,
+      "ops": [
+        {
+          "op": "create"
+        },
+        {
+          "op": "start"
+        },
+        {
+          "op": "give_item",
+          "itemId": 1071,
+          "count": 1
+        },
+        {
+          "op": "set_cond",
+          "cond": 1
+        }
+      ],
+      "htmlFile": "30154-event-30154-04-003.htm"
+    },
+    {
+      "npcId": 30154,
+      "hook": "talk",
+      "when": "started",
+      "cond": 1,
+      "hasItem": 1071,
+      "lacksItems": [
+        1035
+      ],
+      "htmlFile": "30154-talk-c1-004.htm"
+    },
+    {
+      "npcId": 30154,
+      "hook": "talk",
+      "when": "started",
+      "cond": 2,
+      "hasItems": [
+        1071,
+        1035
+      ],
+      "ops": [
+        {
+          "op": "take_item",
+          "itemId": 1071,
+          "count": 1
+        },
+        {
+          "op": "take_item",
+          "itemId": 1035,
+          "count": 1
+        },
+        {
+          "op": "give_item",
+          "itemId": 1072,
+          "count": 1
+        },
+        {
+          "op": "set_cond",
+          "cond": 3
+        }
+      ],
+      "htmlFile": "30154-talk-c2-005.htm"
+    },
+    {
+      "npcId": 30154,
+      "hook": "talk",
+      "when": "started",
+      "cond": 3,
+      "hasItem": 1072,
+      "htmlFile": "30154-talk-c3-006.htm"
+    },
+    {
+      "npcId": 30154,
+      "hook": "talk",
+      "when": "started",
+      "cond": 4,
+      "hasItem": 1072,
+      "atLeast": {
+        "1035": 5
+      },
+      "ops": [
+        {
+          "op": "give_adena",
+          "count": 18250
+        },
+        {
+          "op": "complete"
+        }
+      ],
+      "htmlFile": "30154-talk-c4-007.htm"
+    },
+    {
+      "npcId": 27017,
+      "hook": "kill",
+      "when": "started",
+      "cond": 1,
+      "hasItem": 1071,
+      "lacksItems": [
+        1035
+      ],
+      "html": "",
+      "ops": [
+        {
+          "op": "drop_item",
+          "itemId": 1035,
+          "count": 1,
+          "chance": 0.4,
+          "limit": 1,
+          "condAtLimit": 2
+        }
+      ]
+    },
+    {
+      "npcId": 27017,
+      "hook": "kill",
+      "when": "started",
+      "cond": 3,
+      "hasItem": 1072,
+      "html": "",
+      "ops": [
+        {
+          "op": "drop_item",
+          "itemId": 1035,
+          "count": 1,
+          "chance": 0.4,
+          "limit": 5,
+          "condAtLimit": 4
+        }
+      ]
+    }
+  ]
+}

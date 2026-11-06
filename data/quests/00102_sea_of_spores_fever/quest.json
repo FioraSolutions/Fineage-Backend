@@ -1,0 +1,593 @@
+{
+  "id": 102,
+  "name": "Sea of Spores Fever",
+  "repeatable": false,
+  "abortable": true,
+  "questItems": [
+    746,
+    964,
+    965,
+    966,
+    1130,
+    1131,
+    1132,
+    1133,
+    1134
+  ],
+  "dialogs": [
+    {
+      "npcId": 30284,
+      "hook": "talk",
+      "when": "absent",
+      "races": [
+        1
+      ],
+      "minLevel": 12,
+      "htmlFile": "30284-talk-000.htm"
+    },
+    {
+      "npcId": 30284,
+      "hook": "talk",
+      "when": "absent",
+      "races": [
+        1
+      ],
+      "htmlFile": "30284-talk-001.htm"
+    },
+    {
+      "npcId": 30284,
+      "hook": "talk",
+      "when": "absent",
+      "htmlFile": "30284-talk-002.htm"
+    },
+    {
+      "npcId": 30284,
+      "hook": "event",
+      "when": "absent",
+      "event": "30284-02",
+      "races": [
+        1
+      ],
+      "minLevel": 12,
+      "ops": [
+        {
+          "op": "create"
+        },
+        {
+          "op": "start"
+        },
+        {
+          "op": "give_item",
+          "itemId": 964,
+          "count": 1
+        },
+        {
+          "op": "set_cond",
+          "cond": 1
+        }
+      ],
+      "htmlFile": "30284-event-30284-02-003.htm"
+    },
+    {
+      "npcId": 30284,
+      "hook": "talk",
+      "when": "started",
+      "cond": 1,
+      "hasItem": 964,
+      "htmlFile": "30284-talk-c1-004.htm"
+    },
+    {
+      "npcId": 30284,
+      "hook": "talk",
+      "when": "started",
+      "cond": 2,
+      "hasItem": 965,
+      "htmlFile": "30284-talk-c2-005.htm"
+    },
+    {
+      "npcId": 30284,
+      "hook": "talk",
+      "when": "started",
+      "cond": 4,
+      "hasItem": 1130,
+      "ops": [
+        {
+          "op": "take_item",
+          "itemId": 1130,
+          "count": 1
+        },
+        {
+          "op": "give_item",
+          "itemId": 746,
+          "count": 1
+        },
+        {
+          "op": "set_cond",
+          "cond": 5
+        }
+      ],
+      "htmlFile": "30284-talk-c4-006.htm"
+    },
+    {
+      "npcId": 30284,
+      "hook": "talk",
+      "when": "started",
+      "cond": 5,
+      "hasAny": [
+        1130,
+        1131,
+        1132,
+        1133,
+        1134
+      ],
+      "htmlFile": "30284-talk-c5-007.htm"
+    },
+    {
+      "npcId": 30284,
+      "hook": "talk",
+      "when": "started",
+      "cond": 6,
+      "isMage": true,
+      "lacksItems": [
+        1130,
+        1131,
+        1132,
+        1133,
+        1134
+      ],
+      "ops": [
+        {
+          "op": "give_item",
+          "itemId": 1060,
+          "count": 100
+        },
+        {
+          "op": "give_item",
+          "itemId": 4412,
+          "count": 10
+        },
+        {
+          "op": "give_item",
+          "itemId": 4413,
+          "count": 10
+        },
+        {
+          "op": "give_item",
+          "itemId": 4414,
+          "count": 10
+        },
+        {
+          "op": "give_item",
+          "itemId": 4415,
+          "count": 10
+        },
+        {
+          "op": "give_item",
+          "itemId": 4416,
+          "count": 10
+        },
+        {
+          "op": "give_item",
+          "itemId": 744,
+          "count": 1
+        },
+        {
+          "op": "give_item",
+          "itemId": 2509,
+          "count": 500
+        },
+        {
+          "op": "give_exp_sp",
+          "exp": 30202,
+          "sp": 1339
+        },
+        {
+          "op": "give_adena",
+          "count": 6331
+        },
+        {
+          "op": "complete"
+        }
+      ],
+      "htmlFile": "30284-talk-c6-008.htm"
+    },
+    {
+      "npcId": 30284,
+      "hook": "talk",
+      "when": "started",
+      "cond": 6,
+      "isMage": false,
+      "lacksItems": [
+        1130,
+        1131,
+        1132,
+        1133,
+        1134
+      ],
+      "ops": [
+        {
+          "op": "give_item",
+          "itemId": 1060,
+          "count": 100
+        },
+        {
+          "op": "give_item",
+          "itemId": 4412,
+          "count": 10
+        },
+        {
+          "op": "give_item",
+          "itemId": 4413,
+          "count": 10
+        },
+        {
+          "op": "give_item",
+          "itemId": 4414,
+          "count": 10
+        },
+        {
+          "op": "give_item",
+          "itemId": 4415,
+          "count": 10
+        },
+        {
+          "op": "give_item",
+          "itemId": 4416,
+          "count": 10
+        },
+        {
+          "op": "give_item",
+          "itemId": 743,
+          "count": 1
+        },
+        {
+          "op": "give_item",
+          "itemId": 1835,
+          "count": 500
+        },
+        {
+          "op": "give_exp_sp",
+          "exp": 30202,
+          "sp": 1339
+        },
+        {
+          "op": "give_adena",
+          "count": 6331
+        },
+        {
+          "op": "complete"
+        }
+      ],
+      "htmlFile": "30284-talk-c6-009.htm"
+    },
+    {
+      "npcId": 30156,
+      "hook": "talk",
+      "when": "started",
+      "cond": 1,
+      "hasItem": 964,
+      "ops": [
+        {
+          "op": "take_item",
+          "itemId": 964,
+          "count": 1
+        },
+        {
+          "op": "give_item",
+          "itemId": 965,
+          "count": 1
+        },
+        {
+          "op": "set_cond",
+          "cond": 2
+        }
+      ],
+      "htmlFile": "30156-talk-c1-010.htm"
+    },
+    {
+      "npcId": 30156,
+      "hook": "talk",
+      "when": "started",
+      "cond": 3,
+      "atLeast": {
+        "966": 10
+      },
+      "ops": [
+        {
+          "op": "take_item",
+          "itemId": 965,
+          "count": 1
+        },
+        {
+          "op": "take_item",
+          "itemId": 966,
+          "count": 10
+        },
+        {
+          "op": "give_item",
+          "itemId": 1130,
+          "count": 1
+        },
+        {
+          "op": "give_item",
+          "itemId": 1131,
+          "count": 1
+        },
+        {
+          "op": "give_item",
+          "itemId": 1132,
+          "count": 1
+        },
+        {
+          "op": "give_item",
+          "itemId": 1133,
+          "count": 1
+        },
+        {
+          "op": "give_item",
+          "itemId": 1134,
+          "count": 1
+        },
+        {
+          "op": "set_cond",
+          "cond": 4
+        }
+      ],
+      "htmlFile": "30156-talk-c3-011.htm"
+    },
+    {
+      "npcId": 30156,
+      "hook": "talk",
+      "when": "started",
+      "cond": 2,
+      "hasItem": 965,
+      "htmlFile": "30156-talk-c2-012.htm"
+    },
+    {
+      "npcId": 30156,
+      "hook": "talk",
+      "when": "started",
+      "cond": 4,
+      "hasAny": [
+        1130,
+        1131,
+        1132,
+        1133,
+        1134
+      ],
+      "htmlFile": "30156-talk-c4-013.htm"
+    },
+    {
+      "npcId": 30156,
+      "hook": "talk",
+      "when": "started",
+      "cond": 5,
+      "hasAny": [
+        1130,
+        1131,
+        1132,
+        1133,
+        1134
+      ],
+      "htmlFile": "30156-talk-c5-014.htm"
+    },
+    {
+      "npcId": 30285,
+      "hook": "talk",
+      "when": "started",
+      "cond": 5,
+      "hasItems": [
+        746,
+        1134
+      ],
+      "lacksItems": [
+        1130,
+        1131,
+        1132,
+        1133
+      ],
+      "ops": [
+        {
+          "op": "take_item",
+          "itemId": 1134,
+          "count": 1
+        },
+        {
+          "op": "set_cond",
+          "cond": 6
+        }
+      ],
+      "htmlFile": "30285-talk-c5-015.htm"
+    },
+    {
+      "npcId": 30285,
+      "hook": "talk",
+      "when": "started",
+      "cond": 5,
+      "hasItems": [
+        746,
+        1134
+      ],
+      "ops": [
+        {
+          "op": "take_item",
+          "itemId": 1134,
+          "count": 1
+        }
+      ],
+      "htmlFile": "30285-talk-c5-016.htm"
+    },
+    {
+      "npcId": 30221,
+      "hook": "talk",
+      "when": "started",
+      "cond": 5,
+      "hasItems": [
+        746,
+        1133
+      ],
+      "lacksItems": [
+        1130,
+        1131,
+        1132,
+        1134
+      ],
+      "ops": [
+        {
+          "op": "take_item",
+          "itemId": 1133,
+          "count": 1
+        },
+        {
+          "op": "set_cond",
+          "cond": 6
+        }
+      ],
+      "htmlFile": "30221-talk-c5-017.htm"
+    },
+    {
+      "npcId": 30221,
+      "hook": "talk",
+      "when": "started",
+      "cond": 5,
+      "hasItems": [
+        746,
+        1133
+      ],
+      "ops": [
+        {
+          "op": "take_item",
+          "itemId": 1133,
+          "count": 1
+        }
+      ],
+      "htmlFile": "30221-talk-c5-018.htm"
+    },
+    {
+      "npcId": 30219,
+      "hook": "talk",
+      "when": "started",
+      "cond": 5,
+      "hasItems": [
+        746,
+        1132
+      ],
+      "lacksItems": [
+        1130,
+        1131,
+        1133,
+        1134
+      ],
+      "ops": [
+        {
+          "op": "take_item",
+          "itemId": 1132,
+          "count": 1
+        },
+        {
+          "op": "set_cond",
+          "cond": 6
+        }
+      ],
+      "htmlFile": "30219-talk-c5-019.htm"
+    },
+    {
+      "npcId": 30219,
+      "hook": "talk",
+      "when": "started",
+      "cond": 5,
+      "hasItems": [
+        746,
+        1132
+      ],
+      "ops": [
+        {
+          "op": "take_item",
+          "itemId": 1132,
+          "count": 1
+        }
+      ],
+      "htmlFile": "30219-talk-c5-020.htm"
+    },
+    {
+      "npcId": 30217,
+      "hook": "talk",
+      "when": "started",
+      "cond": 5,
+      "hasItems": [
+        746,
+        1131
+      ],
+      "lacksItems": [
+        1130,
+        1132,
+        1133,
+        1134
+      ],
+      "ops": [
+        {
+          "op": "take_item",
+          "itemId": 1131,
+          "count": 1
+        },
+        {
+          "op": "set_cond",
+          "cond": 6
+        }
+      ],
+      "htmlFile": "30217-talk-c5-021.htm"
+    },
+    {
+      "npcId": 30217,
+      "hook": "talk",
+      "when": "started",
+      "cond": 5,
+      "hasItems": [
+        746,
+        1131
+      ],
+      "ops": [
+        {
+          "op": "take_item",
+          "itemId": 1131,
+          "count": 1
+        }
+      ],
+      "htmlFile": "30217-talk-c5-022.htm"
+    },
+    {
+      "npcId": 20013,
+      "hook": "kill",
+      "when": "started",
+      "cond": 2,
+      "html": "",
+      "ops": [
+        {
+          "op": "drop_item",
+          "itemId": 966,
+          "count": 1,
+          "chance": 0.3,
+          "limit": 10,
+          "condAtLimit": 3
+        }
+      ]
+    },
+    {
+      "npcId": 20019,
+      "hook": "kill",
+      "when": "started",
+      "cond": 2,
+      "html": "",
+      "ops": [
+        {
+          "op": "drop_item",
+          "itemId": 966,
+          "count": 1,
+          "chance": 0.3,
+          "limit": 10,
+          "condAtLimit": 3
+        }
+      ]
+    }
+  ]
+}

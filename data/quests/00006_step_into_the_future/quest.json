@@ -1,0 +1,168 @@
+{
+  "id": 6,
+  "name": "Step Into the Future",
+  "repeatable": false,
+  "abortable": true,
+  "questItems": [
+    7571
+  ],
+  "dialogs": [
+    {
+      "npcId": 30006,
+      "hook": "talk",
+      "when": "absent",
+      "races": [
+        0
+      ],
+      "minLevel": 3,
+      "htmlFile": "30006-talk-000.htm"
+    },
+    {
+      "npcId": 30006,
+      "hook": "talk",
+      "when": "absent",
+      "races": [
+        0
+      ],
+      "htmlFile": "30006-talk-001.htm"
+    },
+    {
+      "npcId": 30006,
+      "hook": "event",
+      "when": "absent",
+      "event": "30006-03",
+      "races": [
+        0
+      ],
+      "minLevel": 3,
+      "ops": [
+        {
+          "op": "create"
+        },
+        {
+          "op": "start"
+        },
+        {
+          "op": "set_cond",
+          "cond": 1
+        }
+      ],
+      "htmlFile": "30006-event-30006-03-002.htm"
+    },
+    {
+      "npcId": 30006,
+      "hook": "event",
+      "when": "started",
+      "event": "30006-06",
+      "cond": 3,
+      "ops": [
+        {
+          "op": "give_item",
+          "itemId": 7559,
+          "count": 1
+        },
+        {
+          "op": "give_item",
+          "itemId": 7570,
+          "count": 1
+        },
+        {
+          "op": "complete"
+        }
+      ],
+      "htmlFile": "30006-event-30006-06-c3-003.htm"
+    },
+    {
+      "npcId": 30033,
+      "hook": "event",
+      "when": "started",
+      "event": "30033-02",
+      "cond": 1,
+      "ops": [
+        {
+          "op": "set_cond",
+          "cond": 2
+        },
+        {
+          "op": "give_item",
+          "itemId": 7571,
+          "count": 1
+        }
+      ],
+      "htmlFile": "30033-event-30033-02-c1-004.htm"
+    },
+    {
+      "npcId": 30311,
+      "hook": "event",
+      "when": "started",
+      "event": "30311-02",
+      "cond": 2,
+      "hasItem": 7571,
+      "ops": [
+        {
+          "op": "take_item",
+          "itemId": 7571,
+          "count": 1
+        },
+        {
+          "op": "set_cond",
+          "cond": 3
+        }
+      ],
+      "htmlFile": "30311-event-30311-02-c2-005.htm"
+    },
+    {
+      "npcId": 30006,
+      "hook": "talk",
+      "when": "started",
+      "cond": 1,
+      "htmlFile": "30006-talk-c1-006.htm"
+    },
+    {
+      "npcId": 30006,
+      "hook": "talk",
+      "when": "started",
+      "cond": 3,
+      "htmlFile": "30006-talk-c3-007.htm"
+    },
+    {
+      "npcId": 30033,
+      "hook": "talk",
+      "when": "started",
+      "cond": 1,
+      "htmlFile": "30033-talk-c1-008.htm"
+    },
+    {
+      "npcId": 30033,
+      "hook": "talk",
+      "when": "started",
+      "cond": 2,
+      "htmlFile": "30033-talk-c2-009.htm"
+    },
+    {
+      "npcId": 30311,
+      "hook": "talk",
+      "when": "started",
+      "cond": 2,
+      "htmlFile": "30311-talk-c2-010.htm"
+    },
+    {
+      "npcId": 30311,
+      "hook": "talk",
+      "when": "started",
+      "cond": 3,
+      "htmlFile": "30311-talk-c3-011.htm"
+    },
+    {
+      "npcId": 30311,
+      "hook": "event",
+      "when": "started",
+      "event": "30311-02",
+      "cond": 2,
+      "lacksItems": [
+        7571
+      ],
+      "htmlFile": "30311-event-30311-02-c2-012.htm"
+    }
+  ]
+}

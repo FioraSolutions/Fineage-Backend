@@ -1,0 +1,148 @@
+{
+  "id": 265,
+  "name": "Bonds of Slavery",
+  "repeatable": true,
+  "abortable": true,
+  "questItems": [
+    1368
+  ],
+  "dialogs": [
+    {
+      "npcId": 30357,
+      "hook": "talk",
+      "when": "absent",
+      "races": [
+        0,
+        1,
+        3,
+        4
+      ],
+      "htmlFile": "30357-talk-000.htm"
+    },
+    {
+      "npcId": 30357,
+      "hook": "talk",
+      "when": "absent",
+      "races": [
+        2
+      ],
+      "maxLevel": 5,
+      "htmlFile": "30357-talk-001.htm"
+    },
+    {
+      "npcId": 30357,
+      "hook": "talk",
+      "when": "absent",
+      "races": [
+        2
+      ],
+      "minLevel": 6,
+      "htmlFile": "30357-talk-002.htm"
+    },
+    {
+      "npcId": 30357,
+      "hook": "event",
+      "when": "absent",
+      "event": "30357-04",
+      "races": [
+        2
+      ],
+      "minLevel": 6,
+      "ops": [
+        {
+          "op": "create"
+        },
+        {
+          "op": "start"
+        },
+        {
+          "op": "set_cond",
+          "cond": 1
+        }
+      ],
+      "htmlFile": "30357-event-30357-04-003.htm"
+    },
+    {
+      "npcId": 30357,
+      "hook": "event",
+      "when": "started",
+      "event": "30357-07",
+      "ops": [
+        {
+          "op": "complete"
+        }
+      ],
+      "htmlFile": "30357-event-30357-07-004.htm"
+    },
+    {
+      "npcId": 30357,
+      "hook": "event",
+      "when": "started",
+      "event": "30357-08",
+      "htmlFile": "30357-event-30357-08-005.htm"
+    },
+    {
+      "npcId": 30357,
+      "hook": "talk",
+      "when": "started",
+      "cond": 1,
+      "lacksItems": [
+        1368
+      ],
+      "htmlFile": "30357-talk-c1-006.htm"
+    },
+    {
+      "npcId": 30357,
+      "hook": "talk",
+      "when": "started",
+      "cond": 1,
+      "hasItem": 1368,
+      "ops": [
+        {
+          "op": "sell_items",
+          "prices": [
+            {
+              "itemId": 1368,
+              "adena": 12
+            }
+          ],
+          "bonusMin": 10,
+          "bonusAdena": 500
+        }
+      ],
+      "htmlFile": "30357-talk-c1-007.htm"
+    },
+    {
+      "npcId": 20004,
+      "hook": "kill",
+      "when": "started",
+      "cond": 1,
+      "html": "",
+      "ops": [
+        {
+          "op": "drop_item",
+          "itemId": 1368,
+          "count": 1,
+          "chance": 0.5,
+          "limit": 0
+        }
+      ]
+    },
+    {
+      "npcId": 20005,
+      "hook": "kill",
+      "when": "started",
+      "cond": 1,
+      "html": "",
+      "ops": [
+        {
+          "op": "drop_item",
+          "itemId": 1368,
+          "count": 1,
+          "chance": 0.6,
+          "limit": 0
+        }
+      ]
+    }
+  ]
+}

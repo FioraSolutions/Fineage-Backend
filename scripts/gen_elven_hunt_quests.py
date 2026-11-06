@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Batch-port early Elven Village hunt quests into data/quests.json:
+"""Batch-port early Elven Village hunt quests into data/quests/ pack (questio.upsert):
   Q105 Skirmish with Orcs (linearized to orders 1→5; Mobius random order pick is a follow-up)
   Q159 Protect the Water Source
   Q162 Curse of the Underground Fortress
@@ -14,6 +14,10 @@ import pathlib
 import re
 
 ROOT = pathlib.Path(__file__).resolve().parent.parent
+import sys
+
+sys.path.insert(0, str(pathlib.Path(__file__).resolve().parent))
+import questio
 QROOT = ROOT / "ref/mobius-ct0-interlude/dist/game/data/scripts/quests"
 if not QROOT.is_dir():
     QROOT = ROOT / "ref/mobius-ct0-interlude/data/scripts/quests"
@@ -184,11 +188,7 @@ def q163():
     }
 
 
-path = ROOT / "data/quests.json"
-data = json.loads(path.read_text())
 new = [q105(), q159(), q162(), q163()]
-ids = {q["id"] for q in new}
-data["quests"] = sorted([q for q in data["quests"] if q["id"] not in ids] + new, key=lambda q: q["id"])
-path.write_text(json.dumps(data, indent=2, ensure_ascii=False) + "\n")
+questio.upsert_quests(new)
 for q in new:
     print(f"quest {q['id']}: {len(q['dialogs'])} dialogs")

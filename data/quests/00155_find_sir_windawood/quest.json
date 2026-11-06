@@ -1,0 +1,77 @@
+{
+  "id": 155,
+  "name": "Find Sir Windawood",
+  "repeatable": false,
+  "abortable": true,
+  "questItems": [
+    1019
+  ],
+  "dialogs": [
+    {
+      "npcId": 30042,
+      "hook": "talk",
+      "when": "absent",
+      "minLevel": 3,
+      "htmlFile": "30042-talk-000.htm"
+    },
+    {
+      "npcId": 30042,
+      "hook": "talk",
+      "when": "absent",
+      "htmlFile": "30042-talk-001.htm"
+    },
+    {
+      "npcId": 30042,
+      "hook": "event",
+      "when": "absent",
+      "event": "30042-03",
+      "minLevel": 3,
+      "ops": [
+        {
+          "op": "create"
+        },
+        {
+          "op": "start"
+        },
+        {
+          "op": "give_item",
+          "itemId": 1019,
+          "count": 1
+        },
+        {
+          "op": "set_cond",
+          "cond": 1
+        }
+      ],
+      "htmlFile": "30042-event-30042-03-002.htm"
+    },
+    {
+      "npcId": 30042,
+      "hook": "talk",
+      "when": "started",
+      "htmlFile": "30042-talk-003.htm"
+    },
+    {
+      "npcId": 30311,
+      "hook": "talk",
+      "when": "started",
+      "hasItem": 1019,
+      "ops": [
+        {
+          "op": "take_item",
+          "itemId": 1019,
+          "count": 1
+        },
+        {
+          "op": "give_item",
+          "itemId": 734,
+          "count": 1
+        },
+        {
+          "op": "complete"
+        }
+      ],
+      "htmlFile": "30311-talk-004.htm"
+    }
+  ]
+}

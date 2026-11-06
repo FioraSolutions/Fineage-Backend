@@ -4,8 +4,8 @@ using Xunit;
 namespace Fineage.Game.Tests;
 
 /// <summary>
-/// Mobius early newbie quests Q1, Q153, Q166 — requires data/quests.json entries from
-/// scripts/gen_early_wave1_newbie.py (parent runs generators).
+/// Mobius early newbie quests Q1, Q153, Q166 — requires data/quests/ pack from
+/// scripts/gen_early_wave1_newbie.py (via questio.upsert_quests).
 /// </summary>
 public sealed class EarlyNewbieQuestTests
 {

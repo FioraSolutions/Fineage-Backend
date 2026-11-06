@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Q406 Path of the Elven Knight, Q407 Path of the Elven Scout, Q409 Path of the Elven Oracle -> data/quests.json
+"""Q406 Path of the Elven Knight, Q407 Path of the Elven Scout, Q409 Path of the Elven Oracle -> data/quests/ pack (questio.upsert)
 (replaces those ids in place). Same pattern as gen_q408.py: Mobius CT0 Interlude onAdvEvent/onTalk/onKill branches
 transcribed in order as dialog gates (classes, minLevel/maxLevel, hasItem+minCount, hasItems, lacksItems, atLeast,
 whenVar) and the Mobius HTML with links rewritten to quest_event:<id>:<event> ('.htm(l)' dropped).
@@ -7,6 +7,10 @@ Run scripts/gen_drop_items.py and scripts/gen_quest_item_flags.py afterwards."""
 import json, pathlib, re
 
 ROOT = pathlib.Path(__file__).resolve().parent.parent
+import sys
+
+sys.path.insert(0, str(pathlib.Path(__file__).resolve().parent))
+import questio
 QDIR = ROOT / "ref/mobius-ct0-interlude/dist/game/data/scripts/quests"
 if not QDIR.is_dir():
     QDIR = ROOT / "ref/mobius-ct0-interlude/data/scripts/quests"
@@ -178,11 +182,7 @@ def q409():
     return g.quest("Path of the Elven Oracle", [MEDAL, MONEY, DIARY, ORDER, HALF, NECK])
 
 
-path = ROOT / "data/quests.json"
-data = json.loads(path.read_text())
 new = [q406(), q407(), q409()]
-ids = {q["id"] for q in new}
-data["quests"] = sorted([q for q in data["quests"] if q["id"] not in ids] + new, key=lambda q: q["id"])
-path.write_text(json.dumps(data, indent=2, ensure_ascii=False) + "\n")
+questio.upsert_quests(new)
 for q in new:
     print(f"quest {q['id']}: {len(q['dialogs'])} dialogs")

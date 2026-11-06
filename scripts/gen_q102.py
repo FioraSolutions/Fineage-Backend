@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Q102 Sea of Spores Fever -> data/quests.json (insert/replace id 102).
+"""Q102 Sea of Spores Fever -> data/quests/ pack (questio.upsert) (insert/replace id 102).
 
 Transcribes Mobius CT0 Interlude Q00102_SeaOfSporesFever.java. HTML links rewritten to
 quest_event:102:<event>. Run gen_drop_items.py + gen_quest_item_flags.py afterwards.
@@ -11,6 +11,10 @@ import pathlib
 import re
 
 ROOT = pathlib.Path(__file__).resolve().parent.parent
+import sys
+
+sys.path.insert(0, str(pathlib.Path(__file__).resolve().parent))
+import questio
 SRC = ROOT / "ref/mobius-ct0-interlude/dist/game/data/scripts/quests/Q00102_SeaOfSporesFever"
 if not SRC.is_dir():
     SRC = ROOT / "ref/mobius-ct0-interlude/data/scripts/quests/Q00102_SeaOfSporesFever"
@@ -115,8 +119,5 @@ quest = {
     "dialogs": dialogs,
 }
 
-path = ROOT / "data/quests.json"
-data = json.loads(path.read_text())
-data["quests"] = sorted([q for q in data["quests"] if q["id"] != Q] + [quest], key=lambda q: q["id"])
-path.write_text(json.dumps(data, indent=2, ensure_ascii=False) + "\n")
+questio.upsert_quest(quest)
 print(f"quest {Q}: {len(dialogs)} dialogs")

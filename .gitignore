@@ -9,7 +9,8 @@ data/*
 !data/classes.json
 !data/experience.json
 !data/stat-bonuses.json
-!data/quests.json
+!data/quests/
+!data/quests/**
 !data/skills.json
 !data/skill-combat.json
 !data/skill-stat-effects.json

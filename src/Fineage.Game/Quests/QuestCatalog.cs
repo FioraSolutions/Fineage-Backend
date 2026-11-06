@@ -4,11 +4,14 @@ namespace Fineage.Game.Quests;
 
 /// <summary>
 /// Data-driven quests. Mobius Interlude quests are Java scripts plus HTML;
-/// this catalog stores the same lifecycle (create, start, cond, complete, abort) as JSON.
+/// Fineage stores one folder per quest under <c>data/quests/</c> (see <see cref="LoadPack"/>).
 /// </summary>
 public sealed class QuestCatalog
 {
-    public const string FileName = "quests.json";
+    /// <summary>Directory under <c>data/</c> that holds <c>_meta.json</c> and per-quest folders.</summary>
+    public const string DirectoryName = "quests";
+    public const string MetaFileName = "_meta.json";
+    public const string QuestFileName = "quest.json";
     public const int DefaultMaxActive = 25;
     public const int DefaultTalkRange = 150;
     public const int AdenaItemId = 57;
@@ -43,20 +46,65 @@ public sealed class QuestCatalog
 
     public QuestDefinition? Find(int questId) => _byId.TryGetValue(questId, out var quest) ? quest : null;
 
-    public static QuestCatalog Load(string path, ItemCatalog items)
+    /// <summary>
+    /// Loads <c>data/quests/_meta.json</c> plus every <c>data/quests/*/quest.json</c>.
+    /// Dialog HTML may be inline or <c>htmlFile</c> relative to that quest folder (Mobius-style).
+    /// </summary>
+    public static QuestCatalog LoadPack(string questsDirectory, ItemCatalog items)
     {
-        if (!File.Exists(path))
-            throw new FileNotFoundException($"Quest datapack not found: {path}", path);
+        ArgumentException.ThrowIfNullOrWhiteSpace(questsDirectory);
+        ArgumentNullException.ThrowIfNull(items);
+        if (!Directory.Exists(questsDirectory))
+            throw new DirectoryNotFoundException($"Quest pack not found: {questsDirectory}");
+
+        string metaPath = Path.Combine(questsDirectory, MetaFileName);
+        if (!File.Exists(metaPath))
+            throw new FileNotFoundException($"Quest pack meta not found: {metaPath}", metaPath);
+
+        MetaDto meta;
         try
         {
-            return Parse(File.ReadAllText(path), items, path);
+            meta = JsonSerializer.Deserialize<MetaDto>(File.ReadAllText(metaPath), JsonOptions)
+                ?? throw new InvalidDataException($"{metaPath} was empty.");
         }
         catch (JsonException ex)
         {
-            throw new InvalidDataException($"Could not read {path}.", ex);
+            throw new InvalidDataException($"Could not read {metaPath}.", ex);
         }
+
+        int maxActive = meta.MaxActive == 0 ? DefaultMaxActive : meta.MaxActive;
+        int talkRange = meta.TalkRange == 0 ? DefaultTalkRange : meta.TalkRange;
+        ValidateLimits(maxActive, talkRange, metaPath, items);
+
+        var quests = new List<QuestDefinition>();
+        var seen = new HashSet<int>();
+        foreach (string dir in Directory.EnumerateDirectories(questsDirectory).OrderBy(static d => d, StringComparer.Ordinal))
+        {
+            string questPath = Path.Combine(dir, QuestFileName);
+            if (!File.Exists(questPath))
+                continue;
+            QuestDto row;
+            try
+            {
+                row = JsonSerializer.Deserialize<QuestDto>(File.ReadAllText(questPath), JsonOptions)
+                    ?? throw new InvalidDataException($"{questPath} was empty.");
+            }
+            catch (JsonException ex)
+            {
+                throw new InvalidDataException($"Could not read {questPath}.", ex);
+            }
+
+            quests.Add(BuildQuest(row, items, questPath, dir, seen));
+        }
+
+        if (quests.Count == 0)
+            throw new InvalidDataException($"{questsDirectory} has no {QuestFileName} folders.");
+
+        quests.Sort(static (a, b) => a.Id.CompareTo(b.Id));
+        return new QuestCatalog(maxActive, talkRange, quests);
     }
 
+    /// <summary>In-memory / test helper: monolith <c>{ maxActive, talkRange, quests: [...] }</c> JSON.</summary>
     public static QuestCatalog Parse(string json, ItemCatalog items, string? source = null)
     {
         ArgumentNullException.ThrowIfNull(json);
@@ -66,55 +114,63 @@ public sealed class QuestCatalog
             ?? throw new InvalidDataException($"{where} was empty.");
 
         int maxActive = file.MaxActive == 0 ? DefaultMaxActive : file.MaxActive;
-        if (maxActive < 1 || maxActive > 100)
-            throw new InvalidDataException($"{where} maxActive must be 1..100.");
         int talkRange = file.TalkRange == 0 ? DefaultTalkRange : file.TalkRange;
-        if (talkRange < 1 || talkRange > 5000)
-            throw new InvalidDataException($"{where} talkRange must be 1..5000.");
-        if (!items.TryGet(AdenaItemId, out _))
-            throw new InvalidDataException($"{where} requires item {AdenaItemId} (adena) in the item catalog.");
+        ValidateLimits(maxActive, talkRange, where, items);
 
         var quests = new List<QuestDefinition>();
         var seen = new HashSet<int>();
         foreach (var row in file.Quests ?? [])
-        {
-            if (row.Id <= 0)
-                throw new InvalidDataException($"{where} has a quest id that is not positive.");
-            if (!seen.Add(row.Id))
-                throw new InvalidDataException($"{where} repeats quest id {row.Id}.");
-            if (string.IsNullOrWhiteSpace(row.Name) || row.Name.Trim().Length > 40)
-                throw new InvalidDataException($"{where} quest {row.Id} needs a name of 1..40 characters.");
-
-            var questItems = new List<int>();
-            foreach (int itemId in row.QuestItems ?? [])
-            {
-                if (!items.TryGet(itemId, out _))
-                    throw new InvalidDataException($"{where} quest {row.Id} quest item {itemId} is unknown.");
-                if (itemId == AdenaItemId)
-                    throw new InvalidDataException($"{where} quest {row.Id} cannot register adena as a quest item.");
-                if (questItems.Contains(itemId))
-                    throw new InvalidDataException($"{where} quest {row.Id} repeats quest item {itemId}.");
-                questItems.Add(itemId);
-            }
-
-            var dialogs = new List<QuestDialog>();
-            foreach (var dialog in row.Dialogs ?? [])
-                dialogs.Add(ReadDialog(dialog, items, where, row.Id));
-
-            quests.Add(new QuestDefinition(
-                row.Id,
-                row.Name.Trim(),
-                row.Repeatable,
-                row.Abortable ?? true,
-                questItems,
-                dialogs));
-        }
+            quests.Add(BuildQuest(row, items, where, htmlBaseDir: null, seen));
 
         quests.Sort(static (a, b) => a.Id.CompareTo(b.Id));
         return new QuestCatalog(maxActive, talkRange, quests);
     }
 
-    static QuestDialog ReadDialog(DialogDto dialog, ItemCatalog items, string where, int questId)
+    static void ValidateLimits(int maxActive, int talkRange, string where, ItemCatalog items)
+    {
+        if (maxActive < 1 || maxActive > 100)
+            throw new InvalidDataException($"{where} maxActive must be 1..100.");
+        if (talkRange < 1 || talkRange > 5000)
+            throw new InvalidDataException($"{where} talkRange must be 1..5000.");
+        if (!items.TryGet(AdenaItemId, out _))
+            throw new InvalidDataException($"{where} requires item {AdenaItemId} (adena) in the item catalog.");
+    }
+
+    static QuestDefinition BuildQuest(QuestDto row, ItemCatalog items, string where, string? htmlBaseDir, HashSet<int> seen)
+    {
+        if (row.Id <= 0)
+            throw new InvalidDataException($"{where} has a quest id that is not positive.");
+        if (!seen.Add(row.Id))
+            throw new InvalidDataException($"{where} repeats quest id {row.Id}.");
+        if (string.IsNullOrWhiteSpace(row.Name) || row.Name.Trim().Length > 40)
+            throw new InvalidDataException($"{where} quest {row.Id} needs a name of 1..40 characters.");
+
+        var questItems = new List<int>();
+        foreach (int itemId in row.QuestItems ?? [])
+        {
+            if (!items.TryGet(itemId, out _))
+                throw new InvalidDataException($"{where} quest {row.Id} quest item {itemId} is unknown.");
+            if (itemId == AdenaItemId)
+                throw new InvalidDataException($"{where} quest {row.Id} cannot register adena as a quest item.");
+            if (questItems.Contains(itemId))
+                throw new InvalidDataException($"{where} quest {row.Id} repeats quest item {itemId}.");
+            questItems.Add(itemId);
+        }
+
+        var dialogs = new List<QuestDialog>();
+        foreach (var dialog in row.Dialogs ?? [])
+            dialogs.Add(ReadDialog(dialog, items, where, row.Id, htmlBaseDir));
+
+        return new QuestDefinition(
+            row.Id,
+            row.Name.Trim(),
+            row.Repeatable,
+            row.Abortable ?? true,
+            questItems,
+            dialogs);
+    }
+
+    static QuestDialog ReadDialog(DialogDto dialog, ItemCatalog items, string where, int questId, string? htmlBaseDir = null)
     {
         var hook = ParseHook(dialog.Hook, where, questId);
         var when = ParseWhen(dialog.When, where, questId);
@@ -138,7 +194,7 @@ public sealed class QuestCatalog
         foreach (var op in dialog.Ops ?? [])
             ops.Add(ReadOp(op, items, where, questId));
 
-        string html = dialog.Html ?? "";
+        string html = ResolveHtml(dialog, htmlBaseDir, where, questId);
         // Mobius addSpawn events often return null htmltext; allow empty HTML when spawn_npc is present.
         bool spawnOnly = ops.Exists(static o => o is SpawnNpcOp);
         if (hook != QuestHook.Kill && string.IsNullOrWhiteSpace(html) && !spawnOnly)
@@ -386,6 +442,29 @@ public sealed class QuestCatalog
         return true;
     }
 
+    static string ResolveHtml(DialogDto dialog, string? htmlBaseDir, string where, int questId)
+    {
+        string file = (dialog.HtmlFile ?? "").Trim();
+        if (file.Length == 0)
+            return dialog.Html ?? "";
+
+        if (htmlBaseDir == null)
+            throw new InvalidDataException($"{where} quest {questId} uses htmlFile but has no quest folder.");
+        if (file.Contains("..", StringComparison.Ordinal) || Path.IsPathRooted(file) || file.Contains('/') || file.Contains('\\'))
+            throw new InvalidDataException($"{where} quest {questId} htmlFile must be a plain file name in the quest folder.");
+
+        string path = Path.Combine(htmlBaseDir, file);
+        if (!File.Exists(path))
+            throw new FileNotFoundException($"{where} quest {questId} htmlFile '{file}' not found.", path);
+        return File.ReadAllText(path);
+    }
+
+    sealed class MetaDto
+    {
+        public int MaxActive { get; set; }
+        public int TalkRange { get; set; }
+    }
+
     sealed class QuestFileDto
     {
         public int MaxActive { get; set; }
@@ -413,6 +492,8 @@ public sealed class QuestCatalog
         public string? WhenVar { get; set; }
         public string? WhenValue { get; set; }
         public string? Html { get; set; }
+        /// <summary>Plain file name under the quest folder (Mobius HTML sibling).</summary>
+        public string? HtmlFile { get; set; }
         public List<OpDto>? Ops { get; set; }
         public List<int>? Races { get; set; }
         public int MinLevel { get; set; }

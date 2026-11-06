@@ -1,0 +1,205 @@
+{
+  "id": 152,
+  "name": "Shards of Golem",
+  "repeatable": false,
+  "abortable": true,
+  "questItems": [
+    1008,
+    1009,
+    1010,
+    1011
+  ],
+  "dialogs": [
+    {
+      "npcId": 30035,
+      "hook": "talk",
+      "when": "absent",
+      "maxLevel": 9,
+      "htmlFile": "30035-talk-000.htm"
+    },
+    {
+      "npcId": 30035,
+      "hook": "talk",
+      "when": "absent",
+      "minLevel": 10,
+      "htmlFile": "30035-talk-001.htm"
+    },
+    {
+      "npcId": 30035,
+      "hook": "event",
+      "when": "absent",
+      "event": "30035-03",
+      "minLevel": 10,
+      "ops": [
+        {
+          "op": "create"
+        },
+        {
+          "op": "start"
+        },
+        {
+          "op": "give_item",
+          "itemId": 1008,
+          "count": 1
+        },
+        {
+          "op": "set_cond",
+          "cond": 1
+        }
+      ],
+      "htmlFile": "30035-event-30035-03-002.htm"
+    },
+    {
+      "npcId": 30035,
+      "hook": "talk",
+      "when": "started",
+      "cond": 1,
+      "hasItem": 1008,
+      "htmlFile": "30035-talk-c1-003.htm"
+    },
+    {
+      "npcId": 30035,
+      "hook": "talk",
+      "when": "started",
+      "cond": 2,
+      "hasItem": 1009,
+      "htmlFile": "30035-talk-c2-004.htm"
+    },
+    {
+      "npcId": 30035,
+      "hook": "talk",
+      "when": "started",
+      "cond": 3,
+      "hasItem": 1009,
+      "htmlFile": "30035-talk-c3-005.htm"
+    },
+    {
+      "npcId": 30035,
+      "hook": "talk",
+      "when": "started",
+      "cond": 4,
+      "hasItems": [
+        1009,
+        1011
+      ],
+      "ops": [
+        {
+          "op": "give_item",
+          "itemId": 23,
+          "count": 1
+        },
+        {
+          "op": "give_exp_sp",
+          "exp": 5000,
+          "sp": 0
+        },
+        {
+          "op": "complete"
+        }
+      ],
+      "htmlFile": "30035-talk-c4-006.htm"
+    },
+    {
+      "npcId": 30283,
+      "hook": "event",
+      "when": "started",
+      "event": "30283-02",
+      "cond": 1,
+      "hasItem": 1008,
+      "ops": [
+        {
+          "op": "take_item",
+          "itemId": 1008,
+          "count": 1
+        },
+        {
+          "op": "give_item",
+          "itemId": 1009,
+          "count": 1
+        },
+        {
+          "op": "set_cond",
+          "cond": 2
+        }
+      ],
+      "htmlFile": "30283-event-30283-02-c1-007.htm"
+    },
+    {
+      "npcId": 30283,
+      "hook": "talk",
+      "when": "started",
+      "cond": 1,
+      "hasItem": 1008,
+      "htmlFile": "30283-talk-c1-008.htm"
+    },
+    {
+      "npcId": 30283,
+      "hook": "talk",
+      "when": "started",
+      "cond": 2,
+      "hasItem": 1009,
+      "lacksItems": [
+        1011
+      ],
+      "htmlFile": "30283-talk-c2-009.htm"
+    },
+    {
+      "npcId": 30283,
+      "hook": "talk",
+      "when": "started",
+      "cond": 3,
+      "hasItems": [
+        1009,
+        1010
+      ],
+      "atLeast": {
+        "1010": 5
+      },
+      "ops": [
+        {
+          "op": "take_item",
+          "itemId": 1010,
+          "count": 5
+        },
+        {
+          "op": "give_item",
+          "itemId": 1011,
+          "count": 1
+        },
+        {
+          "op": "set_cond",
+          "cond": 4
+        }
+      ],
+      "htmlFile": "30283-talk-c3-010.htm"
+    },
+    {
+      "npcId": 30283,
+      "hook": "talk",
+      "when": "started",
+      "cond": 4,
+      "hasItems": [
+        1009,
+        1011
+      ],
+      "htmlFile": "30283-talk-c4-011.htm"
+    },
+    {
+      "npcId": 20016,
+      "hook": "kill",
+      "when": "started",
+      "cond": 2,
+      "html": "",
+      "ops": [
+        {
+          "op": "drop_item",
+          "itemId": 1010,
+          "count": 1,
+          "chance": 0.3,
+          "limit": 5,
+          "condAtLimit": 3
+        }
+      ]
+    }
+  ]
+}

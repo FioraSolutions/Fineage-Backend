@@ -6,7 +6,7 @@ Issue: [#299](https://github.com/FioraSolutions/Fineage-Backend/issues/299).
 | Metric | Count |
 |---|---|
 | Mobius scripts with `MIN_LEVEL ≤ 21` | **114** |
-| LIVE in `data/quests.json` (of those) | **44** |
+| LIVE in `data/quests/` pack (of those) | **44** |
 | Still TODO | **70** |
 
 ## LIVE (44)

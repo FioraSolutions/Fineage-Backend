@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Append Mobius CT_0_Interlude EtcItem templates referenced by data/drops/*.json or data/quests.json (questItems + give/take ops) or data/village-masters.json (proof + reward items) but missing from data/items.json.
+"""Append Mobius CT_0_Interlude EtcItem templates referenced by data/drops/*.json or data/quests/*/quest.json (questItems + give/take ops) or data/village-masters.json (proof + reward items) but missing from data/items.json.
 Maps name/icon/is_stackable/price/weight into our etc item shape. Existing rows are never touched.
 Usage: gen_drop_items.py [mobius items xml dir] (default ref/mobius-ct0-interlude/data/stats/items)"""
 import json, sys, pathlib
@@ -19,8 +19,9 @@ for p in (ROOT / "data/drops").glob("*.json"):
     rows = [i for g in d["death"]["groups"] for i in g["items"]] + d.get("corpse", {}).get("items", [])
     want |= {r["itemId"] for r in rows if r["itemId"] not in have}
 
-q = json.loads((ROOT / "data/quests.json").read_text())
-for quest in q.get("quests", []):
+sys.path.insert(0, str(ROOT / "scripts"))
+import questio  # noqa: E402
+for quest in questio.load_all_quests():
     ids = list(quest.get("questItems", []))
     ids += [op[k] for d in quest.get("dialogs", []) for op in d.get("ops", []) for k in ("itemId", "rewardItemId") if op.get(k)]
     want |= {i for i in ids if i not in have}

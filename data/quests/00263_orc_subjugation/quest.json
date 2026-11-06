@@ -1,0 +1,189 @@
+{
+  "id": 263,
+  "name": "Orc Subjugation",
+  "repeatable": true,
+  "abortable": true,
+  "questItems": [
+    1116,
+    1117
+  ],
+  "dialogs": [
+    {
+      "npcId": 30346,
+      "hook": "talk",
+      "when": "absent",
+      "races": [
+        0,
+        1,
+        3,
+        4
+      ],
+      "htmlFile": "30346-talk-000.htm"
+    },
+    {
+      "npcId": 30346,
+      "hook": "talk",
+      "when": "absent",
+      "races": [
+        2
+      ],
+      "maxLevel": 7,
+      "htmlFile": "30346-talk-001.htm"
+    },
+    {
+      "npcId": 30346,
+      "hook": "talk",
+      "when": "absent",
+      "races": [
+        2
+      ],
+      "minLevel": 8,
+      "htmlFile": "30346-talk-002.htm"
+    },
+    {
+      "npcId": 30346,
+      "hook": "event",
+      "when": "absent",
+      "event": "30346-04",
+      "races": [
+        2
+      ],
+      "minLevel": 8,
+      "ops": [
+        {
+          "op": "create"
+        },
+        {
+          "op": "start"
+        },
+        {
+          "op": "set_cond",
+          "cond": 1
+        }
+      ],
+      "htmlFile": "30346-event-30346-04-003.htm"
+    },
+    {
+      "npcId": 30346,
+      "hook": "event",
+      "when": "started",
+      "event": "30346-07",
+      "ops": [
+        {
+          "op": "complete"
+        }
+      ],
+      "htmlFile": "30346-event-30346-07-004.htm"
+    },
+    {
+      "npcId": 30346,
+      "hook": "event",
+      "when": "started",
+      "event": "30346-08",
+      "htmlFile": "30346-event-30346-08-005.htm"
+    },
+    {
+      "npcId": 30346,
+      "hook": "talk",
+      "when": "started",
+      "cond": 1,
+      "lacksItems": [
+        1116,
+        1117
+      ],
+      "htmlFile": "30346-talk-c1-006.htm"
+    },
+    {
+      "npcId": 30346,
+      "hook": "talk",
+      "when": "started",
+      "cond": 1,
+      "hasAny": [
+        1116,
+        1117
+      ],
+      "ops": [
+        {
+          "op": "sell_items",
+          "prices": [
+            {
+              "itemId": 1116,
+              "adena": 20
+            },
+            {
+              "itemId": 1117,
+              "adena": 30
+            }
+          ],
+          "bonusMin": 10,
+          "bonusAdena": 1100
+        }
+      ],
+      "htmlFile": "30346-talk-c1-007.htm"
+    },
+    {
+      "npcId": 20385,
+      "hook": "kill",
+      "when": "started",
+      "cond": 1,
+      "html": "",
+      "ops": [
+        {
+          "op": "drop_item",
+          "itemId": 1116,
+          "count": 1,
+          "chance": 0.5,
+          "limit": 0
+        }
+      ]
+    },
+    {
+      "npcId": 20386,
+      "hook": "kill",
+      "when": "started",
+      "cond": 1,
+      "html": "",
+      "ops": [
+        {
+          "op": "drop_item",
+          "itemId": 1117,
+          "count": 1,
+          "chance": 0.5,
+          "limit": 0
+        }
+      ]
+    },
+    {
+      "npcId": 20387,
+      "hook": "kill",
+      "when": "started",
+      "cond": 1,
+      "html": "",
+      "ops": [
+        {
+          "op": "drop_item",
+          "itemId": 1117,
+          "count": 1,
+          "chance": 0.5,
+          "limit": 0
+        }
+      ]
+    },
+    {
+      "npcId": 20388,
+      "hook": "kill",
+      "when": "started",
+      "cond": 1,
+      "html": "",
+      "ops": [
+        {
+          "op": "drop_item",
+          "itemId": 1117,
+          "count": 1,
+          "chance": 0.5,
+          "limit": 0
+        }
+      ]
+    }
+  ]
+}

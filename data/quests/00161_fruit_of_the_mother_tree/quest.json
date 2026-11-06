@@ -1,0 +1,137 @@
+{
+  "id": 161,
+  "name": "Fruit of the Mother Tree",
+  "repeatable": false,
+  "abortable": true,
+  "questItems": [
+    1036,
+    1037
+  ],
+  "dialogs": [
+    {
+      "npcId": 30362,
+      "hook": "talk",
+      "when": "absent",
+      "races": [
+        1
+      ],
+      "minLevel": 3,
+      "htmlFile": "30362-talk-000.htm"
+    },
+    {
+      "npcId": 30362,
+      "hook": "talk",
+      "when": "absent",
+      "races": [
+        1
+      ],
+      "htmlFile": "30362-talk-001.htm"
+    },
+    {
+      "npcId": 30362,
+      "hook": "talk",
+      "when": "absent",
+      "htmlFile": "30362-talk-002.htm"
+    },
+    {
+      "npcId": 30362,
+      "hook": "event",
+      "event": "accept",
+      "when": "absent",
+      "races": [
+        1
+      ],
+      "minLevel": 3,
+      "ops": [
+        {
+          "op": "create"
+        },
+        {
+          "op": "start"
+        },
+        {
+          "op": "give_item",
+          "itemId": 1036,
+          "count": 1
+        }
+      ],
+      "htmlFile": "30362-event-accept-003.htm"
+    },
+    {
+      "npcId": 30362,
+      "hook": "talk",
+      "when": "started",
+      "cond": 1,
+      "htmlFile": "30362-talk-c1-004.htm"
+    },
+    {
+      "npcId": 30362,
+      "hook": "talk",
+      "when": "started",
+      "cond": 2,
+      "ops": [
+        {
+          "op": "take_item",
+          "itemId": 1037,
+          "count": 1
+        },
+        {
+          "op": "give_adena",
+          "count": 1000
+        },
+        {
+          "op": "give_exp_sp",
+          "exp": 1000,
+          "sp": 0
+        },
+        {
+          "op": "complete"
+        }
+      ],
+      "htmlFile": "30362-talk-c2-005.htm"
+    },
+    {
+      "npcId": 30362,
+      "hook": "talk",
+      "when": "completed",
+      "htmlFile": "30362-talk-006.htm"
+    },
+    {
+      "npcId": 30371,
+      "hook": "talk",
+      "when": "started",
+      "cond": 1,
+      "ops": [
+        {
+          "op": "take_item",
+          "itemId": 1036,
+          "count": 1
+        },
+        {
+          "op": "give_item",
+          "itemId": 1037,
+          "count": 1
+        },
+        {
+          "op": "set_cond",
+          "cond": 2
+        }
+      ],
+      "htmlFile": "30371-talk-c1-007.htm"
+    },
+    {
+      "npcId": 30371,
+      "hook": "talk",
+      "when": "started",
+      "cond": 2,
+      "htmlFile": "30371-talk-c2-008.htm"
+    },
+    {
+      "npcId": 30371,
+      "hook": "event",
+      "event": "lake",
+      "when": "started",
+      "htmlFile": "30371-event-lake-009.htm"
+    }
+  ]
+}

@@ -1,0 +1,212 @@
+{
+  "id": 274,
+  "name": "Skirmish with the Werewolves",
+  "repeatable": true,
+  "abortable": true,
+  "questItems": [
+    1477,
+    1501
+  ],
+  "dialogs": [
+    {
+      "npcId": 30569,
+      "hook": "talk",
+      "when": "absent",
+      "lacksItems": [
+        1506,
+        1507
+      ],
+      "htmlFile": "30569-talk-000.htm"
+    },
+    {
+      "npcId": 30569,
+      "hook": "talk",
+      "when": "absent",
+      "races": [
+        0,
+        1,
+        2,
+        4
+      ],
+      "hasAny": [
+        1506,
+        1507
+      ],
+      "htmlFile": "30569-talk-001.htm"
+    },
+    {
+      "npcId": 30569,
+      "hook": "talk",
+      "when": "absent",
+      "races": [
+        3
+      ],
+      "maxLevel": 8,
+      "hasAny": [
+        1506,
+        1507
+      ],
+      "htmlFile": "30569-talk-002.htm"
+    },
+    {
+      "npcId": 30569,
+      "hook": "talk",
+      "when": "absent",
+      "races": [
+        3
+      ],
+      "minLevel": 9,
+      "hasAny": [
+        1506,
+        1507
+      ],
+      "htmlFile": "30569-talk-003.htm"
+    },
+    {
+      "npcId": 30569,
+      "hook": "event",
+      "when": "absent",
+      "event": "30569-04",
+      "races": [
+        3
+      ],
+      "minLevel": 9,
+      "hasAny": [
+        1506,
+        1507
+      ],
+      "ops": [
+        {
+          "op": "create"
+        },
+        {
+          "op": "start"
+        },
+        {
+          "op": "set_cond",
+          "cond": 1
+        }
+      ],
+      "htmlFile": "30569-event-30569-04-004.htm"
+    },
+    {
+      "npcId": 30569,
+      "hook": "talk",
+      "when": "started",
+      "cond": 1,
+      "htmlFile": "30569-talk-c1-005.htm"
+    },
+    {
+      "npcId": 30569,
+      "hook": "talk",
+      "when": "started",
+      "cond": 2,
+      "atLeast": {
+        "1477": 40
+      },
+      "lacksItems": [
+        1501
+      ],
+      "ops": [
+        {
+          "op": "sell_items",
+          "prices": [
+            {
+              "itemId": 1477,
+              "adena": 30
+            }
+          ]
+        },
+        {
+          "op": "give_adena",
+          "count": 2300
+        },
+        {
+          "op": "complete"
+        }
+      ],
+      "htmlFile": "30569-talk-c2-006.htm"
+    },
+    {
+      "npcId": 30569,
+      "hook": "talk",
+      "when": "started",
+      "cond": 2,
+      "atLeast": {
+        "1477": 40
+      },
+      "hasItem": 1501,
+      "ops": [
+        {
+          "op": "sell_items",
+          "prices": [
+            {
+              "itemId": 1477,
+              "adena": 30
+            },
+            {
+              "itemId": 1501,
+              "adena": 600
+            }
+          ]
+        },
+        {
+          "op": "give_adena",
+          "count": 2300
+        },
+        {
+          "op": "complete"
+        }
+      ],
+      "htmlFile": "30569-talk-c2-007.htm"
+    },
+    {
+      "npcId": 20363,
+      "hook": "kill",
+      "when": "started",
+      "cond": 1,
+      "html": "",
+      "ops": [
+        {
+          "op": "drop_item",
+          "itemId": 1477,
+          "count": 1,
+          "chance": 1.0,
+          "limit": 40,
+          "condAtLimit": 2
+        },
+        {
+          "op": "drop_item",
+          "itemId": 1501,
+          "count": 1,
+          "chance": 0.05,
+          "limit": 0
+        }
+      ]
+    },
+    {
+      "npcId": 20364,
+      "hook": "kill",
+      "when": "started",
+      "cond": 1,
+      "html": "",
+      "ops": [
+        {
+          "op": "drop_item",
+          "itemId": 1477,
+          "count": 1,
+          "chance": 1.0,
+          "limit": 40,
+          "condAtLimit": 2
+        },
+        {
+          "op": "drop_item",
+          "itemId": 1501,
+          "count": 1,
+          "chance": 0.05,
+          "limit": 0
+        }
+      ]
+    }
+  ]
+}

@@ -1,0 +1,110 @@
+{
+  "id": 267,
+  "name": "Wrath of Verdure",
+  "repeatable": true,
+  "abortable": true,
+  "questItems": [
+    1335
+  ],
+  "dialogs": [
+    {
+      "npcId": 31853,
+      "hook": "talk",
+      "when": "absent",
+      "races": [
+        1
+      ],
+      "minLevel": 4,
+      "htmlFile": "31853-talk-000.htm"
+    },
+    {
+      "npcId": 31853,
+      "hook": "talk",
+      "when": "absent",
+      "races": [
+        1
+      ],
+      "htmlFile": "31853-talk-001.htm"
+    },
+    {
+      "npcId": 31853,
+      "hook": "talk",
+      "when": "absent",
+      "htmlFile": "31853-talk-002.htm"
+    },
+    {
+      "npcId": 31853,
+      "hook": "event",
+      "event": "accept",
+      "when": "absent",
+      "races": [
+        1
+      ],
+      "minLevel": 4,
+      "ops": [
+        {
+          "op": "create"
+        },
+        {
+          "op": "start"
+        }
+      ],
+      "htmlFile": "31853-event-accept-003.htm"
+    },
+    {
+      "npcId": 31853,
+      "hook": "talk",
+      "when": "started",
+      "hasItem": 1335,
+      "ops": [
+        {
+          "op": "exchange_all",
+          "itemId": 1335,
+          "rewardItemId": 1340,
+          "per": 1,
+          "bonusMin": 10,
+          "bonusAdena": 600
+        }
+      ],
+      "htmlFile": "31853-talk-004.htm"
+    },
+    {
+      "npcId": 31853,
+      "hook": "talk",
+      "when": "started",
+      "htmlFile": "31853-talk-005.htm"
+    },
+    {
+      "npcId": 31853,
+      "hook": "event",
+      "event": "more",
+      "when": "started",
+      "htmlFile": "31853-event-more-006.htm"
+    },
+    {
+      "npcId": 31853,
+      "hook": "event",
+      "event": "quit",
+      "when": "started",
+      "ops": [
+        {
+          "op": "complete"
+        }
+      ],
+      "htmlFile": "31853-event-quit-007.htm"
+    },
+    {
+      "npcId": 20325,
+      "hook": "kill",
+      "when": "started",
+      "html": "",
+      "ops": [
+        {
+          "op": "drop_item",
+          "itemId": 1335,
+          "chance": 0.5
+        }
+      ]
+    }
+  ]
+}

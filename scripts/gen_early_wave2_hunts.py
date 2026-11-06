@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Upsert Mobius CT0 early hunt/collect quests (MIN_LEVEL<=21) into data/quests.json.
+"""Upsert Mobius CT0 early hunt/collect quests (MIN_LEVEL<=21) into data/quests/ pack (questio.upsert).
 
 IDs: 151, 152, 157, 164, 165, 169, 170, 257, 258, 260, 263, 264, 265, 266, 271, 272, 273, 274
 
@@ -34,6 +34,10 @@ import pathlib
 import re
 
 ROOT = pathlib.Path(__file__).resolve().parent.parent
+import sys
+
+sys.path.insert(0, str(pathlib.Path(__file__).resolve().parent))
+import questio
 QROOT = ROOT / "ref/mobius-ct0-interlude/dist/game/data/scripts/quests"
 if not QROOT.is_dir():
     QROOT = ROOT / "ref/mobius-ct0-interlude/data/scripts/quests"
@@ -845,11 +849,7 @@ def main():
         q273(),
         q274(),
     ]
-    ids = {q["id"] for q in new}
-    path = ROOT / "data/quests.json"
-    data = json.loads(path.read_text())
-    data["quests"] = sorted([q for q in data["quests"] if q["id"] not in ids] + new, key=lambda q: q["id"])
-    path.write_text(json.dumps(data, indent=2, ensure_ascii=False) + "\n")
+    questio.upsert_quests(new)
     for q in new:
         print(f"quest {q['id']}: {len(q['dialogs'])} dialogs")
 
