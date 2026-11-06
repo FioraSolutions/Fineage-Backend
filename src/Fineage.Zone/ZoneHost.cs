@@ -26,7 +26,8 @@ sealed class ZoneHost : IAsyncDisposable
     public static ZoneHost StartNet(HandoffTokens tokens, ZoneWorld? world = null, IAccountStore? accounts = null)
     {
         var cts = new CancellationTokenSource();
-        var created = world ?? ZoneAoiSettings.CreateWorld(accounts: accounts);
+        // Loopback selftest keeps the Cedric smoke map; Program hosts the full datapack.
+        var created = world ?? ZoneAoiSettings.CreateWorld(accounts: accounts, includeEnabledMaps: false);
         created.StartSimulation(cts.Token);
         var server = new NetTcpServer();
         var netZone = new NetZoneServer(tokens, created, accounts);

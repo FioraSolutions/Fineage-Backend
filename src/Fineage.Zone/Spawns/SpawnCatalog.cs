@@ -11,6 +11,7 @@ namespace Fineage.Zone.Spawns;
 /// </summary>
 public sealed class SpawnCatalog
 {
+    /// <summary>Cedric training-hall map id — smoke/test fixtures only, not the hosted world default.</summary>
     public const string DefaultMapId = "ti_cedric";
     public const string TalkingIslandVillageMapId = "ti_village";
     public const string SpawnsDirectoryName = "spawns";

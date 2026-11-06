@@ -134,7 +134,7 @@ Not done / next:
 - Mobius `setClassId` extras: MagicSkillUse 5103 class-change effect broadcast, party/clan member-list refresh,
   `checkPlayerSkills` (drop skills above the new tree), sub-class / `setBaseClass` (we only have one class id).
 - Net client has no dedicated class-change UI: everything is NpcHtml + UserInfo/SkillList it already handles.
-- `FINEAGE_TRAINER_SP_LEARN` and `AOI_CELL` stay off by default (unchanged).
+- `FINEAGE_TRAINER_SP_LEARN` stays off by default. Hosted Zone defaults `FINEAGE_ZONE_AOI_CELL` to 3000.
 
 ## Other elven first-job paths (Q406 / Q407 / Q409)
 

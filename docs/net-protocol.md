@@ -136,22 +136,21 @@ AOI (who is on the knownlist):
 
 | Env | Effect |
 |-----|--------|
-| `FINEAGE_ZONE_AOI_CELL` &gt; 0 | `GridAoi` with that cell size (default design size 3000) |
-| else `FINEAGE_ZONE_INTEREST_RANGE` &gt; 0 | `RangeAoi` |
-| else | `SingleCellAoi` (whole zone — only sane for one village map) |
+| `FINEAGE_ZONE_AOI_CELL` (default **3000**) | `GridAoi` with that cell size |
+| `FINEAGE_ZONE_AOI_CELL=0` and `FINEAGE_ZONE_INTEREST_RANGE` &gt; 0 | `RangeAoi` |
+| `FINEAGE_ZONE_AOI_CELL=0` and no interest range | `SingleCellAoi` (tiny test hosts only) |
 
 How much of the datapack is spawned:
 
 | Env | Effect |
 |-----|--------|
-| `FINEAGE_ZONE_INCLUDE_ENABLED_MAPS=1` | every `enabled` map under `data/spawns/` — the whole Interlude world (~34k NPCs) |
+| *(default)* | every `enabled` map under `data/spawns/` — the whole Interlude world (~34k NPCs) |
+| `FINEAGE_ZONE_INCLUDE_ENABLED_MAPS=0` | single active map only (`ti_cedric` unless overridden) — tests / emergency |
 | `FINEAGE_ZONE_MAPS=a,b` | whitelist: only those spawn maps |
 | `FINEAGE_ZONE_BOUNDS=x1,y1,x2,y2[;...]` | keep only rows inside those XY boxes |
-| none of the above | the single legacy active map (`ti_cedric`) |
 
-`scripts/run-local-net.sh` starts the whole world with `GridAoi(3000)`, so visibility stays spatial: a
-player only receives the NPCs around them, not all 34k. Do not pair the whole world with
-`SingleCellAoi` — that would put every NPC on every knownlist.
+Hosted Zone defaults to the full enabled datapack with `GridAoi(3000)`, so a player only receives
+NPCs around them, not all 34k. Do not pair the whole world with `SingleCellAoi`.
 
 ## Scale seams
 

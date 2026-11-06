@@ -104,11 +104,11 @@ public sealed class NerupaSpawnTests
         // (the zone filter is process-global and other tests run in parallel with this one).
         string script = File.ReadAllText(Path.Combine(RepoRoot(), "scripts", "run-local-net.sh"));
 
-        // One world: every enabled spawn map, no region whitelist and no bounding box.
-        string include = DefaultExport(script, "FINEAGE_ZONE_INCLUDE_ENABLED_MAPS");
-        Assert.Equal("1", include);
+        // Hosted Zone defaults to every enabled map; the script must not pin a region whitelist.
+        Assert.DoesNotContain("FINEAGE_ZONE_INCLUDE_ENABLED_MAPS", script);
         Assert.Equal(string.Empty, DefaultExport(script, "FINEAGE_ZONE_MAPS"));
         Assert.Equal(string.Empty, DefaultExport(script, "FINEAGE_ZONE_BOUNDS"));
+        Assert.Equal("3000", DefaultExport(script, "FINEAGE_ZONE_AOI_CELL"));
 
         // Empty filters keep everything, so her map and row survive the filtering the zone applies.
         var boxes = ZoneMapFilter.ParseBounds(DefaultExport(script, "FINEAGE_ZONE_BOUNDS"));

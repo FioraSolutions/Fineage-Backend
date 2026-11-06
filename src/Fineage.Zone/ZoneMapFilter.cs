@@ -2,12 +2,20 @@ namespace Fineage.Zone;
 
 /// <summary>
 /// Optional spawn-map whitelist (FINEAGE_ZONE_MAPS=ti_village,ti_monsters,...) and XY bounds
-/// (FINEAGE_ZONE_BOUNDS=minX,minY,maxX,maxY) so one Zone can host a region (e.g. Talking Island)
-/// without loading the whole world. Unset = legacy behaviour (active map [+ enabled maps]).
+/// (FINEAGE_ZONE_BOUNDS=minX,minY,maxX,maxY) so one Zone can host a region without the full
+/// Interlude datapack. Hosted default is every enabled map; these filters only narrow it.
 /// </summary>
 public static class ZoneMapFilter
 {
     public readonly record struct Box(int MinX, int MinY, int MaxX, int MaxY);
+
+    /// <summary>True when env is <c>0</c> / <c>false</c> / <c>off</c> / <c>no</c>.</summary>
+    public static bool IsExplicitlyOff(string? text) =>
+        !string.IsNullOrWhiteSpace(text) &&
+        (string.Equals(text.Trim(), "0", StringComparison.OrdinalIgnoreCase)
+         || string.Equals(text.Trim(), "false", StringComparison.OrdinalIgnoreCase)
+         || string.Equals(text.Trim(), "off", StringComparison.OrdinalIgnoreCase)
+         || string.Equals(text.Trim(), "no", StringComparison.OrdinalIgnoreCase));
 
     public static IReadOnlyList<string> Maps
     {

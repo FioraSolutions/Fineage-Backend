@@ -157,13 +157,23 @@ public sealed class NpcTemplateSpawnTests
     }
 
     [Fact]
-    public void Default_world_keeps_the_gremlin_smoke_set()
+    public void Unit_world_keeps_the_gremlin_smoke_set()
     {
         var ids = new ZoneWorld().NpcObjectIds;
         foreach (var gremlin in TalkingIsland.Gremlins)
             Assert.Contains(gremlin.ObjectId, ids);
         Assert.DoesNotContain(60013, ids);
-        Assert.Equal(ids, ZoneAoiSettings.CreateWorld().NpcObjectIds);
+        Assert.Equal(ids, ZoneAoiSettings.CreateWorld(includeEnabledMaps: false).NpcObjectIds);
+    }
+
+    [Fact]
+    public void CreateWorld_defaults_to_all_enabled_maps()
+    {
+        var baseline = new ZoneWorld().NpcObjectIds;
+        var hosted = ZoneAoiSettings.CreateWorld();
+        Assert.Equal(new ZoneWorld(includeEnabledMaps: true).NpcObjectIds, hosted.NpcObjectIds);
+        Assert.True(hosted.NpcObjectIds.Count > baseline.Count);
+        Assert.Contains(60013, hosted.NpcObjectIds);
     }
 
     [Fact]
@@ -180,7 +190,7 @@ public sealed class NpcTemplateSpawnTests
             Assert.Contains(id, world.NpcObjectIds);
         Assert.Contains(60013, world.NpcObjectIds);
 
-        var hosted = ZoneAoiSettings.CreateWorld(includeEnabledMaps: true);
+        var hosted = ZoneAoiSettings.CreateWorld();
         Assert.Equal(world.NpcObjectIds, hosted.NpcObjectIds);
     }
 
