@@ -665,8 +665,21 @@ public sealed class QuestMachine : IQuestKillHook
             return false;
         if (dialog.Classes is { Count: > 0 } classes && !classes.Contains(who.ClassId))
             return false;
+        if (dialog.IsMage is bool wantMage && IsMageClass(who.ClassId) != wantMage)
+            return false;
         return true;
     }
+
+    /// <summary>
+    /// Interlude mystic class ids (root in human/elven/dark/orc mystic). Used for Mobius <c>isMageClass</c> gates.
+    /// </summary>
+    static readonly HashSet<int> MageClassIds =
+    [
+        10, 11, 12, 13, 14, 15, 16, 17, 25, 26, 27, 28, 29, 30, 38, 39, 40, 41, 42, 43, 49, 50, 51, 52,
+        94, 95, 96, 97, 98, 103, 104, 105, 110, 111, 112, 115, 116
+    ];
+
+    static bool IsMageClass(int classId) => classId >= 0 && MageClassIds.Contains(classId);
 
     /// <summary>
     /// Mobius path quests branch on <c>hasQuestItems(a, b, ...)</c> (all held) and <c>!hasAtLeastOneQuestItem(...)</c> (none held).
@@ -692,6 +705,23 @@ public sealed class QuestMachine : IQuestKillHook
         foreach (var pair in dialog.AtLeast ?? new Dictionary<int, int>())
         {
             if (inventory.CountOf(pair.Key) < pair.Value)
+                return false;
+        }
+
+        // Mobius hasAtLeastOneQuestItem.
+        if (dialog.HasAny is { Count: > 0 } any)
+        {
+            bool hit = false;
+            foreach (int id in any)
+            {
+                if (inventory.CountOf(id) > 0)
+                {
+                    hit = true;
+                    break;
+                }
+            }
+
+            if (!hit)
                 return false;
         }
 

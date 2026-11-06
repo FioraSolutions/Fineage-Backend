@@ -82,7 +82,11 @@ public sealed record QuestDialog(
     IReadOnlyList<int>? Classes = null,
     IReadOnlyList<int>? HasItems = null,
     IReadOnlyList<int>? LacksItems = null,
-    IReadOnlyDictionary<int, int>? AtLeast = null);
+    IReadOnlyDictionary<int, int>? AtLeast = null,
+    /// <summary>Mobius <c>hasAtLeastOneQuestItem</c> — at least one listed item held.</summary>
+    IReadOnlyList<int>? HasAny = null,
+    /// <summary>Mobius <c>player.isMageClass()</c>. Null = no gate.</summary>
+    bool? IsMage = null);
 
 /// <summary>
 /// Who is talking. Mobius quest scripts branch on <c>player.getRace()</c> / <c>getLevel()</c>

@@ -177,7 +177,9 @@ public sealed class QuestCatalog
             dialog.Classes is { Count: > 0 } classes ? classes.Distinct().ToArray() : null,
             ReadItemList(dialog.HasItems, items, where, questId, "hasItems"),
             ReadItemList(dialog.LacksItems, items, where, questId, "lacksItems"),
-            ReadAtLeast(dialog.AtLeast, items, where, questId));
+            ReadAtLeast(dialog.AtLeast, items, where, questId),
+            ReadItemList(dialog.HasAny, items, where, questId, "hasAny"),
+            dialog.IsMage);
     }
 
     static IReadOnlyDictionary<int, int>? ReadAtLeast(Dictionary<string, int>? rows, ItemCatalog items, string where, int questId)
@@ -422,6 +424,8 @@ public sealed class QuestCatalog
         public List<int>? HasItems { get; set; }
         public List<int>? LacksItems { get; set; }
         public Dictionary<string, int>? AtLeast { get; set; }
+        public List<int>? HasAny { get; set; }
+        public bool? IsMage { get; set; }
     }
 
     sealed class OpDto

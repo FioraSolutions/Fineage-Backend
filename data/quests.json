@@ -4,6 +4,599 @@
   "talkRange": 150,
   "quests": [
     {
+      "id": 102,
+      "name": "Sea of Spores Fever",
+      "repeatable": false,
+      "abortable": true,
+      "questItems": [
+        746,
+        964,
+        965,
+        966,
+        1130,
+        1131,
+        1132,
+        1133,
+        1134
+      ],
+      "dialogs": [
+        {
+          "npcId": 30284,
+          "hook": "talk",
+          "when": "absent",
+          "races": [
+            1
+          ],
+          "minLevel": 12,
+          "html": "<html><body>Sentinel Knight Alberius:<br>\nI would like to ask you to carry out a task for me. This task must be swiftly and quietly completed without attracting the attention of the other Elves. Can I trust you with this?<br>\n<a action=\"quest_event:102:30284-02\">Say you will take the task</a>\n</body></html>"
+        },
+        {
+          "npcId": 30284,
+          "hook": "talk",
+          "when": "absent",
+          "races": [
+            1
+          ],
+          "html": "<html><body>Sentinel Knight Alberius:<br>\nRecently the Human Mystics of the Ivory Tower and the top Spellsingers of our race have been working together to research methods to purify the poisons that fill the Sea of Spores, and perhaps some day return it to the beautiful forest it used to be.<br>\nRecently Spellsinger Adria Lumingshine personally travelled to the Sea of Spores to gather materials necessary for research, and a few Sentinels, including myself, accompanied her to that horrendous place as her guards.<br>\nBut after she returned from her journey, Adria fell ill of a fever. They say that she has been infected with the poison from the Sea of Spores. Master Cobendell is concocting a medication, but is worried that he may be short on ingredients. If he lacks ingredients for his <font color=\"LEVEL\">fever remedy,</font> I would ask your help in gathering those ingredients.<br>\n(Elf characters with Level 12 and higher may undertake this quest.)\n</body></html>"
+        },
+        {
+          "npcId": 30284,
+          "hook": "talk",
+          "when": "absent",
+          "html": "<html><body>Sentinel Knight Alberius:<br>\nWell I must say, I do have a very important task at hand... but I cannot ask one who is not an Elf to perform this task.<br>\n(This quest may only be undertaken by Elf characters.)\n</body></html>"
+        },
+        {
+          "npcId": 30284,
+          "hook": "event",
+          "when": "absent",
+          "event": "30284-02",
+          "races": [
+            1
+          ],
+          "minLevel": 12,
+          "html": "<html><body>Sentinel Knight Alberius:<br>\nGo and seek <font color=\"LEVEL\">Master Cobendell</font>, who resides within the Sanctum of Eva. Give him this letter and tell him that Alberius has sent you. Cobendell will provide further details. Please hurry.\n</body></html>",
+          "ops": [
+            {
+              "op": "create"
+            },
+            {
+              "op": "start"
+            },
+            {
+              "op": "give_item",
+              "itemId": 964,
+              "count": 1
+            },
+            {
+              "op": "set_cond",
+              "cond": 1
+            }
+          ]
+        },
+        {
+          "npcId": 30284,
+          "hook": "talk",
+          "when": "started",
+          "cond": 1,
+          "hasItem": 964,
+          "html": "<html><body>Sentinel Knight Alberius:<br>\nWhat, you haven't gone yet? Go on, take the letter I have given you and find Master Cobendell. He'll be at the Sanctum of Eva, where the Hierarchs are. Please hurry.\n</body></html>"
+        },
+        {
+          "npcId": 30284,
+          "hook": "talk",
+          "when": "started",
+          "cond": 2,
+          "hasItem": 965,
+          "html": "<html><body>Sentinel Knight Alberius:<br>\nI hear that Cobendell has asked you to gather dryad tears. Dryads may be found in the remote corners of the Elven Forest. Their appearance may indeed be beautiful, but be careful -- they have a deep-rooted hatred for our race.\n</body></html>"
+        },
+        {
+          "npcId": 30284,
+          "hook": "talk",
+          "when": "started",
+          "cond": 4,
+          "hasItem": 1130,
+          "html": "<html><body>Sentinel Knight Alberius:<br>\nAh, Master Cobendell has completed his medicine. Here, give me one for starters.<br>\nI need to make one more request of you. I would like you to deliver the rest of this medicine to the other Sentinels. In these times, with Dark Elven spies always watching for signs of weakness, none of the sentinels, including myself, dare to leave our posts. I need you to deal with this, because we do not want to give off the impression that we sentinels, the protectors of the woods, are harmed or affected in the slightest. Please honor my request and grant me this favor.<br>\nThe other Sentinels who traveled to the Sea of Spores are <font color=\"LEVEL\">Berry, Veltress, Rayen, and Gartrandell</font>. I have written down their names on this list. Come and seek me again after you have delivered the medicine to them.\n</body></html>",
+          "ops": [
+            {
+              "op": "take_item",
+              "itemId": 1130,
+              "count": 1
+            },
+            {
+              "op": "give_item",
+              "itemId": 746,
+              "count": 1
+            },
+            {
+              "op": "set_cond",
+              "cond": 5
+            }
+          ]
+        },
+        {
+          "npcId": 30284,
+          "hook": "talk",
+          "when": "started",
+          "cond": 5,
+          "hasAny": [
+            1130,
+            1131,
+            1132,
+            1133,
+            1134
+          ],
+          "html": "<html><body>Sentinel Knight Alberius:<br>\nPlease deliver Cobendell's Medicine to the sentinels on my list. Thank you.\n</body></html>"
+        },
+        {
+          "npcId": 30284,
+          "hook": "talk",
+          "when": "started",
+          "cond": 6,
+          "isMage": true,
+          "lacksItems": [
+            1130,
+            1131,
+            1132,
+            1133,
+            1134
+          ],
+          "html": "<html><body>Sentinel Knight Alberius:<br>\nHave you delivered all of the medicine to the Sentinels? Well done indeed, my friend. You have performed a great deed for the Sentinels, guardians of the wood.<br>\nAs the representative of the sentinels, I hereby present you with this. This is a precious weapon that symbolizes the honor and pride of those who protect the sacred woods and the Mother Tree. I ask only that you see that this weapon is not used in unjust causes.<br>\nUntil the day we meet again, may the smiles of the stars light your path.\n</body></html>",
+          "ops": [
+            {
+              "op": "give_item",
+              "itemId": 1060,
+              "count": 100
+            },
+            {
+              "op": "give_item",
+              "itemId": 4412,
+              "count": 10
+            },
+            {
+              "op": "give_item",
+              "itemId": 4413,
+              "count": 10
+            },
+            {
+              "op": "give_item",
+              "itemId": 4414,
+              "count": 10
+            },
+            {
+              "op": "give_item",
+              "itemId": 4415,
+              "count": 10
+            },
+            {
+              "op": "give_item",
+              "itemId": 4416,
+              "count": 10
+            },
+            {
+              "op": "give_item",
+              "itemId": 744,
+              "count": 1
+            },
+            {
+              "op": "give_item",
+              "itemId": 2509,
+              "count": 500
+            },
+            {
+              "op": "give_exp_sp",
+              "exp": 30202,
+              "sp": 1339
+            },
+            {
+              "op": "give_adena",
+              "count": 6331
+            },
+            {
+              "op": "complete"
+            }
+          ]
+        },
+        {
+          "npcId": 30284,
+          "hook": "talk",
+          "when": "started",
+          "cond": 6,
+          "isMage": false,
+          "lacksItems": [
+            1130,
+            1131,
+            1132,
+            1133,
+            1134
+          ],
+          "html": "<html><body>Sentinel Knight Alberius:<br>\nHave you delivered all of the medicine to the Sentinels? Well done indeed, my friend. You have performed a great deed for the Sentinels, guardians of the wood.<br>\nAs the representative of the sentinels, I hereby present you with this. This is a precious weapon that symbolizes the honor and pride of those who protect the sacred woods and the Mother Tree. I ask only that you see that this weapon is not used in unjust causes.<br>\nUntil the day we meet again, may the smiles of the stars light your path.\n</body></html>",
+          "ops": [
+            {
+              "op": "give_item",
+              "itemId": 1060,
+              "count": 100
+            },
+            {
+              "op": "give_item",
+              "itemId": 4412,
+              "count": 10
+            },
+            {
+              "op": "give_item",
+              "itemId": 4413,
+              "count": 10
+            },
+            {
+              "op": "give_item",
+              "itemId": 4414,
+              "count": 10
+            },
+            {
+              "op": "give_item",
+              "itemId": 4415,
+              "count": 10
+            },
+            {
+              "op": "give_item",
+              "itemId": 4416,
+              "count": 10
+            },
+            {
+              "op": "give_item",
+              "itemId": 743,
+              "count": 1
+            },
+            {
+              "op": "give_item",
+              "itemId": 1835,
+              "count": 500
+            },
+            {
+              "op": "give_exp_sp",
+              "exp": 30202,
+              "sp": 1339
+            },
+            {
+              "op": "give_adena",
+              "count": 6331
+            },
+            {
+              "op": "complete"
+            }
+          ]
+        },
+        {
+          "npcId": 30156,
+          "hook": "talk",
+          "when": "started",
+          "cond": 1,
+          "hasItem": 964,
+          "html": "<html><body>Master Cobendell:<br>\nTo create a Healing Potion to treat the fever, I need the <font color=\"LEVEL\">dryad's tear</font>, where the purest life forces of the earth are concentrated. Long ago the dryads were beautiful spirits of the trees that sang of the life force of the earth. However, after the balance of magic powers flowing through the woods and the earth were undone during the battle with the Humans, the dryads became spirits with a deep-rooted hatred for all the material races. You can still find <font color=\"LEVEL\">dryads</font> today if you travel to the Elven Forest to west of the village.<br>\nWhen the dryad's physical body is destroyed, a <font color=\"LEVEL\">dryad's tear</font> is created. But you must keep this amulet with you at all times. The crystal embedded in this necklace works as a catalyst to concentrate the spiritual power scattered when a dryad is killed into the dryad's tear.<br>\nWell then, good luck on your journey. <font color=\"LEVEL\">Gather ten Dryad's Tears</font> and bring them to me.\n</body></html>",
+          "ops": [
+            {
+              "op": "take_item",
+              "itemId": 964,
+              "count": 1
+            },
+            {
+              "op": "give_item",
+              "itemId": 965,
+              "count": 1
+            },
+            {
+              "op": "set_cond",
+              "cond": 2
+            }
+          ]
+        },
+        {
+          "npcId": 30156,
+          "hook": "talk",
+          "when": "started",
+          "cond": 3,
+          "atLeast": {
+            "966": 10
+          },
+          "html": "<html><body>Master Cobendell:<br>\nMy friend, you have done well to return. Have you gathered all the Dryad's Tears? Ah, excellent.<br>\nPlease wait a moment. All I need to do is add the Dryad's Tears to the mixture that I have prepared.<br>\nHere, I have created the five potions that are needed most immediately. Please deliver this to <font color=\"LEVEL\">Sentinel Knight Alberius</font>.\n</body></html>",
+          "ops": [
+            {
+              "op": "take_item",
+              "itemId": 965,
+              "count": 1
+            },
+            {
+              "op": "take_item",
+              "itemId": 966,
+              "count": 10
+            },
+            {
+              "op": "give_item",
+              "itemId": 1130,
+              "count": 1
+            },
+            {
+              "op": "give_item",
+              "itemId": 1131,
+              "count": 1
+            },
+            {
+              "op": "give_item",
+              "itemId": 1132,
+              "count": 1
+            },
+            {
+              "op": "give_item",
+              "itemId": 1133,
+              "count": 1
+            },
+            {
+              "op": "give_item",
+              "itemId": 1134,
+              "count": 1
+            },
+            {
+              "op": "set_cond",
+              "cond": 4
+            }
+          ]
+        },
+        {
+          "npcId": 30156,
+          "hook": "talk",
+          "when": "started",
+          "cond": 2,
+          "hasItem": 965,
+          "html": "<html><body>Master Cobendell:<br>\nMy dear friend, did you not agree to bring me ten Dryad's Tears? I must create a Healing Potion before the poisons of the spores spread throughout the entire village. Please hurry.\n</body></html>"
+        },
+        {
+          "npcId": 30156,
+          "hook": "talk",
+          "when": "started",
+          "cond": 4,
+          "hasAny": [
+            1130,
+            1131,
+            1132,
+            1133,
+            1134
+          ],
+          "html": "<html><body>Master Cobendell:<br>\nPlease deliver the Dryad's Tears potion that I have made to <font color=\"LEVEL\">Sentinel Knight Alberius</font>.<br>\nAlberius is standing guard at the terrace of the building directly in front of us.\n</body></html>"
+        },
+        {
+          "npcId": 30156,
+          "hook": "talk",
+          "when": "started",
+          "cond": 5,
+          "hasAny": [
+            1130,
+            1131,
+            1132,
+            1133,
+            1134
+          ],
+          "html": "<html><body>Master Cobendell:<br>\nI hear that Alberius has asked you to deliver the medicine to all the Sentinels that traveled to the Sea of Spores? Have you delivered them all? They are all healthy individuals, and there's probably no need to worry, but it's best to have them take the medication. Better safe than sorry, right?\n</body></html>"
+        },
+        {
+          "npcId": 30285,
+          "hook": "talk",
+          "when": "started",
+          "cond": 5,
+          "hasItems": [
+            746,
+            1134
+          ],
+          "lacksItems": [
+            1130,
+            1131,
+            1132,
+            1133
+          ],
+          "html": "<html><body>Sentinel Gartrandell:<br>\nI don't think anything's wrong with me ... But Alberius has ordered me to take this medicine, and I must follow my orders.\n</body></html>",
+          "ops": [
+            {
+              "op": "take_item",
+              "itemId": 1134,
+              "count": 1
+            },
+            {
+              "op": "set_cond",
+              "cond": 6
+            }
+          ]
+        },
+        {
+          "npcId": 30285,
+          "hook": "talk",
+          "when": "started",
+          "cond": 5,
+          "hasItems": [
+            746,
+            1134
+          ],
+          "html": "<html><body>Sentinel Gartrandell:<br>\nI don't think anything's wrong with me ... But Alberius has ordered me to take this medicine, and I must follow my orders.\n</body></html>",
+          "ops": [
+            {
+              "op": "take_item",
+              "itemId": 1134,
+              "count": 1
+            }
+          ]
+        },
+        {
+          "npcId": 30221,
+          "hook": "talk",
+          "when": "started",
+          "cond": 5,
+          "hasItems": [
+            746,
+            1133
+          ],
+          "lacksItems": [
+            1130,
+            1131,
+            1132,
+            1134
+          ],
+          "html": "<html><body>Sentinel Rayen:<br>\nAh, is this the fever medication? If only this could also erase the horrendous memories of my experiences in the Sea of Spores.\n</body></html>",
+          "ops": [
+            {
+              "op": "take_item",
+              "itemId": 1133,
+              "count": 1
+            },
+            {
+              "op": "set_cond",
+              "cond": 6
+            }
+          ]
+        },
+        {
+          "npcId": 30221,
+          "hook": "talk",
+          "when": "started",
+          "cond": 5,
+          "hasItems": [
+            746,
+            1133
+          ],
+          "html": "<html><body>Sentinel Rayen:<br>\nAh, is this the fever medication? If only this could also erase the horrendous memories of my experiences in the Sea of Spores.\n</body></html>",
+          "ops": [
+            {
+              "op": "take_item",
+              "itemId": 1133,
+              "count": 1
+            }
+          ]
+        },
+        {
+          "npcId": 30219,
+          "hook": "talk",
+          "when": "started",
+          "cond": 5,
+          "hasItems": [
+            746,
+            1132
+          ],
+          "lacksItems": [
+            1130,
+            1131,
+            1133,
+            1134
+          ],
+          "html": "<html><body>Sentinel Veltress:<br>\nIs this the medicine to treat the fever? Please tell Cobendell thank you for me.\n</body></html>",
+          "ops": [
+            {
+              "op": "take_item",
+              "itemId": 1132,
+              "count": 1
+            },
+            {
+              "op": "set_cond",
+              "cond": 6
+            }
+          ]
+        },
+        {
+          "npcId": 30219,
+          "hook": "talk",
+          "when": "started",
+          "cond": 5,
+          "hasItems": [
+            746,
+            1132
+          ],
+          "html": "<html><body>Sentinel Veltress:<br>\nIs this the medicine to treat the fever? Please tell Cobendell thank you for me.\n</body></html>",
+          "ops": [
+            {
+              "op": "take_item",
+              "itemId": 1132,
+              "count": 1
+            }
+          ]
+        },
+        {
+          "npcId": 30217,
+          "hook": "talk",
+          "when": "started",
+          "cond": 5,
+          "hasItems": [
+            746,
+            1131
+          ],
+          "lacksItems": [
+            1130,
+            1132,
+            1133,
+            1134
+          ],
+          "html": "<html><body>Sentinel Berros:<br>\nAh, the medicine concocted by Cobendell. Thank you. Thank you.\n</body></html>",
+          "ops": [
+            {
+              "op": "take_item",
+              "itemId": 1131,
+              "count": 1
+            },
+            {
+              "op": "set_cond",
+              "cond": 6
+            }
+          ]
+        },
+        {
+          "npcId": 30217,
+          "hook": "talk",
+          "when": "started",
+          "cond": 5,
+          "hasItems": [
+            746,
+            1131
+          ],
+          "html": "<html><body>Sentinel Berros:<br>\nAh, the medicine concocted by Cobendell. Thank you. Thank you.\n</body></html>",
+          "ops": [
+            {
+              "op": "take_item",
+              "itemId": 1131,
+              "count": 1
+            }
+          ]
+        },
+        {
+          "npcId": 20013,
+          "hook": "kill",
+          "when": "started",
+          "cond": 2,
+          "html": "",
+          "ops": [
+            {
+              "op": "drop_item",
+              "itemId": 966,
+              "count": 1,
+              "chance": 0.3,
+              "limit": 10,
+              "condAtLimit": 3
+            }
+          ]
+        },
+        {
+          "npcId": 20019,
+          "hook": "kill",
+          "when": "started",
+          "cond": 2,
+          "html": "",
+          "ops": [
+            {
+              "op": "drop_item",
+              "itemId": 966,
+              "count": 1,
+              "chance": 0.3,
+              "limit": 10,
+              "condAtLimit": 3
+            }
+          ]
+        }
+      ]
+    },
+    {
       "id": 160,
       "name": "Nerupa's Request",
       "repeatable": false,

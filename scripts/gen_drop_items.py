@@ -6,7 +6,9 @@ import json, sys, pathlib
 import xml.etree.ElementTree as ET
 
 ROOT = pathlib.Path(__file__).resolve().parent.parent
-src = pathlib.Path(sys.argv[1]) if len(sys.argv) > 1 else ROOT / "ref/mobius-ct0-interlude/data/stats/items"
+src = pathlib.Path(sys.argv[1]) if len(sys.argv) > 1 else ROOT / "ref/mobius-ct0-interlude/dist/game/data/stats/items"
+if not src.is_dir():
+    src = ROOT / "ref/mobius-ct0-interlude/data/stats/items"
 path = ROOT / "data/items.json"
 data = json.loads(path.read_text())
 have = {i["id"] for i in data["items"]}
