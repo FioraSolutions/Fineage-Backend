@@ -81,12 +81,13 @@ filter is process-global and xUnit runs collections in parallel.
 - Q316 mobs: Mobius spawns Sukar Wererats / Varool at ~(12400..12900, 75500..80200, z -4176) — the underground Elven Ruins, not the village/forest maps we load. Not spawned; needs that dungeon map first.
 
 ## Missing (next bricks, in order)
-1. More elven hunt quests beyond Q102/Q105/Q159/Q162/Q163/Q267/Q313/Q316 (#299). Q105 still approximates Mobius random Kaboo order pick as fixed 1st→5th.
-2. **Quest items tab / quest item flag** in items (client shows them in the main bag now).
-3. Trainers 30155-30158 (`SkillList` learn on Net). Hierarch 30154 + first class change: foundation landed (see below).
-4. Merchant extras: `Wear`, `TerritoryStatus`, `exc_multisell 003` (multisell data check).
-5. Newbie Guide 30599 multi-page / Adventure Guildsman 31780 quest list, Lottery 30991, Olympiad 31688 — leave as pages.
-6. Other areas: run `tools/import_npc_html.py data/spawns/<area>.json` + review WARN lines.
+1. **All-race early quest coverage** (not only elven village): full Mobius CT0 slice with MIN_LEVEL≤21 is tracked in [`early-quests-checklist.md`](early-quests-checklist.md) ([#299](https://github.com/FioraSolutions/Fineage-Backend/issues/299)). The elf-area table above is a subset; parity target is the checklist + matrix row 29.
+2. More elven hunt quests beyond Q102/Q105/Q159/Q162/Q163/Q267/Q313/Q316 (#299). Q105 still approximates Mobius random Kaboo order pick as fixed 1st→5th.
+3. **Quest items tab / quest item flag** in items (client shows them in the main bag now).
+4. Trainers 30155-30158 (`SkillList` learn on Net). Hierarch 30154 + first class change: foundation landed (see below).
+5. Merchant extras: `Wear`, `TerritoryStatus`, `exc_multisell 003` (multisell data check).
+6. Newbie Guide 30599 multi-page / Adventure Guildsman 31780 quest list, Lottery 30991, Olympiad 31688 — leave as pages.
+7. Other areas: run `tools/import_npc_html.py data/spawns/<area>.json` + review WARN lines.
 
 ## Merchant extras + quest-item flag
 
