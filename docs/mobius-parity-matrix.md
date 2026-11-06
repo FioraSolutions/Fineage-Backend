@@ -10,7 +10,7 @@ Legend: ✅ done · 🟡 partial · ❌ missing · stub = shell only.
 |---|---|---|---|---|
 | 1 | Login / auth / roster / create (5 races) | Auth | ✅ | Net lobby |
 | 2 | Movement, sit/stand, run/walk, target | World | ✅ | |
-| 3 | Geodata collision / pathfinding | World | 🟡 | LOS ported; moveToPawn pathfinding incomplete |
+| 3 | Geodata collision / pathfinding | World | ✅ | LOS + MoveCheck/FindPath; approach ETA/sticky/path-sync (#273) |
 | 4 | NPC spawns + respawn (loaded maps) | World | 🟡 | Full world when maps enabled; day/night spawn modes not switched |
 | 5 | Melee + hit/miss/crit/shield/ss/position/night | Combat | ✅ | `#256` night; `#255` unrelated |
 | 6 | Skills list/use/reuse + Mobius attack catalog | Combat | 🟡 | Catalog formulas; legacy `power+10` outside catalog |
@@ -44,7 +44,6 @@ Legend: ✅ done · 🟡 partial · ❌ missing · stub = shell only.
 ## Next backend slices (priority)
 
 1. **Private store** (needs Net + client — coordinate).
-2. **Geodata pathfinding** for approach (medium).
 
 ## Docs
 

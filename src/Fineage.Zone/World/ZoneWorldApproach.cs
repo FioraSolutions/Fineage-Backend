@@ -16,7 +16,7 @@ public sealed partial class ZoneWorld
     /// <summary>
     /// Start a server-driven approach so <paramref name="player"/> ends within <paramref name="range"/>
     /// of <paramref name="target"/>. Returns travel time in ms, or -1 when the target is unreachable.
-    /// Server position snaps to the stop point immediately (same model as <c>TryMove</c>).
+    /// Uses <see cref="StartTimedMove"/> so a geo-blocked straight line becomes an A* path (Mobius moveToPawn).
     /// </summary>
     long ApproachTarget(ZoneEntity player, ZoneEntity target, int range)
     {
@@ -27,10 +27,14 @@ public sealed partial class ZoneWorld
         // Net: bring the timed-move position up to date before measuring (the pawn may already be running).
         AdvanceMove(player, now);
 
-        // Sticky intention: same target, still running, target has not drifted -> no re-send, same ETA.
+        // Sticky intention: same target, still running a path, target has not drifted -> no re-send, same ETA.
+        // If the pawn stopped short (wall / truncated MoveCheck) while still out of range, repath immediately.
         if (session != null && session.ApproachTargetId == target.ObjectId && now < session.ApproachArriveUnixMs &&
             ZoneCombat.Within(target.X, target.Y, session.ApproachTargetX, session.ApproachTargetY, ZoneCombat.ApproachRepathDistance))
-            return session.ApproachArriveUnixMs - now;
+        {
+            if (player.MoveActive || ZoneCombat.Within(player.X, player.Y, target.X, target.Y, range))
+                return Math.Max(1, session.ApproachArriveUnixMs - now);
+        }
 
         double dx = target.X - player.X;
         double dy = target.Y - player.Y;
@@ -65,27 +69,52 @@ public sealed partial class ZoneWorld
 
         // Net: Mobius moveToPawn is a real timed run (MovementTaskManager), never a snap. Snapping the server
         // position here made the next ValidatePosition send a PositionCorrection onto the mob = "teleport".
+        // StartTimedMove applies MoveCheck + FindPath so walls are walked around, not crashed into.
         if (session != null)
             StartTimedMove(player, session, ack);
-        ZoneLog.Info($"[combat] approach obj={player.ObjectId} target={target.ObjectId} from={originX},{originY} to={player.MoveDestX},{player.MoveDestY} dist={(int)dist}");
+        ZoneLog.Info(
+            $"[combat] approach obj={player.ObjectId} target={target.ObjectId} from={originX},{originY} " +
+            $"to={player.MoveDestX},{player.MoveDestY} path={player.MovePath.Count} dist={(int)dist}");
 
         float speed = MoveSpeedOf(player);
-        long ms = Math.Max(1, (long)Math.Ceiling((dist - stopAt) * 1000.0 / speed));
+        long ms = RemainingPathTravelMs(player, speed);
         if (session != null)
         {
             session.ApproachTargetId = target.ObjectId;
             session.ApproachArriveUnixMs = now + ms;
             session.ApproachOriginX = originX;
             session.ApproachOriginY = originY;
-            session.ApproachDestX = destX;
-            session.ApproachDestY = destY;
+            // Sync segment = current MoveToLocation leg (first geo waypoint), not the ideal stop behind a wall.
+            session.ApproachDestX = player.MoveDestX;
+            session.ApproachDestY = player.MoveDestY;
             session.ApproachTargetX = target.X;
             session.ApproachTargetY = target.Y;
         }
         return ms;
     }
 
-    /// <summary>Client MoveTo that lies on the in-flight moveToPawn path is a position report, not a new order.</summary>
+    /// <summary>Travel time along the active MoveDest + queued geo waypoints at <paramref name="speed"/>.</summary>
+    internal static long RemainingPathTravelMs(ZoneEntity entity, float speed)
+    {
+        if (speed <= 0)
+            return 1;
+        double len = Math.Sqrt(
+            (double)(entity.MoveDestX - entity.X) * (entity.MoveDestX - entity.X) +
+            (double)(entity.MoveDestY - entity.Y) * (entity.MoveDestY - entity.Y));
+        int ax = entity.MoveDestX, ay = entity.MoveDestY;
+        foreach (var (x, y, _) in entity.MovePath)
+        {
+            double dx = x - ax, dy = y - ay;
+            len += Math.Sqrt(dx * dx + dy * dy);
+            ax = x;
+            ay = y;
+        }
+        if (len < 1 && !entity.MoveActive)
+            return 1;
+        return Math.Max(1, (long)Math.Ceiling(len * 1000.0 / speed));
+    }
+
+    /// <summary>Client MoveTo that lies on the current approach leg is a position report, not a new order.</summary>
     bool IsApproachSync(ZoneSession session, MoveToMsg move)
     {
         if (session.ApproachTargetId <= 0 || _clock().ToUnixTimeMilliseconds() >= session.ApproachArriveUnixMs)

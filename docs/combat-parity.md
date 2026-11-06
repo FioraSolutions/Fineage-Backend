@@ -83,7 +83,8 @@
 ## Slice 14 — player LOS on attack / cast; level-gap damage
 - Player melee swing (doAttack) and attack-skill cast (doCast) check the Slice 12 `canSeeTarget` port (geo + closed doors). No LOS → SysMsg 181 "Cannot see target.", attack intention and approach cleared, no swing / no MP or reuse spent. Covers auto-attack ticks and casts fired on arrival.
 - Level-gap damage penalty: Mobius CT_0 Interlude `Formulas` has none for physical/magic damage vs mobs (level gap only enters magic failure and Lethal's magicLvl gate, both modelled, plus debuff land rate, not modelled yet) — nothing to port.
-- Gaps: buffs/support skills don't check LOS; out-of-reach approach doesn't path around a blocking wall before the check (Mobius moveToPawn uses pathfinding).
+- Gaps: buffs/support skills don't check LOS.
+- Approach pathfinding (#273): `ApproachTarget` → `StartTimedMove` uses MoveCheck + `FindPath`; ETA follows remaining path length; sticky repaths when stopped short of reach; approach sync tracks the current geo leg.
 
 ## Slice 15 — skill weapon conditions
 - `scripts/gen_skill_conditions.py` copies plain Mobius `<conditions><using kind=".."/></conditions>` into `skill-combat.json` `usingKinds` (41 skills: DAGGER blows, BOW, DUALFIST, SWORD/BLUNT Power Strike…; 10 compound and/or/not conditions skipped).

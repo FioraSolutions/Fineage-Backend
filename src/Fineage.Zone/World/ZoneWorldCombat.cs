@@ -402,10 +402,14 @@ public sealed partial class ZoneWorld
                 continue;
             }
 
-            // Mid-run and the pawn moved: re-send MoveToPawn toward its new spot (Mobius follow).
+            // Mid-run: repath if the target drifted, or if we stopped short of reach (geo wall / failed path).
             if (session.ApproachTargetId == targetId && now < session.ApproachArriveUnixMs)
             {
-                if (!ZoneCombat.Within(target.X, target.Y, session.ApproachTargetX, session.ApproachTargetY, ZoneCombat.ApproachRepathDistance))
+                bool targetMoved = !ZoneCombat.Within(target.X, target.Y, session.ApproachTargetX, session.ApproachTargetY,
+                    ZoneCombat.ApproachRepathDistance);
+                bool stuckShort = !player.MoveActive
+                    && !ZoneCombat.Within(player.X, player.Y, target.X, target.Y, PlayerReach(player));
+                if (targetMoved || stuckShort)
                 {
                     long re = ApproachTarget(player, target, PlayerReach(player));
                     if (re < 0)
