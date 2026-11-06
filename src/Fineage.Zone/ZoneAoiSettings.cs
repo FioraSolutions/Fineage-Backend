@@ -12,13 +12,17 @@ public static class ZoneAoiSettings
     /// <summary>0 = whole zone (<see cref="SingleCellAoi"/>). &gt;0 = <see cref="RangeAoi"/> radius in world units.</summary>
     public const int DefaultInterestRange = 0;
 
+    /// <summary>Hosted default grid size — full Interlude datapack must not use SingleCellAoi.</summary>
+    public const int DefaultAoiCell = 3000;
+
     public static int InterestRange => ReadInt("FINEAGE_ZONE_INTEREST_RANGE", DefaultInterestRange, min: 0, max: 500_000);
 
     /// <summary>
     /// When &gt;0, use <see cref="GridAoi"/> with this cell size (ARCHITECTURE_NET Phase 1).
-    /// Takes precedence over <see cref="InterestRange"/>.
+    /// Takes precedence over <see cref="InterestRange"/>. Default <see cref="DefaultAoiCell"/>;
+    /// set <c>FINEAGE_ZONE_AOI_CELL=0</c> only for tiny single-map test hosts.
     /// </summary>
-    public static int AoiCellSize => ReadInt("FINEAGE_ZONE_AOI_CELL", 0, min: 0, max: 500_000);
+    public static int AoiCellSize => ReadInt("FINEAGE_ZONE_AOI_CELL", DefaultAoiCell, min: 0, max: 500_000);
 
     /// <summary>
     /// The AOI the world will actually be built with, as one banner-safe token (grid:3000 / range:3500 /
@@ -38,7 +42,7 @@ public static class ZoneAoiSettings
         IAoi? aoi = null,
         IAccountStore? accounts = null,
         SevenSignsEngine? sevenSigns = null,
-        bool includeEnabledMaps = false,
+        bool includeEnabledMaps = true,
         BossSchedule? bosses = null,
         OlympiadBoard? olympiad = null)
     {

@@ -32,21 +32,24 @@ public sealed partial class ZoneWorld
                 maps.Add(map);
             }
         }
+        else if (_includeEnabledMaps)
+        {
+            foreach (var map in _spawnCatalog.Maps.Values.OrderBy(map => map.MapId, StringComparer.Ordinal))
+            {
+                if (!map.Enabled)
+                    continue;
+                maps.Add(map);
+            }
+            if (maps.Count == 0)
+                throw new InvalidOperationException("No enabled spawn maps in datapack.");
+        }
         else
         {
+            // Test / explicit opt-out: one active map only (default id is Cedric hall for smoke fixtures).
             var active = _spawnCatalog.GetMap(_activeMapId);
             if (!active.Enabled)
                 throw new InvalidOperationException($"Active spawn map '{_activeMapId}' is disabled in datapack.");
             maps.Add(active);
-            if (_includeEnabledMaps)
-            {
-                foreach (var map in _spawnCatalog.Maps.Values.OrderBy(map => map.MapId, StringComparer.Ordinal))
-                {
-                    if (!map.Enabled || map.MapId == _activeMapId)
-                        continue;
-                    maps.Add(map);
-                }
-            }
         }
 
         var bounds = ZoneMapFilter.BoundsList;

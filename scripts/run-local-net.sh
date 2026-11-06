@@ -8,13 +8,11 @@ mkdir -p local-logs local-data
 CMD="${1:-start}"
 
 export FINEAGE_DATABASE_URL="${FINEAGE_DATABASE_URL:-Host=127.0.0.1;Port=5432;Database=fineage;Username=fineage;Password=fineage}"
-# One world: every enabled spawn map (all of Interlude — Talking Island, Elven Village, the villages,
-# hunting grounds, catacombs). FINEAGE_ZONE_MAPS / FINEAGE_ZONE_BOUNDS are unset on purpose so nothing
-# is whitelisted; pass them only to shard this down to a single region.
-export FINEAGE_ZONE_INCLUDE_ENABLED_MAPS="${FINEAGE_ZONE_INCLUDE_ENABLED_MAPS:-1}"
+# Hosted default is every enabled spawn map. Leave INCLUDE unset (or 1). Pass FINEAGE_ZONE_MAPS /
+# FINEAGE_ZONE_BOUNDS only to shard a region; INCLUDE=0 is a single-map test escape hatch.
 export FINEAGE_ZONE_MAPS="${FINEAGE_ZONE_MAPS-}"
 export FINEAGE_ZONE_BOUNDS="${FINEAGE_ZONE_BOUNDS-}"
-# The world is 34k NPCs, so visibility must be spatial, not "the whole zone".
+# Visibility must be spatial for ~34k NPCs (Zone defaults AOI_CELL to 3000 if unset).
 export FINEAGE_ZONE_AOI_CELL="${FINEAGE_ZONE_AOI_CELL:-3000}"
 export COMPOSE_PROJECT_NAME="${COMPOSE_PROJECT_NAME:-fineage-backend}"
 
