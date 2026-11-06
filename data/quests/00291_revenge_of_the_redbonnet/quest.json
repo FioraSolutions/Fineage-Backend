@@ -1,0 +1,99 @@
+{
+  "id": 291,
+  "name": "Revenge of the Redbonnet",
+  "repeatable": true,
+  "abortable": true,
+  "questItems": [
+    1482
+  ],
+  "dialogs": [
+    {
+      "npcId": 30553,
+      "hook": "talk",
+      "when": "absent",
+      "maxLevel": 3,
+      "htmlFile": "30553-talk-000.htm"
+    },
+    {
+      "npcId": 30553,
+      "hook": "talk",
+      "when": "absent",
+      "minLevel": 4,
+      "htmlFile": "30553-talk-001.htm"
+    },
+    {
+      "npcId": 30553,
+      "hook": "event",
+      "when": "absent",
+      "event": "30553-03",
+      "minLevel": 4,
+      "ops": [
+        {
+          "op": "create"
+        },
+        {
+          "op": "start"
+        },
+        {
+          "op": "set_cond",
+          "cond": 1
+        }
+      ],
+      "htmlFile": "30553-event-30553-03-002.htm"
+    },
+    {
+      "npcId": 30553,
+      "hook": "talk",
+      "when": "started",
+      "cond": 1,
+      "htmlFile": "30553-talk-c1-003.htm"
+    },
+    {
+      "npcId": 30553,
+      "hook": "talk",
+      "when": "started",
+      "cond": 2,
+      "atLeast": {
+        "1482": 40
+      },
+      "ops": [
+        {
+          "op": "take_item",
+          "itemId": 1482,
+          "count": 40
+        },
+        {
+          "op": "give_item",
+          "itemId": 1505,
+          "count": 1
+        },
+        {
+          "op": "give_item",
+          "itemId": 736,
+          "count": 1
+        },
+        {
+          "op": "complete"
+        }
+      ],
+      "htmlFile": "30553-talk-c2-004.htm"
+    },
+    {
+      "npcId": 20317,
+      "hook": "kill",
+      "when": "started",
+      "cond": 1,
+      "html": "",
+      "ops": [
+        {
+          "op": "drop_item",
+          "itemId": 1482,
+          "count": 1,
+          "chance": 1.0,
+          "limit": 40,
+          "condAtLimit": 2
+        }
+      ]
+    }
+  ]
+}
