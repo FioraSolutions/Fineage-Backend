@@ -105,7 +105,8 @@
 2. ~~Night game clock (GameTimeTaskManager) for the −10% dark bonus~~ — done (`ZoneGameTime`, HitConditionBonus night).
 3. ~~magicLvl in skill-combat.json + mcrit stat mods~~ — done (slice 10 follow-up).
 4. ~~NPC soulshots~~ — stock + chance on melee (`gen_npc_shots.py`); spiritshots / SS glow / boss materialize still open.
-5. ~~Weapon vulnerabilities (NPC passive traits)~~ — done (#261). NPC blow/magic skills on players — medium.
+5. ~~Weapon vulnerabilities (NPC passive traits)~~ — done (#261).
+6. NPC blow/magic skills on players — first slice (#259): `gen_npc_ai_skills.py` → `aiSkills` + chance cast via skill-combat; full AttackableAI scopes still open.
 
 ## Slice — NPC soulshots (Mobius `Npc.rechargeShots`)
 

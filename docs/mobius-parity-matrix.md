@@ -22,7 +22,7 @@ Legend: ✅ done · 🟡 partial · ❌ missing · stub = shell only.
 | 12 | Mob AI aggro/hate/clan/LOS | Combat | ✅ | |
 | 13 | NPC soulshots | Combat | 🟡 | `#257` stock+chance on melee; no SS glow packet yet; spiritshots unused (no NPC magic cast) |
 | 14 | Weapon trait / NPC defence traits | Combat | ✅ | `#261` gen_npc_weapon_traits → defenceTraits; race weakness traits still open |
-| 15 | NPC cast magic/blow at players | Combat | ❌ | No mob skill AI |
+| 15 | NPC cast magic/blow at players | Combat | 🟡 | `#259` first slice: aiSkills + chance cast; scopes/heal/buff AI still open |
 | 16 | PvP flagging / karma persist | Combat | ❌ | karma field 0 |
 | 17 | Pets / summons | Combat | ❌ | |
 | 18 | Death: lost-exp + DP + town respawn | Combat | ✅ | |
@@ -43,7 +43,7 @@ Legend: ✅ done · 🟡 partial · ❌ missing · stub = shell only.
 
 ## Next backend slices (priority)
 
-1. **NPC magic/blow skills vs players** — [#259](https://github.com/FioraSolutions/Fineage-Backend/issues/259)
+1. **NPC magic/blow skills vs players** (finish scopes / heal / buff) — [#259](https://github.com/FioraSolutions/Fineage-Backend/issues/259)
 2. **Party loot modes + sweep distributeItem** — [#260](https://github.com/FioraSolutions/Fineage-Backend/issues/260)
 3. **Player death item drop** — [#258](https://github.com/FioraSolutions/Fineage-Backend/issues/258)
 4. **Private store** (needs Net + client — coordinate).

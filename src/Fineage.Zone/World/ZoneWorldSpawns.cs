@@ -119,6 +119,9 @@ public sealed partial class ZoneWorld
             NpcSpiritShotLeft = def.SpiritShot,
             NpcSpiritShotChance = def.SpiritShotChance,
             DefenceTraits = def.DefenceTraits,
+            AiSkills = def.AiSkills,
+            MinSkillChance = def.MinSkillChance,
+            MaxSkillChance = def.MaxSkillChance,
             RunSpeed = def.RunSpeed,
             WalkSpeed = def.WalkSpeed,
             // Mobius Spawn location is the returnHome target; captured at spawn, not at first aggro, so a mob that

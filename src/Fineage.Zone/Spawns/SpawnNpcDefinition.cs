@@ -49,7 +49,10 @@ public sealed record SpawnNpcDefinition(
     int SoulShotChance = 0,
     int SpiritShot = 0,
     int SpiritShotChance = 0,
-    IReadOnlyDictionary<string, double>? DefenceTraits = null);
+    IReadOnlyDictionary<string, double>? DefenceTraits = null,
+    IReadOnlyList<Fineage.Zone.Npcs.NpcAiSkill>? AiSkills = null,
+    int MinSkillChance = 7,
+    int MaxSkillChance = 15);
 
 public sealed record SpawnMapDefinition(
     string MapId,

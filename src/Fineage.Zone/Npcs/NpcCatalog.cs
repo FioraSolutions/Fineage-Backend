@@ -53,7 +53,16 @@ public sealed record NpcTemplate(
     /// Folded Mobius <c>CreatureStat._defenceTraits</c> for weapon types (keys <c>sword</c>/<c>bow</c>/…),
     /// resolved from NPC skillList <c>DefenceTrait</c> passives. Missing key = 1.0.
     /// </summary>
-    IReadOnlyDictionary<string, double>? DefenceTraits = null);
+    IReadOnlyDictionary<string, double>? DefenceTraits = null,
+    /// <summary>Mobius skillList ∩ skill-combat.json attack skills (PhysicalSpecial / DDMagic / …).</summary>
+    IReadOnlyList<NpcAiSkill>? AiSkills = null,
+    /// <summary>Mobius <c>ai skill minChance</c> (default 7).</summary>
+    int MinSkillChance = 7,
+    /// <summary>Mobius <c>ai skill maxChance</c> (default 15).</summary>
+    int MaxSkillChance = 15);
+
+/// <summary>One active Mobius NPC AI attack skill (id + level from skillList).</summary>
+public readonly record struct NpcAiSkill(int SkillId, int Level);
 
 /// <summary>Loads <c>data/npcs.json</c>.</summary>
 public sealed class NpcCatalog
@@ -187,8 +196,24 @@ public sealed class NpcCatalog
                 Math.Max(0, row.SoulShotChance),
                 Math.Max(0, row.SpiritShot),
                 Math.Max(0, row.SpiritShotChance),
-                row.DefenceTraits is { Count: > 0 } ? row.DefenceTraits : null));
+                row.DefenceTraits is { Count: > 0 } ? row.DefenceTraits : null,
+                ParseAiSkills(row.AiSkills),
+                row.MinSkillChance > 0 ? row.MinSkillChance : 7,
+                row.MaxSkillChance > 0 ? row.MaxSkillChance : 15));
         }
+
+    static IReadOnlyList<NpcAiSkill>? ParseAiSkills(List<AiSkillDto>? rows)
+    {
+        if (rows is not { Count: > 0 })
+            return null;
+        var list = new List<NpcAiSkill>(rows.Count);
+        foreach (var r in rows)
+        {
+            if (r.Id > 0 && r.Level > 0)
+                list.Add(new NpcAiSkill(r.Id, r.Level));
+        }
+        return list.Count > 0 ? list : null;
+    }
 
         return new NpcCatalog(byId);
     }
@@ -253,5 +278,14 @@ public sealed class NpcCatalog
         public int SpiritShotChance { get; set; }
         /// <summary>Mobius weapon defenceTraits multipliers (sword/bow/…).</summary>
         public Dictionary<string, double>? DefenceTraits { get; set; }
+        public List<AiSkillDto>? AiSkills { get; set; }
+        public int MinSkillChance { get; set; }
+        public int MaxSkillChance { get; set; }
+    }
+
+    sealed class AiSkillDto
+    {
+        public int Id { get; set; }
+        public int Level { get; set; }
     }
 }
