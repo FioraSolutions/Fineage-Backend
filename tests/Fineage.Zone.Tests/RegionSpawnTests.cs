@@ -72,6 +72,50 @@ public sealed class RegionSpawnTests
     }
 
     [Fact]
+    public void Elven_forest_stands_the_mobius_mob_count_around_elven_village()
+    {
+        var map = SpawnCatalog.LoadDefault().GetMap("elven_starting");
+        Assert.True(map.Enabled);
+
+        // Mobius CT 0 Interlude keeps the outdoor world in one InterludeSpawns.xml; there is no
+        // per-territory ElvenStarting.xml. These are the fixed rows for the elven forest set, so the
+        // count here has to match the original server row for row, not just "roughly right".
+        Assert.Equal(845, map.Npcs.Count);
+        Assert.Equal(48, Count(map, 20013)); // Dryad
+        Assert.Equal(48, Count(map, 20019)); // Dryad Elder
+        Assert.Equal(40, Count(map, 20036)); // Lirein
+        Assert.Equal(28, Count(map, 20044)); // Lirein Elder
+        Assert.Equal(30, Count(map, 20308)); // Hook Spider
+        Assert.Equal(39, Count(map, 20325)); // Goblin Raider
+        Assert.Equal(30, Count(map, 20336)); // Green Dryad
+        Assert.Equal(24, Count(map, 20460)); // Crimson Spider
+        Assert.Equal(52, Count(map, 20466)); // Pincer Spider
+        Assert.Equal(22, Count(map, 20468)); // Kaboo Orc
+        Assert.Equal(32, Count(map, 20469)); // Kaboo Orc Archer
+        Assert.Equal(42, Count(map, 20470)); // Kaboo Orc Soldier
+        Assert.Equal(65, Count(map, 20471)); // Kaboo Orc Warrior
+        Assert.Equal(67, Count(map, 20472)); // Kaboo Orc Warrior Captain
+        Assert.Equal(51, Count(map, 20473)); // Kaboo Orc Warrior Lieutenant
+        Assert.Equal(81, Count(map, 20509)); // Spore Fungus
+        Assert.Equal(56, Count(map, 20525)); // Gray Wolf
+        Assert.Equal(11, Count(map, 20530)); // Young Red Keltir
+        Assert.Equal(42, Count(map, 20534)); // Red Keltir
+        Assert.Equal(37, Count(map, 20537)); // Elder Red Keltir
+
+        // Every row stands in the elven forest box, and every mob is a real attackable monster.
+        Assert.All(map.Npcs, row =>
+        {
+            Assert.InRange(row.X, 0, 61_000);
+            Assert.InRange(row.Y, 30_000, 91_000);
+            Assert.True(row.Attackable, $"{row.NpcId} must stay attackable");
+            Assert.InRange(row.RespawnDelaySeconds, 15, 20);
+        });
+
+        // Fixed Mobius rows keep their heading; the old polygon resampler flattened them all to 0.
+        Assert.Contains(map.Npcs, row => row.Heading != 0);
+    }
+
+    [Fact]
     public void Region_maps_are_enabled_without_colliding_with_towns_or_bosses()
     {
         var catalog = SpawnCatalog.LoadDefault();
