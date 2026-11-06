@@ -20,10 +20,15 @@ Character actions use **51** / **1067–1069** (`docs/action-v2-protocol.md`). S
 ## Death
 
 1. Server sets `Dead`, `CurHp = 0`, clears target, combat stance, abnormals, enchant window.
-2. AOI watchers (and self) receive **`Die` (1074)** and **`StatusUpdate`** with 0 HP.
-3. The player object **stays** in the world (no `DeleteObject` on the corpse). Peers still see the dead body until revive or disconnect.
+2. Exp loss + Death Penalty roll (`ApplyDeathConsequences`) when the killer is an NPC.
+3. **Item drop** — Mobius `Player.onDieDropItem` (`ZoneWorldDeathDrop` + `data/death-drop.json`):
+   - Karma + PK ≥ `karmaPkLimit` → karma rates; else NPC killer and level &gt; 4 → player rates; else none.
+   - Selected inventory/equip rows spawn as ground stacks on the corpse tile (adena / quest / non-droppable ids skipped).
+   - Clan-war and PvP-zone exemptions are not modelled yet.
+4. AOI watchers (and self) receive **`Die` (1074)** and **`StatusUpdate`** with 0 HP.
+5. The player object **stays** in the world (no `DeleteObject` on the corpse). Peers still see the dead body until revive or disconnect.
 
-MVP kill path: **`AdminKillPlayer` (53)** when `FINEAGE_ZONE_ADMIN` is set. Mob damage to players is a follow-up.
+Kill paths: NPC final blow, player combat, and **`AdminKillPlayer` (53)** when `FINEAGE_ZONE_ADMIN` is set (admin kill skips exp/DP and has no NPC killer for drop rates).
 
 ## Revive (MVP)
 

@@ -78,6 +78,8 @@ public sealed partial class ZoneWorld
         // Mobius Player.onDeath runs the exp penalty before the Die packet goes out, so the client's exp bar and the
         // Death Penalty level are already the post-death values on the death screen.
         ApplyDeathConsequences(player, killerObjectId);
+        // Mobius Player.onDieDropItem — after exp/DP, before Die packet.
+        OnDieDropItem(player, killerObjectId);
 
         FanoutPlayerDeath(player, killerObjectId);
         if (player.Session != null)

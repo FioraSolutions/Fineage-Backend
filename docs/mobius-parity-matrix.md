@@ -1,6 +1,6 @@
 # Mobius CT0 Interlude ↔ Fineage — live parity matrix
 
-> Updated **2026-11-06** against Backend `dev` + `#255`–`#257` + `#261` (weapon traits).  
+> Updated **2026-11-06** against Backend `dev` + `#255`–`#257` + `#261` (weapon traits) + `#258` (death item drop) + `#260` (party sweep loot).  
 > Replaces the stale snapshot in `docs/mobius-parity-audit.md` and the outdated table on Backend issue [#174](https://github.com/FioraSolutions/Fineage-Backend/issues/174).  
 > SoT for combat detail: [`combat-parity.md`](combat-parity.md). SoT for wire: [`net-protocol.md`](net-protocol.md).
 
@@ -18,15 +18,15 @@ Legend: ✅ done · 🟡 partial · ❌ missing · stub = shell only.
 | 8 | Magic: mcrit / fail / magicLevel / mCritRate / mCritPower | Combat | ✅ | `#255` |
 | 9 | Phys skill crit / CritDmg / BlowRate / pSkillEvas | Combat | ✅ | `#256` |
 | 10 | Blow / Lethal | Combat | ✅ | |
-| 11 | Spoil / Sweep | Combat | 🟡 | Party distributeItem stub |
+| 11 | Spoil / Sweep | Combat | 🟡 | `#260` party loot modes on sweep; ground pickup party loot still open |
 | 12 | Mob AI aggro/hate/clan/LOS | Combat | ✅ | |
 | 13 | NPC soulshots | Combat | 🟡 | `#257` stock+chance on melee; no SS glow packet yet; spiritshots unused (no NPC magic cast) |
 | 14 | Weapon trait / NPC defence traits | Combat | ✅ | `#261` gen_npc_weapon_traits → defenceTraits; race weakness traits still open |
 | 15 | NPC cast magic/blow at players | Combat | 🟡 | `#259` first slice: aiSkills + chance cast; scopes/heal/buff AI still open |
-| 16 | PvP flagging / karma persist | Combat | ❌ | karma field 0 |
+| 16 | PvP flagging / karma persist | Combat | ❌ | `ZoneEntity.Karma` wired for drop rates; persist/flagging still open |
 | 17 | Pets / summons | Combat | ❌ | |
 | 18 | Death: lost-exp + DP + town respawn | Combat | ✅ | |
-| 19 | Death: player item drop (PK/karma) | Combat | ❌ | |
+| 19 | Death: player item drop (PK/karma) | Combat | ✅ | `#258` `onDieDropItem` + `data/death-drop.json`; clan-war/PvP-zone exemptions deferred |
 | 20 | Inventory / equip / warehouse private | Economy | ✅ | Clan/freight ❌ |
 | 21 | Shops buy/sell/multisell | Economy | ✅ | Wear preview stub |
 | 22 | Player trade | Economy | ✅ | |
@@ -44,11 +44,11 @@ Legend: ✅ done · 🟡 partial · ❌ missing · stub = shell only.
 ## Next backend slices (priority)
 
 1. **NPC magic/blow skills vs players** (finish scopes / heal / buff) — [#259](https://github.com/FioraSolutions/Fineage-Backend/issues/259)
-2. **Player death item drop** — [#258](https://github.com/FioraSolutions/Fineage-Backend/issues/258)
-3. Ground pickup party `distributeItem` (non-spoil) — follow-up to #260.
-4. **Private store** (needs Net + client — coordinate).
-5. **Geodata pathfinding** for approach (medium).
-6. Race / construct weakness traits (`calcAttackTraitBonus` type-2) — follow-up to `#261`.
+2. Ground pickup party `distributeItem` (non-spoil) — follow-up to #260.
+3. **Private store** (needs Net + client — coordinate).
+4. **Geodata pathfinding** for approach (medium).
+5. Race / construct weakness traits (`calcAttackTraitBonus` type-2) — follow-up to `#261`.
+6. PvP flagging / karma persist (feeds death-drop karma rates) — follow-up to `#258`.
 
 ## Docs
 

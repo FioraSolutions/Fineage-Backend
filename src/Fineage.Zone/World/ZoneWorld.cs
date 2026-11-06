@@ -66,6 +66,8 @@ sealed class ZoneEntity
     public int HideoutId { get; set; }
     public bool PvpFlagged { get; set; }
     public int PkKills { get; set; }
+    /// <summary>Mobius karma (Chaotic); death item drop uses karma rates when &gt; 0 and PK ≥ limit.</summary>
+    public int Karma { get; set; }
     public int ExpertiseBonus { get; set; }
     /// <summary>Weapon expertise penalty, 0–4. Updated when gear changes and on enter.</summary>
     public int WeaponGradePenalty { get; set; }
@@ -406,6 +408,8 @@ public sealed partial class ZoneWorld
     readonly ShopStock _shopStock;
     /// <summary>Mobius death rules: exp-bar share lost, Death Penalty chance, respawn vitals restore.</summary>
     readonly DeathRuleCatalog _deathRules;
+    /// <summary>Mobius <c>Player.onDieDropItem</c> rates (data/death-drop.json).</summary>
+    readonly Fineage.Game.Services.DeathDropRules _deathDrop;
     /// <summary>Mobius <c>Rnd.get</c> for the Death Penalty roll (separate from the damage rolls).</summary>
     readonly Random _deathRandom;
     readonly Dictionary<int, ZoneEntity> _byId = [];
@@ -466,6 +470,7 @@ public sealed partial class ZoneWorld
         SkillCombatCatalog? skillCombat = null,
         SkillStatEffectCatalog? passives = null,
         DeathRuleCatalog? deathRules = null,
+        Fineage.Game.Services.DeathDropRules? deathDrop = null,
         Random? deathRandom = null,
         bool? npcRegen = null,
         Fineage.Game.Services.ItemSkillCatalog? itemSkills = null,
@@ -513,6 +518,7 @@ public sealed partial class ZoneWorld
         _multisells = multisells ?? MultiSellCatalog.LoadDefault();
         _shopStock = new ShopStock(_buyLists);
         _deathRules = deathRules ?? DeathRuleCatalog.LoadDefault();
+        _deathDrop = deathDrop ?? Fineage.Game.Services.DeathDropRules.LoadDefault();
         _deathRandom = deathRandom ?? Random.Shared;
         _itemSkills = itemSkills ?? Fineage.Game.Services.ItemSkillCatalog.LoadDefault();
         _mapRegions = mapRegions ?? Fineage.Game.Services.MapRegionCatalog.LoadDefault();
