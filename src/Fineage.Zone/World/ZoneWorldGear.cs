@@ -68,6 +68,8 @@ public sealed partial class ZoneWorld
             TryChargeShot(session, player, item, quiet: false);
             return null;
         }
+        if (IsEscapeScroll(item.Template.Id))
+            return TryUseEscapeScroll(session, player, item);
         if (!item.Template.Equippable)
             return InventoryProtocol.NotEquippable;
         // Unequip skips conditions. There is no cast state, so weapon changes are not deferred.
@@ -303,4 +305,36 @@ public sealed partial class ZoneWorld
         EquipDeny.Condition => InventoryProtocol.ConditionRestricted,
         _ => InventoryProtocol.ConditionRestricted
     };
+
+    /// <summary>Scroll of Escape (736) / Blessed Scroll of Escape (1538).</summary>
+    static bool IsEscapeScroll(int itemId) => itemId is 736 or 1538;
+
+    string? TryUseEscapeScroll(ZoneSession session, ZoneEntity player, ItemInstance scroll)
+    {
+        var inventory = player.Inventory!;
+        int slot = scroll.EquippedSlot is { } worn ? (int)worn : -1;
+        int left = inventory.TakeOne(scroll);
+        var change = left == 0
+            ? InventoryMessages.RemoveRow(scroll, slot)
+            : InventoryMessages.ChangeRow(InventoryChange.Modify, scroll);
+        NetBridge?.FanoutInventoryUpdate(
+            [session.ObjectId],
+            ToNetInventoryUpdate(new InventoryUpdateMsg { Changes = [change] }));
+        SaveInventory(session, inventory);
+
+        // Race/class creation village (Mobius soe → MapRegion restart). Fallback TI human town.
+        int x = TalkingIslandRestart.X, y = TalkingIslandRestart.Y, z = TalkingIslandRestart.Z;
+        int heading = TalkingIslandRestart.Heading;
+        if (PlayerClasses.TryGet(player.ClassId, out var template) && template != null && template.Spawns.Count > 0)
+        {
+            var spawn = template.Spawns[0];
+            x = spawn.X;
+            y = spawn.Y;
+            z = spawn.Z;
+        }
+
+        Relocate(player, x, y, z, heading: heading);
+        ZoneLog.Info($"escape object={session.ObjectId} item={scroll.Template.Id} -> {x},{y},{z}");
+        return null;
+    }
 }
