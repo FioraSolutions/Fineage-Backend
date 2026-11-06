@@ -3040,12 +3040,24 @@
           "hook": "event",
           "when": "started",
           "event": "replay_1",
-          "html": "<html><body>Allana:<br>(The quest monsters for this step are not spawned on this server yet.)</body></html>",
+          "html": "",
           "ops": [
             {
               "op": "set",
               "key": "memo",
               "value": "2"
+            },
+            {
+              "op": "spawn_npc",
+              "npcId": 27032
+            },
+            {
+              "op": "spawn_npc",
+              "npcId": 27033
+            },
+            {
+              "op": "spawn_npc",
+              "npcId": 27034
             }
           ]
         },
@@ -3138,12 +3150,16 @@
           "event": "replay_2",
           "whenVar": "memo",
           "whenValue": "2",
-          "html": "<html><body>Perrin:<br>(The quest monsters for this step are not spawned on this server yet.)</body></html>",
+          "html": "",
           "ops": [
             {
               "op": "set",
               "key": "memo",
               "value": "3"
+            },
+            {
+              "op": "spawn_npc",
+              "npcId": 27035
             }
           ]
         },

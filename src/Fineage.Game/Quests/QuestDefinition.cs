@@ -57,6 +57,12 @@ public sealed record ExchangeAllOp(int ItemId, int RewardItemId, int Per, int Bo
 
 public sealed record SoundOp(string Name) : QuestOp;
 
+/// <summary>
+/// Mobius <c>addSpawn(npcId, npc, randomOffset, despawnDelay, isSummonSpawn)</c> from a quest event.
+/// Zone materializes the NPC near the talking NPC and adds hate toward the player.
+/// </summary>
+public sealed record SpawnNpcOp(int NpcId) : QuestOp;
+
 public sealed record QuestDialog(
     int NpcId,
     QuestHook Hook,

@@ -247,7 +247,8 @@ public sealed class QuestMachine : IQuestKillHook
             Lines = outcome.Lines,
             Items = outcome.Items,
             Exp = outcome.Exp,
-            Sp = outcome.Sp
+            Sp = outcome.Sp,
+            Spawns = outcome.Spawns
         };
     }
 
@@ -502,6 +503,9 @@ public sealed class QuestMachine : IQuestKillHook
                 case SoundOp sound:
                     plan.Sounds.Add(sound.Name);
                     break;
+                case SpawnNpcOp spawn:
+                    plan.Spawns.Add(spawn.NpcId);
+                    break;
             }
         }
 
@@ -540,7 +544,8 @@ public sealed class QuestMachine : IQuestKillHook
             Lines = plan.Lines,
             Items = touches,
             Exp = plan.Exp,
-            Sp = plan.Sp
+            Sp = plan.Sp,
+            Spawns = plan.Spawns
         };
     }
 
@@ -794,6 +799,7 @@ public sealed class QuestMachine : IQuestKillHook
         public Dictionary<int, int> Delta { get; } = [];
         public List<string> Sounds { get; } = [];
         public List<QuestLine> Lines { get; } = [];
+        public List<int> Spawns { get; } = [];
         public long Exp;
         public int Sp;
     }

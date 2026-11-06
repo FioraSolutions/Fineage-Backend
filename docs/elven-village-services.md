@@ -81,7 +81,7 @@ filter is process-global and xUnit runs collections in parallel.
 - Q316 mobs: Mobius spawns Sukar Wererats / Varool at ~(12400..12900, 75500..80200, z -4176) — the underground Elven Ruins, not the village/forest maps we load. Not spawned; needs that dungeon map first.
 
 ## Missing (next bricks, in order)
-1. More elven hunt quests (Q102 Sea of Spores Fever); spawn Q316 / Q408 wererats when the Elven Ruins are loaded; quest-spawn op for Q409.
+1. More elven hunt quests (Q102 Sea of Spores Fever). Q316/Q408 wererats and Q409 quest-spawns are live.
 2. **Quest items tab / quest item flag** in items (client shows them in the main bag now).
 3. Trainers 30155-30158 (`SkillList` learn on Net). Hierarch 30154 + first class change: foundation landed (see below).
 4. Merchant extras: `Wear`, `TerritoryStatus`, `exc_multisell 003` (multisell data check).
@@ -123,14 +123,12 @@ On Net:
   Dryad Elder 20019 → Gold Leaves (40%, 5), Sukar Wererat Leader 20047 → Amethyst (40%, 2). Reward 163800 adena,
   Eternity Diamond, exp/sp by level (18: 591724/35928, 19: 456128/29230, 20+: 320534/22532).
 
-Play reachability with the default local maps (elven_village, elven_starting, ...):
-- Asterios dialogs: yes. Q408 start, ruby (Pincer Spiders) and aquamarine (Dryad Elders) branches: yes.
-- Amethyst branch: **blocked** — Sukar Wererat Leaders are in the Elven Ruins (not loaded), as for Q316.
-- The actual transfer NPCs live in Gludin/Gludio/Dion, outside the default `FINEAGE_ZONE_MAPS`. Server path is covered by
-  tests; to try it in Play load a town map with a Grand Master (e.g. add `gludio` and widen `FINEAGE_ZONE_BOUNDS`).
+Play reachability (hosted / `run-local-net.sh` default = **every enabled spawn map**):
+- Asterios dialogs: yes. Q408 all branches: yes (`elven_fortress` carries Sukar Wererat Leaders).
+- Grand Masters in Gludio/Gludin/Dion: yes when maps are enabled (default).
+- Path quests Q406/Q407/Q409: Gludio/Gludin + `others_*` hunt maps are in the default full-world load.
 
 Not done / next:
-- Elven Ruins map for wererats (Q408 amethyst).
 - Mobius `setClassId` extras: MagicSkillUse 5103 class-change effect broadcast, party/clan member-list refresh,
   `checkPlayerSkills` (drop skills above the new tree), sub-class / `setBaseClass` (we only have one class id).
 - Net client has no dedicated class-change UI: everything is NpcHtml + UserInfo/SkillList it already handles.
@@ -151,13 +149,9 @@ items at once); Mobius quest vars map to `whenVar` (`variable` for Q407, `memo` 
 Rewards like Mobius: 163800 adena + proof + exp/sp by level (Q406 18/19/20+: 591724/33328, 456128/29850, 320534/23152;
 Q407: 591724/33328, 456128/26630, 320534/19932; Q409: 591724/33788, 456128/27090, 320534/20392).
 
-**Play reachability:** as in Mobius, none of these three paths has an NPC or a mob in the Elven Village maps — all start in
-Gludio/Gludin and hunt in the Gludio-area `others_*` maps. With the default `FINEAGE_ZONE_MAPS` they are data + tests only.
-To play them load `gludio,gludin` plus the hunt maps above (and widen `FINEAGE_ZONE_BOUNDS`); this slice does not change the maps.
-
-Stubs: Q409 `replay_1` / `replay_2` set the memo state but cannot spawn the quest monsters (no quest-spawn op yet) and
-show a short note page instead; Mobius `onAttack` script values (Q407 "only the attacker who hit it", Q409 "single attacker")
-are approximated by killer credit.
+**Play reachability:** path NPCs/mobs live in Gludio/Gludin/`others_*` — loaded by the default full-world Zone.
+Q409 `replay_1` / `replay_2` use quest op `spawn_npc` (Mobius `addSpawn` + `addAttackDesire`) near Allana/Perrin.
+Mobius `onAttack` script values (Q407 "only the attacker who hit it", Q409 "single attacker") are approximated by killer credit.
 
 ## Newbie helpers / village buffs (Mobius CT0 parity foundation)
 

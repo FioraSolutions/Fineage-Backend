@@ -134,8 +134,14 @@ public sealed class QuestCatalog
         if (dialog.Cond is < 0 or > 255)
             throw new InvalidDataException($"{where} quest {questId} cond must be 0..255.");
 
+        var ops = new List<QuestOp>();
+        foreach (var op in dialog.Ops ?? [])
+            ops.Add(ReadOp(op, items, where, questId));
+
         string html = dialog.Html ?? "";
-        if (hook != QuestHook.Kill && string.IsNullOrWhiteSpace(html))
+        // Mobius addSpawn events often return null htmltext; allow empty HTML when spawn_npc is present.
+        bool spawnOnly = ops.Exists(static o => o is SpawnNpcOp);
+        if (hook != QuestHook.Kill && string.IsNullOrWhiteSpace(html) && !spawnOnly)
             throw new InvalidDataException($"{where} quest {questId} step needs html.");
         if (html.Length > 12_000)
             throw new InvalidDataException($"{where} quest {questId} html is longer than 12000 characters.");
@@ -144,10 +150,6 @@ public sealed class QuestCatalog
         string? whenValue = dialog.WhenValue;
         if (whenVar != null && !QuestJournal.IsStoredVar(whenVar, whenValue ?? ""))
             throw new InvalidDataException($"{where} quest {questId} whenVar is not a stored variable.");
-
-        var ops = new List<QuestOp>();
-        foreach (var op in dialog.Ops ?? [])
-            ops.Add(ReadOp(op, items, where, questId));
 
         var races = new List<int>();
         foreach (int race in dialog.Races ?? [])
@@ -232,8 +234,16 @@ public sealed class QuestCatalog
             "exchange_all" => ReadExchange(op, items, where, questId),
             "sell_items" => ReadSell(op, items, where, questId),
             "sound" => ReadSound(op, where, questId),
+            "spawn_npc" => ReadSpawn(op, where, questId),
             _ => throw new InvalidDataException($"{where} quest {questId} has unknown op '{op.Op}'.")
         };
+    }
+
+    static SpawnNpcOp ReadSpawn(OpDto op, string where, int questId)
+    {
+        if (op.NpcId <= 0)
+            throw new InvalidDataException($"{where} quest {questId} spawn_npc needs a positive npcId.");
+        return new SpawnNpcOp(op.NpcId);
     }
 
     static DropItemOp ReadDrop(OpDto op, ItemCatalog items, string where, int questId)
@@ -432,6 +442,7 @@ public sealed class QuestCatalog
         public int? Per { get; set; }
         public int? BonusMin { get; set; }
         public int? BonusAdena { get; set; }
+        public int NpcId { get; set; }
         public List<PriceDto>? Prices { get; set; }
     }
 
