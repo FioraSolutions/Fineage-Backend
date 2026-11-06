@@ -113,6 +113,12 @@ sealed class ZoneEntity
     public List<ManufactureListing> ManufactureList { get; } = [];
     /// <summary>Mobius recipe book: known <c>RecipeList</c> ids (make-self / book open).</summary>
     public HashSet<int> KnownRecipes { get; } = [];
+    /// <summary>Friend objectId → name snapshot (Mobius friend list).</summary>
+    public Dictionary<int, string> Friends { get; } = [];
+    /// <summary>Blocked objectId → name snapshot (Mobius ignore list).</summary>
+    public Dictionary<int, string> Blocked { get; } = [];
+    /// <summary>Mobius block-all / message refusal mode.</summary>
+    public bool BlockAll { get; set; }
     /// <summary>NPC Mobius physical attack (0 = unknown → level placeholder). Players read the class template.</summary>
     public double PAtk { get; init; }
     /// <summary>NPC Mobius <c>vitals hpRegen</c>: HP restored per 3 s regen tick (players use the class table).</summary>
@@ -848,6 +854,7 @@ public sealed partial class ZoneWorld
         LoadQuestProgress(session, entity);
         LoadLearnedSkills(entity, stored);
         LoadKnownRecipes(entity, stored);
+        LoadSocialLists(entity, stored);
         RefreshKnownSkills(entity);
         // Mobius GameClient:493 / EnterWorld:208 — refreshOverloaded() runs before the first UserInfo, so a character
         // that logs in while overloaded already carries skill 4270's level and its slowed speeds. This must come after
@@ -880,6 +887,7 @@ public sealed partial class ZoneWorld
         }
 
         AnnounceClanEnter(entity);
+        FriendPlayerEnteredWorld(entity);
         known = entity.Knownlist.Count;
         return true;
     }
@@ -1048,6 +1056,7 @@ public sealed partial class ZoneWorld
         PartyPlayerLeftWorld(session.ObjectId);
         TradePlayerLeftWorld(session.ObjectId);
         PrivateStorePlayerLeftWorld(session.ObjectId);
+        FriendPlayerLeftWorld(session.ObjectId);
         ClanPlayerLeftWorld(session.ObjectId, session.Name);
 
         // The Net despawn for the leaver is owned by NetZoneServer.LeaveNetAsync (it knows the connection's

@@ -348,6 +348,19 @@ public sealed class PostgresAccountStore : IAccountStore, IDisposable
         // Recipe book rows: JSON mirror for now; normalized table follow-up (#281).
         _inner.TryReplaceKnownRecipes(account, characterId, recipeIds);
 
+    public bool TryReplaceFriends(string account, int characterId, IReadOnlyList<StoredSocial> friends) =>
+        // Friends: JSON mirror for now; normalized character_friends follow-up (#285).
+        _inner.TryReplaceFriends(account, characterId, friends);
+
+    public bool TryReplaceBlocked(string account, int characterId, IReadOnlyList<StoredSocial> blocked, bool blockAll) =>
+        _inner.TryReplaceBlocked(account, characterId, blocked, blockAll);
+
+    public CharacterRecord? FindByCharacterId(int characterId) =>
+        _inner.FindByCharacterId(characterId);
+
+    public CharacterRecord? FindByCharacterName(string name) =>
+        _inner.FindByCharacterName(name);
+
     public bool TryReplaceShortcuts(string account, int characterId, IReadOnlyList<StoredShortcut> shortcuts) =>
         RunSilent(
             () => _inner.TryReplaceShortcuts(account, characterId, shortcuts),

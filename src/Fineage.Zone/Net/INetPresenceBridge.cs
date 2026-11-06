@@ -165,6 +165,14 @@ interface INetPresenceBridge
     /// <summary>Manufacturer MP + recipe after make-info / make-item.</summary>
     void FanoutRecipeShopItemInfo(IReadOnlyList<int> watcherObjectIds, RecipeShopItemInfoNetMsg info);
 
+    void FanoutFriendInviteAsk(IReadOnlyList<int> watcherObjectIds, FriendInviteAskNetMsg ask);
+
+    void FanoutFriendList(IReadOnlyList<int> watcherObjectIds, FriendListNetMsg list);
+
+    void FanoutFriendUpdate(IReadOnlyList<int> watcherObjectIds, FriendUpdateNetMsg update);
+
+    void FanoutBlockList(IReadOnlyList<int> watcherObjectIds, BlockListNetMsg list);
+
     /// <summary>Boss schedule rows, the reply to a <c>BossStatusRequest</c>.</summary>
     void FanoutBossStatus(IReadOnlyList<int> watcherObjectIds, BossStatusNetMsg status);
 

@@ -34,7 +34,7 @@ Legend: ✅ done · 🟡 partial · ❌ missing · stub = shell only.
 | 24 | Enchant | Economy | 🟡 | Backend; client UI partial |
 | 25 | Party invite/leave + exp share | Social | 🟡 | Invite/leave + exp; loot modes on sweep + ground pickup (#260 follow-up) |
 | 26 | Clan basic | Social | 🟡 | No crest/war/ally |
-| 27 | Friends / block | Social | ❌ | |
+| 27 | Friends / block | Social | 🟡 | Invite/list/delete + block (#285); friend chat deferred |
 | 28 | NPC HTML + bypass + teleports + newbie buffs | Content | ✅ | |
 | 29 | Quests (engine + elven paths) | Content | 🟡 | Many scripts; ruins/quest-spawn gaps |
 | 30 | Class change 1st (elven paths) | Content | 🟡 | Foundation; Gludio masters outside default maps |
@@ -43,8 +43,9 @@ Legend: ✅ done · 🟡 partial · ❌ missing · stub = shell only.
 
 ## Next backend slices (priority)
 
-1. **Pets / summons** or **friends / block**.
-2. Client craft / private-store / manufacture UI (server #281/#283 done).
+1. **Pets / summons**.
+2. Friend chat (type 12) + client social UI (#285 server done).
+3. Client craft / private-store / manufacture UI (server #281/#283 done).
 
 ## Docs
 

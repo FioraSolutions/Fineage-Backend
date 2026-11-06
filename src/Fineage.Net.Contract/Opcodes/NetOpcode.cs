@@ -251,5 +251,23 @@ namespace Fineage.Net.Contract
         public const ushort RecipeShopSellList = 0x039D;
         /// <summary>Zone → client: manufacturer MP + recipe after make-info / make-item.</summary>
         public const ushort RecipeShopItemInfo = 0x039E;
+        /// <summary>Client → zone: Mobius RequestFriendInvite.</summary>
+        public const ushort FriendInvite = 0x039F;
+        /// <summary>Client → zone: Mobius RequestAnswerFriendInvite.</summary>
+        public const ushort FriendAnswer = 0x03A0;
+        /// <summary>Client → zone: Mobius RequestFriendList.</summary>
+        public const ushort FriendListRequest = 0x03A1;
+        /// <summary>Client → zone: Mobius RequestFriendDel.</summary>
+        public const ushort FriendDelete = 0x03A2;
+        /// <summary>Client → zone: Mobius RequestBlock.</summary>
+        public const ushort BlockRequest = 0x03A3;
+        /// <summary>Zone → client: friend invite prompt (Mobius FriendAddRequest).</summary>
+        public const ushort FriendInviteAsk = 0x03A4;
+        /// <summary>Zone → client: full friend list.</summary>
+        public const ushort FriendList = 0x03A5;
+        /// <summary>Zone → client: add/remove/online friend row (Mobius FriendPacket).</summary>
+        public const ushort FriendUpdate = 0x03A6;
+        /// <summary>Zone → client: block list (+ block-all flag).</summary>
+        public const ushort BlockList = 0x03A7;
     }
 }

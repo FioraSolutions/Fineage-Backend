@@ -113,6 +113,7 @@ V2 MessagePack flushes still go to a discarded stream on the Net path. Net peers
 | Private store | Sell: `SetPrivateStoreSell` `0x038D` / `PrivateStoreBuy` `0x0390` / `PrivateStoreListSell` `0x0392`. Buy: `SetPrivateStoreBuy` `0x0393` / `PrivateStoreSellTo` `0x0394` / `PrivateStoreListBuy` `0x0395`. Shared: `PrivateStoreQuit` `0x038E` / `PrivateStoreListRequest` `0x038F` / `PrivateStoreInfo` `0x0391`. See `docs/private-store-v2-protocol.md`. |
 | Craft | `RecipeBookOpen` `0x0396` / `RecipeMakeSelf` `0x0397`. Fanout `RecipeBookList` `0x0398` / `RecipeItemMakeInfo` `0x0399`. See `docs/craft-v2-protocol.md`. |
 | Manufacture | `SetRecipeShop` `0x039A` / `RecipeShopMakeInfo` `0x039B` / `RecipeShopMakeItem` `0x039C`. Fanout `RecipeShopSellList` `0x039D` / `RecipeShopItemInfo` `0x039E`. See `docs/craft-manufacture-v2-protocol.md`. |
+| Friends / block | `FriendInvite` `0x039F` … `BlockRequest` `0x03A3`. Fanout `FriendInviteAsk` `0x03A4` / `FriendList` `0x03A5` / `FriendUpdate` `0x03A6` / `BlockList` `0x03A7`. See `docs/friends-v2-protocol.md`. |
 | Hotbar (shortcuts) | See **Shortcuts** below. `RequestShortCutReg` `0x0358` → `ShortCutRegister` `0x035B`; `RequestShortCutDel` `0x0359` → `ShortCutDelete` `0x035C`. |
 | Leave / disconnect | `EntityDespawn` of leaver to known Net peers. |
 
