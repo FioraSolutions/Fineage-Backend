@@ -4,7 +4,7 @@ Usage: gen_skill_stat_effects.py <mobius dist/game/data/stats/skills dir> > data
 import glob, json, sys, xml.etree.ElementTree as ET
 
 STATS = {"pAtk", "pDef", "mAtk", "mDef", "pAtkSpd", "mAtkSpd", "accCombat", "rEvas", "critRate", "runSpd",
-         "mCritRate", "mCritPower"}
+         "mCritRate", "mCritPower", "critDmg", "blowRate", "pSkillEvas"}
 OPS = {"add": "add", "sub": "sub", "mul": "mul", "set": "set"}
 
 out = []
@@ -35,7 +35,7 @@ for f in sorted(glob.glob(sys.argv[1] + "/*.xml")):
             out.append({"skillId": int(sk.get("id")), "name": sk.get("name"), "levels": levels, "effects": funcs})
 
 reference = ("Combat stat functions (mul/add/sub/set on pAtk, pDef, mAtk, mDef, pAtkSpd, mAtkSpd, accCombat, rEvas, critRate, runSpd, "
-             "mCritRate, mCritPower) inside <for><effect> of non-passive skills, transcribed from L2J Mobius CT 0 Interlude "
-             "dist/game/data/stats/skills. values are per skill level (index 0 = level 1). Conditions, enchant routes and "
-             "non-combat stats are not included.")
+             "mCritRate, mCritPower, critDmg, blowRate, pSkillEvas) inside <for><effect> of non-passive skills, transcribed "
+             "from L2J Mobius CT 0 Interlude dist/game/data/stats/skills. values are per skill level (index 0 = level 1). "
+             "Conditions, enchant routes and non-combat stats are not included.")
 json.dump({"reference": reference, "skills": out}, sys.stdout, indent=1)

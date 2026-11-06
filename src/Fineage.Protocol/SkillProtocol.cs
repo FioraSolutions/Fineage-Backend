@@ -22,4 +22,6 @@ public static class SkillProtocol
     public const string Target = "skill_target";
     public const string Range = "skill_range";
     public const string Dead = "skill_dead";
+    /// <summary>Player is silenced (Mobius mute / SILENCE abnormal).</summary>
+    public const string Muted = "skill_muted";
 }

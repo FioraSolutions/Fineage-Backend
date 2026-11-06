@@ -65,19 +65,30 @@ public sealed partial class ZoneWorld
 
         player.Dead = true;
         player.CurHp = 0;
+        ClosePrivateStore(player.ObjectId, standUp: false);
         player.Sitting = false;
         player.Running = false;
         player.ActiveEnchantObjectId = 0;
         player.Abnormals.Clear();
         RefreshRunSpeed(player); // dead: buff runSpd funcs drop with the abnormals
         player.CombatUntilUnixMs = 0;
+        player.PvpFlagged = false;
+        player.PvpFlagUntilMs = 0;
 
         if (player.Session != null)
             player.Session.SelectedTargetId = 0;
 
+        // Mobius Playable.doDie → killer.onKillUpdatePvPKarma before death penalty / drops.
+        if (killerObjectId > 0
+            && _byId.TryGetValue(killerObjectId, out var killer)
+            && killer.Kind == ZoneEntityKind.Player)
+            OnKillUpdatePvPKarma(killer, player);
+
         // Mobius Player.onDeath runs the exp penalty before the Die packet goes out, so the client's exp bar and the
         // Death Penalty level are already the post-death values on the death screen.
         ApplyDeathConsequences(player, killerObjectId);
+        // Mobius Player.onDieDropItem — after exp/DP, before Die packet.
+        OnDieDropItem(player, killerObjectId);
 
         FanoutPlayerDeath(player, killerObjectId);
         if (player.Session != null)

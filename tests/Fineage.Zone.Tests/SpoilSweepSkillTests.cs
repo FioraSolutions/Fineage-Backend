@@ -82,4 +82,46 @@ public sealed class SpoilSweepSkillTests
         Assert.Equal(0, mob2.SpoilerObjectId);
         Assert.Empty(mob2.SweepItems);
     }
+
+    [Fact]
+    public async Task Sweep_by_turn_including_spoil_gives_loot_to_next_party_member()
+    {
+        var (kit, s, p, mob) = await SetupAsync();
+        var (other, mate) = await kit.EnterAsync(classId: 54, race: 4, x: mob.X + 10, y: mob.Y, z: mob.Z);
+        mate.KnownSkills[42] = 1;
+        mate.CurMp = 100;
+        // Leader first in MemberIds → ByTurnIncludingSpoil cursor 0→1 → mate
+        kit.World.JoinPartyForTest(Fineage.Game.Services.PartyDistributionType.ByTurnIncludingSpoil, p, mate);
+
+        Assert.Null(await Cast(kit, s, 254, mob.ObjectId));
+        kit.World.KillForTest(mob, p);
+        mob.SweepItems.Clear();
+        mob.SweepItems.Add(new Fineage.Zone.Drops.DropStack(1864, 5));
+
+        long beforeLeader = p.Inventory!.CountOf(1864);
+        long beforeMate = mate.Inventory!.CountOf(1864);
+        // AdminSweep hits the same ApplySweep / distributeItem path as skill 42.
+        Assert.Null(await kit.World.TryAdminSweepAsync(s, new AdminSweepCorpseMsg { TargetObjectId = mob.ObjectId }, default));
+        Assert.Equal(beforeLeader, p.Inventory.CountOf(1864));
+        Assert.Equal(beforeMate + 5, mate.Inventory.CountOf(1864));
+    }
+
+    [Fact]
+    public async Task Sweep_adena_splits_among_in_range_party()
+    {
+        var (kit, s, p, mob) = await SetupAsync();
+        var (_, mate) = await kit.EnterAsync(classId: 54, race: 4, x: mob.X + 10, y: mob.Y, z: mob.Z);
+        kit.World.JoinPartyForTest(Fineage.Game.Services.PartyDistributionType.FindersKeepers, p, mate);
+
+        Assert.Null(await Cast(kit, s, 254, mob.ObjectId));
+        kit.World.KillForTest(mob, p);
+        mob.SweepItems.Clear();
+        mob.SweepItems.Add(new Fineage.Zone.Drops.DropStack(57, 100)); // Adena
+
+        long beforeL = p.Inventory!.CountOf(57);
+        long beforeM = mate.Inventory!.CountOf(57);
+        Assert.Null(await kit.World.TryAdminSweepAsync(s, new AdminSweepCorpseMsg { TargetObjectId = mob.ObjectId }, default));
+        Assert.Equal(beforeL + 50, p.Inventory.CountOf(57));
+        Assert.Equal(beforeM + 50, mate.Inventory.CountOf(57));
+    }
 }

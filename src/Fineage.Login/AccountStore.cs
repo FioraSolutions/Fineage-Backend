@@ -100,7 +100,14 @@ public sealed record CharacterRecord(
     bool Newbie = true,
     IReadOnlyList<StoredShortcut>? Shortcuts = null,
     IReadOnlyList<StoredSkill>? LearnedSkills = null,
-    int DeathPenaltyLevel = 0)
+    int DeathPenaltyLevel = 0,
+    int Karma = 0,
+    int PkKills = 0,
+    int PvpKills = 0,
+    IReadOnlyList<int>? KnownRecipes = null,
+    IReadOnlyList<StoredSocial>? Friends = null,
+    IReadOnlyList<StoredSocial>? Blocked = null,
+    bool BlockAll = false)
 {
     /// <summary>Remaining whole seconds until hard delete. Zero when the character is not pending.</summary>
     public int DeleteSecondsLeft(DateTimeOffset now)
@@ -115,6 +122,9 @@ public sealed record CharacterRecord(
 
     public bool IsPendingDelete => DeleteAt != null;
 }
+
+/// <summary>One friend or block-list entry (Mobius character_friends row with a name snapshot).</summary>
+public sealed record StoredSocial(int ObjectId, string Name);
 
 /// <summary>One persisted clan member. <see cref="CharacterId"/> is the zone object id.</summary>
 public sealed record ClanMemberRecord(
@@ -222,6 +232,26 @@ public interface IAccountStore
     /// outlives the session, so the zone writes it the moment a death rolls it up.
     /// </summary>
     bool TrySaveDeathPenalty(string account, int characterId, int level);
+
+    /// <summary>
+    /// Writes karma / PK / PvP kill counters (Mobius <c>characters.karma|pkkills|pvpkills</c>).
+    /// </summary>
+    bool TrySaveKarmaPk(string account, int characterId, int karma, int pkKills, int pvpKills);
+
+    /// <summary>Replace the character's known craft recipe list ids (Mobius recipe book).</summary>
+    bool TryReplaceKnownRecipes(string account, int characterId, IReadOnlyList<int> recipeIds);
+
+    /// <summary>Replace the character's friend list (Mobius character_friends relation=0).</summary>
+    bool TryReplaceFriends(string account, int characterId, IReadOnlyList<StoredSocial> friends);
+
+    /// <summary>Replace the character's block list + block-all flag (Mobius relation=1 / blockAll).</summary>
+    bool TryReplaceBlocked(string account, int characterId, IReadOnlyList<StoredSocial> blocked, bool blockAll);
+
+    /// <summary>Global character lookup by id (names are unique across accounts).</summary>
+    CharacterRecord? FindByCharacterId(int characterId);
+
+    /// <summary>Global character lookup by name (case-insensitive).</summary>
+    CharacterRecord? FindByCharacterName(string name);
 
     /// <summary>Replaces the character's quest rows. An empty list is a real save.</summary>
     bool TryReplaceQuests(string account, int characterId, IReadOnlyList<QuestSaveRow> quests);
@@ -432,7 +462,14 @@ public sealed class MemoryAccountStore : IAccountStore
             Quests = character.Quests?.Select(CopyQuest).ToList(),
             Shortcuts = character.Shortcuts?.Select(CopyShortcut).ToList(),
             LearnedSkills = character.LearnedSkills?.Select(s => new StoredSkillDto { SkillId = s.SkillId, Level = s.Level }).ToList(),
-            DeathPenaltyLevel = character.DeathPenaltyLevel
+            DeathPenaltyLevel = character.DeathPenaltyLevel,
+            Karma = character.Karma,
+            PkKills = character.PkKills,
+            PvpKills = character.PvpKills,
+            KnownRecipes = character.KnownRecipes?.ToList(),
+            Friends = character.Friends?.Select(f => new StoredSocialDto { ObjectId = f.ObjectId, Name = f.Name }).ToList(),
+            Blocked = character.Blocked?.Select(f => new StoredSocialDto { ObjectId = f.ObjectId, Name = f.Name }).ToList(),
+            BlockAll = character.BlockAll
         };
 
     static StoredShortcutDto CopyShortcut(StoredShortcut s) => new()
@@ -712,6 +749,23 @@ public sealed class MemoryAccountStore : IAccountStore
         }
     }
 
+    public bool TrySaveKarmaPk(string account, int characterId, int karma, int pkKills, int pvpKills)
+    {
+        if (karma < 0 || pkKills < 0 || pvpKills < 0)
+            return false;
+        lock (_gate)
+        {
+            var character = FindCharacter(account, characterId);
+            if (character == null)
+                return false;
+            character.Karma = karma;
+            character.PkKills = pkKills;
+            character.PvpKills = pvpKills;
+            Save();
+            return true;
+        }
+    }
+
     public bool TryReplaceQuests(string account, int characterId, IReadOnlyList<QuestSaveRow> quests)
     {
         ArgumentNullException.ThrowIfNull(quests);
@@ -748,6 +802,113 @@ public sealed class MemoryAccountStore : IAccountStore
             Save();
             return true;
         }
+    }
+
+    public bool TryReplaceKnownRecipes(string account, int characterId, IReadOnlyList<int> recipeIds)
+    {
+        ArgumentNullException.ThrowIfNull(recipeIds);
+        var seen = new HashSet<int>();
+        foreach (int id in recipeIds)
+        {
+            if (id < 1 || !seen.Add(id))
+                return false;
+        }
+
+        lock (_gate)
+        {
+            var character = FindCharacter(account, characterId);
+            if (character == null)
+                return false;
+            character.KnownRecipes = recipeIds.OrderBy(id => id).ToList();
+            Save();
+            return true;
+        }
+    }
+
+    public bool TryReplaceFriends(string account, int characterId, IReadOnlyList<StoredSocial> friends)
+    {
+        ArgumentNullException.ThrowIfNull(friends);
+        if (!ValidateSocialList(friends))
+            return false;
+
+        lock (_gate)
+        {
+            var character = FindCharacter(account, characterId);
+            if (character == null)
+                return false;
+            character.Friends = friends
+                .OrderBy(f => f.ObjectId)
+                .Select(f => new StoredSocialDto { ObjectId = f.ObjectId, Name = f.Name.Trim() })
+                .ToList();
+            Save();
+            return true;
+        }
+    }
+
+    public bool TryReplaceBlocked(string account, int characterId, IReadOnlyList<StoredSocial> blocked, bool blockAll)
+    {
+        ArgumentNullException.ThrowIfNull(blocked);
+        if (!ValidateSocialList(blocked))
+            return false;
+
+        lock (_gate)
+        {
+            var character = FindCharacter(account, characterId);
+            if (character == null)
+                return false;
+            character.Blocked = blocked
+                .OrderBy(f => f.ObjectId)
+                .Select(f => new StoredSocialDto { ObjectId = f.ObjectId, Name = f.Name.Trim() })
+                .ToList();
+            character.BlockAll = blockAll;
+            Save();
+            return true;
+        }
+    }
+
+    public CharacterRecord? FindByCharacterId(int characterId)
+    {
+        if (characterId < 1)
+            return null;
+        lock (_gate)
+        {
+            foreach (var account in _data.Accounts)
+            {
+                var character = account.Characters.FirstOrDefault(c => c.Id == characterId);
+                if (character != null)
+                    return ToRecord(account.Name, character);
+            }
+            return null;
+        }
+    }
+
+    public CharacterRecord? FindByCharacterName(string name)
+    {
+        if (string.IsNullOrWhiteSpace(name))
+            return null;
+        string key = name.Trim();
+        lock (_gate)
+        {
+            foreach (var account in _data.Accounts)
+            {
+                var character = account.Characters.FirstOrDefault(c =>
+                    string.Equals(c.Name, key, StringComparison.OrdinalIgnoreCase));
+                if (character != null)
+                    return ToRecord(account.Name, character);
+            }
+            return null;
+        }
+    }
+
+    static bool ValidateSocialList(IReadOnlyList<StoredSocial> rows)
+    {
+        var seen = new HashSet<int>();
+        foreach (var row in rows)
+        {
+            if (row == null || row.ObjectId < 1 || string.IsNullOrWhiteSpace(row.Name) || !seen.Add(row.ObjectId))
+                return false;
+        }
+        return true;
     }
 
     public bool TryReplaceShortcuts(string account, int characterId, IReadOnlyList<StoredShortcut> shortcuts)
@@ -1358,7 +1519,18 @@ public sealed class MemoryAccountStore : IAccountStore
             character.LearnedSkills == null
                 ? null
                 : character.LearnedSkills.Select(s => new StoredSkill(s.SkillId, s.Level)).ToArray(),
-            character.DeathPenaltyLevel);
+            character.DeathPenaltyLevel,
+            character.Karma,
+            character.PkKills,
+            character.PvpKills,
+            character.KnownRecipes?.ToArray(),
+            character.Friends == null
+                ? null
+                : character.Friends.Select(f => new StoredSocial(f.ObjectId, f.Name ?? "")).ToArray(),
+            character.Blocked == null
+                ? null
+                : character.Blocked.Select(f => new StoredSocial(f.ObjectId, f.Name ?? "")).ToArray(),
+            character.BlockAll);
 
     sealed class StoreFile
     {
@@ -1418,6 +1590,19 @@ public sealed class MemoryAccountStore : IAccountStore
         public List<StoredShortcutDto>? Shortcuts { get; set; }
         public List<StoredSkillDto>? LearnedSkills { get; set; }
         public int DeathPenaltyLevel { get; set; }
+        public int Karma { get; set; }
+        public int PkKills { get; set; }
+        public int PvpKills { get; set; }
+        public List<int>? KnownRecipes { get; set; }
+        public List<StoredSocialDto>? Friends { get; set; }
+        public List<StoredSocialDto>? Blocked { get; set; }
+        public bool BlockAll { get; set; }
+    }
+
+    sealed class StoredSocialDto
+    {
+        public int ObjectId { get; set; }
+        public string Name { get; set; } = "";
     }
 
     sealed class StoredSkillDto

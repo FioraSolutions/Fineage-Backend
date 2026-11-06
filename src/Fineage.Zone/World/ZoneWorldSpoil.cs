@@ -100,7 +100,7 @@ public sealed partial class ZoneWorld
 
     /// <summary>
     /// Mobius Sweeper (skill 42) + ConditionPlayerCanSweep + ConsumeBody: spoiled (343), spoiler or party mate (683), corpse not
-    /// too old (1247), bag slots/weight; then spoil loot to the sweeper and the corpse is consumed.
+    /// too old (1247), bag slots/weight; then spoil loot via <c>Party.distributeItem(..., spoil=true)</c> and the corpse is consumed.
     /// </summary>
     bool ApplySweep(ZoneSession session, ZoneEntity player, ZoneEntity target)
     {
@@ -125,36 +125,127 @@ public sealed partial class ZoneWorld
                 return false;
         }
 
-        var inventory = player.Inventory!;
-        int slots = target.SweepItems.Select(s => s.ItemId).Distinct().Count(id => inventory.FindByItemId(id) == null);
-        if (inventory.Items.Count + slots > WarehouseRules.InventorySlots(player.Race))
+        // Pre-check: sweeper must be able to hold everything in FindersKeepers / fallback path (Mobius
+        // ConditionPlayerCanSweep capacity). Party modes re-check per looter below.
+        if (!CanReceiveSweep(player, target.SweepItems))
         {
-            Notice(session, NpcServiceProtocol.InventoryFull, NpcServiceProtocol.InventoryFullText);
+            if (!CanReceiveAnySweepWeight(player, target.SweepItems))
+                Notice(session, NpcServiceProtocol.WeightLimit, NpcServiceProtocol.WeightLimitText);
+            else
+                Notice(session, NpcServiceProtocol.InventoryFull, NpcServiceProtocol.InventoryFullText);
             return false;
         }
 
-        long incoming = target.SweepItems.Sum(s => (long)_weights.Of(s.ItemId) * s.Count);
-        int carried = _weights.Load(inventory.Items.Select(item => (item.ItemId, item.Count)));
-        if (carried + incoming > MaxLoadOf(player))
-        {
-            Notice(session, NpcServiceProtocol.WeightLimit, NpcServiceProtocol.WeightLimitText);
-            return false;
-        }
+        ZoneParty? party = null;
+        if (_partyByPlayer.TryGetValue(player.ObjectId, out int partyId))
+            _parties.TryGetValue(partyId, out party);
 
+        var touchInventories = new HashSet<int>();
         foreach (var stack in target.SweepItems)
         {
-            var added = inventory.Add(stack.ItemId, stack.Count);
-            var update = InventoryMessages.Update(InventoryChange.Add, added);
-            // Swept loot is a bag change like any other, so Net clients need the same row the V2 frame carries.
-            NetBridge?.FanoutInventoryUpdate([session.ObjectId], ToNetInventoryUpdate(update));
+            if (stack.ItemId == WarehouseRules.AdenaItemId && party != null)
+            {
+                DistributeSweepAdena(party, player, target, stack.Count, touchInventories);
+                continue;
+            }
+
+            ZoneEntity looter = player;
+            if (party != null)
+            {
+                int last = party.ItemLastLoot;
+                int looterId = PartyLootRules.ActualLooter(
+                    player.ObjectId,
+                    (PartyDistributionType)party.ItemDistribution,
+                    spoil: true,
+                    party.MemberIds,
+                    id => CanReceiveOne(id, stack.ItemId, stack.Count, target),
+                    ref last,
+                    _combatRandom);
+                party.ItemLastLoot = last;
+                if (_byId.TryGetValue(looterId, out var entity) && entity.Kind == ZoneEntityKind.Player && entity.Inventory != null)
+                    looter = entity;
+            }
+
+            GrantSweepStack(looter, stack.ItemId, stack.Count, touchInventories);
         }
 
-        if (target.SweepItems.Count > 0)
-            SaveInventory(session, inventory);
-        ZoneLog.Info($"sweep object={target.ObjectId} spoiler={target.SpoilerObjectId} sweeper={player.ObjectId} items={target.SweepItems.Count}");
+        foreach (int objectId in touchInventories)
+        {
+            if (_byId.TryGetValue(objectId, out var e) && e.Session != null && e.Inventory != null)
+                SaveInventory(e.Session, e.Inventory);
+        }
+
+        ZoneLog.Info($"sweep object={target.ObjectId} spoiler={target.SpoilerObjectId} sweeper={player.ObjectId} items={target.SweepItems.Count} party={(party != null)}");
         target.SweepItems.Clear();
         DespawnNpc(target); // Mobius ConsumeBody
         return true;
+    }
+
+    void DistributeSweepAdena(ZoneParty party, ZoneEntity sweeper, ZoneEntity corpse, int adena, HashSet<int> touched)
+    {
+        var inRange = new List<ZoneEntity>();
+        foreach (int id in party.MemberIds)
+        {
+            if (!_byId.TryGetValue(id, out var m) || m.Kind != ZoneEntityKind.Player || m.Inventory == null || m.Dead)
+                continue;
+            if (!ZoneCombat.Within(corpse.X, corpse.Y, m.X, m.Y, PartyLootRules.PartyRange))
+                continue;
+            inRange.Add(m);
+        }
+        if (inRange.Count == 0)
+        {
+            GrantSweepStack(sweeper, WarehouseRules.AdenaItemId, adena, touched);
+            return;
+        }
+
+        int share = PartyLootRules.AdenaShare(adena, inRange.Count);
+        if (share <= 0)
+            return;
+        foreach (var m in inRange)
+            GrantSweepStack(m, WarehouseRules.AdenaItemId, share, touched);
+    }
+
+    void GrantSweepStack(ZoneEntity looter, int itemId, int count, HashSet<int> touched)
+    {
+        if (looter.Inventory == null || looter.Session == null || count <= 0)
+            return;
+        var added = looter.Inventory.Add(itemId, count);
+        var update = InventoryMessages.Update(InventoryChange.Add, added);
+        NetBridge?.FanoutInventoryUpdate([looter.Session.ObjectId], ToNetInventoryUpdate(update));
+        touched.Add(looter.ObjectId);
+    }
+
+    bool CanReceiveSweep(ZoneEntity player, List<Fineage.Zone.Drops.DropStack> stacks)
+    {
+        if (player.Inventory == null)
+            return false;
+        int slots = stacks.Select(s => s.ItemId).Distinct().Count(id => player.Inventory.FindByItemId(id) == null);
+        if (player.Inventory.Items.Count + slots > WarehouseRules.InventorySlots(player.Race))
+            return false;
+        return CanReceiveAnySweepWeight(player, stacks);
+    }
+
+    bool CanReceiveAnySweepWeight(ZoneEntity player, List<Fineage.Zone.Drops.DropStack> stacks)
+    {
+        if (player.Inventory == null)
+            return false;
+        long incoming = stacks.Sum(s => (long)_weights.Of(s.ItemId) * s.Count);
+        int carried = _weights.Load(player.Inventory.Items.Select(item => (item.ItemId, item.Count)));
+        return carried + incoming <= MaxLoadOf(player);
+    }
+
+    bool CanReceiveOne(int objectId, int itemId, int count, ZoneEntity corpse)
+    {
+        if (!_byId.TryGetValue(objectId, out var m) || m.Kind != ZoneEntityKind.Player || m.Inventory == null || m.Dead)
+            return false;
+        if (!ZoneCombat.Within(corpse.X, corpse.Y, m.X, m.Y, PartyLootRules.PartyRange))
+            return false;
+        bool newSlot = m.Inventory.FindByItemId(itemId) == null;
+        if (newSlot && m.Inventory.Items.Count + 1 > WarehouseRules.InventorySlots(m.Race))
+            return false;
+        long incoming = (long)_weights.Of(itemId) * count;
+        int carried = _weights.Load(m.Inventory.Items.Select(item => (item.ItemId, item.Count)));
+        return carried + incoming <= MaxLoadOf(m);
     }
 
     /// <summary>Skill 254 / 42 through the normal SkillUse path: MP, reuse, MagicSkillUse fan-out, then the spoil/sweep effect.</summary>
@@ -228,6 +319,16 @@ public sealed partial class ZoneWorld
     {
         lock (_gate)
             return _byId.Values.FirstOrDefault(e => e.Kind == ZoneEntityKind.Npc && e.Attackable && e.CurHp > 0);
+    }
+
+    /// <summary>Test hook: up to <paramref name="take"/> living attackable NPCs.</summary>
+    internal List<ZoneEntity> AttackablesForTest(int take = 2)
+    {
+        lock (_gate)
+            return _byId.Values
+                .Where(e => e.Kind == ZoneEntityKind.Npc && e.Attackable && e.CurHp > 0)
+                .Take(take)
+                .ToList();
     }
 
     /// <summary>Test: kill an NPC through the normal death path (corpse, drops, spoil roll, decay timer).</summary>

@@ -151,7 +151,14 @@ public sealed partial class ZoneWorld
         // Inventory.validateCapacity(target) and answers YOUR_INVENTORY_IS_FULL. Mobius deliberately does *not*
         // weight-check a pickup (validateWeight is only on buy / withdraw / trade), so an overloaded character may
         // still loot and simply carries the weight penalty — matching the reference means slots-only here.
-        if (!HasRoomForGroundItem(player, ground))
+        // Party RANDOM/BY_TURN modes check the eventual looter instead of the picker (Party.distributeItem).
+        ZoneParty? pickupParty = null;
+        if (_partyByPlayer.TryGetValue(player.ObjectId, out int pickupPartyId))
+            _parties.TryGetValue(pickupPartyId, out pickupParty);
+        bool partyDistributes = pickupParty != null
+                                && pickupParty.ItemDistribution != (int)PartyDistributionType.FindersKeepers
+                                && !IsHerb(ground.GroundItemId);
+        if (!partyDistributes && !HasRoomForGroundItem(player, ground))
         {
             session.PendingPickupId = 0;
             session.PendingPickupAtUnixMs = 0;
@@ -194,35 +201,141 @@ public sealed partial class ZoneWorld
             return null;
         }
 
-        _game.Items.TryGet(ground.GroundItemId, out var template);
+        // Mobius Party.distributeItem(spoil=false) / distributeAdena when the picker is in a party.
+        if (pickupParty != null)
+        {
+            if (ground.GroundItemId == WarehouseRules.AdenaItemId)
+            {
+                DistributePickupAdena(pickupParty, player, ground);
+                return null;
+            }
+
+            int last = pickupParty.ItemLastLoot;
+            int looterId = PartyLootRules.ActualLooter(
+                player.ObjectId,
+                (PartyDistributionType)pickupParty.ItemDistribution,
+                spoil: false,
+                pickupParty.MemberIds,
+                id => CanReceiveGround(id, ground),
+                ref last,
+                _combatRandom);
+            pickupParty.ItemLastLoot = last;
+            if (!_byId.TryGetValue(looterId, out var looter)
+                || looter.Kind != ZoneEntityKind.Player
+                || looter.Inventory == null
+                || looter.Session == null
+                || !CanReceiveGround(looterId, ground))
+            {
+                session.PendingPickupId = 0;
+                session.PendingPickupAtUnixMs = 0;
+                ShotNotice(session, SysMsgInventoryFull, "Your inventory is full.");
+                return "slots";
+            }
+
+            GrantGroundPickup(looter, ground);
+            ZoneLog.Info(
+                $"pickup object={session.ObjectId} looter={looter.ObjectId} ground={groundObjectId} item={ground.GroundItemId} count={ground.GroundCount} party=1");
+            return null;
+        }
+
+        GrantGroundPickup(player, ground);
+        ZoneLog.Info($"pickup object={session.ObjectId} ground={groundObjectId} item={ground.GroundItemId} count={ground.GroundCount} party=0");
+        return null;
+    }
+
+    /// <summary>Mobius <c>Party.distributeAdena</c> on ground pickup: equal share to in-range living members.</summary>
+    void DistributePickupAdena(ZoneParty party, ZoneEntity picker, ZoneEntity ground)
+    {
+        var inRange = new List<ZoneEntity>();
+        foreach (int id in party.MemberIds)
+        {
+            if (!_byId.TryGetValue(id, out var m) || m.Kind != ZoneEntityKind.Player || m.Inventory == null || m.Dead)
+                continue;
+            if (!ZoneCombat.Within(ground.X, ground.Y, m.X, m.Y, PartyLootRules.PartyRange))
+                continue;
+            inRange.Add(m);
+        }
+
+        int adena = ground.GroundCount;
+        RemoveGroundItem(ground);
+        if (inRange.Count == 0)
+        {
+            if (picker.Inventory != null && picker.Session != null)
+                GrantInventoryStack(picker, WarehouseRules.AdenaItemId, adena, notifyObtained: true);
+            return;
+        }
+
+        int share = PartyLootRules.AdenaShare(adena, inRange.Count);
+        if (share <= 0)
+            return;
+        foreach (var m in inRange)
+            GrantInventoryStack(m, WarehouseRules.AdenaItemId, share, notifyObtained: true);
+    }
+
+    bool CanReceiveGround(int objectId, ZoneEntity ground)
+    {
+        if (!_byId.TryGetValue(objectId, out var m) || m.Kind != ZoneEntityKind.Player || m.Inventory == null || m.Dead)
+            return false;
+        if (!ZoneCombat.Within(ground.X, ground.Y, m.X, m.Y, PartyLootRules.PartyRange))
+            return false;
+        return HasRoomForGroundItem(m, ground);
+    }
+
+    /// <summary>Move one ground stack into <paramref name="looter"/>'s bag and despawn the world item.</summary>
+    void GrantGroundPickup(ZoneEntity looter, ZoneEntity ground)
+    {
+        if (looter.Inventory == null || looter.Session == null)
+            return;
+        int itemId = ground.GroundItemId;
+        int count = ground.GroundCount;
+        bool stackable = ground.GroundStackable;
         // Stack merge must be a Modify (Mobius InventoryUpdate addModifiedItem): the client ignores an Add
         // for an objectId it already holds, so the picked-up count only showed after relog.
-        bool merged = ground.GroundStackable && player.Inventory.FindByItemId(ground.GroundItemId) != null;
+        bool merged = stackable && looter.Inventory.FindByItemId(itemId) != null;
         InventoryUpdateMsg invUpdate;
-        if (ground.GroundStackable || ground.GroundCount <= 1)
+        if (stackable || count <= 1)
         {
-            var added = player.Inventory.Add(ground.GroundItemId, ground.GroundCount);
+            var added = looter.Inventory.Add(itemId, count);
             invUpdate = InventoryMessages.Update(merged ? InventoryChange.Modify : InventoryChange.Add, added);
         }
         else
         {
-            var pieces = player.Inventory.AddPieces(ground.GroundItemId, ground.GroundCount);
-            invUpdate = new InventoryUpdateMsg { Changes = pieces.Select(p => InventoryMessages.Update(InventoryChange.Add, p).Changes[0]).ToArray() };
+            var pieces = looter.Inventory.AddPieces(itemId, count);
+            invUpdate = new InventoryUpdateMsg
+            {
+                Changes = pieces.Select(p => InventoryMessages.Update(InventoryChange.Add, p).Changes[0]).ToArray()
+            };
         }
-        if (NetBridge != null)
-            NetBridge.FanoutInventoryUpdate([session.ObjectId], ToNetInventoryUpdate(invUpdate));
-        RemoveGroundItem(ground);
-        SaveInventory(session, player.Inventory);
 
-        string name = template?.Name ?? $"item {ground.GroundItemId}";
-        if (ground.GroundItemId == 57)
-            ShotNotice(session, SysMsgObtainedAdena, $"You have obtained {ground.GroundCount} adena.");
-        else if (ground.GroundCount > 1)
-            ShotNotice(session, SysMsgObtainedCount, $"You have obtained {ground.GroundCount} {name}.");
+        NetBridge?.FanoutInventoryUpdate([looter.Session.ObjectId], ToNetInventoryUpdate(invUpdate));
+        RemoveGroundItem(ground);
+        SaveInventory(looter.Session, looter.Inventory);
+        NotifyObtained(looter.Session, itemId, count);
+    }
+
+    void GrantInventoryStack(ZoneEntity looter, int itemId, int count, bool notifyObtained)
+    {
+        if (looter.Inventory == null || looter.Session == null || count <= 0)
+            return;
+        bool merged = looter.Inventory.FindByItemId(itemId) != null;
+        var added = looter.Inventory.Add(itemId, count);
+        var invUpdate = InventoryMessages.Update(merged ? InventoryChange.Modify : InventoryChange.Add, added);
+        NetBridge?.FanoutInventoryUpdate([looter.Session.ObjectId], ToNetInventoryUpdate(invUpdate));
+        SaveInventory(looter.Session, looter.Inventory);
+        if (notifyObtained)
+            NotifyObtained(looter.Session, itemId, count);
+    }
+
+    void NotifyObtained(ZoneSession session, int itemId, int count)
+    {
+        _game.Items.TryGet(itemId, out var template);
+        string name = template?.Name ?? $"item {itemId}";
+        if (itemId == WarehouseRules.AdenaItemId)
+            ShotNotice(session, SysMsgObtainedAdena, $"You have obtained {count} adena.");
+        else if (count > 1)
+            ShotNotice(session, SysMsgObtainedCount, $"You have obtained {count} {name}.");
         else
             ShotNotice(session, SysMsgObtainedItem, $"You have obtained {name}.");
-        ZoneLog.Info($"pickup object={session.ObjectId} ground={groundObjectId} item={ground.GroundItemId} count={ground.GroundCount} merged={merged}");
-        return null;
     }
 
     void PickupFailed(ZoneSession session, ZoneEntity ground)

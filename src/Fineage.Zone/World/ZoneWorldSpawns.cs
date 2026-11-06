@@ -114,6 +114,20 @@ public sealed partial class ZoneWorld
             ClanHelpRange = def.ClanHelpRange,
             Clans = def.Clans,
             IgnoreNpcIds = def.IgnoreNpcIds,
+            NpcSoulShotLeft = def.SoulShot,
+            NpcSoulShotChance = def.SoulShotChance,
+            NpcSpiritShotLeft = def.SpiritShot,
+            NpcSpiritShotChance = def.SpiritShotChance,
+            DefenceTraits = def.DefenceTraits,
+            AiSkills = FilterAttackSkills(def.AiSkills, _npcAiSupport.Get(def.NpcId)?.Suicide),
+            MinSkillChance = def.MinSkillChance,
+            MaxSkillChance = def.MaxSkillChance,
+            AiHealSkills = _npcAiSupport.Get(def.NpcId)?.Heal,
+            AiBuffSkills = _npcAiSupport.Get(def.NpcId)?.Buff,
+            AiDebuffSkills = _npcAiSupport.Get(def.NpcId)?.Debuff,
+            AiImmobilizeSkills = _npcAiSupport.Get(def.NpcId)?.Immobilize,
+            AiSilenceSkills = _npcAiSupport.Get(def.NpcId)?.Silence,
+            AiSuicideSkills = _npcAiSupport.Get(def.NpcId)?.Suicide,
             RunSpeed = def.RunSpeed,
             WalkSpeed = def.WalkSpeed,
             // Mobius Spawn location is the returnHome target; captured at spawn, not at first aggro, so a mob that
@@ -198,5 +212,22 @@ public sealed partial class ZoneWorld
             TickCorpseDecay(_clock().ToUnixTimeMilliseconds());
             TickSpawns();
         }
+    }
+
+    /// <summary>
+    /// Mobius puts <c>isSuicideAttack</c> skills only in <c>AISkillScope.SUICIDE</c>, not GENERAL/ATTACK.
+    /// Fineage <c>aiSkills</c> still list Death Bomb — strip those ids when suicide scope is present.
+    /// </summary>
+    static IReadOnlyList<Fineage.Zone.Npcs.NpcAiSkill>? FilterAttackSkills(
+        IReadOnlyList<Fineage.Zone.Npcs.NpcAiSkill>? attack,
+        IReadOnlyList<Fineage.Zone.Npcs.NpcAiSupportSkill>? suicide)
+    {
+        if (attack is not { Count: > 0 } || suicide is not { Count: > 0 })
+            return attack;
+        var ban = new HashSet<int>();
+        foreach (var s in suicide)
+            ban.Add(s.SkillId);
+        var kept = attack.Where(a => !ban.Contains(a.SkillId)).ToList();
+        return kept.Count > 0 ? kept : null;
     }
 }

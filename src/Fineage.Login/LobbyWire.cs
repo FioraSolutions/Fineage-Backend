@@ -35,7 +35,7 @@ public static class LobbyWire
             MaxCp = stats.MaxCp,
             Exp = character.Exp,
             Sp = character.Sp,
-            Karma = 0,
+            Karma = character.Karma,
             WeaponItemId = stats.WeaponItemId,
             Paperdoll = stats.Paperdoll
         };

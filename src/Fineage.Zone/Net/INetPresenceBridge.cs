@@ -144,6 +144,35 @@ interface INetPresenceBridge
 
     void FanoutTradeFinished(IReadOnlyList<int> watcherObjectIds, TradeFinishedNetMsg finished);
 
+    /// <summary>Private store type + title for a pawn (self + knownlist).</summary>
+    void FanoutPrivateStoreInfo(IReadOnlyList<int> watcherObjectIds, PrivateStoreInfoNetMsg info);
+
+    /// <summary>Sell list window for a buyer who clicked a store pawn.</summary>
+    void FanoutPrivateStoreListSell(IReadOnlyList<int> watcherObjectIds, PrivateStoreListSellNetMsg list);
+
+    /// <summary>Buy list window for a visitor who clicked a buy-store pawn.</summary>
+    void FanoutPrivateStoreListBuy(IReadOnlyList<int> watcherObjectIds, PrivateStoreListBuyNetMsg list);
+
+    /// <summary>Known recipe ids for one craft book tab.</summary>
+    void FanoutRecipeBookList(IReadOnlyList<int> watcherObjectIds, RecipeBookListNetMsg list);
+
+    /// <summary>Self-craft result after RequestRecipeItemMakeSelf.</summary>
+    void FanoutRecipeItemMakeInfo(IReadOnlyList<int> watcherObjectIds, RecipeItemMakeInfoNetMsg info);
+
+    /// <summary>Manufacture recipe list for a visitor who clicked a workshop pawn.</summary>
+    void FanoutRecipeShopSellList(IReadOnlyList<int> watcherObjectIds, RecipeShopSellListNetMsg list);
+
+    /// <summary>Manufacturer MP + recipe after make-info / make-item.</summary>
+    void FanoutRecipeShopItemInfo(IReadOnlyList<int> watcherObjectIds, RecipeShopItemInfoNetMsg info);
+
+    void FanoutFriendInviteAsk(IReadOnlyList<int> watcherObjectIds, FriendInviteAskNetMsg ask);
+
+    void FanoutFriendList(IReadOnlyList<int> watcherObjectIds, FriendListNetMsg list);
+
+    void FanoutFriendUpdate(IReadOnlyList<int> watcherObjectIds, FriendUpdateNetMsg update);
+
+    void FanoutBlockList(IReadOnlyList<int> watcherObjectIds, BlockListNetMsg list);
+
     /// <summary>Boss schedule rows, the reply to a <c>BossStatusRequest</c>.</summary>
     void FanoutBossStatus(IReadOnlyList<int> watcherObjectIds, BossStatusNetMsg status);
 

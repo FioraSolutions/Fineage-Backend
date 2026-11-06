@@ -888,6 +888,200 @@ namespace Fineage.Net.Contract
         public int Response { get; set; }
     }
 
+    public sealed class PrivateStoreSellRowNet
+    {
+        public int InventoryObjectId { get; set; }
+        public int ItemId { get; set; }
+        public long Count { get; set; } = 1;
+        public long Price { get; set; }
+        public int EnchantLevel { get; set; }
+    }
+
+    public sealed class SetPrivateStoreSellNetMsg
+    {
+        public string Message { get; set; } = "";
+        public int Packaged { get; set; }
+        public PrivateStoreSellRowNet[] Items { get; set; } = System.Array.Empty<PrivateStoreSellRowNet>();
+    }
+
+    public sealed class PrivateStoreListRequestNetMsg
+    {
+        public int StoreObjectId { get; set; }
+    }
+
+    public sealed class PrivateStoreBuyNetMsg
+    {
+        public int StoreObjectId { get; set; }
+        public PrivateStoreSellRowNet[] Items { get; set; } = System.Array.Empty<PrivateStoreSellRowNet>();
+    }
+
+    /// <summary>Broadcast store type + title (Mobius PrivateStoreMsgSell / UserInfo store bit).</summary>
+    public sealed class PrivateStoreInfoNetMsg
+    {
+        public int ObjectId { get; set; }
+        public int StoreType { get; set; }
+        public string Message { get; set; } = "";
+    }
+
+    public sealed class PrivateStoreListSellNetMsg
+    {
+        public int StoreObjectId { get; set; }
+        public string StoreName { get; set; } = "";
+        public string Message { get; set; } = "";
+        public int Packaged { get; set; }
+        public long BuyerAdena { get; set; }
+        public PrivateStoreSellRowNet[] Items { get; set; } = System.Array.Empty<PrivateStoreSellRowNet>();
+    }
+
+    public sealed class PrivateStoreBuyRowNet
+    {
+        public int ItemId { get; set; }
+        public long Count { get; set; } = 1;
+        public long Price { get; set; }
+    }
+
+    public sealed class SetPrivateStoreBuyNetMsg
+    {
+        public string Message { get; set; } = "";
+        public PrivateStoreBuyRowNet[] Items { get; set; } = System.Array.Empty<PrivateStoreBuyRowNet>();
+    }
+
+    public sealed class PrivateStoreSellToNetMsg
+    {
+        public int StoreObjectId { get; set; }
+        public PrivateStoreSellRowNet[] Items { get; set; } = System.Array.Empty<PrivateStoreSellRowNet>();
+    }
+
+    public sealed class PrivateStoreListBuyNetMsg
+    {
+        public int StoreObjectId { get; set; }
+        public string StoreName { get; set; } = "";
+        public string Message { get; set; } = "";
+        public long StoreAdena { get; set; }
+        public PrivateStoreBuyRowNet[] Items { get; set; } = System.Array.Empty<PrivateStoreBuyRowNet>();
+    }
+
+    public sealed class RecipeBookOpenNetMsg
+    {
+        public int Dwarven { get; set; }
+    }
+
+    public sealed class RecipeMakeSelfNetMsg
+    {
+        public int RecipeId { get; set; }
+    }
+
+    public sealed class RecipeBookListNetMsg
+    {
+        public int Dwarven { get; set; }
+        public int[] RecipeIds { get; set; } = System.Array.Empty<int>();
+    }
+
+    /// <summary>0 = success, 1 = fail (materials lost), 2 = cannot craft (no consume).</summary>
+    public sealed class RecipeItemMakeInfoNetMsg
+    {
+        public int RecipeId { get; set; }
+        public int Result { get; set; }
+        public int CurrentMp { get; set; }
+        public int MaxMp { get; set; }
+    }
+
+    public sealed class RecipeShopRowNet
+    {
+        public int RecipeId { get; set; }
+        public long Price { get; set; }
+    }
+
+    public sealed class SetRecipeShopNetMsg
+    {
+        public string Message { get; set; } = "";
+        public RecipeShopRowNet[] Items { get; set; } = System.Array.Empty<RecipeShopRowNet>();
+    }
+
+    public sealed class RecipeShopMakeInfoNetMsg
+    {
+        public int ManufacturerObjectId { get; set; }
+        public int RecipeId { get; set; }
+    }
+
+    public sealed class RecipeShopMakeItemNetMsg
+    {
+        public int ManufacturerObjectId { get; set; }
+        public int RecipeId { get; set; }
+    }
+
+    public sealed class RecipeShopSellListNetMsg
+    {
+        public int ManufacturerObjectId { get; set; }
+        public int CurrentMp { get; set; }
+        public int MaxMp { get; set; }
+        public long BuyerAdena { get; set; }
+        public RecipeShopRowNet[] Items { get; set; } = System.Array.Empty<RecipeShopRowNet>();
+    }
+
+    public sealed class RecipeShopItemInfoNetMsg
+    {
+        public int ManufacturerObjectId { get; set; }
+        public int RecipeId { get; set; }
+        public int CurrentMp { get; set; }
+        public int MaxMp { get; set; }
+        /// <summary>0 = ok / success, 1 = fail (fee+mats consumed).</summary>
+        public int Result { get; set; }
+    }
+
+    public sealed class FriendInviteNetMsg
+    {
+        public string Name { get; set; } = "";
+    }
+
+    public sealed class FriendAnswerNetMsg
+    {
+        public int Response { get; set; }
+    }
+
+    public sealed class FriendDeleteNetMsg
+    {
+        public string Name { get; set; } = "";
+    }
+
+    public sealed class BlockRequestNetMsg
+    {
+        public int Type { get; set; }
+        public string Name { get; set; } = "";
+    }
+
+    public sealed class FriendInviteAskNetMsg
+    {
+        public string RequestorName { get; set; } = "";
+    }
+
+    public sealed class FriendRowNet
+    {
+        public int ObjectId { get; set; }
+        public string Name { get; set; } = "";
+        public int Online { get; set; }
+    }
+
+    public sealed class FriendListNetMsg
+    {
+        public FriendRowNet[] Friends { get; set; } = System.Array.Empty<FriendRowNet>();
+    }
+
+    /// <summary>Added=1 / removed=0; Online reflects presence when added or on login notify.</summary>
+    public sealed class FriendUpdateNetMsg
+    {
+        public int Added { get; set; }
+        public int ObjectId { get; set; }
+        public string Name { get; set; } = "";
+        public int Online { get; set; }
+    }
+
+    public sealed class BlockListNetMsg
+    {
+        public int BlockAll { get; set; }
+        public FriendRowNet[] Blocked { get; set; } = System.Array.Empty<FriendRowNet>();
+    }
+
     /// <summary>One paperdoll slot (Mobius UserInfo / CharInfo order, 17 slots, right hand = 7). Zeros when empty.</summary>
     public sealed class PaperdollSlotNet
     {

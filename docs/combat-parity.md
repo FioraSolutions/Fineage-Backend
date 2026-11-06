@@ -22,7 +22,7 @@
 5. Magic damage (`calcMagicDam`), M.Atk/M.Def, cast speed from MAtkSpd.
 6. Attack stance/AutoAttackStart/Stop packets and client Attack hit flags (crit/miss/shot) on the Net wire.
 7. Aggressive mob aggro range, social/faction help, hate list with multiple attackers.
-8. PvP/flagging melee (players attacking players).
+8. ~~PvP/flagging melee~~ — `#271` flag on damage, PK/karma or PvP kill on death, persist; peace zones / RelationChanged deferred.
 
 ## Slice 6 — attack-skill damage and timing
 - `data/skill-combat.json` (374 Mobius skills): power/mpConsume/mpInitialConsume per level, hit/cool/reuse, castRange.
@@ -83,12 +83,13 @@
 ## Slice 14 — player LOS on attack / cast; level-gap damage
 - Player melee swing (doAttack) and attack-skill cast (doCast) check the Slice 12 `canSeeTarget` port (geo + closed doors). No LOS → SysMsg 181 "Cannot see target.", attack intention and approach cleared, no swing / no MP or reuse spent. Covers auto-attack ticks and casts fired on arrival.
 - Level-gap damage penalty: Mobius CT_0 Interlude `Formulas` has none for physical/magic damage vs mobs (level gap only enters magic failure and Lethal's magicLvl gate, both modelled, plus debuff land rate, not modelled yet) — nothing to port.
-- Gaps: buffs/support skills don't check LOS; out-of-reach approach doesn't path around a blocking wall before the check (Mobius moveToPawn uses pathfinding).
+- Gaps: buffs/support skills don't check LOS.
+- Approach pathfinding (#273): `ApproachTarget` → `StartTimedMove` uses MoveCheck + `FindPath`; ETA follows remaining path length; sticky repaths when stopped short of reach; approach sync tracks the current geo leg.
 
 ## Slice 15 — skill weapon conditions
 - `scripts/gen_skill_conditions.py` copies plain Mobius `<conditions><using kind=".."/></conditions>` into `skill-combat.json` `usingKinds` (41 skills: DAGGER blows, BOW, DUALFIST, SWORD/BLUNT Power Strike…; 10 compound and/or/not conditions skipped).
 - Attack-skill use checks them with the passive-mastery `Wearing` rules (ConditionUsingItemType); mismatch → SysMsg 113 "<skill> cannot be used due to unsuitable terms.", no cast / MP / reuse.
-- Weapon vulnerabilities (calcWeaponTraitBonus): Mobius derives NPC defence traits from NPC passive skills (no direct npcs.xml field) — not ported; needs NPC passive skill → trait data first.
+- Weapon + race vulnerabilities (`calcAttackTraitBonus`): done — `scripts/gen_npc_weapon_traits.py` folds NPC skillList `DefenceTrait` passives (weapon + type-2 weakness) into `npcs.json` `defenceTraits`; melee / phys skill / blow multiply by `ZoneCombat.AttackTraitBonus` (weapon × Detect Weakness AttackTrait product).
 - Gaps: compound conditions, buff/debuff skill conditions, NPC soulshots.
 
 ## Slice 16 — cast ↔ movement (Mobius CreatureAI.thinkCast / PlayerAI / Player.useMagic)
@@ -101,10 +102,25 @@
 - Open: no cast interruption by damage/stun (Interlude has no move-cancels-cast — the client simply can't move); MagicSkillCanceled on target death/out of range; channeling skills; sit blocked by combat stance (stricter than Mobius sitDown); teleport/gatekeeper doesn't clear queued cast/move; buff hitTime-delayed effect.
 
 ## Still open (PvE priority)
-1. Physical-skill crit/evasion stat mods (CRITICAL_DAMAGE, BLOW_RATE, P_SKILL_EVASION) — small/medium.
-2. Night game clock (GameTimeTaskManager) for the −10% dark bonus — small.
+1. ~~Physical-skill crit/evasion stat mods (CRITICAL_DAMAGE, BLOW_RATE, P_SKILL_EVASION)~~ — done (see below).
+2. ~~Night game clock (GameTimeTaskManager) for the −10% dark bonus~~ — done (`ZoneGameTime`, HitConditionBonus night).
 3. ~~magicLvl in skill-combat.json + mcrit stat mods~~ — done (slice 10 follow-up).
-4. Weapon vulnerabilities (NPC passive traits data), NPC soulshots, NPC blow/magic skills on players — medium.
+4. ~~NPC soulshots~~ — stock + chance on melee (`gen_npc_shots.py`); spiritshots / SS glow / boss materialize still open.
+5. ~~Weapon vulnerabilities (NPC passive traits)~~ — done (#261).
+6. NPC blow/magic skills on players (#259): attack via `gen_npc_ai_skills.py`; HEAL/BUFF/DEBUFF/IMMOBILIZE/silence + clan heal + SUICIDE via `gen_npc_ai_support.py`. Sleep/stun/paralyze block move+skills; root blocks move; silence blocks skills. Suicide = HP&lt;30% + skill chance + aura MagicalAttack then self-die. RES N/A on Interlude NPC skillLists.
+
+## Slice — NPC soulshots (Mobius `Npc.rechargeShots`)
+
+- `npcs.json` carries `soulShot` / `soulShotChance` / `spiritShot` / `spiritShotChance` from Mobius `<param name="SoulShot|…">` (~1355 templates).
+- On NPC melee, `TryNpcSoulshot`: if stock &gt; 0 and `Rnd(100) &lt; chance`, decrement stock and double P.Atk for that swing (Attack soulshot flag).
+- Gaps: no MagicSkillUse 2154 glow fan-out; spiritshots unused until NPC magic cast; raid boss materialize path does not copy shot stock from template.
+
+## Slice — CRITICAL_DAMAGE / BLOW_RATE / P_SKILL_EVASION + IG night
+
+- `CombatStat.CritDmg` / `BlowRate` / `PSkillEvasion` from Mobius `critDmg` / `blowRate` / `pSkillEvas` (buff + passive catalogs regenerated).
+- Melee crit and blow skill-crit damage · `CRITICAL_DAMAGE`; blow success folds `BLOW_RATE` over chance·DEX·side.
+- Physical attack skills (incl. blows): `calcPhysicalSkillEvasion` before damage; non-blow skills with `baseCritRate` roll STR crit ·2 · CritDmg (Mobius `PhysicalAttack`).
+- `ZoneGameTime`: 6 IG days / real day, night while IG hour &lt; 6; wired into `HitConditionBonus(..., night: IsNight)`.
 
 ## Spoil / Sweeper (Mobius CT0 parity)
 
@@ -116,7 +132,7 @@ Rules in `data/spoil.json` + `Fineage.Game.Services.SpoilRules`; applied by `Zon
 | Death | `RollCorpse` spoil list separate from droplist | Unchanged: `data/drops` corpse entries rolled only when spoiled |
 | Corpse time | DefaultCorpseTime 7 s + SpoiledCorpseExtendTime 10 s when spoiled | Same (17 s). **Fixed:** spoiled corpses no longer wait forever; unswept spoil decays with the corpse. |
 | Sweeper 42 | `ConditionPlayerCanSweep`: spoiled (343), spoiler or looter party (683), not old corpse — ≥2 s before decay (1247), slots/weight | Same; bag full 195 / weight 196 |
-| Loot | `takeSweep` → sweeper (party: `distributeItem`) + ConsumeBody | Items to the sweeper, corpse despawned. **Stub:** party loot distribution mode not applied (party mate who sweeps keeps it). |
+| Loot | `takeSweep` → sweeper (party: `distributeItem`) + ConsumeBody | Done (#260): FINDERS_KEEPERS / RANDOM* / BY_TURN* via `PartyLootRules`; spoil respects *INCLUDING_SPOIL; adena split in range. Ground pickup uses the same rules with `spoil=false`. |
 
 Stubs: Spoil Festival 302 / Sweeper Festival 444 (AoE) not wired; spoil success ignores Mobius MEN/level-bonus extras (base `calcMagicSuccess` only). Admin hooks (opcodes 30/31, `FINEAGE_ZONE_ADMIN`) reuse the same core (admin spoil skips the roll and hate).
 

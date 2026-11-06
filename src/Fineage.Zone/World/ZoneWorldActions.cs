@@ -57,6 +57,9 @@ public sealed partial class ZoneWorld
 
         if (player.Sitting)
         {
+            // Mobius: standing up ends a private store.
+            if (player.PrivateStoreType != PrivateStoreProtocol.TypeNone)
+                ClosePrivateStore(player.ObjectId, standUp: false);
             player.Sitting = false;
             FanoutWaitType(player, ActionProtocol.WaitStanding);
         }
