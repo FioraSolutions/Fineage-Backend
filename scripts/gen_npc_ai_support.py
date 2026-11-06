@@ -1,8 +1,9 @@
 #!/usr/bin/env python3
-"""Build data/npc-ai-support.json — Mobius AISkillScope HEAL/BUFF/DEBUFF/IMMOBILIZE/COT.
+"""Build data/npc-ai-support.json — Mobius AISkillScope HEAL/BUFF/DEBUFF/IMMOBILIZE/COT/SUICIDE.
 
 Classifies non-passive skillList rows using Mobius skill XML. Buff/debuff need
 skill-stat-effects.json; immobilize/silence carry abnormalType slots for control.
+Suicide rows carry MagicalAttack power + affectRange (NPC Death Bomb).
 
 Usage: gen_npc_ai_support.py <mobius dist/game/data>
 """
@@ -48,6 +49,7 @@ def parse_skill_meta(skills_dir: pathlib.Path) -> dict[int, dict]:
                 continue
 
             heal = bool(re.search(r'effect name="Heal"', body))
+            suicide = bool(re.search(r'set name="isSuicideAttack" val="true"', body, re.I))
             cont = "abnormalTime" in body
             debuff = bool(re.search(r'set name="isDebuff" val="true"', body, re.I))
             slot_m = re.search(r'set name="abnormalType" val="([^"]+)"', body)
@@ -56,6 +58,11 @@ def parse_skill_meta(skills_dir: pathlib.Path) -> dict[int, dict]:
             amount = (
                 [int(float(x)) for x in amount_m.group(1).split()] if amount_m else None
             )
+            power_m = re.search(r'<table name="#power">(.*?)</table>', body, re.S)
+            power = (
+                [int(float(x)) for x in power_m.group(1).split()] if power_m else None
+            )
+            affect_m = re.search(r'set name="affectRange" val="(\d+)"', body)
             mp_m = re.search(r'<table name="#mpConsume">(.*?)</table>', body, re.S)
             mpi_m = re.search(r'<table name="#mpInitialConsume">(.*?)</table>', body, re.S)
             hit_m = re.search(r'set name="hitTime" val="(\d+)"', body)
@@ -68,7 +75,9 @@ def parse_skill_meta(skills_dir: pathlib.Path) -> dict[int, dict]:
             abn_fixed = re.search(r'set name="abnormalLevel" val="(\d+)"', body)
 
             kind = "other"
-            if heal:
+            if suicide:
+                kind = "suicide"
+            elif heal:
                 kind = "clan_heal" if "Clan" in name else "heal"
             elif slot in IMMOBILIZE_SLOTS:
                 kind = "immobilize"
@@ -84,6 +93,8 @@ def parse_skill_meta(skills_dir: pathlib.Path) -> dict[int, dict]:
                 "name": name,
                 "levels": levels,
                 "amount": amount,
+                "power": power,
+                "affectRange": int(affect_m.group(1)) if affect_m else 0,
                 "slot": slot,
                 "mp": [int(float(x)) for x in mp_m.group(1).split()] if mp_m else None,
                 "mpi": [int(float(x)) for x in mpi_m.group(1).split()] if mpi_m else None,
@@ -112,7 +123,10 @@ def skill_row(sid: int, level: int, info: dict) -> dict:
         "mp": table_at(info.get("mp"), level),
         "mpInitial": table_at(info.get("mpi"), level),
     }
-    if info["kind"] in ("heal", "clan_heal"):
+    if info["kind"] == "suicide":
+        row["power"] = table_at(info.get("power"), level)
+        row["affectRange"] = info.get("affectRange") or 150
+    elif info["kind"] in ("heal", "clan_heal"):
         row["amount"] = table_at(info.get("amount"), level)
     else:
         row["abnormalTimeSeconds"] = info["abnormalTimeSeconds"]
@@ -142,19 +156,25 @@ def main() -> None:
             sl = re.search(r"<skillList>(.*?)</skillList>", body, re.S)
             if not sl:
                 continue
-            heal, buff, debuff, immobilize, silence = [], [], [], [], []
+            heal, buff, debuff, immobilize, silence, suicide = [], [], [], [], [], []
             seen = set()
             for sid_s, lvl_s in re.findall(
                 r'\bid="(\d+)"[^>]*\blevel="(\d+)"', sl.group(1)
             ):
                 sid, level = int(sid_s), int(lvl_s)
-                if sid in seen or sid in COMBAT_IDS:
+                if sid in seen:
                     continue
                 seen.add(sid)
                 info = meta.get(sid)
                 if not info or info["kind"] == "passive":
                     continue
                 kind = info["kind"]
+                # Suicide MagicalAttack rows live in skill-combat too — still SUICIDE scope, not ATTACK.
+                if kind == "suicide" and info.get("power"):
+                    suicide.append(skill_row(sid, level, info))
+                    continue
+                if sid in COMBAT_IDS:
+                    continue
                 if kind in ("heal", "clan_heal") and info.get("amount"):
                     heal.append(skill_row(sid, level, info))
                 elif kind == "buff" and sid in SSE_IDS and info["abnormalTimeSeconds"] > 0:
@@ -165,7 +185,7 @@ def main() -> None:
                     immobilize.append(skill_row(sid, level, info))
                 elif kind == "silence" and info["abnormalTimeSeconds"] > 0:
                     silence.append(skill_row(sid, level, info))
-            if heal or buff or debuff or immobilize or silence:
+            if heal or buff or debuff or immobilize or silence or suicide:
                 row: dict = {"npcId": nid}
                 if heal:
                     row["heal"] = heal
@@ -177,6 +197,8 @@ def main() -> None:
                     row["immobilize"] = immobilize
                 if silence:
                     row["silence"] = silence
+                if suicide:
+                    row["suicide"] = suicide
                 by_npc[nid] = row
 
     catalog_ids = {
@@ -185,7 +207,7 @@ def main() -> None:
     rows = [by_npc[i] for i in sorted(by_npc) if i in catalog_ids]
 
     out = {
-        "reference": "Mobius AISkillScope HEAL/BUFF/DEBUFF/IMMOBILIZE/COT from skillList",
+        "reference": "Mobius AISkillScope HEAL/BUFF/DEBUFF/IMMOBILIZE/COT/SUICIDE from skillList",
         "npcs": rows,
     }
     path = ROOT / "data" / "npc-ai-support.json"
@@ -196,7 +218,8 @@ def main() -> None:
         f"buff={sum(1 for r in rows if r.get('buff'))}, "
         f"debuff={sum(1 for r in rows if r.get('debuff'))}, "
         f"immobilize={sum(1 for r in rows if r.get('immobilize'))}, "
-        f"silence={sum(1 for r in rows if r.get('silence'))})"
+        f"silence={sum(1 for r in rows if r.get('silence'))}, "
+        f"suicide={sum(1 for r in rows if r.get('suicide'))})"
     )
 
 

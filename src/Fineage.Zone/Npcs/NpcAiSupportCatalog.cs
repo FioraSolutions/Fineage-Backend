@@ -2,7 +2,7 @@ using System.Text.Json;
 
 namespace Fineage.Zone.Npcs;
 
-/// <summary>One Mobius AISkillScope support row for NPC AI (heal / buff / debuff / control).</summary>
+/// <summary>One Mobius AISkillScope support row for NPC AI (heal / buff / debuff / control / suicide).</summary>
 public readonly record struct NpcAiSupportSkill(
     int SkillId,
     int Level,
@@ -13,7 +13,9 @@ public readonly record struct NpcAiSupportSkill(
     int Amount = 0,
     int AbnormalTimeSeconds = 0,
     int AbnormalLevel = 0,
-    string Slot = "");
+    string Slot = "",
+    int Power = 0,
+    int AffectRange = 0);
 
 /// <summary>Per-NPC support skill lists from <c>data/npc-ai-support.json</c>.</summary>
 public sealed class NpcAiSupportCatalog
@@ -82,7 +84,8 @@ public sealed class NpcAiSupportCatalog
                 Parse(row.Buff),
                 Parse(row.Debuff),
                 Parse(row.Immobilize),
-                Parse(row.Silence));
+                Parse(row.Silence),
+                Parse(row.Suicide));
         }
         return new NpcAiSupportCatalog(byId);
     }
@@ -106,7 +109,9 @@ public sealed class NpcAiSupportCatalog
                 Math.Max(0, r.Amount),
                 Math.Max(0, r.AbnormalTimeSeconds),
                 Math.Max(0, r.AbnormalLevel),
-                (r.Slot ?? "").Trim()));
+                (r.Slot ?? "").Trim(),
+                Math.Max(0, r.Power),
+                Math.Max(0, r.AffectRange)));
         }
         return list.Count > 0 ? list : null;
     }
@@ -116,7 +121,8 @@ public sealed class NpcAiSupportCatalog
         IReadOnlyList<NpcAiSupportSkill>? Buff,
         IReadOnlyList<NpcAiSupportSkill>? Debuff,
         IReadOnlyList<NpcAiSupportSkill>? Immobilize,
-        IReadOnlyList<NpcAiSupportSkill>? Silence);
+        IReadOnlyList<NpcAiSupportSkill>? Silence,
+        IReadOnlyList<NpcAiSupportSkill>? Suicide);
 
     sealed class FileDto
     {
@@ -131,6 +137,7 @@ public sealed class NpcAiSupportCatalog
         public List<SkillDto>? Debuff { get; set; }
         public List<SkillDto>? Immobilize { get; set; }
         public List<SkillDto>? Silence { get; set; }
+        public List<SkillDto>? Suicide { get; set; }
     }
 
     sealed class SkillDto
@@ -145,5 +152,7 @@ public sealed class NpcAiSupportCatalog
         public int AbnormalTimeSeconds { get; set; }
         public int AbnormalLevel { get; set; }
         public string? Slot { get; set; }
+        public int Power { get; set; }
+        public int AffectRange { get; set; }
     }
 }

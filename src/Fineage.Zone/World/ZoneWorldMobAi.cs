@@ -143,7 +143,9 @@ public sealed partial class ZoneWorld
             }
             if (now < npc.NextMobAttackMs || npc.CastingUntilMs > now)
                 continue;
-            // Mobius thinkAttack: HEAL (self/clan), BUFF, then control/debuff chances, then ATTACK skill chance.
+            // Mobius thinkAttack: SUICIDE (HP&lt;30%), then HEAL/BUFF/control/debuff, then ATTACK skill chance.
+            if (TryNpcSuicideSkill(npc, player, now))
+                continue;
             if (TryNpcHealSkill(npc, now))
                 continue;
             if (TryNpcSelfBuffSkill(npc, now))

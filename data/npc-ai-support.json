@@ -1,5 +1,5 @@
 {
- "reference": "Mobius AISkillScope HEAL/BUFF/DEBUFF/IMMOBILIZE/COT from skillList",
+ "reference": "Mobius AISkillScope HEAL/BUFF/DEBUFF/IMMOBILIZE/COT/SUICIDE from skillList",
  "npcs": [
   {
    "npcId": 13018,
@@ -78,6 +78,36 @@
      "abnormalTimeSeconds": 120,
      "abnormalLevel": 1,
      "slot": "MULTI_DEBUFF"
+    }
+   ]
+  },
+  {
+   "npcId": 14702,
+   "suicide": [
+    {
+     "id": 4139,
+     "level": 6,
+     "hitTimeMs": 6000,
+     "reuseDelayMs": 8000,
+     "mp": 0,
+     "mpInitial": 0,
+     "power": 255,
+     "affectRange": 150
+    }
+   ]
+  },
+  {
+   "npcId": 14703,
+   "suicide": [
+    {
+     "id": 4139,
+     "level": 6,
+     "hitTimeMs": 6000,
+     "reuseDelayMs": 8000,
+     "mp": 0,
+     "mpInitial": 0,
+     "power": 255,
+     "affectRange": 150
     }
    ]
   },
@@ -2569,6 +2599,66 @@
      "mp": 189,
      "mpInitial": 0,
      "amount": 823
+    }
+   ]
+  },
+  {
+   "npcId": 18299,
+   "suicide": [
+    {
+     "id": 4614,
+     "level": 4,
+     "hitTimeMs": 0,
+     "reuseDelayMs": 0,
+     "mp": 57,
+     "mpInitial": 0,
+     "power": 155,
+     "affectRange": 150
+    }
+   ]
+  },
+  {
+   "npcId": 18301,
+   "suicide": [
+    {
+     "id": 4614,
+     "level": 5,
+     "hitTimeMs": 0,
+     "reuseDelayMs": 0,
+     "mp": 74,
+     "mpInitial": 0,
+     "power": 203,
+     "affectRange": 150
+    }
+   ]
+  },
+  {
+   "npcId": 18309,
+   "suicide": [
+    {
+     "id": 4614,
+     "level": 4,
+     "hitTimeMs": 0,
+     "reuseDelayMs": 0,
+     "mp": 57,
+     "mpInitial": 0,
+     "power": 155,
+     "affectRange": 150
+    }
+   ]
+  },
+  {
+   "npcId": 18311,
+   "suicide": [
+    {
+     "id": 4614,
+     "level": 5,
+     "hitTimeMs": 0,
+     "reuseDelayMs": 0,
+     "mp": 74,
+     "mpInitial": 0,
+     "power": 203,
+     "affectRange": 150
     }
    ]
   },
@@ -12110,6 +12200,21 @@
    ]
   },
   {
+   "npcId": 21666,
+   "suicide": [
+    {
+     "id": 4614,
+     "level": 3,
+     "hitTimeMs": 0,
+     "reuseDelayMs": 0,
+     "mp": 42,
+     "mpInitial": 0,
+     "power": 112,
+     "affectRange": 150
+    }
+   ]
+  },
+  {
    "npcId": 21668,
    "immobilize": [
     {
@@ -12185,6 +12290,21 @@
    ]
   },
   {
+   "npcId": 21689,
+   "suicide": [
+    {
+     "id": 4614,
+     "level": 4,
+     "hitTimeMs": 0,
+     "reuseDelayMs": 0,
+     "mp": 57,
+     "mpInitial": 0,
+     "power": 155,
+     "affectRange": 150
+    }
+   ]
+  },
+  {
    "npcId": 21691,
    "immobilize": [
     {
@@ -12256,6 +12376,21 @@
      "abnormalTimeSeconds": 30,
      "abnormalLevel": 1,
      "slot": "SLEEP"
+    }
+   ]
+  },
+  {
+   "npcId": 21712,
+   "suicide": [
+    {
+     "id": 4614,
+     "level": 5,
+     "hitTimeMs": 0,
+     "reuseDelayMs": 0,
+     "mp": 74,
+     "mpInitial": 0,
+     "power": 203,
+     "affectRange": 150
     }
    ]
   },

@@ -169,6 +169,8 @@ sealed class ZoneEntity
     public IReadOnlyList<Fineage.Zone.Npcs.NpcAiSupportSkill>? AiImmobilizeSkills { get; set; }
     /// <summary>Mobius AISkillScope.COT silence.</summary>
     public IReadOnlyList<Fineage.Zone.Npcs.NpcAiSupportSkill>? AiSilenceSkills { get; set; }
+    /// <summary>Mobius AISkillScope.SUICIDE (Death Bomb when HP &lt; 30%).</summary>
+    public IReadOnlyList<Fineage.Zone.Npcs.NpcAiSupportSkill>? AiSuicideSkills { get; set; }
     public int MinSkillChance { get; init; } = 7;
     public int MaxSkillChance { get; init; } = 15;
     /// <summary>Mobius auto soulshot set: shot item ids recharged after each discharge.</summary>

@@ -11,6 +11,106 @@ namespace Fineage.Zone.World;
 public sealed partial class ZoneWorld
 {
     /// <summary>
+    /// Mobius AISkillScope.SUICIDE: when HP &lt; 30%, skill-chance cast Death Bomb (aura MagicalAttack)
+    /// then <c>doDie(self)</c>. Hate target must be inside <c>affectRange</c>.
+    /// </summary>
+    bool TryNpcSuicideSkill(ZoneEntity npc, ZoneEntity player, long now)
+    {
+        if (npc.AiSuicideSkills is not { Count: > 0 } || npc.CastingUntilMs > now || npc.PendingHit != null)
+            return false;
+        if (npc.MaxHp <= 0 || (int)(npc.CurHp * 100d / npc.MaxHp) >= 30)
+            return false;
+
+        int min = Math.Clamp(npc.MinSkillChance, 0, 100);
+        int max = Math.Clamp(Math.Max(min, npc.MaxSkillChance), 0, 100);
+        int threshold = min >= max ? min : min + _combatRandom.Next(max - min + 1);
+        if (_combatRandom.Next(100) >= threshold)
+            return false;
+
+        var ready = ReadySupportSkills(npc, npc.AiSuicideSkills, now);
+        if (ready.Count == 0)
+            return false;
+        var pick = ready[_combatRandom.Next(ready.Count)];
+        int range = pick.AffectRange > 0 ? pick.AffectRange : 150;
+        if (!ZoneCombat.Within(npc.X, npc.Y, player.X, player.Y, range))
+            return false;
+
+        return CastNpcSuicideSkill(npc, player, pick, now);
+    }
+
+    bool CastNpcSuicideSkill(ZoneEntity npc, ZoneEntity hateTarget, NpcAiSupportSkill skill, long now)
+    {
+        npc.CurMp = Math.Max(0, npc.CurMp - skill.MpInitial);
+        int hitTime = Math.Max(0, skill.HitTimeMs);
+        if (skill.ReuseDelayMs > 0)
+            npc.SkillReuseUntilMs[skill.SkillId] = now + skill.ReuseDelayMs;
+
+        npc.Heading = ZoneCombat.HeadingFrom(npc.X, npc.Y, hateTarget.X, hateTarget.Y);
+        FanoutNpcMagicSkillUse(npc, hateTarget, skill.SkillId, skill.Level, hitTime, skill.ReuseDelayMs);
+        npc.CastingUntilMs = now + hitTime;
+        npc.NextMobAttackMs = npc.CastingUntilMs;
+        int range = skill.AffectRange > 0 ? skill.AffectRange : 150;
+        int creditId = hateTarget.ObjectId;
+        ZoneLog.Info(
+            $"[npc-suicide] cast {skill.SkillId} lv{skill.Level} npc={npc.NpcId} power={skill.Power} range={range} hit={hitTime}ms");
+
+        // Pending on self so mid-cast hate-target death still detonates (Mobius activateSkill → doDie).
+        npc.PendingHit = new PendingSkillHit(npc.ObjectId, 0, now + hitTime, null, skill.Level)
+        {
+            SkillId = skill.SkillId,
+            EscapeRange = 0,
+            TargetIsNpc = true,
+            Apply = (Action<ZoneEntity, long>)((_, at) =>
+            {
+                npc.CurMp = Math.Max(0, npc.CurMp - skill.Mp);
+                ApplyNpcSuicideBlast(npc, skill, range, at);
+                ZoneEntity? credit = _byId.TryGetValue(creditId, out var c) && c.Kind == ZoneEntityKind.Player ? c : null;
+                npc.CurHp = 0;
+                RemoveDeadNpc(npc, killer: credit);
+                if (credit != null)
+                    GrantKillReward(credit, npc);
+            })
+        };
+        if (hitTime == 0)
+            ResolveNpcPendingHit(npc, now);
+        return true;
+    }
+
+    void ApplyNpcSuicideBlast(ZoneEntity npc, NpcAiSupportSkill skill, int range, long now)
+    {
+        if (skill.Power <= 0)
+            return;
+        foreach (var target in Players().ToList())
+        {
+            if (target.Dead || target.CurHp <= 0
+                || !SameInstance(npc.ObjectId, target.ObjectId)
+                || !ZoneCombat.Within(npc.X, npc.Y, target.X, target.Y, range))
+                continue;
+
+            var ps = PlayerStats(target);
+            bool spirit = TryNpcSpiritshot(npc);
+            double mAtk = Math.Max(1d, npc.MAtk) * ZoneCombat.SpiritshotMAtkMultiplier(spirit ? 1 : 0);
+            var (damage, _) = ZoneCombat.RollMagicDamage(
+                _combatRandom, mAtk, Math.Max(1d, ps.MDef), skill.Power,
+                npc.Level, magicLevel: npc.Level, target.Level, mCritRate: 10);
+            if (damage <= 0)
+                continue;
+
+            target.CurHp = Math.Max(0, target.CurHp - damage);
+            FanoutVitals(target, PlayerVitalsStatus(target));
+            target.CombatUntilUnixMs = now + ClanProtocol.CombatStanceMillis;
+            if (target.CurHp > 0)
+                MaybeBreakCast(target, damage);
+            if (target.CurHp <= 0)
+            {
+                if (target.Session != null)
+                    target.Session.AutoAttackTargetId = 0;
+                ApplyPlayerDeath(target, npc.ObjectId);
+            }
+        }
+    }
+
+    /// <summary>
     /// Mobius HEAL scope: self-heal when wounded, else heal a wounded same-clan NPC in cast range.
     /// </summary>
     bool TryNpcHealSkill(ZoneEntity npc, long now)
@@ -427,6 +527,15 @@ public sealed partial class ZoneWorld
                 _ => throw new ArgumentOutOfRangeException(nameof(kind))
             };
             return CastNpcSupportSkill(npc, target, skill, k, _clock().ToUnixTimeMilliseconds());
+        }
+    }
+
+    /// <summary>Test hook: force Death Bomb (AoE + self-die) ignoring HP%/chance gates.</summary>
+    internal bool CastNpcSuicideForTest(ZoneEntity npc, ZoneEntity hateTarget, NpcAiSupportSkill skill)
+    {
+        lock (_gate)
+        {
+            return CastNpcSuicideSkill(npc, hateTarget, skill, _clock().ToUnixTimeMilliseconds());
         }
     }
 }

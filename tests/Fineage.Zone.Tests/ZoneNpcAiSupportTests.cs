@@ -124,4 +124,31 @@ public sealed class ZoneNpcAiSupportTests
         Assert.True(kit.World.CastNpcSupportForTest(healer, mate, skill, "heal"));
         Assert.True(mate.CurHp > before);
     }
+
+    [Fact]
+    public void Catalog_loads_flame_suicide()
+    {
+        var row = NpcAiSupportCatalog.LoadDefault().Get(18301);
+        Assert.NotNull(row);
+        Assert.Contains(row!.Value.Suicide!, s =>
+            s.SkillId == 4614 && s.Level == 5 && s.Power == 203 && s.AffectRange == 150);
+    }
+
+    [Fact]
+    public async Task Npc_suicide_damages_player_and_dies()
+    {
+        var kit = new NetTestKit(Fineage.Zone.Spawns.SpawnCatalog.LoadDefault(), "elven_starting");
+        var mob = kit.World.AttackableForTest()!;
+        var (_, player) = await kit.EnterAsync(classId: 54, race: 4, x: mob.X + 10, y: mob.Y, z: mob.Z);
+        var skill = new NpcAiSupportSkill(4614, 5, HitTimeMs: 0, ReuseDelayMs: 0, Mp: 74, MpInitial: 0,
+            Power: 203, AffectRange: 150);
+        mob.AiSuicideSkills = [skill];
+        mob.CurMp = mob.MaxMp;
+        mob.CurHp = Math.Max(1, mob.MaxHp / 5);
+        int playerHp = player.CurHp;
+
+        Assert.True(kit.World.CastNpcSuicideForTest(mob, player, skill));
+        Assert.True(player.CurHp < playerHp);
+        Assert.True(mob.CurHp <= 0);
+    }
 }
