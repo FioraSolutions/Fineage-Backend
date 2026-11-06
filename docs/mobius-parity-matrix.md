@@ -32,7 +32,7 @@ Legend: ✅ done · 🟡 partial · ❌ missing · stub = shell only.
 | 22 | Player trade | Economy | ✅ | |
 | 23 | Private store / craft | Economy | ❌ | |
 | 24 | Enchant | Economy | 🟡 | Backend; client UI partial |
-| 25 | Party invite/leave + exp share | Social | 🟡 | Loot modes incomplete |
+| 25 | Party invite/leave + exp share | Social | 🟡 | Sweep `distributeItem` loot modes done (#260); ground pickup party loot still open |
 | 26 | Clan basic | Social | 🟡 | No crest/war/ally |
 | 27 | Friends / block | Social | ❌ | |
 | 28 | NPC HTML + bypass + teleports + newbie buffs | Content | ✅ | |
@@ -44,8 +44,8 @@ Legend: ✅ done · 🟡 partial · ❌ missing · stub = shell only.
 ## Next backend slices (priority)
 
 1. **NPC magic/blow skills vs players** (finish scopes / heal / buff) — [#259](https://github.com/FioraSolutions/Fineage-Backend/issues/259)
-2. **Party loot modes + sweep distributeItem** — [#260](https://github.com/FioraSolutions/Fineage-Backend/issues/260)
-3. **Player death item drop** — [#258](https://github.com/FioraSolutions/Fineage-Backend/issues/258)
+2. **Player death item drop** — [#258](https://github.com/FioraSolutions/Fineage-Backend/issues/258)
+3. Ground pickup party `distributeItem` (non-spoil) — follow-up to #260.
 4. **Private store** (needs Net + client — coordinate).
 5. **Geodata pathfinding** for approach (medium).
 6. Race / construct weakness traits (`calcAttackTraitBonus` type-2) — follow-up to `#261`.

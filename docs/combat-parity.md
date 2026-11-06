@@ -131,7 +131,7 @@ Rules in `data/spoil.json` + `Fineage.Game.Services.SpoilRules`; applied by `Zon
 | Death | `RollCorpse` spoil list separate from droplist | Unchanged: `data/drops` corpse entries rolled only when spoiled |
 | Corpse time | DefaultCorpseTime 7 s + SpoiledCorpseExtendTime 10 s when spoiled | Same (17 s). **Fixed:** spoiled corpses no longer wait forever; unswept spoil decays with the corpse. |
 | Sweeper 42 | `ConditionPlayerCanSweep`: spoiled (343), spoiler or looter party (683), not old corpse — ≥2 s before decay (1247), slots/weight | Same; bag full 195 / weight 196 |
-| Loot | `takeSweep` → sweeper (party: `distributeItem`) + ConsumeBody | Items to the sweeper, corpse despawned. **Stub:** party loot distribution mode not applied (party mate who sweeps keeps it). |
+| Loot | `takeSweep` → sweeper (party: `distributeItem`) + ConsumeBody | Done (#260): FINDERS_KEEPERS / RANDOM* / BY_TURN* via `PartyLootRules`; spoil respects *INCLUDING_SPOIL; adena split in range. |
 
 Stubs: Spoil Festival 302 / Sweeper Festival 444 (AoE) not wired; spoil success ignores Mobius MEN/level-bonus extras (base `calcMagicSuccess` only). Admin hooks (opcodes 30/31, `FINEAGE_ZONE_ADMIN`) reuse the same core (admin spoil skips the roll and hate).
 
