@@ -3,7 +3,18 @@
   "name": "Grim Collector",
   "repeatable": true,
   "abortable": true,
-  "questItems": [],
+  "questItems": [
+    1349,
+    1350,
+    1351,
+    1352,
+    1353,
+    1354,
+    1355,
+    1356,
+    1357,
+    1358
+  ],
   "dialogs": [
     {
       "npcId": 30336,
@@ -12,9 +23,19 @@
       "htmlFile": "30336-talk-000.htm"
     },
     {
+      "npcId": 30342,
+      "hook": "talk",
+      "when": "absent",
+      "hasItem": 1349,
+      "htmlFile": "30342-talk-001.htm"
+    },
+    {
       "npcId": 30434,
       "hook": "talk",
       "when": "absent",
+      "lacksItems": [
+        1349
+      ],
       "htmlFile": "30434-talk-002.htm"
     },
     {
@@ -27,6 +48,9 @@
       "npcId": 30434,
       "hook": "talk",
       "when": "absent",
+      "lacksItems": [
+        1358
+      ],
       "htmlFile": "30434-talk-004.htm"
     },
     {
@@ -53,6 +77,13 @@
       "hook": "event",
       "when": "absent",
       "event": "assembleSkeleton",
+      "lacksItems": [
+        1355,
+        1356,
+        1353,
+        1354,
+        1357
+      ],
       "htmlFile": "30336-event-assembleSkeleton-006.htm"
     },
     {
@@ -60,6 +91,13 @@
       "hook": "event",
       "when": "absent",
       "event": "assembleSkeleton",
+      "ops": [
+        {
+          "op": "give_item",
+          "itemId": 1358,
+          "count": 1
+        }
+      ],
       "htmlFile": "30336-event-assembleSkeleton-007.htm"
     },
     {
@@ -74,6 +112,13 @@
       "hook": "event",
       "when": "absent",
       "event": "30434-03",
+      "ops": [
+        {
+          "op": "give_item",
+          "itemId": 1349,
+          "count": 1
+        }
+      ],
       "htmlFile": "30336-event-30434-03-009.htm"
     },
     {
@@ -119,6 +164,13 @@
       "hook": "event",
       "when": "absent",
       "event": "30434-09",
+      "ops": [
+        {
+          "op": "take_item",
+          "itemId": 1358,
+          "count": 1
+        }
+      ],
       "htmlFile": "30336-event-30434-09-014.htm"
     }
   ]

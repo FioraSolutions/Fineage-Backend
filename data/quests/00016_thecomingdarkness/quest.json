@@ -3,7 +3,9 @@
   "name": "TheComingDarkness",
   "repeatable": false,
   "abortable": true,
-  "questItems": [],
+  "questItems": [
+    7167
+  ],
   "dialogs": [
     {
       "npcId": 31517,
@@ -46,11 +48,91 @@
           "op": "start"
         },
         {
+          "op": "give_item",
+          "itemId": 7167,
+          "count": 5
+        },
+        {
           "op": "set_cond",
           "cond": 1
         }
       ],
       "htmlFile": "31517-event-31517-02-003.htm"
+    },
+    {
+      "npcId": 31517,
+      "hook": "event",
+      "when": "absent",
+      "event": "31512-01",
+      "hasItem": 7167,
+      "ops": [
+        {
+          "op": "take_item",
+          "itemId": 7167,
+          "count": 1
+        }
+      ],
+      "htmlFile": "31517-event-31512-01-004.htm"
+    },
+    {
+      "npcId": 31517,
+      "hook": "event",
+      "when": "absent",
+      "event": "31513-01",
+      "hasItem": 7167,
+      "ops": [
+        {
+          "op": "take_item",
+          "itemId": 7167,
+          "count": 1
+        }
+      ],
+      "htmlFile": "31517-event-31513-01-005.htm"
+    },
+    {
+      "npcId": 31517,
+      "hook": "event",
+      "when": "absent",
+      "event": "31514-01",
+      "hasItem": 7167,
+      "ops": [
+        {
+          "op": "take_item",
+          "itemId": 7167,
+          "count": 1
+        }
+      ],
+      "htmlFile": "31517-event-31514-01-006.htm"
+    },
+    {
+      "npcId": 31517,
+      "hook": "event",
+      "when": "absent",
+      "event": "31515-01",
+      "hasItem": 7167,
+      "ops": [
+        {
+          "op": "take_item",
+          "itemId": 7167,
+          "count": 1
+        }
+      ],
+      "htmlFile": "31517-event-31515-01-007.htm"
+    },
+    {
+      "npcId": 31517,
+      "hook": "event",
+      "when": "absent",
+      "event": "31516-01",
+      "hasItem": 7167,
+      "ops": [
+        {
+          "op": "take_item",
+          "itemId": 7167,
+          "count": 1
+        }
+      ],
+      "htmlFile": "31517-event-31516-01-008.htm"
     }
   ]
 }

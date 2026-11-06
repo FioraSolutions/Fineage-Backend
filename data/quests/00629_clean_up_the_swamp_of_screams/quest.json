@@ -3,7 +3,10 @@
   "name": "Clean Up The Swamp Of Screams",
   "repeatable": true,
   "abortable": true,
-  "questItems": [],
+  "questItems": [
+    7250,
+    7251
+  ],
   "dialogs": [
     {
       "npcId": 31553,
@@ -49,6 +52,18 @@
       "hook": "event",
       "when": "absent",
       "event": "31553-07",
+      "ops": [
+        {
+          "op": "take_item",
+          "itemId": 7250,
+          "count": 100
+        },
+        {
+          "op": "give_item",
+          "itemId": 7251,
+          "count": 20
+        }
+      ],
       "htmlFile": "31553-event-31553-07-003.htm"
     },
     {

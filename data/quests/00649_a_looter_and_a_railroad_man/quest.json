@@ -3,7 +3,9 @@
   "name": "A Looter And A Railroad Man",
   "repeatable": true,
   "abortable": true,
-  "questItems": [],
+  "questItems": [
+    8099
+  ],
   "dialogs": [
     {
       "npcId": 32052,
@@ -47,6 +49,23 @@
         }
       ],
       "htmlFile": "32052-event-32052-03-004.htm"
+    },
+    {
+      "npcId": 32052,
+      "hook": "event",
+      "when": "absent",
+      "event": "32052-06",
+      "hasItem": 8099,
+      "ops": [
+        {
+          "op": "give_adena",
+          "count": 21698
+        },
+        {
+          "op": "complete"
+        }
+      ],
+      "htmlFile": "32052-event-32052-06-005.htm"
     }
   ]
 }

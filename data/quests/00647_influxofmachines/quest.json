@@ -3,7 +3,9 @@
   "name": "InfluxOfMachines",
   "repeatable": true,
   "abortable": true,
-  "questItems": [],
+  "questItems": [
+    8100
+  ],
   "dialogs": [
     {
       "npcId": 32069,

@@ -3,7 +3,14 @@
   "name": "KamaelAWindowToTheFuture",
   "repeatable": false,
   "abortable": true,
-  "questItems": [],
+  "questItems": [
+    8939,
+    8940,
+    8941,
+    8942,
+    8943,
+    8944
+  ],
   "dialogs": [
     {
       "npcId": 31350,
@@ -70,6 +77,13 @@
       "hook": "event",
       "when": "absent",
       "event": "31350-04",
+      "ops": [
+        {
+          "op": "give_item",
+          "itemId": 8939,
+          "count": 1
+        }
+      ],
       "htmlFile": "31350-event-31350-04-010.htm"
     },
     {
@@ -78,6 +92,36 @@
       "when": "absent",
       "event": "31350-06",
       "ops": [
+        {
+          "op": "take_item",
+          "itemId": 8940,
+          "count": 1
+        },
+        {
+          "op": "take_item",
+          "itemId": 8941,
+          "count": 1
+        },
+        {
+          "op": "take_item",
+          "itemId": 8942,
+          "count": 1
+        },
+        {
+          "op": "take_item",
+          "itemId": 8943,
+          "count": 1
+        },
+        {
+          "op": "take_item",
+          "itemId": 8944,
+          "count": 1
+        },
+        {
+          "op": "take_item",
+          "itemId": 8939,
+          "count": 1
+        },
         {
           "op": "give_adena",
           "count": 159100
@@ -97,6 +141,13 @@
       "hook": "event",
       "when": "absent",
       "event": "30187-08",
+      "ops": [
+        {
+          "op": "give_item",
+          "itemId": 8940,
+          "count": 1
+        }
+      ],
       "htmlFile": "31350-event-30187-08-013.htm"
     },
     {
@@ -104,6 +155,13 @@
       "hook": "event",
       "when": "absent",
       "event": "32092-05",
+      "ops": [
+        {
+          "op": "give_item",
+          "itemId": 8941,
+          "count": 1
+        }
+      ],
       "htmlFile": "31350-event-32092-05-014.htm"
     },
     {
@@ -111,6 +169,13 @@
       "hook": "event",
       "when": "absent",
       "event": "31288-04",
+      "ops": [
+        {
+          "op": "give_item",
+          "itemId": 8944,
+          "count": 1
+        }
+      ],
       "htmlFile": "31350-event-31288-04-015.htm"
     },
     {
@@ -118,6 +183,13 @@
       "hook": "event",
       "when": "absent",
       "event": "30862-04",
+      "ops": [
+        {
+          "op": "give_item",
+          "itemId": 8943,
+          "count": 1
+        }
+      ],
       "htmlFile": "31350-event-30862-04-016.htm"
     },
     {
@@ -125,6 +197,13 @@
       "hook": "event",
       "when": "absent",
       "event": "30113-04",
+      "ops": [
+        {
+          "op": "give_item",
+          "itemId": 8942,
+          "count": 1
+        }
+      ],
       "htmlFile": "31350-event-30113-04-017.htm"
     },
     {

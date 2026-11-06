@@ -3,7 +3,10 @@
   "name": "Necromancer's Request",
   "repeatable": true,
   "abortable": true,
-  "questItems": [],
+  "questItems": [
+    7542,
+    7543
+  ],
   "dialogs": [
     {
       "npcId": 31522,
@@ -31,6 +34,11 @@
           "op": "start"
         },
         {
+          "op": "set",
+          "key": "memoState",
+          "value": "11"
+        },
+        {
           "op": "set_cond",
           "cond": 1
         }
@@ -51,6 +59,16 @@
       "event": "31522-202",
       "ops": [
         {
+          "op": "take_item",
+          "itemId": 7542,
+          "count": 1
+        },
+        {
+          "op": "set",
+          "key": "memoState",
+          "value": "11"
+        },
+        {
           "op": "give_adena",
           "count": 120000
         }
@@ -63,6 +81,11 @@
       "when": "absent",
       "event": "31522-204",
       "ops": [
+        {
+          "op": "take_item",
+          "itemId": 7542,
+          "count": 1
+        },
         {
           "op": "complete"
         }

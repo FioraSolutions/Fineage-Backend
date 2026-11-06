@@ -3,7 +3,9 @@
   "name": "InSearchOfTheNest",
   "repeatable": false,
   "abortable": true,
-  "questItems": [],
+  "questItems": [
+    8083
+  ],
   "dialogs": [
     {
       "npcId": 31553,
@@ -60,6 +62,13 @@
       "hook": "event",
       "when": "absent",
       "event": "32015-02",
+      "ops": [
+        {
+          "op": "give_item",
+          "itemId": 8083,
+          "count": 1
+        }
+      ],
       "htmlFile": "31553-event-32015-02-008.htm"
     },
     {
@@ -67,6 +76,13 @@
       "hook": "event",
       "when": "absent",
       "event": "31553-03",
+      "ops": [
+        {
+          "op": "take_item",
+          "itemId": 8083,
+          "count": 1
+        }
+      ],
       "htmlFile": "31553-event-31553-03-009.htm"
     },
     {

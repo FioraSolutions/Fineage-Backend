@@ -3,7 +3,9 @@
   "name": "GatherTheFlames",
   "repeatable": true,
   "abortable": true,
-  "questItems": [],
+  "questItems": [
+    7264
+  ],
   "dialogs": [
     {
       "npcId": 31539,

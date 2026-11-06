@@ -3,7 +3,13 @@
   "name": "AClansFame",
   "repeatable": true,
   "abortable": true,
-  "questItems": [],
+  "questItems": [
+    8489,
+    8490,
+    8491,
+    8492,
+    8493
+  ],
   "dialogs": [
     {
       "npcId": 31331,

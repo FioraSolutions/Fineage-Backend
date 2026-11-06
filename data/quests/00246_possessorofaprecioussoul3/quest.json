@@ -10,6 +10,14 @@
       "hook": "talk",
       "when": "absent",
       "maxLevel": 64,
+      "hasItem": 7678,
+      "htmlFile": "31740-talk-000.htm"
+    },
+    {
+      "npcId": 31740,
+      "hook": "talk",
+      "when": "absent",
+      "maxLevel": 64,
       "htmlFile": "31740-talk-001.htm"
     },
     {
@@ -37,6 +45,10 @@
       "hook": "talk",
       "when": "started",
       "cond": 3,
+      "hasItems": [
+        7591,
+        7592
+      ],
       "htmlFile": "31741-talk-c3-005.htm"
     },
     {
@@ -50,8 +62,23 @@
       "npcId": 31741,
       "hook": "talk",
       "when": "started",
+      "cond": 5,
+      "hasItem": 7593,
+      "htmlFile": "31741-talk-c5-007.htm"
+    },
+    {
+      "npcId": 31741,
+      "hook": "talk",
+      "when": "started",
       "cond": 6,
       "htmlFile": "31741-talk-c6-008.htm"
+    },
+    {
+      "npcId": 30721,
+      "hook": "talk",
+      "when": "started",
+      "hasItem": 7594,
+      "htmlFile": "30721-talk-009.htm"
     }
   ]
 }

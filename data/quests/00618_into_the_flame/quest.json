@@ -3,7 +3,10 @@
   "name": "Into The Flame",
   "repeatable": true,
   "abortable": true,
-  "questItems": [],
+  "questItems": [
+    7265,
+    7266
+  ],
   "dialogs": [
     {
       "npcId": 31540,
@@ -71,6 +74,9 @@
       "hook": "event",
       "when": "absent",
       "event": "31540-05",
+      "lacksItems": [
+        7266
+      ],
       "htmlFile": "31540-event-31540-05-007.htm"
     },
     {
@@ -92,6 +98,16 @@
       "when": "absent",
       "event": "31271-05",
       "ops": [
+        {
+          "op": "take_item",
+          "itemId": 7265,
+          "count": 1
+        },
+        {
+          "op": "give_item",
+          "itemId": 7266,
+          "count": 1
+        },
         {
           "op": "set_cond",
           "cond": 4

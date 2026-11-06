@@ -3,7 +3,9 @@
   "name": "Illegitimate Child of the Goddess",
   "repeatable": true,
   "abortable": true,
-  "questItems": [],
+  "questItems": [
+    5868
+  ],
   "dialogs": [
     {
       "npcId": 30862,

@@ -3,7 +3,9 @@
   "name": "Make a Sewing Kit",
   "repeatable": false,
   "abortable": true,
-  "questItems": [],
+  "questItems": [
+    7163
+  ],
   "dialogs": [
     {
       "npcId": 30847,
@@ -80,6 +82,11 @@
           "op": "take_item",
           "itemId": 1893,
           "count": 10
+        },
+        {
+          "op": "give_item",
+          "itemId": 7078,
+          "count": 1
         },
         {
           "op": "complete"

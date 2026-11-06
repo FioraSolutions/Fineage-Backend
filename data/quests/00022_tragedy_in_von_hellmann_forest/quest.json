@@ -3,7 +3,14 @@
   "name": "Tragedy in Von Hellmann Forest",
   "repeatable": false,
   "abortable": true,
-  "questItems": [],
+  "questItems": [
+    7141,
+    7142,
+    7144,
+    7145,
+    7146,
+    7147
+  ],
   "dialogs": [
     {
       "npcId": 31334,
@@ -31,6 +38,28 @@
       "hook": "talk",
       "when": "started",
       "cond": 4,
+      "hasItem": 7141,
+      "lacksItems": [
+        7142
+      ],
+      "htmlFile": "31334-talk-c4-003.htm"
+    },
+    {
+      "npcId": 31334,
+      "hook": "talk",
+      "when": "started",
+      "cond": 4,
+      "hasItem": 7141,
+      "htmlFile": "31334-talk-c4-004.htm"
+    },
+    {
+      "npcId": 31334,
+      "hook": "talk",
+      "when": "started",
+      "cond": 4,
+      "lacksItems": [
+        7142
+      ],
       "htmlFile": "31334-talk-c4-005.htm"
     },
     {
@@ -45,6 +74,28 @@
       "hook": "talk",
       "when": "started",
       "cond": 5,
+      "hasItem": 7141,
+      "lacksItems": [
+        7142
+      ],
+      "htmlFile": "31334-talk-c5-007.htm"
+    },
+    {
+      "npcId": 31334,
+      "hook": "talk",
+      "when": "started",
+      "cond": 5,
+      "hasItem": 7141,
+      "htmlFile": "31334-talk-c5-008.htm"
+    },
+    {
+      "npcId": 31334,
+      "hook": "talk",
+      "when": "started",
+      "cond": 5,
+      "lacksItems": [
+        7142
+      ],
       "htmlFile": "31334-talk-c5-009.htm"
     },
     {
@@ -53,6 +104,22 @@
       "when": "started",
       "cond": 5,
       "htmlFile": "31334-talk-c5-010.htm"
+    },
+    {
+      "npcId": 31334,
+      "hook": "talk",
+      "when": "started",
+      "cond": 6,
+      "hasItem": 7141,
+      "htmlFile": "31334-talk-c6-011.htm"
+    },
+    {
+      "npcId": 31334,
+      "hook": "talk",
+      "when": "started",
+      "cond": 6,
+      "hasItem": 7141,
+      "htmlFile": "31334-talk-c6-012.htm"
     },
     {
       "npcId": 31334,
@@ -73,6 +140,22 @@
       "hook": "talk",
       "when": "started",
       "cond": 7,
+      "hasItem": 7141,
+      "htmlFile": "31334-talk-c7-015.htm"
+    },
+    {
+      "npcId": 31334,
+      "hook": "talk",
+      "when": "started",
+      "cond": 7,
+      "hasItem": 7141,
+      "htmlFile": "31334-talk-c7-016.htm"
+    },
+    {
+      "npcId": 31334,
+      "hook": "talk",
+      "when": "started",
+      "cond": 7,
       "htmlFile": "31334-talk-c7-017.htm"
     },
     {
@@ -81,6 +164,14 @@
       "when": "started",
       "cond": 7,
       "htmlFile": "31334-talk-c7-018.htm"
+    },
+    {
+      "npcId": 31334,
+      "hook": "talk",
+      "when": "started",
+      "cond": 8,
+      "hasItem": 7141,
+      "htmlFile": "31334-talk-c8-019.htm"
     },
     {
       "npcId": 31528,
@@ -93,7 +184,15 @@
       "hook": "talk",
       "when": "started",
       "cond": 2,
+      "lacksItems": [
+        7141
+      ],
       "ops": [
+        {
+          "op": "give_item",
+          "itemId": 7141,
+          "count": 1
+        },
         {
           "op": "set_cond",
           "cond": 3
@@ -105,8 +204,32 @@
       "npcId": 31328,
       "hook": "talk",
       "when": "started",
+      "cond": 3,
+      "hasItem": 7141,
+      "htmlFile": "31328-talk-c3-022.htm"
+    },
+    {
+      "npcId": 31328,
+      "hook": "talk",
+      "when": "started",
+      "cond": 8,
+      "hasItem": 7141,
+      "htmlFile": "31328-talk-c8-023.htm"
+    },
+    {
+      "npcId": 31328,
+      "hook": "talk",
+      "when": "started",
       "cond": 9,
       "htmlFile": "31328-talk-c9-024.htm"
+    },
+    {
+      "npcId": 31328,
+      "hook": "talk",
+      "when": "started",
+      "cond": 14,
+      "hasItem": 7147,
+      "htmlFile": "31328-talk-c14-025.htm"
     },
     {
       "npcId": 31328,
@@ -122,6 +245,36 @@
       "cond": 16,
       "minLevel": 63,
       "htmlFile": "31328-talk-c16-027.htm"
+    },
+    {
+      "npcId": 31527,
+      "hook": "talk",
+      "when": "started",
+      "cond": 10,
+      "hasItem": 7144,
+      "htmlFile": "31527-talk-c10-028.htm"
+    },
+    {
+      "npcId": 31527,
+      "hook": "talk",
+      "when": "started",
+      "cond": 12,
+      "hasItem": 7145,
+      "lacksItems": [
+        7146
+      ],
+      "ops": [
+        {
+          "op": "give_item",
+          "itemId": 7146,
+          "count": 1
+        },
+        {
+          "op": "set_cond",
+          "cond": 13
+        }
+      ],
+      "htmlFile": "31527-talk-c12-029.htm"
     },
     {
       "npcId": 31527,
@@ -156,6 +309,8 @@
       "hook": "talk",
       "when": "started",
       "cond": 9,
+      "whenVar": "memoState",
+      "whenValue": "0",
       "htmlFile": "31529-talk-c9-034.htm"
     },
     {
@@ -163,6 +318,8 @@
       "hook": "talk",
       "when": "started",
       "cond": 9,
+      "whenVar": "memoState",
+      "whenValue": "8",
       "htmlFile": "31529-talk-c9-035.htm"
     },
     {
@@ -170,7 +327,25 @@
       "hook": "talk",
       "when": "started",
       "cond": 9,
+      "whenVar": "memoState",
+      "whenValue": "9",
       "htmlFile": "31529-talk-c9-036.htm"
+    },
+    {
+      "npcId": 31529,
+      "hook": "talk",
+      "when": "started",
+      "cond": 10,
+      "hasItem": 7144,
+      "htmlFile": "31529-talk-c10-037.htm"
+    },
+    {
+      "npcId": 31529,
+      "hook": "talk",
+      "when": "started",
+      "cond": 10,
+      "hasItem": 7144,
+      "htmlFile": "31529-talk-c10-038.htm"
     },
     {
       "npcId": 31529,
@@ -190,14 +365,58 @@
       "npcId": 31529,
       "hook": "talk",
       "when": "started",
-      "cond": 13,
+      "cond": 11,
+      "hasItem": 7145,
+      "lacksItems": [
+        7146
+      ],
       "ops": [
+        {
+          "op": "set_cond",
+          "cond": 12
+        }
+      ],
+      "htmlFile": "31529-talk-c11-041.htm"
+    },
+    {
+      "npcId": 31529,
+      "hook": "talk",
+      "when": "started",
+      "cond": 13,
+      "hasItems": [
+        7145,
+        7146
+      ],
+      "ops": [
+        {
+          "op": "take_item",
+          "itemId": 7146,
+          "count": 1
+        },
+        {
+          "op": "take_item",
+          "itemId": 7145,
+          "count": 1
+        },
+        {
+          "op": "give_item",
+          "itemId": 7147,
+          "count": 1
+        },
         {
           "op": "set_cond",
           "cond": 14
         }
       ],
       "htmlFile": "31529-talk-c13-042.htm"
+    },
+    {
+      "npcId": 31529,
+      "hook": "talk",
+      "when": "started",
+      "cond": 14,
+      "hasItem": 7147,
+      "htmlFile": "31529-talk-c14-043.htm"
     },
     {
       "npcId": 31334,
@@ -398,6 +617,14 @@
       "npcId": 31334,
       "hook": "event",
       "when": "absent",
+      "event": "31334-06",
+      "hasItem": 7141,
+      "htmlFile": "31334-event-31334-06-070.htm"
+    },
+    {
+      "npcId": 31334,
+      "hook": "event",
+      "when": "absent",
       "event": "31334-08",
       "ops": [
         {
@@ -412,13 +639,41 @@
       "hook": "event",
       "when": "absent",
       "event": "31334-13",
+      "hasItems": [
+        7141,
+        7142
+      ],
       "ops": [
+        {
+          "op": "take_item",
+          "itemId": 7142,
+          "count": 1
+        },
         {
           "op": "set_cond",
           "cond": 7
         }
       ],
       "htmlFile": "31334-event-31334-13-072.htm"
+    },
+    {
+      "npcId": 31334,
+      "hook": "event",
+      "when": "absent",
+      "event": "31334-13",
+      "hasItem": 7142,
+      "ops": [
+        {
+          "op": "take_item",
+          "itemId": 7142,
+          "count": 1
+        },
+        {
+          "op": "set_cond",
+          "cond": 7
+        }
+      ],
+      "htmlFile": "31334-event-31334-13-073.htm"
     },
     {
       "npcId": 31334,
@@ -445,6 +700,13 @@
       "hook": "event",
       "when": "absent",
       "event": "31328-03",
+      "ops": [
+        {
+          "op": "take_item",
+          "itemId": 7141,
+          "count": 1
+        }
+      ],
       "htmlFile": "31334-event-31328-03-076.htm"
     },
     {
@@ -454,11 +716,35 @@
       "event": "31328-09",
       "ops": [
         {
+          "op": "give_item",
+          "itemId": 7143,
+          "count": 1
+        },
+        {
           "op": "set_cond",
           "cond": 9
         }
       ],
       "htmlFile": "31334-event-31328-09-077.htm"
+    },
+    {
+      "npcId": 31334,
+      "hook": "event",
+      "when": "absent",
+      "event": "31328-11",
+      "hasItem": 7147,
+      "ops": [
+        {
+          "op": "take_item",
+          "itemId": 7147,
+          "count": 1
+        },
+        {
+          "op": "set_cond",
+          "cond": 15
+        }
+      ],
+      "htmlFile": "31334-event-31328-11-078.htm"
     },
     {
       "npcId": 31334,
@@ -490,7 +776,29 @@
       "npcId": 31334,
       "hook": "event",
       "when": "absent",
+      "event": "31529-03",
+      "hasItem": 7143,
+      "ops": [
+        {
+          "op": "set",
+          "key": "memoState",
+          "value": "8"
+        }
+      ],
+      "htmlFile": "31334-event-31529-03-081.htm"
+    },
+    {
+      "npcId": 31334,
+      "hook": "event",
+      "when": "absent",
       "event": "31529-08",
+      "ops": [
+        {
+          "op": "set",
+          "key": "memoState",
+          "value": "9"
+        }
+      ],
       "htmlFile": "31334-event-31529-08-082.htm"
     },
     {
@@ -499,6 +807,16 @@
       "when": "absent",
       "event": "31529-11",
       "ops": [
+        {
+          "op": "give_item",
+          "itemId": 7144,
+          "count": 1
+        },
+        {
+          "op": "set",
+          "key": "memoState",
+          "value": "10"
+        },
         {
           "op": "set_cond",
           "cond": 10

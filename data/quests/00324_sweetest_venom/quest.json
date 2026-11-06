@@ -3,7 +3,9 @@
   "name": "Sweetest Venom",
   "repeatable": true,
   "abortable": true,
-  "questItems": [],
+  "questItems": [
+    1077
+  ],
   "dialogs": [
     {
       "npcId": 30351,

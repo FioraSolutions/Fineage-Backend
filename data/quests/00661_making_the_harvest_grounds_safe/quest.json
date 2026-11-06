@@ -3,7 +3,11 @@
   "name": "Making the Harvest Grounds Safe",
   "repeatable": true,
   "abortable": true,
-  "questItems": [],
+  "questItems": [
+    8283,
+    8284,
+    8285
+  ],
   "dialogs": [
     {
       "npcId": 30210,
@@ -21,6 +25,11 @@
       "npcId": 30210,
       "hook": "talk",
       "when": "started",
+      "hasItems": [
+        8283,
+        8284,
+        8285
+      ],
       "htmlFile": "30210-talk-002.htm"
     },
     {

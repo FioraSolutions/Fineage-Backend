@@ -3,7 +3,9 @@
   "name": "GoToThePastureland",
   "repeatable": false,
   "abortable": true,
-  "questItems": [],
+  "questItems": [
+    7547
+  ],
   "dialogs": [
     {
       "npcId": 31302,

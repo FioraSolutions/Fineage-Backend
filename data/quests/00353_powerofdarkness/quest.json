@@ -3,7 +3,9 @@
   "name": "PowerOfDarkness",
   "repeatable": true,
   "abortable": true,
-  "questItems": [],
+  "questItems": [
+    5862
+  ],
   "dialogs": [
     {
       "npcId": 31044,

@@ -3,7 +3,9 @@
   "name": "WhereaboutsOfTheArchaeologist",
   "repeatable": false,
   "abortable": true,
-  "questItems": [],
+  "questItems": [
+    7253
+  ],
   "dialogs": [
     {
       "npcId": 31263,
@@ -44,11 +46,38 @@
           "op": "start"
         },
         {
+          "op": "give_item",
+          "itemId": 7253,
+          "count": 1
+        },
+        {
           "op": "set_cond",
           "cond": 1
         }
       ],
       "htmlFile": "31263-event-31263-02-004.htm"
+    },
+    {
+      "npcId": 31263,
+      "hook": "event",
+      "when": "absent",
+      "event": "31538-01",
+      "hasItem": 7253,
+      "ops": [
+        {
+          "op": "give_adena",
+          "count": 136928
+        },
+        {
+          "op": "give_exp_sp",
+          "exp": 325881,
+          "sp": 32524
+        },
+        {
+          "op": "complete"
+        }
+      ],
+      "htmlFile": "31263-event-31538-01-005.htm"
     }
   ]
 }

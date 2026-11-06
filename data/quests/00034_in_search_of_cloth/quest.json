@@ -3,7 +3,10 @@
   "name": "In Search of Cloth",
   "repeatable": false,
   "abortable": true,
-  "questItems": [],
+  "questItems": [
+    7161,
+    7528
+  ],
   "dialogs": [
     {
       "npcId": 30088,
@@ -158,6 +161,39 @@
       "when": "absent",
       "event": "30165-05",
       "htmlFile": "30088-event-30165-05-017.htm"
+    },
+    {
+      "npcId": 30088,
+      "hook": "event",
+      "when": "absent",
+      "event": "30088-10",
+      "hasItem": 7161,
+      "ops": [
+        {
+          "op": "take_item",
+          "itemId": 7161,
+          "count": 1
+        },
+        {
+          "op": "take_item",
+          "itemId": 1866,
+          "count": 3000
+        },
+        {
+          "op": "take_item",
+          "itemId": 1868,
+          "count": 5000
+        },
+        {
+          "op": "give_item",
+          "itemId": 7076,
+          "count": 1
+        },
+        {
+          "op": "complete"
+        }
+      ],
+      "htmlFile": "30088-event-30088-10-018.htm"
     }
   ]
 }

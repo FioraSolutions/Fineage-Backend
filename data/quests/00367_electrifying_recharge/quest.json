@@ -3,7 +3,14 @@
   "name": "Electrifying Recharge!",
   "repeatable": true,
   "abortable": true,
-  "questItems": [],
+  "questItems": [
+    5875,
+    5876,
+    5877,
+    5878,
+    5879,
+    5880
+  ],
   "dialogs": [
     {
       "npcId": 30673,
@@ -22,6 +29,11 @@
         },
         {
           "op": "start"
+        },
+        {
+          "op": "give_item",
+          "itemId": 5875,
+          "count": 1
         },
         {
           "op": "set_cond",

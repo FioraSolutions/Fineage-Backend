@@ -3,7 +3,12 @@
   "name": "The Name of Evil - 1",
   "repeatable": false,
   "abortable": true,
-  "questItems": [],
+  "questItems": [
+    8779,
+    8780,
+    8781,
+    8782
+  ],
   "dialogs": [
     {
       "npcId": 32114,
@@ -62,6 +67,24 @@
       "htmlFile": "32114-talk-c7-007.htm"
     },
     {
+      "npcId": 32114,
+      "hook": "talk",
+      "when": "started",
+      "cond": 8,
+      "hasItem": 8781,
+      "ops": [
+        {
+          "op": "give_exp_sp",
+          "exp": 859195,
+          "sp": 86603
+        },
+        {
+          "op": "complete"
+        }
+      ],
+      "htmlFile": "32114-talk-c8-008.htm"
+    },
+    {
       "npcId": 32117,
       "hook": "talk",
       "when": "started",
@@ -87,6 +110,18 @@
       "hook": "talk",
       "when": "started",
       "cond": 4,
+      "ops": [
+        {
+          "op": "take_item",
+          "itemId": 8779,
+          "count": 1
+        },
+        {
+          "op": "take_item",
+          "itemId": 8780,
+          "count": 1
+        }
+      ],
       "htmlFile": "32117-talk-c4-012.htm"
     },
     {
@@ -304,6 +339,11 @@
       "event": "32114-08",
       "ops": [
         {
+          "op": "give_item",
+          "itemId": 8782,
+          "count": 1
+        },
+        {
           "op": "set_cond",
           "cond": 2
         }
@@ -480,6 +520,30 @@
       "when": "absent",
       "event": "32121-16",
       "htmlFile": "32114-event-32121-16-062.htm"
+    },
+    {
+      "npcId": 32114,
+      "hook": "event",
+      "when": "absent",
+      "event": "32121-18",
+      "hasItem": 8782,
+      "ops": [
+        {
+          "op": "take_item",
+          "itemId": 8782,
+          "count": 1
+        },
+        {
+          "op": "give_item",
+          "itemId": 8781,
+          "count": 1
+        },
+        {
+          "op": "set_cond",
+          "cond": 8
+        }
+      ],
+      "htmlFile": "32114-event-32121-18-063.htm"
     }
   ]
 }

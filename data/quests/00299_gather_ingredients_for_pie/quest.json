@@ -3,7 +3,11 @@
   "name": "Gather Ingredients for Pie",
   "repeatable": true,
   "abortable": true,
-  "questItems": [],
+  "questItems": [
+    7136,
+    7137,
+    7138
+  ],
   "dialogs": [
     {
       "npcId": 30620,
@@ -18,6 +22,11 @@
       "event": "30063-02",
       "ops": [
         {
+          "op": "give_item",
+          "itemId": 7137,
+          "count": 1
+        },
+        {
           "op": "set_cond",
           "cond": 4
         }
@@ -30,6 +39,11 @@
       "when": "absent",
       "event": "30466-02",
       "ops": [
+        {
+          "op": "give_item",
+          "itemId": 7136,
+          "count": 1
+        },
         {
           "op": "set_cond",
           "cond": 6
@@ -63,11 +77,43 @@
       "event": "30620-06",
       "ops": [
         {
+          "op": "take_item",
+          "itemId": 7138,
+          "count": 1
+        },
+        {
           "op": "set_cond",
           "cond": 3
         }
       ],
       "htmlFile": "30620-event-30620-06-003.htm"
+    },
+    {
+      "npcId": 30620,
+      "hook": "event",
+      "when": "absent",
+      "event": "30620-10",
+      "hasItem": 7137,
+      "ops": [
+        {
+          "op": "take_item",
+          "itemId": 7137,
+          "count": 1
+        },
+        {
+          "op": "set_cond",
+          "cond": 5
+        }
+      ],
+      "htmlFile": "30620-event-30620-10-004.htm"
+    },
+    {
+      "npcId": 30620,
+      "hook": "event",
+      "when": "absent",
+      "event": "30620-14",
+      "hasItem": 7136,
+      "htmlFile": "30620-event-30620-14-005.htm"
     },
     {
       "npcId": 30620,

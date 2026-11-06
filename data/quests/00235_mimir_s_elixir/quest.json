@@ -3,77 +3,128 @@
   "name": "Mimir's Elixir",
   "repeatable": false,
   "abortable": true,
-  "questItems": [],
+  "questItems": [
+    5905,
+    6318,
+    6319,
+    6321,
+    6322
+  ],
   "dialogs": [
     {
       "npcId": 30721,
       "hook": "talk",
-      "when": "absent",
+      "when": "started",
+      "whenVar": "memoState",
+      "whenValue": "2",
       "htmlFile": "30721-talk-000.htm"
     },
     {
       "npcId": 30721,
       "hook": "talk",
-      "when": "absent",
+      "when": "started",
+      "whenVar": "memoState",
+      "whenValue": "3",
       "htmlFile": "30721-talk-001.htm"
     },
     {
       "npcId": 30721,
       "hook": "talk",
-      "when": "absent",
+      "when": "started",
+      "whenVar": "memoState",
+      "whenValue": "4",
       "htmlFile": "30721-talk-002.htm"
     },
     {
       "npcId": 30721,
       "hook": "talk",
-      "when": "absent",
+      "when": "started",
+      "whenVar": "memoState",
+      "whenValue": "5",
       "htmlFile": "30721-talk-003.htm"
     },
     {
-      "npcId": 30718,
+      "npcId": 30721,
       "hook": "talk",
-      "when": "absent",
-      "htmlFile": "30718-talk-004.htm"
+      "when": "started",
+      "whenVar": "memoState",
+      "whenValue": "6",
+      "htmlFile": "30721-talk-004.htm"
+    },
+    {
+      "npcId": 30721,
+      "hook": "talk",
+      "when": "started",
+      "whenVar": "memoState",
+      "whenValue": "7",
+      "htmlFile": "30721-talk-005.htm"
+    },
+    {
+      "npcId": 30721,
+      "hook": "talk",
+      "when": "started",
+      "whenVar": "memoState",
+      "whenValue": "8",
+      "htmlFile": "30721-talk-006.htm"
     },
     {
       "npcId": 30718,
       "hook": "talk",
-      "when": "absent",
-      "htmlFile": "30718-talk-005.htm"
+      "when": "started",
+      "whenVar": "memoState",
+      "whenValue": "2",
+      "htmlFile": "30718-talk-007.htm"
     },
     {
       "npcId": 30718,
       "hook": "talk",
+      "when": "started",
+      "whenVar": "memoState",
+      "whenValue": "3",
+      "htmlFile": "30718-talk-008.htm"
+    },
+    {
+      "npcId": 30718,
+      "hook": "talk",
+      "when": "started",
+      "whenVar": "memoState",
+      "whenValue": "4",
+      "htmlFile": "30718-talk-009.htm"
+    },
+    {
+      "npcId": 31149,
+      "hook": "talk",
       "when": "absent",
-      "htmlFile": "30718-talk-006.htm"
+      "hasItem": 5905,
+      "htmlFile": "31149-talk-010.htm"
     },
     {
       "npcId": 30721,
       "hook": "event",
       "when": "absent",
       "event": "30721-02",
-      "htmlFile": "30721-event-30721-02-008.htm"
+      "htmlFile": "30721-event-30721-02-011.htm"
     },
     {
       "npcId": 30721,
       "hook": "event",
       "when": "absent",
       "event": "30721-03",
-      "htmlFile": "30721-event-30721-03-009.htm"
+      "htmlFile": "30721-event-30721-03-012.htm"
     },
     {
       "npcId": 30721,
       "hook": "event",
       "when": "absent",
       "event": "30721-04",
-      "htmlFile": "30721-event-30721-04-010.htm"
+      "htmlFile": "30721-event-30721-04-013.htm"
     },
     {
       "npcId": 30721,
       "hook": "event",
       "when": "absent",
       "event": "30721-05",
-      "htmlFile": "30721-event-30721-05-011.htm"
+      "htmlFile": "30721-event-30721-05-014.htm"
     },
     {
       "npcId": 30721,
@@ -88,11 +139,16 @@
           "op": "start"
         },
         {
+          "op": "set",
+          "key": "memoState",
+          "value": "1"
+        },
+        {
           "op": "set_cond",
           "cond": 1
         }
       ],
-      "htmlFile": "30721-event-30721-06-012.htm"
+      "htmlFile": "30721-event-30721-06-015.htm"
     },
     {
       "npcId": 30721,
@@ -101,11 +157,16 @@
       "event": "30721-12",
       "ops": [
         {
+          "op": "set",
+          "key": "memoState",
+          "value": "2"
+        },
+        {
           "op": "set_cond",
           "cond": 2
         }
       ],
-      "htmlFile": "30721-event-30721-12-013.htm"
+      "htmlFile": "30721-event-30721-12-016.htm"
     },
     {
       "npcId": 30721,
@@ -114,25 +175,44 @@
       "event": "30721-15",
       "ops": [
         {
+          "op": "give_item",
+          "itemId": 5905,
+          "count": 1
+        },
+        {
+          "op": "set",
+          "key": "memoState",
+          "value": "6"
+        },
+        {
           "op": "set_cond",
           "cond": 6
         }
       ],
-      "htmlFile": "30721-event-30721-15-014.htm"
+      "htmlFile": "30721-event-30721-15-017.htm"
     },
     {
       "npcId": 30721,
       "hook": "event",
       "when": "absent",
       "event": "30721-18",
-      "htmlFile": "30721-event-30721-18-015.htm"
+      "htmlFile": "30721-event-30721-18-018.htm"
     },
     {
       "npcId": 30721,
       "hook": "event",
       "when": "absent",
       "event": "30721-19",
+      "hasItems": [
+        5905,
+        6319
+      ],
       "ops": [
+        {
+          "op": "take_item",
+          "itemId": 5011,
+          "count": 1
+        },
         {
           "op": "give_item",
           "itemId": 729,
@@ -142,14 +222,14 @@
           "op": "complete"
         }
       ],
-      "htmlFile": "30721-event-30721-19-016.htm"
+      "htmlFile": "30721-event-30721-19-019.htm"
     },
     {
       "npcId": 30721,
       "hook": "event",
       "when": "absent",
       "event": "30718-02",
-      "htmlFile": "30721-event-30718-02-017.htm"
+      "htmlFile": "30721-event-30718-02-020.htm"
     },
     {
       "npcId": 30721,
@@ -158,59 +238,108 @@
       "event": "30718-03",
       "ops": [
         {
+          "op": "set",
+          "key": "memoState",
+          "value": "3"
+        },
+        {
           "op": "set_cond",
           "cond": 3
         }
       ],
-      "htmlFile": "30721-event-30718-03-018.htm"
+      "htmlFile": "30721-event-30718-03-021.htm"
+    },
+    {
+      "npcId": 30721,
+      "hook": "event",
+      "when": "absent",
+      "event": "30718-06",
+      "hasItem": 6322,
+      "ops": [
+        {
+          "op": "take_item",
+          "itemId": 6322,
+          "count": 1
+        },
+        {
+          "op": "give_item",
+          "itemId": 6321,
+          "count": 1
+        },
+        {
+          "op": "set",
+          "key": "memoState",
+          "value": "5"
+        },
+        {
+          "op": "set_cond",
+          "cond": 5
+        }
+      ],
+      "htmlFile": "30721-event-30718-06-022.htm"
     },
     {
       "npcId": 30721,
       "hook": "event",
       "when": "absent",
       "event": "31149-02",
-      "htmlFile": "30721-event-31149-02-020.htm"
+      "htmlFile": "30721-event-31149-02-023.htm"
     },
     {
       "npcId": 30721,
       "hook": "event",
       "when": "absent",
       "event": "31149-05",
-      "htmlFile": "30721-event-31149-05-021.htm"
+      "htmlFile": "30721-event-31149-05-024.htm"
     },
     {
       "npcId": 30721,
       "hook": "event",
       "when": "absent",
       "event": "31149-07",
-      "htmlFile": "30721-event-31149-07-022.htm"
+      "htmlFile": "30721-event-31149-07-025.htm"
     },
     {
       "npcId": 30721,
       "hook": "event",
       "when": "absent",
       "event": "31149-09",
-      "htmlFile": "30721-event-31149-09-023.htm"
+      "htmlFile": "30721-event-31149-09-026.htm"
     },
     {
       "npcId": 30721,
       "hook": "event",
       "when": "absent",
       "event": "31149-10",
-      "htmlFile": "30721-event-31149-10-024.htm"
+      "htmlFile": "30721-event-31149-10-027.htm"
     },
     {
       "npcId": 30721,
       "hook": "event",
       "when": "absent",
       "event": "31149-11",
+      "hasItems": [
+        6318,
+        6320,
+        6321
+      ],
       "ops": [
+        {
+          "op": "give_item",
+          "itemId": 6319,
+          "count": 1
+        },
+        {
+          "op": "set",
+          "key": "memoState",
+          "value": "8"
+        },
         {
           "op": "set_cond",
           "cond": 8
         }
       ],
-      "htmlFile": "30721-event-31149-11-025.htm"
+      "htmlFile": "30721-event-31149-11-028.htm"
     }
   ]
 }

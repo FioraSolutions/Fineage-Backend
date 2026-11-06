@@ -3,7 +3,11 @@
   "name": "Alliance with Varka Silenos",
   "repeatable": true,
   "abortable": true,
-  "questItems": [],
+  "questItems": [
+    7226,
+    7227,
+    7228
+  ],
   "dialogs": [
     {
       "npcId": 31378,
@@ -85,6 +89,14 @@
     },
     {
       "npcId": 31378,
+      "hook": "talk",
+      "when": "started",
+      "cond": 6,
+      "hasItem": 7223,
+      "htmlFile": "31378-talk-c6-011.htm"
+    },
+    {
+      "npcId": 31378,
       "hook": "event",
       "when": "absent",
       "event": "31378-12a",
@@ -144,6 +156,9 @@
       "hook": "event",
       "when": "absent",
       "event": "31378-21",
+      "lacksItems": [
+        7229
+      ],
       "htmlFile": "31378-event-31378-21-020.htm"
     },
     {

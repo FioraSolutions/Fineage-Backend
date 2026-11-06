@@ -3,7 +3,9 @@
   "name": "OFullesSpecialBait",
   "repeatable": false,
   "abortable": true,
-  "questItems": [],
+  "questItems": [
+    7622
+  ],
   "dialogs": [
     {
       "npcId": 31572,
@@ -54,6 +56,11 @@
       "when": "absent",
       "event": "31572-07",
       "ops": [
+        {
+          "op": "give_item",
+          "itemId": 7611,
+          "count": 4
+        },
         {
           "op": "complete"
         }

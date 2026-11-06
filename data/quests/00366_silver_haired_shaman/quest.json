@@ -3,7 +3,9 @@
   "name": "Silver Haired Shaman",
   "repeatable": true,
   "abortable": true,
-  "questItems": [],
+  "questItems": [
+    5874
+  ],
   "dialogs": [
     {
       "npcId": 30111,
@@ -16,6 +18,20 @@
       "hook": "talk",
       "when": "absent",
       "htmlFile": "30111-talk-001.htm"
+    },
+    {
+      "npcId": 30111,
+      "hook": "talk",
+      "when": "absent",
+      "hasItem": 5874,
+      "ops": [
+        {
+          "op": "take_item",
+          "itemId": 5874,
+          "count": 1
+        }
+      ],
+      "htmlFile": "30111-talk-002.htm"
     },
     {
       "npcId": 30111,

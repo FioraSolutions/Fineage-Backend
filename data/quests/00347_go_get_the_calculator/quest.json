@@ -3,7 +3,10 @@
   "name": "Go Get the Calculator",
   "repeatable": true,
   "abortable": true,
-  "questItems": [],
+  "questItems": [
+    4285,
+    4286
+  ],
   "dialogs": [
     {
       "npcId": 30526,
@@ -112,6 +115,16 @@
       "cond": 5,
       "ops": [
         {
+          "op": "take_item",
+          "itemId": 4286,
+          "count": 1
+        },
+        {
+          "op": "give_item",
+          "itemId": 4285,
+          "count": 1
+        },
+        {
           "op": "set_cond",
           "cond": 6
         }
@@ -200,6 +213,16 @@
       "event": "30526-10",
       "ops": [
         {
+          "op": "take_item",
+          "itemId": 4285,
+          "count": 1
+        },
+        {
+          "op": "give_item",
+          "itemId": 4393,
+          "count": 1
+        },
+        {
           "op": "complete"
         }
       ],
@@ -211,6 +234,11 @@
       "when": "absent",
       "event": "30526-11",
       "ops": [
+        {
+          "op": "take_item",
+          "itemId": 4285,
+          "count": 1
+        },
         {
           "op": "give_adena",
           "count": 1500

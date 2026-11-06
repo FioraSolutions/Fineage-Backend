@@ -3,7 +3,11 @@
   "name": "Lizardmen's Conspiracy",
   "repeatable": true,
   "abortable": true,
-  "questItems": [],
+  "questItems": [
+    7182,
+    7183,
+    7184
+  ],
   "dialogs": [
     {
       "npcId": 30333,
@@ -45,11 +49,35 @@
           "op": "start"
         },
         {
+          "op": "give_item",
+          "itemId": 7182,
+          "count": 1
+        },
+        {
           "op": "set_cond",
           "cond": 1
         }
       ],
       "htmlFile": "30333-event-30333-03-003.htm"
+    },
+    {
+      "npcId": 30333,
+      "hook": "event",
+      "when": "absent",
+      "event": "30344-04",
+      "hasItem": 7182,
+      "ops": [
+        {
+          "op": "take_item",
+          "itemId": 7182,
+          "count": 1
+        },
+        {
+          "op": "set_cond",
+          "cond": 2
+        }
+      ],
+      "htmlFile": "30333-event-30344-04-004.htm"
     },
     {
       "npcId": 30333,

@@ -3,7 +3,9 @@
   "name": "Catch The Wind",
   "repeatable": true,
   "abortable": true,
-  "questItems": [],
+  "questItems": [
+    1078
+  ],
   "dialogs": [
     {
       "npcId": 30361,
@@ -35,6 +37,13 @@
       "hook": "event",
       "when": "absent",
       "event": "30361-08",
+      "ops": [
+        {
+          "op": "take_item",
+          "itemId": 1078,
+          "count": 1
+        }
+      ],
       "htmlFile": "30361-event-30361-08-001.htm"
     },
     {
@@ -54,6 +63,13 @@
       "hook": "event",
       "when": "absent",
       "event": "30361-09",
+      "ops": [
+        {
+          "op": "take_item",
+          "itemId": 1078,
+          "count": 1
+        }
+      ],
       "htmlFile": "30361-event-30361-09-003.htm"
     },
     {

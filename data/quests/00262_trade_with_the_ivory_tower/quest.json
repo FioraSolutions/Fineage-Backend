@@ -3,7 +3,9 @@
   "name": "Trade With The Ivory Tower",
   "repeatable": true,
   "abortable": true,
-  "questItems": [],
+  "questItems": [
+    707
+  ],
   "dialogs": [
     {
       "npcId": 30137,

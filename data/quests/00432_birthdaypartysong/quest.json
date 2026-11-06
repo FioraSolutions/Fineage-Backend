@@ -3,7 +3,9 @@
   "name": "BirthdayPartySong",
   "repeatable": true,
   "abortable": true,
-  "questItems": [],
+  "questItems": [
+    7541
+  ],
   "dialogs": [
     {
       "npcId": 31043,

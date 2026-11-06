@@ -3,7 +3,10 @@
   "name": "A Grand Plan for Taming Wild Beasts",
   "repeatable": true,
   "abortable": true,
-  "questItems": [],
+  "questItems": [
+    8084,
+    8293
+  ],
   "dialogs": [
     {
       "npcId": 35627,
@@ -18,10 +21,27 @@
       "when": "absent",
       "ops": [
         {
+          "op": "take_item",
+          "itemId": 8293,
+          "count": 1
+        },
+        {
+          "op": "take_item",
+          "itemId": 8084,
+          "count": 1
+        },
+        {
           "op": "complete"
         }
       ],
       "htmlFile": "35627-talk-001.htm"
+    },
+    {
+      "npcId": 35627,
+      "hook": "talk",
+      "when": "absent",
+      "hasItem": 8293,
+      "htmlFile": "35627-talk-002.htm"
     },
     {
       "npcId": 35627,

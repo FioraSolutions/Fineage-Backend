@@ -3,8 +3,45 @@
   "name": "Path Of The Scavenger",
   "repeatable": false,
   "abortable": true,
-  "questItems": [],
+  "questItems": [
+    1643,
+    1644,
+    1645,
+    1646,
+    1647,
+    1648,
+    1649,
+    1650,
+    1651,
+    1652,
+    1653,
+    1654,
+    1655,
+    1656,
+    1657,
+    8543
+  ],
   "dialogs": [
+    {
+      "npcId": 30524,
+      "hook": "talk",
+      "when": "absent",
+      "hasItem": 1643,
+      "htmlFile": "30524-talk-000.htm"
+    },
+    {
+      "npcId": 30519,
+      "hook": "talk",
+      "when": "absent",
+      "hasItem": 1643,
+      "ops": [
+        {
+          "op": "set_cond",
+          "cond": 2
+        }
+      ],
+      "htmlFile": "30519-talk-001.htm"
+    },
     {
       "npcId": 30519,
       "hook": "talk",
@@ -27,25 +64,176 @@
       "npcId": 30519,
       "hook": "talk",
       "when": "absent",
+      "hasItem": 1646,
+      "htmlFile": "30519-talk-005.htm"
+    },
+    {
+      "npcId": 30519,
+      "hook": "talk",
+      "when": "absent",
       "htmlFile": "30519-talk-006.htm"
     },
     {
       "npcId": 30517,
       "hook": "talk",
       "when": "absent",
+      "hasItem": 1648,
+      "ops": [
+        {
+          "op": "take_item",
+          "itemId": 1648,
+          "count": 1
+        },
+        {
+          "op": "give_item",
+          "itemId": 1651,
+          "count": 1
+        }
+      ],
+      "htmlFile": "30517-talk-007.htm"
+    },
+    {
+      "npcId": 30517,
+      "hook": "talk",
+      "when": "absent",
+      "ops": [
+        {
+          "op": "take_item",
+          "itemId": 1648,
+          "count": 1
+        },
+        {
+          "op": "give_item",
+          "itemId": 1651,
+          "count": 1
+        }
+      ],
       "htmlFile": "30517-talk-008.htm"
+    },
+    {
+      "npcId": 30517,
+      "hook": "talk",
+      "when": "absent",
+      "hasItem": 1651,
+      "htmlFile": "30517-talk-009.htm"
     },
     {
       "npcId": 30525,
       "hook": "talk",
       "when": "absent",
+      "hasItem": 1647,
+      "ops": [
+        {
+          "op": "take_item",
+          "itemId": 1647,
+          "count": 1
+        },
+        {
+          "op": "give_item",
+          "itemId": 1650,
+          "count": 1
+        }
+      ],
+      "htmlFile": "30525-talk-010.htm"
+    },
+    {
+      "npcId": 30525,
+      "hook": "talk",
+      "when": "absent",
+      "ops": [
+        {
+          "op": "take_item",
+          "itemId": 1647,
+          "count": 1
+        },
+        {
+          "op": "give_item",
+          "itemId": 1650,
+          "count": 1
+        }
+      ],
       "htmlFile": "30525-talk-011.htm"
+    },
+    {
+      "npcId": 30525,
+      "hook": "talk",
+      "when": "absent",
+      "hasItem": 1650,
+      "htmlFile": "30525-talk-012.htm"
     },
     {
       "npcId": 30538,
       "hook": "talk",
       "when": "absent",
+      "hasItem": 1649,
+      "ops": [
+        {
+          "op": "take_item",
+          "itemId": 1649,
+          "count": 1
+        },
+        {
+          "op": "give_item",
+          "itemId": 1652,
+          "count": 1
+        }
+      ],
+      "htmlFile": "30538-talk-013.htm"
+    },
+    {
+      "npcId": 30538,
+      "hook": "talk",
+      "when": "absent",
+      "ops": [
+        {
+          "op": "take_item",
+          "itemId": 1649,
+          "count": 1
+        },
+        {
+          "op": "give_item",
+          "itemId": 1652,
+          "count": 1
+        }
+      ],
       "htmlFile": "30538-talk-014.htm"
+    },
+    {
+      "npcId": 30538,
+      "hook": "talk",
+      "when": "absent",
+      "hasItem": 1652,
+      "htmlFile": "30538-talk-015.htm"
+    },
+    {
+      "npcId": 30556,
+      "hook": "talk",
+      "when": "absent",
+      "hasItem": 1646,
+      "ops": [
+        {
+          "op": "take_item",
+          "itemId": 1646,
+          "count": 1
+        },
+        {
+          "op": "give_item",
+          "itemId": 1653,
+          "count": 1
+        },
+        {
+          "op": "set_cond",
+          "cond": 5
+        }
+      ],
+      "htmlFile": "30556-talk-016.htm"
+    },
+    {
+      "npcId": 30556,
+      "hook": "talk",
+      "when": "absent",
+      "hasItem": 1653,
+      "htmlFile": "30556-talk-017.htm"
     },
     {
       "npcId": 30556,
@@ -57,13 +245,71 @@
       "npcId": 30556,
       "hook": "talk",
       "when": "absent",
+      "hasItem": 1654,
+      "htmlFile": "30556-talk-019.htm"
+    },
+    {
+      "npcId": 30556,
+      "hook": "talk",
+      "when": "absent",
       "htmlFile": "30556-talk-020.htm"
     },
     {
       "npcId": 30556,
       "hook": "talk",
       "when": "absent",
+      "hasItem": 1657,
+      "lacksItems": [
+        8543
+      ],
+      "htmlFile": "30556-talk-021.htm"
+    },
+    {
+      "npcId": 30556,
+      "hook": "talk",
+      "when": "absent",
+      "hasItem": 8543,
+      "lacksItems": [
+        1657
+      ],
+      "htmlFile": "30556-talk-022.htm"
+    },
+    {
+      "npcId": 30556,
+      "hook": "talk",
+      "when": "absent",
       "htmlFile": "30556-talk-023.htm"
+    },
+    {
+      "npcId": 30316,
+      "hook": "talk",
+      "when": "absent",
+      "hasItem": 1657,
+      "htmlFile": "30316-talk-024.htm"
+    },
+    {
+      "npcId": 30316,
+      "hook": "talk",
+      "when": "absent",
+      "hasItem": 1644,
+      "htmlFile": "30316-talk-025.htm"
+    },
+    {
+      "npcId": 30557,
+      "hook": "talk",
+      "when": "absent",
+      "hasItem": 1644,
+      "htmlFile": "30557-talk-026.htm"
+    },
+    {
+      "npcId": 31958,
+      "hook": "talk",
+      "when": "absent",
+      "hasItem": 8543,
+      "lacksItems": [
+        1657
+      ],
+      "htmlFile": "31958-talk-027.htm"
     },
     {
       "npcId": 30524,
@@ -115,6 +361,13 @@
       "hook": "event",
       "when": "absent",
       "event": "reply_1",
+      "ops": [
+        {
+          "op": "give_item",
+          "itemId": 1649,
+          "count": 1
+        }
+      ],
       "htmlFile": "30524-event-reply_1-034.htm"
     },
     {
@@ -122,6 +375,13 @@
       "hook": "event",
       "when": "absent",
       "event": "reply_1",
+      "ops": [
+        {
+          "op": "give_item",
+          "itemId": 1648,
+          "count": 1
+        }
+      ],
       "htmlFile": "30524-event-reply_1-035.htm"
     },
     {
@@ -129,6 +389,13 @@
       "hook": "event",
       "when": "absent",
       "event": "reply_1",
+      "ops": [
+        {
+          "op": "give_item",
+          "itemId": 1647,
+          "count": 1
+        }
+      ],
       "htmlFile": "30524-event-reply_1-036.htm"
     },
     {
@@ -173,6 +440,26 @@
       "event": "reply_3",
       "ops": [
         {
+          "op": "take_item",
+          "itemId": 1648,
+          "count": 1
+        },
+        {
+          "op": "take_item",
+          "itemId": 1649,
+          "count": 1
+        },
+        {
+          "op": "take_item",
+          "itemId": 1647,
+          "count": 1
+        },
+        {
+          "op": "give_item",
+          "itemId": 1646,
+          "count": 1
+        },
+        {
           "op": "set_cond",
           "cond": 4
         }
@@ -184,6 +471,13 @@
       "hook": "event",
       "when": "absent",
       "event": "reply_4",
+      "ops": [
+        {
+          "op": "give_item",
+          "itemId": 1649,
+          "count": 1
+        }
+      ],
       "htmlFile": "30524-event-reply_4-043.htm"
     },
     {
@@ -191,6 +485,13 @@
       "hook": "event",
       "when": "absent",
       "event": "reply_4",
+      "ops": [
+        {
+          "op": "give_item",
+          "itemId": 1648,
+          "count": 1
+        }
+      ],
       "htmlFile": "30524-event-reply_4-044.htm"
     },
     {
@@ -198,7 +499,179 @@
       "hook": "event",
       "when": "absent",
       "event": "reply_4",
+      "ops": [
+        {
+          "op": "give_item",
+          "itemId": 1647,
+          "count": 1
+        }
+      ],
       "htmlFile": "30524-event-reply_4-045.htm"
+    },
+    {
+      "npcId": 30524,
+      "hook": "event",
+      "when": "absent",
+      "event": "30556-05b",
+      "hasItem": 1654,
+      "ops": [
+        {
+          "op": "take_item",
+          "itemId": 1654,
+          "count": 1
+        },
+        {
+          "op": "take_item",
+          "itemId": 1656,
+          "count": 1
+        },
+        {
+          "op": "give_item",
+          "itemId": 1657,
+          "count": 1
+        },
+        {
+          "op": "set_cond",
+          "cond": 9
+        }
+      ],
+      "htmlFile": "30524-event-30556-05b-046.htm"
+    },
+    {
+      "npcId": 30524,
+      "hook": "event",
+      "when": "absent",
+      "event": "30556-06b",
+      "hasItem": 1654,
+      "ops": [
+        {
+          "op": "take_item",
+          "itemId": 1654,
+          "count": 1
+        },
+        {
+          "op": "take_item",
+          "itemId": 1656,
+          "count": 1
+        },
+        {
+          "op": "give_item",
+          "itemId": 8543,
+          "count": 1
+        },
+        {
+          "op": "set",
+          "key": "memoState",
+          "value": "2"
+        },
+        {
+          "op": "set_cond",
+          "cond": 12
+        }
+      ],
+      "htmlFile": "30524-event-30556-06b-047.htm"
+    },
+    {
+      "npcId": 30524,
+      "hook": "event",
+      "when": "absent",
+      "event": "30316-02",
+      "hasItem": 1657,
+      "ops": [
+        {
+          "op": "take_item",
+          "itemId": 1657,
+          "count": 1
+        },
+        {
+          "op": "give_item",
+          "itemId": 1644,
+          "count": 1
+        },
+        {
+          "op": "set_cond",
+          "cond": 10
+        }
+      ],
+      "htmlFile": "30524-event-30316-02-048.htm"
+    },
+    {
+      "npcId": 30524,
+      "hook": "event",
+      "when": "absent",
+      "event": "30316-03",
+      "hasItem": 1657,
+      "ops": [
+        {
+          "op": "take_item",
+          "itemId": 1657,
+          "count": 1
+        },
+        {
+          "op": "give_item",
+          "itemId": 1644,
+          "count": 1
+        },
+        {
+          "op": "set_cond",
+          "cond": 10
+        }
+      ],
+      "htmlFile": "30524-event-30316-03-049.htm"
+    },
+    {
+      "npcId": 30524,
+      "hook": "event",
+      "when": "absent",
+      "event": "30557-03",
+      "hasItem": 1644,
+      "ops": [
+        {
+          "op": "take_item",
+          "itemId": 1644,
+          "count": 1
+        },
+        {
+          "op": "give_item",
+          "itemId": 1645,
+          "count": 1
+        },
+        {
+          "op": "set_cond",
+          "cond": 11
+        }
+      ],
+      "htmlFile": "30524-event-30557-03-050.htm"
+    },
+    {
+      "npcId": 30524,
+      "hook": "event",
+      "when": "absent",
+      "event": "31958-02",
+      "hasItem": 8543,
+      "ops": [
+        {
+          "op": "give_exp_sp",
+          "exp": 320534,
+          "sp": 35412
+        }
+      ],
+      "htmlFile": "30524-event-31958-02-051.htm"
+    },
+    {
+      "npcId": 30524,
+      "hook": "event",
+      "when": "absent",
+      "event": "31958-02",
+      "hasItem": 8543,
+      "ops": [
+        {
+          "op": "give_exp_sp",
+          "exp": 456128,
+          "sp": 42110
+        }
+      ],
+      "htmlFile": "30524-event-31958-02-052.htm"
     },
     {
       "npcId": 30524,
@@ -227,6 +700,45 @@
         }
       ],
       "htmlFile": "30524-event-31958-02-054.htm"
+    },
+    {
+      "npcId": 27058,
+      "hook": "kill",
+      "when": "started",
+      "hasItem": 1653,
+      "ops": [
+        {
+          "op": "set_cond",
+          "cond": 6
+        }
+      ],
+      "html": ""
+    },
+    {
+      "npcId": 20403,
+      "hook": "kill",
+      "when": "started",
+      "hasItem": 1654,
+      "ops": [
+        {
+          "op": "set_cond",
+          "cond": 8
+        }
+      ],
+      "html": ""
+    },
+    {
+      "npcId": 20508,
+      "hook": "kill",
+      "when": "started",
+      "hasItem": 1654,
+      "ops": [
+        {
+          "op": "set_cond",
+          "cond": 8
+        }
+      ],
+      "html": ""
     }
   ]
 }

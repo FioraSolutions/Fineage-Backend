@@ -3,7 +3,10 @@
   "name": "A Powerful Primeval Creature",
   "repeatable": true,
   "abortable": true,
-  "questItems": [],
+  "questItems": [
+    8774,
+    8775
+  ],
   "dialogs": [
     {
       "npcId": 32105,
@@ -41,6 +44,34 @@
         }
       ],
       "htmlFile": "32105-event-32105-06-001.htm"
+    },
+    {
+      "npcId": 32105,
+      "hook": "event",
+      "when": "absent",
+      "event": "32105-09",
+      "hasItem": 8774,
+      "ops": [
+        {
+          "op": "take_item",
+          "itemId": 8774,
+          "count": 1
+        }
+      ],
+      "htmlFile": "32105-event-32105-09-002.htm"
+    },
+    {
+      "npcId": 32105,
+      "hook": "event",
+      "when": "absent",
+      "event": "exit",
+      "hasItem": 8774,
+      "ops": [
+        {
+          "op": "complete"
+        }
+      ],
+      "htmlFile": "32105-event-exit-003.htm"
     }
   ]
 }

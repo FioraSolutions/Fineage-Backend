@@ -3,7 +3,9 @@
   "name": "DeliciousTopChoiceMeat",
   "repeatable": true,
   "abortable": true,
-  "questItems": [],
+  "questItems": [
+    7546
+  ],
   "dialogs": [
     {
       "npcId": 31537,
@@ -16,6 +18,13 @@
       "hook": "talk",
       "when": "started",
       "htmlFile": "31537-talk-001.htm"
+    },
+    {
+      "npcId": 31537,
+      "hook": "talk",
+      "when": "started",
+      "hasItem": 7546,
+      "htmlFile": "31537-talk-002.htm"
     }
   ]
 }

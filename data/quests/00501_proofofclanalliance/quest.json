@@ -3,8 +3,24 @@
   "name": "ProofOfClanAlliance",
   "repeatable": true,
   "abortable": true,
-  "questItems": [],
+  "questItems": [
+    3832,
+    3833,
+    3834,
+    3835,
+    3836,
+    3837,
+    3872,
+    3873
+  ],
   "dialogs": [
+    {
+      "npcId": 30756,
+      "hook": "talk",
+      "when": "absent",
+      "hasItem": 3874,
+      "htmlFile": "30756-talk-000.htm"
+    },
     {
       "npcId": 30756,
       "hook": "talk",
@@ -28,6 +44,30 @@
       "npcId": 30756,
       "hook": "talk",
       "when": "started",
+      "hasItem": 3873,
+      "ops": [
+        {
+          "op": "take_item",
+          "itemId": 3873,
+          "count": 1
+        },
+        {
+          "op": "give_item",
+          "itemId": 3874,
+          "count": 1
+        },
+        {
+          "op": "give_exp_sp",
+          "exp": 0,
+          "sp": 120000
+        }
+      ],
+      "htmlFile": "30756-talk-004.htm"
+    },
+    {
+      "npcId": 30756,
+      "hook": "talk",
+      "when": "started",
       "htmlFile": "30756-talk-005.htm"
     },
     {
@@ -40,6 +80,9 @@
       "npcId": 30759,
       "hook": "talk",
       "when": "started",
+      "lacksItems": [
+        3837
+      ],
       "htmlFile": "30759-talk-007.htm"
     },
     {
@@ -52,6 +95,13 @@
       "npcId": 30759,
       "hook": "talk",
       "when": "started",
+      "ops": [
+        {
+          "op": "take_item",
+          "itemId": 3872,
+          "count": 1
+        }
+      ],
       "htmlFile": "30759-talk-009.htm"
     },
     {
@@ -64,6 +114,43 @@
       "npcId": 30759,
       "hook": "talk",
       "when": "started",
+      "ops": [
+        {
+          "op": "take_item",
+          "itemId": 3872,
+          "count": 1
+        },
+        {
+          "op": "take_item",
+          "itemId": 3832,
+          "count": 1
+        },
+        {
+          "op": "take_item",
+          "itemId": 3833,
+          "count": 1
+        },
+        {
+          "op": "take_item",
+          "itemId": 3834,
+          "count": 1
+        },
+        {
+          "op": "take_item",
+          "itemId": 3835,
+          "count": 1
+        },
+        {
+          "op": "give_item",
+          "itemId": 3873,
+          "count": 1
+        },
+        {
+          "op": "give_item",
+          "itemId": 3889,
+          "count": 1
+        }
+      ],
       "htmlFile": "30759-talk-011.htm"
     },
     {
@@ -82,6 +169,13 @@
       "npcId": 30758,
       "hook": "talk",
       "when": "started",
+      "ops": [
+        {
+          "op": "give_item",
+          "itemId": 3835,
+          "count": 1
+        }
+      ],
       "htmlFile": "30758-talk-014.htm"
     },
     {
@@ -151,6 +245,28 @@
       "hook": "event",
       "when": "absent",
       "event": "30759-07",
+      "ops": [
+        {
+          "op": "take_item",
+          "itemId": 3837,
+          "count": 1
+        },
+        {
+          "op": "take_item",
+          "itemId": 3837,
+          "count": 1
+        },
+        {
+          "op": "take_item",
+          "itemId": 3837,
+          "count": 1
+        },
+        {
+          "op": "give_item",
+          "itemId": 3872,
+          "count": 1
+        }
+      ],
       "htmlFile": "30756-event-30759-07-024.htm"
     },
     {
@@ -158,6 +274,28 @@
       "hook": "event",
       "when": "absent",
       "event": "30759-07",
+      "ops": [
+        {
+          "op": "take_item",
+          "itemId": 3837,
+          "count": 1
+        },
+        {
+          "op": "take_item",
+          "itemId": 3837,
+          "count": 1
+        },
+        {
+          "op": "take_item",
+          "itemId": 3837,
+          "count": 1
+        },
+        {
+          "op": "give_item",
+          "itemId": 3872,
+          "count": 1
+        }
+      ],
       "htmlFile": "30757-event-30759-07-025.htm"
     },
     {
@@ -165,6 +303,28 @@
       "hook": "event",
       "when": "absent",
       "event": "30759-07",
+      "ops": [
+        {
+          "op": "take_item",
+          "itemId": 3837,
+          "count": 1
+        },
+        {
+          "op": "take_item",
+          "itemId": 3837,
+          "count": 1
+        },
+        {
+          "op": "take_item",
+          "itemId": 3837,
+          "count": 1
+        },
+        {
+          "op": "give_item",
+          "itemId": 3872,
+          "count": 1
+        }
+      ],
       "htmlFile": "30758-event-30759-07-026.htm"
     },
     {
@@ -172,6 +332,28 @@
       "hook": "event",
       "when": "absent",
       "event": "30759-07",
+      "ops": [
+        {
+          "op": "take_item",
+          "itemId": 3837,
+          "count": 1
+        },
+        {
+          "op": "take_item",
+          "itemId": 3837,
+          "count": 1
+        },
+        {
+          "op": "take_item",
+          "itemId": 3837,
+          "count": 1
+        },
+        {
+          "op": "give_item",
+          "itemId": 3872,
+          "count": 1
+        }
+      ],
       "htmlFile": "30759-event-30759-07-027.htm"
     },
     {
@@ -179,6 +361,13 @@
       "hook": "event",
       "when": "absent",
       "event": "30757-03",
+      "ops": [
+        {
+          "op": "give_item",
+          "itemId": 3837,
+          "count": 1
+        }
+      ],
       "htmlFile": "30756-event-30757-03-028.htm"
     },
     {
@@ -186,6 +375,13 @@
       "hook": "event",
       "when": "absent",
       "event": "30757-03",
+      "ops": [
+        {
+          "op": "give_item",
+          "itemId": 3837,
+          "count": 1
+        }
+      ],
       "htmlFile": "30757-event-30757-03-029.htm"
     },
     {
@@ -193,6 +389,13 @@
       "hook": "event",
       "when": "absent",
       "event": "30757-03",
+      "ops": [
+        {
+          "op": "give_item",
+          "itemId": 3837,
+          "count": 1
+        }
+      ],
       "htmlFile": "30758-event-30757-03-030.htm"
     },
     {
@@ -200,6 +403,13 @@
       "hook": "event",
       "when": "absent",
       "event": "30757-03",
+      "ops": [
+        {
+          "op": "give_item",
+          "itemId": 3837,
+          "count": 1
+        }
+      ],
       "htmlFile": "30759-event-30757-03-031.htm"
     },
     {

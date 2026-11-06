@@ -3,7 +3,10 @@
   "name": "Help Rood Raise A New Pet!",
   "repeatable": true,
   "abortable": true,
-  "questItems": [],
+  "questItems": [
+    5860,
+    5861
+  ],
   "dialogs": [
     {
       "npcId": 31067,
@@ -27,6 +30,18 @@
       "npcId": 31067,
       "hook": "talk",
       "when": "absent",
+      "ops": [
+        {
+          "op": "take_item",
+          "itemId": 5860,
+          "count": 1
+        },
+        {
+          "op": "take_item",
+          "itemId": 5861,
+          "count": 1
+        }
+      ],
       "htmlFile": "31067-talk-003.htm"
     },
     {
@@ -68,6 +83,11 @@
         },
         {
           "op": "start"
+        },
+        {
+          "op": "set",
+          "key": "memoState",
+          "value": "1"
         },
         {
           "op": "set_cond",

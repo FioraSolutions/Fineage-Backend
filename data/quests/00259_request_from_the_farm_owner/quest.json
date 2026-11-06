@@ -3,13 +3,29 @@
   "name": "Request from the Farm Owner",
   "repeatable": true,
   "abortable": true,
-  "questItems": [],
+  "questItems": [
+    1495
+  ],
   "dialogs": [
     {
       "npcId": 30497,
       "hook": "talk",
       "when": "absent",
       "htmlFile": "30497-talk-000.htm"
+    },
+    {
+      "npcId": 30497,
+      "hook": "talk",
+      "when": "started",
+      "hasItem": 1495,
+      "ops": [
+        {
+          "op": "take_item",
+          "itemId": 1495,
+          "count": 1
+        }
+      ],
+      "htmlFile": "30497-talk-001.htm"
     },
     {
       "npcId": 30405,
@@ -50,6 +66,13 @@
       "hook": "event",
       "when": "absent",
       "event": "30405-04",
+      "ops": [
+        {
+          "op": "take_item",
+          "itemId": 1495,
+          "count": 10
+        }
+      ],
       "htmlFile": "30497-event-30405-04-007.htm"
     },
     {
@@ -57,6 +80,13 @@
       "hook": "event",
       "when": "absent",
       "event": "30405-05",
+      "ops": [
+        {
+          "op": "take_item",
+          "itemId": 1495,
+          "count": 10
+        }
+      ],
       "htmlFile": "30497-event-30405-05-008.htm"
     },
     {
@@ -64,6 +94,13 @@
       "hook": "event",
       "when": "absent",
       "event": "30405-05a",
+      "ops": [
+        {
+          "op": "take_item",
+          "itemId": 1495,
+          "count": 10
+        }
+      ],
       "htmlFile": "30497-event-30405-05a-009.htm"
     },
     {
@@ -71,6 +108,13 @@
       "hook": "event",
       "when": "absent",
       "event": "30405-05c",
+      "ops": [
+        {
+          "op": "take_item",
+          "itemId": 1495,
+          "count": 10
+        }
+      ],
       "htmlFile": "30497-event-30405-05c-010.htm"
     },
     {

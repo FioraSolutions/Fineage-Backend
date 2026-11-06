@@ -3,7 +3,25 @@
   "name": "Little Wing",
   "repeatable": true,
   "abortable": true,
-  "questItems": [],
+  "questItems": [
+    3499,
+    3816,
+    3817,
+    3818,
+    3819,
+    3820,
+    3821,
+    3822,
+    3823,
+    3824,
+    3825,
+    3826,
+    3827,
+    3828,
+    3829,
+    3830,
+    3831
+  ],
   "dialogs": [
     {
       "npcId": 30829,
@@ -166,6 +184,25 @@
       "npcId": 30748,
       "hook": "talk",
       "when": "started",
+      "cond": 6,
+      "hasItem": 3823,
+      "ops": [
+        {
+          "op": "give_item",
+          "itemId": 3823,
+          "count": 1
+        },
+        {
+          "op": "set_cond",
+          "cond": 7
+        }
+      ],
+      "htmlFile": "30748-talk-c6-022.htm"
+    },
+    {
+      "npcId": 30748,
+      "hook": "talk",
+      "when": "started",
       "cond": 7,
       "htmlFile": "30748-talk-c7-023.htm"
     },
@@ -175,6 +212,25 @@
       "when": "started",
       "cond": 5,
       "htmlFile": "30749-talk-c5-024.htm"
+    },
+    {
+      "npcId": 30749,
+      "hook": "talk",
+      "when": "started",
+      "cond": 6,
+      "hasItem": 3825,
+      "ops": [
+        {
+          "op": "give_item",
+          "itemId": 3825,
+          "count": 1
+        },
+        {
+          "op": "set_cond",
+          "cond": 7
+        }
+      ],
+      "htmlFile": "30749-talk-c6-025.htm"
     },
     {
       "npcId": 30749,
@@ -194,6 +250,14 @@
       "npcId": 30750,
       "hook": "talk",
       "when": "started",
+      "cond": 6,
+      "hasItem": 3827,
+      "htmlFile": "30750-talk-c6-028.htm"
+    },
+    {
+      "npcId": 30750,
+      "hook": "talk",
+      "when": "started",
       "cond": 7,
       "htmlFile": "30750-talk-c7-029.htm"
     },
@@ -208,6 +272,25 @@
       "npcId": 30751,
       "hook": "talk",
       "when": "started",
+      "cond": 6,
+      "hasItem": 3829,
+      "ops": [
+        {
+          "op": "give_item",
+          "itemId": 3829,
+          "count": 1
+        },
+        {
+          "op": "set_cond",
+          "cond": 7
+        }
+      ],
+      "htmlFile": "30751-talk-c6-031.htm"
+    },
+    {
+      "npcId": 30751,
+      "hook": "talk",
+      "when": "started",
       "cond": 7,
       "htmlFile": "30751-talk-c7-032.htm"
     },
@@ -217,6 +300,25 @@
       "when": "started",
       "cond": 5,
       "htmlFile": "30752-talk-c5-033.htm"
+    },
+    {
+      "npcId": 30752,
+      "hook": "talk",
+      "when": "started",
+      "cond": 6,
+      "hasItem": 3831,
+      "ops": [
+        {
+          "op": "give_item",
+          "itemId": 3831,
+          "count": 1
+        },
+        {
+          "op": "set_cond",
+          "cond": 7
+        }
+      ],
+      "htmlFile": "30752-talk-c6-034.htm"
     },
     {
       "npcId": 30752,
@@ -300,6 +402,11 @@
       "event": "30610-05",
       "ops": [
         {
+          "op": "give_item",
+          "itemId": 3818,
+          "count": 1
+        },
+        {
           "op": "set_cond",
           "cond": 2
         }
@@ -312,6 +419,11 @@
       "when": "absent",
       "event": "30610-06",
       "ops": [
+        {
+          "op": "give_item",
+          "itemId": 3819,
+          "count": 1
+        },
         {
           "op": "set_cond",
           "cond": 2
@@ -326,6 +438,11 @@
       "event": "30610-12",
       "ops": [
         {
+          "op": "give_item",
+          "itemId": 3818,
+          "count": 1
+        },
+        {
           "op": "set_cond",
           "cond": 2
         }
@@ -338,6 +455,11 @@
       "when": "absent",
       "event": "30610-13",
       "ops": [
+        {
+          "op": "give_item",
+          "itemId": 3819,
+          "count": 1
+        },
         {
           "op": "set_cond",
           "cond": 2
@@ -353,6 +475,11 @@
       "ops": [
         {
           "op": "take_item",
+          "itemId": 3818,
+          "count": 1
+        },
+        {
+          "op": "take_item",
           "itemId": 1870,
           "count": 10
         },
@@ -363,8 +490,23 @@
         },
         {
           "op": "take_item",
+          "itemId": 2130,
+          "count": 1
+        },
+        {
+          "op": "take_item",
           "itemId": 1873,
           "count": 3
+        },
+        {
+          "op": "take_item",
+          "itemId": 3820,
+          "count": 1
+        },
+        {
+          "op": "give_item",
+          "itemId": 3816,
+          "count": 1
         }
       ],
       "htmlFile": "30829-event-30608-03-048.htm"
@@ -377,6 +519,11 @@
       "ops": [
         {
           "op": "take_item",
+          "itemId": 3819,
+          "count": 1
+        },
+        {
+          "op": "take_item",
           "itemId": 1870,
           "count": 10
         },
@@ -387,6 +534,11 @@
         },
         {
           "op": "take_item",
+          "itemId": 2131,
+          "count": 1
+        },
+        {
+          "op": "take_item",
           "itemId": 1875,
           "count": 1
         },
@@ -394,6 +546,16 @@
           "op": "take_item",
           "itemId": 1873,
           "count": 5
+        },
+        {
+          "op": "take_item",
+          "itemId": 3820,
+          "count": 1
+        },
+        {
+          "op": "give_item",
+          "itemId": 3817,
+          "count": 1
         }
       ],
       "htmlFile": "30829-event-30608-05-049.htm"
@@ -410,6 +572,13 @@
       "hook": "event",
       "when": "absent",
       "event": "30747-02",
+      "ops": [
+        {
+          "op": "give_item",
+          "itemId": 3499,
+          "count": 1
+        }
+      ],
       "htmlFile": "30829-event-30747-02-051.htm"
     },
     {
@@ -417,6 +586,13 @@
       "hook": "event",
       "when": "absent",
       "event": "30747-04",
+      "ops": [
+        {
+          "op": "give_item",
+          "itemId": 3499,
+          "count": 1
+        }
+      ],
       "htmlFile": "30829-event-30747-04-052.htm"
     },
     {
@@ -424,6 +600,13 @@
       "hook": "event",
       "when": "absent",
       "event": "30747-07",
+      "ops": [
+        {
+          "op": "give_item",
+          "itemId": 3821,
+          "count": 1
+        }
+      ],
       "htmlFile": "30829-event-30747-07-053.htm"
     },
     {
@@ -431,6 +614,13 @@
       "hook": "event",
       "when": "absent",
       "event": "30747-08",
+      "ops": [
+        {
+          "op": "give_item",
+          "itemId": 3821,
+          "count": 1
+        }
+      ],
       "htmlFile": "30829-event-30747-08-054.htm"
     },
     {
@@ -469,6 +659,13 @@
       "hook": "event",
       "when": "absent",
       "event": "30747-15",
+      "ops": [
+        {
+          "op": "give_item",
+          "itemId": 3912,
+          "count": 1
+        }
+      ],
       "htmlFile": "30829-event-30747-15-058.htm"
     },
     {
@@ -477,6 +674,16 @@
       "when": "absent",
       "event": "30748-02",
       "ops": [
+        {
+          "op": "take_item",
+          "itemId": 3821,
+          "count": 1
+        },
+        {
+          "op": "give_item",
+          "itemId": 3822,
+          "count": 1
+        },
         {
           "op": "set_cond",
           "cond": 6
@@ -491,6 +698,16 @@
       "event": "30749-02",
       "ops": [
         {
+          "op": "take_item",
+          "itemId": 3821,
+          "count": 1
+        },
+        {
+          "op": "give_item",
+          "itemId": 3824,
+          "count": 1
+        },
+        {
           "op": "set_cond",
           "cond": 6
         }
@@ -503,6 +720,16 @@
       "when": "absent",
       "event": "30750-02",
       "ops": [
+        {
+          "op": "take_item",
+          "itemId": 3821,
+          "count": 1
+        },
+        {
+          "op": "give_item",
+          "itemId": 3826,
+          "count": 1
+        },
         {
           "op": "set_cond",
           "cond": 6
@@ -517,6 +744,11 @@
       "event": "30750-05",
       "ops": [
         {
+          "op": "give_item",
+          "itemId": 3827,
+          "count": 1
+        },
+        {
           "op": "set_cond",
           "cond": 7
         }
@@ -530,6 +762,16 @@
       "event": "30751-03",
       "ops": [
         {
+          "op": "take_item",
+          "itemId": 3821,
+          "count": 1
+        },
+        {
+          "op": "give_item",
+          "itemId": 3828,
+          "count": 1
+        },
+        {
           "op": "set_cond",
           "cond": 6
         }
@@ -542,6 +784,16 @@
       "when": "absent",
       "event": "30752-02",
       "ops": [
+        {
+          "op": "take_item",
+          "itemId": 3821,
+          "count": 1
+        },
+        {
+          "op": "give_item",
+          "itemId": 3830,
+          "count": 1
+        },
         {
           "op": "set_cond",
           "cond": 6

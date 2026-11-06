@@ -3,7 +3,9 @@
   "name": "Battle against Ketra Orcs",
   "repeatable": true,
   "abortable": true,
-  "questItems": [],
+  "questItems": [
+    7234
+  ],
   "dialogs": [
     {
       "npcId": 31377,

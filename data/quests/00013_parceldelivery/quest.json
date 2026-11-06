@@ -3,7 +3,9 @@
   "name": "ParcelDelivery",
   "repeatable": false,
   "abortable": true,
-  "questItems": [],
+  "questItems": [
+    7263
+  ],
   "dialogs": [
     {
       "npcId": 31274,
@@ -42,11 +44,38 @@
           "op": "start"
         },
         {
+          "op": "give_item",
+          "itemId": 7263,
+          "count": 1
+        },
+        {
           "op": "set_cond",
           "cond": 1
         }
       ],
       "htmlFile": "31274-event-31274-02-004.htm"
+    },
+    {
+      "npcId": 31274,
+      "hook": "event",
+      "when": "absent",
+      "event": "31539-01",
+      "hasItem": 7263,
+      "ops": [
+        {
+          "op": "give_adena",
+          "count": 157834
+        },
+        {
+          "op": "give_exp_sp",
+          "exp": 589092,
+          "sp": 58794
+        },
+        {
+          "op": "complete"
+        }
+      ],
+      "htmlFile": "31274-event-31539-01-005.htm"
     }
   ]
 }

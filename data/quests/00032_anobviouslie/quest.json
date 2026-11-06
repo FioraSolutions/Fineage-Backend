@@ -3,7 +3,9 @@
   "name": "AnObviousLie",
   "repeatable": false,
   "abortable": true,
-  "questItems": [],
+  "questItems": [
+    7165
+  ],
   "dialogs": [
     {
       "npcId": 30120,
@@ -57,6 +59,14 @@
       "when": "started",
       "cond": 8,
       "htmlFile": "30094-talk-c8-007.htm"
+    },
+    {
+      "npcId": 31706,
+      "hook": "talk",
+      "when": "started",
+      "cond": 2,
+      "hasItem": 7165,
+      "htmlFile": "31706-talk-c2-008.htm"
     },
     {
       "npcId": 31706,
@@ -119,11 +129,35 @@
       "event": "30094-02",
       "ops": [
         {
+          "op": "give_item",
+          "itemId": 7165,
+          "count": 1
+        },
+        {
           "op": "set_cond",
           "cond": 2
         }
       ],
       "htmlFile": "30120-event-30094-02-015.htm"
+    },
+    {
+      "npcId": 30120,
+      "hook": "event",
+      "when": "absent",
+      "event": "31706-02",
+      "hasItem": 7165,
+      "ops": [
+        {
+          "op": "take_item",
+          "itemId": 7165,
+          "count": 1
+        },
+        {
+          "op": "set_cond",
+          "cond": 3
+        }
+      ],
+      "htmlFile": "30120-event-31706-02-016.htm"
     },
     {
       "npcId": 30120,

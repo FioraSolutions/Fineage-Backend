@@ -3,7 +3,9 @@
   "name": "Hunting for Wild Beasts",
   "repeatable": true,
   "abortable": true,
-  "questItems": [],
+  "questItems": [
+    4259
+  ],
   "dialogs": [
     {
       "npcId": 30078,

@@ -3,7 +3,9 @@
   "name": "Gatekeeper's Favor",
   "repeatable": true,
   "abortable": true,
-  "questItems": [],
+  "questItems": [
+    1573
+  ],
   "dialogs": [
     {
       "npcId": 30540,
@@ -22,6 +24,11 @@
       "hook": "talk",
       "when": "started",
       "ops": [
+        {
+          "op": "give_item",
+          "itemId": 1659,
+          "count": 2
+        },
         {
           "op": "complete"
         }

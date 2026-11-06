@@ -3,7 +3,14 @@
   "name": "Into The Dark Elven Forest",
   "repeatable": false,
   "abortable": true,
-  "questItems": [],
+  "questItems": [
+    7563,
+    7564,
+    7565,
+    7566,
+    7567,
+    7568
+  ],
   "dialogs": [
     {
       "npcId": 30097,
@@ -30,6 +37,14 @@
       "npcId": 30097,
       "hook": "talk",
       "when": "started",
+      "cond": 2,
+      "hasItem": 7568,
+      "htmlFile": "30097-talk-c2-003.htm"
+    },
+    {
+      "npcId": 30097,
+      "hook": "talk",
+      "when": "started",
       "cond": 3,
       "htmlFile": "30097-talk-c3-004.htm"
     },
@@ -37,8 +52,24 @@
       "npcId": 30097,
       "hook": "talk",
       "when": "started",
+      "cond": 4,
+      "hasItem": 7567,
+      "htmlFile": "30097-talk-c4-005.htm"
+    },
+    {
+      "npcId": 30097,
+      "hook": "talk",
+      "when": "started",
       "cond": 5,
       "htmlFile": "30097-talk-c5-006.htm"
+    },
+    {
+      "npcId": 30097,
+      "hook": "talk",
+      "when": "started",
+      "cond": 6,
+      "hasItem": 7566,
+      "htmlFile": "30097-talk-c6-007.htm"
     },
     {
       "npcId": 30097,
@@ -53,11 +84,154 @@
           "op": "start"
         },
         {
+          "op": "give_item",
+          "itemId": 7563,
+          "count": 1
+        },
+        {
           "op": "set_cond",
           "cond": 1
         }
       ],
       "htmlFile": "30097-event-30097-04-008.htm"
+    },
+    {
+      "npcId": 30097,
+      "hook": "event",
+      "when": "absent",
+      "event": "30094-02",
+      "hasItem": 7563,
+      "ops": [
+        {
+          "op": "take_item",
+          "itemId": 7563,
+          "count": 1
+        },
+        {
+          "op": "give_item",
+          "itemId": 7568,
+          "count": 1
+        },
+        {
+          "op": "set_cond",
+          "cond": 2
+        }
+      ],
+      "htmlFile": "30097-event-30094-02-009.htm"
+    },
+    {
+      "npcId": 30097,
+      "hook": "event",
+      "when": "absent",
+      "event": "30097-07",
+      "hasItem": 7568,
+      "ops": [
+        {
+          "op": "take_item",
+          "itemId": 7568,
+          "count": 1
+        },
+        {
+          "op": "give_item",
+          "itemId": 7564,
+          "count": 1
+        },
+        {
+          "op": "set_cond",
+          "cond": 3
+        }
+      ],
+      "htmlFile": "30097-event-30097-07-010.htm"
+    },
+    {
+      "npcId": 30097,
+      "hook": "event",
+      "when": "absent",
+      "event": "30090-02",
+      "hasItem": 7564,
+      "ops": [
+        {
+          "op": "take_item",
+          "itemId": 7564,
+          "count": 1
+        },
+        {
+          "op": "give_item",
+          "itemId": 7567,
+          "count": 1
+        },
+        {
+          "op": "set_cond",
+          "cond": 4
+        }
+      ],
+      "htmlFile": "30097-event-30090-02-011.htm"
+    },
+    {
+      "npcId": 30097,
+      "hook": "event",
+      "when": "absent",
+      "event": "30097-11",
+      "hasItem": 7567,
+      "ops": [
+        {
+          "op": "take_item",
+          "itemId": 7567,
+          "count": 1
+        },
+        {
+          "op": "give_item",
+          "itemId": 7565,
+          "count": 1
+        },
+        {
+          "op": "set_cond",
+          "cond": 5
+        }
+      ],
+      "htmlFile": "30097-event-30097-11-012.htm"
+    },
+    {
+      "npcId": 30097,
+      "hook": "event",
+      "when": "absent",
+      "event": "30116-02",
+      "hasItem": 7565,
+      "ops": [
+        {
+          "op": "take_item",
+          "itemId": 7565,
+          "count": 1
+        },
+        {
+          "op": "give_item",
+          "itemId": 7566,
+          "count": 1
+        },
+        {
+          "op": "set_cond",
+          "cond": 6
+        }
+      ],
+      "htmlFile": "30097-event-30116-02-013.htm"
+    },
+    {
+      "npcId": 30097,
+      "hook": "event",
+      "when": "absent",
+      "event": "30097-15",
+      "hasItem": 7566,
+      "ops": [
+        {
+          "op": "give_item",
+          "itemId": 7556,
+          "count": 1
+        },
+        {
+          "op": "complete"
+        }
+      ],
+      "htmlFile": "30097-event-30097-15-014.htm"
     }
   ]
 }

@@ -3,7 +3,9 @@
   "name": "Collector's Dream",
   "repeatable": true,
   "abortable": true,
-  "questItems": [],
+  "questItems": [
+    1087
+  ],
   "dialogs": [
     {
       "npcId": 30222,

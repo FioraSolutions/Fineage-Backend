@@ -3,7 +3,11 @@
   "name": "The Hidden Veins",
   "repeatable": true,
   "abortable": true,
-  "questItems": [],
+  "questItems": [
+    1488,
+    1489,
+    1490
+  ],
   "dialogs": [
     {
       "npcId": 30539,
@@ -54,6 +58,18 @@
       "hook": "event",
       "when": "absent",
       "event": "30539-03",
+      "ops": [
+        {
+          "op": "take_item",
+          "itemId": 1489,
+          "count": 4
+        },
+        {
+          "op": "give_item",
+          "itemId": 1490,
+          "count": 1
+        }
+      ],
       "htmlFile": "30535-event-30539-03-004.htm"
     }
   ]

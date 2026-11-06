@@ -3,7 +3,11 @@
   "name": "An Ice Merchant's Dream",
   "repeatable": true,
   "abortable": true,
-  "questItems": [],
+  "questItems": [
+    8057,
+    8077,
+    8078
+  ],
   "dialogs": [
     {
       "npcId": 32020,
@@ -11,6 +15,13 @@
       "when": "absent",
       "maxLevel": 52,
       "htmlFile": "32020-talk-000.htm"
+    },
+    {
+      "npcId": 32023,
+      "hook": "talk",
+      "when": "absent",
+      "hasItem": 8077,
+      "htmlFile": "32023-talk-001.htm"
     },
     {
       "npcId": 32023,
@@ -123,7 +134,52 @@
       "npcId": 32020,
       "hook": "event",
       "when": "absent",
+      "event": "32023-04",
+      "hasItem": 8077,
+      "htmlFile": "32020-event-32023-04-016.htm"
+    },
+    {
+      "npcId": 32020,
+      "hook": "event",
+      "when": "absent",
+      "event": "32023-05",
+      "hasItem": 8077,
+      "ops": [
+        {
+          "op": "take_item",
+          "itemId": 8077,
+          "count": 1
+        }
+      ],
+      "htmlFile": "32020-event-32023-05-017.htm"
+    },
+    {
+      "npcId": 32020,
+      "hook": "event",
+      "when": "absent",
+      "event": "32023-06",
+      "hasItem": 8077,
+      "ops": [
+        {
+          "op": "take_item",
+          "itemId": 8077,
+          "count": 1
+        }
+      ],
+      "htmlFile": "32020-event-32023-06-018.htm"
+    },
+    {
+      "npcId": 32020,
+      "hook": "event",
+      "when": "absent",
       "event": "REPLY4",
+      "ops": [
+        {
+          "op": "give_item",
+          "itemId": 8078,
+          "count": 1
+        }
+      ],
       "htmlFile": "32020-event-REPLY4-019.htm"
     },
     {
@@ -131,6 +187,13 @@
       "hook": "event",
       "when": "absent",
       "event": "REPLY5",
+      "ops": [
+        {
+          "op": "give_item",
+          "itemId": 8078,
+          "count": 1
+        }
+      ],
       "htmlFile": "32020-event-REPLY5-020.htm"
     }
   ]

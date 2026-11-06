@@ -3,7 +3,10 @@
   "name": "Specialty Liquor Delivery",
   "repeatable": true,
   "abortable": true,
-  "questItems": [],
+  "questItems": [
+    7197,
+    7198
+  ],
   "dialogs": [
     {
       "npcId": 31521,
@@ -28,8 +31,27 @@
       "npcId": 31521,
       "hook": "talk",
       "when": "started",
+      "cond": 6,
+      "hasItem": 7198,
+      "htmlFile": "31521-talk-c6-003.htm"
+    },
+    {
+      "npcId": 31521,
+      "hook": "talk",
+      "when": "started",
       "cond": 7,
+      "lacksItems": [
+        7197
+      ],
       "htmlFile": "31521-talk-c7-004.htm"
+    },
+    {
+      "npcId": 31547,
+      "hook": "talk",
+      "when": "started",
+      "cond": 1,
+      "hasItem": 7197,
+      "htmlFile": "31547-talk-c1-005.htm"
     },
     {
       "npcId": 31547,
@@ -57,11 +79,134 @@
           "op": "start"
         },
         {
+          "op": "give_item",
+          "itemId": 7197,
+          "count": 5
+        },
+        {
           "op": "set_cond",
           "cond": 1
         }
       ],
       "htmlFile": "31521-event-31521-03-008.htm"
+    },
+    {
+      "npcId": 31521,
+      "hook": "event",
+      "when": "absent",
+      "event": "31521-06",
+      "hasItem": 7198,
+      "ops": [
+        {
+          "op": "set_cond",
+          "cond": 7
+        }
+      ],
+      "htmlFile": "31521-event-31521-06-009.htm"
+    },
+    {
+      "npcId": 31521,
+      "hook": "event",
+      "when": "absent",
+      "event": "31547-02",
+      "hasItem": 7197,
+      "ops": [
+        {
+          "op": "take_item",
+          "itemId": 7197,
+          "count": 1
+        },
+        {
+          "op": "give_item",
+          "itemId": 7198,
+          "count": 1
+        },
+        {
+          "op": "set_cond",
+          "cond": 2
+        }
+      ],
+      "htmlFile": "31521-event-31547-02-010.htm"
+    },
+    {
+      "npcId": 31521,
+      "hook": "event",
+      "when": "absent",
+      "event": "31543-02",
+      "hasItem": 7197,
+      "ops": [
+        {
+          "op": "take_item",
+          "itemId": 7197,
+          "count": 1
+        },
+        {
+          "op": "give_item",
+          "itemId": 7198,
+          "count": 1
+        }
+      ],
+      "htmlFile": "31521-event-31543-02-011.htm"
+    },
+    {
+      "npcId": 31521,
+      "hook": "event",
+      "when": "absent",
+      "event": "31544-02",
+      "hasItem": 7197,
+      "ops": [
+        {
+          "op": "take_item",
+          "itemId": 7197,
+          "count": 1
+        },
+        {
+          "op": "give_item",
+          "itemId": 7198,
+          "count": 1
+        }
+      ],
+      "htmlFile": "31521-event-31544-02-012.htm"
+    },
+    {
+      "npcId": 31521,
+      "hook": "event",
+      "when": "absent",
+      "event": "31545-02",
+      "hasItem": 7197,
+      "ops": [
+        {
+          "op": "take_item",
+          "itemId": 7197,
+          "count": 1
+        },
+        {
+          "op": "give_item",
+          "itemId": 7198,
+          "count": 1
+        }
+      ],
+      "htmlFile": "31521-event-31545-02-013.htm"
+    },
+    {
+      "npcId": 31521,
+      "hook": "event",
+      "when": "absent",
+      "event": "31546-02",
+      "hasItem": 7197,
+      "ops": [
+        {
+          "op": "take_item",
+          "itemId": 7197,
+          "count": 1
+        },
+        {
+          "op": "give_item",
+          "itemId": 7198,
+          "count": 1
+        }
+      ],
+      "htmlFile": "31521-event-31546-02-014.htm"
     },
     {
       "npcId": 31521,
@@ -86,6 +231,13 @@
       "hook": "event",
       "when": "absent",
       "event": "31267-02",
+      "ops": [
+        {
+          "op": "give_item",
+          "itemId": 6849,
+          "count": 1
+        }
+      ],
       "htmlFile": "31521-event-31267-02-016.htm"
     },
     {
@@ -93,6 +245,13 @@
       "hook": "event",
       "when": "absent",
       "event": "31267-02",
+      "ops": [
+        {
+          "op": "give_item",
+          "itemId": 6847,
+          "count": 1
+        }
+      ],
       "htmlFile": "31521-event-31267-02-017.htm"
     }
   ]

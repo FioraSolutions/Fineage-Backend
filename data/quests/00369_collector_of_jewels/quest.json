@@ -3,13 +3,29 @@
   "name": "Collector of Jewels",
   "repeatable": true,
   "abortable": true,
-  "questItems": [],
+  "questItems": [
+    5882,
+    5883
+  ],
   "dialogs": [
     {
       "npcId": 30376,
       "hook": "talk",
       "when": "absent",
+      "htmlFile": "30376-event-30376-02-003.htm"
+    },
+    {
+      "npcId": 30376,
+      "hook": "talk",
+      "when": "started",
+      "whenVar": "memoState",
+      "whenValue": "1",
       "ops": [
+        {
+          "op": "set",
+          "key": "memoState",
+          "value": "2"
+        },
         {
           "op": "give_adena",
           "count": 31810
@@ -20,13 +36,17 @@
     {
       "npcId": 30376,
       "hook": "talk",
-      "when": "absent",
+      "when": "started",
+      "whenVar": "memoState",
+      "whenValue": "2",
       "htmlFile": "30376-talk-001.htm"
     },
     {
       "npcId": 30376,
       "hook": "talk",
-      "when": "absent",
+      "when": "started",
+      "whenVar": "memoState",
+      "whenValue": "3",
       "ops": [
         {
           "op": "give_adena",
@@ -51,6 +71,11 @@
           "op": "start"
         },
         {
+          "op": "set",
+          "key": "memoState",
+          "value": "1"
+        },
+        {
           "op": "set_cond",
           "cond": 1
         }
@@ -70,6 +95,11 @@
       "when": "absent",
       "event": "30376-06",
       "ops": [
+        {
+          "op": "set",
+          "key": "memoState",
+          "value": "3"
+        },
         {
           "op": "set_cond",
           "cond": 3

@@ -3,7 +3,10 @@
   "name": "Supplier of Reagents",
   "repeatable": true,
   "abortable": true,
-  "questItems": [],
+  "questItems": [
+    5904,
+    6317
+  ],
   "dialogs": [
     {
       "npcId": 30166,
@@ -81,6 +84,16 @@
           "op": "start"
         },
         {
+          "op": "give_item",
+          "itemId": 5904,
+          "count": 1
+        },
+        {
+          "op": "give_item",
+          "itemId": 6317,
+          "count": 1
+        },
+        {
           "op": "set_cond",
           "cond": 1
         }
@@ -104,6 +117,13 @@
       "hook": "event",
       "when": "absent",
       "event": "31149-02",
+      "ops": [
+        {
+          "op": "set",
+          "key": "memoState",
+          "value": "0"
+        }
+      ],
       "htmlFile": "30166-event-31149-02-011.htm"
     },
     {

@@ -3,7 +3,9 @@
   "name": "Hunting Leto Lizardman",
   "repeatable": true,
   "abortable": true,
-  "questItems": [],
+  "questItems": [
+    7139
+  ],
   "dialogs": [
     {
       "npcId": 30126,

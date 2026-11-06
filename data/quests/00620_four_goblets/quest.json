@@ -3,36 +3,76 @@
   "name": "Four Goblets",
   "repeatable": true,
   "abortable": true,
-  "questItems": [],
+  "questItems": [
+    7255,
+    7256,
+    7257,
+    7258,
+    7259,
+    7261
+  ],
   "dialogs": [
     {
       "npcId": 31453,
       "hook": "talk",
       "when": "absent",
+      "hasItems": [
+        7256,
+        7257,
+        7258,
+        7259
+      ],
+      "lacksItems": [
+        7262
+      ],
       "htmlFile": "31453-talk-000.htm"
     },
     {
       "npcId": 31453,
       "hook": "talk",
       "when": "absent",
+      "hasItems": [
+        7256,
+        7257,
+        7258,
+        7259
+      ],
       "htmlFile": "31453-talk-001.htm"
     },
     {
       "npcId": 31452,
       "hook": "talk",
       "when": "absent",
+      "hasItems": [
+        7256,
+        7257,
+        7258,
+        7259
+      ],
+      "lacksItems": [
+        7262
+      ],
       "htmlFile": "31452-talk-002.htm"
     },
     {
       "npcId": 31452,
       "hook": "talk",
       "when": "absent",
+      "lacksItems": [
+        7262
+      ],
       "htmlFile": "31452-talk-003.htm"
     },
     {
       "npcId": 31452,
       "hook": "talk",
       "when": "absent",
+      "hasItems": [
+        7256,
+        7257,
+        7258,
+        7259
+      ],
       "htmlFile": "31452-talk-004.htm"
     },
     {
@@ -229,6 +269,20 @@
       "npcId": 31453,
       "hook": "event",
       "when": "absent",
+      "event": "31453-12",
+      "hasItem": 7262,
+      "ops": [
+        {
+          "op": "set_cond",
+          "cond": 2
+        }
+      ],
+      "htmlFile": "31453-event-31453-12-033.htm"
+    },
+    {
+      "npcId": 31453,
+      "hook": "event",
+      "when": "absent",
       "event": "31453-15",
       "ops": [
         {
@@ -242,10 +296,21 @@
       "hook": "event",
       "when": "absent",
       "event": "31453-28",
+      "hasItems": [
+        7256,
+        7257,
+        7258,
+        7259
+      ],
       "ops": [
         {
           "op": "take_item",
           "itemId": 1,
+          "count": 1
+        },
+        {
+          "op": "give_item",
+          "itemId": 7262,
           "count": 1
         },
         {
@@ -274,6 +339,13 @@
       "hook": "event",
       "when": "absent",
       "event": "6881",
+      "ops": [
+        {
+          "op": "take_item",
+          "itemId": 7254,
+          "count": 1000
+        }
+      ],
       "htmlFile": "31453-event-6881-038.htm"
     },
     {
@@ -281,6 +353,13 @@
       "hook": "event",
       "when": "absent",
       "event": "6883",
+      "ops": [
+        {
+          "op": "take_item",
+          "itemId": 7254,
+          "count": 1000
+        }
+      ],
       "htmlFile": "31453-event-6883-039.htm"
     },
     {
@@ -288,6 +367,13 @@
       "hook": "event",
       "when": "absent",
       "event": "6885",
+      "ops": [
+        {
+          "op": "take_item",
+          "itemId": 7254,
+          "count": 1000
+        }
+      ],
       "htmlFile": "31453-event-6885-040.htm"
     },
     {
@@ -295,6 +381,13 @@
       "hook": "event",
       "when": "absent",
       "event": "6887",
+      "ops": [
+        {
+          "op": "take_item",
+          "itemId": 7254,
+          "count": 1000
+        }
+      ],
       "htmlFile": "31453-event-6887-041.htm"
     },
     {
@@ -302,6 +395,13 @@
       "hook": "event",
       "when": "absent",
       "event": "6891",
+      "ops": [
+        {
+          "op": "take_item",
+          "itemId": 7254,
+          "count": 1000
+        }
+      ],
       "htmlFile": "31453-event-6891-042.htm"
     },
     {
@@ -309,6 +409,13 @@
       "hook": "event",
       "when": "absent",
       "event": "6893",
+      "ops": [
+        {
+          "op": "take_item",
+          "itemId": 7254,
+          "count": 1000
+        }
+      ],
       "htmlFile": "31453-event-6893-043.htm"
     },
     {
@@ -316,6 +423,13 @@
       "hook": "event",
       "when": "absent",
       "event": "6895",
+      "ops": [
+        {
+          "op": "take_item",
+          "itemId": 7254,
+          "count": 1000
+        }
+      ],
       "htmlFile": "31453-event-6895-044.htm"
     },
     {
@@ -323,6 +437,13 @@
       "hook": "event",
       "when": "absent",
       "event": "6897",
+      "ops": [
+        {
+          "op": "take_item",
+          "itemId": 7254,
+          "count": 1000
+        }
+      ],
       "htmlFile": "31453-event-6897-045.htm"
     },
     {
@@ -330,6 +451,13 @@
       "hook": "event",
       "when": "absent",
       "event": "6899",
+      "ops": [
+        {
+          "op": "take_item",
+          "itemId": 7254,
+          "count": 1000
+        }
+      ],
       "htmlFile": "31453-event-6899-046.htm"
     },
     {
@@ -337,7 +465,37 @@
       "hook": "event",
       "when": "absent",
       "event": "7580",
+      "ops": [
+        {
+          "op": "take_item",
+          "itemId": 7254,
+          "count": 1000
+        }
+      ],
       "htmlFile": "31453-event-7580-047.htm"
+    },
+    {
+      "npcId": 31453,
+      "hook": "event",
+      "when": "absent",
+      "event": "31454-07",
+      "hasItem": 7255,
+      "ops": [
+        {
+          "op": "take_item",
+          "itemId": 7255,
+          "count": 1
+        }
+      ],
+      "htmlFile": "31453-event-31454-07-048.htm"
+    },
+    {
+      "npcId": 31453,
+      "hook": "event",
+      "when": "absent",
+      "event": "31919-02",
+      "hasItem": 7255,
+      "htmlFile": "31453-event-31919-02-049.htm"
     },
     {
       "npcId": 31453,

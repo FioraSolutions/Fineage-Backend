@@ -3,7 +3,10 @@
   "name": "ExplorationOfTheGiantsCavePart1",
   "repeatable": true,
   "abortable": true,
-  "questItems": [],
+  "questItems": [
+    5890,
+    5891
+  ],
   "dialogs": [
     {
       "npcId": 31147,
@@ -23,6 +26,13 @@
       "npcId": 30182,
       "hook": "talk",
       "when": "started",
+      "hasItem": 5890,
+      "htmlFile": "30182-talk-002.htm"
+    },
+    {
+      "npcId": 30182,
+      "hook": "talk",
+      "when": "started",
       "htmlFile": "30182-talk-003.htm"
     },
     {
@@ -30,6 +40,13 @@
       "hook": "event",
       "when": "absent",
       "event": "31147-03",
+      "ops": [
+        {
+          "op": "give_item",
+          "itemId": 5891,
+          "count": 1
+        }
+      ],
       "htmlFile": "31147-event-31147-03-004.htm"
     },
     {
@@ -51,6 +68,18 @@
       "hook": "event",
       "when": "absent",
       "event": "30182-02",
+      "ops": [
+        {
+          "op": "take_item",
+          "itemId": 5890,
+          "count": 1
+        },
+        {
+          "op": "give_item",
+          "itemId": 5892,
+          "count": 1
+        }
+      ],
       "htmlFile": "31147-event-30182-02-007.htm"
     }
   ]

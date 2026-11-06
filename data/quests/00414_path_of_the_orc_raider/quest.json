@@ -3,13 +3,42 @@
   "name": "Path Of The Orc Raider",
   "repeatable": false,
   "abortable": true,
-  "questItems": [],
+  "questItems": [
+    1578,
+    1579,
+    1580,
+    1589,
+    1590,
+    1591,
+    8544
+  ],
   "dialogs": [
     {
       "npcId": 30570,
       "hook": "talk",
       "when": "absent",
+      "hasItem": 1579,
+      "htmlFile": "30570-talk-000.htm"
+    },
+    {
+      "npcId": 30570,
+      "hook": "talk",
+      "when": "absent",
+      "hasItem": 1579,
+      "htmlFile": "30570-talk-001.htm"
+    },
+    {
+      "npcId": 30570,
+      "hook": "talk",
+      "when": "absent",
       "htmlFile": "30570-talk-002.htm"
+    },
+    {
+      "npcId": 30570,
+      "hook": "talk",
+      "when": "absent",
+      "hasItem": 1591,
+      "htmlFile": "30570-talk-003.htm"
     },
     {
       "npcId": 30570,
@@ -21,6 +50,9 @@
       "npcId": 30501,
       "hook": "talk",
       "when": "absent",
+      "lacksItems": [
+        1591
+      ],
       "htmlFile": "30501-talk-005.htm"
     },
     {
@@ -39,6 +71,9 @@
       "npcId": 31978,
       "hook": "talk",
       "when": "absent",
+      "lacksItems": [
+        8544
+      ],
       "htmlFile": "31978-talk-008.htm"
     },
     {
@@ -69,6 +104,69 @@
       "npcId": 30570,
       "hook": "event",
       "when": "absent",
+      "event": "30570-07a",
+      "hasItem": 1579,
+      "ops": [
+        {
+          "op": "take_item",
+          "itemId": 1579,
+          "count": 1
+        },
+        {
+          "op": "take_item",
+          "itemId": 1580,
+          "count": 1
+        },
+        {
+          "op": "give_item",
+          "itemId": 1589,
+          "count": 1
+        },
+        {
+          "op": "give_item",
+          "itemId": 1590,
+          "count": 1
+        },
+        {
+          "op": "set_cond",
+          "cond": 3
+        }
+      ],
+      "htmlFile": "30570-event-30570-07a-012.htm"
+    },
+    {
+      "npcId": 30570,
+      "hook": "event",
+      "when": "absent",
+      "event": "30570-07b",
+      "hasItem": 1579,
+      "ops": [
+        {
+          "op": "take_item",
+          "itemId": 1579,
+          "count": 1
+        },
+        {
+          "op": "take_item",
+          "itemId": 1580,
+          "count": 1
+        },
+        {
+          "op": "set",
+          "key": "memoState",
+          "value": "2"
+        },
+        {
+          "op": "set_cond",
+          "cond": 5
+        }
+      ],
+      "htmlFile": "30570-event-30570-07b-013.htm"
+    },
+    {
+      "npcId": 30570,
+      "hook": "event",
+      "when": "absent",
       "event": "31978-04",
       "htmlFile": "30570-event-31978-04-014.htm"
     },
@@ -78,6 +176,11 @@
       "when": "absent",
       "event": "31978-02",
       "ops": [
+        {
+          "op": "set",
+          "key": "memoState",
+          "value": "3"
+        },
         {
           "op": "set_cond",
           "cond": 6
@@ -89,7 +192,38 @@
       "npcId": 27045,
       "hook": "kill",
       "when": "started",
+      "hasItems": [
+        1579,
+        1580
+      ],
       "ops": [
+        {
+          "op": "drop_item",
+          "itemId": 1580,
+          "count": 1,
+          "chance": 1.0,
+          "limit": 1
+        },
+        {
+          "op": "set_cond",
+          "cond": 2
+        }
+      ],
+      "html": ""
+    },
+    {
+      "npcId": 27045,
+      "hook": "kill",
+      "when": "started",
+      "hasItem": 1580,
+      "ops": [
+        {
+          "op": "drop_item",
+          "itemId": 1580,
+          "count": 1,
+          "chance": 1.0,
+          "limit": 1
+        },
         {
           "op": "set_cond",
           "cond": 2
@@ -113,7 +247,17 @@
       "npcId": 27320,
       "hook": "kill",
       "when": "started",
+      "lacksItems": [
+        8544
+      ],
       "ops": [
+        {
+          "op": "drop_item",
+          "itemId": 8544,
+          "count": 1,
+          "chance": 1.0,
+          "limit": 1
+        },
         {
           "op": "set_cond",
           "cond": 7

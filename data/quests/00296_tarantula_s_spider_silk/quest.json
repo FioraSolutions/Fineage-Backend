@@ -3,7 +3,10 @@
   "name": "Tarantula's Spider Silk",
   "repeatable": true,
   "abortable": true,
-  "questItems": [],
+  "questItems": [
+    1493,
+    1494
+  ],
   "dialogs": [
     {
       "npcId": 30519,
@@ -48,6 +51,21 @@
       "when": "absent",
       "event": "30519-07",
       "htmlFile": "30519-event-30519-07-002.htm"
+    },
+    {
+      "npcId": 30519,
+      "hook": "event",
+      "when": "absent",
+      "event": "30548-03",
+      "hasItem": 1494,
+      "ops": [
+        {
+          "op": "take_item",
+          "itemId": 1494,
+          "count": 1
+        }
+      ],
+      "htmlFile": "30519-event-30548-03-003.htm"
     }
   ]
 }

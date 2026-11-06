@@ -3,8 +3,29 @@
   "name": "Path Of The Assassin",
   "repeatable": false,
   "abortable": true,
-  "questItems": [],
+  "questItems": [
+    1245,
+    1246,
+    1247,
+    1248,
+    1250,
+    1251
+  ],
   "dialogs": [
+    {
+      "npcId": 30416,
+      "hook": "talk",
+      "when": "absent",
+      "hasItem": 1246,
+      "htmlFile": "30416-talk-000.htm"
+    },
+    {
+      "npcId": 30416,
+      "hook": "talk",
+      "when": "absent",
+      "hasItem": 1247,
+      "htmlFile": "30416-talk-001.htm"
+    },
     {
       "npcId": 30416,
       "hook": "talk",
@@ -12,16 +33,113 @@
       "htmlFile": "30416-talk-002.htm"
     },
     {
+      "npcId": 30416,
+      "hook": "talk",
+      "when": "absent",
+      "hasItem": 1250,
+      "htmlFile": "30416-talk-003.htm"
+    },
+    {
+      "npcId": 30416,
+      "hook": "talk",
+      "when": "absent",
+      "hasItem": 1245,
+      "htmlFile": "30416-talk-004.htm"
+    },
+    {
       "npcId": 30382,
       "hook": "talk",
       "when": "absent",
+      "hasItem": 1246,
+      "htmlFile": "30382-talk-005.htm"
+    },
+    {
+      "npcId": 30382,
+      "hook": "talk",
+      "when": "absent",
+      "hasItem": 1247,
+      "htmlFile": "30382-talk-006.htm"
+    },
+    {
+      "npcId": 30382,
+      "hook": "talk",
+      "when": "absent",
+      "hasItems": [
+        1247,
+        1248
+      ],
       "htmlFile": "30382-talk-007.htm"
     },
     {
       "npcId": 30382,
       "hook": "talk",
       "when": "absent",
+      "hasItem": 1248,
+      "htmlFile": "30382-talk-008.htm"
+    },
+    {
+      "npcId": 30382,
+      "hook": "talk",
+      "when": "absent",
+      "hasItem": 1250,
+      "htmlFile": "30382-talk-009.htm"
+    },
+    {
+      "npcId": 30382,
+      "hook": "talk",
+      "when": "absent",
       "htmlFile": "30382-talk-010.htm"
+    },
+    {
+      "npcId": 30419,
+      "hook": "talk",
+      "when": "absent",
+      "hasItem": 1245,
+      "htmlFile": "30419-talk-011.htm"
+    },
+    {
+      "npcId": 30419,
+      "hook": "talk",
+      "when": "absent",
+      "hasItem": 1246,
+      "htmlFile": "30419-talk-012.htm"
+    },
+    {
+      "npcId": 30419,
+      "hook": "talk",
+      "when": "absent",
+      "hasItem": 1250,
+      "ops": [
+        {
+          "op": "take_item",
+          "itemId": 1250,
+          "count": 1
+        },
+        {
+          "op": "give_item",
+          "itemId": 1251,
+          "count": 1
+        },
+        {
+          "op": "set_cond",
+          "cond": 7
+        }
+      ],
+      "htmlFile": "30419-talk-013.htm"
+    },
+    {
+      "npcId": 30419,
+      "hook": "talk",
+      "when": "absent",
+      "hasItem": 1251,
+      "htmlFile": "30419-talk-014.htm"
+    },
+    {
+      "npcId": 30419,
+      "hook": "talk",
+      "when": "absent",
+      "hasItem": 1247,
+      "htmlFile": "30419-talk-015.htm"
     },
     {
       "npcId": 30419,
@@ -71,6 +189,30 @@
       "npcId": 30416,
       "hook": "event",
       "when": "absent",
+      "event": "30382-03",
+      "hasItem": 1246,
+      "ops": [
+        {
+          "op": "take_item",
+          "itemId": 1246,
+          "count": 1
+        },
+        {
+          "op": "give_item",
+          "itemId": 1247,
+          "count": 1
+        },
+        {
+          "op": "set_cond",
+          "cond": 3
+        }
+      ],
+      "htmlFile": "30416-event-30382-03-022.htm"
+    },
+    {
+      "npcId": 30416,
+      "hook": "event",
+      "when": "absent",
       "event": "30419-02",
       "htmlFile": "30416-event-30419-02-023.htm"
     },
@@ -96,6 +238,43 @@
       "htmlFile": "30416-event-30419-06-026.htm"
     },
     {
+      "npcId": 30416,
+      "hook": "event",
+      "when": "absent",
+      "event": "30419-05",
+      "hasItem": 1245,
+      "ops": [
+        {
+          "op": "take_item",
+          "itemId": 1245,
+          "count": 1
+        },
+        {
+          "op": "give_item",
+          "itemId": 1246,
+          "count": 1
+        },
+        {
+          "op": "set_cond",
+          "cond": 2
+        }
+      ],
+      "htmlFile": "30416-event-30419-05-027.htm"
+    },
+    {
+      "npcId": 20369,
+      "hook": "kill",
+      "when": "started",
+      "hasItem": 1247,
+      "ops": [
+        {
+          "op": "set_cond",
+          "cond": 4
+        }
+      ],
+      "html": ""
+    },
+    {
       "npcId": 20369,
       "hook": "kill",
       "when": "started",
@@ -111,7 +290,17 @@
       "npcId": 27036,
       "hook": "kill",
       "when": "started",
+      "lacksItems": [
+        1250
+      ],
       "ops": [
+        {
+          "op": "drop_item",
+          "itemId": 1250,
+          "count": 1,
+          "chance": 1.0,
+          "limit": 1
+        },
         {
           "op": "set_cond",
           "cond": 6

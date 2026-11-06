@@ -3,7 +3,9 @@
   "name": "Gatekeeper's Offering",
   "repeatable": true,
   "abortable": true,
-  "questItems": [],
+  "questItems": [
+    1572
+  ],
   "dialogs": [
     {
       "npcId": 30576,
@@ -22,6 +24,11 @@
       "hook": "talk",
       "when": "started",
       "ops": [
+        {
+          "op": "give_item",
+          "itemId": 1658,
+          "count": 2
+        },
         {
           "op": "complete"
         }

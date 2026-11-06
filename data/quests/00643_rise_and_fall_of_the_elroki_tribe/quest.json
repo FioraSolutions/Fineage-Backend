@@ -3,7 +3,9 @@
   "name": "Rise and Fall of the Elroki Tribe",
   "repeatable": true,
   "abortable": true,
-  "questItems": [],
+  "questItems": [
+    8776
+  ],
   "dialogs": [
     {
       "npcId": 32106,
@@ -98,6 +100,13 @@
       "hook": "event",
       "when": "absent",
       "event": "32106-09",
+      "ops": [
+        {
+          "op": "take_item",
+          "itemId": 8776,
+          "count": 1
+        }
+      ],
       "htmlFile": "32106-event-32106-09-011.htm"
     },
     {
@@ -105,6 +114,9 @@
       "hook": "event",
       "when": "absent",
       "event": "exit",
+      "lacksItems": [
+        8776
+      ],
       "htmlFile": "32106-event-exit-012.htm"
     },
     {

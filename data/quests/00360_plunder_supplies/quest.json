@@ -3,7 +3,11 @@
   "name": "Plunder Supplies",
   "repeatable": false,
   "abortable": true,
-  "questItems": [],
+  "questItems": [
+    5870,
+    5871,
+    5872
+  ],
   "dialogs": [
     {
       "npcId": 30873,
@@ -27,6 +31,13 @@
       "npcId": 30873,
       "hook": "talk",
       "when": "started",
+      "ops": [
+        {
+          "op": "take_item",
+          "itemId": 5872,
+          "count": 1
+        }
+      ],
       "htmlFile": "30873-talk-003.htm"
     },
     {

@@ -3,7 +3,9 @@
   "name": "A Broken Dream",
   "repeatable": true,
   "abortable": true,
-  "questItems": [],
+  "questItems": [
+    8514
+  ],
   "dialogs": [
     {
       "npcId": 32054,

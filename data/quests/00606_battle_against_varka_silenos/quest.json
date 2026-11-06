@@ -3,7 +3,9 @@
   "name": "Battle against Varka Silenos",
   "repeatable": true,
   "abortable": true,
-  "questItems": [],
+  "questItems": [
+    7233
+  ],
   "dialogs": [
     {
       "npcId": 31370,

@@ -3,7 +3,12 @@
   "name": "The Other Side of Truth",
   "repeatable": true,
   "abortable": true,
-  "questItems": [],
+  "questItems": [
+    8079,
+    8080,
+    8081,
+    8082
+  ],
   "dialogs": [
     {
       "npcId": 32020,
@@ -45,11 +50,24 @@
       "cond": 5,
       "ops": [
         {
+          "op": "give_item",
+          "itemId": 8080,
+          "count": 1
+        },
+        {
           "op": "set_cond",
           "cond": 6
         }
       ],
       "htmlFile": "32020-talk-c5-005.htm"
+    },
+    {
+      "npcId": 32020,
+      "hook": "talk",
+      "when": "started",
+      "cond": 6,
+      "hasItem": 8080,
+      "htmlFile": "32020-talk-c6-006.htm"
     },
     {
       "npcId": 32020,
@@ -69,6 +87,14 @@
       "npcId": 32020,
       "hook": "talk",
       "when": "started",
+      "cond": 9,
+      "hasItem": 8082,
+      "htmlFile": "32020-talk-c9-009.htm"
+    },
+    {
+      "npcId": 32020,
+      "hook": "talk",
+      "when": "started",
       "cond": 10,
       "htmlFile": "32020-talk-c10-010.htm"
     },
@@ -77,6 +103,9 @@
       "hook": "talk",
       "when": "started",
       "cond": 11,
+      "lacksItems": [
+        8081
+      ],
       "htmlFile": "32020-talk-c11-011.htm"
     },
     {
@@ -85,6 +114,11 @@
       "when": "started",
       "cond": 1,
       "ops": [
+        {
+          "op": "give_item",
+          "itemId": 8079,
+          "count": 1
+        },
         {
           "op": "set_cond",
           "cond": 2
@@ -117,6 +151,14 @@
       "npcId": 32018,
       "hook": "talk",
       "when": "started",
+      "cond": 6,
+      "hasItem": 8080,
+      "htmlFile": "32018-talk-c6-016.htm"
+    },
+    {
+      "npcId": 32018,
+      "hook": "talk",
+      "when": "started",
       "cond": 7,
       "htmlFile": "32018-talk-c7-017.htm"
     },
@@ -131,7 +173,18 @@
       "npcId": 32022,
       "hook": "talk",
       "when": "started",
+      "cond": 9,
+      "hasItem": 8082,
+      "htmlFile": "32022-talk-c9-019.htm"
+    },
+    {
+      "npcId": 32022,
+      "hook": "talk",
+      "when": "started",
       "cond": 11,
+      "lacksItems": [
+        8082
+      ],
       "htmlFile": "32022-talk-c11-020.htm"
     },
     {
@@ -160,6 +213,16 @@
       "hook": "talk",
       "when": "started",
       "cond": 11,
+      "lacksItems": [
+        8081
+      ],
+      "ops": [
+        {
+          "op": "give_item",
+          "itemId": 8081,
+          "count": 1
+        }
+      ],
       "htmlFile": "32021-talk-c11-024.htm"
     },
     {
@@ -188,6 +251,16 @@
       "hook": "talk",
       "when": "started",
       "cond": 11,
+      "lacksItems": [
+        8081
+      ],
+      "ops": [
+        {
+          "op": "give_item",
+          "itemId": 8081,
+          "count": 1
+        }
+      ],
       "htmlFile": "32077-talk-c11-028.htm"
     },
     {
@@ -216,6 +289,16 @@
       "hook": "talk",
       "when": "started",
       "cond": 11,
+      "lacksItems": [
+        8081
+      ],
+      "ops": [
+        {
+          "op": "give_item",
+          "itemId": 8081,
+          "count": 1
+        }
+      ],
       "htmlFile": "32078-talk-c11-032.htm"
     },
     {
@@ -244,6 +327,16 @@
       "hook": "talk",
       "when": "started",
       "cond": 11,
+      "lacksItems": [
+        8081
+      ],
+      "ops": [
+        {
+          "op": "give_item",
+          "itemId": 8081,
+          "count": 1
+        }
+      ],
       "htmlFile": "32079-talk-c11-036.htm"
     },
     {
@@ -272,6 +365,11 @@
       "event": "32020-07",
       "ops": [
         {
+          "op": "take_item",
+          "itemId": 8079,
+          "count": 1
+        },
+        {
           "op": "set_cond",
           "cond": 3
         }
@@ -284,6 +382,11 @@
       "when": "absent",
       "event": "32020-05",
       "ops": [
+        {
+          "op": "take_item",
+          "itemId": 8079,
+          "count": 1
+        },
         {
           "op": "complete"
         }
@@ -386,8 +489,76 @@
       "npcId": 32020,
       "hook": "event",
       "when": "absent",
+      "event": "finish",
+      "hasItem": 8081,
+      "ops": [
+        {
+          "op": "give_adena",
+          "count": 115673
+        },
+        {
+          "op": "give_exp_sp",
+          "exp": 493595,
+          "sp": 40442
+        },
+        {
+          "op": "complete"
+        }
+      ],
+      "htmlFile": "32020-event-finish-049.htm"
+    },
+    {
+      "npcId": 32020,
+      "hook": "event",
+      "when": "absent",
+      "event": "finish2",
+      "hasItem": 8081,
+      "ops": [
+        {
+          "op": "give_adena",
+          "count": 115673
+        },
+        {
+          "op": "give_exp_sp",
+          "exp": 493595,
+          "sp": 40442
+        },
+        {
+          "op": "complete"
+        }
+      ],
+      "htmlFile": "32020-event-finish2-050.htm"
+    },
+    {
+      "npcId": 32020,
+      "hook": "event",
+      "when": "absent",
+      "event": "32018-05",
+      "hasItem": 8080,
+      "ops": [
+        {
+          "op": "take_item",
+          "itemId": 8080,
+          "count": 1
+        },
+        {
+          "op": "set_cond",
+          "cond": 7
+        }
+      ],
+      "htmlFile": "32020-event-32018-05-051.htm"
+    },
+    {
+      "npcId": 32020,
+      "hook": "event",
+      "when": "absent",
       "event": "32022-02",
       "ops": [
+        {
+          "op": "give_item",
+          "itemId": 8082,
+          "count": 1
+        },
         {
           "op": "set_cond",
           "cond": 9
@@ -400,6 +571,13 @@
       "hook": "event",
       "when": "absent",
       "event": "32021-02",
+      "ops": [
+        {
+          "op": "give_item",
+          "itemId": 8081,
+          "count": 1
+        }
+      ],
       "htmlFile": "32021-event-32021-02-053.htm"
     },
     {
@@ -407,6 +585,13 @@
       "hook": "event",
       "when": "absent",
       "event": "32021-02",
+      "ops": [
+        {
+          "op": "give_item",
+          "itemId": 8081,
+          "count": 1
+        }
+      ],
       "htmlFile": "32077-event-32021-02-054.htm"
     },
     {
@@ -414,6 +599,13 @@
       "hook": "event",
       "when": "absent",
       "event": "32021-02",
+      "ops": [
+        {
+          "op": "give_item",
+          "itemId": 8081,
+          "count": 1
+        }
+      ],
       "htmlFile": "32078-event-32021-02-055.htm"
     },
     {
@@ -421,6 +613,13 @@
       "hook": "event",
       "when": "absent",
       "event": "32021-02",
+      "ops": [
+        {
+          "op": "give_item",
+          "itemId": 8081,
+          "count": 1
+        }
+      ],
       "htmlFile": "32079-event-32021-02-056.htm"
     },
     {

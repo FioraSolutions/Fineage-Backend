@@ -3,7 +3,11 @@
   "name": "Arrow for Vengeance",
   "repeatable": true,
   "abortable": true,
-  "questItems": [],
+  "questItems": [
+    1452,
+    1453,
+    1454
+  ],
   "dialogs": [
     {
       "npcId": 30125,
@@ -59,18 +63,45 @@
       "npcId": 20145,
       "hook": "kill",
       "when": "started",
+      "ops": [
+        {
+          "op": "drop_item",
+          "itemId": 1452,
+          "count": 1,
+          "chance": 1.0,
+          "limit": 1
+        }
+      ],
       "html": ""
     },
     {
       "npcId": 20158,
       "hook": "kill",
       "when": "started",
+      "ops": [
+        {
+          "op": "drop_item",
+          "itemId": 1453,
+          "count": 1,
+          "chance": 1.0,
+          "limit": 1
+        }
+      ],
       "html": ""
     },
     {
       "npcId": 20176,
       "hook": "kill",
       "when": "started",
+      "ops": [
+        {
+          "op": "drop_item",
+          "itemId": 1454,
+          "count": 1,
+          "chance": 1.0,
+          "limit": 1
+        }
+      ],
       "html": ""
     }
   ]

@@ -3,13 +3,34 @@
   "name": "PursuitOfClanAmbition",
   "repeatable": true,
   "abortable": true,
-  "questItems": [],
+  "questItems": [
+    3839,
+    3840,
+    3841,
+    3842,
+    3843,
+    3844,
+    3845,
+    3846,
+    3847,
+    3866,
+    3867,
+    3868,
+    3869
+  ],
   "dialogs": [
     {
       "npcId": 30760,
       "hook": "talk",
       "when": "absent",
       "htmlFile": "30760-talk-000.htm"
+    },
+    {
+      "npcId": 30760,
+      "hook": "talk",
+      "when": "absent",
+      "hasItem": 3870,
+      "htmlFile": "30760-talk-001.htm"
     },
     {
       "npcId": 30760,
@@ -69,6 +90,13 @@
       "npcId": 30760,
       "hook": "talk",
       "when": "started",
+      "hasItem": 3869,
+      "htmlFile": "30760-talk-011.htm"
+    },
+    {
+      "npcId": 30760,
+      "hook": "talk",
+      "when": "started",
       "htmlFile": "30760-talk-012.htm"
     },
     {
@@ -93,6 +121,28 @@
       "npcId": 30645,
       "hook": "talk",
       "when": "started",
+      "ops": [
+        {
+          "op": "take_item",
+          "itemId": 3839,
+          "count": 1
+        },
+        {
+          "op": "take_item",
+          "itemId": 3840,
+          "count": 1
+        },
+        {
+          "op": "take_item",
+          "itemId": 3841,
+          "count": 1
+        },
+        {
+          "op": "take_item",
+          "itemId": 3842,
+          "count": 1
+        }
+      ],
       "htmlFile": "30645-talk-016.htm"
     },
     {
@@ -153,6 +203,23 @@
       "npcId": 30764,
       "hook": "talk",
       "when": "started",
+      "ops": [
+        {
+          "op": "take_item",
+          "itemId": 3846,
+          "count": 1
+        },
+        {
+          "op": "take_item",
+          "itemId": 3844,
+          "count": 1
+        },
+        {
+          "op": "take_item",
+          "itemId": 3843,
+          "count": 1
+        }
+      ],
       "htmlFile": "30764-talk-026.htm"
     },
     {
@@ -268,6 +335,13 @@
       "hook": "event",
       "when": "absent",
       "event": "30760-08",
+      "ops": [
+        {
+          "op": "give_item",
+          "itemId": 3866,
+          "count": 1
+        }
+      ],
       "htmlFile": "30760-event-30760-08-045.htm"
     },
     {
@@ -275,6 +349,13 @@
       "hook": "event",
       "when": "absent",
       "event": "30760-12",
+      "ops": [
+        {
+          "op": "give_item",
+          "itemId": 3867,
+          "count": 1
+        }
+      ],
       "htmlFile": "30760-event-30760-12-046.htm"
     },
     {
@@ -282,6 +363,13 @@
       "hook": "event",
       "when": "absent",
       "event": "30760-16",
+      "ops": [
+        {
+          "op": "give_item",
+          "itemId": 3868,
+          "count": 1
+        }
+      ],
       "htmlFile": "30760-event-30760-16-047.htm"
     },
     {
@@ -290,6 +378,16 @@
       "when": "absent",
       "event": "30760-20",
       "ops": [
+        {
+          "op": "take_item",
+          "itemId": 3869,
+          "count": 1
+        },
+        {
+          "op": "give_item",
+          "itemId": 3870,
+          "count": 1
+        },
         {
           "op": "give_exp_sp",
           "exp": 0,
@@ -312,6 +410,16 @@
       "event": "30760-23",
       "ops": [
         {
+          "op": "take_item",
+          "itemId": 3869,
+          "count": 1
+        },
+        {
+          "op": "give_item",
+          "itemId": 3870,
+          "count": 1
+        },
+        {
           "op": "give_exp_sp",
           "exp": 0,
           "sp": 250000
@@ -324,6 +432,13 @@
       "hook": "event",
       "when": "absent",
       "event": "30645-03",
+      "ops": [
+        {
+          "op": "take_item",
+          "itemId": 3866,
+          "count": 1
+        }
+      ],
       "htmlFile": "30760-event-30645-03-051.htm"
     },
     {
@@ -331,6 +446,18 @@
       "hook": "event",
       "when": "absent",
       "event": "30763-02",
+      "ops": [
+        {
+          "op": "give_item",
+          "itemId": 3839,
+          "count": 6
+        },
+        {
+          "op": "give_item",
+          "itemId": 3843,
+          "count": 1
+        }
+      ],
       "htmlFile": "30760-event-30763-02-052.htm"
     },
     {
@@ -339,6 +466,16 @@
       "when": "absent",
       "event": "30762-02",
       "ops": [
+        {
+          "op": "give_item",
+          "itemId": 3839,
+          "count": 4
+        },
+        {
+          "op": "give_item",
+          "itemId": 3840,
+          "count": 3
+        },
         {
           "op": "spawn_npc",
           "npcId": 27178
@@ -357,6 +494,11 @@
       "event": "30761-02",
       "ops": [
         {
+          "op": "give_item",
+          "itemId": 3840,
+          "count": 3
+        },
+        {
           "op": "spawn_npc",
           "npcId": 27178
         },
@@ -372,6 +514,18 @@
       "hook": "event",
       "when": "absent",
       "event": "30512-03",
+      "ops": [
+        {
+          "op": "take_item",
+          "itemId": 3843,
+          "count": 1
+        },
+        {
+          "op": "give_item",
+          "itemId": 3871,
+          "count": 1
+        }
+      ],
       "htmlFile": "30760-event-30512-03-055.htm"
     },
     {
@@ -379,6 +533,13 @@
       "hook": "event",
       "when": "absent",
       "event": "30764-03",
+      "ops": [
+        {
+          "op": "take_item",
+          "itemId": 3867,
+          "count": 1
+        }
+      ],
       "htmlFile": "30760-event-30764-03-056.htm"
     },
     {
@@ -386,6 +547,13 @@
       "hook": "event",
       "when": "absent",
       "event": "30764-05",
+      "ops": [
+        {
+          "op": "take_item",
+          "itemId": 3867,
+          "count": 1
+        }
+      ],
       "htmlFile": "30760-event-30764-05-057.htm"
     },
     {
@@ -393,6 +561,18 @@
       "hook": "event",
       "when": "absent",
       "event": "30764-06",
+      "ops": [
+        {
+          "op": "take_item",
+          "itemId": 3871,
+          "count": 1
+        },
+        {
+          "op": "give_item",
+          "itemId": 3838,
+          "count": 1
+        }
+      ],
       "htmlFile": "30760-event-30764-06-058.htm"
     },
     {
@@ -400,6 +580,13 @@
       "hook": "event",
       "when": "absent",
       "event": "30868-04",
+      "ops": [
+        {
+          "op": "take_item",
+          "itemId": 3868,
+          "count": 1
+        }
+      ],
       "htmlFile": "30760-event-30868-04-059.htm"
     },
     {

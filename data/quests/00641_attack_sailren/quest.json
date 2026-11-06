@@ -3,7 +3,9 @@
   "name": "Attack Sailren!",
   "repeatable": true,
   "abortable": true,
-  "questItems": [],
+  "questItems": [
+    8782
+  ],
   "dialogs": [
     {
       "npcId": 32109,
@@ -30,6 +32,24 @@
         }
       ],
       "htmlFile": "32109-event-32109-1-001.htm"
+    },
+    {
+      "npcId": 32109,
+      "hook": "event",
+      "when": "absent",
+      "event": "32109-2a",
+      "hasItem": 8782,
+      "ops": [
+        {
+          "op": "give_item",
+          "itemId": 8784,
+          "count": 1
+        },
+        {
+          "op": "complete"
+        }
+      ],
+      "htmlFile": "32109-event-32109-2a-002.htm"
     }
   ]
 }

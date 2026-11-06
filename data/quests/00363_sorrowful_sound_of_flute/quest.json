@@ -3,7 +3,11 @@
   "name": "Sorrowful Sound of Flute",
   "repeatable": true,
   "abortable": true,
-  "questItems": [],
+  "questItems": [
+    4318,
+    4319,
+    4320
+  ],
   "dialogs": [
     {
       "npcId": 30956,
@@ -15,19 +19,30 @@
       "npcId": 30956,
       "hook": "talk",
       "when": "started",
+      "whenVar": "memoState",
+      "whenValue": "2",
       "htmlFile": "30956-talk-001.htm"
     },
     {
       "npcId": 30956,
       "hook": "talk",
       "when": "started",
+      "whenVar": "memoState",
+      "whenValue": "4",
       "htmlFile": "30956-talk-002.htm"
     },
     {
       "npcId": 30956,
       "hook": "talk",
       "when": "started",
+      "whenVar": "memoState",
+      "whenValue": "5",
       "ops": [
+        {
+          "op": "give_item",
+          "itemId": 4420,
+          "count": 1
+        },
         {
           "op": "complete"
         }
@@ -38,6 +53,8 @@
       "npcId": 30956,
       "hook": "talk",
       "when": "started",
+      "whenVar": "memoState",
+      "whenValue": "6",
       "ops": [
         {
           "op": "complete"
@@ -143,6 +160,11 @@
           "op": "start"
         },
         {
+          "op": "set",
+          "key": "memoState",
+          "value": "2"
+        },
+        {
           "op": "set_cond",
           "cond": 1
         }
@@ -155,6 +177,16 @@
       "when": "absent",
       "event": "30956-05",
       "ops": [
+        {
+          "op": "give_item",
+          "itemId": 4318,
+          "count": 1
+        },
+        {
+          "op": "set",
+          "key": "memoState",
+          "value": "4"
+        },
         {
           "op": "set_cond",
           "cond": 3
@@ -169,6 +201,16 @@
       "event": "30956-06",
       "ops": [
         {
+          "op": "give_item",
+          "itemId": 4319,
+          "count": 1
+        },
+        {
+          "op": "set",
+          "key": "memoState",
+          "value": "4"
+        },
+        {
           "op": "set_cond",
           "cond": 3
         }
@@ -181,6 +223,16 @@
       "when": "absent",
       "event": "30956-07",
       "ops": [
+        {
+          "op": "give_item",
+          "itemId": 4320,
+          "count": 1
+        },
+        {
+          "op": "set",
+          "key": "memoState",
+          "value": "4"
+        },
         {
           "op": "set_cond",
           "cond": 3

@@ -3,7 +3,9 @@
   "name": "WatchingEyes",
   "repeatable": true,
   "abortable": true,
-  "questItems": [],
+  "questItems": [
+    7188
+  ],
   "dialogs": [
     {
       "npcId": 31683,

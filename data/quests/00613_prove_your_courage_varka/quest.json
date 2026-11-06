@@ -3,7 +3,9 @@
   "name": "Prove Your Courage! (Varka)",
   "repeatable": true,
   "abortable": true,
-  "questItems": [],
+  "questItems": [
+    7240
+  ],
   "dialogs": [
     {
       "npcId": 31377,
@@ -41,6 +43,29 @@
         }
       ],
       "htmlFile": "31377-event-31377-04-002.htm"
+    },
+    {
+      "npcId": 31377,
+      "hook": "event",
+      "when": "absent",
+      "event": "31377-07",
+      "hasItem": 7240,
+      "ops": [
+        {
+          "op": "give_item",
+          "itemId": 7229,
+          "count": 1
+        },
+        {
+          "op": "give_exp_sp",
+          "exp": 10000,
+          "sp": 0
+        },
+        {
+          "op": "complete"
+        }
+      ],
+      "htmlFile": "31377-event-31377-07-003.htm"
     }
   ]
 }

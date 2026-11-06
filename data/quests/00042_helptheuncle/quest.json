@@ -3,7 +3,10 @@
   "name": "HelpTheUncle",
   "repeatable": false,
   "abortable": true,
-  "questItems": [],
+  "questItems": [
+    7548,
+    7549
+  ],
   "dialogs": [
     {
       "npcId": 30828,
@@ -82,8 +85,37 @@
       "npcId": 30828,
       "hook": "event",
       "when": "absent",
+      "event": "30828-03",
+      "hasItem": 291,
+      "ops": [
+        {
+          "op": "take_item",
+          "itemId": 291,
+          "count": 1
+        },
+        {
+          "op": "set_cond",
+          "cond": 2
+        }
+      ],
+      "htmlFile": "30828-event-30828-03-009.htm"
+    },
+    {
+      "npcId": 30828,
+      "hook": "event",
+      "when": "absent",
       "event": "30828-06",
       "ops": [
+        {
+          "op": "take_item",
+          "itemId": 7548,
+          "count": 1
+        },
+        {
+          "op": "give_item",
+          "itemId": 7549,
+          "count": 1
+        },
         {
           "op": "set_cond",
           "cond": 4
@@ -95,8 +127,32 @@
       "npcId": 30828,
       "hook": "event",
       "when": "absent",
+      "event": "30735-02",
+      "hasItem": 7549,
+      "ops": [
+        {
+          "op": "take_item",
+          "itemId": 7549,
+          "count": 1
+        },
+        {
+          "op": "set_cond",
+          "cond": 5
+        }
+      ],
+      "htmlFile": "30828-event-30735-02-011.htm"
+    },
+    {
+      "npcId": 30828,
+      "hook": "event",
+      "when": "absent",
       "event": "30828-09",
       "ops": [
+        {
+          "op": "give_item",
+          "itemId": 7583,
+          "count": 1
+        },
         {
           "op": "complete"
         }

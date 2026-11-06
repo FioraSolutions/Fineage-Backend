@@ -3,7 +3,11 @@
   "name": "Make Formal Wear",
   "repeatable": false,
   "abortable": true,
-  "questItems": [],
+  "questItems": [
+    7159,
+    7160,
+    7164
+  ],
   "dialogs": [
     {
       "npcId": 30842,
@@ -112,6 +116,11 @@
       "event": "31520-02",
       "ops": [
         {
+          "op": "give_item",
+          "itemId": 7164,
+          "count": 1
+        },
+        {
           "op": "set_cond",
           "cond": 2
         }
@@ -125,6 +134,11 @@
       "event": "31521-02",
       "ops": [
         {
+          "op": "give_item",
+          "itemId": 7160,
+          "count": 1
+        },
+        {
           "op": "set_cond",
           "cond": 3
         }
@@ -136,6 +150,9 @@
       "hook": "event",
       "when": "absent",
       "event": "31627-02",
+      "lacksItems": [
+        7160
+      ],
       "htmlFile": "30842-event-31627-02-015.htm"
     },
     {
@@ -144,6 +161,11 @@
       "when": "absent",
       "event": "31521-05",
       "ops": [
+        {
+          "op": "give_item",
+          "itemId": 7159,
+          "count": 1
+        },
         {
           "op": "set_cond",
           "cond": 5
@@ -156,6 +178,9 @@
       "hook": "event",
       "when": "absent",
       "event": "31520-05",
+      "lacksItems": [
+        7159
+      ],
       "htmlFile": "30842-event-31520-05-017.htm"
     },
     {
@@ -163,6 +188,11 @@
       "hook": "event",
       "when": "absent",
       "event": "31520-08",
+      "lacksItems": [
+        7078,
+        7077,
+        7076
+      ],
       "htmlFile": "30842-event-31520-08-018.htm"
     },
     {
@@ -170,6 +200,9 @@
       "hook": "event",
       "when": "absent",
       "event": "31520-12",
+      "lacksItems": [
+        7113
+      ],
       "htmlFile": "30842-event-31520-12-019.htm"
     }
   ]

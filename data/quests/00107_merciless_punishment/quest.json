@@ -3,7 +3,14 @@
   "name": "Merciless Punishment",
   "repeatable": true,
   "abortable": true,
-  "questItems": [],
+  "questItems": [
+    1553,
+    1554,
+    1555,
+    1556,
+    1557,
+    1558
+  ],
   "dialogs": [
     {
       "npcId": 30568,
@@ -22,7 +29,27 @@
       "npcId": 30568,
       "hook": "talk",
       "when": "started",
+      "cond": 1,
+      "hasItem": 1553,
+      "htmlFile": "30568-talk-c1-002.htm"
+    },
+    {
+      "npcId": 30568,
+      "hook": "talk",
+      "when": "started",
+      "cond": 2,
+      "hasItem": 1553,
+      "htmlFile": "30568-talk-c2-003.htm"
+    },
+    {
+      "npcId": 30568,
+      "hook": "talk",
+      "when": "started",
       "cond": 3,
+      "hasItems": [
+        1553,
+        1557
+      ],
       "htmlFile": "30568-talk-c3-004.htm"
     },
     {
@@ -30,6 +57,10 @@
       "hook": "talk",
       "when": "started",
       "cond": 4,
+      "hasItems": [
+        1554,
+        1557
+      ],
       "htmlFile": "30568-talk-c4-005.htm"
     },
     {
@@ -37,6 +68,11 @@
       "hook": "talk",
       "when": "started",
       "cond": 5,
+      "hasItems": [
+        1554,
+        1557,
+        1556
+      ],
       "htmlFile": "30568-talk-c5-006.htm"
     },
     {
@@ -44,6 +80,11 @@
       "hook": "talk",
       "when": "started",
       "cond": 6,
+      "hasItems": [
+        1555,
+        1557,
+        1556
+      ],
       "htmlFile": "30568-talk-c6-007.htm"
     },
     {
@@ -51,6 +92,12 @@
       "hook": "talk",
       "when": "started",
       "cond": 7,
+      "hasItems": [
+        1555,
+        1557,
+        1556,
+        1558
+      ],
       "ops": [
         {
           "op": "give_adena",
@@ -68,6 +115,19 @@
       "htmlFile": "30568-talk-c7-008.htm"
     },
     {
+      "npcId": 30580,
+      "hook": "talk",
+      "when": "absent",
+      "hasItem": 1553,
+      "ops": [
+        {
+          "op": "set_cond",
+          "cond": 2
+        }
+      ],
+      "htmlFile": "30580-talk-009.htm"
+    },
+    {
       "npcId": 30568,
       "hook": "event",
       "when": "absent",
@@ -78,6 +138,11 @@
         },
         {
           "op": "start"
+        },
+        {
+          "op": "give_item",
+          "itemId": 1553,
+          "count": 1
         },
         {
           "op": "set_cond",
@@ -101,6 +166,54 @@
         }
       ],
       "htmlFile": "30568-event-30568-07-011.htm"
+    },
+    {
+      "npcId": 30568,
+      "hook": "event",
+      "when": "absent",
+      "event": "30568-08",
+      "hasItem": 1553,
+      "ops": [
+        {
+          "op": "take_item",
+          "itemId": 1553,
+          "count": 1
+        },
+        {
+          "op": "give_item",
+          "itemId": 1554,
+          "count": 1
+        },
+        {
+          "op": "set_cond",
+          "cond": 4
+        }
+      ],
+      "htmlFile": "30568-event-30568-08-012.htm"
+    },
+    {
+      "npcId": 30568,
+      "hook": "event",
+      "when": "absent",
+      "event": "30568-10",
+      "hasItem": 1554,
+      "ops": [
+        {
+          "op": "take_item",
+          "itemId": 1554,
+          "count": 1
+        },
+        {
+          "op": "give_item",
+          "itemId": 1555,
+          "count": 1
+        },
+        {
+          "op": "set_cond",
+          "cond": 6
+        }
+      ],
+      "htmlFile": "30568-event-30568-10-013.htm"
     }
   ]
 }

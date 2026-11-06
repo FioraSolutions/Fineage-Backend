@@ -3,7 +3,11 @@
   "name": "PossessorOfAPreciousSoul2",
   "repeatable": false,
   "abortable": true,
-  "questItems": [],
+  "questItems": [
+    7590,
+    7595,
+    7596
+  ],
   "dialogs": [
     {
       "npcId": 31742,
@@ -30,6 +34,11 @@
       "when": "started",
       "cond": 11,
       "ops": [
+        {
+          "op": "give_item",
+          "itemId": 7678,
+          "count": 1
+        },
         {
           "op": "give_exp_sp",
           "exp": 455764,
@@ -91,6 +100,14 @@
       "npcId": 31751,
       "hook": "talk",
       "when": "started",
+      "cond": 5,
+      "hasItem": 7590,
+      "htmlFile": "31751-talk-c5-011.htm"
+    },
+    {
+      "npcId": 31751,
+      "hook": "talk",
+      "when": "started",
       "cond": 6,
       "htmlFile": "31751-talk-c6-012.htm"
     },
@@ -99,6 +116,13 @@
       "hook": "talk",
       "when": "started",
       "cond": 4,
+      "ops": [
+        {
+          "op": "give_item",
+          "itemId": 7590,
+          "count": 1
+        }
+      ],
       "htmlFile": "31752-talk-c4-013.htm"
     },
     {
@@ -121,6 +145,14 @@
       "when": "started",
       "cond": 7,
       "htmlFile": "30759-talk-c7-016.htm"
+    },
+    {
+      "npcId": 30759,
+      "hook": "talk",
+      "when": "started",
+      "cond": 8,
+      "hasItem": 7596,
+      "htmlFile": "30759-talk-c8-017.htm"
     },
     {
       "npcId": 30759,
@@ -176,6 +208,13 @@
       "hook": "event",
       "when": "absent",
       "event": "31742-02",
+      "ops": [
+        {
+          "op": "take_item",
+          "itemId": 7677,
+          "count": 1
+        }
+      ],
       "htmlFile": "31742-event-31742-02-025.htm"
     },
     {
@@ -211,6 +250,13 @@
       "hook": "event",
       "when": "absent",
       "event": "30738-02",
+      "ops": [
+        {
+          "op": "give_item",
+          "itemId": 7596,
+          "count": 1
+        }
+      ],
       "htmlFile": "31742-event-30738-02-030.htm"
     },
     {
@@ -218,6 +264,18 @@
       "hook": "event",
       "when": "absent",
       "event": "30759-05",
+      "ops": [
+        {
+          "op": "take_item",
+          "itemId": 7590,
+          "count": 1
+        },
+        {
+          "op": "take_item",
+          "itemId": 7596,
+          "count": 1
+        }
+      ],
       "htmlFile": "31742-event-30759-05-031.htm"
     }
   ]

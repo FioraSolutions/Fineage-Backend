@@ -3,7 +3,11 @@
   "name": "Bring Out the Flavor of Ingredients!",
   "repeatable": true,
   "abortable": true,
-  "questItems": [],
+  "questItems": [
+    5895,
+    5896,
+    5897
+  ],
   "dialogs": [
     {
       "npcId": 30069,
@@ -187,6 +191,11 @@
       "when": "absent",
       "event": "30069-13",
       "ops": [
+        {
+          "op": "give_item",
+          "itemId": 5959,
+          "count": 1
+        },
         {
           "op": "complete"
         }

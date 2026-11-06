@@ -3,7 +3,11 @@
   "name": "GuardiansOfTheHolyGrail",
   "repeatable": true,
   "abortable": true,
-  "questItems": [],
+  "questItems": [
+    8069,
+    8070,
+    8071
+  ],
   "dialogs": [
     {
       "npcId": 31350,
@@ -110,6 +114,13 @@
       "hook": "event",
       "when": "absent",
       "event": "31350-08",
+      "ops": [
+        {
+          "op": "take_item",
+          "itemId": 8069,
+          "count": 1
+        }
+      ],
       "htmlFile": "31350-event-31350-08-012.htm"
     },
     {
@@ -131,6 +142,11 @@
       "event": "32008-05",
       "ops": [
         {
+          "op": "give_item",
+          "itemId": 8070,
+          "count": 1
+        },
+        {
           "op": "set_cond",
           "cond": 2
         }
@@ -144,6 +160,11 @@
       "event": "32008-09",
       "ops": [
         {
+          "op": "take_item",
+          "itemId": 8071,
+          "count": 1
+        },
+        {
           "op": "set_cond",
           "cond": 4
         }
@@ -154,8 +175,58 @@
       "npcId": 31350,
       "hook": "event",
       "when": "absent",
+      "event": "32008-12",
+      "hasItem": 8069,
+      "ops": [
+        {
+          "op": "take_item",
+          "itemId": 8069,
+          "count": 4000
+        },
+        {
+          "op": "give_item",
+          "itemId": 959,
+          "count": 1
+        }
+      ],
+      "htmlFile": "31350-event-32008-12-016.htm"
+    },
+    {
+      "npcId": 31350,
+      "hook": "event",
+      "when": "absent",
+      "event": "32008-14",
+      "hasItem": 8069,
+      "ops": [
+        {
+          "op": "take_item",
+          "itemId": 8069,
+          "count": 400
+        },
+        {
+          "op": "give_item",
+          "itemId": 960,
+          "count": 1
+        }
+      ],
+      "htmlFile": "31350-event-32008-14-017.htm"
+    },
+    {
+      "npcId": 31350,
+      "hook": "event",
+      "when": "absent",
       "event": "32028-02",
       "ops": [
+        {
+          "op": "take_item",
+          "itemId": 8070,
+          "count": 1
+        },
+        {
+          "op": "give_item",
+          "itemId": 8071,
+          "count": 1
+        },
         {
           "op": "set_cond",
           "cond": 3

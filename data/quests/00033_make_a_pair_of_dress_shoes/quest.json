@@ -139,6 +139,11 @@
       "event": "30838-13",
       "ops": [
         {
+          "op": "give_item",
+          "itemId": 7113,
+          "count": 1
+        },
+        {
           "op": "complete"
         }
       ],

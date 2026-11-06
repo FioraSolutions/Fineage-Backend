@@ -3,7 +3,11 @@
   "name": "RecoverTheFarmland",
   "repeatable": true,
   "abortable": true,
-  "questItems": [],
+  "questItems": [
+    1846,
+    1847,
+    5012
+  ],
   "dialogs": [
     {
       "npcId": 30597,
@@ -363,6 +367,11 @@
           "op": "start"
         },
         {
+          "op": "give_item",
+          "itemId": 5012,
+          "count": 1
+        },
+        {
           "op": "set_cond",
           "cond": 2
         }
@@ -380,6 +389,11 @@
         },
         {
           "op": "start"
+        },
+        {
+          "op": "give_item",
+          "itemId": 5012,
+          "count": 1
         },
         {
           "op": "set_cond",
@@ -401,6 +415,11 @@
           "op": "start"
         },
         {
+          "op": "give_item",
+          "itemId": 5012,
+          "count": 1
+        },
+        {
           "op": "set_cond",
           "cond": 2
         }
@@ -420,6 +439,11 @@
           "op": "start"
         },
         {
+          "op": "give_item",
+          "itemId": 5012,
+          "count": 1
+        },
+        {
           "op": "set_cond",
           "cond": 2
         }
@@ -437,6 +461,11 @@
         },
         {
           "op": "start"
+        },
+        {
+          "op": "give_item",
+          "itemId": 5012,
+          "count": 1
         },
         {
           "op": "set_cond",
@@ -815,6 +844,13 @@
       "hook": "event",
       "when": "absent",
       "event": "30313-03",
+      "ops": [
+        {
+          "op": "give_item",
+          "itemId": 1852,
+          "count": 1
+        }
+      ],
       "htmlFile": "30034-event-30313-03-090.htm"
     },
     {
@@ -822,6 +858,13 @@
       "hook": "event",
       "when": "absent",
       "event": "30313-03",
+      "ops": [
+        {
+          "op": "give_item",
+          "itemId": 1852,
+          "count": 1
+        }
+      ],
       "htmlFile": "30313-event-30313-03-091.htm"
     },
     {
@@ -829,6 +872,13 @@
       "hook": "event",
       "when": "absent",
       "event": "30313-03",
+      "ops": [
+        {
+          "op": "give_item",
+          "itemId": 1852,
+          "count": 1
+        }
+      ],
       "htmlFile": "30314-event-30313-03-092.htm"
     },
     {
@@ -836,6 +886,13 @@
       "hook": "event",
       "when": "absent",
       "event": "30313-03",
+      "ops": [
+        {
+          "op": "give_item",
+          "itemId": 1852,
+          "count": 1
+        }
+      ],
       "htmlFile": "30382-event-30313-03-093.htm"
     },
     {
@@ -843,6 +900,13 @@
       "hook": "event",
       "when": "absent",
       "event": "30313-03",
+      "ops": [
+        {
+          "op": "give_item",
+          "itemId": 1852,
+          "count": 1
+        }
+      ],
       "htmlFile": "30597-event-30313-03-094.htm"
     },
     {
@@ -885,6 +949,13 @@
       "hook": "event",
       "when": "absent",
       "event": "30313-05",
+      "ops": [
+        {
+          "op": "give_item",
+          "itemId": 1853,
+          "count": 1
+        }
+      ],
       "htmlFile": "30034-event-30313-05-100.htm"
     },
     {
@@ -892,6 +963,13 @@
       "hook": "event",
       "when": "absent",
       "event": "30313-05",
+      "ops": [
+        {
+          "op": "give_item",
+          "itemId": 1853,
+          "count": 1
+        }
+      ],
       "htmlFile": "30313-event-30313-05-101.htm"
     },
     {
@@ -899,6 +977,13 @@
       "hook": "event",
       "when": "absent",
       "event": "30313-05",
+      "ops": [
+        {
+          "op": "give_item",
+          "itemId": 1853,
+          "count": 1
+        }
+      ],
       "htmlFile": "30314-event-30313-05-102.htm"
     },
     {
@@ -906,6 +991,13 @@
       "hook": "event",
       "when": "absent",
       "event": "30313-05",
+      "ops": [
+        {
+          "op": "give_item",
+          "itemId": 1853,
+          "count": 1
+        }
+      ],
       "htmlFile": "30382-event-30313-05-103.htm"
     },
     {
@@ -913,6 +1005,13 @@
       "hook": "event",
       "when": "absent",
       "event": "30313-05",
+      "ops": [
+        {
+          "op": "give_item",
+          "itemId": 1853,
+          "count": 1
+        }
+      ],
       "htmlFile": "30597-event-30313-05-104.htm"
     },
     {
@@ -955,6 +1054,13 @@
       "hook": "event",
       "when": "absent",
       "event": "30313-07",
+      "ops": [
+        {
+          "op": "give_item",
+          "itemId": 1854,
+          "count": 1
+        }
+      ],
       "htmlFile": "30034-event-30313-07-110.htm"
     },
     {
@@ -962,6 +1068,13 @@
       "hook": "event",
       "when": "absent",
       "event": "30313-07",
+      "ops": [
+        {
+          "op": "give_item",
+          "itemId": 1854,
+          "count": 1
+        }
+      ],
       "htmlFile": "30313-event-30313-07-111.htm"
     },
     {
@@ -969,6 +1082,13 @@
       "hook": "event",
       "when": "absent",
       "event": "30313-07",
+      "ops": [
+        {
+          "op": "give_item",
+          "itemId": 1854,
+          "count": 1
+        }
+      ],
       "htmlFile": "30314-event-30313-07-112.htm"
     },
     {
@@ -976,6 +1096,13 @@
       "hook": "event",
       "when": "absent",
       "event": "30313-07",
+      "ops": [
+        {
+          "op": "give_item",
+          "itemId": 1854,
+          "count": 1
+        }
+      ],
       "htmlFile": "30382-event-30313-07-113.htm"
     },
     {
@@ -983,6 +1110,13 @@
       "hook": "event",
       "when": "absent",
       "event": "30313-07",
+      "ops": [
+        {
+          "op": "give_item",
+          "itemId": 1854,
+          "count": 1
+        }
+      ],
       "htmlFile": "30597-event-30313-07-114.htm"
     },
     {
@@ -1025,6 +1159,13 @@
       "hook": "event",
       "when": "absent",
       "event": "30313-09",
+      "ops": [
+        {
+          "op": "give_item",
+          "itemId": 1855,
+          "count": 1
+        }
+      ],
       "htmlFile": "30034-event-30313-09-120.htm"
     },
     {
@@ -1032,6 +1173,13 @@
       "hook": "event",
       "when": "absent",
       "event": "30313-09",
+      "ops": [
+        {
+          "op": "give_item",
+          "itemId": 1855,
+          "count": 1
+        }
+      ],
       "htmlFile": "30313-event-30313-09-121.htm"
     },
     {
@@ -1039,6 +1187,13 @@
       "hook": "event",
       "when": "absent",
       "event": "30313-09",
+      "ops": [
+        {
+          "op": "give_item",
+          "itemId": 1855,
+          "count": 1
+        }
+      ],
       "htmlFile": "30314-event-30313-09-122.htm"
     },
     {
@@ -1046,6 +1201,13 @@
       "hook": "event",
       "when": "absent",
       "event": "30313-09",
+      "ops": [
+        {
+          "op": "give_item",
+          "itemId": 1855,
+          "count": 1
+        }
+      ],
       "htmlFile": "30382-event-30313-09-123.htm"
     },
     {
@@ -1053,6 +1215,13 @@
       "hook": "event",
       "when": "absent",
       "event": "30313-09",
+      "ops": [
+        {
+          "op": "give_item",
+          "itemId": 1855,
+          "count": 1
+        }
+      ],
       "htmlFile": "30597-event-30313-09-124.htm"
     },
     {
@@ -1060,6 +1229,9 @@
       "hook": "event",
       "when": "absent",
       "event": "30314-03",
+      "lacksItems": [
+        1852
+      ],
       "htmlFile": "30034-event-30314-03-125.htm"
     },
     {
@@ -1067,6 +1239,9 @@
       "hook": "event",
       "when": "absent",
       "event": "30314-03",
+      "lacksItems": [
+        1852
+      ],
       "htmlFile": "30313-event-30314-03-126.htm"
     },
     {
@@ -1074,6 +1249,9 @@
       "hook": "event",
       "when": "absent",
       "event": "30314-03",
+      "lacksItems": [
+        1852
+      ],
       "htmlFile": "30314-event-30314-03-127.htm"
     },
     {
@@ -1081,6 +1259,9 @@
       "hook": "event",
       "when": "absent",
       "event": "30314-03",
+      "lacksItems": [
+        1852
+      ],
       "htmlFile": "30382-event-30314-03-128.htm"
     },
     {
@@ -1088,6 +1269,9 @@
       "hook": "event",
       "when": "absent",
       "event": "30314-03",
+      "lacksItems": [
+        1852
+      ],
       "htmlFile": "30597-event-30314-03-129.htm"
     },
     {
@@ -1095,6 +1279,9 @@
       "hook": "event",
       "when": "absent",
       "event": "30314-04",
+      "lacksItems": [
+        1853
+      ],
       "htmlFile": "30034-event-30314-04-130.htm"
     },
     {
@@ -1102,6 +1289,9 @@
       "hook": "event",
       "when": "absent",
       "event": "30314-04",
+      "lacksItems": [
+        1853
+      ],
       "htmlFile": "30313-event-30314-04-131.htm"
     },
     {
@@ -1109,6 +1299,9 @@
       "hook": "event",
       "when": "absent",
       "event": "30314-04",
+      "lacksItems": [
+        1853
+      ],
       "htmlFile": "30314-event-30314-04-132.htm"
     },
     {
@@ -1116,6 +1309,9 @@
       "hook": "event",
       "when": "absent",
       "event": "30314-04",
+      "lacksItems": [
+        1853
+      ],
       "htmlFile": "30382-event-30314-04-133.htm"
     },
     {
@@ -1123,6 +1319,9 @@
       "hook": "event",
       "when": "absent",
       "event": "30314-04",
+      "lacksItems": [
+        1853
+      ],
       "htmlFile": "30597-event-30314-04-134.htm"
     },
     {
@@ -1130,6 +1329,13 @@
       "hook": "event",
       "when": "absent",
       "event": "30314-04",
+      "ops": [
+        {
+          "op": "give_item",
+          "itemId": 1061,
+          "count": 1
+        }
+      ],
       "htmlFile": "30034-event-30314-04-135.htm"
     },
     {
@@ -1137,6 +1343,13 @@
       "hook": "event",
       "when": "absent",
       "event": "30314-04",
+      "ops": [
+        {
+          "op": "give_item",
+          "itemId": 1061,
+          "count": 1
+        }
+      ],
       "htmlFile": "30313-event-30314-04-136.htm"
     },
     {
@@ -1144,6 +1357,13 @@
       "hook": "event",
       "when": "absent",
       "event": "30314-04",
+      "ops": [
+        {
+          "op": "give_item",
+          "itemId": 1061,
+          "count": 1
+        }
+      ],
       "htmlFile": "30314-event-30314-04-137.htm"
     },
     {
@@ -1151,6 +1371,13 @@
       "hook": "event",
       "when": "absent",
       "event": "30314-04",
+      "ops": [
+        {
+          "op": "give_item",
+          "itemId": 1061,
+          "count": 1
+        }
+      ],
       "htmlFile": "30382-event-30314-04-138.htm"
     },
     {
@@ -1158,6 +1385,13 @@
       "hook": "event",
       "when": "absent",
       "event": "30314-04",
+      "ops": [
+        {
+          "op": "give_item",
+          "itemId": 1061,
+          "count": 1
+        }
+      ],
       "htmlFile": "30597-event-30314-04-139.htm"
     },
     {
@@ -1235,6 +1469,9 @@
       "hook": "event",
       "when": "absent",
       "event": "30314-05",
+      "lacksItems": [
+        1854
+      ],
       "htmlFile": "30034-event-30314-05-145.htm"
     },
     {
@@ -1242,6 +1479,9 @@
       "hook": "event",
       "when": "absent",
       "event": "30314-05",
+      "lacksItems": [
+        1854
+      ],
       "htmlFile": "30313-event-30314-05-146.htm"
     },
     {
@@ -1249,6 +1489,9 @@
       "hook": "event",
       "when": "absent",
       "event": "30314-05",
+      "lacksItems": [
+        1854
+      ],
       "htmlFile": "30314-event-30314-05-147.htm"
     },
     {
@@ -1256,6 +1499,9 @@
       "hook": "event",
       "when": "absent",
       "event": "30314-05",
+      "lacksItems": [
+        1854
+      ],
       "htmlFile": "30382-event-30314-05-148.htm"
     },
     {
@@ -1263,6 +1509,9 @@
       "hook": "event",
       "when": "absent",
       "event": "30314-05",
+      "lacksItems": [
+        1854
+      ],
       "htmlFile": "30597-event-30314-05-149.htm"
     },
     {
@@ -1270,6 +1519,9 @@
       "hook": "event",
       "when": "absent",
       "event": "30314-06",
+      "lacksItems": [
+        1855
+      ],
       "htmlFile": "30034-event-30314-06-150.htm"
     },
     {
@@ -1277,6 +1529,9 @@
       "hook": "event",
       "when": "absent",
       "event": "30314-06",
+      "lacksItems": [
+        1855
+      ],
       "htmlFile": "30313-event-30314-06-151.htm"
     },
     {
@@ -1284,6 +1539,9 @@
       "hook": "event",
       "when": "absent",
       "event": "30314-06",
+      "lacksItems": [
+        1855
+      ],
       "htmlFile": "30314-event-30314-06-152.htm"
     },
     {
@@ -1291,6 +1549,9 @@
       "hook": "event",
       "when": "absent",
       "event": "30314-06",
+      "lacksItems": [
+        1855
+      ],
       "htmlFile": "30382-event-30314-06-153.htm"
     },
     {
@@ -1298,6 +1559,9 @@
       "hook": "event",
       "when": "absent",
       "event": "30314-06",
+      "lacksItems": [
+        1855
+      ],
       "htmlFile": "30597-event-30314-06-154.htm"
     }
   ]

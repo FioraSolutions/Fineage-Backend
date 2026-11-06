@@ -3,7 +3,9 @@
   "name": "For a Sleepless Deadman",
   "repeatable": true,
   "abortable": true,
-  "questItems": [],
+  "questItems": [
+    5869
+  ],
   "dialogs": [
     {
       "npcId": 30857,
@@ -55,6 +57,11 @@
         },
         {
           "op": "start"
+        },
+        {
+          "op": "set",
+          "key": "memoState",
+          "value": "1"
         },
         {
           "op": "set_cond",
