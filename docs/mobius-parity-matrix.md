@@ -36,7 +36,7 @@ Legend: ✅ done · 🟡 partial · ❌ missing · stub = shell only.
 | 26 | Clan basic | Social | 🟡 | No crest/war/ally |
 | 27 | Friends / block | Social | 🟡 | Invite/list/delete + block (#285); friend chat deferred |
 | 28 | NPC HTML + bypass + teleports + newbie buffs | Content | ✅ | |
-| 29 | Quests (engine + elven paths) | Content | 🟡 | target = all races MIN_LEVEL≤21 (~129 in [`early-quests-checklist.md`](early-quests-checklist.md)); live count from `data/quests.json`; tracking that doc + issue [#299](https://github.com/FioraSolutions/Fineage-Backend/issues/299) |
+| 29 | Quests (engine + elven paths) | Content | 🟡 | target = all races `MIN_LEVEL≤21` (**114** Mobius / **44** live / **70** TODO — [`early-quests-checklist.md`](early-quests-checklist.md), [#299](https://github.com/FioraSolutions/Fineage-Backend/issues/299)) |
 | 30 | Class change 1st (elven paths) | Content | 🟡 | Full-world maps + Q409 spawn (#298); 2nd/3rd prof still open |
 | 31 | Raid / Seven Signs / Siege / Olympiad | Content | 🟡 | Schedule/reg shells; no full content |
 | 32 | Chat channels beyond say/shout/system | Social | 🟡 | |
