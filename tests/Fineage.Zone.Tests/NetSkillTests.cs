@@ -9,14 +9,15 @@ using Xunit;
 namespace Fineage.Zone.Tests;
 
 /// <summary>
-/// Skills on the zone: the auto-get book the enter burst carries, and a Power Strike cast that damages a gremlin,
-/// locks movement while casting, and pulls aggro. Ported off the V2 wire; the assertions read the sheet the Net
-/// enter projector builds and the recorded <see cref="INetPresenceBridge"/> combat fanout.
+/// Skills on the zone: the auto-get book the enter burst carries, Power Strike / Wind Strike casts that damage a
+/// gremlin, lock movement while casting, and pull aggro. Ported off the V2 wire; the assertions read the sheet the
+/// Net enter projector builds and the recorded <see cref="INetPresenceBridge"/> combat fanout.
 /// </summary>
 public sealed class NetSkillTests
 {
     const int SquiresSword = 2369;
     const int PowerStrike = 3;
+    const int WindStrike = 1177;
 
     static DateTimeOffset Now { get; set; } = DateTimeOffset.FromUnixTimeMilliseconds(1_800_000_000_000);
 
@@ -118,6 +119,54 @@ public sealed class NetSkillTests
         Assert.True(bench.World.TryGetEntityById(gremlinObjectId, out var mob));
         Assert.Equal(actor.ObjectId, mob.AggroTargetId);
         Assert.NotEmpty(bench.Rec.Of(nameof(INetPresenceBridge.FanoutAttackState)));
+    }
+
+    /// <summary>#522: Human Mystic Wind Strike must reduce gremlin HP after hitTime (staff melee is separate).</summary>
+    [Fact]
+    public async Task SkillUse_wind_strike_damages_gremlin_for_human_mystic()
+    {
+        Now = DateTimeOffset.FromUnixTimeMilliseconds(1_800_000_000_000);
+        var bench = new WorldBench(
+            clock: () => Now,
+            spawns: Fineage.Zone.Spawns.SpawnCatalog.LoadDefault(),
+            mapId: null);
+        var gremlinHome = TalkingIsland.Gremlins[0];
+        BenchPlayer actor = await bench.EnterAsync(
+            "mage", "WindKid",
+            classId: HumanClasses.Mystic,
+            level: 1,
+            x: gremlinHome.X, y: gremlinHome.Y, z: gremlinHome.Z);
+
+        Assert.True(bench.World.TryGetLivePlayer(actor.Session, out var caster));
+        Assert.Contains(caster.KnownSkills, kv => kv.Key == WindStrike);
+        int gremlinObjectId = GremlinObjectId(bench.World);
+        Assert.True(gremlinObjectId > 0);
+        Assert.True(bench.World.TryGetEntityById(gremlinObjectId, out var gremlin));
+        int hpBefore = gremlin.CurHp;
+
+        Assert.Null(await bench.World.TrySelectTargetAsync(
+            actor.Session, new SelectTargetMsg { TargetObjectId = gremlinObjectId }, CancellationToken.None));
+
+        bench.Rec.Calls.Clear();
+        Assert.Null(await bench.World.TrySkillUseAsync(
+            actor.Session,
+            new SkillUseRequestMsg { SkillId = WindStrike, TargetObjectId = gremlinObjectId },
+            CancellationToken.None));
+
+        var use = Assert.IsType<MagicSkillUseNetMsg>(
+            bench.Rec.Of(nameof(INetPresenceBridge.FanoutMagicSkillUse)).Last()[1]);
+        Assert.Equal(WindStrike, use.SkillId);
+        Assert.Equal(gremlinObjectId, use.TargetObjectId);
+        Assert.NotNull(caster.PendingHit);
+
+        // Wind Strike hitTime is ~4s at base C.Spd; advance past it.
+        Now = Now.AddSeconds(6);
+        await bench.World.RunCombatTickAsync(CancellationToken.None);
+
+        Assert.True(bench.World.TryGetEntityById(gremlinObjectId, out var after));
+        Assert.True(after.CurHp < hpBefore, $"expected Wind Strike damage, hp {hpBefore} → {after.CurHp}");
+        var hit = LastStatusFor(bench.Rec, gremlinObjectId);
+        Assert.True(hit.Values[0] < hit.Values[1]);
     }
 
     static int GremlinObjectId(ZoneWorld world)
