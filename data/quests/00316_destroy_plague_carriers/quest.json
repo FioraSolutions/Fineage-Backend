@@ -123,6 +123,7 @@
       "npcId": 20040,
       "hook": "kill",
       "when": "started",
+      "party": true,
       "html": "",
       "ops": [
         {
@@ -138,6 +139,7 @@
       "npcId": 20047,
       "hook": "kill",
       "when": "started",
+      "party": true,
       "html": "",
       "ops": [
         {
@@ -153,6 +155,7 @@
       "npcId": 27020,
       "hook": "kill",
       "when": "started",
+      "party": true,
       "html": "",
       "ops": [
         {

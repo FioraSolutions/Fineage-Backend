@@ -43,7 +43,8 @@ public sealed class NetQuestPartyKillTests
         Start316(mate);
 
         kit.World.QuestKillForTest(killer, 20040);
-        Assert.Equal(2, mate.Inventory!.CountOf(1042));
+        // Mobius giveItemRandomly count=1 (chance 10/5 ≈ always); older pack wrongly dropped 2.
+        Assert.Equal(1, mate.Inventory!.CountOf(1042));
         Assert.Equal(0, killer.Inventory!.CountOf(1042));
     }
 

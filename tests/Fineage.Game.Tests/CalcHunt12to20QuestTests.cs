@@ -47,8 +47,8 @@ public sealed class CalcHunt12to20QuestTests
         Assert.True(m.AdvEvent(j, bag, Q, Ellenia, "30155-04", me).Ok);
 
         for (int i = 0; i < 9; i++)
-            m.OnKill(j, bag, 20040, me);
-        m.OnKill(j, bag, 27020, me);
+            m.OnPartyKill(j, bag, Q, 20040, me);
+        m.OnPartyKill(j, bag, Q, 27020, me);
         Assert.Equal(9, bag.CountOf(Rat));
         Assert.Equal(1, bag.CountOf(Varool));
 

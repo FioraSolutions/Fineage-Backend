@@ -7,7 +7,7 @@
   Q347 Go Get the Calculator — Brunon guild chain + gemstone hunt
 
 Simplifications:
-  Q316: killer-only drops (skip party); chance ≈ always (Mobius 10/N).
+  Q316: drop chance ≈ always (Mobius 10/N); keep party:true for getRandomPartyMemberState.
   Q347: skip Brunon auto-cond-6 when already holding calculator item.
 
 After: python3 scripts/gen_quests_12_20_calc_hunts.py
@@ -166,9 +166,9 @@ def q316():
         d(ELLENIA, "event", "30155-09.html", when="started", event="30155-09"),
         d(ELLENIA, "talk", "30155-07.html", when="started", hasAny=[RAT, VAROOL], ops=[sell]),
         d(ELLENIA, "talk", "30155-05.html", when="started", lacksItems=[RAT, VAROOL]),
-        d(20040, "kill", None, when="started", raw="", ops=[drop(RAT, 1.0)]),
-        d(20047, "kill", None, when="started", raw="", ops=[drop(RAT, 1.0)]),
-        d(27020, "kill", None, when="started", raw="", ops=[drop(VAROOL, 1.0, limit=1)]),
+        d(20040, "kill", None, when="started", party=True, raw="", ops=[drop(RAT, 1.0)]),
+        d(20047, "kill", None, when="started", party=True, raw="", ops=[drop(RAT, 1.0)]),
+        d(27020, "kill", None, when="started", party=True, raw="", ops=[drop(VAROOL, 1.0, limit=1)]),
     ]
     return {
         "id": Q,
