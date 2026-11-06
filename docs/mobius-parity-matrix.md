@@ -43,10 +43,10 @@ Legend: ✅ done · 🟡 partial · ❌ missing · stub = shell only.
 
 ## Next backend slices (priority)
 
-1. **Weapon trait / NPC defence traits** (medium) — `calcWeaponTraitBonus`.
-2. **NPC magic skills vs players** (medium) — AI skill picks + spiritshots.
-3. **Party loot modes + sweep distributeItem** (medium).
-4. **Player death item drop** (high for PK feel).
+1. **Weapon trait / NPC defence traits** — [#261](https://github.com/FioraSolutions/Fineage-Backend/issues/261)
+2. **NPC magic/blow skills vs players** — [#259](https://github.com/FioraSolutions/Fineage-Backend/issues/259)
+3. **Party loot modes + sweep distributeItem** — [#260](https://github.com/FioraSolutions/Fineage-Backend/issues/260)
+4. **Player death item drop** — [#258](https://github.com/FioraSolutions/Fineage-Backend/issues/258)
 5. **Private store** (needs Net + client — coordinate).
 6. **Geodata pathfinding** for approach (medium).
 
