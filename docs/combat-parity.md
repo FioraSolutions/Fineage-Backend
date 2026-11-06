@@ -104,7 +104,14 @@
 1. ~~Physical-skill crit/evasion stat mods (CRITICAL_DAMAGE, BLOW_RATE, P_SKILL_EVASION)~~ — done (see below).
 2. ~~Night game clock (GameTimeTaskManager) for the −10% dark bonus~~ — done (`ZoneGameTime`, HitConditionBonus night).
 3. ~~magicLvl in skill-combat.json + mcrit stat mods~~ — done (slice 10 follow-up).
-4. Weapon vulnerabilities (NPC passive traits data), NPC soulshots, NPC blow/magic skills on players — medium.
+4. ~~NPC soulshots~~ — stock + chance on melee (`gen_npc_shots.py`); spiritshots / SS glow / boss materialize still open.
+5. Weapon vulnerabilities (NPC passive traits data), NPC blow/magic skills on players — medium.
+
+## Slice — NPC soulshots (Mobius `Npc.rechargeShots`)
+
+- `npcs.json` carries `soulShot` / `soulShotChance` / `spiritShot` / `spiritShotChance` from Mobius `<param name="SoulShot|…">` (~1355 templates).
+- On NPC melee, `TryNpcSoulshot`: if stock &gt; 0 and `Rnd(100) &lt; chance`, decrement stock and double P.Atk for that swing (Attack soulshot flag).
+- Gaps: no MagicSkillUse 2154 glow fan-out; spiritshots unused until NPC magic cast; raid boss materialize path does not copy shot stock from template.
 
 ## Slice — CRITICAL_DAMAGE / BLOW_RATE / P_SKILL_EVASION + IG night
 

@@ -114,6 +114,10 @@ public sealed partial class ZoneWorld
             ClanHelpRange = def.ClanHelpRange,
             Clans = def.Clans,
             IgnoreNpcIds = def.IgnoreNpcIds,
+            NpcSoulShotLeft = def.SoulShot,
+            NpcSoulShotChance = def.SoulShotChance,
+            NpcSpiritShotLeft = def.SpiritShot,
+            NpcSpiritShotChance = def.SpiritShotChance,
             RunSpeed = def.RunSpeed,
             WalkSpeed = def.WalkSpeed,
             // Mobius Spawn location is the returnHome target; captured at spawn, not at first aggro, so a mob that

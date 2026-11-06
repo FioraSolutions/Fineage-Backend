@@ -150,7 +150,11 @@ public sealed class SpawnCatalog
                     template.IgnoreNpcIds,
                     template.HpRegen,
                     template.MpRegen,
-                    Math.Max(0, template.Mp)));
+                    Math.Max(0, template.Mp),
+                    template.SoulShot,
+                    template.SoulShotChance,
+                    template.SpiritShot,
+                    template.SpiritShotChance));
             }
 
             maps.Add(map.MapId, new SpawnMapDefinition(map.MapId, map.Enabled, npcs));

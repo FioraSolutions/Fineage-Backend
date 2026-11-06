@@ -44,7 +44,11 @@ public sealed record SpawnNpcDefinition(
     IReadOnlyList<int>? IgnoreNpcIds = null,
     double HpRegen = 0,
     double MpRegen = 0,
-    int MaxMp = 0);
+    int MaxMp = 0,
+    int SoulShot = 0,
+    int SoulShotChance = 0,
+    int SpiritShot = 0,
+    int SpiritShotChance = 0);
 
 public sealed record SpawnMapDefinition(
     string MapId,

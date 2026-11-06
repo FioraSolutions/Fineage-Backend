@@ -42,7 +42,13 @@ public sealed record NpcTemplate(
     IReadOnlyList<string>? Clans = null,
     IReadOnlyList<int>? IgnoreNpcIds = null,
     double HpRegen = 0,
-    double MpRegen = 0);
+    double MpRegen = 0,
+    /// <summary>Mobius <c>SoulShot</c> starting stock (Npc.rechargeShots).</summary>
+    int SoulShot = 0,
+    /// <summary>Mobius <c>SoulShotRate</c> % chance to fire a soulshot when stock remains.</summary>
+    int SoulShotChance = 0,
+    int SpiritShot = 0,
+    int SpiritShotChance = 0);
 
 /// <summary>Loads <c>data/npcs.json</c>.</summary>
 public sealed class NpcCatalog
@@ -171,7 +177,11 @@ public sealed class NpcCatalog
                 row.Clans is { Count: > 0 } ? row.Clans : null,
                 row.IgnoreNpcIds is { Count: > 0 } ? row.IgnoreNpcIds : null,
                 Math.Max(0, row.HpRegen),
-                Math.Max(0, row.MpRegen)));
+                Math.Max(0, row.MpRegen),
+                Math.Max(0, row.SoulShot),
+                Math.Max(0, row.SoulShotChance),
+                Math.Max(0, row.SpiritShot),
+                Math.Max(0, row.SpiritShotChance)));
         }
 
         return new NpcCatalog(byId);
@@ -231,5 +241,9 @@ public sealed class NpcCatalog
         public double HpRegen { get; set; }
         /// <summary>Mobius <c>vitals mpRegen</c>: MP restored per 3 s regen tick.</summary>
         public double MpRegen { get; set; }
+        public int SoulShot { get; set; }
+        public int SoulShotChance { get; set; }
+        public int SpiritShot { get; set; }
+        public int SpiritShotChance { get; set; }
     }
 }

@@ -146,6 +146,13 @@ sealed class ZoneEntity
     public bool SoulshotCharged { get; set; }
     /// <summary>0 none, 1 spiritshot, 2 blessed spiritshot (Mobius ShotType SPIRITSHOTS / BLESSED_SPIRITSHOTS).</summary>
     public int SpiritshotCharge { get; set; }
+    /// <summary>NPC remaining Mobius SoulShot stock (template starting count; decremented on fire).</summary>
+    public int NpcSoulShotLeft { get; set; }
+    /// <summary>NPC SoulShotRate % (template).</summary>
+    public int NpcSoulShotChance { get; set; }
+    /// <summary>NPC remaining SpiritShot stock.</summary>
+    public int NpcSpiritShotLeft { get; set; }
+    public int NpcSpiritShotChance { get; set; }
     /// <summary>Mobius auto soulshot set: shot item ids recharged after each discharge.</summary>
     public HashSet<int> AutoShots { get; } = [];
     /// <summary>Mobius ShortCuts keyed by world slot (slot + page * 12).</summary>

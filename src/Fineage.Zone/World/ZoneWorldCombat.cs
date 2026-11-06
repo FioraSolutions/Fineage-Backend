@@ -319,10 +319,23 @@ public sealed partial class ZoneWorld
             return (ZoneCombat.MobMeleeDamage(npc.Level), 0);
         var ps = PlayerStats(player);
         npc.Heading = ZoneCombat.HeadingFrom(npc.X, npc.Y, player.X, player.Y);
+        // Mobius Npc.rechargeShots(physical): chance vs SoulShotRate, then stock--; charged for this swing.
+        bool ss = TryNpcSoulshot(npc);
         return ZoneCombat.RollMelee(_combatRandom, StatMods(npc).Apply(CombatStat.PAtk, npc.PAtk), ps.PDef, NpcAccuracy(npc), ps.Evasion,
-            NpcCritPermille(npc), npc.RandomDamage, false, 0, ps.ShieldRate, ps.ShieldDef, false,
+            NpcCritPermille(npc), npc.RandomDamage, ss, 0, ps.ShieldRate, ps.ShieldDef, false,
             ZoneCombat.HitConditionBonus(npc.X, npc.Y, npc.Z, player.X, player.Y, player.Z, player.Heading, IsNight),
             StatMods(npc).Apply(CombatStat.CritDmg, 1d));
+    }
+
+    /// <summary>Mobius <c>Npc.rechargeShots(true, false)</c>: fire one soulshot if stock and chance allow.</summary>
+    bool TryNpcSoulshot(ZoneEntity npc)
+    {
+        if (npc.NpcSoulShotLeft <= 0 || npc.NpcSoulShotChance <= 0)
+            return false;
+        if (_combatRandom.Next(100) >= npc.NpcSoulShotChance)
+            return false;
+        npc.NpcSoulShotLeft--;
+        return true;
     }
 
     Task? _combatLoop;
