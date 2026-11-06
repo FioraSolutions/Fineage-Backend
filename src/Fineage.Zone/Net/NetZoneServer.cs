@@ -2513,7 +2513,12 @@ public sealed class NetZoneServer : INetPresenceBridge
         }).ToArray();
         string? error = await _world.TrySetPrivateStoreSellAsync(
             zoneSession,
-            new SetPrivateStoreSellMsg { Message = req.Message ?? "", Items = items },
+            new SetPrivateStoreSellMsg
+            {
+                Message = req.Message ?? "",
+                Packaged = req.Packaged != 0,
+                Items = items
+            },
             ct).ConfigureAwait(false);
         if (error != null)
             await RejectAsync(conn, error, "Private store sell failed.", ct).ConfigureAwait(false);

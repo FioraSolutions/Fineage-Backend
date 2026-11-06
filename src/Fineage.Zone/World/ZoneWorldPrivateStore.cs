@@ -24,7 +24,7 @@ public sealed class PrivateStoreBuyListing
 }
 
 /// <summary>
-/// Mobius private store: sell (#275) and buy (#277). Package-sell and manufacture deferred.
+/// Mobius private store: sell (#275), buy (#277), package-sell (#279). Manufacture deferred.
 /// </summary>
 public sealed partial class ZoneWorld
 {
@@ -180,7 +180,8 @@ public sealed partial class ZoneWorld
         player.PrivateBuyList.Clear();
         player.PrivateSellList.Clear();
         player.PrivateSellList.AddRange(listings);
-        ActivatePrivateStore(player, PrivateStoreProtocol.TypeSell, request.Message);
+        byte type = request.Packaged ? PrivateStoreProtocol.TypePackageSell : PrivateStoreProtocol.TypeSell;
+        ActivatePrivateStore(player, type, request.Message);
         return null;
     }
 
@@ -250,7 +251,7 @@ public sealed partial class ZoneWorld
         if (!StoreInRange(visitor, store))
             return PrivateStoreProtocol.Range;
 
-        if (store.PrivateStoreType == PrivateStoreProtocol.TypeSell && store.PrivateSellList.Count > 0)
+        if (PrivateStoreProtocol.IsSellStore(store.PrivateStoreType) && store.PrivateSellList.Count > 0)
         {
             SendPrivateStoreListSell(visitor, store);
             return null;
@@ -273,7 +274,7 @@ public sealed partial class ZoneWorld
             return PrivateStoreProtocol.Closed;
         if (store.ObjectId == buyer.ObjectId)
             return "bad_request";
-        if (store.PrivateStoreType != PrivateStoreProtocol.TypeSell || store.PrivateSellList.Count == 0)
+        if (!PrivateStoreProtocol.IsSellStore(store.PrivateStoreType) || store.PrivateSellList.Count == 0)
             return PrivateStoreProtocol.Closed;
         if (!StoreInRange(buyer, store))
             return PrivateStoreProtocol.Range;
@@ -283,9 +284,14 @@ public sealed partial class ZoneWorld
         var wants = request.Items ?? [];
         if (wants.Length == 0)
             return PrivateStoreProtocol.Item;
+        // Mobius RequestPrivateStoreBuy: package must request every listed row.
+        if (store.PrivateStoreType == PrivateStoreProtocol.TypePackageSell
+            && wants.Length < store.PrivateSellList.Count)
+            return PrivateStoreProtocol.Package;
 
         long cost = 0;
         var transfers = new List<(PrivateStoreSellListing Listing, long Count)>();
+        var covered = new HashSet<int>();
         foreach (var want in wants)
         {
             if (want.Count < 1 || want.Price < 0)
@@ -300,7 +306,12 @@ public sealed partial class ZoneWorld
             if (cost > ShopTrade.MaxAdena)
                 return PrivateStoreProtocol.Adena;
             transfers.Add((listing, want.Count));
+            covered.Add(listing.InventoryObjectId);
         }
+        if (store.PrivateStoreType == PrivateStoreProtocol.TypePackageSell
+            && (covered.Count != store.PrivateSellList.Count
+                || transfers.Any(t => t.Count != t.Listing.Count)))
+            return PrivateStoreProtocol.Package;
 
         if (buyer.Inventory.CountOf(ShopTrade.AdenaItemId) < cost)
             return PrivateStoreProtocol.Adena;
@@ -538,6 +549,7 @@ public sealed partial class ZoneWorld
             StoreObjectId = store.ObjectId,
             StoreName = store.Name,
             Message = store.PrivateStoreMessage,
+            Packaged = store.PrivateStoreType == PrivateStoreProtocol.TypePackageSell ? 1 : 0,
             BuyerAdena = visitor.Inventory.CountOf(ShopTrade.AdenaItemId),
             Items = items
         });

@@ -2201,6 +2201,7 @@ namespace Fineage.Net.Contract
         public static byte[] EncodeSetPrivateStoreSell(SetPrivateStoreSellNetMsg m) => Write(w =>
         {
             w.WriteString(m.Message ?? "");
+            w.WriteInt32(m.Packaged);
             var items = m.Items ?? System.Array.Empty<PrivateStoreSellRowNet>();
             w.WriteInt32(items.Length);
             for (int i = 0; i < items.Length; i++)
@@ -2217,6 +2218,7 @@ namespace Fineage.Net.Contract
         {
             var r = new Reader(p);
             string message = r.ReadString();
+            int packaged = r.ReadInt32();
             int n = r.ReadInt32();
             if (n < 0) n = 0;
             var items = new PrivateStoreSellRowNet[n];
@@ -2231,7 +2233,7 @@ namespace Fineage.Net.Contract
                     EnchantLevel = r.ReadInt32()
                 };
             }
-            return new SetPrivateStoreSellNetMsg { Message = message, Items = items };
+            return new SetPrivateStoreSellNetMsg { Message = message, Packaged = packaged, Items = items };
         }
 
         public static byte[] EncodePrivateStoreListRequest(PrivateStoreListRequestNetMsg m) =>
@@ -2293,6 +2295,7 @@ namespace Fineage.Net.Contract
             w.WriteInt32(m.StoreObjectId);
             w.WriteString(m.StoreName ?? "");
             w.WriteString(m.Message ?? "");
+            w.WriteInt32(m.Packaged);
             w.WriteInt64(m.BuyerAdena);
             var items = m.Items ?? System.Array.Empty<PrivateStoreSellRowNet>();
             w.WriteInt32(items.Length);
@@ -2312,6 +2315,7 @@ namespace Fineage.Net.Contract
             int storeId = r.ReadInt32();
             string name = r.ReadString();
             string message = r.ReadString();
+            int packaged = r.ReadInt32();
             long adena = r.ReadInt64();
             int n = r.ReadInt32();
             if (n < 0) n = 0;
@@ -2332,6 +2336,7 @@ namespace Fineage.Net.Contract
                 StoreObjectId = storeId,
                 StoreName = name,
                 Message = message,
+                Packaged = packaged,
                 BuyerAdena = adena,
                 Items = items
             };

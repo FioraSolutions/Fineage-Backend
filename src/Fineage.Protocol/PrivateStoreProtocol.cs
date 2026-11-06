@@ -1,6 +1,6 @@
 namespace Fineage.Protocol;
 
-/// <summary>Player private store (Mobius <c>PrivateStoreType</c>). Sell #275, buy #277.</summary>
+/// <summary>Player private store (Mobius <c>PrivateStoreType</c>). Sell #275, buy #277, package #279.</summary>
 public static class PrivateStoreProtocol
 {
     /// <summary>Mobius INTERACTION_DISTANCE for opening / buying from a store.</summary>
@@ -23,6 +23,8 @@ public static class PrivateStoreProtocol
     public const byte TypeNone = 0;
     public const byte TypeSell = 1;
     public const byte TypeBuy = 2;
+    /// <summary>Mobius <c>PACKAGE_SELL</c>: visitor must buy every listed row in one request.</summary>
+    public const byte TypePackageSell = 3;
 
     public const string Busy = "store_busy";
     public const string Combat = "store_combat";
@@ -33,6 +35,10 @@ public static class PrivateStoreProtocol
     public const string Closed = "store_closed";
     public const string Weight = "store_weight";
     public const string Slots = "store_slots";
+    public const string Package = "store_package";
+
+    public static bool IsSellStore(byte type) =>
+        type is TypeSell or TypePackageSell;
 
     public static int SellSlotLimit(int race) =>
         race == DwarfRace ? SellSlotsDwarf : SellSlotsOther;

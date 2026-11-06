@@ -802,6 +802,8 @@ public sealed class PrivateStoreSellRowMsg
 public sealed class SetPrivateStoreSellMsg
 {
     public string Message { get; set; } = "";
+    /// <summary>Mobius package sale: buyer must take the whole list.</summary>
+    public bool Packaged { get; set; }
     public PrivateStoreSellRowMsg[] Items { get; set; } = [];
 }
 

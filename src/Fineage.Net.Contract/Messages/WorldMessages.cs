@@ -900,6 +900,7 @@ namespace Fineage.Net.Contract
     public sealed class SetPrivateStoreSellNetMsg
     {
         public string Message { get; set; } = "";
+        public int Packaged { get; set; }
         public PrivateStoreSellRowNet[] Items { get; set; } = System.Array.Empty<PrivateStoreSellRowNet>();
     }
 
@@ -927,6 +928,7 @@ namespace Fineage.Net.Contract
         public int StoreObjectId { get; set; }
         public string StoreName { get; set; } = "";
         public string Message { get; set; } = "";
+        public int Packaged { get; set; }
         public long BuyerAdena { get; set; }
         public PrivateStoreSellRowNet[] Items { get; set; } = System.Array.Empty<PrivateStoreSellRowNet>();
     }
