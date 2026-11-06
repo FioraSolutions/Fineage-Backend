@@ -11,8 +11,15 @@ namespace Fineage.Zone.Spawns;
 /// </summary>
 public sealed class SpawnCatalog
 {
-    /// <summary>Cedric training-hall map id — smoke/test fixtures only, not the hosted world default.</summary>
-    public const string DefaultMapId = "ti_cedric";
+    /// <summary>
+    /// Single-map fallback when <c>includeEnabledMaps</c> is off (unit tests / opt-out). Talking Island village —
+    /// never the Cedric 5-NPC hall. Hosted Zone ignores this and loads every enabled map.
+    /// </summary>
+    public const string DefaultMapId = "ti_village";
+
+    /// <summary>Cedric training-hall — ZoneAcceptance / Gremlin smoke only. Never the hosted default.</summary>
+    public const string SmokeMapId = "ti_cedric";
+
     public const string TalkingIslandVillageMapId = "ti_village";
     public const string SpawnsDirectoryName = "spawns";
 

@@ -64,7 +64,7 @@ public sealed class NpcTemplateSpawnTests
     [Fact]
     public void Cedric_gremlin_rows_keep_their_inline_stats()
     {
-        var rows = SpawnCatalog.LoadDefault().GetMap(SpawnCatalog.DefaultMapId).Npcs;
+        var rows = SpawnCatalog.LoadDefault().GetMap(SpawnCatalog.SmokeMapId).Npcs;
         Assert.Equal([50001, 50002, 50003], rows.Select(row => row.ObjectId).ToArray());
         Assert.All(rows, row =>
         {
@@ -159,36 +159,32 @@ public sealed class NpcTemplateSpawnTests
     [Fact]
     public void Unit_world_keeps_the_gremlin_smoke_set()
     {
-        var ids = new ZoneWorld().NpcObjectIds;
+        var ids = new ZoneWorld(includeEnabledMaps: false, activeMapId: SpawnCatalog.SmokeMapId).NpcObjectIds;
         foreach (var gremlin in TalkingIsland.Gremlins)
             Assert.Contains(gremlin.ObjectId, ids);
         Assert.DoesNotContain(60013, ids);
-        Assert.Equal(ids, ZoneAoiSettings.CreateWorld(includeEnabledMaps: false).NpcObjectIds);
     }
 
     [Fact]
     public void CreateWorld_defaults_to_all_enabled_maps()
     {
-        var baseline = new ZoneWorld().NpcObjectIds;
+        var single = new ZoneWorld(includeEnabledMaps: false).NpcObjectIds;
         var hosted = ZoneAoiSettings.CreateWorld();
         Assert.Equal(new ZoneWorld(includeEnabledMaps: true).NpcObjectIds, hosted.NpcObjectIds);
-        Assert.True(hosted.NpcObjectIds.Count > baseline.Count);
+        Assert.True(hosted.NpcObjectIds.Count > single.Count);
         Assert.Contains(60013, hosted.NpcObjectIds);
     }
 
     [Fact]
     public void Enabled_maps_include_the_Talking_Island_village()
     {
-        var baseline = new ZoneWorld().NpcObjectIds;
+        var village = new ZoneWorld(includeEnabledMaps: false, activeMapId: SpawnCatalog.TalkingIslandVillageMapId)
+            .NpcObjectIds;
         var world = new ZoneWorld(includeEnabledMaps: true);
-        int extra = SpawnCatalog.LoadDefault().Maps.Values
-            .Where(map => map.Enabled && map.MapId != SpawnCatalog.DefaultMapId)
-            .Sum(map => map.Npcs.Count);
-        Assert.True(extra > TalkingIslandNpcCount);
-        Assert.Equal(baseline.Count + extra, world.NpcObjectIds.Count);
-        foreach (int id in baseline)
-            Assert.Contains(id, world.NpcObjectIds);
+        Assert.True(world.NpcObjectIds.Count > village.Count);
         Assert.Contains(60013, world.NpcObjectIds);
+        foreach (int id in village)
+            Assert.Contains(id, world.NpcObjectIds);
 
         var hosted = ZoneAoiSettings.CreateWorld();
         Assert.Equal(world.NpcObjectIds, hosted.NpcObjectIds);

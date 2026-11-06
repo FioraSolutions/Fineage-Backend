@@ -43,7 +43,7 @@ public static class TalkingIsland
 
     static NpcInfoMsg[] LoadGremlins()
     {
-        var map = SpawnCatalog.LoadDefault().GetMap(SpawnCatalog.DefaultMapId);
+        var map = SpawnCatalog.LoadDefault().GetMap(SpawnCatalog.SmokeMapId);
         var gremlins = new List<NpcInfoMsg>();
         foreach (var row in map.Npcs)
         {
