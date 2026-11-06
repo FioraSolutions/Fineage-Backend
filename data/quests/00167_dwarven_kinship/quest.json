@@ -12,110 +12,22 @@
       "npcId": 30350,
       "hook": "talk",
       "when": "absent",
+      "maxLevel": 14,
       "htmlFile": "30350-talk-000.htm"
     },
     {
       "npcId": 30350,
       "hook": "talk",
-      "when": "started",
-      "hasItem": 1076,
+      "when": "absent",
+      "minLevel": 15,
       "htmlFile": "30350-talk-001.htm"
-    },
-    {
-      "npcId": 30255,
-      "hook": "talk",
-      "when": "absent",
-      "hasItem": 1076,
-      "htmlFile": "30255-talk-002.htm"
-    },
-    {
-      "npcId": 30255,
-      "hook": "talk",
-      "when": "absent",
-      "hasItem": 1106,
-      "htmlFile": "30255-talk-003.htm"
-    },
-    {
-      "npcId": 30210,
-      "hook": "talk",
-      "when": "absent",
-      "hasItem": 1106,
-      "htmlFile": "30210-talk-004.htm"
-    },
-    {
-      "npcId": 30350,
-      "hook": "event",
-      "when": "absent",
-      "event": "30210-02",
-      "hasItem": 1106,
-      "ops": [
-        {
-          "op": "give_adena",
-          "count": 20000
-        },
-        {
-          "op": "complete"
-        }
-      ],
-      "htmlFile": "30350-event-30210-02-005.htm"
-    },
-    {
-      "npcId": 30350,
-      "hook": "event",
-      "when": "absent",
-      "event": "30255-02",
-      "htmlFile": "30350-event-30255-02-006.htm"
-    },
-    {
-      "npcId": 30350,
-      "hook": "event",
-      "when": "absent",
-      "event": "30255-03",
-      "hasItem": 1076,
-      "ops": [
-        {
-          "op": "take_item",
-          "itemId": 1076,
-          "count": 1
-        },
-        {
-          "op": "give_item",
-          "itemId": 1106,
-          "count": 1
-        },
-        {
-          "op": "set_cond",
-          "cond": 2
-        },
-        {
-          "op": "give_adena",
-          "count": 2000
-        }
-      ],
-      "htmlFile": "30350-event-30255-03-007.htm"
-    },
-    {
-      "npcId": 30350,
-      "hook": "event",
-      "when": "absent",
-      "event": "30255-04",
-      "hasItem": 1076,
-      "ops": [
-        {
-          "op": "give_adena",
-          "count": 15000
-        },
-        {
-          "op": "complete"
-        }
-      ],
-      "htmlFile": "30350-event-30255-04-008.htm"
     },
     {
       "npcId": 30350,
       "hook": "event",
       "when": "absent",
       "event": "30350-03",
+      "minLevel": 15,
       "ops": [
         {
           "op": "create"
@@ -133,7 +45,113 @@
           "cond": 1
         }
       ],
-      "htmlFile": "30350-event-30350-03-009.htm"
+      "htmlFile": "30350-event-30350-03-002.htm"
+    },
+    {
+      "npcId": 30350,
+      "hook": "talk",
+      "when": "started",
+      "cond": 1,
+      "hasItem": 1076,
+      "htmlFile": "30350-talk-c1-003.htm"
+    },
+    {
+      "npcId": 30255,
+      "hook": "talk",
+      "when": "started",
+      "cond": 1,
+      "hasItem": 1076,
+      "htmlFile": "30255-talk-c1-004.htm"
+    },
+    {
+      "npcId": 30255,
+      "hook": "event",
+      "when": "started",
+      "event": "30255-02",
+      "cond": 1,
+      "hasItem": 1076,
+      "htmlFile": "30255-event-30255-02-c1-005.htm"
+    },
+    {
+      "npcId": 30255,
+      "hook": "event",
+      "when": "started",
+      "event": "30255-03",
+      "cond": 1,
+      "hasItem": 1076,
+      "ops": [
+        {
+          "op": "take_item",
+          "itemId": 1076,
+          "count": 1
+        },
+        {
+          "op": "give_item",
+          "itemId": 1106,
+          "count": 1
+        },
+        {
+          "op": "give_adena",
+          "count": 2000
+        },
+        {
+          "op": "set_cond",
+          "cond": 2
+        }
+      ],
+      "htmlFile": "30255-event-30255-03-c1-006.htm"
+    },
+    {
+      "npcId": 30255,
+      "hook": "event",
+      "when": "started",
+      "event": "30255-04",
+      "cond": 1,
+      "hasItem": 1076,
+      "ops": [
+        {
+          "op": "give_adena",
+          "count": 15000
+        },
+        {
+          "op": "complete"
+        }
+      ],
+      "htmlFile": "30255-event-30255-04-c1-007.htm"
+    },
+    {
+      "npcId": 30255,
+      "hook": "talk",
+      "when": "started",
+      "cond": 2,
+      "hasItem": 1106,
+      "htmlFile": "30255-talk-c2-008.htm"
+    },
+    {
+      "npcId": 30210,
+      "hook": "talk",
+      "when": "started",
+      "cond": 2,
+      "hasItem": 1106,
+      "htmlFile": "30210-talk-c2-009.htm"
+    },
+    {
+      "npcId": 30210,
+      "hook": "event",
+      "when": "started",
+      "event": "30210-02",
+      "cond": 2,
+      "hasItem": 1106,
+      "ops": [
+        {
+          "op": "give_adena",
+          "count": 20000
+        },
+        {
+          "op": "complete"
+        }
+      ],
+      "htmlFile": "30210-event-30210-02-c2-010.htm"
     }
   ]
 }
