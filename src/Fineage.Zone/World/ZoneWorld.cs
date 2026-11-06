@@ -293,6 +293,11 @@ sealed class ZoneEntity
     public Dictionary<int, int> KnownSkills { get; } = [];
     /// <summary>Skill id to unix-ms when reuse expires.</summary>
     public Dictionary<int, long> SkillReuseUntilMs { get; } = [];
+    /// <summary>
+    /// Item id to unix-ms when the item may be used again (Mobius <c>ItemInstance.getReuseDelay</c> / reuse stamp).
+    /// Item skills carry a reuse delay; the stamp lives on the character so a stack shares one timer.
+    /// </summary>
+    public Dictionary<int, long> ItemReuseUntilMs { get; } = [];
     public HashSet<int> Knownlist { get; } = [];
     public int ClanId { get; set; }
     /// <summary>Attack stance end, unix milliseconds. Leave and dismiss are refused until this passes.</summary>
@@ -368,6 +373,10 @@ public sealed partial class ZoneWorld
     readonly TeleportCatalog _teleports;
     readonly NewbieBuffCatalog _newbieBuffs;
     readonly ItemWeights _weights;
+    /// <summary>Mobius <c>handler="ItemSkills"</c> items: what a potion or scroll actually does (data/item-skills.json).</summary>
+    readonly Fineage.Game.Services.ItemSkillCatalog _itemSkills;
+    /// <summary>Mobius <c>MapRegionManager</c>: the "nearest town" a Scroll of Escape lands in.</summary>
+    readonly Fineage.Game.Services.MapRegionCatalog _mapRegions;
     readonly int _teleportOffset;
     readonly Random _serviceRandom;
     /// <summary>Hit/miss, crit and damage spread rolls (Mobius Rnd in Formulas).</summary>
@@ -443,7 +452,9 @@ public sealed partial class ZoneWorld
         SkillStatEffectCatalog? passives = null,
         DeathRuleCatalog? deathRules = null,
         Random? deathRandom = null,
-        bool? npcRegen = null)
+        bool? npcRegen = null,
+        Fineage.Game.Services.ItemSkillCatalog? itemSkills = null,
+        Fineage.Game.Services.MapRegionCatalog? mapRegions = null)
     {
         _npcRegen = npcRegen ?? ZoneNpcSettings.NpcRegenEnabled;
         _skillCombat = skillCombat ?? SkillCombatCatalog.LoadDefault();
@@ -486,6 +497,8 @@ public sealed partial class ZoneWorld
         _shopStock = new ShopStock(_buyLists);
         _deathRules = deathRules ?? DeathRuleCatalog.LoadDefault();
         _deathRandom = deathRandom ?? Random.Shared;
+        _itemSkills = itemSkills ?? Fineage.Game.Services.ItemSkillCatalog.LoadDefault();
+        _mapRegions = mapRegions ?? Fineage.Game.Services.MapRegionCatalog.LoadDefault();
         _geo = geo ?? SharedGeo.Value;
         if (geo == null)
         {

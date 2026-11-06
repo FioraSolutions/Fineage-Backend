@@ -52,3 +52,5 @@ publish/
 !data/spoil.json
 !data/herbs.json
 !data/xp-percent-lost.json
+!data/item-skills.json
+!data/map-regions.json
