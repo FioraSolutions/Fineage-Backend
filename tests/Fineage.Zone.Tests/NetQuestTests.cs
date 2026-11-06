@@ -16,7 +16,7 @@ public sealed class NetQuestTests
 {
     const int RoxxyIndex = 0;
     const int BitzIndex = 1;
-    const int QuestId = 999;
+    const int QuestId = 998; // Fineage Roxxy smoke (Mobius id 999 is Newbie Tutorial)
 
     [Fact]
     public async Task Smoke_quest_talks_reward_and_persist()
@@ -72,7 +72,7 @@ public sealed class NetQuestTests
         var finished = LastQuestList(bench.Rec);
         Assert.Empty(finished.Active);
         Assert.Equal(QuestId, Assert.Single(finished.CompletedQuestIds));
-        Assert.Equal(128, finished.CompletedMask[QuestId / 8]);
+        Assert.Equal(1 << (QuestId % 8), finished.CompletedMask[QuestId / 8]);
         Assert.Equal(25, finished.MaxActive);
 
         // The reward was written through before anything else happened.
@@ -91,7 +91,7 @@ public sealed class NetQuestTests
         BenchPlayer again = await bench.EnterAsync("quester", "Quester", []);
         var reloaded = bench.World.NetQuestList(again.Session);
         Assert.Equal(QuestId, Assert.Single(reloaded.CompletedQuestIds));
-        Assert.Equal(128, reloaded.CompletedMask[QuestId / 8]);
+        Assert.Equal(1 << (QuestId % 8), reloaded.CompletedMask[QuestId / 8]);
     }
 
     [Fact]
