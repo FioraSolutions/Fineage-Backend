@@ -1,0 +1,1515 @@
+{
+  "id": 999,
+  "name": "Newbie Tutorial",
+  "repeatable": false,
+  "abortable": true,
+  "questItems": [
+    6353,
+    1067,
+    1068,
+    1069,
+    1070,
+    1498,
+    1496
+  ],
+  "dialogs": [
+    {
+      "npcId": 30009,
+      "hook": "talk",
+      "when": "absent",
+      "races": [
+        0
+      ],
+      "isMage": false,
+      "maxLevel": 9,
+      "ops": [
+        {
+          "op": "create"
+        },
+        {
+          "op": "start"
+        },
+        {
+          "op": "set_cond",
+          "cond": 1
+        }
+      ],
+      "htmlFile": "30009-talk-000.htm"
+    },
+    {
+      "npcId": 30009,
+      "hook": "talk",
+      "when": "started",
+      "cond": 1,
+      "lacksItems": [
+        6353,
+        1067
+      ],
+      "races": [
+        0
+      ],
+      "isMage": false,
+      "maxLevel": 9,
+      "htmlFile": "30009-talk-c1-001.htm"
+    },
+    {
+      "npcId": 30009,
+      "hook": "talk",
+      "when": "started",
+      "cond": 1,
+      "hasItem": 6353,
+      "races": [
+        0
+      ],
+      "isMage": false,
+      "maxLevel": 9,
+      "ops": [
+        {
+          "op": "take_item",
+          "itemId": 6353,
+          "count": 1
+        },
+        {
+          "op": "give_item",
+          "itemId": 1067,
+          "count": 1
+        },
+        {
+          "op": "give_item",
+          "itemId": 5789,
+          "count": 200
+        },
+        {
+          "op": "set_cond",
+          "cond": 2
+        }
+      ],
+      "htmlFile": "30009-talk-c1-002.htm"
+    },
+    {
+      "npcId": 30009,
+      "hook": "talk",
+      "when": "started",
+      "cond": 2,
+      "hasItem": 1067,
+      "races": [
+        0
+      ],
+      "isMage": false,
+      "maxLevel": 9,
+      "htmlFile": "30009-talk-c2-003.htm"
+    },
+    {
+      "npcId": 30008,
+      "hook": "talk",
+      "when": "absent",
+      "races": [
+        0
+      ],
+      "isMage": false,
+      "maxLevel": 9,
+      "htmlFile": "30008-talk-004.htm"
+    },
+    {
+      "npcId": 30008,
+      "hook": "talk",
+      "when": "started",
+      "cond": 1,
+      "races": [
+        0
+      ],
+      "isMage": false,
+      "maxLevel": 9,
+      "htmlFile": "30008-talk-c1-005.htm"
+    },
+    {
+      "npcId": 30008,
+      "hook": "talk",
+      "when": "started",
+      "cond": 2,
+      "hasItem": 1067,
+      "races": [
+        0
+      ],
+      "isMage": false,
+      "maxLevel": 9,
+      "htmlFile": "30008-talk-c2-006.htm"
+    },
+    {
+      "npcId": 30008,
+      "hook": "event",
+      "when": "started",
+      "event": "30008_02",
+      "cond": 2,
+      "hasItem": 1067,
+      "races": [
+        0
+      ],
+      "isMage": false,
+      "maxLevel": 9,
+      "ops": [
+        {
+          "op": "take_item",
+          "itemId": 1067,
+          "count": 1
+        },
+        {
+          "op": "give_exp_sp",
+          "exp": 0,
+          "sp": 50
+        },
+        {
+          "op": "complete"
+        }
+      ],
+      "htmlFile": "30008-event-30008_02-c2-007.htm"
+    },
+    {
+      "npcId": 30008,
+      "hook": "talk",
+      "when": "completed",
+      "races": [
+        0
+      ],
+      "isMage": false,
+      "maxLevel": 9,
+      "htmlFile": "30008-talk-008.htm"
+    },
+    {
+      "npcId": 30019,
+      "hook": "talk",
+      "when": "absent",
+      "races": [
+        0
+      ],
+      "isMage": true,
+      "maxLevel": 9,
+      "ops": [
+        {
+          "op": "create"
+        },
+        {
+          "op": "start"
+        },
+        {
+          "op": "set_cond",
+          "cond": 1
+        }
+      ],
+      "htmlFile": "30019-talk-009.htm"
+    },
+    {
+      "npcId": 30019,
+      "hook": "talk",
+      "when": "started",
+      "cond": 1,
+      "lacksItems": [
+        6353,
+        1068
+      ],
+      "races": [
+        0
+      ],
+      "isMage": true,
+      "maxLevel": 9,
+      "htmlFile": "30019-talk-c1-010.htm"
+    },
+    {
+      "npcId": 30019,
+      "hook": "talk",
+      "when": "started",
+      "cond": 1,
+      "hasItem": 6353,
+      "races": [
+        0
+      ],
+      "isMage": true,
+      "maxLevel": 9,
+      "ops": [
+        {
+          "op": "take_item",
+          "itemId": 6353,
+          "count": 1
+        },
+        {
+          "op": "give_item",
+          "itemId": 1068,
+          "count": 1
+        },
+        {
+          "op": "give_item",
+          "itemId": 5790,
+          "count": 100
+        },
+        {
+          "op": "set_cond",
+          "cond": 2
+        }
+      ],
+      "htmlFile": "30019-talk-c1-011.htm"
+    },
+    {
+      "npcId": 30019,
+      "hook": "talk",
+      "when": "started",
+      "cond": 2,
+      "hasItem": 1068,
+      "races": [
+        0
+      ],
+      "isMage": true,
+      "maxLevel": 9,
+      "htmlFile": "30019-talk-c2-012.htm"
+    },
+    {
+      "npcId": 30017,
+      "hook": "talk",
+      "when": "absent",
+      "races": [
+        0
+      ],
+      "isMage": true,
+      "maxLevel": 9,
+      "htmlFile": "30017-talk-013.htm"
+    },
+    {
+      "npcId": 30017,
+      "hook": "talk",
+      "when": "started",
+      "cond": 1,
+      "races": [
+        0
+      ],
+      "isMage": true,
+      "maxLevel": 9,
+      "htmlFile": "30017-talk-c1-014.htm"
+    },
+    {
+      "npcId": 30017,
+      "hook": "talk",
+      "when": "started",
+      "cond": 2,
+      "hasItem": 1068,
+      "races": [
+        0
+      ],
+      "isMage": true,
+      "maxLevel": 9,
+      "htmlFile": "30017-talk-c2-015.htm"
+    },
+    {
+      "npcId": 30017,
+      "hook": "event",
+      "when": "started",
+      "event": "30017_02",
+      "cond": 2,
+      "hasItem": 1068,
+      "races": [
+        0
+      ],
+      "isMage": true,
+      "maxLevel": 9,
+      "ops": [
+        {
+          "op": "take_item",
+          "itemId": 1068,
+          "count": 1
+        },
+        {
+          "op": "give_exp_sp",
+          "exp": 0,
+          "sp": 50
+        },
+        {
+          "op": "complete"
+        }
+      ],
+      "htmlFile": "30017-event-30017_02-c2-016.htm"
+    },
+    {
+      "npcId": 30017,
+      "hook": "talk",
+      "when": "completed",
+      "races": [
+        0
+      ],
+      "isMage": true,
+      "maxLevel": 9,
+      "htmlFile": "30017-talk-017.htm"
+    },
+    {
+      "npcId": 30400,
+      "hook": "talk",
+      "when": "absent",
+      "races": [
+        1
+      ],
+      "isMage": false,
+      "maxLevel": 9,
+      "ops": [
+        {
+          "op": "create"
+        },
+        {
+          "op": "start"
+        },
+        {
+          "op": "set_cond",
+          "cond": 1
+        }
+      ],
+      "htmlFile": "30400-talk-018.htm"
+    },
+    {
+      "npcId": 30400,
+      "hook": "talk",
+      "when": "started",
+      "cond": 1,
+      "lacksItems": [
+        6353,
+        1069
+      ],
+      "races": [
+        1
+      ],
+      "isMage": false,
+      "maxLevel": 9,
+      "htmlFile": "30400-talk-c1-019.htm"
+    },
+    {
+      "npcId": 30400,
+      "hook": "talk",
+      "when": "started",
+      "cond": 1,
+      "hasItem": 6353,
+      "races": [
+        1
+      ],
+      "isMage": false,
+      "maxLevel": 9,
+      "ops": [
+        {
+          "op": "take_item",
+          "itemId": 6353,
+          "count": 1
+        },
+        {
+          "op": "give_item",
+          "itemId": 1069,
+          "count": 1
+        },
+        {
+          "op": "give_item",
+          "itemId": 5789,
+          "count": 200
+        },
+        {
+          "op": "set_cond",
+          "cond": 2
+        }
+      ],
+      "htmlFile": "30400-talk-c1-020.htm"
+    },
+    {
+      "npcId": 30400,
+      "hook": "talk",
+      "when": "started",
+      "cond": 2,
+      "hasItem": 1069,
+      "races": [
+        1
+      ],
+      "isMage": false,
+      "maxLevel": 9,
+      "htmlFile": "30400-talk-c2-021.htm"
+    },
+    {
+      "npcId": 30370,
+      "hook": "talk",
+      "when": "absent",
+      "races": [
+        1
+      ],
+      "isMage": false,
+      "maxLevel": 9,
+      "htmlFile": "30370-talk-022.htm"
+    },
+    {
+      "npcId": 30370,
+      "hook": "talk",
+      "when": "started",
+      "cond": 1,
+      "races": [
+        1
+      ],
+      "isMage": false,
+      "maxLevel": 9,
+      "htmlFile": "30370-talk-c1-023.htm"
+    },
+    {
+      "npcId": 30370,
+      "hook": "talk",
+      "when": "started",
+      "cond": 2,
+      "hasItem": 1069,
+      "races": [
+        1
+      ],
+      "isMage": false,
+      "maxLevel": 9,
+      "htmlFile": "30370-talk-c2-024.htm"
+    },
+    {
+      "npcId": 30370,
+      "hook": "event",
+      "when": "started",
+      "event": "30370_02",
+      "cond": 2,
+      "hasItem": 1069,
+      "races": [
+        1
+      ],
+      "isMage": false,
+      "maxLevel": 9,
+      "ops": [
+        {
+          "op": "take_item",
+          "itemId": 1069,
+          "count": 1
+        },
+        {
+          "op": "give_exp_sp",
+          "exp": 0,
+          "sp": 50
+        },
+        {
+          "op": "complete"
+        }
+      ],
+      "htmlFile": "30370-event-30370_02-c2-025.htm"
+    },
+    {
+      "npcId": 30370,
+      "hook": "talk",
+      "when": "completed",
+      "races": [
+        1
+      ],
+      "isMage": false,
+      "maxLevel": 9,
+      "htmlFile": "30370-talk-026.htm"
+    },
+    {
+      "npcId": 30400,
+      "hook": "talk",
+      "when": "absent",
+      "races": [
+        1
+      ],
+      "isMage": true,
+      "maxLevel": 9,
+      "ops": [
+        {
+          "op": "create"
+        },
+        {
+          "op": "start"
+        },
+        {
+          "op": "set_cond",
+          "cond": 1
+        }
+      ],
+      "htmlFile": "30400-talk-027.htm"
+    },
+    {
+      "npcId": 30400,
+      "hook": "talk",
+      "when": "started",
+      "cond": 1,
+      "lacksItems": [
+        6353,
+        1069
+      ],
+      "races": [
+        1
+      ],
+      "isMage": true,
+      "maxLevel": 9,
+      "htmlFile": "30400-talk-c1-028.htm"
+    },
+    {
+      "npcId": 30400,
+      "hook": "talk",
+      "when": "started",
+      "cond": 1,
+      "hasItem": 6353,
+      "races": [
+        1
+      ],
+      "isMage": true,
+      "maxLevel": 9,
+      "ops": [
+        {
+          "op": "take_item",
+          "itemId": 6353,
+          "count": 1
+        },
+        {
+          "op": "give_item",
+          "itemId": 1069,
+          "count": 1
+        },
+        {
+          "op": "give_item",
+          "itemId": 5790,
+          "count": 100
+        },
+        {
+          "op": "set_cond",
+          "cond": 2
+        }
+      ],
+      "htmlFile": "30400-talk-c1-029.htm"
+    },
+    {
+      "npcId": 30400,
+      "hook": "talk",
+      "when": "started",
+      "cond": 2,
+      "hasItem": 1069,
+      "races": [
+        1
+      ],
+      "isMage": true,
+      "maxLevel": 9,
+      "htmlFile": "30400-talk-c2-030.htm"
+    },
+    {
+      "npcId": 30370,
+      "hook": "talk",
+      "when": "absent",
+      "races": [
+        1
+      ],
+      "isMage": true,
+      "maxLevel": 9,
+      "htmlFile": "30370-talk-031.htm"
+    },
+    {
+      "npcId": 30370,
+      "hook": "talk",
+      "when": "started",
+      "cond": 1,
+      "races": [
+        1
+      ],
+      "isMage": true,
+      "maxLevel": 9,
+      "htmlFile": "30370-talk-c1-032.htm"
+    },
+    {
+      "npcId": 30370,
+      "hook": "talk",
+      "when": "started",
+      "cond": 2,
+      "hasItem": 1069,
+      "races": [
+        1
+      ],
+      "isMage": true,
+      "maxLevel": 9,
+      "htmlFile": "30370-talk-c2-033.htm"
+    },
+    {
+      "npcId": 30370,
+      "hook": "event",
+      "when": "started",
+      "event": "30370_02",
+      "cond": 2,
+      "hasItem": 1069,
+      "races": [
+        1
+      ],
+      "isMage": true,
+      "maxLevel": 9,
+      "ops": [
+        {
+          "op": "take_item",
+          "itemId": 1069,
+          "count": 1
+        },
+        {
+          "op": "give_exp_sp",
+          "exp": 0,
+          "sp": 50
+        },
+        {
+          "op": "complete"
+        }
+      ],
+      "htmlFile": "30370-event-30370_02-c2-034.htm"
+    },
+    {
+      "npcId": 30370,
+      "hook": "talk",
+      "when": "completed",
+      "races": [
+        1
+      ],
+      "isMage": true,
+      "maxLevel": 9,
+      "htmlFile": "30370-talk-035.htm"
+    },
+    {
+      "npcId": 30131,
+      "hook": "talk",
+      "when": "absent",
+      "races": [
+        2
+      ],
+      "isMage": false,
+      "maxLevel": 9,
+      "ops": [
+        {
+          "op": "create"
+        },
+        {
+          "op": "start"
+        },
+        {
+          "op": "set_cond",
+          "cond": 1
+        }
+      ],
+      "htmlFile": "30131-talk-036.htm"
+    },
+    {
+      "npcId": 30131,
+      "hook": "talk",
+      "when": "started",
+      "cond": 1,
+      "lacksItems": [
+        6353,
+        1070
+      ],
+      "races": [
+        2
+      ],
+      "isMage": false,
+      "maxLevel": 9,
+      "htmlFile": "30131-talk-c1-037.htm"
+    },
+    {
+      "npcId": 30131,
+      "hook": "talk",
+      "when": "started",
+      "cond": 1,
+      "hasItem": 6353,
+      "races": [
+        2
+      ],
+      "isMage": false,
+      "maxLevel": 9,
+      "ops": [
+        {
+          "op": "take_item",
+          "itemId": 6353,
+          "count": 1
+        },
+        {
+          "op": "give_item",
+          "itemId": 1070,
+          "count": 1
+        },
+        {
+          "op": "give_item",
+          "itemId": 5789,
+          "count": 200
+        },
+        {
+          "op": "set_cond",
+          "cond": 2
+        }
+      ],
+      "htmlFile": "30131-talk-c1-038.htm"
+    },
+    {
+      "npcId": 30131,
+      "hook": "talk",
+      "when": "started",
+      "cond": 2,
+      "hasItem": 1070,
+      "races": [
+        2
+      ],
+      "isMage": false,
+      "maxLevel": 9,
+      "htmlFile": "30131-talk-c2-039.htm"
+    },
+    {
+      "npcId": 30129,
+      "hook": "talk",
+      "when": "absent",
+      "races": [
+        2
+      ],
+      "isMage": false,
+      "maxLevel": 9,
+      "htmlFile": "30129-talk-040.htm"
+    },
+    {
+      "npcId": 30129,
+      "hook": "talk",
+      "when": "started",
+      "cond": 1,
+      "races": [
+        2
+      ],
+      "isMage": false,
+      "maxLevel": 9,
+      "htmlFile": "30129-talk-c1-041.htm"
+    },
+    {
+      "npcId": 30129,
+      "hook": "talk",
+      "when": "started",
+      "cond": 2,
+      "hasItem": 1070,
+      "races": [
+        2
+      ],
+      "isMage": false,
+      "maxLevel": 9,
+      "htmlFile": "30129-talk-c2-042.htm"
+    },
+    {
+      "npcId": 30129,
+      "hook": "event",
+      "when": "started",
+      "event": "30129_02",
+      "cond": 2,
+      "hasItem": 1070,
+      "races": [
+        2
+      ],
+      "isMage": false,
+      "maxLevel": 9,
+      "ops": [
+        {
+          "op": "take_item",
+          "itemId": 1070,
+          "count": 1
+        },
+        {
+          "op": "give_exp_sp",
+          "exp": 0,
+          "sp": 50
+        },
+        {
+          "op": "complete"
+        }
+      ],
+      "htmlFile": "30129-event-30129_02-c2-043.htm"
+    },
+    {
+      "npcId": 30129,
+      "hook": "talk",
+      "when": "completed",
+      "races": [
+        2
+      ],
+      "isMage": false,
+      "maxLevel": 9,
+      "htmlFile": "30129-talk-044.htm"
+    },
+    {
+      "npcId": 30131,
+      "hook": "talk",
+      "when": "absent",
+      "races": [
+        2
+      ],
+      "isMage": true,
+      "maxLevel": 9,
+      "ops": [
+        {
+          "op": "create"
+        },
+        {
+          "op": "start"
+        },
+        {
+          "op": "set_cond",
+          "cond": 1
+        }
+      ],
+      "htmlFile": "30131-talk-045.htm"
+    },
+    {
+      "npcId": 30131,
+      "hook": "talk",
+      "when": "started",
+      "cond": 1,
+      "lacksItems": [
+        6353,
+        1070
+      ],
+      "races": [
+        2
+      ],
+      "isMage": true,
+      "maxLevel": 9,
+      "htmlFile": "30131-talk-c1-046.htm"
+    },
+    {
+      "npcId": 30131,
+      "hook": "talk",
+      "when": "started",
+      "cond": 1,
+      "hasItem": 6353,
+      "races": [
+        2
+      ],
+      "isMage": true,
+      "maxLevel": 9,
+      "ops": [
+        {
+          "op": "take_item",
+          "itemId": 6353,
+          "count": 1
+        },
+        {
+          "op": "give_item",
+          "itemId": 1070,
+          "count": 1
+        },
+        {
+          "op": "give_item",
+          "itemId": 5790,
+          "count": 100
+        },
+        {
+          "op": "set_cond",
+          "cond": 2
+        }
+      ],
+      "htmlFile": "30131-talk-c1-047.htm"
+    },
+    {
+      "npcId": 30131,
+      "hook": "talk",
+      "when": "started",
+      "cond": 2,
+      "hasItem": 1070,
+      "races": [
+        2
+      ],
+      "isMage": true,
+      "maxLevel": 9,
+      "htmlFile": "30131-talk-c2-048.htm"
+    },
+    {
+      "npcId": 30129,
+      "hook": "talk",
+      "when": "absent",
+      "races": [
+        2
+      ],
+      "isMage": true,
+      "maxLevel": 9,
+      "htmlFile": "30129-talk-049.htm"
+    },
+    {
+      "npcId": 30129,
+      "hook": "talk",
+      "when": "started",
+      "cond": 1,
+      "races": [
+        2
+      ],
+      "isMage": true,
+      "maxLevel": 9,
+      "htmlFile": "30129-talk-c1-050.htm"
+    },
+    {
+      "npcId": 30129,
+      "hook": "talk",
+      "when": "started",
+      "cond": 2,
+      "hasItem": 1070,
+      "races": [
+        2
+      ],
+      "isMage": true,
+      "maxLevel": 9,
+      "htmlFile": "30129-talk-c2-051.htm"
+    },
+    {
+      "npcId": 30129,
+      "hook": "event",
+      "when": "started",
+      "event": "30129_02",
+      "cond": 2,
+      "hasItem": 1070,
+      "races": [
+        2
+      ],
+      "isMage": true,
+      "maxLevel": 9,
+      "ops": [
+        {
+          "op": "take_item",
+          "itemId": 1070,
+          "count": 1
+        },
+        {
+          "op": "give_exp_sp",
+          "exp": 0,
+          "sp": 50
+        },
+        {
+          "op": "complete"
+        }
+      ],
+      "htmlFile": "30129-event-30129_02-c2-052.htm"
+    },
+    {
+      "npcId": 30129,
+      "hook": "talk",
+      "when": "completed",
+      "races": [
+        2
+      ],
+      "isMage": true,
+      "maxLevel": 9,
+      "htmlFile": "30129-talk-053.htm"
+    },
+    {
+      "npcId": 30575,
+      "hook": "talk",
+      "when": "absent",
+      "races": [
+        3
+      ],
+      "isMage": false,
+      "maxLevel": 9,
+      "ops": [
+        {
+          "op": "create"
+        },
+        {
+          "op": "start"
+        },
+        {
+          "op": "set_cond",
+          "cond": 1
+        }
+      ],
+      "htmlFile": "30575-talk-054.htm"
+    },
+    {
+      "npcId": 30575,
+      "hook": "talk",
+      "when": "started",
+      "cond": 1,
+      "lacksItems": [
+        6353,
+        1496
+      ],
+      "races": [
+        3
+      ],
+      "isMage": false,
+      "maxLevel": 9,
+      "htmlFile": "30575-talk-c1-055.htm"
+    },
+    {
+      "npcId": 30575,
+      "hook": "talk",
+      "when": "started",
+      "cond": 1,
+      "hasItem": 6353,
+      "races": [
+        3
+      ],
+      "isMage": false,
+      "maxLevel": 9,
+      "ops": [
+        {
+          "op": "take_item",
+          "itemId": 6353,
+          "count": 1
+        },
+        {
+          "op": "give_item",
+          "itemId": 1496,
+          "count": 1
+        },
+        {
+          "op": "give_item",
+          "itemId": 5789,
+          "count": 200
+        },
+        {
+          "op": "set_cond",
+          "cond": 2
+        }
+      ],
+      "htmlFile": "30575-talk-c1-056.htm"
+    },
+    {
+      "npcId": 30575,
+      "hook": "talk",
+      "when": "started",
+      "cond": 2,
+      "hasItem": 1496,
+      "races": [
+        3
+      ],
+      "isMage": false,
+      "maxLevel": 9,
+      "htmlFile": "30575-talk-c2-057.htm"
+    },
+    {
+      "npcId": 30573,
+      "hook": "talk",
+      "when": "absent",
+      "races": [
+        3
+      ],
+      "isMage": false,
+      "maxLevel": 9,
+      "htmlFile": "30573-talk-058.htm"
+    },
+    {
+      "npcId": 30573,
+      "hook": "talk",
+      "when": "started",
+      "cond": 1,
+      "races": [
+        3
+      ],
+      "isMage": false,
+      "maxLevel": 9,
+      "htmlFile": "30573-talk-c1-059.htm"
+    },
+    {
+      "npcId": 30573,
+      "hook": "talk",
+      "when": "started",
+      "cond": 2,
+      "hasItem": 1496,
+      "races": [
+        3
+      ],
+      "isMage": false,
+      "maxLevel": 9,
+      "htmlFile": "30573-talk-c2-060.htm"
+    },
+    {
+      "npcId": 30573,
+      "hook": "event",
+      "when": "started",
+      "event": "30573_02",
+      "cond": 2,
+      "hasItem": 1496,
+      "races": [
+        3
+      ],
+      "isMage": false,
+      "maxLevel": 9,
+      "ops": [
+        {
+          "op": "take_item",
+          "itemId": 1496,
+          "count": 1
+        },
+        {
+          "op": "give_exp_sp",
+          "exp": 0,
+          "sp": 50
+        },
+        {
+          "op": "complete"
+        }
+      ],
+      "htmlFile": "30573-event-30573_02-c2-061.htm"
+    },
+    {
+      "npcId": 30573,
+      "hook": "talk",
+      "when": "completed",
+      "races": [
+        3
+      ],
+      "isMage": false,
+      "maxLevel": 9,
+      "htmlFile": "30573-talk-062.htm"
+    },
+    {
+      "npcId": 30575,
+      "hook": "talk",
+      "when": "absent",
+      "races": [
+        3
+      ],
+      "isMage": true,
+      "maxLevel": 9,
+      "ops": [
+        {
+          "op": "create"
+        },
+        {
+          "op": "start"
+        },
+        {
+          "op": "set_cond",
+          "cond": 1
+        }
+      ],
+      "htmlFile": "30575-talk-063.htm"
+    },
+    {
+      "npcId": 30575,
+      "hook": "talk",
+      "when": "started",
+      "cond": 1,
+      "lacksItems": [
+        6353,
+        1496
+      ],
+      "races": [
+        3
+      ],
+      "isMage": true,
+      "maxLevel": 9,
+      "htmlFile": "30575-talk-c1-064.htm"
+    },
+    {
+      "npcId": 30575,
+      "hook": "talk",
+      "when": "started",
+      "cond": 1,
+      "hasItem": 6353,
+      "races": [
+        3
+      ],
+      "isMage": true,
+      "maxLevel": 9,
+      "ops": [
+        {
+          "op": "take_item",
+          "itemId": 6353,
+          "count": 1
+        },
+        {
+          "op": "give_item",
+          "itemId": 1496,
+          "count": 1
+        },
+        {
+          "op": "give_item",
+          "itemId": 5790,
+          "count": 100
+        },
+        {
+          "op": "set_cond",
+          "cond": 2
+        }
+      ],
+      "htmlFile": "30575-talk-c1-065.htm"
+    },
+    {
+      "npcId": 30575,
+      "hook": "talk",
+      "when": "started",
+      "cond": 2,
+      "hasItem": 1496,
+      "races": [
+        3
+      ],
+      "isMage": true,
+      "maxLevel": 9,
+      "htmlFile": "30575-talk-c2-066.htm"
+    },
+    {
+      "npcId": 30573,
+      "hook": "talk",
+      "when": "absent",
+      "races": [
+        3
+      ],
+      "isMage": true,
+      "maxLevel": 9,
+      "htmlFile": "30573-talk-067.htm"
+    },
+    {
+      "npcId": 30573,
+      "hook": "talk",
+      "when": "started",
+      "cond": 1,
+      "races": [
+        3
+      ],
+      "isMage": true,
+      "maxLevel": 9,
+      "htmlFile": "30573-talk-c1-068.htm"
+    },
+    {
+      "npcId": 30573,
+      "hook": "talk",
+      "when": "started",
+      "cond": 2,
+      "hasItem": 1496,
+      "races": [
+        3
+      ],
+      "isMage": true,
+      "maxLevel": 9,
+      "htmlFile": "30573-talk-c2-069.htm"
+    },
+    {
+      "npcId": 30573,
+      "hook": "event",
+      "when": "started",
+      "event": "30573_02",
+      "cond": 2,
+      "hasItem": 1496,
+      "races": [
+        3
+      ],
+      "isMage": true,
+      "maxLevel": 9,
+      "ops": [
+        {
+          "op": "take_item",
+          "itemId": 1496,
+          "count": 1
+        },
+        {
+          "op": "give_exp_sp",
+          "exp": 0,
+          "sp": 50
+        },
+        {
+          "op": "complete"
+        }
+      ],
+      "htmlFile": "30573-event-30573_02-c2-070.htm"
+    },
+    {
+      "npcId": 30573,
+      "hook": "talk",
+      "when": "completed",
+      "races": [
+        3
+      ],
+      "isMage": true,
+      "maxLevel": 9,
+      "htmlFile": "30573-talk-071.htm"
+    },
+    {
+      "npcId": 30530,
+      "hook": "talk",
+      "when": "absent",
+      "races": [
+        4
+      ],
+      "isMage": false,
+      "maxLevel": 9,
+      "ops": [
+        {
+          "op": "create"
+        },
+        {
+          "op": "start"
+        },
+        {
+          "op": "set_cond",
+          "cond": 1
+        }
+      ],
+      "htmlFile": "30530-talk-072.htm"
+    },
+    {
+      "npcId": 30530,
+      "hook": "talk",
+      "when": "started",
+      "cond": 1,
+      "lacksItems": [
+        6353,
+        1498
+      ],
+      "races": [
+        4
+      ],
+      "isMage": false,
+      "maxLevel": 9,
+      "htmlFile": "30530-talk-c1-073.htm"
+    },
+    {
+      "npcId": 30530,
+      "hook": "talk",
+      "when": "started",
+      "cond": 1,
+      "hasItem": 6353,
+      "races": [
+        4
+      ],
+      "isMage": false,
+      "maxLevel": 9,
+      "ops": [
+        {
+          "op": "take_item",
+          "itemId": 6353,
+          "count": 1
+        },
+        {
+          "op": "give_item",
+          "itemId": 1498,
+          "count": 1
+        },
+        {
+          "op": "give_item",
+          "itemId": 5789,
+          "count": 200
+        },
+        {
+          "op": "set_cond",
+          "cond": 2
+        }
+      ],
+      "htmlFile": "30530-talk-c1-074.htm"
+    },
+    {
+      "npcId": 30530,
+      "hook": "talk",
+      "when": "started",
+      "cond": 2,
+      "hasItem": 1498,
+      "races": [
+        4
+      ],
+      "isMage": false,
+      "maxLevel": 9,
+      "htmlFile": "30530-talk-c2-075.htm"
+    },
+    {
+      "npcId": 30528,
+      "hook": "talk",
+      "when": "absent",
+      "races": [
+        4
+      ],
+      "isMage": false,
+      "maxLevel": 9,
+      "htmlFile": "30528-talk-076.htm"
+    },
+    {
+      "npcId": 30528,
+      "hook": "talk",
+      "when": "started",
+      "cond": 1,
+      "races": [
+        4
+      ],
+      "isMage": false,
+      "maxLevel": 9,
+      "htmlFile": "30528-talk-c1-077.htm"
+    },
+    {
+      "npcId": 30528,
+      "hook": "talk",
+      "when": "started",
+      "cond": 2,
+      "hasItem": 1498,
+      "races": [
+        4
+      ],
+      "isMage": false,
+      "maxLevel": 9,
+      "htmlFile": "30528-talk-c2-078.htm"
+    },
+    {
+      "npcId": 30528,
+      "hook": "event",
+      "when": "started",
+      "event": "30528_02",
+      "cond": 2,
+      "hasItem": 1498,
+      "races": [
+        4
+      ],
+      "isMage": false,
+      "maxLevel": 9,
+      "ops": [
+        {
+          "op": "take_item",
+          "itemId": 1498,
+          "count": 1
+        },
+        {
+          "op": "give_exp_sp",
+          "exp": 0,
+          "sp": 50
+        },
+        {
+          "op": "complete"
+        }
+      ],
+      "htmlFile": "30528-event-30528_02-c2-079.htm"
+    },
+    {
+      "npcId": 30528,
+      "hook": "talk",
+      "when": "completed",
+      "races": [
+        4
+      ],
+      "isMage": false,
+      "maxLevel": 9,
+      "htmlFile": "30528-talk-080.htm"
+    },
+    {
+      "npcId": 18342,
+      "hook": "kill",
+      "when": "started",
+      "cond": 1,
+      "lacksItems": [
+        6353
+      ],
+      "html": "",
+      "ops": [
+        {
+          "op": "drop_item",
+          "itemId": 6353,
+          "count": 1,
+          "chance": 1.0,
+          "limit": 1,
+          "condAtLimit": 1
+        }
+      ]
+    },
+    {
+      "npcId": 20001,
+      "hook": "kill",
+      "when": "started",
+      "cond": 1,
+      "lacksItems": [
+        6353
+      ],
+      "html": "",
+      "ops": [
+        {
+          "op": "drop_item",
+          "itemId": 6353,
+          "count": 1,
+          "chance": 1.0,
+          "limit": 1,
+          "condAtLimit": 1
+        }
+      ]
+    }
+  ]
+}

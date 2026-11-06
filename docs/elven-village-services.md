@@ -62,7 +62,7 @@ filter is process-global and xUnit runs collections in parallel.
 ## Quest engine additions
 - Dialog gates `races` (0 Human, 1 Elf, 2 Dark Elf, 3 Orc, 4 Dwarf), `minLevel`, `maxLevel`. List passing branch first, refusal pages after (Mobius `race != ELF ? 01 : level < MIN ? 02 : 03`).
 - `QuestActor(Race, Level)` passed by ZoneWorld on talk / event / quest list.
-- Quest HTML event links must carry the id: `quest_event:<questId>:<event>` (Roxxy 999 fixed; the bypass parser rejected the id-less form on Net).
+- Quest HTML event links must carry the id: `quest_event:<questId>:<event>` (Roxxy 998 fixed; the bypass parser rejected the id-less form on Net).
 
 - Kill hook is live: `GrantKillReward` → `ApplyQuestKill` → `QuestMachine.OnKill` for the killer (melee + skill/mob-AI kill paths), published like talk (bag `InventoryUpdate`, sounds, journal `QuestList`). Kill steps marked `party: true` go to one random eligible member (killer included) within `ALT_PARTY_RANGE` 1600, alive, with matching state/cond/gates and no full capped drop (Mobius `getRandomPartyMemberState` + `checkPartyMember`). Unmarked steps stay killer-only, as Mobius Q267/Q313 do.
 - Op `sell_items` {prices:[{itemId, adena}], bonusMin, bonusAdena} = hand in all registered items for adena.
