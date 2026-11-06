@@ -22,7 +22,7 @@
 5. Magic damage (`calcMagicDam`), M.Atk/M.Def, cast speed from MAtkSpd.
 6. Attack stance/AutoAttackStart/Stop packets and client Attack hit flags (crit/miss/shot) on the Net wire.
 7. Aggressive mob aggro range, social/faction help, hate list with multiple attackers.
-8. PvP/flagging melee (players attacking players).
+8. ~~PvP/flagging melee~~ — `#271` flag on damage, PK/karma or PvP kill on death, persist; peace zones / RelationChanged deferred.
 
 ## Slice 6 — attack-skill damage and timing
 - `data/skill-combat.json` (374 Mobius skills): power/mpConsume/mpInitialConsume per level, hit/cool/reuse, castRange.

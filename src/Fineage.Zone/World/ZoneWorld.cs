@@ -65,7 +65,10 @@ sealed class ZoneEntity
     public int CastleId { get; set; }
     public int HideoutId { get; set; }
     public bool PvpFlagged { get; set; }
+    /// <summary>Unix ms when the PvP flag expires (Mobius <c>_pvpFlagLasts</c>).</summary>
+    public long PvpFlagUntilMs { get; set; }
     public int PkKills { get; set; }
+    public int PvpKills { get; set; }
     /// <summary>Mobius karma (Chaotic); death item drop uses karma rates when &gt; 0 and PK ≥ limit.</summary>
     public int Karma { get; set; }
     public int ExpertiseBonus { get; set; }
@@ -825,7 +828,10 @@ public sealed partial class ZoneWorld
             Warehouse = warehouse,
             Newbie = stored?.Newbie ?? true,
             // Mobius Player.loadCharFromDB:6578 restores _deathPenaltyBuffLevel, so the debuff outlives the session.
-            DeathPenaltyLevel = Math.Clamp(stored?.DeathPenaltyLevel ?? 0, 0, DeathPenalty.MaxLevel)
+            DeathPenaltyLevel = Math.Clamp(stored?.DeathPenaltyLevel ?? 0, 0, DeathPenalty.MaxLevel),
+            Karma = Math.Max(0, stored?.Karma ?? 0),
+            PkKills = Math.Max(0, stored?.PkKills ?? 0),
+            PvpKills = Math.Max(0, stored?.PvpKills ?? 0)
         };
         LoadQuestProgress(session, entity);
         LoadLearnedSkills(entity, stored);

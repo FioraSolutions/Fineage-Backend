@@ -100,7 +100,10 @@ public sealed record CharacterRecord(
     bool Newbie = true,
     IReadOnlyList<StoredShortcut>? Shortcuts = null,
     IReadOnlyList<StoredSkill>? LearnedSkills = null,
-    int DeathPenaltyLevel = 0)
+    int DeathPenaltyLevel = 0,
+    int Karma = 0,
+    int PkKills = 0,
+    int PvpKills = 0)
 {
     /// <summary>Remaining whole seconds until hard delete. Zero when the character is not pending.</summary>
     public int DeleteSecondsLeft(DateTimeOffset now)
@@ -222,6 +225,11 @@ public interface IAccountStore
     /// outlives the session, so the zone writes it the moment a death rolls it up.
     /// </summary>
     bool TrySaveDeathPenalty(string account, int characterId, int level);
+
+    /// <summary>
+    /// Writes karma / PK / PvP kill counters (Mobius <c>characters.karma|pkkills|pvpkills</c>).
+    /// </summary>
+    bool TrySaveKarmaPk(string account, int characterId, int karma, int pkKills, int pvpKills);
 
     /// <summary>Replaces the character's quest rows. An empty list is a real save.</summary>
     bool TryReplaceQuests(string account, int characterId, IReadOnlyList<QuestSaveRow> quests);
@@ -432,7 +440,10 @@ public sealed class MemoryAccountStore : IAccountStore
             Quests = character.Quests?.Select(CopyQuest).ToList(),
             Shortcuts = character.Shortcuts?.Select(CopyShortcut).ToList(),
             LearnedSkills = character.LearnedSkills?.Select(s => new StoredSkillDto { SkillId = s.SkillId, Level = s.Level }).ToList(),
-            DeathPenaltyLevel = character.DeathPenaltyLevel
+            DeathPenaltyLevel = character.DeathPenaltyLevel,
+            Karma = character.Karma,
+            PkKills = character.PkKills,
+            PvpKills = character.PvpKills
         };
 
     static StoredShortcutDto CopyShortcut(StoredShortcut s) => new()
@@ -707,6 +718,23 @@ public sealed class MemoryAccountStore : IAccountStore
             if (character == null)
                 return false;
             character.DeathPenaltyLevel = level;
+            Save();
+            return true;
+        }
+    }
+
+    public bool TrySaveKarmaPk(string account, int characterId, int karma, int pkKills, int pvpKills)
+    {
+        if (karma < 0 || pkKills < 0 || pvpKills < 0)
+            return false;
+        lock (_gate)
+        {
+            var character = FindCharacter(account, characterId);
+            if (character == null)
+                return false;
+            character.Karma = karma;
+            character.PkKills = pkKills;
+            character.PvpKills = pvpKills;
             Save();
             return true;
         }
@@ -1358,7 +1386,10 @@ public sealed class MemoryAccountStore : IAccountStore
             character.LearnedSkills == null
                 ? null
                 : character.LearnedSkills.Select(s => new StoredSkill(s.SkillId, s.Level)).ToArray(),
-            character.DeathPenaltyLevel);
+            character.DeathPenaltyLevel,
+            character.Karma,
+            character.PkKills,
+            character.PvpKills);
 
     sealed class StoreFile
     {
@@ -1418,6 +1449,9 @@ public sealed class MemoryAccountStore : IAccountStore
         public List<StoredShortcutDto>? Shortcuts { get; set; }
         public List<StoredSkillDto>? LearnedSkills { get; set; }
         public int DeathPenaltyLevel { get; set; }
+        public int Karma { get; set; }
+        public int PkKills { get; set; }
+        public int PvpKills { get; set; }
     }
 
     sealed class StoredSkillDto

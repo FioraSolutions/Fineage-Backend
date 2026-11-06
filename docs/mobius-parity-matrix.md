@@ -23,7 +23,7 @@ Legend: ✅ done · 🟡 partial · ❌ missing · stub = shell only.
 | 13 | NPC soulshots | Combat | 🟡 | `#257` stock+chance on melee; no SS glow packet yet; spiritshots unused (no NPC magic cast) |
 | 14 | Weapon trait / NPC defence traits | Combat | ✅ | `#261` weapon + race/type-2 via `AttackTraitBonus` (Detect Weakness) |
 | 15 | NPC cast magic/blow at players | Combat | ✅ | `#259` attack + HEAL/BUFF/DEBUFF/IMMOBILIZE/silence + clan heal + SUICIDE; RES N/A on skillLists |
-| 16 | PvP flagging / karma persist | Combat | ❌ | `ZoneEntity.Karma` wired for drop rates; persist/flagging still open |
+| 16 | PvP flagging / karma persist | Combat | ✅ | `#271` flag on damage, PK/PvP on kill, karma/pk/pvp persist |
 | 17 | Pets / summons | Combat | ❌ | |
 | 18 | Death: lost-exp + DP + town respawn | Combat | ✅ | |
 | 19 | Death: player item drop (PK/karma) | Combat | ✅ | `#258` `onDieDropItem` + `data/death-drop.json`; clan-war/PvP-zone exemptions deferred |
@@ -45,7 +45,6 @@ Legend: ✅ done · 🟡 partial · ❌ missing · stub = shell only.
 
 1. **Private store** (needs Net + client — coordinate).
 2. **Geodata pathfinding** for approach (medium).
-3. PvP flagging / karma persist (feeds death-drop karma rates) — follow-up to `#258`.
 
 ## Docs
 

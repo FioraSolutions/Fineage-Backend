@@ -319,6 +319,11 @@ public sealed class PostgresAccountStore : IAccountStore, IDisposable
             () => _inner.TrySaveDeathPenalty(account, characterId, level),
             conn => NormalizedStoreWriter.UpdateDeathPenalty(conn, characterId, level));
 
+    public bool TrySaveKarmaPk(string account, int characterId, int karma, int pkKills, int pvpKills) =>
+        RunSilent(
+            () => _inner.TrySaveKarmaPk(account, characterId, karma, pkKills, pvpKills),
+            conn => NormalizedStoreWriter.UpdateKarmaPk(conn, characterId, karma, pkKills, pvpKills));
+
     public bool TryReplaceQuests(string account, int characterId, IReadOnlyList<QuestSaveRow> quests) =>
         RunSilent(
             () => _inner.TryReplaceQuests(account, characterId, quests),

@@ -79,7 +79,7 @@ static class NormalizedStoreReader
                c.hair_style, c.hair_color, c.face, c.has_position, c.x, c.y, c.z,
                c.exp, c.sp, c.title, c.newbie, c.max_hp, c.hp, c.max_mp, c.mp,
                c.clan_id, c.clan_join_expiry_unix_ms, c.clan_create_expiry_unix_ms,
-               c.death_penalty_level,
+               c.death_penalty_level, c.karma, c.pk_kills, c.pvp_kills,
                c.created_at, c.last_access, c.delete_at
         FROM characters c
         """;
@@ -111,6 +111,9 @@ static class NormalizedStoreReader
         long ClanJoinExpiryUnixMs,
         long ClanCreateExpiryUnixMs,
         int DeathPenaltyLevel,
+        int Karma,
+        int PkKills,
+        int PvpKills,
         DateTimeOffset CreatedAt,
         DateTimeOffset LastAccess,
         DateTimeOffset? DeleteAt);
@@ -153,13 +156,16 @@ static class NormalizedStoreReader
             reader.GetInt64(23),
             reader.GetInt64(24),
             reader.GetInt32(25),
-            new DateTimeOffset(DateTime.SpecifyKind(reader.GetDateTime(26), DateTimeKind.Utc)),
-            reader.IsDBNull(27)
+            reader.GetInt32(26),
+            reader.GetInt32(27),
+            reader.GetInt32(28),
+            new DateTimeOffset(DateTime.SpecifyKind(reader.GetDateTime(29), DateTimeKind.Utc)),
+            reader.IsDBNull(30)
                 ? default
-                : new DateTimeOffset(DateTime.SpecifyKind(reader.GetDateTime(27), DateTimeKind.Utc)),
-            reader.IsDBNull(28)
+                : new DateTimeOffset(DateTime.SpecifyKind(reader.GetDateTime(30), DateTimeKind.Utc)),
+            reader.IsDBNull(31)
                 ? null
-                : new DateTimeOffset(DateTime.SpecifyKind(reader.GetDateTime(28), DateTimeKind.Utc)));
+                : new DateTimeOffset(DateTime.SpecifyKind(reader.GetDateTime(31), DateTimeKind.Utc)));
 
     static CharacterRecord Materialize(NpgsqlConnection conn, CharacterStub stub)
     {
@@ -203,7 +209,10 @@ static class NormalizedStoreReader
             stub.Newbie,
             shortcuts,
             learned,
-            stub.DeathPenaltyLevel);
+            stub.DeathPenaltyLevel,
+            stub.Karma,
+            stub.PkKills,
+            stub.PvpKills);
     }
 
     static List<StoredItem> LoadItems(NpgsqlConnection conn, int characterId, params string[] locs)

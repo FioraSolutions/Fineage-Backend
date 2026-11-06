@@ -131,21 +131,20 @@ public sealed partial class ZoneWorld
 
     /// <summary>
     /// Mobius <c>Creature.isAutoAttackable(Player)</c> for the entities this zone carries: NPCs follow their
-    /// template flag; a player is only auto-attackable when hostile (PvP-flagged or carrying karma). Everything
-    /// else is not, so merchants, guides and friendly players all come back white (colour 0).
+    /// template flag; a player is hostile (coloured nameplate) when PvP-flagged or carrying karma. Everything
+    /// else is white (colour 0). Ctrl-attack of a white player is still allowed via <see cref="IsAttackable"/>.
     /// </summary>
     static bool IsAutoAttackable(ZoneEntity target) =>
         target.Kind switch
         {
             ZoneEntityKind.Npc => target.Attackable,
-            ZoneEntityKind.Player => target.PvpFlagged || target.PkKills > 0,
+            ZoneEntityKind.Player => target.PvpFlagged || target.Karma > 0,
             _ => false
         };
 
     /// <summary>
-    /// Mobius <c>Creature.isAttackable</c> for a player's swing. NPCs follow the template flag; another player is
-    /// attackable only while PvP-flagged or carrying karma (Mobius <c>isAutoAttackable(Player)</c>), and never the
-    /// attacker itself. This is the gate <c>D4</c> was missing: it used to reject every non-NPC outright.
+    /// Mobius attack gate: NPCs follow the template flag; another living player is always swingable
+    /// (peace zones not imported). Attacking a white player raises the attacker's PvP flag.
     /// </summary>
     static bool IsAttackable(ZoneEntity attacker, ZoneEntity target)
     {
@@ -154,7 +153,7 @@ public sealed partial class ZoneWorld
         return target.Kind switch
         {
             ZoneEntityKind.Npc => target.Attackable,
-            ZoneEntityKind.Player => !ReferenceEquals(attacker, target) && IsAutoAttackable(target),
+            ZoneEntityKind.Player => !ReferenceEquals(attacker, target),
             _ => false
         };
     }
@@ -353,6 +352,7 @@ public sealed partial class ZoneWorld
             TickNpcMovement(now);
             TickPendingHits(now);
             TickMeleeHits(now);
+            TickPvpFlags(now);
             TickAutoAttacks();
             TickPendingCasts(now);
             TickQueuedMoves(now);
@@ -550,6 +550,8 @@ public sealed partial class ZoneWorld
 
         target.CombatUntilUnixMs = now + ClanProtocol.CombatStanceMillis;
         FanoutVitals(target, PlayerVitalsStatus(target));
+        if (attacker.Kind == ZoneEntityKind.Player && hit.Damage > 0)
+            UpdatePvPStatus(attacker, target, now);
         if (target.CurHp > 0)
             MaybeBreakCast(target, hit.Damage);
         if (target.CurHp <= 0)
