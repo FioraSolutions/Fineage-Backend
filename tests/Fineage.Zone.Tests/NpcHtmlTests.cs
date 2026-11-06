@@ -201,7 +201,9 @@ public sealed class NpcHtmlTests
         Assert.Equal("bad_request", await actor.BypassAsync(MerchantObjectId, "Link ../secret.htm"));
 
         Assert.Null(await actor.BypassAsync(MerchantObjectId, "Quest"));
-        Assert.Contains("I have nothing for you.", LastHtml(bench), StringComparison.Ordinal);
+        // Lector 30001 is start NPC for Q258 Bring Wolf Pelts — Quest opens the gated list, not the empty stub.
+        Assert.Contains("quest_talk:258", LastHtml(bench), StringComparison.Ordinal);
+        Assert.Contains("Bring Wolf Pelts", LastHtml(bench), StringComparison.Ordinal);
     }
 
     [Fact]
