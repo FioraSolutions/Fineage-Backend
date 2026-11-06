@@ -1,5 +1,6 @@
 using Fineage.Game;
 using Fineage.Game.Services;
+using Fineage.Game.Skills;
 using Fineage.Protocol;
 using Fineage.Zone.Combat;
 
@@ -39,6 +40,10 @@ public sealed partial class ZoneWorld
         if (use.ReuseDelayMs > 0 &&
             player.ItemReuseUntilMs.TryGetValue(item.ItemId, out long reuseUntil) && reuseUntil > now)
             return InventoryReuse;
+
+        // Scroll of Escape / Blessed SOE: cast gesture + hitTime teleport (skills 2013 / 2036 are not in skills.json).
+        if (use.Effects is [{ Kind: "escapeTown" } escape])
+            return TryUseEscapeTown(session, player, item, escape, use.ReuseDelayMs, now);
 
         // Effects are resolved first so an unsupported one leaves the stack untouched instead of eating the potion.
         bool vitals = false, abnormals = false, moved = false, penaltyCleared = false;
@@ -91,6 +96,7 @@ public sealed partial class ZoneWorld
                     vitals = true;
                     break;
                 case "escapeTown":
+                    // Mixed-effect items with escapeTown still teleport instantly; pure SOE uses TryUseEscapeTown.
                     destination = TownDestination(player);
                     moved = true;
                     break;
@@ -184,6 +190,81 @@ public sealed partial class ZoneWorld
     {
         var point = _mapRegions.TownRespawn(player.X, player.Y);
         return (point.X, point.Y, point.Z);
+    }
+
+    /// <summary>
+    /// Interlude item skills 2013 (SOE) / 2036 (Blessed SOE) are not in <c>skills.json</c>; hit times match Mobius XML.
+    /// </summary>
+    static int EscapeHitTimeMs(int skillId) => skillId == 2036 ? 200 : 20_000;
+
+    /// <summary>
+    /// Mobius ItemSkills for Scroll of Escape: <c>MagicSkillUse</c> now, consume + <c>teleToLocation(TOWN)</c> at hitTime.
+    /// </summary>
+    string? TryUseEscapeTown(
+        ZoneSession session,
+        ZoneEntity player,
+        ItemInstance item,
+        ItemSkillEffect effect,
+        int reuseDelayMs,
+        long now)
+    {
+        if (player.Dead)
+            return InventoryProtocol.Dead;
+        if (now < player.CastingUntilMs)
+            return "busy";
+
+        int skillId = effect.SkillId > 0 ? effect.SkillId : 2013;
+        int level = Math.Max(1, effect.SkillLevel);
+        int hitTimeMs = EscapeHitTimeMs(skillId);
+        var (x, y, z) = TownDestination(player);
+
+        // Fan the cast gesture first so the client starts long-cast / short-cast before the teleport lands.
+        var cast = new MagicSkillUseMsg
+        {
+            CasterObjectId = player.ObjectId,
+            TargetObjectId = player.ObjectId,
+            SkillId = skillId,
+            SkillLevel = level,
+            HitTimeMs = hitTimeMs,
+            ReuseDelayMs = Math.Max(0, reuseDelayMs)
+        };
+        FanoutSkill(player, player, cast, targetStatus: null, CasterMpStatus(player));
+        player.CastingUntilMs = now + hitTimeMs;
+
+        var template = new SkillDefinition(
+            skillId,
+            effect.Name ?? "Scroll of Escape",
+            passive: false,
+            operateType: "A1",
+            targetType: "SELF",
+            castRange: 0,
+            hitTimeMs: hitTimeMs,
+            reuseDelayMs: Math.Max(0, reuseDelayMs),
+            abnormalTimeSeconds: 0,
+            isDebuff: false,
+            levels: [new SkillLevelData(level, mpConsume: 0, power: 0)])
+        {
+            MagicType = 1
+        };
+
+        // Consume + teleport land together (Mobius destroys the scroll when the cast succeeds).
+        ScheduleEffect(player, player, template, level, now, hitTimeMs, (_, __) =>
+        {
+            if (!player.Inventory!.TryReduce(item, 1, out bool removedEntirely))
+                return;
+
+            player.ItemReuseUntilMs[item.ItemId] = _clock().ToUnixTimeMilliseconds() + Math.Max(0, reuseDelayMs);
+            NetBridge?.FanoutInventoryUpdate([session.ObjectId],
+                ToNetInventoryUpdate(InventoryMessages.Update(
+                    removedEntirely ? InventoryChange.Remove : InventoryChange.Modify, item)));
+            Relocate(player, x, y, z);
+            SelfUserInfo(player);
+            SaveVitals(session, player);
+            SaveInventory(session, player.Inventory);
+            ZoneLog.Info($"escape object={session.ObjectId} item={item.ItemId} skill={skillId} -> {x},{y},{z}");
+        });
+
+        return null;
     }
 
     static int PercentOfMax(int current, int max, int percent)
