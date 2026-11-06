@@ -68,8 +68,8 @@ public sealed partial class ZoneWorld
             TryChargeShot(session, player, item, quiet: false);
             return null;
         }
-        if (IsEscapeScroll(item.Template.Id))
-            return TryUseEscapeScroll(session, player, item);
+        if (TryUseConsumable(session, player, item, out string? consumableError))
+            return consumableError;
         if (!item.Template.Equippable)
             return InventoryProtocol.NotEquippable;
         // Unequip skips conditions. There is no cast state, so weapon changes are not deferred.
@@ -305,6 +305,22 @@ public sealed partial class ZoneWorld
         EquipDeny.Condition => InventoryProtocol.ConditionRestricted,
         _ => InventoryProtocol.ConditionRestricted
     };
+
+    /// <summary>
+    /// Non-equip UseItem handlers (escape scrolls, later potions/etc).
+    /// Returns true when the item was recognized as a consumable (error may still be set).
+    /// </summary>
+    bool TryUseConsumable(ZoneSession session, ZoneEntity player, ItemInstance item, out string? error)
+    {
+        error = null;
+        if (IsEscapeScroll(item.Template.Id))
+        {
+            error = TryUseEscapeScroll(session, player, item);
+            return true;
+        }
+
+        return false;
+    }
 
     /// <summary>Scroll of Escape (736) / Blessed Scroll of Escape (1538).</summary>
     static bool IsEscapeScroll(int itemId) => itemId is 736 or 1538;
