@@ -35,6 +35,27 @@ public sealed record MapRegion(
     /// <summary>First non-chaotic respawn point, as Mobius <c>getSpawnLoc()</c> with random respawns off.</summary>
     public MapRespawnPoint? NormalSpawn() => First(p => !p.IsChaotic && p.Kind == "normal");
 
+    /// <summary>
+    /// Mobius <c>getSpawnLoc()</c> when <c>RandomRespawnInTownEnabled</c> is on: pick uniformly among
+    /// non-chaotic <c>normal</c> points so Scroll of Escape / village restart do not always land on the first row.
+    /// </summary>
+    public MapRespawnPoint? RandomNormalSpawn(Random? rng = null)
+    {
+        List<MapRespawnPoint>? normals = null;
+        foreach (var p in RespawnPoints)
+        {
+            if (p.IsChaotic || !string.Equals(p.Kind, "normal", StringComparison.OrdinalIgnoreCase))
+                continue;
+            (normals ??= []).Add(p);
+        }
+
+        if (normals == null || normals.Count == 0)
+            return null;
+        if (normals.Count == 1)
+            return normals[0];
+        return normals[(rng ?? Random.Shared).Next(normals.Count)];
+    }
+
     /// <summary>Chaotic (karma) ring; falls back to the town square like Mobius <c>getChaoticSpawnLoc()</c>.</summary>
     public MapRespawnPoint? ChaoticSpawn() => First(p => p.IsChaotic) ?? NormalSpawn();
 
@@ -95,9 +116,15 @@ public sealed class MapRegionCatalog
 
     public MapRegion? ByName(string name) => _byName.TryGetValue(name, out var region) ? region : null;
 
-    /// <summary>Mobius <c>getTeleToLocation(creature, TOWN)</c> for a character standing at <paramref name="x"/>/<paramref name="y"/>.</summary>
-    public MapRespawnPoint TownRespawn(int x, int y) =>
-        (At(x, y) ?? Fallback).NormalSpawn() ?? Fallback.NormalSpawn()!;
+    /// <summary>
+    /// Mobius <c>getTeleToLocation(creature, TOWN)</c> for a character standing at <paramref name="x"/>/<paramref name="y"/>.
+    /// Uses a random normal town point (Interlude <c>RandomRespawnInTownEnabled</c>).
+    /// </summary>
+    public MapRespawnPoint TownRespawn(int x, int y, Random? rng = null) =>
+        (At(x, y) ?? Fallback).RandomNormalSpawn(rng)
+        ?? (At(x, y) ?? Fallback).NormalSpawn()
+        ?? Fallback.RandomNormalSpawn(rng)
+        ?? Fallback.NormalSpawn()!;
 
     public static MapRegionCatalog LoadDefault()
     {

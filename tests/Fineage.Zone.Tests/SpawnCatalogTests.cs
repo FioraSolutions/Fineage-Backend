@@ -6,26 +6,26 @@ namespace Fineage.Zone.Tests;
 public sealed class SpawnCatalogTests
 {
     [Fact]
-    public void Default_datapack_loads_cedric_and_dormant_village_map()
+    public void Default_datapack_loads_cedric_smoke_and_dormant_village_map()
     {
         var catalog = SpawnCatalog.LoadDefault();
-        Assert.True(catalog.Maps.ContainsKey(SpawnCatalog.DefaultMapId));
+        Assert.True(catalog.Maps.ContainsKey(SpawnCatalog.SmokeMapId));
         Assert.True(catalog.Maps.ContainsKey("ti_village_road"));
 
-        var cedric = catalog.GetMap(SpawnCatalog.DefaultMapId);
+        var cedric = catalog.GetMap(SpawnCatalog.SmokeMapId);
         Assert.True(cedric.Enabled);
         Assert.Equal(3, cedric.Npcs.Count);
         Assert.All(cedric.Npcs, row => Assert.Equal(TalkingIsland.GremlinNpcId, row.NpcId));
 
-        var village = catalog.GetMap("ti_village_road");
-        Assert.False(village.Enabled);
-        Assert.Equal(2, village.Npcs.Count);
+        var road = catalog.GetMap("ti_village_road");
+        Assert.False(road.Enabled);
+        Assert.Equal(2, road.Npcs.Count);
     }
 
     [Fact]
     public void Cedric_rows_match_TalkingIsland_gremlin_layout()
     {
-        var rows = SpawnCatalog.LoadDefault().GetMap(SpawnCatalog.DefaultMapId).Npcs;
+        var rows = SpawnCatalog.LoadDefault().GetMap(SpawnCatalog.SmokeMapId).Npcs;
         Assert.Equal(TalkingIsland.Gremlins.Length, rows.Count);
         for (int i = 0; i < TalkingIsland.Gremlins.Length; i++)
         {

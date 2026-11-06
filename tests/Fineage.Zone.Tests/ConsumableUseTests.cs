@@ -81,7 +81,7 @@ public sealed class ConsumableUseTests
     }
 
     [Fact]
-    public async Task Scroll_of_escape_moves_the_player_to_the_town_of_its_map_region()
+    public async Task Scroll_of_escape_casts_then_moves_the_player_to_a_town_respawn()
     {
         var kit = new NetTestKit();
         var rec = Recorder(kit);
@@ -92,14 +92,24 @@ public sealed class ConsumableUseTests
 
         Assert.Null(await kit.World.TryUseItemAsync(s, new UseItemMsg { ObjectId = scroll }, CancellationToken.None));
 
-        // Elven Village sits in elf_town, whose normal respawn is 45487/49767/-2950.
-        Assert.Equal(45487, p.X);
-        Assert.Equal(49767, p.Y);
-        Assert.Equal(-2950, p.Z);
+        // Mobius ItemSkills: MagicSkillUse (2013) goes out at use; teleport + consume land at hitTime.
+        Assert.Equal(beforeX, p.X);
+        Assert.Equal(beforeY, p.Y);
+        Assert.Equal(before, p.Inventory!.CountOf(ScrollOfEscape));
+        var cast = Assert.IsType<MagicSkillUseNetMsg>(
+            Assert.Single(rec.Of(nameof(INetPresenceBridge.FanoutMagicSkillUse)))[1]);
+        Assert.Equal(2013, cast.SkillId);
+        Assert.Equal(20_000, cast.HitTimeMs);
+
+        await kit.World.CompleteCastForTestAsync(s);
+
+        var town = MapRegionCatalog.LoadDefault().At(beforeX, beforeY)
+                    ?? MapRegionCatalog.LoadDefault().Fallback;
+        Assert.Contains(town.RespawnPoints, pt =>
+            !pt.IsChaotic && pt.Kind == "normal" && pt.X == p.X && pt.Y == p.Y && pt.Z == p.Z);
         Assert.NotEqual((beforeX, beforeY), (p.X, p.Y));
         Assert.Equal(before - 1, p.Inventory!.CountOf(ScrollOfEscape));
         Assert.NotEmpty(rec.Of(nameof(INetPresenceBridge.FanoutTeleportToLocation)));
-        // Mobius teleToLocation is followed by a UserInfo so the client's own pawn agrees on the new position.
         Assert.NotEmpty(rec.Of(nameof(INetPresenceBridge.FanoutUserInfo)));
     }
 
@@ -220,12 +230,17 @@ public sealed class ConsumableUseTests
         Assert.NotNull(region);
         Assert.Equal("elf_town", region!.Name);
 
-        var spawn = regions.TownRespawn(NetTestKit.ElfX, NetTestKit.ElfY);
-        Assert.Equal(45487, spawn.X);
-        Assert.Equal(49767, spawn.Y);
+        var first = region.NormalSpawn()!;
+        Assert.Equal(45487, first.X);
+        Assert.Equal(49767, first.Y);
+        var spawn = regions.TownRespawn(NetTestKit.ElfX, NetTestKit.ElfY, new Random(0));
+        Assert.Contains(region.RespawnPoints, pt =>
+            !pt.IsChaotic && pt.Kind == "normal" && pt.X == spawn.X && pt.Y == spawn.Y && pt.Z == spawn.Z);
 
         // A cell outside every region falls back to Mobius' default restart, Talking Island.
         Assert.Null(regions.At(-2000000, -2000000));
-        Assert.Equal(regions.Fallback.NormalSpawn()!.X, regions.TownRespawn(-2000000, -2000000).X);
+        Assert.Contains(
+            regions.Fallback.RespawnPoints.Where(pt => !pt.IsChaotic && pt.Kind == "normal"),
+            pt => pt.X == regions.TownRespawn(-2000000, -2000000, new Random(1)).X);
     }
 }

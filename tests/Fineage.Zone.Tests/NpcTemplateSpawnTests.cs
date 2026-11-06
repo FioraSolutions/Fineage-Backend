@@ -182,7 +182,7 @@ public sealed class NpcTemplateSpawnTests
         var baseline = new ZoneWorld().NpcObjectIds;
         var world = new ZoneWorld(includeEnabledMaps: true);
         int extra = SpawnCatalog.LoadDefault().Maps.Values
-            .Where(map => map.Enabled && map.MapId != SpawnCatalog.DefaultMapId)
+            .Where(map => map.Enabled && map.MapId != SpawnCatalog.SmokeMapId)
             .Sum(map => map.Npcs.Count);
         Assert.True(extra > TalkingIslandNpcCount);
         Assert.Equal(baseline.Count + extra, world.NpcObjectIds.Count);

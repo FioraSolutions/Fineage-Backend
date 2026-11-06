@@ -45,7 +45,8 @@ public sealed partial class ZoneWorld
         }
         else
         {
-            // Test / explicit opt-out: one active map only (default id is Cedric hall for smoke fixtures).
+            // Explicit single-map mode (FINEAGE_ZONE_INCLUDE_ENABLED_MAPS=0 or tests). Active id defaults to
+            // SmokeMapId only when the caller opted out of the full world — never the hosted default.
             var active = _spawnCatalog.GetMap(_activeMapId);
             if (!active.Enabled)
                 throw new InvalidOperationException($"Active spawn map '{_activeMapId}' is disabled in datapack.");
