@@ -154,7 +154,8 @@ public sealed class SpawnCatalog
                     template.SoulShot,
                     template.SoulShotChance,
                     template.SpiritShot,
-                    template.SpiritShotChance));
+                    template.SpiritShotChance,
+                    template.DefenceTraits));
             }
 
             maps.Add(map.MapId, new SpawnMapDefinition(map.MapId, map.Enabled, npcs));

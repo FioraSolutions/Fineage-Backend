@@ -48,7 +48,8 @@ public sealed record SpawnNpcDefinition(
     int SoulShot = 0,
     int SoulShotChance = 0,
     int SpiritShot = 0,
-    int SpiritShotChance = 0);
+    int SpiritShotChance = 0,
+    IReadOnlyDictionary<string, double>? DefenceTraits = null);
 
 public sealed record SpawnMapDefinition(
     string MapId,

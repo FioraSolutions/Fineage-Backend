@@ -304,7 +304,8 @@ public sealed partial class ZoneWorld
             ps.Accuracy, evasion, ps.CritRate, ps.RandomDamage,
             soulshot, (int)ps.WeaponGrade, shieldRate, shieldDef, ps.Weapon == Fineage.Game.WeaponType.Bow,
             ZoneCombat.HitConditionBonus(player.X, player.Y, player.Z, target.X, target.Y, target.Z, target.Heading, IsNight),
-            ps.CritDmg);
+            ps.CritDmg,
+            ZoneCombat.WeaponTraitBonus(ps.Weapon, target.Kind == ZoneEntityKind.Npc ? target.DefenceTraits : null));
     }
 
     double NpcPDef(ZoneEntity npc) =>

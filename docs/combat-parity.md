@@ -88,7 +88,7 @@
 ## Slice 15 — skill weapon conditions
 - `scripts/gen_skill_conditions.py` copies plain Mobius `<conditions><using kind=".."/></conditions>` into `skill-combat.json` `usingKinds` (41 skills: DAGGER blows, BOW, DUALFIST, SWORD/BLUNT Power Strike…; 10 compound and/or/not conditions skipped).
 - Attack-skill use checks them with the passive-mastery `Wearing` rules (ConditionUsingItemType); mismatch → SysMsg 113 "<skill> cannot be used due to unsuitable terms.", no cast / MP / reuse.
-- Weapon vulnerabilities (calcWeaponTraitBonus): Mobius derives NPC defence traits from NPC passive skills (no direct npcs.xml field) — not ported; needs NPC passive skill → trait data first.
+- Weapon vulnerabilities (calcWeaponTraitBonus): done — `scripts/gen_npc_weapon_traits.py` folds NPC skillList `DefenceTrait` passives into `npcs.json` `defenceTraits`; melee / phys skill / blow multiply by `ZoneCombat.WeaponTraitBonus`.
 - Gaps: compound conditions, buff/debuff skill conditions, NPC soulshots.
 
 ## Slice 16 — cast ↔ movement (Mobius CreatureAI.thinkCast / PlayerAI / Player.useMagic)
@@ -105,7 +105,7 @@
 2. ~~Night game clock (GameTimeTaskManager) for the −10% dark bonus~~ — done (`ZoneGameTime`, HitConditionBonus night).
 3. ~~magicLvl in skill-combat.json + mcrit stat mods~~ — done (slice 10 follow-up).
 4. ~~NPC soulshots~~ — stock + chance on melee (`gen_npc_shots.py`); spiritshots / SS glow / boss materialize still open.
-5. Weapon vulnerabilities (NPC passive traits data), NPC blow/magic skills on players — medium.
+5. ~~Weapon vulnerabilities (NPC passive traits)~~ — done (#261). NPC blow/magic skills on players — medium.
 
 ## Slice — NPC soulshots (Mobius `Npc.rechargeShots`)
 

@@ -100,7 +100,8 @@ public sealed partial class ZoneWorld
         bool crit = ZoneCombat.RollSkillCrit(_combatRandom, combat.BaseCritRate, str);
         if (crit && player.Session != null)
             ShotNotice(player.Session, SysMsgCriticalHit, "Critical hit!");
-        return ZoneCombat.PhysicalSkillDamage(ps.PAtk, pDef, power, ss, crit, ps.CritDmg);
+        return ZoneCombat.PhysicalSkillDamage(ps.PAtk, pDef, power, ss, crit, ps.CritDmg,
+            ZoneCombat.WeaponTraitBonus(ps.Weapon, target.Kind == ZoneEntityKind.Npc ? target.DefenceTraits : null));
     }
 
     public const int SysMsgLethalSuccess = 1668;
@@ -123,7 +124,8 @@ public sealed partial class ZoneWorld
             return 0;
         }
         var (damage, outcome) = ZoneCombat.RollBlowDamage(_combatRandom, blow, ps.PAtk, NpcPDef(target), combat.PowerAt(level), ss,
-            front, behind, ps.RandomDamage, combat.BaseCritRate, str, NpcShieldRate(target), target.ShieldDef, ps.CritDmg);
+            front, behind, ps.RandomDamage, combat.BaseCritRate, str, NpcShieldRate(target), target.ShieldDef, ps.CritDmg,
+            ZoneCombat.WeaponTraitBonus(ps.Weapon, target.DefenceTraits));
         int hpAfter = Math.Max(0, target.CurHp - damage);
         bool lethalable = target.NpcType is not ("RaidBoss" or "GrandBoss");
         var (extra, lethal) = ZoneCombat.RollLethal(_combatRandom, combat.FullLethal, combat.HalfLethal,

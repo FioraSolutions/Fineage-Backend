@@ -153,6 +153,8 @@ sealed class ZoneEntity
     /// <summary>NPC remaining SpiritShot stock.</summary>
     public int NpcSpiritShotLeft { get; set; }
     public int NpcSpiritShotChance { get; set; }
+    /// <summary>Mobius weapon <c>_defenceTraits</c> multipliers (sword/bow/…); null = all 1.0.</summary>
+    public IReadOnlyDictionary<string, double>? DefenceTraits { get; init; }
     /// <summary>Mobius auto soulshot set: shot item ids recharged after each discharge.</summary>
     public HashSet<int> AutoShots { get; } = [];
     /// <summary>Mobius ShortCuts keyed by world slot (slot + page * 12).</summary>

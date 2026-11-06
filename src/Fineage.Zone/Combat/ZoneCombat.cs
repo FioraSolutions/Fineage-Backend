@@ -212,14 +212,21 @@ public static class ZoneCombat
         RollMelee(rnd, pAtk, pDef, accuracy, evasion, critPermille, randomPercent, soulshot, shotGrade, shieldRate, shieldDef,
             attackerBow, hitConditionBonus, 1d);
 
+    public static (int Damage, byte Flags) RollMelee(Random rnd, double pAtk, double pDef, double accuracy, double evasion,
+        int critPermille, int randomPercent, bool soulshot, int shotGrade, double shieldRate, int shieldDef, bool attackerBow,
+        double hitConditionBonus, double critDamageMod) =>
+        RollMelee(rnd, pAtk, pDef, accuracy, evasion, critPermille, randomPercent, soulshot, shotGrade, shieldRate, shieldDef,
+            attackerBow, hitConditionBonus, critDamageMod, 1d);
+
     /// <summary>
     /// Full swing: miss → shield → crit → calcPhysDam. Soulshot doubles P.Atk (flag 0x10 | grade); shield block
     /// adds sDef to P.Def, perfect block deals 1 (flag 0x40). Crit damage · <paramref name="critDamageMod"/>
-    /// (<c>Stat.CRITICAL_DAMAGE</c>, default 1).
+    /// (<c>Stat.CRITICAL_DAMAGE</c>, default 1). <paramref name="weaponTraitBonus"/> is Mobius
+    /// <c>calcWeaponTraitBonus</c> (default 1).
     /// </summary>
     public static (int Damage, byte Flags) RollMelee(Random rnd, double pAtk, double pDef, double accuracy, double evasion,
         int critPermille, int randomPercent, bool soulshot, int shotGrade, double shieldRate, int shieldDef, bool attackerBow,
-        double hitConditionBonus, double critDamageMod)
+        double hitConditionBonus, double critDamageMod, double weaponTraitBonus)
     {
         byte ssFlags = soulshot ? (byte)(HitFlagSoulshot | (shotGrade & 0x0F)) : (byte)0;
         if (rnd.Next(1000) >= HitChancePermille(accuracy, evasion, hitConditionBonus))
@@ -238,7 +245,41 @@ public static class ZoneCombat
             damage *= 2 * Math.Max(0, critDamageMod);
         if (randomPercent > 0)
             damage *= 1 + rnd.Next(-randomPercent, randomPercent + 1) / 100d;
+        damage *= Math.Max(0, weaponTraitBonus);
+        if (damage <= 0)
+            return (0, (byte)(flags | (crit ? HitFlagCrit : 0)));
         return (Math.Max(1, (int)damage), (byte)(flags | (crit ? HitFlagCrit : 0)));
+    }
+
+    /// <summary>
+    /// Mobius <c>Formulas.calcWeaponTraitBonus</c>: <c>1 − (defenceTraits[weapon] − 1)</c>.
+    /// <paramref name="defenceTraits"/> keys are Fineage tokens (<c>sword</c>, <c>bow</c>, …) from
+    /// <c>npcs.json</c> / <see cref="Npcs.NpcTemplate.DefenceTraits"/>. Missing → 1.
+    /// Fist weapons prefer <c>dualfist</c> (Mobius DualFist gloves) then <c>fist</c>.
+    /// </summary>
+    public static double WeaponTraitBonus(Fineage.Game.WeaponType weapon, IReadOnlyDictionary<string, double>? defenceTraits)
+    {
+        if (defenceTraits == null || defenceTraits.Count == 0 || weapon == Fineage.Game.WeaponType.None)
+            return 1d;
+        string? key = weapon switch
+        {
+            Fineage.Game.WeaponType.Sword => "sword",
+            Fineage.Game.WeaponType.Blunt => "blunt",
+            Fineage.Game.WeaponType.Dagger => "dagger",
+            Fineage.Game.WeaponType.Bow => "bow",
+            Fineage.Game.WeaponType.Pole => "pole",
+            Fineage.Game.WeaponType.Dual => "dual",
+            Fineage.Game.WeaponType.Fist => "dualfist",
+            Fineage.Game.WeaponType.Etc => "etc",
+            _ => null
+        };
+        if (key == null)
+            return 1d;
+        if (!defenceTraits.TryGetValue(key, out var defence) &&
+            !(weapon == Fineage.Game.WeaponType.Fist && defenceTraits.TryGetValue("fist", out defence)) &&
+            !(weapon == Fineage.Game.WeaponType.Dagger && defenceTraits.TryGetValue("dualdagger", out defence)))
+            return 1d;
+        return 1d - (defence - 1d);
     }
 
     /// <summary>Mobius <c>Formulas.calcAtkSpd</c> for skills: magic time·333/Cspd, physical time·300/Pspd.</summary>
@@ -258,11 +299,14 @@ public static class ZoneCombat
     /// <paramref name="critDamageMod"/> (<c>CRITICAL_DAMAGE</c>).
     /// </summary>
     public static int PhysicalSkillDamage(double pAtk, double pDef, double power, bool soulshot, bool crit,
-        double critDamageMod = 1d)
+        double critDamageMod = 1d, double weaponTraitBonus = 1d)
     {
         double damage = 70d * (Math.Max(0, pAtk) * (soulshot ? 2 : 1) + Math.Max(0, power)) / Math.Max(1d, pDef);
         if (crit)
             damage *= 2 * Math.Max(0, critDamageMod);
+        damage *= Math.Max(0, weaponTraitBonus);
+        if (damage <= 0)
+            return 0;
         return Math.Max(1, (int)damage);
     }
 
@@ -350,7 +394,7 @@ public static class ZoneCombat
     /// </summary>
     public static (int Damage, BlowOutcome Outcome) RollBlowDamage(Random rnd, BlowEffect effect, double pAtk, double pDef,
         double power, bool soulshot, bool front, bool behind, int randomPercent, int baseCritRate, double strBonus,
-        double shieldRate = 0, int shieldDef = 0, double critDamageMod = 1d)
+        double shieldRate = 0, int shieldDef = 0, double critDamageMod = 1d, double weaponTraitBonus = 1d)
     {
         var shield = RollShield(rnd, shieldRate, false);
         if (shield == ShieldResult.Perfect)
@@ -366,6 +410,9 @@ public static class ZoneCombat
         bool crit = RollSkillCrit(rnd, baseCritRate, strBonus);
         if (crit)
             damage *= 2 * Math.Max(0, critDamageMod);
+        damage *= Math.Max(0, weaponTraitBonus);
+        if (damage <= 0)
+            return (0, crit ? BlowOutcome.Critical : BlowOutcome.Hit);
         return (Math.Max(1, (int)damage), crit ? BlowOutcome.Critical : BlowOutcome.Hit);
     }
 

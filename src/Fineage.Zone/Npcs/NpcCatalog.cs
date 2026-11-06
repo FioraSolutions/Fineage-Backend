@@ -48,7 +48,12 @@ public sealed record NpcTemplate(
     /// <summary>Mobius <c>SoulShotRate</c> % chance to fire a soulshot when stock remains.</summary>
     int SoulShotChance = 0,
     int SpiritShot = 0,
-    int SpiritShotChance = 0);
+    int SpiritShotChance = 0,
+    /// <summary>
+    /// Folded Mobius <c>CreatureStat._defenceTraits</c> for weapon types (keys <c>sword</c>/<c>bow</c>/…),
+    /// resolved from NPC skillList <c>DefenceTrait</c> passives. Missing key = 1.0.
+    /// </summary>
+    IReadOnlyDictionary<string, double>? DefenceTraits = null);
 
 /// <summary>Loads <c>data/npcs.json</c>.</summary>
 public sealed class NpcCatalog
@@ -181,7 +186,8 @@ public sealed class NpcCatalog
                 Math.Max(0, row.SoulShot),
                 Math.Max(0, row.SoulShotChance),
                 Math.Max(0, row.SpiritShot),
-                Math.Max(0, row.SpiritShotChance)));
+                Math.Max(0, row.SpiritShotChance),
+                row.DefenceTraits is { Count: > 0 } ? row.DefenceTraits : null));
         }
 
         return new NpcCatalog(byId);
@@ -245,5 +251,7 @@ public sealed class NpcCatalog
         public int SoulShotChance { get; set; }
         public int SpiritShot { get; set; }
         public int SpiritShotChance { get; set; }
+        /// <summary>Mobius weapon defenceTraits multipliers (sword/bow/…).</summary>
+        public Dictionary<string, double>? DefenceTraits { get; set; }
     }
 }
