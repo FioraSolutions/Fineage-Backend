@@ -1,0 +1,143 @@
+{
+  "id": 231,
+  "name": "Test Of The Maestro",
+  "repeatable": false,
+  "abortable": true,
+  "questItems": [],
+  "dialogs": [
+    {
+      "npcId": 30531,
+      "hook": "talk",
+      "when": "absent",
+      "htmlFile": "30531-talk-000.htm"
+    },
+    {
+      "npcId": 30531,
+      "hook": "talk",
+      "when": "absent",
+      "ops": [
+        {
+          "op": "give_item",
+          "itemId": 2867,
+          "count": 1
+        },
+        {
+          "op": "give_adena",
+          "count": 372154
+        },
+        {
+          "op": "give_exp_sp",
+          "exp": 2085244,
+          "sp": 141240
+        },
+        {
+          "op": "complete"
+        }
+      ],
+      "htmlFile": "30531-talk-001.htm"
+    },
+    {
+      "npcId": 30532,
+      "hook": "talk",
+      "when": "absent",
+      "htmlFile": "30532-talk-002.htm"
+    },
+    {
+      "npcId": 30533,
+      "hook": "talk",
+      "when": "absent",
+      "htmlFile": "30533-talk-003.htm"
+    },
+    {
+      "npcId": 30533,
+      "hook": "talk",
+      "when": "absent",
+      "htmlFile": "30533-talk-004.htm"
+    },
+    {
+      "npcId": 30534,
+      "hook": "talk",
+      "when": "absent",
+      "htmlFile": "30534-talk-006.htm"
+    },
+    {
+      "npcId": 30535,
+      "hook": "talk",
+      "when": "absent",
+      "htmlFile": "30535-talk-007.htm"
+    },
+    {
+      "npcId": 30536,
+      "hook": "talk",
+      "when": "absent",
+      "htmlFile": "30536-talk-010.htm"
+    },
+    {
+      "npcId": 30556,
+      "hook": "talk",
+      "when": "absent",
+      "htmlFile": "30556-talk-015.htm"
+    },
+    {
+      "npcId": 30671,
+      "hook": "talk",
+      "when": "absent",
+      "htmlFile": "30671-talk-016.htm"
+    },
+    {
+      "npcId": 30673,
+      "hook": "talk",
+      "when": "absent",
+      "htmlFile": "30673-talk-023.htm"
+    },
+    {
+      "npcId": 30531,
+      "hook": "event",
+      "when": "absent",
+      "event": "ACCEPT",
+      "ops": [
+        {
+          "op": "give_item",
+          "itemId": 7562,
+          "count": 23
+        }
+      ],
+      "htmlFile": "30531-event-ACCEPT-025.htm"
+    },
+    {
+      "npcId": 30531,
+      "hook": "event",
+      "when": "absent",
+      "event": "30533-02",
+      "htmlFile": "30531-event-30533-02-026.htm"
+    },
+    {
+      "npcId": 30531,
+      "hook": "event",
+      "when": "absent",
+      "event": "30556-02",
+      "htmlFile": "30531-event-30556-02-027.htm"
+    },
+    {
+      "npcId": 30531,
+      "hook": "event",
+      "when": "absent",
+      "event": "30556-03",
+      "htmlFile": "30531-event-30556-03-028.htm"
+    },
+    {
+      "npcId": 30531,
+      "hook": "event",
+      "when": "absent",
+      "event": "30556-04",
+      "htmlFile": "30531-event-30556-04-029.htm"
+    },
+    {
+      "npcId": 30531,
+      "hook": "event",
+      "when": "absent",
+      "event": "30671-02",
+      "htmlFile": "30531-event-30671-02-031.htm"
+    }
+  ]
+}

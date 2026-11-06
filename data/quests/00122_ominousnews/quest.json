@@ -1,0 +1,73 @@
+{
+  "id": 122,
+  "name": "OminousNews",
+  "repeatable": false,
+  "abortable": true,
+  "questItems": [],
+  "dialogs": [
+    {
+      "npcId": 31979,
+      "hook": "talk",
+      "when": "absent",
+      "htmlFile": "31979-talk-000.htm"
+    },
+    {
+      "npcId": 31979,
+      "hook": "talk",
+      "when": "absent",
+      "htmlFile": "31979-talk-001.htm"
+    },
+    {
+      "npcId": 31979,
+      "hook": "talk",
+      "when": "started",
+      "htmlFile": "31979-talk-002.htm"
+    },
+    {
+      "npcId": 32017,
+      "hook": "talk",
+      "when": "absent",
+      "htmlFile": "32017-talk-003.htm"
+    },
+    {
+      "npcId": 31979,
+      "hook": "event",
+      "when": "absent",
+      "event": "31979-02",
+      "ops": [
+        {
+          "op": "create"
+        },
+        {
+          "op": "start"
+        },
+        {
+          "op": "set_cond",
+          "cond": 1
+        }
+      ],
+      "htmlFile": "31979-event-31979-02-004.htm"
+    },
+    {
+      "npcId": 31979,
+      "hook": "event",
+      "when": "absent",
+      "event": "32017-02",
+      "ops": [
+        {
+          "op": "give_adena",
+          "count": 8923
+        },
+        {
+          "op": "give_exp_sp",
+          "exp": 45151,
+          "sp": 2310
+        },
+        {
+          "op": "complete"
+        }
+      ],
+      "htmlFile": "31979-event-32017-02-005.htm"
+    }
+  ]
+}

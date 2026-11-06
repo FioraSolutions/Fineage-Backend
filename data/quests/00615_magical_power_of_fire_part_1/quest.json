@@ -1,0 +1,96 @@
+{
+  "id": 615,
+  "name": "Magical Power of Fire - Part 1",
+  "repeatable": true,
+  "abortable": true,
+  "questItems": [],
+  "dialogs": [
+    {
+      "npcId": 31378,
+      "hook": "talk",
+      "when": "started",
+      "htmlFile": "31378-talk-000.htm"
+    },
+    {
+      "npcId": 31379,
+      "hook": "talk",
+      "when": "started",
+      "cond": 1,
+      "ops": [
+        {
+          "op": "set_cond",
+          "cond": 2
+        }
+      ],
+      "htmlFile": "31379-talk-c1-001.htm"
+    },
+    {
+      "npcId": 31379,
+      "hook": "talk",
+      "when": "started",
+      "cond": 2,
+      "htmlFile": "31379-talk-c2-002.htm"
+    },
+    {
+      "npcId": 31379,
+      "hook": "talk",
+      "when": "started",
+      "cond": 3,
+      "ops": [
+        {
+          "op": "complete"
+        }
+      ],
+      "htmlFile": "31379-talk-c3-003.htm"
+    },
+    {
+      "npcId": 31559,
+      "hook": "talk",
+      "when": "absent",
+      "htmlFile": "31559-talk-004.htm"
+    },
+    {
+      "npcId": 31378,
+      "hook": "event",
+      "when": "absent",
+      "event": "31378-02",
+      "ops": [
+        {
+          "op": "create"
+        },
+        {
+          "op": "start"
+        },
+        {
+          "op": "set_cond",
+          "cond": 1
+        }
+      ],
+      "htmlFile": "31378-event-31378-02-005.htm"
+    },
+    {
+      "npcId": 31378,
+      "hook": "event",
+      "when": "absent",
+      "event": "open_box",
+      "lacksItems": [
+        1661
+      ],
+      "htmlFile": "31378-event-open_box-006.htm"
+    },
+    {
+      "npcId": 31378,
+      "hook": "event",
+      "when": "absent",
+      "event": "open_box",
+      "ops": [
+        {
+          "op": "take_item",
+          "itemId": 1661,
+          "count": 1
+        }
+      ],
+      "htmlFile": "31378-event-open_box-007.htm"
+    }
+  ]
+}

@@ -1,0 +1,216 @@
+{
+  "id": 235,
+  "name": "Mimir's Elixir",
+  "repeatable": false,
+  "abortable": true,
+  "questItems": [],
+  "dialogs": [
+    {
+      "npcId": 30721,
+      "hook": "talk",
+      "when": "absent",
+      "htmlFile": "30721-talk-000.htm"
+    },
+    {
+      "npcId": 30721,
+      "hook": "talk",
+      "when": "absent",
+      "htmlFile": "30721-talk-001.htm"
+    },
+    {
+      "npcId": 30721,
+      "hook": "talk",
+      "when": "absent",
+      "htmlFile": "30721-talk-002.htm"
+    },
+    {
+      "npcId": 30721,
+      "hook": "talk",
+      "when": "absent",
+      "htmlFile": "30721-talk-003.htm"
+    },
+    {
+      "npcId": 30718,
+      "hook": "talk",
+      "when": "absent",
+      "htmlFile": "30718-talk-004.htm"
+    },
+    {
+      "npcId": 30718,
+      "hook": "talk",
+      "when": "absent",
+      "htmlFile": "30718-talk-005.htm"
+    },
+    {
+      "npcId": 30718,
+      "hook": "talk",
+      "when": "absent",
+      "htmlFile": "30718-talk-006.htm"
+    },
+    {
+      "npcId": 30721,
+      "hook": "event",
+      "when": "absent",
+      "event": "30721-02",
+      "htmlFile": "30721-event-30721-02-008.htm"
+    },
+    {
+      "npcId": 30721,
+      "hook": "event",
+      "when": "absent",
+      "event": "30721-03",
+      "htmlFile": "30721-event-30721-03-009.htm"
+    },
+    {
+      "npcId": 30721,
+      "hook": "event",
+      "when": "absent",
+      "event": "30721-04",
+      "htmlFile": "30721-event-30721-04-010.htm"
+    },
+    {
+      "npcId": 30721,
+      "hook": "event",
+      "when": "absent",
+      "event": "30721-05",
+      "htmlFile": "30721-event-30721-05-011.htm"
+    },
+    {
+      "npcId": 30721,
+      "hook": "event",
+      "when": "absent",
+      "event": "30721-06",
+      "ops": [
+        {
+          "op": "create"
+        },
+        {
+          "op": "start"
+        },
+        {
+          "op": "set_cond",
+          "cond": 1
+        }
+      ],
+      "htmlFile": "30721-event-30721-06-012.htm"
+    },
+    {
+      "npcId": 30721,
+      "hook": "event",
+      "when": "absent",
+      "event": "30721-12",
+      "ops": [
+        {
+          "op": "set_cond",
+          "cond": 2
+        }
+      ],
+      "htmlFile": "30721-event-30721-12-013.htm"
+    },
+    {
+      "npcId": 30721,
+      "hook": "event",
+      "when": "absent",
+      "event": "30721-15",
+      "ops": [
+        {
+          "op": "set_cond",
+          "cond": 6
+        }
+      ],
+      "htmlFile": "30721-event-30721-15-014.htm"
+    },
+    {
+      "npcId": 30721,
+      "hook": "event",
+      "when": "absent",
+      "event": "30721-18",
+      "htmlFile": "30721-event-30721-18-015.htm"
+    },
+    {
+      "npcId": 30721,
+      "hook": "event",
+      "when": "absent",
+      "event": "30721-19",
+      "ops": [
+        {
+          "op": "give_item",
+          "itemId": 729,
+          "count": 1
+        },
+        {
+          "op": "complete"
+        }
+      ],
+      "htmlFile": "30721-event-30721-19-016.htm"
+    },
+    {
+      "npcId": 30721,
+      "hook": "event",
+      "when": "absent",
+      "event": "30718-02",
+      "htmlFile": "30721-event-30718-02-017.htm"
+    },
+    {
+      "npcId": 30721,
+      "hook": "event",
+      "when": "absent",
+      "event": "30718-03",
+      "ops": [
+        {
+          "op": "set_cond",
+          "cond": 3
+        }
+      ],
+      "htmlFile": "30721-event-30718-03-018.htm"
+    },
+    {
+      "npcId": 30721,
+      "hook": "event",
+      "when": "absent",
+      "event": "31149-02",
+      "htmlFile": "30721-event-31149-02-020.htm"
+    },
+    {
+      "npcId": 30721,
+      "hook": "event",
+      "when": "absent",
+      "event": "31149-05",
+      "htmlFile": "30721-event-31149-05-021.htm"
+    },
+    {
+      "npcId": 30721,
+      "hook": "event",
+      "when": "absent",
+      "event": "31149-07",
+      "htmlFile": "30721-event-31149-07-022.htm"
+    },
+    {
+      "npcId": 30721,
+      "hook": "event",
+      "when": "absent",
+      "event": "31149-09",
+      "htmlFile": "30721-event-31149-09-023.htm"
+    },
+    {
+      "npcId": 30721,
+      "hook": "event",
+      "when": "absent",
+      "event": "31149-10",
+      "htmlFile": "30721-event-31149-10-024.htm"
+    },
+    {
+      "npcId": 30721,
+      "hook": "event",
+      "when": "absent",
+      "event": "31149-11",
+      "ops": [
+        {
+          "op": "set_cond",
+          "cond": 8
+        }
+      ],
+      "htmlFile": "30721-event-31149-11-025.htm"
+    }
+  ]
+}

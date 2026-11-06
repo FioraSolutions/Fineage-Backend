@@ -1,0 +1,78 @@
+{
+  "id": 360,
+  "name": "Plunder Supplies",
+  "repeatable": false,
+  "abortable": true,
+  "questItems": [],
+  "dialogs": [
+    {
+      "npcId": 30873,
+      "hook": "talk",
+      "when": "absent",
+      "htmlFile": "30873-talk-000.htm"
+    },
+    {
+      "npcId": 30873,
+      "hook": "talk",
+      "when": "absent",
+      "htmlFile": "30873-talk-001.htm"
+    },
+    {
+      "npcId": 30873,
+      "hook": "talk",
+      "when": "started",
+      "htmlFile": "30873-talk-002.htm"
+    },
+    {
+      "npcId": 30873,
+      "hook": "talk",
+      "when": "started",
+      "htmlFile": "30873-talk-003.htm"
+    },
+    {
+      "npcId": 30873,
+      "hook": "event",
+      "when": "absent",
+      "event": "30873-03",
+      "htmlFile": "30873-event-30873-03-004.htm"
+    },
+    {
+      "npcId": 30873,
+      "hook": "event",
+      "when": "absent",
+      "event": "30873-09",
+      "htmlFile": "30873-event-30873-09-005.htm"
+    },
+    {
+      "npcId": 30873,
+      "hook": "event",
+      "when": "absent",
+      "event": "30873-04",
+      "ops": [
+        {
+          "op": "create"
+        },
+        {
+          "op": "start"
+        },
+        {
+          "op": "set_cond",
+          "cond": 1
+        }
+      ],
+      "htmlFile": "30873-event-30873-04-006.htm"
+    },
+    {
+      "npcId": 30873,
+      "hook": "event",
+      "when": "absent",
+      "event": "30873-10",
+      "ops": [
+        {
+          "op": "complete"
+        }
+      ],
+      "htmlFile": "30873-event-30873-10-007.htm"
+    }
+  ]
+}

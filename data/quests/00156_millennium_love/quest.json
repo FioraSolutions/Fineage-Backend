@@ -1,0 +1,49 @@
+{
+  "id": 156,
+  "name": "Millennium Love",
+  "repeatable": false,
+  "abortable": true,
+  "questItems": [],
+  "dialogs": [
+    {
+      "npcId": 30368,
+      "hook": "talk",
+      "when": "absent",
+      "htmlFile": "30368-talk-000.htm"
+    },
+    {
+      "npcId": 30368,
+      "hook": "event",
+      "when": "absent",
+      "event": "30368-02",
+      "htmlFile": "30368-event-30368-02-005.htm"
+    },
+    {
+      "npcId": 30368,
+      "hook": "event",
+      "when": "absent",
+      "event": "30368-03",
+      "htmlFile": "30368-event-30368-03-006.htm"
+    },
+    {
+      "npcId": 30368,
+      "hook": "event",
+      "when": "absent",
+      "event": "30368-05",
+      "minLevel": 15,
+      "ops": [
+        {
+          "op": "create"
+        },
+        {
+          "op": "start"
+        },
+        {
+          "op": "set_cond",
+          "cond": 1
+        }
+      ],
+      "htmlFile": "30368-event-30368-05-007.htm"
+    }
+  ]
+}

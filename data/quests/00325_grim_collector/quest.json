@@ -1,0 +1,125 @@
+{
+  "id": 325,
+  "name": "Grim Collector",
+  "repeatable": true,
+  "abortable": true,
+  "questItems": [],
+  "dialogs": [
+    {
+      "npcId": 30336,
+      "hook": "talk",
+      "when": "absent",
+      "htmlFile": "30336-talk-000.htm"
+    },
+    {
+      "npcId": 30434,
+      "hook": "talk",
+      "when": "absent",
+      "htmlFile": "30434-talk-002.htm"
+    },
+    {
+      "npcId": 30434,
+      "hook": "talk",
+      "when": "absent",
+      "htmlFile": "30434-talk-003.htm"
+    },
+    {
+      "npcId": 30434,
+      "hook": "talk",
+      "when": "absent",
+      "htmlFile": "30434-talk-004.htm"
+    },
+    {
+      "npcId": 30336,
+      "hook": "event",
+      "when": "absent",
+      "event": "30336-03",
+      "ops": [
+        {
+          "op": "create"
+        },
+        {
+          "op": "start"
+        },
+        {
+          "op": "set_cond",
+          "cond": 1
+        }
+      ],
+      "htmlFile": "30336-event-30336-03-005.htm"
+    },
+    {
+      "npcId": 30336,
+      "hook": "event",
+      "when": "absent",
+      "event": "assembleSkeleton",
+      "htmlFile": "30336-event-assembleSkeleton-006.htm"
+    },
+    {
+      "npcId": 30336,
+      "hook": "event",
+      "when": "absent",
+      "event": "assembleSkeleton",
+      "htmlFile": "30336-event-assembleSkeleton-007.htm"
+    },
+    {
+      "npcId": 30336,
+      "hook": "event",
+      "when": "absent",
+      "event": "30434-02",
+      "htmlFile": "30336-event-30434-02-008.htm"
+    },
+    {
+      "npcId": 30336,
+      "hook": "event",
+      "when": "absent",
+      "event": "30434-03",
+      "htmlFile": "30336-event-30434-03-009.htm"
+    },
+    {
+      "npcId": 30336,
+      "hook": "event",
+      "when": "absent",
+      "event": "30434-06",
+      "htmlFile": "30336-event-30434-06-010.htm"
+    },
+    {
+      "npcId": 30336,
+      "hook": "event",
+      "when": "absent",
+      "event": "30434-06",
+      "ops": [
+        {
+          "op": "complete"
+        }
+      ],
+      "htmlFile": "30336-event-30434-06-011.htm"
+    },
+    {
+      "npcId": 30336,
+      "hook": "event",
+      "when": "absent",
+      "event": "30434-07",
+      "htmlFile": "30336-event-30434-07-012.htm"
+    },
+    {
+      "npcId": 30336,
+      "hook": "event",
+      "when": "absent",
+      "event": "30434-07",
+      "ops": [
+        {
+          "op": "complete"
+        }
+      ],
+      "htmlFile": "30336-event-30434-07-013.htm"
+    },
+    {
+      "npcId": 30336,
+      "hook": "event",
+      "when": "absent",
+      "event": "30434-09",
+      "htmlFile": "30336-event-30434-09-014.htm"
+    }
+  ]
+}

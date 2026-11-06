@@ -1,0 +1,52 @@
+{
+  "id": 13,
+  "name": "ParcelDelivery",
+  "repeatable": false,
+  "abortable": true,
+  "questItems": [],
+  "dialogs": [
+    {
+      "npcId": 31274,
+      "hook": "talk",
+      "when": "absent",
+      "htmlFile": "31274-talk-000.htm"
+    },
+    {
+      "npcId": 31274,
+      "hook": "talk",
+      "when": "absent",
+      "htmlFile": "31274-talk-001.htm"
+    },
+    {
+      "npcId": 31274,
+      "hook": "talk",
+      "when": "started",
+      "htmlFile": "31274-talk-002.htm"
+    },
+    {
+      "npcId": 31274,
+      "hook": "talk",
+      "when": "started",
+      "htmlFile": "31274-talk-003.htm"
+    },
+    {
+      "npcId": 31274,
+      "hook": "event",
+      "when": "absent",
+      "event": "31274-02",
+      "ops": [
+        {
+          "op": "create"
+        },
+        {
+          "op": "start"
+        },
+        {
+          "op": "set_cond",
+          "cond": 1
+        }
+      ],
+      "htmlFile": "31274-event-31274-02-004.htm"
+    }
+  ]
+}

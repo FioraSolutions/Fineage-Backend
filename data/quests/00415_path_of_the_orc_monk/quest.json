@@ -1,0 +1,339 @@
+{
+  "id": 415,
+  "name": "Path Of The Orc Monk",
+  "repeatable": false,
+  "abortable": true,
+  "questItems": [],
+  "dialogs": [
+    {
+      "npcId": 30587,
+      "hook": "talk",
+      "when": "absent",
+      "htmlFile": "30587-talk-000.htm"
+    },
+    {
+      "npcId": 30587,
+      "hook": "talk",
+      "when": "absent",
+      "htmlFile": "30587-talk-002.htm"
+    },
+    {
+      "npcId": 30587,
+      "hook": "talk",
+      "when": "absent",
+      "htmlFile": "30587-talk-003.htm"
+    },
+    {
+      "npcId": 30587,
+      "hook": "talk",
+      "when": "absent",
+      "htmlFile": "30587-talk-004.htm"
+    },
+    {
+      "npcId": 30501,
+      "hook": "talk",
+      "when": "absent",
+      "htmlFile": "30501-talk-008.htm"
+    },
+    {
+      "npcId": 30590,
+      "hook": "talk",
+      "when": "absent",
+      "htmlFile": "30590-talk-016.htm"
+    },
+    {
+      "npcId": 30591,
+      "hook": "talk",
+      "when": "absent",
+      "htmlFile": "30591-talk-021.htm"
+    },
+    {
+      "npcId": 31979,
+      "hook": "talk",
+      "when": "absent",
+      "htmlFile": "31979-talk-022.htm"
+    },
+    {
+      "npcId": 32056,
+      "hook": "talk",
+      "when": "absent",
+      "htmlFile": "32056-talk-023.htm"
+    },
+    {
+      "npcId": 32056,
+      "hook": "talk",
+      "when": "absent",
+      "htmlFile": "32056-talk-024.htm"
+    },
+    {
+      "npcId": 32056,
+      "hook": "talk",
+      "when": "absent",
+      "htmlFile": "32056-talk-025.htm"
+    },
+    {
+      "npcId": 32056,
+      "hook": "talk",
+      "when": "absent",
+      "htmlFile": "32056-talk-026.htm"
+    },
+    {
+      "npcId": 30587,
+      "hook": "event",
+      "when": "absent",
+      "event": "ACCEPT",
+      "minLevel": 18,
+      "hasItem": 1615,
+      "htmlFile": "30587-event-ACCEPT-027.htm"
+    },
+    {
+      "npcId": 30587,
+      "hook": "event",
+      "when": "absent",
+      "event": "ACCEPT",
+      "hasItem": 1615,
+      "htmlFile": "30587-event-ACCEPT-028.htm"
+    },
+    {
+      "npcId": 30587,
+      "hook": "event",
+      "when": "absent",
+      "event": "ACCEPT",
+      "htmlFile": "30587-event-ACCEPT-029.htm"
+    },
+    {
+      "npcId": 30587,
+      "hook": "event",
+      "when": "absent",
+      "event": "30587-06",
+      "ops": [
+        {
+          "op": "create"
+        },
+        {
+          "op": "start"
+        },
+        {
+          "op": "set_cond",
+          "cond": 1
+        }
+      ],
+      "htmlFile": "30587-event-30587-06-030.htm"
+    },
+    {
+      "npcId": 30587,
+      "hook": "event",
+      "when": "absent",
+      "event": "30587-09b",
+      "ops": [
+        {
+          "op": "set_cond",
+          "cond": 9
+        }
+      ],
+      "htmlFile": "30587-event-30587-09b-031.htm"
+    },
+    {
+      "npcId": 30587,
+      "hook": "event",
+      "when": "absent",
+      "event": "30587-09c",
+      "ops": [
+        {
+          "op": "set_cond",
+          "cond": 14
+        }
+      ],
+      "htmlFile": "30587-event-30587-09c-032.htm"
+    },
+    {
+      "npcId": 30587,
+      "hook": "event",
+      "when": "absent",
+      "event": "31979-02",
+      "htmlFile": "30587-event-31979-02-033.htm"
+    },
+    {
+      "npcId": 30587,
+      "hook": "event",
+      "when": "absent",
+      "event": "31979-03",
+      "ops": [
+        {
+          "op": "give_exp_sp",
+          "exp": 160267,
+          "sp": 12646
+        }
+      ],
+      "htmlFile": "30587-event-31979-03-034.htm"
+    },
+    {
+      "npcId": 30587,
+      "hook": "event",
+      "when": "absent",
+      "event": "31979-03",
+      "ops": [
+        {
+          "op": "give_exp_sp",
+          "exp": 228064,
+          "sp": 15995
+        }
+      ],
+      "htmlFile": "30587-event-31979-03-035.htm"
+    },
+    {
+      "npcId": 30587,
+      "hook": "event",
+      "when": "absent",
+      "event": "31979-04",
+      "ops": [
+        {
+          "op": "set_cond",
+          "cond": 20
+        }
+      ],
+      "htmlFile": "30587-event-31979-04-036.htm"
+    },
+    {
+      "npcId": 30587,
+      "hook": "event",
+      "when": "absent",
+      "event": "32056-02",
+      "htmlFile": "30587-event-32056-02-037.htm"
+    },
+    {
+      "npcId": 30587,
+      "hook": "event",
+      "when": "absent",
+      "event": "32056-03",
+      "ops": [
+        {
+          "op": "set_cond",
+          "cond": 15
+        }
+      ],
+      "htmlFile": "30587-event-32056-03-038.htm"
+    },
+    {
+      "npcId": 30587,
+      "hook": "event",
+      "when": "absent",
+      "event": "32056-08",
+      "ops": [
+        {
+          "op": "set_cond",
+          "cond": 19
+        }
+      ],
+      "htmlFile": "30587-event-32056-08-039.htm"
+    },
+    {
+      "npcId": 20014,
+      "hook": "kill",
+      "when": "started",
+      "ops": [
+        {
+          "op": "set_cond",
+          "cond": 12
+        }
+      ],
+      "html": ""
+    },
+    {
+      "npcId": 20017,
+      "hook": "kill",
+      "when": "started",
+      "ops": [
+        {
+          "op": "set_cond",
+          "cond": 12
+        }
+      ],
+      "html": ""
+    },
+    {
+      "npcId": 20024,
+      "hook": "kill",
+      "when": "started",
+      "ops": [
+        {
+          "op": "set_cond",
+          "cond": 12
+        }
+      ],
+      "html": ""
+    },
+    {
+      "npcId": 20359,
+      "hook": "kill",
+      "when": "started",
+      "ops": [
+        {
+          "op": "set_cond",
+          "cond": 12
+        }
+      ],
+      "html": ""
+    },
+    {
+      "npcId": 20415,
+      "hook": "kill",
+      "when": "started",
+      "ops": [
+        {
+          "op": "set_cond",
+          "cond": 7
+        }
+      ],
+      "html": ""
+    },
+    {
+      "npcId": 20478,
+      "hook": "kill",
+      "when": "started",
+      "ops": [
+        {
+          "op": "set_cond",
+          "cond": 5
+        }
+      ],
+      "html": ""
+    },
+    {
+      "npcId": 20478,
+      "hook": "kill",
+      "when": "started",
+      "ops": [
+        {
+          "op": "set_cond",
+          "cond": 16
+        }
+      ],
+      "html": ""
+    },
+    {
+      "npcId": 20479,
+      "hook": "kill",
+      "when": "started",
+      "ops": [
+        {
+          "op": "set_cond",
+          "cond": 3
+        }
+      ],
+      "html": ""
+    },
+    {
+      "npcId": 21118,
+      "hook": "kill",
+      "when": "started",
+      "ops": [
+        {
+          "op": "set_cond",
+          "cond": 18
+        }
+      ],
+      "html": ""
+    }
+  ]
+}

@@ -1,0 +1,111 @@
+{
+  "id": 355,
+  "name": "Family Honor",
+  "repeatable": true,
+  "abortable": true,
+  "questItems": [],
+  "dialogs": [
+    {
+      "npcId": 30181,
+      "hook": "talk",
+      "when": "absent",
+      "htmlFile": "30181-talk-000.htm"
+    },
+    {
+      "npcId": 30181,
+      "hook": "event",
+      "when": "absent",
+      "event": "30181-02",
+      "htmlFile": "30181-event-30181-02-002.htm"
+    },
+    {
+      "npcId": 30181,
+      "hook": "event",
+      "when": "absent",
+      "event": "30181-09",
+      "htmlFile": "30181-event-30181-09-003.htm"
+    },
+    {
+      "npcId": 30181,
+      "hook": "event",
+      "when": "absent",
+      "event": "30929-01",
+      "htmlFile": "30181-event-30929-01-004.htm"
+    },
+    {
+      "npcId": 30181,
+      "hook": "event",
+      "when": "absent",
+      "event": "30929-02",
+      "htmlFile": "30181-event-30929-02-005.htm"
+    },
+    {
+      "npcId": 30181,
+      "hook": "event",
+      "when": "absent",
+      "event": "30181-03",
+      "ops": [
+        {
+          "op": "create"
+        },
+        {
+          "op": "start"
+        },
+        {
+          "op": "set_cond",
+          "cond": 1
+        }
+      ],
+      "htmlFile": "30181-event-30181-03-006.htm"
+    },
+    {
+      "npcId": 30181,
+      "hook": "event",
+      "when": "absent",
+      "event": "30181-06",
+      "htmlFile": "30181-event-30181-06-007.htm"
+    },
+    {
+      "npcId": 30181,
+      "hook": "event",
+      "when": "absent",
+      "event": "30181-06",
+      "htmlFile": "30181-event-30181-06-008.htm"
+    },
+    {
+      "npcId": 30181,
+      "hook": "event",
+      "when": "absent",
+      "event": "30181-10",
+      "htmlFile": "30181-event-30181-10-009.htm"
+    },
+    {
+      "npcId": 30181,
+      "hook": "event",
+      "when": "absent",
+      "event": "30929-03",
+      "htmlFile": "30181-event-30929-03-014.htm"
+    },
+    {
+      "npcId": 30181,
+      "hook": "event",
+      "when": "absent",
+      "event": "30929-03",
+      "htmlFile": "30181-event-30929-03-015.htm"
+    },
+    {
+      "npcId": 30181,
+      "hook": "event",
+      "when": "absent",
+      "event": "30929-03",
+      "htmlFile": "30181-event-30929-03-016.htm"
+    },
+    {
+      "npcId": 30181,
+      "hook": "event",
+      "when": "absent",
+      "event": "30929-03",
+      "htmlFile": "30181-event-30929-03-017.htm"
+    }
+  ]
+}

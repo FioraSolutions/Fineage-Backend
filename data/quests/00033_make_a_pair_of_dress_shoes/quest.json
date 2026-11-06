@@ -1,0 +1,168 @@
+{
+  "id": 33,
+  "name": "Make a Pair of Dress Shoes",
+  "repeatable": false,
+  "abortable": true,
+  "questItems": [],
+  "dialogs": [
+    {
+      "npcId": 30838,
+      "hook": "talk",
+      "when": "absent",
+      "htmlFile": "30838-talk-000.htm"
+    },
+    {
+      "npcId": 30838,
+      "hook": "talk",
+      "when": "started",
+      "cond": 1,
+      "htmlFile": "30838-talk-c1-001.htm"
+    },
+    {
+      "npcId": 30838,
+      "hook": "talk",
+      "when": "started",
+      "cond": 2,
+      "htmlFile": "30838-talk-c2-002.htm"
+    },
+    {
+      "npcId": 30838,
+      "hook": "talk",
+      "when": "started",
+      "cond": 3,
+      "htmlFile": "30838-talk-c3-003.htm"
+    },
+    {
+      "npcId": 30838,
+      "hook": "talk",
+      "when": "started",
+      "cond": 3,
+      "htmlFile": "30838-talk-c3-004.htm"
+    },
+    {
+      "npcId": 30838,
+      "hook": "talk",
+      "when": "started",
+      "cond": 4,
+      "htmlFile": "30838-talk-c4-005.htm"
+    },
+    {
+      "npcId": 30838,
+      "hook": "talk",
+      "when": "started",
+      "cond": 5,
+      "htmlFile": "30838-talk-c5-006.htm"
+    },
+    {
+      "npcId": 31520,
+      "hook": "talk",
+      "when": "absent",
+      "htmlFile": "31520-talk-007.htm"
+    },
+    {
+      "npcId": 31520,
+      "hook": "talk",
+      "when": "absent",
+      "htmlFile": "31520-talk-008.htm"
+    },
+    {
+      "npcId": 30164,
+      "hook": "talk",
+      "when": "absent",
+      "htmlFile": "30164-talk-009.htm"
+    },
+    {
+      "npcId": 30164,
+      "hook": "talk",
+      "when": "absent",
+      "htmlFile": "30164-talk-010.htm"
+    },
+    {
+      "npcId": 30838,
+      "hook": "event",
+      "when": "absent",
+      "event": "30838-03",
+      "ops": [
+        {
+          "op": "create"
+        },
+        {
+          "op": "start"
+        },
+        {
+          "op": "set_cond",
+          "cond": 1
+        }
+      ],
+      "htmlFile": "30838-event-30838-03-011.htm"
+    },
+    {
+      "npcId": 30838,
+      "hook": "event",
+      "when": "absent",
+      "event": "30838-06",
+      "ops": [
+        {
+          "op": "set_cond",
+          "cond": 3
+        }
+      ],
+      "htmlFile": "30838-event-30838-06-012.htm"
+    },
+    {
+      "npcId": 30838,
+      "hook": "event",
+      "when": "absent",
+      "event": "30838-09",
+      "ops": [
+        {
+          "op": "take_item",
+          "itemId": 1882,
+          "count": 200
+        },
+        {
+          "op": "take_item",
+          "itemId": 1868,
+          "count": 200
+        },
+        {
+          "op": "set_cond",
+          "cond": 4
+        }
+      ],
+      "htmlFile": "30838-event-30838-09-013.htm"
+    },
+    {
+      "npcId": 30838,
+      "hook": "event",
+      "when": "absent",
+      "event": "30838-13",
+      "ops": [
+        {
+          "op": "complete"
+        }
+      ],
+      "htmlFile": "30838-event-30838-13-014.htm"
+    },
+    {
+      "npcId": 30838,
+      "hook": "event",
+      "when": "absent",
+      "event": "31520-02",
+      "ops": [
+        {
+          "op": "set_cond",
+          "cond": 2
+        }
+      ],
+      "htmlFile": "30838-event-31520-02-015.htm"
+    },
+    {
+      "npcId": 30838,
+      "hook": "event",
+      "when": "absent",
+      "event": "30164-02",
+      "htmlFile": "30838-event-30164-02-016.htm"
+    }
+  ]
+}

@@ -1,0 +1,21 @@
+{
+  "id": 631,
+  "name": "DeliciousTopChoiceMeat",
+  "repeatable": true,
+  "abortable": true,
+  "questItems": [],
+  "dialogs": [
+    {
+      "npcId": 31537,
+      "hook": "talk",
+      "when": "absent",
+      "htmlFile": "31537-talk-000.htm"
+    },
+    {
+      "npcId": 31537,
+      "hook": "talk",
+      "when": "started",
+      "htmlFile": "31537-talk-001.htm"
+    }
+  ]
+}

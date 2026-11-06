@@ -1,0 +1,73 @@
+{
+  "id": 632,
+  "name": "Necromancer's Request",
+  "repeatable": true,
+  "abortable": true,
+  "questItems": [],
+  "dialogs": [
+    {
+      "npcId": 31522,
+      "hook": "talk",
+      "when": "absent",
+      "htmlFile": "31522-talk-000.htm"
+    },
+    {
+      "npcId": 31522,
+      "hook": "talk",
+      "when": "absent",
+      "htmlFile": "31522-talk-001.htm"
+    },
+    {
+      "npcId": 31522,
+      "hook": "event",
+      "when": "absent",
+      "event": "31522-104",
+      "minLevel": 63,
+      "ops": [
+        {
+          "op": "create"
+        },
+        {
+          "op": "start"
+        },
+        {
+          "op": "set_cond",
+          "cond": 1
+        }
+      ],
+      "htmlFile": "31522-event-31522-104-002.htm"
+    },
+    {
+      "npcId": 31522,
+      "hook": "event",
+      "when": "absent",
+      "event": "31522-201",
+      "htmlFile": "31522-event-31522-201-003.htm"
+    },
+    {
+      "npcId": 31522,
+      "hook": "event",
+      "when": "absent",
+      "event": "31522-202",
+      "ops": [
+        {
+          "op": "give_adena",
+          "count": 120000
+        }
+      ],
+      "htmlFile": "31522-event-31522-202-004.htm"
+    },
+    {
+      "npcId": 31522,
+      "hook": "event",
+      "when": "absent",
+      "event": "31522-204",
+      "ops": [
+        {
+          "op": "complete"
+        }
+      ],
+      "htmlFile": "31522-event-31522-204-005.htm"
+    }
+  ]
+}

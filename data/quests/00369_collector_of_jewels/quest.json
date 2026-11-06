@@ -1,0 +1,93 @@
+{
+  "id": 369,
+  "name": "Collector of Jewels",
+  "repeatable": true,
+  "abortable": true,
+  "questItems": [],
+  "dialogs": [
+    {
+      "npcId": 30376,
+      "hook": "talk",
+      "when": "absent",
+      "ops": [
+        {
+          "op": "give_adena",
+          "count": 31810
+        }
+      ],
+      "htmlFile": "30376-talk-000.htm"
+    },
+    {
+      "npcId": 30376,
+      "hook": "talk",
+      "when": "absent",
+      "htmlFile": "30376-talk-001.htm"
+    },
+    {
+      "npcId": 30376,
+      "hook": "talk",
+      "when": "absent",
+      "ops": [
+        {
+          "op": "give_adena",
+          "count": 84415
+        },
+        {
+          "op": "complete"
+        }
+      ],
+      "htmlFile": "30376-talk-002.htm"
+    },
+    {
+      "npcId": 30376,
+      "hook": "event",
+      "when": "absent",
+      "event": "30376-02",
+      "ops": [
+        {
+          "op": "create"
+        },
+        {
+          "op": "start"
+        },
+        {
+          "op": "set_cond",
+          "cond": 1
+        }
+      ],
+      "htmlFile": "30376-event-30376-02-003.htm"
+    },
+    {
+      "npcId": 30376,
+      "hook": "event",
+      "when": "absent",
+      "event": "30376-05",
+      "htmlFile": "30376-event-30376-05-004.htm"
+    },
+    {
+      "npcId": 30376,
+      "hook": "event",
+      "when": "absent",
+      "event": "30376-06",
+      "ops": [
+        {
+          "op": "set_cond",
+          "cond": 3
+        }
+      ],
+      "htmlFile": "30376-event-30376-06-005.htm"
+    },
+    {
+      "npcId": 30376,
+      "hook": "event",
+      "when": "absent",
+      "event": "30376-07",
+      "ops": [
+        {
+          "op": "complete"
+        }
+      ],
+      "htmlFile": "30376-event-30376-07-006.htm"
+    }
+  ]
+}

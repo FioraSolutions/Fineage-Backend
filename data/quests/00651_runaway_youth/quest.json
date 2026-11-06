@@ -1,0 +1,42 @@
+{
+  "id": 651,
+  "name": "Runaway Youth",
+  "repeatable": true,
+  "abortable": true,
+  "questItems": [],
+  "dialogs": [
+    {
+      "npcId": 32014,
+      "hook": "talk",
+      "when": "absent",
+      "htmlFile": "32014-talk-000.htm"
+    },
+    {
+      "npcId": 32014,
+      "hook": "talk",
+      "when": "absent",
+      "htmlFile": "32014-talk-001.htm"
+    },
+    {
+      "npcId": 32014,
+      "hook": "talk",
+      "when": "started",
+      "htmlFile": "32014-talk-002.htm"
+    },
+    {
+      "npcId": 31989,
+      "hook": "talk",
+      "when": "absent",
+      "ops": [
+        {
+          "op": "give_adena",
+          "count": 2883
+        },
+        {
+          "op": "complete"
+        }
+      ],
+      "htmlFile": "31989-talk-003.htm"
+    }
+  ]
+}

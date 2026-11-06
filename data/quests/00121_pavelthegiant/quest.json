@@ -1,0 +1,69 @@
+{
+  "id": 121,
+  "name": "PavelTheGiant",
+  "repeatable": false,
+  "abortable": true,
+  "questItems": [],
+  "dialogs": [
+    {
+      "npcId": 31961,
+      "hook": "talk",
+      "when": "absent",
+      "htmlFile": "31961-talk-000.htm"
+    },
+    {
+      "npcId": 31961,
+      "hook": "talk",
+      "when": "absent",
+      "htmlFile": "31961-talk-001.htm"
+    },
+    {
+      "npcId": 31961,
+      "hook": "talk",
+      "when": "started",
+      "htmlFile": "31961-talk-002.htm"
+    },
+    {
+      "npcId": 32041,
+      "hook": "talk",
+      "when": "absent",
+      "htmlFile": "32041-talk-003.htm"
+    },
+    {
+      "npcId": 31961,
+      "hook": "event",
+      "when": "absent",
+      "event": "31961-02",
+      "ops": [
+        {
+          "op": "create"
+        },
+        {
+          "op": "start"
+        },
+        {
+          "op": "set_cond",
+          "cond": 1
+        }
+      ],
+      "htmlFile": "31961-event-31961-02-004.htm"
+    },
+    {
+      "npcId": 31961,
+      "hook": "event",
+      "when": "absent",
+      "event": "32041-02",
+      "ops": [
+        {
+          "op": "give_exp_sp",
+          "exp": 346320,
+          "sp": 26069
+        },
+        {
+          "op": "complete"
+        }
+      ],
+      "htmlFile": "31961-event-32041-02-005.htm"
+    }
+  ]
+}

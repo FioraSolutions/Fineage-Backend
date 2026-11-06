@@ -1,0 +1,156 @@
+{
+  "id": 362,
+  "name": "Bard's Mandolin",
+  "repeatable": true,
+  "abortable": true,
+  "questItems": [],
+  "dialogs": [
+    {
+      "npcId": 30957,
+      "hook": "talk",
+      "when": "absent",
+      "htmlFile": "30957-talk-000.htm"
+    },
+    {
+      "npcId": 30957,
+      "hook": "talk",
+      "when": "started",
+      "htmlFile": "30957-talk-001.htm"
+    },
+    {
+      "npcId": 30957,
+      "hook": "talk",
+      "when": "started",
+      "ops": [
+        {
+          "op": "set_cond",
+          "cond": 4
+        }
+      ],
+      "htmlFile": "30957-talk-002.htm"
+    },
+    {
+      "npcId": 30957,
+      "hook": "talk",
+      "when": "started",
+      "htmlFile": "30957-talk-003.htm"
+    },
+    {
+      "npcId": 30957,
+      "hook": "talk",
+      "when": "started",
+      "htmlFile": "30957-talk-004.htm"
+    },
+    {
+      "npcId": 30958,
+      "hook": "talk",
+      "when": "started",
+      "ops": [
+        {
+          "op": "set_cond",
+          "cond": 3
+        }
+      ],
+      "htmlFile": "30958-talk-005.htm"
+    },
+    {
+      "npcId": 30958,
+      "hook": "talk",
+      "when": "started",
+      "htmlFile": "30958-talk-006.htm"
+    },
+    {
+      "npcId": 30837,
+      "hook": "talk",
+      "when": "started",
+      "ops": [
+        {
+          "op": "set_cond",
+          "cond": 2
+        }
+      ],
+      "htmlFile": "30837-talk-007.htm"
+    },
+    {
+      "npcId": 30837,
+      "hook": "talk",
+      "when": "started",
+      "htmlFile": "30837-talk-008.htm"
+    },
+    {
+      "npcId": 30837,
+      "hook": "talk",
+      "when": "started",
+      "htmlFile": "30837-talk-009.htm"
+    },
+    {
+      "npcId": 30956,
+      "hook": "talk",
+      "when": "started",
+      "ops": [
+        {
+          "op": "set_cond",
+          "cond": 5
+        }
+      ],
+      "htmlFile": "30956-talk-010.htm"
+    },
+    {
+      "npcId": 30956,
+      "hook": "talk",
+      "when": "started",
+      "htmlFile": "30956-talk-011.htm"
+    },
+    {
+      "npcId": 30957,
+      "hook": "event",
+      "when": "absent",
+      "event": "30957-02",
+      "ops": [
+        {
+          "op": "create"
+        },
+        {
+          "op": "start"
+        },
+        {
+          "op": "set_cond",
+          "cond": 1
+        }
+      ],
+      "htmlFile": "30957-event-30957-02-012.htm"
+    },
+    {
+      "npcId": 30957,
+      "hook": "event",
+      "when": "absent",
+      "event": "30957-07",
+      "ops": [
+        {
+          "op": "give_adena",
+          "count": 10000
+        },
+        {
+          "op": "complete"
+        }
+      ],
+      "htmlFile": "30957-event-30957-07-013.htm"
+    },
+    {
+      "npcId": 30957,
+      "hook": "event",
+      "when": "absent",
+      "event": "30957-08",
+      "ops": [
+        {
+          "op": "give_adena",
+          "count": 10000
+        },
+        {
+          "op": "complete"
+        }
+      ],
+      "htmlFile": "30957-event-30957-08-014.htm"
+    }
+  ]
+}

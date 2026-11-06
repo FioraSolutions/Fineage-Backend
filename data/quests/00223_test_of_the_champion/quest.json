@@ -1,0 +1,282 @@
+{
+  "id": 223,
+  "name": "Test Of The Champion",
+  "repeatable": false,
+  "abortable": true,
+  "questItems": [],
+  "dialogs": [
+    {
+      "npcId": 30624,
+      "hook": "talk",
+      "when": "absent",
+      "htmlFile": "30624-talk-007.htm"
+    },
+    {
+      "npcId": 30093,
+      "hook": "talk",
+      "when": "absent",
+      "ops": [
+        {
+          "op": "set_cond",
+          "cond": 8
+        }
+      ],
+      "htmlFile": "30093-talk-011.htm"
+    },
+    {
+      "npcId": 30093,
+      "hook": "talk",
+      "when": "absent",
+      "htmlFile": "30093-talk-013.htm"
+    },
+    {
+      "npcId": 30196,
+      "hook": "talk",
+      "when": "absent",
+      "htmlFile": "30196-talk-016.htm"
+    },
+    {
+      "npcId": 30196,
+      "hook": "talk",
+      "when": "absent",
+      "htmlFile": "30196-talk-018.htm"
+    },
+    {
+      "npcId": 30625,
+      "hook": "talk",
+      "when": "absent",
+      "htmlFile": "30625-talk-022.htm"
+    },
+    {
+      "npcId": 30625,
+      "hook": "talk",
+      "when": "absent",
+      "htmlFile": "30625-talk-024.htm"
+    },
+    {
+      "npcId": 30624,
+      "hook": "event",
+      "when": "absent",
+      "event": "30624-05",
+      "htmlFile": "30624-event-30624-05-025.htm"
+    },
+    {
+      "npcId": 30624,
+      "hook": "event",
+      "when": "absent",
+      "event": "30196-02",
+      "htmlFile": "30624-event-30196-02-026.htm"
+    },
+    {
+      "npcId": 30624,
+      "hook": "event",
+      "when": "absent",
+      "event": "30625-02",
+      "htmlFile": "30624-event-30625-02-027.htm"
+    },
+    {
+      "npcId": 20145,
+      "hook": "kill",
+      "when": "started",
+      "ops": [
+        {
+          "op": "set_cond",
+          "cond": 7
+        }
+      ],
+      "html": ""
+    },
+    {
+      "npcId": 20145,
+      "hook": "kill",
+      "when": "started",
+      "ops": [
+        {
+          "op": "set_cond",
+          "cond": 7
+        }
+      ],
+      "html": ""
+    },
+    {
+      "npcId": 27088,
+      "hook": "kill",
+      "when": "started",
+      "ops": [
+        {
+          "op": "set_cond",
+          "cond": 7
+        }
+      ],
+      "html": ""
+    },
+    {
+      "npcId": 27088,
+      "hook": "kill",
+      "when": "started",
+      "ops": [
+        {
+          "op": "set_cond",
+          "cond": 7
+        }
+      ],
+      "html": ""
+    },
+    {
+      "npcId": 20158,
+      "hook": "kill",
+      "when": "started",
+      "ops": [
+        {
+          "op": "set_cond",
+          "cond": 7
+        }
+      ],
+      "html": ""
+    },
+    {
+      "npcId": 20158,
+      "hook": "kill",
+      "when": "started",
+      "ops": [
+        {
+          "op": "set_cond",
+          "cond": 7
+        }
+      ],
+      "html": ""
+    },
+    {
+      "npcId": 20553,
+      "hook": "kill",
+      "when": "started",
+      "ops": [
+        {
+          "op": "set_cond",
+          "cond": 7
+        }
+      ],
+      "html": ""
+    },
+    {
+      "npcId": 20553,
+      "hook": "kill",
+      "when": "started",
+      "ops": [
+        {
+          "op": "set_cond",
+          "cond": 7
+        }
+      ],
+      "html": ""
+    },
+    {
+      "npcId": 20551,
+      "hook": "kill",
+      "when": "started",
+      "ops": [
+        {
+          "op": "set_cond",
+          "cond": 11
+        }
+      ],
+      "html": ""
+    },
+    {
+      "npcId": 27089,
+      "hook": "kill",
+      "when": "started",
+      "ops": [
+        {
+          "op": "set_cond",
+          "cond": 11
+        }
+      ],
+      "html": ""
+    },
+    {
+      "npcId": 20577,
+      "hook": "kill",
+      "when": "started",
+      "ops": [
+        {
+          "op": "set_cond",
+          "cond": 13
+        }
+      ],
+      "html": ""
+    },
+    {
+      "npcId": 20578,
+      "hook": "kill",
+      "when": "started",
+      "ops": [
+        {
+          "op": "set_cond",
+          "cond": 13
+        }
+      ],
+      "html": ""
+    },
+    {
+      "npcId": 20579,
+      "hook": "kill",
+      "when": "started",
+      "ops": [
+        {
+          "op": "set_cond",
+          "cond": 13
+        }
+      ],
+      "html": ""
+    },
+    {
+      "npcId": 20580,
+      "hook": "kill",
+      "when": "started",
+      "ops": [
+        {
+          "op": "set_cond",
+          "cond": 13
+        }
+      ],
+      "html": ""
+    },
+    {
+      "npcId": 20581,
+      "hook": "kill",
+      "when": "started",
+      "ops": [
+        {
+          "op": "set_cond",
+          "cond": 13
+        }
+      ],
+      "html": ""
+    },
+    {
+      "npcId": 20582,
+      "hook": "kill",
+      "when": "started",
+      "ops": [
+        {
+          "op": "set_cond",
+          "cond": 13
+        }
+      ],
+      "html": ""
+    },
+    {
+      "npcId": 20780,
+      "hook": "kill",
+      "when": "started",
+      "ops": [
+        {
+          "op": "set_cond",
+          "cond": 3
+        }
+      ],
+      "html": ""
+    }
+  ]
+}

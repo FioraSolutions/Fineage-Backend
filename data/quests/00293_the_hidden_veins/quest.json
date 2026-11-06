@@ -1,0 +1,60 @@
+{
+  "id": 293,
+  "name": "The Hidden Veins",
+  "repeatable": true,
+  "abortable": true,
+  "questItems": [],
+  "dialogs": [
+    {
+      "npcId": 30539,
+      "hook": "talk",
+      "when": "absent",
+      "htmlFile": "30539-talk-000.htm"
+    },
+    {
+      "npcId": 30535,
+      "hook": "event",
+      "when": "absent",
+      "event": "30535-04",
+      "ops": [
+        {
+          "op": "create"
+        },
+        {
+          "op": "start"
+        },
+        {
+          "op": "set_cond",
+          "cond": 1
+        }
+      ],
+      "htmlFile": "30535-event-30535-04-001.htm"
+    },
+    {
+      "npcId": 30535,
+      "hook": "event",
+      "when": "absent",
+      "event": "30535-07",
+      "ops": [
+        {
+          "op": "complete"
+        }
+      ],
+      "htmlFile": "30535-event-30535-07-002.htm"
+    },
+    {
+      "npcId": 30535,
+      "hook": "event",
+      "when": "absent",
+      "event": "30535-08",
+      "htmlFile": "30535-event-30535-08-003.htm"
+    },
+    {
+      "npcId": 30535,
+      "hook": "event",
+      "when": "absent",
+      "event": "30539-03",
+      "htmlFile": "30535-event-30539-03-004.htm"
+    }
+  ]
+}

@@ -1,0 +1,46 @@
+{
+  "id": 608,
+  "name": "Slay the Enemy Commander! (Ketra)",
+  "repeatable": true,
+  "abortable": true,
+  "questItems": [],
+  "dialogs": [
+    {
+      "npcId": 31370,
+      "hook": "talk",
+      "when": "absent",
+      "htmlFile": "31370-event-31370-04-002.htm"
+    },
+    {
+      "npcId": 31370,
+      "hook": "talk",
+      "when": "started",
+      "htmlFile": "31370-talk-000.htm"
+    },
+    {
+      "npcId": 31370,
+      "hook": "talk",
+      "when": "started",
+      "htmlFile": "31370-talk-001.htm"
+    },
+    {
+      "npcId": 31370,
+      "hook": "event",
+      "when": "absent",
+      "event": "31370-04",
+      "ops": [
+        {
+          "op": "create"
+        },
+        {
+          "op": "start"
+        },
+        {
+          "op": "set_cond",
+          "cond": 1
+        }
+      ],
+      "htmlFile": "31370-event-31370-04-002.htm"
+    }
+  ]
+}

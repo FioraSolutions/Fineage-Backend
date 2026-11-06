@@ -1,0 +1,67 @@
+{
+  "id": 629,
+  "name": "Clean Up The Swamp Of Screams",
+  "repeatable": true,
+  "abortable": true,
+  "questItems": [],
+  "dialogs": [
+    {
+      "npcId": 31553,
+      "hook": "talk",
+      "when": "absent",
+      "htmlFile": "31553-event-31553-03-000.htm"
+    },
+    {
+      "npcId": 31553,
+      "hook": "event",
+      "when": "absent",
+      "event": "31553-03",
+      "ops": [
+        {
+          "op": "create"
+        },
+        {
+          "op": "start"
+        },
+        {
+          "op": "set_cond",
+          "cond": 1
+        }
+      ],
+      "htmlFile": "31553-event-31553-03-000.htm"
+    },
+    {
+      "npcId": 31553,
+      "hook": "event",
+      "when": "absent",
+      "event": "31553-04",
+      "htmlFile": "31553-event-31553-04-001.htm"
+    },
+    {
+      "npcId": 31553,
+      "hook": "event",
+      "when": "absent",
+      "event": "31553-06",
+      "htmlFile": "31553-event-31553-06-002.htm"
+    },
+    {
+      "npcId": 31553,
+      "hook": "event",
+      "when": "absent",
+      "event": "31553-07",
+      "htmlFile": "31553-event-31553-07-003.htm"
+    },
+    {
+      "npcId": 31553,
+      "hook": "event",
+      "when": "absent",
+      "event": "31553-09",
+      "ops": [
+        {
+          "op": "complete"
+        }
+      ],
+      "htmlFile": "31553-event-31553-09-004.htm"
+    }
+  ]
+}

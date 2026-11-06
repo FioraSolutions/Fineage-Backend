@@ -1,0 +1,116 @@
+{
+  "id": 116,
+  "name": "Beyond the Hills of Winter",
+  "repeatable": false,
+  "abortable": true,
+  "questItems": [],
+  "dialogs": [
+    {
+      "npcId": 30535,
+      "hook": "talk",
+      "when": "absent",
+      "htmlFile": "30535-talk-000.htm"
+    },
+    {
+      "npcId": 30535,
+      "hook": "talk",
+      "when": "absent",
+      "htmlFile": "30535-talk-001.htm"
+    },
+    {
+      "npcId": 30535,
+      "hook": "talk",
+      "when": "started",
+      "htmlFile": "30535-talk-002.htm"
+    },
+    {
+      "npcId": 30535,
+      "hook": "talk",
+      "when": "started",
+      "htmlFile": "30535-talk-003.htm"
+    },
+    {
+      "npcId": 30535,
+      "hook": "talk",
+      "when": "started",
+      "htmlFile": "30535-talk-004.htm"
+    },
+    {
+      "npcId": 30535,
+      "hook": "event",
+      "when": "absent",
+      "event": "30535-02",
+      "ops": [
+        {
+          "op": "create"
+        },
+        {
+          "op": "start"
+        },
+        {
+          "op": "set_cond",
+          "cond": 1
+        }
+      ],
+      "htmlFile": "30535-event-30535-02-006.htm"
+    },
+    {
+      "npcId": 30535,
+      "hook": "event",
+      "when": "absent",
+      "event": "30535-05",
+      "ops": [
+        {
+          "op": "set_cond",
+          "cond": 2
+        }
+      ],
+      "htmlFile": "30535-event-30535-05-007.htm"
+    },
+    {
+      "npcId": 30535,
+      "hook": "event",
+      "when": "absent",
+      "event": "32052-02",
+      "htmlFile": "30535-event-32052-02-008.htm"
+    },
+    {
+      "npcId": 30535,
+      "hook": "event",
+      "when": "absent",
+      "event": "MATERIAL",
+      "ops": [
+        {
+          "op": "give_exp_sp",
+          "exp": 82792,
+          "sp": 4981
+        },
+        {
+          "op": "complete"
+        }
+      ],
+      "htmlFile": "30535-event-MATERIAL-009.htm"
+    },
+    {
+      "npcId": 30535,
+      "hook": "event",
+      "when": "absent",
+      "event": "ADENA",
+      "ops": [
+        {
+          "op": "give_adena",
+          "count": 17387
+        },
+        {
+          "op": "give_exp_sp",
+          "exp": 82792,
+          "sp": 4981
+        },
+        {
+          "op": "complete"
+        }
+      ],
+      "htmlFile": "30535-event-ADENA-010.htm"
+    }
+  ]
+}

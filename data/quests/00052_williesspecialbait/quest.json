@@ -1,0 +1,64 @@
+{
+  "id": 52,
+  "name": "WilliesSpecialBait",
+  "repeatable": false,
+  "abortable": true,
+  "questItems": [],
+  "dialogs": [
+    {
+      "npcId": 31574,
+      "hook": "talk",
+      "when": "absent",
+      "htmlFile": "31574-talk-000.htm"
+    },
+    {
+      "npcId": 31574,
+      "hook": "talk",
+      "when": "absent",
+      "htmlFile": "31574-talk-001.htm"
+    },
+    {
+      "npcId": 31574,
+      "hook": "talk",
+      "when": "started",
+      "htmlFile": "31574-talk-002.htm"
+    },
+    {
+      "npcId": 31574,
+      "hook": "talk",
+      "when": "started",
+      "htmlFile": "31574-talk-003.htm"
+    },
+    {
+      "npcId": 31574,
+      "hook": "event",
+      "when": "absent",
+      "event": "31574-03",
+      "ops": [
+        {
+          "op": "create"
+        },
+        {
+          "op": "start"
+        },
+        {
+          "op": "set_cond",
+          "cond": 1
+        }
+      ],
+      "htmlFile": "31574-event-31574-03-004.htm"
+    },
+    {
+      "npcId": 31574,
+      "hook": "event",
+      "when": "absent",
+      "event": "31574-07",
+      "ops": [
+        {
+          "op": "complete"
+        }
+      ],
+      "htmlFile": "31574-event-31574-07-005.htm"
+    }
+  ]
+}

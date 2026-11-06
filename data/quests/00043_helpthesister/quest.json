@@ -1,0 +1,107 @@
+{
+  "id": 43,
+  "name": "HelpTheSister",
+  "repeatable": false,
+  "abortable": true,
+  "questItems": [],
+  "dialogs": [
+    {
+      "npcId": 30829,
+      "hook": "talk",
+      "when": "absent",
+      "htmlFile": "30829-talk-000.htm"
+    },
+    {
+      "npcId": 30829,
+      "hook": "talk",
+      "when": "absent",
+      "htmlFile": "30829-talk-001.htm"
+    },
+    {
+      "npcId": 30829,
+      "hook": "talk",
+      "when": "started",
+      "cond": 2,
+      "htmlFile": "30829-talk-c2-002.htm"
+    },
+    {
+      "npcId": 30829,
+      "hook": "talk",
+      "when": "started",
+      "cond": 3,
+      "htmlFile": "30829-talk-c3-003.htm"
+    },
+    {
+      "npcId": 30829,
+      "hook": "talk",
+      "when": "started",
+      "cond": 4,
+      "htmlFile": "30829-talk-c4-004.htm"
+    },
+    {
+      "npcId": 30829,
+      "hook": "talk",
+      "when": "started",
+      "cond": 5,
+      "htmlFile": "30829-talk-c5-005.htm"
+    },
+    {
+      "npcId": 30097,
+      "hook": "talk",
+      "when": "started",
+      "cond": 4,
+      "htmlFile": "30097-talk-c4-006.htm"
+    },
+    {
+      "npcId": 30097,
+      "hook": "talk",
+      "when": "started",
+      "cond": 5,
+      "htmlFile": "30097-talk-c5-007.htm"
+    },
+    {
+      "npcId": 30829,
+      "hook": "event",
+      "when": "absent",
+      "event": "30829-01",
+      "ops": [
+        {
+          "op": "create"
+        },
+        {
+          "op": "start"
+        },
+        {
+          "op": "set_cond",
+          "cond": 1
+        }
+      ],
+      "htmlFile": "30829-event-30829-01-008.htm"
+    },
+    {
+      "npcId": 30829,
+      "hook": "event",
+      "when": "absent",
+      "event": "30829-06",
+      "ops": [
+        {
+          "op": "set_cond",
+          "cond": 4
+        }
+      ],
+      "htmlFile": "30829-event-30829-06-010.htm"
+    },
+    {
+      "npcId": 30829,
+      "hook": "event",
+      "when": "absent",
+      "event": "30829-09",
+      "ops": [
+        {
+          "op": "complete"
+        }
+      ],
+      "htmlFile": "30829-event-30829-09-012.htm"
+    }
+  ]
+}

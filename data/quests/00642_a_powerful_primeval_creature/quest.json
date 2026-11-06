@@ -1,0 +1,46 @@
+{
+  "id": 642,
+  "name": "A Powerful Primeval Creature",
+  "repeatable": true,
+  "abortable": true,
+  "questItems": [],
+  "dialogs": [
+    {
+      "npcId": 32105,
+      "hook": "talk",
+      "when": "absent",
+      "htmlFile": "32105-event-32105-05-000.htm"
+    },
+    {
+      "npcId": 32105,
+      "hook": "event",
+      "when": "absent",
+      "event": "32105-05",
+      "ops": [
+        {
+          "op": "create"
+        },
+        {
+          "op": "start"
+        },
+        {
+          "op": "set_cond",
+          "cond": 1
+        }
+      ],
+      "htmlFile": "32105-event-32105-05-000.htm"
+    },
+    {
+      "npcId": 32105,
+      "hook": "event",
+      "when": "absent",
+      "event": "32105-06",
+      "ops": [
+        {
+          "op": "complete"
+        }
+      ],
+      "htmlFile": "32105-event-32105-06-001.htm"
+    }
+  ]
+}

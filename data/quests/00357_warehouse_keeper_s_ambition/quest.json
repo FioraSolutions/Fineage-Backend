@@ -1,0 +1,69 @@
+{
+  "id": 357,
+  "name": "Warehouse Keeper's Ambition",
+  "repeatable": true,
+  "abortable": true,
+  "questItems": [],
+  "dialogs": [
+    {
+      "npcId": 30686,
+      "hook": "talk",
+      "when": "absent",
+      "htmlFile": "30686-talk-000.htm"
+    },
+    {
+      "npcId": 30686,
+      "hook": "event",
+      "when": "absent",
+      "event": "30686-03",
+      "htmlFile": "30686-event-30686-03-001.htm"
+    },
+    {
+      "npcId": 30686,
+      "hook": "event",
+      "when": "absent",
+      "event": "30686-04",
+      "htmlFile": "30686-event-30686-04-002.htm"
+    },
+    {
+      "npcId": 30686,
+      "hook": "event",
+      "when": "absent",
+      "event": "30686-10",
+      "htmlFile": "30686-event-30686-10-003.htm"
+    },
+    {
+      "npcId": 30686,
+      "hook": "event",
+      "when": "absent",
+      "event": "30686-05",
+      "ops": [
+        {
+          "op": "create"
+        },
+        {
+          "op": "start"
+        },
+        {
+          "op": "set_cond",
+          "cond": 1
+        }
+      ],
+      "htmlFile": "30686-event-30686-05-004.htm"
+    },
+    {
+      "npcId": 30686,
+      "hook": "event",
+      "when": "absent",
+      "event": "30686-09",
+      "htmlFile": "30686-event-30686-09-005.htm"
+    },
+    {
+      "npcId": 30686,
+      "hook": "event",
+      "when": "absent",
+      "event": "30686-11",
+      "htmlFile": "30686-event-30686-11-006.htm"
+    }
+  ]
+}

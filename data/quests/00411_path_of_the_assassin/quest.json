@@ -1,0 +1,123 @@
+{
+  "id": 411,
+  "name": "Path Of The Assassin",
+  "repeatable": false,
+  "abortable": true,
+  "questItems": [],
+  "dialogs": [
+    {
+      "npcId": 30416,
+      "hook": "talk",
+      "when": "absent",
+      "htmlFile": "30416-talk-002.htm"
+    },
+    {
+      "npcId": 30382,
+      "hook": "talk",
+      "when": "absent",
+      "htmlFile": "30382-talk-007.htm"
+    },
+    {
+      "npcId": 30382,
+      "hook": "talk",
+      "when": "absent",
+      "htmlFile": "30382-talk-010.htm"
+    },
+    {
+      "npcId": 30419,
+      "hook": "talk",
+      "when": "absent",
+      "htmlFile": "30419-talk-016.htm"
+    },
+    {
+      "npcId": 30416,
+      "hook": "event",
+      "when": "absent",
+      "event": "ACCEPT",
+      "minLevel": 18,
+      "hasItem": 1252,
+      "htmlFile": "30416-event-ACCEPT-017.htm"
+    },
+    {
+      "npcId": 30416,
+      "hook": "event",
+      "when": "absent",
+      "event": "ACCEPT",
+      "hasItem": 1252,
+      "htmlFile": "30416-event-ACCEPT-018.htm"
+    },
+    {
+      "npcId": 30416,
+      "hook": "event",
+      "when": "absent",
+      "event": "ACCEPT",
+      "htmlFile": "30416-event-ACCEPT-019.htm"
+    },
+    {
+      "npcId": 30416,
+      "hook": "event",
+      "when": "absent",
+      "event": "30382-02",
+      "htmlFile": "30416-event-30382-02-020.htm"
+    },
+    {
+      "npcId": 30416,
+      "hook": "event",
+      "when": "absent",
+      "event": "30382-04",
+      "htmlFile": "30416-event-30382-04-021.htm"
+    },
+    {
+      "npcId": 30416,
+      "hook": "event",
+      "when": "absent",
+      "event": "30419-02",
+      "htmlFile": "30416-event-30419-02-023.htm"
+    },
+    {
+      "npcId": 30416,
+      "hook": "event",
+      "when": "absent",
+      "event": "30419-03",
+      "htmlFile": "30416-event-30419-03-024.htm"
+    },
+    {
+      "npcId": 30416,
+      "hook": "event",
+      "when": "absent",
+      "event": "30419-04",
+      "htmlFile": "30416-event-30419-04-025.htm"
+    },
+    {
+      "npcId": 30416,
+      "hook": "event",
+      "when": "absent",
+      "event": "30419-06",
+      "htmlFile": "30416-event-30419-06-026.htm"
+    },
+    {
+      "npcId": 20369,
+      "hook": "kill",
+      "when": "started",
+      "ops": [
+        {
+          "op": "set_cond",
+          "cond": 4
+        }
+      ],
+      "html": ""
+    },
+    {
+      "npcId": 27036,
+      "hook": "kill",
+      "when": "started",
+      "ops": [
+        {
+          "op": "set_cond",
+          "cond": 6
+        }
+      ],
+      "html": ""
+    }
+  ]
+}

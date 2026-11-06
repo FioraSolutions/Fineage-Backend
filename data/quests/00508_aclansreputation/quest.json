@@ -1,0 +1,22 @@
+{
+  "id": 508,
+  "name": "AClansReputation",
+  "repeatable": true,
+  "abortable": true,
+  "questItems": [],
+  "dialogs": [
+    {
+      "npcId": 30868,
+      "hook": "talk",
+      "when": "absent",
+      "htmlFile": "30868-talk-000.htm"
+    },
+    {
+      "npcId": 30868,
+      "hook": "talk",
+      "when": "absent",
+      "maxLevel": 4,
+      "htmlFile": "30868-talk-001.htm"
+    }
+  ]
+}

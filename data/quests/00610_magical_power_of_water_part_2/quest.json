@@ -1,0 +1,60 @@
+{
+  "id": 610,
+  "name": "Magical Power of Water - Part 2",
+  "repeatable": true,
+  "abortable": true,
+  "questItems": [],
+  "dialogs": [
+    {
+      "npcId": 31372,
+      "hook": "talk",
+      "when": "absent",
+      "htmlFile": "31372-event-31372-02-004.htm"
+    },
+    {
+      "npcId": 31372,
+      "hook": "talk",
+      "when": "started",
+      "htmlFile": "31372-talk-000.htm"
+    },
+    {
+      "npcId": 31372,
+      "hook": "talk",
+      "when": "started",
+      "htmlFile": "31372-talk-001.htm"
+    },
+    {
+      "npcId": 31560,
+      "hook": "talk",
+      "when": "started",
+      "cond": 1,
+      "htmlFile": "31560-talk-c1-002.htm"
+    },
+    {
+      "npcId": 31560,
+      "hook": "talk",
+      "when": "started",
+      "cond": 3,
+      "htmlFile": "31560-talk-c3-003.htm"
+    },
+    {
+      "npcId": 31372,
+      "hook": "event",
+      "when": "absent",
+      "event": "31372-02",
+      "ops": [
+        {
+          "op": "create"
+        },
+        {
+          "op": "start"
+        },
+        {
+          "op": "set_cond",
+          "cond": 1
+        }
+      ],
+      "htmlFile": "31372-event-31372-02-004.htm"
+    }
+  ]
+}

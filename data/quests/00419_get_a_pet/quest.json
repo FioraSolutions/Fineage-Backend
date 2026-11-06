@@ -1,0 +1,122 @@
+{
+  "id": 419,
+  "name": "Get A Pet",
+  "repeatable": true,
+  "abortable": true,
+  "questItems": [],
+  "dialogs": [
+    {
+      "npcId": 30731,
+      "hook": "talk",
+      "when": "absent",
+      "htmlFile": "30731-talk-001.htm"
+    },
+    {
+      "npcId": 30731,
+      "hook": "talk",
+      "when": "absent",
+      "htmlFile": "30731-talk-003.htm"
+    },
+    {
+      "npcId": 30731,
+      "hook": "talk",
+      "when": "absent",
+      "htmlFile": "30731-talk-005.htm"
+    },
+    {
+      "npcId": 30731,
+      "hook": "talk",
+      "when": "absent",
+      "htmlFile": "30731-talk-007.htm"
+    },
+    {
+      "npcId": 30731,
+      "hook": "talk",
+      "when": "absent",
+      "htmlFile": "30731-talk-009.htm"
+    },
+    {
+      "npcId": 30731,
+      "hook": "talk",
+      "when": "absent",
+      "htmlFile": "30731-talk-011.htm"
+    },
+    {
+      "npcId": 30731,
+      "hook": "event",
+      "when": "absent",
+      "event": "ACCEPT",
+      "htmlFile": "30731-event-ACCEPT-015.htm"
+    },
+    {
+      "npcId": 30731,
+      "hook": "event",
+      "when": "absent",
+      "event": "ACCEPT",
+      "htmlFile": "30731-event-ACCEPT-016.htm"
+    },
+    {
+      "npcId": 30731,
+      "hook": "event",
+      "when": "absent",
+      "event": "ACCEPT",
+      "htmlFile": "30731-event-ACCEPT-017.htm"
+    },
+    {
+      "npcId": 30731,
+      "hook": "event",
+      "when": "absent",
+      "event": "ACCEPT",
+      "htmlFile": "30731-event-ACCEPT-018.htm"
+    },
+    {
+      "npcId": 30731,
+      "hook": "event",
+      "when": "absent",
+      "event": "ACCEPT",
+      "htmlFile": "30731-event-ACCEPT-019.htm"
+    },
+    {
+      "npcId": 30731,
+      "hook": "event",
+      "when": "absent",
+      "event": "30731-03",
+      "htmlFile": "30731-event-30731-03-020.htm"
+    },
+    {
+      "npcId": 30731,
+      "hook": "event",
+      "when": "absent",
+      "event": "30072-02",
+      "htmlFile": "30731-event-30072-02-021.htm"
+    },
+    {
+      "npcId": 30731,
+      "hook": "event",
+      "when": "absent",
+      "event": "30091-02",
+      "htmlFile": "30731-event-30091-02-022.htm"
+    },
+    {
+      "npcId": 30731,
+      "hook": "event",
+      "when": "absent",
+      "event": "30256-02",
+      "htmlFile": "30731-event-30256-02-023.htm"
+    },
+    {
+      "npcId": 30731,
+      "hook": "event",
+      "when": "absent",
+      "event": "30256-03",
+      "htmlFile": "30731-event-30256-03-024.htm"
+    },
+    {
+      "npcId": 30731,
+      "hook": "event",
+      "when": "absent",
+      "event": "30731-14",
+      "htmlFile": "30731-event-30731-14-031.htm"
+    }
+  ]
+}

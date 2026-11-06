@@ -1,0 +1,59 @@
+{
+  "id": 366,
+  "name": "Silver Haired Shaman",
+  "repeatable": true,
+  "abortable": true,
+  "questItems": [],
+  "dialogs": [
+    {
+      "npcId": 30111,
+      "hook": "talk",
+      "when": "absent",
+      "htmlFile": "30111-talk-000.htm"
+    },
+    {
+      "npcId": 30111,
+      "hook": "talk",
+      "when": "absent",
+      "htmlFile": "30111-talk-001.htm"
+    },
+    {
+      "npcId": 30111,
+      "hook": "event",
+      "when": "absent",
+      "event": "30111-02",
+      "ops": [
+        {
+          "op": "create"
+        },
+        {
+          "op": "start"
+        },
+        {
+          "op": "set_cond",
+          "cond": 1
+        }
+      ],
+      "htmlFile": "30111-event-30111-02-003.htm"
+    },
+    {
+      "npcId": 30111,
+      "hook": "event",
+      "when": "absent",
+      "event": "30111-05",
+      "ops": [
+        {
+          "op": "complete"
+        }
+      ],
+      "htmlFile": "30111-event-30111-05-004.htm"
+    },
+    {
+      "npcId": 30111,
+      "hook": "event",
+      "when": "absent",
+      "event": "30111-06",
+      "htmlFile": "30111-event-30111-06-005.htm"
+    }
+  ]
+}

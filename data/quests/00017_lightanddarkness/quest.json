@@ -1,0 +1,53 @@
+{
+  "id": 17,
+  "name": "LightAndDarkness",
+  "repeatable": false,
+  "abortable": true,
+  "questItems": [],
+  "dialogs": [
+    {
+      "npcId": 31517,
+      "hook": "talk",
+      "when": "absent",
+      "htmlFile": "31517-talk-000.htm"
+    },
+    {
+      "npcId": 31517,
+      "hook": "talk",
+      "when": "absent",
+      "htmlFile": "31517-talk-001.htm"
+    },
+    {
+      "npcId": 31517,
+      "hook": "talk",
+      "when": "started",
+      "htmlFile": "31517-talk-002.htm"
+    },
+    {
+      "npcId": 31517,
+      "hook": "talk",
+      "when": "started",
+      "htmlFile": "31517-talk-003.htm"
+    },
+    {
+      "npcId": 31517,
+      "hook": "event",
+      "when": "absent",
+      "event": "31517-02",
+      "minLevel": 61,
+      "ops": [
+        {
+          "op": "create"
+        },
+        {
+          "op": "start"
+        },
+        {
+          "op": "set_cond",
+          "cond": 1
+        }
+      ],
+      "htmlFile": "31517-event-31517-02-004.htm"
+    }
+  ]
+}

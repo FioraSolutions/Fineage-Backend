@@ -1,0 +1,190 @@
+{
+  "id": 39,
+  "name": "Red-eyed Invaders",
+  "repeatable": false,
+  "abortable": true,
+  "questItems": [],
+  "dialogs": [
+    {
+      "npcId": 30332,
+      "hook": "talk",
+      "when": "started",
+      "cond": 1,
+      "htmlFile": "30332-talk-c1-000.htm"
+    },
+    {
+      "npcId": 30332,
+      "hook": "talk",
+      "when": "started",
+      "cond": 2,
+      "htmlFile": "30332-talk-c2-001.htm"
+    },
+    {
+      "npcId": 30332,
+      "hook": "talk",
+      "when": "started",
+      "cond": 3,
+      "htmlFile": "30332-talk-c3-002.htm"
+    },
+    {
+      "npcId": 30332,
+      "hook": "talk",
+      "when": "started",
+      "cond": 4,
+      "htmlFile": "30332-talk-c4-003.htm"
+    },
+    {
+      "npcId": 30332,
+      "hook": "talk",
+      "when": "started",
+      "cond": 5,
+      "htmlFile": "30332-talk-c5-004.htm"
+    },
+    {
+      "npcId": 30334,
+      "hook": "talk",
+      "when": "absent",
+      "htmlFile": "30334-talk-005.htm"
+    },
+    {
+      "npcId": 30334,
+      "hook": "talk",
+      "when": "absent",
+      "htmlFile": "30334-talk-006.htm"
+    },
+    {
+      "npcId": 30334,
+      "hook": "event",
+      "when": "absent",
+      "event": "30334-03",
+      "ops": [
+        {
+          "op": "create"
+        },
+        {
+          "op": "start"
+        },
+        {
+          "op": "set_cond",
+          "cond": 1
+        }
+      ],
+      "htmlFile": "30334-event-30334-03-007.htm"
+    },
+    {
+      "npcId": 30334,
+      "hook": "event",
+      "when": "absent",
+      "event": "30332-02",
+      "ops": [
+        {
+          "op": "set_cond",
+          "cond": 2
+        }
+      ],
+      "htmlFile": "30334-event-30332-02-008.htm"
+    },
+    {
+      "npcId": 30334,
+      "hook": "event",
+      "when": "absent",
+      "event": "30332-05",
+      "ops": [
+        {
+          "op": "set_cond",
+          "cond": 4
+        }
+      ],
+      "htmlFile": "30334-event-30332-05-009.htm"
+    },
+    {
+      "npcId": 30334,
+      "hook": "event",
+      "when": "absent",
+      "event": "30332-09",
+      "ops": [
+        {
+          "op": "give_exp_sp",
+          "exp": 62366,
+          "sp": 2783
+        },
+        {
+          "op": "complete"
+        }
+      ],
+      "htmlFile": "30334-event-30332-09-010.htm"
+    },
+    {
+      "npcId": 20919,
+      "hook": "kill",
+      "when": "started",
+      "ops": [
+        {
+          "op": "set_cond",
+          "cond": 3
+        }
+      ],
+      "html": ""
+    },
+    {
+      "npcId": 20920,
+      "hook": "kill",
+      "when": "started",
+      "ops": [
+        {
+          "op": "set_cond",
+          "cond": 3
+        }
+      ],
+      "html": ""
+    },
+    {
+      "npcId": 20920,
+      "hook": "kill",
+      "when": "started",
+      "ops": [
+        {
+          "op": "set_cond",
+          "cond": 5
+        }
+      ],
+      "html": ""
+    },
+    {
+      "npcId": 20921,
+      "hook": "kill",
+      "when": "started",
+      "ops": [
+        {
+          "op": "set_cond",
+          "cond": 3
+        }
+      ],
+      "html": ""
+    },
+    {
+      "npcId": 20921,
+      "hook": "kill",
+      "when": "started",
+      "ops": [
+        {
+          "op": "set_cond",
+          "cond": 5
+        }
+      ],
+      "html": ""
+    },
+    {
+      "npcId": 20925,
+      "hook": "kill",
+      "when": "started",
+      "ops": [
+        {
+          "op": "set_cond",
+          "cond": 5
+        }
+      ],
+      "html": ""
+    }
+  ]
+}

@@ -1,0 +1,37 @@
+{
+  "id": 303,
+  "name": "Collect Arrowheads",
+  "repeatable": true,
+  "abortable": true,
+  "questItems": [],
+  "dialogs": [
+    {
+      "npcId": 30029,
+      "hook": "talk",
+      "when": "started",
+      "cond": 1,
+      "htmlFile": "30029-talk-c1-000.htm"
+    },
+    {
+      "npcId": 30029,
+      "hook": "talk",
+      "when": "started",
+      "cond": 2,
+      "ops": [
+        {
+          "op": "give_adena",
+          "count": 1000
+        },
+        {
+          "op": "give_exp_sp",
+          "exp": 2000,
+          "sp": 0
+        },
+        {
+          "op": "complete"
+        }
+      ],
+      "htmlFile": "30029-talk-c2-001.htm"
+    }
+  ]
+}

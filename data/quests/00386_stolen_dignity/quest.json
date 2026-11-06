@@ -1,0 +1,22 @@
+{
+  "id": 386,
+  "name": "Stolen Dignity",
+  "repeatable": true,
+  "abortable": true,
+  "questItems": [],
+  "dialogs": [
+    {
+      "npcId": 30843,
+      "hook": "talk",
+      "when": "absent",
+      "minLevel": 58,
+      "htmlFile": "30843-talk-000.htm"
+    },
+    {
+      "npcId": 30843,
+      "hook": "talk",
+      "when": "absent",
+      "htmlFile": "30843-talk-001.htm"
+    }
+  ]
+}

@@ -1,0 +1,41 @@
+{
+  "id": 167,
+  "name": "Dwarven Kinship",
+  "repeatable": false,
+  "abortable": true,
+  "questItems": [],
+  "dialogs": [
+    {
+      "npcId": 30350,
+      "hook": "talk",
+      "when": "absent",
+      "htmlFile": "30350-talk-000.htm"
+    },
+    {
+      "npcId": 30350,
+      "hook": "event",
+      "when": "absent",
+      "event": "30255-02",
+      "htmlFile": "30350-event-30255-02-006.htm"
+    },
+    {
+      "npcId": 30350,
+      "hook": "event",
+      "when": "absent",
+      "event": "30350-03",
+      "ops": [
+        {
+          "op": "create"
+        },
+        {
+          "op": "start"
+        },
+        {
+          "op": "set_cond",
+          "cond": 1
+        }
+      ],
+      "htmlFile": "30350-event-30350-03-009.htm"
+    }
+  ]
+}

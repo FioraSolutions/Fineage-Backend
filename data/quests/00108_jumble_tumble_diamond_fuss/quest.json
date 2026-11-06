@@ -1,0 +1,163 @@
+{
+  "id": 108,
+  "name": "Jumble, Tumble, Diamond Fuss",
+  "repeatable": false,
+  "abortable": true,
+  "questItems": [],
+  "dialogs": [
+    {
+      "npcId": 30523,
+      "hook": "talk",
+      "when": "absent",
+      "htmlFile": "30523-talk-000.htm"
+    },
+    {
+      "npcId": 30523,
+      "hook": "talk",
+      "when": "absent",
+      "maxLevel": 9,
+      "htmlFile": "30523-talk-001.htm"
+    },
+    {
+      "npcId": 30523,
+      "hook": "talk",
+      "when": "started",
+      "cond": 2,
+      "htmlFile": "30523-talk-c2-003.htm"
+    },
+    {
+      "npcId": 30523,
+      "hook": "talk",
+      "when": "started",
+      "cond": 3,
+      "htmlFile": "30523-talk-c3-004.htm"
+    },
+    {
+      "npcId": 30523,
+      "hook": "talk",
+      "when": "started",
+      "cond": 4,
+      "htmlFile": "30523-talk-c4-005.htm"
+    },
+    {
+      "npcId": 30523,
+      "hook": "talk",
+      "when": "started",
+      "cond": 5,
+      "htmlFile": "30523-talk-c5-006.htm"
+    },
+    {
+      "npcId": 30523,
+      "hook": "talk",
+      "when": "started",
+      "cond": 6,
+      "htmlFile": "30523-talk-c6-007.htm"
+    },
+    {
+      "npcId": 30523,
+      "hook": "talk",
+      "when": "started",
+      "cond": 8,
+      "htmlFile": "30523-talk-c8-009.htm"
+    },
+    {
+      "npcId": 30523,
+      "hook": "talk",
+      "when": "started",
+      "cond": 9,
+      "htmlFile": "30523-talk-c9-010.htm"
+    },
+    {
+      "npcId": 30523,
+      "hook": "talk",
+      "when": "started",
+      "cond": 10,
+      "htmlFile": "30523-talk-c10-011.htm"
+    },
+    {
+      "npcId": 30523,
+      "hook": "talk",
+      "when": "started",
+      "cond": 11,
+      "htmlFile": "30523-talk-c11-012.htm"
+    },
+    {
+      "npcId": 30526,
+      "hook": "talk",
+      "when": "started",
+      "cond": 10,
+      "htmlFile": "30526-talk-c10-027.htm"
+    },
+    {
+      "npcId": 30526,
+      "hook": "talk",
+      "when": "started",
+      "cond": 11,
+      "htmlFile": "30526-talk-c11-028.htm"
+    },
+    {
+      "npcId": 30526,
+      "hook": "talk",
+      "when": "started",
+      "cond": 12,
+      "htmlFile": "30526-talk-c12-029.htm"
+    },
+    {
+      "npcId": 30521,
+      "hook": "talk",
+      "when": "started",
+      "cond": 11,
+      "htmlFile": "30521-talk-c11-032.htm"
+    },
+    {
+      "npcId": 30521,
+      "hook": "talk",
+      "when": "started",
+      "cond": 12,
+      "htmlFile": "30521-talk-c12-033.htm"
+    },
+    {
+      "npcId": 30523,
+      "hook": "event",
+      "when": "absent",
+      "event": "30523-04",
+      "ops": [
+        {
+          "op": "create"
+        },
+        {
+          "op": "start"
+        },
+        {
+          "op": "set_cond",
+          "cond": 1
+        }
+      ],
+      "htmlFile": "30523-event-30523-04-037.htm"
+    },
+    {
+      "npcId": 20323,
+      "hook": "kill",
+      "when": "started",
+      "ops": [
+        {
+          "op": "set_cond",
+          "cond": 6
+        }
+      ],
+      "html": ""
+    },
+    {
+      "npcId": 20324,
+      "hook": "kill",
+      "when": "started",
+      "ops": [
+        {
+          "op": "set_cond",
+          "cond": 6
+        }
+      ],
+      "html": ""
+    }
+  ]
+}

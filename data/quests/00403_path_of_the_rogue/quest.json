@@ -1,0 +1,99 @@
+{
+  "id": 403,
+  "name": "Path Of The Rogue",
+  "repeatable": false,
+  "abortable": true,
+  "questItems": [],
+  "dialogs": [
+    {
+      "npcId": 30379,
+      "hook": "talk",
+      "when": "absent",
+      "htmlFile": "30379-talk-002.htm"
+    },
+    {
+      "npcId": 30425,
+      "hook": "talk",
+      "when": "absent",
+      "htmlFile": "30425-talk-006.htm"
+    },
+    {
+      "npcId": 30379,
+      "hook": "event",
+      "when": "absent",
+      "event": "ACCEPT",
+      "minLevel": 18,
+      "hasItem": 1190,
+      "htmlFile": "30379-event-ACCEPT-008.htm"
+    },
+    {
+      "npcId": 30379,
+      "hook": "event",
+      "when": "absent",
+      "event": "ACCEPT",
+      "hasItem": 1190,
+      "htmlFile": "30379-event-ACCEPT-009.htm"
+    },
+    {
+      "npcId": 30379,
+      "hook": "event",
+      "when": "absent",
+      "event": "ACCEPT",
+      "htmlFile": "30379-event-ACCEPT-010.htm"
+    },
+    {
+      "npcId": 30379,
+      "hook": "event",
+      "when": "absent",
+      "event": "30379-06",
+      "ops": [
+        {
+          "op": "create"
+        },
+        {
+          "op": "start"
+        },
+        {
+          "op": "set_cond",
+          "cond": 1
+        }
+      ],
+      "htmlFile": "30379-event-30379-06-011.htm"
+    },
+    {
+      "npcId": 30379,
+      "hook": "event",
+      "when": "absent",
+      "event": "30425-02",
+      "htmlFile": "30379-event-30425-02-012.htm"
+    },
+    {
+      "npcId": 30379,
+      "hook": "event",
+      "when": "absent",
+      "event": "30425-03",
+      "htmlFile": "30379-event-30425-03-013.htm"
+    },
+    {
+      "npcId": 30379,
+      "hook": "event",
+      "when": "absent",
+      "event": "30425-04",
+      "htmlFile": "30379-event-30425-04-014.htm"
+    },
+    {
+      "npcId": 30379,
+      "hook": "event",
+      "when": "absent",
+      "event": "30425-05",
+      "htmlFile": "30379-event-30425-05-017.htm"
+    },
+    {
+      "npcId": 30379,
+      "hook": "event",
+      "when": "absent",
+      "event": "30425-05",
+      "htmlFile": "30379-event-30425-05-018.htm"
+    }
+  ]
+}

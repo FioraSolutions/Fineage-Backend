@@ -1,0 +1,510 @@
+{
+  "id": 22,
+  "name": "Tragedy in Von Hellmann Forest",
+  "repeatable": false,
+  "abortable": true,
+  "questItems": [],
+  "dialogs": [
+    {
+      "npcId": 31334,
+      "hook": "talk",
+      "when": "started",
+      "cond": 0,
+      "htmlFile": "31334-talk-c0-000.htm"
+    },
+    {
+      "npcId": 31334,
+      "hook": "talk",
+      "when": "started",
+      "cond": 1,
+      "htmlFile": "31334-talk-c1-001.htm"
+    },
+    {
+      "npcId": 31334,
+      "hook": "talk",
+      "when": "started",
+      "cond": 3,
+      "htmlFile": "31334-talk-c3-002.htm"
+    },
+    {
+      "npcId": 31334,
+      "hook": "talk",
+      "when": "started",
+      "cond": 4,
+      "htmlFile": "31334-talk-c4-005.htm"
+    },
+    {
+      "npcId": 31334,
+      "hook": "talk",
+      "when": "started",
+      "cond": 4,
+      "htmlFile": "31334-talk-c4-006.htm"
+    },
+    {
+      "npcId": 31334,
+      "hook": "talk",
+      "when": "started",
+      "cond": 5,
+      "htmlFile": "31334-talk-c5-009.htm"
+    },
+    {
+      "npcId": 31334,
+      "hook": "talk",
+      "when": "started",
+      "cond": 5,
+      "htmlFile": "31334-talk-c5-010.htm"
+    },
+    {
+      "npcId": 31334,
+      "hook": "talk",
+      "when": "started",
+      "cond": 6,
+      "htmlFile": "31334-talk-c6-013.htm"
+    },
+    {
+      "npcId": 31334,
+      "hook": "talk",
+      "when": "started",
+      "cond": 6,
+      "htmlFile": "31334-talk-c6-014.htm"
+    },
+    {
+      "npcId": 31334,
+      "hook": "talk",
+      "when": "started",
+      "cond": 7,
+      "htmlFile": "31334-talk-c7-017.htm"
+    },
+    {
+      "npcId": 31334,
+      "hook": "talk",
+      "when": "started",
+      "cond": 7,
+      "htmlFile": "31334-talk-c7-018.htm"
+    },
+    {
+      "npcId": 31528,
+      "hook": "talk",
+      "when": "absent",
+      "htmlFile": "31528-talk-020.htm"
+    },
+    {
+      "npcId": 31328,
+      "hook": "talk",
+      "when": "started",
+      "cond": 2,
+      "ops": [
+        {
+          "op": "set_cond",
+          "cond": 3
+        }
+      ],
+      "htmlFile": "31328-talk-c2-021.htm"
+    },
+    {
+      "npcId": 31328,
+      "hook": "talk",
+      "when": "started",
+      "cond": 9,
+      "htmlFile": "31328-talk-c9-024.htm"
+    },
+    {
+      "npcId": 31328,
+      "hook": "talk",
+      "when": "started",
+      "cond": 15,
+      "htmlFile": "31328-talk-c15-026.htm"
+    },
+    {
+      "npcId": 31328,
+      "hook": "talk",
+      "when": "started",
+      "cond": 16,
+      "minLevel": 63,
+      "htmlFile": "31328-talk-c16-027.htm"
+    },
+    {
+      "npcId": 31527,
+      "hook": "talk",
+      "when": "started",
+      "cond": 13,
+      "htmlFile": "31527-talk-c13-030.htm"
+    },
+    {
+      "npcId": 31527,
+      "hook": "talk",
+      "when": "started",
+      "cond": 14,
+      "htmlFile": "31527-talk-c14-031.htm"
+    },
+    {
+      "npcId": 31527,
+      "hook": "talk",
+      "when": "started",
+      "cond": 15,
+      "htmlFile": "31527-talk-c15-032.htm"
+    },
+    {
+      "npcId": 31527,
+      "hook": "talk",
+      "when": "started",
+      "cond": 16,
+      "htmlFile": "31527-talk-c16-033.htm"
+    },
+    {
+      "npcId": 31529,
+      "hook": "talk",
+      "when": "started",
+      "cond": 9,
+      "htmlFile": "31529-talk-c9-034.htm"
+    },
+    {
+      "npcId": 31529,
+      "hook": "talk",
+      "when": "started",
+      "cond": 9,
+      "htmlFile": "31529-talk-c9-035.htm"
+    },
+    {
+      "npcId": 31529,
+      "hook": "talk",
+      "when": "started",
+      "cond": 9,
+      "htmlFile": "31529-talk-c9-036.htm"
+    },
+    {
+      "npcId": 31529,
+      "hook": "talk",
+      "when": "started",
+      "cond": 10,
+      "htmlFile": "31529-talk-c10-039.htm"
+    },
+    {
+      "npcId": 31529,
+      "hook": "talk",
+      "when": "started",
+      "cond": 10,
+      "htmlFile": "31529-talk-c10-040.htm"
+    },
+    {
+      "npcId": 31529,
+      "hook": "talk",
+      "when": "started",
+      "cond": 13,
+      "ops": [
+        {
+          "op": "set_cond",
+          "cond": 14
+        }
+      ],
+      "htmlFile": "31529-talk-c13-042.htm"
+    },
+    {
+      "npcId": 31334,
+      "hook": "event",
+      "when": "absent",
+      "event": "31529-02",
+      "htmlFile": "31334-event-31529-02-044.htm"
+    },
+    {
+      "npcId": 31334,
+      "hook": "event",
+      "when": "absent",
+      "event": "31529-04",
+      "htmlFile": "31334-event-31529-04-045.htm"
+    },
+    {
+      "npcId": 31334,
+      "hook": "event",
+      "when": "absent",
+      "event": "31529-05",
+      "htmlFile": "31334-event-31529-05-046.htm"
+    },
+    {
+      "npcId": 31334,
+      "hook": "event",
+      "when": "absent",
+      "event": "31529-06",
+      "htmlFile": "31334-event-31529-06-047.htm"
+    },
+    {
+      "npcId": 31334,
+      "hook": "event",
+      "when": "absent",
+      "event": "31529-07",
+      "htmlFile": "31334-event-31529-07-048.htm"
+    },
+    {
+      "npcId": 31334,
+      "hook": "event",
+      "when": "absent",
+      "event": "31529-09",
+      "htmlFile": "31334-event-31529-09-049.htm"
+    },
+    {
+      "npcId": 31334,
+      "hook": "event",
+      "when": "absent",
+      "event": "31529-13",
+      "htmlFile": "31334-event-31529-13-050.htm"
+    },
+    {
+      "npcId": 31334,
+      "hook": "event",
+      "when": "absent",
+      "event": "31529-13a",
+      "htmlFile": "31334-event-31529-13a-051.htm"
+    },
+    {
+      "npcId": 31334,
+      "hook": "event",
+      "when": "absent",
+      "event": "31528-02",
+      "htmlFile": "31334-event-31528-02-052.htm"
+    },
+    {
+      "npcId": 31334,
+      "hook": "event",
+      "when": "absent",
+      "event": "31528-05",
+      "htmlFile": "31334-event-31528-05-053.htm"
+    },
+    {
+      "npcId": 31334,
+      "hook": "event",
+      "when": "absent",
+      "event": "31528-06",
+      "htmlFile": "31334-event-31528-06-054.htm"
+    },
+    {
+      "npcId": 31334,
+      "hook": "event",
+      "when": "absent",
+      "event": "31528-07",
+      "htmlFile": "31334-event-31528-07-055.htm"
+    },
+    {
+      "npcId": 31334,
+      "hook": "event",
+      "when": "absent",
+      "event": "31328-13",
+      "htmlFile": "31334-event-31328-13-056.htm"
+    },
+    {
+      "npcId": 31334,
+      "hook": "event",
+      "when": "absent",
+      "event": "31328-06",
+      "htmlFile": "31334-event-31328-06-057.htm"
+    },
+    {
+      "npcId": 31334,
+      "hook": "event",
+      "when": "absent",
+      "event": "31328-05",
+      "htmlFile": "31334-event-31328-05-058.htm"
+    },
+    {
+      "npcId": 31334,
+      "hook": "event",
+      "when": "absent",
+      "event": "31328-02",
+      "htmlFile": "31334-event-31328-02-059.htm"
+    },
+    {
+      "npcId": 31334,
+      "hook": "event",
+      "when": "absent",
+      "event": "31328-07",
+      "htmlFile": "31334-event-31328-07-060.htm"
+    },
+    {
+      "npcId": 31334,
+      "hook": "event",
+      "when": "absent",
+      "event": "31328-08",
+      "htmlFile": "31334-event-31328-08-061.htm"
+    },
+    {
+      "npcId": 31334,
+      "hook": "event",
+      "when": "absent",
+      "event": "31328-14",
+      "htmlFile": "31334-event-31328-14-062.htm"
+    },
+    {
+      "npcId": 31334,
+      "hook": "event",
+      "when": "absent",
+      "event": "31328-15",
+      "htmlFile": "31334-event-31328-15-063.htm"
+    },
+    {
+      "npcId": 31334,
+      "hook": "event",
+      "when": "absent",
+      "event": "31328-16",
+      "htmlFile": "31334-event-31328-16-064.htm"
+    },
+    {
+      "npcId": 31334,
+      "hook": "event",
+      "when": "absent",
+      "event": "31328-17",
+      "htmlFile": "31334-event-31328-17-065.htm"
+    },
+    {
+      "npcId": 31334,
+      "hook": "event",
+      "when": "absent",
+      "event": "31328-18",
+      "htmlFile": "31334-event-31328-18-066.htm"
+    },
+    {
+      "npcId": 31334,
+      "hook": "event",
+      "when": "absent",
+      "event": "31334-12",
+      "htmlFile": "31334-event-31334-12-067.htm"
+    },
+    {
+      "npcId": 31334,
+      "hook": "event",
+      "when": "absent",
+      "event": "31334-02",
+      "minLevel": 63,
+      "htmlFile": "31334-event-31334-02-068.htm"
+    },
+    {
+      "npcId": 31334,
+      "hook": "event",
+      "when": "absent",
+      "event": "31334-04",
+      "ops": [
+        {
+          "op": "create"
+        },
+        {
+          "op": "start"
+        },
+        {
+          "op": "set_cond",
+          "cond": 1
+        }
+      ],
+      "htmlFile": "31334-event-31334-04-069.htm"
+    },
+    {
+      "npcId": 31334,
+      "hook": "event",
+      "when": "absent",
+      "event": "31334-08",
+      "ops": [
+        {
+          "op": "set_cond",
+          "cond": 4
+        }
+      ],
+      "htmlFile": "31334-event-31334-08-071.htm"
+    },
+    {
+      "npcId": 31334,
+      "hook": "event",
+      "when": "absent",
+      "event": "31334-13",
+      "ops": [
+        {
+          "op": "set_cond",
+          "cond": 7
+        }
+      ],
+      "htmlFile": "31334-event-31334-13-072.htm"
+    },
+    {
+      "npcId": 31334,
+      "hook": "event",
+      "when": "absent",
+      "event": "31528-04",
+      "htmlFile": "31334-event-31528-04-074.htm"
+    },
+    {
+      "npcId": 31334,
+      "hook": "event",
+      "when": "absent",
+      "event": "31528-08",
+      "ops": [
+        {
+          "op": "set_cond",
+          "cond": 8
+        }
+      ],
+      "htmlFile": "31334-event-31528-08-075.htm"
+    },
+    {
+      "npcId": 31334,
+      "hook": "event",
+      "when": "absent",
+      "event": "31328-03",
+      "htmlFile": "31334-event-31328-03-076.htm"
+    },
+    {
+      "npcId": 31334,
+      "hook": "event",
+      "when": "absent",
+      "event": "31328-09",
+      "ops": [
+        {
+          "op": "set_cond",
+          "cond": 9
+        }
+      ],
+      "htmlFile": "31334-event-31328-09-077.htm"
+    },
+    {
+      "npcId": 31334,
+      "hook": "event",
+      "when": "absent",
+      "event": "31328-19",
+      "ops": [
+        {
+          "op": "set_cond",
+          "cond": 16
+        }
+      ],
+      "htmlFile": "31334-event-31328-19-079.htm"
+    },
+    {
+      "npcId": 31334,
+      "hook": "event",
+      "when": "absent",
+      "event": "31527-02",
+      "ops": [
+        {
+          "op": "spawn_npc",
+          "npcId": 27217
+        }
+      ],
+      "htmlFile": "31334-event-31527-02-080.htm"
+    },
+    {
+      "npcId": 31334,
+      "hook": "event",
+      "when": "absent",
+      "event": "31529-08",
+      "htmlFile": "31334-event-31529-08-082.htm"
+    },
+    {
+      "npcId": 31334,
+      "hook": "event",
+      "when": "absent",
+      "event": "31529-11",
+      "ops": [
+        {
+          "op": "set_cond",
+          "cond": 10
+        }
+      ],
+      "htmlFile": "31334-event-31529-11-083.htm"
+    }
+  ]
+}

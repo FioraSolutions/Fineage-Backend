@@ -1,0 +1,211 @@
+{
+  "id": 117,
+  "name": "The Ocean of Distant Stars",
+  "repeatable": false,
+  "abortable": true,
+  "questItems": [],
+  "dialogs": [
+    {
+      "npcId": 32053,
+      "hook": "talk",
+      "when": "absent",
+      "htmlFile": "32053-talk-000.htm"
+    },
+    {
+      "npcId": 32053,
+      "hook": "talk",
+      "when": "absent",
+      "htmlFile": "32053-talk-001.htm"
+    },
+    {
+      "npcId": 32053,
+      "hook": "talk",
+      "when": "absent",
+      "htmlFile": "32053-talk-002.htm"
+    },
+    {
+      "npcId": 32053,
+      "hook": "talk",
+      "when": "absent",
+      "htmlFile": "32053-talk-004.htm"
+    },
+    {
+      "npcId": 32054,
+      "hook": "talk",
+      "when": "absent",
+      "htmlFile": "32054-talk-005.htm"
+    },
+    {
+      "npcId": 32055,
+      "hook": "talk",
+      "when": "absent",
+      "htmlFile": "32055-talk-006.htm"
+    },
+    {
+      "npcId": 32055,
+      "hook": "talk",
+      "when": "absent",
+      "htmlFile": "32055-talk-007.htm"
+    },
+    {
+      "npcId": 32055,
+      "hook": "talk",
+      "when": "absent",
+      "htmlFile": "32055-talk-008.htm"
+    },
+    {
+      "npcId": 32055,
+      "hook": "talk",
+      "when": "absent",
+      "htmlFile": "32055-talk-009.htm"
+    },
+    {
+      "npcId": 32076,
+      "hook": "talk",
+      "when": "absent",
+      "htmlFile": "32076-talk-010.htm"
+    },
+    {
+      "npcId": 32076,
+      "hook": "talk",
+      "when": "absent",
+      "htmlFile": "32076-talk-011.htm"
+    },
+    {
+      "npcId": 32052,
+      "hook": "talk",
+      "when": "absent",
+      "htmlFile": "32052-talk-012.htm"
+    },
+    {
+      "npcId": 32052,
+      "hook": "talk",
+      "when": "absent",
+      "htmlFile": "32052-talk-013.htm"
+    },
+    {
+      "npcId": 32052,
+      "hook": "talk",
+      "when": "absent",
+      "htmlFile": "32052-talk-014.htm"
+    },
+    {
+      "npcId": 32052,
+      "hook": "talk",
+      "when": "absent",
+      "htmlFile": "32052-talk-015.htm"
+    },
+    {
+      "npcId": 32053,
+      "hook": "event",
+      "when": "absent",
+      "event": "32053-02",
+      "ops": [
+        {
+          "op": "create"
+        },
+        {
+          "op": "start"
+        },
+        {
+          "op": "set_cond",
+          "cond": 1
+        }
+      ],
+      "htmlFile": "32053-event-32053-02-016.htm"
+    },
+    {
+      "npcId": 32053,
+      "hook": "event",
+      "when": "absent",
+      "event": "32053-06",
+      "ops": [
+        {
+          "op": "set_cond",
+          "cond": 4
+        }
+      ],
+      "htmlFile": "32053-event-32053-06-017.htm"
+    },
+    {
+      "npcId": 32053,
+      "hook": "event",
+      "when": "absent",
+      "event": "32054-02",
+      "htmlFile": "32053-event-32054-02-019.htm"
+    },
+    {
+      "npcId": 32053,
+      "hook": "event",
+      "when": "absent",
+      "event": "32054-03",
+      "ops": [
+        {
+          "op": "give_adena",
+          "count": 17647
+        },
+        {
+          "op": "give_exp_sp",
+          "exp": 107387,
+          "sp": 7369
+        },
+        {
+          "op": "complete"
+        }
+      ],
+      "htmlFile": "32053-event-32054-03-020.htm"
+    },
+    {
+      "npcId": 32053,
+      "hook": "event",
+      "when": "absent",
+      "event": "32055-02",
+      "ops": [
+        {
+          "op": "set_cond",
+          "cond": 2
+        }
+      ],
+      "htmlFile": "32053-event-32055-02-021.htm"
+    },
+    {
+      "npcId": 32053,
+      "hook": "event",
+      "when": "absent",
+      "event": "32076-02",
+      "ops": [
+        {
+          "op": "set_cond",
+          "cond": 5
+        }
+      ],
+      "htmlFile": "32053-event-32076-02-023.htm"
+    },
+    {
+      "npcId": 32053,
+      "hook": "event",
+      "when": "absent",
+      "event": "32052-02",
+      "ops": [
+        {
+          "op": "set_cond",
+          "cond": 3
+        }
+      ],
+      "htmlFile": "32053-event-32052-02-024.htm"
+    },
+    {
+      "npcId": 32053,
+      "hook": "event",
+      "when": "absent",
+      "event": "32052-05",
+      "ops": [
+        {
+          "op": "set_cond",
+          "cond": 7
+        }
+      ],
+      "htmlFile": "32053-event-32052-05-025.htm"
+    }
+  ]
+}

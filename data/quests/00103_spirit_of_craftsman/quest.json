@@ -1,0 +1,72 @@
+{
+  "id": 103,
+  "name": "Spirit of Craftsman",
+  "repeatable": false,
+  "abortable": true,
+  "questItems": [],
+  "dialogs": [
+    {
+      "npcId": 30307,
+      "hook": "talk",
+      "when": "absent",
+      "htmlFile": "30307-talk-000.htm"
+    },
+    {
+      "npcId": 30307,
+      "hook": "talk",
+      "when": "absent",
+      "maxLevel": 9,
+      "htmlFile": "30307-talk-001.htm"
+    },
+    {
+      "npcId": 30307,
+      "hook": "talk",
+      "when": "absent",
+      "htmlFile": "30307-talk-002.htm"
+    },
+    {
+      "npcId": 30132,
+      "hook": "talk",
+      "when": "absent",
+      "htmlFile": "30132-talk-005.htm"
+    },
+    {
+      "npcId": 30144,
+      "hook": "talk",
+      "when": "absent",
+      "ops": [
+        {
+          "op": "set_cond",
+          "cond": 5
+        }
+      ],
+      "htmlFile": "30144-talk-011.htm"
+    },
+    {
+      "npcId": 30307,
+      "hook": "event",
+      "when": "absent",
+      "event": "30307-04",
+      "htmlFile": "30307-event-30307-04-014.htm"
+    },
+    {
+      "npcId": 30307,
+      "hook": "event",
+      "when": "absent",
+      "event": "30307-05",
+      "ops": [
+        {
+          "op": "create"
+        },
+        {
+          "op": "start"
+        },
+        {
+          "op": "set_cond",
+          "cond": 1
+        }
+      ],
+      "htmlFile": "30307-event-30307-05-015.htm"
+    }
+  ]
+}

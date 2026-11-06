@@ -1,0 +1,80 @@
+{
+  "id": 338,
+  "name": "Alligator Hunter",
+  "repeatable": true,
+  "abortable": true,
+  "questItems": [],
+  "dialogs": [
+    {
+      "npcId": 30892,
+      "hook": "talk",
+      "when": "absent",
+      "htmlFile": "30892-talk-000.htm"
+    },
+    {
+      "npcId": 30892,
+      "hook": "talk",
+      "when": "started",
+      "htmlFile": "30892-talk-001.htm"
+    },
+    {
+      "npcId": 30892,
+      "hook": "event",
+      "when": "absent",
+      "event": "30892-03",
+      "ops": [
+        {
+          "op": "create"
+        },
+        {
+          "op": "start"
+        },
+        {
+          "op": "set_cond",
+          "cond": 1
+        }
+      ],
+      "htmlFile": "30892-event-30892-03-002.htm"
+    },
+    {
+      "npcId": 30892,
+      "hook": "event",
+      "when": "absent",
+      "event": "30892-06",
+      "htmlFile": "30892-event-30892-06-003.htm"
+    },
+    {
+      "npcId": 30892,
+      "hook": "event",
+      "when": "absent",
+      "event": "30892-10",
+      "ops": [
+        {
+          "op": "complete"
+        }
+      ],
+      "htmlFile": "30892-event-30892-10-004.htm"
+    },
+    {
+      "npcId": 30892,
+      "hook": "event",
+      "when": "absent",
+      "event": "30892-07",
+      "htmlFile": "30892-event-30892-07-005.htm"
+    },
+    {
+      "npcId": 30892,
+      "hook": "event",
+      "when": "absent",
+      "event": "30892-08",
+      "htmlFile": "30892-event-30892-08-006.htm"
+    },
+    {
+      "npcId": 30892,
+      "hook": "event",
+      "when": "absent",
+      "event": "30892-09",
+      "htmlFile": "30892-event-30892-09-007.htm"
+    }
+  ]
+}

@@ -1,0 +1,121 @@
+{
+  "id": 412,
+  "name": "Path Of The Dark Wizard",
+  "repeatable": false,
+  "abortable": true,
+  "questItems": [],
+  "dialogs": [
+    {
+      "npcId": 30421,
+      "hook": "talk",
+      "when": "absent",
+      "htmlFile": "30421-talk-004.htm"
+    },
+    {
+      "npcId": 30421,
+      "hook": "talk",
+      "when": "absent",
+      "htmlFile": "30421-talk-005.htm"
+    },
+    {
+      "npcId": 30421,
+      "hook": "talk",
+      "when": "absent",
+      "htmlFile": "30421-talk-006.htm"
+    },
+    {
+      "npcId": 30421,
+      "hook": "talk",
+      "when": "absent",
+      "htmlFile": "30421-talk-007.htm"
+    },
+    {
+      "npcId": 30415,
+      "hook": "talk",
+      "when": "absent",
+      "htmlFile": "30415-talk-009.htm"
+    },
+    {
+      "npcId": 30415,
+      "hook": "talk",
+      "when": "absent",
+      "htmlFile": "30415-talk-010.htm"
+    },
+    {
+      "npcId": 30418,
+      "hook": "talk",
+      "when": "absent",
+      "htmlFile": "30418-talk-013.htm"
+    },
+    {
+      "npcId": 30418,
+      "hook": "talk",
+      "when": "absent",
+      "htmlFile": "30418-talk-014.htm"
+    },
+    {
+      "npcId": 30419,
+      "hook": "talk",
+      "when": "absent",
+      "htmlFile": "30419-talk-016.htm"
+    },
+    {
+      "npcId": 30419,
+      "hook": "talk",
+      "when": "absent",
+      "htmlFile": "30419-talk-018.htm"
+    },
+    {
+      "npcId": 30421,
+      "hook": "event",
+      "when": "absent",
+      "event": "ACCEPT",
+      "minLevel": 18,
+      "hasItem": 1261,
+      "htmlFile": "30421-event-ACCEPT-020.htm"
+    },
+    {
+      "npcId": 30421,
+      "hook": "event",
+      "when": "absent",
+      "event": "ACCEPT",
+      "hasItem": 1261,
+      "htmlFile": "30421-event-ACCEPT-021.htm"
+    },
+    {
+      "npcId": 30421,
+      "hook": "event",
+      "when": "absent",
+      "event": "ACCEPT",
+      "htmlFile": "30421-event-ACCEPT-022.htm"
+    },
+    {
+      "npcId": 30421,
+      "hook": "event",
+      "when": "absent",
+      "event": "30421-08",
+      "htmlFile": "30421-event-30421-08-027.htm"
+    },
+    {
+      "npcId": 30421,
+      "hook": "event",
+      "when": "absent",
+      "event": "30415-02",
+      "htmlFile": "30421-event-30415-02-028.htm"
+    },
+    {
+      "npcId": 30421,
+      "hook": "event",
+      "when": "absent",
+      "event": "30415-03",
+      "htmlFile": "30421-event-30415-03-029.htm"
+    },
+    {
+      "npcId": 30421,
+      "hook": "event",
+      "when": "absent",
+      "event": "30418-02",
+      "htmlFile": "30421-event-30418-02-030.htm"
+    }
+  ]
+}

@@ -1,0 +1,313 @@
+{
+  "id": 336,
+  "name": "Coin Of Magic",
+  "repeatable": true,
+  "abortable": true,
+  "questItems": [],
+  "dialogs": [
+    {
+      "npcId": 30702,
+      "hook": "talk",
+      "when": "absent",
+      "htmlFile": "30702-talk-001.htm"
+    },
+    {
+      "npcId": 30702,
+      "hook": "talk",
+      "when": "absent",
+      "htmlFile": "30702-talk-002.htm"
+    },
+    {
+      "npcId": 30232,
+      "hook": "talk",
+      "when": "absent",
+      "htmlFile": "30232-talk-003.htm"
+    },
+    {
+      "npcId": 30232,
+      "hook": "event",
+      "when": "absent",
+      "event": "1",
+      "htmlFile": "30232-event-1-008.htm"
+    },
+    {
+      "npcId": 30232,
+      "hook": "event",
+      "when": "absent",
+      "event": "2",
+      "ops": [
+        {
+          "op": "set_cond",
+          "cond": 2
+        }
+      ],
+      "htmlFile": "30232-event-2-009.htm"
+    },
+    {
+      "npcId": 30232,
+      "hook": "event",
+      "when": "absent",
+      "event": "3",
+      "ops": [
+        {
+          "op": "set_cond",
+          "cond": 2
+        }
+      ],
+      "htmlFile": "30232-event-3-010.htm"
+    },
+    {
+      "npcId": 30232,
+      "hook": "event",
+      "when": "absent",
+      "event": "4",
+      "ops": [
+        {
+          "op": "set_cond",
+          "cond": 7
+        }
+      ],
+      "htmlFile": "30232-event-4-011.htm"
+    },
+    {
+      "npcId": 30232,
+      "hook": "event",
+      "when": "absent",
+      "event": "1",
+      "htmlFile": "30232-event-1-012.htm"
+    },
+    {
+      "npcId": 30232,
+      "hook": "event",
+      "when": "absent",
+      "event": "2",
+      "htmlFile": "30232-event-2-013.htm"
+    },
+    {
+      "npcId": 30232,
+      "hook": "event",
+      "when": "absent",
+      "event": "3",
+      "htmlFile": "30232-event-3-014.htm"
+    },
+    {
+      "npcId": 30232,
+      "hook": "event",
+      "when": "absent",
+      "event": "4",
+      "htmlFile": "30232-event-4-015.htm"
+    },
+    {
+      "npcId": 30232,
+      "hook": "event",
+      "when": "absent",
+      "event": "5",
+      "ops": [
+        {
+          "op": "set_cond",
+          "cond": 9
+        }
+      ],
+      "htmlFile": "30232-event-5-016.htm"
+    },
+    {
+      "npcId": 30232,
+      "hook": "event",
+      "when": "absent",
+      "event": "5",
+      "ops": [
+        {
+          "op": "set_cond",
+          "cond": 9
+        }
+      ],
+      "htmlFile": "30232-event-5-017.htm"
+    },
+    {
+      "npcId": 30232,
+      "hook": "event",
+      "when": "absent",
+      "event": "5",
+      "ops": [
+        {
+          "op": "set_cond",
+          "cond": 11
+        }
+      ],
+      "htmlFile": "30232-event-5-018.htm"
+    },
+    {
+      "npcId": 30232,
+      "hook": "event",
+      "when": "absent",
+      "event": "5",
+      "ops": [
+        {
+          "op": "set_cond",
+          "cond": 11
+        }
+      ],
+      "htmlFile": "30232-event-5-019.htm"
+    },
+    {
+      "npcId": 30232,
+      "hook": "event",
+      "when": "absent",
+      "event": "6",
+      "htmlFile": "30232-event-6-021.htm"
+    },
+    {
+      "npcId": 30232,
+      "hook": "event",
+      "when": "absent",
+      "event": "7",
+      "htmlFile": "30232-event-7-022.htm"
+    },
+    {
+      "npcId": 30232,
+      "hook": "event",
+      "when": "absent",
+      "event": "8",
+      "htmlFile": "30232-event-8-023.htm"
+    },
+    {
+      "npcId": 30232,
+      "hook": "event",
+      "when": "absent",
+      "event": "9",
+      "htmlFile": "30232-event-9-024.htm"
+    },
+    {
+      "npcId": 30232,
+      "hook": "event",
+      "when": "absent",
+      "event": "10",
+      "ops": [
+        {
+          "op": "set_cond",
+          "cond": 6
+        }
+      ],
+      "htmlFile": "30232-event-10-025.htm"
+    },
+    {
+      "npcId": 30232,
+      "hook": "event",
+      "when": "absent",
+      "event": "11",
+      "ops": [
+        {
+          "op": "set_cond",
+          "cond": 5
+        }
+      ],
+      "htmlFile": "30232-event-11-026.htm"
+    },
+    {
+      "npcId": 30232,
+      "hook": "event",
+      "when": "absent",
+      "event": "20",
+      "htmlFile": "30232-event-20-027.htm"
+    },
+    {
+      "npcId": 30232,
+      "hook": "event",
+      "when": "absent",
+      "event": "21",
+      "htmlFile": "30232-event-21-028.htm"
+    },
+    {
+      "npcId": 30232,
+      "hook": "event",
+      "when": "absent",
+      "event": "22",
+      "htmlFile": "30232-event-22-029.htm"
+    },
+    {
+      "npcId": 30232,
+      "hook": "event",
+      "when": "absent",
+      "event": "23",
+      "htmlFile": "30232-event-23-030.htm"
+    },
+    {
+      "npcId": 30232,
+      "hook": "event",
+      "when": "absent",
+      "event": "25",
+      "htmlFile": "30232-event-25-032.htm"
+    },
+    {
+      "npcId": 30232,
+      "hook": "event",
+      "when": "absent",
+      "event": "27",
+      "htmlFile": "30232-event-27-034.htm"
+    },
+    {
+      "npcId": 30232,
+      "hook": "event",
+      "when": "absent",
+      "event": "28",
+      "htmlFile": "30232-event-28-035.htm"
+    },
+    {
+      "npcId": 30232,
+      "hook": "event",
+      "when": "absent",
+      "event": "29",
+      "htmlFile": "30232-event-29-036.htm"
+    },
+    {
+      "npcId": 30232,
+      "hook": "event",
+      "when": "absent",
+      "event": "30",
+      "htmlFile": "30232-event-30-037.htm"
+    },
+    {
+      "npcId": 30232,
+      "hook": "event",
+      "when": "absent",
+      "event": "31",
+      "htmlFile": "30232-event-31-038.htm"
+    },
+    {
+      "npcId": 30232,
+      "hook": "event",
+      "when": "absent",
+      "event": "100",
+      "ops": [
+        {
+          "op": "complete"
+        }
+      ],
+      "htmlFile": "30232-event-100-039.htm"
+    },
+    {
+      "npcId": 20644,
+      "hook": "kill",
+      "when": "started",
+      "ops": [
+        {
+          "op": "set_cond",
+          "cond": 3
+        }
+      ],
+      "html": ""
+    },
+    {
+      "npcId": 20645,
+      "hook": "kill",
+      "when": "started",
+      "ops": [
+        {
+          "op": "set_cond",
+          "cond": 3
+        }
+      ],
+      "html": ""
+    }
+  ]
+}

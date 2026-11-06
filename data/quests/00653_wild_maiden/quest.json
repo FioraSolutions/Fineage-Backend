@@ -1,0 +1,42 @@
+{
+  "id": 653,
+  "name": "Wild Maiden",
+  "repeatable": true,
+  "abortable": true,
+  "questItems": [],
+  "dialogs": [
+    {
+      "npcId": 32013,
+      "hook": "talk",
+      "when": "absent",
+      "htmlFile": "32013-talk-000.htm"
+    },
+    {
+      "npcId": 32013,
+      "hook": "talk",
+      "when": "absent",
+      "htmlFile": "32013-talk-001.htm"
+    },
+    {
+      "npcId": 32013,
+      "hook": "talk",
+      "when": "started",
+      "htmlFile": "32013-talk-002.htm"
+    },
+    {
+      "npcId": 30181,
+      "hook": "talk",
+      "when": "absent",
+      "ops": [
+        {
+          "op": "give_adena",
+          "count": 2553
+        },
+        {
+          "op": "complete"
+        }
+      ],
+      "htmlFile": "30181-talk-003.htm"
+    }
+  ]
+}

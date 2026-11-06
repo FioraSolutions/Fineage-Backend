@@ -1,0 +1,102 @@
+{
+  "id": 625,
+  "name": "The Finest Ingredients Part - 2",
+  "repeatable": true,
+  "abortable": true,
+  "questItems": [],
+  "dialogs": [
+    {
+      "npcId": 31521,
+      "hook": "talk",
+      "when": "absent",
+      "htmlFile": "31521-event-31521-04-006.htm"
+    },
+    {
+      "npcId": 31521,
+      "hook": "talk",
+      "when": "started",
+      "cond": 1,
+      "htmlFile": "31521-talk-c1-000.htm"
+    },
+    {
+      "npcId": 31521,
+      "hook": "talk",
+      "when": "started",
+      "cond": 2,
+      "htmlFile": "31521-talk-c2-001.htm"
+    },
+    {
+      "npcId": 31521,
+      "hook": "talk",
+      "when": "started",
+      "cond": 3,
+      "htmlFile": "31521-talk-c3-002.htm"
+    },
+    {
+      "npcId": 31542,
+      "hook": "talk",
+      "when": "started",
+      "cond": 1,
+      "htmlFile": "31542-talk-c1-003.htm"
+    },
+    {
+      "npcId": 31542,
+      "hook": "talk",
+      "when": "started",
+      "cond": 2,
+      "ops": [
+        {
+          "op": "spawn_npc",
+          "npcId": 25296
+        }
+      ],
+      "htmlFile": "31542-talk-c2-004.htm"
+    },
+    {
+      "npcId": 31542,
+      "hook": "talk",
+      "when": "started",
+      "cond": 3,
+      "htmlFile": "31542-talk-c3-005.htm"
+    },
+    {
+      "npcId": 31521,
+      "hook": "event",
+      "when": "absent",
+      "event": "31521-04",
+      "ops": [
+        {
+          "op": "create"
+        },
+        {
+          "op": "start"
+        },
+        {
+          "op": "set_cond",
+          "cond": 1
+        }
+      ],
+      "htmlFile": "31521-event-31521-04-006.htm"
+    },
+    {
+      "npcId": 31521,
+      "hook": "event",
+      "when": "absent",
+      "event": "31521-08",
+      "htmlFile": "31521-event-31521-08-007.htm"
+    },
+    {
+      "npcId": 31521,
+      "hook": "event",
+      "when": "absent",
+      "event": "31542-02",
+      "ops": [
+        {
+          "op": "spawn_npc",
+          "npcId": 25296
+        }
+      ],
+      "htmlFile": "31521-event-31542-02-008.htm"
+    }
+  ]
+}

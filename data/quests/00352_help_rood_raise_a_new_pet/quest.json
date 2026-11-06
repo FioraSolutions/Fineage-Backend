@@ -1,0 +1,92 @@
+{
+  "id": 352,
+  "name": "Help Rood Raise A New Pet!",
+  "repeatable": true,
+  "abortable": true,
+  "questItems": [],
+  "dialogs": [
+    {
+      "npcId": 31067,
+      "hook": "talk",
+      "when": "absent",
+      "htmlFile": "31067-talk-000.htm"
+    },
+    {
+      "npcId": 31067,
+      "hook": "talk",
+      "when": "absent",
+      "htmlFile": "31067-talk-001.htm"
+    },
+    {
+      "npcId": 31067,
+      "hook": "talk",
+      "when": "absent",
+      "htmlFile": "31067-talk-002.htm"
+    },
+    {
+      "npcId": 31067,
+      "hook": "talk",
+      "when": "absent",
+      "htmlFile": "31067-talk-003.htm"
+    },
+    {
+      "npcId": 31067,
+      "hook": "event",
+      "when": "absent",
+      "event": "31067-02",
+      "htmlFile": "31067-event-31067-02-004.htm"
+    },
+    {
+      "npcId": 31067,
+      "hook": "event",
+      "when": "absent",
+      "event": "31067-03",
+      "htmlFile": "31067-event-31067-03-005.htm"
+    },
+    {
+      "npcId": 31067,
+      "hook": "event",
+      "when": "absent",
+      "event": "31067-07",
+      "htmlFile": "31067-event-31067-07-006.htm"
+    },
+    {
+      "npcId": 31067,
+      "hook": "event",
+      "when": "absent",
+      "event": "31067-10",
+      "htmlFile": "31067-event-31067-10-007.htm"
+    },
+    {
+      "npcId": 31067,
+      "hook": "event",
+      "when": "absent",
+      "event": "31067-04",
+      "ops": [
+        {
+          "op": "create"
+        },
+        {
+          "op": "start"
+        },
+        {
+          "op": "set_cond",
+          "cond": 1
+        }
+      ],
+      "htmlFile": "31067-event-31067-04-008.htm"
+    },
+    {
+      "npcId": 31067,
+      "hook": "event",
+      "when": "absent",
+      "event": "31067-08",
+      "ops": [
+        {
+          "op": "complete"
+        }
+      ],
+      "htmlFile": "31067-event-31067-08-009.htm"
+    }
+  ]
+}

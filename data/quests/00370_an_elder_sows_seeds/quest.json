@@ -1,0 +1,94 @@
+{
+  "id": 370,
+  "name": "An Elder Sows Seeds",
+  "repeatable": true,
+  "abortable": true,
+  "questItems": [],
+  "dialogs": [
+    {
+      "npcId": 30612,
+      "hook": "talk",
+      "when": "absent",
+      "htmlFile": "30612-talk-000.htm"
+    },
+    {
+      "npcId": 30612,
+      "hook": "talk",
+      "when": "absent",
+      "htmlFile": "30612-talk-001.htm"
+    },
+    {
+      "npcId": 30612,
+      "hook": "event",
+      "when": "absent",
+      "event": "30612-02",
+      "htmlFile": "30612-event-30612-02-002.htm"
+    },
+    {
+      "npcId": 30612,
+      "hook": "event",
+      "when": "absent",
+      "event": "30612-03",
+      "htmlFile": "30612-event-30612-03-003.htm"
+    },
+    {
+      "npcId": 30612,
+      "hook": "event",
+      "when": "absent",
+      "event": "30612-06",
+      "htmlFile": "30612-event-30612-06-004.htm"
+    },
+    {
+      "npcId": 30612,
+      "hook": "event",
+      "when": "absent",
+      "event": "30612-07",
+      "htmlFile": "30612-event-30612-07-005.htm"
+    },
+    {
+      "npcId": 30612,
+      "hook": "event",
+      "when": "absent",
+      "event": "30612-09",
+      "htmlFile": "30612-event-30612-09-006.htm"
+    },
+    {
+      "npcId": 30612,
+      "hook": "event",
+      "when": "absent",
+      "event": "30612-04",
+      "ops": [
+        {
+          "op": "create"
+        },
+        {
+          "op": "start"
+        },
+        {
+          "op": "set_cond",
+          "cond": 1
+        }
+      ],
+      "htmlFile": "30612-event-30612-04-007.htm"
+    },
+    {
+      "npcId": 30612,
+      "hook": "event",
+      "when": "absent",
+      "event": "REWARD",
+      "htmlFile": "30612-event-REWARD-008.htm"
+    },
+    {
+      "npcId": 30612,
+      "hook": "event",
+      "when": "absent",
+      "event": "30612-10",
+      "ops": [
+        {
+          "op": "complete"
+        }
+      ],
+      "htmlFile": "30612-event-30612-10-009.htm"
+    }
+  ]
+}

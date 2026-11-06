@@ -1,0 +1,28 @@
+{
+  "id": 510,
+  "name": "AClansPrestige",
+  "repeatable": true,
+  "abortable": true,
+  "questItems": [],
+  "dialogs": [
+    {
+      "npcId": 31331,
+      "hook": "talk",
+      "when": "absent",
+      "htmlFile": "31331-talk-000.htm"
+    },
+    {
+      "npcId": 31331,
+      "hook": "talk",
+      "when": "absent",
+      "maxLevel": 4,
+      "htmlFile": "31331-talk-001.htm"
+    },
+    {
+      "npcId": 31331,
+      "hook": "talk",
+      "when": "started",
+      "htmlFile": "31331-talk-002.htm"
+    }
+  ]
+}
