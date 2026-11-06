@@ -1,0 +1,641 @@
+{
+  "reference": "L2J Mobius CT0 Interlude: stats/items handler ItemSkills + item_skill, resolved against stats/skills (including skills/custom). Effects are flattened to what the zone executes: buff, healOverTime, heal, manaHeal, escapeTown, teleport, dispel, restoration, recovery. Mobius UseItem consumes one item on success.",
+  "items": [
+    {
+      "itemId": 728,
+      "name": "Mana Potion",
+      "etcType": "POTION",
+      "reuseDelayMs": 0,
+      "effects": [
+        {
+          "kind": "manaHeal",
+          "skillId": 10001,
+          "skillLevel": 1,
+          "name": "Mana Potion",
+          "power": 1000
+        }
+      ]
+    },
+    {
+      "itemId": 734,
+      "name": "Haste Potion",
+      "etcType": "POTION",
+      "reuseDelayMs": 500,
+      "effects": [
+        {
+          "kind": "buff",
+          "skillId": 2011,
+          "skillLevel": 1,
+          "name": "Haste Potion",
+          "abnormalLevel": 1,
+          "durationSeconds": 1200
+        }
+      ]
+    },
+    {
+      "itemId": 735,
+      "name": "Alacrity Potion",
+      "etcType": "POTION",
+      "reuseDelayMs": 500,
+      "effects": [
+        {
+          "kind": "buff",
+          "skillId": 2012,
+          "skillLevel": 1,
+          "name": "Potion of Alacrity",
+          "abnormalLevel": 1,
+          "durationSeconds": 1200
+        }
+      ]
+    },
+    {
+      "itemId": 736,
+      "name": "Scroll of Escape",
+      "etcType": "SCROLL",
+      "reuseDelayMs": 0,
+      "effects": [
+        {
+          "kind": "escapeTown",
+          "skillId": 2013,
+          "skillLevel": 1,
+          "name": "Scroll of Escape"
+        }
+      ]
+    },
+    {
+      "itemId": 1060,
+      "name": "Lesser Healing Potion",
+      "etcType": "POTION",
+      "reuseDelayMs": 10000,
+      "effects": [
+        {
+          "kind": "healOverTime",
+          "skillId": 2031,
+          "skillLevel": 1,
+          "name": "Lesser Healing Potion",
+          "power": 8,
+          "ticks": 3,
+          "durationSeconds": 15
+        }
+      ]
+    },
+    {
+      "itemId": 1538,
+      "name": "Blessed Scroll of Escape",
+      "etcType": "SCROLL",
+      "reuseDelayMs": 0,
+      "effects": [
+        {
+          "kind": "escapeTown",
+          "skillId": 2036,
+          "skillLevel": 1,
+          "name": "Blessed Scroll of Escape"
+        }
+      ]
+    },
+    {
+      "itemId": 1539,
+      "name": "Greater Healing Potion",
+      "etcType": "POTION",
+      "reuseDelayMs": 10000,
+      "effects": [
+        {
+          "kind": "healOverTime",
+          "skillId": 2037,
+          "skillLevel": 1,
+          "name": "Greater Healing Potion",
+          "power": 50,
+          "ticks": 3,
+          "durationSeconds": 15
+        }
+      ]
+    },
+    {
+      "itemId": 1831,
+      "name": "Antidote",
+      "etcType": "POTION",
+      "reuseDelayMs": 500,
+      "effects": [
+        {
+          "kind": "dispel",
+          "skillId": 2042,
+          "skillLevel": 1,
+          "name": "Antidote",
+          "slot": "POISON",
+          "count": 3
+        }
+      ]
+    },
+    {
+      "itemId": 1833,
+      "name": "Bandage",
+      "etcType": "POTION",
+      "reuseDelayMs": 500,
+      "effects": [
+        {
+          "kind": "dispel",
+          "skillId": 2044,
+          "skillLevel": 1,
+          "name": "Bandage",
+          "slot": "BLEEDING",
+          "count": 3
+        }
+      ]
+    },
+    {
+      "itemId": 5134,
+      "name": "Compressed Package of Soulshots: No Grade",
+      "etcType": null,
+      "reuseDelayMs": 0,
+      "effects": [
+        {
+          "kind": "restoration",
+          "skillId": 2078,
+          "skillLevel": 1,
+          "name": "Compressed Package of Soulshots: No Grade",
+          "itemId": 1835,
+          "count": 300
+        }
+      ]
+    },
+    {
+      "itemId": 5140,
+      "name": "Compressed Package of Spiritshots: No Grade",
+      "etcType": null,
+      "reuseDelayMs": 0,
+      "effects": [
+        {
+          "kind": "restoration",
+          "skillId": 2084,
+          "skillLevel": 1,
+          "name": "Compressed Package of Spiritshots: No Grade",
+          "itemId": 2509,
+          "count": 300
+        }
+      ]
+    },
+    {
+      "itemId": 5146,
+      "name": "Compressed Package of Blessed Spiritshots: No Grade",
+      "etcType": null,
+      "reuseDelayMs": 0,
+      "effects": [
+        {
+          "kind": "restoration",
+          "skillId": 2090,
+          "skillLevel": 1,
+          "name": "Compressed Package of Blessed Spiritshots: No Grade",
+          "itemId": 3947,
+          "count": 300
+        }
+      ]
+    },
+    {
+      "itemId": 5250,
+      "name": "Greater Compressed Package of Soulshots (No-Grade)",
+      "etcType": null,
+      "reuseDelayMs": 0,
+      "effects": [
+        {
+          "kind": "restoration",
+          "skillId": 2104,
+          "skillLevel": 1,
+          "name": "Greater Compressed Package of Soulshots: No-grade",
+          "itemId": 1835,
+          "count": 1000
+        }
+      ]
+    },
+    {
+      "itemId": 5256,
+      "name": "Greater Compressed Package of Spiritshots (No-Grade)",
+      "etcType": null,
+      "reuseDelayMs": 0,
+      "effects": [
+        {
+          "kind": "restoration",
+          "skillId": 2110,
+          "skillLevel": 1,
+          "name": "Greater Compressed Package of Spiritshots: No-grade",
+          "itemId": 2509,
+          "count": 1000
+        }
+      ]
+    },
+    {
+      "itemId": 5262,
+      "name": "Greater Compressed Package of Blessed Spiritshots (No-Grade)",
+      "etcType": null,
+      "reuseDelayMs": 0,
+      "effects": [
+        {
+          "kind": "restoration",
+          "skillId": 2116,
+          "skillLevel": 1,
+          "name": "Greater Compressed Package of Blessed Spiritshots: No-grade",
+          "itemId": 3947,
+          "count": 1000
+        }
+      ]
+    },
+    {
+      "itemId": 6035,
+      "name": "Magic Haste Potion",
+      "etcType": "POTION",
+      "reuseDelayMs": 500,
+      "effects": [
+        {
+          "kind": "buff",
+          "skillId": 2169,
+          "skillLevel": 1,
+          "name": "Magic Haste Potion",
+          "abnormalLevel": 2,
+          "durationSeconds": 1200
+        }
+      ]
+    },
+    {
+      "itemId": 6037,
+      "name": "Waking Scroll",
+      "etcType": "SCROLL",
+      "reuseDelayMs": 0,
+      "effects": [
+        {
+          "kind": "dispel",
+          "skillId": 2170,
+          "skillLevel": 1,
+          "name": "Scroll: Cancel Sleep",
+          "slot": "SLEEP",
+          "count": 1
+        }
+      ]
+    },
+    {
+      "itemId": 7117,
+      "name": "Scroll of Escape: Talking Island Village",
+      "etcType": null,
+      "reuseDelayMs": 0,
+      "effects": [
+        {
+          "kind": "teleport",
+          "skillId": 2213,
+          "skillLevel": 1,
+          "name": "Escape - to X Town",
+          "x": -84200,
+          "y": 244566,
+          "z": -3728
+        }
+      ]
+    },
+    {
+      "itemId": 7118,
+      "name": "Scroll of Escape: Elven Village",
+      "etcType": null,
+      "reuseDelayMs": 0,
+      "effects": [
+        {
+          "kind": "teleport",
+          "skillId": 2213,
+          "skillLevel": 2,
+          "name": "Escape - to X Town",
+          "x": 46915,
+          "y": 51441,
+          "z": -2976
+        }
+      ]
+    },
+    {
+      "itemId": 7119,
+      "name": "Scroll of Escape: Dark Elven Village",
+      "etcType": null,
+      "reuseDelayMs": 0,
+      "effects": [
+        {
+          "kind": "teleport",
+          "skillId": 2213,
+          "skillLevel": 3,
+          "name": "Escape - to X Town",
+          "x": 9723,
+          "y": 15576,
+          "z": -4568
+        }
+      ]
+    },
+    {
+      "itemId": 7120,
+      "name": "Scroll of Escape: Orc Village",
+      "etcType": null,
+      "reuseDelayMs": 0,
+      "effects": [
+        {
+          "kind": "teleport",
+          "skillId": 2213,
+          "skillLevel": 4,
+          "name": "Escape - to X Town",
+          "x": -45208,
+          "y": -112502,
+          "z": -240
+        }
+      ]
+    },
+    {
+      "itemId": 7121,
+      "name": "Scroll of Escape: Dwarven Village",
+      "etcType": null,
+      "reuseDelayMs": 0,
+      "effects": [
+        {
+          "kind": "teleport",
+          "skillId": 2213,
+          "skillLevel": 5,
+          "name": "Escape - to X Town",
+          "x": 115158,
+          "y": -178170,
+          "z": -880
+        }
+      ]
+    },
+    {
+      "itemId": 7122,
+      "name": "Scroll of Escape: Gludin Village",
+      "etcType": null,
+      "reuseDelayMs": 0,
+      "effects": [
+        {
+          "kind": "teleport",
+          "skillId": 2213,
+          "skillLevel": 6,
+          "name": "Escape - to X Town",
+          "x": -80831,
+          "y": 149808,
+          "z": -3040
+        }
+      ]
+    },
+    {
+      "itemId": 7123,
+      "name": "Scroll of Escape: Town of Gludio",
+      "etcType": null,
+      "reuseDelayMs": 0,
+      "effects": [
+        {
+          "kind": "teleport",
+          "skillId": 2213,
+          "skillLevel": 7,
+          "name": "Escape - to X Town",
+          "x": -12728,
+          "y": 122726,
+          "z": -3112
+        }
+      ]
+    },
+    {
+      "itemId": 7124,
+      "name": "Scroll of Escape: Town of Dion",
+      "etcType": null,
+      "reuseDelayMs": 0,
+      "effects": [
+        {
+          "kind": "teleport",
+          "skillId": 2213,
+          "skillLevel": 8,
+          "name": "Escape - to X Town",
+          "x": 15633,
+          "y": 142962,
+          "z": -2696
+        }
+      ]
+    },
+    {
+      "itemId": 7125,
+      "name": "Scroll of Escape: Floran Village",
+      "etcType": null,
+      "reuseDelayMs": 0,
+      "effects": [
+        {
+          "kind": "teleport",
+          "skillId": 2213,
+          "skillLevel": 9,
+          "name": "Escape - to X Town",
+          "x": 17860,
+          "y": 170191,
+          "z": -3496
+        }
+      ]
+    },
+    {
+      "itemId": 7126,
+      "name": "Scroll of Escape: Town of Giran",
+      "etcType": null,
+      "reuseDelayMs": 0,
+      "effects": [
+        {
+          "kind": "teleport",
+          "skillId": 2213,
+          "skillLevel": 10,
+          "name": "Escape - to X Town",
+          "x": 83378,
+          "y": 147999,
+          "z": -3400
+        }
+      ]
+    },
+    {
+      "itemId": 7127,
+      "name": "Scroll of Escape: Hardin's Academy",
+      "etcType": null,
+      "reuseDelayMs": 0,
+      "effects": [
+        {
+          "kind": "teleport",
+          "skillId": 2213,
+          "skillLevel": 11,
+          "name": "Escape - to X Town",
+          "x": 105760,
+          "y": 113064,
+          "z": -3176
+        }
+      ]
+    },
+    {
+      "itemId": 7128,
+      "name": "Scroll of Escape: Heine",
+      "etcType": null,
+      "reuseDelayMs": 0,
+      "effects": [
+        {
+          "kind": "teleport",
+          "skillId": 2213,
+          "skillLevel": 12,
+          "name": "Escape - to X Town",
+          "x": 111388,
+          "y": 219331,
+          "z": -3544
+        }
+      ]
+    },
+    {
+      "itemId": 7129,
+      "name": "Scroll of Escape: Town of Oren",
+      "etcType": null,
+      "reuseDelayMs": 0,
+      "effects": [
+        {
+          "kind": "teleport",
+          "skillId": 2213,
+          "skillLevel": 13,
+          "name": "Escape - to X Town",
+          "x": 82916,
+          "y": 53210,
+          "z": -1488
+        }
+      ]
+    },
+    {
+      "itemId": 7130,
+      "name": "Scroll of Escape: Ivory Tower",
+      "etcType": null,
+      "reuseDelayMs": 0,
+      "effects": [
+        {
+          "kind": "teleport",
+          "skillId": 2213,
+          "skillLevel": 14,
+          "name": "Escape - to X Town",
+          "x": 85289,
+          "y": 16225,
+          "z": -3672
+        }
+      ]
+    },
+    {
+      "itemId": 7131,
+      "name": "Scroll of Escape: Hunters Village",
+      "etcType": null,
+      "reuseDelayMs": 0,
+      "effects": [
+        {
+          "kind": "teleport",
+          "skillId": 2213,
+          "skillLevel": 15,
+          "name": "Escape - to X Town",
+          "x": 117052,
+          "y": 76884,
+          "z": -2688
+        }
+      ]
+    },
+    {
+      "itemId": 7132,
+      "name": "Scroll of Escape: Town of Aden",
+      "etcType": null,
+      "reuseDelayMs": 0,
+      "effects": [
+        {
+          "kind": "teleport",
+          "skillId": 2213,
+          "skillLevel": 16,
+          "name": "Escape - to X Town",
+          "x": 146818,
+          "y": 25807,
+          "z": -2008
+        }
+      ]
+    },
+    {
+      "itemId": 7133,
+      "name": "Scroll of Escape: Town of Goddard",
+      "etcType": null,
+      "reuseDelayMs": 0,
+      "effects": [
+        {
+          "kind": "teleport",
+          "skillId": 2213,
+          "skillLevel": 17,
+          "name": "Escape - to X Town",
+          "x": 147922,
+          "y": -55316,
+          "z": -2728
+        }
+      ]
+    },
+    {
+      "itemId": 7134,
+      "name": "Scroll of Escape: Rune Township",
+      "etcType": null,
+      "reuseDelayMs": 0,
+      "effects": [
+        {
+          "kind": "teleport",
+          "skillId": 2213,
+          "skillLevel": 18,
+          "name": "Escape - to X Town",
+          "x": 43840,
+          "y": -47779,
+          "z": -792
+        }
+      ]
+    },
+    {
+      "itemId": 7135,
+      "name": "Scroll of Escape: Town of Schuttgart",
+      "etcType": null,
+      "reuseDelayMs": 0,
+      "effects": [
+        {
+          "kind": "teleport",
+          "skillId": 2213,
+          "skillLevel": 19,
+          "name": "Escape - to X Town",
+          "x": 87326,
+          "y": -143370,
+          "z": -1319
+        }
+      ]
+    },
+    {
+      "itemId": 8202,
+      "name": "Fisherman's Potion",
+      "etcType": null,
+      "reuseDelayMs": 0,
+      "effects": [
+        {
+          "kind": "dispel",
+          "skillId": 2275,
+          "skillLevel": 1,
+          "name": "Fisherman's Recovery Potion",
+          "slot": "FISHING_MASTERY_DOWN",
+          "count": 1
+        }
+      ]
+    },
+    {
+      "itemId": 8594,
+      "name": "Scroll: Recovery (No Grade)",
+      "etcType": "SCROLL",
+      "reuseDelayMs": 10000,
+      "effects": [
+        {
+          "kind": "recovery",
+          "skillId": 2286,
+          "skillLevel": 1,
+          "name": "Scroll: Recovery (No Grade)"
+        }
+      ]
+    },
+    {
+      "itemId": 8595,
+      "name": "Scroll: Recovery (Grade D)",
+      "etcType": "SCROLL",
+      "reuseDelayMs": 10000,
+      "effects": [
+        {
+          "kind": "recovery",
+          "skillId": 2286,
+          "skillLevel": 2,
+          "name": "Scroll: Recovery (No Grade)"
+        }
+      ]
+    }
+  ]
+}

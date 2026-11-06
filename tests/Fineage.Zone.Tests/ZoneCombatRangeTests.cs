@@ -21,10 +21,18 @@ public sealed class ZoneCombatRangeTests
         Assert.True(ZoneCombat.InMeleeRange(0, 0, ZoneCombat.MeleeRange - ZoneCombat.ApproachSlack, 0));
     }
 
+    /// <summary>
+    /// Mobius <c>PlayerAI.thinkPickUp</c> → <c>maybeMoveToPawn(target, 36)</c>: a dropped item is not a Creature,
+    /// so the gate is 36 + the player's collision radius (9) = 45. Farther loot must be walked to first.
+    /// Dropping keeps its own, wider <c>RequestDropItem</c> radius of 150.
+    /// </summary>
     [Fact]
-    public void Pickup_and_drop_use_Mobius_150_radius()
+    public void Pickup_needs_the_pawn_on_top_of_the_item_but_drop_keeps_150()
     {
-        Assert.True(ZoneCombat.InPickupRange(0, 0, 150, 0));
+        Assert.Equal(ZoneCombat.PickupReach + 9, ZoneCombat.PickupRange);
+        Assert.True(ZoneCombat.InPickupRange(0, 0, ZoneCombat.PickupRange, 0));
+        Assert.False(ZoneCombat.InPickupRange(0, 0, 60, 0));
+        Assert.False(ZoneCombat.InPickupRange(0, 0, 150, 0));
         Assert.False(ZoneCombat.InPickupRange(0, 0, 800, 0));
         Assert.True(ZoneCombat.InDropRange(0, 0, 0, 100, 0, 30));
         Assert.False(ZoneCombat.InDropRange(0, 0, 0, 200, 0, 0));

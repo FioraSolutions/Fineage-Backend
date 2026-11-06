@@ -9,13 +9,15 @@ public static class ZoneCombat
     /// matches <see cref="MobMeleeRange"/>. Out of range the server walks the player in (moveToPawn).
     /// </summary>
     public const int MeleeRange = 80;
-    /// <summary>Ground pickup / interaction reach — client walks there itself, keep the old wide gate.</summary>
     /// <summary>
-    /// Mobius doPickupItem: the pawn must stand next to the item. Farther clicks run in first (moveToPawn) —
-    /// the old 900u reach picked items up from across the screen with no walk.
+    /// Ground pickup gate. Mobius never picks loot up at range: <c>PlayerAI.thinkPickUp</c> calls
+    /// <c>maybeMoveToPawn(target, 36)</c> and <c>CreatureAI.maybeMoveToPawn</c> only proceeds when
+    /// <c>isInsideRadius2D(target, 36 + collisionRadius)</c>; a dropped <c>Item</c> is not a Creature, so the
+    /// gate is 36 + the player's template collisionRadius (9) = <b>45</b>. Anything farther runs in first.
+    /// (The old 150 picked items up from across the screen with no walk.)
     /// </summary>
-    public const int PickupRange = 150;
-    /// <summary>Mobius AI_INTENTION_PICK_UP moveToPawn offset.</summary>
+    public const int PickupRange = 45;
+    /// <summary>Mobius AI_INTENTION_PICK_UP moveToPawn offset (36) — the approach stop distance base.</summary>
     public const int PickupReach = 36;
     /// <summary>Mobius RequestDropItem: isInsideRadius3D(x, y, z, 150) and |dz| &lt;= 50, else CANNOT_DISCARD_DISTANCE_TOO_FAR.</summary>
     public const int DropRange = 150;
