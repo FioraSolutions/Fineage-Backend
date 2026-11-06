@@ -109,6 +109,8 @@ sealed class ZoneEntity
     public List<PrivateStoreSellListing> PrivateSellList { get; } = [];
     /// <summary>Active buy listings while <see cref="PrivateStoreType"/> is Buy (by template id).</summary>
     public List<PrivateStoreBuyListing> PrivateBuyList { get; } = [];
+    /// <summary>Mobius recipe book: known <c>RecipeList</c> ids (make-self / book open).</summary>
+    public HashSet<int> KnownRecipes { get; } = [];
     /// <summary>NPC Mobius physical attack (0 = unknown → level placeholder). Players read the class template.</summary>
     public double PAtk { get; init; }
     /// <summary>NPC Mobius <c>vitals hpRegen</c>: HP restored per 3 s regen tick (players use the class table).</summary>
@@ -843,6 +845,7 @@ public sealed partial class ZoneWorld
         };
         LoadQuestProgress(session, entity);
         LoadLearnedSkills(entity, stored);
+        LoadKnownRecipes(entity, stored);
         RefreshKnownSkills(entity);
         // Mobius GameClient:493 / EnterWorld:208 — refreshOverloaded() runs before the first UserInfo, so a character
         // that logs in while overloaded already carries skill 4270's level and its slowed speeds. This must come after

@@ -344,6 +344,10 @@ public sealed class PostgresAccountStore : IAccountStore, IDisposable
                 tx.Commit();
             });
 
+    public bool TryReplaceKnownRecipes(string account, int characterId, IReadOnlyList<int> recipeIds) =>
+        // Recipe book rows: JSON mirror for now; normalized table follow-up (#281).
+        _inner.TryReplaceKnownRecipes(account, characterId, recipeIds);
+
     public bool TryReplaceShortcuts(string account, int characterId, IReadOnlyList<StoredShortcut> shortcuts) =>
         RunSilent(
             () => _inner.TryReplaceShortcuts(account, characterId, shortcuts),

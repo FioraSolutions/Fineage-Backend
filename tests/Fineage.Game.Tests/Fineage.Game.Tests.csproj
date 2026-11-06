@@ -18,6 +18,7 @@
   </ItemGroup>
   <ItemGroup>
     <Content Include="..\..\data\items.json" Link="data\items.json" CopyToOutputDirectory="PreserveNewest" />
+    <Content Include="..\..\data\recipes.json" Link="data\recipes.json" CopyToOutputDirectory="PreserveNewest" />
     <Content Include="..\..\data\starter-kits.json" Link="data\starter-kits.json" CopyToOutputDirectory="PreserveNewest" />
     <Content Include="..\..\data\classes.json" Link="data\classes.json" CopyToOutputDirectory="PreserveNewest" />
     <Content Include="..\..\data\experience.json" Link="data\experience.json" CopyToOutputDirectory="PreserveNewest" />

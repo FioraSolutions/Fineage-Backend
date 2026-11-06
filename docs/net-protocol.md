@@ -111,6 +111,7 @@ V2 MessagePack flushes still go to a discarded stream on the Net path. Net peers
 | Party | Invite/answer/leave/kick → `PartyInviteRequest` `0x0333` / `PartyAnswerJoinRequest` `0x0334` / `PartyLeaveRequest` `0x0335` / `PartyKickRequest` `0x0336`. Fanout `PartyAskJoin` `0x0337` / `PartyJoinResult` `0x0338` / `PartyMemberList` `0x0339`. |
 | Trade | Request/answer/add/done → `TradeRequest` `0x033A` / `TradeAnswerRequest` `0x033B` / `TradeAddItemRequest` `0x033C` / `TradeDoneRequest` `0x033D`. Fanout `TradeAsk` `0x033E` / `TradeRequestResult` `0x033F` / `TradeStart` `0x0340` / `TradeOfferUpdate` `0x0341` / `TradeConfirmState` `0x0342` / `TradeFinished` `0x0343` (+ inventory on exchange). |
 | Private store | Sell: `SetPrivateStoreSell` `0x038D` / `PrivateStoreBuy` `0x0390` / `PrivateStoreListSell` `0x0392`. Buy: `SetPrivateStoreBuy` `0x0393` / `PrivateStoreSellTo` `0x0394` / `PrivateStoreListBuy` `0x0395`. Shared: `PrivateStoreQuit` `0x038E` / `PrivateStoreListRequest` `0x038F` / `PrivateStoreInfo` `0x0391`. See `docs/private-store-v2-protocol.md`. |
+| Craft | `RecipeBookOpen` `0x0396` / `RecipeMakeSelf` `0x0397`. Fanout `RecipeBookList` `0x0398` / `RecipeItemMakeInfo` `0x0399`. See `docs/craft-v2-protocol.md`. |
 | Hotbar (shortcuts) | See **Shortcuts** below. `RequestShortCutReg` `0x0358` → `ShortCutRegister` `0x035B`; `RequestShortCutDel` `0x0359` → `ShortCutDelete` `0x035C`. |
 | Leave / disconnect | `EntityDespawn` of leaver to known Net peers. |
 

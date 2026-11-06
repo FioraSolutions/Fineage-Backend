@@ -68,11 +68,13 @@ public sealed partial class ZoneWorld
             TryChargeShot(session, player, item, quiet: false);
             return null;
         }
-        // Mobius UseItem: a non-equippable item goes to its ItemHandler. handler="ItemSkills" (potions, Scroll of
-        // Escape, recovery scrolls, shot packages) casts the item skills and consumes one; only an item with no
-        // handler at all is refused.
+        // Mobius UseItem: recipe scrolls register into the craft book; ItemSkills handle potions / SOE / shots.
         if (!item.Template.Equippable)
+        {
+            if (_game.Recipes.TryGetByRecipeItem(item.ItemId, out _))
+                return TryLearnRecipeFromItem(session, player, item);
             return TryUseConsumable(session, player, item);
+        }
         // Unequip skips conditions. There is no cast state, so weapon changes are not deferred.
         if (!item.IsEquipped && Restriction(player, item) is { } denied)
             return denied;

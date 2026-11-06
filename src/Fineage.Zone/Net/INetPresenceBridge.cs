@@ -153,6 +153,12 @@ interface INetPresenceBridge
     /// <summary>Buy list window for a visitor who clicked a buy-store pawn.</summary>
     void FanoutPrivateStoreListBuy(IReadOnlyList<int> watcherObjectIds, PrivateStoreListBuyNetMsg list);
 
+    /// <summary>Known recipe ids for one craft book tab.</summary>
+    void FanoutRecipeBookList(IReadOnlyList<int> watcherObjectIds, RecipeBookListNetMsg list);
+
+    /// <summary>Self-craft result after RequestRecipeItemMakeSelf.</summary>
+    void FanoutRecipeItemMakeInfo(IReadOnlyList<int> watcherObjectIds, RecipeItemMakeInfoNetMsg info);
+
     /// <summary>Boss schedule rows, the reply to a <c>BossStatusRequest</c>.</summary>
     void FanoutBossStatus(IReadOnlyList<int> watcherObjectIds, BossStatusNetMsg status);
 

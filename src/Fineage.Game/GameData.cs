@@ -1,5 +1,6 @@
 using System.Text.Json;
 using Fineage.Game.Quests;
+using Fineage.Game.Recipes;
 using Fineage.Game.Skills;
 
 namespace Fineage.Game;
@@ -27,7 +28,8 @@ public sealed class GameData
         ClassCatalog? classes,
         QuestCatalog quests,
         SkillCatalog skills,
-        SkillTreeCatalog skillTrees)
+        SkillTreeCatalog skillTrees,
+        RecipeCatalog recipes)
     {
         Items = items;
         StarterKits = starterKits;
@@ -35,6 +37,7 @@ public sealed class GameData
         Quests = quests;
         Skills = skills;
         SkillTrees = skillTrees;
+        Recipes = recipes;
     }
 
     public ItemCatalog Items { get; }
@@ -50,6 +53,8 @@ public sealed class GameData
 
     public SkillTreeCatalog SkillTrees { get; }
 
+    public RecipeCatalog Recipes { get; }
+
     public static GameData Load(string dataDirectory)
     {
         ArgumentException.ThrowIfNullOrWhiteSpace(dataDirectory);
@@ -62,7 +67,8 @@ public sealed class GameData
         var quests = QuestCatalog.Load(Path.Combine(dataDirectory, QuestCatalog.FileName), items);
         var skills = SkillCatalog.Load(Path.Combine(dataDirectory, SkillCatalog.FileName));
         var skillTrees = SkillTreeCatalog.Load(Path.Combine(dataDirectory, SkillTreeCatalog.FileName));
-        return new GameData(items, kits, classes, quests, skills, skillTrees);
+        var recipes = RecipeCatalog.Load(Path.Combine(dataDirectory, RecipeCatalog.FileName));
+        return new GameData(items, kits, classes, quests, skills, skillTrees, recipes);
     }
 
     public static GameData LoadDefault()
@@ -110,7 +116,8 @@ public sealed class GameData
             classes: null,
             quests ?? QuestCatalog.Empty,
             skills: SkillCatalog.Parse("{\"skills\":[]}", "memory"),
-            skillTrees: SkillTreeCatalog.Parse("{\"trees\":[]}", "memory"));
+            skillTrees: SkillTreeCatalog.Parse("{\"trees\":[]}", "memory"),
+            recipes: RecipeCatalog.Empty);
     }
 
     public PlayerInventory CreateStarterInventory(int classId, int firstObjectId = PlayerInventory.FirstObjectId) =>

@@ -8,7 +8,7 @@
 
 | In | Out (follow-up) |
 |----|-----------------|
-| Open / refresh sell, package-sell, or buy list | Manufacture / craft |
+| Open / refresh sell, package-sell, or buy list | Manufacture / recipe shop |
 | Visitor list + buy-from-sell / sell-into-buy | Offline traders, NO_STORE zones |
 | Package buy must request every listed row | Client manage UI |
 | Quit / death / stand / leave close store | |

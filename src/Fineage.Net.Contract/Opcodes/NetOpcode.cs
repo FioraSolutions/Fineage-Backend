@@ -233,5 +233,13 @@ namespace Fineage.Net.Contract
         public const ushort PrivateStoreSellTo = 0x0394;
         /// <summary>Zone → client: buy list window for a visitor.</summary>
         public const ushort PrivateStoreListBuy = 0x0395;
+        /// <summary>Client → zone: Mobius RequestRecipeBookOpen.</summary>
+        public const ushort RecipeBookOpen = 0x0396;
+        /// <summary>Client → zone: Mobius RequestRecipeItemMakeSelf.</summary>
+        public const ushort RecipeMakeSelf = 0x0397;
+        /// <summary>Zone → client: known recipe ids for one book tab.</summary>
+        public const ushort RecipeBookList = 0x0398;
+        /// <summary>Zone → client: craft result (success / fail / materials).</summary>
+        public const ushort RecipeItemMakeInfo = 0x0399;
     }
 }

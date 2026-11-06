@@ -103,7 +103,8 @@ public sealed record CharacterRecord(
     int DeathPenaltyLevel = 0,
     int Karma = 0,
     int PkKills = 0,
-    int PvpKills = 0)
+    int PvpKills = 0,
+    IReadOnlyList<int>? KnownRecipes = null)
 {
     /// <summary>Remaining whole seconds until hard delete. Zero when the character is not pending.</summary>
     public int DeleteSecondsLeft(DateTimeOffset now)
@@ -230,6 +231,9 @@ public interface IAccountStore
     /// Writes karma / PK / PvP kill counters (Mobius <c>characters.karma|pkkills|pvpkills</c>).
     /// </summary>
     bool TrySaveKarmaPk(string account, int characterId, int karma, int pkKills, int pvpKills);
+
+    /// <summary>Replace the character's known craft recipe list ids (Mobius recipe book).</summary>
+    bool TryReplaceKnownRecipes(string account, int characterId, IReadOnlyList<int> recipeIds);
 
     /// <summary>Replaces the character's quest rows. An empty list is a real save.</summary>
     bool TryReplaceQuests(string account, int characterId, IReadOnlyList<QuestSaveRow> quests);
@@ -443,7 +447,8 @@ public sealed class MemoryAccountStore : IAccountStore
             DeathPenaltyLevel = character.DeathPenaltyLevel,
             Karma = character.Karma,
             PkKills = character.PkKills,
-            PvpKills = character.PvpKills
+            PvpKills = character.PvpKills,
+            KnownRecipes = character.KnownRecipes?.ToList()
         };
 
     static StoredShortcutDto CopyShortcut(StoredShortcut s) => new()
@@ -773,6 +778,27 @@ public sealed class MemoryAccountStore : IAccountStore
                 return false;
             character.LearnedSkills = skills.OrderBy(s => s.SkillId)
                 .Select(s => new StoredSkillDto { SkillId = s.SkillId, Level = s.Level }).ToList();
+            Save();
+            return true;
+        }
+    }
+
+    public bool TryReplaceKnownRecipes(string account, int characterId, IReadOnlyList<int> recipeIds)
+    {
+        ArgumentNullException.ThrowIfNull(recipeIds);
+        var seen = new HashSet<int>();
+        foreach (int id in recipeIds)
+        {
+            if (id < 1 || !seen.Add(id))
+                return false;
+        }
+
+        lock (_gate)
+        {
+            var character = FindCharacter(account, characterId);
+            if (character == null)
+                return false;
+            character.KnownRecipes = recipeIds.OrderBy(id => id).ToList();
             Save();
             return true;
         }
@@ -1389,7 +1415,8 @@ public sealed class MemoryAccountStore : IAccountStore
             character.DeathPenaltyLevel,
             character.Karma,
             character.PkKills,
-            character.PvpKills);
+            character.PvpKills,
+            character.KnownRecipes?.ToArray());
 
     sealed class StoreFile
     {
@@ -1452,6 +1479,7 @@ public sealed class MemoryAccountStore : IAccountStore
         public int Karma { get; set; }
         public int PkKills { get; set; }
         public int PvpKills { get; set; }
+        public List<int>? KnownRecipes { get; set; }
     }
 
     sealed class StoredSkillDto

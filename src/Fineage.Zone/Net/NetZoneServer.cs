@@ -531,6 +531,20 @@ public sealed class NetZoneServer : INetPresenceBridge
             _presence.TrySend(watcher, NetOpcode.PrivateStoreListBuy, payload);
     }
 
+    void INetPresenceBridge.FanoutRecipeBookList(IReadOnlyList<int> watcherObjectIds, RecipeBookListNetMsg list)
+    {
+        var payload = NetCodec.EncodeRecipeBookList(list);
+        foreach (int watcher in watcherObjectIds)
+            _presence.TrySend(watcher, NetOpcode.RecipeBookList, payload);
+    }
+
+    void INetPresenceBridge.FanoutRecipeItemMakeInfo(IReadOnlyList<int> watcherObjectIds, RecipeItemMakeInfoNetMsg info)
+    {
+        var payload = NetCodec.EncodeRecipeItemMakeInfo(info);
+        foreach (int watcher in watcherObjectIds)
+            _presence.TrySend(watcher, NetOpcode.RecipeItemMakeInfo, payload);
+    }
+
     void INetPresenceBridge.FanoutBossStatus(IReadOnlyList<int> watcherObjectIds, BossStatusNetMsg status)
     {
         var payload = NetCodec.EncodeBossStatus(status);
@@ -895,6 +909,12 @@ public sealed class NetZoneServer : INetPresenceBridge
                             break;
                         case NetOpcode.PrivateStoreSellTo:
                             await OnPrivateStoreSellToAsync(conn, zoneSession, envelope, ct).ConfigureAwait(false);
+                            break;
+                        case NetOpcode.RecipeBookOpen:
+                            await OnRecipeBookOpenAsync(conn, zoneSession, envelope, ct).ConfigureAwait(false);
+                            break;
+                        case NetOpcode.RecipeMakeSelf:
+                            await OnRecipeMakeSelfAsync(conn, zoneSession, envelope, ct).ConfigureAwait(false);
                             break;
                         case NetOpcode.StopMove:
                             // Authoritative stop: correct to current session position.
@@ -2642,6 +2662,50 @@ public sealed class NetZoneServer : INetPresenceBridge
             ct).ConfigureAwait(false);
         if (error != null)
             await RejectAsync(conn, error, "Private store sell-to failed.", ct).ConfigureAwait(false);
+    }
+
+    async Task OnRecipeBookOpenAsync(
+        NetConnection conn,
+        ZoneSession zoneSession,
+        PacketEnvelope envelope,
+        CancellationToken ct)
+    {
+        RequireHello(conn);
+        if (!zoneSession.Bound || !zoneSession.InWorld)
+        {
+            await RejectAsync(conn, "not_in_world", "Enter world first.", ct).ConfigureAwait(false);
+            return;
+        }
+
+        var req = NetCodec.DecodeRecipeBookOpen(envelope.Payload);
+        string? error = await _world.TryRecipeBookOpenAsync(
+            zoneSession,
+            new RecipeBookOpenMsg { Dwarven = req.Dwarven != 0 },
+            ct).ConfigureAwait(false);
+        if (error != null)
+            await RejectAsync(conn, error, "Recipe book open failed.", ct).ConfigureAwait(false);
+    }
+
+    async Task OnRecipeMakeSelfAsync(
+        NetConnection conn,
+        ZoneSession zoneSession,
+        PacketEnvelope envelope,
+        CancellationToken ct)
+    {
+        RequireHello(conn);
+        if (!zoneSession.Bound || !zoneSession.InWorld)
+        {
+            await RejectAsync(conn, "not_in_world", "Enter world first.", ct).ConfigureAwait(false);
+            return;
+        }
+
+        var req = NetCodec.DecodeRecipeMakeSelf(envelope.Payload);
+        string? error = await _world.TryRecipeMakeSelfAsync(
+            zoneSession,
+            new RecipeMakeSelfMsg { RecipeId = req.RecipeId },
+            ct).ConfigureAwait(false);
+        if (error != null)
+            await RejectAsync(conn, error, "Recipe make self failed.", ct).ConfigureAwait(false);
     }
 
     static void RequireHello(NetConnection conn)

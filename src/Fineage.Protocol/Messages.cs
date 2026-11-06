@@ -847,6 +847,18 @@ public sealed class PrivateStoreSellToMsg
     public PrivateStoreSellRowMsg[] Items { get; set; } = [];
 }
 
+/// <summary>Open the recipe book (Mobius RequestRecipeBookOpen). Dwarven=true → dwarven tab.</summary>
+public sealed class RecipeBookOpenMsg
+{
+    public bool Dwarven { get; set; }
+}
+
+/// <summary>Craft one recipe (Mobius RequestRecipeItemMakeSelf). <see cref="RecipeId"/> is the list id.</summary>
+public sealed class RecipeMakeSelfMsg
+{
+    public int RecipeId { get; set; }
+}
+
 /// <summary>Opcode <see cref="MsgType.RequestQuestList"/> (42). Empty body.</summary>
 public sealed class RequestQuestListMsg
 {

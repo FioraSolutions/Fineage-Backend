@@ -961,6 +961,31 @@ namespace Fineage.Net.Contract
         public PrivateStoreBuyRowNet[] Items { get; set; } = System.Array.Empty<PrivateStoreBuyRowNet>();
     }
 
+    public sealed class RecipeBookOpenNetMsg
+    {
+        public int Dwarven { get; set; }
+    }
+
+    public sealed class RecipeMakeSelfNetMsg
+    {
+        public int RecipeId { get; set; }
+    }
+
+    public sealed class RecipeBookListNetMsg
+    {
+        public int Dwarven { get; set; }
+        public int[] RecipeIds { get; set; } = System.Array.Empty<int>();
+    }
+
+    /// <summary>0 = success, 1 = fail (materials lost), 2 = cannot craft (no consume).</summary>
+    public sealed class RecipeItemMakeInfoNetMsg
+    {
+        public int RecipeId { get; set; }
+        public int Result { get; set; }
+        public int CurrentMp { get; set; }
+        public int MaxMp { get; set; }
+    }
+
     /// <summary>One paperdoll slot (Mobius UserInfo / CharInfo order, 17 slots, right hand = 7). Zeros when empty.</summary>
     public sealed class PaperdollSlotNet
     {
