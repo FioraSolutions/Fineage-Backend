@@ -75,14 +75,11 @@ public sealed class NetSkillTests
             actor.Session,
             new MoveToMsg { DestX = gremlin.X, DestY = gremlin.Y, DestZ = gremlin.Z },
             CancellationToken.None));
-        Assert.Null(await bench.World.TrySelectTargetAsync(
-            actor.Session, new SelectTargetMsg { TargetObjectId = gremlinObjectId }, CancellationToken.None));
+        Assert.Null(await bench.World.TrySelectTargetAsync(actor.Session, gremlinObjectId, CancellationToken.None));
 
         // Drop the enter-knownlist status rows so the next assertions only see what the cast itself emits.
         bench.Rec.Calls.Clear();
-        Assert.Null(await bench.World.TrySkillUseAsync(
-            actor.Session,
-            new SkillUseRequestMsg { SkillId = PowerStrike, TargetObjectId = gremlinObjectId },
+        Assert.Null(await bench.World.TrySkillUseAsync(actor.Session, PowerStrike, gremlinObjectId,
             CancellationToken.None));
 
         // Mobius onMagicHitTimer: the cast announces itself, and movement is deferred until the hit lands.
@@ -144,13 +141,10 @@ public sealed class NetSkillTests
         Assert.True(bench.World.TryGetEntityById(gremlinObjectId, out var gremlin));
         int hpBefore = gremlin.CurHp;
 
-        Assert.Null(await bench.World.TrySelectTargetAsync(
-            actor.Session, new SelectTargetMsg { TargetObjectId = gremlinObjectId }, CancellationToken.None));
+        Assert.Null(await bench.World.TrySelectTargetAsync(actor.Session, gremlinObjectId, CancellationToken.None));
 
         bench.Rec.Calls.Clear();
-        Assert.Null(await bench.World.TrySkillUseAsync(
-            actor.Session,
-            new SkillUseRequestMsg { SkillId = WindStrike, TargetObjectId = gremlinObjectId },
+        Assert.Null(await bench.World.TrySkillUseAsync(actor.Session, WindStrike, gremlinObjectId,
             CancellationToken.None));
 
         var use = Assert.IsType<MagicSkillUseNetMsg>(

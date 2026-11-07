@@ -1624,10 +1624,7 @@ public sealed class NetZoneServer : INetPresenceBridge
         }
 
         var select = NetCodec.DecodeSelectTarget(envelope.Payload);
-        string? error = await _world.TrySelectTargetAsync(
-            zoneSession,
-            new SelectTargetMsg { TargetObjectId = select.TargetObjectId },
-            ct).ConfigureAwait(false);
+        string? error = await _world.TrySelectTargetAsync(zoneSession, select.TargetObjectId, ct).ConfigureAwait(false);
         if (error != null)
         {
             await RejectAsync(conn, error, "Select target failed.", ct).ConfigureAwait(false);
@@ -1980,10 +1977,7 @@ public sealed class NetZoneServer : INetPresenceBridge
         }
 
         var attack = NetCodec.DecodeAttackRequest(envelope.Payload);
-        string? error = await _world.TryAttackAsync(
-            zoneSession,
-            new AttackRequestMsg { TargetObjectId = attack.TargetObjectId },
-            ct).ConfigureAwait(false);
+        string? error = await _world.TryAttackAsync(zoneSession, attack.TargetObjectId, ct).ConfigureAwait(false);
         if (error != null)
             await RejectAsync(conn, error, "Attack failed.", ct).ConfigureAwait(false);
         // AttackState / MoveState / StatusUpdate fan out via NetBridge from ZoneWorld combat.
@@ -2142,12 +2136,8 @@ public sealed class NetZoneServer : INetPresenceBridge
         var use = NetCodec.DecodeUseSkill(envelope.Payload);
         string? error = await _world.TrySkillUseAsync(
             zoneSession,
-            new SkillUseRequestMsg
-            {
-                SkillId = use.SkillId,
-                TargetObjectId = use.TargetObjectId,
-                CtrlPressed = use.CtrlPressed
-            },
+            use.SkillId,
+            use.TargetObjectId,
             ct).ConfigureAwait(false);
         if (error != null)
             await RejectAsync(conn, error, "UseSkill failed.", ct).ConfigureAwait(false);

@@ -46,8 +46,7 @@ public sealed class NetTargetSelectTests
         Assert.True(kit.World.TryGetEntityById(MobId, out var mob));
         mob.Level = player.Level - 3;
 
-        Assert.Null(await kit.World.TrySelectTargetAsync(
-            session, new SelectTargetMsg { TargetObjectId = MobId }, default));
+        Assert.Null(await kit.World.TrySelectTargetAsync(session, MobId, default));
 
         Assert.Equal(MobId, session.SelectedTargetId);
         var selected = Assert.IsType<TargetSelectedNetMsg>(
@@ -70,8 +69,7 @@ public sealed class NetTargetSelectTests
         Assert.True(kit.World.TryGetEntityById(GuideId, out var guide));
         guide.Level = player.Level + 10;
 
-        Assert.Null(await kit.World.TrySelectTargetAsync(
-            session, new SelectTargetMsg { TargetObjectId = GuideId }, default));
+        Assert.Null(await kit.World.TrySelectTargetAsync(session, GuideId, default));
 
         var selected = Assert.IsType<TargetSelectedNetMsg>(
             Assert.Single(rec.Of(nameof(INetPresenceBridge.FanoutTargetSelected)))[1]);
@@ -91,8 +89,7 @@ public sealed class NetTargetSelectTests
         otherPlayer.Level = player.Level + 4;
         otherPlayer.PvpFlagged = true;
 
-        Assert.Null(await kit.World.TrySelectTargetAsync(
-            session, new SelectTargetMsg { TargetObjectId = otherSession.ObjectId }, default));
+        Assert.Null(await kit.World.TrySelectTargetAsync(session, otherSession.ObjectId, default));
 
         Assert.Equal(otherSession.ObjectId, session.SelectedTargetId);
         var selected = Assert.IsType<TargetSelectedNetMsg>(
@@ -113,8 +110,7 @@ public sealed class NetTargetSelectTests
         var (otherSession, otherPlayer) = await kit.EnterAsync();
         otherPlayer.Level = player.Level + 4;
 
-        Assert.Null(await kit.World.TrySelectTargetAsync(
-            session, new SelectTargetMsg { TargetObjectId = otherSession.ObjectId }, default));
+        Assert.Null(await kit.World.TrySelectTargetAsync(session, otherSession.ObjectId, default));
 
         Assert.Equal(otherSession.ObjectId, session.SelectedTargetId);
         var selected = Assert.IsType<TargetSelectedNetMsg>(
@@ -127,8 +123,7 @@ public sealed class NetTargetSelectTests
     {
         var (kit, session, player, rec) = await SetupAsync();
 
-        Assert.Null(await kit.World.TrySelectTargetAsync(
-            session, new SelectTargetMsg { TargetObjectId = session.ObjectId }, default));
+        Assert.Null(await kit.World.TrySelectTargetAsync(session, session.ObjectId, default));
 
         Assert.Equal(session.ObjectId, session.SelectedTargetId);
         // Own pawn: Mobius sends colour 0 and no HP block, so a self-target draws as white without a bar.
@@ -169,8 +164,7 @@ public sealed class NetTargetSelectTests
     public async Task Cancelling_the_target_clears_the_zone_selection_and_announces_it()
     {
         var (kit, session, player, rec) = await SetupAsync();
-        Assert.Null(await kit.World.TrySelectTargetAsync(
-            session, new SelectTargetMsg { TargetObjectId = MobId }, default));
+        Assert.Null(await kit.World.TrySelectTargetAsync(session, MobId, default));
         Assert.Equal(MobId, session.SelectedTargetId);
 
         Assert.Null(await kit.World.TryCancelTargetAsync(session, default));
@@ -194,8 +188,7 @@ public sealed class NetTargetSelectTests
     {
         var (kit, session, player, rec) = await SetupAsync();
 
-        Assert.Null(await kit.World.TrySelectTargetAsync(
-            session, new SelectTargetMsg { TargetObjectId = MobId }, default));
+        Assert.Null(await kit.World.TrySelectTargetAsync(session, MobId, default));
         session.AutoAttackTargetId = MobId;
 
         Assert.Null(await kit.World.TryCancelTargetAsync(session, default));

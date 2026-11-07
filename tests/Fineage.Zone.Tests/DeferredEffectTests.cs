@@ -7,7 +7,7 @@ namespace Fineage.Zone.Tests;
 public sealed class DeferredEffectTests
 {
     static Task<string?> Cast(NetTestKit kit, ZoneSession s, int skill, int target = 0) =>
-        kit.World.TrySkillUseAsync(s, new SkillUseRequestMsg { SkillId = skill, TargetObjectId = target }, CancellationToken.None);
+        kit.World.TrySkillUseAsync(s, skill, target, CancellationToken.None);
 
     [Fact]
     public async Task Heal_raises_hp_only_when_the_cast_completes()

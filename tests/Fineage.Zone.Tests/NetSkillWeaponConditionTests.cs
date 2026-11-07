@@ -33,7 +33,7 @@ public sealed class NetSkillWeaponConditionTests
         player.CurMp = player.MaxMp = 500;
         var (bridge, rec) = NetBridgeRecorder.Create();
         kit.World.NetBridge = bridge;
-        Assert.Null(await kit.World.TrySelectTargetAsync(session, new SelectTargetMsg { TargetObjectId = MobId }, CancellationToken.None));
+        Assert.Null(await kit.World.TrySelectTargetAsync(session, MobId, CancellationToken.None));
         return (kit, session, player, rec);
     }
 
@@ -47,7 +47,7 @@ public sealed class NetSkillWeaponConditionTests
         var bag = player.Inventory!;
         if (bag.GetEquipped(PaperdollSlot.RHand) is { } w && w.Template.WeaponType == WeaponType.Dagger)
             bag.Equip(bag.Add(1)); // Short Sword
-        Assert.Null(await kit.World.TrySkillUseAsync(session, new SkillUseRequestMsg { SkillId = MortalBlow, TargetObjectId = MobId }, CancellationToken.None));
+        Assert.Null(await kit.World.TrySkillUseAsync(session, MortalBlow, MobId, CancellationToken.None));
         Assert.True(Unsuitable(rec));
         Assert.Null(player.PendingHit);
         Assert.False(player.SkillReuseUntilMs.ContainsKey(MortalBlow));
@@ -59,7 +59,7 @@ public sealed class NetSkillWeaponConditionTests
         var (kit, session, player, rec) = await SetupAsync();
         var bag = player.Inventory!;
         bag.Equip(bag.Add(10)); // Dagger
-        Assert.Null(await kit.World.TrySkillUseAsync(session, new SkillUseRequestMsg { SkillId = MortalBlow, TargetObjectId = MobId }, CancellationToken.None));
+        Assert.Null(await kit.World.TrySkillUseAsync(session, MortalBlow, MobId, CancellationToken.None));
         Assert.False(Unsuitable(rec));
         Assert.True(player.PendingHit != null || session.PendingCastSkillId == MortalBlow);
     }

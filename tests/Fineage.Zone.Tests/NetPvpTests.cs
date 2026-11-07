@@ -56,8 +56,7 @@ public sealed class NetPvpTests
     {
         for (int i = 0; i < 20 && !done(); i++)
         {
-            Assert.Null(await kit.World.TryAttackAsync(
-                session, new AttackRequestMsg { TargetObjectId = targetId }, CancellationToken.None));
+            Assert.Null(await kit.World.TryAttackAsync(session, targetId, CancellationToken.None));
             await SwingAsync(kit);
         }
     }
@@ -90,8 +89,7 @@ public sealed class NetPvpTests
 
         // Mobius: white nameplate (not auto-attackable) but Ctrl/forced swing is still allowed and raises PvP flag.
         // ZoneWorldCombat.IsAttackable mirrors that; IsAutoAttackable stays false until flagged/karma.
-        Assert.Null(await kit.World.TryAttackAsync(
-            session, new AttackRequestMsg { TargetObjectId = other.ObjectId }, CancellationToken.None));
+        Assert.Null(await kit.World.TryAttackAsync(session, other.ObjectId, CancellationToken.None));
 
         await SwingUntilAsync(kit, session, other.ObjectId, () => player.PvpFlagged || otherPlayer.CurHp < 100_000);
         Assert.True(player.PvpFlagged, "attacking a white player must raise the attacker's PvP flag");
@@ -116,8 +114,7 @@ public sealed class NetPvpTests
         var (kit, session, player, _, _, _) = await SetupAsync();
         player.PvpFlagged = true;
 
-        Assert.NotNull(await kit.World.TryAttackAsync(
-            session, new AttackRequestMsg { TargetObjectId = session.ObjectId }, CancellationToken.None));
+        Assert.NotNull(await kit.World.TryAttackAsync(session, session.ObjectId, CancellationToken.None));
     }
 
     [Fact]

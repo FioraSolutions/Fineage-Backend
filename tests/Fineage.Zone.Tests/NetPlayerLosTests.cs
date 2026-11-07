@@ -42,7 +42,7 @@ public sealed class NetPlayerLosTests
         Assert.Contains(MobId, player.Knownlist);
         var (bridge, rec) = NetBridgeRecorder.Create();
         kit.World.NetBridge = bridge;
-        Assert.Null(await kit.World.TrySelectTargetAsync(session, new SelectTargetMsg { TargetObjectId = MobId }, CancellationToken.None));
+        Assert.Null(await kit.World.TrySelectTargetAsync(session, MobId, CancellationToken.None));
         return (kit, session, rec);
     }
 
@@ -50,7 +50,7 @@ public sealed class NetPlayerLosTests
     public async Task Wall_between_blocks_the_swing_with_cannot_see_target()
     {
         var (kit, session, rec) = await SetupAsync(wall: true);
-        Assert.Null(await kit.World.TryAttackAsync(session, new AttackRequestMsg { TargetObjectId = MobId }, CancellationToken.None));
+        Assert.Null(await kit.World.TryAttackAsync(session, MobId, CancellationToken.None));
         Assert.Empty(rec.Of(nameof(INetPresenceBridge.FanoutAttackState)));
         Assert.Equal(0, session.AutoAttackTargetId);
         Assert.Contains(rec.Of(nameof(INetPresenceBridge.FanoutSystemMessage)),
@@ -61,7 +61,7 @@ public sealed class NetPlayerLosTests
     public async Task Open_ground_swings_normally()
     {
         var (kit, session, rec) = await SetupAsync(wall: false);
-        Assert.Null(await kit.World.TryAttackAsync(session, new AttackRequestMsg { TargetObjectId = MobId }, CancellationToken.None));
+        Assert.Null(await kit.World.TryAttackAsync(session, MobId, CancellationToken.None));
         Assert.NotEmpty(rec.Of(nameof(INetPresenceBridge.FanoutAttackState)));
         Assert.True(session.AutoAttackTargetId > 0);
     }

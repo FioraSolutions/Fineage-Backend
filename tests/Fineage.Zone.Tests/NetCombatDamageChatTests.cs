@@ -39,10 +39,8 @@ public sealed class NetCombatDamageChatTests
         var (bridge, rec) = NetBridgeRecorder.Create();
         kit.World.NetBridge = bridge;
 
-        Assert.Null(await kit.World.TrySelectTargetAsync(
-            session, new SelectTargetMsg { TargetObjectId = MobId }, CancellationToken.None));
-        Assert.Null(await kit.World.TryAttackAsync(
-            session, new AttackRequestMsg { TargetObjectId = MobId }, CancellationToken.None));
+        Assert.Null(await kit.World.TrySelectTargetAsync(session, MobId, CancellationToken.None));
+        Assert.Null(await kit.World.TryAttackAsync(session, MobId, CancellationToken.None));
 
         var attacks = rec.Of(nameof(INetPresenceBridge.FanoutAttackState))
             .Select(args => Assert.IsType<AttackStateMsg>(args[1]))
