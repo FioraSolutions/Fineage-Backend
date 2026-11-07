@@ -2365,13 +2365,7 @@ public sealed class NetZoneServer : INetPresenceBridge
 
         var invite = NetCodec.DecodePartyInviteRequest(envelope.Payload);
         string? error = await _world.TryPartyInviteAsync(
-            zoneSession,
-            new PartyInviteRequestMsg
-            {
-                TargetObjectId = invite.TargetObjectId,
-                ItemDistribution = invite.ItemDistribution
-            },
-            ct).ConfigureAwait(false);
+            zoneSession, invite.TargetObjectId, invite.ItemDistribution, ct).ConfigureAwait(false);
         if (error != null)
             await RejectAsync(conn, error, "Party invite failed.", ct).ConfigureAwait(false);
     }
@@ -2391,13 +2385,7 @@ public sealed class NetZoneServer : INetPresenceBridge
 
         var answer = NetCodec.DecodePartyAnswerJoinRequest(envelope.Payload);
         string? error = await _world.TryPartyAnswerAsync(
-            zoneSession,
-            new PartyAnswerJoinRequestMsg
-            {
-                RequestorObjectId = answer.RequestorObjectId,
-                Response = answer.Response
-            },
-            ct).ConfigureAwait(false);
+            zoneSession, answer.RequestorObjectId, answer.Response, ct).ConfigureAwait(false);
         if (error != null)
             await RejectAsync(conn, error, "Party answer failed.", ct).ConfigureAwait(false);
     }
@@ -2431,9 +2419,7 @@ public sealed class NetZoneServer : INetPresenceBridge
 
         var kick = NetCodec.DecodePartyKickRequest(envelope.Payload);
         string? error = await _world.TryPartyKickAsync(
-            zoneSession,
-            new PartyKickRequestMsg { TargetObjectId = kick.TargetObjectId },
-            ct).ConfigureAwait(false);
+            zoneSession, kick.TargetObjectId, ct).ConfigureAwait(false);
         if (error != null)
             await RejectAsync(conn, error, "Party kick failed.", ct).ConfigureAwait(false);
     }
