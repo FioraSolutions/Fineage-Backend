@@ -848,17 +848,18 @@ public sealed partial class ZoneWorld
         if (_byId.TryGetValue(session.ObjectId, out var occupied) && occupied.Kind != ZoneEntityKind.Player)
             return false;
 
+        // Same-session re-enter: detach without flushing (avoid double write), then rebuild
+        // from the preloaded CharacterRecord so durable edits while InWorld (death penalty,
+        // etc.) still apply — Reattach alone would keep a stale in-memory snapshot.
         if (session.InWorld)
         {
-            if (!TryDetachPlayer(session, capturePersist: false, out var detached, out _))
+            if (!TryDetachPlayer(session, capturePersist: false, out _, out _))
                 return false;
-            return ReattachPlayer(session, detached!, out known, out enterX, out enterY, out enterZ);
         }
-
-        if (_byId.TryGetValue(session.ObjectId, out var current) &&
-            current.Session != null &&
-            !ReferenceEquals(current.Session, session) &&
-            TryDetachPlayer(current.Session, capturePersist: true, out _, out var evicted))
+        else if (_byId.TryGetValue(session.ObjectId, out var current) &&
+                 current.Session != null &&
+                 !ReferenceEquals(current.Session, session) &&
+                 TryDetachPlayer(current.Session, capturePersist: true, out _, out var evicted))
         {
             pendingUnlink = [evicted!.Value];
         }
@@ -1130,39 +1131,6 @@ public sealed partial class ZoneWorld
 
         // The Net despawn for the leaver is owned by NetZoneServer.LeaveNetAsync (it knows the connection's
         // EntityId and unregisters the presence); fanning it here too would double-remove the same entity.
-        return true;
-    }
-
-    /// <summary>Re-attach a player detached for same-session re-enter (no durable save).</summary>
-    bool ReattachPlayer(
-        ZoneSession session,
-        ZoneEntity entity,
-        out int known,
-        out int enterX,
-        out int enterY,
-        out int enterZ)
-    {
-        session.InWorld = true;
-        session.X = entity.X;
-        session.Y = entity.Y;
-        session.Z = entity.Z;
-        enterX = entity.X;
-        enterY = entity.Y;
-        enterZ = entity.Z;
-
-        _byId[entity.ObjectId] = entity;
-        _aoi.Enter(entity.ObjectId, entity.X, entity.Y);
-
-        foreach (var other in OrderedVisible(entity.ObjectId))
-        {
-            entity.Knownlist.Add(other.ObjectId);
-            if (other.Session != null)
-                other.Knownlist.Add(entity.ObjectId);
-        }
-
-        AnnounceClanEnter(entity);
-        FriendPlayerEnteredWorld(entity);
-        known = entity.Knownlist.Count;
         return true;
     }
 
