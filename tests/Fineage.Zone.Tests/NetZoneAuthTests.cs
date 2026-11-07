@@ -1,4 +1,5 @@
 using Fineage.Accounts;
+using Fineage.Game;
 using Fineage.Net.Contract;
 using Xunit;
 
@@ -104,6 +105,39 @@ public sealed class NetZoneAuthTests
 
         await session.HelloAsync(timeout.Token);
         await session.AuthAsync("hero", "HeroOne", timeout.Token);
+    }
+
+    [Fact]
+    public async Task A_consumed_handoff_cannot_be_replayed_on_another_connection()
+    {
+        using var timeout = new CancellationTokenSource(TimeSpan.FromSeconds(20));
+        await using var host = await NetZoneHost.StartAsync();
+        var ticket = host.Tokens.Issue(
+            new CharacterRecord(
+                1,
+                "HeroOne",
+                "hero",
+                HumanClasses.Fighter,
+                HumanClasses.RaceHuman,
+                HumanClasses.SexMale,
+                Level: 1,
+                CreatedAt: DateTimeOffset.UtcNow,
+                LastAccess: DateTimeOffset.UtcNow),
+            DateTimeOffset.UtcNow);
+
+        await using (var first = await host.ConnectAsync())
+        {
+            await first.HelloAsync(timeout.Token);
+            await first.AuthWithTicketAsync("hero", ticket.Token, timeout.Token);
+        }
+
+        await using var second = await host.ConnectAsync();
+        await second.HelloAsync(timeout.Token);
+        string code = await second.RefusalCodeAsync(
+            NetOpcode.ZoneAuth,
+            NetCodec.EncodeZoneAuth(new ZoneAuthMsg { Account = "hero", Token = ticket.Token }),
+            timeout.Token);
+        Assert.Equal("invalid_credentials", code);
     }
 
     [Fact]

@@ -149,9 +149,14 @@ internal sealed class NetZoneSession : IAsyncDisposable
     public async Task AuthAsync(string account, string name, CancellationToken ct)
     {
         HandoffTicket ticket = Ticket(account, name);
+        await AuthWithTicketAsync(account, ticket.Token, ct);
+    }
+
+    public async Task AuthWithTicketAsync(string account, string token, CancellationToken ct)
+    {
         PacketEnvelope reply = await ExchangeAsync(
             NetOpcode.ZoneAuth,
-            NetCodec.EncodeZoneAuth(new ZoneAuthMsg { Account = account, Token = ticket.Token }),
+            NetCodec.EncodeZoneAuth(new ZoneAuthMsg { Account = account, Token = token }),
             ct);
         Assert.Equal(NetOpcode.ZoneAuthResult, reply.Opcode);
         Assert.True(NetCodec.DecodeZoneAuthResult(reply.Payload).Ok);

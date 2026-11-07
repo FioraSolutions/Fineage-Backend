@@ -88,10 +88,10 @@ int maxConnections = ZoneNetSettings.MaxConnections;
 int outboundQueue = ZoneNetSettings.OutboundQueue;
 int maxMsgPerSec = ZoneNetSettings.MaxMessagesPerSecond;
 bool adminCommands = ZoneAdmin.Enabled;
-HandoffTokens handoffTokens;
+MemoryHandoffStore handoffStore;
 try
 {
-    handoffTokens = HandoffTokens.FromEnvironment(
+    handoffStore = MemoryHandoffStore.FromEnvironment(
         allowDefaultSecret: HandoffTokens.AllowDefaultSecretForBind(bindAddress));
 }
 catch (InvalidOperationException ex)
@@ -129,7 +129,7 @@ if (zoneStatus != null)
     Console.WriteLine($"[ZONE] status {zoneStatus.Url}");
 
 await using FineageMetricsHost? metrics = FineageMetricsHost.Start("zone", Console.Out, Console.Error);
-var netZone = new NetZoneServer(handoffTokens, world, accounts);
+var netZone = new NetZoneServer(handoffStore, world, accounts);
 var netTcp = new NetTcpServer { Endpoint = "zone" };
 Console.WriteLine($"[ZONE] net listen {bindDisplay}:{NetSettings.ZonePort} (PacketEnvelope)");
 Task netTask = netTcp.RunAsync(
