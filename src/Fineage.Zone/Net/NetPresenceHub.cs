@@ -75,6 +75,7 @@ public sealed class NetPresenceHub
     /// <summary>
     /// Fanout path: never waits. A full outbound queue drops the frame and counts
     /// <c>fineage.outbound.dropped</c> instead of stalling the tick.
+    /// Use for replaceable traffic (MoveState). Prefer <see cref="TrySendCritical"/> for spawn/despawn/inventory.
     /// </summary>
     public void TrySend(int objectId, ushort opcode, byte[] payload)
     {
@@ -83,9 +84,26 @@ public sealed class NetPresenceHub
         conn.TrySend(opcode, payload);
     }
 
+    /// <summary>
+    /// Critical presence: wait briefly for outbound room instead of dropping EntitySpawn/Despawn/Inventory.
+    /// Fire-and-forget so the sim tick is not blocked on a slow client; SendAsync still times out at 2s.
+    /// </summary>
+    public void TrySendCritical(int objectId, ushort opcode, byte[] payload)
+    {
+        if (!TryGet(objectId, out var conn, out _))
+            return;
+        _ = conn.SendAsync(opcode, payload);
+    }
+
     public void TryBroadcast(IEnumerable<int> objectIds, ushort opcode, byte[] payload)
     {
         foreach (int id in objectIds)
             TrySend(id, opcode, payload);
+    }
+
+    public void TryBroadcastCritical(IEnumerable<int> objectIds, ushort opcode, byte[] payload)
+    {
+        foreach (int id in objectIds)
+            TrySendCritical(id, opcode, payload);
     }
 }
