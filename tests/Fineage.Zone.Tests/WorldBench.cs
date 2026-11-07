@@ -225,27 +225,18 @@ internal sealed class BenchPlayer
 
     /// <summary>Picks a gatekeeper destination, the same call the teleport page's link lands on.</summary>
     public Task<string?> Teleport(int npcObjectId, string listName, int locationId) =>
-        World.TryTeleportSelectAsync(
-            Session,
-            new TeleportSelectRequestMsg { NpcObjectId = npcObjectId, ListName = listName, LocationId = locationId },
-            CancellationToken.None);
+        World.TryTeleportSelectAsync(Session, npcObjectId, listName, locationId, CancellationToken.None);
 
     public Task<string?> Deposit(int npcObjectId, params (int ObjectId, int Count)[] rows)
     {
-        var lines = rows.Select(row => new WarehouseCountMsg { ObjectId = row.ObjectId, Count = row.Count }).ToArray();
-        return World.TryWarehouseDepositAsync(
-            Session,
-            new WarehouseDepositRequestMsg { NpcObjectId = npcObjectId, Lines = lines },
-            CancellationToken.None);
+        var lines = rows.Select(row => new Fineage.Game.Services.WarehouseLine(row.ObjectId, row.Count)).ToArray();
+        return World.TryWarehouseDepositAsync(Session, npcObjectId, lines, CancellationToken.None);
     }
 
     public Task<string?> Withdraw(int npcObjectId, params (int ObjectId, int Count)[] rows)
     {
-        var lines = rows.Select(row => new WarehouseCountMsg { ObjectId = row.ObjectId, Count = row.Count }).ToArray();
-        return World.TryWarehouseWithdrawAsync(
-            Session,
-            new WarehouseWithdrawRequestMsg { NpcObjectId = npcObjectId, Lines = lines },
-            CancellationToken.None);
+        var lines = rows.Select(row => new Fineage.Game.Services.WarehouseLine(row.ObjectId, row.Count)).ToArray();
+        return World.TryWarehouseWithdrawAsync(Session, npcObjectId, lines, CancellationToken.None);
     }
 
     public Task<string?> SupportMagic(int npcObjectId) =>
