@@ -1,0 +1,701 @@
+{
+  "id": 631,
+  "name": "Delicious Top Choice Meat",
+  "repeatable": true,
+  "abortable": true,
+  "questItems": [
+    7546
+  ],
+  "dialogs": [
+    {
+      "npcId": 31537,
+      "hook": "talk",
+      "when": "absent",
+      "maxLevel": 64,
+      "htmlFile": "31537-talk-000.htm"
+    },
+    {
+      "npcId": 31537,
+      "hook": "talk",
+      "when": "absent",
+      "minLevel": 65,
+      "htmlFile": "31537-talk-001.htm"
+    },
+    {
+      "npcId": 31537,
+      "hook": "event",
+      "when": "absent",
+      "event": "31537-03",
+      "minLevel": 65,
+      "ops": [
+        {
+          "op": "create"
+        },
+        {
+          "op": "start"
+        },
+        {
+          "op": "set_cond",
+          "cond": 1
+        }
+      ],
+      "htmlFile": "31537-event-31537-03-002.htm"
+    },
+    {
+      "npcId": 31537,
+      "hook": "talk",
+      "when": "started",
+      "cond": 2,
+      "atLeast": {
+        "7546": 120
+      },
+      "htmlFile": "31537-talk-c2-003.htm"
+    },
+    {
+      "npcId": 31537,
+      "hook": "talk",
+      "when": "started",
+      "htmlFile": "31537-talk-004.htm"
+    },
+    {
+      "npcId": 31537,
+      "hook": "event",
+      "when": "started",
+      "event": "31537-05",
+      "cond": 2,
+      "atLeast": {
+        "7546": 120
+      },
+      "htmlFile": "31537-event-31537-05-c2-005.htm"
+    },
+    {
+      "npcId": 31537,
+      "hook": "event",
+      "when": "started",
+      "event": "0",
+      "cond": 2,
+      "atLeast": {
+        "7546": 120
+      },
+      "ops": [
+        {
+          "op": "take_item",
+          "itemId": 7546,
+          "count": 120
+        },
+        {
+          "op": "give_item",
+          "itemId": 4039,
+          "count": 15
+        },
+        {
+          "op": "complete"
+        }
+      ],
+      "htmlFile": "31537-event-0-c2-006.htm"
+    },
+    {
+      "npcId": 31537,
+      "hook": "event",
+      "when": "started",
+      "event": "0",
+      "htmlFile": "31537-event-0-007.htm"
+    },
+    {
+      "npcId": 31537,
+      "hook": "event",
+      "when": "started",
+      "event": "1",
+      "cond": 2,
+      "atLeast": {
+        "7546": 120
+      },
+      "ops": [
+        {
+          "op": "take_item",
+          "itemId": 7546,
+          "count": 120
+        },
+        {
+          "op": "give_adena",
+          "count": 50000
+        },
+        {
+          "op": "complete"
+        }
+      ],
+      "htmlFile": "31537-event-1-c2-008.htm"
+    },
+    {
+      "npcId": 31537,
+      "hook": "event",
+      "when": "started",
+      "event": "1",
+      "htmlFile": "31537-event-1-009.htm"
+    },
+    {
+      "npcId": 31537,
+      "hook": "event",
+      "when": "started",
+      "event": "2",
+      "cond": 2,
+      "atLeast": {
+        "7546": 120
+      },
+      "ops": [
+        {
+          "op": "take_item",
+          "itemId": 7546,
+          "count": 120
+        },
+        {
+          "op": "give_item",
+          "itemId": 4044,
+          "count": 15
+        },
+        {
+          "op": "complete"
+        }
+      ],
+      "htmlFile": "31537-event-2-c2-010.htm"
+    },
+    {
+      "npcId": 31537,
+      "hook": "event",
+      "when": "started",
+      "event": "2",
+      "htmlFile": "31537-event-2-011.htm"
+    },
+    {
+      "npcId": 31537,
+      "hook": "event",
+      "when": "started",
+      "event": "3",
+      "cond": 2,
+      "atLeast": {
+        "7546": 120
+      },
+      "ops": [
+        {
+          "op": "take_item",
+          "itemId": 7546,
+          "count": 120
+        },
+        {
+          "op": "give_item",
+          "itemId": 4040,
+          "count": 10
+        },
+        {
+          "op": "complete"
+        }
+      ],
+      "htmlFile": "31537-event-3-c2-012.htm"
+    },
+    {
+      "npcId": 31537,
+      "hook": "event",
+      "when": "started",
+      "event": "3",
+      "htmlFile": "31537-event-3-013.htm"
+    },
+    {
+      "npcId": 31537,
+      "hook": "event",
+      "when": "started",
+      "event": "4",
+      "cond": 2,
+      "atLeast": {
+        "7546": 120
+      },
+      "ops": [
+        {
+          "op": "take_item",
+          "itemId": 7546,
+          "count": 120
+        },
+        {
+          "op": "give_item",
+          "itemId": 4042,
+          "count": 10
+        },
+        {
+          "op": "complete"
+        }
+      ],
+      "htmlFile": "31537-event-4-c2-014.htm"
+    },
+    {
+      "npcId": 31537,
+      "hook": "event",
+      "when": "started",
+      "event": "4",
+      "htmlFile": "31537-event-4-015.htm"
+    },
+    {
+      "npcId": 31537,
+      "hook": "event",
+      "when": "started",
+      "event": "5",
+      "cond": 2,
+      "atLeast": {
+        "7546": 120
+      },
+      "ops": [
+        {
+          "op": "take_item",
+          "itemId": 7546,
+          "count": 120
+        },
+        {
+          "op": "give_item",
+          "itemId": 4041,
+          "count": 5
+        },
+        {
+          "op": "complete"
+        }
+      ],
+      "htmlFile": "31537-event-5-c2-016.htm"
+    },
+    {
+      "npcId": 31537,
+      "hook": "event",
+      "when": "started",
+      "event": "5",
+      "htmlFile": "31537-event-5-017.htm"
+    },
+    {
+      "npcId": 21460,
+      "hook": "kill",
+      "when": "started",
+      "cond": 1,
+      "party": true,
+      "html": "",
+      "ops": [
+        {
+          "op": "drop_item",
+          "itemId": 7546,
+          "count": 1,
+          "chance": 0.6,
+          "limit": 120,
+          "condAtLimit": 2
+        }
+      ]
+    },
+    {
+      "npcId": 21461,
+      "hook": "kill",
+      "when": "started",
+      "cond": 1,
+      "party": true,
+      "html": "",
+      "ops": [
+        {
+          "op": "drop_item",
+          "itemId": 7546,
+          "count": 1,
+          "chance": 0.48,
+          "limit": 120,
+          "condAtLimit": 2
+        }
+      ]
+    },
+    {
+      "npcId": 21462,
+      "hook": "kill",
+      "when": "started",
+      "cond": 1,
+      "party": true,
+      "html": "",
+      "ops": [
+        {
+          "op": "drop_item",
+          "itemId": 7546,
+          "count": 1,
+          "chance": 0.447,
+          "limit": 120,
+          "condAtLimit": 2
+        }
+      ]
+    },
+    {
+      "npcId": 21463,
+      "hook": "kill",
+      "when": "started",
+      "cond": 1,
+      "party": true,
+      "html": "",
+      "ops": [
+        {
+          "op": "drop_item",
+          "itemId": 7546,
+          "count": 1,
+          "chance": 0.808,
+          "limit": 120,
+          "condAtLimit": 2
+        }
+      ]
+    },
+    {
+      "npcId": 21464,
+      "hook": "kill",
+      "when": "started",
+      "cond": 1,
+      "party": true,
+      "html": "",
+      "ops": [
+        {
+          "op": "drop_item",
+          "itemId": 7546,
+          "count": 1,
+          "chance": 0.447,
+          "limit": 120,
+          "condAtLimit": 2
+        }
+      ]
+    },
+    {
+      "npcId": 21465,
+      "hook": "kill",
+      "when": "started",
+      "cond": 1,
+      "party": true,
+      "html": "",
+      "ops": [
+        {
+          "op": "drop_item",
+          "itemId": 7546,
+          "count": 1,
+          "chance": 0.808,
+          "limit": 120,
+          "condAtLimit": 2
+        }
+      ]
+    },
+    {
+      "npcId": 21466,
+      "hook": "kill",
+      "when": "started",
+      "cond": 1,
+      "party": true,
+      "html": "",
+      "ops": [
+        {
+          "op": "drop_item",
+          "itemId": 7546,
+          "count": 1,
+          "chance": 0.447,
+          "limit": 120,
+          "condAtLimit": 2
+        }
+      ]
+    },
+    {
+      "npcId": 21467,
+      "hook": "kill",
+      "when": "started",
+      "cond": 1,
+      "party": true,
+      "html": "",
+      "ops": [
+        {
+          "op": "drop_item",
+          "itemId": 7546,
+          "count": 1,
+          "chance": 0.808,
+          "limit": 120,
+          "condAtLimit": 2
+        }
+      ]
+    },
+    {
+      "npcId": 21479,
+      "hook": "kill",
+      "when": "started",
+      "cond": 1,
+      "party": true,
+      "html": "",
+      "ops": [
+        {
+          "op": "drop_item",
+          "itemId": 7546,
+          "count": 1,
+          "chance": 0.477,
+          "limit": 120,
+          "condAtLimit": 2
+        }
+      ]
+    },
+    {
+      "npcId": 21480,
+      "hook": "kill",
+      "when": "started",
+      "cond": 1,
+      "party": true,
+      "html": "",
+      "ops": [
+        {
+          "op": "drop_item",
+          "itemId": 7546,
+          "count": 1,
+          "chance": 0.863,
+          "limit": 120,
+          "condAtLimit": 2
+        }
+      ]
+    },
+    {
+      "npcId": 21481,
+      "hook": "kill",
+      "when": "started",
+      "cond": 1,
+      "party": true,
+      "html": "",
+      "ops": [
+        {
+          "op": "drop_item",
+          "itemId": 7546,
+          "count": 1,
+          "chance": 0.477,
+          "limit": 120,
+          "condAtLimit": 2
+        }
+      ]
+    },
+    {
+      "npcId": 21482,
+      "hook": "kill",
+      "when": "started",
+      "cond": 1,
+      "party": true,
+      "html": "",
+      "ops": [
+        {
+          "op": "drop_item",
+          "itemId": 7546,
+          "count": 1,
+          "chance": 0.863,
+          "limit": 120,
+          "condAtLimit": 2
+        }
+      ]
+    },
+    {
+      "npcId": 21483,
+      "hook": "kill",
+      "when": "started",
+      "cond": 1,
+      "party": true,
+      "html": "",
+      "ops": [
+        {
+          "op": "drop_item",
+          "itemId": 7546,
+          "count": 1,
+          "chance": 0.477,
+          "limit": 120,
+          "condAtLimit": 2
+        }
+      ]
+    },
+    {
+      "npcId": 21484,
+      "hook": "kill",
+      "when": "started",
+      "cond": 1,
+      "party": true,
+      "html": "",
+      "ops": [
+        {
+          "op": "drop_item",
+          "itemId": 7546,
+          "count": 1,
+          "chance": 0.863,
+          "limit": 120,
+          "condAtLimit": 2
+        }
+      ]
+    },
+    {
+      "npcId": 21485,
+      "hook": "kill",
+      "when": "started",
+      "cond": 1,
+      "party": true,
+      "html": "",
+      "ops": [
+        {
+          "op": "drop_item",
+          "itemId": 7546,
+          "count": 1,
+          "chance": 0.477,
+          "limit": 120,
+          "condAtLimit": 2
+        }
+      ]
+    },
+    {
+      "npcId": 21486,
+      "hook": "kill",
+      "when": "started",
+      "cond": 1,
+      "party": true,
+      "html": "",
+      "ops": [
+        {
+          "op": "drop_item",
+          "itemId": 7546,
+          "count": 1,
+          "chance": 0.863,
+          "limit": 120,
+          "condAtLimit": 2
+        }
+      ]
+    },
+    {
+      "npcId": 21498,
+      "hook": "kill",
+      "when": "started",
+      "cond": 1,
+      "party": true,
+      "html": "",
+      "ops": [
+        {
+          "op": "drop_item",
+          "itemId": 7546,
+          "count": 1,
+          "chance": 0.509,
+          "limit": 120,
+          "condAtLimit": 2
+        }
+      ]
+    },
+    {
+      "npcId": 21499,
+      "hook": "kill",
+      "when": "started",
+      "cond": 1,
+      "party": true,
+      "html": "",
+      "ops": [
+        {
+          "op": "drop_item",
+          "itemId": 7546,
+          "count": 1,
+          "chance": 0.92,
+          "limit": 120,
+          "condAtLimit": 2
+        }
+      ]
+    },
+    {
+      "npcId": 21500,
+      "hook": "kill",
+      "when": "started",
+      "cond": 1,
+      "party": true,
+      "html": "",
+      "ops": [
+        {
+          "op": "drop_item",
+          "itemId": 7546,
+          "count": 1,
+          "chance": 0.509,
+          "limit": 120,
+          "condAtLimit": 2
+        }
+      ]
+    },
+    {
+      "npcId": 21501,
+      "hook": "kill",
+      "when": "started",
+      "cond": 1,
+      "party": true,
+      "html": "",
+      "ops": [
+        {
+          "op": "drop_item",
+          "itemId": 7546,
+          "count": 1,
+          "chance": 0.92,
+          "limit": 120,
+          "condAtLimit": 2
+        }
+      ]
+    },
+    {
+      "npcId": 21502,
+      "hook": "kill",
+      "when": "started",
+      "cond": 1,
+      "party": true,
+      "html": "",
+      "ops": [
+        {
+          "op": "drop_item",
+          "itemId": 7546,
+          "count": 1,
+          "chance": 0.509,
+          "limit": 120,
+          "condAtLimit": 2
+        }
+      ]
+    },
+    {
+      "npcId": 21503,
+      "hook": "kill",
+      "when": "started",
+      "cond": 1,
+      "party": true,
+      "html": "",
+      "ops": [
+        {
+          "op": "drop_item",
+          "itemId": 7546,
+          "count": 1,
+          "chance": 0.92,
+          "limit": 120,
+          "condAtLimit": 2
+        }
+      ]
+    },
+    {
+      "npcId": 21504,
+      "hook": "kill",
+      "when": "started",
+      "cond": 1,
+      "party": true,
+      "html": "",
+      "ops": [
+        {
+          "op": "drop_item",
+          "itemId": 7546,
+          "count": 1,
+          "chance": 0.509,
+          "limit": 120,
+          "condAtLimit": 2
+        }
+      ]
+    },
+    {
+      "npcId": 21505,
+      "hook": "kill",
+      "when": "started",
+      "cond": 1,
+      "party": true,
+      "html": "",
+      "ops": [
+        {
+          "op": "drop_item",
+          "itemId": 7546,
+          "count": 1,
+          "chance": 0.92,
+          "limit": 120,
+          "condAtLimit": 2
+        }
+      ]
+    }
+  ]
+}

@@ -1,0 +1,168 @@
+{
+  "id": 353,
+  "name": "Power of Darkness",
+  "repeatable": true,
+  "abortable": true,
+  "questItems": [
+    5862
+  ],
+  "dialogs": [
+    {
+      "npcId": 31044,
+      "hook": "talk",
+      "when": "absent",
+      "maxLevel": 54,
+      "htmlFile": "31044-talk-000.htm"
+    },
+    {
+      "npcId": 31044,
+      "hook": "talk",
+      "when": "absent",
+      "minLevel": 55,
+      "htmlFile": "31044-talk-001.htm"
+    },
+    {
+      "npcId": 31044,
+      "hook": "event",
+      "when": "absent",
+      "event": "31044-03",
+      "minLevel": 55,
+      "htmlFile": "31044-event-31044-03-002.htm"
+    },
+    {
+      "npcId": 31044,
+      "hook": "event",
+      "when": "absent",
+      "event": "31044-04",
+      "minLevel": 55,
+      "ops": [
+        {
+          "op": "create"
+        },
+        {
+          "op": "start"
+        },
+        {
+          "op": "set_cond",
+          "cond": 1
+        }
+      ],
+      "htmlFile": "31044-event-31044-04-003.htm"
+    },
+    {
+      "npcId": 31044,
+      "hook": "talk",
+      "when": "started",
+      "cond": 1,
+      "hasItem": 5862,
+      "ops": [
+        {
+          "op": "sell_items",
+          "prices": [
+            {
+              "itemId": 5862,
+              "adena": 230
+            }
+          ],
+          "bonusMin": 1,
+          "bonusAdena": 2500
+        }
+      ],
+      "htmlFile": "31044-talk-c1-004.htm"
+    },
+    {
+      "npcId": 31044,
+      "hook": "talk",
+      "when": "started",
+      "cond": 1,
+      "lacksItems": [
+        5862
+      ],
+      "htmlFile": "31044-talk-c1-005.htm"
+    },
+    {
+      "npcId": 31044,
+      "hook": "event",
+      "when": "started",
+      "event": "31044-07",
+      "cond": 1,
+      "htmlFile": "31044-event-31044-07-c1-006.htm"
+    },
+    {
+      "npcId": 31044,
+      "hook": "event",
+      "when": "started",
+      "event": "31044-08",
+      "ops": [
+        {
+          "op": "complete"
+        }
+      ],
+      "htmlFile": "31044-event-31044-08-007.htm"
+    },
+    {
+      "npcId": 20244,
+      "hook": "kill",
+      "when": "started",
+      "cond": 1,
+      "html": "",
+      "ops": [
+        {
+          "op": "drop_item",
+          "itemId": 5862,
+          "count": 1,
+          "chance": 0.48,
+          "limit": 0
+        }
+      ]
+    },
+    {
+      "npcId": 20283,
+      "hook": "kill",
+      "when": "started",
+      "cond": 1,
+      "html": "",
+      "ops": [
+        {
+          "op": "drop_item",
+          "itemId": 5862,
+          "count": 1,
+          "chance": 0.48,
+          "limit": 0
+        }
+      ]
+    },
+    {
+      "npcId": 20245,
+      "hook": "kill",
+      "when": "started",
+      "cond": 1,
+      "html": "",
+      "ops": [
+        {
+          "op": "drop_item",
+          "itemId": 5862,
+          "count": 1,
+          "chance": 0.5,
+          "limit": 0
+        }
+      ]
+    },
+    {
+      "npcId": 20284,
+      "hook": "kill",
+      "when": "started",
+      "cond": 1,
+      "html": "",
+      "ops": [
+        {
+          "op": "drop_item",
+          "itemId": 5862,
+          "count": 1,
+          "chance": 0.5,
+          "limit": 0
+        }
+      ]
+    }
+  ]
+}
