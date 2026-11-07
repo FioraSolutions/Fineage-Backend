@@ -42,6 +42,10 @@ public sealed class NetMoveStateCoalesceTests
         for (int i = 0; i < 8; i++)
             Assert.True(conn.TrySend(NetOpcode.SystemMessage, filler));
 
+        // Snapshot after fillers: fineage.outbound.dropped is process-global and other
+        // Net.* tests may emit drops in parallel on CI.
+        int dropsBeforeMoves = dropped.Count;
+
         const ulong entity = 0xBEEF;
         const uint gen = 1;
         int accepted = 0;
@@ -60,7 +64,7 @@ public sealed class NetMoveStateCoalesceTests
         }
 
         Assert.Equal(32, accepted);
-        Assert.Empty(dropped);
+        Assert.Equal(dropsBeforeMoves, dropped.Count);
 
         await Task.Delay(200, cts.Token);
 
