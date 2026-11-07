@@ -12,29 +12,64 @@
     {
       "npcId": 30312,
       "hook": "talk",
+      "when": "absent",
+      "maxLevel": 1,
+      "htmlFile": "30312-talk-000.htm"
+    },
+    {
+      "npcId": 30312,
+      "hook": "talk",
+      "when": "absent",
+      "minLevel": 2,
+      "htmlFile": "30312-talk-001.htm"
+    },
+    {
+      "npcId": 30312,
+      "hook": "event",
+      "when": "absent",
+      "event": "30312-03",
+      "minLevel": 2,
+      "ops": [
+        {
+          "op": "create"
+        },
+        {
+          "op": "start"
+        },
+        {
+          "op": "set_cond",
+          "cond": 1
+        }
+      ],
+      "htmlFile": "30312-event-30312-03-002.htm"
+    },
+    {
+      "npcId": 30312,
+      "hook": "talk",
       "when": "started",
       "cond": 1,
-      "htmlFile": "30312-talk-c1-000.htm"
+      "htmlFile": "30312-talk-c1-003.htm"
     },
     {
       "npcId": 30312,
       "hook": "talk",
       "when": "started",
       "cond": 2,
-      "htmlFile": "30312-talk-c2-001.htm"
+      "htmlFile": "30312-talk-c2-004.htm"
     },
     {
       "npcId": 30312,
       "hook": "talk",
       "when": "started",
       "cond": 3,
-      "htmlFile": "30312-talk-c3-002.htm"
+      "htmlFile": "30312-talk-c3-005.htm"
     },
     {
       "npcId": 30312,
       "hook": "talk",
       "when": "started",
       "cond": 4,
+      "hasItem": 1034,
       "ops": [
         {
           "op": "take_item",
@@ -55,25 +90,28 @@
           "op": "complete"
         }
       ],
-      "htmlFile": "30312-talk-c4-003.htm"
+      "htmlFile": "30312-talk-c4-006.htm"
     },
     {
       "npcId": 30051,
       "hook": "talk",
       "when": "started",
       "cond": 1,
-      "htmlFile": "30051-talk-c1-004.htm"
+      "htmlFile": "30051-talk-c1-007.htm"
     },
     {
       "npcId": 30051,
       "hook": "talk",
       "when": "started",
       "cond": 2,
+      "atLeast": {
+        "1032": 10
+      },
       "ops": [
         {
           "op": "take_item",
           "itemId": 1032,
-          "count": 1
+          "count": 10
         },
         {
           "op": "give_item",
@@ -85,41 +123,42 @@
           "cond": 3
         }
       ],
-      "htmlFile": "30051-talk-c2-005.htm"
+      "htmlFile": "30051-talk-c2-008.htm"
     },
     {
       "npcId": 30051,
       "hook": "talk",
       "when": "started",
       "cond": 3,
-      "htmlFile": "30051-talk-c3-006.htm"
+      "htmlFile": "30051-talk-c3-009.htm"
     },
     {
       "npcId": 30051,
       "hook": "talk",
       "when": "started",
       "cond": 4,
-      "htmlFile": "30051-talk-c4-007.htm"
+      "htmlFile": "30051-talk-c4-010.htm"
     },
     {
       "npcId": 30055,
       "hook": "talk",
       "when": "started",
       "cond": 1,
-      "htmlFile": "30055-talk-c1-008.htm"
+      "htmlFile": "30055-talk-c1-011.htm"
     },
     {
       "npcId": 30055,
       "hook": "talk",
       "when": "started",
       "cond": 2,
-      "htmlFile": "30055-talk-c2-009.htm"
+      "htmlFile": "30055-talk-c2-012.htm"
     },
     {
       "npcId": 30055,
       "hook": "talk",
       "when": "started",
       "cond": 3,
+      "hasItem": 1033,
       "ops": [
         {
           "op": "take_item",
@@ -136,14 +175,68 @@
           "cond": 4
         }
       ],
-      "htmlFile": "30055-talk-c3-010.htm"
+      "htmlFile": "30055-talk-c3-013.htm"
     },
     {
       "npcId": 30055,
       "hook": "talk",
       "when": "started",
       "cond": 4,
-      "htmlFile": "30055-talk-c4-011.htm"
+      "htmlFile": "30055-talk-c4-014.htm"
+    },
+    {
+      "npcId": 20544,
+      "hook": "kill",
+      "when": "started",
+      "cond": 1,
+      "party": true,
+      "html": "",
+      "ops": [
+        {
+          "op": "drop_item",
+          "itemId": 1032,
+          "count": 1,
+          "chance": 0.3,
+          "limit": 10,
+          "condAtLimit": 2
+        }
+      ]
+    },
+    {
+      "npcId": 20545,
+      "hook": "kill",
+      "when": "started",
+      "cond": 1,
+      "party": true,
+      "html": "",
+      "ops": [
+        {
+          "op": "drop_item",
+          "itemId": 1032,
+          "count": 1,
+          "chance": 0.3,
+          "limit": 10,
+          "condAtLimit": 2
+        }
+      ]
+    },
+    {
+      "npcId": 20481,
+      "hook": "kill",
+      "when": "started",
+      "cond": 1,
+      "party": true,
+      "html": "",
+      "ops": [
+        {
+          "op": "drop_item",
+          "itemId": 1032,
+          "count": 1,
+          "chance": 0.3,
+          "limit": 10,
+          "condAtLimit": 2
+        }
+      ]
     }
   ]
 }

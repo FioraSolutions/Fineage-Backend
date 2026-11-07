@@ -11,13 +11,14 @@
       "npcId": 30042,
       "hook": "talk",
       "when": "absent",
-      "minLevel": 3,
+      "maxLevel": 2,
       "htmlFile": "30042-talk-000.htm"
     },
     {
       "npcId": 30042,
       "hook": "talk",
       "when": "absent",
+      "minLevel": 3,
       "htmlFile": "30042-talk-001.htm"
     },
     {
@@ -34,13 +35,13 @@
           "op": "start"
         },
         {
+          "op": "set_cond",
+          "cond": 1
+        },
+        {
           "op": "give_item",
           "itemId": 1019,
           "count": 1
-        },
-        {
-          "op": "set_cond",
-          "cond": 1
         }
       ],
       "htmlFile": "30042-event-30042-03-002.htm"
@@ -57,11 +58,6 @@
       "when": "started",
       "hasItem": 1019,
       "ops": [
-        {
-          "op": "take_item",
-          "itemId": 1019,
-          "count": 1
-        },
         {
           "op": "give_item",
           "itemId": 734,
