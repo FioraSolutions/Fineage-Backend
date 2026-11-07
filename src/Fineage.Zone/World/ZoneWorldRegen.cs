@@ -225,19 +225,17 @@ public sealed partial class ZoneWorld
         Values = [entity.CurHp, entity.MaxHp, entity.CurMp, entity.MaxMp]
     };
 
-    (int hp, int maxHp, int mp, int maxMp, int level, int race, int sex) LoadVitals(ZoneSession session)
+    (int hp, int maxHp, int mp, int maxMp, int level, int race, int sex) LoadVitals(
+        ZoneSession session,
+        CharacterRecord? stored = null)
     {
-        if (_accounts != null)
+        if (stored != null)
         {
-            var record = _accounts.FindById(session.Account, session.ObjectId);
-            if (record != null)
-            {
-                var (maxHp, maxMp) = ResolveMaxima(record);
-                int hp = record.Hp > 0 ? Math.Min(record.Hp, maxHp) : maxHp;
-                int mp = record.Mp > 0 ? Math.Min(record.Mp, maxMp) : maxMp;
-                int level = record.Level > 0 ? record.Level : 1;
-                return (hp, maxHp, mp, maxMp, level, record.Race, record.Sex);
-            }
+            var (maxHp, maxMp) = ResolveMaxima(stored);
+            int hp = stored.Hp > 0 ? Math.Min(stored.Hp, maxHp) : maxHp;
+            int mp = stored.Mp > 0 ? Math.Min(stored.Mp, maxMp) : maxMp;
+            int level = stored.Level > 0 ? stored.Level : 1;
+            return (hp, maxHp, mp, maxMp, level, stored.Race, stored.Sex);
         }
 
         if (PlayerClasses.TryGet(session.ClassId, out var template) && template != null)
