@@ -1,0 +1,176 @@
+{
+  "id": 601,
+  "name": "Watching Eyes",
+  "repeatable": true,
+  "abortable": true,
+  "questItems": [
+    7188
+  ],
+  "dialogs": [
+    {
+      "npcId": 31683,
+      "hook": "talk",
+      "when": "absent",
+      "maxLevel": 70,
+      "htmlFile": "31683-talk-000.htm"
+    },
+    {
+      "npcId": 31683,
+      "hook": "talk",
+      "when": "absent",
+      "minLevel": 71,
+      "htmlFile": "31683-talk-001.htm"
+    },
+    {
+      "npcId": 31683,
+      "hook": "event",
+      "when": "absent",
+      "event": "31683-02",
+      "minLevel": 71,
+      "ops": [
+        {
+          "op": "create"
+        },
+        {
+          "op": "start"
+        },
+        {
+          "op": "set_cond",
+          "cond": 1
+        }
+      ],
+      "htmlFile": "31683-event-31683-02-002.htm"
+    },
+    {
+      "npcId": 31683,
+      "hook": "talk",
+      "when": "started",
+      "cond": 1,
+      "htmlFile": "31683-talk-c1-003.htm"
+    },
+    {
+      "npcId": 31683,
+      "hook": "talk",
+      "when": "started",
+      "cond": 2,
+      "htmlFile": "31683-talk-c2-004.htm"
+    },
+    {
+      "npcId": 31683,
+      "hook": "event",
+      "when": "started",
+      "event": "31683-05",
+      "cond": 2,
+      "atLeast": {
+        "7188": 100
+      },
+      "ops": [
+        {
+          "op": "take_item",
+          "itemId": 7188,
+          "count": 100
+        },
+        {
+          "op": "give_adena",
+          "count": 230000
+        },
+        {
+          "op": "complete"
+        }
+      ],
+      "htmlFile": "31683-event-31683-05-c2-005.htm"
+    },
+    {
+      "npcId": 31683,
+      "hook": "event",
+      "when": "started",
+      "event": "31683-05",
+      "htmlFile": "31683-event-31683-05-006.htm"
+    },
+    {
+      "npcId": 21308,
+      "hook": "kill",
+      "when": "started",
+      "cond": 1,
+      "html": "",
+      "ops": [
+        {
+          "op": "drop_item",
+          "itemId": 7188,
+          "count": 1,
+          "chance": 0.79,
+          "limit": 100,
+          "condAtLimit": 2
+        }
+      ]
+    },
+    {
+      "npcId": 21309,
+      "hook": "kill",
+      "when": "started",
+      "cond": 1,
+      "html": "",
+      "ops": [
+        {
+          "op": "drop_item",
+          "itemId": 7188,
+          "count": 1,
+          "chance": 0.82,
+          "limit": 100,
+          "condAtLimit": 2
+        }
+      ]
+    },
+    {
+      "npcId": 21306,
+      "hook": "kill",
+      "when": "started",
+      "cond": 1,
+      "html": "",
+      "ops": [
+        {
+          "op": "drop_item",
+          "itemId": 7188,
+          "count": 1,
+          "chance": 0.85,
+          "limit": 100,
+          "condAtLimit": 2
+        }
+      ]
+    },
+    {
+      "npcId": 21310,
+      "hook": "kill",
+      "when": "started",
+      "cond": 1,
+      "html": "",
+      "ops": [
+        {
+          "op": "drop_item",
+          "itemId": 7188,
+          "count": 1,
+          "chance": 0.68,
+          "limit": 100,
+          "condAtLimit": 2
+        }
+      ]
+    },
+    {
+      "npcId": 21311,
+      "hook": "kill",
+      "when": "started",
+      "cond": 1,
+      "html": "",
+      "ops": [
+        {
+          "op": "drop_item",
+          "itemId": 7188,
+          "count": 1,
+          "chance": 0.63,
+          "limit": 100,
+          "condAtLimit": 2
+        }
+      ]
+    }
+  ]
+}
