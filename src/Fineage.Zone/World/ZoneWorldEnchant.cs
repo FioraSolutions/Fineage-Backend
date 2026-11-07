@@ -5,22 +5,22 @@ namespace Fineage.Zone.World;
 
 public sealed partial class ZoneWorld
 {
-    public Task<string?> TryEnchantRequestAsync(ZoneSession session, EnchantRequestMsg request, CancellationToken ct)
+    public Task<string?> TryEnchantRequestAsync(ZoneSession session, int scrollObjectId, CancellationToken ct)
     {
         string? error;
         lock (_gate)
-            error = TryEnchantRequest(session, request.ObjectId);
+            error = TryEnchantRequest(session, scrollObjectId);
         if (error != null)
             return Task.FromResult<string?>(error);
 
         return Task.FromResult<string?>(null);
     }
 
-    public Task<string?> TryEnchantConfirmAsync(ZoneSession session, EnchantConfirmMsg request, CancellationToken ct)
+    public Task<string?> TryEnchantConfirmAsync(ZoneSession session, int targetObjectId, CancellationToken ct)
     {
         string? error;
         lock (_gate)
-            error = TryEnchantConfirm(session, request.ObjectId);
+            error = TryEnchantConfirm(session, targetObjectId);
         if (error != null)
             return Task.FromResult<string?>(error);
 

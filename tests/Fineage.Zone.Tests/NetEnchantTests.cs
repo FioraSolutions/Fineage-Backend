@@ -36,14 +36,12 @@ public sealed class NetEnchantTests
         var saber = player.Inventory!.Add(Saber, 1);
         var scroll = player.Inventory!.Add(NormalD, 1);
 
-        Assert.Null(await kit.World.TryEnchantRequestAsync(
-            session, new EnchantRequestMsg { ObjectId = scroll.ObjectId }, default));
+        Assert.Null(await kit.World.TryEnchantRequestAsync(session, scroll.ObjectId, default));
         Assert.Contains(
             rec.Of(nameof(INetPresenceBridge.FanoutSystemMessage)),
             args => args[1] is SystemMessageNetMsg line && line.Id == EnchantProtocol.SelectItem);
 
-        Assert.Null(await kit.World.TryEnchantConfirmAsync(
-            session, new EnchantConfirmMsg { ObjectId = saber.ObjectId }, default));
+        Assert.Null(await kit.World.TryEnchantConfirmAsync(session, saber.ObjectId, default));
 
         EnchantResultNetMsg result = LastResult(rec);
         Assert.Equal(saber.ObjectId, result.ObjectId);
@@ -57,8 +55,7 @@ public sealed class NetEnchantTests
         var (kit, session, player, rec) = await SetupAsync();
         var scroll = player.Inventory!.Add(NormalD, 1);
 
-        Assert.Null(await kit.World.TryEnchantRequestAsync(
-            session, new EnchantRequestMsg { ObjectId = scroll.ObjectId }, default));
+        Assert.Null(await kit.World.TryEnchantRequestAsync(session, scroll.ObjectId, default));
         Assert.Null(await kit.World.TryEnchantCancelAsync(session, default));
 
         EnchantResultNetMsg result = LastResult(rec);
@@ -72,8 +69,7 @@ public sealed class NetEnchantTests
         var (kit, session, player, rec) = await SetupAsync();
         var saber = player.Inventory!.Add(Saber, 1);
 
-        Assert.Equal(EnchantProtocol.NoRequest, await kit.World.TryEnchantConfirmAsync(
-            session, new EnchantConfirmMsg { ObjectId = saber.ObjectId }, default));
+        Assert.Equal(EnchantProtocol.NoRequest, await kit.World.TryEnchantConfirmAsync(session, saber.ObjectId, default));
         Assert.Empty(rec.Of(nameof(INetPresenceBridge.FanoutEnchantResult)));
     }
 
@@ -83,8 +79,7 @@ public sealed class NetEnchantTests
         var (kit, session, player, rec) = await SetupAsync();
         var saber = player.Inventory!.Add(Saber, 1);
 
-        Assert.Equal(EnchantProtocol.NotScroll, await kit.World.TryEnchantRequestAsync(
-            session, new EnchantRequestMsg { ObjectId = saber.ObjectId }, default));
+        Assert.Equal(EnchantProtocol.NotScroll, await kit.World.TryEnchantRequestAsync(session, saber.ObjectId, default));
         Assert.Empty(rec.Of(nameof(INetPresenceBridge.FanoutEnchantResult)));
     }
 }

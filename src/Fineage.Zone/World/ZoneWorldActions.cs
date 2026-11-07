@@ -5,32 +5,33 @@ namespace Fineage.Zone.World;
 
 public sealed partial class ZoneWorld
 {
-    public Task<string?> TryCharacterActionAsync(ZoneSession session, CharacterActionRequestMsg request, CancellationToken ct)
+    public Task<string?> TryCharacterActionAsync(
+        ZoneSession session, int actionId, int targetObjectId, CancellationToken ct)
     {
         if (!IsLive(session))
             return Task.FromResult<string?>("world");
 
         string? error;
         lock (_gate)
-            error = TryCharacterAction(session, request);
+            error = TryCharacterAction(session, actionId, targetObjectId);
         return Task.FromResult<string?>(error);
     }
 
-    string? TryCharacterAction(ZoneSession session, CharacterActionRequestMsg request)
+    string? TryCharacterAction(ZoneSession session, int actionId, int targetObjectId)
     {
         if (!_byId.TryGetValue(session.ObjectId, out var player) || player.Session == null)
             return "world";
         if (player.Dead)
             return ActionProtocol.Dead;
 
-        return request.ActionId switch
+        return actionId switch
         {
             ActionProtocol.SitStand => ToggleSitStand(player),
             ActionProtocol.WalkRun => ToggleWalkRun(player),
-            ActionProtocol.Attack => TryAttack(session, request.TargetObjectId),
+            ActionProtocol.Attack => TryAttack(session, targetObjectId),
             ActionProtocol.NextTarget => TryNextTarget(session, player),
             ActionProtocol.SocialGreeting or ActionProtocol.SocialVictory or ActionProtocol.SocialAdvance
-                => FanoutSocial(player, request.ActionId),
+                => FanoutSocial(player, actionId),
             >= 10 and <= 61 => ActionProtocol.Unsupported,
             _ => ActionProtocol.Unknown
         };

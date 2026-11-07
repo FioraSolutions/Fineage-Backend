@@ -84,8 +84,7 @@ public sealed class NetEnchantRulesTests
     static async Task<int> OpenScrollAsync(Bench bench, ZoneSession session, ZoneEntity player, int scrollId)
     {
         int scroll = SlotFor(player, scrollId);
-        Assert.Null(await bench.World.TryEnchantRequestAsync(session,
-            new EnchantRequestMsg { ObjectId = scroll }, default));
+        Assert.Null(await bench.World.TryEnchantRequestAsync(session, scroll, default));
         return scroll;
     }
 
@@ -105,8 +104,7 @@ public sealed class NetEnchantRulesTests
             new StoredItem(Saber, 1, -1, 3), Bag(NormalD), Bag(CrystalAdena, 2));
 
         await OpenScrollAsync(bench, session, player, NormalD);
-        Assert.Null(await bench.World.TryEnchantConfirmAsync(session,
-            new EnchantConfirmMsg { ObjectId = SlotFor(player, Saber) }, default));
+        Assert.Null(await bench.World.TryEnchantConfirmAsync(session, SlotFor(player, Saber), default));
 
         var result = LastResult(bench.Rec);
         Assert.Equal(EnchantProtocol.ResultCrystallize, result.Result);
@@ -140,8 +138,7 @@ public sealed class NetEnchantRulesTests
             new StoredItem(Saber, 1, -1, 3), Bag(BlessedD));
 
         await OpenScrollAsync(bench, session, player, BlessedD);
-        Assert.Null(await bench.World.TryEnchantConfirmAsync(session,
-            new EnchantConfirmMsg { ObjectId = SlotFor(player, Saber) }, default));
+        Assert.Null(await bench.World.TryEnchantConfirmAsync(session, SlotFor(player, Saber), default));
 
         var result = LastResult(bench.Rec);
         Assert.Equal(EnchantProtocol.ResultReset, result.Result);
@@ -167,8 +164,7 @@ public sealed class NetEnchantRulesTests
             new StoredItem(Saber, 1, -1, 3), Bag(9001));
 
         await OpenScrollAsync(bench, session, player, 9001);
-        Assert.Null(await bench.World.TryEnchantConfirmAsync(session,
-            new EnchantConfirmMsg { ObjectId = SlotFor(player, Saber) }, default));
+        Assert.Null(await bench.World.TryEnchantConfirmAsync(session, SlotFor(player, Saber), default));
 
         var result = LastResult(bench.Rec);
         Assert.Equal(EnchantProtocol.ResultKeep, result.Result);
@@ -197,26 +193,21 @@ public sealed class NetEnchantRulesTests
         int fresh = sabers.Single(s => s.EnchantLevel != 16).ObjectId;
 
         await OpenScrollAsync(bench, session, player, NormalC);
-        Assert.Equal(EnchantProtocol.GradeMismatch, await bench.World.TryEnchantConfirmAsync(session,
-            new EnchantConfirmMsg { ObjectId = fresh }, default));
+        Assert.Equal(EnchantProtocol.GradeMismatch, await bench.World.TryEnchantConfirmAsync(session, fresh, default));
         Assert.Contains(bench.Store.FindById(session.Account, session.ObjectId)!.Items!, item => item.ItemId == NormalC);
 
         await OpenScrollAsync(bench, session, player, NormalD);
-        Assert.Equal(EnchantProtocol.SlotMismatch, await bench.World.TryEnchantConfirmAsync(session,
-            new EnchantConfirmMsg { ObjectId = SlotFor(player, Neck) }, default));
+        Assert.Equal(EnchantProtocol.SlotMismatch, await bench.World.TryEnchantConfirmAsync(session, SlotFor(player, Neck), default));
 
         await OpenScrollAsync(bench, session, player, NormalD);
-        Assert.Equal(EnchantProtocol.NotEnchantable, await bench.World.TryEnchantConfirmAsync(session,
-            new EnchantConfirmMsg { ObjectId = SlotFor(player, 5588) }, default));
+        Assert.Equal(EnchantProtocol.NotEnchantable, await bench.World.TryEnchantConfirmAsync(session, SlotFor(player, 5588), default));
 
         await OpenScrollAsync(bench, session, player, ArmorD);
-        Assert.Null(await bench.World.TryEnchantConfirmAsync(session,
-            new EnchantConfirmMsg { ObjectId = SlotFor(player, Neck) }, default));
+        Assert.Null(await bench.World.TryEnchantConfirmAsync(session, SlotFor(player, Neck), default));
         Assert.Equal(1, LastResult(bench.Rec).EnchantLevel);
 
         await OpenScrollAsync(bench, session, player, NormalD);
-        Assert.Equal(EnchantProtocol.MaxEnchant, await bench.World.TryEnchantConfirmAsync(session,
-            new EnchantConfirmMsg { ObjectId = capped }, default));
+        Assert.Equal(EnchantProtocol.MaxEnchant, await bench.World.TryEnchantConfirmAsync(session, capped, default));
         Assert.Contains(bench.Store.FindById(session.Account, session.ObjectId)!.Items!,
             item => item.ItemId == Saber && item.EnchantLevel == 16);
     }
@@ -230,8 +221,7 @@ public sealed class NetEnchantRulesTests
         await bench.EnterAsync("enchb", "Bram", Bag(Neck));
 
         await OpenScrollAsync(bench, session, player, NormalD);
-        Assert.Null(await bench.World.TryEnchantConfirmAsync(session,
-            new EnchantConfirmMsg { ObjectId = SlotFor(player, Saber) }, default));
+        Assert.Null(await bench.World.TryEnchantConfirmAsync(session, SlotFor(player, Saber), default));
 
         var info = Assert.IsType<UserInfoNetMsg>(
             bench.Rec.Of(nameof(INetPresenceBridge.FanoutUserInfo)).Last()[1]);
@@ -250,8 +240,7 @@ public sealed class NetEnchantRulesTests
         await bench.EnterAsync("enchb", "Bram", Bag(Neck));
 
         await OpenScrollAsync(bench, session, player, NormalD);
-        Assert.Null(await bench.World.TryEnchantConfirmAsync(session,
-            new EnchantConfirmMsg { ObjectId = SlotFor(player, Saber) }, default));
+        Assert.Null(await bench.World.TryEnchantConfirmAsync(session, SlotFor(player, Saber), default));
 
         Assert.Contains(Lines(bench.Rec), l => l.Id == EnchantProtocol.EquipmentRemoved);
         var info = Assert.IsType<UserInfoNetMsg>(
@@ -271,14 +260,12 @@ public sealed class NetEnchantRulesTests
             new StoredItem(Blade, 1, -1, 16), Bag(CrystalS));
 
         await OpenScrollAsync(bench, session, player, CrystalD);
-        Assert.Null(await bench.World.TryEnchantConfirmAsync(session,
-            new EnchantConfirmMsg { ObjectId = SlotFor(player, Saber) }, default));
+        Assert.Null(await bench.World.TryEnchantConfirmAsync(session, SlotFor(player, Saber), default));
         Assert.Equal(4, LastResult(bench.Rec).EnchantLevel);
 
         bench.Rec.Calls.Clear();
         await OpenScrollAsync(bench, session, player, CrystalS);
-        Assert.Null(await bench.World.TryEnchantConfirmAsync(session,
-            new EnchantConfirmMsg { ObjectId = SlotFor(player, Blade) }, default));
+        Assert.Null(await bench.World.TryEnchantConfirmAsync(session, SlotFor(player, Blade), default));
         Assert.Equal(16, LastResult(bench.Rec).EnchantLevel);
         var update = Assert.IsType<InventoryUpdateNetMsg>(
             bench.Rec.Of(nameof(INetPresenceBridge.FanoutInventoryUpdate)).Last()[1]);
@@ -295,8 +282,7 @@ public sealed class NetEnchantRulesTests
             new StoredItem(Full, 1, -1, 3), Bag(ArmorB));
 
         await OpenScrollAsync(bench, session, player, ArmorB);
-        Assert.Null(await bench.World.TryEnchantConfirmAsync(session,
-            new EnchantConfirmMsg { ObjectId = SlotFor(player, Full) }, default));
+        Assert.Null(await bench.World.TryEnchantConfirmAsync(session, SlotFor(player, Full), default));
         Assert.Equal(4, LastResult(bench.Rec).EnchantLevel);
         Assert.Contains(bench.Store.FindById(session.Account, session.ObjectId)!.Items!,
             item => item.ItemId == Full && item.EnchantLevel == 4);
@@ -310,10 +296,8 @@ public sealed class NetEnchantRulesTests
             Bag(Saber), Bag(NormalD), Bag(NormalC));
 
         Assert.Equal(EnchantProtocol.NoRequest, await bench.World.TryEnchantCancelAsync(session, default));
-        Assert.Equal(InventoryProtocol.NotOwned, await bench.World.TryEnchantRequestAsync(session,
-            new EnchantRequestMsg { ObjectId = 999 }, default));
-        Assert.Equal(EnchantProtocol.NotScroll, await bench.World.TryEnchantRequestAsync(session,
-            new EnchantRequestMsg { ObjectId = SlotFor(player, Saber) }, default));
+        Assert.Equal(InventoryProtocol.NotOwned, await bench.World.TryEnchantRequestAsync(session, 999, default));
+        Assert.Equal(EnchantProtocol.NotScroll, await bench.World.TryEnchantRequestAsync(session, SlotFor(player, Saber), default));
 
         await OpenScrollAsync(bench, session, player, NormalD);
         var opened = Assert.Single(Lines(bench.Rec));
@@ -329,15 +313,13 @@ public sealed class NetEnchantRulesTests
 
         bench.Rec.Calls.Clear();
         await OpenScrollAsync(bench, session, player, NormalD);
-        Assert.Null(await bench.World.TryEnchantConfirmAsync(session,
-            new EnchantConfirmMsg { ObjectId = SlotFor(player, Saber) }, default));
+        Assert.Null(await bench.World.TryEnchantConfirmAsync(session, SlotFor(player, Saber), default));
         var success = LastResult(bench.Rec);
         Assert.Equal(EnchantProtocol.ResultSuccess, success.Result);
         Assert.Equal(1, success.EnchantLevel);
         Assert.Equal(SlotFor(player, Saber), success.ObjectId);
         Assert.Contains(Lines(bench.Rec), l => l.Id == EnchantProtocol.SuccessPlain);
 
-        Assert.Equal(EnchantProtocol.NoRequest, await bench.World.TryEnchantConfirmAsync(session,
-            new EnchantConfirmMsg { ObjectId = SlotFor(player, Saber) }, default));
+        Assert.Equal(EnchantProtocol.NoRequest, await bench.World.TryEnchantConfirmAsync(session, SlotFor(player, Saber), default));
     }
 }

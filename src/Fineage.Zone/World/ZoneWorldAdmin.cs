@@ -81,23 +81,13 @@ public sealed partial class ZoneWorld
         if (verb.Equals("admin_buff", StringComparison.OrdinalIgnoreCase)
             || verb.Equals("admin_buffs", StringComparison.OrdinalIgnoreCase))
         {
-            return TryBuffRequest(session, player.ObjectId, new BuffRequestMsg
-            {
-                TargetObjectId = player.ObjectId,
-                EffectId = 0,
-                Remove = false
-            });
+            return TryBuffRequest(session, player.ObjectId, effectId: 0, remove: false);
         }
 
         if (verb.Equals("admin_buff_clear", StringComparison.OrdinalIgnoreCase)
             || verb.Equals("admin_clearbuffs", StringComparison.OrdinalIgnoreCase))
         {
-            return TryBuffRequest(session, player.ObjectId, new BuffRequestMsg
-            {
-                TargetObjectId = player.ObjectId,
-                EffectId = 0,
-                Remove = true
-            });
+            return TryBuffRequest(session, player.ObjectId, effectId: 0, remove: true);
         }
 
         // Unknown admin_* — show shop hub rather than hard-failing HTML clicks we have not wired yet.

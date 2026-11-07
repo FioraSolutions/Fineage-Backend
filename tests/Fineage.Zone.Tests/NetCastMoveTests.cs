@@ -96,10 +96,10 @@ public sealed class NetCastMoveTests
     public async Task No_sit_while_casting_and_sit_on_arrival_while_running()
     {
         var (kit, session, player) = await SetupAsync();
-        var sit = new CharacterActionRequestMsg { ActionId = ActionProtocol.SitStand };
         Assert.Null(await Cast(kit, session));
         player.CombatUntilUnixMs = 0;
-        Assert.Equal(ActionProtocol.Blocked, await kit.World.TryCharacterActionAsync(session, sit, CancellationToken.None));
+        Assert.Equal(ActionProtocol.Blocked, await kit.World.TryCharacterActionAsync(
+            session, ActionProtocol.SitStand, 0, CancellationToken.None));
         Assert.False(player.Sitting);
 
         kit.Now = DateTimeOffset.FromUnixTimeMilliseconds(player.CastingUntilMs + 1);
@@ -107,7 +107,8 @@ public sealed class NetCastMoveTests
         player.CombatUntilUnixMs = 0;
         Assert.Null(await Move(kit, session, player, -200));
         Assert.True(player.MoveActive);
-        Assert.Null(await kit.World.TryCharacterActionAsync(session, sit, CancellationToken.None));
+        Assert.Null(await kit.World.TryCharacterActionAsync(
+            session, ActionProtocol.SitStand, 0, CancellationToken.None));
         Assert.False(player.Sitting);
         Assert.True(session.SitOnArrive);
 

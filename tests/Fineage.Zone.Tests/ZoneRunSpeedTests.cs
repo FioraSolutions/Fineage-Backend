@@ -81,7 +81,7 @@ public sealed class ZoneRunSpeedTests
         Assert.Equal(baseWalk, player.WalkSpeed, 3);
 
         rec.Calls.Clear();
-        Assert.Null(await kit.World.TryBuffRequestAsync(session, new BuffRequestMsg { EffectId = 1204 }, CancellationToken.None));
+        Assert.Null(await kit.World.TryBuffRequestAsync(session, 0, 1204, false, CancellationToken.None));
         var moves = rec.Of(nameof(INetPresenceBridge.FanoutChangeMoveType));
         // ChangeMoveType carries both gaits: the client animates walk speed from the same packet.
         Assert.Contains(moves, m => (int)m[1]! == player.ObjectId
@@ -251,7 +251,7 @@ public sealed class ZoneRunSpeedTests
         Assert.True(player.MoveActive);
 
         // Same tick budget: the buffed pawn covers more ground (applied through the real buff path).
-        Assert.Null(await kit.World.TryBuffRequestAsync(session, new BuffRequestMsg { EffectId = 1204 }, CancellationToken.None));
+        Assert.Null(await kit.World.TryBuffRequestAsync(session, 0, 1204, false, CancellationToken.None));
         player.Abnormals.Clear();
         ZoneAbnormals.Apply(player.Abnormals, 1204, 2, 1200, kit.Now.ToUnixTimeMilliseconds(), 2); // +33
         kit.World.RefreshRunSpeed(player);
