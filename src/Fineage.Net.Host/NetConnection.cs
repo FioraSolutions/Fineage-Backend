@@ -27,9 +27,12 @@ public sealed class NetConnection : IAsyncDisposable
         _client = client;
         _endpoint = endpoint;
         _stream = client.GetStream();
+        // Wait (not DropOldest): trade/inventory/auth commands must not silently lose earlier
+        // frames while later ones still run. Full inbox applies TCP backpressure via the read loop.
+        // Movement coalesce can land later as a separate inbound class.
         _inbox = Channel.CreateBounded<PacketEnvelope>(new BoundedChannelOptions(inboxCapacity)
         {
-            FullMode = BoundedChannelFullMode.DropOldest,
+            FullMode = BoundedChannelFullMode.Wait,
             SingleReader = true,
             SingleWriter = false
         });
