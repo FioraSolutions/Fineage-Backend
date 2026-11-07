@@ -25,8 +25,7 @@ public sealed class NetTeleportFanoutTests
         kit.World.NetBridge = bridge;
 
         Assert.Null(await kit.World.TryAdminKillPlayerAsync(session, CancellationToken.None));
-        Assert.Null(await kit.World.TryReviveAsync(
-            session, new ReviveRequestMsg { Action = DeathProtocol.ReviveToVillage }, CancellationToken.None));
+        Assert.Null(await kit.World.TryReviveAsync(session, DeathProtocol.ReviveToVillage, CancellationToken.None));
 
         var frames = rec.Of(nameof(INetPresenceBridge.FanoutTeleportToLocation));
         var only = Assert.Single(frames);

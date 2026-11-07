@@ -2137,10 +2137,7 @@ public sealed class NetZoneServer : INetPresenceBridge
 
         var before = _world.SnapshotKnownIds(zoneSession);
         var revive = NetCodec.DecodeReviveRequest(envelope.Payload);
-        string? error = await _world.TryReviveAsync(
-            zoneSession,
-            new ReviveRequestMsg { Action = revive.Action },
-            ct).ConfigureAwait(false);
+        string? error = await _world.TryReviveAsync(zoneSession, revive.Action, ct).ConfigureAwait(false);
         if (error != null)
         {
             await RejectAsync(conn, error, "Revive failed.", ct).ConfigureAwait(false);

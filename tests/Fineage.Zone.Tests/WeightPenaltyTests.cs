@@ -501,7 +501,7 @@ public sealed class WeightPenaltyWorldTests
         int count = (int)((need + 119) / 120); // Blessed Scroll of Escape, weight 120
         Assert.InRange(count, 1, ZoneWorld.MaxGrantCount);
 
-        Assert.Null(await kit.World.TryGiveItemAsync(session, new GiveItemMsg { ItemId = ScrollId, Count = count },
+        Assert.Null(await kit.World.TryGiveItemAsync(session, ScrollId, count,
             CancellationToken.None));
         Assert.Equal(2, player.WeightPenaltyLevel);
         Assert.NotEmpty(rec.Of(nameof(INetPresenceBridge.FanoutEtcStatusUpdate)));
@@ -514,7 +514,7 @@ public sealed class WeightPenaltyWorldTests
 
         // GrantItemRequest is the one add path that does not go through SaveInventory (the bag is persisted on leave),
         // so it calls the recompute itself; it must move the level just the same.
-        Assert.Null(await kit.World.TryGrantItemAsync(session, new GrantItemRequestMsg { ItemId = ScrollId, Count = count },
+        Assert.Null(await kit.World.TryGrantItemAsync(session, ScrollId, count,
             CancellationToken.None));
         Assert.Equal(2, player.WeightPenaltyLevel);
     }

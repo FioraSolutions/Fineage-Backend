@@ -4,14 +4,14 @@ namespace Fineage.Zone.World;
 
 public sealed partial class ZoneWorld
 {
-    public Task<string?> TryReviveAsync(ZoneSession session, ReviveRequestMsg request, CancellationToken ct)
+    public Task<string?> TryReviveAsync(ZoneSession session, int action, CancellationToken ct)
     {
         if (!IsLive(session))
             return Task.FromResult<string?>("world");
 
         string? error;
         lock (_gate)
-            error = TryRevive(session, request);
+            error = TryRevive(session, action);
         if (error != null)
             return Task.FromResult<string?>(error);
 
@@ -44,13 +44,13 @@ public sealed partial class ZoneWorld
         return null;
     }
 
-    string? TryRevive(ZoneSession session, ReviveRequestMsg request)
+    string? TryRevive(ZoneSession session, int action)
     {
         if (!_byId.TryGetValue(session.ObjectId, out var player) || player.Session == null)
             return "world";
         if (!player.Dead)
             return DeathProtocol.NotDead;
-        if (request.Action != DeathProtocol.ReviveToVillage)
+        if (action != DeathProtocol.ReviveToVillage)
             return DeathProtocol.Unsupported;
 
         ReviveAtVillage(player);

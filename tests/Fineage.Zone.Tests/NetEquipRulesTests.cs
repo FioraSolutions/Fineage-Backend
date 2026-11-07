@@ -317,14 +317,12 @@ public sealed class NetEquipRulesTests
         var bench = Open();
         BenchPlayer actor = await bench.EnterAsync("gear", "Alden", [Stack(Adena, 10)]);
 
-        Assert.Equal("world", await bench.World.TryGiveItemAsync(
-            new ZoneSession(),
-            new GiveItemMsg { ItemId = Adena, Count = 1 },
+        Assert.Equal("world", await bench.World.TryGiveItemAsync(new ZoneSession(), Adena, 1,
             CancellationToken.None));
 
         var unbound = new ZoneSession();
         unbound.Bind(50, "missing", "Nope", HumanClasses.Fighter);
-        Assert.Equal("world", await bench.World.TryGiveItemAsync(unbound, new GiveItemMsg { ItemId = Adena, Count = 1 }, CancellationToken.None));
+        Assert.Equal("world", await bench.World.TryGiveItemAsync(unbound, Adena, 1, CancellationToken.None));
 
         Assert.Equal("bad_request", await Give(actor, Adena, 0));
         Assert.Equal("bad_request", await Give(actor, 999, 1));
@@ -349,7 +347,7 @@ public sealed class NetEquipRulesTests
     }
 
     static Task<string?> Give(BenchPlayer actor, int itemId, int count) =>
-        actor.World.TryGiveItemAsync(actor.Session, new GiveItemMsg { ItemId = itemId, Count = count }, CancellationToken.None);
+        actor.World.TryGiveItemAsync(actor.Session, itemId, count, CancellationToken.None);
 
     static async Task ExpectSlot(WorldBench bench, BenchPlayer actor, int itemId, int slot)
     {
