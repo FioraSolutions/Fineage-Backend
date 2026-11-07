@@ -22,22 +22,22 @@ public sealed partial class ZoneWorld
         }
     }
 
-    public Task<string?> TryUseItemAsync(ZoneSession session, UseItemMsg request, CancellationToken ct)
+    public Task<string?> TryUseItemAsync(ZoneSession session, int objectId, CancellationToken ct)
     {
         string? error;
         lock (_gate)
-            error = TryUseItem(session, request.ObjectId);
+            error = TryUseItem(session, objectId);
         if (error != null)
             return Task.FromResult<string?>(error);
 
         return Task.FromResult<string?>(null);
     }
 
-    public Task<string?> TryUnequipItemAsync(ZoneSession session, UnequipItemMsg request, CancellationToken ct)
+    public Task<string?> TryUnequipItemAsync(ZoneSession session, int paperdollSlot, CancellationToken ct)
     {
         string? error;
         lock (_gate)
-            error = TryUnequipItem(session, request.PaperdollSlot);
+            error = TryUnequipItem(session, paperdollSlot);
         if (error != null)
             return Task.FromResult<string?>(error);
 

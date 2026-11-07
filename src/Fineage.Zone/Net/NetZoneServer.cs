@@ -2078,10 +2078,7 @@ public sealed class NetZoneServer : INetPresenceBridge
         }
 
         var use = NetCodec.DecodeUseItem(envelope.Payload);
-        string? error = await _world.TryUseItemAsync(
-            zoneSession,
-            new UseItemMsg { ObjectId = use.ObjectId },
-            ct).ConfigureAwait(false);
+        string? error = await _world.TryUseItemAsync(zoneSession, use.ObjectId, ct).ConfigureAwait(false);
         if (error != null)
             await RejectAsync(conn, error, "UseItem failed.", ct).ConfigureAwait(false);
     }
@@ -2100,10 +2097,8 @@ public sealed class NetZoneServer : INetPresenceBridge
         }
 
         var unequip = NetCodec.DecodeUnequipItem(envelope.Payload);
-        string? error = await _world.TryUnequipItemAsync(
-            zoneSession,
-            new UnequipItemMsg { PaperdollSlot = unequip.PaperdollSlot },
-            ct).ConfigureAwait(false);
+        string? error = await _world.TryUnequipItemAsync(zoneSession, unequip.PaperdollSlot, ct)
+            .ConfigureAwait(false);
         if (error != null)
             await RejectAsync(conn, error, "Unequip failed.", ct).ConfigureAwait(false);
     }
