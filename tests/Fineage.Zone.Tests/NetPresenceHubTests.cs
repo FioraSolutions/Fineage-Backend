@@ -534,4 +534,33 @@ public sealed class NetPresenceHubTests
         Assert.Equal(EntityKindNet.Npc, round.Kind);
         Assert.Equal(4416, round.TemplateId);
     }
+
+    [Fact]
+    public void EntitySpawn_patkspd_roundtrips_and_npc_spawn_fills_template()
+    {
+        var npc = new EntitySpawnMsg
+        {
+            EntityValue = 1,
+            EntityGeneration = 1,
+            Kind = EntityKindNet.Npc,
+            Name = "Wolf",
+            PAtkSpd = 400
+        };
+        Assert.Equal(400, NetCodec.DecodeEntitySpawn(NetCodec.EncodeEntitySpawn(npc)).PAtkSpd);
+
+        var entity = new ZoneEntity
+        {
+            ObjectId = 42,
+            Kind = ZoneEntityKind.Npc,
+            NpcId = 20332,
+            PAtkSpd = 320,
+            Attackable = true
+        };
+        var built = NetEnterWorldProjector.BuildNpcSpawn(entity, EntityId.FromObjectId(42));
+        Assert.Equal(320, built.PAtkSpd);
+
+        entity = new ZoneEntity { ObjectId = 43, Kind = ZoneEntityKind.Npc, NpcId = 1, Attackable = true };
+        built = NetEnterWorldProjector.BuildNpcSpawn(entity, EntityId.FromObjectId(43));
+        Assert.Equal(Fineage.Zone.Combat.ZoneCombat.DefaultNpcPAtkSpd, built.PAtkSpd);
+    }
 }

@@ -1,6 +1,7 @@
 using Fineage.Game;
 using Fineage.Accounts;
 using Fineage.Net.Contract;
+using Fineage.Zone.Combat;
 using Fineage.Zone.World;
 
 namespace Fineage.Zone.Net;
@@ -17,7 +18,7 @@ static class NetEnterWorldProjector
         ItemListNetMsg Items,
         SkillListNetMsg Skills);
 
-    public static EnterPackets FromEntity(ZoneEntity entity, EntityId self, long nowUnixMs)
+    public static EnterPackets FromEntity(ZoneEntity entity, EntityId self, long nowUnixMs, int playerPAtkSpd = 0)
     {
         ArgumentNullException.ThrowIfNull(entity);
         if (entity.Kind != ZoneEntityKind.Player)
@@ -27,23 +28,23 @@ static class NetEnterWorldProjector
 
         int maxCp = ResolveMaxCp(entity);
         return new EnterPackets(
-            BuildSpawn(entity, self, isSelf: true),
+            BuildSpawn(entity, self, isSelf: true, playerPAtkSpd),
             BuildStats(entity, self, maxCp),
             BuildItems(entity.Inventory),
             BuildSkills(entity, nowUnixMs));
     }
 
     /// <summary>Remote peer appearance (Mobius CharInfo) for Net knownlist.</summary>
-    public static EntitySpawnMsg BuildRemoteSpawn(ZoneEntity entity, EntityId id) =>
-        BuildSpawn(entity, id, isSelf: false);
+    public static EntitySpawnMsg BuildRemoteSpawn(ZoneEntity entity, EntityId id, int playerPAtkSpd = 0) =>
+        BuildSpawn(entity, id, isSelf: false, playerPAtkSpd);
 
     /// <summary>Player or NPC presence packet for Net knownlist (Mobius CharInfo / NpcInfo).</summary>
-    public static EntitySpawnMsg BuildPresenceSpawn(ZoneEntity entity, EntityId id)
+    public static EntitySpawnMsg BuildPresenceSpawn(ZoneEntity entity, EntityId id, int playerPAtkSpd = 0)
     {
         ArgumentNullException.ThrowIfNull(entity);
         return entity.Kind switch
         {
-            ZoneEntityKind.Player => BuildSpawn(entity, id, isSelf: false),
+            ZoneEntityKind.Player => BuildSpawn(entity, id, isSelf: false, playerPAtkSpd),
             ZoneEntityKind.Npc => BuildNpcSpawn(entity, id),
             _ => throw new ArgumentException($"Net presence spawn unsupported for {entity.Kind}.", nameof(entity))
         };
@@ -76,11 +77,12 @@ static class NetEnterWorldProjector
             Attackable = entity.Attackable,
             Dead = entity.CurHp <= 0,
             Level = entity.Level,
-            MaxHp = entity.MaxHp
+            MaxHp = entity.MaxHp,
+            PAtkSpd = entity.PAtkSpd > 0 ? entity.PAtkSpd : ZoneCombat.DefaultNpcPAtkSpd
         };
     }
 
-    static EntitySpawnMsg BuildSpawn(ZoneEntity entity, EntityId id, bool isSelf) =>
+    static EntitySpawnMsg BuildSpawn(ZoneEntity entity, EntityId id, bool isSelf, int pAtkSpd = 0) =>
         new()
         {
             EntityValue = id.Value,
@@ -102,7 +104,8 @@ static class NetEnterWorldProjector
             Paperdoll = entity.Inventory == null ? [] : InventoryMessages.ItemIds(entity.Inventory),
             Dead = entity.Dead,
             Level = entity.Level,
-            MaxHp = entity.MaxHp
+            MaxHp = entity.MaxHp,
+            PAtkSpd = pAtkSpd
         };
 
     static PlayerStatsMsg BuildStats(ZoneEntity entity, EntityId self, int maxCp) =>

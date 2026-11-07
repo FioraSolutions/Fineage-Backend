@@ -330,6 +330,7 @@ namespace Fineage.Net.Contract
             w.WriteByte(m.Dead ? (byte)1 : (byte)0);
             w.WriteInt32(m.Level);
             w.WriteInt32(m.MaxHp);
+            w.WriteInt32(m.PAtkSpd);
         });
 
         public static EntitySpawnMsg DecodeEntitySpawn(ReadOnlySpan<byte> p)
@@ -364,6 +365,8 @@ namespace Fineage.Net.Contract
                 msg.Level = r.ReadInt32();
             if (r.Remaining > 0)
                 msg.MaxHp = r.ReadInt32();
+            if (r.Remaining > 0)
+                msg.PAtkSpd = r.ReadInt32();
             return msg;
         }
 
