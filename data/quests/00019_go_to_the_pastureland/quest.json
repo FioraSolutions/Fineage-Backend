@@ -1,0 +1,94 @@
+{
+  "id": 19,
+  "name": "Go to the Pastureland",
+  "repeatable": false,
+  "abortable": true,
+  "questItems": [
+    7547
+  ],
+  "dialogs": [
+    {
+      "npcId": 31302,
+      "hook": "talk",
+      "when": "absent",
+      "maxLevel": 62,
+      "htmlFile": "31302-talk-000.htm"
+    },
+    {
+      "npcId": 31302,
+      "hook": "talk",
+      "when": "absent",
+      "minLevel": 63,
+      "htmlFile": "31302-talk-001.htm"
+    },
+    {
+      "npcId": 31302,
+      "hook": "event",
+      "when": "absent",
+      "event": "31302-01",
+      "minLevel": 63,
+      "ops": [
+        {
+          "op": "create"
+        },
+        {
+          "op": "start"
+        },
+        {
+          "op": "set_cond",
+          "cond": 1
+        },
+        {
+          "op": "give_item",
+          "itemId": 7547,
+          "count": 1
+        }
+      ],
+      "htmlFile": "31302-event-31302-01-002.htm"
+    },
+    {
+      "npcId": 31302,
+      "hook": "talk",
+      "when": "started",
+      "htmlFile": "31302-talk-003.htm"
+    },
+    {
+      "npcId": 31537,
+      "hook": "talk",
+      "when": "started",
+      "htmlFile": "31537-talk-004.htm"
+    },
+    {
+      "npcId": 31537,
+      "hook": "event",
+      "when": "started",
+      "event": "019_finish",
+      "hasItem": 7547,
+      "ops": [
+        {
+          "op": "take_item",
+          "itemId": 7547,
+          "count": 1
+        },
+        {
+          "op": "give_adena",
+          "count": 30000
+        },
+        {
+          "op": "complete"
+        }
+      ],
+      "htmlFile": "31537-event-019_finish-005.htm"
+    },
+    {
+      "npcId": 31537,
+      "hook": "event",
+      "when": "started",
+      "event": "019_finish",
+      "lacksItems": [
+        7547
+      ],
+      "htmlFile": "31537-event-019_finish-006.htm"
+    }
+  ]
+}
