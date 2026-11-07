@@ -1009,7 +1009,9 @@ public sealed class NetZoneServer : INetPresenceBridge
                 }
                 catch (Exception ex) when (ex is not OperationCanceledException)
                 {
-                    await RejectAsync(conn, "handler_error", ex.Message, ct).ConfigureAwait(false);
+                    // Keep stack/details on the server; clients only get a stable reason code.
+                    Console.Error.WriteLine($"[ZONE] handler_error opcode=0x{envelope.Opcode:X4}: {ex}");
+                    await RejectAsync(conn, "handler_error", "Internal zone error.", ct).ConfigureAwait(false);
                 }
             }
         }
