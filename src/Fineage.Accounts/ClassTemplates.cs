@@ -1,7 +1,7 @@
 using Fineage.Game;
 using Fineage.Protocol;
 
-namespace Fineage.Login;
+namespace Fineage.Accounts;
 
 /// <summary>
 /// Class facts for login and zone call sites. The values come from the datapack

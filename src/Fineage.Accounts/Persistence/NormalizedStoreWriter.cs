@@ -4,7 +4,7 @@ using Fineage.Game;
 using Fineage.Game.Quests;
 using Npgsql;
 
-namespace Fineage.Login;
+namespace Fineage.Accounts;
 
 /// <summary>Upserts Mobius-shaped character / item / quest rows from a versioned snapshot or live records.</summary>
 static class NormalizedStoreWriter

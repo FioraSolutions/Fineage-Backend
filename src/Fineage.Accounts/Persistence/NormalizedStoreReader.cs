@@ -1,7 +1,7 @@
 using Fineage.Game.Quests;
 using Npgsql;
 
-namespace Fineage.Login;
+namespace Fineage.Accounts;
 
 /// <summary>
 /// Authoritative character-domain reads from normalized Postgres tables

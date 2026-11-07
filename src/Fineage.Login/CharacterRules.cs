@@ -1,3 +1,4 @@
+using Fineage.Accounts;
 namespace Fineage.Login;
 
 /// <summary>Lobby character policy. Delete delay matches Mobius <c>DeleteCharAfterDays</c> (0 deletes immediately).</summary>

@@ -184,7 +184,7 @@ public sealed partial class ZoneWorld
         return null;
     }
 
-    void LoadKnownRecipes(ZoneEntity entity, Fineage.Login.CharacterRecord? stored)
+    void LoadKnownRecipes(ZoneEntity entity, Fineage.Accounts.CharacterRecord? stored)
     {
         entity.KnownRecipes.Clear();
         if (stored?.KnownRecipes == null)

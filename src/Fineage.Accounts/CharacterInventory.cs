@@ -1,6 +1,6 @@
 using Fineage.Game;
 
-namespace Fineage.Login;
+namespace Fineage.Accounts;
 
 public static class CharacterInventory
 {

@@ -8,6 +8,7 @@ using Fineage.Net.Contract;
 using Fineage.Net.Host;
 using Xunit;
 using LobbyProtocol = Fineage.Protocol.LobbyProtocol;
+using Fineage.Accounts;
 
 namespace Fineage.Login.Tests;
 

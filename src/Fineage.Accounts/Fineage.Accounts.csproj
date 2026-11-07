@@ -1,0 +1,21 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <RootNamespace>Fineage.Accounts</RootNamespace>
+    <Description>Shared account store, handoff tokens, and boot helpers for Login and Zone.</Description>
+  </PropertyGroup>
+  <ItemGroup>
+    <InternalsVisibleTo Include="Fineage.Login.Tests" />
+    <InternalsVisibleTo Include="Fineage.Zone.Tests" />
+  </ItemGroup>
+  <ItemGroup>
+    <PackageReference Include="Microsoft.Extensions.Logging.Console" Version="9.0.0" />
+    <PackageReference Include="Npgsql" Version="9.0.3" />
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\Fineage.Game\Fineage.Game.csproj" />
+    <ProjectReference Include="..\Fineage.Protocol\Fineage.Protocol.csproj" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Persistence\Migrations\**\*.sql" CopyToOutputDirectory="PreserveNewest" Link="Persistence\Migrations\%(Filename)%(Extension)" />
+  </ItemGroup>
+</Project>

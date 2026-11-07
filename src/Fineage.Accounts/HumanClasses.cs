@@ -1,4 +1,4 @@
-namespace Fineage.Login;
+namespace Fineage.Accounts;
 
 /// <summary>Interlude race and class ids, plus the CLI names for the two human base classes.</summary>
 public static class HumanClasses

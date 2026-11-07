@@ -1,6 +1,7 @@
 using Fineage.Login;
 using Npgsql;
 using Xunit;
+using Fineage.Accounts;
 
 namespace Fineage.Login.Tests;
 

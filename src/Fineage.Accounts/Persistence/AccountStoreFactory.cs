@@ -1,4 +1,4 @@
-namespace Fineage.Login;
+namespace Fineage.Accounts;
 
 /// <summary>
 /// Opens the account store. PostgreSQL is the only store: characters, items, quests, skills, and

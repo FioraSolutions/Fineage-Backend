@@ -1,3 +1,4 @@
+using Fineage.Accounts;
 using Fineage.Login;
 
 if (args.Contains("--selftest"))
