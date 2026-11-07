@@ -9,24 +9,71 @@
       "npcId": 32014,
       "hook": "talk",
       "when": "absent",
+      "maxLevel": 25,
       "htmlFile": "32014-talk-000.htm"
     },
     {
       "npcId": 32014,
       "hook": "talk",
       "when": "absent",
+      "minLevel": 26,
       "htmlFile": "32014-talk-001.htm"
+    },
+    {
+      "npcId": 32014,
+      "hook": "event",
+      "when": "absent",
+      "event": "32014-03",
+      "minLevel": 26,
+      "htmlFile": "32014-event-32014-03-002.htm"
+    },
+    {
+      "npcId": 32014,
+      "hook": "event",
+      "when": "absent",
+      "event": "32014-04",
+      "minLevel": 26,
+      "hasItem": 736,
+      "ops": [
+        {
+          "op": "create"
+        },
+        {
+          "op": "start"
+        },
+        {
+          "op": "set_cond",
+          "cond": 1
+        },
+        {
+          "op": "take_item",
+          "itemId": 736,
+          "count": 1
+        }
+      ],
+      "htmlFile": "32014-event-32014-04-003.htm"
+    },
+    {
+      "npcId": 32014,
+      "hook": "event",
+      "when": "absent",
+      "event": "32014-04",
+      "minLevel": 26,
+      "lacksItems": [
+        736
+      ],
+      "htmlFile": "32014-event-32014-04-004.htm"
     },
     {
       "npcId": 32014,
       "hook": "talk",
       "when": "started",
-      "htmlFile": "32014-talk-002.htm"
+      "htmlFile": "32014-talk-005.htm"
     },
     {
       "npcId": 31989,
       "hook": "talk",
-      "when": "absent",
+      "when": "started",
       "ops": [
         {
           "op": "give_adena",
@@ -36,7 +83,7 @@
           "op": "complete"
         }
       ],
-      "htmlFile": "31989-talk-003.htm"
+      "htmlFile": "31989-talk-006.htm"
     }
   ]
 }
