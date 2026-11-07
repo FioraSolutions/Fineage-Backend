@@ -81,7 +81,12 @@ public sealed class NetLoginServer
             }
             catch (Exception ex) when (ex is not OperationCanceledException)
             {
-                await RejectAsync(conn, "handler_error", ex.Message, ct).ConfigureAwait(false);
+                FineageLogging.Write(
+                    "Fineage.Login",
+                    "Information",
+                    "log",
+                    ("message", $"handler_error opcode=0x{envelope.Opcode:X4}: {ex}"));
+                await RejectAsync(conn, "handler_error", "An internal error occurred.", ct).ConfigureAwait(false);
             }
         }
     }
