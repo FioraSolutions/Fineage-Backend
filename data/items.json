@@ -6246,6 +6246,15 @@
       "stackable": true
     },
     {
+      "id": 1464,
+      "name": "Soulshot (C-Grade)",
+      "kind": "etc",
+      "icon": "icon.etc_spirit_bullet_green_i00",
+      "price": 22,
+      "weight": 3,
+      "stackable": true
+    },
+    {
       "id": 1473,
       "name": "Kasha Wolf Fang",
       "kind": "etc",
