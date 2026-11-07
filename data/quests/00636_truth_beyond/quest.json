@@ -1,0 +1,104 @@
+{
+  "id": 636,
+  "name": "Truth Beyond",
+  "repeatable": true,
+  "abortable": true,
+  "questItems": [],
+  "dialogs": [
+    {
+      "npcId": 31329,
+      "hook": "talk",
+      "when": "absent",
+      "hasAny": [
+        8064,
+        8065,
+        8067
+      ],
+      "ops": [
+        {
+          "op": "complete"
+        }
+      ],
+      "htmlFile": "31329-talk-000.htm"
+    },
+    {
+      "npcId": 31329,
+      "hook": "talk",
+      "when": "absent",
+      "maxLevel": 72,
+      "htmlFile": "31329-talk-001.htm"
+    },
+    {
+      "npcId": 31329,
+      "hook": "talk",
+      "when": "absent",
+      "minLevel": 73,
+      "htmlFile": "31329-talk-002.htm"
+    },
+    {
+      "npcId": 31329,
+      "hook": "event",
+      "when": "absent",
+      "event": "31329-03",
+      "minLevel": 73,
+      "htmlFile": "31329-event-31329-03-003.htm"
+    },
+    {
+      "npcId": 31329,
+      "hook": "event",
+      "when": "absent",
+      "event": "31329-04",
+      "minLevel": 73,
+      "ops": [
+        {
+          "op": "create"
+        },
+        {
+          "op": "start"
+        },
+        {
+          "op": "set_cond",
+          "cond": 1
+        }
+      ],
+      "htmlFile": "31329-event-31329-04-004.htm"
+    },
+    {
+      "npcId": 31329,
+      "hook": "talk",
+      "when": "started",
+      "htmlFile": "31329-talk-005.htm"
+    },
+    {
+      "npcId": 32010,
+      "hook": "talk",
+      "when": "started",
+      "cond": 1,
+      "htmlFile": "32010-talk-c1-006.htm"
+    },
+    {
+      "npcId": 32010,
+      "hook": "event",
+      "when": "started",
+      "event": "32010-02",
+      "cond": 1,
+      "ops": [
+        {
+          "op": "give_item",
+          "itemId": 8064,
+          "count": 1
+        },
+        {
+          "op": "complete"
+        }
+      ],
+      "htmlFile": "32010-event-32010-02-c1-007.htm"
+    },
+    {
+      "npcId": 32010,
+      "hook": "talk",
+      "when": "started",
+      "htmlFile": "32010-talk-008.htm"
+    }
+  ]
+}

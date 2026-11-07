@@ -1,0 +1,432 @@
+{
+  "id": 645,
+  "name": "Ghosts of Batur",
+  "repeatable": true,
+  "abortable": true,
+  "questItems": [
+    8089
+  ],
+  "dialogs": [
+    {
+      "npcId": 32017,
+      "hook": "talk",
+      "when": "absent",
+      "maxLevel": 22,
+      "htmlFile": "32017-talk-000.htm"
+    },
+    {
+      "npcId": 32017,
+      "hook": "talk",
+      "when": "absent",
+      "minLevel": 23,
+      "htmlFile": "32017-talk-001.htm"
+    },
+    {
+      "npcId": 32017,
+      "hook": "event",
+      "when": "absent",
+      "event": "32017-03",
+      "minLevel": 23,
+      "ops": [
+        {
+          "op": "create"
+        },
+        {
+          "op": "start"
+        },
+        {
+          "op": "set_cond",
+          "cond": 1
+        }
+      ],
+      "htmlFile": "32017-event-32017-03-002.htm"
+    },
+    {
+      "npcId": 32017,
+      "hook": "talk",
+      "when": "started",
+      "cond": 2,
+      "atLeast": {
+        "8089": 500
+      },
+      "htmlFile": "32017-talk-c2-003.htm"
+    },
+    {
+      "npcId": 32017,
+      "hook": "talk",
+      "when": "started",
+      "htmlFile": "32017-talk-004.htm"
+    },
+    {
+      "npcId": 32017,
+      "hook": "event",
+      "when": "started",
+      "event": "32017-06",
+      "cond": 2,
+      "atLeast": {
+        "8089": 500
+      },
+      "htmlFile": "32017-event-32017-06-c2-005.htm"
+    },
+    {
+      "npcId": 32017,
+      "hook": "event",
+      "when": "started",
+      "event": "0",
+      "cond": 2,
+      "atLeast": {
+        "8089": 500
+      },
+      "ops": [
+        {
+          "op": "take_item",
+          "itemId": 8089,
+          "count": 500
+        },
+        {
+          "op": "give_item",
+          "itemId": 1878,
+          "count": 18
+        },
+        {
+          "op": "complete"
+        }
+      ],
+      "htmlFile": "32017-event-0-c2-006.htm"
+    },
+    {
+      "npcId": 32017,
+      "hook": "event",
+      "when": "started",
+      "event": "0",
+      "htmlFile": "32017-event-0-007.htm"
+    },
+    {
+      "npcId": 32017,
+      "hook": "event",
+      "when": "started",
+      "event": "1",
+      "cond": 2,
+      "atLeast": {
+        "8089": 500
+      },
+      "ops": [
+        {
+          "op": "take_item",
+          "itemId": 8089,
+          "count": 500
+        },
+        {
+          "op": "give_item",
+          "itemId": 1879,
+          "count": 7
+        },
+        {
+          "op": "complete"
+        }
+      ],
+      "htmlFile": "32017-event-1-c2-008.htm"
+    },
+    {
+      "npcId": 32017,
+      "hook": "event",
+      "when": "started",
+      "event": "1",
+      "htmlFile": "32017-event-1-009.htm"
+    },
+    {
+      "npcId": 32017,
+      "hook": "event",
+      "when": "started",
+      "event": "2",
+      "cond": 2,
+      "atLeast": {
+        "8089": 500
+      },
+      "ops": [
+        {
+          "op": "take_item",
+          "itemId": 8089,
+          "count": 500
+        },
+        {
+          "op": "give_item",
+          "itemId": 1880,
+          "count": 4
+        },
+        {
+          "op": "complete"
+        }
+      ],
+      "htmlFile": "32017-event-2-c2-010.htm"
+    },
+    {
+      "npcId": 32017,
+      "hook": "event",
+      "when": "started",
+      "event": "2",
+      "htmlFile": "32017-event-2-011.htm"
+    },
+    {
+      "npcId": 32017,
+      "hook": "event",
+      "when": "started",
+      "event": "3",
+      "cond": 2,
+      "atLeast": {
+        "8089": 500
+      },
+      "ops": [
+        {
+          "op": "take_item",
+          "itemId": 8089,
+          "count": 500
+        },
+        {
+          "op": "give_item",
+          "itemId": 1881,
+          "count": 6
+        },
+        {
+          "op": "complete"
+        }
+      ],
+      "htmlFile": "32017-event-3-c2-012.htm"
+    },
+    {
+      "npcId": 32017,
+      "hook": "event",
+      "when": "started",
+      "event": "3",
+      "htmlFile": "32017-event-3-013.htm"
+    },
+    {
+      "npcId": 32017,
+      "hook": "event",
+      "when": "started",
+      "event": "4",
+      "cond": 2,
+      "atLeast": {
+        "8089": 500
+      },
+      "ops": [
+        {
+          "op": "take_item",
+          "itemId": 8089,
+          "count": 500
+        },
+        {
+          "op": "give_item",
+          "itemId": 1882,
+          "count": 10
+        },
+        {
+          "op": "complete"
+        }
+      ],
+      "htmlFile": "32017-event-4-c2-014.htm"
+    },
+    {
+      "npcId": 32017,
+      "hook": "event",
+      "when": "started",
+      "event": "4",
+      "htmlFile": "32017-event-4-015.htm"
+    },
+    {
+      "npcId": 32017,
+      "hook": "event",
+      "when": "started",
+      "event": "5",
+      "cond": 2,
+      "atLeast": {
+        "8089": 500
+      },
+      "ops": [
+        {
+          "op": "take_item",
+          "itemId": 8089,
+          "count": 500
+        },
+        {
+          "op": "give_item",
+          "itemId": 1883,
+          "count": 2
+        },
+        {
+          "op": "complete"
+        }
+      ],
+      "htmlFile": "32017-event-5-c2-016.htm"
+    },
+    {
+      "npcId": 32017,
+      "hook": "event",
+      "when": "started",
+      "event": "5",
+      "htmlFile": "32017-event-5-017.htm"
+    },
+    {
+      "npcId": 22007,
+      "hook": "kill",
+      "when": "started",
+      "cond": 1,
+      "party": true,
+      "html": "",
+      "ops": [
+        {
+          "op": "drop_item",
+          "itemId": 8089,
+          "count": 1,
+          "chance": 0.75,
+          "limit": 500,
+          "condAtLimit": 2
+        }
+      ]
+    },
+    {
+      "npcId": 22009,
+      "hook": "kill",
+      "when": "started",
+      "cond": 1,
+      "party": true,
+      "html": "",
+      "ops": [
+        {
+          "op": "drop_item",
+          "itemId": 8089,
+          "count": 1,
+          "chance": 0.75,
+          "limit": 500,
+          "condAtLimit": 2
+        }
+      ]
+    },
+    {
+      "npcId": 22010,
+      "hook": "kill",
+      "when": "started",
+      "cond": 1,
+      "party": true,
+      "html": "",
+      "ops": [
+        {
+          "op": "drop_item",
+          "itemId": 8089,
+          "count": 1,
+          "chance": 0.75,
+          "limit": 500,
+          "condAtLimit": 2
+        }
+      ]
+    },
+    {
+      "npcId": 22011,
+      "hook": "kill",
+      "when": "started",
+      "cond": 1,
+      "party": true,
+      "html": "",
+      "ops": [
+        {
+          "op": "drop_item",
+          "itemId": 8089,
+          "count": 1,
+          "chance": 0.75,
+          "limit": 500,
+          "condAtLimit": 2
+        }
+      ]
+    },
+    {
+      "npcId": 22012,
+      "hook": "kill",
+      "when": "started",
+      "cond": 1,
+      "party": true,
+      "html": "",
+      "ops": [
+        {
+          "op": "drop_item",
+          "itemId": 8089,
+          "count": 1,
+          "chance": 0.75,
+          "limit": 500,
+          "condAtLimit": 2
+        }
+      ]
+    },
+    {
+      "npcId": 22013,
+      "hook": "kill",
+      "when": "started",
+      "cond": 1,
+      "party": true,
+      "html": "",
+      "ops": [
+        {
+          "op": "drop_item",
+          "itemId": 8089,
+          "count": 1,
+          "chance": 0.75,
+          "limit": 500,
+          "condAtLimit": 2
+        }
+      ]
+    },
+    {
+      "npcId": 22014,
+      "hook": "kill",
+      "when": "started",
+      "cond": 1,
+      "party": true,
+      "html": "",
+      "ops": [
+        {
+          "op": "drop_item",
+          "itemId": 8089,
+          "count": 1,
+          "chance": 0.75,
+          "limit": 500,
+          "condAtLimit": 2
+        }
+      ]
+    },
+    {
+      "npcId": 22015,
+      "hook": "kill",
+      "when": "started",
+      "cond": 1,
+      "party": true,
+      "html": "",
+      "ops": [
+        {
+          "op": "drop_item",
+          "itemId": 8089,
+          "count": 1,
+          "chance": 0.75,
+          "limit": 500,
+          "condAtLimit": 2
+        }
+      ]
+    },
+    {
+      "npcId": 22016,
+      "hook": "kill",
+      "when": "started",
+      "cond": 1,
+      "party": true,
+      "html": "",
+      "ops": [
+        {
+          "op": "drop_item",
+          "itemId": 8089,
+          "count": 1,
+          "chance": 0.75,
+          "limit": 500,
+          "condAtLimit": 2
+        }
+      ]
+    }
+  ]
+}
