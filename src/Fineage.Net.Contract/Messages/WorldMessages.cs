@@ -54,6 +54,8 @@ namespace Fineage.Net.Contract
         public int Level { get; set; }
         /// <summary>Max HP so a client can size the HP bar without waiting for the first StatusUpdate.</summary>
         public int MaxHp { get; set; }
+        /// <summary>Physical attack speed (Mobius P.AtkSpd); drives client attack anim timing. Optional wire tail.</summary>
+        public int PAtkSpd { get; set; }
     }
 
     public sealed class PlayerStatsMsg

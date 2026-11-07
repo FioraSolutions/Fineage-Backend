@@ -47,6 +47,9 @@ public sealed class NetZoneServer : INetPresenceBridge
         _world.NetBridge = this;
     }
 
+    int PlayerSpawnPAtkSpd(ZoneEntity entity) =>
+        entity.Kind == ZoneEntityKind.Player ? _world.PlayerStats(entity).PAtkSpd : 0;
+
     /// <summary>Tests and selftest: wraps <paramref name="tokens"/> in a consuming in-memory store.</summary>
     public NetZoneServer(
         HandoffTokens tokens,
@@ -126,12 +129,12 @@ public sealed class NetZoneServer : INetPresenceBridge
             }
 
             _presence.TrySendCritical(selfObjectId, NetOpcode.EntitySpawn,
-                NetCodec.EncodeEntitySpawn(NetEnterWorldProjector.BuildPresenceSpawn(seen, otherId)));
+                NetCodec.EncodeEntitySpawn(NetEnterWorldProjector.BuildPresenceSpawn(seen, otherId, PlayerSpawnPAtkSpd(seen))));
             if (seen.MoveActive)
                 SendMoveState(selfObjectId, otherId, seen);
             if (seen.Kind == ZoneEntityKind.Player && seen.Session is { InWorld: true })
             {
-                selfSpawn ??= NetCodec.EncodeEntitySpawn(NetEnterWorldProjector.BuildRemoteSpawn(selfEntity, self));
+                selfSpawn ??= NetCodec.EncodeEntitySpawn(NetEnterWorldProjector.BuildRemoteSpawn(selfEntity, self, PlayerSpawnPAtkSpd(selfEntity)));
                 _presence.TrySendCritical(id, NetOpcode.EntitySpawn, selfSpawn);
                 if (selfEntity.MoveActive)
                     SendMoveState(id, self, selfEntity);
@@ -218,7 +221,7 @@ public sealed class NetZoneServer : INetPresenceBridge
         if (watcherObjectIds.Count == 0 || !_world.TryGetEntityById(objectId, out var entity) ||
             entity.Kind != ZoneEntityKind.Player)
             return;
-        var payload = NetCodec.EncodeEntitySpawn(NetEnterWorldProjector.BuildRemoteSpawn(entity, _ids.AllocateOrGet(objectId)));
+        var payload = NetCodec.EncodeEntitySpawn(NetEnterWorldProjector.BuildRemoteSpawn(entity, _ids.AllocateOrGet(objectId), PlayerSpawnPAtkSpd(entity)));
         foreach (int watcher in watcherObjectIds)
             _presence.TrySendCritical(watcher, NetOpcode.EntitySpawn, payload);
     }
@@ -1195,7 +1198,7 @@ public sealed class NetZoneServer : INetPresenceBridge
         }
 
         // Single source of truth: ZoneEntity after TryEnter (inventory, vitals, AutoSkills already applied).
-        var packets = NetEnterWorldProjector.FromEntity(entity, self, _clock().ToUnixTimeMilliseconds());
+        var packets = NetEnterWorldProjector.FromEntity(entity, self, _clock().ToUnixTimeMilliseconds(), PlayerSpawnPAtkSpd(entity));
         await conn.SendAsync(NetOpcode.EntitySpawn, NetCodec.EncodeEntitySpawn(packets.Spawn), ct: ct)
             .ConfigureAwait(false);
         await conn.SendAsync(NetOpcode.PlayerStats, NetCodec.EncodePlayerStats(packets.Stats), ct: ct)
@@ -1263,12 +1266,12 @@ public sealed class NetZoneServer : INetPresenceBridge
                 continue;
             }
 
-            var remote = NetEnterWorldProjector.BuildPresenceSpawn(other, otherId);
+            var remote = NetEnterWorldProjector.BuildPresenceSpawn(other, otherId, PlayerSpawnPAtkSpd(other));
             await conn.SendAsync(NetOpcode.EntitySpawn, NetCodec.EncodeEntitySpawn(remote), ct: ct)
                 .ConfigureAwait(false);
         }
 
-        var selfRemote = NetCodec.EncodeEntitySpawn(NetEnterWorldProjector.BuildRemoteSpawn(entity, self));
+        var selfRemote = NetCodec.EncodeEntitySpawn(NetEnterWorldProjector.BuildRemoteSpawn(entity, self, PlayerSpawnPAtkSpd(entity)));
         foreach (var peer in known)
         {
             if (peer.Kind == ZoneEntityKind.Player)
@@ -1355,13 +1358,13 @@ public sealed class NetZoneServer : INetPresenceBridge
             }
 
             var spawn = NetCodec.EncodeEntitySpawn(
-                NetEnterWorldProjector.BuildPresenceSpawn(newlySeen, otherId));
+                NetEnterWorldProjector.BuildPresenceSpawn(newlySeen, otherId, PlayerSpawnPAtkSpd(newlySeen)));
             await conn.SendAsync(NetOpcode.EntitySpawn, spawn, ct: ct).ConfigureAwait(false);
             if (newlySeen.Kind == ZoneEntityKind.Player &&
                 _world.TryGetLivePlayer(zoneSession, out var selfEntity))
             {
                 var toPeer = NetCodec.EncodeEntitySpawn(
-                    NetEnterWorldProjector.BuildRemoteSpawn(selfEntity, self));
+                    NetEnterWorldProjector.BuildRemoteSpawn(selfEntity, self, PlayerSpawnPAtkSpd(selfEntity)));
                 await _presence.SendAsync(id, NetOpcode.EntitySpawn, toPeer, ct).ConfigureAwait(false);
             }
         }
