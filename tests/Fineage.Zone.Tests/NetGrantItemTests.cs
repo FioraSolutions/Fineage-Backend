@@ -23,9 +23,7 @@ public sealed class NetGrantItemTests
         var bench = new WorldBench();
         BenchPlayer actor = await bench.EnterAsync("grant", "Merchant");
 
-        Assert.Null(await bench.World.TryGrantItemAsync(
-            actor.Session,
-            new GrantItemRequestMsg { ItemId = Adena, Count = 25 },
+        Assert.Null(await bench.World.TryGrantItemAsync(actor.Session, Adena, 25,
             CancellationToken.None));
 
         var update = Assert.IsType<InventoryUpdateNetMsg>(
@@ -48,9 +46,7 @@ public sealed class NetGrantItemTests
         var bench = new WorldBench();
         var session = new ZoneSession();
 
-        Assert.Equal("world", await bench.World.TryGrantItemAsync(
-            session,
-            new GrantItemRequestMsg { ItemId = Adena, Count = 1 },
+        Assert.Equal("world", await bench.World.TryGrantItemAsync(session, Adena, 1,
             CancellationToken.None));
         Assert.Empty(bench.Rec.Of(nameof(INetPresenceBridge.FanoutInventoryUpdate)));
     }
@@ -65,9 +61,7 @@ public sealed class NetGrantItemTests
         var bench = new WorldBench();
         BenchPlayer actor = await bench.EnterAsync("grant", "Merchant");
 
-        Assert.Equal("bad_request", await bench.World.TryGrantItemAsync(
-            actor.Session,
-            new GrantItemRequestMsg { ItemId = itemId, Count = count },
+        Assert.Equal("bad_request", await bench.World.TryGrantItemAsync(actor.Session, itemId, count,
             CancellationToken.None));
         Assert.Empty(bench.Rec.Of(nameof(INetPresenceBridge.FanoutInventoryUpdate)));
     }

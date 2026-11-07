@@ -75,11 +75,7 @@ public sealed class NetDungeonTests
         BenchPlayer dawn = await bench.EnterAsync("gate2", "Dawn", classId: 1);
         await AdvanceAsync(bench, clock);
 
-        Assert.Null(await bench.World.TryGrantItemAsync(dusk.Session, new GrantItemRequestMsg
-        {
-            ItemId = SevenSignsProtocol.RedSealStoneId,
-            Count = 1
-        }, CancellationToken.None));
+        Assert.Null(await bench.World.TryGrantItemAsync(dusk.Session, SevenSignsProtocol.RedSealStoneId, 1, CancellationToken.None));
         Assert.Null(await bench.World.TrySevenSignsActionAsync(
             dusk.Session, Join(SevenSignsCabal.Dusk, SevenSignsSeal.Avarice), CancellationToken.None));
         Assert.Null(await bench.World.TrySevenSignsActionAsync(dusk.Session, new SevenSignsActionRequestMsg
@@ -160,11 +156,7 @@ public sealed class NetDungeonTests
             await bench.World.TryDungeonAsync(member.Session, Enter(1), CancellationToken.None));
         Assert.NotEqual(10, member.Session.X);
 
-        Assert.Null(await bench.World.TryGrantItemAsync(member.Session, new GrantItemRequestMsg
-        {
-            ItemId = DungeonProtocol.AdenaItemId,
-            Count = 100
-        }, CancellationToken.None));
+        Assert.Null(await bench.World.TryGrantItemAsync(member.Session, DungeonProtocol.AdenaItemId, 100, CancellationToken.None));
         bench.Rec.Calls.Clear();
         Assert.Null(await bench.World.TryDungeonAsync(member.Session, Enter(1), CancellationToken.None));
         Assert.Equal(10, member.Session.X);

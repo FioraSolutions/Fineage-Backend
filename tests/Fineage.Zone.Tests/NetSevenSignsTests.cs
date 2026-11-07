@@ -47,11 +47,7 @@ public sealed class NetSevenSignsTests
         Assert.Equal(SevenSignsProtocol.PeriodCompetitionMessage, LastSystemMessage(bench).Id);
         Assert.Equal(SevenSignsProtocol.SkyNormal, LastSky(bench).State);
 
-        Assert.Null(await bench.World.TryGrantItemAsync(player.Session, new GrantItemRequestMsg
-        {
-            ItemId = SevenSignsProtocol.RedSealStoneId,
-            Count = 2
-        }, CancellationToken.None));
+        Assert.Null(await bench.World.TryGrantItemAsync(player.Session, SevenSignsProtocol.RedSealStoneId, 2, CancellationToken.None));
 
         Assert.Null(await bench.World.TrySevenSignsActionAsync(player.Session, new SevenSignsActionRequestMsg
         {

@@ -44,11 +44,11 @@ public sealed partial class ZoneWorld
         return Task.FromResult<string?>(null);
     }
 
-    public Task<string?> TryGiveItemAsync(ZoneSession session, GiveItemMsg request, CancellationToken ct)
+    public Task<string?> TryGiveItemAsync(ZoneSession session, int itemId, int count, CancellationToken ct)
     {
         string? error;
         lock (_gate)
-            error = TryGiveItem(session, request);
+            error = TryGiveItem(session, itemId, count);
         if (error != null)
             return Task.FromResult<string?>(error);
 
@@ -133,25 +133,25 @@ public sealed partial class ZoneWorld
         return null;
     }
 
-    string? TryGiveItem(ZoneSession session, GiveItemMsg request)
+    string? TryGiveItem(ZoneSession session, int itemId, int count)
     {
         if (!IsLive(session))
             return "world";
         if (!_byId.TryGetValue(session.ObjectId, out var player) || player.Inventory == null)
             return "world";
-        if (request.ItemId <= 0 || request.Count <= 0 || request.Count > MaxGrantCount)
+        if (itemId <= 0 || count <= 0 || count > MaxGrantCount)
             return "bad_request";
-        if (!_game.Items.TryGet(request.ItemId, out _))
+        if (!_game.Items.TryGet(itemId, out _))
             return "bad_request";
 
-        var added = player.Inventory.Add(request.ItemId, request.Count);
+        var added = player.Inventory.Add(itemId, count);
         // Net clients only read the PacketEnvelope path, so the V2 frame alone would leave the bag
         // stale for an admin GiveItem.
         NetBridge?.FanoutInventoryUpdate(
             [session.ObjectId],
             ToNetInventoryUpdate(InventoryMessages.Update(InventoryChange.Add, added)));
         SaveInventory(session, player.Inventory);
-        ZoneLog.Info($"give object={session.ObjectId} item={request.ItemId} count={request.Count}");
+        ZoneLog.Info($"give object={session.ObjectId} item={itemId} count={count}");
         return null;
     }
 

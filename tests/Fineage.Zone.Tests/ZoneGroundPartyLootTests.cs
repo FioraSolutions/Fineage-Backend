@@ -19,7 +19,7 @@ public sealed class ZoneGroundPartyLootTests
         // Leader first → ByTurn cursor 0→1 → mate
         kit.World.JoinPartyForTest(PartyDistributionType.ByTurn, leader, mate);
 
-        Assert.Null(await kit.World.TryGiveItemAsync(s1, new GiveItemMsg { ItemId = Stem, Count = 3 }, default));
+        Assert.Null(await kit.World.TryGiveItemAsync(s1, Stem, 3, default));
         var stem = leader.Inventory!.FindByItemId(Stem)!;
         Assert.Null(await kit.World.TryDropItemAsync(s1, stem.ObjectId, 3, leader.X + 5, leader.Y, leader.Z, default));
 
@@ -42,7 +42,7 @@ public sealed class ZoneGroundPartyLootTests
         var (_, mate) = await kit.EnterAsync(classId: 54, race: 4, x: leader.X + 20, y: leader.Y, z: leader.Z);
         kit.World.JoinPartyForTest(PartyDistributionType.FindersKeepers, leader, mate);
 
-        Assert.Null(await kit.World.TryGiveItemAsync(s1, new GiveItemMsg { ItemId = Adena, Count = 100 }, default));
+        Assert.Null(await kit.World.TryGiveItemAsync(s1, Adena, 100, default));
         var bag = leader.Inventory!.FindByItemId(Adena)!;
         Assert.Null(await kit.World.TryDropItemAsync(s1, bag.ObjectId, 100, leader.X + 5, leader.Y, leader.Z, default));
 
@@ -62,7 +62,7 @@ public sealed class ZoneGroundPartyLootTests
         var (_, mate) = await kit.EnterAsync(classId: 54, race: 4, x: leader.X + 20, y: leader.Y, z: leader.Z);
         kit.World.JoinPartyForTest(PartyDistributionType.FindersKeepers, leader, mate);
 
-        Assert.Null(await kit.World.TryGiveItemAsync(s1, new GiveItemMsg { ItemId = Stem, Count = 2 }, default));
+        Assert.Null(await kit.World.TryGiveItemAsync(s1, Stem, 2, default));
         var stem = leader.Inventory!.FindByItemId(Stem)!;
         Assert.Null(await kit.World.TryDropItemAsync(s1, stem.ObjectId, 2, leader.X + 5, leader.Y, leader.Z, default));
 

@@ -50,7 +50,7 @@ public sealed partial class ZoneWorld
         {
             if (!TryParseItemCount(args, out int itemId, out int count))
                 return "bad_request";
-            return TryGiveItem(session, new GiveItemMsg { ItemId = itemId, Count = count });
+            return TryGiveItem(session, itemId, count);
         }
 
         if (verb.Equals("admin_setlevel", StringComparison.OrdinalIgnoreCase)
@@ -177,7 +177,7 @@ public sealed partial class ZoneWorld
 
         foreach (var row in free)
         {
-            string? err = TryGiveItem(session, new GiveItemMsg { ItemId = row.ItemId, Count = row.Count });
+            string? err = TryGiveItem(session, row.ItemId, row.Count);
             if (err != null)
                 return err;
         }
