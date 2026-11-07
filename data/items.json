@@ -20422,6 +20422,26 @@
       "quest": true
     },
     {
+      "id": 5893,
+      "name": "Leaf of Eucalyptus",
+      "kind": "etc",
+      "icon": "icon.etc_herb_red_i00",
+      "price": 0,
+      "weight": 0,
+      "stackable": true,
+      "quest": true
+    },
+    {
+      "id": 5894,
+      "name": "Stone of Chill",
+      "kind": "etc",
+      "icon": "icon.etc_crystal_ball_blue_i00",
+      "price": 0,
+      "weight": 0,
+      "stackable": true,
+      "quest": true
+    },
+    {
       "id": 5895,
       "name": "Ritron's Fruit",
       "kind": "etc",
@@ -24998,6 +25018,16 @@
       "name": "Orc Grave Goods",
       "kind": "etc",
       "icon": "icon.etc_orcish_talisman_i00",
+      "price": 0,
+      "weight": 0,
+      "stackable": true,
+      "quest": true
+    },
+    {
+      "id": 8089,
+      "name": "Cursed Grave Goods",
+      "kind": "etc",
+      "icon": "icon.etc_totem_black_i00",
       "price": 0,
       "weight": 0,
       "stackable": true,
