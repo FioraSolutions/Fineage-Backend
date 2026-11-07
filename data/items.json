@@ -19735,6 +19735,24 @@
       "stackable": true
     },
     {
+      "id": 5364,
+      "name": "Recipe: Sealed Dark Crystal Shield(60%)",
+      "kind": "etc",
+      "icon": "icon.etc_recipe_violet_i00",
+      "price": 24400,
+      "weight": 30,
+      "stackable": true
+    },
+    {
+      "id": 5366,
+      "name": "Recipe: Sealed Shield of Nightmare(60%)",
+      "kind": "etc",
+      "icon": "icon.etc_recipe_violet_i00",
+      "price": 37000,
+      "weight": 30,
+      "stackable": true
+    },
+    {
       "id": 5368,
       "name": "Recipe: Sealed Dark Crystal Boots(60%)",
       "kind": "etc",
@@ -20575,6 +20593,36 @@
       "weight": 10
     },
     {
+      "id": 5961,
+      "name": "Kail's Silver Basilisk",
+      "kind": "etc",
+      "icon": "icon.etc_kyles_silver_basilisk_i00",
+      "price": 1000,
+      "weight": 0,
+      "stackable": true,
+      "quest": true
+    },
+    {
+      "id": 5962,
+      "name": "Kail's Gold Golem",
+      "kind": "etc",
+      "icon": "icon.etc_kyles_gold_golem_i00",
+      "price": 1000,
+      "weight": 0,
+      "stackable": true,
+      "quest": true
+    },
+    {
+      "id": 5963,
+      "name": "Kail's Blood Dragon",
+      "kind": "etc",
+      "icon": "icon.etc_kyles_blood_dragon_i00",
+      "price": 1000,
+      "weight": 0,
+      "stackable": true,
+      "quest": true
+    },
+    {
       "id": 5964,
       "name": "Warehouse Keeper's Medal",
       "kind": "etc",
@@ -20720,6 +20768,60 @@
       "icon": "icon.accessary_phoenixs_earing_i02",
       "price": 1005000,
       "weight": 150
+    },
+    {
+      "id": 6329,
+      "name": "Recipe: Sealed Phoenix Necklace(70%)",
+      "kind": "etc",
+      "icon": "icon.etc_recipe_violet_i00",
+      "price": 34800,
+      "weight": 30,
+      "stackable": true
+    },
+    {
+      "id": 6331,
+      "name": "Recipe: Sealed Phoenix Earring(70%)",
+      "kind": "etc",
+      "icon": "icon.etc_recipe_violet_i00",
+      "price": 26200,
+      "weight": 30,
+      "stackable": true
+    },
+    {
+      "id": 6333,
+      "name": "Recipe: Sealed Phoenix Ring(70%)",
+      "kind": "etc",
+      "icon": "icon.etc_recipe_violet_i00",
+      "price": 17420,
+      "weight": 30,
+      "stackable": true
+    },
+    {
+      "id": 6335,
+      "name": "Recipe: Sealed Majestic Necklace(70%)",
+      "kind": "etc",
+      "icon": "icon.etc_recipe_violet_i00",
+      "price": 52000,
+      "weight": 30,
+      "stackable": true
+    },
+    {
+      "id": 6337,
+      "name": "Recipe: Sealed Majestic Earring(70%)",
+      "kind": "etc",
+      "icon": "icon.etc_recipe_violet_i00",
+      "price": 39000,
+      "weight": 30,
+      "stackable": true
+    },
+    {
+      "id": 6339,
+      "name": "Recipe: Sealed Majestic Ring(70%)",
+      "kind": "etc",
+      "icon": "icon.etc_recipe_violet_i00",
+      "price": 26000,
+      "weight": 30,
+      "stackable": true
     },
     {
       "id": 6353,
@@ -22527,6 +22629,87 @@
     {
       "id": 6881,
       "name": "Recipe: Forgotten Blade (60%)",
+      "kind": "etc",
+      "icon": "icon.etc_recipe_black_i00",
+      "price": 976000,
+      "weight": 30,
+      "stackable": true
+    },
+    {
+      "id": 6883,
+      "name": "Recipe: Basalt Battlehammer (60%)",
+      "kind": "etc",
+      "icon": "icon.etc_recipe_black_i00",
+      "price": 976000,
+      "weight": 30,
+      "stackable": true
+    },
+    {
+      "id": 6885,
+      "name": "Recipe: Imperial Staff (60%)",
+      "kind": "etc",
+      "icon": "icon.etc_recipe_black_i00",
+      "price": 976000,
+      "weight": 30,
+      "stackable": true
+    },
+    {
+      "id": 6887,
+      "name": "Recipe: Angel Slayer (60%)",
+      "kind": "etc",
+      "icon": "icon.etc_recipe_black_i00",
+      "price": 976000,
+      "weight": 30,
+      "stackable": true
+    },
+    {
+      "id": 6889,
+      "name": "Recipe: Shining Bow (60%)",
+      "kind": "etc",
+      "icon": "icon.etc_recipe_black_i00",
+      "price": 976000,
+      "weight": 30,
+      "stackable": true
+    },
+    {
+      "id": 6891,
+      "name": "Recipe: Dragon Hunter Axe (60%)",
+      "kind": "etc",
+      "icon": "icon.etc_recipe_black_i00",
+      "price": 976000,
+      "weight": 30,
+      "stackable": true
+    },
+    {
+      "id": 6893,
+      "name": "Recipe: Saint Spear (60%)",
+      "kind": "etc",
+      "icon": "icon.etc_recipe_black_i00",
+      "price": 976000,
+      "weight": 30,
+      "stackable": true
+    },
+    {
+      "id": 6895,
+      "name": "Recipe: Demon Splinter (60%)",
+      "kind": "etc",
+      "icon": "icon.etc_recipe_black_i00",
+      "price": 976000,
+      "weight": 30,
+      "stackable": true
+    },
+    {
+      "id": 6897,
+      "name": "Recipe: Heavens Divider (60%)",
+      "kind": "etc",
+      "icon": "icon.etc_recipe_black_i00",
+      "price": 976000,
+      "weight": 30,
+      "stackable": true
+    },
+    {
+      "id": 6899,
+      "name": "Recipe: Arcana Mace (60%)",
       "kind": "etc",
       "icon": "icon.etc_recipe_black_i00",
       "price": 976000,
@@ -24353,6 +24536,15 @@
       "randomDamage": 5,
       "soulshots": 1,
       "spiritshots": 1
+    },
+    {
+      "id": 7580,
+      "name": "Recipe: Draconic Bow (60%)",
+      "kind": "etc",
+      "icon": "icon.etc_recipe_black_i00",
+      "price": 976000,
+      "weight": 30,
+      "stackable": true
     },
     {
       "id": 7583,
