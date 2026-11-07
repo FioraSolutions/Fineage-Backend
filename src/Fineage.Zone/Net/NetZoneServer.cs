@@ -2278,11 +2278,11 @@ public sealed class NetZoneServer : INetPresenceBridge
         }
 
         var req = NetCodec.DecodeWarehouseDepositRequest(envelope.Payload);
-        var lines = (req.Lines ?? []).Select(l => new WarehouseCountMsg { ObjectId = l.ObjectId, Count = l.Count }).ToArray();
+        var lines = (req.Lines ?? [])
+            .Select(l => new Fineage.Game.Services.WarehouseLine(l.ObjectId, l.Count))
+            .ToArray();
         string? error = await _world.TryWarehouseDepositAsync(
-            zoneSession,
-            new WarehouseDepositRequestMsg { NpcObjectId = req.NpcObjectId, Lines = lines },
-            ct).ConfigureAwait(false);
+            zoneSession, req.NpcObjectId, lines, ct).ConfigureAwait(false);
         if (error != null)
             await RejectAsync(conn, error, "Warehouse deposit failed.", ct).ConfigureAwait(false);
     }
@@ -2301,11 +2301,11 @@ public sealed class NetZoneServer : INetPresenceBridge
         }
 
         var req = NetCodec.DecodeWarehouseWithdrawRequest(envelope.Payload);
-        var lines = (req.Lines ?? []).Select(l => new WarehouseCountMsg { ObjectId = l.ObjectId, Count = l.Count }).ToArray();
+        var lines = (req.Lines ?? [])
+            .Select(l => new Fineage.Game.Services.WarehouseLine(l.ObjectId, l.Count))
+            .ToArray();
         string? error = await _world.TryWarehouseWithdrawAsync(
-            zoneSession,
-            new WarehouseWithdrawRequestMsg { NpcObjectId = req.NpcObjectId, Lines = lines },
-            ct).ConfigureAwait(false);
+            zoneSession, req.NpcObjectId, lines, ct).ConfigureAwait(false);
         if (error != null)
             await RejectAsync(conn, error, "Warehouse withdraw failed.", ct).ConfigureAwait(false);
     }

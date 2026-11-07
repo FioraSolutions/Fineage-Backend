@@ -9,27 +9,30 @@ namespace Fineage.Zone.World;
 
 public sealed partial class ZoneWorld
 {
-    public Task<string?> TryTeleportSelectAsync(ZoneSession session, TeleportSelectRequestMsg request, CancellationToken ct)
+    public Task<string?> TryTeleportSelectAsync(
+        ZoneSession session, int npcObjectId, string? listName, int locationId, CancellationToken ct)
     {
         string? error;
         lock (_gate)
-            error = TeleportTo(session, request.NpcObjectId, request.ListName, request.LocationId, html: false);
+            error = TeleportTo(session, npcObjectId, listName ?? "", locationId, html: false);
         return Task.FromResult<string?>(error);
     }
 
-    public Task<string?> TryWarehouseDepositAsync(ZoneSession session, WarehouseDepositRequestMsg request, CancellationToken ct)
+    public Task<string?> TryWarehouseDepositAsync(
+        ZoneSession session, int npcObjectId, WarehouseLine[] lines, CancellationToken ct)
     {
         string? error;
         lock (_gate)
-            error = DepositPrivate(session, request.NpcObjectId, request.Lines, html: false);
+            error = DepositPrivate(session, npcObjectId, lines, html: false);
         return Task.FromResult<string?>(error);
     }
 
-    public Task<string?> TryWarehouseWithdrawAsync(ZoneSession session, WarehouseWithdrawRequestMsg request, CancellationToken ct)
+    public Task<string?> TryWarehouseWithdrawAsync(
+        ZoneSession session, int npcObjectId, WarehouseLine[] lines, CancellationToken ct)
     {
         string? error;
         lock (_gate)
-            error = WithdrawPrivate(session, request.NpcObjectId, request.Lines, html: false);
+            error = WithdrawPrivate(session, npcObjectId, lines, html: false);
         return Task.FromResult<string?>(error);
     }
 
@@ -298,7 +301,7 @@ public sealed partial class ZoneWorld
         return null;
     }
 
-    string? DepositPrivate(ZoneSession session, int npcObjectId, WarehouseCountMsg[]? lines, bool html)
+    string? DepositPrivate(ZoneSession session, int npcObjectId, WarehouseLine[]? lines, bool html)
     {
         if (!TryServicePair(session, npcObjectId, out var player, out var npc, out var error))
             return error;
@@ -382,7 +385,7 @@ public sealed partial class ZoneWorld
         return null;
     }
 
-    string? WithdrawPrivate(ZoneSession session, int npcObjectId, WarehouseCountMsg[]? lines, bool html)
+    string? WithdrawPrivate(ZoneSession session, int npcObjectId, WarehouseLine[]? lines, bool html)
     {
         if (!TryServicePair(session, npcObjectId, out var player, out var npc, out var error))
             return error;
@@ -675,7 +678,7 @@ public sealed partial class ZoneWorld
         return true;
     }
 
-    static bool TryReadLines(WarehouseCountMsg[]? lines, out WarehouseCountMsg[] request, out string? error)
+    static bool TryReadLines(WarehouseLine[]? lines, out WarehouseLine[] request, out string? error)
     {
         request = [];
         error = null;
@@ -687,7 +690,7 @@ public sealed partial class ZoneWorld
 
         foreach (var line in lines)
         {
-            if (line == null || line.ObjectId <= 0 || line.Count < 1)
+            if (line.ObjectId <= 0 || line.Count < 1)
             {
                 error = "bad_request";
                 return false;
