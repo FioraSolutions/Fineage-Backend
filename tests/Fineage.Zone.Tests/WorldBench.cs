@@ -210,33 +210,18 @@ internal sealed class BenchPlayer
 
     public Task<string?> Buy(int npcObjectId, int listId, params (int ItemId, int Count)[] rows)
     {
-        var items = rows.Select(row => new ShopCountMsg { ItemId = row.ItemId, Count = row.Count }).ToArray();
-        return World.TryBuyAsync(
-            Session,
-            new RequestBuyItemMsg { NpcObjectId = npcObjectId, ListId = listId, Items = items },
-            CancellationToken.None);
+        var items = rows.Select(row => new Fineage.Game.Shops.ShopLine(row.ItemId, row.Count)).ToArray();
+        return World.TryBuyAsync(Session, npcObjectId, listId, items, CancellationToken.None);
     }
 
     public Task<string?> Sell(int npcObjectId, params (int ObjectId, int Count)[] rows)
     {
-        var items = rows.Select(row => new ShopObjectCountMsg { ObjectId = row.ObjectId, Count = row.Count }).ToArray();
-        return World.TrySellAsync(
-            Session,
-            new RequestSellItemMsg { NpcObjectId = npcObjectId, Items = items },
-            CancellationToken.None);
+        var items = rows.Select(row => new Fineage.Game.Shops.ShopObjectLine(row.ObjectId, row.Count)).ToArray();
+        return World.TrySellAsync(Session, npcObjectId, items, CancellationToken.None);
     }
 
     public Task<string?> MultiSell(int npcObjectId, int listId, int entryId, int amount) =>
-        World.TryMultiSellAsync(
-            Session,
-            new RequestMultiSellChooseMsg
-            {
-                NpcObjectId = npcObjectId,
-                ListId = listId,
-                EntryId = entryId,
-                Amount = amount
-            },
-            CancellationToken.None);
+        World.TryMultiSellAsync(Session, npcObjectId, listId, entryId, amount, CancellationToken.None);
 
     /// <summary>Picks a gatekeeper destination, the same call the teleport page's link lands on.</summary>
     public Task<string?> Teleport(int npcObjectId, string listName, int locationId) =>

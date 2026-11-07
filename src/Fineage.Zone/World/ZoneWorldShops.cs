@@ -7,43 +7,47 @@ namespace Fineage.Zone.World;
 
 public sealed partial class ZoneWorld
 {
-    public Task<string?> TryBuyAsync(ZoneSession session, RequestBuyItemMsg request, CancellationToken ct)
+    public Task<string?> TryBuyAsync(
+        ZoneSession session, int npcObjectId, int listId, ShopLine[] items, CancellationToken ct)
     {
         if (!IsLive(session))
             return Task.FromResult<string?>("world");
         string? error;
         lock (_gate)
-            error = Buy(session, request);
+            error = Buy(session, npcObjectId, listId, items);
         return Task.FromResult<string?>(error);
     }
 
-    public Task<string?> TrySellAsync(ZoneSession session, RequestSellItemMsg request, CancellationToken ct)
+    public Task<string?> TrySellAsync(
+        ZoneSession session, int npcObjectId, ShopObjectLine[] items, CancellationToken ct)
     {
         if (!IsLive(session))
             return Task.FromResult<string?>("world");
         string? error;
         lock (_gate)
-            error = Sell(session, request);
+            error = Sell(session, npcObjectId, items);
         return Task.FromResult<string?>(error);
     }
 
-    public Task<string?> TryMultiSellAsync(ZoneSession session, RequestMultiSellChooseMsg request, CancellationToken ct)
+    public Task<string?> TryMultiSellAsync(
+        ZoneSession session, int npcObjectId, int listId, int entryId, int amount, CancellationToken ct)
     {
         if (!IsLive(session))
             return Task.FromResult<string?>("world");
         string? error;
         lock (_gate)
-            error = ChooseMultiSell(session, request);
+            error = ChooseMultiSell(session, npcObjectId, listId, entryId, amount);
         return Task.FromResult<string?>(error);
     }
 
-    public Task<string?> TryPreviewAsync(ZoneSession session, RequestPreviewItemMsg request, CancellationToken ct)
+    public Task<string?> TryPreviewAsync(
+        ZoneSession session, int npcObjectId, int listId, int itemId, CancellationToken ct)
     {
         if (!IsLive(session))
             return Task.FromResult<string?>("world");
         string? error;
         lock (_gate)
-            error = Preview(session, request);
+            error = Preview(session, npcObjectId);
         return Task.FromResult<string?>(error);
     }
 
@@ -100,9 +104,9 @@ public sealed partial class ZoneWorld
         return null;
     }
 
-    string? Buy(ZoneSession session, RequestBuyItemMsg request)
+    string? Buy(ZoneSession session, int npcObjectId, int listId, ShopLine[] items)
     {
-        if (request.Items == null)
+        if (items == null)
             return "bad_request";
         if (!TryPlayer(session, out var player) || player.Inventory == null)
             return "world";
@@ -112,34 +116,30 @@ public sealed partial class ZoneWorld
         // Mobius admin_buy: NpcObjectId 0 + ShopSession.IsAdmin. Price-0 GM lists are free grants
         // (ShopTrade.Buy refuses unit price 0 as NotTradable).
         if (player.Shop is { IsAdmin: true } adminShop
-            && request.NpcObjectId == 0
+            && npcObjectId == 0
             && adminShop.NpcObjectId == 0
-            && adminShop.BuyListId == request.ListId)
+            && adminShop.BuyListId == listId)
         {
             if (!ZoneAdmin.IsAdminCharacter(player.Name))
                 return "forbidden";
-            if (!_buyLists.TryGet(request.ListId, out var adminList))
+            if (!_buyLists.TryGet(listId, out var adminList))
                 return "bad_request";
-            return CompleteAdminBuy(session, player, adminList, request.Items);
+            return CompleteAdminBuy(session, player, adminList, items);
         }
 
-        if (!TryShopNpc(session, request.NpcObjectId, out player, out var npc, out var error))
+        if (!TryShopNpc(session, npcObjectId, out player, out var npc, out var error))
             return error;
-        if (player.Shop == null || player.Shop.NpcObjectId != npc.ObjectId || player.Shop.BuyListId != request.ListId)
+        if (player.Shop == null || player.Shop.NpcObjectId != npc.ObjectId || player.Shop.BuyListId != listId)
             return "bad_request";
-        if (!_buyLists.TryGet(request.ListId, out var list) || !list.Allows(npc.NpcId) || player.Inventory == null)
+        if (!_buyLists.TryGet(listId, out var list) || !list.Allows(npc.NpcId) || player.Inventory == null)
             return "bad_request";
-
-        var lines = new ShopLine[request.Items.Length];
-        for (int i = 0; i < lines.Length; i++)
-            lines[i] = new ShopLine(request.Items[i].ItemId, request.Items[i].Count);
 
         Tax(npc, out int baseTax, out int castleTax, out _);
         var mutation = ShopTrade.Buy(
             player.Inventory,
             _game.Items,
             list,
-            lines,
+            items,
             baseTax,
             castleTax,
             MaxLoadOf(player),
@@ -161,22 +161,18 @@ public sealed partial class ZoneWorld
         return null;
     }
 
-    string? Sell(ZoneSession session, RequestSellItemMsg request)
+    string? Sell(ZoneSession session, int npcObjectId, ShopObjectLine[] items)
     {
-        if (request.Items == null)
+        if (items == null)
             return "bad_request";
-        if (!TryShopNpc(session, request.NpcObjectId, out var player, out var npc, out var error))
+        if (!TryShopNpc(session, npcObjectId, out var player, out var npc, out var error))
             return error;
         if (player.Shop is not { SellOpen: true } || player.Shop.NpcObjectId != npc.ObjectId || player.Inventory == null)
             return "bad_request";
         if (!CanSell(npc))
             return "bad_request";
 
-        var lines = new ShopObjectLine[request.Items.Length];
-        for (int i = 0; i < lines.Length; i++)
-            lines[i] = new ShopObjectLine(request.Items[i].ObjectId, request.Items[i].Count);
-
-        var mutation = ShopTrade.Sell(player.Inventory, lines);
+        var mutation = ShopTrade.Sell(player.Inventory, items);
         if (!mutation.Ok)
         {
             SendDeny(session, mutation);
@@ -192,15 +188,15 @@ public sealed partial class ZoneWorld
         return null;
     }
 
-    string? ChooseMultiSell(ZoneSession session, RequestMultiSellChooseMsg request)
+    string? ChooseMultiSell(ZoneSession session, int npcObjectId, int listId, int entryId, int amount)
     {
-        if (!TryShopNpc(session, request.NpcObjectId, out var player, out var npc, out var error))
+        if (!TryShopNpc(session, npcObjectId, out var player, out var npc, out var error))
             return error;
-        if (player.Shop?.Multi == null || player.Shop.NpcObjectId != npc.ObjectId || player.Shop.Multi.ListId != request.ListId)
+        if (player.Shop?.Multi == null || player.Shop.NpcObjectId != npc.ObjectId || player.Shop.Multi.ListId != listId)
             return "bad_request";
         if (player.Inventory == null)
             return "bad_request";
-        var entry = player.Shop.Multi.Find(request.EntryId);
+        var entry = player.Shop.Multi.Find(entryId);
         if (entry == null)
             return "bad_request";
 
@@ -208,7 +204,7 @@ public sealed partial class ZoneWorld
             player.Inventory,
             _game.Items,
             entry,
-            request.Amount,
+            amount,
             MaxLoadOf(player),
             ShopTrade.SlotLimit(player.Race));
         if (!mutation.Ok)
@@ -220,7 +216,7 @@ public sealed partial class ZoneWorld
         SendTouches(session, mutation);
         SendComplete(session);
         MultiSellListMsg? multi = null;
-        if (player.Shop.Multi.InventoryOnly && _multisells.TryGet(request.ListId, out var list))
+        if (player.Shop.Multi.InventoryOnly && _multisells.TryGet(listId, out var list))
         {
             Tax(npc, out _, out int castleTax, out bool owned);
             bool applyTax = list.ApplyTaxes && npc.MerchantCastleId > 0 && owned;
@@ -238,9 +234,9 @@ public sealed partial class ZoneWorld
         return null;
     }
 
-    string? Preview(ZoneSession session, RequestPreviewItemMsg request)
+    string? Preview(ZoneSession session, int npcObjectId)
     {
-        if (!TryShopNpc(session, request.NpcObjectId, out _, out _, out var error))
+        if (!TryShopNpc(session, npcObjectId, out _, out _, out var error))
             return error;
         return null;
     }

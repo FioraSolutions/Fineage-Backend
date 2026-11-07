@@ -136,9 +136,9 @@ public sealed partial class ZoneWorld
         ZoneSession session,
         ZoneEntity player,
         Fineage.Game.Shops.BuyListDefinition list,
-        ShopCountMsg[] items)
+        ShopLine[] items)
     {
-        var free = new List<ShopCountMsg>();
+        var free = new List<ShopLine>();
         var paid = new List<ShopLine>();
         foreach (var row in items)
         {
@@ -150,7 +150,7 @@ public sealed partial class ZoneWorld
             if (product.Price <= 0)
                 free.Add(row);
             else
-                paid.Add(new ShopLine(row.ItemId, row.Count));
+                paid.Add(row);
         }
 
         if (paid.Count > 0)
