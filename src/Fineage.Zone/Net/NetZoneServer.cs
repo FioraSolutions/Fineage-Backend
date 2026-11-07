@@ -2211,11 +2211,11 @@ public sealed class NetZoneServer : INetPresenceBridge
         }
 
         var buy = NetCodec.DecodeRequestBuyItem(envelope.Payload);
-        var items = (buy.Items ?? []).Select(i => new ShopCountMsg { ItemId = i.ItemId, Count = i.Count }).ToArray();
+        var items = (buy.Items ?? [])
+            .Select(i => new Fineage.Game.Shops.ShopLine(i.ItemId, i.Count))
+            .ToArray();
         string? error = await _world.TryBuyAsync(
-            zoneSession,
-            new RequestBuyItemMsg { NpcObjectId = buy.NpcObjectId, ListId = buy.ListId, Items = items },
-            ct).ConfigureAwait(false);
+            zoneSession, buy.NpcObjectId, buy.ListId, items, ct).ConfigureAwait(false);
         if (error != null)
             await RejectAsync(conn, error, "Buy failed.", ct).ConfigureAwait(false);
     }
@@ -2234,11 +2234,11 @@ public sealed class NetZoneServer : INetPresenceBridge
         }
 
         var sell = NetCodec.DecodeRequestSellItem(envelope.Payload);
-        var items = (sell.Items ?? []).Select(i => new ShopObjectCountMsg { ObjectId = i.ObjectId, Count = i.Count }).ToArray();
+        var items = (sell.Items ?? [])
+            .Select(i => new Fineage.Game.Shops.ShopObjectLine(i.ObjectId, i.Count))
+            .ToArray();
         string? error = await _world.TrySellAsync(
-            zoneSession,
-            new RequestSellItemMsg { NpcObjectId = sell.NpcObjectId, Items = items },
-            ct).ConfigureAwait(false);
+            zoneSession, sell.NpcObjectId, items, ct).ConfigureAwait(false);
         if (error != null)
             await RejectAsync(conn, error, "Sell failed.", ct).ConfigureAwait(false);
     }
@@ -2258,15 +2258,8 @@ public sealed class NetZoneServer : INetPresenceBridge
 
         var choose = NetCodec.DecodeRequestMultiSellChoose(envelope.Payload);
         string? error = await _world.TryMultiSellAsync(
-            zoneSession,
-            new RequestMultiSellChooseMsg
-            {
-                NpcObjectId = choose.NpcObjectId,
-                ListId = choose.ListId,
-                EntryId = choose.EntryId,
-                Amount = choose.Amount
-            },
-            ct).ConfigureAwait(false);
+            zoneSession, choose.NpcObjectId, choose.ListId, choose.EntryId, choose.Amount, ct)
+            .ConfigureAwait(false);
         if (error != null)
             await RejectAsync(conn, error, "MultiSell failed.", ct).ConfigureAwait(false);
     }
