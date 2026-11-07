@@ -11,24 +11,48 @@
       "npcId": 30031,
       "hook": "talk",
       "when": "absent",
+      "maxLevel": 20,
       "htmlFile": "30031-talk-000.htm"
     },
     {
       "npcId": 30031,
       "hook": "talk",
       "when": "absent",
+      "minLevel": 21,
       "htmlFile": "30031-talk-001.htm"
     },
     {
       "npcId": 30031,
-      "hook": "talk",
-      "when": "started",
-      "htmlFile": "30031-talk-002.htm"
+      "hook": "event",
+      "when": "absent",
+      "event": "30031-03",
+      "minLevel": 21,
+      "ops": [
+        {
+          "op": "create"
+        },
+        {
+          "op": "start"
+        },
+        {
+          "op": "set_cond",
+          "cond": 1
+        }
+      ],
+      "htmlFile": "30031-event-30031-03-002.htm"
     },
     {
       "npcId": 30031,
       "hook": "talk",
       "when": "started",
+      "cond": 1,
+      "htmlFile": "30031-talk-c1-003.htm"
+    },
+    {
+      "npcId": 30031,
+      "hook": "talk",
+      "when": "started",
+      "cond": 2,
       "hasItem": 1025,
       "ops": [
         {
@@ -49,7 +73,28 @@
           "op": "complete"
         }
       ],
-      "htmlFile": "30031-talk-003.htm"
+      "htmlFile": "30031-talk-c2-004.htm"
+    },
+    {
+      "npcId": 27016,
+      "hook": "kill",
+      "when": "started",
+      "cond": 1,
+      "lacksItems": [
+        1025
+      ],
+      "html": "",
+      "ops": [
+        {
+          "op": "give_item",
+          "itemId": 1025,
+          "count": 1
+        },
+        {
+          "op": "set_cond",
+          "cond": 2
+        }
+      ]
     }
   ]
 }
