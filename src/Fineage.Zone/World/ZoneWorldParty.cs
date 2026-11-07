@@ -24,30 +24,28 @@ public sealed partial class ZoneWorld
 
     readonly record struct PendingPartyInvite(int InviterObjectId, int ItemDistribution);
 
-    public Task<string?> TryPartyInviteAsync(ZoneSession session, PartyInviteRequestMsg invite, CancellationToken ct)
+    public Task<string?> TryPartyInviteAsync(
+        ZoneSession session, int targetObjectId, int itemDistribution, CancellationToken ct)
     {
-        if (invite == null)
-            return Task.FromResult<string?>("bad_request");
         if (!session.InWorld)
             return Task.FromResult<string?>("world");
-        if (invite.TargetObjectId == session.ObjectId)
+        if (targetObjectId == session.ObjectId)
             return Task.FromResult<string?>("bad_request");
-        if (!Fineage.Game.Services.PartyLootRules.IsValidDistribution(invite.ItemDistribution))
+        if (!Fineage.Game.Services.PartyLootRules.IsValidDistribution(itemDistribution))
             return Task.FromResult<string?>("bad_request");
 
         lock (_gate)
-            return Task.FromResult<string?>(TryPartyInvite(session, invite));
+            return Task.FromResult<string?>(TryPartyInvite(session, targetObjectId, itemDistribution));
     }
 
-    public Task<string?> TryPartyAnswerAsync(ZoneSession session, PartyAnswerJoinRequestMsg answer, CancellationToken ct)
+    public Task<string?> TryPartyAnswerAsync(
+        ZoneSession session, int requestorObjectId, int response, CancellationToken ct)
     {
-        if (answer == null)
-            return Task.FromResult<string?>("bad_request");
         if (!session.InWorld)
             return Task.FromResult<string?>("world");
 
         lock (_gate)
-            return Task.FromResult<string?>(TryPartyAnswer(session, answer));
+            return Task.FromResult<string?>(TryPartyAnswer(session, requestorObjectId, response));
     }
 
     public Task<string?> TryPartyLeaveAsync(ZoneSession session, CancellationToken ct)
@@ -59,15 +57,13 @@ public sealed partial class ZoneWorld
             return Task.FromResult<string?>(TryPartyLeave(session.ObjectId));
     }
 
-    public Task<string?> TryPartyKickAsync(ZoneSession session, PartyKickRequestMsg kick, CancellationToken ct)
+    public Task<string?> TryPartyKickAsync(ZoneSession session, int targetObjectId, CancellationToken ct)
     {
-        if (kick == null)
-            return Task.FromResult<string?>("bad_request");
         if (!session.InWorld)
             return Task.FromResult<string?>("world");
 
         lock (_gate)
-            return Task.FromResult<string?>(TryPartyKick(session, kick.TargetObjectId));
+            return Task.FromResult<string?>(TryPartyKick(session, targetObjectId));
     }
 
     void PartyPlayerLeftWorld(int objectId)
@@ -85,22 +81,22 @@ public sealed partial class ZoneWorld
         TryPartyLeave(objectId);
     }
 
-    string? TryPartyInvite(ZoneSession inviter, PartyInviteRequestMsg invite)
+    string? TryPartyInvite(ZoneSession inviter, int targetObjectId, int itemDistribution)
     {
         if (!IsLive(inviter))
             return "world";
-        if (!_byId.TryGetValue(invite.TargetObjectId, out var targetEntity) ||
+        if (!_byId.TryGetValue(targetObjectId, out var targetEntity) ||
             targetEntity.Kind != ZoneEntityKind.Player ||
             targetEntity.Session == null ||
             !targetEntity.Session.InWorld)
             return "target";
 
-        if (_partyByPlayer.ContainsKey(invite.TargetObjectId))
+        if (_partyByPlayer.ContainsKey(targetObjectId))
             return "party_busy";
-        if (_pendingInvites.ContainsKey(invite.TargetObjectId))
+        if (_pendingInvites.ContainsKey(targetObjectId))
             return "party_busy";
 
-        int distribution = invite.ItemDistribution;
+        int distribution = itemDistribution;
         if (_partyByPlayer.TryGetValue(inviter.ObjectId, out int partyId))
         {
             if (!_parties.TryGetValue(partyId, out var party))
@@ -112,7 +108,7 @@ public sealed partial class ZoneWorld
             distribution = party.ItemDistribution;
         }
 
-        _pendingInvites[invite.TargetObjectId] = new PendingPartyInvite(inviter.ObjectId, distribution);
+        _pendingInvites[targetObjectId] = new PendingPartyInvite(inviter.ObjectId, distribution);
         FanPartyAsk([targetEntity.ObjectId], new PartyAskJoinNetMsg
         {
             RequestorObjectId = inviter.ObjectId,
@@ -122,24 +118,24 @@ public sealed partial class ZoneWorld
         return null;
     }
 
-    string? TryPartyAnswer(ZoneSession invitee, PartyAnswerJoinRequestMsg answer)
+    string? TryPartyAnswer(ZoneSession invitee, int requestorObjectId, int response)
     {
         if (!IsLive(invitee))
             return "world";
         if (!_pendingInvites.TryGetValue(invitee.ObjectId, out var pending) ||
-            pending.InviterObjectId != answer.RequestorObjectId)
+            pending.InviterObjectId != requestorObjectId)
             return "party_invite";
 
         _pendingInvites.Remove(invitee.ObjectId);
 
-        if (!_byId.TryGetValue(answer.RequestorObjectId, out var requestorEntity) ||
+        if (!_byId.TryGetValue(requestorObjectId, out var requestorEntity) ||
             requestorEntity.Session == null ||
             !IsLive(requestorEntity.Session))
         {
             return "party_invite";
         }
 
-        if (answer.Response != 1)
+        if (response != 1)
         {
             FanPartyJoinResult([requestorEntity.ObjectId], 0);
             return null;
@@ -149,7 +145,7 @@ public sealed partial class ZoneWorld
             return "party_busy";
 
         ZoneParty party;
-        if (_partyByPlayer.TryGetValue(answer.RequestorObjectId, out int partyId))
+        if (_partyByPlayer.TryGetValue(requestorObjectId, out int partyId))
         {
             if (!_parties.TryGetValue(partyId, out party!))
                 return "party";
@@ -164,12 +160,12 @@ public sealed partial class ZoneWorld
             party = new ZoneParty
             {
                 PartyId = _nextPartyId++,
-                LeaderObjectId = answer.RequestorObjectId,
+                LeaderObjectId = requestorObjectId,
                 ItemDistribution = pending.ItemDistribution
             };
-            party.MemberIds.Add(answer.RequestorObjectId);
+            party.MemberIds.Add(requestorObjectId);
             _parties[party.PartyId] = party;
-            _partyByPlayer[answer.RequestorObjectId] = party.PartyId;
+            _partyByPlayer[requestorObjectId] = party.PartyId;
         }
 
         party.MemberIds.Add(invitee.ObjectId);
