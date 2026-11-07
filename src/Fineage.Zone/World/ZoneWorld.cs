@@ -406,6 +406,7 @@ public sealed partial class ZoneWorld
     readonly Random _spawnRandom;
     readonly Random _dropRandom;
     readonly IAccountStore? _accounts;
+    readonly ZoneCharacterPersist _persist;
     readonly bool _expertisePenalty;
     readonly IEnchantRandom _enchantRandom;
     readonly EnchantRates _enchantRates;
@@ -526,6 +527,7 @@ public sealed partial class ZoneWorld
         _spawnRandom = spawnRandom ?? Random.Shared;
         _dropRandom = dropRandom ?? spawnRandom ?? Random.Shared;
         _accounts = accounts;
+        _persist = new ZoneCharacterPersist(accounts);
         _expertisePenalty = expertisePenalty ?? ZoneGearSettings.ExpertisePenalty;
         _spawnCatalog = spawnCatalog ?? SpawnCatalog.LoadDefault();
         _dropCatalog = dropCatalog ?? DropCatalog.LoadDefault();
@@ -1099,7 +1101,7 @@ public sealed partial class ZoneWorld
     /// <summary>Throttled save of the move destination so a Zone restart mid-session keeps the player's spot.</summary>
     void MaybeSavePresenceOnMove(ZoneSession session)
     {
-        if (_accounts == null || session.ObjectId <= 0)
+        if (!_persist.Enabled || session.ObjectId <= 0)
             return;
         long now = _clock().ToUnixTimeMilliseconds();
         long last = _lastPresenceSaveMs.GetValueOrDefault(session.ObjectId, long.MinValue / 2);
@@ -1109,18 +1111,14 @@ public sealed partial class ZoneWorld
         SavePresence(session, session.X, session.Y, session.Z, touchAccess: false);
     }
 
-    void SavePresence(ZoneSession session, int x, int y, int z, bool touchAccess)
-    {
-        if (_accounts == null)
-            return;
-        _accounts.TrySavePresence(
+    void SavePresence(ZoneSession session, int x, int y, int z, bool touchAccess) =>
+        _persist.SavePresence(
             session.Account,
             session.ObjectId,
             x,
             y,
             z,
             touchAccess ? DateTimeOffset.UtcNow : null);
-    }
 
     PlayerInventory LoadInventory(ZoneSession session)
     {
@@ -1133,7 +1131,7 @@ public sealed partial class ZoneWorld
         if (record.Items == null)
         {
             var granted = _game.CreateStarterInventory(session.ClassId, _itemIds);
-            _accounts.TryReplaceItems(session.Account, session.ObjectId, CharacterInventory.Rows(granted));
+            _persist.ReplaceItemsFromInventory(session.Account, session.ObjectId, granted);
             return granted;
         }
 
@@ -1146,9 +1144,7 @@ public sealed partial class ZoneWorld
         // here, so the overload level is recomputed exactly when the load changes (pickup, drop, shop, trade,
         // warehouse, enchant, equip/unequip, quest reward, sweep, shots).
         RefreshWeightPenaltyAfterInventoryChange(session);
-        if (_accounts == null)
-            return;
-        _accounts.TryReplaceItems(session.Account, session.ObjectId, CharacterInventory.Rows(inventory));
+        _persist.ReplaceItemsFromInventory(session.Account, session.ObjectId, inventory);
     }
 
     bool IsLive(ZoneSession session) =>

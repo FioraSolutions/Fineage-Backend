@@ -248,7 +248,7 @@ public sealed partial class ZoneWorld
             var remaining = (offline.Friends ?? [])
                 .Where(f => f.ObjectId != self.ObjectId)
                 .ToArray();
-            _accounts.TryReplaceFriends(offline.Account, offline.Id, remaining);
+            _persist.ReplaceFriends(offline.Account, offline.Id, remaining);
         }
 
         NotifyLine(self.ObjectId, 0, $"{friendName} has been deleted from your Friends List.");
@@ -355,24 +355,24 @@ public sealed partial class ZoneWorld
 
     void PersistFriends(ZoneEntity player)
     {
-        if (_accounts == null || player.Session == null)
+        if (player.Session == null)
             return;
         var rows = player.Friends
             .OrderBy(kv => kv.Key)
             .Select(kv => new StoredSocial(kv.Key, kv.Value))
             .ToArray();
-        _accounts.TryReplaceFriends(player.Session.Account, player.ObjectId, rows);
+        _persist.ReplaceFriends(player.Session.Account, player.ObjectId, rows);
     }
 
     void PersistBlocked(ZoneEntity player)
     {
-        if (_accounts == null || player.Session == null)
+        if (player.Session == null)
             return;
         var rows = player.Blocked
             .OrderBy(kv => kv.Key)
             .Select(kv => new StoredSocial(kv.Key, kv.Value))
             .ToArray();
-        _accounts.TryReplaceBlocked(player.Session.Account, player.ObjectId, rows, player.BlockAll);
+        _persist.ReplaceBlocked(player.Session.Account, player.ObjectId, rows, player.BlockAll);
     }
 
     ZoneEntity? FindOnlinePlayerByName(string name)

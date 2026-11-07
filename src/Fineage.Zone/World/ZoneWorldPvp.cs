@@ -111,9 +111,14 @@ public sealed partial class ZoneWorld
 
     void PersistKarmaPk(ZoneEntity player)
     {
-        if (player.Session == null || _accounts == null)
+        if (player.Session == null)
             return;
-        _accounts.TrySaveKarmaPk(player.Session.Account, player.ObjectId, player.Karma, player.PkKills, player.PvpKills);
+        _persist.SaveKarmaPk(
+            player.Session.Account,
+            player.ObjectId,
+            player.Karma,
+            player.PkKills,
+            player.PvpKills);
     }
 
     /// <summary>Test hook: apply PvP status as if <paramref name="attacker"/> damaged <paramref name="target"/>.</summary>
