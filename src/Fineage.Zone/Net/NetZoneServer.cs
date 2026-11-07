@@ -856,9 +856,8 @@ public sealed class NetZoneServer : INetPresenceBridge
                                     await RejectAsync(conn, ActionProtocol.Unsupported, $"action {use.ActionId} not on Net yet", ct).ConfigureAwait(false);
                                     break;
                                 }
-                                string? actionError = await _world.TryCharacterActionAsync(zoneSession,
-                                    new CharacterActionRequestMsg { ActionId = use.ActionId, CtrlPressed = use.CtrlPressed, ShiftPressed = use.ShiftPressed },
-                                    ct).ConfigureAwait(false);
+                                string? actionError = await _world.TryCharacterActionAsync(
+                                    zoneSession, use.ActionId, targetObjectId: 0, ct).ConfigureAwait(false);
                                 if (actionError != null)
                                     await RejectAsync(conn, actionError, "Action failed.", ct).ConfigureAwait(false);
                             }
@@ -1410,7 +1409,7 @@ public sealed class NetZoneServer : INetPresenceBridge
 
         var request = NetCodec.DecodeEnchantRequest(envelope.Payload);
         string? error = await _world
-            .TryEnchantRequestAsync(zoneSession, new EnchantRequestMsg { ObjectId = request.ScrollObjectId }, ct)
+            .TryEnchantRequestAsync(zoneSession, request.ScrollObjectId, ct)
             .ConfigureAwait(false);
         if (error != null)
             await RejectAsync(conn, error, "Enchant scroll select failed.", ct).ConfigureAwait(false);
@@ -1431,7 +1430,7 @@ public sealed class NetZoneServer : INetPresenceBridge
 
         var confirm = NetCodec.DecodeEnchantConfirm(envelope.Payload);
         string? error = await _world
-            .TryEnchantConfirmAsync(zoneSession, new EnchantConfirmMsg { ObjectId = confirm.TargetObjectId }, ct)
+            .TryEnchantConfirmAsync(zoneSession, confirm.TargetObjectId, ct)
             .ConfigureAwait(false);
         if (error != null)
             await RejectAsync(conn, error, "Enchant failed.", ct).ConfigureAwait(false);

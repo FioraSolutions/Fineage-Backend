@@ -27,8 +27,7 @@ public sealed class NetActionUseTests
         var rec = (NetBridgeRecorder)(object)kit.World.NetBridge!;
         var (session, elf) = await kit.EnterAsync();
 
-        Assert.Null(await kit.World.TryCharacterActionAsync(session,
-            new CharacterActionRequestMsg { ActionId = ActionProtocol.SitStand }, default));
+        Assert.Null(await kit.World.TryCharacterActionAsync(session, ActionProtocol.SitStand, 0, default));
         Assert.True(elf.Sitting);
 
         var waits = rec.Of(nameof(INetPresenceBridge.FanoutChangeWaitType));
@@ -47,8 +46,8 @@ public sealed class NetActionUseTests
         var rec = (NetBridgeRecorder)(object)kit.World.NetBridge!;
         var (session, elf) = await kit.EnterAsync();
 
-        await kit.World.TryCharacterActionAsync(session, new CharacterActionRequestMsg { ActionId = ActionProtocol.SitStand }, default);
-        await kit.World.TryCharacterActionAsync(session, new CharacterActionRequestMsg { ActionId = ActionProtocol.SitStand }, default);
+        await kit.World.TryCharacterActionAsync(session, ActionProtocol.SitStand, 0, default);
+        await kit.World.TryCharacterActionAsync(session, ActionProtocol.SitStand, 0, default);
 
         Assert.False(elf.Sitting);
         var waits = rec.Of(nameof(INetPresenceBridge.FanoutChangeWaitType));
@@ -67,8 +66,7 @@ public sealed class NetActionUseTests
         var rec = (NetBridgeRecorder)(object)kit.World.NetBridge!;
         var (session, elf) = await kit.EnterAsync();
 
-        Assert.Null(await kit.World.TryCharacterActionAsync(session,
-            new CharacterActionRequestMsg { ActionId = ActionProtocol.SocialVictory }, default));
+        Assert.Null(await kit.World.TryCharacterActionAsync(session, ActionProtocol.SocialVictory, 0, default));
 
         var call = Assert.Single(rec.Of(nameof(INetPresenceBridge.FanoutSocialAction)));
         var msg = Assert.IsType<SocialActionNetMsg>(call[1]);
@@ -84,8 +82,7 @@ public sealed class NetActionUseTests
         var (session, elf) = await kit.EnterAsync();
         Assert.True(elf.Running);
 
-        Assert.Null(await kit.World.TryCharacterActionAsync(session,
-            new CharacterActionRequestMsg { ActionId = ActionProtocol.WalkRun }, default));
+        Assert.Null(await kit.World.TryCharacterActionAsync(session, ActionProtocol.WalkRun, 0, default));
 
         Assert.False(elf.Running);
         var call = Assert.Single(rec.Of(nameof(INetPresenceBridge.FanoutChangeMoveType)));
