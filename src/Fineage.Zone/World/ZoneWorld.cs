@@ -757,17 +757,40 @@ public sealed partial class ZoneWorld
             DecreaseSkillsOnDelevel(player);
     }
 
-    public Task<bool> TryEnterAsync(ZoneSession session, CancellationToken ct)
+    public async Task<bool> TryEnterAsync(ZoneSession session, CancellationToken ct)
     {
+        // Load durable character state off the world lock so a slow Postgres round-trip
+        // cannot stall move/combat handlers waiting on _gate.
+        CharacterRecord? stored = null;
+        if (_accounts != null && session.ObjectId > 0)
+        {
+            stored = await Task.Run(
+                () => _accounts.FindById(session.Account, session.ObjectId),
+                ct).ConfigureAwait(false);
+        }
+
+        // Starter-kit backfill is durable IO — keep it off the lock too.
+        if (stored is { Items: null } && _accounts != null)
+        {
+            var granted = _game.CreateStarterInventory(session.ClassId, _itemIds);
+            await Task.Run(
+                () => _persist.ReplaceItemsFromInventory(session.Account, session.ObjectId, granted),
+                ct).ConfigureAwait(false);
+            stored = stored with { Items = CharacterInventory.Rows(granted) };
+        }
+
         bool ok;
         int known;
+        int enterX = 0, enterY = 0, enterZ = 0;
         lock (_gate)
-            ok = TryEnter(session, out known);
+            ok = TryEnter(session, stored, out known, out enterX, out enterY, out enterZ);
         if (!ok)
-            return Task.FromResult(false);
+            return false;
 
+        // Presence / last_access after the world commit so DB latency is not under _gate.
+        SavePresence(session, enterX, enterY, enterZ, touchAccess: true);
         ZoneLog.EnterWorld(session, known);
-        return Task.FromResult(true);
+        return true;
     }
 
     public Task LeaveAsync(ZoneSession session, CancellationToken ct)
@@ -796,9 +819,16 @@ public sealed partial class ZoneWorld
         return Task.FromResult<string?>(null);
     }
 
-    bool TryEnter(ZoneSession session, out int known)
+    bool TryEnter(
+        ZoneSession session,
+        CharacterRecord? stored,
+        out int known,
+        out int enterX,
+        out int enterY,
+        out int enterZ)
     {
         known = 0;
+        enterX = enterY = enterZ = 0;
         if (session.ObjectId <= 0)
             return false;
         if (_byId.TryGetValue(session.ObjectId, out var occupied) && occupied.Kind != ZoneEntityKind.Player)
@@ -811,14 +841,13 @@ public sealed partial class ZoneWorld
                  !ReferenceEquals(current.Session, session))
             Unlink(current.Session);
 
-        var spawn = SpawnFor(session);
-        var inventory = LoadInventory(session);
-        var stored = _accounts?.FindById(session.Account, session.ObjectId);
-        var vitals = LoadVitals(session);
+        var spawn = SpawnFor(session, stored);
+        var inventory = LoadInventory(session, stored);
+        var vitals = LoadVitals(session, stored);
         var warehouse = new PrivateWarehouse(_game.Items);
         if (stored?.Warehouse != null)
             warehouse.Restore(stored.Warehouse.Select(item => new WarehouseRow(item.ItemId, item.Count, item.EnchantLevel, item.ObjectId)));
-        RememberPenalties(session);
+        RememberPenalties(session, stored);
         var entity = new ZoneEntity
         {
             ObjectId = session.ObjectId,
@@ -853,7 +882,7 @@ public sealed partial class ZoneWorld
             PkKills = Math.Max(0, stored?.PkKills ?? 0),
             PvpKills = Math.Max(0, stored?.PvpKills ?? 0)
         };
-        LoadQuestProgress(session, entity);
+        LoadQuestProgress(session, entity, stored);
         LoadLearnedSkills(entity, stored);
         LoadKnownRecipes(entity, stored);
         LoadSocialLists(entity, stored);
@@ -877,7 +906,9 @@ public sealed partial class ZoneWorld
         session.X = entity.X;
         session.Y = entity.Y;
         session.Z = entity.Z;
-        SavePresence(session, entity.X, entity.Y, entity.Z, touchAccess: true);
+        enterX = entity.X;
+        enterY = entity.Y;
+        enterZ = entity.Z;
 
         // The enter sequence itself (UserInfo, ItemList, SkillList, spawns) is Net-only and lives in
         // NetZoneServer.OnEnterAsync; the knownlist is still built here because the sim owns it.
@@ -1080,14 +1111,10 @@ public sealed partial class ZoneWorld
         return true;
     }
 
-    ClassSpawn.Point SpawnFor(ZoneSession session)
+    ClassSpawn.Point SpawnFor(ZoneSession session, CharacterRecord? stored = null)
     {
-        if (_accounts != null)
-        {
-            var record = _accounts.FindById(session.Account, session.ObjectId);
-            if (record is { HasPosition: true })
-                return new ClassSpawn.Point(record.X, record.Y, record.Z);
-        }
+        if (stored is { HasPosition: true })
+            return new ClassSpawn.Point(stored.X, stored.Y, stored.Z);
 
         if (!PlayerClasses.TryGet(session.ClassId, out var template) || template == null || template.Spawns.Count == 0)
             return new ClassSpawn.Point(TalkingIslandSpawn.X, TalkingIslandSpawn.Y, TalkingIslandSpawn.Z);
@@ -1133,22 +1160,15 @@ public sealed partial class ZoneWorld
             z,
             touchAccess ? DateTimeOffset.UtcNow : null);
 
-    PlayerInventory LoadInventory(ZoneSession session)
+    PlayerInventory LoadInventory(ZoneSession session, CharacterRecord? stored = null)
     {
-        if (_accounts == null)
+        if (stored == null)
+            return _game.CreateStarterInventory(session.ClassId, _itemIds);
+        // Items == null was backfilled off-lock in TryEnterAsync; treat missing as starter in-memory only.
+        if (stored.Items == null)
             return _game.CreateStarterInventory(session.ClassId, _itemIds);
 
-        var record = _accounts.FindById(session.Account, session.ObjectId);
-        if (record == null)
-            return _game.CreateStarterInventory(session.ClassId, _itemIds);
-        if (record.Items == null)
-        {
-            var granted = _game.CreateStarterInventory(session.ClassId, _itemIds);
-            _persist.ReplaceItemsFromInventory(session.Account, session.ObjectId, granted);
-            return granted;
-        }
-
-        return CharacterInventory.Restore(_game.Items, _itemIds, record.Items);
+        return CharacterInventory.Restore(_game.Items, _itemIds, stored.Items);
     }
 
     void SaveInventory(ZoneSession session, PlayerInventory inventory)

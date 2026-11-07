@@ -111,14 +111,14 @@ public sealed class NetZoneServer : INetPresenceBridge
                 continue;
             }
 
-            _presence.TrySend(selfObjectId, NetOpcode.EntitySpawn,
+            _presence.TrySendCritical(selfObjectId, NetOpcode.EntitySpawn,
                 NetCodec.EncodeEntitySpawn(NetEnterWorldProjector.BuildPresenceSpawn(seen, otherId)));
             if (seen.MoveActive)
                 SendMoveState(selfObjectId, otherId, seen);
             if (seen.Kind == ZoneEntityKind.Player && seen.Session is { InWorld: true })
             {
                 selfSpawn ??= NetCodec.EncodeEntitySpawn(NetEnterWorldProjector.BuildRemoteSpawn(selfEntity, self));
-                _presence.TrySend(id, NetOpcode.EntitySpawn, selfSpawn);
+                _presence.TrySendCritical(id, NetOpcode.EntitySpawn, selfSpawn);
                 if (selfEntity.MoveActive)
                     SendMoveState(id, self, selfEntity);
             }
@@ -134,13 +134,13 @@ public sealed class NetZoneServer : INetPresenceBridge
         foreach (int id in removed)
         {
             var forgotten = _ids.AllocateOrGet(id);
-            _presence.TrySend(selfObjectId, NetOpcode.EntityDespawn, NetCodec.EncodeEntityDespawn(new EntityDespawnMsg
+            _presence.TrySendCritical(selfObjectId, NetOpcode.EntityDespawn, NetCodec.EncodeEntityDespawn(new EntityDespawnMsg
             {
                 EntityValue = forgotten.Value,
                 EntityGeneration = forgotten.Generation
             }));
             if (_world.TryGetLivePlayerById(id, out _))
-                _presence.TrySend(id, NetOpcode.EntityDespawn, despawnSelf);
+                _presence.TrySendCritical(id, NetOpcode.EntityDespawn, despawnSelf);
         }
     }
 
@@ -196,7 +196,7 @@ public sealed class NetZoneServer : INetPresenceBridge
     {
         var payload = NetCodec.EncodeUserInfo(info);
         foreach (int watcher in watcherObjectIds)
-            _presence.TrySend(watcher, NetOpcode.UserInfo, payload);
+            _presence.TrySendCritical(watcher, NetOpcode.UserInfo, payload);
     }
 
     void INetPresenceBridge.FanoutCharInfo(IReadOnlyList<int> watcherObjectIds, int objectId)
@@ -206,7 +206,7 @@ public sealed class NetZoneServer : INetPresenceBridge
             return;
         var payload = NetCodec.EncodeEntitySpawn(NetEnterWorldProjector.BuildRemoteSpawn(entity, _ids.AllocateOrGet(objectId)));
         foreach (int watcher in watcherObjectIds)
-            _presence.TrySend(watcher, NetOpcode.EntitySpawn, payload);
+            _presence.TrySendCritical(watcher, NetOpcode.EntitySpawn, payload);
     }
 
     void INetPresenceBridge.FanoutAttackState(IReadOnlyList<int> watcherObjectIds, AttackStateMsg attack)
@@ -227,28 +227,28 @@ public sealed class NetZoneServer : INetPresenceBridge
     {
         var payload = NetCodec.EncodeEntityDie(die);
         foreach (int watcher in watcherObjectIds)
-            _presence.TrySend(watcher, NetOpcode.EntityDie, payload);
+            _presence.TrySendCritical(watcher, NetOpcode.EntityDie, payload);
     }
 
     void INetPresenceBridge.FanoutDropItem(IReadOnlyList<int> watcherObjectIds, DropItemNetMsg drop)
     {
         var payload = NetCodec.EncodeDropItem(drop);
         foreach (int watcher in watcherObjectIds)
-            _presence.TrySend(watcher, NetOpcode.DropItem, payload);
+            _presence.TrySendCritical(watcher, NetOpcode.DropItem, payload);
     }
 
     void INetPresenceBridge.FanoutEntityDespawn(IReadOnlyList<int> watcherObjectIds, EntityDespawnMsg despawn)
     {
         var payload = NetCodec.EncodeEntityDespawn(despawn);
         foreach (int watcher in watcherObjectIds)
-            _presence.TrySend(watcher, NetOpcode.EntityDespawn, payload);
+            _presence.TrySendCritical(watcher, NetOpcode.EntityDespawn, payload);
     }
 
     void INetPresenceBridge.FanoutInventoryUpdate(IReadOnlyList<int> watcherObjectIds, InventoryUpdateNetMsg update)
     {
         var payload = NetCodec.EncodeInventoryUpdate(update);
         foreach (int watcher in watcherObjectIds)
-            _presence.TrySend(watcher, NetOpcode.InventoryUpdate, payload);
+            _presence.TrySendCritical(watcher, NetOpcode.InventoryUpdate, payload);
     }
 
     void INetPresenceBridge.FanoutEtcStatusUpdate(IReadOnlyList<int> watcherObjectIds, EtcStatusUpdateNetMsg status)
@@ -1009,7 +1009,9 @@ public sealed class NetZoneServer : INetPresenceBridge
                 }
                 catch (Exception ex) when (ex is not OperationCanceledException)
                 {
-                    await RejectAsync(conn, "handler_error", ex.Message, ct).ConfigureAwait(false);
+                    // Keep stack/details on the server; clients only get a stable reason code.
+                    Console.Error.WriteLine($"[ZONE] handler_error opcode=0x{envelope.Opcode:X4}: {ex}");
+                    await RejectAsync(conn, "handler_error", "Internal zone error.", ct).ConfigureAwait(false);
                 }
             }
         }

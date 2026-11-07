@@ -1,3 +1,4 @@
+using Fineage.Accounts;
 using Fineage.Game;
 using Fineage.Game.Quests;
 using Fineage.Game.Services;
@@ -638,16 +639,14 @@ public sealed partial class ZoneWorld
         }
     }
 
-    void LoadQuestProgress(ZoneSession session, ZoneEntity entity)    {
+    void LoadQuestProgress(ZoneSession session, ZoneEntity entity, CharacterRecord? stored = null)
+    {
         entity.Quests = new QuestJournal();
-        if (_accounts == null)
+        if (stored == null)
             return;
-        var record = _accounts.FindById(session.Account, session.ObjectId);
-        if (record == null)
-            return;
-        entity.Exp = record.Exp;
-        entity.Sp = record.Sp;
-        entity.Quests = QuestJournal.Load(record.Quests);
+        entity.Exp = stored.Exp;
+        entity.Sp = stored.Sp;
+        entity.Quests = QuestJournal.Load(stored.Quests);
     }
 
     /// <summary>

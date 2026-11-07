@@ -184,25 +184,22 @@ public sealed partial class ZoneWorld
             DestroyClan(id, nowMs);
     }
 
-    void RememberPenalties(ZoneSession session)
+    void RememberPenalties(ZoneSession session, CharacterRecord? stored = null)
     {
-        if (_accounts == null)
-            return;
-        var record = _accounts.FindById(session.Account, session.ObjectId);
-        if (record == null)
+        if (stored == null)
             return;
 
-        _joinExpiry[session.ObjectId] = record.ClanJoinExpiryUnixMs;
-        _createExpiry[session.ObjectId] = record.ClanCreateExpiryUnixMs;
+        _joinExpiry[session.ObjectId] = stored.ClanJoinExpiryUnixMs;
+        _createExpiry[session.ObjectId] = stored.ClanCreateExpiryUnixMs;
         int clanId = ClanIdFor(session.ObjectId);
-        if (record.ClanId == clanId)
+        if (stored.ClanId == clanId)
             return;
-        _accounts.TrySetCharacterClanState(new CharacterClanState(
+        _accounts?.TrySetCharacterClanState(new CharacterClanState(
             session.Account,
             session.ObjectId,
             clanId,
-            record.ClanJoinExpiryUnixMs,
-            record.ClanCreateExpiryUnixMs));
+            stored.ClanJoinExpiryUnixMs,
+            stored.ClanCreateExpiryUnixMs));
     }
 
     void AnnounceClanEnter(ZoneEntity entity)
