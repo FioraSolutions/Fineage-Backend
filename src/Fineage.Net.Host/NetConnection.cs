@@ -1,3 +1,5 @@
+using System.Buffers.Binary;
+using System.Collections.Concurrent;
 using System.Net.Sockets;
 using System.Threading.Channels;
 using Fineage.Net.Contract;
@@ -20,7 +22,10 @@ public sealed class NetConnection : IAsyncDisposable
     readonly CommandDeduper _deduper = new();
     readonly string _endpoint;
     readonly Task _pump;
+    readonly ConcurrentDictionary<CoalesceEntityKey, PacketEnvelope> _coalescedMove = new();
     int _closed;
+
+    readonly record struct CoalesceEntityKey(ulong EntityValue, uint EntityGeneration);
 
     public NetConnection(TcpClient client, int inboxCapacity, string endpoint = "net", int outboundCapacity = DefaultOutboundCapacity)
     {
@@ -132,11 +137,66 @@ public sealed class NetConnection : IAsyncDisposable
         if (!TryEnvelope(opcode, payload, requestSequence, out PacketEnvelope envelope))
             return false;
 
+        if (TryCoalescedSend(opcode, envelope))
+            return true;
+
         if (_outbound.Writer.TryWrite(envelope))
             return true;
 
         NetTelemetry.OutboundDropped(_endpoint);
         return false;
+    }
+
+    /// <summary>
+    /// Replaceable move fanout: when the outbound channel is full, keep the latest MoveState /
+    /// ChangeMoveType per entity instead of counting a drop. The pump merges stashed frames when room opens.
+    /// </summary>
+    bool TryCoalescedSend(ushort opcode, PacketEnvelope envelope)
+    {
+        if (opcode != NetOpcode.MoveState && opcode != NetOpcode.ChangeMoveType)
+            return false;
+
+        if (!TryCoalesceEntityKey(envelope.Payload, out ulong entityValue, out uint generation))
+            return false;
+
+        var key = new CoalesceEntityKey(entityValue, generation);
+
+        if (_outbound.Writer.TryWrite(envelope))
+        {
+            _coalescedMove.TryRemove(key, out _);
+            return true;
+        }
+
+        _coalescedMove[key] = envelope;
+        FlushCoalescedOutbound();
+        return true;
+    }
+
+    static bool TryCoalesceEntityKey(byte[] payload, out ulong entityValue, out uint generation)
+    {
+        entityValue = 0;
+        generation = 0;
+        if (payload.Length < 12)
+            return false;
+
+        ReadOnlySpan<byte> span = payload;
+        entityValue = BinaryPrimitives.ReadUInt64LittleEndian(span);
+        generation = BinaryPrimitives.ReadUInt32LittleEndian(span[8..]);
+        return true;
+    }
+
+    void FlushCoalescedOutbound()
+    {
+        foreach (KeyValuePair<CoalesceEntityKey, PacketEnvelope> entry in _coalescedMove.ToArray())
+        {
+            if (!_coalescedMove.ContainsKey(entry.Key))
+                continue;
+
+            PacketEnvelope envelope = entry.Value;
+            if (!_outbound.Writer.TryWrite(envelope))
+                break;
+            _coalescedMove.TryRemove(entry.Key, out _);
+        }
     }
 
     /// <summary>
@@ -169,8 +229,10 @@ public sealed class NetConnection : IAsyncDisposable
         {
             await foreach (PacketEnvelope envelope in _outbound.Reader.ReadAllAsync().ConfigureAwait(false))
             {
+                FlushCoalescedOutbound();
                 await NetFraming.WriteAsync(_stream, envelope, CancellationToken.None).ConfigureAwait(false);
                 NetTelemetry.FrameOut(_endpoint, envelope.Payload.Length);
+                FlushCoalescedOutbound();
             }
         }
         catch (Exception ex) when (ex is IOException or OperationCanceledException or ObjectDisposedException or InvalidOperationException)
