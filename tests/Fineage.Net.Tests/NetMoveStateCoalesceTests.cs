@@ -25,7 +25,9 @@ public sealed class NetMoveStateCoalesceTests
         await using var conn = new NetConnection(serverSide, inboxCapacity: 8, endpoint: "move-coalesce", outboundCapacity: 4);
 
         // Fill the outbound queue with non-MoveState frames so further MoveState sends
-        // must coalesce rather than enqueue.
+        // must coalesce rather than enqueue. The pump may still drain a slot between the
+        // filler loop and the move burst, so an early DestX=1000 on the wire is allowed —
+        // the contract under test is that the *latest* coalesced DestX still arrives.
         byte[] filler = new byte[256];
         for (int i = 0; i < 8; i++)
             Assert.True(conn.TrySend(NetOpcode.SystemMessage, filler));
@@ -48,28 +50,26 @@ public sealed class NetMoveStateCoalesceTests
         }
 
         // Without coalesce, TrySend would start returning false once the queue is full.
-        // Do not assert fineage.outbound.dropped — that counter is process-global and
-        // races with NetOutboundQueueTests under parallel CI.
         Assert.Equal(32, accepted);
 
-        await Task.Delay(200, cts.Token);
+        await Task.Delay(300, cts.Token);
 
         var stream = client.GetStream();
-        MoveStateMsg? lastMove = null;
-        int moveFrames = 0;
+        var destXs = new List<int>();
         using var readCts = CancellationTokenSource.CreateLinkedTokenSource(cts.Token);
         readCts.CancelAfter(TimeSpan.FromSeconds(5));
         try
         {
-            while (moveFrames < 16)
+            while (true)
             {
                 PacketEnvelope? frame = await NetFraming.ReadAsync(stream, readCts.Token);
                 if (frame == null)
                     break;
                 if (frame.Opcode == NetOpcode.MoveState)
                 {
-                    moveFrames++;
-                    lastMove = NetCodec.DecodeMoveState(frame.Payload);
+                    MoveStateMsg move = NetCodec.DecodeMoveState(frame.Payload);
+                    Assert.Equal(entity, move.EntityValue);
+                    destXs.Add(move.DestX);
                 }
             }
         }
@@ -77,9 +77,8 @@ public sealed class NetMoveStateCoalesceTests
         {
         }
 
-        Assert.NotNull(lastMove);
-        Assert.Equal(entity, lastMove.EntityValue);
-        Assert.Equal(1031, lastMove.DestX);
+        Assert.NotEmpty(destXs);
+        Assert.Equal(1031, destXs.Max());
 
         server.Stop();
     }
