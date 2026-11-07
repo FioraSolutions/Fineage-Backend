@@ -1,6 +1,6 @@
 using System.Reflection;
 using Fineage.Game;
-using Fineage.Login;
+using Fineage.Accounts;
 using Fineage.Zone.Net;
 using Fineage.Zone.World;
 using Xunit;

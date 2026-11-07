@@ -1,6 +1,6 @@
 using System.Net;
 
-namespace Fineage.Login;
+namespace Fineage.Accounts;
 
 /// <summary>TCP/HTTP listen address. Default is every interface so a Pi playtest is reachable on the LAN.</summary>
 public static class BindAddress

@@ -96,7 +96,7 @@ public sealed partial class ZoneWorld
             ? npc
             : new ZoneEntity { Kind = ZoneEntityKind.Npc, NpcId = 0, Name = "Trainer", ObjectId = 0 };
 
-    void LoadLearnedSkills(ZoneEntity entity, Fineage.Login.CharacterRecord? stored)
+    void LoadLearnedSkills(ZoneEntity entity, Fineage.Accounts.CharacterRecord? stored)
     {
         entity.LearnedSkills.Clear();
         foreach (var s in stored?.LearnedSkills ?? [])
@@ -298,7 +298,7 @@ public sealed partial class ZoneWorld
         player.LearnedSkills[row.SkillId] = row.Level;
         RefreshKnownSkills(player);
         _accounts?.TryReplaceLearnedSkills(session.Account, session.ObjectId,
-            player.LearnedSkills.Select(p => new Fineage.Login.StoredSkill(p.Key, p.Value)).ToList());
+            player.LearnedSkills.Select(p => new Fineage.Accounts.StoredSkill(p.Key, p.Value)).ToList());
         SaveQuestProgress(session, player); // persists exp/sp like quest rewards
         NetBridge?.FanoutSkillList([player.ObjectId], Fineage.Zone.Net.NetEnterWorldProjector.BuildSkills(player, _clock().ToUnixTimeMilliseconds()));
         string skillName = _game.Skills.Find(row.SkillId)?.Name ?? $"Skill {row.SkillId}";

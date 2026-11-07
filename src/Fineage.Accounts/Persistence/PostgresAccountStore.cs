@@ -3,7 +3,7 @@ using System.Text.Json;
 using Fineage.Game.Quests;
 using Npgsql;
 
-namespace Fineage.Login;
+namespace Fineage.Accounts;
 
 /// <summary>
 /// PostgreSQL-backed <see cref="IAccountStore"/>. In-process mutations reuse

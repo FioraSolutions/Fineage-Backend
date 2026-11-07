@@ -1,4 +1,4 @@
-namespace Fineage.Login;
+namespace Fineage.Accounts;
 
 /// <summary>
 /// Issues and validates login→zone handoff tickets. In-memory HMAC today;

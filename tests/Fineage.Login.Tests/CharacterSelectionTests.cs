@@ -11,6 +11,7 @@ using NetRestoreCharacterMsg = Fineage.Net.Contract.RestoreCharacterMsg;
 using NetSelectCharacterMsg = Fineage.Net.Contract.SelectCharacterMsg;
 using NetOpcode = Fineage.Net.Contract.NetOpcode;
 using NetCodec = Fineage.Net.Contract.NetCodec;
+using Fineage.Accounts;
 
 namespace Fineage.Login.Tests;
 

@@ -8,6 +8,7 @@ using Xunit;
 using NetCreateCharacterMsg = Fineage.Net.Contract.CreateCharacterMsg;
 using NetOpcode = Fineage.Net.Contract.NetOpcode;
 using NetCodec = Fineage.Net.Contract.NetCodec;
+using Fineage.Accounts;
 
 namespace Fineage.Login.Tests;
 

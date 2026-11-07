@@ -3,7 +3,7 @@ using System.Text.Json.Serialization;
 using Fineage.Game;
 using Fineage.Game.Quests;
 
-namespace Fineage.Login;
+namespace Fineage.Accounts;
 
 public enum CreateCharacterStatus
 {

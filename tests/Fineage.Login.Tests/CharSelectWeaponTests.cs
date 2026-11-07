@@ -4,6 +4,7 @@ using Fineage.Net.Contract;
 using Fineage.Protocol;
 using Xunit;
 using Xunit.Abstractions;
+using Fineage.Accounts;
 
 public class CharSelectWeaponTests
 {

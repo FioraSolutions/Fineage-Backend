@@ -1,6 +1,7 @@
 using System.Net;
 using System.Net.Http;
 using System.Net.Sockets;
+using Fineage.Accounts;
 using Fineage.Login;
 using Fineage.Protocol;
 using Xunit;

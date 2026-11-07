@@ -3,6 +3,7 @@ using Fineage.Login.Net;
 using Fineage.Net.Contract;
 using Fineage.Net.Host;
 using Xunit;
+using Fineage.Accounts;
 
 namespace Fineage.Login.Tests;
 

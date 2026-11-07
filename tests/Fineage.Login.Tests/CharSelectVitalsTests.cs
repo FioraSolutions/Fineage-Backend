@@ -2,6 +2,7 @@ using Fineage.Login;
 using Fineage.Net.Contract;
 using Fineage.Protocol;
 using Xunit;
+using Fineage.Accounts;
 
 public class CharSelectVitalsTests
 {

@@ -73,8 +73,8 @@ public sealed class NerupaSpawnTests
         var nerupa = Assert.Single(map.Npcs, row => row.NpcId == NerupaNpcId);
         double nerupaZ = nerupa.Z;
 
-        var points = Fineage.Login.ClassTemplates.Points(18)
-            .Concat(Fineage.Login.ClassTemplates.Points(25))
+        var points = Fineage.Accounts.ClassTemplates.Points(18)
+            .Concat(Fineage.Accounts.ClassTemplates.Points(25))
             .Distinct()
             .ToArray();
         Assert.NotEmpty(points);

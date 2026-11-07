@@ -2,7 +2,7 @@ using System.Security.Cryptography;
 using System.Text;
 using Fineage.Protocol;
 
-namespace Fineage.Login;
+namespace Fineage.Accounts;
 
 public sealed record HandoffClaims(
     string Account,
@@ -183,19 +183,25 @@ public static class ZoneHandoff
     }
 
     /// <summary>
-    /// Zone TCP port written into the V2 handoff ticket.
-    /// <c>FINEAGE_ZONE_PORT</c> wins; with Net enabled the V2 listener defaults to 9877.
-    /// Net handoff uses <c>FINEAGE_NET_ZONE_PORT</c> / 9777 separately.
+    /// Zone TCP port written into the handoff ticket.
+    /// <c>FINEAGE_ZONE_PORT</c> wins, then <c>FINEAGE_NET_ZONE_PORT</c>, then 9777.
+    /// Kept free of <c>Fineage.Net.Host</c> so Accounts stays a shared library for Login and Zone.
     /// </summary>
     public static int AdvertisePort
     {
         get
         {
-            string? text = Environment.GetEnvironmentVariable("FINEAGE_ZONE_PORT");
-            if (int.TryParse(text, out int port) && port is >= 1 and <= 65535)
-                return port;
-            // Handoff points at the Net zone: it is the only transport the client speaks.
-            return Fineage.Net.Host.NetSettings.ZonePort;
+            foreach (string? text in new[]
+                     {
+                         Environment.GetEnvironmentVariable("FINEAGE_ZONE_PORT"),
+                         Environment.GetEnvironmentVariable("FINEAGE_NET_ZONE_PORT"),
+                     })
+            {
+                if (int.TryParse(text, out int port) && port is >= 1 and <= 65535)
+                    return port;
+            }
+
+            return 9777;
         }
     }
 }

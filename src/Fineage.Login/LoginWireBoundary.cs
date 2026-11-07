@@ -1,3 +1,4 @@
+using Fineage.Accounts;
 namespace Fineage.Login;
 
 /// <summary>Zone-port gameplay opcodes that must not be sent to the login TCP listener.</summary>

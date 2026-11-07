@@ -1,7 +1,7 @@
 using Fineage.Zone.Geo;
 using Fineage.Game;
 using Fineage.Game.Quests;
-using Fineage.Login;
+using Fineage.Accounts;
 using Fineage.Protocol;
 using Fineage.Zone.Chat;
 using Fineage.Zone.Combat;
@@ -197,7 +197,7 @@ sealed class ZoneEntity
     /// <summary>Mobius auto soulshot set: shot item ids recharged after each discharge.</summary>
     public HashSet<int> AutoShots { get; } = [];
     /// <summary>Mobius ShortCuts keyed by world slot (slot + page * 12).</summary>
-    public Dictionary<int, Fineage.Login.StoredShortcut> Shortcuts { get; } = [];
+    public Dictionary<int, Fineage.Accounts.StoredShortcut> Shortcuts { get; } = [];
     /// <summary>Trainer-learned skills (persisted; Mobius character_skills). Merged into KnownSkills.</summary>
     public Dictionary<int, int> LearnedSkills { get; } = [];
     /// <summary>True while an abnormal with combat stat funcs is active (UserInfo refresh on change).</summary>

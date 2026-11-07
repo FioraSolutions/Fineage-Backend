@@ -15,5 +15,7 @@
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\..\src\Fineage.Zone\Fineage.Zone.csproj" />
+    <!-- Test fixtures seed via LoginService / LoginHttpHost; production Zone references Accounts only. -->
+    <ProjectReference Include="..\..\src\Fineage.Login\Fineage.Login.csproj" />
   </ItemGroup>
 </Project>
