@@ -241,6 +241,8 @@ public sealed class NetConnection : IAsyncDisposable
         }
         finally
         {
+            // Last chance: drain replaceable MoveState that never fit the channel.
+            FlushCoalescedOutbound();
             _outbound.Writer.TryComplete();
         }
     }
@@ -250,6 +252,8 @@ public sealed class NetConnection : IAsyncDisposable
         if (Interlocked.Exchange(ref _closed, 1) != 0)
             return;
 
+        // Push any stashed MoveState before completing the channel so the pump can still send them.
+        FlushCoalescedOutbound();
         _outbound.Writer.TryComplete();
         try
         {
