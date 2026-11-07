@@ -21,6 +21,9 @@ using Fineage.Game.Services;
 
 namespace Fineage.Zone.World;
 
+/// <summary>Durable character state captured at detach; persisted outside <c>_gate</c>.</summary>
+readonly record struct UnlinkPersistSnapshot(ZoneSession Session, ZoneEntity Entity);
+
 public enum ZoneEntityKind
 {
     Npc = 0,
@@ -782,10 +785,17 @@ public sealed partial class ZoneWorld
         bool ok;
         int known;
         int enterX = 0, enterY = 0, enterZ = 0;
+        List<UnlinkPersistSnapshot>? pendingUnlink = null;
         lock (_gate)
-            ok = TryEnter(session, stored, out known, out enterX, out enterY, out enterZ);
+            ok = TryEnter(session, stored, out known, out enterX, out enterY, out enterZ, out pendingUnlink);
         if (!ok)
             return false;
+
+        if (pendingUnlink is { Count: > 0 })
+        {
+            foreach (var snapshot in pendingUnlink)
+                PersistUnlinkSnapshot(snapshot);
+        }
 
         // Presence / last_access after the world commit so DB latency is not under _gate.
         SavePresence(session, enterX, enterY, enterZ, touchAccess: true);
@@ -795,11 +805,13 @@ public sealed partial class ZoneWorld
 
     public Task LeaveAsync(ZoneSession session, CancellationToken ct)
     {
-        bool removed;
+        UnlinkPersistSnapshot? snapshot = null;
         lock (_gate)
-            removed = Unlink(session);
-        if (!removed)
+            TryDetachPlayer(session, capturePersist: true, out _, out snapshot);
+        if (snapshot == null)
             return Task.CompletedTask;
+
+        PersistUnlinkSnapshot(snapshot.Value);
 
         _sevenSigns.Save();
         _bosses.Save();
@@ -825,21 +837,31 @@ public sealed partial class ZoneWorld
         out int known,
         out int enterX,
         out int enterY,
-        out int enterZ)
+        out int enterZ,
+        out List<UnlinkPersistSnapshot>? pendingUnlink)
     {
         known = 0;
         enterX = enterY = enterZ = 0;
+        pendingUnlink = null;
         if (session.ObjectId <= 0)
             return false;
         if (_byId.TryGetValue(session.ObjectId, out var occupied) && occupied.Kind != ZoneEntityKind.Player)
             return false;
 
         if (session.InWorld)
-            Unlink(session);
-        else if (_byId.TryGetValue(session.ObjectId, out var current) &&
-                 current.Session != null &&
-                 !ReferenceEquals(current.Session, session))
-            Unlink(current.Session);
+        {
+            if (!TryDetachPlayer(session, capturePersist: false, out var detached, out _))
+                return false;
+            return ReattachPlayer(session, detached!, out known, out enterX, out enterY, out enterZ);
+        }
+
+        if (_byId.TryGetValue(session.ObjectId, out var current) &&
+            current.Session != null &&
+            !ReferenceEquals(current.Session, session) &&
+            TryDetachPlayer(current.Session, capturePersist: true, out _, out var evicted))
+        {
+            pendingUnlink = [evicted!.Value];
+        }
 
         var spawn = SpawnFor(session, stored);
         var inventory = LoadInventory(session, stored);
@@ -1061,8 +1083,15 @@ public sealed partial class ZoneWorld
             other.Knownlist.Remove(self.ObjectId);
     }
 
-    bool Unlink(ZoneSession session)
+    /// <returns>False when nothing was detached (stale session / object id).</returns>
+    bool TryDetachPlayer(
+        ZoneSession session,
+        bool capturePersist,
+        out ZoneEntity? detached,
+        out UnlinkPersistSnapshot? snapshot)
     {
+        detached = null;
+        snapshot = null;
         if (session.ObjectId == 0 || !_byId.TryGetValue(session.ObjectId, out var entity))
         {
             session.InWorld = false;
@@ -1075,24 +1104,14 @@ public sealed partial class ZoneWorld
             return false;
         }
 
-        var watchers = new List<ZoneSession>();
         foreach (int id in entity.Knownlist)
         {
             if (!_byId.TryGetValue(id, out var other))
                 continue;
             other.Knownlist.Remove(session.ObjectId);
-            if (other.Session != null)
-                watchers.Add(other.Session);
         }
 
         NoteOlympiadDisconnect(entity);
-
-        if (entity.Inventory != null)
-            SaveInventory(session, entity.Inventory);
-        SaveWarehouse(session, entity);
-        SaveVitals(session, entity);
-        SaveQuestProgress(session, entity);
-        SavePresence(session, entity.X, entity.Y, entity.Z, touchAccess: false);
 
         entity.Knownlist.Clear();
         _aoi.Leave(session.ObjectId);
@@ -1105,10 +1124,59 @@ public sealed partial class ZoneWorld
         FriendPlayerLeftWorld(session.ObjectId);
         ClanPlayerLeftWorld(session.ObjectId, session.Name);
 
+        detached = entity;
+        if (capturePersist)
+            snapshot = new UnlinkPersistSnapshot(session, entity);
+
         // The Net despawn for the leaver is owned by NetZoneServer.LeaveNetAsync (it knows the connection's
         // EntityId and unregisters the presence); fanning it here too would double-remove the same entity.
-        _ = watchers;
         return true;
+    }
+
+    /// <summary>Re-attach a player detached for same-session re-enter (no durable save).</summary>
+    bool ReattachPlayer(
+        ZoneSession session,
+        ZoneEntity entity,
+        out int known,
+        out int enterX,
+        out int enterY,
+        out int enterZ)
+    {
+        session.InWorld = true;
+        session.X = entity.X;
+        session.Y = entity.Y;
+        session.Z = entity.Z;
+        enterX = entity.X;
+        enterY = entity.Y;
+        enterZ = entity.Z;
+
+        _byId[entity.ObjectId] = entity;
+        _aoi.Enter(entity.ObjectId, entity.X, entity.Y);
+
+        foreach (var other in OrderedVisible(entity.ObjectId))
+        {
+            entity.Knownlist.Add(other.ObjectId);
+            if (other.Session != null)
+                other.Knownlist.Add(entity.ObjectId);
+        }
+
+        AnnounceClanEnter(entity);
+        FriendPlayerEnteredWorld(entity);
+        known = entity.Knownlist.Count;
+        return true;
+    }
+
+    /// <summary>Inventory / warehouse / vitals / quests / presence — must run outside <c>_gate</c>.</summary>
+    void PersistUnlinkSnapshot(UnlinkPersistSnapshot snapshot)
+    {
+        var session = snapshot.Session;
+        var entity = snapshot.Entity;
+        if (entity.Inventory != null)
+            _persist.ReplaceItemsFromInventory(session.Account, session.ObjectId, entity.Inventory);
+        SaveWarehouse(session, entity);
+        SaveVitals(session, entity);
+        SaveQuestProgress(session, entity);
+        SavePresence(session, entity.X, entity.Y, entity.Z, touchAccess: false);
     }
 
     ClassSpawn.Point SpawnFor(ZoneSession session, CharacterRecord? stored = null)
