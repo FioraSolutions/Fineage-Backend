@@ -84,8 +84,7 @@ public sealed class NetChatTests
         var (far, _) = await kit.EnterAsync(x: 5_000, y: 0);
         rec.Calls.Clear();
 
-        Assert.Null(await kit.World.TrySayAsync(
-            origin, new SayMsg { Text = "  hello  ", ChatType = ChatProtocol.All }, Now, CancellationToken.None));
+        Assert.Null(await kit.World.TrySayAsync(origin, "  hello  ", ChatProtocol.All, Now, CancellationToken.None));
 
         // The speaker always hears their own line, and so does everyone on the local boundary.
         Assert.True(Hears(Says(rec), origin.ObjectId, "hello"));
@@ -110,14 +109,12 @@ public sealed class NetChatTests
         var (close, _) = await kit.EnterAsync(x: 100, y: 0);
         var (hidden, _) = await kit.EnterAsync(x: 1_000, y: 0);
 
-        Assert.Null(await kit.World.TrySayAsync(
-            origin, new SayMsg { Text = "local", ChatType = ChatProtocol.All }, Now, CancellationToken.None));
+        Assert.Null(await kit.World.TrySayAsync(origin, "local", ChatProtocol.All, Now, CancellationToken.None));
         Assert.True(Hears(Says(rec), close.ObjectId, "local"));
         Assert.False(HearsAny(Says(rec), hidden.ObjectId));
 
         rec.Calls.Clear();
-        Assert.Null(await kit.World.TrySayAsync(
-            origin, new SayMsg { Text = "zone", ChatType = ChatProtocol.Shout }, Now.AddSeconds(1), CancellationToken.None));
+        Assert.Null(await kit.World.TrySayAsync(origin, "zone", ChatProtocol.Shout, Now.AddSeconds(1), CancellationToken.None));
 
         Assert.True(Hears(Says(rec), close.ObjectId, "zone"));
         Assert.True(Hears(Says(rec), hidden.ObjectId, "zone"));
@@ -139,8 +136,7 @@ public sealed class NetChatTests
         int[] types = [ChatProtocol.Tell, ChatProtocol.Party, ChatProtocol.Clan, ChatProtocol.Trade, ChatProtocol.Hero, 99];
         foreach (int type in types)
         {
-            Assert.Null(await kit.World.TrySayAsync(
-                speaker, new SayMsg { Text = "secret", ChatType = type }, now, CancellationToken.None));
+            Assert.Null(await kit.World.TrySayAsync(speaker, "secret", type, now, CancellationToken.None));
 
             SystemMessageNetMsg notice = Assert.Single(SystemLines(rec));
             Assert.Equal(ChatProtocol.ChatNotSupported, notice.Id);
@@ -163,19 +159,16 @@ public sealed class NetChatTests
         var (speaker, _) = await kit.EnterAsync(x: 0, y: 0);
         rec.Calls.Clear();
 
-        Assert.Null(await kit.World.TrySayAsync(
-            speaker, new SayMsg { Text = "one", ChatType = ChatProtocol.All }, Now, CancellationToken.None));
+        Assert.Null(await kit.World.TrySayAsync(speaker, "one", ChatProtocol.All, Now, CancellationToken.None));
         Assert.Equal("one", Assert.Single(Says(rec)).Line.Text);
 
         rec.Calls.Clear();
-        Assert.Null(await kit.World.TrySayAsync(
-            speaker, new SayMsg { Text = "two", ChatType = ChatProtocol.Shout }, Now.AddMilliseconds(999), CancellationToken.None));
+        Assert.Null(await kit.World.TrySayAsync(speaker, "two", ChatProtocol.Shout, Now.AddMilliseconds(999), CancellationToken.None));
         Assert.Equal("Please do not spam the chat.", Assert.Single(SystemLines(rec)).Text);
         Assert.Empty(Says(rec));
 
         rec.Calls.Clear();
-        Assert.Null(await kit.World.TrySayAsync(
-            speaker, new SayMsg { Text = "three", ChatType = ChatProtocol.All }, Now.AddMilliseconds(1000), CancellationToken.None));
+        Assert.Null(await kit.World.TrySayAsync(speaker, "three", ChatProtocol.All, Now.AddMilliseconds(1000), CancellationToken.None));
         Assert.Equal("three", Assert.Single(Says(rec)).Line.Text);
     }
 
@@ -188,17 +181,14 @@ public sealed class NetChatTests
         var (speaker, _) = await kit.EnterAsync(x: 0, y: 0);
         rec.Calls.Clear();
 
+        Assert.Equal("bad_request", await kit.World.TrySayAsync(speaker, "   ", ChatProtocol.All, Now, CancellationToken.None));
         Assert.Equal("bad_request", await kit.World.TrySayAsync(
-            speaker, new SayMsg { Text = "   ", ChatType = ChatProtocol.All }, Now, CancellationToken.None));
-        Assert.Equal("bad_request", await kit.World.TrySayAsync(
-            speaker, new SayMsg { Text = new string('z', ChatProtocol.MaxTextLength + 1), ChatType = ChatProtocol.All }, Now, CancellationToken.None));
-        Assert.Equal("bad_request", await kit.World.TrySayAsync(
-            speaker, new SayMsg { Text = "no\npe", ChatType = ChatProtocol.All }, Now, CancellationToken.None));
+            speaker, new string('z', ChatProtocol.MaxTextLength + 1), ChatProtocol.All, Now, CancellationToken.None));
+        Assert.Equal("bad_request", await kit.World.TrySayAsync(speaker, "no\npe", ChatProtocol.All, Now, CancellationToken.None));
         Assert.Empty(Says(rec));
 
         // None of the refusals touched the flood window, so the next good line still goes out.
-        Assert.Null(await kit.World.TrySayAsync(
-            speaker, new SayMsg { Text = "ok", ChatType = ChatProtocol.All }, Now, CancellationToken.None));
+        Assert.Null(await kit.World.TrySayAsync(speaker, "ok", ChatProtocol.All, Now, CancellationToken.None));
         Assert.Equal("ok", Assert.Single(Says(rec)).Line.Text);
     }
 }

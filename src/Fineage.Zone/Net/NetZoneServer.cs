@@ -2090,10 +2090,7 @@ public sealed class NetZoneServer : INetPresenceBridge
 
         var say = NetCodec.DecodeSay(envelope.Payload);
         string? error = await _world.TrySayAsync(
-            zoneSession,
-            new SayMsg { Text = say.Text, ChatType = say.ChatType },
-            _clock(),
-            ct).ConfigureAwait(false);
+            zoneSession, say.Text, say.ChatType, _clock(), ct).ConfigureAwait(false);
         if (error != null)
             await RejectAsync(conn, error, "Say failed.", ct).ConfigureAwait(false);
     }
