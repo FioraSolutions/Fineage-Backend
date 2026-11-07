@@ -13,9 +13,11 @@
       "hook": "talk",
       "when": "absent",
       "races": [
-        1
+        0,
+        2,
+        3,
+        4
       ],
-      "minLevel": 18,
       "htmlFile": "30155-talk-000.htm"
     },
     {
@@ -25,19 +27,24 @@
       "races": [
         1
       ],
+      "maxLevel": 17,
       "htmlFile": "30155-talk-001.htm"
     },
     {
       "npcId": 30155,
       "hook": "talk",
       "when": "absent",
+      "races": [
+        1
+      ],
+      "minLevel": 18,
       "htmlFile": "30155-talk-002.htm"
     },
     {
       "npcId": 30155,
       "hook": "event",
-      "event": "accept",
       "when": "absent",
+      "event": "30155-04",
       "races": [
         1
       ],
@@ -48,75 +55,69 @@
         },
         {
           "op": "start"
-        }
-      ],
-      "htmlFile": "30155-event-accept-003.htm"
-    },
-    {
-      "npcId": 30155,
-      "hook": "talk",
-      "when": "started",
-      "hasItem": 1042,
-      "ops": [
+        },
         {
-          "op": "sell_items",
-          "prices": [
-            {
-              "itemId": 1042,
-              "adena": 30
-            },
-            {
-              "itemId": 1043,
-              "adena": 10000
-            }
-          ],
-          "bonusMin": 10,
-          "bonusAdena": 5000
+          "op": "set_cond",
+          "cond": 1
         }
       ],
-      "htmlFile": "30155-talk-004.htm"
-    },
-    {
-      "npcId": 30155,
-      "hook": "talk",
-      "when": "started",
-      "hasItem": 1043,
-      "ops": [
-        {
-          "op": "sell_items",
-          "prices": [
-            {
-              "itemId": 1042,
-              "adena": 30
-            },
-            {
-              "itemId": 1043,
-              "adena": 10000
-            }
-          ],
-          "bonusMin": 10,
-          "bonusAdena": 5000
-        }
-      ],
-      "htmlFile": "30155-talk-005.htm"
-    },
-    {
-      "npcId": 30155,
-      "hook": "talk",
-      "when": "started",
-      "htmlFile": "30155-talk-006.htm"
+      "htmlFile": "30155-event-30155-04-003.htm"
     },
     {
       "npcId": 30155,
       "hook": "event",
-      "event": "quit",
       "when": "started",
+      "event": "30155-08",
       "ops": [
         {
           "op": "complete"
         }
       ],
-      "htmlFile": "30155-event-quit-007.htm"
+      "htmlFile": "30155-event-30155-08-004.htm"
+    },
+    {
+      "npcId": 30155,
+      "hook": "event",
+      "when": "started",
+      "event": "30155-09",
+      "htmlFile": "30155-event-30155-09-005.htm"
+    },
+    {
+      "npcId": 30155,
+      "hook": "talk",
+      "when": "started",
+      "hasAny": [
+        1042,
+        1043
+      ],
+      "ops": [
+        {
+          "op": "sell_items",
+          "prices": [
+            {
+              "itemId": 1042,
+              "adena": 30
+            },
+            {
+              "itemId": 1043,
+              "adena": 10000
+            }
+          ],
+          "bonusMin": 10,
+          "bonusAdena": 5000
+        }
+      ],
+      "htmlFile": "30155-talk-006.htm"
+    },
+    {
+      "npcId": 30155,
+      "hook": "talk",
+      "when": "started",
+      "lacksItems": [
+        1042,
+        1043
+      ],
+      "htmlFile": "30155-talk-007.htm"
     },
     {
       "npcId": 20040,
@@ -128,8 +129,9 @@
         {
           "op": "drop_item",
           "itemId": 1042,
-          "count": 2,
-          "chance": 1.0
+          "count": 1,
+          "chance": 1.0,
+          "limit": 0
         }
       ]
     },
@@ -143,8 +145,9 @@
         {
           "op": "drop_item",
           "itemId": 1042,
-          "count": 2,
-          "chance": 1.0
+          "count": 1,
+          "chance": 1.0,
+          "limit": 0
         }
       ]
     },
