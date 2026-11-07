@@ -11,12 +11,14 @@
       "npcId": 30892,
       "hook": "talk",
       "when": "absent",
+      "maxLevel": 39,
       "htmlFile": "30892-talk-000.htm"
     },
     {
       "npcId": 30892,
       "hook": "talk",
-      "when": "started",
+      "when": "absent",
+      "minLevel": 40,
       "htmlFile": "30892-talk-001.htm"
     },
     {
@@ -24,6 +26,7 @@
       "hook": "event",
       "when": "absent",
       "event": "30892-03",
+      "minLevel": 40,
       "ops": [
         {
           "op": "create"
@@ -40,46 +43,95 @@
     },
     {
       "npcId": 30892,
-      "hook": "event",
-      "when": "absent",
-      "event": "30892-06",
-      "lacksItems": [
-        4337
-      ],
-      "htmlFile": "30892-event-30892-06-003.htm"
+      "hook": "talk",
+      "when": "started",
+      "htmlFile": "30892-talk-003.htm"
     },
     {
       "npcId": 30892,
       "hook": "event",
-      "when": "absent",
+      "when": "started",
+      "event": "30892-06",
+      "hasItem": 4337,
+      "ops": [
+        {
+          "op": "sell_items",
+          "prices": [
+            {
+              "itemId": 4337,
+              "adena": 60
+            }
+          ],
+          "bonusMin": 10,
+          "bonusAdena": 3430
+        }
+      ],
+      "htmlFile": "30892-event-30892-06-004.htm"
+    },
+    {
+      "npcId": 30892,
+      "hook": "event",
+      "when": "started",
+      "event": "30892-06",
+      "lacksItems": [
+        4337
+      ],
+      "htmlFile": "30892-event-30892-06-005.htm"
+    },
+    {
+      "npcId": 30892,
+      "hook": "event",
+      "when": "started",
       "event": "30892-10",
       "ops": [
         {
           "op": "complete"
         }
       ],
-      "htmlFile": "30892-event-30892-10-004.htm"
+      "htmlFile": "30892-event-30892-10-006.htm"
     },
     {
       "npcId": 30892,
       "hook": "event",
-      "when": "absent",
+      "when": "started",
       "event": "30892-07",
-      "htmlFile": "30892-event-30892-07-005.htm"
+      "htmlFile": "30892-event-30892-07-007.htm"
     },
     {
       "npcId": 30892,
       "hook": "event",
-      "when": "absent",
+      "when": "started",
       "event": "30892-08",
-      "htmlFile": "30892-event-30892-08-006.htm"
+      "htmlFile": "30892-event-30892-08-008.htm"
     },
     {
       "npcId": 30892,
       "hook": "event",
-      "when": "absent",
+      "when": "started",
       "event": "30892-09",
-      "htmlFile": "30892-event-30892-09-007.htm"
+      "htmlFile": "30892-event-30892-09-009.htm"
+    },
+    {
+      "npcId": 20135,
+      "hook": "kill",
+      "when": "started",
+      "html": "",
+      "ops": [
+        {
+          "op": "drop_item",
+          "itemId": 4337,
+          "count": 1,
+          "chance": 1.0,
+          "limit": 0
+        },
+        {
+          "op": "drop_item",
+          "itemId": 4337,
+          "count": 1,
+          "chance": 0.19,
+          "limit": 0
+        }
+      ]
     }
   ]
 }
