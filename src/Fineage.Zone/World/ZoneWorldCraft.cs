@@ -196,11 +196,9 @@ public sealed partial class ZoneWorld
         }
     }
 
-    void PersistKnownRecipes(ZoneSession session, ZoneEntity player)
-    {
-        if (_accounts == null)
-            return;
-        var ids = player.KnownRecipes.OrderBy(id => id).ToArray();
-        _accounts.TryReplaceKnownRecipes(session.Account, session.ObjectId, ids);
-    }
+    void PersistKnownRecipes(ZoneSession session, ZoneEntity player) =>
+        _persist.ReplaceKnownRecipes(
+            session.Account,
+            session.ObjectId,
+            player.KnownRecipes.OrderBy(id => id).ToArray());
 }

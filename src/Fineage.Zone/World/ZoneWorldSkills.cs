@@ -297,7 +297,9 @@ public sealed partial class ZoneWorld
         player.Sp -= row.LevelUpSp;
         player.LearnedSkills[row.SkillId] = row.Level;
         RefreshKnownSkills(player);
-        _accounts?.TryReplaceLearnedSkills(session.Account, session.ObjectId,
+        _persist.ReplaceLearnedSkills(
+            session.Account,
+            session.ObjectId,
             player.LearnedSkills.Select(p => new Fineage.Accounts.StoredSkill(p.Key, p.Value)).ToList());
         SaveQuestProgress(session, player); // persists exp/sp like quest rewards
         NetBridge?.FanoutSkillList([player.ObjectId], Fineage.Zone.Net.NetEnterWorldProjector.BuildSkills(player, _clock().ToUnixTimeMilliseconds()));

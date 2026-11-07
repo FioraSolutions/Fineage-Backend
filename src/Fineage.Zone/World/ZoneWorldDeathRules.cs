@@ -133,7 +133,7 @@ public sealed partial class ZoneWorld
             Params = [level.ToString(System.Globalization.CultureInfo.InvariantCulture)]
         });
         // The level is durable: Mobius writes characters.death_penalty_level with the rest of the row on save.
-        _accounts?.TrySaveDeathPenalty(session.Account, session.ObjectId, level);
+        _persist.SaveDeathPenalty(session.Account, session.ObjectId, level);
     }
 
     /// <summary>

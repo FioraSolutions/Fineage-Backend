@@ -262,8 +262,8 @@ public sealed partial class ZoneWorld
 
     void SaveVitals(ZoneSession session, ZoneEntity entity)
     {
-        if (_accounts == null || entity.Kind != ZoneEntityKind.Player)
+        if (entity.Kind != ZoneEntityKind.Player)
             return;
-        _accounts.TrySaveVitals(session.Account, session.ObjectId, entity.CurHp, entity.CurMp);
+        _persist.SaveVitals(session.Account, session.ObjectId, entity.CurHp, entity.CurMp);
     }
 }

@@ -741,7 +741,7 @@ public sealed partial class ZoneWorld
 
     void SaveWarehouse(ZoneSession session, ZoneEntity player)
     {
-        if (_accounts == null || player.Warehouse == null)
+        if (player.Warehouse == null)
             return;
         var stacks = player.Warehouse.Items;
         var stored = new StoredItem[stacks.Count];
@@ -751,7 +751,7 @@ public sealed partial class ZoneWorld
             stored[i] = new StoredItem(stack.ItemId, stack.Count, -1, stack.EnchantLevel, stack.ObjectId);
         }
 
-        _accounts.TryReplaceWarehouse(session.Account, session.ObjectId, stored);
+        _persist.ReplaceWarehouse(session.Account, session.ObjectId, stored);
     }
 
     static int ReadTeleportOffset()

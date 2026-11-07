@@ -165,7 +165,7 @@ public sealed partial class ZoneWorld
         if (netPeers != null)
             NetBridge?.FanoutCharInfo(netPeers, player.ObjectId);
 
-        _accounts?.TrySaveClass(session.Account, session.ObjectId, change.ClassId);
+        _persist.SaveClass(session.Account, session.ObjectId, change.ClassId);
         SaveInventory(session, inventory);
         SaveQuestProgress(session, player);
         ZoneLog.Info($"class-change object={session.ObjectId} {previous}->{change.ClassId} " +

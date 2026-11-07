@@ -48,12 +48,8 @@ public sealed partial class ZoneWorld
             SaveShortcuts(entity.Session, entity);
     }
 
-    void SaveShortcuts(ZoneSession session, ZoneEntity entity)
-    {
-        if (_accounts == null)
-            return;
-        _accounts.TryReplaceShortcuts(session.Account, session.ObjectId, entity.Shortcuts.Values.ToList());
-    }
+    void SaveShortcuts(ZoneSession session, ZoneEntity entity) =>
+        _persist.ReplaceShortcuts(session.Account, session.ObjectId, entity.Shortcuts.Values.ToList());
 
     static ShortCutNetMsg ToNet(StoredShortcut s) =>
         new() { Type = s.Type, Slot = s.WorldSlot, Id = s.Id, Level = s.Level };

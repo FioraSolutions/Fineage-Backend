@@ -295,7 +295,7 @@ public sealed partial class ZoneWorld
             }
         }
 
-        _accounts?.TrySaveProgress(
+        _persist.SaveProgress(
             session.Account,
             session.ObjectId,
             player.Level,
@@ -342,7 +342,7 @@ public sealed partial class ZoneWorld
         if (netPeers != null)
             NetBridge?.FanoutCharInfo(netPeers, player.ObjectId);
 
-        _accounts?.TrySaveClass(session.Account, session.ObjectId, classId);
+        _persist.SaveClass(session.Account, session.ObjectId, classId);
         ZoneLog.Info($"admin setclass object={player.ObjectId} {previous}->{classId}");
         return null;
     }

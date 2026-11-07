@@ -903,22 +903,8 @@ public sealed partial class ZoneWorld
 
     internal const int KillRewardMessageId = 95;
 
-    void SaveQuestProgress(ZoneSession session, ZoneEntity entity)
-    {
-        if (_accounts == null)
-            return;
-        _accounts.TryReplaceQuests(session.Account, session.ObjectId, entity.Quests.Save());
-        _accounts.TrySaveProgress(
-            session.Account,
-            session.ObjectId,
-            entity.Level,
-            entity.Exp,
-            entity.Sp,
-            entity.MaxHp,
-            entity.CurHp,
-            entity.MaxMp,
-            entity.CurMp);
-    }
+    void SaveQuestProgress(ZoneSession session, ZoneEntity entity) =>
+        _persist.SaveQuestProgress(session.Account, session.ObjectId, entity);
 
     bool TryPlayer(ZoneSession session, out ZoneEntity player)
     {
