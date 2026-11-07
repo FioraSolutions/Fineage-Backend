@@ -12,34 +12,22 @@
       "npcId": 30895,
       "hook": "talk",
       "when": "absent",
-      "htmlFile": "30895-event-30895-02-003.htm"
+      "maxLevel": 37,
+      "htmlFile": "30895-talk-000.htm"
     },
     {
       "npcId": 30895,
-      "hook": "event",
+      "hook": "talk",
       "when": "absent",
-      "event": "30895-04",
-      "htmlFile": "30895-event-30895-04-000.htm"
-    },
-    {
-      "npcId": 30895,
-      "hook": "event",
-      "when": "absent",
-      "event": "30895-05",
-      "htmlFile": "30895-event-30895-05-001.htm"
-    },
-    {
-      "npcId": 30895,
-      "hook": "event",
-      "when": "absent",
-      "event": "30895-09",
-      "htmlFile": "30895-event-30895-09-002.htm"
+      "minLevel": 38,
+      "htmlFile": "30895-talk-001.htm"
     },
     {
       "npcId": 30895,
       "hook": "event",
       "when": "absent",
       "event": "30895-02",
+      "minLevel": 38,
       "ops": [
         {
           "op": "create"
@@ -52,53 +40,107 @@
           "cond": 1
         }
       ],
-      "htmlFile": "30895-event-30895-02-003.htm"
+      "htmlFile": "30895-event-30895-02-002.htm"
     },
     {
       "npcId": 30895,
       "hook": "event",
-      "when": "absent",
+      "when": "started",
+      "event": "30895-04",
+      "htmlFile": "30895-event-30895-04-003.htm"
+    },
+    {
+      "npcId": 30895,
+      "hook": "event",
+      "when": "started",
+      "event": "30895-05",
+      "htmlFile": "30895-event-30895-05-004.htm"
+    },
+    {
+      "npcId": 30895,
+      "hook": "event",
+      "when": "started",
+      "event": "30895-09",
+      "htmlFile": "30895-event-30895-09-005.htm"
+    },
+    {
+      "npcId": 30895,
+      "hook": "talk",
+      "when": "started",
+      "hasItem": 5864,
+      "htmlFile": "30895-talk-006.htm"
+    },
+    {
+      "npcId": 30895,
+      "hook": "talk",
+      "when": "started",
+      "lacksItems": [
+        5864
+      ],
+      "htmlFile": "30895-talk-007.htm"
+    },
+    {
+      "npcId": 30895,
+      "hook": "event",
+      "when": "started",
       "event": "ADENA",
+      "atLeast": {
+        "5863": 100
+      },
       "ops": [
         {
-          "op": "take_item",
-          "itemId": 5863,
-          "count": 1
+          "op": "sell_items",
+          "prices": [
+            {
+              "itemId": 5863,
+              "adena": 220
+            }
+          ],
+          "bonusMin": 100,
+          "bonusAdena": 10700
         }
       ],
-      "htmlFile": "30895-event-ADENA-004.htm"
+      "htmlFile": "30895-event-ADENA-008.htm"
     },
     {
       "npcId": 30895,
       "hook": "event",
-      "when": "absent",
+      "when": "started",
       "event": "ADENA",
+      "hasItem": 5863,
       "ops": [
         {
-          "op": "take_item",
-          "itemId": 5863,
-          "count": 1
+          "op": "sell_items",
+          "prices": [
+            {
+              "itemId": 5863,
+              "adena": 220
+            }
+          ],
+          "bonusMin": 1,
+          "bonusAdena": 3100
         }
       ],
-      "htmlFile": "30895-event-ADENA-005.htm"
+      "htmlFile": "30895-event-ADENA-009.htm"
     },
     {
       "npcId": 30895,
       "hook": "event",
-      "when": "absent",
-      "event": "30895-10",
-      "ops": [
-        {
-          "op": "complete"
-        }
+      "when": "started",
+      "event": "ADENA",
+      "lacksItems": [
+        5863
       ],
-      "htmlFile": "30895-event-30895-10-006.htm"
+      "htmlFile": "30895-event-ADENA-010.htm"
     },
     {
       "npcId": 30895,
       "hook": "event",
-      "when": "absent",
+      "when": "started",
       "event": "REWARD",
+      "atLeast": {
+        "5864": 10
+      },
       "ops": [
         {
           "op": "take_item",
@@ -111,14 +153,179 @@
           "count": 1
         }
       ],
-      "htmlFile": "30895-event-REWARD-007.htm"
+      "htmlFile": "30895-event-REWARD-011.htm"
     },
     {
       "npcId": 30895,
       "hook": "event",
-      "when": "absent",
+      "when": "started",
       "event": "REWARD",
-      "htmlFile": "30895-event-REWARD-008.htm"
+      "hasItem": 5864,
+      "htmlFile": "30895-event-REWARD-012.htm"
+    },
+    {
+      "npcId": 30895,
+      "hook": "event",
+      "when": "started",
+      "event": "30895-10",
+      "ops": [
+        {
+          "op": "complete"
+        }
+      ],
+      "htmlFile": "30895-event-30895-10-013.htm"
+    },
+    {
+      "npcId": 20804,
+      "hook": "kill",
+      "when": "started",
+      "party": true,
+      "html": "",
+      "ops": [
+        {
+          "op": "drop_item",
+          "itemId": 5863,
+          "count": 1,
+          "chance": 0.84,
+          "limit": 0
+        },
+        {
+          "op": "drop_item",
+          "itemId": 5864,
+          "count": 1,
+          "chance": 0.1,
+          "limit": 0
+        }
+      ]
+    },
+    {
+      "npcId": 20805,
+      "hook": "kill",
+      "when": "started",
+      "party": true,
+      "html": "",
+      "ops": [
+        {
+          "op": "drop_item",
+          "itemId": 5863,
+          "count": 1,
+          "chance": 0.91,
+          "limit": 0
+        },
+        {
+          "op": "drop_item",
+          "itemId": 5864,
+          "count": 1,
+          "chance": 0.1,
+          "limit": 0
+        }
+      ]
+    },
+    {
+      "npcId": 20806,
+      "hook": "kill",
+      "when": "started",
+      "party": true,
+      "html": "",
+      "ops": [
+        {
+          "op": "drop_item",
+          "itemId": 5863,
+          "count": 1,
+          "chance": 0.88,
+          "limit": 0
+        },
+        {
+          "op": "drop_item",
+          "itemId": 5864,
+          "count": 1,
+          "chance": 0.1,
+          "limit": 0
+        }
+      ]
+    },
+    {
+      "npcId": 20807,
+      "hook": "kill",
+      "when": "started",
+      "party": true,
+      "html": "",
+      "ops": [
+        {
+          "op": "drop_item",
+          "itemId": 5863,
+          "count": 1,
+          "chance": 0.92,
+          "limit": 0
+        },
+        {
+          "op": "drop_item",
+          "itemId": 5864,
+          "count": 1,
+          "chance": 0.1,
+          "limit": 0
+        }
+      ]
+    },
+    {
+      "npcId": 20808,
+      "hook": "kill",
+      "when": "started",
+      "party": true,
+      "html": "",
+      "ops": [
+        {
+          "op": "drop_item",
+          "itemId": 5863,
+          "count": 1,
+          "chance": 1.0,
+          "limit": 0
+        },
+        {
+          "op": "drop_item",
+          "itemId": 5863,
+          "count": 1,
+          "chance": 0.14,
+          "limit": 0
+        },
+        {
+          "op": "drop_item",
+          "itemId": 5864,
+          "count": 1,
+          "chance": 0.1,
+          "limit": 0
+        }
+      ]
+    },
+    {
+      "npcId": 20991,
+      "hook": "kill",
+      "when": "started",
+      "party": true,
+      "html": "",
+      "ops": [
+        {
+          "op": "drop_item",
+          "itemId": 5863,
+          "count": 1,
+          "chance": 1.0,
+          "limit": 0
+        },
+        {
+          "op": "drop_item",
+          "itemId": 5863,
+          "count": 1,
+          "chance": 0.69,
+          "limit": 0
+        },
+        {
+          "op": "drop_item",
+          "itemId": 5864,
+          "count": 1,
+          "chance": 0.1,
+          "limit": 0
+        }
+      ]
     }
   ]
 }
