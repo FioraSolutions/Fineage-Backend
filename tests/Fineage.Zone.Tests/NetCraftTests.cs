@@ -42,7 +42,7 @@ public sealed class NetCraftTests
         player.CurMp = Math.Max(player.CurMp, 50);
 
         var scroll = player.Inventory.FindByItemId(RecipeItemId)!;
-        Assert.Null(await kit.World.TryUseItemAsync(session, new UseItemMsg { ObjectId = scroll.ObjectId }, default));
+        Assert.Null(await kit.World.TryUseItemAsync(session, scroll.ObjectId, default));
         Assert.Contains(RecipeListId, player.KnownRecipes);
         Assert.Equal(0, player.Inventory.CountOf(RecipeItemId));
 

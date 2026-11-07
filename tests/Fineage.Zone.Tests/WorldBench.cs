@@ -180,10 +180,10 @@ internal sealed class BenchPlayer
     public CharacterRecord SavedRecord() => Store.FindById(Ticket.Account, Ticket.CharacterId)!;
 
     public Task<string?> Use(int objectId) =>
-        World.TryUseItemAsync(Session, new UseItemMsg { ObjectId = objectId }, CancellationToken.None);
+        World.TryUseItemAsync(Session, objectId, CancellationToken.None);
 
     public Task<string?> Unequip(int paperdollSlot) =>
-        World.TryUnequipItemAsync(Session, new UnequipItemMsg { PaperdollSlot = paperdollSlot }, CancellationToken.None);
+        World.TryUnequipItemAsync(Session, paperdollSlot, CancellationToken.None);
 
     /// <summary>Teleports without the walk, for tests that only care about being in talk range.</summary>
     public void MoveTo(int x, int y, int z)

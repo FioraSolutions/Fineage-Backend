@@ -1,6 +1,9 @@
 namespace Fineage.Zone.Combat;
 
-/// <summary>Minimal melee constants — not full Interlude formulas.</summary>
+/// <summary>
+/// Interlude combat constants and pure roll helpers (melee/magic/blow/lethal, ranges, regen).
+/// World orchestration (cast timers, AOI fanout) stays on <c>ZoneWorld*</c>.
+/// </summary>
 public static class ZoneCombat
 {
     /// <summary>

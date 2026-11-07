@@ -288,8 +288,8 @@ public sealed class NetEquipRulesTests
 
         var idle = new ZoneSession();
         idle.Bind(actor.Ticket.CharacterId, actor.Ticket.Account, actor.Ticket.CharacterName, actor.Ticket.ClassId);
-        Assert.Equal("world", await bench.World.TryUseItemAsync(idle, new UseItemMsg { ObjectId = 1 }, CancellationToken.None));
-        Assert.Equal("world", await bench.World.TryUnequipItemAsync(idle, new UnequipItemMsg { PaperdollSlot = 0 }, CancellationToken.None));
+        Assert.Equal("world", await bench.World.TryUseItemAsync(idle, 1, CancellationToken.None));
+        Assert.Equal("world", await bench.World.TryUnequipItemAsync(idle, 0, CancellationToken.None));
     }
 
     [Fact]

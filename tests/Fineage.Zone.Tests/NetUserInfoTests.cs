@@ -94,7 +94,7 @@ public sealed class NetUserInfoTests
         Assert.True(kit.World.TryBuildNetUserInfo(session, out var before));
         var armor = elf.Inventory!.Items.First(i => i.EquippedSlot != null && (int)i.EquippedSlot.Value != 7);
         int slot = (int)armor.EquippedSlot!.Value;
-        Assert.Null(await kit.World.TryUnequipItemAsync(session, new UnequipItemMsg { PaperdollSlot = slot }, CancellationToken.None));
+        Assert.Null(await kit.World.TryUnequipItemAsync(session, slot, CancellationToken.None));
 
         var infos = rec.Of(nameof(INetPresenceBridge.FanoutUserInfo));
         Assert.Single(infos);
