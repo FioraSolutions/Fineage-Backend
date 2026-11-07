@@ -16,7 +16,7 @@ namespace Fineage.Zone.Net;
 /// </summary>
 public sealed class NetZoneServer : INetPresenceBridge
 {
-    readonly HandoffTokens _tokens;
+    readonly IHandoffStore _handoff;
     readonly ZoneWorld _world;
     readonly EntityIdMap _ids = new();
     readonly NetPresenceHub _presence;
@@ -26,7 +26,7 @@ public sealed class NetZoneServer : INetPresenceBridge
     readonly bool _adminCommands;
 
     public NetZoneServer(
-        HandoffTokens tokens,
+        IHandoffStore handoff,
         ZoneWorld world,
         IAccountStore? accounts = null,
         Func<DateTimeOffset>? clock = null,
@@ -35,7 +35,7 @@ public sealed class NetZoneServer : INetPresenceBridge
         TimeSpan? idleTimeout = null,
         bool? adminCommands = null)
     {
-        _tokens = tokens;
+        _handoff = handoff ?? throw new ArgumentNullException(nameof(handoff));
         _world = world;
         // Character durable state is loaded by ZoneWorld.TryEnterAsync via the shared store.
         _ = accounts;
@@ -45,6 +45,20 @@ public sealed class NetZoneServer : INetPresenceBridge
         _idleTimeout = idleTimeout ?? TcpSessionSettings.IdleTimeout;
         _adminCommands = adminCommands ?? ZoneAdmin.Enabled;
         _world.NetBridge = this;
+    }
+
+    /// <summary>Tests and selftest: wraps <paramref name="tokens"/> in a consuming in-memory store.</summary>
+    public NetZoneServer(
+        HandoffTokens tokens,
+        ZoneWorld world,
+        IAccountStore? accounts = null,
+        Func<DateTimeOffset>? clock = null,
+        NetPresenceHub? presence = null,
+        int? maxMessagesPerSecond = null,
+        TimeSpan? idleTimeout = null,
+        bool? adminCommands = null)
+        : this(new MemoryHandoffStore(tokens), world, accounts, clock, presence, maxMessagesPerSecond, idleTimeout, adminCommands)
+    {
     }
 
     void INetPresenceBridge.FanoutMoveState(
@@ -1009,9 +1023,8 @@ public sealed class NetZoneServer : INetPresenceBridge
                 }
                 catch (Exception ex) when (ex is not OperationCanceledException)
                 {
-                    // Keep stack/details on the server; clients only get a stable reason code.
-                    Console.Error.WriteLine($"[ZONE] handler_error opcode=0x{envelope.Opcode:X4}: {ex}");
-                    await RejectAsync(conn, "handler_error", "Internal zone error.", ct).ConfigureAwait(false);
+                    ZoneLog.Info($"handler_error session={zoneSession.WireSessionId} opcode=0x{envelope.Opcode:X4}: {ex}");
+                    await RejectAsync(conn, "handler_error", "An internal error occurred.", ct).ConfigureAwait(false);
                 }
             }
         }
@@ -1099,7 +1112,7 @@ public sealed class NetZoneServer : INetPresenceBridge
             return default;
         }
 
-        var status = _tokens.Validate(auth.Token, _clock(), out var parsed);
+        var status = _handoff.TryConsume(auth.Token, _clock(), out var parsed);
         if (status == HandoffTokens.ValidateStatus.Expired)
         {
             await conn.SendAsync(

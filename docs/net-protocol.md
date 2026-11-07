@@ -159,7 +159,7 @@ NPCs around them, not all 34k. Do not pair the whole world with `SingleCellAoi`.
 ## Scale seams
 
 - `IAccountStore` — Postgres (normalized character domain) now, JSON for tests
-- `IHandoffStore` / `MemoryHandoffStore` — HMAC handoff; Redis later
+- `IHandoffStore` / `MemoryHandoffStore` — HMAC handoff with one-time consume on the Zone process; Redis/Postgres for multi-zone later
 - `IAoi` — SingleCell / Range / Grid (`FINEAGE_ZONE_AOI_CELL`)
 
 ## Local
