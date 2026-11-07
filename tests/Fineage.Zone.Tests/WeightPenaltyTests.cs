@@ -509,8 +509,7 @@ public sealed class WeightPenaltyWorldTests
         // Dropping the same stack walks it back down through the same hook.
         var stack = player.Inventory.FindByItemId(ScrollId);
         Assert.NotNull(stack);
-        Assert.Null(await kit.World.TryDropItemAsync(session,
-            new DropItemRequestMsg { ObjectId = stack!.ObjectId, Count = count }, CancellationToken.None));
+        Assert.Null(await kit.World.TryDropItemAsync(session, stack!.ObjectId, count, 0, 0, 0, CancellationToken.None));
         Assert.Equal(0, player.WeightPenaltyLevel);
 
         // GrantItemRequest is the one add path that does not go through SaveInventory (the bag is persisted on leave),

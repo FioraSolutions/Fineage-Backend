@@ -61,8 +61,7 @@ public sealed class CarryLimitTests
         FillBag(player);
         int ground = kit.World.PlaceGroundForTest(player, Harvester);
 
-        Assert.Equal("slots", await kit.World.TryPickupAsync(
-            session, new PickupRequestMsg { ObjectId = ground }, CancellationToken.None));
+        Assert.Equal("slots", await kit.World.TryPickupAsync(session, ground, CancellationToken.None));
 
         Assert.Contains(ZoneWorld.SysMsgInventoryFull, SysIds(rec));
         Assert.True(kit.World.ExistsForTest(ground));
@@ -78,8 +77,7 @@ public sealed class CarryLimitTests
         FillBag(player); // the arrow row is already counted, so the bag is at the slot limit
         int ground = kit.World.PlaceGroundForTest(player, WoodenArrow, count: 5);
 
-        Assert.Null(await kit.World.TryPickupAsync(
-            session, new PickupRequestMsg { ObjectId = ground }, CancellationToken.None));
+        Assert.Null(await kit.World.TryPickupAsync(session, ground, CancellationToken.None));
 
         Assert.Equal(15, arrows.Count);
         Assert.DoesNotContain(ZoneWorld.SysMsgInventoryFull, SysIds(rec));
@@ -98,8 +96,7 @@ public sealed class CarryLimitTests
         int count = (int)(maxLoad / weightPer) + 100;
         int ground = kit.World.PlaceGroundForTest(player, WoodenArrow, count);
 
-        Assert.Null(await kit.World.TryPickupAsync(
-            session, new PickupRequestMsg { ObjectId = ground }, CancellationToken.None));
+        Assert.Null(await kit.World.TryPickupAsync(session, ground, CancellationToken.None));
 
         Assert.Equal(1 + count, arrows.Count);
         Assert.True(ZoneWorld.CurrentLoadOf(player) > maxLoad);

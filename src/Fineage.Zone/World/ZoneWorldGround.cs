@@ -8,14 +8,14 @@ namespace Fineage.Zone.World;
 
 public sealed partial class ZoneWorld
 {
-    public Task<string?> TryPickupAsync(ZoneSession session, PickupRequestMsg request, CancellationToken ct)
+    public Task<string?> TryPickupAsync(ZoneSession session, int groundObjectId, CancellationToken ct)
     {
         if (!IsLive(session))
             return Task.FromResult<string?>("world");
 
         string? error;
         lock (_gate)
-            error = TryPickup(session, request.ObjectId);
+            error = TryPickup(session, groundObjectId);
         if (error != null)
             return Task.FromResult<string?>(error);
 
@@ -26,28 +26,29 @@ public sealed partial class ZoneWorld
     /// Mobius <c>RequestDestroyItem</c>: the bag slot is deleted outright, no ground spawn. Except for the
     /// adena/quest guards the client could bypass, this is the trash-basket action.
     /// </summary>
-    public Task<string?> TryDestroyItemAsync(ZoneSession session, DestroyItemRequestMsg request, CancellationToken ct)
+    public Task<string?> TryDestroyItemAsync(ZoneSession session, int objectId, int count, CancellationToken ct)
     {
         if (!IsLive(session))
             return Task.FromResult<string?>("world");
 
         string? error;
         lock (_gate)
-            error = TryDestroyItem(session, request);
+            error = TryDestroyItem(session, objectId, count);
         if (error != null)
             return Task.FromResult<string?>(error);
 
         return Task.FromResult<string?>(null);
     }
 
-    public Task<string?> TryDropItemAsync(ZoneSession session, DropItemRequestMsg request, CancellationToken ct)
+    public Task<string?> TryDropItemAsync(
+        ZoneSession session, int objectId, int count, int x, int y, int z, CancellationToken ct)
     {
         if (!IsLive(session))
             return Task.FromResult<string?>("world");
 
         string? error;
         lock (_gate)
-            error = TryDropItem(session, request);
+            error = TryDropItem(session, objectId, count, x, y, z);
         if (error != null)
             return Task.FromResult<string?>(error);
 
@@ -366,24 +367,24 @@ public sealed partial class ZoneWorld
     /// Mobius <c>RequestDestroyItem</c> body. It shares the drop path's guards (owner, not equipped, not a
     /// quest item, count available) but never spawns a ground stack and never checks distance.
     /// </summary>
-    string? TryDestroyItem(ZoneSession session, DestroyItemRequestMsg request)
+    string? TryDestroyItem(ZoneSession session, int objectId, int count)
     {
         if (!_byId.TryGetValue(session.ObjectId, out var player) || player.Inventory == null)
             return "world";
         if (player.Dead)
             return InventoryProtocol.Dead;
-        if (request.ObjectId <= 0 || request.Count < 1)
+        if (objectId <= 0 || count < 1)
             return "bad_request";
 
-        var item = player.Inventory.Find(request.ObjectId);
+        var item = player.Inventory.Find(objectId);
         if (item == null || item.IsEquipped)
             return InventoryProtocol.NotOwned;
         if (!item.Template.CanDropTradeStore)
             return "bad_request"; // Mobius: quest items cannot be destroyed either
-        if (item.Count < request.Count)
+        if (item.Count < count)
             return "bad_request";
 
-        if (!player.Inventory.TryReduce(item, request.Count, out bool removedEntirely))
+        if (!player.Inventory.TryReduce(item, count, out bool removedEntirely))
             return "bad_request";
 
         var invUpdate = removedEntirely
@@ -391,30 +392,31 @@ public sealed partial class ZoneWorld
             : InventoryMessages.Update(InventoryChange.Modify, item);
         NetBridge?.FanoutInventoryUpdate([session.ObjectId], ToNetInventoryUpdate(invUpdate));
         SaveInventory(session, player.Inventory);
-        ZoneLog.Info($"destroy-bag object={session.ObjectId} item={item.ItemId} x{request.Count} all={removedEntirely}");
+        ZoneLog.Info($"destroy-bag object={session.ObjectId} item={item.ItemId} x{count} all={removedEntirely}");
         return null;
     }
 
-    string? TryDropItem(ZoneSession session, DropItemRequestMsg request)
-    {        if (!_byId.TryGetValue(session.ObjectId, out var player) || player.Inventory == null)
+    string? TryDropItem(ZoneSession session, int objectId, int count, int x, int y, int z)
+    {
+        if (!_byId.TryGetValue(session.ObjectId, out var player) || player.Inventory == null)
             return "world";
         if (player.Dead)
             return InventoryProtocol.Dead;
-        if (request.ObjectId <= 0 || request.Count < 1)
+        if (objectId <= 0 || count < 1)
             return "bad_request";
 
-        var item = player.Inventory.Find(request.ObjectId);
+        var item = player.Inventory.Find(objectId);
         if (item == null || item.IsEquipped)
             return InventoryProtocol.NotOwned;
         if (!item.Template.CanDropTradeStore)
             return "bad_request"; // Mobius: quest items are not dropable
-        if (item.Count < request.Count)
+        if (item.Count < count)
             return "bad_request";
 
-        bool useCoords = request.X != 0 || request.Y != 0 || request.Z != 0;
-        int dropX = useCoords ? request.X : player.X;
-        int dropY = useCoords ? request.Y : player.Y;
-        int dropZ = useCoords ? request.Z : player.Z;
+        bool useCoords = x != 0 || y != 0 || z != 0;
+        int dropX = useCoords ? x : player.X;
+        int dropY = useCoords ? y : player.Y;
+        int dropZ = useCoords ? z : player.Z;
         AdvanceMove(player, _clock().ToUnixTimeMilliseconds());
         if (useCoords && !ZoneCombat.InDropRange(player.X, player.Y, player.Z, dropX, dropY, dropZ))
         {
@@ -428,7 +430,7 @@ public sealed partial class ZoneWorld
         }
 
         int itemId = item.ItemId;
-        if (!player.Inventory.TryReduce(item, request.Count, out bool removedEntirely))
+        if (!player.Inventory.TryReduce(item, count, out bool removedEntirely))
             return "bad_request";
 
         InventoryUpdateMsg invUpdate;
@@ -457,14 +459,14 @@ public sealed partial class ZoneWorld
 
         SpawnGroundStack(
             itemId,
-            request.Count,
+            count,
             dropX,
             dropY,
             dropZ,
             player.InstanceId,
             watchers,
             dropperObjectId: player.ObjectId);
-        ZoneLog.Info($"drop-bag object={session.ObjectId} item={itemId} count={request.Count} @ {dropX},{dropY},{dropZ}");
+        ZoneLog.Info($"drop-bag object={session.ObjectId} item={itemId} count={count} @ {dropX},{dropY},{dropZ}");
         return null;
     }
 
