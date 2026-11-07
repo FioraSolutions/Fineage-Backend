@@ -1,6 +1,6 @@
 # Zone Net friends + block
 
-> Mobius `RequestFriend*` / `RequestBlock` / `FriendList` / `BlockList`. Issue [#285](https://github.com/FioraSolutions/Fineage-Backend/issues/285).
+> Mobius `RequestFriend*` / `RequestBlock` / `FriendList` / `BlockList`. Server slice [#285](https://github.com/FioraSolutions/Fineage-Backend/issues/285) landed in `#287`; friend chat (type 12) remains open.
 
 ## Scope
 

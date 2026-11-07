@@ -15,14 +15,17 @@
 - Mob AI: aggro/hate on hit, chase on timed mover, returnHome, retaliation; Die + 7 s corpse; cast hitTime + cast move lock.
 
 ## Remaining gaps (next slices)
-1. Stat pipeline leftovers: passive masteries beyond the `using` kinds (hp/behind/zone conditions), maxHp/regen/critDmg/pvp buff stats, Net PlayerStats has no combat-stat fields (Net status window not refreshed on buff), enchant bonuses, grade penalty on stats (the `runSpd` part now lands), shield P.Def/block, bow arrows consumption + bow reuse timing (Mobius bow 1500*345/Pspd), dual/pole AoE, class-transfer base stats. (Weight penalty 4270 is done — see slice 9.)
-2. calcPhysDam extras still missing: auto-soulshot toggle (needs client RequestAutoSoulShot wire), NPC soulshots, spiritshots/blessed, shield facing angle, position bonus (back/side crit & hit from hitConditionBonus.xml), crit SystemMessages to attacker, level-difference penalties, weapon-type vulnerabilities, crit damage stat mods.
-3. NPC attack range per template (`attackRange`, polearm/archer mobs) — still constant 80.
-4. Skills: real power formulas (pAtk/mAtk based), reuse/hit/cool times from skills.json, MP consumption parity, skill range per skill; still `power + 10` stub.
-5. Magic damage (`calcMagicDam`), M.Atk/M.Def, cast speed from MAtkSpd.
-6. Attack stance/AutoAttackStart/Stop packets and client Attack hit flags (crit/miss/shot) on the Net wire.
-7. Aggressive mob aggro range, social/faction help, hate list with multiple attackers.
-8. ~~PvP/flagging melee~~ — `#271` flag on damage, PK/karma or PvP kill on death, persist; peace zones / RelationChanged deferred.
+
+Feature-level status lives in [`mobius-parity-matrix.md`](mobius-parity-matrix.md). Combat polish still open:
+
+1. Stat pipeline leftovers: passive masteries beyond `using` kinds (hp/behind/zone conditions), Net PlayerStats combat-stat fields (status window refresh on buff), enchant bonuses on folded stats, dual/pole AoE, class-transfer base stats. Weight 4270 / grade 4267 / DP 5076 done.
+2. calcPhysDam extras: shield facing angle, back/side crit position mods for blows, crit SystemMessages to attacker, MAGIC_SUCCESS_RES / attribute polish.
+3. Bow: arrows consumption + Mobius bow reuse timing (`1500*345/Pspd`).
+4. Skills outside `skill-combat.json` still use legacy `power + 10` stub; compound skill conditions skipped.
+5. NPC SS / spiritshot stock+chance done (#257 / #259); MagicSkillUse SS glow (2154) and raid-boss materialize shot stock still open.
+6. Wire: `MagicSkillCanceled` packet (client cast-bar cancel); peace-zone / `RelationChanged` for PvP (#271 core done).
+7. Pets / summons — matrix #17 (largest remaining combat feature).
+8. Spoil Festival 302 / Sweeper Festival 444 (AoE) not wired.
 
 ## Slice 6 — attack-skill damage and timing
 - `data/skill-combat.json` (374 Mobius skills): power/mpConsume/mpInitialConsume per level, hit/cool/reuse, castRange.
@@ -102,18 +105,19 @@
 - Open: no cast interruption by damage/stun (Interlude has no move-cancels-cast — the client simply can't move); MagicSkillCanceled on target death/out of range; channeling skills; sit blocked by combat stance (stricter than Mobius sitDown); teleport/gatekeeper doesn't clear queued cast/move; buff hitTime-delayed effect.
 
 ## Still open (PvE priority)
-1. ~~Physical-skill crit/evasion stat mods (CRITICAL_DAMAGE, BLOW_RATE, P_SKILL_EVASION)~~ — done (see below).
+1. ~~Physical-skill crit/evasion stat mods (CRITICAL_DAMAGE, BLOW_RATE, P_SKILL_EVASION)~~ — done.
 2. ~~Night game clock (GameTimeTaskManager) for the −10% dark bonus~~ — done (`ZoneGameTime`, HitConditionBonus night).
 3. ~~magicLvl in skill-combat.json + mcrit stat mods~~ — done (slice 10 follow-up).
-4. ~~NPC soulshots~~ — stock + chance on melee (`gen_npc_shots.py`); spiritshots / SS glow / boss materialize still open.
+4. ~~NPC soulshots~~ — melee stock+chance (`gen_npc_shots.py`); ~~spiritshots on NPC magic~~ (`TryNpcSpiritshot` in `ZoneWorldNpcSkills`); SS glow / boss materialize still open.
 5. ~~Weapon vulnerabilities (NPC passive traits)~~ — done (#261).
-6. NPC blow/magic skills on players (#259): attack via `gen_npc_ai_skills.py`; HEAL/BUFF/DEBUFF/IMMOBILIZE/silence + clan heal + SUICIDE via `gen_npc_ai_support.py`. Sleep/stun/paralyze block move+skills; root blocks move; silence blocks skills. Suicide = HP&lt;30% + skill chance + aura MagicalAttack then self-die. RES N/A on Interlude NPC skillLists.
+6. ~~NPC blow/magic skills on players (#259)~~ — attack via `gen_npc_ai_skills.py`; HEAL/BUFF/DEBUFF/IMMOBILIZE/silence + clan heal + SUICIDE via `gen_npc_ai_support.py`. Sleep/stun/paralyze block move+skills; root blocks move; silence blocks skills. Suicide = HP&lt;30% + skill chance + aura MagicalAttack then self-die. RES N/A on Interlude NPC skillLists.
+7. **Pets / summons** — next large combat feature (matrix #17).
 
 ## Slice — NPC soulshots (Mobius `Npc.rechargeShots`)
 
 - `npcs.json` carries `soulShot` / `soulShotChance` / `spiritShot` / `spiritShotChance` from Mobius `<param name="SoulShot|…">` (~1355 templates).
 - On NPC melee, `TryNpcSoulshot`: if stock &gt; 0 and `Rnd(100) &lt; chance`, decrement stock and double P.Atk for that swing (Attack soulshot flag).
-- Gaps: no MagicSkillUse 2154 glow fan-out; spiritshots unused until NPC magic cast; raid boss materialize path does not copy shot stock from template.
+- Gaps: no MagicSkillUse 2154 glow fan-out; raid boss materialize path does not copy shot stock from template. Spiritshots consume on NPC magic via `TryNpcSpiritshot`.
 
 ## Slice — CRITICAL_DAMAGE / BLOW_RATE / P_SKILL_EVASION + IG night
 
@@ -155,7 +159,7 @@ Rules: `Fineage.Game.Combat.CastRules`; Zone: `ZoneWorldCastInterrupt.cs` + `Res
 - **Abort at launch** (`onMagicLaunchedTimer`): at hitTime the target must still exist and be alive, be within the skill's **effectRange** (now in `skill-combat.json`, 314 skills via `scripts/gen_skill_effect_range.py`; castRange fallback) and be in line of sight. Otherwise the cast aborts silently: no damage, `mpConsume` not spent (only `mpInitialConsume` was), reuse stays.
 - **Teleport** (`Relocate`, used by gatekeepers / dungeons / travel token): aborts the cast and clears queued cast, pickup, auto-attack and approach (Mobius `teleToLocation`).
 - Client gap: the Net contract has no `MagicSkillCanceled`, so the client's cast bar/animation runs out on its own; only SysMsg 27 tells the player. Adding the packet needs a client change (deferred).
-- Stubs / deferred: stun/sleep/paralyze interrupts (no control abnormals hit players yet; `AbortCast` is the hook), legacy non-`skill-combat` attack skills aren't interruptible, mob skills (none on players yet), full channeling, magicLvl/land-rate polish, buffs on magic crit.
+- Stubs / deferred: stun/sleep/paralyze interrupts via control abnormals (`AbortCast` is the hook; NPC immobilize/silence landed in #259), legacy non-`skill-combat` attack skills aren't interruptible, full channeling, magicLvl/land-rate polish, buffs on magic crit.
 
 ## Buff / debuff / heal / Spoil at hitTime
 
