@@ -1988,10 +1988,8 @@ public sealed class NetZoneServer : INetPresenceBridge
         }
 
         var pickup = NetCodec.DecodePickupRequest(envelope.Payload);
-        string? error = await _world.TryPickupAsync(
-            zoneSession,
-            new PickupRequestMsg { ObjectId = pickup.GroundObjectId },
-            ct).ConfigureAwait(false);
+        string? error = await _world.TryPickupAsync(zoneSession, pickup.GroundObjectId, ct)
+            .ConfigureAwait(false);
         if (error != null)
             await RejectAsync(conn, error, "Pickup failed.", ct).ConfigureAwait(false);
         // InventoryUpdate + EntityDespawn fan out via NetBridge.
@@ -2012,9 +2010,7 @@ public sealed class NetZoneServer : INetPresenceBridge
 
         var destroy = NetCodec.DecodeDestroyItemRequest(envelope.Payload);
         string? error = await _world.TryDestroyItemAsync(
-            zoneSession,
-            new DestroyItemRequestMsg { ObjectId = destroy.ObjectId, Count = destroy.Count },
-            ct).ConfigureAwait(false);
+            zoneSession, destroy.ObjectId, destroy.Count, ct).ConfigureAwait(false);
         if (error != null)
             await RejectAsync(conn, error, "Destroy item failed.", ct).ConfigureAwait(false);
         // InventoryUpdate fans out from ZoneWorldGround.
@@ -2035,16 +2031,7 @@ public sealed class NetZoneServer : INetPresenceBridge
 
         var drop = NetCodec.DecodeDropItemRequest(envelope.Payload);
         string? error = await _world.TryDropItemAsync(
-            zoneSession,
-            new DropItemRequestMsg
-            {
-                ObjectId = drop.ObjectId,
-                Count = drop.Count,
-                X = drop.X,
-                Y = drop.Y,
-                Z = drop.Z
-            },
-            ct).ConfigureAwait(false);
+            zoneSession, drop.ObjectId, drop.Count, drop.X, drop.Y, drop.Z, ct).ConfigureAwait(false);
         if (error != null)
             await RejectAsync(conn, error, "Drop failed.", ct).ConfigureAwait(false);
     }

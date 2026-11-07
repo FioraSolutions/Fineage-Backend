@@ -40,7 +40,7 @@ public sealed class QuestItemLockTests
         var kit = new NetTestKit();
         var (session, elf) = await kit.EnterAsync();
         var club = elf.Inventory!.AddPieces(1335, 1)[0];
-        var error = await kit.World.TryDropItemAsync(session, new DropItemRequestMsg { ObjectId = club.ObjectId, Count = 1 }, CancellationToken.None);
+        var error = await kit.World.TryDropItemAsync(session, club.ObjectId, 1, 0, 0, 0, CancellationToken.None);
         Assert.Equal("bad_request", error);
         Assert.Equal(1, elf.Inventory.CountOf(1335));
     }

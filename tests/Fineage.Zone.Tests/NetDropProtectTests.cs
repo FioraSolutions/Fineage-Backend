@@ -39,12 +39,12 @@ public sealed class NetDropProtectTests
         other.Knownlist.Add(groundId);
 
         rec.Calls.Clear();
-        Assert.Equal("protected", await kit.World.TryPickupAsync(otherSession, new PickupRequestMsg { ObjectId = groundId }, CancellationToken.None));
+        Assert.Equal("protected", await kit.World.TryPickupAsync(otherSession, groundId, CancellationToken.None));
         Assert.Contains(ZoneWorld.SysMsgFailedToPickup, SysIds(rec));
         Assert.True(kit.World.TryGetEntityById(groundId, out _));
 
         kit.Now = kit.Now.AddMilliseconds(ZoneWorld.DropProtectMs + 1);
-        Assert.Null(await kit.World.TryPickupAsync(otherSession, new PickupRequestMsg { ObjectId = groundId }, CancellationToken.None));
+        Assert.Null(await kit.World.TryPickupAsync(otherSession, groundId, CancellationToken.None));
         Assert.False(kit.World.TryGetEntityById(groundId, out _));
     }
 

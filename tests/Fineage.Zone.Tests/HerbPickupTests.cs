@@ -7,7 +7,7 @@ namespace Fineage.Zone.Tests;
 public sealed class HerbPickupTests
 {
     static Task<string?> Pick(NetTestKit kit, ZoneSession s, int id) =>
-        kit.World.TryPickupAsync(s, new PickupRequestMsg { ObjectId = id }, CancellationToken.None);
+        kit.World.TryPickupAsync(s, id, CancellationToken.None);
 
     [Fact]
     public async Task Herb_of_life_heals_on_pickup_and_is_not_stored()
