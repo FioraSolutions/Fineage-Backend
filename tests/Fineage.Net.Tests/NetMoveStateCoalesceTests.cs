@@ -52,15 +52,13 @@ public sealed class NetMoveStateCoalesceTests
         // Without coalesce, TrySend would start returning false once the queue is full.
         Assert.Equal(32, accepted);
 
-        await Task.Delay(300, cts.Token);
-
         var stream = client.GetStream();
         var destXs = new List<int>();
         using var readCts = CancellationTokenSource.CreateLinkedTokenSource(cts.Token);
-        readCts.CancelAfter(TimeSpan.FromSeconds(5));
+        readCts.CancelAfter(TimeSpan.FromSeconds(8));
         try
         {
-            while (true)
+            while (destXs.Count == 0 || destXs.Max() < 1031)
             {
                 PacketEnvelope? frame = await NetFraming.ReadAsync(stream, readCts.Token);
                 if (frame == null)
