@@ -34,8 +34,8 @@ public sealed class NetDeathBroadcastTests
         var (bridge, rec) = NetBridgeRecorder.Create();
         kit.World.NetBridge = bridge;
 
-        Assert.Null(await kit.World.TrySelectTargetAsync(killerSession, new SelectTargetMsg { TargetObjectId = MobId }, CancellationToken.None));
-        Assert.Null(await kit.World.TryAttackAsync(killerSession, new AttackRequestMsg { TargetObjectId = MobId }, CancellationToken.None));
+        Assert.Null(await kit.World.TrySelectTargetAsync(killerSession, MobId, CancellationToken.None));
+        Assert.Null(await kit.World.TryAttackAsync(killerSession, MobId, CancellationToken.None));
         // HP 1 mob: keep swinging (misses allowed) until it dies.
         for (int i = 0; i < 60 && mob.CurHp > 0; i++)
         {

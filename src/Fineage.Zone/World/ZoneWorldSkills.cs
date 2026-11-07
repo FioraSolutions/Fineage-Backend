@@ -8,14 +8,18 @@ namespace Fineage.Zone.World;
 
 public sealed partial class ZoneWorld
 {
-    public Task<string?> TrySkillUseAsync(ZoneSession session, SkillUseRequestMsg request, CancellationToken ct)
+    public Task<string?> TrySkillUseAsync(
+        ZoneSession session,
+        int skillId,
+        int targetObjectId,
+        CancellationToken ct)
     {
         if (!IsLive(session))
             return Task.FromResult<string?>("world");
 
         string? error;
         lock (_gate)
-            error = TrySkillUse(session, request);
+            error = TrySkillUse(session, new SkillUseIntent(skillId, targetObjectId));
         if (error != null)
             return Task.FromResult<string?>(error);
 
@@ -336,7 +340,7 @@ public sealed partial class ZoneWorld
         return SkillMessages.List(rows, entity.SkillReuseUntilMs, now);
     }
 
-    string? TrySkillUse(ZoneSession session, SkillUseRequestMsg request)
+    string? TrySkillUse(ZoneSession session, SkillUseIntent request)
     {
         if (!_byId.TryGetValue(session.ObjectId, out var player) || player.Session == null)
             return "world";
@@ -388,7 +392,7 @@ public sealed partial class ZoneWorld
     string? TrySkillUseAttack(
         ZoneSession session,
         ZoneEntity player,
-        SkillUseRequestMsg request,
+        SkillUseIntent request,
         SkillDefinition template,
         SkillLevelData levelData,
         int level,
@@ -464,7 +468,7 @@ public sealed partial class ZoneWorld
     string? TrySkillUseBuff(
         ZoneSession session,
         ZoneEntity player,
-        SkillUseRequestMsg request,
+        SkillUseIntent request,
         SkillDefinition template,
         SkillLevelData levelData,
         int level,
@@ -504,7 +508,7 @@ public sealed partial class ZoneWorld
     string? TrySkillUseSupport(
         ZoneSession session,
         ZoneEntity player,
-        SkillUseRequestMsg request,
+        SkillUseIntent request,
         SkillDefinition template,
         SkillLevelData levelData,
         int level,
@@ -560,7 +564,7 @@ public sealed partial class ZoneWorld
     string? TrySkillUseDebuff(
         ZoneSession session,
         ZoneEntity player,
-        SkillUseRequestMsg request,
+        SkillUseIntent request,
         SkillDefinition template,
         SkillLevelData levelData,
         int level,
@@ -598,7 +602,7 @@ public sealed partial class ZoneWorld
     /// Friendly skills: SELF always self. Otherwise prefer an explicit player target; if the client
     /// sent a mob (selected target), fall back to self so Heal works without clearing the target.
     /// </summary>
-    int ResolveFriendlyTargetId(ZoneSession session, ZoneEntity player, SkillUseRequestMsg request, SkillDefinition template)
+    int ResolveFriendlyTargetId(ZoneSession session, ZoneEntity player, SkillUseIntent request, SkillDefinition template)
     {
         if (string.Equals(template.TargetType, "SELF", StringComparison.OrdinalIgnoreCase))
             return player.ObjectId;

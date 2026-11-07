@@ -69,7 +69,7 @@ public sealed class ZoneApproachPathTests
         float speed = player.RunSpeed;
         long straightMs = Math.Max(1, (long)Math.Ceiling((dist - stopAt) * 1000.0 / speed));
 
-        Assert.Null(await kit.World.TryAttackAsync(session, new AttackRequestMsg { TargetObjectId = MobId }, CancellationToken.None));
+        Assert.Null(await kit.World.TryAttackAsync(session, MobId, CancellationToken.None));
 
         Assert.True(player.MoveActive);
         Assert.True(player.MovePath.Count > 0, "straight line hits the wall — FindPath must queue detour waypoints");

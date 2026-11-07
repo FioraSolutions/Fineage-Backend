@@ -30,7 +30,7 @@ public sealed class NetCastMoveTests
         player.CurMp = player.MaxMp = 500;
         var (bridge, _) = NetBridgeRecorder.Create();
         kit.World.NetBridge = bridge;
-        Assert.Null(await kit.World.TrySelectTargetAsync(session, new SelectTargetMsg { TargetObjectId = MobId }, CancellationToken.None));
+        Assert.Null(await kit.World.TrySelectTargetAsync(session, MobId, CancellationToken.None));
         return (kit, session, player);
     }
 
@@ -38,7 +38,7 @@ public sealed class NetCastMoveTests
         kit.World.TryMoveAsync(s, new MoveToMsg { ObjectId = p.ObjectId, DestX = p.X + dx, DestY = p.Y, DestZ = p.Z }, CancellationToken.None);
 
     static Task<string?> Cast(NetTestKit kit, ZoneSession s, int skill = WindStrike) =>
-        kit.World.TrySkillUseAsync(s, new SkillUseRequestMsg { SkillId = skill, TargetObjectId = MobId }, CancellationToken.None);
+        kit.World.TrySkillUseAsync(s, skill, MobId, CancellationToken.None);
 
     long Now(NetTestKit kit) => kit.Now.ToUnixTimeMilliseconds();
 

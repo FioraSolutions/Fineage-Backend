@@ -7,14 +7,14 @@ namespace Fineage.Zone.World;
 
 public sealed partial class ZoneWorld
 {
-    public Task<string?> TrySelectTargetAsync(ZoneSession session, SelectTargetMsg select, CancellationToken ct)
+    public Task<string?> TrySelectTargetAsync(ZoneSession session, int targetObjectId, CancellationToken ct)
     {
         if (!IsLive(session))
             return Task.FromResult<string?>("world");
 
         string? error;
         lock (_gate)
-            error = TrySelectTarget(session, select.TargetObjectId);
+            error = TrySelectTarget(session, targetObjectId);
         return Task.FromResult<string?>(error);
     }
 
@@ -41,7 +41,7 @@ public sealed partial class ZoneWorld
         return Task.FromResult<string?>(null);
     }
 
-    public Task<string?> TryAttackAsync(ZoneSession session, AttackRequestMsg request, CancellationToken ct)
+    public Task<string?> TryAttackAsync(ZoneSession session, int targetObjectId, CancellationToken ct)
     {
         if (!IsLive(session))
             return Task.FromResult<string?>("world");
@@ -52,11 +52,11 @@ public sealed partial class ZoneWorld
         {
             int previous = session.AutoAttackTargetId;
             long now0 = _clock().ToUnixTimeMilliseconds();
-            int requested = request.TargetObjectId > 0 ? request.TargetObjectId : session.SelectedTargetId;
+            int requested = targetObjectId > 0 ? targetObjectId : session.SelectedTargetId;
             bool alreadySwinging = previous > 0 && previous == requested && session.ApproachTargetId == 0 &&
                 session.NextAutoAttackUnixMs > now0;
             // Re-click on the target already being hit: Mobius keeps the running attack, no extra swing.
-            error = alreadySwinging ? null : TryAttack(session, request.TargetObjectId, out approachMs);
+            error = alreadySwinging ? null : TryAttack(session, targetObjectId, out approachMs);
             if (error == null && !alreadySwinging && approachMs >= 0)
             {
                 session.AutoAttackTargetId = session.SelectedTargetId;

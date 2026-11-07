@@ -13,7 +13,7 @@ public sealed class CastInterruptTests
         var (s, p) = await kit.EnterAsync(classId: 25, x: mob.X + 100, y: mob.Y, z: mob.Z);
         p.KnownSkills[1177] = 1;
         p.CurMp = 80;
-        Assert.Null(await kit.World.TrySkillUseAsync(s, new SkillUseRequestMsg { SkillId = 1177, TargetObjectId = mob.ObjectId }, CancellationToken.None));
+        Assert.Null(await kit.World.TrySkillUseAsync(s, 1177, mob.ObjectId, CancellationToken.None));
         Assert.NotNull(p.PendingHit);
         return (kit, s, p, mob);
     }
@@ -49,7 +49,7 @@ public sealed class CastInterruptTests
         kit.World.HitPlayerForTest(p, 100_000); // rate clamps to 99 %
         for (int i = 0; i < 20 && p.PendingHit != null; i++)
         {
-            await kit.World.TrySkillUseAsync(s, new SkillUseRequestMsg { SkillId = 1177 }, CancellationToken.None);
+            await kit.World.TrySkillUseAsync(s, 1177, 0, CancellationToken.None);
             kit.World.HitPlayerForTest(p, 100_000);
         }
         Assert.Null(p.PendingHit);

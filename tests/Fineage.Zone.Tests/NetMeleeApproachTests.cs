@@ -35,7 +35,7 @@ public sealed class NetMeleeApproachTests
         Assert.Contains(MobId, player.Knownlist);
         var (bridge, rec) = NetBridgeRecorder.Create();
         kit.World.NetBridge = bridge;
-        Assert.Null(await kit.World.TrySelectTargetAsync(session, new SelectTargetMsg { TargetObjectId = MobId }, CancellationToken.None));
+        Assert.Null(await kit.World.TrySelectTargetAsync(session, MobId, CancellationToken.None));
         return (kit, session, player, mob, rec);
     }
 
@@ -45,7 +45,7 @@ public sealed class NetMeleeApproachTests
         var (kit, session, player, mob, rec) = await SetupAsync();
         int startX = player.X;
 
-        Assert.Null(await kit.World.TryAttackAsync(session, new AttackRequestMsg { TargetObjectId = MobId }, CancellationToken.None));
+        Assert.Null(await kit.World.TryAttackAsync(session, MobId, CancellationToken.None));
 
         // Server position did not jump: still at the start, a timed run toward the mob is active.
         Assert.Equal(startX, player.X);
@@ -103,7 +103,7 @@ public sealed class NetMeleeApproachTests
         int x = player.X;
         rec.Calls.Clear();
 
-        Assert.Null(await kit.World.TryAttackAsync(session, new AttackRequestMsg { TargetObjectId = MobId }, CancellationToken.None));
+        Assert.Null(await kit.World.TryAttackAsync(session, MobId, CancellationToken.None));
         Assert.Equal(x, player.X);
         Assert.False(player.MoveActive);
         Assert.NotEmpty(rec.Of(nameof(INetPresenceBridge.FanoutAttackState)));

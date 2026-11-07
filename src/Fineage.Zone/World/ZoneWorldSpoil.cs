@@ -249,7 +249,7 @@ public sealed partial class ZoneWorld
     }
 
     /// <summary>Skill 254 / 42 through the normal SkillUse path: MP, reuse, MagicSkillUse fan-out, then the spoil/sweep effect.</summary>
-    string? TrySkillUseSpoilOrSweep(ZoneSession session, ZoneEntity player, SkillUseRequestMsg request, SkillDefinition template,
+    string? TrySkillUseSpoilOrSweep(ZoneSession session, ZoneEntity player, SkillUseIntent request, SkillDefinition template,
         SkillLevelData levelData, int level, long now, bool sweep)
     {
         int targetId = request.TargetObjectId > 0 ? request.TargetObjectId : session.SelectedTargetId;
