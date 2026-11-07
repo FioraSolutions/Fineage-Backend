@@ -92,11 +92,7 @@ public sealed class NetMeleeApproachTests
     {
         var (kit, session, player, mob, rec) = await SetupAsync();
         // Walk next to the mob first (timed move, then let it finish).
-        Assert.Null(await kit.World.TryMoveAsync(session, new MoveToMsg
-        {
-            ObjectId = player.ObjectId, DestX = mob.X - 30, DestY = mob.Y, DestZ = mob.Z,
-            OriginX = player.X, OriginY = player.Y, OriginZ = player.Z
-        }, CancellationToken.None));
+        Assert.Null(await kit.World.TryMoveAsync(session, mob.X - 30, mob.Y, mob.Z, CancellationToken.None));
         kit.Now = kit.Now.AddSeconds(10);
         await kit.World.RunPlayerCombatTickAsync(CancellationToken.None);
         Assert.False(player.MoveActive);

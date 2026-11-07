@@ -784,11 +784,11 @@ public sealed partial class ZoneWorld
         return Task.CompletedTask;
     }
 
-    public Task<string?> TryMoveAsync(ZoneSession session, MoveToMsg move, CancellationToken ct)
+    public Task<string?> TryMoveAsync(ZoneSession session, int destX, int destY, int destZ, CancellationToken ct)
     {
         string? error;
         lock (_gate)
-            error = TryMove(session, move);
+            error = TryMove(session, destX, destY, destZ);
         if (error != null)
             return Task.FromResult<string?>(error);
 
@@ -902,7 +902,7 @@ public sealed partial class ZoneWorld
     static bool WithinMoveRequest(int fromX, int fromY, int toX, int toY) =>
         MoveLimits.WithinStep(fromX, fromY, toX, toY);
 
-    string? TryMove(ZoneSession session, MoveToMsg move)
+    string? TryMove(ZoneSession session, int destX, int destY, int destZ)
     {
         if (!IsLive(session))
             return "world";
@@ -914,6 +914,19 @@ public sealed partial class ZoneWorld
             return ActionProtocol.Immobilized;
         if (entity.Sitting)
             return ActionProtocol.Sitting;
+
+        // Origin/ObjectId filled here so Net and tests only pass destination; MoveToMsg remains the internal/ack shape.
+        var move = new MoveToMsg
+        {
+            ObjectId = session.ObjectId,
+            DestX = destX,
+            DestY = destY,
+            DestZ = destZ,
+            OriginX = session.X,
+            OriginY = session.Y,
+            OriginZ = session.Z
+        };
+
         if (entity.CastingUntilMs > _clock().ToUnixTimeMilliseconds())
         {
             // Mobius PlayerAI.onIntentionMoveTo: casting → ActionFailed + saveNextIntention(MOVE_TO); runs after the cast.

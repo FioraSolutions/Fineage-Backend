@@ -46,12 +46,7 @@ public sealed class ZoneSpawnRespawnTests
         session.Bind(ticket.CharacterId, ticket.Account, ticket.CharacterName, ticket.ClassId);
         Assert.True(await world.TryEnterAsync(session, CancellationToken.None));
 
-        Assert.Null(await world.TryMoveAsync(session, new MoveToMsg
-        {
-            DestX = gremlin.X,
-            DestY = gremlin.Y,
-            DestZ = gremlin.Z
-        }, CancellationToken.None));
+        Assert.Null(await world.TryMoveAsync(session, gremlin.X, gremlin.Y, gremlin.Z, CancellationToken.None));
         Assert.Null(await world.TrySelectTargetAsync(session, gremlin.ObjectId,
             CancellationToken.None));
 

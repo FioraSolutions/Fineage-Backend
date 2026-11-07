@@ -35,7 +35,7 @@ public sealed class NetCastMoveTests
     }
 
     static Task<string?> Move(NetTestKit kit, ZoneSession s, ZoneEntity p, int dx) =>
-        kit.World.TryMoveAsync(s, new MoveToMsg { ObjectId = p.ObjectId, DestX = p.X + dx, DestY = p.Y, DestZ = p.Z }, CancellationToken.None);
+        kit.World.TryMoveAsync(s, p.X + dx, p.Y, p.Z, CancellationToken.None);
 
     static Task<string?> Cast(NetTestKit kit, ZoneSession s, int skill = WindStrike) =>
         kit.World.TrySkillUseAsync(s, skill, MobId, CancellationToken.None);

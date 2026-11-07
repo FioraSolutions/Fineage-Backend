@@ -71,9 +71,7 @@ public sealed class NetSkillTests
         // so cast with the weakest sword (Squire's Sword, P.Atk 6) — Power Strike needs SWORD/BLUNT.
         caster.Inventory!.Equip(caster.Inventory.Add(SquiresSword));
         Assert.True(bench.World.TryGetEntityById(gremlinObjectId, out var gremlin));
-        Assert.Null(await bench.World.TryMoveAsync(
-            actor.Session,
-            new MoveToMsg { DestX = gremlin.X, DestY = gremlin.Y, DestZ = gremlin.Z },
+        Assert.Null(await bench.World.TryMoveAsync(actor.Session, gremlin.X, gremlin.Y, gremlin.Z,
             CancellationToken.None));
         Assert.Null(await bench.World.TrySelectTargetAsync(actor.Session, gremlinObjectId, CancellationToken.None));
 
@@ -88,9 +86,7 @@ public sealed class NetSkillTests
         Assert.Equal(PowerStrike, use.SkillId);
         Assert.Equal(gremlinObjectId, use.TargetObjectId);
         int beforeMoveX = caster.X;
-        Assert.Null(await bench.World.TryMoveAsync(
-            actor.Session,
-            new MoveToMsg { DestX = caster.X + 10, DestY = caster.Y, DestZ = caster.Z },
+        Assert.Null(await bench.World.TryMoveAsync(actor.Session, caster.X + 10, caster.Y, caster.Z,
             CancellationToken.None));
         // Net clients are not refused: the intention parks on the session and runs once the cast completes.
         Assert.NotNull(actor.Session.QueuedMove);
