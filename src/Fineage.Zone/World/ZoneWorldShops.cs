@@ -104,7 +104,26 @@ public sealed partial class ZoneWorld
     {
         if (request.Items == null)
             return "bad_request";
-        if (!TryShopNpc(session, request.NpcObjectId, out var player, out var npc, out var error))
+        if (!TryPlayer(session, out var player) || player.Inventory == null)
+            return "world";
+        if (player.Dead)
+            return InventoryProtocol.Dead;
+
+        // Mobius admin_buy: NpcObjectId 0 + ShopSession.IsAdmin. Price-0 GM lists are free grants
+        // (ShopTrade.Buy refuses unit price 0 as NotTradable).
+        if (player.Shop is { IsAdmin: true } adminShop
+            && request.NpcObjectId == 0
+            && adminShop.NpcObjectId == 0
+            && adminShop.BuyListId == request.ListId)
+        {
+            if (!ZoneAdmin.IsAdminCharacter(player.Name))
+                return "forbidden";
+            if (!_buyLists.TryGet(request.ListId, out var adminList))
+                return "bad_request";
+            return CompleteAdminBuy(session, player, adminList, request.Items);
+        }
+
+        if (!TryShopNpc(session, request.NpcObjectId, out player, out var npc, out var error))
             return error;
         if (player.Shop == null || player.Shop.NpcObjectId != npc.ObjectId || player.Shop.BuyListId != request.ListId)
             return "bad_request";

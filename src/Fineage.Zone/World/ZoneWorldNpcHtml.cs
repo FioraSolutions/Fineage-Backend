@@ -20,6 +20,11 @@ public sealed partial class ZoneWorld
     {
         if (!TryPlayer(session, out var player))
             return "world";
+
+        // Mobius admin_* (gmshop / buy / setlevel): no NPC required; KuK + FINEAGE_ZONE_ADMIN.
+        if (TryNormalizeAdminCommand(command, out string adminCmd))
+            return TryAdminBypass(session, player, adminCmd);
+
         if (!BypassCommands.TrySplit(npcObjectId, command, out int resolvedId, out var verb))
             return "bad_request";
         if (!_byId.TryGetValue(resolvedId, out var npc) || npc.Kind != ZoneEntityKind.Npc)
@@ -110,5 +115,33 @@ public sealed partial class ZoneWorld
             Html = html ?? "",
             ItemId = 0
         });
+    }
+
+    static bool TryNormalizeAdminCommand(string? raw, out string command)
+    {
+        command = "";
+        if (string.IsNullOrWhiteSpace(raw))
+            return false;
+
+        var text = raw.Trim();
+        if (text.StartsWith("bypass -h ", StringComparison.OrdinalIgnoreCase))
+            text = text["bypass -h ".Length..].TrimStart();
+        else if (text.StartsWith("bypass ", StringComparison.OrdinalIgnoreCase))
+            text = text["bypass ".Length..].TrimStart();
+
+        // npc_<id>_admin_buy 9917 from HTML when a fake npc id was baked in — still admin.
+        if (text.StartsWith("npc_", StringComparison.OrdinalIgnoreCase))
+        {
+            int split = text.IndexOf('_', 4);
+            if (split > 4)
+                text = text[(split + 1)..].TrimStart();
+        }
+
+        if (!text.StartsWith("admin_", StringComparison.OrdinalIgnoreCase))
+            return false;
+        if (text.Length > BypassCommands.MaxLength)
+            return false;
+        command = text;
+        return true;
     }
 }

@@ -9,4 +9,6 @@ public sealed class ShopSession
     public int BuyListId { get; set; }
     public bool SellOpen { get; set; }
     public PreparedMultiSell? Multi { get; set; }
+    /// <summary>Mobius <c>admin_buy</c>: no NPC, tax 0, buylist NPC allow-list skipped.</summary>
+    public bool IsAdmin { get; init; }
 }

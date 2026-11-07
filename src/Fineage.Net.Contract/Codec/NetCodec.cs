@@ -3342,7 +3342,8 @@ namespace Fineage.Net.Contract
             {
                 s ??= "";
                 byte[] bytes = Utf8.GetBytes(s);
-                if (bytes.Length > 2048)
+                // Length is UInt16 on the wire — allow full range (NpcHtml / admin pages exceed 2 KiB).
+                if (bytes.Length > ushort.MaxValue)
                     throw new InvalidOperationException("string too long");
                 WriteUInt16((ushort)bytes.Length);
                 Ensure(bytes.Length);
