@@ -1,3 +1,4 @@
+using System.Net;
 using System.Security.Cryptography;
 using System.Text;
 using Fineage.Protocol;
@@ -57,11 +58,23 @@ public sealed class HandoffTokens
             throw new ArgumentOutOfRangeException(nameof(ttl));
     }
 
-    public static HandoffTokens FromEnvironment()
+    /// <summary>
+    /// Builds tokens from <c>FINEAGE_HANDOFF_SECRET</c> (+ optional TTL env).
+    /// When the secret is unset, <paramref name="allowDefaultSecret"/> must be true
+    /// (loopback / selftest only); otherwise this throws so production cannot ship
+    /// with the well-known <see cref="DefaultSecret"/>.
+    /// </summary>
+    public static HandoffTokens FromEnvironment(bool allowDefaultSecret = false)
     {
         string? secret = Environment.GetEnvironmentVariable("FINEAGE_HANDOFF_SECRET");
         if (string.IsNullOrWhiteSpace(secret))
+        {
+            if (!allowDefaultSecret || RequireConfiguredSecret())
+                throw new InvalidOperationException(
+                    "FINEAGE_HANDOFF_SECRET is required (shared Login↔Zone HMAC). " +
+                    "Set a random secret (≥32 bytes). DefaultSecret is for tests/loopback only.");
             secret = DefaultSecret;
+        }
 
         TimeSpan? ttl = null;
         string? ttlText = Environment.GetEnvironmentVariable("FINEAGE_HANDOFF_TTL_SECONDS");
@@ -70,6 +83,20 @@ public sealed class HandoffTokens
 
         return new HandoffTokens(secret, ttl);
     }
+
+    /// <summary>
+    /// True when <c>FINEAGE_REQUIRE_HANDOFF_SECRET</c> is 1/true — forces a configured
+    /// secret even on loopback binds.
+    /// </summary>
+    public static bool RequireConfiguredSecret()
+    {
+        string? flag = Environment.GetEnvironmentVariable("FINEAGE_REQUIRE_HANDOFF_SECRET");
+        return flag is "1" or "true" or "TRUE" or "yes" or "YES";
+    }
+
+    /// <summary>Whether this bind may fall back to <see cref="DefaultSecret"/>.</summary>
+    public static bool AllowDefaultSecretForBind(IPAddress bindAddress) =>
+        !RequireConfiguredSecret() && IPAddress.IsLoopback(bindAddress);
 
     public HandoffTicket Issue(CharacterRecord character, DateTimeOffset now)
     {

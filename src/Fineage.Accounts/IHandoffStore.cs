@@ -19,8 +19,8 @@ public sealed class MemoryHandoffStore : IHandoffStore
     public MemoryHandoffStore(HandoffTokens tokens) =>
         _tokens = tokens ?? throw new ArgumentNullException(nameof(tokens));
 
-    public static MemoryHandoffStore FromEnvironment() =>
-        new(HandoffTokens.FromEnvironment());
+    public static MemoryHandoffStore FromEnvironment(bool allowDefaultSecret = false) =>
+        new(HandoffTokens.FromEnvironment(allowDefaultSecret));
 
     /// <summary>Underlying HMAC tokens (Zone still takes <see cref="HandoffTokens"/> directly).</summary>
     public HandoffTokens Tokens => _tokens;

@@ -88,10 +88,23 @@ int maxConnections = ZoneNetSettings.MaxConnections;
 int outboundQueue = ZoneNetSettings.OutboundQueue;
 int maxMsgPerSec = ZoneNetSettings.MaxMessagesPerSecond;
 bool adminCommands = ZoneAdmin.Enabled;
-if (string.IsNullOrWhiteSpace(Environment.GetEnvironmentVariable("FINEAGE_HANDOFF_SECRET")) &&
-    !IPAddress.IsLoopback(bindAddress))
+HandoffTokens handoffTokens;
+try
 {
-    Console.WriteLine("[ZONE] warning: FINEAGE_HANDOFF_SECRET is unset. It must match Login before clients hand off from another machine.");
+    handoffTokens = HandoffTokens.FromEnvironment(
+        allowDefaultSecret: HandoffTokens.AllowDefaultSecretForBind(bindAddress));
+}
+catch (InvalidOperationException ex)
+{
+    Console.Error.WriteLine($"[ZONE] {ex.Message}");
+    Environment.ExitCode = 1;
+    return;
+}
+
+if (string.IsNullOrWhiteSpace(Environment.GetEnvironmentVariable("FINEAGE_HANDOFF_SECRET")) &&
+    IPAddress.IsLoopback(bindAddress))
+{
+    Console.WriteLine("[ZONE] FINEAGE_HANDOFF_SECRET unset; using DefaultSecret (loopback only).");
 }
 
 string worldLabel = includeEnabledMaps ? "whole world (all enabled spawn maps)" : "single spawn map";
@@ -116,7 +129,7 @@ if (zoneStatus != null)
     Console.WriteLine($"[ZONE] status {zoneStatus.Url}");
 
 await using FineageMetricsHost? metrics = FineageMetricsHost.Start("zone", Console.Out, Console.Error);
-var netZone = new NetZoneServer(HandoffTokens.FromEnvironment(), world, accounts);
+var netZone = new NetZoneServer(handoffTokens, world, accounts);
 var netTcp = new NetTcpServer { Endpoint = "zone" };
 Console.WriteLine($"[ZONE] net listen {bindDisplay}:{NetSettings.ZonePort} (PacketEnvelope)");
 Task netTask = netTcp.RunAsync(
@@ -125,7 +138,8 @@ Task netTask = netTcp.RunAsync(
     netZone.HandleAsync,
     shutdown.Token,
     maxConnections,
-    NetSettings.InboxCapacity);
+    NetSettings.InboxCapacity,
+    outboundQueue);
 
 try
 {

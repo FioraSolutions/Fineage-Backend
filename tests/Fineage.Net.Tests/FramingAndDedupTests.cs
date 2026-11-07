@@ -41,6 +41,20 @@ public class FramingAndDedupTests
     }
 
     [Fact]
+    public void Deduper_rejects_stale_replay_after_advance()
+    {
+        var d = new CommandDeduper();
+        for (uint i = 1; i <= 3000; i++)
+            Assert.True(d.TryAccept(i));
+
+        // Old HashSet+prune accepted pruned ids; strict watermark must reject.
+        Assert.False(d.TryAccept(100));
+        Assert.False(d.TryAccept(3000));
+        Assert.True(d.TryAccept(3001));
+        Assert.True(d.TryAccept(0));
+    }
+
+    [Fact]
     public void Oversized_payload_rejected()
     {
         var envelope = new PacketEnvelope
