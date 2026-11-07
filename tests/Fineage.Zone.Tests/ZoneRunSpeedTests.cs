@@ -247,11 +247,7 @@ public sealed class ZoneRunSpeedTests
         float baseRun = player.BaseRunSpeed * ElfDexBonus;
         int destX = player.X + 600;
 
-        Assert.Null(await kit.World.TryMoveAsync(session, new MoveToMsg
-        {
-            ObjectId = player.ObjectId, DestX = destX, DestY = player.Y, DestZ = player.Z,
-            OriginX = player.X, OriginY = player.Y, OriginZ = player.Z
-        }, CancellationToken.None));
+        Assert.Null(await kit.World.TryMoveAsync(session, destX, player.Y, player.Z, CancellationToken.None));
         Assert.True(player.MoveActive);
 
         // Same tick budget: the buffed pawn covers more ground (applied through the real buff path).

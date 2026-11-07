@@ -1278,18 +1278,9 @@ public sealed class NetZoneServer : INetPresenceBridge
 
         var move = NetCodec.DecodeMoveInput(envelope.Payload);
         var before = _world.SnapshotKnownIds(zoneSession);
-        var msg = new MoveToMsg
-        {
-            ObjectId = zoneSession.ObjectId,
-            DestX = move.DestX,
-            DestY = move.DestY,
-            DestZ = move.DestZ,
-            OriginX = zoneSession.X,
-            OriginY = zoneSession.Y,
-            OriginZ = zoneSession.Z
-        };
 
-        string? error = await _world.TryMoveAsync(zoneSession, msg, ct).ConfigureAwait(false);
+        string? error = await _world.TryMoveAsync(
+            zoneSession, move.DestX, move.DestY, move.DestZ, ct).ConfigureAwait(false);
         if (error != null)
         {
             await conn.SendAsync(

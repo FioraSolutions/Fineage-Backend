@@ -72,7 +72,7 @@ public sealed partial class ZoneWorld
                 var move = session.QueuedMove;
                 session.QueuedMove = null;
                 if (!player.Dead)
-                    TryMove(session, move);
+                    TryMove(session, move.DestX, move.DestY, move.DestZ);
             }
             if (session.SitOnArrive && !player.MoveActive)
             {
