@@ -6,11 +6,12 @@ namespace Fineage.Zone.World;
 
 public sealed partial class ZoneWorld
 {
-    public Task<string?> TrySayAsync(ZoneSession session, SayMsg say, DateTimeOffset now, CancellationToken ct)
+    public Task<string?> TrySayAsync(
+        ZoneSession session, string? text, int chatType, DateTimeOffset now, CancellationToken ct)
     {
         if (!session.InWorld)
             return Task.FromResult<string?>("world");
-        if (!SayRules.TryNormalize(say.Text, out string text))
+        if (!SayRules.TryNormalize(text, out string normalized))
             return Task.FromResult<string?>("bad_request");
 
         SystemMessageMsg? notice = null;
@@ -24,15 +25,15 @@ public sealed partial class ZoneWorld
             {
                 notice = SayRules.Flood();
             }
-            else if (!SayRules.IsDelivered(say.ChatType))
+            else if (!SayRules.IsDelivered(chatType))
             {
                 session.LastChatUnixMs = nowMs;
-                notice = SayRules.NotSupported(say.ChatType);
+                notice = SayRules.NotSupported(chatType);
             }
             else
             {
                 session.LastChatUnixMs = nowMs;
-                BuildSay(speaker, say.ChatType, text);
+                BuildSay(speaker, chatType, normalized);
             }
         }
 
@@ -50,7 +51,7 @@ public sealed partial class ZoneWorld
             return Task.FromResult<string?>(null);
         }
 
-        ZoneLog.Info($"say object={session.ObjectId} name={session.Name} type={say.ChatType} text={text}");
+        ZoneLog.Info($"say object={session.ObjectId} name={session.Name} type={chatType} text={normalized}");
         return Task.FromResult<string?>(null);
     }
 
