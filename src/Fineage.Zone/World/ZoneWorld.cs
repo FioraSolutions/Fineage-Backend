@@ -49,6 +49,14 @@ sealed class ZoneNpcSpoilPayload
     public bool CorpseAwaitingSweep { get; set; }
 }
 
+/// <summary>Player friend/block social fields composed off <see cref="ZoneEntity"/> (#353).</summary>
+sealed class ZonePlayerSocialPayload
+{
+    public Dictionary<int, string> Friends { get; } = [];
+    public Dictionary<int, string> Blocked { get; } = [];
+    public bool BlockAll { get; set; }
+}
+
 /// <summary>Player private-store / manufacture fields composed off <see cref="ZoneEntity"/> (#353).</summary>
 sealed class ZonePlayerStorePayload
 {
@@ -184,12 +192,24 @@ sealed class ZoneEntity
     public HashSet<int> KnownRecipes => EnsureStore().KnownRecipes;
 
     ZonePlayerStorePayload EnsureStore() => Store ??= new ZonePlayerStorePayload();
+
+    /// <summary>Player social payload; null until first friend/block access (#353 composition).</summary>
+    public ZonePlayerSocialPayload? Social { get; set; }
+
     /// <summary>Friend objectId → name snapshot (Mobius friend list).</summary>
-    public Dictionary<int, string> Friends { get; } = [];
+    public Dictionary<int, string> Friends => EnsureSocial().Friends;
+
     /// <summary>Blocked objectId → name snapshot (Mobius ignore list).</summary>
-    public Dictionary<int, string> Blocked { get; } = [];
+    public Dictionary<int, string> Blocked => EnsureSocial().Blocked;
+
     /// <summary>Mobius block-all / message refusal mode.</summary>
-    public bool BlockAll { get; set; }
+    public bool BlockAll
+    {
+        get => Social?.BlockAll ?? false;
+        set => EnsureSocial().BlockAll = value;
+    }
+
+    ZonePlayerSocialPayload EnsureSocial() => Social ??= new ZonePlayerSocialPayload();
     /// <summary>NPC Mobius physical attack (0 = unknown → level placeholder). Players read the class template.</summary>
     public double PAtk { get; init; }
     /// <summary>NPC Mobius <c>vitals hpRegen</c>: HP restored per 3 s regen tick (players use the class table).</summary>
