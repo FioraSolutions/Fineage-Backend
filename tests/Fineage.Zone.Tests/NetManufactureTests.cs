@@ -64,7 +64,7 @@ public sealed class NetManufactureTests
         {
             StoreObjectId = maker.ObjectId
         }, default));
-        var list = Assert.IsType<Fineage.Net.Contract.RecipeShopSellListNetMsg>(
+        var list = Assert.IsType<Fineage.Protocol.RecipeShopSellListMsg>(
             Last(rec, nameof(IWorldEventPublisher.FanoutRecipeShopSellList)));
         Assert.Equal(maker.ObjectId, list.ManufacturerObjectId);
         Assert.Single(list.Items);
@@ -77,7 +77,7 @@ public sealed class NetManufactureTests
             RecipeId = RecipeListId
         }, default));
 
-        var result = Assert.IsType<Fineage.Net.Contract.RecipeShopItemInfoNetMsg>(
+        var result = Assert.IsType<Fineage.Protocol.RecipeShopItemInfoMsg>(
             Last(rec, nameof(IWorldEventPublisher.FanoutRecipeShopItemInfo)));
         Assert.Equal(0, result.Result);
         Assert.Equal(0, customer.Inventory.CountOf(Stem));

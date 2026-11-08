@@ -247,12 +247,12 @@ public sealed partial class ZoneWorld
     {
         if (visitor.Session == null || visitor.Inventory == null)
             return;
-        var items = maker.ManufactureList.Select(row => new Fineage.Net.Contract.RecipeShopRowNet
+        var items = maker.ManufactureList.Select(row => new RecipeShopRowMsg
         {
             RecipeId = row.RecipeId,
             Price = row.Price
         }).ToArray();
-        NetBridge?.FanoutRecipeShopSellList([visitor.ObjectId], new Fineage.Net.Contract.RecipeShopSellListNetMsg
+        NetBridge?.FanoutRecipeShopSellList([visitor.ObjectId], new RecipeShopSellListMsg
         {
             ManufacturerObjectId = maker.ObjectId,
             CurrentMp = maker.CurMp,
@@ -264,7 +264,7 @@ public sealed partial class ZoneWorld
 
     void FanoutRecipeShopItemInfo(int visitorObjectId, ZoneEntity maker, int recipeId, int result)
     {
-        NetBridge?.FanoutRecipeShopItemInfo([visitorObjectId], new Fineage.Net.Contract.RecipeShopItemInfoNetMsg
+        NetBridge?.FanoutRecipeShopItemInfo([visitorObjectId], new RecipeShopItemInfoMsg
         {
             ManufacturerObjectId = maker.ObjectId,
             RecipeId = recipeId,

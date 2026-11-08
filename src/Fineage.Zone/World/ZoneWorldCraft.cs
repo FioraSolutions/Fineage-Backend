@@ -66,7 +66,7 @@ public sealed partial class ZoneWorld
             .Where(id => _game.Recipes.TryGet(id, out var r) && r.Dwarven == request.Dwarven)
             .OrderBy(id => id)
             .ToArray();
-        NetBridge?.FanoutRecipeBookList([player.ObjectId], new Fineage.Net.Contract.RecipeBookListNetMsg
+        NetBridge?.FanoutRecipeBookList([player.ObjectId], new RecipeBookListMsg
         {
             Dwarven = request.Dwarven ? 1 : 0,
             RecipeIds = ids
@@ -170,7 +170,7 @@ public sealed partial class ZoneWorld
             SelfUserInfo(player);
         }
 
-        NetBridge?.FanoutRecipeItemMakeInfo([player.ObjectId], new Fineage.Net.Contract.RecipeItemMakeInfoNetMsg
+        NetBridge?.FanoutRecipeItemMakeInfo([player.ObjectId], new RecipeItemMakeInfoMsg
         {
             RecipeId = recipe.Id,
             Result = result,

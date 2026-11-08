@@ -926,6 +926,43 @@ public sealed class RecipeShopMakeItemMsg
     public int RecipeId { get; set; }
 }
 
+/// <summary>Zone → client: known recipe ids for one craft book tab.</summary>
+public sealed class RecipeBookListMsg
+{
+    public int Dwarven { get; set; }
+    public int[] RecipeIds { get; set; } = [];
+}
+
+/// <summary>Zone → client: self-craft result (0 success, 1 fail, 2 cannot).</summary>
+public sealed class RecipeItemMakeInfoMsg
+{
+    public int RecipeId { get; set; }
+    public int Result { get; set; }
+    public int CurrentMp { get; set; }
+    public int MaxMp { get; set; }
+}
+
+/// <summary>Zone → client: manufacture recipe list for a visitor.</summary>
+public sealed class RecipeShopSellListMsg
+{
+    public int ManufacturerObjectId { get; set; }
+    public int CurrentMp { get; set; }
+    public int MaxMp { get; set; }
+    public long BuyerAdena { get; set; }
+    public RecipeShopRowMsg[] Items { get; set; } = [];
+}
+
+/// <summary>Zone → client: manufacturer MP + recipe after make-info / make-item.</summary>
+public sealed class RecipeShopItemInfoMsg
+{
+    public int ManufacturerObjectId { get; set; }
+    public int RecipeId { get; set; }
+    public int CurrentMp { get; set; }
+    public int MaxMp { get; set; }
+    /// <summary>0 = ok / success, 1 = fail (fee+mats consumed).</summary>
+    public int Result { get; set; }
+}
+
 /// <summary>Opcode <see cref="MsgType.RequestQuestList"/> (42). Empty body.</summary>
 public sealed class RequestQuestListMsg
 {
