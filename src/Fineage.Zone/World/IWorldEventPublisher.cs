@@ -3,11 +3,11 @@ using Fineage.Net.Contract;
 namespace Fineage.Zone.World;
 
 /// <summary>
-/// ZoneWorld → presence fanout for sim ticks (NPC chase, attacks, vitals, die/drop).
+/// World sim → presence/domain event fanout for sim ticks (NPC chase, attacks, vitals, die/drop).
 /// Lives in World so the sim does not take a Net-namespace type (#353 domain events).
 /// Player enter/move knownlist diffs stay in <c>NetZoneServer</c>; encoding stays on the Net implementer.
 /// </summary>
-interface INetPresenceBridge
+interface IWorldEventPublisher
 {
     void FanoutMoveState(
         IReadOnlyList<int> watcherObjectIds,

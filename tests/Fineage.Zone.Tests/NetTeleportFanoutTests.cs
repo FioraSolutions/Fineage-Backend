@@ -27,7 +27,7 @@ public sealed class NetTeleportFanoutTests
         Assert.Null(await kit.World.TryAdminKillPlayerAsync(session, CancellationToken.None));
         Assert.Null(await kit.World.TryReviveAsync(session, DeathProtocol.ReviveToVillage, CancellationToken.None));
 
-        var frames = rec.Of(nameof(INetPresenceBridge.FanoutTeleportToLocation));
+        var frames = rec.Of(nameof(IWorldEventPublisher.FanoutTeleportToLocation));
         var only = Assert.Single(frames);
         var msg = Assert.IsType<TeleportToLocationNetMsg>(only[1]);
         Assert.Equal(player.ObjectId, msg.ObjectId);
@@ -48,7 +48,7 @@ public sealed class NetTeleportFanoutTests
         int marker = session.ObjectId;
         Assert.Null(await world.TryBypassAsync(session, GateObjectId, "teleport NORMAL 0", CancellationToken.None));
 
-        var frames = rec.Of(nameof(INetPresenceBridge.FanoutTeleportToLocation));
+        var frames = rec.Of(nameof(IWorldEventPublisher.FanoutTeleportToLocation));
         var only = Assert.Single(frames);
         var msg = Assert.IsType<TeleportToLocationNetMsg>(only[1]);
         Assert.Equal(marker, msg.ObjectId);

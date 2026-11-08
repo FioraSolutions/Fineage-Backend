@@ -84,7 +84,7 @@ public sealed class CombatPacketHandler
         }
 
         // Nothing to answer here: the world already fanned MyTargetSelected's Net mirror (TargetSelected, id +
-        // Mobius colour), the target's StatusUpdate and the error path through INetPresenceBridge.
+        // Mobius colour), the target's StatusUpdate and the error path through IWorldEventPublisher.
     }
 
     public async Task OnTargetCancelAsync(

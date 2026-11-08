@@ -12,7 +12,7 @@ namespace Fineage.Zone.Net;
 /// Net packets are the only client-facing transport; presence (spawn / move / despawn) is fanned out via
 /// <see cref="NetPresenceHub"/>.
 /// </summary>
-public sealed class NetZoneServer : INetPresenceBridge
+public sealed class NetZoneServer : IWorldEventPublisher
 {
     readonly IHandoffStore _handoff;
     readonly ZoneWorld _world;
@@ -105,7 +105,7 @@ public sealed class NetZoneServer : INetPresenceBridge
     {
     }
 
-    void INetPresenceBridge.FanoutMoveState(
+    void IWorldEventPublisher.FanoutMoveState(
         IReadOnlyList<int> watcherObjectIds,
         int moverObjectId,
         int originX,
@@ -140,7 +140,7 @@ public sealed class NetZoneServer : INetPresenceBridge
         }
     }
 
-    void INetPresenceBridge.FanoutKnownlistDiff(int selfObjectId, IReadOnlyList<int> added, IReadOnlyList<int> removed)
+    void IWorldEventPublisher.FanoutKnownlistDiff(int selfObjectId, IReadOnlyList<int> added, IReadOnlyList<int> removed)
     {
         if (!_world.TryGetEntityById(selfObjectId, out var selfEntity))
             return;
@@ -218,7 +218,7 @@ public sealed class NetZoneServer : INetPresenceBridge
         }));
     }
 
-    void INetPresenceBridge.FanoutChangeMoveType(IReadOnlyList<int> watcherObjectIds, int moverObjectId, bool running, float runSpeed, float walkSpeed, bool inWater)
+    void IWorldEventPublisher.FanoutChangeMoveType(IReadOnlyList<int> watcherObjectIds, int moverObjectId, bool running, float runSpeed, float walkSpeed, bool inWater)
     {
         var mover = _ids.AllocateOrGet(moverObjectId);
         var payload = NetCodec.EncodeChangeMoveType(new ChangeMoveTypeNetMsg
@@ -234,7 +234,7 @@ public sealed class NetZoneServer : INetPresenceBridge
             _presence.TrySend(watcher, NetOpcode.ChangeMoveType, payload);
     }
 
-    void INetPresenceBridge.FanoutAttackStance(IReadOnlyList<int> watcherObjectIds, int objectId, bool inStance)
+    void IWorldEventPublisher.FanoutAttackStance(IReadOnlyList<int> watcherObjectIds, int objectId, bool inStance)
     {
         var id = _ids.AllocateOrGet(objectId);
         var payload = NetCodec.EncodeAttackStance(new AttackStanceNetMsg { EntityValue = id.Value, EntityGeneration = id.Generation });
@@ -243,21 +243,21 @@ public sealed class NetZoneServer : INetPresenceBridge
             _presence.TrySend(watcher, opcode, payload);
     }
 
-    void INetPresenceBridge.FanoutAutoSoulShot(IReadOnlyList<int> watcherObjectIds, int itemId, bool enabled)
+    void IWorldEventPublisher.FanoutAutoSoulShot(IReadOnlyList<int> watcherObjectIds, int itemId, bool enabled)
     {
         var payload = NetCodec.EncodeAutoSoulShot(new AutoSoulShotNetMsg { ItemId = itemId, Enabled = enabled });
         foreach (int watcher in watcherObjectIds)
             _presence.TrySend(watcher, NetOpcode.AutoSoulShot, payload);
     }
 
-    void INetPresenceBridge.FanoutUserInfo(IReadOnlyList<int> watcherObjectIds, UserInfoNetMsg info)
+    void IWorldEventPublisher.FanoutUserInfo(IReadOnlyList<int> watcherObjectIds, UserInfoNetMsg info)
     {
         var payload = NetCodec.EncodeUserInfo(info);
         foreach (int watcher in watcherObjectIds)
             _presence.TrySendCritical(watcher, NetOpcode.UserInfo, payload);
     }
 
-    void INetPresenceBridge.FanoutCharInfo(IReadOnlyList<int> watcherObjectIds, int objectId)
+    void IWorldEventPublisher.FanoutCharInfo(IReadOnlyList<int> watcherObjectIds, int objectId)
     {
         if (watcherObjectIds.Count == 0 || !_world.TryGetEntityById(objectId, out var entity) ||
             entity.Kind != ZoneEntityKind.Player)
@@ -267,441 +267,441 @@ public sealed class NetZoneServer : INetPresenceBridge
             _presence.TrySendCritical(watcher, NetOpcode.EntitySpawn, payload);
     }
 
-    void INetPresenceBridge.FanoutAttackState(IReadOnlyList<int> watcherObjectIds, AttackStateMsg attack)
+    void IWorldEventPublisher.FanoutAttackState(IReadOnlyList<int> watcherObjectIds, AttackStateMsg attack)
     {
         var payload = NetCodec.EncodeAttackState(attack);
         foreach (int watcher in watcherObjectIds)
             _presence.TrySend(watcher, NetOpcode.AttackState, payload);
     }
 
-    void INetPresenceBridge.FanoutStatusUpdate(IReadOnlyList<int> watcherObjectIds, StatusUpdateNetMsg status)
+    void IWorldEventPublisher.FanoutStatusUpdate(IReadOnlyList<int> watcherObjectIds, StatusUpdateNetMsg status)
     {
         var payload = NetCodec.EncodeStatusUpdate(status);
         foreach (int watcher in watcherObjectIds)
             _presence.TrySend(watcher, NetOpcode.StatusUpdate, payload);
     }
 
-    void INetPresenceBridge.FanoutDie(IReadOnlyList<int> watcherObjectIds, EntityDieMsg die)
+    void IWorldEventPublisher.FanoutDie(IReadOnlyList<int> watcherObjectIds, EntityDieMsg die)
     {
         var payload = NetCodec.EncodeEntityDie(die);
         foreach (int watcher in watcherObjectIds)
             _presence.TrySendCritical(watcher, NetOpcode.EntityDie, payload);
     }
 
-    void INetPresenceBridge.FanoutDropItem(IReadOnlyList<int> watcherObjectIds, DropItemNetMsg drop)
+    void IWorldEventPublisher.FanoutDropItem(IReadOnlyList<int> watcherObjectIds, DropItemNetMsg drop)
     {
         var payload = NetCodec.EncodeDropItem(drop);
         foreach (int watcher in watcherObjectIds)
             _presence.TrySendCritical(watcher, NetOpcode.DropItem, payload);
     }
 
-    void INetPresenceBridge.FanoutEntityDespawn(IReadOnlyList<int> watcherObjectIds, EntityDespawnMsg despawn)
+    void IWorldEventPublisher.FanoutEntityDespawn(IReadOnlyList<int> watcherObjectIds, EntityDespawnMsg despawn)
     {
         var payload = NetCodec.EncodeEntityDespawn(despawn);
         foreach (int watcher in watcherObjectIds)
             _presence.TrySendCritical(watcher, NetOpcode.EntityDespawn, payload);
     }
 
-    void INetPresenceBridge.FanoutInventoryUpdate(IReadOnlyList<int> watcherObjectIds, InventoryUpdateNetMsg update)
+    void IWorldEventPublisher.FanoutInventoryUpdate(IReadOnlyList<int> watcherObjectIds, InventoryUpdateNetMsg update)
     {
         var payload = NetCodec.EncodeInventoryUpdate(update);
         foreach (int watcher in watcherObjectIds)
             _presence.TrySendCritical(watcher, NetOpcode.InventoryUpdate, payload);
     }
 
-    void INetPresenceBridge.FanoutEtcStatusUpdate(IReadOnlyList<int> watcherObjectIds, EtcStatusUpdateNetMsg status)
+    void IWorldEventPublisher.FanoutEtcStatusUpdate(IReadOnlyList<int> watcherObjectIds, EtcStatusUpdateNetMsg status)
     {
         var payload = NetCodec.EncodeEtcStatusUpdate(status);
         foreach (int watcher in watcherObjectIds)
             _presence.TrySend(watcher, NetOpcode.EtcStatusUpdate, payload);
     }
 
-    void INetPresenceBridge.FanoutCreatureSay(IReadOnlyList<int> watcherObjectIds, CreatureSayNetMsg say)
+    void IWorldEventPublisher.FanoutCreatureSay(IReadOnlyList<int> watcherObjectIds, CreatureSayNetMsg say)
     {
         var payload = NetCodec.EncodeCreatureSay(say);
         foreach (int watcher in watcherObjectIds)
             _presence.TrySend(watcher, NetOpcode.CreatureSay, payload);
     }
 
-    void INetPresenceBridge.FanoutSystemMessage(IReadOnlyList<int> watcherObjectIds, SystemMessageNetMsg message)
+    void IWorldEventPublisher.FanoutSystemMessage(IReadOnlyList<int> watcherObjectIds, SystemMessageNetMsg message)
     {
         var payload = NetCodec.EncodeSystemMessage(message);
         foreach (int watcher in watcherObjectIds)
             _presence.TrySend(watcher, NetOpcode.SystemMessage, payload);
     }
 
-    void INetPresenceBridge.FanoutMagicSkillUse(IReadOnlyList<int> watcherObjectIds, MagicSkillUseNetMsg cast)
+    void IWorldEventPublisher.FanoutMagicSkillUse(IReadOnlyList<int> watcherObjectIds, MagicSkillUseNetMsg cast)
     {
         var payload = NetCodec.EncodeMagicSkillUse(cast);
         foreach (int watcher in watcherObjectIds)
             _presence.TrySend(watcher, NetOpcode.MagicSkillUse, payload);
     }
 
-    void INetPresenceBridge.FanoutRevive(IReadOnlyList<int> watcherObjectIds, ReviveNetMsg revive)
+    void IWorldEventPublisher.FanoutRevive(IReadOnlyList<int> watcherObjectIds, ReviveNetMsg revive)
     {
         var payload = NetCodec.EncodeRevive(revive);
         foreach (int watcher in watcherObjectIds)
             _presence.TrySend(watcher, NetOpcode.Revive, payload);
     }
 
-    void INetPresenceBridge.FanoutTeleportToLocation(IReadOnlyList<int> watcherObjectIds, TeleportToLocationNetMsg teleport)
+    void IWorldEventPublisher.FanoutTeleportToLocation(IReadOnlyList<int> watcherObjectIds, TeleportToLocationNetMsg teleport)
     {
         var payload = NetCodec.EncodeTeleportToLocation(teleport);
         foreach (int watcher in watcherObjectIds)
             _presence.TrySend(watcher, NetOpcode.TeleportToLocation, payload);
     }
 
-    void INetPresenceBridge.FanoutPlayerStats(IReadOnlyList<int> watcherObjectIds, PlayerStatsMsg stats)
+    void IWorldEventPublisher.FanoutPlayerStats(IReadOnlyList<int> watcherObjectIds, PlayerStatsMsg stats)
     {
         var payload = NetCodec.EncodePlayerStats(stats);
         foreach (int watcher in watcherObjectIds)
             _presence.TrySend(watcher, NetOpcode.PlayerStats, payload);
     }
 
-    void INetPresenceBridge.FanoutAbnormalStatusUpdate(IReadOnlyList<int> watcherObjectIds, AbnormalStatusUpdateNetMsg update)
+    void IWorldEventPublisher.FanoutAbnormalStatusUpdate(IReadOnlyList<int> watcherObjectIds, AbnormalStatusUpdateNetMsg update)
     {
         var payload = NetCodec.EncodeAbnormalStatusUpdate(update);
         foreach (int watcher in watcherObjectIds)
             _presence.TrySend(watcher, NetOpcode.AbnormalStatusUpdate, payload);
     }
 
-    void INetPresenceBridge.FanoutNpcHtml(IReadOnlyList<int> watcherObjectIds, NpcHtmlNetMsg html)
+    void IWorldEventPublisher.FanoutNpcHtml(IReadOnlyList<int> watcherObjectIds, NpcHtmlNetMsg html)
     {
         var payload = NetCodec.EncodeNpcHtml(html);
         foreach (int watcher in watcherObjectIds)
             _presence.TrySend(watcher, NetOpcode.NpcHtml, payload);
     }
 
-    void INetPresenceBridge.FanoutBuyList(IReadOnlyList<int> watcherObjectIds, BuyListNetMsg list)
+    void IWorldEventPublisher.FanoutBuyList(IReadOnlyList<int> watcherObjectIds, BuyListNetMsg list)
     {
         var payload = NetCodec.EncodeBuyList(list);
         foreach (int watcher in watcherObjectIds)
             _presence.TrySend(watcher, NetOpcode.BuyList, payload);
     }
 
-    void INetPresenceBridge.FanoutSellList(IReadOnlyList<int> watcherObjectIds, SellListNetMsg list)
+    void IWorldEventPublisher.FanoutSellList(IReadOnlyList<int> watcherObjectIds, SellListNetMsg list)
     {
         var payload = NetCodec.EncodeSellList(list);
         foreach (int watcher in watcherObjectIds)
             _presence.TrySend(watcher, NetOpcode.SellList, payload);
     }
 
-    void INetPresenceBridge.FanoutMultiSellList(IReadOnlyList<int> watcherObjectIds, MultiSellListNetMsg list)
+    void IWorldEventPublisher.FanoutMultiSellList(IReadOnlyList<int> watcherObjectIds, MultiSellListNetMsg list)
     {
         var payload = NetCodec.EncodeMultiSellList(list);
         foreach (int watcher in watcherObjectIds)
             _presence.TrySend(watcher, NetOpcode.MultiSellList, payload);
     }
 
-    void INetPresenceBridge.FanoutShopBalance(IReadOnlyList<int> watcherObjectIds, ShopBalanceNetMsg balance)
+    void IWorldEventPublisher.FanoutShopBalance(IReadOnlyList<int> watcherObjectIds, ShopBalanceNetMsg balance)
     {
         var payload = NetCodec.EncodeShopBalance(balance);
         foreach (int watcher in watcherObjectIds)
             _presence.TrySend(watcher, NetOpcode.ShopBalance, payload);
     }
 
-    void INetPresenceBridge.FanoutWarehouseDepositList(IReadOnlyList<int> watcherObjectIds, WarehouseDepositListNetMsg list)
+    void IWorldEventPublisher.FanoutWarehouseDepositList(IReadOnlyList<int> watcherObjectIds, WarehouseDepositListNetMsg list)
     {
         var payload = NetCodec.EncodeWarehouseDepositList(list);
         foreach (int watcher in watcherObjectIds)
             _presence.TrySend(watcher, NetOpcode.WarehouseDepositList, payload);
     }
 
-    void INetPresenceBridge.FanoutWarehouseWithdrawList(IReadOnlyList<int> watcherObjectIds, WarehouseWithdrawListNetMsg list)
+    void IWorldEventPublisher.FanoutWarehouseWithdrawList(IReadOnlyList<int> watcherObjectIds, WarehouseWithdrawListNetMsg list)
     {
         var payload = NetCodec.EncodeWarehouseWithdrawList(list);
         foreach (int watcher in watcherObjectIds)
             _presence.TrySend(watcher, NetOpcode.WarehouseWithdrawList, payload);
     }
 
-    void INetPresenceBridge.FanoutSkillList(IReadOnlyList<int> watcherObjectIds, SkillListNetMsg list)
+    void IWorldEventPublisher.FanoutSkillList(IReadOnlyList<int> watcherObjectIds, SkillListNetMsg list)
     {
         var payload = NetCodec.EncodeSkillList(list);
         foreach (int watcher in watcherObjectIds)
             _presence.TrySend(watcher, NetOpcode.SkillList, payload);
     }
 
-    void INetPresenceBridge.FanoutChangeWaitType(IReadOnlyList<int> watcherObjectIds, ChangeWaitTypeNetMsg waitType)
+    void IWorldEventPublisher.FanoutChangeWaitType(IReadOnlyList<int> watcherObjectIds, ChangeWaitTypeNetMsg waitType)
     {
         var payload = NetCodec.EncodeChangeWaitType(waitType);
         foreach (int watcher in watcherObjectIds)
             _presence.TrySend(watcher, NetOpcode.ChangeWaitType, payload);
     }
 
-    void INetPresenceBridge.FanoutSocialAction(IReadOnlyList<int> watcherObjectIds, SocialActionNetMsg action)
+    void IWorldEventPublisher.FanoutSocialAction(IReadOnlyList<int> watcherObjectIds, SocialActionNetMsg action)
     {
         var payload = NetCodec.EncodeSocialAction(action);
         foreach (int watcher in watcherObjectIds)
             _presence.TrySend(watcher, NetOpcode.SocialAction, payload);
     }
 
-    void INetPresenceBridge.FanoutTargetSelected(IReadOnlyList<int> watcherObjectIds, TargetSelectedNetMsg selected)
+    void IWorldEventPublisher.FanoutTargetSelected(IReadOnlyList<int> watcherObjectIds, TargetSelectedNetMsg selected)
     {
         var payload = NetCodec.EncodeTargetSelected(selected);
         foreach (int watcher in watcherObjectIds)
             _presence.TrySend(watcher, NetOpcode.TargetSelected, payload);
     }
 
-    void INetPresenceBridge.FanoutTargetUnselected(IReadOnlyList<int> watcherObjectIds, TargetUnselectedNetMsg unselected)
+    void IWorldEventPublisher.FanoutTargetUnselected(IReadOnlyList<int> watcherObjectIds, TargetUnselectedNetMsg unselected)
     {
         var payload = NetCodec.EncodeTargetUnselected(unselected);
         foreach (int watcher in watcherObjectIds)
             _presence.TrySend(watcher, NetOpcode.TargetUnselected, payload);
     }
 
-    void INetPresenceBridge.FanoutAcquireSkillList(IReadOnlyList<int> watcherObjectIds, AcquireSkillListNetMsg list)
+    void IWorldEventPublisher.FanoutAcquireSkillList(IReadOnlyList<int> watcherObjectIds, AcquireSkillListNetMsg list)
     {
         var payload = NetCodec.EncodeAcquireSkillList(list);
         foreach (int watcher in watcherObjectIds)
             _presence.TrySend(watcher, NetOpcode.AcquireSkillList, payload);
     }
 
-    void INetPresenceBridge.FanoutAcquireSkillInfo(IReadOnlyList<int> watcherObjectIds, AcquireSkillInfoNetMsg info)
+    void IWorldEventPublisher.FanoutAcquireSkillInfo(IReadOnlyList<int> watcherObjectIds, AcquireSkillInfoNetMsg info)
     {
         var payload = NetCodec.EncodeAcquireSkillInfo(info);
         foreach (int watcher in watcherObjectIds)
             _presence.TrySend(watcher, NetOpcode.AcquireSkillInfo, payload);
     }
 
-    void INetPresenceBridge.FanoutEnchantResult(IReadOnlyList<int> watcherObjectIds, EnchantResultNetMsg result)
+    void IWorldEventPublisher.FanoutEnchantResult(IReadOnlyList<int> watcherObjectIds, EnchantResultNetMsg result)
     {
         var payload = NetCodec.EncodeEnchantResult(result);
         foreach (int watcher in watcherObjectIds)
             _presence.TrySend(watcher, NetOpcode.EnchantResult, payload);
     }
 
-    void INetPresenceBridge.FanoutPledgeStatus(IReadOnlyList<int> watcherObjectIds, PledgeStatusNetMsg status)
+    void IWorldEventPublisher.FanoutPledgeStatus(IReadOnlyList<int> watcherObjectIds, PledgeStatusNetMsg status)
     {
         var payload = NetCodec.EncodePledgeStatus(status);
         foreach (int watcher in watcherObjectIds)
             _presence.TrySend(watcher, NetOpcode.PledgeStatus, payload);
     }
 
-    void INetPresenceBridge.FanoutPledgeMemberList(IReadOnlyList<int> watcherObjectIds, PledgeMemberListNetMsg list)
+    void IWorldEventPublisher.FanoutPledgeMemberList(IReadOnlyList<int> watcherObjectIds, PledgeMemberListNetMsg list)
     {
         var payload = NetCodec.EncodePledgeMemberList(list);
         foreach (int watcher in watcherObjectIds)
             _presence.TrySend(watcher, NetOpcode.PledgeMemberList, payload);
     }
 
-    void INetPresenceBridge.FanoutClanAskJoin(IReadOnlyList<int> watcherObjectIds, ClanAskJoinNetMsg ask)
+    void IWorldEventPublisher.FanoutClanAskJoin(IReadOnlyList<int> watcherObjectIds, ClanAskJoinNetMsg ask)
     {
         var payload = NetCodec.EncodeClanAskJoin(ask);
         foreach (int watcher in watcherObjectIds)
             _presence.TrySend(watcher, NetOpcode.ClanAskJoin, payload);
     }
 
-    void INetPresenceBridge.FanoutClanJoinResult(IReadOnlyList<int> watcherObjectIds, ClanJoinResultNetMsg result)
+    void IWorldEventPublisher.FanoutClanJoinResult(IReadOnlyList<int> watcherObjectIds, ClanJoinResultNetMsg result)
     {
         var payload = NetCodec.EncodeClanJoinResult(result);
         foreach (int watcher in watcherObjectIds)
             _presence.TrySend(watcher, NetOpcode.ClanJoinResult, payload);
     }
 
-    void INetPresenceBridge.FanoutQuestList(IReadOnlyList<int> watcherObjectIds, QuestListNetMsg list)
+    void IWorldEventPublisher.FanoutQuestList(IReadOnlyList<int> watcherObjectIds, QuestListNetMsg list)
     {
         var payload = NetCodec.EncodeQuestList(list);
         foreach (int watcher in watcherObjectIds)
             _presence.TrySend(watcher, NetOpcode.QuestList, payload);
     }
 
-    void INetPresenceBridge.FanoutPartyAskJoin(IReadOnlyList<int> watcherObjectIds, PartyAskJoinNetMsg ask)
+    void IWorldEventPublisher.FanoutPartyAskJoin(IReadOnlyList<int> watcherObjectIds, PartyAskJoinNetMsg ask)
     {
         var payload = NetCodec.EncodePartyAskJoin(ask);
         foreach (int watcher in watcherObjectIds)
             _presence.TrySend(watcher, NetOpcode.PartyAskJoin, payload);
     }
 
-    void INetPresenceBridge.FanoutPartyJoinResult(IReadOnlyList<int> watcherObjectIds, PartyJoinResultNetMsg result)
+    void IWorldEventPublisher.FanoutPartyJoinResult(IReadOnlyList<int> watcherObjectIds, PartyJoinResultNetMsg result)
     {
         var payload = NetCodec.EncodePartyJoinResult(result);
         foreach (int watcher in watcherObjectIds)
             _presence.TrySend(watcher, NetOpcode.PartyJoinResult, payload);
     }
 
-    void INetPresenceBridge.FanoutPartyMemberList(IReadOnlyList<int> watcherObjectIds, PartyMemberListNetMsg list)
+    void IWorldEventPublisher.FanoutPartyMemberList(IReadOnlyList<int> watcherObjectIds, PartyMemberListNetMsg list)
     {
         var payload = NetCodec.EncodePartyMemberList(list);
         foreach (int watcher in watcherObjectIds)
             _presence.TrySend(watcher, NetOpcode.PartyMemberList, payload);
     }
 
-    void INetPresenceBridge.FanoutTradeAsk(IReadOnlyList<int> watcherObjectIds, TradeAskNetMsg ask)
+    void IWorldEventPublisher.FanoutTradeAsk(IReadOnlyList<int> watcherObjectIds, TradeAskNetMsg ask)
     {
         var payload = NetCodec.EncodeTradeAsk(ask);
         foreach (int watcher in watcherObjectIds)
             _presence.TrySend(watcher, NetOpcode.TradeAsk, payload);
     }
 
-    void INetPresenceBridge.FanoutTradeRequestResult(IReadOnlyList<int> watcherObjectIds, TradeRequestResultNetMsg result)
+    void IWorldEventPublisher.FanoutTradeRequestResult(IReadOnlyList<int> watcherObjectIds, TradeRequestResultNetMsg result)
     {
         var payload = NetCodec.EncodeTradeRequestResult(result);
         foreach (int watcher in watcherObjectIds)
             _presence.TrySend(watcher, NetOpcode.TradeRequestResult, payload);
     }
 
-    void INetPresenceBridge.FanoutTradeStart(IReadOnlyList<int> watcherObjectIds, TradeStartNetMsg start)
+    void IWorldEventPublisher.FanoutTradeStart(IReadOnlyList<int> watcherObjectIds, TradeStartNetMsg start)
     {
         var payload = NetCodec.EncodeTradeStart(start);
         foreach (int watcher in watcherObjectIds)
             _presence.TrySend(watcher, NetOpcode.TradeStart, payload);
     }
 
-    void INetPresenceBridge.FanoutTradeOfferUpdate(IReadOnlyList<int> watcherObjectIds, TradeOfferUpdateNetMsg update)
+    void IWorldEventPublisher.FanoutTradeOfferUpdate(IReadOnlyList<int> watcherObjectIds, TradeOfferUpdateNetMsg update)
     {
         var payload = NetCodec.EncodeTradeOfferUpdate(update);
         foreach (int watcher in watcherObjectIds)
             _presence.TrySend(watcher, NetOpcode.TradeOfferUpdate, payload);
     }
 
-    void INetPresenceBridge.FanoutTradeConfirmState(IReadOnlyList<int> watcherObjectIds, TradeConfirmStateNetMsg state)
+    void IWorldEventPublisher.FanoutTradeConfirmState(IReadOnlyList<int> watcherObjectIds, TradeConfirmStateNetMsg state)
     {
         var payload = NetCodec.EncodeTradeConfirmState(state);
         foreach (int watcher in watcherObjectIds)
             _presence.TrySend(watcher, NetOpcode.TradeConfirmState, payload);
     }
 
-    void INetPresenceBridge.FanoutTradeFinished(IReadOnlyList<int> watcherObjectIds, TradeFinishedNetMsg finished)
+    void IWorldEventPublisher.FanoutTradeFinished(IReadOnlyList<int> watcherObjectIds, TradeFinishedNetMsg finished)
     {
         var payload = NetCodec.EncodeTradeFinished(finished);
         foreach (int watcher in watcherObjectIds)
             _presence.TrySend(watcher, NetOpcode.TradeFinished, payload);
     }
 
-    void INetPresenceBridge.FanoutPrivateStoreInfo(IReadOnlyList<int> watcherObjectIds, PrivateStoreInfoNetMsg info)
+    void IWorldEventPublisher.FanoutPrivateStoreInfo(IReadOnlyList<int> watcherObjectIds, PrivateStoreInfoNetMsg info)
     {
         var payload = NetCodec.EncodePrivateStoreInfo(info);
         foreach (int watcher in watcherObjectIds)
             _presence.TrySend(watcher, NetOpcode.PrivateStoreInfo, payload);
     }
 
-    void INetPresenceBridge.FanoutPrivateStoreListSell(IReadOnlyList<int> watcherObjectIds, PrivateStoreListSellNetMsg list)
+    void IWorldEventPublisher.FanoutPrivateStoreListSell(IReadOnlyList<int> watcherObjectIds, PrivateStoreListSellNetMsg list)
     {
         var payload = NetCodec.EncodePrivateStoreListSell(list);
         foreach (int watcher in watcherObjectIds)
             _presence.TrySend(watcher, NetOpcode.PrivateStoreListSell, payload);
     }
 
-    void INetPresenceBridge.FanoutPrivateStoreListBuy(IReadOnlyList<int> watcherObjectIds, PrivateStoreListBuyNetMsg list)
+    void IWorldEventPublisher.FanoutPrivateStoreListBuy(IReadOnlyList<int> watcherObjectIds, PrivateStoreListBuyNetMsg list)
     {
         var payload = NetCodec.EncodePrivateStoreListBuy(list);
         foreach (int watcher in watcherObjectIds)
             _presence.TrySend(watcher, NetOpcode.PrivateStoreListBuy, payload);
     }
 
-    void INetPresenceBridge.FanoutRecipeBookList(IReadOnlyList<int> watcherObjectIds, RecipeBookListNetMsg list)
+    void IWorldEventPublisher.FanoutRecipeBookList(IReadOnlyList<int> watcherObjectIds, RecipeBookListNetMsg list)
     {
         var payload = NetCodec.EncodeRecipeBookList(list);
         foreach (int watcher in watcherObjectIds)
             _presence.TrySend(watcher, NetOpcode.RecipeBookList, payload);
     }
 
-    void INetPresenceBridge.FanoutRecipeItemMakeInfo(IReadOnlyList<int> watcherObjectIds, RecipeItemMakeInfoNetMsg info)
+    void IWorldEventPublisher.FanoutRecipeItemMakeInfo(IReadOnlyList<int> watcherObjectIds, RecipeItemMakeInfoNetMsg info)
     {
         var payload = NetCodec.EncodeRecipeItemMakeInfo(info);
         foreach (int watcher in watcherObjectIds)
             _presence.TrySend(watcher, NetOpcode.RecipeItemMakeInfo, payload);
     }
 
-    void INetPresenceBridge.FanoutRecipeShopSellList(IReadOnlyList<int> watcherObjectIds, RecipeShopSellListNetMsg list)
+    void IWorldEventPublisher.FanoutRecipeShopSellList(IReadOnlyList<int> watcherObjectIds, RecipeShopSellListNetMsg list)
     {
         var payload = NetCodec.EncodeRecipeShopSellList(list);
         foreach (int watcher in watcherObjectIds)
             _presence.TrySend(watcher, NetOpcode.RecipeShopSellList, payload);
     }
 
-    void INetPresenceBridge.FanoutRecipeShopItemInfo(IReadOnlyList<int> watcherObjectIds, RecipeShopItemInfoNetMsg info)
+    void IWorldEventPublisher.FanoutRecipeShopItemInfo(IReadOnlyList<int> watcherObjectIds, RecipeShopItemInfoNetMsg info)
     {
         var payload = NetCodec.EncodeRecipeShopItemInfo(info);
         foreach (int watcher in watcherObjectIds)
             _presence.TrySend(watcher, NetOpcode.RecipeShopItemInfo, payload);
     }
 
-    void INetPresenceBridge.FanoutFriendInviteAsk(IReadOnlyList<int> watcherObjectIds, FriendInviteAskNetMsg ask)
+    void IWorldEventPublisher.FanoutFriendInviteAsk(IReadOnlyList<int> watcherObjectIds, FriendInviteAskNetMsg ask)
     {
         var payload = NetCodec.EncodeFriendInviteAsk(ask);
         foreach (int watcher in watcherObjectIds)
             _presence.TrySend(watcher, NetOpcode.FriendInviteAsk, payload);
     }
 
-    void INetPresenceBridge.FanoutFriendList(IReadOnlyList<int> watcherObjectIds, FriendListNetMsg list)
+    void IWorldEventPublisher.FanoutFriendList(IReadOnlyList<int> watcherObjectIds, FriendListNetMsg list)
     {
         var payload = NetCodec.EncodeFriendList(list);
         foreach (int watcher in watcherObjectIds)
             _presence.TrySend(watcher, NetOpcode.FriendList, payload);
     }
 
-    void INetPresenceBridge.FanoutFriendUpdate(IReadOnlyList<int> watcherObjectIds, FriendUpdateNetMsg update)
+    void IWorldEventPublisher.FanoutFriendUpdate(IReadOnlyList<int> watcherObjectIds, FriendUpdateNetMsg update)
     {
         var payload = NetCodec.EncodeFriendUpdate(update);
         foreach (int watcher in watcherObjectIds)
             _presence.TrySend(watcher, NetOpcode.FriendUpdate, payload);
     }
 
-    void INetPresenceBridge.FanoutBlockList(IReadOnlyList<int> watcherObjectIds, BlockListNetMsg list)
+    void IWorldEventPublisher.FanoutBlockList(IReadOnlyList<int> watcherObjectIds, BlockListNetMsg list)
     {
         var payload = NetCodec.EncodeBlockList(list);
         foreach (int watcher in watcherObjectIds)
             _presence.TrySend(watcher, NetOpcode.BlockList, payload);
     }
 
-    void INetPresenceBridge.FanoutBossStatus(IReadOnlyList<int> watcherObjectIds, BossStatusNetMsg status)
+    void IWorldEventPublisher.FanoutBossStatus(IReadOnlyList<int> watcherObjectIds, BossStatusNetMsg status)
     {
         var payload = NetCodec.EncodeBossStatus(status);
         foreach (int watcher in watcherObjectIds)
             _presence.TrySend(watcher, NetOpcode.BossStatus, payload);
     }
 
-    void INetPresenceBridge.FanoutSiegeInfo(IReadOnlyList<int> watcherObjectIds, SiegeInfoNetMsg info)
+    void IWorldEventPublisher.FanoutSiegeInfo(IReadOnlyList<int> watcherObjectIds, SiegeInfoNetMsg info)
     {
         var payload = NetCodec.EncodeSiegeInfo(info);
         foreach (int watcher in watcherObjectIds)
             _presence.TrySend(watcher, NetOpcode.SiegeInfo, payload);
     }
 
-    void INetPresenceBridge.FanoutOlympiadStatus(IReadOnlyList<int> watcherObjectIds, OlympiadStatusNetMsg status)
+    void IWorldEventPublisher.FanoutOlympiadStatus(IReadOnlyList<int> watcherObjectIds, OlympiadStatusNetMsg status)
     {
         var payload = NetCodec.EncodeOlympiadStatus(status);
         foreach (int watcher in watcherObjectIds)
             _presence.TrySend(watcher, NetOpcode.OlympiadStatus, payload);
     }
 
-    void INetPresenceBridge.FanoutOlympiadMatch(IReadOnlyList<int> watcherObjectIds, OlympiadMatchNetMsg match)
+    void IWorldEventPublisher.FanoutOlympiadMatch(IReadOnlyList<int> watcherObjectIds, OlympiadMatchNetMsg match)
     {
         var payload = NetCodec.EncodeOlympiadMatch(match);
         foreach (int watcher in watcherObjectIds)
             _presence.TrySend(watcher, NetOpcode.OlympiadMatch, payload);
     }
 
-    void INetPresenceBridge.FanoutOlympiadCountdown(IReadOnlyList<int> watcherObjectIds, OlympiadCountdownNetMsg countdown)
+    void IWorldEventPublisher.FanoutOlympiadCountdown(IReadOnlyList<int> watcherObjectIds, OlympiadCountdownNetMsg countdown)
     {
         var payload = NetCodec.EncodeOlympiadCountdown(countdown);
         foreach (int watcher in watcherObjectIds)
             _presence.TrySend(watcher, NetOpcode.OlympiadCountdown, payload);
     }
 
-    void INetPresenceBridge.FanoutOlympiadResult(IReadOnlyList<int> watcherObjectIds, OlympiadResultNetMsg result)
+    void IWorldEventPublisher.FanoutOlympiadResult(IReadOnlyList<int> watcherObjectIds, OlympiadResultNetMsg result)
     {
         var payload = NetCodec.EncodeOlympiadResult(result);
         foreach (int watcher in watcherObjectIds)
             _presence.TrySend(watcher, NetOpcode.OlympiadResult, payload);
     }
 
-    void INetPresenceBridge.FanoutSevenSignsStatus(IReadOnlyList<int> watcherObjectIds, SevenSignsStatusNetMsg status)
+    void IWorldEventPublisher.FanoutSevenSignsStatus(IReadOnlyList<int> watcherObjectIds, SevenSignsStatusNetMsg status)
     {
         var payload = NetCodec.EncodeSevenSignsStatus(status);
         foreach (int watcher in watcherObjectIds)
             _presence.TrySend(watcher, NetOpcode.SevenSignsStatus, payload);
     }
 
-    void INetPresenceBridge.FanoutSevenSignsSky(IReadOnlyList<int> watcherObjectIds, SevenSignsSkyNetMsg sky)
+    void IWorldEventPublisher.FanoutSevenSignsSky(IReadOnlyList<int> watcherObjectIds, SevenSignsSkyNetMsg sky)
     {
         var payload = NetCodec.EncodeSevenSignsSky(sky);
         foreach (int watcher in watcherObjectIds)
             _presence.TrySend(watcher, NetOpcode.SevenSignsSky, payload);
     }
 
-    void INetPresenceBridge.FanoutDungeonEntered(IReadOnlyList<int> watcherObjectIds, DungeonEnteredNetMsg entered)
+    void IWorldEventPublisher.FanoutDungeonEntered(IReadOnlyList<int> watcherObjectIds, DungeonEnteredNetMsg entered)
     {
         var payload = NetCodec.EncodeDungeonEntered(entered);
         foreach (int watcher in watcherObjectIds)

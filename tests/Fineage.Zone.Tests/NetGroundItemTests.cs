@@ -27,11 +27,11 @@ public sealed class NetGroundItemTests
     }
 
     static List<InventoryUpdateEntryNet> InvRows(NetBridgeRecorder rec) =>
-        rec.Of(nameof(INetPresenceBridge.FanoutInventoryUpdate))
+        rec.Of(nameof(IWorldEventPublisher.FanoutInventoryUpdate))
             .SelectMany(a => ((InventoryUpdateNetMsg)a[1]!).Changes).ToList();
 
     static List<int> SysIds(NetBridgeRecorder rec) =>
-        rec.Of(nameof(INetPresenceBridge.FanoutSystemMessage)).Select(a => ((SystemMessageNetMsg)a[1]!).Id).ToList();
+        rec.Of(nameof(IWorldEventPublisher.FanoutSystemMessage)).Select(a => ((SystemMessageNetMsg)a[1]!).Id).ToList();
 
     /// <summary>
     /// Mobius <c>RequestDestroyItem</c>: the trash-basket action. The slot is deleted outright, and unlike a
@@ -47,7 +47,7 @@ public sealed class NetGroundItemTests
 
         Assert.Equal(600, stack.Count);
         Assert.Contains(InvRows(rec), r => r.ObjectId == stack.ObjectId && r.Count == 600);
-        Assert.Empty(rec.Of(nameof(INetPresenceBridge.FanoutDropItem)));
+        Assert.Empty(rec.Of(nameof(IWorldEventPublisher.FanoutDropItem)));
     }
 
     [Fact]
@@ -60,7 +60,7 @@ public sealed class NetGroundItemTests
 
         Assert.Null(player.Inventory.Find(stack.ObjectId));
         Assert.Contains(InvRows(rec), r => r.ObjectId == stack.ObjectId && r.Change == InventoryChange.Remove);
-        Assert.Empty(rec.Of(nameof(INetPresenceBridge.FanoutDropItem)));
+        Assert.Empty(rec.Of(nameof(IWorldEventPublisher.FanoutDropItem)));
     }
 
     [Fact]
@@ -73,7 +73,7 @@ public sealed class NetGroundItemTests
 
         Assert.NotNull(err);
         Assert.Equal(1000, stack.Count);
-        Assert.Empty(rec.Of(nameof(INetPresenceBridge.FanoutInventoryUpdate)));
+        Assert.Empty(rec.Of(nameof(IWorldEventPublisher.FanoutInventoryUpdate)));
     }
 
     [Fact]
@@ -88,7 +88,7 @@ public sealed class NetGroundItemTests
         Assert.Equal(1000, stack.Count);
         Assert.Contains(ZoneWorld.SysMsgDiscardTooFar, SysIds(rec));
         Assert.Contains(InvRows(rec), r => r.ObjectId == stack.ObjectId && r.Count == 1000 && r.Change == InventoryChange.Modify);
-        Assert.Empty(rec.Of(nameof(INetPresenceBridge.FanoutDropItem)));
+        Assert.Empty(rec.Of(nameof(IWorldEventPublisher.FanoutDropItem)));
     }
 
     [Fact]
@@ -99,7 +99,7 @@ public sealed class NetGroundItemTests
 
         Assert.Null(await kit.World.TryDropItemAsync(session, stack.ObjectId, 100, player.X + 40, player.Y, player.Z, CancellationToken.None));
         Assert.Equal(900, stack.Count);
-        var drop = (DropItemNetMsg)Assert.Single(rec.Of(nameof(INetPresenceBridge.FanoutDropItem)))[1]!;
+        var drop = (DropItemNetMsg)Assert.Single(rec.Of(nameof(IWorldEventPublisher.FanoutDropItem)))[1]!;
         Assert.Equal(Adena, drop.ItemId);
         Assert.Equal(100, drop.Count);
         int groundId = (int)drop.EntityValue;
@@ -113,7 +113,7 @@ public sealed class NetGroundItemTests
         Assert.Equal(InventoryChange.Modify, row.Change); // Add for a held objectId is ignored by the client
         Assert.Equal(1000, row.Count);
         Assert.Contains(ZoneWorld.SysMsgObtainedAdena, SysIds(rec));
-        Assert.NotEmpty(rec.Of(nameof(INetPresenceBridge.FanoutEntityDespawn)));
+        Assert.NotEmpty(rec.Of(nameof(IWorldEventPublisher.FanoutEntityDespawn)));
         Assert.False(kit.World.TryGetEntityById(groundId, out _));
     }
 
@@ -123,7 +123,7 @@ public sealed class NetGroundItemTests
         var (kit, session, player, rec) = await SetupAsync();
         var stack = player.Inventory!.FindByItemId(Adena)!;
         Assert.Null(await kit.World.TryDropItemAsync(session, stack.ObjectId, 100, player.X + 100, player.Y, player.Z, CancellationToken.None));
-        int groundId = (int)((DropItemNetMsg)rec.Of(nameof(INetPresenceBridge.FanoutDropItem))[0][1]!).EntityValue;
+        int groundId = (int)((DropItemNetMsg)rec.Of(nameof(IWorldEventPublisher.FanoutDropItem))[0][1]!).EntityValue;
 
         // Walk away 400u — far outside the 45u Mobius pickup gate.
         Assert.True(kit.World.TryGetEntityById(groundId, out var ground));
@@ -177,7 +177,7 @@ public sealed class NetGroundItemTests
     {
         var (kit, session, player, rec) = await SetupAsync();
         Assert.Null(await kit.World.TryDropItemAsync(session, player.Inventory!.FindByItemId(Adena)!.ObjectId, 10, player.X + 60, player.Y, player.Z, CancellationToken.None));
-        int groundId = (int)((DropItemNetMsg)rec.Of(nameof(INetPresenceBridge.FanoutDropItem))[0][1]!).EntityValue;
+        int groundId = (int)((DropItemNetMsg)rec.Of(nameof(IWorldEventPublisher.FanoutDropItem))[0][1]!).EntityValue;
         Assert.True(kit.World.TryGetEntityById(groundId, out var ground));
 
         rec.Calls.Clear();

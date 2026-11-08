@@ -17,7 +17,7 @@ public sealed class NetNpcMoveAoiTests
     }
 
     static bool Diff(NetBridgeRecorder rec, int self, int id, bool added) =>
-        rec.Of(nameof(INetPresenceBridge.FanoutKnownlistDiff)).Any(a =>
+        rec.Of(nameof(IWorldEventPublisher.FanoutKnownlistDiff)).Any(a =>
             (int)a[0]! == self && ((IReadOnlyList<int>)a[added ? 1 : 2]!).Contains(id));
 
     [Fact]

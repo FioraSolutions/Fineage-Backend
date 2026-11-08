@@ -13,7 +13,7 @@ namespace Fineage.Zone.Tests;
 /// <summary>
 /// Shop rules over the Net bridge: what a merchant list, a purchase, a sale, and a multisell hand the client,
 /// plus every refusal that must not move adena. The retired V2 suite drove these through MessagePack frames;
-/// here the world is the driver and the recorded <see cref="INetPresenceBridge"/> traffic is the client.
+/// here the world is the driver and the recorded <see cref="IWorldEventPublisher"/> traffic is the client.
 /// </summary>
 public sealed class NetShopTests
 {
@@ -266,23 +266,23 @@ public sealed class NetShopTests
     ]);
 
     static BuyListNetMsg LastBuyList(NetBridgeRecorder rec) =>
-        Assert.IsType<BuyListNetMsg>(rec.Of(nameof(INetPresenceBridge.FanoutBuyList)).Last()[1]);
+        Assert.IsType<BuyListNetMsg>(rec.Of(nameof(IWorldEventPublisher.FanoutBuyList)).Last()[1]);
 
     static SellListNetMsg LastSellList(NetBridgeRecorder rec) =>
-        Assert.IsType<SellListNetMsg>(rec.Of(nameof(INetPresenceBridge.FanoutSellList)).Last()[1]);
+        Assert.IsType<SellListNetMsg>(rec.Of(nameof(IWorldEventPublisher.FanoutSellList)).Last()[1]);
 
     static MultiSellListNetMsg LastMultiSell(NetBridgeRecorder rec) =>
-        Assert.IsType<MultiSellListNetMsg>(rec.Of(nameof(INetPresenceBridge.FanoutMultiSellList)).Last()[1]);
+        Assert.IsType<MultiSellListNetMsg>(rec.Of(nameof(IWorldEventPublisher.FanoutMultiSellList)).Last()[1]);
 
     static ShopBalanceNetMsg LastBalance(NetBridgeRecorder rec) =>
-        Assert.IsType<ShopBalanceNetMsg>(rec.Of(nameof(INetPresenceBridge.FanoutShopBalance)).Last()[1]);
+        Assert.IsType<ShopBalanceNetMsg>(rec.Of(nameof(IWorldEventPublisher.FanoutShopBalance)).Last()[1]);
 
     static InventoryUpdateNetMsg LastInventory(NetBridgeRecorder rec) =>
-        Assert.IsType<InventoryUpdateNetMsg>(rec.Of(nameof(INetPresenceBridge.FanoutInventoryUpdate)).Last()[1]);
+        Assert.IsType<InventoryUpdateNetMsg>(rec.Of(nameof(IWorldEventPublisher.FanoutInventoryUpdate)).Last()[1]);
 
     static SystemMessageNetMsg LastSystemMessage(NetBridgeRecorder rec) =>
-        Assert.IsType<SystemMessageNetMsg>(rec.Of(nameof(INetPresenceBridge.FanoutSystemMessage)).Last()[1]);
+        Assert.IsType<SystemMessageNetMsg>(rec.Of(nameof(IWorldEventPublisher.FanoutSystemMessage)).Last()[1]);
 
     static void NoInventoryUpdate(NetBridgeRecorder rec) =>
-        Assert.Empty(rec.Of(nameof(INetPresenceBridge.FanoutInventoryUpdate)));
+        Assert.Empty(rec.Of(nameof(IWorldEventPublisher.FanoutInventoryUpdate)));
 }

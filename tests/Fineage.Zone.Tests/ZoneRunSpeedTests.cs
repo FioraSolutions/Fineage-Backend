@@ -82,7 +82,7 @@ public sealed class ZoneRunSpeedTests
 
         rec.Calls.Clear();
         Assert.Null(await kit.World.TryBuffRequestAsync(session, 0, 1204, false, CancellationToken.None));
-        var moves = rec.Of(nameof(INetPresenceBridge.FanoutChangeMoveType));
+        var moves = rec.Of(nameof(IWorldEventPublisher.FanoutChangeMoveType));
         // ChangeMoveType carries both gaits: the client animates walk speed from the same packet.
         Assert.Contains(moves, m => (int)m[1]! == player.ObjectId
             && (float)m[3]! == baseRun + 20f && (float)m[4]! == baseWalk + 20f);

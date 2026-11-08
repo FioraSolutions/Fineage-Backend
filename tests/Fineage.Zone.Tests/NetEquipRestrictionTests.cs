@@ -11,7 +11,7 @@ namespace Fineage.Zone.Tests;
 /// <summary>
 /// Class, race, sex, hero, clan, castle, PvP, level, PK, clan-hall, and exact-Expertise equip conditions, plus the
 /// grade penalty a higher crystal brings. Ported off the V2 wire: the deny code is the world's own return value and
-/// the paperdoll / penalty sheet is read from the recorded <see cref="INetPresenceBridge"/> traffic.
+/// the paperdoll / penalty sheet is read from the recorded <see cref="IWorldEventPublisher"/> traffic.
 /// </summary>
 public sealed class NetEquipRestrictionTests
 {
@@ -186,7 +186,7 @@ public sealed class NetEquipRestrictionTests
         // The V2 sheet carries the folded level; the Net EtcStatusUpdate carries only the flag, and is sent only
         // when the penalty actually moved (Mobius refreshExpertisePenalty fires on a change).
         bool moved = weapon > 0 || armor > 0;
-        Assert.Equal(moved, bench.Rec.Of(nameof(INetPresenceBridge.FanoutEtcStatusUpdate)).Count > 0);
+        Assert.Equal(moved, bench.Rec.Of(nameof(IWorldEventPublisher.FanoutEtcStatusUpdate)).Count > 0);
         if (moved)
             Assert.Equal(skill > 0, LastEtcStatus(bench.Rec).GradePenalty);
         AssertSavedSlot(actor, blade, 7);
@@ -203,7 +203,7 @@ public sealed class NetEquipRestrictionTests
         Assert.Equal(SArrow, user.Paperdoll[8].ItemId);
         Assert.Equal(0, user.WeaponGradePenalty);
         Assert.Equal(0, user.ArmorGradePenalty);
-        Assert.DoesNotContain(bench.Rec.Of(nameof(INetPresenceBridge.FanoutEtcStatusUpdate)),
+        Assert.DoesNotContain(bench.Rec.Of(nameof(IWorldEventPublisher.FanoutEtcStatusUpdate)),
             args => args[1] is EtcStatusUpdateNetMsg { GradePenalty: true });
 
         var quiet = new WorldBench(GradeCatalog(), expertisePenalty: false);
@@ -243,7 +243,7 @@ public sealed class NetEquipRestrictionTests
     }
 
     static UserInfoNetMsg LastUserInfoAtEnter(NetBridgeRecorder rec) =>
-        Assert.IsType<UserInfoNetMsg>(rec.Of(nameof(INetPresenceBridge.FanoutUserInfo)).First()[1]);
+        Assert.IsType<UserInfoNetMsg>(rec.Of(nameof(IWorldEventPublisher.FanoutUserInfo)).First()[1]);
 
     /// <summary>The sheet <c>NetZoneServer</c> sends on enter — built on demand, never fanned out.</summary>
     static UserInfoNetMsg EnterSheet(WorldBench bench, BenchPlayer actor)
@@ -253,11 +253,11 @@ public sealed class NetEquipRestrictionTests
     }
 
     static (InventoryUpdateNetMsg Update, UserInfoNetMsg User) LastGear(NetBridgeRecorder rec) =>
-        (Assert.IsType<InventoryUpdateNetMsg>(rec.Of(nameof(INetPresenceBridge.FanoutInventoryUpdate)).Last()[1]),
-         Assert.IsType<UserInfoNetMsg>(rec.Of(nameof(INetPresenceBridge.FanoutUserInfo)).Last()[1]));
+        (Assert.IsType<InventoryUpdateNetMsg>(rec.Of(nameof(IWorldEventPublisher.FanoutInventoryUpdate)).Last()[1]),
+         Assert.IsType<UserInfoNetMsg>(rec.Of(nameof(IWorldEventPublisher.FanoutUserInfo)).Last()[1]));
 
     static EtcStatusUpdateNetMsg LastEtcStatus(NetBridgeRecorder rec) =>
-        Assert.IsType<EtcStatusUpdateNetMsg>(rec.Of(nameof(INetPresenceBridge.FanoutEtcStatusUpdate)).Last()[1]);
+        Assert.IsType<EtcStatusUpdateNetMsg>(rec.Of(nameof(IWorldEventPublisher.FanoutEtcStatusUpdate)).Last()[1]);
 
     static void AssertSavedSlot(BenchPlayer actor, int itemId, int slot) =>
         Assert.Contains(actor.Saved(), item => item.ItemId == itemId && item.EquippedSlot == slot);

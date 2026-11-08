@@ -10,7 +10,7 @@ using Xunit;
 namespace Fineage.Zone.Tests;
 
 /// <summary>
-/// A <see cref="ZoneWorld"/> with in-memory players and every <see cref="INetPresenceBridge"/> call recorded.
+/// A <see cref="ZoneWorld"/> with in-memory players and every <see cref="IWorldEventPublisher"/> call recorded.
 /// Feature rules assert on the recorded Net fanout instead of reading MessagePack frames, so a test states
 /// what the client receives without dragging in the retired V2 wire.
 /// </summary>
@@ -76,7 +76,7 @@ internal sealed class WorldBench
     public GameData Game { get; }
     public MemoryAccountStore Store { get; }
     public ZoneWorld World { get; }
-    public INetPresenceBridge Bridge { get; }
+    public IWorldEventPublisher Bridge { get; }
     public NetBridgeRecorder Rec { get; }
     public Func<DateTimeOffset> Now { get; }
 

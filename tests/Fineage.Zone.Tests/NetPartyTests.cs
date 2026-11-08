@@ -21,7 +21,7 @@ public sealed class NetPartyTests
     }
 
     static PartyMemberListNetMsg LastList(NetBridgeRecorder rec) =>
-        Assert.IsType<PartyMemberListNetMsg>(rec.Of(nameof(INetPresenceBridge.FanoutPartyMemberList)).Last()[1]);
+        Assert.IsType<PartyMemberListNetMsg>(rec.Of(nameof(IWorldEventPublisher.FanoutPartyMemberList)).Last()[1]);
 
     static async Task<(ZoneSession Leader, ZoneSession Member)> Joined(NetTestKit kit)
     {
@@ -42,16 +42,16 @@ public sealed class NetPartyTests
         Assert.Null(await kit.World.TryPartyInviteAsync(leader, memberEntity.ObjectId, 0, default));
 
         var ask = Assert.IsType<PartyAskJoinNetMsg>(
-            Assert.Single(rec.Of(nameof(INetPresenceBridge.FanoutPartyAskJoin)))[1]);
+            Assert.Single(rec.Of(nameof(IWorldEventPublisher.FanoutPartyAskJoin)))[1]);
         Assert.Equal(leaderEntity.ObjectId, ask.RequestorObjectId);
         Assert.Equal(leaderEntity.Name, ask.RequestorName);
 
         Assert.Null(await kit.World.TryPartyAnswerAsync(member, leaderEntity.ObjectId, 1, default));
 
         Assert.Equal(1, Assert.IsType<PartyJoinResultNetMsg>(
-            Assert.Single(rec.Of(nameof(INetPresenceBridge.FanoutPartyJoinResult)))[1]).Response);
+            Assert.Single(rec.Of(nameof(IWorldEventPublisher.FanoutPartyJoinResult)))[1]).Response);
 
-        var lists = rec.Of(nameof(INetPresenceBridge.FanoutPartyMemberList));
+        var lists = rec.Of(nameof(IWorldEventPublisher.FanoutPartyMemberList));
         Assert.NotEmpty(lists);
         var roster = LastList(rec);
         Assert.Equal(leaderEntity.ObjectId, roster.LeaderObjectId);
@@ -70,8 +70,8 @@ public sealed class NetPartyTests
         Assert.Null(await kit.World.TryPartyAnswerAsync(member, leaderEntity.ObjectId, 0, default));
 
         Assert.Equal(0, Assert.IsType<PartyJoinResultNetMsg>(
-            Assert.Single(rec.Of(nameof(INetPresenceBridge.FanoutPartyJoinResult)))[1]).Response);
-        Assert.Empty(rec.Of(nameof(INetPresenceBridge.FanoutPartyMemberList)));
+            Assert.Single(rec.Of(nameof(IWorldEventPublisher.FanoutPartyJoinResult)))[1]).Response);
+        Assert.Empty(rec.Of(nameof(IWorldEventPublisher.FanoutPartyMemberList)));
     }
 
     [Fact]
@@ -87,7 +87,7 @@ public sealed class NetPartyTests
         Assert.Equal(0, closed.PartyId);
         Assert.Equal(0, closed.LeaderObjectId);
         Assert.Empty(closed.Members);
-        Assert.Contains(rec.Of(nameof(INetPresenceBridge.FanoutPartyMemberList)),
+        Assert.Contains(rec.Of(nameof(IWorldEventPublisher.FanoutPartyMemberList)),
             call => ((IReadOnlyList<int>)call[0]).Count == 1);
     }
 

@@ -90,7 +90,7 @@ public sealed class NpcRegenTests
         await kit.World.RunRegenTickAsync(CancellationToken.None);
 
         Assert.Equal(mob.MaxHp, mob.CurHp);
-        Assert.Empty(rec.Of(nameof(INetPresenceBridge.FanoutStatusUpdate)));
+        Assert.Empty(rec.Of(nameof(IWorldEventPublisher.FanoutStatusUpdate)));
     }
 
     [Fact]

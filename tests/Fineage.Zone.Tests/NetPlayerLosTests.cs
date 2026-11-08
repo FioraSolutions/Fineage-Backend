@@ -51,9 +51,9 @@ public sealed class NetPlayerLosTests
     {
         var (kit, session, rec) = await SetupAsync(wall: true);
         Assert.Null(await kit.World.TryAttackAsync(session, MobId, CancellationToken.None));
-        Assert.Empty(rec.Of(nameof(INetPresenceBridge.FanoutAttackState)));
+        Assert.Empty(rec.Of(nameof(IWorldEventPublisher.FanoutAttackState)));
         Assert.Equal(0, session.AutoAttackTargetId);
-        Assert.Contains(rec.Of(nameof(INetPresenceBridge.FanoutSystemMessage)),
+        Assert.Contains(rec.Of(nameof(IWorldEventPublisher.FanoutSystemMessage)),
             m => ((SystemMessageNetMsg)m[1]!).Id == ZoneWorld.SysMsgCannotSeeTarget);
     }
 
@@ -62,7 +62,7 @@ public sealed class NetPlayerLosTests
     {
         var (kit, session, rec) = await SetupAsync(wall: false);
         Assert.Null(await kit.World.TryAttackAsync(session, MobId, CancellationToken.None));
-        Assert.NotEmpty(rec.Of(nameof(INetPresenceBridge.FanoutAttackState)));
+        Assert.NotEmpty(rec.Of(nameof(IWorldEventPublisher.FanoutAttackState)));
         Assert.True(session.AutoAttackTargetId > 0);
     }
 }

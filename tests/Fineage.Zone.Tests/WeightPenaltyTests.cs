@@ -407,10 +407,10 @@ public sealed class WeightPenaltyWorldTests
         Assert.Equal(1, player.WeightPenaltyLevel);
 
         // Level 1 is runSpd ×1 (only regen halves), so no ChangeMoveType is due — Mobius sends just EtcStatusUpdate.
-        Assert.Empty(rec.Of(nameof(INetPresenceBridge.FanoutChangeMoveType)));
+        Assert.Empty(rec.Of(nameof(IWorldEventPublisher.FanoutChangeMoveType)));
         Assert.Equal(cleanRun, player.RunSpeed, 3);
 
-        var etcArgs = Assert.Single(rec.Of(nameof(INetPresenceBridge.FanoutEtcStatusUpdate)));
+        var etcArgs = Assert.Single(rec.Of(nameof(IWorldEventPublisher.FanoutEtcStatusUpdate)));
         var status = Assert.IsType<EtcStatusUpdateNetMsg>(etcArgs[1]);
         Assert.Equal(1, status.WeightPenalty);
         Assert.Equal((ulong)(uint)player.ObjectId, status.EntityValue);
@@ -429,7 +429,7 @@ public sealed class WeightPenaltyWorldTests
         Assert.Equal(2, player.WeightPenaltyLevel);
         Assert.Equal(baseRun * 0.5f, player.RunSpeed, 2);
 
-        var move = rec.Of(nameof(INetPresenceBridge.FanoutChangeMoveType)).Last();
+        var move = rec.Of(nameof(IWorldEventPublisher.FanoutChangeMoveType)).Last();
         Assert.Equal(player.ObjectId, (int)move[1]!);
         Assert.Equal(player.Running, (bool)move[2]!);
         Assert.Equal(player.RunSpeed, (float)move[3]!, 2);
@@ -460,7 +460,7 @@ public sealed class WeightPenaltyWorldTests
         Assert.Equal(0, player.WeightPenaltyLevel);
         Assert.Equal(clean, player.RunSpeed, 3);
 
-        var statuses = rec.Of(nameof(INetPresenceBridge.FanoutEtcStatusUpdate))
+        var statuses = rec.Of(nameof(IWorldEventPublisher.FanoutEtcStatusUpdate))
             .Select(args => ((EtcStatusUpdateNetMsg)args[1]!).WeightPenalty)
             .ToList();
         Assert.Equal(0, statuses[^1]); // recovery publishes the cleared level last
@@ -504,7 +504,7 @@ public sealed class WeightPenaltyWorldTests
         Assert.Null(await kit.World.TryGiveItemAsync(session, ScrollId, count,
             CancellationToken.None));
         Assert.Equal(2, player.WeightPenaltyLevel);
-        Assert.NotEmpty(rec.Of(nameof(INetPresenceBridge.FanoutEtcStatusUpdate)));
+        Assert.NotEmpty(rec.Of(nameof(IWorldEventPublisher.FanoutEtcStatusUpdate)));
 
         // Dropping the same stack walks it back down through the same hook.
         var stack = player.Inventory.FindByItemId(ScrollId);

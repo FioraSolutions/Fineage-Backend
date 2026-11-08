@@ -14,10 +14,10 @@ namespace Fineage.Zone.Tests;
 public sealed class NetDropProtectTests
 {
     static List<DropItemNetMsg> Drops(NetBridgeRecorder rec) =>
-        rec.Of(nameof(INetPresenceBridge.FanoutDropItem)).Select(a => (DropItemNetMsg)a[1]!).ToList();
+        rec.Of(nameof(IWorldEventPublisher.FanoutDropItem)).Select(a => (DropItemNetMsg)a[1]!).ToList();
 
     static List<int> SysIds(NetBridgeRecorder rec) =>
-        rec.Of(nameof(INetPresenceBridge.FanoutSystemMessage)).Select(a => ((SystemMessageNetMsg)a[1]!).Id).ToList();
+        rec.Of(nameof(IWorldEventPublisher.FanoutSystemMessage)).Select(a => ((SystemMessageNetMsg)a[1]!).Id).ToList();
 
     [Fact]
     public async Task Killer_loot_is_protected_for_others_then_free_and_scattered()
@@ -65,7 +65,7 @@ public sealed class NetDropProtectTests
         kit.Now = kit.Now.AddMilliseconds(2000);
         await kit.World.RunPlayerCombatTickAsync(CancellationToken.None);
         Assert.False(kit.World.TryGetEntityById(groundId, out _));
-        Assert.NotEmpty(rec.Of(nameof(INetPresenceBridge.FanoutEntityDespawn)));
+        Assert.NotEmpty(rec.Of(nameof(IWorldEventPublisher.FanoutEntityDespawn)));
     }
 
     [Theory]
