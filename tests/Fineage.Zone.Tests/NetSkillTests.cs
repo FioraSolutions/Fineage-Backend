@@ -83,7 +83,7 @@ public sealed class NetSkillTests
             CancellationToken.None));
 
         // Mobius onMagicHitTimer: the cast announces itself, and movement is deferred until the hit lands.
-        var use = Assert.IsType<MagicSkillUseNetMsg>(
+        var use = Assert.IsType<MagicSkillUseMsg>(
             bench.Rec.Of(nameof(IWorldEventPublisher.FanoutMagicSkillUse)).Last()[1]);
         Assert.Equal(PowerStrike, use.SkillId);
         Assert.Equal(gremlinObjectId, use.TargetObjectId);
@@ -145,7 +145,7 @@ public sealed class NetSkillTests
         Assert.Null(await bench.World.TrySkillUseAsync(actor.Session, WindStrike, gremlinObjectId,
             CancellationToken.None));
 
-        var use = Assert.IsType<MagicSkillUseNetMsg>(
+        var use = Assert.IsType<MagicSkillUseMsg>(
             bench.Rec.Of(nameof(IWorldEventPublisher.FanoutMagicSkillUse)).Last()[1]);
         Assert.Equal(WindStrike, use.SkillId);
         Assert.Equal(gremlinObjectId, use.TargetObjectId);

@@ -500,7 +500,7 @@ public sealed partial class ZoneWorld
         }
         if (netWatchers is { Count: > 0 })
         {
-            NetBridge?.FanoutMagicSkillUse(netWatchers, new Fineage.Net.Contract.MagicSkillUseNetMsg
+            NetBridge?.FanoutMagicSkillUse(netWatchers, new MagicSkillUseMsg
             {
                 CasterObjectId = npc.ObjectId,
                 TargetObjectId = target.ObjectId,

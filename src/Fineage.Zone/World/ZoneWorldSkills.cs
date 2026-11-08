@@ -668,15 +668,7 @@ public sealed partial class ZoneWorld
 
         if (netWatchers is { Count: > 0 } && NetBridge != null)
         {
-            NetBridge.FanoutMagicSkillUse(netWatchers, new Fineage.Net.Contract.MagicSkillUseNetMsg
-            {
-                CasterObjectId = cast.CasterObjectId,
-                TargetObjectId = cast.TargetObjectId,
-                SkillId = cast.SkillId,
-                SkillLevel = cast.SkillLevel,
-                HitTimeMs = cast.HitTimeMs,
-                ReuseDelayMs = cast.ReuseDelayMs
-            });
+            NetBridge.FanoutMagicSkillUse(netWatchers, cast);
             if (targetStatus != null)
             {
                 NetBridge.FanoutStatusUpdate(netWatchers, targetStatus);

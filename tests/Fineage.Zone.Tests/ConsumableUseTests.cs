@@ -96,7 +96,7 @@ public sealed class ConsumableUseTests
         Assert.Equal(beforeX, p.X);
         Assert.Equal(beforeY, p.Y);
         Assert.Equal(before, p.Inventory!.CountOf(ScrollOfEscape));
-        var cast = Assert.IsType<MagicSkillUseNetMsg>(
+        var cast = Assert.IsType<MagicSkillUseMsg>(
             Assert.Single(rec.Of(nameof(IWorldEventPublisher.FanoutMagicSkillUse)))[1]);
         Assert.Equal(2013, cast.SkillId);
         Assert.Equal(20_000, cast.HitTimeMs);

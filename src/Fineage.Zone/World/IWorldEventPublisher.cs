@@ -72,7 +72,8 @@ interface IWorldEventPublisher
     /// <summary>Mobius SystemMessage to watchers. Called under the ZoneWorld gate.</summary>
     void FanoutSystemMessage(IReadOnlyList<int> watcherObjectIds, Fineage.Protocol.SystemMessageMsg message);
 
-    void FanoutMagicSkillUse(IReadOnlyList<int> watcherObjectIds, MagicSkillUseNetMsg cast);
+    /// <summary>Mobius MagicSkillUse to watchers. Called under the ZoneWorld gate.</summary>
+    void FanoutMagicSkillUse(IReadOnlyList<int> watcherObjectIds, Fineage.Protocol.MagicSkillUseMsg cast);
 
     /// <summary>Mobius Revive for <paramref name="objectId"/>. Called under the ZoneWorld gate.</summary>
     void FanoutRevive(IReadOnlyList<int> watcherObjectIds, int objectId);
