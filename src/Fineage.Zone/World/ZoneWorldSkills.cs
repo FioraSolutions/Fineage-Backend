@@ -458,7 +458,7 @@ public sealed partial class ZoneWorld
         player.CombatUntilUnixMs = now + ClanProtocol.CombatStanceMillis;
         session.SelectedTargetId = targetId;
         player.CastingUntilMs = now + hitTime;
-        player.PendingHit = new PendingSkillHit(targetId, damage, now + hitTime);
+        SetPendingHit(player, new PendingSkillHit(targetId, damage, now + hitTime));
         if (hitTime == 0)
             ResolvePendingHit(player, now);
 

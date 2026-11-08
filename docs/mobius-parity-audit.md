@@ -522,6 +522,11 @@ Hate-модель: `Attackable.addDamageHate` (`Attackable.java:740`), `getMostH
 
 ### У нас
 
+Scheduling (Mobius `AttackableThinkTaskManager` / `MovementTaskManager`):
+`ZoneWorldActiveSets` keeps `_moving` / `_aiBusy` / `_pendingHit` / `_decaying` / `_needRegen` /
+`_withAbnormals`. Combat and sim ticks iterate those registries only — idle whole-world spawn
+does not scan ~34k `_byId` every 200 ms.
+
 `src/Fineage.Zone/World/ZoneWorldAggro.cs`:
 
 - `DamageHate(damage, npcLevel) = max(1, damage·100/(level+7))` (`:20`) — точная Mobius-формула;

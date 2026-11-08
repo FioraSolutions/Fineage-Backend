@@ -165,6 +165,7 @@ NPCs around them, not all 34k. Do not pair the whole world with `SingleCellAoi`.
 ## Local
 
 ```bash
-./scripts/run-local-net.sh start
+./scripts/run-local-net.sh start   # sole local SoT (see README)
 ./scripts/run-local-net.sh status
+./scripts/run-local-net.sh stop
 ```

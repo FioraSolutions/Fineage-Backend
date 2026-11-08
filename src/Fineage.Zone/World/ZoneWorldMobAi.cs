@@ -31,22 +31,28 @@ public sealed partial class ZoneWorld
 
     void TickPendingHits(long now)
     {
-        foreach (var player in Players().ToList())
+        if (_pendingHit.Count == 0)
+            return;
+        foreach (int id in _pendingHit.ToArray())
         {
-            if (player.PendingHit != null && player.PendingHit.DueUnixMs <= now)
-                ResolvePendingHit(player, now);
-        }
-        foreach (var npc in _byId.Values.Where(e => e.Kind == ZoneEntityKind.Npc && e.PendingHit != null).ToList())
-        {
-            if (npc.PendingHit!.DueUnixMs <= now)
-                ResolveNpcPendingHit(npc, now);
+            if (!_byId.TryGetValue(id, out var entity) || entity.PendingHit == null)
+            {
+                _pendingHit.Remove(id);
+                continue;
+            }
+            if (entity.PendingHit.DueUnixMs > now)
+                continue;
+            if (entity.Kind == ZoneEntityKind.Player)
+                ResolvePendingHit(entity, now);
+            else if (entity.Kind == ZoneEntityKind.Npc)
+                ResolveNpcPendingHit(entity, now);
         }
     }
 
     void ResolvePendingHit(ZoneEntity player, long now)
     {
         var hit = player.PendingHit;
-        player.PendingHit = null;
+        SetPendingHit(player, null);
         if (hit == null || player.Dead)
             return;
         if (hit.Apply is DeferredEffect deferred)
@@ -97,11 +103,15 @@ public sealed partial class ZoneWorld
 
     void TickMobAttacks(long now)
     {
-        foreach (var npc in _byId.Values.Where(e => e.Kind == ZoneEntityKind.Npc && e.AggroTargetId > 0).ToList())
+        if (_aiBusy.Count == 0)
+            return;
+        foreach (int id in _aiBusy.ToArray())
         {
+            if (!_byId.TryGetValue(id, out var npc) || npc.Kind != ZoneEntityKind.Npc || npc.AggroTargetId <= 0)
+                continue;
             if (npc.CurHp <= 0)
             {
-                npc.AggroTargetId = 0;
+                SetAggroTarget(npc, 0);
                 npc.HateList.Clear();
                 StopTimedMove(npc);
                 continue;
@@ -116,14 +126,16 @@ public sealed partial class ZoneWorld
                 int next = MostHated(npc);
                 if (next > 0)
                 {
-                    npc.AggroTargetId = next;
+                    SetAggroTarget(npc, next);
                     npc.NextMobAttackMs = now + ZoneCombat.HitTimeMs(NpcPAtkSpd(npc));
                     continue;
                 }
                 ReturnHome(npc, now);
                 continue;
             }
-            npc.AggroTargetId = MostHated(npc) is > 0 and var top ? top : npc.AggroTargetId;
+            int topHate = MostHated(npc);
+            if (topHate > 0)
+                SetAggroTarget(npc, topHate);
             CallClanHelp(npc, player, now);
             npc.LastAiTickMs = now;
             // Mobius thinkAttack: no LOS to the most hated → moveTo(target) instead of swinging.
@@ -206,7 +218,7 @@ public sealed partial class ZoneWorld
                 npc.HomeSet = true;
                 (npc.HomeX, npc.HomeY, npc.HomeZ) = (npc.X, npc.Y, npc.Z);
             }
-            npc.ReturningHome = false;
+            SetReturningHome(npc, false);
             if (!npc.Running)
             {
                 // Mobius AttackableAI: setRunning() on attack intention -> ChangeMoveType(run).
@@ -246,9 +258,18 @@ public sealed partial class ZoneWorld
     /// <summary>Mobius DecayTaskManager: corpse stays (death animation) then DeleteObject + respawn timer.</summary>
     void TickCorpseDecay(long now)
     {
-        foreach (var npc in _byId.Values.Where(e => e.Kind == ZoneEntityKind.Npc && e.DecayAtMs > 0 && e.DecayAtMs <= now).ToList())
+        if (_decaying.Count == 0)
+            return;
+        foreach (int id in _decaying.ToArray())
         {
-            npc.DecayAtMs = 0;
+            if (!_byId.TryGetValue(id, out var npc) || npc.Kind != ZoneEntityKind.Npc || npc.DecayAtMs <= 0)
+            {
+                _decaying.Remove(id);
+                continue;
+            }
+            if (npc.DecayAtMs > now)
+                continue;
+            SetDecayAtMs(npc, 0);
             DespawnNpc(npc);
         }
     }

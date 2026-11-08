@@ -38,7 +38,7 @@ public sealed partial class ZoneWorld
         int top = MostHated(npc);
         if (top == npc.AggroTargetId || top == 0)
             return;
-        npc.AggroTargetId = top;
+        SetAggroTarget(npc, top);
         // Mobius: first swing after attack-speed delay, not instantly.
         npc.NextMobAttackMs = _clock().ToUnixTimeMilliseconds() + ZoneCombat.HitTimeMs(NpcPAtkSpd(npc));
     }
@@ -91,14 +91,16 @@ public sealed partial class ZoneWorld
 
     void TickAggression(long now)
     {
-        List<ZoneEntity>? players = null;
+        // Mobius thinkActive only matters when players exist nearby; empty world → no scan.
+        var players = Players();
+        if (players.Count == 0)
+            return;
         foreach (var npc in _byId.Values)
         {
             if (npc.Kind != ZoneEntityKind.Npc || !npc.Aggressive || npc.AggroRange <= 0 || !npc.Attackable ||
                 npc.CurHp <= 0 || npc.AggroTargetId > 0 || npc.ReturningHome || now < npc.NextAggroScanMs)
                 continue;
             npc.NextAggroScanMs = now + AggroScanIntervalMs;
-            players ??= Players();
             foreach (var p in players)
             {
                 if (p.Dead || p.CurHp <= 0 || p.Session == null || !SameInstance(npc.ObjectId, p.ObjectId))

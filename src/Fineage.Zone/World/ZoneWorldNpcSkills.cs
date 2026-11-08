@@ -55,7 +55,7 @@ public sealed partial class ZoneWorld
             $"[npc-suicide] cast {skill.SkillId} lv{skill.Level} npc={npc.NpcId} power={skill.Power} range={range} hit={hitTime}ms");
 
         // Pending on self so mid-cast hate-target death still detonates (Mobius activateSkill → doDie).
-        npc.PendingHit = new PendingSkillHit(npc.ObjectId, 0, now + hitTime, null, skill.Level)
+        SetPendingHit(npc, new PendingSkillHit(npc.ObjectId, 0, now + hitTime, null, skill.Level)
         {
             SkillId = skill.SkillId,
             EscapeRange = 0,
@@ -70,7 +70,7 @@ public sealed partial class ZoneWorld
                 if (credit != null)
                     GrantKillReward(credit, npc);
             })
-        };
+        });
         if (hitTime == 0)
             ResolveNpcPendingHit(npc, now);
         return true;
@@ -280,13 +280,13 @@ public sealed partial class ZoneWorld
         FanoutNpcMagicSkillUse(npc, target, skill.SkillId, skill.Level, hitTime, skill.ReuseDelayMs);
         npc.CastingUntilMs = now + hitTime;
         npc.NextMobAttackMs = npc.CastingUntilMs;
-        npc.PendingHit = new PendingSkillHit(target.ObjectId, 0, now + hitTime, null, skill.Level)
+        SetPendingHit(npc, new PendingSkillHit(target.ObjectId, 0, now + hitTime, null, skill.Level)
         {
             SkillId = skill.SkillId,
             EscapeRange = ReferenceEquals(npc, target) ? 0 : 600,
             TargetIsNpc = target.Kind == ZoneEntityKind.Npc,
             Apply = (Action<ZoneEntity, long>)((t, at) => ApplyNpcSupportEffect(npc, t, skill, kind, at))
-        };
+        });
         ZoneLog.Info(
             $"[npc-support] cast {kind} {skill.SkillId} lv{skill.Level} npc={npc.NpcId} → {target.ObjectId} hit={hitTime}ms");
         if (hitTime == 0)
@@ -389,7 +389,7 @@ public sealed partial class ZoneWorld
         npc.Heading = ZoneCombat.HeadingFrom(npc.X, npc.Y, player.X, player.Y);
         FanoutNpcMagicSkillUse(npc, player, ai.SkillId, level, hitTime, reuse);
         npc.CastingUntilMs = now + hitTime + Math.Max(0, combat.CoolTimeMs);
-        npc.PendingHit = new PendingSkillHit(player.ObjectId, 0, now + hitTime, combat, level);
+        SetPendingHit(npc, new PendingSkillHit(player.ObjectId, 0, now + hitTime, combat, level));
         npc.NextMobAttackMs = npc.CastingUntilMs;
         ZoneLog.Info($"[npc-skill] cast {ai.SkillId} lv{level} npc={npc.NpcId} → player={player.ObjectId} hit={hitTime}ms");
         if (hitTime == 0)
@@ -400,7 +400,7 @@ public sealed partial class ZoneWorld
     void ResolveNpcPendingHit(ZoneEntity npc, long now)
     {
         var hit = npc.PendingHit;
-        npc.PendingHit = null;
+        SetPendingHit(npc, null);
         if (hit == null || npc.Dead)
             return;
         if (!_byId.TryGetValue(hit.TargetId, out var target) || target.Dead)
@@ -440,7 +440,7 @@ public sealed partial class ZoneWorld
         if (target.CurHp <= 0)
         {
             npc.HateList.Remove(target.ObjectId);
-            npc.AggroTargetId = MostHated(npc);
+            SetAggroTarget(npc, MostHated(npc));
             if (target.Session != null)
                 target.Session.AutoAttackTargetId = 0;
             ApplyPlayerDeath(target, npc.ObjectId);
