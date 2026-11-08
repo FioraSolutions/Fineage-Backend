@@ -30,6 +30,8 @@ public sealed class NetZoneServer : INetPresenceBridge
     readonly PartyPacketHandler _party;
     readonly FriendPacketHandler _friends;
     readonly ShortcutActionPacketHandler _shortcutActions;
+    readonly QuestPacketHandler _quests;
+    readonly WarehousePacketHandler _warehouse;
 
     public NetZoneServer(
         IHandoffStore handoff,
@@ -56,6 +58,8 @@ public sealed class NetZoneServer : INetPresenceBridge
         _party = new PartyPacketHandler(_world, RejectAsync);
         _friends = new FriendPacketHandler(_world, RejectAsync);
         _shortcutActions = new ShortcutActionPacketHandler(_world, RejectAsync);
+        _quests = new QuestPacketHandler(_world, RejectAsync);
+        _warehouse = new WarehousePacketHandler(_world, RejectAsync);
         _world.NetBridge = this;
     }
 
@@ -812,16 +816,16 @@ public sealed class NetZoneServer : INetPresenceBridge
                             await OnRequestMultiSellChooseAsync(conn, zoneSession, envelope, ct).ConfigureAwait(false);
                             break;
                         case NetOpcode.WarehouseDepositRequest:
-                            await OnWarehouseDepositAsync(conn, zoneSession, envelope, ct).ConfigureAwait(false);
+                            await _warehouse.OnDepositAsync(conn, zoneSession, envelope, ct).ConfigureAwait(false);
                             break;
                         case NetOpcode.WarehouseWithdrawRequest:
-                            await OnWarehouseWithdrawAsync(conn, zoneSession, envelope, ct).ConfigureAwait(false);
+                            await _warehouse.OnWithdrawAsync(conn, zoneSession, envelope, ct).ConfigureAwait(false);
                             break;
                         case NetOpcode.RequestQuestList:
-                            await OnRequestQuestListAsync(conn, zoneSession, ct).ConfigureAwait(false);
+                            await _quests.OnListAsync(conn, zoneSession, ct).ConfigureAwait(false);
                             break;
                         case NetOpcode.RequestQuestAbort:
-                            await OnRequestQuestAbortAsync(conn, zoneSession, envelope, ct).ConfigureAwait(false);
+                            await _quests.OnAbortAsync(conn, zoneSession, envelope, ct).ConfigureAwait(false);
                             break;
                         case NetOpcode.PartyInviteRequest:
                             await _party.OnInviteAsync(conn, zoneSession, envelope, ct).ConfigureAwait(false);
@@ -2039,85 +2043,6 @@ public sealed class NetZoneServer : INetPresenceBridge
             .ConfigureAwait(false);
         if (error != null)
             await RejectAsync(conn, error, "MultiSell failed.", ct).ConfigureAwait(false);
-    }
-
-    async Task OnWarehouseDepositAsync(
-        NetConnection conn,
-        ZoneSession zoneSession,
-        PacketEnvelope envelope,
-        CancellationToken ct)
-    {
-        RequireHello(conn);
-        if (!zoneSession.Bound || !zoneSession.InWorld)
-        {
-            await RejectAsync(conn, "not_in_world", "Enter world first.", ct).ConfigureAwait(false);
-            return;
-        }
-
-        var req = NetCodec.DecodeWarehouseDepositRequest(envelope.Payload);
-        var lines = (req.Lines ?? [])
-            .Select(l => new Fineage.Game.Services.WarehouseLine(l.ObjectId, l.Count))
-            .ToArray();
-        string? error = await _world.TryWarehouseDepositAsync(
-            zoneSession, req.NpcObjectId, lines, ct).ConfigureAwait(false);
-        if (error != null)
-            await RejectAsync(conn, error, "Warehouse deposit failed.", ct).ConfigureAwait(false);
-    }
-
-    async Task OnWarehouseWithdrawAsync(
-        NetConnection conn,
-        ZoneSession zoneSession,
-        PacketEnvelope envelope,
-        CancellationToken ct)
-    {
-        RequireHello(conn);
-        if (!zoneSession.Bound || !zoneSession.InWorld)
-        {
-            await RejectAsync(conn, "not_in_world", "Enter world first.", ct).ConfigureAwait(false);
-            return;
-        }
-
-        var req = NetCodec.DecodeWarehouseWithdrawRequest(envelope.Payload);
-        var lines = (req.Lines ?? [])
-            .Select(l => new Fineage.Game.Services.WarehouseLine(l.ObjectId, l.Count))
-            .ToArray();
-        string? error = await _world.TryWarehouseWithdrawAsync(
-            zoneSession, req.NpcObjectId, lines, ct).ConfigureAwait(false);
-        if (error != null)
-            await RejectAsync(conn, error, "Warehouse withdraw failed.", ct).ConfigureAwait(false);
-    }
-
-    async Task OnRequestQuestListAsync(NetConnection conn, ZoneSession zoneSession, CancellationToken ct)
-    {
-        RequireHello(conn);
-        if (!zoneSession.Bound || !zoneSession.InWorld)
-        {
-            await RejectAsync(conn, "not_in_world", "Enter world first.", ct).ConfigureAwait(false);
-            return;
-        }
-
-        string? error = await _world.TryQuestListAsync(zoneSession, ct).ConfigureAwait(false);
-        if (error != null)
-            await RejectAsync(conn, error, "Quest list failed.", ct).ConfigureAwait(false);
-    }
-
-    async Task OnRequestQuestAbortAsync(
-        NetConnection conn,
-        ZoneSession zoneSession,
-        PacketEnvelope envelope,
-        CancellationToken ct)
-    {
-        RequireHello(conn);
-        if (!zoneSession.Bound || !zoneSession.InWorld)
-        {
-            await RejectAsync(conn, "not_in_world", "Enter world first.", ct).ConfigureAwait(false);
-            return;
-        }
-
-        var abort = NetCodec.DecodeRequestQuestAbort(envelope.Payload);
-        string? error = await _world.TryQuestAbortAsync(zoneSession, abort.QuestId, ct).ConfigureAwait(false);
-        if (error != null)
-            await RejectAsync(conn, error, "Quest abort failed.", ct).ConfigureAwait(false);
     }
 
     async Task OnSetPrivateStoreSellAsync(
