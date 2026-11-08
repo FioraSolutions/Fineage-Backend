@@ -25,6 +25,7 @@ public sealed class NetZoneServer : INetPresenceBridge
     readonly TimeSpan _idleTimeout;
     readonly bool _adminCommands;
     readonly EnchantPacketHandler _enchant;
+    readonly ClanPacketHandler _clan;
 
     public NetZoneServer(
         IHandoffStore handoff,
@@ -46,6 +47,7 @@ public sealed class NetZoneServer : INetPresenceBridge
         _idleTimeout = idleTimeout ?? TcpSessionSettings.IdleTimeout;
         _adminCommands = adminCommands ?? ZoneAdmin.Enabled;
         _enchant = new EnchantPacketHandler(_world, RejectAsync);
+        _clan = new ClanPacketHandler(_world, _clock, RejectAsync);
         _world.NetBridge = this;
     }
 
@@ -766,25 +768,25 @@ public sealed class NetZoneServer : INetPresenceBridge
                             await _enchant.OnCancelAsync(conn, zoneSession, ct).ConfigureAwait(false);
                             break;
                         case NetOpcode.ClanCreateRequest:
-                            await OnClanCreateAsync(conn, zoneSession, envelope, ct).ConfigureAwait(false);
+                            await _clan.OnCreateAsync(conn, zoneSession, envelope, ct).ConfigureAwait(false);
                             break;
                         case NetOpcode.ClanInviteRequest:
-                            await OnClanInviteAsync(conn, zoneSession, envelope, ct).ConfigureAwait(false);
+                            await _clan.OnInviteAsync(conn, zoneSession, envelope, ct).ConfigureAwait(false);
                             break;
                         case NetOpcode.ClanAnswerJoinRequest:
-                            await OnClanAnswerAsync(conn, zoneSession, envelope, ct).ConfigureAwait(false);
+                            await _clan.OnAnswerAsync(conn, zoneSession, envelope, ct).ConfigureAwait(false);
                             break;
                         case NetOpcode.ClanLeaveRequest:
-                            await OnClanLeaveAsync(conn, zoneSession, ct).ConfigureAwait(false);
+                            await _clan.OnLeaveAsync(conn, zoneSession, ct).ConfigureAwait(false);
                             break;
                         case NetOpcode.ClanKickRequest:
-                            await OnClanKickAsync(conn, zoneSession, envelope, ct).ConfigureAwait(false);
+                            await _clan.OnKickAsync(conn, zoneSession, envelope, ct).ConfigureAwait(false);
                             break;
                         case NetOpcode.ClanDissolveRequest:
-                            await OnClanDissolveAsync(conn, zoneSession, ct).ConfigureAwait(false);
+                            await _clan.OnDissolveAsync(conn, zoneSession, ct).ConfigureAwait(false);
                             break;
                         case NetOpcode.ClanCancelDissolveRequest:
-                            await OnClanCancelDissolveAsync(conn, zoneSession, ct).ConfigureAwait(false);
+                            await _clan.OnCancelDissolveAsync(conn, zoneSession, ct).ConfigureAwait(false);
                             break;
                         case NetOpcode.NpcTalk:
                             await OnNpcTalkAsync(conn, zoneSession, envelope, ct).ConfigureAwait(false);
@@ -1412,153 +1414,6 @@ public sealed class NetZoneServer : INetPresenceBridge
         string? error = await _world.TryAcquireSkillAsync(zoneSession, skillId, level, skillType, informing, ct).ConfigureAwait(false);
         if (error != null)
             await RejectAsync(conn, error, informing ? "Skill info failed." : "Learn failed.", ct).ConfigureAwait(false);
-    }
-
-    async Task OnClanCreateAsync(
-        NetConnection conn,
-        ZoneSession zoneSession,
-        PacketEnvelope envelope,
-        CancellationToken ct)
-    {
-        RequireHello(conn);
-        if (!zoneSession.Bound || !zoneSession.InWorld)
-        {
-            await RejectAsync(conn, "not_in_world", "Enter world first.", ct).ConfigureAwait(false);
-            return;
-        }
-
-        var create = NetCodec.DecodeClanCreateRequest(envelope.Payload);
-        string? error = await _world
-            .TryClanCreateAsync(zoneSession, new ClanCreateRequestMsg { Name = create.Name }, _clock(), ct)
-            .ConfigureAwait(false);
-        if (error != null)
-            await RejectAsync(conn, error, "Clan create failed.", ct).ConfigureAwait(false);
-    }
-
-    async Task OnClanInviteAsync(
-        NetConnection conn,
-        ZoneSession zoneSession,
-        PacketEnvelope envelope,
-        CancellationToken ct)
-    {
-        RequireHello(conn);
-        if (!zoneSession.Bound || !zoneSession.InWorld)
-        {
-            await RejectAsync(conn, "not_in_world", "Enter world first.", ct).ConfigureAwait(false);
-            return;
-        }
-
-        var invite = NetCodec.DecodeClanInviteRequest(envelope.Payload);
-        string? error = await _world
-            .TryClanInviteAsync(
-                zoneSession,
-                new ClanInviteRequestMsg { TargetObjectId = invite.TargetObjectId, PledgeType = 0 },
-                _clock(),
-                ct)
-            .ConfigureAwait(false);
-        if (error != null)
-            await RejectAsync(conn, error, "Clan invite failed.", ct).ConfigureAwait(false);
-    }
-
-    async Task OnClanAnswerAsync(
-        NetConnection conn,
-        ZoneSession zoneSession,
-        PacketEnvelope envelope,
-        CancellationToken ct)
-    {
-        RequireHello(conn);
-        if (!zoneSession.Bound || !zoneSession.InWorld)
-        {
-            await RejectAsync(conn, "not_in_world", "Enter world first.", ct).ConfigureAwait(false);
-            return;
-        }
-
-        var answer = NetCodec.DecodeClanAnswer(envelope.Payload);
-        string? error = await _world
-            .TryClanAnswerAsync(
-                zoneSession,
-                new ClanAnswerJoinRequestMsg
-                {
-                    RequestorObjectId = answer.RequestorObjectId,
-                    Response = answer.Response
-                },
-                _clock(),
-                ct)
-            .ConfigureAwait(false);
-        if (error != null)
-            await RejectAsync(conn, error, "Clan answer failed.", ct).ConfigureAwait(false);
-    }
-
-    async Task OnClanLeaveAsync(
-        NetConnection conn,
-        ZoneSession zoneSession,
-        CancellationToken ct)
-    {
-        RequireHello(conn);
-        if (!zoneSession.Bound || !zoneSession.InWorld)
-        {
-            await RejectAsync(conn, "not_in_world", "Enter world first.", ct).ConfigureAwait(false);
-            return;
-        }
-
-        string? error = await _world.TryClanLeaveAsync(zoneSession, _clock(), ct).ConfigureAwait(false);
-        if (error != null)
-            await RejectAsync(conn, error, "Clan leave failed.", ct).ConfigureAwait(false);
-    }
-
-    async Task OnClanKickAsync(
-        NetConnection conn,
-        ZoneSession zoneSession,
-        PacketEnvelope envelope,
-        CancellationToken ct)
-    {
-        RequireHello(conn);
-        if (!zoneSession.Bound || !zoneSession.InWorld)
-        {
-            await RejectAsync(conn, "not_in_world", "Enter world first.", ct).ConfigureAwait(false);
-            return;
-        }
-
-        var kick = NetCodec.DecodeClanKickRequest(envelope.Payload);
-        string? error = await _world
-            .TryClanKickAsync(zoneSession, new ClanKickRequestMsg { TargetObjectId = kick.TargetObjectId }, _clock(), ct)
-            .ConfigureAwait(false);
-        if (error != null)
-            await RejectAsync(conn, error, "Clan kick failed.", ct).ConfigureAwait(false);
-    }
-
-    async Task OnClanDissolveAsync(
-        NetConnection conn,
-        ZoneSession zoneSession,
-        CancellationToken ct)
-    {
-        RequireHello(conn);
-        if (!zoneSession.Bound || !zoneSession.InWorld)
-        {
-            await RejectAsync(conn, "not_in_world", "Enter world first.", ct).ConfigureAwait(false);
-            return;
-        }
-
-        string? error = await _world.TryClanDissolveAsync(zoneSession, _clock(), ct).ConfigureAwait(false);
-        if (error != null)
-            await RejectAsync(conn, error, "Clan dissolve failed.", ct).ConfigureAwait(false);
-    }
-
-    async Task OnClanCancelDissolveAsync(
-        NetConnection conn,
-        ZoneSession zoneSession,
-        CancellationToken ct)
-    {
-        RequireHello(conn);
-        if (!zoneSession.Bound || !zoneSession.InWorld)
-        {
-            await RejectAsync(conn, "not_in_world", "Enter world first.", ct).ConfigureAwait(false);
-            return;
-        }
-
-        string? error = await _world.TryClanCancelDissolveAsync(zoneSession, _clock(), ct).ConfigureAwait(false);
-        if (error != null)
-            await RejectAsync(conn, error, "Clan cancel dissolve failed.", ct).ConfigureAwait(false);
     }
 
     async Task OnSelectTargetAsync(
