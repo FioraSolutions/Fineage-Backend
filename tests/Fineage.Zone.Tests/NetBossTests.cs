@@ -33,8 +33,8 @@ public sealed class NetBossTests
         return (bench, bench.Rec);
     }
 
-    static BossStatusNetMsg LastStatus(NetBridgeRecorder rec) =>
-        Assert.IsType<BossStatusNetMsg>(rec.Of("FanoutBossStatus").Last()[1]);
+    static Fineage.Protocol.BossStatusMsg LastStatus(NetBridgeRecorder rec) =>
+        Assert.IsType<Fineage.Protocol.BossStatusMsg>(rec.Of("FanoutBossStatus").Last()[1]);
 
     [Fact]
     public async Task Status_returns_the_row_and_admin_actions_flip_it()

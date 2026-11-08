@@ -798,9 +798,29 @@ public sealed class NetZoneServer : IWorldEventPublisher
             _presence.TrySend(watcher, NetOpcode.BlockList, payload);
     }
 
-    void IWorldEventPublisher.FanoutBossStatus(IReadOnlyList<int> watcherObjectIds, BossStatusNetMsg status)
+    void IWorldEventPublisher.FanoutBossStatus(IReadOnlyList<int> watcherObjectIds, Fineage.Protocol.BossStatusMsg status)
     {
-        var payload = NetCodec.EncodeBossStatus(status);
+        var src = status.Bosses ?? [];
+        var bosses = new BossStatusEntryNet[src.Length];
+        for (int i = 0; i < src.Length; i++)
+        {
+            var row = src[i];
+            bosses[i] = new BossStatusEntryNet
+            {
+                NpcId = row.NpcId,
+                ObjectId = row.ObjectId,
+                Kind = row.Kind,
+                Status = row.Status,
+                RespawnUnixMs = row.RespawnUnixMs,
+                CurrentHp = row.CurrentHp,
+                MaxHp = row.MaxHp,
+                CurrentMp = row.CurrentMp,
+                MaxMp = row.MaxMp,
+                Enabled = row.Enabled,
+                Spawned = row.Spawned
+            };
+        }
+        var payload = NetCodec.EncodeBossStatus(new BossStatusNetMsg { Bosses = bosses });
         foreach (int watcher in watcherObjectIds)
             _presence.TrySend(watcher, NetOpcode.BossStatus, payload);
     }

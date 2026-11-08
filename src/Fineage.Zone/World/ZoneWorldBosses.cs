@@ -59,17 +59,15 @@ public sealed partial class ZoneWorld
             return Task.FromResult<string?>("bad_request");
 
         BossStatusMsg? message;
-        Fineage.Net.Contract.BossStatusNetMsg? net;
         string? error;
         lock (_gate)
-            error = BuildBossStatus(npcId, out message, out net);
+            error = BuildBossStatus(npcId, out message);
         if (error != null)
             return Task.FromResult<string?>(error);
 
-        _ = message;
         // The schedule is read-only state: Net clients ask with a request opcode and get the rows back here.
-        if (net != null)
-            NetBridge?.FanoutBossStatus([session.ObjectId], net);
+        if (message != null)
+            NetBridge?.FanoutBossStatus([session.ObjectId], message);
         return Task.FromResult<string?>(null);
     }
 
@@ -145,51 +143,29 @@ public sealed partial class ZoneWorld
         return null;
     }
 
-    string? BuildBossStatus(int npcId, out BossStatusMsg? message, out Fineage.Net.Contract.BossStatusNetMsg? net)
+    string? BuildBossStatus(int npcId, out BossStatusMsg? message)
     {
         if (npcId == 0)
         {
             var views = _bosses.Views();
             var entries = new BossStatusEntryMsg[views.Count];
-            var netEntries = new Fineage.Net.Contract.BossStatusEntryNet[views.Count];
             for (int i = 0; i < views.Count; i++)
-            {
                 entries[i] = Entry(views[i]);
-                netEntries[i] = NetEntry(views[i]);
-            }
             message = new BossStatusMsg { Bosses = entries };
-            net = new Fineage.Net.Contract.BossStatusNetMsg { Bosses = netEntries };
             return null;
         }
 
         if (!_bosses.TryView(npcId, out var view))
         {
             message = null;
-            net = null;
             return BossProtocol.UnknownBoss;
         }
 
         message = new BossStatusMsg { Bosses = [Entry(view)] };
-        net = new Fineage.Net.Contract.BossStatusNetMsg { Bosses = [NetEntry(view)] };
         return null;
     }
 
     BossStatusEntryMsg Entry(BossView view) => new()
-    {
-        NpcId = view.NpcId,
-        ObjectId = view.ObjectId,
-        Kind = (int)view.Kind,
-        Status = (int)view.Status,
-        RespawnUnixMs = view.RespawnUnixMs,
-        CurrentHp = view.CurrentHp,
-        MaxHp = view.MaxHp,
-        CurrentMp = view.CurrentMp,
-        MaxMp = view.MaxMp,
-        Enabled = view.Enabled,
-        Spawned = _byId.ContainsKey(view.ObjectId)
-    };
-
-    Fineage.Net.Contract.BossStatusEntryNet NetEntry(BossView view) => new()
     {
         NpcId = view.NpcId,
         ObjectId = view.ObjectId,
