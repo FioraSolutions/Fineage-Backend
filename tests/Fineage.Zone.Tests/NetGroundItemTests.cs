@@ -77,6 +77,23 @@ public sealed class NetGroundItemTests
     }
 
     [Fact]
+    public async Task Second_destroy_of_a_removed_stack_cannot_invent_another_removal()
+    {
+        var (kit, session, player, rec) = await SetupAsync();
+        var stack = player.Inventory!.FindByItemId(Adena)!;
+        int objectId = stack.ObjectId;
+
+        Assert.Null(await kit.World.TryDestroyItemAsync(session, objectId, 1000, CancellationToken.None));
+        Assert.Null(player.Inventory.Find(objectId));
+        int updates = rec.Of(nameof(IWorldEventPublisher.FanoutInventoryUpdate)).Count;
+
+        string? err = await kit.World.TryDestroyItemAsync(session, objectId, 1, CancellationToken.None);
+        Assert.NotNull(err);
+        Assert.Equal(updates, rec.Of(nameof(IWorldEventPublisher.FanoutInventoryUpdate)).Count);
+        Assert.Null(player.Inventory.FindByItemId(Adena));
+    }
+
+    [Fact]
     public async Task Far_drop_is_refused_with_151_and_bag_row_resent()
     {
         var (kit, session, player, rec) = await SetupAsync();
