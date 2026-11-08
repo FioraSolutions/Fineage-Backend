@@ -38,7 +38,7 @@ public sealed class NetTradeTests
         Assert.Null(await kit.World.TryTradeRequestAsync(
             seller, new TradeRequestMsg { TargetObjectId = buyerEntity.ObjectId }, default));
 
-        var ask = Assert.IsType<Fineage.Net.Contract.TradeAskNetMsg>(
+        var ask = Assert.IsType<Fineage.Protocol.TradeAskMsg>(
             Last(rec, nameof(IWorldEventPublisher.FanoutTradeAsk)));
         Assert.Equal(sellerEntity.ObjectId, ask.RequestorObjectId);
         Assert.Equal(sellerEntity.Name, ask.RequestorName);
@@ -48,33 +48,33 @@ public sealed class NetTradeTests
             new TradeAnswerRequestMsg { RequestorObjectId = sellerEntity.ObjectId, Response = 1 },
             default));
 
-        Assert.Equal(1, Assert.IsType<Fineage.Net.Contract.TradeRequestResultNetMsg>(
+        Assert.Equal(1, Assert.IsType<Fineage.Protocol.TradeRequestResultMsg>(
             Last(rec, nameof(IWorldEventPublisher.FanoutTradeRequestResult))).Response);
 
         // Each side gets its own TradeStart naming the other partner, plus the initial confirm state.
         var starts = rec.Of(nameof(IWorldEventPublisher.FanoutTradeStart));
         Assert.Equal(2, starts.Count);
-        Assert.Equal(buyerEntity.ObjectId, Assert.IsType<Fineage.Net.Contract.TradeStartNetMsg>(starts[0][1]).PartnerObjectId);
-        Assert.Equal(sellerEntity.ObjectId, Assert.IsType<Fineage.Net.Contract.TradeStartNetMsg>(starts[1][1]).PartnerObjectId);
+        Assert.Equal(buyerEntity.ObjectId, Assert.IsType<Fineage.Protocol.TradeStartMsg>(starts[0][1]).PartnerObjectId);
+        Assert.Equal(sellerEntity.ObjectId, Assert.IsType<Fineage.Protocol.TradeStartMsg>(starts[1][1]).PartnerObjectId);
         Assert.Equal(2, rec.Of(nameof(IWorldEventPublisher.FanoutTradeConfirmState)).Count);
 
         Assert.Null(await kit.World.TryTradeAddItemAsync(
             seller, new TradeAddItemRequestMsg { InventoryObjectId = offered.ObjectId, Count = 1 }, default));
 
-        var offer = Assert.IsType<Fineage.Net.Contract.TradeOfferUpdateNetMsg>(
+        var offer = Assert.IsType<Fineage.Protocol.TradeOfferUpdateMsg>(
             Last(rec, nameof(IWorldEventPublisher.FanoutTradeOfferUpdate)));
         Assert.Equal(offered.ObjectId, offer.InventoryObjectId);
         Assert.Equal(offered.ItemId, offer.ItemId);
 
         Assert.Null(await kit.World.TryTradeDoneAsync(seller, new TradeDoneRequestMsg { Response = 1 }, default));
         var confirms = rec.Of(nameof(IWorldEventPublisher.FanoutTradeConfirmState))
-            .Select(call => Assert.IsType<Fineage.Net.Contract.TradeConfirmStateNetMsg>(call[1])).ToList();
+            .Select(call => Assert.IsType<Fineage.Protocol.TradeConfirmStateMsg>(call[1])).ToList();
         Assert.Contains(confirms, state => state.SelfConfirmed == 1);
         Assert.Contains(confirms, state => state.PartnerConfirmed == 1);
         Assert.Empty(rec.Of(nameof(IWorldEventPublisher.FanoutTradeFinished)));
 
         Assert.Null(await kit.World.TryTradeDoneAsync(buyer, new TradeDoneRequestMsg { Response = 1 }, default));
-        Assert.Equal(1, Assert.IsType<Fineage.Net.Contract.TradeFinishedNetMsg>(
+        Assert.Equal(1, Assert.IsType<Fineage.Protocol.TradeFinishedMsg>(
             Last(rec, nameof(IWorldEventPublisher.FanoutTradeFinished))).Response);
         Assert.DoesNotContain(buyerEntity.Inventory!.Items, item => item.ObjectId == offered.ObjectId);
         Assert.Contains(buyerEntity.Inventory.Items, item => item.ItemId == offered.ItemId);
@@ -92,7 +92,7 @@ public sealed class NetTradeTests
         Assert.Null(await kit.World.TryTradeAnswerAsync(
             buyer, new TradeAnswerRequestMsg { RequestorObjectId = sellerEntity.ObjectId, Response = 0 }, default));
 
-        Assert.Equal(0, Assert.IsType<Fineage.Net.Contract.TradeRequestResultNetMsg>(
+        Assert.Equal(0, Assert.IsType<Fineage.Protocol.TradeRequestResultMsg>(
             Last(rec, nameof(IWorldEventPublisher.FanoutTradeRequestResult))).Response);
         Assert.Empty(rec.Of(nameof(IWorldEventPublisher.FanoutTradeStart)));
         Assert.Empty(rec.Of(nameof(IWorldEventPublisher.FanoutTradeConfirmState)));

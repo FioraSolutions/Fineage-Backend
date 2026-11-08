@@ -423,12 +423,7 @@ public sealed partial class ZoneWorld
             return;
         if (!_byId.TryGetValue(partnerId, out var partner))
             return;
-        var start = new TradeStartMsg
-        {
-            PartnerObjectId = partnerId,
-            PartnerName = partner.Name
-        };
-        NetBridge?.FanoutTradeStart([viewer.ObjectId], new Fineage.Net.Contract.TradeStartNetMsg
+        NetBridge?.FanoutTradeStart([viewer.ObjectId], new TradeStartMsg
         {
             PartnerObjectId = partnerId,
             PartnerName = partner.Name
@@ -442,7 +437,7 @@ public sealed partial class ZoneWorld
             if (!_byId.TryGetValue(playerId, out var entity) || entity.Session == null)
                 continue;
             NetBridge?.FanoutTradeOfferUpdate([entity.ObjectId],
-                new Fineage.Net.Contract.TradeOfferUpdateNetMsg
+                new TradeOfferUpdateMsg
                 {
                     IsOwn = playerId == actorId ? 1 : 0,
                     InventoryObjectId = update.InventoryObjectId,
@@ -463,7 +458,7 @@ public sealed partial class ZoneWorld
     {
         if (!_byId.TryGetValue(viewerId, out var entity) || entity.Session == null)
             return;
-        NetBridge?.FanoutTradeConfirmState([viewerId], new Fineage.Net.Contract.TradeConfirmStateNetMsg
+        NetBridge?.FanoutTradeConfirmState([viewerId], new TradeConfirmStateMsg
         {
             SelfConfirmed = selfConfirmed ? 1 : 0,
             PartnerConfirmed = partnerConfirmed ? 1 : 0
@@ -479,7 +474,7 @@ public sealed partial class ZoneWorld
         foreach (int playerId in new[] { session.RequestorObjectId, session.PartnerObjectId })
         {
             if (_byId.TryGetValue(playerId, out var entity) && entity.Session != null)
-                NetBridge?.FanoutTradeFinished([playerId], new Fineage.Net.Contract.TradeFinishedNetMsg
+                NetBridge?.FanoutTradeFinished([playerId], new TradeFinishedMsg
                 {
                     Response = response
                 });
@@ -490,17 +485,13 @@ public sealed partial class ZoneWorld
 
     void QueueTradeAsk(ZoneEntity target, TradeAskMsg ask)
     {
-        NetBridge?.FanoutTradeAsk([target.ObjectId], new Fineage.Net.Contract.TradeAskNetMsg
-        {
-            RequestorObjectId = ask.RequestorObjectId,
-            RequestorName = ask.RequestorName ?? ""
-        });
+        NetBridge?.FanoutTradeAsk([target.ObjectId], ask);
     }
 
     void QueueTradeRequestResult(ZoneEntity requestor, int response)
     {
         NetBridge?.FanoutTradeRequestResult([requestor.ObjectId],
-            new Fineage.Net.Contract.TradeRequestResultNetMsg { Response = response });
+            new TradeRequestResultMsg { Response = response });
     }
 
     void BindTradeSession(ZoneTradeSession session)
