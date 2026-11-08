@@ -252,8 +252,8 @@ public sealed class NetEquipRestrictionTests
         return info;
     }
 
-    static (InventoryUpdateNetMsg Update, UserInfoNetMsg User) LastGear(NetBridgeRecorder rec) =>
-        (Assert.IsType<InventoryUpdateNetMsg>(rec.Of(nameof(IWorldEventPublisher.FanoutInventoryUpdate)).Last()[1]),
+    static (InventoryUpdateMsg Update, UserInfoNetMsg User) LastGear(NetBridgeRecorder rec) =>
+        (Assert.IsType<InventoryUpdateMsg>(rec.Of(nameof(IWorldEventPublisher.FanoutInventoryUpdate)).Last()[1]),
          Assert.IsType<UserInfoNetMsg>(rec.Of(nameof(IWorldEventPublisher.FanoutUserInfo)).Last()[1]));
 
     static EtcStatusUpdateNetMsg LastEtcStatus(NetBridgeRecorder rec) =>

@@ -422,7 +422,7 @@ public sealed partial class ZoneWorld
 
         var invUpdate = new InventoryUpdateMsg { Changes = changes };
         if (NetBridge != null)
-            NetBridge.FanoutInventoryUpdate([session.ObjectId], ToNetInventoryUpdate(invUpdate));
+            NetBridge.FanoutInventoryUpdate([session.ObjectId], invUpdate);
     }
 
     void SendComplete(ZoneSession session)

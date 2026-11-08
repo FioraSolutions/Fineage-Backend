@@ -26,9 +26,9 @@ public sealed class NetGroundItemTests
         return (kit, session, player, rec);
     }
 
-    static List<InventoryUpdateEntryNet> InvRows(NetBridgeRecorder rec) =>
+    static List<InventoryUpdateEntryMsg> InvRows(NetBridgeRecorder rec) =>
         rec.Of(nameof(IWorldEventPublisher.FanoutInventoryUpdate))
-            .SelectMany(a => ((InventoryUpdateNetMsg)a[1]!).Changes).ToList();
+            .SelectMany(a => ((InventoryUpdateMsg)a[1]!).Changes).ToList();
 
     static List<int> SysIds(NetBridgeRecorder rec) =>
         rec.Of(nameof(IWorldEventPublisher.FanoutSystemMessage)).Select(a => ((SystemMessageMsg)a[1]!).Id).ToList();

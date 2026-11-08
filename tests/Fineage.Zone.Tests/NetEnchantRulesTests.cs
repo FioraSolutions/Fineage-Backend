@@ -112,7 +112,7 @@ public sealed class NetEnchantRulesTests
         Assert.Equal(CrystalAdena, result.CrystalItemId);
         Assert.Equal(641, result.CrystalCount);
 
-        var update = Assert.IsType<InventoryUpdateNetMsg>(
+        var update = Assert.IsType<InventoryUpdateMsg>(
             bench.Rec.Of(nameof(IWorldEventPublisher.FanoutInventoryUpdate)).Last()[1]);
         Assert.Contains(update.Changes, row => row.Change == InventoryChange.Remove &&
                                                row.ItemId == Saber && row.EnchantLevel == 3 && row.Count == 0);
@@ -143,7 +143,7 @@ public sealed class NetEnchantRulesTests
         var result = LastResult(bench.Rec);
         Assert.Equal(EnchantProtocol.ResultReset, result.Result);
         Assert.Equal(0, result.EnchantLevel);
-        var update = Assert.IsType<InventoryUpdateNetMsg>(
+        var update = Assert.IsType<InventoryUpdateMsg>(
             bench.Rec.Of(nameof(IWorldEventPublisher.FanoutInventoryUpdate)).Last()[1]);
         Assert.Contains(update.Changes, row => row.ItemId == Saber &&
                                                row.EnchantLevel == 0 && row.Change == InventoryChange.Modify);
@@ -171,7 +171,7 @@ public sealed class NetEnchantRulesTests
         Assert.Equal(3, result.EnchantLevel);
         Assert.Equal(SlotFor(player, Saber), result.ObjectId);
 
-        var update = Assert.IsType<InventoryUpdateNetMsg>(
+        var update = Assert.IsType<InventoryUpdateMsg>(
             bench.Rec.Of(nameof(IWorldEventPublisher.FanoutInventoryUpdate)).Last()[1]);
         Assert.DoesNotContain(update.Changes, row => row.ItemId == Saber);
         Assert.Contains(update.Changes, row => row.Change == InventoryChange.Remove && row.ItemId == 9001);
@@ -267,7 +267,7 @@ public sealed class NetEnchantRulesTests
         await OpenScrollAsync(bench, session, player, CrystalS);
         Assert.Null(await bench.World.TryEnchantConfirmAsync(session, SlotFor(player, Blade), default));
         Assert.Equal(16, LastResult(bench.Rec).EnchantLevel);
-        var update = Assert.IsType<InventoryUpdateNetMsg>(
+        var update = Assert.IsType<InventoryUpdateMsg>(
             bench.Rec.Of(nameof(IWorldEventPublisher.FanoutInventoryUpdate)).Last()[1]);
         Assert.Contains(update.Changes, row => row.ItemId == Blade && row.EnchantLevel == 16);
         Assert.DoesNotContain(bench.Store.FindById(session.Account, session.ObjectId)!.Items!,

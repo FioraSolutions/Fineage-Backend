@@ -71,7 +71,7 @@ public sealed class NetBowArrowTests
         // checkAndEquipArrows moved one arrow into the left hand (paperdoll change fanned as InventoryUpdate).
         Assert.Equal(WoodenArrow, player.Inventory!.GetEquipped(PaperdollSlot.LHand)?.ItemId);
         Assert.Contains(rec.Of(nameof(IWorldEventPublisher.FanoutInventoryUpdate)), u =>
-            ((InventoryUpdateNetMsg)u[1]!).Changes.Length is 1 or 2);
+            ((InventoryUpdateMsg)u[1]!).Changes.Length is 1 or 2);
     }
 
     [Fact]

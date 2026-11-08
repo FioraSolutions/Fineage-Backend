@@ -51,7 +51,7 @@ public sealed class ConsumableUseTests
         Assert.Equal(Math.Min(p.MaxMp, 1000), p.CurMp);
         Assert.Equal(before - 1, p.Inventory.CountOf(ManaPotion));
         // Mobius consumes one item: the stack survives as Modify, not Remove.
-        var update = Assert.IsType<InventoryUpdateNetMsg>(
+        var update = Assert.IsType<InventoryUpdateMsg>(
             rec.Of(nameof(IWorldEventPublisher.FanoutInventoryUpdate))[^1][1]);
         Assert.Equal(InventoryChange.Modify, update.Changes[0].Change);
         Assert.Equal(before - 1, update.Changes[0].Count);
@@ -71,7 +71,7 @@ public sealed class ConsumableUseTests
 
         Assert.Equal(expected, p.CurHp);
         Assert.Equal(0, p.Inventory!.CountOf(LesserHealingPotion));
-        var update = Assert.IsType<InventoryUpdateNetMsg>(
+        var update = Assert.IsType<InventoryUpdateMsg>(
             rec.Of(nameof(IWorldEventPublisher.FanoutInventoryUpdate))[^1][1]);
         Assert.Equal(InventoryChange.Remove, update.Changes[0].Change);
         // HealOverTime 2031 is 15 s: the potion icon has to reach the client, not only the HP bar.
@@ -128,7 +128,7 @@ public sealed class ConsumableUseTests
         Assert.Equal(shotsBefore + 300, p.Inventory.CountOf(SoulshotNoGrade));
         // The package's shots merge into the stack the character already carries, so the Add row reports the merged count.
         var added = rec.Of(nameof(IWorldEventPublisher.FanoutInventoryUpdate))
-            .Select(call => Assert.IsType<InventoryUpdateNetMsg>(call[1]))
+            .Select(call => Assert.IsType<InventoryUpdateMsg>(call[1]))
             .SelectMany(update => update.Changes)
             .Any(row => row.ItemId == SoulshotNoGrade && row.Change == InventoryChange.Add && row.Count == shotsBefore + 300);
         Assert.True(added);

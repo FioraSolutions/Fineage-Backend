@@ -114,7 +114,7 @@ public sealed class NetOlympiadTests
         Assert.Equal(2, Assert.IsAssignableFrom<IReadOnlyList<int>>(resultCall[0]).Count);
 
         // The Gate Pass lands in the winner's bag, so the Net inventory row must follow the V2 one.
-        var grant = Assert.IsType<InventoryUpdateNetMsg>(bench.Rec.Of("FanoutInventoryUpdate").Last()[1]);
+        var grant = Assert.IsType<InventoryUpdateMsg>(bench.Rec.Of("FanoutInventoryUpdate").Last()[1]);
         var added = Assert.Single(grant.Changes);
         Assert.Equal(OlympiadProtocol.RewardItemId, added.ItemId);
         Assert.Equal(OlympiadProtocol.ClassedRewardCount, added.Count);

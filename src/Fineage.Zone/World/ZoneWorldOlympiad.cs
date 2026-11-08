@@ -180,7 +180,7 @@ public sealed partial class ZoneWorld
         var added = entity.Inventory.Add(grant.ItemId, grant.Count);
         var update = InventoryMessages.Update(InventoryChange.Add, added);
         // The Gate Pass lands in the bag, so Net clients need the same row the V2 frame carries.
-        NetBridge?.FanoutInventoryUpdate([entity.ObjectId], ToNetInventoryUpdate(update));
+        NetBridge?.FanoutInventoryUpdate([entity.ObjectId], update);
         SaveInventory(entity.Session, entity.Inventory);
     }
 

@@ -358,7 +358,7 @@ public sealed class NetEquipRulesTests
         Assert.Equal(actor.Slot(itemId), user.Paperdoll[slot].ObjectId);
     }
 
-    static void AssertModify(InventoryUpdateNetMsg update, int objectId, int slot)
+    static void AssertModify(InventoryUpdateMsg update, int objectId, int slot)
     {
         var row = Assert.Single(update.Changes, change => change.ObjectId == objectId);
         Assert.Equal(InventoryChange.Modify, row.Change);
@@ -366,11 +366,11 @@ public sealed class NetEquipRulesTests
     }
 
     /// <summary>The bag update and the owner's UserInfo a gear change emits, in that order.</summary>
-    static (InventoryUpdateNetMsg Update, UserInfoNetMsg User) LastGear(NetBridgeRecorder rec) =>
+    static (InventoryUpdateMsg Update, UserInfoNetMsg User) LastGear(NetBridgeRecorder rec) =>
         (LastInventory(rec), LastUserInfo(rec));
 
-    static InventoryUpdateNetMsg LastInventory(NetBridgeRecorder rec) =>
-        Assert.IsType<InventoryUpdateNetMsg>(
+    static InventoryUpdateMsg LastInventory(NetBridgeRecorder rec) =>
+        Assert.IsType<InventoryUpdateMsg>(
             rec.Of(nameof(IWorldEventPublisher.FanoutInventoryUpdate)).Last()[1]);
 
     static UserInfoNetMsg LastUserInfo(NetBridgeRecorder rec) =>

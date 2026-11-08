@@ -30,9 +30,9 @@ public sealed class CarryLimitTests
     static List<int> SysIds(NetBridgeRecorder rec) =>
         rec.Of(nameof(IWorldEventPublisher.FanoutSystemMessage)).Select(a => ((SystemMessageMsg)a[1]!).Id).ToList();
 
-    static List<InventoryUpdateEntryNet> InvRows(NetBridgeRecorder rec) =>
+    static List<InventoryUpdateEntryMsg> InvRows(NetBridgeRecorder rec) =>
         rec.Of(nameof(IWorldEventPublisher.FanoutInventoryUpdate))
-            .SelectMany(a => ((InventoryUpdateNetMsg)a[1]!).Changes).ToList();
+            .SelectMany(a => ((InventoryUpdateMsg)a[1]!).Changes).ToList();
 
     /// <summary>Fills the bag to exactly <see cref="WarehouseRules.InventorySlots"/> rows with single pieces.</summary>
     static void FillBag(ZoneEntity player, int itemId = FishingManual)

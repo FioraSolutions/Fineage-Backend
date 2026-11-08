@@ -149,7 +149,7 @@ public sealed partial class ZoneWorld
         // stale for an admin GiveItem.
         NetBridge?.FanoutInventoryUpdate(
             [session.ObjectId],
-            ToNetInventoryUpdate(InventoryMessages.Update(InventoryChange.Add, added)));
+            InventoryMessages.Update(InventoryChange.Add, added));
         SaveInventory(session, player.Inventory);
         ZoneLog.Info($"give object={session.ObjectId} item={itemId} count={count}");
         return null;
@@ -189,7 +189,7 @@ public sealed partial class ZoneWorld
         var invUpdate = InventoryMessages.Modify(changed);
         SelfUserInfo(player);
         if (NetBridge != null)
-            NetBridge.FanoutInventoryUpdate([session.ObjectId], ToNetInventoryUpdate(invUpdate));
+            NetBridge.FanoutInventoryUpdate([session.ObjectId], invUpdate);
         List<int>? netPeers = null;
         foreach (int id in player.Knownlist)
         {

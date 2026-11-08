@@ -211,7 +211,7 @@ public sealed partial class ZoneWorld
             return;
         var added = looter.Inventory.Add(itemId, count);
         var update = InventoryMessages.Update(InventoryChange.Add, added);
-        NetBridge?.FanoutInventoryUpdate([looter.Session.ObjectId], ToNetInventoryUpdate(update));
+        NetBridge?.FanoutInventoryUpdate([looter.Session.ObjectId], update);
         touched.Add(looter.ObjectId);
     }
 

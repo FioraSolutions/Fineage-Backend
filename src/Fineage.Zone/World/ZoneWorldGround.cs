@@ -308,7 +308,7 @@ public sealed partial class ZoneWorld
             };
         }
 
-        NetBridge?.FanoutInventoryUpdate([looter.Session.ObjectId], ToNetInventoryUpdate(invUpdate));
+        NetBridge?.FanoutInventoryUpdate([looter.Session.ObjectId], invUpdate);
         RemoveGroundItem(ground);
         SaveInventory(looter.Session, looter.Inventory);
         NotifyObtained(looter.Session, itemId, count);
@@ -321,7 +321,7 @@ public sealed partial class ZoneWorld
         bool merged = looter.Inventory.FindByItemId(itemId) != null;
         var added = looter.Inventory.Add(itemId, count);
         var invUpdate = InventoryMessages.Update(merged ? InventoryChange.Modify : InventoryChange.Add, added);
-        NetBridge?.FanoutInventoryUpdate([looter.Session.ObjectId], ToNetInventoryUpdate(invUpdate));
+        NetBridge?.FanoutInventoryUpdate([looter.Session.ObjectId], invUpdate);
         SaveInventory(looter.Session, looter.Inventory);
         if (notifyObtained)
             NotifyObtained(looter.Session, itemId, count);
@@ -390,7 +390,7 @@ public sealed partial class ZoneWorld
         var invUpdate = removedEntirely
             ? new InventoryUpdateMsg { Changes = [InventoryMessages.RemoveRow(item, -1)] }
             : InventoryMessages.Update(InventoryChange.Modify, item);
-        NetBridge?.FanoutInventoryUpdate([session.ObjectId], ToNetInventoryUpdate(invUpdate));
+        NetBridge?.FanoutInventoryUpdate([session.ObjectId], invUpdate);
         SaveInventory(session, player.Inventory);
         ZoneLog.Info($"destroy-bag object={session.ObjectId} item={item.ItemId} x{count} all={removedEntirely}");
         return null;
@@ -424,7 +424,7 @@ public sealed partial class ZoneWorld
             // hid the slot on drag puts it back without a relog.
             ShotNotice(session, SysMsgDiscardTooFar, "That is too far from you to discard.");
             var keep = InventoryMessages.Update(InventoryChange.Modify, item);
-            NetBridge?.FanoutInventoryUpdate([session.ObjectId], ToNetInventoryUpdate(keep));
+            NetBridge?.FanoutInventoryUpdate([session.ObjectId], keep);
             ZoneLog.Info($"drop-bag refused far object={session.ObjectId} item={item.ItemId} player={player.X},{player.Y},{player.Z} at={dropX},{dropY},{dropZ}");
             return "range";
         }
@@ -444,7 +444,7 @@ public sealed partial class ZoneWorld
         }
 
         if (NetBridge != null)
-            NetBridge.FanoutInventoryUpdate([session.ObjectId], ToNetInventoryUpdate(invUpdate));
+            NetBridge.FanoutInventoryUpdate([session.ObjectId], invUpdate);
 
         SaveInventory(session, player.Inventory);
 
@@ -602,24 +602,4 @@ public sealed partial class ZoneWorld
         }
     }
 
-    static InventoryUpdateNetMsg ToNetInventoryUpdate(InventoryUpdateMsg msg)
-    {
-        var src = msg.Changes ?? [];
-        var rows = new InventoryUpdateEntryNet[src.Length];
-        for (int i = 0; i < src.Length; i++)
-        {
-            var row = src[i];
-            rows[i] = new InventoryUpdateEntryNet
-            {
-                Change = row.Change,
-                ObjectId = row.ObjectId,
-                ItemId = row.ItemId,
-                Count = row.Count,
-                EnchantLevel = row.EnchantLevel,
-                EquippedSlot = row.EquippedSlot
-            };
-        }
-
-        return new InventoryUpdateNetMsg { Changes = rows };
-    }
 }

@@ -265,7 +265,7 @@ public sealed partial class ZoneWorld
                 Changes = outcome.Items.Select(touch => InventoryMessages.ChangeRow((int)touch.Kind, touch.Item)).ToArray()
             };
             if (NetBridge != null)
-                NetBridge.FanoutInventoryUpdate([session.ObjectId], ToNetInventoryUpdate(invUpdate));
+                NetBridge.FanoutInventoryUpdate([session.ObjectId], invUpdate);
             SaveInventory(session, player.Inventory);
         }
 
@@ -690,7 +690,7 @@ public sealed partial class ZoneWorld
         player.Quests.Add(NewbieHelperGift.QuestId, QuestPhase.Completed);
         var update = new InventoryUpdateMsg { Changes = changes.ToArray() };
         // Net clients only learn about the kit from the bridge; without this they get the page but never the items.
-        NetBridge?.FanoutInventoryUpdate([session.ObjectId], ToNetInventoryUpdate(update));
+        NetBridge?.FanoutInventoryUpdate([session.ObjectId], update);
         SaveInventory(session, player.Inventory);
         SaveQuestProgress(session, player);
         QueueList(session);

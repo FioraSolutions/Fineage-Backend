@@ -158,14 +158,12 @@ public sealed partial class ZoneWorld
         {
             foreach (var stack in added)
             {
-                NetBridge?.FanoutInventoryUpdate([session.ObjectId],
-                    ToNetInventoryUpdate(InventoryMessages.Update(InventoryChange.Add, stack)));
+                NetBridge?.FanoutInventoryUpdate([session.ObjectId], InventoryMessages.Update(InventoryChange.Add, stack));
             }
         }
 
-        NetBridge?.FanoutInventoryUpdate([session.ObjectId],
-            ToNetInventoryUpdate(InventoryMessages.Update(
-                removedEntirely ? InventoryChange.Remove : InventoryChange.Modify, item)));
+        NetBridge?.FanoutInventoryUpdate([session.ObjectId], InventoryMessages.Update(
+                removedEntirely ? InventoryChange.Remove : InventoryChange.Modify, item));
 
         if (moved && destination is { } loc)
         {
@@ -254,9 +252,8 @@ public sealed partial class ZoneWorld
                 return;
 
             player.ItemReuseUntilMs[item.ItemId] = _clock().ToUnixTimeMilliseconds() + Math.Max(0, reuseDelayMs);
-            NetBridge?.FanoutInventoryUpdate([session.ObjectId],
-                ToNetInventoryUpdate(InventoryMessages.Update(
-                    removedEntirely ? InventoryChange.Remove : InventoryChange.Modify, item)));
+            NetBridge?.FanoutInventoryUpdate([session.ObjectId], InventoryMessages.Update(
+                    removedEntirely ? InventoryChange.Remove : InventoryChange.Modify, item));
             Relocate(player, x, y, z);
             SelfUserInfo(player);
             SaveVitals(session, player);

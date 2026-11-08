@@ -53,8 +53,7 @@ public sealed partial class ZoneWorld
         else
             changes.Add(InventoryMessages.ChangeRow(InventoryChange.Modify, item));
         SaveInventory(session, player.Inventory);
-        NetBridge?.FanoutInventoryUpdate([player.ObjectId],
-            ToNetInventoryUpdate(new InventoryUpdateMsg { Changes = changes.ToArray() }));
+        NetBridge?.FanoutInventoryUpdate([player.ObjectId], new InventoryUpdateMsg { Changes = changes.ToArray() });
         NotifyLine(player.ObjectId, 0, $"You learned {recipe.Name}.");
         return null;
     }
@@ -168,8 +167,7 @@ public sealed partial class ZoneWorld
         SaveInventory(session, player.Inventory);
         if (changes.Count > 0)
         {
-            NetBridge?.FanoutInventoryUpdate([player.ObjectId],
-                ToNetInventoryUpdate(new InventoryUpdateMsg { Changes = changes.ToArray() }));
+            NetBridge?.FanoutInventoryUpdate([player.ObjectId], new InventoryUpdateMsg { Changes = changes.ToArray() });
             SelfUserInfo(player);
         }
 
