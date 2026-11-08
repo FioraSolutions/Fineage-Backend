@@ -100,6 +100,20 @@ sealed class ZonePlayerSocialPayload
     public bool BlockAll { get; set; }
 }
 
+/// <summary>Shared HP/MP/XP/sitting/death fields composed off <see cref="ZoneEntity"/> (#353).</summary>
+sealed class ZoneEntityVitalsPayload
+{
+    public int CurHp { get; set; }
+    public int MaxHp { get; set; }
+    public int CurMp { get; set; }
+    public int MaxMp { get; set; }
+    public int Level { get; set; } = 1;
+    public long Exp { get; set; }
+    public int Sp { get; set; }
+    public bool Sitting { get; set; }
+    public bool Dead { get; set; }
+}
+
 /// <summary>Shared move / swim / path fields composed off <see cref="ZoneEntity"/> (#353).</summary>
 sealed class ZoneEntityMovePayload
 {
@@ -217,13 +231,50 @@ sealed class ZoneEntity
         get => NpcTemplate?.Attackable ?? false;
         init => EnsureNpcTemplate().Attackable = value;
     }
-    public int CurHp { get; set; }
-    public int MaxHp { get; set; }
-    public int CurMp { get; set; }
-    public int MaxMp { get; set; }
-    public int Level { get; set; } = 1;
-    public long Exp { get; set; }
-    public int Sp { get; set; }
+    /// <summary>Shared vitals payload; null until first HP/MP/XP access (#353 composition).</summary>
+    public ZoneEntityVitalsPayload? Vitals { get; set; }
+
+    public int CurHp
+    {
+        get => Vitals?.CurHp ?? 0;
+        set => EnsureVitals().CurHp = value;
+    }
+
+    public int MaxHp
+    {
+        get => Vitals?.MaxHp ?? 0;
+        set => EnsureVitals().MaxHp = value;
+    }
+
+    public int CurMp
+    {
+        get => Vitals?.CurMp ?? 0;
+        set => EnsureVitals().CurMp = value;
+    }
+
+    public int MaxMp
+    {
+        get => Vitals?.MaxMp ?? 0;
+        set => EnsureVitals().MaxMp = value;
+    }
+
+    public int Level
+    {
+        get => Vitals?.Level ?? 1;
+        set => EnsureVitals().Level = value;
+    }
+
+    public long Exp
+    {
+        get => Vitals?.Exp ?? 0;
+        set => EnsureVitals().Exp = value;
+    }
+
+    public int Sp
+    {
+        get => Vitals?.Sp ?? 0;
+        set => EnsureVitals().Sp = value;
+    }
     /// <summary>NPC kill reward from the Mobius template (acquire exp/sp). Zero for players.</summary>
     public long RewardExp
     {
@@ -323,7 +374,14 @@ sealed class ZoneEntity
         set => EnsureStatus().RegenCarryMp = value;
     }
     /// <summary>When true, regen rates double (classic sitting rest).</summary>
-    public bool Sitting { get; set; }
+    public bool Sitting
+    {
+        get => Vitals?.Sitting ?? false;
+        set => EnsureVitals().Sitting = value;
+    }
+
+    ZoneEntityVitalsPayload EnsureVitals() => Vitals ??= new ZoneEntityVitalsPayload();
+
     /// <summary>Player store/manufacture payload; null until first store access (#353 composition).</summary>
     public ZonePlayerStorePayload? Store { get; set; }
 
@@ -837,7 +895,11 @@ sealed class ZoneEntity
     /// Player is dead. Equip and unequip are rejected. Combat sets this; spawn leaves it false.
     /// CurHp is not the signal: a living player can sit at low HP while regen heals them.
     /// </summary>
-    public bool Dead { get; set; }
+    public bool Dead
+    {
+        get => Vitals?.Dead ?? false;
+        set => EnsureVitals().Dead = value;
+    }
     /// <summary>Scroll object id selected for the enchant window. 0 when the window is closed.</summary>
     public int ActiveEnchantObjectId { get; set; }
     /// <summary>Ground-drop payload; null unless <see cref="Kind"/> is GroundItem (#353 composition).</summary>
