@@ -11,7 +11,7 @@ namespace Fineage.Zone.Tests;
 /// <summary>
 /// Olympiad over Net: the period sheet, the Noblesse gate on registration, the queue and its cancel, and the
 /// admin report gate. The world runs on <see cref="WorldBench"/>, so these assert the recorded
-/// <see cref="Fineage.Zone.Net.INetPresenceBridge"/> fanout rather than MessagePack frames.
+/// <see cref="Fineage.Zone.World.INetPresenceBridge"/> fanout rather than MessagePack frames.
 /// </summary>
 public sealed class NetOlympiadTests
 {

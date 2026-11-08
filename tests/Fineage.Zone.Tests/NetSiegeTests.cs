@@ -11,7 +11,7 @@ namespace Fineage.Zone.Tests;
 /// <summary>
 /// Siege registration over Net: the castle page a clan reads, attacker registration, the duplicate refusal, and
 /// the capture that moves ownership. The world runs on <see cref="WorldBench"/>, so these assert the recorded
-/// <see cref="Fineage.Zone.Net.INetPresenceBridge"/> fanout instead of frames.
+/// <see cref="Fineage.Zone.World.INetPresenceBridge"/> fanout instead of frames.
 /// </summary>
 public sealed class NetSiegeTests
 {

@@ -10,7 +10,7 @@ namespace Fineage.Zone.Tests;
 /// <summary>
 /// Talking to an NPC and following a bypass link: the page the client receives, the range gate, the refusals, and
 /// the merchant stubs. Ported off the V2 wire; the world is driven through <see cref="WorldBench"/> and the pages
-/// read from the recorded <see cref="Fineage.Zone.Net.INetPresenceBridge"/> fanout.
+/// read from the recorded <see cref="Fineage.Zone.World.INetPresenceBridge"/> fanout.
 /// </summary>
 public sealed class NpcHtmlTests
 {

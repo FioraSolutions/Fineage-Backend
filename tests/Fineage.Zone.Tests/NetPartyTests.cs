@@ -1,6 +1,7 @@
 using Fineage.Net.Contract;
 using Fineage.Protocol;
 using Fineage.Zone.Net;
+using Fineage.Zone.World;
 using Xunit;
 
 namespace Fineage.Zone.Tests;
