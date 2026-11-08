@@ -598,11 +598,7 @@ public sealed partial class ZoneWorld
 
         if (netWatchers is { Count: > 0 } && NetBridge != null)
         {
-            NetBridge.FanoutEntityDespawn(netWatchers, new EntityDespawnMsg
-            {
-                EntityValue = (ulong)(uint)objectId,
-                EntityGeneration = 1
-            });
+            NetBridge.FanoutEntityDespawn(netWatchers, objectId);
         }
     }
 

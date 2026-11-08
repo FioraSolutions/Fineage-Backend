@@ -29,12 +29,11 @@ public sealed class NetTeleportFanoutTests
 
         var frames = rec.Of(nameof(IWorldEventPublisher.FanoutTeleportToLocation));
         var only = Assert.Single(frames);
-        var msg = Assert.IsType<TeleportToLocationNetMsg>(only[1]);
-        Assert.Equal(player.ObjectId, msg.ObjectId);
-        Assert.Equal(TalkingIslandRestart.X, msg.X);
-        Assert.Equal(TalkingIslandRestart.Y, msg.Y);
-        Assert.Equal(TalkingIslandRestart.Z, msg.Z);
-        Assert.Equal(TalkingIslandRestart.Heading, msg.Heading);
+        Assert.Equal(player.ObjectId, (int)only[1]!);
+        Assert.Equal(TalkingIslandRestart.X, (int)only[2]!);
+        Assert.Equal(TalkingIslandRestart.Y, (int)only[3]!);
+        Assert.Equal(TalkingIslandRestart.Z, (int)only[4]!);
+        Assert.Equal(TalkingIslandRestart.Heading, (int)only[5]!);
         Assert.Contains(player.ObjectId, Assert.IsAssignableFrom<IReadOnlyList<int>>(only[0]));
     }
 
@@ -50,10 +49,9 @@ public sealed class NetTeleportFanoutTests
 
         var frames = rec.Of(nameof(IWorldEventPublisher.FanoutTeleportToLocation));
         var only = Assert.Single(frames);
-        var msg = Assert.IsType<TeleportToLocationNetMsg>(only[1]);
-        Assert.Equal(marker, msg.ObjectId);
-        Assert.Equal(100, msg.X);
-        Assert.Equal(0, msg.Y);
+        Assert.Equal(marker, (int)only[1]!);
+        Assert.Equal(100, (int)only[2]!);
+        Assert.Equal(0, (int)only[3]!);
         Assert.Contains(marker, Assert.IsAssignableFrom<IReadOnlyList<int>>(only[0]));
     }
 

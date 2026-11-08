@@ -58,7 +58,8 @@ interface IWorldEventPublisher
 
     void FanoutDropItem(IReadOnlyList<int> watcherObjectIds, DropItemNetMsg drop);
 
-    void FanoutEntityDespawn(IReadOnlyList<int> watcherObjectIds, EntityDespawnMsg despawn);
+    /// <summary>Mobius DeleteObject for <paramref name="objectId"/>. Called under the ZoneWorld gate.</summary>
+    void FanoutEntityDespawn(IReadOnlyList<int> watcherObjectIds, int objectId);
 
     void FanoutInventoryUpdate(IReadOnlyList<int> watcherObjectIds, InventoryUpdateNetMsg update);
 
@@ -71,7 +72,8 @@ interface IWorldEventPublisher
     /// <summary>Mobius Revive for <paramref name="objectId"/>. Called under the ZoneWorld gate.</summary>
     void FanoutRevive(IReadOnlyList<int> watcherObjectIds, int objectId);
 
-    void FanoutTeleportToLocation(IReadOnlyList<int> watcherObjectIds, TeleportToLocationNetMsg teleport);
+    /// <summary>Mobius TeleportToLocation for <paramref name="objectId"/>. Called under the ZoneWorld gate.</summary>
+    void FanoutTeleportToLocation(IReadOnlyList<int> watcherObjectIds, int objectId, int x, int y, int z, int heading);
 
     void FanoutPlayerStats(IReadOnlyList<int> watcherObjectIds, PlayerStatsMsg stats);
 
@@ -99,19 +101,19 @@ interface IWorldEventPublisher
     /// <summary>Mobius ChangeWaitType (sit/stand) for <paramref name="waitType"/>'s actor. Called under the ZoneWorld gate.</summary>
     void FanoutChangeWaitType(IReadOnlyList<int> watcherObjectIds, ChangeWaitTypeNetMsg waitType);
 
-    /// <summary>Mobius SocialAction (gesture) for an actor. Called under the ZoneWorld gate.</summary>
-    void FanoutSocialAction(IReadOnlyList<int> watcherObjectIds, SocialActionNetMsg action);
+    /// <summary>Mobius SocialAction (gesture) for <paramref name="objectId"/>. Called under the ZoneWorld gate.</summary>
+    void FanoutSocialAction(IReadOnlyList<int> watcherObjectIds, int objectId, int actionId);
 
     /// <summary>
     /// Mobius <c>MyTargetSelected</c>: the owner's own click answer (nameplate colour for the target window).
     /// Called under the ZoneWorld gate.
     /// </summary>
-    void FanoutTargetSelected(IReadOnlyList<int> watcherObjectIds, TargetSelectedNetMsg selected);
+    void FanoutTargetSelected(IReadOnlyList<int> watcherObjectIds, int targetObjectId, int colorHint);
 
     /// <summary>
     /// Mobius <c>TargetUnselected</c>: the selection was dropped. Called under the ZoneWorld gate.
     /// </summary>
-    void FanoutTargetUnselected(IReadOnlyList<int> watcherObjectIds, TargetUnselectedNetMsg unselected);
+    void FanoutTargetUnselected(IReadOnlyList<int> watcherObjectIds, int targetObjectId);
 
     /// <summary>Mobius <c>AcquireSkillList</c>: the trainer's learnable rows. Called under the ZoneWorld gate.</summary>
     void FanoutAcquireSkillList(IReadOnlyList<int> watcherObjectIds, AcquireSkillListNetMsg list);

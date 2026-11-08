@@ -69,9 +69,8 @@ public sealed class NetActionUseTests
         Assert.Null(await kit.World.TryCharacterActionAsync(session, ActionProtocol.SocialVictory, 0, default));
 
         var call = Assert.Single(rec.Of(nameof(IWorldEventPublisher.FanoutSocialAction)));
-        var msg = Assert.IsType<SocialActionNetMsg>(call[1]);
-        Assert.Equal(ActionProtocol.SocialVictory, msg.ActionId);
-        Assert.Equal(elf.ObjectId, (int)msg.EntityValue);
+        Assert.Equal(elf.ObjectId, (int)call[1]!);
+        Assert.Equal(ActionProtocol.SocialVictory, (int)call[2]!);
     }
 
     [Fact]

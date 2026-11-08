@@ -300,9 +300,13 @@ public sealed class NetZoneServer : IWorldEventPublisher
             _presence.TrySendCritical(watcher, NetOpcode.DropItem, payload);
     }
 
-    void IWorldEventPublisher.FanoutEntityDespawn(IReadOnlyList<int> watcherObjectIds, EntityDespawnMsg despawn)
+    void IWorldEventPublisher.FanoutEntityDespawn(IReadOnlyList<int> watcherObjectIds, int objectId)
     {
-        var payload = NetCodec.EncodeEntityDespawn(despawn);
+        var payload = NetCodec.EncodeEntityDespawn(new EntityDespawnMsg
+        {
+            EntityValue = (ulong)(uint)objectId,
+            EntityGeneration = 1
+        });
         foreach (int watcher in watcherObjectIds)
             _presence.TrySendCritical(watcher, NetOpcode.EntityDespawn, payload);
     }
@@ -349,9 +353,16 @@ public sealed class NetZoneServer : IWorldEventPublisher
             _presence.TrySend(watcher, NetOpcode.Revive, payload);
     }
 
-    void IWorldEventPublisher.FanoutTeleportToLocation(IReadOnlyList<int> watcherObjectIds, TeleportToLocationNetMsg teleport)
+    void IWorldEventPublisher.FanoutTeleportToLocation(IReadOnlyList<int> watcherObjectIds, int objectId, int x, int y, int z, int heading)
     {
-        var payload = NetCodec.EncodeTeleportToLocation(teleport);
+        var payload = NetCodec.EncodeTeleportToLocation(new TeleportToLocationNetMsg
+        {
+            ObjectId = objectId,
+            X = x,
+            Y = y,
+            Z = z,
+            Heading = heading
+        });
         foreach (int watcher in watcherObjectIds)
             _presence.TrySend(watcher, NetOpcode.TeleportToLocation, payload);
     }
@@ -433,23 +444,35 @@ public sealed class NetZoneServer : IWorldEventPublisher
             _presence.TrySend(watcher, NetOpcode.ChangeWaitType, payload);
     }
 
-    void IWorldEventPublisher.FanoutSocialAction(IReadOnlyList<int> watcherObjectIds, SocialActionNetMsg action)
+    void IWorldEventPublisher.FanoutSocialAction(IReadOnlyList<int> watcherObjectIds, int objectId, int actionId)
     {
-        var payload = NetCodec.EncodeSocialAction(action);
+        var payload = NetCodec.EncodeSocialAction(new SocialActionNetMsg
+        {
+            EntityValue = (ulong)(uint)objectId,
+            EntityGeneration = 1,
+            ActionId = actionId
+        });
         foreach (int watcher in watcherObjectIds)
             _presence.TrySend(watcher, NetOpcode.SocialAction, payload);
     }
 
-    void IWorldEventPublisher.FanoutTargetSelected(IReadOnlyList<int> watcherObjectIds, TargetSelectedNetMsg selected)
+    void IWorldEventPublisher.FanoutTargetSelected(IReadOnlyList<int> watcherObjectIds, int targetObjectId, int colorHint)
     {
-        var payload = NetCodec.EncodeTargetSelected(selected);
+        var payload = NetCodec.EncodeTargetSelected(new TargetSelectedNetMsg
+        {
+            TargetObjectId = targetObjectId,
+            ColorHint = colorHint
+        });
         foreach (int watcher in watcherObjectIds)
             _presence.TrySend(watcher, NetOpcode.TargetSelected, payload);
     }
 
-    void IWorldEventPublisher.FanoutTargetUnselected(IReadOnlyList<int> watcherObjectIds, TargetUnselectedNetMsg unselected)
+    void IWorldEventPublisher.FanoutTargetUnselected(IReadOnlyList<int> watcherObjectIds, int targetObjectId)
     {
-        var payload = NetCodec.EncodeTargetUnselected(unselected);
+        var payload = NetCodec.EncodeTargetUnselected(new TargetUnselectedNetMsg
+        {
+            TargetObjectId = targetObjectId
+        });
         foreach (int watcher in watcherObjectIds)
             _presence.TrySend(watcher, NetOpcode.TargetUnselected, payload);
     }
