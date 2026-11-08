@@ -24,8 +24,8 @@ public sealed class NetAcquireSkillTests
         return (kit, session, elf, rec);
     }
 
-    static AcquireSkillListNetMsg LastList(NetBridgeRecorder rec) =>
-        Assert.IsType<AcquireSkillListNetMsg>(rec.Of(nameof(IWorldEventPublisher.FanoutAcquireSkillList)).Last()[1]);
+    static Fineage.Protocol.AcquireSkillListMsg LastList(NetBridgeRecorder rec) =>
+        Assert.IsType<Fineage.Protocol.AcquireSkillListMsg>(rec.Of(nameof(IWorldEventPublisher.FanoutAcquireSkillList)).Last()[1]);
 
     [Fact]
     public async Task Trainer_opens_the_acquire_skill_list_window()
@@ -59,7 +59,7 @@ public sealed class NetAcquireSkillTests
         Assert.Null(await kit.World.TryAcquireSkillAsync(
             session, offer.SkillId, offer.NextLevel, ZoneWorld.AcquireSkillTypeUsual, informing: true, default));
 
-        var info = Assert.IsType<AcquireSkillInfoNetMsg>(
+        var info = Assert.IsType<Fineage.Protocol.AcquireSkillInfoMsg>(
             Assert.Single(rec.Of(nameof(IWorldEventPublisher.FanoutAcquireSkillInfo)))[1]);
         Assert.Equal(offer.SkillId, info.SkillId);
         Assert.Equal(offer.NextLevel, info.Level);
@@ -172,7 +172,7 @@ public sealed class NetAcquireSkillTests
 
         Assert.Null(await kit.World.TryAcquireSkillAsync(
             session, 1405, 1, ZoneWorld.AcquireSkillTypeUsual, informing: true, default));
-        var info = Assert.IsType<AcquireSkillInfoNetMsg>(
+        var info = Assert.IsType<Fineage.Protocol.AcquireSkillInfoMsg>(
             Assert.Single(rec.Of(nameof(IWorldEventPublisher.FanoutAcquireSkillInfo)))[1]);
         var req = Assert.Single(info.Requirements);
         Assert.Equal(99, req.Type);

@@ -567,18 +567,62 @@ public sealed class NetZoneServer : IWorldEventPublisher
             _presence.TrySend(watcher, NetOpcode.TargetUnselected, payload);
     }
 
-    void IWorldEventPublisher.FanoutAcquireSkillList(IReadOnlyList<int> watcherObjectIds, AcquireSkillListNetMsg list)
+    void IWorldEventPublisher.FanoutAcquireSkillList(IReadOnlyList<int> watcherObjectIds, Fineage.Protocol.AcquireSkillListMsg list)
     {
-        var payload = NetCodec.EncodeAcquireSkillList(list);
+        var payload = NetCodec.EncodeAcquireSkillList(ToNetAcquireSkillList(list));
         foreach (int watcher in watcherObjectIds)
             _presence.TrySend(watcher, NetOpcode.AcquireSkillList, payload);
     }
 
-    void IWorldEventPublisher.FanoutAcquireSkillInfo(IReadOnlyList<int> watcherObjectIds, AcquireSkillInfoNetMsg info)
+    void IWorldEventPublisher.FanoutAcquireSkillInfo(IReadOnlyList<int> watcherObjectIds, Fineage.Protocol.AcquireSkillInfoMsg info)
     {
-        var payload = NetCodec.EncodeAcquireSkillInfo(info);
+        var payload = NetCodec.EncodeAcquireSkillInfo(ToNetAcquireSkillInfo(info));
         foreach (int watcher in watcherObjectIds)
             _presence.TrySend(watcher, NetOpcode.AcquireSkillInfo, payload);
+    }
+
+    static AcquireSkillListNetMsg ToNetAcquireSkillList(Fineage.Protocol.AcquireSkillListMsg list)
+    {
+        var src = list.Skills ?? [];
+        var rows = new AcquireSkillEntryNet[src.Length];
+        for (int i = 0; i < src.Length; i++)
+        {
+            rows[i] = new AcquireSkillEntryNet
+            {
+                SkillId = src[i].SkillId,
+                NextLevel = src[i].NextLevel,
+                MaxLevel = src[i].MaxLevel,
+                SpCost = src[i].SpCost,
+                Requirements = src[i].Requirements
+            };
+        }
+
+        return new AcquireSkillListNetMsg { SkillType = list.SkillType, Skills = rows };
+    }
+
+    static AcquireSkillInfoNetMsg ToNetAcquireSkillInfo(Fineage.Protocol.AcquireSkillInfoMsg info)
+    {
+        var src = info.Requirements ?? [];
+        var reqs = new AcquireSkillRequirementNet[src.Length];
+        for (int i = 0; i < src.Length; i++)
+        {
+            reqs[i] = new AcquireSkillRequirementNet
+            {
+                Type = src[i].Type,
+                ItemId = src[i].ItemId,
+                Count = src[i].Count,
+                Unk = src[i].Unk
+            };
+        }
+
+        return new AcquireSkillInfoNetMsg
+        {
+            SkillId = info.SkillId,
+            Level = info.Level,
+            SpCost = info.SpCost,
+            SkillType = info.SkillType,
+            Requirements = reqs
+        };
     }
 
     void IWorldEventPublisher.FanoutEnchantResult(IReadOnlyList<int> watcherObjectIds, Fineage.Protocol.EnchantResultMsg result)
