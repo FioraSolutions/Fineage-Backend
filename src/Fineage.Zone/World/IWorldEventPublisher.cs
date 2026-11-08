@@ -130,7 +130,8 @@ interface IWorldEventPublisher
     /// <summary>Mobius <c>AcquireSkillInfo</c>: the confirmation page for one trainer offer. Called under the ZoneWorld gate.</summary>
     void FanoutAcquireSkillInfo(IReadOnlyList<int> watcherObjectIds, AcquireSkillInfoNetMsg info);
 
-    void FanoutEnchantResult(IReadOnlyList<int> watcherObjectIds, EnchantResultNetMsg result);
+    /// <summary>Mobius EnchantResult to the enchanter. Called under the ZoneWorld gate.</summary>
+    void FanoutEnchantResult(IReadOnlyList<int> watcherObjectIds, Fineage.Protocol.EnchantResultMsg result);
 
     void FanoutPledgeStatus(IReadOnlyList<int> watcherObjectIds, PledgeStatusNetMsg status);
 

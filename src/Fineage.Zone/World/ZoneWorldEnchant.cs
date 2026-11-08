@@ -76,7 +76,7 @@ public sealed partial class ZoneWorld
 
         player.ActiveEnchantObjectId = 0;
         var cancelled = EnchantLines.Cancelled();
-        NetBridge?.FanoutEnchantResult([session.ObjectId], new Fineage.Net.Contract.EnchantResultNetMsg
+        NetBridge?.FanoutEnchantResult([session.ObjectId], new EnchantResultMsg
         {
             Result = EnchantProtocol.ResultCancel
         });
@@ -210,7 +210,7 @@ public sealed partial class ZoneWorld
         }
 
         NetBridge?.FanoutInventoryUpdate([session.ObjectId], new InventoryUpdateMsg { Changes = [.. changes] });
-        NetBridge?.FanoutEnchantResult([session.ObjectId], new Fineage.Net.Contract.EnchantResultNetMsg
+        NetBridge?.FanoutEnchantResult([session.ObjectId], new EnchantResultMsg
         {
             Result = resultCode,
             EnchantLevel = reportedLevel,

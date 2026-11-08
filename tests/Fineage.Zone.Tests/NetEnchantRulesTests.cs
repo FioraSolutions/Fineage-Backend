@@ -88,8 +88,8 @@ public sealed class NetEnchantRulesTests
         return scroll;
     }
 
-    static EnchantResultNetMsg LastResult(NetBridgeRecorder rec) =>
-        Assert.IsType<EnchantResultNetMsg>(rec.Of(nameof(IWorldEventPublisher.FanoutEnchantResult)).Last()[1]);
+    static EnchantResultMsg LastResult(NetBridgeRecorder rec) =>
+        Assert.IsType<EnchantResultMsg>(rec.Of(nameof(IWorldEventPublisher.FanoutEnchantResult)).Last()[1]);
 
     static IReadOnlyList<SystemMessageMsg> Lines(NetBridgeRecorder rec) =>
         rec.Of(nameof(IWorldEventPublisher.FanoutSystemMessage))

@@ -581,9 +581,16 @@ public sealed class NetZoneServer : IWorldEventPublisher
             _presence.TrySend(watcher, NetOpcode.AcquireSkillInfo, payload);
     }
 
-    void IWorldEventPublisher.FanoutEnchantResult(IReadOnlyList<int> watcherObjectIds, EnchantResultNetMsg result)
+    void IWorldEventPublisher.FanoutEnchantResult(IReadOnlyList<int> watcherObjectIds, Fineage.Protocol.EnchantResultMsg result)
     {
-        var payload = NetCodec.EncodeEnchantResult(result);
+        var payload = NetCodec.EncodeEnchantResult(new EnchantResultNetMsg
+        {
+            Result = result.Result,
+            EnchantLevel = result.EnchantLevel,
+            ObjectId = result.ObjectId,
+            CrystalItemId = result.CrystalItemId,
+            CrystalCount = result.CrystalCount
+        });
         foreach (int watcher in watcherObjectIds)
             _presence.TrySend(watcher, NetOpcode.EnchantResult, payload);
     }

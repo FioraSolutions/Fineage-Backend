@@ -26,8 +26,8 @@ public sealed class NetEnchantTests
         return (kit, session, player, rec);
     }
 
-    static EnchantResultNetMsg LastResult(NetBridgeRecorder rec) =>
-        Assert.IsType<EnchantResultNetMsg>(rec.Of(nameof(IWorldEventPublisher.FanoutEnchantResult)).Last()[1]);
+    static EnchantResultMsg LastResult(NetBridgeRecorder rec) =>
+        Assert.IsType<EnchantResultMsg>(rec.Of(nameof(IWorldEventPublisher.FanoutEnchantResult)).Last()[1]);
 
     [Fact]
     public async Task Enchant_request_picks_the_scroll_and_confirm_fans_the_result()
@@ -43,7 +43,7 @@ public sealed class NetEnchantTests
 
         Assert.Null(await kit.World.TryEnchantConfirmAsync(session, saber.ObjectId, default));
 
-        EnchantResultNetMsg result = LastResult(rec);
+        EnchantResultMsg result = LastResult(rec);
         Assert.Equal(saber.ObjectId, result.ObjectId);
         Assert.NotEqual(EnchantProtocol.ResultCancel, result.Result);
         Assert.Single(rec.Of(nameof(IWorldEventPublisher.FanoutInventoryUpdate)));
@@ -58,7 +58,7 @@ public sealed class NetEnchantTests
         Assert.Null(await kit.World.TryEnchantRequestAsync(session, scroll.ObjectId, default));
         Assert.Null(await kit.World.TryEnchantCancelAsync(session, default));
 
-        EnchantResultNetMsg result = LastResult(rec);
+        EnchantResultMsg result = LastResult(rec);
         Assert.Equal(EnchantProtocol.ResultCancel, result.Result);
         Assert.Equal(0, result.ObjectId);
     }
