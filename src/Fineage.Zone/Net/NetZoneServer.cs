@@ -27,6 +27,8 @@ public sealed class NetZoneServer : INetPresenceBridge
     readonly EnchantPacketHandler _enchant;
     readonly ClanPacketHandler _clan;
     readonly TradePacketHandler _trade;
+    readonly PartyPacketHandler _party;
+    readonly FriendPacketHandler _friends;
 
     public NetZoneServer(
         IHandoffStore handoff,
@@ -50,6 +52,8 @@ public sealed class NetZoneServer : INetPresenceBridge
         _enchant = new EnchantPacketHandler(_world, RejectAsync);
         _clan = new ClanPacketHandler(_world, _clock, RejectAsync);
         _trade = new TradePacketHandler(_world, RejectAsync);
+        _party = new PartyPacketHandler(_world, RejectAsync);
+        _friends = new FriendPacketHandler(_world, RejectAsync);
         _world.NetBridge = this;
     }
 
@@ -818,16 +822,16 @@ public sealed class NetZoneServer : INetPresenceBridge
                             await OnRequestQuestAbortAsync(conn, zoneSession, envelope, ct).ConfigureAwait(false);
                             break;
                         case NetOpcode.PartyInviteRequest:
-                            await OnPartyInviteAsync(conn, zoneSession, envelope, ct).ConfigureAwait(false);
+                            await _party.OnInviteAsync(conn, zoneSession, envelope, ct).ConfigureAwait(false);
                             break;
                         case NetOpcode.PartyAnswerJoinRequest:
-                            await OnPartyAnswerAsync(conn, zoneSession, envelope, ct).ConfigureAwait(false);
+                            await _party.OnAnswerAsync(conn, zoneSession, envelope, ct).ConfigureAwait(false);
                             break;
                         case NetOpcode.PartyLeaveRequest:
-                            await OnPartyLeaveAsync(conn, zoneSession, ct).ConfigureAwait(false);
+                            await _party.OnLeaveAsync(conn, zoneSession, ct).ConfigureAwait(false);
                             break;
                         case NetOpcode.PartyKickRequest:
-                            await OnPartyKickAsync(conn, zoneSession, envelope, ct).ConfigureAwait(false);
+                            await _party.OnKickAsync(conn, zoneSession, envelope, ct).ConfigureAwait(false);
                             break;
                         case NetOpcode.TradeRequest:
                             await _trade.OnRequestAsync(conn, zoneSession, envelope, ct).ConfigureAwait(false);
@@ -990,19 +994,19 @@ public sealed class NetZoneServer : INetPresenceBridge
                             await OnRecipeShopMakeItemAsync(conn, zoneSession, envelope, ct).ConfigureAwait(false);
                             break;
                         case NetOpcode.FriendInvite:
-                            await OnFriendInviteAsync(conn, zoneSession, envelope, ct).ConfigureAwait(false);
+                            await _friends.OnInviteAsync(conn, zoneSession, envelope, ct).ConfigureAwait(false);
                             break;
                         case NetOpcode.FriendAnswer:
-                            await OnFriendAnswerAsync(conn, zoneSession, envelope, ct).ConfigureAwait(false);
+                            await _friends.OnAnswerAsync(conn, zoneSession, envelope, ct).ConfigureAwait(false);
                             break;
                         case NetOpcode.FriendListRequest:
-                            await OnFriendListRequestAsync(conn, zoneSession, ct).ConfigureAwait(false);
+                            await _friends.OnListRequestAsync(conn, zoneSession, ct).ConfigureAwait(false);
                             break;
                         case NetOpcode.FriendDelete:
-                            await OnFriendDeleteAsync(conn, zoneSession, envelope, ct).ConfigureAwait(false);
+                            await _friends.OnDeleteAsync(conn, zoneSession, envelope, ct).ConfigureAwait(false);
                             break;
                         case NetOpcode.BlockRequest:
-                            await OnBlockRequestAsync(conn, zoneSession, envelope, ct).ConfigureAwait(false);
+                            await _friends.OnBlockAsync(conn, zoneSession, envelope, ct).ConfigureAwait(false);
                             break;
                         case NetOpcode.StopMove:
                             // Authoritative stop: correct to current session position.
@@ -2160,80 +2164,6 @@ public sealed class NetZoneServer : INetPresenceBridge
             await RejectAsync(conn, error, "Quest abort failed.", ct).ConfigureAwait(false);
     }
 
-    async Task OnPartyInviteAsync(
-        NetConnection conn,
-        ZoneSession zoneSession,
-        PacketEnvelope envelope,
-        CancellationToken ct)
-    {
-        RequireHello(conn);
-        if (!zoneSession.Bound || !zoneSession.InWorld)
-        {
-            await RejectAsync(conn, "not_in_world", "Enter world first.", ct).ConfigureAwait(false);
-            return;
-        }
-
-        var invite = NetCodec.DecodePartyInviteRequest(envelope.Payload);
-        string? error = await _world.TryPartyInviteAsync(
-            zoneSession, invite.TargetObjectId, invite.ItemDistribution, ct).ConfigureAwait(false);
-        if (error != null)
-            await RejectAsync(conn, error, "Party invite failed.", ct).ConfigureAwait(false);
-    }
-
-    async Task OnPartyAnswerAsync(
-        NetConnection conn,
-        ZoneSession zoneSession,
-        PacketEnvelope envelope,
-        CancellationToken ct)
-    {
-        RequireHello(conn);
-        if (!zoneSession.Bound || !zoneSession.InWorld)
-        {
-            await RejectAsync(conn, "not_in_world", "Enter world first.", ct).ConfigureAwait(false);
-            return;
-        }
-
-        var answer = NetCodec.DecodePartyAnswerJoinRequest(envelope.Payload);
-        string? error = await _world.TryPartyAnswerAsync(
-            zoneSession, answer.RequestorObjectId, answer.Response, ct).ConfigureAwait(false);
-        if (error != null)
-            await RejectAsync(conn, error, "Party answer failed.", ct).ConfigureAwait(false);
-    }
-
-    async Task OnPartyLeaveAsync(NetConnection conn, ZoneSession zoneSession, CancellationToken ct)
-    {
-        RequireHello(conn);
-        if (!zoneSession.Bound || !zoneSession.InWorld)
-        {
-            await RejectAsync(conn, "not_in_world", "Enter world first.", ct).ConfigureAwait(false);
-            return;
-        }
-
-        string? error = await _world.TryPartyLeaveAsync(zoneSession, ct).ConfigureAwait(false);
-        if (error != null)
-            await RejectAsync(conn, error, "Party leave failed.", ct).ConfigureAwait(false);
-    }
-
-    async Task OnPartyKickAsync(
-        NetConnection conn,
-        ZoneSession zoneSession,
-        PacketEnvelope envelope,
-        CancellationToken ct)
-    {
-        RequireHello(conn);
-        if (!zoneSession.Bound || !zoneSession.InWorld)
-        {
-            await RejectAsync(conn, "not_in_world", "Enter world first.", ct).ConfigureAwait(false);
-            return;
-        }
-
-        var kick = NetCodec.DecodePartyKickRequest(envelope.Payload);
-        string? error = await _world.TryPartyKickAsync(
-            zoneSession, kick.TargetObjectId, ct).ConfigureAwait(false);
-        if (error != null)
-            await RejectAsync(conn, error, "Party kick failed.", ct).ConfigureAwait(false);
-    }
-
     async Task OnSetPrivateStoreSellAsync(
         NetConnection conn,
         ZoneSession zoneSession,
@@ -2508,108 +2438,6 @@ public sealed class NetZoneServer : INetPresenceBridge
             ct).ConfigureAwait(false);
         if (error != null)
             await RejectAsync(conn, error, "Recipe shop make item failed.", ct).ConfigureAwait(false);
-    }
-
-    async Task OnFriendInviteAsync(
-        NetConnection conn,
-        ZoneSession zoneSession,
-        PacketEnvelope envelope,
-        CancellationToken ct)
-    {
-        RequireHello(conn);
-        if (!zoneSession.Bound || !zoneSession.InWorld)
-        {
-            await RejectAsync(conn, "not_in_world", "Enter world first.", ct).ConfigureAwait(false);
-            return;
-        }
-
-        var req = NetCodec.DecodeFriendInvite(envelope.Payload);
-        string? error = await _world.TryFriendInviteAsync(
-            zoneSession,
-            new FriendInviteMsg { Name = req.Name ?? "" },
-            ct).ConfigureAwait(false);
-        if (error != null)
-            await RejectAsync(conn, error, "Friend invite failed.", ct).ConfigureAwait(false);
-    }
-
-    async Task OnFriendAnswerAsync(
-        NetConnection conn,
-        ZoneSession zoneSession,
-        PacketEnvelope envelope,
-        CancellationToken ct)
-    {
-        RequireHello(conn);
-        if (!zoneSession.Bound || !zoneSession.InWorld)
-        {
-            await RejectAsync(conn, "not_in_world", "Enter world first.", ct).ConfigureAwait(false);
-            return;
-        }
-
-        var req = NetCodec.DecodeFriendAnswer(envelope.Payload);
-        string? error = await _world.TryFriendAnswerAsync(
-            zoneSession,
-            new FriendAnswerMsg { Response = req.Response },
-            ct).ConfigureAwait(false);
-        if (error != null)
-            await RejectAsync(conn, error, "Friend answer failed.", ct).ConfigureAwait(false);
-    }
-
-    async Task OnFriendListRequestAsync(NetConnection conn, ZoneSession zoneSession, CancellationToken ct)
-    {
-        RequireHello(conn);
-        if (!zoneSession.Bound || !zoneSession.InWorld)
-        {
-            await RejectAsync(conn, "not_in_world", "Enter world first.", ct).ConfigureAwait(false);
-            return;
-        }
-
-        string? error = await _world.TryFriendListAsync(zoneSession, ct).ConfigureAwait(false);
-        if (error != null)
-            await RejectAsync(conn, error, "Friend list failed.", ct).ConfigureAwait(false);
-    }
-
-    async Task OnFriendDeleteAsync(
-        NetConnection conn,
-        ZoneSession zoneSession,
-        PacketEnvelope envelope,
-        CancellationToken ct)
-    {
-        RequireHello(conn);
-        if (!zoneSession.Bound || !zoneSession.InWorld)
-        {
-            await RejectAsync(conn, "not_in_world", "Enter world first.", ct).ConfigureAwait(false);
-            return;
-        }
-
-        var req = NetCodec.DecodeFriendDelete(envelope.Payload);
-        string? error = await _world.TryFriendDeleteAsync(
-            zoneSession,
-            new FriendDeleteMsg { Name = req.Name ?? "" },
-            ct).ConfigureAwait(false);
-        if (error != null)
-            await RejectAsync(conn, error, "Friend delete failed.", ct).ConfigureAwait(false);
-    }
-
-    async Task OnBlockRequestAsync(
-        NetConnection conn,
-        ZoneSession zoneSession,
-        PacketEnvelope envelope,
-        CancellationToken ct)
-    {
-        RequireHello(conn);
-        if (!zoneSession.Bound || !zoneSession.InWorld)
-        {
-            await RejectAsync(conn, "not_in_world", "Enter world first.", ct).ConfigureAwait(false);
-            return;
-        }
-
-        var req = NetCodec.DecodeBlockRequest(envelope.Payload);
-        string? error = await _world.TryBlockRequestAsync(
-            zoneSession,
-            new BlockRequestMsg { Type = req.Type, Name = req.Name ?? "" },
-            ct).ConfigureAwait(false);
-        if (error != null)
-            await RejectAsync(conn, error, "Block request failed.", ct).ConfigureAwait(false);
     }
 
     static void RequireHello(NetConnection conn)
