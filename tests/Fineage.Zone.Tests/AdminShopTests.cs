@@ -66,7 +66,7 @@ public sealed class AdminShopTests : IDisposable
         Assert.Contains("GM", page.Html, StringComparison.Ordinal);
 
         Assert.Null(await me.BypassAsync(0, "admin_buy 9917"));
-        var buy = Assert.IsType<BuyListNetMsg>(kit.Rec.Of(nameof(IWorldEventPublisher.FanoutBuyList)).Last()[1]);
+        var buy = Assert.IsType<Fineage.Protocol.BuyListMsg>(kit.Rec.Of(nameof(IWorldEventPublisher.FanoutBuyList)).Last()[1]);
         Assert.Equal(9917, buy.ListId);
         Assert.Equal(0, buy.NpcObjectId);
 
