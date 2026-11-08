@@ -57,6 +57,22 @@ sealed class ZonePlayerSocialPayload
     public bool BlockAll { get; set; }
 }
 
+/// <summary>Player penalty / shot / regen-carry fields composed off <see cref="ZoneEntity"/> (#353).</summary>
+sealed class ZonePlayerStatusPayload
+{
+    public int ExpertiseBonus { get; set; }
+    public int WeaponGradePenalty { get; set; }
+    public int ArmorGradePenalty { get; set; }
+    public int GradePenaltyLevel { get; set; }
+    public int DeathPenaltyLevel { get; set; }
+    public int WeightPenaltyLevel { get; set; }
+    public double RegenCarryHp { get; set; }
+    public double RegenCarryMp { get; set; }
+    public bool SoulshotCharged { get; set; }
+    public int SpiritshotCharge { get; set; }
+    public HashSet<int> AutoShots { get; } = [];
+}
+
 /// <summary>Player private-store / manufacture fields composed off <see cref="ZoneEntity"/> (#353).</summary>
 sealed class ZonePlayerStorePayload
 {
@@ -132,34 +148,76 @@ sealed class ZoneEntity
     public int PvpKills { get; set; }
     /// <summary>Mobius karma (Chaotic); death item drop uses karma rates when &gt; 0 and PK ≥ limit.</summary>
     public int Karma { get; set; }
-    public int ExpertiseBonus { get; set; }
+    /// <summary>Player penalty/shot payload; null until first status access (#353 composition).</summary>
+    public ZonePlayerStatusPayload? Status { get; set; }
+
+    public int ExpertiseBonus
+    {
+        get => Status?.ExpertiseBonus ?? 0;
+        set => EnsureStatus().ExpertiseBonus = value;
+    }
+
     /// <summary>Weapon expertise penalty, 0–4. Updated when gear changes and on enter.</summary>
-    public int WeaponGradePenalty { get; set; }
+    public int WeaponGradePenalty
+    {
+        get => Status?.WeaponGradePenalty ?? 0;
+        set => EnsureStatus().WeaponGradePenalty = value;
+    }
+
     /// <summary>Armor expertise penalty, 0–4. Updated when gear changes and on enter.</summary>
-    public int ArmorGradePenalty { get; set; }
+    public int ArmorGradePenalty
+    {
+        get => Status?.ArmorGradePenalty ?? 0;
+        set => EnsureStatus().ArmorGradePenalty = value;
+    }
+
     /// <summary>
     /// Grade Penalty level, 0–4 — the level skill 4267 is added at (Mobius
     /// <c>addSkill(4267, max(weaponPenalty, armorPenalty))</c>). The stat fold needs this single level, not the two raw
     /// penalties. Derived from gear, so never persisted.
     /// </summary>
-    public int GradePenaltyLevel { get; set; }
+    public int GradePenaltyLevel
+    {
+        get => Status?.GradePenaltyLevel ?? 0;
+        set => EnsureStatus().GradePenaltyLevel = value;
+    }
+
     /// <summary>
     /// Death Penalty level, 0–15 (Mobius <c>Player._deathPenaltyBuffLevel</c>). Persisted: it survives logout and
     /// shrinks only on its own recovery rules. Folds skill 5076 into the stats and is reported on
     /// <c>EtcStatusUpdate</c>.
     /// </summary>
-    public int DeathPenaltyLevel { get; set; }
+    public int DeathPenaltyLevel
+    {
+        get => Status?.DeathPenaltyLevel ?? 0;
+        set => EnsureStatus().DeathPenaltyLevel = value;
+    }
+
     /// <summary>
     /// Weight Penalty level, 0–4 (Mobius <c>Player._curWeightPenalty</c>). Derived from the load and recomputed on
     /// every inventory change and on enter — never stored. Skips persistence on purpose: it is a function of the bag.
     /// </summary>
-    public int WeightPenaltyLevel { get; set; }
+    public int WeightPenaltyLevel
+    {
+        get => Status?.WeightPenaltyLevel ?? 0;
+        set => EnsureStatus().WeightPenaltyLevel = value;
+    }
+
     /// <summary>
     /// Fractional HP/MP regen left over from the previous tick. Mobius keeps vitals as doubles, so a halved rate
     /// (Weight Penalty 4270) still accumulates; here the integer vitals need the remainder carried explicitly.
     /// </summary>
-    public double RegenCarryHp { get; set; }
-    public double RegenCarryMp { get; set; }
+    public double RegenCarryHp
+    {
+        get => Status?.RegenCarryHp ?? 0;
+        set => EnsureStatus().RegenCarryHp = value;
+    }
+
+    public double RegenCarryMp
+    {
+        get => Status?.RegenCarryMp ?? 0;
+        set => EnsureStatus().RegenCarryMp = value;
+    }
     /// <summary>When true, regen rates double (classic sitting rest).</summary>
     public bool Sitting { get; set; }
     /// <summary>Player store/manufacture payload; null until first store access (#353 composition).</summary>
@@ -276,9 +334,18 @@ sealed class ZoneEntity
     public double MAtk { get; init; }
     public double MDef { get; init; }
     /// <summary>Mobius ChargedShot SOULSHOTS: weapon is charged; next swing doubles P.Atk and clears it.</summary>
-    public bool SoulshotCharged { get; set; }
+    public bool SoulshotCharged
+    {
+        get => Status?.SoulshotCharged ?? false;
+        set => EnsureStatus().SoulshotCharged = value;
+    }
+
     /// <summary>0 none, 1 spiritshot, 2 blessed spiritshot (Mobius ShotType SPIRITSHOTS / BLESSED_SPIRITSHOTS).</summary>
-    public int SpiritshotCharge { get; set; }
+    public int SpiritshotCharge
+    {
+        get => Status?.SpiritshotCharge ?? 0;
+        set => EnsureStatus().SpiritshotCharge = value;
+    }
     /// <summary>NPC remaining Mobius SoulShot stock (template starting count; decremented on fire).</summary>
     public int NpcSoulShotLeft { get; set; }
     /// <summary>NPC SoulShotRate % (template).</summary>
@@ -305,7 +372,9 @@ sealed class ZoneEntity
     public int MinSkillChance { get; init; } = 7;
     public int MaxSkillChance { get; init; } = 15;
     /// <summary>Mobius auto soulshot set: shot item ids recharged after each discharge.</summary>
-    public HashSet<int> AutoShots { get; } = [];
+    public HashSet<int> AutoShots => EnsureStatus().AutoShots;
+
+    ZonePlayerStatusPayload EnsureStatus() => Status ??= new ZonePlayerStatusPayload();
     /// <summary>Mobius ShortCuts keyed by world slot (slot + page * 12).</summary>
     public Dictionary<int, Fineage.Accounts.StoredShortcut> Shortcuts { get; } = [];
     /// <summary>Trainer-learned skills (persisted; Mobius character_skills). Merged into KnownSkills.</summary>
