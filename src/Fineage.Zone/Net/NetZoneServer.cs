@@ -812,30 +812,81 @@ public sealed class NetZoneServer : IWorldEventPublisher
             _presence.TrySend(watcher, NetOpcode.SiegeInfo, payload);
     }
 
-    void IWorldEventPublisher.FanoutOlympiadStatus(IReadOnlyList<int> watcherObjectIds, OlympiadStatusNetMsg status)
+    void IWorldEventPublisher.FanoutOlympiadStatus(IReadOnlyList<int> watcherObjectIds, Fineage.Protocol.OlympiadStatusMsg status)
     {
-        var payload = NetCodec.EncodeOlympiadStatus(status);
+        var payload = NetCodec.EncodeOlympiadStatus(new OlympiadStatusNetMsg
+        {
+            Period = status.Period,
+            Cycle = status.Cycle,
+            InCompetition = status.InCompetition,
+            CompetitionStartUnixMs = status.CompetitionStartUnixMs,
+            CompetitionEndUnixMs = status.CompetitionEndUnixMs,
+            OlympiadEndUnixMs = status.OlympiadEndUnixMs,
+            ValidationEndUnixMs = status.ValidationEndUnixMs,
+            NextWeeklyUnixMs = status.NextWeeklyUnixMs,
+            RegistrationOpen = status.RegistrationOpen,
+            Noble = status.Noble,
+            Points = status.Points,
+            CompetitionsDone = status.CompetitionsDone,
+            Won = status.Won,
+            Lost = status.Lost,
+            Drawn = status.Drawn,
+            Queue = status.Queue,
+            MatchId = status.MatchId,
+            StadiumId = status.StadiumId,
+            ClassId = status.ClassId
+        });
         foreach (int watcher in watcherObjectIds)
             _presence.TrySend(watcher, NetOpcode.OlympiadStatus, payload);
     }
 
-    void IWorldEventPublisher.FanoutOlympiadMatch(IReadOnlyList<int> watcherObjectIds, OlympiadMatchNetMsg match)
+    void IWorldEventPublisher.FanoutOlympiadMatch(IReadOnlyList<int> watcherObjectIds, Fineage.Protocol.OlympiadMatchMsg match)
     {
-        var payload = NetCodec.EncodeOlympiadMatch(match);
+        var payload = NetCodec.EncodeOlympiadMatch(new OlympiadMatchNetMsg
+        {
+            MatchId = match.MatchId,
+            StadiumId = match.StadiumId,
+            ZoneId = match.ZoneId,
+            Classed = match.Classed,
+            Phase = match.Phase,
+            PlayerOneId = match.PlayerOneId,
+            PlayerTwoId = match.PlayerTwoId,
+            PlayerOneName = match.PlayerOneName ?? "",
+            PlayerTwoName = match.PlayerTwoName ?? "",
+            InstanceId = match.InstanceId
+        });
         foreach (int watcher in watcherObjectIds)
             _presence.TrySend(watcher, NetOpcode.OlympiadMatch, payload);
     }
 
-    void IWorldEventPublisher.FanoutOlympiadCountdown(IReadOnlyList<int> watcherObjectIds, OlympiadCountdownNetMsg countdown)
+    void IWorldEventPublisher.FanoutOlympiadCountdown(IReadOnlyList<int> watcherObjectIds, Fineage.Protocol.OlympiadCountdownMsg countdown)
     {
-        var payload = NetCodec.EncodeOlympiadCountdown(countdown);
+        var payload = NetCodec.EncodeOlympiadCountdown(new OlympiadCountdownNetMsg
+        {
+            MatchId = countdown.MatchId,
+            Kind = countdown.Kind,
+            Seconds = countdown.Seconds
+        });
         foreach (int watcher in watcherObjectIds)
             _presence.TrySend(watcher, NetOpcode.OlympiadCountdown, payload);
     }
 
-    void IWorldEventPublisher.FanoutOlympiadResult(IReadOnlyList<int> watcherObjectIds, OlympiadResultNetMsg result)
+    void IWorldEventPublisher.FanoutOlympiadResult(IReadOnlyList<int> watcherObjectIds, Fineage.Protocol.OlympiadResultMsg result)
     {
-        var payload = NetCodec.EncodeOlympiadResult(result);
+        var payload = NetCodec.EncodeOlympiadResult(new OlympiadResultNetMsg
+        {
+            MatchId = result.MatchId,
+            Outcome = result.Outcome,
+            WinnerObjectId = result.WinnerObjectId,
+            PointsOne = result.PointsOne,
+            PointsTwo = result.PointsTwo,
+            DeltaOne = result.DeltaOne,
+            DeltaTwo = result.DeltaTwo,
+            RewardItemId = result.RewardItemId,
+            RewardCount = result.RewardCount,
+            CompetitionsDoneOne = result.CompetitionsDoneOne,
+            CompetitionsDoneTwo = result.CompetitionsDoneTwo
+        });
         foreach (int watcher in watcherObjectIds)
             _presence.TrySend(watcher, NetOpcode.OlympiadResult, payload);
     }

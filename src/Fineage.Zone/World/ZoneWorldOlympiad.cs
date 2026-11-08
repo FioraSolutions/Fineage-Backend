@@ -228,19 +228,7 @@ public sealed partial class ZoneWorld
             PlayerTwoName = note.PlayerTwoName,
             InstanceId = note.InstanceId
         };
-        FanOlympiadBoth(note.PlayerOneId, note.PlayerTwoId, match: new Fineage.Net.Contract.OlympiadMatchNetMsg
-        {
-            MatchId = message.MatchId,
-            StadiumId = message.StadiumId,
-            ZoneId = message.ZoneId,
-            Classed = message.Classed,
-            Phase = message.Phase,
-            PlayerOneId = message.PlayerOneId,
-            PlayerTwoId = message.PlayerTwoId,
-            PlayerOneName = message.PlayerOneName,
-            PlayerTwoName = message.PlayerTwoName,
-            InstanceId = message.InstanceId
-        });
+        FanOlympiadBoth(note.PlayerOneId, note.PlayerTwoId, match: message);
     }
 
     void QueueCountdown(OlympiadCountdownNote note)
@@ -257,12 +245,7 @@ public sealed partial class ZoneWorld
             Params = [note.Kind.ToString(), note.Seconds.ToString()],
             Text = OlympiadLines.CountdownText(note.Kind, note.Seconds)
         };
-        FanOlympiadBoth(note.PlayerOneId, note.PlayerTwoId, countdown: new Fineage.Net.Contract.OlympiadCountdownNetMsg
-        {
-            MatchId = packet.MatchId,
-            Kind = packet.Kind,
-            Seconds = packet.Seconds
-        });
+        FanOlympiadBoth(note.PlayerOneId, note.PlayerTwoId, countdown: packet);
         FanOlympiadBoth(note.PlayerOneId, note.PlayerTwoId, line: line);
     }
 
@@ -282,20 +265,7 @@ public sealed partial class ZoneWorld
             CompetitionsDoneOne = note.CompetitionsDoneOne,
             CompetitionsDoneTwo = note.CompetitionsDoneTwo
         };
-        FanOlympiadBoth(note.PlayerOneId, note.PlayerTwoId, result: new Fineage.Net.Contract.OlympiadResultNetMsg
-        {
-            MatchId = message.MatchId,
-            Outcome = message.Outcome,
-            WinnerObjectId = message.WinnerObjectId,
-            PointsOne = message.PointsOne,
-            PointsTwo = message.PointsTwo,
-            DeltaOne = message.DeltaOne,
-            DeltaTwo = message.DeltaTwo,
-            RewardItemId = message.RewardItemId,
-            RewardCount = message.RewardCount,
-            CompetitionsDoneOne = message.CompetitionsDoneOne,
-            CompetitionsDoneTwo = message.CompetitionsDoneTwo
-        });
+        FanOlympiadBoth(note.PlayerOneId, note.PlayerTwoId, result: message);
     }
 
     void QueueOlympiadStatus(ZoneSession session, long nowUnixMs)
@@ -323,39 +293,16 @@ public sealed partial class ZoneWorld
             StadiumId = view.StadiumId,
             ClassId = view.ClassId
         };
-        NetBridge?.FanoutOlympiadStatus([session.ObjectId], ToNetOlympiadStatus(message));
+        NetBridge?.FanoutOlympiadStatus([session.ObjectId], message);
     }
-
-    static Fineage.Net.Contract.OlympiadStatusNetMsg ToNetOlympiadStatus(OlympiadStatusMsg s) => new()
-    {
-        Period = s.Period,
-        Cycle = s.Cycle,
-        InCompetition = s.InCompetition,
-        CompetitionStartUnixMs = s.CompetitionStartUnixMs,
-        CompetitionEndUnixMs = s.CompetitionEndUnixMs,
-        OlympiadEndUnixMs = s.OlympiadEndUnixMs,
-        ValidationEndUnixMs = s.ValidationEndUnixMs,
-        NextWeeklyUnixMs = s.NextWeeklyUnixMs,
-        RegistrationOpen = s.RegistrationOpen,
-        Noble = s.Noble,
-        Points = s.Points,
-        CompetitionsDone = s.CompetitionsDone,
-        Won = s.Won,
-        Lost = s.Lost,
-        Drawn = s.Drawn,
-        Queue = s.Queue,
-        MatchId = s.MatchId,
-        StadiumId = s.StadiumId,
-        ClassId = s.ClassId
-    };
 
     /// <summary>Both match participants get one Net message per event, exactly as <c>SendBoth</c> does for V2.</summary>
     void FanOlympiadBoth(
         int one,
         int two,
-        Fineage.Net.Contract.OlympiadMatchNetMsg? match = null,
-        Fineage.Net.Contract.OlympiadCountdownNetMsg? countdown = null,
-        Fineage.Net.Contract.OlympiadResultNetMsg? result = null,
+        OlympiadMatchMsg? match = null,
+        OlympiadCountdownMsg? countdown = null,
+        OlympiadResultMsg? result = null,
         SystemMessageMsg? line = null)
     {
         if (NetBridge == null)
