@@ -24,6 +24,7 @@ public sealed class NetZoneServer : INetPresenceBridge
     readonly int _maxMessagesPerSecond;
     readonly TimeSpan _idleTimeout;
     readonly bool _adminCommands;
+    readonly EnchantPacketHandler _enchant;
 
     public NetZoneServer(
         IHandoffStore handoff,
@@ -44,6 +45,7 @@ public sealed class NetZoneServer : INetPresenceBridge
         _maxMessagesPerSecond = maxMessagesPerSecond ?? ZoneNetSettings.MaxMessagesPerSecond;
         _idleTimeout = idleTimeout ?? TcpSessionSettings.IdleTimeout;
         _adminCommands = adminCommands ?? ZoneAdmin.Enabled;
+        _enchant = new EnchantPacketHandler(_world, RejectAsync);
         _world.NetBridge = this;
     }
 
@@ -755,13 +757,13 @@ public sealed class NetZoneServer : INetPresenceBridge
                             await OnAcquireSkillRequestAsync(conn, zoneSession, envelope, informing: false, ct).ConfigureAwait(false);
                             break;
                         case NetOpcode.EnchantRequest:
-                            await OnEnchantRequestAsync(conn, zoneSession, envelope, ct).ConfigureAwait(false);
+                            await _enchant.OnRequestAsync(conn, zoneSession, envelope, ct).ConfigureAwait(false);
                             break;
                         case NetOpcode.EnchantConfirm:
-                            await OnEnchantConfirmAsync(conn, zoneSession, envelope, ct).ConfigureAwait(false);
+                            await _enchant.OnConfirmAsync(conn, zoneSession, envelope, ct).ConfigureAwait(false);
                             break;
                         case NetOpcode.EnchantCancel:
-                            await OnEnchantCancelAsync(conn, zoneSession, ct).ConfigureAwait(false);
+                            await _enchant.OnCancelAsync(conn, zoneSession, ct).ConfigureAwait(false);
                             break;
                         case NetOpcode.ClanCreateRequest:
                             await OnClanCreateAsync(conn, zoneSession, envelope, ct).ConfigureAwait(false);
@@ -1410,65 +1412,6 @@ public sealed class NetZoneServer : INetPresenceBridge
         string? error = await _world.TryAcquireSkillAsync(zoneSession, skillId, level, skillType, informing, ct).ConfigureAwait(false);
         if (error != null)
             await RejectAsync(conn, error, informing ? "Skill info failed." : "Learn failed.", ct).ConfigureAwait(false);
-    }
-
-    async Task OnEnchantRequestAsync(
-        NetConnection conn,
-        ZoneSession zoneSession,
-        PacketEnvelope envelope,
-        CancellationToken ct)
-    {
-        RequireHello(conn);
-        if (!zoneSession.Bound || !zoneSession.InWorld)
-        {
-            await RejectAsync(conn, "not_in_world", "Enter world first.", ct).ConfigureAwait(false);
-            return;
-        }
-
-        var request = NetCodec.DecodeEnchantRequest(envelope.Payload);
-        string? error = await _world
-            .TryEnchantRequestAsync(zoneSession, request.ScrollObjectId, ct)
-            .ConfigureAwait(false);
-        if (error != null)
-            await RejectAsync(conn, error, "Enchant scroll select failed.", ct).ConfigureAwait(false);
-    }
-
-    async Task OnEnchantConfirmAsync(
-        NetConnection conn,
-        ZoneSession zoneSession,
-        PacketEnvelope envelope,
-        CancellationToken ct)
-    {
-        RequireHello(conn);
-        if (!zoneSession.Bound || !zoneSession.InWorld)
-        {
-            await RejectAsync(conn, "not_in_world", "Enter world first.", ct).ConfigureAwait(false);
-            return;
-        }
-
-        var confirm = NetCodec.DecodeEnchantConfirm(envelope.Payload);
-        string? error = await _world
-            .TryEnchantConfirmAsync(zoneSession, confirm.TargetObjectId, ct)
-            .ConfigureAwait(false);
-        if (error != null)
-            await RejectAsync(conn, error, "Enchant failed.", ct).ConfigureAwait(false);
-    }
-
-    async Task OnEnchantCancelAsync(
-        NetConnection conn,
-        ZoneSession zoneSession,
-        CancellationToken ct)
-    {
-        RequireHello(conn);
-        if (!zoneSession.Bound || !zoneSession.InWorld)
-        {
-            await RejectAsync(conn, "not_in_world", "Enter world first.", ct).ConfigureAwait(false);
-            return;
-        }
-
-        string? error = await _world.TryEnchantCancelAsync(zoneSession, ct).ConfigureAwait(false);
-        if (error != null)
-            await RejectAsync(conn, error, "Enchant cancel failed.", ct).ConfigureAwait(false);
     }
 
     async Task OnClanCreateAsync(
