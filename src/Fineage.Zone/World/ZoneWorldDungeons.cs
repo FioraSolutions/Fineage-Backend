@@ -172,14 +172,7 @@ public sealed partial class ZoneWorld
 
         if (netTeleport)
         {
-            NetBridge?.FanoutTeleportToLocation(netWatchers, new Fineage.Net.Contract.TeleportToLocationNetMsg
-            {
-                ObjectId = entity.ObjectId,
-                X = x,
-                Y = y,
-                Z = z,
-                Heading = entity.Heading
-            });
+            NetBridge?.FanoutTeleportToLocation(netWatchers, entity.ObjectId, x, y, z, entity.Heading);
         }
     }
 

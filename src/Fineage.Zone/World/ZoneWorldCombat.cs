@@ -32,10 +32,7 @@ public sealed partial class ZoneWorld
             session.SelectedTargetId = 0;
             session.AutoAttackTargetId = 0;
             session.ClearApproach();
-            NetBridge?.FanoutTargetUnselected([session.ObjectId], new Fineage.Net.Contract.TargetUnselectedNetMsg
-            {
-                TargetObjectId = previous
-            });
+            NetBridge?.FanoutTargetUnselected([session.ObjectId], previous);
         }
 
         return Task.FromResult<string?>(null);
@@ -122,11 +119,7 @@ public sealed partial class ZoneWorld
         });
         // Net has no MyTargetSelected opcode: TargetSelected (0x030F) is its self-side mirror, so it carries the
         // same id + colour. Mobius also broadcasts TargetSelected to peers; that fanout stays out of scope here.
-        NetBridge.FanoutTargetSelected(self, new Fineage.Net.Contract.TargetSelectedNetMsg
-        {
-            TargetObjectId = target.ObjectId,
-            ColorHint = colour
-        });
+        NetBridge.FanoutTargetSelected(self, target.ObjectId, colour);
     }
 
     /// <summary>
@@ -651,11 +644,7 @@ public sealed partial class ZoneWorld
 
         if (netWatchers is { Count: > 0 } && NetBridge != null)
         {
-            NetBridge.FanoutEntityDespawn(netWatchers, new Fineage.Net.Contract.EntityDespawnMsg
-            {
-                EntityValue = (ulong)(uint)objectId,
-                EntityGeneration = 1
-            });
+            NetBridge.FanoutEntityDespawn(netWatchers, objectId);
         }
     }
 

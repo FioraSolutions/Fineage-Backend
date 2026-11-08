@@ -69,7 +69,7 @@ public sealed class NetDeathBroadcastTests
         var despawns = rec.Of(nameof(IWorldEventPublisher.FanoutEntityDespawn));
         Assert.Contains(despawns, d => ((IReadOnlyList<int>)d[0]!).Contains(bystander.ObjectId) &&
                                        ((IReadOnlyList<int>)d[0]!).Contains(late.ObjectId) &&
-                                       ((EntityDespawnMsg)d[1]!).EntityValue == (ulong)(uint)MobId);
+                                       (int)d[1]! == MobId);
         _ = lateSession;
     }
 

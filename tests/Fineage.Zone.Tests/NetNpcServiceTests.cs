@@ -45,9 +45,9 @@ public sealed class NetNpcServiceTests
         Assert.DoesNotContain("1000 Adena", page, StringComparison.Ordinal);
 
         Assert.Null(await actor.Teleport(GateObjectId, "NORMAL", 0));
-        var moved = Assert.IsType<TeleportToLocationNetMsg>(Last(bench, FanoutTeleportToLocation)[1]);
-        Assert.Equal(100, moved.X);
-        Assert.Equal(0, moved.Y);
+        var moved = Last(bench, FanoutTeleportToLocation);
+        Assert.Equal(100, (int)moved[2]!);
+        Assert.Equal(0, (int)moved[3]!);
         Assert.Equal(NpcServiceProtocol.Teleported, LastSystemMessageId(bench));
         Assert.Equal(100, actor.Session.X);
 
@@ -79,7 +79,7 @@ public sealed class NetNpcServiceTests
         var adena = Assert.Single(update.Changes);
         Assert.Equal(Adena, adena.ItemId);
         Assert.Equal(4500, adena.Count);
-        Assert.Equal(100, Assert.IsType<TeleportToLocationNetMsg>(Last(bench, FanoutTeleportToLocation)[1]).X);
+        Assert.Equal(100, (int)Last(bench, FanoutTeleportToLocation)[2]!);
     }
 
     [Fact]

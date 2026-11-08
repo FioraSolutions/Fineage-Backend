@@ -49,10 +49,9 @@ public sealed class NetTargetSelectTests
         Assert.Null(await kit.World.TrySelectTargetAsync(session, MobId, default));
 
         Assert.Equal(MobId, session.SelectedTargetId);
-        var selected = Assert.IsType<TargetSelectedNetMsg>(
-            Assert.Single(rec.Of(nameof(IWorldEventPublisher.FanoutTargetSelected)))[1]);
-        Assert.Equal(MobId, selected.TargetObjectId);
-        Assert.Equal(3, selected.ColorHint);
+        var selected = Assert.Single(rec.Of(nameof(IWorldEventPublisher.FanoutTargetSelected)));
+        Assert.Equal(MobId, (int)selected[1]!);
+        Assert.Equal(3, (int)selected[2]!);
 
         // Mobius setTarget also sends the target's HP so the target window can draw a bar.
         var hp = Assert.IsType<StatusUpdateNetMsg>(
@@ -71,10 +70,9 @@ public sealed class NetTargetSelectTests
 
         Assert.Null(await kit.World.TrySelectTargetAsync(session, GuideId, default));
 
-        var selected = Assert.IsType<TargetSelectedNetMsg>(
-            Assert.Single(rec.Of(nameof(IWorldEventPublisher.FanoutTargetSelected)))[1]);
-        Assert.Equal(GuideId, selected.TargetObjectId);
-        Assert.Equal(0, selected.ColorHint);
+        var selected = Assert.Single(rec.Of(nameof(IWorldEventPublisher.FanoutTargetSelected)));
+        Assert.Equal(GuideId, (int)selected[1]!);
+        Assert.Equal(0, (int)selected[2]!);
     }
 
     /// <summary>
@@ -92,11 +90,10 @@ public sealed class NetTargetSelectTests
         Assert.Null(await kit.World.TrySelectTargetAsync(session, otherSession.ObjectId, default));
 
         Assert.Equal(otherSession.ObjectId, session.SelectedTargetId);
-        var selected = Assert.IsType<TargetSelectedNetMsg>(
-            Assert.Single(rec.Of(nameof(IWorldEventPublisher.FanoutTargetSelected)))[1]);
-        Assert.Equal(otherSession.ObjectId, selected.TargetObjectId);
+        var selected = Assert.Single(rec.Of(nameof(IWorldEventPublisher.FanoutTargetSelected)));
+        Assert.Equal(otherSession.ObjectId, (int)selected[1]!);
         // A flagged player is auto-attackable, so the colour is the level delta rather than the friendly 0.
-        Assert.Equal(-4, selected.ColorHint);
+        Assert.Equal(-4, (int)selected[2]!);
 
         var hp = Assert.IsType<StatusUpdateNetMsg>(
             Assert.Single(rec.Of(nameof(IWorldEventPublisher.FanoutStatusUpdate)))[1]);
@@ -113,9 +110,8 @@ public sealed class NetTargetSelectTests
         Assert.Null(await kit.World.TrySelectTargetAsync(session, otherSession.ObjectId, default));
 
         Assert.Equal(otherSession.ObjectId, session.SelectedTargetId);
-        var selected = Assert.IsType<TargetSelectedNetMsg>(
-            Assert.Single(rec.Of(nameof(IWorldEventPublisher.FanoutTargetSelected)))[1]);
-        Assert.Equal(0, selected.ColorHint);
+        var selected = Assert.Single(rec.Of(nameof(IWorldEventPublisher.FanoutTargetSelected)));
+        Assert.Equal(0, (int)selected[2]!);
     }
 
     [Fact]
@@ -138,9 +134,8 @@ public sealed class NetTargetSelectTests
         Assert.Null(await kit.World.TryCharacterActionAsync(session, ActionProtocol.NextTarget, 0, default));
 
         Assert.Equal(MobId, session.SelectedTargetId);
-        var selected = Assert.IsType<TargetSelectedNetMsg>(
-            Assert.Single(rec.Of(nameof(IWorldEventPublisher.FanoutTargetSelected)))[1]);
-        Assert.Equal(MobId, selected.TargetObjectId);
+        var selected = Assert.Single(rec.Of(nameof(IWorldEventPublisher.FanoutTargetSelected)));
+        Assert.Equal(MobId, (int)selected[1]!);
     }
 
     [Fact]
@@ -169,15 +164,13 @@ public sealed class NetTargetSelectTests
 
         Assert.Equal(0, session.SelectedTargetId);
         Assert.Equal(0, session.AutoAttackTargetId);
-        var unselected = Assert.IsType<TargetUnselectedNetMsg>(
-            Assert.Single(rec.Of(nameof(IWorldEventPublisher.FanoutTargetUnselected)))[1]);
-        Assert.Equal(MobId, unselected.TargetObjectId);
+        var unselected = Assert.Single(rec.Of(nameof(IWorldEventPublisher.FanoutTargetUnselected)));
+        Assert.Equal(MobId, (int)unselected[1]!);
 
         // A second cancel has nothing to unselect and must not upset the client with a stale id.
         Assert.Null(await kit.World.TryCancelTargetAsync(session, default));
-        var again = Assert.IsType<TargetUnselectedNetMsg>(
-            rec.Of(nameof(IWorldEventPublisher.FanoutTargetUnselected)).Last()[1]);
-        Assert.Equal(0, again.TargetObjectId);
+        var again = rec.Of(nameof(IWorldEventPublisher.FanoutTargetUnselected)).Last();
+        Assert.Equal(0, (int)again[1]!);
     }
 
     /// <summary>Cancelling also stops the auto-attack, or the next swing would re-target the dropped mob.</summary>

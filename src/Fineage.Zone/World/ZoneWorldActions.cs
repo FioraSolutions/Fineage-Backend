@@ -149,12 +149,7 @@ public sealed partial class ZoneWorld
     string? FanoutSocial(ZoneEntity player, int actionId)
     {
         // Mobius broadcastPacket(new SocialAction(...)): self + everyone holding the actor in view.
-        NetBridge?.FanoutSocialAction(NetWatchersOf(player), new Fineage.Net.Contract.SocialActionNetMsg
-        {
-            EntityValue = (ulong)(uint)player.ObjectId,
-            EntityGeneration = 1,
-            ActionId = actionId
-        });
+        NetBridge?.FanoutSocialAction(NetWatchersOf(player), player.ObjectId, actionId);
 
         return null;
     }
