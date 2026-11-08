@@ -1,10 +1,11 @@
 using Fineage.Protocol;
+using Fineage.Zone.Party;
 
 namespace Fineage.Zone.World;
 
 public sealed partial class ZoneWorld
 {
-    public const int MaxPartyMembers = 9;
+    public const int MaxPartyMembers = PartyRules.MaxMembers;
 
     readonly Dictionary<int, ZoneParty> _parties = [];
     readonly Dictionary<int, int> _partyByPlayer = [];
@@ -102,7 +103,7 @@ public sealed partial class ZoneWorld
                 return "party";
             if (party.LeaderObjectId != inviter.ObjectId)
                 return "party_leader";
-            if (party.MemberIds.Count >= MaxPartyMembers)
+            if (PartyRules.IsFull(party.MemberIds.Count))
                 return "party_full";
             distribution = party.ItemDistribution;
         }
@@ -148,7 +149,7 @@ public sealed partial class ZoneWorld
         {
             if (!_parties.TryGetValue(partyId, out party!))
                 return "party";
-            if (party.MemberIds.Count >= MaxPartyMembers)
+            if (PartyRules.IsFull(party.MemberIds.Count))
             {
                 FanPartyJoinResult([requestorEntity.ObjectId], 0);
                 return null;
