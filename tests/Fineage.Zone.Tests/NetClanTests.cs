@@ -26,11 +26,11 @@ public sealed class NetClanTests
         return (kit, rec);
     }
 
-    static PledgeStatusNetMsg LastStatus(NetBridgeRecorder rec) =>
-        Assert.IsType<PledgeStatusNetMsg>(rec.Of(nameof(IWorldEventPublisher.FanoutPledgeStatus)).Last()[1]);
+    static Fineage.Protocol.PledgeStatusChangedMsg LastStatus(NetBridgeRecorder rec) =>
+        Assert.IsType<Fineage.Protocol.PledgeStatusChangedMsg>(rec.Of(nameof(IWorldEventPublisher.FanoutPledgeStatus)).Last()[1]);
 
-    static PledgeMemberListNetMsg LastRoster(NetBridgeRecorder rec) =>
-        Assert.IsType<PledgeMemberListNetMsg>(rec.Of(nameof(IWorldEventPublisher.FanoutPledgeMemberList)).Last()[1]);
+    static Fineage.Protocol.PledgeMemberListMsg LastRoster(NetBridgeRecorder rec) =>
+        Assert.IsType<Fineage.Protocol.PledgeMemberListMsg>(rec.Of(nameof(IWorldEventPublisher.FanoutPledgeMemberList)).Last()[1]);
 
     /// <summary>Clan open, at a level and class the create gate accepts.</summary>
     static NetTestKit.Character LevelTen(NetTestKit kit) => kit.Create(level: ClanCreateLevel);
@@ -62,12 +62,12 @@ public sealed class NetClanTests
         Assert.Null(await kit.World.TryClanCreateAsync(
             leader, new ClanCreateRequestMsg { Name = "Fine" }, kit.Now, default));
 
-        PledgeStatusNetMsg status = LastStatus(rec);
+        Fineage.Protocol.PledgeStatusChangedMsg status = LastStatus(rec);
         Assert.Equal("Fine", status.Name);
         Assert.Equal(leaderEntity.ObjectId, status.LeaderObjectId);
         Assert.Equal(1, status.MemberCount);
 
-        PledgeMemberListNetMsg roster = LastRoster(rec);
+        Fineage.Protocol.PledgeMemberListMsg roster = LastRoster(rec);
         Assert.Equal(leaderEntity.ObjectId, Assert.Single(roster.Members).ObjectId);
     }
 
@@ -85,7 +85,7 @@ public sealed class NetClanTests
         Assert.Null(await kit.World.TryClanInviteAsync(
             leader, new ClanInviteRequestMsg { TargetObjectId = memberEntity.ObjectId, PledgeType = 0 }, kit.Now, default));
 
-        ClanAskJoinNetMsg ask = Assert.IsType<ClanAskJoinNetMsg>(
+        Fineage.Protocol.ClanAskJoinMsg ask = Assert.IsType<Fineage.Protocol.ClanAskJoinMsg>(
             Assert.Single(rec.Of(nameof(IWorldEventPublisher.FanoutClanAskJoin)))[1]);
         Assert.Equal(leaderEntity.ObjectId, ask.RequestorObjectId);
         Assert.Equal("Fine", ask.ClanName);
@@ -93,7 +93,7 @@ public sealed class NetClanTests
         Assert.Null(await kit.World.TryClanAnswerAsync(
             member, new ClanAnswerJoinRequestMsg { RequestorObjectId = leaderEntity.ObjectId, Response = 2 }, kit.Now, default));
 
-        ClanJoinResultNetMsg result = Assert.IsType<ClanJoinResultNetMsg>(
+        Fineage.Protocol.ClanJoinResultMsg result = Assert.IsType<Fineage.Protocol.ClanJoinResultMsg>(
             Assert.Single(rec.Of(nameof(IWorldEventPublisher.FanoutClanJoinResult)))[1]);
         Assert.Equal(2, result.Response);
         Assert.Equal(2, LastRoster(rec).Members.Length);
@@ -244,7 +244,7 @@ public sealed class NetClanTests
         var lines = rec.Of(nameof(IWorldEventPublisher.FanoutSystemMessage));
         Assert.Contains(lines, call => ((SystemMessageMsg)call[1]).Id == ClanProtocol.InviteDeclinedSelf);
         Assert.Contains(lines, call => ((SystemMessageMsg)call[1]).Id == ClanProtocol.InviteDeclinedRequestor);
-        Assert.Equal(0, Assert.IsType<ClanJoinResultNetMsg>(
+        Assert.Equal(0, Assert.IsType<Fineage.Protocol.ClanJoinResultMsg>(
             Assert.Single(rec.Of(nameof(IWorldEventPublisher.FanoutClanJoinResult)))[1]).Response);
         Assert.Equal(0, kit.Store.FindById(member.Account, member.CharacterId)!.ClanId);
 
@@ -286,10 +286,10 @@ public sealed class NetClanTests
 
         // The leaver is told the clan is gone: an empty status and an empty roster, both addressed to them only.
         Assert.Contains(rec.Of(nameof(IWorldEventPublisher.FanoutPledgeStatus)), call =>
-            Assert.IsType<PledgeStatusNetMsg>(call[1]).ClanId == 0 &&
+            Assert.IsType<Fineage.Protocol.PledgeStatusChangedMsg>(call[1]).ClanId == 0 &&
             ((IReadOnlyList<int>)call[0]).SequenceEqual([memberEntity.ObjectId]));
         Assert.Contains(rec.Of(nameof(IWorldEventPublisher.FanoutPledgeMemberList)), call =>
-            Assert.IsType<PledgeMemberListNetMsg>(call[1]).Members.Length == 0 &&
+            Assert.IsType<Fineage.Protocol.PledgeMemberListMsg>(call[1]).Members.Length == 0 &&
             ((IReadOnlyList<int>)call[0]).SequenceEqual([memberEntity.ObjectId]));
 
         Assert.Equal(1, LastStatus(rec).MemberCount);
@@ -390,7 +390,7 @@ public sealed class NetClanTests
         kit.Now = DateTimeOffset.FromUnixTimeMilliseconds(ClanRules.DissolveExpiry(again));
         kit.World.CompleteDueDissolutions(kit.Now);
         Assert.Equal(ClanProtocol.Dispersed, LastLine(rec).Id);
-        Assert.Equal(0, ((PledgeStatusNetMsg)rec.Of(nameof(IWorldEventPublisher.FanoutPledgeStatus))[^1][1]).ClanId);
+        Assert.Equal(0, ((Fineage.Protocol.PledgeStatusChangedMsg)rec.Of(nameof(IWorldEventPublisher.FanoutPledgeStatus))[^1][1]).ClanId);
         Assert.Equal(0, LastUserInfoClan(rec));
         Assert.Null(kit.Store.FindClan(clanId));
 
