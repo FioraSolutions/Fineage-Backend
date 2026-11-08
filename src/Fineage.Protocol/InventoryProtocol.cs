@@ -66,6 +66,26 @@ namespace Fineage.Protocol;
 /// Set the variable to <c>0</c>, <c>false</c>, or <c>no</c> to leave those keys at 0.
 /// Gear is written to the account store on each successful change and again on leave.</para>
 /// </summary>
+/// <summary>
+/// Mobius <c>EtcStatusUpdate</c> body for the owner (weight / grade / death-penalty icons).
+/// Entity identity is filled at the Net edge from the watcher object id.
+/// </summary>
+public sealed class EtcStatusUpdateMsg
+{
+    /// <summary>1–7 increase-force charges. Always 0 until the force system exists.</summary>
+    public int Charges { get; set; }
+    /// <summary>0 none, 1 ≥50%, 2 ≥66.6%, 3 ≥80%, 4 ≥100% of the load limit (Mobius skill 4270 level).</summary>
+    public int WeightPenalty { get; set; }
+    /// <summary>Mobius writes 1 when chat is refused, banned, or in silence mode.</summary>
+    public bool ChatBlocked { get; set; }
+    /// <summary>Inside a Mobius DANGER_AREA zone.</summary>
+    public bool DangerArea { get; set; }
+    /// <summary>True when either expertise penalty is above 0 (packet field is a flag, not the 1–4 level).</summary>
+    public bool GradePenalty { get; set; }
+    public bool CharmOfCourage { get; set; }
+    public int DeathPenalty { get; set; }
+}
+
 public static class InventoryProtocol
 {
     public const string NotOwned = "not_owned";

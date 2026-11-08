@@ -173,7 +173,10 @@ sealed class SessionLifecyclePacketHandler
         // Mobius EnterWorld:401 sends EtcStatusUpdate after ItemList/ShortCutInit and after updateEffectIcons, so the
         // overload icon appears on an otherwise fully-dressed status bar.
         if (_world.TryBuildNetEtcStatus(zoneSession, out var etcStatus))
-            await conn.SendAsync(NetOpcode.EtcStatusUpdate, NetCodec.EncodeEtcStatusUpdate(etcStatus), ct: ct)
+            await conn.SendAsync(
+                    NetOpcode.EtcStatusUpdate,
+                    NetCodec.EncodeEtcStatusUpdate(NetZoneServer.ToNetEtcStatus(etcStatus, zoneSession.ObjectId)),
+                    ct: ct)
                 .ConfigureAwait(false);
         // Journal on enter so the quest tabs are filled before the player presses the menu button.
         await conn.SendAsync(NetOpcode.QuestList, NetCodec.EncodeQuestList(NetZoneServer.ToNetQuestList(_world.NetQuestList(zoneSession))), ct: ct)

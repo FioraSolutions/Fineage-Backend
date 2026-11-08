@@ -204,7 +204,7 @@ public sealed class NetEquipRestrictionTests
         Assert.Equal(0, user.WeaponGradePenalty);
         Assert.Equal(0, user.ArmorGradePenalty);
         Assert.DoesNotContain(bench.Rec.Of(nameof(IWorldEventPublisher.FanoutEtcStatusUpdate)),
-            args => args[1] is EtcStatusUpdateNetMsg { GradePenalty: true });
+            args => args[1] is Fineage.Protocol.EtcStatusUpdateMsg { GradePenalty: true });
 
         var quiet = new WorldBench(GradeCatalog(), expertisePenalty: false);
         BenchPlayer open = await quiet.EnterAsync("open", "Bram", [Bag(SSword)]);
@@ -256,8 +256,8 @@ public sealed class NetEquipRestrictionTests
         (Assert.IsType<InventoryUpdateMsg>(rec.Of(nameof(IWorldEventPublisher.FanoutInventoryUpdate)).Last()[1]),
          Assert.IsType<UserInfoNetMsg>(rec.Of(nameof(IWorldEventPublisher.FanoutUserInfo)).Last()[1]));
 
-    static EtcStatusUpdateNetMsg LastEtcStatus(NetBridgeRecorder rec) =>
-        Assert.IsType<EtcStatusUpdateNetMsg>(rec.Of(nameof(IWorldEventPublisher.FanoutEtcStatusUpdate)).Last()[1]);
+    static Fineage.Protocol.EtcStatusUpdateMsg LastEtcStatus(NetBridgeRecorder rec) =>
+        Assert.IsType<Fineage.Protocol.EtcStatusUpdateMsg>(rec.Of(nameof(IWorldEventPublisher.FanoutEtcStatusUpdate)).Last()[1]);
 
     static void AssertSavedSlot(BenchPlayer actor, int itemId, int slot) =>
         Assert.Contains(actor.Saved(), item => item.ItemId == itemId && item.EquippedSlot == slot);

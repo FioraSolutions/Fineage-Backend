@@ -350,12 +350,27 @@ public sealed class NetZoneServer : IWorldEventPublisher
             _presence.TrySendCritical(watcher, NetOpcode.InventoryUpdate, payload);
     }
 
-    void IWorldEventPublisher.FanoutEtcStatusUpdate(IReadOnlyList<int> watcherObjectIds, EtcStatusUpdateNetMsg status)
+    void IWorldEventPublisher.FanoutEtcStatusUpdate(IReadOnlyList<int> watcherObjectIds, Fineage.Protocol.EtcStatusUpdateMsg status)
     {
-        var payload = NetCodec.EncodeEtcStatusUpdate(status);
         foreach (int watcher in watcherObjectIds)
+        {
+            var payload = NetCodec.EncodeEtcStatusUpdate(ToNetEtcStatus(status, watcher));
             _presence.TrySend(watcher, NetOpcode.EtcStatusUpdate, payload);
+        }
     }
+
+    internal static EtcStatusUpdateNetMsg ToNetEtcStatus(Fineage.Protocol.EtcStatusUpdateMsg status, int objectId) => new()
+    {
+        EntityValue = (ulong)(uint)objectId,
+        EntityGeneration = 1,
+        Charges = status.Charges,
+        WeightPenalty = status.WeightPenalty,
+        ChatBlocked = status.ChatBlocked,
+        DangerArea = status.DangerArea,
+        GradePenalty = status.GradePenalty,
+        CharmOfCourage = status.CharmOfCourage,
+        DeathPenalty = status.DeathPenalty
+    };
 
     void IWorldEventPublisher.FanoutCreatureSay(IReadOnlyList<int> watcherObjectIds, Fineage.Protocol.CreatureSayMsg say)
     {

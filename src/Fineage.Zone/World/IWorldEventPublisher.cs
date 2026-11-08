@@ -35,7 +35,7 @@ interface IWorldEventPublisher
     /// Mobius EtcStatusUpdate (weight penalty level, grade-penalty flag, force charges) to the owner.
     /// Called under the ZoneWorld gate.
     /// </summary>
-    void FanoutEtcStatusUpdate(IReadOnlyList<int> watcherObjectIds, EtcStatusUpdateNetMsg status);
+    void FanoutEtcStatusUpdate(IReadOnlyList<int> watcherObjectIds, Fineage.Protocol.EtcStatusUpdateMsg status);
 
     /// <summary>Mobius AutoAttackStart (<paramref name="inStance"/>) / AutoAttackStop for <paramref name="objectId"/>. Called under the ZoneWorld gate.</summary>
     void FanoutAttackStance(IReadOnlyList<int> watcherObjectIds, int objectId, bool inStance);
