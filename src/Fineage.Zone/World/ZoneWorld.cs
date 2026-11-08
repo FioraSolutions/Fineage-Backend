@@ -100,6 +100,18 @@ sealed class ZonePlayerSocialPayload
     public bool BlockAll { get; set; }
 }
 
+/// <summary>Player skill / abnormal / shortcut fields composed off <see cref="ZoneEntity"/> (#353).</summary>
+sealed class ZonePlayerSkillsPayload
+{
+    public Dictionary<int, Fineage.Accounts.StoredShortcut> Shortcuts { get; } = [];
+    public Dictionary<int, int> LearnedSkills { get; } = [];
+    public bool HasStatAbnormal { get; set; }
+    public List<ZoneAbnormalEntry> Abnormals { get; } = [];
+    public Dictionary<int, int> KnownSkills { get; } = [];
+    public Dictionary<int, long> SkillReuseUntilMs { get; } = [];
+    public Dictionary<int, long> ItemReuseUntilMs { get; } = [];
+}
+
 /// <summary>Player penalty / shot / regen-carry fields composed off <see cref="ZoneEntity"/> (#353).</summary>
 sealed class ZonePlayerStatusPayload
 {
@@ -606,12 +618,21 @@ sealed class ZoneEntity
     public HashSet<int> AutoShots => EnsureStatus().AutoShots;
 
     ZonePlayerStatusPayload EnsureStatus() => Status ??= new ZonePlayerStatusPayload();
+    /// <summary>Player skills/abnormals payload; null until first skill access (#353 composition).</summary>
+    public ZonePlayerSkillsPayload? Skills { get; set; }
+
     /// <summary>Mobius ShortCuts keyed by world slot (slot + page * 12).</summary>
-    public Dictionary<int, Fineage.Accounts.StoredShortcut> Shortcuts { get; } = [];
+    public Dictionary<int, Fineage.Accounts.StoredShortcut> Shortcuts => EnsureSkills().Shortcuts;
+
     /// <summary>Trainer-learned skills (persisted; Mobius character_skills). Merged into KnownSkills.</summary>
-    public Dictionary<int, int> LearnedSkills { get; } = [];
+    public Dictionary<int, int> LearnedSkills => EnsureSkills().LearnedSkills;
+
     /// <summary>True while an abnormal with combat stat funcs is active (UserInfo refresh on change).</summary>
-    public bool HasStatAbnormal { get; set; }
+    public bool HasStatAbnormal
+    {
+        get => Skills?.HasStatAbnormal ?? false;
+        set => EnsureSkills().HasStatAbnormal = value;
+    }
     /// <summary>
     /// Base run speed (Mobius <c>CreatureTemplate.baseRunSpd</c>). Buffs and debuffs change the live
     /// <see cref="RunSpeed"/> through the <c>runSpd</c> (<c>Stat.MOVE_SPEED</c>) functions; the base is only rewritten
@@ -794,16 +815,21 @@ sealed class ZoneEntity
     }
 
     ZoneNpcSpoilPayload EnsureSpoil() => Spoil ??= new ZoneNpcSpoilPayload();
-    public List<ZoneAbnormalEntry> Abnormals { get; } = [];
+    public List<ZoneAbnormalEntry> Abnormals => EnsureSkills().Abnormals;
+
     /// <summary>Known skill id to level (auto-get tree on enter).</summary>
-    public Dictionary<int, int> KnownSkills { get; } = [];
+    public Dictionary<int, int> KnownSkills => EnsureSkills().KnownSkills;
+
     /// <summary>Skill id to unix-ms when reuse expires.</summary>
-    public Dictionary<int, long> SkillReuseUntilMs { get; } = [];
+    public Dictionary<int, long> SkillReuseUntilMs => EnsureSkills().SkillReuseUntilMs;
+
     /// <summary>
     /// Item id to unix-ms when the item may be used again (Mobius <c>ItemInstance.getReuseDelay</c> / reuse stamp).
     /// Item skills carry a reuse delay; the stamp lives on the character so a stack shares one timer.
     /// </summary>
-    public Dictionary<int, long> ItemReuseUntilMs { get; } = [];
+    public Dictionary<int, long> ItemReuseUntilMs => EnsureSkills().ItemReuseUntilMs;
+
+    ZonePlayerSkillsPayload EnsureSkills() => Skills ??= new ZonePlayerSkillsPayload();
     public HashSet<int> Knownlist { get; } = [];
     public int ClanId { get; set; }
     /// <summary>Attack stance end, unix milliseconds. Leave and dismiss are refused until this passes.</summary>
