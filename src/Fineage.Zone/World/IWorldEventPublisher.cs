@@ -53,7 +53,8 @@ interface IWorldEventPublisher
 
     void FanoutStatusUpdate(IReadOnlyList<int> watcherObjectIds, StatusUpdateNetMsg status);
 
-    void FanoutDie(IReadOnlyList<int> watcherObjectIds, EntityDieMsg die);
+    /// <summary>Mobius Die packet for <paramref name="objectId"/> (killer may be 0). Called under the ZoneWorld gate.</summary>
+    void FanoutDie(IReadOnlyList<int> watcherObjectIds, int objectId, int killerObjectId);
 
     void FanoutDropItem(IReadOnlyList<int> watcherObjectIds, DropItemNetMsg drop);
 
@@ -67,7 +68,8 @@ interface IWorldEventPublisher
 
     void FanoutMagicSkillUse(IReadOnlyList<int> watcherObjectIds, MagicSkillUseNetMsg cast);
 
-    void FanoutRevive(IReadOnlyList<int> watcherObjectIds, ReviveNetMsg revive);
+    /// <summary>Mobius Revive for <paramref name="objectId"/>. Called under the ZoneWorld gate.</summary>
+    void FanoutRevive(IReadOnlyList<int> watcherObjectIds, int objectId);
 
     void FanoutTeleportToLocation(IReadOnlyList<int> watcherObjectIds, TeleportToLocationNetMsg teleport);
 

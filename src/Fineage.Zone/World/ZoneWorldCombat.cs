@@ -600,12 +600,7 @@ public sealed partial class ZoneWorld
 
         if (netWatchers is { Count: > 0 } && NetBridge != null)
         {
-            NetBridge.FanoutDie(netWatchers, new Fineage.Net.Contract.EntityDieMsg
-            {
-                EntityValue = (ulong)(uint)objectId,
-                EntityGeneration = 1,
-                KillerObjectId = killer?.ObjectId ?? 0
-            });
+            NetBridge.FanoutDie(netWatchers, objectId, killer?.ObjectId ?? 0);
         }
 
         npc.SweepItems.Clear();

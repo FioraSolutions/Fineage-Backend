@@ -143,12 +143,7 @@ public sealed partial class ZoneWorld
 
         if (netWatchers is { Count: > 0 } && NetBridge != null)
         {
-            NetBridge.FanoutDie(netWatchers, new Fineage.Net.Contract.EntityDieMsg
-            {
-                EntityValue = (ulong)(uint)dead.ObjectId,
-                EntityGeneration = 1,
-                KillerObjectId = killerObjectId
-            });
+            NetBridge.FanoutDie(netWatchers, dead.ObjectId, killerObjectId);
             NetBridge.FanoutStatusUpdate(netWatchers, new Fineage.Net.Contract.StatusUpdateNetMsg
             {
                 EntityValue = (ulong)(uint)dead.ObjectId,
@@ -177,10 +172,7 @@ public sealed partial class ZoneWorld
 
         if (netWatchers is { Count: > 0 })
         {
-            NetBridge?.FanoutRevive(netWatchers, new Fineage.Net.Contract.ReviveNetMsg
-            {
-                ObjectId = actor.ObjectId
-            });
+            NetBridge?.FanoutRevive(netWatchers, actor.ObjectId);
         }
     }
 
