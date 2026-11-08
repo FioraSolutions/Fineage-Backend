@@ -385,16 +385,38 @@ public sealed class NetZoneServer : IWorldEventPublisher
             _presence.TrySend(watcher, NetOpcode.PlayerStats, payload);
     }
 
-    void IWorldEventPublisher.FanoutAbnormalStatusUpdate(IReadOnlyList<int> watcherObjectIds, AbnormalStatusUpdateNetMsg update)
+    void IWorldEventPublisher.FanoutAbnormalStatusUpdate(IReadOnlyList<int> watcherObjectIds, Fineage.Protocol.AbnormalStatusUpdateMsg update)
     {
-        var payload = NetCodec.EncodeAbnormalStatusUpdate(update);
+        var effects = update.Effects ?? [];
+        var netEffects = new AbnormalEffectNet[effects.Length];
+        for (int i = 0; i < effects.Length; i++)
+        {
+            var src = effects[i];
+            netEffects[i] = new AbnormalEffectNet
+            {
+                Id = src.Id,
+                Value = src.Value,
+                DurationSeconds = src.DurationSeconds
+            };
+        }
+        var payload = NetCodec.EncodeAbnormalStatusUpdate(new AbnormalStatusUpdateNetMsg
+        {
+            ObjectId = update.ObjectId,
+            Effects = netEffects
+        });
         foreach (int watcher in watcherObjectIds)
             _presence.TrySend(watcher, NetOpcode.AbnormalStatusUpdate, payload);
     }
 
-    void IWorldEventPublisher.FanoutNpcHtml(IReadOnlyList<int> watcherObjectIds, NpcHtmlNetMsg html)
+    void IWorldEventPublisher.FanoutNpcHtml(IReadOnlyList<int> watcherObjectIds, Fineage.Protocol.NpcHtmlMsg html)
     {
-        var payload = NetCodec.EncodeNpcHtml(html);
+        var payload = NetCodec.EncodeNpcHtml(new NpcHtmlNetMsg
+        {
+            NpcObjectId = html.NpcObjectId,
+            NpcId = html.NpcId,
+            Html = html.Html ?? "",
+            ItemId = html.ItemId
+        });
         foreach (int watcher in watcherObjectIds)
             _presence.TrySend(watcher, NetOpcode.NpcHtml, payload);
     }

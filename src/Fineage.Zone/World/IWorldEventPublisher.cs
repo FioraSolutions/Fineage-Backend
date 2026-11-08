@@ -79,9 +79,11 @@ interface IWorldEventPublisher
 
     void FanoutPlayerStats(IReadOnlyList<int> watcherObjectIds, PlayerStatsMsg stats);
 
-    void FanoutAbnormalStatusUpdate(IReadOnlyList<int> watcherObjectIds, AbnormalStatusUpdateNetMsg update);
+    /// <summary>Mobius AbnormalStatusUpdate to watchers. Called under the ZoneWorld gate.</summary>
+    void FanoutAbnormalStatusUpdate(IReadOnlyList<int> watcherObjectIds, Fineage.Protocol.AbnormalStatusUpdateMsg update);
 
-    void FanoutNpcHtml(IReadOnlyList<int> watcherObjectIds, NpcHtmlNetMsg html);
+    /// <summary>Mobius NpcHtmlMessage to watchers. Called under the ZoneWorld gate.</summary>
+    void FanoutNpcHtml(IReadOnlyList<int> watcherObjectIds, Fineage.Protocol.NpcHtmlMsg html);
 
     void FanoutBuyList(IReadOnlyList<int> watcherObjectIds, BuyListNetMsg list);
 

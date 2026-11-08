@@ -164,7 +164,7 @@ public sealed class NpcHtmlTests
         BenchPlayer actor = await bench.EnterAsync("talker", "Talker");
 
         Assert.Null(await actor.Talk(MerchantObjectId));
-        var page = Assert.IsType<NpcHtmlNetMsg>(Bench(bench, FanoutHtml).Last()[1]);
+        var page = Assert.IsType<NpcHtmlMsg>(Bench(bench, FanoutHtml).Last()[1]);
         Assert.Equal(MerchantObjectId, page.NpcObjectId);
         Assert.Equal(MerchantNpcId, page.NpcId);
         Assert.Equal(0, page.ItemId);
@@ -256,7 +256,7 @@ public sealed class NpcHtmlTests
     static List<object?[]> Bench(WorldBench bench, string method) => bench.Rec.Of(method);
 
     static string LastHtml(WorldBench bench) =>
-        Assert.IsType<NpcHtmlNetMsg>(Bench(bench, FanoutHtml).Last()[1]).Html;
+        Assert.IsType<NpcHtmlMsg>(Bench(bench, FanoutHtml).Last()[1]).Html;
 
     // The recorder is keyed by interface method name, so spell them once instead of scattering strings.
     const string FanoutHtml = "FanoutNpcHtml";
