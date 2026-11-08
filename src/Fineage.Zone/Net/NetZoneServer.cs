@@ -267,9 +267,23 @@ public sealed class NetZoneServer : IWorldEventPublisher
             _presence.TrySendCritical(watcher, NetOpcode.EntitySpawn, payload);
     }
 
-    void IWorldEventPublisher.FanoutAttackState(IReadOnlyList<int> watcherObjectIds, AttackStateMsg attack)
+    void IWorldEventPublisher.FanoutAttackState(IReadOnlyList<int> watcherObjectIds, Fineage.Protocol.AttackMsg attack)
     {
-        var payload = NetCodec.EncodeAttackState(attack);
+        var payload = NetCodec.EncodeAttackState(new AttackStateMsg
+        {
+            AttackerValue = (ulong)(uint)attack.AttackerObjectId,
+            AttackerGeneration = 1,
+            TargetValue = (ulong)(uint)attack.TargetObjectId,
+            TargetGeneration = 1,
+            Damage = attack.Damage,
+            Flags = attack.Flags,
+            AttackerX = attack.AttackerX,
+            AttackerY = attack.AttackerY,
+            AttackerZ = attack.AttackerZ,
+            TargetX = attack.TargetX,
+            TargetY = attack.TargetY,
+            TargetZ = attack.TargetZ
+        });
         foreach (int watcher in watcherObjectIds)
             _presence.TrySend(watcher, NetOpcode.AttackState, payload);
     }
@@ -433,9 +447,22 @@ public sealed class NetZoneServer : IWorldEventPublisher
             _presence.TrySend(watcher, NetOpcode.TeleportToLocation, payload);
     }
 
-    void IWorldEventPublisher.FanoutPlayerStats(IReadOnlyList<int> watcherObjectIds, PlayerStatsMsg stats)
+    void IWorldEventPublisher.FanoutPlayerStats(IReadOnlyList<int> watcherObjectIds, Fineage.Protocol.PlayerStatsMsg stats)
     {
-        var payload = NetCodec.EncodePlayerStats(stats);
+        var payload = NetCodec.EncodePlayerStats(new Fineage.Net.Contract.PlayerStatsMsg
+        {
+            EntityValue = (ulong)(uint)stats.ObjectId,
+            EntityGeneration = 1,
+            Level = stats.Level,
+            Exp = stats.Exp,
+            Sp = stats.Sp,
+            Hp = stats.Hp,
+            MaxHp = stats.MaxHp,
+            Mp = stats.Mp,
+            MaxMp = stats.MaxMp,
+            Cp = stats.Cp,
+            MaxCp = stats.MaxCp
+        });
         foreach (int watcher in watcherObjectIds)
             _presence.TrySend(watcher, NetOpcode.PlayerStats, payload);
     }

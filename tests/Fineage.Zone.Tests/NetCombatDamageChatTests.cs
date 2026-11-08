@@ -43,7 +43,7 @@ public sealed class NetCombatDamageChatTests
         Assert.Null(await kit.World.TryAttackAsync(session, MobId, CancellationToken.None));
 
         var attacks = rec.Of(nameof(IWorldEventPublisher.FanoutAttackState))
-            .Select(args => Assert.IsType<AttackStateMsg>(args[1]))
+            .Select(args => Assert.IsType<Fineage.Protocol.AttackMsg>(args[1]))
             .ToList();
         var swing = Assert.Single(attacks);
 

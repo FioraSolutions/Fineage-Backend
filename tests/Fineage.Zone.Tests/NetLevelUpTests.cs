@@ -37,7 +37,7 @@ public sealed class NetLevelUpTests
         Assert.Equal(ZoneWorld.LevelUpMessageId, messages.Id);
 
         var stats = Assert.Single(rec.Of(nameof(IWorldEventPublisher.FanoutPlayerStats)));
-        Assert.Equal(20, Assert.IsType<PlayerStatsMsg>(stats[1]).Level);
+        Assert.Equal(20, Assert.IsType<Fineage.Protocol.PlayerStatsMsg>(stats[1]).Level);
     }
 
     [Fact]

@@ -477,21 +477,7 @@ public sealed partial class ZoneWorld
 
         if (netWatchers is { Count: > 0 } && NetBridge != null)
         {
-            NetBridge.FanoutAttackState(netWatchers, new Fineage.Net.Contract.AttackStateMsg
-            {
-                AttackerValue = (ulong)(uint)attack.AttackerObjectId,
-                AttackerGeneration = 1,
-                TargetValue = (ulong)(uint)attack.TargetObjectId,
-                TargetGeneration = 1,
-                Damage = attack.Damage,
-                Flags = attack.Flags,
-                AttackerX = attack.AttackerX,
-                AttackerY = attack.AttackerY,
-                AttackerZ = attack.AttackerZ,
-                TargetX = attack.TargetX,
-                TargetY = attack.TargetY,
-                TargetZ = attack.TargetZ
-            });
+            NetBridge.FanoutAttackState(netWatchers, attack);
         }
     }
 

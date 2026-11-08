@@ -15,7 +15,7 @@ static class NetEnterWorldProjector
 {
     public readonly record struct EnterPackets(
         EntitySpawnMsg Spawn,
-        PlayerStatsMsg Stats,
+        Fineage.Net.Contract.PlayerStatsMsg Stats,
         ItemListNetMsg Items,
         SkillListMsg Skills);
 
@@ -109,7 +109,7 @@ static class NetEnterWorldProjector
             PAtkSpd = pAtkSpd
         };
 
-    static PlayerStatsMsg BuildStats(ZoneEntity entity, EntityId self, int maxCp) =>
+    static Fineage.Net.Contract.PlayerStatsMsg BuildStats(ZoneEntity entity, EntityId self, int maxCp) =>
         new()
         {
             EntityValue = self.Value,
