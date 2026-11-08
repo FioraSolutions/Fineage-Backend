@@ -182,9 +182,9 @@ sealed class SessionLifecyclePacketHandler
         // otherwise the clan window is blank until some later clan action fans a status out.
         if (_world.TryBuildNetClanSnapshot(zoneSession, out var clanStatus, out var clanMembers))
         {
-            await conn.SendAsync(NetOpcode.PledgeStatus, NetCodec.EncodePledgeStatus(clanStatus), ct: ct)
+            await conn.SendAsync(NetOpcode.PledgeStatus, NetCodec.EncodePledgeStatus(NetZoneServer.ToNetPledgeStatus(clanStatus)), ct: ct)
                 .ConfigureAwait(false);
-            await conn.SendAsync(NetOpcode.PledgeMemberList, NetCodec.EncodePledgeMemberList(clanMembers), ct: ct)
+            await conn.SendAsync(NetOpcode.PledgeMemberList, NetCodec.EncodePledgeMemberList(NetZoneServer.ToNetPledgeMemberList(clanMembers)), ct: ct)
                 .ConfigureAwait(false);
         }
 

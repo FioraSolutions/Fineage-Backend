@@ -319,7 +319,7 @@ public sealed partial class ZoneWorld
             clan!.Id,
             ClanRules.InviteDeadline(nowMs));
         var target = _byId[invite.TargetObjectId].Session!;
-        NetBridge?.FanoutClanAskJoin([target.ObjectId], new Fineage.Net.Contract.ClanAskJoinNetMsg
+        NetBridge?.FanoutClanAskJoin([target.ObjectId], new ClanAskJoinMsg
         {
             RequestorObjectId = session.ObjectId,
             RequestorName = session.Name,
@@ -800,7 +800,7 @@ public sealed partial class ZoneWorld
             ClanProtocol.MainPledge)).ToArray(),
         clan.CastleId);
 
-    Fineage.Net.Contract.PledgeStatusNetMsg StatusOf(ZoneClan clan) => new()
+    PledgeStatusChangedMsg StatusOf(ZoneClan clan) => new()
     {
         ClanId = clan.Id,
         Name = clan.Name,
@@ -812,11 +812,11 @@ public sealed partial class ZoneWorld
         CharPenaltyExpiryUnixMs = clan.CharPenaltyExpiryUnixMs
     };
 
-    Fineage.Net.Contract.PledgeMemberListNetMsg MembersOf(ZoneClan clan) => new()
+    PledgeMemberListMsg MembersOf(ZoneClan clan) => new()
     {
         ClanId = clan.Id,
         LeaderObjectId = clan.LeaderId,
-        Members = clan.Members.Select(member => new Fineage.Net.Contract.PledgeMemberNet
+        Members = clan.Members.Select(member => new PledgeMemberEntryMsg
         {
             ObjectId = member.CharacterId,
             Name = member.Name,
@@ -842,7 +842,7 @@ public sealed partial class ZoneWorld
         });
 
     void FanJoinResult(IReadOnlyList<int> watchers, int response) =>
-        NetBridge?.FanoutClanJoinResult(watchers, new Fineage.Net.Contract.ClanJoinResultNetMsg
+        NetBridge?.FanoutClanJoinResult(watchers, new ClanJoinResultMsg
         {
             Response = response
         });
@@ -855,8 +855,8 @@ public sealed partial class ZoneWorld
     void QueueClearPledge(ZoneSession session)
     {
         int[] self = [session.ObjectId];
-        NetBridge?.FanoutPledgeStatus(self, new Fineage.Net.Contract.PledgeStatusNetMsg());
-        NetBridge?.FanoutPledgeMemberList(self, new Fineage.Net.Contract.PledgeMemberListNetMsg());
+        NetBridge?.FanoutPledgeStatus(self, new PledgeStatusChangedMsg());
+        NetBridge?.FanoutPledgeMemberList(self, new PledgeMemberListMsg());
     }
 
 
@@ -867,8 +867,8 @@ public sealed partial class ZoneWorld
     /// </summary>
     internal bool TryBuildNetClanSnapshot(
         ZoneSession session,
-        out Fineage.Net.Contract.PledgeStatusNetMsg status,
-        out Fineage.Net.Contract.PledgeMemberListNetMsg members)
+        out PledgeStatusChangedMsg status,
+        out PledgeMemberListMsg members)
     {
         status = null!;
         members = null!;
@@ -880,41 +880,8 @@ public sealed partial class ZoneWorld
             if (clan == null)
                 return false;
 
-            var v2Status = StatusOf(clan);
-            status = new Fineage.Net.Contract.PledgeStatusNetMsg
-            {
-                ClanId = v2Status.ClanId,
-                Name = v2Status.Name ?? "",
-                Level = v2Status.Level,
-                LeaderObjectId = v2Status.LeaderObjectId,
-                CrestId = v2Status.CrestId,
-                MemberCount = v2Status.MemberCount,
-                DissolvingExpiryUnixMs = v2Status.DissolvingExpiryUnixMs,
-                CharPenaltyExpiryUnixMs = v2Status.CharPenaltyExpiryUnixMs
-            };
-
-            var v2Members = MembersOf(clan);
-            var rows = new Fineage.Net.Contract.PledgeMemberNet[v2Members.Members.Length];
-            for (int i = 0; i < rows.Length; i++)
-            {
-                var src = v2Members.Members[i];
-                rows[i] = new Fineage.Net.Contract.PledgeMemberNet
-                {
-                    ObjectId = src.ObjectId,
-                    Name = src.Name ?? "",
-                    ClassId = src.ClassId,
-                    Level = src.Level,
-                    Online = src.Online,
-                    PledgeType = src.PledgeType
-                };
-            }
-
-            members = new Fineage.Net.Contract.PledgeMemberListNetMsg
-            {
-                ClanId = v2Members.ClanId,
-                LeaderObjectId = v2Members.LeaderObjectId,
-                Members = rows
-            };
+            status = StatusOf(clan);
+            members = MembersOf(clan);
             return true;
         }
     }
