@@ -49,9 +49,8 @@ public sealed class NetDeathBroadcastTests
         var watchers = (IReadOnlyList<int>)dies[0][0]!;
         Assert.Contains(killer.ObjectId, watchers);
         Assert.Contains(bystander.ObjectId, watchers);
-        var die = (EntityDieMsg)dies[0][1]!;
-        Assert.Equal((ulong)(uint)MobId, die.EntityValue);
-        Assert.Equal(killer.ObjectId, die.KillerObjectId);
+        Assert.Equal(MobId, (int)dies[0][1]!);
+        Assert.Equal(killer.ObjectId, (int)dies[0][2]!);
         // Both saw the killing blow's HP drop to 0.
         Assert.Contains(rec.Of(nameof(IWorldEventPublisher.FanoutStatusUpdate)),
             s => ((IReadOnlyList<int>)s[0]!).Contains(bystander.ObjectId) && ((StatusUpdateNetMsg)s[1]!).EntityValue == (ulong)(uint)MobId);
@@ -98,7 +97,7 @@ public sealed class NetDeathBroadcastTests
         // The victim knows itself, so it is a watcher of its own die + status fanout.
         var die = Assert.Single(rec.Of(nameof(IWorldEventPublisher.FanoutDie)));
         Assert.Contains(elf.ObjectId, (IReadOnlyList<int>)die[0]!);
-        Assert.Equal((ulong)(uint)elf.ObjectId, ((EntityDieMsg)die[1]!).EntityValue);
+        Assert.Equal(elf.ObjectId, (int)die[1]!);
 
         Assert.Contains(rec.Of(nameof(IWorldEventPublisher.FanoutStatusUpdate)), s =>
             ((IReadOnlyList<int>)s[0]!).Contains(elf.ObjectId) &&
