@@ -56,7 +56,7 @@ public sealed class NetManufactureTests
 
         Assert.Equal(PrivateStoreProtocol.TypeManufacture, maker.PrivateStoreType);
         Assert.True(maker.Sitting);
-        var info = Assert.IsType<Fineage.Net.Contract.PrivateStoreInfoNetMsg>(
+        var info = Assert.IsType<Fineage.Protocol.PrivateStoreInfoMsg>(
             Last(rec, nameof(IWorldEventPublisher.FanoutPrivateStoreInfo)));
         Assert.Equal(PrivateStoreProtocol.TypeManufacture, info.StoreType);
 

@@ -535,7 +535,7 @@ public sealed partial class ZoneWorld
 
     void FanoutPrivateStoreInfo(ZoneEntity player)
     {
-        var msg = new Fineage.Net.Contract.PrivateStoreInfoNetMsg
+        var msg = new PrivateStoreInfoMsg
         {
             ObjectId = player.ObjectId,
             StoreType = player.PrivateStoreType,
@@ -548,7 +548,7 @@ public sealed partial class ZoneWorld
     {
         if (visitor.Session == null || visitor.Inventory == null)
             return;
-        var items = store.PrivateSellList.Select(row => new Fineage.Net.Contract.PrivateStoreSellRowNet
+        var items = store.PrivateSellList.Select(row => new PrivateStoreListedSellRowMsg
         {
             InventoryObjectId = row.InventoryObjectId,
             ItemId = row.ItemId,
@@ -556,7 +556,7 @@ public sealed partial class ZoneWorld
             Price = row.Price,
             EnchantLevel = row.EnchantLevel
         }).ToArray();
-        NetBridge?.FanoutPrivateStoreListSell([visitor.ObjectId], new Fineage.Net.Contract.PrivateStoreListSellNetMsg
+        NetBridge?.FanoutPrivateStoreListSell([visitor.ObjectId], new PrivateStoreListSellMsg
         {
             StoreObjectId = store.ObjectId,
             StoreName = store.Name,
@@ -571,13 +571,13 @@ public sealed partial class ZoneWorld
     {
         if (visitor.Session == null || store.Inventory == null)
             return;
-        var items = store.PrivateBuyList.Select(row => new Fineage.Net.Contract.PrivateStoreBuyRowNet
+        var items = store.PrivateBuyList.Select(row => new PrivateStoreBuyRowMsg
         {
             ItemId = row.ItemId,
             Count = row.Count,
             Price = row.Price
         }).ToArray();
-        NetBridge?.FanoutPrivateStoreListBuy([visitor.ObjectId], new Fineage.Net.Contract.PrivateStoreListBuyNetMsg
+        NetBridge?.FanoutPrivateStoreListBuy([visitor.ObjectId], new PrivateStoreListBuyMsg
         {
             StoreObjectId = store.ObjectId,
             StoreName = store.Name,
