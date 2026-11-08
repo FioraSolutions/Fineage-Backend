@@ -80,11 +80,15 @@ public sealed partial class ZoneWorld
 
     bool CanPickupProtected(ZoneEntity player, ZoneEntity ground, long now)
     {
-        if (ground.GroundOwnerId == 0 || now >= ground.GroundProtectUntilMs || ground.GroundOwnerId == player.ObjectId)
-            return true;
-        return _partyByPlayer.TryGetValue(ground.GroundOwnerId, out int ownerParty)
+        bool sameParty = _partyByPlayer.TryGetValue(ground.GroundOwnerId, out int ownerParty)
             && _partyByPlayer.TryGetValue(player.ObjectId, out int myParty)
             && ownerParty == myParty;
+        return GroundRules.CanPickupProtected(
+            ground.GroundOwnerId,
+            ground.GroundProtectUntilMs,
+            now,
+            player.ObjectId,
+            sameParty);
     }
 
     /// <summary>
@@ -94,11 +98,16 @@ public sealed partial class ZoneWorld
     /// </summary>
     bool HasRoomForGroundItem(ZoneEntity player, ZoneEntity ground)
     {
-        if (player.Inventory == null || IsHerb(ground.GroundItemId))
+        if (player.Inventory == null)
             return true;
         bool alreadyCarried = player.Inventory.FindByItemId(ground.GroundItemId) != null;
-        int slots = WarehouseRules.SlotsFor(ground.GroundStackable, alreadyCarried, ground.GroundCount);
-        return player.Inventory.Items.Count + slots <= WarehouseRules.InventorySlots(player.Race);
+        return GroundRules.HasRoomForGroundItem(
+            IsHerb(ground.GroundItemId),
+            player.Inventory.Items.Count,
+            player.Race,
+            ground.GroundStackable,
+            alreadyCarried,
+            ground.GroundCount);
     }
 
     /// <summary>Test hook: roll + drop death loot for <paramref name="npcId"/> as if <paramref name="killer"/> killed it here.</summary>
