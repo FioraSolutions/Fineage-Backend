@@ -49,6 +49,49 @@ sealed class ZoneNpcSpoilPayload
     public bool CorpseAwaitingSweep { get; set; }
 }
 
+/// <summary>NPC template / identity combat fields composed off <see cref="ZoneEntity"/> (#353).</summary>
+sealed class ZoneNpcTemplatePayload
+{
+    public string NpcType { get; set; } = "";
+    public int NpcId { get; set; }
+    public bool Attackable { get; set; }
+    public long RewardExp { get; set; }
+    public int RewardSp { get; set; }
+    public double PAtk { get; set; }
+    public double HpRegen { get; set; }
+    public double MpRegen { get; set; }
+    public double PDef { get; set; }
+    public int PAtkSpd { get; set; }
+    public int AttackRange { get; set; }
+    public bool Aggressive { get; set; }
+    public int AggroRange { get; set; }
+    public int ClanHelpRange { get; set; }
+    public IReadOnlyList<string>? Clans { get; set; }
+    public IReadOnlyList<int>? IgnoreNpcIds { get; set; }
+    public double BaseAccuracy { get; set; }
+    public double BaseEvasion { get; set; }
+    public int BaseCritical { get; set; }
+    public int RandomDamage { get; set; }
+    public int ShieldDef { get; set; }
+    public int ShieldRate { get; set; }
+    public double MAtk { get; set; }
+    public double MDef { get; set; }
+    public int NpcSoulShotLeft { get; set; }
+    public int NpcSoulShotChance { get; set; }
+    public int NpcSpiritShotLeft { get; set; }
+    public int NpcSpiritShotChance { get; set; }
+    public IReadOnlyDictionary<string, double>? DefenceTraits { get; set; }
+    public IReadOnlyList<Fineage.Zone.Npcs.NpcAiSkill>? AiSkills { get; set; }
+    public IReadOnlyList<Fineage.Zone.Npcs.NpcAiSupportSkill>? AiHealSkills { get; set; }
+    public IReadOnlyList<Fineage.Zone.Npcs.NpcAiSupportSkill>? AiBuffSkills { get; set; }
+    public IReadOnlyList<Fineage.Zone.Npcs.NpcAiSupportSkill>? AiDebuffSkills { get; set; }
+    public IReadOnlyList<Fineage.Zone.Npcs.NpcAiSupportSkill>? AiImmobilizeSkills { get; set; }
+    public IReadOnlyList<Fineage.Zone.Npcs.NpcAiSupportSkill>? AiSilenceSkills { get; set; }
+    public IReadOnlyList<Fineage.Zone.Npcs.NpcAiSupportSkill>? AiSuicideSkills { get; set; }
+    public int MinSkillChance { get; set; } = 7;
+    public int MaxSkillChance { get; set; } = 15;
+}
+
 /// <summary>Player friend/block social fields composed off <see cref="ZoneEntity"/> (#353).</summary>
 sealed class ZonePlayerSocialPayload
 {
@@ -111,8 +154,15 @@ sealed class ZoneEntity
     public ZoneEntityKind Kind { get; init; }
     public string Name { get; init; } = "";
     public string Title { get; init; } = "";
+    /// <summary>NPC template payload; null until first template access (#353 composition).</summary>
+    public ZoneNpcTemplatePayload? NpcTemplate { get; set; }
+
     /// <summary>Mobius instance type (Merchant, Guard, Monster, …).</summary>
-    public string NpcType { get; init; } = "";
+    public string NpcType
+    {
+        get => NpcTemplate?.NpcType ?? "";
+        init => EnsureNpcTemplate().NpcType = value ?? "";
+    }
     public int X { get; set; }
     public int Y { get; set; }
     public int Z { get; set; }
@@ -120,8 +170,17 @@ sealed class ZoneEntity
     public int Heading { get; set; }
     /// <summary>Players: changes on class transfer (Mobius setClassId).</summary>
     public int ClassId { get; set; }
-    public int NpcId { get; init; }
-    public bool Attackable { get; init; }
+    public int NpcId
+    {
+        get => NpcTemplate?.NpcId ?? 0;
+        init => EnsureNpcTemplate().NpcId = value;
+    }
+
+    public bool Attackable
+    {
+        get => NpcTemplate?.Attackable ?? false;
+        init => EnsureNpcTemplate().Attackable = value;
+    }
     public int CurHp { get; set; }
     public int MaxHp { get; set; }
     public int CurMp { get; set; }
@@ -130,8 +189,17 @@ sealed class ZoneEntity
     public long Exp { get; set; }
     public int Sp { get; set; }
     /// <summary>NPC kill reward from the Mobius template (acquire exp/sp). Zero for players.</summary>
-    public long RewardExp { get; init; }
-    public int RewardSp { get; init; }
+    public long RewardExp
+    {
+        get => NpcTemplate?.RewardExp ?? 0;
+        init => EnsureNpcTemplate().RewardExp = value;
+    }
+
+    public int RewardSp
+    {
+        get => NpcTemplate?.RewardSp ?? 0;
+        init => EnsureNpcTemplate().RewardSp = value;
+    }
     public QuestJournal Quests { get; set; } = new();
     public int Race { get; init; }
     public int Sex { get; init; }
@@ -269,24 +337,78 @@ sealed class ZoneEntity
 
     ZonePlayerSocialPayload EnsureSocial() => Social ??= new ZonePlayerSocialPayload();
     /// <summary>NPC Mobius physical attack (0 = unknown → level placeholder). Players read the class template.</summary>
-    public double PAtk { get; init; }
+    public double PAtk
+    {
+        get => NpcTemplate?.PAtk ?? 0;
+        init => EnsureNpcTemplate().PAtk = value;
+    }
+
     /// <summary>NPC Mobius <c>vitals hpRegen</c>: HP restored per 3 s regen tick (players use the class table).</summary>
-    public double HpRegen { get; init; }
+    public double HpRegen
+    {
+        get => NpcTemplate?.HpRegen ?? 0;
+        init => EnsureNpcTemplate().HpRegen = value;
+    }
+
     /// <summary>NPC Mobius <c>vitals mpRegen</c>: MP restored per 3 s regen tick.</summary>
-    public double MpRegen { get; init; }
+    public double MpRegen
+    {
+        get => NpcTemplate?.MpRegen ?? 0;
+        init => EnsureNpcTemplate().MpRegen = value;
+    }
+
     /// <summary>NPC Mobius physical defence (0 = unknown).</summary>
-    public double PDef { get; init; }
+    public double PDef
+    {
+        get => NpcTemplate?.PDef ?? 0;
+        init => EnsureNpcTemplate().PDef = value;
+    }
+
     /// <summary>NPC Mobius attack speed (Pspd, 0 = default 253).</summary>
-    public int PAtkSpd { get; init; }
+    public int PAtkSpd
+    {
+        get => NpcTemplate?.PAtkSpd ?? 0;
+        init => EnsureNpcTemplate().PAtkSpd = value;
+    }
+
     /// <summary>NPC template physical attack range (Mobius atkRange: 40 melee, 1100 archers); 0 = default.</summary>
-    public int AttackRange { get; init; }
+    public int AttackRange
+    {
+        get => NpcTemplate?.AttackRange ?? 0;
+        init => EnsureNpcTemplate().AttackRange = value;
+    }
+
     /// <summary>Mobius <c>ai isAggressive</c>; attacks players inside <see cref="AggroRange"/> on its own.</summary>
-    public bool Aggressive { get; init; }
-    public int AggroRange { get; init; }
+    public bool Aggressive
+    {
+        get => NpcTemplate?.Aggressive ?? false;
+        init => EnsureNpcTemplate().Aggressive = value;
+    }
+
+    public int AggroRange
+    {
+        get => NpcTemplate?.AggroRange ?? 0;
+        init => EnsureNpcTemplate().AggroRange = value;
+    }
+
     /// <summary>Mobius <c>clanHelpRange</c> + <c>clanList</c>: same-clan mobs in range join the fight.</summary>
-    public int ClanHelpRange { get; init; }
-    public IReadOnlyList<string>? Clans { get; init; }
-    public IReadOnlyList<int>? IgnoreNpcIds { get; init; }
+    public int ClanHelpRange
+    {
+        get => NpcTemplate?.ClanHelpRange ?? 0;
+        init => EnsureNpcTemplate().ClanHelpRange = value;
+    }
+
+    public IReadOnlyList<string>? Clans
+    {
+        get => NpcTemplate?.Clans;
+        init => EnsureNpcTemplate().Clans = value;
+    }
+
+    public IReadOnlyList<int>? IgnoreNpcIds
+    {
+        get => NpcTemplate?.IgnoreNpcIds;
+        init => EnsureNpcTemplate().IgnoreNpcIds = value;
+    }
     /// <summary>NPC aggro/chase payload; null until first aggro access (#353 composition).</summary>
     public ZoneNpcAggroPayload? Aggro { get; set; }
 
@@ -318,21 +440,59 @@ sealed class ZoneEntity
         set => EnsureAggro().StanceShown = value;
     }
     /// <summary>NPC Mobius base accuracy / evasion / crit / random spread / DEX (players use the class template).</summary>
-    public double BaseAccuracy { get; init; }
-    public double BaseEvasion { get; init; }
-    public int BaseCritical { get; init; }
-    public int RandomDamage { get; init; }
+    public double BaseAccuracy
+    {
+        get => NpcTemplate?.BaseAccuracy ?? 0;
+        init => EnsureNpcTemplate().BaseAccuracy = value;
+    }
+
+    public double BaseEvasion
+    {
+        get => NpcTemplate?.BaseEvasion ?? 0;
+        init => EnsureNpcTemplate().BaseEvasion = value;
+    }
+
+    public int BaseCritical
+    {
+        get => NpcTemplate?.BaseCritical ?? 0;
+        init => EnsureNpcTemplate().BaseCritical = value;
+    }
+
+    public int RandomDamage
+    {
+        get => NpcTemplate?.RandomDamage ?? 0;
+        init => EnsureNpcTemplate().RandomDamage = value;
+    }
     /// <summary>
     /// Mobius <c>getDEX()</c>: feeds <c>FuncMoveSpeed</c> (run/walk/swim speed × DEX bonus), accuracy, evasion and
     /// crit. Players copy it from the class template and re-copy it on class change.
     /// </summary>
     public int Dex { get; set; } = 30;
     /// <summary>NPC Mobius shield defence / block rate (players read the equipped shield).</summary>
-    public int ShieldDef { get; init; }
-    public int ShieldRate { get; init; }
+    public int ShieldDef
+    {
+        get => NpcTemplate?.ShieldDef ?? 0;
+        init => EnsureNpcTemplate().ShieldDef = value;
+    }
+
+    public int ShieldRate
+    {
+        get => NpcTemplate?.ShieldRate ?? 0;
+        init => EnsureNpcTemplate().ShieldRate = value;
+    }
+
     /// <summary>NPC Mobius magic attack / defence.</summary>
-    public double MAtk { get; init; }
-    public double MDef { get; init; }
+    public double MAtk
+    {
+        get => NpcTemplate?.MAtk ?? 0;
+        init => EnsureNpcTemplate().MAtk = value;
+    }
+
+    public double MDef
+    {
+        get => NpcTemplate?.MDef ?? 0;
+        init => EnsureNpcTemplate().MDef = value;
+    }
     /// <summary>Mobius ChargedShot SOULSHOTS: weapon is charged; next swing doubles P.Atk and clears it.</summary>
     public bool SoulshotCharged
     {
@@ -347,30 +507,101 @@ sealed class ZoneEntity
         set => EnsureStatus().SpiritshotCharge = value;
     }
     /// <summary>NPC remaining Mobius SoulShot stock (template starting count; decremented on fire).</summary>
-    public int NpcSoulShotLeft { get; set; }
+    public int NpcSoulShotLeft
+    {
+        get => NpcTemplate?.NpcSoulShotLeft ?? 0;
+        set => EnsureNpcTemplate().NpcSoulShotLeft = value;
+    }
+
     /// <summary>NPC SoulShotRate % (template).</summary>
-    public int NpcSoulShotChance { get; set; }
+    public int NpcSoulShotChance
+    {
+        get => NpcTemplate?.NpcSoulShotChance ?? 0;
+        set => EnsureNpcTemplate().NpcSoulShotChance = value;
+    }
+
     /// <summary>NPC remaining SpiritShot stock.</summary>
-    public int NpcSpiritShotLeft { get; set; }
-    public int NpcSpiritShotChance { get; set; }
+    public int NpcSpiritShotLeft
+    {
+        get => NpcTemplate?.NpcSpiritShotLeft ?? 0;
+        set => EnsureNpcTemplate().NpcSpiritShotLeft = value;
+    }
+
+    public int NpcSpiritShotChance
+    {
+        get => NpcTemplate?.NpcSpiritShotChance ?? 0;
+        set => EnsureNpcTemplate().NpcSpiritShotChance = value;
+    }
+
     /// <summary>Mobius weapon <c>_defenceTraits</c> multipliers (sword/bow/…); null = all 1.0.</summary>
-    public IReadOnlyDictionary<string, double>? DefenceTraits { get; init; }
+    public IReadOnlyDictionary<string, double>? DefenceTraits
+    {
+        get => NpcTemplate?.DefenceTraits;
+        init => EnsureNpcTemplate().DefenceTraits = value;
+    }
+
     /// <summary>Mobius AI attack skills (skillList ∩ skill-combat); null = melee only.</summary>
-    public IReadOnlyList<Fineage.Zone.Npcs.NpcAiSkill>? AiSkills { get; init; }
+    public IReadOnlyList<Fineage.Zone.Npcs.NpcAiSkill>? AiSkills
+    {
+        get => NpcTemplate?.AiSkills;
+        init => EnsureNpcTemplate().AiSkills = value;
+    }
+
     /// <summary>Mobius AISkillScope.HEAL rows (self/clan heal when wounded).</summary>
-    public IReadOnlyList<Fineage.Zone.Npcs.NpcAiSupportSkill>? AiHealSkills { get; set; }
+    public IReadOnlyList<Fineage.Zone.Npcs.NpcAiSupportSkill>? AiHealSkills
+    {
+        get => NpcTemplate?.AiHealSkills;
+        set => EnsureNpcTemplate().AiHealSkills = value;
+    }
+
     /// <summary>Mobius AISkillScope.BUFF rows (self buff when missing).</summary>
-    public IReadOnlyList<Fineage.Zone.Npcs.NpcAiSupportSkill>? AiBuffSkills { get; set; }
+    public IReadOnlyList<Fineage.Zone.Npcs.NpcAiSupportSkill>? AiBuffSkills
+    {
+        get => NpcTemplate?.AiBuffSkills;
+        set => EnsureNpcTemplate().AiBuffSkills = value;
+    }
+
     /// <summary>Mobius AISkillScope.DEBUFF rows (debuff hate target).</summary>
-    public IReadOnlyList<Fineage.Zone.Npcs.NpcAiSupportSkill>? AiDebuffSkills { get; set; }
+    public IReadOnlyList<Fineage.Zone.Npcs.NpcAiSupportSkill>? AiDebuffSkills
+    {
+        get => NpcTemplate?.AiDebuffSkills;
+        set => EnsureNpcTemplate().AiDebuffSkills = value;
+    }
+
     /// <summary>Mobius AISkillScope.IMMOBILIZE (sleep/root/stun/paralyze).</summary>
-    public IReadOnlyList<Fineage.Zone.Npcs.NpcAiSupportSkill>? AiImmobilizeSkills { get; set; }
+    public IReadOnlyList<Fineage.Zone.Npcs.NpcAiSupportSkill>? AiImmobilizeSkills
+    {
+        get => NpcTemplate?.AiImmobilizeSkills;
+        set => EnsureNpcTemplate().AiImmobilizeSkills = value;
+    }
+
     /// <summary>Mobius AISkillScope.COT silence.</summary>
-    public IReadOnlyList<Fineage.Zone.Npcs.NpcAiSupportSkill>? AiSilenceSkills { get; set; }
+    public IReadOnlyList<Fineage.Zone.Npcs.NpcAiSupportSkill>? AiSilenceSkills
+    {
+        get => NpcTemplate?.AiSilenceSkills;
+        set => EnsureNpcTemplate().AiSilenceSkills = value;
+    }
+
     /// <summary>Mobius AISkillScope.SUICIDE (Death Bomb when HP &lt; 30%).</summary>
-    public IReadOnlyList<Fineage.Zone.Npcs.NpcAiSupportSkill>? AiSuicideSkills { get; set; }
-    public int MinSkillChance { get; init; } = 7;
-    public int MaxSkillChance { get; init; } = 15;
+    public IReadOnlyList<Fineage.Zone.Npcs.NpcAiSupportSkill>? AiSuicideSkills
+    {
+        get => NpcTemplate?.AiSuicideSkills;
+        set => EnsureNpcTemplate().AiSuicideSkills = value;
+    }
+
+    public int MinSkillChance
+    {
+        get => NpcTemplate?.MinSkillChance ?? 7;
+        init => EnsureNpcTemplate().MinSkillChance = value;
+    }
+
+    public int MaxSkillChance
+    {
+        get => NpcTemplate?.MaxSkillChance ?? 15;
+        init => EnsureNpcTemplate().MaxSkillChance = value;
+    }
+
+    ZoneNpcTemplatePayload EnsureNpcTemplate() => NpcTemplate ??= new ZoneNpcTemplatePayload();
     /// <summary>Mobius auto soulshot set: shot item ids recharged after each discharge.</summary>
     public HashSet<int> AutoShots => EnsureStatus().AutoShots;
 
