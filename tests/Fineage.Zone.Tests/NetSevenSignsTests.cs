@@ -191,11 +191,11 @@ public sealed class NetSevenSignsTests
         Assert.Equal(3, action.RedStones);
     }
 
-    static SevenSignsStatusNetMsg LastStatus(WorldBench bench) =>
-        Assert.IsType<SevenSignsStatusNetMsg>(bench.Rec.Of("FanoutSevenSignsStatus").Last()[1]);
+    static SevenSignsStatusMsg LastStatus(WorldBench bench) =>
+        Assert.IsType<SevenSignsStatusMsg>(bench.Rec.Of("FanoutSevenSignsStatus").Last()[1]);
 
-    static SevenSignsSkyNetMsg LastSky(WorldBench bench) =>
-        Assert.IsType<SevenSignsSkyNetMsg>(bench.Rec.Of("FanoutSevenSignsSky").Last()[1]);
+    static SevenSignsSkyMsg LastSky(WorldBench bench) =>
+        Assert.IsType<SevenSignsSkyMsg>(bench.Rec.Of("FanoutSevenSignsSky").Last()[1]);
 
     static SystemMessageMsg LastSystemMessage(WorldBench bench) =>
         Assert.IsType<SystemMessageMsg>(bench.Rec.Of("FanoutSystemMessage").Last()[1]);

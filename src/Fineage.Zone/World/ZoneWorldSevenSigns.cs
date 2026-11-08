@@ -57,7 +57,7 @@ public sealed partial class ZoneWorld
         {
             foreach (var notice in notices)
                 NetBridge?.FanoutSystemMessage(live, ToNet(notice));
-            NetBridge?.FanoutSevenSignsSky(live, ToNet(sky));
+            NetBridge?.FanoutSevenSignsSky(live, sky);
         }
 
         EvictDungeonLosers();
@@ -159,8 +159,8 @@ public sealed partial class ZoneWorld
     {
         var status = _sevenSigns.StatusFor(session.ObjectId);
         var sky = _sevenSigns.Sky();
-        NetBridge?.FanoutSevenSignsStatus([session.ObjectId], ToNet(status));
-        NetBridge?.FanoutSevenSignsSky([session.ObjectId], ToNet(sky));
+        NetBridge?.FanoutSevenSignsStatus([session.ObjectId], status);
+        NetBridge?.FanoutSevenSignsSky([session.ObjectId], sky);
     }
 
     bool Pay(PlayerInventory inventory, SevenSignsJoinCost cost, List<InventoryUpdateEntryMsg> changes)
@@ -199,42 +199,5 @@ public sealed partial class ZoneWorld
         Text = notice.Text
     };
 
-    static Fineage.Net.Contract.SevenSignsSkyNetMsg ToNet(SevenSignsSkyMsg sky) => new()
-    {
-        State = sky.State,
-        Period = sky.Period,
-        WinningCabal = sky.WinningCabal
-    };
 
-    static Fineage.Net.Contract.SevenSignsStatusNetMsg ToNet(SevenSignsStatusMsg s) => new()
-    {
-        Period = s.Period,
-        Cycle = s.Cycle,
-        PlayerCabal = s.PlayerCabal,
-        PlayerSeal = s.PlayerSeal,
-        PlayerStoneCount = s.PlayerStoneCount,
-        PlayerAncientAdena = s.PlayerAncientAdena,
-        PlayerContribution = s.PlayerContribution,
-        DawnScore = s.DawnScore,
-        DuskScore = s.DuskScore,
-        DawnFestivalScore = s.DawnFestivalScore,
-        DuskFestivalScore = s.DuskFestivalScore,
-        DawnStonePoints = s.DawnStonePoints,
-        DuskStonePoints = s.DuskStonePoints,
-        AvariceOwner = s.AvariceOwner,
-        GnosisOwner = s.GnosisOwner,
-        StrifeOwner = s.StrifeOwner,
-        DawnMembers = s.DawnMembers,
-        DuskMembers = s.DuskMembers,
-        WinningCabal = s.WinningCabal,
-        NextChangeUnixMs = s.NextChangeUnixMs,
-        SkyState = s.SkyState,
-        DawnAvarice = s.DawnAvarice,
-        DawnGnosis = s.DawnGnosis,
-        DawnStrife = s.DawnStrife,
-        DuskAvarice = s.DuskAvarice,
-        DuskGnosis = s.DuskGnosis,
-        DuskStrife = s.DuskStrife,
-        PreviousWinner = s.PreviousWinner
-    };
 }

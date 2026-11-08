@@ -208,11 +208,12 @@ interface IWorldEventPublisher
     void FanoutOlympiadResult(IReadOnlyList<int> watcherObjectIds, OlympiadResultNetMsg result);
 
     /// <summary>The Seven Signs record, also the reply to a status request.</summary>
-    void FanoutSevenSignsStatus(IReadOnlyList<int> watcherObjectIds, SevenSignsStatusNetMsg status);
+    /// <summary>Seven Signs status record. Called under the ZoneWorld gate.</summary>
+    void FanoutSevenSignsStatus(IReadOnlyList<int> watcherObjectIds, Fineage.Protocol.SevenSignsStatusMsg status);
 
     /// <summary>The sky tint the record implies, so the client can recolour without polling.</summary>
-    void FanoutSevenSignsSky(IReadOnlyList<int> watcherObjectIds, SevenSignsSkyNetMsg sky);
+    void FanoutSevenSignsSky(IReadOnlyList<int> watcherObjectIds, Fineage.Protocol.SevenSignsSkyMsg sky);
 
     /// <summary>The catacomb/necropolis result, also the validation kick.</summary>
-    void FanoutDungeonEntered(IReadOnlyList<int> watcherObjectIds, DungeonEnteredNetMsg entered);
+    void FanoutDungeonEntered(IReadOnlyList<int> watcherObjectIds, Fineage.Protocol.DungeonEnteredMsg entered);
 }
