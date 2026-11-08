@@ -123,4 +123,56 @@ public sealed class NetTradeTests
 
         Assert.True(accepted <= TradeProtocol.MaxOfferRows);
     }
+
+    [Fact]
+    public async Task An_offer_count_above_owned_stack_is_refused()
+    {
+        var (kit, _) = World();
+        var (seller, sellerEntity) = await kit.EnterAsync(classId: 0);
+        var (buyer, buyerEntity) = await kit.EnterAsync(classId: 1);
+        Assert.Null(await kit.World.TryTradeRequestAsync(
+            seller, new TradeRequestMsg { TargetObjectId = buyerEntity.ObjectId }, default));
+        Assert.Null(await kit.World.TryTradeAnswerAsync(
+            buyer, new TradeAnswerRequestMsg { RequestorObjectId = sellerEntity.ObjectId, Response = 1 }, default));
+
+        var offered = Tradable(sellerEntity);
+        string? error = await kit.World.TryTradeAddItemAsync(
+            seller,
+            new TradeAddItemRequestMsg { InventoryObjectId = offered.ObjectId, Count = offered.Count + 1 },
+            default);
+        Assert.Equal(TradeProtocol.Item, error);
+        Assert.Equal(offered.Count, sellerEntity.Inventory!.Find(offered.ObjectId)!.Count);
+    }
+
+    [Fact]
+    public async Task A_finished_trade_cannot_confirm_again_without_a_session()
+    {
+        var (kit, _) = World();
+        var (seller, sellerEntity) = await kit.EnterAsync(classId: 0);
+        var (buyer, buyerEntity) = await kit.EnterAsync(classId: 1);
+        var offered = Tradable(sellerEntity);
+        int offeredObjectId = offered.ObjectId;
+        int offeredItemId = offered.ItemId;
+
+        Assert.Null(await kit.World.TryTradeRequestAsync(
+            seller, new TradeRequestMsg { TargetObjectId = buyerEntity.ObjectId }, default));
+        Assert.Null(await kit.World.TryTradeAnswerAsync(
+            buyer, new TradeAnswerRequestMsg { RequestorObjectId = sellerEntity.ObjectId, Response = 1 }, default));
+        Assert.Null(await kit.World.TryTradeAddItemAsync(
+            seller, new TradeAddItemRequestMsg { InventoryObjectId = offeredObjectId, Count = 1 }, default));
+        Assert.Null(await kit.World.TryTradeDoneAsync(seller, new TradeDoneRequestMsg { Response = 1 }, default));
+        Assert.Null(await kit.World.TryTradeDoneAsync(buyer, new TradeDoneRequestMsg { Response = 1 }, default));
+
+        Assert.DoesNotContain(sellerEntity.Inventory!.Items, item => item.ObjectId == offeredObjectId);
+        Assert.Contains(buyerEntity.Inventory!.Items, item => item.ItemId == offeredItemId);
+
+        // Second confirm after FinishTradeSession must not invent a new transfer.
+        Assert.Equal(
+            TradeProtocol.Session,
+            await kit.World.TryTradeDoneAsync(seller, new TradeDoneRequestMsg { Response = 1 }, default));
+        Assert.Equal(
+            TradeProtocol.Session,
+            await kit.World.TryTradeDoneAsync(buyer, new TradeDoneRequestMsg { Response = 1 }, default));
+        Assert.Single(buyerEntity.Inventory.Items, item => item.ItemId == offeredItemId && !item.IsEquipped);
+    }
 }
