@@ -109,7 +109,7 @@ public sealed partial class ZoneWorld
         LastNpcHtmlForTest = rendered;
         if (NetBridge != null && session.ObjectId > 0)
         {
-            NetBridge.FanoutNpcHtml([session.ObjectId], new Fineage.Net.Contract.NpcHtmlNetMsg
+            NetBridge.FanoutNpcHtml([session.ObjectId], new NpcHtmlMsg
             {
                 NpcObjectId = 0,
                 NpcId = 0,

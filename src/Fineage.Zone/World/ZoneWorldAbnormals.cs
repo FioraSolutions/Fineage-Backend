@@ -93,26 +93,7 @@ public sealed partial class ZoneWorld
         }
 
         if (netWatchers is { Count: > 0 } && NetBridge != null)
-        {
-            var effects = update.Effects ?? [];
-            var netEffects = new Fineage.Net.Contract.AbnormalEffectNet[effects.Length];
-            for (int i = 0; i < effects.Length; i++)
-            {
-                var src = effects[i];
-                netEffects[i] = new Fineage.Net.Contract.AbnormalEffectNet
-                {
-                    Id = src.Id,
-                    Value = src.Value,
-                    DurationSeconds = src.DurationSeconds
-                };
-            }
-
-            NetBridge.FanoutAbnormalStatusUpdate(netWatchers, new Fineage.Net.Contract.AbnormalStatusUpdateNetMsg
-            {
-                ObjectId = update.ObjectId,
-                Effects = netEffects
-            });
-        }
+            NetBridge.FanoutAbnormalStatusUpdate(netWatchers, update);
     }
 
     AbnormalStatusUpdateMsg AbnormalFor(ZoneEntity entity)

@@ -53,7 +53,7 @@ public sealed class NewbieHelperGiftTests
     }
 
     static string LastHtml(WorldBench bench) =>
-        Assert.IsType<NpcHtmlNetMsg>(bench.Rec.Of(nameof(FanoutNpcHtml)).Last()[1]).Html;
+        Assert.IsType<NpcHtmlMsg>(bench.Rec.Of(nameof(FanoutNpcHtml)).Last()[1]).Html;
 
     const string FanoutNpcHtml = "FanoutNpcHtml";
     const string FanoutInventoryUpdate = "FanoutInventoryUpdate";

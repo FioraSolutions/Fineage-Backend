@@ -62,7 +62,7 @@ public sealed class AdminShopTests : IDisposable
         BenchPlayer me = await kit.EnterAsync(name: "KuK");
 
         Assert.Null(await me.BypassAsync(0, "admin_gmshop"));
-        var page = Assert.IsType<NpcHtmlNetMsg>(kit.Rec.Of(nameof(IWorldEventPublisher.FanoutNpcHtml)).Last()[1]);
+        var page = Assert.IsType<NpcHtmlMsg>(kit.Rec.Of(nameof(IWorldEventPublisher.FanoutNpcHtml)).Last()[1]);
         Assert.Contains("GM", page.Html, StringComparison.Ordinal);
 
         Assert.Null(await me.BypassAsync(0, "admin_buy 9917"));

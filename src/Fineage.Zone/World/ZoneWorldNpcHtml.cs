@@ -108,7 +108,7 @@ public sealed partial class ZoneWorld
     {
         if (NetBridge == null || session.ObjectId <= 0)
             return;
-        NetBridge.FanoutNpcHtml([session.ObjectId], new Fineage.Net.Contract.NpcHtmlNetMsg
+        NetBridge.FanoutNpcHtml([session.ObjectId], new NpcHtmlMsg
         {
             NpcObjectId = npc.ObjectId,
             NpcId = npc.NpcId,

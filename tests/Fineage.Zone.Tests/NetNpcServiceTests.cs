@@ -91,7 +91,7 @@ public sealed class NetNpcServiceTests
         Assert.True(fighter.SavedRecord().Newbie);
 
         Assert.Null(await fighter.SupportMagic(GateObjectId));
-        var effects = Assert.IsType<AbnormalStatusUpdateNetMsg>(Last(bench, FanoutAbnormalStatusUpdate)[1]).Effects;
+        var effects = Assert.IsType<AbnormalStatusUpdateMsg>(Last(bench, FanoutAbnormalStatusUpdate)[1]).Effects;
         Assert.Contains(effects, effect => effect.Id == 4322 && effect.Value == 3 && effect.DurationSeconds == 3600);
         Assert.Contains(effects, effect => effect.Id == 4327);
         Assert.DoesNotContain(effects, effect => effect.Id == 4331);
@@ -250,7 +250,7 @@ public sealed class NetNpcServiceTests
     static object?[] Last(WorldBench bench, string method) => bench.Rec.Of(method).Last();
 
     static string LastHtml(WorldBench bench) =>
-        Assert.IsType<NpcHtmlNetMsg>(Last(bench, FanoutNpcHtml)[1]).Html;
+        Assert.IsType<NpcHtmlMsg>(Last(bench, FanoutNpcHtml)[1]).Html;
 
     static int LastSystemMessageId(WorldBench bench) =>
         Assert.IsType<SystemMessageMsg>(Last(bench, FanoutSystemMessage)[1]).Id;
