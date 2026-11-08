@@ -181,13 +181,13 @@ interface IWorldEventPublisher
     /// <summary>Manufacturer MP + recipe after make-info / make-item.</summary>
     void FanoutRecipeShopItemInfo(IReadOnlyList<int> watcherObjectIds, RecipeShopItemInfoNetMsg info);
 
-    void FanoutFriendInviteAsk(IReadOnlyList<int> watcherObjectIds, FriendInviteAskNetMsg ask);
+    void FanoutFriendInviteAsk(IReadOnlyList<int> watcherObjectIds, Fineage.Protocol.FriendInviteAskMsg ask);
 
-    void FanoutFriendList(IReadOnlyList<int> watcherObjectIds, FriendListNetMsg list);
+    void FanoutFriendList(IReadOnlyList<int> watcherObjectIds, Fineage.Protocol.FriendListMsg list);
 
-    void FanoutFriendUpdate(IReadOnlyList<int> watcherObjectIds, FriendUpdateNetMsg update);
+    void FanoutFriendUpdate(IReadOnlyList<int> watcherObjectIds, Fineage.Protocol.FriendUpdateMsg update);
 
-    void FanoutBlockList(IReadOnlyList<int> watcherObjectIds, BlockListNetMsg list);
+    void FanoutBlockList(IReadOnlyList<int> watcherObjectIds, Fineage.Protocol.BlockListMsg list);
 
     /// <summary>Boss schedule rows, the reply to a <c>BossStatusRequest</c>.</summary>
     void FanoutBossStatus(IReadOnlyList<int> watcherObjectIds, Fineage.Protocol.BossStatusMsg status);
