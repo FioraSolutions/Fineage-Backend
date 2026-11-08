@@ -65,7 +65,10 @@ public sealed class WorldEventPacketHandler
         }
 
         var request = NetCodec.DecodeAdminBossSchedule(envelope.Payload);
-        string? error = await _world.TryAdminBossNetAsync(zoneSession, request, ct).ConfigureAwait(false);
+        string? error = await _world.TryAdminBossAsync(
+            zoneSession,
+            new AdminBossScheduleMsg { NpcId = request.NpcId, Action = request.Action },
+            ct).ConfigureAwait(false);
         if (error != null)
             await _reject(conn, error, "AdminBossSchedule was rejected.", ct).ConfigureAwait(false);
     }
@@ -164,7 +167,8 @@ public sealed class WorldEventPacketHandler
         }
 
         var request = NetCodec.DecodeAdminCaptureCastle(envelope.Payload);
-        string? error = await _world.TryAdminCaptureNetAsync(zoneSession, request, ct).ConfigureAwait(false);
+        string? error = await _world.TryAdminCaptureAsync(zoneSession, request.CastleId, request.ClanId, ct)
+            .ConfigureAwait(false);
         if (error != null)
             await _reject(conn, error, "AdminCaptureCastle was rejected.", ct).ConfigureAwait(false);
     }

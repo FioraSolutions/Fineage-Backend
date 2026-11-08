@@ -1,5 +1,4 @@
 using Fineage.Game;
-using Fineage.Net.Contract;
 using Fineage.Protocol;
 
 namespace Fineage.Zone.World;

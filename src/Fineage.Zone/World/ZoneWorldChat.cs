@@ -1,4 +1,3 @@
-using Fineage.Net.Contract;
 using Fineage.Protocol;
 using Fineage.Zone.Chat;
 

@@ -54,8 +54,8 @@ public sealed class NetBossTests
         Assert.Equal(row.MaxHp, row.CurrentHp);
 
         // Mark dead: the world removes the pawn and opens the respawn window.
-        Assert.Null(await bench.World.TryAdminBossNetAsync(
-            actor.Session, new AdminBossScheduleNetMsg { NpcId = BossNpcId, Action = BossProtocol.ActionMarkDead }, CancellationToken.None));
+        Assert.Null(await bench.World.TryAdminBossAsync(
+            actor.Session, new AdminBossScheduleMsg { NpcId = BossNpcId, Action = BossProtocol.ActionMarkDead }, CancellationToken.None));
         Assert.Contains(rec.Of("FanoutEntityDespawn"), _ => true);
 
         Assert.Null(await bench.World.TryBossStatusAsync(actor.Session, BossNpcId, CancellationToken.None));
@@ -66,8 +66,8 @@ public sealed class NetBossTests
         Assert.Equal(expected, dead.RespawnUnixMs);
 
         // Force spawn: the row is alive again and the pawn is back with its full vitals.
-        Assert.Null(await bench.World.TryAdminBossNetAsync(
-            actor.Session, new AdminBossScheduleNetMsg { NpcId = BossNpcId, Action = BossProtocol.ActionForceSpawn }, CancellationToken.None));
+        Assert.Null(await bench.World.TryAdminBossAsync(
+            actor.Session, new AdminBossScheduleMsg { NpcId = BossNpcId, Action = BossProtocol.ActionForceSpawn }, CancellationToken.None));
         Assert.Null(await bench.World.TryBossStatusAsync(actor.Session, BossNpcId, CancellationToken.None));
         var back = Assert.Single(LastStatus(rec).Bosses);
         Assert.Equal(BossProtocol.StatusAlive, back.Status);
@@ -85,10 +85,10 @@ public sealed class NetBossTests
         Assert.Equal(BossNpcId, Assert.Single(LastStatus(rec).Bosses).NpcId);
 
         Assert.Equal(BossProtocol.UnknownBoss, await bench.World.TryBossStatusAsync(actor.Session, 1, CancellationToken.None));
-        Assert.Equal(BossProtocol.UnknownBoss, await bench.World.TryAdminBossNetAsync(
-            actor.Session, new AdminBossScheduleNetMsg { NpcId = 1, Action = BossProtocol.ActionMarkDead }, CancellationToken.None));
-        Assert.Equal("bad_request", await bench.World.TryAdminBossNetAsync(
-            actor.Session, new AdminBossScheduleNetMsg { NpcId = BossNpcId, Action = 9 }, CancellationToken.None));
+        Assert.Equal(BossProtocol.UnknownBoss, await bench.World.TryAdminBossAsync(
+            actor.Session, new AdminBossScheduleMsg { NpcId = 1, Action = BossProtocol.ActionMarkDead }, CancellationToken.None));
+        Assert.Equal("bad_request", await bench.World.TryAdminBossAsync(
+            actor.Session, new AdminBossScheduleMsg { NpcId = BossNpcId, Action = 9 }, CancellationToken.None));
     }
 
     /// <summary>
