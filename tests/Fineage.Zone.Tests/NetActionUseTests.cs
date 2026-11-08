@@ -30,7 +30,7 @@ public sealed class NetActionUseTests
         Assert.Null(await kit.World.TryCharacterActionAsync(session, ActionProtocol.SitStand, 0, default));
         Assert.True(elf.Sitting);
 
-        var waits = rec.Of(nameof(INetPresenceBridge.FanoutChangeWaitType));
+        var waits = rec.Of(nameof(IWorldEventPublisher.FanoutChangeWaitType));
         var call = Assert.Single(waits);
         var watchers = Assert.IsAssignableFrom<IReadOnlyList<int>>(call[0]);
         Assert.Contains(elf.ObjectId, watchers);
@@ -50,7 +50,7 @@ public sealed class NetActionUseTests
         await kit.World.TryCharacterActionAsync(session, ActionProtocol.SitStand, 0, default);
 
         Assert.False(elf.Sitting);
-        var waits = rec.Of(nameof(INetPresenceBridge.FanoutChangeWaitType));
+        var waits = rec.Of(nameof(IWorldEventPublisher.FanoutChangeWaitType));
         Assert.Equal(2, waits.Count);
         var standing = Assert.IsType<ChangeWaitTypeNetMsg>(waits[1][1]);
         Assert.Equal(ActionProtocol.WaitStanding, standing.WaitType);
@@ -68,7 +68,7 @@ public sealed class NetActionUseTests
 
         Assert.Null(await kit.World.TryCharacterActionAsync(session, ActionProtocol.SocialVictory, 0, default));
 
-        var call = Assert.Single(rec.Of(nameof(INetPresenceBridge.FanoutSocialAction)));
+        var call = Assert.Single(rec.Of(nameof(IWorldEventPublisher.FanoutSocialAction)));
         var msg = Assert.IsType<SocialActionNetMsg>(call[1]);
         Assert.Equal(ActionProtocol.SocialVictory, msg.ActionId);
         Assert.Equal(elf.ObjectId, (int)msg.EntityValue);
@@ -85,7 +85,7 @@ public sealed class NetActionUseTests
         Assert.Null(await kit.World.TryCharacterActionAsync(session, ActionProtocol.WalkRun, 0, default));
 
         Assert.False(elf.Running);
-        var call = Assert.Single(rec.Of(nameof(INetPresenceBridge.FanoutChangeMoveType)));
+        var call = Assert.Single(rec.Of(nameof(IWorldEventPublisher.FanoutChangeMoveType)));
         var watchers = Assert.IsAssignableFrom<IReadOnlyList<int>>(call[0]);
         Assert.Contains(elf.ObjectId, watchers);
         Assert.Equal(elf.ObjectId, (int)call[1]!);

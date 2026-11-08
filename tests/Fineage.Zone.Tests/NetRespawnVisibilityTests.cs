@@ -24,7 +24,7 @@ public sealed class NetRespawnVisibilityTests
         kit.World.AdvanceSpawnsForTests();
 
         Assert.Contains(npcId, player.Knownlist);
-        Assert.Contains(rec.Of(nameof(INetPresenceBridge.FanoutKnownlistDiff)),
+        Assert.Contains(rec.Of(nameof(IWorldEventPublisher.FanoutKnownlistDiff)),
             a => (int)a[0]! == player.ObjectId && ((IReadOnlyList<int>)a[1]!).Contains(npcId));
     }
 }

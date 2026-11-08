@@ -42,12 +42,12 @@ public sealed class NetCombatDamageChatTests
         Assert.Null(await kit.World.TrySelectTargetAsync(session, MobId, CancellationToken.None));
         Assert.Null(await kit.World.TryAttackAsync(session, MobId, CancellationToken.None));
 
-        var attacks = rec.Of(nameof(INetPresenceBridge.FanoutAttackState))
+        var attacks = rec.Of(nameof(IWorldEventPublisher.FanoutAttackState))
             .Select(args => Assert.IsType<AttackStateMsg>(args[1]))
             .ToList();
         var swing = Assert.Single(attacks);
 
-        var lines = rec.Of(nameof(INetPresenceBridge.FanoutSystemMessage));
+        var lines = rec.Of(nameof(IWorldEventPublisher.FanoutSystemMessage));
         var damageLines = lines
             .Select(args => (Watchers: Assert.IsAssignableFrom<IReadOnlyList<int>>(args[0]),
                              Line: Assert.IsType<SystemMessageNetMsg>(args[1])))

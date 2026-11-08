@@ -23,7 +23,7 @@ public sealed class NetQuestKillTests
 
         Assert.Equal(10, killer.Inventory!.CountOf(1118));
         Assert.Equal(2, killer.Quests.Find(313)!.Cond);
-        Assert.NotEmpty(rec.Of(nameof(INetPresenceBridge.FanoutInventoryUpdate)));
+        Assert.NotEmpty(rec.Of(nameof(IWorldEventPublisher.FanoutInventoryUpdate)));
     }
 }
 

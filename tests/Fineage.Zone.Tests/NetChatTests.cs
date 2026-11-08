@@ -57,7 +57,7 @@ public sealed class NetChatTests
 
     /// <summary>One entry per fanout call: the watchers it was addressed to and the line they got.</summary>
     static List<(IReadOnlyList<int> Watchers, CreatureSayNetMsg Line)> Says(NetBridgeRecorder rec) =>
-        rec.Of(nameof(INetPresenceBridge.FanoutCreatureSay))
+        rec.Of(nameof(IWorldEventPublisher.FanoutCreatureSay))
             .Select(args => ((IReadOnlyList<int>)args[0], (CreatureSayNetMsg)args[1]))
             .ToList();
 
@@ -68,7 +68,7 @@ public sealed class NetChatTests
         says.Any(s => s.Watchers.Contains(objectId));
 
     static List<SystemMessageNetMsg> SystemLines(NetBridgeRecorder rec) =>
-        rec.Of(nameof(INetPresenceBridge.FanoutSystemMessage))
+        rec.Of(nameof(IWorldEventPublisher.FanoutSystemMessage))
             .Select(args => (SystemMessageNetMsg)args[1])
             .ToList();
 

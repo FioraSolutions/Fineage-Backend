@@ -9,7 +9,7 @@ namespace Fineage.Zone.Tests;
 /// <summary>
 /// Boss schedule over Net: the status rows a client asks for, the admin dead / force-spawn actions, and the
 /// <c>FINEAGE_ZONE_ADMIN</c> gate. The world <see cref="ZoneWorld"/> is driven through <see cref="WorldBench"/>,
-/// so these assert on the recorded <see cref="Fineage.Zone.World.INetPresenceBridge"/> fanout rather than a frame.
+/// so these assert on the recorded <see cref="Fineage.Zone.World.IWorldEventPublisher"/> fanout rather than a frame.
 /// </summary>
 public sealed class NetBossTests
 {

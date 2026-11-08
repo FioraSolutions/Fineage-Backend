@@ -26,7 +26,7 @@ public sealed class ElvenMerchantExtrasTests
         var (bridge, rec) = NetBridgeRecorder.Create();
         kit.World.NetBridge = bridge;
         Assert.Null(kit.World.NpcServiceForTest(session, 30147, NpcServiceIntent.TerritoryStatus));
-        var html = ((NpcHtmlNetMsg)rec.Of(nameof(INetPresenceBridge.FanoutNpcHtml)).Last()[1]!).Html;
+        var html = ((NpcHtmlNetMsg)rec.Of(nameof(IWorldEventPublisher.FanoutNpcHtml)).Last()[1]!).Html;
         Assert.Contains("Oren", html);
         Assert.Contains("Elven Village", html);
         Assert.Contains("not ruled by any clan", html);

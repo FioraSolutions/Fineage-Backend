@@ -30,7 +30,7 @@ public sealed class NetFriendTests
 
         Assert.Null(await kit.World.TryFriendInviteAsync(sessionA, new FriendInviteMsg { Name = b.Name }, default));
         var ask = Assert.IsType<Fineage.Net.Contract.FriendInviteAskNetMsg>(
-            Last(rec, nameof(INetPresenceBridge.FanoutFriendInviteAsk)));
+            Last(rec, nameof(IWorldEventPublisher.FanoutFriendInviteAsk)));
         Assert.Equal(a.Name, ask.RequestorName);
 
         Assert.Null(await kit.World.TryFriendAnswerAsync(sessionB, new FriendAnswerMsg { Response = 1 }, default));
@@ -39,7 +39,7 @@ public sealed class NetFriendTests
 
         Assert.Null(await kit.World.TryFriendListAsync(sessionA, default));
         var list = Assert.IsType<Fineage.Net.Contract.FriendListNetMsg>(
-            Last(rec, nameof(INetPresenceBridge.FanoutFriendList)));
+            Last(rec, nameof(IWorldEventPublisher.FanoutFriendList)));
         Assert.Single(list.Friends);
         Assert.Equal(playerB.ObjectId, list.Friends[0].ObjectId);
         Assert.Equal(1, list.Friends[0].Online);

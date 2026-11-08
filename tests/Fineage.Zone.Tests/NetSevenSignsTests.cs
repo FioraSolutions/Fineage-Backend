@@ -11,7 +11,7 @@ namespace Fineage.Zone.Tests;
 /// Seven Signs over Net: the record and sky a client reads, the period gate on joining, the seal-stone
 /// contribution that moves the cabal score, and the period change that reaches every live player.
 /// The world runs on <see cref="WorldBench"/>, so these assert the recorded
-/// <see cref="Fineage.Zone.World.INetPresenceBridge"/> fanout rather than MessagePack frames.
+/// <see cref="Fineage.Zone.World.IWorldEventPublisher"/> fanout rather than MessagePack frames.
 /// </summary>
 public sealed class NetSevenSignsTests
 {

@@ -135,7 +135,7 @@ public sealed class NetPvpTests
     static (int CurHp, int MaxHp)? LatestNetHp(NetBridgeRecorder rec, int objectId)
     {
         (int CurHp, int MaxHp)? last = null;
-        foreach (var args in rec.Of(nameof(INetPresenceBridge.FanoutStatusUpdate)))
+        foreach (var args in rec.Of(nameof(IWorldEventPublisher.FanoutStatusUpdate)))
         {
             if (args[1] is not StatusUpdateNetMsg msg || msg.EntityValue != (ulong)(uint)objectId)
                 continue;

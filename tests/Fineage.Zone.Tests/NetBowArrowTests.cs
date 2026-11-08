@@ -45,7 +45,7 @@ public sealed class NetBowArrowTests
     }
 
     static bool RanOutOfArrows(NetBridgeRecorder rec) =>
-        rec.Of(nameof(INetPresenceBridge.FanoutSystemMessage))
+        rec.Of(nameof(IWorldEventPublisher.FanoutSystemMessage))
             .Any(m => ((SystemMessageNetMsg)m[1]!).Id == ZoneWorld.SysMsgRunOutOfArrows);
 
     [Fact]
@@ -56,7 +56,7 @@ public sealed class NetBowArrowTests
         Assert.Null(await kit.World.TryAttackAsync(session, MobId, CancellationToken.None));
 
         Assert.True(RanOutOfArrows(rec));
-        Assert.Empty(rec.Of(nameof(INetPresenceBridge.FanoutAttackState)));
+        Assert.Empty(rec.Of(nameof(IWorldEventPublisher.FanoutAttackState)));
         Assert.Equal(0, session.AutoAttackTargetId);
         Assert.Null(player.Inventory!.GetEquipped(PaperdollSlot.LHand));
     }
@@ -70,7 +70,7 @@ public sealed class NetBowArrowTests
 
         // checkAndEquipArrows moved one arrow into the left hand (paperdoll change fanned as InventoryUpdate).
         Assert.Equal(WoodenArrow, player.Inventory!.GetEquipped(PaperdollSlot.LHand)?.ItemId);
-        Assert.Contains(rec.Of(nameof(INetPresenceBridge.FanoutInventoryUpdate)), u =>
+        Assert.Contains(rec.Of(nameof(IWorldEventPublisher.FanoutInventoryUpdate)), u =>
             ((InventoryUpdateNetMsg)u[1]!).Changes.Length is 1 or 2);
     }
 

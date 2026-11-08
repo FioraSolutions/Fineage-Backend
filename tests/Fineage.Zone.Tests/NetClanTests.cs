@@ -10,7 +10,7 @@ namespace Fineage.Zone.Tests;
 
 /// <summary>
 /// Clan lifecycle over Net. Every case drives the public <c>TryClan*</c> entry points and asserts the
-/// <see cref="INetPresenceBridge"/> fanout: the pledge status, the roster, the invite, the join result,
+/// <see cref="IWorldEventPublisher"/> fanout: the pledge status, the roster, the invite, the join result,
 /// and the system lines that carry the rejection codes.
 /// </summary>
 public sealed class NetClanTests
@@ -27,10 +27,10 @@ public sealed class NetClanTests
     }
 
     static PledgeStatusNetMsg LastStatus(NetBridgeRecorder rec) =>
-        Assert.IsType<PledgeStatusNetMsg>(rec.Of(nameof(INetPresenceBridge.FanoutPledgeStatus)).Last()[1]);
+        Assert.IsType<PledgeStatusNetMsg>(rec.Of(nameof(IWorldEventPublisher.FanoutPledgeStatus)).Last()[1]);
 
     static PledgeMemberListNetMsg LastRoster(NetBridgeRecorder rec) =>
-        Assert.IsType<PledgeMemberListNetMsg>(rec.Of(nameof(INetPresenceBridge.FanoutPledgeMemberList)).Last()[1]);
+        Assert.IsType<PledgeMemberListNetMsg>(rec.Of(nameof(IWorldEventPublisher.FanoutPledgeMemberList)).Last()[1]);
 
     /// <summary>Clan open, at a level and class the create gate accepts.</summary>
     static NetTestKit.Character LevelTen(NetTestKit kit) => kit.Create(level: ClanCreateLevel);
@@ -86,7 +86,7 @@ public sealed class NetClanTests
             leader, new ClanInviteRequestMsg { TargetObjectId = memberEntity.ObjectId, PledgeType = 0 }, kit.Now, default));
 
         ClanAskJoinNetMsg ask = Assert.IsType<ClanAskJoinNetMsg>(
-            Assert.Single(rec.Of(nameof(INetPresenceBridge.FanoutClanAskJoin)))[1]);
+            Assert.Single(rec.Of(nameof(IWorldEventPublisher.FanoutClanAskJoin)))[1]);
         Assert.Equal(leaderEntity.ObjectId, ask.RequestorObjectId);
         Assert.Equal("Fine", ask.ClanName);
 
@@ -94,7 +94,7 @@ public sealed class NetClanTests
             member, new ClanAnswerJoinRequestMsg { RequestorObjectId = leaderEntity.ObjectId, Response = 2 }, kit.Now, default));
 
         ClanJoinResultNetMsg result = Assert.IsType<ClanJoinResultNetMsg>(
-            Assert.Single(rec.Of(nameof(INetPresenceBridge.FanoutClanJoinResult)))[1]);
+            Assert.Single(rec.Of(nameof(IWorldEventPublisher.FanoutClanJoinResult)))[1]);
         Assert.Equal(2, result.Response);
         Assert.Equal(2, LastRoster(rec).Members.Length);
     }
@@ -165,11 +165,11 @@ public sealed class NetClanTests
         leaderEntity.Level = ClanCreateLevel;
         Assert.Null(await kit.World.TryClanCreateAsync(
             leader, new ClanCreateRequestMsg { Name = "Fine" }, kit.Now, default));
-        int published = rec.Of(nameof(INetPresenceBridge.FanoutPledgeStatus)).Count;
+        int published = rec.Of(nameof(IWorldEventPublisher.FanoutPledgeStatus)).Count;
 
         Assert.Equal(ClanProtocol.Member, await kit.World.TryClanCreateAsync(
             leader, new ClanCreateRequestMsg { Name = "Other" }, kit.Now, default));
-        Assert.Equal(published, rec.Of(nameof(INetPresenceBridge.FanoutPledgeStatus)).Count);
+        Assert.Equal(published, rec.Of(nameof(IWorldEventPublisher.FanoutPledgeStatus)).Count);
     }
 
     [Fact]
@@ -241,11 +241,11 @@ public sealed class NetClanTests
             memberSession, new ClanAnswerJoinRequestMsg { RequestorObjectId = leaderEntity.ObjectId, Response = 0 },
             kit.Now, default));
 
-        var lines = rec.Of(nameof(INetPresenceBridge.FanoutSystemMessage));
+        var lines = rec.Of(nameof(IWorldEventPublisher.FanoutSystemMessage));
         Assert.Contains(lines, call => ((SystemMessageNetMsg)call[1]).Id == ClanProtocol.InviteDeclinedSelf);
         Assert.Contains(lines, call => ((SystemMessageNetMsg)call[1]).Id == ClanProtocol.InviteDeclinedRequestor);
         Assert.Equal(0, Assert.IsType<ClanJoinResultNetMsg>(
-            Assert.Single(rec.Of(nameof(INetPresenceBridge.FanoutClanJoinResult)))[1]).Response);
+            Assert.Single(rec.Of(nameof(IWorldEventPublisher.FanoutClanJoinResult)))[1]).Response);
         Assert.Equal(0, kit.Store.FindById(member.Account, member.CharacterId)!.ClanId);
 
         // Second invite while the first is still pending is refused as busy.
@@ -281,14 +281,14 @@ public sealed class NetClanTests
             session, new ClanKickRequestMsg { TargetObjectId = leaderEntity.ObjectId }, kit.Now, default));
 
         Assert.Null(await kit.World.TryClanLeaveAsync(memberSession, kit.Now, default));
-        Assert.Contains(rec.Of(nameof(INetPresenceBridge.FanoutSystemMessage)),
+        Assert.Contains(rec.Of(nameof(IWorldEventPublisher.FanoutSystemMessage)),
             call => ((SystemMessageNetMsg)call[1]).Id == ClanProtocol.Withdrawn);
 
         // The leaver is told the clan is gone: an empty status and an empty roster, both addressed to them only.
-        Assert.Contains(rec.Of(nameof(INetPresenceBridge.FanoutPledgeStatus)), call =>
+        Assert.Contains(rec.Of(nameof(IWorldEventPublisher.FanoutPledgeStatus)), call =>
             Assert.IsType<PledgeStatusNetMsg>(call[1]).ClanId == 0 &&
             ((IReadOnlyList<int>)call[0]).SequenceEqual([memberEntity.ObjectId]));
-        Assert.Contains(rec.Of(nameof(INetPresenceBridge.FanoutPledgeMemberList)), call =>
+        Assert.Contains(rec.Of(nameof(IWorldEventPublisher.FanoutPledgeMemberList)), call =>
             Assert.IsType<PledgeMemberListNetMsg>(call[1]).Members.Length == 0 &&
             ((IReadOnlyList<int>)call[0]).SequenceEqual([memberEntity.ObjectId]));
 
@@ -327,7 +327,7 @@ public sealed class NetClanTests
     }
 
     static SystemMessageNetMsg LastLine(NetBridgeRecorder rec) =>
-        Assert.IsType<SystemMessageNetMsg>(rec.Of(nameof(INetPresenceBridge.FanoutSystemMessage)).Last()[1]);
+        Assert.IsType<SystemMessageNetMsg>(rec.Of(nameof(IWorldEventPublisher.FanoutSystemMessage)).Last()[1]);
 
     [Fact]
     public async Task Combat_blocks_leave_and_dismiss_until_the_stance_ends()
@@ -390,7 +390,7 @@ public sealed class NetClanTests
         kit.Now = DateTimeOffset.FromUnixTimeMilliseconds(ClanRules.DissolveExpiry(again));
         kit.World.CompleteDueDissolutions(kit.Now);
         Assert.Equal(ClanProtocol.Dispersed, LastLine(rec).Id);
-        Assert.Equal(0, ((PledgeStatusNetMsg)rec.Of(nameof(INetPresenceBridge.FanoutPledgeStatus))[^1][1]).ClanId);
+        Assert.Equal(0, ((PledgeStatusNetMsg)rec.Of(nameof(IWorldEventPublisher.FanoutPledgeStatus))[^1][1]).ClanId);
         Assert.Equal(0, LastUserInfoClan(rec));
         Assert.Null(kit.Store.FindClan(clanId));
 
@@ -402,7 +402,7 @@ public sealed class NetClanTests
     }
 
     static int LastUserInfoClan(NetBridgeRecorder rec) =>
-        Assert.IsType<UserInfoNetMsg>(rec.Of(nameof(INetPresenceBridge.FanoutUserInfo)).Last()[1]).ClanId;
+        Assert.IsType<UserInfoNetMsg>(rec.Of(nameof(IWorldEventPublisher.FanoutUserInfo)).Last()[1]).ClanId;
 
     [Fact]
     public async Task Level_0_clan_rejects_an_eleventh_member()
@@ -434,7 +434,7 @@ public sealed class NetClanTests
 
         Assert.Equal(ClanProtocol.Full, await kit.World.TryClanInviteAsync(
             leader, new ClanInviteRequestMsg { TargetObjectId = recruitEntity.ObjectId }, kit.Now, default));
-        Assert.Empty(rec.Of(nameof(INetPresenceBridge.FanoutClanAskJoin)));
+        Assert.Empty(rec.Of(nameof(IWorldEventPublisher.FanoutClanAskJoin)));
     }
 
     [Fact]

@@ -11,7 +11,7 @@ namespace Fineage.Zone.Tests;
 /// <summary>
 /// Equip and unequip rules on the zone world: which paperdoll slot each item lands in, what a swap
 /// displaces, and the bag/paperdoll rows the client receives. Ported off the V2 wire; the same rules are
-/// asserted through <see cref="INetPresenceBridge"/>, which is what a real client renders.
+/// asserted through <see cref="IWorldEventPublisher"/>, which is what a real client renders.
 /// </summary>
 public sealed class NetEquipRulesTests
 {
@@ -304,7 +304,7 @@ public sealed class NetEquipRulesTests
         Assert.Null(await actor.Use(actor.Slot(Sword)));
         var (_, user) = LastGear(bench.Rec);
 
-        var charInfo = bench.Rec.Of(nameof(INetPresenceBridge.FanoutCharInfo));
+        var charInfo = bench.Rec.Of(nameof(IWorldEventPublisher.FanoutCharInfo));
         Assert.NotEmpty(charInfo);
         Assert.Contains(charInfo, args => args[0] is IReadOnlyList<int> watchers && watchers.Contains(near.ObjectId));
         Assert.DoesNotContain(charInfo, args => args[0] is IReadOnlyList<int> watchers && watchers.Contains(far.ObjectId));
@@ -371,11 +371,11 @@ public sealed class NetEquipRulesTests
 
     static InventoryUpdateNetMsg LastInventory(NetBridgeRecorder rec) =>
         Assert.IsType<InventoryUpdateNetMsg>(
-            rec.Of(nameof(INetPresenceBridge.FanoutInventoryUpdate)).Last()[1]);
+            rec.Of(nameof(IWorldEventPublisher.FanoutInventoryUpdate)).Last()[1]);
 
     static UserInfoNetMsg LastUserInfo(NetBridgeRecorder rec) =>
         Assert.IsType<UserInfoNetMsg>(
-            rec.Of(nameof(INetPresenceBridge.FanoutUserInfo)).Last()[1]);
+            rec.Of(nameof(IWorldEventPublisher.FanoutUserInfo)).Last()[1]);
 
     static StoredItem Bag(int itemId) => new(itemId, 1, -1);
 

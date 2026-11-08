@@ -154,20 +154,20 @@ public sealed class NetQuestTests
     static DateTimeOffset FixedClock() => DateTimeOffset.FromUnixTimeMilliseconds(1_800_000_000_000);
 
     static QuestListNetMsg LastQuestList(NetBridgeRecorder rec) =>
-        Assert.IsType<QuestListNetMsg>(rec.Of(nameof(INetPresenceBridge.FanoutQuestList)).Last()[1]);
+        Assert.IsType<QuestListNetMsg>(rec.Of(nameof(IWorldEventPublisher.FanoutQuestList)).Last()[1]);
 
     static SystemMessageNetMsg LastSystemMessage(NetBridgeRecorder rec) =>
-        Assert.IsType<SystemMessageNetMsg>(rec.Of(nameof(INetPresenceBridge.FanoutSystemMessage)).Last()[1]);
+        Assert.IsType<SystemMessageNetMsg>(rec.Of(nameof(IWorldEventPublisher.FanoutSystemMessage)).Last()[1]);
 
     static List<int> SystemMessageIds(NetBridgeRecorder rec) =>
-        rec.Of(nameof(INetPresenceBridge.FanoutSystemMessage))
+        rec.Of(nameof(IWorldEventPublisher.FanoutSystemMessage))
             .Select(args => ((SystemMessageNetMsg)args[1]).Id)
             .ToList();
 
     static InventoryUpdateNetMsg LastInventory(NetBridgeRecorder rec) =>
-        Assert.IsType<InventoryUpdateNetMsg>(rec.Of(nameof(INetPresenceBridge.FanoutInventoryUpdate)).Last()[1]);
+        Assert.IsType<InventoryUpdateNetMsg>(rec.Of(nameof(IWorldEventPublisher.FanoutInventoryUpdate)).Last()[1]);
 
     /// <summary>The quest dialog HTML the client opens; a Net page arrives as NPC HTML, not the V2 dialog.</summary>
     static NpcHtmlNetMsg LastDialog(NetBridgeRecorder rec) =>
-        Assert.IsType<NpcHtmlNetMsg>(rec.Of(nameof(INetPresenceBridge.FanoutNpcHtml)).Last()[1]);
+        Assert.IsType<NpcHtmlNetMsg>(rec.Of(nameof(IWorldEventPublisher.FanoutNpcHtml)).Last()[1]);
 }

@@ -12,7 +12,7 @@ namespace Fineage.Zone.Tests;
 /// <summary>
 /// Mobius enchant <em>roll</em> rules on the world layer: what each scroll's fail mode does to the item, the bag
 /// and the paperdoll. The Net transport cases live in <see cref="NetEnchantTests"/>; these assert the outcome
-/// through <see cref="INetPresenceBridge"/> instead of reading MessagePack frames.
+/// through <see cref="IWorldEventPublisher"/> instead of reading MessagePack frames.
 /// </summary>
 public sealed class NetEnchantRulesTests
 {
@@ -89,10 +89,10 @@ public sealed class NetEnchantRulesTests
     }
 
     static EnchantResultNetMsg LastResult(NetBridgeRecorder rec) =>
-        Assert.IsType<EnchantResultNetMsg>(rec.Of(nameof(INetPresenceBridge.FanoutEnchantResult)).Last()[1]);
+        Assert.IsType<EnchantResultNetMsg>(rec.Of(nameof(IWorldEventPublisher.FanoutEnchantResult)).Last()[1]);
 
     static IReadOnlyList<SystemMessageNetMsg> Lines(NetBridgeRecorder rec) =>
-        rec.Of(nameof(INetPresenceBridge.FanoutSystemMessage))
+        rec.Of(nameof(IWorldEventPublisher.FanoutSystemMessage))
             .Select(args => Assert.IsType<SystemMessageNetMsg>(args[1]))
             .ToList();
 
@@ -113,7 +113,7 @@ public sealed class NetEnchantRulesTests
         Assert.Equal(641, result.CrystalCount);
 
         var update = Assert.IsType<InventoryUpdateNetMsg>(
-            bench.Rec.Of(nameof(INetPresenceBridge.FanoutInventoryUpdate)).Last()[1]);
+            bench.Rec.Of(nameof(IWorldEventPublisher.FanoutInventoryUpdate)).Last()[1]);
         Assert.Contains(update.Changes, row => row.Change == InventoryChange.Remove &&
                                                row.ItemId == Saber && row.EnchantLevel == 3 && row.Count == 0);
         Assert.Contains(update.Changes, row => row.Change == InventoryChange.Modify &&
@@ -144,7 +144,7 @@ public sealed class NetEnchantRulesTests
         Assert.Equal(EnchantProtocol.ResultReset, result.Result);
         Assert.Equal(0, result.EnchantLevel);
         var update = Assert.IsType<InventoryUpdateNetMsg>(
-            bench.Rec.Of(nameof(INetPresenceBridge.FanoutInventoryUpdate)).Last()[1]);
+            bench.Rec.Of(nameof(IWorldEventPublisher.FanoutInventoryUpdate)).Last()[1]);
         Assert.Contains(update.Changes, row => row.ItemId == Saber &&
                                                row.EnchantLevel == 0 && row.Change == InventoryChange.Modify);
         Assert.Contains(Lines(bench.Rec), l => l.Id == EnchantProtocol.Reset);
@@ -172,7 +172,7 @@ public sealed class NetEnchantRulesTests
         Assert.Equal(SlotFor(player, Saber), result.ObjectId);
 
         var update = Assert.IsType<InventoryUpdateNetMsg>(
-            bench.Rec.Of(nameof(INetPresenceBridge.FanoutInventoryUpdate)).Last()[1]);
+            bench.Rec.Of(nameof(IWorldEventPublisher.FanoutInventoryUpdate)).Last()[1]);
         Assert.DoesNotContain(update.Changes, row => row.ItemId == Saber);
         Assert.Contains(update.Changes, row => row.Change == InventoryChange.Remove && row.ItemId == 9001);
         Assert.Contains(Lines(bench.Rec), l => l.Id == EnchantProtocol.Kept);
@@ -224,10 +224,10 @@ public sealed class NetEnchantRulesTests
         Assert.Null(await bench.World.TryEnchantConfirmAsync(session, SlotFor(player, Saber), default));
 
         var info = Assert.IsType<UserInfoNetMsg>(
-            bench.Rec.Of(nameof(INetPresenceBridge.FanoutUserInfo)).Last()[1]);
+            bench.Rec.Of(nameof(IWorldEventPublisher.FanoutUserInfo)).Last()[1]);
         Assert.Equal(Saber, info.Paperdoll[7].ItemId);
         Assert.Equal(1, info.Paperdoll[7].EnchantLevel);
-        Assert.NotEmpty(bench.Rec.Of(nameof(INetPresenceBridge.FanoutCharInfo)));
+        Assert.NotEmpty(bench.Rec.Of(nameof(IWorldEventPublisher.FanoutCharInfo)));
         Assert.Contains(Lines(bench.Rec), l => l.Id == EnchantProtocol.SuccessPlain);
     }
 
@@ -244,7 +244,7 @@ public sealed class NetEnchantRulesTests
 
         Assert.Contains(Lines(bench.Rec), l => l.Id == EnchantProtocol.EquipmentRemoved);
         var info = Assert.IsType<UserInfoNetMsg>(
-            bench.Rec.Of(nameof(INetPresenceBridge.FanoutUserInfo)).Last()[1]);
+            bench.Rec.Of(nameof(IWorldEventPublisher.FanoutUserInfo)).Last()[1]);
         Assert.Equal(0, info.Paperdoll[7].ItemId);
         Assert.Equal(0, info.Paperdoll[7].EnchantLevel);
         Assert.Contains(bench.Store.FindById(session.Account, session.ObjectId)!.Items!,
@@ -268,7 +268,7 @@ public sealed class NetEnchantRulesTests
         Assert.Null(await bench.World.TryEnchantConfirmAsync(session, SlotFor(player, Blade), default));
         Assert.Equal(16, LastResult(bench.Rec).EnchantLevel);
         var update = Assert.IsType<InventoryUpdateNetMsg>(
-            bench.Rec.Of(nameof(INetPresenceBridge.FanoutInventoryUpdate)).Last()[1]);
+            bench.Rec.Of(nameof(IWorldEventPublisher.FanoutInventoryUpdate)).Last()[1]);
         Assert.Contains(update.Changes, row => row.ItemId == Blade && row.EnchantLevel == 16);
         Assert.DoesNotContain(bench.Store.FindById(session.Account, session.ObjectId)!.Items!,
             item => item.ItemId == CrystalS);

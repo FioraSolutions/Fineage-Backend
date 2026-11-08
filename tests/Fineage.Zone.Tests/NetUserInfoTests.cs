@@ -96,14 +96,14 @@ public sealed class NetUserInfoTests
         int slot = (int)armor.EquippedSlot!.Value;
         Assert.Null(await kit.World.TryUnequipItemAsync(session, slot, CancellationToken.None));
 
-        var infos = rec.Of(nameof(INetPresenceBridge.FanoutUserInfo));
+        var infos = rec.Of(nameof(IWorldEventPublisher.FanoutUserInfo));
         Assert.Single(infos);
         Assert.Equal([elf.ObjectId], (IReadOnlyList<int>)infos[0][0]!);
         var after = (UserInfoNetMsg)infos[0][1]!;
         Assert.Equal(0, after.Paperdoll[slot].ItemId);
         Assert.True(after.PDef < before.PDef, $"pdef {before.PDef} -> {after.PDef}");
 
-        var charInfos = rec.Of(nameof(INetPresenceBridge.FanoutCharInfo));
+        var charInfos = rec.Of(nameof(IWorldEventPublisher.FanoutCharInfo));
         Assert.Single(charInfos);
         Assert.Contains(peer.ObjectId, (IReadOnlyList<int>)charInfos[0][0]!);
         Assert.Equal(elf.ObjectId, (int)charInfos[0][1]!);
