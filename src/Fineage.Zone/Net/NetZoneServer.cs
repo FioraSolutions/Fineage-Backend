@@ -41,6 +41,8 @@ public sealed class NetZoneServer : INetPresenceBridge
     readonly RecipePacketHandler _recipes;
     readonly ChatPacketHandler _chat;
     readonly WorldEventPacketHandler _worldEvents;
+    readonly MovementPacketHandler _movement;
+    readonly CharacterActionPacketHandler _characterActions;
 
     public NetZoneServer(
         IHandoffStore handoff,
@@ -78,6 +80,8 @@ public sealed class NetZoneServer : INetPresenceBridge
         _recipes = new RecipePacketHandler(_world, RejectAsync);
         _chat = new ChatPacketHandler(_world, _clock, RejectAsync);
         _worldEvents = new WorldEventPacketHandler(_world, _adminCommands, RejectAsync);
+        _movement = new MovementPacketHandler(_world, RejectAsync, FanKnownlistDiffAsync);
+        _characterActions = new CharacterActionPacketHandler(_world, RejectAsync, FanKnownlistDiffAsync);
         _world.NetBridge = this;
     }
 
@@ -747,7 +751,7 @@ public sealed class NetZoneServer : INetPresenceBridge
                             await OnEnterAsync(conn, zoneSession, self, ct).ConfigureAwait(false);
                             break;
                         case NetOpcode.MoveInput:
-                            await OnMoveAsync(conn, zoneSession, self, envelope, ct).ConfigureAwait(false);
+                            await _movement.OnMoveAsync(conn, zoneSession, self, envelope, ct).ConfigureAwait(false);
                             break;
                         case NetOpcode.SelectTarget:
                             await _combat.OnSelectTargetAsync(conn, zoneSession, envelope, ct).ConfigureAwait(false);
@@ -780,7 +784,7 @@ public sealed class NetZoneServer : INetPresenceBridge
                             await _combat.OnUseSkillAsync(conn, zoneSession, envelope, ct).ConfigureAwait(false);
                             break;
                         case NetOpcode.ReviveRequest:
-                            await OnReviveRequestAsync(conn, zoneSession, self, envelope, ct).ConfigureAwait(false);
+                            await _characterActions.OnReviveAsync(conn, zoneSession, self, envelope, ct).ConfigureAwait(false);
                             break;
                         case NetOpcode.RequestAcquireSkillInfo:
                             await _skillLearn.OnAcquireAsync(conn, zoneSession, envelope, informing: true, ct).ConfigureAwait(false);
@@ -822,7 +826,7 @@ public sealed class NetZoneServer : INetPresenceBridge
                             await _npcTalk.OnTalkAsync(conn, zoneSession, envelope, ct).ConfigureAwait(false);
                             break;
                         case NetOpcode.BypassRequest:
-                            await OnBypassRequestAsync(conn, zoneSession, self, envelope, ct).ConfigureAwait(false);
+                            await _characterActions.OnBypassAsync(conn, zoneSession, self, envelope, ct).ConfigureAwait(false);
                             break;
                         case NetOpcode.RequestBuyItem:
                             await _shop.OnBuyAsync(conn, zoneSession, envelope, ct).ConfigureAwait(false);
@@ -870,28 +874,7 @@ public sealed class NetZoneServer : INetPresenceBridge
                             await _trade.OnDoneAsync(conn, zoneSession, envelope, ct).ConfigureAwait(false);
                             break;
                         case NetOpcode.ValidatePosition:
-                            if (zoneSession.Bound && zoneSession.InWorld)
-                            {
-                                var vp = NetCodec.DecodeValidatePosition(envelope.Payload);
-                                if (_world.ValidateClientPosition(zoneSession, vp.X, vp.Y, vp.Z, out int dxy, out int dz))
-                                {
-                                    Console.WriteLine(
-                                        $"[zone] ValidatePosition drift obj={zoneSession.ObjectId} dxy={dxy} dz={dz} client={vp.X},{vp.Y},{vp.Z} server={zoneSession.X},{zoneSession.Y},{zoneSession.Z} -> PositionCorrection");
-                                    await conn.SendAsync(
-                                        NetOpcode.PositionCorrection,
-                                        NetCodec.EncodePositionCorrection(new PositionCorrectionMsg
-                                        {
-                                            EntityValue = self.Value,
-                                            EntityGeneration = self.Generation,
-                                            X = zoneSession.X,
-                                            Y = zoneSession.Y,
-                                            Z = zoneSession.Z
-                                        }),
-                                        envelope.RequestSequence,
-                                        ct).ConfigureAwait(false);
-                                }
-                            }
-
+                            await _movement.OnValidatePositionAsync(conn, zoneSession, self, envelope, ct).ConfigureAwait(false);
                             break;
                         case NetOpcode.RequestActionUse:
                             await _shortcutActions.OnActionUseAsync(conn, zoneSession, envelope, ct).ConfigureAwait(false);
@@ -996,24 +979,7 @@ public sealed class NetZoneServer : INetPresenceBridge
                             await _friends.OnBlockAsync(conn, zoneSession, envelope, ct).ConfigureAwait(false);
                             break;
                         case NetOpcode.StopMove:
-                            // Authoritative stop: correct to current session position.
-                            if (zoneSession.Bound && zoneSession.InWorld)
-                            {
-                                _world.StopMove(zoneSession);
-                                await conn.SendAsync(
-                                    NetOpcode.PositionCorrection,
-                                    NetCodec.EncodePositionCorrection(new PositionCorrectionMsg
-                                    {
-                                        EntityValue = self.Value,
-                                        EntityGeneration = self.Generation,
-                                        X = zoneSession.X,
-                                        Y = zoneSession.Y,
-                                        Z = zoneSession.Z
-                                    }),
-                                    envelope.RequestSequence,
-                                    ct).ConfigureAwait(false);
-                            }
-
+                            await _movement.OnStopMoveAsync(conn, zoneSession, self, envelope, ct).ConfigureAwait(false);
                             break;
                         default:
                             await RejectAsync(conn, "unknown_opcode", $"opcode 0x{envelope.Opcode:X4}", ct)
@@ -1267,47 +1233,6 @@ public sealed class NetZoneServer : INetPresenceBridge
         }
     }
 
-    async Task OnMoveAsync(
-        NetConnection conn,
-        ZoneSession zoneSession,
-        EntityId self,
-        PacketEnvelope envelope,
-        CancellationToken ct)
-    {
-        RequireHello(conn);
-        if (!zoneSession.Bound || !zoneSession.InWorld)
-        {
-            await RejectAsync(conn, "not_in_world", "Enter world first.", ct).ConfigureAwait(false);
-            return;
-        }
-
-        var move = NetCodec.DecodeMoveInput(envelope.Payload);
-        var before = _world.SnapshotKnownIds(zoneSession);
-
-        string? error = await _world.TryMoveAsync(
-            zoneSession, move.DestX, move.DestY, move.DestZ, ct).ConfigureAwait(false);
-        if (error != null)
-        {
-            await conn.SendAsync(
-                NetOpcode.PositionCorrection,
-                NetCodec.EncodePositionCorrection(new PositionCorrectionMsg
-                {
-                    EntityValue = self.Value,
-                    EntityGeneration = self.Generation,
-                    X = zoneSession.X,
-                    Y = zoneSession.Y,
-                    Z = zoneSession.Z
-                }),
-                envelope.RequestSequence,
-                ct).ConfigureAwait(false);
-            return;
-        }
-
-        var after = _world.SnapshotKnownIds(zoneSession);
-        // MoveState to self + stayed peers is fanned by ZoneWorld.ReconcileKnownlist → NetBridge.
-        await FanKnownlistDiffAsync(conn, zoneSession, self, before, after, ct).ConfigureAwait(false);
-    }
-
     async Task FanKnownlistDiffAsync(
         NetConnection conn,
         ZoneSession zoneSession,
@@ -1378,66 +1303,6 @@ public sealed class NetZoneServer : INetPresenceBridge
             if (_world.TryGetLivePlayerById(id, out _))
                 await _presence.SendAsync(id, NetOpcode.EntityDespawn, despawnSelf, ct).ConfigureAwait(false);
         }
-    }
-
-    async Task OnReviveRequestAsync(
-        NetConnection conn,
-        ZoneSession zoneSession,
-        EntityId self,
-        PacketEnvelope envelope,
-        CancellationToken ct)
-    {
-        RequireHello(conn);
-        if (!zoneSession.Bound || !zoneSession.InWorld)
-        {
-            await RejectAsync(conn, "not_in_world", "Enter world first.", ct).ConfigureAwait(false);
-            return;
-        }
-
-        var before = _world.SnapshotKnownIds(zoneSession);
-        var revive = NetCodec.DecodeReviveRequest(envelope.Payload);
-        string? error = await _world.TryReviveAsync(zoneSession, revive.Action, ct).ConfigureAwait(false);
-        if (error != null)
-        {
-            await RejectAsync(conn, error, "Revive failed.", ct).ConfigureAwait(false);
-            return;
-        }
-
-        // Revive / Teleport / StatusUpdate fan via NetBridge; AOI after village relocate needs spawn/despawn.
-        var after = _world.SnapshotKnownIds(zoneSession);
-        await FanKnownlistDiffAsync(conn, zoneSession, self, before, after, ct).ConfigureAwait(false);
-    }
-
-    async Task OnBypassRequestAsync(
-        NetConnection conn,
-        ZoneSession zoneSession,
-        EntityId self,
-        PacketEnvelope envelope,
-        CancellationToken ct)
-    {
-        RequireHello(conn);
-        if (!zoneSession.Bound || !zoneSession.InWorld)
-        {
-            await RejectAsync(conn, "not_in_world", "Enter world first.", ct).ConfigureAwait(false);
-            return;
-        }
-
-        var before = _world.SnapshotKnownIds(zoneSession);
-        var bypass = NetCodec.DecodeBypassRequest(envelope.Payload);
-        string? error = await _world.TryBypassAsync(
-            zoneSession,
-            bypass.NpcObjectId,
-            bypass.Command,
-            ct).ConfigureAwait(false);
-        if (error != null)
-        {
-            await RejectAsync(conn, error, "Bypass failed.", ct).ConfigureAwait(false);
-            return;
-        }
-
-        // Teleport bypass relocates; refresh AOI for Net peers.
-        var after = _world.SnapshotKnownIds(zoneSession);
-        await FanKnownlistDiffAsync(conn, zoneSession, self, before, after, ct).ConfigureAwait(false);
     }
 
     static void RequireHello(NetConnection conn)
