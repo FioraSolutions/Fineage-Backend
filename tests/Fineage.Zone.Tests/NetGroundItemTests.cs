@@ -116,10 +116,10 @@ public sealed class NetGroundItemTests
 
         Assert.Null(await kit.World.TryDropItemAsync(session, stack.ObjectId, 100, player.X + 40, player.Y, player.Z, CancellationToken.None));
         Assert.Equal(900, stack.Count);
-        var drop = (DropItemNetMsg)Assert.Single(rec.Of(nameof(IWorldEventPublisher.FanoutDropItem)))[1]!;
+        var drop = (DropItemMsg)Assert.Single(rec.Of(nameof(IWorldEventPublisher.FanoutDropItem)))[1]!;
         Assert.Equal(Adena, drop.ItemId);
         Assert.Equal(100, drop.Count);
-        int groundId = (int)drop.EntityValue;
+        int groundId = drop.ObjectId;
         Assert.Contains(groundId, player.Knownlist);
 
         rec.Calls.Clear();
@@ -140,7 +140,7 @@ public sealed class NetGroundItemTests
         var (kit, session, player, rec) = await SetupAsync();
         var stack = player.Inventory!.FindByItemId(Adena)!;
         Assert.Null(await kit.World.TryDropItemAsync(session, stack.ObjectId, 100, player.X + 100, player.Y, player.Z, CancellationToken.None));
-        int groundId = (int)((DropItemNetMsg)rec.Of(nameof(IWorldEventPublisher.FanoutDropItem))[0][1]!).EntityValue;
+        int groundId = ((DropItemMsg)rec.Of(nameof(IWorldEventPublisher.FanoutDropItem))[0][1]!).ObjectId;
 
         // Walk away 400u — far outside the 45u Mobius pickup gate.
         Assert.True(kit.World.TryGetEntityById(groundId, out var ground));
@@ -194,7 +194,7 @@ public sealed class NetGroundItemTests
     {
         var (kit, session, player, rec) = await SetupAsync();
         Assert.Null(await kit.World.TryDropItemAsync(session, player.Inventory!.FindByItemId(Adena)!.ObjectId, 10, player.X + 60, player.Y, player.Z, CancellationToken.None));
-        int groundId = (int)((DropItemNetMsg)rec.Of(nameof(IWorldEventPublisher.FanoutDropItem))[0][1]!).EntityValue;
+        int groundId = ((DropItemMsg)rec.Of(nameof(IWorldEventPublisher.FanoutDropItem))[0][1]!).ObjectId;
         Assert.True(kit.World.TryGetEntityById(groundId, out var ground));
 
         rec.Calls.Clear();

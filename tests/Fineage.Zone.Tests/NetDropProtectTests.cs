@@ -13,8 +13,8 @@ namespace Fineage.Zone.Tests;
 /// </summary>
 public sealed class NetDropProtectTests
 {
-    static List<DropItemNetMsg> Drops(NetBridgeRecorder rec) =>
-        rec.Of(nameof(IWorldEventPublisher.FanoutDropItem)).Select(a => (DropItemNetMsg)a[1]!).ToList();
+    static List<DropItemMsg> Drops(NetBridgeRecorder rec) =>
+        rec.Of(nameof(IWorldEventPublisher.FanoutDropItem)).Select(a => (DropItemMsg)a[1]!).ToList();
 
     static List<int> SysIds(NetBridgeRecorder rec) =>
         rec.Of(nameof(IWorldEventPublisher.FanoutSystemMessage)).Select(a => ((SystemMessageMsg)a[1]!).Id).ToList();
@@ -32,7 +32,7 @@ public sealed class NetDropProtectTests
         var drop = Assert.Single(Drops(rec));
         Assert.InRange(drop.X, killer.X - ZoneWorld.DeathDropScatter, killer.X + ZoneWorld.DeathDropScatter);
         Assert.InRange(drop.Y, killer.Y - ZoneWorld.DeathDropScatter, killer.Y + ZoneWorld.DeathDropScatter);
-        int groundId = (int)drop.EntityValue;
+        int groundId = drop.ObjectId;
         Assert.True(kit.World.TryGetEntityById(groundId, out var ground));
         Assert.Equal(killer.ObjectId, ground.GroundOwnerId);
         other.X = ground.X; other.Y = ground.Y;
@@ -56,7 +56,7 @@ public sealed class NetDropProtectTests
         var (bridge, rec) = NetBridgeRecorder.Create();
         kit.World.NetBridge = bridge;
         kit.World.DropDeathLootForTest(TalkingIsland.GremlinNpcId, killer.X, killer.Y, killer.Z, killer);
-        int groundId = (int)Assert.Single(Drops(rec)).EntityValue;
+        int groundId = Assert.Single(Drops(rec)).ObjectId;
 
         kit.Now = kit.Now.AddMilliseconds(ZoneWorld.GroundItemAutoDestroyMs - 1000);
         await kit.World.RunPlayerCombatTickAsync(CancellationToken.None);

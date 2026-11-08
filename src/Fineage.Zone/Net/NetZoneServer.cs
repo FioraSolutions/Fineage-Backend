@@ -293,9 +293,20 @@ public sealed class NetZoneServer : IWorldEventPublisher
             _presence.TrySendCritical(watcher, NetOpcode.EntityDie, payload);
     }
 
-    void IWorldEventPublisher.FanoutDropItem(IReadOnlyList<int> watcherObjectIds, DropItemNetMsg drop)
+    void IWorldEventPublisher.FanoutDropItem(IReadOnlyList<int> watcherObjectIds, Fineage.Protocol.DropItemMsg drop)
     {
-        var payload = NetCodec.EncodeDropItem(drop);
+        var payload = NetCodec.EncodeDropItem(new DropItemNetMsg
+        {
+            DropperObjectId = drop.CharObjectId,
+            EntityValue = (ulong)(uint)drop.ObjectId,
+            EntityGeneration = 1,
+            ItemId = drop.ItemId,
+            X = drop.X,
+            Y = drop.Y,
+            Z = drop.Z,
+            Stackable = drop.Stackable,
+            Count = drop.Count
+        });
         foreach (int watcher in watcherObjectIds)
             _presence.TrySendCritical(watcher, NetOpcode.DropItem, payload);
     }
