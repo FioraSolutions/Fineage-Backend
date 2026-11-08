@@ -30,6 +30,17 @@ public enum ZoneEntityKind
     Player = 2
 }
 
+/// <summary>Ground-item fields composed off <see cref="ZoneEntity"/> (#353).</summary>
+sealed class ZoneGroundItemPayload
+{
+    public int ItemId { get; set; }
+    public int Count { get; set; } = 1;
+    public bool Stackable { get; set; }
+    public int OwnerId { get; set; }
+    public long ProtectUntilMs { get; set; }
+    public long ExpireAtMs { get; set; }
+}
+
 sealed class ZoneEntity
 {
     public int ObjectId { get; init; }
@@ -323,15 +334,48 @@ sealed class ZoneEntity
     public bool Dead { get; set; }
     /// <summary>Scroll object id selected for the enchant window. 0 when the window is closed.</summary>
     public int ActiveEnchantObjectId { get; set; }
-    public int GroundItemId { get; set; }
-    public int GroundCount { get; set; } = 1;
-    public bool GroundStackable { get; set; }
+    /// <summary>Ground-drop payload; null unless <see cref="Kind"/> is GroundItem (#353 composition).</summary>
+    public ZoneGroundItemPayload? Ground { get; set; }
+
+    public int GroundItemId
+    {
+        get => Ground?.ItemId ?? 0;
+        set => EnsureGround().ItemId = value;
+    }
+
+    public int GroundCount
+    {
+        get => Ground?.Count ?? 1;
+        set => EnsureGround().Count = value;
+    }
+
+    public bool GroundStackable
+    {
+        get => Ground?.Stackable ?? false;
+        set => EnsureGround().Stackable = value;
+    }
+
+    ZoneGroundItemPayload EnsureGround() => Ground ??= new ZoneGroundItemPayload();
     /// <summary>Mobius DropProtection owner (killer); 0 = anyone may pick up.</summary>
-    public int GroundOwnerId { get; set; }
+    public int GroundOwnerId
+    {
+        get => Ground?.OwnerId ?? 0;
+        set => EnsureGround().OwnerId = value;
+    }
+
     /// <summary>Unix ms until only <see cref="GroundOwnerId"/> (or their party) may pick up.</summary>
-    public long GroundProtectUntilMs { get; set; }
+    public long GroundProtectUntilMs
+    {
+        get => Ground?.ProtectUntilMs ?? 0;
+        set => EnsureGround().ProtectUntilMs = value;
+    }
+
     /// <summary>Mobius ItemsAutoDestroy: unix ms when the ground item is removed; 0 = never.</summary>
-    public long GroundExpireAtMs { get; set; }
+    public long GroundExpireAtMs
+    {
+        get => Ground?.ExpireAtMs ?? 0;
+        set => EnsureGround().ExpireAtMs = value;
+    }
     /// <summary>Mobius spoil: who activated spoil on this attackable (0 = none).</summary>
     public int SpoilerObjectId { get; set; }
     /// <summary>Pre-rolled corpse drops after death when spoiled; cleared by sweeper.</summary>
