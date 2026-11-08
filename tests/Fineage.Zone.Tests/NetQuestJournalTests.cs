@@ -1,6 +1,7 @@
 using Fineage.Net.Contract;
 using Fineage.Zone.World;
 using Xunit;
+using Fineage.Protocol;
 
 namespace Fineage.Zone.Tests;
 
@@ -17,7 +18,7 @@ public sealed class NetQuestJournalTests
         var kit = new NetTestKit();
         var (session, _) = await kit.EnterAsync();
 
-        QuestListNetMsg list = kit.World.NetQuestList(session);
+        QuestListMsg list = kit.World.NetQuestList(session);
 
         Assert.NotNull(list.Active);
         Assert.NotNull(list.CompletedMask);
@@ -31,7 +32,7 @@ public sealed class NetQuestJournalTests
         var kit = new NetTestKit();
         var stranger = new ZoneSession();
 
-        QuestListNetMsg list = kit.World.NetQuestList(stranger);
+        QuestListMsg list = kit.World.NetQuestList(stranger);
 
         Assert.Empty(list.Active);
         Assert.Empty(list.CompletedMask);

@@ -623,11 +623,39 @@ public sealed class NetZoneServer : IWorldEventPublisher
             _presence.TrySend(watcher, NetOpcode.ClanJoinResult, payload);
     }
 
-    void IWorldEventPublisher.FanoutQuestList(IReadOnlyList<int> watcherObjectIds, QuestListNetMsg list)
+    void IWorldEventPublisher.FanoutQuestList(IReadOnlyList<int> watcherObjectIds, Fineage.Protocol.QuestListMsg list)
     {
-        var payload = NetCodec.EncodeQuestList(list);
+        var payload = NetCodec.EncodeQuestList(ToNetQuestList(list));
         foreach (int watcher in watcherObjectIds)
             _presence.TrySend(watcher, NetOpcode.QuestList, payload);
+    }
+
+    internal static QuestListNetMsg ToNetQuestList(Fineage.Protocol.QuestListMsg list)
+    {
+        var src = list.Active ?? [];
+        var active = new QuestJournalEntryNet[src.Length];
+        for (int i = 0; i < src.Length; i++)
+        {
+            var entry = src[i];
+            active[i] = new QuestJournalEntryNet
+            {
+                QuestId = entry.QuestId,
+                Name = entry.Name ?? "",
+                State = entry.State,
+                Cond = entry.Cond,
+                ProgressFlags = entry.ProgressFlags,
+                JournalWord = entry.JournalWord,
+                Repeatable = entry.Repeatable
+            };
+        }
+
+        return new QuestListNetMsg
+        {
+            Active = active,
+            CompletedMask = list.CompletedMask ?? [],
+            CompletedQuestIds = list.CompletedQuestIds ?? [],
+            MaxActive = list.MaxActive
+        };
     }
 
     void IWorldEventPublisher.FanoutPartyAskJoin(IReadOnlyList<int> watcherObjectIds, PartyAskJoinNetMsg ask)

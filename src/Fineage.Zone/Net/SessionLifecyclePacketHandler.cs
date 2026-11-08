@@ -176,7 +176,7 @@ sealed class SessionLifecyclePacketHandler
             await conn.SendAsync(NetOpcode.EtcStatusUpdate, NetCodec.EncodeEtcStatusUpdate(etcStatus), ct: ct)
                 .ConfigureAwait(false);
         // Journal on enter so the quest tabs are filled before the player presses the menu button.
-        await conn.SendAsync(NetOpcode.QuestList, NetCodec.EncodeQuestList(_world.NetQuestList(zoneSession)), ct: ct)
+        await conn.SendAsync(NetOpcode.QuestList, NetCodec.EncodeQuestList(NetZoneServer.ToNetQuestList(_world.NetQuestList(zoneSession))), ct: ct)
             .ConfigureAwait(false);
         // Mobius EnterWorld:561 — a returning clan member gets the pledge sheet and roster up front,
         // otherwise the clan window is blank until some later clan action fans a status out.
