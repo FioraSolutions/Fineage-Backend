@@ -375,14 +375,12 @@ public sealed partial class ZoneWorld
 
         if (buyerChanges.Count > 0)
         {
-            NetBridge?.FanoutInventoryUpdate([buyer.ObjectId],
-                ToNetInventoryUpdate(new InventoryUpdateMsg { Changes = buyerChanges.ToArray() }));
+            NetBridge?.FanoutInventoryUpdate([buyer.ObjectId], new InventoryUpdateMsg { Changes = buyerChanges.ToArray() });
             SelfUserInfo(buyer);
         }
         if (sellerChanges.Count > 0)
         {
-            NetBridge?.FanoutInventoryUpdate([store.ObjectId],
-                ToNetInventoryUpdate(new InventoryUpdateMsg { Changes = sellerChanges.ToArray() }));
+            NetBridge?.FanoutInventoryUpdate([store.ObjectId], new InventoryUpdateMsg { Changes = sellerChanges.ToArray() });
             SelfUserInfo(store);
         }
 
@@ -483,14 +481,12 @@ public sealed partial class ZoneWorld
 
         if (sellerChanges.Count > 0)
         {
-            NetBridge?.FanoutInventoryUpdate([seller.ObjectId],
-                ToNetInventoryUpdate(new InventoryUpdateMsg { Changes = sellerChanges.ToArray() }));
+            NetBridge?.FanoutInventoryUpdate([seller.ObjectId], new InventoryUpdateMsg { Changes = sellerChanges.ToArray() });
             SelfUserInfo(seller);
         }
         if (storeChanges.Count > 0)
         {
-            NetBridge?.FanoutInventoryUpdate([store.ObjectId],
-                ToNetInventoryUpdate(new InventoryUpdateMsg { Changes = storeChanges.ToArray() }));
+            NetBridge?.FanoutInventoryUpdate([store.ObjectId], new InventoryUpdateMsg { Changes = storeChanges.ToArray() });
             SelfUserInfo(store);
         }
 

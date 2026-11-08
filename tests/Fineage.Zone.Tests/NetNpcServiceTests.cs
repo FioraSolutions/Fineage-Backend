@@ -75,7 +75,7 @@ public sealed class NetNpcServiceTests
 
         Assert.Null(await actor.Teleport(GateObjectId, "NORMAL", 0));
 
-        var update = Assert.IsType<InventoryUpdateNetMsg>(Last(bench, FanoutInventoryUpdate)[1]);
+        var update = Assert.IsType<InventoryUpdateMsg>(Last(bench, FanoutInventoryUpdate)[1]);
         var adena = Assert.Single(update.Changes);
         Assert.Equal(Adena, adena.ItemId);
         Assert.Equal(4500, adena.Count);
@@ -153,13 +153,13 @@ public sealed class NetNpcServiceTests
 
         // Depositing charges the per-line fee out of the adena stack and moves the scrolls out of the bag.
         Assert.Null(await actor.Deposit(KeeperObjectId, (scrolls.ObjectId, 10)));
-        var paid = Assert.IsType<InventoryUpdateNetMsg>(Last(bench, FanoutInventoryUpdate)[1]);
+        var paid = Assert.IsType<InventoryUpdateMsg>(Last(bench, FanoutInventoryUpdate)[1]);
         Assert.Contains(paid.Changes, row => row.ItemId == Adena && row.Count == 170);
         Assert.Contains(paid.Changes, row => row.ItemId == Scroll && row.Count == 0);
         Assert.Equal(NpcServiceProtocol.TransactionComplete, LastSystemMessageId(bench));
 
         Assert.Null(await actor.Deposit(KeeperObjectId, (adena.ObjectId, 50)));
-        var second = Assert.IsType<InventoryUpdateNetMsg>(Last(bench, FanoutInventoryUpdate)[1]);
+        var second = Assert.IsType<InventoryUpdateMsg>(Last(bench, FanoutInventoryUpdate)[1]);
         Assert.Contains(second.Changes, row => row.ItemId == Adena && row.Count == 90);
 
         // The keeper's storage is durable across a relog.
@@ -180,7 +180,7 @@ public sealed class NetNpcServiceTests
         Assert.Equal(NpcServiceProtocol.WeightLimit, LastSystemMessageId(bench));
 
         Assert.Null(await again.Withdraw(KeeperObjectId, (storedAdena.ObjectId, 50)));
-        var returned = Assert.IsType<InventoryUpdateNetMsg>(Last(bench, FanoutInventoryUpdate)[1]);
+        var returned = Assert.IsType<InventoryUpdateMsg>(Last(bench, FanoutInventoryUpdate)[1]);
         Assert.Contains(returned.Changes, row => row.ItemId == Adena && row.Count == 140);
     }
 

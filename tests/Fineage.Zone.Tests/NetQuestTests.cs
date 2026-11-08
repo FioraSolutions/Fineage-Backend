@@ -164,8 +164,8 @@ public sealed class NetQuestTests
             .Select(args => ((SystemMessageMsg)args[1]).Id)
             .ToList();
 
-    static InventoryUpdateNetMsg LastInventory(NetBridgeRecorder rec) =>
-        Assert.IsType<InventoryUpdateNetMsg>(rec.Of(nameof(IWorldEventPublisher.FanoutInventoryUpdate)).Last()[1]);
+    static InventoryUpdateMsg LastInventory(NetBridgeRecorder rec) =>
+        Assert.IsType<InventoryUpdateMsg>(rec.Of(nameof(IWorldEventPublisher.FanoutInventoryUpdate)).Last()[1]);
 
     /// <summary>The quest dialog HTML the client opens; a Net page arrives as NPC HTML, not the V2 dialog.</summary>
     static NpcHtmlMsg LastDialog(NetBridgeRecorder rec) =>

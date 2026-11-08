@@ -70,7 +70,7 @@ public sealed partial class ZoneWorld
         else
             player.SpiritshotCharge = t.IsBlessedSpiritshot ? BlessedSpiritCharge : SpiritCharge;
         var update = InventoryMessages.Update(removed ? InventoryChange.Remove : InventoryChange.Modify, stack);
-        NetBridge?.FanoutInventoryUpdate([session.ObjectId], ToNetInventoryUpdate(update));
+        NetBridge?.FanoutInventoryUpdate([session.ObjectId], update);
         ShotNotice(session, soul ? SysMsgSoulshotEnabled : SysMsgSpiritshotEnabled,
             soul ? "Your soulshots are enabled." : "Your spiritshot has been enabled.");
 

@@ -26,7 +26,7 @@ public sealed class NetGrantItemTests
         Assert.Null(await bench.World.TryGrantItemAsync(actor.Session, Adena, 25,
             CancellationToken.None));
 
-        var update = Assert.IsType<InventoryUpdateNetMsg>(
+        var update = Assert.IsType<InventoryUpdateMsg>(
             bench.Rec.Of(nameof(IWorldEventPublisher.FanoutInventoryUpdate)).Last()[1]);
         var row = Assert.Single(update.Changes);
         Assert.Equal(InventoryChange.Add, row.Change);

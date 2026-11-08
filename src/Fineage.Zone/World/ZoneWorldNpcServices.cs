@@ -791,7 +791,7 @@ public sealed partial class ZoneWorld
     {
         var invUpdate = new InventoryUpdateMsg { Changes = changes };
         if (NetBridge != null)
-            NetBridge.FanoutInventoryUpdate([session.ObjectId], ToNetInventoryUpdate(invUpdate));
+            NetBridge.FanoutInventoryUpdate([session.ObjectId], invUpdate);
     }
 
     static Fineage.Net.Contract.WarehouseDepositListNetMsg ToNetDepositList(WarehouseDepositListMsg list) => new()

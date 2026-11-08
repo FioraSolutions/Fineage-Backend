@@ -74,7 +74,7 @@ public sealed class NetSevenSignsTests
         Assert.Equal(SevenSignsProtocol.SealStrife, record.PlayerSeal);
         Assert.Equal(20, record.PlayerContribution);
         Assert.Equal(500, record.DuskScore);
-        var spent = Assert.IsType<InventoryUpdateNetMsg>(bench.Rec.Of("FanoutInventoryUpdate").Last()[1]);
+        var spent = Assert.IsType<InventoryUpdateMsg>(bench.Rec.Of("FanoutInventoryUpdate").Last()[1]);
         var row = Assert.Single(spent.Changes);
         Assert.Equal(SevenSignsProtocol.RedSealStoneId, row.ItemId);
         Assert.Equal(2, row.Change);

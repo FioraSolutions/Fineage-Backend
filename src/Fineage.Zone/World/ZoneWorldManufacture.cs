@@ -231,14 +231,12 @@ public sealed partial class ZoneWorld
 
         if (customerChanges.Count > 0)
         {
-            NetBridge?.FanoutInventoryUpdate([customer.ObjectId],
-                ToNetInventoryUpdate(new InventoryUpdateMsg { Changes = customerChanges.ToArray() }));
+            NetBridge?.FanoutInventoryUpdate([customer.ObjectId], new InventoryUpdateMsg { Changes = customerChanges.ToArray() });
             SelfUserInfo(customer);
         }
         if (makerChanges.Count > 0)
         {
-            NetBridge?.FanoutInventoryUpdate([maker.ObjectId],
-                ToNetInventoryUpdate(new InventoryUpdateMsg { Changes = makerChanges.ToArray() }));
+            NetBridge?.FanoutInventoryUpdate([maker.ObjectId], new InventoryUpdateMsg { Changes = makerChanges.ToArray() });
             SelfUserInfo(maker);
         }
 

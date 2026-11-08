@@ -311,9 +311,24 @@ public sealed class NetZoneServer : IWorldEventPublisher
             _presence.TrySendCritical(watcher, NetOpcode.EntityDespawn, payload);
     }
 
-    void IWorldEventPublisher.FanoutInventoryUpdate(IReadOnlyList<int> watcherObjectIds, InventoryUpdateNetMsg update)
+    void IWorldEventPublisher.FanoutInventoryUpdate(IReadOnlyList<int> watcherObjectIds, Fineage.Protocol.InventoryUpdateMsg update)
     {
-        var payload = NetCodec.EncodeInventoryUpdate(update);
+        var src = update.Changes ?? [];
+        var rows = new InventoryUpdateEntryNet[src.Length];
+        for (int i = 0; i < src.Length; i++)
+        {
+            var row = src[i];
+            rows[i] = new InventoryUpdateEntryNet
+            {
+                Change = row.Change,
+                ObjectId = row.ObjectId,
+                ItemId = row.ItemId,
+                Count = row.Count,
+                EnchantLevel = row.EnchantLevel,
+                EquippedSlot = row.EquippedSlot
+            };
+        }
+        var payload = NetCodec.EncodeInventoryUpdate(new InventoryUpdateNetMsg { Changes = rows });
         foreach (int watcher in watcherObjectIds)
             _presence.TrySendCritical(watcher, NetOpcode.InventoryUpdate, payload);
     }

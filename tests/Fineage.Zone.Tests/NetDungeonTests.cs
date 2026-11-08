@@ -163,7 +163,7 @@ public sealed class NetDungeonTests
         Assert.Equal(20, member.Session.Y);
 
         // The fee leaves the bag, so the client must see the row it lost. A fully spent stack reports 0 left.
-        var paid = Assert.IsType<InventoryUpdateNetMsg>(Assert.Single(bench.Rec.Of("FanoutInventoryUpdate"))[1]);
+        var paid = Assert.IsType<InventoryUpdateMsg>(Assert.Single(bench.Rec.Of("FanoutInventoryUpdate"))[1]);
         var row = Assert.Single(paid.Changes);
         Assert.Equal(DungeonProtocol.AdenaItemId, row.ItemId);
         Assert.Equal(0, row.Count);

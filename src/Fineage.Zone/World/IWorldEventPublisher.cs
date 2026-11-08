@@ -61,7 +61,8 @@ interface IWorldEventPublisher
     /// <summary>Mobius DeleteObject for <paramref name="objectId"/>. Called under the ZoneWorld gate.</summary>
     void FanoutEntityDespawn(IReadOnlyList<int> watcherObjectIds, int objectId);
 
-    void FanoutInventoryUpdate(IReadOnlyList<int> watcherObjectIds, InventoryUpdateNetMsg update);
+    /// <summary>Mobius InventoryUpdate to watchers. Called under the ZoneWorld gate.</summary>
+    void FanoutInventoryUpdate(IReadOnlyList<int> watcherObjectIds, Fineage.Protocol.InventoryUpdateMsg update);
 
     /// <summary>Mobius CreatureSay to watchers. Called under the ZoneWorld gate.</summary>
     void FanoutCreatureSay(IReadOnlyList<int> watcherObjectIds, Fineage.Protocol.CreatureSayMsg say);

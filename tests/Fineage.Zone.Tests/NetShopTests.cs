@@ -277,8 +277,8 @@ public sealed class NetShopTests
     static Fineage.Protocol.ShopBalanceMsg LastBalance(NetBridgeRecorder rec) =>
         Assert.IsType<Fineage.Protocol.ShopBalanceMsg>(rec.Of(nameof(IWorldEventPublisher.FanoutShopBalance)).Last()[1]);
 
-    static InventoryUpdateNetMsg LastInventory(NetBridgeRecorder rec) =>
-        Assert.IsType<InventoryUpdateNetMsg>(rec.Of(nameof(IWorldEventPublisher.FanoutInventoryUpdate)).Last()[1]);
+    static InventoryUpdateMsg LastInventory(NetBridgeRecorder rec) =>
+        Assert.IsType<InventoryUpdateMsg>(rec.Of(nameof(IWorldEventPublisher.FanoutInventoryUpdate)).Last()[1]);
 
     static SystemMessageMsg LastSystemMessage(NetBridgeRecorder rec) =>
         Assert.IsType<SystemMessageMsg>(rec.Of(nameof(IWorldEventPublisher.FanoutSystemMessage)).Last()[1]);
