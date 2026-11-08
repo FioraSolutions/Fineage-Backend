@@ -437,9 +437,17 @@ public sealed class NetZoneServer : IWorldEventPublisher
             _presence.TrySend(watcher, NetOpcode.SkillList, payload);
     }
 
-    void IWorldEventPublisher.FanoutChangeWaitType(IReadOnlyList<int> watcherObjectIds, ChangeWaitTypeNetMsg waitType)
+    void IWorldEventPublisher.FanoutChangeWaitType(IReadOnlyList<int> watcherObjectIds, int objectId, int waitType, int x, int y, int z)
     {
-        var payload = NetCodec.EncodeChangeWaitType(waitType);
+        var payload = NetCodec.EncodeChangeWaitType(new ChangeWaitTypeNetMsg
+        {
+            EntityValue = (ulong)(uint)objectId,
+            EntityGeneration = 1,
+            WaitType = waitType,
+            X = x,
+            Y = y,
+            Z = z
+        });
         foreach (int watcher in watcherObjectIds)
             _presence.TrySend(watcher, NetOpcode.ChangeWaitType, payload);
     }

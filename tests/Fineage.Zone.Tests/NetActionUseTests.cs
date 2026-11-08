@@ -34,9 +34,8 @@ public sealed class NetActionUseTests
         var call = Assert.Single(waits);
         var watchers = Assert.IsAssignableFrom<IReadOnlyList<int>>(call[0]);
         Assert.Contains(elf.ObjectId, watchers);
-        var msg = Assert.IsType<ChangeWaitTypeNetMsg>(call[1]);
-        Assert.Equal(ActionProtocol.WaitSitting, msg.WaitType);
-        Assert.Equal(elf.ObjectId, (int)msg.EntityValue);
+        Assert.Equal(elf.ObjectId, (int)call[1]!);
+        Assert.Equal(ActionProtocol.WaitSitting, (int)call[2]!);
     }
 
     [Fact]
@@ -52,11 +51,11 @@ public sealed class NetActionUseTests
         Assert.False(elf.Sitting);
         var waits = rec.Of(nameof(IWorldEventPublisher.FanoutChangeWaitType));
         Assert.Equal(2, waits.Count);
-        var standing = Assert.IsType<ChangeWaitTypeNetMsg>(waits[1][1]);
-        Assert.Equal(ActionProtocol.WaitStanding, standing.WaitType);
-        Assert.Equal(elf.X, standing.X);
-        Assert.Equal(elf.Y, standing.Y);
-        Assert.Equal(elf.Z, standing.Z);
+        var standing = waits[1];
+        Assert.Equal(ActionProtocol.WaitStanding, (int)standing[2]!);
+        Assert.Equal(elf.X, (int)standing[3]!);
+        Assert.Equal(elf.Y, (int)standing[4]!);
+        Assert.Equal(elf.Z, (int)standing[5]!);
     }
 
     [Fact]
