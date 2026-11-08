@@ -6,7 +6,7 @@ C# login and zone servers for Fineage. The Net `PacketEnvelope` wire is the only
 
 `src/Fineage.Net.Contract` + `src/Fineage.Net.Host` are the **live** client codec and TCP host (`NetOpcode`, `PacketEnvelope`). `src/Fineage.Protocol` keeps legacy `MsgType` / MessagePack-shaped DTOs and helpers for documentation and shared shapes — **not** the on-wire opcode table.
 
-Login issues an HMAC handoff token. The zone on **9777** accepts it in the Net `ZoneAuth` payload and checks it with `HandoffTokens.TryValidate`. Both processes share `FINEAGE_HANDOFF_SECRET` (dev default `FineageLoginHandoffV1`).
+Login issues an HMAC handoff token. The zone on **9777** accepts it in the Net `ZoneAuth` payload and **consumes** it once via `IHandoffStore.TryConsume` (signature + TTL + one-time nonce). Both processes share `FINEAGE_HANDOFF_SECRET`. Non-loopback binds **refuse to start** without that env var; the well-known `DefaultSecret` (`FineageLoginHandoffV1`) is for loopback / `--selftest` only.
 
 ## Docs (what to trust)
 
@@ -17,6 +17,8 @@ Login issues an HMAC handoff token. The zone on **9777** accepts it in the Net `
 | [`docs/combat-parity.md`](docs/combat-parity.md) | Combat checklist vs Mobius |
 | `docs/*-v2-protocol.md` | Feature **semantics** only; MsgType numbers inside are legacy MessagePack |
 | Client [`Docs/DOC_CANON.md`](https://github.com/FioraSolutions/Fineage/blob/dev/Docs/DOC_CANON.md) | Cross-repo doc triage |
+| Client [`Docs/REFACTOR_PLAN_2026-11.md`](https://github.com/FioraSolutions/Fineage/blob/dev/Docs/REFACTOR_PLAN_2026-11.md) | Harden / Zone modularize plan + GPT review verification |
+| Client [`Docs/ARCHITECTURE_NET.md`](https://github.com/FioraSolutions/Fineage/blob/dev/Docs/ARCHITECTURE_NET.md) | Target scale (gateway / 20k) — design, not “already shipped” |
 
 Chronicle today: **Interlude (Mobius CT0)**. Near-term program: finish and stabilize Interlude — not High Five. See client [`Docs/DOC_CANON.md`](https://github.com/FioraSolutions/Fineage/blob/dev/Docs/DOC_CANON.md).
 
