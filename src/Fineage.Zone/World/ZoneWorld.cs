@@ -41,6 +41,14 @@ sealed class ZoneGroundItemPayload
     public long ExpireAtMs { get; set; }
 }
 
+/// <summary>NPC spoil/sweep corpse fields composed off <see cref="ZoneEntity"/> (#353).</summary>
+sealed class ZoneNpcSpoilPayload
+{
+    public int SpoilerObjectId { get; set; }
+    public List<Drops.DropStack> SweepItems { get; } = [];
+    public bool CorpseAwaitingSweep { get; set; }
+}
+
 sealed class ZoneEntity
 {
     public int ObjectId { get; init; }
@@ -376,12 +384,27 @@ sealed class ZoneEntity
         get => Ground?.ExpireAtMs ?? 0;
         set => EnsureGround().ExpireAtMs = value;
     }
+    /// <summary>NPC spoil/sweep payload; null until first spoil access (#353 composition).</summary>
+    public ZoneNpcSpoilPayload? Spoil { get; set; }
+
     /// <summary>Mobius spoil: who activated spoil on this attackable (0 = none).</summary>
-    public int SpoilerObjectId { get; set; }
+    public int SpoilerObjectId
+    {
+        get => Spoil?.SpoilerObjectId ?? 0;
+        set => EnsureSpoil().SpoilerObjectId = value;
+    }
+
     /// <summary>Pre-rolled corpse drops after death when spoiled; cleared by sweeper.</summary>
-    public List<Drops.DropStack> SweepItems { get; } = [];
+    public List<Drops.DropStack> SweepItems => EnsureSpoil().SweepItems;
+
     /// <summary>Dead NPC kept in world until sweeper takes <see cref="SweepItems"/>.</summary>
-    public bool CorpseAwaitingSweep { get; set; }
+    public bool CorpseAwaitingSweep
+    {
+        get => Spoil?.CorpseAwaitingSweep ?? false;
+        set => EnsureSpoil().CorpseAwaitingSweep = value;
+    }
+
+    ZoneNpcSpoilPayload EnsureSpoil() => Spoil ??= new ZoneNpcSpoilPayload();
     public List<ZoneAbnormalEntry> Abnormals { get; } = [];
     /// <summary>Known skill id to level (auto-get tree on enter).</summary>
     public Dictionary<int, int> KnownSkills { get; } = [];
