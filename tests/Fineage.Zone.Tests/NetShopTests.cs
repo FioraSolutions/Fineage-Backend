@@ -265,14 +265,14 @@ public sealed class NetShopTests
             ReferencePrice: 2000, Weight: 100)
     ]);
 
-    static BuyListNetMsg LastBuyList(NetBridgeRecorder rec) =>
-        Assert.IsType<BuyListNetMsg>(rec.Of(nameof(IWorldEventPublisher.FanoutBuyList)).Last()[1]);
+    static Fineage.Protocol.BuyListMsg LastBuyList(NetBridgeRecorder rec) =>
+        Assert.IsType<Fineage.Protocol.BuyListMsg>(rec.Of(nameof(IWorldEventPublisher.FanoutBuyList)).Last()[1]);
 
-    static SellListNetMsg LastSellList(NetBridgeRecorder rec) =>
-        Assert.IsType<SellListNetMsg>(rec.Of(nameof(IWorldEventPublisher.FanoutSellList)).Last()[1]);
+    static Fineage.Protocol.SellListMsg LastSellList(NetBridgeRecorder rec) =>
+        Assert.IsType<Fineage.Protocol.SellListMsg>(rec.Of(nameof(IWorldEventPublisher.FanoutSellList)).Last()[1]);
 
-    static MultiSellListNetMsg LastMultiSell(NetBridgeRecorder rec) =>
-        Assert.IsType<MultiSellListNetMsg>(rec.Of(nameof(IWorldEventPublisher.FanoutMultiSellList)).Last()[1]);
+    static Fineage.Protocol.MultiSellListMsg LastMultiSell(NetBridgeRecorder rec) =>
+        Assert.IsType<Fineage.Protocol.MultiSellListMsg>(rec.Of(nameof(IWorldEventPublisher.FanoutMultiSellList)).Last()[1]);
 
     static Fineage.Protocol.ShopBalanceMsg LastBalance(NetBridgeRecorder rec) =>
         Assert.IsType<Fineage.Protocol.ShopBalanceMsg>(rec.Of(nameof(IWorldEventPublisher.FanoutShopBalance)).Last()[1]);

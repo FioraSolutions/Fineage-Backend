@@ -461,23 +461,23 @@ public sealed class NetZoneServer : IWorldEventPublisher
             _presence.TrySend(watcher, NetOpcode.NpcHtml, payload);
     }
 
-    void IWorldEventPublisher.FanoutBuyList(IReadOnlyList<int> watcherObjectIds, BuyListNetMsg list)
+    void IWorldEventPublisher.FanoutBuyList(IReadOnlyList<int> watcherObjectIds, Fineage.Protocol.BuyListMsg list)
     {
-        var payload = NetCodec.EncodeBuyList(list);
+        var payload = NetCodec.EncodeBuyList(ToNetBuyList(list));
         foreach (int watcher in watcherObjectIds)
             _presence.TrySend(watcher, NetOpcode.BuyList, payload);
     }
 
-    void IWorldEventPublisher.FanoutSellList(IReadOnlyList<int> watcherObjectIds, SellListNetMsg list)
+    void IWorldEventPublisher.FanoutSellList(IReadOnlyList<int> watcherObjectIds, Fineage.Protocol.SellListMsg list)
     {
-        var payload = NetCodec.EncodeSellList(list);
+        var payload = NetCodec.EncodeSellList(ToNetSellList(list));
         foreach (int watcher in watcherObjectIds)
             _presence.TrySend(watcher, NetOpcode.SellList, payload);
     }
 
-    void IWorldEventPublisher.FanoutMultiSellList(IReadOnlyList<int> watcherObjectIds, MultiSellListNetMsg list)
+    void IWorldEventPublisher.FanoutMultiSellList(IReadOnlyList<int> watcherObjectIds, Fineage.Protocol.MultiSellListMsg list)
     {
-        var payload = NetCodec.EncodeMultiSellList(list);
+        var payload = NetCodec.EncodeMultiSellList(ToNetMultiSellList(list));
         foreach (int watcher in watcherObjectIds)
             _presence.TrySend(watcher, NetOpcode.MultiSellList, payload);
     }
@@ -1293,5 +1293,90 @@ public sealed class NetZoneServer : IWorldEventPublisher
     {
         NetTelemetry.PacketRejected("zone");
         return conn.SendAsync(NetOpcode.Reject, NetCodec.EncodeReject(new NetReject { Code = code, Message = message }), ct: ct);
+    }
+
+    static BuyListNetMsg ToNetBuyList(Fineage.Protocol.BuyListMsg buy)
+    {
+        var src = buy.Items ?? [];
+        var items = new BuyListItemNet[src.Length];
+        for (int i = 0; i < src.Length; i++)
+        {
+            items[i] = new BuyListItemNet
+            {
+                ItemId = src[i].ItemId,
+                Price = src[i].Price,
+                Count = src[i].Count
+            };
+        }
+
+        return new BuyListNetMsg
+        {
+            NpcObjectId = buy.NpcObjectId,
+            ListId = buy.ListId,
+            BaseTaxPercent = buy.BaseTaxPercent,
+            CastleTaxPercent = buy.CastleTaxPercent,
+            Items = items
+        };
+    }
+
+    static SellListNetMsg ToNetSellList(Fineage.Protocol.SellListMsg sell)
+    {
+        var src = sell.Items ?? [];
+        var items = new SellListItemNet[src.Length];
+        for (int i = 0; i < src.Length; i++)
+        {
+            items[i] = new SellListItemNet
+            {
+                ObjectId = src[i].ObjectId,
+                ItemId = src[i].ItemId,
+                Count = src[i].Count,
+                Price = src[i].Price,
+                EnchantLevel = src[i].EnchantLevel
+            };
+        }
+
+        return new SellListNetMsg { NpcObjectId = sell.NpcObjectId, Items = items };
+    }
+
+    static MultiSellListNetMsg ToNetMultiSellList(Fineage.Protocol.MultiSellListMsg multi)
+    {
+        var src = multi.Entries ?? [];
+        var entries = new MultiSellEntryNet[src.Length];
+        for (int i = 0; i < src.Length; i++)
+        {
+            entries[i] = new MultiSellEntryNet
+            {
+                EntryId = src[i].EntryId,
+                Ingredients = ToNetMultiSellParts(src[i].Ingredients),
+                Products = ToNetMultiSellParts(src[i].Products)
+            };
+        }
+
+        return new MultiSellListNetMsg
+        {
+            NpcObjectId = multi.NpcObjectId,
+            ListId = multi.ListId,
+            MaintainEnchantment = multi.MaintainEnchantment,
+            InventoryOnly = multi.InventoryOnly,
+            CastleTaxPercent = multi.CastleTaxPercent,
+            Entries = entries
+        };
+    }
+
+    static MultiSellPartNet[] ToNetMultiSellParts(Fineage.Protocol.MultiSellPartMsg[]? parts)
+    {
+        parts ??= [];
+        var rows = new MultiSellPartNet[parts.Length];
+        for (int i = 0; i < parts.Length; i++)
+        {
+            rows[i] = new MultiSellPartNet
+            {
+                ItemId = parts[i].ItemId,
+                Count = parts[i].Count,
+                EnchantLevel = parts[i].EnchantLevel
+            };
+        }
+
+        return rows;
     }
 }

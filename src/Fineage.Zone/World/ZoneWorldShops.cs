@@ -459,7 +459,7 @@ public sealed partial class ZoneWorld
         if (NetBridge == null)
             return;
         int[] self = [session.ObjectId];
-        NetBridge.FanoutBuyList(self, ToNetBuy(buy));
+        NetBridge.FanoutBuyList(self, buy);
         NetBridge.FanoutShopBalance(self, balance);
     }
 
@@ -468,7 +468,7 @@ public sealed partial class ZoneWorld
         if (NetBridge == null)
             return;
         int[] self = [session.ObjectId];
-        NetBridge.FanoutSellList(self, ToNetSell(sell));
+        NetBridge.FanoutSellList(self, sell);
         NetBridge.FanoutShopBalance(self, balance);
     }
 
@@ -477,7 +477,7 @@ public sealed partial class ZoneWorld
         if (NetBridge == null)
             return;
         int[] self = [session.ObjectId];
-        NetBridge.FanoutMultiSellList(self, ToNetMulti(multi));
+        NetBridge.FanoutMultiSellList(self, multi);
         NetBridge.FanoutShopBalance(self, balance);
     }
 
@@ -491,91 +491,6 @@ public sealed partial class ZoneWorld
             Text = message.Text ?? "",
             Params = message.Params ?? []
         });
-    }
-
-    static Fineage.Net.Contract.BuyListNetMsg ToNetBuy(BuyListMsg buy)
-    {
-        var src = buy.Items ?? [];
-        var items = new Fineage.Net.Contract.BuyListItemNet[src.Length];
-        for (int i = 0; i < src.Length; i++)
-        {
-            items[i] = new Fineage.Net.Contract.BuyListItemNet
-            {
-                ItemId = src[i].ItemId,
-                Price = src[i].Price,
-                Count = src[i].Count
-            };
-        }
-
-        return new Fineage.Net.Contract.BuyListNetMsg
-        {
-            NpcObjectId = buy.NpcObjectId,
-            ListId = buy.ListId,
-            BaseTaxPercent = buy.BaseTaxPercent,
-            CastleTaxPercent = buy.CastleTaxPercent,
-            Items = items
-        };
-    }
-
-    static Fineage.Net.Contract.SellListNetMsg ToNetSell(SellListMsg sell)
-    {
-        var src = sell.Items ?? [];
-        var items = new Fineage.Net.Contract.SellListItemNet[src.Length];
-        for (int i = 0; i < src.Length; i++)
-        {
-            items[i] = new Fineage.Net.Contract.SellListItemNet
-            {
-                ObjectId = src[i].ObjectId,
-                ItemId = src[i].ItemId,
-                Count = src[i].Count,
-                Price = src[i].Price,
-                EnchantLevel = src[i].EnchantLevel
-            };
-        }
-
-        return new Fineage.Net.Contract.SellListNetMsg { NpcObjectId = sell.NpcObjectId, Items = items };
-    }
-
-    static Fineage.Net.Contract.MultiSellListNetMsg ToNetMulti(MultiSellListMsg multi)
-    {
-        var src = multi.Entries ?? [];
-        var entries = new Fineage.Net.Contract.MultiSellEntryNet[src.Length];
-        for (int i = 0; i < src.Length; i++)
-        {
-            entries[i] = new Fineage.Net.Contract.MultiSellEntryNet
-            {
-                EntryId = src[i].EntryId,
-                Ingredients = ToNetParts(src[i].Ingredients),
-                Products = ToNetParts(src[i].Products)
-            };
-        }
-
-        return new Fineage.Net.Contract.MultiSellListNetMsg
-        {
-            NpcObjectId = multi.NpcObjectId,
-            ListId = multi.ListId,
-            MaintainEnchantment = multi.MaintainEnchantment,
-            InventoryOnly = multi.InventoryOnly,
-            CastleTaxPercent = multi.CastleTaxPercent,
-            Entries = entries
-        };
-    }
-
-    static Fineage.Net.Contract.MultiSellPartNet[] ToNetParts(MultiSellPartMsg[]? parts)
-    {
-        parts ??= [];
-        var rows = new Fineage.Net.Contract.MultiSellPartNet[parts.Length];
-        for (int i = 0; i < parts.Length; i++)
-        {
-            rows[i] = new Fineage.Net.Contract.MultiSellPartNet
-            {
-                ItemId = parts[i].ItemId,
-                Count = parts[i].Count,
-                EnchantLevel = parts[i].EnchantLevel
-            };
-        }
-
-        return rows;
     }
 
 }

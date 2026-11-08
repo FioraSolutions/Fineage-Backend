@@ -89,11 +89,11 @@ interface IWorldEventPublisher
     /// <summary>Mobius NpcHtmlMessage to watchers. Called under the ZoneWorld gate.</summary>
     void FanoutNpcHtml(IReadOnlyList<int> watcherObjectIds, Fineage.Protocol.NpcHtmlMsg html);
 
-    void FanoutBuyList(IReadOnlyList<int> watcherObjectIds, BuyListNetMsg list);
+    void FanoutBuyList(IReadOnlyList<int> watcherObjectIds, Fineage.Protocol.BuyListMsg list);
 
-    void FanoutSellList(IReadOnlyList<int> watcherObjectIds, SellListNetMsg list);
+    void FanoutSellList(IReadOnlyList<int> watcherObjectIds, Fineage.Protocol.SellListMsg list);
 
-    void FanoutMultiSellList(IReadOnlyList<int> watcherObjectIds, MultiSellListNetMsg list);
+    void FanoutMultiSellList(IReadOnlyList<int> watcherObjectIds, Fineage.Protocol.MultiSellListMsg list);
 
     /// <summary>Shop window adena/weight/slots snapshot. Called under the ZoneWorld gate.</summary>
     void FanoutShopBalance(IReadOnlyList<int> watcherObjectIds, Fineage.Protocol.ShopBalanceMsg balance);
