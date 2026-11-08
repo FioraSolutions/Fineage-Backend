@@ -193,7 +193,7 @@ interface IWorldEventPublisher
     void FanoutBossStatus(IReadOnlyList<int> watcherObjectIds, BossStatusNetMsg status);
 
     /// <summary>One castle's siege state, the reply to a <c>SiegeListRequest</c> and the echo after a change.</summary>
-    void FanoutSiegeInfo(IReadOnlyList<int> watcherObjectIds, SiegeInfoNetMsg info);
+    void FanoutSiegeInfo(IReadOnlyList<int> watcherObjectIds, Fineage.Protocol.SiegeInfoMsg info);
 
     /// <summary>Olympiad period, standing, queue and match slot.</summary>
     void FanoutOlympiadStatus(IReadOnlyList<int> watcherObjectIds, Fineage.Protocol.OlympiadStatusMsg status);

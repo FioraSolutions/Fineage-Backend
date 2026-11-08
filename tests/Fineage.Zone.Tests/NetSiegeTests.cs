@@ -97,8 +97,8 @@ public sealed class NetSiegeTests
         Assert.Equal(SiegeProtocol.Attacker, row.Side);
     }
 
-    static SiegeInfoNetMsg LastInfo(WorldBench bench) =>
-        Assert.IsType<SiegeInfoNetMsg>(bench.Rec.Of("FanoutSiegeInfo").Last()[1]);
+    static SiegeInfoMsg LastInfo(WorldBench bench) =>
+        Assert.IsType<SiegeInfoMsg>(bench.Rec.Of("FanoutSiegeInfo").Last()[1]);
 
     static SystemMessageMsg LastSystemMessage(WorldBench bench) =>
         Assert.IsType<SystemMessageMsg>(bench.Rec.Of("FanoutSystemMessage").Last()[1]);

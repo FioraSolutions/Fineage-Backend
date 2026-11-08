@@ -805,9 +805,28 @@ public sealed class NetZoneServer : IWorldEventPublisher
             _presence.TrySend(watcher, NetOpcode.BossStatus, payload);
     }
 
-    void IWorldEventPublisher.FanoutSiegeInfo(IReadOnlyList<int> watcherObjectIds, SiegeInfoNetMsg info)
+    void IWorldEventPublisher.FanoutSiegeInfo(IReadOnlyList<int> watcherObjectIds, Fineage.Protocol.SiegeInfoMsg info)
     {
-        var payload = NetCodec.EncodeSiegeInfo(info);
+        var clans = info.Clans ?? [];
+        var netClans = new SiegeClanNet[clans.Length];
+        for (int i = 0; i < clans.Length; i++)
+        {
+            var row = clans[i];
+            netClans[i] = new SiegeClanNet { ClanId = row.ClanId, Side = row.Side };
+        }
+        var payload = NetCodec.EncodeSiegeInfo(new SiegeInfoNetMsg
+        {
+            CastleId = info.CastleId,
+            Name = info.Name ?? "",
+            OwnerClanId = info.OwnerClanId,
+            TaxPercent = info.TaxPercent,
+            SiegeUnixMs = info.SiegeUnixMs,
+            RegistrationDeadlineUnixMs = info.RegistrationDeadlineUnixMs,
+            RegistrationClosed = info.RegistrationClosed,
+            InProgress = info.InProgress,
+            EndsUnixMs = info.EndsUnixMs,
+            Clans = netClans
+        });
         foreach (int watcher in watcherObjectIds)
             _presence.TrySend(watcher, NetOpcode.SiegeInfo, payload);
     }
