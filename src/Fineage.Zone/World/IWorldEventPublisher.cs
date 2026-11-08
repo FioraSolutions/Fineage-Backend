@@ -190,7 +190,7 @@ interface IWorldEventPublisher
     void FanoutBlockList(IReadOnlyList<int> watcherObjectIds, BlockListNetMsg list);
 
     /// <summary>Boss schedule rows, the reply to a <c>BossStatusRequest</c>.</summary>
-    void FanoutBossStatus(IReadOnlyList<int> watcherObjectIds, BossStatusNetMsg status);
+    void FanoutBossStatus(IReadOnlyList<int> watcherObjectIds, Fineage.Protocol.BossStatusMsg status);
 
     /// <summary>One castle's siege state, the reply to a <c>SiegeListRequest</c> and the echo after a change.</summary>
     void FanoutSiegeInfo(IReadOnlyList<int> watcherObjectIds, Fineage.Protocol.SiegeInfoMsg info);
