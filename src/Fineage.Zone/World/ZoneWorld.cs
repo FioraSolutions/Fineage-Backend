@@ -142,6 +142,17 @@ sealed class ZoneEntityVitalsPayload
     public bool Dead { get; set; }
 }
 
+/// <summary>Shared combat timing / DEX / enchant/decay fields composed off <see cref="ZoneEntity"/> (#353).</summary>
+sealed class ZoneEntityCombatPayload
+{
+    public int Dex { get; set; } = 30;
+    public long CombatUntilUnixMs { get; set; }
+    public long CastingUntilMs { get; set; }
+    public PendingSkillHit? PendingHit { get; set; }
+    public int ActiveEnchantObjectId { get; set; }
+    public long DecayAtMs { get; set; }
+}
+
 /// <summary>Shared move / swim / path fields composed off <see cref="ZoneEntity"/> (#353).</summary>
 sealed class ZoneEntityMovePayload
 {
@@ -655,11 +666,18 @@ sealed class ZoneEntity
         get => NpcTemplate?.RandomDamage ?? 0;
         init => EnsureNpcTemplate().RandomDamage = value;
     }
+    /// <summary>Shared combat timing payload; null until first combat access (#353 composition).</summary>
+    public ZoneEntityCombatPayload? Combat { get; set; }
+
     /// <summary>
     /// Mobius <c>getDEX()</c>: feeds <c>FuncMoveSpeed</c> (run/walk/swim speed × DEX bonus), accuracy, evasion and
     /// crit. Players copy it from the class template and re-copy it on class change.
     /// </summary>
-    public int Dex { get; set; } = 30;
+    public int Dex
+    {
+        get => Combat?.Dex ?? 30;
+        set => EnsureCombat().Dex = value;
+    }
     /// <summary>NPC Mobius shield defence / block rate (players read the equipped shield).</summary>
     public int ShieldDef
     {
@@ -999,7 +1017,11 @@ sealed class ZoneEntity
         set => EnsureVitals().Dead = value;
     }
     /// <summary>Scroll object id selected for the enchant window. 0 when the window is closed.</summary>
-    public int ActiveEnchantObjectId { get; set; }
+    public int ActiveEnchantObjectId
+    {
+        get => Combat?.ActiveEnchantObjectId ?? 0;
+        set => EnsureCombat().ActiveEnchantObjectId = value;
+    }
     /// <summary>Ground-drop payload; null unless <see cref="Kind"/> is GroundItem (#353 composition).</summary>
     public ZoneGroundItemPayload? Ground { get; set; }
 
@@ -1085,7 +1107,11 @@ sealed class ZoneEntity
         set => EnsureIdentity().ClanId = value;
     }
     /// <summary>Attack stance end, unix milliseconds. Leave and dismiss are refused until this passes.</summary>
-    public long CombatUntilUnixMs { get; set; }
+    public long CombatUntilUnixMs
+    {
+        get => Combat?.CombatUntilUnixMs ?? 0;
+        set => EnsureCombat().CombatUntilUnixMs = value;
+    }
     /// <summary>Catacomb or necropolis id while inside a Seven Signs gate. 0 is outside. Runtime only, same as Mobius <c>isIn7sDungeon</c>.</summary>
     public int DungeonId { get; set; }
     /// <summary>0 is the open world. An Olympiad stadium uses its zone id so the pair does not share knownlist with the town.</summary>
@@ -1099,9 +1125,17 @@ sealed class ZoneEntity
         set => EnsureIdentity().Newbie = value;
     }
     /// <summary>Mobius <c>Creature.isCastingNow</c>: unix ms until the current cast ends. Movement is refused before this.</summary>
-    public long CastingUntilMs { get; set; }
+    public long CastingUntilMs
+    {
+        get => Combat?.CastingUntilMs ?? 0;
+        set => EnsureCombat().CastingUntilMs = value;
+    }
     /// <summary>Skill damage queued for Mobius <c>onMagicHitTimer</c> (applied at hitTime, not on key press).</summary>
-    public PendingSkillHit? PendingHit { get; set; }
+    public PendingSkillHit? PendingHit
+    {
+        get => Combat?.PendingHit;
+        set => EnsureCombat().PendingHit = value;
+    }
     /// <summary>NPC: most-hated player (Mobius <c>AggroList</c> top, simplified to last attacker).</summary>
     public int AggroTargetId
     {
@@ -1176,7 +1210,14 @@ sealed class ZoneEntity
 
     ZoneNpcAggroPayload EnsureAggro() => Aggro ??= new ZoneNpcAggroPayload();
     /// <summary>NPC corpse: unix ms when DecayTaskManager removes it. 0 = alive / not scheduled.</summary>
-    public long DecayAtMs { get; set; }
+    public long DecayAtMs
+    {
+        get => Combat?.DecayAtMs ?? 0;
+        set => EnsureCombat().DecayAtMs = value;
+    }
+
+    ZoneEntityCombatPayload EnsureCombat() => Combat ??= new ZoneEntityCombatPayload();
+
     /// <summary>NPC merchant tax payload; null until first merchant access (#353 composition).</summary>
     public ZoneNpcMerchantPayload? Merchant { get; set; }
 
