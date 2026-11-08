@@ -1,5 +1,4 @@
 using Fineage.Game.Services;
-using Fineage.Net.Contract;
 using Fineage.Protocol;
 using Fineage.Zone.Combat;
 using Fineage.Zone.Drops;

@@ -85,13 +85,6 @@ public sealed partial class ZoneWorld
         return Task.FromResult<string?>(null);
     }
 
-    /// <summary>Admin actions run through <see cref="TryAdminBossAsync"/> after the Net gate has checked the env flag.</summary>
-    public async Task<string?> TryAdminBossNetAsync(ZoneSession session, Fineage.Net.Contract.AdminBossScheduleNetMsg request, CancellationToken ct) =>
-        await TryAdminBossAsync(
-            session,
-            new AdminBossScheduleMsg { NpcId = request.NpcId, Action = request.Action },
-            ct).ConfigureAwait(false);
-
     /// <summary>Test hook: run the boss respawn tick without the simulation loop.</summary>
     internal void AdvanceBossesForTests()
     {

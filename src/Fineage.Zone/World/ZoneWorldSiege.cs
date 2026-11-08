@@ -276,10 +276,6 @@ public sealed partial class ZoneWorld
         NetBridge?.FanoutSiegeInfo([session.ObjectId], msg);
     }
 
-    /// <summary>Net admin entry point: the listener checks the flag before calling this.</summary>
-    public async Task<string?> TryAdminCaptureNetAsync(ZoneSession session, Fineage.Net.Contract.AdminCaptureCastleNetMsg request, CancellationToken ct) =>
-        await TryAdminCaptureAsync(session, request.CastleId, request.ClanId, ct).ConfigureAwait(false);
-
     void Broadcast(SystemMessageMsg line)
     {
         var live = new List<int>();
