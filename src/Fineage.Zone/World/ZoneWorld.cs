@@ -49,6 +49,27 @@ sealed class ZoneNpcSpoilPayload
     public bool CorpseAwaitingSweep { get; set; }
 }
 
+/// <summary>NPC aggro / chase / return-home runtime fields composed off <see cref="ZoneEntity"/> (#353).</summary>
+sealed class ZoneNpcAggroPayload
+{
+    public Dictionary<int, long> HateList { get; } = [];
+    public Dictionary<int, long> DamageBy { get; } = [];
+    public long NextAggroScanMs { get; set; }
+    public long NextClanCallMs { get; set; }
+    public bool StanceShown { get; set; }
+    public int AggroTargetId { get; set; }
+    public long NextMobAttackMs { get; set; }
+    public int ChaseDestX { get; set; }
+    public int ChaseDestY { get; set; }
+    public bool Chasing { get; set; }
+    public long LastAiTickMs { get; set; }
+    public bool HomeSet { get; set; }
+    public int HomeX { get; set; }
+    public int HomeY { get; set; }
+    public int HomeZ { get; set; }
+    public bool ReturningHome { get; set; }
+}
+
 sealed class ZoneEntity
 {
     public int ObjectId { get; init; }
@@ -159,17 +180,36 @@ sealed class ZoneEntity
     public int ClanHelpRange { get; init; }
     public IReadOnlyList<string>? Clans { get; init; }
     public IReadOnlyList<int>? IgnoreNpcIds { get; init; }
+    /// <summary>NPC aggro/chase payload; null until first aggro access (#353 composition).</summary>
+    public ZoneNpcAggroPayload? Aggro { get; set; }
+
     /// <summary>NPC: Mobius AggroList (attacker objectId → hate). <see cref="AggroTargetId"/> is the most hated.</summary>
-    public Dictionary<int, long> HateList { get; } = [];
+    public Dictionary<int, long> HateList => EnsureAggro().HateList;
+
     /// <summary>
     /// NPC: damage dealt per attacker (Mobius <c>AggroInfo.getDamage</c>). Exp/SP are paid as a share of this, so a
     /// kill belongs to everyone who hit the mob, not only to the last blow.
     /// </summary>
-    public Dictionary<int, long> DamageBy { get; } = [];
-    public long NextAggroScanMs { get; set; }
-    public long NextClanCallMs { get; set; }
+    public Dictionary<int, long> DamageBy => EnsureAggro().DamageBy;
+
+    public long NextAggroScanMs
+    {
+        get => Aggro?.NextAggroScanMs ?? 0;
+        set => EnsureAggro().NextAggroScanMs = value;
+    }
+
+    public long NextClanCallMs
+    {
+        get => Aggro?.NextClanCallMs ?? 0;
+        set => EnsureAggro().NextClanCallMs = value;
+    }
+
     /// <summary>Attack stance the watchers were last told (Mobius AutoAttackStart / AutoAttackStop).</summary>
-    public bool StanceShown { get; set; }
+    public bool StanceShown
+    {
+        get => Aggro?.StanceShown ?? false;
+        set => EnsureAggro().StanceShown = value;
+    }
     /// <summary>NPC Mobius base accuracy / evasion / crit / random spread / DEX (players use the class template).</summary>
     public double BaseAccuracy { get; init; }
     public double BaseEvasion { get; init; }
@@ -432,22 +472,78 @@ sealed class ZoneEntity
     /// <summary>Skill damage queued for Mobius <c>onMagicHitTimer</c> (applied at hitTime, not on key press).</summary>
     public PendingSkillHit? PendingHit { get; set; }
     /// <summary>NPC: most-hated player (Mobius <c>AggroList</c> top, simplified to last attacker).</summary>
-    public int AggroTargetId { get; set; }
+    public int AggroTargetId
+    {
+        get => Aggro?.AggroTargetId ?? 0;
+        set => EnsureAggro().AggroTargetId = value;
+    }
+
     /// <summary>NPC: next melee swing time, unix ms.</summary>
-    public long NextMobAttackMs { get; set; }
+    public long NextMobAttackMs
+    {
+        get => Aggro?.NextMobAttackMs ?? 0;
+        set => EnsureAggro().NextMobAttackMs = value;
+    }
+
     /// <summary>NPC: last chase destination broadcast (Mobius MoveToPawn re-sent when the pawn moves).</summary>
-    public int ChaseDestX { get; set; }
-    public int ChaseDestY { get; set; }
-    public bool Chasing { get; set; }
+    public int ChaseDestX
+    {
+        get => Aggro?.ChaseDestX ?? 0;
+        set => EnsureAggro().ChaseDestX = value;
+    }
+
+    public int ChaseDestY
+    {
+        get => Aggro?.ChaseDestY ?? 0;
+        set => EnsureAggro().ChaseDestY = value;
+    }
+
+    public bool Chasing
+    {
+        get => Aggro?.Chasing ?? false;
+        set => EnsureAggro().Chasing = value;
+    }
+
     /// <summary>NPC: last AI tick, unix ms (movement integration).</summary>
-    public long LastAiTickMs { get; set; }
+    public long LastAiTickMs
+    {
+        get => Aggro?.LastAiTickMs ?? 0;
+        set => EnsureAggro().LastAiTickMs = value;
+    }
+
     /// <summary>NPC: spawn point captured on first aggro (Mobius <c>Attackable.returnHome</c> target).</summary>
-    public bool HomeSet { get; set; }
-    public int HomeX { get; set; }
-    public int HomeY { get; set; }
-    public int HomeZ { get; set; }
+    public bool HomeSet
+    {
+        get => Aggro?.HomeSet ?? false;
+        set => EnsureAggro().HomeSet = value;
+    }
+
+    public int HomeX
+    {
+        get => Aggro?.HomeX ?? 0;
+        set => EnsureAggro().HomeX = value;
+    }
+
+    public int HomeY
+    {
+        get => Aggro?.HomeY ?? 0;
+        set => EnsureAggro().HomeY = value;
+    }
+
+    public int HomeZ
+    {
+        get => Aggro?.HomeZ ?? 0;
+        set => EnsureAggro().HomeZ = value;
+    }
+
     /// <summary>NPC: walking back to <see cref="HomeX"/>/<see cref="HomeY"/> after forgetting its target.</summary>
-    public bool ReturningHome { get; set; }
+    public bool ReturningHome
+    {
+        get => Aggro?.ReturningHome ?? false;
+        set => EnsureAggro().ReturningHome = value;
+    }
+
+    ZoneNpcAggroPayload EnsureAggro() => Aggro ??= new ZoneNpcAggroPayload();
     /// <summary>NPC corpse: unix ms when DecayTaskManager removes it. 0 = alive / not scheduled.</summary>
     public long DecayAtMs { get; set; }
     /// <summary>Mobius merchant price config castle. 0 when the NPC is not in a taxed town.</summary>
