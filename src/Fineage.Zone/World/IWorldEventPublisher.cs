@@ -51,7 +51,8 @@ interface IWorldEventPublisher
 
     void FanoutAttackState(IReadOnlyList<int> watcherObjectIds, AttackStateMsg attack);
 
-    void FanoutStatusUpdate(IReadOnlyList<int> watcherObjectIds, StatusUpdateNetMsg status);
+    /// <summary>Mobius StatusUpdate to watchers. Called under the ZoneWorld gate.</summary>
+    void FanoutStatusUpdate(IReadOnlyList<int> watcherObjectIds, Fineage.Protocol.StatusUpdateMsg status);
 
     /// <summary>Mobius Die packet for <paramref name="objectId"/> (killer may be 0). Called under the ZoneWorld gate.</summary>
     void FanoutDie(IReadOnlyList<int> watcherObjectIds, int objectId, int killerObjectId);

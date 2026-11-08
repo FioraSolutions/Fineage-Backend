@@ -144,13 +144,7 @@ public sealed partial class ZoneWorld
         if (netWatchers is { Count: > 0 } && NetBridge != null)
         {
             NetBridge.FanoutDie(netWatchers, dead.ObjectId, killerObjectId);
-            NetBridge.FanoutStatusUpdate(netWatchers, new Fineage.Net.Contract.StatusUpdateNetMsg
-            {
-                EntityValue = (ulong)(uint)dead.ObjectId,
-                EntityGeneration = 1,
-                AttributeIds = status.AttributeIds ?? [],
-                Values = status.Values ?? []
-            });
+            NetBridge.FanoutStatusUpdate(netWatchers, status);
         }
     }
 

@@ -204,10 +204,9 @@ public sealed partial class ZoneWorld
         maker.CurMp -= recipe.MpConsume;
         if (NetBridge != null)
         {
-            NetBridge.FanoutStatusUpdate([maker.ObjectId], new Fineage.Net.Contract.StatusUpdateNetMsg
+            NetBridge.FanoutStatusUpdate([maker.ObjectId], new StatusUpdateMsg
             {
-                EntityValue = (ulong)(uint)maker.ObjectId,
-                EntityGeneration = 1,
+                ObjectId = maker.ObjectId,
                 AttributeIds = [InterludeStatus.CurMp, InterludeStatus.MaxMp],
                 Values = [maker.CurMp, maker.MaxMp]
             });

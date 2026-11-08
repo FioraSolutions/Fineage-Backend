@@ -545,13 +545,7 @@ public sealed partial class ZoneWorld
                 Text = "Your level has increased!",
                 Params = []
             });
-            NetBridge.FanoutStatusUpdate(self, new Fineage.Net.Contract.StatusUpdateNetMsg
-            {
-                EntityValue = (ulong)(uint)status.ObjectId,
-                EntityGeneration = 1,
-                AttributeIds = status.AttributeIds ?? [],
-                Values = status.Values ?? []
-            });
+            NetBridge.FanoutStatusUpdate(self, status);
             NetBridge.FanoutSkillList(self,
                 Fineage.Zone.Net.NetEnterWorldProjector.BuildSkills(player, _clock().ToUnixTimeMilliseconds()));
             NetBridge.FanoutPlayerStats(self, new Fineage.Net.Contract.PlayerStatsMsg
@@ -870,13 +864,7 @@ public sealed partial class ZoneWorld
                 Text = notice.Text,
                 Params = notice.Params ?? []
             });
-            NetBridge.FanoutStatusUpdate(self, new Fineage.Net.Contract.StatusUpdateNetMsg
-            {
-                EntityValue = (ulong)(uint)status.ObjectId,
-                EntityGeneration = 1,
-                AttributeIds = status.AttributeIds ?? [],
-                Values = status.Values ?? []
-            });
+            NetBridge.FanoutStatusUpdate(self, status);
             NetBridge.FanoutPlayerStats(self, new Fineage.Net.Contract.PlayerStatsMsg
             {
                 EntityValue = (ulong)(uint)player.ObjectId,

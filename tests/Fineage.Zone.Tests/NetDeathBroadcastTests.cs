@@ -53,7 +53,7 @@ public sealed class NetDeathBroadcastTests
         Assert.Equal(killer.ObjectId, (int)dies[0][2]!);
         // Both saw the killing blow's HP drop to 0.
         Assert.Contains(rec.Of(nameof(IWorldEventPublisher.FanoutStatusUpdate)),
-            s => ((IReadOnlyList<int>)s[0]!).Contains(bystander.ObjectId) && ((StatusUpdateNetMsg)s[1]!).EntityValue == (ulong)(uint)MobId);
+            s => ((IReadOnlyList<int>)s[0]!).Contains(bystander.ObjectId) && ((StatusUpdateMsg)s[1]!).ObjectId == MobId);
 
         // A player arriving while the corpse lies gets it as dead (no standing gremlin).
         var (lateSession, late) = await kit.EnterAsync(classId: 0, race: 0, x: NetTestKit.ElfX - 200);
@@ -101,7 +101,7 @@ public sealed class NetDeathBroadcastTests
 
         Assert.Contains(rec.Of(nameof(IWorldEventPublisher.FanoutStatusUpdate)), s =>
             ((IReadOnlyList<int>)s[0]!).Contains(elf.ObjectId) &&
-            ((StatusUpdateNetMsg)s[1]!).EntityValue == (ulong)(uint)elf.ObjectId &&
-            ((StatusUpdateNetMsg)s[1]!).Values[0] == 0);
+            ((StatusUpdateMsg)s[1]!).ObjectId == elf.ObjectId &&
+            ((StatusUpdateMsg)s[1]!).Values[0] == 0);
     }
 }

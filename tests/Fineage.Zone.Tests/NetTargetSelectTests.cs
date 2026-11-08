@@ -54,9 +54,9 @@ public sealed class NetTargetSelectTests
         Assert.Equal(3, (int)selected[2]!);
 
         // Mobius setTarget also sends the target's HP so the target window can draw a bar.
-        var hp = Assert.IsType<StatusUpdateNetMsg>(
+        var hp = Assert.IsType<StatusUpdateMsg>(
             Assert.Single(rec.Of(nameof(IWorldEventPublisher.FanoutStatusUpdate)))[1]);
-        Assert.Equal(MobId, (int)hp.EntityValue);
+        Assert.Equal(MobId, hp.ObjectId);
         Assert.Contains(InterludeStatus.MaxHp, hp.AttributeIds);
         Assert.Contains(InterludeStatus.CurHp, hp.AttributeIds);
     }
@@ -95,9 +95,9 @@ public sealed class NetTargetSelectTests
         // A flagged player is auto-attackable, so the colour is the level delta rather than the friendly 0.
         Assert.Equal(-4, (int)selected[2]!);
 
-        var hp = Assert.IsType<StatusUpdateNetMsg>(
+        var hp = Assert.IsType<StatusUpdateMsg>(
             Assert.Single(rec.Of(nameof(IWorldEventPublisher.FanoutStatusUpdate)))[1]);
-        Assert.Equal(otherSession.ObjectId, (int)hp.EntityValue);
+        Assert.Equal(otherSession.ObjectId, hp.ObjectId);
     }
 
     [Fact]
