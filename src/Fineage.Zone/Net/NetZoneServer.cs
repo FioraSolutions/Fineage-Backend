@@ -498,16 +498,16 @@ public sealed class NetZoneServer : IWorldEventPublisher
             _presence.TrySend(watcher, NetOpcode.ShopBalance, payload);
     }
 
-    void IWorldEventPublisher.FanoutWarehouseDepositList(IReadOnlyList<int> watcherObjectIds, WarehouseDepositListNetMsg list)
+    void IWorldEventPublisher.FanoutWarehouseDepositList(IReadOnlyList<int> watcherObjectIds, Fineage.Protocol.WarehouseDepositListMsg list)
     {
-        var payload = NetCodec.EncodeWarehouseDepositList(list);
+        var payload = NetCodec.EncodeWarehouseDepositList(ToNetWarehouseDepositList(list));
         foreach (int watcher in watcherObjectIds)
             _presence.TrySend(watcher, NetOpcode.WarehouseDepositList, payload);
     }
 
-    void IWorldEventPublisher.FanoutWarehouseWithdrawList(IReadOnlyList<int> watcherObjectIds, WarehouseWithdrawListNetMsg list)
+    void IWorldEventPublisher.FanoutWarehouseWithdrawList(IReadOnlyList<int> watcherObjectIds, Fineage.Protocol.WarehouseWithdrawListMsg list)
     {
-        var payload = NetCodec.EncodeWarehouseWithdrawList(list);
+        var payload = NetCodec.EncodeWarehouseWithdrawList(ToNetWarehouseWithdrawList(list));
         foreach (int watcher in watcherObjectIds)
             _presence.TrySend(watcher, NetOpcode.WarehouseWithdrawList, payload);
     }
@@ -1374,6 +1374,47 @@ public sealed class NetZoneServer : IWorldEventPublisher
                 ItemId = parts[i].ItemId,
                 Count = parts[i].Count,
                 EnchantLevel = parts[i].EnchantLevel
+            };
+        }
+
+        return rows;
+    }
+
+    static WarehouseDepositListNetMsg ToNetWarehouseDepositList(Fineage.Protocol.WarehouseDepositListMsg list) => new()
+    {
+        NpcObjectId = list.NpcObjectId,
+        FeePerLine = list.FeePerLine,
+        SlotsUsed = list.SlotsUsed,
+        SlotsMax = list.SlotsMax,
+        Adena = list.Adena,
+        Items = ToNetWarehouseItemRows(list.Items)
+    };
+
+    static WarehouseWithdrawListNetMsg ToNetWarehouseWithdrawList(Fineage.Protocol.WarehouseWithdrawListMsg list) => new()
+    {
+        NpcObjectId = list.NpcObjectId,
+        SlotsUsed = list.SlotsUsed,
+        SlotsMax = list.SlotsMax,
+        InventorySlotsUsed = list.InventorySlotsUsed,
+        InventorySlotsMax = list.InventorySlotsMax,
+        CurrentWeight = list.CurrentWeight,
+        MaxWeight = list.MaxWeight,
+        Items = ToNetWarehouseItemRows(list.Items)
+    };
+
+    static ItemListEntryNet[] ToNetWarehouseItemRows(Fineage.Protocol.ItemListEntryMsg[]? items)
+    {
+        items ??= [];
+        var rows = new ItemListEntryNet[items.Length];
+        for (int i = 0; i < items.Length; i++)
+        {
+            rows[i] = new ItemListEntryNet
+            {
+                ObjectId = items[i].ObjectId,
+                ItemId = items[i].ItemId,
+                Count = items[i].Count,
+                EnchantLevel = items[i].EnchantLevel,
+                EquippedSlot = items[i].EquippedSlot
             };
         }
 
