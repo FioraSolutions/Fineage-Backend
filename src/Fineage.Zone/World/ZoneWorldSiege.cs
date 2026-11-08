@@ -273,24 +273,8 @@ public sealed partial class ZoneWorld
             Clans = list.Clans.Select(row => new SiegeClanMsg { ClanId = row.ClanId, Side = row.Side }).ToArray()
         };
         // Siege state is per-castle, so the requester is the only watcher: no broadcast, just this session.
-        NetBridge?.FanoutSiegeInfo([session.ObjectId], ToNetSiegeInfo(msg));
+        NetBridge?.FanoutSiegeInfo([session.ObjectId], msg);
     }
-
-    static Fineage.Net.Contract.SiegeInfoNetMsg ToNetSiegeInfo(SiegeInfoMsg info) => new()
-    {
-        CastleId = info.CastleId,
-        Name = info.Name,
-        OwnerClanId = info.OwnerClanId,
-        TaxPercent = info.TaxPercent,
-        SiegeUnixMs = info.SiegeUnixMs,
-        RegistrationDeadlineUnixMs = info.RegistrationDeadlineUnixMs,
-        RegistrationClosed = info.RegistrationClosed,
-        InProgress = info.InProgress,
-        EndsUnixMs = info.EndsUnixMs,
-        Clans = info.Clans
-            .Select(row => new Fineage.Net.Contract.SiegeClanNet { ClanId = row.ClanId, Side = row.Side })
-            .ToArray()
-    };
 
     /// <summary>Net admin entry point: the listener checks the flag before calling this.</summary>
     public async Task<string?> TryAdminCaptureNetAsync(ZoneSession session, Fineage.Net.Contract.AdminCaptureCastleNetMsg request, CancellationToken ct) =>
