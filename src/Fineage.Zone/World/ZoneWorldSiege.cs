@@ -307,17 +307,11 @@ public sealed partial class ZoneWorld
         }
         // Castle capture and the end of a siege are server-wide news, not a per-session reply.
         if (live.Count > 0)
-            NetBridge?.FanoutSystemMessage(live, ToNetSystemLine(line));
+            NetBridge?.FanoutSystemMessage(live, line);
     }
 
     /// <summary>One siege line to one session over Net, next to the V2 frame the same call queues.</summary>
     void FanSystemLine(ZoneSession session, SystemMessageMsg line) =>
-        NetBridge?.FanoutSystemMessage([session.ObjectId], ToNetSystemLine(line));
+        NetBridge?.FanoutSystemMessage([session.ObjectId], line);
 
-    static Fineage.Net.Contract.SystemMessageNetMsg ToNetSystemLine(SystemMessageMsg line) => new()
-    {
-        Id = line.Id,
-        Text = line.Text,
-        Params = line.Params
-    };
 }

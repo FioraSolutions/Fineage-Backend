@@ -31,7 +31,7 @@ public sealed class NetGroundItemTests
             .SelectMany(a => ((InventoryUpdateNetMsg)a[1]!).Changes).ToList();
 
     static List<int> SysIds(NetBridgeRecorder rec) =>
-        rec.Of(nameof(IWorldEventPublisher.FanoutSystemMessage)).Select(a => ((SystemMessageNetMsg)a[1]!).Id).ToList();
+        rec.Of(nameof(IWorldEventPublisher.FanoutSystemMessage)).Select(a => ((SystemMessageMsg)a[1]!).Id).ToList();
 
     /// <summary>
     /// Mobius <c>RequestDestroyItem</c>: the trash-basket action. The slot is deleted outright, and unlike a

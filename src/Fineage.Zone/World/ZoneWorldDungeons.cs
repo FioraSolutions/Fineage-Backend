@@ -103,7 +103,7 @@ public sealed partial class ZoneWorld
                 Text = notice.Text
             };
             var kicked = Entered(site, inside: false, DungeonProtocol.ActionKick);
-            NetBridge?.FanoutSystemMessage([player.ObjectId], ToNet(line));
+            NetBridge?.FanoutSystemMessage([player.ObjectId], line);
             NetBridge?.FanoutDungeonEntered([player.ObjectId], ToNet(kicked));
             ZoneLog.Info($"dungeon kick object={player.ObjectId} dungeon={site.Id} -> {site.ExitX},{site.ExitY},{site.ExitZ}");
         }
@@ -176,13 +176,6 @@ public sealed partial class ZoneWorld
         }
     }
 
-    static Fineage.Net.Contract.SystemMessageNetMsg ToNet(SystemMessageMsg line) => new()
-    {
-        Id = line.Id,
-        Params = line.Params,
-        Text = line.Text
-    };
-
     static Fineage.Net.Contract.DungeonEnteredNetMsg ToNet(DungeonEnteredMsg entered) => new()
     {
         DungeonId = entered.DungeonId,
@@ -213,7 +206,7 @@ public sealed partial class ZoneWorld
                 Params = [],
                 Text = notice.Text
             };
-            NetBridge?.FanoutSystemMessage([session.ObjectId], ToNet(line));
+            NetBridge?.FanoutSystemMessage([session.ObjectId], line);
         }
     }
 }

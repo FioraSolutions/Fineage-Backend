@@ -332,9 +332,14 @@ public sealed class NetZoneServer : IWorldEventPublisher
             _presence.TrySend(watcher, NetOpcode.CreatureSay, payload);
     }
 
-    void IWorldEventPublisher.FanoutSystemMessage(IReadOnlyList<int> watcherObjectIds, SystemMessageNetMsg message)
+    void IWorldEventPublisher.FanoutSystemMessage(IReadOnlyList<int> watcherObjectIds, Fineage.Protocol.SystemMessageMsg message)
     {
-        var payload = NetCodec.EncodeSystemMessage(message);
+        var payload = NetCodec.EncodeSystemMessage(new SystemMessageNetMsg
+        {
+            Id = message.Id,
+            Params = message.Params ?? [],
+            Text = message.Text ?? ""
+        });
         foreach (int watcher in watcherObjectIds)
             _presence.TrySend(watcher, NetOpcode.SystemMessage, payload);
     }

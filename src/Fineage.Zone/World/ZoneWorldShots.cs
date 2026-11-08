@@ -185,7 +185,7 @@ public sealed partial class ZoneWorld
 
     void ShotNotice(ZoneSession session, int id, string text)
     {
-        NetBridge?.FanoutSystemMessage([session.ObjectId], new Fineage.Net.Contract.SystemMessageNetMsg
+        NetBridge?.FanoutSystemMessage([session.ObjectId], new SystemMessageMsg
         {
             Id = id,
             Text = text,

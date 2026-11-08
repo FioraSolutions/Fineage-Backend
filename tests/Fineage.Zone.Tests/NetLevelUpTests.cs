@@ -2,6 +2,7 @@ using Fineage.Net.Contract;
 using Fineage.Zone.Net;
 using Fineage.Zone.World;
 using Xunit;
+using Fineage.Protocol;
 
 namespace Fineage.Zone.Tests;
 
@@ -32,7 +33,7 @@ public sealed class NetLevelUpTests
         Assert.True(rec.Of(nameof(IWorldEventPublisher.FanoutSkillList)).Count > skillsBefore);
 
         var notice = Assert.Single(rec.Of(nameof(IWorldEventPublisher.FanoutSystemMessage)));
-        var messages = Assert.IsType<SystemMessageNetMsg>(notice[1]);
+        var messages = Assert.IsType<SystemMessageMsg>(notice[1]);
         Assert.Equal(ZoneWorld.LevelUpMessageId, messages.Id);
 
         var stats = Assert.Single(rec.Of(nameof(IWorldEventPublisher.FanoutPlayerStats)));

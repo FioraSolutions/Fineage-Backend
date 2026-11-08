@@ -834,7 +834,7 @@ public sealed partial class ZoneWorld
         NetBridge?.FanoutPledgeMemberList(watchers, MembersOf(clan));
 
     void FanLine(IReadOnlyList<int> watchers, SystemMessageMsg line) =>
-        NetBridge?.FanoutSystemMessage(watchers, new Fineage.Net.Contract.SystemMessageNetMsg
+        NetBridge?.FanoutSystemMessage(watchers, new SystemMessageMsg
         {
             Id = line.Id,
             Text = line.Text ?? "",

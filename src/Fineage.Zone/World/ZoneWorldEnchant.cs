@@ -54,7 +54,7 @@ public sealed partial class ZoneWorld
 
         player.ActiveEnchantObjectId = scroll.ObjectId;
         var select = EnchantLines.Select(scroll);
-        NetBridge?.FanoutSystemMessage([session.ObjectId], new Fineage.Net.Contract.SystemMessageNetMsg
+        NetBridge?.FanoutSystemMessage([session.ObjectId], new SystemMessageMsg
         {
             Id = select.Id,
             Text = select.Text ?? "",
@@ -80,7 +80,7 @@ public sealed partial class ZoneWorld
         {
             Result = EnchantProtocol.ResultCancel
         });
-        NetBridge?.FanoutSystemMessage([session.ObjectId], new Fineage.Net.Contract.SystemMessageNetMsg
+        NetBridge?.FanoutSystemMessage([session.ObjectId], new SystemMessageMsg
         {
             Id = cancelled.Id,
             Text = cancelled.Text ?? "",
@@ -220,7 +220,7 @@ public sealed partial class ZoneWorld
         });
         foreach (var line in lines)
         {
-            NetBridge?.FanoutSystemMessage([session.ObjectId], new Fineage.Net.Contract.SystemMessageNetMsg
+            NetBridge?.FanoutSystemMessage([session.ObjectId], new SystemMessageMsg
             {
                 Id = line.Id,
                 Text = line.Text ?? "",

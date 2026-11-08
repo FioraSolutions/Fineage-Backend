@@ -17,7 +17,7 @@ public sealed class NetDropProtectTests
         rec.Of(nameof(IWorldEventPublisher.FanoutDropItem)).Select(a => (DropItemNetMsg)a[1]!).ToList();
 
     static List<int> SysIds(NetBridgeRecorder rec) =>
-        rec.Of(nameof(IWorldEventPublisher.FanoutSystemMessage)).Select(a => ((SystemMessageNetMsg)a[1]!).Id).ToList();
+        rec.Of(nameof(IWorldEventPublisher.FanoutSystemMessage)).Select(a => ((SystemMessageMsg)a[1]!).Id).ToList();
 
     [Fact]
     public async Task Killer_loot_is_protected_for_others_then_free_and_scattered()

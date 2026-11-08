@@ -457,7 +457,7 @@ public sealed partial class ZoneWorld
 
         NetBridge.FanoutSystemMessage(
             [attacker.ObjectId],
-            CombatLines.ToNet(CombatLines.HitTarget(target.Name, damage)));
+            CombatLines.HitTarget(target.Name, damage));
     }
 
     void FanoutAttack(ZoneEntity attacker, ZoneEntity target, AttackMsg attack)

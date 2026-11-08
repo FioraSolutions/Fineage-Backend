@@ -253,7 +253,7 @@ public sealed class NetNpcServiceTests
         Assert.IsType<NpcHtmlNetMsg>(Last(bench, FanoutNpcHtml)[1]).Html;
 
     static int LastSystemMessageId(WorldBench bench) =>
-        Assert.IsType<SystemMessageNetMsg>(Last(bench, FanoutSystemMessage)[1]).Id;
+        Assert.IsType<SystemMessageMsg>(Last(bench, FanoutSystemMessage)[1]).Id;
 
     const string FanoutNpcHtml = "FanoutNpcHtml";
     const string FanoutSystemMessage = "FanoutSystemMessage";

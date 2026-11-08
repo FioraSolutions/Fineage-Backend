@@ -89,7 +89,7 @@ public sealed partial class ZoneWorld
     {
         session.AutoAttackTargetId = 0;
         session.ClearApproach();
-        NetBridge?.FanoutSystemMessage([session.ObjectId], new Fineage.Net.Contract.SystemMessageNetMsg
+        NetBridge?.FanoutSystemMessage([session.ObjectId], new SystemMessageMsg
         {
             Id = SysMsgRunOutOfArrows,
             Text = "You have run out of arrows.",

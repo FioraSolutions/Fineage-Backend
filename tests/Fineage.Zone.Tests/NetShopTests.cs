@@ -280,8 +280,8 @@ public sealed class NetShopTests
     static InventoryUpdateNetMsg LastInventory(NetBridgeRecorder rec) =>
         Assert.IsType<InventoryUpdateNetMsg>(rec.Of(nameof(IWorldEventPublisher.FanoutInventoryUpdate)).Last()[1]);
 
-    static SystemMessageNetMsg LastSystemMessage(NetBridgeRecorder rec) =>
-        Assert.IsType<SystemMessageNetMsg>(rec.Of(nameof(IWorldEventPublisher.FanoutSystemMessage)).Last()[1]);
+    static SystemMessageMsg LastSystemMessage(NetBridgeRecorder rec) =>
+        Assert.IsType<SystemMessageMsg>(rec.Of(nameof(IWorldEventPublisher.FanoutSystemMessage)).Last()[1]);
 
     static void NoInventoryUpdate(NetBridgeRecorder rec) =>
         Assert.Empty(rec.Of(nameof(IWorldEventPublisher.FanoutInventoryUpdate)));

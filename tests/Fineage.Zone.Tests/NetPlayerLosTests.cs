@@ -54,7 +54,7 @@ public sealed class NetPlayerLosTests
         Assert.Empty(rec.Of(nameof(IWorldEventPublisher.FanoutAttackState)));
         Assert.Equal(0, session.AutoAttackTargetId);
         Assert.Contains(rec.Of(nameof(IWorldEventPublisher.FanoutSystemMessage)),
-            m => ((SystemMessageNetMsg)m[1]!).Id == ZoneWorld.SysMsgCannotSeeTarget);
+            m => ((SystemMessageMsg)m[1]!).Id == ZoneWorld.SysMsgCannotSeeTarget);
     }
 
     [Fact]

@@ -1,3 +1,5 @@
+using Fineage.Protocol;
+
 namespace Fineage.Zone.World;
 
 /// <summary>
@@ -8,7 +10,7 @@ public sealed partial class ZoneWorld
 {
     /// <summary>Mobius <c>sendPacket(new SystemMessage(id))</c> to one player.</summary>
     void NotifyLine(int objectId, int id, string text = "", params string[] args) =>
-        NetBridge?.FanoutSystemMessage([objectId], new Fineage.Net.Contract.SystemMessageNetMsg
+        NetBridge?.FanoutSystemMessage([objectId], new SystemMessageMsg
         {
             Id = id,
             Text = text,
@@ -16,7 +18,7 @@ public sealed partial class ZoneWorld
         });
 
     void NotifyLine(IReadOnlyList<int> watchers, int id, string text = "", params string[] args) =>
-        NetBridge?.FanoutSystemMessage(watchers, new Fineage.Net.Contract.SystemMessageNetMsg
+        NetBridge?.FanoutSystemMessage(watchers, new SystemMessageMsg
         {
             Id = id,
             Text = text,

@@ -50,7 +50,7 @@ public sealed class NetCombatDamageChatTests
         var lines = rec.Of(nameof(IWorldEventPublisher.FanoutSystemMessage));
         var damageLines = lines
             .Select(args => (Watchers: Assert.IsAssignableFrom<IReadOnlyList<int>>(args[0]),
-                             Line: Assert.IsType<SystemMessageNetMsg>(args[1])))
+                             Line: Assert.IsType<SystemMessageMsg>(args[1])))
             .Where(entry => entry.Line.Id == CombatProtocol.HitTargetForDamage)
             .ToList();
 

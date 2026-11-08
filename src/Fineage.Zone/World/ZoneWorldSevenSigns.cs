@@ -192,7 +192,7 @@ public sealed partial class ZoneWorld
         Text = notice.Text
     };
 
-    static Fineage.Net.Contract.SystemMessageNetMsg ToNet(SevenSignsNotice notice) => new()
+    static SystemMessageMsg ToNet(SevenSignsNotice notice) => new()
     {
         Id = notice.Id,
         Params = [],

@@ -203,13 +203,13 @@ public sealed partial class ZoneWorld
                 }
             }
             if (live.Count > 0)
-                NetBridge?.FanoutSystemMessage(live, ToNetOlympiadLine(message));
+                NetBridge?.FanoutSystemMessage(live, message);
             return;
         }
 
         if (_byId.TryGetValue(notice.CharacterId, out var target) && target.Session != null)
         {
-            NetBridge?.FanoutSystemMessage([target.ObjectId], ToNetOlympiadLine(message));
+            NetBridge?.FanoutSystemMessage([target.ObjectId], message);
         }
     }
 
@@ -263,7 +263,7 @@ public sealed partial class ZoneWorld
             Kind = packet.Kind,
             Seconds = packet.Seconds
         });
-        FanOlympiadBoth(note.PlayerOneId, note.PlayerTwoId, line: ToNetOlympiadLine(line));
+        FanOlympiadBoth(note.PlayerOneId, note.PlayerTwoId, line: line);
     }
 
     void QueueResult(OlympiadResultNote note)
@@ -349,13 +349,6 @@ public sealed partial class ZoneWorld
         ClassId = s.ClassId
     };
 
-    static Fineage.Net.Contract.SystemMessageNetMsg ToNetOlympiadLine(SystemMessageMsg line) => new()
-    {
-        Id = line.Id,
-        Text = line.Text,
-        Params = line.Params
-    };
-
     /// <summary>Both match participants get one Net message per event, exactly as <c>SendBoth</c> does for V2.</summary>
     void FanOlympiadBoth(
         int one,
@@ -363,7 +356,7 @@ public sealed partial class ZoneWorld
         Fineage.Net.Contract.OlympiadMatchNetMsg? match = null,
         Fineage.Net.Contract.OlympiadCountdownNetMsg? countdown = null,
         Fineage.Net.Contract.OlympiadResultNetMsg? result = null,
-        Fineage.Net.Contract.SystemMessageNetMsg? line = null)
+        SystemMessageMsg? line = null)
     {
         if (NetBridge == null)
             return;

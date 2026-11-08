@@ -39,7 +39,7 @@ public sealed class NetEnchantTests
         Assert.Null(await kit.World.TryEnchantRequestAsync(session, scroll.ObjectId, default));
         Assert.Contains(
             rec.Of(nameof(IWorldEventPublisher.FanoutSystemMessage)),
-            args => args[1] is SystemMessageNetMsg line && line.Id == EnchantProtocol.SelectItem);
+            args => args[1] is SystemMessageMsg line && line.Id == EnchantProtocol.SelectItem);
 
         Assert.Null(await kit.World.TryEnchantConfirmAsync(session, saber.ObjectId, default));
 

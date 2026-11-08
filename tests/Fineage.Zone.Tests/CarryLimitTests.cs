@@ -28,7 +28,7 @@ public sealed class CarryLimitTests
     const int WoodenArrow = 17;
 
     static List<int> SysIds(NetBridgeRecorder rec) =>
-        rec.Of(nameof(IWorldEventPublisher.FanoutSystemMessage)).Select(a => ((SystemMessageNetMsg)a[1]!).Id).ToList();
+        rec.Of(nameof(IWorldEventPublisher.FanoutSystemMessage)).Select(a => ((SystemMessageMsg)a[1]!).Id).ToList();
 
     static List<InventoryUpdateEntryNet> InvRows(NetBridgeRecorder rec) =>
         rec.Of(nameof(IWorldEventPublisher.FanoutInventoryUpdate))

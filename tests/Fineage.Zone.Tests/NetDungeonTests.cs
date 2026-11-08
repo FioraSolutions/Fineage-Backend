@@ -254,6 +254,6 @@ public sealed class NetDungeonTests
     static DungeonEnteredNetMsg LastDungeon(WorldBench bench) =>
         Assert.IsType<DungeonEnteredNetMsg>(bench.Rec.Of("FanoutDungeonEntered").Last()[1]);
 
-    static SystemMessageNetMsg LastSystemMessage(WorldBench bench) =>
-        Assert.IsType<SystemMessageNetMsg>(bench.Rec.Of("FanoutSystemMessage").Last()[1]);
+    static SystemMessageMsg LastSystemMessage(WorldBench bench) =>
+        Assert.IsType<SystemMessageMsg>(bench.Rec.Of("FanoutSystemMessage").Last()[1]);
 }

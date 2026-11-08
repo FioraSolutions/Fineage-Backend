@@ -197,6 +197,6 @@ public sealed class NetSevenSignsTests
     static SevenSignsSkyNetMsg LastSky(WorldBench bench) =>
         Assert.IsType<SevenSignsSkyNetMsg>(bench.Rec.Of("FanoutSevenSignsSky").Last()[1]);
 
-    static SystemMessageNetMsg LastSystemMessage(WorldBench bench) =>
-        Assert.IsType<SystemMessageNetMsg>(bench.Rec.Of("FanoutSystemMessage").Last()[1]);
+    static SystemMessageMsg LastSystemMessage(WorldBench bench) =>
+        Assert.IsType<SystemMessageMsg>(bench.Rec.Of("FanoutSystemMessage").Last()[1]);
 }

@@ -46,7 +46,7 @@ public sealed class NetBowArrowTests
 
     static bool RanOutOfArrows(NetBridgeRecorder rec) =>
         rec.Of(nameof(IWorldEventPublisher.FanoutSystemMessage))
-            .Any(m => ((SystemMessageNetMsg)m[1]!).Id == ZoneWorld.SysMsgRunOutOfArrows);
+            .Any(m => ((SystemMessageMsg)m[1]!).Id == ZoneWorld.SysMsgRunOutOfArrows);
 
     [Fact]
     public async Task Bow_without_arrows_refuses_the_shot()

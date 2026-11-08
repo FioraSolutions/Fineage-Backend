@@ -156,12 +156,12 @@ public sealed class NetQuestTests
     static QuestListNetMsg LastQuestList(NetBridgeRecorder rec) =>
         Assert.IsType<QuestListNetMsg>(rec.Of(nameof(IWorldEventPublisher.FanoutQuestList)).Last()[1]);
 
-    static SystemMessageNetMsg LastSystemMessage(NetBridgeRecorder rec) =>
-        Assert.IsType<SystemMessageNetMsg>(rec.Of(nameof(IWorldEventPublisher.FanoutSystemMessage)).Last()[1]);
+    static SystemMessageMsg LastSystemMessage(NetBridgeRecorder rec) =>
+        Assert.IsType<SystemMessageMsg>(rec.Of(nameof(IWorldEventPublisher.FanoutSystemMessage)).Last()[1]);
 
     static List<int> SystemMessageIds(NetBridgeRecorder rec) =>
         rec.Of(nameof(IWorldEventPublisher.FanoutSystemMessage))
-            .Select(args => ((SystemMessageNetMsg)args[1]).Id)
+            .Select(args => ((SystemMessageMsg)args[1]).Id)
             .ToList();
 
     static InventoryUpdateNetMsg LastInventory(NetBridgeRecorder rec) =>
