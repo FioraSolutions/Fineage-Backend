@@ -705,44 +705,63 @@ public sealed class NetZoneServer : IWorldEventPublisher
             _presence.TrySend(watcher, NetOpcode.PartyMemberList, payload);
     }
 
-    void IWorldEventPublisher.FanoutTradeAsk(IReadOnlyList<int> watcherObjectIds, TradeAskNetMsg ask)
+    void IWorldEventPublisher.FanoutTradeAsk(IReadOnlyList<int> watcherObjectIds, Fineage.Protocol.TradeAskMsg ask)
     {
-        var payload = NetCodec.EncodeTradeAsk(ask);
+        var payload = NetCodec.EncodeTradeAsk(new TradeAskNetMsg
+        {
+            RequestorObjectId = ask.RequestorObjectId,
+            RequestorName = ask.RequestorName ?? ""
+        });
         foreach (int watcher in watcherObjectIds)
             _presence.TrySend(watcher, NetOpcode.TradeAsk, payload);
     }
 
-    void IWorldEventPublisher.FanoutTradeRequestResult(IReadOnlyList<int> watcherObjectIds, TradeRequestResultNetMsg result)
+    void IWorldEventPublisher.FanoutTradeRequestResult(IReadOnlyList<int> watcherObjectIds, Fineage.Protocol.TradeRequestResultMsg result)
     {
-        var payload = NetCodec.EncodeTradeRequestResult(result);
+        var payload = NetCodec.EncodeTradeRequestResult(new TradeRequestResultNetMsg { Response = result.Response });
         foreach (int watcher in watcherObjectIds)
             _presence.TrySend(watcher, NetOpcode.TradeRequestResult, payload);
     }
 
-    void IWorldEventPublisher.FanoutTradeStart(IReadOnlyList<int> watcherObjectIds, TradeStartNetMsg start)
+    void IWorldEventPublisher.FanoutTradeStart(IReadOnlyList<int> watcherObjectIds, Fineage.Protocol.TradeStartMsg start)
     {
-        var payload = NetCodec.EncodeTradeStart(start);
+        var payload = NetCodec.EncodeTradeStart(new TradeStartNetMsg
+        {
+            PartnerObjectId = start.PartnerObjectId,
+            PartnerName = start.PartnerName ?? ""
+        });
         foreach (int watcher in watcherObjectIds)
             _presence.TrySend(watcher, NetOpcode.TradeStart, payload);
     }
 
-    void IWorldEventPublisher.FanoutTradeOfferUpdate(IReadOnlyList<int> watcherObjectIds, TradeOfferUpdateNetMsg update)
+    void IWorldEventPublisher.FanoutTradeOfferUpdate(IReadOnlyList<int> watcherObjectIds, Fineage.Protocol.TradeOfferUpdateMsg update)
     {
-        var payload = NetCodec.EncodeTradeOfferUpdate(update);
+        var payload = NetCodec.EncodeTradeOfferUpdate(new TradeOfferUpdateNetMsg
+        {
+            IsOwn = update.IsOwn,
+            InventoryObjectId = update.InventoryObjectId,
+            ItemId = update.ItemId,
+            Count = update.Count,
+            EnchantLevel = update.EnchantLevel
+        });
         foreach (int watcher in watcherObjectIds)
             _presence.TrySend(watcher, NetOpcode.TradeOfferUpdate, payload);
     }
 
-    void IWorldEventPublisher.FanoutTradeConfirmState(IReadOnlyList<int> watcherObjectIds, TradeConfirmStateNetMsg state)
+    void IWorldEventPublisher.FanoutTradeConfirmState(IReadOnlyList<int> watcherObjectIds, Fineage.Protocol.TradeConfirmStateMsg state)
     {
-        var payload = NetCodec.EncodeTradeConfirmState(state);
+        var payload = NetCodec.EncodeTradeConfirmState(new TradeConfirmStateNetMsg
+        {
+            SelfConfirmed = state.SelfConfirmed,
+            PartnerConfirmed = state.PartnerConfirmed
+        });
         foreach (int watcher in watcherObjectIds)
             _presence.TrySend(watcher, NetOpcode.TradeConfirmState, payload);
     }
 
-    void IWorldEventPublisher.FanoutTradeFinished(IReadOnlyList<int> watcherObjectIds, TradeFinishedNetMsg finished)
+    void IWorldEventPublisher.FanoutTradeFinished(IReadOnlyList<int> watcherObjectIds, Fineage.Protocol.TradeFinishedMsg finished)
     {
-        var payload = NetCodec.EncodeTradeFinished(finished);
+        var payload = NetCodec.EncodeTradeFinished(new TradeFinishedNetMsg { Response = finished.Response });
         foreach (int watcher in watcherObjectIds)
             _presence.TrySend(watcher, NetOpcode.TradeFinished, payload);
     }
