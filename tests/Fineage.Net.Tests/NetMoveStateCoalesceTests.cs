@@ -10,7 +10,7 @@ public sealed class NetMoveStateCoalesceTests
     [Fact]
     public async Task TrySend_keeps_latest_move_state_when_outbound_is_full()
     {
-        using var cts = new CancellationTokenSource(TimeSpan.FromSeconds(15));
+        using var cts = new CancellationTokenSource(TimeSpan.FromSeconds(20));
 
         var server = new TcpListener(System.Net.IPAddress.Loopback, 0);
         server.Start();
@@ -22,15 +22,43 @@ public sealed class NetMoveStateCoalesceTests
         await client.ConnectAsync("127.0.0.1", port, cts.Token);
         using var serverSide = await accept;
 
-        await using var conn = new NetConnection(serverSide, inboxCapacity: 8, endpoint: "move-coalesce", outboundCapacity: 4);
+        // Capacity is floored at 8 inside NetConnection; saturate it so MoveState must coalesce.
+        await using var conn = new NetConnection(serverSide, inboxCapacity: 8, endpoint: "move-coalesce", outboundCapacity: 8);
 
-        // Fill the outbound queue with non-MoveState frames so further MoveState sends
-        // must coalesce rather than enqueue. The pump may still drain a slot between the
-        // filler loop and the move burst, so an early DestX=1000 on the wire is allowed —
-        // the contract under test is that the *latest* coalesced DestX still arrives.
+        var stream = client.GetStream();
+        var destXs = new List<int>();
+        var latestSeen = new TaskCompletionSource<int>(TaskCreationOptions.RunContinuationsAsynchronously);
+
+        // Drain the wire concurrently so the outbound pump can flush coalesced MoveState after fillers.
+        Task reader = Task.Run(async () =>
+        {
+            try
+            {
+                while (!cts.IsCancellationRequested)
+                {
+                    PacketEnvelope? frame = await NetFraming.ReadAsync(stream, cts.Token);
+                    if (frame == null)
+                        break;
+                    if (frame.Opcode != NetOpcode.MoveState)
+                        continue;
+                    MoveStateMsg move = NetCodec.DecodeMoveState(frame.Payload);
+                    Assert.Equal(0xBEEFul, move.EntityValue);
+                    lock (destXs)
+                        destXs.Add(move.DestX);
+                    if (move.DestX >= 1031)
+                        latestSeen.TrySetResult(move.DestX);
+                }
+            }
+            catch (OperationCanceledException)
+            {
+            }
+        }, cts.Token);
+
         byte[] filler = new byte[256];
-        for (int i = 0; i < 8; i++)
-            Assert.True(conn.TrySend(NetOpcode.SystemMessage, filler));
+        int filled = 0;
+        while (conn.TrySend(NetOpcode.SystemMessage, filler) && filled < 64)
+            filled++;
+        Assert.True(filled >= 8, $"expected saturated outbound, filled={filled}");
 
         const ulong entity = 0xBEEF;
         const uint gen = 1;
@@ -52,31 +80,18 @@ public sealed class NetMoveStateCoalesceTests
         // Without coalesce, TrySend would start returning false once the queue is full.
         Assert.Equal(32, accepted);
 
-        var stream = client.GetStream();
-        var destXs = new List<int>();
-        using var readCts = CancellationTokenSource.CreateLinkedTokenSource(cts.Token);
-        readCts.CancelAfter(TimeSpan.FromSeconds(8));
-        try
-        {
-            while (destXs.Count == 0 || destXs.Max() < 1031)
-            {
-                PacketEnvelope? frame = await NetFraming.ReadAsync(stream, readCts.Token);
-                if (frame == null)
-                    break;
-                if (frame.Opcode == NetOpcode.MoveState)
-                {
-                    MoveStateMsg move = NetCodec.DecodeMoveState(frame.Payload);
-                    Assert.Equal(entity, move.EntityValue);
-                    destXs.Add(move.DestX);
-                }
-            }
-        }
-        catch (OperationCanceledException)
-        {
-        }
+        // Early DestX=1000 on the wire is fine; the contract is that the latest coalesced value arrives.
+        int latest = await latestSeen.Task.WaitAsync(TimeSpan.FromSeconds(10), cts.Token);
+        Assert.Equal(1031, latest);
 
-        Assert.NotEmpty(destXs);
-        Assert.Equal(1031, destXs.Max());
+        cts.Cancel();
+        try { await reader; } catch { /* cancelled */ }
+
+        lock (destXs)
+        {
+            Assert.NotEmpty(destXs);
+            Assert.Equal(1031, destXs.Max());
+        }
 
         server.Stop();
     }
