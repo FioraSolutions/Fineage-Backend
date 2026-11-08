@@ -30,18 +30,32 @@ public sealed partial class ZoneWorld
         long nowUnixMs)
     {
         ZoneAbnormals.Apply(target.Abnormals, effectId, value, durationSeconds, nowUnixMs);
+        if (target.Abnormals.Count > 0)
+            _withAbnormals.Add(target.ObjectId);
         FanoutAbnormal(target);
     }
 
     void TickAbnormals()
     {
+        if (_withAbnormals.Count == 0)
+            return;
         long now = _clock().ToUnixTimeMilliseconds();
-        foreach (var entity in _byId.Values)
+        foreach (int id in _withAbnormals.ToArray())
         {
-            if (entity.Abnormals.Count == 0)
+            if (!_byId.TryGetValue(id, out var entity))
+            {
+                _withAbnormals.Remove(id);
                 continue;
+            }
+            if (entity.Abnormals.Count == 0)
+            {
+                _withAbnormals.Remove(id);
+                continue;
+            }
             if (!ZoneAbnormals.TickExpired(entity.Abnormals, now))
                 continue;
+            if (entity.Abnormals.Count == 0)
+                _withAbnormals.Remove(id);
             FanoutAbnormal(entity);
         }
     }

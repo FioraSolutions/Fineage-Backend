@@ -156,14 +156,20 @@ public sealed partial class ZoneWorld
 
     void TickNpcRegen()
     {
-        if (!_npcRegen)
+        if (!_npcRegen || _needRegen.Count == 0)
             return;
-        foreach (var npc in _byId.Values)
+        foreach (int id in _needRegen.ToArray())
         {
-            if (npc.Kind != ZoneEntityKind.Npc || npc.Dead || npc.CurHp <= 0)
+            if (!_byId.TryGetValue(id, out var npc) || npc.Kind != ZoneEntityKind.Npc || npc.Dead || npc.CurHp <= 0)
+            {
+                _needRegen.Remove(id);
                 continue;
+            }
             if (npc.CurHp >= npc.MaxHp && npc.CurMp >= npc.MaxMp)
+            {
+                SyncNeedRegen(npc);
                 continue;
+            }
 
             npc.RegenCarryHp += npc.CurHp < npc.MaxHp ? Math.Max(1d, npc.HpRegen) : 0d;
             npc.RegenCarryMp += npc.CurMp < npc.MaxMp ? Math.Max(1d, npc.MpRegen) : 0d;
@@ -183,12 +189,14 @@ public sealed partial class ZoneWorld
             if (npc.CurMp >= npc.MaxMp)
                 npc.RegenCarryMp = 0;
 
+            SyncNeedRegen(npc);
             FanoutVitals(npc, StatusFor(npc));
         }
     }
 
     void FanoutVitals(ZoneEntity subject, StatusUpdateMsg status)
     {
+        SyncNeedRegen(subject);
         List<int>? netWatchers = null;
         foreach (var watcher in Players())
         {
@@ -196,8 +204,7 @@ public sealed partial class ZoneWorld
                 continue;
             if (!ReferenceEquals(watcher, subject) && !watcher.Knownlist.Contains(subject.ObjectId))
                 continue;
-            netWatchers ??= [];
-            netWatchers.Add(watcher.ObjectId);
+            netWatchers ??= [];            netWatchers.Add(watcher.ObjectId);
         }
 
         if (netWatchers is { Count: > 0 } && NetBridge != null)

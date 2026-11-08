@@ -81,7 +81,7 @@ public sealed partial class ZoneWorld
         entity.MoveDestY = destY;
         entity.MoveDestZ = destZ;
         entity.MoveLastTickMs = now;
-        entity.MoveActive = curX != destX || curY != destY;
+        SetMoveActive(entity, curX != destX || curY != destY);
         if (!entity.MoveActive)
             entity.Z = destZ;
         SyncSession(entity, session);
@@ -92,7 +92,7 @@ public sealed partial class ZoneWorld
     internal void StopTimedMove(ZoneEntity entity)
     {
         AdvanceMove(entity, _clock().ToUnixTimeMilliseconds());
-        entity.MoveActive = false;
+        SetMoveActive(entity, false);
         entity.MovePath.Clear();
         entity.MoveSegmentDirty = false;
     }
@@ -159,9 +159,11 @@ public sealed partial class ZoneWorld
 
     void TickPlayerMovement(long now)
     {
-        foreach (var e in _byId.Values)
+        if (_moving.Count == 0)
+            return;
+        foreach (int id in _moving.ToArray())
         {
-            if (e.Kind != ZoneEntityKind.Player)
+            if (!_byId.TryGetValue(id, out var e) || e.Kind != ZoneEntityKind.Player)
                 continue;
             bool wasMoving = e.MoveActive;
             if (e.MoveActive)
@@ -233,7 +235,7 @@ public sealed partial class ZoneWorld
         e.MoveLastTickMs = now;
         if (e.Dead)
         {
-            e.MoveActive = false;
+            SetMoveActive(e, false);
             return;
         }
 
@@ -263,7 +265,7 @@ public sealed partial class ZoneWorld
             e.X = e.MoveDestX;
             e.Y = e.MoveDestY;
             e.Z = e.MoveDestZ;
-            e.MoveActive = false;
+            SetMoveActive(e, false);
         }
         else
         {

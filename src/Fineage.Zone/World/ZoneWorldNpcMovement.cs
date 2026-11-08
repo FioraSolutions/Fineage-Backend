@@ -42,7 +42,7 @@ public sealed partial class ZoneWorld
         npc.MoveDestY = destY;
         npc.MoveDestZ = destZ;
         npc.MoveLastTickMs = now;
-        npc.MoveActive = npc.X != destX || npc.Y != destY;
+        SetMoveActive(npc, npc.X != destX || npc.Y != destY);
         BroadcastNpcMove(npc, destX, destY, destZ);
     }
 
@@ -53,7 +53,7 @@ public sealed partial class ZoneWorld
     /// </summary>
     void ReturnHome(ZoneEntity npc, long now)
     {
-        npc.AggroTargetId = 0;
+        SetAggroTarget(npc, 0);
         npc.HateList.Clear();
         // Mobius clearAggroList drops the whole AggroList, damage shares included: a mob that disengaged must not
         // pay the old attacker's damage to whoever kills it next.
@@ -65,7 +65,7 @@ public sealed partial class ZoneWorld
             BroadcastNpcMove(npc, npc.X, npc.Y, npc.Z);
             return;
         }
-        npc.ReturningHome = true;
+        SetReturningHome(npc, true);
         if (npc.Running)
         {
             npc.Running = false;
@@ -92,9 +92,12 @@ public sealed partial class ZoneWorld
         int raidRange = ZoneNpcSettings.AggroDistanceCheckRaidRange;
         bool raids = ZoneNpcSettings.AggroDistanceCheckRaids;
         bool restoreLife = ZoneNpcSettings.AggroDistanceCheckRestoreLife;
-        foreach (var npc in _byId.Values)
+        if (_aiBusy.Count == 0)
+            return;
+        foreach (int id in _aiBusy.ToArray())
         {
-            if (npc.Kind != ZoneEntityKind.Npc || npc.CurHp <= 0 || npc.AggroTargetId <= 0 || !npc.HomeSet)
+            if (!_byId.TryGetValue(id, out var npc) || npc.Kind != ZoneEntityKind.Npc ||
+                npc.CurHp <= 0 || npc.AggroTargetId <= 0 || !npc.HomeSet)
                 continue;
             TryLeashReset(npc, range, raidRange, raids, restoreLife);
         }
@@ -137,13 +140,15 @@ public sealed partial class ZoneWorld
     /// <summary>Advance every moving NPC at walk/run speed; announce new path legs and the final stop.</summary>
     void TickNpcMovement(long now)
     {
-        foreach (var e in _byId.Values)
+        if (_moving.Count == 0)
+            return;
+        foreach (int id in _moving.ToArray())
         {
-            if (e.Kind != ZoneEntityKind.Npc || !e.MoveActive)
+            if (!_byId.TryGetValue(id, out var e) || e.Kind != ZoneEntityKind.Npc || !e.MoveActive)
                 continue;
             if (e.CurHp <= 0)
             {
-                e.MoveActive = false;
+                SetMoveActive(e, false);
                 e.MovePath.Clear();
                 continue;
             }
@@ -164,7 +169,7 @@ public sealed partial class ZoneWorld
             {
                 // Arrived: stop broadcast at the exact server spot (Mobius onEvtArrived / StopMove).
                 BroadcastNpcMove(e, e.X, e.Y, e.Z);
-                e.ReturningHome = false; // stays walking; the next chase fans ChangeMoveType(run)
+                SetReturningHome(e, false); // stays walking; the next chase fans ChangeMoveType(run)
             }
         }
     }

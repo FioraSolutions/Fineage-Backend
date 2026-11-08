@@ -43,6 +43,7 @@ public sealed class NpcRegenTests
         var (kit, mob, _) = await SetupAsync();
         mob.CurHp = 100;
         mob.CurMp = 10;
+        kit.World.SyncNeedRegen(mob);
 
         await kit.World.RunRegenTickAsync(CancellationToken.None);
 
@@ -57,6 +58,7 @@ public sealed class NpcRegenTests
         mob.CurHp = 100;
         mob.MaxHp = 400;
         mob.CurMp = mob.MaxMp;
+        kit.World.SyncNeedRegen(mob);
 
         await kit.World.RunRegenTickAsync(CancellationToken.None);
         Assert.Equal(102, mob.CurHp);
@@ -72,6 +74,7 @@ public sealed class NpcRegenTests
         var (kit, mob, _) = await SetupAsync();
         mob.CurHp = mob.MaxHp - 1;
         mob.CurMp = mob.MaxMp - 1;
+        kit.World.SyncNeedRegen(mob);
 
         await kit.World.RunRegenTickAsync(CancellationToken.None);
 
@@ -112,7 +115,7 @@ public sealed class NpcRegenTests
     public async Task Leash_reset_restores_life_when_restore_life_is_on()
     {
         var (kit, mob, _) = await SetupAsync();
-        mob.AggroTargetId = 1;
+        kit.World.SetAggroTarget(mob, 1);
         mob.CurHp = 40;
         mob.CurMp = 5;
         mob.X = mob.HomeX + 2_500;
@@ -130,7 +133,7 @@ public sealed class NpcRegenTests
     public async Task Leash_reset_keeps_the_wound_when_restore_life_is_off()
     {
         var (kit, mob, _) = await SetupAsync();
-        mob.AggroTargetId = 1;
+        kit.World.SetAggroTarget(mob, 1);
         mob.CurHp = 40;
         mob.X = mob.HomeX + 2_500;
 
@@ -142,7 +145,7 @@ public sealed class NpcRegenTests
     public async Task Mob_inside_the_leash_is_left_alone()
     {
         var (kit, mob, _) = await SetupAsync();
-        mob.AggroTargetId = 1;
+        kit.World.SetAggroTarget(mob, 1);
         mob.CurHp = 40;
         mob.X = mob.HomeX + 1_500;
 
@@ -157,7 +160,7 @@ public sealed class NpcRegenTests
         var kit = new NetTestKit(RaidMap(), "regen");
         await kit.EnterAsync();
         Assert.True(kit.World.TryGetEntityById(MobId, out var mob));
-        mob.AggroTargetId = 1;
+        kit.World.SetAggroTarget(mob, 1);
         mob.X = mob.HomeX + 5_000;
 
         Assert.False(kit.World.LeashResetForTest(mob, 2_000, 4_000, checkRaids: false, restoreLife: true));
@@ -172,7 +175,7 @@ public sealed class NpcRegenTests
     public async Task Return_home_forgets_the_damage_share_of_the_old_attacker()
     {
         var (kit, mob, _) = await SetupAsync();
-        mob.AggroTargetId = 1;
+        kit.World.SetAggroTarget(mob, 1);
         mob.DamageBy[1] = 900;
         mob.X = mob.HomeX + 2_500;
 

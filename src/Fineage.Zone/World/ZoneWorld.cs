@@ -1117,6 +1117,7 @@ public sealed partial class ZoneWorld
         entity.Knownlist.Clear();
         _aoi.Leave(session.ObjectId);
         _byId.Remove(session.ObjectId);
+        ForgetActiveSets(session.ObjectId);
         session.InWorld = false;
 
         PartyPlayerLeftWorld(session.ObjectId);

@@ -11,7 +11,7 @@ public sealed class NetNpcMoveAoiTests
     {
         npc.X = x; npc.Y = y;
         npc.MoveDestX = x; npc.MoveDestY = y; npc.MoveDestZ = npc.Z;
-        npc.MoveActive = true;
+        kit.World.SetMoveActive(npc, true);
         npc.MoveLastTickMs = kit.Now.ToUnixTimeMilliseconds();
         kit.Now = kit.Now.AddMilliseconds(100);
     }

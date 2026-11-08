@@ -561,7 +561,7 @@ public sealed partial class ZoneWorld
         if (target.CurHp <= 0)
         {
             attacker.HateList.Remove(target.ObjectId);
-            attacker.AggroTargetId = MostHated(attacker);
+            SetAggroTarget(attacker, MostHated(attacker));
             if (target.Session != null)
                 target.Session.AutoAttackTargetId = 0;
             ApplyPlayerDeath(target, attacker.ObjectId);
@@ -585,7 +585,7 @@ public sealed partial class ZoneWorld
         }
 
         // Mobius Creature.doDie -> broadcastPacket(new Die(this)): client plays the death animation.
-        npc.AggroTargetId = 0;
+        SetAggroTarget(npc, 0);
         npc.Chasing = false;
         List<int>? netWatchers = null;
         foreach (var watcher in watchers)
@@ -621,7 +621,7 @@ public sealed partial class ZoneWorld
         if (spoiled)
             ZoneLog.Info($"corpse object={objectId} spoiler={npc.SpoilerObjectId} sweep={npc.SweepItems.Count}");
         // Mobius DecayTaskManager: DefaultCorpseTime, + SpoiledCorpseExtendTime when spoiled; unswept spoil decays with the corpse.
-        npc.DecayAtMs = _clock().ToUnixTimeMilliseconds() + _spoilRules.CorpseMs(spoiled);
+        SetDecayAtMs(npc, _clock().ToUnixTimeMilliseconds() + _spoilRules.CorpseMs(spoiled));
     }
 
     void DespawnNpc(ZoneEntity npc)
@@ -633,10 +633,11 @@ public sealed partial class ZoneWorld
         npc.SpoilerObjectId = 0;
         npc.SweepItems.Clear();
         npc.CorpseAwaitingSweep = false;
-        npc.DecayAtMs = 0;
+        SetDecayAtMs(npc, 0);
         npc.Chasing = false;
-        npc.AggroTargetId = 0;
+        SetAggroTarget(npc, 0);
         npc.LastAiTickMs = 0;
+        ForgetActiveSets(objectId);
         ScheduleRespawn(objectId);
 
         List<int>? netWatchers = null;

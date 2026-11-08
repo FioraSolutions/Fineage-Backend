@@ -20,7 +20,7 @@ public sealed partial class ZoneWorld
         if (!casting)
             return false;
         int skill = player.PendingHit?.Combat?.SkillId ?? 0;
-        player.PendingHit = null;
+        SetPendingHit(player, null);
         player.CastingUntilMs = 0;
         if (player.Session is { } session)
         {
@@ -68,14 +68,14 @@ public sealed partial class ZoneWorld
         DeferredEffect effect)
     {
         bool self = ReferenceEquals(player, target);
-        player.PendingHit = new PendingSkillHit(target.ObjectId, 0, now + Math.Max(0, hitTimeMs), null, level)
+        SetPendingHit(player, new PendingSkillHit(target.ObjectId, 0, now + Math.Max(0, hitTimeMs), null, level)
         {
             SkillId = template.SkillId,
             MagicType = template.MagicType,
             EscapeRange = self ? 0 : CastRules.EscapeRange(template.CastRange, template.EffectRange),
             TargetIsNpc = target.Kind == ZoneEntityKind.Npc,
             Apply = effect
-        };
+        });
         if (hitTimeMs <= 0)
             ResolvePendingHit(player, now);
     }
