@@ -11,7 +11,7 @@ namespace Fineage.Zone.Tests;
 /// Catacombs and necropolises over Net: the cabal gate that refuses an unregistered visitor, a member entering
 /// and leaving, the validation kick that clears the losers, the recruiting kick, and the adena fee. The world
 /// runs on <see cref="WorldBench"/>, so these assert the recorded
-/// <see cref="Fineage.Zone.Net.INetPresenceBridge"/> fanout rather than MessagePack frames.
+/// <see cref="Fineage.Zone.World.INetPresenceBridge"/> fanout rather than MessagePack frames.
 /// </summary>
 public sealed class NetDungeonTests
 {

@@ -6,6 +6,7 @@ using Fineage.Protocol;
 using Fineage.Zone;
 using Fineage.Zone.NpcHtml;
 using Fineage.Zone.Net;
+using Fineage.Zone.World;
 using Xunit;
 
 namespace Fineage.Zone.Tests;

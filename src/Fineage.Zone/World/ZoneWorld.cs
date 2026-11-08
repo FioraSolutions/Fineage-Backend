@@ -6,7 +6,6 @@ using Fineage.Protocol;
 using Fineage.Zone.Chat;
 using Fineage.Zone.Combat;
 using Fineage.Zone.Interest;
-using Fineage.Zone.Net;
 using Fineage.Zone.Spawns;
 using Fineage.Zone.Drops;
 using Fineage.Zone.Bosses;

@@ -1,10 +1,11 @@
 using Fineage.Net.Contract;
 
-namespace Fineage.Zone.Net;
+namespace Fineage.Zone.World;
 
 /// <summary>
-/// ZoneWorld → Net PacketEnvelope fanout for sim ticks (NPC chase, attacks, vitals, die/drop).
-/// Player enter/move knownlist diffs stay in <see cref="NetZoneServer"/>.
+/// ZoneWorld → presence fanout for sim ticks (NPC chase, attacks, vitals, die/drop).
+/// Lives in World so the sim does not take a Net-namespace type (#353 domain events).
+/// Player enter/move knownlist diffs stay in <c>NetZoneServer</c>; encoding stays on the Net implementer.
 /// </summary>
 interface INetPresenceBridge
 {
