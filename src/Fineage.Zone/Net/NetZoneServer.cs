@@ -29,6 +29,7 @@ public sealed class NetZoneServer : INetPresenceBridge
     readonly TradePacketHandler _trade;
     readonly PartyPacketHandler _party;
     readonly FriendPacketHandler _friends;
+    readonly ShortcutActionPacketHandler _shortcutActions;
 
     public NetZoneServer(
         IHandoffStore handoff,
@@ -54,6 +55,7 @@ public sealed class NetZoneServer : INetPresenceBridge
         _trade = new TradePacketHandler(_world, RejectAsync);
         _party = new PartyPacketHandler(_world, RejectAsync);
         _friends = new FriendPacketHandler(_world, RejectAsync);
+        _shortcutActions = new ShortcutActionPacketHandler(_world, RejectAsync);
         _world.NetBridge = this;
     }
 
@@ -870,53 +872,16 @@ public sealed class NetZoneServer : INetPresenceBridge
 
                             break;
                         case NetOpcode.RequestActionUse:
-                            if (zoneSession.Bound && zoneSession.InWorld)
-                            {
-                                var use = NetCodec.DecodeActionUse(envelope.Payload);
-                                // Net renders sit/stand (ChangeWaitType), the walk/run toggle (ChangeMoveType),
-                                // next-target (MyTargetSelected), panel Attack (AttackRequest) and the three social
-                                // gestures (SocialAction); the rest of Mobius' action table is still V2-only.
-                                if (use.ActionId is not (ActionProtocol.SitStand or ActionProtocol.WalkRun
-                                    or ActionProtocol.Attack or ActionProtocol.NextTarget
-                                    or ActionProtocol.SocialGreeting or ActionProtocol.SocialVictory or ActionProtocol.SocialAdvance))
-                                {
-                                    await RejectAsync(conn, ActionProtocol.Unsupported, $"action {use.ActionId} not on Net yet", ct).ConfigureAwait(false);
-                                    break;
-                                }
-                                string? actionError = await _world.TryCharacterActionAsync(
-                                    zoneSession, use.ActionId, targetObjectId: 0, ct).ConfigureAwait(false);
-                                if (actionError != null)
-                                    await RejectAsync(conn, actionError, "Action failed.", ct).ConfigureAwait(false);
-                            }
-
+                            await _shortcutActions.OnActionUseAsync(conn, zoneSession, envelope, ct).ConfigureAwait(false);
                             break;
                         case NetOpcode.RequestAutoSoulShot:
-                            if (zoneSession.Bound && zoneSession.InWorld)
-                            {
-                                var auto = NetCodec.DecodeAutoSoulShot(envelope.Payload);
-                                string? autoError = await _world.TryAutoSoulShotAsync(zoneSession, auto.ItemId, auto.Enabled, ct).ConfigureAwait(false);
-                                if (autoError != null)
-                                    await RejectAsync(conn, autoError, "Auto shot failed.", ct).ConfigureAwait(false);
-                            }
-
+                            await _shortcutActions.OnAutoSoulShotAsync(conn, zoneSession, envelope, ct).ConfigureAwait(false);
                             break;
                         case NetOpcode.RequestShortCutReg:
-                            if (zoneSession.Bound && zoneSession.InWorld)
-                            {
-                                var reg = NetCodec.DecodeShortCut(envelope.Payload);
-                                var regReply = _world.RegisterShortcut(zoneSession, reg.Type, reg.Slot, reg.Id, reg.Level);
-                                await SendShortcutReplyAsync(conn, regReply, envelope.RequestSequence, ct).ConfigureAwait(false);
-                            }
-
+                            await _shortcutActions.OnShortCutRegAsync(conn, zoneSession, envelope, ct).ConfigureAwait(false);
                             break;
                         case NetOpcode.RequestShortCutDel:
-                            if (zoneSession.Bound && zoneSession.InWorld)
-                            {
-                                var del = NetCodec.DecodeShortCutDel(envelope.Payload);
-                                var delReply = _world.DeleteShortcut(zoneSession, del.Slot);
-                                await SendShortcutReplyAsync(conn, delReply, envelope.RequestSequence, ct).ConfigureAwait(false);
-                            }
-
+                            await _shortcutActions.OnShortCutDelAsync(conn, zoneSession, envelope, ct).ConfigureAwait(false);
                             break;
                         case NetOpcode.BossStatusRequest:
                             await OnBossStatusAsync(conn, zoneSession, envelope, ct).ConfigureAwait(false);
@@ -1175,15 +1140,6 @@ public sealed class NetZoneServer : INetPresenceBridge
         return entityId;
     }
 
-    static async Task SendShortcutReplyAsync(NetConnection conn, ZoneWorld.ShortcutReply reply, uint sequence, CancellationToken ct)
-    {
-        if (reply.Register != null)
-            await conn.SendAsync(NetOpcode.ShortCutRegister, NetCodec.EncodeShortCut(reply.Register), sequence, ct).ConfigureAwait(false);
-        else if (reply.DeleteSlot is int slot)
-            await conn.SendAsync(NetOpcode.ShortCutDelete, NetCodec.EncodeShortCutDel(new ShortCutDelNetMsg { Slot = slot }), sequence, ct).ConfigureAwait(false);
-        if (reply.Error != null)
-            ZoneLog.Info($"shortcut rejected: {reply.Error}");
-    }
 
     async Task OnEnterAsync(NetConnection conn, ZoneSession zoneSession, EntityId self, CancellationToken ct)
     {
