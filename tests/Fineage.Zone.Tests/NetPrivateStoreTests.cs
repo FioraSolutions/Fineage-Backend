@@ -56,7 +56,7 @@ public sealed class NetPrivateStoreTests
         Assert.True(sellerEntity.Sitting);
         Assert.Equal("WTS", sellerEntity.PrivateStoreMessage);
 
-        var info = Assert.IsType<Fineage.Net.Contract.PrivateStoreInfoNetMsg>(
+        var info = Assert.IsType<Fineage.Protocol.PrivateStoreInfoMsg>(
             Last(rec, nameof(IWorldEventPublisher.FanoutPrivateStoreInfo)));
         Assert.Equal(sellerEntity.ObjectId, info.ObjectId);
         Assert.Equal(PrivateStoreProtocol.TypeSell, info.StoreType);
@@ -66,7 +66,7 @@ public sealed class NetPrivateStoreTests
             StoreObjectId = sellerEntity.ObjectId
         }, default));
 
-        var list = Assert.IsType<Fineage.Net.Contract.PrivateStoreListSellNetMsg>(
+        var list = Assert.IsType<Fineage.Protocol.PrivateStoreListSellMsg>(
             Last(rec, nameof(IWorldEventPublisher.FanoutPrivateStoreListSell)));
         Assert.Equal(sellerEntity.ObjectId, list.StoreObjectId);
         Assert.Single(list.Items);
@@ -171,7 +171,7 @@ public sealed class NetPrivateStoreTests
             StoreObjectId = buyerEntity.ObjectId
         }, default));
 
-        var list = Assert.IsType<Fineage.Net.Contract.PrivateStoreListBuyNetMsg>(
+        var list = Assert.IsType<Fineage.Protocol.PrivateStoreListBuyMsg>(
             Last(rec, nameof(IWorldEventPublisher.FanoutPrivateStoreListBuy)));
         Assert.Equal(buyerEntity.ObjectId, list.StoreObjectId);
         Assert.Equal(itemId, Assert.Single(list.Items).ItemId);
@@ -224,7 +224,7 @@ public sealed class NetPrivateStoreTests
         {
             StoreObjectId = sellerEntity.ObjectId
         }, default));
-        Assert.Equal(1, Assert.IsType<Fineage.Net.Contract.PrivateStoreListSellNetMsg>(
+        Assert.Equal(1, Assert.IsType<Fineage.Protocol.PrivateStoreListSellMsg>(
             Last(rec, nameof(IWorldEventPublisher.FanoutPrivateStoreListSell))).Packaged);
 
         Assert.Equal(PrivateStoreProtocol.Package, await kit.World.TryPrivateStoreBuyAsync(buyer, new PrivateStoreBuyMsg

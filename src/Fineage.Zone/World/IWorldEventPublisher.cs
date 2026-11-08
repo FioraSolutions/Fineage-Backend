@@ -161,13 +161,13 @@ interface IWorldEventPublisher
     void FanoutTradeFinished(IReadOnlyList<int> watcherObjectIds, Fineage.Protocol.TradeFinishedMsg finished);
 
     /// <summary>Private store type + title for a pawn (self + knownlist).</summary>
-    void FanoutPrivateStoreInfo(IReadOnlyList<int> watcherObjectIds, PrivateStoreInfoNetMsg info);
+    void FanoutPrivateStoreInfo(IReadOnlyList<int> watcherObjectIds, Fineage.Protocol.PrivateStoreInfoMsg info);
 
     /// <summary>Sell list window for a buyer who clicked a store pawn.</summary>
-    void FanoutPrivateStoreListSell(IReadOnlyList<int> watcherObjectIds, PrivateStoreListSellNetMsg list);
+    void FanoutPrivateStoreListSell(IReadOnlyList<int> watcherObjectIds, Fineage.Protocol.PrivateStoreListSellMsg list);
 
     /// <summary>Buy list window for a visitor who clicked a buy-store pawn.</summary>
-    void FanoutPrivateStoreListBuy(IReadOnlyList<int> watcherObjectIds, PrivateStoreListBuyNetMsg list);
+    void FanoutPrivateStoreListBuy(IReadOnlyList<int> watcherObjectIds, Fineage.Protocol.PrivateStoreListBuyMsg list);
 
     /// <summary>Known recipe ids for one craft book tab.</summary>
     void FanoutRecipeBookList(IReadOnlyList<int> watcherObjectIds, RecipeBookListNetMsg list);

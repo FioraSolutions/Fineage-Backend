@@ -847,6 +847,45 @@ public sealed class PrivateStoreSellToMsg
     public PrivateStoreSellRowMsg[] Items { get; set; } = [];
 }
 
+/// <summary>Zone → client: store type + title on the pawn (Mobius PrivateStoreMsg).</summary>
+public sealed class PrivateStoreInfoMsg
+{
+    public int ObjectId { get; set; }
+    public int StoreType { get; set; }
+    public string Message { get; set; } = "";
+}
+
+/// <summary>One sell-list row with template metadata for the buyer UI.</summary>
+public sealed class PrivateStoreListedSellRowMsg
+{
+    public int InventoryObjectId { get; set; }
+    public int ItemId { get; set; }
+    public long Count { get; set; } = 1;
+    public long Price { get; set; }
+    public int EnchantLevel { get; set; }
+}
+
+/// <summary>Zone → client: a sell store's open list for a visitor.</summary>
+public sealed class PrivateStoreListSellMsg
+{
+    public int StoreObjectId { get; set; }
+    public string StoreName { get; set; } = "";
+    public string Message { get; set; } = "";
+    public int Packaged { get; set; }
+    public long BuyerAdena { get; set; }
+    public PrivateStoreListedSellRowMsg[] Items { get; set; } = [];
+}
+
+/// <summary>Zone → client: a buy store's open wish list for a visitor.</summary>
+public sealed class PrivateStoreListBuyMsg
+{
+    public int StoreObjectId { get; set; }
+    public string StoreName { get; set; } = "";
+    public string Message { get; set; } = "";
+    public long StoreAdena { get; set; }
+    public PrivateStoreBuyRowMsg[] Items { get; set; } = [];
+}
+
 /// <summary>Open the recipe book (Mobius RequestRecipeBookOpen). Dwarven=true → dwarven tab.</summary>
 public sealed class RecipeBookOpenMsg
 {
