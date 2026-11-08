@@ -35,6 +35,9 @@ public sealed class NetZoneServer : INetPresenceBridge
     readonly ShopPacketHandler _shop;
     readonly NpcTalkPacketHandler _npcTalk;
     readonly PrivateStorePacketHandler _privateStore;
+    readonly CombatPacketHandler _combat;
+    readonly InventoryActionPacketHandler _inventoryActions;
+    readonly SkillLearnPacketHandler _skillLearn;
 
     public NetZoneServer(
         IHandoffStore handoff,
@@ -66,6 +69,9 @@ public sealed class NetZoneServer : INetPresenceBridge
         _shop = new ShopPacketHandler(_world, RejectAsync);
         _npcTalk = new NpcTalkPacketHandler(_world, RejectAsync);
         _privateStore = new PrivateStorePacketHandler(_world, RejectAsync);
+        _combat = new CombatPacketHandler(_world, RejectAsync);
+        _inventoryActions = new InventoryActionPacketHandler(_world, RejectAsync);
+        _skillLearn = new SkillLearnPacketHandler(_world, RejectAsync);
         _world.NetBridge = this;
     }
 
@@ -738,43 +744,43 @@ public sealed class NetZoneServer : INetPresenceBridge
                             await OnMoveAsync(conn, zoneSession, self, envelope, ct).ConfigureAwait(false);
                             break;
                         case NetOpcode.SelectTarget:
-                            await OnSelectTargetAsync(conn, zoneSession, envelope, ct).ConfigureAwait(false);
+                            await _combat.OnSelectTargetAsync(conn, zoneSession, envelope, ct).ConfigureAwait(false);
                             break;
                         case NetOpcode.TargetCancelRequest:
-                            await OnTargetCancelAsync(conn, zoneSession, ct).ConfigureAwait(false);
+                            await _combat.OnTargetCancelAsync(conn, zoneSession, ct).ConfigureAwait(false);
                             break;
                         case NetOpcode.AttackRequest:
-                            await OnAttackAsync(conn, zoneSession, envelope, ct).ConfigureAwait(false);
+                            await _combat.OnAttackAsync(conn, zoneSession, envelope, ct).ConfigureAwait(false);
                             break;
                         case NetOpcode.PickupRequest:
-                            await OnPickupAsync(conn, zoneSession, envelope, ct).ConfigureAwait(false);
+                            await _inventoryActions.OnPickupAsync(conn, zoneSession, envelope, ct).ConfigureAwait(false);
                             break;
                         case NetOpcode.DropItemRequest:
-                            await OnDropItemAsync(conn, zoneSession, envelope, ct).ConfigureAwait(false);
+                            await _inventoryActions.OnDropAsync(conn, zoneSession, envelope, ct).ConfigureAwait(false);
                             break;
                         case NetOpcode.DestroyItemRequest:
-                            await OnDestroyItemAsync(conn, zoneSession, envelope, ct).ConfigureAwait(false);
+                            await _inventoryActions.OnDestroyAsync(conn, zoneSession, envelope, ct).ConfigureAwait(false);
                             break;
                         case NetOpcode.UseItem:
-                            await OnUseItemAsync(conn, zoneSession, envelope, ct).ConfigureAwait(false);
+                            await _inventoryActions.OnUseItemAsync(conn, zoneSession, envelope, ct).ConfigureAwait(false);
                             break;
                         case NetOpcode.UnequipItem:
-                            await OnUnequipItemAsync(conn, zoneSession, envelope, ct).ConfigureAwait(false);
+                            await _inventoryActions.OnUnequipAsync(conn, zoneSession, envelope, ct).ConfigureAwait(false);
                             break;
                         case NetOpcode.Say:
                             await OnSayAsync(conn, zoneSession, envelope, ct).ConfigureAwait(false);
                             break;
                         case NetOpcode.UseSkill:
-                            await OnUseSkillAsync(conn, zoneSession, envelope, ct).ConfigureAwait(false);
+                            await _combat.OnUseSkillAsync(conn, zoneSession, envelope, ct).ConfigureAwait(false);
                             break;
                         case NetOpcode.ReviveRequest:
                             await OnReviveRequestAsync(conn, zoneSession, self, envelope, ct).ConfigureAwait(false);
                             break;
                         case NetOpcode.RequestAcquireSkillInfo:
-                            await OnAcquireSkillRequestAsync(conn, zoneSession, envelope, informing: true, ct).ConfigureAwait(false);
+                            await _skillLearn.OnAcquireAsync(conn, zoneSession, envelope, informing: true, ct).ConfigureAwait(false);
                             break;
                         case NetOpcode.RequestAcquireSkill:
-                            await OnAcquireSkillRequestAsync(conn, zoneSession, envelope, informing: false, ct).ConfigureAwait(false);
+                            await _skillLearn.OnAcquireAsync(conn, zoneSession, envelope, informing: false, ct).ConfigureAwait(false);
                             break;
                         case NetOpcode.EnchantRequest:
                             await _enchant.OnRequestAsync(conn, zoneSession, envelope, ct).ConfigureAwait(false);
@@ -1368,69 +1374,6 @@ public sealed class NetZoneServer : INetPresenceBridge
         }
     }
 
-    async Task OnAcquireSkillRequestAsync(
-        NetConnection conn,
-        ZoneSession zoneSession,
-        PacketEnvelope envelope,
-        bool informing,
-        CancellationToken ct)
-    {
-        RequireHello(conn);
-        if (!zoneSession.Bound || !zoneSession.InWorld)
-        {
-            await RejectAsync(conn, "not_in_world", "Enter world first.", ct).ConfigureAwait(false);
-            return;
-        }
-
-        var (skillId, level, skillType) = NetCodec.DecodeAcquireSkillRequest(envelope.Payload);
-        string? error = await _world.TryAcquireSkillAsync(zoneSession, skillId, level, skillType, informing, ct).ConfigureAwait(false);
-        if (error != null)
-            await RejectAsync(conn, error, informing ? "Skill info failed." : "Learn failed.", ct).ConfigureAwait(false);
-    }
-
-    async Task OnSelectTargetAsync(
-        NetConnection conn,
-        ZoneSession zoneSession,
-        PacketEnvelope envelope,
-        CancellationToken ct)
-    {
-        RequireHello(conn);
-        if (!zoneSession.Bound || !zoneSession.InWorld)
-        {
-            await RejectAsync(conn, "not_in_world", "Enter world first.", ct).ConfigureAwait(false);
-            return;
-        }
-
-        var select = NetCodec.DecodeSelectTarget(envelope.Payload);
-        string? error = await _world.TrySelectTargetAsync(zoneSession, select.TargetObjectId, ct).ConfigureAwait(false);
-        if (error != null)
-        {
-            await RejectAsync(conn, error, "Select target failed.", ct).ConfigureAwait(false);
-            return;
-        }
-
-        // Nothing to answer here: the world already fanned MyTargetSelected's Net mirror (TargetSelected, id +
-        // Mobius colour), the target's StatusUpdate and the error path through INetPresenceBridge.
-    }
-
-    async Task OnTargetCancelAsync(
-        NetConnection conn,
-        ZoneSession zoneSession,
-        CancellationToken ct)
-    {
-        RequireHello(conn);
-        if (!zoneSession.Bound || !zoneSession.InWorld)
-        {
-            await RejectAsync(conn, "not_in_world", "Enter world first.", ct).ConfigureAwait(false);
-            return;
-        }
-
-        string? error = await _world.TryCancelTargetAsync(zoneSession, ct).ConfigureAwait(false);
-        if (error != null)
-            await RejectAsync(conn, error, "Target cancel failed.", ct).ConfigureAwait(false);
-        // The world already fanned TargetUnselected, so nothing to answer here.
-    }
-
     async Task OnBossStatusAsync(
         NetConnection conn,
         ZoneSession zoneSession,
@@ -1742,126 +1685,6 @@ public sealed class NetZoneServer : INetPresenceBridge
         // DungeonEntered goes out as fanout, so the reply body is empty on purpose.
     }
 
-    async Task OnAttackAsync(
-        NetConnection conn,
-        ZoneSession zoneSession,
-        PacketEnvelope envelope,
-        CancellationToken ct)    {
-        RequireHello(conn);
-        if (!zoneSession.Bound || !zoneSession.InWorld)
-        {
-            await RejectAsync(conn, "not_in_world", "Enter world first.", ct).ConfigureAwait(false);
-            return;
-        }
-
-        var attack = NetCodec.DecodeAttackRequest(envelope.Payload);
-        string? error = await _world.TryAttackAsync(zoneSession, attack.TargetObjectId, ct).ConfigureAwait(false);
-        if (error != null)
-            await RejectAsync(conn, error, "Attack failed.", ct).ConfigureAwait(false);
-        // AttackState / MoveState / StatusUpdate fan out via NetBridge from ZoneWorld combat.
-    }
-
-    async Task OnPickupAsync(
-        NetConnection conn,
-        ZoneSession zoneSession,
-        PacketEnvelope envelope,
-        CancellationToken ct)
-    {
-        RequireHello(conn);
-        if (!zoneSession.Bound || !zoneSession.InWorld)
-        {
-            await RejectAsync(conn, "not_in_world", "Enter world first.", ct).ConfigureAwait(false);
-            return;
-        }
-
-        var pickup = NetCodec.DecodePickupRequest(envelope.Payload);
-        string? error = await _world.TryPickupAsync(zoneSession, pickup.GroundObjectId, ct)
-            .ConfigureAwait(false);
-        if (error != null)
-            await RejectAsync(conn, error, "Pickup failed.", ct).ConfigureAwait(false);
-        // InventoryUpdate + EntityDespawn fan out via NetBridge.
-    }
-
-    async Task OnDestroyItemAsync(
-        NetConnection conn,
-        ZoneSession zoneSession,
-        PacketEnvelope envelope,
-        CancellationToken ct)
-    {
-        RequireHello(conn);
-        if (!zoneSession.Bound || !zoneSession.InWorld)
-        {
-            await RejectAsync(conn, "not_in_world", "Enter world first.", ct).ConfigureAwait(false);
-            return;
-        }
-
-        var destroy = NetCodec.DecodeDestroyItemRequest(envelope.Payload);
-        string? error = await _world.TryDestroyItemAsync(
-            zoneSession, destroy.ObjectId, destroy.Count, ct).ConfigureAwait(false);
-        if (error != null)
-            await RejectAsync(conn, error, "Destroy item failed.", ct).ConfigureAwait(false);
-        // InventoryUpdate fans out from ZoneWorldGround.
-    }
-
-    async Task OnDropItemAsync(
-        NetConnection conn,
-        ZoneSession zoneSession,
-        PacketEnvelope envelope,
-        CancellationToken ct)
-    {
-        RequireHello(conn);
-        if (!zoneSession.Bound || !zoneSession.InWorld)
-        {
-            await RejectAsync(conn, "not_in_world", "Enter world first.", ct).ConfigureAwait(false);
-            return;
-        }
-
-        var drop = NetCodec.DecodeDropItemRequest(envelope.Payload);
-        string? error = await _world.TryDropItemAsync(
-            zoneSession, drop.ObjectId, drop.Count, drop.X, drop.Y, drop.Z, ct).ConfigureAwait(false);
-        if (error != null)
-            await RejectAsync(conn, error, "Drop failed.", ct).ConfigureAwait(false);
-    }
-
-    async Task OnUseItemAsync(
-        NetConnection conn,
-        ZoneSession zoneSession,
-        PacketEnvelope envelope,
-        CancellationToken ct)
-    {
-        RequireHello(conn);
-        if (!zoneSession.Bound || !zoneSession.InWorld)
-        {
-            await RejectAsync(conn, "not_in_world", "Enter world first.", ct).ConfigureAwait(false);
-            return;
-        }
-
-        var use = NetCodec.DecodeUseItem(envelope.Payload);
-        string? error = await _world.TryUseItemAsync(zoneSession, use.ObjectId, ct).ConfigureAwait(false);
-        if (error != null)
-            await RejectAsync(conn, error, "UseItem failed.", ct).ConfigureAwait(false);
-    }
-
-    async Task OnUnequipItemAsync(
-        NetConnection conn,
-        ZoneSession zoneSession,
-        PacketEnvelope envelope,
-        CancellationToken ct)
-    {
-        RequireHello(conn);
-        if (!zoneSession.Bound || !zoneSession.InWorld)
-        {
-            await RejectAsync(conn, "not_in_world", "Enter world first.", ct).ConfigureAwait(false);
-            return;
-        }
-
-        var unequip = NetCodec.DecodeUnequipItem(envelope.Payload);
-        string? error = await _world.TryUnequipItemAsync(zoneSession, unequip.PaperdollSlot, ct)
-            .ConfigureAwait(false);
-        if (error != null)
-            await RejectAsync(conn, error, "Unequip failed.", ct).ConfigureAwait(false);
-    }
-
     async Task OnSayAsync(
         NetConnection conn,
         ZoneSession zoneSession,
@@ -1880,29 +1703,6 @@ public sealed class NetZoneServer : INetPresenceBridge
             zoneSession, say.Text, say.ChatType, _clock(), ct).ConfigureAwait(false);
         if (error != null)
             await RejectAsync(conn, error, "Say failed.", ct).ConfigureAwait(false);
-    }
-
-    async Task OnUseSkillAsync(
-        NetConnection conn,
-        ZoneSession zoneSession,
-        PacketEnvelope envelope,
-        CancellationToken ct)
-    {
-        RequireHello(conn);
-        if (!zoneSession.Bound || !zoneSession.InWorld)
-        {
-            await RejectAsync(conn, "not_in_world", "Enter world first.", ct).ConfigureAwait(false);
-            return;
-        }
-
-        var use = NetCodec.DecodeUseSkill(envelope.Payload);
-        string? error = await _world.TrySkillUseAsync(
-            zoneSession,
-            use.SkillId,
-            use.TargetObjectId,
-            ct).ConfigureAwait(false);
-        if (error != null)
-            await RejectAsync(conn, error, "UseSkill failed.", ct).ConfigureAwait(false);
     }
 
     async Task OnReviveRequestAsync(
