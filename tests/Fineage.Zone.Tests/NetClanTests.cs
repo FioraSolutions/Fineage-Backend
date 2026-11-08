@@ -402,7 +402,7 @@ public sealed class NetClanTests
     }
 
     static int LastUserInfoClan(NetBridgeRecorder rec) =>
-        Assert.IsType<UserInfoNetMsg>(rec.Of(nameof(IWorldEventPublisher.FanoutUserInfo)).Last()[1]).ClanId;
+        Assert.IsType<Fineage.Protocol.UserInfoMsg>(rec.Of(nameof(IWorldEventPublisher.FanoutUserInfo)).Last()[1]).ClanId;
 
     [Fact]
     public async Task Level_0_clan_rejects_an_eleventh_member()

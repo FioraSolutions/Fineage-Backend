@@ -44,7 +44,7 @@ interface IWorldEventPublisher
     void FanoutAutoSoulShot(IReadOnlyList<int> watcherObjectIds, int itemId, bool enabled);
 
     /// <summary>Mobius UserInfo to the owner (status window sheet + own paperdoll). Called under the ZoneWorld gate.</summary>
-    void FanoutUserInfo(IReadOnlyList<int> watcherObjectIds, UserInfoNetMsg info);
+    void FanoutUserInfo(IReadOnlyList<int> watcherObjectIds, Fineage.Protocol.UserInfoMsg info);
 
     /// <summary>Mobius CharInfo refresh (paperdoll changed) of player <paramref name="objectId"/> to knownlist players. Called under the ZoneWorld gate.</summary>
     void FanoutCharInfo(IReadOnlyList<int> watcherObjectIds, int objectId);

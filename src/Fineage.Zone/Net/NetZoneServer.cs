@@ -250,11 +250,70 @@ public sealed class NetZoneServer : IWorldEventPublisher
             _presence.TrySend(watcher, NetOpcode.AutoSoulShot, payload);
     }
 
-    void IWorldEventPublisher.FanoutUserInfo(IReadOnlyList<int> watcherObjectIds, UserInfoNetMsg info)
+    void IWorldEventPublisher.FanoutUserInfo(IReadOnlyList<int> watcherObjectIds, Fineage.Protocol.UserInfoMsg info)
     {
-        var payload = NetCodec.EncodeUserInfo(info);
+        var payload = NetCodec.EncodeUserInfo(ToNetUserInfo(info));
         foreach (int watcher in watcherObjectIds)
             _presence.TrySendCritical(watcher, NetOpcode.UserInfo, payload);
+    }
+
+    internal static UserInfoNetMsg ToNetUserInfo(Fineage.Protocol.UserInfoMsg info)
+    {
+        var src = info.Paperdoll ?? [];
+        var slots = new PaperdollSlotNet[src.Length];
+        for (int i = 0; i < src.Length; i++)
+        {
+            slots[i] = new PaperdollSlotNet
+            {
+                ObjectId = src[i].ObjectId,
+                ItemId = src[i].ItemId,
+                EnchantLevel = src[i].EnchantLevel
+            };
+        }
+
+        return new UserInfoNetMsg
+        {
+            EntityValue = (ulong)(uint)info.ObjectId,
+            EntityGeneration = 1,
+            Name = info.Name ?? "",
+            ClassId = info.ClassId,
+            Race = info.Race,
+            Sex = info.Sex,
+            X = info.X,
+            Y = info.Y,
+            Z = info.Z,
+            RunSpeed = info.RunSpeed,
+            WalkSpeed = info.WalkSpeed,
+            Running = info.Running,
+            Level = info.Level,
+            Exp = info.Exp,
+            Sp = info.Sp,
+            CurHp = info.CurHp,
+            MaxHp = info.MaxHp,
+            CurMp = info.CurMp,
+            MaxMp = info.MaxMp,
+            CurCp = info.CurCp,
+            MaxCp = info.MaxCp,
+            Str = info.Str,
+            Dex = info.Dex,
+            Con = info.Con,
+            Int = info.Int,
+            Wit = info.Wit,
+            Men = info.Men,
+            PAtk = info.PAtk,
+            MAtk = info.MAtk,
+            PDef = info.PDef,
+            MDef = info.MDef,
+            PAtkSpd = info.PAtkSpd,
+            MAtkSpd = info.MAtkSpd,
+            Accuracy = info.Accuracy,
+            Evasion = info.Evasion,
+            CritRate = info.CritRate,
+            WeaponGradePenalty = info.WeaponGradePenalty,
+            ArmorGradePenalty = info.ArmorGradePenalty,
+            ClanId = info.ClanId,
+            Paperdoll = slots
+        };
     }
 
     void IWorldEventPublisher.FanoutCharInfo(IReadOnlyList<int> watcherObjectIds, int objectId)
