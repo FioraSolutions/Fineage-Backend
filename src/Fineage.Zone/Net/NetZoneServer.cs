@@ -43,6 +43,7 @@ public sealed class NetZoneServer : INetPresenceBridge
     readonly WorldEventPacketHandler _worldEvents;
     readonly MovementPacketHandler _movement;
     readonly CharacterActionPacketHandler _characterActions;
+    readonly NetKnownlistFanout _knownlist;
 
     public NetZoneServer(
         IHandoffStore handoff,
@@ -80,8 +81,9 @@ public sealed class NetZoneServer : INetPresenceBridge
         _recipes = new RecipePacketHandler(_world, RejectAsync);
         _chat = new ChatPacketHandler(_world, _clock, RejectAsync);
         _worldEvents = new WorldEventPacketHandler(_world, _adminCommands, RejectAsync);
-        _movement = new MovementPacketHandler(_world, RejectAsync, FanKnownlistDiffAsync);
-        _characterActions = new CharacterActionPacketHandler(_world, RejectAsync, FanKnownlistDiffAsync);
+        _knownlist = new NetKnownlistFanout(_world, _ids, _presence, PlayerSpawnPAtkSpd);
+        _movement = new MovementPacketHandler(_world, RejectAsync, _knownlist.FanDiffAsync);
+        _characterActions = new CharacterActionPacketHandler(_world, RejectAsync, _knownlist.FanDiffAsync);
         _world.NetBridge = this;
     }
 
@@ -1230,78 +1232,6 @@ public sealed class NetZoneServer : INetPresenceBridge
         {
             if (peer.Kind == ZoneEntityKind.Player)
                 await _presence.SendAsync(peer.ObjectId, NetOpcode.EntitySpawn, selfRemote, ct).ConfigureAwait(false);
-        }
-    }
-
-    async Task FanKnownlistDiffAsync(
-        NetConnection conn,
-        ZoneSession zoneSession,
-        EntityId self,
-        HashSet<int> before,
-        HashSet<int> after,
-        CancellationToken ct)
-    {
-        // Newly visible: EntitySpawn. Forgotten: EntityDespawn.
-        foreach (int id in after)
-        {
-            if (before.Contains(id))
-                continue;
-            if (!_world.TryGetEntityById(id, out var newlySeen))
-                continue;
-
-            var otherId = _ids.AllocateOrGet(id);
-            if (newlySeen.Kind == ZoneEntityKind.GroundItem)
-            {
-                await conn.SendAsync(
-                    NetOpcode.DropItem,
-                    NetCodec.EncodeDropItem(new DropItemNetMsg
-                    {
-                        DropperObjectId = 0,
-                        EntityValue = otherId.Value,
-                        EntityGeneration = otherId.Generation,
-                        ItemId = newlySeen.GroundItemId,
-                        X = newlySeen.X,
-                        Y = newlySeen.Y,
-                        Z = newlySeen.Z,
-                        Stackable = newlySeen.GroundStackable,
-                        Count = newlySeen.GroundCount
-                    }),
-                    ct: ct).ConfigureAwait(false);
-                continue;
-            }
-
-            var spawn = NetCodec.EncodeEntitySpawn(
-                NetEnterWorldProjector.BuildPresenceSpawn(newlySeen, otherId, PlayerSpawnPAtkSpd(newlySeen)));
-            await conn.SendAsync(NetOpcode.EntitySpawn, spawn, ct: ct).ConfigureAwait(false);
-            if (newlySeen.Kind == ZoneEntityKind.Player &&
-                _world.TryGetLivePlayer(zoneSession, out var selfEntity))
-            {
-                var toPeer = NetCodec.EncodeEntitySpawn(
-                    NetEnterWorldProjector.BuildRemoteSpawn(selfEntity, self, PlayerSpawnPAtkSpd(selfEntity)));
-                await _presence.SendAsync(id, NetOpcode.EntitySpawn, toPeer, ct).ConfigureAwait(false);
-            }
-        }
-
-        var despawnSelf = NetCodec.EncodeEntityDespawn(new EntityDespawnMsg
-        {
-            EntityValue = self.Value,
-            EntityGeneration = self.Generation
-        });
-        foreach (int id in before)
-        {
-            if (after.Contains(id))
-                continue;
-            var forgottenId = _ids.AllocateOrGet(id);
-            await conn.SendAsync(
-                NetOpcode.EntityDespawn,
-                NetCodec.EncodeEntityDespawn(new EntityDespawnMsg
-                {
-                    EntityValue = forgottenId.Value,
-                    EntityGeneration = forgottenId.Generation
-                }),
-                ct: ct).ConfigureAwait(false);
-            if (_world.TryGetLivePlayerById(id, out _))
-                await _presence.SendAsync(id, NetOpcode.EntityDespawn, despawnSelf, ct).ConfigureAwait(false);
         }
     }
 
