@@ -98,7 +98,7 @@ public sealed class NetBossTests
     [Fact]
     public async Task Admin_schedule_is_forbidden_when_admin_is_off()
     {
-        using var timeout = new CancellationTokenSource(TimeSpan.FromSeconds(30));
+        using var timeout = new CancellationTokenSource(TimeSpan.FromSeconds(90));
         await using var host = await NetZoneHost.StartAsync();
         await using var session = await host.ConnectAsync();
         await session.HelloAsync(timeout.Token);

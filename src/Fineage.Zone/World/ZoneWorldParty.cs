@@ -1,4 +1,3 @@
-using Fineage.Net.Contract;
 using Fineage.Protocol;
 
 namespace Fineage.Zone.World;
@@ -109,7 +108,7 @@ public sealed partial class ZoneWorld
         }
 
         _pendingInvites[targetObjectId] = new PendingPartyInvite(inviter.ObjectId, distribution);
-        FanPartyAsk([targetEntity.ObjectId], new PartyAskJoinNetMsg
+        FanPartyAsk([targetEntity.ObjectId], new PartyAskJoinMsg
         {
             RequestorObjectId = inviter.ObjectId,
             RequestorName = inviter.Name,
@@ -234,8 +233,8 @@ public sealed partial class ZoneWorld
             party.PartyId,
             BuildPartyRows(party));
 
-    void FanPartyList(IReadOnlyList<int> members, int leaderObjectId, int partyId, PartyMemberEntryNet[] rows) =>
-        NetBridge?.FanoutPartyMemberList(members, new PartyMemberListNetMsg
+    void FanPartyList(IReadOnlyList<int> members, int leaderObjectId, int partyId, PartyMemberEntryMsg[] rows) =>
+        NetBridge?.FanoutPartyMemberList(members, new PartyMemberListMsg
         {
             LeaderObjectId = leaderObjectId,
             PartyId = partyId,
@@ -243,24 +242,24 @@ public sealed partial class ZoneWorld
         });
 
     void FanPartyJoinResult(IReadOnlyList<int> watchers, int response) =>
-        NetBridge?.FanoutPartyJoinResult(watchers, new PartyJoinResultNetMsg { Response = response });
+        NetBridge?.FanoutPartyJoinResult(watchers, new PartyJoinResultMsg { Response = response });
 
-    void FanPartyAsk(IReadOnlyList<int> watchers, PartyAskJoinNetMsg ask) =>
+    void FanPartyAsk(IReadOnlyList<int> watchers, PartyAskJoinMsg ask) =>
         NetBridge?.FanoutPartyAskJoin(watchers, ask);
 
-    PartyMemberEntryNet[] BuildPartyRows(ZoneParty party)
+    PartyMemberEntryMsg[] BuildPartyRows(ZoneParty party)
     {
-        var members = new PartyMemberEntryNet[party.MemberIds.Count];
+        var members = new PartyMemberEntryMsg[party.MemberIds.Count];
         for (int i = 0; i < party.MemberIds.Count; i++)
         {
             int id = party.MemberIds[i];
             if (!_byId.TryGetValue(id, out var entity))
             {
-                members[i] = new PartyMemberEntryNet { ObjectId = id };
+                members[i] = new PartyMemberEntryMsg { ObjectId = id };
                 continue;
             }
 
-            members[i] = new PartyMemberEntryNet
+            members[i] = new PartyMemberEntryMsg
             {
                 ObjectId = entity.ObjectId,
                 Name = entity.Name,
