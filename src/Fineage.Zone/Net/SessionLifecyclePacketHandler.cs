@@ -165,7 +165,7 @@ sealed class SessionLifecyclePacketHandler
             await conn.SendAsync(NetOpcode.UserInfo, NetCodec.EncodeUserInfo(userInfo), ct: ct).ConfigureAwait(false);
         await conn.SendAsync(NetOpcode.ItemList, NetCodec.EncodeItemList(packets.Items), ct: ct)
             .ConfigureAwait(false);
-        await conn.SendAsync(NetOpcode.SkillList, NetCodec.EncodeSkillList(packets.Skills), ct: ct)
+        await conn.SendAsync(NetOpcode.SkillList, NetCodec.EncodeSkillList(NetEnterWorldProjector.ToNetSkillList(packets.Skills)), ct: ct)
             .ConfigureAwait(false);
         // Mobius EnterWorld: ShortCutInit after ItemList / SkillList so item and skill icons resolve.
         await conn.SendAsync(NetOpcode.ShortCutInit, NetCodec.EncodeShortCutInit(_world.NetShortcutInit(zoneSession)), ct: ct)

@@ -41,7 +41,7 @@ public sealed class NetSkillTests
         Assert.True(bench.World.TrySetPlayerLevelForTests(actor.Session, 20));
         Assert.True(bench.World.TryGetLivePlayer(actor.Session, out var after));
         Assert.True(after.KnownSkills.Count > before);
-        var list = Assert.IsType<SkillListNetMsg>(
+        var list = Assert.IsType<SkillListMsg>(
             bench.Rec.Of(nameof(IWorldEventPublisher.FanoutSkillList)).Last()[1]);
         Assert.Equal(after.KnownSkills.Count, list.Skills.Length);
         Assert.Contains(list.Skills, row => row.SkillId == 194);
