@@ -51,3 +51,39 @@ public sealed class BlockRequestMsg
     public int Type { get; set; }
     public string Name { get; set; } = "";
 }
+
+/// <summary>Zone → client: an invite arrived (Mobius AskJoinFriend).</summary>
+public sealed class FriendInviteAskMsg
+{
+    public string RequestorName { get; set; } = "";
+}
+
+/// <summary>One friend or block-list row.</summary>
+public sealed class FriendRowMsg
+{
+    public int ObjectId { get; set; }
+    public string Name { get; set; } = "";
+    public int Online { get; set; }
+}
+
+/// <summary>Zone → client: full friends roster.</summary>
+public sealed class FriendListMsg
+{
+    public FriendRowMsg[] Friends { get; set; } = [];
+}
+
+/// <summary>Added=1 / removed=0; Online reflects presence when added or on login notify.</summary>
+public sealed class FriendUpdateMsg
+{
+    public int Added { get; set; }
+    public int ObjectId { get; set; }
+    public string Name { get; set; } = "";
+    public int Online { get; set; }
+}
+
+/// <summary>Zone → client: block list + block-all flag.</summary>
+public sealed class BlockListMsg
+{
+    public int BlockAll { get; set; }
+    public FriendRowMsg[] Blocked { get; set; } = [];
+}

@@ -151,7 +151,7 @@ public sealed partial class ZoneWorld
             return FriendProtocol.Limit;
 
         _pendingFriendInvites[target.ObjectId] = self.ObjectId;
-        NetBridge?.FanoutFriendInviteAsk([target.ObjectId], new Fineage.Net.Contract.FriendInviteAskNetMsg
+        NetBridge?.FanoutFriendInviteAsk([target.ObjectId], new FriendInviteAskMsg
         {
             RequestorName = self.Name
         });
@@ -197,14 +197,14 @@ public sealed partial class ZoneWorld
             return "world";
         var rows = self.Friends
             .OrderBy(kv => kv.Value, StringComparer.OrdinalIgnoreCase)
-            .Select(kv => new Fineage.Net.Contract.FriendRowNet
+            .Select(kv => new FriendRowMsg
             {
                 ObjectId = kv.Key,
                 Name = LiveNameOr(kv.Key, kv.Value),
                 Online = IsOnlinePlayer(kv.Key) ? 1 : 0
             })
             .ToArray();
-        NetBridge?.FanoutFriendList([self.ObjectId], new Fineage.Net.Contract.FriendListNetMsg { Friends = rows });
+        NetBridge?.FanoutFriendList([self.ObjectId], new FriendListMsg { Friends = rows });
         return null;
     }
 
@@ -339,14 +339,14 @@ public sealed partial class ZoneWorld
     {
         var rows = self.Blocked
             .OrderBy(kv => kv.Value, StringComparer.OrdinalIgnoreCase)
-            .Select(kv => new Fineage.Net.Contract.FriendRowNet
+            .Select(kv => new FriendRowMsg
             {
                 ObjectId = kv.Key,
                 Name = kv.Value,
                 Online = IsOnlinePlayer(kv.Key) ? 1 : 0
             })
             .ToArray();
-        NetBridge?.FanoutBlockList([self.ObjectId], new Fineage.Net.Contract.BlockListNetMsg
+        NetBridge?.FanoutBlockList([self.ObjectId], new BlockListMsg
         {
             BlockAll = self.BlockAll ? 1 : 0,
             Blocked = rows
@@ -406,7 +406,7 @@ public sealed partial class ZoneWorld
 
     void FanoutFriendUpdate(int watcherObjectId, bool added, int objectId, string name, int online)
     {
-        NetBridge?.FanoutFriendUpdate([watcherObjectId], new Fineage.Net.Contract.FriendUpdateNetMsg
+        NetBridge?.FanoutFriendUpdate([watcherObjectId], new FriendUpdateMsg
         {
             Added = added ? 1 : 0,
             ObjectId = objectId,
