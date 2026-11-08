@@ -57,6 +57,17 @@ sealed class ZonePlayerSocialPayload
     public bool BlockAll { get; set; }
 }
 
+/// <summary>Player private-store / manufacture fields composed off <see cref="ZoneEntity"/> (#353).</summary>
+sealed class ZonePlayerStorePayload
+{
+    public byte PrivateStoreType { get; set; }
+    public string PrivateStoreMessage { get; set; } = "";
+    public List<PrivateStoreSellListing> PrivateSellList { get; } = [];
+    public List<PrivateStoreBuyListing> PrivateBuyList { get; } = [];
+    public List<ManufactureListing> ManufactureList { get; } = [];
+    public HashSet<int> KnownRecipes { get; } = [];
+}
+
 /// <summary>NPC aggro / chase / return-home runtime fields composed off <see cref="ZoneEntity"/> (#353).</summary>
 sealed class ZoneNpcAggroPayload
 {
@@ -151,18 +162,37 @@ sealed class ZoneEntity
     public double RegenCarryMp { get; set; }
     /// <summary>When true, regen rates double (classic sitting rest).</summary>
     public bool Sitting { get; set; }
+    /// <summary>Player store/manufacture payload; null until first store access (#353 composition).</summary>
+    public ZonePlayerStorePayload? Store { get; set; }
+
     /// <summary>Mobius <c>PrivateStoreType</c> (None / Sell / Buy).</summary>
-    public byte PrivateStoreType { get; set; }
+    public byte PrivateStoreType
+    {
+        get => Store?.PrivateStoreType ?? 0;
+        set => EnsureStore().PrivateStoreType = value;
+    }
+
     /// <summary>Store title shown above the sitting pawn (Mobius PrivateStoreMsgSell/Buy).</summary>
-    public string PrivateStoreMessage { get; set; } = "";
+    public string PrivateStoreMessage
+    {
+        get => Store?.PrivateStoreMessage ?? "";
+        set => EnsureStore().PrivateStoreMessage = value ?? "";
+    }
+
     /// <summary>Active sell listings while <see cref="PrivateStoreType"/> is Sell.</summary>
-    public List<PrivateStoreSellListing> PrivateSellList { get; } = [];
+    public List<PrivateStoreSellListing> PrivateSellList => EnsureStore().PrivateSellList;
+
     /// <summary>Active buy listings while <see cref="PrivateStoreType"/> is Buy (by template id).</summary>
-    public List<PrivateStoreBuyListing> PrivateBuyList { get; } = [];
+    public List<PrivateStoreBuyListing> PrivateBuyList => EnsureStore().PrivateBuyList;
+
     /// <summary>Active manufacture listings while <see cref="PrivateStoreType"/> is Manufacture.</summary>
-    public List<ManufactureListing> ManufactureList { get; } = [];
+    public List<ManufactureListing> ManufactureList => EnsureStore().ManufactureList;
+
     /// <summary>Mobius recipe book: known <c>RecipeList</c> ids (make-self / book open).</summary>
-    public HashSet<int> KnownRecipes { get; } = [];
+    public HashSet<int> KnownRecipes => EnsureStore().KnownRecipes;
+
+    ZonePlayerStorePayload EnsureStore() => Store ??= new ZonePlayerStorePayload();
+
     /// <summary>Player social payload; null until first friend/block access (#353 composition).</summary>
     public ZonePlayerSocialPayload? Social { get; set; }
 
