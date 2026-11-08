@@ -137,7 +137,7 @@ public sealed class NetPvpTests
         (int CurHp, int MaxHp)? last = null;
         foreach (var args in rec.Of(nameof(IWorldEventPublisher.FanoutStatusUpdate)))
         {
-            if (args[1] is not StatusUpdateNetMsg msg || msg.EntityValue != (ulong)(uint)objectId)
+            if (args[1] is not StatusUpdateMsg msg || msg.ObjectId != objectId)
                 continue;
             var ids = msg.AttributeIds ?? [];
             var vals = msg.Values ?? [];

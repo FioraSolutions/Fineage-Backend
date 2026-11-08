@@ -274,9 +274,15 @@ public sealed class NetZoneServer : IWorldEventPublisher
             _presence.TrySend(watcher, NetOpcode.AttackState, payload);
     }
 
-    void IWorldEventPublisher.FanoutStatusUpdate(IReadOnlyList<int> watcherObjectIds, StatusUpdateNetMsg status)
+    void IWorldEventPublisher.FanoutStatusUpdate(IReadOnlyList<int> watcherObjectIds, Fineage.Protocol.StatusUpdateMsg status)
     {
-        var payload = NetCodec.EncodeStatusUpdate(status);
+        var payload = NetCodec.EncodeStatusUpdate(new StatusUpdateNetMsg
+        {
+            EntityValue = (ulong)(uint)status.ObjectId,
+            EntityGeneration = 1,
+            AttributeIds = status.AttributeIds ?? [],
+            Values = status.Values ?? []
+        });
         foreach (int watcher in watcherObjectIds)
             _presence.TrySend(watcher, NetOpcode.StatusUpdate, payload);
     }

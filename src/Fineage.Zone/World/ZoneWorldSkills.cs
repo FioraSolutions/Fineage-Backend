@@ -679,22 +679,10 @@ public sealed partial class ZoneWorld
             });
             if (targetStatus != null)
             {
-                NetBridge.FanoutStatusUpdate(netWatchers, new Fineage.Net.Contract.StatusUpdateNetMsg
-                {
-                    EntityValue = (ulong)(uint)targetStatus.ObjectId,
-                    EntityGeneration = 1,
-                    AttributeIds = targetStatus.AttributeIds ?? [],
-                    Values = targetStatus.Values ?? []
-                });
+                NetBridge.FanoutStatusUpdate(netWatchers, targetStatus);
             }
 
-            NetBridge.FanoutStatusUpdate([caster.ObjectId], new Fineage.Net.Contract.StatusUpdateNetMsg
-            {
-                EntityValue = (ulong)(uint)casterMp.ObjectId,
-                EntityGeneration = 1,
-                AttributeIds = casterMp.AttributeIds ?? [],
-                Values = casterMp.Values ?? []
-            });
+            NetBridge.FanoutStatusUpdate([caster.ObjectId], casterMp);
         }
     }
 }

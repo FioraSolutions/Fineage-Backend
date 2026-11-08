@@ -209,13 +209,7 @@ public sealed partial class ZoneWorld
 
         if (netWatchers is { Count: > 0 } && NetBridge != null)
         {
-            NetBridge.FanoutStatusUpdate(netWatchers, new Fineage.Net.Contract.StatusUpdateNetMsg
-            {
-                EntityValue = (ulong)(uint)status.ObjectId,
-                EntityGeneration = 1,
-                AttributeIds = status.AttributeIds ?? [],
-                Values = status.Values ?? []
-            });
+            NetBridge.FanoutStatusUpdate(netWatchers, status);
         }
     }
 

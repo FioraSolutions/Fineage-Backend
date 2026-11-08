@@ -97,7 +97,7 @@ public sealed class NetSkillTests
         // Nothing has been damaged on key press, only after the hit timer runs.
         Assert.DoesNotContain(
             bench.Rec.Of(nameof(IWorldEventPublisher.FanoutStatusUpdate)),
-            args => args[1] is StatusUpdateNetMsg status && status.EntityValue == (ulong)(uint)gremlinObjectId);
+            args => args[1] is StatusUpdateMsg status && status.ObjectId == gremlinObjectId);
 
         Now = Now.AddSeconds(5);
         await bench.World.RunCombatTickAsync(CancellationToken.None);
@@ -239,8 +239,8 @@ public sealed class NetSkillTests
         return info.ObjectId;
     }
 
-    static StatusUpdateNetMsg LastStatusFor(NetBridgeRecorder rec, int objectId) =>
-        Assert.IsType<StatusUpdateNetMsg>(rec.Of(nameof(IWorldEventPublisher.FanoutStatusUpdate))
-            .Select(args => (StatusUpdateNetMsg)args[1])
-            .Last(status => status.EntityValue == (ulong)(uint)objectId));
+    static StatusUpdateMsg LastStatusFor(NetBridgeRecorder rec, int objectId) =>
+        Assert.IsType<StatusUpdateMsg>(rec.Of(nameof(IWorldEventPublisher.FanoutStatusUpdate))
+            .Select(args => (StatusUpdateMsg)args[1])
+            .Last(status => status.ObjectId == objectId));
 }
