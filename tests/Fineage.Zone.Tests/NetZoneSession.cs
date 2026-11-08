@@ -40,7 +40,8 @@ internal sealed class NetZoneHost : IAsyncDisposable
         HandoffTokens? tokens = null,
         Func<DateTimeOffset>? clock = null,
         int maxMessagesPerSecond = 120,
-        int idleSeconds = 1800)
+        int idleSeconds = 1800,
+        bool? adminCommands = null)
     {
         tokens ??= new HandoffTokens(HandoffTokens.DefaultSecret);
         store ??= MemoryAccountStore.InMemory();
@@ -52,7 +53,8 @@ internal sealed class NetZoneHost : IAsyncDisposable
             store,
             clock,
             maxMessagesPerSecond: maxMessagesPerSecond,
-            idleTimeout: TimeSpan.FromSeconds(idleSeconds));
+            idleTimeout: TimeSpan.FromSeconds(idleSeconds),
+            adminCommands: adminCommands);
         var server = new NetTcpServer();
         var serve = Task.Run(
             () => server.RunAsync("127.0.0.1", 0, zone.HandleAsync, cts.Token, maxConnections: 8, inboxCapacity: 64),

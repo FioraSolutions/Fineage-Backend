@@ -98,8 +98,10 @@ public sealed class NetBossTests
     [Fact]
     public async Task Admin_schedule_is_forbidden_when_admin_is_off()
     {
-        using var timeout = new CancellationTokenSource(TimeSpan.FromSeconds(90));
-        await using var host = await NetZoneHost.StartAsync();
+        using var timeout = new CancellationTokenSource(TimeSpan.FromSeconds(30));
+        // Force the env gate off so a developer shell with FINEAGE_ZONE_ADMIN=1 cannot hang this test
+        // waiting for a Reject that a successful admin apply never sends.
+        await using var host = await NetZoneHost.StartAsync(adminCommands: false);
         await using var session = await host.ConnectAsync();
         await session.HelloAsync(timeout.Token);
         await session.AuthAsync("boss", "Scout", timeout.Token);
