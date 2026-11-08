@@ -1,22 +1,23 @@
 using Fineage.Game;
+using Fineage.Protocol;
 
 namespace Fineage.Zone.World;
 
 /// <summary>
-/// Net projection of Mobius UserInfo: vitals, base stats, live combat stats from <see cref="PlayerStats"/>,
-/// speeds, paperdoll, so the Net status window and the owner's model match the server.
+/// Projection of Mobius UserInfo: vitals, base stats, live combat stats from <see cref="PlayerStats"/>,
+/// speeds, paperdoll, so the status window and the owner's model match the server.
 /// Every self UserInfo refresh goes through <see cref="SelfUserInfo"/>.
 /// </summary>
 public sealed partial class ZoneWorld
 {
-    /// <summary>Build the Net UserInfo for a live player (Net enter path).</summary>
-    internal bool TryBuildNetUserInfo(ZoneSession session, out Fineage.Net.Contract.UserInfoNetMsg info)
+    /// <summary>Build the UserInfo for a live player (enter path + fanout).</summary>
+    internal bool TryBuildNetUserInfo(ZoneSession session, out UserInfoMsg info)
     {
         lock (_gate)
         {
             if (_byId.TryGetValue(session.ObjectId, out var e) && e.Kind == ZoneEntityKind.Player && e.Inventory != null)
             {
-                info = NetUserInfo(e);
+                info = BuildUserInfo(e);
                 return true;
             }
         }
@@ -24,16 +25,16 @@ public sealed partial class ZoneWorld
         return false;
     }
 
-    internal Fineage.Net.Contract.UserInfoNetMsg NetUserInfo(ZoneEntity e)
+    internal UserInfoMsg BuildUserInfo(ZoneEntity e)
     {
         var vitals = BuildUserInfoVitals(e);
-        var slots = new Fineage.Net.Contract.PaperdollSlotNet[InventoryMessages.PaperdollSlotCount];
+        var slots = new PaperdollSlotMsg[InventoryMessages.PaperdollSlotCount];
         if (e.Inventory != null)
         {
             for (int i = 0; i < slots.Length; i++)
             {
                 var item = e.Inventory.GetEquipped((PaperdollSlot)i);
-                slots[i] = new Fineage.Net.Contract.PaperdollSlotNet
+                slots[i] = new PaperdollSlotMsg
                 {
                     ObjectId = item?.ObjectId ?? 0,
                     ItemId = item?.ItemId ?? 0,
@@ -42,10 +43,9 @@ public sealed partial class ZoneWorld
             }
         }
 
-        return new Fineage.Net.Contract.UserInfoNetMsg
+        return new UserInfoMsg
         {
-            EntityValue = (ulong)(uint)e.ObjectId,
-            EntityGeneration = 1,
+            ObjectId = e.ObjectId,
             Name = e.Name,
             ClassId = e.ClassId,
             Race = e.Race,
@@ -82,12 +82,16 @@ public sealed partial class ZoneWorld
             CritRate = vitals.CritRate,
             WeaponGradePenalty = e.WeaponGradePenalty,
             ArmorGradePenalty = e.ArmorGradePenalty,
+            GradePenalty = Math.Max(e.WeaponGradePenalty, e.ArmorGradePenalty),
             ClanId = e.ClanId,
             Paperdoll = slots
         };
     }
 
+    /// <summary>Legacy name used by clan / gear paths; same as <see cref="BuildUserInfo"/>.</summary>
+    internal UserInfoMsg NetUserInfo(ZoneEntity e) => BuildUserInfo(e);
+
     /// <summary>Mobius <c>sendPacket(new UserInfo)</c>: the owner's sheet only, straight to its Net client.</summary>
     void SelfUserInfo(ZoneEntity entity) =>
-        NetBridge?.FanoutUserInfo([entity.ObjectId], NetUserInfo(entity));
+        NetBridge?.FanoutUserInfo([entity.ObjectId], BuildUserInfo(entity));
 }

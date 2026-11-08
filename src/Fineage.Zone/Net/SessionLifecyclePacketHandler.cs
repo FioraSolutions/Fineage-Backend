@@ -162,7 +162,8 @@ sealed class SessionLifecyclePacketHandler
             .ConfigureAwait(false);
         // Mobius enter: UserInfo (full sheet + paperdoll) before ItemList so the status window and model are dressed.
         if (_world.TryBuildNetUserInfo(zoneSession, out var userInfo))
-            await conn.SendAsync(NetOpcode.UserInfo, NetCodec.EncodeUserInfo(userInfo), ct: ct).ConfigureAwait(false);
+            await conn.SendAsync(NetOpcode.UserInfo, NetCodec.EncodeUserInfo(NetZoneServer.ToNetUserInfo(userInfo)), ct: ct)
+                .ConfigureAwait(false);
         await conn.SendAsync(NetOpcode.ItemList, NetCodec.EncodeItemList(packets.Items), ct: ct)
             .ConfigureAwait(false);
         await conn.SendAsync(NetOpcode.SkillList, NetCodec.EncodeSkillList(NetEnterWorldProjector.ToNetSkillList(packets.Skills)), ct: ct)

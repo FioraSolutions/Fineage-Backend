@@ -366,15 +366,15 @@ public sealed class NetEquipRulesTests
     }
 
     /// <summary>The bag update and the owner's UserInfo a gear change emits, in that order.</summary>
-    static (InventoryUpdateMsg Update, UserInfoNetMsg User) LastGear(NetBridgeRecorder rec) =>
+    static (InventoryUpdateMsg Update, Fineage.Protocol.UserInfoMsg User) LastGear(NetBridgeRecorder rec) =>
         (LastInventory(rec), LastUserInfo(rec));
 
     static InventoryUpdateMsg LastInventory(NetBridgeRecorder rec) =>
         Assert.IsType<InventoryUpdateMsg>(
             rec.Of(nameof(IWorldEventPublisher.FanoutInventoryUpdate)).Last()[1]);
 
-    static UserInfoNetMsg LastUserInfo(NetBridgeRecorder rec) =>
-        Assert.IsType<UserInfoNetMsg>(
+    static Fineage.Protocol.UserInfoMsg LastUserInfo(NetBridgeRecorder rec) =>
+        Assert.IsType<Fineage.Protocol.UserInfoMsg>(
             rec.Of(nameof(IWorldEventPublisher.FanoutUserInfo)).Last()[1]);
 
     static StoredItem Bag(int itemId) => new(itemId, 1, -1);

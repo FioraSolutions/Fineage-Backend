@@ -242,19 +242,19 @@ public sealed class NetEquipRestrictionTests
         Assert.Equal(enabled, ZoneGearSettings.ParseExpertisePenalty(text));
     }
 
-    static UserInfoNetMsg LastUserInfoAtEnter(NetBridgeRecorder rec) =>
-        Assert.IsType<UserInfoNetMsg>(rec.Of(nameof(IWorldEventPublisher.FanoutUserInfo)).First()[1]);
+    static Fineage.Protocol.UserInfoMsg LastUserInfoAtEnter(NetBridgeRecorder rec) =>
+        Assert.IsType<Fineage.Protocol.UserInfoMsg>(rec.Of(nameof(IWorldEventPublisher.FanoutUserInfo)).First()[1]);
 
     /// <summary>The sheet <c>NetZoneServer</c> sends on enter — built on demand, never fanned out.</summary>
-    static UserInfoNetMsg EnterSheet(WorldBench bench, BenchPlayer actor)
+    static Fineage.Protocol.UserInfoMsg EnterSheet(WorldBench bench, BenchPlayer actor)
     {
         Assert.True(bench.World.TryBuildNetUserInfo(actor.Session, out var info));
         return info;
     }
 
-    static (InventoryUpdateMsg Update, UserInfoNetMsg User) LastGear(NetBridgeRecorder rec) =>
+    static (InventoryUpdateMsg Update, Fineage.Protocol.UserInfoMsg User) LastGear(NetBridgeRecorder rec) =>
         (Assert.IsType<InventoryUpdateMsg>(rec.Of(nameof(IWorldEventPublisher.FanoutInventoryUpdate)).Last()[1]),
-         Assert.IsType<UserInfoNetMsg>(rec.Of(nameof(IWorldEventPublisher.FanoutUserInfo)).Last()[1]));
+         Assert.IsType<Fineage.Protocol.UserInfoMsg>(rec.Of(nameof(IWorldEventPublisher.FanoutUserInfo)).Last()[1]));
 
     static Fineage.Protocol.EtcStatusUpdateMsg LastEtcStatus(NetBridgeRecorder rec) =>
         Assert.IsType<Fineage.Protocol.EtcStatusUpdateMsg>(rec.Of(nameof(IWorldEventPublisher.FanoutEtcStatusUpdate)).Last()[1]);

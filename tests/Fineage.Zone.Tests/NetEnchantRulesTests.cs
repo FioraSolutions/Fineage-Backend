@@ -223,7 +223,7 @@ public sealed class NetEnchantRulesTests
         await OpenScrollAsync(bench, session, player, NormalD);
         Assert.Null(await bench.World.TryEnchantConfirmAsync(session, SlotFor(player, Saber), default));
 
-        var info = Assert.IsType<UserInfoNetMsg>(
+        var info = Assert.IsType<Fineage.Protocol.UserInfoMsg>(
             bench.Rec.Of(nameof(IWorldEventPublisher.FanoutUserInfo)).Last()[1]);
         Assert.Equal(Saber, info.Paperdoll[7].ItemId);
         Assert.Equal(1, info.Paperdoll[7].EnchantLevel);
@@ -243,7 +243,7 @@ public sealed class NetEnchantRulesTests
         Assert.Null(await bench.World.TryEnchantConfirmAsync(session, SlotFor(player, Saber), default));
 
         Assert.Contains(Lines(bench.Rec), l => l.Id == EnchantProtocol.EquipmentRemoved);
-        var info = Assert.IsType<UserInfoNetMsg>(
+        var info = Assert.IsType<Fineage.Protocol.UserInfoMsg>(
             bench.Rec.Of(nameof(IWorldEventPublisher.FanoutUserInfo)).Last()[1]);
         Assert.Equal(0, info.Paperdoll[7].ItemId);
         Assert.Equal(0, info.Paperdoll[7].EnchantLevel);

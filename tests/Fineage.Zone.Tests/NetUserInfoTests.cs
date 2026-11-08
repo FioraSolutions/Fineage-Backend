@@ -99,7 +99,7 @@ public sealed class NetUserInfoTests
         var infos = rec.Of(nameof(IWorldEventPublisher.FanoutUserInfo));
         Assert.Single(infos);
         Assert.Equal([elf.ObjectId], (IReadOnlyList<int>)infos[0][0]!);
-        var after = (UserInfoNetMsg)infos[0][1]!;
+        var after = (Fineage.Protocol.UserInfoMsg)infos[0][1]!;
         Assert.Equal(0, after.Paperdoll[slot].ItemId);
         Assert.True(after.PDef < before.PDef, $"pdef {before.PDef} -> {after.PDef}");
 

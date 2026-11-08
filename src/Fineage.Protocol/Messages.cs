@@ -266,6 +266,10 @@ public sealed class UserInfoMsg
     public int ObjectId { get; set; }
     public string Name { get; set; } = "";
     public int ClassId { get; set; }
+    /// <summary>0 human … race ordinals. Net clients need this on the owner sheet.</summary>
+    public int Race { get; set; }
+    /// <summary>0 male, 1 female.</summary>
+    public int Sex { get; set; }
     public int X { get; set; }
     public int Y { get; set; }
     public int Z { get; set; }
@@ -309,6 +313,7 @@ public sealed class UserInfoMsg
     public int PAtkSpd { get; set; }
     public int MAtkSpd { get; set; }
     public int Accuracy { get; set; }
+    public int Evasion { get; set; }
     public int CritRate { get; set; }
 }
 
