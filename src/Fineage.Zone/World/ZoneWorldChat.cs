@@ -84,15 +84,7 @@ public sealed partial class ZoneWorld
         }
 
         if (netWatchers is { Count: > 0 } && NetBridge != null)
-        {
-            NetBridge.FanoutCreatureSay(netWatchers, new CreatureSayNetMsg
-            {
-                ObjectId = said.ObjectId,
-                Name = said.Name,
-                Text = said.Text,
-                ChatType = said.ChatType
-            });
-        }
+            NetBridge.FanoutCreatureSay(netWatchers, said);
     }
 
     static bool HearsLocal(ZoneEntity speaker, ZoneEntity other) =>

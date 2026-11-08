@@ -325,9 +325,15 @@ public sealed class NetZoneServer : IWorldEventPublisher
             _presence.TrySend(watcher, NetOpcode.EtcStatusUpdate, payload);
     }
 
-    void IWorldEventPublisher.FanoutCreatureSay(IReadOnlyList<int> watcherObjectIds, CreatureSayNetMsg say)
+    void IWorldEventPublisher.FanoutCreatureSay(IReadOnlyList<int> watcherObjectIds, Fineage.Protocol.CreatureSayMsg say)
     {
-        var payload = NetCodec.EncodeCreatureSay(say);
+        var payload = NetCodec.EncodeCreatureSay(new CreatureSayNetMsg
+        {
+            ObjectId = say.ObjectId,
+            Name = say.Name ?? "",
+            Text = say.Text ?? "",
+            ChatType = say.ChatType
+        });
         foreach (int watcher in watcherObjectIds)
             _presence.TrySend(watcher, NetOpcode.CreatureSay, payload);
     }
