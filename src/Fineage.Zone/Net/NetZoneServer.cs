@@ -26,6 +26,7 @@ public sealed class NetZoneServer : INetPresenceBridge
     readonly bool _adminCommands;
     readonly EnchantPacketHandler _enchant;
     readonly ClanPacketHandler _clan;
+    readonly TradePacketHandler _trade;
 
     public NetZoneServer(
         IHandoffStore handoff,
@@ -48,6 +49,7 @@ public sealed class NetZoneServer : INetPresenceBridge
         _adminCommands = adminCommands ?? ZoneAdmin.Enabled;
         _enchant = new EnchantPacketHandler(_world, RejectAsync);
         _clan = new ClanPacketHandler(_world, _clock, RejectAsync);
+        _trade = new TradePacketHandler(_world, RejectAsync);
         _world.NetBridge = this;
     }
 
@@ -828,16 +830,16 @@ public sealed class NetZoneServer : INetPresenceBridge
                             await OnPartyKickAsync(conn, zoneSession, envelope, ct).ConfigureAwait(false);
                             break;
                         case NetOpcode.TradeRequest:
-                            await OnTradeRequestAsync(conn, zoneSession, envelope, ct).ConfigureAwait(false);
+                            await _trade.OnRequestAsync(conn, zoneSession, envelope, ct).ConfigureAwait(false);
                             break;
                         case NetOpcode.TradeAnswerRequest:
-                            await OnTradeAnswerAsync(conn, zoneSession, envelope, ct).ConfigureAwait(false);
+                            await _trade.OnAnswerAsync(conn, zoneSession, envelope, ct).ConfigureAwait(false);
                             break;
                         case NetOpcode.TradeAddItemRequest:
-                            await OnTradeAddItemAsync(conn, zoneSession, envelope, ct).ConfigureAwait(false);
+                            await _trade.OnAddItemAsync(conn, zoneSession, envelope, ct).ConfigureAwait(false);
                             break;
                         case NetOpcode.TradeDoneRequest:
-                            await OnTradeDoneAsync(conn, zoneSession, envelope, ct).ConfigureAwait(false);
+                            await _trade.OnDoneAsync(conn, zoneSession, envelope, ct).ConfigureAwait(false);
                             break;
                         case NetOpcode.ValidatePosition:
                             if (zoneSession.Bound && zoneSession.InWorld)
@@ -2230,102 +2232,6 @@ public sealed class NetZoneServer : INetPresenceBridge
             zoneSession, kick.TargetObjectId, ct).ConfigureAwait(false);
         if (error != null)
             await RejectAsync(conn, error, "Party kick failed.", ct).ConfigureAwait(false);
-    }
-
-    async Task OnTradeRequestAsync(
-        NetConnection conn,
-        ZoneSession zoneSession,
-        PacketEnvelope envelope,
-        CancellationToken ct)
-    {
-        RequireHello(conn);
-        if (!zoneSession.Bound || !zoneSession.InWorld)
-        {
-            await RejectAsync(conn, "not_in_world", "Enter world first.", ct).ConfigureAwait(false);
-            return;
-        }
-
-        var req = NetCodec.DecodeTradeRequest(envelope.Payload);
-        string? error = await _world.TryTradeRequestAsync(
-            zoneSession,
-            new TradeRequestMsg { TargetObjectId = req.TargetObjectId },
-            ct).ConfigureAwait(false);
-        if (error != null)
-            await RejectAsync(conn, error, "Trade request failed.", ct).ConfigureAwait(false);
-    }
-
-    async Task OnTradeAnswerAsync(
-        NetConnection conn,
-        ZoneSession zoneSession,
-        PacketEnvelope envelope,
-        CancellationToken ct)
-    {
-        RequireHello(conn);
-        if (!zoneSession.Bound || !zoneSession.InWorld)
-        {
-            await RejectAsync(conn, "not_in_world", "Enter world first.", ct).ConfigureAwait(false);
-            return;
-        }
-
-        var answer = NetCodec.DecodeTradeAnswerRequest(envelope.Payload);
-        string? error = await _world.TryTradeAnswerAsync(
-            zoneSession,
-            new TradeAnswerRequestMsg
-            {
-                RequestorObjectId = answer.RequestorObjectId,
-                Response = answer.Response
-            },
-            ct).ConfigureAwait(false);
-        if (error != null)
-            await RejectAsync(conn, error, "Trade answer failed.", ct).ConfigureAwait(false);
-    }
-
-    async Task OnTradeAddItemAsync(
-        NetConnection conn,
-        ZoneSession zoneSession,
-        PacketEnvelope envelope,
-        CancellationToken ct)
-    {
-        RequireHello(conn);
-        if (!zoneSession.Bound || !zoneSession.InWorld)
-        {
-            await RejectAsync(conn, "not_in_world", "Enter world first.", ct).ConfigureAwait(false);
-            return;
-        }
-
-        var add = NetCodec.DecodeTradeAddItemRequest(envelope.Payload);
-        string? error = await _world.TryTradeAddItemAsync(
-            zoneSession,
-            new TradeAddItemRequestMsg
-            {
-                InventoryObjectId = add.InventoryObjectId,
-                Count = add.Count
-            },
-            ct).ConfigureAwait(false);
-        if (error != null)
-            await RejectAsync(conn, error, "Trade add item failed.", ct).ConfigureAwait(false);
-    }
-
-    async Task OnTradeDoneAsync(
-        NetConnection conn,
-        ZoneSession zoneSession,
-        PacketEnvelope envelope,
-        CancellationToken ct)
-    {
-        RequireHello(conn);
-        if (!zoneSession.Bound || !zoneSession.InWorld)
-        {
-            await RejectAsync(conn, "not_in_world", "Enter world first.", ct).ConfigureAwait(false);
-            return;
-        }
-
-        var done = NetCodec.DecodeTradeDoneRequest(envelope.Payload);
-        string? error = await _world.TryTradeDoneAsync(
-            zoneSession,
-            new TradeDoneRequestMsg { Response = done.Response },
-            ct).ConfigureAwait(false);
-        if (error != null)
-            await RejectAsync(conn, error, "Trade done failed.", ct).ConfigureAwait(false);
     }
 
     async Task OnSetPrivateStoreSellAsync(
