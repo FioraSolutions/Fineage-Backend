@@ -409,9 +409,18 @@ public sealed class NetZoneServer : IWorldEventPublisher
             _presence.TrySend(watcher, NetOpcode.MultiSellList, payload);
     }
 
-    void IWorldEventPublisher.FanoutShopBalance(IReadOnlyList<int> watcherObjectIds, ShopBalanceNetMsg balance)
+    void IWorldEventPublisher.FanoutShopBalance(IReadOnlyList<int> watcherObjectIds, Fineage.Protocol.ShopBalanceMsg balance)
     {
-        var payload = NetCodec.EncodeShopBalance(balance);
+        var payload = NetCodec.EncodeShopBalance(new ShopBalanceNetMsg
+        {
+            Adena = balance.Adena,
+            Weight = balance.Weight,
+            MaxWeight = balance.MaxWeight,
+            Slots = balance.Slots,
+            MaxSlots = balance.MaxSlots,
+            BaseTaxPercent = balance.BaseTaxPercent,
+            CastleTaxPercent = balance.CastleTaxPercent
+        });
         foreach (int watcher in watcherObjectIds)
             _presence.TrySend(watcher, NetOpcode.ShopBalance, payload);
     }

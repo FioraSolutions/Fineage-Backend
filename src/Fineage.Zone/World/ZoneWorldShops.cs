@@ -229,7 +229,7 @@ public sealed partial class ZoneWorld
         if (multi != null)
             FanNetMulti(session, multi, balance);
         else if (NetBridge != null)
-            NetBridge.FanoutShopBalance([session.ObjectId], ToNetBalance(balance));
+            NetBridge.FanoutShopBalance([session.ObjectId], balance);
         SaveInventory(session, player.Inventory);
         return null;
     }
@@ -460,7 +460,7 @@ public sealed partial class ZoneWorld
             return;
         int[] self = [session.ObjectId];
         NetBridge.FanoutBuyList(self, ToNetBuy(buy));
-        NetBridge.FanoutShopBalance(self, ToNetBalance(balance));
+        NetBridge.FanoutShopBalance(self, balance);
     }
 
     void FanNetSell(ZoneSession session, SellListMsg sell, ShopBalanceMsg balance)
@@ -469,7 +469,7 @@ public sealed partial class ZoneWorld
             return;
         int[] self = [session.ObjectId];
         NetBridge.FanoutSellList(self, ToNetSell(sell));
-        NetBridge.FanoutShopBalance(self, ToNetBalance(balance));
+        NetBridge.FanoutShopBalance(self, balance);
     }
 
     void FanNetMulti(ZoneSession session, MultiSellListMsg multi, ShopBalanceMsg balance)
@@ -478,7 +478,7 @@ public sealed partial class ZoneWorld
             return;
         int[] self = [session.ObjectId];
         NetBridge.FanoutMultiSellList(self, ToNetMulti(multi));
-        NetBridge.FanoutShopBalance(self, ToNetBalance(balance));
+        NetBridge.FanoutShopBalance(self, balance);
     }
 
     void FanNetSystem(ZoneSession session, SystemMessageMsg message)
@@ -578,14 +578,4 @@ public sealed partial class ZoneWorld
         return rows;
     }
 
-    static Fineage.Net.Contract.ShopBalanceNetMsg ToNetBalance(ShopBalanceMsg balance) => new()
-    {
-        Adena = balance.Adena,
-        Weight = balance.Weight,
-        MaxWeight = balance.MaxWeight,
-        Slots = balance.Slots,
-        MaxSlots = balance.MaxSlots,
-        BaseTaxPercent = balance.BaseTaxPercent,
-        CastleTaxPercent = balance.CastleTaxPercent
-    };
 }
