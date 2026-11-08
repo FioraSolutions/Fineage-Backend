@@ -39,6 +39,7 @@ public sealed class NetZoneServer : INetPresenceBridge
     readonly InventoryActionPacketHandler _inventoryActions;
     readonly SkillLearnPacketHandler _skillLearn;
     readonly RecipePacketHandler _recipes;
+    readonly ChatPacketHandler _chat;
 
     public NetZoneServer(
         IHandoffStore handoff,
@@ -74,6 +75,7 @@ public sealed class NetZoneServer : INetPresenceBridge
         _inventoryActions = new InventoryActionPacketHandler(_world, RejectAsync);
         _skillLearn = new SkillLearnPacketHandler(_world, RejectAsync);
         _recipes = new RecipePacketHandler(_world, RejectAsync);
+        _chat = new ChatPacketHandler(_world, _clock, RejectAsync);
         _world.NetBridge = this;
     }
 
@@ -770,7 +772,7 @@ public sealed class NetZoneServer : INetPresenceBridge
                             await _inventoryActions.OnUnequipAsync(conn, zoneSession, envelope, ct).ConfigureAwait(false);
                             break;
                         case NetOpcode.Say:
-                            await OnSayAsync(conn, zoneSession, envelope, ct).ConfigureAwait(false);
+                            await _chat.OnSayAsync(conn, zoneSession, envelope, ct).ConfigureAwait(false);
                             break;
                         case NetOpcode.UseSkill:
                             await _combat.OnUseSkillAsync(conn, zoneSession, envelope, ct).ConfigureAwait(false);
@@ -1685,26 +1687,6 @@ public sealed class NetZoneServer : INetPresenceBridge
         if (error != null)
             await RejectAsync(conn, error, "Dungeon request was rejected.", ct).ConfigureAwait(false);
         // DungeonEntered goes out as fanout, so the reply body is empty on purpose.
-    }
-
-    async Task OnSayAsync(
-        NetConnection conn,
-        ZoneSession zoneSession,
-        PacketEnvelope envelope,
-        CancellationToken ct)
-    {
-        RequireHello(conn);
-        if (!zoneSession.Bound || !zoneSession.InWorld)
-        {
-            await RejectAsync(conn, "not_in_world", "Enter world first.", ct).ConfigureAwait(false);
-            return;
-        }
-
-        var say = NetCodec.DecodeSay(envelope.Payload);
-        string? error = await _world.TrySayAsync(
-            zoneSession, say.Text, say.ChatType, _clock(), ct).ConfigureAwait(false);
-        if (error != null)
-            await RejectAsync(conn, error, "Say failed.", ct).ConfigureAwait(false);
     }
 
     async Task OnReviveRequestAsync(
