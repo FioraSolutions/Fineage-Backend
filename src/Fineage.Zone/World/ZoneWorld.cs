@@ -100,6 +100,30 @@ sealed class ZonePlayerSocialPayload
     public bool BlockAll { get; set; }
 }
 
+/// <summary>Shared move / swim / path fields composed off <see cref="ZoneEntity"/> (#353).</summary>
+sealed class ZoneEntityMovePayload
+{
+    public float BaseRunSpeed { get; set; }
+    public float? LiveRunSpeed { get; set; }
+    public float BaseWalkSpeed { get; set; }
+    public float? LiveWalkSpeed { get; set; }
+    public float BaseSwimRunSpeed { get; set; }
+    public float BaseSwimWalkSpeed { get; set; }
+    public float? LiveSwimRunSpeed { get; set; }
+    public float? LiveSwimWalkSpeed { get; set; }
+    public bool Running { get; set; } = true;
+    public bool InWater { get; set; }
+    public bool MoveActive { get; set; }
+    public int MoveDestX { get; set; }
+    public int MoveDestY { get; set; }
+    public int MoveDestZ { get; set; }
+    public long MoveLastTickMs { get; set; }
+    public Queue<(int X, int Y, int Z)> MovePath { get; } = new();
+    public bool MoveSegmentDirty { get; set; }
+    public int AoiRefreshX { get; set; }
+    public int AoiRefreshY { get; set; }
+}
+
 /// <summary>Player skill / abnormal / shortcut fields composed off <see cref="ZoneEntity"/> (#353).</summary>
 sealed class ZonePlayerSkillsPayload
 {
@@ -633,12 +657,19 @@ sealed class ZoneEntity
         get => Skills?.HasStatAbnormal ?? false;
         set => EnsureSkills().HasStatAbnormal = value;
     }
+    /// <summary>Shared move payload; null until first move access (#353 composition).</summary>
+    public ZoneEntityMovePayload? Move { get; set; }
+
     /// <summary>
     /// Base run speed (Mobius <c>CreatureTemplate.baseRunSpd</c>). Buffs and debuffs change the live
     /// <see cref="RunSpeed"/> through the <c>runSpd</c> (<c>Stat.MOVE_SPEED</c>) functions; the base is only rewritten
     /// by a template / class change.
     /// </summary>
-    public float BaseRunSpeed { get; set; }
+    public float BaseRunSpeed
+    {
+        get => Move?.BaseRunSpeed ?? 0;
+        set => EnsureMove().BaseRunSpeed = value;
+    }
 
     /// <summary>
     /// Live run speed sent on the wire. Kept denormalised on the entity: spawn / MoveState / UserInfo / ChangeMoveType
@@ -646,103 +677,160 @@ sealed class ZoneEntity
     /// </summary>
     public float RunSpeed
     {
-        get => _runSpeed ?? BaseRunSpeed;
+        get => Move?.LiveRunSpeed ?? BaseRunSpeed;
         set
         {
-            BaseRunSpeed = value;
-            _runSpeed = value;
+            EnsureMove().BaseRunSpeed = value;
+            EnsureMove().LiveRunSpeed = value;
         }
     }
 
-    float? _runSpeed;
-
     /// <summary>Sets the live (buffed) run speed without touching the base template value.</summary>
-    internal void SetLiveRunSpeed(float speed) => _runSpeed = speed;
+    internal void SetLiveRunSpeed(float speed) => EnsureMove().LiveRunSpeed = speed;
 
     /// <summary>
     /// Base walk speed (Mobius <c>CreatureTemplate.baseWalkSpd</c>). <c>Stat.MOVE_SPEED("runSpd")</c> is the one speed
     /// stat in Mobius and <c>CreatureStat.getWalkSpeed</c> folds it onto this base, so buffs and debuffs move walk too.
     /// </summary>
-    public float BaseWalkSpeed { get; set; }
+    public float BaseWalkSpeed
+    {
+        get => Move?.BaseWalkSpeed ?? 0;
+        set => EnsureMove().BaseWalkSpeed = value;
+    }
 
     /// <summary>
     /// Live walk speed sent on the wire; mirrors <see cref="RunSpeed"/> and is recomputed with it.
     /// </summary>
     public float WalkSpeed
     {
-        get => _walkSpeed ?? BaseWalkSpeed;
+        get => Move?.LiveWalkSpeed ?? BaseWalkSpeed;
         set
         {
-            BaseWalkSpeed = value;
-            _walkSpeed = value;
+            EnsureMove().BaseWalkSpeed = value;
+            EnsureMove().LiveWalkSpeed = value;
         }
     }
 
-    float? _walkSpeed;
-
     /// <summary>Sets the live (buffed) walk speed without touching the base template value.</summary>
-    internal void SetLiveWalkSpeed(float speed) => _walkSpeed = speed;
+    internal void SetLiveWalkSpeed(float speed) => EnsureMove().LiveWalkSpeed = speed;
 
     /// <summary>
     /// Mobius <c>baseMoveSpd/fastSwim</c> (<c>CreatureTemplate.java:147</c>, falls back to <c>baseRunSpd</c>).
     /// 0 = not in the template → use the run base, exactly like Mobius.
     /// </summary>
-    public float BaseSwimRunSpeed { get; set; }
+    public float BaseSwimRunSpeed
+    {
+        get => Move?.BaseSwimRunSpeed ?? 0;
+        set => EnsureMove().BaseSwimRunSpeed = value;
+    }
 
     /// <summary>
     /// Mobius <c>baseMoveSpd/slowSwim</c> (<c>CreatureTemplate.java:148</c>, falls back to <c>baseWalkSpd</c>).
     /// </summary>
-    public float BaseSwimWalkSpeed { get; set; }
+    public float BaseSwimWalkSpeed
+    {
+        get => Move?.BaseSwimWalkSpeed ?? 0;
+        set => EnsureMove().BaseSwimWalkSpeed = value;
+    }
 
     /// <summary>Live swim run speed (Mobius <c>getSwimRunSpeed()</c>); recomputed with the land speeds.</summary>
     public float SwimRunSpeed
     {
-        get => _swimRunSpeed ?? (BaseSwimRunSpeed > 0 ? BaseSwimRunSpeed : BaseRunSpeed);
+        get => Move?.LiveSwimRunSpeed ?? (BaseSwimRunSpeed > 0 ? BaseSwimRunSpeed : BaseRunSpeed);
         set
         {
-            BaseSwimRunSpeed = value;
-            _swimRunSpeed = value;
+            EnsureMove().BaseSwimRunSpeed = value;
+            EnsureMove().LiveSwimRunSpeed = value;
         }
     }
-
-    float? _swimRunSpeed;
 
     /// <summary>Live swim walk speed (Mobius <c>getSwimWalkSpeed()</c>).</summary>
     public float SwimWalkSpeed
     {
-        get => _swimWalkSpeed ?? (BaseSwimWalkSpeed > 0 ? BaseSwimWalkSpeed : BaseWalkSpeed);
+        get => Move?.LiveSwimWalkSpeed ?? (BaseSwimWalkSpeed > 0 ? BaseSwimWalkSpeed : BaseWalkSpeed);
         set
         {
-            BaseSwimWalkSpeed = value;
-            _swimWalkSpeed = value;
+            EnsureMove().BaseSwimWalkSpeed = value;
+            EnsureMove().LiveSwimWalkSpeed = value;
         }
     }
-
-    float? _swimWalkSpeed;
 
     /// <summary>Sets the live swim speeds without touching the base template values.</summary>
     internal void SetLiveSwimSpeed(float run, float walk)
     {
-        _swimRunSpeed = run;
-        _swimWalkSpeed = walk;
+        EnsureMove().LiveSwimRunSpeed = run;
+        EnsureMove().LiveSwimWalkSpeed = walk;
     }
 
-    public bool Running { get; set; } = true;
+    public bool Running
+    {
+        get => Move?.Running ?? true;
+        set => EnsureMove().Running = value;
+    }
+
     /// <summary>Mobius isInsideZone(WATER): last water state seen by the mover (swim speed while true).</summary>
-    public bool InWater { get; set; }
+    public bool InWater
+    {
+        get => Move?.InWater ?? false;
+        set => EnsureMove().InWater = value;
+    }
+
     /// <summary>Mobius MoveData: server-side move in progress (Net path). Position advances by speed each tick.</summary>
-    public bool MoveActive { get; set; }
-    public int MoveDestX { get; set; }
-    public int MoveDestY { get; set; }
-    public int MoveDestZ { get; set; }
-    public long MoveLastTickMs { get; set; }
+    public bool MoveActive
+    {
+        get => Move?.MoveActive ?? false;
+        set => EnsureMove().MoveActive = value;
+    }
+
+    public int MoveDestX
+    {
+        get => Move?.MoveDestX ?? 0;
+        set => EnsureMove().MoveDestX = value;
+    }
+
+    public int MoveDestY
+    {
+        get => Move?.MoveDestY ?? 0;
+        set => EnsureMove().MoveDestY = value;
+    }
+
+    public int MoveDestZ
+    {
+        get => Move?.MoveDestZ ?? 0;
+        set => EnsureMove().MoveDestZ = value;
+    }
+
+    public long MoveLastTickMs
+    {
+        get => Move?.MoveLastTickMs ?? 0;
+        set => EnsureMove().MoveLastTickMs = value;
+    }
+
     /// <summary>Mobius MoveData.geoPath: remaining geo-path waypoints after the current segment.</summary>
-    public Queue<(int X, int Y, int Z)> MovePath { get; } = new();
+    public Queue<(int X, int Y, int Z)> MovePath => EnsureMove().MovePath;
+
     /// <summary>Segment switched to the next waypoint inside AdvanceMove; tick broadcasts MoveToLocation for it.</summary>
-    public bool MoveSegmentDirty { get; set; }
+    public bool MoveSegmentDirty
+    {
+        get => Move?.MoveSegmentDirty ?? false;
+        set => EnsureMove().MoveSegmentDirty = value;
+    }
+
     /// <summary>Position of the last in-move knownlist refresh (Mobius region/knownlist revalidate while running).</summary>
-    public int AoiRefreshX { get; set; }
-    public int AoiRefreshY { get; set; }
+    public int AoiRefreshX
+    {
+        get => Move?.AoiRefreshX ?? 0;
+        set => EnsureMove().AoiRefreshX = value;
+    }
+
+    public int AoiRefreshY
+    {
+        get => Move?.AoiRefreshY ?? 0;
+        set => EnsureMove().AoiRefreshY = value;
+    }
+
+    ZoneEntityMovePayload EnsureMove() => Move ??= new ZoneEntityMovePayload();
+
     public ZoneSession? Session { get; init; }
     public PlayerInventory? Inventory { get; init; }
     /// <summary>
