@@ -172,11 +172,11 @@ public sealed partial class ZoneWorld
     {
         if (NetBridge == null || session.ObjectId <= 0)
             return;
-        var entries = new Fineage.Net.Contract.AcquireSkillEntryNet[rows.Count];
+        var entries = new AcquireSkillEntryMsg[rows.Count];
         for (int i = 0; i < rows.Count; i++)
         {
             var row = rows[i];
-            entries[i] = new Fineage.Net.Contract.AcquireSkillEntryNet
+            entries[i] = new AcquireSkillEntryMsg
             {
                 SkillId = row.SkillId,
                 NextLevel = row.Level,
@@ -187,7 +187,7 @@ public sealed partial class ZoneWorld
             };
         }
 
-        NetBridge.FanoutAcquireSkillList([player.ObjectId], new Fineage.Net.Contract.AcquireSkillListNetMsg
+        NetBridge.FanoutAcquireSkillList([player.ObjectId], new AcquireSkillListMsg
         {
             SkillType = AcquireSkillTypeUsual,
             Skills = entries
@@ -240,7 +240,7 @@ public sealed partial class ZoneWorld
 
         // Mobius AcquireSkillInfo fills one requirement row per book (type 99, count, unk 50).
         var requirements = row.Items
-            .Select(item => new Fineage.Net.Contract.AcquireSkillRequirementNet
+            .Select(item => new AcquireSkillRequirementMsg
             {
                 Type = 99,
                 ItemId = item.ItemId,
@@ -249,7 +249,7 @@ public sealed partial class ZoneWorld
             })
             .ToArray();
 
-        NetBridge.FanoutAcquireSkillInfo([player.ObjectId], new Fineage.Net.Contract.AcquireSkillInfoNetMsg
+        NetBridge.FanoutAcquireSkillInfo([player.ObjectId], new AcquireSkillInfoMsg
         {
             SkillId = row.SkillId,
             Level = row.Level,

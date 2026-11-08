@@ -1059,6 +1059,45 @@ public sealed class SkillListMsg
     public SkillListEntryMsg[] Skills { get; set; } = [];
 }
 
+/// <summary>One trainer offer row for <see cref="AcquireSkillListMsg"/> (Mobius <c>AcquireSkillList</c>).</summary>
+public sealed class AcquireSkillEntryMsg
+{
+    public int SkillId { get; set; }
+    public int NextLevel { get; set; }
+    public int MaxLevel { get; set; }
+    public int SpCost { get; set; }
+    /// <summary>Mobius <c>requirements</c> bitmask (1 = needs the previous level, 2 = needs a book/item).</summary>
+    public int Requirements { get; set; }
+}
+
+/// <summary>Trainer learnable rows (Zone → client). Net encodes as <c>AcquireSkillList</c>.</summary>
+public sealed class AcquireSkillListMsg
+{
+    /// <summary>Mobius <c>AcquireSkillType</c> ordinal: 0 = class, 1 = fishing, 2 = pledge.</summary>
+    public int SkillType { get; set; }
+    public AcquireSkillEntryMsg[] Skills { get; set; } = [];
+}
+
+/// <summary>One requirement row for <see cref="AcquireSkillInfoMsg"/>.</summary>
+public sealed class AcquireSkillRequirementMsg
+{
+    public int Type { get; set; }
+    public int ItemId { get; set; }
+    public long Count { get; set; }
+    public int Unk { get; set; }
+}
+
+/// <summary>Confirmation page for one trainer offer (Zone → client). Net encodes as <c>AcquireSkillInfo</c>.</summary>
+public sealed class AcquireSkillInfoMsg
+{
+    public int SkillId { get; set; }
+    public int Level { get; set; }
+    public int SpCost { get; set; }
+    /// <summary>Mobius <c>AcquireSkillType</c> ordinal.</summary>
+    public int SkillType { get; set; }
+    public AcquireSkillRequirementMsg[] Requirements { get; set; } = [];
+}
+
 /// <summary>Opcode <see cref="MsgType.MagicSkillUse"/> (1066).</summary>
 public sealed class MagicSkillUseMsg
 {
