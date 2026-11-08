@@ -56,15 +56,15 @@ public sealed class NetChatTests
     static readonly DateTimeOffset Now = new(2026, 10, 28, 0, 0, 0, TimeSpan.Zero);
 
     /// <summary>One entry per fanout call: the watchers it was addressed to and the line they got.</summary>
-    static List<(IReadOnlyList<int> Watchers, CreatureSayNetMsg Line)> Says(NetBridgeRecorder rec) =>
+    static List<(IReadOnlyList<int> Watchers, CreatureSayMsg Line)> Says(NetBridgeRecorder rec) =>
         rec.Of(nameof(IWorldEventPublisher.FanoutCreatureSay))
-            .Select(args => ((IReadOnlyList<int>)args[0], (CreatureSayNetMsg)args[1]))
+            .Select(args => ((IReadOnlyList<int>)args[0], (CreatureSayMsg)args[1]))
             .ToList();
 
-    static bool Hears(IEnumerable<(IReadOnlyList<int> Watchers, CreatureSayNetMsg Line)> says, int objectId, string text) =>
+    static bool Hears(IEnumerable<(IReadOnlyList<int> Watchers, CreatureSayMsg Line)> says, int objectId, string text) =>
         says.Any(s => s.Watchers.Contains(objectId) && s.Line.Text == text);
 
-    static bool HearsAny(IEnumerable<(IReadOnlyList<int> Watchers, CreatureSayNetMsg Line)> says, int objectId) =>
+    static bool HearsAny(IEnumerable<(IReadOnlyList<int> Watchers, CreatureSayMsg Line)> says, int objectId) =>
         says.Any(s => s.Watchers.Contains(objectId));
 
     static List<SystemMessageMsg> SystemLines(NetBridgeRecorder rec) =>

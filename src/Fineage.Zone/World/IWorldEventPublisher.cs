@@ -63,7 +63,8 @@ interface IWorldEventPublisher
 
     void FanoutInventoryUpdate(IReadOnlyList<int> watcherObjectIds, InventoryUpdateNetMsg update);
 
-    void FanoutCreatureSay(IReadOnlyList<int> watcherObjectIds, CreatureSayNetMsg say);
+    /// <summary>Mobius CreatureSay to watchers. Called under the ZoneWorld gate.</summary>
+    void FanoutCreatureSay(IReadOnlyList<int> watcherObjectIds, Fineage.Protocol.CreatureSayMsg say);
 
     /// <summary>Mobius SystemMessage to watchers. Called under the ZoneWorld gate.</summary>
     void FanoutSystemMessage(IReadOnlyList<int> watcherObjectIds, Fineage.Protocol.SystemMessageMsg message);
