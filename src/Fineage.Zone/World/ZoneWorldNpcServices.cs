@@ -549,7 +549,7 @@ public sealed partial class ZoneWorld
             Items = items.ToArray()
         };
         if (NetBridge != null)
-            NetBridge.FanoutWarehouseDepositList([session.ObjectId], ToNetDepositList(list));
+            NetBridge.FanoutWarehouseDepositList([session.ObjectId], list);
     }
 
     void SendWithdrawList(ZoneSession session, ZoneEntity player, ZoneEntity npc)
@@ -573,7 +573,7 @@ public sealed partial class ZoneWorld
             Items = items.ToArray()
         };
         if (NetBridge != null)
-            NetBridge.FanoutWarehouseWithdrawList([session.ObjectId], ToNetWithdrawList(list));
+            NetBridge.FanoutWarehouseWithdrawList([session.ObjectId], list);
     }
 
     ItemListEntryMsg StackEntry(WarehouseStack stack)
@@ -784,47 +784,6 @@ public sealed partial class ZoneWorld
         var invUpdate = new InventoryUpdateMsg { Changes = changes };
         if (NetBridge != null)
             NetBridge.FanoutInventoryUpdate([session.ObjectId], invUpdate);
-    }
-
-    static Fineage.Net.Contract.WarehouseDepositListNetMsg ToNetDepositList(WarehouseDepositListMsg list) => new()
-    {
-        NpcObjectId = list.NpcObjectId,
-        FeePerLine = list.FeePerLine,
-        SlotsUsed = list.SlotsUsed,
-        SlotsMax = list.SlotsMax,
-        Adena = list.Adena,
-        Items = ToNetItemRows(list.Items)
-    };
-
-    static Fineage.Net.Contract.WarehouseWithdrawListNetMsg ToNetWithdrawList(WarehouseWithdrawListMsg list) => new()
-    {
-        NpcObjectId = list.NpcObjectId,
-        SlotsUsed = list.SlotsUsed,
-        SlotsMax = list.SlotsMax,
-        InventorySlotsUsed = list.InventorySlotsUsed,
-        InventorySlotsMax = list.InventorySlotsMax,
-        CurrentWeight = list.CurrentWeight,
-        MaxWeight = list.MaxWeight,
-        Items = ToNetItemRows(list.Items)
-    };
-
-    static Fineage.Net.Contract.ItemListEntryNet[] ToNetItemRows(ItemListEntryMsg[]? items)
-    {
-        items ??= [];
-        var rows = new Fineage.Net.Contract.ItemListEntryNet[items.Length];
-        for (int i = 0; i < items.Length; i++)
-        {
-            rows[i] = new Fineage.Net.Contract.ItemListEntryNet
-            {
-                ObjectId = items[i].ObjectId,
-                ItemId = items[i].ItemId,
-                Count = items[i].Count,
-                EnchantLevel = items[i].EnchantLevel,
-                EquippedSlot = items[i].EquippedSlot
-            };
-        }
-
-        return rows;
     }
 
     static (int Id, string Text, string Code) Refusal(NewbieBuffRefusal refusal) => refusal switch

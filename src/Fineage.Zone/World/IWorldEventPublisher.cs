@@ -98,9 +98,9 @@ interface IWorldEventPublisher
     /// <summary>Shop window adena/weight/slots snapshot. Called under the ZoneWorld gate.</summary>
     void FanoutShopBalance(IReadOnlyList<int> watcherObjectIds, Fineage.Protocol.ShopBalanceMsg balance);
 
-    void FanoutWarehouseDepositList(IReadOnlyList<int> watcherObjectIds, WarehouseDepositListNetMsg list);
+    void FanoutWarehouseDepositList(IReadOnlyList<int> watcherObjectIds, Fineage.Protocol.WarehouseDepositListMsg list);
 
-    void FanoutWarehouseWithdrawList(IReadOnlyList<int> watcherObjectIds, WarehouseWithdrawListNetMsg list);
+    void FanoutWarehouseWithdrawList(IReadOnlyList<int> watcherObjectIds, Fineage.Protocol.WarehouseWithdrawListMsg list);
 
     /// <summary>Mobius QuestList journal to the owner. Called under the ZoneWorld gate.</summary>
     void FanoutQuestList(IReadOnlyList<int> watcherObjectIds, Fineage.Protocol.QuestListMsg list);

@@ -27,7 +27,7 @@ public sealed class NetWarehouseEconomyTests
             x: 0, y: 0, z: 0);
 
         Assert.Null(await actor.BypassAsync(KeeperObjectId, "DepositP"));
-        var window = Assert.IsType<WarehouseDepositListNetMsg>(Last(bench, FanoutWarehouseDepositList)[1]);
+        var window = Assert.IsType<Fineage.Protocol.WarehouseDepositListMsg>(Last(bench, FanoutWarehouseDepositList)[1]);
         var scrolls = Assert.Single(window.Items, item => item.ItemId == Scroll);
 
         Assert.Null(await actor.Deposit(KeeperObjectId, (scrolls.ObjectId, scrolls.Count + 1)));
@@ -47,7 +47,7 @@ public sealed class NetWarehouseEconomyTests
             x: 0, y: 0, z: 0);
 
         Assert.Null(await actor.BypassAsync(KeeperObjectId, "DepositP"));
-        var window = Assert.IsType<WarehouseDepositListNetMsg>(Last(bench, FanoutWarehouseDepositList)[1]);
+        var window = Assert.IsType<Fineage.Protocol.WarehouseDepositListMsg>(Last(bench, FanoutWarehouseDepositList)[1]);
         var scrolls = Assert.Single(window.Items, item => item.ItemId == Scroll);
 
         Assert.Equal(
@@ -68,7 +68,7 @@ public sealed class NetWarehouseEconomyTests
             x: 0, y: 0, z: 0);
 
         Assert.Null(await actor.BypassAsync(KeeperObjectId, "DepositP"));
-        var window = Assert.IsType<WarehouseDepositListNetMsg>(Last(bench, FanoutWarehouseDepositList)[1]);
+        var window = Assert.IsType<Fineage.Protocol.WarehouseDepositListMsg>(Last(bench, FanoutWarehouseDepositList)[1]);
         var scrolls = Assert.Single(window.Items, item => item.ItemId == Scroll);
         int scrollObjectId = scrolls.ObjectId;
 
@@ -95,12 +95,12 @@ public sealed class NetWarehouseEconomyTests
             x: 0, y: 0, z: 0);
 
         Assert.Null(await actor.BypassAsync(KeeperObjectId, "DepositP"));
-        var deposit = Assert.IsType<WarehouseDepositListNetMsg>(Last(bench, FanoutWarehouseDepositList)[1]);
+        var deposit = Assert.IsType<Fineage.Protocol.WarehouseDepositListMsg>(Last(bench, FanoutWarehouseDepositList)[1]);
         var scrolls = Assert.Single(deposit.Items, item => item.ItemId == Scroll);
         Assert.Null(await actor.Deposit(KeeperObjectId, (scrolls.ObjectId, 10)));
 
         Assert.Null(await actor.BypassAsync(KeeperObjectId, "WithdrawP"));
-        var withdraw = Assert.IsType<WarehouseWithdrawListNetMsg>(Last(bench, FanoutWarehouseWithdrawList)[1]);
+        var withdraw = Assert.IsType<Fineage.Protocol.WarehouseWithdrawListMsg>(Last(bench, FanoutWarehouseWithdrawList)[1]);
         var stored = Assert.Single(withdraw.Items, item => item.ItemId == Scroll);
 
         Assert.Equal(
@@ -120,12 +120,12 @@ public sealed class NetWarehouseEconomyTests
             x: 0, y: 0, z: 0);
 
         Assert.Null(await actor.BypassAsync(KeeperObjectId, "DepositP"));
-        var deposit = Assert.IsType<WarehouseDepositListNetMsg>(Last(bench, FanoutWarehouseDepositList)[1]);
+        var deposit = Assert.IsType<Fineage.Protocol.WarehouseDepositListMsg>(Last(bench, FanoutWarehouseDepositList)[1]);
         var scrolls = Assert.Single(deposit.Items, item => item.ItemId == Scroll);
         Assert.Null(await actor.Deposit(KeeperObjectId, (scrolls.ObjectId, 4)));
 
         Assert.Null(await actor.BypassAsync(KeeperObjectId, "WithdrawP"));
-        var withdraw = Assert.IsType<WarehouseWithdrawListNetMsg>(Last(bench, FanoutWarehouseWithdrawList)[1]);
+        var withdraw = Assert.IsType<Fineage.Protocol.WarehouseWithdrawListMsg>(Last(bench, FanoutWarehouseWithdrawList)[1]);
         var stored = Assert.Single(withdraw.Items, item => item.ItemId == Scroll);
         int warehouseObjectId = stored.ObjectId;
 

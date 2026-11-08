@@ -144,7 +144,7 @@ public sealed class NetNpcServiceTests
             x: 0, y: 0, z: 0);
 
         Assert.Null(await actor.BypassAsync(KeeperObjectId, "DepositP"));
-        var window = Assert.IsType<WarehouseDepositListNetMsg>(Last(bench, FanoutWarehouseDepositList)[1]);
+        var window = Assert.IsType<Fineage.Protocol.WarehouseDepositListMsg>(Last(bench, FanoutWarehouseDepositList)[1]);
         Assert.Equal(30, window.FeePerLine);
         Assert.Equal(100, window.SlotsMax);
         Assert.Equal(200, window.Adena);
@@ -169,7 +169,7 @@ public sealed class NetNpcServiceTests
 
         BenchPlayer again = await bench.EnterAsync("keep", "Keep", items: [], x: 0, y: 0, z: 0);
         Assert.Null(await again.BypassAsync(KeeperObjectId, "WithdrawP"));
-        var back = Assert.IsType<WarehouseWithdrawListNetMsg>(Last(bench, FanoutWarehouseWithdrawList)[1]);
+        var back = Assert.IsType<Fineage.Protocol.WarehouseWithdrawListMsg>(Last(bench, FanoutWarehouseWithdrawList)[1]);
         Assert.Equal(2, back.SlotsUsed);
         Assert.True(back.MaxWeight > 69000);
         var storedAdena = Assert.Single(back.Items, item => item.ItemId == Adena);
