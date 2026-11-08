@@ -196,16 +196,16 @@ interface IWorldEventPublisher
     void FanoutSiegeInfo(IReadOnlyList<int> watcherObjectIds, SiegeInfoNetMsg info);
 
     /// <summary>Olympiad period, standing, queue and match slot.</summary>
-    void FanoutOlympiadStatus(IReadOnlyList<int> watcherObjectIds, OlympiadStatusNetMsg status);
+    void FanoutOlympiadStatus(IReadOnlyList<int> watcherObjectIds, Fineage.Protocol.OlympiadStatusMsg status);
 
     /// <summary>The match both participants were placed in.</summary>
-    void FanoutOlympiadMatch(IReadOnlyList<int> watcherObjectIds, OlympiadMatchNetMsg match);
+    void FanoutOlympiadMatch(IReadOnlyList<int> watcherObjectIds, Fineage.Protocol.OlympiadMatchMsg match);
 
     /// <summary>One countdown step for both participants.</summary>
-    void FanoutOlympiadCountdown(IReadOnlyList<int> watcherObjectIds, OlympiadCountdownNetMsg countdown);
+    void FanoutOlympiadCountdown(IReadOnlyList<int> watcherObjectIds, Fineage.Protocol.OlympiadCountdownMsg countdown);
 
     /// <summary>The finished match and its reward.</summary>
-    void FanoutOlympiadResult(IReadOnlyList<int> watcherObjectIds, OlympiadResultNetMsg result);
+    void FanoutOlympiadResult(IReadOnlyList<int> watcherObjectIds, Fineage.Protocol.OlympiadResultMsg result);
 
     /// <summary>The Seven Signs record, also the reply to a status request.</summary>
     /// <summary>Seven Signs status record. Called under the ZoneWorld gate.</summary>
