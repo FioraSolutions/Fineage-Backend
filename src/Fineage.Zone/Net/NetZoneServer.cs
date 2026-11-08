@@ -38,6 +38,7 @@ public sealed class NetZoneServer : INetPresenceBridge
     readonly CombatPacketHandler _combat;
     readonly InventoryActionPacketHandler _inventoryActions;
     readonly SkillLearnPacketHandler _skillLearn;
+    readonly RecipePacketHandler _recipes;
 
     public NetZoneServer(
         IHandoffStore handoff,
@@ -72,6 +73,7 @@ public sealed class NetZoneServer : INetPresenceBridge
         _combat = new CombatPacketHandler(_world, RejectAsync);
         _inventoryActions = new InventoryActionPacketHandler(_world, RejectAsync);
         _skillLearn = new SkillLearnPacketHandler(_world, RejectAsync);
+        _recipes = new RecipePacketHandler(_world, RejectAsync);
         _world.NetBridge = this;
     }
 
@@ -960,19 +962,19 @@ public sealed class NetZoneServer : INetPresenceBridge
                             await _privateStore.OnSellToAsync(conn, zoneSession, envelope, ct).ConfigureAwait(false);
                             break;
                         case NetOpcode.RecipeBookOpen:
-                            await OnRecipeBookOpenAsync(conn, zoneSession, envelope, ct).ConfigureAwait(false);
+                            await _recipes.OnBookOpenAsync(conn, zoneSession, envelope, ct).ConfigureAwait(false);
                             break;
                         case NetOpcode.RecipeMakeSelf:
-                            await OnRecipeMakeSelfAsync(conn, zoneSession, envelope, ct).ConfigureAwait(false);
+                            await _recipes.OnMakeSelfAsync(conn, zoneSession, envelope, ct).ConfigureAwait(false);
                             break;
                         case NetOpcode.SetRecipeShop:
-                            await OnSetRecipeShopAsync(conn, zoneSession, envelope, ct).ConfigureAwait(false);
+                            await _recipes.OnSetShopAsync(conn, zoneSession, envelope, ct).ConfigureAwait(false);
                             break;
                         case NetOpcode.RecipeShopMakeInfo:
-                            await OnRecipeShopMakeInfoAsync(conn, zoneSession, envelope, ct).ConfigureAwait(false);
+                            await _recipes.OnShopMakeInfoAsync(conn, zoneSession, envelope, ct).ConfigureAwait(false);
                             break;
                         case NetOpcode.RecipeShopMakeItem:
-                            await OnRecipeShopMakeItemAsync(conn, zoneSession, envelope, ct).ConfigureAwait(false);
+                            await _recipes.OnShopMakeItemAsync(conn, zoneSession, envelope, ct).ConfigureAwait(false);
                             break;
                         case NetOpcode.FriendInvite:
                             await _friends.OnInviteAsync(conn, zoneSession, envelope, ct).ConfigureAwait(false);
@@ -1763,129 +1765,6 @@ public sealed class NetZoneServer : INetPresenceBridge
         // Teleport bypass relocates; refresh AOI for Net peers.
         var after = _world.SnapshotKnownIds(zoneSession);
         await FanKnownlistDiffAsync(conn, zoneSession, self, before, after, ct).ConfigureAwait(false);
-    }
-
-    async Task OnRecipeBookOpenAsync(
-        NetConnection conn,
-        ZoneSession zoneSession,
-        PacketEnvelope envelope,
-        CancellationToken ct)
-    {
-        RequireHello(conn);
-        if (!zoneSession.Bound || !zoneSession.InWorld)
-        {
-            await RejectAsync(conn, "not_in_world", "Enter world first.", ct).ConfigureAwait(false);
-            return;
-        }
-
-        var req = NetCodec.DecodeRecipeBookOpen(envelope.Payload);
-        string? error = await _world.TryRecipeBookOpenAsync(
-            zoneSession,
-            new RecipeBookOpenMsg { Dwarven = req.Dwarven != 0 },
-            ct).ConfigureAwait(false);
-        if (error != null)
-            await RejectAsync(conn, error, "Recipe book open failed.", ct).ConfigureAwait(false);
-    }
-
-    async Task OnRecipeMakeSelfAsync(
-        NetConnection conn,
-        ZoneSession zoneSession,
-        PacketEnvelope envelope,
-        CancellationToken ct)
-    {
-        RequireHello(conn);
-        if (!zoneSession.Bound || !zoneSession.InWorld)
-        {
-            await RejectAsync(conn, "not_in_world", "Enter world first.", ct).ConfigureAwait(false);
-            return;
-        }
-
-        var req = NetCodec.DecodeRecipeMakeSelf(envelope.Payload);
-        string? error = await _world.TryRecipeMakeSelfAsync(
-            zoneSession,
-            new RecipeMakeSelfMsg { RecipeId = req.RecipeId },
-            ct).ConfigureAwait(false);
-        if (error != null)
-            await RejectAsync(conn, error, "Recipe make self failed.", ct).ConfigureAwait(false);
-    }
-
-    async Task OnSetRecipeShopAsync(
-        NetConnection conn,
-        ZoneSession zoneSession,
-        PacketEnvelope envelope,
-        CancellationToken ct)
-    {
-        RequireHello(conn);
-        if (!zoneSession.Bound || !zoneSession.InWorld)
-        {
-            await RejectAsync(conn, "not_in_world", "Enter world first.", ct).ConfigureAwait(false);
-            return;
-        }
-
-        var req = NetCodec.DecodeSetRecipeShop(envelope.Payload);
-        var items = (req.Items ?? []).Select(row => new RecipeShopRowMsg
-        {
-            RecipeId = row.RecipeId,
-            Price = row.Price
-        }).ToArray();
-        string? error = await _world.TrySetRecipeShopAsync(
-            zoneSession,
-            new SetRecipeShopMsg { Message = req.Message ?? "", Items = items },
-            ct).ConfigureAwait(false);
-        if (error != null)
-            await RejectAsync(conn, error, "Recipe shop open failed.", ct).ConfigureAwait(false);
-    }
-
-    async Task OnRecipeShopMakeInfoAsync(
-        NetConnection conn,
-        ZoneSession zoneSession,
-        PacketEnvelope envelope,
-        CancellationToken ct)
-    {
-        RequireHello(conn);
-        if (!zoneSession.Bound || !zoneSession.InWorld)
-        {
-            await RejectAsync(conn, "not_in_world", "Enter world first.", ct).ConfigureAwait(false);
-            return;
-        }
-
-        var req = NetCodec.DecodeRecipeShopMakeInfo(envelope.Payload);
-        string? error = await _world.TryRecipeShopMakeInfoAsync(
-            zoneSession,
-            new RecipeShopMakeInfoMsg
-            {
-                ManufacturerObjectId = req.ManufacturerObjectId,
-                RecipeId = req.RecipeId
-            },
-            ct).ConfigureAwait(false);
-        if (error != null)
-            await RejectAsync(conn, error, "Recipe shop make info failed.", ct).ConfigureAwait(false);
-    }
-
-    async Task OnRecipeShopMakeItemAsync(
-        NetConnection conn,
-        ZoneSession zoneSession,
-        PacketEnvelope envelope,
-        CancellationToken ct)
-    {
-        RequireHello(conn);
-        if (!zoneSession.Bound || !zoneSession.InWorld)
-        {
-            await RejectAsync(conn, "not_in_world", "Enter world first.", ct).ConfigureAwait(false);
-            return;
-        }
-
-        var req = NetCodec.DecodeRecipeShopMakeItem(envelope.Payload);
-        string? error = await _world.TryRecipeShopMakeItemAsync(
-            zoneSession,
-            new RecipeShopMakeItemMsg
-            {
-                ManufacturerObjectId = req.ManufacturerObjectId,
-                RecipeId = req.RecipeId
-            },
-            ct).ConfigureAwait(false);
-        if (error != null)
-            await RejectAsync(conn, error, "Recipe shop make item failed.", ct).ConfigureAwait(false);
     }
 
     static void RequireHello(NetConnection conn)
