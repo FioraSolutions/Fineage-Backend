@@ -281,9 +281,14 @@ public sealed class NetZoneServer : IWorldEventPublisher
             _presence.TrySend(watcher, NetOpcode.StatusUpdate, payload);
     }
 
-    void IWorldEventPublisher.FanoutDie(IReadOnlyList<int> watcherObjectIds, EntityDieMsg die)
+    void IWorldEventPublisher.FanoutDie(IReadOnlyList<int> watcherObjectIds, int objectId, int killerObjectId)
     {
-        var payload = NetCodec.EncodeEntityDie(die);
+        var payload = NetCodec.EncodeEntityDie(new EntityDieMsg
+        {
+            EntityValue = (ulong)(uint)objectId,
+            EntityGeneration = 1,
+            KillerObjectId = killerObjectId
+        });
         foreach (int watcher in watcherObjectIds)
             _presence.TrySendCritical(watcher, NetOpcode.EntityDie, payload);
     }
@@ -337,9 +342,9 @@ public sealed class NetZoneServer : IWorldEventPublisher
             _presence.TrySend(watcher, NetOpcode.MagicSkillUse, payload);
     }
 
-    void IWorldEventPublisher.FanoutRevive(IReadOnlyList<int> watcherObjectIds, ReviveNetMsg revive)
+    void IWorldEventPublisher.FanoutRevive(IReadOnlyList<int> watcherObjectIds, int objectId)
     {
-        var payload = NetCodec.EncodeRevive(revive);
+        var payload = NetCodec.EncodeRevive(new ReviveNetMsg { ObjectId = objectId });
         foreach (int watcher in watcherObjectIds)
             _presence.TrySend(watcher, NetOpcode.Revive, payload);
     }
