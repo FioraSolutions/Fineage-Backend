@@ -36,7 +36,7 @@ public sealed partial class ZoneWorld
             Relocate(player, site.ExitX, site.ExitY, site.ExitZ);
             player.DungeonId = 0;
             var left = Entered(site, inside: false, DungeonProtocol.ActionExit);
-            NetBridge?.FanoutDungeonEntered([session.ObjectId], ToNet(left));
+            NetBridge?.FanoutDungeonEntered([session.ObjectId], left);
             return null;
         }
 
@@ -72,7 +72,7 @@ public sealed partial class ZoneWorld
         Relocate(player, site.EntranceX, site.EntranceY, site.EntranceZ);
         player.DungeonId = site.Id;
         var inside = Entered(site, inside: true, DungeonProtocol.ActionEnter);
-        NetBridge?.FanoutDungeonEntered([session.ObjectId], ToNet(inside));
+        NetBridge?.FanoutDungeonEntered([session.ObjectId], inside);
         return null;
     }
 
@@ -104,7 +104,7 @@ public sealed partial class ZoneWorld
             };
             var kicked = Entered(site, inside: false, DungeonProtocol.ActionKick);
             NetBridge?.FanoutSystemMessage([player.ObjectId], line);
-            NetBridge?.FanoutDungeonEntered([player.ObjectId], ToNet(kicked));
+            NetBridge?.FanoutDungeonEntered([player.ObjectId], kicked);
             ZoneLog.Info($"dungeon kick object={player.ObjectId} dungeon={site.Id} -> {site.ExitX},{site.ExitY},{site.ExitZ}");
         }
     }
@@ -175,16 +175,6 @@ public sealed partial class ZoneWorld
             NetBridge?.FanoutTeleportToLocation(netWatchers, entity.ObjectId, x, y, z, entity.Heading);
         }
     }
-
-    static Fineage.Net.Contract.DungeonEnteredNetMsg ToNet(DungeonEnteredMsg entered) => new()
-    {
-        DungeonId = entered.DungeonId,
-        X = entered.X,
-        Y = entered.Y,
-        Z = entered.Z,
-        Inside = entered.Inside,
-        Action = entered.Action
-    };
 
     static DungeonEnteredMsg Entered(DungeonSite site, bool inside, int action) => new()
     {

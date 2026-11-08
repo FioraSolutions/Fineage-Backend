@@ -840,23 +840,66 @@ public sealed class NetZoneServer : IWorldEventPublisher
             _presence.TrySend(watcher, NetOpcode.OlympiadResult, payload);
     }
 
-    void IWorldEventPublisher.FanoutSevenSignsStatus(IReadOnlyList<int> watcherObjectIds, SevenSignsStatusNetMsg status)
+    void IWorldEventPublisher.FanoutSevenSignsStatus(IReadOnlyList<int> watcherObjectIds, Fineage.Protocol.SevenSignsStatusMsg status)
     {
-        var payload = NetCodec.EncodeSevenSignsStatus(status);
+        var payload = NetCodec.EncodeSevenSignsStatus(new SevenSignsStatusNetMsg
+        {
+            Period = status.Period,
+            Cycle = status.Cycle,
+            PlayerCabal = status.PlayerCabal,
+            PlayerSeal = status.PlayerSeal,
+            PlayerStoneCount = status.PlayerStoneCount,
+            PlayerAncientAdena = status.PlayerAncientAdena,
+            PlayerContribution = status.PlayerContribution,
+            DawnScore = status.DawnScore,
+            DuskScore = status.DuskScore,
+            DawnFestivalScore = status.DawnFestivalScore,
+            DuskFestivalScore = status.DuskFestivalScore,
+            DawnStonePoints = status.DawnStonePoints,
+            DuskStonePoints = status.DuskStonePoints,
+            AvariceOwner = status.AvariceOwner,
+            GnosisOwner = status.GnosisOwner,
+            StrifeOwner = status.StrifeOwner,
+            DawnMembers = status.DawnMembers,
+            DuskMembers = status.DuskMembers,
+            WinningCabal = status.WinningCabal,
+            NextChangeUnixMs = status.NextChangeUnixMs,
+            SkyState = status.SkyState,
+            DawnAvarice = status.DawnAvarice,
+            DawnGnosis = status.DawnGnosis,
+            DawnStrife = status.DawnStrife,
+            DuskAvarice = status.DuskAvarice,
+            DuskGnosis = status.DuskGnosis,
+            DuskStrife = status.DuskStrife,
+            PreviousWinner = status.PreviousWinner
+        });
         foreach (int watcher in watcherObjectIds)
             _presence.TrySend(watcher, NetOpcode.SevenSignsStatus, payload);
     }
 
-    void IWorldEventPublisher.FanoutSevenSignsSky(IReadOnlyList<int> watcherObjectIds, SevenSignsSkyNetMsg sky)
+    void IWorldEventPublisher.FanoutSevenSignsSky(IReadOnlyList<int> watcherObjectIds, Fineage.Protocol.SevenSignsSkyMsg sky)
     {
-        var payload = NetCodec.EncodeSevenSignsSky(sky);
+        var payload = NetCodec.EncodeSevenSignsSky(new SevenSignsSkyNetMsg
+        {
+            State = sky.State,
+            Period = sky.Period,
+            WinningCabal = sky.WinningCabal
+        });
         foreach (int watcher in watcherObjectIds)
             _presence.TrySend(watcher, NetOpcode.SevenSignsSky, payload);
     }
 
-    void IWorldEventPublisher.FanoutDungeonEntered(IReadOnlyList<int> watcherObjectIds, DungeonEnteredNetMsg entered)
+    void IWorldEventPublisher.FanoutDungeonEntered(IReadOnlyList<int> watcherObjectIds, Fineage.Protocol.DungeonEnteredMsg entered)
     {
-        var payload = NetCodec.EncodeDungeonEntered(entered);
+        var payload = NetCodec.EncodeDungeonEntered(new DungeonEnteredNetMsg
+        {
+            DungeonId = entered.DungeonId,
+            X = entered.X,
+            Y = entered.Y,
+            Z = entered.Z,
+            Inside = entered.Inside,
+            Action = entered.Action
+        });
         foreach (int watcher in watcherObjectIds)
             _presence.TrySend(watcher, NetOpcode.DungeonEntered, payload);
     }
