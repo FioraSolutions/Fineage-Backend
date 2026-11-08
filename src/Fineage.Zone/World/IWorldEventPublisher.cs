@@ -49,7 +49,7 @@ interface IWorldEventPublisher
     /// <summary>Mobius CharInfo refresh (paperdoll changed) of player <paramref name="objectId"/> to knownlist players. Called under the ZoneWorld gate.</summary>
     void FanoutCharInfo(IReadOnlyList<int> watcherObjectIds, int objectId);
 
-    void FanoutAttackState(IReadOnlyList<int> watcherObjectIds, AttackStateMsg attack);
+    void FanoutAttackState(IReadOnlyList<int> watcherObjectIds, Fineage.Protocol.AttackMsg attack);
 
     /// <summary>Mobius StatusUpdate to watchers. Called under the ZoneWorld gate.</summary>
     void FanoutStatusUpdate(IReadOnlyList<int> watcherObjectIds, Fineage.Protocol.StatusUpdateMsg status);
@@ -81,7 +81,7 @@ interface IWorldEventPublisher
     /// <summary>Mobius TeleportToLocation for <paramref name="objectId"/>. Called under the ZoneWorld gate.</summary>
     void FanoutTeleportToLocation(IReadOnlyList<int> watcherObjectIds, int objectId, int x, int y, int z, int heading);
 
-    void FanoutPlayerStats(IReadOnlyList<int> watcherObjectIds, PlayerStatsMsg stats);
+    void FanoutPlayerStats(IReadOnlyList<int> watcherObjectIds, Fineage.Protocol.PlayerStatsMsg stats);
 
     /// <summary>Mobius AbnormalStatusUpdate to watchers. Called under the ZoneWorld gate.</summary>
     void FanoutAbnormalStatusUpdate(IReadOnlyList<int> watcherObjectIds, Fineage.Protocol.AbnormalStatusUpdateMsg update);

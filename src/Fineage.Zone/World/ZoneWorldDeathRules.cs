@@ -166,10 +166,9 @@ public sealed partial class ZoneWorld
         int[] self = [player.ObjectId];
         NetBridge.FanoutStatusUpdate(self, status);
         var vitals = BuildUserInfoVitals(player);
-        NetBridge.FanoutPlayerStats(self, new Fineage.Net.Contract.PlayerStatsMsg
+        NetBridge.FanoutPlayerStats(self, new Fineage.Protocol.PlayerStatsMsg
         {
-            EntityValue = (ulong)(uint)player.ObjectId,
-            EntityGeneration = 1,
+            ObjectId = player.ObjectId,
             Level = player.Level,
             Exp = player.Exp,
             Sp = player.Sp,

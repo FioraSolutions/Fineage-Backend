@@ -78,9 +78,9 @@ public sealed class NetMeleeApproachTests
         await kit.World.RunPlayerCombatTickAsync(CancellationToken.None);
         var attacks = rec.Of(nameof(IWorldEventPublisher.FanoutAttackState));
         Assert.NotEmpty(attacks);
-        var swing = (AttackStateMsg)attacks[0][1]!;
-        Assert.Equal((ulong)(uint)player.ObjectId, swing.AttackerValue);
-        Assert.Equal((ulong)(uint)MobId, swing.TargetValue);
+        var swing = Assert.IsType<Fineage.Protocol.AttackMsg>(attacks[0][1]);
+        Assert.Equal(player.ObjectId, swing.AttackerObjectId);
+        Assert.Equal(MobId, swing.TargetObjectId);
         Assert.False(player.MoveActive);
         Assert.True(ZoneCombat.Within(player.X, player.Y, mob.X, mob.Y, ZoneCombat.MeleeRange + ZoneCombat.HitRangeTolerance));
         Assert.True(Math.Abs(player.X - mob.X) >= 10, "pawn must stop in front of the mob, not on it");

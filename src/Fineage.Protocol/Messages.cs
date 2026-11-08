@@ -482,6 +482,23 @@ public sealed class StatusUpdateMsg
     public int[] Values { get; set; } = [];
 }
 
+/// <summary>
+/// Zone → client: compact vitals sheet (level/exp/sp/hp/mp/cp). Entity wire ids are filled at the Net edge.
+/// </summary>
+public sealed class PlayerStatsMsg
+{
+    public int ObjectId { get; set; }
+    public int Level { get; set; }
+    public long Exp { get; set; }
+    public int Sp { get; set; }
+    public int Hp { get; set; }
+    public int MaxHp { get; set; }
+    public int Mp { get; set; }
+    public int MaxMp { get; set; }
+    public int Cp { get; set; }
+    public int MaxCp { get; set; }
+}
+
 /// <summary>Interlude StatusUpdate attribute ids (see client StatusUpdate.AttributeType).</summary>
 public static class InterludeStatus
 {

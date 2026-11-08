@@ -548,10 +548,9 @@ public sealed partial class ZoneWorld
             NetBridge.FanoutStatusUpdate(self, status);
             NetBridge.FanoutSkillList(self,
                 Fineage.Zone.Net.NetEnterWorldProjector.BuildSkills(player, _clock().ToUnixTimeMilliseconds()));
-            NetBridge.FanoutPlayerStats(self, new Fineage.Net.Contract.PlayerStatsMsg
+            NetBridge.FanoutPlayerStats(self, new Fineage.Protocol.PlayerStatsMsg
             {
-                EntityValue = (ulong)(uint)player.ObjectId,
-                EntityGeneration = 1,
+                ObjectId = player.ObjectId,
                 Level = player.Level,
                 Exp = player.Exp,
                 Sp = player.Sp,
@@ -856,10 +855,9 @@ public sealed partial class ZoneWorld
                 Params = notice.Params ?? []
             });
             NetBridge.FanoutStatusUpdate(self, status);
-            NetBridge.FanoutPlayerStats(self, new Fineage.Net.Contract.PlayerStatsMsg
+            NetBridge.FanoutPlayerStats(self, new Fineage.Protocol.PlayerStatsMsg
             {
-                EntityValue = (ulong)(uint)player.ObjectId,
-                EntityGeneration = 1,
+                ObjectId = player.ObjectId,
                 Level = player.Level,
                 Exp = player.Exp,
                 Sp = player.Sp,
