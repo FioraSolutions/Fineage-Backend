@@ -67,9 +67,9 @@ public sealed class NetChatTests
     static bool HearsAny(IEnumerable<(IReadOnlyList<int> Watchers, CreatureSayNetMsg Line)> says, int objectId) =>
         says.Any(s => s.Watchers.Contains(objectId));
 
-    static List<SystemMessageNetMsg> SystemLines(NetBridgeRecorder rec) =>
+    static List<SystemMessageMsg> SystemLines(NetBridgeRecorder rec) =>
         rec.Of(nameof(IWorldEventPublisher.FanoutSystemMessage))
-            .Select(args => (SystemMessageNetMsg)args[1])
+            .Select(args => (SystemMessageMsg)args[1])
             .ToList();
 
     [Fact]
@@ -139,7 +139,7 @@ public sealed class NetChatTests
         {
             Assert.Null(await kit.World.TrySayAsync(speaker, "secret", type, now, CancellationToken.None));
 
-            SystemMessageNetMsg notice = Assert.Single(SystemLines(rec));
+            SystemMessageMsg notice = Assert.Single(SystemLines(rec));
             Assert.Equal(ChatProtocol.ChatNotSupported, notice.Id);
             Assert.Equal("not supported yet", notice.Text);
             Assert.Equal(type.ToString(), Assert.Single(notice.Params));

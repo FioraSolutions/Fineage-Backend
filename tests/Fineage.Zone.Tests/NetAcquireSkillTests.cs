@@ -108,7 +108,7 @@ public sealed class NetAcquireSkillTests
 
         Assert.Equal(0, elf.Sp);
         Assert.False(elf.KnownSkills.ContainsKey(offer.SkillId));
-        var message = Assert.IsType<SystemMessageNetMsg>(
+        var message = Assert.IsType<SystemMessageMsg>(
             Assert.Single(rec.Of(nameof(IWorldEventPublisher.FanoutSystemMessage)))[1]);
         Assert.Equal(278, message.Id);
         Assert.Contains(LastList(rec).Skills, row => row.SkillId == offer.SkillId);
@@ -184,7 +184,7 @@ public sealed class NetAcquireSkillTests
         Assert.Null(await kit.World.TryAcquireSkillAsync(
             session, 1405, 1, ZoneWorld.AcquireSkillTypeUsual, informing: false, default));
         Assert.False(elf.KnownSkills.ContainsKey(1405));
-        Assert.Equal(276, Assert.IsType<SystemMessageNetMsg>(
+        Assert.Equal(276, Assert.IsType<SystemMessageMsg>(
             Assert.Single(rec.Of(nameof(IWorldEventPublisher.FanoutSystemMessage)))[1]).Id);
         Assert.Contains(LastList(rec).Skills, row => row.SkillId == 1405 && row.NextLevel == 1);
 

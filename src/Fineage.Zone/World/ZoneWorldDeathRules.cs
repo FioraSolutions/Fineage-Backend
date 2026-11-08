@@ -126,7 +126,7 @@ public sealed partial class ZoneWorld
 
         if (player.Session is not { } session)
             return;
-        NetBridge?.FanoutSystemMessage([player.ObjectId], new Fineage.Net.Contract.SystemMessageNetMsg
+        NetBridge?.FanoutSystemMessage([player.ObjectId], new SystemMessageMsg
         {
             Id = DeathPenaltyMessageId,
             Text = $"Your Death Penalty is now level {level}.",

@@ -41,7 +41,7 @@ public sealed partial class ZoneWorld
         {
             NetBridge?.FanoutSystemMessage(
                 [session.ObjectId],
-                new SystemMessageNetMsg
+                new SystemMessageMsg
                 {
                     Id = notice.Id,
                     Text = notice.Text,

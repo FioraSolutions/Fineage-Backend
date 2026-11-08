@@ -65,7 +65,8 @@ interface IWorldEventPublisher
 
     void FanoutCreatureSay(IReadOnlyList<int> watcherObjectIds, CreatureSayNetMsg say);
 
-    void FanoutSystemMessage(IReadOnlyList<int> watcherObjectIds, SystemMessageNetMsg message);
+    /// <summary>Mobius SystemMessage to watchers. Called under the ZoneWorld gate.</summary>
+    void FanoutSystemMessage(IReadOnlyList<int> watcherObjectIds, Fineage.Protocol.SystemMessageMsg message);
 
     void FanoutMagicSkillUse(IReadOnlyList<int> watcherObjectIds, MagicSkillUseNetMsg cast);
 

@@ -161,7 +161,7 @@ public sealed class NetWarehouseEconomyTests
     static int LastSystemMessageId(WorldBench bench)
     {
         var call = Last(bench, FanoutSystemMessage);
-        return Assert.IsType<SystemMessageNetMsg>(call[1]).Id;
+        return Assert.IsType<SystemMessageMsg>(call[1]).Id;
     }
 
     const string FanoutWarehouseDepositList = "FanoutWarehouseDepositList";

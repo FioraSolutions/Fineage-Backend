@@ -279,7 +279,7 @@ public sealed partial class ZoneWorld
             };
             if (NetBridge != null)
             {
-                NetBridge.FanoutSystemMessage([session.ObjectId], new Fineage.Net.Contract.SystemMessageNetMsg
+                NetBridge.FanoutSystemMessage([session.ObjectId], new SystemMessageMsg
                 {
                     Id = notice.Id,
                     Text = notice.Text ?? "",
@@ -539,7 +539,7 @@ public sealed partial class ZoneWorld
         if (NetBridge != null)
         {
             int[] self = [player.ObjectId];
-            NetBridge.FanoutSystemMessage(self, new Fineage.Net.Contract.SystemMessageNetMsg
+            NetBridge.FanoutSystemMessage(self, new SystemMessageMsg
             {
                 Id = LevelUpMessageId,
                 Text = "Your level has increased!",
@@ -864,7 +864,7 @@ public sealed partial class ZoneWorld
         {
             int[] self = [player.ObjectId];
             var vitals = BuildUserInfoVitals(player);
-            NetBridge.FanoutSystemMessage(self, new Fineage.Net.Contract.SystemMessageNetMsg
+            NetBridge.FanoutSystemMessage(self, new SystemMessageMsg
             {
                 Id = notice.Id,
                 Text = notice.Text,

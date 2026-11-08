@@ -91,9 +91,9 @@ public sealed class NetEnchantRulesTests
     static EnchantResultNetMsg LastResult(NetBridgeRecorder rec) =>
         Assert.IsType<EnchantResultNetMsg>(rec.Of(nameof(IWorldEventPublisher.FanoutEnchantResult)).Last()[1]);
 
-    static IReadOnlyList<SystemMessageNetMsg> Lines(NetBridgeRecorder rec) =>
+    static IReadOnlyList<SystemMessageMsg> Lines(NetBridgeRecorder rec) =>
         rec.Of(nameof(IWorldEventPublisher.FanoutSystemMessage))
-            .Select(args => Assert.IsType<SystemMessageNetMsg>(args[1]))
+            .Select(args => Assert.IsType<SystemMessageMsg>(args[1]))
             .ToList();
 
     [Fact]

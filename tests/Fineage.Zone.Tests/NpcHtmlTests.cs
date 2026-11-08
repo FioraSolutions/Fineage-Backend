@@ -179,7 +179,7 @@ public sealed class NpcHtmlTests
 
         // Anonymous bypass (no target NPC) still resolves the id out of the Mobius prefix.
         Assert.Null(await actor.BypassAsync(0, $"bypass -h npc_{MerchantObjectId}_goto 15"));
-        var gateNotice = Assert.IsType<SystemMessageNetMsg>(Bench(bench, FanoutSystemMessage).Last()[1]);
+        var gateNotice = Assert.IsType<SystemMessageMsg>(Bench(bench, FanoutSystemMessage).Last()[1]);
         Assert.Equal(NpcServiceProtocol.UnknownTeleport, gateNotice.Id);
         Assert.Contains("not available", LastHtml(bench), StringComparison.Ordinal);
 
@@ -187,7 +187,7 @@ public sealed class NpcHtmlTests
         Assert.Contains("warehouse keeper", LastHtml(bench), StringComparison.OrdinalIgnoreCase);
 
         Assert.Null(await actor.BypassAsync(MerchantObjectId, "SupportMagic"));
-        var buffNotice = Assert.IsType<SystemMessageNetMsg>(Bench(bench, FanoutSystemMessage).Last()[1]);
+        var buffNotice = Assert.IsType<SystemMessageMsg>(Bench(bench, FanoutSystemMessage).Last()[1]);
         Assert.Equal(NpcServiceProtocol.BuffLevelLow, buffNotice.Id);
         Assert.Contains("low level", LastHtml(bench), StringComparison.OrdinalIgnoreCase);
 

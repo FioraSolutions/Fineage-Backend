@@ -38,7 +38,7 @@ public sealed class NetSkillWeaponConditionTests
     }
 
     static bool Unsuitable(NetBridgeRecorder rec) =>
-        rec.Of(nameof(IWorldEventPublisher.FanoutSystemMessage)).Any(m => ((SystemMessageNetMsg)m[1]!).Id == ZoneWorld.SysMsgUnsuitableTerms);
+        rec.Of(nameof(IWorldEventPublisher.FanoutSystemMessage)).Any(m => ((SystemMessageMsg)m[1]!).Id == ZoneWorld.SysMsgUnsuitableTerms);
 
     [Fact]
     public async Task Mortal_blow_without_dagger_is_refused()

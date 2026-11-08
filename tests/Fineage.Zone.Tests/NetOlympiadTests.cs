@@ -246,8 +246,8 @@ public sealed class NetOlympiadTests
     static OlympiadStatusNetMsg LastStatus(WorldBench bench) =>
         Assert.IsType<OlympiadStatusNetMsg>(bench.Rec.Of("FanoutOlympiadStatus").Last()[1]);
 
-    static SystemMessageNetMsg LastSystemMessage(WorldBench bench) =>
-        Assert.IsType<SystemMessageNetMsg>(bench.Rec.Of("FanoutSystemMessage").Last()[1]);
+    static SystemMessageMsg LastSystemMessage(WorldBench bench) =>
+        Assert.IsType<SystemMessageMsg>(bench.Rec.Of("FanoutSystemMessage").Last()[1]);
 
     /// <summary>18:30 on a competition day, so the sheet opens rather than waiting for the start hour.</summary>
     static WorldBench Open() => new(clock: () => Evening);

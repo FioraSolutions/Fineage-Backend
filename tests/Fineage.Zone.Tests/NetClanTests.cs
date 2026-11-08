@@ -242,8 +242,8 @@ public sealed class NetClanTests
             kit.Now, default));
 
         var lines = rec.Of(nameof(IWorldEventPublisher.FanoutSystemMessage));
-        Assert.Contains(lines, call => ((SystemMessageNetMsg)call[1]).Id == ClanProtocol.InviteDeclinedSelf);
-        Assert.Contains(lines, call => ((SystemMessageNetMsg)call[1]).Id == ClanProtocol.InviteDeclinedRequestor);
+        Assert.Contains(lines, call => ((SystemMessageMsg)call[1]).Id == ClanProtocol.InviteDeclinedSelf);
+        Assert.Contains(lines, call => ((SystemMessageMsg)call[1]).Id == ClanProtocol.InviteDeclinedRequestor);
         Assert.Equal(0, Assert.IsType<ClanJoinResultNetMsg>(
             Assert.Single(rec.Of(nameof(IWorldEventPublisher.FanoutClanJoinResult)))[1]).Response);
         Assert.Equal(0, kit.Store.FindById(member.Account, member.CharacterId)!.ClanId);
@@ -282,7 +282,7 @@ public sealed class NetClanTests
 
         Assert.Null(await kit.World.TryClanLeaveAsync(memberSession, kit.Now, default));
         Assert.Contains(rec.Of(nameof(IWorldEventPublisher.FanoutSystemMessage)),
-            call => ((SystemMessageNetMsg)call[1]).Id == ClanProtocol.Withdrawn);
+            call => ((SystemMessageMsg)call[1]).Id == ClanProtocol.Withdrawn);
 
         // The leaver is told the clan is gone: an empty status and an empty roster, both addressed to them only.
         Assert.Contains(rec.Of(nameof(IWorldEventPublisher.FanoutPledgeStatus)), call =>
@@ -326,8 +326,8 @@ public sealed class NetClanTests
             kLeaderSession, new ClanInviteRequestMsg { TargetObjectId = kThirdEntity.ObjectId }, kicked.Now, default));
     }
 
-    static SystemMessageNetMsg LastLine(NetBridgeRecorder rec) =>
-        Assert.IsType<SystemMessageNetMsg>(rec.Of(nameof(IWorldEventPublisher.FanoutSystemMessage)).Last()[1]);
+    static SystemMessageMsg LastLine(NetBridgeRecorder rec) =>
+        Assert.IsType<SystemMessageMsg>(rec.Of(nameof(IWorldEventPublisher.FanoutSystemMessage)).Last()[1]);
 
     [Fact]
     public async Task Combat_blocks_leave_and_dismiss_until_the_stance_ends()

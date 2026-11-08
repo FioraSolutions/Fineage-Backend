@@ -485,7 +485,7 @@ public sealed partial class ZoneWorld
     {
         if (NetBridge == null)
             return;
-        NetBridge.FanoutSystemMessage([session.ObjectId], new Fineage.Net.Contract.SystemMessageNetMsg
+        NetBridge.FanoutSystemMessage([session.ObjectId], new SystemMessageMsg
         {
             Id = message.Id,
             Text = message.Text ?? "",
