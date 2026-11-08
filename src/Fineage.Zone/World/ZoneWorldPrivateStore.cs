@@ -1,6 +1,7 @@
 using Fineage.Game;
 using Fineage.Game.Shops;
 using Fineage.Protocol;
+using Fineage.Zone.Trade;
 using Fineage.Zone.Clan;
 
 namespace Fineage.Zone.World;
@@ -341,9 +342,9 @@ public sealed partial class ZoneWorld
             EnchantLevel = t.Listing.EnchantLevel
         }).ToList();
         var deny = IncomingDenyOf(buyer, offerProxy);
-        if (deny == TradeIncomingDeny.Weight)
+        if (deny == TradeRules.IncomingDeny.Weight)
             return PrivateStoreProtocol.Weight;
-        if (deny == TradeIncomingDeny.Slots)
+        if (deny == TradeRules.IncomingDeny.Slots)
             return PrivateStoreProtocol.Slots;
 
         var buyerChanges = new List<InventoryUpdateEntryMsg>();
@@ -448,9 +449,9 @@ public sealed partial class ZoneWorld
             EnchantLevel = t.Stock.EnchantLevel
         }).ToList();
         var deny = IncomingDenyOf(store, offerProxy);
-        if (deny == TradeIncomingDeny.Weight)
+        if (deny == TradeRules.IncomingDeny.Weight)
             return PrivateStoreProtocol.Weight;
-        if (deny == TradeIncomingDeny.Slots)
+        if (deny == TradeRules.IncomingDeny.Slots)
             return PrivateStoreProtocol.Slots;
 
         var sellerChanges = new List<InventoryUpdateEntryMsg>();

@@ -2,6 +2,7 @@ using Fineage.Game;
 using Fineage.Game.Recipes;
 using Fineage.Game.Shops;
 using Fineage.Protocol;
+using Fineage.Zone.Trade;
 
 namespace Fineage.Zone.World;
 
@@ -170,9 +171,9 @@ public sealed partial class ZoneWorld
             }
         };
         var deny = IncomingDenyOf(customer, productOffers);
-        if (deny == TradeIncomingDeny.Weight)
+        if (deny == TradeRules.IncomingDeny.Weight)
             return CraftProtocol.Weight;
-        if (deny == TradeIncomingDeny.Slots)
+        if (deny == TradeRules.IncomingDeny.Slots)
             return CraftProtocol.Slots;
 
         var customerChanges = new List<InventoryUpdateEntryMsg>();

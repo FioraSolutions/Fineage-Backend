@@ -1,6 +1,7 @@
 using Fineage.Game;
 using Fineage.Game.Recipes;
 using Fineage.Protocol;
+using Fineage.Zone.Trade;
 
 namespace Fineage.Zone.World;
 
@@ -115,9 +116,9 @@ public sealed partial class ZoneWorld
         };
         // IncomingDenyOf uses FindByItemId for stackables — product object id unused.
         var deny = IncomingDenyOf(player, productOffers);
-        if (deny == TradeIncomingDeny.Weight)
+        if (deny == TradeRules.IncomingDeny.Weight)
             return PrivateStoreProtocol.Weight;
-        if (deny == TradeIncomingDeny.Slots)
+        if (deny == TradeRules.IncomingDeny.Slots)
             return PrivateStoreProtocol.Slots;
 
         var changes = new List<InventoryUpdateEntryMsg>();
