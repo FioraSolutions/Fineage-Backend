@@ -102,7 +102,8 @@ interface IWorldEventPublisher
 
     void FanoutWarehouseWithdrawList(IReadOnlyList<int> watcherObjectIds, WarehouseWithdrawListNetMsg list);
 
-    void FanoutQuestList(IReadOnlyList<int> watcherObjectIds, QuestListNetMsg list);
+    /// <summary>Mobius QuestList journal to the owner. Called under the ZoneWorld gate.</summary>
+    void FanoutQuestList(IReadOnlyList<int> watcherObjectIds, Fineage.Protocol.QuestListMsg list);
 
     /// <summary>Full SkillList re-send after a trainer learn (Mobius sends SkillList after RequestAcquireSkill).</summary>
     void FanoutSkillList(IReadOnlyList<int> watcherObjectIds, Fineage.Protocol.SkillListMsg list);

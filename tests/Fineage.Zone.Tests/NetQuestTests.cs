@@ -153,8 +153,8 @@ public sealed class NetQuestTests
 
     static DateTimeOffset FixedClock() => DateTimeOffset.FromUnixTimeMilliseconds(1_800_000_000_000);
 
-    static QuestListNetMsg LastQuestList(NetBridgeRecorder rec) =>
-        Assert.IsType<QuestListNetMsg>(rec.Of(nameof(IWorldEventPublisher.FanoutQuestList)).Last()[1]);
+    static QuestListMsg LastQuestList(NetBridgeRecorder rec) =>
+        Assert.IsType<QuestListMsg>(rec.Of(nameof(IWorldEventPublisher.FanoutQuestList)).Last()[1]);
 
     static SystemMessageMsg LastSystemMessage(NetBridgeRecorder rec) =>
         Assert.IsType<SystemMessageMsg>(rec.Of(nameof(IWorldEventPublisher.FanoutSystemMessage)).Last()[1]);

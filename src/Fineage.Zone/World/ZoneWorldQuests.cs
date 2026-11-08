@@ -582,18 +582,9 @@ public sealed partial class ZoneWorld
         }).ToArray();
         if (NetBridge != null)
         {
-            NetBridge.FanoutQuestList([session.ObjectId], new Fineage.Net.Contract.QuestListNetMsg
+            NetBridge.FanoutQuestList([session.ObjectId], new QuestListMsg
             {
-                Active = active.Select(entry => new Fineage.Net.Contract.QuestJournalEntryNet
-                {
-                    QuestId = entry.QuestId,
-                    Name = entry.Name ?? "",
-                    State = entry.State,
-                    Cond = entry.Cond,
-                    ProgressFlags = entry.ProgressFlags,
-                    JournalWord = entry.JournalWord,
-                    Repeatable = entry.Repeatable
-                }).ToArray(),
+                Active = active,
                 CompletedMask = list.CompletedMask ?? [],
                 CompletedQuestIds = list.CompletedQuestIds ?? [],
                 MaxActive = list.MaxActive
@@ -606,17 +597,17 @@ public sealed partial class ZoneWorld
     /// first <c>RequestQuestList</c>; the Net client shows the window on the menu button, so sending it with the
     /// rest of the enter packet leaves the tabs filled even if the player opens the window before the reply lands.
     /// </summary>
-    internal Fineage.Net.Contract.QuestListNetMsg NetQuestList(ZoneSession session)
+    internal QuestListMsg NetQuestList(ZoneSession session)
     {
         lock (_gate)
         {
             if (!TryPlayer(session, out var player))
-                return new Fineage.Net.Contract.QuestListNetMsg();
+                return new QuestListMsg();
 
             var list = _quests.List(player.Quests);
-            return new Fineage.Net.Contract.QuestListNetMsg
+            return new QuestListMsg
             {
-                Active = list.Active.Select(entry => new Fineage.Net.Contract.QuestJournalEntryNet
+                Active = list.Active.Select(entry => new QuestJournalEntryMsg
                 {
                     QuestId = entry.QuestId,
                     Name = entry.Name ?? "",
