@@ -999,42 +999,7 @@ public sealed class NetZoneServer : INetPresenceBridge
         }
         finally
         {
-            await LeaveNetAsync(zoneSession, self, registeredObjectId, conn).ConfigureAwait(false);
-        }
-    }
-
-    async Task LeaveNetAsync(ZoneSession zoneSession, EntityId self, int registeredObjectId, NetConnection conn)
-    {
-        try
-        {
-            if (zoneSession.Bound && zoneSession.InWorld && self.Value != 0)
-            {
-                var peers = _world.SnapshotKnownPlayers(zoneSession);
-                var despawn = NetCodec.EncodeEntityDespawn(new EntityDespawnMsg
-                {
-                    EntityValue = self.Value,
-                    EntityGeneration = self.Generation
-                });
-                foreach (var peer in peers)
-                    await _presence.SendAsync(peer.ObjectId, NetOpcode.EntityDespawn, despawn, CancellationToken.None)
-                        .ConfigureAwait(false);
-            }
-        }
-        catch
-        {
-            /* ignore */
-        }
-
-        if (registeredObjectId != 0)
-            _presence.Unregister(registeredObjectId, conn);
-
-        try
-        {
-            await _world.LeaveAsync(zoneSession, CancellationToken.None).ConfigureAwait(false);
-        }
-        catch
-        {
-            /* ignore */
+            await _session.LeaveAsync(zoneSession, self, registeredObjectId, conn).ConfigureAwait(false);
         }
     }
 
