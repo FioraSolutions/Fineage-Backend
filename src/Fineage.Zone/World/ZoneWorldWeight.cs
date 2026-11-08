@@ -90,7 +90,7 @@ public sealed partial class ZoneWorld
     }
 
     /// <summary>Net enter path: the same EtcStatusUpdate a client would get from <c>refreshOverloaded</c>.</summary>
-    internal bool TryBuildNetEtcStatus(ZoneSession session, out Fineage.Net.Contract.EtcStatusUpdateNetMsg status)
+    internal bool TryBuildNetEtcStatus(ZoneSession session, out Fineage.Protocol.EtcStatusUpdateMsg status)
     {
         lock (_gate)
         {
@@ -124,10 +124,8 @@ public sealed partial class ZoneWorld
     /// (force charges, chat ban, danger area, charm of courage, death penalty) go out as 0, exactly like a clean
     /// character in Mobius.
     /// </summary>
-    internal static Fineage.Net.Contract.EtcStatusUpdateNetMsg EtcStatusOf(ZoneEntity player) => new()
+    internal static Fineage.Protocol.EtcStatusUpdateMsg EtcStatusOf(ZoneEntity player) => new()
     {
-        EntityValue = (ulong)(uint)player.ObjectId,
-        EntityGeneration = 1,
         Charges = 0,
         WeightPenalty = player.WeightPenaltyLevel,
         ChatBlocked = false,

@@ -411,9 +411,8 @@ public sealed class WeightPenaltyWorldTests
         Assert.Equal(cleanRun, player.RunSpeed, 3);
 
         var etcArgs = Assert.Single(rec.Of(nameof(IWorldEventPublisher.FanoutEtcStatusUpdate)));
-        var status = Assert.IsType<EtcStatusUpdateNetMsg>(etcArgs[1]);
+        var status = Assert.IsType<Fineage.Protocol.EtcStatusUpdateMsg>(etcArgs[1]);
         Assert.Equal(1, status.WeightPenalty);
-        Assert.Equal((ulong)(uint)player.ObjectId, status.EntityValue);
         // The packet is self-only, exactly like Mobius (Player.java:2012).
         Assert.Equal([player.ObjectId], Assert.IsAssignableFrom<IReadOnlyList<int>>(etcArgs[0]));
     }
@@ -461,7 +460,7 @@ public sealed class WeightPenaltyWorldTests
         Assert.Equal(clean, player.RunSpeed, 3);
 
         var statuses = rec.Of(nameof(IWorldEventPublisher.FanoutEtcStatusUpdate))
-            .Select(args => ((EtcStatusUpdateNetMsg)args[1]!).WeightPenalty)
+            .Select(args => ((Fineage.Protocol.EtcStatusUpdateMsg)args[1]!).WeightPenalty)
             .ToList();
         Assert.Equal(0, statuses[^1]); // recovery publishes the cleared level last
     }
@@ -582,7 +581,6 @@ public sealed class WeightPenaltyWorldTests
         Assert.False(status.CharmOfCourage);
         Assert.Equal(0, status.Charges);
         Assert.Equal(0, status.DeathPenalty);
-        Assert.Equal((ulong)(uint)player.ObjectId, status.EntityValue);
 
         player.WeaponGradePenalty = 0;
         Assert.False(ZoneWorld.EtcStatusOf(player).GradePenalty);
@@ -595,7 +593,9 @@ public sealed class WeightPenaltyWorldTests
         var (session, player) = await kit.EnterAsync(classId: 18);
         Assert.True(kit.World.TryBuildNetEtcStatus(session, out var status));
         Assert.Equal(player.WeightPenaltyLevel, status.WeightPenalty);
-        Assert.Equal(1u, status.EntityGeneration);
+        var net = Fineage.Zone.Net.NetZoneServer.ToNetEtcStatus(status, player.ObjectId);
+        Assert.Equal(1u, net.EntityGeneration);
+        Assert.Equal((ulong)(uint)player.ObjectId, net.EntityValue);
     }
 
     [Fact]
