@@ -379,6 +379,11 @@ public sealed partial class ZoneWorld
                 _spoilRules.IsSweepSkill(request.SkillId));
         if (template.IsBuffSkill)
             return TrySkillUseBuff(session, player, request, template, levelData, level, now);
+        // Mobius nukes that also apply a short abnormal (Aura Flare A3, Fire Vortex DoT+slow, …)
+        // are flagged isDebuff + abnormalTime in skills.json. Prefer skill-combat damage over the
+        // pure-CC debuff path so they still roll magic damage; ResolvePendingHit applies the abnormal.
+        if (_skillCombat.TryGet(request.SkillId, out _))
+            return TrySkillUseAttack(session, player, request, template, levelData, level, now);
         if (template.IsDebuffSkill)
             return TrySkillUseDebuff(session, player, request, template, levelData, level, now);
         if (template.IsInstantSupportSkill(level))

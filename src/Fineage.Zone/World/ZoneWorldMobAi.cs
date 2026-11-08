@@ -94,6 +94,18 @@ public sealed partial class ZoneWorld
         AddHate(target, player, DamageHate(damage, target.Level));
         player.CombatUntilUnixMs = now + ClanProtocol.CombatStanceMillis;
 
+        // Debuff-nukes (Aura Flare, Fire Vortex, …): abnormal lands with the damage at hitTime.
+        if (hit.Combat != null)
+        {
+            var template = _game.Skills.Find(hit.Combat.SkillId);
+            if (template != null &&
+                template.AppliesAbnormal &&
+                template.TryLevelData(hit.Level, out var levelData))
+            {
+                ApplyAbnormalFromSkill(template, levelData, target, now);
+            }
+        }
+
         if (target.CurHp <= 0)
         {
             RemoveDeadNpc(target, killer: player);

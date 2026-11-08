@@ -18,6 +18,8 @@ public sealed class NetSkillTests
     const int SquiresSword = 2369;
     const int PowerStrike = 3;
     const int WindStrike = 1177;
+    const int AuraFlare = 1231;
+    const int FireVortex = 1339;
 
     static DateTimeOffset Now { get; set; } = DateTimeOffset.FromUnixTimeMilliseconds(1_800_000_000_000);
 
@@ -157,6 +159,78 @@ public sealed class NetSkillTests
         Assert.True(after.CurHp < hpBefore, $"expected Wind Strike damage, hp {hpBefore} → {after.CurHp}");
         var hit = LastStatusFor(bench.Rec, gremlinObjectId);
         Assert.True(hit.Values[0] < hit.Values[1]);
+    }
+
+    /// <summary>
+    /// Aura Flare / Fire Vortex are isDebuff+abnormal in skills.json but live in skill-combat —
+    /// they must still roll magic damage (not the pure-CC debuff path).
+    /// </summary>
+    [Fact]
+    public async Task SkillUse_aura_flare_damages_gremlin_despite_debuff_flag()
+    {
+        Now = DateTimeOffset.FromUnixTimeMilliseconds(1_800_000_000_000);
+        var bench = new WorldBench(
+            clock: () => Now,
+            spawns: Fineage.Zone.Spawns.SpawnCatalog.LoadDefault(),
+            mapId: null);
+        var gremlinHome = TalkingIsland.Gremlins[0];
+        BenchPlayer actor = await bench.EnterAsync(
+            "flare", "FlareKid",
+            classId: HumanClasses.Mystic,
+            level: 40,
+            x: gremlinHome.X, y: gremlinHome.Y, z: gremlinHome.Z);
+
+        Assert.True(bench.World.TryGetLivePlayer(actor.Session, out var caster));
+        caster.KnownSkills[AuraFlare] = 1;
+        int gremlinObjectId = GremlinObjectId(bench.World);
+        Assert.True(bench.World.TryGetEntityById(gremlinObjectId, out var gremlin));
+        int hpBefore = gremlin.CurHp;
+
+        Assert.Null(await bench.World.TrySelectTargetAsync(actor.Session, gremlinObjectId, CancellationToken.None));
+        Assert.Null(await bench.World.TrySkillUseAsync(actor.Session, AuraFlare, gremlinObjectId,
+            CancellationToken.None));
+        Assert.NotNull(caster.PendingHit);
+
+        Now = Now.AddSeconds(3);
+        await bench.World.RunCombatTickAsync(CancellationToken.None);
+
+        Assert.True(bench.World.TryGetEntityById(gremlinObjectId, out var after));
+        Assert.True(after.CurHp < hpBefore, $"expected Aura Flare damage, hp {hpBefore} → {after.CurHp}");
+    }
+
+    [Fact]
+    public async Task SkillUse_fire_vortex_damages_gremlin_despite_debuff_flag()
+    {
+        Now = DateTimeOffset.FromUnixTimeMilliseconds(1_800_000_000_000);
+        var bench = new WorldBench(
+            clock: () => Now,
+            spawns: Fineage.Zone.Spawns.SpawnCatalog.LoadDefault(),
+            mapId: null);
+        var gremlinHome = TalkingIsland.Gremlins[0];
+        BenchPlayer actor = await bench.EnterAsync(
+            "vortex", "VortexKid",
+            classId: HumanClasses.Mystic,
+            level: 76,
+            x: gremlinHome.X, y: gremlinHome.Y, z: gremlinHome.Z);
+
+        Assert.True(bench.World.TryGetLivePlayer(actor.Session, out var caster));
+        caster.KnownSkills[FireVortex] = 1;
+        int gremlinObjectId = GremlinObjectId(bench.World);
+        Assert.True(bench.World.TryGetEntityById(gremlinObjectId, out var gremlin));
+        int hpBefore = gremlin.CurHp;
+
+        Assert.Null(await bench.World.TrySelectTargetAsync(actor.Session, gremlinObjectId, CancellationToken.None));
+        Assert.Null(await bench.World.TrySkillUseAsync(actor.Session, FireVortex, gremlinObjectId,
+            CancellationToken.None));
+        Assert.NotNull(caster.PendingHit);
+
+        // Fire Vortex hitTime is 6s at base C.Spd.
+        Now = Now.AddSeconds(10);
+        await bench.World.RunCombatTickAsync(CancellationToken.None);
+
+        Assert.True(bench.World.TryGetEntityById(gremlinObjectId, out var after));
+        Assert.True(after.CurHp < hpBefore, $"expected Fire Vortex damage, hp {hpBefore} → {after.CurHp}");
+        Assert.Contains(after.Abnormals, a => a.Id == FireVortex);
     }
 
     static int GremlinObjectId(ZoneWorld world)
