@@ -98,8 +98,8 @@ interface IWorldEventPublisher
     /// <summary>Full SkillList re-send after a trainer learn (Mobius sends SkillList after RequestAcquireSkill).</summary>
     void FanoutSkillList(IReadOnlyList<int> watcherObjectIds, SkillListNetMsg list);
 
-    /// <summary>Mobius ChangeWaitType (sit/stand) for <paramref name="waitType"/>'s actor. Called under the ZoneWorld gate.</summary>
-    void FanoutChangeWaitType(IReadOnlyList<int> watcherObjectIds, ChangeWaitTypeNetMsg waitType);
+    /// <summary>Mobius ChangeWaitType (sit/stand) for <paramref name="objectId"/>. Called under the ZoneWorld gate.</summary>
+    void FanoutChangeWaitType(IReadOnlyList<int> watcherObjectIds, int objectId, int waitType, int x, int y, int z);
 
     /// <summary>Mobius SocialAction (gesture) for <paramref name="objectId"/>. Called under the ZoneWorld gate.</summary>
     void FanoutSocialAction(IReadOnlyList<int> watcherObjectIds, int objectId, int actionId);
