@@ -87,7 +87,8 @@ interface IWorldEventPublisher
 
     void FanoutMultiSellList(IReadOnlyList<int> watcherObjectIds, MultiSellListNetMsg list);
 
-    void FanoutShopBalance(IReadOnlyList<int> watcherObjectIds, ShopBalanceNetMsg balance);
+    /// <summary>Shop window adena/weight/slots snapshot. Called under the ZoneWorld gate.</summary>
+    void FanoutShopBalance(IReadOnlyList<int> watcherObjectIds, Fineage.Protocol.ShopBalanceMsg balance);
 
     void FanoutWarehouseDepositList(IReadOnlyList<int> watcherObjectIds, WarehouseDepositListNetMsg list);
 
