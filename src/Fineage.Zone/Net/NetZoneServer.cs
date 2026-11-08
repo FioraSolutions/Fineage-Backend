@@ -512,9 +512,9 @@ public sealed class NetZoneServer : IWorldEventPublisher
             _presence.TrySend(watcher, NetOpcode.WarehouseWithdrawList, payload);
     }
 
-    void IWorldEventPublisher.FanoutSkillList(IReadOnlyList<int> watcherObjectIds, SkillListNetMsg list)
+    void IWorldEventPublisher.FanoutSkillList(IReadOnlyList<int> watcherObjectIds, Fineage.Protocol.SkillListMsg list)
     {
-        var payload = NetCodec.EncodeSkillList(list);
+        var payload = NetCodec.EncodeSkillList(NetEnterWorldProjector.ToNetSkillList(list));
         foreach (int watcher in watcherObjectIds)
             _presence.TrySend(watcher, NetOpcode.SkillList, payload);
     }

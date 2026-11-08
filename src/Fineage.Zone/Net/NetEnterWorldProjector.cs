@@ -1,6 +1,7 @@
 using Fineage.Game;
 using Fineage.Accounts;
 using Fineage.Net.Contract;
+using Fineage.Protocol;
 using Fineage.Zone.Combat;
 using Fineage.Zone.World;
 
@@ -16,7 +17,7 @@ static class NetEnterWorldProjector
         EntitySpawnMsg Spawn,
         PlayerStatsMsg Stats,
         ItemListNetMsg Items,
-        SkillListNetMsg Skills);
+        SkillListMsg Skills);
 
     public static EnterPackets FromEntity(ZoneEntity entity, EntityId self, long nowUnixMs, int playerPAtkSpd = 0)
     {
@@ -149,23 +150,41 @@ static class NetEnterWorldProjector
         return new ItemListNetMsg { Items = rows };
     }
 
-    internal static SkillListNetMsg BuildSkills(ZoneEntity entity, long nowUnixMs)
+    internal static SkillListMsg BuildSkills(ZoneEntity entity, long nowUnixMs)
     {
-        var rows = new List<SkillListEntryNet>(entity.KnownSkills.Count);
+        var rows = new List<SkillListEntryMsg>(entity.KnownSkills.Count);
         foreach (var pair in entity.KnownSkills.OrderBy(p => p.Key))
         {
             int reuse = 0;
             if (entity.SkillReuseUntilMs.TryGetValue(pair.Key, out long until) && until > nowUnixMs)
                 reuse = (int)Math.Min(int.MaxValue, until - nowUnixMs);
-            rows.Add(new SkillListEntryNet
+            rows.Add(new SkillListEntryMsg
             {
                 SkillId = pair.Key,
                 Level = pair.Value,
-                ReuseRemainingMs = reuse
+                ReuseDelayMs = reuse
             });
         }
 
-        return new SkillListNetMsg { Skills = rows.ToArray() };
+        return new SkillListMsg { Skills = rows.ToArray() };
+    }
+
+    internal static SkillListNetMsg ToNetSkillList(SkillListMsg list)
+    {
+        var src = list.Skills ?? [];
+        var rows = new SkillListEntryNet[src.Length];
+        for (int i = 0; i < src.Length; i++)
+        {
+            var row = src[i];
+            rows[i] = new SkillListEntryNet
+            {
+                SkillId = row.SkillId,
+                Level = row.Level,
+                ReuseRemainingMs = row.ReuseDelayMs
+            };
+        }
+
+        return new SkillListNetMsg { Skills = rows };
     }
 
     static int ResolveMaxCp(ZoneEntity entity)
