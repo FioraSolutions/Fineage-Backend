@@ -97,7 +97,7 @@ public sealed class NetNpcServiceTests
         Assert.DoesNotContain(effects, effect => effect.Id == 4331);
 
         var casts = bench.Rec.Of(FanoutMagicSkillUse)
-            .Select(args => ((MagicSkillUseNetMsg)args[1]).SkillId)
+            .Select(args => ((MagicSkillUseMsg)args[1]).SkillId)
             .ToArray();
         Assert.Contains(4322, casts);
         Assert.Contains(4327, casts);
@@ -111,14 +111,14 @@ public sealed class NetNpcServiceTests
         // Mobius CT0 SupportMagic has no isNewbie check: a non-newbie character is buffed too.
         Assert.Null(await mage.SupportMagic(GateObjectId));
         var mageCasts = bench.Rec.Of(FanoutMagicSkillUse)
-            .Select(args => ((MagicSkillUseNetMsg)args[1]).SkillId)
+            .Select(args => ((MagicSkillUseMsg)args[1]).SkillId)
             .ToArray();
         Assert.Contains(4331, mageCasts);
 
         bench.Rec.Calls.Clear();
         Assert.Null(await mage.GiveBlessing(GateObjectId));
         Assert.Contains(5182, bench.Rec.Of(FanoutMagicSkillUse)
-            .Select(args => ((MagicSkillUseNetMsg)args[1]).SkillId));
+            .Select(args => ((MagicSkillUseMsg)args[1]).SkillId));
     }
 
     [Fact]

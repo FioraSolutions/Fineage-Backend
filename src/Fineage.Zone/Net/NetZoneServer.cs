@@ -382,9 +382,17 @@ public sealed class NetZoneServer : IWorldEventPublisher
             _presence.TrySend(watcher, NetOpcode.SystemMessage, payload);
     }
 
-    void IWorldEventPublisher.FanoutMagicSkillUse(IReadOnlyList<int> watcherObjectIds, MagicSkillUseNetMsg cast)
+    void IWorldEventPublisher.FanoutMagicSkillUse(IReadOnlyList<int> watcherObjectIds, Fineage.Protocol.MagicSkillUseMsg cast)
     {
-        var payload = NetCodec.EncodeMagicSkillUse(cast);
+        var payload = NetCodec.EncodeMagicSkillUse(new MagicSkillUseNetMsg
+        {
+            CasterObjectId = cast.CasterObjectId,
+            TargetObjectId = cast.TargetObjectId,
+            SkillId = cast.SkillId,
+            SkillLevel = cast.SkillLevel,
+            HitTimeMs = cast.HitTimeMs,
+            ReuseDelayMs = cast.ReuseDelayMs
+        });
         foreach (int watcher in watcherObjectIds)
             _presence.TrySend(watcher, NetOpcode.MagicSkillUse, payload);
     }

@@ -68,7 +68,7 @@ public sealed class NewbieGuideBuffTests
         Assert.Null(await actor.BypassAsync(guide.ObjectId, $"bypass -h npc_{guide.ObjectId}_SupportMagic"));
 
         var casts = bench.Rec.Of(nameof(FanoutMagicSkillUse))
-            .Select(args => ((MagicSkillUseNetMsg)args[1]).SkillId)
+            .Select(args => ((MagicSkillUseMsg)args[1]).SkillId)
             .ToArray();
         var abnormal = Assert.IsType<AbnormalStatusUpdateMsg>(
             bench.Rec.Of(nameof(FanoutAbnormalStatusUpdate)).Last()[1]);

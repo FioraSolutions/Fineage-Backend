@@ -91,7 +91,7 @@ public sealed partial class ZoneWorld
                 continue;
             netWatchers.Add(watcher.ObjectId);
         }
-        NetBridge?.FanoutMagicSkillUse(netWatchers, new Fineage.Net.Contract.MagicSkillUseNetMsg
+        NetBridge?.FanoutMagicSkillUse(netWatchers, new MagicSkillUseMsg
         {
             CasterObjectId = player.ObjectId,
             TargetObjectId = player.ObjectId,
