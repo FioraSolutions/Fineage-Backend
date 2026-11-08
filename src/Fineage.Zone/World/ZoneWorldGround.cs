@@ -560,11 +560,10 @@ public sealed partial class ZoneWorld
 
         if (netWatchers is { Count: > 0 } && NetBridge != null)
         {
-            NetBridge.FanoutDropItem(netWatchers, new DropItemNetMsg
+            NetBridge.FanoutDropItem(netWatchers, new DropItemMsg
             {
-                DropperObjectId = dropperObjectId,
-                EntityValue = (ulong)(uint)objectId,
-                EntityGeneration = 1,
+                CharObjectId = dropperObjectId,
+                ObjectId = objectId,
                 ItemId = itemId,
                 X = x,
                 Y = y,

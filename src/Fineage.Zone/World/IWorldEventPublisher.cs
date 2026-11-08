@@ -56,7 +56,8 @@ interface IWorldEventPublisher
     /// <summary>Mobius Die packet for <paramref name="objectId"/> (killer may be 0). Called under the ZoneWorld gate.</summary>
     void FanoutDie(IReadOnlyList<int> watcherObjectIds, int objectId, int killerObjectId);
 
-    void FanoutDropItem(IReadOnlyList<int> watcherObjectIds, DropItemNetMsg drop);
+    /// <summary>Mobius DropItem (ground spawn with dropper FX). Called under the ZoneWorld gate.</summary>
+    void FanoutDropItem(IReadOnlyList<int> watcherObjectIds, Fineage.Protocol.DropItemMsg drop);
 
     /// <summary>Mobius DeleteObject for <paramref name="objectId"/>. Called under the ZoneWorld gate.</summary>
     void FanoutEntityDespawn(IReadOnlyList<int> watcherObjectIds, int objectId);
