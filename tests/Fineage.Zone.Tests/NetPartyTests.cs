@@ -20,8 +20,8 @@ public sealed class NetPartyTests
         return (kit, rec);
     }
 
-    static PartyMemberListNetMsg LastList(NetBridgeRecorder rec) =>
-        Assert.IsType<PartyMemberListNetMsg>(rec.Of(nameof(IWorldEventPublisher.FanoutPartyMemberList)).Last()[1]);
+    static Fineage.Protocol.PartyMemberListMsg LastList(NetBridgeRecorder rec) =>
+        Assert.IsType<Fineage.Protocol.PartyMemberListMsg>(rec.Of(nameof(IWorldEventPublisher.FanoutPartyMemberList)).Last()[1]);
 
     static async Task<(ZoneSession Leader, ZoneSession Member)> Joined(NetTestKit kit)
     {
@@ -41,14 +41,14 @@ public sealed class NetPartyTests
 
         Assert.Null(await kit.World.TryPartyInviteAsync(leader, memberEntity.ObjectId, 0, default));
 
-        var ask = Assert.IsType<PartyAskJoinNetMsg>(
+        var ask = Assert.IsType<Fineage.Protocol.PartyAskJoinMsg>(
             Assert.Single(rec.Of(nameof(IWorldEventPublisher.FanoutPartyAskJoin)))[1]);
         Assert.Equal(leaderEntity.ObjectId, ask.RequestorObjectId);
         Assert.Equal(leaderEntity.Name, ask.RequestorName);
 
         Assert.Null(await kit.World.TryPartyAnswerAsync(member, leaderEntity.ObjectId, 1, default));
 
-        Assert.Equal(1, Assert.IsType<PartyJoinResultNetMsg>(
+        Assert.Equal(1, Assert.IsType<Fineage.Protocol.PartyJoinResultMsg>(
             Assert.Single(rec.Of(nameof(IWorldEventPublisher.FanoutPartyJoinResult)))[1]).Response);
 
         var lists = rec.Of(nameof(IWorldEventPublisher.FanoutPartyMemberList));
@@ -69,7 +69,7 @@ public sealed class NetPartyTests
         Assert.Null(await kit.World.TryPartyInviteAsync(leader, memberEntity.ObjectId, 0, default));
         Assert.Null(await kit.World.TryPartyAnswerAsync(member, leaderEntity.ObjectId, 0, default));
 
-        Assert.Equal(0, Assert.IsType<PartyJoinResultNetMsg>(
+        Assert.Equal(0, Assert.IsType<Fineage.Protocol.PartyJoinResultMsg>(
             Assert.Single(rec.Of(nameof(IWorldEventPublisher.FanoutPartyJoinResult)))[1]).Response);
         Assert.Empty(rec.Of(nameof(IWorldEventPublisher.FanoutPartyMemberList)));
     }
