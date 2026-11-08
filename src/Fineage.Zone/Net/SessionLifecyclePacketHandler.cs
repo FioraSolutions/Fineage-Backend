@@ -1,6 +1,7 @@
 using Fineage.Accounts;
 using Fineage.Net.Contract;
 using Fineage.Net.Host;
+using Fineage.Protocol;
 using Fineage.Zone.Chat;
 using Fineage.Zone.World;
 using NetHelloAck = Fineage.Net.Contract.HelloAckMsg;
@@ -168,7 +169,10 @@ sealed class SessionLifecyclePacketHandler
         await conn.SendAsync(NetOpcode.SkillList, NetCodec.EncodeSkillList(NetEnterWorldProjector.ToNetSkillList(packets.Skills)), ct: ct)
             .ConfigureAwait(false);
         // Mobius EnterWorld: ShortCutInit after ItemList / SkillList so item and skill icons resolve.
-        await conn.SendAsync(NetOpcode.ShortCutInit, NetCodec.EncodeShortCutInit(_world.NetShortcutInit(zoneSession)), ct: ct)
+        await conn.SendAsync(
+                NetOpcode.ShortCutInit,
+                NetCodec.EncodeShortCutInit(ToNetShortcutInit(_world.BuildShortcutInit(zoneSession))),
+                ct: ct)
             .ConfigureAwait(false);
         // Mobius EnterWorld:401 sends EtcStatusUpdate after ItemList/ShortCutInit and after updateEffectIcons, so the
         // overload icon appears on an otherwise fully-dressed status bar.
@@ -279,5 +283,14 @@ sealed class SessionLifecyclePacketHandler
     {
         if (!conn.HelloCompleted)
             throw new InvalidOperationException("hello_required");
+    }
+
+    static ShortCutInitNetMsg ToNetShortcutInit(ShortCutInitMsg init)
+    {
+        var src = init.Shortcuts ?? [];
+        var rows = new ShortCutNetMsg[src.Length];
+        for (int i = 0; i < src.Length; i++)
+            rows[i] = ShortcutActionPacketHandler.ToNet(src[i]);
+        return new ShortCutInitNetMsg { Shortcuts = rows };
     }
 }

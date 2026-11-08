@@ -94,10 +94,13 @@ public sealed class ShortcutActionPacketHandler
     static async Task SendShortcutReplyAsync(NetConnection conn, ZoneWorld.ShortcutReply reply, uint sequence, CancellationToken ct)
     {
         if (reply.Register != null)
-            await conn.SendAsync(NetOpcode.ShortCutRegister, NetCodec.EncodeShortCut(reply.Register), sequence, ct).ConfigureAwait(false);
+            await conn.SendAsync(NetOpcode.ShortCutRegister, NetCodec.EncodeShortCut(ToNet(reply.Register)), sequence, ct).ConfigureAwait(false);
         else if (reply.DeleteSlot is int slot)
             await conn.SendAsync(NetOpcode.ShortCutDelete, NetCodec.EncodeShortCutDel(new ShortCutDelNetMsg { Slot = slot }), sequence, ct).ConfigureAwait(false);
         if (reply.Error != null)
             ZoneLog.Info($"shortcut rejected: {reply.Error}");
     }
+
+    internal static ShortCutNetMsg ToNet(ShortCutMsg cut) =>
+        new() { Type = cut.Type, Slot = cut.Slot, Id = cut.Id, Level = cut.Level };
 }

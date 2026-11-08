@@ -1,5 +1,5 @@
 using Fineage.Accounts;
-using Fineage.Net.Contract;
+using Fineage.Protocol;
 
 namespace Fineage.Zone.World;
 
@@ -12,7 +12,7 @@ namespace Fineage.Zone.World;
 public sealed partial class ZoneWorld
 {
     /// <summary>Outcome of a shortcut request: echo one slot as registered, or tell the client the slot is empty.</summary>
-    internal readonly record struct ShortcutReply(ShortCutNetMsg? Register, int? DeleteSlot, string? Error);
+    internal readonly record struct ShortcutReply(ShortCutMsg? Register, int? DeleteSlot, string? Error);
 
     void LoadShortcuts(ZoneEntity entity, CharacterRecord? stored)
     {
@@ -51,22 +51,25 @@ public sealed partial class ZoneWorld
     void SaveShortcuts(ZoneSession session, ZoneEntity entity) =>
         _persist.ReplaceShortcuts(session.Account, session.ObjectId, entity.Shortcuts.Values.ToList());
 
-    static ShortCutNetMsg ToNet(StoredShortcut s) =>
+    static ShortCutMsg ToProtocol(StoredShortcut s) =>
         new() { Type = s.Type, Slot = s.WorldSlot, Id = s.Id, Level = s.Level };
 
     /// <summary>ShortCutInit rows for the live player (world-slot order).</summary>
-    internal ShortCutInitNetMsg NetShortcutInit(ZoneSession session)
+    internal ShortCutInitMsg BuildShortcutInit(ZoneSession session)
     {
         lock (_gate)
         {
             if (!_byId.TryGetValue(session.ObjectId, out var e) || e.Kind != ZoneEntityKind.Player)
-                return new ShortCutInitNetMsg();
-            return new ShortCutInitNetMsg
+                return new ShortCutInitMsg();
+            return new ShortCutInitMsg
             {
-                Shortcuts = e.Shortcuts.Values.OrderBy(s => s.WorldSlot).Select(ToNet).ToArray()
+                Shortcuts = e.Shortcuts.Values.OrderBy(s => s.WorldSlot).Select(ToProtocol).ToArray()
             };
         }
     }
+
+    /// <summary>Legacy name used by enter / tests; same as <see cref="BuildShortcutInit"/>.</summary>
+    internal ShortCutInitMsg NetShortcutInit(ZoneSession session) => BuildShortcutInit(session);
 
     /// <summary>Mobius RequestShortCutReg. Rejected requests reply with the slot's current server state.</summary>
     internal ShortcutReply RegisterShortcut(ZoneSession session, int type, int worldSlot, int id, int level)
@@ -91,7 +94,7 @@ public sealed partial class ZoneWorld
             else if (type == StoredShortcut.TypeItem)
             {
                 if (e.Inventory?.Find(id) == null)
-                    error = Fineage.Protocol.InventoryProtocol.NotOwned;
+                    error = InventoryProtocol.NotOwned;
                 else
                     row = row with { Level = 0 };
             }
@@ -109,7 +112,7 @@ public sealed partial class ZoneWorld
 
             e.Shortcuts[worldSlot] = row;
             SaveShortcuts(session, e);
-            return new ShortcutReply(ToNet(row), null, null);
+            return new ShortcutReply(ToProtocol(row), null, null);
         }
     }
 
@@ -130,6 +133,6 @@ public sealed partial class ZoneWorld
 
     static ShortcutReply Current(ZoneEntity e, int worldSlot, string error) =>
         e.Shortcuts.TryGetValue(worldSlot, out var existing)
-            ? new ShortcutReply(ToNet(existing), null, error)
+            ? new ShortcutReply(ToProtocol(existing), null, error)
             : new ShortcutReply(null, worldSlot, error);
 }
