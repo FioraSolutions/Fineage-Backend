@@ -49,6 +49,14 @@ sealed class ZoneNpcSpoilPayload
     public bool CorpseAwaitingSweep { get; set; }
 }
 
+/// <summary>NPC merchant tax/town fields composed off <see cref="ZoneEntity"/> (#353).</summary>
+sealed class ZoneNpcMerchantPayload
+{
+    public int MerchantCastleId { get; set; }
+    public string? MerchantTown { get; set; }
+    public int MerchantBaseTaxPercent { get; set; }
+}
+
 /// <summary>NPC template / identity combat fields composed off <see cref="ZoneEntity"/> (#353).</summary>
 sealed class ZoneNpcTemplatePayload
 {
@@ -1169,12 +1177,32 @@ sealed class ZoneEntity
     ZoneNpcAggroPayload EnsureAggro() => Aggro ??= new ZoneNpcAggroPayload();
     /// <summary>NPC corpse: unix ms when DecayTaskManager removes it. 0 = alive / not scheduled.</summary>
     public long DecayAtMs { get; set; }
+    /// <summary>NPC merchant tax payload; null until first merchant access (#353 composition).</summary>
+    public ZoneNpcMerchantPayload? Merchant { get; set; }
+
     /// <summary>Mobius merchant price config castle. 0 when the NPC is not in a taxed town.</summary>
-    public int MerchantCastleId { get; set; }
+    public int MerchantCastleId
+    {
+        get => Merchant?.MerchantCastleId ?? 0;
+        set => EnsureMerchant().MerchantCastleId = value;
+    }
+
     /// <summary>Town name for TerritoryStatus (%territory%); null = castle name.</summary>
-    public string? MerchantTown { get; set; }
+    public string? MerchantTown
+    {
+        get => Merchant?.MerchantTown;
+        set => EnsureMerchant().MerchantTown = value;
+    }
+
     /// <summary>Town base tax percent from Mobius <c>MerchantPriceConfig.xml</c>. Castle tax is separate.</summary>
-    public int MerchantBaseTaxPercent { get; set; }
+    public int MerchantBaseTaxPercent
+    {
+        get => Merchant?.MerchantBaseTaxPercent ?? 0;
+        set => EnsureMerchant().MerchantBaseTaxPercent = value;
+    }
+
+    ZoneNpcMerchantPayload EnsureMerchant() => Merchant ??= new ZoneNpcMerchantPayload();
+
     /// <summary>Buylist or multisell this player opened. Null until a shop bypass.</summary>
     public ShopSession? Shop { get; set; }
 }
