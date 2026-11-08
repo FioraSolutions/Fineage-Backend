@@ -92,6 +92,26 @@ sealed class ZoneNpcTemplatePayload
     public int MaxSkillChance { get; set; } = 15;
 }
 
+/// <summary>Player race/clan/PvP identity fields composed off <see cref="ZoneEntity"/> (#353).</summary>
+sealed class ZonePlayerIdentityPayload
+{
+    public int Race { get; set; }
+    public int Sex { get; set; }
+    public bool Hero { get; set; }
+    public bool InClan { get; set; }
+    public bool ClanLeader { get; set; }
+    public int PledgeClass { get; set; }
+    public int CastleId { get; set; }
+    public int HideoutId { get; set; }
+    public bool PvpFlagged { get; set; }
+    public long PvpFlagUntilMs { get; set; }
+    public int PkKills { get; set; }
+    public int PvpKills { get; set; }
+    public int Karma { get; set; }
+    public int ClanId { get; set; }
+    public bool Newbie { get; set; } = true;
+}
+
 /// <summary>Player friend/block social fields composed off <see cref="ZoneEntity"/> (#353).</summary>
 sealed class ZonePlayerSocialPayload
 {
@@ -288,21 +308,91 @@ sealed class ZoneEntity
         init => EnsureNpcTemplate().RewardSp = value;
     }
     public QuestJournal Quests { get; set; } = new();
-    public int Race { get; init; }
-    public int Sex { get; init; }
-    public bool Hero { get; set; }
-    public bool InClan { get; set; }
-    public bool ClanLeader { get; set; }
-    public int PledgeClass { get; set; }
-    public int CastleId { get; set; }
-    public int HideoutId { get; set; }
-    public bool PvpFlagged { get; set; }
+    /// <summary>Player identity payload; null until first race/clan/PvP access (#353 composition).</summary>
+    public ZonePlayerIdentityPayload? Identity { get; set; }
+
+    public int Race
+    {
+        get => Identity?.Race ?? 0;
+        init => EnsureIdentity().Race = value;
+    }
+
+    public int Sex
+    {
+        get => Identity?.Sex ?? 0;
+        init => EnsureIdentity().Sex = value;
+    }
+
+    public bool Hero
+    {
+        get => Identity?.Hero ?? false;
+        set => EnsureIdentity().Hero = value;
+    }
+
+    public bool InClan
+    {
+        get => Identity?.InClan ?? false;
+        set => EnsureIdentity().InClan = value;
+    }
+
+    public bool ClanLeader
+    {
+        get => Identity?.ClanLeader ?? false;
+        set => EnsureIdentity().ClanLeader = value;
+    }
+
+    public int PledgeClass
+    {
+        get => Identity?.PledgeClass ?? 0;
+        set => EnsureIdentity().PledgeClass = value;
+    }
+
+    public int CastleId
+    {
+        get => Identity?.CastleId ?? 0;
+        set => EnsureIdentity().CastleId = value;
+    }
+
+    public int HideoutId
+    {
+        get => Identity?.HideoutId ?? 0;
+        set => EnsureIdentity().HideoutId = value;
+    }
+
+    public bool PvpFlagged
+    {
+        get => Identity?.PvpFlagged ?? false;
+        set => EnsureIdentity().PvpFlagged = value;
+    }
+
     /// <summary>Unix ms when the PvP flag expires (Mobius <c>_pvpFlagLasts</c>).</summary>
-    public long PvpFlagUntilMs { get; set; }
-    public int PkKills { get; set; }
-    public int PvpKills { get; set; }
+    public long PvpFlagUntilMs
+    {
+        get => Identity?.PvpFlagUntilMs ?? 0;
+        set => EnsureIdentity().PvpFlagUntilMs = value;
+    }
+
+    public int PkKills
+    {
+        get => Identity?.PkKills ?? 0;
+        set => EnsureIdentity().PkKills = value;
+    }
+
+    public int PvpKills
+    {
+        get => Identity?.PvpKills ?? 0;
+        set => EnsureIdentity().PvpKills = value;
+    }
+
     /// <summary>Mobius karma (Chaotic); death item drop uses karma rates when &gt; 0 and PK ≥ limit.</summary>
-    public int Karma { get; set; }
+    public int Karma
+    {
+        get => Identity?.Karma ?? 0;
+        set => EnsureIdentity().Karma = value;
+    }
+
+    ZonePlayerIdentityPayload EnsureIdentity() => Identity ??= new ZonePlayerIdentityPayload();
+
     /// <summary>Player penalty/shot payload; null until first status access (#353 composition).</summary>
     public ZonePlayerStatusPayload? Status { get; set; }
 
@@ -981,7 +1071,11 @@ sealed class ZoneEntity
 
     ZonePlayerSkillsPayload EnsureSkills() => Skills ??= new ZonePlayerSkillsPayload();
     public HashSet<int> Knownlist { get; } = [];
-    public int ClanId { get; set; }
+    public int ClanId
+    {
+        get => Identity?.ClanId ?? 0;
+        set => EnsureIdentity().ClanId = value;
+    }
     /// <summary>Attack stance end, unix milliseconds. Leave and dismiss are refused until this passes.</summary>
     public long CombatUntilUnixMs { get; set; }
     /// <summary>Catacomb or necropolis id while inside a Seven Signs gate. 0 is outside. Runtime only, same as Mobius <c>isIn7sDungeon</c>.</summary>
@@ -991,7 +1085,11 @@ sealed class ZoneEntity
     /// <summary>Private warehouse. Null on NPCs.</summary>
     public PrivateWarehouse? Warehouse { get; set; }
     /// <summary>First character created on the account. Mobius <c>Player.isNewbie</c> when the account had no characters yet.</summary>
-    public bool Newbie { get; set; } = true;
+    public bool Newbie
+    {
+        get => Identity?.Newbie ?? true;
+        set => EnsureIdentity().Newbie = value;
+    }
     /// <summary>Mobius <c>Creature.isCastingNow</c>: unix ms until the current cast ends. Movement is refused before this.</summary>
     public long CastingUntilMs { get; set; }
     /// <summary>Skill damage queued for Mobius <c>onMagicHitTimer</c> (applied at hitTime, not on key press).</summary>
