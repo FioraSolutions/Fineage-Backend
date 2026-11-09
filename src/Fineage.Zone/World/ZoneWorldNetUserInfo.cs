@@ -84,6 +84,8 @@ public sealed partial class ZoneWorld
             ArmorGradePenalty = e.ArmorGradePenalty,
             GradePenalty = Math.Max(e.WeaponGradePenalty, e.ArmorGradePenalty),
             ClanId = e.ClanId,
+            CurrentWeight = (int)Math.Clamp(CurrentLoadOf(e), 0, int.MaxValue),
+            MaxWeight = MaxLoadOf(e),
             Paperdoll = slots
         };
     }

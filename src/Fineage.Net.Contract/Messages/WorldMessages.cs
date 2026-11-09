@@ -1143,6 +1143,10 @@ namespace Fineage.Net.Contract
         public int WeaponGradePenalty { get; set; }
         public int ArmorGradePenalty { get; set; }
         public int ClanId { get; set; }
+        /// <summary>Mobius currentLoad — inventory weight for the status/inventory gauges.</summary>
+        public int CurrentWeight { get; set; }
+        /// <summary>Mobius getMaxLoad — CON-derived carry limit.</summary>
+        public int MaxWeight { get; set; }
         public PaperdollSlotNet[] Paperdoll { get; set; } = System.Array.Empty<PaperdollSlotNet>();
     }
 }

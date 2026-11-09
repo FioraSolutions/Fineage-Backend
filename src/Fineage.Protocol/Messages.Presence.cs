@@ -112,6 +112,10 @@ public sealed class UserInfoMsg
     public int Accuracy { get; set; }
     public int Evasion { get; set; }
     public int CritRate { get; set; }
+    /// <summary>Mobius currentLoad (inventory template weight × count).</summary>
+    public int CurrentWeight { get; set; }
+    /// <summary>Mobius getMaxLoad (CON bonus × 69000 × AltWeightLimit, then weightLimit passives).</summary>
+    public int MaxWeight { get; set; }
 }
 
 /// <summary>Opcode <see cref="MsgType.DeleteObject"/> (1007). Left knownlist.</summary>

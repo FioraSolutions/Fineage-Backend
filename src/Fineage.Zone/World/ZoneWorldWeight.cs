@@ -117,6 +117,9 @@ public sealed partial class ZoneWorld
         if (entity.Kind != ZoneEntityKind.Player || !ReferenceEquals(entity.Session, session))
             return;
         RefreshWeightPenalty(entity);
+        // Gauge numbers change even when the penalty level does not — keep CurrWeight/MaxWeight in sync.
+        if (session.InWorld)
+            SelfUserInfo(entity);
     }
 
     /// <summary>

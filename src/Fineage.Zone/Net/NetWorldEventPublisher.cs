@@ -234,6 +234,8 @@ sealed partial class NetWorldEventPublisher : IWorldEventPublisher
             WeaponGradePenalty = info.WeaponGradePenalty,
             ArmorGradePenalty = info.ArmorGradePenalty,
             ClanId = info.ClanId,
+            CurrentWeight = info.CurrentWeight,
+            MaxWeight = info.MaxWeight,
             Paperdoll = slots
         };
     }
