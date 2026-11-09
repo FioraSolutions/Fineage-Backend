@@ -190,6 +190,11 @@ sealed class ZonePlayerSkillsPayload
     /// <c>PassiveSkillLevels</c>. Empty until clan skill grant is wired.
     /// </summary>
     public Dictionary<int, int> ClanSkills { get; } = [];
+    /// <summary>
+    /// Ephemeral equip + complete armor-set skills (Mobius <c>Inventory.addSkill(..., false)</c>).
+    /// Rebuilt by <c>RefreshGearSkills</c>; never persisted.
+    /// </summary>
+    public Dictionary<int, int> GearSkills { get; } = [];
     public Dictionary<int, long> SkillReuseUntilMs { get; } = [];
     public Dictionary<int, long> ItemReuseUntilMs { get; } = [];
 }

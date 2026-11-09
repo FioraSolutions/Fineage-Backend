@@ -51,5 +51,6 @@
     <Content Include="..\..\data\map-regions.json" Link="data\map-regions.json" CopyToOutputDirectory="PreserveNewest" />
     <Content Include="..\..\data\henna.json" Link="data\henna.json" CopyToOutputDirectory="PreserveNewest" />
     <Content Include="..\..\data\armor-sets.json" Link="data\armor-sets.json" CopyToOutputDirectory="PreserveNewest" />
+    <Content Include="..\..\data\item-equip-skills.json" Link="data\item-equip-skills.json" CopyToOutputDirectory="PreserveNewest" />
   </ItemGroup>
 </Project>

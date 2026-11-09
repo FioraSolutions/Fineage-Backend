@@ -92,16 +92,17 @@ public sealed partial class ZoneWorld
     /// Named mod stages shared by combat / speed / regen / load getters:
     /// <list type="number">
     /// <item>Abnormals (buff/debuff XML funcs)</item>
-    /// <item>Known + clan passives (<see cref="PlayerPassiveSources"/>)</item>
-    /// <item>Complete armor-set skills</item>
+    /// <item>Known + clan + gear passives (<see cref="PlayerPassiveSources"/>)</item>
     /// <item>Virtual weight / grade / death penalties</item>
     /// </list>
+    /// Gear SA and complete armor-set skills live in <see cref="ZoneEntity.GearSkills"/>
+    /// (rebuilt by <see cref="RefreshGearSkills"/>).
     /// </summary>
     internal CombatStatMods PlayerStatMods(ZoneEntity player)
     {
+        RefreshGearSkills(player);
         var mods = FoldAbnormals(player);
-        mods = FoldLearnedAndClanPassives(player, mods);
-        mods = FoldArmorSets(player, mods);
+        mods = FoldLearnedClanAndGearPassives(player, mods);
         mods = FoldWeightPenalty(player, mods);
         mods = FoldGradePenalty(player, mods);
         return FoldDeathPenalty(player, mods);
@@ -115,7 +116,7 @@ public sealed partial class ZoneWorld
         return ReferenceEquals(mods, CombatStatMods.None) ? null : mods;
     }
 
-    CombatStatMods? FoldLearnedAndClanPassives(ZoneEntity player, CombatStatMods? mods)
+    CombatStatMods? FoldLearnedClanAndGearPassives(ZoneEntity player, CombatStatMods? mods)
     {
         var passiveLevels = PassiveSkillLevels(player);
         return passiveLevels.Count == 0
@@ -125,24 +126,31 @@ public sealed partial class ZoneWorld
 
     /// <summary>
     /// Skill id → level fed into <c>skill-passives.json</c> for combat mods.
-    /// KnownSkills (auto-tree + learned; EnchantSkill bumps level in place) plus ClanSkills
-    /// (Mobius <c>Clan.addSkillEffects</c> — grant path still TBD). Higher level wins.
+    /// KnownSkills + ClanSkills + GearSkills (equip SA / complete sets). Higher level wins.
     /// </summary>
     internal static Dictionary<int, int> PassiveSkillLevels(ZoneEntity player) =>
-        PlayerPassiveSources.Merge(player.KnownSkills, player.ClanSkills);
+        PlayerPassiveSources.Merge(player.KnownSkills, player.ClanSkills, player.GearSkills);
 
     /// <summary>
-    /// Mobius <c>ArmorSetListener</c>: when the worn chest matches a set and every required part is on,
-    /// fold the set's skills (and optional shield / +6 skills) through the passive catalog.
+    /// Rebuild ephemeral <see cref="ZoneEntity.GearSkills"/> from equipped item_skill rows and complete armor sets
+    /// (Mobius Inventory temporary skills). Safe to call often — clears and refills the map.
     /// </summary>
-    CombatStatMods FoldArmorSets(ZoneEntity player, CombatStatMods? mods)
+    internal void RefreshGearSkills(ZoneEntity player)
+    {
+        var gear = player.GearSkills;
+        gear.Clear();
+        _equipSkills.CollectEquipped(player.Inventory, gear);
+        CollectArmorSetSkills(player, gear);
+    }
+
+    void CollectArmorSetSkills(ZoneEntity player, Dictionary<int, int> target)
     {
         if (player.Inventory == null || _armorSets.Count == 0)
-            return mods ?? CombatStatMods.None;
+            return;
         var inv = player.Inventory;
         var chest = inv.GetEquipped(PaperdollSlot.Chest);
         if (chest == null)
-            return mods ?? CombatStatMods.None;
+            return;
         int? ItemId(PaperdollSlot slot) => inv.GetEquipped(slot)?.ItemId;
         int EnchantOf(int itemId)
         {
@@ -166,9 +174,7 @@ public sealed partial class ZoneWorld
             ItemId(PaperdollSlot.Feet),
             ItemId(PaperdollSlot.LHand),
             EnchantOf);
-        return skills.Count == 0
-            ? mods ?? CombatStatMods.None
-            : _passives.CollectPassives(skills, kinds => ConditionUsingItemType.Matches(player.Inventory, kinds), mods);
+        PlayerPassiveSources.MergeInto(target, skills);
     }
 
     /// <summary>

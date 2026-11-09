@@ -16,6 +16,7 @@ public sealed partial class ZoneWorld
             return false;
 
         RefreshGradePenalty(player);
+        RefreshGearSkills(player);
         RefreshRunSpeedAndFanout(player);
         var invUpdate = InventoryMessages.Modify(changed);
         SelfUserInfo(player);

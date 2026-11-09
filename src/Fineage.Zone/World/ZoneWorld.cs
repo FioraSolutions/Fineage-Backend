@@ -70,8 +70,10 @@ public sealed partial class ZoneWorld
     readonly SkillStatEffectCatalog _passives;
     /// <summary>Mobius hennaList dyes (data/henna.json). Deltas fold before the STR/DEX bonus table.</summary>
     readonly HennaCatalog _henna;
-    /// <summary>Mobius armorsets (data/armor-sets.json). Complete-set skills fold like passives.</summary>
+    /// <summary>Mobius armorsets (data/armor-sets.json). Complete-set skills fold via GearSkills.</summary>
     readonly ArmorSetCatalog _armorSets;
+    /// <summary>Mobius Inventory item_skill on Weapon/Armor (data/item-equip-skills.json).</summary>
+    readonly ItemEquipSkillCatalog _equipSkills;
     readonly BuyListCatalog _buyLists;
     readonly MultiSellCatalog _multisells;
     readonly ShopStock _shopStock;
@@ -147,7 +149,8 @@ public sealed partial class ZoneWorld
         Fineage.Game.Services.MapRegionCatalog? mapRegions = null,
         ZoneGameTime? gameTime = null,
         HennaCatalog? henna = null,
-        ArmorSetCatalog? armorSets = null)
+        ArmorSetCatalog? armorSets = null,
+        ItemEquipSkillCatalog? equipSkills = null)
     {
         _npcRegen = npcRegen ?? ZoneNpcSettings.NpcRegenEnabled;
         _skillCombat = skillCombat ?? SkillCombatCatalog.LoadDefault();
@@ -156,6 +159,7 @@ public sealed partial class ZoneWorld
         _passives = passives ?? SkillStatEffectCatalog.LoadPassives();
         _henna = henna ?? HennaCatalog.LoadDefault();
         _armorSets = armorSets ?? ArmorSetCatalog.LoadDefault();
+        _equipSkills = equipSkills ?? ItemEquipSkillCatalog.LoadDefault();
         _combatRandom = combatRandom ?? Random.Shared;
         _gameTime = gameTime ?? ZoneGameTime.FromLocalMidnight();
         _aoi = aoi ?? new SingleCellAoi();

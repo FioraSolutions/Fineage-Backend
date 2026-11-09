@@ -1,0 +1,3869 @@
+{
+  "reference": "L2J Mobius CT0 Interlude: stats/items <set name=\"item_skill\"> on Weapon/Armor. Granted while equipped (Inventory.addSkill false). Consumable UseItem chains stay in item-skills.json.",
+  "items": [
+    {
+      "itemId": 15,
+      "name": "Short Spear",
+      "skills": [
+        {
+          "id": 3599,
+          "level": 1
+        }
+      ]
+    },
+    {
+      "itemId": 16,
+      "name": "Great Spear",
+      "skills": [
+        {
+          "id": 3599,
+          "level": 1
+        }
+      ]
+    },
+    {
+      "itemId": 93,
+      "name": "Winged Spear",
+      "skills": [
+        {
+          "id": 3599,
+          "level": 1
+        }
+      ]
+    },
+    {
+      "itemId": 94,
+      "name": "Bec de Corbin",
+      "skills": [
+        {
+          "id": 3599,
+          "level": 1
+        }
+      ]
+    },
+    {
+      "itemId": 95,
+      "name": "Poleaxe",
+      "skills": [
+        {
+          "id": 3599,
+          "level": 1
+        }
+      ]
+    },
+    {
+      "itemId": 96,
+      "name": "Scythe",
+      "skills": [
+        {
+          "id": 3599,
+          "level": 1
+        }
+      ]
+    },
+    {
+      "itemId": 97,
+      "name": "Lance",
+      "skills": [
+        {
+          "id": 3599,
+          "level": 1
+        }
+      ]
+    },
+    {
+      "itemId": 98,
+      "name": "Halberd",
+      "skills": [
+        {
+          "id": 3599,
+          "level": 1
+        }
+      ]
+    },
+    {
+      "itemId": 291,
+      "name": "Trident",
+      "skills": [
+        {
+          "id": 3599,
+          "level": 1
+        }
+      ]
+    },
+    {
+      "itemId": 292,
+      "name": "Pike",
+      "skills": [
+        {
+          "id": 3599,
+          "level": 1
+        }
+      ]
+    },
+    {
+      "itemId": 293,
+      "name": "War Hammer",
+      "skills": [
+        {
+          "id": 3599,
+          "level": 1
+        }
+      ]
+    },
+    {
+      "itemId": 294,
+      "name": "War Pick",
+      "skills": [
+        {
+          "id": 3599,
+          "level": 1
+        }
+      ]
+    },
+    {
+      "itemId": 295,
+      "name": "Dwarven Trident",
+      "skills": [
+        {
+          "id": 3599,
+          "level": 1
+        }
+      ]
+    },
+    {
+      "itemId": 296,
+      "name": "Dwarven Pike",
+      "skills": [
+        {
+          "id": 3599,
+          "level": 1
+        }
+      ]
+    },
+    {
+      "itemId": 297,
+      "name": "Glaive",
+      "skills": [
+        {
+          "id": 3599,
+          "level": 1
+        }
+      ]
+    },
+    {
+      "itemId": 298,
+      "name": "Orcish Glaive",
+      "skills": [
+        {
+          "id": 3599,
+          "level": 1
+        }
+      ]
+    },
+    {
+      "itemId": 299,
+      "name": "Orcish Poleaxe",
+      "skills": [
+        {
+          "id": 3599,
+          "level": 1
+        }
+      ]
+    },
+    {
+      "itemId": 300,
+      "name": "Great Axe",
+      "skills": [
+        {
+          "id": 3599,
+          "level": 1
+        }
+      ]
+    },
+    {
+      "itemId": 301,
+      "name": "Scorpion",
+      "skills": [
+        {
+          "id": 3599,
+          "level": 1
+        }
+      ]
+    },
+    {
+      "itemId": 302,
+      "name": "Body Slasher",
+      "skills": [
+        {
+          "id": 3599,
+          "level": 1
+        }
+      ]
+    },
+    {
+      "itemId": 303,
+      "name": "Widow Maker",
+      "skills": [
+        {
+          "id": 3599,
+          "level": 1
+        }
+      ]
+    },
+    {
+      "itemId": 304,
+      "name": "Orcish Halberd",
+      "skills": [
+        {
+          "id": 3599,
+          "level": 1
+        }
+      ]
+    },
+    {
+      "itemId": 305,
+      "name": "Tallum Glaive",
+      "skills": [
+        {
+          "id": 3599,
+          "level": 1
+        }
+      ]
+    },
+    {
+      "itemId": 306,
+      "name": "Dragon Claw Axe",
+      "skills": [
+        {
+          "id": 3599,
+          "level": 1
+        }
+      ]
+    },
+    {
+      "itemId": 307,
+      "name": "Aurakyria Lance",
+      "skills": [
+        {
+          "id": 3599,
+          "level": 1
+        }
+      ]
+    },
+    {
+      "itemId": 1302,
+      "name": "Bec de Corbin",
+      "skills": [
+        {
+          "id": 3599,
+          "level": 1
+        }
+      ]
+    },
+    {
+      "itemId": 1303,
+      "name": "Lance",
+      "skills": [
+        {
+          "id": 3599,
+          "level": 1
+        }
+      ]
+    },
+    {
+      "itemId": 1376,
+      "name": "Guard Spear",
+      "skills": [
+        {
+          "id": 3599,
+          "level": 1
+        }
+      ]
+    },
+    {
+      "itemId": 1472,
+      "name": "Dreadbane",
+      "skills": [
+        {
+          "id": 3599,
+          "level": 1
+        }
+      ]
+    },
+    {
+      "itemId": 3026,
+      "name": "Talins Spear",
+      "skills": [
+        {
+          "id": 3599,
+          "level": 1
+        }
+      ]
+    },
+    {
+      "itemId": 3937,
+      "name": "Giant Bar",
+      "skills": [
+        {
+          "id": 3599,
+          "level": 1
+        }
+      ]
+    },
+    {
+      "itemId": 3938,
+      "name": "Giant Rod",
+      "skills": [
+        {
+          "id": 3599,
+          "level": 1
+        }
+      ]
+    },
+    {
+      "itemId": 3939,
+      "name": "Lady's Fan",
+      "skills": [
+        {
+          "id": 3599,
+          "level": 1
+        }
+      ]
+    },
+    {
+      "itemId": 4681,
+      "name": "Stormbringer - Critical Anger",
+      "skills": [
+        {
+          "id": 3026,
+          "level": 1
+        }
+      ]
+    },
+    {
+      "itemId": 4682,
+      "name": "Stormbringer - Focus",
+      "skills": [
+        {
+          "id": 3010,
+          "level": 1
+        }
+      ]
+    },
+    {
+      "itemId": 4683,
+      "name": "Stormbringer - Light",
+      "skills": [
+        {
+          "id": 3498,
+          "level": 1
+        }
+      ]
+    },
+    {
+      "itemId": 4684,
+      "name": "Shamshir - Guidance",
+      "skills": [
+        {
+          "id": 3007,
+          "level": 2
+        }
+      ]
+    },
+    {
+      "itemId": 4685,
+      "name": "Shamshir - Back Blow",
+      "skills": [
+        {
+          "id": 3018,
+          "level": 2
+        }
+      ]
+    },
+    {
+      "itemId": 4686,
+      "name": "Shamshir - Rsk. Evasion",
+      "skills": [
+        {
+          "id": 3028,
+          "level": 2
+        }
+      ]
+    },
+    {
+      "itemId": 4687,
+      "name": "Katana - Focus",
+      "skills": [
+        {
+          "id": 3010,
+          "level": 2
+        }
+      ]
+    },
+    {
+      "itemId": 4688,
+      "name": "Katana - Critical Damage",
+      "skills": [
+        {
+          "id": 3023,
+          "level": 2
+        }
+      ]
+    },
+    {
+      "itemId": 4689,
+      "name": "Katana - Haste",
+      "skills": [
+        {
+          "id": 3036,
+          "level": 2
+        }
+      ]
+    },
+    {
+      "itemId": 4690,
+      "name": "Spirit Sword - Critical Damage",
+      "skills": [
+        {
+          "id": 3023,
+          "level": 2
+        }
+      ]
+    },
+    {
+      "itemId": 4692,
+      "name": "Spirit Sword - Haste",
+      "skills": [
+        {
+          "id": 3036,
+          "level": 2
+        }
+      ]
+    },
+    {
+      "itemId": 4693,
+      "name": "Raid Sword - Focus",
+      "skills": [
+        {
+          "id": 3010,
+          "level": 2
+        }
+      ]
+    },
+    {
+      "itemId": 4696,
+      "name": "Caliburs - Guidance",
+      "skills": [
+        {
+          "id": 3007,
+          "level": 3
+        }
+      ]
+    },
+    {
+      "itemId": 4697,
+      "name": "Caliburs - Focus",
+      "skills": [
+        {
+          "id": 3010,
+          "level": 3
+        }
+      ]
+    },
+    {
+      "itemId": 4698,
+      "name": "Caliburs - Critical Damage",
+      "skills": [
+        {
+          "id": 3023,
+          "level": 3
+        }
+      ]
+    },
+    {
+      "itemId": 4699,
+      "name": "Sword of Delusion - Focus",
+      "skills": [
+        {
+          "id": 3010,
+          "level": 3
+        }
+      ]
+    },
+    {
+      "itemId": 4700,
+      "name": "Sword of Delusion - Health",
+      "skills": [
+        {
+          "id": 3013,
+          "level": 1
+        }
+      ]
+    },
+    {
+      "itemId": 4701,
+      "name": "Sword of Delusion - Rsk. Haste",
+      "skills": [
+        {
+          "id": 3032,
+          "level": 3
+        }
+      ]
+    },
+    {
+      "itemId": 4702,
+      "name": "Tsurugi - Focus",
+      "skills": [
+        {
+          "id": 3010,
+          "level": 3
+        }
+      ]
+    },
+    {
+      "itemId": 4703,
+      "name": "Tsurugi - Critical Damage",
+      "skills": [
+        {
+          "id": 3023,
+          "level": 3
+        }
+      ]
+    },
+    {
+      "itemId": 4704,
+      "name": "Tsurugi - Haste",
+      "skills": [
+        {
+          "id": 3036,
+          "level": 3
+        }
+      ]
+    },
+    {
+      "itemId": 4705,
+      "name": "Sword of Nightmare - Health",
+      "skills": [
+        {
+          "id": 3013,
+          "level": 1
+        }
+      ]
+    },
+    {
+      "itemId": 4706,
+      "name": "Sword of Nightmare - Focus",
+      "skills": [
+        {
+          "id": 3010,
+          "level": 3
+        }
+      ]
+    },
+    {
+      "itemId": 4707,
+      "name": "Sword of Nightmare - Light",
+      "skills": [
+        {
+          "id": 3498,
+          "level": 1
+        }
+      ]
+    },
+    {
+      "itemId": 4708,
+      "name": "Samurai Longsword - Focus",
+      "skills": [
+        {
+          "id": 3010,
+          "level": 4
+        }
+      ]
+    },
+    {
+      "itemId": 4709,
+      "name": "Samurai Longsword - Critical Damage",
+      "skills": [
+        {
+          "id": 3023,
+          "level": 4
+        }
+      ]
+    },
+    {
+      "itemId": 4710,
+      "name": "Samurai Longsword - Haste",
+      "skills": [
+        {
+          "id": 3036,
+          "level": 4
+        }
+      ]
+    },
+    {
+      "itemId": 4711,
+      "name": "Flamberge - Critical Damage",
+      "skills": [
+        {
+          "id": 3023,
+          "level": 1
+        }
+      ]
+    },
+    {
+      "itemId": 4712,
+      "name": "Flamberge - Focus",
+      "skills": [
+        {
+          "id": 3010,
+          "level": 1
+        }
+      ]
+    },
+    {
+      "itemId": 4713,
+      "name": "Flamberge - Light",
+      "skills": [
+        {
+          "id": 3498,
+          "level": 1
+        }
+      ]
+    },
+    {
+      "itemId": 4714,
+      "name": "Keshanberk - Guidance",
+      "skills": [
+        {
+          "id": 3007,
+          "level": 5
+        }
+      ]
+    },
+    {
+      "itemId": 4715,
+      "name": "Keshanberk - Focus",
+      "skills": [
+        {
+          "id": 3010,
+          "level": 5
+        }
+      ]
+    },
+    {
+      "itemId": 4716,
+      "name": "Keshanberk - Back Blow",
+      "skills": [
+        {
+          "id": 3018,
+          "level": 5
+        }
+      ]
+    },
+    {
+      "itemId": 4717,
+      "name": "Sword of Damascus - Focus",
+      "skills": [
+        {
+          "id": 3010,
+          "level": 6
+        }
+      ]
+    },
+    {
+      "itemId": 4718,
+      "name": "Sword of Damascus - Critical Damage",
+      "skills": [
+        {
+          "id": 3023,
+          "level": 6
+        }
+      ]
+    },
+    {
+      "itemId": 4719,
+      "name": "Sword of Damascus - Haste",
+      "skills": [
+        {
+          "id": 3036,
+          "level": 6
+        }
+      ]
+    },
+    {
+      "itemId": 4723,
+      "name": "Great Sword - Health",
+      "skills": [
+        {
+          "id": 3013,
+          "level": 1
+        }
+      ]
+    },
+    {
+      "itemId": 4724,
+      "name": "Great Sword - Critical Damage",
+      "skills": [
+        {
+          "id": 3023,
+          "level": 5
+        }
+      ]
+    },
+    {
+      "itemId": 4725,
+      "name": "Great Sword - Focus",
+      "skills": [
+        {
+          "id": 3010,
+          "level": 5
+        }
+      ]
+    },
+    {
+      "itemId": 4734,
+      "name": "Silver Axe - Haste",
+      "skills": [
+        {
+          "id": 3036,
+          "level": 1
+        }
+      ]
+    },
+    {
+      "itemId": 4735,
+      "name": "Skull Graver - Anger",
+      "skills": [
+        {
+          "id": 3012,
+          "level": 1
+        }
+      ]
+    },
+    {
+      "itemId": 4736,
+      "name": "Skull Graver - Health",
+      "skills": [
+        {
+          "id": 3013,
+          "level": 1
+        }
+      ]
+    },
+    {
+      "itemId": 4737,
+      "name": "Skull Graver - Rsk. Focus",
+      "skills": [
+        {
+          "id": 3027,
+          "level": 1
+        }
+      ]
+    },
+    {
+      "itemId": 4738,
+      "name": "Dwarven War Hammer - Anger",
+      "skills": [
+        {
+          "id": 3012,
+          "level": 2
+        }
+      ]
+    },
+    {
+      "itemId": 4739,
+      "name": "Dwarven War Hammer - Health",
+      "skills": [
+        {
+          "id": 3013,
+          "level": 1
+        }
+      ]
+    },
+    {
+      "itemId": 4740,
+      "name": "Dwarven War Hammer - Haste",
+      "skills": [
+        {
+          "id": 3036,
+          "level": 2
+        }
+      ]
+    },
+    {
+      "itemId": 4741,
+      "name": "War Axe - Anger",
+      "skills": [
+        {
+          "id": 3012,
+          "level": 3
+        }
+      ]
+    },
+    {
+      "itemId": 4742,
+      "name": "War Axe - Health",
+      "skills": [
+        {
+          "id": 3013,
+          "level": 1
+        }
+      ]
+    },
+    {
+      "itemId": 4743,
+      "name": "War Axe - Haste",
+      "skills": [
+        {
+          "id": 3036,
+          "level": 3
+        }
+      ]
+    },
+    {
+      "itemId": 4744,
+      "name": "Yaksa Mace - Anger",
+      "skills": [
+        {
+          "id": 3012,
+          "level": 4
+        }
+      ]
+    },
+    {
+      "itemId": 4745,
+      "name": "Yaksa Mace - Health",
+      "skills": [
+        {
+          "id": 3013,
+          "level": 1
+        }
+      ]
+    },
+    {
+      "itemId": 4746,
+      "name": "Yaksa Mace - Rsk. Focus",
+      "skills": [
+        {
+          "id": 3027,
+          "level": 4
+        }
+      ]
+    },
+    {
+      "itemId": 4747,
+      "name": "Heavy War Axe - Anger",
+      "skills": [
+        {
+          "id": 3012,
+          "level": 5
+        }
+      ]
+    },
+    {
+      "itemId": 4748,
+      "name": "Heavy War Axe - Health",
+      "skills": [
+        {
+          "id": 3013,
+          "level": 1
+        }
+      ]
+    },
+    {
+      "itemId": 4749,
+      "name": "Heavy War Axe - Rsk. Focus",
+      "skills": [
+        {
+          "id": 3027,
+          "level": 5
+        }
+      ]
+    },
+    {
+      "itemId": 4750,
+      "name": "Deadman's Glory - Anger",
+      "skills": [
+        {
+          "id": 3012,
+          "level": 6
+        }
+      ]
+    },
+    {
+      "itemId": 4751,
+      "name": "Deadman's Glory - Health",
+      "skills": [
+        {
+          "id": 3013,
+          "level": 1
+        }
+      ]
+    },
+    {
+      "itemId": 4752,
+      "name": "Deadman's Glory - Haste",
+      "skills": [
+        {
+          "id": 3036,
+          "level": 6
+        }
+      ]
+    },
+    {
+      "itemId": 4753,
+      "name": "Art of Battle Axe - Health",
+      "skills": [
+        {
+          "id": 3013,
+          "level": 1
+        }
+      ]
+    },
+    {
+      "itemId": 4754,
+      "name": "Art of Battle Axe - Rsk. Focus",
+      "skills": [
+        {
+          "id": 3027,
+          "level": 6
+        }
+      ]
+    },
+    {
+      "itemId": 4755,
+      "name": "Art of Battle Axe - Haste",
+      "skills": [
+        {
+          "id": 3036,
+          "level": 6
+        }
+      ]
+    },
+    {
+      "itemId": 4761,
+      "name": "Cursed Dagger - Rsk. Haste",
+      "skills": [
+        {
+          "id": 3033,
+          "level": 1
+        }
+      ]
+    },
+    {
+      "itemId": 4762,
+      "name": "Dark Elven Dagger - Focus",
+      "skills": [
+        {
+          "id": 3011,
+          "level": 1
+        }
+      ]
+    },
+    {
+      "itemId": 4763,
+      "name": "Dark Elven Dagger - Back Blow",
+      "skills": [
+        {
+          "id": 3019,
+          "level": 1
+        }
+      ]
+    },
+    {
+      "itemId": 4764,
+      "name": "Dark Elven Dagger - Mortal Strike",
+      "skills": [
+        {
+          "id": 3035,
+          "level": 1
+        }
+      ]
+    },
+    {
+      "itemId": 4767,
+      "name": "Stiletto - Mortal Strike",
+      "skills": [
+        {
+          "id": 3035,
+          "level": 2
+        }
+      ]
+    },
+    {
+      "itemId": 4768,
+      "name": "Grace Dagger - Evasion",
+      "skills": [
+        {
+          "id": 3009,
+          "level": 3
+        }
+      ]
+    },
+    {
+      "itemId": 4769,
+      "name": "Grace Dagger - Focus",
+      "skills": [
+        {
+          "id": 3011,
+          "level": 3
+        }
+      ]
+    },
+    {
+      "itemId": 4770,
+      "name": "Grace Dagger - Back Blow",
+      "skills": [
+        {
+          "id": 3019,
+          "level": 3
+        }
+      ]
+    },
+    {
+      "itemId": 4771,
+      "name": "Dark Screamer - Evasion",
+      "skills": [
+        {
+          "id": 3009,
+          "level": 3
+        }
+      ]
+    },
+    {
+      "itemId": 4772,
+      "name": "Dark Screamer - Focus",
+      "skills": [
+        {
+          "id": 3011,
+          "level": 3
+        }
+      ]
+    },
+    {
+      "itemId": 4776,
+      "name": "Crystal Dagger - Mortal Strike",
+      "skills": [
+        {
+          "id": 3035,
+          "level": 4
+        }
+      ]
+    },
+    {
+      "itemId": 4777,
+      "name": "Kris - Evasion",
+      "skills": [
+        {
+          "id": 3009,
+          "level": 5
+        }
+      ]
+    },
+    {
+      "itemId": 4778,
+      "name": "Kris - Focus",
+      "skills": [
+        {
+          "id": 3011,
+          "level": 5
+        }
+      ]
+    },
+    {
+      "itemId": 4779,
+      "name": "Kris - Back Blow",
+      "skills": [
+        {
+          "id": 3019,
+          "level": 5
+        }
+      ]
+    },
+    {
+      "itemId": 4782,
+      "name": "Demon's Dagger - Mortal Strike",
+      "skills": [
+        {
+          "id": 3035,
+          "level": 6
+        }
+      ]
+    },
+    {
+      "itemId": 4786,
+      "name": "Hell Knife - Focus",
+      "skills": [
+        {
+          "id": 3011,
+          "level": 5
+        }
+      ]
+    },
+    {
+      "itemId": 4787,
+      "name": "Hell Knife - Back Blow",
+      "skills": [
+        {
+          "id": 3019,
+          "level": 5
+        }
+      ]
+    },
+    {
+      "itemId": 4788,
+      "name": "Hell Knife - Mortal Strike",
+      "skills": [
+        {
+          "id": 3035,
+          "level": 5
+        }
+      ]
+    },
+    {
+      "itemId": 4791,
+      "name": "Chakram - Rsk. Haste",
+      "skills": [
+        {
+          "id": 3034,
+          "level": 1
+        }
+      ]
+    },
+    {
+      "itemId": 4792,
+      "name": "Fisted Blade - Rsk. Evasion",
+      "skills": [
+        {
+          "id": 3030,
+          "level": 3
+        }
+      ]
+    },
+    {
+      "itemId": 4793,
+      "name": "Fisted Blade - Rsk. Haste",
+      "skills": [
+        {
+          "id": 3034,
+          "level": 3
+        }
+      ]
+    },
+    {
+      "itemId": 4794,
+      "name": "Fisted Blade - Haste",
+      "skills": [
+        {
+          "id": 3037,
+          "level": 3
+        }
+      ]
+    },
+    {
+      "itemId": 4797,
+      "name": "Great Pata - Rsk. Haste",
+      "skills": [
+        {
+          "id": 3034,
+          "level": 4
+        }
+      ]
+    },
+    {
+      "itemId": 4798,
+      "name": "Knuckle Duster - Rsk. Evasion",
+      "skills": [
+        {
+          "id": 3030,
+          "level": 2
+        }
+      ]
+    },
+    {
+      "itemId": 4799,
+      "name": "Knuckle Duster - Rsk. Haste",
+      "skills": [
+        {
+          "id": 3034,
+          "level": 2
+        }
+      ]
+    },
+    {
+      "itemId": 4800,
+      "name": "Knuckle Duster - Haste",
+      "skills": [
+        {
+          "id": 3037,
+          "level": 2
+        }
+      ]
+    },
+    {
+      "itemId": 4802,
+      "name": "Arthro Nail - Rsk. Evasion",
+      "skills": [
+        {
+          "id": 3030,
+          "level": 5
+        }
+      ]
+    },
+    {
+      "itemId": 4803,
+      "name": "Arthro Nail - Rsk. Haste",
+      "skills": [
+        {
+          "id": 3034,
+          "level": 5
+        }
+      ]
+    },
+    {
+      "itemId": 4806,
+      "name": "Bellion Cestus - Rsk. Haste",
+      "skills": [
+        {
+          "id": 3034,
+          "level": 6
+        }
+      ]
+    },
+    {
+      "itemId": 4810,
+      "name": "Crystallized Ice Bow - Guidance",
+      "skills": [
+        {
+          "id": 3008,
+          "level": 1
+        }
+      ]
+    },
+    {
+      "itemId": 4811,
+      "name": "Crystallized Ice Bow - Evasion",
+      "skills": [
+        {
+          "id": 3009,
+          "level": 1
+        }
+      ]
+    },
+    {
+      "itemId": 4813,
+      "name": "Elemental Bow - Guidance",
+      "skills": [
+        {
+          "id": 3008,
+          "level": 2
+        }
+      ]
+    },
+    {
+      "itemId": 4816,
+      "name": "Noble Elven Bow - Evasion",
+      "skills": [
+        {
+          "id": 3009,
+          "level": 2
+        }
+      ]
+    },
+    {
+      "itemId": 4819,
+      "name": "Akat Long Bow - Guidance",
+      "skills": [
+        {
+          "id": 3008,
+          "level": 3
+        }
+      ]
+    },
+    {
+      "itemId": 4820,
+      "name": "Akat Long Bow - Evasion",
+      "skills": [
+        {
+          "id": 3009,
+          "level": 3
+        }
+      ]
+    },
+    {
+      "itemId": 4822,
+      "name": "Eminence Bow - Guidance",
+      "skills": [
+        {
+          "id": 3008,
+          "level": 4
+        }
+      ]
+    },
+    {
+      "itemId": 4825,
+      "name": "Dark Elven Long Bow - Evasion",
+      "skills": [
+        {
+          "id": 3009,
+          "level": 5
+        }
+      ]
+    },
+    {
+      "itemId": 4828,
+      "name": "Bow of Peril - Guidance",
+      "skills": [
+        {
+          "id": 3008,
+          "level": 6
+        }
+      ]
+    },
+    {
+      "itemId": 4834,
+      "name": "Scythe - Anger",
+      "skills": [
+        {
+          "id": 3600,
+          "level": 1
+        }
+      ]
+    },
+    {
+      "itemId": 4835,
+      "name": "Scythe - Critical Stun",
+      "skills": [
+        {
+          "id": 3599,
+          "level": 1
+        }
+      ]
+    },
+    {
+      "itemId": 4836,
+      "name": "Scythe - Light",
+      "skills": [
+        {
+          "id": 3599,
+          "level": 1
+        },
+        {
+          "id": 3498,
+          "level": 1
+        }
+      ]
+    },
+    {
+      "itemId": 4837,
+      "name": "Orcish Glaive - Anger",
+      "skills": [
+        {
+          "id": 3600,
+          "level": 1
+        }
+      ]
+    },
+    {
+      "itemId": 4838,
+      "name": "Orcish Glaive - Critical Stun",
+      "skills": [
+        {
+          "id": 3599,
+          "level": 1
+        }
+      ]
+    },
+    {
+      "itemId": 4839,
+      "name": "Orcish Glaive - Towering Blow",
+      "skills": [
+        {
+          "id": 3599,
+          "level": 1
+        }
+      ]
+    },
+    {
+      "itemId": 4840,
+      "name": "Body Slasher - Critical Stun",
+      "skills": [
+        {
+          "id": 3599,
+          "level": 1
+        }
+      ]
+    },
+    {
+      "itemId": 4841,
+      "name": "Body Slasher - Towering Blow",
+      "skills": [
+        {
+          "id": 3599,
+          "level": 1
+        }
+      ]
+    },
+    {
+      "itemId": 4842,
+      "name": "Body Slasher - Wide Blow",
+      "skills": [
+        {
+          "id": 3599,
+          "level": 1
+        }
+      ]
+    },
+    {
+      "itemId": 4843,
+      "name": "Bec de Corbin - Critical Stun",
+      "skills": [
+        {
+          "id": 3599,
+          "level": 1
+        }
+      ]
+    },
+    {
+      "itemId": 4844,
+      "name": "Bec de Corbin - Towering Blow",
+      "skills": [
+        {
+          "id": 3599,
+          "level": 1
+        }
+      ]
+    },
+    {
+      "itemId": 4845,
+      "name": "Bec de Corbin - Light",
+      "skills": [
+        {
+          "id": 3599,
+          "level": 1
+        },
+        {
+          "id": 3498,
+          "level": 1
+        }
+      ]
+    },
+    {
+      "itemId": 4846,
+      "name": "Scorpion - Anger",
+      "skills": [
+        {
+          "id": 3600,
+          "level": 3
+        }
+      ]
+    },
+    {
+      "itemId": 4847,
+      "name": "Scorpion - Critical Stun",
+      "skills": [
+        {
+          "id": 3599,
+          "level": 1
+        }
+      ]
+    },
+    {
+      "itemId": 4848,
+      "name": "Scorpion - Towering Blow",
+      "skills": [
+        {
+          "id": 3599,
+          "level": 1
+        }
+      ]
+    },
+    {
+      "itemId": 4849,
+      "name": "Widow Maker - Critical Stun",
+      "skills": [
+        {
+          "id": 3599,
+          "level": 1
+        }
+      ]
+    },
+    {
+      "itemId": 4850,
+      "name": "Widow Maker - Towering Blow",
+      "skills": [
+        {
+          "id": 3599,
+          "level": 1
+        }
+      ]
+    },
+    {
+      "itemId": 4851,
+      "name": "Widow Maker - Wide Blow",
+      "skills": [
+        {
+          "id": 3599,
+          "level": 1
+        }
+      ]
+    },
+    {
+      "itemId": 4852,
+      "name": "Orcish Poleaxe - Critical Stun",
+      "skills": [
+        {
+          "id": 3599,
+          "level": 1
+        }
+      ]
+    },
+    {
+      "itemId": 4853,
+      "name": "Orcish Poleaxe - Towering Blow",
+      "skills": [
+        {
+          "id": 3599,
+          "level": 1
+        }
+      ]
+    },
+    {
+      "itemId": 4854,
+      "name": "Orcish Poleaxe - Wide Blow",
+      "skills": [
+        {
+          "id": 3599,
+          "level": 1
+        }
+      ]
+    },
+    {
+      "itemId": 4855,
+      "name": "Great Axe - Anger",
+      "skills": [
+        {
+          "id": 3600,
+          "level": 5
+        }
+      ]
+    },
+    {
+      "itemId": 4856,
+      "name": "Great Axe - Critical Stun",
+      "skills": [
+        {
+          "id": 3599,
+          "level": 1
+        }
+      ]
+    },
+    {
+      "itemId": 4857,
+      "name": "Great Axe - Light",
+      "skills": [
+        {
+          "id": 3599,
+          "level": 1
+        },
+        {
+          "id": 3498,
+          "level": 1
+        }
+      ]
+    },
+    {
+      "itemId": 4858,
+      "name": "Lance - Anger",
+      "skills": [
+        {
+          "id": 3600,
+          "level": 6
+        }
+      ]
+    },
+    {
+      "itemId": 4859,
+      "name": "Lance - Critical Stun",
+      "skills": [
+        {
+          "id": 3599,
+          "level": 1
+        }
+      ]
+    },
+    {
+      "itemId": 4860,
+      "name": "Lance - Towering Blow",
+      "skills": [
+        {
+          "id": 3599,
+          "level": 1
+        }
+      ]
+    },
+    {
+      "itemId": 4861,
+      "name": "Halberd - Critical Stun",
+      "skills": [
+        {
+          "id": 3599,
+          "level": 1
+        }
+      ]
+    },
+    {
+      "itemId": 4862,
+      "name": "Halberd - Towering Blow",
+      "skills": [
+        {
+          "id": 3599,
+          "level": 1
+        }
+      ]
+    },
+    {
+      "itemId": 4863,
+      "name": "Halberd - Wide Blow",
+      "skills": [
+        {
+          "id": 3599,
+          "level": 1
+        }
+      ]
+    },
+    {
+      "itemId": 4891,
+      "name": "Ghoul's Staff - Rsk. Evasion",
+      "skills": [
+        {
+          "id": 3031,
+          "level": 4
+        }
+      ]
+    },
+    {
+      "itemId": 4892,
+      "name": "Ghoul's Staff - Mana Up",
+      "skills": [
+        {
+          "id": 3014,
+          "level": 1
+        }
+      ]
+    },
+    {
+      "itemId": 5596,
+      "name": "Dasparion's Staff - Mana Up",
+      "skills": [
+        {
+          "id": 3014,
+          "level": 2
+        }
+      ]
+    },
+    {
+      "itemId": 5597,
+      "name": "Dasparion's Staff - Conversion",
+      "skills": [
+        {
+          "id": 3048,
+          "level": 2
+        }
+      ]
+    },
+    {
+      "itemId": 5598,
+      "name": "Dasparion's Staff - Acumen",
+      "skills": [
+        {
+          "id": 3047,
+          "level": 2
+        }
+      ]
+    },
+    {
+      "itemId": 5599,
+      "name": "Meteor Shower - Focus",
+      "skills": [
+        {
+          "id": 3050,
+          "level": 1
+        }
+      ]
+    },
+    {
+      "itemId": 5600,
+      "name": "Meteor Shower - Critical Bleed",
+      "skills": [
+        {
+          "id": 3552,
+          "level": 1
+        }
+      ]
+    },
+    {
+      "itemId": 5601,
+      "name": "Meteor Shower - Rsk. Haste",
+      "skills": [
+        {
+          "id": 3056,
+          "level": 2
+        }
+      ]
+    },
+    {
+      "itemId": 5602,
+      "name": "Elysian - Health",
+      "skills": [
+        {
+          "id": 3013,
+          "level": 3
+        }
+      ]
+    },
+    {
+      "itemId": 5603,
+      "name": "Elysian - Anger",
+      "skills": [
+        {
+          "id": 3057,
+          "level": 2
+        }
+      ]
+    },
+    {
+      "itemId": 5604,
+      "name": "Elysian - Critical Drain",
+      "skills": [
+        {
+          "id": 3552,
+          "level": 1
+        }
+      ]
+    },
+    {
+      "itemId": 5605,
+      "name": "Branch of the Mother Tree - Conversion",
+      "skills": [
+        {
+          "id": 3048,
+          "level": 2
+        }
+      ]
+    },
+    {
+      "itemId": 5606,
+      "name": "Branch of the Mother Tree - Magic Damage",
+      "skills": [
+        {
+          "id": 3552,
+          "level": 1
+        }
+      ]
+    },
+    {
+      "itemId": 5607,
+      "name": "Branch of the Mother Tree - Acumen",
+      "skills": [
+        {
+          "id": 3047,
+          "level": 2
+        }
+      ]
+    },
+    {
+      "itemId": 5608,
+      "name": "Carnage Bow - Light",
+      "skills": [
+        {
+          "id": 3552,
+          "level": 1
+        },
+        {
+          "id": 3498,
+          "level": 1
+        }
+      ]
+    },
+    {
+      "itemId": 5609,
+      "name": "Carnage Bow - Critical Bleed",
+      "skills": [
+        {
+          "id": 3552,
+          "level": 1
+        }
+      ]
+    },
+    {
+      "itemId": 5610,
+      "name": "Carnage Bow - Mana Up",
+      "skills": [
+        {
+          "id": 3014,
+          "level": 2
+        }
+      ]
+    },
+    {
+      "itemId": 5611,
+      "name": "Soul Bow - Cheap Shot",
+      "skills": [
+        {
+          "id": 3552,
+          "level": 1
+        }
+      ]
+    },
+    {
+      "itemId": 5612,
+      "name": "Soul Bow - Quick Recovery",
+      "skills": [
+        {
+          "id": 3552,
+          "level": 1
+        }
+      ]
+    },
+    {
+      "itemId": 5613,
+      "name": "Soul Bow - Critical Poison",
+      "skills": [
+        {
+          "id": 3552,
+          "level": 1
+        }
+      ]
+    },
+    {
+      "itemId": 5614,
+      "name": "Bloody Orchid - Focus",
+      "skills": [
+        {
+          "id": 3051,
+          "level": 1
+        }
+      ]
+    },
+    {
+      "itemId": 5615,
+      "name": "Bloody Orchid - Back Blow",
+      "skills": [
+        {
+          "id": 3063,
+          "level": 1
+        }
+      ]
+    },
+    {
+      "itemId": 5616,
+      "name": "Bloody Orchid - Critical Bleed",
+      "skills": [
+        {
+          "id": 3552,
+          "level": 1
+        }
+      ]
+    },
+    {
+      "itemId": 5617,
+      "name": "Soul Separator - Guidance",
+      "skills": [
+        {
+          "id": 3064,
+          "level": 1
+        }
+      ]
+    },
+    {
+      "itemId": 5618,
+      "name": "Soul Separator - Critical Damage",
+      "skills": [
+        {
+          "id": 3066,
+          "level": 2
+        }
+      ]
+    },
+    {
+      "itemId": 5619,
+      "name": "Soul Separator - Rsk. Haste",
+      "skills": [
+        {
+          "id": 3056,
+          "level": 2
+        }
+      ]
+    },
+    {
+      "itemId": 5620,
+      "name": "Blood Tornado - Haste",
+      "skills": [
+        {
+          "id": 3068,
+          "level": 2
+        }
+      ]
+    },
+    {
+      "itemId": 5621,
+      "name": "Blood Tornado - Focus",
+      "skills": [
+        {
+          "id": 3050,
+          "level": 1
+        }
+      ]
+    },
+    {
+      "itemId": 5622,
+      "name": "Blood Tornado - Anger",
+      "skills": [
+        {
+          "id": 3058,
+          "level": 1
+        }
+      ]
+    },
+    {
+      "itemId": 5623,
+      "name": "Dragon Grinder - Rsk. Evasion",
+      "skills": [
+        {
+          "id": 3069,
+          "level": 1
+        }
+      ]
+    },
+    {
+      "itemId": 5624,
+      "name": "Dragon Grinder - Guidance",
+      "skills": [
+        {
+          "id": 3065,
+          "level": 1
+        }
+      ]
+    },
+    {
+      "itemId": 5625,
+      "name": "Dragon Grinder - Health",
+      "skills": [
+        {
+          "id": 3013,
+          "level": 3
+        }
+      ]
+    },
+    {
+      "itemId": 5626,
+      "name": "Halberd - Haste",
+      "skills": [
+        {
+          "id": 3601,
+          "level": 7
+        }
+      ]
+    },
+    {
+      "itemId": 5627,
+      "name": "Halberd - Critical Stun",
+      "skills": [
+        {
+          "id": 3552,
+          "level": 2
+        }
+      ]
+    },
+    {
+      "itemId": 5628,
+      "name": "Halberd - Wide Blow",
+      "skills": [
+        {
+          "id": 3552,
+          "level": 2
+        }
+      ]
+    },
+    {
+      "itemId": 5629,
+      "name": "Orcish Halberd",
+      "skills": [
+        {
+          "id": 3599,
+          "level": 1
+        }
+      ]
+    },
+    {
+      "itemId": 5630,
+      "name": "Orcish Halberd",
+      "skills": [
+        {
+          "id": 3599,
+          "level": 1
+        }
+      ]
+    },
+    {
+      "itemId": 5631,
+      "name": "Orcish Halberd",
+      "skills": [
+        {
+          "id": 3599,
+          "level": 1
+        }
+      ]
+    },
+    {
+      "itemId": 5632,
+      "name": "Tallum Glaive - Guidance",
+      "skills": [
+        {
+          "id": 3602,
+          "level": 8
+        }
+      ]
+    },
+    {
+      "itemId": 5633,
+      "name": "Tallum Glaive - Health",
+      "skills": [
+        {
+          "id": 3013,
+          "level": 4
+        }
+      ]
+    },
+    {
+      "itemId": 5634,
+      "name": "Tallum Glaive - Wide Blow",
+      "skills": [
+        {
+          "id": 3552,
+          "level": 2
+        }
+      ]
+    },
+    {
+      "itemId": 5635,
+      "name": "Tallum Blade - Critical Poison",
+      "skills": [
+        {
+          "id": 3552,
+          "level": 1
+        }
+      ]
+    },
+    {
+      "itemId": 5636,
+      "name": "Tallum Blade - Haste",
+      "skills": [
+        {
+          "id": 3068,
+          "level": 2
+        }
+      ]
+    },
+    {
+      "itemId": 5637,
+      "name": "Tallum Blade - Anger",
+      "skills": [
+        {
+          "id": 3057,
+          "level": 1
+        }
+      ]
+    },
+    {
+      "itemId": 5638,
+      "name": "Elemental Sword - M. Atk.",
+      "skills": [
+        {
+          "id": 3073,
+          "level": 1
+        }
+      ]
+    },
+    {
+      "itemId": 5639,
+      "name": "Elemental Sword - Magic Paralyze",
+      "skills": [
+        {
+          "id": 3552,
+          "level": 1
+        }
+      ]
+    },
+    {
+      "itemId": 5640,
+      "name": "Elemental Sword - Empower",
+      "skills": [
+        {
+          "id": 3072,
+          "level": 1
+        }
+      ]
+    },
+    {
+      "itemId": 5641,
+      "name": "Sword of Miracles - M. Atk.",
+      "skills": [
+        {
+          "id": 3073,
+          "level": 2
+        }
+      ]
+    },
+    {
+      "itemId": 5642,
+      "name": "Sword of Miracles - Magic Silence",
+      "skills": [
+        {
+          "id": 3552,
+          "level": 1
+        }
+      ]
+    },
+    {
+      "itemId": 5643,
+      "name": "Sword of Miracles - Acumen",
+      "skills": [
+        {
+          "id": 3047,
+          "level": 2
+        }
+      ]
+    },
+    {
+      "itemId": 5644,
+      "name": "Dragon Slayer - Health",
+      "skills": [
+        {
+          "id": 3013,
+          "level": 3
+        }
+      ]
+    },
+    {
+      "itemId": 5645,
+      "name": "Dragon Slayer - Critical Bleed",
+      "skills": [
+        {
+          "id": 3552,
+          "level": 1
+        }
+      ]
+    },
+    {
+      "itemId": 5646,
+      "name": "Dragon Slayer - Critical Drain",
+      "skills": [
+        {
+          "id": 3552,
+          "level": 1
+        }
+      ]
+    },
+    {
+      "itemId": 5647,
+      "name": "Dark Legion's Edge - Critical Damage",
+      "skills": [
+        {
+          "id": 3067,
+          "level": 2
+        }
+      ]
+    },
+    {
+      "itemId": 5648,
+      "name": "Dark Legion's Edge - Health",
+      "skills": [
+        {
+          "id": 3013,
+          "level": 3
+        }
+      ]
+    },
+    {
+      "itemId": 5649,
+      "name": "Dark Legion's Edge - Rsk. Focus",
+      "skills": [
+        {
+          "id": 3071,
+          "level": 2
+        }
+      ]
+    },
+    {
+      "itemId": 5817,
+      "name": "Chrono Campana",
+      "skills": [
+        {
+          "id": 3599,
+          "level": 1
+        }
+      ]
+    },
+    {
+      "itemId": 6307,
+      "name": "Sword of Limit - Guidance",
+      "skills": [
+        {
+          "id": 3007,
+          "level": 3
+        }
+      ]
+    },
+    {
+      "itemId": 6309,
+      "name": "Sword of Limit - Health",
+      "skills": [
+        {
+          "id": 3013,
+          "level": 1
+        }
+      ]
+    },
+    {
+      "itemId": 6310,
+      "name": "Sword of Whispering Death - Empower",
+      "skills": [
+        {
+          "id": 3076,
+          "level": 3
+        }
+      ]
+    },
+    {
+      "itemId": 6311,
+      "name": "Sword of Whispering Death - M. Atk.",
+      "skills": [
+        {
+          "id": 3077,
+          "level": 3
+        }
+      ]
+    },
+    {
+      "itemId": 6313,
+      "name": "Homunkulus's Sword - Acumen",
+      "skills": [
+        {
+          "id": 3047,
+          "level": 1
+        }
+      ]
+    },
+    {
+      "itemId": 6314,
+      "name": "Homunkulus's Sword - Conversion",
+      "skills": [
+        {
+          "id": 3048,
+          "level": 1
+        }
+      ]
+    },
+    {
+      "itemId": 6347,
+      "name": "Berserker Blade - Focus",
+      "skills": [
+        {
+          "id": 3010,
+          "level": 4
+        }
+      ]
+    },
+    {
+      "itemId": 6348,
+      "name": "Berserker Blade - Critical Damage",
+      "skills": [
+        {
+          "id": 3542,
+          "level": 4
+        }
+      ]
+    },
+    {
+      "itemId": 6349,
+      "name": "Berserker Blade - Haste",
+      "skills": [
+        {
+          "id": 3037,
+          "level": 4
+        }
+      ]
+    },
+    {
+      "itemId": 6356,
+      "name": "Dark Elven Dagger - Rsk. Haste",
+      "skills": [
+        {
+          "id": 3033,
+          "level": 1
+        }
+      ]
+    },
+    {
+      "itemId": 6357,
+      "name": "Stiletto - Rsk. Haste",
+      "skills": [
+        {
+          "id": 3033,
+          "level": 2
+        }
+      ]
+    },
+    {
+      "itemId": 6358,
+      "name": "Crystal Dagger - Critical Damage",
+      "skills": [
+        {
+          "id": 3043,
+          "level": 4
+        }
+      ]
+    },
+    {
+      "itemId": 6359,
+      "name": "Demon's Dagger - Critical Damage",
+      "skills": [
+        {
+          "id": 3043,
+          "level": 6
+        }
+      ]
+    },
+    {
+      "itemId": 6370,
+      "name": "Saint Spear",
+      "skills": [
+        {
+          "id": 3599,
+          "level": 1
+        }
+      ]
+    },
+    {
+      "itemId": 6580,
+      "name": "Tallum Blade*Dark Legion's Edge",
+      "skills": [
+        {
+          "id": 3552,
+          "level": 1
+        }
+      ]
+    },
+    {
+      "itemId": 6581,
+      "name": "Forgotten Blade - Haste",
+      "skills": [
+        {
+          "id": 3564,
+          "level": 1
+        }
+      ]
+    },
+    {
+      "itemId": 6582,
+      "name": "Forgotten Blade - Health",
+      "skills": [
+        {
+          "id": 3013,
+          "level": 3
+        }
+      ]
+    },
+    {
+      "itemId": 6583,
+      "name": "Forgotten Blade - Focus",
+      "skills": [
+        {
+          "id": 3566,
+          "level": 1
+        }
+      ]
+    },
+    {
+      "itemId": 6584,
+      "name": "Basalt Battlehammer - HP Drain",
+      "skills": [
+        {
+          "id": 3568,
+          "level": 1
+        }
+      ]
+    },
+    {
+      "itemId": 6585,
+      "name": "Basalt Battlehammer - Health",
+      "skills": [
+        {
+          "id": 3013,
+          "level": 3
+        }
+      ]
+    },
+    {
+      "itemId": 6586,
+      "name": "Basalt Battlehammer - HP Regeneration",
+      "skills": [
+        {
+          "id": 3569,
+          "level": 1
+        }
+      ]
+    },
+    {
+      "itemId": 6587,
+      "name": "Imperial Staff - Empower",
+      "skills": [
+        {
+          "id": 3575,
+          "level": 1
+        }
+      ]
+    },
+    {
+      "itemId": 6588,
+      "name": "Imperial Staff - MP Regeneration",
+      "skills": [
+        {
+          "id": 3576,
+          "level": 1
+        }
+      ]
+    },
+    {
+      "itemId": 6589,
+      "name": "Imperial Staff - Magic Hold",
+      "skills": [
+        {
+          "id": 3552,
+          "level": 1
+        }
+      ]
+    },
+    {
+      "itemId": 6590,
+      "name": "Angel Slayer - Critical Damage",
+      "skills": [
+        {
+          "id": 3572,
+          "level": 1
+        }
+      ]
+    },
+    {
+      "itemId": 6591,
+      "name": "Angel Slayer - HP Drain",
+      "skills": [
+        {
+          "id": 3568,
+          "level": 1
+        }
+      ]
+    },
+    {
+      "itemId": 6592,
+      "name": "Angel Slayer - Haste",
+      "skills": [
+        {
+          "id": 3564,
+          "level": 1
+        }
+      ]
+    },
+    {
+      "itemId": 6593,
+      "name": "Shining Bow - Cheap Shot",
+      "skills": [
+        {
+          "id": 3552,
+          "level": 1
+        }
+      ]
+    },
+    {
+      "itemId": 6594,
+      "name": "Shining Bow - Focus",
+      "skills": [
+        {
+          "id": 3567,
+          "level": 1
+        }
+      ]
+    },
+    {
+      "itemId": 6595,
+      "name": "Shining Bow - Critical Slow",
+      "skills": [
+        {
+          "id": 3552,
+          "level": 1
+        }
+      ]
+    },
+    {
+      "itemId": 6596,
+      "name": "Dragon Hunter Axe - HP Regeneration",
+      "skills": [
+        {
+          "id": 3569,
+          "level": 1
+        }
+      ]
+    },
+    {
+      "itemId": 6597,
+      "name": "Dragon Hunter Axe - Health",
+      "skills": [
+        {
+          "id": 3013,
+          "level": 3
+        }
+      ]
+    },
+    {
+      "itemId": 6598,
+      "name": "Dragon Hunter Axe - HP Drain",
+      "skills": [
+        {
+          "id": 3568,
+          "level": 1
+        }
+      ]
+    },
+    {
+      "itemId": 6599,
+      "name": "Saint Spear - Health",
+      "skills": [
+        {
+          "id": 3013,
+          "level": 4
+        }
+      ]
+    },
+    {
+      "itemId": 6600,
+      "name": "Saint Spear - Guidance",
+      "skills": [
+        {
+          "id": 3602,
+          "level": 9
+        }
+      ]
+    },
+    {
+      "itemId": 6601,
+      "name": "Saint Spear - Haste",
+      "skills": [
+        {
+          "id": 3601,
+          "level": 9
+        }
+      ]
+    },
+    {
+      "itemId": 6602,
+      "name": "Demon Splinter - Focus",
+      "skills": [
+        {
+          "id": 3565,
+          "level": 1
+        }
+      ]
+    },
+    {
+      "itemId": 6603,
+      "name": "Demon Splinter - Health",
+      "skills": [
+        {
+          "id": 3013,
+          "level": 3
+        }
+      ]
+    },
+    {
+      "itemId": 6604,
+      "name": "Demon Splinter - Critical Stun",
+      "skills": [
+        {
+          "id": 3552,
+          "level": 1
+        }
+      ]
+    },
+    {
+      "itemId": 6605,
+      "name": "Heavens Divider - Haste",
+      "skills": [
+        {
+          "id": 3564,
+          "level": 1
+        }
+      ]
+    },
+    {
+      "itemId": 6606,
+      "name": "Heavens Divider - Health",
+      "skills": [
+        {
+          "id": 3013,
+          "level": 3
+        }
+      ]
+    },
+    {
+      "itemId": 6607,
+      "name": "Heavens Divider - Focus",
+      "skills": [
+        {
+          "id": 3566,
+          "level": 1
+        }
+      ]
+    },
+    {
+      "itemId": 6608,
+      "name": "Arcana Mace - Acumen",
+      "skills": [
+        {
+          "id": 3047,
+          "level": 2
+        }
+      ]
+    },
+    {
+      "itemId": 6609,
+      "name": "Arcana Mace - MP Regeneration",
+      "skills": [
+        {
+          "id": 3576,
+          "level": 1
+        }
+      ]
+    },
+    {
+      "itemId": 6610,
+      "name": "Arcana Mace - Mana Up",
+      "skills": [
+        {
+          "id": 3014,
+          "level": 2
+        }
+      ]
+    },
+    {
+      "itemId": 6611,
+      "name": "Infinity Blade",
+      "skills": [
+        {
+          "id": 3578,
+          "level": 1
+        }
+      ]
+    },
+    {
+      "itemId": 6612,
+      "name": "Infinity Cleaver",
+      "skills": [
+        {
+          "id": 3582,
+          "level": 1
+        }
+      ]
+    },
+    {
+      "itemId": 6613,
+      "name": "Infinity Axe",
+      "skills": [
+        {
+          "id": 3580,
+          "level": 1
+        }
+      ]
+    },
+    {
+      "itemId": 6614,
+      "name": "Infinity Rod",
+      "skills": [
+        {
+          "id": 3597,
+          "level": 1
+        }
+      ]
+    },
+    {
+      "itemId": 6615,
+      "name": "Infinity Crusher",
+      "skills": [
+        {
+          "id": 3583,
+          "level": 1
+        }
+      ]
+    },
+    {
+      "itemId": 6616,
+      "name": "Infinity Scepter",
+      "skills": [
+        {
+          "id": 3595,
+          "level": 1
+        }
+      ]
+    },
+    {
+      "itemId": 6617,
+      "name": "Infinity Stinger",
+      "skills": [
+        {
+          "id": 3589,
+          "level": 1
+        }
+      ]
+    },
+    {
+      "itemId": 6618,
+      "name": "Infinity Fang",
+      "skills": [
+        {
+          "id": 3587,
+          "level": 1
+        }
+      ]
+    },
+    {
+      "itemId": 6619,
+      "name": "Infinity Bow",
+      "skills": [
+        {
+          "id": 3593,
+          "level": 1
+        }
+      ]
+    },
+    {
+      "itemId": 6620,
+      "name": "Infinity Wing",
+      "skills": [
+        {
+          "id": 3585,
+          "level": 1
+        }
+      ]
+    },
+    {
+      "itemId": 6621,
+      "name": "Infinity Spear",
+      "skills": [
+        {
+          "id": 3591,
+          "level": 1
+        }
+      ]
+    },
+    {
+      "itemId": 6656,
+      "name": "Earring of Antharas",
+      "skills": [
+        {
+          "id": 3558,
+          "level": 1
+        }
+      ]
+    },
+    {
+      "itemId": 6657,
+      "name": "Necklace of Valakas",
+      "skills": [
+        {
+          "id": 3557,
+          "level": 1
+        }
+      ]
+    },
+    {
+      "itemId": 6658,
+      "name": "Ring of Baium",
+      "skills": [
+        {
+          "id": 3561,
+          "level": 1
+        }
+      ]
+    },
+    {
+      "itemId": 6659,
+      "name": "Zaken's Earring",
+      "skills": [
+        {
+          "id": 3559,
+          "level": 1
+        }
+      ]
+    },
+    {
+      "itemId": 6660,
+      "name": "Ring of Queen Ant",
+      "skills": [
+        {
+          "id": 3562,
+          "level": 1
+        }
+      ]
+    },
+    {
+      "itemId": 6661,
+      "name": "Earring of Orfen",
+      "skills": [
+        {
+          "id": 3560,
+          "level": 1
+        }
+      ]
+    },
+    {
+      "itemId": 6662,
+      "name": "Ring of Core",
+      "skills": [
+        {
+          "id": 3563,
+          "level": 1
+        }
+      ]
+    },
+    {
+      "itemId": 6834,
+      "name": "Circlet of Innadril",
+      "skills": [
+        {
+          "id": 3633,
+          "level": 1
+        }
+      ]
+    },
+    {
+      "itemId": 6835,
+      "name": "Circlet of Dion",
+      "skills": [
+        {
+          "id": 3633,
+          "level": 1
+        }
+      ]
+    },
+    {
+      "itemId": 6836,
+      "name": "Goddard Circlet",
+      "skills": [
+        {
+          "id": 3633,
+          "level": 1
+        }
+      ]
+    },
+    {
+      "itemId": 6837,
+      "name": "Circlet of Oren",
+      "skills": [
+        {
+          "id": 3633,
+          "level": 1
+        }
+      ]
+    },
+    {
+      "itemId": 6838,
+      "name": "Circlet of Gludio",
+      "skills": [
+        {
+          "id": 3633,
+          "level": 1
+        }
+      ]
+    },
+    {
+      "itemId": 6839,
+      "name": "Circlet of Giran",
+      "skills": [
+        {
+          "id": 3633,
+          "level": 1
+        }
+      ]
+    },
+    {
+      "itemId": 6840,
+      "name": "Circlet of Aden",
+      "skills": [
+        {
+          "id": 3633,
+          "level": 2
+        }
+      ]
+    },
+    {
+      "itemId": 6841,
+      "name": "The Lord's Crown",
+      "skills": [
+        {
+          "id": 3632,
+          "level": 1
+        }
+      ]
+    },
+    {
+      "itemId": 7576,
+      "name": "Draconic Bow - Cheap Shot",
+      "skills": [
+        {
+          "id": 3552,
+          "level": 1
+        }
+      ]
+    },
+    {
+      "itemId": 7577,
+      "name": "Draconic Bow - Focus",
+      "skills": [
+        {
+          "id": 3567,
+          "level": 1
+        }
+      ]
+    },
+    {
+      "itemId": 7578,
+      "name": "Draconic Bow - Critical Slow",
+      "skills": [
+        {
+          "id": 3552,
+          "level": 1
+        }
+      ]
+    },
+    {
+      "itemId": 7701,
+      "name": "Stick of Faith - Mana Up",
+      "skills": [
+        {
+          "id": 3014,
+          "level": 1
+        }
+      ]
+    },
+    {
+      "itemId": 7704,
+      "name": "Stick of Eternity - Empower",
+      "skills": [
+        {
+          "id": 3076,
+          "level": 3
+        }
+      ]
+    },
+    {
+      "itemId": 7705,
+      "name": "Stick of Eternity - Rsk. Evasion",
+      "skills": [
+        {
+          "id": 3030,
+          "level": 3
+        }
+      ]
+    },
+    {
+      "itemId": 7707,
+      "name": "Nirvana Axe - M. Atk.",
+      "skills": [
+        {
+          "id": 3077,
+          "level": 3
+        }
+      ]
+    },
+    {
+      "itemId": 7710,
+      "name": "Club of Nature - Acumen",
+      "skills": [
+        {
+          "id": 3047,
+          "level": 1
+        }
+      ]
+    },
+    {
+      "itemId": 7713,
+      "name": "Mace of Underworld - Mana Up",
+      "skills": [
+        {
+          "id": 3014,
+          "level": 1
+        }
+      ]
+    },
+    {
+      "itemId": 7715,
+      "name": "Mace of Underworld - Conversion",
+      "skills": [
+        {
+          "id": 3048,
+          "level": 1
+        }
+      ]
+    },
+    {
+      "itemId": 7716,
+      "name": "Inferno Staff - Acumen",
+      "skills": [
+        {
+          "id": 3047,
+          "level": 1
+        }
+      ]
+    },
+    {
+      "itemId": 7719,
+      "name": "Poleaxe - Critical Stun",
+      "skills": [
+        {
+          "id": 3599,
+          "level": 1
+        }
+      ]
+    },
+    {
+      "itemId": 7720,
+      "name": "Poleaxe - Towering Blow",
+      "skills": [
+        {
+          "id": 3599,
+          "level": 1
+        }
+      ]
+    },
+    {
+      "itemId": 7721,
+      "name": "Poleaxe - Wide Blow",
+      "skills": [
+        {
+          "id": 3599,
+          "level": 1
+        }
+      ]
+    },
+    {
+      "itemId": 7722,
+      "name": "Sword of Valhalla - Acumen",
+      "skills": [
+        {
+          "id": 3047,
+          "level": 1
+        }
+      ]
+    },
+    {
+      "itemId": 7810,
+      "name": "Soulfire Dirk - Mana Up",
+      "skills": [
+        {
+          "id": 3014,
+          "level": 1
+        }
+      ]
+    },
+    {
+      "itemId": 7831,
+      "name": "Traveler's Pike",
+      "skills": [
+        {
+          "id": 3599,
+          "level": 1
+        }
+      ]
+    },
+    {
+      "itemId": 8102,
+      "name": "Pa'agrian Sword - Focus",
+      "skills": [
+        {
+          "id": 3010,
+          "level": 3
+        }
+      ]
+    },
+    {
+      "itemId": 8103,
+      "name": "Pa'agrian Sword - Health",
+      "skills": [
+        {
+          "id": 3013,
+          "level": 1
+        }
+      ]
+    },
+    {
+      "itemId": 8106,
+      "name": "Guardian Sword - Health",
+      "skills": [
+        {
+          "id": 3013,
+          "level": 1
+        }
+      ]
+    },
+    {
+      "itemId": 8108,
+      "name": "Infernal Master - Haste",
+      "skills": [
+        {
+          "id": 3068,
+          "level": 2
+        }
+      ]
+    },
+    {
+      "itemId": 8109,
+      "name": "Infernal Master - Critical Damage",
+      "skills": [
+        {
+          "id": 3067,
+          "level": 1
+        }
+      ]
+    },
+    {
+      "itemId": 8110,
+      "name": "Infernal Master - Focus",
+      "skills": [
+        {
+          "id": 3050,
+          "level": 1
+        }
+      ]
+    },
+    {
+      "itemId": 8111,
+      "name": "Mysterious Sword - Acumen",
+      "skills": [
+        {
+          "id": 3047,
+          "level": 1
+        }
+      ]
+    },
+    {
+      "itemId": 8112,
+      "name": "Mysterious Sword - M. Atk.",
+      "skills": [
+        {
+          "id": 3077,
+          "level": 1
+        }
+      ]
+    },
+    {
+      "itemId": 8114,
+      "name": "Ecliptic Sword - Empower",
+      "skills": [
+        {
+          "id": 3076,
+          "level": 4
+        }
+      ]
+    },
+    {
+      "itemId": 8115,
+      "name": "Ecliptic Sword - M. Atk.",
+      "skills": [
+        {
+          "id": 3077,
+          "level": 4
+        }
+      ]
+    },
+    {
+      "itemId": 8117,
+      "name": "Wizard's Tear - Acumen",
+      "skills": [
+        {
+          "id": 3047,
+          "level": 1
+        }
+      ]
+    },
+    {
+      "itemId": 8118,
+      "name": "Wizard's Tear - M. Atk.",
+      "skills": [
+        {
+          "id": 3077,
+          "level": 6
+        }
+      ]
+    },
+    {
+      "itemId": 8119,
+      "name": "Wizard's Tear - Conversion",
+      "skills": [
+        {
+          "id": 3048,
+          "level": 1
+        }
+      ]
+    },
+    {
+      "itemId": 8120,
+      "name": "Dwarven Hammer - Health",
+      "skills": [
+        {
+          "id": 3013,
+          "level": 1
+        }
+      ]
+    },
+    {
+      "itemId": 8121,
+      "name": "Dwarven Hammer - Anger",
+      "skills": [
+        {
+          "id": 3012,
+          "level": 4
+        }
+      ]
+    },
+    {
+      "itemId": 8123,
+      "name": "Karik Horn - Focus",
+      "skills": [
+        {
+          "id": 3010,
+          "level": 3
+        }
+      ]
+    },
+    {
+      "itemId": 8124,
+      "name": "Karik Horn - Haste",
+      "skills": [
+        {
+          "id": 3036,
+          "level": 3
+        }
+      ]
+    },
+    {
+      "itemId": 8126,
+      "name": "Destroyer Hammer - Health",
+      "skills": [
+        {
+          "id": 3013,
+          "level": 3
+        }
+      ]
+    },
+    {
+      "itemId": 8127,
+      "name": "Destroyer Hammer - Haste",
+      "skills": [
+        {
+          "id": 3068,
+          "level": 2
+        }
+      ]
+    },
+    {
+      "itemId": 8128,
+      "name": "Destroyer Hammer - Critical Drain",
+      "skills": [
+        {
+          "id": 3552,
+          "level": 1
+        }
+      ]
+    },
+    {
+      "itemId": 8129,
+      "name": "Ice Storm Hammer - Focus",
+      "skills": [
+        {
+          "id": 3010,
+          "level": 5
+        }
+      ]
+    },
+    {
+      "itemId": 8130,
+      "name": "Ice Storm Hammer - Anger",
+      "skills": [
+        {
+          "id": 3012,
+          "level": 5
+        }
+      ]
+    },
+    {
+      "itemId": 8132,
+      "name": "Star Buster - Health",
+      "skills": [
+        {
+          "id": 3013,
+          "level": 1
+        }
+      ]
+    },
+    {
+      "itemId": 8133,
+      "name": "Star Buster - Haste",
+      "skills": [
+        {
+          "id": 3036,
+          "level": 6
+        }
+      ]
+    },
+    {
+      "itemId": 8134,
+      "name": "Star Buster - Rsk. Focus",
+      "skills": [
+        {
+          "id": 3027,
+          "level": 6
+        }
+      ]
+    },
+    {
+      "itemId": 8135,
+      "name": "Doom Crusher - Health",
+      "skills": [
+        {
+          "id": 3013,
+          "level": 3
+        }
+      ]
+    },
+    {
+      "itemId": 8136,
+      "name": "Doom Crusher - Anger",
+      "skills": [
+        {
+          "id": 3057,
+          "level": 2
+        }
+      ]
+    },
+    {
+      "itemId": 8137,
+      "name": "Doom Crusher - Rsk. Haste",
+      "skills": [
+        {
+          "id": 3056,
+          "level": 2
+        }
+      ]
+    },
+    {
+      "itemId": 8138,
+      "name": "Ecliptic Axe - Conversion",
+      "skills": [
+        {
+          "id": 3048,
+          "level": 1
+        }
+      ]
+    },
+    {
+      "itemId": 8139,
+      "name": "Ecliptic Axe - M. Atk.",
+      "skills": [
+        {
+          "id": 3077,
+          "level": 4
+        }
+      ]
+    },
+    {
+      "itemId": 8141,
+      "name": "Spell Breaker - Acumen",
+      "skills": [
+        {
+          "id": 3047,
+          "level": 1
+        }
+      ]
+    },
+    {
+      "itemId": 8144,
+      "name": "Kaim Vanul's Bones - Mana Up",
+      "skills": [
+        {
+          "id": 3014,
+          "level": 1
+        }
+      ]
+    },
+    {
+      "itemId": 8146,
+      "name": "Kaim Vanul's Bones - Conversion",
+      "skills": [
+        {
+          "id": 3048,
+          "level": 1
+        }
+      ]
+    },
+    {
+      "itemId": 8147,
+      "name": "Spiritual Eye - Mana Up",
+      "skills": [
+        {
+          "id": 3014,
+          "level": 2
+        }
+      ]
+    },
+    {
+      "itemId": 8148,
+      "name": "Spiritual Eye - Magic Poison",
+      "skills": [
+        {
+          "id": 3552,
+          "level": 1
+        }
+      ]
+    },
+    {
+      "itemId": 8149,
+      "name": "Spiritual Eye - Acumen",
+      "skills": [
+        {
+          "id": 3047,
+          "level": 2
+        }
+      ]
+    },
+    {
+      "itemId": 8150,
+      "name": "Flaming Dragon Skull - Acumen",
+      "skills": [
+        {
+          "id": 3047,
+          "level": 2
+        }
+      ]
+    },
+    {
+      "itemId": 8151,
+      "name": "Flaming Dragon Skull - M. Atk.",
+      "skills": [
+        {
+          "id": 3073,
+          "level": 2
+        }
+      ]
+    },
+    {
+      "itemId": 8152,
+      "name": "Flaming Dragon Skull - Magic Silence",
+      "skills": [
+        {
+          "id": 3552,
+          "level": 1
+        }
+      ]
+    },
+    {
+      "itemId": 8182,
+      "name": "Circlet of Rune",
+      "skills": [
+        {
+          "id": 3633,
+          "level": 2
+        }
+      ]
+    },
+    {
+      "itemId": 8183,
+      "name": "Circlet of Schuttgart",
+      "skills": [
+        {
+          "id": 3633,
+          "level": 1
+        }
+      ]
+    },
+    {
+      "itemId": 8191,
+      "name": "Necklace of Frintezza",
+      "skills": [
+        {
+          "id": 3604,
+          "level": 1
+        }
+      ]
+    },
+    {
+      "itemId": 8683,
+      "name": "Tiphon's Spear",
+      "skills": [
+        {
+          "id": 3599,
+          "level": 1
+        }
+      ]
+    },
+    {
+      "itemId": 8763,
+      "name": "Elrokian Trap",
+      "skills": [
+        {
+          "id": 3626,
+          "level": 1
+        },
+        {
+          "id": 3627,
+          "level": 1
+        },
+        {
+          "id": 3628,
+          "level": 1
+        }
+      ]
+    },
+    {
+      "itemId": 8788,
+      "name": "Sirra's Blade - Haste",
+      "skills": [
+        {
+          "id": 3068,
+          "level": 3
+        }
+      ]
+    },
+    {
+      "itemId": 8789,
+      "name": "Sirra's Blade - Health",
+      "skills": [
+        {
+          "id": 3013,
+          "level": 5
+        }
+      ]
+    },
+    {
+      "itemId": 8790,
+      "name": "Sirra's Blade - Critical Poison",
+      "skills": [
+        {
+          "id": 3552,
+          "level": 1
+        }
+      ]
+    },
+    {
+      "itemId": 8791,
+      "name": "Sword of Ipos - Focus",
+      "skills": [
+        {
+          "id": 3050,
+          "level": 2
+        }
+      ]
+    },
+    {
+      "itemId": 8792,
+      "name": "Sword of Ipos - Haste",
+      "skills": [
+        {
+          "id": 3068,
+          "level": 3
+        }
+      ]
+    },
+    {
+      "itemId": 8793,
+      "name": "Sword of Ipos - Health",
+      "skills": [
+        {
+          "id": 3013,
+          "level": 5
+        }
+      ]
+    },
+    {
+      "itemId": 8794,
+      "name": "Barakiel's Axe - Health",
+      "skills": [
+        {
+          "id": 3013,
+          "level": 5
+        }
+      ]
+    },
+    {
+      "itemId": 8795,
+      "name": "Barakiel's Axe - Haste",
+      "skills": [
+        {
+          "id": 3068,
+          "level": 3
+        }
+      ]
+    },
+    {
+      "itemId": 8796,
+      "name": "Barakiel's Axe - Focus",
+      "skills": [
+        {
+          "id": 3050,
+          "level": 2
+        }
+      ]
+    },
+    {
+      "itemId": 8797,
+      "name": "Behemoth's Tuning Fork - Focus",
+      "skills": [
+        {
+          "id": 3050,
+          "level": 2
+        }
+      ]
+    },
+    {
+      "itemId": 8798,
+      "name": "Behemoth's Tuning Fork - Health",
+      "skills": [
+        {
+          "id": 3013,
+          "level": 5
+        }
+      ]
+    },
+    {
+      "itemId": 8799,
+      "name": "Behemoth's Tuning Fork - Anger",
+      "skills": [
+        {
+          "id": 3057,
+          "level": 3
+        }
+      ]
+    },
+    {
+      "itemId": 8800,
+      "name": "Naga Storm - Focus",
+      "skills": [
+        {
+          "id": 3051,
+          "level": 2
+        }
+      ]
+    },
+    {
+      "itemId": 8801,
+      "name": "Naga Storm - Critical Damage",
+      "skills": [
+        {
+          "id": 3066,
+          "level": 2
+        }
+      ]
+    },
+    {
+      "itemId": 8802,
+      "name": "Naga Storm - Back Blow",
+      "skills": [
+        {
+          "id": 3063,
+          "level": 1
+        }
+      ]
+    },
+    {
+      "itemId": 8803,
+      "name": "Tiphon's Spear - Critical Stun",
+      "skills": [
+        {
+          "id": 3552,
+          "level": 2
+        }
+      ]
+    },
+    {
+      "itemId": 8804,
+      "name": "Tiphon's Spear - Towering Blow",
+      "skills": [
+        {
+          "id": 3552,
+          "level": 2
+        }
+      ]
+    },
+    {
+      "itemId": 8805,
+      "name": "Tiphon's Spear - Wild Blow",
+      "skills": [
+        {
+          "id": 3552,
+          "level": 2
+        }
+      ]
+    },
+    {
+      "itemId": 8806,
+      "name": "Shyeed's Bow - Cheap Shot",
+      "skills": [
+        {
+          "id": 3552,
+          "level": 1
+        }
+      ]
+    },
+    {
+      "itemId": 8807,
+      "name": "Shyeed's Bow - Focus",
+      "skills": [
+        {
+          "id": 3050,
+          "level": 2
+        }
+      ]
+    },
+    {
+      "itemId": 8808,
+      "name": "Shyeed's Bow - Quick Recovery",
+      "skills": [
+        {
+          "id": 3552,
+          "level": 1
+        }
+      ]
+    },
+    {
+      "itemId": 8809,
+      "name": "Sobekk's Hurricane - Rsk. Haste",
+      "skills": [
+        {
+          "id": 3056,
+          "level": 3
+        }
+      ]
+    },
+    {
+      "itemId": 8810,
+      "name": "Sobekk's Hurricane - Haste",
+      "skills": [
+        {
+          "id": 3068,
+          "level": 3
+        }
+      ]
+    },
+    {
+      "itemId": 8811,
+      "name": "Sobekk's Hurricane - Critical Drain",
+      "skills": [
+        {
+          "id": 3552,
+          "level": 1
+        }
+      ]
+    },
+    {
+      "itemId": 8812,
+      "name": "Themis' Tongue - Mana Up",
+      "skills": [
+        {
+          "id": 3014,
+          "level": 3
+        }
+      ]
+    },
+    {
+      "itemId": 8813,
+      "name": "Themis' Tongue - Mental Shield",
+      "skills": [
+        {
+          "id": 3552,
+          "level": 1
+        }
+      ]
+    },
+    {
+      "itemId": 8814,
+      "name": "Themis' Tongue - Magic Focus",
+      "skills": [
+        {
+          "id": 3552,
+          "level": 1
+        }
+      ]
+    },
+    {
+      "itemId": 8815,
+      "name": "Cabrio's Hand - Conversion",
+      "skills": [
+        {
+          "id": 3048,
+          "level": 3
+        }
+      ]
+    },
+    {
+      "itemId": 8816,
+      "name": "Cabrio's Hand - Mana Up",
+      "skills": [
+        {
+          "id": 3014,
+          "level": 3
+        }
+      ]
+    },
+    {
+      "itemId": 8817,
+      "name": "Cabrio's Hand - Magic Silence",
+      "skills": [
+        {
+          "id": 3552,
+          "level": 1
+        }
+      ]
+    },
+    {
+      "itemId": 8818,
+      "name": "Daimon Crystal - Mana Up",
+      "skills": [
+        {
+          "id": 3014,
+          "level": 3
+        }
+      ]
+    },
+    {
+      "itemId": 8819,
+      "name": "Daimon Crystal - Acumen",
+      "skills": [
+        {
+          "id": 3047,
+          "level": 3
+        }
+      ]
+    },
+    {
+      "itemId": 8820,
+      "name": "Daimon Crystal - Mental Shield",
+      "skills": [
+        {
+          "id": 3552,
+          "level": 1
+        }
+      ]
+    }
+  ]
+}
