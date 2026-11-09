@@ -1,5 +1,6 @@
 using Fineage.Accounts;
 using Fineage.Protocol;
+using Fineage.Zone.Friends;
 
 namespace Fineage.Zone.World;
 
@@ -131,26 +132,25 @@ public sealed partial class ZoneWorld
         if (!IsLive(session) || !_byId.TryGetValue(session.ObjectId, out var self))
             return "world";
         string name = (request.Name ?? "").Trim();
-        if (name.Length == 0)
-            return "bad_request";
-        if (string.Equals(self.Name, name, StringComparison.OrdinalIgnoreCase))
-            return FriendProtocol.Self;
-
         var target = FindOnlinePlayerByName(name);
-        if (target == null || target.Session == null || !target.Session.InWorld)
-            return FriendProtocol.Missing;
-        if (IsBlocked(target, self) || self.BlockAll)
-            return FriendProtocol.Blocked;
-        if (IsBlocked(self, target) || target.BlockAll)
-            return FriendProtocol.Blocked;
-        if (self.Friends.ContainsKey(target.ObjectId))
-            return FriendProtocol.Already;
-        if (_pendingFriendInvites.ContainsKey(target.ObjectId) || _pendingFriendInvites.ContainsKey(self.ObjectId))
-            return FriendProtocol.Busy;
-        if (self.Friends.Count >= FriendProtocol.MaxFriends || target.Friends.Count >= FriendProtocol.MaxFriends)
-            return FriendProtocol.Limit;
+        bool targetOnline = target?.Session != null && target.Session.InWorld;
+        bool blockedEitherWay = targetOnline
+            && (IsBlocked(target!, self) || self.BlockAll || IsBlocked(self, target!) || target!.BlockAll);
+        bool alreadyFriends = targetOnline && self.Friends.ContainsKey(target!.ObjectId);
+        bool eitherBusy = targetOnline
+            && (_pendingFriendInvites.ContainsKey(target!.ObjectId) || _pendingFriendInvites.ContainsKey(self.ObjectId));
+        if (FriendRules.InviteError(
+                name,
+                self.Name,
+                targetOnline,
+                blockedEitherWay,
+                alreadyFriends,
+                eitherBusy,
+                self.Friends.Count,
+                targetOnline ? target!.Friends.Count : 0) is { } inviteError)
+            return inviteError;
 
-        _pendingFriendInvites[target.ObjectId] = self.ObjectId;
+        _pendingFriendInvites[target!.ObjectId] = self.ObjectId;
         NetBridge?.FanoutFriendInviteAsk([target.ObjectId], new FriendInviteAskMsg
         {
             RequestorName = self.Name
@@ -174,10 +174,13 @@ public sealed partial class ZoneWorld
             return null;
         }
 
-        if (self.Friends.ContainsKey(inviter.ObjectId) || inviter.Friends.ContainsKey(self.ObjectId))
-            return FriendProtocol.Already;
-        if (self.Friends.Count >= FriendProtocol.MaxFriends || inviter.Friends.Count >= FriendProtocol.MaxFriends)
-            return FriendProtocol.Limit;
+        if (FriendRules.AcceptError(
+                inviterOnlineInWorld: true,
+                alreadyFriendsEitherWay: self.Friends.ContainsKey(inviter.ObjectId)
+                    || inviter.Friends.ContainsKey(self.ObjectId),
+                selfFriendCount: self.Friends.Count,
+                inviterFriendCount: inviter.Friends.Count) is { } acceptError)
+            return acceptError;
 
         self.Friends[inviter.ObjectId] = inviter.Name;
         inviter.Friends[self.ObjectId] = self.Name;
@@ -260,6 +263,9 @@ public sealed partial class ZoneWorld
         if (!IsLive(session) || !_byId.TryGetValue(session.ObjectId, out var self))
             return "world";
 
+        if (!FriendRules.IsKnownBlockType(request.Type))
+            return "bad_request";
+
         switch (request.Type)
         {
             case FriendProtocol.BlockList:
@@ -278,16 +284,9 @@ public sealed partial class ZoneWorld
             case FriendProtocol.BlockAdd:
             case FriendProtocol.BlockRemove:
                 break;
-            default:
-                return "bad_request";
         }
 
         string name = (request.Name ?? "").Trim();
-        if (name.Length == 0)
-            return "bad_request";
-        if (string.Equals(self.Name, name, StringComparison.OrdinalIgnoreCase))
-            return FriendProtocol.Self;
-
         int targetId = 0;
         string targetName = name;
         var online = FindOnlinePlayerByName(name);
@@ -301,15 +300,16 @@ public sealed partial class ZoneWorld
             targetId = stored.Id;
             targetName = stored.Name;
         }
-        if (targetId < 1)
-            return FriendProtocol.Missing;
 
         if (request.Type == FriendProtocol.BlockAdd)
         {
-            if (self.Blocked.ContainsKey(targetId))
-                return FriendProtocol.Already;
-            if (self.Blocked.Count >= FriendProtocol.MaxBlocked)
-                return FriendProtocol.Limit;
+            if (FriendRules.BlockAddError(
+                    name,
+                    self.Name,
+                    targetId,
+                    alreadyBlocked: self.Blocked.ContainsKey(targetId),
+                    blockedCount: self.Blocked.Count) is { } blockError)
+                return blockError;
             self.Blocked[targetId] = targetName;
             // Mobius: blocking removes from friends both ways when present.
             if (self.Friends.Remove(targetId))
@@ -328,6 +328,8 @@ public sealed partial class ZoneWorld
             return null;
         }
 
+        if (name.Length == 0)
+            return "bad_request";
         if (!self.Blocked.Remove(targetId))
             return FriendProtocol.Missing;
         PersistBlocked(self);
