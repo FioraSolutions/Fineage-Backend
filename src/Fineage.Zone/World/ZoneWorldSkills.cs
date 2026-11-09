@@ -344,52 +344,73 @@ public sealed partial class ZoneWorld
     {
         if (!_byId.TryGetValue(session.ObjectId, out var player) || player.Session == null)
             return "world";
-        if (player.Dead)
-            return SkillProtocol.Dead;
-        if (IsActionBlocked(player) || IsSilenced(player))
-            return SkillProtocol.Muted;
-        if (request.SkillId <= 0)
-            return "bad_request";
 
-        if (!player.KnownSkills.TryGetValue(request.SkillId, out int level))
-            return SkillProtocol.Unknown;
-
-        var template = _game.Skills.Find(request.SkillId);
-        if (template == null || template.Passive)
-            return template == null ? SkillProtocol.Unknown : SkillProtocol.Passive;
-        if (!template.TryLevelData(level, out var levelData))
-            return SkillProtocol.Unknown;
-
+        bool skillKnown = player.KnownSkills.TryGetValue(request.SkillId, out int level);
+        var template = skillKnown ? _game.Skills.Find(request.SkillId) : null;
+        SkillLevelData? levelData = null;
+        bool levelDataOk = false;
+        if (template != null && template.TryLevelData(level, out var ld))
+        {
+            levelData = ld;
+            levelDataOk = true;
+        }
         long now = _clock().ToUnixTimeMilliseconds();
+        bool onReuse = player.SkillReuseUntilMs.TryGetValue(request.SkillId, out long reuseUntil)
+            && reuseUntil > now;
+        // Casting queue is not a refusal — check before reuse/MP so queued casts still land.
         if (IsCasting(player, now))
         {
+            if (SkillUseRules.PrecheckError(
+                    dead: player.Dead,
+                    actionBlockedOrSilenced: IsActionBlocked(player) || IsSilenced(player),
+                    skillId: request.SkillId,
+                    skillKnown: skillKnown,
+                    templateFound: template != null,
+                    passive: template?.Passive == true,
+                    levelDataOk: levelDataOk,
+                    onReuse: false,
+                    curMp: player.CurMp,
+                    mpConsume: 0) is { } castQueueError)
+                return castQueueError;
             QueueSkillAfterCast(session, player, request);
             return null;
         }
+
+        if (SkillUseRules.PrecheckError(
+                dead: player.Dead,
+                actionBlockedOrSilenced: IsActionBlocked(player) || IsSilenced(player),
+                skillId: request.SkillId,
+                skillKnown: skillKnown,
+                templateFound: template != null,
+                passive: template?.Passive == true,
+                levelDataOk: levelDataOk,
+                onReuse: onReuse,
+                curMp: player.CurMp,
+                mpConsume: levelData?.MpConsume ?? 0) is { } precheckError)
+            return precheckError;
+
+        var liveTemplate = template!;
+        var liveLevelData = levelData!;
+
         // Net timed move: measure range from where the pawn really is now, not the last move order.
         AdvanceMove(player, now);
-        if (player.SkillReuseUntilMs.TryGetValue(request.SkillId, out long reuseUntil) && reuseUntil > now)
-            return SkillProtocol.Reuse;
-
-        if (player.CurMp < levelData.MpConsume)
-            return SkillProtocol.Mp;
 
         if (_spoilRules.IsSpoilSkill(request.SkillId) || _spoilRules.IsSweepSkill(request.SkillId))
-            return TrySkillUseSpoilOrSweep(session, player, request, template, levelData, level, now,
+            return TrySkillUseSpoilOrSweep(session, player, request, liveTemplate, liveLevelData, level, now,
                 _spoilRules.IsSweepSkill(request.SkillId));
-        if (template.IsBuffSkill)
-            return TrySkillUseBuff(session, player, request, template, levelData, level, now);
+        if (liveTemplate.IsBuffSkill)
+            return TrySkillUseBuff(session, player, request, liveTemplate, liveLevelData, level, now);
         // Mobius nukes that also apply a short abnormal (Aura Flare A3, Fire Vortex DoT+slow, …)
         // are flagged isDebuff + abnormalTime in skills.json. Prefer skill-combat damage over the
         // pure-CC debuff path so they still roll magic damage; ResolvePendingHit applies the abnormal.
         if (_skillCombat.TryGet(request.SkillId, out _))
-            return TrySkillUseAttack(session, player, request, template, levelData, level, now);
-        if (template.IsDebuffSkill)
-            return TrySkillUseDebuff(session, player, request, template, levelData, level, now);
-        if (template.IsInstantSupportSkill(level))
-            return TrySkillUseSupport(session, player, request, template, levelData, level, now);
+            return TrySkillUseAttack(session, player, request, liveTemplate, liveLevelData, level, now);
+        if (liveTemplate.IsDebuffSkill)
+            return TrySkillUseDebuff(session, player, request, liveTemplate, liveLevelData, level, now);
+        if (liveTemplate.IsInstantSupportSkill(level))
+            return TrySkillUseSupport(session, player, request, liveTemplate, liveLevelData, level, now);
 
-        return TrySkillUseAttack(session, player, request, template, levelData, level, now);
+        return TrySkillUseAttack(session, player, request, liveTemplate, liveLevelData, level, now);
     }
 
     public const int SysMsgUnsuitableTerms = 113;
