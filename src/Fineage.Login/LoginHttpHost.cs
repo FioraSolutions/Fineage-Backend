@@ -183,6 +183,7 @@ public sealed class LoginHttpHost : IAsyncDisposable
         {
             "username_taken" or "email_taken" => 409,
             "invalid_credentials" => 401,
+            "rate_limited" => 429,
             _ => 400
         };
         string code = string.IsNullOrEmpty(result.Code) ? "invalid_body" : result.Code;
