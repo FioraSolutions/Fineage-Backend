@@ -119,4 +119,26 @@ public sealed class AdminShopTests : IDisposable
         Assert.Null(await me.Buy(0, 9956, (6379, 1)));
         Assert.True(me.Inventory.CountOf(6379) >= 1);
     }
+
+    [Fact]
+    public async Task Shots_buylist_and_mbuff_work_for_KuK()
+    {
+        var kit = new WorldBench();
+        BenchPlayer me = await kit.EnterAsync(name: "KuK");
+        Assert.True(kit.Game.Items.TryGet(1835, out _));
+        Assert.True(kit.Game.Items.TryGet(1465, out _)); // B-grade was missing from items.json
+
+        Assert.Null(await me.BypassAsync(0, "admin_buy 9938"));
+        Assert.Null(await me.Buy(0, 9938, (1835, 1)));
+        Assert.True(me.Inventory.CountOf(1835) >= 1);
+
+        Assert.Null(await me.Buy(0, 9938, (1465, 100)));
+        Assert.True(me.Inventory.CountOf(1465) >= 100);
+
+        Assert.Null(await me.Buy(0, 9938, (1835, 10000)));
+        Assert.True(me.Inventory.CountOf(1835) >= 10001);
+
+        Assert.Null(await me.BypassAsync(0, "admin_mbuff"));
+        Assert.True(me.Player.Abnormals.Count >= 3);
+    }
 }

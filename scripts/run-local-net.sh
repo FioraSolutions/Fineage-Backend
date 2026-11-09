@@ -17,6 +17,8 @@ export FINEAGE_ZONE_AOI_CELL="${FINEAGE_ZONE_AOI_CELL:-3000}"
 export COMPOSE_PROJECT_NAME="${COMPOSE_PROJECT_NAME:-fineage-backend}"
 # Non-loopback binds refuse DefaultSecret; local SoT binds 0.0.0.0 so set the shared secret.
 export FINEAGE_HANDOFF_SECRET="${FINEAGE_HANDOFF_SECRET:-FineageLoginHandoffV1}"
+# Local playtest: GM chat (//gmshop, //setlevel, …) for allowlisted chars in data/admin-characters.json (KuK).
+export FINEAGE_ZONE_ADMIN="${FINEAGE_ZONE_ADMIN:-1}"
 
 PORTS=(5080 9106 9777 7780)
 
@@ -211,5 +213,5 @@ if [[ "$ok" != 1 ]]; then
   tail -40 local-logs/zone-net.log 2>/dev/null || true
   exit 1
 fi
-echo "Net login=9106 zone=9777 http=5080 | store=postgres | maps=${FINEAGE_ZONE_MAPS:-default}"
+echo "Net login=9106 zone=9777 http=5080 | store=postgres | maps=${FINEAGE_ZONE_MAPS:-default} | admin=${FINEAGE_ZONE_ADMIN}"
 echo "stop: ./scripts/run-local-net.sh stop"

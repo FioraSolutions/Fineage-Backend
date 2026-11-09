@@ -12195,6 +12195,39 @@
       "stackable": true
     },
     {
+      "id": 1465,
+      "name": "Soulshot (B-Grade)",
+      "kind": "etc",
+      "icon": "icon.etc_spirit_bullet_red_i00",
+      "stackable": true,
+      "price": 50,
+      "weight": 2,
+      "soulshot": true,
+      "shotGrade": "b"
+    },
+    {
+      "id": 1466,
+      "name": "Soulshot (A-Grade)",
+      "kind": "etc",
+      "icon": "icon.etc_spirit_bullet_silver_i00",
+      "stackable": true,
+      "price": 80,
+      "weight": 2,
+      "soulshot": true,
+      "shotGrade": "a"
+    },
+    {
+      "id": 1467,
+      "name": "Soulshot (S-Grade)",
+      "kind": "etc",
+      "icon": "icon.etc_spirit_bullet_gold_i00",
+      "stackable": true,
+      "price": 100,
+      "weight": 2,
+      "soulshot": true,
+      "shotGrade": "s"
+    },
+    {
       "id": 1471,
       "name": "Silenos Blowgun",
       "kind": "weapon",
@@ -15915,6 +15948,50 @@
       "price": 18,
       "weight": 5,
       "stackable": true
+    },
+    {
+      "id": 2511,
+      "name": "Spiritshot (C-Grade)",
+      "kind": "etc",
+      "icon": "icon.etc_spell_shot_green_i00",
+      "stackable": true,
+      "price": 35,
+      "weight": 3,
+      "spiritshot": true,
+      "shotGrade": "c"
+    },
+    {
+      "id": 2512,
+      "name": "Spiritshot (B-Grade)",
+      "kind": "etc",
+      "icon": "icon.etc_spell_shot_red_i00",
+      "stackable": true,
+      "price": 100,
+      "weight": 3,
+      "spiritshot": true,
+      "shotGrade": "b"
+    },
+    {
+      "id": 2513,
+      "name": "Spiritshot (A-Grade)",
+      "kind": "etc",
+      "icon": "icon.etc_spell_shot_silver_i00",
+      "stackable": true,
+      "price": 120,
+      "weight": 2,
+      "spiritshot": true,
+      "shotGrade": "a"
+    },
+    {
+      "id": 2514,
+      "name": "Spiritshot (S-Grade)",
+      "kind": "etc",
+      "icon": "icon.etc_spell_shot_gold_i00",
+      "stackable": true,
+      "price": 150,
+      "weight": 2,
+      "spiritshot": true,
+      "shotGrade": "s"
     },
     {
       "id": 2516,
@@ -27091,6 +27168,61 @@
       "shotGrade": "none"
     },
     {
+      "id": 3948,
+      "name": "Blessed Spiritshot (D-Grade)",
+      "kind": "etc",
+      "icon": "icon.etc_spell_shot_blue_i01",
+      "stackable": true,
+      "price": 28,
+      "weight": 5,
+      "shotGrade": "d",
+      "blessedSpiritshot": true
+    },
+    {
+      "id": 3949,
+      "name": "Blessed Spiritshot (C-Grade)",
+      "kind": "etc",
+      "icon": "icon.etc_spell_shot_green_i01",
+      "stackable": true,
+      "price": 42,
+      "weight": 3,
+      "shotGrade": "c",
+      "blessedSpiritshot": true
+    },
+    {
+      "id": 3950,
+      "name": "Blessed Spiritshot (B-Grade)",
+      "kind": "etc",
+      "icon": "icon.etc_spell_shot_red_i01",
+      "stackable": true,
+      "price": 245,
+      "weight": 3,
+      "shotGrade": "b",
+      "blessedSpiritshot": true
+    },
+    {
+      "id": 3951,
+      "name": "Blessed Spiritshot (A-Grade)",
+      "kind": "etc",
+      "icon": "icon.etc_spell_shot_silver_i01",
+      "stackable": true,
+      "price": 290,
+      "weight": 2,
+      "shotGrade": "a",
+      "blessedSpiritshot": true
+    },
+    {
+      "id": 3952,
+      "name": "Blessed Spiritshot (S-Grade)",
+      "kind": "etc",
+      "icon": "icon.etc_spell_shot_gold_i01",
+      "stackable": true,
+      "price": 350,
+      "weight": 2,
+      "shotGrade": "s",
+      "blessedSpiritshot": true
+    },
+    {
       "id": 4027,
       "name": "Bouquet",
       "kind": "weapon",
@@ -32383,6 +32515,51 @@
       "weight": 600
     },
     {
+      "id": 5135,
+      "name": "Compressed Package of Soulshots (D-Grade)",
+      "kind": "etc",
+      "icon": "icon.etc_pouch_yellow_i00",
+      "stackable": false,
+      "price": 3300,
+      "weight": 450
+    },
+    {
+      "id": 5136,
+      "name": "Compressed Package of Soulshots (C-Grade)",
+      "kind": "etc",
+      "icon": "icon.etc_pouch_yellow_i00",
+      "stackable": false,
+      "price": 4950,
+      "weight": 450
+    },
+    {
+      "id": 5137,
+      "name": "Compressed Package of Soulshots (B-Grade)",
+      "kind": "etc",
+      "icon": "icon.etc_pouch_yellow_i00",
+      "stackable": false,
+      "price": 16500,
+      "weight": 300
+    },
+    {
+      "id": 5138,
+      "name": "Compressed Package of Soulshots (A-Grade)",
+      "kind": "etc",
+      "icon": "icon.etc_pouch_yellow_i00",
+      "stackable": false,
+      "price": 26400,
+      "weight": 300
+    },
+    {
+      "id": 5139,
+      "name": "Compressed Package of Soulshots (S-Grade)",
+      "kind": "etc",
+      "icon": "icon.etc_pouch_yellow_i00",
+      "stackable": false,
+      "price": 33000,
+      "weight": 300
+    },
+    {
       "id": 5140,
       "name": "Compressed Package of Spiritshots: No Grade",
       "kind": "etc",
@@ -32391,12 +32568,102 @@
       "weight": 750
     },
     {
+      "id": 5141,
+      "name": "Compressed Package of Spiritshots (D-Grade)",
+      "kind": "etc",
+      "icon": "icon.etc_pouch_yellow_i00",
+      "stackable": false,
+      "price": 5940,
+      "weight": 750
+    },
+    {
+      "id": 5142,
+      "name": "Compressed Package of Spiritshots (C-Grade)",
+      "kind": "etc",
+      "icon": "icon.etc_pouch_yellow_i00",
+      "stackable": false,
+      "price": 11550,
+      "weight": 450
+    },
+    {
+      "id": 5143,
+      "name": "Compressed Package of Spiritshots (B-Grade)",
+      "kind": "etc",
+      "icon": "icon.etc_pouch_yellow_i00",
+      "stackable": false,
+      "price": 33000,
+      "weight": 450
+    },
+    {
+      "id": 5144,
+      "name": "Compressed Package of Spiritshots (A-Grade)",
+      "kind": "etc",
+      "icon": "icon.etc_pouch_yellow_i00",
+      "stackable": false,
+      "price": 39600,
+      "weight": 300
+    },
+    {
+      "id": 5145,
+      "name": "Compressed Package of Spiritshots (S-Grade)",
+      "kind": "etc",
+      "icon": "icon.etc_pouch_yellow_i00",
+      "stackable": false,
+      "price": 49500,
+      "weight": 300
+    },
+    {
       "id": 5146,
       "name": "Compressed Package of Blessed Spiritshots: No Grade",
       "kind": "etc",
       "icon": "icon.etc_pouch_yellow_i00",
       "price": 11550,
       "weight": 750
+    },
+    {
+      "id": 5147,
+      "name": "Compressed Package of Blessed Spiritshots (D-Grade)",
+      "kind": "etc",
+      "icon": "icon.etc_pouch_yellow_i00",
+      "stackable": false,
+      "price": 14850,
+      "weight": 750
+    },
+    {
+      "id": 5148,
+      "name": "Compressed Package of Blessed Spiritshots (C-Grade)",
+      "kind": "etc",
+      "icon": "icon.etc_pouch_yellow_i00",
+      "stackable": false,
+      "price": 29700,
+      "weight": 450
+    },
+    {
+      "id": 5149,
+      "name": "Compressed Package of Blessed Spiritshots (B-Grade)",
+      "kind": "etc",
+      "icon": "icon.etc_pouch_yellow_i00",
+      "stackable": false,
+      "price": 80850,
+      "weight": 450
+    },
+    {
+      "id": 5150,
+      "name": "Compressed Package of Blessed Spiritshots (A-Grade)",
+      "kind": "etc",
+      "icon": "icon.etc_pouch_yellow_i00",
+      "stackable": false,
+      "price": 95700,
+      "weight": 300
+    },
+    {
+      "id": 5151,
+      "name": "Compressed Package of Blessed Spiritshots (S-Grade)",
+      "kind": "etc",
+      "icon": "icon.etc_pouch_yellow_i00",
+      "stackable": false,
+      "price": 115500,
+      "weight": 300
     },
     {
       "id": 5158,
@@ -32794,6 +33061,51 @@
       "weight": 600
     },
     {
+      "id": 5251,
+      "name": "Greater Compressed Package of Soulshots (D-Grade)",
+      "kind": "etc",
+      "icon": "icon.etc_pouch_gray_i00",
+      "stackable": false,
+      "price": 11000,
+      "weight": 450
+    },
+    {
+      "id": 5252,
+      "name": "Greater Compressed Package of Soulshots (C-Grade)",
+      "kind": "etc",
+      "icon": "icon.etc_pouch_gray_i00",
+      "stackable": false,
+      "price": 16500,
+      "weight": 450
+    },
+    {
+      "id": 5253,
+      "name": "Greater Compressed Package of Soulshots (B-Grade)",
+      "kind": "etc",
+      "icon": "icon.etc_pouch_gray_i00",
+      "stackable": false,
+      "price": 55000,
+      "weight": 300
+    },
+    {
+      "id": 5254,
+      "name": "Greater Compressed Package of Soulshots (A-Grade)",
+      "kind": "etc",
+      "icon": "icon.etc_pouch_gray_i00",
+      "stackable": false,
+      "price": 88000,
+      "weight": 300
+    },
+    {
+      "id": 5255,
+      "name": "Greater Compressed Package of Soulshots (S-Grade)",
+      "kind": "etc",
+      "icon": "icon.etc_pouch_gray_i00",
+      "stackable": false,
+      "price": 120000,
+      "weight": 300
+    },
+    {
       "id": 5256,
       "name": "Greater Compressed Package of Spiritshots: No-grade",
       "kind": "etc",
@@ -32802,12 +33114,102 @@
       "weight": 750
     },
     {
+      "id": 5257,
+      "name": "Greater Compressed Package of Spiritshots (D-Grade)",
+      "kind": "etc",
+      "icon": "icon.etc_pouch_gray_i00",
+      "stackable": false,
+      "price": 19800,
+      "weight": 750
+    },
+    {
+      "id": 5258,
+      "name": "Greater Compressed Package of Spiritshots (C-Grade)",
+      "kind": "etc",
+      "icon": "icon.etc_pouch_gray_i00",
+      "stackable": false,
+      "price": 38500,
+      "weight": 450
+    },
+    {
+      "id": 5259,
+      "name": "Greater Compressed Package of Spiritshots (B-Grade)",
+      "kind": "etc",
+      "icon": "icon.etc_pouch_gray_i00",
+      "stackable": false,
+      "price": 110000,
+      "weight": 450
+    },
+    {
+      "id": 5260,
+      "name": "Greater Compressed Package of Spiritshots (A-Grade)",
+      "kind": "etc",
+      "icon": "icon.etc_pouch_gray_i00",
+      "stackable": false,
+      "price": 132000,
+      "weight": 300
+    },
+    {
+      "id": 5261,
+      "name": "Greater Compressed Package of Spiritshots (S-Grade)",
+      "kind": "etc",
+      "icon": "icon.etc_pouch_gray_i00",
+      "stackable": false,
+      "price": 180000,
+      "weight": 300
+    },
+    {
       "id": 5262,
       "name": "Greater Compressed Package of Blessed Spiritshots: No-grade",
       "kind": "etc",
       "icon": "icon.etc_pouch_gray_i00",
       "price": 38500,
       "weight": 750
+    },
+    {
+      "id": 5263,
+      "name": "Greater Compressed Package of Blessed Spiritshots (D-Grade)",
+      "kind": "etc",
+      "icon": "icon.etc_pouch_gray_i00",
+      "stackable": false,
+      "price": 49500,
+      "weight": 750
+    },
+    {
+      "id": 5264,
+      "name": "Greater Compressed Package of Blessed Spiritshots (C-Grade)",
+      "kind": "etc",
+      "icon": "icon.etc_pouch_gray_i00",
+      "stackable": false,
+      "price": 99000,
+      "weight": 450
+    },
+    {
+      "id": 5265,
+      "name": "Greater Compressed Package of Blessed Spiritshots (B-Grade)",
+      "kind": "etc",
+      "icon": "icon.etc_pouch_gray_i00",
+      "stackable": false,
+      "price": 269500,
+      "weight": 450
+    },
+    {
+      "id": 5266,
+      "name": "Greater Compressed Package of Blessed Spiritshots (A-Grade)",
+      "kind": "etc",
+      "icon": "icon.etc_pouch_gray_i00",
+      "stackable": false,
+      "price": 319000,
+      "weight": 300
+    },
+    {
+      "id": 5267,
+      "name": "Greater Compressed Package of Blessed Spiritshots (S-Grade)",
+      "kind": "etc",
+      "icon": "icon.etc_pouch_gray_i00",
+      "stackable": false,
+      "price": 419000,
+      "weight": 300
     },
     {
       "id": 5284,
@@ -38718,6 +39120,33 @@
       "icon": "icon.etc_codex_of_giant_i00",
       "price": 500000,
       "weight": 10
+    },
+    {
+      "id": 6645,
+      "name": "Beast Soulshot",
+      "kind": "etc",
+      "icon": "icon.etc_beast_soul_shot_i00",
+      "stackable": true,
+      "price": 20,
+      "weight": 1
+    },
+    {
+      "id": 6646,
+      "name": "Beast Spiritshot",
+      "kind": "etc",
+      "icon": "icon.etc_beast_spirit_shot_i00",
+      "stackable": true,
+      "price": 40,
+      "weight": 2
+    },
+    {
+      "id": 6647,
+      "name": "Blessed Beast Spiritshot",
+      "kind": "etc",
+      "icon": "icon.etc_blessed_beast_spirit_shot_i00",
+      "stackable": true,
+      "price": 100,
+      "weight": 2
     },
     {
       "id": 6651,
