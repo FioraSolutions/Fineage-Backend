@@ -2,6 +2,7 @@ using Fineage.Game;
 using Fineage.Game.Recipes;
 using Fineage.Game.Shops;
 using Fineage.Protocol;
+using Fineage.Zone.Craft;
 using Fineage.Zone.Trade;
 
 namespace Fineage.Zone.World;
@@ -61,24 +62,23 @@ public sealed partial class ZoneWorld
             ClosePrivateStore(player.ObjectId, standUp: false);
             return null;
         }
-        if (rows.Length > CraftProtocol.ManufactureSlots)
-            return CraftProtocol.Limit;
+        if (ManufactureRules.OpenListLimitError(rows.Length) is { } limitError)
+            return limitError;
 
         var listings = new List<ManufactureListing>(rows.Length);
         var seen = new HashSet<int>();
         foreach (var row in rows)
         {
-            if (row.RecipeId < 1 || row.Price < 0)
-                return PrivateStoreProtocol.Item;
-            if (!seen.Add(row.RecipeId))
-                return PrivateStoreProtocol.Item;
-            if (!_game.Recipes.TryGet(row.RecipeId, out var recipe))
-                return CraftProtocol.Unknown;
-            if (!player.KnownRecipes.Contains(recipe.Id))
-                return CraftProtocol.NotLearned;
-            if (row.Price > ShopTrade.MaxAdena)
-                return PrivateStoreProtocol.Adena;
-            listings.Add(new ManufactureListing { RecipeId = recipe.Id, Price = row.Price });
+            bool duplicate = !seen.Add(row.RecipeId);
+            bool known = _game.Recipes.TryGet(row.RecipeId, out var recipe);
+            if (ManufactureRules.OpenRowError(
+                    row.RecipeId,
+                    row.Price,
+                    duplicate,
+                    known,
+                    known && player.KnownRecipes.Contains(recipe!.Id)) is { } rowError)
+                return rowError;
+            listings.Add(new ManufactureListing { RecipeId = recipe!.Id, Price = row.Price });
         }
 
         player.PrivateSellList.Clear();
@@ -93,15 +93,18 @@ public sealed partial class ZoneWorld
     {
         if (!IsLive(session) || !_byId.TryGetValue(session.ObjectId, out var visitor))
             return "world";
-        if (!_byId.TryGetValue(request.ManufacturerObjectId, out var maker) || maker.Kind != ZoneEntityKind.Player)
-            return CraftProtocol.Closed;
-        if (maker.PrivateStoreType != PrivateStoreProtocol.TypeManufacture
-            || maker.ManufactureList.All(row => row.RecipeId != request.RecipeId))
-            return CraftProtocol.Closed;
-        if (!StoreInRange(visitor, maker))
-            return CraftProtocol.Range;
+        bool makerPlayer = _byId.TryGetValue(request.ManufacturerObjectId, out var maker)
+            && maker.Kind == ZoneEntityKind.Player;
+        bool listingOpen = makerPlayer
+            && maker!.PrivateStoreType == PrivateStoreProtocol.TypeManufacture
+            && maker.ManufactureList.Any(row => row.RecipeId == request.RecipeId);
+        if (ManufactureRules.MakeInfoError(
+                makerPlayer,
+                listingOpen,
+                makerPlayer && StoreInRange(visitor, maker!)) is { } infoError)
+            return infoError;
 
-        FanoutRecipeShopItemInfo(visitor.ObjectId, maker, request.RecipeId, result: 0);
+        FanoutRecipeShopItemInfo(visitor.ObjectId, maker!, request.RecipeId, result: 0);
         return null;
     }
 
@@ -109,50 +112,45 @@ public sealed partial class ZoneWorld
     {
         if (!IsLive(session) || !_byId.TryGetValue(session.ObjectId, out var customer) || customer.Inventory == null)
             return "world";
-        if (customer.Dead)
-            return InventoryProtocol.Dead;
-        if (customer.PrivateStoreType != PrivateStoreProtocol.TypeNone)
-            return CraftProtocol.Busy;
-        if (_tradeByPlayer.ContainsKey(customer.ObjectId))
-            return CraftProtocol.Busy;
-        if (!_byId.TryGetValue(request.ManufacturerObjectId, out var maker)
-            || maker.Kind != ZoneEntityKind.Player
-            || maker.Inventory == null)
-            return CraftProtocol.Closed;
-        if (maker.ObjectId == customer.ObjectId)
-            return "bad_request";
-        if (maker.PrivateStoreType != PrivateStoreProtocol.TypeManufacture)
-            return CraftProtocol.Closed;
-        if (!StoreInRange(customer, maker))
-            return CraftProtocol.Range;
-        if (maker.Dead)
-            return CraftProtocol.Closed;
+        _byId.TryGetValue(request.ManufacturerObjectId, out var makerCandidate);
+        bool makerOk = makerCandidate != null
+            && makerCandidate.Kind == ZoneEntityKind.Player
+            && makerCandidate.Inventory != null;
+        var listing = makerOk
+            ? makerCandidate!.ManufactureList.FirstOrDefault(row => row.RecipeId == request.RecipeId)
+            : null;
+        RecipeDefinition? recipeCandidate = null;
+        bool recipeKnown = listing != null && _game.Recipes.TryGet(listing.RecipeId, out recipeCandidate);
+        int skillId = recipeKnown
+            ? (recipeCandidate!.Dwarven ? RecipeCatalog.CreateDwarvenSkillId : RecipeCatalog.CreateCommonSkillId)
+            : 0;
+        bool skillOk = recipeKnown
+            && makerCandidate!.KnownSkills.TryGetValue(skillId, out int skillLevel)
+            && skillLevel >= recipeCandidate!.Level;
+        long fee = listing?.Price ?? 0;
+        if (ManufactureRules.MakeItemError(
+                customerDead: customer.Dead,
+                customerStoreOpen: customer.PrivateStoreType != PrivateStoreProtocol.TypeNone,
+                customerInTrade: _tradeByPlayer.ContainsKey(customer.ObjectId),
+                makerValidManufacture: makerOk && makerCandidate!.PrivateStoreType == PrivateStoreProtocol.TypeManufacture,
+                selfTarget: makerOk && makerCandidate!.ObjectId == customer.ObjectId,
+                inRange: makerOk && StoreInRange(customer, makerCandidate!),
+                makerDead: makerOk && makerCandidate!.Dead,
+                listingPresent: listing != null,
+                recipeKnown: recipeKnown,
+                recipeLearned: recipeKnown && makerCandidate!.KnownRecipes.Contains(recipeCandidate!.Id),
+                skillLevelOk: skillOk,
+                makerCurMp: makerOk ? makerCandidate!.CurMp : 0,
+                mpConsume: recipeKnown ? recipeCandidate!.MpConsume : 0,
+                fee: fee,
+                customerCanPayFee: fee <= 0 || customer.Inventory.CountOf(ShopTrade.AdenaItemId) >= fee,
+                makerCanReceiveFee: fee <= 0
+                    || (makerOk && makerCandidate!.Inventory!.CountOf(ShopTrade.AdenaItemId) + fee <= ShopTrade.MaxAdena)) is { } makeError)
+            return makeError;
 
-        var listing = maker.ManufactureList.FirstOrDefault(row => row.RecipeId == request.RecipeId);
-        if (listing == null)
-            return CraftProtocol.Closed;
-        if (!_game.Recipes.TryGet(listing.RecipeId, out var recipe))
-            return CraftProtocol.Unknown;
-        if (!maker.KnownRecipes.Contains(recipe.Id))
-            return CraftProtocol.NotLearned;
-
-        int skillId = recipe.Dwarven ? RecipeCatalog.CreateDwarvenSkillId : RecipeCatalog.CreateCommonSkillId;
-        if (!maker.KnownSkills.TryGetValue(skillId, out int skillLevel) || skillLevel < recipe.Level)
-            return CraftProtocol.Skill;
-        if (maker.CurMp < recipe.MpConsume)
-            return CraftProtocol.Mp;
-
-        long fee = listing.Price;
-        if (fee > ShopTrade.MaxAdena)
-            return CraftProtocol.Adena;
-        if (fee > 0 && customer.Inventory.CountOf(ShopTrade.AdenaItemId) < fee)
-            return CraftProtocol.Adena;
-        if (fee > 0)
-        {
-            long makerAdena = maker.Inventory.CountOf(ShopTrade.AdenaItemId);
-            if (makerAdena + fee > ShopTrade.MaxAdena)
-                return CraftProtocol.Adena;
-        }
+        var maker = makerCandidate!;
+        var makerInventory = maker.Inventory!;
+        var recipe = recipeCandidate!;
 
         foreach (var ing in recipe.Ingredients)
         {
@@ -180,7 +178,7 @@ public sealed partial class ZoneWorld
         var makerChanges = new List<InventoryUpdateEntryMsg>();
 
         // Mobius: fee first, then materials, then success roll (fee kept on fail).
-        if (fee > 0 && !TransferAdena(customer.Inventory, maker.Inventory, (int)fee, customerChanges, makerChanges))
+        if (fee > 0 && !TransferAdena(customer.Inventory, makerInventory, (int)fee, customerChanges, makerChanges))
             return CraftProtocol.Adena;
 
         foreach (var ing in recipe.Ingredients)
@@ -213,8 +211,7 @@ public sealed partial class ZoneWorld
             });
         }
 
-        bool success = recipe.SuccessRate >= 100
-            || _spawnRandom.Next(100) < recipe.SuccessRate;
+        bool success = CraftRules.Succeeds(recipe.SuccessRate, _spawnRandom.Next(100));
         int result = success ? 0 : 1;
         if (success)
         {
@@ -227,7 +224,7 @@ public sealed partial class ZoneWorld
 
         SaveInventory(session, customer.Inventory);
         if (maker.Session != null)
-            SaveInventory(maker.Session, maker.Inventory);
+            SaveInventory(maker.Session, makerInventory);
 
         if (customerChanges.Count > 0)
         {
