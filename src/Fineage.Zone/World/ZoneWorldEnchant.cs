@@ -1,5 +1,6 @@
 using Fineage.Game;
 using Fineage.Protocol;
+using Fineage.Zone.Inventory;
 
 namespace Fineage.Zone.World;
 
@@ -47,12 +48,10 @@ public sealed partial class ZoneWorld
         }
 
         var scroll = player.Inventory!.Find(objectId);
-        if (scroll == null)
-            return InventoryProtocol.NotOwned;
-        if (scroll.Template.Scroll == null)
-            return EnchantProtocol.NotScroll;
+        if (EnchantSessionRules.RequestError(scroll != null, scroll?.Template.Scroll != null) is { } requestError)
+            return requestError;
 
-        player.ActiveEnchantObjectId = scroll.ObjectId;
+        player.ActiveEnchantObjectId = scroll!.ObjectId;
         var select = EnchantLines.Select(scroll);
         NetBridge?.FanoutSystemMessage([session.ObjectId], new SystemMessageMsg
         {
@@ -71,8 +70,8 @@ public sealed partial class ZoneWorld
             ClearEnchantIfDead(session, error);
             return error;
         }
-        if (player.ActiveEnchantObjectId == 0)
-            return EnchantProtocol.NoRequest;
+        if (EnchantSessionRules.CancelError(player.ActiveEnchantObjectId != 0) is { } cancelError)
+            return cancelError;
 
         player.ActiveEnchantObjectId = 0;
         var cancelled = EnchantLines.Cancelled();
@@ -99,18 +98,22 @@ public sealed partial class ZoneWorld
         }
 
         var inventory = player.Inventory!;
-        if (player.ActiveEnchantObjectId == 0)
-            return EnchantProtocol.NoRequest;
-
         var scroll = inventory.Find(player.ActiveEnchantObjectId);
-        player.ActiveEnchantObjectId = 0;
-        if (scroll?.Template.Scroll is not { } definition)
-            return scroll == null ? InventoryProtocol.NotOwned : EnchantProtocol.NotScroll;
-
         var target = inventory.Find(objectId);
-        if (target == null)
-            return InventoryProtocol.NotOwned;
-        if (EnchantRules.Reject(target.Template, target.EnchantLevel, definition) is { } denied)
+        if (EnchantSessionRules.ConfirmError(
+                player.ActiveEnchantObjectId != 0,
+                scroll != null,
+                scroll?.Template.Scroll != null,
+                target != null) is { } confirmError)
+        {
+            // Mobius clears the pending request when confirm is answered (even on reject).
+            player.ActiveEnchantObjectId = 0;
+            return confirmError;
+        }
+
+        player.ActiveEnchantObjectId = 0;
+        var definition = scroll!.Template.Scroll!;
+        if (EnchantRules.Reject(target!.Template, target.EnchantLevel, definition) is { } denied)
             return DenyCode(denied);
 
         var before = PaperdollSnapshot(inventory);
