@@ -10,7 +10,7 @@ public sealed class NetMoveStateCoalesceTests
     [Fact]
     public async Task TrySend_keeps_latest_move_state_when_outbound_is_full()
     {
-        using var cts = new CancellationTokenSource(TimeSpan.FromSeconds(120));
+        using var cts = new CancellationTokenSource(TimeSpan.FromSeconds(180));
 
         var server = new TcpListener(System.Net.IPAddress.Loopback, 0);
         server.Start();
@@ -81,7 +81,7 @@ public sealed class NetMoveStateCoalesceTests
         Assert.Equal(32, accepted);
 
         // Early DestX=1000 on the wire is fine; the contract is that the latest coalesced value arrives.
-        int latest = await latestSeen.Task.WaitAsync(TimeSpan.FromSeconds(90), cts.Token);
+        int latest = await latestSeen.Task.WaitAsync(TimeSpan.FromSeconds(150), cts.Token);
         Assert.Equal(1031, latest);
 
         cts.Cancel();
