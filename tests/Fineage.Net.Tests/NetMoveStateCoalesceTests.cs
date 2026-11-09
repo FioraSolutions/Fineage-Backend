@@ -81,7 +81,17 @@ public sealed class NetMoveStateCoalesceTests
         Assert.Equal(32, accepted);
 
         // Early DestX=1000 on the wire is fine; the contract is that the latest coalesced value arrives.
-        int latest = await latestSeen.Task.WaitAsync(TimeSpan.FromSeconds(150), cts.Token);
+        // Poke the outbound path as the reader drains fillers so stashed MoveState can flush.
+        byte[] poke = new byte[16];
+        using var pokeCts = CancellationTokenSource.CreateLinkedTokenSource(cts.Token);
+        pokeCts.CancelAfter(TimeSpan.FromSeconds(150));
+        while (!latestSeen.Task.IsCompleted)
+        {
+            pokeCts.Token.ThrowIfCancellationRequested();
+            conn.TrySend(NetOpcode.SystemMessage, poke);
+            await Task.WhenAny(latestSeen.Task, Task.Delay(20, pokeCts.Token));
+        }
+        int latest = await latestSeen.Task;
         Assert.Equal(1031, latest);
 
         cts.Cancel();
