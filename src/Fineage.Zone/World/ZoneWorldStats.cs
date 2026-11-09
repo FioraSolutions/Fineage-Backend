@@ -17,8 +17,8 @@ public sealed partial class ZoneWorld
     /// <list type="number">
     /// <item><see cref="PlayerEffectiveAttributes"/> — template + henna → bonus table</item>
     /// <item><see cref="PlayerGearBases"/> — weapon/armor/jewels + <c>FuncEnchant</c></item>
-    /// <item>Mobius base formulas (STR/levelMod/…)</item>
-    /// <item><see cref="PlayerStatMods"/> — buffs, passives, clan/set skills, weight/grade/death</item>
+    /// <item><see cref="PlayerFormulaBases"/> — Mobius STR/levelMod/… formulas</item>
+    /// <item><see cref="PlayerStatMods"/> — abnormals → passives → sets → weight/grade/death</item>
     /// </list>
     /// Thin <c>IStatCalculator</c> stays deferred; these named layers are the SoT for parity tests.
     /// </summary>
@@ -30,28 +30,27 @@ public sealed partial class ZoneWorld
 
         var attrs = EffectiveAttributes(player, t);
         var gear = GearBases(player, t);
-        double levelMod = PlayerGearBases.LevelMod(level);
+        var formula = PlayerFormulaBases.From(attrs, gear, t.MAtkSpd, level);
         var mods = PlayerStatMods(player);
 
         return new PlayerCombatStats(
-            PAtk: mods.Apply(CombatStat.PAtk, (int)(gear.PAtk * attrs.StrBonus * levelMod)),
-            MAtk: mods.Apply(CombatStat.MAtk, (int)(gear.MAtk * attrs.IntBonus * attrs.IntBonus * levelMod * levelMod)),
-            PDef: Math.Max(1, mods.Apply(CombatStat.PDef, (int)(gear.PDef * levelMod))),
-            MDef: Math.Max(1, mods.Apply(CombatStat.MDef, (int)(gear.MDef * attrs.MenBonus * levelMod))),
-            PAtkSpd: Math.Max(1, mods.Apply(CombatStat.PAtkSpd, (int)(gear.PAtkSpd * attrs.DexBonus))),
-            MAtkSpd: Math.Max(1, mods.Apply(CombatStat.MAtkSpd, (int)(t.MAtkSpd * attrs.WitBonus))),
-            Accuracy: mods.Apply(CombatStat.Accuracy, (int)(Math.Sqrt(attrs.Dex) * 6 + level)),
-            CritRate: mods.Apply(CombatStat.CritRate, (int)(gear.CritRate * attrs.DexBonus * 10)),
+            PAtk: mods.Apply(CombatStat.PAtk, formula.PAtk),
+            MAtk: mods.Apply(CombatStat.MAtk, formula.MAtk),
+            PDef: Math.Max(1, mods.Apply(CombatStat.PDef, formula.PDef)),
+            MDef: Math.Max(1, mods.Apply(CombatStat.MDef, formula.MDef)),
+            PAtkSpd: Math.Max(1, mods.Apply(CombatStat.PAtkSpd, formula.PAtkSpd)),
+            MAtkSpd: Math.Max(1, mods.Apply(CombatStat.MAtkSpd, formula.MAtkSpd)),
+            Accuracy: mods.Apply(CombatStat.Accuracy, formula.Accuracy),
+            CritRate: mods.Apply(CombatStat.CritRate, formula.CritRate),
             AttackRange: gear.AttackRange,
             Weapon: gear.Weapon,
-            Evasion: mods.Apply(CombatStat.Evasion,
-                (int)ZoneCombat.AccuracyOrEvasion(0, attrs.Dex, level) - (gear.Shielded ? gear.ShieldEvasionPenalty : 0)),
+            Evasion: mods.Apply(CombatStat.Evasion, formula.Evasion),
             RandomDamage: gear.RandomDamage,
             ShieldDef: gear.ShieldDef,
-            ShieldRate: gear.Shielded ? gear.ShieldRate * attrs.DexBonus : 0,
+            ShieldRate: formula.ShieldRate,
             Soulshots: gear.Soulshots,
             WeaponGrade: gear.WeaponGrade,
-            MCritRate: ZoneCombat.PlayerMCritRate(gear.Armed, attrs.WitBonus, mods),
+            MCritRate: (int)mods.Apply(CombatStat.MCritRate, formula.MagicCritBase) * 10,
             MagicCritDmg: mods.Apply(CombatStat.MagicCritDmg, 1d),
             CritDmg: mods.Apply(CombatStat.CritDmg, 1d),
             BlowRate: mods.Apply(CombatStat.BlowRate, 1d));
@@ -90,55 +89,47 @@ public sealed partial class ZoneWorld
     internal bool IsNight => _gameTime.IsNight(_clock().ToUnixTimeMilliseconds());
 
     /// <summary>
-    /// Buffs plus passive masteries (Mobius operateType P) whose <c>using</c> condition matches the gear, plus the
-    /// virtual Weight Penalty 4270 (<see cref="FoldWeightPenalty"/>) and Grade Penalty 4267
-    /// (<see cref="FoldGradePenalty"/>) sources. Internal so tests can assert the folds that the speed/regen/load
-    /// getters share.
-    /// <para>
-    /// Passive sources merged by <see cref="PassiveSkillLevels"/>:
-    /// trainer/auto <see cref="ZoneEntity.KnownSkills"/> (includes skill-enchant levels once EnchantSkill writes them),
-    /// and <see cref="ZoneEntity.ClanSkills"/> (Mobius <c>Clan.addSkillEffects</c> — grant path still TBD).
-    /// </para>
+    /// Named mod stages shared by combat / speed / regen / load getters:
+    /// <list type="number">
+    /// <item>Abnormals (buff/debuff XML funcs)</item>
+    /// <item>Known + clan passives (<see cref="PlayerPassiveSources"/>)</item>
+    /// <item>Complete armor-set skills</item>
+    /// <item>Virtual weight / grade / death penalties</item>
+    /// </list>
     /// </summary>
     internal CombatStatMods PlayerStatMods(ZoneEntity player)
     {
-        var mods = player.Abnormals.Count == 0 ? null : _statEffects.Collect(player.Abnormals);
-        if (mods != null && ReferenceEquals(mods, CombatStatMods.None))
-            mods = null;
-        var passiveLevels = PassiveSkillLevels(player);
-        mods = passiveLevels.Count == 0
-            ? mods
-            : _passives.CollectPassives(passiveLevels, kinds => Wearing(player, kinds), mods);
-        // Weight Penalty 4270 is added by refreshOverloaded instead of the skill book, so it is folded here; Grade
-        // Penalty 4267 comes from refreshExpertisePenalty the same way, and Death Penalty 5076 from
-        // increaseDeathPenaltyBuffLevel — none of the three live in the trainer skill book.
+        var mods = FoldAbnormals(player);
+        mods = FoldLearnedAndClanPassives(player, mods);
         mods = FoldArmorSets(player, mods);
         mods = FoldWeightPenalty(player, mods);
         mods = FoldGradePenalty(player, mods);
         return FoldDeathPenalty(player, mods);
     }
 
+    CombatStatMods? FoldAbnormals(ZoneEntity player)
+    {
+        if (player.Abnormals.Count == 0)
+            return null;
+        var mods = _statEffects.Collect(player.Abnormals);
+        return ReferenceEquals(mods, CombatStatMods.None) ? null : mods;
+    }
+
+    CombatStatMods? FoldLearnedAndClanPassives(ZoneEntity player, CombatStatMods? mods)
+    {
+        var passiveLevels = PassiveSkillLevels(player);
+        return passiveLevels.Count == 0
+            ? mods
+            : _passives.CollectPassives(passiveLevels, kinds => Wearing(player, kinds), mods);
+    }
+
     /// <summary>
     /// Skill id → level fed into <c>skill-passives.json</c> for combat mods.
-    /// <list type="bullet">
-    /// <item>KnownSkills: auto-tree + learned. EnchantSkill (Mobius) bumps the learned level in place — no extra map.</item>
-    /// <item>ClanSkills: clan book effects (376 Might, 377 Aegis, …). Populate when clan skill grant is wired;
-    /// funcs already live in <c>skill-passives.json</c>.</item>
-    /// </list>
-    /// Higher level wins on id collision.
+    /// KnownSkills (auto-tree + learned; EnchantSkill bumps level in place) plus ClanSkills
+    /// (Mobius <c>Clan.addSkillEffects</c> — grant path still TBD). Higher level wins.
     /// </summary>
-    internal static Dictionary<int, int> PassiveSkillLevels(ZoneEntity player)
-    {
-        var map = new Dictionary<int, int>(player.KnownSkills.Count + player.ClanSkills.Count);
-        foreach (var (id, level) in player.KnownSkills)
-            map[id] = level;
-        foreach (var (id, level) in player.ClanSkills)
-        {
-            if (!map.TryGetValue(id, out int have) || level > have)
-                map[id] = level;
-        }
-        return map;
-    }
+    internal static Dictionary<int, int> PassiveSkillLevels(ZoneEntity player) =>
+        PlayerPassiveSources.Merge(player.KnownSkills, player.ClanSkills);
 
     /// <summary>
     /// Mobius <c>ArmorSetListener</c>: when the worn chest matches a set and every required part is on,
