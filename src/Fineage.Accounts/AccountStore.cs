@@ -59,6 +59,12 @@ public sealed record StoredShortcut(int Slot, int Page, int Type, int Id, int Le
 /// <summary>
 /// One Mobius <c>character_skills</c> row: a skill learned from a trainer (or quest). Auto-granted skills
 /// are not stored; they are re-derived from the class tree at enter. Null <c>LearnedSkills</c> = none saved.
+/// <para>
+/// Interlude skill enchant (<c>RequestExEnchantSkill</c>) does <b>not</b> use a separate column: Mobius writes the
+/// enchanted skill level into the same <c>skill_level</c> field (enchanted ranks are extra levels on the skill
+/// definition). When Fineage wires EnchantSkill, bump <see cref="Level"/> here and rebuild KnownSkills — the
+/// passive fold already reads that level for <c>ValueAt</c>.
+/// </para>
 /// </summary>
 public sealed record StoredSkill(int SkillId, int Level)
 {
@@ -107,7 +113,10 @@ public sealed record CharacterRecord(
     IReadOnlyList<int>? KnownRecipes = null,
     IReadOnlyList<StoredSocial>? Friends = null,
     IReadOnlyList<StoredSocial>? Blocked = null,
-    bool BlockAll = false)
+    bool BlockAll = false,
+    int HennaDye1 = 0,
+    int HennaDye2 = 0,
+    int HennaDye3 = 0)
 {
     /// <summary>Remaining whole seconds until hard delete. Zero when the character is not pending.</summary>
     public int DeleteSecondsLeft(DateTimeOffset now)
@@ -232,6 +241,11 @@ public interface IAccountStore
     /// outlives the session, so the zone writes it the moment a death rolls it up.
     /// </summary>
     bool TrySaveDeathPenalty(string account, int characterId, int level);
+
+    /// <summary>
+    /// Writes the three henna dye slot ids (Mobius <c>character_hennas</c> / player henna array).
+    /// </summary>
+    bool TrySaveHenna(string account, int characterId, int dye1, int dye2, int dye3);
 
     /// <summary>
     /// Writes karma / PK / PvP kill counters (Mobius <c>characters.karma|pkkills|pvpkills</c>).
@@ -469,7 +483,10 @@ public sealed class MemoryAccountStore : IAccountStore
             KnownRecipes = character.KnownRecipes?.ToList(),
             Friends = character.Friends?.Select(f => new StoredSocialDto { ObjectId = f.ObjectId, Name = f.Name }).ToList(),
             Blocked = character.Blocked?.Select(f => new StoredSocialDto { ObjectId = f.ObjectId, Name = f.Name }).ToList(),
-            BlockAll = character.BlockAll
+            BlockAll = character.BlockAll,
+            HennaDye1 = character.HennaDye1,
+            HennaDye2 = character.HennaDye2,
+            HennaDye3 = character.HennaDye3
         };
 
     static StoredShortcutDto CopyShortcut(StoredShortcut s) => new()
@@ -729,6 +746,21 @@ public sealed class MemoryAccountStore : IAccountStore
             if (character == null)
                 return false;
             character.ClassId = classId;
+            Save();
+            return true;
+        }
+    }
+
+    public bool TrySaveHenna(string account, int characterId, int dye1, int dye2, int dye3)
+    {
+        lock (_gate)
+        {
+            var character = FindCharacter(account, characterId);
+            if (character == null)
+                return false;
+            character.HennaDye1 = Math.Max(0, dye1);
+            character.HennaDye2 = Math.Max(0, dye2);
+            character.HennaDye3 = Math.Max(0, dye3);
             Save();
             return true;
         }
@@ -1530,7 +1562,10 @@ public sealed class MemoryAccountStore : IAccountStore
             character.Blocked == null
                 ? null
                 : character.Blocked.Select(f => new StoredSocial(f.ObjectId, f.Name ?? "")).ToArray(),
-            character.BlockAll);
+            character.BlockAll,
+            character.HennaDye1,
+            character.HennaDye2,
+            character.HennaDye3);
 
     sealed class StoreFile
     {
@@ -1597,6 +1632,9 @@ public sealed class MemoryAccountStore : IAccountStore
         public List<StoredSocialDto>? Friends { get; set; }
         public List<StoredSocialDto>? Blocked { get; set; }
         public bool BlockAll { get; set; }
+        public int HennaDye1 { get; set; }
+        public int HennaDye2 { get; set; }
+        public int HennaDye3 { get; set; }
     }
 
     sealed class StoredSocialDto

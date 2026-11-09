@@ -63,27 +63,9 @@ public sealed partial class ZoneWorld
         if (_skillCombat.TryGet(request.SkillId, out var combat))
             return CastMobiusAttack(session, player, target, request.SkillId, level, combat, now);
 
-        player.CurMp = Math.Max(0, player.CurMp - levelData.MpConsume);
-        if (template.ReuseDelayMs > 0)
-            player.SkillReuseUntilMs[request.SkillId] = now + template.ReuseDelayMs;
-
-        // Legacy path: skills missing from skill-combat.json keep the old power stub.
-        int damage = Math.Max(1, levelData.Power + ZoneCombat.LegacySkillDamageBonus);
-        int hitTime = Math.Max(0, template.HitTimeMs);
-
-        // Mobius Creature.doCast: MagicSkillUse goes out now, damage lands in onMagicHitTimer after hitTime.
-        var cast = BuildCast(player, target, request.SkillId, level, template);
-        StopForCast(player, target, now);
-        FanoutSkill(player, target, cast, targetStatus: null, CasterMpStatus(player));
-
-        player.CombatUntilUnixMs = now + ClanProtocol.CombatStanceMillis;
-        session.SelectedTargetId = targetId;
-        player.CastingUntilMs = now + hitTime;
-        SetPendingHit(player, new PendingSkillHit(targetId, damage, now + hitTime));
-        if (hitTime == 0)
-            ResolvePendingHit(player, now);
-
-        return null;
+        // Fail-loud: attack skills without skill-combat.json rows must not invent damage (was power+10 stub).
+        ZoneLog.Warn($"skill-combat missing skillId={request.SkillId} — refuse cast");
+        return SkillProtocol.NoCombat;
     }
 
     string? TrySkillUseBuff(

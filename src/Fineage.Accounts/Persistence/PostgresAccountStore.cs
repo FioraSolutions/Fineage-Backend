@@ -321,6 +321,11 @@ public sealed class PostgresAccountStore : IAccountStore, IDisposable
             () => _inner.TrySaveDeathPenalty(account, characterId, level),
             conn => NormalizedStoreWriter.UpdateDeathPenalty(conn, characterId, level));
 
+    public bool TrySaveHenna(string account, int characterId, int dye1, int dye2, int dye3) =>
+        RunSilent(
+            () => _inner.TrySaveHenna(account, characterId, dye1, dye2, dye3),
+            conn => NormalizedStoreWriter.UpdateHenna(conn, characterId, dye1, dye2, dye3));
+
     public bool TrySaveKarmaPk(string account, int characterId, int karma, int pkKills, int pvpKills) =>
         RunSilent(
             () => _inner.TrySaveKarmaPk(account, characterId, karma, pkKills, pvpKills),

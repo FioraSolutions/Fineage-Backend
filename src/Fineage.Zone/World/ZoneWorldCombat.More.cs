@@ -7,8 +7,8 @@ namespace Fineage.Zone.World;
 
 public sealed partial class ZoneWorld
 {
-    // Physical stats. Players: class template values (same as UserInfo); NPCs: Mobius npcs.json.
-    // TODO(combat parity): STR/level/weapon/armor/buff stat pipeline.
+    // Physical stats. Players: PlayerStats (template + henna + gear + enchant + buffs/passives/penalties/sets).
+    // NPCs: template fields folded through StatMods.
     int PlayerPAtkSpd(ZoneEntity player) => PlayerStats(player).PAtkSpd;
 
     long PlayerAttackTimeMs(int objectId) =>
@@ -58,7 +58,15 @@ public sealed partial class ZoneWorld
             ZoneCombat.AttackTraitBonus(ps.Weapon, defenceTraits, attackTraits));
     }
 
-    double NpcPDef(ZoneEntity npc) =>
-        Math.Max(1d, StatMods(npc).Apply(CombatStat.PDef, npc.PDef > 0 ? npc.PDef : Math.Max(1, npc.Level) * 40d));
+    double NpcPDef(ZoneEntity npc)
+    {
+        double raw = npc.PDef;
+        if (raw <= 0)
+        {
+            raw = Math.Max(1, npc.Level) * 40d;
+            ZoneLog.Warn($"npc PDef missing npcId={npc.NpcId} object={npc.ObjectId} level={npc.Level} — fallback level*40");
+        }
+        return Math.Max(1d, StatMods(npc).Apply(CombatStat.PDef, raw));
+    }
 
 }

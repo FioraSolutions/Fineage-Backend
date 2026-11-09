@@ -122,7 +122,10 @@ static class NormalizedStoreWriter
             character.PvpKills,
             character.CreatedAt,
             character.LastAccess,
-            character.DeleteAt);
+            character.DeleteAt,
+            character.HennaDye1,
+            character.HennaDye2,
+            character.HennaDye3);
 
         ReplaceItems(conn, tx, character.Id, character.Items, character.Warehouse);
         ReplaceQuests(conn, tx, character.Id, character.Quests);
@@ -201,6 +204,23 @@ static class NormalizedStoreWriter
         cmd.CommandText = "UPDATE characters SET death_penalty_level = @level, updated_at = now() WHERE id = @id";
         cmd.Parameters.AddWithValue("id", characterId);
         cmd.Parameters.AddWithValue("level", level);
+        cmd.ExecuteNonQuery();
+    }
+
+    /// <summary>Mobius henna dye slots (three tattoos).</summary>
+    public static void UpdateHenna(NpgsqlConnection conn, int characterId, int dye1, int dye2, int dye3)
+    {
+        using var cmd = conn.CreateCommand();
+        cmd.CommandText =
+            """
+            UPDATE characters
+            SET henna_dye1 = @d1, henna_dye2 = @d2, henna_dye3 = @d3, updated_at = now()
+            WHERE id = @id
+            """;
+        cmd.Parameters.AddWithValue("id", characterId);
+        cmd.Parameters.AddWithValue("d1", Math.Max(0, dye1));
+        cmd.Parameters.AddWithValue("d2", Math.Max(0, dye2));
+        cmd.Parameters.AddWithValue("d3", Math.Max(0, dye3));
         cmd.ExecuteNonQuery();
     }
 
@@ -541,7 +561,10 @@ static class NormalizedStoreWriter
             ReadInt(ch, "pvpKills", 0),
             ReadDate(ch, "createdAt") ?? DateTimeOffset.UtcNow,
             ReadDate(ch, "lastAccess"),
-            ReadDate(ch, "deleteAt"));
+            ReadDate(ch, "deleteAt"),
+            ReadInt(ch, "hennaDye1", 0),
+            ReadInt(ch, "hennaDye2", 0),
+            ReadInt(ch, "hennaDye3", 0));
 
         var inventory = ReadItems(ch, "items");
         var warehouse = ReadItems(ch, "warehouse");
@@ -585,7 +608,10 @@ static class NormalizedStoreWriter
         int pvpKills,
         DateTimeOffset createdAt,
         DateTimeOffset? lastAccess,
-        DateTimeOffset? deleteAt)
+        DateTimeOffset? deleteAt,
+        int hennaDye1 = 0,
+        int hennaDye2 = 0,
+        int hennaDye3 = 0)
     {
         using var cmd = conn.CreateCommand();
         cmd.Transaction = tx;
@@ -597,6 +623,7 @@ static class NormalizedStoreWriter
                 exp, sp, title, newbie, max_hp, hp, max_mp, mp,
                 clan_id, clan_join_expiry_unix_ms, clan_create_expiry_unix_ms,
                 death_penalty_level, karma, pk_kills, pvp_kills,
+                henna_dye1, henna_dye2, henna_dye3,
                 created_at, last_access, delete_at, payload, updated_at)
             VALUES (
                 @id, @account, @name, @classId, @race, @sex, @level,
@@ -604,6 +631,7 @@ static class NormalizedStoreWriter
                 @exp, @sp, @title, @newbie, @maxHp, @hp, @maxMp, @mp,
                 @clanId, @clanJoin, @clanCreate,
                 @deathPenalty, @karma, @pk, @pvp,
+                @henna1, @henna2, @henna3,
                 @createdAt, @lastAccess, @deleteAt, '{}'::jsonb, now())
             ON CONFLICT (id) DO UPDATE SET
                 account = EXCLUDED.account,
@@ -634,6 +662,9 @@ static class NormalizedStoreWriter
                 karma = EXCLUDED.karma,
                 pk_kills = EXCLUDED.pk_kills,
                 pvp_kills = EXCLUDED.pvp_kills,
+                henna_dye1 = EXCLUDED.henna_dye1,
+                henna_dye2 = EXCLUDED.henna_dye2,
+                henna_dye3 = EXCLUDED.henna_dye3,
                 created_at = EXCLUDED.created_at,
                 last_access = EXCLUDED.last_access,
                 delete_at = EXCLUDED.delete_at,
@@ -668,6 +699,9 @@ static class NormalizedStoreWriter
         cmd.Parameters.AddWithValue("karma", Math.Max(0, karma));
         cmd.Parameters.AddWithValue("pk", Math.Max(0, pkKills));
         cmd.Parameters.AddWithValue("pvp", Math.Max(0, pvpKills));
+        cmd.Parameters.AddWithValue("henna1", Math.Max(0, hennaDye1));
+        cmd.Parameters.AddWithValue("henna2", Math.Max(0, hennaDye2));
+        cmd.Parameters.AddWithValue("henna3", Math.Max(0, hennaDye3));
         cmd.Parameters.AddWithValue("createdAt", createdAt.UtcDateTime);
         cmd.Parameters.AddWithValue("lastAccess", (object?)lastAccess?.UtcDateTime ?? DBNull.Value);
         cmd.Parameters.AddWithValue("deleteAt", (object?)deleteAt?.UtcDateTime ?? DBNull.Value);

@@ -80,6 +80,7 @@ static class NormalizedStoreReader
                c.exp, c.sp, c.title, c.newbie, c.max_hp, c.hp, c.max_mp, c.mp,
                c.clan_id, c.clan_join_expiry_unix_ms, c.clan_create_expiry_unix_ms,
                c.death_penalty_level, c.karma, c.pk_kills, c.pvp_kills,
+               c.henna_dye1, c.henna_dye2, c.henna_dye3,
                c.created_at, c.last_access, c.delete_at
         FROM characters c
         """;
@@ -114,6 +115,9 @@ static class NormalizedStoreReader
         int Karma,
         int PkKills,
         int PvpKills,
+        int HennaDye1,
+        int HennaDye2,
+        int HennaDye3,
         DateTimeOffset CreatedAt,
         DateTimeOffset LastAccess,
         DateTimeOffset? DeleteAt);
@@ -159,13 +163,16 @@ static class NormalizedStoreReader
             reader.GetInt32(26),
             reader.GetInt32(27),
             reader.GetInt32(28),
-            new DateTimeOffset(DateTime.SpecifyKind(reader.GetDateTime(29), DateTimeKind.Utc)),
-            reader.IsDBNull(30)
+            reader.GetInt32(29),
+            reader.GetInt32(30),
+            reader.GetInt32(31),
+            new DateTimeOffset(DateTime.SpecifyKind(reader.GetDateTime(32), DateTimeKind.Utc)),
+            reader.IsDBNull(33)
                 ? default
-                : new DateTimeOffset(DateTime.SpecifyKind(reader.GetDateTime(30), DateTimeKind.Utc)),
-            reader.IsDBNull(31)
+                : new DateTimeOffset(DateTime.SpecifyKind(reader.GetDateTime(33), DateTimeKind.Utc)),
+            reader.IsDBNull(34)
                 ? null
-                : new DateTimeOffset(DateTime.SpecifyKind(reader.GetDateTime(31), DateTimeKind.Utc)));
+                : new DateTimeOffset(DateTime.SpecifyKind(reader.GetDateTime(34), DateTimeKind.Utc)));
 
     static CharacterRecord Materialize(NpgsqlConnection conn, CharacterStub stub)
     {
@@ -212,7 +219,10 @@ static class NormalizedStoreReader
             stub.DeathPenaltyLevel,
             stub.Karma,
             stub.PkKills,
-            stub.PvpKills);
+            stub.PvpKills,
+            HennaDye1: stub.HennaDye1,
+            HennaDye2: stub.HennaDye2,
+            HennaDye3: stub.HennaDye3);
     }
 
     static List<StoredItem> LoadItems(NpgsqlConnection conn, int characterId, params string[] locs)

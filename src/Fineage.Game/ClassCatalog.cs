@@ -35,7 +35,26 @@ public sealed class StatBonusTable
 
     public double Bonus(StatSlot stat, int value)
     {
-        var table = stat switch
+        var table = TableFor(stat);
+        if (value < 0 || value >= table.Length)
+            throw new ArgumentOutOfRangeException(nameof(value), value, "Stat value is outside the bonus table.");
+        return table[value];
+    }
+
+    /// <summary>
+    /// Same as <see cref="Bonus"/> but clamps to the table instead of throwing.
+    /// <paramref name="clamped"/> is true when the raw value was outside 0..Length-1 (henna overflow, bad data).
+    /// </summary>
+    public double BonusClamped(StatSlot stat, int value, out bool clamped)
+    {
+        var table = TableFor(stat);
+        clamped = value < 0 || value >= table.Length;
+        int idx = clamped ? Math.Clamp(value, 0, table.Length - 1) : value;
+        return table[idx];
+    }
+
+    double[] TableFor(StatSlot stat) =>
+        stat switch
         {
             StatSlot.Str => _str,
             StatSlot.Dex => _dex,
@@ -45,10 +64,6 @@ public sealed class StatBonusTable
             StatSlot.Men => _men,
             _ => throw new ArgumentOutOfRangeException(nameof(stat), stat, "Unknown stat.")
         };
-        if (value < 0 || value >= table.Length)
-            throw new ArgumentOutOfRangeException(nameof(value), value, "Stat value is outside the bonus table.");
-        return table[value];
-    }
 }
 
 /// <summary>Experience required to be each level. <see cref="ExpToBeLevel"/> is cumulative.</summary>

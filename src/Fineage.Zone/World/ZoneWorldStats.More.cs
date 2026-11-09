@@ -30,7 +30,9 @@ public sealed partial class ZoneWorld
     float FoldSpeed(ZoneEntity entity, float baseSpeed, CombatStatMods mods, int runSpeedBoost)
     {
         bool player = entity.Kind == ZoneEntityKind.Player;
-        double speed = player ? baseSpeed * SafeBonus(PlayerClasses.StatBonuses, StatSlot.Dex, entity.Dex) : baseSpeed;
+        double speed = player
+            ? baseSpeed * StatBonus(PlayerClasses.StatBonuses, StatSlot.Dex, EffectiveDex(entity))
+            : baseSpeed;
         speed = mods.Apply(CombatStat.RunSpd, speed);
         if (player)
         {
@@ -136,14 +138,37 @@ public sealed partial class ZoneWorld
     double NpcEvasion(ZoneEntity npc) =>
         StatMods(npc).Apply(CombatStat.Evasion, ZoneCombat.AccuracyOrEvasion(npc.BaseEvasion, npc.Dex, npc.Level));
     int NpcCritPermille(ZoneEntity npc) =>
-        StatMods(npc).Apply(CombatStat.CritRate, (int)(npc.BaseCritical * 10 * SafeBonus(PlayerClasses.StatBonuses, StatSlot.Dex, npc.Dex)));
+        StatMods(npc).Apply(CombatStat.CritRate, (int)(npc.BaseCritical * 10 * StatBonus(PlayerClasses.StatBonuses, StatSlot.Dex, npc.Dex)));
 
     double NpcShieldRate(ZoneEntity npc) =>
-        npc.ShieldRate * SafeBonus(PlayerClasses.StatBonuses, StatSlot.Dex, npc.Dex);
+        npc.ShieldRate * StatBonus(PlayerClasses.StatBonuses, StatSlot.Dex, npc.Dex);
 
-    static double SafeBonus(StatBonusTable table, StatSlot slot, int value)
+    /// <summary>
+    /// Stat bonus table lookup. Out-of-range values (henna push, bad data) clamp and warn —
+    /// never silently return 1.0 like the old SafeBonus swallow.
+    /// </summary>
+    static double StatBonus(StatBonusTable table, StatSlot slot, int value)
     {
-        try { return table.Bonus(slot, value); }
-        catch (ArgumentOutOfRangeException) { return 1d; }
+        double result = table.BonusClamped(slot, value, out bool clamped);
+        if (clamped)
+            ZoneLog.Warn($"stat-bonus out of range slot={slot} value={value} — clamped");
+        return result;
     }
+
+    /// <summary>Template DEX + henna (Mobius calcStat STAT_DEX before FuncMoveSpeed).</summary>
+    int EffectiveDex(ZoneEntity player)
+    {
+        if (PlayerClasses.TryGet(player.ClassId, out var t) && t != null)
+            return t.Dex + player.HennaDex;
+        return player.Dex + player.HennaDex;
+    }
+
+    int EffectiveStr(ZoneEntity player) =>
+        PlayerClasses.TryGet(player.ClassId, out var t) && t != null ? t.Str + player.HennaStr : player.HennaStr;
+
+    int EffectiveCon(ZoneEntity player) =>
+        PlayerClasses.TryGet(player.ClassId, out var t) && t != null ? t.Con + player.HennaCon : player.HennaCon;
+
+    int EffectiveMen(ZoneEntity player) =>
+        PlayerClasses.TryGet(player.ClassId, out var t) && t != null ? t.Men + player.HennaMen : player.HennaMen;
 }

@@ -39,6 +39,9 @@ sealed class ZoneCharacterPersist(IAccountStore? accounts)
     public void SaveDeathPenalty(string account, int characterId, int level) =>
         _accounts?.TrySaveDeathPenalty(account, characterId, level);
 
+    public void SaveHenna(string account, int characterId, int dye1, int dye2, int dye3) =>
+        _accounts?.TrySaveHenna(account, characterId, dye1, dye2, dye3);
+
     public void SaveKarmaPk(string account, int characterId, int karma, int pkKills, int pvpKills) =>
         _accounts?.TrySaveKarmaPk(account, characterId, karma, pkKills, pvpKills);
 

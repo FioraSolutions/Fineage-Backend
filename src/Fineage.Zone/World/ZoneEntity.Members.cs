@@ -76,6 +76,12 @@ sealed partial class ZoneEntity
     /// <summary>Trainer-learned skills (persisted; Mobius character_skills). Merged into KnownSkills.</summary>
     public Dictionary<int, int> LearnedSkills => EnsureSkills().LearnedSkills;
 
+    /// <summary>
+    /// Clan-granted skills (Mobius <c>Clan.addSkillEffects</c>). Live session map — not in character_skills.
+    /// Folds through the same passive catalog as trainer masteries once populated.
+    /// </summary>
+    public Dictionary<int, int> ClanSkills => EnsureSkills().ClanSkills;
+
     /// <summary>True while an abnormal with combat stat funcs is active (UserInfo refresh on change).</summary>
     public bool HasStatAbnormal
     {

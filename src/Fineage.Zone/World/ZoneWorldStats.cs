@@ -18,27 +18,40 @@ public sealed partial class ZoneWorld
     /// P.Def = (base 80 − default of each equipped armor slot + armor pDef) * levelMod; M.Def = base * MEN * levelMod;
     /// Pspd = (weapon pAtkSpd | 300) * DEX bonus; Cspd = base * WIT bonus; accuracy = sqrt(DEX)*6 + level;
     /// M.Def swaps naked jewel shares for jewel mDef the same way.
-    /// levelMod = (level + 89) / 100. Buffs, enchant, grade penalty and jewel M.Def are not applied yet.
+    /// levelMod = (level + 89) / 100. Then <see cref="PlayerStatMods"/> folds buffs, passives, armor-set skills,
+    /// weight/grade/death penalties. Henna adjusts base STR/DEX/… before the bonus table; enchant adds on weapon/armor
+    /// fields (Mobius <c>FuncEnchant</c>). A thin <c>IStatCalculator</c> is deferred until these layers start to
+    /// duplicate — do not start a Calculator/AbstractFunction big-bang here.
     /// </summary>
     internal PlayerCombatStats PlayerStats(ZoneEntity player)
     {
         int level = Math.Max(1, player.Level);
         double levelMod = (level + 89) / 100d;
         if (!PlayerClasses.TryGet(player.ClassId, out var t) || t == null)
-            return new PlayerCombatStats(ZoneCombat.DefaultPlayerPAtk, 0, ZoneCombat.DefaultPlayerPDef, 0,
-                ZoneCombat.DefaultPlayerPAtkSpd, 0, 0, 0, ZoneCombat.DefaultWeaponRange, WeaponType.None);
+            throw new InvalidOperationException($"PlayerStats: unknown classId={player.ClassId} object={player.ObjectId}");
 
         var bonus = PlayerClasses.StatBonuses;
-        double str = SafeBonus(bonus, StatSlot.Str, t.Str);
-        double dex = SafeBonus(bonus, StatSlot.Dex, t.Dex);
-        double intel = SafeBonus(bonus, StatSlot.Int, t.Int);
-        double wit = SafeBonus(bonus, StatSlot.Wit, t.Wit);
-        double men = SafeBonus(bonus, StatSlot.Men, t.Men);
+        int strStat = t.Str + player.HennaStr;
+        int dexStat = t.Dex + player.HennaDex;
+        int intStat = t.Int + player.HennaInt;
+        int witStat = t.Wit + player.HennaWit;
+        int menStat = t.Men + player.HennaMen;
+        double str = StatBonus(bonus, StatSlot.Str, strStat);
+        double dex = StatBonus(bonus, StatSlot.Dex, dexStat);
+        double intel = StatBonus(bonus, StatSlot.Int, intStat);
+        double wit = StatBonus(bonus, StatSlot.Wit, witStat);
+        double men = StatBonus(bonus, StatSlot.Men, menStat);
 
-        var weapon = player.Inventory?.GetEquipped(PaperdollSlot.RHand)?.Template;
+        var weaponItem = player.Inventory?.GetEquipped(PaperdollSlot.RHand);
+        var weapon = weaponItem?.Template;
         bool armed = weapon != null && weapon.Kind == ItemKind.Weapon;
-        double basePAtk = armed && weapon!.PAtk > 0 ? weapon.PAtk : t.PAtk;
-        double baseMAtk = armed && weapon!.MAtk > 0 ? weapon.MAtk : t.MAtk;
+        int weaponEnchant = armed ? weaponItem!.EnchantLevel : 0;
+        double basePAtk = armed && weapon!.PAtk > 0
+            ? weapon.PAtk + EnchantCombatBonus.PhysicalAttack(weapon, weaponEnchant)
+            : t.PAtk;
+        double baseMAtk = armed && weapon!.MAtk > 0
+            ? weapon.MAtk + EnchantCombatBonus.MagicAttack(weapon.Crystal, weaponEnchant)
+            : t.MAtk;
         double baseSpd = armed && weapon!.PAtkSpd > 0 ? weapon.PAtkSpd : t.PAtkSpd;
         int range = armed && weapon!.AttackRange > 0 ? weapon.AttackRange : ZoneCombat.DefaultWeaponRange;
         int crit = armed && weapon!.CritRate > 0 ? weapon.CritRate : t.CritRate;
@@ -55,20 +68,22 @@ public sealed partial class ZoneWorld
                     : slot == PaperdollSlot.Chest ? ZoneCombat.MysticNakedChestPDef
                     : slot == PaperdollSlot.Legs ? ZoneCombat.MysticNakedLegsPDef
                     : fighterDef;
-                var armor = player.Inventory.GetEquipped(slot)?.Template;
+                var armorItem = player.Inventory.GetEquipped(slot);
+                var armor = armorItem?.Template;
                 if (armor == null || armor.Kind != ItemKind.Armor)
                     continue;
-                pDefBase += armor.PDef - nakedDef;
+                pDefBase += armor.PDef + EnchantCombatBonus.Defence(armorItem!.EnchantLevel) - nakedDef;
                 // Full-body armor (Mobius bodypart fullarmor) also covers the legs slot.
                 if (slot == PaperdollSlot.Chest && armor.BodySlot == BodySlot.FullArmor)
                     pDefBase -= mystic ? ZoneCombat.MysticNakedLegsPDef : ZoneCombat.NakedLegsPDef;
             }
             foreach (var (slot, nakedDef) in ZoneCombat.NakedMDefBySlot)
             {
-                var jewel = player.Inventory.GetEquipped(slot)?.Template;
+                var jewelItem = player.Inventory.GetEquipped(slot);
+                var jewel = jewelItem?.Template;
                 if (jewel == null || jewel.Kind != ItemKind.Armor)
                     continue;
-                mDefBase += jewel.MDef - nakedDef;
+                mDefBase += jewel.MDef + EnchantCombatBonus.Defence(jewelItem!.EnchantLevel) - nakedDef;
             }
         }
 
@@ -82,11 +97,11 @@ public sealed partial class ZoneWorld
             MDef: Math.Max(1, mods.Apply(CombatStat.MDef, (int)(mDefBase * men * levelMod))),
             PAtkSpd: Math.Max(1, mods.Apply(CombatStat.PAtkSpd, (int)(baseSpd * dex))),
             MAtkSpd: Math.Max(1, mods.Apply(CombatStat.MAtkSpd, (int)(t.MAtkSpd * wit))),
-            Accuracy: mods.Apply(CombatStat.Accuracy, (int)(Math.Sqrt(t.Dex) * 6 + level)),
+            Accuracy: mods.Apply(CombatStat.Accuracy, (int)(Math.Sqrt(dexStat) * 6 + level)),
             CritRate: mods.Apply(CombatStat.CritRate, (int)(crit * dex * 10)),
             AttackRange: range,
             Weapon: armed ? weapon!.WeaponType : WeaponType.None,
-            Evasion: mods.Apply(CombatStat.Evasion, (int)ZoneCombat.AccuracyOrEvasion(0, t.Dex, level) - (shielded ? shield!.ShieldEvasionPenalty : 0)),
+            Evasion: mods.Apply(CombatStat.Evasion, (int)ZoneCombat.AccuracyOrEvasion(0, dexStat, level) - (shielded ? shield!.ShieldEvasionPenalty : 0)),
             RandomDamage: armed && weapon!.RandomDamage > 0 ? weapon.RandomDamage : ZoneCombat.DefaultPlayerRandomDamage,
             ShieldDef: shielded ? shield!.ShieldDef : 0,
             ShieldRate: shielded ? shield!.ShieldRate * dex : 0,
@@ -106,19 +121,88 @@ public sealed partial class ZoneWorld
     /// virtual Weight Penalty 4270 (<see cref="FoldWeightPenalty"/>) and Grade Penalty 4267
     /// (<see cref="FoldGradePenalty"/>) sources. Internal so tests can assert the folds that the speed/regen/load
     /// getters share.
+    /// <para>
+    /// Passive sources merged by <see cref="PassiveSkillLevels"/>:
+    /// trainer/auto <see cref="ZoneEntity.KnownSkills"/> (includes skill-enchant levels once EnchantSkill writes them),
+    /// and <see cref="ZoneEntity.ClanSkills"/> (Mobius <c>Clan.addSkillEffects</c> — grant path still TBD).
+    /// </para>
     /// </summary>
     internal CombatStatMods PlayerStatMods(ZoneEntity player)
     {
         var mods = player.Abnormals.Count == 0 ? null : _statEffects.Collect(player.Abnormals);
         if (mods != null && ReferenceEquals(mods, CombatStatMods.None))
             mods = null;
-        mods = player.KnownSkills.Count == 0 ? mods : _passives.CollectPassives(player.KnownSkills, kinds => Wearing(player, kinds), mods);
+        var passiveLevels = PassiveSkillLevels(player);
+        mods = passiveLevels.Count == 0
+            ? mods
+            : _passives.CollectPassives(passiveLevels, kinds => Wearing(player, kinds), mods);
         // Weight Penalty 4270 is added by refreshOverloaded instead of the skill book, so it is folded here; Grade
         // Penalty 4267 comes from refreshExpertisePenalty the same way, and Death Penalty 5076 from
         // increaseDeathPenaltyBuffLevel — none of the three live in the trainer skill book.
+        mods = FoldArmorSets(player, mods);
         mods = FoldWeightPenalty(player, mods);
         mods = FoldGradePenalty(player, mods);
         return FoldDeathPenalty(player, mods);
+    }
+
+    /// <summary>
+    /// Skill id → level fed into <c>skill-passives.json</c> for combat mods.
+    /// <list type="bullet">
+    /// <item>KnownSkills: auto-tree + learned. EnchantSkill (Mobius) bumps the learned level in place — no extra map.</item>
+    /// <item>ClanSkills: clan book effects (376 Might, 377 Aegis, …). Populate when clan skill grant is wired;
+    /// funcs already live in <c>skill-passives.json</c>.</item>
+    /// </list>
+    /// Higher level wins on id collision.
+    /// </summary>
+    internal static Dictionary<int, int> PassiveSkillLevels(ZoneEntity player)
+    {
+        var map = new Dictionary<int, int>(player.KnownSkills.Count + player.ClanSkills.Count);
+        foreach (var (id, level) in player.KnownSkills)
+            map[id] = level;
+        foreach (var (id, level) in player.ClanSkills)
+        {
+            if (!map.TryGetValue(id, out int have) || level > have)
+                map[id] = level;
+        }
+        return map;
+    }
+
+    /// <summary>
+    /// Mobius <c>ArmorSetListener</c>: when the worn chest matches a set and every required part is on,
+    /// fold the set's skills (and optional shield / +6 skills) through the passive catalog.
+    /// </summary>
+    CombatStatMods FoldArmorSets(ZoneEntity player, CombatStatMods? mods)
+    {
+        if (player.Inventory == null || _armorSets.Count == 0)
+            return mods ?? CombatStatMods.None;
+        var inv = player.Inventory;
+        var chest = inv.GetEquipped(PaperdollSlot.Chest);
+        if (chest == null)
+            return mods ?? CombatStatMods.None;
+        int? ItemId(PaperdollSlot slot) => inv.GetEquipped(slot)?.ItemId;
+        int EnchantOf(int itemId)
+        {
+            foreach (PaperdollSlot slot in new[]
+                     {
+                         PaperdollSlot.Chest, PaperdollSlot.Legs, PaperdollSlot.Head,
+                         PaperdollSlot.Gloves, PaperdollSlot.Feet, PaperdollSlot.LHand
+                     })
+            {
+                var item = inv.GetEquipped(slot);
+                if (item != null && item.ItemId == itemId)
+                    return item.EnchantLevel;
+            }
+            return 0;
+        }
+        var skills = _armorSets.ActiveSkills(
+            chest.ItemId,
+            ItemId(PaperdollSlot.Legs),
+            ItemId(PaperdollSlot.Head),
+            ItemId(PaperdollSlot.Gloves),
+            ItemId(PaperdollSlot.Feet),
+            ItemId(PaperdollSlot.LHand),
+            EnchantOf);
+        return skills.Count == 0 ? mods ?? CombatStatMods.None : _passives.CollectPassives(skills, kinds => Wearing(player, kinds), mods);
     }
 
     /// <summary>

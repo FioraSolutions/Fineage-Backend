@@ -16,20 +16,15 @@ public sealed partial class ZoneWorld
     /// </summary>
     /// <summary>
     /// Mobius <c>BaseStat.CON.calcBonus</c> / <c>MEN.calcBonus</c> for this player's class, read from
-    /// <c>data/stat-bonuses.json</c>. 1 when the class or the stat value is outside the table.
+    /// <c>data/stat-bonuses.json</c>, including henna. Out-of-range values clamp+warn via <c>StatBonus</c>.
     /// </summary>
     internal (double Con, double Men) RegenStatBonuses(ZoneEntity entity)
     {
         if (PlayerClasses == null || !PlayerClasses.TryGet(entity.ClassId, out var template) || template == null)
             return (1d, 1d);
         var table = PlayerClasses.StatBonuses;
-        return (BonusOrOne(table, StatSlot.Con, template.Con), BonusOrOne(table, StatSlot.Men, template.Men));
-    }
-
-    static double BonusOrOne(StatBonusTable table, StatSlot slot, int value)
-    {
-        try { return table.Bonus(slot, value); }
-        catch (ArgumentOutOfRangeException) { return 1d; }
+        return (StatBonus(table, StatSlot.Con, template.Con + entity.HennaCon),
+            StatBonus(table, StatSlot.Men, template.Men + entity.HennaMen));
     }
 
     void TickNpcRegen()

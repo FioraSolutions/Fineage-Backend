@@ -94,9 +94,6 @@ public static class ZoneCombat
     /// <summary>Reference hit: base fighter (P.Atk 4) vs Gremlin through <see cref="PhysicalDamage"/> (= 6).</summary>
     public static readonly int SampleMeleeDamage = PhysicalDamage(DefaultPlayerPAtk, GremlinPDef);
 
-    /// <summary>Flat bonus the stub skill-damage path adds on top of skill power (was SampleMeleeDamage/3).</summary>
-    public const int LegacySkillDamageBonus = 10;
-
     /// <summary>Mobius <c>Formulas.calculateTimeBetweenAttacks</c>: 500000 / Pspd (ms), floor 100.</summary>
     public static int AttackTimeMs(int pAtkSpd) => Math.Max(100, 500000 / Math.Max(1, pAtkSpd));
 

@@ -184,6 +184,12 @@ sealed class ZonePlayerSkillsPayload
     public bool HasStatAbnormal { get; set; }
     public List<ZoneAbnormalEntry> Abnormals { get; } = [];
     public Dictionary<int, int> KnownSkills { get; } = [];
+    /// <summary>
+    /// Mobius <c>Clan.addSkillEffects</c> rows (Clan Might 376, Aegis 377, …). Not persisted on the character —
+    /// refreshed from the clan skill book when that grant path lands. Folded into combat mods via
+    /// <c>PassiveSkillLevels</c>. Empty until clan skill grant is wired.
+    /// </summary>
+    public Dictionary<int, int> ClanSkills { get; } = [];
     public Dictionary<int, long> SkillReuseUntilMs { get; } = [];
     public Dictionary<int, long> ItemReuseUntilMs { get; } = [];
 }
@@ -202,6 +208,17 @@ sealed class ZonePlayerStatusPayload
     public bool SoulshotCharged { get; set; }
     public int SpiritshotCharge { get; set; }
     public HashSet<int> AutoShots { get; } = [];
+    /// <summary>Mobius henna dye ids in the three tattoo slots (0 = empty).</summary>
+    public int HennaDye1 { get; set; }
+    public int HennaDye2 { get; set; }
+    public int HennaDye3 { get; set; }
+    /// <summary>Cached sum of worn henna STR/CON/… (recomputed when dyes change).</summary>
+    public int HennaStr { get; set; }
+    public int HennaCon { get; set; }
+    public int HennaDex { get; set; }
+    public int HennaInt { get; set; }
+    public int HennaMen { get; set; }
+    public int HennaWit { get; set; }
 }
 
 /// <summary>Player private-store / manufacture fields composed off <see cref="ZoneEntity"/> (#353).</summary>
