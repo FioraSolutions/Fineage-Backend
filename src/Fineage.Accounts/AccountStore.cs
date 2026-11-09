@@ -157,7 +157,9 @@ public sealed record ClanRecord(
     long DissolvingExpiryUnixMs,
     long CharPenaltyExpiryUnixMs,
     IReadOnlyList<ClanMemberRecord> Members,
-    int CastleId = 0);
+    int CastleId = 0,
+    /// <summary>Mobius <c>clan_skills</c> book (id → level). Applied to online members via ZoneEntity.ClanSkills.</summary>
+    IReadOnlyDictionary<int, int>? Skills = null);
 
 /// <summary>Persisted castle row. Owner 0 is an NPC castle. Tax is a percent. Times are unix milliseconds.</summary>
 public sealed record CastleSave(
@@ -1336,6 +1338,9 @@ public sealed class MemoryAccountStore : IAccountStore
         DissolvingExpiryUnixMs = clan.DissolvingExpiryUnixMs,
         CharPenaltyExpiryUnixMs = clan.CharPenaltyExpiryUnixMs,
         CastleId = clan.CastleId,
+        Skills = clan.Skills is { Count: > 0 }
+            ? clan.Skills.ToDictionary(pair => pair.Key, pair => pair.Value)
+            : null,
         Members = clan.Members.Select(member => new ClanMemberDto
         {
             CharacterId = member.CharacterId,
@@ -1362,7 +1367,10 @@ public sealed class MemoryAccountStore : IAccountStore
             member.ClassId,
             member.Level,
             member.PledgeType)).ToArray(),
-        clan.CastleId);
+        clan.CastleId,
+        clan.Skills is { Count: > 0 }
+            ? new Dictionary<int, int>(clan.Skills)
+            : null);
 
     void LoadFromJson(string json)
     {
@@ -1681,6 +1689,7 @@ public sealed class MemoryAccountStore : IAccountStore
         public long DissolvingExpiryUnixMs { get; set; }
         public long CharPenaltyExpiryUnixMs { get; set; }
         public int CastleId { get; set; }
+        public Dictionary<int, int>? Skills { get; set; }
         public List<ClanMemberDto> Members { get; set; } = [];
     }
 

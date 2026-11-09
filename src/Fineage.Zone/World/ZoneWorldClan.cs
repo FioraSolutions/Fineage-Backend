@@ -23,6 +23,8 @@ public sealed partial class ZoneWorld
         public long CharPenaltyExpiryUnixMs { get; set; }
         /// <summary>Mobius <c>hasCastle</c>. 0 when this clan owns no castle.</summary>
         public int CastleId { get; set; }
+        /// <summary>Mobius <c>clan_skills</c> book. Copied onto members via <see cref="RefreshClanSkills"/>.</summary>
+        public Dictionary<int, int> Skills { get; } = [];
         public List<ZoneClanMember> Members { get; } = [];
     }
 

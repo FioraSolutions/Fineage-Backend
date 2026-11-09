@@ -58,15 +58,18 @@ public sealed partial class ZoneWorld
             ZoneCombat.AttackTraitBonus(ps.Weapon, defenceTraits, attackTraits));
     }
 
+    /// <summary>
+    /// NPC physical defence from the template (data/npcs.json is complete — no level×40 invent).
+    /// Missing/zero PDef is a spawn/data bug: fail loud instead of silently fabricating defence.
+    /// </summary>
     double NpcPDef(ZoneEntity npc)
     {
-        double raw = npc.PDef;
-        if (raw <= 0)
-        {
-            raw = Math.Max(1, npc.Level) * 40d;
-            ZoneLog.Warn($"npc PDef missing npcId={npc.NpcId} object={npc.ObjectId} level={npc.Level} — fallback level*40");
-        }
-        return Math.Max(1d, StatMods(npc).Apply(CombatStat.PDef, raw));
+        if (npc.PDef <= 0)
+            throw new InvalidOperationException(
+                $"npc PDef missing npcId={npc.NpcId} object={npc.ObjectId} level={npc.Level}");
+        return Math.Max(1d, StatMods(npc).Apply(CombatStat.PDef, npc.PDef));
     }
+
+    internal double NpcPDefForTest(ZoneEntity npc) => NpcPDef(npc);
 
 }
