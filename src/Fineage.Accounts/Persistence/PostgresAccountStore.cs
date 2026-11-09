@@ -35,8 +35,11 @@ public sealed class PostgresAccountStore : IAccountStore, IDisposable
                 ? MemoryAccountStore.InMemory()
                 : MemoryAccountStore.FromSnapshot(existing);
             var store = new PostgresAccountStore(dataSource, inner);
-            // Ensure normalized tables match memory (assigns object ids, backfills SQL).
-            store.PersistSnapshot(inner.ExportSnapshot());
+            // Normalized tables are the character-domain SoT (FindById reads SQL). Reprojecting
+            // from store_snapshot on every Open would let a stale Login/Zone JSON wipe live rows
+            // (Claude B9). Bootstrap only when the SQL side is empty.
+            if (!store.HasNormalizedCharacterRows())
+                store.PersistSnapshot(inner.ExportSnapshot());
             return store;
         }
         catch
@@ -211,26 +214,23 @@ public sealed class PostgresAccountStore : IAccountStore, IDisposable
             _inner.EmitSnapshots = previous;
         }
 
-        // Export before taking _persistGate so we never nest with MemoryAccountStore._gate.
-        string snapshot = _inner.ExportSnapshot();
+        // Hot paths write normalized SQL only. Rewriting store_snapshot from this process's
+        // partial MemoryAccountStore would clobber the other process's backup JSON (Claude B9).
         lock (_persistGate)
         {
             using var conn = _dataSource.OpenConnection();
             sql(conn);
-            using var cmd = conn.CreateCommand();
-            cmd.CommandText =
-                """
-                INSERT INTO store_snapshot (id, version, payload, updated_at)
-                VALUES (1, 1, @payload::jsonb, now())
-                ON CONFLICT (id) DO UPDATE
-                SET payload = excluded.payload,
-                    updated_at = now();
-                """;
-            cmd.Parameters.AddWithValue("payload", snapshot);
-            cmd.ExecuteNonQuery();
         }
 
         return true;
+    }
+
+    bool HasNormalizedCharacterRows()
+    {
+        using var conn = _dataSource.OpenConnection();
+        using var cmd = conn.CreateCommand();
+        cmd.CommandText = "SELECT EXISTS (SELECT 1 FROM characters LIMIT 1)";
+        return cmd.ExecuteScalar() is true;
     }
 
     // --- IAccountStore ---
