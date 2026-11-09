@@ -1,5 +1,6 @@
 using Fineage.Accounts;
 using Fineage.Protocol;
+using Fineage.Zone.Shortcuts;
 
 namespace Fineage.Zone.World;
 
@@ -79,8 +80,8 @@ public sealed partial class ZoneWorld
             if (!IsLive(session) || !_byId.TryGetValue(session.ObjectId, out var e) || e.Kind != ZoneEntityKind.Player)
                 return new ShortcutReply(null, null, "world");
 
-            if (worldSlot < 0 || worldSlot >= StoredShortcut.SlotsPerPage * StoredShortcut.MaxPages)
-                return new ShortcutReply(null, null, "shortcut_slot");
+            if (ShortCutRules.SlotError(worldSlot) is { } slotError)
+                return new ShortcutReply(null, null, slotError);
 
             var row = new StoredShortcut(
                 worldSlot % StoredShortcut.SlotsPerPage,
@@ -88,27 +89,17 @@ public sealed partial class ZoneWorld
                 type,
                 id,
                 Math.Max(0, level));
-            string? error = null;
-            if (!row.IsValid)
-                error = "shortcut_invalid";
-            else if (type == StoredShortcut.TypeItem)
-            {
-                if (e.Inventory?.Find(id) == null)
-                    error = InventoryProtocol.NotOwned;
-                else
-                    row = row with { Level = 0 };
-            }
-            else if (type == StoredShortcut.TypeSkill)
-            {
-                // Mobius: the bar shows the level the player knows, not what the client claims.
-                if (!e.KnownSkills.TryGetValue(id, out int known))
-                    error = "skill_unknown";
-                else
-                    row = row with { Level = known };
-            }
-
-            if (error != null)
+            bool itemOwned = type != StoredShortcut.TypeItem || e.Inventory?.Find(id) != null;
+            int knownLevel = 0;
+            bool skillKnown = type != StoredShortcut.TypeSkill
+                || e.KnownSkills.TryGetValue(id, out knownLevel);
+            if (ShortCutRules.RegisterError(row.IsValid, type, itemOwned, skillKnown) is { } error)
                 return Current(e, worldSlot, error);
+
+            if (type == StoredShortcut.TypeItem)
+                row = row with { Level = 0 };
+            else if (type == StoredShortcut.TypeSkill)
+                row = row with { Level = knownLevel };
 
             e.Shortcuts[worldSlot] = row;
             SaveShortcuts(session, e);
@@ -123,8 +114,8 @@ public sealed partial class ZoneWorld
         {
             if (!IsLive(session) || !_byId.TryGetValue(session.ObjectId, out var e) || e.Kind != ZoneEntityKind.Player)
                 return new ShortcutReply(null, null, "world");
-            if (worldSlot < 0 || worldSlot >= StoredShortcut.SlotsPerPage * StoredShortcut.MaxPages)
-                return new ShortcutReply(null, null, "shortcut_slot");
+            if (ShortCutRules.SlotError(worldSlot) is { } slotError)
+                return new ShortcutReply(null, null, slotError);
             if (e.Shortcuts.Remove(worldSlot))
                 SaveShortcuts(session, e);
             return new ShortcutReply(null, worldSlot, null);
