@@ -31,7 +31,7 @@ public sealed partial class ZoneWorld
     {
         bool player = entity.Kind == ZoneEntityKind.Player;
         double speed = player
-            ? baseSpeed * StatBonus(PlayerClasses.StatBonuses, StatSlot.Dex, EffectiveDex(entity))
+            ? baseSpeed * EffectiveAttributes(entity).DexBonus
             : baseSpeed;
         speed = mods.Apply(CombatStat.RunSpd, speed);
         if (player)
@@ -145,7 +145,7 @@ public sealed partial class ZoneWorld
 
     /// <summary>
     /// Stat bonus table lookup. Out-of-range values (henna push, bad data) clamp and warn —
-    /// never silently return 1.0 like the old SafeBonus swallow.
+    /// never silently return 1.0 like the old SafeBonus swallow. Prefer <see cref="EffectiveAttributes"/> for players.
     /// </summary>
     static double StatBonus(StatBonusTable table, StatSlot slot, int value)
     {
@@ -156,19 +156,11 @@ public sealed partial class ZoneWorld
     }
 
     /// <summary>Template DEX + henna (Mobius calcStat STAT_DEX before FuncMoveSpeed).</summary>
-    int EffectiveDex(ZoneEntity player)
-    {
-        if (PlayerClasses.TryGet(player.ClassId, out var t) && t != null)
-            return t.Dex + player.HennaDex;
-        return player.Dex + player.HennaDex;
-    }
+    int EffectiveDex(ZoneEntity player) => EffectiveAttributes(player).Dex;
 
-    int EffectiveStr(ZoneEntity player) =>
-        PlayerClasses.TryGet(player.ClassId, out var t) && t != null ? t.Str + player.HennaStr : player.HennaStr;
+    int EffectiveStr(ZoneEntity player) => EffectiveAttributes(player).Str;
 
-    int EffectiveCon(ZoneEntity player) =>
-        PlayerClasses.TryGet(player.ClassId, out var t) && t != null ? t.Con + player.HennaCon : player.HennaCon;
+    int EffectiveCon(ZoneEntity player) => EffectiveAttributes(player).Con;
 
-    int EffectiveMen(ZoneEntity player) =>
-        PlayerClasses.TryGet(player.ClassId, out var t) && t != null ? t.Men + player.HennaMen : player.HennaMen;
+    int EffectiveMen(ZoneEntity player) => EffectiveAttributes(player).Men;
 }

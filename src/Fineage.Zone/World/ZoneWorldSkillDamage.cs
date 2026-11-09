@@ -95,7 +95,7 @@ public sealed partial class ZoneWorld
             return 1;
         if (shield == ZoneCombat.ShieldResult.Block)
             pDef += target.ShieldDef;
-        double str = StatBonus(PlayerClasses.StatBonuses, Fineage.Game.StatSlot.Str, EffectiveStr(player));
+        double str = EffectiveAttributes(player).StrBonus;
         bool crit = ZoneCombat.RollSkillCrit(_combatRandom, combat.BaseCritRate, str);
         if (crit && player.Session != null)
             ShotNotice(player.Session, SysMsgCriticalHit, "Critical hit!");
@@ -113,8 +113,9 @@ public sealed partial class ZoneWorld
     {
         bool front = ZoneCombat.IsInFrontOf(player.X, player.Y, target.X, target.Y, target.Heading);
         bool behind = ZoneCombat.IsBehind(player.X, player.Y, target.X, target.Y, target.Heading);
-        double dex = StatBonus(PlayerClasses.StatBonuses, Fineage.Game.StatSlot.Dex, EffectiveDex(player));
-        double str = StatBonus(PlayerClasses.StatBonuses, Fineage.Game.StatSlot.Str, EffectiveStr(player));
+        var attrs = EffectiveAttributes(player);
+        double dex = attrs.DexBonus;
+        double str = attrs.StrBonus;
         // Backstab.calcSuccess: !isInFrontOf; both: calcBlowSuccess (+ BLOW_RATE fold).
         if ((blow == BlowEffect.Backstab && front) ||
             !ZoneCombat.RollBlowSuccess(_combatRandom, combat.BlowChance, dex, front, behind, ps.BlowRate))
