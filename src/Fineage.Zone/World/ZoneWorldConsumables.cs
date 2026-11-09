@@ -3,6 +3,7 @@ using Fineage.Game.Services;
 using Fineage.Game.Skills;
 using Fineage.Protocol;
 using Fineage.Zone.Combat;
+using Fineage.Zone.Inventory;
 
 namespace Fineage.Zone.World;
 
@@ -22,7 +23,7 @@ public sealed partial class ZoneWorld
     public const int SysMsgItemCannotBeUsed = 113;
 
     /// <summary>Returned when the item's own reuse delay has not expired yet (Mobius <c>ItemTemplate</c> reuse).</summary>
-    public const string InventoryReuse = "item_reuse";
+    public const string InventoryReuse = ConsumableRules.InventoryReuse;
 
     bool IsConsumable(int itemId) => _itemSkills.TryGet(itemId, out _);
 
@@ -32,17 +33,18 @@ public sealed partial class ZoneWorld
     /// </summary>
     string? TryUseConsumable(ZoneSession session, ZoneEntity player, ItemInstance item)
     {
-        if (!_itemSkills.TryGet(item.ItemId, out var use))
-            return InventoryProtocol.NotEquippable;
-
+        bool known = _itemSkills.TryGet(item.ItemId, out var use);
         long now = _clock().ToUnixTimeMilliseconds();
         // Mobius keeps one reuse stamp per item id on the character; a stack shares that timer.
-        if (use.ReuseDelayMs > 0 &&
-            player.ItemReuseUntilMs.TryGetValue(item.ItemId, out long reuseUntil) && reuseUntil > now)
-            return InventoryReuse;
+        bool onReuse = known
+            && use!.ReuseDelayMs > 0
+            && player.ItemReuseUntilMs.TryGetValue(item.ItemId, out long reuseUntil)
+            && reuseUntil > now;
+        if (ConsumableRules.UsePrecheckError(known, onReuse) is { } precheck)
+            return precheck;
 
         // Scroll of Escape / Blessed SOE: cast gesture + hitTime teleport (skills 2013 / 2036 are not in skills.json).
-        if (use.Effects is [{ Kind: "escapeTown" } escape])
+        if (use!.Effects is [{ Kind: "escapeTown" } escape])
             return TryUseEscapeTown(session, player, item, escape, use.ReuseDelayMs, now);
 
         // Effects are resolved first so an unsupported one leaves the stack untouched instead of eating the potion.
@@ -84,11 +86,11 @@ public sealed partial class ZoneWorld
                     vitals = true;
                     break;
                 case "healPercent":
-                    hpTotal += PercentOfMax(player.CurHp, player.MaxHp, effect.Power);
+                    hpTotal += ConsumableRules.PercentHeal(player.CurHp, player.MaxHp, effect.Power);
                     vitals = true;
                     break;
                 case "manaHealPercent":
-                    mpTotal += PercentOfMax(player.CurMp, player.MaxMp, effect.Power);
+                    mpTotal += ConsumableRules.PercentHeal(player.CurMp, player.MaxMp, effect.Power);
                     vitals = true;
                     break;
                 case "healByLevel":
@@ -193,8 +195,6 @@ public sealed partial class ZoneWorld
     /// <summary>
     /// Interlude item skills 2013 (SOE) / 2036 (Blessed SOE) are not in <c>skills.json</c>; hit times match Mobius XML.
     /// </summary>
-    static int EscapeHitTimeMs(int skillId) => skillId == 2036 ? 200 : 20_000;
-
     /// <summary>
     /// Mobius ItemSkills for Scroll of Escape: <c>MagicSkillUse</c> now, consume + <c>teleToLocation(TOWN)</c> at hitTime.
     /// </summary>
@@ -206,14 +206,12 @@ public sealed partial class ZoneWorld
         int reuseDelayMs,
         long now)
     {
-        if (player.Dead)
-            return InventoryProtocol.Dead;
-        if (now < player.CastingUntilMs)
-            return "busy";
+        if (ConsumableRules.EscapeTownError(player.Dead, now < player.CastingUntilMs) is { } escapeError)
+            return escapeError;
 
         int skillId = effect.SkillId > 0 ? effect.SkillId : 2013;
         int level = Math.Max(1, effect.SkillLevel);
-        int hitTimeMs = EscapeHitTimeMs(skillId);
+        int hitTimeMs = ConsumableRules.EscapeHitTimeMs(skillId);
         var (x, y, z) = TownDestination(player);
 
         // Fan the cast gesture first so the client starts long-cast / short-cast before the teleport lands.
@@ -262,14 +260,6 @@ public sealed partial class ZoneWorld
         });
 
         return null;
-    }
-
-    static int PercentOfMax(int current, int max, int percent)
-    {
-        if (max <= 0 || percent <= 0)
-            return 0;
-        int room = Math.Max(0, max - Math.Clamp(current, 0, max));
-        return (int)Math.Min((long)max * percent / 100, room);
     }
 
     /// <summary>Mobius <c>Heal</c> with a level table: power grows with the caster level (HP potions 1061 … 1065).</summary>
