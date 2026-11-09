@@ -43,7 +43,7 @@ public sealed partial class ZoneWorld
     {
         double bonus = 1;
         if (PlayerClasses.TryGet(player.ClassId, out var template) && template != null)
-            bonus = SafeBonus(PlayerClasses.StatBonuses, StatSlot.Con, template.Con);
+            bonus = StatBonus(PlayerClasses.StatBonuses, StatSlot.Con, template.Con + player.HennaCon);
         int baseLoad = WeightPenalty.BaseMaxLoad(bonus, ZoneWeightSettings.AltWeightLimit);
         return (int)PlayerStatMods(player).Apply(CombatStat.WeightLimit, (double)baseLoad);
     }

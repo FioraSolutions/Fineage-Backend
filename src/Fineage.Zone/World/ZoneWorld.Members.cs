@@ -364,12 +364,12 @@ public sealed partial class ZoneWorld
         {
             try { maxCp = template.ModifiedCp(level); }
             catch (ArgumentOutOfRangeException) { maxCp = template.MaxCp; }
-            str = template.Str;
-            dex = template.Dex;
-            con = template.Con;
-            intel = template.Int;
-            wit = template.Wit;
-            men = template.Men;
+            str = template.Str + entity.HennaStr;
+            dex = template.Dex + entity.HennaDex;
+            con = template.Con + entity.HennaCon;
+            intel = template.Int + entity.HennaInt;
+            wit = template.Wit + entity.HennaWit;
+            men = template.Men + entity.HennaMen;
             // Same pipeline combat uses (Mobius stat funcs), so the client status window matches the server.
             var stats = PlayerStats(entity);
             pAtk = stats.PAtk;

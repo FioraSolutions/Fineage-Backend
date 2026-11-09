@@ -34,6 +34,13 @@ public sealed partial class ZoneWorld
     public bool TrainerSpLearn { get; set; } =
         Environment.GetEnvironmentVariable("FINEAGE_TRAINER_SP_LEARN") is "1" or "true";
 
+    /// <summary>
+    /// Rebuild the live skill book from the class auto-tree + persisted learned rows.
+    /// Does <b>not</b> clear <see cref="ZoneEntity.ClanSkills"/> — those come from the clan (Mobius
+    /// <c>Clan.addSkillEffects</c>) and are merged at fold time via <c>PassiveSkillLevels</c>.
+    /// Skill enchant: when EnchantSkill updates a learned level, that higher level lands here through
+    /// <see cref="ZoneEntity.LearnedSkills"/> and is what <c>skill-passives.json</c> ValueAt uses.
+    /// </summary>
     void RefreshKnownSkills(ZoneEntity entity)
     {
         entity.KnownSkills.Clear();

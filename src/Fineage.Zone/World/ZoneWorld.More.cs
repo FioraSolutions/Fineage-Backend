@@ -266,6 +266,7 @@ public sealed partial class ZoneWorld
             PkKills = Math.Max(0, stored?.PkKills ?? 0),
             PvpKills = Math.Max(0, stored?.PvpKills ?? 0)
         };
+        LoadHenna(entity, stored);
         LoadQuestProgress(session, entity, stored);
         LoadLearnedSkills(entity, stored);
         LoadKnownRecipes(entity, stored);

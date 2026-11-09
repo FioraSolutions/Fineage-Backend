@@ -1,3 +1,4 @@
+using System.Collections.Concurrent;
 using System.Text.Json;
 using Fineage.Game.Services;
 
@@ -100,6 +101,7 @@ public sealed class SkillStatEffectCatalog
     };
 
     readonly Dictionary<int, SkillStatEffect> _byId;
+    static readonly ConcurrentDictionary<int, byte> MissingStatWarned = new();
 
     SkillStatEffectCatalog(Dictionary<int, SkillStatEffect> byId) => _byId = byId;
 
@@ -116,7 +118,11 @@ public sealed class SkillStatEffectCatalog
         foreach (var a in abnormals)
         {
             if (!_byId.TryGetValue(a.Id, out var effect))
+            {
+                if (MissingStatWarned.TryAdd(a.Id, 0))
+                    ZoneLog.Warn($"skill-stat-effects missing skillId={a.Id} — abnormal has no combat mods");
                 continue;
+            }
             int level = a.SkillLevel > 0 ? a.SkillLevel : (effect.Levels <= 1 ? 1 : Math.Clamp(a.Value, 1, effect.Levels));
             mods ??= new CombatStatMods();
             foreach (var f in effect.Funcs)
