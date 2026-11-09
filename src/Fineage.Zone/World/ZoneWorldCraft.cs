@@ -1,6 +1,7 @@
 using Fineage.Game;
 using Fineage.Game.Recipes;
 using Fineage.Protocol;
+using Fineage.Zone.Craft;
 using Fineage.Zone.Trade;
 
 namespace Fineage.Zone.World;
@@ -38,10 +39,9 @@ public sealed partial class ZoneWorld
     /// <summary>Mobius recipe-scroll use: register the recipe list id and consume one scroll.</summary>
     string? TryLearnRecipeFromItem(ZoneSession session, ZoneEntity player, ItemInstance item)
     {
-        if (!_game.Recipes.TryGetByRecipeItem(item.ItemId, out var recipe))
-            return InventoryProtocol.Blocked;
-        if (player.KnownRecipes.Contains(recipe.Id))
-            return CraftProtocol.Already;
+        bool resolved = _game.Recipes.TryGetByRecipeItem(item.ItemId, out var recipe);
+        if (CraftRules.LearnScrollError(resolved, resolved && player.KnownRecipes.Contains(recipe!.Id)) is { } learnError)
+            return learnError;
         if (!player.Inventory!.TryRemoveFromStack(item, 1, out bool removedEntirely))
             return InventoryProtocol.Blocked;
 
@@ -79,25 +79,25 @@ public sealed partial class ZoneWorld
     {
         if (!IsLive(session) || !_byId.TryGetValue(session.ObjectId, out var player) || player.Inventory == null)
             return "world";
-        if (player.Dead)
-            return InventoryProtocol.Dead;
-        if (player.PrivateStoreType != PrivateStoreProtocol.TypeNone)
-            return CraftProtocol.Busy;
-        if (_tradeByPlayer.ContainsKey(player.ObjectId))
-            return CraftProtocol.Busy;
-        if (!_game.Recipes.TryGet(request.RecipeId, out var recipe))
-            return CraftProtocol.Unknown;
-        if (!player.KnownRecipes.Contains(recipe.Id))
-            return CraftProtocol.NotLearned;
+        bool recipeKnown = _game.Recipes.TryGet(request.RecipeId, out var recipe);
+        int skillId = recipeKnown
+            ? (recipe!.Dwarven ? RecipeCatalog.CreateDwarvenSkillId : RecipeCatalog.CreateCommonSkillId)
+            : 0;
+        bool skillOk = recipeKnown
+            && player.KnownSkills.TryGetValue(skillId, out int skillLevel)
+            && skillLevel >= recipe!.Level;
+        if (CraftRules.MakeSelfError(
+                dead: player.Dead,
+                privateStoreOpen: player.PrivateStoreType != PrivateStoreProtocol.TypeNone,
+                inTrade: _tradeByPlayer.ContainsKey(player.ObjectId),
+                recipeKnown: recipeKnown,
+                recipeLearned: recipeKnown && player.KnownRecipes.Contains(recipe!.Id),
+                skillLevelOk: skillOk,
+                curMp: player.CurMp,
+                mpConsume: recipeKnown ? recipe!.MpConsume : 0) is { } makeError)
+            return makeError;
 
-        int skillId = recipe.Dwarven ? RecipeCatalog.CreateDwarvenSkillId : RecipeCatalog.CreateCommonSkillId;
-        if (!player.KnownSkills.TryGetValue(skillId, out int skillLevel) || skillLevel < recipe.Level)
-            return CraftProtocol.Skill;
-
-        if (player.CurMp < recipe.MpConsume)
-            return CraftProtocol.Mp;
-
-        foreach (var ing in recipe.Ingredients)
+        foreach (var ing in recipe!.Ingredients)
         {
             if (player.Inventory.CountOf(ing.ItemId) < ing.Count)
                 return CraftProtocol.Materials;
@@ -152,8 +152,7 @@ public sealed partial class ZoneWorld
             });
         }
 
-        bool success = recipe.SuccessRate >= 100
-            || _spawnRandom.Next(100) < recipe.SuccessRate;
+        bool success = CraftRules.Succeeds(recipe.SuccessRate, _spawnRandom.Next(100));
         int result = success ? 0 : 1;
         if (success)
         {
