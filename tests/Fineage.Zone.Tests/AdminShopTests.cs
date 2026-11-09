@@ -140,5 +140,9 @@ public sealed class AdminShopTests : IDisposable
 
         Assert.Null(await me.BypassAsync(0, "admin_mbuff"));
         Assert.True(me.Player.Abnormals.Count >= 3);
+        // Expanded mage pack: SWS Song of Wind + BD dances must land.
+        Assert.Contains(me.Player.Abnormals, a => a.Id == 268);
+        Assert.Contains(me.Player.Abnormals, a => a.Id == 276);
+        Assert.Contains(me.Player.Abnormals, a => a.Id == 365);
     }
 }

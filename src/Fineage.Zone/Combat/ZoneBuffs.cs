@@ -10,7 +10,11 @@ public static class ZoneBuffs
     /// <summary>Fallback when playtest effect id is not in <c>data/skills.json</c>.</summary>
     public const int SampleDurationSeconds = 1200;
 
-    /// <summary>Chat <c>//mbuff</c> — mage-oriented self-buff pack (max skill level).</summary>
+    /// <summary>
+    /// Chat <c>//mbuff</c> — mage-oriented self-buff pack (max skill level).
+    /// Includes SWS songs / BD dances that already have combat funcs in skill-stat-effects.json
+    /// (physical-only songs/dances stay out of this pack).
+    /// </summary>
     public static readonly int[] MageSelfBuffs =
     [
         1204, // Wind Walk
@@ -24,8 +28,16 @@ public static class ZoneBuffs
         1085, // Acumen
         1259, // Resist Shock
         1303, // Wild Magic
-        276,  // Dance of Concentration (cast speed)
         1356, // Prophecy of Fire
+        // SWS songs (combat funcs present)
+        268,  // Song of Wind — runSpd +20
+        267,  // Song of Warding — mDef ×1.3
+        264,  // Song of Earth — pDef ×1.25
+        266,  // Song of Water — rEvas +3
+        // BD dances (combat funcs present)
+        273,  // Dance of the Mystic — mAtk ×1.2
+        276,  // Dance of Concentration — mAtkSpd ×1.3
+        365,  // Siren's Dance — mCritRate ×2
     ];
 
     /// <summary>Chat <c>//fbuff</c> — fighter-oriented self-buff pack (max skill level).</summary>
