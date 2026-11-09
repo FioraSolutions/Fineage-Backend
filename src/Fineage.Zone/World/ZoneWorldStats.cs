@@ -112,7 +112,7 @@ public sealed partial class ZoneWorld
     {
         if (player.Abnormals.Count == 0)
             return null;
-        var mods = _statEffects.Collect(player.Abnormals);
+        var mods = SkillStatEffects.Collect(_statEffects, player.Abnormals);
         return ReferenceEquals(mods, CombatStatMods.None) ? null : mods;
     }
 

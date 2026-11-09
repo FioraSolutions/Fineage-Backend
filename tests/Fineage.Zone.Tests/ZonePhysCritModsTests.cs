@@ -1,3 +1,4 @@
+using Fineage.Game;
 using Fineage.Zone.Combat;
 using Xunit;
 
