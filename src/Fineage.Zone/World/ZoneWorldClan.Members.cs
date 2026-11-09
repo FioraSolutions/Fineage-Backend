@@ -318,6 +318,14 @@ public sealed partial class ZoneWorld
             CharPenaltyExpiryUnixMs = record.CharPenaltyExpiryUnixMs,
             CastleId = record.CastleId
         };
+        if (record.Skills != null)
+        {
+            foreach (var (id, level) in record.Skills)
+            {
+                if (id > 0 && level > 0)
+                    clan.Skills[id] = level;
+            }
+        }
         foreach (var member in record.Members)
         {
             clan.Members.Add(new ZoneClanMember
@@ -350,7 +358,8 @@ public sealed partial class ZoneWorld
             member.ClassId,
             member.Level,
             ClanProtocol.MainPledge)).ToArray(),
-        clan.CastleId);
+        clan.CastleId,
+        clan.Skills.Count == 0 ? null : new Dictionary<int, int>(clan.Skills));
 
     PledgeStatusChangedMsg StatusOf(ZoneClan clan) => new()
     {
@@ -444,6 +453,46 @@ public sealed partial class ZoneWorld
         entity.InClan = clan != null;
         entity.ClanLeader = clan != null && clan.LeaderId == entity.ObjectId;
         entity.CastleId = clan?.CastleId ?? 0;
+        RefreshClanSkills(entity, clan);
+    }
+
+    /// <summary>
+    /// Mobius <c>Clan.addSkillEffects(player)</c>: copy the clan skill book onto the live session map
+    /// (or clear it when the player leaves the clan).
+    /// </summary>
+    void RefreshClanSkills(ZoneEntity entity, ZoneClan? clan)
+    {
+        var live = entity.ClanSkills;
+        live.Clear();
+        if (clan == null || clan.Skills.Count == 0)
+            return;
+        foreach (var (id, level) in clan.Skills)
+        {
+            if (id > 0 && level > 0)
+                live[id] = level;
+        }
+    }
+
+    /// <summary>Test/admin hook: put a skill on the clan book, persist it, and refresh every online member.</summary>
+    internal bool TrySetClanSkillForTest(int clanId, int skillId, int level)
+    {
+        lock (_gate)
+        {
+            if (!_clans.TryGetValue(clanId, out var clan) || skillId <= 0)
+                return false;
+            if (level <= 0)
+                clan.Skills.Remove(skillId);
+            else
+                clan.Skills[skillId] = level;
+            if (_accounts != null)
+                _accounts.UpdateClan(ToRecord(clan), []);
+            foreach (var member in OnlineMembers(clan))
+            {
+                if (_byId.TryGetValue(member.ObjectId, out var entity))
+                    RefreshClanSkills(entity, clan);
+            }
+            return true;
+        }
     }
 
     /// <summary>The crest and clan name ride on the spawn row, so every watcher needs it again.</summary>

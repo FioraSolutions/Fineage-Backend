@@ -35,4 +35,33 @@ public sealed class ZoneCombatFormulaTests
         Assert.Equal(253, gremlin.AttackSpeed);
         Assert.Equal(40, gremlin.AttackRange);
     }
+
+    [Fact]
+    public void Npc_catalog_PDef_is_complete_for_attackables()
+    {
+        var catalog = NpcCatalog.LoadDefault();
+        var missing = catalog.ById.Values
+            .Where(n => n.Attackable && n.PDef <= 0)
+            .Select(n => n.NpcId)
+            .Take(10)
+            .ToArray();
+        Assert.True(missing.Length == 0, $"attackable NPCs missing PDef: {string.Join(",", missing)}");
+    }
+
+    [Fact]
+    public void Npc_PDef_missing_fails_loud_instead_of_level_times_40()
+    {
+        var world = new Fineage.Zone.World.ZoneWorld();
+        var npc = new Fineage.Zone.World.ZoneEntity
+        {
+            ObjectId = 90_001,
+            Kind = Fineage.Zone.World.ZoneEntityKind.Npc,
+            NpcId = 20001,
+            Level = 5,
+            PDef = 0
+        };
+        var ex = Assert.Throws<InvalidOperationException>(() => world.NpcPDefForTest(npc));
+        Assert.Contains("PDef missing", ex.Message, StringComparison.Ordinal);
+        Assert.DoesNotContain("fallback", ex.Message, StringComparison.OrdinalIgnoreCase);
+    }
 }

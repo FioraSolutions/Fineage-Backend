@@ -186,8 +186,8 @@ sealed class ZonePlayerSkillsPayload
     public Dictionary<int, int> KnownSkills { get; } = [];
     /// <summary>
     /// Mobius <c>Clan.addSkillEffects</c> rows (Clan Might 376, Aegis 377, …). Not persisted on the character —
-    /// refreshed from the clan skill book when that grant path lands. Folded into combat mods via
-    /// <c>PassiveSkillLevels</c>. Empty until clan skill grant is wired.
+    /// refreshed from the clan skill book on join / enter / leave via <c>RefreshClanSkills</c>.
+    /// Folded into combat mods via <c>PassiveSkillLevels</c>.
     /// </summary>
     public Dictionary<int, int> ClanSkills { get; } = [];
     /// <summary>
