@@ -111,6 +111,8 @@ namespace Fineage.Net.Contract
             w.WriteInt32(m.WeaponGradePenalty);
             w.WriteInt32(m.ArmorGradePenalty);
             w.WriteInt32(m.ClanId);
+            w.WriteInt32(m.CurrentWeight);
+            w.WriteInt32(m.MaxWeight);
             var slots = m.Paperdoll ?? Array.Empty<PaperdollSlotNet>();
             w.WriteInt32(slots.Length);
             for (int i = 0; i < slots.Length; i++)
@@ -164,7 +166,9 @@ namespace Fineage.Net.Contract
                 CritRate = r.ReadInt32(),
                 WeaponGradePenalty = r.ReadInt32(),
                 ArmorGradePenalty = r.ReadInt32(),
-                ClanId = r.ReadInt32()
+                ClanId = r.ReadInt32(),
+                CurrentWeight = r.ReadInt32(),
+                MaxWeight = r.ReadInt32()
             };
             int n = r.ReadInt32();
             if (n < 0 || n > 64)

@@ -19,7 +19,8 @@ public sealed partial class ZoneWorld
         RefreshGearSkills(player);
         RefreshRunSpeedAndFanout(player);
         var invUpdate = InventoryMessages.Modify(changed);
-        SelfUserInfo(player);
+        // UserInfo (paperdoll + CurrWeight/MaxWeight) is sent from SaveInventory →
+        // RefreshWeightPenaltyAfterInventoryChange, which every equip/unequip path calls next.
         if (NetBridge != null)
             NetBridge.FanoutInventoryUpdate([session.ObjectId], invUpdate);
         List<int>? netPeers = null;
