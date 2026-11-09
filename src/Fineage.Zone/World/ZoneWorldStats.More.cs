@@ -85,49 +85,9 @@ public sealed partial class ZoneWorld
             || Math.Abs(beforeSwimWalk - entity.SwimWalkSpeed) > 0.001f;
     }
 
-    /// <summary>Mobius <c>ConditionUsingItemType</c>: weapon kinds test the right-hand weapon type; armor kinds (LIGHT/HEAVY/MAGIC)    /// need the chest armor type and, unless the chest is full-body, matching legs; SHIELD needs a left-hand shield.
-    /// </summary>
-    internal static bool Wearing(ZoneEntity player, string[] kinds)
-    {
-        var inv = player.Inventory;
-        if (inv == null)
-            return false;
-        var weapon = inv.GetEquipped(PaperdollSlot.RHand)?.Template;
-        var chest = inv.GetEquipped(PaperdollSlot.Chest)?.Template;
-        var legs = inv.GetEquipped(PaperdollSlot.Legs)?.Template;
-        var lhand = inv.GetEquipped(PaperdollSlot.LHand)?.Template;
-        foreach (var kind in kinds)
-        {
-            switch (kind)
-            {
-                case "LIGHT" or "HEAVY" or "MAGIC":
-                    var want = kind == "LIGHT" ? ArmorType.Light : kind == "HEAVY" ? ArmorType.Heavy : ArmorType.Magic;
-                    if (chest != null && chest.ArmorType == want
-                        && (chest.BodySlot == BodySlot.FullArmor || (legs != null && legs.ArmorType == want)))
-                        return true;
-                    break;
-                case "SHIELD":
-                    if (lhand != null && lhand.Kind == ItemKind.Armor && lhand.ShieldDef > 0)
-                        return true;
-                    break;
-                default:
-                    if (weapon == null || weapon.Kind != ItemKind.Weapon)
-                        break;
-                    var wt = weapon.WeaponType;
-                    if (kind switch
-                        {
-                            "SWORD" => wt == WeaponType.Sword, "BLUNT" => wt == WeaponType.Blunt,
-                            "DAGGER" or "DUALDAGGER" => wt == WeaponType.Dagger, "BOW" => wt == WeaponType.Bow,
-                            "POLE" => wt == WeaponType.Pole, "DUAL" => wt == WeaponType.Dual,
-                            "FIST" or "DUALFIST" => wt == WeaponType.Fist, "FISHINGROD" => wt == WeaponType.FishingRod,
-                            "ETC" => wt == WeaponType.Etc, _ => false
-                        })
-                        return true;
-                    break;
-            }
-        }
-        return false;
-    }
+    /// <summary>Mobius <c>ConditionUsingItemType</c> — delegates to <see cref="ConditionUsingItemType"/>.</summary>
+    internal static bool Wearing(ZoneEntity player, string[] kinds) =>
+        ConditionUsingItemType.Matches(player.Inventory, kinds);
 
     /// <summary>Live buff/debuff stat funcs on <paramref name="entity"/> (players and NPCs).</summary>
     internal CombatStatMods StatMods(ZoneEntity entity) =>
