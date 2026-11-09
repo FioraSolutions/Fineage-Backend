@@ -120,7 +120,7 @@ public sealed partial class ZoneWorld
         var passiveLevels = PassiveSkillLevels(player);
         return passiveLevels.Count == 0
             ? mods
-            : _passives.CollectPassives(passiveLevels, kinds => Wearing(player, kinds), mods);
+            : _passives.CollectPassives(passiveLevels, kinds => ConditionUsingItemType.Matches(player.Inventory, kinds), mods);
     }
 
     /// <summary>
@@ -166,7 +166,9 @@ public sealed partial class ZoneWorld
             ItemId(PaperdollSlot.Feet),
             ItemId(PaperdollSlot.LHand),
             EnchantOf);
-        return skills.Count == 0 ? mods ?? CombatStatMods.None : _passives.CollectPassives(skills, kinds => Wearing(player, kinds), mods);
+        return skills.Count == 0
+            ? mods ?? CombatStatMods.None
+            : _passives.CollectPassives(skills, kinds => ConditionUsingItemType.Matches(player.Inventory, kinds), mods);
     }
 
     /// <summary>
