@@ -1,5 +1,6 @@
 using Fineage.Game;
 using Fineage.Protocol;
+using Fineage.Zone.Inventory;
 
 namespace Fineage.Zone.World;
 
@@ -60,9 +61,9 @@ public sealed partial class ZoneWorld
             return error;
 
         var item = player.Inventory!.Find(objectId);
-        if (item == null)
-            return InventoryProtocol.NotOwned;
-        if (IsShot(item.Template))
+        if (GearRules.UseOwnedError(item != null) is { } ownedError)
+            return ownedError;
+        if (IsShot(item!.Template))
         {
             TryChargeShot(session, player, item, quiet: false);
             return null;
@@ -110,16 +111,17 @@ public sealed partial class ZoneWorld
     {
         if (!TryLivePlayer(session, out var player, out var error))
             return error;
-        if (paperdollSlot < 0 || paperdollSlot > (int)PaperdollSlot.Hair2)
-            return InventoryProtocol.BadSlot;
+        if (GearRules.UnequipSlotError(paperdollSlot, (int)PaperdollSlot.Hair2) is { } slotError)
+            return slotError;
 
         var item = player.Inventory!.GetEquipped((PaperdollSlot)paperdollSlot);
-        if (item == null)
-            return InventoryProtocol.Empty;
+        if (GearRules.UnequipEmptyError(item != null) is { } emptyError)
+            return emptyError;
+        var liveItem = item!;
 
         var before = PaperdollSnapshot(player.Inventory);
-        player.Inventory.Unequip(item);
-        if (item.Template.Kind == ItemKind.Weapon)
+        player.Inventory.Unequip(liveItem);
+        if (liveItem.Template.Kind == ItemKind.Weapon)
         {
             player.SoulshotCharged = false;
             player.SpiritshotCharge = 0;
@@ -128,7 +130,7 @@ public sealed partial class ZoneWorld
             return "bad_request";
 
         SaveInventory(session, player.Inventory);
-        ZoneLog.Info($"gear object={session.ObjectId} unequip slot={paperdollSlot} item={item.ObjectId}");
+        ZoneLog.Info($"gear object={session.ObjectId} unequip slot={paperdollSlot} item={liveItem.ObjectId}");
         return null;
     }
 
@@ -138,10 +140,8 @@ public sealed partial class ZoneWorld
             return "world";
         if (!_byId.TryGetValue(session.ObjectId, out var player) || player.Inventory == null)
             return "world";
-        if (itemId <= 0 || count <= 0 || count > MaxGrantCount)
-            return "bad_request";
-        if (!_game.Items.TryGet(itemId, out _))
-            return "bad_request";
+        if (GearRules.GrantError(itemId, count, MaxGrantCount, _game.Items.TryGet(itemId, out _)) is { } giveError)
+            return giveError;
 
         var added = player.Inventory.Add(itemId, count);
         // Net clients only read the PacketEnvelope path, so the V2 frame alone would leave the bag

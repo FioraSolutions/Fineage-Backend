@@ -1,4 +1,5 @@
 using Fineage.Protocol;
+using Fineage.Zone.Inventory;
 
 namespace Fineage.Zone.World;
 
@@ -24,10 +25,8 @@ public sealed partial class ZoneWorld
     {
         if (!_byId.TryGetValue(session.ObjectId, out var player) || player.Inventory == null)
             return "world";
-        if (itemId <= 0 || count <= 0 || count > MaxGrantCount)
-            return "bad_request";
-        if (!_game.Items.TryGet(itemId, out _))
-            return "bad_request";
+        if (GearRules.GrantError(itemId, count, MaxGrantCount, _game.Items.TryGet(itemId, out _)) is { } grantError)
+            return grantError;
 
         var added = player.Inventory.Add(itemId, count);
         // Same reasoning as GiveItem: the Net client would otherwise never learn the row appeared.
