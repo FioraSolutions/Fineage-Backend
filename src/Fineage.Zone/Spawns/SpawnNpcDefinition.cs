@@ -24,8 +24,10 @@ public sealed record SpawnNpcDefinition(
     int Level = 1,
     long Exp = 0,
     int Sp = 0,
-    double PAtk = 0,
-    double PDef = 0,
+    // Defaults match L1 Gremlin (npcs.json) so hand-built test rows swing without
+    // omitting combat stats. SpawnCatalog always overwrites from the template.
+    double PAtk = 8.475,
+    double PDef = 44.444,
     int AttackSpeed = 0,
     double Accuracy = 0,
     double Evasion = 0,

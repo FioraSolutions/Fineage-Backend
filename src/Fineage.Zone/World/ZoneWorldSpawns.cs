@@ -73,6 +73,28 @@ public sealed partial class ZoneWorld
         if (_byId.ContainsKey(def.ObjectId))
             return;
 
+        // Hand-built test spawn rows often omit combat stats (PDef=0). Fill from npcs.json
+        // when present so melee rolls fail loud only on genuine missing templates.
+        double pAtk = def.PAtk;
+        double pDef = def.PDef;
+        double mAtk = def.MAtk;
+        double mDef = def.MDef;
+        int level = def.Level;
+        if ((pDef <= 0 || pAtk <= 0) &&
+            Fineage.Zone.Npcs.NpcCatalog.LoadDefault().ById.TryGetValue(def.NpcId, out var template))
+        {
+            if (pAtk <= 0)
+                pAtk = template.PAtk;
+            if (pDef <= 0)
+                pDef = template.PDef;
+            if (mAtk <= 0)
+                mAtk = template.MAtk;
+            if (mDef <= 0)
+                mDef = template.MDef;
+            if (level <= 1 && template.Level > 1)
+                level = template.Level;
+        }
+
         var tax = MerchantTowns.For(mapId);
         var entity = new ZoneEntity
         {
@@ -91,13 +113,13 @@ public sealed partial class ZoneWorld
             CurHp = def.MaxHp,
             MaxMp = def.MaxMp,
             CurMp = def.MaxMp,
-            Level = def.Level,
+            Level = level,
             RewardExp = def.Exp,
             RewardSp = def.Sp,
-            PAtk = def.PAtk,
+            PAtk = pAtk,
             HpRegen = def.HpRegen,
             MpRegen = def.MpRegen,
-            PDef = def.PDef,
+            PDef = pDef,
             PAtkSpd = def.AttackSpeed,
             BaseAccuracy = def.Accuracy,
             BaseEvasion = def.Evasion,
@@ -106,8 +128,8 @@ public sealed partial class ZoneWorld
             Dex = def.Dex,
             ShieldDef = def.ShieldDef,
             ShieldRate = def.ShieldRate,
-            MAtk = def.MAtk,
-            MDef = def.MDef,
+            MAtk = mAtk,
+            MDef = mDef,
             AttackRange = def.AttackRange,
             Aggressive = def.Aggressive,
             AggroRange = def.AggroRange,
