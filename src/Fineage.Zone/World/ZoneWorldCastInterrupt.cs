@@ -48,7 +48,7 @@ public sealed partial class ZoneWorld
             return;
         double men = 1;
         if (PlayerClasses.TryGet(player.ClassId, out var t) && t != null)
-            men = StatBonus(PlayerClasses.StatBonuses, StatSlot.Men, t.Men + player.HennaMen);
+            men = EffectiveAttributes(player, t).MenBonus;
         if (CastRules.RollAttackBreak(_combatRandom, damage, men))
             AbortCast(player, "hit", notify: true);
     }

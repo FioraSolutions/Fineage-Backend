@@ -13,104 +13,77 @@ public readonly record struct PlayerCombatStats(
 public sealed partial class ZoneWorld
 {
     /// <summary>
-    /// Mobius Interlude player stat pipeline (subset):
-    /// P.Atk = (weapon pAtk | fist base) * STR bonus * levelMod; M.Atk = (weapon mAtk | base) * INT² * levelMod²;
-    /// P.Def = (base 80 − default of each equipped armor slot + armor pDef) * levelMod; M.Def = base * MEN * levelMod;
-    /// Pspd = (weapon pAtkSpd | 300) * DEX bonus; Cspd = base * WIT bonus; accuracy = sqrt(DEX)*6 + level;
-    /// M.Def swaps naked jewel shares for jewel mDef the same way.
-    /// levelMod = (level + 89) / 100. Then <see cref="PlayerStatMods"/> folds buffs, passives, armor-set skills,
-    /// weight/grade/death penalties. Henna adjusts base STR/DEX/… before the bonus table; enchant adds on weapon/armor
-    /// fields (Mobius <c>FuncEnchant</c>). A thin <c>IStatCalculator</c> is deferred until these layers start to
-    /// duplicate — do not start a Calculator/AbstractFunction big-bang here.
+    /// Mobius Interlude player stat pipeline (layered, no Calculator rewrite):
+    /// <list type="number">
+    /// <item><see cref="PlayerEffectiveAttributes"/> — template + henna → bonus table</item>
+    /// <item><see cref="PlayerGearBases"/> — weapon/armor/jewels + <c>FuncEnchant</c></item>
+    /// <item>Mobius base formulas (STR/levelMod/…)</item>
+    /// <item><see cref="PlayerStatMods"/> — buffs, passives, clan/set skills, weight/grade/death</item>
+    /// </list>
+    /// Thin <c>IStatCalculator</c> stays deferred; these named layers are the SoT for parity tests.
     /// </summary>
     internal PlayerCombatStats PlayerStats(ZoneEntity player)
     {
         int level = Math.Max(1, player.Level);
-        double levelMod = (level + 89) / 100d;
         if (!PlayerClasses.TryGet(player.ClassId, out var t) || t == null)
             throw new InvalidOperationException($"PlayerStats: unknown classId={player.ClassId} object={player.ObjectId}");
 
-        var bonus = PlayerClasses.StatBonuses;
-        int strStat = t.Str + player.HennaStr;
-        int dexStat = t.Dex + player.HennaDex;
-        int intStat = t.Int + player.HennaInt;
-        int witStat = t.Wit + player.HennaWit;
-        int menStat = t.Men + player.HennaMen;
-        double str = StatBonus(bonus, StatSlot.Str, strStat);
-        double dex = StatBonus(bonus, StatSlot.Dex, dexStat);
-        double intel = StatBonus(bonus, StatSlot.Int, intStat);
-        double wit = StatBonus(bonus, StatSlot.Wit, witStat);
-        double men = StatBonus(bonus, StatSlot.Men, menStat);
-
-        var weaponItem = player.Inventory?.GetEquipped(PaperdollSlot.RHand);
-        var weapon = weaponItem?.Template;
-        bool armed = weapon != null && weapon.Kind == ItemKind.Weapon;
-        int weaponEnchant = armed ? weaponItem!.EnchantLevel : 0;
-        double basePAtk = armed && weapon!.PAtk > 0
-            ? weapon.PAtk + EnchantCombatBonus.PhysicalAttack(weapon, weaponEnchant)
-            : t.PAtk;
-        double baseMAtk = armed && weapon!.MAtk > 0
-            ? weapon.MAtk + EnchantCombatBonus.MagicAttack(weapon.Crystal, weaponEnchant)
-            : t.MAtk;
-        double baseSpd = armed && weapon!.PAtkSpd > 0 ? weapon.PAtkSpd : t.PAtkSpd;
-        int range = armed && weapon!.AttackRange > 0 ? weapon.AttackRange : ZoneCombat.DefaultWeaponRange;
-        int crit = armed && weapon!.CritRate > 0 ? weapon.CritRate : t.CritRate;
-
-        double pDefBase = t.PDef;
-        double mDefBase = t.MDef;
-        if (player.Inventory != null)
-        {
-            bool mystic = t.PDef < ZoneCombat.DefaultPlayerPDef;
-            foreach (var (slot, fighterDef) in ZoneCombat.NakedPDefBySlot)
-            {
-                // Mobius mystic templates: chest 15 / legs 8 (base 54) instead of 31 / 18 (base 80).
-                int nakedDef = !mystic ? fighterDef
-                    : slot == PaperdollSlot.Chest ? ZoneCombat.MysticNakedChestPDef
-                    : slot == PaperdollSlot.Legs ? ZoneCombat.MysticNakedLegsPDef
-                    : fighterDef;
-                var armorItem = player.Inventory.GetEquipped(slot);
-                var armor = armorItem?.Template;
-                if (armor == null || armor.Kind != ItemKind.Armor)
-                    continue;
-                pDefBase += armor.PDef + EnchantCombatBonus.Defence(armorItem!.EnchantLevel) - nakedDef;
-                // Full-body armor (Mobius bodypart fullarmor) also covers the legs slot.
-                if (slot == PaperdollSlot.Chest && armor.BodySlot == BodySlot.FullArmor)
-                    pDefBase -= mystic ? ZoneCombat.MysticNakedLegsPDef : ZoneCombat.NakedLegsPDef;
-            }
-            foreach (var (slot, nakedDef) in ZoneCombat.NakedMDefBySlot)
-            {
-                var jewelItem = player.Inventory.GetEquipped(slot);
-                var jewel = jewelItem?.Template;
-                if (jewel == null || jewel.Kind != ItemKind.Armor)
-                    continue;
-                mDefBase += jewel.MDef + EnchantCombatBonus.Defence(jewelItem!.EnchantLevel) - nakedDef;
-            }
-        }
-
-        var shield = player.Inventory?.GetEquipped(PaperdollSlot.LHand)?.Template;
-        bool shielded = shield != null && shield.Kind == ItemKind.Armor && shield.ShieldDef > 0;
+        var attrs = EffectiveAttributes(player, t);
+        var gear = GearBases(player, t);
+        double levelMod = PlayerGearBases.LevelMod(level);
         var mods = PlayerStatMods(player);
+
         return new PlayerCombatStats(
-            PAtk: mods.Apply(CombatStat.PAtk, (int)(basePAtk * str * levelMod)),
-            MAtk: mods.Apply(CombatStat.MAtk, (int)(baseMAtk * intel * intel * levelMod * levelMod)),
-            PDef: Math.Max(1, mods.Apply(CombatStat.PDef, (int)(pDefBase * levelMod))),
-            MDef: Math.Max(1, mods.Apply(CombatStat.MDef, (int)(mDefBase * men * levelMod))),
-            PAtkSpd: Math.Max(1, mods.Apply(CombatStat.PAtkSpd, (int)(baseSpd * dex))),
-            MAtkSpd: Math.Max(1, mods.Apply(CombatStat.MAtkSpd, (int)(t.MAtkSpd * wit))),
-            Accuracy: mods.Apply(CombatStat.Accuracy, (int)(Math.Sqrt(dexStat) * 6 + level)),
-            CritRate: mods.Apply(CombatStat.CritRate, (int)(crit * dex * 10)),
-            AttackRange: range,
-            Weapon: armed ? weapon!.WeaponType : WeaponType.None,
-            Evasion: mods.Apply(CombatStat.Evasion, (int)ZoneCombat.AccuracyOrEvasion(0, dexStat, level) - (shielded ? shield!.ShieldEvasionPenalty : 0)),
-            RandomDamage: armed && weapon!.RandomDamage > 0 ? weapon.RandomDamage : ZoneCombat.DefaultPlayerRandomDamage,
-            ShieldDef: shielded ? shield!.ShieldDef : 0,
-            ShieldRate: shielded ? shield!.ShieldRate * dex : 0,
-            Soulshots: armed ? weapon!.Soulshots : 0,
-            WeaponGrade: armed ? weapon!.Crystal : CrystalGrade.None,
-            MCritRate: ZoneCombat.PlayerMCritRate(armed, wit, mods),
+            PAtk: mods.Apply(CombatStat.PAtk, (int)(gear.PAtk * attrs.StrBonus * levelMod)),
+            MAtk: mods.Apply(CombatStat.MAtk, (int)(gear.MAtk * attrs.IntBonus * attrs.IntBonus * levelMod * levelMod)),
+            PDef: Math.Max(1, mods.Apply(CombatStat.PDef, (int)(gear.PDef * levelMod))),
+            MDef: Math.Max(1, mods.Apply(CombatStat.MDef, (int)(gear.MDef * attrs.MenBonus * levelMod))),
+            PAtkSpd: Math.Max(1, mods.Apply(CombatStat.PAtkSpd, (int)(gear.PAtkSpd * attrs.DexBonus))),
+            MAtkSpd: Math.Max(1, mods.Apply(CombatStat.MAtkSpd, (int)(t.MAtkSpd * attrs.WitBonus))),
+            Accuracy: mods.Apply(CombatStat.Accuracy, (int)(Math.Sqrt(attrs.Dex) * 6 + level)),
+            CritRate: mods.Apply(CombatStat.CritRate, (int)(gear.CritRate * attrs.DexBonus * 10)),
+            AttackRange: gear.AttackRange,
+            Weapon: gear.Weapon,
+            Evasion: mods.Apply(CombatStat.Evasion,
+                (int)ZoneCombat.AccuracyOrEvasion(0, attrs.Dex, level) - (gear.Shielded ? gear.ShieldEvasionPenalty : 0)),
+            RandomDamage: gear.RandomDamage,
+            ShieldDef: gear.ShieldDef,
+            ShieldRate: gear.Shielded ? gear.ShieldRate * attrs.DexBonus : 0,
+            Soulshots: gear.Soulshots,
+            WeaponGrade: gear.WeaponGrade,
+            MCritRate: ZoneCombat.PlayerMCritRate(gear.Armed, attrs.WitBonus, mods),
             MagicCritDmg: mods.Apply(CombatStat.MagicCritDmg, 1d),
             CritDmg: mods.Apply(CombatStat.CritDmg, 1d),
             BlowRate: mods.Apply(CombatStat.BlowRate, 1d));
+    }
+
+    /// <summary>Template + henna + bonus table (shared by combat, regen, weight, move speed).</summary>
+    internal PlayerEffectiveAttributes EffectiveAttributes(ZoneEntity player, ClassTemplate? template = null)
+    {
+        if (template == null && (!PlayerClasses.TryGet(player.ClassId, out template) || template == null))
+            throw new InvalidOperationException($"EffectiveAttributes: unknown classId={player.ClassId}");
+        var henna = new HennaStatBonus(
+            player.HennaStr, player.HennaCon, player.HennaDex,
+            player.HennaInt, player.HennaMen, player.HennaWit);
+        return PlayerEffectiveAttributes.From(
+            template, henna, PlayerClasses.StatBonuses,
+            static (slot, value) => ZoneLog.Warn($"stat-bonus out of range slot={slot} value={value} — clamped"));
+    }
+
+    PlayerGearBases GearBases(ZoneEntity player, ClassTemplate template)
+    {
+        ItemInstance? Equipped(PaperdollSlot slot) => player.Inventory?.GetEquipped(slot);
+        return PlayerGearBases.From(
+            template,
+            Equipped,
+            ZoneCombat.DefaultWeaponRange,
+            ZoneCombat.DefaultPlayerRandomDamage,
+            ZoneCombat.NakedPDefBySlot,
+            ZoneCombat.NakedMDefBySlot,
+            ZoneCombat.MysticNakedChestPDef,
+            ZoneCombat.MysticNakedLegsPDef,
+            ZoneCombat.NakedLegsPDef,
+            ZoneCombat.DefaultPlayerPDef);
     }
 
     /// <summary>Mobius GameTimeTaskManager.isNight for HitConditionBonus dark −10.</summary>
