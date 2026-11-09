@@ -25,7 +25,7 @@ public sealed class PrivateStoreRulesTests
             PrivateStoreRules.SellStockError(true, false, true, true, 1, 5, ShopTrade.AdenaItemId));
         Assert.Equal(
             PrivateStoreProtocol.Item,
-            PrivateStoreRules.SellStockError(true, false, true, false, 2, 2, 57));
-        Assert.Null(PrivateStoreRules.SellStockError(true, false, true, true, 2, 5, 57));
+            PrivateStoreRules.SellStockError(true, false, true, false, 2, 2, itemId: 1060));
+        Assert.Null(PrivateStoreRules.SellStockError(true, false, true, true, 2, 5, itemId: 1060));
     }
 }
