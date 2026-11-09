@@ -176,4 +176,33 @@ public sealed partial class ZoneWorld
             count = 1;
         return true;
     }
+
+    /// <summary>Apply a chat GM buff pack (<c>//mbuff</c> / <c>//fbuff</c>) at each skill's max level.</summary>
+    string? AdminApplyBuffSet(ZoneSession session, ZoneEntity player, int[] skillIds)
+    {
+        if (skillIds == null || skillIds.Length == 0)
+            return "bad_request";
+
+        long now = _clock().ToUnixTimeMilliseconds();
+        int applied = 0;
+        foreach (int skillId in skillIds)
+        {
+            if (skillId <= 0)
+                continue;
+            var skill = _game.Skills.Find(skillId);
+            if (skill == null)
+                continue;
+            int level = Math.Max(1, skill.MaxLevel);
+            if (!skill.TryLevelData(level, out var data))
+                continue;
+            ApplyAbnormalFromSkill(skill, data, player, now);
+            applied++;
+        }
+
+        if (applied == 0)
+            return "bad_request";
+
+        ZoneLog.Info($"admin buffset object={player.ObjectId} applied={applied}");
+        return null;
+    }
 }

@@ -84,6 +84,18 @@ public sealed partial class ZoneWorld
             return TryBuffRequest(session, player.ObjectId, effectId: 0, remove: false);
         }
 
+        if (verb.Equals("admin_mbuff", StringComparison.OrdinalIgnoreCase)
+            || verb.Equals("admin_magebuff", StringComparison.OrdinalIgnoreCase))
+        {
+            return AdminApplyBuffSet(session, player, Fineage.Zone.Combat.ZoneBuffs.MageSelfBuffs);
+        }
+
+        if (verb.Equals("admin_fbuff", StringComparison.OrdinalIgnoreCase)
+            || verb.Equals("admin_fighterbuff", StringComparison.OrdinalIgnoreCase))
+        {
+            return AdminApplyBuffSet(session, player, Fineage.Zone.Combat.ZoneBuffs.FighterSelfBuffs);
+        }
+
         if (verb.Equals("admin_buff_clear", StringComparison.OrdinalIgnoreCase)
             || verb.Equals("admin_clearbuffs", StringComparison.OrdinalIgnoreCase))
         {
