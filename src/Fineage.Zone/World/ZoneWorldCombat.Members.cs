@@ -37,7 +37,7 @@ public sealed partial class ZoneWorld
 
     Task? _combatLoop;
 
-    /// <summary>One live combat-loop tick (movement, hits, player auto-attack / approach, casts, mobs, corpses).</summary>
+    /// <summary>One live combat-loop tick (movement, hits, player auto-attack / approach, casts, mobs, corpses, aggro/leash).</summary>
     internal async Task RunPlayerCombatTickAsync(CancellationToken ct)
     {
         lock (_gate)
@@ -52,8 +52,13 @@ public sealed partial class ZoneWorld
             TickPendingCasts(now);
             TickQueuedMoves(now);
             TickPendingPickups(now);
+            // Proactive AI used to live only on RunCombatTickAsync (tests). Without these,
+            // aggressive mobs never aggro or leash on the live CombatLoopAsync path.
+            TickAggression(now);
+            TickLeash(now);
             TickMobAttacks(now);
             TickCorpseDecay(now);
+            TickAttackStance(now);
             TickGroundExpiry(now);
         }
         await Task.CompletedTask.ConfigureAwait(false);
