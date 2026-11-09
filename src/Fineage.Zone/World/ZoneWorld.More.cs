@@ -272,6 +272,7 @@ public sealed partial class ZoneWorld
         LoadKnownRecipes(entity, stored);
         LoadSocialLists(entity, stored);
         RefreshKnownSkills(entity);
+        RefreshGearSkills(entity);
         // Mobius GameClient:493 / EnterWorld:208 — refreshOverloaded() runs before the first UserInfo, so a character
         // that logs in while overloaded already carries skill 4270's level and its slowed speeds. This must come after
         // RefreshKnownSkills: Weight Limit 150 and the armor-set weightLimit/weightPenalty passives are only in

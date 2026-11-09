@@ -91,22 +91,30 @@ public readonly record struct PlayerFormulaBases(
 
 /// <summary>
 /// Skill id → level map fed into <c>skill-passives.json</c>.
-/// Higher level wins on id collision (enchanted learned skill beats clan copy, etc.).
+/// Higher level wins on id collision (enchanted learned / clan / gear).
 /// </summary>
 public static class PlayerPassiveSources
 {
     public static Dictionary<int, int> Merge(
         IReadOnlyDictionary<int, int> knownSkills,
-        IReadOnlyDictionary<int, int> clanSkills)
+        IReadOnlyDictionary<int, int> clanSkills,
+        IReadOnlyDictionary<int, int>? gearSkills = null)
     {
-        var map = new Dictionary<int, int>(knownSkills.Count + clanSkills.Count);
-        foreach (var (id, level) in knownSkills)
-            map[id] = level;
-        foreach (var (id, level) in clanSkills)
-        {
-            if (!map.TryGetValue(id, out int have) || level > have)
-                map[id] = level;
-        }
+        int gearCount = gearSkills?.Count ?? 0;
+        var map = new Dictionary<int, int>(knownSkills.Count + clanSkills.Count + gearCount);
+        MergeInto(map, knownSkills);
+        MergeInto(map, clanSkills);
+        if (gearSkills != null)
+            MergeInto(map, gearSkills);
         return map;
+    }
+
+    public static void MergeInto(Dictionary<int, int> target, IReadOnlyDictionary<int, int> source)
+    {
+        foreach (var (id, level) in source)
+        {
+            if (!target.TryGetValue(id, out int have) || level > have)
+                target[id] = level;
+        }
     }
 }
