@@ -1,6 +1,7 @@
 using Fineage.Zone.Combat;
 using Fineage.Protocol;
 using Fineage.Zone.Geo;
+using Fineage.Zone.Movement;
 
 namespace Fineage.Zone.World;
 
@@ -13,18 +14,14 @@ namespace Fineage.Zone.World;
 public sealed partial class ZoneWorld
 {
     /// <summary>Max Z change allowed per unit of horizontal travel (≈ 45° slope) before we treat client Z as bogus.</summary>
-    internal const double MaxZPerXy = 1.0;
+    internal const double MaxZPerXy = MoveRules.MaxZPerXy;
     /// <summary>Flat Z tolerance (stairs / small steps) on top of the slope allowance.</summary>
-    internal const int MaxZFlat = 96;
+    internal const int MaxZFlat = MoveRules.MaxZFlat;
     internal const float DefaultRunSpeed = 120f;
 
     /// <summary>Stub geo: client dest Z far off a sane slope from the current ground is replaced with current Z.</summary>
-    internal static int SanitizeDestZ(int curX, int curY, int curZ, int destX, int destY, int destZ)
-    {
-        double xy = Math.Sqrt((double)(destX - curX) * (destX - curX) + (double)(destY - curY) * (destY - curY));
-        double allowed = MaxZFlat + xy * MaxZPerXy;
-        return Math.Abs(destZ - curZ) > allowed ? curZ : destZ;
-    }
+    internal static int SanitizeDestZ(int curX, int curY, int curZ, int destX, int destY, int destZ) =>
+        MoveRules.SanitizeDestZ(curX, curY, curZ, destX, destY, destZ);
 
     string? StartTimedMove(ZoneEntity entity, ZoneSession session, MoveToMsg move)
     {
