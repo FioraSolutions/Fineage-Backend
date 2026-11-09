@@ -3,6 +3,7 @@ using Fineage.Game.Services;
 using Fineage.Accounts;
 using Fineage.Protocol;
 using Fineage.Zone.Combat;
+using Fineage.Zone.Inventory;
 using Fineage.Zone.NpcHtml;
 
 namespace Fineage.Zone.World;
@@ -307,11 +308,11 @@ public sealed partial class ZoneWorld
             return error;
         if (player.Inventory == null || player.Warehouse == null)
             return "world";
-        if (!IsWarehouse(npc))
+        if (WarehouseSessionRules.NpcWindowError(IsWarehouse(npc)) is { } depositNpcError)
         {
             if (html)
                 SendHtml(session, player, npc, "<html><body>%npcname%:<br>" + NpcServiceProtocol.NotWarehouseText + "</body></html>");
-            return "bad_request";
+            return depositNpcError;
         }
 
         if (player.ActiveEnchantObjectId != 0)
@@ -329,8 +330,8 @@ public sealed partial class ZoneWorld
         int slots = 0;
         foreach (var line in request)
         {
-            if (!seen.Add(line.ObjectId))
-                return "bad_request";
+            if (WarehouseSessionRules.LineDuplicateError(!seen.Add(line.ObjectId)) is { } dupError)
+                return dupError;
             var item = player.Inventory.Find(line.ObjectId);
             if (item == null || item.IsEquipped || !item.Template.CanDropTradeStore || item.Count < line.Count)
             {
@@ -339,8 +340,8 @@ public sealed partial class ZoneWorld
             }
 
             bool stackable = item.Template.Stackable;
-            if (!stackable && line.Count != 1)
-                return "bad_request";
+            if (WarehouseSessionRules.NonStackableCountError(stackable, line.Count) is { } countError)
+                return countError;
             planned.Add((item, line.Count, stackable));
             if (item.ItemId == WarehouseRules.AdenaItemId)
                 depositedAdena = checked(depositedAdena + line.Count);
@@ -391,11 +392,11 @@ public sealed partial class ZoneWorld
             return error;
         if (player.Inventory == null || player.Warehouse == null)
             return "world";
-        if (!IsWarehouse(npc))
+        if (WarehouseSessionRules.NpcWindowError(IsWarehouse(npc)) is { } withdrawNpcError)
         {
             if (html)
                 SendHtml(session, player, npc, "<html><body>%npcname%:<br>" + NpcServiceProtocol.NotWarehouseText + "</body></html>");
-            return "bad_request";
+            return withdrawNpcError;
         }
 
         if (player.ActiveEnchantObjectId != 0)
@@ -413,14 +414,14 @@ public sealed partial class ZoneWorld
         int incomingWeight = 0;
         foreach (var line in request)
         {
-            if (!seen.Add(line.ObjectId))
-                return "bad_request";
+            if (WarehouseSessionRules.LineDuplicateError(!seen.Add(line.ObjectId)) is { } withdrawDup)
+                return withdrawDup;
             var stack = player.Warehouse.Find(line.ObjectId);
             if (stack == null || stack.Count < line.Count)
                 return "bad_request";
             var template = _game.Items.Get(stack.ItemId);
-            if (!template.Stackable && line.Count != 1)
-                return "bad_request";
+            if (WarehouseSessionRules.NonStackableCountError(template.Stackable, line.Count) is { } withdrawCount)
+                return withdrawCount;
             planned.Add((stack, line.Count, template.Stackable));
             slots += WarehouseRules.SlotsFor(template.Stackable, player.Inventory.FindByItemId(stack.ItemId) != null, line.Count);
             incomingWeight = checked(incomingWeight + _weights.Of(stack.ItemId) * line.Count);
