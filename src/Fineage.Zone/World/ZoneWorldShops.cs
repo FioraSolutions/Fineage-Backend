@@ -106,12 +106,8 @@ public sealed partial class ZoneWorld
 
     string? Buy(ZoneSession session, int npcObjectId, int listId, ShopLine[] items)
     {
-        if (items == null)
-            return "bad_request";
         if (!TryPlayer(session, out var player) || player.Inventory == null)
             return "world";
-        if (player.Dead)
-            return InventoryProtocol.Dead;
 
         // Mobius admin_buy: NpcObjectId 0 + ShopSession.IsAdmin. Price-0 GM lists are free grants
         // (ShopTrade.Buy refuses unit price 0 as NotTradable).
@@ -120,6 +116,10 @@ public sealed partial class ZoneWorld
             && adminShop.NpcObjectId == 0
             && adminShop.BuyListId == listId)
         {
+            if (items == null)
+                return "bad_request";
+            if (player.Dead)
+                return InventoryProtocol.Dead;
             if (!ZoneAdmin.IsAdminCharacter(player.Name))
                 return "forbidden";
             if (!_buyLists.TryGet(listId, out var adminList))
@@ -129,17 +129,20 @@ public sealed partial class ZoneWorld
 
         if (!TryShopNpc(session, npcObjectId, out player, out var npc, out var error))
             return error;
-        if (player.Shop == null || player.Shop.NpcObjectId != npc.ObjectId || player.Shop.BuyListId != listId)
-            return "bad_request";
-        if (!_buyLists.TryGet(listId, out var list) || !list.Allows(npc.NpcId) || player.Inventory == null)
-            return "bad_request";
+        bool haveList = _buyLists.TryGet(listId, out var list);
+        bool listOk = haveList && list!.Allows(npc.NpcId) && player.Inventory != null;
+        bool shopMatches = player.Shop != null && player.Shop.NpcObjectId == npc.ObjectId && player.Shop.BuyListId == listId;
+        if (ShopSessionRules.BuyWindowError(items != null, player.Dead, shopMatches, listOk) is { } buyWindow)
+            return buyWindow;
+        var liveList = list!;
+        var liveItems = items!;
 
         Tax(npc, out int baseTax, out int castleTax, out _);
         var mutation = ShopTrade.Buy(
-            player.Inventory,
+            player.Inventory!,
             _game.Items,
-            list,
-            items,
+            liveList,
+            liveItems,
             baseTax,
             castleTax,
             MaxLoadOf(player),
@@ -154,25 +157,23 @@ public sealed partial class ZoneWorld
 
         SendTouches(session, mutation);
         SendComplete(session);
-        var buy = BuyList(npc, list, baseTax, castleTax);
+        var buy = BuyList(npc, liveList, baseTax, castleTax);
         var balance = Balance(player, npc);
         FanNetBuy(session, buy, balance);
-        SaveInventory(session, player.Inventory);
+        SaveInventory(session, player.Inventory!);
         return null;
     }
 
     string? Sell(ZoneSession session, int npcObjectId, ShopObjectLine[] items)
     {
-        if (items == null)
-            return "bad_request";
         if (!TryShopNpc(session, npcObjectId, out var player, out var npc, out var error))
             return error;
-        if (player.Shop is not { SellOpen: true } || player.Shop.NpcObjectId != npc.ObjectId || player.Inventory == null)
-            return "bad_request";
-        if (!CanSell(npc))
-            return "bad_request";
+        bool sellOpen = player.Shop is { SellOpen: true } && player.Shop.NpcObjectId == npc.ObjectId && player.Inventory != null;
+        if (ShopSessionRules.SellWindowError(items != null, sellOpen, CanSell(npc)) is { } sellWindow)
+            return sellWindow;
+        var liveItems = items!;
 
-        var mutation = ShopTrade.Sell(player.Inventory, items);
+        var mutation = ShopTrade.Sell(player.Inventory!, liveItems);
         if (!mutation.Ok)
         {
             SendDeny(session, mutation);
@@ -184,7 +185,7 @@ public sealed partial class ZoneWorld
         var sell = SellList(npc, player);
         var balance = Balance(player, npc);
         FanNetSell(session, sell, balance);
-        SaveInventory(session, player.Inventory);
+        SaveInventory(session, player.Inventory!);
         return null;
     }
 
@@ -192,18 +193,20 @@ public sealed partial class ZoneWorld
     {
         if (!TryShopNpc(session, npcObjectId, out var player, out var npc, out var error))
             return error;
-        if (player.Shop?.Multi == null || player.Shop.NpcObjectId != npc.ObjectId || player.Shop.Multi.ListId != listId)
-            return "bad_request";
-        if (player.Inventory == null)
-            return "bad_request";
-        var entry = player.Shop.Multi.Find(entryId);
-        if (entry == null)
-            return "bad_request";
+        bool multiMatches = player.Shop?.Multi != null
+            && player.Shop.NpcObjectId == npc.ObjectId
+            && player.Shop.Multi.ListId == listId;
+        var entry = multiMatches ? player.Shop!.Multi!.Find(entryId) : null;
+        if (ShopSessionRules.MultiWindowError(multiMatches, player.Inventory != null, entry != null) is { } multiWindow)
+            return multiWindow;
+        var liveEntry = entry!;
+        var liveInventory = player.Inventory!;
+        var liveShop = player.Shop!;
 
         var mutation = ShopTrade.Exchange(
-            player.Inventory,
+            liveInventory,
             _game.Items,
-            entry,
+            liveEntry,
             amount,
             MaxLoadOf(player),
             ShopTrade.SlotLimit(player.Race));
@@ -216,12 +219,12 @@ public sealed partial class ZoneWorld
         SendTouches(session, mutation);
         SendComplete(session);
         MultiSellListMsg? multi = null;
-        if (player.Shop.Multi.InventoryOnly && _multisells.TryGet(listId, out var list))
+        if (liveShop.Multi!.InventoryOnly && _multisells.TryGet(listId, out var list))
         {
             Tax(npc, out _, out int castleTax, out bool owned);
             bool applyTax = list.ApplyTaxes && npc.MerchantCastleId > 0 && owned;
-            var prepared = ShopTrade.Prepare(list, player.Inventory, _game.Items, true, applyTax, castleTax);
-            player.Shop.Multi = prepared;
+            var prepared = ShopTrade.Prepare(list, liveInventory, _game.Items, true, applyTax, castleTax);
+            liveShop.Multi = prepared;
             multi = MultiList(npc, prepared, castleTax);
         }
 
@@ -230,7 +233,7 @@ public sealed partial class ZoneWorld
             FanNetMulti(session, multi, balance);
         else if (NetBridge != null)
             NetBridge.FanoutShopBalance([session.ObjectId], balance);
-        SaveInventory(session, player.Inventory);
+        SaveInventory(session, liveInventory);
         return null;
     }
 
