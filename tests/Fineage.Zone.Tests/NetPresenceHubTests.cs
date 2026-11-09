@@ -429,7 +429,9 @@ public sealed class NetPresenceHubTests
                     ItemId = 57,
                     Count = 40,
                     EnchantLevel = 0,
-                    EquippedSlot = -1
+                    EquippedSlot = -1,
+                    BodySlot = "none",
+                    Kind = "etc"
                 }
             ]
         };
@@ -437,6 +439,8 @@ public sealed class NetPresenceHubTests
         Assert.Single(again.Changes);
         Assert.Equal(57, again.Changes[0].ItemId);
         Assert.Equal(40, again.Changes[0].Count);
+        Assert.Equal("none", again.Changes[0].BodySlot);
+        Assert.Equal("etc", again.Changes[0].Kind);
 
         var pickup = new PickupRequestNetMsg { GroundObjectId = 99 };
         Assert.Equal(99, NetCodec.DecodePickupRequest(NetCodec.EncodePickupRequest(pickup)).GroundObjectId);

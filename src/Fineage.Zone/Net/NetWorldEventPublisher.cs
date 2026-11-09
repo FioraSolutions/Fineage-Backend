@@ -337,7 +337,12 @@ sealed partial class NetWorldEventPublisher : IWorldEventPublisher
                 ItemId = row.ItemId,
                 Count = row.Count,
                 EnchantLevel = row.EnchantLevel,
-                EquippedSlot = row.EquippedSlot
+                EquippedSlot = row.EquippedSlot,
+                BodySlot = row.BodySlot ?? "",
+                Kind = row.Kind ?? "",
+                Icon = row.Icon ?? "",
+                WeaponType = row.WeaponType ?? "",
+                ArmorType = row.ArmorType ?? ""
             };
         }
         var payload = NetCodec.EncodeInventoryUpdate(new InventoryUpdateNetMsg { Changes = rows });
