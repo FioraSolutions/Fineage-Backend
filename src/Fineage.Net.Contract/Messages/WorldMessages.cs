@@ -501,6 +501,12 @@ namespace Fineage.Net.Contract
         public int Count { get; set; }
         public int EnchantLevel { get; set; }
         public int EquippedSlot { get; set; } = -1;
+        /// <summary>Same tokens as <see cref="ItemListEntryNet"/> — client must not re-guess kind/slot from tables.</summary>
+        public string BodySlot { get; set; } = "";
+        public string Kind { get; set; } = "";
+        public string Icon { get; set; } = "";
+        public string WeaponType { get; set; } = "";
+        public string ArmorType { get; set; } = "";
     }
 
     public sealed class InventoryUpdateNetMsg

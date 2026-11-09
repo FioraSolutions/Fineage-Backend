@@ -22,7 +22,20 @@ public sealed class EconomyCodecRoundTripTests
                     ItemId = 57,
                     Count = 100,
                     EnchantLevel = 0,
-                    EquippedSlot = -1
+                    EquippedSlot = -1,
+                    BodySlot = "none",
+                    Kind = "etc"
+                },
+                new InventoryUpdateEntryNet
+                {
+                    Change = 1,
+                    ObjectId = 46,
+                    ItemId = 102,
+                    Count = 1,
+                    EnchantLevel = 0,
+                    EquippedSlot = 8,
+                    BodySlot = "lhand",
+                    Kind = "armor"
                 },
                 new InventoryUpdateEntryNet
                 {
@@ -35,11 +48,16 @@ public sealed class EconomyCodecRoundTripTests
                 }
             ]
         }));
-        Assert.Equal(2, update.Changes!.Length);
+        Assert.Equal(3, update.Changes!.Length);
         Assert.Equal(57, update.Changes[0].ItemId);
         Assert.Equal(100, update.Changes[0].Count);
-        Assert.Equal(736, update.Changes[1].ItemId);
-        Assert.Equal(0, update.Changes[1].Count);
+        Assert.Equal("etc", update.Changes[0].Kind);
+        Assert.Equal(102, update.Changes[1].ItemId);
+        Assert.Equal("lhand", update.Changes[1].BodySlot);
+        Assert.Equal("armor", update.Changes[1].Kind);
+        Assert.Equal(8, update.Changes[1].EquippedSlot);
+        Assert.Equal(736, update.Changes[2].ItemId);
+        Assert.Equal(0, update.Changes[2].Count);
 
         var drop = NetCodec.DecodeDropItem(NetCodec.EncodeDropItem(new DropItemNetMsg
         {
