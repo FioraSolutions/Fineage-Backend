@@ -1,5 +1,6 @@
 using Fineage.Game;
 using Fineage.Protocol;
+using Fineage.Zone.Inventory;
 
 namespace Fineage.Zone.World;
 
@@ -37,29 +38,37 @@ public sealed partial class ZoneWorld
         bool soul = t.IsSoulshot;
         var weapon = player.Inventory!.GetEquipped(PaperdollSlot.RHand)?.Template;
         int need = weapon == null || weapon.Kind != ItemKind.Weapon ? 0 : soul ? weapon.Soulshots : weapon.Spiritshots;
-        if (need <= 0)
+        bool alreadyCharged = soul ? player.SoulshotCharged : player.SpiritshotCharge > 0;
+        int haveCount = player.Inventory.FindByItemId(shot.ItemId)?.Count ?? 0;
+        switch (ShotRules.ChargeError(need, weapon != null && weapon.Crystal == t.ShotGrade, alreadyCharged, haveCount))
         {
-            if (!quiet)
-                ShotNotice(session, soul ? SysMsgCannotUseSoulshots : SysMsgCannotUseSpiritshots,
-                    soul ? "Cannot use soulshots." : "Cannot use spiritshots.");
-            return false;
+            case ShotRules.ChargeDeny.CannotUse:
+                if (!quiet)
+                    ShotNotice(session, soul ? SysMsgCannotUseSoulshots : SysMsgCannotUseSpiritshots,
+                        soul ? "Cannot use soulshots." : "Cannot use spiritshots.");
+                return false;
+            case ShotRules.ChargeDeny.GradeMismatch:
+                if (!quiet)
+                    ShotNotice(session, soul ? SysMsgSoulshotGradeMismatch : SysMsgSpiritshotGradeMismatch,
+                        soul ? "The soulshot you are attempting to use does not match the grade of your equipped weapon."
+                             : "Your spiritshot does not match the weapon's grade.");
+                return false;
+            case ShotRules.ChargeDeny.AlreadyCharged:
+                return false; // Mobius: already charged, nothing consumed
+            case ShotRules.ChargeDeny.NotEnough:
+                ShotNotice(session, soul ? SysMsgNotEnoughSoulshots : SysMsgNotEnoughSpiritshots,
+                    soul ? "You do not have enough soulshots for that." : "You do not have enough spiritshots for that.");
+                // Mobius: auto use switches itself off when the stack cannot pay for a charge.
+                if (player.AutoShots.Remove(shot.ItemId))
+                    SendAutoShotState(session, player, shot.ItemId, t.Name, false);
+                return false;
         }
-        if (weapon!.Crystal != t.ShotGrade)
-        {
-            if (!quiet)
-                ShotNotice(session, soul ? SysMsgSoulshotGradeMismatch : SysMsgSpiritshotGradeMismatch,
-                    soul ? "The soulshot you are attempting to use does not match the grade of your equipped weapon."
-                         : "Your spiritshot does not match the weapon's grade.");
-            return false;
-        }
-        if (soul ? player.SoulshotCharged : player.SpiritshotCharge > 0)
-            return false; // Mobius: already charged, nothing consumed
 
         if (!player.Inventory.TryConsume(shot.ItemId, need, out var stack, out bool removed) || stack == null)
         {
+            // Race with concurrent consume: treat as not enough.
             ShotNotice(session, soul ? SysMsgNotEnoughSoulshots : SysMsgNotEnoughSpiritshots,
                 soul ? "You do not have enough soulshots for that." : "You do not have enough spiritshots for that.");
-            // Mobius: auto use switches itself off when the stack cannot pay for a charge.
             if (player.AutoShots.Remove(shot.ItemId))
                 SendAutoShotState(session, player, shot.ItemId, t.Name, false);
             return false;
@@ -128,23 +137,22 @@ public sealed partial class ZoneWorld
                 SendAutoShotState(session, player, itemId, stack?.Template.Name ?? "", false);
             return null;
         }
-        if (stack == null)
-            return InventoryProtocol.NotOwned;
-        if (!IsShot(stack.Template))
-            return "not_a_shot";
+        if (ShotRules.AutoEnableError(stack != null, stack != null && IsShot(stack.Template)) is { } autoError)
+            return autoError;
+        var liveStack = stack!;
         // Mobius: one auto slot per shot kind; switching grades replaces the old one.
         foreach (int other in player.AutoShots.ToList())
         {
             var o = player.Inventory.FindByItemId(other)?.Template;
-            if (o == null || o.IsSoulshot == stack.Template.IsSoulshot)
+            if (o == null || o.IsSoulshot == liveStack.Template.IsSoulshot)
             {
                 player.AutoShots.Remove(other);
                 SendAutoShotState(session, player, other, o?.Name ?? "", false);
             }
         }
         player.AutoShots.Add(itemId);
-        SendAutoShotState(session, player, itemId, stack.Template.Name, true);
-        TryChargeShot(session, player, stack, quiet: false);
+        SendAutoShotState(session, player, itemId, liveStack.Template.Name, true);
+        TryChargeShot(session, player, liveStack, quiet: false);
         return null;
     }
 
