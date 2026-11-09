@@ -158,26 +158,26 @@ public sealed partial class ZoneWorld
         var seen = new HashSet<int>();
         foreach (var row in rows)
         {
-            if (row.Count < 1 || row.Price < 0 || row.InventoryObjectId < 1)
-                return PrivateStoreProtocol.Item;
+            if (PrivateStoreRules.SellRowShapeError(row.Count, row.Price, row.InventoryObjectId) is { } shape)
+                return shape;
             if (!seen.Add(row.InventoryObjectId))
                 return PrivateStoreProtocol.Item;
             var item = player.Inventory.Find(row.InventoryObjectId);
-            if (item == null || item.IsEquipped || !item.Template.CanDropTradeStore || item.Count < row.Count)
-                return PrivateStoreProtocol.Item;
-            if (!item.Template.Stackable && row.Count != 1)
-                return PrivateStoreProtocol.Item;
-            if (item.ItemId == ShopTrade.AdenaItemId)
-                return PrivateStoreProtocol.Item;
-            long line = checked(row.Price * row.Count);
-            if (line > ShopTrade.MaxAdena)
-                return PrivateStoreProtocol.Adena;
-            totalPrice = checked(totalPrice + line);
-            if (totalPrice > ShopTrade.MaxAdena)
-                return PrivateStoreProtocol.Adena;
+            if (PrivateStoreRules.SellStockError(
+                    found: item != null,
+                    equipped: item?.IsEquipped == true,
+                    canDropTradeStore: item?.Template.CanDropTradeStore == true,
+                    stackable: item?.Template.Stackable == true,
+                    count: row.Count,
+                    available: item?.Count ?? 0,
+                    itemId: item?.ItemId ?? 0) is { } stock)
+                return stock;
+            if (PrivateStoreRules.AdenaLineError(row.Price, row.Count, totalPrice) is { } adena)
+                return adena;
+            totalPrice = checked(totalPrice + row.Price * row.Count);
             listings.Add(new PrivateStoreSellListing
             {
-                InventoryObjectId = item.ObjectId,
+                InventoryObjectId = item!.ObjectId,
                 ItemId = item.ItemId,
                 Count = row.Count,
                 Price = row.Price,
@@ -217,8 +217,8 @@ public sealed partial class ZoneWorld
         var seen = new HashSet<int>();
         foreach (var row in rows)
         {
-            if (row.Count < 1 || row.Price < 0 || row.ItemId < 1)
-                return PrivateStoreProtocol.Item;
+            if (PrivateStoreRules.BuyRowShapeError(row.Count, row.Price, row.ItemId) is { } shape)
+                return shape;
             if (row.ItemId == ShopTrade.AdenaItemId)
                 return PrivateStoreProtocol.Item;
             if (!seen.Add(row.ItemId))
@@ -227,12 +227,9 @@ public sealed partial class ZoneWorld
                 return PrivateStoreProtocol.Item;
             if (!template.Stackable && row.Count != 1)
                 return PrivateStoreProtocol.Item;
-            long line = checked(row.Price * row.Count);
-            if (line > ShopTrade.MaxAdena)
-                return PrivateStoreProtocol.Adena;
-            totalCost = checked(totalCost + line);
-            if (totalCost > ShopTrade.MaxAdena)
-                return PrivateStoreProtocol.Adena;
+            if (PrivateStoreRules.AdenaLineError(row.Price, row.Count, totalCost) is { } adena)
+                return adena;
+            totalCost = checked(totalCost + row.Price * row.Count);
             listings.Add(new PrivateStoreBuyListing
             {
                 ItemId = row.ItemId,
