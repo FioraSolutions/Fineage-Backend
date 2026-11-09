@@ -186,4 +186,65 @@ public sealed class NetTargetSelectTests
 
         Assert.Equal(0, session.AutoAttackTargetId);
     }
+
+    /// <summary>
+    /// Mobius NpcAction still <c>setTarget</c>s a corpse; only the second click (attack) checks AlikeDead.
+    /// Rejecting dead NPCs caused <c>[Net] zone reject target</c> when clicking a kill for spoil/look.
+    /// </summary>
+    [Fact]
+    public async Task A_dead_npc_is_still_selectable()
+    {
+        var (kit, session, player, rec) = await SetupAsync();
+        Assert.True(kit.World.TryGetEntityById(MobId, out var mob));
+        mob.CurHp = 0;
+        mob.Dead = true;
+
+        Assert.Null(await kit.World.TrySelectTargetAsync(session, MobId, default));
+
+        Assert.Equal(MobId, session.SelectedTargetId);
+        var selected = Assert.Single(rec.Of(nameof(IWorldEventPublisher.FanoutTargetSelected)));
+        Assert.Equal(MobId, (int)selected[1]!);
+        var hp = Assert.IsType<StatusUpdateMsg>(
+            Assert.Single(rec.Of(nameof(IWorldEventPublisher.FanoutStatusUpdate)))[1]);
+        Assert.Equal(0, hp.Values[Array.IndexOf(hp.AttributeIds, InterludeStatus.CurHp)]);
+    }
+
+    /// <summary>
+    /// Mobius ItemAction targets ground drops. SelectTarget for a bag drop must not Reject —
+    /// that was the spam after inventory drop when the client fell through to SelectTarget.
+    /// </summary>
+    [Fact]
+    public async Task A_ground_item_is_selectable_with_colour_zero_and_no_hp_block()
+    {
+        var (kit, session, player, rec) = await SetupAsync();
+        const int adena = 57;
+        player.Inventory!.Add(adena, 1000);
+        var stack = player.Inventory.FindByItemId(adena)!;
+        Assert.Null(await kit.World.TryDropItemAsync(
+            session, stack.ObjectId, 100, player.X + 40, player.Y, player.Z, default));
+        int groundId = ((DropItemMsg)Assert.Single(rec.Of(nameof(IWorldEventPublisher.FanoutDropItem)))[1]!).ObjectId;
+        Assert.Contains(groundId, player.Knownlist);
+        rec.Calls.Clear();
+
+        Assert.Null(await kit.World.TrySelectTargetAsync(session, groundId, default));
+
+        Assert.Equal(groundId, session.SelectedTargetId);
+        var selected = Assert.Single(rec.Of(nameof(IWorldEventPublisher.FanoutTargetSelected)));
+        Assert.Equal(groundId, (int)selected[1]!);
+        Assert.Equal(0, (int)selected[2]!);
+        Assert.Empty(rec.Of(nameof(IWorldEventPublisher.FanoutStatusUpdate)));
+    }
+
+    /// <summary>Mobius Action on a missing objectId is ActionFailed — never a protocol Reject.</summary>
+    [Fact]
+    public async Task A_missing_object_is_a_soft_miss_not_a_reject()
+    {
+        var (kit, session, player, rec) = await SetupAsync();
+        session.SelectedTargetId = MobId;
+
+        Assert.Null(await kit.World.TrySelectTargetAsync(session, 9_999_999, default));
+
+        Assert.Equal(MobId, session.SelectedTargetId);
+        Assert.Empty(rec.Of(nameof(IWorldEventPublisher.FanoutTargetSelected)));
+    }
 }

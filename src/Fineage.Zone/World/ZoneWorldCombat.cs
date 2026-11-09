@@ -69,14 +69,17 @@ public sealed partial class ZoneWorld
     {
         if (!_byId.TryGetValue(session.ObjectId, out var player))
             return "world";
+
+        // Mobius Action: missing / not visible object → ActionFailed, not a protocol Reject.
+        // Returning null here keeps the previous selection and avoids client "[Net] zone reject target".
         if (!_byId.TryGetValue(targetObjectId, out var target))
-            return "target";
+            return null;
 
         // Interlude: click own pawn → target self (AOI never lists the observer).
         if (targetObjectId == session.ObjectId)
         {
             if (player.Dead || player.CurHp <= 0)
-                return "target";
+                return null;
 
             // Own pawn: the client already draws itself; Mobius sends colour 0 with no HP block and Net has no
             // self-target frame, so nothing is fanned.
@@ -84,12 +87,13 @@ public sealed partial class ZoneWorld
             return null;
         }
 
-        // Mobius setTarget accepts any live Creature: friendly NPCs (guides, merchants) select for talk UI,
-        // Attackable is attack-only, and other players select so their nameplate and target window work.
-        if (target.Kind is not (ZoneEntityKind.Npc or ZoneEntityKind.Player) || target.CurHp <= 0)
-            return "target";
+        // Mobius NpcAction.setTarget accepts dead creatures (attack is gated separately).
+        // Mobius ItemAction also targets ground drops before pickup — rejecting them with "target"
+        // was the reject spam after inventory drops.
+        if (target.Kind is not (ZoneEntityKind.Npc or ZoneEntityKind.Player or ZoneEntityKind.GroundItem))
+            return null;
         if (!VisibleTo(session.ObjectId, targetObjectId))
-            return "target";
+            return null;
 
         session.SelectedTargetId = targetObjectId;
         PublishTargetSelection(session, player, target);
@@ -104,18 +108,25 @@ public sealed partial class ZoneWorld
     /// </summary>
     void PublishTargetSelection(ZoneSession session, ZoneEntity player, ZoneEntity target)
     {
-        int colour = InterludeStatus.TargetColor(player.Level, target.Level, IsAutoAttackable(target));
+        bool creature = target.Kind is ZoneEntityKind.Npc or ZoneEntityKind.Player;
+        int colour = creature
+            ? InterludeStatus.TargetColor(player.Level, target.Level, IsAutoAttackable(target))
+            : 0;
 
         if (NetBridge == null)
             return;
 
         int[] self = [player.ObjectId];
-        NetBridge.FanoutStatusUpdate(self, new StatusUpdateMsg
+        if (creature)
         {
-            ObjectId = target.ObjectId,
-            AttributeIds = [InterludeStatus.MaxHp, InterludeStatus.CurHp],
-            Values = [target.MaxHp, target.CurHp]
-        });
+            NetBridge.FanoutStatusUpdate(self, new StatusUpdateMsg
+            {
+                ObjectId = target.ObjectId,
+                AttributeIds = [InterludeStatus.MaxHp, InterludeStatus.CurHp],
+                Values = [target.MaxHp, target.CurHp]
+            });
+        }
+
         // Net has no MyTargetSelected opcode: TargetSelected (0x030F) is its self-side mirror, so it carries the
         // same id + colour. Mobius also broadcasts TargetSelected to peers; that fanout stays out of scope here.
         NetBridge.FanoutTargetSelected(self, target.ObjectId, colour);
