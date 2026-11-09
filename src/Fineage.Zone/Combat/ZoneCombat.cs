@@ -1,3 +1,5 @@
+using Fineage.Game;
+
 namespace Fineage.Zone.Combat;
 
 /// <summary>
@@ -368,7 +370,7 @@ public static class ZoneCombat
     /// </summary>
     public static int PlayerMCritRate(bool armed, double witBonus, CombatStatMods? mods = null)
     {
-        double rate = Fineage.Game.PlayerCombatFormulas.MagicCriticalBase(armed, witBonus);
+        double rate = PlayerCombatFormulas.MagicCriticalBase(armed, witBonus);
         if (mods != null && !ReferenceEquals(mods, CombatStatMods.None))
             rate = mods.Apply(CombatStat.MCritRate, rate);
         return (int)rate * 10;

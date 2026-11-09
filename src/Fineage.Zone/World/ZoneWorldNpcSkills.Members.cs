@@ -1,3 +1,4 @@
+using Fineage.Game;
 using Fineage.Protocol;
 using Fineage.Zone.Combat;
 using Fineage.Zone.Npcs;
