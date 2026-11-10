@@ -8,35 +8,18 @@ public sealed partial class ZoneWorld
 {
     public Task<string?> TryEnchantRequestAsync(ZoneSession session, int scrollObjectId, CancellationToken ct)
     {
-        string? error;
-        lock (_gate)
-            error = TryEnchantRequest(session, scrollObjectId);
-        if (error != null)
-            return Task.FromResult<string?>(error);
-
-        return Task.FromResult<string?>(null);
+        // Enchant confirm saves inventory; request/cancel stay under the same deferred pattern (B8).
+        return Task.FromResult(WithDeferredInventoryPersist(() => TryEnchantRequest(session, scrollObjectId)));
     }
 
     public Task<string?> TryEnchantConfirmAsync(ZoneSession session, int targetObjectId, CancellationToken ct)
     {
-        string? error;
-        lock (_gate)
-            error = TryEnchantConfirm(session, targetObjectId);
-        if (error != null)
-            return Task.FromResult<string?>(error);
-
-        return Task.FromResult<string?>(null);
+        return Task.FromResult(WithDeferredInventoryPersist(() => TryEnchantConfirm(session, targetObjectId)));
     }
 
     public Task<string?> TryEnchantCancelAsync(ZoneSession session, CancellationToken ct)
     {
-        string? error;
-        lock (_gate)
-            error = TryEnchantCancel(session);
-        if (error != null)
-            return Task.FromResult<string?>(error);
-
-        return Task.FromResult<string?>(null);
+        return Task.FromResult(WithDeferredInventoryPersist(() => TryEnchantCancel(session)));
     }
 
     string? TryEnchantRequest(ZoneSession session, int objectId)
