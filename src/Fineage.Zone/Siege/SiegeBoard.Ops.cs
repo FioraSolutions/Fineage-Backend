@@ -1,3 +1,5 @@
+using Fineage.Protocol;
+
 namespace Fineage.Zone.Siege;
 
 public sealed partial class SiegeBoard
