@@ -40,10 +40,16 @@ public sealed partial class ZoneWorld
             return;
         }
 
-        target.CurHp = Math.Max(0, target.CurHp - hit.Damage);
-
         if (target.Kind == ZoneEntityKind.Npc)
         {
+            // Mobius FolkStatus.reduceHp: swing may land, but Folk/Merchant/Trainer take no damage and never hate.
+            if (!ZoneCombat.IsCombatNpcType(target.NpcType))
+            {
+                attacker.CombatUntilUnixMs = now + ClanProtocol.CombatStanceMillis;
+                return;
+            }
+
+            target.CurHp = Math.Max(0, target.CurHp - hit.Damage);
             FanoutVitals(target, StatusFor(target));
             RecordDamage(target, attacker, hit.Damage);
             AddHate(target, attacker, DamageHate(hit.Damage, target.Level));
@@ -55,6 +61,8 @@ public sealed partial class ZoneWorld
             }
             return;
         }
+
+        target.CurHp = Math.Max(0, target.CurHp - hit.Damage);
 
         target.CombatUntilUnixMs = now + ClanProtocol.CombatStanceMillis;
         FanoutVitals(target, PlayerVitalsStatus(target));

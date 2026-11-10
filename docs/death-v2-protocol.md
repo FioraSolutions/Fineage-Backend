@@ -34,7 +34,7 @@ Kill paths: NPC final blow, player combat, and **`AdminKillPlayer` (53)** when `
 
 1. Client sends **`ReviveRequest`** with `Action = 0` (`DeathProtocol.ReviveToVillage`).
 2. Server clears `Dead`, restores HP/MP to max (XP loss stub — no penalty yet).
-3. Relocates to **Talking Island village restart** (`TalkingIslandRestart`: Mobius TI town restart, not Cedric hall).
+3. Relocates to the **nearest map-region town** (`MapRegionCatalog.TownRespawn` / same as Scroll of Escape). Outside every region → `talking_island_town` fallback — not a race-home hardcode.
 4. Fan-out order: **`Revive`**, **`MoveToAck`** + AOI enter/leave (**`DeleteObject`** / **`CharInfo`** as needed), **`TeleportToLocation`**, then self **`UserInfo`** + vitals **`StatusUpdate`**.
 
 ## Errors
