@@ -43,7 +43,7 @@ public sealed partial class ZoneWorld
         if (target.Kind == ZoneEntityKind.Npc)
         {
             // Mobius FolkStatus.reduceHp: swing may land, but Folk/Merchant/Trainer take no damage and never hate.
-            if (!ZoneCombat.IsCombatNpcType(target.NpcType))
+            if (!ZoneCombat.TakesNpcCombatDamage(target.NpcType, target.Attackable))
             {
                 attacker.CombatUntilUnixMs = now + ClanProtocol.CombatStanceMillis;
                 return;

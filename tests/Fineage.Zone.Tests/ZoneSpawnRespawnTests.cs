@@ -27,7 +27,9 @@ public sealed class ZoneSpawnRespawnTests
             gremlin.RunSpeed,
             gremlin.WalkSpeed,
             RespawnDelaySeconds: 2,
-            RespawnRandomSeconds: 0);
+            RespawnRandomSeconds: 0,
+            Title: gremlin.Title ?? "",
+            NpcType: string.IsNullOrEmpty(gremlin.NpcType) ? "Monster" : gremlin.NpcType);
 
         var catalog = SpawnCatalog.From(new Dictionary<string, SpawnMapDefinition>
         {

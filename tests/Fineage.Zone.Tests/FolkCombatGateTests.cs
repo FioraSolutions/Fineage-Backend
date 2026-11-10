@@ -40,6 +40,11 @@ public sealed class FolkCombatGateTests
         Assert.False(ZoneCombat.IsCombatNpcType("Merchant"));
         Assert.False(ZoneCombat.IsCombatNpcType("Trainer"));
         Assert.False(ZoneCombat.IsCombatNpcType("Teleporter"));
+        // Smoke rows without type: Attackable flag wins.
+        Assert.True(ZoneCombat.TakesNpcCombatDamage("", attackable: true));
+        Assert.False(ZoneCombat.TakesNpcCombatDamage("", attackable: false));
+        Assert.True(ZoneCombat.TakesNpcCombatDamage("Guard", attackable: false));
+        Assert.False(ZoneCombat.TakesNpcCombatDamage("Folk", attackable: true));
     }
 
     [Fact]

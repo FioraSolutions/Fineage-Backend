@@ -35,7 +35,7 @@ public sealed partial class ZoneWorld
         if (npc.Kind != ZoneEntityKind.Npc || attacker.Kind != ZoneEntityKind.Player || npc.CurHp <= 0)
             return;
         // Mobius FolkStatus: merchants/trainers/folk never hate. Guards/Monsters (Attackable types) do.
-        if (!ZoneCombat.IsCombatNpcType(npc.NpcType))
+        if (!ZoneCombat.TakesNpcCombatDamage(npc.NpcType, npc.Attackable))
             return;
         npc.HateList[attacker.ObjectId] = npc.HateList.GetValueOrDefault(attacker.ObjectId) + Math.Max(1, hate);
         int top = MostHated(npc);
