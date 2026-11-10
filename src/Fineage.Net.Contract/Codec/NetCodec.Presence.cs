@@ -33,6 +33,7 @@ namespace Fineage.Net.Contract
             w.WriteInt32(m.PAtkSpd);
             w.WriteInt32(m.Karma);
             w.WriteByte(m.PvpFlag);
+            w.WriteInt32(m.CurHp);
         });
 
         public static EntitySpawnMsg DecodeEntitySpawn(ReadOnlySpan<byte> p)
@@ -73,6 +74,12 @@ namespace Fineage.Net.Contract
                 msg.Karma = r.ReadInt32();
             if (r.Remaining > 0)
                 msg.PvpFlag = r.ReadByte();
+            if (r.Remaining > 0)
+                msg.CurHp = r.ReadInt32();
+            else if (msg.Dead)
+                msg.CurHp = 0;
+            else if (msg.MaxHp > 0)
+                msg.CurHp = msg.MaxHp;
             return msg;
         }
 

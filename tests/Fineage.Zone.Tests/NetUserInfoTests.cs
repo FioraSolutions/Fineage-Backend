@@ -35,12 +35,36 @@ public sealed class NetUserInfoTests
         Assert.Equal(new[] { 0, 1101, 177 }, NetCodec.DecodeEntitySpawn(wire).Paperdoll);
 
         // Older peers stop after the Attackable byte: decode must still work with an empty paperdoll.
-        // Tail: u16 length + 3 ints + Dead + Level + MaxHp + PAtkSpd + Karma + PvpFlag.
-        int tailBytes = 2 + 3 * 4 + 1 + 4 + 4 + 4 + 4 + 1;
+        // Tail: u16 length + 3 ints + Dead + Level + MaxHp + PAtkSpd + Karma + PvpFlag + CurHp.
+        int tailBytes = 2 + 3 * 4 + 1 + 4 + 4 + 4 + 4 + 1 + 4;
         var old = NetCodec.DecodeEntitySpawn(wire.AsSpan(0, wire.Length - tailBytes));
         Assert.Empty(old.Paperdoll);
         Assert.Equal("P", old.Name);
         Assert.Equal(0, old.Level); // trailing additions stay optional for old frames
+    }
+
+    [Fact]
+    public void EntitySpawn_cur_hp_round_trips_and_defaults_full_when_absent()
+    {
+        var spawn = new EntitySpawnMsg
+        {
+            EntityValue = 9,
+            EntityGeneration = 1,
+            Kind = EntityKindNet.Npc,
+            Name = "Wolf",
+            MaxHp = 400,
+            CurHp = 120,
+            Dead = false
+        };
+        var decoded = NetCodec.DecodeEntitySpawn(NetCodec.EncodeEntitySpawn(spawn));
+        Assert.Equal(400, decoded.MaxHp);
+        Assert.Equal(120, decoded.CurHp);
+
+        // Strip CurHp tail (4 bytes): old frame still decodes, CurHp falls back to MaxHp.
+        byte[] wire = NetCodec.EncodeEntitySpawn(spawn);
+        var withoutCur = NetCodec.DecodeEntitySpawn(wire.AsSpan(0, wire.Length - 4));
+        Assert.Equal(400, withoutCur.MaxHp);
+        Assert.Equal(400, withoutCur.CurHp);
     }
 
     [Fact]

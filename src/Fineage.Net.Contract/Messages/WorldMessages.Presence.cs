@@ -60,6 +60,11 @@ namespace Fineage.Net.Contract
         public int Karma { get; set; }
         /// <summary>Mobius PvP flag (purple name). 0/1. Optional wire tail.</summary>
         public byte PvpFlag { get; set; }
+        /// <summary>
+        /// Current HP at enter-view (Mobius NpcInfo/CharInfo). Optional wire tail after <see cref="PvpFlag"/>.
+        /// Absent on old peers — decode fills <see cref="MaxHp"/> (full) so select-target StatusUpdate is not a false hit.
+        /// </summary>
+        public int CurHp { get; set; }
     }
 
     public sealed class PlayerStatsMsg

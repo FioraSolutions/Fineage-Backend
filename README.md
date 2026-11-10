@@ -45,7 +45,7 @@ One script starts Postgres (docker), builds, and runs Login+Zone:
 
 Shared `FINEAGE_HANDOFF_SECRET` defaults to `FineageLoginHandoffV1` for this local path. Do not use ad-hoc `dotnet run` for day-to-day play — that fights the script and any old LaunchAgents.
 
-**GM commands (KuK):** the script sets `FINEAGE_ZONE_ADMIN=1` by default. Character name must be in [`data/admin-characters.json`](data/admin-characters.json) (default **KuK**). In chat: `//gmshop`, `//setlevel 80`, `//setclass <id>`, `//give <itemId> [count]`, `//buff` / `//mbuff` / `//fbuff` / `//buff_clear`. Override with `FINEAGE_ZONE_ADMIN=0 ./scripts/run-local-net.sh start` to disable.
+**GM commands:** the script sets `FINEAGE_ZONE_ADMIN=1` by default. Character name must be in [`data/admin-characters.json`](data/admin-characters.json) (`*` = any name for local/dev; use explicit names on shared hosts). In chat: `//gmshop`, `//setlevel 80`, `//setclass <id>`, `//give <itemId> [count]`, `//buff` / `//mbuff` / `//fbuff` / `//buff_clear`. Override with `FINEAGE_ZONE_ADMIN=0 ./scripts/run-local-net.sh start` to disable.
 
 Tests / smoke (not the live world):
 

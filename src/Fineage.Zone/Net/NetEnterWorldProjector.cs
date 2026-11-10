@@ -79,7 +79,8 @@ static class NetEnterWorldProjector
             Dead = entity.CurHp <= 0,
             Level = entity.Level,
             MaxHp = entity.MaxHp,
-            PAtkSpd = entity.PAtkSpd > 0 ? entity.PAtkSpd : ZoneCombat.DefaultNpcPAtkSpd
+            PAtkSpd = entity.PAtkSpd > 0 ? entity.PAtkSpd : ZoneCombat.DefaultNpcPAtkSpd,
+            CurHp = entity.CurHp
         };
     }
 
@@ -108,7 +109,8 @@ static class NetEnterWorldProjector
             MaxHp = entity.MaxHp,
             PAtkSpd = pAtkSpd,
             Karma = entity.Karma,
-            PvpFlag = entity.PvpFlagged ? (byte)1 : (byte)0
+            PvpFlag = entity.PvpFlagged ? (byte)1 : (byte)0,
+            CurHp = entity.CurHp
         };
 
     static Fineage.Net.Contract.PlayerStatsMsg BuildStats(ZoneEntity entity, EntityId self, int maxCp) =>
