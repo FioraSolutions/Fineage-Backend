@@ -35,18 +35,15 @@ public sealed partial class ZoneWorld
 
     public Task<string?> TrySupportMagicAsync(ZoneSession session, int npcObjectId, CancellationToken ct)
     {
-        string? error;
-        lock (_gate)
-            error = ApplySupportMagic(session, npcObjectId, html: false);
-        return Task.FromResult<string?>(error);
+        // Keep same defer pattern as other NPC services (B8 consistency).
+        return Task.FromResult(WithDeferredInventoryPersist(
+            () => ApplySupportMagic(session, npcObjectId, html: false)));
     }
 
     public Task<string?> TryGiveBlessingAsync(ZoneSession session, int npcObjectId, CancellationToken ct)
     {
-        string? error;
-        lock (_gate)
-            error = ApplyBlessing(session, npcObjectId, html: false);
-        return Task.FromResult<string?>(error);
+        return Task.FromResult(WithDeferredInventoryPersist(
+            () => ApplyBlessing(session, npcObjectId, html: false)));
     }
 
     string? ApplyNpcService(
