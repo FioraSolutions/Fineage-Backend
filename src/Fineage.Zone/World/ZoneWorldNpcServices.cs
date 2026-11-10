@@ -22,19 +22,16 @@ public sealed partial class ZoneWorld
     public Task<string?> TryWarehouseDepositAsync(
         ZoneSession session, int npcObjectId, WarehouseLine[] lines, CancellationToken ct)
     {
-        string? error;
-        lock (_gate)
-            error = DepositPrivate(session, npcObjectId, lines, html: false);
-        return Task.FromResult<string?>(error);
+        // World mutate under _gate; Postgres inventory write after unlock (B8).
+        return Task.FromResult(WithDeferredInventoryPersist(
+            () => DepositPrivate(session, npcObjectId, lines, html: false)));
     }
 
     public Task<string?> TryWarehouseWithdrawAsync(
         ZoneSession session, int npcObjectId, WarehouseLine[] lines, CancellationToken ct)
     {
-        string? error;
-        lock (_gate)
-            error = WithdrawPrivate(session, npcObjectId, lines, html: false);
-        return Task.FromResult<string?>(error);
+        return Task.FromResult(WithDeferredInventoryPersist(
+            () => WithdrawPrivate(session, npcObjectId, lines, html: false)));
     }
 
     public Task<string?> TrySupportMagicAsync(ZoneSession session, int npcObjectId, CancellationToken ct)

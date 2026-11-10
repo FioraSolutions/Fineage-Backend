@@ -28,17 +28,16 @@ public sealed partial class ZoneWorld
         if (questId <= 0)
             return Task.FromResult<string?>("bad_request");
 
-        QuestOutcome outcome;
-        lock (_gate)
+        // Abort may strip quest items → SaveInventory after unlock (B8).
+        return Task.FromResult(WithDeferredInventoryPersist(() =>
         {
             if (!TryPlayer(session, out var player))
-                return Task.FromResult<string?>("world");
-            outcome = _quests.Abort(player.Quests, player.Inventory!, questId);
+                return "world";
+            var outcome = _quests.Abort(player.Quests, player.Inventory!, questId);
             if (outcome.Ok || outcome.Lines.Count > 0)
                 Publish(session, player, outcome, npcObjectId: 0, npcId: 0);
-        }
-
-        return Task.FromResult<string?>(outcome.Ok ? null : FailureCode(outcome.Failure));
+            return outcome.Ok ? null : FailureCode(outcome.Failure);
+        }));
     }
 
     public Task<string?> TryNpcTalkAsync(ZoneSession session, int npcObjectId, CancellationToken ct)
@@ -48,10 +47,8 @@ public sealed partial class ZoneWorld
         if (npcObjectId <= 0)
             return Task.FromResult<string?>("bad_request");
 
-        string? error;
-        lock (_gate)
-            error = Talk(session, npcObjectId, questId: 0, eventName: null, out _);
-        return Task.FromResult<string?>(error);
+        return Task.FromResult(WithDeferredInventoryPersist(
+            () => Talk(session, npcObjectId, questId: 0, eventName: null, out _)));
     }
 
     public Task<string?> TryQuestEventAsync(ZoneSession session, int npcObjectId, int questId, string? eventName, CancellationToken ct)
@@ -64,10 +61,8 @@ public sealed partial class ZoneWorld
         if (eventName.Length > 64 || !EventOk(eventName))
             return Task.FromResult<string?>("bad_request");
 
-        string? error;
-        lock (_gate)
-            error = Talk(session, npcObjectId, questId, eventName, out _);
-        return Task.FromResult<string?>(error);
+        return Task.FromResult(WithDeferredInventoryPersist(
+            () => Talk(session, npcObjectId, questId, eventName, out _)));
     }
 
     void BootstrapQuestNpcs()

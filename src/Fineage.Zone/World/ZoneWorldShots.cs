@@ -118,12 +118,8 @@ public sealed partial class ZoneWorld
     /// <summary>Mobius RequestAutoSoulShot (type 1 on / 0 off) for a shot item the player carries.</summary>
     public Task<string?> TryAutoSoulShotAsync(ZoneSession session, int itemId, bool enable, CancellationToken ct)
     {
-        string? error;
-        lock (_gate)
-            error = TryAutoSoulShot(session, itemId, enable);
-        if (error != null)
-            return Task.FromResult<string?>(error);
-        return Task.FromResult<string?>(null);
+        // Charge can consume shot stacks → SaveInventory after unlock (B8).
+        return Task.FromResult(WithDeferredInventoryPersist(() => TryAutoSoulShot(session, itemId, enable)));
     }
 
     string? TryAutoSoulShot(ZoneSession session, int itemId, bool enable)

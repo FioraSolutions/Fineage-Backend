@@ -24,16 +24,14 @@ public sealed partial class ZoneWorld
         return error;
     }
 
-    public async Task<string?> TryRecipeMakeSelfAsync(ZoneSession session, RecipeMakeSelfMsg request, CancellationToken ct)
+    public Task<string?> TryRecipeMakeSelfAsync(ZoneSession session, RecipeMakeSelfMsg request, CancellationToken ct)
     {
         if (request == null)
-            return "bad_request";
+            return Task.FromResult<string?>("bad_request");
         if (!session.InWorld)
-            return "world";
-        string? error;
-        lock (_gate)
-            error = TryRecipeMakeSelf(session, request);
-        return error;
+            return Task.FromResult<string?>("world");
+        // World mutate under _gate; Postgres inventory write after unlock (B8).
+        return Task.FromResult(WithDeferredInventoryPersist(() => TryRecipeMakeSelf(session, request)));
     }
 
     /// <summary>Mobius recipe-scroll use: register the recipe list id and consume one scroll.</summary>

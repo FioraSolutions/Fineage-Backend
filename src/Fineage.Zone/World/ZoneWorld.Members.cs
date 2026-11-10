@@ -297,17 +297,29 @@ public sealed partial class ZoneWorld
         _persist.ReplaceItemsFromInventory(session.Account, session.ObjectId, inventory);
     }
 
-    /// <summary>Flush inventory rows queued while <see cref="_deferInventoryPersist"/> was set. Call outside <c>_gate</c>.</summary>
+    /// <summary>Flush inventory/warehouse rows queued while <see cref="_deferInventoryPersist"/> was set. Call outside <c>_gate</c>.</summary>
     void FlushDirtyInventories()
     {
-        if (_dirtyInventories.Count == 0)
+        if (_dirtyInventories.Count > 0)
+        {
+            foreach (var (_, pair) in _dirtyInventories)
+                _persist.ReplaceItemsFromInventory(pair.Session.Account, pair.Session.ObjectId, pair.Inventory);
+            _dirtyInventories.Clear();
+        }
+
+        if (_dirtyWarehouses.Count == 0)
             return;
-        foreach (var (_, pair) in _dirtyInventories)
-            _persist.ReplaceItemsFromInventory(pair.Session.Account, pair.Session.ObjectId, pair.Inventory);
-        _dirtyInventories.Clear();
+        foreach (var player in _dirtyWarehouses.Values)
+        {
+            if (player.Session == null)
+                continue;
+            ReplaceWarehouseNow(player.Session, player);
+        }
+
+        _dirtyWarehouses.Clear();
     }
 
-    /// <summary>Run <paramref name="underGate"/> under <c>_gate</c> with inventory Postgres deferred until after unlock.</summary>
+    /// <summary>Run <paramref name="underGate"/> under <c>_gate</c> with inventory/warehouse Postgres deferred until after unlock.</summary>
     T WithDeferredInventoryPersist<T>(Func<T> underGate)
     {
         T result;
