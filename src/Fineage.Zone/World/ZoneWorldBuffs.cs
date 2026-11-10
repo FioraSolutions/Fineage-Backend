@@ -46,10 +46,11 @@ public sealed partial class ZoneWorld
         }
         else
         {
-            int resolvedEffectId = effectId > 0 ? effectId : ZoneBuffs.SampleWindWalk;
-            int value = ResolveAbnormalValue(resolvedEffectId, ZoneBuffs.SampleEffectValue);
-            int duration = ResolveAbnormalDurationSeconds(resolvedEffectId, ZoneBuffs.SampleDurationSeconds);
-            ApplyAbnormalPlaytest(target, resolvedEffectId, value, duration, now);
+            if (effectId <= 0)
+                throw new InvalidOperationException("buff request requires a skill/effect id (no SampleWindWalk fallback).");
+            int value = ResolveAbnormalValue(effectId);
+            int duration = ResolveAbnormalDurationSeconds(effectId);
+            ApplyAbnormalPlaytest(target, effectId, value, duration, now);
             ZoneLog.Info($"buff object={targetId} count={target.Abnormals.Count} remove={remove}");
             return null;
         }

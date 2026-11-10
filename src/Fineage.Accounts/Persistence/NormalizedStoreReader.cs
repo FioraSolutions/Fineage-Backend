@@ -181,6 +181,7 @@ static class NormalizedStoreReader
         var quests = LoadQuests(conn, stub.Id);
         var shortcuts = LoadShortcuts(conn, stub.Id);
         var learned = LoadLearnedSkills(conn, stub.Id);
+        var effects = LoadEffects(conn, stub.Id);
         return new CharacterRecord(
             stub.Id,
             stub.Name,
@@ -222,7 +223,8 @@ static class NormalizedStoreReader
             stub.PvpKills,
             HennaDye1: stub.HennaDye1,
             HennaDye2: stub.HennaDye2,
-            HennaDye3: stub.HennaDye3);
+            HennaDye3: stub.HennaDye3,
+            Effects: effects);
     }
 
     static List<StoredItem> LoadItems(NpgsqlConnection conn, int characterId, params string[] locs)
@@ -302,6 +304,33 @@ static class NormalizedStoreReader
         using var reader = cmd.ExecuteReader();
         while (reader.Read())
             rows.Add(new StoredSkill(reader.GetInt32(0), reader.GetInt32(1)));
+        return rows.Count == 0 ? null : rows;
+    }
+
+    static List<StoredEffect>? LoadEffects(NpgsqlConnection conn, int characterId)
+    {
+        using var cmd = conn.CreateCommand();
+        cmd.CommandText =
+            """
+            SELECT skill_id, skill_level, remaining_time
+            FROM character_skills_save
+            WHERE character_id = @cid
+            ORDER BY skill_id
+            """;
+        cmd.Parameters.AddWithValue("cid", characterId);
+        var rows = new List<StoredEffect>();
+        try
+        {
+            using var reader = cmd.ExecuteReader();
+            while (reader.Read())
+                rows.Add(new StoredEffect(reader.GetInt32(0), reader.GetInt32(1), reader.GetInt32(2)));
+        }
+        catch (PostgresException)
+        {
+            // Pre-migration hosts: table missing until 009 runs.
+            return null;
+        }
+
         return rows.Count == 0 ? null : rows;
     }
 

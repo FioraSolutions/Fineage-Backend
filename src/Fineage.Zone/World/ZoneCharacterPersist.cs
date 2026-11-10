@@ -69,6 +69,9 @@ sealed class ZoneCharacterPersist(IAccountStore? accounts)
     public void ReplaceShortcuts(string account, int characterId, IReadOnlyList<StoredShortcut> shortcuts) =>
         _accounts?.TryReplaceShortcuts(account, characterId, shortcuts);
 
+    public void ReplaceEffects(string account, int characterId, IReadOnlyList<StoredEffect> effects) =>
+        _accounts?.TryReplaceEffects(account, characterId, effects);
+
     public void ReplaceItemsFromInventory(string account, int characterId, PlayerInventory inventory) =>
         ReplaceItems(account, characterId, CharacterInventory.Rows(inventory));
 

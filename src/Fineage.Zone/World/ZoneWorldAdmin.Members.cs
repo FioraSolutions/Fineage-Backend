@@ -189,18 +189,17 @@ public sealed partial class ZoneWorld
         {
             if (skillId <= 0)
                 continue;
-            var skill = _game.Skills.Find(skillId);
-            if (skill == null)
-                continue;
+            var skill = _game.Skills.Find(skillId)
+                ?? throw new InvalidOperationException($"admin buffset missing skillId={skillId}");
             int level = Math.Max(1, skill.MaxLevel);
             if (!skill.TryLevelData(level, out var data))
-                continue;
-            ApplyAbnormalFromSkill(skill, data, player, now);
+                throw new InvalidOperationException($"admin buffset skill={skillId} missing level={level}");
+            ApplyAbnormalFromSkill(skill, data, player, now, force: true);
             applied++;
         }
 
         if (applied == 0)
-            return "bad_request";
+            throw new InvalidOperationException("admin buffset applied zero skills");
 
         ZoneLog.Info($"admin buffset object={player.ObjectId} applied={applied}");
         return null;

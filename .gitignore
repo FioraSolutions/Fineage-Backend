@@ -15,7 +15,10 @@ data/*
 !data/skill-combat.json
 !data/skill-stat-effects.json
 !data/skill-passives.json
+!data/skill-effects.json
+!data/skill-dots.json
 !data/skill-trees.json
+!data/henna.json
 !data/npcs.json
 !data/dungeons.json
 !data/olympiad-stadiums.json

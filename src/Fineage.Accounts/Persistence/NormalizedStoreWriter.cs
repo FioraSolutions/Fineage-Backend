@@ -23,6 +23,7 @@ static class NormalizedStoreWriter
         // Full reproject of item/quest rows — clears global object_id PKs so memory and SQL stay aligned.
         foreach (string wipe in new[]
                  {
+                     "DELETE FROM character_skills_save",
                      "DELETE FROM character_skills",
                      "DELETE FROM character_shortcuts",
                      "DELETE FROM character_quest_vars",
@@ -131,6 +132,7 @@ static class NormalizedStoreWriter
         ReplaceQuests(conn, tx, character.Id, character.Quests);
         ReplaceShortcuts(conn, tx, character.Id, character.Shortcuts);
         ReplaceLearnedSkills(conn, tx, character.Id, character.LearnedSkills);
+        ReplaceEffects(conn, tx, character.Id, character.Effects);
     }
 
     public static void UpdatePresence(
@@ -572,6 +574,25 @@ static class NormalizedStoreWriter
         ReplaceQuests(conn, tx, id, ReadQuests(ch));
         ReplaceShortcuts(conn, tx, id, ReadShortcuts(ch));
         ReplaceLearnedSkills(conn, tx, id, ReadLearnedSkills(ch));
+        ReplaceEffects(conn, tx, id, ReadEffects(ch));
+    }
+
+    static List<StoredEffect>? ReadEffects(JsonElement character)
+    {
+        if (!character.TryGetProperty("effects", out var arr) || arr.ValueKind != JsonValueKind.Array)
+            return null;
+        var rows = new List<StoredEffect>();
+        foreach (var e in arr.EnumerateArray())
+        {
+            var row = new StoredEffect(
+                ReadInt(e, "skillId", 0),
+                ReadInt(e, "level", 0),
+                ReadInt(e, "remainingSeconds", 0));
+            if (row.IsValid)
+                rows.Add(row);
+        }
+
+        return rows;
     }
 
     static void UpsertCharacterColumns(
@@ -782,6 +803,43 @@ static class NormalizedStoreWriter
             ins.Parameters.AddWithValue("cid", characterId);
             ins.Parameters.AddWithValue("sid", s.SkillId);
             ins.Parameters.AddWithValue("lvl", s.Level);
+            ins.ExecuteNonQuery();
+        }
+    }
+
+    public static void ReplaceEffects(
+        NpgsqlConnection conn,
+        NpgsqlTransaction? tx,
+        int characterId,
+        IReadOnlyList<StoredEffect>? effects)
+    {
+        using (var del = conn.CreateCommand())
+        {
+            del.Transaction = tx;
+            del.CommandText = "DELETE FROM character_skills_save WHERE character_id = @id";
+            del.Parameters.AddWithValue("id", characterId);
+            del.ExecuteNonQuery();
+        }
+
+        if (effects == null)
+            return;
+        foreach (var e in effects)
+        {
+            if (e == null || !e.IsValid)
+                continue;
+            using var ins = conn.CreateCommand();
+            ins.Transaction = tx;
+            ins.CommandText =
+                """
+                INSERT INTO character_skills_save (character_id, skill_id, skill_level, remaining_time)
+                VALUES (@cid, @sid, @lvl, @rem)
+                ON CONFLICT (character_id, skill_id) DO UPDATE
+                SET skill_level = excluded.skill_level, remaining_time = excluded.remaining_time
+                """;
+            ins.Parameters.AddWithValue("cid", characterId);
+            ins.Parameters.AddWithValue("sid", e.SkillId);
+            ins.Parameters.AddWithValue("lvl", e.Level);
+            ins.Parameters.AddWithValue("rem", e.RemainingSeconds);
             ins.ExecuteNonQuery();
         }
     }

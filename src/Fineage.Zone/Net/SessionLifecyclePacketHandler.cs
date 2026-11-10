@@ -175,6 +175,13 @@ sealed class SessionLifecyclePacketHandler
                 NetCodec.EncodeShortCutInit(ToNetShortcutInit(_world.BuildShortcutInit(zoneSession))),
                 ct: ct)
             .ConfigureAwait(false);
+        // Mobius updateEffectIcons: restored buffs (character_skills_save) must land before EtcStatusUpdate.
+        if (_world.TryBuildNetAbnormalStatus(zoneSession, out var abnormals))
+            await conn.SendAsync(
+                    NetOpcode.AbnormalStatusUpdate,
+                    NetCodec.EncodeAbnormalStatusUpdate(ToNetAbnormal(abnormals)),
+                    ct: ct)
+                .ConfigureAwait(false);
         // Mobius EnterWorld:401 sends EtcStatusUpdate after ItemList/ShortCutInit and after updateEffectIcons, so the
         // overload icon appears on an otherwise fully-dressed status bar.
         if (_world.TryBuildNetEtcStatus(zoneSession, out var etcStatus))
@@ -293,5 +300,23 @@ sealed class SessionLifecyclePacketHandler
         for (int i = 0; i < src.Length; i++)
             rows[i] = ShortcutActionPacketHandler.ToNet(src[i]);
         return new ShortCutInitNetMsg { Shortcuts = rows };
+    }
+
+    static AbnormalStatusUpdateNetMsg ToNetAbnormal(AbnormalStatusUpdateMsg update)
+    {
+        var src = update.Effects ?? [];
+        var rows = new AbnormalEffectNet[src.Length];
+        for (int i = 0; i < src.Length; i++)
+        {
+            var e = src[i];
+            rows[i] = new AbnormalEffectNet
+            {
+                Id = e.Id,
+                Value = e.Value,
+                DurationSeconds = e.DurationSeconds
+            };
+        }
+
+        return new AbnormalStatusUpdateNetMsg { ObjectId = update.ObjectId, Effects = rows };
     }
 }

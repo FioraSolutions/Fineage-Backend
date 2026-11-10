@@ -16,13 +16,22 @@ public sealed partial class ZoneWorld
             return false;
 
         RefreshGradePenalty(player);
+        // Mobius ArmorSetListener / item_skill: temporary skills change → sendSkillList.
+        var gearBefore = new Dictionary<int, int>(player.GearSkills);
         RefreshGearSkills(player);
+        RefreshPlayerMaxima(player, fanout: true);
         RefreshRunSpeedAndFanout(player);
         var invUpdate = InventoryMessages.Modify(changed);
         // UserInfo (paperdoll + CurrWeight/MaxWeight) is sent from SaveInventory →
         // RefreshWeightPenaltyAfterInventoryChange, which every equip/unequip path calls next.
         if (NetBridge != null)
             NetBridge.FanoutInventoryUpdate([session.ObjectId], invUpdate);
+        if (NetBridge != null && !SkillMapsEqual(gearBefore, player.GearSkills))
+        {
+            NetBridge.FanoutSkillList(
+                [session.ObjectId],
+                Fineage.Zone.Net.NetEnterWorldProjector.BuildSkills(player, _clock().ToUnixTimeMilliseconds()));
+        }
         List<int>? netPeers = null;
         foreach (int id in player.Knownlist)
         {
@@ -35,6 +44,18 @@ public sealed partial class ZoneWorld
         if (netPeers != null && NetBridge != null)
             NetBridge.FanoutCharInfo(netPeers, player.ObjectId);
 
+        return true;
+    }
+
+    static bool SkillMapsEqual(IReadOnlyDictionary<int, int> a, IReadOnlyDictionary<int, int> b)
+    {
+        if (a.Count != b.Count)
+            return false;
+        foreach (var (id, level) in a)
+        {
+            if (!b.TryGetValue(id, out int other) || other != level)
+                return false;
+        }
         return true;
     }
 

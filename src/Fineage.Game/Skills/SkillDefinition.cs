@@ -58,6 +58,24 @@ public sealed class SkillDefinition
 
     public bool IsDebuff { get; }
 
+    /// <summary>Mobius <c>abnormalType</c> slot (POISON, TURN_FLEE, BLEEDING, …). Empty when unset.</summary>
+    public string AbnormalType { get; init; } = "";
+
+    /// <summary>Mobius <c>trait</c> (POISON, HOLD, DERANGEMENT, …). Empty when unset.</summary>
+    public string Trait { get; init; } = "";
+
+    /// <summary>
+    /// Mobius <c>activateRate</c> for <c>calcSkillSuccess</c>.
+    /// −1 = always land (no roll); 0 = missing / treat as always land for non-debuffs.
+    /// </summary>
+    public int ActivateRate { get; init; }
+
+    /// <summary>Mobius <c>lvlBonusRate</c> in calcSkillSuccess (default 1).</summary>
+    public int LvlBonusRate { get; init; } = 1;
+
+    /// <summary>Mobius <c>basicProperty</c> (CON, MEN, …). Empty = none → always land.</summary>
+    public string BasicProperty { get; init; } = "";
+
     public bool AppliesAbnormal => AbnormalTimeSeconds > 0;
 
     public bool IsBuffSkill => AppliesAbnormal && !IsDebuff;

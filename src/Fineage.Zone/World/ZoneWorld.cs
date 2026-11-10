@@ -68,6 +68,12 @@ public sealed partial class ZoneWorld
     /// <summary>Mobius AISkillScope HEAL/BUFF/DEBUFF rows (data/npc-ai-support.json).</summary>
     readonly Fineage.Zone.Npcs.NpcAiSupportCatalog _npcAiSupport;
     readonly SkillStatEffectCatalog _passives;
+    /// <summary>Mobius DefenceTrait percents from skill-passives (jewelry poison/hold/… resists).</summary>
+    readonly SkillDefenceTraitCatalog _defenceTraits;
+    /// <summary>Mobius DamOverTime / DamOverTimePercent (data/skill-dots.json).</summary>
+    readonly SkillDotCatalog _skillDots;
+    /// <summary>Mobius skill &lt;effect&gt; rows (data/skill-effects.json) — Cancel, ManaBurn, …</summary>
+    readonly SkillEffectCatalog _skillEffects;
     /// <summary>Mobius hennaList dyes (data/henna.json). Deltas fold before the STR/DEX bonus table.</summary>
     readonly HennaCatalog _henna;
     /// <summary>Mobius armorsets (data/armor-sets.json). Complete-set skills fold via GearSkills.</summary>
@@ -148,6 +154,9 @@ public sealed partial class ZoneWorld
         SkillCombatCatalog? skillCombat = null,
         Fineage.Zone.Npcs.NpcAiSupportCatalog? npcAiSupport = null,
         SkillStatEffectCatalog? passives = null,
+        SkillDefenceTraitCatalog? defenceTraits = null,
+        SkillDotCatalog? skillDots = null,
+        SkillEffectCatalog? skillEffects = null,
         DeathRuleCatalog? deathRules = null,
         Fineage.Game.Services.DeathDropRules? deathDrop = null,
         Random? deathRandom = null,
@@ -164,6 +173,9 @@ public sealed partial class ZoneWorld
         _npcAiSupport = npcAiSupport ?? Fineage.Zone.Npcs.NpcAiSupportCatalog.LoadDefault();
         _statEffects = statEffects ?? SkillStatEffectCatalog.LoadDefault();
         _passives = passives ?? SkillStatEffectCatalog.LoadPassives();
+        _defenceTraits = defenceTraits ?? SkillDefenceTraitCatalog.LoadDefault();
+        _skillDots = skillDots ?? SkillDotCatalog.LoadDefault();
+        _skillEffects = skillEffects ?? SkillEffectCatalog.LoadDefault();
         _henna = henna ?? HennaCatalog.LoadDefault();
         _armorSets = armorSets ?? ArmorSetCatalog.LoadDefault();
         _equipSkills = equipSkills ?? ItemEquipSkillCatalog.LoadDefault();

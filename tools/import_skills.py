@@ -107,6 +107,7 @@ def parse_skill(node: ET.Element) -> dict | None:
         abnormal_time_seconds = 0
 
     is_debuff = (child_text(node, "isDebuff") or "").lower() == "true"
+    abnormal_type = (child_text(node, "abnormalType") or "").strip()
 
     level_rows = []
     for index in range(levels):
@@ -135,6 +136,8 @@ def parse_skill(node: ET.Element) -> dict | None:
         row["abnormalTimeSeconds"] = abnormal_time_seconds
     if is_debuff:
         row["isDebuff"] = True
+    if abnormal_type:
+        row["abnormalType"] = abnormal_type
     return row
 
 

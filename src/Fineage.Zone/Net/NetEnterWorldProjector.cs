@@ -150,10 +150,15 @@ static class NetEnterWorldProjector
         return new ItemListNetMsg { Items = rows };
     }
 
+    /// <summary>
+    /// Mobius <c>sendSkillList</c>: learned book + clan skills + ephemeral gear skills
+    /// (item SA / complete armor sets). Higher level wins on id collision.
+    /// </summary>
     internal static SkillListMsg BuildSkills(ZoneEntity entity, long nowUnixMs)
     {
-        var rows = new List<SkillListEntryMsg>(entity.KnownSkills.Count);
-        foreach (var pair in entity.KnownSkills.OrderBy(p => p.Key))
+        var skills = PlayerPassiveSources.Merge(entity.KnownSkills, entity.ClanSkills, entity.GearSkills);
+        var rows = new List<SkillListEntryMsg>(skills.Count);
+        foreach (var pair in skills.OrderBy(p => p.Key))
         {
             int reuse = 0;
             if (entity.SkillReuseUntilMs.TryGetValue(pair.Key, out long until) && until > nowUnixMs)

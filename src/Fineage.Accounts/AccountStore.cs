@@ -71,6 +71,14 @@ public sealed record StoredSkill(int SkillId, int Level)
     public bool IsValid => SkillId > 0 && Level > 0 && Level < 1000;
 }
 
+/// <summary>
+/// Mobius <c>character_skills_save</c> row: active abnormal remaining time across logout.
+/// </summary>
+public sealed record StoredEffect(int SkillId, int Level, int RemainingSeconds)
+{
+    public bool IsValid => SkillId > 0 && Level > 0 && RemainingSeconds > 0;
+}
+
 public sealed record CharacterRecord(
     int Id,
     string Name,
@@ -116,7 +124,8 @@ public sealed record CharacterRecord(
     bool BlockAll = false,
     int HennaDye1 = 0,
     int HennaDye2 = 0,
-    int HennaDye3 = 0)
+    int HennaDye3 = 0,
+    IReadOnlyList<StoredEffect>? Effects = null)
 {
     /// <summary>Remaining whole seconds until hard delete. Zero when the character is not pending.</summary>
     public int DeleteSecondsLeft(DateTimeOffset now)
@@ -277,6 +286,9 @@ public interface IAccountStore
 
     /// <summary>Replaces the character's learned skills (Mobius character_skills). An empty list is a real save.</summary>
     bool TryReplaceLearnedSkills(string account, int characterId, IReadOnlyList<StoredSkill> skills);
+
+    /// <summary>Replaces active effects (Mobius character_skills_save). An empty list clears stored buffs.</summary>
+    bool TryReplaceEffects(string account, int characterId, IReadOnlyList<StoredEffect> effects);
 
     bool TrySetLastAccess(string account, int characterId, DateTimeOffset when);
 
@@ -488,7 +500,13 @@ public sealed class MemoryAccountStore : IAccountStore
             BlockAll = character.BlockAll,
             HennaDye1 = character.HennaDye1,
             HennaDye2 = character.HennaDye2,
-            HennaDye3 = character.HennaDye3
+            HennaDye3 = character.HennaDye3,
+            Effects = character.Effects?.Select(e => new StoredEffectDto
+            {
+                SkillId = e.SkillId,
+                Level = e.Level,
+                RemainingSeconds = e.RemainingSeconds
+            }).ToList()
         };
 
     static StoredShortcutDto CopyShortcut(StoredShortcut s) => new()
@@ -833,6 +851,33 @@ public sealed class MemoryAccountStore : IAccountStore
                 return false;
             character.LearnedSkills = skills.OrderBy(s => s.SkillId)
                 .Select(s => new StoredSkillDto { SkillId = s.SkillId, Level = s.Level }).ToList();
+            Save();
+            return true;
+        }
+    }
+
+    public bool TryReplaceEffects(string account, int characterId, IReadOnlyList<StoredEffect> effects)
+    {
+        ArgumentNullException.ThrowIfNull(effects);
+        var ids = new HashSet<int>();
+        foreach (var e in effects)
+        {
+            if (e == null || !e.IsValid || !ids.Add(e.SkillId))
+                return false;
+        }
+
+        lock (_gate)
+        {
+            var character = FindCharacter(account, characterId);
+            if (character == null)
+                return false;
+            character.Effects = effects.OrderBy(e => e.SkillId)
+                .Select(e => new StoredEffectDto
+                {
+                    SkillId = e.SkillId,
+                    Level = e.Level,
+                    RemainingSeconds = e.RemainingSeconds
+                }).ToList();
             Save();
             return true;
         }
@@ -1573,7 +1618,10 @@ public sealed class MemoryAccountStore : IAccountStore
             character.BlockAll,
             character.HennaDye1,
             character.HennaDye2,
-            character.HennaDye3);
+            character.HennaDye3,
+            character.Effects == null
+                ? null
+                : character.Effects.Select(e => new StoredEffect(e.SkillId, e.Level, e.RemainingSeconds)).ToArray());
 
     sealed class StoreFile
     {
@@ -1643,6 +1691,7 @@ public sealed class MemoryAccountStore : IAccountStore
         public int HennaDye1 { get; set; }
         public int HennaDye2 { get; set; }
         public int HennaDye3 { get; set; }
+        public List<StoredEffectDto>? Effects { get; set; }
     }
 
     sealed class StoredSocialDto
@@ -1655,6 +1704,13 @@ public sealed class MemoryAccountStore : IAccountStore
     {
         public int SkillId { get; set; }
         public int Level { get; set; }
+    }
+
+    sealed class StoredEffectDto
+    {
+        public int SkillId { get; set; }
+        public int Level { get; set; }
+        public int RemainingSeconds { get; set; }
     }
 
     sealed class StoredShortcutDto

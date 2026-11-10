@@ -39167,7 +39167,8 @@
       "enchantable": true,
       "crystal": "s",
       "crystalCount": 178,
-      "mDef": 71
+      "mDef": 71,
+      "maxMp": 31
     },
     {
       "id": 6657,
@@ -39180,7 +39181,8 @@
       "enchantable": true,
       "crystal": "s",
       "crystalCount": 237,
-      "mDef": 95
+      "mDef": 95,
+      "maxMp": 42
     },
     {
       "id": 6658,
@@ -39190,7 +39192,8 @@
       "bodySlot": "both_fingers",
       "price": 1730000,
       "weight": 150,
-      "mDef": 48
+      "mDef": 48,
+      "maxMp": 21
     },
     {
       "id": 6659,
@@ -39200,7 +39203,8 @@
       "bodySlot": "both_ears",
       "price": 2590000,
       "weight": 150,
-      "mDef": 71
+      "mDef": 71,
+      "maxMp": 31
     },
     {
       "id": 6660,
@@ -39210,7 +39214,8 @@
       "bodySlot": "both_fingers",
       "price": 616000,
       "weight": 150,
-      "mDef": 48
+      "mDef": 48,
+      "maxMp": 21
     },
     {
       "id": 6661,
@@ -39223,7 +39228,8 @@
       "enchantable": true,
       "crystal": "a",
       "crystalCount": 104,
-      "mDef": 71
+      "mDef": 71,
+      "maxMp": 31
     },
     {
       "id": 6662,
@@ -39236,7 +39242,8 @@
       "enchantable": true,
       "crystal": "a",
       "crystalCount": 69,
-      "mDef": 48
+      "mDef": 48,
+      "maxMp": 21
     },
     {
       "id": 6674,
@@ -45386,7 +45393,8 @@
       "enchantable": true,
       "crystal": "a",
       "crystalCount": 230,
-      "mDef": 95
+      "mDef": 95,
+      "maxMp": 42
     },
     {
       "id": 8193,

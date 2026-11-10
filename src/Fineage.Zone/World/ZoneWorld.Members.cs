@@ -219,6 +219,7 @@ public sealed partial class ZoneWorld
         SaveWarehouse(session, entity);
         SaveVitals(session, entity);
         SaveQuestProgress(session, entity);
+        SaveEffects(session, entity);
         SavePresence(session, entity.X, entity.Y, entity.Z, touchAccess: false);
     }
 

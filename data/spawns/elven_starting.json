@@ -8452,6 +8452,17 @@
       "heading": 36741,
       "respawnDelaySeconds": 15,
       "respawnRandomSeconds": 0
+    },
+    {
+      "objectId": 98001,
+      "npcId": 31046,
+      "x": 53940,
+      "y": 47640,
+      "z": -3658,
+      "heading": 0,
+      "respawnDelaySeconds": 60,
+      "respawnRandomSeconds": 0,
+      "comment": "local playtest Symbol Maker next to KuK"
     }
   ]
 }

@@ -9,6 +9,56 @@ public sealed partial class ZoneWorld
     /// One AI tick of chase (Mobius moveToPawn). Only (re)issues a MoveToLocation when the chase starts or the
     /// pawn drifted; the actual travel is done by <see cref="TickNpcMovement"/> on the shared speed-tick mover.
     /// </summary>
+    /// <summary>Mobius <c>TURN_FLEE</c> / <c>onEvtAfraid</c> — slot comes from skills.json abnormalType.</summary>
+    static bool IsFeared(ZoneEntity entity)
+    {
+        for (int i = 0; i < entity.Abnormals.Count; i++)
+        {
+            if (string.Equals(entity.Abnormals[i].Slot, "TURN_FLEE", StringComparison.OrdinalIgnoreCase))
+                return true;
+        }
+        return false;
+    }
+
+    /// <summary>Mobius FearTask: run ~500 units away from the feared source.</summary>
+    void FleeFrom(ZoneEntity npc, ZoneEntity from, long now)
+    {
+        double dx = npc.X - from.X;
+        double dy = npc.Y - from.Y;
+        double dist = Math.Sqrt(dx * dx + dy * dy);
+        if (dist < 1)
+        {
+            dx = 1;
+            dy = 0;
+            dist = 1;
+        }
+
+        const double fleeRange = 500;
+        int destX = (int)Math.Round(npc.X + dx / dist * fleeRange);
+        int destY = (int)Math.Round(npc.Y + dy / dist * fleeRange);
+        int destZ = npc.Z;
+
+        long ddx = destX - (long)npc.ChaseDestX, ddy = destY - (long)npc.ChaseDestY;
+        if (!npc.Chasing || !npc.MoveActive || ddx * ddx + ddy * ddy > 40L * 40L)
+        {
+            if (!npc.HomeSet)
+            {
+                npc.HomeSet = true;
+                (npc.HomeX, npc.HomeY, npc.HomeZ) = (npc.X, npc.Y, npc.Z);
+            }
+            SetReturningHome(npc, false);
+            if (!npc.Running)
+            {
+                npc.Running = true;
+                FanoutMoveType(npc);
+            }
+            npc.Chasing = true;
+            npc.ChaseDestX = destX;
+            npc.ChaseDestY = destY;
+            StartNpcMove(npc, destX, destY, destZ, now);
+        }
+    }
+
     void ChaseStep(ZoneEntity npc, ZoneEntity target, long now)
     {
         double dx = target.X - npc.X;

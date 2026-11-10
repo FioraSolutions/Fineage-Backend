@@ -61,7 +61,7 @@ public sealed partial class ZoneWorld
         }
 
         if (reply.ScriptName != null)
-            return VillageMasterBypass(session, player, npc, reply.ScriptName, reply.ScriptEvent);
+            return NpcScriptBypass(session, player, npc, reply.ScriptName, reply.ScriptEvent);
 
         if (reply.QuestAction)
         {

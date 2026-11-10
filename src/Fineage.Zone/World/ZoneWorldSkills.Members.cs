@@ -100,14 +100,11 @@ public sealed partial class ZoneWorld
         player.CastingUntilMs = now + Math.Max(0, template.HitTimeMs);
         // Mobius onMagicHitTimer: the buff lands at hitTime (interruptible for magic/static skills).
         ScheduleEffect(player, target, template, level, now, template.HitTimeMs,
-            (t, at) => ApplyAbnormalFromSkill(template, levelData, t, at));
+            (t, at) => ApplyAbnormalFromSkill(template, levelData, t, at, attacker: player));
         return null;
     }
 
-    /// <summary>
-    /// Instant heal/utility (Elemental Heal, Heal, Self Heal, …). Datapack heal power is often 0 —
-    /// use a Mobius-ish fallback so SELF heals work with a mob selected.
-    /// </summary>
+    /// <summary>Instant heal/utility (Elemental Heal, Heal, Self Heal, …).</summary>
     string? TrySkillUseSupport(
         ZoneSession session,
         ZoneEntity player,
@@ -135,7 +132,10 @@ public sealed partial class ZoneWorld
         if (template.ReuseDelayMs > 0)
             player.SkillReuseUntilMs[request.SkillId] = now + template.ReuseDelayMs;
 
-        int heal = SupportHealAmount(levelData, level, player.Level);
+        if (levelData.Power <= 0)
+            throw new InvalidOperationException(
+                $"skill {request.SkillId} lv{level} heal power missing — refuse invented heal amount");
+        int heal = levelData.Power;
         var cast = BuildCast(player, target, request.SkillId, level, template);
         StopForCast(player, target, now);
         FanoutSkill(player, target, cast, targetStatus: null, CasterMpStatus(player));
@@ -154,14 +154,6 @@ public sealed partial class ZoneWorld
             });
         });
         return null;
-    }
-
-    static int SupportHealAmount(SkillLevelData levelData, int skillLevel, int playerLevel)
-    {
-        if (levelData.Power > 0)
-            return levelData.Power;
-        // Datapack omitted heal power; scale by skill level and character level until import is fixed.
-        return Math.Max(25, 18 + skillLevel * 10 + Math.Max(1, playerLevel) * 4);
     }
 
     string? TrySkillUseDebuff(
@@ -196,14 +188,155 @@ public sealed partial class ZoneWorld
         player.CastingUntilMs = now + Math.Max(0, template.HitTimeMs);
         session.SelectedTargetId = targetId;
         // Mobius onMagicHitTimer: debuff lands at hitTime; a dead/escaped/hidden target aborts it.
-        ScheduleEffect(player, target, template, level, now, template.HitTimeMs,
-            (t, at) => ApplyAbnormalFromSkill(template, levelData, t, at));
+        // Debuffs also add hate (Mobius EffectPoint / addDamageHate) so Fear AI and retaliation start
+        // even when the cast dealt no HP damage.
+        ScheduleEffect(player, target, template, level, now, template.HitTimeMs, (t, at) =>
+        {
+            if (!ApplyAbnormalFromSkill(template, levelData, t, at, attacker: player))
+                return;
+            if (t.Kind == ZoneEntityKind.Npc)
+                AddHate(t, player, hate: Math.Max(1, Math.Abs(levelData.Power)));
+        });
         return null;
     }
 
     /// <summary>
-    /// Friendly skills: SELF always self. Otherwise prefer an explicit player target; if the client
-    /// sent a mob (selected target), fall back to self so Heal works without clearing the target.
+    /// Mobius Cancellation / DispelByCategory: hostile cast that strips buffs (not a heal / buff).
+    /// </summary>
+    string? TrySkillUseCancel(
+        ZoneSession session,
+        ZoneEntity player,
+        SkillUseIntent request,
+        SkillDefinition template,
+        SkillLevelData levelData,
+        int level,
+        long now,
+        SkillEffectCatalog.Effect dispel)
+    {
+        int targetId = request.TargetObjectId > 0 ? request.TargetObjectId : session.SelectedTargetId;
+        if (targetId <= 0)
+            return SkillProtocol.Target;
+        if (!_byId.TryGetValue(targetId, out var target))
+            return SkillProtocol.Target;
+        if (!IsAttackable(player, target))
+            return SkillProtocol.Target;
+        if (!VisibleTo(player.ObjectId, targetId))
+            return SkillProtocol.Target;
+        if (!ZoneCombat.InCastRange(player.X, player.Y, target.X, target.Y, template.CastRange))
+            return SkillProtocol.Range;
+
+        player.CurMp = Math.Max(0, player.CurMp - levelData.MpConsume);
+        if (template.ReuseDelayMs > 0)
+            player.SkillReuseUntilMs[request.SkillId] = now + template.ReuseDelayMs;
+
+        var cast = BuildCast(player, target, request.SkillId, level, template);
+        StopForCast(player, target, now);
+        FanoutSkill(player, target, cast, targetStatus: null, CasterMpStatus(player));
+        player.CombatUntilUnixMs = now + ClanProtocol.CombatStanceMillis;
+        player.CastingUntilMs = now + Math.Max(0, template.HitTimeMs);
+        session.SelectedTargetId = targetId;
+        if (levelData.MagicLevel <= 0)
+            throw new InvalidOperationException(
+                $"skill {request.SkillId} lv{levelData.Level} missing magicLevel for calcCancelSuccess");
+        int cancelMl = levelData.MagicLevel;
+        if (string.IsNullOrWhiteSpace(dispel.Slot))
+            throw new InvalidOperationException($"skill {request.SkillId} DispelByCategory missing slot");
+        if (dispel.Rate <= 0)
+            throw new InvalidOperationException($"skill {request.SkillId} DispelByCategory missing rate");
+        if (dispel.Max <= 0)
+            throw new InvalidOperationException($"skill {request.SkillId} DispelByCategory missing max");
+        string slot = dispel.Slot;
+        int rate = dispel.Rate;
+        int max = dispel.Max;
+        ScheduleEffect(player, target, template, level, now, template.HitTimeMs, (t, _) =>
+        {
+            int removed = ApplyDispelByCategory(t, slot, rate, max, cancelMl);
+            if (removed > 0)
+                FanoutAbnormal(t);
+            if (t.Kind == ZoneEntityKind.Npc)
+                AddHate(t, player, hate: Math.Max(1, removed * 10));
+        });
+        return null;
+    }
+
+    /// <summary>Mobius MagicalAttackMp (Mana Burn): burns target MP, not HP.</summary>
+    string? TrySkillUseManaBurn(
+        ZoneSession session,
+        ZoneEntity player,
+        SkillUseIntent request,
+        SkillDefinition template,
+        SkillLevelData levelData,
+        int level,
+        long now)
+    {
+        int targetId = request.TargetObjectId > 0 ? request.TargetObjectId : session.SelectedTargetId;
+        if (targetId <= 0)
+            return SkillProtocol.Target;
+        if (!_byId.TryGetValue(targetId, out var target))
+            return SkillProtocol.Target;
+        if (!IsAttackable(player, target))
+            return SkillProtocol.Target;
+        if (!VisibleTo(player.ObjectId, targetId))
+            return SkillProtocol.Target;
+        if (!ZoneCombat.InCastRange(player.X, player.Y, target.X, target.Y, template.CastRange))
+            return SkillProtocol.Range;
+
+        player.CurMp = Math.Max(0, player.CurMp - levelData.MpConsume);
+        if (template.ReuseDelayMs > 0)
+            player.SkillReuseUntilMs[request.SkillId] = now + template.ReuseDelayMs;
+
+        var cast = BuildCast(player, target, request.SkillId, level, template);
+        StopForCast(player, target, now);
+        FanoutSkill(player, target, cast, targetStatus: null, CasterMpStatus(player));
+        player.CombatUntilUnixMs = now + ClanProtocol.CombatStanceMillis;
+        player.CastingUntilMs = now + Math.Max(0, template.HitTimeMs);
+        session.SelectedTargetId = targetId;
+        int power = Math.Max(1, levelData.Power);
+        ScheduleEffect(player, target, template, level, now, template.HitTimeMs, (t, _) =>
+        {
+            int burned = Math.Min(t.CurMp, power);
+            if (burned <= 0)
+                return;
+            t.CurMp = Math.Max(0, t.CurMp - burned);
+            FanoutVitals(t, new StatusUpdateMsg
+            {
+                ObjectId = t.ObjectId,
+                AttributeIds = [InterludeStatus.CurMp, InterludeStatus.MaxMp],
+                Values = [t.CurMp, t.MaxMp]
+            });
+            if (t.Kind == ZoneEntityKind.Npc)
+                AddHate(t, player, hate: Math.Max(1, burned));
+        });
+        return null;
+    }
+
+    /// <summary>Mobius calcCancelEffects for buff/debuff categories on a live target.</summary>
+    int ApplyDispelByCategory(ZoneEntity target, string slot, int rate, int max, int cancelMagicLevel)
+    {
+        bool wantBuff = slot.Equals("buff", StringComparison.OrdinalIgnoreCase);
+        return ZoneAbnormals.DispelByCategory(
+            target.Abnormals,
+            entry =>
+            {
+                var skill = _game.Skills.Find(entry.Id);
+                if (skill == null)
+                    return wantBuff; // unknown → treat as buff strip candidate
+                return wantBuff ? !skill.IsDebuff : skill.IsDebuff;
+            },
+            entry =>
+            {
+                var skill = _game.Skills.Find(entry.Id);
+                int buffMl = 0;
+                if (skill != null && skill.TryLevelData(Math.Max(1, entry.SkillLevel), out var ld))
+                    buffMl = ld.MagicLevel;
+                return ZoneCombat.RollCancelSuccess(_combatRandom, rate, cancelMagicLevel, buffMl);
+            },
+            max);
+    }
+
+    /// <summary>
+    /// Mobius friendly targeting for support skills: SELF → caster; an explicit living player → that
+    /// player; otherwise the caster (heal/buff with a mob selected or with no target).
     /// </summary>
     int ResolveFriendlyTargetId(ZoneSession session, ZoneEntity player, SkillUseIntent request, SkillDefinition template)
     {

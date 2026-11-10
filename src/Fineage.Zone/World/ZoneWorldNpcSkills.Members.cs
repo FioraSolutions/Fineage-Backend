@@ -31,7 +31,19 @@ public sealed partial class ZoneWorld
             case NpcSupportKind.Silence:
                 if (skill.AbnormalTimeSeconds <= 0)
                     return;
+                // Debuffs/control roll Mobius calcEffectSuccess so jewelry DefenceTrait resists apply.
+                if (kind is not NpcSupportKind.Buff)
+                {
+                    var template = _game.Skills.Find(skill.SkillId);
+                    if (template != null &&
+                        template.TryLevelData(Math.Max(1, skill.Level), out var levelData) &&
+                        !RollDebuffLand(caster, target, template, levelData, out _))
+                        return;
+                }
                 int abnormal = skill.AbnormalLevel > 0 ? skill.AbnormalLevel : skill.Level;
+                string slot = skill.Slot;
+                if (slot.Length == 0)
+                    slot = _game.Skills.Find(skill.SkillId)?.AbnormalType ?? "";
                 ZoneAbnormals.Apply(
                     target.Abnormals,
                     skill.SkillId,
@@ -39,12 +51,12 @@ public sealed partial class ZoneWorld
                     skill.AbnormalTimeSeconds,
                     now,
                     skill.Level,
-                    skill.Slot);
+                    slot);
                 if (kind is NpcSupportKind.Immobilize or NpcSupportKind.Silence)
                     StopTimedMove(target);
                 FanoutAbnormal(target);
                 ZoneLog.Info(
-                    $"[npc-support] {kind} {skill.SkillId} lv{skill.Level} slot={skill.Slot} on={target.ObjectId}");
+                    $"[npc-support] {kind} {skill.SkillId} lv{skill.Level} slot={slot} on={target.ObjectId}");
                 break;
         }
     }

@@ -54,6 +54,16 @@ public sealed class HennaCatalog
 
     public bool TryGet(int dyeId, out HennaDefinition dye) => _byId.TryGetValue(dyeId, out dye!);
 
+    /// <summary>Dyes the class may wear (empty <see cref="HennaDefinition.ClassIds"/> = all classes).</summary>
+    public IEnumerable<HennaDefinition> ForClass(int classId)
+    {
+        foreach (var dye in _byId.Values)
+        {
+            if (dye.ClassIds.Count == 0 || dye.ClassIds.Contains(classId))
+                yield return dye;
+        }
+    }
+
     /// <summary>Sum STR/CON/… for up to <see cref="SlotCount"/> dye ids (0 = empty slot).</summary>
     public HennaStatBonus Sum(ReadOnlySpan<int> dyeIds)
     {
@@ -70,8 +80,9 @@ public sealed class HennaCatalog
 
     public static HennaCatalog LoadDefault()
     {
-        var path = TeleportCatalog.FindFile(FileName);
-        return path == null ? Empty : Parse(File.ReadAllText(path), path);
+        var path = TeleportCatalog.FindFile(FileName)
+            ?? throw new FileNotFoundException($"Missing datapack {FileName} (henna list).");
+        return Parse(File.ReadAllText(path), path);
     }
 
     public static HennaCatalog Parse(string json, string source = FileName)

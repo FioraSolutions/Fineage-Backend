@@ -72,7 +72,8 @@ public sealed class SkillCatalog
                     level,
                     Math.Max(0, levelRow.MpConsume),
                     Math.Max(0, levelRow.Power),
-                    abnormalLevel);
+                    abnormalLevel,
+                    Math.Max(0, levelRow.MagicLevel));
             }
 
             skills.Add(new SkillDefinition(
@@ -89,7 +90,12 @@ public sealed class SkillCatalog
                 levels)
             {
                 MagicType = Math.Clamp(row.MagicType, 0, 2),
-                EffectRange = Math.Max(0, row.EffectRange)
+                EffectRange = Math.Max(0, row.EffectRange),
+                AbnormalType = (row.AbnormalType ?? "").Trim(),
+                Trait = (row.Trait ?? "").Trim().ToUpperInvariant(),
+                ActivateRate = row.ActivateRate,
+                LvlBonusRate = row.LvlBonusRate <= 0 ? 1 : row.LvlBonusRate,
+                BasicProperty = (row.BasicProperty ?? "").Trim().ToUpperInvariant()
             });
         }
 
@@ -113,6 +119,11 @@ public sealed class SkillCatalog
         public int ReuseDelayMs { get; set; }
         public int AbnormalTimeSeconds { get; set; }
         public bool IsDebuff { get; set; }
+        public string? AbnormalType { get; set; }
+        public string? Trait { get; set; }
+        public int ActivateRate { get; set; }
+        public int LvlBonusRate { get; set; } = 1;
+        public string? BasicProperty { get; set; }
         public int MagicType { get; set; }
         public int EffectRange { get; set; }
         public List<LevelDto>? LevelData { get; set; }
@@ -124,5 +135,6 @@ public sealed class SkillCatalog
         public int MpConsume { get; set; }
         public int Power { get; set; }
         public int AbnormalLevel { get; set; } = 1;
+        public int MagicLevel { get; set; }
     }
 }

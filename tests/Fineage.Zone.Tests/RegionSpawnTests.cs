@@ -80,7 +80,9 @@ public sealed class RegionSpawnTests
         // Mobius CT 0 Interlude keeps the outdoor world in one InterludeSpawns.xml; there is no
         // per-territory ElvenStarting.xml. These are the fixed rows for the elven forest set, so the
         // count here has to match the original server row for row, not just "roughly right".
-        Assert.Equal(845, map.Npcs.Count);
+        // +1 local playtest Symbol Maker (Marsden 31046) next to KuK — not in Mobius elven forest dump.
+        Assert.Equal(846, map.Npcs.Count);
+        Assert.Equal(1, Count(map, 31046));
         Assert.Equal(48, Count(map, 20013)); // Dryad
         Assert.Equal(48, Count(map, 20019)); // Dryad Elder
         Assert.Equal(40, Count(map, 20036)); // Lirein
@@ -102,13 +104,18 @@ public sealed class RegionSpawnTests
         Assert.Equal(42, Count(map, 20534)); // Red Keltir
         Assert.Equal(37, Count(map, 20537)); // Elder Red Keltir
 
-        // Every row stands in the elven forest box, and every mob is a real attackable monster.
-        Assert.All(map.Npcs, row =>
+        // Mobius forest mobs stay attackable in the elven box; service NPCs (Symbol Maker) are excluded.
+        Assert.All(map.Npcs.Where(row => row.Attackable), row =>
         {
             Assert.InRange(row.X, 0, 61_000);
             Assert.InRange(row.Y, 30_000, 91_000);
-            Assert.True(row.Attackable, $"{row.NpcId} must stay attackable");
             Assert.InRange(row.RespawnDelaySeconds, 15, 20);
+        });
+        Assert.All(map.Npcs.Where(row => !row.Attackable), row =>
+        {
+            Assert.InRange(row.X, 0, 61_000);
+            Assert.InRange(row.Y, 30_000, 91_000);
+            Assert.False(string.IsNullOrWhiteSpace(row.NpcType), $"{row.NpcId} service NPC needs a type");
         });
 
         // Fixed Mobius rows keep their heading; the old polygon resampler flattened them all to 0.

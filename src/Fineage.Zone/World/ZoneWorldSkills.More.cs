@@ -1,3 +1,4 @@
+using Fineage.Game;
 using Fineage.Game.Quests;
 using Fineage.Game.Skills;
 using Fineage.Protocol;
@@ -115,7 +116,9 @@ public sealed partial class ZoneWorld
 
     SkillListMsg SkillListFor(ZoneEntity entity)
     {
-        var rows = entity.KnownSkills
+        // Same union as NetEnterWorldProjector.BuildSkills (known + clan + gear).
+        var skills = PlayerPassiveSources.Merge(entity.KnownSkills, entity.ClanSkills, entity.GearSkills);
+        var rows = skills
             .OrderBy(pair => pair.Key)
             .Select(pair => new KnownSkill(pair.Key, pair.Value))
             .ToList();
@@ -190,7 +193,12 @@ public sealed partial class ZoneWorld
             return TrySkillUseAttack(session, player, request, liveTemplate, liveLevelData, level, now);
         if (liveTemplate.IsDebuffSkill)
             return TrySkillUseDebuff(session, player, request, liveTemplate, liveLevelData, level, now);
-        if (liveTemplate.IsInstantSupportSkill(level))
+        // Mobius DispelByCategory (Cancellation) / MagicalAttackMp — must not fall into InstantSupport.
+        if (_skillEffects.TryDispelByCategory(request.SkillId, out var dispel))
+            return TrySkillUseCancel(session, player, request, liveTemplate, liveLevelData, level, now, dispel);
+        if (_skillEffects.HasMagicalAttackMp(request.SkillId))
+            return TrySkillUseManaBurn(session, player, request, liveTemplate, liveLevelData, level, now);
+        if (liveTemplate.IsInstantSupportSkill(level) || _skillEffects.HasHeal(request.SkillId))
             return TrySkillUseSupport(session, player, request, liveTemplate, liveLevelData, level, now);
 
         return TrySkillUseAttack(session, player, request, liveTemplate, liveLevelData, level, now);

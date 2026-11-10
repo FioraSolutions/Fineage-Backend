@@ -5,6 +5,16 @@ namespace Fineage.Zone.World;
 
 public sealed partial class ZoneWorld
 {
+    internal enum HennaWearResult
+    {
+        Ok,
+        UnknownDye,
+        WrongClass,
+        NoFreeSlot,
+        MissingItems,
+        NoInventory
+    }
+
     /// <summary>
     /// Recompute cached henna STR/CON/… from the three dye slots (Mobius <c>Player.recalcHennaStats</c>).
     /// Call after load or after a dye wear/cancel.
@@ -41,6 +51,45 @@ public sealed partial class ZoneWorld
         else return false;
         SetHennaSlot(player, slot, dyeId);
         return true;
+    }
+
+    /// <summary>
+    /// Mobius Symbol Maker Draw: consume wearCount of the dye item, then seat it.
+    /// Restores the stack if no free slot remains after consume.
+    /// </summary>
+    internal HennaWearResult TryWearHennaPaying(
+        ZoneEntity player,
+        int dyeId,
+        out int slot,
+        out HennaDefinition? dye,
+        out int have)
+    {
+        slot = -1;
+        dye = null;
+        have = 0;
+        if (!_henna.TryGet(dyeId, out var def))
+            return HennaWearResult.UnknownDye;
+        dye = def;
+        if (def.ClassIds.Count > 0 && !def.ClassIds.Contains(player.ClassId))
+            return HennaWearResult.WrongClass;
+        if (player.Inventory == null)
+            return HennaWearResult.NoInventory;
+
+        have = player.Inventory.CountOf(def.ItemId);
+        if (have < def.WearCount)
+            return HennaWearResult.MissingItems;
+
+        if (!player.Inventory.TryConsume(def.ItemId, def.WearCount, out _, out _))
+            throw new InvalidOperationException(
+                $"henna consume failed object={player.ObjectId} item={def.ItemId} count={def.WearCount}");
+
+        if (!TryWearHenna(player, dyeId, out slot))
+        {
+            player.Inventory.Add(def.ItemId, def.WearCount);
+            return HennaWearResult.NoFreeSlot;
+        }
+
+        return HennaWearResult.Ok;
     }
 
     /// <summary>Clear one henna slot and refresh cached deltas.</summary>
