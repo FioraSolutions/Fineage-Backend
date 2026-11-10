@@ -39,6 +39,14 @@ public sealed class AdminShopTests : IDisposable
         Environment.SetEnvironmentVariable(ZoneAdmin.EnvVar, "0");
         Assert.False(ZoneAdmin.IsAdminCharacter("KuK"));
         Environment.SetEnvironmentVariable(ZoneAdmin.EnvVar, "1");
+
+        ZoneAdmin.SetNamesForTest([ZoneAdmin.AnyCharacter]);
+        Assert.True(ZoneAdmin.IsAdminCharacter("Other"));
+        Assert.True(ZoneAdmin.IsAdminCharacter("anyone"));
+        Environment.SetEnvironmentVariable(ZoneAdmin.EnvVar, "0");
+        Assert.False(ZoneAdmin.IsAdminCharacter("anyone"));
+        Environment.SetEnvironmentVariable(ZoneAdmin.EnvVar, "1");
+        ZoneAdmin.SetNamesForTest(["KuK"]);
     }
 
     [Fact]
