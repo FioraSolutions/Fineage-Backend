@@ -10,10 +10,8 @@ public sealed partial class ZoneWorld
         if (!IsLive(session))
             return Task.FromResult<string?>("world");
 
-        string? error;
-        lock (_gate)
-            error = Bypass(session, npcObjectId, command);
-        return Task.FromResult<string?>(error);
+        // Bypass may class-change / fee / warehouse → SaveInventory after unlock (B8).
+        return Task.FromResult(WithDeferredInventoryPersist(() => Bypass(session, npcObjectId, command)));
     }
 
     string? Bypass(ZoneSession session, int npcObjectId, string? command)

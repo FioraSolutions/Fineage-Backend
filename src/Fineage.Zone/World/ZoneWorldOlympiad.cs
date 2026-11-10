@@ -85,16 +85,14 @@ public sealed partial class ZoneWorld
     {
         if (!IsLive(session))
             return Task.FromResult<string?>("world");
-        string? error;
-        lock (_gate)
+        // Rewards may SaveInventory → flush after unlock (B8).
+        return Task.FromResult(WithDeferredInventoryPersist(() =>
         {
             var step = _olympiad.Report(matchId, winnerObjectId, _clock().ToUnixTimeMilliseconds());
-            error = step.Error;
-            if (error == null)
+            if (step.Error == null)
                 ApplyOlympiad(step);
-        }
-
-        return Task.FromResult<string?>(error);
+            return step.Error;
+        }));
     }
 
     void TickOlympiad()
@@ -113,14 +111,13 @@ public sealed partial class ZoneWorld
 
     Task<string?> RunOlympiadAsync(Func<long, OlympiadStep> action)
     {
-        string? error;
-        lock (_gate)
+        string? error = WithDeferredInventoryPersist(() =>
         {
             long now = _clock().ToUnixTimeMilliseconds();
             var step = action(now);
-            error = step.Error;
             ApplyOlympiad(step);
-        }
+            return step.Error;
+        });
 
         return Task.FromResult(error);
     }

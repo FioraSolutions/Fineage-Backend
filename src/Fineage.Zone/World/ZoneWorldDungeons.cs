@@ -14,10 +14,8 @@ public sealed partial class ZoneWorld
 
     public Task<string?> TryDungeonAsync(ZoneSession session, DungeonEnterRequestMsg request, CancellationToken ct)
     {
-        string? error;
-        lock (_gate)
-            error = ApplyDungeon(session, request);
-        return Task.FromResult<string?>(error);
+        // Enter fee / key consume → SaveInventory after unlock (B8).
+        return Task.FromResult(WithDeferredInventoryPersist(() => ApplyDungeon(session, request)));
     }
 
     string? ApplyDungeon(ZoneSession session, DungeonEnterRequestMsg request)
