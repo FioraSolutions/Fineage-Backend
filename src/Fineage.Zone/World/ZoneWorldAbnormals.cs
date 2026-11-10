@@ -296,7 +296,7 @@ public sealed partial class ZoneWorld
         }
     }
 
-    int ResolveAbnormalDurationSeconds(int effectId, int fallbackSeconds)
+    int ResolveAbnormalDurationSeconds(int effectId)
     {
         if (effectId <= 0)
             throw new ArgumentOutOfRangeException(nameof(effectId), effectId, "Abnormal effect id required.");
@@ -304,13 +304,10 @@ public sealed partial class ZoneWorld
             ?? throw new InvalidOperationException($"skills.json missing skillId={effectId} (duration).");
         if (skill.AbnormalTimeSeconds <= 0)
             throw new InvalidOperationException($"skill {effectId} has no abnormalTimeSeconds.");
-        // fallbackSeconds kept only for call-site diagnostics in logs when callers still pass it.
-        if (fallbackSeconds > 0 && fallbackSeconds != skill.AbnormalTimeSeconds)
-            ZoneLog.Warn($"abnormal duration skill={effectId} catalog={skill.AbnormalTimeSeconds}s callerHint={fallbackSeconds}s — using catalog");
         return skill.AbnormalTimeSeconds;
     }
 
-    int ResolveAbnormalValue(int effectId, int fallbackValue)
+    int ResolveAbnormalValue(int effectId)
     {
         if (effectId <= 0)
             throw new ArgumentOutOfRangeException(nameof(effectId), effectId, "Abnormal effect id required.");
@@ -318,8 +315,6 @@ public sealed partial class ZoneWorld
             ?? throw new InvalidOperationException($"skills.json missing skillId={effectId} (abnormalLevel).");
         if (!skill.TryLevelData(1, out var level) || level.AbnormalLevel <= 0)
             throw new InvalidOperationException($"skill {effectId} lv1 missing abnormalLevel.");
-        if (fallbackValue > 0 && fallbackValue != level.AbnormalLevel)
-            ZoneLog.Warn($"abnormal value skill={effectId} catalog={level.AbnormalLevel} callerHint={fallbackValue} — using catalog");
         return level.AbnormalLevel;
     }
 }
