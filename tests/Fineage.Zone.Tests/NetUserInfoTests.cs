@@ -35,7 +35,8 @@ public sealed class NetUserInfoTests
         Assert.Equal(new[] { 0, 1101, 177 }, NetCodec.DecodeEntitySpawn(wire).Paperdoll);
 
         // Older peers stop after the Attackable byte: decode must still work with an empty paperdoll.
-        int tailBytes = 2 + 3 * 4 + 1 + 4 + 4 + 4; // u16 length + 3 ints + Dead + Level + MaxHp + PAtkSpd
+        // Tail: u16 length + 3 ints + Dead + Level + MaxHp + PAtkSpd + Karma + PvpFlag.
+        int tailBytes = 2 + 3 * 4 + 1 + 4 + 4 + 4 + 4 + 1;
         var old = NetCodec.DecodeEntitySpawn(wire.AsSpan(0, wire.Length - tailBytes));
         Assert.Empty(old.Paperdoll);
         Assert.Equal("P", old.Name);
