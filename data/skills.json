@@ -5210,63 +5210,63 @@
         {
           "level": 1,
           "mpConsume": 60,
-          "power": 0,
+          "power": 143,
           "abnormalLevel": 1,
           "magicLevel": 26
         },
         {
           "level": 2,
           "mpConsume": 63,
-          "power": 0,
+          "power": 150,
           "abnormalLevel": 1,
           "magicLevel": 27
         },
         {
           "level": 3,
           "mpConsume": 66,
-          "power": 0,
+          "power": 157,
           "abnormalLevel": 1,
           "magicLevel": 28
         },
         {
           "level": 4,
           "mpConsume": 70,
-          "power": 0,
+          "power": 172,
           "abnormalLevel": 1,
           "magicLevel": 30
         },
         {
           "level": 5,
           "mpConsume": 70,
-          "power": 0,
+          "power": 179,
           "abnormalLevel": 1,
           "magicLevel": 31
         },
         {
           "level": 6,
           "mpConsume": 74,
-          "power": 0,
+          "power": 187,
           "abnormalLevel": 1,
           "magicLevel": 32
         },
         {
           "level": 7,
           "mpConsume": 79,
-          "power": 0,
+          "power": 203,
           "abnormalLevel": 1,
           "magicLevel": 34
         },
         {
           "level": 8,
           "mpConsume": 82,
-          "power": 0,
+          "power": 211,
           "abnormalLevel": 1,
           "magicLevel": 35
         },
         {
           "level": 9,
           "mpConsume": 86,
-          "power": 0,
+          "power": 219,
           "abnormalLevel": 1,
           "magicLevel": 36
         }
@@ -6506,385 +6506,385 @@
         {
           "level": 1,
           "mpConsume": 32,
-          "power": 0,
+          "power": 71,
           "abnormalLevel": 1,
           "magicLevel": 13
         },
         {
           "level": 2,
           "mpConsume": 34,
-          "power": 0,
+          "power": 75,
           "abnormalLevel": 1,
           "magicLevel": 14
         },
         {
           "level": 3,
           "mpConsume": 36,
-          "power": 0,
+          "power": 80,
           "abnormalLevel": 1,
           "magicLevel": 15
         },
         {
           "level": 4,
           "mpConsume": 42,
-          "power": 0,
+          "power": 95,
           "abnormalLevel": 1,
           "magicLevel": 18
         },
         {
           "level": 5,
           "mpConsume": 45,
-          "power": 0,
+          "power": 100,
           "abnormalLevel": 1,
           "magicLevel": 19
         },
         {
           "level": 6,
           "mpConsume": 47,
-          "power": 0,
+          "power": 106,
           "abnormalLevel": 1,
           "magicLevel": 20
         },
         {
           "level": 7,
           "mpConsume": 49,
-          "power": 0,
+          "power": 118,
           "abnormalLevel": 1,
           "magicLevel": 22
         },
         {
           "level": 8,
           "mpConsume": 52,
-          "power": 0,
+          "power": 124,
           "abnormalLevel": 1,
           "magicLevel": 23
         },
         {
           "level": 9,
           "mpConsume": 55,
-          "power": 0,
+          "power": 130,
           "abnormalLevel": 1,
           "magicLevel": 24
         },
         {
           "level": 10,
           "mpConsume": 60,
-          "power": 0,
+          "power": 143,
           "abnormalLevel": 1,
           "magicLevel": 26
         },
         {
           "level": 11,
           "mpConsume": 63,
-          "power": 0,
+          "power": 150,
           "abnormalLevel": 1,
           "magicLevel": 27
         },
         {
           "level": 12,
           "mpConsume": 66,
-          "power": 0,
+          "power": 157,
           "abnormalLevel": 1,
           "magicLevel": 28
         },
         {
           "level": 13,
           "mpConsume": 70,
-          "power": 0,
+          "power": 172,
           "abnormalLevel": 1,
           "magicLevel": 30
         },
         {
           "level": 14,
           "mpConsume": 70,
-          "power": 0,
+          "power": 179,
           "abnormalLevel": 1,
           "magicLevel": 31
         },
         {
           "level": 15,
           "mpConsume": 73,
-          "power": 0,
+          "power": 187,
           "abnormalLevel": 1,
           "magicLevel": 32
         },
         {
           "level": 16,
           "mpConsume": 79,
-          "power": 0,
+          "power": 203,
           "abnormalLevel": 1,
           "magicLevel": 34
         },
         {
           "level": 17,
           "mpConsume": 82,
-          "power": 0,
+          "power": 211,
           "abnormalLevel": 1,
           "magicLevel": 35
         },
         {
           "level": 18,
           "mpConsume": 85,
-          "power": 0,
+          "power": 219,
           "abnormalLevel": 1,
           "magicLevel": 36
         },
         {
           "level": 19,
           "mpConsume": 92,
-          "power": 0,
+          "power": 236,
           "abnormalLevel": 1,
           "magicLevel": 38
         },
         {
           "level": 20,
           "mpConsume": 95,
-          "power": 0,
+          "power": 245,
           "abnormalLevel": 1,
           "magicLevel": 39
         },
         {
           "level": 21,
           "mpConsume": 97,
-          "power": 0,
+          "power": 254,
           "abnormalLevel": 1,
           "magicLevel": 40
         },
         {
           "level": 22,
           "mpConsume": 97,
-          "power": 0,
+          "power": 262,
           "abnormalLevel": 1,
           "magicLevel": 41
         },
         {
           "level": 23,
           "mpConsume": 101,
-          "power": 0,
+          "power": 271,
           "abnormalLevel": 1,
           "magicLevel": 42
         },
         {
           "level": 24,
           "mpConsume": 104,
-          "power": 0,
+          "power": 281,
           "abnormalLevel": 1,
           "magicLevel": 43
         },
         {
           "level": 25,
           "mpConsume": 107,
-          "power": 0,
+          "power": 290,
           "abnormalLevel": 1,
           "magicLevel": 44
         },
         {
           "level": 26,
           "mpConsume": 111,
-          "power": 0,
+          "power": 299,
           "abnormalLevel": 1,
           "magicLevel": 45
         },
         {
           "level": 27,
           "mpConsume": 114,
-          "power": 0,
+          "power": 308,
           "abnormalLevel": 1,
           "magicLevel": 46
         },
         {
           "level": 28,
           "mpConsume": 118,
-          "power": 0,
+          "power": 318,
           "abnormalLevel": 1,
           "magicLevel": 47
         },
         {
           "level": 29,
           "mpConsume": 121,
-          "power": 0,
+          "power": 327,
           "abnormalLevel": 1,
           "magicLevel": 48
         },
         {
           "level": 30,
           "mpConsume": 125,
-          "power": 0,
+          "power": 337,
           "abnormalLevel": 1,
           "magicLevel": 49
         },
         {
           "level": 31,
           "mpConsume": 127,
-          "power": 0,
+          "power": 346,
           "abnormalLevel": 1,
           "magicLevel": 50
         },
         {
           "level": 32,
           "mpConsume": 127,
-          "power": 0,
+          "power": 356,
           "abnormalLevel": 1,
           "magicLevel": 51
         },
         {
           "level": 33,
           "mpConsume": 131,
-          "power": 0,
+          "power": 365,
           "abnormalLevel": 1,
           "magicLevel": 52
         },
         {
           "level": 34,
           "mpConsume": 134,
-          "power": 0,
+          "power": 375,
           "abnormalLevel": 1,
           "magicLevel": 53
         },
         {
           "level": 35,
           "mpConsume": 138,
-          "power": 0,
+          "power": 384,
           "abnormalLevel": 1,
           "magicLevel": 54
         },
         {
           "level": 36,
           "mpConsume": 141,
-          "power": 0,
+          "power": 393,
           "abnormalLevel": 1,
           "magicLevel": 55
         },
         {
           "level": 37,
           "mpConsume": 144,
-          "power": 0,
+          "power": 403,
           "abnormalLevel": 1,
           "magicLevel": 56
         },
         {
           "level": 38,
           "mpConsume": 148,
-          "power": 0,
+          "power": 412,
           "abnormalLevel": 1,
           "magicLevel": 57
         },
         {
           "level": 39,
           "mpConsume": 151,
-          "power": 0,
+          "power": 421,
           "abnormalLevel": 1,
           "magicLevel": 58
         },
         {
           "level": 40,
           "mpConsume": 154,
-          "power": 0,
+          "power": 430,
           "abnormalLevel": 1,
           "magicLevel": 59
         },
         {
           "level": 41,
           "mpConsume": 156,
-          "power": 0,
+          "power": 439,
           "abnormalLevel": 1,
           "magicLevel": 60
         },
         {
           "level": 42,
           "mpConsume": 156,
-          "power": 0,
+          "power": 448,
           "abnormalLevel": 1,
           "magicLevel": 61
         },
         {
           "level": 43,
           "mpConsume": 159,
-          "power": 0,
+          "power": 457,
           "abnormalLevel": 1,
           "magicLevel": 62
         },
         {
           "level": 44,
           "mpConsume": 162,
-          "power": 0,
+          "power": 466,
           "abnormalLevel": 1,
           "magicLevel": 63
         },
         {
           "level": 45,
           "mpConsume": 165,
-          "power": 0,
+          "power": 474,
           "abnormalLevel": 1,
           "magicLevel": 64
         },
         {
           "level": 46,
           "mpConsume": 168,
-          "power": 0,
+          "power": 482,
           "abnormalLevel": 1,
           "magicLevel": 65
         },
         {
           "level": 47,
           "mpConsume": 171,
-          "power": 0,
+          "power": 490,
           "abnormalLevel": 1,
           "magicLevel": 66
         },
         {
           "level": 48,
           "mpConsume": 174,
-          "power": 0,
+          "power": 498,
           "abnormalLevel": 1,
           "magicLevel": 67
         },
         {
           "level": 49,
           "mpConsume": 177,
-          "power": 0,
+          "power": 506,
           "abnormalLevel": 1,
           "magicLevel": 68
         },
         {
           "level": 50,
           "mpConsume": 179,
-          "power": 0,
+          "power": 513,
           "abnormalLevel": 1,
           "magicLevel": 69
         },
         {
           "level": 51,
           "mpConsume": 182,
-          "power": 0,
+          "power": 520,
           "abnormalLevel": 1,
           "magicLevel": 70
         },
         {
           "level": 52,
           "mpConsume": 184,
-          "power": 0,
+          "power": 527,
           "abnormalLevel": 1,
           "magicLevel": 71
         },
         {
           "level": 53,
           "mpConsume": 186,
-          "power": 0,
+          "power": 534,
           "abnormalLevel": 1,
           "magicLevel": 72
         },
         {
           "level": 54,
           "mpConsume": 189,
-          "power": 0,
+          "power": 540,
           "abnormalLevel": 1,
           "magicLevel": 73
         },
         {
           "level": 55,
           "mpConsume": 191,
-          "power": 0,
+          "power": 546,
           "abnormalLevel": 1,
           "magicLevel": 74
         }
@@ -7135,175 +7135,175 @@
         {
           "level": 1,
           "mpConsume": 0,
-          "power": 0,
+          "power": 741,
           "abnormalLevel": 1,
           "magicLevel": 50
         },
         {
           "level": 2,
           "mpConsume": 0,
-          "power": 0,
+          "power": 762,
           "abnormalLevel": 1,
           "magicLevel": 51
         },
         {
           "level": 3,
           "mpConsume": 0,
-          "power": 0,
+          "power": 782,
           "abnormalLevel": 1,
           "magicLevel": 52
         },
         {
           "level": 4,
           "mpConsume": 0,
-          "power": 0,
+          "power": 802,
           "abnormalLevel": 1,
           "magicLevel": 53
         },
         {
           "level": 5,
           "mpConsume": 0,
-          "power": 0,
+          "power": 822,
           "abnormalLevel": 1,
           "magicLevel": 54
         },
         {
           "level": 6,
           "mpConsume": 0,
-          "power": 0,
+          "power": 843,
           "abnormalLevel": 1,
           "magicLevel": 55
         },
         {
           "level": 7,
           "mpConsume": 0,
-          "power": 0,
+          "power": 863,
           "abnormalLevel": 1,
           "magicLevel": 56
         },
         {
           "level": 8,
           "mpConsume": 0,
-          "power": 0,
+          "power": 882,
           "abnormalLevel": 1,
           "magicLevel": 57
         },
         {
           "level": 9,
           "mpConsume": 0,
-          "power": 0,
+          "power": 902,
           "abnormalLevel": 1,
           "magicLevel": 58
         },
         {
           "level": 10,
           "mpConsume": 0,
-          "power": 0,
+          "power": 922,
           "abnormalLevel": 1,
           "magicLevel": 59
         },
         {
           "level": 11,
           "mpConsume": 0,
-          "power": 0,
+          "power": 941,
           "abnormalLevel": 1,
           "magicLevel": 60
         },
         {
           "level": 12,
           "mpConsume": 0,
-          "power": 0,
+          "power": 960,
           "abnormalLevel": 1,
           "magicLevel": 61
         },
         {
           "level": 13,
           "mpConsume": 0,
-          "power": 0,
+          "power": 979,
           "abnormalLevel": 1,
           "magicLevel": 62
         },
         {
           "level": 14,
           "mpConsume": 0,
-          "power": 0,
+          "power": 997,
           "abnormalLevel": 1,
           "magicLevel": 63
         },
         {
           "level": 15,
           "mpConsume": 0,
-          "power": 0,
+          "power": 1015,
           "abnormalLevel": 1,
           "magicLevel": 64
         },
         {
           "level": 16,
           "mpConsume": 0,
-          "power": 0,
+          "power": 1033,
           "abnormalLevel": 1,
           "magicLevel": 65
         },
         {
           "level": 17,
           "mpConsume": 0,
-          "power": 0,
+          "power": 1050,
           "abnormalLevel": 1,
           "magicLevel": 66
         },
         {
           "level": 18,
           "mpConsume": 0,
-          "power": 0,
+          "power": 1067,
           "abnormalLevel": 1,
           "magicLevel": 67
         },
         {
           "level": 19,
           "mpConsume": 0,
-          "power": 0,
+          "power": 1083,
           "abnormalLevel": 1,
           "magicLevel": 68
         },
         {
           "level": 20,
           "mpConsume": 0,
-          "power": 0,
+          "power": 1099,
           "abnormalLevel": 1,
           "magicLevel": 69
         },
         {
           "level": 21,
           "mpConsume": 0,
-          "power": 0,
+          "power": 1115,
           "abnormalLevel": 1,
           "magicLevel": 70
         },
         {
           "level": 22,
           "mpConsume": 0,
-          "power": 0,
+          "power": 1129,
           "abnormalLevel": 1,
           "magicLevel": 71
         },
         {
           "level": 23,
           "mpConsume": 0,
-          "power": 0,
+          "power": 1144,
           "abnormalLevel": 1,
           "magicLevel": 72
         },
         {
           "level": 24,
           "mpConsume": 0,
-          "power": 0,
+          "power": 1157,
           "abnormalLevel": 1,
           "magicLevel": 73
         },
         {
           "level": 25,
           "mpConsume": 0,
-          "power": 0,
+          "power": 1170,
           "abnormalLevel": 1,
           "magicLevel": 74
         }
@@ -21656,259 +21656,259 @@
         {
           "level": 1,
           "mpConsume": 92,
-          "power": 0,
+          "power": 236,
           "abnormalLevel": 1,
           "magicLevel": 38
         },
         {
           "level": 2,
           "mpConsume": 95,
-          "power": 0,
+          "power": 245,
           "abnormalLevel": 1,
           "magicLevel": 39
         },
         {
           "level": 3,
           "mpConsume": 97,
-          "power": 0,
+          "power": 254,
           "abnormalLevel": 1,
           "magicLevel": 40
         },
         {
           "level": 4,
           "mpConsume": 97,
-          "power": 0,
+          "power": 262,
           "abnormalLevel": 1,
           "magicLevel": 41
         },
         {
           "level": 5,
           "mpConsume": 101,
-          "power": 0,
+          "power": 271,
           "abnormalLevel": 1,
           "magicLevel": 42
         },
         {
           "level": 6,
           "mpConsume": 104,
-          "power": 0,
+          "power": 281,
           "abnormalLevel": 1,
           "magicLevel": 43
         },
         {
           "level": 7,
           "mpConsume": 107,
-          "power": 0,
+          "power": 290,
           "abnormalLevel": 1,
           "magicLevel": 44
         },
         {
           "level": 8,
           "mpConsume": 111,
-          "power": 0,
+          "power": 299,
           "abnormalLevel": 1,
           "magicLevel": 45
         },
         {
           "level": 9,
           "mpConsume": 114,
-          "power": 0,
+          "power": 308,
           "abnormalLevel": 1,
           "magicLevel": 46
         },
         {
           "level": 10,
           "mpConsume": 118,
-          "power": 0,
+          "power": 318,
           "abnormalLevel": 1,
           "magicLevel": 47
         },
         {
           "level": 11,
           "mpConsume": 121,
-          "power": 0,
+          "power": 327,
           "abnormalLevel": 1,
           "magicLevel": 48
         },
         {
           "level": 12,
           "mpConsume": 125,
-          "power": 0,
+          "power": 337,
           "abnormalLevel": 1,
           "magicLevel": 49
         },
         {
           "level": 13,
           "mpConsume": 127,
-          "power": 0,
+          "power": 346,
           "abnormalLevel": 1,
           "magicLevel": 50
         },
         {
           "level": 14,
           "mpConsume": 127,
-          "power": 0,
+          "power": 356,
           "abnormalLevel": 1,
           "magicLevel": 51
         },
         {
           "level": 15,
           "mpConsume": 131,
-          "power": 0,
+          "power": 365,
           "abnormalLevel": 1,
           "magicLevel": 52
         },
         {
           "level": 16,
           "mpConsume": 134,
-          "power": 0,
+          "power": 375,
           "abnormalLevel": 1,
           "magicLevel": 53
         },
         {
           "level": 17,
           "mpConsume": 138,
-          "power": 0,
+          "power": 384,
           "abnormalLevel": 1,
           "magicLevel": 54
         },
         {
           "level": 18,
           "mpConsume": 141,
-          "power": 0,
+          "power": 393,
           "abnormalLevel": 1,
           "magicLevel": 55
         },
         {
           "level": 19,
           "mpConsume": 144,
-          "power": 0,
+          "power": 403,
           "abnormalLevel": 1,
           "magicLevel": 56
         },
         {
           "level": 20,
           "mpConsume": 148,
-          "power": 0,
+          "power": 412,
           "abnormalLevel": 1,
           "magicLevel": 57
         },
         {
           "level": 21,
           "mpConsume": 151,
-          "power": 0,
+          "power": 421,
           "abnormalLevel": 1,
           "magicLevel": 58
         },
         {
           "level": 22,
           "mpConsume": 154,
-          "power": 0,
+          "power": 430,
           "abnormalLevel": 1,
           "magicLevel": 59
         },
         {
           "level": 23,
           "mpConsume": 156,
-          "power": 0,
+          "power": 439,
           "abnormalLevel": 1,
           "magicLevel": 60
         },
         {
           "level": 24,
           "mpConsume": 156,
-          "power": 0,
+          "power": 448,
           "abnormalLevel": 1,
           "magicLevel": 61
         },
         {
           "level": 25,
           "mpConsume": 159,
-          "power": 0,
+          "power": 457,
           "abnormalLevel": 1,
           "magicLevel": 62
         },
         {
           "level": 26,
           "mpConsume": 162,
-          "power": 0,
+          "power": 466,
           "abnormalLevel": 1,
           "magicLevel": 63
         },
         {
           "level": 27,
           "mpConsume": 165,
-          "power": 0,
+          "power": 474,
           "abnormalLevel": 1,
           "magicLevel": 64
         },
         {
           "level": 28,
           "mpConsume": 168,
-          "power": 0,
+          "power": 482,
           "abnormalLevel": 1,
           "magicLevel": 65
         },
         {
           "level": 29,
           "mpConsume": 171,
-          "power": 0,
+          "power": 490,
           "abnormalLevel": 1,
           "magicLevel": 66
         },
         {
           "level": 30,
           "mpConsume": 174,
-          "power": 0,
+          "power": 498,
           "abnormalLevel": 1,
           "magicLevel": 67
         },
         {
           "level": 31,
           "mpConsume": 177,
-          "power": 0,
+          "power": 506,
           "abnormalLevel": 1,
           "magicLevel": 68
         },
         {
           "level": 32,
           "mpConsume": 179,
-          "power": 0,
+          "power": 513,
           "abnormalLevel": 1,
           "magicLevel": 69
         },
         {
           "level": 33,
           "mpConsume": 182,
-          "power": 0,
+          "power": 520,
           "abnormalLevel": 1,
           "magicLevel": 70
         },
         {
           "level": 34,
           "mpConsume": 184,
-          "power": 0,
+          "power": 527,
           "abnormalLevel": 1,
           "magicLevel": 71
         },
         {
           "level": 35,
           "mpConsume": 186,
-          "power": 0,
+          "power": 534,
           "abnormalLevel": 1,
           "magicLevel": 72
         },
         {
           "level": 36,
           "mpConsume": 189,
-          "power": 0,
+          "power": 540,
           "abnormalLevel": 1,
           "magicLevel": 73
         },
         {
           "level": 37,
           "mpConsume": 191,
-          "power": 0,
+          "power": 546,
           "abnormalLevel": 1,
           "magicLevel": 74
         }
@@ -29426,126 +29426,126 @@
         {
           "level": 1,
           "mpConsume": 8,
-          "power": 0,
+          "power": 50,
           "abnormalLevel": 1,
           "magicLevel": 3
         },
         {
           "level": 2,
           "mpConsume": 10,
-          "power": 0,
+          "power": 58,
           "abnormalLevel": 1,
           "magicLevel": 5
         },
         {
           "level": 3,
           "mpConsume": 11,
-          "power": 0,
+          "power": 67,
           "abnormalLevel": 1,
           "magicLevel": 7
         },
         {
           "level": 4,
           "mpConsume": 14,
-          "power": 0,
+          "power": 83,
           "abnormalLevel": 1,
           "magicLevel": 10
         },
         {
           "level": 5,
           "mpConsume": 15,
-          "power": 0,
+          "power": 95,
           "abnormalLevel": 1,
           "magicLevel": 12
         },
         {
           "level": 6,
           "mpConsume": 18,
-          "power": 0,
+          "power": 107,
           "abnormalLevel": 1,
           "magicLevel": 14
         },
         {
           "level": 7,
           "mpConsume": 19,
-          "power": 0,
+          "power": 121,
           "abnormalLevel": 1,
           "magicLevel": 16
         },
         {
           "level": 8,
           "mpConsume": 22,
-          "power": 0,
+          "power": 135,
           "abnormalLevel": 1,
           "magicLevel": 18
         },
         {
           "level": 9,
           "mpConsume": 24,
-          "power": 0,
+          "power": 151,
           "abnormalLevel": 1,
           "magicLevel": 20
         },
         {
           "level": 10,
           "mpConsume": 26,
-          "power": 0,
+          "power": 176,
           "abnormalLevel": 1,
           "magicLevel": 23
         },
         {
           "level": 11,
           "mpConsume": 28,
-          "power": 0,
+          "power": 185,
           "abnormalLevel": 1,
           "magicLevel": 24
         },
         {
           "level": 12,
           "mpConsume": 30,
-          "power": 0,
+          "power": 195,
           "abnormalLevel": 1,
           "magicLevel": 25
         },
         {
           "level": 13,
           "mpConsume": 34,
-          "power": 0,
+          "power": 224,
           "abnormalLevel": 1,
           "magicLevel": 28
         },
         {
           "level": 14,
           "mpConsume": 35,
-          "power": 0,
+          "power": 234,
           "abnormalLevel": 1,
           "magicLevel": 29
         },
         {
           "level": 15,
           "mpConsume": 35,
-          "power": 0,
+          "power": 245,
           "abnormalLevel": 1,
           "magicLevel": 30
         },
         {
           "level": 16,
           "mpConsume": 38,
-          "power": 0,
+          "power": 278,
           "abnormalLevel": 1,
           "magicLevel": 33
         },
         {
           "level": 17,
           "mpConsume": 40,
-          "power": 0,
+          "power": 289,
           "abnormalLevel": 1,
           "magicLevel": 34
         },
         {
           "level": 18,
           "mpConsume": 42,
-          "power": 0,
+          "power": 301,
           "abnormalLevel": 1,
           "magicLevel": 35
         }
@@ -29842,105 +29842,105 @@
         {
           "level": 1,
           "mpConsume": 20,
-          "power": 0,
+          "power": 83,
           "abnormalLevel": 1,
           "magicLevel": 10
         },
         {
           "level": 2,
           "mpConsume": 22,
-          "power": 0,
+          "power": 95,
           "abnormalLevel": 1,
           "magicLevel": 12
         },
         {
           "level": 3,
           "mpConsume": 25,
-          "power": 0,
+          "power": 107,
           "abnormalLevel": 1,
           "magicLevel": 14
         },
         {
           "level": 4,
           "mpConsume": 28,
-          "power": 0,
+          "power": 121,
           "abnormalLevel": 1,
           "magicLevel": 16
         },
         {
           "level": 5,
           "mpConsume": 32,
-          "power": 0,
+          "power": 135,
           "abnormalLevel": 1,
           "magicLevel": 18
         },
         {
           "level": 6,
           "mpConsume": 35,
-          "power": 0,
+          "power": 151,
           "abnormalLevel": 1,
           "magicLevel": 20
         },
         {
           "level": 7,
           "mpConsume": 39,
-          "power": 0,
+          "power": 176,
           "abnormalLevel": 1,
           "magicLevel": 23
         },
         {
           "level": 8,
           "mpConsume": 41,
-          "power": 0,
+          "power": 185,
           "abnormalLevel": 1,
           "magicLevel": 24
         },
         {
           "level": 9,
           "mpConsume": 43,
-          "power": 0,
+          "power": 195,
           "abnormalLevel": 1,
           "magicLevel": 25
         },
         {
           "level": 10,
           "mpConsume": 49,
-          "power": 0,
+          "power": 224,
           "abnormalLevel": 1,
           "magicLevel": 28
         },
         {
           "level": 11,
           "mpConsume": 52,
-          "power": 0,
+          "power": 234,
           "abnormalLevel": 1,
           "magicLevel": 29
         },
         {
           "level": 12,
           "mpConsume": 53,
-          "power": 0,
+          "power": 245,
           "abnormalLevel": 1,
           "magicLevel": 30
         },
         {
           "level": 13,
           "mpConsume": 57,
-          "power": 0,
+          "power": 278,
           "abnormalLevel": 1,
           "magicLevel": 33
         },
         {
           "level": 14,
           "mpConsume": 59,
-          "power": 0,
+          "power": 289,
           "abnormalLevel": 1,
           "magicLevel": 34
         },
         {
           "level": 15,
           "mpConsume": 62,
-          "power": 0,
+          "power": 301,
           "abnormalLevel": 1,
           "magicLevel": 35
         }
@@ -30076,189 +30076,189 @@
         {
           "level": 1,
           "mpConsume": 69,
-          "power": 0,
+          "power": 440,
           "abnormalLevel": 1,
           "magicLevel": 46
         },
         {
           "level": 2,
           "mpConsume": 71,
-          "power": 0,
+          "power": 454,
           "abnormalLevel": 1,
           "magicLevel": 47
         },
         {
           "level": 3,
           "mpConsume": 73,
-          "power": 0,
+          "power": 467,
           "abnormalLevel": 1,
           "magicLevel": 48
         },
         {
           "level": 4,
           "mpConsume": 77,
-          "power": 0,
+          "power": 494,
           "abnormalLevel": 1,
           "magicLevel": 50
         },
         {
           "level": 5,
           "mpConsume": 77,
-          "power": 0,
+          "power": 508,
           "abnormalLevel": 1,
           "magicLevel": 51
         },
         {
           "level": 6,
           "mpConsume": 79,
-          "power": 0,
+          "power": 521,
           "abnormalLevel": 1,
           "magicLevel": 52
         },
         {
           "level": 7,
           "mpConsume": 83,
-          "power": 0,
+          "power": 548,
           "abnormalLevel": 1,
           "magicLevel": 54
         },
         {
           "level": 8,
           "mpConsume": 85,
-          "power": 0,
+          "power": 562,
           "abnormalLevel": 1,
           "magicLevel": 55
         },
         {
           "level": 9,
           "mpConsume": 87,
-          "power": 0,
+          "power": 575,
           "abnormalLevel": 1,
           "magicLevel": 56
         },
         {
           "level": 10,
           "mpConsume": 89,
-          "power": 0,
+          "power": 588,
           "abnormalLevel": 1,
           "magicLevel": 57
         },
         {
           "level": 11,
           "mpConsume": 91,
-          "power": 0,
+          "power": 602,
           "abnormalLevel": 1,
           "magicLevel": 58
         },
         {
           "level": 12,
           "mpConsume": 93,
-          "power": 0,
+          "power": 615,
           "abnormalLevel": 1,
           "magicLevel": 59
         },
         {
           "level": 13,
           "mpConsume": 94,
-          "power": 0,
+          "power": 627,
           "abnormalLevel": 1,
           "magicLevel": 60
         },
         {
           "level": 14,
           "mpConsume": 94,
-          "power": 0,
+          "power": 640,
           "abnormalLevel": 1,
           "magicLevel": 61
         },
         {
           "level": 15,
           "mpConsume": 96,
-          "power": 0,
+          "power": 653,
           "abnormalLevel": 1,
           "magicLevel": 62
         },
         {
           "level": 16,
           "mpConsume": 98,
-          "power": 0,
+          "power": 665,
           "abnormalLevel": 1,
           "magicLevel": 63
         },
         {
           "level": 17,
           "mpConsume": 99,
-          "power": 0,
+          "power": 677,
           "abnormalLevel": 1,
           "magicLevel": 64
         },
         {
           "level": 18,
           "mpConsume": 101,
-          "power": 0,
+          "power": 689,
           "abnormalLevel": 1,
           "magicLevel": 65
         },
         {
           "level": 19,
           "mpConsume": 103,
-          "power": 0,
+          "power": 700,
           "abnormalLevel": 1,
           "magicLevel": 66
         },
         {
           "level": 20,
           "mpConsume": 105,
-          "power": 0,
+          "power": 711,
           "abnormalLevel": 1,
           "magicLevel": 67
         },
         {
           "level": 21,
           "mpConsume": 106,
-          "power": 0,
+          "power": 722,
           "abnormalLevel": 1,
           "magicLevel": 68
         },
         {
           "level": 22,
           "mpConsume": 108,
-          "power": 0,
+          "power": 733,
           "abnormalLevel": 1,
           "magicLevel": 69
         },
         {
           "level": 23,
           "mpConsume": 109,
-          "power": 0,
+          "power": 743,
           "abnormalLevel": 1,
           "magicLevel": 70
         },
         {
           "level": 24,
           "mpConsume": 111,
-          "power": 0,
+          "power": 753,
           "abnormalLevel": 1,
           "magicLevel": 71
         },
         {
           "level": 25,
           "mpConsume": 112,
-          "power": 0,
+          "power": 763,
           "abnormalLevel": 1,
           "magicLevel": 72
         },
         {
           "level": 26,
           "mpConsume": 113,
-          "power": 0,
+          "power": 772,
           "abnormalLevel": 1,
           "magicLevel": 73
         },
         {
           "level": 27,
           "mpConsume": 115,
-          "power": 0,
+          "power": 780,
           "abnormalLevel": 1,
           "magicLevel": 74
         }
@@ -30280,105 +30280,105 @@
         {
           "level": 1,
           "mpConsume": 26,
-          "power": 0,
+          "power": 66,
           "abnormalLevel": 1,
           "magicLevel": 10
         },
         {
           "level": 2,
           "mpConsume": 30,
-          "power": 0,
+          "power": 76,
           "abnormalLevel": 1,
           "magicLevel": 12
         },
         {
           "level": 3,
           "mpConsume": 34,
-          "power": 0,
+          "power": 86,
           "abnormalLevel": 1,
           "magicLevel": 14
         },
         {
           "level": 4,
           "mpConsume": 38,
-          "power": 0,
+          "power": 97,
           "abnormalLevel": 1,
           "magicLevel": 16
         },
         {
           "level": 5,
           "mpConsume": 42,
-          "power": 0,
+          "power": 108,
           "abnormalLevel": 1,
           "magicLevel": 18
         },
         {
           "level": 6,
           "mpConsume": 47,
-          "power": 0,
+          "power": 121,
           "abnormalLevel": 1,
           "magicLevel": 20
         },
         {
           "level": 7,
           "mpConsume": 52,
-          "power": 0,
+          "power": 141,
           "abnormalLevel": 1,
           "magicLevel": 23
         },
         {
           "level": 8,
           "mpConsume": 55,
-          "power": 0,
+          "power": 148,
           "abnormalLevel": 1,
           "magicLevel": 24
         },
         {
           "level": 9,
           "mpConsume": 57,
-          "power": 0,
+          "power": 156,
           "abnormalLevel": 1,
           "magicLevel": 25
         },
         {
           "level": 10,
           "mpConsume": 66,
-          "power": 0,
+          "power": 179,
           "abnormalLevel": 1,
           "magicLevel": 28
         },
         {
           "level": 11,
           "mpConsume": 69,
-          "power": 0,
+          "power": 188,
           "abnormalLevel": 1,
           "magicLevel": 29
         },
         {
           "level": 12,
           "mpConsume": 70,
-          "power": 0,
+          "power": 196,
           "abnormalLevel": 1,
           "magicLevel": 30
         },
         {
           "level": 13,
           "mpConsume": 76,
-          "power": 0,
+          "power": 222,
           "abnormalLevel": 1,
           "magicLevel": 33
         },
         {
           "level": 14,
           "mpConsume": 79,
-          "power": 0,
+          "power": 231,
           "abnormalLevel": 1,
           "magicLevel": 34
         },
         {
           "level": 15,
           "mpConsume": 82,
-          "power": 0,
+          "power": 241,
           "abnormalLevel": 1,
           "magicLevel": 35
         }
@@ -34324,315 +34324,315 @@
         {
           "level": 1,
           "mpConsume": 19,
-          "power": 0,
+          "power": 169,
           "abnormalLevel": 1,
           "magicLevel": 16
         },
         {
           "level": 2,
           "mpConsume": 21,
-          "power": 0,
+          "power": 189,
           "abnormalLevel": 1,
           "magicLevel": 18
         },
         {
           "level": 3,
           "mpConsume": 24,
-          "power": 0,
+          "power": 211,
           "abnormalLevel": 1,
           "magicLevel": 20
         },
         {
           "level": 4,
           "mpConsume": 26,
-          "power": 0,
+          "power": 247,
           "abnormalLevel": 1,
           "magicLevel": 23
         },
         {
           "level": 5,
           "mpConsume": 28,
-          "power": 0,
+          "power": 259,
           "abnormalLevel": 1,
           "magicLevel": 24
         },
         {
           "level": 6,
           "mpConsume": 29,
-          "power": 0,
+          "power": 272,
           "abnormalLevel": 1,
           "magicLevel": 25
         },
         {
           "level": 7,
           "mpConsume": 33,
-          "power": 0,
+          "power": 313,
           "abnormalLevel": 1,
           "magicLevel": 28
         },
         {
           "level": 8,
           "mpConsume": 35,
-          "power": 0,
+          "power": 328,
           "abnormalLevel": 1,
           "magicLevel": 29
         },
         {
           "level": 9,
           "mpConsume": 35,
-          "power": 0,
+          "power": 343,
           "abnormalLevel": 1,
           "magicLevel": 30
         },
         {
           "level": 10,
           "mpConsume": 38,
-          "power": 0,
+          "power": 389,
           "abnormalLevel": 1,
           "magicLevel": 33
         },
         {
           "level": 11,
           "mpConsume": 40,
-          "power": 0,
+          "power": 405,
           "abnormalLevel": 1,
           "magicLevel": 34
         },
         {
           "level": 12,
           "mpConsume": 41,
-          "power": 0,
+          "power": 421,
           "abnormalLevel": 1,
           "magicLevel": 35
         },
         {
           "level": 13,
           "mpConsume": 46,
-          "power": 0,
+          "power": 472,
           "abnormalLevel": 1,
           "magicLevel": 38
         },
         {
           "level": 14,
           "mpConsume": 48,
-          "power": 0,
+          "power": 489,
           "abnormalLevel": 1,
           "magicLevel": 39
         },
         {
           "level": 15,
           "mpConsume": 49,
-          "power": 0,
+          "power": 507,
           "abnormalLevel": 1,
           "magicLevel": 40
         },
         {
           "level": 16,
           "mpConsume": 51,
-          "power": 0,
+          "power": 542,
           "abnormalLevel": 1,
           "magicLevel": 42
         },
         {
           "level": 17,
           "mpConsume": 52,
-          "power": 0,
+          "power": 561,
           "abnormalLevel": 1,
           "magicLevel": 43
         },
         {
           "level": 18,
           "mpConsume": 54,
-          "power": 0,
+          "power": 579,
           "abnormalLevel": 1,
           "magicLevel": 44
         },
         {
           "level": 19,
           "mpConsume": 57,
-          "power": 0,
+          "power": 616,
           "abnormalLevel": 1,
           "magicLevel": 46
         },
         {
           "level": 20,
           "mpConsume": 59,
-          "power": 0,
+          "power": 635,
           "abnormalLevel": 1,
           "magicLevel": 47
         },
         {
           "level": 21,
           "mpConsume": 61,
-          "power": 0,
+          "power": 654,
           "abnormalLevel": 1,
           "magicLevel": 48
         },
         {
           "level": 22,
           "mpConsume": 64,
-          "power": 0,
+          "power": 692,
           "abnormalLevel": 1,
           "magicLevel": 50
         },
         {
           "level": 23,
           "mpConsume": 64,
-          "power": 0,
+          "power": 711,
           "abnormalLevel": 1,
           "magicLevel": 51
         },
         {
           "level": 24,
           "mpConsume": 66,
-          "power": 0,
+          "power": 730,
           "abnormalLevel": 1,
           "magicLevel": 52
         },
         {
           "level": 25,
           "mpConsume": 69,
-          "power": 0,
+          "power": 768,
           "abnormalLevel": 1,
           "magicLevel": 54
         },
         {
           "level": 26,
           "mpConsume": 71,
-          "power": 0,
+          "power": 786,
           "abnormalLevel": 1,
           "magicLevel": 55
         },
         {
           "level": 27,
           "mpConsume": 72,
-          "power": 0,
+          "power": 805,
           "abnormalLevel": 1,
           "magicLevel": 56
         },
         {
           "level": 28,
           "mpConsume": 74,
-          "power": 0,
+          "power": 824,
           "abnormalLevel": 1,
           "magicLevel": 57
         },
         {
           "level": 29,
           "mpConsume": 76,
-          "power": 0,
+          "power": 842,
           "abnormalLevel": 1,
           "magicLevel": 58
         },
         {
           "level": 30,
           "mpConsume": 77,
-          "power": 0,
+          "power": 860,
           "abnormalLevel": 1,
           "magicLevel": 59
         },
         {
           "level": 31,
           "mpConsume": 78,
-          "power": 0,
+          "power": 878,
           "abnormalLevel": 1,
           "magicLevel": 60
         },
         {
           "level": 32,
           "mpConsume": 78,
-          "power": 0,
+          "power": 896,
           "abnormalLevel": 1,
           "magicLevel": 61
         },
         {
           "level": 33,
           "mpConsume": 80,
-          "power": 0,
+          "power": 913,
           "abnormalLevel": 1,
           "magicLevel": 62
         },
         {
           "level": 34,
           "mpConsume": 81,
-          "power": 0,
+          "power": 931,
           "abnormalLevel": 1,
           "magicLevel": 63
         },
         {
           "level": 35,
           "mpConsume": 83,
-          "power": 0,
+          "power": 947,
           "abnormalLevel": 1,
           "magicLevel": 64
         },
         {
           "level": 36,
           "mpConsume": 84,
-          "power": 0,
+          "power": 964,
           "abnormalLevel": 1,
           "magicLevel": 65
         },
         {
           "level": 37,
           "mpConsume": 86,
-          "power": 0,
+          "power": 980,
           "abnormalLevel": 1,
           "magicLevel": 66
         },
         {
           "level": 38,
           "mpConsume": 87,
-          "power": 0,
+          "power": 996,
           "abnormalLevel": 1,
           "magicLevel": 67
         },
         {
           "level": 39,
           "mpConsume": 89,
-          "power": 0,
+          "power": 1011,
           "abnormalLevel": 1,
           "magicLevel": 68
         },
         {
           "level": 40,
           "mpConsume": 90,
-          "power": 0,
+          "power": 1026,
           "abnormalLevel": 1,
           "magicLevel": 69
         },
         {
           "level": 41,
           "mpConsume": 91,
-          "power": 0,
+          "power": 1040,
           "abnormalLevel": 1,
           "magicLevel": 70
         },
         {
           "level": 42,
           "mpConsume": 92,
-          "power": 0,
+          "power": 1054,
           "abnormalLevel": 1,
           "magicLevel": 71
         },
         {
           "level": 43,
           "mpConsume": 93,
-          "power": 0,
+          "power": 1067,
           "abnormalLevel": 1,
           "magicLevel": 72
         },
         {
           "level": 44,
           "mpConsume": 95,
-          "power": 0,
+          "power": 1080,
           "abnormalLevel": 1,
           "magicLevel": 73
         },
         {
           "level": 45,
           "mpConsume": 96,
-          "power": 0,
+          "power": 1092,
           "abnormalLevel": 1,
           "magicLevel": 74
         }
@@ -38316,7 +38316,7 @@
         {
           "level": 1,
           "mpConsume": 7,
-          "power": 0,
+          "power": 42,
           "abnormalLevel": 1,
           "magicLevel": 1
         }
@@ -38337,231 +38337,231 @@
         {
           "level": 1,
           "mpConsume": 46,
-          "power": 0,
+          "power": 204,
           "abnormalLevel": 1,
           "magicLevel": 38
         },
         {
           "level": 2,
           "mpConsume": 48,
-          "power": 0,
+          "power": 212,
           "abnormalLevel": 1,
           "magicLevel": 39
         },
         {
           "level": 3,
           "mpConsume": 49,
-          "power": 0,
+          "power": 219,
           "abnormalLevel": 1,
           "magicLevel": 40
         },
         {
           "level": 4,
           "mpConsume": 51,
-          "power": 0,
+          "power": 235,
           "abnormalLevel": 1,
           "magicLevel": 42
         },
         {
           "level": 5,
           "mpConsume": 52,
-          "power": 0,
+          "power": 243,
           "abnormalLevel": 1,
           "magicLevel": 43
         },
         {
           "level": 6,
           "mpConsume": 54,
-          "power": 0,
+          "power": 251,
           "abnormalLevel": 1,
           "magicLevel": 44
         },
         {
           "level": 7,
           "mpConsume": 57,
-          "power": 0,
+          "power": 267,
           "abnormalLevel": 1,
           "magicLevel": 46
         },
         {
           "level": 8,
           "mpConsume": 59,
-          "power": 0,
+          "power": 275,
           "abnormalLevel": 1,
           "magicLevel": 47
         },
         {
           "level": 9,
           "mpConsume": 61,
-          "power": 0,
+          "power": 283,
           "abnormalLevel": 1,
           "magicLevel": 48
         },
         {
           "level": 10,
           "mpConsume": 64,
-          "power": 0,
+          "power": 299,
           "abnormalLevel": 1,
           "magicLevel": 50
         },
         {
           "level": 11,
           "mpConsume": 64,
-          "power": 0,
+          "power": 307,
           "abnormalLevel": 1,
           "magicLevel": 51
         },
         {
           "level": 12,
           "mpConsume": 66,
-          "power": 0,
+          "power": 316,
           "abnormalLevel": 1,
           "magicLevel": 52
         },
         {
           "level": 13,
           "mpConsume": 69,
-          "power": 0,
+          "power": 332,
           "abnormalLevel": 1,
           "magicLevel": 54
         },
         {
           "level": 14,
           "mpConsume": 71,
-          "power": 0,
+          "power": 340,
           "abnormalLevel": 1,
           "magicLevel": 55
         },
         {
           "level": 15,
           "mpConsume": 72,
-          "power": 0,
+          "power": 348,
           "abnormalLevel": 1,
           "magicLevel": 56
         },
         {
           "level": 16,
           "mpConsume": 74,
-          "power": 0,
+          "power": 356,
           "abnormalLevel": 1,
           "magicLevel": 57
         },
         {
           "level": 17,
           "mpConsume": 76,
-          "power": 0,
+          "power": 364,
           "abnormalLevel": 1,
           "magicLevel": 58
         },
         {
           "level": 18,
           "mpConsume": 77,
-          "power": 0,
+          "power": 372,
           "abnormalLevel": 1,
           "magicLevel": 59
         },
         {
           "level": 19,
           "mpConsume": 78,
-          "power": 0,
+          "power": 380,
           "abnormalLevel": 1,
           "magicLevel": 60
         },
         {
           "level": 20,
           "mpConsume": 78,
-          "power": 0,
+          "power": 388,
           "abnormalLevel": 1,
           "magicLevel": 61
         },
         {
           "level": 21,
           "mpConsume": 80,
-          "power": 0,
+          "power": 395,
           "abnormalLevel": 1,
           "magicLevel": 62
         },
         {
           "level": 22,
           "mpConsume": 81,
-          "power": 0,
+          "power": 402,
           "abnormalLevel": 1,
           "magicLevel": 63
         },
         {
           "level": 23,
           "mpConsume": 83,
-          "power": 0,
+          "power": 410,
           "abnormalLevel": 1,
           "magicLevel": 64
         },
         {
           "level": 24,
           "mpConsume": 84,
-          "power": 0,
+          "power": 417,
           "abnormalLevel": 1,
           "magicLevel": 65
         },
         {
           "level": 25,
           "mpConsume": 86,
-          "power": 0,
+          "power": 424,
           "abnormalLevel": 1,
           "magicLevel": 66
         },
         {
           "level": 26,
           "mpConsume": 87,
-          "power": 0,
+          "power": 431,
           "abnormalLevel": 1,
           "magicLevel": 67
         },
         {
           "level": 27,
           "mpConsume": 89,
-          "power": 0,
+          "power": 437,
           "abnormalLevel": 1,
           "magicLevel": 68
         },
         {
           "level": 28,
           "mpConsume": 90,
-          "power": 0,
+          "power": 444,
           "abnormalLevel": 1,
           "magicLevel": 69
         },
         {
           "level": 29,
           "mpConsume": 91,
-          "power": 0,
+          "power": 450,
           "abnormalLevel": 1,
           "magicLevel": 70
         },
         {
           "level": 30,
           "mpConsume": 92,
-          "power": 0,
+          "power": 456,
           "abnormalLevel": 1,
           "magicLevel": 71
         },
         {
           "level": 31,
           "mpConsume": 93,
-          "power": 0,
+          "power": 462,
           "abnormalLevel": 1,
           "magicLevel": 72
         },
         {
           "level": 32,
           "mpConsume": 95,
-          "power": 0,
+          "power": 467,
           "abnormalLevel": 1,
           "magicLevel": 73
         },
         {
           "level": 33,
           "mpConsume": 96,
-          "power": 0,
+          "power": 472,
           "abnormalLevel": 1,
           "magicLevel": 74
         }
@@ -38586,231 +38586,231 @@
         {
           "level": 1,
           "mpConsume": 69,
-          "power": 0,
+          "power": 371,
           "abnormalLevel": 1,
           "magicLevel": 38
         },
         {
           "level": 2,
           "mpConsume": 72,
-          "power": 0,
+          "power": 384,
           "abnormalLevel": 1,
           "magicLevel": 39
         },
         {
           "level": 3,
           "mpConsume": 73,
-          "power": 0,
+          "power": 398,
           "abnormalLevel": 1,
           "magicLevel": 40
         },
         {
           "level": 4,
           "mpConsume": 76,
-          "power": 0,
+          "power": 426,
           "abnormalLevel": 1,
           "magicLevel": 42
         },
         {
           "level": 5,
           "mpConsume": 78,
-          "power": 0,
+          "power": 441,
           "abnormalLevel": 1,
           "magicLevel": 43
         },
         {
           "level": 6,
           "mpConsume": 81,
-          "power": 0,
+          "power": 455,
           "abnormalLevel": 1,
           "magicLevel": 44
         },
         {
           "level": 7,
           "mpConsume": 86,
-          "power": 0,
+          "power": 484,
           "abnormalLevel": 1,
           "magicLevel": 46
         },
         {
           "level": 8,
           "mpConsume": 88,
-          "power": 0,
+          "power": 499,
           "abnormalLevel": 1,
           "magicLevel": 47
         },
         {
           "level": 9,
           "mpConsume": 91,
-          "power": 0,
+          "power": 514,
           "abnormalLevel": 1,
           "magicLevel": 48
         },
         {
           "level": 10,
           "mpConsume": 96,
-          "power": 0,
+          "power": 544,
           "abnormalLevel": 1,
           "magicLevel": 50
         },
         {
           "level": 11,
           "mpConsume": 96,
-          "power": 0,
+          "power": 559,
           "abnormalLevel": 1,
           "magicLevel": 51
         },
         {
           "level": 12,
           "mpConsume": 98,
-          "power": 0,
+          "power": 573,
           "abnormalLevel": 1,
           "magicLevel": 52
         },
         {
           "level": 13,
           "mpConsume": 103,
-          "power": 0,
+          "power": 603,
           "abnormalLevel": 1,
           "magicLevel": 54
         },
         {
           "level": 14,
           "mpConsume": 106,
-          "power": 0,
+          "power": 618,
           "abnormalLevel": 1,
           "magicLevel": 55
         },
         {
           "level": 15,
           "mpConsume": 108,
-          "power": 0,
+          "power": 633,
           "abnormalLevel": 1,
           "magicLevel": 56
         },
         {
           "level": 16,
           "mpConsume": 111,
-          "power": 0,
+          "power": 647,
           "abnormalLevel": 1,
           "magicLevel": 57
         },
         {
           "level": 17,
           "mpConsume": 113,
-          "power": 0,
+          "power": 662,
           "abnormalLevel": 1,
           "magicLevel": 58
         },
         {
           "level": 18,
           "mpConsume": 116,
-          "power": 0,
+          "power": 676,
           "abnormalLevel": 1,
           "magicLevel": 59
         },
         {
           "level": 19,
           "mpConsume": 117,
-          "power": 0,
+          "power": 690,
           "abnormalLevel": 1,
           "magicLevel": 60
         },
         {
           "level": 20,
           "mpConsume": 117,
-          "power": 0,
+          "power": 704,
           "abnormalLevel": 1,
           "magicLevel": 61
         },
         {
           "level": 21,
           "mpConsume": 120,
-          "power": 0,
+          "power": 718,
           "abnormalLevel": 1,
           "magicLevel": 62
         },
         {
           "level": 22,
           "mpConsume": 122,
-          "power": 0,
+          "power": 731,
           "abnormalLevel": 1,
           "magicLevel": 63
         },
         {
           "level": 23,
           "mpConsume": 124,
-          "power": 0,
+          "power": 745,
           "abnormalLevel": 1,
           "magicLevel": 64
         },
         {
           "level": 24,
           "mpConsume": 126,
-          "power": 0,
+          "power": 758,
           "abnormalLevel": 1,
           "magicLevel": 65
         },
         {
           "level": 25,
           "mpConsume": 128,
-          "power": 0,
+          "power": 770,
           "abnormalLevel": 1,
           "magicLevel": 66
         },
         {
           "level": 26,
           "mpConsume": 131,
-          "power": 0,
+          "power": 783,
           "abnormalLevel": 1,
           "magicLevel": 67
         },
         {
           "level": 27,
           "mpConsume": 133,
-          "power": 0,
+          "power": 795,
           "abnormalLevel": 1,
           "magicLevel": 68
         },
         {
           "level": 28,
           "mpConsume": 134,
-          "power": 0,
+          "power": 806,
           "abnormalLevel": 1,
           "magicLevel": 69
         },
         {
           "level": 29,
           "mpConsume": 136,
-          "power": 0,
+          "power": 817,
           "abnormalLevel": 1,
           "magicLevel": 70
         },
         {
           "level": 30,
           "mpConsume": 138,
-          "power": 0,
+          "power": 828,
           "abnormalLevel": 1,
           "magicLevel": 71
         },
         {
           "level": 31,
           "mpConsume": 140,
-          "power": 0,
+          "power": 839,
           "abnormalLevel": 1,
           "magicLevel": 72
         },
         {
           "level": 32,
           "mpConsume": 142,
-          "power": 0,
+          "power": 849,
           "abnormalLevel": 1,
           "magicLevel": 73
         },
         {
           "level": 33,
           "mpConsume": 143,
-          "power": 0,
+          "power": 858,
           "abnormalLevel": 1,
           "magicLevel": 74
         }
@@ -38832,231 +38832,231 @@
         {
           "level": 1,
           "mpConsume": 92,
-          "power": 0,
+          "power": 163,
           "abnormalLevel": 1,
           "magicLevel": 38
         },
         {
           "level": 2,
           "mpConsume": 95,
-          "power": 0,
+          "power": 169,
           "abnormalLevel": 1,
           "magicLevel": 39
         },
         {
           "level": 3,
           "mpConsume": 97,
-          "power": 0,
+          "power": 175,
           "abnormalLevel": 1,
           "magicLevel": 40
         },
         {
           "level": 4,
           "mpConsume": 101,
-          "power": 0,
+          "power": 188,
           "abnormalLevel": 1,
           "magicLevel": 42
         },
         {
           "level": 5,
           "mpConsume": 104,
-          "power": 0,
+          "power": 194,
           "abnormalLevel": 1,
           "magicLevel": 43
         },
         {
           "level": 6,
           "mpConsume": 107,
-          "power": 0,
+          "power": 201,
           "abnormalLevel": 1,
           "magicLevel": 44
         },
         {
           "level": 7,
           "mpConsume": 114,
-          "power": 0,
+          "power": 213,
           "abnormalLevel": 1,
           "magicLevel": 46
         },
         {
           "level": 8,
           "mpConsume": 118,
-          "power": 0,
+          "power": 220,
           "abnormalLevel": 1,
           "magicLevel": 47
         },
         {
           "level": 9,
           "mpConsume": 121,
-          "power": 0,
+          "power": 226,
           "abnormalLevel": 1,
           "magicLevel": 48
         },
         {
           "level": 10,
           "mpConsume": 127,
-          "power": 0,
+          "power": 239,
           "abnormalLevel": 1,
           "magicLevel": 50
         },
         {
           "level": 11,
           "mpConsume": 127,
-          "power": 0,
+          "power": 246,
           "abnormalLevel": 1,
           "magicLevel": 51
         },
         {
           "level": 12,
           "mpConsume": 131,
-          "power": 0,
+          "power": 253,
           "abnormalLevel": 1,
           "magicLevel": 52
         },
         {
           "level": 13,
           "mpConsume": 138,
-          "power": 0,
+          "power": 266,
           "abnormalLevel": 1,
           "magicLevel": 54
         },
         {
           "level": 14,
           "mpConsume": 141,
-          "power": 0,
+          "power": 272,
           "abnormalLevel": 1,
           "magicLevel": 55
         },
         {
           "level": 15,
           "mpConsume": 144,
-          "power": 0,
+          "power": 279,
           "abnormalLevel": 1,
           "magicLevel": 56
         },
         {
           "level": 16,
           "mpConsume": 148,
-          "power": 0,
+          "power": 285,
           "abnormalLevel": 1,
           "magicLevel": 57
         },
         {
           "level": 17,
           "mpConsume": 151,
-          "power": 0,
+          "power": 291,
           "abnormalLevel": 1,
           "magicLevel": 58
         },
         {
           "level": 18,
           "mpConsume": 154,
-          "power": 0,
+          "power": 298,
           "abnormalLevel": 1,
           "magicLevel": 59
         },
         {
           "level": 19,
           "mpConsume": 156,
-          "power": 0,
+          "power": 304,
           "abnormalLevel": 1,
           "magicLevel": 60
         },
         {
           "level": 20,
           "mpConsume": 156,
-          "power": 0,
+          "power": 310,
           "abnormalLevel": 1,
           "magicLevel": 61
         },
         {
           "level": 21,
           "mpConsume": 159,
-          "power": 0,
+          "power": 316,
           "abnormalLevel": 1,
           "magicLevel": 62
         },
         {
           "level": 22,
           "mpConsume": 162,
-          "power": 0,
+          "power": 322,
           "abnormalLevel": 1,
           "magicLevel": 63
         },
         {
           "level": 23,
           "mpConsume": 165,
-          "power": 0,
+          "power": 328,
           "abnormalLevel": 1,
           "magicLevel": 64
         },
         {
           "level": 24,
           "mpConsume": 168,
-          "power": 0,
+          "power": 334,
           "abnormalLevel": 1,
           "magicLevel": 65
         },
         {
           "level": 25,
           "mpConsume": 171,
-          "power": 0,
+          "power": 339,
           "abnormalLevel": 1,
           "magicLevel": 66
         },
         {
           "level": 26,
           "mpConsume": 174,
-          "power": 0,
+          "power": 345,
           "abnormalLevel": 1,
           "magicLevel": 67
         },
         {
           "level": 27,
           "mpConsume": 177,
-          "power": 0,
+          "power": 350,
           "abnormalLevel": 1,
           "magicLevel": 68
         },
         {
           "level": 28,
           "mpConsume": 179,
-          "power": 0,
+          "power": 355,
           "abnormalLevel": 1,
           "magicLevel": 69
         },
         {
           "level": 29,
           "mpConsume": 182,
-          "power": 0,
+          "power": 360,
           "abnormalLevel": 1,
           "magicLevel": 70
         },
         {
           "level": 30,
           "mpConsume": 184,
-          "power": 0,
+          "power": 365,
           "abnormalLevel": 1,
           "magicLevel": 71
         },
         {
           "level": 31,
           "mpConsume": 186,
-          "power": 0,
+          "power": 369,
           "abnormalLevel": 1,
           "magicLevel": 72
         },
         {
           "level": 32,
           "mpConsume": 189,
-          "power": 0,
+          "power": 374,
           "abnormalLevel": 1,
           "magicLevel": 73
         },
         {
           "level": 33,
           "mpConsume": 191,
-          "power": 0,
+          "power": 378,
           "abnormalLevel": 1,
           "magicLevel": 74
         }
@@ -42612,91 +42612,91 @@
         {
           "level": 1,
           "mpConsume": 107,
-          "power": 0,
+          "power": 91,
           "abnormalLevel": 6,
           "magicLevel": 44
         },
         {
           "level": 2,
           "mpConsume": 121,
-          "power": 0,
+          "power": 103,
           "abnormalLevel": 7,
           "magicLevel": 48
         },
         {
           "level": 3,
           "mpConsume": 131,
-          "power": 0,
+          "power": 115,
           "abnormalLevel": 8,
           "magicLevel": 52
         },
         {
           "level": 4,
           "mpConsume": 144,
-          "power": 0,
+          "power": 127,
           "abnormalLevel": 9,
           "magicLevel": 56
         },
         {
           "level": 5,
           "mpConsume": 151,
-          "power": 0,
+          "power": 133,
           "abnormalLevel": 10,
           "magicLevel": 58
         },
         {
           "level": 6,
           "mpConsume": 156,
-          "power": 0,
+          "power": 138,
           "abnormalLevel": 11,
           "magicLevel": 60
         },
         {
           "level": 7,
           "mpConsume": 159,
-          "power": 0,
+          "power": 144,
           "abnormalLevel": 12,
           "magicLevel": 62
         },
         {
           "level": 8,
           "mpConsume": 165,
-          "power": 0,
+          "power": 149,
           "abnormalLevel": 13,
           "magicLevel": 64
         },
         {
           "level": 9,
           "mpConsume": 171,
-          "power": 0,
+          "power": 154,
           "abnormalLevel": 14,
           "magicLevel": 66
         },
         {
           "level": 10,
           "mpConsume": 177,
-          "power": 0,
+          "power": 158,
           "abnormalLevel": 15,
           "magicLevel": 68
         },
         {
           "level": 11,
           "mpConsume": 182,
-          "power": 0,
+          "power": 164,
           "abnormalLevel": 16,
           "magicLevel": 70
         },
         {
           "level": 12,
           "mpConsume": 186,
-          "power": 0,
+          "power": 168,
           "abnormalLevel": 17,
           "magicLevel": 72
         },
         {
           "level": 13,
           "mpConsume": 191,
-          "power": 0,
+          "power": 172,
           "abnormalLevel": 18,
           "magicLevel": 74
         }
@@ -48475,77 +48475,77 @@
         {
           "level": 1,
           "mpConsume": 48,
-          "power": 0,
+          "power": 690,
           "abnormalLevel": 1,
           "magicLevel": 56
         },
         {
           "level": 2,
           "mpConsume": 51,
-          "power": 0,
+          "power": 722,
           "abnormalLevel": 1,
           "magicLevel": 58
         },
         {
           "level": 3,
           "mpConsume": 52,
-          "power": 0,
+          "power": 753,
           "abnormalLevel": 1,
           "magicLevel": 60
         },
         {
           "level": 4,
           "mpConsume": 54,
-          "power": 0,
+          "power": 783,
           "abnormalLevel": 1,
           "magicLevel": 62
         },
         {
           "level": 5,
           "mpConsume": 55,
-          "power": 0,
+          "power": 812,
           "abnormalLevel": 1,
           "magicLevel": 64
         },
         {
           "level": 6,
           "mpConsume": 58,
-          "power": 0,
+          "power": 840,
           "abnormalLevel": 1,
           "magicLevel": 66
         },
         {
           "level": 7,
           "mpConsume": 59,
-          "power": 0,
+          "power": 867,
           "abnormalLevel": 1,
           "magicLevel": 68
         },
         {
           "level": 8,
           "mpConsume": 62,
-          "power": 0,
+          "power": 892,
           "abnormalLevel": 1,
           "magicLevel": 70
         },
         {
           "level": 9,
           "mpConsume": 62,
-          "power": 0,
+          "power": 915,
           "abnormalLevel": 1,
           "magicLevel": 72
         },
         {
           "level": 10,
           "mpConsume": 64,
-          "power": 0,
+          "power": 936,
           "abnormalLevel": 1,
           "magicLevel": 74
         },
         {
           "level": 11,
           "mpConsume": 64,
-          "power": 0,
+          "power": 946,
           "abnormalLevel": 1,
           "magicLevel": 75
         }
@@ -48567,35 +48567,35 @@
         {
           "level": 1,
           "mpConsume": 151,
-          "power": 0,
+          "power": 902,
           "abnormalLevel": 1,
           "magicLevel": 58
         },
         {
           "level": 2,
           "mpConsume": 159,
-          "power": 0,
+          "power": 979,
           "abnormalLevel": 1,
           "magicLevel": 62
         },
         {
           "level": 3,
           "mpConsume": 171,
-          "power": 0,
+          "power": 1050,
           "abnormalLevel": 1,
           "magicLevel": 66
         },
         {
           "level": 4,
           "mpConsume": 182,
-          "power": 0,
+          "power": 1115,
           "abnormalLevel": 1,
           "magicLevel": 70
         },
         {
           "level": 5,
           "mpConsume": 191,
-          "power": 0,
+          "power": 1170,
           "abnormalLevel": 1,
           "magicLevel": 74
         }

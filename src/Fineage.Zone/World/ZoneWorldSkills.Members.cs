@@ -334,20 +334,23 @@ public sealed partial class ZoneWorld
             max);
     }
 
-    /// <summary>Friendly skills: SELF → self. Otherwise require a living player target (no silent self swap).</summary>
+    /// <summary>
+    /// Mobius friendly targeting for support skills: SELF → caster; an explicit living player → that
+    /// player; otherwise the caster (heal/buff with a mob selected or with no target).
+    /// </summary>
     int ResolveFriendlyTargetId(ZoneSession session, ZoneEntity player, SkillUseIntent request, SkillDefinition template)
     {
         if (string.Equals(template.TargetType, "SELF", StringComparison.OrdinalIgnoreCase))
             return player.ObjectId;
 
         int requested = request.TargetObjectId > 0 ? request.TargetObjectId : session.SelectedTargetId;
-        if (requested <= 0)
-            return 0;
-        if (!_byId.TryGetValue(requested, out var candidate) ||
-            candidate.Kind != ZoneEntityKind.Player ||
-            candidate.Dead)
-            return 0;
-        return requested;
+        if (requested > 0 &&
+            _byId.TryGetValue(requested, out var candidate) &&
+            candidate.Kind == ZoneEntityKind.Player &&
+            !candidate.Dead)
+            return requested;
+
+        return player.ObjectId;
     }
 
     static MagicSkillUseMsg BuildCast(

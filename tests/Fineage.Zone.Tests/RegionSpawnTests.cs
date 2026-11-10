@@ -80,7 +80,9 @@ public sealed class RegionSpawnTests
         // Mobius CT 0 Interlude keeps the outdoor world in one InterludeSpawns.xml; there is no
         // per-territory ElvenStarting.xml. These are the fixed rows for the elven forest set, so the
         // count here has to match the original server row for row, not just "roughly right".
-        Assert.Equal(845, map.Npcs.Count);
+        // +1 local playtest Symbol Maker (Marsden 31046) next to KuK — not in Mobius elven forest dump.
+        Assert.Equal(846, map.Npcs.Count);
+        Assert.Equal(1, Count(map, 31046));
         Assert.Equal(48, Count(map, 20013)); // Dryad
         Assert.Equal(48, Count(map, 20019)); // Dryad Elder
         Assert.Equal(40, Count(map, 20036)); // Lirein
