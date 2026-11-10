@@ -17,7 +17,8 @@ Login issues an HMAC handoff token. The zone on **9777** accepts it in the Net `
 | [`docs/combat-parity.md`](docs/combat-parity.md) | Combat checklist vs Mobius |
 | `docs/*-v2-protocol.md` | Feature **semantics** only; MsgType numbers inside are legacy MessagePack |
 | Client [`Docs/DOC_CANON.md`](https://github.com/FioraSolutions/Fineage/blob/dev/Docs/DOC_CANON.md) | Cross-repo doc triage |
-| Client [`Docs/REFACTOR_PLAN_2026-11.md`](https://github.com/FioraSolutions/Fineage/blob/dev/Docs/REFACTOR_PLAN_2026-11.md) | Harden / Zone modularize plan + GPT review verification |
+| Client [`Docs/REFACTOR_PLAN_2026-11.md`](https://github.com/FioraSolutions/Fineage/blob/dev/Docs/REFACTOR_PLAN_2026-11.md) | Harden / Zone modularize plan + “Agent start here” |
+| [`docs/ZONE_MODULARIZATION.md`](docs/ZONE_MODULARIZATION.md) | **Status Now** for epic [#353](https://github.com/FioraSolutions/Fineage-Backend/issues/353) — what landed, what is next |
 | Client [`Docs/ARCHITECTURE_NET.md`](https://github.com/FioraSolutions/Fineage/blob/dev/Docs/ARCHITECTURE_NET.md) | Target scale (gateway / 20k) — design, not “already shipped” |
 
 Chronicle today: **Interlude (Mobius CT0)**. Near-term program: finish and stabilize Interlude — not High Five. See client [`Docs/DOC_CANON.md`](https://github.com/FioraSolutions/Fineage/blob/dev/Docs/DOC_CANON.md).
