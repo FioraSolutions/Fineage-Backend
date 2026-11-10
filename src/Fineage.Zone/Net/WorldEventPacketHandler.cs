@@ -80,3 +80,4 @@ public sealed partial class WorldEventPacketHandler
             throw new InvalidOperationException("hello_required");
     }
 }
+
