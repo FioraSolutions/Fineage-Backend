@@ -5,7 +5,10 @@ using Fineage.Zone.World;
 
 namespace Fineage.Zone.Net;
 
-sealed partial class WorldEventPacketHandler
+/// <summary>
+/// Boss / siege / olympiad / seven signs / dungeon opcodes extracted from <see cref="NetZoneServer"/> (B2b / #353).
+/// </summary>
+public sealed partial class WorldEventPacketHandler
 {
 
     readonly ZoneWorld _world;

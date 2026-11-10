@@ -5,7 +5,7 @@ using Fineage.Zone.World;
 
 namespace Fineage.Zone.Net;
 
-sealed partial class WorldEventPacketHandler
+public sealed partial class WorldEventPacketHandler
 {
     public async Task OnOlympiadStatusAsync(NetConnection conn, ZoneSession zoneSession, CancellationToken ct)
     {
