@@ -24,10 +24,8 @@ public sealed partial class ZoneWorld
         if (!IsLive(session))
             return Task.FromResult<string?>("world");
 
-        string? error;
-        lock (_gate)
-            error = ApplySevenSigns(session, request);
-        return Task.FromResult<string?>(error);
+        // Seal stone trade mutates inventory → SaveInventory after unlock (B8).
+        return Task.FromResult(WithDeferredInventoryPersist(() => ApplySevenSigns(session, request)));
     }
 
     public Task<bool> AdvanceSevenSignsAsync(CancellationToken ct)

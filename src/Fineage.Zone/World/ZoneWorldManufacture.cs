@@ -37,16 +37,14 @@ public sealed partial class ZoneWorld
         return error;
     }
 
-    public async Task<string?> TryRecipeShopMakeItemAsync(ZoneSession session, RecipeShopMakeItemMsg request, CancellationToken ct)
+    public Task<string?> TryRecipeShopMakeItemAsync(ZoneSession session, RecipeShopMakeItemMsg request, CancellationToken ct)
     {
         if (request == null)
-            return "bad_request";
+            return Task.FromResult<string?>("bad_request");
         if (!session.InWorld)
-            return "world";
-        string? error;
-        lock (_gate)
-            error = TryRecipeShopMakeItem(session, request);
-        return error;
+            return Task.FromResult<string?>("world");
+        // World mutate under _gate; Postgres inventory write after unlock (B8).
+        return Task.FromResult(WithDeferredInventoryPersist(() => TryRecipeShopMakeItem(session, request)));
     }
 
     string? TrySetRecipeShop(ZoneSession session, SetRecipeShopMsg request)
