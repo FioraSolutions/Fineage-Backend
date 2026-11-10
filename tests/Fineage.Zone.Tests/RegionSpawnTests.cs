@@ -104,13 +104,18 @@ public sealed class RegionSpawnTests
         Assert.Equal(42, Count(map, 20534)); // Red Keltir
         Assert.Equal(37, Count(map, 20537)); // Elder Red Keltir
 
-        // Every row stands in the elven forest box, and every mob is a real attackable monster.
-        Assert.All(map.Npcs, row =>
+        // Mobius forest mobs stay attackable in the elven box; service NPCs (Symbol Maker) are excluded.
+        Assert.All(map.Npcs.Where(row => row.Attackable), row =>
         {
             Assert.InRange(row.X, 0, 61_000);
             Assert.InRange(row.Y, 30_000, 91_000);
-            Assert.True(row.Attackable, $"{row.NpcId} must stay attackable");
             Assert.InRange(row.RespawnDelaySeconds, 15, 20);
+        });
+        Assert.All(map.Npcs.Where(row => !row.Attackable), row =>
+        {
+            Assert.InRange(row.X, 0, 61_000);
+            Assert.InRange(row.Y, 30_000, 91_000);
+            Assert.False(string.IsNullOrWhiteSpace(row.NpcType), $"{row.NpcId} service NPC needs a type");
         });
 
         // Fixed Mobius rows keep their heading; the old polygon resampler flattened them all to 0.
