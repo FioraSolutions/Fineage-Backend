@@ -13,10 +13,9 @@ public sealed partial class ZoneWorld
     public Task<string?> TryTeleportSelectAsync(
         ZoneSession session, int npcObjectId, string? listName, int locationId, CancellationToken ct)
     {
-        string? error;
-        lock (_gate)
-            error = TeleportTo(session, npcObjectId, listName ?? "", locationId, html: false);
-        return Task.FromResult<string?>(error);
+        // Teleport fee may SaveInventory → flush after unlock (B8).
+        return Task.FromResult(WithDeferredInventoryPersist(
+            () => TeleportTo(session, npcObjectId, listName ?? "", locationId, html: false)));
     }
 
     public Task<string?> TryWarehouseDepositAsync(

@@ -17,13 +17,9 @@ public sealed partial class ZoneWorld
         if (!IsLive(session))
             return Task.FromResult<string?>("world");
 
-        string? error;
-        lock (_gate)
-            error = TrySkillUse(session, new SkillUseIntent(skillId, targetObjectId));
-        if (error != null)
-            return Task.FromResult<string?>(error);
-
-        return Task.FromResult<string?>(null);
+        // Skill use may spoil/sweep/consume → SaveInventory after unlock (B8).
+        return Task.FromResult(WithDeferredInventoryPersist(
+            () => TrySkillUse(session, new SkillUseIntent(skillId, targetObjectId))));
     }
 
     /// <summary>
@@ -83,22 +79,21 @@ public sealed partial class ZoneWorld
         if (skillId <= 0 || level <= 0)
             return Task.FromResult<string?>("bad_request");
 
-        string? error = null;
-        lock (_gate)
+        // Trainer purchase can consume SP items / update bag → SaveInventory after unlock (B8).
+        return Task.FromResult(WithDeferredInventoryPersist(() =>
         {
             if (!_byId.TryGetValue(session.ObjectId, out var player) || player.Session == null)
-                return Task.FromResult<string?>("world");
+                return "world";
             if (player.Dead)
-                return Task.FromResult<string?>(InventoryProtocol.Dead);
+                return InventoryProtocol.Dead;
             if (informing)
+            {
                 PublishAcquireSkillInfo(session, player, skillId, level, skillType);
-            else
-                error = LearnTrainerSkill(session, player, TrainerNpcOf(session), skillId);
-        }
+                return null;
+            }
 
-        if (error != null)
-            return Task.FromResult<string?>(error);
-        return Task.FromResult<string?>(null);
+            return LearnTrainerSkill(session, player, TrainerNpcOf(session), skillId);
+        }));
     }
 
     /// <summary>The trainer this player last opened, or a stand-in so the gate does not need the NPC in range.</summary>
