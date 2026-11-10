@@ -81,28 +81,23 @@ public sealed partial class ZoneWorld
         return error;
     }
 
-    public async Task<string?> TryPrivateStoreBuyAsync(ZoneSession session, PrivateStoreBuyMsg request, CancellationToken ct)
+    public Task<string?> TryPrivateStoreBuyAsync(ZoneSession session, PrivateStoreBuyMsg request, CancellationToken ct)
     {
         if (request == null)
-            return "bad_request";
+            return Task.FromResult<string?>("bad_request");
         if (!session.InWorld)
-            return "world";
-        string? error;
-        lock (_gate)
-            error = TryPrivateStoreBuy(session, request);
-        return error;
+            return Task.FromResult<string?>("world");
+        // World mutate under _gate; Postgres inventory write after unlock (B8).
+        return Task.FromResult(WithDeferredInventoryPersist(() => TryPrivateStoreBuy(session, request)));
     }
 
-    public async Task<string?> TryPrivateStoreSellToAsync(ZoneSession session, PrivateStoreSellToMsg request, CancellationToken ct)
+    public Task<string?> TryPrivateStoreSellToAsync(ZoneSession session, PrivateStoreSellToMsg request, CancellationToken ct)
     {
         if (request == null)
-            return "bad_request";
+            return Task.FromResult<string?>("bad_request");
         if (!session.InWorld)
-            return "world";
-        string? error;
-        lock (_gate)
-            error = TryPrivateStoreSellTo(session, request);
-        return error;
+            return Task.FromResult<string?>("world");
+        return Task.FromResult(WithDeferredInventoryPersist(() => TryPrivateStoreSellTo(session, request)));
     }
 
     void PrivateStorePlayerLeftWorld(int objectId) => ClosePrivateStore(objectId, standUp: false);

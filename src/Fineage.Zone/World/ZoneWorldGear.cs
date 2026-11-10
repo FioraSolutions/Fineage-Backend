@@ -24,35 +24,18 @@ public sealed partial class ZoneWorld
 
     public Task<string?> TryUseItemAsync(ZoneSession session, int objectId, CancellationToken ct)
     {
-        string? error;
-        lock (_gate)
-            error = TryUseItem(session, objectId);
-        if (error != null)
-            return Task.FromResult<string?>(error);
-
-        return Task.FromResult<string?>(null);
+        // World mutate under _gate; Postgres inventory write after unlock (B8).
+        return Task.FromResult(WithDeferredInventoryPersist(() => TryUseItem(session, objectId)));
     }
 
     public Task<string?> TryUnequipItemAsync(ZoneSession session, int paperdollSlot, CancellationToken ct)
     {
-        string? error;
-        lock (_gate)
-            error = TryUnequipItem(session, paperdollSlot);
-        if (error != null)
-            return Task.FromResult<string?>(error);
-
-        return Task.FromResult<string?>(null);
+        return Task.FromResult(WithDeferredInventoryPersist(() => TryUnequipItem(session, paperdollSlot)));
     }
 
     public Task<string?> TryGiveItemAsync(ZoneSession session, int itemId, int count, CancellationToken ct)
     {
-        string? error;
-        lock (_gate)
-            error = TryGiveItem(session, itemId, count);
-        if (error != null)
-            return Task.FromResult<string?>(error);
-
-        return Task.FromResult<string?>(null);
+        return Task.FromResult(WithDeferredInventoryPersist(() => TryGiveItem(session, itemId, count)));
     }
 
     string? TryUseItem(ZoneSession session, int objectId)

@@ -12,10 +12,9 @@ public sealed partial class ZoneWorld
     {
         if (!IsLive(session))
             return Task.FromResult<string?>("world");
-        string? error;
-        lock (_gate)
-            error = Buy(session, npcObjectId, listId, items);
-        return Task.FromResult<string?>(error);
+        // World mutate under _gate; Postgres inventory write after unlock (B8).
+        return Task.FromResult(WithDeferredInventoryPersist(
+            () => Buy(session, npcObjectId, listId, items)));
     }
 
     public Task<string?> TrySellAsync(
@@ -23,10 +22,8 @@ public sealed partial class ZoneWorld
     {
         if (!IsLive(session))
             return Task.FromResult<string?>("world");
-        string? error;
-        lock (_gate)
-            error = Sell(session, npcObjectId, items);
-        return Task.FromResult<string?>(error);
+        return Task.FromResult(WithDeferredInventoryPersist(
+            () => Sell(session, npcObjectId, items)));
     }
 
     public Task<string?> TryMultiSellAsync(
@@ -34,10 +31,8 @@ public sealed partial class ZoneWorld
     {
         if (!IsLive(session))
             return Task.FromResult<string?>("world");
-        string? error;
-        lock (_gate)
-            error = ChooseMultiSell(session, npcObjectId, listId, entryId, amount);
-        return Task.FromResult<string?>(error);
+        return Task.FromResult(WithDeferredInventoryPersist(
+            () => ChooseMultiSell(session, npcObjectId, listId, entryId, amount)));
     }
 
     public Task<string?> TryPreviewAsync(
