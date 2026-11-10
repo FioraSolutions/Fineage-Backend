@@ -69,17 +69,15 @@ public sealed partial class ZoneWorld
         return error;
     }
 
-    public async Task<string?> TryTradeDoneAsync(ZoneSession session, TradeDoneRequestMsg done, CancellationToken ct)
+    public Task<string?> TryTradeDoneAsync(ZoneSession session, TradeDoneRequestMsg done, CancellationToken ct)
     {
         if (done == null)
-            return "bad_request";
+            return Task.FromResult<string?>("bad_request");
         if (!session.InWorld)
-            return "world";
+            return Task.FromResult<string?>("world");
 
-        string? error;
-        lock (_gate)
-            error = TryTradeDone(session, done);
-        return error;
+        // World mutate under _gate; Postgres inventory write after unlock (B8).
+        return Task.FromResult(WithDeferredInventoryPersist(() => TryTradeDone(session, done)));
     }
 
     void TradePlayerLeftWorld(int objectId)

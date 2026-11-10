@@ -288,7 +288,44 @@ public sealed partial class ZoneWorld
         // here, so the overload level is recomputed exactly when the load changes (pickup, drop, shop, trade,
         // warehouse, enchant, equip/unequip, quest reward, sweep, shots).
         RefreshWeightPenaltyAfterInventoryChange(session);
+        if (_deferInventoryPersist)
+        {
+            _dirtyInventories[session.ObjectId] = (session, inventory);
+            return;
+        }
+
         _persist.ReplaceItemsFromInventory(session.Account, session.ObjectId, inventory);
+    }
+
+    /// <summary>Flush inventory rows queued while <see cref="_deferInventoryPersist"/> was set. Call outside <c>_gate</c>.</summary>
+    void FlushDirtyInventories()
+    {
+        if (_dirtyInventories.Count == 0)
+            return;
+        foreach (var (_, pair) in _dirtyInventories)
+            _persist.ReplaceItemsFromInventory(pair.Session.Account, pair.Session.ObjectId, pair.Inventory);
+        _dirtyInventories.Clear();
+    }
+
+    /// <summary>Run <paramref name="underGate"/> under <c>_gate</c> with inventory Postgres deferred until after unlock.</summary>
+    T WithDeferredInventoryPersist<T>(Func<T> underGate)
+    {
+        T result;
+        lock (_gate)
+        {
+            _deferInventoryPersist = true;
+            try
+            {
+                result = underGate();
+            }
+            finally
+            {
+                _deferInventoryPersist = false;
+            }
+        }
+
+        FlushDirtyInventories();
+        return result;
     }
 
     bool IsLive(ZoneSession session) =>
