@@ -1,0 +1,200 @@
+using Fineage.Accounts;
+using Fineage.Net.Contract;
+using Fineage.Net.Host;
+using Fineage.Protocol;
+using Fineage.Zone.Chat;
+using Fineage.Zone.World;
+using NetHelloAck = Fineage.Net.Contract.HelloAckMsg;
+
+namespace Fineage.Zone.Net;
+
+sealed partial class SessionLifecyclePacketHandler
+{
+    public async Task OnEnterAsync(NetConnection conn, ZoneSession zoneSession, EntityId self, CancellationToken ct)
+    {
+        RequireHello(conn);
+        if (!zoneSession.Bound)
+        {
+            await _reject(conn, "auth_required", "Auth with a handoff token first.", ct).ConfigureAwait(false);
+            return;
+        }
+
+        bool ok = await _world.TryEnterAsync(zoneSession, ct).ConfigureAwait(false);
+        if (!ok)
+        {
+            await _reject(conn, "enter_failed", "Could not enter world.", ct).ConfigureAwait(false);
+            return;
+        }
+
+        if (!_world.TryGetLivePlayer(zoneSession, out var entity))
+        {
+            await _reject(conn, "enter_failed", "Enter world produced no live player entity.", ct).ConfigureAwait(false);
+            return;
+        }
+
+        // Single source of truth: ZoneEntity after TryEnter (inventory, vitals, AutoSkills already applied).
+        var packets = NetEnterWorldProjector.FromEntity(entity, self, _clock().ToUnixTimeMilliseconds(), _playerSpawnPAtkSpd(entity));
+        await conn.SendAsync(NetOpcode.EntitySpawn, NetCodec.EncodeEntitySpawn(packets.Spawn), ct: ct)
+            .ConfigureAwait(false);
+        await conn.SendAsync(NetOpcode.PlayerStats, NetCodec.EncodePlayerStats(packets.Stats), ct: ct)
+            .ConfigureAwait(false);
+        // Mobius enter: UserInfo (full sheet + paperdoll) before ItemList so the status window and model are dressed.
+        if (_world.TryBuildNetUserInfo(zoneSession, out var userInfo))
+            await conn.SendAsync(NetOpcode.UserInfo, NetCodec.EncodeUserInfo(NetZoneServer.ToNetUserInfo(userInfo)), ct: ct)
+                .ConfigureAwait(false);
+        await conn.SendAsync(NetOpcode.ItemList, NetCodec.EncodeItemList(packets.Items), ct: ct)
+            .ConfigureAwait(false);
+        await conn.SendAsync(NetOpcode.SkillList, NetCodec.EncodeSkillList(NetEnterWorldProjector.ToNetSkillList(packets.Skills)), ct: ct)
+            .ConfigureAwait(false);
+        // Mobius EnterWorld: ShortCutInit after ItemList / SkillList so item and skill icons resolve.
+        await conn.SendAsync(
+                NetOpcode.ShortCutInit,
+                NetCodec.EncodeShortCutInit(ToNetShortcutInit(_world.BuildShortcutInit(zoneSession))),
+                ct: ct)
+            .ConfigureAwait(false);
+        // Mobius updateEffectIcons: restored buffs (character_skills_save) must land before EtcStatusUpdate.
+        if (_world.TryBuildNetAbnormalStatus(zoneSession, out var abnormals))
+            await conn.SendAsync(
+                    NetOpcode.AbnormalStatusUpdate,
+                    NetCodec.EncodeAbnormalStatusUpdate(ToNetAbnormal(abnormals)),
+                    ct: ct)
+                .ConfigureAwait(false);
+        // Mobius EnterWorld:401 sends EtcStatusUpdate after ItemList/ShortCutInit and after updateEffectIcons, so the
+        // overload icon appears on an otherwise fully-dressed status bar.
+        if (_world.TryBuildNetEtcStatus(zoneSession, out var etcStatus))
+            await conn.SendAsync(
+                    NetOpcode.EtcStatusUpdate,
+                    NetCodec.EncodeEtcStatusUpdate(NetZoneServer.ToNetEtcStatus(etcStatus, zoneSession.ObjectId)),
+                    ct: ct)
+                .ConfigureAwait(false);
+        // Journal on enter so the quest tabs are filled before the player presses the menu button.
+        await conn.SendAsync(NetOpcode.QuestList, NetCodec.EncodeQuestList(NetZoneServer.ToNetQuestList(_world.NetQuestList(zoneSession))), ct: ct)
+            .ConfigureAwait(false);
+        // Mobius EnterWorld:561 — a returning clan member gets the pledge sheet and roster up front,
+        // otherwise the clan window is blank until some later clan action fans a status out.
+        if (_world.TryBuildNetClanSnapshot(zoneSession, out var clanStatus, out var clanMembers))
+        {
+            await conn.SendAsync(NetOpcode.PledgeStatus, NetCodec.EncodePledgeStatus(NetZoneServer.ToNetPledgeStatus(clanStatus)), ct: ct)
+                .ConfigureAwait(false);
+            await conn.SendAsync(NetOpcode.PledgeMemberList, NetCodec.EncodePledgeMemberList(NetZoneServer.ToNetPledgeMemberList(clanMembers)), ct: ct)
+                .ConfigureAwait(false);
+        }
+
+        var welcome = SayRules.Welcome(zoneSession.Name);
+        await conn.SendAsync(
+            NetOpcode.SystemMessage,
+            NetCodec.EncodeSystemMessage(new SystemMessageNetMsg
+            {
+                Id = welcome.Id,
+                Text = welcome.Text,
+                Params = welcome.Params ?? []
+            }),
+            ct: ct).ConfigureAwait(false);
+
+        var known = _world.SnapshotKnownEntities(zoneSession);
+        foreach (var other in known)
+        {
+            var otherId = _ids.AllocateOrGet(other.ObjectId);
+            if (other.Kind == ZoneEntityKind.GroundItem)
+            {
+                await conn.SendAsync(
+                    NetOpcode.DropItem,
+                    NetCodec.EncodeDropItem(new DropItemNetMsg
+                    {
+                        DropperObjectId = 0,
+                        EntityValue = otherId.Value,
+                        EntityGeneration = otherId.Generation,
+                        ItemId = other.GroundItemId,
+                        X = other.X,
+                        Y = other.Y,
+                        Z = other.Z,
+                        Stackable = other.GroundStackable,
+                        Count = other.GroundCount
+                    }),
+                    ct: ct).ConfigureAwait(false);
+                continue;
+            }
+
+            var remote = NetEnterWorldProjector.BuildPresenceSpawn(other, otherId, _playerSpawnPAtkSpd(other));
+            await conn.SendAsync(NetOpcode.EntitySpawn, NetCodec.EncodeEntitySpawn(remote), ct: ct)
+                .ConfigureAwait(false);
+        }
+
+        var selfRemote = NetCodec.EncodeEntitySpawn(NetEnterWorldProjector.BuildRemoteSpawn(entity, self, _playerSpawnPAtkSpd(entity)));
+        foreach (var peer in known)
+        {
+            if (peer.Kind == ZoneEntityKind.Player)
+                await _presence.SendAsync(peer.ObjectId, NetOpcode.EntitySpawn, selfRemote, ct).ConfigureAwait(false);
+        }
+    }
+
+    public async Task LeaveAsync(ZoneSession zoneSession, EntityId self, int registeredObjectId, NetConnection conn)
+    {
+        try
+        {
+            if (zoneSession.Bound && zoneSession.InWorld && self.Value != 0)
+            {
+                var peers = _world.SnapshotKnownPlayers(zoneSession);
+                var despawn = NetCodec.EncodeEntityDespawn(new EntityDespawnMsg
+                {
+                    EntityValue = self.Value,
+                    EntityGeneration = self.Generation
+                });
+                foreach (var peer in peers)
+                    await _presence.SendAsync(peer.ObjectId, NetOpcode.EntityDespawn, despawn, CancellationToken.None)
+                        .ConfigureAwait(false);
+            }
+        }
+        catch
+        {
+            /* ignore */
+        }
+
+        if (registeredObjectId != 0)
+            _presence.Unregister(registeredObjectId, conn);
+
+        try
+        {
+            await _world.LeaveAsync(zoneSession, CancellationToken.None).ConfigureAwait(false);
+        }
+        catch
+        {
+            /* ignore */
+        }
+    }
+
+
+    static void RequireHello(NetConnection conn)
+    {
+        if (!conn.HelloCompleted)
+            throw new InvalidOperationException("hello_required");
+    }
+
+    static ShortCutInitNetMsg ToNetShortcutInit(ShortCutInitMsg init)
+    {
+        var src = init.Shortcuts ?? [];
+        var rows = new ShortCutNetMsg[src.Length];
+        for (int i = 0; i < src.Length; i++)
+            rows[i] = ShortcutActionPacketHandler.ToNet(src[i]);
+        return new ShortCutInitNetMsg { Shortcuts = rows };
+    }
+
+    static AbnormalStatusUpdateNetMsg ToNetAbnormal(AbnormalStatusUpdateMsg update)
+    {
+        var src = update.Effects ?? [];
+        var rows = new AbnormalEffectNet[src.Length];
+        for (int i = 0; i < src.Length; i++)
+        {
+            var e = src[i];
+            rows[i] = new AbnormalEffectNet
+            {
+                Id = e.Id,
+                Value = e.Value,
+                DurationSeconds = e.DurationSeconds,
+                Slot = e.Slot ?? ""
+            };
+        }
+
+        return new AbnormalStatusUpdateNetMsg { ObjectId = update.ObjectId, Effects = rows };
+    }
+}
