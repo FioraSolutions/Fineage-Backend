@@ -67,6 +67,20 @@ public sealed class SkillEffectCatalog
         return false;
     }
 
+    public bool HasResurrection(int skillId)
+    {
+        if (!_byId.TryGetValue(skillId, out var rows))
+            return false;
+        for (int i = 0; i < rows.Length; i++)
+        {
+            string n = rows[i].Name;
+            if (n.Equals("Resurrection", StringComparison.OrdinalIgnoreCase) ||
+                n.Equals("ResurrectionSpecial", StringComparison.OrdinalIgnoreCase))
+                return true;
+        }
+        return false;
+    }
+
     public static SkillEffectCatalog LoadDefault()
     {
         var path = TeleportCatalog.FindFile(FileName)

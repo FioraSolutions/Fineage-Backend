@@ -12,14 +12,15 @@ public sealed partial class ZoneWorld
         ZoneSession session,
         int skillId,
         int targetObjectId,
-        CancellationToken ct)
+        CancellationToken ct,
+        bool ctrlPressed = false)
     {
         if (!IsLive(session))
             return Task.FromResult<string?>("world");
 
         // Skill use may spoil/sweep/consume → SaveInventory after unlock (B8).
         return Task.FromResult(WithDeferredInventoryPersist(
-            () => TrySkillUse(session, new SkillUseIntent(skillId, targetObjectId))));
+            () => TrySkillUse(session, new SkillUseIntent(skillId, targetObjectId, ctrlPressed))));
     }
 
     /// <summary>

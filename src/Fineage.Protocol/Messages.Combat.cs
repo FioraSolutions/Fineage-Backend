@@ -96,6 +96,8 @@ public sealed class AbnormalEffectMsg
     public int Id { get; set; }
     public int Value { get; set; }
     public int DurationSeconds { get; set; }
+    /// <summary>Mobius <c>abnormalType</c> slot (SLEEP, STUN, PARALYZE, ROOT_MAGICALLY, …).</summary>
+    public string Slot { get; set; } = "";
 }
 
 /// <summary>Opcode <see cref="MsgType.AbnormalStatusUpdate"/> (1017). Full effect list for one object.</summary>

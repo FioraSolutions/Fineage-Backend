@@ -16,7 +16,8 @@ public static class ZoneAbnormals
     {
         Id = entry.Id,
         Value = entry.Value,
-        DurationSeconds = RemainingSeconds(nowUnixMs, entry)
+        DurationSeconds = RemainingSeconds(nowUnixMs, entry),
+        Slot = entry.Slot ?? ""
     };
 
     public static void Apply(

@@ -31,6 +31,9 @@ public static class CharacterInventory
         var inventory = new PlayerInventory(catalog, ids);
         foreach (var row in items)
         {
+            // Stale / not-yet-imported templates must not abort EnterWorld (handler_error on 0x0303).
+            if (!catalog.TryGet(row.ItemId, out _))
+                continue;
             ItemInstance instance = row.ObjectId > 0
                 ? inventory.AddRestored(row.ObjectId, row.ItemId, row.Count, row.EnchantLevel)
                 : inventory.Add(row.ItemId, row.Count, row.EnchantLevel);

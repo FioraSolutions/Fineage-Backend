@@ -149,8 +149,10 @@ public sealed partial class ZoneWorld
         };
 
     /// <summary>
-    /// Mobius attack gate: NPCs follow the template flag; another living player is always swingable
-    /// (peace zones not imported). Attacking a white player raises the attacker's PvP flag.
+    /// Mobius attack gate for an explicit AttackRequest: another living player is always swingable
+    /// (peace zones not imported); any living NPC is swingable because AttackRequest is only sent when
+    /// the client intends to force-attack (ctrl / attack hotkey). Accidental merchant clicks stay on
+    /// the talk path and never reach here. Attacking a white player raises the attacker's PvP flag.
     /// </summary>
     static bool IsAttackable(ZoneEntity attacker, ZoneEntity target)
     {
@@ -158,7 +160,7 @@ public sealed partial class ZoneWorld
             return false;
         return target.Kind switch
         {
-            ZoneEntityKind.Npc => target.Attackable,
+            ZoneEntityKind.Npc => true,
             ZoneEntityKind.Player => !ReferenceEquals(attacker, target),
             _ => false
         };

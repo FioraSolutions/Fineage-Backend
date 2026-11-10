@@ -106,7 +106,9 @@ static class NetEnterWorldProjector
             Dead = entity.Dead,
             Level = entity.Level,
             MaxHp = entity.MaxHp,
-            PAtkSpd = pAtkSpd
+            PAtkSpd = pAtkSpd,
+            Karma = entity.Karma,
+            PvpFlag = entity.PvpFlagged ? (byte)1 : (byte)0
         };
 
     static Fineage.Net.Contract.PlayerStatsMsg BuildStats(ZoneEntity entity, EntityId self, int maxCp) =>

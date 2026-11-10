@@ -170,6 +170,7 @@ public sealed partial class ZoneWorld
         if (entity.CurHp <= 0 || entity.Dead || entity.MaxHp <= 0)
             return;
         bool hurt = false;
+        int totalDmg = 0;
         for (int i = 0; i < entity.Abnormals.Count; i++)
         {
             var ab = entity.Abnormals[i];
@@ -179,22 +180,29 @@ public sealed partial class ZoneWorld
                 continue;
             int level = ab.SkillLevel > 0 ? ab.SkillLevel : Math.Max(1, ab.Value);
             double power = dot.PowerAt(level);
-            int dmg = Math.Max(1, (int)Math.Round(dot.Percent ? entity.MaxHp * power : power));
-            entity.CurHp = Math.Max(0, entity.CurHp - dmg);
+            // Mobius DamOverTimePercent: currentHp * power (ticksMultiplier folded into skill-dots tick).
+            double raw = dot.Percent ? entity.CurHp * power : power;
+            // Keep fractional DoT from vanishing on full-HP low-level mobs: floor at 1 once power > 0.
+            int dmg = power <= 0 ? 0 : Math.Max(1, (int)Math.Round(raw));
+            if (dmg <= 0)
+            {
+                ab.NextDotAtUnixMs = now + dot.TickMs;
+                continue;
+            }
+            // Mobius canKill=false DoTs leave the target at 1 HP.
+            int nextHp = entity.CurHp - dmg;
+            if (nextHp < 1)
+                nextHp = 1;
+            totalDmg += entity.CurHp - nextHp;
+            entity.CurHp = nextHp;
             ab.NextDotAtUnixMs = now + dot.TickMs;
             hurt = true;
-            if (entity.CurHp <= 0)
-                break;
         }
 
-        if (!hurt)
+        if (!hurt || totalDmg <= 0)
             return;
+        SyncNeedRegen(entity);
         FanoutVitals(entity, StatusFor(entity));
-        if (entity.Kind == ZoneEntityKind.Npc && entity.CurHp <= 0)
-        {
-            // Killer unknown for periodic DoT — treat as environmental death (no PK/party share).
-            RemoveDeadNpc(entity, killer: null);
-        }
     }
 
     /// <summary>Test hook: run one abnormal expiry pass and fan-out clears.</summary>

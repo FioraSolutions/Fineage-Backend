@@ -92,6 +92,27 @@ sealed partial class ZoneEntity
         set => EnsureVitals().Exp = value;
     }
 
+    /// <summary>Mobius <c>_expBeforeDeath</c>: set on death penalty, cleared when a resurrection restores exp.</summary>
+    public long ExpBeforeDeath
+    {
+        get => Vitals?.ExpBeforeDeath ?? 0;
+        set => EnsureVitals().ExpBeforeDeath = value;
+    }
+
+    /// <summary>Mobius <c>_reviveRequested</c>.</summary>
+    public bool ReviveRequested
+    {
+        get => Vitals?.ReviveRequested ?? false;
+        set => EnsureVitals().ReviveRequested = value;
+    }
+
+    /// <summary>Mobius <c>_revivePower</c> (restore percent).</summary>
+    public double RevivePower
+    {
+        get => Vitals?.RevivePower ?? 0;
+        set => EnsureVitals().RevivePower = value;
+    }
+
     public int Sp
     {
         get => Vitals?.Sp ?? 0;

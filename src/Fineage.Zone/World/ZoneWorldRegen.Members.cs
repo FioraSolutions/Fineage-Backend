@@ -43,7 +43,9 @@ public sealed partial class ZoneWorld
                 continue;
             }
 
-            npc.RegenCarryHp += npc.CurHp < npc.MaxHp ? Math.Max(1d, npc.HpRegen) : 0d;
+            // DoT (poison/bleed) must outpace NPC regen or StatusUpdate HP looks stuck at full.
+            bool hasDot = npc.Abnormals.Any(a => _skillDots.TryGet(a.Id, out _));
+            npc.RegenCarryHp += !hasDot && npc.CurHp < npc.MaxHp ? Math.Max(1d, npc.HpRegen) : 0d;
             npc.RegenCarryMp += npc.CurMp < npc.MaxMp ? Math.Max(1d, npc.MpRegen) : 0d;
             int hpGain = (int)Math.Floor(npc.RegenCarryHp);
             int mpGain = (int)Math.Floor(npc.RegenCarryMp);

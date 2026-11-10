@@ -136,9 +136,15 @@ sealed class ZoneEntityVitalsPayload
     public int MaxMp { get; set; }
     public int Level { get; set; } = 1;
     public long Exp { get; set; }
+    /// <summary>Mobius <c>_expBeforeDeath</c>: exp snapshot taken before the death penalty, used by resurrection restore.</summary>
+    public long ExpBeforeDeath { get; set; }
     public int Sp { get; set; }
     public bool Sitting { get; set; }
     public bool Dead { get; set; }
+    /// <summary>Mobius <c>_reviveRequested</c>: a skill resurrection ConfirmDlg is outstanding.</summary>
+    public bool ReviveRequested { get; set; }
+    /// <summary>Mobius <c>_revivePower</c>: restore percent offered by the pending resurrection.</summary>
+    public double RevivePower { get; set; }
 }
 
 /// <summary>Shared combat timing / DEX / enchant/decay fields composed off <see cref="ZoneEntity"/> (#353).</summary>

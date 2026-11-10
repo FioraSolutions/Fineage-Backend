@@ -55,6 +55,7 @@ public sealed partial class ZoneWorld
     {
         session.PendingCastSkillId = request.SkillId;
         session.PendingCastTargetId = request.TargetObjectId > 0 ? request.TargetObjectId : session.SelectedTargetId;
+        session.PendingCastCtrlPressed = request.CtrlPressed;
         session.PendingCastAtUnixMs = player.CastingUntilMs;
         ZoneLog.Info($"[cast] queued skill={request.SkillId} obj={player.ObjectId} at={player.CastingUntilMs}");
     }

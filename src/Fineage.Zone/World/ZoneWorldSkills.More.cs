@@ -184,6 +184,8 @@ public sealed partial class ZoneWorld
         if (_spoilRules.IsSpoilSkill(request.SkillId) || _spoilRules.IsSweepSkill(request.SkillId))
             return TrySkillUseSpoilOrSweep(session, player, request, liveTemplate, liveLevelData, level, now,
                 _spoilRules.IsSweepSkill(request.SkillId));
+        if (_skillEffects.HasResurrection(request.SkillId))
+            return TrySkillUseResurrection(session, player, request, liveTemplate, liveLevelData, level, now);
         if (liveTemplate.IsBuffSkill)
             return TrySkillUseBuff(session, player, request, liveTemplate, liveLevelData, level, now);
         // Mobius nukes that also apply a short abnormal (Aura Flare A3, Fire Vortex DoT+slow, …)

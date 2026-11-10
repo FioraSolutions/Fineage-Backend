@@ -66,8 +66,8 @@ sealed class ZoneCharacterPersist(IAccountStore? accounts)
     public void ReplaceBlocked(string account, int characterId, IReadOnlyList<StoredSocial> blocked, bool blockAll) =>
         _accounts?.TryReplaceBlocked(account, characterId, blocked, blockAll);
 
-    public void ReplaceShortcuts(string account, int characterId, IReadOnlyList<StoredShortcut> shortcuts) =>
-        _accounts?.TryReplaceShortcuts(account, characterId, shortcuts);
+    public bool ReplaceShortcuts(string account, int characterId, IReadOnlyList<StoredShortcut> shortcuts) =>
+        _accounts != null && _accounts.TryReplaceShortcuts(account, characterId, shortcuts);
 
     public void ReplaceEffects(string account, int characterId, IReadOnlyList<StoredEffect> effects) =>
         _accounts?.TryReplaceEffects(account, characterId, effects);

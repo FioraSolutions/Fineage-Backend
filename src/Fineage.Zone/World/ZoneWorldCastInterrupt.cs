@@ -65,7 +65,7 @@ public sealed partial class ZoneWorld
     /// the Mobius launch checks (target alive, within escape range, in sight). hitTime 0 resolves now.
     /// </summary>
     void ScheduleEffect(ZoneEntity player, ZoneEntity target, SkillDefinition template, int level, long now, int hitTimeMs,
-        DeferredEffect effect)
+        DeferredEffect effect, bool allowDeadTarget = false)
     {
         bool self = ReferenceEquals(player, target);
         SetPendingHit(player, new PendingSkillHit(target.ObjectId, 0, now + Math.Max(0, hitTimeMs), null, level)
@@ -74,6 +74,7 @@ public sealed partial class ZoneWorld
             MagicType = template.MagicType,
             EscapeRange = self ? 0 : CastRules.EscapeRange(template.CastRange, template.EffectRange),
             TargetIsNpc = target.Kind == ZoneEntityKind.Npc,
+            AllowDeadTarget = allowDeadTarget,
             Apply = effect
         });
         if (hitTimeMs <= 0)
@@ -82,10 +83,18 @@ public sealed partial class ZoneWorld
 
     void ResolveDeferredEffect(ZoneEntity player, PendingSkillHit hit, DeferredEffect effect, long now)
     {
-        bool alive = _byId.TryGetValue(hit.TargetId, out var target) && (hit.TargetIsNpc
-            ? target.Kind == ZoneEntityKind.Npc && target.CurHp > 0 && !target.Dead
-            : target.Kind == ZoneEntityKind.Player && !target.Dead);
-        if (!alive)
+        if (!_byId.TryGetValue(hit.TargetId, out var target))
+        {
+            AbortCast(player, "target-gone", notify: false);
+            return;
+        }
+
+        bool ok = hit.TargetIsNpc
+            ? target.Kind == ZoneEntityKind.Npc &&
+              (hit.AllowDeadTarget || (target.CurHp > 0 && !target.Dead))
+            : target.Kind == ZoneEntityKind.Player &&
+              (hit.AllowDeadTarget ? target.Dead : !target.Dead);
+        if (!ok)
         {
             AbortCast(player, "target-gone", notify: false);
             return;

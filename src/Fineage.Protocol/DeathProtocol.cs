@@ -17,6 +17,12 @@ public static class DeathProtocol
     /// <summary>Respawn at the Talking Island village restart (Mobius default for TI).</summary>
     public const int ReviveToVillage = 0;
 
+    /// <summary>Accept a pending skill resurrection offer (Mobius <c>reviveAnswer(1)</c>).</summary>
+    public const int AcceptSkillResurrection = 1;
+
+    /// <summary>Decline a pending skill resurrection offer (Mobius <c>reviveAnswer(0)</c>).</summary>
+    public const int DeclineSkillResurrection = 2;
+
     public const string NotDead = "revive_not_dead";
     public const string AlreadyDead = "death_already";
     public const string Unsupported = "revive_unsupported";

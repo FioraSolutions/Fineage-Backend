@@ -335,7 +335,7 @@ public sealed class NetPresenceHubTests
             ObjectId = 7,
             Effects =
             [
-                new AbnormalEffectNet { Id = 1204, Value = 1, DurationSeconds = 1200 }
+                new AbnormalEffectNet { Id = 1204, Value = 1, DurationSeconds = 1200, Slot = "SLEEP" }
             ]
         };
         var again = NetCodec.DecodeAbnormalStatusUpdate(NetCodec.EncodeAbnormalStatusUpdate(update));
@@ -343,6 +343,7 @@ public sealed class NetPresenceHubTests
         Assert.Single(again.Effects);
         Assert.Equal(1204, again.Effects[0].Id);
         Assert.Equal(1200, again.Effects[0].DurationSeconds);
+        Assert.Equal("SLEEP", again.Effects[0].Slot);
     }
 
     [Fact]
