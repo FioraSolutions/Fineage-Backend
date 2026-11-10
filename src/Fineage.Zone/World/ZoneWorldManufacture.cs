@@ -13,28 +13,22 @@ namespace Fineage.Zone.World;
 /// </summary>
 public sealed partial class ZoneWorld
 {
-    public async Task<string?> TrySetRecipeShopAsync(ZoneSession session, SetRecipeShopMsg request, CancellationToken ct)
+    public Task<string?> TrySetRecipeShopAsync(ZoneSession session, SetRecipeShopMsg request, CancellationToken ct)
     {
         if (request == null)
-            return "bad_request";
+            return Task.FromResult<string?>("bad_request");
         if (!session.InWorld)
-            return "world";
-        string? error;
-        lock (_gate)
-            error = TrySetRecipeShop(session, request);
-        return error;
+            return Task.FromResult<string?>("world");
+        return Task.FromResult(WithDeferredInventoryPersist(() => TrySetRecipeShop(session, request)));
     }
 
-    public async Task<string?> TryRecipeShopMakeInfoAsync(ZoneSession session, RecipeShopMakeInfoMsg request, CancellationToken ct)
+    public Task<string?> TryRecipeShopMakeInfoAsync(ZoneSession session, RecipeShopMakeInfoMsg request, CancellationToken ct)
     {
         if (request == null)
-            return "bad_request";
+            return Task.FromResult<string?>("bad_request");
         if (!session.InWorld)
-            return "world";
-        string? error;
-        lock (_gate)
-            error = TryRecipeShopMakeInfo(session, request);
-        return error;
+            return Task.FromResult<string?>("world");
+        return Task.FromResult(WithDeferredInventoryPersist(() => TryRecipeShopMakeInfo(session, request)));
     }
 
     public Task<string?> TryRecipeShopMakeItemAsync(ZoneSession session, RecipeShopMakeItemMsg request, CancellationToken ct)
