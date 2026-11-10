@@ -363,6 +363,19 @@ public sealed partial class ZoneWorld
     {
         if (player.Warehouse == null)
             return;
+        if (_deferInventoryPersist)
+        {
+            _dirtyWarehouses[session.ObjectId] = player;
+            return;
+        }
+
+        ReplaceWarehouseNow(session, player);
+    }
+
+    void ReplaceWarehouseNow(ZoneSession session, ZoneEntity player)
+    {
+        if (player.Warehouse == null)
+            return;
         var stacks = player.Warehouse.Items;
         var stored = new StoredItem[stacks.Count];
         for (int i = 0; i < stacks.Count; i++)
