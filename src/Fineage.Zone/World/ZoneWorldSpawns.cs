@@ -11,6 +11,8 @@ public sealed partial class ZoneWorld
     readonly bool _includeEnabledMaps;
     readonly Func<DateTimeOffset> _clock;
     readonly Dictionary<int, SpawnSlotState> _spawnSlots = [];
+    /// <summary>Due-ordered respawn index so <see cref="TickSpawns"/> does not scan every slot (B10).</summary>
+    readonly SortedSet<(long DueUnixMs, int ObjectId)> _spawnDue = [];
 
     sealed class SpawnSlotState
     {
@@ -176,24 +178,42 @@ public sealed partial class ZoneWorld
         if (jitter > 0)
             delaySeconds += _spawnRandom.Next(0, jitter + 1);
 
-        slot.RespawnAt = _clock().AddSeconds(Math.Max(1, delaySeconds));
+        ClearSpawnDue(slot);
+        var at = _clock().AddSeconds(Math.Max(1, delaySeconds));
+        slot.RespawnAt = at;
+        _spawnDue.Add((at.ToUnixTimeMilliseconds(), objectId));
+    }
+
+    void ClearSpawnDue(SpawnSlotState slot)
+    {
+        if (slot.RespawnAt is not { } at)
+            return;
+        _spawnDue.Remove((at.ToUnixTimeMilliseconds(), slot.Definition.ObjectId));
+        slot.RespawnAt = null;
     }
 
     void TickSpawns()
     {
-        var now = _clock();
-        foreach (var slot in _spawnSlots.Values)
+        long nowMs = _clock().ToUnixTimeMilliseconds();
+        while (_spawnDue.Count > 0)
         {
-            if (slot.RespawnAt == null || now < slot.RespawnAt)
+            var first = _spawnDue.Min;
+            if (first.DueUnixMs > nowMs)
+                break;
+            _spawnDue.Remove(first);
+            if (!_spawnSlots.TryGetValue(first.ObjectId, out var slot))
                 continue;
+            if (slot.RespawnAt is not { } at || at.ToUnixTimeMilliseconds() != first.DueUnixMs)
+                continue;
+
             if (_byId.ContainsKey(slot.Definition.ObjectId))
             {
-                slot.RespawnAt = null;
+                ClearSpawnDue(slot);
                 continue;
             }
 
+            ClearSpawnDue(slot);
             MaterializeSpawn(slot.Definition, slot.MapId);
-            slot.RespawnAt = null;
             if (_byId.TryGetValue(slot.Definition.ObjectId, out var npc))
                 FanoutNewNpc(npc);
         }
