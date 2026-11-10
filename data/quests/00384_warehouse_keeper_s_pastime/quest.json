@@ -1,0 +1,30 @@
+{
+  "id": 384,
+  "name": "Warehouse Keeper's Pastime",
+  "repeatable": true,
+  "abortable": true,
+  "questItems": [
+    5964
+  ],
+  "dialogs": [
+    {
+      "npcId": 30182,
+      "hook": "talk",
+      "when": "absent",
+      "minLevel": 40,
+      "htmlFile": "30182-talk-000.htm"
+    },
+    {
+      "npcId": 30182,
+      "hook": "talk",
+      "when": "absent",
+      "htmlFile": "30182-talk-001.htm"
+    },
+    {
+      "npcId": 30685,
+      "hook": "talk",
+      "when": "absent",
+      "htmlFile": "30685-talk-002.htm"
+    }
+  ]
+}

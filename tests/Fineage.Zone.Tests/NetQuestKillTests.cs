@@ -1,6 +1,7 @@
 using Fineage.Game.Quests;
 using Fineage.Net.Contract;
 using Fineage.Zone.Net;
+using Fineage.Zone.World;
 using Xunit;
 
 namespace Fineage.Zone.Tests;
@@ -22,7 +23,7 @@ public sealed class NetQuestKillTests
 
         Assert.Equal(10, killer.Inventory!.CountOf(1118));
         Assert.Equal(2, killer.Quests.Find(313)!.Cond);
-        Assert.NotEmpty(rec.Of(nameof(INetPresenceBridge.FanoutInventoryUpdate)));
+        Assert.NotEmpty(rec.Of(nameof(IWorldEventPublisher.FanoutInventoryUpdate)));
     }
 }
 
@@ -43,7 +44,8 @@ public sealed class NetQuestPartyKillTests
         Start316(mate);
 
         kit.World.QuestKillForTest(killer, 20040);
-        Assert.Equal(2, mate.Inventory!.CountOf(1042));
+        // Mobius giveItemRandomly count=1 (chance 10/5 ≈ always); older pack wrongly dropped 2.
+        Assert.Equal(1, mate.Inventory!.CountOf(1042));
         Assert.Equal(0, killer.Inventory!.CountOf(1042));
     }
 

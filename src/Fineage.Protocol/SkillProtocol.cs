@@ -24,4 +24,6 @@ public static class SkillProtocol
     public const string Dead = "skill_dead";
     /// <summary>Player is silenced (Mobius mute / SILENCE abnormal).</summary>
     public const string Muted = "skill_muted";
+    /// <summary>Attack skill is known but missing from skill-combat.json (no silent power stub).</summary>
+    public const string NoCombat = "skill_no_combat";
 }

@@ -1,4 +1,3 @@
-using Fineage.Net.Contract;
 using Fineage.Protocol;
 
 namespace Fineage.Zone.Combat;
@@ -17,12 +16,4 @@ public static class CombatLines
             Text = $"You hit {name} for {amount} damage."
         };
     }
-
-    /// <summary>Net form of <see cref="SystemMessageMsg"/> for the attacker's own damage line.</summary>
-    public static SystemMessageNetMsg ToNet(SystemMessageMsg message) => new()
-    {
-        Id = message.Id,
-        Text = message.Text,
-        Params = message.Params ?? []
-    };
 }

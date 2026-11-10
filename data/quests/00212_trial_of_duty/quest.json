@@ -1,0 +1,267 @@
+{
+  "id": 212,
+  "name": "Trial of Duty",
+  "repeatable": false,
+  "abortable": true,
+  "questItems": [
+    2634,
+    2635,
+    2636,
+    2637
+  ],
+  "dialogs": [
+    {
+      "npcId": 30109,
+      "hook": "event",
+      "when": "absent",
+      "event": "30116-02",
+      "hasItem": 2640,
+      "htmlFile": "30109-event-30116-02-000.htm"
+    },
+    {
+      "npcId": 30109,
+      "hook": "event",
+      "when": "absent",
+      "event": "30116-03",
+      "hasItem": 2640,
+      "htmlFile": "30109-event-30116-03-001.htm"
+    },
+    {
+      "npcId": 30109,
+      "hook": "event",
+      "when": "absent",
+      "event": "30116-04",
+      "hasItem": 2640,
+      "htmlFile": "30109-event-30116-04-002.htm"
+    },
+    {
+      "npcId": 30109,
+      "hook": "event",
+      "when": "absent",
+      "event": "30116-05",
+      "hasItem": 2640,
+      "ops": [
+        {
+          "op": "take_item",
+          "itemId": 2640,
+          "count": 1
+        },
+        {
+          "op": "set",
+          "key": "memoState",
+          "value": "11"
+        },
+        {
+          "op": "set_cond",
+          "cond": 14
+        }
+      ],
+      "htmlFile": "30109-event-30116-05-003.htm"
+    },
+    {
+      "npcId": 27119,
+      "hook": "kill",
+      "when": "started",
+      "ops": [
+        {
+          "op": "drop_item",
+          "itemId": 2635,
+          "count": 1,
+          "chance": 1.0,
+          "limit": 1
+        },
+        {
+          "op": "set_cond",
+          "cond": 3
+        }
+      ],
+      "html": ""
+    },
+    {
+      "npcId": 20200,
+      "hook": "kill",
+      "when": "started",
+      "lacksItems": [
+        2639
+      ],
+      "ops": [
+        {
+          "op": "drop_item",
+          "itemId": 2639,
+          "count": 1,
+          "chance": 1.0,
+          "limit": 1
+        },
+        {
+          "op": "set_cond",
+          "cond": 6
+        }
+      ],
+      "html": ""
+    },
+    {
+      "npcId": 20201,
+      "hook": "kill",
+      "when": "started",
+      "lacksItems": [
+        2639
+      ],
+      "ops": [
+        {
+          "op": "drop_item",
+          "itemId": 2639,
+          "count": 1,
+          "chance": 1.0,
+          "limit": 1
+        },
+        {
+          "op": "set_cond",
+          "cond": 6
+        }
+      ],
+      "html": ""
+    },
+    {
+      "npcId": 20144,
+      "hook": "kill",
+      "when": "started",
+      "ops": [
+        {
+          "op": "set_cond",
+          "cond": 8
+        }
+      ],
+      "html": ""
+    },
+    {
+      "npcId": 20577,
+      "hook": "kill",
+      "when": "started",
+      "ops": [
+        {
+          "op": "set_cond",
+          "cond": 12
+        }
+      ],
+      "html": ""
+    },
+    {
+      "npcId": 20578,
+      "hook": "kill",
+      "when": "started",
+      "ops": [
+        {
+          "op": "set_cond",
+          "cond": 12
+        }
+      ],
+      "html": ""
+    },
+    {
+      "npcId": 20579,
+      "hook": "kill",
+      "when": "started",
+      "ops": [
+        {
+          "op": "set_cond",
+          "cond": 12
+        }
+      ],
+      "html": ""
+    },
+    {
+      "npcId": 20580,
+      "hook": "kill",
+      "when": "started",
+      "ops": [
+        {
+          "op": "set_cond",
+          "cond": 12
+        }
+      ],
+      "html": ""
+    },
+    {
+      "npcId": 20581,
+      "hook": "kill",
+      "when": "started",
+      "ops": [
+        {
+          "op": "set_cond",
+          "cond": 12
+        }
+      ],
+      "html": ""
+    },
+    {
+      "npcId": 20582,
+      "hook": "kill",
+      "when": "started",
+      "ops": [
+        {
+          "op": "set_cond",
+          "cond": 12
+        }
+      ],
+      "html": ""
+    },
+    {
+      "npcId": 20270,
+      "hook": "kill",
+      "when": "started",
+      "lacksItems": [
+        2643
+      ],
+      "ops": [
+        {
+          "op": "drop_item",
+          "itemId": 2643,
+          "count": 1,
+          "chance": 1.0,
+          "limit": 1
+        }
+      ],
+      "html": ""
+    },
+    {
+      "npcId": 20270,
+      "hook": "kill",
+      "when": "started",
+      "lacksItems": [
+        2644
+      ],
+      "ops": [
+        {
+          "op": "drop_item",
+          "itemId": 2644,
+          "count": 1,
+          "chance": 1.0,
+          "limit": 1
+        }
+      ],
+      "html": ""
+    },
+    {
+      "npcId": 20270,
+      "hook": "kill",
+      "when": "started",
+      "lacksItems": [
+        2645
+      ],
+      "ops": [
+        {
+          "op": "drop_item",
+          "itemId": 2645,
+          "count": 1,
+          "chance": 1.0,
+          "limit": 1
+        },
+        {
+          "op": "set_cond",
+          "cond": 15
+        }
+      ],
+      "html": ""
+    }
+  ]
+}

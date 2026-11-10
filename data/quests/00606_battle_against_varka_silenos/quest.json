@@ -1,0 +1,80 @@
+{
+  "id": 606,
+  "name": "Battle against Varka Silenos",
+  "repeatable": true,
+  "abortable": true,
+  "questItems": [
+    7233
+  ],
+  "dialogs": [
+    {
+      "npcId": 31370,
+      "hook": "talk",
+      "when": "absent",
+      "htmlFile": "31370-talk-000.htm"
+    },
+    {
+      "npcId": 31370,
+      "hook": "talk",
+      "when": "absent",
+      "htmlFile": "31370-talk-001.htm"
+    },
+    {
+      "npcId": 31370,
+      "hook": "talk",
+      "when": "started",
+      "htmlFile": "31370-talk-002.htm"
+    },
+    {
+      "npcId": 31370,
+      "hook": "talk",
+      "when": "started",
+      "htmlFile": "31370-talk-003.htm"
+    },
+    {
+      "npcId": 31370,
+      "hook": "event",
+      "when": "absent",
+      "event": "31370-03",
+      "ops": [
+        {
+          "op": "create"
+        },
+        {
+          "op": "start"
+        },
+        {
+          "op": "set_cond",
+          "cond": 1
+        }
+      ],
+      "htmlFile": "31370-event-31370-03-004.htm"
+    },
+    {
+      "npcId": 31370,
+      "hook": "event",
+      "when": "absent",
+      "event": "31370-06",
+      "htmlFile": "31370-event-31370-06-005.htm"
+    },
+    {
+      "npcId": 31370,
+      "hook": "event",
+      "when": "absent",
+      "event": "31370-07",
+      "htmlFile": "31370-event-31370-07-006.htm"
+    },
+    {
+      "npcId": 31370,
+      "hook": "event",
+      "when": "absent",
+      "event": "31370-09",
+      "ops": [
+        {
+          "op": "complete"
+        }
+      ],
+      "htmlFile": "31370-event-31370-09-007.htm"
+    }
+  ]
+}

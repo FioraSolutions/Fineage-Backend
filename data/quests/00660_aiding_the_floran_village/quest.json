@@ -1,0 +1,433 @@
+{
+  "id": 660,
+  "name": "Aiding the Floran Village",
+  "repeatable": true,
+  "abortable": true,
+  "questItems": [
+    8074,
+    8075,
+    8076
+  ],
+  "dialogs": [
+    {
+      "npcId": 30608,
+      "hook": "talk",
+      "when": "absent",
+      "htmlFile": "30608-talk-000.htm"
+    },
+    {
+      "npcId": 30291,
+      "hook": "talk",
+      "when": "started",
+      "cond": 1,
+      "ops": [
+        {
+          "op": "set_cond",
+          "cond": 2
+        }
+      ],
+      "htmlFile": "30291-talk-c1-001.htm"
+    },
+    {
+      "npcId": 30291,
+      "hook": "talk",
+      "when": "started",
+      "cond": 2,
+      "htmlFile": "30291-talk-c2-002.htm"
+    },
+    {
+      "npcId": 30291,
+      "hook": "event",
+      "when": "absent",
+      "event": "30608-06",
+      "minLevel": 30,
+      "ops": [
+        {
+          "op": "create"
+        },
+        {
+          "op": "start"
+        },
+        {
+          "op": "set_cond",
+          "cond": 1
+        }
+      ],
+      "htmlFile": "30291-event-30608-06-003.htm"
+    },
+    {
+      "npcId": 30608,
+      "hook": "event",
+      "when": "absent",
+      "event": "30608-06",
+      "minLevel": 30,
+      "ops": [
+        {
+          "op": "create"
+        },
+        {
+          "op": "start"
+        },
+        {
+          "op": "set_cond",
+          "cond": 1
+        }
+      ],
+      "htmlFile": "30608-event-30608-06-004.htm"
+    },
+    {
+      "npcId": 30291,
+      "hook": "event",
+      "when": "absent",
+      "event": "30608-02",
+      "htmlFile": "30291-event-30608-02-005.htm"
+    },
+    {
+      "npcId": 30608,
+      "hook": "event",
+      "when": "absent",
+      "event": "30608-02",
+      "htmlFile": "30608-event-30608-02-006.htm"
+    },
+    {
+      "npcId": 30291,
+      "hook": "event",
+      "when": "absent",
+      "event": "30608-03",
+      "htmlFile": "30291-event-30608-03-007.htm"
+    },
+    {
+      "npcId": 30608,
+      "hook": "event",
+      "when": "absent",
+      "event": "30608-03",
+      "htmlFile": "30608-event-30608-03-008.htm"
+    },
+    {
+      "npcId": 30291,
+      "hook": "event",
+      "when": "absent",
+      "event": "30291-07",
+      "htmlFile": "30291-event-30291-07-009.htm"
+    },
+    {
+      "npcId": 30608,
+      "hook": "event",
+      "when": "absent",
+      "event": "30291-07",
+      "htmlFile": "30608-event-30291-07-010.htm"
+    },
+    {
+      "npcId": 30291,
+      "hook": "event",
+      "when": "absent",
+      "event": "30291-09",
+      "htmlFile": "30291-event-30291-09-011.htm"
+    },
+    {
+      "npcId": 30608,
+      "hook": "event",
+      "when": "absent",
+      "event": "30291-09",
+      "htmlFile": "30608-event-30291-09-012.htm"
+    },
+    {
+      "npcId": 30291,
+      "hook": "event",
+      "when": "absent",
+      "event": "30291-10",
+      "htmlFile": "30291-event-30291-10-013.htm"
+    },
+    {
+      "npcId": 30608,
+      "hook": "event",
+      "when": "absent",
+      "event": "30291-10",
+      "htmlFile": "30608-event-30291-10-014.htm"
+    },
+    {
+      "npcId": 30291,
+      "hook": "event",
+      "when": "absent",
+      "event": "30291-14",
+      "htmlFile": "30291-event-30291-14-015.htm"
+    },
+    {
+      "npcId": 30608,
+      "hook": "event",
+      "when": "absent",
+      "event": "30291-14",
+      "htmlFile": "30608-event-30291-14-016.htm"
+    },
+    {
+      "npcId": 30291,
+      "hook": "event",
+      "when": "absent",
+      "event": "30291-18",
+      "htmlFile": "30291-event-30291-18-017.htm"
+    },
+    {
+      "npcId": 30608,
+      "hook": "event",
+      "when": "absent",
+      "event": "30291-18",
+      "htmlFile": "30608-event-30291-18-018.htm"
+    },
+    {
+      "npcId": 30291,
+      "hook": "event",
+      "when": "absent",
+      "event": "30291-03",
+      "minLevel": 30,
+      "ops": [
+        {
+          "op": "set_cond",
+          "cond": 2
+        }
+      ],
+      "htmlFile": "30291-event-30291-03-019.htm"
+    },
+    {
+      "npcId": 30608,
+      "hook": "event",
+      "when": "absent",
+      "event": "30291-03",
+      "minLevel": 30,
+      "ops": [
+        {
+          "op": "set_cond",
+          "cond": 2
+        }
+      ],
+      "htmlFile": "30608-event-30291-03-020.htm"
+    },
+    {
+      "npcId": 30291,
+      "hook": "event",
+      "when": "absent",
+      "event": "30291-03",
+      "ops": [
+        {
+          "op": "set_cond",
+          "cond": 2
+        }
+      ],
+      "htmlFile": "30291-event-30291-03-021.htm"
+    },
+    {
+      "npcId": 30608,
+      "hook": "event",
+      "when": "absent",
+      "event": "30291-03",
+      "ops": [
+        {
+          "op": "set_cond",
+          "cond": 2
+        }
+      ],
+      "htmlFile": "30608-event-30291-03-022.htm"
+    },
+    {
+      "npcId": 30291,
+      "hook": "event",
+      "when": "absent",
+      "event": "30291-06",
+      "htmlFile": "30291-event-30291-06-023.htm"
+    },
+    {
+      "npcId": 30608,
+      "hook": "event",
+      "when": "absent",
+      "event": "30291-06",
+      "htmlFile": "30608-event-30291-06-024.htm"
+    },
+    {
+      "npcId": 30291,
+      "hook": "event",
+      "when": "absent",
+      "event": "30291-08a",
+      "ops": [
+        {
+          "op": "complete"
+        }
+      ],
+      "htmlFile": "30291-event-30291-08a-025.htm"
+    },
+    {
+      "npcId": 30608,
+      "hook": "event",
+      "when": "absent",
+      "event": "30291-08a",
+      "ops": [
+        {
+          "op": "complete"
+        }
+      ],
+      "htmlFile": "30608-event-30291-08a-026.htm"
+    },
+    {
+      "npcId": 30291,
+      "hook": "event",
+      "when": "absent",
+      "event": "30291-12",
+      "htmlFile": "30291-event-30291-12-027.htm"
+    },
+    {
+      "npcId": 30608,
+      "hook": "event",
+      "when": "absent",
+      "event": "30291-12",
+      "htmlFile": "30608-event-30291-12-028.htm"
+    },
+    {
+      "npcId": 30291,
+      "hook": "event",
+      "when": "absent",
+      "event": "30291-12",
+      "ops": [
+        {
+          "op": "give_item",
+          "itemId": 956,
+          "count": 1
+        },
+        {
+          "op": "give_adena",
+          "count": 13000
+        }
+      ],
+      "htmlFile": "30291-event-30291-12-029.htm"
+    },
+    {
+      "npcId": 30608,
+      "hook": "event",
+      "when": "absent",
+      "event": "30291-12",
+      "ops": [
+        {
+          "op": "give_item",
+          "itemId": 956,
+          "count": 1
+        },
+        {
+          "op": "give_adena",
+          "count": 13000
+        }
+      ],
+      "htmlFile": "30608-event-30291-12-030.htm"
+    },
+    {
+      "npcId": 30291,
+      "hook": "event",
+      "when": "absent",
+      "event": "30291-16",
+      "htmlFile": "30291-event-30291-16-031.htm"
+    },
+    {
+      "npcId": 30608,
+      "hook": "event",
+      "when": "absent",
+      "event": "30291-16",
+      "htmlFile": "30608-event-30291-16-032.htm"
+    },
+    {
+      "npcId": 30291,
+      "hook": "event",
+      "when": "absent",
+      "event": "30291-16",
+      "ops": [
+        {
+          "op": "give_item",
+          "itemId": 956,
+          "count": 1
+        },
+        {
+          "op": "give_adena",
+          "count": 20000
+        }
+      ],
+      "htmlFile": "30291-event-30291-16-033.htm"
+    },
+    {
+      "npcId": 30608,
+      "hook": "event",
+      "when": "absent",
+      "event": "30291-16",
+      "ops": [
+        {
+          "op": "give_item",
+          "itemId": 956,
+          "count": 1
+        },
+        {
+          "op": "give_adena",
+          "count": 20000
+        }
+      ],
+      "htmlFile": "30608-event-30291-16-034.htm"
+    },
+    {
+      "npcId": 30291,
+      "hook": "event",
+      "when": "absent",
+      "event": "30291-20",
+      "htmlFile": "30291-event-30291-20-035.htm"
+    },
+    {
+      "npcId": 30608,
+      "hook": "event",
+      "when": "absent",
+      "event": "30291-20",
+      "htmlFile": "30608-event-30291-20-036.htm"
+    },
+    {
+      "npcId": 30291,
+      "hook": "event",
+      "when": "absent",
+      "event": "30291-20",
+      "ops": [
+        {
+          "op": "give_item",
+          "itemId": 955,
+          "count": 1
+        },
+        {
+          "op": "give_adena",
+          "count": 45000
+        }
+      ],
+      "htmlFile": "30291-event-30291-20-037.htm"
+    },
+    {
+      "npcId": 30608,
+      "hook": "event",
+      "when": "absent",
+      "event": "30291-20",
+      "ops": [
+        {
+          "op": "give_item",
+          "itemId": 955,
+          "count": 1
+        },
+        {
+          "op": "give_adena",
+          "count": 45000
+        }
+      ],
+      "htmlFile": "30608-event-30291-20-038.htm"
+    },
+    {
+      "npcId": 30291,
+      "hook": "event",
+      "when": "absent",
+      "event": "30291-22",
+      "htmlFile": "30291-event-30291-22-039.htm"
+    },
+    {
+      "npcId": 30608,
+      "hook": "event",
+      "when": "absent",
+      "event": "30291-22",
+      "htmlFile": "30608-event-30291-22-040.htm"
+    }
+  ]
+}

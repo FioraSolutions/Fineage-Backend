@@ -1,0 +1,336 @@
+{
+  "id": 106,
+  "name": "Forgotten Truth",
+  "repeatable": false,
+  "abortable": true,
+  "questItems": [
+    984,
+    985,
+    986,
+    987,
+    988
+  ],
+  "dialogs": [
+    {
+      "npcId": 30358,
+      "hook": "talk",
+      "when": "absent",
+      "races": [
+        0,
+        1,
+        3,
+        4
+      ],
+      "htmlFile": "30358-talk-000.htm"
+    },
+    {
+      "npcId": 30358,
+      "hook": "talk",
+      "when": "absent",
+      "races": [
+        2
+      ],
+      "maxLevel": 9,
+      "htmlFile": "30358-talk-001.htm"
+    },
+    {
+      "npcId": 30358,
+      "hook": "talk",
+      "when": "absent",
+      "races": [
+        2
+      ],
+      "minLevel": 10,
+      "htmlFile": "30358-talk-002.htm"
+    },
+    {
+      "npcId": 30358,
+      "hook": "event",
+      "when": "absent",
+      "event": "30358-04",
+      "races": [
+        2
+      ],
+      "minLevel": 10,
+      "htmlFile": "30358-event-30358-04-003.htm"
+    },
+    {
+      "npcId": 30358,
+      "hook": "event",
+      "when": "absent",
+      "event": "30358-05",
+      "races": [
+        2
+      ],
+      "minLevel": 10,
+      "ops": [
+        {
+          "op": "create"
+        },
+        {
+          "op": "start"
+        },
+        {
+          "op": "give_item",
+          "itemId": 984,
+          "count": 1
+        },
+        {
+          "op": "set_cond",
+          "cond": 1
+        }
+      ],
+      "htmlFile": "30358-event-30358-05-004.htm"
+    },
+    {
+      "npcId": 30358,
+      "hook": "talk",
+      "when": "started",
+      "hasAny": [
+        984,
+        985
+      ],
+      "lacksItems": [
+        988
+      ],
+      "htmlFile": "30358-talk-005.htm"
+    },
+    {
+      "npcId": 30358,
+      "hook": "talk",
+      "when": "started",
+      "cond": 4,
+      "hasItem": 988,
+      "isMage": true,
+      "ops": [
+        {
+          "op": "give_item",
+          "itemId": 2373,
+          "count": 1
+        },
+        {
+          "op": "give_item",
+          "itemId": 1060,
+          "count": 100
+        },
+        {
+          "op": "give_item",
+          "itemId": 4412,
+          "count": 10
+        },
+        {
+          "op": "give_item",
+          "itemId": 4413,
+          "count": 10
+        },
+        {
+          "op": "give_item",
+          "itemId": 4414,
+          "count": 10
+        },
+        {
+          "op": "give_item",
+          "itemId": 4415,
+          "count": 10
+        },
+        {
+          "op": "give_item",
+          "itemId": 4416,
+          "count": 10
+        },
+        {
+          "op": "give_adena",
+          "count": 10266
+        },
+        {
+          "op": "give_exp_sp",
+          "exp": 24195,
+          "sp": 2074
+        },
+        {
+          "op": "complete"
+        }
+      ],
+      "htmlFile": "30358-talk-c4-006.htm"
+    },
+    {
+      "npcId": 30358,
+      "hook": "talk",
+      "when": "started",
+      "cond": 4,
+      "hasItem": 988,
+      "isMage": false,
+      "ops": [
+        {
+          "op": "give_item",
+          "itemId": 989,
+          "count": 1
+        },
+        {
+          "op": "give_item",
+          "itemId": 1060,
+          "count": 100
+        },
+        {
+          "op": "give_item",
+          "itemId": 4412,
+          "count": 10
+        },
+        {
+          "op": "give_item",
+          "itemId": 4413,
+          "count": 10
+        },
+        {
+          "op": "give_item",
+          "itemId": 4414,
+          "count": 10
+        },
+        {
+          "op": "give_item",
+          "itemId": 4415,
+          "count": 10
+        },
+        {
+          "op": "give_item",
+          "itemId": 4416,
+          "count": 10
+        },
+        {
+          "op": "give_adena",
+          "count": 10266
+        },
+        {
+          "op": "give_exp_sp",
+          "exp": 24195,
+          "sp": 2074
+        },
+        {
+          "op": "complete"
+        }
+      ],
+      "htmlFile": "30358-talk-c4-007.htm"
+    },
+    {
+      "npcId": 30133,
+      "hook": "talk",
+      "when": "started",
+      "cond": 1,
+      "hasItem": 984,
+      "ops": [
+        {
+          "op": "take_item",
+          "itemId": 984,
+          "count": 1
+        },
+        {
+          "op": "give_item",
+          "itemId": 985,
+          "count": 1
+        },
+        {
+          "op": "set_cond",
+          "cond": 2
+        }
+      ],
+      "htmlFile": "30133-talk-c1-008.htm"
+    },
+    {
+      "npcId": 30133,
+      "hook": "talk",
+      "when": "started",
+      "cond": 2,
+      "hasItem": 985,
+      "htmlFile": "30133-talk-c2-009.htm"
+    },
+    {
+      "npcId": 30133,
+      "hook": "talk",
+      "when": "started",
+      "cond": 3,
+      "hasItems": [
+        986,
+        987
+      ],
+      "ops": [
+        {
+          "op": "take_item",
+          "itemId": 986,
+          "count": 1
+        },
+        {
+          "op": "take_item",
+          "itemId": 987,
+          "count": 1
+        },
+        {
+          "op": "take_item",
+          "itemId": 985,
+          "count": 1
+        },
+        {
+          "op": "give_item",
+          "itemId": 988,
+          "count": 1
+        },
+        {
+          "op": "set_cond",
+          "cond": 4
+        }
+      ],
+      "htmlFile": "30133-talk-c3-010.htm"
+    },
+    {
+      "npcId": 30133,
+      "hook": "talk",
+      "when": "started",
+      "cond": 4,
+      "hasItem": 988,
+      "htmlFile": "30133-talk-c4-011.htm"
+    },
+    {
+      "npcId": 27070,
+      "hook": "kill",
+      "when": "started",
+      "cond": 2,
+      "hasItem": 985,
+      "lacksItems": [
+        986
+      ],
+      "html": "",
+      "ops": [
+        {
+          "op": "drop_item",
+          "itemId": 986,
+          "count": 1,
+          "chance": 0.2,
+          "limit": 1
+        }
+      ]
+    },
+    {
+      "npcId": 27070,
+      "hook": "kill",
+      "when": "started",
+      "cond": 2,
+      "hasItems": [
+        985,
+        986
+      ],
+      "lacksItems": [
+        987
+      ],
+      "html": "",
+      "ops": [
+        {
+          "op": "drop_item",
+          "itemId": 987,
+          "count": 1,
+          "chance": 0.2,
+          "limit": 1,
+          "condAtLimit": 3
+        }
+      ]
+    }
+  ]
+}

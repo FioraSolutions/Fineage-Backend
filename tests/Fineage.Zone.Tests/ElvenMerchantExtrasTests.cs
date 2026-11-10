@@ -1,6 +1,7 @@
 using Fineage.Net.Contract;
 using Fineage.Protocol;
 using Fineage.Zone.Net;
+using Fineage.Zone.World;
 using Fineage.Zone.NpcHtml;
 using Xunit;
 
@@ -25,7 +26,7 @@ public sealed class ElvenMerchantExtrasTests
         var (bridge, rec) = NetBridgeRecorder.Create();
         kit.World.NetBridge = bridge;
         Assert.Null(kit.World.NpcServiceForTest(session, 30147, NpcServiceIntent.TerritoryStatus));
-        var html = ((NpcHtmlNetMsg)rec.Of(nameof(INetPresenceBridge.FanoutNpcHtml)).Last()[1]!).Html;
+        var html = ((NpcHtmlMsg)rec.Of(nameof(IWorldEventPublisher.FanoutNpcHtml)).Last()[1]!).Html;
         Assert.Contains("Oren", html);
         Assert.Contains("Elven Village", html);
         Assert.Contains("not ruled by any clan", html);
@@ -40,7 +41,7 @@ public sealed class QuestItemLockTests
         var kit = new NetTestKit();
         var (session, elf) = await kit.EnterAsync();
         var club = elf.Inventory!.AddPieces(1335, 1)[0];
-        var error = await kit.World.TryDropItemAsync(session, new DropItemRequestMsg { ObjectId = club.ObjectId, Count = 1 }, CancellationToken.None);
+        var error = await kit.World.TryDropItemAsync(session, club.ObjectId, 1, 0, 0, 0, CancellationToken.None);
         Assert.Equal("bad_request", error);
         Assert.Equal(1, elf.Inventory.CountOf(1335));
     }

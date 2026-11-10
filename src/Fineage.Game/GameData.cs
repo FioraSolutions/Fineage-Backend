@@ -64,7 +64,7 @@ public sealed class GameData
         var items = ReadItems(Path.Combine(dataDirectory, ItemsFileName));
         var kits = ReadKits(Path.Combine(dataDirectory, StarterKitsFileName), items);
         var classes = ClassCatalog.Load(dataDirectory);
-        var quests = QuestCatalog.Load(Path.Combine(dataDirectory, QuestCatalog.FileName), items);
+        var quests = QuestCatalog.LoadPack(Path.Combine(dataDirectory, QuestCatalog.DirectoryName), items);
         var skills = SkillCatalog.Load(Path.Combine(dataDirectory, SkillCatalog.FileName));
         var skillTrees = SkillTreeCatalog.Load(Path.Combine(dataDirectory, SkillTreeCatalog.FileName));
         var recipes = RecipeCatalog.Load(Path.Combine(dataDirectory, RecipeCatalog.FileName));
@@ -205,6 +205,8 @@ public sealed class GameData
                 Math.Max(0, row.AttackRange),
                 Math.Max(0, row.RandomDamage),
                 Math.Max(0, row.MDef),
+                Math.Max(0, row.MaxMp),
+                Math.Max(0, row.MaxHp),
                 Math.Max(0, row.Soulshots),
                 Math.Max(0, row.ShieldDef),
                 Math.Max(0, row.ShieldRate),
@@ -478,6 +480,10 @@ public sealed class GameData
         public int RandomDamage { get; set; }
         /// <summary>Mobius jewel <c>add stat="mDef"</c>.</summary>
         public int MDef { get; set; }
+        /// <summary>Mobius jewel/armor <c>add stat="maxMp"</c>.</summary>
+        public int MaxMp { get; set; }
+        /// <summary>Mobius item <c>add stat="maxHp"</c>.</summary>
+        public int MaxHp { get; set; }
         /// <summary>Mobius weapon <c>soulshots</c>: shots consumed per charge.</summary>
         public int Soulshots { get; set; }
         /// <summary>Mobius shield <c>sDef</c> / <c>rShld</c> / <c>sub rEvas</c>.</summary>

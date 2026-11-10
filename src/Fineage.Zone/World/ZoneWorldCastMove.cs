@@ -51,10 +51,11 @@ public sealed partial class ZoneWorld
     }
 
     /// <summary>Mobius Player.useMagic while isCastingNow(): queue the skill for when the current cast ends.</summary>
-    void QueueSkillAfterCast(ZoneSession session, ZoneEntity player, SkillUseRequestMsg request)
+    void QueueSkillAfterCast(ZoneSession session, ZoneEntity player, SkillUseIntent request)
     {
         session.PendingCastSkillId = request.SkillId;
         session.PendingCastTargetId = request.TargetObjectId > 0 ? request.TargetObjectId : session.SelectedTargetId;
+        session.PendingCastCtrlPressed = request.CtrlPressed;
         session.PendingCastAtUnixMs = player.CastingUntilMs;
         ZoneLog.Info($"[cast] queued skill={request.SkillId} obj={player.ObjectId} at={player.CastingUntilMs}");
     }
@@ -72,7 +73,7 @@ public sealed partial class ZoneWorld
                 var move = session.QueuedMove;
                 session.QueuedMove = null;
                 if (!player.Dead)
-                    TryMove(session, move);
+                    TryMove(session, move.DestX, move.DestY, move.DestZ);
             }
             if (session.SitOnArrive && !player.MoveActive)
             {

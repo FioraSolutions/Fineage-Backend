@@ -30,15 +30,15 @@ public sealed class NetCastMoveTests
         player.CurMp = player.MaxMp = 500;
         var (bridge, _) = NetBridgeRecorder.Create();
         kit.World.NetBridge = bridge;
-        Assert.Null(await kit.World.TrySelectTargetAsync(session, new SelectTargetMsg { TargetObjectId = MobId }, CancellationToken.None));
+        Assert.Null(await kit.World.TrySelectTargetAsync(session, MobId, CancellationToken.None));
         return (kit, session, player);
     }
 
     static Task<string?> Move(NetTestKit kit, ZoneSession s, ZoneEntity p, int dx) =>
-        kit.World.TryMoveAsync(s, new MoveToMsg { ObjectId = p.ObjectId, DestX = p.X + dx, DestY = p.Y, DestZ = p.Z }, CancellationToken.None);
+        kit.World.TryMoveAsync(s, p.X + dx, p.Y, p.Z, CancellationToken.None);
 
     static Task<string?> Cast(NetTestKit kit, ZoneSession s, int skill = WindStrike) =>
-        kit.World.TrySkillUseAsync(s, new SkillUseRequestMsg { SkillId = skill, TargetObjectId = MobId }, CancellationToken.None);
+        kit.World.TrySkillUseAsync(s, skill, MobId, CancellationToken.None);
 
     long Now(NetTestKit kit) => kit.Now.ToUnixTimeMilliseconds();
 
@@ -96,10 +96,10 @@ public sealed class NetCastMoveTests
     public async Task No_sit_while_casting_and_sit_on_arrival_while_running()
     {
         var (kit, session, player) = await SetupAsync();
-        var sit = new CharacterActionRequestMsg { ActionId = ActionProtocol.SitStand };
         Assert.Null(await Cast(kit, session));
         player.CombatUntilUnixMs = 0;
-        Assert.Equal(ActionProtocol.Blocked, await kit.World.TryCharacterActionAsync(session, sit, CancellationToken.None));
+        Assert.Equal(ActionProtocol.Blocked, await kit.World.TryCharacterActionAsync(
+            session, ActionProtocol.SitStand, 0, CancellationToken.None));
         Assert.False(player.Sitting);
 
         kit.Now = DateTimeOffset.FromUnixTimeMilliseconds(player.CastingUntilMs + 1);
@@ -107,7 +107,8 @@ public sealed class NetCastMoveTests
         player.CombatUntilUnixMs = 0;
         Assert.Null(await Move(kit, session, player, -200));
         Assert.True(player.MoveActive);
-        Assert.Null(await kit.World.TryCharacterActionAsync(session, sit, CancellationToken.None));
+        Assert.Null(await kit.World.TryCharacterActionAsync(
+            session, ActionProtocol.SitStand, 0, CancellationToken.None));
         Assert.False(player.Sitting);
         Assert.True(session.SitOnArrive);
 

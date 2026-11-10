@@ -1,0 +1,61 @@
+{
+  "id": 247,
+  "name": "PossessorOfAPreciousSoul4",
+  "repeatable": false,
+  "abortable": true,
+  "questItems": [],
+  "dialogs": [
+    {
+      "npcId": 31740,
+      "hook": "talk",
+      "when": "started",
+      "htmlFile": "31740-talk-000.htm"
+    },
+    {
+      "npcId": 31745,
+      "hook": "talk",
+      "when": "absent",
+      "htmlFile": "31745-talk-001.htm"
+    },
+    {
+      "npcId": 31740,
+      "hook": "event",
+      "when": "absent",
+      "event": "31740-3",
+      "ops": [
+        {
+          "op": "take_item",
+          "itemId": 7679,
+          "count": 1
+        }
+      ],
+      "htmlFile": "31740-event-31740-3-002.htm"
+    },
+    {
+      "npcId": 31740,
+      "hook": "event",
+      "when": "absent",
+      "event": "31740-5",
+      "htmlFile": "31740-event-31740-5-003.htm"
+    },
+    {
+      "npcId": 31740,
+      "hook": "event",
+      "when": "absent",
+      "event": "31745-5",
+      "ops": [
+        {
+          "op": "give_item",
+          "itemId": 7694,
+          "count": 1
+        },
+        {
+          "op": "give_exp_sp",
+          "exp": 93836,
+          "sp": 0
+        }
+      ],
+      "htmlFile": "31740-event-31745-5-004.htm"
+    }
+  ]
+}

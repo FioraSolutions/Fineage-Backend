@@ -1,5 +1,6 @@
-using Fineage.Login;
-using Fineage.Net.Contract;
+using Fineage.Accounts;
+using Fineage.Protocol;
+using Fineage.Zone.Shortcuts;
 
 namespace Fineage.Zone.World;
 
@@ -12,7 +13,7 @@ namespace Fineage.Zone.World;
 public sealed partial class ZoneWorld
 {
     /// <summary>Outcome of a shortcut request: echo one slot as registered, or tell the client the slot is empty.</summary>
-    internal readonly record struct ShortcutReply(ShortCutNetMsg? Register, int? DeleteSlot, string? Error);
+    internal readonly record struct ShortcutReply(ShortCutMsg? Register, int? DeleteSlot, string? Error);
 
     void LoadShortcuts(ZoneEntity entity, CharacterRecord? stored)
     {
@@ -31,8 +32,16 @@ public sealed partial class ZoneWorld
             var row = s;
             if (s.Type == StoredShortcut.TypeItem && entity.Inventory?.Find(s.Id) == null)
             {
+                // Stackables (soulshots etc.): objectId changes when the stack is emptied and restocked.
+                // Remap to a live bag row of the same itemId so the hotbar survives restock/relog.
+                var remapped = RemapItemShortcut(entity, s);
+                if (remapped == null)
+                {
+                    pruned = true;
+                    continue;
+                }
+                row = remapped;
                 pruned = true;
-                continue;
             }
 
             if (s.Type == StoredShortcut.TypeSkill && entity.KnownSkills.TryGetValue(s.Id, out int lvl) && lvl != s.Level)
@@ -50,27 +59,42 @@ public sealed partial class ZoneWorld
 
     void SaveShortcuts(ZoneSession session, ZoneEntity entity)
     {
-        if (_accounts == null)
+        // Persist immediately (Mobius registerShortCut). Log when the store refuses the write —
+        // silent false left players with a painted hotbar that vanished on relog.
+        var rows = entity.Shortcuts.Values.ToList();
+        if (!_persist.Enabled)
             return;
-        _accounts.TryReplaceShortcuts(session.Account, session.ObjectId, entity.Shortcuts.Values.ToList());
+        try
+        {
+            if (!_persist.ReplaceShortcuts(session.Account, session.ObjectId, rows))
+                ZoneLog.Warn(
+                    $"shortcut persist refused account={session.Account} char={session.ObjectId} count={rows.Count}");
+        }
+        catch (Exception ex)
+        {
+            ZoneLog.Warn($"shortcut persist failed account={session.Account} char={session.ObjectId}: {ex.Message}");
+        }
     }
 
-    static ShortCutNetMsg ToNet(StoredShortcut s) =>
+    static ShortCutMsg ToProtocol(StoredShortcut s) =>
         new() { Type = s.Type, Slot = s.WorldSlot, Id = s.Id, Level = s.Level };
 
     /// <summary>ShortCutInit rows for the live player (world-slot order).</summary>
-    internal ShortCutInitNetMsg NetShortcutInit(ZoneSession session)
+    internal ShortCutInitMsg BuildShortcutInit(ZoneSession session)
     {
         lock (_gate)
         {
             if (!_byId.TryGetValue(session.ObjectId, out var e) || e.Kind != ZoneEntityKind.Player)
-                return new ShortCutInitNetMsg();
-            return new ShortCutInitNetMsg
+                return new ShortCutInitMsg();
+            return new ShortCutInitMsg
             {
-                Shortcuts = e.Shortcuts.Values.OrderBy(s => s.WorldSlot).Select(ToNet).ToArray()
+                Shortcuts = e.Shortcuts.Values.OrderBy(s => s.WorldSlot).Select(ToProtocol).ToArray()
             };
         }
     }
+
+    /// <summary>Legacy name used by enter / tests; same as <see cref="BuildShortcutInit"/>.</summary>
+    internal ShortCutInitMsg NetShortcutInit(ZoneSession session) => BuildShortcutInit(session);
 
     /// <summary>Mobius RequestShortCutReg. Rejected requests reply with the slot's current server state.</summary>
     internal ShortcutReply RegisterShortcut(ZoneSession session, int type, int worldSlot, int id, int level)
@@ -80,8 +104,8 @@ public sealed partial class ZoneWorld
             if (!IsLive(session) || !_byId.TryGetValue(session.ObjectId, out var e) || e.Kind != ZoneEntityKind.Player)
                 return new ShortcutReply(null, null, "world");
 
-            if (worldSlot < 0 || worldSlot >= StoredShortcut.SlotsPerPage * StoredShortcut.MaxPages)
-                return new ShortcutReply(null, null, "shortcut_slot");
+            if (ShortCutRules.SlotError(worldSlot) is { } slotError)
+                return new ShortcutReply(null, null, slotError);
 
             var row = new StoredShortcut(
                 worldSlot % StoredShortcut.SlotsPerPage,
@@ -89,31 +113,25 @@ public sealed partial class ZoneWorld
                 type,
                 id,
                 Math.Max(0, level));
-            string? error = null;
-            if (!row.IsValid)
-                error = "shortcut_invalid";
-            else if (type == StoredShortcut.TypeItem)
+            bool itemOwned = type != StoredShortcut.TypeItem || e.Inventory?.Find(id) != null;
+            int knownLevel = 0;
+            bool skillKnown = type != StoredShortcut.TypeSkill
+                || e.KnownSkills.TryGetValue(id, out knownLevel);
+            if (ShortCutRules.RegisterError(row.IsValid, type, itemOwned, skillKnown) is { } error)
+                return Current(e, worldSlot, error);
+
+            if (type == StoredShortcut.TypeItem)
             {
-                if (e.Inventory?.Find(id) == null)
-                    error = Fineage.Protocol.InventoryProtocol.NotOwned;
-                else
-                    row = row with { Level = 0 };
+                // Persist itemId in Level so LoadShortcuts can rebind after a stack is emptied/restocked.
+                int itemId = e.Inventory?.Find(id)?.ItemId ?? 0;
+                row = row with { Level = itemId };
             }
             else if (type == StoredShortcut.TypeSkill)
-            {
-                // Mobius: the bar shows the level the player knows, not what the client claims.
-                if (!e.KnownSkills.TryGetValue(id, out int known))
-                    error = "skill_unknown";
-                else
-                    row = row with { Level = known };
-            }
-
-            if (error != null)
-                return Current(e, worldSlot, error);
+                row = row with { Level = knownLevel };
 
             e.Shortcuts[worldSlot] = row;
             SaveShortcuts(session, e);
-            return new ShortcutReply(ToNet(row), null, null);
+            return new ShortcutReply(ToProtocol(row), null, null);
         }
     }
 
@@ -124,8 +142,8 @@ public sealed partial class ZoneWorld
         {
             if (!IsLive(session) || !_byId.TryGetValue(session.ObjectId, out var e) || e.Kind != ZoneEntityKind.Player)
                 return new ShortcutReply(null, null, "world");
-            if (worldSlot < 0 || worldSlot >= StoredShortcut.SlotsPerPage * StoredShortcut.MaxPages)
-                return new ShortcutReply(null, null, "shortcut_slot");
+            if (ShortCutRules.SlotError(worldSlot) is { } slotError)
+                return new ShortcutReply(null, null, slotError);
             if (e.Shortcuts.Remove(worldSlot))
                 SaveShortcuts(session, e);
             return new ShortcutReply(null, worldSlot, null);
@@ -134,6 +152,17 @@ public sealed partial class ZoneWorld
 
     static ShortcutReply Current(ZoneEntity e, int worldSlot, string error) =>
         e.Shortcuts.TryGetValue(worldSlot, out var existing)
-            ? new ShortcutReply(ToNet(existing), null, error)
+            ? new ShortcutReply(ToProtocol(existing), null, error)
             : new ShortcutReply(null, worldSlot, error);
+
+    /// <summary>
+    /// When an ITEM shortcut's objectId is gone, rebind via Level (stored itemId) to a live bag stack.
+    /// </summary>
+    static StoredShortcut? RemapItemShortcut(ZoneEntity entity, StoredShortcut stale)
+    {
+        if (entity.Inventory == null || stale.Level <= 0)
+            return null;
+        var stack = entity.Inventory.FindByItemId(stale.Level);
+        return stack == null ? null : stale with { Id = stack.ObjectId };
+    }
 }

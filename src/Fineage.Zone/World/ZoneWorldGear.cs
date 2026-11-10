@@ -1,6 +1,6 @@
 using Fineage.Game;
-using Fineage.Net.Contract;
 using Fineage.Protocol;
+using Fineage.Zone.Inventory;
 
 namespace Fineage.Zone.World;
 
@@ -22,37 +22,20 @@ public sealed partial class ZoneWorld
         }
     }
 
-    public Task<string?> TryUseItemAsync(ZoneSession session, UseItemMsg request, CancellationToken ct)
+    public Task<string?> TryUseItemAsync(ZoneSession session, int objectId, CancellationToken ct)
     {
-        string? error;
-        lock (_gate)
-            error = TryUseItem(session, request.ObjectId);
-        if (error != null)
-            return Task.FromResult<string?>(error);
-
-        return Task.FromResult<string?>(null);
+        // World mutate under _gate; Postgres inventory write after unlock (B8).
+        return Task.FromResult(WithDeferredInventoryPersist(() => TryUseItem(session, objectId)));
     }
 
-    public Task<string?> TryUnequipItemAsync(ZoneSession session, UnequipItemMsg request, CancellationToken ct)
+    public Task<string?> TryUnequipItemAsync(ZoneSession session, int paperdollSlot, CancellationToken ct)
     {
-        string? error;
-        lock (_gate)
-            error = TryUnequipItem(session, request.PaperdollSlot);
-        if (error != null)
-            return Task.FromResult<string?>(error);
-
-        return Task.FromResult<string?>(null);
+        return Task.FromResult(WithDeferredInventoryPersist(() => TryUnequipItem(session, paperdollSlot)));
     }
 
-    public Task<string?> TryGiveItemAsync(ZoneSession session, GiveItemMsg request, CancellationToken ct)
+    public Task<string?> TryGiveItemAsync(ZoneSession session, int itemId, int count, CancellationToken ct)
     {
-        string? error;
-        lock (_gate)
-            error = TryGiveItem(session, request);
-        if (error != null)
-            return Task.FromResult<string?>(error);
-
-        return Task.FromResult<string?>(null);
+        return Task.FromResult(WithDeferredInventoryPersist(() => TryGiveItem(session, itemId, count)));
     }
 
     string? TryUseItem(ZoneSession session, int objectId)
@@ -61,9 +44,9 @@ public sealed partial class ZoneWorld
             return error;
 
         var item = player.Inventory!.Find(objectId);
-        if (item == null)
-            return InventoryProtocol.NotOwned;
-        if (IsShot(item.Template))
+        if (GearRules.UseOwnedError(item != null) is { } ownedError)
+            return ownedError;
+        if (IsShot(item!.Template))
         {
             TryChargeShot(session, player, item, quiet: false);
             return null;
@@ -111,16 +94,17 @@ public sealed partial class ZoneWorld
     {
         if (!TryLivePlayer(session, out var player, out var error))
             return error;
-        if (paperdollSlot < 0 || paperdollSlot > (int)PaperdollSlot.Hair2)
-            return InventoryProtocol.BadSlot;
+        if (GearRules.UnequipSlotError(paperdollSlot, (int)PaperdollSlot.Hair2) is { } slotError)
+            return slotError;
 
         var item = player.Inventory!.GetEquipped((PaperdollSlot)paperdollSlot);
-        if (item == null)
-            return InventoryProtocol.Empty;
+        if (GearRules.UnequipEmptyError(item != null) is { } emptyError)
+            return emptyError;
+        var liveItem = item!;
 
         var before = PaperdollSnapshot(player.Inventory);
-        player.Inventory.Unequip(item);
-        if (item.Template.Kind == ItemKind.Weapon)
+        player.Inventory.Unequip(liveItem);
+        if (liveItem.Template.Kind == ItemKind.Weapon)
         {
             player.SoulshotCharged = false;
             player.SpiritshotCharge = 0;
@@ -129,29 +113,27 @@ public sealed partial class ZoneWorld
             return "bad_request";
 
         SaveInventory(session, player.Inventory);
-        ZoneLog.Info($"gear object={session.ObjectId} unequip slot={paperdollSlot} item={item.ObjectId}");
+        ZoneLog.Info($"gear object={session.ObjectId} unequip slot={paperdollSlot} item={liveItem.ObjectId}");
         return null;
     }
 
-    string? TryGiveItem(ZoneSession session, GiveItemMsg request)
+    string? TryGiveItem(ZoneSession session, int itemId, int count)
     {
         if (!IsLive(session))
             return "world";
         if (!_byId.TryGetValue(session.ObjectId, out var player) || player.Inventory == null)
             return "world";
-        if (request.ItemId <= 0 || request.Count <= 0 || request.Count > MaxGrantCount)
-            return "bad_request";
-        if (!_game.Items.TryGet(request.ItemId, out _))
-            return "bad_request";
+        if (GearRules.GrantError(itemId, count, MaxGrantCount, _game.Items.TryGet(itemId, out _)) is { } giveError)
+            return giveError;
 
-        var added = player.Inventory.Add(request.ItemId, request.Count);
+        var added = player.Inventory.Add(itemId, count);
         // Net clients only read the PacketEnvelope path, so the V2 frame alone would leave the bag
         // stale for an admin GiveItem.
         NetBridge?.FanoutInventoryUpdate(
             [session.ObjectId],
-            ToNetInventoryUpdate(InventoryMessages.Update(InventoryChange.Add, added)));
+            InventoryMessages.Update(InventoryChange.Add, added));
         SaveInventory(session, player.Inventory);
-        ZoneLog.Info($"give object={session.ObjectId} item={request.ItemId} count={request.Count}");
+        ZoneLog.Info($"give object={session.ObjectId} item={itemId} count={count}");
         return null;
     }
 
@@ -175,137 +157,4 @@ public sealed partial class ZoneWorld
         return true;
     }
 
-    bool PublishGear(
-        ZoneSession session,
-        ZoneEntity player,
-        Dictionary<int, int> before)
-    {
-        var changed = PaperdollChanges(player.Inventory!, before);
-        if (changed.Count == 0)
-            return false;
-
-        RefreshGradePenalty(player);
-        RefreshRunSpeedAndFanout(player);
-        var invUpdate = InventoryMessages.Modify(changed);
-        SelfUserInfo(player);
-        if (NetBridge != null)
-            NetBridge.FanoutInventoryUpdate([session.ObjectId], ToNetInventoryUpdate(invUpdate));
-        List<int>? netPeers = null;
-        foreach (int id in player.Knownlist)
-        {
-            if (_byId.TryGetValue(id, out var other) && other.Session != null)
-            {
-                (netPeers ??= []).Add(id);
-            }
-        }
-        // Mobius broadcastUserInfo: peers get a fresh CharInfo (Net EntitySpawn with paperdoll) after gear changes.
-        if (netPeers != null && NetBridge != null)
-            NetBridge.FanoutCharInfo(netPeers, player.ObjectId);
-
-        return true;
-    }
-
-    static Dictionary<int, int> PaperdollSnapshot(PlayerInventory inventory)
-    {
-        var slots = new Dictionary<int, int>(inventory.Items.Count);
-        foreach (var item in inventory.Items)
-            slots.Add(item.ObjectId, item.EquippedSlot is { } slot ? (int)slot : -1);
-        return slots;
-    }
-
-    static List<ItemInstance> PaperdollChanges(PlayerInventory inventory, Dictionary<int, int> before)
-    {
-        var changed = new List<ItemInstance>();
-        foreach (var item in inventory.Items)
-        {
-            int slot = item.EquippedSlot is { } worn ? (int)worn : -1;
-            if (!before.TryGetValue(item.ObjectId, out int prior) || prior != slot)
-                changed.Add(item);
-        }
-
-        changed.Sort(static (a, b) => a.ObjectId.CompareTo(b.ObjectId));
-        return changed;
-    }
-
-    /// <summary>
-    /// Clan, hero, castle, and PvP standing used by equip conditions.
-    /// Defaults are an ordinary character: not a hero, not in a clan, not PvP flagged.
-    /// </summary>
-    public bool TrySetEquipStanding(int objectId, PlayerEquipStanding standing)
-    {
-        ArgumentNullException.ThrowIfNull(standing);
-        lock (_gate)
-        {
-            if (!_byId.TryGetValue(objectId, out var entity) || entity.Kind != ZoneEntityKind.Player)
-                return false;
-            entity.Hero = standing.Hero;
-            entity.InClan = standing.InClan;
-            entity.ClanLeader = standing.ClanLeader;
-            entity.PledgeClass = standing.PledgeClass;
-            entity.CastleId = standing.CastleId;
-            entity.HideoutId = standing.HideoutId;
-            entity.PvpFlagged = standing.PvpFlagged;
-            entity.PkKills = standing.PkKills;
-            entity.ExpertiseBonus = standing.ExpertiseBonus;
-            RefreshGradePenalty(entity);
-            return true;
-        }
-    }
-
-    void RefreshGradePenalty(ZoneEntity player)
-    {
-        if (player.Inventory == null)
-            return;
-        var penalty = GradePenalty.Compute(
-            player.Inventory.Items,
-            Expertise.ForLevel(player.Level),
-            player.ExpertiseBonus,
-            _expertisePenalty);
-        bool changed = penalty.Weapon != player.WeaponGradePenalty || penalty.Armor != player.ArmorGradePenalty;
-        player.WeaponGradePenalty = penalty.Weapon;
-        player.ArmorGradePenalty = penalty.Armor;
-        player.GradePenaltyLevel = penalty.SkillLevel;
-        // Mobius refreshExpertisePenalty ends with sendPacket(new EtcStatusUpdate(this)). Without it the Net client
-        // keeps the previous grade-penalty flag, so the icon disagrees with the penalty UserInfo now reports.
-        if (changed)
-            FanoutNetEtcStatus(player);
-    }
-
-    static string? Restriction(ZoneEntity player, ItemInstance item)
-    {
-        var deny = item.Template.Equip?.Deny(Actor(player));
-        return deny == null ? null : EquipDenyCode(deny.Value);
-    }
-
-    static EquipActor Actor(ZoneEntity player) => new(
-        player.ClassId,
-        player.Race,
-        player.Sex,
-        player.Level,
-        player.Hero,
-        player.InClan,
-        player.ClanLeader,
-        player.PledgeClass,
-        player.CastleId,
-        player.HideoutId,
-        player.PvpFlagged,
-        player.PkKills);
-
-    static string EquipDenyCode(EquipDeny deny) => deny switch
-    {
-        EquipDeny.Class => InventoryProtocol.ClassRestricted,
-        EquipDeny.Race => InventoryProtocol.RaceRestricted,
-        EquipDeny.Sex => InventoryProtocol.SexRestricted,
-        EquipDeny.Hero => InventoryProtocol.HeroRestricted,
-        EquipDeny.ClanLeader => InventoryProtocol.ClanLeaderRestricted,
-        EquipDeny.Pledge => InventoryProtocol.PledgeRestricted,
-        EquipDeny.Pvp => InventoryProtocol.PvpRestricted,
-        EquipDeny.Level => InventoryProtocol.LevelRestricted,
-        EquipDeny.Castle => InventoryProtocol.CastleRestricted,
-        EquipDeny.ClanHall => InventoryProtocol.ClanHallRestricted,
-        EquipDeny.Pk => InventoryProtocol.PkRestricted,
-        EquipDeny.Grade => InventoryProtocol.GradeRestricted,
-        EquipDeny.Condition => InventoryProtocol.ConditionRestricted,
-        _ => InventoryProtocol.ConditionRestricted
-    };
 }

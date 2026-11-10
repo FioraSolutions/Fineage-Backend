@@ -1,0 +1,66 @@
+{
+  "id": 27,
+  "name": "ChestCaughtWithABaitOfWind",
+  "repeatable": false,
+  "abortable": true,
+  "questItems": [
+    7625
+  ],
+  "dialogs": [
+    {
+      "npcId": 31570,
+      "hook": "talk",
+      "when": "started",
+      "hasItem": 6500,
+      "htmlFile": "31570-talk-000.htm"
+    },
+    {
+      "npcId": 31434,
+      "hook": "talk",
+      "when": "started",
+      "htmlFile": "31434-talk-001.htm"
+    },
+    {
+      "npcId": 31570,
+      "hook": "event",
+      "when": "absent",
+      "event": "31570-03",
+      "htmlFile": "31570-event-31570-03-002.htm"
+    },
+    {
+      "npcId": 31570,
+      "hook": "event",
+      "when": "absent",
+      "event": "31570-05",
+      "hasItem": 6500,
+      "ops": [
+        {
+          "op": "take_item",
+          "itemId": 6500,
+          "count": 1
+        },
+        {
+          "op": "give_item",
+          "itemId": 7625,
+          "count": 1
+        }
+      ],
+      "htmlFile": "31570-event-31570-05-003.htm"
+    },
+    {
+      "npcId": 31570,
+      "hook": "event",
+      "when": "absent",
+      "event": "31434-02",
+      "hasItem": 7625,
+      "ops": [
+        {
+          "op": "give_item",
+          "itemId": 880,
+          "count": 1
+        }
+      ],
+      "htmlFile": "31570-event-31434-02-004.htm"
+    }
+  ]
+}

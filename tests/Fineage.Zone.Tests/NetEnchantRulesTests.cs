@@ -1,4 +1,5 @@
 using Fineage.Game;
+using Fineage.Accounts;
 using Fineage.Login;
 using Fineage.Net.Contract;
 using Fineage.Protocol;
@@ -11,7 +12,7 @@ namespace Fineage.Zone.Tests;
 /// <summary>
 /// Mobius enchant <em>roll</em> rules on the world layer: what each scroll's fail mode does to the item, the bag
 /// and the paperdoll. The Net transport cases live in <see cref="NetEnchantTests"/>; these assert the outcome
-/// through <see cref="INetPresenceBridge"/> instead of reading MessagePack frames.
+/// through <see cref="IWorldEventPublisher"/> instead of reading MessagePack frames.
 /// </summary>
 public sealed class NetEnchantRulesTests
 {
@@ -83,17 +84,16 @@ public sealed class NetEnchantRulesTests
     static async Task<int> OpenScrollAsync(Bench bench, ZoneSession session, ZoneEntity player, int scrollId)
     {
         int scroll = SlotFor(player, scrollId);
-        Assert.Null(await bench.World.TryEnchantRequestAsync(session,
-            new EnchantRequestMsg { ObjectId = scroll }, default));
+        Assert.Null(await bench.World.TryEnchantRequestAsync(session, scroll, default));
         return scroll;
     }
 
-    static EnchantResultNetMsg LastResult(NetBridgeRecorder rec) =>
-        Assert.IsType<EnchantResultNetMsg>(rec.Of(nameof(INetPresenceBridge.FanoutEnchantResult)).Last()[1]);
+    static EnchantResultMsg LastResult(NetBridgeRecorder rec) =>
+        Assert.IsType<EnchantResultMsg>(rec.Of(nameof(IWorldEventPublisher.FanoutEnchantResult)).Last()[1]);
 
-    static IReadOnlyList<SystemMessageNetMsg> Lines(NetBridgeRecorder rec) =>
-        rec.Of(nameof(INetPresenceBridge.FanoutSystemMessage))
-            .Select(args => Assert.IsType<SystemMessageNetMsg>(args[1]))
+    static IReadOnlyList<SystemMessageMsg> Lines(NetBridgeRecorder rec) =>
+        rec.Of(nameof(IWorldEventPublisher.FanoutSystemMessage))
+            .Select(args => Assert.IsType<SystemMessageMsg>(args[1]))
             .ToList();
 
     [Fact]
@@ -104,8 +104,7 @@ public sealed class NetEnchantRulesTests
             new StoredItem(Saber, 1, -1, 3), Bag(NormalD), Bag(CrystalAdena, 2));
 
         await OpenScrollAsync(bench, session, player, NormalD);
-        Assert.Null(await bench.World.TryEnchantConfirmAsync(session,
-            new EnchantConfirmMsg { ObjectId = SlotFor(player, Saber) }, default));
+        Assert.Null(await bench.World.TryEnchantConfirmAsync(session, SlotFor(player, Saber), default));
 
         var result = LastResult(bench.Rec);
         Assert.Equal(EnchantProtocol.ResultCrystallize, result.Result);
@@ -113,8 +112,8 @@ public sealed class NetEnchantRulesTests
         Assert.Equal(CrystalAdena, result.CrystalItemId);
         Assert.Equal(641, result.CrystalCount);
 
-        var update = Assert.IsType<InventoryUpdateNetMsg>(
-            bench.Rec.Of(nameof(INetPresenceBridge.FanoutInventoryUpdate)).Last()[1]);
+        var update = Assert.IsType<InventoryUpdateMsg>(
+            bench.Rec.Of(nameof(IWorldEventPublisher.FanoutInventoryUpdate)).Last()[1]);
         Assert.Contains(update.Changes, row => row.Change == InventoryChange.Remove &&
                                                row.ItemId == Saber && row.EnchantLevel == 3 && row.Count == 0);
         Assert.Contains(update.Changes, row => row.Change == InventoryChange.Modify &&
@@ -139,14 +138,13 @@ public sealed class NetEnchantRulesTests
             new StoredItem(Saber, 1, -1, 3), Bag(BlessedD));
 
         await OpenScrollAsync(bench, session, player, BlessedD);
-        Assert.Null(await bench.World.TryEnchantConfirmAsync(session,
-            new EnchantConfirmMsg { ObjectId = SlotFor(player, Saber) }, default));
+        Assert.Null(await bench.World.TryEnchantConfirmAsync(session, SlotFor(player, Saber), default));
 
         var result = LastResult(bench.Rec);
         Assert.Equal(EnchantProtocol.ResultReset, result.Result);
         Assert.Equal(0, result.EnchantLevel);
-        var update = Assert.IsType<InventoryUpdateNetMsg>(
-            bench.Rec.Of(nameof(INetPresenceBridge.FanoutInventoryUpdate)).Last()[1]);
+        var update = Assert.IsType<InventoryUpdateMsg>(
+            bench.Rec.Of(nameof(IWorldEventPublisher.FanoutInventoryUpdate)).Last()[1]);
         Assert.Contains(update.Changes, row => row.ItemId == Saber &&
                                                row.EnchantLevel == 0 && row.Change == InventoryChange.Modify);
         Assert.Contains(Lines(bench.Rec), l => l.Id == EnchantProtocol.Reset);
@@ -166,16 +164,15 @@ public sealed class NetEnchantRulesTests
             new StoredItem(Saber, 1, -1, 3), Bag(9001));
 
         await OpenScrollAsync(bench, session, player, 9001);
-        Assert.Null(await bench.World.TryEnchantConfirmAsync(session,
-            new EnchantConfirmMsg { ObjectId = SlotFor(player, Saber) }, default));
+        Assert.Null(await bench.World.TryEnchantConfirmAsync(session, SlotFor(player, Saber), default));
 
         var result = LastResult(bench.Rec);
         Assert.Equal(EnchantProtocol.ResultKeep, result.Result);
         Assert.Equal(3, result.EnchantLevel);
         Assert.Equal(SlotFor(player, Saber), result.ObjectId);
 
-        var update = Assert.IsType<InventoryUpdateNetMsg>(
-            bench.Rec.Of(nameof(INetPresenceBridge.FanoutInventoryUpdate)).Last()[1]);
+        var update = Assert.IsType<InventoryUpdateMsg>(
+            bench.Rec.Of(nameof(IWorldEventPublisher.FanoutInventoryUpdate)).Last()[1]);
         Assert.DoesNotContain(update.Changes, row => row.ItemId == Saber);
         Assert.Contains(update.Changes, row => row.Change == InventoryChange.Remove && row.ItemId == 9001);
         Assert.Contains(Lines(bench.Rec), l => l.Id == EnchantProtocol.Kept);
@@ -196,26 +193,21 @@ public sealed class NetEnchantRulesTests
         int fresh = sabers.Single(s => s.EnchantLevel != 16).ObjectId;
 
         await OpenScrollAsync(bench, session, player, NormalC);
-        Assert.Equal(EnchantProtocol.GradeMismatch, await bench.World.TryEnchantConfirmAsync(session,
-            new EnchantConfirmMsg { ObjectId = fresh }, default));
+        Assert.Equal(EnchantProtocol.GradeMismatch, await bench.World.TryEnchantConfirmAsync(session, fresh, default));
         Assert.Contains(bench.Store.FindById(session.Account, session.ObjectId)!.Items!, item => item.ItemId == NormalC);
 
         await OpenScrollAsync(bench, session, player, NormalD);
-        Assert.Equal(EnchantProtocol.SlotMismatch, await bench.World.TryEnchantConfirmAsync(session,
-            new EnchantConfirmMsg { ObjectId = SlotFor(player, Neck) }, default));
+        Assert.Equal(EnchantProtocol.SlotMismatch, await bench.World.TryEnchantConfirmAsync(session, SlotFor(player, Neck), default));
 
         await OpenScrollAsync(bench, session, player, NormalD);
-        Assert.Equal(EnchantProtocol.NotEnchantable, await bench.World.TryEnchantConfirmAsync(session,
-            new EnchantConfirmMsg { ObjectId = SlotFor(player, 5588) }, default));
+        Assert.Equal(EnchantProtocol.NotEnchantable, await bench.World.TryEnchantConfirmAsync(session, SlotFor(player, 5588), default));
 
         await OpenScrollAsync(bench, session, player, ArmorD);
-        Assert.Null(await bench.World.TryEnchantConfirmAsync(session,
-            new EnchantConfirmMsg { ObjectId = SlotFor(player, Neck) }, default));
+        Assert.Null(await bench.World.TryEnchantConfirmAsync(session, SlotFor(player, Neck), default));
         Assert.Equal(1, LastResult(bench.Rec).EnchantLevel);
 
         await OpenScrollAsync(bench, session, player, NormalD);
-        Assert.Equal(EnchantProtocol.MaxEnchant, await bench.World.TryEnchantConfirmAsync(session,
-            new EnchantConfirmMsg { ObjectId = capped }, default));
+        Assert.Equal(EnchantProtocol.MaxEnchant, await bench.World.TryEnchantConfirmAsync(session, capped, default));
         Assert.Contains(bench.Store.FindById(session.Account, session.ObjectId)!.Items!,
             item => item.ItemId == Saber && item.EnchantLevel == 16);
     }
@@ -229,14 +221,13 @@ public sealed class NetEnchantRulesTests
         await bench.EnterAsync("enchb", "Bram", Bag(Neck));
 
         await OpenScrollAsync(bench, session, player, NormalD);
-        Assert.Null(await bench.World.TryEnchantConfirmAsync(session,
-            new EnchantConfirmMsg { ObjectId = SlotFor(player, Saber) }, default));
+        Assert.Null(await bench.World.TryEnchantConfirmAsync(session, SlotFor(player, Saber), default));
 
-        var info = Assert.IsType<UserInfoNetMsg>(
-            bench.Rec.Of(nameof(INetPresenceBridge.FanoutUserInfo)).Last()[1]);
+        var info = Assert.IsType<Fineage.Protocol.UserInfoMsg>(
+            bench.Rec.Of(nameof(IWorldEventPublisher.FanoutUserInfo)).Last()[1]);
         Assert.Equal(Saber, info.Paperdoll[7].ItemId);
         Assert.Equal(1, info.Paperdoll[7].EnchantLevel);
-        Assert.NotEmpty(bench.Rec.Of(nameof(INetPresenceBridge.FanoutCharInfo)));
+        Assert.NotEmpty(bench.Rec.Of(nameof(IWorldEventPublisher.FanoutCharInfo)));
         Assert.Contains(Lines(bench.Rec), l => l.Id == EnchantProtocol.SuccessPlain);
     }
 
@@ -249,12 +240,11 @@ public sealed class NetEnchantRulesTests
         await bench.EnterAsync("enchb", "Bram", Bag(Neck));
 
         await OpenScrollAsync(bench, session, player, NormalD);
-        Assert.Null(await bench.World.TryEnchantConfirmAsync(session,
-            new EnchantConfirmMsg { ObjectId = SlotFor(player, Saber) }, default));
+        Assert.Null(await bench.World.TryEnchantConfirmAsync(session, SlotFor(player, Saber), default));
 
         Assert.Contains(Lines(bench.Rec), l => l.Id == EnchantProtocol.EquipmentRemoved);
-        var info = Assert.IsType<UserInfoNetMsg>(
-            bench.Rec.Of(nameof(INetPresenceBridge.FanoutUserInfo)).Last()[1]);
+        var info = Assert.IsType<Fineage.Protocol.UserInfoMsg>(
+            bench.Rec.Of(nameof(IWorldEventPublisher.FanoutUserInfo)).Last()[1]);
         Assert.Equal(0, info.Paperdoll[7].ItemId);
         Assert.Equal(0, info.Paperdoll[7].EnchantLevel);
         Assert.Contains(bench.Store.FindById(session.Account, session.ObjectId)!.Items!,
@@ -270,17 +260,15 @@ public sealed class NetEnchantRulesTests
             new StoredItem(Blade, 1, -1, 16), Bag(CrystalS));
 
         await OpenScrollAsync(bench, session, player, CrystalD);
-        Assert.Null(await bench.World.TryEnchantConfirmAsync(session,
-            new EnchantConfirmMsg { ObjectId = SlotFor(player, Saber) }, default));
+        Assert.Null(await bench.World.TryEnchantConfirmAsync(session, SlotFor(player, Saber), default));
         Assert.Equal(4, LastResult(bench.Rec).EnchantLevel);
 
         bench.Rec.Calls.Clear();
         await OpenScrollAsync(bench, session, player, CrystalS);
-        Assert.Null(await bench.World.TryEnchantConfirmAsync(session,
-            new EnchantConfirmMsg { ObjectId = SlotFor(player, Blade) }, default));
+        Assert.Null(await bench.World.TryEnchantConfirmAsync(session, SlotFor(player, Blade), default));
         Assert.Equal(16, LastResult(bench.Rec).EnchantLevel);
-        var update = Assert.IsType<InventoryUpdateNetMsg>(
-            bench.Rec.Of(nameof(INetPresenceBridge.FanoutInventoryUpdate)).Last()[1]);
+        var update = Assert.IsType<InventoryUpdateMsg>(
+            bench.Rec.Of(nameof(IWorldEventPublisher.FanoutInventoryUpdate)).Last()[1]);
         Assert.Contains(update.Changes, row => row.ItemId == Blade && row.EnchantLevel == 16);
         Assert.DoesNotContain(bench.Store.FindById(session.Account, session.ObjectId)!.Items!,
             item => item.ItemId == CrystalS);
@@ -294,8 +282,7 @@ public sealed class NetEnchantRulesTests
             new StoredItem(Full, 1, -1, 3), Bag(ArmorB));
 
         await OpenScrollAsync(bench, session, player, ArmorB);
-        Assert.Null(await bench.World.TryEnchantConfirmAsync(session,
-            new EnchantConfirmMsg { ObjectId = SlotFor(player, Full) }, default));
+        Assert.Null(await bench.World.TryEnchantConfirmAsync(session, SlotFor(player, Full), default));
         Assert.Equal(4, LastResult(bench.Rec).EnchantLevel);
         Assert.Contains(bench.Store.FindById(session.Account, session.ObjectId)!.Items!,
             item => item.ItemId == Full && item.EnchantLevel == 4);
@@ -309,10 +296,8 @@ public sealed class NetEnchantRulesTests
             Bag(Saber), Bag(NormalD), Bag(NormalC));
 
         Assert.Equal(EnchantProtocol.NoRequest, await bench.World.TryEnchantCancelAsync(session, default));
-        Assert.Equal(InventoryProtocol.NotOwned, await bench.World.TryEnchantRequestAsync(session,
-            new EnchantRequestMsg { ObjectId = 999 }, default));
-        Assert.Equal(EnchantProtocol.NotScroll, await bench.World.TryEnchantRequestAsync(session,
-            new EnchantRequestMsg { ObjectId = SlotFor(player, Saber) }, default));
+        Assert.Equal(InventoryProtocol.NotOwned, await bench.World.TryEnchantRequestAsync(session, 999, default));
+        Assert.Equal(EnchantProtocol.NotScroll, await bench.World.TryEnchantRequestAsync(session, SlotFor(player, Saber), default));
 
         await OpenScrollAsync(bench, session, player, NormalD);
         var opened = Assert.Single(Lines(bench.Rec));
@@ -328,15 +313,13 @@ public sealed class NetEnchantRulesTests
 
         bench.Rec.Calls.Clear();
         await OpenScrollAsync(bench, session, player, NormalD);
-        Assert.Null(await bench.World.TryEnchantConfirmAsync(session,
-            new EnchantConfirmMsg { ObjectId = SlotFor(player, Saber) }, default));
+        Assert.Null(await bench.World.TryEnchantConfirmAsync(session, SlotFor(player, Saber), default));
         var success = LastResult(bench.Rec);
         Assert.Equal(EnchantProtocol.ResultSuccess, success.Result);
         Assert.Equal(1, success.EnchantLevel);
         Assert.Equal(SlotFor(player, Saber), success.ObjectId);
         Assert.Contains(Lines(bench.Rec), l => l.Id == EnchantProtocol.SuccessPlain);
 
-        Assert.Equal(EnchantProtocol.NoRequest, await bench.World.TryEnchantConfirmAsync(session,
-            new EnchantConfirmMsg { ObjectId = SlotFor(player, Saber) }, default));
+        Assert.Equal(EnchantProtocol.NoRequest, await bench.World.TryEnchantConfirmAsync(session, SlotFor(player, Saber), default));
     }
 }

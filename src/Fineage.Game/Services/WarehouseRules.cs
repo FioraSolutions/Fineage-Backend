@@ -53,3 +53,6 @@ public static class WarehouseRules
     public static bool FeeCovered(int adena, int depositedAdena, int fee) =>
         adena - depositedAdena >= fee && depositedAdena >= 0 && fee >= 0;
 }
+
+/// <summary>One warehouse deposit/withdraw line (bag or warehouse object id + count).</summary>
+public readonly record struct WarehouseLine(int ObjectId, int Count);

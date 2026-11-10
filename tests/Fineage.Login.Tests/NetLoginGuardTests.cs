@@ -3,6 +3,7 @@ using Fineage.Login.Net;
 using Fineage.Net.Contract;
 using Fineage.Net.Host;
 using Xunit;
+using Fineage.Accounts;
 
 namespace Fineage.Login.Tests;
 
@@ -36,6 +37,22 @@ public sealed class NetLoginGuardTests
         Assert.Equal(NetOpcode.Reject, last!.Opcode);
         Assert.Equal("rate_limit", NetCodec.DecodeReject(last.Payload).Code);
         Assert.Null(await link.ReadAsync(timeout.Token, allowEndOfStream: true));
+    }
+
+    [Fact]
+    public async Task Handler_exception_is_rejected_without_leaking_the_message()
+    {
+        using var timeout = new CancellationTokenSource(TimeSpan.FromSeconds(20));
+        await using var link = await LoginLink.OpenAsync(maxMessagesPerSecond: 120, idleSeconds: 1800);
+
+        // ListCharacters before Hello: RequireHello throws; the client must see a generic reason, not ex.Message.
+        await link.SendAsync(NetOpcode.ListCharacters, [], timeout.Token);
+        PacketEnvelope? last = await link.ReadAsync(timeout.Token);
+        Assert.NotNull(last);
+        Assert.Equal(NetOpcode.Reject, last!.Opcode);
+        RejectMsg reject = NetCodec.DecodeReject(last.Payload);
+        Assert.Equal("handler_error", reject.Code);
+        Assert.Equal("An internal error occurred.", reject.Message);
     }
 
     [Fact]

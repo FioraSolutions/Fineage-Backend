@@ -3,6 +3,7 @@ using Fineage.Protocol;
 using Fineage.Zone.Chat;
 using Fineage.Zone.Interest;
 using Fineage.Zone.Net;
+using Fineage.Zone.World;
 using Xunit;
 
 namespace Fineage.Zone.Tests;
@@ -55,20 +56,20 @@ public sealed class NetChatTests
     static readonly DateTimeOffset Now = new(2026, 10, 28, 0, 0, 0, TimeSpan.Zero);
 
     /// <summary>One entry per fanout call: the watchers it was addressed to and the line they got.</summary>
-    static List<(IReadOnlyList<int> Watchers, CreatureSayNetMsg Line)> Says(NetBridgeRecorder rec) =>
-        rec.Of(nameof(INetPresenceBridge.FanoutCreatureSay))
-            .Select(args => ((IReadOnlyList<int>)args[0], (CreatureSayNetMsg)args[1]))
+    static List<(IReadOnlyList<int> Watchers, CreatureSayMsg Line)> Says(NetBridgeRecorder rec) =>
+        rec.Of(nameof(IWorldEventPublisher.FanoutCreatureSay))
+            .Select(args => ((IReadOnlyList<int>)args[0], (CreatureSayMsg)args[1]))
             .ToList();
 
-    static bool Hears(IEnumerable<(IReadOnlyList<int> Watchers, CreatureSayNetMsg Line)> says, int objectId, string text) =>
+    static bool Hears(IEnumerable<(IReadOnlyList<int> Watchers, CreatureSayMsg Line)> says, int objectId, string text) =>
         says.Any(s => s.Watchers.Contains(objectId) && s.Line.Text == text);
 
-    static bool HearsAny(IEnumerable<(IReadOnlyList<int> Watchers, CreatureSayNetMsg Line)> says, int objectId) =>
+    static bool HearsAny(IEnumerable<(IReadOnlyList<int> Watchers, CreatureSayMsg Line)> says, int objectId) =>
         says.Any(s => s.Watchers.Contains(objectId));
 
-    static List<SystemMessageNetMsg> SystemLines(NetBridgeRecorder rec) =>
-        rec.Of(nameof(INetPresenceBridge.FanoutSystemMessage))
-            .Select(args => (SystemMessageNetMsg)args[1])
+    static List<SystemMessageMsg> SystemLines(NetBridgeRecorder rec) =>
+        rec.Of(nameof(IWorldEventPublisher.FanoutSystemMessage))
+            .Select(args => (SystemMessageMsg)args[1])
             .ToList();
 
     [Fact]
@@ -84,8 +85,7 @@ public sealed class NetChatTests
         var (far, _) = await kit.EnterAsync(x: 5_000, y: 0);
         rec.Calls.Clear();
 
-        Assert.Null(await kit.World.TrySayAsync(
-            origin, new SayMsg { Text = "  hello  ", ChatType = ChatProtocol.All }, Now, CancellationToken.None));
+        Assert.Null(await kit.World.TrySayAsync(origin, "  hello  ", ChatProtocol.All, Now, CancellationToken.None));
 
         // The speaker always hears their own line, and so does everyone on the local boundary.
         Assert.True(Hears(Says(rec), origin.ObjectId, "hello"));
@@ -110,14 +110,12 @@ public sealed class NetChatTests
         var (close, _) = await kit.EnterAsync(x: 100, y: 0);
         var (hidden, _) = await kit.EnterAsync(x: 1_000, y: 0);
 
-        Assert.Null(await kit.World.TrySayAsync(
-            origin, new SayMsg { Text = "local", ChatType = ChatProtocol.All }, Now, CancellationToken.None));
+        Assert.Null(await kit.World.TrySayAsync(origin, "local", ChatProtocol.All, Now, CancellationToken.None));
         Assert.True(Hears(Says(rec), close.ObjectId, "local"));
         Assert.False(HearsAny(Says(rec), hidden.ObjectId));
 
         rec.Calls.Clear();
-        Assert.Null(await kit.World.TrySayAsync(
-            origin, new SayMsg { Text = "zone", ChatType = ChatProtocol.Shout }, Now.AddSeconds(1), CancellationToken.None));
+        Assert.Null(await kit.World.TrySayAsync(origin, "zone", ChatProtocol.Shout, Now.AddSeconds(1), CancellationToken.None));
 
         Assert.True(Hears(Says(rec), close.ObjectId, "zone"));
         Assert.True(Hears(Says(rec), hidden.ObjectId, "zone"));
@@ -139,10 +137,9 @@ public sealed class NetChatTests
         int[] types = [ChatProtocol.Tell, ChatProtocol.Party, ChatProtocol.Clan, ChatProtocol.Trade, ChatProtocol.Hero, 99];
         foreach (int type in types)
         {
-            Assert.Null(await kit.World.TrySayAsync(
-                speaker, new SayMsg { Text = "secret", ChatType = type }, now, CancellationToken.None));
+            Assert.Null(await kit.World.TrySayAsync(speaker, "secret", type, now, CancellationToken.None));
 
-            SystemMessageNetMsg notice = Assert.Single(SystemLines(rec));
+            SystemMessageMsg notice = Assert.Single(SystemLines(rec));
             Assert.Equal(ChatProtocol.ChatNotSupported, notice.Id);
             Assert.Equal("not supported yet", notice.Text);
             Assert.Equal(type.ToString(), Assert.Single(notice.Params));
@@ -163,19 +160,16 @@ public sealed class NetChatTests
         var (speaker, _) = await kit.EnterAsync(x: 0, y: 0);
         rec.Calls.Clear();
 
-        Assert.Null(await kit.World.TrySayAsync(
-            speaker, new SayMsg { Text = "one", ChatType = ChatProtocol.All }, Now, CancellationToken.None));
+        Assert.Null(await kit.World.TrySayAsync(speaker, "one", ChatProtocol.All, Now, CancellationToken.None));
         Assert.Equal("one", Assert.Single(Says(rec)).Line.Text);
 
         rec.Calls.Clear();
-        Assert.Null(await kit.World.TrySayAsync(
-            speaker, new SayMsg { Text = "two", ChatType = ChatProtocol.Shout }, Now.AddMilliseconds(999), CancellationToken.None));
+        Assert.Null(await kit.World.TrySayAsync(speaker, "two", ChatProtocol.Shout, Now.AddMilliseconds(999), CancellationToken.None));
         Assert.Equal("Please do not spam the chat.", Assert.Single(SystemLines(rec)).Text);
         Assert.Empty(Says(rec));
 
         rec.Calls.Clear();
-        Assert.Null(await kit.World.TrySayAsync(
-            speaker, new SayMsg { Text = "three", ChatType = ChatProtocol.All }, Now.AddMilliseconds(1000), CancellationToken.None));
+        Assert.Null(await kit.World.TrySayAsync(speaker, "three", ChatProtocol.All, Now.AddMilliseconds(1000), CancellationToken.None));
         Assert.Equal("three", Assert.Single(Says(rec)).Line.Text);
     }
 
@@ -188,17 +182,14 @@ public sealed class NetChatTests
         var (speaker, _) = await kit.EnterAsync(x: 0, y: 0);
         rec.Calls.Clear();
 
+        Assert.Equal("bad_request", await kit.World.TrySayAsync(speaker, "   ", ChatProtocol.All, Now, CancellationToken.None));
         Assert.Equal("bad_request", await kit.World.TrySayAsync(
-            speaker, new SayMsg { Text = "   ", ChatType = ChatProtocol.All }, Now, CancellationToken.None));
-        Assert.Equal("bad_request", await kit.World.TrySayAsync(
-            speaker, new SayMsg { Text = new string('z', ChatProtocol.MaxTextLength + 1), ChatType = ChatProtocol.All }, Now, CancellationToken.None));
-        Assert.Equal("bad_request", await kit.World.TrySayAsync(
-            speaker, new SayMsg { Text = "no\npe", ChatType = ChatProtocol.All }, Now, CancellationToken.None));
+            speaker, new string('z', ChatProtocol.MaxTextLength + 1), ChatProtocol.All, Now, CancellationToken.None));
+        Assert.Equal("bad_request", await kit.World.TrySayAsync(speaker, "no\npe", ChatProtocol.All, Now, CancellationToken.None));
         Assert.Empty(Says(rec));
 
         // None of the refusals touched the flood window, so the next good line still goes out.
-        Assert.Null(await kit.World.TrySayAsync(
-            speaker, new SayMsg { Text = "ok", ChatType = ChatProtocol.All }, Now, CancellationToken.None));
+        Assert.Null(await kit.World.TrySayAsync(speaker, "ok", ChatProtocol.All, Now, CancellationToken.None));
         Assert.Equal("ok", Assert.Single(Says(rec)).Line.Text);
     }
 }

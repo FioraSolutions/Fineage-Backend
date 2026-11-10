@@ -1,0 +1,127 @@
+{
+  "id": 119,
+  "name": "Last Imperial Prince",
+  "repeatable": true,
+  "abortable": true,
+  "questItems": [],
+  "dialogs": [
+    {
+      "npcId": 31453,
+      "hook": "talk",
+      "when": "completed",
+      "htmlFile": "31453-talk-000.htm"
+    },
+    {
+      "npcId": 31453,
+      "hook": "talk",
+      "when": "absent",
+      "htmlFile": "31453-talk-001.htm"
+    },
+    {
+      "npcId": 31453,
+      "hook": "talk",
+      "when": "absent",
+      "htmlFile": "31453-talk-002.htm"
+    },
+    {
+      "npcId": 31453,
+      "hook": "talk",
+      "when": "started",
+      "hasItem": 7262,
+      "htmlFile": "31453-talk-003.htm"
+    },
+    {
+      "npcId": 31453,
+      "hook": "talk",
+      "when": "started",
+      "htmlFile": "31453-talk-004.htm"
+    },
+    {
+      "npcId": 31453,
+      "hook": "talk",
+      "when": "started",
+      "htmlFile": "31453-talk-005.htm"
+    },
+    {
+      "npcId": 31453,
+      "hook": "talk",
+      "when": "started",
+      "htmlFile": "31453-talk-006.htm"
+    },
+    {
+      "npcId": 31453,
+      "hook": "event",
+      "when": "absent",
+      "event": "31453-02",
+      "htmlFile": "31453-event-31453-02-007.htm"
+    },
+    {
+      "npcId": 31453,
+      "hook": "event",
+      "when": "absent",
+      "event": "31453-03",
+      "htmlFile": "31453-event-31453-03-008.htm"
+    },
+    {
+      "npcId": 31453,
+      "hook": "event",
+      "when": "absent",
+      "event": "31453-10",
+      "htmlFile": "31453-event-31453-10-009.htm"
+    },
+    {
+      "npcId": 31453,
+      "hook": "event",
+      "when": "absent",
+      "event": "31453-04",
+      "ops": [
+        {
+          "op": "create"
+        },
+        {
+          "op": "start"
+        },
+        {
+          "op": "set_cond",
+          "cond": 1
+        }
+      ],
+      "htmlFile": "31453-event-31453-04-010.htm"
+    },
+    {
+      "npcId": 31453,
+      "hook": "event",
+      "when": "absent",
+      "event": "31453-11",
+      "ops": [
+        {
+          "op": "give_adena",
+          "count": 150292
+        },
+        {
+          "op": "give_exp_sp",
+          "exp": 902439,
+          "sp": 90067
+        },
+        {
+          "op": "complete"
+        }
+      ],
+      "htmlFile": "31453-event-31453-11-011.htm"
+    },
+    {
+      "npcId": 31453,
+      "hook": "event",
+      "when": "absent",
+      "event": "32009-04",
+      "hasItem": 7262,
+      "ops": [
+        {
+          "op": "set_cond",
+          "cond": 2
+        }
+      ],
+      "htmlFile": "31453-event-32009-04-012.htm"
+    }
+  ]
+}

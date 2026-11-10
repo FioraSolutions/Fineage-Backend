@@ -1,4 +1,5 @@
 using System.Reflection;
+using Fineage.Accounts;
 using Fineage.Login;
 using Fineage.Zone.Net;
 using Fineage.Zone.Spawns;
@@ -15,7 +16,7 @@ public sealed class ZoneAggroTests
         public readonly List<(int ObjectId, bool InStance)> Stances = [];
         protected override object? Invoke(MethodInfo? method, object?[]? args)
         {
-            if (method?.Name == nameof(INetPresenceBridge.FanoutAttackStance))
+            if (method?.Name == nameof(IWorldEventPublisher.FanoutAttackStance))
                 Stances.Add(((int)args![1]!, (bool)args[2]!));
             return method?.ReturnType == typeof(bool) ? false : null;
         }
@@ -62,7 +63,7 @@ public sealed class ZoneAggroTests
             Mob(9_100_002, 450, aggressive: false, "WOLF"),   // 250 from the caller: clan help
             Mob(9_100_003, 480, aggressive: false, "ORC"),    // other clan: stays idle
             Mob(9_100_004, 2000, aggressive: true, "WOLF")));  // outside aggroRange
-        var bridge = DispatchProxy.Create<INetPresenceBridge, StanceRecorder>();
+        var bridge = DispatchProxy.Create<IWorldEventPublisher, StanceRecorder>();
         world.NetBridge = bridge;
 
         await world.RunCombatTickAsync(CancellationToken.None);

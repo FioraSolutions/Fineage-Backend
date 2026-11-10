@@ -42,19 +42,19 @@ public sealed class NetCraftTests
         player.CurMp = Math.Max(player.CurMp, 50);
 
         var scroll = player.Inventory.FindByItemId(RecipeItemId)!;
-        Assert.Null(await kit.World.TryUseItemAsync(session, new UseItemMsg { ObjectId = scroll.ObjectId }, default));
+        Assert.Null(await kit.World.TryUseItemAsync(session, scroll.ObjectId, default));
         Assert.Contains(RecipeListId, player.KnownRecipes);
         Assert.Equal(0, player.Inventory.CountOf(RecipeItemId));
 
         Assert.Null(await kit.World.TryRecipeBookOpenAsync(session, new RecipeBookOpenMsg { Dwarven = true }, default));
-        var book = Assert.IsType<Fineage.Net.Contract.RecipeBookListNetMsg>(
-            Last(rec, nameof(INetPresenceBridge.FanoutRecipeBookList)));
+        var book = Assert.IsType<Fineage.Protocol.RecipeBookListMsg>(
+            Last(rec, nameof(IWorldEventPublisher.FanoutRecipeBookList)));
         Assert.Equal(1, book.Dwarven);
         Assert.Contains(RecipeListId, book.RecipeIds);
 
         Assert.Null(await kit.World.TryRecipeMakeSelfAsync(session, new RecipeMakeSelfMsg { RecipeId = RecipeListId }, default));
-        var info = Assert.IsType<Fineage.Net.Contract.RecipeItemMakeInfoNetMsg>(
-            Last(rec, nameof(INetPresenceBridge.FanoutRecipeItemMakeInfo)));
+        var info = Assert.IsType<Fineage.Protocol.RecipeItemMakeInfoMsg>(
+            Last(rec, nameof(IWorldEventPublisher.FanoutRecipeItemMakeInfo)));
         Assert.Equal(RecipeListId, info.RecipeId);
         Assert.Equal(0, info.Result);
         Assert.Equal(0, player.Inventory.CountOf(Stem));

@@ -1,0 +1,146 @@
+{
+  "id": 341,
+  "name": "Hunting for Wild Beasts",
+  "repeatable": true,
+  "abortable": true,
+  "questItems": [
+    4259
+  ],
+  "dialogs": [
+    {
+      "npcId": 30078,
+      "hook": "talk",
+      "when": "absent",
+      "maxLevel": 19,
+      "htmlFile": "30078-talk-000.htm"
+    },
+    {
+      "npcId": 30078,
+      "hook": "talk",
+      "when": "absent",
+      "minLevel": 20,
+      "htmlFile": "30078-talk-001.htm"
+    },
+    {
+      "npcId": 30078,
+      "hook": "event",
+      "when": "absent",
+      "event": "30078-03",
+      "minLevel": 20,
+      "htmlFile": "30078-event-30078-03-002.htm"
+    },
+    {
+      "npcId": 30078,
+      "hook": "event",
+      "when": "absent",
+      "event": "30078-04",
+      "minLevel": 20,
+      "ops": [
+        {
+          "op": "create"
+        },
+        {
+          "op": "start"
+        },
+        {
+          "op": "set_cond",
+          "cond": 1
+        }
+      ],
+      "htmlFile": "30078-event-30078-04-003.htm"
+    },
+    {
+      "npcId": 30078,
+      "hook": "talk",
+      "when": "started",
+      "cond": 2,
+      "atLeast": {
+        "4259": 20
+      },
+      "ops": [
+        {
+          "op": "give_adena",
+          "count": 3710
+        },
+        {
+          "op": "complete"
+        }
+      ],
+      "htmlFile": "30078-talk-c2-004.htm"
+    },
+    {
+      "npcId": 30078,
+      "hook": "talk",
+      "when": "started",
+      "htmlFile": "30078-talk-005.htm"
+    },
+    {
+      "npcId": 20203,
+      "hook": "kill",
+      "when": "started",
+      "cond": 1,
+      "html": "",
+      "ops": [
+        {
+          "op": "drop_item",
+          "itemId": 4259,
+          "count": 1,
+          "chance": 0.99,
+          "limit": 20,
+          "condAtLimit": 2
+        }
+      ]
+    },
+    {
+      "npcId": 20310,
+      "hook": "kill",
+      "when": "started",
+      "cond": 1,
+      "html": "",
+      "ops": [
+        {
+          "op": "drop_item",
+          "itemId": 4259,
+          "count": 1,
+          "chance": 0.87,
+          "limit": 20,
+          "condAtLimit": 2
+        }
+      ]
+    },
+    {
+      "npcId": 20021,
+      "hook": "kill",
+      "when": "started",
+      "cond": 1,
+      "html": "",
+      "ops": [
+        {
+          "op": "drop_item",
+          "itemId": 4259,
+          "count": 1,
+          "chance": 0.83,
+          "limit": 20,
+          "condAtLimit": 2
+        }
+      ]
+    },
+    {
+      "npcId": 20335,
+      "hook": "kill",
+      "when": "started",
+      "cond": 1,
+      "html": "",
+      "ops": [
+        {
+          "op": "drop_item",
+          "itemId": 4259,
+          "count": 1,
+          "chance": 0.87,
+          "limit": 20,
+          "condAtLimit": 2
+        }
+      ]
+    }
+  ]
+}

@@ -1,0 +1,139 @@
+{
+  "id": 382,
+  "name": "Kail's Magic Coin",
+  "repeatable": true,
+  "abortable": true,
+  "questItems": [],
+  "dialogs": [
+    {
+      "npcId": 30687,
+      "hook": "talk",
+      "when": "absent",
+      "lacksItems": [
+        5898
+      ],
+      "htmlFile": "30687-talk-000.htm"
+    },
+    {
+      "npcId": 30687,
+      "hook": "talk",
+      "when": "absent",
+      "hasItem": 5898,
+      "maxLevel": 54,
+      "htmlFile": "30687-talk-001.htm"
+    },
+    {
+      "npcId": 30687,
+      "hook": "talk",
+      "when": "absent",
+      "hasItem": 5898,
+      "minLevel": 55,
+      "htmlFile": "30687-talk-002.htm"
+    },
+    {
+      "npcId": 30687,
+      "hook": "event",
+      "when": "absent",
+      "event": "30687-03",
+      "hasItem": 5898,
+      "minLevel": 55,
+      "ops": [
+        {
+          "op": "create"
+        },
+        {
+          "op": "start"
+        },
+        {
+          "op": "set_cond",
+          "cond": 1
+        }
+      ],
+      "htmlFile": "30687-event-30687-03-003.htm"
+    },
+    {
+      "npcId": 30687,
+      "hook": "talk",
+      "when": "started",
+      "htmlFile": "30687-talk-004.htm"
+    },
+    {
+      "npcId": 30687,
+      "hook": "event",
+      "when": "started",
+      "event": "30687-05",
+      "htmlFile": "30687-event-30687-05-005.htm"
+    },
+    {
+      "npcId": 30687,
+      "hook": "event",
+      "when": "started",
+      "event": "30687-06",
+      "htmlFile": "30687-event-30687-06-006.htm"
+    },
+    {
+      "npcId": 21017,
+      "hook": "kill",
+      "when": "started",
+      "hasItem": 5898,
+      "html": "",
+      "ops": [
+        {
+          "op": "drop_item",
+          "itemId": 5961,
+          "count": 1,
+          "chance": 0.073,
+          "limit": 0
+        }
+      ]
+    },
+    {
+      "npcId": 21019,
+      "hook": "kill",
+      "when": "started",
+      "hasItem": 5898,
+      "html": "",
+      "ops": [
+        {
+          "op": "drop_item",
+          "itemId": 5962,
+          "count": 1,
+          "chance": 0.075,
+          "limit": 0
+        }
+      ]
+    },
+    {
+      "npcId": 21020,
+      "hook": "kill",
+      "when": "started",
+      "hasItem": 5898,
+      "html": "",
+      "ops": [
+        {
+          "op": "drop_item",
+          "itemId": 5963,
+          "count": 1,
+          "chance": 0.073,
+          "limit": 0
+        }
+      ]
+    },
+    {
+      "npcId": 21022,
+      "hook": "kill",
+      "when": "started",
+      "hasItem": 5898,
+      "html": "",
+      "ops": [
+        {
+          "op": "drop_item",
+          "itemId": 5961,
+          "count": 1,
+          "chance": 0.069,
+          "limit": 0
+        }
+      ]
+    }
+  ]
+}

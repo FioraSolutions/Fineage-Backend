@@ -1,3 +1,4 @@
+using Fineage.Accounts;
 using Fineage.Login;
 using Fineage.Protocol;
 using Fineage.Zone.Combat;
@@ -45,19 +46,14 @@ public sealed class ZoneSpawnRespawnTests
         session.Bind(ticket.CharacterId, ticket.Account, ticket.CharacterName, ticket.ClassId);
         Assert.True(await world.TryEnterAsync(session, CancellationToken.None));
 
-        Assert.Null(await world.TryMoveAsync(session, new MoveToMsg
-        {
-            DestX = gremlin.X,
-            DestY = gremlin.Y,
-            DestZ = gremlin.Z
-        }, CancellationToken.None));
-        Assert.Null(await world.TrySelectTargetAsync(session, new SelectTargetMsg { TargetObjectId = gremlin.ObjectId },
+        Assert.Null(await world.TryMoveAsync(session, gremlin.X, gremlin.Y, gremlin.Z, CancellationToken.None));
+        Assert.Null(await world.TrySelectTargetAsync(session, gremlin.ObjectId,
             CancellationToken.None));
 
         // Damage is Mobius 70*pAtk/pDef now; swing until the gremlin is dead (attack refused).
         for (int hit = 0; hit < TalkingIsland.GremlinMaxHp; hit++)
         {
-            if (await world.TryAttackAsync(session, new AttackRequestMsg { TargetObjectId = gremlin.ObjectId },
+            if (await world.TryAttackAsync(session, gremlin.ObjectId,
                     CancellationToken.None) != null)
                 break;
             // Re-click on the target being hit keeps the running attack (no double swing);

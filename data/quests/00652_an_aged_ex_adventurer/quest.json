@@ -1,0 +1,88 @@
+{
+  "id": 652,
+  "name": "An Aged Ex Adventurer",
+  "repeatable": true,
+  "abortable": true,
+  "questItems": [],
+  "dialogs": [
+    {
+      "npcId": 32012,
+      "hook": "talk",
+      "when": "absent",
+      "maxLevel": 45,
+      "htmlFile": "32012-talk-000.htm"
+    },
+    {
+      "npcId": 32012,
+      "hook": "talk",
+      "when": "absent",
+      "minLevel": 46,
+      "htmlFile": "32012-talk-001.htm"
+    },
+    {
+      "npcId": 32012,
+      "hook": "event",
+      "when": "absent",
+      "event": "32012-03",
+      "minLevel": 46,
+      "htmlFile": "32012-event-32012-03-002.htm"
+    },
+    {
+      "npcId": 32012,
+      "hook": "event",
+      "when": "absent",
+      "event": "32012-04",
+      "minLevel": 46,
+      "atLeast": {
+        "1464": 100
+      },
+      "ops": [
+        {
+          "op": "create"
+        },
+        {
+          "op": "start"
+        },
+        {
+          "op": "set_cond",
+          "cond": 1
+        },
+        {
+          "op": "take_item",
+          "itemId": 1464,
+          "count": 100
+        }
+      ],
+      "htmlFile": "32012-event-32012-04-003.htm"
+    },
+    {
+      "npcId": 32012,
+      "hook": "event",
+      "when": "absent",
+      "event": "32012-04",
+      "minLevel": 46,
+      "htmlFile": "32012-event-32012-04-004.htm"
+    },
+    {
+      "npcId": 32012,
+      "hook": "talk",
+      "when": "started",
+      "htmlFile": "32012-talk-005.htm"
+    },
+    {
+      "npcId": 30180,
+      "hook": "talk",
+      "when": "started",
+      "ops": [
+        {
+          "op": "give_adena",
+          "count": 10000
+        },
+        {
+          "op": "complete"
+        }
+      ],
+      "htmlFile": "30180-talk-006.htm"
+    }
+  ]
+}

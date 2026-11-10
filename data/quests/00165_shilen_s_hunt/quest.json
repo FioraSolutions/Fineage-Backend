@@ -1,0 +1,166 @@
+{
+  "id": 165,
+  "name": "Shilen's Hunt",
+  "repeatable": false,
+  "abortable": true,
+  "questItems": [
+    1160
+  ],
+  "dialogs": [
+    {
+      "npcId": 30348,
+      "hook": "talk",
+      "when": "absent",
+      "races": [
+        0,
+        1,
+        3,
+        4
+      ],
+      "htmlFile": "30348-talk-000.htm"
+    },
+    {
+      "npcId": 30348,
+      "hook": "talk",
+      "when": "absent",
+      "races": [
+        2
+      ],
+      "maxLevel": 2,
+      "htmlFile": "30348-talk-001.htm"
+    },
+    {
+      "npcId": 30348,
+      "hook": "talk",
+      "when": "absent",
+      "races": [
+        2
+      ],
+      "minLevel": 3,
+      "htmlFile": "30348-talk-002.htm"
+    },
+    {
+      "npcId": 30348,
+      "hook": "event",
+      "when": "absent",
+      "event": "30348-03",
+      "races": [
+        2
+      ],
+      "minLevel": 3,
+      "ops": [
+        {
+          "op": "create"
+        },
+        {
+          "op": "start"
+        },
+        {
+          "op": "set_cond",
+          "cond": 1
+        }
+      ],
+      "htmlFile": "30348-event-30348-03-003.htm"
+    },
+    {
+      "npcId": 30348,
+      "hook": "talk",
+      "when": "started",
+      "cond": 1,
+      "htmlFile": "30348-talk-c1-004.htm"
+    },
+    {
+      "npcId": 30348,
+      "hook": "talk",
+      "when": "started",
+      "cond": 2,
+      "atLeast": {
+        "1160": 13
+      },
+      "ops": [
+        {
+          "op": "give_item",
+          "itemId": 1060,
+          "count": 5
+        },
+        {
+          "op": "give_exp_sp",
+          "exp": 1000,
+          "sp": 0
+        },
+        {
+          "op": "complete"
+        }
+      ],
+      "htmlFile": "30348-talk-c2-005.htm"
+    },
+    {
+      "npcId": 20456,
+      "hook": "kill",
+      "when": "started",
+      "cond": 1,
+      "html": "",
+      "ops": [
+        {
+          "op": "drop_item",
+          "itemId": 1160,
+          "count": 1,
+          "chance": 0.3333333333333333,
+          "limit": 13,
+          "condAtLimit": 2
+        }
+      ]
+    },
+    {
+      "npcId": 20529,
+      "hook": "kill",
+      "when": "started",
+      "cond": 1,
+      "html": "",
+      "ops": [
+        {
+          "op": "drop_item",
+          "itemId": 1160,
+          "count": 1,
+          "chance": 0.3333333333333333,
+          "limit": 13,
+          "condAtLimit": 2
+        }
+      ]
+    },
+    {
+      "npcId": 20532,
+      "hook": "kill",
+      "when": "started",
+      "cond": 1,
+      "html": "",
+      "ops": [
+        {
+          "op": "drop_item",
+          "itemId": 1160,
+          "count": 1,
+          "chance": 0.3333333333333333,
+          "limit": 13,
+          "condAtLimit": 2
+        }
+      ]
+    },
+    {
+      "npcId": 20536,
+      "hook": "kill",
+      "when": "started",
+      "cond": 1,
+      "html": "",
+      "ops": [
+        {
+          "op": "drop_item",
+          "itemId": 1160,
+          "count": 1,
+          "chance": 0.6666666666666666,
+          "limit": 13,
+          "condAtLimit": 2
+        }
+      ]
+    }
+  ]
+}

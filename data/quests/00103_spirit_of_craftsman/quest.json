@@ -1,0 +1,330 @@
+{
+  "id": 103,
+  "name": "Spirit of Craftsman",
+  "repeatable": false,
+  "abortable": true,
+  "questItems": [
+    968,
+    969,
+    970,
+    971,
+    972,
+    973,
+    974,
+    1107
+  ],
+  "dialogs": [
+    {
+      "npcId": 30307,
+      "hook": "talk",
+      "when": "absent",
+      "htmlFile": "30307-talk-000.htm"
+    },
+    {
+      "npcId": 30307,
+      "hook": "talk",
+      "when": "absent",
+      "maxLevel": 9,
+      "htmlFile": "30307-talk-001.htm"
+    },
+    {
+      "npcId": 30307,
+      "hook": "talk",
+      "when": "absent",
+      "htmlFile": "30307-talk-002.htm"
+    },
+    {
+      "npcId": 30307,
+      "hook": "talk",
+      "when": "absent",
+      "hasItem": 974,
+      "ops": [
+        {
+          "op": "give_adena",
+          "count": 19799
+        },
+        {
+          "op": "give_exp_sp",
+          "exp": 46663,
+          "sp": 3999
+        },
+        {
+          "op": "complete"
+        }
+      ],
+      "htmlFile": "30307-talk-003.htm"
+    },
+    {
+      "npcId": 30132,
+      "hook": "talk",
+      "when": "absent",
+      "hasItem": 968,
+      "ops": [
+        {
+          "op": "take_item",
+          "itemId": 968,
+          "count": 1
+        },
+        {
+          "op": "give_item",
+          "itemId": 969,
+          "count": 1
+        },
+        {
+          "op": "set_cond",
+          "cond": 2
+        }
+      ],
+      "htmlFile": "30132-talk-004.htm"
+    },
+    {
+      "npcId": 30132,
+      "hook": "talk",
+      "when": "absent",
+      "htmlFile": "30132-talk-005.htm"
+    },
+    {
+      "npcId": 30132,
+      "hook": "talk",
+      "when": "absent",
+      "hasItem": 971,
+      "ops": [
+        {
+          "op": "take_item",
+          "itemId": 971,
+          "count": 1
+        },
+        {
+          "op": "give_item",
+          "itemId": 972,
+          "count": 1
+        },
+        {
+          "op": "set_cond",
+          "cond": 6
+        }
+      ],
+      "htmlFile": "30132-talk-006.htm"
+    },
+    {
+      "npcId": 30132,
+      "hook": "talk",
+      "when": "absent",
+      "hasItem": 972,
+      "lacksItems": [
+        973,
+        974
+      ],
+      "htmlFile": "30132-talk-007.htm"
+    },
+    {
+      "npcId": 30132,
+      "hook": "talk",
+      "when": "absent",
+      "hasItem": 973,
+      "ops": [
+        {
+          "op": "take_item",
+          "itemId": 973,
+          "count": 1
+        },
+        {
+          "op": "give_item",
+          "itemId": 974,
+          "count": 1
+        },
+        {
+          "op": "set_cond",
+          "cond": 8
+        }
+      ],
+      "htmlFile": "30132-talk-008.htm"
+    },
+    {
+      "npcId": 30132,
+      "hook": "talk",
+      "when": "absent",
+      "hasItem": 974,
+      "htmlFile": "30132-talk-009.htm"
+    },
+    {
+      "npcId": 30144,
+      "hook": "talk",
+      "when": "absent",
+      "hasItem": 969,
+      "ops": [
+        {
+          "op": "take_item",
+          "itemId": 969,
+          "count": 1
+        },
+        {
+          "op": "give_item",
+          "itemId": 970,
+          "count": 1
+        },
+        {
+          "op": "set_cond",
+          "cond": 3
+        }
+      ],
+      "htmlFile": "30144-talk-010.htm"
+    },
+    {
+      "npcId": 30144,
+      "hook": "talk",
+      "when": "absent",
+      "hasItems": [
+        970,
+        1107
+      ],
+      "ops": [
+        {
+          "op": "take_item",
+          "itemId": 970,
+          "count": 1
+        },
+        {
+          "op": "take_item",
+          "itemId": 1107,
+          "count": 10
+        },
+        {
+          "op": "give_item",
+          "itemId": 971,
+          "count": 1
+        },
+        {
+          "op": "set_cond",
+          "cond": 5
+        }
+      ],
+      "htmlFile": "30144-talk-011.htm"
+    },
+    {
+      "npcId": 30144,
+      "hook": "talk",
+      "when": "absent",
+      "hasItem": 1107,
+      "ops": [
+        {
+          "op": "take_item",
+          "itemId": 970,
+          "count": 1
+        },
+        {
+          "op": "take_item",
+          "itemId": 1107,
+          "count": 10
+        },
+        {
+          "op": "give_item",
+          "itemId": 971,
+          "count": 1
+        },
+        {
+          "op": "set_cond",
+          "cond": 5
+        }
+      ],
+      "htmlFile": "30144-talk-012.htm"
+    },
+    {
+      "npcId": 30144,
+      "hook": "talk",
+      "when": "absent",
+      "hasItem": 971,
+      "htmlFile": "30144-talk-013.htm"
+    },
+    {
+      "npcId": 30307,
+      "hook": "event",
+      "when": "absent",
+      "event": "30307-04",
+      "htmlFile": "30307-event-30307-04-014.htm"
+    },
+    {
+      "npcId": 30307,
+      "hook": "event",
+      "when": "absent",
+      "event": "30307-05",
+      "ops": [
+        {
+          "op": "create"
+        },
+        {
+          "op": "start"
+        },
+        {
+          "op": "give_item",
+          "itemId": 968,
+          "count": 1
+        },
+        {
+          "op": "set_cond",
+          "cond": 1
+        }
+      ],
+      "htmlFile": "30307-event-30307-05-015.htm"
+    },
+    {
+      "npcId": 20015,
+      "hook": "kill",
+      "when": "started",
+      "hasItem": 972,
+      "ops": [
+        {
+          "op": "drop_item",
+          "itemId": 973,
+          "count": 1,
+          "chance": 1.0,
+          "limit": 1
+        },
+        {
+          "op": "set_cond",
+          "cond": 7
+        }
+      ],
+      "html": ""
+    },
+    {
+      "npcId": 20455,
+      "hook": "kill",
+      "when": "started",
+      "hasItem": 970,
+      "ops": [
+        {
+          "op": "set_cond",
+          "cond": 4
+        }
+      ],
+      "html": ""
+    },
+    {
+      "npcId": 20517,
+      "hook": "kill",
+      "when": "started",
+      "hasItem": 970,
+      "ops": [
+        {
+          "op": "set_cond",
+          "cond": 4
+        }
+      ],
+      "html": ""
+    },
+    {
+      "npcId": 20518,
+      "hook": "kill",
+      "when": "started",
+      "hasItem": 970,
+      "ops": [
+        {
+          "op": "set_cond",
+          "cond": 4
+        }
+      ],
+      "html": ""
+    }
+  ]
+}

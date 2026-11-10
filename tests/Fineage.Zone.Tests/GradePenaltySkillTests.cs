@@ -141,10 +141,9 @@ public sealed class GradePenaltySkillTests
         Assert.Equal(0, player.GradePenaltyLevel);
 
         // A level-1 character has expertise rank 0, so any D-grade weapon already sits above it.
-        Assert.Null(await kit.World.TryGiveItemAsync(session,
-            new GiveItemMsg { ItemId = DGradeWeaponId, Count = 1 }, CancellationToken.None));
+        Assert.Null(await kit.World.TryGiveItemAsync(session, DGradeWeaponId, 1, CancellationToken.None));
         int weapon = player.Inventory!.FindByItemId(DGradeWeaponId)!.ObjectId;
-        Assert.Null(await kit.World.TryUseItemAsync(session, new UseItemMsg { ObjectId = weapon }, CancellationToken.None));
+        Assert.Null(await kit.World.TryUseItemAsync(session, weapon, CancellationToken.None));
 
         Assert.True(player.GradePenaltyLevel > 0, "equipping above expertise must set the grade level");
         Assert.True(player.RunSpeed < clean, $"run speed {player.RunSpeed} should be below the clean {clean}");
@@ -159,17 +158,18 @@ public sealed class GradePenaltySkillTests
         WeightPenaltyWorldTests.StripToPaperdoll(player);
         float clean = player.RunSpeed;
 
-        Assert.Null(await kit.World.TryGiveItemAsync(session,
-            new GiveItemMsg { ItemId = DGradeWeaponId, Count = 1 }, CancellationToken.None));
+        Assert.Null(await kit.World.TryGiveItemAsync(session, DGradeWeaponId, 1, CancellationToken.None));
         int weapon = player.Inventory!.FindByItemId(DGradeWeaponId)!.ObjectId;
-        Assert.Null(await kit.World.TryUseItemAsync(session, new UseItemMsg { ObjectId = weapon }, CancellationToken.None));
+        Assert.Null(await kit.World.TryUseItemAsync(session, weapon, CancellationToken.None));
         Assert.True(player.RunSpeed < clean);
 
         var worn = player.Inventory.Find(weapon);
         Assert.NotNull(worn);
         Assert.NotNull(worn!.EquippedSlot);
-        Assert.Null(await kit.World.TryUnequipItemAsync(session,
-            new UnequipItemMsg { PaperdollSlot = (int)worn.EquippedSlot.Value }, CancellationToken.None));
+        Assert.Null(await kit.World.TryUnequipItemAsync(
+            session,
+            (int)worn.EquippedSlot.Value,
+            CancellationToken.None));
         Assert.Equal(0, player.GradePenaltyLevel);
         Assert.Equal(clean, player.RunSpeed, 3);
     }

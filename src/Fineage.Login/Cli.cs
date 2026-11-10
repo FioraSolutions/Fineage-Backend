@@ -3,6 +3,7 @@ using System.Net.Sockets;
 using Fineage.Login.Net;
 using Fineage.Net.Host;
 using Fineage.Protocol.Telemetry;
+using Fineage.Accounts;
 
 namespace Fineage.Login;
 
@@ -73,7 +74,8 @@ public static class Cli
             return 1;
         }
 
-        var handoff = MemoryHandoffStore.FromEnvironment();
+        // CLI one-shots stay developer-friendly; listen path enforces secret separately.
+        var handoff = MemoryHandoffStore.FromEnvironment(allowDefaultSecret: true);
         var service = new LoginService(
             accounts,
             handoff.Tokens,
@@ -209,7 +211,18 @@ public static class Cli
             return false;
         }
 
-        var handoff = MemoryHandoffStore.FromEnvironment();
+        MemoryHandoffStore handoff;
+        try
+        {
+            handoff = MemoryHandoffStore.FromEnvironment(
+                allowDefaultSecret: HandoffTokens.AllowDefaultSecretForBind(bindAddress));
+        }
+        catch (InvalidOperationException ex)
+        {
+            error.WriteLine($"[LOGIN] {ex.Message}");
+            return false;
+        }
+
         var service = new LoginService(
             accounts,
             handoff.Tokens,
@@ -238,7 +251,8 @@ public static class Cli
             netLogin.HandleAsync,
             shutdown.Token,
             maxConnections,
-            NetSettings.InboxCapacity);
+            NetSettings.InboxCapacity,
+            outboundQueue);
 
         HttpZoneStatusSource? zoneProbe = HttpZoneStatusSource.FromEnvironment(error);
         try
@@ -266,9 +280,9 @@ public static class Cli
         }
 
         if (string.IsNullOrWhiteSpace(Environment.GetEnvironmentVariable("FINEAGE_HANDOFF_SECRET")) &&
-            !IPAddress.IsLoopback(bindAddress))
+            IPAddress.IsLoopback(bindAddress))
         {
-            output.WriteLine("[LOGIN] warning: FINEAGE_HANDOFF_SECRET is unset. Set one shared secret on Login and Zone before exposing this bind.");
+            output.WriteLine("[LOGIN] FINEAGE_HANDOFF_SECRET unset; using DefaultSecret (loopback only).");
         }
 
         output.WriteLine(

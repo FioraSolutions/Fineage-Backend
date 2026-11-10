@@ -1,0 +1,102 @@
+{
+  "id": 12,
+  "name": "SecretMeetingWithVarkaSilenos",
+  "repeatable": false,
+  "abortable": true,
+  "questItems": [
+    7232
+  ],
+  "dialogs": [
+    {
+      "npcId": 31296,
+      "hook": "talk",
+      "when": "absent",
+      "htmlFile": "31296-talk-000.htm"
+    },
+    {
+      "npcId": 31296,
+      "hook": "talk",
+      "when": "absent",
+      "htmlFile": "31296-talk-001.htm"
+    },
+    {
+      "npcId": 31296,
+      "hook": "talk",
+      "when": "started",
+      "htmlFile": "31296-talk-002.htm"
+    },
+    {
+      "npcId": 31296,
+      "hook": "talk",
+      "when": "started",
+      "htmlFile": "31296-talk-003.htm"
+    },
+    {
+      "npcId": 31296,
+      "hook": "talk",
+      "when": "started",
+      "htmlFile": "31296-talk-004.htm"
+    },
+    {
+      "npcId": 31296,
+      "hook": "talk",
+      "when": "started",
+      "htmlFile": "31296-talk-005.htm"
+    },
+    {
+      "npcId": 31296,
+      "hook": "event",
+      "when": "absent",
+      "event": "31296-03",
+      "ops": [
+        {
+          "op": "create"
+        },
+        {
+          "op": "start"
+        },
+        {
+          "op": "set_cond",
+          "cond": 1
+        }
+      ],
+      "htmlFile": "31296-event-31296-03-006.htm"
+    },
+    {
+      "npcId": 31296,
+      "hook": "event",
+      "when": "absent",
+      "event": "31258-02",
+      "ops": [
+        {
+          "op": "give_item",
+          "itemId": 7232,
+          "count": 1
+        },
+        {
+          "op": "set_cond",
+          "cond": 2
+        }
+      ],
+      "htmlFile": "31296-event-31258-02-007.htm"
+    },
+    {
+      "npcId": 31296,
+      "hook": "event",
+      "when": "absent",
+      "event": "31378-02",
+      "hasItem": 7232,
+      "ops": [
+        {
+          "op": "give_exp_sp",
+          "exp": 233125,
+          "sp": 18142
+        },
+        {
+          "op": "complete"
+        }
+      ],
+      "htmlFile": "31296-event-31378-02-008.htm"
+    }
+  ]
+}

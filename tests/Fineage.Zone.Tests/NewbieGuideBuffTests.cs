@@ -1,9 +1,10 @@
 using Fineage.Game;
-using Fineage.Login;
+using Fineage.Accounts;
 using Fineage.Net.Contract;
 using Fineage.Zone.NpcHtml;
 using Fineage.Zone.Spawns;
 using Xunit;
+using Fineage.Protocol;
 
 namespace Fineage.Zone.Tests;
 
@@ -67,9 +68,9 @@ public sealed class NewbieGuideBuffTests
         Assert.Null(await actor.BypassAsync(guide.ObjectId, $"bypass -h npc_{guide.ObjectId}_SupportMagic"));
 
         var casts = bench.Rec.Of(nameof(FanoutMagicSkillUse))
-            .Select(args => ((MagicSkillUseNetMsg)args[1]).SkillId)
+            .Select(args => ((MagicSkillUseMsg)args[1]).SkillId)
             .ToArray();
-        var abnormal = Assert.IsType<AbnormalStatusUpdateNetMsg>(
+        var abnormal = Assert.IsType<AbnormalStatusUpdateMsg>(
             bench.Rec.Of(nameof(FanoutAbnormalStatusUpdate)).Last()[1]);
         Assert.Contains(abnormal.Effects, effect => effect.Id == MightBuff && effect.Value == 3 && effect.DurationSeconds == 3600);
         Assert.Contains(abnormal.Effects, effect => effect.Id == ShieldBuff);
@@ -81,7 +82,7 @@ public sealed class NewbieGuideBuffTests
     }
 
     static string LastHtml(WorldBench bench) =>
-        Assert.IsType<NpcHtmlNetMsg>(bench.Rec.Of(nameof(FanoutNpcHtml)).Last()[1]).Html;
+        Assert.IsType<NpcHtmlMsg>(bench.Rec.Of(nameof(FanoutNpcHtml)).Last()[1]).Html;
 
     const string FanoutNpcHtml = "FanoutNpcHtml";
     const string FanoutMagicSkillUse = "FanoutMagicSkillUse";

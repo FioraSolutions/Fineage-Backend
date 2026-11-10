@@ -1,0 +1,190 @@
+{
+  "id": 105,
+  "name": "Skirmish with Orcs",
+  "repeatable": false,
+  "abortable": true,
+  "questItems": [
+    1836,
+    1837,
+    1838,
+    1839,
+    1840,
+    1841,
+    1842,
+    1843,
+    1844,
+    1845
+  ],
+  "dialogs": [
+    {
+      "npcId": 30218,
+      "hook": "talk",
+      "when": "absent",
+      "races": [
+        1
+      ],
+      "minLevel": 10,
+      "htmlFile": "30218-talk-000.htm"
+    },
+    {
+      "npcId": 30218,
+      "hook": "talk",
+      "when": "absent",
+      "races": [
+        1
+      ],
+      "htmlFile": "30218-talk-001.htm"
+    },
+    {
+      "npcId": 30218,
+      "hook": "talk",
+      "when": "absent",
+      "htmlFile": "30218-talk-002.htm"
+    },
+    {
+      "npcId": 30218,
+      "hook": "event",
+      "when": "absent",
+      "event": "30218-04",
+      "races": [
+        1
+      ],
+      "minLevel": 10,
+      "ops": [
+        {
+          "op": "create"
+        },
+        {
+          "op": "start"
+        },
+        {
+          "op": "give_item",
+          "itemId": 1836,
+          "count": 1
+        },
+        {
+          "op": "set_cond",
+          "cond": 1
+        }
+      ],
+      "htmlFile": "30218-event-30218-04-003.htm"
+    },
+    {
+      "npcId": 30218,
+      "hook": "event",
+      "when": "any",
+      "event": "30218-05",
+      "htmlFile": "30218-event-30218-05-004.htm"
+    },
+    {
+      "npcId": 30218,
+      "hook": "talk",
+      "when": "started",
+      "cond": 1,
+      "hasAny": [
+        1836,
+        1837,
+        1838,
+        1839
+      ],
+      "htmlFile": "30218-talk-c1-005.htm"
+    },
+    {
+      "npcId": 30218,
+      "hook": "talk",
+      "when": "started",
+      "cond": 2,
+      "hasItem": 1844,
+      "ops": [
+        {
+          "op": "take_item",
+          "itemId": 1836,
+          "count": 1
+        },
+        {
+          "op": "take_item",
+          "itemId": 1844,
+          "count": 1
+        },
+        {
+          "op": "give_item",
+          "itemId": 1840,
+          "count": 1
+        },
+        {
+          "op": "set_cond",
+          "cond": 3
+        }
+      ],
+      "htmlFile": "30218-talk-c2-006.htm"
+    },
+    {
+      "npcId": 30218,
+      "hook": "talk",
+      "when": "started",
+      "cond": 3,
+      "hasItem": 1840,
+      "htmlFile": "30218-talk-c3-007.htm"
+    },
+    {
+      "npcId": 30218,
+      "hook": "talk",
+      "when": "started",
+      "cond": 4,
+      "hasItem": 1845,
+      "ops": [
+        {
+          "op": "give_adena",
+          "count": 17599
+        },
+        {
+          "op": "give_exp_sp",
+          "exp": 41478,
+          "sp": 3555
+        },
+        {
+          "op": "complete"
+        }
+      ],
+      "htmlFile": "30218-talk-c4-008.htm"
+    },
+    {
+      "npcId": 27059,
+      "hook": "kill",
+      "when": "started",
+      "cond": 1,
+      "hasItem": 1836,
+      "html": "",
+      "ops": [
+        {
+          "op": "give_item",
+          "itemId": 1844,
+          "count": 1
+        },
+        {
+          "op": "set_cond",
+          "cond": 2
+        }
+      ]
+    },
+    {
+      "npcId": 27064,
+      "hook": "kill",
+      "when": "started",
+      "cond": 3,
+      "hasItem": 1840,
+      "html": "",
+      "ops": [
+        {
+          "op": "give_item",
+          "itemId": 1845,
+          "count": 1
+        },
+        {
+          "op": "set_cond",
+          "cond": 4
+        }
+      ]
+    }
+  ]
+}

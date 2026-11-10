@@ -3,6 +3,7 @@ using Fineage.Game.Services;
 using Fineage.Game.Skills;
 using Fineage.Protocol;
 using Fineage.Zone.Combat;
+using Fineage.Zone.Inventory;
 
 namespace Fineage.Zone.World;
 
@@ -22,7 +23,7 @@ public sealed partial class ZoneWorld
     public const int SysMsgItemCannotBeUsed = 113;
 
     /// <summary>Returned when the item's own reuse delay has not expired yet (Mobius <c>ItemTemplate</c> reuse).</summary>
-    public const string InventoryReuse = "item_reuse";
+    public const string InventoryReuse = ConsumableRules.InventoryReuse;
 
     bool IsConsumable(int itemId) => _itemSkills.TryGet(itemId, out _);
 
@@ -32,17 +33,18 @@ public sealed partial class ZoneWorld
     /// </summary>
     string? TryUseConsumable(ZoneSession session, ZoneEntity player, ItemInstance item)
     {
-        if (!_itemSkills.TryGet(item.ItemId, out var use))
-            return InventoryProtocol.NotEquippable;
-
+        bool known = _itemSkills.TryGet(item.ItemId, out var use);
         long now = _clock().ToUnixTimeMilliseconds();
         // Mobius keeps one reuse stamp per item id on the character; a stack shares that timer.
-        if (use.ReuseDelayMs > 0 &&
-            player.ItemReuseUntilMs.TryGetValue(item.ItemId, out long reuseUntil) && reuseUntil > now)
-            return InventoryReuse;
+        bool onReuse = known
+            && use!.ReuseDelayMs > 0
+            && player.ItemReuseUntilMs.TryGetValue(item.ItemId, out long reuseUntil)
+            && reuseUntil > now;
+        if (ConsumableRules.UsePrecheckError(known, onReuse) is { } precheck)
+            return precheck;
 
         // Scroll of Escape / Blessed SOE: cast gesture + hitTime teleport (skills 2013 / 2036 are not in skills.json).
-        if (use.Effects is [{ Kind: "escapeTown" } escape])
+        if (use!.Effects is [{ Kind: "escapeTown" } escape])
             return TryUseEscapeTown(session, player, item, escape, use.ReuseDelayMs, now);
 
         // Effects are resolved first so an unsupported one leaves the stack untouched instead of eating the potion.
@@ -84,11 +86,11 @@ public sealed partial class ZoneWorld
                     vitals = true;
                     break;
                 case "healPercent":
-                    hpTotal += PercentOfMax(player.CurHp, player.MaxHp, effect.Power);
+                    hpTotal += ConsumableRules.PercentHeal(player.CurHp, player.MaxHp, effect.Power);
                     vitals = true;
                     break;
                 case "manaHealPercent":
-                    mpTotal += PercentOfMax(player.CurMp, player.MaxMp, effect.Power);
+                    mpTotal += ConsumableRules.PercentHeal(player.CurMp, player.MaxMp, effect.Power);
                     vitals = true;
                     break;
                 case "healByLevel":
@@ -158,14 +160,12 @@ public sealed partial class ZoneWorld
         {
             foreach (var stack in added)
             {
-                NetBridge?.FanoutInventoryUpdate([session.ObjectId],
-                    ToNetInventoryUpdate(InventoryMessages.Update(InventoryChange.Add, stack)));
+                NetBridge?.FanoutInventoryUpdate([session.ObjectId], InventoryMessages.Update(InventoryChange.Add, stack));
             }
         }
 
-        NetBridge?.FanoutInventoryUpdate([session.ObjectId],
-            ToNetInventoryUpdate(InventoryMessages.Update(
-                removedEntirely ? InventoryChange.Remove : InventoryChange.Modify, item)));
+        NetBridge?.FanoutInventoryUpdate([session.ObjectId], InventoryMessages.Update(
+                removedEntirely ? InventoryChange.Remove : InventoryChange.Modify, item));
 
         if (moved && destination is { } loc)
         {
@@ -182,100 +182,4 @@ public sealed partial class ZoneWorld
         return null;
     }
 
-    /// <summary>
-    /// Mobius <c>MapRegionManager.getTeleToLocation(creature, TOWN)</c>: the town square of the region that owns the
-    /// player's grid cell, or the Talking Island restart when the cell belongs to no region.
-    /// </summary>
-    (int X, int Y, int Z) TownDestination(ZoneEntity player)
-    {
-        var point = _mapRegions.TownRespawn(player.X, player.Y);
-        return (point.X, point.Y, point.Z);
-    }
-
-    /// <summary>
-    /// Interlude item skills 2013 (SOE) / 2036 (Blessed SOE) are not in <c>skills.json</c>; hit times match Mobius XML.
-    /// </summary>
-    static int EscapeHitTimeMs(int skillId) => skillId == 2036 ? 200 : 20_000;
-
-    /// <summary>
-    /// Mobius ItemSkills for Scroll of Escape: <c>MagicSkillUse</c> now, consume + <c>teleToLocation(TOWN)</c> at hitTime.
-    /// </summary>
-    string? TryUseEscapeTown(
-        ZoneSession session,
-        ZoneEntity player,
-        ItemInstance item,
-        ItemSkillEffect effect,
-        int reuseDelayMs,
-        long now)
-    {
-        if (player.Dead)
-            return InventoryProtocol.Dead;
-        if (now < player.CastingUntilMs)
-            return "busy";
-
-        int skillId = effect.SkillId > 0 ? effect.SkillId : 2013;
-        int level = Math.Max(1, effect.SkillLevel);
-        int hitTimeMs = EscapeHitTimeMs(skillId);
-        var (x, y, z) = TownDestination(player);
-
-        // Fan the cast gesture first so the client starts long-cast / short-cast before the teleport lands.
-        var cast = new MagicSkillUseMsg
-        {
-            CasterObjectId = player.ObjectId,
-            TargetObjectId = player.ObjectId,
-            SkillId = skillId,
-            SkillLevel = level,
-            HitTimeMs = hitTimeMs,
-            ReuseDelayMs = Math.Max(0, reuseDelayMs)
-        };
-        FanoutSkill(player, player, cast, targetStatus: null, CasterMpStatus(player));
-        player.CastingUntilMs = now + hitTimeMs;
-
-        var template = new SkillDefinition(
-            skillId,
-            effect.Name ?? "Scroll of Escape",
-            passive: false,
-            operateType: "A1",
-            targetType: "SELF",
-            castRange: 0,
-            hitTimeMs: hitTimeMs,
-            reuseDelayMs: Math.Max(0, reuseDelayMs),
-            abnormalTimeSeconds: 0,
-            isDebuff: false,
-            levels: [new SkillLevelData(level, mpConsume: 0, power: 0)])
-        {
-            MagicType = 1
-        };
-
-        // Consume + teleport land together (Mobius destroys the scroll when the cast succeeds).
-        ScheduleEffect(player, player, template, level, now, hitTimeMs, (_, __) =>
-        {
-            if (!player.Inventory!.TryReduce(item, 1, out bool removedEntirely))
-                return;
-
-            player.ItemReuseUntilMs[item.ItemId] = _clock().ToUnixTimeMilliseconds() + Math.Max(0, reuseDelayMs);
-            NetBridge?.FanoutInventoryUpdate([session.ObjectId],
-                ToNetInventoryUpdate(InventoryMessages.Update(
-                    removedEntirely ? InventoryChange.Remove : InventoryChange.Modify, item)));
-            Relocate(player, x, y, z);
-            SelfUserInfo(player);
-            SaveVitals(session, player);
-            SaveInventory(session, player.Inventory);
-            ZoneLog.Info($"escape object={session.ObjectId} item={item.ItemId} skill={skillId} -> {x},{y},{z}");
-        });
-
-        return null;
-    }
-
-    static int PercentOfMax(int current, int max, int percent)
-    {
-        if (max <= 0 || percent <= 0)
-            return 0;
-        int room = Math.Max(0, max - Math.Clamp(current, 0, max));
-        return (int)Math.Min((long)max * percent / 100, room);
-    }
-
-    /// <summary>Mobius <c>Heal</c> with a level table: power grows with the caster level (HP potions 1061 … 1065).</summary>
-    static int HealByLevel(int level, int basePower, int step) =>
-        Math.Max(0, basePower) + Math.Max(0, step) * Math.Max(0, level - 1);
 }

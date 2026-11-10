@@ -1,5 +1,5 @@
 using Fineage.Game;
-using Fineage.Login;
+using Fineage.Accounts;
 using Fineage.Net.Contract;
 using Fineage.Zone.Net;
 using Fineage.Zone.World;
@@ -82,7 +82,7 @@ public class NetEnterWorldProjectorTests
         Assert.Contains(itemsAgain.Items, i => !string.IsNullOrEmpty(i.WeaponType));
         Assert.Contains(itemsAgain.Items, i => !string.IsNullOrEmpty(i.ArmorType));
 
-        var skillsAgain = NetCodec.DecodeSkillList(NetCodec.EncodeSkillList(packets.Skills));
+        var skillsAgain = NetCodec.DecodeSkillList(NetCodec.EncodeSkillList(NetEnterWorldProjector.ToNetSkillList(packets.Skills)));
         Assert.Equal(packets.Skills.Skills.Length, skillsAgain.Skills.Length);
     }
 }

@@ -1,0 +1,88 @@
+{
+  "id": 297,
+  "name": "Gatekeeper's Favor",
+  "repeatable": true,
+  "abortable": true,
+  "questItems": [
+    1573
+  ],
+  "dialogs": [
+    {
+      "npcId": 30540,
+      "hook": "talk",
+      "when": "absent",
+      "htmlFile": "30540-talk-000.htm"
+    },
+    {
+      "npcId": 30540,
+      "hook": "event",
+      "when": "absent",
+      "event": "30540-03",
+      "maxLevel": 14,
+      "htmlFile": "30540-event-30540-03-001.htm"
+    },
+    {
+      "npcId": 30540,
+      "hook": "event",
+      "when": "absent",
+      "event": "30540-03",
+      "minLevel": 15,
+      "ops": [
+        {
+          "op": "create"
+        },
+        {
+          "op": "start"
+        },
+        {
+          "op": "set_cond",
+          "cond": 1
+        }
+      ],
+      "htmlFile": "30540-event-30540-03-002.htm"
+    },
+    {
+      "npcId": 30540,
+      "hook": "talk",
+      "when": "started",
+      "cond": 1,
+      "htmlFile": "30540-talk-c1-003.htm"
+    },
+    {
+      "npcId": 30540,
+      "hook": "talk",
+      "when": "started",
+      "cond": 2,
+      "atLeast": {
+        "1573": 20
+      },
+      "ops": [
+        {
+          "op": "give_item",
+          "itemId": 1659,
+          "count": 2
+        },
+        {
+          "op": "complete"
+        }
+      ],
+      "htmlFile": "30540-talk-c2-004.htm"
+    },
+    {
+      "npcId": 20521,
+      "hook": "kill",
+      "when": "started",
+      "html": "",
+      "ops": [
+        {
+          "op": "drop_item",
+          "itemId": 1573,
+          "count": 1,
+          "chance": 1.0,
+          "limit": 20,
+          "condAtLimit": 2
+        }
+      ]
+    }
+  ]
+}

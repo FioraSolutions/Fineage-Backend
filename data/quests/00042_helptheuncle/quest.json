@@ -1,0 +1,163 @@
+{
+  "id": 42,
+  "name": "HelpTheUncle",
+  "repeatable": false,
+  "abortable": true,
+  "questItems": [
+    7548,
+    7549
+  ],
+  "dialogs": [
+    {
+      "npcId": 30828,
+      "hook": "talk",
+      "when": "absent",
+      "htmlFile": "30828-talk-000.htm"
+    },
+    {
+      "npcId": 30828,
+      "hook": "talk",
+      "when": "absent",
+      "htmlFile": "30828-talk-001.htm"
+    },
+    {
+      "npcId": 30828,
+      "hook": "talk",
+      "when": "started",
+      "cond": 2,
+      "htmlFile": "30828-talk-c2-002.htm"
+    },
+    {
+      "npcId": 30828,
+      "hook": "talk",
+      "when": "started",
+      "cond": 3,
+      "htmlFile": "30828-talk-c3-003.htm"
+    },
+    {
+      "npcId": 30828,
+      "hook": "talk",
+      "when": "started",
+      "cond": 4,
+      "htmlFile": "30828-talk-c4-004.htm"
+    },
+    {
+      "npcId": 30828,
+      "hook": "talk",
+      "when": "started",
+      "cond": 5,
+      "htmlFile": "30828-talk-c5-005.htm"
+    },
+    {
+      "npcId": 30735,
+      "hook": "talk",
+      "when": "started",
+      "cond": 4,
+      "htmlFile": "30735-talk-c4-006.htm"
+    },
+    {
+      "npcId": 30735,
+      "hook": "talk",
+      "when": "started",
+      "cond": 5,
+      "htmlFile": "30735-talk-c5-007.htm"
+    },
+    {
+      "npcId": 30828,
+      "hook": "event",
+      "when": "absent",
+      "event": "30828-01",
+      "ops": [
+        {
+          "op": "create"
+        },
+        {
+          "op": "start"
+        },
+        {
+          "op": "set_cond",
+          "cond": 1
+        }
+      ],
+      "htmlFile": "30828-event-30828-01-008.htm"
+    },
+    {
+      "npcId": 30828,
+      "hook": "event",
+      "when": "absent",
+      "event": "30828-03",
+      "hasItem": 291,
+      "ops": [
+        {
+          "op": "take_item",
+          "itemId": 291,
+          "count": 1
+        },
+        {
+          "op": "set_cond",
+          "cond": 2
+        }
+      ],
+      "htmlFile": "30828-event-30828-03-009.htm"
+    },
+    {
+      "npcId": 30828,
+      "hook": "event",
+      "when": "absent",
+      "event": "30828-06",
+      "ops": [
+        {
+          "op": "take_item",
+          "itemId": 7548,
+          "count": 1
+        },
+        {
+          "op": "give_item",
+          "itemId": 7549,
+          "count": 1
+        },
+        {
+          "op": "set_cond",
+          "cond": 4
+        }
+      ],
+      "htmlFile": "30828-event-30828-06-010.htm"
+    },
+    {
+      "npcId": 30828,
+      "hook": "event",
+      "when": "absent",
+      "event": "30735-02",
+      "hasItem": 7549,
+      "ops": [
+        {
+          "op": "take_item",
+          "itemId": 7549,
+          "count": 1
+        },
+        {
+          "op": "set_cond",
+          "cond": 5
+        }
+      ],
+      "htmlFile": "30828-event-30735-02-011.htm"
+    },
+    {
+      "npcId": 30828,
+      "hook": "event",
+      "when": "absent",
+      "event": "30828-09",
+      "ops": [
+        {
+          "op": "give_item",
+          "itemId": 7583,
+          "count": 1
+        },
+        {
+          "op": "complete"
+        }
+      ],
+      "htmlFile": "30828-event-30828-09-012.htm"
+    }
+  ]
+}

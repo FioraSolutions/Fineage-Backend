@@ -35,7 +35,7 @@ public sealed class NetMeleeApproachTests
         Assert.Contains(MobId, player.Knownlist);
         var (bridge, rec) = NetBridgeRecorder.Create();
         kit.World.NetBridge = bridge;
-        Assert.Null(await kit.World.TrySelectTargetAsync(session, new SelectTargetMsg { TargetObjectId = MobId }, CancellationToken.None));
+        Assert.Null(await kit.World.TrySelectTargetAsync(session, MobId, CancellationToken.None));
         return (kit, session, player, mob, rec);
     }
 
@@ -45,7 +45,7 @@ public sealed class NetMeleeApproachTests
         var (kit, session, player, mob, rec) = await SetupAsync();
         int startX = player.X;
 
-        Assert.Null(await kit.World.TryAttackAsync(session, new AttackRequestMsg { TargetObjectId = MobId }, CancellationToken.None));
+        Assert.Null(await kit.World.TryAttackAsync(session, MobId, CancellationToken.None));
 
         // Server position did not jump: still at the start, a timed run toward the mob is active.
         Assert.Equal(startX, player.X);
@@ -55,10 +55,10 @@ public sealed class NetMeleeApproachTests
         Assert.True(ZoneCombat.Within(player.MoveDestX, player.MoveDestY, mob.X, mob.Y, ZoneCombat.MeleeRange));
 
         // Self got a MoveState (client animates the run) from the start point to the stop point.
-        var moves = rec.Of(nameof(INetPresenceBridge.FanoutMoveState));
+        var moves = rec.Of(nameof(IWorldEventPublisher.FanoutMoveState));
         Assert.Contains(moves, m => ((IReadOnlyList<int>)m[0]!).Contains(player.ObjectId) && (int)m[1]! == player.ObjectId &&
                                     (int)m[2]! == startX && (int)m[5]! == player.MoveDestX);
-        Assert.Empty(rec.Of(nameof(INetPresenceBridge.FanoutAttackState)));
+        Assert.Empty(rec.Of(nameof(IWorldEventPublisher.FanoutAttackState)));
 
         // Halfway: the client is mid-run; ValidatePosition at its interpolated spot is NOT corrected.
         long eta = session.ApproachArriveUnixMs - kit.Now.ToUnixTimeMilliseconds();
@@ -70,17 +70,17 @@ public sealed class NetMeleeApproachTests
 
         // Before arrival no swing yet.
         await kit.World.RunPlayerCombatTickAsync(CancellationToken.None);
-        Assert.Empty(rec.Of(nameof(INetPresenceBridge.FanoutAttackState)));
+        Assert.Empty(rec.Of(nameof(IWorldEventPublisher.FanoutAttackState)));
 
         // Arrival: first swing fires from the stop point, the pawn never stands on the mob.
         kit.Now = kit.Now.AddMilliseconds(eta);
         await kit.World.RunPlayerCombatTickAsync(CancellationToken.None);
         await kit.World.RunPlayerCombatTickAsync(CancellationToken.None);
-        var attacks = rec.Of(nameof(INetPresenceBridge.FanoutAttackState));
+        var attacks = rec.Of(nameof(IWorldEventPublisher.FanoutAttackState));
         Assert.NotEmpty(attacks);
-        var swing = (AttackStateMsg)attacks[0][1]!;
-        Assert.Equal((ulong)(uint)player.ObjectId, swing.AttackerValue);
-        Assert.Equal((ulong)(uint)MobId, swing.TargetValue);
+        var swing = Assert.IsType<Fineage.Protocol.AttackMsg>(attacks[0][1]);
+        Assert.Equal(player.ObjectId, swing.AttackerObjectId);
+        Assert.Equal(MobId, swing.TargetObjectId);
         Assert.False(player.MoveActive);
         Assert.True(ZoneCombat.Within(player.X, player.Y, mob.X, mob.Y, ZoneCombat.MeleeRange + ZoneCombat.HitRangeTolerance));
         Assert.True(Math.Abs(player.X - mob.X) >= 10, "pawn must stop in front of the mob, not on it");
@@ -92,21 +92,17 @@ public sealed class NetMeleeApproachTests
     {
         var (kit, session, player, mob, rec) = await SetupAsync();
         // Walk next to the mob first (timed move, then let it finish).
-        Assert.Null(await kit.World.TryMoveAsync(session, new MoveToMsg
-        {
-            ObjectId = player.ObjectId, DestX = mob.X - 30, DestY = mob.Y, DestZ = mob.Z,
-            OriginX = player.X, OriginY = player.Y, OriginZ = player.Z
-        }, CancellationToken.None));
+        Assert.Null(await kit.World.TryMoveAsync(session, mob.X - 30, mob.Y, mob.Z, CancellationToken.None));
         kit.Now = kit.Now.AddSeconds(10);
         await kit.World.RunPlayerCombatTickAsync(CancellationToken.None);
         Assert.False(player.MoveActive);
         int x = player.X;
         rec.Calls.Clear();
 
-        Assert.Null(await kit.World.TryAttackAsync(session, new AttackRequestMsg { TargetObjectId = MobId }, CancellationToken.None));
+        Assert.Null(await kit.World.TryAttackAsync(session, MobId, CancellationToken.None));
         Assert.Equal(x, player.X);
         Assert.False(player.MoveActive);
-        Assert.NotEmpty(rec.Of(nameof(INetPresenceBridge.FanoutAttackState)));
-        Assert.DoesNotContain(rec.Of(nameof(INetPresenceBridge.FanoutMoveState)), m => (int)m[1]! == player.ObjectId);
+        Assert.NotEmpty(rec.Of(nameof(IWorldEventPublisher.FanoutAttackState)));
+        Assert.DoesNotContain(rec.Of(nameof(IWorldEventPublisher.FanoutMoveState)), m => (int)m[1]! == player.ObjectId);
     }
 }

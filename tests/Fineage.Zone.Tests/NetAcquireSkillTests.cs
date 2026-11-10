@@ -24,8 +24,8 @@ public sealed class NetAcquireSkillTests
         return (kit, session, elf, rec);
     }
 
-    static AcquireSkillListNetMsg LastList(NetBridgeRecorder rec) =>
-        Assert.IsType<AcquireSkillListNetMsg>(rec.Of(nameof(INetPresenceBridge.FanoutAcquireSkillList)).Last()[1]);
+    static Fineage.Protocol.AcquireSkillListMsg LastList(NetBridgeRecorder rec) =>
+        Assert.IsType<Fineage.Protocol.AcquireSkillListMsg>(rec.Of(nameof(IWorldEventPublisher.FanoutAcquireSkillList)).Last()[1]);
 
     [Fact]
     public async Task Trainer_opens_the_acquire_skill_list_window()
@@ -59,8 +59,8 @@ public sealed class NetAcquireSkillTests
         Assert.Null(await kit.World.TryAcquireSkillAsync(
             session, offer.SkillId, offer.NextLevel, ZoneWorld.AcquireSkillTypeUsual, informing: true, default));
 
-        var info = Assert.IsType<AcquireSkillInfoNetMsg>(
-            Assert.Single(rec.Of(nameof(INetPresenceBridge.FanoutAcquireSkillInfo)))[1]);
+        var info = Assert.IsType<Fineage.Protocol.AcquireSkillInfoMsg>(
+            Assert.Single(rec.Of(nameof(IWorldEventPublisher.FanoutAcquireSkillInfo)))[1]);
         Assert.Equal(offer.SkillId, info.SkillId);
         Assert.Equal(offer.NextLevel, info.Level);
         Assert.Equal(offer.SpCost, info.SpCost);
@@ -84,7 +84,7 @@ public sealed class NetAcquireSkillTests
         Assert.Equal(100, elf.Sp);
         Assert.True(elf.KnownSkills.ContainsKey(offer.SkillId));
         Assert.Equal(offer.NextLevel, elf.KnownSkills[offer.SkillId]);
-        Assert.NotEmpty(rec.Of(nameof(INetPresenceBridge.FanoutSkillList)));
+        Assert.NotEmpty(rec.Of(nameof(IWorldEventPublisher.FanoutSkillList)));
 
         // Mobius re-sends the list after a learn: the bought level is gone, and the skill's next level
         // (if the tree has one at this character level) takes its place.
@@ -108,8 +108,8 @@ public sealed class NetAcquireSkillTests
 
         Assert.Equal(0, elf.Sp);
         Assert.False(elf.KnownSkills.ContainsKey(offer.SkillId));
-        var message = Assert.IsType<SystemMessageNetMsg>(
-            Assert.Single(rec.Of(nameof(INetPresenceBridge.FanoutSystemMessage)))[1]);
+        var message = Assert.IsType<SystemMessageMsg>(
+            Assert.Single(rec.Of(nameof(IWorldEventPublisher.FanoutSystemMessage)))[1]);
         Assert.Equal(278, message.Id);
         Assert.Contains(LastList(rec).Skills, row => row.SkillId == offer.SkillId);
     }
@@ -172,8 +172,8 @@ public sealed class NetAcquireSkillTests
 
         Assert.Null(await kit.World.TryAcquireSkillAsync(
             session, 1405, 1, ZoneWorld.AcquireSkillTypeUsual, informing: true, default));
-        var info = Assert.IsType<AcquireSkillInfoNetMsg>(
-            Assert.Single(rec.Of(nameof(INetPresenceBridge.FanoutAcquireSkillInfo)))[1]);
+        var info = Assert.IsType<Fineage.Protocol.AcquireSkillInfoMsg>(
+            Assert.Single(rec.Of(nameof(IWorldEventPublisher.FanoutAcquireSkillInfo)))[1]);
         var req = Assert.Single(info.Requirements);
         Assert.Equal(99, req.Type);
         Assert.Equal(8618, req.ItemId);
@@ -184,8 +184,8 @@ public sealed class NetAcquireSkillTests
         Assert.Null(await kit.World.TryAcquireSkillAsync(
             session, 1405, 1, ZoneWorld.AcquireSkillTypeUsual, informing: false, default));
         Assert.False(elf.KnownSkills.ContainsKey(1405));
-        Assert.Equal(276, Assert.IsType<SystemMessageNetMsg>(
-            Assert.Single(rec.Of(nameof(INetPresenceBridge.FanoutSystemMessage)))[1]).Id);
+        Assert.Equal(276, Assert.IsType<SystemMessageMsg>(
+            Assert.Single(rec.Of(nameof(IWorldEventPublisher.FanoutSystemMessage)))[1]).Id);
         Assert.Contains(LastList(rec).Skills, row => row.SkillId == 1405 && row.NextLevel == 1);
 
         // With the book the skill is learned and the book leaves the bag.
@@ -196,6 +196,6 @@ public sealed class NetAcquireSkillTests
         Assert.Equal(1, elf.KnownSkills[1405]);
         Assert.Equal(0, elf.Inventory.CountOf(8618));
         Assert.Equal(spBefore - offer.SpCost, elf.Sp);
-        Assert.NotEmpty(rec.Of(nameof(INetPresenceBridge.FanoutInventoryUpdate)));
+        Assert.NotEmpty(rec.Of(nameof(IWorldEventPublisher.FanoutInventoryUpdate)));
     }
 }

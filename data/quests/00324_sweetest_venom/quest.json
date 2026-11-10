@@ -1,0 +1,122 @@
+{
+  "id": 324,
+  "name": "Sweetest Venom",
+  "repeatable": true,
+  "abortable": true,
+  "questItems": [
+    1077
+  ],
+  "dialogs": [
+    {
+      "npcId": 30351,
+      "hook": "talk",
+      "when": "absent",
+      "maxLevel": 17,
+      "htmlFile": "30351-talk-000.htm"
+    },
+    {
+      "npcId": 30351,
+      "hook": "talk",
+      "when": "absent",
+      "minLevel": 18,
+      "htmlFile": "30351-talk-001.htm"
+    },
+    {
+      "npcId": 30351,
+      "hook": "event",
+      "when": "absent",
+      "event": "30351-04",
+      "minLevel": 18,
+      "ops": [
+        {
+          "op": "create"
+        },
+        {
+          "op": "start"
+        },
+        {
+          "op": "set_cond",
+          "cond": 1
+        }
+      ],
+      "htmlFile": "30351-event-30351-04-002.htm"
+    },
+    {
+      "npcId": 30351,
+      "hook": "talk",
+      "when": "started",
+      "cond": 1,
+      "htmlFile": "30351-talk-c1-003.htm"
+    },
+    {
+      "npcId": 30351,
+      "hook": "talk",
+      "when": "started",
+      "cond": 2,
+      "atLeast": {
+        "1077": 10
+      },
+      "ops": [
+        {
+          "op": "give_adena",
+          "count": 5810
+        },
+        {
+          "op": "complete"
+        }
+      ],
+      "htmlFile": "30351-talk-c2-004.htm"
+    },
+    {
+      "npcId": 20034,
+      "hook": "kill",
+      "when": "started",
+      "cond": 1,
+      "html": "",
+      "ops": [
+        {
+          "op": "drop_item",
+          "itemId": 1077,
+          "count": 1,
+          "chance": 0.26,
+          "limit": 10,
+          "condAtLimit": 2
+        }
+      ]
+    },
+    {
+      "npcId": 20038,
+      "hook": "kill",
+      "when": "started",
+      "cond": 1,
+      "html": "",
+      "ops": [
+        {
+          "op": "drop_item",
+          "itemId": 1077,
+          "count": 1,
+          "chance": 0.29,
+          "limit": 10,
+          "condAtLimit": 2
+        }
+      ]
+    },
+    {
+      "npcId": 20043,
+      "hook": "kill",
+      "when": "started",
+      "cond": 1,
+      "html": "",
+      "ops": [
+        {
+          "op": "drop_item",
+          "itemId": 1077,
+          "count": 1,
+          "chance": 0.3,
+          "limit": 10,
+          "condAtLimit": 2
+        }
+      ]
+    }
+  ]
+}

@@ -34,8 +34,8 @@ public sealed class NetDeathBroadcastTests
         var (bridge, rec) = NetBridgeRecorder.Create();
         kit.World.NetBridge = bridge;
 
-        Assert.Null(await kit.World.TrySelectTargetAsync(killerSession, new SelectTargetMsg { TargetObjectId = MobId }, CancellationToken.None));
-        Assert.Null(await kit.World.TryAttackAsync(killerSession, new AttackRequestMsg { TargetObjectId = MobId }, CancellationToken.None));
+        Assert.Null(await kit.World.TrySelectTargetAsync(killerSession, MobId, CancellationToken.None));
+        Assert.Null(await kit.World.TryAttackAsync(killerSession, MobId, CancellationToken.None));
         // HP 1 mob: keep swinging (misses allowed) until it dies.
         for (int i = 0; i < 60 && mob.CurHp > 0; i++)
         {
@@ -44,17 +44,16 @@ public sealed class NetDeathBroadcastTests
         }
         Assert.Equal(0, mob.CurHp);
 
-        var dies = rec.Of(nameof(INetPresenceBridge.FanoutDie));
+        var dies = rec.Of(nameof(IWorldEventPublisher.FanoutDie));
         Assert.Single(dies);
         var watchers = (IReadOnlyList<int>)dies[0][0]!;
         Assert.Contains(killer.ObjectId, watchers);
         Assert.Contains(bystander.ObjectId, watchers);
-        var die = (EntityDieMsg)dies[0][1]!;
-        Assert.Equal((ulong)(uint)MobId, die.EntityValue);
-        Assert.Equal(killer.ObjectId, die.KillerObjectId);
+        Assert.Equal(MobId, (int)dies[0][1]!);
+        Assert.Equal(killer.ObjectId, (int)dies[0][2]!);
         // Both saw the killing blow's HP drop to 0.
-        Assert.Contains(rec.Of(nameof(INetPresenceBridge.FanoutStatusUpdate)),
-            s => ((IReadOnlyList<int>)s[0]!).Contains(bystander.ObjectId) && ((StatusUpdateNetMsg)s[1]!).EntityValue == (ulong)(uint)MobId);
+        Assert.Contains(rec.Of(nameof(IWorldEventPublisher.FanoutStatusUpdate)),
+            s => ((IReadOnlyList<int>)s[0]!).Contains(bystander.ObjectId) && ((StatusUpdateMsg)s[1]!).ObjectId == MobId);
 
         // A player arriving while the corpse lies gets it as dead (no standing gremlin).
         var (lateSession, late) = await kit.EnterAsync(classId: 0, race: 0, x: NetTestKit.ElfX - 200);
@@ -67,10 +66,10 @@ public sealed class NetDeathBroadcastTests
         rec.Calls.Clear();
         kit.Now = kit.Now.AddMinutes(5);
         await kit.World.RunPlayerCombatTickAsync(CancellationToken.None);
-        var despawns = rec.Of(nameof(INetPresenceBridge.FanoutEntityDespawn));
+        var despawns = rec.Of(nameof(IWorldEventPublisher.FanoutEntityDespawn));
         Assert.Contains(despawns, d => ((IReadOnlyList<int>)d[0]!).Contains(bystander.ObjectId) &&
                                        ((IReadOnlyList<int>)d[0]!).Contains(late.ObjectId) &&
-                                       ((EntityDespawnMsg)d[1]!).EntityValue == (ulong)(uint)MobId);
+                                       (int)d[1]! == MobId);
         _ = lateSession;
     }
 
@@ -96,13 +95,13 @@ public sealed class NetDeathBroadcastTests
         Assert.Equal(0, elf.CurHp);
 
         // The victim knows itself, so it is a watcher of its own die + status fanout.
-        var die = Assert.Single(rec.Of(nameof(INetPresenceBridge.FanoutDie)));
+        var die = Assert.Single(rec.Of(nameof(IWorldEventPublisher.FanoutDie)));
         Assert.Contains(elf.ObjectId, (IReadOnlyList<int>)die[0]!);
-        Assert.Equal((ulong)(uint)elf.ObjectId, ((EntityDieMsg)die[1]!).EntityValue);
+        Assert.Equal(elf.ObjectId, (int)die[1]!);
 
-        Assert.Contains(rec.Of(nameof(INetPresenceBridge.FanoutStatusUpdate)), s =>
+        Assert.Contains(rec.Of(nameof(IWorldEventPublisher.FanoutStatusUpdate)), s =>
             ((IReadOnlyList<int>)s[0]!).Contains(elf.ObjectId) &&
-            ((StatusUpdateNetMsg)s[1]!).EntityValue == (ulong)(uint)elf.ObjectId &&
-            ((StatusUpdateNetMsg)s[1]!).Values[0] == 0);
+            ((StatusUpdateMsg)s[1]!).ObjectId == elf.ObjectId &&
+            ((StatusUpdateMsg)s[1]!).Values[0] == 0);
     }
 }

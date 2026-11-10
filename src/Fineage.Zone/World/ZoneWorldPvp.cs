@@ -1,4 +1,4 @@
-using Fineage.Login;
+using Fineage.Accounts;
 
 namespace Fineage.Zone.World;
 
@@ -26,15 +26,26 @@ public sealed partial class ZoneWorld
         if (ReferenceEquals(attacker, target) || target.Karma > 0)
             return;
 
-        long lasts = now + (CheckIfPvP(attacker, target) ? PvpVsPvpTimeMs : PvpNormalTimeMs);
+        RaisePvpFlag(attacker, now, CheckIfPvP(attacker, target) ? PvpVsPvpTimeMs : PvpNormalTimeMs);
+    }
+
+    /// <summary>
+    /// Mobius <c>Player.updatePvPStatus()</c> / <c>startPvPFlag</c>: raise or refresh the purple name
+    /// for <paramref name="durationMs"/> (normal vs already-flagged target).
+    /// </summary>
+    void RaisePvpFlag(ZoneEntity attacker, long now, int durationMs)
+    {
+        if (attacker.Kind != ZoneEntityKind.Player)
+            return;
+
+        long lasts = now + Math.Max(0, durationMs);
         if (lasts > attacker.PvpFlagUntilMs)
             attacker.PvpFlagUntilMs = lasts;
         if (!attacker.PvpFlagged)
         {
             attacker.PvpFlagged = true;
             ZoneLog.Info($"[pvp] flag on object={attacker.ObjectId} until={attacker.PvpFlagUntilMs}");
-            if (attacker.Session != null)
-                SelfUserInfo(attacker);
+            BroadcastPvpAppearance(attacker);
         }
     }
 
@@ -60,8 +71,7 @@ public sealed partial class ZoneWorld
             killer.PvpKills++;
             PersistKarmaPk(killer);
             ZoneLog.Info($"[pvp] pvp-kill killer={killer.ObjectId} victim={victim.ObjectId} pvp={killer.PvpKills}");
-            if (killer.Session != null)
-                SelfUserInfo(killer);
+            BroadcastPvpAppearance(killer);
             return;
         }
 
@@ -76,8 +86,7 @@ public sealed partial class ZoneWorld
         PersistKarmaPk(killer);
         ZoneLog.Info(
             $"[pvp] pk killer={killer.ObjectId} victim={victim.ObjectId} karma={killer.Karma} pk={killer.PkKills}");
-        if (killer.Session != null)
-            SelfUserInfo(killer);
+        BroadcastPvpAppearance(killer);
     }
 
     /// <summary>Mobius <c>Formulas.calculateKarmaGain</c> (High Five retail table).</summary>
@@ -104,16 +113,41 @@ public sealed partial class ZoneWorld
             player.PvpFlagged = false;
             player.PvpFlagUntilMs = 0;
             ZoneLog.Info($"[pvp] flag clear object={player.ObjectId}");
-            if (player.Session != null)
-                SelfUserInfo(player);
+            BroadcastPvpAppearance(player);
         }
+    }
+
+    /// <summary>Self UserInfo + knownlist CharInfo so purple/red nameplates update for peers.</summary>
+    void BroadcastPvpAppearance(ZoneEntity player)
+    {
+        if (player.Session != null)
+            SelfUserInfo(player);
+        if (NetBridge == null)
+            return;
+        List<int>? watchers = null;
+        foreach (var watcher in Players())
+        {
+            if (watcher.Session == null || ReferenceEquals(watcher, player))
+                continue;
+            if (!watcher.Knownlist.Contains(player.ObjectId))
+                continue;
+            watchers ??= [];
+            watchers.Add(watcher.ObjectId);
+        }
+        if (watchers is { Count: > 0 })
+            NetBridge.FanoutCharInfo(watchers, player.ObjectId);
     }
 
     void PersistKarmaPk(ZoneEntity player)
     {
-        if (player.Session == null || _accounts == null)
+        if (player.Session == null)
             return;
-        _accounts.TrySaveKarmaPk(player.Session.Account, player.ObjectId, player.Karma, player.PkKills, player.PvpKills);
+        _persist.SaveKarmaPk(
+            player.Session.Account,
+            player.ObjectId,
+            player.Karma,
+            player.PkKills,
+            player.PvpKills);
     }
 
     /// <summary>Test hook: apply PvP status as if <paramref name="attacker"/> damaged <paramref name="target"/>.</summary>

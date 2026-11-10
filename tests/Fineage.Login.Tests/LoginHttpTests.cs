@@ -3,6 +3,7 @@ using System.Net.Sockets;
 using System.Text;
 using System.Text.Json;
 using Xunit;
+using Fineage.Accounts;
 
 namespace Fineage.Login.Tests;
 

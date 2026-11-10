@@ -1,0 +1,160 @@
+{
+  "id": 234,
+  "name": "FatesWhisper",
+  "repeatable": false,
+  "abortable": true,
+  "questItems": [
+    4665,
+    4673
+  ],
+  "dialogs": [
+    {
+      "npcId": 31002,
+      "hook": "talk",
+      "when": "absent",
+      "maxLevel": 74,
+      "htmlFile": "31002-talk-000.htm"
+    },
+    {
+      "npcId": 31002,
+      "hook": "talk",
+      "when": "absent",
+      "minLevel": 75,
+      "htmlFile": "31002-talk-001.htm"
+    },
+    {
+      "npcId": 31002,
+      "hook": "talk",
+      "when": "started",
+      "lacksItems": [
+        4666
+      ],
+      "htmlFile": "31002-talk-002.htm"
+    },
+    {
+      "npcId": 31002,
+      "hook": "talk",
+      "when": "started",
+      "lacksItems": [
+        4667
+      ],
+      "htmlFile": "31002-talk-003.htm"
+    },
+    {
+      "npcId": 31002,
+      "hook": "talk",
+      "when": "started",
+      "lacksItems": [
+        4672
+      ],
+      "htmlFile": "31002-talk-004.htm"
+    },
+    {
+      "npcId": 31002,
+      "hook": "talk",
+      "when": "started",
+      "lacksItems": [
+        4670
+      ],
+      "htmlFile": "31002-talk-005.htm"
+    },
+    {
+      "npcId": 31002,
+      "hook": "talk",
+      "when": "started",
+      "htmlFile": "31002-talk-006.htm"
+    },
+    {
+      "npcId": 31002,
+      "hook": "talk",
+      "when": "started",
+      "ops": [
+        {
+          "op": "take_item",
+          "itemId": 4671,
+          "count": 1
+        }
+      ],
+      "htmlFile": "31002-talk-007.htm"
+    },
+    {
+      "npcId": 31002,
+      "hook": "talk",
+      "when": "started",
+      "htmlFile": "31002-talk-008.htm"
+    },
+    {
+      "npcId": 30847,
+      "hook": "talk",
+      "when": "started",
+      "lacksItems": [
+        4670
+      ],
+      "ops": [
+        {
+          "op": "give_item",
+          "itemId": 4670,
+          "count": 1
+        }
+      ],
+      "htmlFile": "30847-talk-009.htm"
+    },
+    {
+      "npcId": 30847,
+      "hook": "talk",
+      "when": "started",
+      "hasItem": 4670,
+      "htmlFile": "30847-talk-010.htm"
+    },
+    {
+      "npcId": 30178,
+      "hook": "talk",
+      "when": "started",
+      "htmlFile": "30178-talk-011.htm"
+    },
+    {
+      "npcId": 30178,
+      "hook": "talk",
+      "when": "started",
+      "htmlFile": "30178-talk-012.htm"
+    },
+    {
+      "npcId": 30833,
+      "hook": "talk",
+      "when": "started",
+      "htmlFile": "30833-talk-013.htm"
+    },
+    {
+      "npcId": 30833,
+      "hook": "talk",
+      "when": "started",
+      "hasItem": 4665,
+      "lacksItems": [
+        4673
+      ],
+      "htmlFile": "30833-talk-014.htm"
+    },
+    {
+      "npcId": 30833,
+      "hook": "talk",
+      "when": "started",
+      "htmlFile": "30833-talk-015.htm"
+    },
+    {
+      "npcId": 31027,
+      "hook": "talk",
+      "when": "started",
+      "lacksItems": [
+        4666
+      ],
+      "ops": [
+        {
+          "op": "give_item",
+          "itemId": 4666,
+          "count": 1
+        }
+      ],
+      "htmlFile": "31027-talk-016.htm"
+    }
+  ]
+}

@@ -9,12 +9,16 @@ data/*
 !data/classes.json
 !data/experience.json
 !data/stat-bonuses.json
-!data/quests.json
+!data/quests/
+!data/quests/**
 !data/skills.json
 !data/skill-combat.json
 !data/skill-stat-effects.json
 !data/skill-passives.json
+!data/skill-effects.json
+!data/skill-dots.json
 !data/skill-trees.json
+!data/henna.json
 !data/npcs.json
 !data/dungeons.json
 !data/olympiad-stadiums.json
@@ -33,6 +37,7 @@ data/*
 !data/village-masters.json
 !data/doors.json
 !data/water-zones.json
+!data/admin-characters.json
 # Prefer converters → JSON; do not commit the full Mobius datapack (~1486+ XML files).
 data/mobius-xml/
 # Local Mobius CT0 tree (SoT for agents; do not commit dump). Keep pointer README.
@@ -55,3 +60,7 @@ publish/
 !data/map-regions.json
 !data/death-drop.json
 !data/npc-ai-support.json
+!data/henna.json
+!data/armor-sets.json
+!data/item-equip-skills.json
+__pycache__/

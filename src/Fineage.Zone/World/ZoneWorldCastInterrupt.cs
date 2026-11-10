@@ -20,7 +20,7 @@ public sealed partial class ZoneWorld
         if (!casting)
             return false;
         int skill = player.PendingHit?.Combat?.SkillId ?? 0;
-        player.PendingHit = null;
+        SetPendingHit(player, null);
         player.CastingUntilMs = 0;
         if (player.Session is { } session)
         {
@@ -48,7 +48,7 @@ public sealed partial class ZoneWorld
             return;
         double men = 1;
         if (PlayerClasses.TryGet(player.ClassId, out var t) && t != null)
-            men = SafeBonus(PlayerClasses.StatBonuses, StatSlot.Men, t.Men);
+            men = EffectiveAttributes(player, t).MenBonus;
         if (CastRules.RollAttackBreak(_combatRandom, damage, men))
             AbortCast(player, "hit", notify: true);
     }
@@ -65,27 +65,36 @@ public sealed partial class ZoneWorld
     /// the Mobius launch checks (target alive, within escape range, in sight). hitTime 0 resolves now.
     /// </summary>
     void ScheduleEffect(ZoneEntity player, ZoneEntity target, SkillDefinition template, int level, long now, int hitTimeMs,
-        DeferredEffect effect)
+        DeferredEffect effect, bool allowDeadTarget = false)
     {
         bool self = ReferenceEquals(player, target);
-        player.PendingHit = new PendingSkillHit(target.ObjectId, 0, now + Math.Max(0, hitTimeMs), null, level)
+        SetPendingHit(player, new PendingSkillHit(target.ObjectId, 0, now + Math.Max(0, hitTimeMs), null, level)
         {
             SkillId = template.SkillId,
             MagicType = template.MagicType,
             EscapeRange = self ? 0 : CastRules.EscapeRange(template.CastRange, template.EffectRange),
             TargetIsNpc = target.Kind == ZoneEntityKind.Npc,
+            AllowDeadTarget = allowDeadTarget,
             Apply = effect
-        };
+        });
         if (hitTimeMs <= 0)
             ResolvePendingHit(player, now);
     }
 
     void ResolveDeferredEffect(ZoneEntity player, PendingSkillHit hit, DeferredEffect effect, long now)
     {
-        bool alive = _byId.TryGetValue(hit.TargetId, out var target) && (hit.TargetIsNpc
-            ? target.Kind == ZoneEntityKind.Npc && target.CurHp > 0 && !target.Dead
-            : target.Kind == ZoneEntityKind.Player && !target.Dead);
-        if (!alive)
+        if (!_byId.TryGetValue(hit.TargetId, out var target))
+        {
+            AbortCast(player, "target-gone", notify: false);
+            return;
+        }
+
+        bool ok = hit.TargetIsNpc
+            ? target.Kind == ZoneEntityKind.Npc &&
+              (hit.AllowDeadTarget || (target.CurHp > 0 && !target.Dead))
+            : target.Kind == ZoneEntityKind.Player &&
+              (hit.AllowDeadTarget ? target.Dead : !target.Dead);
+        if (!ok)
         {
             AbortCast(player, "target-gone", notify: false);
             return;

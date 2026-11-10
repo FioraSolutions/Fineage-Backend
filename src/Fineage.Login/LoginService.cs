@@ -1,4 +1,5 @@
 using System.Text.RegularExpressions;
+using Fineage.Accounts;
 using Fineage.Game;
 using Fineage.Protocol;
 
@@ -30,6 +31,7 @@ public sealed class LoginService
     readonly ClassCatalog _classes;
     readonly IReadOnlySet<int> _allowedClasses;
     readonly IReadOnlySet<int> _allowedRaces;
+    readonly AuthAttemptLimiter _authAttempts;
 
     public LoginService(
         IAccountStore store,
@@ -38,7 +40,8 @@ public sealed class LoginService
         GameData? game = null,
         int? deleteAfterDays = null,
         CharacterCreateOptions? create = null,
-        Action<string>? warn = null)
+        Action<string>? warn = null,
+        AuthAttemptLimiter? authAttempts = null)
     {
         _store = store;
         _tokens = tokens;
@@ -52,6 +55,7 @@ public sealed class LoginService
         _classes = _game.Classes ?? throw new InvalidOperationException("Class templates were not loaded.");
         _allowedClasses = _create.AllowedClasses ?? _classes.BaseClassIdSet;
         _allowedRaces = _create.AllowedRaces ?? _classes.BaseRaceSet;
+        _authAttempts = authAttempts ?? new AuthAttemptLimiter(clock: _clock);
         _classes.EnsureCreatable(_allowedClasses);
         foreach (int race in _allowedRaces)
         {
@@ -129,10 +133,18 @@ public sealed class LoginService
         if (string.IsNullOrWhiteSpace(account))
             return LoginResult<string>.Fail("invalid_credentials", "Unknown account or password.");
 
+        if (_authAttempts.IsLocked(account, out _))
+            return LoginResult<string>.Fail("rate_limited", "Too many failed logins. Try again later.");
+
         bool found = _store.TryGetCredential(account, out var cred) ||
                      _store.TryGetCredentialByEmail(account, out cred);
         if (!found || !PasswordHasher.Verify(password, cred.PasswordHash, cred.PasswordSalt, cred.Iterations))
+        {
+            _authAttempts.RegisterFailure(account);
             return LoginResult<string>.Fail("invalid_credentials", "Unknown account or password.");
+        }
+
+        _authAttempts.RegisterSuccess(cred.AccountName);
         return LoginResult<string>.Success(cred.AccountName);
     }
 

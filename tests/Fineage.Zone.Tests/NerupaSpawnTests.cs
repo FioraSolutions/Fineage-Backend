@@ -73,8 +73,8 @@ public sealed class NerupaSpawnTests
         var nerupa = Assert.Single(map.Npcs, row => row.NpcId == NerupaNpcId);
         double nerupaZ = nerupa.Z;
 
-        var points = Fineage.Login.ClassTemplates.Points(18)
-            .Concat(Fineage.Login.ClassTemplates.Points(25))
+        var points = Fineage.Accounts.ClassTemplates.Points(18)
+            .Concat(Fineage.Accounts.ClassTemplates.Points(25))
             .Distinct()
             .ToArray();
         Assert.NotEmpty(points);
@@ -161,8 +161,7 @@ public sealed class NerupaSpawnTests
         var (session, _) = await kit.EnterAsync(classId: 25, race: 1);
         var row = ElvenVillageOnly().GetMap("elven_village").Npcs.Single(r => r.NpcId == NerupaNpcId);
 
-        Assert.Null(await kit.World.TrySelectTargetAsync(
-            session, new SelectTargetMsg { TargetObjectId = row.ObjectId }, CancellationToken.None));
+        Assert.Null(await kit.World.TrySelectTargetAsync(session, row.ObjectId, CancellationToken.None));
         Assert.Equal(row.ObjectId, session.SelectedTargetId);
         Assert.Null(await kit.World.TryNpcTalkAsync(session, row.ObjectId, CancellationToken.None));
     }

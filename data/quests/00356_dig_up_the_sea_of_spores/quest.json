@@ -1,0 +1,151 @@
+{
+  "id": 356,
+  "name": "Dig Up the Sea of Spores!",
+  "repeatable": true,
+  "abortable": true,
+  "questItems": [
+    5865,
+    5866
+  ],
+  "dialogs": [
+    {
+      "npcId": 30717,
+      "hook": "talk",
+      "when": "absent",
+      "htmlFile": "30717-talk-000.htm"
+    },
+    {
+      "npcId": 30717,
+      "hook": "talk",
+      "when": "absent",
+      "htmlFile": "30717-talk-001.htm"
+    },
+    {
+      "npcId": 30717,
+      "hook": "talk",
+      "when": "absent",
+      "htmlFile": "30717-talk-002.htm"
+    },
+    {
+      "npcId": 30717,
+      "hook": "event",
+      "when": "absent",
+      "event": "30717-02",
+      "htmlFile": "30717-event-30717-02-003.htm"
+    },
+    {
+      "npcId": 30717,
+      "hook": "event",
+      "when": "absent",
+      "event": "30717-03",
+      "htmlFile": "30717-event-30717-03-004.htm"
+    },
+    {
+      "npcId": 30717,
+      "hook": "event",
+      "when": "absent",
+      "event": "30717-04",
+      "htmlFile": "30717-event-30717-04-005.htm"
+    },
+    {
+      "npcId": 30717,
+      "hook": "event",
+      "when": "absent",
+      "event": "30717-10",
+      "htmlFile": "30717-event-30717-10-006.htm"
+    },
+    {
+      "npcId": 30717,
+      "hook": "event",
+      "when": "absent",
+      "event": "30717-18",
+      "htmlFile": "30717-event-30717-18-007.htm"
+    },
+    {
+      "npcId": 30717,
+      "hook": "event",
+      "when": "absent",
+      "event": "30717-05",
+      "ops": [
+        {
+          "op": "create"
+        },
+        {
+          "op": "start"
+        },
+        {
+          "op": "set_cond",
+          "cond": 1
+        }
+      ],
+      "htmlFile": "30717-event-30717-05-008.htm"
+    },
+    {
+      "npcId": 30717,
+      "hook": "event",
+      "when": "absent",
+      "event": "30717-09",
+      "ops": [
+        {
+          "op": "take_item",
+          "itemId": 5865,
+          "count": 1
+        },
+        {
+          "op": "take_item",
+          "itemId": 5866,
+          "count": 1
+        },
+        {
+          "op": "give_exp_sp",
+          "exp": 31850,
+          "sp": 0
+        }
+      ],
+      "htmlFile": "30717-event-30717-09-009.htm"
+    },
+    {
+      "npcId": 30717,
+      "hook": "event",
+      "when": "absent",
+      "event": "30717-11",
+      "ops": [
+        {
+          "op": "complete"
+        }
+      ],
+      "htmlFile": "30717-event-30717-11-010.htm"
+    },
+    {
+      "npcId": 30717,
+      "hook": "event",
+      "when": "absent",
+      "event": "30717-14",
+      "ops": [
+        {
+          "op": "give_exp_sp",
+          "exp": 45500,
+          "sp": 2600
+        },
+        {
+          "op": "complete"
+        }
+      ],
+      "htmlFile": "30717-event-30717-14-011.htm"
+    },
+    {
+      "npcId": 30717,
+      "hook": "event",
+      "when": "absent",
+      "event": "FINISH",
+      "htmlFile": "30717-event-FINISH-012.htm"
+    },
+    {
+      "npcId": 30717,
+      "hook": "event",
+      "when": "absent",
+      "event": "FINISH",
+      "htmlFile": "30717-event-FINISH-013.htm"
+    }
+  ]
+}

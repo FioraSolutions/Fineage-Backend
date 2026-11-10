@@ -1,0 +1,113 @@
+{
+  "id": 998,
+  "name": "Roxxy's Message",
+  "repeatable": false,
+  "abortable": true,
+  "questItems": [],
+  "dialogs": [
+    {
+      "npcId": 30006,
+      "hook": "first_talk",
+      "when": "absent",
+      "ops": [
+        {
+          "op": "create"
+        }
+      ],
+      "htmlFile": "30006-first_talk-000.htm"
+    },
+    {
+      "npcId": 30006,
+      "hook": "first_talk",
+      "when": "created",
+      "htmlFile": "30006-first_talk-001.htm"
+    },
+    {
+      "npcId": 30006,
+      "hook": "event",
+      "event": "accept",
+      "when": "created",
+      "ops": [
+        {
+          "op": "start"
+        }
+      ],
+      "htmlFile": "30006-event-accept-002.htm"
+    },
+    {
+      "npcId": 30006,
+      "hook": "first_talk",
+      "when": "started",
+      "cond": 1,
+      "htmlFile": "30006-first_talk-c1-003.htm"
+    },
+    {
+      "npcId": 30026,
+      "hook": "first_talk",
+      "when": "started",
+      "cond": 1,
+      "htmlFile": "30026-first_talk-c1-004.htm"
+    },
+    {
+      "npcId": 30026,
+      "hook": "event",
+      "event": "heard",
+      "when": "started",
+      "cond": 1,
+      "ops": [
+        {
+          "op": "set_cond",
+          "cond": 2
+        }
+      ],
+      "htmlFile": "30026-event-heard-c1-005.htm"
+    },
+    {
+      "npcId": 30026,
+      "hook": "first_talk",
+      "when": "started",
+      "cond": 2,
+      "htmlFile": "30026-first_talk-c2-006.htm"
+    },
+    {
+      "npcId": 30006,
+      "hook": "first_talk",
+      "when": "started",
+      "cond": 2,
+      "htmlFile": "30006-first_talk-c2-007.htm"
+    },
+    {
+      "npcId": 30006,
+      "hook": "event",
+      "event": "reward",
+      "when": "started",
+      "cond": 2,
+      "ops": [
+        {
+          "op": "give_item",
+          "itemId": 736,
+          "count": 1
+        },
+        {
+          "op": "give_adena",
+          "count": 25
+        },
+        {
+          "op": "give_exp_sp",
+          "exp": 50,
+          "sp": 5
+        },
+        {
+          "op": "complete"
+        }
+      ],
+      "htmlFile": "30006-event-reward-c2-008.htm"
+    },
+    {
+      "npcId": 30006,
+      "hook": "first_talk",
+      "when": "completed",
+      "htmlFile": "30006-first_talk-009.htm"
+    }
+  ]
+}

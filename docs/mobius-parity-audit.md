@@ -2,6 +2,7 @@
 
 > **SNAPSHOT** — сверка на коммите `a52304d` / ветке `feat/net-foundation` (2026-11-03).
 > Не считать актуальным для текущего `dev` без повторного прогона.
+> **Live feature status:** [`mobius-parity-matrix.md`](mobius-parity-matrix.md) + tracker [#174](https://github.com/FioraSolutions/Fineage-Backend/issues/174).
 > Документ ссылается на `Fineage.Protocol/V2/` как живой транспорт — **удалён**; live wire = Fineage Net (`docs/net-protocol.md`).
 > Doc triage: client [`Docs/DOC_CANON.md`](https://github.com/FioraSolutions/Fineage/blob/dev/Docs/DOC_CANON.md).
 
@@ -520,6 +521,11 @@ add/sub → mul/div → нелинейные.
 Hate-модель: `Attackable.addDamageHate` (`Attackable.java:740`), `getMostHated`, `reduceHate`.
 
 ### У нас
+
+Scheduling (Mobius `AttackableThinkTaskManager` / `MovementTaskManager`):
+`ZoneWorldActiveSets` keeps `_moving` / `_aiBusy` / `_pendingHit` / `_decaying` / `_needRegen` /
+`_withAbnormals`. Combat and sim ticks iterate those registries only — idle whole-world spawn
+does not scan ~34k `_byId` every 200 ms.
 
 `src/Fineage.Zone/World/ZoneWorldAggro.cs`:
 

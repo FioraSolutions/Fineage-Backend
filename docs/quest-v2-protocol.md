@@ -168,9 +168,9 @@ Rows are stored on the character (`quests`, `exp`, `sp`, `level`) and written wh
 
 ## Datapack
 
-`data/quests.json`. Steps are `first_talk`, `talk`, `event`, or `kill`. `when` is `absent`, `created`, `started`, or `completed`, with an optional exact `cond`. Ops: `create`, `start`, `set_cond`, `set`, `unset`, `give_item`, `give_adena`, `give_exp_sp`, `take_item`, `complete`, `sound`.
+`data/quests/` pack (see [`quests-pack.md`](quests-pack.md)): `_meta.json` + one folder per quest. Steps are `first_talk`, `talk`, `event`, or `kill`. `when` is `absent`, `created`, `started`, or `completed`, with an optional exact `cond`. Ops: `create`, `start`, `set_cond`, `set`, `unset`, `give_item`, `give_adena`, `give_exp_sp`, `take_item`, `complete`, `sound`. Dialog HTML is usually `htmlFile` next to `quest.json`.
 
-Smoke quest **999** `Roxxy's Message` on Talking Island: Roxxy (**30006**, object **50010**) to Bitz (**30026**, object **50011**) and back. Talks only. Reward is Scroll of Escape **736**, 25 adena, 50 exp, and 5 SP. It is one-time and abortable.
+**999** `Newbie Tutorial` is Mobius T0 (training-hall helpers → blue gem → recommendation → grand master). Fineage smoke **998** `Roxxy's Message` remains Roxxy (**30006**) → Bitz (**30026**) for Net regression (id ≤1023 so `completedMask` applies).
 
 ## Kill hook
 

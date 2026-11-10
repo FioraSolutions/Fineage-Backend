@@ -1,0 +1,85 @@
+{
+  "id": 113,
+  "name": "Status of the Beacon Tower",
+  "repeatable": false,
+  "abortable": true,
+  "questItems": [
+    8086
+  ],
+  "dialogs": [
+    {
+      "npcId": 31979,
+      "hook": "talk",
+      "when": "absent",
+      "maxLevel": 39,
+      "htmlFile": "31979-talk-000.htm"
+    },
+    {
+      "npcId": 31979,
+      "hook": "talk",
+      "when": "absent",
+      "minLevel": 40,
+      "htmlFile": "31979-talk-001.htm"
+    },
+    {
+      "npcId": 31979,
+      "hook": "event",
+      "when": "absent",
+      "event": "31979-02",
+      "minLevel": 40,
+      "ops": [
+        {
+          "op": "create"
+        },
+        {
+          "op": "start"
+        },
+        {
+          "op": "set_cond",
+          "cond": 1
+        },
+        {
+          "op": "give_item",
+          "itemId": 8086,
+          "count": 1
+        }
+      ],
+      "htmlFile": "31979-event-31979-02-002.htm"
+    },
+    {
+      "npcId": 31979,
+      "hook": "talk",
+      "when": "started",
+      "htmlFile": "31979-talk-003.htm"
+    },
+    {
+      "npcId": 32016,
+      "hook": "talk",
+      "when": "started",
+      "hasItem": 8086,
+      "htmlFile": "32016-talk-004.htm"
+    },
+    {
+      "npcId": 32016,
+      "hook": "event",
+      "when": "started",
+      "event": "32016-02",
+      "hasItem": 8086,
+      "ops": [
+        {
+          "op": "take_item",
+          "itemId": 8086,
+          "count": 1
+        },
+        {
+          "op": "give_adena",
+          "count": 21578
+        },
+        {
+          "op": "complete"
+        }
+      ],
+      "htmlFile": "32016-event-32016-02-005.htm"
+    }
+  ]
+}

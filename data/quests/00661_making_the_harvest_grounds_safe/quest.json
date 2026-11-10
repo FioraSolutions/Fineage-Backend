@@ -1,0 +1,102 @@
+{
+  "id": 661,
+  "name": "Making the Harvest Grounds Safe",
+  "repeatable": true,
+  "abortable": true,
+  "questItems": [
+    8283,
+    8284,
+    8285
+  ],
+  "dialogs": [
+    {
+      "npcId": 30210,
+      "hook": "talk",
+      "when": "absent",
+      "htmlFile": "30210-talk-000.htm"
+    },
+    {
+      "npcId": 30210,
+      "hook": "talk",
+      "when": "absent",
+      "htmlFile": "30210-talk-001.htm"
+    },
+    {
+      "npcId": 30210,
+      "hook": "talk",
+      "when": "started",
+      "hasItems": [
+        8283,
+        8284,
+        8285
+      ],
+      "htmlFile": "30210-talk-002.htm"
+    },
+    {
+      "npcId": 30210,
+      "hook": "event",
+      "when": "absent",
+      "event": "30210-01",
+      "htmlFile": "30210-event-30210-01-003.htm"
+    },
+    {
+      "npcId": 30210,
+      "hook": "event",
+      "when": "absent",
+      "event": "30210-02",
+      "htmlFile": "30210-event-30210-02-004.htm"
+    },
+    {
+      "npcId": 30210,
+      "hook": "event",
+      "when": "absent",
+      "event": "30210-04",
+      "htmlFile": "30210-event-30210-04-005.htm"
+    },
+    {
+      "npcId": 30210,
+      "hook": "event",
+      "when": "absent",
+      "event": "30210-06",
+      "htmlFile": "30210-event-30210-06-006.htm"
+    },
+    {
+      "npcId": 30210,
+      "hook": "event",
+      "when": "absent",
+      "event": "30210-03",
+      "ops": [
+        {
+          "op": "create"
+        },
+        {
+          "op": "start"
+        },
+        {
+          "op": "set_cond",
+          "cond": 1
+        }
+      ],
+      "htmlFile": "30210-event-30210-03-007.htm"
+    },
+    {
+      "npcId": 30210,
+      "hook": "event",
+      "when": "absent",
+      "event": "30210-08",
+      "htmlFile": "30210-event-30210-08-008.htm"
+    },
+    {
+      "npcId": 30210,
+      "hook": "event",
+      "when": "absent",
+      "event": "30210-09",
+      "ops": [
+        {
+          "op": "complete"
+        }
+      ],
+      "htmlFile": "30210-event-30210-09-009.htm"
+    }
+  ]
+}

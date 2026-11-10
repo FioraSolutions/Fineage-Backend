@@ -1,4 +1,4 @@
-using Fineage.Login;
+using Fineage.Accounts;
 
 namespace Fineage.Zone;
 
@@ -8,6 +8,9 @@ static class ZoneLog
 
     public static void Info(string message) =>
         FineageLogging.Write(Category, "Information", "log", ("message", message));
+
+    public static void Warn(string message) =>
+        FineageLogging.Write(Category, "Warning", "log", ("message", message));
 
     public static void Connect(int sessionId, string remote) =>
         FineageLogging.Write(Category, "Information", "Connect",

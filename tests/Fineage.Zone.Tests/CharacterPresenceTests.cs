@@ -1,3 +1,4 @@
+using Fineage.Accounts;
 using Fineage.Login;
 using Fineage.Protocol;
 using Fineage.Zone.World;
@@ -23,12 +24,7 @@ public sealed class CharacterPresenceTests
         int movedX = session.X + 100;
         int movedY = session.Y;
         int movedZ = session.Z;
-        Assert.Null(await world.TryMoveAsync(session, new MoveToMsg
-        {
-            DestX = movedX,
-            DestY = movedY,
-            DestZ = movedZ
-        }, CancellationToken.None));
+        Assert.Null(await world.TryMoveAsync(session, movedX, movedY, movedZ, CancellationToken.None));
 
         await world.LeaveAsync(session, CancellationToken.None);
         var saved = store.FindById(ticket.Account, ticket.CharacterId);
@@ -60,12 +56,7 @@ public sealed class CharacterPresenceTests
 
         Assert.True(await world.TryEnterAsync(first, CancellationToken.None));
         int movedX = first.X + 50;
-        Assert.Null(await world.TryMoveAsync(first, new MoveToMsg
-        {
-            DestX = movedX,
-            DestY = first.Y,
-            DestZ = first.Z
-        }, CancellationToken.None));
+        Assert.Null(await world.TryMoveAsync(first, movedX, first.Y, first.Z, CancellationToken.None));
 
         Assert.True(await world.TryEnterAsync(second, CancellationToken.None));
         Assert.False(first.InWorld);

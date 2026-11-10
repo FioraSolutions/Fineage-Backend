@@ -1,0 +1,220 @@
+{
+  "id": 328,
+  "name": "Sense for Business",
+  "repeatable": true,
+  "abortable": true,
+  "questItems": [
+    1347,
+    1366,
+    1348
+  ],
+  "dialogs": [
+    {
+      "npcId": 30436,
+      "hook": "talk",
+      "when": "absent",
+      "maxLevel": 20,
+      "htmlFile": "30436-talk-000.htm"
+    },
+    {
+      "npcId": 30436,
+      "hook": "talk",
+      "when": "absent",
+      "minLevel": 21,
+      "htmlFile": "30436-talk-001.htm"
+    },
+    {
+      "npcId": 30436,
+      "hook": "event",
+      "when": "absent",
+      "event": "30436-03",
+      "minLevel": 21,
+      "ops": [
+        {
+          "op": "create"
+        },
+        {
+          "op": "start"
+        },
+        {
+          "op": "set_cond",
+          "cond": 1
+        }
+      ],
+      "htmlFile": "30436-event-30436-03-002.htm"
+    },
+    {
+      "npcId": 30436,
+      "hook": "event",
+      "when": "started",
+      "event": "30436-06",
+      "ops": [
+        {
+          "op": "complete"
+        }
+      ],
+      "htmlFile": "30436-event-30436-06-003.htm"
+    },
+    {
+      "npcId": 30436,
+      "hook": "talk",
+      "when": "started",
+      "hasAny": [
+        1347,
+        1366,
+        1348
+      ],
+      "ops": [
+        {
+          "op": "sell_items",
+          "prices": [
+            {
+              "itemId": 1347,
+              "adena": 25
+            },
+            {
+              "itemId": 1366,
+              "adena": 1000
+            },
+            {
+              "itemId": 1348,
+              "adena": 60
+            }
+          ],
+          "bonusMin": 10,
+          "bonusAdena": 618
+        }
+      ],
+      "htmlFile": "30436-talk-004.htm"
+    },
+    {
+      "npcId": 30436,
+      "hook": "talk",
+      "when": "started",
+      "lacksItems": [
+        1347,
+        1366,
+        1348
+      ],
+      "htmlFile": "30436-talk-005.htm"
+    },
+    {
+      "npcId": 20055,
+      "hook": "kill",
+      "when": "started",
+      "html": "",
+      "ops": [
+        {
+          "op": "drop_item",
+          "itemId": 1347,
+          "count": 1,
+          "chance": 0.61,
+          "limit": 0
+        },
+        {
+          "op": "drop_item",
+          "itemId": 1366,
+          "count": 1,
+          "chance": 0.01,
+          "limit": 0
+        }
+      ]
+    },
+    {
+      "npcId": 20059,
+      "hook": "kill",
+      "when": "started",
+      "html": "",
+      "ops": [
+        {
+          "op": "drop_item",
+          "itemId": 1347,
+          "count": 1,
+          "chance": 0.61,
+          "limit": 0
+        },
+        {
+          "op": "drop_item",
+          "itemId": 1366,
+          "count": 1,
+          "chance": 0.01,
+          "limit": 0
+        }
+      ]
+    },
+    {
+      "npcId": 20067,
+      "hook": "kill",
+      "when": "started",
+      "html": "",
+      "ops": [
+        {
+          "op": "drop_item",
+          "itemId": 1347,
+          "count": 1,
+          "chance": 0.72,
+          "limit": 0
+        },
+        {
+          "op": "drop_item",
+          "itemId": 1366,
+          "count": 1,
+          "chance": 0.02,
+          "limit": 0
+        }
+      ]
+    },
+    {
+      "npcId": 20068,
+      "hook": "kill",
+      "when": "started",
+      "html": "",
+      "ops": [
+        {
+          "op": "drop_item",
+          "itemId": 1347,
+          "count": 1,
+          "chance": 0.78,
+          "limit": 0
+        },
+        {
+          "op": "drop_item",
+          "itemId": 1366,
+          "count": 1,
+          "chance": 0.01,
+          "limit": 0
+        }
+      ]
+    },
+    {
+      "npcId": 20070,
+      "hook": "kill",
+      "when": "started",
+      "html": "",
+      "ops": [
+        {
+          "op": "drop_item",
+          "itemId": 1348,
+          "count": 1,
+          "chance": 0.6,
+          "limit": 0
+        }
+      ]
+    },
+    {
+      "npcId": 20072,
+      "hook": "kill",
+      "when": "started",
+      "html": "",
+      "ops": [
+        {
+          "op": "drop_item",
+          "itemId": 1348,
+          "count": 1,
+          "chance": 0.63,
+          "limit": 0
+        }
+      ]
+    }
+  ]
+}

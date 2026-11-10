@@ -1,0 +1,70 @@
+{
+  "id": 659,
+  "name": "I'd Rather Be Collecting Fairy Breath",
+  "repeatable": true,
+  "abortable": true,
+  "questItems": [
+    8286
+  ],
+  "dialogs": [
+    {
+      "npcId": 30634,
+      "hook": "talk",
+      "when": "absent",
+      "htmlFile": "30634-event-30634-02-000.htm"
+    },
+    {
+      "npcId": 30634,
+      "hook": "event",
+      "when": "absent",
+      "event": "30634-02",
+      "ops": [
+        {
+          "op": "create"
+        },
+        {
+          "op": "start"
+        },
+        {
+          "op": "set_cond",
+          "cond": 1
+        }
+      ],
+      "htmlFile": "30634-event-30634-02-000.htm"
+    },
+    {
+      "npcId": 30634,
+      "hook": "event",
+      "when": "absent",
+      "event": "REWARD",
+      "hasItem": 8286,
+      "ops": [
+        {
+          "op": "take_item",
+          "itemId": 8286,
+          "count": 1
+        }
+      ],
+      "htmlFile": "30634-event-REWARD-001.htm"
+    },
+    {
+      "npcId": 30634,
+      "hook": "event",
+      "when": "absent",
+      "event": "30634-07",
+      "htmlFile": "30634-event-30634-07-002.htm"
+    },
+    {
+      "npcId": 30634,
+      "hook": "event",
+      "when": "absent",
+      "event": "30634-08",
+      "ops": [
+        {
+          "op": "complete"
+        }
+      ],
+      "htmlFile": "30634-event-30634-08-003.htm"
+    }
+  ]
+}

@@ -7,6 +7,7 @@ using Microsoft.AspNetCore.Hosting.Server.Features;
 using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
+using Fineage.Accounts;
 
 namespace Fineage.Login;
 
@@ -182,6 +183,7 @@ public sealed class LoginHttpHost : IAsyncDisposable
         {
             "username_taken" or "email_taken" => 409,
             "invalid_credentials" => 401,
+            "rate_limited" => 429,
             _ => 400
         };
         string code = string.IsNullOrEmpty(result.Code) ? "invalid_body" : result.Code;

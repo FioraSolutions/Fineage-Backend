@@ -1,6 +1,7 @@
 using Fineage.Login;
 using Npgsql;
 using Xunit;
+using Fineage.Accounts;
 
 namespace Fineage.Login.Tests;
 
@@ -160,5 +161,82 @@ public class PostgresNormalizedStoreTests
         var rows = reopened.FindById(account, characterId)!.Shortcuts!;
         Assert.Equal(2, rows.Count);
         Assert.Contains(rows, s => s.WorldSlot == 14 && s.Type == StoredShortcut.TypeAction);
+    }
+
+    [Fact]
+    public void Open_does_not_reproject_stale_snapshot_over_live_normalized_rows()
+    {
+        string? url = ConnectionString();
+        if (url == null)
+            return;
+
+        string suffix = Guid.NewGuid().ToString("n")[..8];
+        string account = "pgopen" + suffix;
+        int characterId;
+        long itemCount;
+        using (var store = PostgresAccountStore.Open(url))
+        {
+            var service = new LoginService(store, new HandoffTokens(HandoffTokens.DefaultSecret));
+            Assert.True(service.Register(account, "secret1").Ok);
+            var created = service.CreateHuman(account, "Op" + suffix, HumanClasses.Fighter);
+            Assert.True(created.Ok, created.Message);
+            characterId = created.Value!.Id;
+            // Simulate Zone hot-path inventory write: SQL rows change, store_snapshot stays stale.
+            Assert.True(store.TryReplaceItems(account, characterId,
+            [
+                new StoredItem(57, 100, EquippedSlot: -1)
+            ]));
+        }
+
+        using (var conn = new NpgsqlConnection(url))
+        {
+            conn.Open();
+            using var cmd = conn.CreateCommand();
+            cmd.CommandText = "SELECT count(*) FROM character_items WHERE character_id = @id";
+            cmd.Parameters.AddWithValue("id", characterId);
+            itemCount = (long)cmd.ExecuteScalar()!;
+            Assert.Equal(1L, itemCount);
+        }
+
+        // Re-open must keep the hot-path SQL row (not wipe from the stale JSON backup).
+        using var reopened = PostgresAccountStore.Open(url);
+        var row = reopened.FindById(account, characterId);
+        Assert.NotNull(row);
+        Assert.NotNull(row!.Items);
+        Assert.Single(row.Items!);
+        Assert.Equal(57, row.Items![0].ItemId);
+        Assert.Equal(100, row.Items[0].Count);
+    }
+
+    [Fact]
+    public void Login_snapshot_backup_does_not_reproject_over_zone_inventory_rows()
+    {
+        string? url = ConnectionString();
+        if (url == null)
+            return;
+
+        string suffix = Guid.NewGuid().ToString("n")[..8];
+        string account = "pgbak" + suffix;
+        using var store = PostgresAccountStore.Open(url);
+        var service = new LoginService(store, new HandoffTokens(HandoffTokens.DefaultSecret));
+        Assert.True(service.Register(account, "secret1").Ok);
+        var created = service.CreateHuman(account, "Bk" + suffix, HumanClasses.Fighter);
+        Assert.True(created.Ok, created.Message);
+        int characterId = created.Value!.Id;
+
+        Assert.True(store.TryReplaceItems(account, characterId,
+        [
+            new StoredItem(57, 42, EquippedSlot: -1)
+        ]));
+
+        // Login mutation that still emits AfterSaveSnapshot (friends JSON mirror) must not
+        // UpsertFromSnapshot and wipe the Zone hot-path inventory SoT.
+        Assert.True(store.TryReplaceFriends(account, characterId, []));
+
+        var row = store.FindById(account, characterId);
+        Assert.NotNull(row);
+        Assert.Single(row!.Items!);
+        Assert.Equal(57, row.Items![0].ItemId);
+        Assert.Equal(42, row.Items[0].Count);
     }
 }

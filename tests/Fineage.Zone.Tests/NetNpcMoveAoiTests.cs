@@ -11,13 +11,13 @@ public sealed class NetNpcMoveAoiTests
     {
         npc.X = x; npc.Y = y;
         npc.MoveDestX = x; npc.MoveDestY = y; npc.MoveDestZ = npc.Z;
-        npc.MoveActive = true;
+        kit.World.SetMoveActive(npc, true);
         npc.MoveLastTickMs = kit.Now.ToUnixTimeMilliseconds();
         kit.Now = kit.Now.AddMilliseconds(100);
     }
 
     static bool Diff(NetBridgeRecorder rec, int self, int id, bool added) =>
-        rec.Of(nameof(INetPresenceBridge.FanoutKnownlistDiff)).Any(a =>
+        rec.Of(nameof(IWorldEventPublisher.FanoutKnownlistDiff)).Any(a =>
             (int)a[0]! == self && ((IReadOnlyList<int>)a[added ? 1 : 2]!).Contains(id));
 
     [Fact]

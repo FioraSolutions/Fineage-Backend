@@ -1,0 +1,120 @@
+{
+  "id": 17,
+  "name": "LightAndDarkness",
+  "repeatable": false,
+  "abortable": true,
+  "questItems": [
+    7168
+  ],
+  "dialogs": [
+    {
+      "npcId": 31517,
+      "hook": "talk",
+      "when": "absent",
+      "htmlFile": "31517-talk-000.htm"
+    },
+    {
+      "npcId": 31517,
+      "hook": "talk",
+      "when": "absent",
+      "htmlFile": "31517-talk-001.htm"
+    },
+    {
+      "npcId": 31517,
+      "hook": "talk",
+      "when": "started",
+      "htmlFile": "31517-talk-002.htm"
+    },
+    {
+      "npcId": 31517,
+      "hook": "talk",
+      "when": "started",
+      "htmlFile": "31517-talk-003.htm"
+    },
+    {
+      "npcId": 31517,
+      "hook": "event",
+      "when": "absent",
+      "event": "31517-02",
+      "minLevel": 61,
+      "ops": [
+        {
+          "op": "create"
+        },
+        {
+          "op": "start"
+        },
+        {
+          "op": "give_item",
+          "itemId": 7168,
+          "count": 4
+        },
+        {
+          "op": "set_cond",
+          "cond": 1
+        }
+      ],
+      "htmlFile": "31517-event-31517-02-004.htm"
+    },
+    {
+      "npcId": 31517,
+      "hook": "event",
+      "when": "absent",
+      "event": "31508-02",
+      "hasItem": 7168,
+      "ops": [
+        {
+          "op": "take_item",
+          "itemId": 7168,
+          "count": 1
+        }
+      ],
+      "htmlFile": "31517-event-31508-02-005.htm"
+    },
+    {
+      "npcId": 31517,
+      "hook": "event",
+      "when": "absent",
+      "event": "31509-02",
+      "hasItem": 7168,
+      "ops": [
+        {
+          "op": "take_item",
+          "itemId": 7168,
+          "count": 1
+        }
+      ],
+      "htmlFile": "31517-event-31509-02-006.htm"
+    },
+    {
+      "npcId": 31517,
+      "hook": "event",
+      "when": "absent",
+      "event": "31510-02",
+      "hasItem": 7168,
+      "ops": [
+        {
+          "op": "take_item",
+          "itemId": 7168,
+          "count": 1
+        }
+      ],
+      "htmlFile": "31517-event-31510-02-007.htm"
+    },
+    {
+      "npcId": 31517,
+      "hook": "event",
+      "when": "absent",
+      "event": "31511-02",
+      "hasItem": 7168,
+      "ops": [
+        {
+          "op": "take_item",
+          "itemId": 7168,
+          "count": 1
+        }
+      ],
+      "htmlFile": "31517-event-31511-02-008.htm"
+    }
+  ]
+}

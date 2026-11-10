@@ -1,0 +1,1167 @@
+{
+ "reference": "Mobius DamOverTime / DamOverTimePercent from CT0 Interlude stats/skills. kind=percent \u2192 MaxHp fraction per tick; kind=flat \u2192 absolute HP per tick. tickSeconds is the effect ticks= attribute (seconds between hits).",
+ "skills": [
+  {
+   "skillId": 84,
+   "name": "Poison Blade Dance",
+   "kind": "flat",
+   "tickSeconds": 5,
+   "powers": [
+    50.0,
+    58.0,
+    63.0
+   ]
+  },
+  {
+   "skillId": 96,
+   "name": "Bleed",
+   "kind": "flat",
+   "tickSeconds": 5,
+   "powers": [
+    25.0,
+    34.0,
+    44.0,
+    54.0,
+    62.0,
+    67.0
+   ]
+  },
+  {
+   "skillId": 103,
+   "name": "Corpse Plague",
+   "kind": "flat",
+   "tickSeconds": 5,
+   "powers": [
+    41.0,
+    50.0,
+    58.0,
+    63.0
+   ]
+  },
+  {
+   "skillId": 129,
+   "name": "Poison",
+   "kind": "percent",
+   "tickSeconds": 2,
+   "powers": [
+    0.009,
+    0.018,
+    0.027,
+    0.035,
+    0.045
+   ]
+  },
+  {
+   "skillId": 222,
+   "name": "Fist Fury",
+   "kind": "flat",
+   "tickSeconds": 2,
+   "powers": [
+    12.0
+   ]
+  },
+  {
+   "skillId": 223,
+   "name": "Sting",
+   "kind": "flat",
+   "tickSeconds": 5,
+   "powers": [
+    25.0,
+    25.0,
+    25.0,
+    25.0,
+    25.0,
+    25.0,
+    34.0,
+    34.0,
+    34.0,
+    34.0,
+    34.0,
+    34.0,
+    34.0,
+    34.0,
+    44.0,
+    44.0,
+    44.0,
+    44.0,
+    44.0,
+    44.0,
+    44.0,
+    44.0,
+    44.0,
+    44.0,
+    54.0,
+    54.0,
+    54.0,
+    54.0,
+    54.0,
+    54.0,
+    54.0,
+    54.0,
+    54.0,
+    54.0,
+    62.0,
+    62.0,
+    62.0,
+    62.0,
+    62.0,
+    62.0,
+    62.0,
+    62.0,
+    62.0,
+    62.0,
+    67.0,
+    67.0,
+    67.0,
+    67.0,
+    67.0
+   ]
+  },
+  {
+   "skillId": 336,
+   "name": "Arcane Wisdom",
+   "kind": "flat",
+   "tickSeconds": 5,
+   "powers": [
+    50.0
+   ]
+  },
+  {
+   "skillId": 337,
+   "name": "Arcane Power",
+   "kind": "flat",
+   "tickSeconds": 5,
+   "powers": [
+    50.0
+   ]
+  },
+  {
+   "skillId": 338,
+   "name": "Arcane Agility",
+   "kind": "flat",
+   "tickSeconds": 5,
+   "powers": [
+    50.0
+   ]
+  },
+  {
+   "skillId": 1095,
+   "name": "Venom",
+   "kind": "flat",
+   "tickSeconds": 5,
+   "powers": [
+    11.0,
+    16.0,
+    24.0,
+    41.0,
+    50.0
+   ]
+  },
+  {
+   "skillId": 1100,
+   "name": "Chill Flame",
+   "kind": "flat",
+   "tickSeconds": 1,
+   "powers": [
+    27.0,
+    40.0
+   ]
+  },
+  {
+   "skillId": 1101,
+   "name": "Blaze Quake",
+   "kind": "flat",
+   "tickSeconds": 1,
+   "powers": [
+    58.0,
+    79.0
+   ]
+  },
+  {
+   "skillId": 1107,
+   "name": "Frost Flame",
+   "kind": "flat",
+   "tickSeconds": 1,
+   "powers": [
+    58.0,
+    79.0
+   ]
+  },
+  {
+   "skillId": 1108,
+   "name": "Seal of Flame",
+   "kind": "percent",
+   "tickSeconds": 2,
+   "powers": [
+    0.009,
+    0.018,
+    0.027,
+    0.036
+   ]
+  },
+  {
+   "skillId": 1167,
+   "name": "Poisonous Cloud",
+   "kind": "percent",
+   "tickSeconds": 2,
+   "powers": [
+    0.008,
+    0.012,
+    0.018,
+    0.024,
+    0.032,
+    0.045
+   ]
+  },
+  {
+   "skillId": 1168,
+   "name": "Curse: Poison",
+   "kind": "percent",
+   "tickSeconds": 2,
+   "powers": [
+    0.007,
+    0.014,
+    0.021,
+    0.028,
+    0.035,
+    0.042,
+    0.045
+   ]
+  },
+  {
+   "skillId": 1183,
+   "name": "Freezing Shackle",
+   "kind": "flat",
+   "tickSeconds": 1,
+   "powers": [
+    102.0,
+    125.0,
+    144.0,
+    157.0
+   ]
+  },
+  {
+   "skillId": 1209,
+   "name": "Seal of Poison",
+   "kind": "percent",
+   "tickSeconds": 2,
+   "powers": [
+    0.006,
+    0.012,
+    0.018,
+    0.024,
+    0.03,
+    0.036
+   ]
+  },
+  {
+   "skillId": 1233,
+   "name": "Decay",
+   "kind": "flat",
+   "tickSeconds": 1,
+   "powers": [
+    102.0,
+    125.0,
+    144.0,
+    157.0
+   ]
+  },
+  {
+   "skillId": 1237,
+   "name": "Ice Dagger",
+   "kind": "flat",
+   "tickSeconds": 5,
+   "powers": [
+    44.0,
+    44.0,
+    44.0,
+    44.0,
+    54.0,
+    54.0,
+    54.0,
+    54.0,
+    54.0,
+    62.0,
+    62.0,
+    62.0,
+    62.0,
+    62.0,
+    67.0,
+    67.0,
+    67.0
+   ]
+  },
+  {
+   "skillId": 1244,
+   "name": "Freezing Flame",
+   "kind": "flat",
+   "tickSeconds": 1,
+   "powers": [
+    102.0,
+    125.0,
+    144.0,
+    157.0
+   ]
+  },
+  {
+   "skillId": 1289,
+   "name": "Inferno",
+   "kind": "flat",
+   "tickSeconds": 1,
+   "powers": [
+    60.0
+   ]
+  },
+  {
+   "skillId": 3005,
+   "name": "Bleed",
+   "kind": "flat",
+   "tickSeconds": 3,
+   "powers": [
+    44.0
+   ]
+  },
+  {
+   "skillId": 3020,
+   "name": "Special Ability: Critical Bleed",
+   "kind": "flat",
+   "tickSeconds": 3,
+   "powers": [
+    128.0,
+    128.0,
+    190.0,
+    190.0,
+    190.0,
+    256.0
+   ]
+  },
+  {
+   "skillId": 3021,
+   "name": "Special Ability: Critical Bleed",
+   "kind": "flat",
+   "tickSeconds": 3,
+   "powers": [
+    43.0,
+    43.0,
+    64.0,
+    64.0,
+    65.0,
+    88.0
+   ]
+  },
+  {
+   "skillId": 3024,
+   "name": "Special Ability: Critical Poison",
+   "kind": "flat",
+   "tickSeconds": 3,
+   "powers": [
+    191.0,
+    191.0,
+    291.0,
+    291.0,
+    291.0,
+    403.0
+   ]
+  },
+  {
+   "skillId": 3040,
+   "name": "Special Ability: Critical Poison",
+   "kind": "flat",
+   "tickSeconds": 3,
+   "powers": [
+    168.0,
+    168.0,
+    249.0,
+    249.0,
+    249.0,
+    336.0
+   ]
+  },
+  {
+   "skillId": 3041,
+   "name": "Special Ability: Critical Poison",
+   "kind": "flat",
+   "tickSeconds": 3,
+   "powers": [
+    317.0,
+    317.0,
+    498.0,
+    498.0,
+    498.0,
+    671.0
+   ]
+  },
+  {
+   "skillId": 3052,
+   "name": "Special Ability: Critical Bleed",
+   "kind": "flat",
+   "tickSeconds": 3,
+   "powers": [
+    74.0,
+    74.0
+   ]
+  },
+  {
+   "skillId": 3053,
+   "name": "Special Ability: Critical Bleed",
+   "kind": "flat",
+   "tickSeconds": 3,
+   "powers": [
+    88.0,
+    88.0
+   ]
+  },
+  {
+   "skillId": 3054,
+   "name": "Special Ability: Critical Bleed",
+   "kind": "flat",
+   "tickSeconds": 3,
+   "powers": [
+    256.0,
+    256.0
+   ]
+  },
+  {
+   "skillId": 3055,
+   "name": "Special Ability: Critical Bleed",
+   "kind": "flat",
+   "tickSeconds": 3,
+   "powers": [
+    128.0,
+    128.0
+   ]
+  },
+  {
+   "skillId": 3061,
+   "name": "Special Ability: Critical Poison",
+   "kind": "flat",
+   "tickSeconds": 3,
+   "powers": [
+    403.0,
+    403.0,
+    439.0
+   ]
+  },
+  {
+   "skillId": 3062,
+   "name": "Special Ability: Critical Poison",
+   "kind": "flat",
+   "tickSeconds": 3,
+   "powers": [
+    224.0,
+    224.0
+   ]
+  },
+  {
+   "skillId": 3091,
+   "name": "Item Skill: Poison",
+   "kind": "flat",
+   "tickSeconds": 5,
+   "powers": [
+    41.0,
+    41.0,
+    50.0,
+    50.0,
+    50.0,
+    58.0,
+    58.0,
+    58.0,
+    63.0,
+    63.0
+   ]
+  },
+  {
+   "skillId": 3092,
+   "name": "Item Skill: Bleed",
+   "kind": "flat",
+   "tickSeconds": 5,
+   "powers": [
+    44.0,
+    44.0,
+    54.0,
+    54.0,
+    54.0,
+    62.0,
+    62.0,
+    62.0,
+    67.0,
+    67.0
+   ]
+  },
+  {
+   "skillId": 3104,
+   "name": "Item Skill: Poison",
+   "kind": "flat",
+   "tickSeconds": 5,
+   "powers": [
+    41.0,
+    41.0,
+    50.0,
+    50.0,
+    50.0,
+    58.0,
+    58.0,
+    58.0,
+    63.0,
+    63.0
+   ]
+  },
+  {
+   "skillId": 3105,
+   "name": "Item Skill: Bleed",
+   "kind": "flat",
+   "tickSeconds": 5,
+   "powers": [
+    44.0,
+    44.0,
+    54.0,
+    54.0,
+    54.0,
+    62.0,
+    62.0,
+    62.0,
+    67.0,
+    67.0
+   ]
+  },
+  {
+   "skillId": 3119,
+   "name": "Item Skill: Poison",
+   "kind": "flat",
+   "tickSeconds": 5,
+   "powers": [
+    41.0,
+    41.0,
+    50.0,
+    50.0,
+    50.0,
+    58.0,
+    58.0,
+    58.0,
+    63.0,
+    63.0
+   ]
+  },
+  {
+   "skillId": 3120,
+   "name": "Item Skill: Bleed",
+   "kind": "flat",
+   "tickSeconds": 5,
+   "powers": [
+    44.0,
+    44.0,
+    54.0,
+    54.0,
+    54.0,
+    62.0,
+    62.0,
+    62.0,
+    67.0,
+    67.0
+   ]
+  },
+  {
+   "skillId": 3195,
+   "name": "Item Skill: Poison",
+   "kind": "flat",
+   "tickSeconds": 3,
+   "powers": [
+    41.0,
+    41.0,
+    50.0,
+    50.0,
+    50.0,
+    58.0,
+    58.0,
+    58.0,
+    63.0,
+    63.0
+   ]
+  },
+  {
+   "skillId": 3196,
+   "name": "Item Skill: Bleed",
+   "kind": "flat",
+   "tickSeconds": 3,
+   "powers": [
+    44.0,
+    44.0,
+    54.0,
+    54.0,
+    54.0,
+    62.0,
+    62.0,
+    62.0,
+    67.0,
+    67.0
+   ]
+  },
+  {
+   "skillId": 4019,
+   "name": "Decrease Speed",
+   "kind": "flat",
+   "tickSeconds": 3,
+   "powers": [
+    30.0
+   ]
+  },
+  {
+   "skillId": 4035,
+   "name": "Poison",
+   "kind": "flat",
+   "tickSeconds": 3,
+   "powers": [
+    16.0,
+    24.0,
+    32.0,
+    41.0,
+    50.0,
+    58.0,
+    63.0,
+    63.0,
+    66.0,
+    66.0,
+    68.0,
+    68.0
+   ]
+  },
+  {
+   "skillId": 4036,
+   "name": "Poison",
+   "kind": "flat",
+   "tickSeconds": 3,
+   "powers": [
+    16.0,
+    24.0,
+    32.0,
+    41.0,
+    50.0,
+    58.0,
+    63.0,
+    63.0,
+    66.0,
+    66.0,
+    68.0,
+    68.0
+   ]
+  },
+  {
+   "skillId": 4052,
+   "name": "Poison",
+   "kind": "flat",
+   "tickSeconds": 3,
+   "powers": [
+    41.0,
+    50.0,
+    58.0,
+    58.0,
+    58.0,
+    63.0,
+    63.0,
+    63.0,
+    63.0,
+    66.0,
+    66.0,
+    66.0,
+    66.0,
+    66.0,
+    66.0
+   ]
+  },
+  {
+   "skillId": 4082,
+   "name": "Poison of Death",
+   "kind": "flat",
+   "tickSeconds": 3,
+   "powers": [
+    30.0
+   ]
+  },
+  {
+   "skillId": 4088,
+   "name": "Bleed",
+   "kind": "flat",
+   "tickSeconds": 3,
+   "powers": [
+    18.0,
+    25.0,
+    34.0,
+    44.0,
+    54.0,
+    62.0,
+    67.0,
+    67.0,
+    70.0,
+    70.0,
+    71.0,
+    71.0
+   ]
+  },
+  {
+   "skillId": 4104,
+   "name": "Flame",
+   "kind": "flat",
+   "tickSeconds": 1,
+   "powers": [
+    18.0,
+    27.0,
+    39.0,
+    53.0,
+    67.0,
+    81.0,
+    91.0,
+    91.0,
+    100.0,
+    100.0,
+    108.0,
+    108.0
+   ]
+  },
+  {
+   "skillId": 4148,
+   "name": "Poison",
+   "kind": "flat",
+   "tickSeconds": 5,
+   "powers": [
+    16.0,
+    24.0,
+    32.0,
+    41.0,
+    50.0,
+    58.0,
+    63.0,
+    63.0,
+    66.0,
+    66.0,
+    68.0,
+    68.0
+   ]
+  },
+  {
+   "skillId": 4149,
+   "name": "Bleed",
+   "kind": "flat",
+   "tickSeconds": 5,
+   "powers": [
+    18.0,
+    25.0,
+    34.0,
+    44.0,
+    54.0,
+    62.0,
+    67.0,
+    67.0,
+    70.0,
+    70.0,
+    71.0,
+    71.0
+   ]
+  },
+  {
+   "skillId": 4150,
+   "name": "Flame",
+   "kind": "flat",
+   "tickSeconds": 5,
+   "powers": [
+    14.0,
+    21.0,
+    30.0,
+    40.0,
+    51.0,
+    61.0,
+    68.0,
+    68.0,
+    72.0,
+    72.0,
+    74.0,
+    74.0
+   ]
+  },
+  {
+   "skillId": 4165,
+   "name": "Icy Air",
+   "kind": "flat",
+   "tickSeconds": 1,
+   "powers": [
+    102.0,
+    102.0,
+    102.0,
+    125.0,
+    125.0,
+    144.0,
+    144.0,
+    157.0,
+    157.0,
+    157.0,
+    157.0,
+    164.0,
+    164.0,
+    164.0,
+    164.0,
+    164.0,
+    164.0
+   ]
+  },
+  {
+   "skillId": 4182,
+   "name": "Poison",
+   "kind": "flat",
+   "tickSeconds": 5,
+   "powers": [
+    13.0,
+    18.0,
+    25.0,
+    32.0,
+    39.0,
+    45.0,
+    49.0,
+    49.0,
+    52.0,
+    52.0,
+    53.0,
+    53.0
+   ]
+  },
+  {
+   "skillId": 4188,
+   "name": "Bleed",
+   "kind": "flat",
+   "tickSeconds": 5,
+   "powers": [
+    19.0,
+    28.0,
+    38.0,
+    49.0,
+    60.0,
+    69.0,
+    75.0,
+    75.0,
+    78.0,
+    78.0,
+    79.0,
+    79.0
+   ]
+  },
+  {
+   "skillId": 4198,
+   "name": "Poison",
+   "kind": "flat",
+   "tickSeconds": 5,
+   "powers": [
+    13.0,
+    18.0,
+    25.0,
+    32.0,
+    39.0,
+    45.0,
+    49.0,
+    49.0,
+    52.0,
+    52.0,
+    53.0,
+    53.0
+   ]
+  },
+  {
+   "skillId": 4204,
+   "name": "Bleed",
+   "kind": "flat",
+   "tickSeconds": 5,
+   "powers": [
+    19.0,
+    28.0,
+    38.0,
+    49.0,
+    60.0,
+    69.0,
+    75.0,
+    75.0,
+    78.0,
+    78.0,
+    79.0,
+    79.0
+   ]
+  },
+  {
+   "skillId": 4243,
+   "name": "Venomous Poison",
+   "kind": "flat",
+   "tickSeconds": 5,
+   "powers": [
+    98.0
+   ]
+  },
+  {
+   "skillId": 4259,
+   "name": "Toxic Smoke",
+   "kind": "flat",
+   "tickSeconds": 5,
+   "powers": [
+    16.0,
+    24.0,
+    32.0,
+    41.0,
+    50.0,
+    58.0,
+    63.0,
+    63.0,
+    66.0,
+    66.0,
+    68.0,
+    68.0
+   ]
+  },
+  {
+   "skillId": 4320,
+   "name": "Poison",
+   "kind": "flat",
+   "tickSeconds": 5,
+   "powers": [
+    16.0,
+    24.0,
+    32.0,
+    41.0,
+    50.0,
+    58.0,
+    63.0,
+    63.0,
+    66.0,
+    66.0,
+    68.0,
+    68.0
+   ]
+  },
+  {
+   "skillId": 4579,
+   "name": "Bleed",
+   "kind": "flat",
+   "tickSeconds": 5,
+   "powers": [
+    18.0,
+    25.0,
+    34.0,
+    44.0,
+    54.0,
+    62.0,
+    67.0,
+    67.0,
+    70.0,
+    70.0,
+    71.0,
+    71.0
+   ]
+  },
+  {
+   "skillId": 4582,
+   "name": "Poison",
+   "kind": "flat",
+   "tickSeconds": 5,
+   "powers": [
+    16.0,
+    24.0,
+    32.0,
+    41.0,
+    50.0,
+    58.0,
+    63.0,
+    63.0,
+    66.0,
+    66.0,
+    68.0,
+    68.0
+   ]
+  },
+  {
+   "skillId": 4596,
+   "name": "Bleed",
+   "kind": "flat",
+   "tickSeconds": 5,
+   "powers": [
+    18.0,
+    25.0,
+    34.0,
+    44.0,
+    54.0,
+    62.0,
+    67.0,
+    67.0,
+    70.0,
+    70.0,
+    71.0,
+    71.0
+   ]
+  },
+  {
+   "skillId": 4597,
+   "name": "Bleed",
+   "kind": "flat",
+   "tickSeconds": 5,
+   "powers": [
+    18.0,
+    25.0,
+    34.0,
+    44.0,
+    54.0,
+    62.0,
+    67.0,
+    67.0,
+    70.0,
+    70.0,
+    71.0,
+    71.0
+   ]
+  },
+  {
+   "skillId": 4598,
+   "name": "Bleed",
+   "kind": "flat",
+   "tickSeconds": 5,
+   "powers": [
+    18.0,
+    25.0,
+    34.0,
+    44.0,
+    54.0,
+    62.0,
+    67.0,
+    67.0,
+    70.0,
+    70.0,
+    71.0,
+    71.0
+   ]
+  },
+  {
+   "skillId": 4606,
+   "name": "Poison",
+   "kind": "flat",
+   "tickSeconds": 3,
+   "powers": [
+    16.0,
+    24.0,
+    32.0,
+    41.0,
+    50.0,
+    58.0,
+    63.0,
+    63.0,
+    66.0,
+    66.0,
+    68.0,
+    68.0
+   ]
+  },
+  {
+   "skillId": 4615,
+   "name": "Bleed",
+   "kind": "flat",
+   "tickSeconds": 3,
+   "powers": [
+    18.0,
+    25.0,
+    34.0,
+    44.0,
+    54.0,
+    62.0,
+    67.0,
+    67.0,
+    70.0,
+    70.0,
+    71.0,
+    71.0
+   ]
+  },
+  {
+   "skillId": 4649,
+   "name": "Poison",
+   "kind": "flat",
+   "tickSeconds": 3,
+   "powers": [
+    16.0,
+    24.0,
+    32.0,
+    41.0,
+    50.0,
+    58.0,
+    63.0,
+    63.0,
+    66.0,
+    66.0,
+    68.0,
+    68.0
+   ]
+  },
+  {
+   "skillId": 4683,
+   "name": "Valakas Dragon Breath",
+   "kind": "flat",
+   "tickSeconds": 3,
+   "powers": [
+    216.0
+   ]
+  },
+  {
+   "skillId": 4684,
+   "name": "Valakas Dragon Breath",
+   "kind": "flat",
+   "tickSeconds": 3,
+   "powers": [
+    216.0
+   ]
+  },
+  {
+   "skillId": 5086,
+   "name": "Deadly Poison",
+   "kind": "flat",
+   "tickSeconds": 5,
+   "powers": [
+    12.0
+   ]
+  },
+  {
+   "skillId": 5140,
+   "name": "Force Curse",
+   "kind": "flat",
+   "tickSeconds": 5,
+   "powers": [
+    109.0
+   ]
+  },
+  {
+   "skillId": 5174,
+   "name": "Poison",
+   "kind": "flat",
+   "tickSeconds": 5,
+   "powers": [
+    41.0,
+    41.0,
+    50.0,
+    50.0,
+    50.0,
+    58.0,
+    58.0,
+    58.0,
+    63.0,
+    63.0
+   ]
+  },
+  {
+   "skillId": 5175,
+   "name": "Bleed",
+   "kind": "flat",
+   "tickSeconds": 5,
+   "powers": [
+    44.0,
+    44.0,
+    54.0,
+    54.0,
+    54.0,
+    62.0,
+    62.0,
+    62.0,
+    67.0,
+    67.0
+   ]
+  }
+ ]
+}

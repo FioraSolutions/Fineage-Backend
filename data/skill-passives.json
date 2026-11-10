@@ -1,6 +1,23 @@
 {
- "reference": "Combat stat funcs of passive (operateType P) skills from L2J Mobius CT 0 Interlude dist/game/data/stats/skills. 'using' = Mobius <using kind> condition (weapon type of the right hand, armor type of chest+legs, SHIELD). Funcs with other conditions are skipped.",
+ "reference": "Combat stat funcs of passive (operateType P) skills from L2J Mobius CT 0 Interlude dist/game/data/stats/skills. 'using' = Mobius <using kind> condition (weapon type of the right hand, armor type of chest+legs, SHIELD). Funcs with other conditions are skipped. defenceTraits/attackTraits carry Mobius DefenceTrait/AttackTrait percent tables (POISON/HOLD/SHOCK/\u2026).",
  "skills": [
+  {
+   "skillId": 134,
+   "name": "Toughness",
+   "levels": 1,
+   "effects": [],
+   "defenceTraits": {
+    "hold": [
+     20.0
+    ],
+    "sleep": [
+     20.0
+    ],
+    "poison": [
+     20.0
+    ]
+   }
+  },
   {
    "skillId": 137,
    "name": "Critical Chance",
@@ -320,6 +337,24 @@
      ]
     }
    ]
+  },
+  {
+   "skillId": 171,
+   "name": "Esprit",
+   "levels": 8,
+   "effects": [],
+   "defenceTraits": {
+    "hold": [
+     -11.0,
+     -11.0,
+     -11.0,
+     -11.0,
+     -11.0,
+     -11.0,
+     -11.0,
+     -11.0
+    ]
+   }
   },
   {
    "skillId": 191,
@@ -768,6 +803,19 @@
      ]
     }
    ]
+  },
+  {
+   "skillId": 225,
+   "name": "Acrobatic Move",
+   "levels": 3,
+   "effects": [],
+   "defenceTraits": {
+    "shock": [
+     -11.0,
+     -11.0,
+     -11.0
+    ]
+   }
   },
   {
    "skillId": 227,
@@ -2149,6 +2197,37 @@
    ]
   },
   {
+   "skillId": 328,
+   "name": "Wisdom",
+   "levels": 1,
+   "effects": [],
+   "defenceTraits": {
+    "hold": [
+     20.0
+    ],
+    "sleep": [
+     20.0
+    ],
+    "derangement": [
+     20.0
+    ]
+   }
+  },
+  {
+   "skillId": 329,
+   "name": "Health",
+   "levels": 1,
+   "effects": [],
+   "defenceTraits": {
+    "poison": [
+     20.0
+    ],
+    "bleed": [
+     20.0
+    ]
+   }
+  },
+  {
    "skillId": 373,
    "name": "Clan Lifeblood",
    "levels": 3,
@@ -2275,6 +2354,45 @@
      ]
     }
    ]
+  },
+  {
+   "skillId": 386,
+   "name": "Clan Fortitude",
+   "levels": 3,
+   "effects": [],
+   "defenceTraits": {
+    "shock": [
+     12.0,
+     20.0,
+     24.0
+    ]
+   }
+  },
+  {
+   "skillId": 387,
+   "name": "Clan Freedom",
+   "levels": 3,
+   "effects": [],
+   "defenceTraits": {
+    "hold": [
+     12.0,
+     20.0,
+     24.0
+    ]
+   }
+  },
+  {
+   "skillId": 388,
+   "name": "Clan Vigilance",
+   "levels": 3,
+   "effects": [],
+   "defenceTraits": {
+    "sleep": [
+     12.0,
+     20.0,
+     24.0
+    ]
+   }
   },
   {
    "skillId": 389,
@@ -3188,6 +3306,17 @@
    ]
   },
   {
+   "skillId": 3502,
+   "name": "Mithril Heavy Armor Set",
+   "levels": 1,
+   "effects": [],
+   "defenceTraits": {
+    "poison": [
+     20.0
+    ]
+   }
+  },
+  {
    "skillId": 3504,
    "name": "Knowledge Set",
    "levels": 1,
@@ -3249,6 +3378,20 @@
      ]
     }
    ]
+  },
+  {
+   "skillId": 3509,
+   "name": "Chain Mail Set",
+   "levels": 1,
+   "effects": [],
+   "defenceTraits": {
+    "dagger": [
+     6.0
+    ],
+    "dualdagger": [
+     6.0
+    ]
+   }
   },
   {
    "skillId": 3510,
@@ -3479,7 +3622,12 @@
       1.025
      ]
     }
-   ]
+   ],
+   "defenceTraits": {
+    "poison": [
+     20.0
+    ]
+   }
   },
   {
    "skillId": 3528,
@@ -3517,6 +3665,17 @@
    ]
   },
   {
+   "skillId": 3530,
+   "name": "Dark Crystal Breastplate Heavy Armor Set",
+   "levels": 1,
+   "effects": [],
+   "defenceTraits": {
+    "paralyze": [
+     50.0
+    ]
+   }
+  },
+  {
    "skillId": 3531,
    "name": "Tallum Heavy Armor Set",
    "levels": 1,
@@ -3535,7 +3694,15 @@
       5759.0
      ]
     }
-   ]
+   ],
+   "defenceTraits": {
+    "poison": [
+     80.0
+    ],
+    "bleed": [
+     80.0
+    ]
+   }
   },
   {
    "skillId": 3532,
@@ -3556,7 +3723,12 @@
       1.04
      ]
     }
-   ]
+   ],
+   "defenceTraits": {
+    "paralyze": [
+     50.0
+    ]
+   }
   },
   {
    "skillId": 3533,
@@ -3570,7 +3742,15 @@
       1.08
      ]
     }
-   ]
+   ],
+   "defenceTraits": {
+    "poison": [
+     80.0
+    ],
+    "bleed": [
+     80.0
+    ]
+   }
   },
   {
    "skillId": 3534,
@@ -3591,7 +3771,15 @@
       1.08
      ]
     }
-   ]
+   ],
+   "defenceTraits": {
+    "poison": [
+     80.0
+    ],
+    "bleed": [
+     80.0
+    ]
+   }
   },
   {
    "skillId": 3535,
@@ -3619,7 +3807,12 @@
       7.0
      ]
     }
-   ]
+   ],
+   "defenceTraits": {
+    "paralyze": [
+     50.0
+    ]
+   }
   },
   {
    "skillId": 3536,
@@ -3633,7 +3826,15 @@
       1.04
      ]
     }
-   ]
+   ],
+   "defenceTraits": {
+    "sleep": [
+     70.0
+    ],
+    "hold": [
+     70.0
+    ]
+   }
   },
   {
    "skillId": 3537,
@@ -3654,7 +3855,12 @@
       3.1
      ]
     }
-   ]
+   ],
+   "defenceTraits": {
+    "shock": [
+     50.0
+    ]
+   }
   },
   {
    "skillId": 3538,
@@ -3668,7 +3874,15 @@
       1.04
      ]
     }
-   ]
+   ],
+   "defenceTraits": {
+    "sleep": [
+     70.0
+    ],
+    "hold": [
+     70.0
+    ]
+   }
   },
   {
    "skillId": 3539,
@@ -3692,7 +3906,12 @@
       5759.0
      ]
     }
-   ]
+   ],
+   "defenceTraits": {
+    "shock": [
+     50.0
+    ]
+   }
   },
   {
    "skillId": 3540,
@@ -3713,7 +3932,15 @@
       1.08
      ]
     }
-   ]
+   ],
+   "defenceTraits": {
+    "sleep": [
+     70.0
+    ],
+    "hold": [
+     70.0
+    ]
+   }
   },
   {
    "skillId": 3541,
@@ -3734,7 +3961,12 @@
       1.08
      ]
     }
-   ]
+   ],
+   "defenceTraits": {
+    "shock": [
+     50.0
+    ]
+   }
   },
   {
    "skillId": 3546,
@@ -3762,7 +3994,29 @@
       1.08
      ]
     }
-   ]
+   ],
+   "defenceTraits": {
+    "sleep": [
+     70.0
+    ],
+    "hold": [
+     70.0
+    ]
+   }
+  },
+  {
+   "skillId": 3554,
+   "name": "Equipped with Shield",
+   "levels": 1,
+   "effects": [],
+   "defenceTraits": {
+    "poison": [
+     80.0
+    ],
+    "bleed": [
+     80.0
+    ]
+   }
   },
   {
    "skillId": 3555,
@@ -3818,7 +4072,12 @@
       5759.0
      ]
     }
-   ]
+   ],
+   "defenceTraits": {
+    "shock": [
+     50.0
+    ]
+   }
   },
   {
    "skillId": 3557,
@@ -3846,7 +4105,95 @@
       2.0
      ]
     }
-   ]
+   ],
+   "defenceTraits": {
+    "sleep": [
+     40.0
+    ]
+   },
+   "attackTraits": {
+    "sleep": [
+     40.0
+    ]
+   }
+  },
+  {
+   "skillId": 3558,
+   "name": "Earring of Antharas",
+   "levels": 1,
+   "effects": [],
+   "defenceTraits": {
+    "bleed": [
+     40.0
+    ],
+    "shock": [
+     30.0
+    ],
+    "derangement": [
+     30.0
+    ]
+   },
+   "attackTraits": {
+    "bleed": [
+     40.0
+    ],
+    "shock": [
+     30.0
+    ],
+    "derangement": [
+     30.0
+    ]
+   }
+  },
+  {
+   "skillId": 3559,
+   "name": "Earring of Zaken",
+   "levels": 2,
+   "effects": [],
+   "defenceTraits": {
+    "bleed": [
+     30.0,
+     30.0
+    ],
+    "shock": [
+     20.0,
+     30.0
+    ],
+    "derangement": [
+     20.0,
+     30.0
+    ]
+   },
+   "attackTraits": {
+    "bleed": [
+     30.0,
+     30.0
+    ],
+    "shock": [
+     20.0,
+     30.0
+    ],
+    "derangement": [
+     20.0,
+     30.0
+    ]
+   }
+  },
+  {
+   "skillId": 3560,
+   "name": "Earring of Orfen",
+   "levels": 1,
+   "effects": [],
+   "defenceTraits": {
+    "bleed": [
+     20.0
+    ]
+   },
+   "attackTraits": {
+    "bleed": [
+     20.0
+    ]
+   }
   },
   {
    "skillId": 3561,
@@ -3881,7 +4228,23 @@
       1.04
      ]
     }
-   ]
+   ],
+   "defenceTraits": {
+    "poison": [
+     40.0
+    ],
+    "hold": [
+     30.0
+    ]
+   },
+   "attackTraits": {
+    "poison": [
+     40.0
+    ],
+    "hold": [
+     30.0
+    ]
+   }
   },
   {
    "skillId": 3562,
@@ -3902,7 +4265,23 @@
       1.15
      ]
     }
-   ]
+   ],
+   "defenceTraits": {
+    "poison": [
+     30.0
+    ],
+    "hold": [
+     20.0
+    ]
+   },
+   "attackTraits": {
+    "poison": [
+     30.0
+    ],
+    "hold": [
+     20.0
+    ]
+   }
   },
   {
    "skillId": 3563,
@@ -3916,7 +4295,17 @@
       1.0
      ]
     }
-   ]
+   ],
+   "defenceTraits": {
+    "poison": [
+     20.0
+    ]
+   },
+   "attackTraits": {
+    "poison": [
+     20.0
+    ]
+   }
   },
   {
    "skillId": 3564,
@@ -4424,6 +4813,46 @@
      ]
     }
    ]
+  },
+  {
+   "skillId": 3604,
+   "name": "Frintezza's Necklace",
+   "levels": 1,
+   "effects": [],
+   "defenceTraits": {
+    "poison": [
+     25.0
+    ],
+    "bleed": [
+     25.0
+    ],
+    "paralyze": [
+     15.0
+    ],
+    "shock": [
+     15.0
+    ],
+    "sleep": [
+     15.0
+    ]
+   },
+   "attackTraits": {
+    "poison": [
+     25.0
+    ],
+    "bleed": [
+     25.0
+    ],
+    "paralyze": [
+     15.0
+    ],
+    "shock": [
+     15.0
+    ],
+    "sleep": [
+     15.0
+    ]
+   }
   },
   {
    "skillId": 3605,
@@ -4996,6 +5425,180 @@
    ]
   },
   {
+   "skillId": 4003,
+   "name": "Golem Body",
+   "levels": 1,
+   "effects": [],
+   "defenceTraits": {
+    "bow": [
+     70.0
+    ],
+    "dagger": [
+     30.0
+    ],
+    "blunt": [
+     -10.0
+    ],
+    "dualdagger": [
+     30.0
+    ]
+   }
+  },
+  {
+   "skillId": 4004,
+   "name": "Fragile Skull",
+   "levels": 1,
+   "effects": [],
+   "defenceTraits": {
+    "blunt": [
+     -10.0
+    ]
+   }
+  },
+  {
+   "skillId": 4005,
+   "name": "Floating Target",
+   "levels": 1,
+   "effects": [],
+   "defenceTraits": {
+    "bow": [
+     -10.0
+    ]
+   }
+  },
+  {
+   "skillId": 4006,
+   "name": "Burning Wood",
+   "levels": 1,
+   "effects": [],
+   "defenceTraits": {
+    "poison": [
+     50.0
+    ]
+   }
+  },
+  {
+   "skillId": 4021,
+   "name": "Queen Ant",
+   "levels": 1,
+   "effects": [],
+   "defenceTraits": {
+    "bow": [
+     80.0
+    ]
+   }
+  },
+  {
+   "skillId": 4045,
+   "name": "Resist Full Magic Attack",
+   "levels": 1,
+   "effects": [],
+   "defenceTraits": {
+    "hold": [
+     100.0
+    ],
+    "sleep": [
+     100.0
+    ],
+    "derangement": [
+     100.0
+    ],
+    "paralyze": [
+     100.0
+    ],
+    "shock": [
+     100.0
+    ],
+    "boss": [
+     100.0
+    ],
+    "physical_blockade": [
+     100.0
+    ]
+   }
+  },
+  {
+   "skillId": 4057,
+   "name": "Insect Weak Point",
+   "levels": 1,
+   "effects": [],
+   "defenceTraits": {
+    "bug_weakness": [
+     -15.0
+    ]
+   }
+  },
+  {
+   "skillId": 4058,
+   "name": "Plant Weak Point",
+   "levels": 1,
+   "effects": [],
+   "defenceTraits": {
+    "animal_weakness": [
+     -15.0
+    ]
+   }
+  },
+  {
+   "skillId": 4059,
+   "name": "Animal Weak Point",
+   "levels": 1,
+   "effects": [],
+   "defenceTraits": {
+    "plant_weakness": [
+     -15.0
+    ]
+   }
+  },
+  {
+   "skillId": 4060,
+   "name": "Beast Weak Point",
+   "levels": 1,
+   "effects": [],
+   "defenceTraits": {
+    "beast_weakness": [
+     -15.0
+    ]
+   }
+  },
+  {
+   "skillId": 4061,
+   "name": "Dragon Weak Point",
+   "levels": 1,
+   "effects": [],
+   "defenceTraits": {
+    "dragon_weakness": [
+     -15.0
+    ]
+   }
+  },
+  {
+   "skillId": 4062,
+   "name": "Orfen",
+   "levels": 1,
+   "effects": [],
+   "defenceTraits": {
+    "bow": [
+     80.0
+    ]
+   }
+  },
+  {
+   "skillId": 4071,
+   "name": "Resist Bow Weapons",
+   "levels": 5,
+   "effects": [],
+   "defenceTraits": {
+    "bow": [
+     10.0,
+     20.0,
+     30.0,
+     40.0,
+     50.0
+    ]
+   }
+  },
+  {
    "skillId": 4084,
    "name": "Resist Physical Attack",
    "levels": 11,
@@ -5085,6 +5688,54 @@
    ]
   },
   {
+   "skillId": 4121,
+   "name": "Summoned Monster Magic Protection",
+   "levels": 12,
+   "effects": [],
+   "defenceTraits": {
+    "derangement": [
+     5.0,
+     10.0,
+     15.0,
+     20.0,
+     25.0,
+     30.0,
+     35.0,
+     40.0,
+     45.0,
+     50.0,
+     75.0,
+     100.0
+    ]
+   }
+  },
+  {
+   "skillId": 4122,
+   "name": "Antharas",
+   "levels": 1,
+   "effects": [],
+   "defenceTraits": {
+    "shock": [
+     80.0
+    ]
+   }
+  },
+  {
+   "skillId": 4225,
+   "name": "Resist Shock Attacks",
+   "levels": 5,
+   "effects": [],
+   "defenceTraits": {
+    "shock": [
+     10.0,
+     20.0,
+     30.0,
+     40.0,
+     50.0
+    ]
+   }
+  },
+  {
    "skillId": 4246,
    "name": "Strong in 'nan' activity magic DOT",
    "levels": 1,
@@ -5096,7 +5747,26 @@
       2.0
      ]
     }
-   ]
+   ],
+   "defenceTraits": {
+    "bow": [
+     50.0
+    ],
+    "bleed": [
+     50.0
+    ]
+   }
+  },
+  {
+   "skillId": 4256,
+   "name": "100% stun resistance.",
+   "levels": 1,
+   "effects": [],
+   "defenceTraits": {
+    "shock": [
+     100.0
+    ]
+   }
   },
   {
    "skillId": 4267,
@@ -5246,6 +5916,84 @@
    ]
   },
   {
+   "skillId": 4272,
+   "name": "Greater Resist Bow Attack",
+   "levels": 1,
+   "effects": [],
+   "defenceTraits": {
+    "bow": [
+     70.0
+    ]
+   }
+  },
+  {
+   "skillId": 4273,
+   "name": "Resist Daggers",
+   "levels": 5,
+   "effects": [],
+   "defenceTraits": {
+    "dagger": [
+     10.0,
+     20.0,
+     30.0,
+     40.0,
+     50.0
+    ],
+    "dualdagger": [
+     10.0,
+     20.0,
+     30.0,
+     40.0,
+     50.0
+    ]
+   }
+  },
+  {
+   "skillId": 4274,
+   "name": "Blunt Weapon Weak Point",
+   "levels": 5,
+   "effects": [],
+   "defenceTraits": {
+    "blunt": [
+     -11.0,
+     -25.0,
+     -43.0,
+     -67.0,
+     -100.0
+    ]
+   }
+  },
+  {
+   "skillId": 4276,
+   "name": "Bow Weapon Weak Point",
+   "levels": 5,
+   "effects": [],
+   "defenceTraits": {
+    "bow": [
+     -11.0,
+     -25.0,
+     -43.0,
+     -67.0,
+     -100.0
+    ]
+   }
+  },
+  {
+   "skillId": 4277,
+   "name": "Resist Poison Attacks",
+   "levels": 5,
+   "effects": [],
+   "defenceTraits": {
+    "poison": [
+     10.0,
+     20.0,
+     30.0,
+     40.0,
+     50.0
+    ]
+   }
+  },
+  {
    "skillId": 4283,
    "name": "Greater Resist Magic Attack",
    "levels": 1,
@@ -5260,6 +6008,90 @@
    ]
   },
   {
+   "skillId": 4284,
+   "name": "Resist Bleed Attacks",
+   "levels": 5,
+   "effects": [],
+   "defenceTraits": {
+    "bleed": [
+     10.0,
+     20.0,
+     30.0,
+     40.0,
+     50.0
+    ]
+   }
+  },
+  {
+   "skillId": 4285,
+   "name": "Resist Sleep Attacks",
+   "levels": 5,
+   "effects": [],
+   "defenceTraits": {
+    "sleep": [
+     10.0,
+     20.0,
+     30.0,
+     40.0,
+     50.0
+    ]
+   }
+  },
+  {
+   "skillId": 4286,
+   "name": "Greater Resist Sleep",
+   "levels": 1,
+   "effects": [],
+   "defenceTraits": {
+    "sleep": [
+     95.0
+    ]
+   }
+  },
+  {
+   "skillId": 4287,
+   "name": "Resist Hold Attacks",
+   "levels": 5,
+   "effects": [],
+   "defenceTraits": {
+    "hold": [
+     10.0,
+     20.0,
+     30.0,
+     40.0,
+     50.0
+    ]
+   }
+  },
+  {
+   "skillId": 4288,
+   "name": "Greater Resist Hold",
+   "levels": 1,
+   "effects": [],
+   "defenceTraits": {
+    "hold": [
+     95.0
+    ]
+   }
+  },
+  {
+   "skillId": 4332,
+   "name": "Mental Aegis",
+   "levels": 1,
+   "effects": [],
+   "defenceTraits": {
+    "hold": [
+     100.0
+    ],
+    "sleep": [
+     100.0
+    ],
+    "derangement": [
+     100.0
+    ]
+   }
+  },
+  {
    "skillId": 4376,
    "name": "Strong Resistance to P. Atk.",
    "levels": 1,
@@ -5272,6 +6104,51 @@
      ]
     }
    ]
+  },
+  {
+   "skillId": 4379,
+   "name": "Resist Spear Weapons",
+   "levels": 5,
+   "effects": [],
+   "defenceTraits": {
+    "pole": [
+     10.0,
+     20.0,
+     30.0,
+     40.0,
+     50.0
+    ]
+   }
+  },
+  {
+   "skillId": 4388,
+   "name": "Resist Paralysis Attacks",
+   "levels": 5,
+   "effects": [],
+   "defenceTraits": {
+    "paralyze": [
+     10.0,
+     20.0,
+     30.0,
+     40.0,
+     50.0
+    ]
+   }
+  },
+  {
+   "skillId": 4389,
+   "name": "Resist Mental Attacks",
+   "levels": 5,
+   "effects": [],
+   "defenceTraits": {
+    "derangement": [
+     10.0,
+     20.0,
+     30.0,
+     40.0,
+     50.0
+    ]
+   }
   },
   {
    "skillId": 4408,
@@ -5576,6 +6453,1229 @@
    ]
   },
   {
+   "skillId": 4416,
+   "name": "Undead",
+   "levels": 25,
+   "effects": [],
+   "defenceTraits": {
+    "construct_weakness": [
+     0.0,
+     -15.0,
+     0.0,
+     0.0,
+     0.0,
+     0.0,
+     0.0,
+     0.0,
+     0.0,
+     0.0,
+     0.0,
+     0.0,
+     0.0,
+     0.0,
+     0.0,
+     0.0,
+     0.0,
+     0.0,
+     0.0,
+     0.0,
+     0.0,
+     0.0,
+     0.0,
+     0.0,
+     0.0
+    ],
+    "beast_weakness": [
+     0.0,
+     0.0,
+     -15.0,
+     0.0,
+     0.0,
+     0.0,
+     0.0,
+     0.0,
+     0.0,
+     0.0,
+     0.0,
+     0.0,
+     0.0,
+     0.0,
+     0.0,
+     0.0,
+     0.0,
+     0.0,
+     0.0,
+     0.0,
+     0.0,
+     0.0,
+     0.0,
+     0.0,
+     0.0
+    ],
+    "animal_weakness": [
+     0.0,
+     0.0,
+     0.0,
+     -15.0,
+     0.0,
+     0.0,
+     0.0,
+     0.0,
+     0.0,
+     0.0,
+     0.0,
+     0.0,
+     0.0,
+     0.0,
+     0.0,
+     0.0,
+     0.0,
+     0.0,
+     0.0,
+     0.0,
+     0.0,
+     0.0,
+     0.0,
+     0.0,
+     0.0
+    ],
+    "bow": [
+     0.0,
+     0.0,
+     0.0,
+     -15.0,
+     0.0,
+     0.0,
+     0.0,
+     0.0,
+     0.0,
+     0.0,
+     0.0,
+     0.0,
+     0.0,
+     0.0,
+     0.0,
+     0.0,
+     0.0,
+     0.0,
+     0.0,
+     0.0,
+     0.0,
+     0.0,
+     0.0,
+     0.0,
+     0.0
+    ],
+    "plant_weakness": [
+     0.0,
+     0.0,
+     0.0,
+     0.0,
+     -15.0,
+     0.0,
+     0.0,
+     0.0,
+     0.0,
+     0.0,
+     0.0,
+     0.0,
+     0.0,
+     0.0,
+     0.0,
+     0.0,
+     0.0,
+     0.0,
+     0.0,
+     0.0,
+     0.0,
+     0.0,
+     0.0,
+     0.0,
+     0.0
+    ],
+    "blunt": [
+     0.0,
+     0.0,
+     0.0,
+     0.0,
+     0.0,
+     0.0,
+     0.0,
+     0.0,
+     -15.0,
+     0.0,
+     0.0,
+     0.0,
+     0.0,
+     0.0,
+     0.0,
+     0.0,
+     0.0,
+     0.0,
+     0.0,
+     0.0,
+     0.0,
+     0.0,
+     0.0,
+     0.0,
+     0.0
+    ],
+    "dragon_weakness": [
+     0.0,
+     0.0,
+     0.0,
+     0.0,
+     0.0,
+     0.0,
+     0.0,
+     0.0,
+     0.0,
+     -15.0,
+     0.0,
+     0.0,
+     0.0,
+     0.0,
+     0.0,
+     0.0,
+     0.0,
+     0.0,
+     0.0,
+     0.0,
+     0.0,
+     0.0,
+     0.0,
+     0.0,
+     0.0
+    ],
+    "sword": [
+     0.0,
+     0.0,
+     0.0,
+     0.0,
+     0.0,
+     0.0,
+     0.0,
+     0.0,
+     0.0,
+     -15.0,
+     0.0,
+     0.0,
+     0.0,
+     0.0,
+     0.0,
+     0.0,
+     0.0,
+     0.0,
+     0.0,
+     0.0,
+     0.0,
+     0.0,
+     0.0,
+     0.0,
+     0.0
+    ],
+    "dual": [
+     0.0,
+     0.0,
+     0.0,
+     0.0,
+     0.0,
+     0.0,
+     0.0,
+     0.0,
+     0.0,
+     -15.0,
+     0.0,
+     0.0,
+     0.0,
+     0.0,
+     0.0,
+     0.0,
+     0.0,
+     0.0,
+     0.0,
+     0.0,
+     0.0,
+     0.0,
+     0.0,
+     0.0,
+     0.0
+    ],
+    "giant_weakness": [
+     0.0,
+     0.0,
+     0.0,
+     0.0,
+     0.0,
+     0.0,
+     0.0,
+     0.0,
+     0.0,
+     0.0,
+     -15.0,
+     0.0,
+     0.0,
+     0.0,
+     0.0,
+     0.0,
+     0.0,
+     0.0,
+     0.0,
+     0.0,
+     0.0,
+     0.0,
+     0.0,
+     0.0,
+     0.0
+    ],
+    "shock": [
+     0.0,
+     0.0,
+     0.0,
+     0.0,
+     0.0,
+     0.0,
+     0.0,
+     0.0,
+     0.0,
+     0.0,
+     15.0,
+     0.0,
+     0.0,
+     0.0,
+     0.0,
+     0.0,
+     0.0,
+     0.0,
+     0.0,
+     0.0,
+     0.0,
+     0.0,
+     0.0,
+     0.0,
+     0.0
+    ],
+    "bug_weakness": [
+     0.0,
+     0.0,
+     0.0,
+     0.0,
+     0.0,
+     0.0,
+     0.0,
+     0.0,
+     0.0,
+     0.0,
+     0.0,
+     -15.0,
+     0.0,
+     0.0,
+     0.0,
+     0.0,
+     0.0,
+     0.0,
+     0.0,
+     0.0,
+     0.0,
+     0.0,
+     0.0,
+     0.0,
+     0.0
+    ]
+   }
+  },
+  {
+   "skillId": 4417,
+   "name": "Animals",
+   "levels": 38,
+   "effects": [],
+   "defenceTraits": {
+    "bow": [
+     0.0,
+     0.0,
+     -15.0,
+     -15.0,
+     -15.0,
+     0.0,
+     0.0,
+     -15.0,
+     0.0,
+     15.0,
+     0.0,
+     0.0,
+     0.0,
+     0.0,
+     0.0,
+     0.0,
+     0.0,
+     0.0,
+     0.0,
+     0.0,
+     0.0,
+     0.0,
+     0.0,
+     0.0,
+     0.0,
+     0.0,
+     0.0,
+     0.0,
+     0.0,
+     0.0,
+     0.0,
+     0.0,
+     0.0,
+     0.0,
+     0.0,
+     15.0,
+     0.0,
+     0.0
+    ],
+    "poison": [
+     0.0,
+     0.0,
+     0.0,
+     0.0,
+     0.0,
+     0.0,
+     15.0,
+     15.0,
+     0.0,
+     15.0,
+     0.0,
+     0.0,
+     0.0,
+     0.0,
+     0.0,
+     0.0,
+     0.0,
+     0.0,
+     0.0,
+     0.0,
+     0.0,
+     0.0,
+     0.0,
+     0.0,
+     0.0,
+     0.0,
+     0.0,
+     0.0,
+     0.0,
+     0.0,
+     0.0,
+     0.0,
+     0.0,
+     0.0,
+     15.0,
+     0.0,
+     0.0,
+     0.0
+    ],
+    "blunt": [
+     0.0,
+     0.0,
+     0.0,
+     0.0,
+     0.0,
+     0.0,
+     0.0,
+     0.0,
+     0.0,
+     -15.0,
+     0.0,
+     0.0,
+     0.0,
+     0.0,
+     0.0,
+     0.0,
+     15.0,
+     0.0,
+     0.0,
+     0.0,
+     0.0,
+     0.0,
+     0.0,
+     0.0,
+     0.0,
+     0.0,
+     0.0,
+     0.0,
+     0.0,
+     0.0,
+     0.0,
+     0.0,
+     0.0,
+     0.0,
+     0.0,
+     15.0,
+     0.0,
+     0.0
+    ],
+    "bleed": [
+     0.0,
+     0.0,
+     0.0,
+     0.0,
+     0.0,
+     0.0,
+     0.0,
+     0.0,
+     0.0,
+     15.0,
+     0.0,
+     0.0,
+     0.0,
+     0.0,
+     0.0,
+     0.0,
+     0.0,
+     0.0,
+     0.0,
+     0.0,
+     0.0,
+     0.0,
+     0.0,
+     0.0,
+     0.0,
+     0.0,
+     0.0,
+     0.0,
+     0.0,
+     0.0,
+     0.0,
+     0.0,
+     0.0,
+     0.0,
+     15.0,
+     0.0,
+     0.0,
+     0.0
+    ],
+    "sleep": [
+     0.0,
+     0.0,
+     0.0,
+     0.0,
+     0.0,
+     0.0,
+     0.0,
+     0.0,
+     0.0,
+     0.0,
+     0.0,
+     0.0,
+     15.0,
+     0.0,
+     0.0,
+     15.0,
+     0.0,
+     0.0,
+     0.0,
+     0.0,
+     0.0,
+     0.0,
+     0.0,
+     0.0,
+     0.0,
+     0.0,
+     0.0,
+     0.0,
+     0.0,
+     0.0,
+     0.0,
+     0.0,
+     0.0,
+     0.0,
+     0.0,
+     0.0,
+     0.0,
+     15.0
+    ],
+    "dagger": [
+     0.0,
+     0.0,
+     0.0,
+     0.0,
+     0.0,
+     0.0,
+     0.0,
+     0.0,
+     0.0,
+     0.0,
+     0.0,
+     0.0,
+     0.0,
+     0.0,
+     0.0,
+     0.0,
+     0.0,
+     0.0,
+     0.0,
+     0.0,
+     0.0,
+     0.0,
+     0.0,
+     0.0,
+     0.0,
+     0.0,
+     0.0,
+     0.0,
+     0.0,
+     0.0,
+     0.0,
+     0.0,
+     0.0,
+     0.0,
+     0.0,
+     15.0,
+     0.0,
+     0.0
+    ],
+    "dualdagger": [
+     0.0,
+     0.0,
+     0.0,
+     0.0,
+     0.0,
+     0.0,
+     0.0,
+     0.0,
+     0.0,
+     0.0,
+     0.0,
+     0.0,
+     0.0,
+     0.0,
+     0.0,
+     0.0,
+     0.0,
+     0.0,
+     0.0,
+     0.0,
+     0.0,
+     0.0,
+     0.0,
+     0.0,
+     0.0,
+     0.0,
+     0.0,
+     0.0,
+     0.0,
+     0.0,
+     0.0,
+     0.0,
+     0.0,
+     0.0,
+     0.0,
+     15.0,
+     0.0,
+     0.0
+    ],
+    "hold": [
+     0.0,
+     0.0,
+     0.0,
+     0.0,
+     0.0,
+     0.0,
+     0.0,
+     0.0,
+     0.0,
+     0.0,
+     0.0,
+     0.0,
+     0.0,
+     0.0,
+     0.0,
+     0.0,
+     0.0,
+     0.0,
+     0.0,
+     0.0,
+     0.0,
+     0.0,
+     0.0,
+     0.0,
+     0.0,
+     0.0,
+     0.0,
+     0.0,
+     0.0,
+     0.0,
+     0.0,
+     0.0,
+     0.0,
+     0.0,
+     0.0,
+     0.0,
+     15.0,
+     0.0
+    ]
+   }
+  },
+  {
+   "skillId": 4424,
+   "name": "Resist Hand-to-hand Weapons",
+   "levels": 5,
+   "effects": [],
+   "defenceTraits": {
+    "dualfist": [
+     10.0,
+     20.0,
+     30.0,
+     40.0,
+     50.0
+    ]
+   }
+  },
+  {
+   "skillId": 4425,
+   "name": "Resist Blunt Weapons",
+   "levels": 5,
+   "effects": [],
+   "defenceTraits": {
+    "blunt": [
+     10.0,
+     20.0,
+     30.0,
+     40.0,
+     50.0
+    ]
+   }
+  },
+  {
+   "skillId": 4426,
+   "name": "Resist Dual-Sword Weapons",
+   "levels": 5,
+   "effects": [],
+   "defenceTraits": {
+    "dual": [
+     10.0,
+     20.0,
+     30.0,
+     40.0,
+     50.0
+    ]
+   }
+  },
+  {
+   "skillId": 4427,
+   "name": "Resist Swords",
+   "levels": 5,
+   "effects": [],
+   "defenceTraits": {
+    "sword": [
+     10.0,
+     20.0,
+     30.0,
+     40.0,
+     50.0
+    ]
+   }
+  },
+  {
+   "skillId": 4435,
+   "name": "Greater Resist Shock",
+   "levels": 5,
+   "effects": [],
+   "defenceTraits": {
+    "shock": [
+     60.0,
+     70.0,
+     80.0,
+     90.0,
+     100.0
+    ]
+   }
+  },
+  {
+   "skillId": 4436,
+   "name": "Greater Resist Poison",
+   "levels": 5,
+   "effects": [],
+   "defenceTraits": {
+    "poison": [
+     60.0,
+     70.0,
+     80.0,
+     90.0,
+     100.0
+    ]
+   }
+  },
+  {
+   "skillId": 4437,
+   "name": "Greater Resist Bleeding",
+   "levels": 5,
+   "effects": [],
+   "defenceTraits": {
+    "bleed": [
+     60.0,
+     70.0,
+     80.0,
+     90.0,
+     100.0
+    ]
+   }
+  },
+  {
+   "skillId": 4438,
+   "name": "Greater Resist Sleep",
+   "levels": 5,
+   "effects": [],
+   "defenceTraits": {
+    "sleep": [
+     60.0,
+     70.0,
+     80.0,
+     90.0,
+     100.0
+    ]
+   }
+  },
+  {
+   "skillId": 4439,
+   "name": "Greater Resist Hold",
+   "levels": 5,
+   "effects": [],
+   "defenceTraits": {
+    "hold": [
+     60.0,
+     70.0,
+     80.0,
+     90.0,
+     100.0
+    ]
+   }
+  },
+  {
+   "skillId": 4440,
+   "name": "Greater Resist Paralysis",
+   "levels": 5,
+   "effects": [],
+   "defenceTraits": {
+    "paralyze": [
+     60.0,
+     70.0,
+     80.0,
+     90.0,
+     100.0
+    ]
+   }
+  },
+  {
+   "skillId": 4441,
+   "name": "Greater Resist Mental Derangement",
+   "levels": 5,
+   "effects": [],
+   "defenceTraits": {
+    "derangement": [
+     60.0,
+     70.0,
+     80.0,
+     90.0,
+     100.0
+    ]
+   }
+  },
+  {
+   "skillId": 4442,
+   "name": "Greater Resist Hand-to-hand Weapons",
+   "levels": 5,
+   "effects": [],
+   "defenceTraits": {
+    "dualfist": [
+     60.0,
+     70.0,
+     80.0,
+     90.0,
+     100.0
+    ]
+   }
+  },
+  {
+   "skillId": 4443,
+   "name": "Greater Resist Blunt Weapons",
+   "levels": 5,
+   "effects": [],
+   "defenceTraits": {
+    "blunt": [
+     60.0,
+     70.0,
+     80.0,
+     90.0,
+     100.0
+    ]
+   }
+  },
+  {
+   "skillId": 4444,
+   "name": "Greater Resist Bow Weapons",
+   "levels": 5,
+   "effects": [],
+   "defenceTraits": {
+    "bow": [
+     60.0,
+     70.0,
+     80.0,
+     90.0,
+     100.0
+    ]
+   }
+  },
+  {
+   "skillId": 4445,
+   "name": "Greater Resist Spear Weapons",
+   "levels": 5,
+   "effects": [],
+   "defenceTraits": {
+    "pole": [
+     60.0,
+     70.0,
+     80.0,
+     90.0,
+     100.0
+    ]
+   }
+  },
+  {
+   "skillId": 4446,
+   "name": "Greater Resist Dual-Sword Weapons",
+   "levels": 5,
+   "effects": [],
+   "defenceTraits": {
+    "dual": [
+     60.0,
+     70.0,
+     80.0,
+     90.0,
+     100.0
+    ]
+   }
+  },
+  {
+   "skillId": 4447,
+   "name": "Greater Resist Swords",
+   "levels": 5,
+   "effects": [],
+   "defenceTraits": {
+    "sword": [
+     60.0,
+     70.0,
+     80.0,
+     90.0,
+     100.0
+    ]
+   }
+  },
+  {
+   "skillId": 4448,
+   "name": "Greater Resist Daggers",
+   "levels": 5,
+   "effects": [],
+   "defenceTraits": {
+    "dagger": [
+     60.0,
+     70.0,
+     80.0,
+     90.0,
+     100.0
+    ],
+    "dualdagger": [
+     60.0,
+     70.0,
+     80.0,
+     90.0,
+     100.0
+    ]
+   }
+  },
+  {
+   "skillId": 4450,
+   "name": "Shock Attack Weak Point",
+   "levels": 5,
+   "effects": [],
+   "defenceTraits": {
+    "shock": [
+     -11.0,
+     -25.0,
+     -43.0,
+     -67.0,
+     -100.0
+    ]
+   }
+  },
+  {
+   "skillId": 4451,
+   "name": "Poison Attack Weak Point",
+   "levels": 5,
+   "effects": [],
+   "defenceTraits": {
+    "poison": [
+     -11.0,
+     -25.0,
+     -43.0,
+     -67.0,
+     -100.0
+    ]
+   }
+  },
+  {
+   "skillId": 4452,
+   "name": "Bleed Attack Weak Point",
+   "levels": 5,
+   "effects": [],
+   "defenceTraits": {
+    "bleed": [
+     -11.0,
+     -25.0,
+     -43.0,
+     -67.0,
+     -100.0
+    ]
+   }
+  },
+  {
+   "skillId": 4453,
+   "name": "Sleep Attack Weak Point",
+   "levels": 5,
+   "effects": [],
+   "defenceTraits": {
+    "sleep": [
+     -11.0,
+     -25.0,
+     -43.0,
+     -67.0,
+     -100.0
+    ]
+   }
+  },
+  {
+   "skillId": 4454,
+   "name": "Hold Attack Weak Point",
+   "levels": 5,
+   "effects": [],
+   "defenceTraits": {
+    "hold": [
+     -11.0,
+     -25.0,
+     -43.0,
+     -67.0,
+     -100.0
+    ]
+   }
+  },
+  {
+   "skillId": 4455,
+   "name": "Paralysis Attack Weak Point",
+   "levels": 5,
+   "effects": [],
+   "defenceTraits": {
+    "paralyze": [
+     -11.0,
+     -25.0,
+     -43.0,
+     -67.0,
+     -100.0
+    ]
+   }
+  },
+  {
+   "skillId": 4456,
+   "name": "Mental Attack Weak Point",
+   "levels": 5,
+   "effects": [],
+   "defenceTraits": {
+    "derangement": [
+     -11.0,
+     -25.0,
+     -43.0,
+     -67.0,
+     -100.0
+    ]
+   }
+  },
+  {
+   "skillId": 4457,
+   "name": "Hand-to-hand Weapon Weak Point",
+   "levels": 5,
+   "effects": [],
+   "defenceTraits": {
+    "dualfist": [
+     -11.0,
+     -25.0,
+     -43.0,
+     -67.0,
+     -100.0
+    ]
+   }
+  },
+  {
+   "skillId": 4458,
+   "name": "Spear Weapon Weak Point",
+   "levels": 5,
+   "effects": [],
+   "defenceTraits": {
+    "pole": [
+     -11.0,
+     -25.0,
+     -43.0,
+     -67.0,
+     -100.0
+    ]
+   }
+  },
+  {
+   "skillId": 4459,
+   "name": "Dual-Sword Weapon Weak Point",
+   "levels": 5,
+   "effects": [],
+   "defenceTraits": {
+    "dual": [
+     -11.0,
+     -25.0,
+     -43.0,
+     -67.0,
+     -100.0
+    ]
+   }
+  },
+  {
+   "skillId": 4460,
+   "name": "Sword Weak Point",
+   "levels": 5,
+   "effects": [],
+   "defenceTraits": {
+    "sword": [
+     -11.0,
+     -25.0,
+     -43.0,
+     -67.0,
+     -100.0
+    ]
+   }
+  },
+  {
+   "skillId": 4461,
+   "name": "Dagger Weak Point",
+   "levels": 5,
+   "effects": [],
+   "defenceTraits": {
+    "dagger": [
+     -11.0,
+     -25.0,
+     -43.0,
+     -67.0,
+     -100.0
+    ],
+    "dualdagger": [
+     -11.0,
+     -25.0,
+     -43.0,
+     -67.0,
+     -100.0
+    ]
+   }
+  },
+  {
+   "skillId": 4462,
+   "name": "Two-handed Weapon Weak Point",
+   "levels": 5,
+   "effects": [],
+   "defenceTraits": {
+    "dagger": [
+     -11.0,
+     -25.0,
+     -43.0,
+     -67.0,
+     -100.0
+    ],
+    "dualdagger": [
+     -11.0,
+     -25.0,
+     -43.0,
+     -67.0,
+     -100.0
+    ]
+   }
+  },
+  {
+   "skillId": 4521,
+   "name": "Quest - BOSS Resist non Bow Weapon",
+   "levels": 1,
+   "effects": [],
+   "defenceTraits": {
+    "sword": [
+     100.0
+    ],
+    "blunt": [
+     100.0
+    ],
+    "dagger": [
+     100.0
+    ],
+    "pole": [
+     100.0
+    ],
+    "dualfist": [
+     100.0
+    ],
+    "dual": [
+     100.0
+    ],
+    "dualdagger": [
+     100.0
+    ]
+   }
+  },
+  {
+   "skillId": 4542,
+   "name": "Quest - Henchman 90% Sleep Stun Weakness",
+   "levels": 1,
+   "effects": [],
+   "defenceTraits": {
+    "sleep": [
+     90.0
+    ],
+    "shock": [
+     -90.0
+    ]
+   }
+  },
+  {
+   "skillId": 4543,
+   "name": "Quest - BOSS Stun Weakness",
+   "levels": 1,
+   "effects": [],
+   "defenceTraits": {
+    "shock": [
+     -10.0
+    ]
+   }
+  },
+  {
+   "skillId": 4555,
+   "name": "NPC Resist Mutant",
+   "levels": 1,
+   "effects": [],
+   "defenceTraits": {
+    "poison": [
+     20.0
+    ],
+    "bleed": [
+     20.0
+    ],
+    "hold": [
+     20.0
+    ],
+    "shock": [
+     20.0
+    ],
+    "paralyze": [
+     20.0
+    ]
+   }
+  },
+  {
    "skillId": 4642,
    "name": "NPC Fast Spell Casting",
    "levels": 9,
@@ -5596,6 +7696,17 @@
      ]
     }
    ]
+  },
+  {
+   "skillId": 4679,
+   "name": "Valakas",
+   "levels": 1,
+   "effects": [],
+   "defenceTraits": {
+    "valakas": [
+     -8.0
+    ]
+   }
   },
   {
    "skillId": 4789,
@@ -5845,6 +7956,17 @@
      ]
     }
    ]
+  },
+  {
+   "skillId": 7028,
+   "name": "For Stationary NPCs",
+   "levels": 1,
+   "effects": [],
+   "defenceTraits": {
+    "derangement": [
+     100.0
+    ]
+   }
   }
  ]
 }

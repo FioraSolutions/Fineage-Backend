@@ -1,0 +1,132 @@
+{
+  "id": 9,
+  "name": "Into the City of Humans",
+  "repeatable": false,
+  "abortable": true,
+  "questItems": [],
+  "dialogs": [
+    {
+      "npcId": 30583,
+      "hook": "talk",
+      "when": "absent",
+      "races": [
+        3
+      ],
+      "minLevel": 3,
+      "htmlFile": "30583-talk-000.htm"
+    },
+    {
+      "npcId": 30583,
+      "hook": "talk",
+      "when": "absent",
+      "races": [
+        0,
+        1,
+        2,
+        4
+      ],
+      "minLevel": 3,
+      "htmlFile": "30583-talk-001.htm"
+    },
+    {
+      "npcId": 30583,
+      "hook": "talk",
+      "when": "absent",
+      "races": [
+        0,
+        1,
+        2,
+        4
+      ],
+      "htmlFile": "30583-talk-002.htm"
+    },
+    {
+      "npcId": 30583,
+      "hook": "event",
+      "when": "absent",
+      "event": "30583-04",
+      "races": [
+        3
+      ],
+      "minLevel": 3,
+      "ops": [
+        {
+          "op": "create"
+        },
+        {
+          "op": "start"
+        },
+        {
+          "op": "set_cond",
+          "cond": 1
+        }
+      ],
+      "htmlFile": "30583-event-30583-04-003.htm"
+    },
+    {
+      "npcId": 30583,
+      "hook": "talk",
+      "when": "started",
+      "cond": 1,
+      "htmlFile": "30583-talk-c1-004.htm"
+    },
+    {
+      "npcId": 30571,
+      "hook": "event",
+      "when": "started",
+      "event": "30571-02",
+      "cond": 1,
+      "ops": [
+        {
+          "op": "set_cond",
+          "cond": 2
+        }
+      ],
+      "htmlFile": "30571-event-30571-02-c1-005.htm"
+    },
+    {
+      "npcId": 30576,
+      "hook": "event",
+      "when": "started",
+      "event": "30576-02",
+      "cond": 2,
+      "ops": [
+        {
+          "op": "give_item",
+          "itemId": 7570,
+          "count": 1
+        },
+        {
+          "op": "give_item",
+          "itemId": 7559,
+          "count": 1
+        },
+        {
+          "op": "complete"
+        }
+      ],
+      "htmlFile": "30576-event-30576-02-c2-006.htm"
+    },
+    {
+      "npcId": 30571,
+      "hook": "talk",
+      "when": "started",
+      "cond": 1,
+      "htmlFile": "30571-talk-c1-007.htm"
+    },
+    {
+      "npcId": 30571,
+      "hook": "talk",
+      "when": "started",
+      "cond": 2,
+      "htmlFile": "30571-talk-c2-008.htm"
+    },
+    {
+      "npcId": 30576,
+      "hook": "talk",
+      "when": "started",
+      "cond": 2,
+      "htmlFile": "30576-talk-c2-009.htm"
+    }
+  ]
+}

@@ -1,0 +1,318 @@
+{
+  "id": 364,
+  "name": "Jovial Accordion",
+  "repeatable": true,
+  "abortable": true,
+  "questItems": [
+    4321,
+    4322,
+    4323,
+    4324
+  ],
+  "dialogs": [
+    {
+      "npcId": 30959,
+      "hook": "talk",
+      "when": "absent",
+      "htmlFile": "30959-talk-000.htm"
+    },
+    {
+      "npcId": 30959,
+      "hook": "talk",
+      "when": "started",
+      "whenVar": "memoState",
+      "whenValue": "1",
+      "htmlFile": "30959-talk-001.htm"
+    },
+    {
+      "npcId": 30959,
+      "hook": "talk",
+      "when": "started",
+      "whenVar": "memoState",
+      "whenValue": "2",
+      "htmlFile": "30959-talk-002.htm"
+    },
+    {
+      "npcId": 30959,
+      "hook": "talk",
+      "when": "started",
+      "whenVar": "memoState",
+      "whenValue": "3",
+      "htmlFile": "30959-talk-003.htm"
+    },
+    {
+      "npcId": 30959,
+      "hook": "talk",
+      "when": "started",
+      "whenVar": "memoState",
+      "whenValue": "4",
+      "htmlFile": "30959-talk-004.htm"
+    },
+    {
+      "npcId": 30959,
+      "hook": "talk",
+      "when": "started",
+      "whenVar": "memoState",
+      "whenValue": "5",
+      "ops": [
+        {
+          "op": "give_item",
+          "itemId": 4421,
+          "count": 1
+        },
+        {
+          "op": "complete"
+        }
+      ],
+      "htmlFile": "30959-talk-005.htm"
+    },
+    {
+      "npcId": 30960,
+      "hook": "talk",
+      "when": "started",
+      "htmlFile": "30960-talk-006.htm"
+    },
+    {
+      "npcId": 30961,
+      "hook": "talk",
+      "when": "started",
+      "htmlFile": "30961-talk-007.htm"
+    },
+    {
+      "npcId": 30957,
+      "hook": "talk",
+      "when": "started",
+      "whenVar": "memoState",
+      "whenValue": "1",
+      "htmlFile": "30957-talk-008.htm"
+    },
+    {
+      "npcId": 30957,
+      "hook": "talk",
+      "when": "started",
+      "whenVar": "memoState",
+      "whenValue": "2",
+      "htmlFile": "30957-talk-009.htm"
+    },
+    {
+      "npcId": 30957,
+      "hook": "talk",
+      "when": "started",
+      "lacksItems": [
+        4324,
+        4323,
+        4321,
+        4322
+      ],
+      "whenVar": "memoState",
+      "whenValue": "2",
+      "ops": [
+        {
+          "op": "complete"
+        }
+      ],
+      "htmlFile": "30957-talk-010.htm"
+    },
+    {
+      "npcId": 30957,
+      "hook": "talk",
+      "when": "started",
+      "whenVar": "memoState",
+      "whenValue": "2",
+      "ops": [
+        {
+          "op": "complete"
+        }
+      ],
+      "htmlFile": "30957-talk-011.htm"
+    },
+    {
+      "npcId": 30957,
+      "hook": "talk",
+      "when": "started",
+      "whenVar": "memoState",
+      "whenValue": "3",
+      "htmlFile": "30957-talk-012.htm"
+    },
+    {
+      "npcId": 30957,
+      "hook": "talk",
+      "when": "started",
+      "lacksItems": [
+        4324,
+        4323,
+        4321,
+        4322
+      ],
+      "whenVar": "memoState",
+      "whenValue": "3",
+      "ops": [
+        {
+          "op": "complete"
+        }
+      ],
+      "htmlFile": "30957-talk-013.htm"
+    },
+    {
+      "npcId": 30957,
+      "hook": "talk",
+      "when": "started",
+      "whenVar": "memoState",
+      "whenValue": "3",
+      "ops": [
+        {
+          "op": "complete"
+        }
+      ],
+      "htmlFile": "30957-talk-014.htm"
+    },
+    {
+      "npcId": 30957,
+      "hook": "talk",
+      "when": "started",
+      "lacksItems": [
+        4324,
+        4323,
+        4321,
+        4322
+      ],
+      "whenVar": "memoState",
+      "whenValue": "4",
+      "ops": [
+        {
+          "op": "set",
+          "key": "memoState",
+          "value": "5"
+        },
+        {
+          "op": "set_cond",
+          "cond": 3
+        },
+        {
+          "op": "give_adena",
+          "count": 100
+        }
+      ],
+      "htmlFile": "30957-talk-015.htm"
+    },
+    {
+      "npcId": 30957,
+      "hook": "talk",
+      "when": "started",
+      "whenVar": "memoState",
+      "whenValue": "5",
+      "htmlFile": "30957-talk-016.htm"
+    },
+    {
+      "npcId": 30959,
+      "hook": "event",
+      "when": "absent",
+      "event": "START",
+      "minLevel": 15,
+      "ops": [
+        {
+          "op": "create"
+        },
+        {
+          "op": "start"
+        },
+        {
+          "op": "set",
+          "key": "memoState",
+          "value": "1"
+        },
+        {
+          "op": "set_cond",
+          "cond": 1
+        }
+      ],
+      "htmlFile": "30959-event-START-017.htm"
+    },
+    {
+      "npcId": 30959,
+      "hook": "event",
+      "when": "absent",
+      "event": "OPEN_CHEST",
+      "hasItem": 4324,
+      "ops": [
+        {
+          "op": "give_item",
+          "itemId": 4321,
+          "count": 1
+        }
+      ],
+      "htmlFile": "30959-event-OPEN_CHEST-018.htm"
+    },
+    {
+      "npcId": 30959,
+      "hook": "event",
+      "when": "absent",
+      "event": "OPEN_CHEST",
+      "ops": [
+        {
+          "op": "give_item",
+          "itemId": 4321,
+          "count": 1
+        }
+      ],
+      "htmlFile": "30959-event-OPEN_CHEST-019.htm"
+    },
+    {
+      "npcId": 30959,
+      "hook": "event",
+      "when": "absent",
+      "event": "OPEN_CLOTH_CHEST",
+      "hasItem": 4323,
+      "ops": [
+        {
+          "op": "give_item",
+          "itemId": 4322,
+          "count": 1
+        }
+      ],
+      "htmlFile": "30959-event-OPEN_CLOTH_CHEST-020.htm"
+    },
+    {
+      "npcId": 30959,
+      "hook": "event",
+      "when": "absent",
+      "event": "OPEN_CLOTH_CHEST",
+      "ops": [
+        {
+          "op": "give_item",
+          "itemId": 4322,
+          "count": 1
+        }
+      ],
+      "htmlFile": "30959-event-OPEN_CLOTH_CHEST-021.htm"
+    },
+    {
+      "npcId": 30959,
+      "hook": "event",
+      "when": "absent",
+      "event": "30957-02",
+      "ops": [
+        {
+          "op": "give_item",
+          "itemId": 4323,
+          "count": 1
+        },
+        {
+          "op": "give_item",
+          "itemId": 4324,
+          "count": 1
+        },
+        {
+          "op": "set",
+          "key": "memoState",
+          "value": "2"
+        },
+        {
+          "op": "set_cond",
+          "cond": 2
+        }
+      ],
+      "htmlFile": "30959-event-30957-02-022.htm"
+    }
+  ]
+}

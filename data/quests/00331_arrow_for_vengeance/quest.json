@@ -1,0 +1,108 @@
+{
+  "id": 331,
+  "name": "Arrow for Vengeance",
+  "repeatable": true,
+  "abortable": true,
+  "questItems": [
+    1452,
+    1453,
+    1454
+  ],
+  "dialogs": [
+    {
+      "npcId": 30125,
+      "hook": "talk",
+      "when": "absent",
+      "htmlFile": "30125-event-30125-03-001.htm"
+    },
+    {
+      "npcId": 30125,
+      "hook": "talk",
+      "when": "started",
+      "htmlFile": "30125-talk-000.htm"
+    },
+    {
+      "npcId": 30125,
+      "hook": "event",
+      "when": "absent",
+      "event": "30125-03",
+      "ops": [
+        {
+          "op": "create"
+        },
+        {
+          "op": "start"
+        },
+        {
+          "op": "set_cond",
+          "cond": 1
+        }
+      ],
+      "htmlFile": "30125-event-30125-03-001.htm"
+    },
+    {
+      "npcId": 30125,
+      "hook": "event",
+      "when": "absent",
+      "event": "30125-06",
+      "ops": [
+        {
+          "op": "complete"
+        }
+      ],
+      "htmlFile": "30125-event-30125-06-002.htm"
+    },
+    {
+      "npcId": 30125,
+      "hook": "event",
+      "when": "absent",
+      "event": "30125-07",
+      "htmlFile": "30125-event-30125-07-003.htm"
+    },
+    {
+      "npcId": 20145,
+      "hook": "kill",
+      "when": "started",
+      "ops": [
+        {
+          "op": "drop_item",
+          "itemId": 1452,
+          "count": 1,
+          "chance": 1.0,
+          "limit": 1
+        }
+      ],
+      "html": ""
+    },
+    {
+      "npcId": 20158,
+      "hook": "kill",
+      "when": "started",
+      "ops": [
+        {
+          "op": "drop_item",
+          "itemId": 1453,
+          "count": 1,
+          "chance": 1.0,
+          "limit": 1
+        }
+      ],
+      "html": ""
+    },
+    {
+      "npcId": 20176,
+      "hook": "kill",
+      "when": "started",
+      "ops": [
+        {
+          "op": "drop_item",
+          "itemId": 1454,
+          "count": 1,
+          "chance": 1.0,
+          "limit": 1
+        }
+      ],
+      "html": ""
+    }
+  ]
+}

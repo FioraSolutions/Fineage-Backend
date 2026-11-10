@@ -26,12 +26,12 @@ public sealed class NetGroundItemTests
         return (kit, session, player, rec);
     }
 
-    static List<InventoryUpdateEntryNet> InvRows(NetBridgeRecorder rec) =>
-        rec.Of(nameof(INetPresenceBridge.FanoutInventoryUpdate))
-            .SelectMany(a => ((InventoryUpdateNetMsg)a[1]!).Changes).ToList();
+    static List<InventoryUpdateEntryMsg> InvRows(NetBridgeRecorder rec) =>
+        rec.Of(nameof(IWorldEventPublisher.FanoutInventoryUpdate))
+            .SelectMany(a => ((InventoryUpdateMsg)a[1]!).Changes).ToList();
 
     static List<int> SysIds(NetBridgeRecorder rec) =>
-        rec.Of(nameof(INetPresenceBridge.FanoutSystemMessage)).Select(a => ((SystemMessageNetMsg)a[1]!).Id).ToList();
+        rec.Of(nameof(IWorldEventPublisher.FanoutSystemMessage)).Select(a => ((SystemMessageMsg)a[1]!).Id).ToList();
 
     /// <summary>
     /// Mobius <c>RequestDestroyItem</c>: the trash-basket action. The slot is deleted outright, and unlike a
@@ -43,12 +43,11 @@ public sealed class NetGroundItemTests
         var (kit, session, player, rec) = await SetupAsync();
         var stack = player.Inventory!.FindByItemId(Adena)!;
 
-        Assert.Null(await kit.World.TryDestroyItemAsync(
-            session, new DestroyItemRequestMsg { ObjectId = stack.ObjectId, Count = 400 }, CancellationToken.None));
+        Assert.Null(await kit.World.TryDestroyItemAsync(session, stack.ObjectId, 400, CancellationToken.None));
 
         Assert.Equal(600, stack.Count);
         Assert.Contains(InvRows(rec), r => r.ObjectId == stack.ObjectId && r.Count == 600);
-        Assert.Empty(rec.Of(nameof(INetPresenceBridge.FanoutDropItem)));
+        Assert.Empty(rec.Of(nameof(IWorldEventPublisher.FanoutDropItem)));
     }
 
     [Fact]
@@ -57,12 +56,11 @@ public sealed class NetGroundItemTests
         var (kit, session, player, rec) = await SetupAsync();
         var stack = player.Inventory!.FindByItemId(Adena)!;
 
-        Assert.Null(await kit.World.TryDestroyItemAsync(
-            session, new DestroyItemRequestMsg { ObjectId = stack.ObjectId, Count = 1000 }, CancellationToken.None));
+        Assert.Null(await kit.World.TryDestroyItemAsync(session, stack.ObjectId, 1000, CancellationToken.None));
 
         Assert.Null(player.Inventory.Find(stack.ObjectId));
         Assert.Contains(InvRows(rec), r => r.ObjectId == stack.ObjectId && r.Change == InventoryChange.Remove);
-        Assert.Empty(rec.Of(nameof(INetPresenceBridge.FanoutDropItem)));
+        Assert.Empty(rec.Of(nameof(IWorldEventPublisher.FanoutDropItem)));
     }
 
     [Fact]
@@ -71,12 +69,28 @@ public sealed class NetGroundItemTests
         var (kit, session, player, rec) = await SetupAsync();
         var stack = player.Inventory!.FindByItemId(Adena)!;
 
-        string? err = await kit.World.TryDestroyItemAsync(
-            session, new DestroyItemRequestMsg { ObjectId = stack.ObjectId, Count = 5000 }, CancellationToken.None);
+        string? err = await kit.World.TryDestroyItemAsync(session, stack.ObjectId, 5000, CancellationToken.None);
 
         Assert.NotNull(err);
         Assert.Equal(1000, stack.Count);
-        Assert.Empty(rec.Of(nameof(INetPresenceBridge.FanoutInventoryUpdate)));
+        Assert.Empty(rec.Of(nameof(IWorldEventPublisher.FanoutInventoryUpdate)));
+    }
+
+    [Fact]
+    public async Task Second_destroy_of_a_removed_stack_cannot_invent_another_removal()
+    {
+        var (kit, session, player, rec) = await SetupAsync();
+        var stack = player.Inventory!.FindByItemId(Adena)!;
+        int objectId = stack.ObjectId;
+
+        Assert.Null(await kit.World.TryDestroyItemAsync(session, objectId, 1000, CancellationToken.None));
+        Assert.Null(player.Inventory.Find(objectId));
+        int updates = rec.Of(nameof(IWorldEventPublisher.FanoutInventoryUpdate)).Count;
+
+        string? err = await kit.World.TryDestroyItemAsync(session, objectId, 1, CancellationToken.None);
+        Assert.NotNull(err);
+        Assert.Equal(updates, rec.Of(nameof(IWorldEventPublisher.FanoutInventoryUpdate)).Count);
+        Assert.Null(player.Inventory.FindByItemId(Adena));
     }
 
     [Fact]
@@ -85,16 +99,13 @@ public sealed class NetGroundItemTests
         var (kit, session, player, rec) = await SetupAsync();
         var stack = player.Inventory!.FindByItemId(Adena)!;
 
-        string? err = await kit.World.TryDropItemAsync(session, new DropItemRequestMsg
-        {
-            ObjectId = stack.ObjectId, Count = 100, X = player.X + 600, Y = player.Y, Z = player.Z
-        }, CancellationToken.None);
+        string? err = await kit.World.TryDropItemAsync(session, stack.ObjectId, 100, player.X + 600, player.Y, player.Z, CancellationToken.None);
 
         Assert.Equal("range", err);
         Assert.Equal(1000, stack.Count);
         Assert.Contains(ZoneWorld.SysMsgDiscardTooFar, SysIds(rec));
         Assert.Contains(InvRows(rec), r => r.ObjectId == stack.ObjectId && r.Count == 1000 && r.Change == InventoryChange.Modify);
-        Assert.Empty(rec.Of(nameof(INetPresenceBridge.FanoutDropItem)));
+        Assert.Empty(rec.Of(nameof(IWorldEventPublisher.FanoutDropItem)));
     }
 
     [Fact]
@@ -103,26 +114,23 @@ public sealed class NetGroundItemTests
         var (kit, session, player, rec) = await SetupAsync();
         var stack = player.Inventory!.FindByItemId(Adena)!;
 
-        Assert.Null(await kit.World.TryDropItemAsync(session, new DropItemRequestMsg
-        {
-            ObjectId = stack.ObjectId, Count = 100, X = player.X + 40, Y = player.Y, Z = player.Z
-        }, CancellationToken.None));
+        Assert.Null(await kit.World.TryDropItemAsync(session, stack.ObjectId, 100, player.X + 40, player.Y, player.Z, CancellationToken.None));
         Assert.Equal(900, stack.Count);
-        var drop = (DropItemNetMsg)Assert.Single(rec.Of(nameof(INetPresenceBridge.FanoutDropItem)))[1]!;
+        var drop = (DropItemMsg)Assert.Single(rec.Of(nameof(IWorldEventPublisher.FanoutDropItem)))[1]!;
         Assert.Equal(Adena, drop.ItemId);
         Assert.Equal(100, drop.Count);
-        int groundId = (int)drop.EntityValue;
+        int groundId = drop.ObjectId;
         Assert.Contains(groundId, player.Knownlist);
 
         rec.Calls.Clear();
-        Assert.Null(await kit.World.TryPickupAsync(session, new PickupRequestMsg { ObjectId = groundId }, CancellationToken.None));
+        Assert.Null(await kit.World.TryPickupAsync(session, groundId, CancellationToken.None));
         Assert.Equal(1000, stack.Count);
         var row = Assert.Single(InvRows(rec));
         Assert.Equal(stack.ObjectId, row.ObjectId);
         Assert.Equal(InventoryChange.Modify, row.Change); // Add for a held objectId is ignored by the client
         Assert.Equal(1000, row.Count);
         Assert.Contains(ZoneWorld.SysMsgObtainedAdena, SysIds(rec));
-        Assert.NotEmpty(rec.Of(nameof(INetPresenceBridge.FanoutEntityDespawn)));
+        Assert.NotEmpty(rec.Of(nameof(IWorldEventPublisher.FanoutEntityDespawn)));
         Assert.False(kit.World.TryGetEntityById(groundId, out _));
     }
 
@@ -131,18 +139,15 @@ public sealed class NetGroundItemTests
     {
         var (kit, session, player, rec) = await SetupAsync();
         var stack = player.Inventory!.FindByItemId(Adena)!;
-        Assert.Null(await kit.World.TryDropItemAsync(session, new DropItemRequestMsg
-        {
-            ObjectId = stack.ObjectId, Count = 100, X = player.X + 100, Y = player.Y, Z = player.Z
-        }, CancellationToken.None));
-        int groundId = (int)((DropItemNetMsg)rec.Of(nameof(INetPresenceBridge.FanoutDropItem))[0][1]!).EntityValue;
+        Assert.Null(await kit.World.TryDropItemAsync(session, stack.ObjectId, 100, player.X + 100, player.Y, player.Z, CancellationToken.None));
+        int groundId = ((DropItemMsg)rec.Of(nameof(IWorldEventPublisher.FanoutDropItem))[0][1]!).ObjectId;
 
         // Walk away 400u — far outside the 45u Mobius pickup gate.
         Assert.True(kit.World.TryGetEntityById(groundId, out var ground));
         player.X -= 400;
         rec.Calls.Clear();
 
-        Assert.Null(await kit.World.TryPickupAsync(session, new PickupRequestMsg { ObjectId = groundId }, CancellationToken.None));
+        Assert.Null(await kit.World.TryPickupAsync(session, groundId, CancellationToken.None));
         Assert.Equal(900, stack.Count);
         Assert.True(player.MoveActive);
         Assert.Equal(groundId, session.PendingPickupId);
@@ -169,8 +174,7 @@ public sealed class NetGroundItemTests
         const int Harvester = 5125; // non-stackable etc item: one bag slot, never merges
         int ground = kit.World.PlaceGroundForTest(player, Harvester);
 
-        Assert.Null(await kit.World.TryPickupAsync(
-            session, new PickupRequestMsg { ObjectId = ground }, CancellationToken.None));
+        Assert.Null(await kit.World.TryPickupAsync(session, ground, CancellationToken.None));
 
         var held = Assert.Single(player.Inventory!.Items, i => i.ItemId == Harvester);
         var row = Assert.Single(InvRows(rec));
@@ -189,19 +193,15 @@ public sealed class NetGroundItemTests
     public async Task Item_just_outside_the_45u_gate_is_walked_to_first()
     {
         var (kit, session, player, rec) = await SetupAsync();
-        Assert.Null(await kit.World.TryDropItemAsync(session, new DropItemRequestMsg
-        {
-            ObjectId = player.Inventory!.FindByItemId(Adena)!.ObjectId, Count = 10,
-            X = player.X + 60, Y = player.Y, Z = player.Z
-        }, CancellationToken.None));
-        int groundId = (int)((DropItemNetMsg)rec.Of(nameof(INetPresenceBridge.FanoutDropItem))[0][1]!).EntityValue;
+        Assert.Null(await kit.World.TryDropItemAsync(session, player.Inventory!.FindByItemId(Adena)!.ObjectId, 10, player.X + 60, player.Y, player.Z, CancellationToken.None));
+        int groundId = ((DropItemMsg)rec.Of(nameof(IWorldEventPublisher.FanoutDropItem))[0][1]!).ObjectId;
         Assert.True(kit.World.TryGetEntityById(groundId, out var ground));
 
         rec.Calls.Clear();
         var stack = player.Inventory.FindByItemId(Adena)!;
         int before = stack.Count;
 
-        Assert.Null(await kit.World.TryPickupAsync(session, new PickupRequestMsg { ObjectId = groundId }, CancellationToken.None));
+        Assert.Null(await kit.World.TryPickupAsync(session, groundId, CancellationToken.None));
         Assert.Equal(before, stack.Count);
         Assert.True(player.MoveActive);
         Assert.Equal(groundId, session.PendingPickupId);

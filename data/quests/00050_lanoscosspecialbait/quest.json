@@ -1,0 +1,65 @@
+{
+  "id": 50,
+  "name": "LanoscosSpecialBait",
+  "repeatable": false,
+  "abortable": true,
+  "questItems": [
+    7621
+  ],
+  "dialogs": [
+    {
+      "npcId": 31570,
+      "hook": "talk",
+      "when": "absent",
+      "htmlFile": "31570-talk-000.htm"
+    },
+    {
+      "npcId": 31570,
+      "hook": "talk",
+      "when": "started",
+      "htmlFile": "31570-talk-001.htm"
+    },
+    {
+      "npcId": 31570,
+      "hook": "talk",
+      "when": "started",
+      "htmlFile": "31570-talk-002.htm"
+    },
+    {
+      "npcId": 31570,
+      "hook": "event",
+      "when": "absent",
+      "event": "31570-03",
+      "ops": [
+        {
+          "op": "create"
+        },
+        {
+          "op": "start"
+        },
+        {
+          "op": "set_cond",
+          "cond": 1
+        }
+      ],
+      "htmlFile": "31570-event-31570-03-003.htm"
+    },
+    {
+      "npcId": 31570,
+      "hook": "event",
+      "when": "absent",
+      "event": "31570-07",
+      "ops": [
+        {
+          "op": "give_item",
+          "itemId": 7610,
+          "count": 4
+        },
+        {
+          "op": "complete"
+        }
+      ],
+      "htmlFile": "31570-event-31570-07-004.htm"
+    }
+  ]
+}

@@ -1,5 +1,5 @@
 using Fineage.Game;
-using Fineage.Login;
+using Fineage.Accounts;
 using Fineage.Net.Contract;
 using Fineage.Protocol;
 using Fineage.Zone.Siege;
@@ -11,7 +11,7 @@ namespace Fineage.Zone.Tests;
 /// <summary>
 /// Siege registration over Net: the castle page a clan reads, attacker registration, the duplicate refusal, and
 /// the capture that moves ownership. The world runs on <see cref="WorldBench"/>, so these assert the recorded
-/// <see cref="Fineage.Zone.Net.INetPresenceBridge"/> fanout instead of frames.
+/// <see cref="Fineage.Zone.World.IWorldEventPublisher"/> fanout instead of frames.
 /// </summary>
 public sealed class NetSiegeTests
 {
@@ -97,11 +97,11 @@ public sealed class NetSiegeTests
         Assert.Equal(SiegeProtocol.Attacker, row.Side);
     }
 
-    static SiegeInfoNetMsg LastInfo(WorldBench bench) =>
-        Assert.IsType<SiegeInfoNetMsg>(bench.Rec.Of("FanoutSiegeInfo").Last()[1]);
+    static SiegeInfoMsg LastInfo(WorldBench bench) =>
+        Assert.IsType<SiegeInfoMsg>(bench.Rec.Of("FanoutSiegeInfo").Last()[1]);
 
-    static SystemMessageNetMsg LastSystemMessage(WorldBench bench) =>
-        Assert.IsType<SystemMessageNetMsg>(bench.Rec.Of("FanoutSystemMessage").Last()[1]);
+    static SystemMessageMsg LastSystemMessage(WorldBench bench) =>
+        Assert.IsType<SystemMessageMsg>(bench.Rec.Of("FanoutSystemMessage").Last()[1]);
 
     /// <summary>
     /// A level-40 character already leading a clan. The clan is written straight to the store because the

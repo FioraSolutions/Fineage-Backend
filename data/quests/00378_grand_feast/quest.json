@@ -1,0 +1,209 @@
+{
+  "id": 378,
+  "name": "Grand Feast",
+  "repeatable": true,
+  "abortable": true,
+  "questItems": [],
+  "dialogs": [
+    {
+      "npcId": 30594,
+      "hook": "talk",
+      "when": "absent",
+      "htmlFile": "30594-event-30594-02-004.htm"
+    },
+    {
+      "npcId": 30594,
+      "hook": "talk",
+      "when": "started",
+      "cond": 1,
+      "htmlFile": "30594-talk-c1-000.htm"
+    },
+    {
+      "npcId": 30594,
+      "hook": "talk",
+      "when": "started",
+      "cond": 2,
+      "htmlFile": "30594-talk-c2-001.htm"
+    },
+    {
+      "npcId": 30594,
+      "hook": "talk",
+      "when": "started",
+      "cond": 2,
+      "htmlFile": "30594-talk-c2-002.htm"
+    },
+    {
+      "npcId": 30594,
+      "hook": "talk",
+      "when": "started",
+      "cond": 3,
+      "htmlFile": "30594-talk-c3-003.htm"
+    },
+    {
+      "npcId": 30594,
+      "hook": "event",
+      "when": "absent",
+      "event": "30594-02",
+      "ops": [
+        {
+          "op": "create"
+        },
+        {
+          "op": "start"
+        },
+        {
+          "op": "set_cond",
+          "cond": 1
+        }
+      ],
+      "htmlFile": "30594-event-30594-02-004.htm"
+    },
+    {
+      "npcId": 30594,
+      "hook": "event",
+      "when": "absent",
+      "event": "30594-05",
+      "hasItem": 5956,
+      "ops": [
+        {
+          "op": "take_item",
+          "itemId": 5956,
+          "count": 1
+        },
+        {
+          "op": "set_cond",
+          "cond": 2
+        }
+      ],
+      "htmlFile": "30594-event-30594-05-005.htm"
+    },
+    {
+      "npcId": 30594,
+      "hook": "event",
+      "when": "absent",
+      "event": "30594-06",
+      "hasItem": 5957,
+      "ops": [
+        {
+          "op": "take_item",
+          "itemId": 5957,
+          "count": 1
+        },
+        {
+          "op": "set_cond",
+          "cond": 2
+        }
+      ],
+      "htmlFile": "30594-event-30594-06-006.htm"
+    },
+    {
+      "npcId": 30594,
+      "hook": "event",
+      "when": "absent",
+      "event": "30594-07",
+      "hasItem": 5958,
+      "ops": [
+        {
+          "op": "take_item",
+          "itemId": 5958,
+          "count": 1
+        },
+        {
+          "op": "set_cond",
+          "cond": 2
+        }
+      ],
+      "htmlFile": "30594-event-30594-07-007.htm"
+    },
+    {
+      "npcId": 30594,
+      "hook": "event",
+      "when": "absent",
+      "event": "30594-09",
+      "htmlFile": "30594-event-30594-09-008.htm"
+    },
+    {
+      "npcId": 30594,
+      "hook": "event",
+      "when": "absent",
+      "event": "30594-18",
+      "htmlFile": "30594-event-30594-18-009.htm"
+    },
+    {
+      "npcId": 30594,
+      "hook": "event",
+      "when": "absent",
+      "event": "30594-12",
+      "hasItem": 4421,
+      "ops": [
+        {
+          "op": "take_item",
+          "itemId": 4421,
+          "count": 1
+        },
+        {
+          "op": "set_cond",
+          "cond": 3
+        }
+      ],
+      "htmlFile": "30594-event-30594-12-010.htm"
+    },
+    {
+      "npcId": 30594,
+      "hook": "event",
+      "when": "absent",
+      "event": "30594-14",
+      "hasItem": 1455,
+      "ops": [
+        {
+          "op": "take_item",
+          "itemId": 1455,
+          "count": 1
+        },
+        {
+          "op": "set_cond",
+          "cond": 4
+        }
+      ],
+      "htmlFile": "30594-event-30594-14-011.htm"
+    },
+    {
+      "npcId": 30594,
+      "hook": "event",
+      "when": "absent",
+      "event": "30594-15",
+      "hasItem": 1456,
+      "ops": [
+        {
+          "op": "take_item",
+          "itemId": 1456,
+          "count": 1
+        },
+        {
+          "op": "set_cond",
+          "cond": 4
+        }
+      ],
+      "htmlFile": "30594-event-30594-15-012.htm"
+    },
+    {
+      "npcId": 30594,
+      "hook": "event",
+      "when": "absent",
+      "event": "30594-16",
+      "hasItem": 1457,
+      "ops": [
+        {
+          "op": "take_item",
+          "itemId": 1457,
+          "count": 1
+        },
+        {
+          "op": "set_cond",
+          "cond": 4
+        }
+      ],
+      "htmlFile": "30594-event-30594-16-013.htm"
+    }
+  ]
+}

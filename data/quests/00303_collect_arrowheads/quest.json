@@ -1,0 +1,94 @@
+{
+  "id": 303,
+  "name": "Collect Arrowheads",
+  "repeatable": true,
+  "abortable": true,
+  "questItems": [
+    963
+  ],
+  "dialogs": [
+    {
+      "npcId": 30029,
+      "hook": "talk",
+      "when": "absent",
+      "maxLevel": 9,
+      "htmlFile": "30029-talk-000.htm"
+    },
+    {
+      "npcId": 30029,
+      "hook": "talk",
+      "when": "absent",
+      "minLevel": 10,
+      "htmlFile": "30029-talk-001.htm"
+    },
+    {
+      "npcId": 30029,
+      "hook": "event",
+      "when": "absent",
+      "event": "30029-04",
+      "minLevel": 10,
+      "ops": [
+        {
+          "op": "create"
+        },
+        {
+          "op": "start"
+        },
+        {
+          "op": "set_cond",
+          "cond": 1
+        }
+      ],
+      "htmlFile": "30029-event-30029-04-002.htm"
+    },
+    {
+      "npcId": 30029,
+      "hook": "talk",
+      "when": "started",
+      "cond": 1,
+      "htmlFile": "30029-talk-c1-003.htm"
+    },
+    {
+      "npcId": 30029,
+      "hook": "talk",
+      "when": "started",
+      "cond": 2,
+      "atLeast": {
+        "963": 10
+      },
+      "ops": [
+        {
+          "op": "give_adena",
+          "count": 1000
+        },
+        {
+          "op": "give_exp_sp",
+          "exp": 2000,
+          "sp": 0
+        },
+        {
+          "op": "complete"
+        }
+      ],
+      "htmlFile": "30029-talk-c2-004.htm"
+    },
+    {
+      "npcId": 20361,
+      "hook": "kill",
+      "when": "started",
+      "cond": 1,
+      "party": true,
+      "html": "",
+      "ops": [
+        {
+          "op": "drop_item",
+          "itemId": 963,
+          "count": 1,
+          "chance": 0.4,
+          "limit": 10,
+          "condAtLimit": 2
+        }
+      ]
+    }
+  ]
+}

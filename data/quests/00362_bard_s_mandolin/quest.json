@@ -1,0 +1,234 @@
+{
+  "id": 362,
+  "name": "Bard's Mandolin",
+  "repeatable": true,
+  "abortable": true,
+  "questItems": [
+    4316,
+    4317
+  ],
+  "dialogs": [
+    {
+      "npcId": 30957,
+      "hook": "talk",
+      "when": "absent",
+      "htmlFile": "30957-talk-000.htm"
+    },
+    {
+      "npcId": 30957,
+      "hook": "talk",
+      "when": "started",
+      "whenVar": "memoState",
+      "whenValue": "1",
+      "htmlFile": "30957-talk-001.htm"
+    },
+    {
+      "npcId": 30957,
+      "hook": "talk",
+      "when": "started",
+      "whenVar": "memoState",
+      "whenValue": "2",
+      "htmlFile": "30957-talk-002.htm"
+    },
+    {
+      "npcId": 30957,
+      "hook": "talk",
+      "when": "started",
+      "whenVar": "memoState",
+      "whenValue": "3",
+      "ops": [
+        {
+          "op": "give_item",
+          "itemId": 4317,
+          "count": 1
+        },
+        {
+          "op": "set",
+          "key": "memoState",
+          "value": "4"
+        },
+        {
+          "op": "set_cond",
+          "cond": 4
+        }
+      ],
+      "htmlFile": "30957-talk-003.htm"
+    },
+    {
+      "npcId": 30957,
+      "hook": "talk",
+      "when": "started",
+      "whenVar": "memoState",
+      "whenValue": "4",
+      "htmlFile": "30957-talk-004.htm"
+    },
+    {
+      "npcId": 30957,
+      "hook": "talk",
+      "when": "started",
+      "whenVar": "memoState",
+      "whenValue": "5",
+      "htmlFile": "30957-talk-005.htm"
+    },
+    {
+      "npcId": 30958,
+      "hook": "talk",
+      "when": "started",
+      "ops": [
+        {
+          "op": "give_item",
+          "itemId": 4316,
+          "count": 1
+        },
+        {
+          "op": "set",
+          "key": "memoState",
+          "value": "3"
+        },
+        {
+          "op": "set_cond",
+          "cond": 3
+        }
+      ],
+      "htmlFile": "30958-talk-006.htm"
+    },
+    {
+      "npcId": 30958,
+      "hook": "talk",
+      "when": "started",
+      "htmlFile": "30958-talk-007.htm"
+    },
+    {
+      "npcId": 30837,
+      "hook": "talk",
+      "when": "started",
+      "ops": [
+        {
+          "op": "set",
+          "key": "memoState",
+          "value": "2"
+        },
+        {
+          "op": "set_cond",
+          "cond": 2
+        }
+      ],
+      "htmlFile": "30837-talk-008.htm"
+    },
+    {
+      "npcId": 30837,
+      "hook": "talk",
+      "when": "started",
+      "htmlFile": "30837-talk-009.htm"
+    },
+    {
+      "npcId": 30837,
+      "hook": "talk",
+      "when": "started",
+      "htmlFile": "30837-talk-010.htm"
+    },
+    {
+      "npcId": 30956,
+      "hook": "talk",
+      "when": "started",
+      "hasItems": [
+        4316,
+        4317
+      ],
+      "ops": [
+        {
+          "op": "take_item",
+          "itemId": 4316,
+          "count": 1
+        },
+        {
+          "op": "take_item",
+          "itemId": 4317,
+          "count": 1
+        },
+        {
+          "op": "set",
+          "key": "memoState",
+          "value": "5"
+        },
+        {
+          "op": "set_cond",
+          "cond": 5
+        }
+      ],
+      "htmlFile": "30956-talk-011.htm"
+    },
+    {
+      "npcId": 30956,
+      "hook": "talk",
+      "when": "started",
+      "htmlFile": "30956-talk-012.htm"
+    },
+    {
+      "npcId": 30957,
+      "hook": "event",
+      "when": "absent",
+      "event": "30957-02",
+      "ops": [
+        {
+          "op": "create"
+        },
+        {
+          "op": "start"
+        },
+        {
+          "op": "set",
+          "key": "memoState",
+          "value": "1"
+        },
+        {
+          "op": "set_cond",
+          "cond": 1
+        }
+      ],
+      "htmlFile": "30957-event-30957-02-013.htm"
+    },
+    {
+      "npcId": 30957,
+      "hook": "event",
+      "when": "absent",
+      "event": "30957-07",
+      "ops": [
+        {
+          "op": "give_item",
+          "itemId": 4410,
+          "count": 1
+        },
+        {
+          "op": "give_adena",
+          "count": 10000
+        },
+        {
+          "op": "complete"
+        }
+      ],
+      "htmlFile": "30957-event-30957-07-014.htm"
+    },
+    {
+      "npcId": 30957,
+      "hook": "event",
+      "when": "absent",
+      "event": "30957-08",
+      "ops": [
+        {
+          "op": "give_item",
+          "itemId": 4410,
+          "count": 1
+        },
+        {
+          "op": "give_adena",
+          "count": 10000
+        },
+        {
+          "op": "complete"
+        }
+      ],
+      "htmlFile": "30957-event-30957-08-015.htm"
+    }
+  ]
+}

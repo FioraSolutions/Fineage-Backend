@@ -1,0 +1,148 @@
+{
+  "id": 329,
+  "name": "Curiosity Of A Dwarf",
+  "repeatable": true,
+  "abortable": true,
+  "questItems": [
+    1346,
+    1365
+  ],
+  "dialogs": [
+    {
+      "npcId": 30437,
+      "hook": "talk",
+      "when": "absent",
+      "maxLevel": 32,
+      "htmlFile": "30437-talk-000.htm"
+    },
+    {
+      "npcId": 30437,
+      "hook": "talk",
+      "when": "absent",
+      "minLevel": 33,
+      "htmlFile": "30437-talk-001.htm"
+    },
+    {
+      "npcId": 30437,
+      "hook": "event",
+      "when": "absent",
+      "event": "30437-03",
+      "minLevel": 33,
+      "ops": [
+        {
+          "op": "create"
+        },
+        {
+          "op": "start"
+        },
+        {
+          "op": "set_cond",
+          "cond": 1
+        }
+      ],
+      "htmlFile": "30437-event-30437-03-002.htm"
+    },
+    {
+      "npcId": 30437,
+      "hook": "event",
+      "when": "started",
+      "event": "30437-06",
+      "ops": [
+        {
+          "op": "complete"
+        }
+      ],
+      "htmlFile": "30437-event-30437-06-003.htm"
+    },
+    {
+      "npcId": 30437,
+      "hook": "event",
+      "when": "started",
+      "event": "30437-07",
+      "htmlFile": "30437-event-30437-07-004.htm"
+    },
+    {
+      "npcId": 30437,
+      "hook": "talk",
+      "when": "started",
+      "hasAny": [
+        1346,
+        1365
+      ],
+      "ops": [
+        {
+          "op": "sell_items",
+          "prices": [
+            {
+              "itemId": 1365,
+              "adena": 50
+            },
+            {
+              "itemId": 1346,
+              "adena": 1000
+            }
+          ],
+          "bonusMin": 10,
+          "bonusAdena": 1183
+        }
+      ],
+      "htmlFile": "30437-talk-005.htm"
+    },
+    {
+      "npcId": 30437,
+      "hook": "talk",
+      "when": "started",
+      "lacksItems": [
+        1346,
+        1365
+      ],
+      "htmlFile": "30437-talk-006.htm"
+    },
+    {
+      "npcId": 20083,
+      "hook": "kill",
+      "when": "started",
+      "party": true,
+      "html": "",
+      "ops": [
+        {
+          "op": "drop_item",
+          "itemId": 1346,
+          "count": 1,
+          "chance": 0.03,
+          "limit": 0
+        },
+        {
+          "op": "drop_item",
+          "itemId": 1365,
+          "count": 1,
+          "chance": 0.51,
+          "limit": 0
+        }
+      ]
+    },
+    {
+      "npcId": 20085,
+      "hook": "kill",
+      "when": "started",
+      "party": true,
+      "html": "",
+      "ops": [
+        {
+          "op": "drop_item",
+          "itemId": 1346,
+          "count": 1,
+          "chance": 0.03,
+          "limit": 0
+        },
+        {
+          "op": "drop_item",
+          "itemId": 1365,
+          "count": 1,
+          "chance": 0.55,
+          "limit": 0
+        }
+      ]
+    }
+  ]
+}

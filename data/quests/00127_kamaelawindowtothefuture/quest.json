@@ -1,0 +1,217 @@
+{
+  "id": 127,
+  "name": "KamaelAWindowToTheFuture",
+  "repeatable": false,
+  "abortable": true,
+  "questItems": [
+    8939,
+    8940,
+    8941,
+    8942,
+    8943,
+    8944
+  ],
+  "dialogs": [
+    {
+      "npcId": 31350,
+      "hook": "talk",
+      "when": "absent",
+      "htmlFile": "31350-talk-000.htm"
+    },
+    {
+      "npcId": 30187,
+      "hook": "talk",
+      "when": "started",
+      "htmlFile": "30187-talk-001.htm"
+    },
+    {
+      "npcId": 30187,
+      "hook": "talk",
+      "when": "started",
+      "htmlFile": "30187-talk-002.htm"
+    },
+    {
+      "npcId": 32092,
+      "hook": "talk",
+      "when": "started",
+      "htmlFile": "32092-talk-003.htm"
+    },
+    {
+      "npcId": 31288,
+      "hook": "talk",
+      "when": "started",
+      "htmlFile": "31288-talk-004.htm"
+    },
+    {
+      "npcId": 30862,
+      "hook": "talk",
+      "when": "started",
+      "htmlFile": "30862-talk-005.htm"
+    },
+    {
+      "npcId": 30113,
+      "hook": "talk",
+      "when": "started",
+      "htmlFile": "30113-talk-006.htm"
+    },
+    {
+      "npcId": 30756,
+      "hook": "talk",
+      "when": "started",
+      "htmlFile": "30756-talk-007.htm"
+    },
+    {
+      "npcId": 30756,
+      "hook": "talk",
+      "when": "started",
+      "htmlFile": "30756-talk-008.htm"
+    },
+    {
+      "npcId": 31350,
+      "hook": "talk",
+      "when": "started",
+      "htmlFile": "31350-talk-009.htm"
+    },
+    {
+      "npcId": 31350,
+      "hook": "event",
+      "when": "absent",
+      "event": "31350-04",
+      "ops": [
+        {
+          "op": "give_item",
+          "itemId": 8939,
+          "count": 1
+        }
+      ],
+      "htmlFile": "31350-event-31350-04-010.htm"
+    },
+    {
+      "npcId": 31350,
+      "hook": "event",
+      "when": "absent",
+      "event": "31350-06",
+      "ops": [
+        {
+          "op": "take_item",
+          "itemId": 8940,
+          "count": 1
+        },
+        {
+          "op": "take_item",
+          "itemId": 8941,
+          "count": 1
+        },
+        {
+          "op": "take_item",
+          "itemId": 8942,
+          "count": 1
+        },
+        {
+          "op": "take_item",
+          "itemId": 8943,
+          "count": 1
+        },
+        {
+          "op": "take_item",
+          "itemId": 8944,
+          "count": 1
+        },
+        {
+          "op": "take_item",
+          "itemId": 8939,
+          "count": 1
+        },
+        {
+          "op": "give_adena",
+          "count": 159100
+        }
+      ],
+      "htmlFile": "31350-event-31350-06-011.htm"
+    },
+    {
+      "npcId": 31350,
+      "hook": "event",
+      "when": "absent",
+      "event": "30187-06",
+      "htmlFile": "31350-event-30187-06-012.htm"
+    },
+    {
+      "npcId": 31350,
+      "hook": "event",
+      "when": "absent",
+      "event": "30187-08",
+      "ops": [
+        {
+          "op": "give_item",
+          "itemId": 8940,
+          "count": 1
+        }
+      ],
+      "htmlFile": "31350-event-30187-08-013.htm"
+    },
+    {
+      "npcId": 31350,
+      "hook": "event",
+      "when": "absent",
+      "event": "32092-05",
+      "ops": [
+        {
+          "op": "give_item",
+          "itemId": 8941,
+          "count": 1
+        }
+      ],
+      "htmlFile": "31350-event-32092-05-014.htm"
+    },
+    {
+      "npcId": 31350,
+      "hook": "event",
+      "when": "absent",
+      "event": "31288-04",
+      "ops": [
+        {
+          "op": "give_item",
+          "itemId": 8944,
+          "count": 1
+        }
+      ],
+      "htmlFile": "31350-event-31288-04-015.htm"
+    },
+    {
+      "npcId": 31350,
+      "hook": "event",
+      "when": "absent",
+      "event": "30862-04",
+      "ops": [
+        {
+          "op": "give_item",
+          "itemId": 8943,
+          "count": 1
+        }
+      ],
+      "htmlFile": "31350-event-30862-04-016.htm"
+    },
+    {
+      "npcId": 31350,
+      "hook": "event",
+      "when": "absent",
+      "event": "30113-04",
+      "ops": [
+        {
+          "op": "give_item",
+          "itemId": 8942,
+          "count": 1
+        }
+      ],
+      "htmlFile": "31350-event-30113-04-017.htm"
+    },
+    {
+      "npcId": 31350,
+      "hook": "event",
+      "when": "absent",
+      "event": "30756-05",
+      "htmlFile": "31350-event-30756-05-018.htm"
+    }
+  ]
+}

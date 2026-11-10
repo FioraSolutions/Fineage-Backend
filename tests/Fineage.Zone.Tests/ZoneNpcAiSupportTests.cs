@@ -100,9 +100,9 @@ public sealed class ZoneNpcAiSupportTests
         Assert.True(kit.World.CastNpcSupportForTest(mob, player, skill, "immobilize"));
         Assert.True(ZoneWorld.IsImmobilized(player));
         Assert.Equal(ActionProtocol.Immobilized,
-            await kit.World.TryMoveAsync(session, new MoveToMsg { DestX = player.X + 200, DestY = player.Y, DestZ = player.Z }, default));
+            await kit.World.TryMoveAsync(session, player.X + 200, player.Y, player.Z, default));
         Assert.Equal(SkillProtocol.Muted,
-            await kit.World.TrySkillUseAsync(session, new SkillUseRequestMsg { SkillId = 4032, TargetObjectId = mob.ObjectId }, default));
+            await kit.World.TrySkillUseAsync(session, 4032, mob.ObjectId, default));
     }
 
     [Fact]

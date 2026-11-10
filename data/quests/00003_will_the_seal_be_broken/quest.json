@@ -1,0 +1,222 @@
+{
+  "id": 3,
+  "name": "Will the Seal Be Broken",
+  "repeatable": false,
+  "abortable": true,
+  "questItems": [
+    1081,
+    1082,
+    1083
+  ],
+  "dialogs": [
+    {
+      "npcId": 30141,
+      "hook": "talk",
+      "when": "absent",
+      "races": [
+        0,
+        1,
+        3,
+        4
+      ],
+      "htmlFile": "30141-talk-000.htm"
+    },
+    {
+      "npcId": 30141,
+      "hook": "talk",
+      "when": "absent",
+      "races": [
+        2
+      ],
+      "maxLevel": 15,
+      "htmlFile": "30141-talk-001.htm"
+    },
+    {
+      "npcId": 30141,
+      "hook": "talk",
+      "when": "absent",
+      "races": [
+        2
+      ],
+      "minLevel": 16,
+      "htmlFile": "30141-talk-002.htm"
+    },
+    {
+      "npcId": 30141,
+      "hook": "event",
+      "when": "absent",
+      "event": "30141-03",
+      "races": [
+        2
+      ],
+      "minLevel": 16,
+      "ops": [
+        {
+          "op": "create"
+        },
+        {
+          "op": "start"
+        },
+        {
+          "op": "set_cond",
+          "cond": 1
+        }
+      ],
+      "htmlFile": "30141-event-30141-03-003.htm"
+    },
+    {
+      "npcId": 30141,
+      "hook": "talk",
+      "when": "started",
+      "cond": 1,
+      "atLeast": {
+        "1081": 1,
+        "1082": 1,
+        "1083": 1
+      },
+      "ops": [
+        {
+          "op": "take_item",
+          "itemId": 1081,
+          "count": 1
+        },
+        {
+          "op": "take_item",
+          "itemId": 1082,
+          "count": 1
+        },
+        {
+          "op": "take_item",
+          "itemId": 1083,
+          "count": 1
+        },
+        {
+          "op": "give_item",
+          "itemId": 956,
+          "count": 1
+        },
+        {
+          "op": "complete"
+        }
+      ],
+      "htmlFile": "30141-talk-c1-004.htm"
+    },
+    {
+      "npcId": 30141,
+      "hook": "talk",
+      "when": "started",
+      "cond": 1,
+      "htmlFile": "30141-talk-c1-005.htm"
+    },
+    {
+      "npcId": 30141,
+      "hook": "event",
+      "when": "started",
+      "event": "30141-05",
+      "cond": 1,
+      "htmlFile": "30141-event-30141-05-c1-006.htm"
+    },
+    {
+      "npcId": 20031,
+      "hook": "kill",
+      "when": "started",
+      "cond": 1,
+      "party": true,
+      "html": "",
+      "ops": [
+        {
+          "op": "drop_item",
+          "itemId": 1081,
+          "count": 1,
+          "chance": 1.0,
+          "limit": 1
+        }
+      ]
+    },
+    {
+      "npcId": 20041,
+      "hook": "kill",
+      "when": "started",
+      "cond": 1,
+      "party": true,
+      "html": "",
+      "ops": [
+        {
+          "op": "drop_item",
+          "itemId": 1082,
+          "count": 1,
+          "chance": 1.0,
+          "limit": 1
+        }
+      ]
+    },
+    {
+      "npcId": 20046,
+      "hook": "kill",
+      "when": "started",
+      "cond": 1,
+      "party": true,
+      "html": "",
+      "ops": [
+        {
+          "op": "drop_item",
+          "itemId": 1082,
+          "count": 1,
+          "chance": 1.0,
+          "limit": 1
+        }
+      ]
+    },
+    {
+      "npcId": 20048,
+      "hook": "kill",
+      "when": "started",
+      "cond": 1,
+      "party": true,
+      "html": "",
+      "ops": [
+        {
+          "op": "drop_item",
+          "itemId": 1083,
+          "count": 1,
+          "chance": 1.0,
+          "limit": 1
+        }
+      ]
+    },
+    {
+      "npcId": 20052,
+      "hook": "kill",
+      "when": "started",
+      "cond": 1,
+      "party": true,
+      "html": "",
+      "ops": [
+        {
+          "op": "drop_item",
+          "itemId": 1083,
+          "count": 1,
+          "chance": 1.0,
+          "limit": 1
+        }
+      ]
+    },
+    {
+      "npcId": 20057,
+      "hook": "kill",
+      "when": "started",
+      "cond": 1,
+      "party": true,
+      "html": "",
+      "ops": [
+        {
+          "op": "drop_item",
+          "itemId": 1083,
+          "count": 1,
+          "chance": 1.0,
+          "limit": 1
+        }
+      ]
+    }
+  ]
+}

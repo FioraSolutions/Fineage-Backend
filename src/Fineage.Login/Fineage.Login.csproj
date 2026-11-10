@@ -10,16 +10,11 @@
     <FrameworkReference Include="Microsoft.AspNetCore.App" />
   </ItemGroup>
   <ItemGroup>
-    <PackageReference Include="Npgsql" Version="9.0.3" />
-  </ItemGroup>
-  <ItemGroup>
+    <ProjectReference Include="..\Fineage.Accounts\Fineage.Accounts.csproj" />
     <ProjectReference Include="..\Fineage.Game\Fineage.Game.csproj" />
     <ProjectReference Include="..\Fineage.Protocol\Fineage.Protocol.csproj" />
     <ProjectReference Include="..\Fineage.Net.Contract\Fineage.Net.Contract.csproj" />
     <ProjectReference Include="..\Fineage.Net.Host\Fineage.Net.Host.csproj" />
-  </ItemGroup>
-  <ItemGroup>
-    <None Include="Persistence\Migrations\**\*.sql" CopyToOutputDirectory="PreserveNewest" Link="Persistence\Migrations\%(Filename)%(Extension)" />
   </ItemGroup>
   <ItemGroup>
     <Content Include="..\..\data\items.json" Link="data\items.json" CopyToOutputDirectory="PreserveNewest" />
@@ -27,7 +22,7 @@
     <Content Include="..\..\data\classes.json" Link="data\classes.json" CopyToOutputDirectory="PreserveNewest" />
     <Content Include="..\..\data\experience.json" Link="data\experience.json" CopyToOutputDirectory="PreserveNewest" />
     <Content Include="..\..\data\stat-bonuses.json" Link="data\stat-bonuses.json" CopyToOutputDirectory="PreserveNewest" />
-    <Content Include="..\..\data\quests.json" Link="data\quests.json" CopyToOutputDirectory="PreserveNewest" />
+    <Content Include="..\..\data\quests\**\*.*" Link="data\quests\%(RecursiveDir)%(Filename)%(Extension)" CopyToOutputDirectory="PreserveNewest" />
     <Content Include="..\..\data\skills.json" Link="data\skills.json" CopyToOutputDirectory="PreserveNewest" />
     <Content Include="..\..\data\skill-trees.json" Link="data\skill-trees.json" CopyToOutputDirectory="PreserveNewest" />
   </ItemGroup>

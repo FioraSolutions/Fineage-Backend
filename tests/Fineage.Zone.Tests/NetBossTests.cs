@@ -9,7 +9,7 @@ namespace Fineage.Zone.Tests;
 /// <summary>
 /// Boss schedule over Net: the status rows a client asks for, the admin dead / force-spawn actions, and the
 /// <c>FINEAGE_ZONE_ADMIN</c> gate. The world <see cref="ZoneWorld"/> is driven through <see cref="WorldBench"/>,
-/// so these assert on the recorded <see cref="Fineage.Zone.Net.INetPresenceBridge"/> fanout rather than a frame.
+/// so these assert on the recorded <see cref="Fineage.Zone.World.IWorldEventPublisher"/> fanout rather than a frame.
 /// </summary>
 public sealed class NetBossTests
 {
@@ -33,8 +33,8 @@ public sealed class NetBossTests
         return (bench, bench.Rec);
     }
 
-    static BossStatusNetMsg LastStatus(NetBridgeRecorder rec) =>
-        Assert.IsType<BossStatusNetMsg>(rec.Of("FanoutBossStatus").Last()[1]);
+    static Fineage.Protocol.BossStatusMsg LastStatus(NetBridgeRecorder rec) =>
+        Assert.IsType<Fineage.Protocol.BossStatusMsg>(rec.Of("FanoutBossStatus").Last()[1]);
 
     [Fact]
     public async Task Status_returns_the_row_and_admin_actions_flip_it()
@@ -54,8 +54,8 @@ public sealed class NetBossTests
         Assert.Equal(row.MaxHp, row.CurrentHp);
 
         // Mark dead: the world removes the pawn and opens the respawn window.
-        Assert.Null(await bench.World.TryAdminBossNetAsync(
-            actor.Session, new AdminBossScheduleNetMsg { NpcId = BossNpcId, Action = BossProtocol.ActionMarkDead }, CancellationToken.None));
+        Assert.Null(await bench.World.TryAdminBossAsync(
+            actor.Session, new AdminBossScheduleMsg { NpcId = BossNpcId, Action = BossProtocol.ActionMarkDead }, CancellationToken.None));
         Assert.Contains(rec.Of("FanoutEntityDespawn"), _ => true);
 
         Assert.Null(await bench.World.TryBossStatusAsync(actor.Session, BossNpcId, CancellationToken.None));
@@ -66,8 +66,8 @@ public sealed class NetBossTests
         Assert.Equal(expected, dead.RespawnUnixMs);
 
         // Force spawn: the row is alive again and the pawn is back with its full vitals.
-        Assert.Null(await bench.World.TryAdminBossNetAsync(
-            actor.Session, new AdminBossScheduleNetMsg { NpcId = BossNpcId, Action = BossProtocol.ActionForceSpawn }, CancellationToken.None));
+        Assert.Null(await bench.World.TryAdminBossAsync(
+            actor.Session, new AdminBossScheduleMsg { NpcId = BossNpcId, Action = BossProtocol.ActionForceSpawn }, CancellationToken.None));
         Assert.Null(await bench.World.TryBossStatusAsync(actor.Session, BossNpcId, CancellationToken.None));
         var back = Assert.Single(LastStatus(rec).Bosses);
         Assert.Equal(BossProtocol.StatusAlive, back.Status);
@@ -85,10 +85,10 @@ public sealed class NetBossTests
         Assert.Equal(BossNpcId, Assert.Single(LastStatus(rec).Bosses).NpcId);
 
         Assert.Equal(BossProtocol.UnknownBoss, await bench.World.TryBossStatusAsync(actor.Session, 1, CancellationToken.None));
-        Assert.Equal(BossProtocol.UnknownBoss, await bench.World.TryAdminBossNetAsync(
-            actor.Session, new AdminBossScheduleNetMsg { NpcId = 1, Action = BossProtocol.ActionMarkDead }, CancellationToken.None));
-        Assert.Equal("bad_request", await bench.World.TryAdminBossNetAsync(
-            actor.Session, new AdminBossScheduleNetMsg { NpcId = BossNpcId, Action = 9 }, CancellationToken.None));
+        Assert.Equal(BossProtocol.UnknownBoss, await bench.World.TryAdminBossAsync(
+            actor.Session, new AdminBossScheduleMsg { NpcId = 1, Action = BossProtocol.ActionMarkDead }, CancellationToken.None));
+        Assert.Equal("bad_request", await bench.World.TryAdminBossAsync(
+            actor.Session, new AdminBossScheduleMsg { NpcId = BossNpcId, Action = 9 }, CancellationToken.None));
     }
 
     /// <summary>
@@ -99,7 +99,9 @@ public sealed class NetBossTests
     public async Task Admin_schedule_is_forbidden_when_admin_is_off()
     {
         using var timeout = new CancellationTokenSource(TimeSpan.FromSeconds(30));
-        await using var host = await NetZoneHost.StartAsync();
+        // Force the env gate off so a developer shell with FINEAGE_ZONE_ADMIN=1 cannot hang this test
+        // waiting for a Reject that a successful admin apply never sends.
+        await using var host = await NetZoneHost.StartAsync(adminCommands: false);
         await using var session = await host.ConnectAsync();
         await session.HelloAsync(timeout.Token);
         await session.AuthAsync("boss", "Scout", timeout.Token);

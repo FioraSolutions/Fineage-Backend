@@ -28,11 +28,11 @@ public sealed class CarryLimitTests
     const int WoodenArrow = 17;
 
     static List<int> SysIds(NetBridgeRecorder rec) =>
-        rec.Of(nameof(INetPresenceBridge.FanoutSystemMessage)).Select(a => ((SystemMessageNetMsg)a[1]!).Id).ToList();
+        rec.Of(nameof(IWorldEventPublisher.FanoutSystemMessage)).Select(a => ((SystemMessageMsg)a[1]!).Id).ToList();
 
-    static List<InventoryUpdateEntryNet> InvRows(NetBridgeRecorder rec) =>
-        rec.Of(nameof(INetPresenceBridge.FanoutInventoryUpdate))
-            .SelectMany(a => ((InventoryUpdateNetMsg)a[1]!).Changes).ToList();
+    static List<InventoryUpdateEntryMsg> InvRows(NetBridgeRecorder rec) =>
+        rec.Of(nameof(IWorldEventPublisher.FanoutInventoryUpdate))
+            .SelectMany(a => ((InventoryUpdateMsg)a[1]!).Changes).ToList();
 
     /// <summary>Fills the bag to exactly <see cref="WarehouseRules.InventorySlots"/> rows with single pieces.</summary>
     static void FillBag(ZoneEntity player, int itemId = FishingManual)
@@ -61,8 +61,7 @@ public sealed class CarryLimitTests
         FillBag(player);
         int ground = kit.World.PlaceGroundForTest(player, Harvester);
 
-        Assert.Equal("slots", await kit.World.TryPickupAsync(
-            session, new PickupRequestMsg { ObjectId = ground }, CancellationToken.None));
+        Assert.Equal("slots", await kit.World.TryPickupAsync(session, ground, CancellationToken.None));
 
         Assert.Contains(ZoneWorld.SysMsgInventoryFull, SysIds(rec));
         Assert.True(kit.World.ExistsForTest(ground));
@@ -78,8 +77,7 @@ public sealed class CarryLimitTests
         FillBag(player); // the arrow row is already counted, so the bag is at the slot limit
         int ground = kit.World.PlaceGroundForTest(player, WoodenArrow, count: 5);
 
-        Assert.Null(await kit.World.TryPickupAsync(
-            session, new PickupRequestMsg { ObjectId = ground }, CancellationToken.None));
+        Assert.Null(await kit.World.TryPickupAsync(session, ground, CancellationToken.None));
 
         Assert.Equal(15, arrows.Count);
         Assert.DoesNotContain(ZoneWorld.SysMsgInventoryFull, SysIds(rec));
@@ -98,8 +96,7 @@ public sealed class CarryLimitTests
         int count = (int)(maxLoad / weightPer) + 100;
         int ground = kit.World.PlaceGroundForTest(player, WoodenArrow, count);
 
-        Assert.Null(await kit.World.TryPickupAsync(
-            session, new PickupRequestMsg { ObjectId = ground }, CancellationToken.None));
+        Assert.Null(await kit.World.TryPickupAsync(session, ground, CancellationToken.None));
 
         Assert.Equal(1 + count, arrows.Count);
         Assert.True(ZoneWorld.CurrentLoadOf(player) > maxLoad);
@@ -151,8 +148,8 @@ public sealed class CarryLimitTests
         Assert.Equal(1, left.Inventory.CountOf(Harvester));
         Assert.Equal(0, right.Inventory!.CountOf(Harvester));
         Assert.Empty(InvRows(rec));
-        Assert.Contains(rec.Of(nameof(INetPresenceBridge.FanoutTradeFinished)),
-            args => ((TradeFinishedNetMsg)args[1]!).Response == 0);
+        Assert.Contains(rec.Of(nameof(IWorldEventPublisher.FanoutTradeFinished)),
+            args => ((Fineage.Protocol.TradeFinishedMsg)args[1]!).Response == 0);
     }
 
     [Fact]
@@ -171,8 +168,8 @@ public sealed class CarryLimitTests
         Assert.Equal(0, right.Inventory!.CountOf(Harvester));
         Assert.Equal(WarehouseRules.InventorySlots(right.Race), right.Inventory.Items.Count);
         Assert.Empty(InvRows(rec));
-        Assert.Contains(rec.Of(nameof(INetPresenceBridge.FanoutTradeFinished)),
-            args => ((TradeFinishedNetMsg)args[1]!).Response == 0);
+        Assert.Contains(rec.Of(nameof(IWorldEventPublisher.FanoutTradeFinished)),
+            args => ((Fineage.Protocol.TradeFinishedMsg)args[1]!).Response == 0);
     }
 
     [Fact]
@@ -190,7 +187,7 @@ public sealed class CarryLimitTests
         Assert.Equal(6, left.Inventory.CountOf(WoodenArrow));
         Assert.Equal(5, right.Inventory.CountOf(WoodenArrow));
         Assert.Empty(SysIds(rec));
-        Assert.Contains(rec.Of(nameof(INetPresenceBridge.FanoutTradeFinished)),
-            args => ((TradeFinishedNetMsg)args[1]!).Response == 1);
+        Assert.Contains(rec.Of(nameof(IWorldEventPublisher.FanoutTradeFinished)),
+            args => ((Fineage.Protocol.TradeFinishedMsg)args[1]!).Response == 1);
     }
 }

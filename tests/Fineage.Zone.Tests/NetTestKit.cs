@@ -1,13 +1,13 @@
 using System.Reflection;
 using Fineage.Game;
-using Fineage.Login;
+using Fineage.Accounts;
 using Fineage.Zone.Net;
 using Fineage.Zone.World;
 using Xunit;
 
 namespace Fineage.Zone.Tests;
 
-/// <summary>Records every <see cref="INetPresenceBridge"/> call (method name + args) for Net fanout assertions.</summary>
+/// <summary>Records every <see cref="IWorldEventPublisher"/> call (method name + args) for Net fanout assertions.</summary>
 public class NetBridgeRecorder : DispatchProxy
 {
     public readonly List<(string Method, object?[] Args)> Calls = [];
@@ -25,9 +25,9 @@ public class NetBridgeRecorder : DispatchProxy
             return Calls.Where(c => c.Method == method).Select(c => c.Args).ToList();
     }
 
-    internal static (INetPresenceBridge Bridge, NetBridgeRecorder Recorder) Create()
+    internal static (IWorldEventPublisher Bridge, NetBridgeRecorder Recorder) Create()
     {
-        var bridge = DispatchProxy.Create<INetPresenceBridge, NetBridgeRecorder>();
+        var bridge = DispatchProxy.Create<IWorldEventPublisher, NetBridgeRecorder>();
         return (bridge, (NetBridgeRecorder)(object)bridge);
     }
 }

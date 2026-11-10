@@ -1,5 +1,5 @@
 using Fineage.Game;
-using Fineage.Login;
+using Fineage.Accounts;
 using Fineage.Net.Contract;
 using Fineage.Protocol;
 using Fineage.Zone.Net;
@@ -11,7 +11,7 @@ namespace Fineage.Zone.Tests;
 /// <summary>
 /// Equip and unequip rules on the zone world: which paperdoll slot each item lands in, what a swap
 /// displaces, and the bag/paperdoll rows the client receives. Ported off the V2 wire; the same rules are
-/// asserted through <see cref="INetPresenceBridge"/>, which is what a real client renders.
+/// asserted through <see cref="IWorldEventPublisher"/>, which is what a real client renders.
 /// </summary>
 public sealed class NetEquipRulesTests
 {
@@ -288,8 +288,8 @@ public sealed class NetEquipRulesTests
 
         var idle = new ZoneSession();
         idle.Bind(actor.Ticket.CharacterId, actor.Ticket.Account, actor.Ticket.CharacterName, actor.Ticket.ClassId);
-        Assert.Equal("world", await bench.World.TryUseItemAsync(idle, new UseItemMsg { ObjectId = 1 }, CancellationToken.None));
-        Assert.Equal("world", await bench.World.TryUnequipItemAsync(idle, new UnequipItemMsg { PaperdollSlot = 0 }, CancellationToken.None));
+        Assert.Equal("world", await bench.World.TryUseItemAsync(idle, 1, CancellationToken.None));
+        Assert.Equal("world", await bench.World.TryUnequipItemAsync(idle, 0, CancellationToken.None));
     }
 
     [Fact]
@@ -304,7 +304,7 @@ public sealed class NetEquipRulesTests
         Assert.Null(await actor.Use(actor.Slot(Sword)));
         var (_, user) = LastGear(bench.Rec);
 
-        var charInfo = bench.Rec.Of(nameof(INetPresenceBridge.FanoutCharInfo));
+        var charInfo = bench.Rec.Of(nameof(IWorldEventPublisher.FanoutCharInfo));
         Assert.NotEmpty(charInfo);
         Assert.Contains(charInfo, args => args[0] is IReadOnlyList<int> watchers && watchers.Contains(near.ObjectId));
         Assert.DoesNotContain(charInfo, args => args[0] is IReadOnlyList<int> watchers && watchers.Contains(far.ObjectId));
@@ -317,14 +317,12 @@ public sealed class NetEquipRulesTests
         var bench = Open();
         BenchPlayer actor = await bench.EnterAsync("gear", "Alden", [Stack(Adena, 10)]);
 
-        Assert.Equal("world", await bench.World.TryGiveItemAsync(
-            new ZoneSession(),
-            new GiveItemMsg { ItemId = Adena, Count = 1 },
+        Assert.Equal("world", await bench.World.TryGiveItemAsync(new ZoneSession(), Adena, 1,
             CancellationToken.None));
 
         var unbound = new ZoneSession();
         unbound.Bind(50, "missing", "Nope", HumanClasses.Fighter);
-        Assert.Equal("world", await bench.World.TryGiveItemAsync(unbound, new GiveItemMsg { ItemId = Adena, Count = 1 }, CancellationToken.None));
+        Assert.Equal("world", await bench.World.TryGiveItemAsync(unbound, Adena, 1, CancellationToken.None));
 
         Assert.Equal("bad_request", await Give(actor, Adena, 0));
         Assert.Equal("bad_request", await Give(actor, 999, 1));
@@ -349,7 +347,7 @@ public sealed class NetEquipRulesTests
     }
 
     static Task<string?> Give(BenchPlayer actor, int itemId, int count) =>
-        actor.World.TryGiveItemAsync(actor.Session, new GiveItemMsg { ItemId = itemId, Count = count }, CancellationToken.None);
+        actor.World.TryGiveItemAsync(actor.Session, itemId, count, CancellationToken.None);
 
     static async Task ExpectSlot(WorldBench bench, BenchPlayer actor, int itemId, int slot)
     {
@@ -360,7 +358,7 @@ public sealed class NetEquipRulesTests
         Assert.Equal(actor.Slot(itemId), user.Paperdoll[slot].ObjectId);
     }
 
-    static void AssertModify(InventoryUpdateNetMsg update, int objectId, int slot)
+    static void AssertModify(InventoryUpdateMsg update, int objectId, int slot)
     {
         var row = Assert.Single(update.Changes, change => change.ObjectId == objectId);
         Assert.Equal(InventoryChange.Modify, row.Change);
@@ -368,16 +366,16 @@ public sealed class NetEquipRulesTests
     }
 
     /// <summary>The bag update and the owner's UserInfo a gear change emits, in that order.</summary>
-    static (InventoryUpdateNetMsg Update, UserInfoNetMsg User) LastGear(NetBridgeRecorder rec) =>
+    static (InventoryUpdateMsg Update, Fineage.Protocol.UserInfoMsg User) LastGear(NetBridgeRecorder rec) =>
         (LastInventory(rec), LastUserInfo(rec));
 
-    static InventoryUpdateNetMsg LastInventory(NetBridgeRecorder rec) =>
-        Assert.IsType<InventoryUpdateNetMsg>(
-            rec.Of(nameof(INetPresenceBridge.FanoutInventoryUpdate)).Last()[1]);
+    static InventoryUpdateMsg LastInventory(NetBridgeRecorder rec) =>
+        Assert.IsType<InventoryUpdateMsg>(
+            rec.Of(nameof(IWorldEventPublisher.FanoutInventoryUpdate)).Last()[1]);
 
-    static UserInfoNetMsg LastUserInfo(NetBridgeRecorder rec) =>
-        Assert.IsType<UserInfoNetMsg>(
-            rec.Of(nameof(INetPresenceBridge.FanoutUserInfo)).Last()[1]);
+    static Fineage.Protocol.UserInfoMsg LastUserInfo(NetBridgeRecorder rec) =>
+        Assert.IsType<Fineage.Protocol.UserInfoMsg>(
+            rec.Of(nameof(IWorldEventPublisher.FanoutUserInfo)).Last()[1]);
 
     static StoredItem Bag(int itemId) => new(itemId, 1, -1);
 

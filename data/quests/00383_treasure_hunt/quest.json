@@ -1,0 +1,150 @@
+{
+  "id": 383,
+  "name": "Treasure Hunt",
+  "repeatable": true,
+  "abortable": true,
+  "questItems": [],
+  "dialogs": [
+    {
+      "npcId": 30890,
+      "hook": "talk",
+      "when": "absent",
+      "maxLevel": 41,
+      "htmlFile": "30890-talk-000.htm"
+    },
+    {
+      "npcId": 30890,
+      "hook": "talk",
+      "when": "absent",
+      "lacksItems": [
+        5915
+      ],
+      "htmlFile": "30890-talk-001.htm"
+    },
+    {
+      "npcId": 30890,
+      "hook": "talk",
+      "when": "absent",
+      "htmlFile": "30890-talk-002.htm"
+    },
+    {
+      "npcId": 30890,
+      "hook": "talk",
+      "when": "absent",
+      "htmlFile": "30890-talk-003.htm"
+    },
+    {
+      "npcId": 30890,
+      "hook": "talk",
+      "when": "absent",
+      "htmlFile": "30890-talk-004.htm"
+    },
+    {
+      "npcId": 30890,
+      "hook": "event",
+      "when": "absent",
+      "event": "30890-04",
+      "htmlFile": "30890-event-30890-04-005.htm"
+    },
+    {
+      "npcId": 30890,
+      "hook": "event",
+      "when": "absent",
+      "event": "30890-05",
+      "hasItem": 5915,
+      "ops": [
+        {
+          "op": "take_item",
+          "itemId": 5915,
+          "count": 1
+        },
+        {
+          "op": "give_adena",
+          "count": 1000
+        }
+      ],
+      "htmlFile": "30890-event-30890-05-006.htm"
+    },
+    {
+      "npcId": 30890,
+      "hook": "event",
+      "when": "absent",
+      "event": "30890-06",
+      "htmlFile": "30890-event-30890-06-007.htm"
+    },
+    {
+      "npcId": 30890,
+      "hook": "event",
+      "when": "absent",
+      "event": "30890-07",
+      "hasItem": 5915,
+      "ops": [
+        {
+          "op": "create"
+        },
+        {
+          "op": "start"
+        },
+        {
+          "op": "take_item",
+          "itemId": 5915,
+          "count": 1
+        },
+        {
+          "op": "set_cond",
+          "cond": 1
+        }
+      ],
+      "htmlFile": "30890-event-30890-07-008.htm"
+    },
+    {
+      "npcId": 30890,
+      "hook": "event",
+      "when": "absent",
+      "event": "30890-08",
+      "htmlFile": "30890-event-30890-08-009.htm"
+    },
+    {
+      "npcId": 30890,
+      "hook": "event",
+      "when": "absent",
+      "event": "30890-09",
+      "htmlFile": "30890-event-30890-09-010.htm"
+    },
+    {
+      "npcId": 30890,
+      "hook": "event",
+      "when": "absent",
+      "event": "30890-10",
+      "htmlFile": "30890-event-30890-10-011.htm"
+    },
+    {
+      "npcId": 30890,
+      "hook": "event",
+      "when": "absent",
+      "event": "30890-11",
+      "ops": [
+        {
+          "op": "set_cond",
+          "cond": 2
+        }
+      ],
+      "htmlFile": "30890-event-30890-11-012.htm"
+    },
+    {
+      "npcId": 30890,
+      "hook": "event",
+      "when": "absent",
+      "event": "31148-02",
+      "hasItem": 1661,
+      "htmlFile": "30890-event-31148-02-013.htm"
+    },
+    {
+      "npcId": 30890,
+      "hook": "event",
+      "when": "absent",
+      "event": "31148-02",
+      "htmlFile": "30890-event-31148-02-014.htm"
+    }
+  ]
+}

@@ -1,0 +1,244 @@
+{
+  "id": 326,
+  "name": "Vanquish Remnants",
+  "repeatable": true,
+  "abortable": true,
+  "questItems": [
+    1359,
+    1360,
+    1361
+  ],
+  "dialogs": [
+    {
+      "npcId": 30435,
+      "hook": "talk",
+      "when": "absent",
+      "maxLevel": 20,
+      "htmlFile": "30435-talk-000.htm"
+    },
+    {
+      "npcId": 30435,
+      "hook": "talk",
+      "when": "absent",
+      "minLevel": 21,
+      "htmlFile": "30435-talk-001.htm"
+    },
+    {
+      "npcId": 30435,
+      "hook": "event",
+      "when": "absent",
+      "event": "30435-03",
+      "minLevel": 21,
+      "ops": [
+        {
+          "op": "create"
+        },
+        {
+          "op": "start"
+        },
+        {
+          "op": "set_cond",
+          "cond": 1
+        }
+      ],
+      "htmlFile": "30435-event-30435-03-002.htm"
+    },
+    {
+      "npcId": 30435,
+      "hook": "event",
+      "when": "started",
+      "event": "30435-07",
+      "ops": [
+        {
+          "op": "complete"
+        }
+      ],
+      "htmlFile": "30435-event-30435-07-003.htm"
+    },
+    {
+      "npcId": 30435,
+      "hook": "event",
+      "when": "started",
+      "event": "30435-08",
+      "htmlFile": "30435-event-30435-08-004.htm"
+    },
+    {
+      "npcId": 30435,
+      "hook": "talk",
+      "when": "started",
+      "hasAny": [
+        1359,
+        1360,
+        1361
+      ],
+      "ops": [
+        {
+          "op": "sell_items",
+          "prices": [
+            {
+              "itemId": 1359,
+              "adena": 46
+            },
+            {
+              "itemId": 1360,
+              "adena": 52
+            },
+            {
+              "itemId": 1361,
+              "adena": 58
+            }
+          ],
+          "bonusMin": 10,
+          "bonusAdena": 4320
+        }
+      ],
+      "htmlFile": "30435-talk-005.htm"
+    },
+    {
+      "npcId": 30435,
+      "hook": "talk",
+      "when": "started",
+      "lacksItems": [
+        1359,
+        1360,
+        1361
+      ],
+      "htmlFile": "30435-talk-006.htm"
+    },
+    {
+      "npcId": 20053,
+      "hook": "kill",
+      "when": "started",
+      "html": "",
+      "ops": [
+        {
+          "op": "drop_item",
+          "itemId": 1359,
+          "count": 1,
+          "chance": 0.61,
+          "limit": 0
+        }
+      ]
+    },
+    {
+      "npcId": 20058,
+      "hook": "kill",
+      "when": "started",
+      "html": "",
+      "ops": [
+        {
+          "op": "drop_item",
+          "itemId": 1359,
+          "count": 1,
+          "chance": 0.61,
+          "limit": 0
+        }
+      ]
+    },
+    {
+      "npcId": 20061,
+      "hook": "kill",
+      "when": "started",
+      "html": "",
+      "ops": [
+        {
+          "op": "drop_item",
+          "itemId": 1360,
+          "count": 1,
+          "chance": 0.57,
+          "limit": 0
+        }
+      ]
+    },
+    {
+      "npcId": 20063,
+      "hook": "kill",
+      "when": "started",
+      "html": "",
+      "ops": [
+        {
+          "op": "drop_item",
+          "itemId": 1360,
+          "count": 1,
+          "chance": 0.63,
+          "limit": 0
+        }
+      ]
+    },
+    {
+      "npcId": 20066,
+      "hook": "kill",
+      "when": "started",
+      "html": "",
+      "ops": [
+        {
+          "op": "drop_item",
+          "itemId": 1361,
+          "count": 1,
+          "chance": 0.59,
+          "limit": 0
+        }
+      ]
+    },
+    {
+      "npcId": 20436,
+      "hook": "kill",
+      "when": "started",
+      "html": "",
+      "ops": [
+        {
+          "op": "drop_item",
+          "itemId": 1360,
+          "count": 1,
+          "chance": 0.55,
+          "limit": 0
+        }
+      ]
+    },
+    {
+      "npcId": 20437,
+      "hook": "kill",
+      "when": "started",
+      "html": "",
+      "ops": [
+        {
+          "op": "drop_item",
+          "itemId": 1359,
+          "count": 1,
+          "chance": 0.59,
+          "limit": 0
+        }
+      ]
+    },
+    {
+      "npcId": 20438,
+      "hook": "kill",
+      "when": "started",
+      "html": "",
+      "ops": [
+        {
+          "op": "drop_item",
+          "itemId": 1361,
+          "count": 1,
+          "chance": 0.6,
+          "limit": 0
+        }
+      ]
+    },
+    {
+      "npcId": 20439,
+      "hook": "kill",
+      "when": "started",
+      "html": "",
+      "ops": [
+        {
+          "op": "drop_item",
+          "itemId": 1360,
+          "count": 1,
+          "chance": 0.62,
+          "limit": 0
+        }
+      ]
+    }
+  ]
+}

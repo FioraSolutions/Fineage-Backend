@@ -1,0 +1,56 @@
+{
+  "id": 374,
+  "name": "WhisperOfDreamsPart1",
+  "repeatable": true,
+  "abortable": true,
+  "questItems": [
+    5884,
+    5885,
+    5886,
+    5887
+  ],
+  "dialogs": [
+    {
+      "npcId": 30515,
+      "hook": "talk",
+      "when": "absent",
+      "maxLevel": 55,
+      "htmlFile": "30515-talk-000.htm"
+    },
+    {
+      "npcId": 30515,
+      "hook": "talk",
+      "when": "absent",
+      "minLevel": 56,
+      "htmlFile": "30515-talk-001.htm"
+    },
+    {
+      "npcId": 30515,
+      "hook": "talk",
+      "when": "started",
+      "lacksItems": [
+        5886
+      ],
+      "htmlFile": "30515-talk-002.htm"
+    },
+    {
+      "npcId": 30515,
+      "hook": "talk",
+      "when": "started",
+      "htmlFile": "30515-talk-003.htm"
+    },
+    {
+      "npcId": 30515,
+      "hook": "talk",
+      "when": "started",
+      "htmlFile": "30515-talk-004.htm"
+    },
+    {
+      "npcId": 30557,
+      "hook": "talk",
+      "when": "started",
+      "hasItem": 5886,
+      "htmlFile": "30557-talk-005.htm"
+    }
+  ]
+}

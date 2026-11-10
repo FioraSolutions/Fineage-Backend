@@ -1,6 +1,6 @@
 using System.Net.Sockets;
 using Fineage.Game;
-using Fineage.Login;
+using Fineage.Accounts;
 using Fineage.Net.Contract;
 using Fineage.Net.Host;
 
@@ -10,17 +10,42 @@ public static class ZoneAcceptance
 {
     public static async Task RunAsync()
     {
-        var login = await LoginAcceptance.RunAsync().ConfigureAwait(false);
+        // Mint handoffs in-process via Fineage.Accounts — Zone must not reference Fineage.Login.
+        // Auth is HMAC-only; loopback ZoneHost runs with accounts=null and grants starter kits on enter.
         var tokens = new HandoffTokens(HandoffTokens.DefaultSecret);
+        var now = DateTimeOffset.UtcNow;
+        var fighter = SeedHandoff(tokens, now, characterId: 1, "selftest", "HumanOne", HumanClasses.Fighter, HumanClasses.RaceHuman);
+        var mystic = SeedHandoff(tokens, now, characterId: 2, "selftest2", "HumanTwo", HumanClasses.Mystic, HumanClasses.RaceHuman);
 
         await using (var zone = ZoneHost.StartNet(tokens))
         {
-            await PlayAsync(zone.Port, login.Fighter.Account, login.Fighter.Token, login.Fighter.CharacterId, login.Fighter.CharacterName)
+            await PlayAsync(zone.Port, fighter.Account, fighter.Token, fighter.CharacterId, fighter.CharacterName)
                 .ConfigureAwait(false);
-            await PlayAsync(zone.Port, login.Mystic.Account, login.Mystic.Token, login.Mystic.CharacterId, login.Mystic.CharacterName)
+            await PlayAsync(zone.Port, mystic.Account, mystic.Token, mystic.CharacterId, mystic.CharacterName)
                 .ConfigureAwait(false);
         }
     }
+
+    static HandoffTicket SeedHandoff(
+        HandoffTokens tokens,
+        DateTimeOffset now,
+        int characterId,
+        string account,
+        string name,
+        int classId,
+        int race) =>
+        tokens.Issue(
+            new CharacterRecord(
+                characterId,
+                name,
+                account,
+                classId,
+                race,
+                HumanClasses.SexMale,
+                Level: 1,
+                CreatedAt: now,
+                LastAccess: now),
+            now);
 
     public static void Write(TextWriter output) => output.WriteLine("selftest OK");
 

@@ -26,7 +26,7 @@ public sealed class NewbieHelperGiftTests
 
         Assert.Null(await actor.Talk(guide.ObjectId));
 
-        var inventory = Assert.IsType<InventoryUpdateNetMsg>(
+        var inventory = Assert.IsType<InventoryUpdateMsg>(
             bench.Rec.Of(nameof(FanoutInventoryUpdate)).Last()[1]);
         Assert.Contains(inventory.Changes, row => row.ItemId == NewbieHelperGift.SoulshotNovice && row.Count == NewbieHelperGift.SoulshotCount);
         Assert.Contains(inventory.Changes, row => row.ItemId == NewbieHelperGift.TravelToken && row.Count == NewbieHelperGift.TokenCount);
@@ -53,7 +53,7 @@ public sealed class NewbieHelperGiftTests
     }
 
     static string LastHtml(WorldBench bench) =>
-        Assert.IsType<NpcHtmlNetMsg>(bench.Rec.Of(nameof(FanoutNpcHtml)).Last()[1]).Html;
+        Assert.IsType<NpcHtmlMsg>(bench.Rec.Of(nameof(FanoutNpcHtml)).Last()[1]).Html;
 
     const string FanoutNpcHtml = "FanoutNpcHtml";
     const string FanoutInventoryUpdate = "FanoutInventoryUpdate";

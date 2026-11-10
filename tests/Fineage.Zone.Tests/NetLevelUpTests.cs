@@ -2,6 +2,7 @@ using Fineage.Net.Contract;
 using Fineage.Zone.Net;
 using Fineage.Zone.World;
 using Xunit;
+using Fineage.Protocol;
 
 namespace Fineage.Zone.Tests;
 
@@ -20,7 +21,7 @@ public sealed class NetLevelUpTests
         var (_, elf) = await kit.EnterAsync();
 
         int before = elf.KnownSkills.Count;
-        int skillsBefore = rec.Of(nameof(INetPresenceBridge.FanoutSkillList)).Count;
+        int skillsBefore = rec.Of(nameof(IWorldEventPublisher.FanoutSkillList)).Count;
 
         // Mobius ExperienceData row for level 20 on an Elven Mystic; the exact exp is irrelevant — the level is what unlocks rows.
         elf.Exp = kit.Game.Classes!.Experience.ExpToBeLevel(20);
@@ -29,14 +30,14 @@ public sealed class NetLevelUpTests
 
         Assert.Equal(20, elf.Level);
         Assert.True(elf.KnownSkills.Count > before, "rewardSkills should add the level-20 rows to the known book");
-        Assert.True(rec.Of(nameof(INetPresenceBridge.FanoutSkillList)).Count > skillsBefore);
+        Assert.True(rec.Of(nameof(IWorldEventPublisher.FanoutSkillList)).Count > skillsBefore);
 
-        var notice = Assert.Single(rec.Of(nameof(INetPresenceBridge.FanoutSystemMessage)));
-        var messages = Assert.IsType<SystemMessageNetMsg>(notice[1]);
+        var notice = Assert.Single(rec.Of(nameof(IWorldEventPublisher.FanoutSystemMessage)));
+        var messages = Assert.IsType<SystemMessageMsg>(notice[1]);
         Assert.Equal(ZoneWorld.LevelUpMessageId, messages.Id);
 
-        var stats = Assert.Single(rec.Of(nameof(INetPresenceBridge.FanoutPlayerStats)));
-        Assert.Equal(20, Assert.IsType<PlayerStatsMsg>(stats[1]).Level);
+        var stats = Assert.Single(rec.Of(nameof(IWorldEventPublisher.FanoutPlayerStats)));
+        Assert.Equal(20, Assert.IsType<Fineage.Protocol.PlayerStatsMsg>(stats[1]).Level);
     }
 
     [Fact]
@@ -54,7 +55,7 @@ public sealed class NetLevelUpTests
         kit.World.GrantExpForTest(elf, 0, 0);
 
         Assert.Equal(19, elf.Level);
-        Assert.Empty(rec.Of(nameof(INetPresenceBridge.FanoutSkillList)));
-        Assert.Empty(rec.Of(nameof(INetPresenceBridge.FanoutSystemMessage)));
+        Assert.Empty(rec.Of(nameof(IWorldEventPublisher.FanoutSkillList)));
+        Assert.Empty(rec.Of(nameof(IWorldEventPublisher.FanoutSystemMessage)));
     }
 }

@@ -1,0 +1,74 @@
+{
+  "id": 30,
+  "name": "ChestCaughtWithABaitOfFire",
+  "repeatable": false,
+  "abortable": true,
+  "questItems": [
+    7628
+  ],
+  "dialogs": [
+    {
+      "npcId": 31577,
+      "hook": "talk",
+      "when": "started",
+      "cond": 1,
+      "hasItem": 6511,
+      "htmlFile": "31577-talk-c1-000.htm"
+    },
+    {
+      "npcId": 31577,
+      "hook": "talk",
+      "when": "started",
+      "cond": 2,
+      "htmlFile": "31577-talk-c2-001.htm"
+    },
+    {
+      "npcId": 31577,
+      "hook": "talk",
+      "when": "started",
+      "htmlFile": "31577-talk-002.htm"
+    },
+    {
+      "npcId": 31577,
+      "hook": "event",
+      "when": "absent",
+      "event": "31577-02",
+      "htmlFile": "31577-event-31577-02-003.htm"
+    },
+    {
+      "npcId": 31577,
+      "hook": "event",
+      "when": "absent",
+      "event": "31577-04a",
+      "hasItem": 6511,
+      "ops": [
+        {
+          "op": "take_item",
+          "itemId": 6511,
+          "count": 1
+        },
+        {
+          "op": "give_item",
+          "itemId": 7628,
+          "count": 1
+        }
+      ],
+      "htmlFile": "31577-event-31577-04a-004.htm"
+    },
+    {
+      "npcId": 31577,
+      "hook": "event",
+      "when": "absent",
+      "event": "30629-02",
+      "hasItem": 7628,
+      "ops": [
+        {
+          "op": "give_item",
+          "itemId": 916,
+          "count": 1
+        }
+      ],
+      "htmlFile": "31577-event-30629-02-005.htm"
+    }
+  ]
+}

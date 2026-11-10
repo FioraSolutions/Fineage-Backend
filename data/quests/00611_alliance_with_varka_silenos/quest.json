@@ -1,0 +1,177 @@
+{
+  "id": 611,
+  "name": "Alliance with Varka Silenos",
+  "repeatable": true,
+  "abortable": true,
+  "questItems": [
+    7226,
+    7227,
+    7228
+  ],
+  "dialogs": [
+    {
+      "npcId": 31378,
+      "hook": "talk",
+      "when": "absent",
+      "htmlFile": "31378-talk-000.htm"
+    },
+    {
+      "npcId": 31378,
+      "hook": "talk",
+      "when": "absent",
+      "htmlFile": "31378-talk-001.htm"
+    },
+    {
+      "npcId": 31378,
+      "hook": "talk",
+      "when": "started",
+      "cond": 1,
+      "htmlFile": "31378-talk-c1-002.htm"
+    },
+    {
+      "npcId": 31378,
+      "hook": "talk",
+      "when": "started",
+      "cond": 1,
+      "htmlFile": "31378-talk-c1-003.htm"
+    },
+    {
+      "npcId": 31378,
+      "hook": "talk",
+      "when": "started",
+      "cond": 2,
+      "htmlFile": "31378-talk-c2-004.htm"
+    },
+    {
+      "npcId": 31378,
+      "hook": "talk",
+      "when": "started",
+      "cond": 2,
+      "htmlFile": "31378-talk-c2-005.htm"
+    },
+    {
+      "npcId": 31378,
+      "hook": "talk",
+      "when": "started",
+      "cond": 3,
+      "htmlFile": "31378-talk-c3-006.htm"
+    },
+    {
+      "npcId": 31378,
+      "hook": "talk",
+      "when": "started",
+      "cond": 3,
+      "htmlFile": "31378-talk-c3-007.htm"
+    },
+    {
+      "npcId": 31378,
+      "hook": "talk",
+      "when": "started",
+      "cond": 4,
+      "htmlFile": "31378-talk-c4-008.htm"
+    },
+    {
+      "npcId": 31378,
+      "hook": "talk",
+      "when": "started",
+      "cond": 4,
+      "htmlFile": "31378-talk-c4-009.htm"
+    },
+    {
+      "npcId": 31378,
+      "hook": "talk",
+      "when": "started",
+      "cond": 5,
+      "lacksItems": [
+        2
+      ],
+      "htmlFile": "31378-talk-c5-010.htm"
+    },
+    {
+      "npcId": 31378,
+      "hook": "talk",
+      "when": "started",
+      "cond": 6,
+      "hasItem": 7223,
+      "htmlFile": "31378-talk-c6-011.htm"
+    },
+    {
+      "npcId": 31378,
+      "hook": "event",
+      "when": "absent",
+      "event": "31378-12a",
+      "htmlFile": "31378-event-31378-12a-012.htm"
+    },
+    {
+      "npcId": 31378,
+      "hook": "event",
+      "when": "absent",
+      "event": "31378-12b",
+      "htmlFile": "31378-event-31378-12b-013.htm"
+    },
+    {
+      "npcId": 31378,
+      "hook": "event",
+      "when": "absent",
+      "event": "31378-25",
+      "htmlFile": "31378-event-31378-25-014.htm"
+    },
+    {
+      "npcId": 31378,
+      "hook": "event",
+      "when": "absent",
+      "event": "31378-04",
+      "htmlFile": "31378-event-31378-04-015.htm"
+    },
+    {
+      "npcId": 31378,
+      "hook": "event",
+      "when": "absent",
+      "event": "31378-04",
+      "htmlFile": "31378-event-31378-04-016.htm"
+    },
+    {
+      "npcId": 31378,
+      "hook": "event",
+      "when": "absent",
+      "event": "31378-12",
+      "htmlFile": "31378-event-31378-12-017.htm"
+    },
+    {
+      "npcId": 31378,
+      "hook": "event",
+      "when": "absent",
+      "event": "31378-15",
+      "htmlFile": "31378-event-31378-15-018.htm"
+    },
+    {
+      "npcId": 31378,
+      "hook": "event",
+      "when": "absent",
+      "event": "31378-18",
+      "htmlFile": "31378-event-31378-18-019.htm"
+    },
+    {
+      "npcId": 31378,
+      "hook": "event",
+      "when": "absent",
+      "event": "31378-21",
+      "lacksItems": [
+        7229
+      ],
+      "htmlFile": "31378-event-31378-21-020.htm"
+    },
+    {
+      "npcId": 31378,
+      "hook": "event",
+      "when": "absent",
+      "event": "31378-26",
+      "ops": [
+        {
+          "op": "complete"
+        }
+      ],
+      "htmlFile": "31378-event-31378-26-021.htm"
+    }
+  ]
+}

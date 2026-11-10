@@ -46,13 +46,13 @@ public sealed class ConsumableUseTests
         int before = p.Inventory!.CountOf(ManaPotion);
         p.CurMp = 0;
 
-        Assert.Null(await kit.World.TryUseItemAsync(s, new UseItemMsg { ObjectId = potion }, CancellationToken.None));
+        Assert.Null(await kit.World.TryUseItemAsync(s, potion, CancellationToken.None));
 
         Assert.Equal(Math.Min(p.MaxMp, 1000), p.CurMp);
         Assert.Equal(before - 1, p.Inventory.CountOf(ManaPotion));
         // Mobius consumes one item: the stack survives as Modify, not Remove.
-        var update = Assert.IsType<InventoryUpdateNetMsg>(
-            rec.Of(nameof(INetPresenceBridge.FanoutInventoryUpdate))[^1][1]);
+        var update = Assert.IsType<InventoryUpdateMsg>(
+            rec.Of(nameof(IWorldEventPublisher.FanoutInventoryUpdate))[^1][1]);
         Assert.Equal(InventoryChange.Modify, update.Changes[0].Change);
         Assert.Equal(before - 1, update.Changes[0].Count);
     }
@@ -67,17 +67,17 @@ public sealed class ConsumableUseTests
         p.CurHp = 1;
         int expected = Math.Min(p.MaxHp, 1 + 8 * 3);
 
-        Assert.Null(await kit.World.TryUseItemAsync(s, new UseItemMsg { ObjectId = potion }, CancellationToken.None));
+        Assert.Null(await kit.World.TryUseItemAsync(s, potion, CancellationToken.None));
 
         Assert.Equal(expected, p.CurHp);
         Assert.Equal(0, p.Inventory!.CountOf(LesserHealingPotion));
-        var update = Assert.IsType<InventoryUpdateNetMsg>(
-            rec.Of(nameof(INetPresenceBridge.FanoutInventoryUpdate))[^1][1]);
+        var update = Assert.IsType<InventoryUpdateMsg>(
+            rec.Of(nameof(IWorldEventPublisher.FanoutInventoryUpdate))[^1][1]);
         Assert.Equal(InventoryChange.Remove, update.Changes[0].Change);
         // HealOverTime 2031 is 15 s: the potion icon has to reach the client, not only the HP bar.
         Assert.Contains(p.Abnormals, a => a.Id == 2031);
-        Assert.NotEmpty(rec.Of(nameof(INetPresenceBridge.FanoutAbnormalStatusUpdate)));
-        Assert.NotEmpty(rec.Of(nameof(INetPresenceBridge.FanoutStatusUpdate)));
+        Assert.NotEmpty(rec.Of(nameof(IWorldEventPublisher.FanoutAbnormalStatusUpdate)));
+        Assert.NotEmpty(rec.Of(nameof(IWorldEventPublisher.FanoutStatusUpdate)));
     }
 
     [Fact]
@@ -90,14 +90,14 @@ public sealed class ConsumableUseTests
         int before = p.Inventory!.CountOf(ScrollOfEscape);
         int beforeX = p.X, beforeY = p.Y;
 
-        Assert.Null(await kit.World.TryUseItemAsync(s, new UseItemMsg { ObjectId = scroll }, CancellationToken.None));
+        Assert.Null(await kit.World.TryUseItemAsync(s, scroll, CancellationToken.None));
 
         // Mobius ItemSkills: MagicSkillUse (2013) goes out at use; teleport + consume land at hitTime.
         Assert.Equal(beforeX, p.X);
         Assert.Equal(beforeY, p.Y);
         Assert.Equal(before, p.Inventory!.CountOf(ScrollOfEscape));
-        var cast = Assert.IsType<MagicSkillUseNetMsg>(
-            Assert.Single(rec.Of(nameof(INetPresenceBridge.FanoutMagicSkillUse)))[1]);
+        var cast = Assert.IsType<MagicSkillUseMsg>(
+            Assert.Single(rec.Of(nameof(IWorldEventPublisher.FanoutMagicSkillUse)))[1]);
         Assert.Equal(2013, cast.SkillId);
         Assert.Equal(20_000, cast.HitTimeMs);
 
@@ -109,8 +109,8 @@ public sealed class ConsumableUseTests
             !pt.IsChaotic && pt.Kind == "normal" && pt.X == p.X && pt.Y == p.Y && pt.Z == p.Z);
         Assert.NotEqual((beforeX, beforeY), (p.X, p.Y));
         Assert.Equal(before - 1, p.Inventory!.CountOf(ScrollOfEscape));
-        Assert.NotEmpty(rec.Of(nameof(INetPresenceBridge.FanoutTeleportToLocation)));
-        Assert.NotEmpty(rec.Of(nameof(INetPresenceBridge.FanoutUserInfo)));
+        Assert.NotEmpty(rec.Of(nameof(IWorldEventPublisher.FanoutTeleportToLocation)));
+        Assert.NotEmpty(rec.Of(nameof(IWorldEventPublisher.FanoutUserInfo)));
     }
 
     [Fact]
@@ -122,13 +122,13 @@ public sealed class ConsumableUseTests
         int package = Grant(kit, p, CompressedSoulshots);
         int shotsBefore = p.Inventory!.CountOf(SoulshotNoGrade);
 
-        Assert.Null(await kit.World.TryUseItemAsync(s, new UseItemMsg { ObjectId = package }, CancellationToken.None));
+        Assert.Null(await kit.World.TryUseItemAsync(s, package, CancellationToken.None));
 
         Assert.Equal(0, p.Inventory.CountOf(CompressedSoulshots));
         Assert.Equal(shotsBefore + 300, p.Inventory.CountOf(SoulshotNoGrade));
         // The package's shots merge into the stack the character already carries, so the Add row reports the merged count.
-        var added = rec.Of(nameof(INetPresenceBridge.FanoutInventoryUpdate))
-            .Select(call => Assert.IsType<InventoryUpdateNetMsg>(call[1]))
+        var added = rec.Of(nameof(IWorldEventPublisher.FanoutInventoryUpdate))
+            .Select(call => Assert.IsType<InventoryUpdateMsg>(call[1]))
             .SelectMany(update => update.Changes)
             .Any(row => row.ItemId == SoulshotNoGrade && row.Change == InventoryChange.Add && row.Count == shotsBefore + 300);
         Assert.True(added);
@@ -143,17 +143,17 @@ public sealed class ConsumableUseTests
         int potion = Grant(kit, p, LesserHealingPotion, 2);
         p.CurHp = 1;
 
-        Assert.Null(await kit.World.TryUseItemAsync(s, new UseItemMsg { ObjectId = potion }, CancellationToken.None));
+        Assert.Null(await kit.World.TryUseItemAsync(s, potion, CancellationToken.None));
         Assert.Equal(1, p.Inventory!.CountOf(LesserHealingPotion));
 
         // Mobius skill 2031 carries reuseDelay 10000 ms.
         Assert.Equal(ZoneWorld.InventoryReuse,
-            await kit.World.TryUseItemAsync(s, new UseItemMsg { ObjectId = potion }, CancellationToken.None));
+            await kit.World.TryUseItemAsync(s, potion, CancellationToken.None));
         Assert.Equal(1, p.Inventory.CountOf(LesserHealingPotion));
 
         kit.Now = kit.Now.AddSeconds(11);
         p.CurHp = 1;
-        Assert.Null(await kit.World.TryUseItemAsync(s, new UseItemMsg { ObjectId = potion }, CancellationToken.None));
+        Assert.Null(await kit.World.TryUseItemAsync(s, potion, CancellationToken.None));
         Assert.Equal(0, p.Inventory.CountOf(LesserHealingPotion));
     }
 
@@ -166,7 +166,7 @@ public sealed class ConsumableUseTests
         int adena = Grant(kit, p, Adena, 10);
 
         Assert.Equal(InventoryProtocol.NotEquippable,
-            await kit.World.TryUseItemAsync(s, new UseItemMsg { ObjectId = adena }, CancellationToken.None));
+            await kit.World.TryUseItemAsync(s, adena, CancellationToken.None));
         Assert.Equal(10, p.Inventory!.CountOf(Adena));
     }
 
@@ -182,7 +182,7 @@ public sealed class ConsumableUseTests
         p.Dead = true;
 
         Assert.Equal(InventoryProtocol.Dead,
-            await kit.World.TryUseItemAsync(s, new UseItemMsg { ObjectId = potion }, CancellationToken.None));
+            await kit.World.TryUseItemAsync(s, potion, CancellationToken.None));
         Assert.Equal(0, p.CurMp);
         Assert.Equal(before, p.Inventory!.CountOf(ManaPotion));
     }
@@ -196,7 +196,7 @@ public sealed class ConsumableUseTests
         int potion = Grant(kit, p, ManaPotion);
         int before = p.Inventory!.CountOf(ManaPotion);
         p.CurMp = 0;
-        Assert.Null(await kit.World.TryUseItemAsync(s, new UseItemMsg { ObjectId = potion }, CancellationToken.None));
+        Assert.Null(await kit.World.TryUseItemAsync(s, potion, CancellationToken.None));
 
         await kit.World.LeaveAsync(s, CancellationToken.None);
         var saved = kit.Store.FindById(s.Account, s.ObjectId)!;

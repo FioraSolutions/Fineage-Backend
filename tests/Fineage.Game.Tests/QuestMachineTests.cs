@@ -11,12 +11,14 @@ public sealed class QuestMachineTests
         var data = GameData.LoadDefault();
         Assert.Equal(25, data.Quests.MaxActive);
         Assert.Equal(150, data.Quests.TalkRange);
-        var quest = data.Quests.Find(999);
-        Assert.NotNull(quest);
-        Assert.Equal("Roxxy's Message", quest!.Name);
-        Assert.False(quest.Repeatable);
-        Assert.True(quest.Abortable);
-        Assert.Empty(quest.QuestItems);
+        var tutorial = data.Quests.Find(999);
+        Assert.NotNull(tutorial);
+        Assert.Equal("Newbie Tutorial", tutorial!.Name);
+        Assert.False(tutorial.Repeatable);
+        Assert.True(tutorial.Abortable);
+        var roxxy = data.Quests.Find(998);
+        Assert.NotNull(roxxy);
+        Assert.Equal("Roxxy's Message", roxxy!.Name);
     }
 
     [Fact]

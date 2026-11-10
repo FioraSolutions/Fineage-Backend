@@ -1,6 +1,7 @@
 using Fineage.Login;
 using Microsoft.Extensions.Logging;
 using Xunit;
+using Fineage.Accounts;
 
 namespace Fineage.Login.Tests;
 

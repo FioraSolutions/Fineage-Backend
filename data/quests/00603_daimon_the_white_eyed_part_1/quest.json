@@ -1,0 +1,204 @@
+{
+  "id": 603,
+  "name": "Daimon the White-Eyed - Part 1",
+  "repeatable": true,
+  "abortable": true,
+  "questItems": [
+    7190,
+    7191
+  ],
+  "dialogs": [
+    {
+      "npcId": 31683,
+      "hook": "talk",
+      "when": "absent",
+      "htmlFile": "31683-event-31683-03-008.htm"
+    },
+    {
+      "npcId": 31683,
+      "hook": "talk",
+      "when": "started",
+      "cond": 1,
+      "htmlFile": "31683-talk-c1-000.htm"
+    },
+    {
+      "npcId": 31683,
+      "hook": "talk",
+      "when": "started",
+      "cond": 2,
+      "htmlFile": "31683-talk-c2-001.htm"
+    },
+    {
+      "npcId": 31683,
+      "hook": "talk",
+      "when": "started",
+      "cond": 3,
+      "htmlFile": "31683-talk-c3-002.htm"
+    },
+    {
+      "npcId": 31683,
+      "hook": "talk",
+      "when": "started",
+      "cond": 4,
+      "htmlFile": "31683-talk-c4-003.htm"
+    },
+    {
+      "npcId": 31683,
+      "hook": "talk",
+      "when": "started",
+      "cond": 5,
+      "htmlFile": "31683-talk-c5-004.htm"
+    },
+    {
+      "npcId": 31683,
+      "hook": "talk",
+      "when": "started",
+      "cond": 6,
+      "htmlFile": "31683-talk-c6-005.htm"
+    },
+    {
+      "npcId": 31683,
+      "hook": "talk",
+      "when": "started",
+      "cond": 7,
+      "htmlFile": "31683-talk-c7-006.htm"
+    },
+    {
+      "npcId": 31683,
+      "hook": "talk",
+      "when": "started",
+      "cond": 8,
+      "htmlFile": "31683-talk-c8-007.htm"
+    },
+    {
+      "npcId": 31683,
+      "hook": "event",
+      "when": "absent",
+      "event": "31683-03",
+      "ops": [
+        {
+          "op": "create"
+        },
+        {
+          "op": "start"
+        },
+        {
+          "op": "set_cond",
+          "cond": 1
+        }
+      ],
+      "htmlFile": "31683-event-31683-03-008.htm"
+    },
+    {
+      "npcId": 31683,
+      "hook": "event",
+      "when": "absent",
+      "event": "31548-02",
+      "ops": [
+        {
+          "op": "give_item",
+          "itemId": 7191,
+          "count": 1
+        }
+      ],
+      "htmlFile": "31683-event-31548-02-009.htm"
+    },
+    {
+      "npcId": 31683,
+      "hook": "event",
+      "when": "absent",
+      "event": "31549-02",
+      "ops": [
+        {
+          "op": "give_item",
+          "itemId": 7191,
+          "count": 1
+        }
+      ],
+      "htmlFile": "31683-event-31549-02-010.htm"
+    },
+    {
+      "npcId": 31683,
+      "hook": "event",
+      "when": "absent",
+      "event": "31550-02",
+      "ops": [
+        {
+          "op": "give_item",
+          "itemId": 7191,
+          "count": 1
+        }
+      ],
+      "htmlFile": "31683-event-31550-02-011.htm"
+    },
+    {
+      "npcId": 31683,
+      "hook": "event",
+      "when": "absent",
+      "event": "31551-02",
+      "ops": [
+        {
+          "op": "give_item",
+          "itemId": 7191,
+          "count": 1
+        }
+      ],
+      "htmlFile": "31683-event-31551-02-012.htm"
+    },
+    {
+      "npcId": 31683,
+      "hook": "event",
+      "when": "absent",
+      "event": "31552-02",
+      "ops": [
+        {
+          "op": "give_item",
+          "itemId": 7191,
+          "count": 1
+        }
+      ],
+      "htmlFile": "31683-event-31552-02-013.htm"
+    },
+    {
+      "npcId": 31683,
+      "hook": "event",
+      "when": "absent",
+      "event": "31683-06",
+      "ops": [
+        {
+          "op": "take_item",
+          "itemId": 7191,
+          "count": 1
+        },
+        {
+          "op": "set_cond",
+          "cond": 7
+        }
+      ],
+      "htmlFile": "31683-event-31683-06-014.htm"
+    },
+    {
+      "npcId": 31683,
+      "hook": "event",
+      "when": "absent",
+      "event": "31683-10",
+      "hasItem": 7190,
+      "ops": [
+        {
+          "op": "take_item",
+          "itemId": 7190,
+          "count": 1
+        },
+        {
+          "op": "give_item",
+          "itemId": 7192,
+          "count": 1
+        },
+        {
+          "op": "complete"
+        }
+      ],
+      "htmlFile": "31683-event-31683-10-015.htm"
+    }
+  ]
+}

@@ -1,5 +1,5 @@
 using Fineage.Game;
-using Fineage.Login;
+using Fineage.Accounts;
 using Fineage.Net.Contract;
 using Fineage.Protocol;
 using Fineage.Zone.Olympiad;
@@ -11,7 +11,7 @@ namespace Fineage.Zone.Tests;
 /// <summary>
 /// Olympiad over Net: the period sheet, the Noblesse gate on registration, the queue and its cancel, and the
 /// admin report gate. The world runs on <see cref="WorldBench"/>, so these assert the recorded
-/// <see cref="Fineage.Zone.Net.INetPresenceBridge"/> fanout rather than MessagePack frames.
+/// <see cref="Fineage.Zone.World.IWorldEventPublisher"/> fanout rather than MessagePack frames.
 /// </summary>
 public sealed class NetOlympiadTests
 {
@@ -78,7 +78,7 @@ public sealed class NetOlympiadTests
         await bench.World.AdvanceOlympiadAsync(CancellationToken.None);
         var matchCall = Assert.Single(bench.Rec.Of("FanoutOlympiadMatch"));
         Assert.Equal(2, Assert.IsAssignableFrom<IReadOnlyList<int>>(matchCall[0]).Count);
-        var match = Assert.IsType<OlympiadMatchNetMsg>(matchCall[1]);
+        var match = Assert.IsType<OlympiadMatchMsg>(matchCall[1]);
         // Which side each participant takes is a random draw, so the pair is asserted as a set.
         Assert.Equal(
             new[] { one.ObjectId, two.ObjectId }.Order(),
@@ -90,7 +90,7 @@ public sealed class NetOlympiadTests
         clock = clock.AddSeconds(OlympiadProtocol.WaitSeconds);
         await bench.World.AdvanceOlympiadAsync(CancellationToken.None);
         Assert.NotEmpty(bench.Rec.Of("FanoutOlympiadCountdown"));
-        var countdown = Assert.IsType<OlympiadCountdownNetMsg>(bench.Rec.Of("FanoutOlympiadCountdown").Last()[1]);
+        var countdown = Assert.IsType<OlympiadCountdownMsg>(bench.Rec.Of("FanoutOlympiadCountdown").Last()[1]);
         Assert.Equal(match.MatchId, countdown.MatchId);
         Assert.Equal(1, countdown.Seconds);
 
@@ -102,7 +102,7 @@ public sealed class NetOlympiadTests
         // Report the first side as the winner; the pair order is drawn at matchmaking.
         int winner = match.PlayerOneId;
         Assert.Null(bench.World.ReportOlympiadResult(match.MatchId, winner, clock));
-        var result = Assert.IsType<OlympiadResultNetMsg>(bench.Rec.Of("FanoutOlympiadResult").Last()[1]);
+        var result = Assert.IsType<OlympiadResultMsg>(bench.Rec.Of("FanoutOlympiadResult").Last()[1]);
         Assert.Equal(match.MatchId, result.MatchId);
         Assert.Equal(winner, result.WinnerObjectId);
         Assert.Equal(OlympiadProtocol.RewardItemId, result.RewardItemId);
@@ -114,7 +114,7 @@ public sealed class NetOlympiadTests
         Assert.Equal(2, Assert.IsAssignableFrom<IReadOnlyList<int>>(resultCall[0]).Count);
 
         // The Gate Pass lands in the winner's bag, so the Net inventory row must follow the V2 one.
-        var grant = Assert.IsType<InventoryUpdateNetMsg>(bench.Rec.Of("FanoutInventoryUpdate").Last()[1]);
+        var grant = Assert.IsType<InventoryUpdateMsg>(bench.Rec.Of("FanoutInventoryUpdate").Last()[1]);
         var added = Assert.Single(grant.Changes);
         Assert.Equal(OlympiadProtocol.RewardItemId, added.ItemId);
         Assert.Equal(OlympiadProtocol.ClassedRewardCount, added.Count);
@@ -243,11 +243,11 @@ public sealed class NetOlympiadTests
         Assert.Equal(11, result.CompetitionsDoneTwo);
     }
 
-    static OlympiadStatusNetMsg LastStatus(WorldBench bench) =>
-        Assert.IsType<OlympiadStatusNetMsg>(bench.Rec.Of("FanoutOlympiadStatus").Last()[1]);
+    static OlympiadStatusMsg LastStatus(WorldBench bench) =>
+        Assert.IsType<OlympiadStatusMsg>(bench.Rec.Of("FanoutOlympiadStatus").Last()[1]);
 
-    static SystemMessageNetMsg LastSystemMessage(WorldBench bench) =>
-        Assert.IsType<SystemMessageNetMsg>(bench.Rec.Of("FanoutSystemMessage").Last()[1]);
+    static SystemMessageMsg LastSystemMessage(WorldBench bench) =>
+        Assert.IsType<SystemMessageMsg>(bench.Rec.Of("FanoutSystemMessage").Last()[1]);
 
     /// <summary>18:30 on a competition day, so the sheet opens rather than waiting for the start hour.</summary>
     static WorldBench Open() => new(clock: () => Evening);

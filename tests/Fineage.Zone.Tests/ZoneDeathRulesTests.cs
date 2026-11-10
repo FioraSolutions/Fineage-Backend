@@ -388,7 +388,7 @@ public sealed class ZoneDeathRulesTests
     static async Task ReviveAsync(NetTestKit kit, ZoneSession session, ZoneEntity player)
     {
         Assert.True(player.Dead);
-        Assert.Null(await kit.World.TryReviveAsync(session, new ReviveRequestMsg { Action = DeathProtocol.ReviveToVillage }, CancellationToken.None));
+        Assert.Null(await kit.World.TryReviveAsync(session, DeathProtocol.ReviveToVillage, CancellationToken.None));
         Assert.False(player.Dead);
     }
 }

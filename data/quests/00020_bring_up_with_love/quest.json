@@ -1,0 +1,134 @@
+{
+  "id": 20,
+  "name": "Bring Up With Love",
+  "repeatable": false,
+  "abortable": true,
+  "questItems": [],
+  "dialogs": [
+    {
+      "npcId": 31537,
+      "hook": "talk",
+      "when": "absent",
+      "htmlFile": "31537-event-31537-11-011.htm"
+    },
+    {
+      "npcId": 31537,
+      "hook": "talk",
+      "when": "started",
+      "cond": 1,
+      "htmlFile": "31537-talk-c1-000.htm"
+    },
+    {
+      "npcId": 31537,
+      "hook": "event",
+      "when": "absent",
+      "event": "31537-02",
+      "htmlFile": "31537-event-31537-02-001.htm"
+    },
+    {
+      "npcId": 31537,
+      "hook": "event",
+      "when": "absent",
+      "event": "31537-03",
+      "htmlFile": "31537-event-31537-03-002.htm"
+    },
+    {
+      "npcId": 31537,
+      "hook": "event",
+      "when": "absent",
+      "event": "31537-04",
+      "htmlFile": "31537-event-31537-04-003.htm"
+    },
+    {
+      "npcId": 31537,
+      "hook": "event",
+      "when": "absent",
+      "event": "31537-05",
+      "htmlFile": "31537-event-31537-05-004.htm"
+    },
+    {
+      "npcId": 31537,
+      "hook": "event",
+      "when": "absent",
+      "event": "31537-06",
+      "htmlFile": "31537-event-31537-06-005.htm"
+    },
+    {
+      "npcId": 31537,
+      "hook": "event",
+      "when": "absent",
+      "event": "31537-07",
+      "htmlFile": "31537-event-31537-07-006.htm"
+    },
+    {
+      "npcId": 31537,
+      "hook": "event",
+      "when": "absent",
+      "event": "31537-08",
+      "htmlFile": "31537-event-31537-08-007.htm"
+    },
+    {
+      "npcId": 31537,
+      "hook": "event",
+      "when": "absent",
+      "event": "31537-09",
+      "htmlFile": "31537-event-31537-09-008.htm"
+    },
+    {
+      "npcId": 31537,
+      "hook": "event",
+      "when": "absent",
+      "event": "31537-10",
+      "htmlFile": "31537-event-31537-10-009.htm"
+    },
+    {
+      "npcId": 31537,
+      "hook": "event",
+      "when": "absent",
+      "event": "31537-12",
+      "htmlFile": "31537-event-31537-12-010.htm"
+    },
+    {
+      "npcId": 31537,
+      "hook": "event",
+      "when": "absent",
+      "event": "31537-11",
+      "ops": [
+        {
+          "op": "create"
+        },
+        {
+          "op": "start"
+        },
+        {
+          "op": "set_cond",
+          "cond": 1
+        }
+      ],
+      "htmlFile": "31537-event-31537-11-011.htm"
+    },
+    {
+      "npcId": 31537,
+      "hook": "event",
+      "when": "absent",
+      "event": "31537-16",
+      "hasItem": 15533,
+      "ops": [
+        {
+          "op": "take_item",
+          "itemId": 15533,
+          "count": 1
+        },
+        {
+          "op": "give_item",
+          "itemId": 9553,
+          "count": 1
+        },
+        {
+          "op": "complete"
+        }
+      ],
+      "htmlFile": "31537-event-31537-16-012.htm"
+    }
+  ]
+}

@@ -1,5 +1,6 @@
 <Solution>
   <Folder Name="/src/">
+    <Project Path="src/Fineage.Accounts/Fineage.Accounts.csproj" />
     <Project Path="src/Fineage.Game/Fineage.Game.csproj" />
     <Project Path="src/Fineage.Login/Fineage.Login.csproj" />
     <Project Path="src/Fineage.Protocol/Fineage.Protocol.csproj" />

@@ -1,3 +1,5 @@
+using System.Buffers.Binary;
+using System.Collections.Concurrent;
 using System.Net.Sockets;
 using System.Threading.Channels;
 using Fineage.Net.Contract;
@@ -20,16 +22,22 @@ public sealed class NetConnection : IAsyncDisposable
     readonly CommandDeduper _deduper = new();
     readonly string _endpoint;
     readonly Task _pump;
+    readonly ConcurrentDictionary<CoalesceEntityKey, PacketEnvelope> _coalescedMove = new();
     int _closed;
+
+    readonly record struct CoalesceEntityKey(ulong EntityValue, uint EntityGeneration);
 
     public NetConnection(TcpClient client, int inboxCapacity, string endpoint = "net", int outboundCapacity = DefaultOutboundCapacity)
     {
         _client = client;
         _endpoint = endpoint;
         _stream = client.GetStream();
+        // Wait (not DropOldest): trade/inventory/auth commands must not silently lose earlier
+        // frames while later ones still run. Full inbox applies TCP backpressure via the read loop.
+        // Movement coalesce can land later as a separate inbound class.
         _inbox = Channel.CreateBounded<PacketEnvelope>(new BoundedChannelOptions(inboxCapacity)
         {
-            FullMode = BoundedChannelFullMode.DropOldest,
+            FullMode = BoundedChannelFullMode.Wait,
             SingleReader = true,
             SingleWriter = false
         });
@@ -129,11 +137,90 @@ public sealed class NetConnection : IAsyncDisposable
         if (!TryEnvelope(opcode, payload, requestSequence, out PacketEnvelope envelope))
             return false;
 
+        if (TryCoalescedSend(opcode, envelope))
+            return true;
+
         if (_outbound.Writer.TryWrite(envelope))
             return true;
 
         NetTelemetry.OutboundDropped(_endpoint);
         return false;
+    }
+
+    /// <summary>
+    /// Replaceable move fanout: when the outbound channel is full, keep the latest MoveState /
+    /// ChangeMoveType per entity instead of counting a drop. The pump writes stashed frames
+    /// straight to the socket after each channel frame so concurrent <see cref="TrySend"/> fillers
+    /// cannot starve coalesced moves by re-filling the channel (CI flake on loaded hosts).
+    /// </summary>
+    bool TryCoalescedSend(ushort opcode, PacketEnvelope envelope)
+    {
+        if (opcode != NetOpcode.MoveState && opcode != NetOpcode.ChangeMoveType)
+            return false;
+
+        if (!TryCoalesceEntityKey(envelope.Payload, out ulong entityValue, out uint generation))
+            return false;
+
+        var key = new CoalesceEntityKey(entityValue, generation);
+
+        if (_outbound.Writer.TryWrite(envelope))
+        {
+            _coalescedMove.TryRemove(key, out _);
+            return true;
+        }
+
+        _coalescedMove[key] = envelope;
+        return true;
+    }
+
+    static bool TryCoalesceEntityKey(byte[] payload, out ulong entityValue, out uint generation)
+    {
+        entityValue = 0;
+        generation = 0;
+        if (payload.Length < 12)
+            return false;
+
+        ReadOnlySpan<byte> span = payload;
+        entityValue = BinaryPrimitives.ReadUInt64LittleEndian(span);
+        generation = BinaryPrimitives.ReadUInt32LittleEndian(span[8..]);
+        return true;
+    }
+
+    /// <summary>
+    /// Best-effort: push stashed moves into the channel when there is room (Dispose / idle wake).
+    /// The pump prefers <see cref="WriteCoalescedToStreamAsync"/> so stash never competes with fillers.
+    /// </summary>
+    void FlushCoalescedOutbound()
+    {
+        foreach (KeyValuePair<CoalesceEntityKey, PacketEnvelope> entry in _coalescedMove.ToArray())
+        {
+            if (!_coalescedMove.TryGetValue(entry.Key, out PacketEnvelope? envelope))
+                continue;
+            if (!_outbound.Writer.TryWrite(envelope))
+                break;
+            _coalescedMove.TryRemove(entry.Key, out _);
+        }
+    }
+
+    /// <summary>
+    /// Pump-only: write every stashed MoveState / ChangeMoveType directly to the socket.
+    /// Bypasses the bounded channel so fanout fillers cannot block the latest position forever.
+    /// </summary>
+    async Task WriteCoalescedToStreamAsync()
+    {
+        foreach (KeyValuePair<CoalesceEntityKey, PacketEnvelope> entry in _coalescedMove.ToArray())
+        {
+            if (!_coalescedMove.TryRemove(entry.Key, out PacketEnvelope? envelope))
+                continue;
+            // A newer frame may have landed for the same entity after ToArray; prefer the latest.
+            if (_coalescedMove.TryGetValue(entry.Key, out PacketEnvelope? newer))
+            {
+                envelope = newer;
+                _coalescedMove.TryRemove(entry.Key, out _);
+            }
+            await NetFraming.WriteAsync(_stream, envelope, CancellationToken.None).ConfigureAwait(false);
+            NetTelemetry.FrameOut(_endpoint, envelope.Payload.Length);
+        }
     }
 
     /// <summary>
@@ -168,6 +255,7 @@ public sealed class NetConnection : IAsyncDisposable
             {
                 await NetFraming.WriteAsync(_stream, envelope, CancellationToken.None).ConfigureAwait(false);
                 NetTelemetry.FrameOut(_endpoint, envelope.Payload.Length);
+                await WriteCoalescedToStreamAsync().ConfigureAwait(false);
             }
         }
         catch (Exception ex) when (ex is IOException or OperationCanceledException or ObjectDisposedException or InvalidOperationException)
@@ -176,6 +264,14 @@ public sealed class NetConnection : IAsyncDisposable
         }
         finally
         {
+            // Last chance: drain replaceable MoveState that never fit the channel.
+            try
+            {
+                await WriteCoalescedToStreamAsync().ConfigureAwait(false);
+            }
+            catch (Exception ex) when (ex is IOException or ObjectDisposedException or InvalidOperationException)
+            {
+            }
             _outbound.Writer.TryComplete();
         }
     }
@@ -185,6 +281,8 @@ public sealed class NetConnection : IAsyncDisposable
         if (Interlocked.Exchange(ref _closed, 1) != 0)
             return;
 
+        // Push any stashed MoveState before completing the channel so the pump can still send them.
+        FlushCoalescedOutbound();
         _outbound.Writer.TryComplete();
         try
         {

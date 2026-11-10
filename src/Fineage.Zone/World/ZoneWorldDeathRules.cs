@@ -65,7 +65,9 @@ public sealed partial class ZoneWorld
 
         // PlayableStat.removeExp: exp never goes negative, and when it falls under the level's own floor the level
         // follows it down (Delevel, the reference default) instead of the bar being clipped.
+        // Mobius setExpBeforeDeath(getExp()) before removeExp — resurrection restore uses this snapshot.
         long before = player.Exp;
+        player.ExpBeforeDeath = before;
         player.Exp = Math.Max(0, before - lost);
 
         int level = player.Level;
@@ -126,14 +128,58 @@ public sealed partial class ZoneWorld
 
         if (player.Session is not { } session)
             return;
-        NetBridge?.FanoutSystemMessage([player.ObjectId], new Fineage.Net.Contract.SystemMessageNetMsg
+        NetBridge?.FanoutSystemMessage([player.ObjectId], new SystemMessageMsg
         {
             Id = DeathPenaltyMessageId,
             Text = $"Your Death Penalty is now level {level}.",
             Params = [level.ToString(System.Globalization.CultureInfo.InvariantCulture)]
         });
         // The level is durable: Mobius writes characters.death_penalty_level with the rest of the row on save.
-        _accounts?.TrySaveDeathPenalty(session.Account, session.ObjectId, level);
+        _persist.SaveDeathPenalty(session.Account, session.ObjectId, level);
+    }
+
+    /// <summary>
+    /// Mobius <c>Player.restoreExp</c>: return <c>(expBeforeDeath - exp) * restorePercent / 100</c>, then clear the
+    /// snapshot. Power 0 restores nothing (village revive / empty Resurrection power).
+    /// </summary>
+    void RestoreExpFromDeath(ZoneEntity player, double restorePercent)
+    {
+        if (player.Session == null || player.ExpBeforeDeath <= 0 || restorePercent <= 0d)
+        {
+            player.ExpBeforeDeath = 0;
+            return;
+        }
+
+        long lost = Math.Max(0, player.ExpBeforeDeath - player.Exp);
+        long gained = (long)Math.Round(lost * restorePercent / 100d);
+        player.ExpBeforeDeath = 0;
+        if (gained <= 0)
+            return;
+
+        bool leveled = ApplyExpSp(player, gained, sp: 0);
+        ZoneLog.Info(
+            $"[death] restore object={player.ObjectId} gained={gained} percent={restorePercent:F1} exp={player.Exp}");
+        SendExpStatus(player.Session, player, deleveled: false);
+        if (leveled)
+            SelfUserInfo(player);
+    }
+
+    /// <summary>
+    /// Mobius <c>Formulas.calculateSkillResurrectRestorePercent</c>: WIT bonus lifts the skill power, capped at 90
+    /// (except exact 0 / 100 passthrough).
+    /// </summary>
+    double SkillResurrectRestorePercent(ZoneEntity caster, int skillPower)
+    {
+        double baseRestore = skillPower;
+        if (baseRestore is 0d or 100d)
+            return baseRestore;
+
+        double witBonus = EffectiveAttributes(caster).WitBonus;
+        double restore = baseRestore * witBonus;
+        if ((restore - baseRestore) > 20.0)
+            restore += 20.0;
+        restore = Math.Max(restore, baseRestore);
+        return Math.Min(restore, 90.0);
     }
 
     /// <summary>
@@ -164,18 +210,11 @@ public sealed partial class ZoneWorld
         if (NetBridge == null)
             return;
         int[] self = [player.ObjectId];
-        NetBridge.FanoutStatusUpdate(self, new Fineage.Net.Contract.StatusUpdateNetMsg
-        {
-            EntityValue = (ulong)(uint)status.ObjectId,
-            EntityGeneration = 1,
-            AttributeIds = status.AttributeIds ?? [],
-            Values = status.Values ?? []
-        });
+        NetBridge.FanoutStatusUpdate(self, status);
         var vitals = BuildUserInfoVitals(player);
-        NetBridge.FanoutPlayerStats(self, new Fineage.Net.Contract.PlayerStatsMsg
+        NetBridge.FanoutPlayerStats(self, new Fineage.Protocol.PlayerStatsMsg
         {
-            EntityValue = (ulong)(uint)player.ObjectId,
-            EntityGeneration = 1,
+            ObjectId = player.ObjectId,
             Level = player.Level,
             Exp = player.Exp,
             Sp = player.Sp,

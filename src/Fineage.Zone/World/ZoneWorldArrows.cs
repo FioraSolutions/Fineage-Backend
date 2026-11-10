@@ -60,7 +60,7 @@ public sealed partial class ZoneWorld
         }
         var update = InventoryMessages.Modify([arrow]);
         if (player.Session != null)
-        NetBridge?.FanoutInventoryUpdate([player.ObjectId], ToNetInventoryUpdate(update));
+        NetBridge?.FanoutInventoryUpdate([player.ObjectId], update);
         return arrow;
     }
 
@@ -77,7 +77,7 @@ public sealed partial class ZoneWorld
 
         int left = bag.TakeOne(arrow);
         var update = InventoryMessages.Update(left > 0 ? InventoryChange.Modify : InventoryChange.Remove, arrow);
-        NetBridge?.FanoutInventoryUpdate([player.ObjectId], ToNetInventoryUpdate(update));
+        NetBridge?.FanoutInventoryUpdate([player.ObjectId], update);
         if (left == 0)
         {
             ZoneLog.Info($"bow object={player.ObjectId} arrows exhausted item={arrow.ItemId}");
@@ -89,7 +89,7 @@ public sealed partial class ZoneWorld
     {
         session.AutoAttackTargetId = 0;
         session.ClearApproach();
-        NetBridge?.FanoutSystemMessage([session.ObjectId], new Fineage.Net.Contract.SystemMessageNetMsg
+        NetBridge?.FanoutSystemMessage([session.ObjectId], new SystemMessageMsg
         {
             Id = SysMsgRunOutOfArrows,
             Text = "You have run out of arrows.",

@@ -54,6 +54,12 @@ namespace Fineage.Net.Contract
         public int Level { get; set; }
         /// <summary>Max HP so a client can size the HP bar without waiting for the first StatusUpdate.</summary>
         public int MaxHp { get; set; }
+        /// <summary>Physical attack speed (Mobius P.AtkSpd); drives client attack anim timing. Optional wire tail.</summary>
+        public int PAtkSpd { get; set; }
+        /// <summary>Mobius karma (PK red name). Optional wire tail; 0 for NPCs / old peers.</summary>
+        public int Karma { get; set; }
+        /// <summary>Mobius PvP flag (purple name). 0/1. Optional wire tail.</summary>
+        public byte PvpFlag { get; set; }
     }
 
     public sealed class PlayerStatsMsg
@@ -499,6 +505,12 @@ namespace Fineage.Net.Contract
         public int Count { get; set; }
         public int EnchantLevel { get; set; }
         public int EquippedSlot { get; set; } = -1;
+        /// <summary>Same tokens as <see cref="ItemListEntryNet"/> — client must not re-guess kind/slot from tables.</summary>
+        public string BodySlot { get; set; } = "";
+        public string Kind { get; set; } = "";
+        public string Icon { get; set; } = "";
+        public string WeaponType { get; set; } = "";
+        public string ArmorType { get; set; } = "";
     }
 
     public sealed class InventoryUpdateNetMsg
@@ -574,6 +586,10 @@ namespace Fineage.Net.Contract
     {
         /// <summary>Restart to village. Matches Backend <c>Fineage.Protocol.DeathProtocol.ReviveToVillage</c>.</summary>
         public const int ReviveToVillage = 0;
+        /// <summary>Accept skill resurrection. Matches <c>DeathProtocol.AcceptSkillResurrection</c>.</summary>
+        public const int AcceptSkillResurrection = 1;
+        /// <summary>Decline skill resurrection. Matches <c>DeathProtocol.DeclineSkillResurrection</c>.</summary>
+        public const int DeclineSkillResurrection = 2;
 
         public int Action { get; set; }
     }
@@ -597,6 +613,8 @@ namespace Fineage.Net.Contract
         public int Id { get; set; }
         public int Value { get; set; }
         public int DurationSeconds { get; set; }
+        /// <summary>Mobius <c>abnormalType</c> slot (SLEEP, STUN, PARALYZE, …).</summary>
+        public string Slot { get; set; } = "";
     }
 
     public sealed class AbnormalStatusUpdateNetMsg
@@ -1135,6 +1153,14 @@ namespace Fineage.Net.Contract
         public int WeaponGradePenalty { get; set; }
         public int ArmorGradePenalty { get; set; }
         public int ClanId { get; set; }
+        /// <summary>Mobius currentLoad — inventory weight for the status/inventory gauges.</summary>
+        public int CurrentWeight { get; set; }
+        /// <summary>Mobius getMaxLoad — CON-derived carry limit.</summary>
+        public int MaxWeight { get; set; }
         public PaperdollSlotNet[] Paperdoll { get; set; } = System.Array.Empty<PaperdollSlotNet>();
+        /// <summary>Mobius karma — PK name colour. Optional wire tail.</summary>
+        public int Karma { get; set; }
+        /// <summary>Mobius PvP flag — purple name while flagged. Optional wire tail.</summary>
+        public byte PvpFlag { get; set; }
     }
 }

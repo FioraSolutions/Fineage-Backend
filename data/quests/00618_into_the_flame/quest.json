@@ -1,0 +1,119 @@
+{
+  "id": 618,
+  "name": "Into The Flame",
+  "repeatable": true,
+  "abortable": true,
+  "questItems": [
+    7265,
+    7266
+  ],
+  "dialogs": [
+    {
+      "npcId": 31540,
+      "hook": "talk",
+      "when": "absent",
+      "maxLevel": 59,
+      "htmlFile": "31540-talk-000.htm"
+    },
+    {
+      "npcId": 31540,
+      "hook": "talk",
+      "when": "absent",
+      "minLevel": 60,
+      "htmlFile": "31540-talk-001.htm"
+    },
+    {
+      "npcId": 31271,
+      "hook": "talk",
+      "when": "started",
+      "cond": 1,
+      "htmlFile": "31271-talk-c1-002.htm"
+    },
+    {
+      "npcId": 31271,
+      "hook": "talk",
+      "when": "started",
+      "cond": 2,
+      "htmlFile": "31271-talk-c2-003.htm"
+    },
+    {
+      "npcId": 31271,
+      "hook": "talk",
+      "when": "started",
+      "cond": 3,
+      "htmlFile": "31271-talk-c3-004.htm"
+    },
+    {
+      "npcId": 31271,
+      "hook": "talk",
+      "when": "started",
+      "cond": 4,
+      "htmlFile": "31271-talk-c4-005.htm"
+    },
+    {
+      "npcId": 31540,
+      "hook": "event",
+      "when": "absent",
+      "event": "31540-03",
+      "ops": [
+        {
+          "op": "create"
+        },
+        {
+          "op": "start"
+        },
+        {
+          "op": "set_cond",
+          "cond": 1
+        }
+      ],
+      "htmlFile": "31540-event-31540-03-006.htm"
+    },
+    {
+      "npcId": 31540,
+      "hook": "event",
+      "when": "absent",
+      "event": "31540-05",
+      "lacksItems": [
+        7266
+      ],
+      "htmlFile": "31540-event-31540-05-007.htm"
+    },
+    {
+      "npcId": 31540,
+      "hook": "event",
+      "when": "absent",
+      "event": "31271-02",
+      "ops": [
+        {
+          "op": "set_cond",
+          "cond": 2
+        }
+      ],
+      "htmlFile": "31540-event-31271-02-008.htm"
+    },
+    {
+      "npcId": 31540,
+      "hook": "event",
+      "when": "absent",
+      "event": "31271-05",
+      "ops": [
+        {
+          "op": "take_item",
+          "itemId": 7265,
+          "count": 1
+        },
+        {
+          "op": "give_item",
+          "itemId": 7266,
+          "count": 1
+        },
+        {
+          "op": "set_cond",
+          "cond": 4
+        }
+      ],
+      "htmlFile": "31540-event-31271-05-009.htm"
+    }
+  ]
+}

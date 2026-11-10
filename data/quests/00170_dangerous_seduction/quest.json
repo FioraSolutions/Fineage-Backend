@@ -1,0 +1,112 @@
+{
+  "id": 170,
+  "name": "Dangerous Seduction",
+  "repeatable": false,
+  "abortable": true,
+  "questItems": [
+    1046
+  ],
+  "dialogs": [
+    {
+      "npcId": 30305,
+      "hook": "talk",
+      "when": "absent",
+      "races": [
+        0,
+        1,
+        3,
+        4
+      ],
+      "htmlFile": "30305-talk-000.htm"
+    },
+    {
+      "npcId": 30305,
+      "hook": "talk",
+      "when": "absent",
+      "races": [
+        2
+      ],
+      "maxLevel": 20,
+      "htmlFile": "30305-talk-001.htm"
+    },
+    {
+      "npcId": 30305,
+      "hook": "talk",
+      "when": "absent",
+      "races": [
+        2
+      ],
+      "minLevel": 21,
+      "htmlFile": "30305-talk-002.htm"
+    },
+    {
+      "npcId": 30305,
+      "hook": "event",
+      "when": "absent",
+      "event": "30305-04",
+      "races": [
+        2
+      ],
+      "minLevel": 21,
+      "ops": [
+        {
+          "op": "create"
+        },
+        {
+          "op": "start"
+        },
+        {
+          "op": "set_cond",
+          "cond": 1
+        }
+      ],
+      "htmlFile": "30305-event-30305-04-003.htm"
+    },
+    {
+      "npcId": 30305,
+      "hook": "talk",
+      "when": "started",
+      "cond": 1,
+      "htmlFile": "30305-talk-c1-004.htm"
+    },
+    {
+      "npcId": 30305,
+      "hook": "talk",
+      "when": "started",
+      "cond": 2,
+      "ops": [
+        {
+          "op": "give_adena",
+          "count": 102680
+        },
+        {
+          "op": "give_exp_sp",
+          "exp": 38607,
+          "sp": 4018
+        },
+        {
+          "op": "complete"
+        }
+      ],
+      "htmlFile": "30305-talk-c2-005.htm"
+    },
+    {
+      "npcId": 27022,
+      "hook": "kill",
+      "when": "started",
+      "cond": 1,
+      "html": "",
+      "ops": [
+        {
+          "op": "give_item",
+          "itemId": 1046,
+          "count": 1
+        },
+        {
+          "op": "set_cond",
+          "cond": 2
+        }
+      ]
+    }
+  ]
+}

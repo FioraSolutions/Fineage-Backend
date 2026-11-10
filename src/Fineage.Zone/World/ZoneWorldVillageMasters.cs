@@ -148,7 +148,7 @@ public sealed partial class ZoneWorld
         {
             Changes = touches.Select(touch => InventoryMessages.ChangeRow((int)touch.Kind, touch.Item)).ToArray()
         };
-        NetBridge?.FanoutInventoryUpdate([session.ObjectId], ToNetInventoryUpdate(invUpdate));
+        NetBridge?.FanoutInventoryUpdate([session.ObjectId], invUpdate);
 
         Notice(session, ClassTransferMessageId, "Congratulations. You have completed the class transfer.");
         NetBridge?.FanoutSkillList([player.ObjectId], Fineage.Zone.Net.NetEnterWorldProjector.BuildSkills(player, _clock().ToUnixTimeMilliseconds()));
@@ -165,7 +165,7 @@ public sealed partial class ZoneWorld
         if (netPeers != null)
             NetBridge?.FanoutCharInfo(netPeers, player.ObjectId);
 
-        _accounts?.TrySaveClass(session.Account, session.ObjectId, change.ClassId);
+        _persist.SaveClass(session.Account, session.ObjectId, change.ClassId);
         SaveInventory(session, inventory);
         SaveQuestProgress(session, player);
         ZoneLog.Info($"class-change object={session.ObjectId} {previous}->{change.ClassId} " +

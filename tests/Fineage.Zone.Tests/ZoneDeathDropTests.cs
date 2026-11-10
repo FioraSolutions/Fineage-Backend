@@ -37,7 +37,7 @@ public sealed class ZoneDeathDropTests
         // Keep Level/Exp in sync — death exp loss re-derives Level from Exp, and drops need level > 4.
         player.Level = 10;
         player.Exp = kit.Game.Classes!.Experience.ExpToBeLevel(10);
-        Assert.Null(await kit.World.TryGiveItemAsync(session, new GiveItemMsg { ItemId = 1864, Count = 2 }, default));
+        Assert.Null(await kit.World.TryGiveItemAsync(session, 1864, 2, default));
         long before = player.Inventory!.CountOf(1864);
         Assert.True(before >= 2);
 
@@ -67,7 +67,7 @@ public sealed class ZoneDeathDropTests
         var mob = kit.World.AttackableForTest()!;
         var (session, player) = await kit.EnterAsync(classId: 54, race: 4, x: mob.X + 10, y: mob.Y, z: mob.Z);
         player.Level = 4;
-        Assert.Null(await kit.World.TryGiveItemAsync(session, new GiveItemMsg { ItemId = 1864, Count = 1 }, default));
+        Assert.Null(await kit.World.TryGiveItemAsync(session, 1864, 1, default));
         long before = player.Inventory!.CountOf(1864);
         kit.World.KillPlayerByNpcForTest(player, mob);
         Assert.Equal(before, player.Inventory.CountOf(1864));

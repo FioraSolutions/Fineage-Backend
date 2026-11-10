@@ -1,6 +1,7 @@
 using Fineage.Login;
 using Fineage.Protocol;
 using Xunit;
+using Fineage.Accounts;
 
 namespace Fineage.Login.Tests;
 
@@ -55,6 +56,29 @@ public class ClanStoreTests
         Assert.False(memberDelete.Ok);
         Assert.Contains("member", memberDelete.Message, StringComparison.OrdinalIgnoreCase);
         Assert.False(reloaded.TryHardDelete("member", member.Id));
+    }
+
+    [Fact]
+    public void Clan_skills_round_trip_through_the_persisted_snapshot()
+    {
+        var store = MemoryAccountStore.InMemory();
+        Assert.Equal(AddAccountStatus.Created, store.TryAddAccount("leader", "h", "s", 1, null));
+        Assert.Equal(CreateCharacterStatus.Ok, store.TryAddCharacter(
+            "leader", "Leader", 0, 0, 0, out var leader, level: 10));
+        var saved = store.InsertClan(new ClanRecord(
+            0, "Fine", 0, leader!.Id, ClanProtocol.CrestId, 0, 0,
+            [new ClanMemberRecord(leader.Id, "leader", "Leader", 0, 10, 0)],
+            Skills: new Dictionary<int, int> { [376] = 3, [377] = 1 }),
+            new CharacterClanState("leader", leader.Id, 0, 0, 0));
+        Assert.NotNull(saved);
+        Assert.NotNull(saved!.Skills);
+        Assert.Equal(3, saved.Skills![376]);
+
+        var reloaded = MemoryAccountStore.FromSnapshot(store.ExportSnapshot());
+        var clan = Assert.Single(reloaded.ListClans());
+        Assert.NotNull(clan.Skills);
+        Assert.Equal(3, clan.Skills![376]);
+        Assert.Equal(1, clan.Skills[377]);
     }
 
     [Fact]

@@ -1,3 +1,4 @@
+using Fineage.Game;
 using Fineage.Protocol;
 using Fineage.Zone.Combat;
 using Fineage.Zone.Net;
@@ -81,8 +82,8 @@ public sealed class ZoneRunSpeedTests
         Assert.Equal(baseWalk, player.WalkSpeed, 3);
 
         rec.Calls.Clear();
-        Assert.Null(await kit.World.TryBuffRequestAsync(session, new BuffRequestMsg { EffectId = 1204 }, CancellationToken.None));
-        var moves = rec.Of(nameof(INetPresenceBridge.FanoutChangeMoveType));
+        Assert.Null(await kit.World.TryBuffRequestAsync(session, 0, 1204, false, CancellationToken.None));
+        var moves = rec.Of(nameof(IWorldEventPublisher.FanoutChangeMoveType));
         // ChangeMoveType carries both gaits: the client animates walk speed from the same packet.
         Assert.Contains(moves, m => (int)m[1]! == player.ObjectId
             && (float)m[3]! == baseRun + 20f && (float)m[4]! == baseWalk + 20f);
@@ -247,15 +248,11 @@ public sealed class ZoneRunSpeedTests
         float baseRun = player.BaseRunSpeed * ElfDexBonus;
         int destX = player.X + 600;
 
-        Assert.Null(await kit.World.TryMoveAsync(session, new MoveToMsg
-        {
-            ObjectId = player.ObjectId, DestX = destX, DestY = player.Y, DestZ = player.Z,
-            OriginX = player.X, OriginY = player.Y, OriginZ = player.Z
-        }, CancellationToken.None));
+        Assert.Null(await kit.World.TryMoveAsync(session, destX, player.Y, player.Z, CancellationToken.None));
         Assert.True(player.MoveActive);
 
         // Same tick budget: the buffed pawn covers more ground (applied through the real buff path).
-        Assert.Null(await kit.World.TryBuffRequestAsync(session, new BuffRequestMsg { EffectId = 1204 }, CancellationToken.None));
+        Assert.Null(await kit.World.TryBuffRequestAsync(session, 0, 1204, false, CancellationToken.None));
         player.Abnormals.Clear();
         ZoneAbnormals.Apply(player.Abnormals, 1204, 2, 1200, kit.Now.ToUnixTimeMilliseconds(), 2); // +33
         kit.World.RefreshRunSpeed(player);

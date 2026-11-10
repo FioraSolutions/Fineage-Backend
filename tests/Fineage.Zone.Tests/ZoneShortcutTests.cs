@@ -1,4 +1,5 @@
 using Fineage.Game;
+using Fineage.Accounts;
 using Fineage.Login;
 using Fineage.Zone.World;
 using Xunit;
@@ -93,6 +94,28 @@ public sealed class ZoneShortcutTests
         var (world2, session2, _) = await Enter(store, id, "bar", "Hotbar");
         Assert.Empty(world2.NetShortcutInit(session2).Shortcuts);
         Assert.Empty(store.FindById("bar", id)!.Shortcuts!);
+    }
+
+    [Fact]
+    public async Task Soulshot_item_shortcut_rebinds_after_stack_object_id_churn()
+    {
+        const int soulshot = 1835;
+        var (store, id) = NewCharacter();
+        var (world, session, player) = await Enter(store, id, "bar", "Hotbar");
+        var stack = player.Inventory!.Add(soulshot, 100);
+        Assert.Null(world.RegisterShortcut(session, StoredShortcut.TypeItem, 0, stack.ObjectId, 0).Error);
+        var saved = Assert.Single(store.FindById("bar", id)!.Shortcuts!);
+        Assert.Equal(soulshot, saved.Level); // itemId persisted for remap
+        player.Inventory.Remove(stack); // empties the stack → new objectId on restock
+        var restocked = player.Inventory.Add(soulshot, 50);
+        Assert.NotEqual(stack.ObjectId, restocked.ObjectId);
+        await world.LeaveAsync(session, CancellationToken.None);
+
+        var (world2, session2, _) = await Enter(store, id, "bar", "Hotbar");
+        var init = Assert.Single(world2.NetShortcutInit(session2).Shortcuts);
+        Assert.Equal(StoredShortcut.TypeItem, init.Type);
+        Assert.Equal(restocked.ObjectId, init.Id);
+        Assert.Equal(soulshot, init.Level);
     }
 
     [Fact]

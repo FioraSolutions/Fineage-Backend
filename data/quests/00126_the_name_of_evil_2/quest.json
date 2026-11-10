@@ -1,0 +1,1115 @@
+{
+  "id": 126,
+  "name": "The Name of Evil - 2",
+  "repeatable": false,
+  "abortable": true,
+  "questItems": [
+    8782,
+    8783
+  ],
+  "dialogs": [
+    {
+      "npcId": 32115,
+      "hook": "talk",
+      "when": "absent",
+      "maxLevel": 76,
+      "htmlFile": "32115-talk-000.htm"
+    },
+    {
+      "npcId": 32115,
+      "hook": "talk",
+      "when": "started",
+      "cond": 1,
+      "htmlFile": "32115-talk-c1-001.htm"
+    },
+    {
+      "npcId": 32115,
+      "hook": "talk",
+      "when": "started",
+      "cond": 2,
+      "htmlFile": "32115-talk-c2-002.htm"
+    },
+    {
+      "npcId": 32115,
+      "hook": "talk",
+      "when": "started",
+      "cond": 3,
+      "htmlFile": "32115-talk-c3-003.htm"
+    },
+    {
+      "npcId": 32115,
+      "hook": "talk",
+      "when": "started",
+      "cond": 4,
+      "htmlFile": "32115-talk-c4-004.htm"
+    },
+    {
+      "npcId": 32115,
+      "hook": "talk",
+      "when": "started",
+      "cond": 5,
+      "htmlFile": "32115-talk-c5-005.htm"
+    },
+    {
+      "npcId": 32115,
+      "hook": "talk",
+      "when": "started",
+      "cond": 6,
+      "htmlFile": "32115-talk-c6-006.htm"
+    },
+    {
+      "npcId": 32115,
+      "hook": "talk",
+      "when": "started",
+      "cond": 7,
+      "htmlFile": "32115-talk-c7-007.htm"
+    },
+    {
+      "npcId": 32115,
+      "hook": "talk",
+      "when": "started",
+      "cond": 8,
+      "htmlFile": "32115-talk-c8-008.htm"
+    },
+    {
+      "npcId": 32115,
+      "hook": "talk",
+      "when": "started",
+      "cond": 9,
+      "htmlFile": "32115-talk-c9-009.htm"
+    },
+    {
+      "npcId": 32115,
+      "hook": "talk",
+      "when": "started",
+      "cond": 10,
+      "htmlFile": "32115-talk-c10-010.htm"
+    },
+    {
+      "npcId": 32115,
+      "hook": "talk",
+      "when": "started",
+      "cond": 11,
+      "htmlFile": "32115-talk-c11-011.htm"
+    },
+    {
+      "npcId": 32115,
+      "hook": "talk",
+      "when": "started",
+      "cond": 12,
+      "htmlFile": "32115-talk-c12-012.htm"
+    },
+    {
+      "npcId": 32115,
+      "hook": "talk",
+      "when": "started",
+      "cond": 13,
+      "htmlFile": "32115-talk-c13-013.htm"
+    },
+    {
+      "npcId": 32115,
+      "hook": "talk",
+      "when": "started",
+      "cond": 14,
+      "htmlFile": "32115-talk-c14-014.htm"
+    },
+    {
+      "npcId": 32115,
+      "hook": "talk",
+      "when": "started",
+      "cond": 15,
+      "htmlFile": "32115-talk-c15-015.htm"
+    },
+    {
+      "npcId": 32115,
+      "hook": "talk",
+      "when": "started",
+      "cond": 16,
+      "htmlFile": "32115-talk-c16-016.htm"
+    },
+    {
+      "npcId": 32115,
+      "hook": "talk",
+      "when": "started",
+      "cond": 17,
+      "htmlFile": "32115-talk-c17-017.htm"
+    },
+    {
+      "npcId": 32115,
+      "hook": "talk",
+      "when": "started",
+      "cond": 18,
+      "htmlFile": "32115-talk-c18-018.htm"
+    },
+    {
+      "npcId": 32115,
+      "hook": "talk",
+      "when": "started",
+      "cond": 19,
+      "htmlFile": "32115-talk-c19-019.htm"
+    },
+    {
+      "npcId": 32115,
+      "hook": "talk",
+      "when": "started",
+      "cond": 20,
+      "htmlFile": "32115-talk-c20-020.htm"
+    },
+    {
+      "npcId": 32115,
+      "hook": "talk",
+      "when": "started",
+      "cond": 21,
+      "htmlFile": "32115-talk-c21-021.htm"
+    },
+    {
+      "npcId": 32115,
+      "hook": "talk",
+      "when": "started",
+      "cond": 22,
+      "htmlFile": "32115-talk-c22-022.htm"
+    },
+    {
+      "npcId": 32119,
+      "hook": "talk",
+      "when": "started",
+      "cond": 1,
+      "htmlFile": "32119-talk-c1-023.htm"
+    },
+    {
+      "npcId": 32119,
+      "hook": "talk",
+      "when": "started",
+      "cond": 2,
+      "htmlFile": "32119-talk-c2-024.htm"
+    },
+    {
+      "npcId": 32119,
+      "hook": "talk",
+      "when": "started",
+      "cond": 3,
+      "htmlFile": "32119-talk-c3-025.htm"
+    },
+    {
+      "npcId": 32119,
+      "hook": "talk",
+      "when": "started",
+      "cond": 4,
+      "htmlFile": "32119-talk-c4-026.htm"
+    },
+    {
+      "npcId": 32119,
+      "hook": "talk",
+      "when": "started",
+      "cond": 5,
+      "htmlFile": "32119-talk-c5-027.htm"
+    },
+    {
+      "npcId": 32120,
+      "hook": "talk",
+      "when": "started",
+      "cond": 1,
+      "htmlFile": "32120-talk-c1-028.htm"
+    },
+    {
+      "npcId": 32120,
+      "hook": "talk",
+      "when": "started",
+      "cond": 2,
+      "htmlFile": "32120-talk-c2-029.htm"
+    },
+    {
+      "npcId": 32120,
+      "hook": "talk",
+      "when": "started",
+      "cond": 3,
+      "htmlFile": "32120-talk-c3-030.htm"
+    },
+    {
+      "npcId": 32120,
+      "hook": "talk",
+      "when": "started",
+      "cond": 4,
+      "htmlFile": "32120-talk-c4-031.htm"
+    },
+    {
+      "npcId": 32120,
+      "hook": "talk",
+      "when": "started",
+      "cond": 5,
+      "htmlFile": "32120-talk-c5-032.htm"
+    },
+    {
+      "npcId": 32120,
+      "hook": "talk",
+      "when": "started",
+      "cond": 6,
+      "htmlFile": "32120-talk-c6-033.htm"
+    },
+    {
+      "npcId": 32120,
+      "hook": "talk",
+      "when": "started",
+      "cond": 7,
+      "htmlFile": "32120-talk-c7-034.htm"
+    },
+    {
+      "npcId": 32121,
+      "hook": "talk",
+      "when": "started",
+      "cond": 1,
+      "htmlFile": "32121-talk-c1-035.htm"
+    },
+    {
+      "npcId": 32121,
+      "hook": "talk",
+      "when": "started",
+      "cond": 2,
+      "htmlFile": "32121-talk-c2-036.htm"
+    },
+    {
+      "npcId": 32121,
+      "hook": "talk",
+      "when": "started",
+      "cond": 3,
+      "htmlFile": "32121-talk-c3-037.htm"
+    },
+    {
+      "npcId": 32121,
+      "hook": "talk",
+      "when": "started",
+      "cond": 4,
+      "htmlFile": "32121-talk-c4-038.htm"
+    },
+    {
+      "npcId": 32121,
+      "hook": "talk",
+      "when": "started",
+      "cond": 5,
+      "htmlFile": "32121-talk-c5-039.htm"
+    },
+    {
+      "npcId": 32121,
+      "hook": "talk",
+      "when": "started",
+      "cond": 6,
+      "htmlFile": "32121-talk-c6-040.htm"
+    },
+    {
+      "npcId": 32121,
+      "hook": "talk",
+      "when": "started",
+      "cond": 7,
+      "htmlFile": "32121-talk-c7-041.htm"
+    },
+    {
+      "npcId": 32121,
+      "hook": "talk",
+      "when": "started",
+      "cond": 8,
+      "htmlFile": "32121-talk-c8-042.htm"
+    },
+    {
+      "npcId": 32121,
+      "hook": "talk",
+      "when": "started",
+      "cond": 9,
+      "htmlFile": "32121-talk-c9-043.htm"
+    },
+    {
+      "npcId": 32121,
+      "hook": "talk",
+      "when": "started",
+      "cond": 10,
+      "htmlFile": "32121-talk-c10-044.htm"
+    },
+    {
+      "npcId": 32122,
+      "hook": "talk",
+      "when": "started",
+      "cond": 1,
+      "htmlFile": "32122-talk-c1-045.htm"
+    },
+    {
+      "npcId": 32122,
+      "hook": "talk",
+      "when": "started",
+      "cond": 2,
+      "htmlFile": "32122-talk-c2-046.htm"
+    },
+    {
+      "npcId": 32122,
+      "hook": "talk",
+      "when": "started",
+      "cond": 3,
+      "htmlFile": "32122-talk-c3-047.htm"
+    },
+    {
+      "npcId": 32122,
+      "hook": "talk",
+      "when": "started",
+      "cond": 4,
+      "htmlFile": "32122-talk-c4-048.htm"
+    },
+    {
+      "npcId": 32122,
+      "hook": "talk",
+      "when": "started",
+      "cond": 5,
+      "htmlFile": "32122-talk-c5-049.htm"
+    },
+    {
+      "npcId": 32122,
+      "hook": "talk",
+      "when": "started",
+      "cond": 6,
+      "htmlFile": "32122-talk-c6-050.htm"
+    },
+    {
+      "npcId": 32122,
+      "hook": "talk",
+      "when": "started",
+      "cond": 7,
+      "htmlFile": "32122-talk-c7-051.htm"
+    },
+    {
+      "npcId": 32122,
+      "hook": "talk",
+      "when": "started",
+      "cond": 8,
+      "htmlFile": "32122-talk-c8-052.htm"
+    },
+    {
+      "npcId": 32122,
+      "hook": "talk",
+      "when": "started",
+      "cond": 9,
+      "htmlFile": "32122-talk-c9-053.htm"
+    },
+    {
+      "npcId": 32122,
+      "hook": "talk",
+      "when": "started",
+      "cond": 10,
+      "htmlFile": "32122-talk-c10-054.htm"
+    },
+    {
+      "npcId": 32122,
+      "hook": "talk",
+      "when": "started",
+      "cond": 11,
+      "ops": [
+        {
+          "op": "set_cond",
+          "cond": 12
+        }
+      ],
+      "htmlFile": "32122-talk-c11-055.htm"
+    },
+    {
+      "npcId": 32122,
+      "hook": "talk",
+      "when": "started",
+      "cond": 12,
+      "htmlFile": "32122-talk-c12-056.htm"
+    },
+    {
+      "npcId": 32122,
+      "hook": "talk",
+      "when": "started",
+      "cond": 13,
+      "htmlFile": "32122-talk-c13-057.htm"
+    },
+    {
+      "npcId": 32122,
+      "hook": "talk",
+      "when": "started",
+      "cond": 14,
+      "htmlFile": "32122-talk-c14-058.htm"
+    },
+    {
+      "npcId": 32122,
+      "hook": "talk",
+      "when": "started",
+      "cond": 15,
+      "htmlFile": "32122-talk-c15-059.htm"
+    },
+    {
+      "npcId": 32122,
+      "hook": "talk",
+      "when": "started",
+      "cond": 16,
+      "htmlFile": "32122-talk-c16-060.htm"
+    },
+    {
+      "npcId": 32122,
+      "hook": "talk",
+      "when": "started",
+      "cond": 18,
+      "htmlFile": "32122-talk-c18-061.htm"
+    },
+    {
+      "npcId": 32109,
+      "hook": "talk",
+      "when": "started",
+      "cond": 1,
+      "htmlFile": "32109-talk-c1-062.htm"
+    },
+    {
+      "npcId": 32109,
+      "hook": "talk",
+      "when": "started",
+      "cond": 2,
+      "htmlFile": "32109-talk-c2-063.htm"
+    },
+    {
+      "npcId": 32109,
+      "hook": "talk",
+      "when": "started",
+      "cond": 3,
+      "htmlFile": "32109-talk-c3-064.htm"
+    },
+    {
+      "npcId": 32109,
+      "hook": "talk",
+      "when": "started",
+      "cond": 4,
+      "htmlFile": "32109-talk-c4-065.htm"
+    },
+    {
+      "npcId": 32109,
+      "hook": "talk",
+      "when": "started",
+      "cond": 5,
+      "htmlFile": "32109-talk-c5-066.htm"
+    },
+    {
+      "npcId": 32109,
+      "hook": "talk",
+      "when": "started",
+      "cond": 6,
+      "htmlFile": "32109-talk-c6-067.htm"
+    },
+    {
+      "npcId": 32109,
+      "hook": "talk",
+      "when": "started",
+      "cond": 7,
+      "htmlFile": "32109-talk-c7-068.htm"
+    },
+    {
+      "npcId": 32109,
+      "hook": "talk",
+      "when": "started",
+      "cond": 8,
+      "htmlFile": "32109-talk-c8-069.htm"
+    },
+    {
+      "npcId": 32109,
+      "hook": "talk",
+      "when": "started",
+      "cond": 9,
+      "htmlFile": "32109-talk-c9-070.htm"
+    },
+    {
+      "npcId": 32109,
+      "hook": "talk",
+      "when": "started",
+      "cond": 10,
+      "htmlFile": "32109-talk-c10-071.htm"
+    },
+    {
+      "npcId": 32109,
+      "hook": "talk",
+      "when": "started",
+      "cond": 11,
+      "htmlFile": "32109-talk-c11-072.htm"
+    },
+    {
+      "npcId": 32109,
+      "hook": "talk",
+      "when": "started",
+      "cond": 12,
+      "htmlFile": "32109-talk-c12-073.htm"
+    },
+    {
+      "npcId": 32109,
+      "hook": "talk",
+      "when": "started",
+      "cond": 13,
+      "htmlFile": "32109-talk-c13-074.htm"
+    },
+    {
+      "npcId": 32109,
+      "hook": "talk",
+      "when": "started",
+      "cond": 14,
+      "htmlFile": "32109-talk-c14-075.htm"
+    },
+    {
+      "npcId": 32109,
+      "hook": "talk",
+      "when": "started",
+      "cond": 15,
+      "htmlFile": "32109-talk-c15-076.htm"
+    },
+    {
+      "npcId": 32109,
+      "hook": "talk",
+      "when": "started",
+      "cond": 16,
+      "htmlFile": "32109-talk-c16-077.htm"
+    },
+    {
+      "npcId": 32109,
+      "hook": "talk",
+      "when": "started",
+      "cond": 17,
+      "htmlFile": "32109-talk-c17-078.htm"
+    },
+    {
+      "npcId": 32109,
+      "hook": "talk",
+      "when": "started",
+      "cond": 18,
+      "hasItem": 8783,
+      "htmlFile": "32109-talk-c18-079.htm"
+    },
+    {
+      "npcId": 32109,
+      "hook": "talk",
+      "when": "started",
+      "cond": 19,
+      "htmlFile": "32109-talk-c19-080.htm"
+    },
+    {
+      "npcId": 32109,
+      "hook": "talk",
+      "when": "started",
+      "cond": 20,
+      "htmlFile": "32109-talk-c20-081.htm"
+    },
+    {
+      "npcId": 32114,
+      "hook": "talk",
+      "when": "absent",
+      "htmlFile": "32114-talk-082.htm"
+    },
+    {
+      "npcId": 32114,
+      "hook": "talk",
+      "when": "absent",
+      "htmlFile": "32114-talk-083.htm"
+    },
+    {
+      "npcId": 32115,
+      "hook": "event",
+      "when": "absent",
+      "event": "32115-1",
+      "ops": [
+        {
+          "op": "create"
+        },
+        {
+          "op": "start"
+        },
+        {
+          "op": "set_cond",
+          "cond": 1
+        }
+      ],
+      "htmlFile": "32115-event-32115-1-084.htm"
+    },
+    {
+      "npcId": 32115,
+      "hook": "event",
+      "when": "absent",
+      "event": "32115-1b",
+      "ops": [
+        {
+          "op": "set_cond",
+          "cond": 2
+        }
+      ],
+      "htmlFile": "32115-event-32115-1b-085.htm"
+    },
+    {
+      "npcId": 32115,
+      "hook": "event",
+      "when": "absent",
+      "event": "32119-3",
+      "ops": [
+        {
+          "op": "set_cond",
+          "cond": 3
+        }
+      ],
+      "htmlFile": "32115-event-32119-3-086.htm"
+    },
+    {
+      "npcId": 32115,
+      "hook": "event",
+      "when": "absent",
+      "event": "32119-4",
+      "ops": [
+        {
+          "op": "set_cond",
+          "cond": 4
+        }
+      ],
+      "htmlFile": "32115-event-32119-4-087.htm"
+    },
+    {
+      "npcId": 32115,
+      "hook": "event",
+      "when": "absent",
+      "event": "32119-4a",
+      "htmlFile": "32115-event-32119-4a-088.htm"
+    },
+    {
+      "npcId": 32115,
+      "hook": "event",
+      "when": "absent",
+      "event": "32119-5b",
+      "htmlFile": "32115-event-32119-5b-089.htm"
+    },
+    {
+      "npcId": 32115,
+      "hook": "event",
+      "when": "absent",
+      "event": "32119-5",
+      "ops": [
+        {
+          "op": "set_cond",
+          "cond": 5
+        }
+      ],
+      "htmlFile": "32115-event-32119-5-090.htm"
+    },
+    {
+      "npcId": 32115,
+      "hook": "event",
+      "when": "absent",
+      "event": "32120-3",
+      "ops": [
+        {
+          "op": "set_cond",
+          "cond": 6
+        }
+      ],
+      "htmlFile": "32115-event-32120-3-091.htm"
+    },
+    {
+      "npcId": 32115,
+      "hook": "event",
+      "when": "absent",
+      "event": "32120-4",
+      "ops": [
+        {
+          "op": "set_cond",
+          "cond": 7
+        }
+      ],
+      "htmlFile": "32115-event-32120-4-092.htm"
+    },
+    {
+      "npcId": 32115,
+      "hook": "event",
+      "when": "absent",
+      "event": "32120-4a",
+      "htmlFile": "32115-event-32120-4a-093.htm"
+    },
+    {
+      "npcId": 32115,
+      "hook": "event",
+      "when": "absent",
+      "event": "32120-5b",
+      "htmlFile": "32115-event-32120-5b-094.htm"
+    },
+    {
+      "npcId": 32115,
+      "hook": "event",
+      "when": "absent",
+      "event": "32120-5",
+      "ops": [
+        {
+          "op": "set_cond",
+          "cond": 8
+        }
+      ],
+      "htmlFile": "32115-event-32120-5-095.htm"
+    },
+    {
+      "npcId": 32115,
+      "hook": "event",
+      "when": "absent",
+      "event": "32121-3",
+      "ops": [
+        {
+          "op": "set_cond",
+          "cond": 9
+        }
+      ],
+      "htmlFile": "32115-event-32121-3-096.htm"
+    },
+    {
+      "npcId": 32115,
+      "hook": "event",
+      "when": "absent",
+      "event": "32121-4",
+      "ops": [
+        {
+          "op": "set_cond",
+          "cond": 10
+        }
+      ],
+      "htmlFile": "32115-event-32121-4-097.htm"
+    },
+    {
+      "npcId": 32115,
+      "hook": "event",
+      "when": "absent",
+      "event": "32121-4a",
+      "htmlFile": "32115-event-32121-4a-098.htm"
+    },
+    {
+      "npcId": 32115,
+      "hook": "event",
+      "when": "absent",
+      "event": "32121-5b",
+      "htmlFile": "32115-event-32121-5b-099.htm"
+    },
+    {
+      "npcId": 32115,
+      "hook": "event",
+      "when": "absent",
+      "event": "32121-5",
+      "ops": [
+        {
+          "op": "give_item",
+          "itemId": 8782,
+          "count": 1
+        },
+        {
+          "op": "set_cond",
+          "cond": 11
+        }
+      ],
+      "htmlFile": "32115-event-32121-5-100.htm"
+    },
+    {
+      "npcId": 32115,
+      "hook": "event",
+      "when": "absent",
+      "event": "32122-2a",
+      "htmlFile": "32115-event-32122-2a-101.htm"
+    },
+    {
+      "npcId": 32115,
+      "hook": "event",
+      "when": "absent",
+      "event": "32122-2d",
+      "ops": [
+        {
+          "op": "take_item",
+          "itemId": 8782,
+          "count": 1
+        }
+      ],
+      "htmlFile": "32115-event-32122-2d-102.htm"
+    },
+    {
+      "npcId": 32115,
+      "hook": "event",
+      "when": "absent",
+      "event": "32122-3",
+      "ops": [
+        {
+          "op": "set_cond",
+          "cond": 13
+        }
+      ],
+      "htmlFile": "32115-event-32122-3-103.htm"
+    },
+    {
+      "npcId": 32115,
+      "hook": "event",
+      "when": "absent",
+      "event": "32122-4",
+      "ops": [
+        {
+          "op": "set_cond",
+          "cond": 14
+        }
+      ],
+      "htmlFile": "32115-event-32122-4-104.htm"
+    },
+    {
+      "npcId": 32115,
+      "hook": "event",
+      "when": "absent",
+      "event": "DO_One",
+      "htmlFile": "32115-event-DO_One-105.htm"
+    },
+    {
+      "npcId": 32115,
+      "hook": "event",
+      "when": "absent",
+      "event": "MI_One",
+      "htmlFile": "32115-event-MI_One-106.htm"
+    },
+    {
+      "npcId": 32115,
+      "hook": "event",
+      "when": "absent",
+      "event": "FA_One",
+      "htmlFile": "32115-event-FA_One-107.htm"
+    },
+    {
+      "npcId": 32115,
+      "hook": "event",
+      "when": "absent",
+      "event": "SOL_One",
+      "htmlFile": "32115-event-SOL_One-108.htm"
+    },
+    {
+      "npcId": 32115,
+      "hook": "event",
+      "when": "absent",
+      "event": "FA2_One",
+      "ops": [
+        {
+          "op": "set_cond",
+          "cond": 15
+        }
+      ],
+      "htmlFile": "32115-event-FA2_One-109.htm"
+    },
+    {
+      "npcId": 32115,
+      "hook": "event",
+      "when": "absent",
+      "event": "32122-4m",
+      "htmlFile": "32115-event-32122-4m-110.htm"
+    },
+    {
+      "npcId": 32115,
+      "hook": "event",
+      "when": "absent",
+      "event": "FA_Two",
+      "htmlFile": "32115-event-FA_Two-111.htm"
+    },
+    {
+      "npcId": 32115,
+      "hook": "event",
+      "when": "absent",
+      "event": "SOL_Two",
+      "htmlFile": "32115-event-SOL_Two-112.htm"
+    },
+    {
+      "npcId": 32115,
+      "hook": "event",
+      "when": "absent",
+      "event": "TI_Two",
+      "htmlFile": "32115-event-TI_Two-113.htm"
+    },
+    {
+      "npcId": 32115,
+      "hook": "event",
+      "when": "absent",
+      "event": "SOL2_Two",
+      "htmlFile": "32115-event-SOL2_Two-114.htm"
+    },
+    {
+      "npcId": 32115,
+      "hook": "event",
+      "when": "absent",
+      "event": "FA2_Two",
+      "ops": [
+        {
+          "op": "set_cond",
+          "cond": 16
+        }
+      ],
+      "htmlFile": "32115-event-FA2_Two-115.htm"
+    },
+    {
+      "npcId": 32115,
+      "hook": "event",
+      "when": "absent",
+      "event": "32122-5i",
+      "htmlFile": "32115-event-32122-5i-116.htm"
+    },
+    {
+      "npcId": 32115,
+      "hook": "event",
+      "when": "absent",
+      "event": "SOL_Three",
+      "htmlFile": "32115-event-SOL_Three-117.htm"
+    },
+    {
+      "npcId": 32115,
+      "hook": "event",
+      "when": "absent",
+      "event": "FA_Three",
+      "htmlFile": "32115-event-FA_Three-118.htm"
+    },
+    {
+      "npcId": 32115,
+      "hook": "event",
+      "when": "absent",
+      "event": "MI_Three",
+      "htmlFile": "32115-event-MI_Three-119.htm"
+    },
+    {
+      "npcId": 32115,
+      "hook": "event",
+      "when": "absent",
+      "event": "FA2_Three",
+      "htmlFile": "32115-event-FA2_Three-120.htm"
+    },
+    {
+      "npcId": 32115,
+      "hook": "event",
+      "when": "absent",
+      "event": "MI2_Three",
+      "ops": [
+        {
+          "op": "set_cond",
+          "cond": 17
+        }
+      ],
+      "htmlFile": "32115-event-MI2_Three-121.htm"
+    },
+    {
+      "npcId": 32115,
+      "hook": "event",
+      "when": "absent",
+      "event": "32122-6i",
+      "htmlFile": "32115-event-32122-6i-122.htm"
+    },
+    {
+      "npcId": 32115,
+      "hook": "event",
+      "when": "absent",
+      "event": "32122-7",
+      "ops": [
+        {
+          "op": "give_item",
+          "itemId": 8783,
+          "count": 1
+        }
+      ],
+      "htmlFile": "32115-event-32122-7-123.htm"
+    },
+    {
+      "npcId": 32115,
+      "hook": "event",
+      "when": "absent",
+      "event": "32122-8",
+      "ops": [
+        {
+          "op": "set_cond",
+          "cond": 18
+        }
+      ],
+      "htmlFile": "32115-event-32122-8-124.htm"
+    },
+    {
+      "npcId": 32115,
+      "hook": "event",
+      "when": "absent",
+      "event": "32109-2",
+      "ops": [
+        {
+          "op": "set_cond",
+          "cond": 19
+        }
+      ],
+      "htmlFile": "32115-event-32109-2-125.htm"
+    },
+    {
+      "npcId": 32115,
+      "hook": "event",
+      "when": "absent",
+      "event": "32109-3",
+      "ops": [
+        {
+          "op": "take_item",
+          "itemId": 8783,
+          "count": 1
+        },
+        {
+          "op": "set_cond",
+          "cond": 20
+        }
+      ],
+      "htmlFile": "32115-event-32109-3-126.htm"
+    },
+    {
+      "npcId": 32115,
+      "hook": "event",
+      "when": "absent",
+      "event": "32115-4",
+      "ops": [
+        {
+          "op": "set_cond",
+          "cond": 21
+        }
+      ],
+      "htmlFile": "32115-event-32115-4-127.htm"
+    },
+    {
+      "npcId": 32115,
+      "hook": "event",
+      "when": "absent",
+      "event": "32115-5",
+      "ops": [
+        {
+          "op": "set_cond",
+          "cond": 22
+        }
+      ],
+      "htmlFile": "32115-event-32115-5-128.htm"
+    },
+    {
+      "npcId": 32115,
+      "hook": "event",
+      "when": "absent",
+      "event": "32114-2",
+      "ops": [
+        {
+          "op": "set_cond",
+          "cond": 23
+        }
+      ],
+      "htmlFile": "32115-event-32114-2-129.htm"
+    },
+    {
+      "npcId": 32115,
+      "hook": "event",
+      "when": "absent",
+      "event": "32114-3",
+      "ops": [
+        {
+          "op": "give_item",
+          "itemId": 729,
+          "count": 1
+        },
+        {
+          "op": "give_adena",
+          "count": 460483
+        },
+        {
+          "op": "give_exp_sp",
+          "exp": 1015973,
+          "sp": 102802
+        },
+        {
+          "op": "complete"
+        }
+      ],
+      "htmlFile": "32115-event-32114-3-130.htm"
+    }
+  ]
+}

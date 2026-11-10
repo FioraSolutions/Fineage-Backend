@@ -10,7 +10,7 @@ namespace Fineage.Zone.Tests;
 /// <summary>
 /// Talking to an NPC and following a bypass link: the page the client receives, the range gate, the refusals, and
 /// the merchant stubs. Ported off the V2 wire; the world is driven through <see cref="WorldBench"/> and the pages
-/// read from the recorded <see cref="Fineage.Zone.Net.INetPresenceBridge"/> fanout.
+/// read from the recorded <see cref="Fineage.Zone.World.IWorldEventPublisher"/> fanout.
 /// </summary>
 public sealed class NpcHtmlTests
 {
@@ -164,7 +164,7 @@ public sealed class NpcHtmlTests
         BenchPlayer actor = await bench.EnterAsync("talker", "Talker");
 
         Assert.Null(await actor.Talk(MerchantObjectId));
-        var page = Assert.IsType<NpcHtmlNetMsg>(Bench(bench, FanoutHtml).Last()[1]);
+        var page = Assert.IsType<NpcHtmlMsg>(Bench(bench, FanoutHtml).Last()[1]);
         Assert.Equal(MerchantObjectId, page.NpcObjectId);
         Assert.Equal(MerchantNpcId, page.NpcId);
         Assert.Equal(0, page.ItemId);
@@ -179,7 +179,7 @@ public sealed class NpcHtmlTests
 
         // Anonymous bypass (no target NPC) still resolves the id out of the Mobius prefix.
         Assert.Null(await actor.BypassAsync(0, $"bypass -h npc_{MerchantObjectId}_goto 15"));
-        var gateNotice = Assert.IsType<SystemMessageNetMsg>(Bench(bench, FanoutSystemMessage).Last()[1]);
+        var gateNotice = Assert.IsType<SystemMessageMsg>(Bench(bench, FanoutSystemMessage).Last()[1]);
         Assert.Equal(NpcServiceProtocol.UnknownTeleport, gateNotice.Id);
         Assert.Contains("not available", LastHtml(bench), StringComparison.Ordinal);
 
@@ -187,7 +187,7 @@ public sealed class NpcHtmlTests
         Assert.Contains("warehouse keeper", LastHtml(bench), StringComparison.OrdinalIgnoreCase);
 
         Assert.Null(await actor.BypassAsync(MerchantObjectId, "SupportMagic"));
-        var buffNotice = Assert.IsType<SystemMessageNetMsg>(Bench(bench, FanoutSystemMessage).Last()[1]);
+        var buffNotice = Assert.IsType<SystemMessageMsg>(Bench(bench, FanoutSystemMessage).Last()[1]);
         Assert.Equal(NpcServiceProtocol.BuffLevelLow, buffNotice.Id);
         Assert.Contains("low level", LastHtml(bench), StringComparison.OrdinalIgnoreCase);
 
@@ -201,7 +201,9 @@ public sealed class NpcHtmlTests
         Assert.Equal("bad_request", await actor.BypassAsync(MerchantObjectId, "Link ../secret.htm"));
 
         Assert.Null(await actor.BypassAsync(MerchantObjectId, "Quest"));
-        Assert.Contains("I have nothing for you.", LastHtml(bench), StringComparison.Ordinal);
+        // Lector 30001 is start NPC for Q258 Bring Wolf Pelts — Quest opens the gated list, not the empty stub.
+        Assert.Contains("quest_talk:258", LastHtml(bench), StringComparison.Ordinal);
+        Assert.Contains("Bring Wolf Pelts", LastHtml(bench), StringComparison.Ordinal);
     }
 
     [Fact]
@@ -254,7 +256,7 @@ public sealed class NpcHtmlTests
     static List<object?[]> Bench(WorldBench bench, string method) => bench.Rec.Of(method);
 
     static string LastHtml(WorldBench bench) =>
-        Assert.IsType<NpcHtmlNetMsg>(Bench(bench, FanoutHtml).Last()[1]).Html;
+        Assert.IsType<NpcHtmlMsg>(Bench(bench, FanoutHtml).Last()[1]).Html;
 
     // The recorder is keyed by interface method name, so spell them once instead of scattering strings.
     const string FanoutHtml = "FanoutNpcHtml";

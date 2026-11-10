@@ -11,6 +11,8 @@ public sealed partial class ZoneWorld
     readonly bool _includeEnabledMaps;
     readonly Func<DateTimeOffset> _clock;
     readonly Dictionary<int, SpawnSlotState> _spawnSlots = [];
+    /// <summary>Due-ordered respawn index so <see cref="TickSpawns"/> does not scan every slot (B10).</summary>
+    readonly SortedSet<(long DueUnixMs, int ObjectId)> _spawnDue = [];
 
     sealed class SpawnSlotState
     {
@@ -73,6 +75,28 @@ public sealed partial class ZoneWorld
         if (_byId.ContainsKey(def.ObjectId))
             return;
 
+        // Hand-built test spawn rows often omit combat stats (PDef=0). Fill from npcs.json
+        // when present so melee rolls fail loud only on genuine missing templates.
+        double pAtk = def.PAtk;
+        double pDef = def.PDef;
+        double mAtk = def.MAtk;
+        double mDef = def.MDef;
+        int level = def.Level;
+        if ((pDef <= 0 || pAtk <= 0) &&
+            Fineage.Zone.Npcs.NpcCatalog.LoadDefault().ById.TryGetValue(def.NpcId, out var template))
+        {
+            if (pAtk <= 0)
+                pAtk = template.PAtk;
+            if (pDef <= 0)
+                pDef = template.PDef;
+            if (mAtk <= 0)
+                mAtk = template.MAtk;
+            if (mDef <= 0)
+                mDef = template.MDef;
+            if (level <= 1 && template.Level > 1)
+                level = template.Level;
+        }
+
         var tax = MerchantTowns.For(mapId);
         var entity = new ZoneEntity
         {
@@ -91,13 +115,13 @@ public sealed partial class ZoneWorld
             CurHp = def.MaxHp,
             MaxMp = def.MaxMp,
             CurMp = def.MaxMp,
-            Level = def.Level,
+            Level = level,
             RewardExp = def.Exp,
             RewardSp = def.Sp,
-            PAtk = def.PAtk,
+            PAtk = pAtk,
             HpRegen = def.HpRegen,
             MpRegen = def.MpRegen,
-            PDef = def.PDef,
+            PDef = pDef,
             PAtkSpd = def.AttackSpeed,
             BaseAccuracy = def.Accuracy,
             BaseEvasion = def.Evasion,
@@ -106,8 +130,8 @@ public sealed partial class ZoneWorld
             Dex = def.Dex,
             ShieldDef = def.ShieldDef,
             ShieldRate = def.ShieldRate,
-            MAtk = def.MAtk,
-            MDef = def.MDef,
+            MAtk = mAtk,
+            MDef = mDef,
             AttackRange = def.AttackRange,
             Aggressive = def.Aggressive,
             AggroRange = def.AggroRange,
@@ -154,24 +178,42 @@ public sealed partial class ZoneWorld
         if (jitter > 0)
             delaySeconds += _spawnRandom.Next(0, jitter + 1);
 
-        slot.RespawnAt = _clock().AddSeconds(Math.Max(1, delaySeconds));
+        ClearSpawnDue(slot);
+        var at = _clock().AddSeconds(Math.Max(1, delaySeconds));
+        slot.RespawnAt = at;
+        _spawnDue.Add((at.ToUnixTimeMilliseconds(), objectId));
+    }
+
+    void ClearSpawnDue(SpawnSlotState slot)
+    {
+        if (slot.RespawnAt is not { } at)
+            return;
+        _spawnDue.Remove((at.ToUnixTimeMilliseconds(), slot.Definition.ObjectId));
+        slot.RespawnAt = null;
     }
 
     void TickSpawns()
     {
-        var now = _clock();
-        foreach (var slot in _spawnSlots.Values)
+        long nowMs = _clock().ToUnixTimeMilliseconds();
+        while (_spawnDue.Count > 0)
         {
-            if (slot.RespawnAt == null || now < slot.RespawnAt)
+            var first = _spawnDue.Min;
+            if (first.DueUnixMs > nowMs)
+                break;
+            _spawnDue.Remove(first);
+            if (!_spawnSlots.TryGetValue(first.ObjectId, out var slot))
                 continue;
+            if (slot.RespawnAt is not { } at || at.ToUnixTimeMilliseconds() != first.DueUnixMs)
+                continue;
+
             if (_byId.ContainsKey(slot.Definition.ObjectId))
             {
-                slot.RespawnAt = null;
+                ClearSpawnDue(slot);
                 continue;
             }
 
+            ClearSpawnDue(slot);
             MaterializeSpawn(slot.Definition, slot.MapId);
-            slot.RespawnAt = null;
             if (_byId.TryGetValue(slot.Definition.ObjectId, out var npc))
                 FanoutNewNpc(npc);
         }

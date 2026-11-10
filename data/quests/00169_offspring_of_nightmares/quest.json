@@ -1,0 +1,212 @@
+{
+  "id": 169,
+  "name": "Offspring of Nightmares",
+  "repeatable": false,
+  "abortable": true,
+  "questItems": [
+    1030,
+    1031
+  ],
+  "dialogs": [
+    {
+      "npcId": 30145,
+      "hook": "talk",
+      "when": "absent",
+      "races": [
+        0,
+        1,
+        3,
+        4
+      ],
+      "htmlFile": "30145-talk-000.htm"
+    },
+    {
+      "npcId": 30145,
+      "hook": "talk",
+      "when": "absent",
+      "races": [
+        2
+      ],
+      "maxLevel": 14,
+      "htmlFile": "30145-talk-001.htm"
+    },
+    {
+      "npcId": 30145,
+      "hook": "talk",
+      "when": "absent",
+      "races": [
+        2
+      ],
+      "minLevel": 15,
+      "htmlFile": "30145-talk-002.htm"
+    },
+    {
+      "npcId": 30145,
+      "hook": "event",
+      "when": "absent",
+      "event": "30145-03",
+      "races": [
+        2
+      ],
+      "minLevel": 15,
+      "ops": [
+        {
+          "op": "create"
+        },
+        {
+          "op": "start"
+        },
+        {
+          "op": "set_cond",
+          "cond": 1
+        }
+      ],
+      "htmlFile": "30145-event-30145-03-003.htm"
+    },
+    {
+      "npcId": 30145,
+      "hook": "talk",
+      "when": "started",
+      "cond": 2,
+      "hasItem": 1031,
+      "htmlFile": "30145-talk-c2-004.htm"
+    },
+    {
+      "npcId": 30145,
+      "hook": "event",
+      "when": "started",
+      "event": "30145-07",
+      "cond": 2,
+      "hasItem": 1031,
+      "hasAny": [
+        1030
+      ],
+      "ops": [
+        {
+          "op": "give_item",
+          "itemId": 31,
+          "count": 1
+        },
+        {
+          "op": "give_exp_sp",
+          "exp": 17475,
+          "sp": 818
+        },
+        {
+          "op": "sell_items",
+          "prices": [
+            {
+              "itemId": 1030,
+              "adena": 10
+            }
+          ]
+        },
+        {
+          "op": "give_adena",
+          "count": 17030
+        },
+        {
+          "op": "complete"
+        }
+      ],
+      "htmlFile": "30145-event-30145-07-c2-005.htm"
+    },
+    {
+      "npcId": 30145,
+      "hook": "event",
+      "when": "started",
+      "event": "30145-07",
+      "cond": 2,
+      "hasItem": 1031,
+      "lacksItems": [
+        1030
+      ],
+      "ops": [
+        {
+          "op": "give_item",
+          "itemId": 31,
+          "count": 1
+        },
+        {
+          "op": "give_exp_sp",
+          "exp": 17475,
+          "sp": 818
+        },
+        {
+          "op": "give_adena",
+          "count": 17030
+        },
+        {
+          "op": "complete"
+        }
+      ],
+      "htmlFile": "30145-event-30145-07-c2-006.htm"
+    },
+    {
+      "npcId": 30145,
+      "hook": "talk",
+      "when": "started",
+      "hasItem": 1030,
+      "lacksItems": [
+        1031
+      ],
+      "htmlFile": "30145-talk-007.htm"
+    },
+    {
+      "npcId": 30145,
+      "hook": "talk",
+      "when": "started",
+      "lacksItems": [
+        1030,
+        1031
+      ],
+      "htmlFile": "30145-talk-008.htm"
+    },
+    {
+      "npcId": 20025,
+      "hook": "kill",
+      "when": "started",
+      "html": "",
+      "ops": [
+        {
+          "op": "drop_item",
+          "itemId": 1031,
+          "count": 1,
+          "chance": 0.2,
+          "limit": 1,
+          "condAtLimit": 2
+        },
+        {
+          "op": "drop_item",
+          "itemId": 1030,
+          "count": 1,
+          "chance": 0.5,
+          "limit": 0
+        }
+      ]
+    },
+    {
+      "npcId": 20105,
+      "hook": "kill",
+      "when": "started",
+      "html": "",
+      "ops": [
+        {
+          "op": "drop_item",
+          "itemId": 1031,
+          "count": 1,
+          "chance": 0.2,
+          "limit": 1,
+          "condAtLimit": 2
+        },
+        {
+          "op": "drop_item",
+          "itemId": 1030,
+          "count": 1,
+          "chance": 0.5,
+          "limit": 0
+        }
+      ]
+    }
+  ]
+}

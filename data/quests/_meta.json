@@ -1,0 +1,5 @@
+{
+  "maxActive": 25,
+  "talkRange": 150,
+  "reference": "Quest pack under data/quests/<id>_<slug>/. Q999 Newbie Tutorial is Mobius T0 (training-hall helpers). Q998 Roxxy Message is Fineage Net smoke (was id 999). Q256 NewbieHelper gift. Q160/161 Elven Village deliveries."
+}

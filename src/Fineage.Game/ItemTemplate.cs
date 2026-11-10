@@ -31,6 +31,10 @@ public sealed record ItemTemplate(
     int AttackRange = 0,
     int RandomDamage = 0,
     int MDef = 0,
+    /// <summary>Mobius jewel/armor <c>add stat="maxMp"</c> while equipped.</summary>
+    int MaxMp = 0,
+    /// <summary>Mobius item <c>add stat="maxHp"</c> while equipped (rare on jewelry).</summary>
+    int MaxHp = 0,
     int Soulshots = 0,
     int ShieldDef = 0,
     int ShieldRate = 0,

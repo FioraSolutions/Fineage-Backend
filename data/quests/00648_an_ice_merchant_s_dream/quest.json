@@ -1,0 +1,200 @@
+{
+  "id": 648,
+  "name": "An Ice Merchant's Dream",
+  "repeatable": true,
+  "abortable": true,
+  "questItems": [
+    8057,
+    8077,
+    8078
+  ],
+  "dialogs": [
+    {
+      "npcId": 32020,
+      "hook": "talk",
+      "when": "absent",
+      "maxLevel": 52,
+      "htmlFile": "32020-talk-000.htm"
+    },
+    {
+      "npcId": 32023,
+      "hook": "talk",
+      "when": "absent",
+      "hasItem": 8077,
+      "htmlFile": "32023-talk-001.htm"
+    },
+    {
+      "npcId": 32023,
+      "hook": "talk",
+      "when": "absent",
+      "htmlFile": "32023-talk-002.htm"
+    },
+    {
+      "npcId": 32020,
+      "hook": "event",
+      "when": "absent",
+      "event": "ACCEPT",
+      "htmlFile": "32020-event-ACCEPT-003.htm"
+    },
+    {
+      "npcId": 32020,
+      "hook": "event",
+      "when": "absent",
+      "event": "ASK",
+      "htmlFile": "32020-event-ASK-004.htm"
+    },
+    {
+      "npcId": 32020,
+      "hook": "event",
+      "when": "absent",
+      "event": "ASK",
+      "htmlFile": "32020-event-ASK-005.htm"
+    },
+    {
+      "npcId": 32020,
+      "hook": "event",
+      "when": "absent",
+      "event": "LATER",
+      "htmlFile": "32020-event-LATER-006.htm"
+    },
+    {
+      "npcId": 32020,
+      "hook": "event",
+      "when": "absent",
+      "event": "LATER",
+      "htmlFile": "32020-event-LATER-007.htm"
+    },
+    {
+      "npcId": 32020,
+      "hook": "event",
+      "when": "absent",
+      "event": "REWARD",
+      "htmlFile": "32020-event-REWARD-008.htm"
+    },
+    {
+      "npcId": 32020,
+      "hook": "event",
+      "when": "absent",
+      "event": "REWARD",
+      "htmlFile": "32020-event-REWARD-009.htm"
+    },
+    {
+      "npcId": 32020,
+      "hook": "event",
+      "when": "absent",
+      "event": "QUIT",
+      "ops": [
+        {
+          "op": "complete"
+        }
+      ],
+      "htmlFile": "32020-event-QUIT-010.htm"
+    },
+    {
+      "npcId": 32020,
+      "hook": "event",
+      "when": "absent",
+      "event": "32020-06",
+      "htmlFile": "32020-event-32020-06-011.htm"
+    },
+    {
+      "npcId": 32020,
+      "hook": "event",
+      "when": "absent",
+      "event": "32020-07",
+      "htmlFile": "32020-event-32020-07-012.htm"
+    },
+    {
+      "npcId": 32020,
+      "hook": "event",
+      "when": "absent",
+      "event": "32020-08",
+      "htmlFile": "32020-event-32020-08-013.htm"
+    },
+    {
+      "npcId": 32020,
+      "hook": "event",
+      "when": "absent",
+      "event": "32020-09",
+      "htmlFile": "32020-event-32020-09-014.htm"
+    },
+    {
+      "npcId": 32020,
+      "hook": "event",
+      "when": "absent",
+      "event": "32020-23",
+      "ops": [
+        {
+          "op": "complete"
+        }
+      ],
+      "htmlFile": "32020-event-32020-23-015.htm"
+    },
+    {
+      "npcId": 32020,
+      "hook": "event",
+      "when": "absent",
+      "event": "32023-04",
+      "hasItem": 8077,
+      "htmlFile": "32020-event-32023-04-016.htm"
+    },
+    {
+      "npcId": 32020,
+      "hook": "event",
+      "when": "absent",
+      "event": "32023-05",
+      "hasItem": 8077,
+      "ops": [
+        {
+          "op": "take_item",
+          "itemId": 8077,
+          "count": 1
+        }
+      ],
+      "htmlFile": "32020-event-32023-05-017.htm"
+    },
+    {
+      "npcId": 32020,
+      "hook": "event",
+      "when": "absent",
+      "event": "32023-06",
+      "hasItem": 8077,
+      "ops": [
+        {
+          "op": "take_item",
+          "itemId": 8077,
+          "count": 1
+        }
+      ],
+      "htmlFile": "32020-event-32023-06-018.htm"
+    },
+    {
+      "npcId": 32020,
+      "hook": "event",
+      "when": "absent",
+      "event": "REPLY4",
+      "ops": [
+        {
+          "op": "give_item",
+          "itemId": 8078,
+          "count": 1
+        }
+      ],
+      "htmlFile": "32020-event-REPLY4-019.htm"
+    },
+    {
+      "npcId": 32020,
+      "hook": "event",
+      "when": "absent",
+      "event": "REPLY5",
+      "ops": [
+        {
+          "op": "give_item",
+          "itemId": 8078,
+          "count": 1
+        }
+      ],
+      "htmlFile": "32020-event-REPLY5-020.htm"
+    }
+  ]
+}

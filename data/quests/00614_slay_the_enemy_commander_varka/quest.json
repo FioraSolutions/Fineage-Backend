@@ -1,0 +1,71 @@
+{
+  "id": 614,
+  "name": "Slay the Enemy Commander! (Varka)",
+  "repeatable": true,
+  "abortable": true,
+  "questItems": [
+    7241
+  ],
+  "dialogs": [
+    {
+      "npcId": 31377,
+      "hook": "talk",
+      "when": "absent",
+      "htmlFile": "31377-event-31377-04-002.htm"
+    },
+    {
+      "npcId": 31377,
+      "hook": "talk",
+      "when": "started",
+      "htmlFile": "31377-talk-000.htm"
+    },
+    {
+      "npcId": 31377,
+      "hook": "talk",
+      "when": "started",
+      "htmlFile": "31377-talk-001.htm"
+    },
+    {
+      "npcId": 31377,
+      "hook": "event",
+      "when": "absent",
+      "event": "31377-04",
+      "ops": [
+        {
+          "op": "create"
+        },
+        {
+          "op": "start"
+        },
+        {
+          "op": "set_cond",
+          "cond": 1
+        }
+      ],
+      "htmlFile": "31377-event-31377-04-002.htm"
+    },
+    {
+      "npcId": 31377,
+      "hook": "event",
+      "when": "absent",
+      "event": "31377-07",
+      "hasItem": 7241,
+      "ops": [
+        {
+          "op": "give_item",
+          "itemId": 7230,
+          "count": 1
+        },
+        {
+          "op": "give_exp_sp",
+          "exp": 10000,
+          "sp": 0
+        },
+        {
+          "op": "complete"
+        }
+      ],
+      "htmlFile": "31377-event-31377-07-003.htm"
+    }
+  ]
+}

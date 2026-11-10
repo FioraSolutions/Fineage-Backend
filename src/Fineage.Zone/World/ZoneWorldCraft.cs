@@ -1,6 +1,8 @@
 using Fineage.Game;
 using Fineage.Game.Recipes;
 using Fineage.Protocol;
+using Fineage.Zone.Craft;
+using Fineage.Zone.Trade;
 
 namespace Fineage.Zone.World;
 
@@ -10,37 +12,31 @@ namespace Fineage.Zone.World;
 /// </summary>
 public sealed partial class ZoneWorld
 {
-    public async Task<string?> TryRecipeBookOpenAsync(ZoneSession session, RecipeBookOpenMsg request, CancellationToken ct)
+    public Task<string?> TryRecipeBookOpenAsync(ZoneSession session, RecipeBookOpenMsg request, CancellationToken ct)
     {
         if (request == null)
-            return "bad_request";
+            return Task.FromResult<string?>("bad_request");
         if (!session.InWorld)
-            return "world";
-        string? error;
-        lock (_gate)
-            error = TryRecipeBookOpen(session, request);
-        return error;
+            return Task.FromResult<string?>("world");
+        return Task.FromResult(WithDeferredInventoryPersist(() => TryRecipeBookOpen(session, request)));
     }
 
-    public async Task<string?> TryRecipeMakeSelfAsync(ZoneSession session, RecipeMakeSelfMsg request, CancellationToken ct)
+    public Task<string?> TryRecipeMakeSelfAsync(ZoneSession session, RecipeMakeSelfMsg request, CancellationToken ct)
     {
         if (request == null)
-            return "bad_request";
+            return Task.FromResult<string?>("bad_request");
         if (!session.InWorld)
-            return "world";
-        string? error;
-        lock (_gate)
-            error = TryRecipeMakeSelf(session, request);
-        return error;
+            return Task.FromResult<string?>("world");
+        // World mutate under _gate; Postgres inventory write after unlock (B8).
+        return Task.FromResult(WithDeferredInventoryPersist(() => TryRecipeMakeSelf(session, request)));
     }
 
     /// <summary>Mobius recipe-scroll use: register the recipe list id and consume one scroll.</summary>
     string? TryLearnRecipeFromItem(ZoneSession session, ZoneEntity player, ItemInstance item)
     {
-        if (!_game.Recipes.TryGetByRecipeItem(item.ItemId, out var recipe))
-            return InventoryProtocol.Blocked;
-        if (player.KnownRecipes.Contains(recipe.Id))
-            return CraftProtocol.Already;
+        bool resolved = _game.Recipes.TryGetByRecipeItem(item.ItemId, out var recipe);
+        if (CraftRules.LearnScrollError(resolved, resolved && player.KnownRecipes.Contains(recipe!.Id)) is { } learnError)
+            return learnError;
         if (!player.Inventory!.TryRemoveFromStack(item, 1, out bool removedEntirely))
             return InventoryProtocol.Blocked;
 
@@ -53,8 +49,7 @@ public sealed partial class ZoneWorld
         else
             changes.Add(InventoryMessages.ChangeRow(InventoryChange.Modify, item));
         SaveInventory(session, player.Inventory);
-        NetBridge?.FanoutInventoryUpdate([player.ObjectId],
-            ToNetInventoryUpdate(new InventoryUpdateMsg { Changes = changes.ToArray() }));
+        NetBridge?.FanoutInventoryUpdate([player.ObjectId], new InventoryUpdateMsg { Changes = changes.ToArray() });
         NotifyLine(player.ObjectId, 0, $"You learned {recipe.Name}.");
         return null;
     }
@@ -67,7 +62,7 @@ public sealed partial class ZoneWorld
             .Where(id => _game.Recipes.TryGet(id, out var r) && r.Dwarven == request.Dwarven)
             .OrderBy(id => id)
             .ToArray();
-        NetBridge?.FanoutRecipeBookList([player.ObjectId], new Fineage.Net.Contract.RecipeBookListNetMsg
+        NetBridge?.FanoutRecipeBookList([player.ObjectId], new RecipeBookListMsg
         {
             Dwarven = request.Dwarven ? 1 : 0,
             RecipeIds = ids
@@ -79,25 +74,25 @@ public sealed partial class ZoneWorld
     {
         if (!IsLive(session) || !_byId.TryGetValue(session.ObjectId, out var player) || player.Inventory == null)
             return "world";
-        if (player.Dead)
-            return InventoryProtocol.Dead;
-        if (player.PrivateStoreType != PrivateStoreProtocol.TypeNone)
-            return CraftProtocol.Busy;
-        if (_tradeByPlayer.ContainsKey(player.ObjectId))
-            return CraftProtocol.Busy;
-        if (!_game.Recipes.TryGet(request.RecipeId, out var recipe))
-            return CraftProtocol.Unknown;
-        if (!player.KnownRecipes.Contains(recipe.Id))
-            return CraftProtocol.NotLearned;
+        bool recipeKnown = _game.Recipes.TryGet(request.RecipeId, out var recipe);
+        int skillId = recipeKnown
+            ? (recipe!.Dwarven ? RecipeCatalog.CreateDwarvenSkillId : RecipeCatalog.CreateCommonSkillId)
+            : 0;
+        bool skillOk = recipeKnown
+            && player.KnownSkills.TryGetValue(skillId, out int skillLevel)
+            && skillLevel >= recipe!.Level;
+        if (CraftRules.MakeSelfError(
+                dead: player.Dead,
+                privateStoreOpen: player.PrivateStoreType != PrivateStoreProtocol.TypeNone,
+                inTrade: _tradeByPlayer.ContainsKey(player.ObjectId),
+                recipeKnown: recipeKnown,
+                recipeLearned: recipeKnown && player.KnownRecipes.Contains(recipe!.Id),
+                skillLevelOk: skillOk,
+                curMp: player.CurMp,
+                mpConsume: recipeKnown ? recipe!.MpConsume : 0) is { } makeError)
+            return makeError;
 
-        int skillId = recipe.Dwarven ? RecipeCatalog.CreateDwarvenSkillId : RecipeCatalog.CreateCommonSkillId;
-        if (!player.KnownSkills.TryGetValue(skillId, out int skillLevel) || skillLevel < recipe.Level)
-            return CraftProtocol.Skill;
-
-        if (player.CurMp < recipe.MpConsume)
-            return CraftProtocol.Mp;
-
-        foreach (var ing in recipe.Ingredients)
+        foreach (var ing in recipe!.Ingredients)
         {
             if (player.Inventory.CountOf(ing.ItemId) < ing.Count)
                 return CraftProtocol.Materials;
@@ -116,9 +111,9 @@ public sealed partial class ZoneWorld
         };
         // IncomingDenyOf uses FindByItemId for stackables — product object id unused.
         var deny = IncomingDenyOf(player, productOffers);
-        if (deny == TradeIncomingDeny.Weight)
+        if (deny == TradeRules.IncomingDeny.Weight)
             return PrivateStoreProtocol.Weight;
-        if (deny == TradeIncomingDeny.Slots)
+        if (deny == TradeRules.IncomingDeny.Slots)
             return PrivateStoreProtocol.Slots;
 
         var changes = new List<InventoryUpdateEntryMsg>();
@@ -144,17 +139,15 @@ public sealed partial class ZoneWorld
         player.CurMp -= recipe.MpConsume;
         if (NetBridge != null)
         {
-            NetBridge.FanoutStatusUpdate([player.ObjectId], new Fineage.Net.Contract.StatusUpdateNetMsg
+            NetBridge.FanoutStatusUpdate([player.ObjectId], new StatusUpdateMsg
             {
-                EntityValue = (ulong)(uint)player.ObjectId,
-                EntityGeneration = 1,
+                ObjectId = player.ObjectId,
                 AttributeIds = [InterludeStatus.CurMp, InterludeStatus.MaxMp],
                 Values = [player.CurMp, player.MaxMp]
             });
         }
 
-        bool success = recipe.SuccessRate >= 100
-            || _spawnRandom.Next(100) < recipe.SuccessRate;
+        bool success = CraftRules.Succeeds(recipe.SuccessRate, _spawnRandom.Next(100));
         int result = success ? 0 : 1;
         if (success)
         {
@@ -168,12 +161,11 @@ public sealed partial class ZoneWorld
         SaveInventory(session, player.Inventory);
         if (changes.Count > 0)
         {
-            NetBridge?.FanoutInventoryUpdate([player.ObjectId],
-                ToNetInventoryUpdate(new InventoryUpdateMsg { Changes = changes.ToArray() }));
+            NetBridge?.FanoutInventoryUpdate([player.ObjectId], new InventoryUpdateMsg { Changes = changes.ToArray() });
             SelfUserInfo(player);
         }
 
-        NetBridge?.FanoutRecipeItemMakeInfo([player.ObjectId], new Fineage.Net.Contract.RecipeItemMakeInfoNetMsg
+        NetBridge?.FanoutRecipeItemMakeInfo([player.ObjectId], new RecipeItemMakeInfoMsg
         {
             RecipeId = recipe.Id,
             Result = result,
@@ -184,7 +176,7 @@ public sealed partial class ZoneWorld
         return null;
     }
 
-    void LoadKnownRecipes(ZoneEntity entity, Fineage.Login.CharacterRecord? stored)
+    void LoadKnownRecipes(ZoneEntity entity, Fineage.Accounts.CharacterRecord? stored)
     {
         entity.KnownRecipes.Clear();
         if (stored?.KnownRecipes == null)
@@ -196,11 +188,9 @@ public sealed partial class ZoneWorld
         }
     }
 
-    void PersistKnownRecipes(ZoneSession session, ZoneEntity player)
-    {
-        if (_accounts == null)
-            return;
-        var ids = player.KnownRecipes.OrderBy(id => id).ToArray();
-        _accounts.TryReplaceKnownRecipes(session.Account, session.ObjectId, ids);
-    }
+    void PersistKnownRecipes(ZoneSession session, ZoneEntity player) =>
+        _persist.ReplaceKnownRecipes(
+            session.Account,
+            session.ObjectId,
+            player.KnownRecipes.OrderBy(id => id).ToArray());
 }

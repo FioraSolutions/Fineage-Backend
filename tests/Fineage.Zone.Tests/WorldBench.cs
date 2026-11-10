@@ -1,4 +1,5 @@
 using Fineage.Game;
+using Fineage.Accounts;
 using Fineage.Login;
 using Fineage.Protocol;
 using Fineage.Zone.Interest;
@@ -9,7 +10,7 @@ using Xunit;
 namespace Fineage.Zone.Tests;
 
 /// <summary>
-/// A <see cref="ZoneWorld"/> with in-memory players and every <see cref="INetPresenceBridge"/> call recorded.
+/// A <see cref="ZoneWorld"/> with in-memory players and every <see cref="IWorldEventPublisher"/> call recorded.
 /// Feature rules assert on the recorded Net fanout instead of reading MessagePack frames, so a test states
 /// what the client receives without dragging in the retired V2 wire.
 /// </summary>
@@ -75,7 +76,7 @@ internal sealed class WorldBench
     public GameData Game { get; }
     public MemoryAccountStore Store { get; }
     public ZoneWorld World { get; }
-    public INetPresenceBridge Bridge { get; }
+    public IWorldEventPublisher Bridge { get; }
     public NetBridgeRecorder Rec { get; }
     public Func<DateTimeOffset> Now { get; }
 
@@ -179,10 +180,10 @@ internal sealed class BenchPlayer
     public CharacterRecord SavedRecord() => Store.FindById(Ticket.Account, Ticket.CharacterId)!;
 
     public Task<string?> Use(int objectId) =>
-        World.TryUseItemAsync(Session, new UseItemMsg { ObjectId = objectId }, CancellationToken.None);
+        World.TryUseItemAsync(Session, objectId, CancellationToken.None);
 
     public Task<string?> Unequip(int paperdollSlot) =>
-        World.TryUnequipItemAsync(Session, new UnequipItemMsg { PaperdollSlot = paperdollSlot }, CancellationToken.None);
+        World.TryUnequipItemAsync(Session, paperdollSlot, CancellationToken.None);
 
     /// <summary>Teleports without the walk, for tests that only care about being in talk range.</summary>
     public void MoveTo(int x, int y, int z)
@@ -209,57 +210,33 @@ internal sealed class BenchPlayer
 
     public Task<string?> Buy(int npcObjectId, int listId, params (int ItemId, int Count)[] rows)
     {
-        var items = rows.Select(row => new ShopCountMsg { ItemId = row.ItemId, Count = row.Count }).ToArray();
-        return World.TryBuyAsync(
-            Session,
-            new RequestBuyItemMsg { NpcObjectId = npcObjectId, ListId = listId, Items = items },
-            CancellationToken.None);
+        var items = rows.Select(row => new Fineage.Game.Shops.ShopLine(row.ItemId, row.Count)).ToArray();
+        return World.TryBuyAsync(Session, npcObjectId, listId, items, CancellationToken.None);
     }
 
     public Task<string?> Sell(int npcObjectId, params (int ObjectId, int Count)[] rows)
     {
-        var items = rows.Select(row => new ShopObjectCountMsg { ObjectId = row.ObjectId, Count = row.Count }).ToArray();
-        return World.TrySellAsync(
-            Session,
-            new RequestSellItemMsg { NpcObjectId = npcObjectId, Items = items },
-            CancellationToken.None);
+        var items = rows.Select(row => new Fineage.Game.Shops.ShopObjectLine(row.ObjectId, row.Count)).ToArray();
+        return World.TrySellAsync(Session, npcObjectId, items, CancellationToken.None);
     }
 
     public Task<string?> MultiSell(int npcObjectId, int listId, int entryId, int amount) =>
-        World.TryMultiSellAsync(
-            Session,
-            new RequestMultiSellChooseMsg
-            {
-                NpcObjectId = npcObjectId,
-                ListId = listId,
-                EntryId = entryId,
-                Amount = amount
-            },
-            CancellationToken.None);
+        World.TryMultiSellAsync(Session, npcObjectId, listId, entryId, amount, CancellationToken.None);
 
     /// <summary>Picks a gatekeeper destination, the same call the teleport page's link lands on.</summary>
     public Task<string?> Teleport(int npcObjectId, string listName, int locationId) =>
-        World.TryTeleportSelectAsync(
-            Session,
-            new TeleportSelectRequestMsg { NpcObjectId = npcObjectId, ListName = listName, LocationId = locationId },
-            CancellationToken.None);
+        World.TryTeleportSelectAsync(Session, npcObjectId, listName, locationId, CancellationToken.None);
 
     public Task<string?> Deposit(int npcObjectId, params (int ObjectId, int Count)[] rows)
     {
-        var lines = rows.Select(row => new WarehouseCountMsg { ObjectId = row.ObjectId, Count = row.Count }).ToArray();
-        return World.TryWarehouseDepositAsync(
-            Session,
-            new WarehouseDepositRequestMsg { NpcObjectId = npcObjectId, Lines = lines },
-            CancellationToken.None);
+        var lines = rows.Select(row => new Fineage.Game.Services.WarehouseLine(row.ObjectId, row.Count)).ToArray();
+        return World.TryWarehouseDepositAsync(Session, npcObjectId, lines, CancellationToken.None);
     }
 
     public Task<string?> Withdraw(int npcObjectId, params (int ObjectId, int Count)[] rows)
     {
-        var lines = rows.Select(row => new WarehouseCountMsg { ObjectId = row.ObjectId, Count = row.Count }).ToArray();
-        return World.TryWarehouseWithdrawAsync(
-            Session,
-            new WarehouseWithdrawRequestMsg { NpcObjectId = npcObjectId, Lines = lines },
-            CancellationToken.None);
+        var lines = rows.Select(row => new Fineage.Game.Services.WarehouseLine(row.ObjectId, row.Count)).ToArray();
+        return World.TryWarehouseWithdrawAsync(Session, npcObjectId, lines, CancellationToken.None);
     }
 
     public Task<string?> SupportMagic(int npcObjectId) =>

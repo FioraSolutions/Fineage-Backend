@@ -1,0 +1,419 @@
+{
+  "id": 340,
+  "name": "Subjugation Of Lizardmen",
+  "repeatable": false,
+  "abortable": true,
+  "questItems": [
+    4255,
+    4256,
+    4257,
+    4258
+  ],
+  "dialogs": [
+    {
+      "npcId": 30385,
+      "hook": "talk",
+      "when": "absent",
+      "htmlFile": "30385-talk-000.htm"
+    },
+    {
+      "npcId": 30385,
+      "hook": "talk",
+      "when": "absent",
+      "htmlFile": "30385-talk-001.htm"
+    },
+    {
+      "npcId": 30385,
+      "hook": "talk",
+      "when": "absent",
+      "htmlFile": "30385-talk-002.htm"
+    },
+    {
+      "npcId": 30385,
+      "hook": "talk",
+      "when": "absent",
+      "ops": [
+        {
+          "op": "give_adena",
+          "count": 14700
+        },
+        {
+          "op": "complete"
+        }
+      ],
+      "htmlFile": "30385-talk-003.htm"
+    },
+    {
+      "npcId": 30037,
+      "hook": "talk",
+      "when": "absent",
+      "htmlFile": "30037-talk-004.htm"
+    },
+    {
+      "npcId": 30037,
+      "hook": "talk",
+      "when": "absent",
+      "htmlFile": "30037-talk-005.htm"
+    },
+    {
+      "npcId": 30037,
+      "hook": "talk",
+      "when": "absent",
+      "ops": [
+        {
+          "op": "take_item",
+          "itemId": 4258,
+          "count": 1
+        },
+        {
+          "op": "set",
+          "key": "memoState",
+          "value": "7"
+        },
+        {
+          "op": "set_cond",
+          "cond": 7
+        }
+      ],
+      "htmlFile": "30037-talk-006.htm"
+    },
+    {
+      "npcId": 30037,
+      "hook": "talk",
+      "when": "absent",
+      "htmlFile": "30037-talk-007.htm"
+    },
+    {
+      "npcId": 30375,
+      "hook": "talk",
+      "when": "absent",
+      "htmlFile": "30375-talk-008.htm"
+    },
+    {
+      "npcId": 30375,
+      "hook": "talk",
+      "when": "absent",
+      "hasItems": [
+        4256,
+        4257
+      ],
+      "ops": [
+        {
+          "op": "take_item",
+          "itemId": 4256,
+          "count": 1
+        },
+        {
+          "op": "take_item",
+          "itemId": 4257,
+          "count": 1
+        },
+        {
+          "op": "set",
+          "key": "memoState",
+          "value": "4"
+        },
+        {
+          "op": "set_cond",
+          "cond": 4
+        }
+      ],
+      "htmlFile": "30375-talk-009.htm"
+    },
+    {
+      "npcId": 30375,
+      "hook": "talk",
+      "when": "absent",
+      "htmlFile": "30375-talk-010.htm"
+    },
+    {
+      "npcId": 30375,
+      "hook": "talk",
+      "when": "absent",
+      "htmlFile": "30375-talk-011.htm"
+    },
+    {
+      "npcId": 30989,
+      "hook": "talk",
+      "when": "absent",
+      "htmlFile": "30989-talk-012.htm"
+    },
+    {
+      "npcId": 30385,
+      "hook": "event",
+      "when": "absent",
+      "event": "30385-03",
+      "ops": [
+        {
+          "op": "create"
+        },
+        {
+          "op": "start"
+        },
+        {
+          "op": "set",
+          "key": "memoState",
+          "value": "1"
+        },
+        {
+          "op": "set_cond",
+          "cond": 1
+        }
+      ],
+      "htmlFile": "30385-event-30385-03-013.htm"
+    },
+    {
+      "npcId": 30385,
+      "hook": "event",
+      "when": "absent",
+      "event": "30385-04",
+      "htmlFile": "30385-event-30385-04-014.htm"
+    },
+    {
+      "npcId": 30385,
+      "hook": "event",
+      "when": "absent",
+      "event": "30385-08",
+      "htmlFile": "30385-event-30385-08-015.htm"
+    },
+    {
+      "npcId": 30385,
+      "hook": "event",
+      "when": "absent",
+      "event": "30385-07",
+      "ops": [
+        {
+          "op": "take_item",
+          "itemId": 4255,
+          "count": 1
+        },
+        {
+          "op": "set",
+          "key": "memoState",
+          "value": "2"
+        },
+        {
+          "op": "set_cond",
+          "cond": 2
+        }
+      ],
+      "htmlFile": "30385-event-30385-07-016.htm"
+    },
+    {
+      "npcId": 30385,
+      "hook": "event",
+      "when": "absent",
+      "event": "30385-09",
+      "hasItem": 4255,
+      "ops": [
+        {
+          "op": "take_item",
+          "itemId": 4255,
+          "count": 1
+        },
+        {
+          "op": "set",
+          "key": "memoState",
+          "value": "1"
+        },
+        {
+          "op": "give_adena",
+          "count": 4090
+        }
+      ],
+      "htmlFile": "30385-event-30385-09-017.htm"
+    },
+    {
+      "npcId": 30385,
+      "hook": "event",
+      "when": "absent",
+      "event": "30385-10",
+      "hasItem": 4255,
+      "ops": [
+        {
+          "op": "take_item",
+          "itemId": 4255,
+          "count": 1
+        },
+        {
+          "op": "give_adena",
+          "count": 4090
+        },
+        {
+          "op": "complete"
+        }
+      ],
+      "htmlFile": "30385-event-30385-10-018.htm"
+    },
+    {
+      "npcId": 30385,
+      "hook": "event",
+      "when": "absent",
+      "event": "30037-02",
+      "ops": [
+        {
+          "op": "set",
+          "key": "memoState",
+          "value": "5"
+        },
+        {
+          "op": "set_cond",
+          "cond": 5
+        }
+      ],
+      "htmlFile": "30385-event-30037-02-019.htm"
+    },
+    {
+      "npcId": 30385,
+      "hook": "event",
+      "when": "absent",
+      "event": "30375-02",
+      "ops": [
+        {
+          "op": "set",
+          "key": "memoState",
+          "value": "3"
+        },
+        {
+          "op": "set_cond",
+          "cond": 3
+        }
+      ],
+      "htmlFile": "30385-event-30375-02-020.htm"
+    },
+    {
+      "npcId": 30385,
+      "hook": "event",
+      "when": "absent",
+      "event": "30989-02",
+      "ops": [
+        {
+          "op": "give_item",
+          "itemId": 4258,
+          "count": 1
+        },
+        {
+          "op": "set",
+          "key": "memoState",
+          "value": "6"
+        },
+        {
+          "op": "set_cond",
+          "cond": 6
+        }
+      ],
+      "htmlFile": "30385-event-30989-02-021.htm"
+    },
+    {
+      "npcId": 20024,
+      "hook": "kill",
+      "when": "started",
+      "lacksItems": [
+        4256
+      ],
+      "ops": [
+        {
+          "op": "drop_item",
+          "itemId": 4256,
+          "count": 1,
+          "chance": 1.0,
+          "limit": 1
+        }
+      ],
+      "html": ""
+    },
+    {
+      "npcId": 20024,
+      "hook": "kill",
+      "when": "started",
+      "hasItem": 4256,
+      "lacksItems": [
+        4257
+      ],
+      "ops": [
+        {
+          "op": "drop_item",
+          "itemId": 4257,
+          "count": 1,
+          "chance": 1.0,
+          "limit": 1
+        }
+      ],
+      "html": ""
+    },
+    {
+      "npcId": 20027,
+      "hook": "kill",
+      "when": "started",
+      "lacksItems": [
+        4256
+      ],
+      "ops": [
+        {
+          "op": "drop_item",
+          "itemId": 4256,
+          "count": 1,
+          "chance": 1.0,
+          "limit": 1
+        }
+      ],
+      "html": ""
+    },
+    {
+      "npcId": 20027,
+      "hook": "kill",
+      "when": "started",
+      "hasItem": 4256,
+      "lacksItems": [
+        4257
+      ],
+      "ops": [
+        {
+          "op": "drop_item",
+          "itemId": 4257,
+          "count": 1,
+          "chance": 1.0,
+          "limit": 1
+        }
+      ],
+      "html": ""
+    },
+    {
+      "npcId": 20030,
+      "hook": "kill",
+      "when": "started",
+      "lacksItems": [
+        4256
+      ],
+      "ops": [
+        {
+          "op": "drop_item",
+          "itemId": 4256,
+          "count": 1,
+          "chance": 1.0,
+          "limit": 1
+        }
+      ],
+      "html": ""
+    },
+    {
+      "npcId": 20030,
+      "hook": "kill",
+      "when": "started",
+      "hasItem": 4256,
+      "lacksItems": [
+        4257
+      ],
+      "ops": [
+        {
+          "op": "drop_item",
+          "itemId": 4257,
+          "count": 1,
+          "chance": 1.0,
+          "limit": 1
+        }
+      ],
+      "html": ""
+    }
+  ]
+}

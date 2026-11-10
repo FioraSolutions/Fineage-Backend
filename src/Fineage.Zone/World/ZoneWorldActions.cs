@@ -5,32 +5,33 @@ namespace Fineage.Zone.World;
 
 public sealed partial class ZoneWorld
 {
-    public Task<string?> TryCharacterActionAsync(ZoneSession session, CharacterActionRequestMsg request, CancellationToken ct)
+    public Task<string?> TryCharacterActionAsync(
+        ZoneSession session, int actionId, int targetObjectId, CancellationToken ct)
     {
         if (!IsLive(session))
             return Task.FromResult<string?>("world");
 
         string? error;
         lock (_gate)
-            error = TryCharacterAction(session, request);
+            error = TryCharacterAction(session, actionId, targetObjectId);
         return Task.FromResult<string?>(error);
     }
 
-    string? TryCharacterAction(ZoneSession session, CharacterActionRequestMsg request)
+    string? TryCharacterAction(ZoneSession session, int actionId, int targetObjectId)
     {
         if (!_byId.TryGetValue(session.ObjectId, out var player) || player.Session == null)
             return "world";
         if (player.Dead)
             return ActionProtocol.Dead;
 
-        return request.ActionId switch
+        return actionId switch
         {
             ActionProtocol.SitStand => ToggleSitStand(player),
             ActionProtocol.WalkRun => ToggleWalkRun(player),
-            ActionProtocol.Attack => TryAttack(session, request.TargetObjectId),
+            ActionProtocol.Attack => TryAttack(session, targetObjectId),
             ActionProtocol.NextTarget => TryNextTarget(session, player),
             ActionProtocol.SocialGreeting or ActionProtocol.SocialVictory or ActionProtocol.SocialAdvance
-                => FanoutSocial(player, request.ActionId),
+                => FanoutSocial(player, actionId),
             >= 10 and <= 61 => ActionProtocol.Unsupported,
             _ => ActionProtocol.Unknown
         };
@@ -148,12 +149,7 @@ public sealed partial class ZoneWorld
     string? FanoutSocial(ZoneEntity player, int actionId)
     {
         // Mobius broadcastPacket(new SocialAction(...)): self + everyone holding the actor in view.
-        NetBridge?.FanoutSocialAction(NetWatchersOf(player), new Fineage.Net.Contract.SocialActionNetMsg
-        {
-            EntityValue = (ulong)(uint)player.ObjectId,
-            EntityGeneration = 1,
-            ActionId = actionId
-        });
+        NetBridge?.FanoutSocialAction(NetWatchersOf(player), player.ObjectId, actionId);
 
         return null;
     }
@@ -161,15 +157,7 @@ public sealed partial class ZoneWorld
     void FanoutWaitType(ZoneEntity player, int waitType)
     {
         // Mobius Player.sitDown/standUp: broadcastPacket(new ChangeWaitType(this, ...)), self included.
-        NetBridge?.FanoutChangeWaitType(NetWatchersOf(player), new Fineage.Net.Contract.ChangeWaitTypeNetMsg
-        {
-            EntityValue = (ulong)(uint)player.ObjectId,
-            EntityGeneration = 1,
-            WaitType = waitType,
-            X = player.X,
-            Y = player.Y,
-            Z = player.Z
-        });
+        NetBridge?.FanoutChangeWaitType(NetWatchersOf(player), player.ObjectId, waitType, player.X, player.Y, player.Z);
     }
 
     void FanoutMoveType(ZoneEntity player) => FanoutNetMoveType(player);

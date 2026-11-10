@@ -7,14 +7,14 @@ namespace Fineage.Zone.World;
 
 public sealed partial class ZoneWorld
 {
-    public Task<string?> TrySelectTargetAsync(ZoneSession session, SelectTargetMsg select, CancellationToken ct)
+    public Task<string?> TrySelectTargetAsync(ZoneSession session, int targetObjectId, CancellationToken ct)
     {
         if (!IsLive(session))
             return Task.FromResult<string?>("world");
 
         string? error;
         lock (_gate)
-            error = TrySelectTarget(session, select.TargetObjectId);
+            error = TrySelectTarget(session, targetObjectId);
         return Task.FromResult<string?>(error);
     }
 
@@ -32,16 +32,13 @@ public sealed partial class ZoneWorld
             session.SelectedTargetId = 0;
             session.AutoAttackTargetId = 0;
             session.ClearApproach();
-            NetBridge?.FanoutTargetUnselected([session.ObjectId], new Fineage.Net.Contract.TargetUnselectedNetMsg
-            {
-                TargetObjectId = previous
-            });
+            NetBridge?.FanoutTargetUnselected([session.ObjectId], previous);
         }
 
         return Task.FromResult<string?>(null);
     }
 
-    public Task<string?> TryAttackAsync(ZoneSession session, AttackRequestMsg request, CancellationToken ct)
+    public Task<string?> TryAttackAsync(ZoneSession session, int targetObjectId, CancellationToken ct)
     {
         if (!IsLive(session))
             return Task.FromResult<string?>("world");
@@ -52,11 +49,11 @@ public sealed partial class ZoneWorld
         {
             int previous = session.AutoAttackTargetId;
             long now0 = _clock().ToUnixTimeMilliseconds();
-            int requested = request.TargetObjectId > 0 ? request.TargetObjectId : session.SelectedTargetId;
+            int requested = targetObjectId > 0 ? targetObjectId : session.SelectedTargetId;
             bool alreadySwinging = previous > 0 && previous == requested && session.ApproachTargetId == 0 &&
                 session.NextAutoAttackUnixMs > now0;
             // Re-click on the target already being hit: Mobius keeps the running attack, no extra swing.
-            error = alreadySwinging ? null : TryAttack(session, request.TargetObjectId, out approachMs);
+            error = alreadySwinging ? null : TryAttack(session, targetObjectId, out approachMs);
             if (error == null && !alreadySwinging && approachMs >= 0)
             {
                 session.AutoAttackTargetId = session.SelectedTargetId;
@@ -72,14 +69,17 @@ public sealed partial class ZoneWorld
     {
         if (!_byId.TryGetValue(session.ObjectId, out var player))
             return "world";
+
+        // Mobius Action: missing / not visible object → ActionFailed, not a protocol Reject.
+        // Returning null here keeps the previous selection and avoids client "[Net] zone reject target".
         if (!_byId.TryGetValue(targetObjectId, out var target))
-            return "target";
+            return null;
 
         // Interlude: click own pawn → target self (AOI never lists the observer).
         if (targetObjectId == session.ObjectId)
         {
             if (player.Dead || player.CurHp <= 0)
-                return "target";
+                return null;
 
             // Own pawn: the client already draws itself; Mobius sends colour 0 with no HP block and Net has no
             // self-target frame, so nothing is fanned.
@@ -87,12 +87,13 @@ public sealed partial class ZoneWorld
             return null;
         }
 
-        // Mobius setTarget accepts any live Creature: friendly NPCs (guides, merchants) select for talk UI,
-        // Attackable is attack-only, and other players select so their nameplate and target window work.
-        if (target.Kind is not (ZoneEntityKind.Npc or ZoneEntityKind.Player) || target.CurHp <= 0)
-            return "target";
+        // Mobius NpcAction.setTarget accepts dead creatures (attack is gated separately).
+        // Mobius ItemAction also targets ground drops before pickup — rejecting them with "target"
+        // was the reject spam after inventory drops.
+        if (target.Kind is not (ZoneEntityKind.Npc or ZoneEntityKind.Player or ZoneEntityKind.GroundItem))
+            return null;
         if (!VisibleTo(session.ObjectId, targetObjectId))
-            return "target";
+            return null;
 
         session.SelectedTargetId = targetObjectId;
         PublishTargetSelection(session, player, target);
@@ -107,26 +108,31 @@ public sealed partial class ZoneWorld
     /// </summary>
     void PublishTargetSelection(ZoneSession session, ZoneEntity player, ZoneEntity target)
     {
-        int colour = InterludeStatus.TargetColor(player.Level, target.Level, IsAutoAttackable(target));
+        bool creature = target.Kind is ZoneEntityKind.Npc or ZoneEntityKind.Player;
+        int colour = creature
+            ? InterludeStatus.TargetColor(player.Level, target.Level, IsAutoAttackable(target))
+            : 0;
 
         if (NetBridge == null)
             return;
 
         int[] self = [player.ObjectId];
-        NetBridge.FanoutStatusUpdate(self, new Fineage.Net.Contract.StatusUpdateNetMsg
+        if (creature)
         {
-            EntityValue = (ulong)(uint)target.ObjectId,
-            EntityGeneration = 1,
-            AttributeIds = [InterludeStatus.MaxHp, InterludeStatus.CurHp],
-            Values = [target.MaxHp, target.CurHp]
-        });
+            NetBridge.FanoutStatusUpdate(self, new StatusUpdateMsg
+            {
+                ObjectId = target.ObjectId,
+                AttributeIds = [InterludeStatus.MaxHp, InterludeStatus.CurHp],
+                Values = [target.MaxHp, target.CurHp]
+            });
+            // Mobius PartySpelled on setTarget — TargetStatus icons (debuffs + spoil mark).
+            if (target.Abnormals.Count > 0 || target.SpoilerObjectId != 0)
+                NetBridge.FanoutAbnormalStatusUpdate(self, AbnormalFor(target));
+        }
+
         // Net has no MyTargetSelected opcode: TargetSelected (0x030F) is its self-side mirror, so it carries the
         // same id + colour. Mobius also broadcasts TargetSelected to peers; that fanout stays out of scope here.
-        NetBridge.FanoutTargetSelected(self, new Fineage.Net.Contract.TargetSelectedNetMsg
-        {
-            TargetObjectId = target.ObjectId,
-            ColorHint = colour
-        });
+        NetBridge.FanoutTargetSelected(self, target.ObjectId, colour);
     }
 
     /// <summary>
@@ -143,8 +149,10 @@ public sealed partial class ZoneWorld
         };
 
     /// <summary>
-    /// Mobius attack gate: NPCs follow the template flag; another living player is always swingable
-    /// (peace zones not imported). Attacking a white player raises the attacker's PvP flag.
+    /// Mobius attack gate for an explicit AttackRequest: another living player is always swingable
+    /// (peace zones not imported); any living NPC is swingable because AttackRequest is only sent when
+    /// the client intends to force-attack (ctrl / attack hotkey). Accidental merchant clicks stay on
+    /// the talk path and never reach here. Attacking a white player raises the attacker's PvP flag.
     /// </summary>
     static bool IsAttackable(ZoneEntity attacker, ZoneEntity target)
     {
@@ -152,7 +160,7 @@ public sealed partial class ZoneWorld
             return false;
         return target.Kind switch
         {
-            ZoneEntityKind.Npc => target.Attackable,
+            ZoneEntityKind.Npc => true,
             ZoneEntityKind.Player => !ReferenceEquals(attacker, target),
             _ => false
         };
@@ -258,421 +266,4 @@ public sealed partial class ZoneWorld
         return null;
     }
 
-    // Physical stats. Players: class template values (same as UserInfo); NPCs: Mobius npcs.json.
-    // TODO(combat parity): STR/level/weapon/armor/buff stat pipeline.
-    int PlayerPAtkSpd(ZoneEntity player) => PlayerStats(player).PAtkSpd;
-
-    long PlayerAttackTimeMs(int objectId) =>
-        _byId.TryGetValue(objectId, out var p) ? ZoneCombat.AttackTimeMs(PlayerPAtkSpd(p)) : ZoneCombat.AutoAttackIntervalMs;
-
-    double PlayerPAtk(ZoneEntity player) => PlayerStats(player).PAtk;
-
-    double PlayerPDef(ZoneEntity player) => PlayerStats(player).PDef;
-
-    int PlayerReach(ZoneEntity player) => ZoneCombat.PlayerAttackReach(PlayerStats(player).AttackRange);
-
-    /// <summary>
-    /// One physical swing from a player. A monster target rolls against its template P.Def / evasion / shield; a player
-    /// target rolls against the same player stat pipeline an incoming mob swing uses (<see cref="PlayerStats"/>), so a
-    /// duel is the same math as PvE with the target's own defence. Mobius applies the same
-    /// <c>calcPhysicalDam</c>, only the stats behind it change.
-    /// </summary>
-    (int Damage, byte Flags) RollPlayerMelee(ZoneEntity player, PlayerCombatStats ps, ZoneEntity target, bool soulshot)
-    {
-        double pDef;
-        double evasion;
-        double shieldRate;
-        int shieldDef;
-        if (target.Kind == ZoneEntityKind.Npc)
-        {
-            pDef = NpcPDef(target);
-            evasion = NpcEvasion(target);
-            shieldRate = NpcShieldRate(target);
-            shieldDef = target.ShieldDef;
-        }
-        else
-        {
-            var ts = PlayerStats(target);
-            pDef = Math.Max(1d, ts.PDef);
-            evasion = ts.Evasion;
-            shieldRate = ts.ShieldRate;
-            shieldDef = ts.ShieldDef;
-        }
-
-        var defenceTraits = target.Kind == ZoneEntityKind.Npc ? target.DefenceTraits : null;
-        var attackTraits = AttackTraitCatalog.FromAbnormals(player.Abnormals.Select(a => (a.Id, a.SkillLevel)));
-        return ZoneCombat.RollMelee(_combatRandom, ps.PAtk, pDef,
-            ps.Accuracy, evasion, ps.CritRate, ps.RandomDamage,
-            soulshot, (int)ps.WeaponGrade, shieldRate, shieldDef, ps.Weapon == Fineage.Game.WeaponType.Bow,
-            ZoneCombat.HitConditionBonus(player.X, player.Y, player.Z, target.X, target.Y, target.Z, target.Heading, IsNight),
-            ps.CritDmg,
-            ZoneCombat.AttackTraitBonus(ps.Weapon, defenceTraits, attackTraits));
-    }
-
-    double NpcPDef(ZoneEntity npc) =>
-        Math.Max(1d, StatMods(npc).Apply(CombatStat.PDef, npc.PDef > 0 ? npc.PDef : Math.Max(1, npc.Level) * 40d));
-
-    int NpcPAtkSpd(ZoneEntity npc) =>
-        Math.Max(1, StatMods(npc).Apply(CombatStat.PAtkSpd, npc.PAtkSpd > 0 ? npc.PAtkSpd : ZoneCombat.DefaultNpcPAtkSpd));
-
-    (int Damage, byte Flags) NpcMeleeRoll(ZoneEntity npc, ZoneEntity player)
-    {
-        if (npc.PAtk <= 0)
-            return (ZoneCombat.MobMeleeDamage(npc.Level), 0);
-        var ps = PlayerStats(player);
-        npc.Heading = ZoneCombat.HeadingFrom(npc.X, npc.Y, player.X, player.Y);
-        // Mobius Npc.rechargeShots(physical): chance vs SoulShotRate, then stock--; charged for this swing.
-        bool ss = TryNpcSoulshot(npc);
-        return ZoneCombat.RollMelee(_combatRandom, StatMods(npc).Apply(CombatStat.PAtk, npc.PAtk), ps.PDef, NpcAccuracy(npc), ps.Evasion,
-            NpcCritPermille(npc), npc.RandomDamage, ss, 0, ps.ShieldRate, ps.ShieldDef, false,
-            ZoneCombat.HitConditionBonus(npc.X, npc.Y, npc.Z, player.X, player.Y, player.Z, player.Heading, IsNight),
-            StatMods(npc).Apply(CombatStat.CritDmg, 1d));
-    }
-
-    /// <summary>Mobius <c>Npc.rechargeShots(true, false)</c>: fire one soulshot if stock and chance allow.</summary>
-    bool TryNpcSoulshot(ZoneEntity npc)
-    {
-        if (npc.NpcSoulShotLeft <= 0 || npc.NpcSoulShotChance <= 0)
-            return false;
-        if (_combatRandom.Next(100) >= npc.NpcSoulShotChance)
-            return false;
-        npc.NpcSoulShotLeft--;
-        return true;
-    }
-
-    Task? _combatLoop;
-
-    /// <summary>One live combat-loop tick (movement, hits, player auto-attack / approach, casts, mobs, corpses).</summary>
-    internal async Task RunPlayerCombatTickAsync(CancellationToken ct)
-    {
-        lock (_gate)
-        {
-            long now = _clock().ToUnixTimeMilliseconds();
-            TickPlayerMovement(now);
-            TickNpcMovement(now);
-            TickPendingHits(now);
-            TickMeleeHits(now);
-            TickPvpFlags(now);
-            TickAutoAttacks();
-            TickPendingCasts(now);
-            TickQueuedMoves(now);
-            TickPendingPickups(now);
-            TickMobAttacks(now);
-            TickCorpseDecay(now);
-            TickGroundExpiry(now);
-        }
-        await Task.CompletedTask.ConfigureAwait(false);
-    }
-
-    async Task CombatLoopAsync(CancellationToken ct)
-    {
-        using var timer = new PeriodicTimer(TimeSpan.FromMilliseconds(ZoneCombat.AutoAttackTickMs));
-        try
-        {
-            while (await timer.WaitForNextTickAsync(ct).ConfigureAwait(false))
-            {
-                await RunPlayerCombatTickAsync(ct).ConfigureAwait(false);
-            }
-        }
-        catch (OperationCanceledException)
-        {
-        }
-    }
-
-    void TickAutoAttacks()
-    {
-        long now = _clock().ToUnixTimeMilliseconds();
-        foreach (var player in Players().ToList())
-        {
-            var session = player.Session;
-            if (session == null || session.AutoAttackTargetId <= 0)
-                continue;
-            AdvanceMove(player, now); // Net timed approach: measure reach from where the pawn really is now
-            int targetId = session.AutoAttackTargetId;
-            if (player.Dead || !_byId.TryGetValue(targetId, out var target) || target.CurHp <= 0 || session.SelectedTargetId != targetId)
-            {
-                session.AutoAttackTargetId = 0;
-                session.ClearApproach();
-                continue;
-            }
-            if (!VisibleTo(player.ObjectId, targetId))
-            {
-                session.AutoAttackTargetId = 0;
-                session.ClearApproach();
-                continue;
-            }
-
-            // Mid-run: repath if the target drifted, or if we stopped short of reach (geo wall / failed path).
-            if (session.ApproachTargetId == targetId && now < session.ApproachArriveUnixMs)
-            {
-                bool targetMoved = !ZoneCombat.Within(target.X, target.Y, session.ApproachTargetX, session.ApproachTargetY,
-                    ZoneCombat.ApproachRepathDistance);
-                bool stuckShort = !player.MoveActive
-                    && !ZoneCombat.Within(player.X, player.Y, target.X, target.Y, PlayerReach(player));
-                if (targetMoved || stuckShort)
-                {
-                    long re = ApproachTarget(player, target, PlayerReach(player));
-                    if (re < 0)
-                    {
-                        session.AutoAttackTargetId = 0;
-                        session.ClearApproach();
-                        SendActionFailed(player);
-                        continue;
-                    }
-                    session.NextAutoAttackUnixMs = now + re;
-                }
-                continue;
-            }
-
-            if (now < session.NextAutoAttackUnixMs)
-                continue;
-            if (!ZoneCombat.Within(player.X, player.Y, target.X, target.Y, PlayerReach(player)))
-            {
-                // Target moved away: Mobius re-issues moveToPawn and keeps the attack intention.
-                long ms = ApproachTarget(player, target, PlayerReach(player));
-                if (ms < 0)
-                {
-                    session.AutoAttackTargetId = 0;
-                    session.ClearApproach();
-                    SendActionFailed(player);
-                    continue;
-                }
-                session.NextAutoAttackUnixMs = now + ms;
-                continue;
-            }
-            session.ClearApproach();
-            session.NextAutoAttackUnixMs = now + PlayerAttackTimeMs(player.ObjectId);
-            if (TryAttack(session, targetId) != null)
-                session.AutoAttackTargetId = 0;
-        }
-    }
-
-    static StatusUpdateMsg StatusFor(ZoneEntity entity) => new()
-    {
-        ObjectId = entity.ObjectId,
-        AttributeIds = [InterludeStatus.CurHp, InterludeStatus.MaxHp],
-        Values = [entity.CurHp, entity.MaxHp]
-    };
-
-    readonly List<PendingMeleeHit> _meleeHits = new();
-
-    void QueueAttackerDamageLine(ZoneEntity attacker, ZoneEntity target, int damage)
-    {
-        // Mobius YOU_HIT_S1_FOR_S2_DAMAGE goes to the attacker only, never to watchers.
-        if (damage <= 0 || attacker.Session == null || NetBridge == null)
-            return;
-
-        NetBridge.FanoutSystemMessage(
-            [attacker.ObjectId],
-            CombatLines.ToNet(CombatLines.HitTarget(target.Name, damage)));
-    }
-
-    void FanoutAttack(ZoneEntity attacker, ZoneEntity target, AttackMsg attack)
-    {
-        List<int>? netWatchers = null;
-        foreach (var watcher in Players())
-        {
-            if (watcher.Session == null)
-                continue;
-            bool cares = ReferenceEquals(watcher, attacker) ||
-                         watcher.Knownlist.Contains(target.ObjectId) ||
-                         watcher.Knownlist.Contains(attacker.ObjectId);
-            if (!cares)
-                continue;
-            netWatchers ??= [];
-            netWatchers.Add(watcher.ObjectId);
-        }
-
-        if (netWatchers is { Count: > 0 } && NetBridge != null)
-        {
-            NetBridge.FanoutAttackState(netWatchers, new Fineage.Net.Contract.AttackStateMsg
-            {
-                AttackerValue = (ulong)(uint)attack.AttackerObjectId,
-                AttackerGeneration = 1,
-                TargetValue = (ulong)(uint)attack.TargetObjectId,
-                TargetGeneration = 1,
-                Damage = attack.Damage,
-                Flags = attack.Flags,
-                AttackerX = attack.AttackerX,
-                AttackerY = attack.AttackerY,
-                AttackerZ = attack.AttackerZ,
-                TargetX = attack.TargetX,
-                TargetY = attack.TargetY,
-                TargetZ = attack.TargetZ
-            });
-        }
-    }
-
-    void TickMeleeHits(long now)
-    {
-        if (_meleeHits.Count == 0)
-            return;
-        var due = _meleeHits.Where(h => h.DueUnixMs <= now).ToList();
-        if (due.Count == 0)
-            return;
-        _meleeHits.RemoveAll(h => h.DueUnixMs <= now);
-        foreach (var hit in due)
-            ResolveMeleeHit(hit, now);
-    }
-
-    void ResolveMeleeHit(PendingMeleeHit hit, long now)
-    {
-        if (!_byId.TryGetValue(hit.AttackerId, out var attacker) || attacker.CurHp <= 0 || attacker.Dead)
-            return;
-        if (!_byId.TryGetValue(hit.TargetId, out var target) || target.CurHp <= 0 || target.Dead)
-            return;
-        // Mobius onHitTimer: target ran out of reach during the swing -> no damage.
-        int reach = (attacker.Kind == ZoneEntityKind.Npc ? ZoneCombat.MobAttackReach(attacker.AttackRange) : PlayerReach(attacker)) + ZoneCombat.HitRangeTolerance;
-        if (!ZoneCombat.Within(attacker.X, attacker.Y, target.X, target.Y, reach))
-            return;
-
-        if (hit.Damage <= 0)
-        {
-            // Miss (Attack carried HitFlagMiss): no HP change / StatusUpdate, but the fight and hate still start.
-            attacker.CombatUntilUnixMs = now + ClanProtocol.CombatStanceMillis;
-            target.CombatUntilUnixMs = now + ClanProtocol.CombatStanceMillis;
-            if (target.Kind == ZoneEntityKind.Npc)
-                AddHate(target, attacker);
-            return;
-        }
-
-        target.CurHp = Math.Max(0, target.CurHp - hit.Damage);
-
-        if (target.Kind == ZoneEntityKind.Npc)
-        {
-            FanoutVitals(target, StatusFor(target));
-            RecordDamage(target, attacker, hit.Damage);
-            AddHate(target, attacker, DamageHate(hit.Damage, target.Level));
-            attacker.CombatUntilUnixMs = now + ClanProtocol.CombatStanceMillis;
-            if (target.CurHp <= 0)
-            {
-                RemoveDeadNpc(target, killer: attacker);
-                GrantKillReward(attacker, target);
-            }
-            return;
-        }
-
-        target.CombatUntilUnixMs = now + ClanProtocol.CombatStanceMillis;
-        FanoutVitals(target, PlayerVitalsStatus(target));
-        if (attacker.Kind == ZoneEntityKind.Player && hit.Damage > 0)
-            UpdatePvPStatus(attacker, target, now);
-        if (target.CurHp > 0)
-            MaybeBreakCast(target, hit.Damage);
-        if (target.CurHp <= 0)
-        {
-            attacker.HateList.Remove(target.ObjectId);
-            attacker.AggroTargetId = MostHated(attacker);
-            if (target.Session != null)
-                target.Session.AutoAttackTargetId = 0;
-            ApplyPlayerDeath(target, attacker.ObjectId);
-        }
-    }
-
-    void RemoveDeadNpc(ZoneEntity npc, ZoneEntity? killer = null)
-    {
-        // Kill quest steps are not applied here. IQuestKillHook is the later combat entry.
-        int objectId = npc.ObjectId;
-        int npcId = npc.NpcId;
-        int x = npc.X;
-        int y = npc.Y;
-        int z = npc.Z;
-
-        var watchers = new List<ZoneEntity>();
-        foreach (var player in Players())
-        {
-            if (player.Knownlist.Contains(objectId))
-                watchers.Add(player);
-        }
-
-        // Mobius Creature.doDie -> broadcastPacket(new Die(this)): client plays the death animation.
-        npc.AggroTargetId = 0;
-        npc.Chasing = false;
-        List<int>? netWatchers = null;
-        foreach (var watcher in watchers)
-        {
-            if (watcher.Session == null)
-                continue;
-            netWatchers ??= [];
-            netWatchers.Add(watcher.ObjectId);
-            if (watcher.Session.SelectedTargetId == objectId)
-                watcher.Session.AutoAttackTargetId = 0;
-        }
-
-        if (netWatchers is { Count: > 0 } && NetBridge != null)
-        {
-            NetBridge.FanoutDie(netWatchers, new Fineage.Net.Contract.EntityDieMsg
-            {
-                EntityValue = (ulong)(uint)objectId,
-                EntityGeneration = 1,
-                KillerObjectId = killer?.ObjectId ?? 0
-            });
-        }
-
-        npc.SweepItems.Clear();
-        if (npc.SpoilerObjectId != 0 && _dropCatalog.TryGet(npcId, out var definition))
-        {
-            foreach (var stack in DropRoller.RollCorpse(definition, _dropRandom, _dropRates))
-                npc.SweepItems.Add(stack);
-        }
-
-        SpawnDeathDrops(npcId, x, y, z, killer, watchers);
-        bool spoiled = npc.SpoilerObjectId != 0;
-        npc.CorpseAwaitingSweep = npc.SweepItems.Count > 0;
-        if (spoiled)
-            ZoneLog.Info($"corpse object={objectId} spoiler={npc.SpoilerObjectId} sweep={npc.SweepItems.Count}");
-        // Mobius DecayTaskManager: DefaultCorpseTime, + SpoiledCorpseExtendTime when spoiled; unswept spoil decays with the corpse.
-        npc.DecayAtMs = _clock().ToUnixTimeMilliseconds() + _spoilRules.CorpseMs(spoiled);
-    }
-
-    void DespawnNpc(ZoneEntity npc)
-    {
-        int objectId = npc.ObjectId;
-
-        _aoi.Leave(objectId);
-        _byId.Remove(objectId);
-        npc.SpoilerObjectId = 0;
-        npc.SweepItems.Clear();
-        npc.CorpseAwaitingSweep = false;
-        npc.DecayAtMs = 0;
-        npc.Chasing = false;
-        npc.AggroTargetId = 0;
-        npc.LastAiTickMs = 0;
-        ScheduleRespawn(objectId);
-
-        List<int>? netWatchers = null;
-        foreach (var player in Players())
-        {
-            if (player.Session == null)
-                continue;
-            if (player.Knownlist.Remove(objectId))
-            {
-                netWatchers ??= [];
-                netWatchers.Add(player.ObjectId);
-            }
-            if (player.Session.SelectedTargetId == objectId)
-                player.Session.SelectedTargetId = 0;
-        }
-
-        if (netWatchers is { Count: > 0 } && NetBridge != null)
-        {
-            NetBridge.FanoutEntityDespawn(netWatchers, new Fineage.Net.Contract.EntityDespawnMsg
-            {
-                EntityValue = (ulong)(uint)objectId,
-                EntityGeneration = 1
-            });
-        }
-    }
-
-    bool VisibleTo(int observerId, int otherId)
-    {
-        if (!SameInstance(observerId, otherId))
-            return false;
-        foreach (int id in _aoi.GetVisible(observerId))
-        {
-            if (id == otherId)
-                return true;
-        }
-
-        return false;
-    }
 }

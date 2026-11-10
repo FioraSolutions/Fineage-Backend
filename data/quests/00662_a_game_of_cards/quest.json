@@ -1,0 +1,116 @@
+{
+  "id": 662,
+  "name": "A Game of Cards",
+  "repeatable": true,
+  "abortable": true,
+  "questItems": [],
+  "dialogs": [
+    {
+      "npcId": 30845,
+      "hook": "talk",
+      "when": "absent",
+      "htmlFile": "30845-event-30845-03-000.htm",
+      "minLevel": 61
+    },
+    {
+      "npcId": 30845,
+      "hook": "event",
+      "when": "absent",
+      "event": "30845-03",
+      "minLevel": 61,
+      "ops": [
+        {
+          "op": "create"
+        },
+        {
+          "op": "start"
+        },
+        {
+          "op": "set_cond",
+          "cond": 1
+        }
+      ],
+      "htmlFile": "30845-event-30845-03-000.htm"
+    },
+    {
+      "npcId": 30845,
+      "hook": "event",
+      "when": "absent",
+      "event": "30845-03",
+      "ops": [
+        {
+          "op": "create"
+        },
+        {
+          "op": "start"
+        },
+        {
+          "op": "set_cond",
+          "cond": 1
+        }
+      ],
+      "htmlFile": "30845-event-30845-03-001.htm"
+    },
+    {
+      "npcId": 30845,
+      "hook": "event",
+      "when": "absent",
+      "event": "30845-06",
+      "htmlFile": "30845-event-30845-06-002.htm"
+    },
+    {
+      "npcId": 30845,
+      "hook": "event",
+      "when": "absent",
+      "event": "30845-08",
+      "htmlFile": "30845-event-30845-08-003.htm"
+    },
+    {
+      "npcId": 30845,
+      "hook": "event",
+      "when": "absent",
+      "event": "30845-09",
+      "htmlFile": "30845-event-30845-09-004.htm"
+    },
+    {
+      "npcId": 30845,
+      "hook": "event",
+      "when": "absent",
+      "event": "30845-09a",
+      "htmlFile": "30845-event-30845-09a-005.htm"
+    },
+    {
+      "npcId": 30845,
+      "hook": "event",
+      "when": "absent",
+      "event": "30845-09b",
+      "htmlFile": "30845-event-30845-09b-006.htm"
+    },
+    {
+      "npcId": 30845,
+      "hook": "event",
+      "when": "absent",
+      "event": "30845-10",
+      "htmlFile": "30845-event-30845-10-007.htm"
+    },
+    {
+      "npcId": 30845,
+      "hook": "event",
+      "when": "absent",
+      "event": "30845-07",
+      "ops": [
+        {
+          "op": "complete"
+        }
+      ],
+      "htmlFile": "30845-event-30845-07-008.htm"
+    },
+    {
+      "npcId": 30845,
+      "hook": "event",
+      "when": "absent",
+      "event": "30845-11",
+      "htmlFile": "30845-event-30845-11-009.htm"
+    }
+  ]
+}

@@ -1,0 +1,206 @@
+{
+  "id": 380,
+  "name": "Bring Out the Flavor of Ingredients!",
+  "repeatable": true,
+  "abortable": true,
+  "questItems": [
+    5895,
+    5896,
+    5897
+  ],
+  "dialogs": [
+    {
+      "npcId": 30069,
+      "hook": "talk",
+      "when": "absent",
+      "htmlFile": "30069-talk-000.htm"
+    },
+    {
+      "npcId": 30069,
+      "hook": "talk",
+      "when": "started",
+      "cond": 1,
+      "ops": [
+        {
+          "op": "take_item",
+          "itemId": 1831,
+          "count": 2
+        },
+        {
+          "op": "set_cond",
+          "cond": 5
+        }
+      ],
+      "htmlFile": "30069-talk-c1-001.htm"
+    },
+    {
+      "npcId": 30069,
+      "hook": "talk",
+      "when": "started",
+      "cond": 2,
+      "ops": [
+        {
+          "op": "take_item",
+          "itemId": 1831,
+          "count": 2
+        },
+        {
+          "op": "set_cond",
+          "cond": 5
+        }
+      ],
+      "htmlFile": "30069-talk-c2-002.htm"
+    },
+    {
+      "npcId": 30069,
+      "hook": "talk",
+      "when": "started",
+      "cond": 3,
+      "ops": [
+        {
+          "op": "take_item",
+          "itemId": 1831,
+          "count": 2
+        },
+        {
+          "op": "set_cond",
+          "cond": 5
+        }
+      ],
+      "htmlFile": "30069-talk-c3-003.htm"
+    },
+    {
+      "npcId": 30069,
+      "hook": "talk",
+      "when": "started",
+      "cond": 4,
+      "ops": [
+        {
+          "op": "take_item",
+          "itemId": 1831,
+          "count": 2
+        },
+        {
+          "op": "set_cond",
+          "cond": 5
+        }
+      ],
+      "htmlFile": "30069-talk-c4-004.htm"
+    },
+    {
+      "npcId": 30069,
+      "hook": "talk",
+      "when": "started",
+      "cond": 5,
+      "ops": [
+        {
+          "op": "set_cond",
+          "cond": 6
+        }
+      ],
+      "htmlFile": "30069-talk-c5-005.htm"
+    },
+    {
+      "npcId": 30069,
+      "hook": "talk",
+      "when": "started",
+      "cond": 6,
+      "ops": [
+        {
+          "op": "set_cond",
+          "cond": 7
+        }
+      ],
+      "htmlFile": "30069-talk-c6-006.htm"
+    },
+    {
+      "npcId": 30069,
+      "hook": "talk",
+      "when": "started",
+      "cond": 7,
+      "ops": [
+        {
+          "op": "set_cond",
+          "cond": 8
+        }
+      ],
+      "htmlFile": "30069-talk-c7-007.htm"
+    },
+    {
+      "npcId": 30069,
+      "hook": "talk",
+      "when": "started",
+      "cond": 8,
+      "ops": [
+        {
+          "op": "complete"
+        }
+      ],
+      "htmlFile": "30069-talk-c8-008.htm"
+    },
+    {
+      "npcId": 30069,
+      "hook": "talk",
+      "when": "started",
+      "cond": 9,
+      "htmlFile": "30069-talk-c9-009.htm"
+    },
+    {
+      "npcId": 30069,
+      "hook": "event",
+      "when": "absent",
+      "event": "30069-03",
+      "htmlFile": "30069-event-30069-03-010.htm"
+    },
+    {
+      "npcId": 30069,
+      "hook": "event",
+      "when": "absent",
+      "event": "30069-04",
+      "htmlFile": "30069-event-30069-04-011.htm"
+    },
+    {
+      "npcId": 30069,
+      "hook": "event",
+      "when": "absent",
+      "event": "30069-06",
+      "htmlFile": "30069-event-30069-06-012.htm"
+    },
+    {
+      "npcId": 30069,
+      "hook": "event",
+      "when": "absent",
+      "event": "30069-05",
+      "ops": [
+        {
+          "op": "create"
+        },
+        {
+          "op": "start"
+        },
+        {
+          "op": "set_cond",
+          "cond": 1
+        }
+      ],
+      "htmlFile": "30069-event-30069-05-013.htm"
+    },
+    {
+      "npcId": 30069,
+      "hook": "event",
+      "when": "absent",
+      "event": "30069-13",
+      "ops": [
+        {
+          "op": "give_item",
+          "itemId": 5959,
+          "count": 1
+        },
+        {
+          "op": "complete"
+        }
+      ],
+      "htmlFile": "30069-event-30069-13-014.htm"
+    }
+  ]
+}

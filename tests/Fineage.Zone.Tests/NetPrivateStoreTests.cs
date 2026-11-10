@@ -56,8 +56,8 @@ public sealed class NetPrivateStoreTests
         Assert.True(sellerEntity.Sitting);
         Assert.Equal("WTS", sellerEntity.PrivateStoreMessage);
 
-        var info = Assert.IsType<Fineage.Net.Contract.PrivateStoreInfoNetMsg>(
-            Last(rec, nameof(INetPresenceBridge.FanoutPrivateStoreInfo)));
+        var info = Assert.IsType<Fineage.Protocol.PrivateStoreInfoMsg>(
+            Last(rec, nameof(IWorldEventPublisher.FanoutPrivateStoreInfo)));
         Assert.Equal(sellerEntity.ObjectId, info.ObjectId);
         Assert.Equal(PrivateStoreProtocol.TypeSell, info.StoreType);
 
@@ -66,8 +66,8 @@ public sealed class NetPrivateStoreTests
             StoreObjectId = sellerEntity.ObjectId
         }, default));
 
-        var list = Assert.IsType<Fineage.Net.Contract.PrivateStoreListSellNetMsg>(
-            Last(rec, nameof(INetPresenceBridge.FanoutPrivateStoreListSell)));
+        var list = Assert.IsType<Fineage.Protocol.PrivateStoreListSellMsg>(
+            Last(rec, nameof(IWorldEventPublisher.FanoutPrivateStoreListSell)));
         Assert.Equal(sellerEntity.ObjectId, list.StoreObjectId);
         Assert.Single(list.Items);
         Assert.Equal(objectId, list.Items[0].InventoryObjectId);
@@ -171,8 +171,8 @@ public sealed class NetPrivateStoreTests
             StoreObjectId = buyerEntity.ObjectId
         }, default));
 
-        var list = Assert.IsType<Fineage.Net.Contract.PrivateStoreListBuyNetMsg>(
-            Last(rec, nameof(INetPresenceBridge.FanoutPrivateStoreListBuy)));
+        var list = Assert.IsType<Fineage.Protocol.PrivateStoreListBuyMsg>(
+            Last(rec, nameof(IWorldEventPublisher.FanoutPrivateStoreListBuy)));
         Assert.Equal(buyerEntity.ObjectId, list.StoreObjectId);
         Assert.Equal(itemId, Assert.Single(list.Items).ItemId);
 
@@ -224,8 +224,8 @@ public sealed class NetPrivateStoreTests
         {
             StoreObjectId = sellerEntity.ObjectId
         }, default));
-        Assert.Equal(1, Assert.IsType<Fineage.Net.Contract.PrivateStoreListSellNetMsg>(
-            Last(rec, nameof(INetPresenceBridge.FanoutPrivateStoreListSell))).Packaged);
+        Assert.Equal(1, Assert.IsType<Fineage.Protocol.PrivateStoreListSellMsg>(
+            Last(rec, nameof(IWorldEventPublisher.FanoutPrivateStoreListSell))).Packaged);
 
         Assert.Equal(PrivateStoreProtocol.Package, await kit.World.TryPrivateStoreBuyAsync(buyer, new PrivateStoreBuyMsg
         {

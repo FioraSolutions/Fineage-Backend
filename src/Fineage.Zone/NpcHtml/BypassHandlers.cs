@@ -86,9 +86,15 @@ public sealed class QuestBypassHandler : IBypassHandler
             return BypassReply.QuestList();
         if (!int.TryParse(args[1], out int questId) || questId <= 0)
         {
-            // Named Mobius script (village_master etc.). The world serves the ones it knows and falls back to Unavailable.
+            // Named Mobius script (SymbolMaker, village_master, …). Keep the full event tail so
+            // "Wear 4453" / "Cancel 1" survive — args[2] alone dropped the dye id.
             if (args[1].Length <= 64 && args[1].All(c => char.IsAsciiLetterOrDigit(c) || c == '_'))
-                return BypassReply.Script(args[1], args.Length > 2 ? args[2] : "");
+            {
+                string scriptEvent = args.Length > 2
+                    ? string.Join(' ', args.Skip(2))
+                    : "";
+                return BypassReply.Script(args[1], scriptEvent);
+            }
             return BypassReply.Page(Unavailable);
         }
         if (args.Length == 2)

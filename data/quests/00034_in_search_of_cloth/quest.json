@@ -1,0 +1,199 @@
+{
+  "id": 34,
+  "name": "In Search of Cloth",
+  "repeatable": false,
+  "abortable": true,
+  "questItems": [
+    7161,
+    7528
+  ],
+  "dialogs": [
+    {
+      "npcId": 30088,
+      "hook": "talk",
+      "when": "absent",
+      "htmlFile": "30088-talk-000.htm"
+    },
+    {
+      "npcId": 30088,
+      "hook": "talk",
+      "when": "absent",
+      "htmlFile": "30088-talk-001.htm"
+    },
+    {
+      "npcId": 30088,
+      "hook": "talk",
+      "when": "started",
+      "cond": 1,
+      "htmlFile": "30088-talk-c1-002.htm"
+    },
+    {
+      "npcId": 30088,
+      "hook": "talk",
+      "when": "started",
+      "cond": 2,
+      "htmlFile": "30088-talk-c2-003.htm"
+    },
+    {
+      "npcId": 30088,
+      "hook": "talk",
+      "when": "started",
+      "cond": 3,
+      "htmlFile": "30088-talk-c3-004.htm"
+    },
+    {
+      "npcId": 30088,
+      "hook": "talk",
+      "when": "started",
+      "cond": 6,
+      "htmlFile": "30088-talk-c6-005.htm"
+    },
+    {
+      "npcId": 30088,
+      "hook": "talk",
+      "when": "started",
+      "cond": 6,
+      "htmlFile": "30088-talk-c6-006.htm"
+    },
+    {
+      "npcId": 30294,
+      "hook": "talk",
+      "when": "started",
+      "cond": 1,
+      "htmlFile": "30294-talk-c1-007.htm"
+    },
+    {
+      "npcId": 30294,
+      "hook": "talk",
+      "when": "started",
+      "cond": 2,
+      "htmlFile": "30294-talk-c2-008.htm"
+    },
+    {
+      "npcId": 30165,
+      "hook": "talk",
+      "when": "started",
+      "cond": 3,
+      "htmlFile": "30165-talk-c3-009.htm"
+    },
+    {
+      "npcId": 30165,
+      "hook": "talk",
+      "when": "started",
+      "cond": 4,
+      "htmlFile": "30165-talk-c4-010.htm"
+    },
+    {
+      "npcId": 30165,
+      "hook": "talk",
+      "when": "started",
+      "cond": 5,
+      "htmlFile": "30165-talk-c5-011.htm"
+    },
+    {
+      "npcId": 30165,
+      "hook": "talk",
+      "when": "started",
+      "cond": 6,
+      "htmlFile": "30165-talk-c6-012.htm"
+    },
+    {
+      "npcId": 30088,
+      "hook": "event",
+      "when": "absent",
+      "event": "30088-03",
+      "ops": [
+        {
+          "op": "create"
+        },
+        {
+          "op": "start"
+        },
+        {
+          "op": "set_cond",
+          "cond": 1
+        }
+      ],
+      "htmlFile": "30088-event-30088-03-013.htm"
+    },
+    {
+      "npcId": 30088,
+      "hook": "event",
+      "when": "absent",
+      "event": "30294-02",
+      "ops": [
+        {
+          "op": "set_cond",
+          "cond": 2
+        }
+      ],
+      "htmlFile": "30088-event-30294-02-014.htm"
+    },
+    {
+      "npcId": 30088,
+      "hook": "event",
+      "when": "absent",
+      "event": "30088-06",
+      "ops": [
+        {
+          "op": "set_cond",
+          "cond": 3
+        }
+      ],
+      "htmlFile": "30088-event-30088-06-015.htm"
+    },
+    {
+      "npcId": 30088,
+      "hook": "event",
+      "when": "absent",
+      "event": "30165-02",
+      "ops": [
+        {
+          "op": "set_cond",
+          "cond": 4
+        }
+      ],
+      "htmlFile": "30088-event-30165-02-016.htm"
+    },
+    {
+      "npcId": 30088,
+      "hook": "event",
+      "when": "absent",
+      "event": "30165-05",
+      "htmlFile": "30088-event-30165-05-017.htm"
+    },
+    {
+      "npcId": 30088,
+      "hook": "event",
+      "when": "absent",
+      "event": "30088-10",
+      "hasItem": 7161,
+      "ops": [
+        {
+          "op": "take_item",
+          "itemId": 7161,
+          "count": 1
+        },
+        {
+          "op": "take_item",
+          "itemId": 1866,
+          "count": 3000
+        },
+        {
+          "op": "take_item",
+          "itemId": 1868,
+          "count": 5000
+        },
+        {
+          "op": "give_item",
+          "itemId": 7076,
+          "count": 1
+        },
+        {
+          "op": "complete"
+        }
+      ],
+      "htmlFile": "30088-event-30088-10-018.htm"
+    }
+  ]
+}

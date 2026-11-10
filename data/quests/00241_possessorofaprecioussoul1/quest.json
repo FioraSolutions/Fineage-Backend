@@ -1,0 +1,233 @@
+{
+  "id": 241,
+  "name": "PossessorOfAPreciousSoul1",
+  "repeatable": true,
+  "abortable": true,
+  "questItems": [],
+  "dialogs": [
+    {
+      "npcId": 31739,
+      "hook": "talk",
+      "when": "absent",
+      "maxLevel": 49,
+      "htmlFile": "31739-talk-000.htm"
+    },
+    {
+      "npcId": 31739,
+      "hook": "talk",
+      "when": "started",
+      "htmlFile": "31739-talk-001.htm"
+    },
+    {
+      "npcId": 31739,
+      "hook": "talk",
+      "when": "started",
+      "htmlFile": "31739-talk-002.htm"
+    },
+    {
+      "npcId": 31739,
+      "hook": "talk",
+      "when": "started",
+      "htmlFile": "31739-talk-003.htm"
+    },
+    {
+      "npcId": 31739,
+      "hook": "talk",
+      "when": "started",
+      "htmlFile": "31739-talk-004.htm"
+    },
+    {
+      "npcId": 31739,
+      "hook": "talk",
+      "when": "started",
+      "htmlFile": "31739-talk-005.htm"
+    },
+    {
+      "npcId": 31739,
+      "hook": "talk",
+      "when": "started",
+      "htmlFile": "31739-talk-006.htm"
+    },
+    {
+      "npcId": 31739,
+      "hook": "talk",
+      "when": "started",
+      "htmlFile": "31739-talk-007.htm"
+    },
+    {
+      "npcId": 31739,
+      "hook": "talk",
+      "when": "started",
+      "htmlFile": "31739-talk-008.htm"
+    },
+    {
+      "npcId": 30753,
+      "hook": "talk",
+      "when": "started",
+      "htmlFile": "30753-talk-009.htm"
+    },
+    {
+      "npcId": 30753,
+      "hook": "talk",
+      "when": "started",
+      "htmlFile": "30753-talk-010.htm"
+    },
+    {
+      "npcId": 30754,
+      "hook": "talk",
+      "when": "started",
+      "htmlFile": "30754-talk-011.htm"
+    },
+    {
+      "npcId": 30754,
+      "hook": "talk",
+      "when": "started",
+      "htmlFile": "30754-talk-012.htm"
+    },
+    {
+      "npcId": 31042,
+      "hook": "talk",
+      "when": "started",
+      "htmlFile": "31042-talk-013.htm"
+    },
+    {
+      "npcId": 31042,
+      "hook": "talk",
+      "when": "started",
+      "htmlFile": "31042-talk-014.htm"
+    },
+    {
+      "npcId": 31042,
+      "hook": "talk",
+      "when": "started",
+      "htmlFile": "31042-talk-015.htm"
+    },
+    {
+      "npcId": 31042,
+      "hook": "talk",
+      "when": "started",
+      "htmlFile": "31042-talk-016.htm"
+    },
+    {
+      "npcId": 30692,
+      "hook": "talk",
+      "when": "started",
+      "htmlFile": "30692-talk-017.htm"
+    },
+    {
+      "npcId": 30692,
+      "hook": "talk",
+      "when": "started",
+      "htmlFile": "30692-talk-018.htm"
+    },
+    {
+      "npcId": 31742,
+      "hook": "talk",
+      "when": "started",
+      "htmlFile": "31742-talk-019.htm"
+    },
+    {
+      "npcId": 31742,
+      "hook": "talk",
+      "when": "started",
+      "htmlFile": "31742-talk-020.htm"
+    },
+    {
+      "npcId": 31742,
+      "hook": "talk",
+      "when": "started",
+      "htmlFile": "31742-talk-021.htm"
+    },
+    {
+      "npcId": 31742,
+      "hook": "talk",
+      "when": "started",
+      "htmlFile": "31742-talk-022.htm"
+    },
+    {
+      "npcId": 31744,
+      "hook": "talk",
+      "when": "started",
+      "htmlFile": "31744-talk-023.htm"
+    },
+    {
+      "npcId": 31744,
+      "hook": "talk",
+      "when": "started",
+      "htmlFile": "31744-talk-024.htm"
+    },
+    {
+      "npcId": 31336,
+      "hook": "talk",
+      "when": "started",
+      "htmlFile": "31336-talk-025.htm"
+    },
+    {
+      "npcId": 31336,
+      "hook": "talk",
+      "when": "started",
+      "htmlFile": "31336-talk-026.htm"
+    },
+    {
+      "npcId": 31336,
+      "hook": "talk",
+      "when": "started",
+      "htmlFile": "31336-talk-027.htm"
+    },
+    {
+      "npcId": 31336,
+      "hook": "talk",
+      "when": "started",
+      "htmlFile": "31336-talk-028.htm"
+    },
+    {
+      "npcId": 31743,
+      "hook": "talk",
+      "when": "started",
+      "htmlFile": "31743-talk-029.htm"
+    },
+    {
+      "npcId": 31743,
+      "hook": "talk",
+      "when": "started",
+      "htmlFile": "31743-talk-030.htm"
+    },
+    {
+      "npcId": 31740,
+      "hook": "talk",
+      "when": "started",
+      "htmlFile": "31740-talk-031.htm"
+    },
+    {
+      "npcId": 31740,
+      "hook": "talk",
+      "when": "started",
+      "htmlFile": "31740-talk-032.htm"
+    },
+    {
+      "npcId": 31740,
+      "hook": "talk",
+      "when": "started",
+      "htmlFile": "31740-talk-033.htm"
+    },
+    {
+      "npcId": 31272,
+      "hook": "talk",
+      "when": "started",
+      "htmlFile": "31272-talk-034.htm"
+    },
+    {
+      "npcId": 31272,
+      "hook": "talk",
+      "when": "started",
+      "hasItem": 6033,
+      "htmlFile": "31272-talk-035.htm"
+    },
+    {
+      "npcId": 31272,
+      "hook": "talk",
+      "when": "started",
+      "htmlFile": "31272-talk-036.htm"
+    }
+  ]
+}

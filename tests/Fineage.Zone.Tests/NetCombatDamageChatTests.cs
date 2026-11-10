@@ -39,20 +39,18 @@ public sealed class NetCombatDamageChatTests
         var (bridge, rec) = NetBridgeRecorder.Create();
         kit.World.NetBridge = bridge;
 
-        Assert.Null(await kit.World.TrySelectTargetAsync(
-            session, new SelectTargetMsg { TargetObjectId = MobId }, CancellationToken.None));
-        Assert.Null(await kit.World.TryAttackAsync(
-            session, new AttackRequestMsg { TargetObjectId = MobId }, CancellationToken.None));
+        Assert.Null(await kit.World.TrySelectTargetAsync(session, MobId, CancellationToken.None));
+        Assert.Null(await kit.World.TryAttackAsync(session, MobId, CancellationToken.None));
 
-        var attacks = rec.Of(nameof(INetPresenceBridge.FanoutAttackState))
-            .Select(args => Assert.IsType<AttackStateMsg>(args[1]))
+        var attacks = rec.Of(nameof(IWorldEventPublisher.FanoutAttackState))
+            .Select(args => Assert.IsType<Fineage.Protocol.AttackMsg>(args[1]))
             .ToList();
         var swing = Assert.Single(attacks);
 
-        var lines = rec.Of(nameof(INetPresenceBridge.FanoutSystemMessage));
+        var lines = rec.Of(nameof(IWorldEventPublisher.FanoutSystemMessage));
         var damageLines = lines
             .Select(args => (Watchers: Assert.IsAssignableFrom<IReadOnlyList<int>>(args[0]),
-                             Line: Assert.IsType<SystemMessageNetMsg>(args[1])))
+                             Line: Assert.IsType<SystemMessageMsg>(args[1])))
             .Where(entry => entry.Line.Id == CombatProtocol.HitTargetForDamage)
             .ToList();
 

@@ -56,16 +56,16 @@ public sealed class NetManufactureTests
 
         Assert.Equal(PrivateStoreProtocol.TypeManufacture, maker.PrivateStoreType);
         Assert.True(maker.Sitting);
-        var info = Assert.IsType<Fineage.Net.Contract.PrivateStoreInfoNetMsg>(
-            Last(rec, nameof(INetPresenceBridge.FanoutPrivateStoreInfo)));
+        var info = Assert.IsType<Fineage.Protocol.PrivateStoreInfoMsg>(
+            Last(rec, nameof(IWorldEventPublisher.FanoutPrivateStoreInfo)));
         Assert.Equal(PrivateStoreProtocol.TypeManufacture, info.StoreType);
 
         Assert.Null(await kit.World.TryPrivateStoreListAsync(customerSession, new PrivateStoreListRequestMsg
         {
             StoreObjectId = maker.ObjectId
         }, default));
-        var list = Assert.IsType<Fineage.Net.Contract.RecipeShopSellListNetMsg>(
-            Last(rec, nameof(INetPresenceBridge.FanoutRecipeShopSellList)));
+        var list = Assert.IsType<Fineage.Protocol.RecipeShopSellListMsg>(
+            Last(rec, nameof(IWorldEventPublisher.FanoutRecipeShopSellList)));
         Assert.Equal(maker.ObjectId, list.ManufacturerObjectId);
         Assert.Single(list.Items);
         Assert.Equal(RecipeListId, list.Items[0].RecipeId);
@@ -77,8 +77,8 @@ public sealed class NetManufactureTests
             RecipeId = RecipeListId
         }, default));
 
-        var result = Assert.IsType<Fineage.Net.Contract.RecipeShopItemInfoNetMsg>(
-            Last(rec, nameof(INetPresenceBridge.FanoutRecipeShopItemInfo)));
+        var result = Assert.IsType<Fineage.Protocol.RecipeShopItemInfoMsg>(
+            Last(rec, nameof(IWorldEventPublisher.FanoutRecipeShopItemInfo)));
         Assert.Equal(0, result.Result);
         Assert.Equal(0, customer.Inventory.CountOf(Stem));
         Assert.Equal(0, customer.Inventory.CountOf(IronOre));

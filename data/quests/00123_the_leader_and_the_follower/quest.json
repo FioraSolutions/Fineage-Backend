@@ -1,0 +1,299 @@
+{
+  "id": 123,
+  "name": "The Leader And The Follower",
+  "repeatable": false,
+  "abortable": true,
+  "questItems": [
+    8549,
+    8550
+  ],
+  "dialogs": [
+    {
+      "npcId": 31961,
+      "hook": "talk",
+      "when": "absent",
+      "htmlFile": "31961-talk-000.htm"
+    },
+    {
+      "npcId": 31961,
+      "hook": "talk",
+      "when": "absent",
+      "htmlFile": "31961-talk-001.htm"
+    },
+    {
+      "npcId": 31961,
+      "hook": "talk",
+      "when": "absent",
+      "minLevel": 19,
+      "htmlFile": "31961-talk-002.htm"
+    },
+    {
+      "npcId": 31961,
+      "hook": "talk",
+      "when": "started",
+      "htmlFile": "31961-talk-003.htm"
+    },
+    {
+      "npcId": 31961,
+      "hook": "talk",
+      "when": "started",
+      "htmlFile": "31961-talk-004.htm"
+    },
+    {
+      "npcId": 31961,
+      "hook": "talk",
+      "when": "started",
+      "htmlFile": "31961-talk-005.htm"
+    },
+    {
+      "npcId": 31961,
+      "hook": "talk",
+      "when": "started",
+      "htmlFile": "31961-talk-006.htm"
+    },
+    {
+      "npcId": 31961,
+      "hook": "talk",
+      "when": "started",
+      "ops": [
+        {
+          "op": "set",
+          "key": "memoState",
+          "value": "4"
+        },
+        {
+          "op": "set_cond",
+          "cond": 7
+        }
+      ],
+      "htmlFile": "31961-talk-007.htm"
+    },
+    {
+      "npcId": 31961,
+      "hook": "talk",
+      "when": "started",
+      "htmlFile": "31961-talk-008.htm"
+    },
+    {
+      "npcId": 31961,
+      "hook": "event",
+      "when": "absent",
+      "event": "sponsor",
+      "htmlFile": "31961-event-sponsor-009.htm"
+    },
+    {
+      "npcId": 31961,
+      "hook": "event",
+      "when": "absent",
+      "event": "sponsor",
+      "htmlFile": "31961-event-sponsor-010.htm"
+    },
+    {
+      "npcId": 31961,
+      "hook": "event",
+      "when": "absent",
+      "event": "sponsor",
+      "htmlFile": "31961-event-sponsor-011.htm"
+    },
+    {
+      "npcId": 31961,
+      "hook": "event",
+      "when": "absent",
+      "event": "sponsor",
+      "htmlFile": "31961-event-sponsor-012.htm"
+    },
+    {
+      "npcId": 31961,
+      "hook": "event",
+      "when": "started",
+      "event": "31961-10",
+      "whenVar": "memoState",
+      "whenValue": "1",
+      "ops": [
+        {
+          "op": "take_item",
+          "itemId": 1458,
+          "count": 922
+        }
+      ],
+      "htmlFile": "31961-event-31961-10-013.htm"
+    },
+    {
+      "npcId": 31961,
+      "hook": "event",
+      "when": "started",
+      "event": "31961-10",
+      "whenVar": "memoState",
+      "whenValue": "2",
+      "ops": [
+        {
+          "op": "take_item",
+          "itemId": 1458,
+          "count": 771
+        }
+      ],
+      "htmlFile": "31961-event-31961-10-014.htm"
+    },
+    {
+      "npcId": 31961,
+      "hook": "event",
+      "when": "started",
+      "event": "31961-10",
+      "whenVar": "memoState",
+      "whenValue": "3",
+      "ops": [
+        {
+          "op": "take_item",
+          "itemId": 1458,
+          "count": 771
+        }
+      ],
+      "htmlFile": "31961-event-31961-10-015.htm"
+    },
+    {
+      "npcId": 31961,
+      "hook": "event",
+      "when": "absent",
+      "event": "31961-03",
+      "ops": [
+        {
+          "op": "create"
+        },
+        {
+          "op": "start"
+        },
+        {
+          "op": "set",
+          "key": "memoState",
+          "value": "1"
+        },
+        {
+          "op": "set_cond",
+          "cond": 1
+        }
+      ],
+      "htmlFile": "31961-event-31961-03-016.htm"
+    },
+    {
+      "npcId": 31961,
+      "hook": "event",
+      "when": "absent",
+      "event": "31961-05a",
+      "htmlFile": "31961-event-31961-05a-017.htm"
+    },
+    {
+      "npcId": 31961,
+      "hook": "event",
+      "when": "absent",
+      "event": "31961-05b",
+      "htmlFile": "31961-event-31961-05b-018.htm"
+    },
+    {
+      "npcId": 31961,
+      "hook": "event",
+      "when": "absent",
+      "event": "31961-05c",
+      "htmlFile": "31961-event-31961-05c-019.htm"
+    },
+    {
+      "npcId": 31961,
+      "hook": "event",
+      "when": "absent",
+      "event": "31961-05g",
+      "htmlFile": "31961-event-31961-05g-020.htm"
+    },
+    {
+      "npcId": 31961,
+      "hook": "event",
+      "when": "absent",
+      "event": "31961-05d",
+      "ops": [
+        {
+          "op": "take_item",
+          "itemId": 8549,
+          "count": 1
+        },
+        {
+          "op": "set",
+          "key": "memoState",
+          "value": "2"
+        },
+        {
+          "op": "set_cond",
+          "cond": 3
+        }
+      ],
+      "htmlFile": "31961-event-31961-05d-021.htm"
+    },
+    {
+      "npcId": 31961,
+      "hook": "event",
+      "when": "absent",
+      "event": "31961-05e",
+      "ops": [
+        {
+          "op": "take_item",
+          "itemId": 8549,
+          "count": 1
+        },
+        {
+          "op": "set",
+          "key": "memoState",
+          "value": "2"
+        },
+        {
+          "op": "set_cond",
+          "cond": 4
+        }
+      ],
+      "htmlFile": "31961-event-31961-05e-022.htm"
+    },
+    {
+      "npcId": 31961,
+      "hook": "event",
+      "when": "absent",
+      "event": "31961-05f",
+      "ops": [
+        {
+          "op": "take_item",
+          "itemId": 8549,
+          "count": 1
+        },
+        {
+          "op": "set",
+          "key": "memoState",
+          "value": "2"
+        },
+        {
+          "op": "set_cond",
+          "cond": 5
+        }
+      ],
+      "htmlFile": "31961-event-31961-05f-023.htm"
+    },
+    {
+      "npcId": 27321,
+      "hook": "kill",
+      "when": "started",
+      "ops": [
+        {
+          "op": "set_cond",
+          "cond": 2
+        }
+      ],
+      "html": ""
+    },
+    {
+      "npcId": 27322,
+      "hook": "kill",
+      "when": "started",
+      "ops": [
+        {
+          "op": "set_cond",
+          "cond": 8
+        }
+      ],
+      "html": ""
+    }
+  ]
+}

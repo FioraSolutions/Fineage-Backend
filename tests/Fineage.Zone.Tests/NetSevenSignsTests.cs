@@ -11,7 +11,7 @@ namespace Fineage.Zone.Tests;
 /// Seven Signs over Net: the record and sky a client reads, the period gate on joining, the seal-stone
 /// contribution that moves the cabal score, and the period change that reaches every live player.
 /// The world runs on <see cref="WorldBench"/>, so these assert the recorded
-/// <see cref="Fineage.Zone.Net.INetPresenceBridge"/> fanout rather than MessagePack frames.
+/// <see cref="Fineage.Zone.World.IWorldEventPublisher"/> fanout rather than MessagePack frames.
 /// </summary>
 public sealed class NetSevenSignsTests
 {
@@ -47,11 +47,7 @@ public sealed class NetSevenSignsTests
         Assert.Equal(SevenSignsProtocol.PeriodCompetitionMessage, LastSystemMessage(bench).Id);
         Assert.Equal(SevenSignsProtocol.SkyNormal, LastSky(bench).State);
 
-        Assert.Null(await bench.World.TryGrantItemAsync(player.Session, new GrantItemRequestMsg
-        {
-            ItemId = SevenSignsProtocol.RedSealStoneId,
-            Count = 2
-        }, CancellationToken.None));
+        Assert.Null(await bench.World.TryGrantItemAsync(player.Session, SevenSignsProtocol.RedSealStoneId, 2, CancellationToken.None));
 
         Assert.Null(await bench.World.TrySevenSignsActionAsync(player.Session, new SevenSignsActionRequestMsg
         {
@@ -78,7 +74,7 @@ public sealed class NetSevenSignsTests
         Assert.Equal(SevenSignsProtocol.SealStrife, record.PlayerSeal);
         Assert.Equal(20, record.PlayerContribution);
         Assert.Equal(500, record.DuskScore);
-        var spent = Assert.IsType<InventoryUpdateNetMsg>(bench.Rec.Of("FanoutInventoryUpdate").Last()[1]);
+        var spent = Assert.IsType<InventoryUpdateMsg>(bench.Rec.Of("FanoutInventoryUpdate").Last()[1]);
         var row = Assert.Single(spent.Changes);
         Assert.Equal(SevenSignsProtocol.RedSealStoneId, row.ItemId);
         Assert.Equal(2, row.Change);
@@ -195,12 +191,12 @@ public sealed class NetSevenSignsTests
         Assert.Equal(3, action.RedStones);
     }
 
-    static SevenSignsStatusNetMsg LastStatus(WorldBench bench) =>
-        Assert.IsType<SevenSignsStatusNetMsg>(bench.Rec.Of("FanoutSevenSignsStatus").Last()[1]);
+    static SevenSignsStatusMsg LastStatus(WorldBench bench) =>
+        Assert.IsType<SevenSignsStatusMsg>(bench.Rec.Of("FanoutSevenSignsStatus").Last()[1]);
 
-    static SevenSignsSkyNetMsg LastSky(WorldBench bench) =>
-        Assert.IsType<SevenSignsSkyNetMsg>(bench.Rec.Of("FanoutSevenSignsSky").Last()[1]);
+    static SevenSignsSkyMsg LastSky(WorldBench bench) =>
+        Assert.IsType<SevenSignsSkyMsg>(bench.Rec.Of("FanoutSevenSignsSky").Last()[1]);
 
-    static SystemMessageNetMsg LastSystemMessage(WorldBench bench) =>
-        Assert.IsType<SystemMessageNetMsg>(bench.Rec.Of("FanoutSystemMessage").Last()[1]);
+    static SystemMessageMsg LastSystemMessage(WorldBench bench) =>
+        Assert.IsType<SystemMessageMsg>(bench.Rec.Of("FanoutSystemMessage").Last()[1]);
 }

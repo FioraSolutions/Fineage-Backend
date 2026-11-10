@@ -1,0 +1,303 @@
+{
+  "id": 421,
+  "name": "Little Wing's Big Adventure",
+  "repeatable": true,
+  "abortable": true,
+  "questItems": [
+    4325
+  ],
+  "dialogs": [
+    {
+      "npcId": 30610,
+      "hook": "talk",
+      "when": "absent",
+      "maxLevel": 44,
+      "htmlFile": "30610-talk-000.htm"
+    },
+    {
+      "npcId": 30610,
+      "hook": "talk",
+      "when": "absent",
+      "htmlFile": "30610-talk-001.htm"
+    },
+    {
+      "npcId": 30610,
+      "hook": "talk",
+      "when": "started",
+      "htmlFile": "30610-talk-002.htm"
+    },
+    {
+      "npcId": 30747,
+      "hook": "talk",
+      "when": "started",
+      "whenVar": "memoState",
+      "whenValue": "100",
+      "ops": [
+        {
+          "op": "set",
+          "key": "memoState",
+          "value": "200"
+        }
+      ],
+      "htmlFile": "30747-talk-003.htm"
+    },
+    {
+      "npcId": 30747,
+      "hook": "talk",
+      "when": "started",
+      "whenVar": "memoState",
+      "whenValue": "200",
+      "htmlFile": "30747-talk-004.htm"
+    },
+    {
+      "npcId": 30747,
+      "hook": "talk",
+      "when": "started",
+      "whenVar": "memoState",
+      "whenValue": "200",
+      "htmlFile": "30747-talk-005.htm"
+    },
+    {
+      "npcId": 30747,
+      "hook": "talk",
+      "when": "started",
+      "whenVar": "memoState",
+      "whenValue": "0",
+      "htmlFile": "30747-talk-006.htm"
+    },
+    {
+      "npcId": 30747,
+      "hook": "talk",
+      "when": "started",
+      "hasItem": 4325,
+      "whenVar": "memoState",
+      "whenValue": "1",
+      "htmlFile": "30747-talk-007.htm"
+    },
+    {
+      "npcId": 30747,
+      "hook": "talk",
+      "when": "started",
+      "hasItem": 4325,
+      "whenVar": "memoState",
+      "whenValue": "2",
+      "htmlFile": "30747-talk-008.htm"
+    },
+    {
+      "npcId": 30747,
+      "hook": "talk",
+      "when": "started",
+      "hasItem": 4325,
+      "whenVar": "memoState",
+      "whenValue": "3",
+      "htmlFile": "30747-talk-009.htm"
+    },
+    {
+      "npcId": 30747,
+      "hook": "talk",
+      "when": "started",
+      "hasItem": 4325,
+      "whenVar": "memoState",
+      "whenValue": "4",
+      "htmlFile": "30747-talk-010.htm"
+    },
+    {
+      "npcId": 30747,
+      "hook": "talk",
+      "when": "started",
+      "hasItem": 4325,
+      "whenVar": "memoState",
+      "whenValue": "5",
+      "htmlFile": "30747-talk-011.htm"
+    },
+    {
+      "npcId": 30747,
+      "hook": "talk",
+      "when": "started",
+      "hasItem": 4325,
+      "whenVar": "memoState",
+      "whenValue": "6",
+      "htmlFile": "30747-talk-012.htm"
+    },
+    {
+      "npcId": 30747,
+      "hook": "talk",
+      "when": "started",
+      "hasItem": 4325,
+      "whenVar": "memoState",
+      "whenValue": "7",
+      "htmlFile": "30747-talk-013.htm"
+    },
+    {
+      "npcId": 30747,
+      "hook": "talk",
+      "when": "started",
+      "hasItem": 4325,
+      "whenVar": "memoState",
+      "whenValue": "8",
+      "htmlFile": "30747-talk-014.htm"
+    },
+    {
+      "npcId": 30747,
+      "hook": "talk",
+      "when": "started",
+      "hasItem": 4325,
+      "whenVar": "memoState",
+      "whenValue": "9",
+      "htmlFile": "30747-talk-015.htm"
+    },
+    {
+      "npcId": 30747,
+      "hook": "talk",
+      "when": "started",
+      "hasItem": 4325,
+      "whenVar": "memoState",
+      "whenValue": "10",
+      "htmlFile": "30747-talk-016.htm"
+    },
+    {
+      "npcId": 30747,
+      "hook": "talk",
+      "when": "started",
+      "hasItem": 4325,
+      "whenVar": "memoState",
+      "whenValue": "11",
+      "htmlFile": "30747-talk-017.htm"
+    },
+    {
+      "npcId": 30747,
+      "hook": "talk",
+      "when": "started",
+      "hasItem": 4325,
+      "whenVar": "memoState",
+      "whenValue": "12",
+      "htmlFile": "30747-talk-018.htm"
+    },
+    {
+      "npcId": 30747,
+      "hook": "talk",
+      "when": "started",
+      "hasItem": 4325,
+      "whenVar": "memoState",
+      "whenValue": "13",
+      "htmlFile": "30747-talk-019.htm"
+    },
+    {
+      "npcId": 30747,
+      "hook": "talk",
+      "when": "started",
+      "hasItem": 4325,
+      "whenVar": "memoState",
+      "whenValue": "14",
+      "htmlFile": "30747-talk-020.htm"
+    },
+    {
+      "npcId": 30747,
+      "hook": "talk",
+      "when": "started",
+      "lacksItems": [
+        4325
+      ],
+      "whenVar": "memoState",
+      "whenValue": "15",
+      "htmlFile": "30747-talk-021.htm"
+    },
+    {
+      "npcId": 30747,
+      "hook": "talk",
+      "when": "started",
+      "lacksItems": [
+        4325
+      ],
+      "whenVar": "memoState",
+      "whenValue": "15",
+      "ops": [
+        {
+          "op": "set",
+          "key": "memoState",
+          "value": "16"
+        }
+      ],
+      "htmlFile": "30747-talk-022.htm"
+    },
+    {
+      "npcId": 30747,
+      "hook": "talk",
+      "when": "started",
+      "whenVar": "memoState",
+      "whenValue": "15",
+      "htmlFile": "30747-talk-023.htm"
+    },
+    {
+      "npcId": 30747,
+      "hook": "talk",
+      "when": "started",
+      "whenVar": "memoState",
+      "whenValue": "15",
+      "ops": [
+        {
+          "op": "set",
+          "key": "memoState",
+          "value": "16"
+        }
+      ],
+      "htmlFile": "30747-talk-024.htm"
+    },
+    {
+      "npcId": 30610,
+      "hook": "event",
+      "when": "absent",
+      "event": "30610-05",
+      "htmlFile": "30610-event-30610-05-025.htm"
+    },
+    {
+      "npcId": 30610,
+      "hook": "event",
+      "when": "absent",
+      "event": "30747-04",
+      "htmlFile": "30610-event-30747-04-026.htm"
+    },
+    {
+      "npcId": 30610,
+      "hook": "event",
+      "when": "absent",
+      "event": "30747-04",
+      "htmlFile": "30610-event-30747-04-027.htm"
+    },
+    {
+      "npcId": 30610,
+      "hook": "event",
+      "when": "absent",
+      "event": "30747-05",
+      "htmlFile": "30610-event-30747-05-028.htm"
+    },
+    {
+      "npcId": 30610,
+      "hook": "event",
+      "when": "absent",
+      "event": "30747-07",
+      "htmlFile": "30610-event-30747-07-029.htm"
+    },
+    {
+      "npcId": 30610,
+      "hook": "event",
+      "when": "absent",
+      "event": "30747-08",
+      "htmlFile": "30610-event-30747-08-030.htm"
+    },
+    {
+      "npcId": 30610,
+      "hook": "event",
+      "when": "absent",
+      "event": "30747-09",
+      "htmlFile": "30610-event-30747-09-031.htm"
+    },
+    {
+      "npcId": 30610,
+      "hook": "event",
+      "when": "absent",
+      "event": "30747-10",
+      "htmlFile": "30610-event-30747-10-032.htm"
+    }
+  ]
+}

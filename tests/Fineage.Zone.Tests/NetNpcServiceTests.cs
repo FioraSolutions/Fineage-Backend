@@ -1,5 +1,5 @@
 using Fineage.Game.Services;
-using Fineage.Login;
+using Fineage.Accounts;
 using Fineage.Net.Contract;
 using Fineage.Protocol;
 using Fineage.Zone.Spawns;
@@ -45,9 +45,9 @@ public sealed class NetNpcServiceTests
         Assert.DoesNotContain("1000 Adena", page, StringComparison.Ordinal);
 
         Assert.Null(await actor.Teleport(GateObjectId, "NORMAL", 0));
-        var moved = Assert.IsType<TeleportToLocationNetMsg>(Last(bench, FanoutTeleportToLocation)[1]);
-        Assert.Equal(100, moved.X);
-        Assert.Equal(0, moved.Y);
+        var moved = Last(bench, FanoutTeleportToLocation);
+        Assert.Equal(100, (int)moved[2]!);
+        Assert.Equal(0, (int)moved[3]!);
         Assert.Equal(NpcServiceProtocol.Teleported, LastSystemMessageId(bench));
         Assert.Equal(100, actor.Session.X);
 
@@ -75,11 +75,11 @@ public sealed class NetNpcServiceTests
 
         Assert.Null(await actor.Teleport(GateObjectId, "NORMAL", 0));
 
-        var update = Assert.IsType<InventoryUpdateNetMsg>(Last(bench, FanoutInventoryUpdate)[1]);
+        var update = Assert.IsType<InventoryUpdateMsg>(Last(bench, FanoutInventoryUpdate)[1]);
         var adena = Assert.Single(update.Changes);
         Assert.Equal(Adena, adena.ItemId);
         Assert.Equal(4500, adena.Count);
-        Assert.Equal(100, Assert.IsType<TeleportToLocationNetMsg>(Last(bench, FanoutTeleportToLocation)[1]).X);
+        Assert.Equal(100, (int)Last(bench, FanoutTeleportToLocation)[2]!);
     }
 
     [Fact]
@@ -91,13 +91,13 @@ public sealed class NetNpcServiceTests
         Assert.True(fighter.SavedRecord().Newbie);
 
         Assert.Null(await fighter.SupportMagic(GateObjectId));
-        var effects = Assert.IsType<AbnormalStatusUpdateNetMsg>(Last(bench, FanoutAbnormalStatusUpdate)[1]).Effects;
+        var effects = Assert.IsType<AbnormalStatusUpdateMsg>(Last(bench, FanoutAbnormalStatusUpdate)[1]).Effects;
         Assert.Contains(effects, effect => effect.Id == 4322 && effect.Value == 3 && effect.DurationSeconds == 3600);
         Assert.Contains(effects, effect => effect.Id == 4327);
         Assert.DoesNotContain(effects, effect => effect.Id == 4331);
 
         var casts = bench.Rec.Of(FanoutMagicSkillUse)
-            .Select(args => ((MagicSkillUseNetMsg)args[1]).SkillId)
+            .Select(args => ((MagicSkillUseMsg)args[1]).SkillId)
             .ToArray();
         Assert.Contains(4322, casts);
         Assert.Contains(4327, casts);
@@ -111,14 +111,14 @@ public sealed class NetNpcServiceTests
         // Mobius CT0 SupportMagic has no isNewbie check: a non-newbie character is buffed too.
         Assert.Null(await mage.SupportMagic(GateObjectId));
         var mageCasts = bench.Rec.Of(FanoutMagicSkillUse)
-            .Select(args => ((MagicSkillUseNetMsg)args[1]).SkillId)
+            .Select(args => ((MagicSkillUseMsg)args[1]).SkillId)
             .ToArray();
         Assert.Contains(4331, mageCasts);
 
         bench.Rec.Calls.Clear();
         Assert.Null(await mage.GiveBlessing(GateObjectId));
         Assert.Contains(5182, bench.Rec.Of(FanoutMagicSkillUse)
-            .Select(args => ((MagicSkillUseNetMsg)args[1]).SkillId));
+            .Select(args => ((MagicSkillUseMsg)args[1]).SkillId));
     }
 
     [Fact]
@@ -144,7 +144,7 @@ public sealed class NetNpcServiceTests
             x: 0, y: 0, z: 0);
 
         Assert.Null(await actor.BypassAsync(KeeperObjectId, "DepositP"));
-        var window = Assert.IsType<WarehouseDepositListNetMsg>(Last(bench, FanoutWarehouseDepositList)[1]);
+        var window = Assert.IsType<Fineage.Protocol.WarehouseDepositListMsg>(Last(bench, FanoutWarehouseDepositList)[1]);
         Assert.Equal(30, window.FeePerLine);
         Assert.Equal(100, window.SlotsMax);
         Assert.Equal(200, window.Adena);
@@ -153,13 +153,13 @@ public sealed class NetNpcServiceTests
 
         // Depositing charges the per-line fee out of the adena stack and moves the scrolls out of the bag.
         Assert.Null(await actor.Deposit(KeeperObjectId, (scrolls.ObjectId, 10)));
-        var paid = Assert.IsType<InventoryUpdateNetMsg>(Last(bench, FanoutInventoryUpdate)[1]);
+        var paid = Assert.IsType<InventoryUpdateMsg>(Last(bench, FanoutInventoryUpdate)[1]);
         Assert.Contains(paid.Changes, row => row.ItemId == Adena && row.Count == 170);
         Assert.Contains(paid.Changes, row => row.ItemId == Scroll && row.Count == 0);
         Assert.Equal(NpcServiceProtocol.TransactionComplete, LastSystemMessageId(bench));
 
         Assert.Null(await actor.Deposit(KeeperObjectId, (adena.ObjectId, 50)));
-        var second = Assert.IsType<InventoryUpdateNetMsg>(Last(bench, FanoutInventoryUpdate)[1]);
+        var second = Assert.IsType<InventoryUpdateMsg>(Last(bench, FanoutInventoryUpdate)[1]);
         Assert.Contains(second.Changes, row => row.ItemId == Adena && row.Count == 90);
 
         // The keeper's storage is durable across a relog.
@@ -169,7 +169,7 @@ public sealed class NetNpcServiceTests
 
         BenchPlayer again = await bench.EnterAsync("keep", "Keep", items: [], x: 0, y: 0, z: 0);
         Assert.Null(await again.BypassAsync(KeeperObjectId, "WithdrawP"));
-        var back = Assert.IsType<WarehouseWithdrawListNetMsg>(Last(bench, FanoutWarehouseWithdrawList)[1]);
+        var back = Assert.IsType<Fineage.Protocol.WarehouseWithdrawListMsg>(Last(bench, FanoutWarehouseWithdrawList)[1]);
         Assert.Equal(2, back.SlotsUsed);
         Assert.True(back.MaxWeight > 69000);
         var storedAdena = Assert.Single(back.Items, item => item.ItemId == Adena);
@@ -180,7 +180,7 @@ public sealed class NetNpcServiceTests
         Assert.Equal(NpcServiceProtocol.WeightLimit, LastSystemMessageId(bench));
 
         Assert.Null(await again.Withdraw(KeeperObjectId, (storedAdena.ObjectId, 50)));
-        var returned = Assert.IsType<InventoryUpdateNetMsg>(Last(bench, FanoutInventoryUpdate)[1]);
+        var returned = Assert.IsType<InventoryUpdateMsg>(Last(bench, FanoutInventoryUpdate)[1]);
         Assert.Contains(returned.Changes, row => row.ItemId == Adena && row.Count == 140);
     }
 
@@ -250,10 +250,10 @@ public sealed class NetNpcServiceTests
     static object?[] Last(WorldBench bench, string method) => bench.Rec.Of(method).Last();
 
     static string LastHtml(WorldBench bench) =>
-        Assert.IsType<NpcHtmlNetMsg>(Last(bench, FanoutNpcHtml)[1]).Html;
+        Assert.IsType<NpcHtmlMsg>(Last(bench, FanoutNpcHtml)[1]).Html;
 
     static int LastSystemMessageId(WorldBench bench) =>
-        Assert.IsType<SystemMessageNetMsg>(Last(bench, FanoutSystemMessage)[1]).Id;
+        Assert.IsType<SystemMessageMsg>(Last(bench, FanoutSystemMessage)[1]).Id;
 
     const string FanoutNpcHtml = "FanoutNpcHtml";
     const string FanoutSystemMessage = "FanoutSystemMessage";

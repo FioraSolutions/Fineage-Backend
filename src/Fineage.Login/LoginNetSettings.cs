@@ -1,3 +1,4 @@
+using Fineage.Accounts;
 namespace Fineage.Login;
 
 public static class LoginNetSettings

@@ -1,4 +1,5 @@
 using Fineage.Game;
+using Fineage.Accounts;
 using Fineage.Login;
 using Fineage.Net.Contract;
 using Fineage.Zone.Net;
@@ -227,9 +228,9 @@ public sealed class NpcTemplateSpawnTests
         session.Bind(ticket.CharacterId, ticket.Account, ticket.CharacterName, ticket.ClassId);
         Assert.True(await world.TryEnterAsync(session, CancellationToken.None));
         // Non-attackable NPCs must still be selectable (talk / target frame); combat stays blocked.
-        Assert.Null(await world.TrySelectTargetAsync(session, new SelectTargetMsg { TargetObjectId = info.ObjectId }, CancellationToken.None));
+        Assert.Null(await world.TrySelectTargetAsync(session, info.ObjectId, CancellationToken.None));
         Assert.Equal(info.ObjectId, session.SelectedTargetId);
-        Assert.Equal("attack", await world.TryAttackAsync(session, new AttackRequestMsg { TargetObjectId = info.ObjectId }, CancellationToken.None));
+        Assert.Equal("attack", await world.TryAttackAsync(session, info.ObjectId, CancellationToken.None));
     }
 
     [Fact]

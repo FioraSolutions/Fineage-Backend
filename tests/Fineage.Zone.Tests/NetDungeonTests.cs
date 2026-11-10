@@ -11,7 +11,7 @@ namespace Fineage.Zone.Tests;
 /// Catacombs and necropolises over Net: the cabal gate that refuses an unregistered visitor, a member entering
 /// and leaving, the validation kick that clears the losers, the recruiting kick, and the adena fee. The world
 /// runs on <see cref="WorldBench"/>, so these assert the recorded
-/// <see cref="Fineage.Zone.Net.INetPresenceBridge"/> fanout rather than MessagePack frames.
+/// <see cref="Fineage.Zone.World.IWorldEventPublisher"/> fanout rather than MessagePack frames.
 /// </summary>
 public sealed class NetDungeonTests
 {
@@ -75,11 +75,7 @@ public sealed class NetDungeonTests
         BenchPlayer dawn = await bench.EnterAsync("gate2", "Dawn", classId: 1);
         await AdvanceAsync(bench, clock);
 
-        Assert.Null(await bench.World.TryGrantItemAsync(dusk.Session, new GrantItemRequestMsg
-        {
-            ItemId = SevenSignsProtocol.RedSealStoneId,
-            Count = 1
-        }, CancellationToken.None));
+        Assert.Null(await bench.World.TryGrantItemAsync(dusk.Session, SevenSignsProtocol.RedSealStoneId, 1, CancellationToken.None));
         Assert.Null(await bench.World.TrySevenSignsActionAsync(
             dusk.Session, Join(SevenSignsCabal.Dusk, SevenSignsSeal.Avarice), CancellationToken.None));
         Assert.Null(await bench.World.TrySevenSignsActionAsync(dusk.Session, new SevenSignsActionRequestMsg
@@ -160,18 +156,14 @@ public sealed class NetDungeonTests
             await bench.World.TryDungeonAsync(member.Session, Enter(1), CancellationToken.None));
         Assert.NotEqual(10, member.Session.X);
 
-        Assert.Null(await bench.World.TryGrantItemAsync(member.Session, new GrantItemRequestMsg
-        {
-            ItemId = DungeonProtocol.AdenaItemId,
-            Count = 100
-        }, CancellationToken.None));
+        Assert.Null(await bench.World.TryGrantItemAsync(member.Session, DungeonProtocol.AdenaItemId, 100, CancellationToken.None));
         bench.Rec.Calls.Clear();
         Assert.Null(await bench.World.TryDungeonAsync(member.Session, Enter(1), CancellationToken.None));
         Assert.Equal(10, member.Session.X);
         Assert.Equal(20, member.Session.Y);
 
         // The fee leaves the bag, so the client must see the row it lost. A fully spent stack reports 0 left.
-        var paid = Assert.IsType<InventoryUpdateNetMsg>(Assert.Single(bench.Rec.Of("FanoutInventoryUpdate"))[1]);
+        var paid = Assert.IsType<InventoryUpdateMsg>(Assert.Single(bench.Rec.Of("FanoutInventoryUpdate"))[1]);
         var row = Assert.Single(paid.Changes);
         Assert.Equal(DungeonProtocol.AdenaItemId, row.ItemId);
         Assert.Equal(0, row.Count);
@@ -259,9 +251,9 @@ public sealed class NetDungeonTests
         Seal = (int)seal
     };
 
-    static DungeonEnteredNetMsg LastDungeon(WorldBench bench) =>
-        Assert.IsType<DungeonEnteredNetMsg>(bench.Rec.Of("FanoutDungeonEntered").Last()[1]);
+    static DungeonEnteredMsg LastDungeon(WorldBench bench) =>
+        Assert.IsType<DungeonEnteredMsg>(bench.Rec.Of("FanoutDungeonEntered").Last()[1]);
 
-    static SystemMessageNetMsg LastSystemMessage(WorldBench bench) =>
-        Assert.IsType<SystemMessageNetMsg>(bench.Rec.Of("FanoutSystemMessage").Last()[1]);
+    static SystemMessageMsg LastSystemMessage(WorldBench bench) =>
+        Assert.IsType<SystemMessageMsg>(bench.Rec.Of("FanoutSystemMessage").Last()[1]);
 }

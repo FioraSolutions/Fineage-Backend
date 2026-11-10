@@ -1,0 +1,184 @@
+{
+  "id": 300,
+  "name": "Hunting Leto Lizardman",
+  "repeatable": true,
+  "abortable": true,
+  "questItems": [
+    7139
+  ],
+  "dialogs": [
+    {
+      "npcId": 30126,
+      "hook": "talk",
+      "when": "absent",
+      "maxLevel": 33,
+      "htmlFile": "30126-talk-000.htm"
+    },
+    {
+      "npcId": 30126,
+      "hook": "talk",
+      "when": "absent",
+      "minLevel": 34,
+      "htmlFile": "30126-talk-001.htm"
+    },
+    {
+      "npcId": 30126,
+      "hook": "event",
+      "when": "absent",
+      "event": "30126-03",
+      "minLevel": 34,
+      "ops": [
+        {
+          "op": "create"
+        },
+        {
+          "op": "start"
+        },
+        {
+          "op": "set_cond",
+          "cond": 1
+        }
+      ],
+      "htmlFile": "30126-event-30126-03-002.htm"
+    },
+    {
+      "npcId": 30126,
+      "hook": "talk",
+      "when": "started",
+      "cond": 1,
+      "htmlFile": "30126-talk-c1-003.htm"
+    },
+    {
+      "npcId": 30126,
+      "hook": "talk",
+      "when": "started",
+      "cond": 2,
+      "atLeast": {
+        "7139": 60
+      },
+      "htmlFile": "30126-talk-c2-004.htm"
+    },
+    {
+      "npcId": 30126,
+      "hook": "event",
+      "when": "started",
+      "event": "30126-06",
+      "cond": 2,
+      "atLeast": {
+        "7139": 60
+      },
+      "ops": [
+        {
+          "op": "take_item",
+          "itemId": 7139,
+          "count": 60
+        },
+        {
+          "op": "give_adena",
+          "count": 30000
+        },
+        {
+          "op": "complete"
+        }
+      ],
+      "htmlFile": "30126-event-30126-06-c2-005.htm"
+    },
+    {
+      "npcId": 30126,
+      "hook": "event",
+      "when": "started",
+      "event": "30126-06",
+      "htmlFile": "30126-event-30126-06-006.htm"
+    },
+    {
+      "npcId": 20577,
+      "hook": "kill",
+      "when": "started",
+      "cond": 1,
+      "party": true,
+      "html": "",
+      "ops": [
+        {
+          "op": "drop_item",
+          "itemId": 7139,
+          "count": 1,
+          "chance": 0.36,
+          "limit": 60,
+          "condAtLimit": 2
+        }
+      ]
+    },
+    {
+      "npcId": 20578,
+      "hook": "kill",
+      "when": "started",
+      "cond": 1,
+      "party": true,
+      "html": "",
+      "ops": [
+        {
+          "op": "drop_item",
+          "itemId": 7139,
+          "count": 1,
+          "chance": 0.39,
+          "limit": 60,
+          "condAtLimit": 2
+        }
+      ]
+    },
+    {
+      "npcId": 20579,
+      "hook": "kill",
+      "when": "started",
+      "cond": 1,
+      "party": true,
+      "html": "",
+      "ops": [
+        {
+          "op": "drop_item",
+          "itemId": 7139,
+          "count": 1,
+          "chance": 0.41,
+          "limit": 60,
+          "condAtLimit": 2
+        }
+      ]
+    },
+    {
+      "npcId": 20580,
+      "hook": "kill",
+      "when": "started",
+      "cond": 1,
+      "party": true,
+      "html": "",
+      "ops": [
+        {
+          "op": "drop_item",
+          "itemId": 7139,
+          "count": 1,
+          "chance": 0.79,
+          "limit": 60,
+          "condAtLimit": 2
+        }
+      ]
+    },
+    {
+      "npcId": 20582,
+      "hook": "kill",
+      "when": "started",
+      "cond": 1,
+      "party": true,
+      "html": "",
+      "ops": [
+        {
+          "op": "drop_item",
+          "itemId": 7139,
+          "count": 1,
+          "chance": 0.89,
+          "limit": 60,
+          "condAtLimit": 2
+        }
+      ]
+    }
+  ]
+}

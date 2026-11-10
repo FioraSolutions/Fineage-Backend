@@ -1,0 +1,119 @@
+{
+  "id": 164,
+  "name": "Blood Fiend",
+  "repeatable": false,
+  "abortable": true,
+  "questItems": [
+    1044
+  ],
+  "dialogs": [
+    {
+      "npcId": 30149,
+      "hook": "talk",
+      "when": "absent",
+      "races": [
+        2
+      ],
+      "htmlFile": "30149-talk-000.htm"
+    },
+    {
+      "npcId": 30149,
+      "hook": "talk",
+      "when": "absent",
+      "races": [
+        0,
+        1,
+        3,
+        4
+      ],
+      "maxLevel": 20,
+      "htmlFile": "30149-talk-001.htm"
+    },
+    {
+      "npcId": 30149,
+      "hook": "talk",
+      "when": "absent",
+      "races": [
+        0,
+        1,
+        3,
+        4
+      ],
+      "minLevel": 21,
+      "htmlFile": "30149-talk-002.htm"
+    },
+    {
+      "npcId": 30149,
+      "hook": "event",
+      "when": "absent",
+      "event": "30149-04",
+      "races": [
+        0,
+        1,
+        3,
+        4
+      ],
+      "minLevel": 21,
+      "ops": [
+        {
+          "op": "create"
+        },
+        {
+          "op": "start"
+        },
+        {
+          "op": "set_cond",
+          "cond": 1
+        }
+      ],
+      "htmlFile": "30149-event-30149-04-003.htm"
+    },
+    {
+      "npcId": 30149,
+      "hook": "talk",
+      "when": "started",
+      "cond": 1,
+      "htmlFile": "30149-talk-c1-004.htm"
+    },
+    {
+      "npcId": 30149,
+      "hook": "talk",
+      "when": "started",
+      "cond": 2,
+      "hasItem": 1044,
+      "ops": [
+        {
+          "op": "give_adena",
+          "count": 42130
+        },
+        {
+          "op": "give_exp_sp",
+          "exp": 35637,
+          "sp": 1854
+        },
+        {
+          "op": "complete"
+        }
+      ],
+      "htmlFile": "30149-talk-c2-005.htm"
+    },
+    {
+      "npcId": 27021,
+      "hook": "kill",
+      "when": "started",
+      "cond": 1,
+      "html": "",
+      "ops": [
+        {
+          "op": "give_item",
+          "itemId": 1044,
+          "count": 1
+        },
+        {
+          "op": "set_cond",
+          "cond": 2
+        }
+      ]
+    }
+  ]
+}

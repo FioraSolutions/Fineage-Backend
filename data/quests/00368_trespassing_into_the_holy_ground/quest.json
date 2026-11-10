@@ -1,0 +1,179 @@
+{
+  "id": 368,
+  "name": "Trespassing into the Holy Ground",
+  "repeatable": true,
+  "abortable": true,
+  "questItems": [
+    5881
+  ],
+  "dialogs": [
+    {
+      "npcId": 30926,
+      "hook": "talk",
+      "when": "absent",
+      "maxLevel": 35,
+      "htmlFile": "30926-talk-000.htm"
+    },
+    {
+      "npcId": 30926,
+      "hook": "talk",
+      "when": "absent",
+      "minLevel": 36,
+      "htmlFile": "30926-talk-001.htm"
+    },
+    {
+      "npcId": 30926,
+      "hook": "event",
+      "when": "absent",
+      "event": "30926-02",
+      "minLevel": 36,
+      "ops": [
+        {
+          "op": "create"
+        },
+        {
+          "op": "start"
+        },
+        {
+          "op": "set_cond",
+          "cond": 1
+        }
+      ],
+      "htmlFile": "30926-event-30926-02-002.htm"
+    },
+    {
+      "npcId": 30926,
+      "hook": "event",
+      "when": "started",
+      "event": "30926-05",
+      "ops": [
+        {
+          "op": "complete"
+        }
+      ],
+      "htmlFile": "30926-event-30926-05-003.htm"
+    },
+    {
+      "npcId": 30926,
+      "hook": "event",
+      "when": "started",
+      "event": "30926-06",
+      "htmlFile": "30926-event-30926-06-004.htm"
+    },
+    {
+      "npcId": 30926,
+      "hook": "talk",
+      "when": "started",
+      "atLeast": {
+        "5881": 10
+      },
+      "ops": [
+        {
+          "op": "sell_items",
+          "prices": [
+            {
+              "itemId": 5881,
+              "adena": 250
+            }
+          ],
+          "bonusMin": 10,
+          "bonusAdena": 9450
+        }
+      ],
+      "htmlFile": "30926-talk-005.htm"
+    },
+    {
+      "npcId": 30926,
+      "hook": "talk",
+      "when": "started",
+      "hasItem": 5881,
+      "ops": [
+        {
+          "op": "sell_items",
+          "prices": [
+            {
+              "itemId": 5881,
+              "adena": 250
+            }
+          ],
+          "bonusMin": 1,
+          "bonusAdena": 2000
+        }
+      ],
+      "htmlFile": "30926-talk-006.htm"
+    },
+    {
+      "npcId": 30926,
+      "hook": "talk",
+      "when": "started",
+      "lacksItems": [
+        5881
+      ],
+      "htmlFile": "30926-talk-007.htm"
+    },
+    {
+      "npcId": 20794,
+      "hook": "kill",
+      "when": "started",
+      "party": true,
+      "html": "",
+      "ops": [
+        {
+          "op": "drop_item",
+          "itemId": 5881,
+          "count": 1,
+          "chance": 0.6,
+          "limit": 0
+        }
+      ]
+    },
+    {
+      "npcId": 20795,
+      "hook": "kill",
+      "when": "started",
+      "party": true,
+      "html": "",
+      "ops": [
+        {
+          "op": "drop_item",
+          "itemId": 5881,
+          "count": 1,
+          "chance": 0.57,
+          "limit": 0
+        }
+      ]
+    },
+    {
+      "npcId": 20796,
+      "hook": "kill",
+      "when": "started",
+      "party": true,
+      "html": "",
+      "ops": [
+        {
+          "op": "drop_item",
+          "itemId": 5881,
+          "count": 1,
+          "chance": 0.61,
+          "limit": 0
+        }
+      ]
+    },
+    {
+      "npcId": 20797,
+      "hook": "kill",
+      "when": "started",
+      "party": true,
+      "html": "",
+      "ops": [
+        {
+          "op": "drop_item",
+          "itemId": 5881,
+          "count": 1,
+          "chance": 0.93,
+          "limit": 0
+        }
+      ]
+    }
+  ]
+}

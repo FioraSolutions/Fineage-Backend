@@ -247,7 +247,8 @@ public sealed class QuestMachine : IQuestKillHook
             Lines = outcome.Lines,
             Items = outcome.Items,
             Exp = outcome.Exp,
-            Sp = outcome.Sp
+            Sp = outcome.Sp,
+            Spawns = outcome.Spawns
         };
     }
 
@@ -502,6 +503,9 @@ public sealed class QuestMachine : IQuestKillHook
                 case SoundOp sound:
                     plan.Sounds.Add(sound.Name);
                     break;
+                case SpawnNpcOp spawn:
+                    plan.Spawns.Add(spawn.NpcId);
+                    break;
             }
         }
 
@@ -540,7 +544,8 @@ public sealed class QuestMachine : IQuestKillHook
             Lines = plan.Lines,
             Items = touches,
             Exp = plan.Exp,
-            Sp = plan.Sp
+            Sp = plan.Sp,
+            Spawns = plan.Spawns
         };
     }
 
@@ -660,8 +665,21 @@ public sealed class QuestMachine : IQuestKillHook
             return false;
         if (dialog.Classes is { Count: > 0 } classes && !classes.Contains(who.ClassId))
             return false;
+        if (dialog.IsMage is bool wantMage && IsMageClass(who.ClassId) != wantMage)
+            return false;
         return true;
     }
+
+    /// <summary>
+    /// Interlude mystic class ids (root in human/elven/dark/orc mystic). Used for Mobius <c>isMageClass</c> gates.
+    /// </summary>
+    static readonly HashSet<int> MageClassIds =
+    [
+        10, 11, 12, 13, 14, 15, 16, 17, 25, 26, 27, 28, 29, 30, 38, 39, 40, 41, 42, 43, 49, 50, 51, 52,
+        94, 95, 96, 97, 98, 103, 104, 105, 110, 111, 112, 115, 116
+    ];
+
+    static bool IsMageClass(int classId) => classId >= 0 && MageClassIds.Contains(classId);
 
     /// <summary>
     /// Mobius path quests branch on <c>hasQuestItems(a, b, ...)</c> (all held) and <c>!hasAtLeastOneQuestItem(...)</c> (none held).
@@ -687,6 +705,23 @@ public sealed class QuestMachine : IQuestKillHook
         foreach (var pair in dialog.AtLeast ?? new Dictionary<int, int>())
         {
             if (inventory.CountOf(pair.Key) < pair.Value)
+                return false;
+        }
+
+        // Mobius hasAtLeastOneQuestItem.
+        if (dialog.HasAny is { Count: > 0 } any)
+        {
+            bool hit = false;
+            foreach (int id in any)
+            {
+                if (inventory.CountOf(id) > 0)
+                {
+                    hit = true;
+                    break;
+                }
+            }
+
+            if (!hit)
                 return false;
         }
 
@@ -794,6 +829,7 @@ public sealed class QuestMachine : IQuestKillHook
         public Dictionary<int, int> Delta { get; } = [];
         public List<string> Sounds { get; } = [];
         public List<QuestLine> Lines { get; } = [];
+        public List<int> Spawns { get; } = [];
         public long Exp;
         public int Sp;
     }

@@ -1,0 +1,148 @@
+{
+  "id": 379,
+  "name": "Fantasy Wine",
+  "repeatable": true,
+  "abortable": true,
+  "questItems": [
+    5893,
+    5894
+  ],
+  "dialogs": [
+    {
+      "npcId": 30074,
+      "hook": "talk",
+      "when": "absent",
+      "maxLevel": 19,
+      "htmlFile": "30074-talk-000.htm"
+    },
+    {
+      "npcId": 30074,
+      "hook": "talk",
+      "when": "absent",
+      "minLevel": 20,
+      "htmlFile": "30074-talk-001.htm"
+    },
+    {
+      "npcId": 30074,
+      "hook": "event",
+      "when": "absent",
+      "event": "30074-02",
+      "minLevel": 20,
+      "htmlFile": "30074-event-30074-02-002.htm"
+    },
+    {
+      "npcId": 30074,
+      "hook": "event",
+      "when": "absent",
+      "event": "30074-03",
+      "minLevel": 20,
+      "htmlFile": "30074-event-30074-03-003.htm"
+    },
+    {
+      "npcId": 30074,
+      "hook": "event",
+      "when": "absent",
+      "event": "30074-04",
+      "minLevel": 20,
+      "ops": [
+        {
+          "op": "create"
+        },
+        {
+          "op": "start"
+        },
+        {
+          "op": "set_cond",
+          "cond": 1
+        }
+      ],
+      "htmlFile": "30074-event-30074-04-004.htm"
+    },
+    {
+      "npcId": 30074,
+      "hook": "event",
+      "when": "absent",
+      "event": "30074-05",
+      "htmlFile": "30074-event-30074-05-005.htm"
+    },
+    {
+      "npcId": 30074,
+      "hook": "talk",
+      "when": "started",
+      "atLeast": {
+        "5893": 80,
+        "5894": 100
+      },
+      "htmlFile": "30074-talk-006.htm"
+    },
+    {
+      "npcId": 30074,
+      "hook": "talk",
+      "when": "started",
+      "htmlFile": "30074-talk-007.htm"
+    },
+    {
+      "npcId": 30074,
+      "hook": "event",
+      "when": "started",
+      "event": "30074-11",
+      "atLeast": {
+        "5893": 80,
+        "5894": 100
+      },
+      "ops": [
+        {
+          "op": "take_item",
+          "itemId": 5893,
+          "count": 80
+        },
+        {
+          "op": "take_item",
+          "itemId": 5894,
+          "count": 100
+        },
+        {
+          "op": "give_item",
+          "itemId": 5957,
+          "count": 1
+        },
+        {
+          "op": "complete"
+        }
+      ],
+      "htmlFile": "30074-event-30074-11-008.htm"
+    },
+    {
+      "npcId": 20291,
+      "hook": "kill",
+      "when": "started",
+      "cond": 1,
+      "html": "",
+      "ops": [
+        {
+          "op": "drop_item",
+          "itemId": 5893,
+          "count": 1,
+          "chance": 1.0,
+          "limit": 80
+        }
+      ]
+    },
+    {
+      "npcId": 20292,
+      "hook": "kill",
+      "when": "started",
+      "cond": 1,
+      "html": "",
+      "ops": [
+        {
+          "op": "drop_item",
+          "itemId": 5894,
+          "count": 1,
+          "chance": 1.0,
+          "limit": 100
+        }
+      ]
+    }
+  ]
+}

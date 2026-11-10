@@ -4,6 +4,7 @@ using Fineage.Zone.Rewards;
 using Fineage.Zone.Spawns;
 using Fineage.Zone.World;
 using Xunit;
+using Fineage.Protocol;
 
 namespace Fineage.Zone.Tests;
 
@@ -40,9 +41,9 @@ public sealed class KillRewardTests
         return (kit, mob, rec);
     }
 
-    static List<SystemMessageNetMsg> KillNotices(NetBridgeRecorder rec) =>
-        rec.Of(nameof(INetPresenceBridge.FanoutSystemMessage))
-            .Select(args => Assert.IsType<SystemMessageNetMsg>(args[1]))
+    static List<SystemMessageMsg> KillNotices(NetBridgeRecorder rec) =>
+        rec.Of(nameof(IWorldEventPublisher.FanoutSystemMessage))
+            .Select(args => Assert.IsType<SystemMessageMsg>(args[1]))
             .Where(message => message.Id == ZoneWorld.KillRewardMessageId)
             .ToList();
 
@@ -110,7 +111,7 @@ public sealed class KillRewardTests
         // Mobius calculateExpAndSp: levelDiff must stay inside ±MonsterExpMaxLevelDifference (Rates.ini 40).
         Assert.Equal(0, player.Exp);
         Assert.Empty(KillNotices(rec));
-        Assert.Empty(rec.Of(nameof(INetPresenceBridge.FanoutPlayerStats)));
+        Assert.Empty(rec.Of(nameof(IWorldEventPublisher.FanoutPlayerStats)));
     }
 
     [Fact]

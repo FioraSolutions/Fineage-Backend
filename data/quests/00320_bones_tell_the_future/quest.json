@@ -1,0 +1,126 @@
+{
+  "id": 320,
+  "name": "Bones Tell The Future",
+  "repeatable": true,
+  "abortable": true,
+  "questItems": [
+    809
+  ],
+  "dialogs": [
+    {
+      "npcId": 30359,
+      "hook": "talk",
+      "when": "absent",
+      "races": [
+        0,
+        1,
+        3,
+        4
+      ],
+      "htmlFile": "30359-talk-000.htm"
+    },
+    {
+      "npcId": 30359,
+      "hook": "talk",
+      "when": "absent",
+      "races": [
+        2
+      ],
+      "maxLevel": 9,
+      "htmlFile": "30359-talk-001.htm"
+    },
+    {
+      "npcId": 30359,
+      "hook": "talk",
+      "when": "absent",
+      "races": [
+        2
+      ],
+      "minLevel": 10,
+      "htmlFile": "30359-talk-002.htm"
+    },
+    {
+      "npcId": 30359,
+      "hook": "event",
+      "when": "absent",
+      "event": "30359-04",
+      "races": [
+        2
+      ],
+      "minLevel": 10,
+      "ops": [
+        {
+          "op": "create"
+        },
+        {
+          "op": "start"
+        },
+        {
+          "op": "set_cond",
+          "cond": 1
+        }
+      ],
+      "htmlFile": "30359-event-30359-04-003.htm"
+    },
+    {
+      "npcId": 30359,
+      "hook": "talk",
+      "when": "started",
+      "atLeast": {
+        "809": 10
+      },
+      "ops": [
+        {
+          "op": "give_adena",
+          "count": 8470
+        },
+        {
+          "op": "complete"
+        }
+      ],
+      "htmlFile": "30359-talk-004.htm"
+    },
+    {
+      "npcId": 30359,
+      "hook": "talk",
+      "when": "started",
+      "htmlFile": "30359-talk-005.htm"
+    },
+    {
+      "npcId": 20517,
+      "hook": "kill",
+      "when": "started",
+      "cond": 1,
+      "party": true,
+      "html": "",
+      "ops": [
+        {
+          "op": "drop_item",
+          "itemId": 809,
+          "count": 1,
+          "chance": 0.18,
+          "limit": 10,
+          "condAtLimit": 2
+        }
+      ]
+    },
+    {
+      "npcId": 20518,
+      "hook": "kill",
+      "when": "started",
+      "cond": 1,
+      "party": true,
+      "html": "",
+      "ops": [
+        {
+          "op": "drop_item",
+          "itemId": 809,
+          "count": 1,
+          "chance": 0.18,
+          "limit": 10,
+          "condAtLimit": 2
+        }
+      ]
+    }
+  ]
+}

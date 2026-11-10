@@ -41,9 +41,9 @@ public sealed partial class ZoneWorld
     /// </summary>
     internal int MaxLoadOf(ZoneEntity player)
     {
-        double bonus = 1;
-        if (PlayerClasses.TryGet(player.ClassId, out var template) && template != null)
-            bonus = SafeBonus(PlayerClasses.StatBonuses, StatSlot.Con, template.Con);
+        double bonus = PlayerClasses.TryGet(player.ClassId, out var template) && template != null
+            ? EffectiveAttributes(player, template).ConBonus
+            : 1;
         int baseLoad = WeightPenalty.BaseMaxLoad(bonus, ZoneWeightSettings.AltWeightLimit);
         return (int)PlayerStatMods(player).Apply(CombatStat.WeightLimit, (double)baseLoad);
     }
@@ -90,7 +90,7 @@ public sealed partial class ZoneWorld
     }
 
     /// <summary>Net enter path: the same EtcStatusUpdate a client would get from <c>refreshOverloaded</c>.</summary>
-    internal bool TryBuildNetEtcStatus(ZoneSession session, out Fineage.Net.Contract.EtcStatusUpdateNetMsg status)
+    internal bool TryBuildNetEtcStatus(ZoneSession session, out Fineage.Protocol.EtcStatusUpdateMsg status)
     {
         lock (_gate)
         {
@@ -117,6 +117,9 @@ public sealed partial class ZoneWorld
         if (entity.Kind != ZoneEntityKind.Player || !ReferenceEquals(entity.Session, session))
             return;
         RefreshWeightPenalty(entity);
+        // Gauge numbers change even when the penalty level does not — keep CurrWeight/MaxWeight in sync.
+        if (session.InWorld)
+            SelfUserInfo(entity);
     }
 
     /// <summary>
@@ -124,10 +127,8 @@ public sealed partial class ZoneWorld
     /// (force charges, chat ban, danger area, charm of courage, death penalty) go out as 0, exactly like a clean
     /// character in Mobius.
     /// </summary>
-    internal static Fineage.Net.Contract.EtcStatusUpdateNetMsg EtcStatusOf(ZoneEntity player) => new()
+    internal static Fineage.Protocol.EtcStatusUpdateMsg EtcStatusOf(ZoneEntity player) => new()
     {
-        EntityValue = (ulong)(uint)player.ObjectId,
-        EntityGeneration = 1,
         Charges = 0,
         WeightPenalty = player.WeightPenaltyLevel,
         ChatBlocked = false,
@@ -143,52 +144,31 @@ public sealed partial class ZoneWorld
     /// (Mobius <c>addSkill(4270, level)</c>). Levels 1–4 are <c>runSpd</c> ×1/×0.5/×0.5/×0 and every level halves
     /// <c>regHp</c>/<c>regMp</c>; level 4 is a legal 0 speed.
     /// </summary>
-    CombatStatMods FoldWeightPenalty(ZoneEntity player, CombatStatMods? mods)
-    {
-        int level = player.WeightPenaltyLevel;
-        if (level <= 0 || !_passives.TryGet(WeightPenalty.SkillId, out var effect))
-            return mods ?? CombatStatMods.None;
-
-        // CombatStatMods.None is a shared static: never accumulate into it.
-        var target = mods == null || ReferenceEquals(mods, CombatStatMods.None) ? new CombatStatMods() : mods;
-        foreach (var func in effect.Funcs)
-            target.Add(func, level);
-        return target;
-    }
+    CombatStatMods FoldWeightPenalty(ZoneEntity player, CombatStatMods? mods) =>
+        FoldVirtualPassive(mods, WeightPenalty.SkillId, player.WeightPenaltyLevel);
 
     /// <summary>
     /// Folds skill 4267 at <see cref="ZoneEntity.GradePenaltyLevel"/> into <paramref name="mods"/>
-    /// (Mobius <c>Player.refreshExpertisePenalty</c> → <c>addSkill(GRADE_PENALTY, max(weapon, armor))</c>,
-    /// <c>Player.java:2059</c>). Levels 1–4 scale <c>pAtkSpd</c>, <c>mAtkSpd</c>, <c>rEvas</c>, <c>runSpd</c>,
-    /// <c>regHp</c> and <c>regMp</c> by 0.22 / 0.19 / 0.16 / 0.13 and subtract 20 accuracy, so gear worn above your
-    /// expertise really does slow and weaken the character instead of only drawing a flag in the window.
+    /// (Mobius <c>Player.refreshExpertisePenalty</c> → <c>addSkill(GRADE_PENALTY, max(weapon, armor))</c>).
     /// </summary>
-    CombatStatMods FoldGradePenalty(ZoneEntity player, CombatStatMods? mods)
-    {
-        int level = player.GradePenaltyLevel;
-        if (level <= 0 || !_passives.TryGet(GradePenalty.SkillId, out var effect))
-            return mods ?? CombatStatMods.None;
-
-        var target = mods == null || ReferenceEquals(mods, CombatStatMods.None) ? new CombatStatMods() : mods;
-        foreach (var func in effect.Funcs)
-            target.Add(func, level);
-        return target;
-    }
+    CombatStatMods FoldGradePenalty(ZoneEntity player, CombatStatMods? mods) =>
+        FoldVirtualPassive(mods, GradePenalty.SkillId, player.GradePenaltyLevel);
 
     /// <summary>
     /// Folds skill 5076 at <see cref="ZoneEntity.DeathPenaltyLevel"/> into <paramref name="mods"/>
-    /// (Mobius <c>Player.increaseDeathPenaltyBuffLevel</c> → <c>addSkill(DEATH_PENALTY, level)</c>,
-    /// <c>Player.java:11718-11730</c>). Unlike 4267/4270 this one is a real entry in the skill book on live Mobius,
-    /// but it is stored outside the trainer list, so it is added as a virtual source here exactly like the other two.
-    /// Levels 1–15 scale <c>pAtk</c>/<c>pAtkSpd</c>/<c>mAtk</c>/<c>mAtkSpd</c>/<c>runSpd</c> down, <c>pDef</c>/<c>mDef</c>
-    /// down, and subtract <c>accCombat</c>/<c>rEvas</c>.
+    /// (Mobius <c>Player.increaseDeathPenaltyBuffLevel</c>). Virtual so RefreshKnownSkills cannot wipe it.
     /// </summary>
-    CombatStatMods FoldDeathPenalty(ZoneEntity player, CombatStatMods? mods)
-    {
-        int level = Math.Clamp(player.DeathPenaltyLevel, 0, DeathRuleCatalog.MaxDeathPenaltyLevel);
-        if (level <= 0 || !_passives.TryGet(DeathPenalty.SkillId, out var effect))
-            return mods ?? CombatStatMods.None;
+    CombatStatMods FoldDeathPenalty(ZoneEntity player, CombatStatMods? mods) =>
+        FoldVirtualPassive(mods, DeathPenalty.SkillId,
+            Math.Clamp(player.DeathPenaltyLevel, 0, DeathRuleCatalog.MaxDeathPenaltyLevel));
 
+    /// <summary>
+    /// Shared fold for virtual passives (weight / grade / death): never mutate <see cref="CombatStatMods.None"/>.
+    /// </summary>
+    CombatStatMods FoldVirtualPassive(CombatStatMods? mods, int skillId, int level)
+    {
+        if (level <= 0 || !_passives.TryGet(skillId, out var effect))
+            return mods ?? CombatStatMods.None;
         var target = mods == null || ReferenceEquals(mods, CombatStatMods.None) ? new CombatStatMods() : mods;
         foreach (var func in effect.Funcs)
             target.Add(func, level);

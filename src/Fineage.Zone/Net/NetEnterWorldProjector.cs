@@ -1,6 +1,8 @@
 using Fineage.Game;
-using Fineage.Login;
+using Fineage.Accounts;
 using Fineage.Net.Contract;
+using Fineage.Protocol;
+using Fineage.Zone.Combat;
 using Fineage.Zone.World;
 
 namespace Fineage.Zone.Net;
@@ -13,11 +15,11 @@ static class NetEnterWorldProjector
 {
     public readonly record struct EnterPackets(
         EntitySpawnMsg Spawn,
-        PlayerStatsMsg Stats,
+        Fineage.Net.Contract.PlayerStatsMsg Stats,
         ItemListNetMsg Items,
-        SkillListNetMsg Skills);
+        SkillListMsg Skills);
 
-    public static EnterPackets FromEntity(ZoneEntity entity, EntityId self, long nowUnixMs)
+    public static EnterPackets FromEntity(ZoneEntity entity, EntityId self, long nowUnixMs, int playerPAtkSpd = 0)
     {
         ArgumentNullException.ThrowIfNull(entity);
         if (entity.Kind != ZoneEntityKind.Player)
@@ -27,23 +29,23 @@ static class NetEnterWorldProjector
 
         int maxCp = ResolveMaxCp(entity);
         return new EnterPackets(
-            BuildSpawn(entity, self, isSelf: true),
+            BuildSpawn(entity, self, isSelf: true, playerPAtkSpd),
             BuildStats(entity, self, maxCp),
             BuildItems(entity.Inventory),
             BuildSkills(entity, nowUnixMs));
     }
 
     /// <summary>Remote peer appearance (Mobius CharInfo) for Net knownlist.</summary>
-    public static EntitySpawnMsg BuildRemoteSpawn(ZoneEntity entity, EntityId id) =>
-        BuildSpawn(entity, id, isSelf: false);
+    public static EntitySpawnMsg BuildRemoteSpawn(ZoneEntity entity, EntityId id, int playerPAtkSpd = 0) =>
+        BuildSpawn(entity, id, isSelf: false, playerPAtkSpd);
 
     /// <summary>Player or NPC presence packet for Net knownlist (Mobius CharInfo / NpcInfo).</summary>
-    public static EntitySpawnMsg BuildPresenceSpawn(ZoneEntity entity, EntityId id)
+    public static EntitySpawnMsg BuildPresenceSpawn(ZoneEntity entity, EntityId id, int playerPAtkSpd = 0)
     {
         ArgumentNullException.ThrowIfNull(entity);
         return entity.Kind switch
         {
-            ZoneEntityKind.Player => BuildSpawn(entity, id, isSelf: false),
+            ZoneEntityKind.Player => BuildSpawn(entity, id, isSelf: false, playerPAtkSpd),
             ZoneEntityKind.Npc => BuildNpcSpawn(entity, id),
             _ => throw new ArgumentException($"Net presence spawn unsupported for {entity.Kind}.", nameof(entity))
         };
@@ -76,11 +78,12 @@ static class NetEnterWorldProjector
             Attackable = entity.Attackable,
             Dead = entity.CurHp <= 0,
             Level = entity.Level,
-            MaxHp = entity.MaxHp
+            MaxHp = entity.MaxHp,
+            PAtkSpd = entity.PAtkSpd > 0 ? entity.PAtkSpd : ZoneCombat.DefaultNpcPAtkSpd
         };
     }
 
-    static EntitySpawnMsg BuildSpawn(ZoneEntity entity, EntityId id, bool isSelf) =>
+    static EntitySpawnMsg BuildSpawn(ZoneEntity entity, EntityId id, bool isSelf, int pAtkSpd = 0) =>
         new()
         {
             EntityValue = id.Value,
@@ -102,10 +105,13 @@ static class NetEnterWorldProjector
             Paperdoll = entity.Inventory == null ? [] : InventoryMessages.ItemIds(entity.Inventory),
             Dead = entity.Dead,
             Level = entity.Level,
-            MaxHp = entity.MaxHp
+            MaxHp = entity.MaxHp,
+            PAtkSpd = pAtkSpd,
+            Karma = entity.Karma,
+            PvpFlag = entity.PvpFlagged ? (byte)1 : (byte)0
         };
 
-    static PlayerStatsMsg BuildStats(ZoneEntity entity, EntityId self, int maxCp) =>
+    static Fineage.Net.Contract.PlayerStatsMsg BuildStats(ZoneEntity entity, EntityId self, int maxCp) =>
         new()
         {
             EntityValue = self.Value,
@@ -146,23 +152,46 @@ static class NetEnterWorldProjector
         return new ItemListNetMsg { Items = rows };
     }
 
-    internal static SkillListNetMsg BuildSkills(ZoneEntity entity, long nowUnixMs)
+    /// <summary>
+    /// Mobius <c>sendSkillList</c>: learned book + clan skills + ephemeral gear skills
+    /// (item SA / complete armor sets). Higher level wins on id collision.
+    /// </summary>
+    internal static SkillListMsg BuildSkills(ZoneEntity entity, long nowUnixMs)
     {
-        var rows = new List<SkillListEntryNet>(entity.KnownSkills.Count);
-        foreach (var pair in entity.KnownSkills.OrderBy(p => p.Key))
+        var skills = PlayerPassiveSources.Merge(entity.KnownSkills, entity.ClanSkills, entity.GearSkills);
+        var rows = new List<SkillListEntryMsg>(skills.Count);
+        foreach (var pair in skills.OrderBy(p => p.Key))
         {
             int reuse = 0;
             if (entity.SkillReuseUntilMs.TryGetValue(pair.Key, out long until) && until > nowUnixMs)
                 reuse = (int)Math.Min(int.MaxValue, until - nowUnixMs);
-            rows.Add(new SkillListEntryNet
+            rows.Add(new SkillListEntryMsg
             {
                 SkillId = pair.Key,
                 Level = pair.Value,
-                ReuseRemainingMs = reuse
+                ReuseDelayMs = reuse
             });
         }
 
-        return new SkillListNetMsg { Skills = rows.ToArray() };
+        return new SkillListMsg { Skills = rows.ToArray() };
+    }
+
+    internal static SkillListNetMsg ToNetSkillList(SkillListMsg list)
+    {
+        var src = list.Skills ?? [];
+        var rows = new SkillListEntryNet[src.Length];
+        for (int i = 0; i < src.Length; i++)
+        {
+            var row = src[i];
+            rows[i] = new SkillListEntryNet
+            {
+                SkillId = row.SkillId,
+                Level = row.Level,
+                ReuseRemainingMs = row.ReuseDelayMs
+            };
+        }
+
+        return new SkillListNetMsg { Skills = rows };
     }
 
     static int ResolveMaxCp(ZoneEntity entity)

@@ -1,0 +1,329 @@
+{
+  "id": 405,
+  "name": "Path Of The Cleric",
+  "repeatable": false,
+  "abortable": true,
+  "questItems": [
+    1191,
+    1192,
+    1193,
+    1194,
+    1195,
+    1196,
+    1197,
+    1198,
+    1199,
+    1200
+  ],
+  "dialogs": [
+    {
+      "npcId": 30022,
+      "hook": "talk",
+      "when": "absent",
+      "hasItem": 1192,
+      "lacksItems": [
+        1200
+      ],
+      "htmlFile": "30022-talk-000.htm"
+    },
+    {
+      "npcId": 30022,
+      "hook": "talk",
+      "when": "absent",
+      "hasItems": [
+        1191,
+        1194,
+        1195,
+        1196
+      ],
+      "ops": [
+        {
+          "op": "take_item",
+          "itemId": 1191,
+          "count": 1
+        },
+        {
+          "op": "take_item",
+          "itemId": 1194,
+          "count": 1
+        },
+        {
+          "op": "take_item",
+          "itemId": 1195,
+          "count": 1
+        },
+        {
+          "op": "take_item",
+          "itemId": 1196,
+          "count": 1
+        },
+        {
+          "op": "give_item",
+          "itemId": 1192,
+          "count": 1
+        },
+        {
+          "op": "set_cond",
+          "cond": 3
+        }
+      ],
+      "htmlFile": "30022-talk-001.htm"
+    },
+    {
+      "npcId": 30022,
+      "hook": "talk",
+      "when": "absent",
+      "hasItems": [
+        1194,
+        1195,
+        1196
+      ],
+      "ops": [
+        {
+          "op": "take_item",
+          "itemId": 1191,
+          "count": 1
+        },
+        {
+          "op": "take_item",
+          "itemId": 1194,
+          "count": 1
+        },
+        {
+          "op": "take_item",
+          "itemId": 1195,
+          "count": 1
+        },
+        {
+          "op": "take_item",
+          "itemId": 1196,
+          "count": 1
+        },
+        {
+          "op": "give_item",
+          "itemId": 1192,
+          "count": 1
+        },
+        {
+          "op": "set_cond",
+          "cond": 3
+        }
+      ],
+      "htmlFile": "30022-talk-002.htm"
+    },
+    {
+      "npcId": 30017,
+      "hook": "talk",
+      "when": "absent",
+      "hasItems": [
+        1192,
+        1193
+      ],
+      "lacksItems": [
+        1200,
+        1197
+      ],
+      "ops": [
+        {
+          "op": "take_item",
+          "itemId": 1193,
+          "count": 1
+        },
+        {
+          "op": "give_item",
+          "itemId": 1197,
+          "count": 1
+        },
+        {
+          "op": "set_cond",
+          "cond": 5
+        }
+      ],
+      "htmlFile": "30017-talk-003.htm"
+    },
+    {
+      "npcId": 30017,
+      "hook": "talk",
+      "when": "absent",
+      "hasItem": 1193,
+      "lacksItems": [
+        1197
+      ],
+      "ops": [
+        {
+          "op": "take_item",
+          "itemId": 1193,
+          "count": 1
+        },
+        {
+          "op": "give_item",
+          "itemId": 1197,
+          "count": 1
+        },
+        {
+          "op": "set_cond",
+          "cond": 5
+        }
+      ],
+      "htmlFile": "30017-talk-004.htm"
+    },
+    {
+      "npcId": 30333,
+      "hook": "talk",
+      "when": "absent",
+      "hasItem": 1191,
+      "ops": [
+        {
+          "op": "give_item",
+          "itemId": 1199,
+          "count": 1
+        }
+      ],
+      "htmlFile": "30333-talk-005.htm"
+    },
+    {
+      "npcId": 30333,
+      "hook": "talk",
+      "when": "absent",
+      "hasItems": [
+        1191,
+        1199
+      ],
+      "htmlFile": "30333-talk-006.htm"
+    },
+    {
+      "npcId": 30333,
+      "hook": "talk",
+      "when": "absent",
+      "hasItems": [
+        1191,
+        1196
+      ],
+      "htmlFile": "30333-talk-007.htm"
+    },
+    {
+      "npcId": 30333,
+      "hook": "talk",
+      "when": "absent",
+      "ops": [
+        {
+          "op": "give_item",
+          "itemId": 1199,
+          "count": 1
+        }
+      ],
+      "htmlFile": "30333-talk-008.htm"
+    },
+    {
+      "npcId": 30333,
+      "hook": "talk",
+      "when": "absent",
+      "hasItem": 1199,
+      "htmlFile": "30333-talk-009.htm"
+    },
+    {
+      "npcId": 30333,
+      "hook": "talk",
+      "when": "absent",
+      "hasItem": 1196,
+      "htmlFile": "30333-talk-010.htm"
+    },
+    {
+      "npcId": 30408,
+      "hook": "talk",
+      "when": "absent",
+      "lacksItems": [
+        1192
+      ],
+      "htmlFile": "30408-talk-011.htm"
+    },
+    {
+      "npcId": 30408,
+      "hook": "talk",
+      "when": "absent",
+      "hasItem": 1192,
+      "ops": [
+        {
+          "op": "give_item",
+          "itemId": 1193,
+          "count": 1
+        },
+        {
+          "op": "set_cond",
+          "cond": 4
+        }
+      ],
+      "htmlFile": "30408-talk-012.htm"
+    },
+    {
+      "npcId": 30408,
+      "hook": "talk",
+      "when": "absent",
+      "hasItems": [
+        1192,
+        1193
+      ],
+      "htmlFile": "30408-talk-013.htm"
+    },
+    {
+      "npcId": 30408,
+      "hook": "talk",
+      "when": "absent",
+      "hasItems": [
+        1192,
+        1197
+      ],
+      "ops": [
+        {
+          "op": "take_item",
+          "itemId": 1197,
+          "count": 1
+        },
+        {
+          "op": "give_item",
+          "itemId": 1200,
+          "count": 1
+        },
+        {
+          "op": "set_cond",
+          "cond": 6
+        }
+      ],
+      "htmlFile": "30408-talk-014.htm"
+    },
+    {
+      "npcId": 30408,
+      "hook": "talk",
+      "when": "absent",
+      "hasItems": [
+        1192,
+        1200
+      ],
+      "htmlFile": "30408-talk-015.htm"
+    },
+    {
+      "npcId": 30022,
+      "hook": "event",
+      "when": "absent",
+      "event": "ACCEPT",
+      "minLevel": 18,
+      "hasItem": 1201,
+      "htmlFile": "30022-event-ACCEPT-016.htm"
+    },
+    {
+      "npcId": 30022,
+      "hook": "event",
+      "when": "absent",
+      "event": "ACCEPT",
+      "hasItem": 1201,
+      "htmlFile": "30022-event-ACCEPT-017.htm"
+    },
+    {
+      "npcId": 30022,
+      "hook": "event",
+      "when": "absent",
+      "event": "ACCEPT",
+      "htmlFile": "30022-event-ACCEPT-018.htm"
+    }
+  ]
+}

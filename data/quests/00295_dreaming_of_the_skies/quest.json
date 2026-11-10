@@ -1,0 +1,120 @@
+{
+  "id": 295,
+  "name": "Dreaming of the Skies",
+  "repeatable": true,
+  "abortable": true,
+  "questItems": [
+    1492
+  ],
+  "dialogs": [
+    {
+      "npcId": 30536,
+      "hook": "talk",
+      "when": "absent",
+      "maxLevel": 10,
+      "htmlFile": "30536-talk-000.htm"
+    },
+    {
+      "npcId": 30536,
+      "hook": "talk",
+      "when": "absent",
+      "minLevel": 11,
+      "htmlFile": "30536-talk-001.htm"
+    },
+    {
+      "npcId": 30536,
+      "hook": "event",
+      "when": "absent",
+      "event": "30536-03",
+      "minLevel": 11,
+      "ops": [
+        {
+          "op": "create"
+        },
+        {
+          "op": "start"
+        },
+        {
+          "op": "set_cond",
+          "cond": 1
+        }
+      ],
+      "htmlFile": "30536-event-30536-03-002.htm"
+    },
+    {
+      "npcId": 30536,
+      "hook": "talk",
+      "when": "started",
+      "cond": 1,
+      "htmlFile": "30536-talk-c1-003.htm"
+    },
+    {
+      "npcId": 30536,
+      "hook": "talk",
+      "when": "started",
+      "cond": 2,
+      "atLeast": {
+        "1492": 50
+      },
+      "hasItem": 1509,
+      "ops": [
+        {
+          "op": "give_adena",
+          "count": 2400
+        },
+        {
+          "op": "complete"
+        }
+      ],
+      "htmlFile": "30536-talk-c2-004.htm"
+    },
+    {
+      "npcId": 30536,
+      "hook": "talk",
+      "when": "started",
+      "cond": 2,
+      "atLeast": {
+        "1492": 50
+      },
+      "lacksItems": [
+        1509
+      ],
+      "ops": [
+        {
+          "op": "give_item",
+          "itemId": 1509,
+          "count": 1
+        },
+        {
+          "op": "complete"
+        }
+      ],
+      "htmlFile": "30536-talk-c2-005.htm"
+    },
+    {
+      "npcId": 20153,
+      "hook": "kill",
+      "when": "started",
+      "cond": 1,
+      "html": "",
+      "ops": [
+        {
+          "op": "drop_item",
+          "itemId": 1492,
+          "count": 1,
+          "chance": 1.0,
+          "limit": 50,
+          "condAtLimit": 2
+        },
+        {
+          "op": "drop_item",
+          "itemId": 1492,
+          "count": 1,
+          "chance": 0.25,
+          "limit": 50,
+          "condAtLimit": 2
+        }
+      ]
+    }
+  ]
+}

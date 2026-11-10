@@ -53,6 +53,8 @@ public sealed class QuestOutcome
     public IReadOnlyList<BagTouch> Items { get; init; } = [];
     public long Exp { get; init; }
     public int Sp { get; init; }
+    /// <summary>Npc ids to spawn near the dialog NPC (Mobius quest <c>addSpawn</c>).</summary>
+    public IReadOnlyList<int> Spawns { get; init; } = [];
 
     public bool Ok => Failure == QuestFailure.None;
 }

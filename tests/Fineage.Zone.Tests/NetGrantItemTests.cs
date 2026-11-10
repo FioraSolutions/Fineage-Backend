@@ -1,5 +1,5 @@
 using Fineage.Game;
-using Fineage.Login;
+using Fineage.Accounts;
 using Fineage.Net.Contract;
 using Fineage.Protocol;
 using Fineage.Zone.Net;
@@ -11,7 +11,7 @@ namespace Fineage.Zone.Tests;
 /// <summary>
 /// The authoritative grant into the bag: an admin grant reaches the client as an InventoryUpdate, persists on
 /// leave, and is refused before the character entered the world. Ported off the V2 wire; the assertions read the
-/// recorded <see cref="INetPresenceBridge"/> fanout.
+/// recorded <see cref="IWorldEventPublisher"/> fanout.
 /// </summary>
 public sealed class NetGrantItemTests
 {
@@ -23,13 +23,11 @@ public sealed class NetGrantItemTests
         var bench = new WorldBench();
         BenchPlayer actor = await bench.EnterAsync("grant", "Merchant");
 
-        Assert.Null(await bench.World.TryGrantItemAsync(
-            actor.Session,
-            new GrantItemRequestMsg { ItemId = Adena, Count = 25 },
+        Assert.Null(await bench.World.TryGrantItemAsync(actor.Session, Adena, 25,
             CancellationToken.None));
 
-        var update = Assert.IsType<InventoryUpdateNetMsg>(
-            bench.Rec.Of(nameof(INetPresenceBridge.FanoutInventoryUpdate)).Last()[1]);
+        var update = Assert.IsType<InventoryUpdateMsg>(
+            bench.Rec.Of(nameof(IWorldEventPublisher.FanoutInventoryUpdate)).Last()[1]);
         var row = Assert.Single(update.Changes);
         Assert.Equal(InventoryChange.Add, row.Change);
         Assert.Equal(Adena, row.ItemId);
@@ -48,11 +46,9 @@ public sealed class NetGrantItemTests
         var bench = new WorldBench();
         var session = new ZoneSession();
 
-        Assert.Equal("world", await bench.World.TryGrantItemAsync(
-            session,
-            new GrantItemRequestMsg { ItemId = Adena, Count = 1 },
+        Assert.Equal("world", await bench.World.TryGrantItemAsync(session, Adena, 1,
             CancellationToken.None));
-        Assert.Empty(bench.Rec.Of(nameof(INetPresenceBridge.FanoutInventoryUpdate)));
+        Assert.Empty(bench.Rec.Of(nameof(IWorldEventPublisher.FanoutInventoryUpdate)));
     }
 
     [Theory]
@@ -65,10 +61,8 @@ public sealed class NetGrantItemTests
         var bench = new WorldBench();
         BenchPlayer actor = await bench.EnterAsync("grant", "Merchant");
 
-        Assert.Equal("bad_request", await bench.World.TryGrantItemAsync(
-            actor.Session,
-            new GrantItemRequestMsg { ItemId = itemId, Count = count },
+        Assert.Equal("bad_request", await bench.World.TryGrantItemAsync(actor.Session, itemId, count,
             CancellationToken.None));
-        Assert.Empty(bench.Rec.Of(nameof(INetPresenceBridge.FanoutInventoryUpdate)));
+        Assert.Empty(bench.Rec.Of(nameof(IWorldEventPublisher.FanoutInventoryUpdate)));
     }
 }

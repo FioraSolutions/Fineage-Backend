@@ -1,6 +1,6 @@
 using Fineage.Game;
 using Fineage.Game.Shops;
-using Fineage.Login;
+using Fineage.Accounts;
 using Fineage.Net.Contract;
 using Fineage.Protocol;
 using Fineage.Zone.Net;
@@ -13,7 +13,7 @@ namespace Fineage.Zone.Tests;
 /// <summary>
 /// Shop rules over the Net bridge: what a merchant list, a purchase, a sale, and a multisell hand the client,
 /// plus every refusal that must not move adena. The retired V2 suite drove these through MessagePack frames;
-/// here the world is the driver and the recorded <see cref="INetPresenceBridge"/> traffic is the client.
+/// here the world is the driver and the recorded <see cref="IWorldEventPublisher"/> traffic is the client.
 /// </summary>
 public sealed class NetShopTests
 {
@@ -265,24 +265,24 @@ public sealed class NetShopTests
             ReferencePrice: 2000, Weight: 100)
     ]);
 
-    static BuyListNetMsg LastBuyList(NetBridgeRecorder rec) =>
-        Assert.IsType<BuyListNetMsg>(rec.Of(nameof(INetPresenceBridge.FanoutBuyList)).Last()[1]);
+    static Fineage.Protocol.BuyListMsg LastBuyList(NetBridgeRecorder rec) =>
+        Assert.IsType<Fineage.Protocol.BuyListMsg>(rec.Of(nameof(IWorldEventPublisher.FanoutBuyList)).Last()[1]);
 
-    static SellListNetMsg LastSellList(NetBridgeRecorder rec) =>
-        Assert.IsType<SellListNetMsg>(rec.Of(nameof(INetPresenceBridge.FanoutSellList)).Last()[1]);
+    static Fineage.Protocol.SellListMsg LastSellList(NetBridgeRecorder rec) =>
+        Assert.IsType<Fineage.Protocol.SellListMsg>(rec.Of(nameof(IWorldEventPublisher.FanoutSellList)).Last()[1]);
 
-    static MultiSellListNetMsg LastMultiSell(NetBridgeRecorder rec) =>
-        Assert.IsType<MultiSellListNetMsg>(rec.Of(nameof(INetPresenceBridge.FanoutMultiSellList)).Last()[1]);
+    static Fineage.Protocol.MultiSellListMsg LastMultiSell(NetBridgeRecorder rec) =>
+        Assert.IsType<Fineage.Protocol.MultiSellListMsg>(rec.Of(nameof(IWorldEventPublisher.FanoutMultiSellList)).Last()[1]);
 
-    static ShopBalanceNetMsg LastBalance(NetBridgeRecorder rec) =>
-        Assert.IsType<ShopBalanceNetMsg>(rec.Of(nameof(INetPresenceBridge.FanoutShopBalance)).Last()[1]);
+    static Fineage.Protocol.ShopBalanceMsg LastBalance(NetBridgeRecorder rec) =>
+        Assert.IsType<Fineage.Protocol.ShopBalanceMsg>(rec.Of(nameof(IWorldEventPublisher.FanoutShopBalance)).Last()[1]);
 
-    static InventoryUpdateNetMsg LastInventory(NetBridgeRecorder rec) =>
-        Assert.IsType<InventoryUpdateNetMsg>(rec.Of(nameof(INetPresenceBridge.FanoutInventoryUpdate)).Last()[1]);
+    static InventoryUpdateMsg LastInventory(NetBridgeRecorder rec) =>
+        Assert.IsType<InventoryUpdateMsg>(rec.Of(nameof(IWorldEventPublisher.FanoutInventoryUpdate)).Last()[1]);
 
-    static SystemMessageNetMsg LastSystemMessage(NetBridgeRecorder rec) =>
-        Assert.IsType<SystemMessageNetMsg>(rec.Of(nameof(INetPresenceBridge.FanoutSystemMessage)).Last()[1]);
+    static SystemMessageMsg LastSystemMessage(NetBridgeRecorder rec) =>
+        Assert.IsType<SystemMessageMsg>(rec.Of(nameof(IWorldEventPublisher.FanoutSystemMessage)).Last()[1]);
 
     static void NoInventoryUpdate(NetBridgeRecorder rec) =>
-        Assert.Empty(rec.Of(nameof(INetPresenceBridge.FanoutInventoryUpdate)));
+        Assert.Empty(rec.Of(nameof(IWorldEventPublisher.FanoutInventoryUpdate)));
 }

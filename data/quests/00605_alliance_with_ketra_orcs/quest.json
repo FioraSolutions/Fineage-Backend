@@ -1,0 +1,177 @@
+{
+  "id": 605,
+  "name": "Alliance with Ketra Orcs",
+  "repeatable": true,
+  "abortable": true,
+  "questItems": [
+    7216,
+    7217,
+    7218
+  ],
+  "dialogs": [
+    {
+      "npcId": 31371,
+      "hook": "talk",
+      "when": "absent",
+      "htmlFile": "31371-talk-000.htm"
+    },
+    {
+      "npcId": 31371,
+      "hook": "talk",
+      "when": "absent",
+      "htmlFile": "31371-talk-001.htm"
+    },
+    {
+      "npcId": 31371,
+      "hook": "talk",
+      "when": "started",
+      "cond": 1,
+      "htmlFile": "31371-talk-c1-002.htm"
+    },
+    {
+      "npcId": 31371,
+      "hook": "talk",
+      "when": "started",
+      "cond": 1,
+      "htmlFile": "31371-talk-c1-003.htm"
+    },
+    {
+      "npcId": 31371,
+      "hook": "talk",
+      "when": "started",
+      "cond": 2,
+      "htmlFile": "31371-talk-c2-004.htm"
+    },
+    {
+      "npcId": 31371,
+      "hook": "talk",
+      "when": "started",
+      "cond": 2,
+      "htmlFile": "31371-talk-c2-005.htm"
+    },
+    {
+      "npcId": 31371,
+      "hook": "talk",
+      "when": "started",
+      "cond": 3,
+      "htmlFile": "31371-talk-c3-006.htm"
+    },
+    {
+      "npcId": 31371,
+      "hook": "talk",
+      "when": "started",
+      "cond": 3,
+      "htmlFile": "31371-talk-c3-007.htm"
+    },
+    {
+      "npcId": 31371,
+      "hook": "talk",
+      "when": "started",
+      "cond": 4,
+      "htmlFile": "31371-talk-c4-008.htm"
+    },
+    {
+      "npcId": 31371,
+      "hook": "talk",
+      "when": "started",
+      "cond": 4,
+      "htmlFile": "31371-talk-c4-009.htm"
+    },
+    {
+      "npcId": 31371,
+      "hook": "talk",
+      "when": "started",
+      "cond": 5,
+      "lacksItems": [
+        2
+      ],
+      "htmlFile": "31371-talk-c5-010.htm"
+    },
+    {
+      "npcId": 31371,
+      "hook": "talk",
+      "when": "started",
+      "cond": 6,
+      "hasItem": 7213,
+      "htmlFile": "31371-talk-c6-011.htm"
+    },
+    {
+      "npcId": 31371,
+      "hook": "event",
+      "when": "absent",
+      "event": "31371-12a",
+      "htmlFile": "31371-event-31371-12a-012.htm"
+    },
+    {
+      "npcId": 31371,
+      "hook": "event",
+      "when": "absent",
+      "event": "31371-12b",
+      "htmlFile": "31371-event-31371-12b-013.htm"
+    },
+    {
+      "npcId": 31371,
+      "hook": "event",
+      "when": "absent",
+      "event": "31371-25",
+      "htmlFile": "31371-event-31371-25-014.htm"
+    },
+    {
+      "npcId": 31371,
+      "hook": "event",
+      "when": "absent",
+      "event": "31371-04",
+      "htmlFile": "31371-event-31371-04-015.htm"
+    },
+    {
+      "npcId": 31371,
+      "hook": "event",
+      "when": "absent",
+      "event": "31371-04",
+      "htmlFile": "31371-event-31371-04-016.htm"
+    },
+    {
+      "npcId": 31371,
+      "hook": "event",
+      "when": "absent",
+      "event": "31371-12",
+      "htmlFile": "31371-event-31371-12-017.htm"
+    },
+    {
+      "npcId": 31371,
+      "hook": "event",
+      "when": "absent",
+      "event": "31371-15",
+      "htmlFile": "31371-event-31371-15-018.htm"
+    },
+    {
+      "npcId": 31371,
+      "hook": "event",
+      "when": "absent",
+      "event": "31371-18",
+      "htmlFile": "31371-event-31371-18-019.htm"
+    },
+    {
+      "npcId": 31371,
+      "hook": "event",
+      "when": "absent",
+      "event": "31371-21",
+      "lacksItems": [
+        7219
+      ],
+      "htmlFile": "31371-event-31371-21-020.htm"
+    },
+    {
+      "npcId": 31371,
+      "hook": "event",
+      "when": "absent",
+      "event": "31371-26",
+      "ops": [
+        {
+          "op": "complete"
+        }
+      ],
+      "htmlFile": "31371-event-31371-26-021.htm"
+    }
+  ]
+}

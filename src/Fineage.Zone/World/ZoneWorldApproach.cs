@@ -162,12 +162,12 @@ public sealed partial class ZoneWorld
             var session = player.Session;
             if (session == null || session.PendingCastSkillId <= 0 || now < session.PendingCastAtUnixMs)
                 continue;
-            var request = new SkillUseRequestMsg
-            {
-                SkillId = session.PendingCastSkillId,
-                TargetObjectId = session.PendingCastTargetId
-            };
+            var request = new SkillUseIntent(
+                session.PendingCastSkillId,
+                session.PendingCastTargetId,
+                session.PendingCastCtrlPressed);
             session.PendingCastSkillId = 0;
+            session.PendingCastCtrlPressed = false;
             session.PendingCastTargetId = 0;
             session.PendingCastAtUnixMs = 0;
             if (TrySkillUse(session, request) != null)

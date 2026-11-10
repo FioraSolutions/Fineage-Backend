@@ -1,0 +1,530 @@
+using System.Text;
+using System.Text.Json;
+using Fineage.Game.Quests;
+using Npgsql;
+
+namespace Fineage.Accounts;
+
+/// <summary>
+/// PostgreSQL-backed <see cref="IAccountStore"/>. In-process mutations reuse
+/// <see cref="MemoryAccountStore"/>; normalized character/item/quest tables are the
+/// durable character-domain source of truth. <c>store_snapshot</c> remains a backup export.
+/// </summary>
+public sealed class PostgresAccountStore : IAccountStore, IDisposable
+{
+    readonly NpgsqlDataSource _dataSource;
+    readonly MemoryAccountStore _inner;
+    readonly object _persistGate = new();
+
+    PostgresAccountStore(NpgsqlDataSource dataSource, MemoryAccountStore inner)
+    {
+        _dataSource = dataSource;
+        _inner = inner;
+        // Backup JSON only — never UpsertFromSnapshot here (Claude B9 Login residual).
+        // Character-domain SQL is written by RunSilent / TryAddCharacter paths.
+        _inner.AfterSaveSnapshot = WriteSnapshotBackup;
+    }
+
+    public static PostgresAccountStore Open(string connectionString)
+    {
+        ArgumentException.ThrowIfNullOrWhiteSpace(connectionString);
+        var dataSource = NpgsqlDataSource.Create(connectionString);
+        try
+        {
+            ApplyMigrations(dataSource);
+            string? existing = LoadSnapshot(dataSource);
+            var inner = string.IsNullOrWhiteSpace(existing)
+                ? MemoryAccountStore.InMemory()
+                : MemoryAccountStore.FromSnapshot(existing);
+            var store = new PostgresAccountStore(dataSource, inner);
+            // Normalized tables are the character-domain SoT (FindById reads SQL). Reprojecting
+            // from store_snapshot on every Open would let a stale Login/Zone JSON wipe live rows
+            // (Claude B9). Bootstrap only when the SQL side is empty.
+            if (!store.HasNormalizedCharacterRows())
+                store.BackfillNormalizedFromSnapshot();
+            return store;
+        }
+        catch
+        {
+            dataSource.Dispose();
+            throw;
+        }
+    }
+
+    /// <summary>Re-project normalized tables from the current in-memory snapshot (CLI / recovery).</summary>
+    public void BackfillNormalizedFromSnapshot()
+    {
+        string snapshotJson = _inner.ExportSnapshot();
+        using var _ = JsonDocument.Parse(snapshotJson);
+        lock (_persistGate)
+        {
+            using var conn = _dataSource.OpenConnection();
+            using var tx = conn.BeginTransaction();
+            UpsertSnapshotRow(conn, tx, snapshotJson);
+            NormalizedStoreWriter.UpsertFromSnapshot(conn, tx, snapshotJson);
+            tx.Commit();
+        }
+    }
+
+    public void Dispose() => _dataSource.Dispose();
+
+    static void ApplyMigrations(NpgsqlDataSource dataSource)
+    {
+        string migrationsDir = FindMigrationsDirectory();
+        using var conn = dataSource.OpenConnection();
+        using (var lockCmd = conn.CreateCommand())
+        {
+            lockCmd.CommandText = "SELECT pg_advisory_lock(87201401)";
+            lockCmd.ExecuteNonQuery();
+        }
+
+        try
+        {
+            using (var ensure = conn.CreateCommand())
+            {
+                ensure.CommandText =
+                    """
+                    CREATE TABLE IF NOT EXISTS schema_migrations (
+                        id text PRIMARY KEY,
+                        applied_at timestamptz NOT NULL DEFAULT now()
+                    );
+                    """;
+                ensure.ExecuteNonQuery();
+            }
+
+            foreach (string file in Directory.GetFiles(migrationsDir, "*.sql").OrderBy(f => f, StringComparer.Ordinal))
+            {
+                string id = Path.GetFileName(file);
+                using (var check = conn.CreateCommand())
+                {
+                    check.CommandText = "SELECT 1 FROM schema_migrations WHERE id = @id";
+                    check.Parameters.AddWithValue("id", id);
+                    if (check.ExecuteScalar() != null)
+                        continue;
+                }
+
+                string sql = File.ReadAllText(file);
+                using var tx = conn.BeginTransaction();
+                foreach (string statement in SplitSqlStatements(sql))
+                {
+                    using var apply = conn.CreateCommand();
+                    apply.Transaction = tx;
+                    apply.CommandText = statement;
+                    apply.ExecuteNonQuery();
+                }
+
+                using (var mark = conn.CreateCommand())
+                {
+                    mark.Transaction = tx;
+                    mark.CommandText = "INSERT INTO schema_migrations (id) VALUES (@id) ON CONFLICT (id) DO NOTHING";
+                    mark.Parameters.AddWithValue("id", id);
+                    mark.ExecuteNonQuery();
+                }
+
+                tx.Commit();
+            }
+        }
+        finally
+        {
+            using var unlock = conn.CreateCommand();
+            unlock.CommandText = "SELECT pg_advisory_unlock(87201401)";
+            unlock.ExecuteNonQuery();
+        }
+    }
+
+    static IEnumerable<string> SplitSqlStatements(string sql)
+    {
+        // Strip -- comments before splitting on ';' so a semicolon inside a header comment
+        // (e.g. "JSON mirror first; table later") cannot leak as a fake statement.
+        var withoutComments = new StringBuilder(sql.Length);
+        foreach (string line in sql.Split('\n'))
+        {
+            string t = line.TrimStart();
+            if (t.StartsWith("--", StringComparison.Ordinal))
+                continue;
+            withoutComments.AppendLine(line);
+        }
+
+        foreach (string part in withoutComments.ToString()
+                     .Split(';', StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries))
+        {
+            if (part.Length == 0)
+                continue;
+            yield return part;
+        }
+    }
+
+    static string FindMigrationsDirectory()
+    {
+        string? dir = AppContext.BaseDirectory;
+        for (int i = 0; i < 8 && dir != null; i++)
+        {
+            string candidate = Path.Combine(dir, "Persistence", "Migrations");
+            if (Directory.Exists(candidate))
+                return candidate;
+            candidate = Path.Combine(dir, "migrations");
+            if (Directory.Exists(candidate))
+                return candidate;
+            dir = Directory.GetParent(dir)?.FullName;
+        }
+
+        string src = Path.GetFullPath(Path.Combine(AppContext.BaseDirectory, "..", "..", "..", "Persistence", "Migrations"));
+        if (Directory.Exists(src))
+            return src;
+
+        throw new DirectoryNotFoundException("Could not locate Persistence/Migrations SQL folder.");
+    }
+
+    static string? LoadSnapshot(NpgsqlDataSource dataSource)
+    {
+        using var conn = dataSource.OpenConnection();
+        using var cmd = conn.CreateCommand();
+        cmd.CommandText = "SELECT payload::text FROM store_snapshot WHERE id = 1";
+        return cmd.ExecuteScalar() as string;
+    }
+
+    /// <summary>
+    /// Writes <c>store_snapshot</c> backup JSON only. Does not reproject normalized character tables —
+    /// Login’s in-memory graph can lag Zone hot-path SQL (Claude B9).
+    /// </summary>
+    void WriteSnapshotBackup(string snapshotJson)
+    {
+        using var _ = JsonDocument.Parse(snapshotJson);
+        lock (_persistGate)
+        {
+            using var conn = _dataSource.OpenConnection();
+            using var tx = conn.BeginTransaction();
+            UpsertSnapshotRow(conn, tx, snapshotJson);
+            tx.Commit();
+        }
+    }
+
+    static void UpsertSnapshotRow(NpgsqlConnection conn, NpgsqlTransaction tx, string snapshotJson)
+    {
+        using var upsert = conn.CreateCommand();
+        upsert.Transaction = tx;
+        upsert.CommandText =
+            """
+            INSERT INTO store_snapshot (id, version, payload, updated_at)
+            VALUES (1, 1, @payload::jsonb, now())
+            ON CONFLICT (id) DO UPDATE
+            SET payload = excluded.payload,
+                updated_at = now();
+            """;
+        upsert.Parameters.AddWithValue("payload", snapshotJson);
+        upsert.ExecuteNonQuery();
+    }
+
+    bool RunSilent(Func<bool> mutation, Action<NpgsqlConnection> sql)
+    {
+        bool previous = _inner.EmitSnapshots;
+        _inner.EmitSnapshots = false;
+        try
+        {
+            if (!mutation())
+                return false;
+        }
+        finally
+        {
+            _inner.EmitSnapshots = previous;
+        }
+
+        // Hot paths write normalized SQL only. Rewriting store_snapshot from this process's
+        // partial MemoryAccountStore would clobber the other process's backup JSON (Claude B9).
+        lock (_persistGate)
+        {
+            using var conn = _dataSource.OpenConnection();
+            sql(conn);
+        }
+
+        return true;
+    }
+
+    bool HasNormalizedCharacterRows()
+    {
+        using var conn = _dataSource.OpenConnection();
+        using var cmd = conn.CreateCommand();
+        cmd.CommandText = "SELECT EXISTS (SELECT 1 FROM characters LIMIT 1)";
+        return cmd.ExecuteScalar() is true;
+    }
+
+    // --- IAccountStore ---
+
+    public bool AccountExists(string account) => _inner.AccountExists(account);
+
+    public AddAccountStatus TryAddAccount(string name, string passwordHash, string passwordSalt, int iterations, string? email) =>
+        _inner.TryAddAccount(name, passwordHash, passwordSalt, iterations, email);
+
+    public bool TryGetCredentialByEmail(string email, out AccountCredential credential) =>
+        _inner.TryGetCredentialByEmail(email, out credential);
+
+    public bool TryGetCredential(string account, out AccountCredential credential) =>
+        _inner.TryGetCredential(account, out credential);
+
+    public CreateCharacterStatus TryAddCharacter(
+        string account,
+        string name,
+        int classId,
+        int race,
+        int sex,
+        out CharacterRecord? created,
+        IReadOnlyList<StoredItem>? items = null,
+        DateTimeOffset? createdAt = null,
+        DateTimeOffset? now = null,
+        int hairStyle = 0,
+        int hairColor = 0,
+        int face = 0,
+        bool hasPosition = false,
+        int x = 0,
+        int y = 0,
+        int z = 0,
+        int level = 1,
+        int maxHp = 0,
+        int hp = 0,
+        int maxMp = 0,
+        int mp = 0,
+        int sp = 0,
+        long adena = 0,
+        string title = "",
+        int? maxCharacters = null)
+    {
+        // Memory create without AfterSaveSnapshot, then backup JSON + single-character SQL upsert.
+        // Full UpsertFromSnapshot would let Login’s stale bag wipe Zone inventory SoT (B9).
+        bool previous = _inner.EmitSnapshots;
+        _inner.EmitSnapshots = false;
+        CreateCharacterStatus status;
+        try
+        {
+            status = _inner.TryAddCharacter(
+                account, name, classId, race, sex, out created, items, createdAt, now,
+                hairStyle, hairColor, face, hasPosition, x, y, z, level, maxHp, hp, maxMp, mp, sp, adena, title,
+                maxCharacters);
+        }
+        finally
+        {
+            _inner.EmitSnapshots = previous;
+        }
+
+        if (status != CreateCharacterStatus.Ok || created == null)
+            return status;
+
+        WriteSnapshotBackup(_inner.ExportSnapshot());
+        lock (_persistGate)
+        {
+            using var conn = _dataSource.OpenConnection();
+            using var tx = conn.BeginTransaction();
+            NormalizedStoreWriter.UpsertCharacterRecord(conn, tx, created);
+            tx.Commit();
+        }
+
+        return status;
+    }
+
+    public bool TryReplaceItems(string account, int characterId, IReadOnlyList<StoredItem> items) =>
+        RunSilent(
+            () => _inner.TryReplaceItems(account, characterId, items),
+            conn =>
+            {
+                var record = _inner.FindById(account, characterId)
+                    ?? throw new InvalidOperationException($"Character {characterId} missing after item replace.");
+                NormalizedStoreWriter.ReplaceInventoryOnly(conn, characterId, record.Items ?? []);
+            });
+
+    public bool TryReplaceWarehouse(string account, int characterId, IReadOnlyList<StoredItem> items) =>
+        RunSilent(
+            () => _inner.TryReplaceWarehouse(account, characterId, items),
+            conn =>
+            {
+                var record = _inner.FindById(account, characterId)
+                    ?? throw new InvalidOperationException($"Character {characterId} missing after warehouse replace.");
+                NormalizedStoreWriter.ReplaceWarehouseOnly(conn, characterId, record.Warehouse ?? []);
+            });
+
+    public bool TrySavePresence(string account, int characterId, int x, int y, int z, DateTimeOffset? lastAccess) =>
+        RunSilent(
+            () => _inner.TrySavePresence(account, characterId, x, y, z, lastAccess),
+            conn => NormalizedStoreWriter.UpdatePresence(conn, characterId, x, y, z, lastAccess));
+
+    public bool TrySaveVitals(string account, int characterId, int hp, int mp) =>
+        RunSilent(
+            () => _inner.TrySaveVitals(account, characterId, hp, mp),
+            conn => NormalizedStoreWriter.UpdateVitals(conn, characterId, hp, mp));
+
+    public bool TrySaveProgress(string account, int characterId, int level, long exp, int sp, int maxHp, int hp, int maxMp, int mp) =>
+        RunSilent(
+            () => _inner.TrySaveProgress(account, characterId, level, exp, sp, maxHp, hp, maxMp, mp),
+            conn => NormalizedStoreWriter.UpdateProgress(conn, characterId, level, exp, sp, maxHp, hp, maxMp, mp));
+
+    public bool TrySaveClass(string account, int characterId, int classId) =>
+        RunSilent(
+            () => _inner.TrySaveClass(account, characterId, classId),
+            conn => NormalizedStoreWriter.UpdateClass(conn, characterId, classId));
+
+    public bool TrySaveDeathPenalty(string account, int characterId, int level) =>
+        RunSilent(
+            () => _inner.TrySaveDeathPenalty(account, characterId, level),
+            conn => NormalizedStoreWriter.UpdateDeathPenalty(conn, characterId, level));
+
+    public bool TrySaveHenna(string account, int characterId, int dye1, int dye2, int dye3) =>
+        RunSilent(
+            () => _inner.TrySaveHenna(account, characterId, dye1, dye2, dye3),
+            conn => NormalizedStoreWriter.UpdateHenna(conn, characterId, dye1, dye2, dye3));
+
+    public bool TrySaveKarmaPk(string account, int characterId, int karma, int pkKills, int pvpKills) =>
+        RunSilent(
+            () => _inner.TrySaveKarmaPk(account, characterId, karma, pkKills, pvpKills),
+            conn => NormalizedStoreWriter.UpdateKarmaPk(conn, characterId, karma, pkKills, pvpKills));
+
+    public bool TryReplaceQuests(string account, int characterId, IReadOnlyList<QuestSaveRow> quests) =>
+        RunSilent(
+            () => _inner.TryReplaceQuests(account, characterId, quests),
+            conn =>
+            {
+                using var tx = conn.BeginTransaction();
+                NormalizedStoreWriter.ReplaceQuests(conn, tx, characterId, quests);
+                tx.Commit();
+            });
+
+    public bool TryReplaceLearnedSkills(string account, int characterId, IReadOnlyList<StoredSkill> skills) =>
+        RunSilent(
+            () => _inner.TryReplaceLearnedSkills(account, characterId, skills),
+            conn =>
+            {
+                using var tx = conn.BeginTransaction();
+                NormalizedStoreWriter.ReplaceLearnedSkills(conn, tx, characterId, skills);
+                tx.Commit();
+            });
+
+    public bool TryReplaceEffects(string account, int characterId, IReadOnlyList<StoredEffect> effects) =>
+        RunSilent(
+            () => _inner.TryReplaceEffects(account, characterId, effects),
+            conn =>
+            {
+                using var tx = conn.BeginTransaction();
+                NormalizedStoreWriter.ReplaceEffects(conn, tx, characterId, effects);
+                tx.Commit();
+            });
+
+    public bool TryReplaceKnownRecipes(string account, int characterId, IReadOnlyList<int> recipeIds) =>
+        // Recipe book rows: JSON mirror for now; normalized table follow-up (#281).
+        _inner.TryReplaceKnownRecipes(account, characterId, recipeIds);
+
+    public bool TryReplaceFriends(string account, int characterId, IReadOnlyList<StoredSocial> friends) =>
+        // Friends: JSON mirror for now; normalized character_friends follow-up (#285).
+        _inner.TryReplaceFriends(account, characterId, friends);
+
+    public bool TryReplaceBlocked(string account, int characterId, IReadOnlyList<StoredSocial> blocked, bool blockAll) =>
+        _inner.TryReplaceBlocked(account, characterId, blocked, blockAll);
+
+    public CharacterRecord? FindByCharacterId(int characterId) =>
+        _inner.FindByCharacterId(characterId);
+
+    public CharacterRecord? FindByCharacterName(string name) =>
+        _inner.FindByCharacterName(name);
+
+    public bool TryReplaceShortcuts(string account, int characterId, IReadOnlyList<StoredShortcut> shortcuts) =>
+        RunSilent(
+            () => _inner.TryReplaceShortcuts(account, characterId, shortcuts),
+            conn =>
+            {
+                using var tx = conn.BeginTransaction();
+                NormalizedStoreWriter.ReplaceShortcuts(conn, tx, characterId, shortcuts);
+                tx.Commit();
+            });
+
+    public bool TrySetLastAccess(string account, int characterId, DateTimeOffset when) =>
+        _inner.TrySetLastAccess(account, characterId, when);
+
+    public bool TrySetDeleteAt(string account, int characterId, DateTimeOffset deleteAt) =>
+        _inner.TrySetDeleteAt(account, characterId, deleteAt);
+
+    public bool TryClearDeletion(string account, int characterId) =>
+        _inner.TryClearDeletion(account, characterId);
+
+    public bool TryHardDelete(string account, int characterId) =>
+        _inner.TryHardDelete(account, characterId);
+
+    public CharacterRecord? FindById(string account, int characterId)
+    {
+        using var conn = _dataSource.OpenConnection();
+        var record = NormalizedStoreReader.TryLoadById(conn, account, characterId);
+        if (record == null)
+            return null;
+        Hydrate(conn, record);
+        return record;
+    }
+
+    public CharacterRecord? FindByName(string account, string name)
+    {
+        using var conn = _dataSource.OpenConnection();
+        var record = NormalizedStoreReader.TryLoadByName(conn, account, name);
+        if (record == null)
+            return null;
+        Hydrate(conn, record);
+        return record;
+    }
+
+    public IReadOnlyList<CharacterRecord> List(string account, DateTimeOffset now)
+    {
+        using var conn = _dataSource.OpenConnection();
+        var rows = NormalizedStoreReader.ListByAccount(conn, account);
+        if (rows.Count == 0)
+            return [];
+
+        var cred = NormalizedStoreReader.TryLoadAccount(conn, account);
+        foreach (var row in rows)
+        {
+            _inner.HydrateCharacter(
+                row,
+                cred?.PasswordHash,
+                cred?.PasswordSalt,
+                cred?.Iterations ?? 0,
+                cred?.Email);
+        }
+
+        // Honour pending-delete purge rules from the in-memory store after hydrate.
+        return _inner.List(account, now);
+    }
+
+    public IReadOnlyList<CharacterRecord> List(string account) =>
+        List(account, DateTimeOffset.UtcNow);
+
+    void Hydrate(NpgsqlConnection conn, CharacterRecord record)
+    {
+        var cred = NormalizedStoreReader.TryLoadAccount(conn, record.Account);
+        _inner.HydrateCharacter(
+            record,
+            cred?.PasswordHash,
+            cred?.PasswordSalt,
+            cred?.Iterations ?? 0,
+            cred?.Email);
+    }
+
+    public IReadOnlyList<ClanRecord> ListClans() => _inner.ListClans();
+
+    public ClanRecord? FindClan(int clanId) => _inner.FindClan(clanId);
+
+    public ClanRecord? FindClanByName(string name) => _inner.FindClanByName(name);
+
+    public ClanRecord? InsertClan(ClanRecord draft, CharacterClanState leader) =>
+        _inner.InsertClan(draft, leader);
+
+    public bool UpdateClan(ClanRecord clan, IReadOnlyList<CharacterClanState> characters) =>
+        _inner.UpdateClan(clan, characters);
+
+    public bool DeleteClan(int clanId, IReadOnlyList<CharacterClanState> characters) =>
+        _inner.DeleteClan(clanId, characters);
+
+    public bool TrySetCharacterClanState(CharacterClanState state) =>
+        _inner.TrySetCharacterClanState(state);
+
+    public IReadOnlyList<CastleSave> ListCastles() => _inner.ListCastles();
+
+    public IReadOnlyList<SiegeClanSave> ListSiegeClans() => _inner.ListSiegeClans();
+
+    public bool SaveSiege(
+        IReadOnlyList<CastleSave> castles,
+        IReadOnlyList<SiegeClanSave> clans,
+        IReadOnlyDictionary<int, int> clanCastleIds) =>
+        _inner.SaveSiege(castles, clans, clanCastleIds);
+}

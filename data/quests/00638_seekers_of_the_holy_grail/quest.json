@@ -1,0 +1,55 @@
+{
+  "id": 638,
+  "name": "Seekers Of The Holy Grail",
+  "repeatable": true,
+  "abortable": true,
+  "questItems": [
+    8068
+  ],
+  "dialogs": [
+    {
+      "npcId": 31328,
+      "hook": "talk",
+      "when": "absent",
+      "htmlFile": "31328-event-31328-03-000.htm"
+    },
+    {
+      "npcId": 31328,
+      "hook": "event",
+      "when": "absent",
+      "event": "31328-03",
+      "ops": [
+        {
+          "op": "create"
+        },
+        {
+          "op": "start"
+        },
+        {
+          "op": "set_cond",
+          "cond": 1
+        }
+      ],
+      "htmlFile": "31328-event-31328-03-000.htm"
+    },
+    {
+      "npcId": 31328,
+      "hook": "event",
+      "when": "absent",
+      "event": "31328-06",
+      "htmlFile": "31328-event-31328-06-001.htm"
+    },
+    {
+      "npcId": 31328,
+      "hook": "event",
+      "when": "absent",
+      "event": "31328-09",
+      "ops": [
+        {
+          "op": "complete"
+        }
+      ],
+      "htmlFile": "31328-event-31328-09-002.htm"
+    }
+  ]
+}

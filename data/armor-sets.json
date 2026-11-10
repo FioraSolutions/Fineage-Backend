@@ -1,0 +1,1677 @@
+{
+  "reference": "L2J Mobius CT0 Interlude: stats/armorsets. Skills granted while the set is complete (ArmorSetListener). str/dex/wit/int/con/men XML fields are intentionally omitted — Mobius parses them but never applies them.",
+  "sets": [
+    {
+      "id": 1,
+      "chest": 23,
+      "legs": [
+        2386
+      ],
+      "head": [
+        43
+      ],
+      "gloves": [],
+      "feet": [],
+      "shield": [],
+      "skills": [
+        {
+          "id": 3006,
+          "level": 1
+        },
+        {
+          "id": 3500,
+          "level": 1
+        }
+      ],
+      "shieldSkills": [],
+      "enchant6Skills": []
+    },
+    {
+      "id": 2,
+      "chest": 1101,
+      "legs": [
+        1104
+      ],
+      "head": [
+        44
+      ],
+      "gloves": [],
+      "feet": [],
+      "shield": [],
+      "skills": [
+        {
+          "id": 3006,
+          "level": 1
+        },
+        {
+          "id": 3501,
+          "level": 1
+        }
+      ],
+      "shieldSkills": [],
+      "enchant6Skills": []
+    },
+    {
+      "id": 3,
+      "chest": 58,
+      "legs": [
+        59
+      ],
+      "head": [
+        47
+      ],
+      "gloves": [],
+      "feet": [],
+      "shield": [
+        628
+      ],
+      "skills": [
+        {
+          "id": 3006,
+          "level": 1
+        },
+        {
+          "id": 3502,
+          "level": 1
+        }
+      ],
+      "shieldSkills": [
+        {
+          "id": 3543,
+          "level": 1
+        }
+      ],
+      "enchant6Skills": [
+        {
+          "id": 3611,
+          "level": 1
+        }
+      ]
+    },
+    {
+      "id": 4,
+      "chest": 394,
+      "legs": [
+        416
+      ],
+      "head": [],
+      "gloves": [],
+      "feet": [
+        2422
+      ],
+      "shield": [],
+      "skills": [
+        {
+          "id": 3006,
+          "level": 1
+        },
+        {
+          "id": 3503,
+          "level": 1
+        }
+      ],
+      "shieldSkills": [],
+      "enchant6Skills": [
+        {
+          "id": 3612,
+          "level": 1
+        }
+      ]
+    },
+    {
+      "id": 5,
+      "chest": 436,
+      "legs": [
+        469
+      ],
+      "head": [],
+      "gloves": [
+        2447
+      ],
+      "feet": [],
+      "shield": [],
+      "skills": [
+        {
+          "id": 3006,
+          "level": 1
+        },
+        {
+          "id": 3504,
+          "level": 1
+        }
+      ],
+      "shieldSkills": [],
+      "enchant6Skills": [
+        {
+          "id": 3613,
+          "level": 1
+        }
+      ]
+    },
+    {
+      "id": 6,
+      "chest": 395,
+      "legs": [
+        417
+      ],
+      "head": [],
+      "gloves": [],
+      "feet": [
+        2424
+      ],
+      "shield": [],
+      "skills": [
+        {
+          "id": 3006,
+          "level": 1
+        },
+        {
+          "id": 3505,
+          "level": 1
+        }
+      ],
+      "shieldSkills": [],
+      "enchant6Skills": [
+        {
+          "id": 3612,
+          "level": 1
+        }
+      ]
+    },
+    {
+      "id": 7,
+      "chest": 352,
+      "legs": [
+        2378
+      ],
+      "head": [
+        2411
+      ],
+      "gloves": [],
+      "feet": [],
+      "shield": [
+        2493
+      ],
+      "skills": [
+        {
+          "id": 3006,
+          "level": 1
+        },
+        {
+          "id": 3506,
+          "level": 1
+        }
+      ],
+      "shieldSkills": [
+        {
+          "id": 3544,
+          "level": 1
+        }
+      ],
+      "enchant6Skills": [
+        {
+          "id": 3611,
+          "level": 1
+        }
+      ]
+    },
+    {
+      "id": 8,
+      "chest": 437,
+      "legs": [
+        470
+      ],
+      "head": [],
+      "gloves": [
+        2450
+      ],
+      "feet": [],
+      "shield": [],
+      "skills": [
+        {
+          "id": 3006,
+          "level": 1
+        },
+        {
+          "id": 3507,
+          "level": 1
+        }
+      ],
+      "shieldSkills": [],
+      "enchant6Skills": [
+        {
+          "id": 3613,
+          "level": 1
+        }
+      ]
+    },
+    {
+      "id": 12,
+      "chest": 397,
+      "legs": [
+        2387
+      ],
+      "head": [],
+      "gloves": [],
+      "feet": [
+        62
+      ],
+      "shield": [],
+      "skills": [
+        {
+          "id": 3006,
+          "level": 1
+        },
+        {
+          "id": 3508,
+          "level": 1
+        }
+      ],
+      "shieldSkills": [],
+      "enchant6Skills": [
+        {
+          "id": 3615,
+          "level": 1
+        }
+      ]
+    },
+    {
+      "id": 13,
+      "chest": 354,
+      "legs": [
+        381
+      ],
+      "head": [
+        2413
+      ],
+      "gloves": [],
+      "feet": [],
+      "shield": [
+        2495
+      ],
+      "skills": [
+        {
+          "id": 3006,
+          "level": 1
+        },
+        {
+          "id": 3509,
+          "level": 1
+        }
+      ],
+      "shieldSkills": [
+        {
+          "id": 3545,
+          "level": 1
+        }
+      ],
+      "enchant6Skills": [
+        {
+          "id": 3614,
+          "level": 1
+        }
+      ]
+    },
+    {
+      "id": 14,
+      "chest": 439,
+      "legs": [
+        471
+      ],
+      "head": [],
+      "gloves": [
+        2454
+      ],
+      "feet": [],
+      "shield": [],
+      "skills": [
+        {
+          "id": 3006,
+          "level": 1
+        },
+        {
+          "id": 3510,
+          "level": 1
+        }
+      ],
+      "shieldSkills": [],
+      "enchant6Skills": [
+        {
+          "id": 3616,
+          "level": 1
+        }
+      ]
+    },
+    {
+      "id": 15,
+      "chest": 398,
+      "legs": [
+        418
+      ],
+      "head": [],
+      "gloves": [],
+      "feet": [
+        2431
+      ],
+      "shield": [],
+      "skills": [
+        {
+          "id": 3006,
+          "level": 1
+        },
+        {
+          "id": 3511,
+          "level": 1
+        }
+      ],
+      "shieldSkills": [],
+      "enchant6Skills": [
+        {
+          "id": 3615,
+          "level": 1
+        }
+      ]
+    },
+    {
+      "id": 19,
+      "chest": 60,
+      "legs": [],
+      "head": [
+        517
+      ],
+      "gloves": [],
+      "feet": [],
+      "shield": [
+        107
+      ],
+      "skills": [
+        {
+          "id": 3006,
+          "level": 1
+        },
+        {
+          "id": 3512,
+          "level": 1
+        }
+      ],
+      "shieldSkills": [
+        {
+          "id": 3546,
+          "level": 1
+        }
+      ],
+      "enchant6Skills": [
+        {
+          "id": 3614,
+          "level": 1
+        }
+      ]
+    },
+    {
+      "id": 20,
+      "chest": 441,
+      "legs": [
+        472
+      ],
+      "head": [],
+      "gloves": [
+        2459
+      ],
+      "feet": [],
+      "shield": [],
+      "skills": [
+        {
+          "id": 3006,
+          "level": 1
+        },
+        {
+          "id": 3513,
+          "level": 1
+        }
+      ],
+      "shieldSkills": [],
+      "enchant6Skills": [
+        {
+          "id": 3616,
+          "level": 1
+        }
+      ]
+    },
+    {
+      "id": 21,
+      "chest": 400,
+      "legs": [
+        420
+      ],
+      "head": [],
+      "gloves": [],
+      "feet": [
+        2436
+      ],
+      "shield": [],
+      "skills": [
+        {
+          "id": 3006,
+          "level": 1
+        },
+        {
+          "id": 3514,
+          "level": 1
+        }
+      ],
+      "shieldSkills": [],
+      "enchant6Skills": [
+        {
+          "id": 3615,
+          "level": 1
+        }
+      ]
+    },
+    {
+      "id": 22,
+      "chest": 401,
+      "legs": [],
+      "head": [],
+      "gloves": [],
+      "feet": [
+        2437
+      ],
+      "shield": [],
+      "skills": [
+        {
+          "id": 3006,
+          "level": 1
+        },
+        {
+          "id": 3515,
+          "level": 1
+        }
+      ],
+      "shieldSkills": [],
+      "enchant6Skills": [
+        {
+          "id": 3615,
+          "level": 1
+        }
+      ]
+    },
+    {
+      "id": 23,
+      "chest": 356,
+      "legs": [],
+      "head": [
+        2414
+      ],
+      "gloves": [],
+      "feet": [],
+      "shield": [
+        2497
+      ],
+      "skills": [
+        {
+          "id": 3006,
+          "level": 1
+        },
+        {
+          "id": 3516,
+          "level": 1
+        }
+      ],
+      "shieldSkills": [
+        {
+          "id": 3547,
+          "level": 1
+        }
+      ],
+      "enchant6Skills": [
+        {
+          "id": 3614,
+          "level": 1
+        }
+      ]
+    },
+    {
+      "id": 24,
+      "chest": 442,
+      "legs": [
+        473
+      ],
+      "head": [],
+      "gloves": [
+        2463
+      ],
+      "feet": [],
+      "shield": [],
+      "skills": [
+        {
+          "id": 3006,
+          "level": 1
+        },
+        {
+          "id": 3517,
+          "level": 1
+        }
+      ],
+      "shieldSkills": [],
+      "enchant6Skills": [
+        {
+          "id": 3616,
+          "level": 1
+        }
+      ]
+    },
+    {
+      "id": 25,
+      "chest": 357,
+      "legs": [
+        383
+      ],
+      "head": [
+        503
+      ],
+      "gloves": [
+        5710
+      ],
+      "feet": [
+        5726
+      ],
+      "shield": [],
+      "skills": [
+        {
+          "id": 3006,
+          "level": 1
+        },
+        {
+          "id": 3518,
+          "level": 1
+        }
+      ],
+      "shieldSkills": [],
+      "enchant6Skills": [
+        {
+          "id": 3617,
+          "level": 1
+        }
+      ]
+    },
+    {
+      "id": 26,
+      "chest": 2376,
+      "legs": [
+        2379
+      ],
+      "head": [
+        2415
+      ],
+      "gloves": [
+        5714
+      ],
+      "feet": [
+        5730
+      ],
+      "shield": [
+        673
+      ],
+      "skills": [
+        {
+          "id": 3006,
+          "level": 1
+        },
+        {
+          "id": 3519,
+          "level": 1
+        }
+      ],
+      "shieldSkills": [
+        {
+          "id": 3548,
+          "level": 1
+        }
+      ],
+      "enchant6Skills": [
+        {
+          "id": 3617,
+          "level": 1
+        }
+      ]
+    },
+    {
+      "id": 27,
+      "chest": 2384,
+      "legs": [
+        2388
+      ],
+      "head": [
+        503
+      ],
+      "gloves": [
+        5711
+      ],
+      "feet": [
+        5727
+      ],
+      "shield": [],
+      "skills": [
+        {
+          "id": 3006,
+          "level": 1
+        },
+        {
+          "id": 3520,
+          "level": 1
+        }
+      ],
+      "shieldSkills": [],
+      "enchant6Skills": [
+        {
+          "id": 3618,
+          "level": 1
+        }
+      ]
+    },
+    {
+      "id": 28,
+      "chest": 2390,
+      "legs": [],
+      "head": [
+        2415
+      ],
+      "gloves": [
+        5715
+      ],
+      "feet": [
+        5731
+      ],
+      "shield": [],
+      "skills": [
+        {
+          "id": 3006,
+          "level": 1
+        },
+        {
+          "id": 3521,
+          "level": 1
+        }
+      ],
+      "shieldSkills": [],
+      "enchant6Skills": [
+        {
+          "id": 3618,
+          "level": 1
+        }
+      ]
+    },
+    {
+      "id": 29,
+      "chest": 2397,
+      "legs": [
+        2402
+      ],
+      "head": [
+        503
+      ],
+      "gloves": [
+        5712
+      ],
+      "feet": [
+        5728
+      ],
+      "shield": [],
+      "skills": [
+        {
+          "id": 3006,
+          "level": 1
+        },
+        {
+          "id": 3522,
+          "level": 1
+        }
+      ],
+      "shieldSkills": [],
+      "enchant6Skills": [
+        {
+          "id": 3619,
+          "level": 1
+        }
+      ]
+    },
+    {
+      "id": 30,
+      "chest": 2406,
+      "legs": [],
+      "head": [
+        2415
+      ],
+      "gloves": [
+        5716
+      ],
+      "feet": [
+        5732
+      ],
+      "shield": [],
+      "skills": [
+        {
+          "id": 3006,
+          "level": 1
+        },
+        {
+          "id": 3523,
+          "level": 1
+        }
+      ],
+      "shieldSkills": [],
+      "enchant6Skills": [
+        {
+          "id": 3619,
+          "level": 1
+        }
+      ]
+    },
+    {
+      "id": 32,
+      "chest": 358,
+      "legs": [
+        2380
+      ],
+      "head": [
+        2416
+      ],
+      "gloves": [
+        5718
+      ],
+      "feet": [
+        5734
+      ],
+      "shield": [],
+      "skills": [
+        {
+          "id": 3006,
+          "level": 1
+        },
+        {
+          "id": 3524,
+          "level": 1
+        }
+      ],
+      "shieldSkills": [],
+      "enchant6Skills": [
+        {
+          "id": 3617,
+          "level": 1
+        }
+      ]
+    },
+    {
+      "id": 33,
+      "chest": 2381,
+      "legs": [],
+      "head": [
+        2417
+      ],
+      "gloves": [
+        5722
+      ],
+      "feet": [
+        5738
+      ],
+      "shield": [
+        110
+      ],
+      "skills": [
+        {
+          "id": 3006,
+          "level": 1
+        },
+        {
+          "id": 3525,
+          "level": 1
+        }
+      ],
+      "shieldSkills": [
+        {
+          "id": 3549,
+          "level": 1
+        }
+      ],
+      "enchant6Skills": [
+        {
+          "id": 3617,
+          "level": 1
+        }
+      ]
+    },
+    {
+      "id": 34,
+      "chest": 2391,
+      "legs": [],
+      "head": [
+        2416
+      ],
+      "gloves": [
+        5719
+      ],
+      "feet": [
+        5735
+      ],
+      "shield": [],
+      "skills": [
+        {
+          "id": 3006,
+          "level": 1
+        },
+        {
+          "id": 3526,
+          "level": 1
+        }
+      ],
+      "shieldSkills": [],
+      "enchant6Skills": [
+        {
+          "id": 3618,
+          "level": 1
+        }
+      ]
+    },
+    {
+      "id": 35,
+      "chest": 2392,
+      "legs": [],
+      "head": [
+        2417
+      ],
+      "gloves": [
+        5723
+      ],
+      "feet": [
+        5739
+      ],
+      "shield": [],
+      "skills": [
+        {
+          "id": 3006,
+          "level": 1
+        },
+        {
+          "id": 3527,
+          "level": 1
+        }
+      ],
+      "shieldSkills": [],
+      "enchant6Skills": [
+        {
+          "id": 3618,
+          "level": 1
+        }
+      ]
+    },
+    {
+      "id": 36,
+      "chest": 2398,
+      "legs": [
+        2403
+      ],
+      "head": [
+        2416
+      ],
+      "gloves": [
+        5720
+      ],
+      "feet": [
+        5736
+      ],
+      "shield": [],
+      "skills": [
+        {
+          "id": 3006,
+          "level": 1
+        },
+        {
+          "id": 3528,
+          "level": 1
+        }
+      ],
+      "shieldSkills": [],
+      "enchant6Skills": [
+        {
+          "id": 3619,
+          "level": 1
+        }
+      ]
+    },
+    {
+      "id": 37,
+      "chest": 2399,
+      "legs": [
+        2404
+      ],
+      "head": [
+        2417
+      ],
+      "gloves": [
+        5724
+      ],
+      "feet": [
+        5740
+      ],
+      "shield": [],
+      "skills": [
+        {
+          "id": 3006,
+          "level": 1
+        },
+        {
+          "id": 3529,
+          "level": 1
+        }
+      ],
+      "shieldSkills": [],
+      "enchant6Skills": [
+        {
+          "id": 3619,
+          "level": 1
+        }
+      ]
+    },
+    {
+      "id": 39,
+      "chest": 365,
+      "legs": [
+        388
+      ],
+      "head": [
+        512
+      ],
+      "gloves": [
+        5765
+      ],
+      "feet": [
+        5777
+      ],
+      "shield": [
+        641
+      ],
+      "skills": [
+        {
+          "id": 3006,
+          "level": 1
+        },
+        {
+          "id": 3530,
+          "level": 1
+        }
+      ],
+      "shieldSkills": [
+        {
+          "id": 3550,
+          "level": 1
+        }
+      ],
+      "enchant6Skills": [
+        {
+          "id": 3620,
+          "level": 1
+        }
+      ]
+    },
+    {
+      "id": 40,
+      "chest": 2382,
+      "legs": [],
+      "head": [
+        547
+      ],
+      "gloves": [
+        5768
+      ],
+      "feet": [
+        5780
+      ],
+      "shield": [],
+      "skills": [
+        {
+          "id": 3006,
+          "level": 1
+        },
+        {
+          "id": 3531,
+          "level": 1
+        }
+      ],
+      "shieldSkills": [],
+      "enchant6Skills": [
+        {
+          "id": 3620,
+          "level": 1
+        }
+      ]
+    },
+    {
+      "id": 41,
+      "chest": 2385,
+      "legs": [
+        2389
+      ],
+      "head": [
+        512
+      ],
+      "gloves": [
+        5766
+      ],
+      "feet": [
+        5778
+      ],
+      "shield": [],
+      "skills": [
+        {
+          "id": 3006,
+          "level": 1
+        },
+        {
+          "id": 3532,
+          "level": 1
+        }
+      ],
+      "shieldSkills": [],
+      "enchant6Skills": [
+        {
+          "id": 3621,
+          "level": 1
+        }
+      ]
+    },
+    {
+      "id": 42,
+      "chest": 2393,
+      "legs": [],
+      "head": [
+        547
+      ],
+      "gloves": [
+        5769
+      ],
+      "feet": [
+        5781
+      ],
+      "shield": [],
+      "skills": [
+        {
+          "id": 3006,
+          "level": 1
+        },
+        {
+          "id": 3533,
+          "level": 1
+        }
+      ],
+      "shieldSkills": [],
+      "enchant6Skills": [
+        {
+          "id": 3621,
+          "level": 1
+        }
+      ]
+    },
+    {
+      "id": 43,
+      "chest": 2400,
+      "legs": [
+        2405
+      ],
+      "head": [
+        547
+      ],
+      "gloves": [
+        5770
+      ],
+      "feet": [
+        5782
+      ],
+      "shield": [],
+      "skills": [
+        {
+          "id": 3006,
+          "level": 1
+        },
+        {
+          "id": 3534,
+          "level": 1
+        }
+      ],
+      "shieldSkills": [],
+      "enchant6Skills": [
+        {
+          "id": 3622,
+          "level": 1
+        }
+      ]
+    },
+    {
+      "id": 44,
+      "chest": 2407,
+      "legs": [],
+      "head": [
+        512
+      ],
+      "gloves": [
+        5767
+      ],
+      "feet": [
+        5779
+      ],
+      "shield": [],
+      "skills": [
+        {
+          "id": 3006,
+          "level": 1
+        },
+        {
+          "id": 3535,
+          "level": 1
+        }
+      ],
+      "shieldSkills": [],
+      "enchant6Skills": [
+        {
+          "id": 3622,
+          "level": 1
+        }
+      ]
+    },
+    {
+      "id": 46,
+      "chest": 374,
+      "legs": [],
+      "head": [
+        2418
+      ],
+      "gloves": [
+        5771
+      ],
+      "feet": [
+        5783
+      ],
+      "shield": [
+        2498
+      ],
+      "skills": [
+        {
+          "id": 3006,
+          "level": 1
+        },
+        {
+          "id": 3536,
+          "level": 1
+        }
+      ],
+      "shieldSkills": [
+        {
+          "id": 3551,
+          "level": 1
+        }
+      ],
+      "enchant6Skills": [
+        {
+          "id": 3620,
+          "level": 1
+        }
+      ]
+    },
+    {
+      "id": 47,
+      "chest": 2383,
+      "legs": [],
+      "head": [
+        2419
+      ],
+      "gloves": [
+        5774
+      ],
+      "feet": [
+        5786
+      ],
+      "shield": [],
+      "skills": [
+        {
+          "id": 3006,
+          "level": 1
+        },
+        {
+          "id": 3537,
+          "level": 1
+        }
+      ],
+      "shieldSkills": [],
+      "enchant6Skills": [
+        {
+          "id": 3620,
+          "level": 1
+        }
+      ]
+    },
+    {
+      "id": 48,
+      "chest": 2394,
+      "legs": [],
+      "head": [
+        2418
+      ],
+      "gloves": [
+        5772
+      ],
+      "feet": [
+        5784
+      ],
+      "shield": [],
+      "skills": [
+        {
+          "id": 3006,
+          "level": 1
+        },
+        {
+          "id": 3538,
+          "level": 1
+        }
+      ],
+      "shieldSkills": [],
+      "enchant6Skills": [
+        {
+          "id": 3621,
+          "level": 1
+        }
+      ]
+    },
+    {
+      "id": 49,
+      "chest": 2395,
+      "legs": [],
+      "head": [
+        2419
+      ],
+      "gloves": [
+        5775
+      ],
+      "feet": [
+        5787
+      ],
+      "shield": [],
+      "skills": [
+        {
+          "id": 3006,
+          "level": 1
+        },
+        {
+          "id": 3539,
+          "level": 1
+        }
+      ],
+      "shieldSkills": [],
+      "enchant6Skills": [
+        {
+          "id": 3621,
+          "level": 1
+        }
+      ]
+    },
+    {
+      "id": 50,
+      "chest": 2408,
+      "legs": [],
+      "head": [
+        2418
+      ],
+      "gloves": [
+        5773
+      ],
+      "feet": [
+        5785
+      ],
+      "shield": [],
+      "skills": [
+        {
+          "id": 3006,
+          "level": 1
+        },
+        {
+          "id": 3540,
+          "level": 1
+        }
+      ],
+      "shieldSkills": [],
+      "enchant6Skills": [
+        {
+          "id": 3622,
+          "level": 1
+        }
+      ]
+    },
+    {
+      "id": 51,
+      "chest": 2409,
+      "legs": [],
+      "head": [
+        2419
+      ],
+      "gloves": [
+        5776
+      ],
+      "feet": [
+        5788
+      ],
+      "shield": [],
+      "skills": [
+        {
+          "id": 3006,
+          "level": 1
+        },
+        {
+          "id": 3541,
+          "level": 1
+        }
+      ],
+      "shieldSkills": [],
+      "enchant6Skills": [
+        {
+          "id": 3622,
+          "level": 1
+        }
+      ]
+    },
+    {
+      "id": 56,
+      "chest": 6373,
+      "legs": [
+        6374
+      ],
+      "head": [
+        6378
+      ],
+      "gloves": [
+        6375
+      ],
+      "feet": [
+        6376
+      ],
+      "shield": [
+        6377
+      ],
+      "skills": [
+        {
+          "id": 3006,
+          "level": 1
+        },
+        {
+          "id": 3553,
+          "level": 1
+        }
+      ],
+      "shieldSkills": [
+        {
+          "id": 3554,
+          "level": 1
+        }
+      ],
+      "enchant6Skills": [
+        {
+          "id": 3623,
+          "level": 1
+        }
+      ]
+    },
+    {
+      "id": 57,
+      "chest": 6379,
+      "legs": [],
+      "head": [
+        6382
+      ],
+      "gloves": [
+        6380
+      ],
+      "feet": [
+        6381
+      ],
+      "shield": [],
+      "skills": [
+        {
+          "id": 3006,
+          "level": 1
+        },
+        {
+          "id": 3555,
+          "level": 1
+        }
+      ],
+      "shieldSkills": [],
+      "enchant6Skills": [
+        {
+          "id": 3624,
+          "level": 1
+        }
+      ]
+    },
+    {
+      "id": 58,
+      "chest": 6383,
+      "legs": [],
+      "head": [
+        6386
+      ],
+      "gloves": [
+        6384
+      ],
+      "feet": [
+        6385
+      ],
+      "shield": [],
+      "skills": [
+        {
+          "id": 3006,
+          "level": 1
+        },
+        {
+          "id": 3556,
+          "level": 1
+        }
+      ],
+      "shieldSkills": [],
+      "enchant6Skills": [
+        {
+          "id": 3625,
+          "level": 1
+        }
+      ]
+    },
+    {
+      "id": 59,
+      "chest": 7851,
+      "legs": [],
+      "head": [
+        7850
+      ],
+      "gloves": [
+        7852
+      ],
+      "feet": [
+        7853
+      ],
+      "shield": [],
+      "skills": [
+        {
+          "id": 3006,
+          "level": 1
+        },
+        {
+          "id": 3605,
+          "level": 1
+        }
+      ],
+      "shieldSkills": [],
+      "enchant6Skills": [
+        {
+          "id": 3611,
+          "level": 1
+        }
+      ]
+    },
+    {
+      "id": 60,
+      "chest": 7854,
+      "legs": [],
+      "head": [
+        7850
+      ],
+      "gloves": [
+        7855
+      ],
+      "feet": [
+        7856
+      ],
+      "shield": [],
+      "skills": [
+        {
+          "id": 3006,
+          "level": 1
+        },
+        {
+          "id": 3606,
+          "level": 1
+        }
+      ],
+      "shieldSkills": [],
+      "enchant6Skills": [
+        {
+          "id": 3612,
+          "level": 1
+        }
+      ]
+    },
+    {
+      "id": 61,
+      "chest": 7857,
+      "legs": [],
+      "head": [
+        7850
+      ],
+      "gloves": [
+        7858
+      ],
+      "feet": [
+        7859
+      ],
+      "shield": [],
+      "skills": [
+        {
+          "id": 3006,
+          "level": 1
+        },
+        {
+          "id": 3607,
+          "level": 1
+        }
+      ],
+      "shieldSkills": [],
+      "enchant6Skills": [
+        {
+          "id": 3613,
+          "level": 1
+        }
+      ]
+    },
+    {
+      "id": 62,
+      "chest": 7861,
+      "legs": [],
+      "head": [
+        7860
+      ],
+      "gloves": [
+        7862
+      ],
+      "feet": [
+        7863
+      ],
+      "shield": [],
+      "skills": [
+        {
+          "id": 3006,
+          "level": 1
+        },
+        {
+          "id": 3608,
+          "level": 1
+        }
+      ],
+      "shieldSkills": [],
+      "enchant6Skills": [
+        {
+          "id": 3620,
+          "level": 1
+        }
+      ]
+    },
+    {
+      "id": 63,
+      "chest": 7864,
+      "legs": [],
+      "head": [
+        7860
+      ],
+      "gloves": [
+        7865
+      ],
+      "feet": [
+        7866
+      ],
+      "shield": [],
+      "skills": [
+        {
+          "id": 3006,
+          "level": 1
+        },
+        {
+          "id": 3609,
+          "level": 1
+        }
+      ],
+      "shieldSkills": [],
+      "enchant6Skills": [
+        {
+          "id": 3621,
+          "level": 1
+        }
+      ]
+    },
+    {
+      "id": 64,
+      "chest": 7867,
+      "legs": [],
+      "head": [
+        7860
+      ],
+      "gloves": [
+        7868
+      ],
+      "feet": [
+        7869
+      ],
+      "shield": [],
+      "skills": [
+        {
+          "id": 3006,
+          "level": 1
+        },
+        {
+          "id": 3610,
+          "level": 1
+        }
+      ],
+      "shieldSkills": [],
+      "enchant6Skills": [
+        {
+          "id": 3622,
+          "level": 1
+        }
+      ]
+    }
+  ]
+}

@@ -1,0 +1,309 @@
+{
+  "id": 412,
+  "name": "Path Of The Dark Wizard",
+  "repeatable": false,
+  "abortable": true,
+  "questItems": [
+    1253,
+    1254,
+    1255,
+    1256,
+    1257,
+    1259,
+    1260,
+    1277,
+    1278,
+    1279
+  ],
+  "dialogs": [
+    {
+      "npcId": 30421,
+      "hook": "talk",
+      "when": "absent",
+      "hasItem": 1254,
+      "htmlFile": "30421-talk-000.htm"
+    },
+    {
+      "npcId": 30421,
+      "hook": "talk",
+      "when": "absent",
+      "hasItem": 1254,
+      "lacksItems": [
+        1253
+      ],
+      "htmlFile": "30421-talk-001.htm"
+    },
+    {
+      "npcId": 30421,
+      "hook": "talk",
+      "when": "absent",
+      "hasItem": 1254,
+      "lacksItems": [
+        1255
+      ],
+      "htmlFile": "30421-talk-002.htm"
+    },
+    {
+      "npcId": 30421,
+      "hook": "talk",
+      "when": "absent",
+      "hasItem": 1254,
+      "lacksItems": [
+        1256
+      ],
+      "htmlFile": "30421-talk-003.htm"
+    },
+    {
+      "npcId": 30421,
+      "hook": "talk",
+      "when": "absent",
+      "htmlFile": "30421-talk-004.htm"
+    },
+    {
+      "npcId": 30421,
+      "hook": "talk",
+      "when": "absent",
+      "lacksItems": [
+        1253
+      ],
+      "htmlFile": "30421-talk-005.htm"
+    },
+    {
+      "npcId": 30421,
+      "hook": "talk",
+      "when": "absent",
+      "lacksItems": [
+        1255
+      ],
+      "htmlFile": "30421-talk-006.htm"
+    },
+    {
+      "npcId": 30421,
+      "hook": "talk",
+      "when": "absent",
+      "lacksItems": [
+        1256
+      ],
+      "htmlFile": "30421-talk-007.htm"
+    },
+    {
+      "npcId": 30415,
+      "hook": "talk",
+      "when": "absent",
+      "hasItem": 1254,
+      "lacksItems": [
+        1253
+      ],
+      "htmlFile": "30415-talk-008.htm"
+    },
+    {
+      "npcId": 30415,
+      "hook": "talk",
+      "when": "absent",
+      "hasItems": [
+        1254,
+        1277
+      ],
+      "lacksItems": [
+        1253
+      ],
+      "htmlFile": "30415-talk-009.htm"
+    },
+    {
+      "npcId": 30415,
+      "hook": "talk",
+      "when": "absent",
+      "htmlFile": "30415-talk-010.htm"
+    },
+    {
+      "npcId": 30415,
+      "hook": "talk",
+      "when": "absent",
+      "hasItem": 1277,
+      "htmlFile": "30415-talk-011.htm"
+    },
+    {
+      "npcId": 30418,
+      "hook": "talk",
+      "when": "absent",
+      "hasItem": 1254,
+      "lacksItems": [
+        1255
+      ],
+      "htmlFile": "30418-talk-012.htm"
+    },
+    {
+      "npcId": 30418,
+      "hook": "talk",
+      "when": "absent",
+      "hasItems": [
+        1254,
+        1278
+      ],
+      "lacksItems": [
+        1255
+      ],
+      "htmlFile": "30418-talk-013.htm"
+    },
+    {
+      "npcId": 30418,
+      "hook": "talk",
+      "when": "absent",
+      "htmlFile": "30418-talk-014.htm"
+    },
+    {
+      "npcId": 30418,
+      "hook": "talk",
+      "when": "absent",
+      "hasItem": 1278,
+      "htmlFile": "30418-talk-015.htm"
+    },
+    {
+      "npcId": 30419,
+      "hook": "talk",
+      "when": "absent",
+      "lacksItems": [
+        1256
+      ],
+      "ops": [
+        {
+          "op": "give_item",
+          "itemId": 1279,
+          "count": 1
+        }
+      ],
+      "htmlFile": "30419-talk-016.htm"
+    },
+    {
+      "npcId": 30419,
+      "hook": "talk",
+      "when": "absent",
+      "hasItem": 1279,
+      "lacksItems": [
+        1256
+      ],
+      "htmlFile": "30419-talk-017.htm"
+    },
+    {
+      "npcId": 30419,
+      "hook": "talk",
+      "when": "absent",
+      "ops": [
+        {
+          "op": "give_item",
+          "itemId": 1279,
+          "count": 1
+        }
+      ],
+      "htmlFile": "30419-talk-018.htm"
+    },
+    {
+      "npcId": 30419,
+      "hook": "talk",
+      "when": "absent",
+      "hasItem": 1279,
+      "htmlFile": "30419-talk-019.htm"
+    },
+    {
+      "npcId": 30421,
+      "hook": "event",
+      "when": "absent",
+      "event": "ACCEPT",
+      "minLevel": 18,
+      "hasItem": 1261,
+      "htmlFile": "30421-event-ACCEPT-020.htm"
+    },
+    {
+      "npcId": 30421,
+      "hook": "event",
+      "when": "absent",
+      "event": "ACCEPT",
+      "hasItem": 1261,
+      "htmlFile": "30421-event-ACCEPT-021.htm"
+    },
+    {
+      "npcId": 30421,
+      "hook": "event",
+      "when": "absent",
+      "event": "ACCEPT",
+      "htmlFile": "30421-event-ACCEPT-022.htm"
+    },
+    {
+      "npcId": 30421,
+      "hook": "event",
+      "when": "absent",
+      "event": "30421-06",
+      "hasItem": 1253,
+      "htmlFile": "30421-event-30421-06-023.htm"
+    },
+    {
+      "npcId": 30421,
+      "hook": "event",
+      "when": "absent",
+      "event": "30421-09",
+      "hasItem": 1255,
+      "htmlFile": "30421-event-30421-09-024.htm"
+    },
+    {
+      "npcId": 30421,
+      "hook": "event",
+      "when": "absent",
+      "event": "30421-11",
+      "hasItem": 1256,
+      "htmlFile": "30421-event-30421-11-025.htm"
+    },
+    {
+      "npcId": 30421,
+      "hook": "event",
+      "when": "absent",
+      "event": "30421-11",
+      "hasItem": 1254,
+      "lacksItems": [
+        1256
+      ],
+      "htmlFile": "30421-event-30421-11-026.htm"
+    },
+    {
+      "npcId": 30421,
+      "hook": "event",
+      "when": "absent",
+      "event": "30421-08",
+      "htmlFile": "30421-event-30421-08-027.htm"
+    },
+    {
+      "npcId": 30421,
+      "hook": "event",
+      "when": "absent",
+      "event": "30415-02",
+      "htmlFile": "30421-event-30415-02-028.htm"
+    },
+    {
+      "npcId": 30421,
+      "hook": "event",
+      "when": "absent",
+      "event": "30415-03",
+      "ops": [
+        {
+          "op": "give_item",
+          "itemId": 1277,
+          "count": 1
+        }
+      ],
+      "htmlFile": "30421-event-30415-03-029.htm"
+    },
+    {
+      "npcId": 30421,
+      "hook": "event",
+      "when": "absent",
+      "event": "30418-02",
+      "ops": [
+        {
+          "op": "give_item",
+          "itemId": 1278,
+          "count": 1
+        }
+      ],
+      "htmlFile": "30421-event-30418-02-030.htm"
+    }
+  ]
+}

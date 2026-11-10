@@ -1,6 +1,7 @@
 using Fineage.Net.Contract;
 using Fineage.Protocol;
 using Fineage.Zone.Net;
+using Fineage.Zone.World;
 using Xunit;
 
 namespace Fineage.Zone.Tests;
@@ -19,17 +20,15 @@ public sealed class NetPartyTests
         return (kit, rec);
     }
 
-    static PartyMemberListNetMsg LastList(NetBridgeRecorder rec) =>
-        Assert.IsType<PartyMemberListNetMsg>(rec.Of(nameof(INetPresenceBridge.FanoutPartyMemberList)).Last()[1]);
+    static Fineage.Protocol.PartyMemberListMsg LastList(NetBridgeRecorder rec) =>
+        Assert.IsType<Fineage.Protocol.PartyMemberListMsg>(rec.Of(nameof(IWorldEventPublisher.FanoutPartyMemberList)).Last()[1]);
 
     static async Task<(ZoneSession Leader, ZoneSession Member)> Joined(NetTestKit kit)
     {
         var (leader, _) = await kit.EnterAsync();
         var (member, memberEntity) = await kit.EnterAsync();
-        Assert.Null(await kit.World.TryPartyInviteAsync(
-            leader, new PartyInviteRequestMsg { TargetObjectId = memberEntity.ObjectId, ItemDistribution = 0 }, default));
-        Assert.Null(await kit.World.TryPartyAnswerAsync(
-            member, new PartyAnswerJoinRequestMsg { RequestorObjectId = leader.ObjectId, Response = 1 }, default));
+        Assert.Null(await kit.World.TryPartyInviteAsync(leader, memberEntity.ObjectId, 0, default));
+        Assert.Null(await kit.World.TryPartyAnswerAsync(member, leader.ObjectId, 1, default));
         return (leader, member);
     }
 
@@ -40,21 +39,19 @@ public sealed class NetPartyTests
         var (leader, leaderEntity) = await kit.EnterAsync();
         var (member, memberEntity) = await kit.EnterAsync();
 
-        Assert.Null(await kit.World.TryPartyInviteAsync(
-            leader, new PartyInviteRequestMsg { TargetObjectId = memberEntity.ObjectId, ItemDistribution = 0 }, default));
+        Assert.Null(await kit.World.TryPartyInviteAsync(leader, memberEntity.ObjectId, 0, default));
 
-        var ask = Assert.IsType<PartyAskJoinNetMsg>(
-            Assert.Single(rec.Of(nameof(INetPresenceBridge.FanoutPartyAskJoin)))[1]);
+        var ask = Assert.IsType<Fineage.Protocol.PartyAskJoinMsg>(
+            Assert.Single(rec.Of(nameof(IWorldEventPublisher.FanoutPartyAskJoin)))[1]);
         Assert.Equal(leaderEntity.ObjectId, ask.RequestorObjectId);
         Assert.Equal(leaderEntity.Name, ask.RequestorName);
 
-        Assert.Null(await kit.World.TryPartyAnswerAsync(
-            member, new PartyAnswerJoinRequestMsg { RequestorObjectId = leaderEntity.ObjectId, Response = 1 }, default));
+        Assert.Null(await kit.World.TryPartyAnswerAsync(member, leaderEntity.ObjectId, 1, default));
 
-        Assert.Equal(1, Assert.IsType<PartyJoinResultNetMsg>(
-            Assert.Single(rec.Of(nameof(INetPresenceBridge.FanoutPartyJoinResult)))[1]).Response);
+        Assert.Equal(1, Assert.IsType<Fineage.Protocol.PartyJoinResultMsg>(
+            Assert.Single(rec.Of(nameof(IWorldEventPublisher.FanoutPartyJoinResult)))[1]).Response);
 
-        var lists = rec.Of(nameof(INetPresenceBridge.FanoutPartyMemberList));
+        var lists = rec.Of(nameof(IWorldEventPublisher.FanoutPartyMemberList));
         Assert.NotEmpty(lists);
         var roster = LastList(rec);
         Assert.Equal(leaderEntity.ObjectId, roster.LeaderObjectId);
@@ -69,14 +66,12 @@ public sealed class NetPartyTests
         var (leader, leaderEntity) = await kit.EnterAsync();
         var (member, memberEntity) = await kit.EnterAsync();
 
-        Assert.Null(await kit.World.TryPartyInviteAsync(
-            leader, new PartyInviteRequestMsg { TargetObjectId = memberEntity.ObjectId, ItemDistribution = 0 }, default));
-        Assert.Null(await kit.World.TryPartyAnswerAsync(
-            member, new PartyAnswerJoinRequestMsg { RequestorObjectId = leaderEntity.ObjectId, Response = 0 }, default));
+        Assert.Null(await kit.World.TryPartyInviteAsync(leader, memberEntity.ObjectId, 0, default));
+        Assert.Null(await kit.World.TryPartyAnswerAsync(member, leaderEntity.ObjectId, 0, default));
 
-        Assert.Equal(0, Assert.IsType<PartyJoinResultNetMsg>(
-            Assert.Single(rec.Of(nameof(INetPresenceBridge.FanoutPartyJoinResult)))[1]).Response);
-        Assert.Empty(rec.Of(nameof(INetPresenceBridge.FanoutPartyMemberList)));
+        Assert.Equal(0, Assert.IsType<Fineage.Protocol.PartyJoinResultMsg>(
+            Assert.Single(rec.Of(nameof(IWorldEventPublisher.FanoutPartyJoinResult)))[1]).Response);
+        Assert.Empty(rec.Of(nameof(IWorldEventPublisher.FanoutPartyMemberList)));
     }
 
     [Fact]
@@ -92,7 +87,7 @@ public sealed class NetPartyTests
         Assert.Equal(0, closed.PartyId);
         Assert.Equal(0, closed.LeaderObjectId);
         Assert.Empty(closed.Members);
-        Assert.Contains(rec.Of(nameof(INetPresenceBridge.FanoutPartyMemberList)),
+        Assert.Contains(rec.Of(nameof(IWorldEventPublisher.FanoutPartyMemberList)),
             call => ((IReadOnlyList<int>)call[0]).Count == 1);
     }
 
@@ -103,13 +98,10 @@ public sealed class NetPartyTests
         var (leader, member) = await Joined(kit);
         var (outsider, outsiderEntity) = await kit.EnterAsync();
 
-        Assert.Equal("party_leader", await kit.World.TryPartyKickAsync(
-            member, new PartyKickRequestMsg { TargetObjectId = leader.ObjectId }, default));
-        Assert.Equal("target", await kit.World.TryPartyKickAsync(
-            leader, new PartyKickRequestMsg { TargetObjectId = outsiderEntity.ObjectId }, default));
+        Assert.Equal("party_leader", await kit.World.TryPartyKickAsync(member, leader.ObjectId, default));
+        Assert.Equal("target", await kit.World.TryPartyKickAsync(leader, outsiderEntity.ObjectId, default));
 
-        Assert.Null(await kit.World.TryPartyKickAsync(
-            leader, new PartyKickRequestMsg { TargetObjectId = member.ObjectId }, default));
+        Assert.Null(await kit.World.TryPartyKickAsync(leader, member.ObjectId, default));
         _ = outsider;
     }
 
@@ -120,13 +112,10 @@ public sealed class NetPartyTests
         var (leader, member) = await Joined(kit);
         var (other, otherEntity) = await kit.EnterAsync();
 
-        Assert.Equal("party_busy", await kit.World.TryPartyInviteAsync(
-            other, new PartyInviteRequestMsg { TargetObjectId = member.ObjectId, ItemDistribution = 0 }, default));
+        Assert.Equal("party_busy", await kit.World.TryPartyInviteAsync(other, member.ObjectId, 0, default));
 
         // Two invites to the same target in a row: the second is busy on the pending one.
-        Assert.Null(await kit.World.TryPartyInviteAsync(
-            leader, new PartyInviteRequestMsg { TargetObjectId = otherEntity.ObjectId, ItemDistribution = 0 }, default));
-        Assert.Equal("party_busy", await kit.World.TryPartyInviteAsync(
-            leader, new PartyInviteRequestMsg { TargetObjectId = otherEntity.ObjectId, ItemDistribution = 0 }, default));
+        Assert.Null(await kit.World.TryPartyInviteAsync(leader, otherEntity.ObjectId, 0, default));
+        Assert.Equal("party_busy", await kit.World.TryPartyInviteAsync(leader, otherEntity.ObjectId, 0, default));
     }
 }

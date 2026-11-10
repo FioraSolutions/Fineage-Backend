@@ -46,19 +46,17 @@ public sealed class NetTargetSelectTests
         Assert.True(kit.World.TryGetEntityById(MobId, out var mob));
         mob.Level = player.Level - 3;
 
-        Assert.Null(await kit.World.TrySelectTargetAsync(
-            session, new SelectTargetMsg { TargetObjectId = MobId }, default));
+        Assert.Null(await kit.World.TrySelectTargetAsync(session, MobId, default));
 
         Assert.Equal(MobId, session.SelectedTargetId);
-        var selected = Assert.IsType<TargetSelectedNetMsg>(
-            Assert.Single(rec.Of(nameof(INetPresenceBridge.FanoutTargetSelected)))[1]);
-        Assert.Equal(MobId, selected.TargetObjectId);
-        Assert.Equal(3, selected.ColorHint);
+        var selected = Assert.Single(rec.Of(nameof(IWorldEventPublisher.FanoutTargetSelected)));
+        Assert.Equal(MobId, (int)selected[1]!);
+        Assert.Equal(3, (int)selected[2]!);
 
         // Mobius setTarget also sends the target's HP so the target window can draw a bar.
-        var hp = Assert.IsType<StatusUpdateNetMsg>(
-            Assert.Single(rec.Of(nameof(INetPresenceBridge.FanoutStatusUpdate)))[1]);
-        Assert.Equal(MobId, (int)hp.EntityValue);
+        var hp = Assert.IsType<StatusUpdateMsg>(
+            Assert.Single(rec.Of(nameof(IWorldEventPublisher.FanoutStatusUpdate)))[1]);
+        Assert.Equal(MobId, hp.ObjectId);
         Assert.Contains(InterludeStatus.MaxHp, hp.AttributeIds);
         Assert.Contains(InterludeStatus.CurHp, hp.AttributeIds);
     }
@@ -70,13 +68,11 @@ public sealed class NetTargetSelectTests
         Assert.True(kit.World.TryGetEntityById(GuideId, out var guide));
         guide.Level = player.Level + 10;
 
-        Assert.Null(await kit.World.TrySelectTargetAsync(
-            session, new SelectTargetMsg { TargetObjectId = GuideId }, default));
+        Assert.Null(await kit.World.TrySelectTargetAsync(session, GuideId, default));
 
-        var selected = Assert.IsType<TargetSelectedNetMsg>(
-            Assert.Single(rec.Of(nameof(INetPresenceBridge.FanoutTargetSelected)))[1]);
-        Assert.Equal(GuideId, selected.TargetObjectId);
-        Assert.Equal(0, selected.ColorHint);
+        var selected = Assert.Single(rec.Of(nameof(IWorldEventPublisher.FanoutTargetSelected)));
+        Assert.Equal(GuideId, (int)selected[1]!);
+        Assert.Equal(0, (int)selected[2]!);
     }
 
     /// <summary>
@@ -91,19 +87,17 @@ public sealed class NetTargetSelectTests
         otherPlayer.Level = player.Level + 4;
         otherPlayer.PvpFlagged = true;
 
-        Assert.Null(await kit.World.TrySelectTargetAsync(
-            session, new SelectTargetMsg { TargetObjectId = otherSession.ObjectId }, default));
+        Assert.Null(await kit.World.TrySelectTargetAsync(session, otherSession.ObjectId, default));
 
         Assert.Equal(otherSession.ObjectId, session.SelectedTargetId);
-        var selected = Assert.IsType<TargetSelectedNetMsg>(
-            Assert.Single(rec.Of(nameof(INetPresenceBridge.FanoutTargetSelected)))[1]);
-        Assert.Equal(otherSession.ObjectId, selected.TargetObjectId);
+        var selected = Assert.Single(rec.Of(nameof(IWorldEventPublisher.FanoutTargetSelected)));
+        Assert.Equal(otherSession.ObjectId, (int)selected[1]!);
         // A flagged player is auto-attackable, so the colour is the level delta rather than the friendly 0.
-        Assert.Equal(-4, selected.ColorHint);
+        Assert.Equal(-4, (int)selected[2]!);
 
-        var hp = Assert.IsType<StatusUpdateNetMsg>(
-            Assert.Single(rec.Of(nameof(INetPresenceBridge.FanoutStatusUpdate)))[1]);
-        Assert.Equal(otherSession.ObjectId, (int)hp.EntityValue);
+        var hp = Assert.IsType<StatusUpdateMsg>(
+            Assert.Single(rec.Of(nameof(IWorldEventPublisher.FanoutStatusUpdate)))[1]);
+        Assert.Equal(otherSession.ObjectId, hp.ObjectId);
     }
 
     [Fact]
@@ -113,13 +107,11 @@ public sealed class NetTargetSelectTests
         var (otherSession, otherPlayer) = await kit.EnterAsync();
         otherPlayer.Level = player.Level + 4;
 
-        Assert.Null(await kit.World.TrySelectTargetAsync(
-            session, new SelectTargetMsg { TargetObjectId = otherSession.ObjectId }, default));
+        Assert.Null(await kit.World.TrySelectTargetAsync(session, otherSession.ObjectId, default));
 
         Assert.Equal(otherSession.ObjectId, session.SelectedTargetId);
-        var selected = Assert.IsType<TargetSelectedNetMsg>(
-            Assert.Single(rec.Of(nameof(INetPresenceBridge.FanoutTargetSelected)))[1]);
-        Assert.Equal(0, selected.ColorHint);
+        var selected = Assert.Single(rec.Of(nameof(IWorldEventPublisher.FanoutTargetSelected)));
+        Assert.Equal(0, (int)selected[2]!);
     }
 
     [Fact]
@@ -127,12 +119,11 @@ public sealed class NetTargetSelectTests
     {
         var (kit, session, player, rec) = await SetupAsync();
 
-        Assert.Null(await kit.World.TrySelectTargetAsync(
-            session, new SelectTargetMsg { TargetObjectId = session.ObjectId }, default));
+        Assert.Null(await kit.World.TrySelectTargetAsync(session, session.ObjectId, default));
 
         Assert.Equal(session.ObjectId, session.SelectedTargetId);
         // Own pawn: Mobius sends colour 0 and no HP block, so a self-target draws as white without a bar.
-        Assert.Empty(rec.Of(nameof(INetPresenceBridge.FanoutTargetSelected)));
+        Assert.Empty(rec.Of(nameof(IWorldEventPublisher.FanoutTargetSelected)));
     }
 
     [Fact]
@@ -140,13 +131,11 @@ public sealed class NetTargetSelectTests
     {
         var (kit, session, player, rec) = await SetupAsync();
 
-        Assert.Null(await kit.World.TryCharacterActionAsync(
-            session, new CharacterActionRequestMsg { ActionId = ActionProtocol.NextTarget }, default));
+        Assert.Null(await kit.World.TryCharacterActionAsync(session, ActionProtocol.NextTarget, 0, default));
 
         Assert.Equal(MobId, session.SelectedTargetId);
-        var selected = Assert.IsType<TargetSelectedNetMsg>(
-            Assert.Single(rec.Of(nameof(INetPresenceBridge.FanoutTargetSelected)))[1]);
-        Assert.Equal(MobId, selected.TargetObjectId);
+        var selected = Assert.Single(rec.Of(nameof(IWorldEventPublisher.FanoutTargetSelected)));
+        Assert.Equal(MobId, (int)selected[1]!);
     }
 
     [Fact]
@@ -155,8 +144,7 @@ public sealed class NetTargetSelectTests
         var (kit, session, player, rec) = await SetupAsync();
 
         // Action 2 with nothing selected is the same "no target" answer as AttackRequest.
-        string? error = await kit.World.TryCharacterActionAsync(
-            session, new CharacterActionRequestMsg { ActionId = ActionProtocol.Attack }, default);
+        string? error = await kit.World.TryCharacterActionAsync(session, ActionProtocol.Attack, 0, default);
 
         Assert.NotNull(error);
     }
@@ -169,23 +157,20 @@ public sealed class NetTargetSelectTests
     public async Task Cancelling_the_target_clears_the_zone_selection_and_announces_it()
     {
         var (kit, session, player, rec) = await SetupAsync();
-        Assert.Null(await kit.World.TrySelectTargetAsync(
-            session, new SelectTargetMsg { TargetObjectId = MobId }, default));
+        Assert.Null(await kit.World.TrySelectTargetAsync(session, MobId, default));
         Assert.Equal(MobId, session.SelectedTargetId);
 
         Assert.Null(await kit.World.TryCancelTargetAsync(session, default));
 
         Assert.Equal(0, session.SelectedTargetId);
         Assert.Equal(0, session.AutoAttackTargetId);
-        var unselected = Assert.IsType<TargetUnselectedNetMsg>(
-            Assert.Single(rec.Of(nameof(INetPresenceBridge.FanoutTargetUnselected)))[1]);
-        Assert.Equal(MobId, unselected.TargetObjectId);
+        var unselected = Assert.Single(rec.Of(nameof(IWorldEventPublisher.FanoutTargetUnselected)));
+        Assert.Equal(MobId, (int)unselected[1]!);
 
         // A second cancel has nothing to unselect and must not upset the client with a stale id.
         Assert.Null(await kit.World.TryCancelTargetAsync(session, default));
-        var again = Assert.IsType<TargetUnselectedNetMsg>(
-            rec.Of(nameof(INetPresenceBridge.FanoutTargetUnselected)).Last()[1]);
-        Assert.Equal(0, again.TargetObjectId);
+        var again = rec.Of(nameof(IWorldEventPublisher.FanoutTargetUnselected)).Last();
+        Assert.Equal(0, (int)again[1]!);
     }
 
     /// <summary>Cancelling also stops the auto-attack, or the next swing would re-target the dropped mob.</summary>
@@ -194,12 +179,72 @@ public sealed class NetTargetSelectTests
     {
         var (kit, session, player, rec) = await SetupAsync();
 
-        Assert.Null(await kit.World.TrySelectTargetAsync(
-            session, new SelectTargetMsg { TargetObjectId = MobId }, default));
+        Assert.Null(await kit.World.TrySelectTargetAsync(session, MobId, default));
         session.AutoAttackTargetId = MobId;
 
         Assert.Null(await kit.World.TryCancelTargetAsync(session, default));
 
         Assert.Equal(0, session.AutoAttackTargetId);
+    }
+
+    /// <summary>
+    /// Mobius NpcAction still <c>setTarget</c>s a corpse; only the second click (attack) checks AlikeDead.
+    /// Rejecting dead NPCs caused <c>[Net] zone reject target</c> when clicking a kill for spoil/look.
+    /// </summary>
+    [Fact]
+    public async Task A_dead_npc_is_still_selectable()
+    {
+        var (kit, session, player, rec) = await SetupAsync();
+        Assert.True(kit.World.TryGetEntityById(MobId, out var mob));
+        mob.CurHp = 0;
+        mob.Dead = true;
+
+        Assert.Null(await kit.World.TrySelectTargetAsync(session, MobId, default));
+
+        Assert.Equal(MobId, session.SelectedTargetId);
+        var selected = Assert.Single(rec.Of(nameof(IWorldEventPublisher.FanoutTargetSelected)));
+        Assert.Equal(MobId, (int)selected[1]!);
+        var hp = Assert.IsType<StatusUpdateMsg>(
+            Assert.Single(rec.Of(nameof(IWorldEventPublisher.FanoutStatusUpdate)))[1]);
+        Assert.Equal(0, hp.Values[Array.IndexOf(hp.AttributeIds, InterludeStatus.CurHp)]);
+    }
+
+    /// <summary>
+    /// Mobius ItemAction targets ground drops. SelectTarget for a bag drop must not Reject —
+    /// that was the spam after inventory drop when the client fell through to SelectTarget.
+    /// </summary>
+    [Fact]
+    public async Task A_ground_item_is_selectable_with_colour_zero_and_no_hp_block()
+    {
+        var (kit, session, player, rec) = await SetupAsync();
+        const int adena = 57;
+        player.Inventory!.Add(adena, 1000);
+        var stack = player.Inventory.FindByItemId(adena)!;
+        Assert.Null(await kit.World.TryDropItemAsync(
+            session, stack.ObjectId, 100, player.X + 40, player.Y, player.Z, default));
+        int groundId = ((DropItemMsg)Assert.Single(rec.Of(nameof(IWorldEventPublisher.FanoutDropItem)))[1]!).ObjectId;
+        Assert.Contains(groundId, player.Knownlist);
+        rec.Calls.Clear();
+
+        Assert.Null(await kit.World.TrySelectTargetAsync(session, groundId, default));
+
+        Assert.Equal(groundId, session.SelectedTargetId);
+        var selected = Assert.Single(rec.Of(nameof(IWorldEventPublisher.FanoutTargetSelected)));
+        Assert.Equal(groundId, (int)selected[1]!);
+        Assert.Equal(0, (int)selected[2]!);
+        Assert.Empty(rec.Of(nameof(IWorldEventPublisher.FanoutStatusUpdate)));
+    }
+
+    /// <summary>Mobius Action on a missing objectId is ActionFailed — never a protocol Reject.</summary>
+    [Fact]
+    public async Task A_missing_object_is_a_soft_miss_not_a_reject()
+    {
+        var (kit, session, player, rec) = await SetupAsync();
+        session.SelectedTargetId = MobId;
+
+        Assert.Null(await kit.World.TrySelectTargetAsync(session, 9_999_999, default));
+
+        Assert.Equal(MobId, session.SelectedTargetId);
+        Assert.Empty(rec.Of(nameof(IWorldEventPublisher.FanoutTargetSelected)));
     }
 }

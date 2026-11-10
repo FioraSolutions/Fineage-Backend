@@ -21,7 +21,7 @@ public sealed class SpoilSweepSkillTests
 
     static async Task<string?> Cast(NetTestKit kit, ZoneSession s, int skill, int target)
     {
-        var error = await kit.World.TrySkillUseAsync(s, new SkillUseRequestMsg { SkillId = skill, TargetObjectId = target }, CancellationToken.None);
+        var error = await kit.World.TrySkillUseAsync(s, skill, target, CancellationToken.None);
         await kit.World.CompleteCastForTestAsync(s); // Spoil lands at hitTime
         return error;
     }

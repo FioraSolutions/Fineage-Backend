@@ -85,16 +85,14 @@ public sealed partial class ZoneWorld
     {
         if (!IsLive(session))
             return Task.FromResult<string?>("world");
-        string? error;
-        lock (_gate)
+        // Rewards may SaveInventory → flush after unlock (B8).
+        return Task.FromResult(WithDeferredInventoryPersist(() =>
         {
             var step = _olympiad.Report(matchId, winnerObjectId, _clock().ToUnixTimeMilliseconds());
-            error = step.Error;
-            if (error == null)
+            if (step.Error == null)
                 ApplyOlympiad(step);
-        }
-
-        return Task.FromResult<string?>(error);
+            return step.Error;
+        }));
     }
 
     void TickOlympiad()
@@ -113,14 +111,13 @@ public sealed partial class ZoneWorld
 
     Task<string?> RunOlympiadAsync(Func<long, OlympiadStep> action)
     {
-        string? error;
-        lock (_gate)
+        string? error = WithDeferredInventoryPersist(() =>
         {
             long now = _clock().ToUnixTimeMilliseconds();
             var step = action(now);
-            error = step.Error;
             ApplyOlympiad(step);
-        }
+            return step.Error;
+        });
 
         return Task.FromResult(error);
     }
@@ -180,7 +177,7 @@ public sealed partial class ZoneWorld
         var added = entity.Inventory.Add(grant.ItemId, grant.Count);
         var update = InventoryMessages.Update(InventoryChange.Add, added);
         // The Gate Pass lands in the bag, so Net clients need the same row the V2 frame carries.
-        NetBridge?.FanoutInventoryUpdate([entity.ObjectId], ToNetInventoryUpdate(update));
+        NetBridge?.FanoutInventoryUpdate([entity.ObjectId], update);
         SaveInventory(entity.Session, entity.Inventory);
     }
 
@@ -203,234 +200,14 @@ public sealed partial class ZoneWorld
                 }
             }
             if (live.Count > 0)
-                NetBridge?.FanoutSystemMessage(live, ToNetOlympiadLine(message));
+                NetBridge?.FanoutSystemMessage(live, message);
             return;
         }
 
         if (_byId.TryGetValue(notice.CharacterId, out var target) && target.Session != null)
         {
-            NetBridge?.FanoutSystemMessage([target.ObjectId], ToNetOlympiadLine(message));
+            NetBridge?.FanoutSystemMessage([target.ObjectId], message);
         }
     }
 
-    void QueueMatch(OlympiadMatchNote note)
-    {
-        var message = new OlympiadMatchMsg
-        {
-            MatchId = note.MatchId,
-            StadiumId = note.StadiumId,
-            ZoneId = note.ZoneId,
-            Classed = note.Classed,
-            Phase = note.Phase,
-            PlayerOneId = note.PlayerOneId,
-            PlayerTwoId = note.PlayerTwoId,
-            PlayerOneName = note.PlayerOneName,
-            PlayerTwoName = note.PlayerTwoName,
-            InstanceId = note.InstanceId
-        };
-        FanOlympiadBoth(note.PlayerOneId, note.PlayerTwoId, match: new Fineage.Net.Contract.OlympiadMatchNetMsg
-        {
-            MatchId = message.MatchId,
-            StadiumId = message.StadiumId,
-            ZoneId = message.ZoneId,
-            Classed = message.Classed,
-            Phase = message.Phase,
-            PlayerOneId = message.PlayerOneId,
-            PlayerTwoId = message.PlayerTwoId,
-            PlayerOneName = message.PlayerOneName,
-            PlayerTwoName = message.PlayerTwoName,
-            InstanceId = message.InstanceId
-        });
-    }
-
-    void QueueCountdown(OlympiadCountdownNote note)
-    {
-        var packet = new OlympiadCountdownMsg
-        {
-            MatchId = note.MatchId,
-            Kind = note.Kind,
-            Seconds = note.Seconds
-        };
-        var line = new SystemMessageMsg
-        {
-            Id = OlympiadProtocol.CountdownLine,
-            Params = [note.Kind.ToString(), note.Seconds.ToString()],
-            Text = OlympiadLines.CountdownText(note.Kind, note.Seconds)
-        };
-        FanOlympiadBoth(note.PlayerOneId, note.PlayerTwoId, countdown: new Fineage.Net.Contract.OlympiadCountdownNetMsg
-        {
-            MatchId = packet.MatchId,
-            Kind = packet.Kind,
-            Seconds = packet.Seconds
-        });
-        FanOlympiadBoth(note.PlayerOneId, note.PlayerTwoId, line: ToNetOlympiadLine(line));
-    }
-
-    void QueueResult(OlympiadResultNote note)
-    {
-        var message = new OlympiadResultMsg
-        {
-            MatchId = note.MatchId,
-            Outcome = note.Outcome,
-            WinnerObjectId = note.WinnerObjectId,
-            PointsOne = note.PointsOne,
-            PointsTwo = note.PointsTwo,
-            DeltaOne = note.DeltaOne,
-            DeltaTwo = note.DeltaTwo,
-            RewardItemId = note.RewardItemId,
-            RewardCount = note.RewardCount,
-            CompetitionsDoneOne = note.CompetitionsDoneOne,
-            CompetitionsDoneTwo = note.CompetitionsDoneTwo
-        };
-        FanOlympiadBoth(note.PlayerOneId, note.PlayerTwoId, result: new Fineage.Net.Contract.OlympiadResultNetMsg
-        {
-            MatchId = message.MatchId,
-            Outcome = message.Outcome,
-            WinnerObjectId = message.WinnerObjectId,
-            PointsOne = message.PointsOne,
-            PointsTwo = message.PointsTwo,
-            DeltaOne = message.DeltaOne,
-            DeltaTwo = message.DeltaTwo,
-            RewardItemId = message.RewardItemId,
-            RewardCount = message.RewardCount,
-            CompetitionsDoneOne = message.CompetitionsDoneOne,
-            CompetitionsDoneTwo = message.CompetitionsDoneTwo
-        });
-    }
-
-    void QueueOlympiadStatus(ZoneSession session, long nowUnixMs)
-    {
-        var view = _olympiad.View(session.ObjectId, nowUnixMs);
-        var message = new OlympiadStatusMsg
-        {
-            Period = view.Period,
-            Cycle = view.Cycle,
-            InCompetition = view.InCompetition,
-            CompetitionStartUnixMs = view.CompetitionStartUnixMs,
-            CompetitionEndUnixMs = view.CompetitionEndUnixMs,
-            OlympiadEndUnixMs = view.OlympiadEndUnixMs,
-            ValidationEndUnixMs = view.ValidationEndUnixMs,
-            NextWeeklyUnixMs = view.NextWeeklyUnixMs,
-            RegistrationOpen = view.RegistrationOpen,
-            Noble = view.Noble,
-            Points = view.Points,
-            CompetitionsDone = view.CompetitionsDone,
-            Won = view.Won,
-            Lost = view.Lost,
-            Drawn = view.Drawn,
-            Queue = view.Queue,
-            MatchId = view.MatchId,
-            StadiumId = view.StadiumId,
-            ClassId = view.ClassId
-        };
-        NetBridge?.FanoutOlympiadStatus([session.ObjectId], ToNetOlympiadStatus(message));
-    }
-
-    static Fineage.Net.Contract.OlympiadStatusNetMsg ToNetOlympiadStatus(OlympiadStatusMsg s) => new()
-    {
-        Period = s.Period,
-        Cycle = s.Cycle,
-        InCompetition = s.InCompetition,
-        CompetitionStartUnixMs = s.CompetitionStartUnixMs,
-        CompetitionEndUnixMs = s.CompetitionEndUnixMs,
-        OlympiadEndUnixMs = s.OlympiadEndUnixMs,
-        ValidationEndUnixMs = s.ValidationEndUnixMs,
-        NextWeeklyUnixMs = s.NextWeeklyUnixMs,
-        RegistrationOpen = s.RegistrationOpen,
-        Noble = s.Noble,
-        Points = s.Points,
-        CompetitionsDone = s.CompetitionsDone,
-        Won = s.Won,
-        Lost = s.Lost,
-        Drawn = s.Drawn,
-        Queue = s.Queue,
-        MatchId = s.MatchId,
-        StadiumId = s.StadiumId,
-        ClassId = s.ClassId
-    };
-
-    static Fineage.Net.Contract.SystemMessageNetMsg ToNetOlympiadLine(SystemMessageMsg line) => new()
-    {
-        Id = line.Id,
-        Text = line.Text,
-        Params = line.Params
-    };
-
-    /// <summary>Both match participants get one Net message per event, exactly as <c>SendBoth</c> does for V2.</summary>
-    void FanOlympiadBoth(
-        int one,
-        int two,
-        Fineage.Net.Contract.OlympiadMatchNetMsg? match = null,
-        Fineage.Net.Contract.OlympiadCountdownNetMsg? countdown = null,
-        Fineage.Net.Contract.OlympiadResultNetMsg? result = null,
-        Fineage.Net.Contract.SystemMessageNetMsg? line = null)
-    {
-        if (NetBridge == null)
-            return;
-        var watchers = new List<int>(2);
-        if (_byId.TryGetValue(one, out var first) && first.Session is { InWorld: true })
-            watchers.Add(one);
-        if (two != one && _byId.TryGetValue(two, out var second) && second.Session is { InWorld: true })
-            watchers.Add(two);
-        if (watchers.Count == 0)
-            return;
-        if (match != null)
-            NetBridge.FanoutOlympiadMatch(watchers, match);
-        if (countdown != null)
-            NetBridge.FanoutOlympiadCountdown(watchers, countdown);
-        if (result != null)
-            NetBridge.FanoutOlympiadResult(watchers, result);
-        if (line != null)
-            NetBridge.FanoutSystemMessage(watchers, line);
-    }
-
-    OlympiadPresence? LookupOlympiad(int characterId)
-    {
-        if (!_byId.TryGetValue(characterId, out var entity) || entity.Kind != ZoneEntityKind.Player || entity.Session is not { InWorld: true })
-            return null;
-        return new OlympiadPresence(
-            true,
-            entity.Dead,
-            entity.ClassId,
-            entity.ClassId,
-            entity.X,
-            entity.Y,
-            entity.Z,
-            entity.Inventory?.Items.Count ?? 0,
-            InventoryLimit(entity),
-            HasCursedWeapon(entity.Inventory));
-    }
-
-    static OlympiadActor ActorFor(ZoneEntity player) => new(
-        player.ObjectId,
-        player.Name,
-        player.ClassId,
-        player.ClassId,
-        player.Inventory?.Items.Count ?? 0,
-        InventoryLimit(player),
-        HasCursedWeapon(player.Inventory));
-
-    static int InventoryLimit(ZoneEntity player) =>
-        player.Race == OlympiadProtocol.DwarfRace ? OlympiadProtocol.DwarfInventoryLimit : OlympiadProtocol.InventoryLimit;
-
-    static bool HasCursedWeapon(PlayerInventory? inventory) =>
-        inventory != null &&
-        (inventory.CountOf(OlympiadProtocol.Zariche) > 0 || inventory.CountOf(OlympiadProtocol.Akamanah) > 0);
-
-    void CollectVisible(ZoneEntity self, HashSet<int> into)
-    {
-        into.Clear();
-        foreach (int id in _aoi.GetVisible(self.ObjectId))
-        {
-            if (_byId.TryGetValue(id, out var other) && other.InstanceId == self.InstanceId)
-                into.Add(id);
-        }
-    }
-
-    bool SameInstance(int leftId, int rightId)
-    {
-        if (!_byId.TryGetValue(leftId, out var left) || !_byId.TryGetValue(rightId, out var right))
-            return false;
-        return left.InstanceId == right.InstanceId;
-    }
 }

@@ -1,0 +1,319 @@
+{
+  "id": 642,
+  "name": "A Powerful Primeval Creature",
+  "repeatable": true,
+  "abortable": true,
+  "questItems": [
+    8774,
+    8775
+  ],
+  "dialogs": [
+    {
+      "npcId": 32105,
+      "hook": "talk",
+      "when": "absent",
+      "maxLevel": 74,
+      "htmlFile": "32105-talk-000.htm"
+    },
+    {
+      "npcId": 32105,
+      "hook": "talk",
+      "when": "absent",
+      "minLevel": 75,
+      "htmlFile": "32105-talk-001.htm"
+    },
+    {
+      "npcId": 32105,
+      "hook": "event",
+      "when": "absent",
+      "event": "32105-03",
+      "minLevel": 75,
+      "htmlFile": "32105-event-32105-03-002.htm"
+    },
+    {
+      "npcId": 32105,
+      "hook": "event",
+      "when": "absent",
+      "event": "32105-04",
+      "minLevel": 75,
+      "htmlFile": "32105-event-32105-04-003.htm"
+    },
+    {
+      "npcId": 32105,
+      "hook": "event",
+      "when": "absent",
+      "event": "32105-05",
+      "minLevel": 75,
+      "ops": [
+        {
+          "op": "create"
+        },
+        {
+          "op": "start"
+        },
+        {
+          "op": "set_cond",
+          "cond": 1
+        }
+      ],
+      "htmlFile": "32105-event-32105-05-004.htm"
+    },
+    {
+      "npcId": 32105,
+      "hook": "event",
+      "when": "absent",
+      "event": "32105-06",
+      "htmlFile": "32105-event-32105-06-005.htm"
+    },
+    {
+      "npcId": 32105,
+      "hook": "talk",
+      "when": "started",
+      "hasAny": [
+        8774,
+        8775
+      ],
+      "htmlFile": "32105-talk-006.htm"
+    },
+    {
+      "npcId": 32105,
+      "hook": "talk",
+      "when": "started",
+      "lacksItems": [
+        8774,
+        8775
+      ],
+      "htmlFile": "32105-talk-007.htm"
+    },
+    {
+      "npcId": 32105,
+      "hook": "event",
+      "when": "started",
+      "event": "32105-09",
+      "hasItem": 8774,
+      "ops": [
+        {
+          "op": "sell_items",
+          "prices": [
+            {
+              "itemId": 8774,
+              "adena": 5000
+            }
+          ],
+          "bonusMin": 0,
+          "bonusAdena": 0
+        }
+      ],
+      "htmlFile": "32105-event-32105-09-008.htm"
+    },
+    {
+      "npcId": 32105,
+      "hook": "event",
+      "when": "started",
+      "event": "32105-09",
+      "lacksItems": [
+        8774
+      ],
+      "htmlFile": "32105-event-32105-09-009.htm"
+    },
+    {
+      "npcId": 32105,
+      "hook": "event",
+      "when": "started",
+      "event": "exit",
+      "hasItem": 8774,
+      "ops": [
+        {
+          "op": "sell_items",
+          "prices": [
+            {
+              "itemId": 8774,
+              "adena": 5000
+            }
+          ],
+          "bonusMin": 0,
+          "bonusAdena": 0
+        },
+        {
+          "op": "complete"
+        }
+      ],
+      "htmlFile": "32105-event-exit-010.htm"
+    },
+    {
+      "npcId": 32105,
+      "hook": "event",
+      "when": "started",
+      "event": "exit",
+      "lacksItems": [
+        8774
+      ],
+      "ops": [
+        {
+          "op": "complete"
+        }
+      ],
+      "htmlFile": "32105-event-exit-011.htm"
+    },
+    {
+      "npcId": 22196,
+      "hook": "kill",
+      "when": "started",
+      "party": true,
+      "html": "",
+      "ops": [
+        {
+          "op": "drop_item",
+          "itemId": 8774,
+          "count": 1,
+          "chance": 0.309,
+          "limit": 0
+        }
+      ]
+    },
+    {
+      "npcId": 22197,
+      "hook": "kill",
+      "when": "started",
+      "party": true,
+      "html": "",
+      "ops": [
+        {
+          "op": "drop_item",
+          "itemId": 8774,
+          "count": 1,
+          "chance": 0.309,
+          "limit": 0
+        }
+      ]
+    },
+    {
+      "npcId": 22198,
+      "hook": "kill",
+      "when": "started",
+      "party": true,
+      "html": "",
+      "ops": [
+        {
+          "op": "drop_item",
+          "itemId": 8774,
+          "count": 1,
+          "chance": 0.309,
+          "limit": 0
+        }
+      ]
+    },
+    {
+      "npcId": 22199,
+      "hook": "kill",
+      "when": "started",
+      "party": true,
+      "html": "",
+      "ops": [
+        {
+          "op": "drop_item",
+          "itemId": 8774,
+          "count": 1,
+          "chance": 0.309,
+          "limit": 0
+        }
+      ]
+    },
+    {
+      "npcId": 22215,
+      "hook": "kill",
+      "when": "started",
+      "party": true,
+      "html": "",
+      "ops": [
+        {
+          "op": "drop_item",
+          "itemId": 8774,
+          "count": 1,
+          "chance": 0.988,
+          "limit": 0
+        }
+      ]
+    },
+    {
+      "npcId": 22216,
+      "hook": "kill",
+      "when": "started",
+      "party": true,
+      "html": "",
+      "ops": [
+        {
+          "op": "drop_item",
+          "itemId": 8774,
+          "count": 1,
+          "chance": 0.988,
+          "limit": 0
+        }
+      ]
+    },
+    {
+      "npcId": 22217,
+      "hook": "kill",
+      "when": "started",
+      "party": true,
+      "html": "",
+      "ops": [
+        {
+          "op": "drop_item",
+          "itemId": 8774,
+          "count": 1,
+          "chance": 0.988,
+          "limit": 0
+        }
+      ]
+    },
+    {
+      "npcId": 22218,
+      "hook": "kill",
+      "when": "started",
+      "party": true,
+      "html": "",
+      "ops": [
+        {
+          "op": "drop_item",
+          "itemId": 8774,
+          "count": 1,
+          "chance": 0.309,
+          "limit": 0
+        }
+      ]
+    },
+    {
+      "npcId": 22223,
+      "hook": "kill",
+      "when": "started",
+      "party": true,
+      "html": "",
+      "ops": [
+        {
+          "op": "drop_item",
+          "itemId": 8774,
+          "count": 1,
+          "chance": 0.309,
+          "limit": 0
+        }
+      ]
+    },
+    {
+      "npcId": 18344,
+      "hook": "kill",
+      "when": "started",
+      "party": true,
+      "html": "",
+      "ops": [
+        {
+          "op": "drop_item",
+          "itemId": 8775,
+          "count": 1,
+          "chance": 1.0,
+          "limit": 0
+        }
+      ]
+    }
+  ]
+}

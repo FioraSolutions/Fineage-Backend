@@ -1,0 +1,128 @@
+{
+  "id": 381,
+  "name": "Let's Become a Royal Member!",
+  "repeatable": false,
+  "abortable": true,
+  "questItems": [
+    5899,
+    7569
+  ],
+  "dialogs": [
+    {
+      "npcId": 30232,
+      "hook": "talk",
+      "when": "absent",
+      "maxLevel": 54,
+      "htmlFile": "30232-talk-000.htm"
+    },
+    {
+      "npcId": 30232,
+      "hook": "talk",
+      "when": "absent",
+      "lacksItems": [
+        5898
+      ],
+      "htmlFile": "30232-talk-001.htm"
+    },
+    {
+      "npcId": 30232,
+      "hook": "talk",
+      "when": "absent",
+      "ops": [
+        {
+          "op": "take_item",
+          "itemId": 1,
+          "count": 1
+        },
+        {
+          "op": "give_item",
+          "itemId": 5898,
+          "count": 1
+        },
+        {
+          "op": "complete"
+        }
+      ],
+      "htmlFile": "30232-talk-002.htm"
+    },
+    {
+      "npcId": 30090,
+      "hook": "talk",
+      "when": "started",
+      "whenVar": "memoState",
+      "whenValue": "1",
+      "htmlFile": "30090-talk-003.htm"
+    },
+    {
+      "npcId": 30090,
+      "hook": "talk",
+      "when": "started",
+      "hasItem": 5900,
+      "whenVar": "memoState",
+      "whenValue": "2",
+      "htmlFile": "30090-talk-004.htm"
+    },
+    {
+      "npcId": 30090,
+      "hook": "talk",
+      "when": "started",
+      "hasItem": 7569,
+      "whenVar": "memoState",
+      "whenValue": "2",
+      "ops": [
+        {
+          "op": "take_item",
+          "itemId": 7569,
+          "count": 1
+        },
+        {
+          "op": "give_item",
+          "itemId": 5900,
+          "count": 1
+        }
+      ],
+      "htmlFile": "30090-talk-005.htm"
+    },
+    {
+      "npcId": 30232,
+      "hook": "event",
+      "when": "absent",
+      "event": "30232-03",
+      "ops": [
+        {
+          "op": "create"
+        },
+        {
+          "op": "start"
+        },
+        {
+          "op": "set",
+          "key": "memoState",
+          "value": "1"
+        },
+        {
+          "op": "set_cond",
+          "cond": 1
+        }
+      ],
+      "htmlFile": "30232-event-30232-03-006.htm"
+    },
+    {
+      "npcId": 30232,
+      "hook": "event",
+      "when": "absent",
+      "event": "30090-02",
+      "lacksItems": [
+        5900
+      ],
+      "ops": [
+        {
+          "op": "set",
+          "key": "memoState",
+          "value": "2"
+        }
+      ],
+      "htmlFile": "30232-event-30090-02-007.htm"
+    }
+  ]
+}

@@ -85,7 +85,7 @@ public sealed class ElvenKillQuestTests
     public void Collect_spores_caps_at_ten_then_cond_2_and_pays()
     {
         var (m, bag, j) = Setup(0.1);
-        Assert.True(m.AdvEvent(j, bag, 313, 30150, "accept", Elf).Ok);
+        Assert.True(m.AdvEvent(j, bag, 313, 30150, "30150-05", Elf).Ok);
         for (int i = 0; i < 9; i++)
             Assert.Contains(QuestSounds.ItemGet, m.OnKill(j, bag, 20509, Elf).Sounds);
         var tenth = m.OnKill(j, bag, 20509, Elf);
@@ -104,7 +104,7 @@ public sealed class ElvenKillQuestTests
     {
         var (m, bag, j) = Setup(0.9);
         m.OnKill(j, bag, 20509, Elf);
-        Assert.True(m.AdvEvent(j, bag, 313, 30150, "accept", Elf).Ok);
+        Assert.True(m.AdvEvent(j, bag, 313, 30150, "30150-05", Elf).Ok);
         m.OnKill(j, bag, 20509, Elf);
         Assert.Equal(0, bag.CountOf(1118));
     }

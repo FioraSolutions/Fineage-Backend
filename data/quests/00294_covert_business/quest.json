@@ -1,0 +1,160 @@
+{
+  "id": 294,
+  "name": "Covert Business",
+  "repeatable": true,
+  "abortable": true,
+  "questItems": [
+    1491
+  ],
+  "dialogs": [
+    {
+      "npcId": 30534,
+      "hook": "talk",
+      "when": "absent",
+      "races": [
+        0,
+        1,
+        2,
+        3
+      ],
+      "htmlFile": "30534-talk-000.htm"
+    },
+    {
+      "npcId": 30534,
+      "hook": "talk",
+      "when": "absent",
+      "races": [
+        4
+      ],
+      "maxLevel": 9,
+      "htmlFile": "30534-talk-001.htm"
+    },
+    {
+      "npcId": 30534,
+      "hook": "talk",
+      "when": "absent",
+      "races": [
+        4
+      ],
+      "minLevel": 10,
+      "htmlFile": "30534-talk-002.htm"
+    },
+    {
+      "npcId": 30534,
+      "hook": "event",
+      "when": "absent",
+      "event": "30534-03",
+      "races": [
+        4
+      ],
+      "minLevel": 10,
+      "ops": [
+        {
+          "op": "create"
+        },
+        {
+          "op": "start"
+        },
+        {
+          "op": "set_cond",
+          "cond": 1
+        }
+      ],
+      "htmlFile": "30534-event-30534-03-003.htm"
+    },
+    {
+      "npcId": 30534,
+      "hook": "talk",
+      "when": "started",
+      "cond": 1,
+      "htmlFile": "30534-talk-c1-004.htm"
+    },
+    {
+      "npcId": 30534,
+      "hook": "talk",
+      "when": "started",
+      "cond": 2,
+      "atLeast": {
+        "1491": 100
+      },
+      "hasItem": 1508,
+      "ops": [
+        {
+          "op": "give_adena",
+          "count": 2400
+        },
+        {
+          "op": "give_exp_sp",
+          "exp": 0,
+          "sp": 600
+        },
+        {
+          "op": "complete"
+        }
+      ],
+      "htmlFile": "30534-talk-c2-005.htm"
+    },
+    {
+      "npcId": 30534,
+      "hook": "talk",
+      "when": "started",
+      "cond": 2,
+      "atLeast": {
+        "1491": 100
+      },
+      "lacksItems": [
+        1508
+      ],
+      "ops": [
+        {
+          "op": "give_item",
+          "itemId": 1508,
+          "count": 1
+        },
+        {
+          "op": "give_exp_sp",
+          "exp": 0,
+          "sp": 600
+        },
+        {
+          "op": "complete"
+        }
+      ],
+      "htmlFile": "30534-talk-c2-006.htm"
+    },
+    {
+      "npcId": 20370,
+      "hook": "kill",
+      "when": "started",
+      "cond": 1,
+      "html": "",
+      "ops": [
+        {
+          "op": "drop_item",
+          "itemId": 1491,
+          "count": 2,
+          "chance": 1.0,
+          "limit": 100,
+          "condAtLimit": 2
+        }
+      ]
+    },
+    {
+      "npcId": 20480,
+      "hook": "kill",
+      "when": "started",
+      "cond": 1,
+      "html": "",
+      "ops": [
+        {
+          "op": "drop_item",
+          "itemId": 1491,
+          "count": 2,
+          "chance": 1.0,
+          "limit": 100,
+          "condAtLimit": 2
+        }
+      ]
+    }
+  ]
+}

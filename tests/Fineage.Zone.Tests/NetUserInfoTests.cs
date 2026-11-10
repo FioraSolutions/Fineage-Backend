@@ -20,6 +20,7 @@ public sealed class NetUserInfoTests
             Str = 21, Dex = 24, Con = 25, Int = 37, Wit = 23, Men = 40,
             PAtk = 5, MAtk = 6, PDef = 50, MDef = 41, PAtkSpd = 300, MAtkSpd = 333, Accuracy = 30, Evasion = 31, CritRate = 44,
             WeaponGradePenalty = 1, ArmorGradePenalty = 2, ClanId = 3,
+            CurrentWeight = 12_345, MaxWeight = 67_620,
             Paperdoll = [new PaperdollSlotNet(), new PaperdollSlotNet { ObjectId = 100, ItemId = 177, EnchantLevel = 3 }]
         };
         var back = NetCodec.DecodeUserInfo(NetCodec.EncodeUserInfo(msg));
@@ -34,7 +35,7 @@ public sealed class NetUserInfoTests
         Assert.Equal(new[] { 0, 1101, 177 }, NetCodec.DecodeEntitySpawn(wire).Paperdoll);
 
         // Older peers stop after the Attackable byte: decode must still work with an empty paperdoll.
-        int tailBytes = 2 + 3 * 4 + 1 + 4 + 4; // u16 length + 3 ints + Dead + Level + MaxHp
+        int tailBytes = 2 + 3 * 4 + 1 + 4 + 4 + 4; // u16 length + 3 ints + Dead + Level + MaxHp + PAtkSpd
         var old = NetCodec.DecodeEntitySpawn(wire.AsSpan(0, wire.Length - tailBytes));
         Assert.Empty(old.Paperdoll);
         Assert.Equal("P", old.Name);
@@ -58,6 +59,9 @@ public sealed class NetUserInfoTests
         Assert.Equal(stats.Accuracy, info.Accuracy);
         Assert.Equal(stats.Evasion, info.Evasion);
         Assert.Equal(stats.CritRate, info.CritRate);
+        Assert.True(info.MaxWeight > 0, "CON-derived MaxLoad must be on UserInfo for the status gauge");
+        Assert.True(info.CurrentWeight >= 0);
+        Assert.Equal((int)elf.Inventory!.TotalWeight, info.CurrentWeight);
         Assert.True(info.PAtk > 0 && info.MAtk > 0 && info.PDef > 0 && info.MDef > 0 && info.PAtkSpd > 0);
         Assert.True(info.Int > 0 && info.Men > 0, "Elven Mystic base INT/MEN");
         Assert.Equal(1, info.Race);
@@ -94,16 +98,20 @@ public sealed class NetUserInfoTests
         Assert.True(kit.World.TryBuildNetUserInfo(session, out var before));
         var armor = elf.Inventory!.Items.First(i => i.EquippedSlot != null && (int)i.EquippedSlot.Value != 7);
         int slot = (int)armor.EquippedSlot!.Value;
-        Assert.Null(await kit.World.TryUnequipItemAsync(session, new UnequipItemMsg { PaperdollSlot = slot }, CancellationToken.None));
+        Assert.Null(await kit.World.TryUnequipItemAsync(session, slot, CancellationToken.None));
 
-        var infos = rec.Of(nameof(INetPresenceBridge.FanoutUserInfo));
-        Assert.Single(infos);
-        Assert.Equal([elf.ObjectId], (IReadOnlyList<int>)infos[0][0]!);
-        var after = (UserInfoNetMsg)infos[0][1]!;
+        var infos = rec.Of(nameof(IWorldEventPublisher.FanoutUserInfo));
+        // PublishGear sends UserInfo for the paperdoll/stats sheet; SaveInventory then refreshes
+        // CurrWeight/MaxWeight on the same path — take the latest sheet.
+        Assert.NotEmpty(infos);
+        var last = infos[^1];
+        Assert.Equal([elf.ObjectId], (IReadOnlyList<int>)last[0]!);
+        var after = (Fineage.Protocol.UserInfoMsg)last[1]!;
         Assert.Equal(0, after.Paperdoll[slot].ItemId);
         Assert.True(after.PDef < before.PDef, $"pdef {before.PDef} -> {after.PDef}");
+        Assert.True(after.MaxWeight > 0);
 
-        var charInfos = rec.Of(nameof(INetPresenceBridge.FanoutCharInfo));
+        var charInfos = rec.Of(nameof(IWorldEventPublisher.FanoutCharInfo));
         Assert.Single(charInfos);
         Assert.Contains(peer.ObjectId, (IReadOnlyList<int>)charInfos[0][0]!);
         Assert.Equal(elf.ObjectId, (int)charInfos[0][1]!);

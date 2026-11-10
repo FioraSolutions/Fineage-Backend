@@ -1,0 +1,124 @@
+{
+  "id": 627,
+  "name": "Heart in Search of Power",
+  "repeatable": true,
+  "abortable": true,
+  "questItems": [
+    7170,
+    7171,
+    7172
+  ],
+  "dialogs": [
+    {
+      "npcId": 31518,
+      "hook": "talk",
+      "when": "absent",
+      "htmlFile": "31518-talk-000.htm"
+    },
+    {
+      "npcId": 31518,
+      "hook": "talk",
+      "when": "absent",
+      "htmlFile": "31518-talk-001.htm"
+    },
+    {
+      "npcId": 31518,
+      "hook": "talk",
+      "when": "started",
+      "cond": 1,
+      "htmlFile": "31518-talk-c1-002.htm"
+    },
+    {
+      "npcId": 31518,
+      "hook": "talk",
+      "when": "started",
+      "cond": 2,
+      "htmlFile": "31518-talk-c2-003.htm"
+    },
+    {
+      "npcId": 31518,
+      "hook": "talk",
+      "when": "started",
+      "cond": 3,
+      "htmlFile": "31518-talk-c3-004.htm"
+    },
+    {
+      "npcId": 31518,
+      "hook": "talk",
+      "when": "started",
+      "cond": 4,
+      "htmlFile": "31518-talk-c4-005.htm"
+    },
+    {
+      "npcId": 31519,
+      "hook": "talk",
+      "when": "started",
+      "cond": 3,
+      "htmlFile": "31519-talk-c3-006.htm"
+    },
+    {
+      "npcId": 31519,
+      "hook": "talk",
+      "when": "started",
+      "cond": 4,
+      "htmlFile": "31519-talk-c4-007.htm"
+    },
+    {
+      "npcId": 31518,
+      "hook": "event",
+      "when": "absent",
+      "event": "31518-02",
+      "ops": [
+        {
+          "op": "create"
+        },
+        {
+          "op": "start"
+        },
+        {
+          "op": "set_cond",
+          "cond": 1
+        }
+      ],
+      "htmlFile": "31518-event-31518-02-008.htm"
+    },
+    {
+      "npcId": 31518,
+      "hook": "event",
+      "when": "absent",
+      "event": "31518-06",
+      "htmlFile": "31518-event-31518-06-009.htm"
+    },
+    {
+      "npcId": 31518,
+      "hook": "event",
+      "when": "absent",
+      "event": "31519-02",
+      "hasItem": 7170,
+      "ops": [
+        {
+          "op": "take_item",
+          "itemId": 7170,
+          "count": 1
+        },
+        {
+          "op": "give_item",
+          "itemId": 7172,
+          "count": 1
+        },
+        {
+          "op": "set_cond",
+          "cond": 4
+        }
+      ],
+      "htmlFile": "31518-event-31519-02-010.htm"
+    },
+    {
+      "npcId": 31518,
+      "hook": "event",
+      "when": "absent",
+      "event": "31518-09",
+      "htmlFile": "31518-event-31518-09-011.htm"
+    }
+  ]
+}

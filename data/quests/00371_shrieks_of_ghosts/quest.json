@@ -1,0 +1,156 @@
+{
+  "id": 371,
+  "name": "Shrieks of Ghosts",
+  "repeatable": true,
+  "abortable": true,
+  "questItems": [
+    5903
+  ],
+  "dialogs": [
+    {
+      "npcId": 30867,
+      "hook": "talk",
+      "when": "absent",
+      "htmlFile": "30867-talk-000.htm"
+    },
+    {
+      "npcId": 30867,
+      "hook": "event",
+      "when": "absent",
+      "event": "30867-02",
+      "ops": [
+        {
+          "op": "create"
+        },
+        {
+          "op": "start"
+        },
+        {
+          "op": "set_cond",
+          "cond": 1
+        }
+      ],
+      "htmlFile": "30867-event-30867-02-001.htm"
+    },
+    {
+      "npcId": 30867,
+      "hook": "event",
+      "when": "absent",
+      "event": "30867-05",
+      "htmlFile": "30867-event-30867-05-002.htm"
+    },
+    {
+      "npcId": 30867,
+      "hook": "event",
+      "when": "absent",
+      "event": "30867-05",
+      "ops": [
+        {
+          "op": "take_item",
+          "itemId": 5903,
+          "count": 1
+        }
+      ],
+      "htmlFile": "30867-event-30867-05-003.htm"
+    },
+    {
+      "npcId": 30867,
+      "hook": "event",
+      "when": "absent",
+      "event": "30867-08",
+      "htmlFile": "30867-event-30867-08-004.htm"
+    },
+    {
+      "npcId": 30867,
+      "hook": "event",
+      "when": "absent",
+      "event": "30929-01",
+      "htmlFile": "30867-event-30929-01-005.htm"
+    },
+    {
+      "npcId": 30867,
+      "hook": "event",
+      "when": "absent",
+      "event": "30929-02",
+      "htmlFile": "30867-event-30929-02-006.htm"
+    },
+    {
+      "npcId": 30867,
+      "hook": "event",
+      "when": "absent",
+      "event": "30867-09",
+      "ops": [
+        {
+          "op": "complete"
+        }
+      ],
+      "htmlFile": "30867-event-30867-09-007.htm"
+    },
+    {
+      "npcId": 30867,
+      "hook": "event",
+      "when": "absent",
+      "event": "30929-03",
+      "lacksItems": [
+        6002
+      ],
+      "htmlFile": "30867-event-30929-03-008.htm"
+    },
+    {
+      "npcId": 30867,
+      "hook": "event",
+      "when": "absent",
+      "event": "30929-03",
+      "ops": [
+        {
+          "op": "give_item",
+          "itemId": 6003,
+          "count": 1
+        }
+      ],
+      "htmlFile": "30867-event-30929-03-009.htm"
+    },
+    {
+      "npcId": 30867,
+      "hook": "event",
+      "when": "absent",
+      "event": "30929-03",
+      "ops": [
+        {
+          "op": "give_item",
+          "itemId": 6004,
+          "count": 1
+        }
+      ],
+      "htmlFile": "30867-event-30929-03-010.htm"
+    },
+    {
+      "npcId": 30867,
+      "hook": "event",
+      "when": "absent",
+      "event": "30929-03",
+      "ops": [
+        {
+          "op": "give_item",
+          "itemId": 6005,
+          "count": 1
+        }
+      ],
+      "htmlFile": "30867-event-30929-03-011.htm"
+    },
+    {
+      "npcId": 30867,
+      "hook": "event",
+      "when": "absent",
+      "event": "30929-03",
+      "ops": [
+        {
+          "op": "give_item",
+          "itemId": 6006,
+          "count": 1
+        }
+      ],
+      "htmlFile": "30867-event-30929-03-012.htm"
+    }
+  ]
+}

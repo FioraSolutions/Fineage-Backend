@@ -56,8 +56,7 @@ public sealed class NetPvpTests
     {
         for (int i = 0; i < 20 && !done(); i++)
         {
-            Assert.Null(await kit.World.TryAttackAsync(
-                session, new AttackRequestMsg { TargetObjectId = targetId }, CancellationToken.None));
+            Assert.Null(await kit.World.TryAttackAsync(session, targetId, CancellationToken.None));
             await SwingAsync(kit);
         }
     }
@@ -82,20 +81,18 @@ public sealed class NetPvpTests
     }
 
     [Fact]
-    public async Task An_unflagged_player_is_not_attackable()
+    public async Task Forced_attack_on_a_white_player_flags_the_attacker()
     {
         var (kit, session, player, other, otherPlayer, rec) = await SetupAsync();
         otherPlayer.MaxHp = 100_000;
         otherPlayer.CurHp = 100_000;
 
-        // Mobius isAutoAttackable(Player): white name, no karma → the request is refused, not merely harmless.
-        string? error = await kit.World.TryAttackAsync(
-            session, new AttackRequestMsg { TargetObjectId = other.ObjectId }, CancellationToken.None);
+        // Mobius: white nameplate (not auto-attackable) but Ctrl/forced swing is still allowed and raises PvP flag.
+        // ZoneWorldCombat.IsAttackable mirrors that; IsAutoAttackable stays false until flagged/karma.
+        Assert.Null(await kit.World.TryAttackAsync(session, other.ObjectId, CancellationToken.None));
 
-        Assert.NotNull(error);
-        await SwingAsync(kit);
-        await SwingAsync(kit);
-        Assert.Equal(100_000, otherPlayer.CurHp);
+        await SwingUntilAsync(kit, session, other.ObjectId, () => player.PvpFlagged || otherPlayer.CurHp < 100_000);
+        Assert.True(player.PvpFlagged, "attacking a white player must raise the attacker's PvP flag");
     }
 
     [Fact]
@@ -117,8 +114,7 @@ public sealed class NetPvpTests
         var (kit, session, player, _, _, _) = await SetupAsync();
         player.PvpFlagged = true;
 
-        Assert.NotNull(await kit.World.TryAttackAsync(
-            session, new AttackRequestMsg { TargetObjectId = session.ObjectId }, CancellationToken.None));
+        Assert.NotNull(await kit.World.TryAttackAsync(session, session.ObjectId, CancellationToken.None));
     }
 
     [Fact]
@@ -139,9 +135,9 @@ public sealed class NetPvpTests
     static (int CurHp, int MaxHp)? LatestNetHp(NetBridgeRecorder rec, int objectId)
     {
         (int CurHp, int MaxHp)? last = null;
-        foreach (var args in rec.Of(nameof(INetPresenceBridge.FanoutStatusUpdate)))
+        foreach (var args in rec.Of(nameof(IWorldEventPublisher.FanoutStatusUpdate)))
         {
-            if (args[1] is not StatusUpdateNetMsg msg || msg.EntityValue != (ulong)(uint)objectId)
+            if (args[1] is not StatusUpdateMsg msg || msg.ObjectId != objectId)
                 continue;
             var ids = msg.AttributeIds ?? [];
             var vals = msg.Values ?? [];

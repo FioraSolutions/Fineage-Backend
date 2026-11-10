@@ -1,0 +1,73 @@
+{
+  "id": 637,
+  "name": "ThroughOnceMore",
+  "repeatable": true,
+  "abortable": true,
+  "questItems": [
+    8066
+  ],
+  "dialogs": [
+    {
+      "npcId": 32010,
+      "hook": "talk",
+      "when": "absent",
+      "hasItem": 8065,
+      "htmlFile": "32010-talk-000.htm"
+    },
+    {
+      "npcId": 32010,
+      "hook": "talk",
+      "when": "absent",
+      "hasItem": 8064,
+      "ops": [
+        {
+          "op": "complete"
+        }
+      ],
+      "htmlFile": "32010-talk-001.htm"
+    },
+    {
+      "npcId": 32010,
+      "hook": "talk",
+      "when": "absent",
+      "hasItem": 8067,
+      "ops": [
+        {
+          "op": "complete"
+        }
+      ],
+      "htmlFile": "32010-talk-002.htm"
+    },
+    {
+      "npcId": 32010,
+      "hook": "talk",
+      "when": "absent",
+      "ops": [
+        {
+          "op": "take_item",
+          "itemId": 8066,
+          "count": 10
+        },
+        {
+          "op": "take_item",
+          "itemId": 8065,
+          "count": 1
+        },
+        {
+          "op": "give_item",
+          "itemId": 8067,
+          "count": 1
+        },
+        {
+          "op": "give_item",
+          "itemId": 8273,
+          "count": 10
+        },
+        {
+          "op": "complete"
+        }
+      ],
+      "htmlFile": "32010-talk-003.htm"
+    }
+  ]
+}

@@ -1,0 +1,223 @@
+{
+  "id": 273,
+  "name": "Invaders of the Holy Land",
+  "repeatable": true,
+  "abortable": true,
+  "questItems": [
+    1475,
+    1476
+  ],
+  "dialogs": [
+    {
+      "npcId": 30566,
+      "hook": "talk",
+      "when": "absent",
+      "races": [
+        0,
+        1,
+        2,
+        4
+      ],
+      "htmlFile": "30566-talk-000.htm"
+    },
+    {
+      "npcId": 30566,
+      "hook": "talk",
+      "when": "absent",
+      "races": [
+        3
+      ],
+      "maxLevel": 5,
+      "htmlFile": "30566-talk-001.htm"
+    },
+    {
+      "npcId": 30566,
+      "hook": "talk",
+      "when": "absent",
+      "races": [
+        3
+      ],
+      "minLevel": 6,
+      "htmlFile": "30566-talk-002.htm"
+    },
+    {
+      "npcId": 30566,
+      "hook": "event",
+      "when": "absent",
+      "event": "30566-04",
+      "races": [
+        3
+      ],
+      "minLevel": 6,
+      "ops": [
+        {
+          "op": "create"
+        },
+        {
+          "op": "start"
+        },
+        {
+          "op": "set_cond",
+          "cond": 1
+        }
+      ],
+      "htmlFile": "30566-event-30566-04-003.htm"
+    },
+    {
+      "npcId": 30566,
+      "hook": "event",
+      "when": "started",
+      "event": "30566-08",
+      "ops": [
+        {
+          "op": "complete"
+        }
+      ],
+      "htmlFile": "30566-event-30566-08-004.htm"
+    },
+    {
+      "npcId": 30566,
+      "hook": "event",
+      "when": "started",
+      "event": "30566-09",
+      "htmlFile": "30566-event-30566-09-005.htm"
+    },
+    {
+      "npcId": 30566,
+      "hook": "talk",
+      "when": "started",
+      "cond": 1,
+      "lacksItems": [
+        1475,
+        1476
+      ],
+      "htmlFile": "30566-talk-c1-006.htm"
+    },
+    {
+      "npcId": 30566,
+      "hook": "talk",
+      "when": "started",
+      "cond": 1,
+      "hasItems": [
+        1475
+      ],
+      "lacksItems": [
+        1476
+      ],
+      "ops": [
+        {
+          "op": "sell_items",
+          "prices": [
+            {
+              "itemId": 1475,
+              "adena": 3
+            }
+          ],
+          "bonusMin": 10,
+          "bonusAdena": 1500
+        },
+        {
+          "op": "complete"
+        }
+      ],
+      "htmlFile": "30566-talk-c1-007.htm"
+    },
+    {
+      "npcId": 30566,
+      "hook": "talk",
+      "when": "started",
+      "cond": 1,
+      "hasItem": 1476,
+      "ops": [
+        {
+          "op": "sell_items",
+          "prices": [
+            {
+              "itemId": 1476,
+              "adena": 10
+            },
+            {
+              "itemId": 1475,
+              "adena": 3
+            }
+          ],
+          "bonusMin": 10,
+          "bonusAdena": 1800
+        },
+        {
+          "op": "complete"
+        }
+      ],
+      "htmlFile": "30566-talk-c1-008.htm"
+    },
+    {
+      "npcId": 20311,
+      "hook": "kill",
+      "when": "started",
+      "cond": 1,
+      "html": "",
+      "ops": [
+        {
+          "op": "drop_item",
+          "itemId": 1475,
+          "count": 1,
+          "chance": 0.9,
+          "limit": 0
+        },
+        {
+          "op": "drop_item",
+          "itemId": 1476,
+          "count": 1,
+          "chance": 0.09999999999999998,
+          "limit": 0
+        }
+      ]
+    },
+    {
+      "npcId": 20312,
+      "hook": "kill",
+      "when": "started",
+      "cond": 1,
+      "html": "",
+      "ops": [
+        {
+          "op": "drop_item",
+          "itemId": 1475,
+          "count": 1,
+          "chance": 0.87,
+          "limit": 0
+        },
+        {
+          "op": "drop_item",
+          "itemId": 1476,
+          "count": 1,
+          "chance": 0.13,
+          "limit": 0
+        }
+      ]
+    },
+    {
+      "npcId": 20313,
+      "hook": "kill",
+      "when": "started",
+      "cond": 1,
+      "html": "",
+      "ops": [
+        {
+          "op": "drop_item",
+          "itemId": 1475,
+          "count": 1,
+          "chance": 0.77,
+          "limit": 0
+        },
+        {
+          "op": "drop_item",
+          "itemId": 1476,
+          "count": 1,
+          "chance": 0.22999999999999998,
+          "limit": 0
+        }
+      ]
+    }
+  ]
+}

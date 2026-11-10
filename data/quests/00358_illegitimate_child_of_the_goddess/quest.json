@@ -1,0 +1,127 @@
+{
+  "id": 358,
+  "name": "Illegitimate Child of the Goddess",
+  "repeatable": true,
+  "abortable": true,
+  "questItems": [
+    5868
+  ],
+  "dialogs": [
+    {
+      "npcId": 30862,
+      "hook": "talk",
+      "when": "absent",
+      "maxLevel": 62,
+      "htmlFile": "30862-talk-000.htm"
+    },
+    {
+      "npcId": 30862,
+      "hook": "talk",
+      "when": "absent",
+      "minLevel": 63,
+      "htmlFile": "30862-talk-001.htm"
+    },
+    {
+      "npcId": 30862,
+      "hook": "event",
+      "when": "absent",
+      "event": "30862-02",
+      "minLevel": 63,
+      "htmlFile": "30862-event-30862-02-002.htm"
+    },
+    {
+      "npcId": 30862,
+      "hook": "event",
+      "when": "absent",
+      "event": "30862-03",
+      "minLevel": 63,
+      "htmlFile": "30862-event-30862-03-003.htm"
+    },
+    {
+      "npcId": 30862,
+      "hook": "event",
+      "when": "absent",
+      "event": "30862-04",
+      "minLevel": 63,
+      "ops": [
+        {
+          "op": "create"
+        },
+        {
+          "op": "start"
+        },
+        {
+          "op": "set_cond",
+          "cond": 1
+        }
+      ],
+      "htmlFile": "30862-event-30862-04-004.htm"
+    },
+    {
+      "npcId": 30862,
+      "hook": "talk",
+      "when": "started",
+      "atLeast": {
+        "5868": 108
+      },
+      "ops": [
+        {
+          "op": "take_item",
+          "itemId": 5868,
+          "count": 108
+        },
+        {
+          "op": "give_item",
+          "itemId": 5364,
+          "count": 1
+        },
+        {
+          "op": "complete"
+        }
+      ],
+      "htmlFile": "30862-talk-005.htm"
+    },
+    {
+      "npcId": 30862,
+      "hook": "talk",
+      "when": "started",
+      "htmlFile": "30862-talk-006.htm"
+    },
+    {
+      "npcId": 20672,
+      "hook": "kill",
+      "when": "started",
+      "cond": 1,
+      "party": true,
+      "html": "",
+      "ops": [
+        {
+          "op": "drop_item",
+          "itemId": 5868,
+          "count": 1,
+          "chance": 0.71,
+          "limit": 108,
+          "condAtLimit": 2
+        }
+      ]
+    },
+    {
+      "npcId": 20673,
+      "hook": "kill",
+      "when": "started",
+      "cond": 1,
+      "party": true,
+      "html": "",
+      "ops": [
+        {
+          "op": "drop_item",
+          "itemId": 5868,
+          "count": 1,
+          "chance": 0.74,
+          "limit": 108,
+          "condAtLimit": 2
+        }
+      ]
+    }
+  ]
+}

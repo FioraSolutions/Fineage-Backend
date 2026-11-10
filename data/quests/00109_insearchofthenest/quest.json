@@ -1,0 +1,102 @@
+{
+  "id": 109,
+  "name": "InSearchOfTheNest",
+  "repeatable": false,
+  "abortable": true,
+  "questItems": [
+    8083
+  ],
+  "dialogs": [
+    {
+      "npcId": 31553,
+      "hook": "talk",
+      "when": "absent",
+      "minLevel": 66,
+      "htmlFile": "31553-talk-000.htm"
+    },
+    {
+      "npcId": 31553,
+      "hook": "talk",
+      "when": "started",
+      "htmlFile": "31553-talk-001.htm"
+    },
+    {
+      "npcId": 31553,
+      "hook": "talk",
+      "when": "started",
+      "htmlFile": "31553-talk-002.htm"
+    },
+    {
+      "npcId": 31553,
+      "hook": "talk",
+      "when": "started",
+      "htmlFile": "31553-talk-003.htm"
+    },
+    {
+      "npcId": 32015,
+      "hook": "talk",
+      "when": "started",
+      "htmlFile": "32015-talk-004.htm"
+    },
+    {
+      "npcId": 32015,
+      "hook": "talk",
+      "when": "started",
+      "htmlFile": "32015-talk-005.htm"
+    },
+    {
+      "npcId": 31554,
+      "hook": "talk",
+      "when": "started",
+      "htmlFile": "31554-talk-006.htm"
+    },
+    {
+      "npcId": 31553,
+      "hook": "event",
+      "when": "absent",
+      "event": "31553-01",
+      "htmlFile": "31553-event-31553-01-007.htm"
+    },
+    {
+      "npcId": 31553,
+      "hook": "event",
+      "when": "absent",
+      "event": "32015-02",
+      "ops": [
+        {
+          "op": "give_item",
+          "itemId": 8083,
+          "count": 1
+        }
+      ],
+      "htmlFile": "31553-event-32015-02-008.htm"
+    },
+    {
+      "npcId": 31553,
+      "hook": "event",
+      "when": "absent",
+      "event": "31553-03",
+      "ops": [
+        {
+          "op": "take_item",
+          "itemId": 8083,
+          "count": 1
+        }
+      ],
+      "htmlFile": "31553-event-31553-03-009.htm"
+    },
+    {
+      "npcId": 31553,
+      "hook": "event",
+      "when": "absent",
+      "event": "31554-02",
+      "ops": [
+        {
+          "op": "give_adena",
+          "count": 5168
+        }
+      ],
+      "htmlFile": "31553-event-31554-02-010.htm"
+    }
+  ]
+}

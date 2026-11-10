@@ -43,7 +43,8 @@ public sealed class SkillCatalogTests
         var level = skill!.LevelData(1);
         Assert.Equal(10, level.MpConsume);
         Assert.Equal(25, level.Power);
-        Assert.Equal(13000, skill.ReuseDelayMs);
+        // Mobius CT0 Interlude Power Strike set reuseDelay="3000".
+        Assert.Equal(3000, skill.ReuseDelayMs);
     }
 
     [Fact]

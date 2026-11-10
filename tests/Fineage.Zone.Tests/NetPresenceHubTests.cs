@@ -335,7 +335,7 @@ public sealed class NetPresenceHubTests
             ObjectId = 7,
             Effects =
             [
-                new AbnormalEffectNet { Id = 1204, Value = 1, DurationSeconds = 1200 }
+                new AbnormalEffectNet { Id = 1204, Value = 1, DurationSeconds = 1200, Slot = "SLEEP" }
             ]
         };
         var again = NetCodec.DecodeAbnormalStatusUpdate(NetCodec.EncodeAbnormalStatusUpdate(update));
@@ -343,6 +343,7 @@ public sealed class NetPresenceHubTests
         Assert.Single(again.Effects);
         Assert.Equal(1204, again.Effects[0].Id);
         Assert.Equal(1200, again.Effects[0].DurationSeconds);
+        Assert.Equal("SLEEP", again.Effects[0].Slot);
     }
 
     [Fact]
@@ -429,7 +430,9 @@ public sealed class NetPresenceHubTests
                     ItemId = 57,
                     Count = 40,
                     EnchantLevel = 0,
-                    EquippedSlot = -1
+                    EquippedSlot = -1,
+                    BodySlot = "none",
+                    Kind = "etc"
                 }
             ]
         };
@@ -437,6 +440,8 @@ public sealed class NetPresenceHubTests
         Assert.Single(again.Changes);
         Assert.Equal(57, again.Changes[0].ItemId);
         Assert.Equal(40, again.Changes[0].Count);
+        Assert.Equal("none", again.Changes[0].BodySlot);
+        Assert.Equal("etc", again.Changes[0].Kind);
 
         var pickup = new PickupRequestNetMsg { GroundObjectId = 99 };
         Assert.Equal(99, NetCodec.DecodePickupRequest(NetCodec.EncodePickupRequest(pickup)).GroundObjectId);
@@ -533,5 +538,34 @@ public sealed class NetPresenceHubTests
         var round = NetCodec.DecodeEntitySpawn(NetCodec.EncodeEntitySpawn(spawn));
         Assert.Equal(EntityKindNet.Npc, round.Kind);
         Assert.Equal(4416, round.TemplateId);
+    }
+
+    [Fact]
+    public void EntitySpawn_patkspd_roundtrips_and_npc_spawn_fills_template()
+    {
+        var npc = new EntitySpawnMsg
+        {
+            EntityValue = 1,
+            EntityGeneration = 1,
+            Kind = EntityKindNet.Npc,
+            Name = "Wolf",
+            PAtkSpd = 400
+        };
+        Assert.Equal(400, NetCodec.DecodeEntitySpawn(NetCodec.EncodeEntitySpawn(npc)).PAtkSpd);
+
+        var entity = new ZoneEntity
+        {
+            ObjectId = 42,
+            Kind = ZoneEntityKind.Npc,
+            NpcId = 20332,
+            PAtkSpd = 320,
+            Attackable = true
+        };
+        var built = NetEnterWorldProjector.BuildNpcSpawn(entity, EntityId.FromObjectId(42));
+        Assert.Equal(320, built.PAtkSpd);
+
+        entity = new ZoneEntity { ObjectId = 43, Kind = ZoneEntityKind.Npc, NpcId = 1, Attackable = true };
+        built = NetEnterWorldProjector.BuildNpcSpawn(entity, EntityId.FromObjectId(43));
+        Assert.Equal(Fineage.Zone.Combat.ZoneCombat.DefaultNpcPAtkSpd, built.PAtkSpd);
     }
 }

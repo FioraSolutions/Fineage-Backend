@@ -1,0 +1,94 @@
+{
+  "id": 15,
+  "name": "SweetWhispers",
+  "repeatable": false,
+  "abortable": true,
+  "questItems": [],
+  "dialogs": [
+    {
+      "npcId": 31302,
+      "hook": "talk",
+      "when": "absent",
+      "htmlFile": "31302-talk-000.htm"
+    },
+    {
+      "npcId": 31302,
+      "hook": "talk",
+      "when": "absent",
+      "htmlFile": "31302-talk-001.htm"
+    },
+    {
+      "npcId": 31302,
+      "hook": "talk",
+      "when": "started",
+      "htmlFile": "31302-talk-002.htm"
+    },
+    {
+      "npcId": 31302,
+      "hook": "talk",
+      "when": "started",
+      "htmlFile": "31302-talk-003.htm"
+    },
+    {
+      "npcId": 31302,
+      "hook": "talk",
+      "when": "started",
+      "htmlFile": "31302-talk-004.htm"
+    },
+    {
+      "npcId": 31302,
+      "hook": "talk",
+      "when": "started",
+      "htmlFile": "31302-talk-005.htm"
+    },
+    {
+      "npcId": 31302,
+      "hook": "event",
+      "when": "absent",
+      "event": "31302-01",
+      "ops": [
+        {
+          "op": "create"
+        },
+        {
+          "op": "start"
+        },
+        {
+          "op": "set_cond",
+          "cond": 1
+        }
+      ],
+      "htmlFile": "31302-event-31302-01-006.htm"
+    },
+    {
+      "npcId": 31302,
+      "hook": "event",
+      "when": "absent",
+      "event": "31518-01",
+      "ops": [
+        {
+          "op": "set_cond",
+          "cond": 2
+        }
+      ],
+      "htmlFile": "31302-event-31518-01-007.htm"
+    },
+    {
+      "npcId": 31302,
+      "hook": "event",
+      "when": "absent",
+      "event": "31517-01",
+      "ops": [
+        {
+          "op": "give_exp_sp",
+          "exp": 350531,
+          "sp": 28204
+        },
+        {
+          "op": "complete"
+        }
+      ],
+      "htmlFile": "31302-event-31517-01-008.htm"
+    }
+  ]
+}

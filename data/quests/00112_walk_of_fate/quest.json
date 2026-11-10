@@ -1,0 +1,80 @@
+{
+  "id": 112,
+  "name": "Walk of Fate",
+  "repeatable": false,
+  "abortable": true,
+  "questItems": [],
+  "dialogs": [
+    {
+      "npcId": 30572,
+      "hook": "talk",
+      "when": "absent",
+      "maxLevel": 19,
+      "htmlFile": "30572-talk-000.htm"
+    },
+    {
+      "npcId": 30572,
+      "hook": "talk",
+      "when": "absent",
+      "minLevel": 20,
+      "htmlFile": "30572-talk-001.htm"
+    },
+    {
+      "npcId": 30572,
+      "hook": "talk",
+      "when": "started",
+      "htmlFile": "30572-talk-002.htm"
+    },
+    {
+      "npcId": 32017,
+      "hook": "talk",
+      "when": "started",
+      "htmlFile": "32017-talk-003.htm"
+    },
+    {
+      "npcId": 30572,
+      "hook": "event",
+      "when": "absent",
+      "event": "30572-04",
+      "ops": [
+        {
+          "op": "create"
+        },
+        {
+          "op": "start"
+        },
+        {
+          "op": "set_cond",
+          "cond": 1
+        }
+      ],
+      "htmlFile": "30572-event-30572-04-004.htm"
+    },
+    {
+      "npcId": 30572,
+      "hook": "event",
+      "when": "absent",
+      "event": "32017-02",
+      "ops": [
+        {
+          "op": "give_item",
+          "itemId": 956,
+          "count": 1
+        },
+        {
+          "op": "give_adena",
+          "count": 22308
+        },
+        {
+          "op": "give_exp_sp",
+          "exp": 112876,
+          "sp": 5774
+        },
+        {
+          "op": "complete"
+        }
+      ],
+      "htmlFile": "30572-event-32017-02-005.htm"
+    }
+  ]
+}

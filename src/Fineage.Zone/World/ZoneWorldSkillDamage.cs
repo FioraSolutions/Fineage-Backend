@@ -1,3 +1,4 @@
+using Fineage.Game;
 using Fineage.Protocol;
 using Fineage.Zone.Combat;
 using Fineage.Zone.Skills;
@@ -41,7 +42,7 @@ public sealed partial class ZoneWorld
         player.CombatUntilUnixMs = now + ClanProtocol.CombatStanceMillis;
         session.SelectedTargetId = target.ObjectId;
         player.CastingUntilMs = now + hitTime + coolTime;
-        player.PendingHit = new PendingSkillHit(target.ObjectId, 0, now + hitTime, combat, level);
+        SetPendingHit(player, new PendingSkillHit(target.ObjectId, 0, now + hitTime, combat, level));
         ZoneLog.Info($"[skill] cast {skillId} lv{level} kind={combat.Kind} hit={hitTime}ms cool={coolTime}ms reuse={reuse}ms");
         if (hitTime == 0)
             ResolvePendingHit(player, now);
@@ -95,8 +96,7 @@ public sealed partial class ZoneWorld
             return 1;
         if (shield == ZoneCombat.ShieldResult.Block)
             pDef += target.ShieldDef;
-        int templateStr = PlayerClasses.TryGet(player.ClassId, out var cls) && cls != null ? cls.Str : 0;
-        double str = SafeBonus(PlayerClasses.StatBonuses, Fineage.Game.StatSlot.Str, templateStr);
+        double str = EffectiveAttributes(player).StrBonus;
         bool crit = ZoneCombat.RollSkillCrit(_combatRandom, combat.BaseCritRate, str);
         if (crit && player.Session != null)
             ShotNotice(player.Session, SysMsgCriticalHit, "Critical hit!");
@@ -114,10 +114,9 @@ public sealed partial class ZoneWorld
     {
         bool front = ZoneCombat.IsInFrontOf(player.X, player.Y, target.X, target.Y, target.Heading);
         bool behind = ZoneCombat.IsBehind(player.X, player.Y, target.X, target.Y, target.Heading);
-        int templateDex = PlayerClasses.TryGet(player.ClassId, out var t) && t != null ? t.Dex : 0;
-        int templateStr = t?.Str ?? 0;
-        double dex = SafeBonus(PlayerClasses.StatBonuses, Fineage.Game.StatSlot.Dex, templateDex);
-        double str = SafeBonus(PlayerClasses.StatBonuses, Fineage.Game.StatSlot.Str, templateStr);
+        var attrs = EffectiveAttributes(player);
+        double dex = attrs.DexBonus;
+        double str = attrs.StrBonus;
         // Backstab.calcSuccess: !isInFrontOf; both: calcBlowSuccess (+ BLOW_RATE fold).
         if ((blow == BlowEffect.Backstab && front) ||
             !ZoneCombat.RollBlowSuccess(_combatRandom, combat.BlowChance, dex, front, behind, ps.BlowRate))
