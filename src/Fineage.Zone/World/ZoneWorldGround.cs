@@ -12,13 +12,8 @@ public sealed partial class ZoneWorld
         if (!IsLive(session))
             return Task.FromResult<string?>("world");
 
-        string? error;
-        lock (_gate)
-            error = TryPickup(session, groundObjectId);
-        if (error != null)
-            return Task.FromResult<string?>(error);
-
-        return Task.FromResult<string?>(null);
+        // World mutate under _gate; Postgres inventory write after unlock (B8).
+        return Task.FromResult(WithDeferredInventoryPersist(() => TryPickup(session, groundObjectId)));
     }
 
     /// <summary>
@@ -30,13 +25,7 @@ public sealed partial class ZoneWorld
         if (!IsLive(session))
             return Task.FromResult<string?>("world");
 
-        string? error;
-        lock (_gate)
-            error = TryDestroyItem(session, objectId, count);
-        if (error != null)
-            return Task.FromResult<string?>(error);
-
-        return Task.FromResult<string?>(null);
+        return Task.FromResult(WithDeferredInventoryPersist(() => TryDestroyItem(session, objectId, count)));
     }
 
     public Task<string?> TryDropItemAsync(
@@ -45,13 +34,8 @@ public sealed partial class ZoneWorld
         if (!IsLive(session))
             return Task.FromResult<string?>("world");
 
-        string? error;
-        lock (_gate)
-            error = TryDropItem(session, objectId, count, x, y, z);
-        if (error != null)
-            return Task.FromResult<string?>(error);
-
-        return Task.FromResult<string?>(null);
+        return Task.FromResult(WithDeferredInventoryPersist(
+            () => TryDropItem(session, objectId, count, x, y, z)));
     }
 
     /// <summary>Interlude SystemMessageId 151 CANNOT_DISCARD_DISTANCE_TOO_FAR.</summary>

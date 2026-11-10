@@ -40,7 +40,8 @@ public sealed partial class ZoneWorld
     /// <summary>One live combat-loop tick (movement, hits, player auto-attack / approach, casts, mobs, corpses, aggro/leash).</summary>
     internal async Task RunPlayerCombatTickAsync(CancellationToken ct)
     {
-        lock (_gate)
+        // Pending pickups / corpse loot may dirty inventories — keep Postgres off _gate (B8).
+        WithDeferredInventoryPersist(() =>
         {
             long now = _clock().ToUnixTimeMilliseconds();
             TickPlayerMovement(now);
@@ -60,7 +61,8 @@ public sealed partial class ZoneWorld
             TickCorpseDecay(now);
             TickAttackStance(now);
             TickGroundExpiry(now);
-        }
+            return 0;
+        });
         await Task.CompletedTask.ConfigureAwait(false);
     }
 

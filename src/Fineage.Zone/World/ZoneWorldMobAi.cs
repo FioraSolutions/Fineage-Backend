@@ -12,7 +12,7 @@ public sealed partial class ZoneWorld
 {
     internal Task RunCombatTickAsync(CancellationToken ct)
     {
-        lock (_gate)
+        WithDeferredInventoryPersist(() =>
         {
             long now = _clock().ToUnixTimeMilliseconds();
             TickPlayerMovement(now);
@@ -24,7 +24,8 @@ public sealed partial class ZoneWorld
             TickMobAttacks(now);
             TickCorpseDecay(now);
             TickAttackStance(now);
-        }
+            return 0;
+        });
 
         return Task.CompletedTask;
     }

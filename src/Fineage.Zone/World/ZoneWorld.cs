@@ -87,6 +87,12 @@ public sealed partial class ZoneWorld
     readonly DropCatalog _dropCatalog;
     readonly DropRates _dropRates;
     readonly object _gate = new();
+    /// <summary>
+    /// When true, <see cref="SaveInventory"/> refreshes weight under the lock but queues the Postgres
+    /// write until <see cref="FlushDirtyInventories"/> (Claude B8 — keep SQL off <c>_gate</c>).
+    /// </summary>
+    bool _deferInventoryPersist;
+    readonly Dictionary<int, (ZoneSession Session, PlayerInventory Inventory)> _dirtyInventories = [];
     readonly bool _npcRegen;
     readonly GeoEngine _geo;
     static readonly Lazy<GeoEngine> SharedGeo = new(GeoEngine.LoadDefault);
