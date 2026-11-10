@@ -89,6 +89,12 @@ public sealed partial class ZoneWorld
         {
             ZoneLog.Info($"[skill] hit {hit.Combat.SkillId} lv{hit.Level} target={target.ObjectId} damage={damage}");
         }
+        // Mobius FolkStatus: offensive skills may cast on merchants, but they take no HP / hate.
+        if (!ZoneCombat.TakesNpcCombatDamage(target.NpcType, target.Attackable))
+        {
+            player.CombatUntilUnixMs = now + ClanProtocol.CombatStanceMillis;
+            return;
+        }
         target.CurHp = Math.Max(0, target.CurHp - damage);
         FanoutVitals(target, StatusFor(target));
         RecordDamage(target, player, damage);
