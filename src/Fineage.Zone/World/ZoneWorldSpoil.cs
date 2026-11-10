@@ -85,6 +85,8 @@ public sealed partial class ZoneWorld
 
         target.SpoilerObjectId = player.ObjectId;
         Notice(session, msg.SpoilActivated, "The Spoil condition has been activated.");
+        // TargetStatus spoil icon rides AbnormalStatusUpdate (skill 254) for knownlist watchers.
+        FanoutAbnormal(target);
         if (!forced)
             AddHate(target, player);
         ZoneLog.Info($"spoil object={target.ObjectId} spoiler={player.ObjectId}");

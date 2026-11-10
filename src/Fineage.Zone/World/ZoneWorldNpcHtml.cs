@@ -61,7 +61,11 @@ public sealed partial class ZoneWorld
         }
 
         if (reply.ScriptName != null)
+        {
+            if (reply.ScriptName.Equals("SymbolMaker", StringComparison.OrdinalIgnoreCase))
+                return SymbolMakerBypass(session, player, npc, reply.ScriptEvent);
             return VillageMasterBypass(session, player, npc, reply.ScriptName, reply.ScriptEvent);
+        }
 
         if (reply.QuestAction)
         {

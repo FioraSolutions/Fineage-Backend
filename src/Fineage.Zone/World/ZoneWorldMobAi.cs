@@ -103,7 +103,7 @@ public sealed partial class ZoneWorld
                 template.AppliesAbnormal &&
                 template.TryLevelData(hit.Level, out var levelData))
             {
-                ApplyAbnormalFromSkill(template, levelData, target, now);
+                ApplyAbnormalFromSkill(template, levelData, target, now, attacker: player);
             }
         }
 
@@ -151,6 +151,12 @@ public sealed partial class ZoneWorld
                 SetAggroTarget(npc, topHate);
             CallClanHelp(npc, player, now);
             npc.LastAiTickMs = now;
+            // Mobius Fear / TURN_FLEE: skip attack AI and run away from the feared source.
+            if (IsFeared(npc))
+            {
+                FleeFrom(npc, player, now);
+                continue;
+            }
             // Mobius thinkAttack: no LOS to the most hated → moveTo(target) instead of swinging.
             if (!ZoneCombat.InMobReach(npc.X, npc.Y, player.X, player.Y, ZoneCombat.MobAttackReach(npc.AttackRange)) ||
                 !CanSeeTarget(npc, player))

@@ -13,4 +13,6 @@ public sealed class ZoneAbnormalEntry
     /// </summary>
     public string Slot { get; set; } = "";
     public long ExpiresAtUnixMs { get; set; }
+    /// <summary>Next DamOverTime tick (unix ms). 0 = fire on the first abnormal tick.</summary>
+    public long NextDotAtUnixMs { get; set; }
 }

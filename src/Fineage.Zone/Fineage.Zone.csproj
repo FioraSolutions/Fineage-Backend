@@ -45,6 +45,8 @@
     <Content Include="..\..\data\herbs.json" Link="data\herbs.json" CopyToOutputDirectory="PreserveNewest" />
     <Content Include="..\..\data\skill-combat.json" Link="data\skill-combat.json" CopyToOutputDirectory="PreserveNewest" />
     <Content Include="..\..\data\skill-passives.json" Link="data\skill-passives.json" CopyToOutputDirectory="PreserveNewest" />
+    <Content Include="..\..\data\skill-dots.json" Link="data\skill-dots.json" CopyToOutputDirectory="PreserveNewest" />
+    <Content Include="..\..\data\skill-effects.json" Link="data\skill-effects.json" CopyToOutputDirectory="PreserveNewest" />
     <Content Include="..\..\data\skill-stat-effects.json" Link="data\skill-stat-effects.json" CopyToOutputDirectory="PreserveNewest" />
     <Content Include="..\..\data\spoil.json" Link="data\spoil.json" CopyToOutputDirectory="PreserveNewest" />
     <Content Include="..\..\data\item-skills.json" Link="data\item-skills.json" CopyToOutputDirectory="PreserveNewest" />

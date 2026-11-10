@@ -32,8 +32,16 @@ public sealed partial class ZoneWorld
             var row = s;
             if (s.Type == StoredShortcut.TypeItem && entity.Inventory?.Find(s.Id) == null)
             {
+                // Stackables (soulshots etc.): objectId changes when the stack is emptied and restocked.
+                // Remap to a live bag row of the same itemId so the hotbar survives restock/relog.
+                var remapped = RemapItemShortcut(entity, s);
+                if (remapped == null)
+                {
+                    pruned = true;
+                    continue;
+                }
+                row = remapped;
                 pruned = true;
-                continue;
             }
 
             if (s.Type == StoredShortcut.TypeSkill && entity.KnownSkills.TryGetValue(s.Id, out int lvl) && lvl != s.Level)
@@ -97,7 +105,11 @@ public sealed partial class ZoneWorld
                 return Current(e, worldSlot, error);
 
             if (type == StoredShortcut.TypeItem)
-                row = row with { Level = 0 };
+            {
+                // Persist itemId in Level so LoadShortcuts can rebind after a stack is emptied/restocked.
+                int itemId = e.Inventory?.Find(id)?.ItemId ?? 0;
+                row = row with { Level = itemId };
+            }
             else if (type == StoredShortcut.TypeSkill)
                 row = row with { Level = knownLevel };
 
@@ -126,4 +138,15 @@ public sealed partial class ZoneWorld
         e.Shortcuts.TryGetValue(worldSlot, out var existing)
             ? new ShortcutReply(ToProtocol(existing), null, error)
             : new ShortcutReply(null, worldSlot, error);
+
+    /// <summary>
+    /// When an ITEM shortcut's objectId is gone, rebind via Level (stored itemId) to a live bag stack.
+    /// </summary>
+    static StoredShortcut? RemapItemShortcut(ZoneEntity entity, StoredShortcut stale)
+    {
+        if (entity.Inventory == null || stale.Level <= 0)
+            return null;
+        var stack = entity.Inventory.FindByItemId(stale.Level);
+        return stack == null ? null : stale with { Id = stack.ObjectId };
+    }
 }

@@ -190,6 +190,88 @@ public static partial class ZoneCombat
     }
 
     /// <summary>
+    /// Mobius <c>Formulas.calcGeneralTraitBonus</c> for type=3 (POISON/HOLD/BLEED/SHOCK/DERANGEMENT/…):
+    /// <c>(attackTrait − defenceTrait) + 1</c> clamped to [0.05, 2]. Missing side defaults to 1.
+    /// Jewelry <c>DefenceTrait</c> passives land here (Queen Ant poison/hold, Antharas bleed/shock, …).
+    /// </summary>
+    public static double GeneralResistanceBonus(
+        IReadOnlyDictionary<string, double>? attackTraits,
+        IReadOnlyDictionary<string, double>? defenceTraits,
+        string trait)
+    {
+        if (string.IsNullOrWhiteSpace(trait))
+            return 1d;
+        string key = trait.Trim().ToLowerInvariant();
+        // Mobius BLEED trait vs jewellery "bleed" DefenceTrait key.
+        if (key is "bleeding")
+            key = "bleed";
+        double attack = 1d;
+        double defence = 1d;
+        attackTraits?.TryGetValue(key, out attack);
+        if (attack <= 0)
+            attack = 1d;
+        defenceTraits?.TryGetValue(key, out defence);
+        if (defence <= 0)
+            defence = 1d;
+        return Math.Clamp((attack - defence) + 1d, 0.05, 2d);
+    }
+
+    /// <summary>Mobius Character.ini defaults for abnormal land clamp.</summary>
+    public const int MinAbnormalSuccessRate = 10;
+    public const int MaxAbnormalSuccessRate = 90;
+
+    /// <summary>
+    /// Mobius <c>Formulas.calcEffectSuccess</c> land chance (0..100) before the Rnd roll.
+    /// <paramref name="activateRate"/> −1 or empty <paramref name="basicProperty"/> → 100 (always).
+    /// </summary>
+    public static double DebuffLandChance(
+        int activateRate,
+        string? basicProperty,
+        int magicLevel,
+        int lvlBonusRate,
+        int targetLevel,
+        int targetBaseStat,
+        double traitMod,
+        double mAtkMod = 1d,
+        double elementMod = 1d,
+        double buffDebuffMod = 1d,
+        int minChance = MinAbnormalSuccessRate,
+        int maxChance = MaxAbnormalSuccessRate)
+    {
+        if (activateRate < 0 || string.IsNullOrWhiteSpace(basicProperty))
+            return 100d;
+        int ml = magicLevel <= 0 ? targetLevel + 3 : magicLevel;
+        int bonus = Math.Max(1, lvlBonusRate);
+        double baseMod = (((((ml - targetLevel) + 3) * bonus) + activateRate) + 30.0) - targetBaseStat;
+        double rate = baseMod * elementMod * traitMod * mAtkMod * buffDebuffMod;
+        if (traitMod <= 0)
+            return 0d;
+        return Math.Clamp(rate, minChance, maxChance);
+    }
+
+    /// <summary>Mobius <c>calcEffectSuccess</c> Rnd: success when <c>Rnd(100) &lt; chance</c>.</summary>
+    public static bool RollDebuffLand(Random rnd, double chancePercent) =>
+        rnd.Next(100) < chancePercent;
+
+    /// <summary>
+    /// Mobius <c>Formulas.calcCancelSuccess</c>: rate × (1 + (cancelMl − buffMl)/100) clamped to abnormal min/max.
+    /// </summary>
+    public static bool RollCancelSuccess(
+        Random rnd,
+        int rate,
+        int cancelMagicLevel,
+        int buffMagicLevel,
+        int minChance = MinAbnormalSuccessRate,
+        int maxChance = MaxAbnormalSuccessRate)
+    {
+        double chance = rate * (buffMagicLevel > 0
+            ? 1d + (cancelMagicLevel - buffMagicLevel) / 100d
+            : 1d);
+        int clamped = (int)Math.Clamp(chance, minChance, maxChance);
+        return rnd.Next(100) < clamped;
+    }
+
+    /// <summary>
     /// Mobius <c>Formulas.calcAttackTraitBonus</c>: weapon trait × product of type-2 weakness bonuses.
     /// </summary>
     public static double AttackTraitBonus(

@@ -131,6 +131,13 @@ public sealed partial class ZoneWorld
     internal static Dictionary<int, int> PassiveSkillLevels(ZoneEntity player) =>
         PlayerPassiveSources.Merge(player.KnownSkills, player.ClanSkills, player.GearSkills);
 
+    /// <summary>Mobius player DefenceTrait map from jewelry / set passives (poison, hold, …).</summary>
+    internal IReadOnlyDictionary<string, double>? PlayerDefenceTraits(ZoneEntity player)
+    {
+        RefreshGearSkills(player);
+        return _defenceTraits.Collect(PassiveSkillLevels(player));
+    }
+
     /// <summary>
     /// Rebuild ephemeral <see cref="ZoneEntity.GearSkills"/> from equipped item_skill rows and complete armor sets
     /// (Mobius Inventory temporary skills). Safe to call often — clears and refills the map.

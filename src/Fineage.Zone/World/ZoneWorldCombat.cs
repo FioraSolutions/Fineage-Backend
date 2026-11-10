@@ -125,6 +125,9 @@ public sealed partial class ZoneWorld
                 AttributeIds = [InterludeStatus.MaxHp, InterludeStatus.CurHp],
                 Values = [target.MaxHp, target.CurHp]
             });
+            // Mobius PartySpelled on setTarget — TargetStatus icons (debuffs + spoil mark).
+            if (target.Abnormals.Count > 0 || target.SpoilerObjectId != 0)
+                NetBridge.FanoutAbnormalStatusUpdate(self, AbnormalFor(target));
         }
 
         // Net has no MyTargetSelected opcode: TargetSelected (0x030F) is its self-side mirror, so it carries the

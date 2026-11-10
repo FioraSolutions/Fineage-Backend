@@ -395,6 +395,16 @@ public sealed class PostgresAccountStore : IAccountStore, IDisposable
                 tx.Commit();
             });
 
+    public bool TryReplaceEffects(string account, int characterId, IReadOnlyList<StoredEffect> effects) =>
+        RunSilent(
+            () => _inner.TryReplaceEffects(account, characterId, effects),
+            conn =>
+            {
+                using var tx = conn.BeginTransaction();
+                NormalizedStoreWriter.ReplaceEffects(conn, tx, characterId, effects);
+                tx.Commit();
+            });
+
     public bool TryReplaceKnownRecipes(string account, int characterId, IReadOnlyList<int> recipeIds) =>
         // Recipe book rows: JSON mirror for now; normalized table follow-up (#281).
         _inner.TryReplaceKnownRecipes(account, characterId, recipeIds);
