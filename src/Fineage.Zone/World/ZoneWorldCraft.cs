@@ -12,16 +12,13 @@ namespace Fineage.Zone.World;
 /// </summary>
 public sealed partial class ZoneWorld
 {
-    public async Task<string?> TryRecipeBookOpenAsync(ZoneSession session, RecipeBookOpenMsg request, CancellationToken ct)
+    public Task<string?> TryRecipeBookOpenAsync(ZoneSession session, RecipeBookOpenMsg request, CancellationToken ct)
     {
         if (request == null)
-            return "bad_request";
+            return Task.FromResult<string?>("bad_request");
         if (!session.InWorld)
-            return "world";
-        string? error;
-        lock (_gate)
-            error = TryRecipeBookOpen(session, request);
-        return error;
+            return Task.FromResult<string?>("world");
+        return Task.FromResult(WithDeferredInventoryPersist(() => TryRecipeBookOpen(session, request)));
     }
 
     public Task<string?> TryRecipeMakeSelfAsync(ZoneSession session, RecipeMakeSelfMsg request, CancellationToken ct)
