@@ -20,7 +20,9 @@ public sealed class PostgresAccountStore : IAccountStore, IDisposable
     {
         _dataSource = dataSource;
         _inner = inner;
-        _inner.AfterSaveSnapshot = PersistSnapshot;
+        // Backup JSON only — never UpsertFromSnapshot here (Claude B9 Login residual).
+        // Character-domain SQL is written by RunSilent / TryAddCharacter paths.
+        _inner.AfterSaveSnapshot = WriteSnapshotBackup;
     }
 
     public static PostgresAccountStore Open(string connectionString)
@@ -39,7 +41,7 @@ public sealed class PostgresAccountStore : IAccountStore, IDisposable
             // from store_snapshot on every Open would let a stale Login/Zone JSON wipe live rows
             // (Claude B9). Bootstrap only when the SQL side is empty.
             if (!store.HasNormalizedCharacterRows())
-                store.PersistSnapshot(inner.ExportSnapshot());
+                store.BackfillNormalizedFromSnapshot();
             return store;
         }
         catch
@@ -52,7 +54,16 @@ public sealed class PostgresAccountStore : IAccountStore, IDisposable
     /// <summary>Re-project normalized tables from the current in-memory snapshot (CLI / recovery).</summary>
     public void BackfillNormalizedFromSnapshot()
     {
-        PersistSnapshot(_inner.ExportSnapshot());
+        string snapshotJson = _inner.ExportSnapshot();
+        using var _ = JsonDocument.Parse(snapshotJson);
+        lock (_persistGate)
+        {
+            using var conn = _dataSource.OpenConnection();
+            using var tx = conn.BeginTransaction();
+            UpsertSnapshotRow(conn, tx, snapshotJson);
+            NormalizedStoreWriter.UpsertFromSnapshot(conn, tx, snapshotJson);
+            tx.Commit();
+        }
     }
 
     public void Dispose() => _dataSource.Dispose();
@@ -172,32 +183,36 @@ public sealed class PostgresAccountStore : IAccountStore, IDisposable
         return cmd.ExecuteScalar() as string;
     }
 
-    void PersistSnapshot(string snapshotJson)
+    /// <summary>
+    /// Writes <c>store_snapshot</c> backup JSON only. Does not reproject normalized character tables —
+    /// Login’s in-memory graph can lag Zone hot-path SQL (Claude B9).
+    /// </summary>
+    void WriteSnapshotBackup(string snapshotJson)
     {
         using var _ = JsonDocument.Parse(snapshotJson);
-
         lock (_persistGate)
         {
             using var conn = _dataSource.OpenConnection();
             using var tx = conn.BeginTransaction();
-            using (var upsert = conn.CreateCommand())
-            {
-                upsert.Transaction = tx;
-                upsert.CommandText =
-                    """
-                    INSERT INTO store_snapshot (id, version, payload, updated_at)
-                    VALUES (1, 1, @payload::jsonb, now())
-                    ON CONFLICT (id) DO UPDATE
-                    SET payload = excluded.payload,
-                        updated_at = now();
-                    """;
-                upsert.Parameters.AddWithValue("payload", snapshotJson);
-                upsert.ExecuteNonQuery();
-            }
-
-            NormalizedStoreWriter.UpsertFromSnapshot(conn, tx, snapshotJson);
+            UpsertSnapshotRow(conn, tx, snapshotJson);
             tx.Commit();
         }
+    }
+
+    static void UpsertSnapshotRow(NpgsqlConnection conn, NpgsqlTransaction tx, string snapshotJson)
+    {
+        using var upsert = conn.CreateCommand();
+        upsert.Transaction = tx;
+        upsert.CommandText =
+            """
+            INSERT INTO store_snapshot (id, version, payload, updated_at)
+            VALUES (1, 1, @payload::jsonb, now())
+            ON CONFLICT (id) DO UPDATE
+            SET payload = excluded.payload,
+                updated_at = now();
+            """;
+        upsert.Parameters.AddWithValue("payload", snapshotJson);
+        upsert.ExecuteNonQuery();
     }
 
     bool RunSilent(Func<bool> mutation, Action<NpgsqlConnection> sql)
@@ -271,10 +286,39 @@ public sealed class PostgresAccountStore : IAccountStore, IDisposable
         int sp = 0,
         long adena = 0,
         string title = "",
-        int? maxCharacters = null) =>
-        _inner.TryAddCharacter(
-            account, name, classId, race, sex, out created, items, createdAt, now,
-            hairStyle, hairColor, face, hasPosition, x, y, z, level, maxHp, hp, maxMp, mp, sp, adena, title, maxCharacters);
+        int? maxCharacters = null)
+    {
+        // Memory create without AfterSaveSnapshot, then backup JSON + single-character SQL upsert.
+        // Full UpsertFromSnapshot would let Login’s stale bag wipe Zone inventory SoT (B9).
+        bool previous = _inner.EmitSnapshots;
+        _inner.EmitSnapshots = false;
+        CreateCharacterStatus status;
+        try
+        {
+            status = _inner.TryAddCharacter(
+                account, name, classId, race, sex, out created, items, createdAt, now,
+                hairStyle, hairColor, face, hasPosition, x, y, z, level, maxHp, hp, maxMp, mp, sp, adena, title,
+                maxCharacters);
+        }
+        finally
+        {
+            _inner.EmitSnapshots = previous;
+        }
+
+        if (status != CreateCharacterStatus.Ok || created == null)
+            return status;
+
+        WriteSnapshotBackup(_inner.ExportSnapshot());
+        lock (_persistGate)
+        {
+            using var conn = _dataSource.OpenConnection();
+            using var tx = conn.BeginTransaction();
+            NormalizedStoreWriter.UpsertCharacterRecord(conn, tx, created);
+            tx.Commit();
+        }
+
+        return status;
+    }
 
     public bool TryReplaceItems(string account, int characterId, IReadOnlyList<StoredItem> items) =>
         RunSilent(

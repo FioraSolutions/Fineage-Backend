@@ -207,4 +207,36 @@ public class PostgresNormalizedStoreTests
         Assert.Equal(57, row.Items![0].ItemId);
         Assert.Equal(100, row.Items[0].Count);
     }
+
+    [Fact]
+    public void Login_snapshot_backup_does_not_reproject_over_zone_inventory_rows()
+    {
+        string? url = ConnectionString();
+        if (url == null)
+            return;
+
+        string suffix = Guid.NewGuid().ToString("n")[..8];
+        string account = "pgbak" + suffix;
+        using var store = PostgresAccountStore.Open(url);
+        var service = new LoginService(store, new HandoffTokens(HandoffTokens.DefaultSecret));
+        Assert.True(service.Register(account, "secret1").Ok);
+        var created = service.CreateHuman(account, "Bk" + suffix, HumanClasses.Fighter);
+        Assert.True(created.Ok, created.Message);
+        int characterId = created.Value!.Id;
+
+        Assert.True(store.TryReplaceItems(account, characterId,
+        [
+            new StoredItem(57, 42, EquippedSlot: -1)
+        ]));
+
+        // Login mutation that still emits AfterSaveSnapshot (friends JSON mirror) must not
+        // UpsertFromSnapshot and wipe the Zone hot-path inventory SoT.
+        Assert.True(store.TryReplaceFriends(account, characterId, []));
+
+        var row = store.FindById(account, characterId);
+        Assert.NotNull(row);
+        Assert.Single(row!.Items!);
+        Assert.Equal(57, row.Items![0].ItemId);
+        Assert.Equal(42, row.Items[0].Count);
+    }
 }
