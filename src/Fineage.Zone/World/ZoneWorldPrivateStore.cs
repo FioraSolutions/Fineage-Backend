@@ -36,49 +36,42 @@ public sealed class ManufactureListing
 /// </summary>
 public sealed partial class ZoneWorld
 {
-    public async Task<string?> TrySetPrivateStoreSellAsync(ZoneSession session, SetPrivateStoreSellMsg request, CancellationToken ct)
+    public Task<string?> TrySetPrivateStoreSellAsync(ZoneSession session, SetPrivateStoreSellMsg request, CancellationToken ct)
     {
         if (request == null)
-            return "bad_request";
+            return Task.FromResult<string?>("bad_request");
         if (!session.InWorld)
-            return "world";
-        string? error;
-        lock (_gate)
-            error = TrySetPrivateStoreSell(session, request);
-        return error;
+            return Task.FromResult<string?>("world");
+        return Task.FromResult(WithDeferredInventoryPersist(() => TrySetPrivateStoreSell(session, request)));
     }
 
-    public async Task<string?> TrySetPrivateStoreBuyAsync(ZoneSession session, SetPrivateStoreBuyMsg request, CancellationToken ct)
+    public Task<string?> TrySetPrivateStoreBuyAsync(ZoneSession session, SetPrivateStoreBuyMsg request, CancellationToken ct)
     {
         if (request == null)
-            return "bad_request";
+            return Task.FromResult<string?>("bad_request");
         if (!session.InWorld)
-            return "world";
-        string? error;
-        lock (_gate)
-            error = TrySetPrivateStoreBuy(session, request);
-        return error;
+            return Task.FromResult<string?>("world");
+        return Task.FromResult(WithDeferredInventoryPersist(() => TrySetPrivateStoreBuy(session, request)));
     }
 
-    public async Task<string?> TryPrivateStoreQuitAsync(ZoneSession session, CancellationToken ct)
+    public Task<string?> TryPrivateStoreQuitAsync(ZoneSession session, CancellationToken ct)
     {
         if (!session.InWorld)
-            return "world";
-        lock (_gate)
+            return Task.FromResult<string?>("world");
+        return Task.FromResult(WithDeferredInventoryPersist(() =>
+        {
             ClosePrivateStore(session.ObjectId, standUp: false);
-        return null;
+            return (string?)null;
+        }));
     }
 
-    public async Task<string?> TryPrivateStoreListAsync(ZoneSession session, PrivateStoreListRequestMsg request, CancellationToken ct)
+    public Task<string?> TryPrivateStoreListAsync(ZoneSession session, PrivateStoreListRequestMsg request, CancellationToken ct)
     {
         if (request == null)
-            return "bad_request";
+            return Task.FromResult<string?>("bad_request");
         if (!session.InWorld)
-            return "world";
-        string? error;
-        lock (_gate)
-            error = TryPrivateStoreList(session, request);
-        return error;
+            return Task.FromResult<string?>("world");
+        return Task.FromResult(WithDeferredInventoryPersist(() => TryPrivateStoreList(session, request)));
     }
 
     public Task<string?> TryPrivateStoreBuyAsync(ZoneSession session, PrivateStoreBuyMsg request, CancellationToken ct)

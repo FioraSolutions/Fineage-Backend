@@ -28,45 +28,36 @@ public sealed partial class ZoneWorld
         public int EnchantLevel { get; set; }
     }
 
-    public async Task<string?> TryTradeRequestAsync(ZoneSession session, TradeRequestMsg request, CancellationToken ct)
+    public Task<string?> TryTradeRequestAsync(ZoneSession session, TradeRequestMsg request, CancellationToken ct)
     {
         if (request == null)
-            return "bad_request";
+            return Task.FromResult<string?>("bad_request");
         if (!session.InWorld)
-            return "world";
+            return Task.FromResult<string?>("world");
         if (request.TargetObjectId == session.ObjectId)
-            return "bad_request";
+            return Task.FromResult<string?>("bad_request");
 
-        string? error;
-        lock (_gate)
-            error = TryTradeRequest(session, request);
-        return error;
+        return Task.FromResult(WithDeferredInventoryPersist(() => TryTradeRequest(session, request)));
     }
 
-    public async Task<string?> TryTradeAnswerAsync(ZoneSession session, TradeAnswerRequestMsg answer, CancellationToken ct)
+    public Task<string?> TryTradeAnswerAsync(ZoneSession session, TradeAnswerRequestMsg answer, CancellationToken ct)
     {
         if (answer == null)
-            return "bad_request";
+            return Task.FromResult<string?>("bad_request");
         if (!session.InWorld)
-            return "world";
+            return Task.FromResult<string?>("world");
 
-        string? error;
-        lock (_gate)
-            error = TryTradeAnswer(session, answer);
-        return error;
+        return Task.FromResult(WithDeferredInventoryPersist(() => TryTradeAnswer(session, answer)));
     }
 
-    public async Task<string?> TryTradeAddItemAsync(ZoneSession session, TradeAddItemRequestMsg add, CancellationToken ct)
+    public Task<string?> TryTradeAddItemAsync(ZoneSession session, TradeAddItemRequestMsg add, CancellationToken ct)
     {
         if (add == null)
-            return "bad_request";
+            return Task.FromResult<string?>("bad_request");
         if (!session.InWorld)
-            return "world";
+            return Task.FromResult<string?>("world");
 
-        string? error;
-        lock (_gate)
-            error = TryTradeAddItem(session, add);
-        return error;
+        return Task.FromResult(WithDeferredInventoryPersist(() => TryTradeAddItem(session, add)));
     }
 
     public Task<string?> TryTradeDoneAsync(ZoneSession session, TradeDoneRequestMsg done, CancellationToken ct)
