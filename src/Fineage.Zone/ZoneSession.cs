@@ -60,6 +60,7 @@ public sealed class ZoneSession
     /// <summary>Mobius AI_INTENTION_CAST after moveToPawn: skill to fire once the server-driven approach arrives.</summary>
     public int PendingCastSkillId { get; set; }
     public int PendingCastTargetId { get; set; }
+    public bool PendingCastCtrlPressed { get; set; }
     public long PendingCastAtUnixMs { get; set; }
 
     /// <summary>Mobius saveNextIntention(MOVE_TO): move order received mid-cast, run when the cast ends.</summary>
@@ -108,6 +109,7 @@ public sealed class ZoneSession
         NextAutoAttackUnixMs = 0;
         PendingCastSkillId = 0;
         PendingCastTargetId = 0;
+        PendingCastCtrlPressed = false;
         PendingCastAtUnixMs = 0;
         QueuedMove = null;
         SitOnArrive = false;

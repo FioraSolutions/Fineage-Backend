@@ -280,6 +280,12 @@ public sealed partial class ZoneWorld
         if (stored.Items == null)
             return _game.CreateStarterInventory(session.ClassId, _itemIds);
 
+        // Drop unknown templates with a log — Restore already skips them so EnterWorld stays up.
+        foreach (var row in stored.Items)
+        {
+            if (!_game.Items.TryGet(row.ItemId, out _))
+                ZoneLog.Info($"inventory skip unknown item={row.ItemId} object={row.ObjectId} char={session.ObjectId}");
+        }
         return CharacterInventory.Restore(_game.Items, _itemIds, stored.Items);
     }
 

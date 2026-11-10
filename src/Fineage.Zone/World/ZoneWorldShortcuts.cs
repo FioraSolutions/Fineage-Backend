@@ -57,8 +57,24 @@ public sealed partial class ZoneWorld
             SaveShortcuts(entity.Session, entity);
     }
 
-    void SaveShortcuts(ZoneSession session, ZoneEntity entity) =>
-        _persist.ReplaceShortcuts(session.Account, session.ObjectId, entity.Shortcuts.Values.ToList());
+    void SaveShortcuts(ZoneSession session, ZoneEntity entity)
+    {
+        // Persist immediately (Mobius registerShortCut). Log when the store refuses the write —
+        // silent false left players with a painted hotbar that vanished on relog.
+        var rows = entity.Shortcuts.Values.ToList();
+        if (!_persist.Enabled)
+            return;
+        try
+        {
+            if (!_persist.ReplaceShortcuts(session.Account, session.ObjectId, rows))
+                ZoneLog.Warn(
+                    $"shortcut persist refused account={session.Account} char={session.ObjectId} count={rows.Count}");
+        }
+        catch (Exception ex)
+        {
+            ZoneLog.Warn($"shortcut persist failed account={session.Account} char={session.ObjectId}: {ex.Message}");
+        }
+    }
 
     static ShortCutMsg ToProtocol(StoredShortcut s) =>
         new() { Type = s.Type, Slot = s.WorldSlot, Id = s.Id, Level = s.Level };

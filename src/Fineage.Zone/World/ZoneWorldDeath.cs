@@ -50,9 +50,18 @@ public sealed partial class ZoneWorld
             return "world";
         if (!player.Dead)
             return DeathProtocol.NotDead;
+
+        if (action == DeathProtocol.AcceptSkillResurrection)
+            return AcceptSkillResurrection(player);
+        if (action == DeathProtocol.DeclineSkillResurrection)
+        {
+            ClearReviveOffer(player);
+            return null;
+        }
         if (action != DeathProtocol.ReviveToVillage)
             return DeathProtocol.Unsupported;
 
+        ClearReviveOffer(player);
         ReviveAtVillage(player);
         ZoneLog.Info($"revive object={player.ObjectId} -> {TalkingIslandRestart.X},{TalkingIslandRestart.Y},{TalkingIslandRestart.Z}");
         return null;
@@ -74,6 +83,7 @@ public sealed partial class ZoneWorld
         player.CombatUntilUnixMs = 0;
         player.PvpFlagged = false;
         player.PvpFlagUntilMs = 0;
+        ClearReviveOffer(player);
 
         if (player.Session != null)
             player.Session.SelectedTargetId = 0;
@@ -92,7 +102,72 @@ public sealed partial class ZoneWorld
 
         FanoutPlayerDeath(player, killerObjectId);
         if (player.Session != null)
+        {
             SaveVitals(player.Session, player);
+            // Death exp/level must land in characters.exp — SaveVitals only writes HP/MP.
+            _persist.SaveProgress(
+                player.Session.Account,
+                player.Session.ObjectId,
+                player.Level,
+                player.Exp,
+                player.Sp,
+                player.MaxHp,
+                player.CurHp,
+                player.MaxMp,
+                player.CurMp);
+        }
+    }
+
+    static void ClearReviveOffer(ZoneEntity player)
+    {
+        player.ReviveRequested = false;
+        player.RevivePower = 0;
+    }
+
+    /// <summary>
+    /// Mobius <c>Player.reviveAnswer(1)</c>: lift death in place with the offered restore percent and return lost exp.
+    /// </summary>
+    string? AcceptSkillResurrection(ZoneEntity player)
+    {
+        if (!player.ReviveRequested)
+            return DeathProtocol.Unsupported;
+
+        double power = player.RevivePower;
+        ClearReviveOffer(player);
+        ReviveInPlace(player, power);
+        ZoneLog.Info($"revive object={player.ObjectId} skill power={power:F1}");
+        return null;
+    }
+
+    /// <summary>
+    /// Mobius <c>Creature.doRevive(revivePower)</c> without a village teleport: bars to RespawnRestore share,
+    /// then <c>restoreExp(power)</c> returns the death-penalty slice.
+    /// </summary>
+    void ReviveInPlace(ZoneEntity player, double revivePower)
+    {
+        player.Dead = false;
+        player.CurHp = RestoreShare(player.CurHp, player.MaxHp, _deathRules.RespawnRestoreHp);
+        player.CurMp = RestoreShare(player.CurMp, player.MaxMp, _deathRules.RespawnRestoreMp);
+        player.Running = true;
+        RestoreExpFromDeath(player, revivePower);
+
+        FanoutRevive(player);
+        if (player.Session != null)
+        {
+            SelfUserInfo(player);
+            FanoutVitals(player, PlayerVitalsStatus(player));
+            SaveVitals(player.Session, player);
+            _persist.SaveProgress(
+                player.Session.Account,
+                player.Session.ObjectId,
+                player.Level,
+                player.Exp,
+                player.Sp,
+                player.MaxHp,
+                player.CurHp,
+                player.MaxMp,
+                player.CurMp);
+        }
     }
 
     /// <summary>

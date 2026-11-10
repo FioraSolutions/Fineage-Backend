@@ -18,7 +18,7 @@ public static class DropRoller
             if (item == null)
                 continue;
 
-            int count = RollCount(item.Min, item.Max, rates.DeathDropAmountMultiplier, random);
+            int count = RollCount(item.Min, item.Max, AmountMultiplier(item.ItemId, rates.DeathDropAmountMultiplier, rates), random);
             if (count > 0)
                 stacks.Add(new DropStack(item.ItemId, count));
         }
@@ -40,12 +40,20 @@ public static class DropRoller
             if (!PassPercent(item.Chance * rates.CorpseDropChanceMultiplier, random))
                 continue;
 
-            int count = RollCount(item.Min, item.Max, rates.CorpseDropAmountMultiplier, random);
+            int count = RollCount(item.Min, item.Max, AmountMultiplier(item.ItemId, rates.CorpseDropAmountMultiplier, rates), random);
             if (count > 0)
                 stacks.Add(new DropStack(item.ItemId, count));
         }
 
         return stacks;
+    }
+
+    static double AmountMultiplier(int itemId, double baseAmount, DropRates rates)
+    {
+        double mul = baseAmount;
+        if (itemId == ZoneRates.AdenaItemId && rates.AdenaAmountMultiplier > 0)
+            mul *= rates.AdenaAmountMultiplier;
+        return mul;
     }
 
     static DropItemDefinition? PickWeighted(IReadOnlyList<DropItemDefinition> items, Random random)

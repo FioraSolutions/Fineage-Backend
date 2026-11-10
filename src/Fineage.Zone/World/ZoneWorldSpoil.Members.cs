@@ -122,20 +122,21 @@ public sealed partial class ZoneWorld
             return null; // Sweeper conditions (343/683/1247) cost nothing
 
         player.CurMp = Math.Max(0, player.CurMp - levelData.MpConsume);
-        if (template.ReuseDelayMs > 0)
-            player.SkillReuseUntilMs[request.SkillId] = now + template.ReuseDelayMs;
-        var cast = BuildCast(player, target, request.SkillId, level, template);
+        var (hitMs, reuseMs) = ScaledSkillTimes(player, template);
+        if (reuseMs > 0)
+            player.SkillReuseUntilMs[request.SkillId] = now + reuseMs;
+        var cast = BuildCast(player, target, request.SkillId, level, hitMs, reuseMs);
         StopForCast(player, target, now);
         FanoutSkill(player, target, cast, targetStatus: null, CasterMpStatus(player));
         if (!sweep)
             player.CombatUntilUnixMs = now + ClanProtocol.CombatStanceMillis;
-        player.CastingUntilMs = now + Math.Max(0, template.HitTimeMs);
+        player.CastingUntilMs = now + Math.Max(0, hitMs);
         session.SelectedTargetId = sweep ? 0 : targetId;
         if (!sweep)
         {
             int skillId = request.SkillId;
             // Mobius Spoil effect (instant, physical skill: not interrupted by hits) at hitTime 1.8 s.
-            ScheduleEffect(player, target, template, level, now, template.HitTimeMs,
+            ScheduleEffect(player, target, template, level, now, hitMs,
                 (t, _) => ApplySpoil(session, player, t, forced: false, skillId, level));
         }
         return null;

@@ -116,6 +116,10 @@ public sealed class UserInfoMsg
     public int CurrentWeight { get; set; }
     /// <summary>Mobius getMaxLoad (CON bonus × 69000 × AltWeightLimit, then weightLimit passives).</summary>
     public int MaxWeight { get; set; }
+    /// <summary>Mobius karma — red PK name while &gt; 0.</summary>
+    public int Karma { get; set; }
+    /// <summary>Mobius PvP flag — purple name while flagged (0/1).</summary>
+    public byte PvpFlag { get; set; }
 }
 
 /// <summary>Opcode <see cref="MsgType.DeleteObject"/> (1007). Left knownlist.</summary>

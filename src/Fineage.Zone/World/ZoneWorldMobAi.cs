@@ -157,6 +157,17 @@ public sealed partial class ZoneWorld
                 FleeFrom(npc, player, now);
                 continue;
             }
+            // Sleep / stun / root / hold / paralyze: stop chase and do not swing (Mobius EffectFlag).
+            if (IsImmobilized(npc))
+            {
+                if (npc.Chasing || npc.MoveActive)
+                {
+                    npc.Chasing = false;
+                    StopTimedMove(npc);
+                    BroadcastNpcMove(npc, npc.X, npc.Y, npc.Z);
+                }
+                continue;
+            }
             // Mobius thinkAttack: no LOS to the most hated → moveTo(target) instead of swinging.
             if (!ZoneCombat.InMobReach(npc.X, npc.Y, player.X, player.Y, ZoneCombat.MobAttackReach(npc.AttackRange)) ||
                 !CanSeeTarget(npc, player))

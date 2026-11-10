@@ -57,7 +57,8 @@ public sealed class CombatPacketHandler
             zoneSession,
             use.SkillId,
             use.TargetObjectId,
-            ct).ConfigureAwait(false);
+            ct,
+            use.CtrlPressed).ConfigureAwait(false);
         if (error != null)
             await _reject(conn, error, "UseSkill failed.", ct).ConfigureAwait(false);
     }

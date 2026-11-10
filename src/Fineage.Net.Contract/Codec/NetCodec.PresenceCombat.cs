@@ -31,6 +31,8 @@ namespace Fineage.Net.Contract
             w.WriteInt32(m.Level);
             w.WriteInt32(m.MaxHp);
             w.WriteInt32(m.PAtkSpd);
+            w.WriteInt32(m.Karma);
+            w.WriteByte(m.PvpFlag);
         });
 
         public static EntitySpawnMsg DecodeEntitySpawn(ReadOnlySpan<byte> p)
@@ -67,6 +69,10 @@ namespace Fineage.Net.Contract
                 msg.MaxHp = r.ReadInt32();
             if (r.Remaining > 0)
                 msg.PAtkSpd = r.ReadInt32();
+            if (r.Remaining > 0)
+                msg.Karma = r.ReadInt32();
+            if (r.Remaining > 0)
+                msg.PvpFlag = r.ReadByte();
             return msg;
         }
 
@@ -121,6 +127,8 @@ namespace Fineage.Net.Contract
                 w.WriteInt32(slots[i]?.ItemId ?? 0);
                 w.WriteInt32(slots[i]?.EnchantLevel ?? 0);
             }
+            w.WriteInt32(m.Karma);
+            w.WriteByte(m.PvpFlag);
         });
 
         public static UserInfoNetMsg DecodeUserInfo(ReadOnlySpan<byte> p)
@@ -177,6 +185,10 @@ namespace Fineage.Net.Contract
             for (int i = 0; i < n; i++)
                 slots[i] = new PaperdollSlotNet { ObjectId = r.ReadInt32(), ItemId = r.ReadInt32(), EnchantLevel = r.ReadInt32() };
             m.Paperdoll = slots;
+            if (r.Remaining > 0)
+                m.Karma = r.ReadInt32();
+            if (r.Remaining > 0)
+                m.PvpFlag = r.ReadByte();
             return m;
         }
 
@@ -1110,6 +1122,7 @@ namespace Fineage.Net.Contract
                 w.WriteInt32(e.Id);
                 w.WriteInt32(e.Value);
                 w.WriteInt32(e.DurationSeconds);
+                w.WriteString(e.Slot ?? "");
             }
         });
 
@@ -1127,7 +1140,8 @@ namespace Fineage.Net.Contract
                 {
                     Id = r.ReadInt32(),
                     Value = r.ReadInt32(),
-                    DurationSeconds = r.ReadInt32()
+                    DurationSeconds = r.ReadInt32(),
+                    Slot = r.ReadString()
                 };
             }
 

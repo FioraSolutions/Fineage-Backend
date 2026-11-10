@@ -259,7 +259,11 @@ public sealed partial class ZoneWorld
             settled.Add(id);
             var share = KillRewardFormula.CalculateExpAndSp(
                 attacker.Level, npc.Level, rewardExp, rewardSp, dealt, totalDamage, maxLevelDifference);
-            SendKillReward(attacker.Session, attacker, share.Exp, share.Sp);
+            SendKillReward(
+                attacker.Session,
+                attacker,
+                share.Exp * _rates.RateXp,
+                share.Sp * _rates.RateSp);
         }
     }
 
@@ -302,8 +306,8 @@ public sealed partial class ZoneWorld
         var pool = KillRewardFormula.CalculateExpAndSp(
             partyLevel, npc.Level, rewardExp, rewardSp, partyDamage, totalDamage, maxLevelDifference);
         double bonus = KillRewardFormula.PartyBonus(valid.Count);
-        double expPool = pool.Exp * partyMul * bonus;
-        double spPool = pool.Sp * partyMul * bonus;
+        double expPool = pool.Exp * partyMul * bonus * _rates.RateXp;
+        double spPool = pool.Sp * partyMul * bonus * _rates.RateSp;
 
         long sqLevelSum = 0;
         foreach (var member in valid)

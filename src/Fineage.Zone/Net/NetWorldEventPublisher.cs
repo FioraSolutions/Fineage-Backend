@@ -236,7 +236,9 @@ sealed partial class NetWorldEventPublisher : IWorldEventPublisher
             ClanId = info.ClanId,
             CurrentWeight = info.CurrentWeight,
             MaxWeight = info.MaxWeight,
-            Paperdoll = slots
+            Paperdoll = slots,
+            Karma = info.Karma,
+            PvpFlag = info.PvpFlag
         };
     }
 
@@ -466,7 +468,8 @@ sealed partial class NetWorldEventPublisher : IWorldEventPublisher
             {
                 Id = src.Id,
                 Value = src.Value,
-                DurationSeconds = src.DurationSeconds
+                DurationSeconds = src.DurationSeconds,
+                Slot = src.Slot ?? ""
             };
         }
         var payload = NetCodec.EncodeAbnormalStatusUpdate(new AbnormalStatusUpdateNetMsg

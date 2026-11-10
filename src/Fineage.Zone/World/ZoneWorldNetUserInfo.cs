@@ -86,7 +86,9 @@ public sealed partial class ZoneWorld
             ClanId = e.ClanId,
             CurrentWeight = (int)Math.Clamp(CurrentLoadOf(e), 0, int.MaxValue),
             MaxWeight = MaxLoadOf(e),
-            Paperdoll = slots
+            Paperdoll = slots,
+            Karma = e.Karma,
+            PvpFlag = e.PvpFlagged ? (byte)1 : (byte)0
         };
     }
 

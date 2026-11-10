@@ -13,6 +13,9 @@ public sealed record PendingSkillHit(int TargetId, int Damage, long DueUnixMs, S
     public int EscapeRange { get; init; }
     /// <summary>Target must be a live NPC (bad skills) or a live player (friendly skills).</summary>
     public bool TargetIsNpc { get; init; }
+
+    /// <summary>Resurrection / corpse skills: deferred effect must land on a dead player (Mobius PC_BODY).</summary>
+    public bool AllowDeadTarget { get; init; }
     /// <summary>ZoneWorld-owned effect delegate (target, now, outbound) run at hitTime.</summary>
     public Delegate? Apply { get; init; }
 }

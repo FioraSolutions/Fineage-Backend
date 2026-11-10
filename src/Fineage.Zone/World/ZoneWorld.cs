@@ -91,6 +91,7 @@ public sealed partial class ZoneWorld
     readonly Random _deathRandom;
     readonly Dictionary<int, ZoneEntity> _byId = [];
     readonly DropCatalog _dropCatalog;
+    readonly ZoneRates _rates;
     readonly DropRates _dropRates;
     readonly object _gate = new();
     /// <summary>
@@ -124,6 +125,7 @@ public sealed partial class ZoneWorld
         bool? expertisePenalty = null,
         SpawnCatalog? spawnCatalog = null,
         DropCatalog? dropCatalog = null,
+        ZoneRates? rates = null,
         DropRates? dropRates = null,
         string? activeMapId = null,
         Func<DateTimeOffset>? clock = null,
@@ -191,7 +193,8 @@ public sealed partial class ZoneWorld
         _expertisePenalty = expertisePenalty ?? ZoneGearSettings.ExpertisePenalty;
         _spawnCatalog = spawnCatalog ?? SpawnCatalog.LoadDefault();
         _dropCatalog = dropCatalog ?? DropCatalog.LoadDefault();
-        _dropRates = dropRates ?? DropRates.Retail;
+        _rates = rates ?? ZoneRates.FromEnvironment();
+        _dropRates = dropRates ?? _rates.AsDropRates();
         _activeMapId = string.IsNullOrWhiteSpace(activeMapId) ? SpawnCatalog.DefaultMapId : activeMapId.Trim();
         _clock = clock ?? (() => DateTimeOffset.UtcNow);
         _enchantRandom = enchantRandom ?? SharedEnchantRandom.Instance;
