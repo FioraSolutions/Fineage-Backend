@@ -17,24 +17,32 @@ namespace Fineage.Zone.Tests;
 public sealed class NetTeleportFanoutTests
 {
     [Fact]
-    public async Task Revive_to_village_fans_one_teleport_with_the_restart_heading()
+    public async Task Revive_to_village_fans_one_teleport_to_the_nearest_town()
     {
         var kit = new NetTestKit();
         var (session, player) = await kit.EnterAsync();
         var (bridge, rec) = NetBridgeRecorder.Create();
         kit.World.NetBridge = bridge;
 
+        int deathX = player.X, deathY = player.Y;
         Assert.Null(await kit.World.TryAdminKillPlayerAsync(session, CancellationToken.None));
         Assert.Null(await kit.World.TryReviveAsync(session, DeathProtocol.ReviveToVillage, CancellationToken.None));
 
         var frames = rec.Of(nameof(IWorldEventPublisher.FanoutTeleportToLocation));
         var only = Assert.Single(frames);
         Assert.Equal(player.ObjectId, (int)only[1]!);
-        Assert.Equal(TalkingIslandRestart.X, (int)only[2]!);
-        Assert.Equal(TalkingIslandRestart.Y, (int)only[3]!);
-        Assert.Equal(TalkingIslandRestart.Z, (int)only[4]!);
-        Assert.Equal(TalkingIslandRestart.Heading, (int)only[5]!);
+        int x = (int)only[2]!, y = (int)only[3]!, z = (int)only[4]!;
+        Assert.Equal(0, (int)only[5]!);
         Assert.Contains(player.ObjectId, Assert.IsAssignableFrom<IReadOnlyList<int>>(only[0]));
+
+        // Mobius teleToLocation(TOWN): map-region of the death cell (elf_town for NetTestKit spawn), not TI hardcode.
+        var regions = MapRegionCatalog.LoadDefault();
+        var region = regions.At(deathX, deathY);
+        Assert.NotNull(region);
+        Assert.Equal("elf_town", region!.Name);
+        Assert.Contains(region.RespawnPoints, pt =>
+            !pt.IsChaotic && pt.Kind == "normal" && pt.X == x && pt.Y == y && pt.Z == z);
+        Assert.NotEqual(TalkingIslandRestart.X, x);
     }
 
     [Fact]

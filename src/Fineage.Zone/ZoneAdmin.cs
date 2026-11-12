@@ -5,12 +5,14 @@ namespace Fineage.Zone;
 
 /// <summary>
 /// Debug admin gate: <c>FINEAGE_ZONE_ADMIN</c> must be on, and the character name must be in
-/// <c>data/admin-characters.json</c> (default: KuK). Used for Mobius-style <c>admin_*</c> bypasses.
+/// <c>data/admin-characters.json</c> (default: KuK). A lone <c>*</c> entry allows any name
+/// (local/dev). Used for Mobius-style <c>admin_*</c> bypasses.
 /// </summary>
 public static class ZoneAdmin
 {
     public const string EnvVar = "FINEAGE_ZONE_ADMIN";
     public const string CharactersFileName = "admin-characters.json";
+    public const string AnyCharacter = "*";
 
     static readonly object Gate = new();
     static HashSet<string>? _names;
@@ -29,13 +31,15 @@ public static class ZoneAdmin
             || token.Equals("yes", StringComparison.OrdinalIgnoreCase);
     }
 
-    /// <summary>True when env admin is on and <paramref name="characterName"/> is allowlisted.</summary>
+    /// <summary>True when env admin is on and <paramref name="characterName"/> is allowlisted (or <c>*</c>).</summary>
     public static bool IsAdminCharacter(string? characterName)
     {
         if (!Enabled || string.IsNullOrWhiteSpace(characterName))
             return false;
         EnsureNamesLoaded();
-        return _names!.Contains(characterName.Trim());
+        if (_names!.Contains(AnyCharacter))
+            return true;
+        return _names.Contains(characterName.Trim());
     }
 
     /// <summary>Test seam: replace allowlist (null restores file load).</summary>

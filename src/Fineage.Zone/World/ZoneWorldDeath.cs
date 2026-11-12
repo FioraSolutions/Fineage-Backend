@@ -62,8 +62,9 @@ public sealed partial class ZoneWorld
             return DeathProtocol.Unsupported;
 
         ClearReviveOffer(player);
-        ReviveAtVillage(player);
-        ZoneLog.Info($"revive object={player.ObjectId} -> {TalkingIslandRestart.X},{TalkingIslandRestart.Y},{TalkingIslandRestart.Z}");
+        var (x, y, z) = TownDestination(player);
+        ReviveAtVillage(player, x, y, z);
+        ZoneLog.Info($"revive object={player.ObjectId} -> {x},{y},{z}");
         return null;
     }
 
@@ -171,11 +172,10 @@ public sealed partial class ZoneWorld
     }
 
     /// <summary>
-    /// Mobius <c>Creature.doRevive</c> (<c>:2524-2553</c>): the revive only lifts the bars to the configured share of
-    /// the maxima when they are still below it — with <c>RespawnRestoreHP = 65</c> and <c>RespawnRestoreMP = 0</c> the
-    /// character comes back on two thirds of the health bar and an empty mana bar, not on full vitals.
+    /// Mobius <c>Creature.doRevive</c> + <c>teleToLocation(TOWN)</c>: bars to RespawnRestore share, then nearest
+    /// map-region town square (same resolver as Scroll of Escape). No Talking Island hardcode.
     /// </summary>
-    void ReviveAtVillage(ZoneEntity player)
+    void ReviveAtVillage(ZoneEntity player, int x, int y, int z)
     {
         player.Dead = false;
         player.CurHp = RestoreShare(player.CurHp, player.MaxHp, _deathRules.RespawnRestoreHp);
@@ -184,8 +184,7 @@ public sealed partial class ZoneWorld
 
         FanoutRevive(player);
         // Relocate fans TeleportToLocation to the owner and every peer that held it in view.
-        Relocate(player, TalkingIslandRestart.X, TalkingIslandRestart.Y, TalkingIslandRestart.Z,
-            heading: TalkingIslandRestart.Heading);
+        Relocate(player, x, y, z, heading: 0);
 
         if (player.Session != null)
         {

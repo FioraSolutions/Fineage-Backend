@@ -76,7 +76,7 @@ After handoff auth, `EnterWorld` runs **one** world join: `ZoneWorld.TryEnterAsy
 
 | Order | Opcode | Payload |
 |-------|--------|---------|
-| 1 | `EntitySpawn` `0x0304` | self player: name, classId, **race/sex**, xyz, speeds |
+| 1 | `EntitySpawn` `0x0304` | self player: name, classId, **race/sex**, xyz, speeds, **MaxHp + CurHp** (CurHp optional wire tail; absent ⇒ full MaxHp) |
 | 2 | `PlayerStats` `0x0305` | level/exp/sp, hp/mp/cp |
 | 3 | `ItemList` `0x030A` | bag + paperdoll rows (`objectId`, `itemId`, `count`, `enchant`, `equippedSlot`) |
 | 4 | `SkillList` `0x030B` | AutoSkills (`skillId`, `level`, `reuseRemainingMs`) |
@@ -92,7 +92,7 @@ V2 MessagePack flushes still go to a discarded stream on the Net path. Net peers
 
 | Event | Opcodes |
 |-------|---------|
-| Enter | Self bootstrap (above). Then `EntitySpawn` for each known **player and NPC** (`IsSelf=false`; NPC `Kind=Npc`, `TemplateId=npcId`). Entrant CharInfo-shaped spawn to Net player peers. |
+| Enter | Self bootstrap (above). Then `EntitySpawn` for each known **player and NPC** (`IsSelf=false`; NPC `Kind=Npc`, `TemplateId=npcId`, **MaxHp + CurHp** so select `StatusUpdate` is not a false HP drop). Entrant CharInfo-shaped spawn to Net player peers. |
 | Move | `MoveState` to self + stayed known Net **players**. Newly visible player/NPC → `EntitySpawn`. Forgotten → `EntityDespawn` `0x030C`. |
 | NPC chase (sim) | `MoveState` to Net watchers that already know the NPC (`INetPresenceBridge`). |
 | Select / Attack | `SelectTarget` `0x030D` → `TargetSelected` `0x030F`. `AttackRequest` `0x030E` → world combat; `AttackState` `0x0310` + `StatusUpdate` `0x0311` via NetBridge (incl. mob swings / hit timer). Approach uses the same MoveState bridge as player move. |

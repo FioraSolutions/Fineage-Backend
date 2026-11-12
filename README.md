@@ -17,7 +17,8 @@ Login issues an HMAC handoff token. The zone on **9777** accepts it in the Net `
 | [`docs/combat-parity.md`](docs/combat-parity.md) | Combat checklist vs Mobius |
 | `docs/*-v2-protocol.md` | Feature **semantics** only; MsgType numbers inside are legacy MessagePack |
 | Client [`Docs/DOC_CANON.md`](https://github.com/FioraSolutions/Fineage/blob/dev/Docs/DOC_CANON.md) | Cross-repo doc triage |
-| Client [`Docs/REFACTOR_PLAN_2026-11.md`](https://github.com/FioraSolutions/Fineage/blob/dev/Docs/REFACTOR_PLAN_2026-11.md) | Harden / Zone modularize plan + GPT review verification |
+| Client [`Docs/REFACTOR_PLAN_2026-11.md`](https://github.com/FioraSolutions/Fineage/blob/dev/Docs/REFACTOR_PLAN_2026-11.md) | Harden / Zone modularize plan + “Agent start here” |
+| [`docs/ZONE_MODULARIZATION.md`](docs/ZONE_MODULARIZATION.md) | **Status Now** for epic [#353](https://github.com/FioraSolutions/Fineage-Backend/issues/353) — what landed, what is next |
 | Client [`Docs/ARCHITECTURE_NET.md`](https://github.com/FioraSolutions/Fineage/blob/dev/Docs/ARCHITECTURE_NET.md) | Target scale (gateway / 20k) — design, not “already shipped” |
 
 Chronicle today: **Interlude (Mobius CT0)**. Near-term program: finish and stabilize Interlude — not High Five. See client [`Docs/DOC_CANON.md`](https://github.com/FioraSolutions/Fineage/blob/dev/Docs/DOC_CANON.md).
@@ -44,7 +45,7 @@ One script starts Postgres (docker), builds, and runs Login+Zone:
 
 Shared `FINEAGE_HANDOFF_SECRET` defaults to `FineageLoginHandoffV1` for this local path. Do not use ad-hoc `dotnet run` for day-to-day play — that fights the script and any old LaunchAgents.
 
-**GM commands (KuK):** the script sets `FINEAGE_ZONE_ADMIN=1` by default. Character name must be in [`data/admin-characters.json`](data/admin-characters.json) (default **KuK**). In chat: `//gmshop`, `//setlevel 80`, `//setclass <id>`, `//give <itemId> [count]`, `//buff` / `//mbuff` / `//fbuff` / `//buff_clear`. Override with `FINEAGE_ZONE_ADMIN=0 ./scripts/run-local-net.sh start` to disable.
+**GM commands:** the script sets `FINEAGE_ZONE_ADMIN=1` by default. Character name must be in [`data/admin-characters.json`](data/admin-characters.json) (`*` = any name for local/dev; use explicit names on shared hosts). In chat: `//gmshop`, `//setlevel 80`, `//setclass <id>`, `//give <itemId> [count]`, `//buff` / `//mbuff` / `//fbuff` / `//buff_clear`. Override with `FINEAGE_ZONE_ADMIN=0 ./scripts/run-local-net.sh start` to disable.
 
 Tests / smoke (not the live world):
 
