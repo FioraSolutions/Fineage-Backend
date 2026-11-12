@@ -30,7 +30,7 @@ The player must be in the world, alive, and within **150** (3D) of a non-attacka
 
 An attackable (a gremlin, any monster) is refused with `npc_attackable`. Combat, death, and respawn are unchanged.
 
-When a datapack `first_talk` step matches, the reply is still `QuestDialog`, then `QuestList` when the journal changed. Roxxy and Bitz keep that path. When no step matches, the server sends `NpcHtml` for page 0 of that NPC type. The generated "I have nothing for you" page is not that reply. It is the Quest bypass list, below.
+When a datapack `first_talk` step matches, the reply is still `QuestDialog`, then `QuestList` when the journal changed. Fineage smoke **998** Roxxy (**30006**) uses `talk` (Quest / `quest_talk:998`) so plain Talk still opens the teleporter page; Bitz (**30026**) keeps `first_talk` while the quest is active. When no step matches, the server sends `NpcHtml` for page 0 of that NPC type. The generated "I have nothing for you" page is not that reply. It is the Quest bypass list, below.
 
 ## `NpcHtml` (1094)
 

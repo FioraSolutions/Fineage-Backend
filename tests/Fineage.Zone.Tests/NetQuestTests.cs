@@ -31,9 +31,15 @@ public sealed class NetQuestTests
         actor.MoveTo(roxxy.X, roxxy.Y, roxxy.Z);
         bench.Rec.Calls.Clear();
 
+        // Plain Talk must open the teleporter page (Q998 is talk-hook only, like Mirabel).
         Assert.Null(await actor.Talk(roxxy.ObjectId));
-        // Net NPC HTML carries the NPC ids and the page; the hook and quest id live in the quest_event links,
-        // which is exactly what the client echoes back.
+        var gate = LastDialog(bench.Rec);
+        Assert.Equal(roxxy.ObjectId, gate.NpcObjectId);
+        Assert.Contains("Chat 1", gate.Html, StringComparison.Ordinal);
+        Assert.DoesNotContain($"quest_event:{QuestId}:accept", gate.Html, StringComparison.Ordinal);
+
+        // Quest / quest_talk:998 (empty event) opens the smoke offer.
+        Assert.Null(await actor.QuestEvent(roxxy.ObjectId, QuestId, ""));
         var offer = LastDialog(bench.Rec);
         Assert.Equal(roxxy.ObjectId, offer.NpcObjectId);
         Assert.Contains($"quest_event:{QuestId}:accept", offer.Html, StringComparison.Ordinal);
@@ -52,7 +58,7 @@ public sealed class NetQuestTests
         Assert.Null(await actor.QuestEvent(bitz.ObjectId, QuestId, "heard"));
         Assert.Equal(2, Assert.Single(LastQuestList(bench.Rec).Active).Cond);
 
-        Assert.Null(await actor.Talk(roxxy.ObjectId));
+        Assert.Null(await actor.QuestEvent(roxxy.ObjectId, QuestId, ""));
         Assert.Contains($"quest_event:{QuestId}:reward", LastDialog(bench.Rec).Html, StringComparison.Ordinal);
 
         Assert.Null(await actor.QuestEvent(roxxy.ObjectId, QuestId, "reward"));
@@ -102,7 +108,7 @@ public sealed class NetQuestTests
         var roxxy = TalkingIsland.Villagers[RoxxyIndex];
 
         actor.MoveTo(roxxy.X, roxxy.Y, roxxy.Z);
-        Assert.Null(await actor.Talk(roxxy.ObjectId));
+        Assert.Null(await actor.QuestEvent(roxxy.ObjectId, QuestId, ""));
         Assert.Null(await actor.QuestEvent(roxxy.ObjectId, QuestId, "accept"));
         Assert.Single(bench.World.NetQuestList(actor.Session).Active);
         bench.Rec.Calls.Clear();
@@ -113,6 +119,8 @@ public sealed class NetQuestTests
         Assert.Empty(actor.SavedRecord().Quests!);
 
         Assert.Null(await actor.Talk(roxxy.ObjectId));
+        Assert.Contains("Chat 1", LastDialog(bench.Rec).Html, StringComparison.Ordinal);
+        Assert.Null(await actor.QuestEvent(roxxy.ObjectId, QuestId, ""));
         Assert.Contains($"quest_event:{QuestId}:accept", LastDialog(bench.Rec).Html, StringComparison.Ordinal);
     }
 
