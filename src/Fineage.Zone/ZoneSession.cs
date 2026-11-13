@@ -63,6 +63,9 @@ public sealed class ZoneSession
     public int PendingTalkNpcId { get; set; }
     public long PendingTalkAtUnixMs { get; set; }
 
+    /// <summary>Next Mobius Fear <c>onActionTime</c> (5 × EffectTickRatio 666 ms). 0 until fear lands.</summary>
+    public long FearFleeAtUnixMs { get; set; }
+
     /// <summary>Mobius AI_INTENTION_CAST after moveToPawn: skill to fire once the server-driven approach arrives.</summary>
     public int PendingCastSkillId { get; set; }
     public int PendingCastTargetId { get; set; }
@@ -120,6 +123,7 @@ public sealed class ZoneSession
         QueuedMove = null;
         SitOnArrive = false;
         ClearApproach();
+        FearFleeAtUnixMs = 0;
         LastChatUnixMs = 0;
     }
 }

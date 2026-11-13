@@ -279,10 +279,18 @@ public sealed partial class ZoneWorld
     /// <c>onEvtSleeping</c> stops auto-attack and movement and does not abort the cast.
     /// <c>onEvtRooted</c> only <c>clientStopMoving</c>.
     /// </summary>
-    void ApplyControlFromSlot(ZoneEntity target, string? slot)
+    void ApplyControlFromSlot(ZoneEntity target, string? slot, ZoneEntity? attacker = null)
     {
         if (string.IsNullOrEmpty(slot))
             return;
+        // Mobius Fear.onStart: abort an interruptible cast, then EVT_AFRAID (run 500 away).
+        if (slot.Equals("TURN_FLEE", StringComparison.OrdinalIgnoreCase))
+        {
+            AbortInterruptibleCast(target);
+            if (target.Kind == ZoneEntityKind.Player)
+                StartFearFlee(target, attacker, alongHeading: false);
+            return;
+        }
         if (ActionBlockSlots.Contains(slot))
         {
             if (target.Session is { } session)

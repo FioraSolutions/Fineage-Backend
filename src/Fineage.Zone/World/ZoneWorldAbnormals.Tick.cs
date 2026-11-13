@@ -88,11 +88,12 @@ public sealed partial class ZoneWorld
         Fineage.Game.Skills.SkillDefinition template,
         Fineage.Game.Skills.SkillLevelData levelData,
         ZoneEntity target,
-        bool force = true)
+        bool force = true,
+        ZoneEntity? attacker = null)
     {
         long now = _clock().ToUnixTimeMilliseconds();
         lock (_gate)
-            return ApplyAbnormalFromSkill(template, levelData, target, now, force: force);
+            return ApplyAbnormalFromSkill(template, levelData, target, now, attacker, force: force);
     }
 
     /// <summary>Test hook: PartySpelled / TargetStatus wire snapshot.</summary>

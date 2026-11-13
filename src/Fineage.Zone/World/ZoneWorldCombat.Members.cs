@@ -55,6 +55,7 @@ public sealed partial class ZoneWorld
             TickQueuedMoves(now);
             TickPendingPickups(now);
             TickPendingTalks(now);
+            TickFear(now);
             // Proactive AI used to live only on RunCombatTickAsync (tests). Without these,
             // aggressive mobs never aggro or leash on the live CombatLoopAsync path.
             TickAggression(now);

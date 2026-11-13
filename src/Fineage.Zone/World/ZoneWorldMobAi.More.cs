@@ -1,3 +1,4 @@
+using Fineage.Game.Combat;
 using Fineage.Protocol;
 using Fineage.Zone.Combat;
 
@@ -18,6 +19,75 @@ public sealed partial class ZoneWorld
                 return true;
         }
         return false;
+    }
+
+    /// <summary>Mobius <c>CreatureAI.FEAR_RANGE</c> and <c>EffectTickRatio</c> 666 × Fear.getTicks() 5.</summary>
+    const int FearRange = 500;
+    const int FearStepMs = 5 * 666;
+
+    /// <summary>
+    /// Mobius <c>onEvtAfraid</c>: run <see cref="FearRange"/> along the angle from the caster (start)
+    /// or along the current heading (later ticks). Geo clips the dest in <see cref="StartTimedMove"/>.
+    /// </summary>
+    void StartFearFlee(ZoneEntity actor, ZoneEntity? from, bool alongHeading)
+    {
+        if (actor.Session is { } session)
+            session.FearFleeAtUnixMs = _clock().ToUnixTimeMilliseconds() + FearStepMs;
+        if (actor.Dead || actor.Sitting || IsImmobilized(actor))
+            return;
+
+        double degrees = !alongHeading && from != null && (from.X != actor.X || from.Y != actor.Y)
+            ? ZoneCombat.AngleFrom(from.X, from.Y, actor.X, actor.Y)
+            : actor.Heading / 182.044444444;
+        double rad = degrees * Math.PI / 180.0;
+        int destX = (int)Math.Round(actor.X + FearRange * Math.Cos(rad));
+        int destY = (int)Math.Round(actor.Y + FearRange * Math.Sin(rad));
+        actor.Heading = ZoneCombat.HeadingFrom(actor.X, actor.Y, destX, destY);
+
+        if (actor.Session is not { } live)
+            return;
+        if (!actor.Running)
+        {
+            actor.Running = true;
+            FanoutMoveType(actor);
+        }
+        live.AutoAttackTargetId = 0;
+        live.ClearApproach();
+        StartTimedMove(actor, live, new MoveToMsg
+        {
+            ObjectId = actor.ObjectId,
+            DestX = destX,
+            DestY = destY,
+            DestZ = actor.Z,
+            OriginX = actor.X,
+            OriginY = actor.Y,
+            OriginZ = actor.Z
+        });
+    }
+
+    /// <summary>Mobius Fear <c>onActionTime</c>: keep fleeing along the heading while TURN_FLEE is up.</summary>
+    void TickFear(long now)
+    {
+        foreach (var player in Players().ToList())
+        {
+            var session = player.Session;
+            if (session == null || !IsFeared(player) || now < session.FearFleeAtUnixMs)
+                continue;
+            StartFearFlee(player, from: null, alongHeading: true);
+        }
+    }
+
+    /// <summary>Mobius <c>Fear.onStart</c>: abort only when <c>canAbortCast</c> (magic / static).</summary>
+    void AbortInterruptibleCast(ZoneEntity actor)
+    {
+        var hit = actor.PendingHit;
+        if (hit == null)
+            return;
+        bool interruptible = hit.Combat != null
+            ? CastRules.Interruptible(hit.Combat.Magic)
+            : CastRules.Interruptible(hit.MagicType);
+        if (interruptible)
+            AbortCast(actor, "fear", notify: false);
     }
 
     /// <summary>Mobius FearTask: run ~500 units away from the feared source.</summary>
