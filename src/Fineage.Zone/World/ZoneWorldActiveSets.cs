@@ -11,6 +11,8 @@ public sealed partial class ZoneWorld
 {
     /// <summary>Entities with <see cref="ZoneEntity.MoveActive"/> (players + NPCs).</summary>
     readonly HashSet<int> _moving = [];
+    /// <summary>NPCs whose region has a player, or who must still walk home (Mobius AttackableThinkTaskManager).</summary>
+    readonly HashSet<int> _thinking = [];
     /// <summary>NPCs with aggro target and/or returning home (Mobius AI task membership).</summary>
     readonly HashSet<int> _aiBusy = [];
     /// <summary>Entities with a queued <see cref="ZoneEntity.PendingHit"/>.</summary>
@@ -90,9 +92,50 @@ public sealed partial class ZoneWorld
     {
         _moving.Remove(objectId);
         _aiBusy.Remove(objectId);
+        _thinking.Remove(objectId);
         _pendingHit.Remove(objectId);
         _decaying.Remove(objectId);
         _needRegen.Remove(objectId);
         _withAbnormals.Remove(objectId);
+    }
+
+    /// <summary>
+    /// Mobius <c>AttackableThinkTaskManager.add</c>: only attackables in an active region
+    /// (a player can see them) or stuck beyond two drift radii.
+    /// </summary>
+    void TrackThink(ZoneEntity npc)
+    {
+        if (npc.Kind != ZoneEntityKind.Npc || npc.CurHp <= 0 || !npc.HomeSet)
+            return;
+        if (!ZoneCombat.IsCombatNpcType(npc.NpcType))
+            return;
+        if (!_thinking.Add(npc.ObjectId))
+            return;
+        SpawnPrivates(npc);
+    }
+
+    void ReleaseThink(ZoneEntity npc)
+    {
+        if (!_thinking.Contains(npc.ObjectId))
+            return;
+        if (npc.AggroTargetId > 0 || npc.ReturningHome || DriftedBeyondDouble(npc))
+            return;
+        foreach (var player in Players())
+        {
+            if (player.Knownlist.Contains(npc.ObjectId))
+                return;
+        }
+
+        _thinking.Remove(npc.ObjectId);
+    }
+
+    bool DriftedBeyondDouble(ZoneEntity npc)
+    {
+        if (!npc.HomeSet)
+            return false;
+        int limit = ZoneNpcSettings.MaxDriftRange * 2;
+        long dx = npc.X - (long)npc.HomeX;
+        long dy = npc.Y - (long)npc.HomeY;
+        return dx * dx + dy * dy > (long)limit * limit;
     }
 }

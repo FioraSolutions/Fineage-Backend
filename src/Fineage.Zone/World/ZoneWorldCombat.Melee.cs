@@ -129,6 +129,14 @@ public sealed partial class ZoneWorld
             ZoneLog.Info($"corpse object={objectId} spoiler={npc.SpoilerObjectId} sweep={npc.SweepItems.Count}");
         // Mobius DecayTaskManager: DefaultCorpseTime, + SpoiledCorpseExtendTime when spoiled; unswept spoil decays with the corpse.
         SetDecayAtMs(npc, _clock().ToUnixTimeMilliseconds() + _spoilRules.CorpseMs(spoiled));
+        if (npc.NpcType is "RaidBoss" or "GrandBoss")
+        {
+            foreach (int minionId in npc.MinionIds.ToArray())
+            {
+                if (_byId.TryGetValue(minionId, out var minion))
+                    DespawnNpc(minion);
+            }
+        }
     }
 
     void DespawnNpc(ZoneEntity npc)

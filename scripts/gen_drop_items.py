@@ -55,7 +55,18 @@ for f in sorted(src.glob("*.xml")):
             continue
         want.discard(iid)
         if e.get("type") != "EtcItem":
-            skipped.append((iid, e.get("type")))
+            if "convert" not in globals():
+                argv = sys.argv[:]
+                sys.argv = ["gen_gmshop_gear_items.py"]
+                sys.path.insert(0, str(ROOT / "scripts"))
+                from gen_gmshop_gear_items import convert as _convert
+                sys.argv = argv
+                globals()["convert"] = _convert
+            row = convert(e)
+            if row is None:
+                skipped.append((iid, e.get("type")))
+                continue
+            added.append(row)
             continue
         s = {x.get("name"): x.get("val") for x in e.findall("set")}
         row = {"id": iid, "name": e.get("name"), "kind": "etc"}

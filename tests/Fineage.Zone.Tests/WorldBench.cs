@@ -39,7 +39,8 @@ internal sealed class WorldBench
         Fineage.Zone.Olympiad.OlympiadSettings? olympiadSettings = null,
         Fineage.Zone.SevenSigns.SevenSignsEngine? sevenSigns = null,
         Fineage.Zone.Dungeons.DungeonCatalog? dungeons = null,
-        Fineage.Zone.Dungeons.DungeonAccessOptions? dungeonAccess = null)
+        Fineage.Zone.Dungeons.DungeonAccessOptions? dungeonAccess = null,
+        Random? combatRandom = null)
     {
         Game = game ?? GameData.LoadDefault();
         Store = MemoryAccountStore.InMemory();
@@ -68,7 +69,8 @@ internal sealed class WorldBench
             olympiadSettings: olympiadSettings,
             sevenSigns: sevenSigns,
             dungeons: dungeons,
-            dungeonAccess: dungeonAccess);
+            dungeonAccess: dungeonAccess,
+            combatRandom: combatRandom);
         (Bridge, Rec) = NetBridgeRecorder.Create();
         World.NetBridge = Bridge;
     }

@@ -11,7 +11,7 @@ public sealed class ZoneActiveSetsTests
     [Fact]
     public async Task Idle_world_combat_tick_keeps_active_sets_empty()
     {
-        var kit = new WorldBench();
+        var kit = new WorldBench(combatRandom: new MissRandomWalk());
         // Spawned NPCs from the default map sit idle with empty registries.
         var before = kit.World.ActiveSetCounts;
         Assert.Equal(0, before.Moving);
@@ -32,17 +32,17 @@ public sealed class ZoneActiveSetsTests
     [Fact]
     public async Task Moving_npc_enters_and_leaves_moving_registry()
     {
-        var kit = new NetTestKit();
+        var kit = new NetTestKit(combatRandom: new MissRandomWalk());
         Assert.True(kit.World.TryGetEntityById(50001, out var npc));
         long t0 = kit.Now.ToUnixTimeMilliseconds();
         kit.World.SetMoveActive(npc!, true);
-        npc!.MoveDestX = npc.X + 400;
+        npc!.MoveDestX = npc.X + 100;
         npc.MoveDestY = npc.Y;
         npc.MoveDestZ = npc.Z;
         npc.MoveLastTickMs = t0;
         Assert.Equal(1, kit.World.ActiveSetCounts.Moving);
 
-        // Far enough time that AdvanceMove finishes the short step and clears MoveActive.
+        // Inside MaxDriftRange (300). A step past that makes thinkActive walk home, so the registry stays occupied.
         kit.Now = kit.Now.AddSeconds(30);
         await kit.World.RunPlayerCombatTickAsync(CancellationToken.None);
 
@@ -59,5 +59,13 @@ public sealed class ZoneActiveSetsTests
         Assert.Equal(1, kit.World.ActiveSetCounts.AiBusy);
         kit.World.SetAggroTarget(npc!, 0);
         Assert.Equal(0, kit.World.ActiveSetCounts.AiBusy);
+    }
+
+    /// <summary><see cref="ZoneWorld"/> idle walk calls <c>Next(30)</c>. Anything but 0 skips the step.</summary>
+    sealed class MissRandomWalk : Random
+    {
+        readonly Random _inner = new(1);
+
+        public override int Next(int maxValue) => maxValue == 30 ? 1 : _inner.Next(maxValue);
     }
 }

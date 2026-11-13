@@ -146,6 +146,8 @@ public sealed partial class ZoneWorld
         self.Knownlist.Add(otherId);
         if (other.Session != null)
             other.Knownlist.Add(self.ObjectId);
+        else
+            TrackThink(other);
     }
 
     void Forget(ZoneEntity self, int otherId)
@@ -179,7 +181,8 @@ public sealed partial class ZoneWorld
             return false;
         }
 
-        foreach (int id in entity.Knownlist)
+        var seen = entity.Knownlist.ToArray();
+        foreach (int id in seen)
         {
             if (!_byId.TryGetValue(id, out var other))
                 continue;
@@ -192,6 +195,11 @@ public sealed partial class ZoneWorld
         _aoi.Leave(session.ObjectId);
         _byId.Remove(session.ObjectId);
         ForgetActiveSets(session.ObjectId);
+        foreach (int id in seen)
+        {
+            if (_byId.TryGetValue(id, out var other))
+                ReleaseThink(other);
+        }
         session.InWorld = false;
 
         PartyPlayerLeftWorld(session.ObjectId);

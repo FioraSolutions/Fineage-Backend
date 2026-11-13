@@ -17,6 +17,7 @@ public sealed partial class ZoneWorld
             long now = _clock().ToUnixTimeMilliseconds();
             TickPlayerMovement(now);
             TickNpcMovement(now);
+            TickRandomWalk(now);
             TickPendingHits(now);
             TickMeleeHits(now);
             TickAggression(now);
@@ -133,6 +134,13 @@ public sealed partial class ZoneWorld
                 SetAggroTarget(npc, 0);
                 npc.HateList.Clear();
                 StopTimedMove(npc);
+                continue;
+            }
+            // Mobius thinkAttack: attack timeout (2 min without a fresh onEvtAttacked) drops the fight
+            // and teleports a monster back to its spawn.
+            if (npc.AttackTimeoutAtMs > 0 && now >= npc.AttackTimeoutAtMs)
+            {
+                TeleportHome(npc);
                 continue;
             }
             if (!_byId.TryGetValue(npc.AggroTargetId, out var player) ||

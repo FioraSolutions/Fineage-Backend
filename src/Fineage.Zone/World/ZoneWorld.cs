@@ -67,6 +67,8 @@ public sealed partial class ZoneWorld
     readonly SkillCombatCatalog _skillCombat;
     /// <summary>Mobius AISkillScope HEAL/BUFF/DEBUFF rows (data/npc-ai-support.json).</summary>
     readonly Fineage.Zone.Npcs.NpcAiSupportCatalog _npcAiSupport;
+    /// <summary>Mobius private minions (data/npc-minions.json).</summary>
+    readonly Fineage.Zone.Npcs.NpcMinionCatalog _minions;
     readonly SkillStatEffectCatalog _passives;
     /// <summary>Mobius DefenceTrait percents from skill-passives (jewelry poison/hold/… resists).</summary>
     readonly SkillDefenceTraitCatalog _defenceTraits;
@@ -173,6 +175,7 @@ public sealed partial class ZoneWorld
         _npcRegen = npcRegen ?? ZoneNpcSettings.NpcRegenEnabled;
         _skillCombat = skillCombat ?? SkillCombatCatalog.LoadDefault();
         _npcAiSupport = npcAiSupport ?? Fineage.Zone.Npcs.NpcAiSupportCatalog.LoadDefault();
+        _minions = Fineage.Zone.Npcs.NpcMinionCatalog.LoadDefault();
         _statEffects = statEffects ?? SkillStatEffectCatalog.LoadDefault();
         _passives = passives ?? SkillStatEffectCatalog.LoadPassives();
         _defenceTraits = defenceTraits ?? SkillDefenceTraitCatalog.LoadDefault();

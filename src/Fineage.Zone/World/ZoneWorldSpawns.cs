@@ -154,6 +154,9 @@ public sealed partial class ZoneWorld
             AiSuicideSkills = _npcAiSupport.Get(def.NpcId)?.Suicide,
             RunSpeed = def.RunSpeed,
             WalkSpeed = def.WalkSpeed,
+            // Mobius Creature._isRunning starts false. Attack intention calls setRunning().
+            Running = false,
+            GlobalAggro = -10,
             // Mobius Spawn location is the returnHome target; captured at spawn, not at first aggro, so a mob that
             // drifted before being attacked still walks back to the real spawn point.
             HomeSet = true,
