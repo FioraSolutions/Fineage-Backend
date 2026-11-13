@@ -205,7 +205,9 @@ public sealed class NetSkillTests
         var bench = new WorldBench(
             clock: () => Now,
             spawns: Fineage.Zone.Spawns.SpawnCatalog.LoadDefault(),
-            mapId: null);
+            mapId: null,
+            // calcEffectSuccess clamps Fire Vortex to 90%, so Random.Shared sometimes resists the abnormal.
+            combatRandom: new AlwaysLandRandom());
         var gremlinHome = TalkingIsland.Gremlins[0];
         BenchPlayer actor = await bench.EnterAsync(
             "vortex", "VortexKid",
@@ -243,4 +245,12 @@ public sealed class NetSkillTests
         Assert.IsType<StatusUpdateMsg>(rec.Of(nameof(IWorldEventPublisher.FanoutStatusUpdate))
             .Select(args => (StatusUpdateMsg)args[1])
             .Last(status => status.ObjectId == objectId));
+
+    /// <summary>Every combat roll succeeds: magic hit and debuff land (<c>Rnd(100) == 0</c>).</summary>
+    sealed class AlwaysLandRandom : Random
+    {
+        public override int Next(int maxValue) => 0;
+
+        public override int Next(int minValue, int maxValue) => minValue;
+    }
 }

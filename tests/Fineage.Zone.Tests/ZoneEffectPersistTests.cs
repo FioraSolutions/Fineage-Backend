@@ -5,6 +5,7 @@ using Xunit;
 namespace Fineage.Zone.Tests;
 
 /// <summary>Mobius character_skills_save: //mbuff (and other abnormals) survive Leave → Enter.</summary>
+[Collection("Zone admin gate")]
 public sealed class ZoneEffectPersistTests : IDisposable
 {
     readonly string? _prevEnv;
