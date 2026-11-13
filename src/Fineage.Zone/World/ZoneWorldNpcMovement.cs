@@ -76,6 +76,50 @@ public sealed partial class ZoneWorld
     }
 
     /// <summary>
+    /// Mobius <c>AttackableAI</c> idle walk (<c>RANDOM_WALK_RATE = 30</c>): once a second, one think in thirty
+    /// sends a monster walking to a point inside <see cref="ZoneNpcSettings.MaxDriftRange"/> of its spawn.
+    /// Guards and town NPCs stay on their posts. Chase, return-home and fear already own the mover.
+    /// </summary>
+    const int RandomWalkRate = 30;
+    long _nextWanderScanMs;
+
+    void TickRandomWalk(long now)
+    {
+        if (now < _nextWanderScanMs)
+            return;
+        _nextWanderScanMs = now + 1000;
+        int drift = ZoneNpcSettings.MaxDriftRange;
+        foreach (var npc in _byId.Values)
+        {
+            if (npc.Kind != ZoneEntityKind.Npc || npc.CurHp <= 0 || !npc.HomeSet)
+                continue;
+            if (npc.NpcType is not ("Monster" or "FriendlyMob"))
+                continue;
+            if (npc.AggroTargetId > 0 || npc.MoveActive || npc.Chasing || npc.ReturningHome)
+                continue;
+            if (npc.CastingUntilMs > now || IsImmobilized(npc) || IsFeared(npc))
+                continue;
+            if (_combatRandom.Next(RandomWalkRate) != 0)
+                continue;
+
+            double angle = _combatRandom.NextDouble() * Math.PI * 2;
+            double radius = 40 + _combatRandom.NextDouble() * Math.Max(0, drift - 40);
+            int destX = npc.HomeX + (int)Math.Round(Math.Cos(angle) * radius);
+            int destY = npc.HomeY + (int)Math.Round(Math.Sin(angle) * radius);
+            long dx = destX - (long)npc.X;
+            long dy = destY - (long)npc.Y;
+            if (dx * dx + dy * dy < 40L * 40L)
+                continue;
+            if (npc.Running)
+            {
+                npc.Running = false;
+                FanoutMoveType(npc);
+            }
+            StartNpcMove(npc, destX, destY, npc.Z, now);
+        }
+    }
+
+    /// <summary>
     /// Mobius <c>AttackableAI.thinkAttack</c> distance leash (<c>AttackableAI.java:740</c>): a monster dragged further
     /// than <c>AggroDistanceCheckRange</c> (2000, raids 4000) from its spawn drops the fight and walks home. With
     /// <c>AggroDistanceCheckRestoreLife</c> it also refills HP/MP (the only Mobius full heal for a monster).

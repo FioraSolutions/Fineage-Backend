@@ -115,8 +115,7 @@ Runtime Talking Island gremlins still use hard-coded `TalkingIsland.cs` until sp
 ## Droplists (data/drops) and ground loot
 
 - `data/drops/*.json` is the source of truth. `scripts/gen_drops.py` converts Mobius `stats/npcs/*.xml`
-  `<dropLists>` for every NPC spawned in elven_village, elven_starting, elven_village_quest_monsters and
-  training_hall_gremlins (edit `MAPS` to add zones). `<drop><group>` → `death.groups`, loose `<drop><item>` →
+  `<dropLists>` for every NPC id in `data/spawns/*.json`. `<drop><group>` → `death.groups`, loose `<drop><item>` →
   its own group, `<spoil>` → `corpse.items`. Files with `"generated": true` are rewritten on each run; remove the
   flag to own a file by hand (npc-20001-gremlin.json is hand-written and skipped).
 - Rolls stay in `DropRoller` (group chance, weighted item, min/max, `DropRates`).

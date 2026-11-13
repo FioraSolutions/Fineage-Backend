@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """Convert Mobius CT_0_Interlude <dropLists> (stats/npcs/*.xml) into our data/drops/npc-<id>-<slug>.json.
-Only NPC ids spawned by the maps in MAPS are converted. Hand-written files (no "generated": true) are kept.
+Every NPC id in data/spawns/*.json is converted. Hand-written files (no "generated": true) are kept.
 <drop><group chance> -> death.groups (weighted pick inside group, as Mobius); loose <drop><item> -> its own
 group (group chance = item chance); <spoil><item> -> corpse.items.
 Usage: gen_drops.py [mobius npcs xml dir] (default ref/mobius-ct0-interlude/data/stats/npcs)"""
@@ -8,13 +8,14 @@ import json, re, sys, pathlib
 import xml.etree.ElementTree as ET
 
 ROOT = pathlib.Path(__file__).resolve().parent.parent
-MAPS = ["elven_village", "elven_starting", "elven_village_quest_monsters", "training_hall_gremlins"]
-src = pathlib.Path(sys.argv[1]) if len(sys.argv) > 1 else ROOT / "ref/mobius-ct0-interlude/data/stats/npcs"
+src = pathlib.Path(sys.argv[1]) if len(sys.argv) > 1 else ROOT / "ref/mobius-ct0-interlude/dist/game/data/stats/npcs"
+if not src.is_dir():
+    src = ROOT / "ref/mobius-ct0-interlude/data/stats/npcs"
 out = ROOT / "data/drops"
 
 ids = set()
-for m in MAPS:
-    ids |= {int(x) for x in re.findall(r'"npcId"\s*:\s*(\d+)', (ROOT / "data/spawns" / f"{m}.json").read_text())}
+for spawn in (ROOT / "data/spawns").glob("*.json"):
+    ids |= {int(x) for x in re.findall(r'"npcId"\s*:\s*(\d+)', spawn.read_text())}
 
 hand = set()
 for p in out.glob("*.json"):
