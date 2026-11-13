@@ -28,7 +28,7 @@ public sealed class NetDropProtectTests
         var (bridge, rec) = NetBridgeRecorder.Create();
         kit.World.NetBridge = bridge;
 
-        kit.World.DropDeathLootForTest(TalkingIsland.GremlinNpcId, killer.X, killer.Y, killer.Z, killer);
+        kit.World.DropDeathLootForTest(MobiusDropTestSeed.TrainingHallGremlinNpcId, killer.X, killer.Y, killer.Z, killer);
         var drop = Assert.Single(Drops(rec));
         Assert.InRange(drop.X, killer.X - ZoneWorld.DeathDropScatter, killer.X + ZoneWorld.DeathDropScatter);
         Assert.InRange(drop.Y, killer.Y - ZoneWorld.DeathDropScatter, killer.Y + ZoneWorld.DeathDropScatter);
@@ -55,7 +55,7 @@ public sealed class NetDropProtectTests
         var (_, killer) = await kit.EnterAsync();
         var (bridge, rec) = NetBridgeRecorder.Create();
         kit.World.NetBridge = bridge;
-        kit.World.DropDeathLootForTest(TalkingIsland.GremlinNpcId, killer.X, killer.Y, killer.Z, killer);
+        kit.World.DropDeathLootForTest(MobiusDropTestSeed.TrainingHallGremlinNpcId, killer.X, killer.Y, killer.Z, killer);
         int groundId = Assert.Single(Drops(rec)).ObjectId;
 
         kit.Now = kit.Now.AddMilliseconds(ZoneWorld.GroundItemAutoDestroyMs - 1000);

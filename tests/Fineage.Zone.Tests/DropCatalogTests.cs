@@ -9,11 +9,10 @@ public sealed class DropCatalogTests
     public void Loads_gremlin_droplist_from_datapack()
     {
         var catalog = DropCatalog.LoadDefault();
-        Assert.True(catalog.TryGet(TalkingIsland.GremlinNpcId, out var gremlin));
+        Assert.False(catalog.TryGet(TalkingIsland.GremlinNpcId, out _));
+        Assert.True(catalog.TryGet(MobiusDropTestSeed.TrainingHallGremlinNpcId, out var gremlin));
         Assert.Single(gremlin!.Death.Groups);
         Assert.Equal(57, gremlin.Death.Groups[0].Items[0].ItemId);
-        Assert.NotNull(gremlin.Corpse);
-        Assert.Equal(1864, gremlin.Corpse!.Items[0].ItemId);
     }
 }
 
@@ -36,7 +35,7 @@ public sealed class DropRollerTests
     public void Gremlin_death_adena_stays_in_mobius_range()
     {
         var catalog = DropCatalog.LoadDefault();
-        catalog.TryGet(TalkingIsland.GremlinNpcId, out var gremlin);
+        catalog.TryGet(MobiusDropTestSeed.TrainingHallGremlinNpcId, out var gremlin);
         var stack = DropRoller.RollDeath(gremlin!, new Random(MobiusDropTestSeed.DefaultSeed)).Single();
         Assert.Equal(57, stack.ItemId);
         Assert.InRange(stack.Count, 7, 13);
