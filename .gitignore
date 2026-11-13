@@ -60,6 +60,7 @@ publish/
 !data/map-regions.json
 !data/death-drop.json
 !data/npc-ai-support.json
+!data/npc-minions.json
 !data/henna.json
 !data/armor-sets.json
 !data/item-equip-skills.json

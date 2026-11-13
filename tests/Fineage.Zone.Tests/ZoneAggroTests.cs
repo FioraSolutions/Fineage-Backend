@@ -69,7 +69,10 @@ public sealed class ZoneAggroTests
         foreach (int id in new[] { 9_100_001, 9_100_002, 9_100_003, 9_100_004 })
         {
             if (world.TryGetEntityById(id, out var mob))
+            {
                 mob.ProactiveAggroAtMs = 0;
+                mob.GlobalAggro = 0;
+            }
         }
 
         await world.RunCombatTickAsync(CancellationToken.None);
