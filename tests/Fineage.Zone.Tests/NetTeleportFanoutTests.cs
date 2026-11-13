@@ -3,6 +3,7 @@ using Fineage.Accounts;
 using Fineage.Login;
 using Fineage.Net.Contract;
 using Fineage.Protocol;
+using Fineage.Zone.Interest;
 using Fineage.Zone.Net;
 using Fineage.Zone.Spawns;
 using Fineage.Zone.World;
@@ -63,9 +64,30 @@ public sealed class NetTeleportFanoutTests
         Assert.Contains(marker, Assert.IsAssignableFrom<IReadOnlyList<int>>(only[0]));
     }
 
+    [Fact]
+    public async Task Gatekeeper_jump_tells_the_client_who_left_and_who_appeared()
+    {
+        var (world, session) = await GatekeeperWorldAsync(destinationX: 7_000);
+        // Enter does not always link the gate. A step while the bridge is still off fills the knownlist;
+        // the jump must then tell the client that the gate left view.
+        Assert.Null(await world.TryMoveAsync(session, 50, 0, 0, CancellationToken.None));
+        var (bridge, rec) = NetBridgeRecorder.Create();
+        world.NetBridge = bridge;
+
+        Assert.Null(await world.TryBypassAsync(session, GateObjectId, "teleport NORMAL 0", CancellationToken.None));
+
+        var frames = rec.Of(nameof(IWorldEventPublisher.FanoutKnownlistDiff));
+        var diff = Assert.Single(frames);
+        Assert.Equal(session.ObjectId, (int)diff[0]!);
+        Assert.Contains(GateObjectId, Assert.IsAssignableFrom<IReadOnlyList<int>>(diff[2]));
+    }
+
     const int GateObjectId = 61000;
 
-    static async Task<(ZoneWorld World, ZoneSession Session)> GatekeeperWorldAsync()
+    static Task<(ZoneWorld World, ZoneSession Session)> GatekeeperWorldAsync() =>
+        GatekeeperWorldAsync(destinationX: 100);
+
+    static async Task<(ZoneWorld World, ZoneSession Session)> GatekeeperWorldAsync(int destinationX)
     {
         var store = MemoryAccountStore.InMemory();
         var login = new LoginService(store, new HandoffTokens(HandoffTokens.DefaultSecret));
@@ -79,9 +101,10 @@ public sealed class NetTeleportFanoutTests
             true,
             [new SpawnNpcDefinition(GateObjectId, 30006, "Roxxy", 0, 0, 0, 0, false, 100, 80f, 40f, 60, 0, "Gatekeeper", "Teleporter")]);
         var world = new ZoneWorld(
+            aoi: new GridAoi(),
             spawnCatalog: SpawnCatalog.From(new Dictionary<string, SpawnMapDefinition> { [SpawnCatalog.DefaultMapId] = map }),
             accounts: store,
-            teleports: FreeTeleports(),
+            teleports: FreeTeleports(destinationX),
             teleportOffset: 0);
 
         var session = new ZoneSession();
@@ -90,7 +113,7 @@ public sealed class NetTeleportFanoutTests
         return (world, session);
     }
 
-    static TeleportCatalog FreeTeleports() => TeleportCatalog.Parse(
+    static TeleportCatalog FreeTeleports(int destinationX) => TeleportCatalog.Parse(
         """
         {
           "gatekeepers": [
@@ -101,13 +124,13 @@ public sealed class NetTeleportFanoutTests
                   "name": "NORMAL",
                   "type": "NORMAL",
                   "locations": [
-                    { "id": 0, "name": "Near", "x": 100, "y": 0, "z": 0, "feeCount": 0 }
+                    { "id": 0, "name": "Near", "x": DEST_X, "y": 0, "z": 0, "feeCount": 0 }
                   ]
                 }
               ]
             }
           ]
         }
-        """,
+        """.Replace("DEST_X", destinationX.ToString()),
         "test");
 }
