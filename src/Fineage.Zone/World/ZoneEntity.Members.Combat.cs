@@ -113,6 +113,13 @@ sealed partial class ZoneEntity
         set => EnsureAggro().LastAiTickMs = value;
     }
 
+    /// <summary>Unix ms when thinkActive may add a player on its own. 0 means already allowed.</summary>
+    public long ProactiveAggroAtMs
+    {
+        get => Aggro?.ProactiveAggroAtMs ?? 0;
+        set => EnsureAggro().ProactiveAggroAtMs = value;
+    }
+
     /// <summary>NPC: spawn point captured on first aggro (Mobius <c>Attackable.returnHome</c> target).</summary>
     public bool HomeSet
     {

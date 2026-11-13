@@ -65,6 +65,12 @@ public sealed class ZoneAggroTests
             Mob(9_100_004, 2000, aggressive: true, "WOLF")));  // outside aggroRange
         var bridge = DispatchProxy.Create<IWorldEventPublisher, StanceRecorder>();
         world.NetBridge = bridge;
+        // Mobius _globalAggro = -10 blocks proactive aggro for 10s. This test is the scan itself.
+        foreach (int id in new[] { 9_100_001, 9_100_002, 9_100_003, 9_100_004 })
+        {
+            if (world.TryGetEntityById(id, out var mob))
+                mob.ProactiveAggroAtMs = 0;
+        }
 
         await world.RunCombatTickAsync(CancellationToken.None);
 
@@ -77,5 +83,38 @@ public sealed class ZoneAggroTests
         Assert.True(caller.HateList[player.ObjectId] >= 1);
         var stances = ((StanceRecorder)(object)bridge).Stances;
         Assert.Contains((9_100_001, true), stances);
+    }
+
+    [Fact]
+    public async Task Fresh_aggressive_mob_does_not_aggro_for_ten_seconds()
+    {
+        var store = MemoryAccountStore.InMemory();
+        var login = new LoginService(store, new HandoffTokens(HandoffTokens.DefaultSecret));
+        Assert.True(login.Register("fresh", "pass1234").Ok);
+        var created = login.CreateHuman("fresh", "Fresh", HumanClasses.Fighter);
+        Assert.True(created.Ok);
+        static SpawnCatalog Map(params SpawnNpcDefinition[] npcs) =>
+            SpawnCatalog.From(new Dictionary<string, SpawnMapDefinition> { ["fresh"] = new("fresh", true, npcs) });
+
+        var ticket = login.Play("fresh", "pass1234", created.Value!.Name, HumanClasses.Fighter);
+        var probeWorld = new ZoneWorld(accounts: store, spawnCatalog: Map(), activeMapId: "fresh");
+        var session = new ZoneSession();
+        session.Bind(ticket.Value!.CharacterId, ticket.Value.Account, ticket.Value.CharacterName, ticket.Value.ClassId);
+        Assert.True(await probeWorld.TryEnterAsync(session, CancellationToken.None));
+        Assert.True(probeWorld.TryGetLivePlayer(session, out var player));
+
+        var mob = new SpawnNpcDefinition(
+            9_100_010, 20001, "Gremlin", player.X + 50, player.Y, player.Z, 0,
+            true, 80, 80f, 40f, 30, 0, NpcType: "Monster", Level: 1, Aggressive: true, AggroRange: 400);
+        var catalog = Map(mob);
+        var ticket2 = login.Play("fresh", "pass1234", created.Value.Name, HumanClasses.Fighter);
+        var world2 = new ZoneWorld(accounts: store, spawnCatalog: catalog, activeMapId: "fresh");
+        var session2 = new ZoneSession();
+        session2.Bind(ticket2.Value!.CharacterId, ticket2.Value.Account, ticket2.Value.CharacterName, ticket2.Value.ClassId);
+        Assert.True(await world2.TryEnterAsync(session2, CancellationToken.None));
+        await world2.RunCombatTickAsync(CancellationToken.None);
+        Assert.True(world2.TryGetEntityById(9_100_010, out var spawned));
+        Assert.Equal(0, spawned.AggroTargetId);
+        Assert.False(spawned.Running);
     }
 }
