@@ -62,7 +62,8 @@ public sealed partial class ZoneWorld
             ResolveDeferredEffect(player, hit, deferred, now);
             return;
         }
-        if (!_byId.TryGetValue(hit.TargetId, out var target) || target.Kind != ZoneEntityKind.Npc || target.CurHp <= 0)
+        if (!_byId.TryGetValue(hit.TargetId, out var target) || target.CurHp <= 0 ||
+            target.Kind is not (ZoneEntityKind.Npc or ZoneEntityKind.Player))
         {
             AbortCast(player, "target-gone", notify: false);
             return;
@@ -89,6 +90,13 @@ public sealed partial class ZoneWorld
         if (hit.Combat != null)
         {
             ZoneLog.Info($"[skill] hit {hit.Combat.SkillId} lv{hit.Level} target={target.ObjectId} damage={damage}");
+        }
+        if (target.Kind == ZoneEntityKind.Player)
+        {
+            ApplySkillDamageToPlayer(player, target, damage, now);
+            if (hit.Combat != null && damage > 0)
+                ApplySkillAbnormal(player, target, hit, now);
+            return;
         }
         // Mobius FolkStatus: offensive skills may cast on merchants, but they take no HP / hate.
         if (!ZoneCombat.TakesNpcCombatDamage(target.NpcType, target.Attackable))
@@ -119,6 +127,40 @@ public sealed partial class ZoneWorld
             RemoveDeadNpc(target, killer: player);
             GrantKillReward(player, target);
         }
+    }
+
+    /// <summary>Offensive skill landing on a player: HP, purple name, cast break, death. Same gate as a melee hit.</summary>
+    void ApplySkillDamageToPlayer(ZoneEntity attacker, ZoneEntity target, int damage, long now)
+    {
+        if (damage <= 0)
+        {
+            attacker.CombatUntilUnixMs = now + ClanProtocol.CombatStanceMillis;
+            target.CombatUntilUnixMs = now + ClanProtocol.CombatStanceMillis;
+            return;
+        }
+
+        target.CurHp = Math.Max(0, target.CurHp - damage);
+        target.CombatUntilUnixMs = now + ClanProtocol.CombatStanceMillis;
+        FanoutVitals(target, PlayerVitalsStatus(target));
+        if (attacker.Kind == ZoneEntityKind.Player)
+            UpdatePvPStatus(attacker, target, now);
+        if (target.CurHp > 0)
+        {
+            MaybeBreakCast(target, damage);
+            return;
+        }
+
+        if (target.Session != null)
+            target.Session.AutoAttackTargetId = 0;
+        ApplyPlayerDeath(target, attacker.ObjectId);
+    }
+
+    void ApplySkillAbnormal(ZoneEntity attacker, ZoneEntity target, PendingSkillHit hit, long now)
+    {
+        var template = _game.Skills.Find(hit.Combat!.SkillId);
+        if (template == null || !template.AppliesAbnormal || !template.TryLevelData(hit.Level, out var levelData))
+            return;
+        ApplyAbnormalFromSkill(template, levelData, target, now, attacker: attacker);
     }
 
     void TickMobAttacks(long now)
