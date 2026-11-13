@@ -42,6 +42,18 @@ public static class ZoneAdmin
         return _names.Contains(characterName.Trim());
     }
 
+    /// <summary>
+    /// Mobius <c>AccessLevel.allowPeaceAttack</c>. A process-wide <c>*</c> opens admin commands and does not
+    /// grant peace-zone attacks; only an explicit name does.
+    /// </summary>
+    public static bool AllowPeaceAttack(string? characterName)
+    {
+        if (!Enabled || string.IsNullOrWhiteSpace(characterName))
+            return false;
+        EnsureNamesLoaded();
+        return _names!.Contains(characterName.Trim());
+    }
+
     /// <summary>Test seam: replace allowlist (null restores file load).</summary>
     internal static void SetNamesForTest(IEnumerable<string>? names)
     {

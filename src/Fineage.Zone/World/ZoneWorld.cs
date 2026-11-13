@@ -108,11 +108,19 @@ public sealed partial class ZoneWorld
     static readonly Lazy<GeoEngine> SharedGeo = new(GeoEngine.LoadDefault);
     static readonly Lazy<DoorTable> SharedDoors = new(DoorTable.LoadDefault);
     static readonly Lazy<WaterZones> SharedWater = new(WaterZones.LoadDefault);
+    static readonly Lazy<PeaceZones> SharedPeace = new(PeaceZones.LoadDefault);
+    static readonly Lazy<PvpZones> SharedPvp = new(PvpZones.LoadDefault);
+    static readonly Lazy<SiegeZones> SharedSiegeZones = new(SiegeZones.LoadDefault);
 
     /// <summary>Mobius DoorData (movement collision). Settable for tests.</summary>
     internal DoorTable Doors { get; set; } = DoorTable.Empty;
     /// <summary>Mobius WaterZone cuboids (swim speed). Settable for tests.</summary>
     internal WaterZones Water { get; set; } = WaterZones.Empty;
+    /// <summary>Mobius PeaceZone polygons. Settable for tests.</summary>
+    internal PeaceZones Peace { get; set; } = PeaceZones.Empty;
+    /// <summary>Mobius ArenaZone polygons (<c>ZoneId.PVP</c>). Settable for tests.</summary>
+    internal PvpZones Pvp { get; set; } = PvpZones.Empty;
+    internal SiegeZones SiegeAreas { get; set; } = SiegeZones.Empty;
 
     /// <summary>Server geodata (empty when no region files are present).</summary>
     public GeoEngine GeoData => _geo;
@@ -233,6 +241,9 @@ public sealed partial class ZoneWorld
             // Production world: real datapack doors / water. Tests that inject geo keep the empty tables.
             Doors = SharedDoors.Value;
             Water = SharedWater.Value;
+            Peace = SharedPeace.Value;
+            Pvp = SharedPvp.Value;
+            SiegeAreas = SharedSiegeZones.Value;
         }
         BootstrapSpawns();
         BootstrapBosses();

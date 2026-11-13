@@ -194,7 +194,9 @@ public sealed partial class ZoneWorld
             int level = Math.Max(1, skill.MaxLevel);
             if (!skill.TryLevelData(level, out var data))
                 throw new InvalidOperationException($"admin buffset skill={skillId} missing level={level}");
-            ApplyAbnormalFromSkill(skill, data, player, now, force: true);
+            ApplyAbnormalFromSkill(
+                skill, data, player, now, force: true,
+                durationSeconds: Fineage.Zone.Combat.ZoneBuffs.AdminPackDurationSeconds);
             applied++;
         }
 

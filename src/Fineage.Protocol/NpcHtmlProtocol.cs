@@ -13,10 +13,10 @@ public static class NpcHtmlProtocol
 
     /// <summary>
     /// Talk and bypass distance, 3D. Same value as <see cref="QuestProtocol.TalkRange"/>.
-    /// Mobius Interlude <c>Npc.INTERACTION_DISTANCE</c> is 250; this server keeps 150
-    /// so quest talk and the HTML window use one distance.
+    /// Mobius Interlude <c>Npc.INTERACTION_DISTANCE</c> (<c>Npc.canInteract</c>).
+    /// Trade stays <see cref="TradeProtocol.Distance"/> (150).
     /// </summary>
-    public const int InteractionDistance = 150;
+    public const int InteractionDistance = 250;
 
     /// <summary>The object is an attackable. Talk and bypass do not open a dialog.</summary>
     public const string Attackable = "npc_attackable";

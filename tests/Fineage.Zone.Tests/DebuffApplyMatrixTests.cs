@@ -52,6 +52,72 @@ public sealed class DebuffApplyMatrixTests
     }
 
     [Fact]
+    public async Task Stun_aborts_the_swing_and_the_cast_sleep_leaves_the_cast_root_leaves_the_swing()
+    {
+        var kit = new NetTestKit(Fineage.Zone.Spawns.SpawnCatalog.LoadDefault(), "elven_starting");
+        var (session, player) = await kit.EnterAsync(classId: 25, x: 0, y: 0, z: 0);
+        long future = kit.Now.ToUnixTimeMilliseconds() + 5_000;
+
+        session.AutoAttackTargetId = 9;
+        player.CastingUntilMs = future;
+        ApplyForced(kit, player, ShieldStun, level: 1);
+        Assert.Equal(0, session.AutoAttackTargetId);
+        Assert.Equal(0, player.CastingUntilMs);
+
+        session.AutoAttackTargetId = 9;
+        player.CastingUntilMs = future;
+        ApplyForced(kit, player, Sleep, level: 1);
+        Assert.Equal(0, session.AutoAttackTargetId);
+        Assert.Equal(future, player.CastingUntilMs);
+
+        session.AutoAttackTargetId = 9;
+        ApplyForced(kit, player, DryadRoot, level: 1);
+        Assert.Equal(9, session.AutoAttackTargetId);
+    }
+
+    [Fact]
+    public async Task Fear_runs_a_player_away_and_drops_a_magic_cast()
+    {
+        var kit = new NetTestKit(Fineage.Zone.Spawns.SpawnCatalog.LoadDefault(), "elven_starting");
+        var (session, player) = await kit.EnterAsync(classId: 25, x: 0, y: 0, z: 0);
+        var caster = new ZoneEntity { X = -100, Y = 0, Z = 0 };
+        session.AutoAttackTargetId = 9;
+        player.PendingHit = new Fineage.Zone.Combat.PendingSkillHit(1, 10, kit.Now.ToUnixTimeMilliseconds() + 5_000)
+        {
+            MagicType = 1
+        };
+        player.CastingUntilMs = kit.Now.ToUnixTimeMilliseconds() + 5_000;
+
+        var template = kit.Game.Skills.Find(Fear) ?? throw new InvalidOperationException("fear missing");
+        Assert.True(template.TryLevelData(1, out var data));
+        Assert.True(kit.World.ApplyAbnormalFromSkillForTest(template, data, player, force: true, attacker: caster));
+
+        Assert.Equal(0, session.AutoAttackTargetId);
+        Assert.Null(player.PendingHit);
+        Assert.Equal(0, player.CastingUntilMs);
+        Assert.True(player.MoveDestX > player.X, $"flee X {player.MoveDestX} should pass {player.X}");
+        Assert.Equal(player.Y, player.MoveDestY);
+    }
+
+    [Fact]
+    public async Task Fear_runs_a_mob_away_from_the_caster_not_its_hate_target()
+    {
+        var kit = new NetTestKit(Fineage.Zone.Spawns.SpawnCatalog.LoadDefault(), "elven_starting");
+        await kit.EnterAsync(classId: 25, x: 0, y: 0, z: 0);
+        var npc = kit.World.AttackableForTest()!;
+        int x = npc.X, y = npc.Y;
+        npc.AggroTargetId = 9;
+        var caster = new ZoneEntity { X = x - 400, Y = y, Z = npc.Z };
+
+        var template = kit.Game.Skills.Find(Fear) ?? throw new InvalidOperationException("fear missing");
+        Assert.True(template.TryLevelData(1, out var data));
+        Assert.True(kit.World.ApplyAbnormalFromSkillForTest(template, data, npc, force: true, attacker: caster));
+
+        Assert.True(npc.MoveDestX > x, $"flee X {npc.MoveDestX} should pass {x}");
+        Assert.Equal(y, npc.MoveDestY);
+    }
+
+    [Fact]
     public async Task Spoil_appears_in_abnormal_snapshot_for_target_window()
     {
         var kit = new NetTestKit(Fineage.Zone.Spawns.SpawnCatalog.LoadDefault(), "elven_starting");

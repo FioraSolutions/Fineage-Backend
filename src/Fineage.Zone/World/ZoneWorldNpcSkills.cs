@@ -256,6 +256,12 @@ public sealed partial class ZoneWorld
         "SILENCE", "SILENCE_PHYSICAL", "SILENCE_ALL"
     };
 
+    /// <summary>Mobius <c>isPhysicalAttackMuted</c> (physical mute / silence all). Magic silence still allows a swing.</summary>
+    internal static readonly HashSet<string> PhysicalMuteSlots = new(StringComparer.OrdinalIgnoreCase)
+    {
+        "SILENCE_PHYSICAL", "SILENCE_ALL"
+    };
+
     internal static bool IsImmobilized(ZoneEntity entity) =>
         entity.Abnormals.Any(a => a.Slot.Length > 0 && ImmobilizeSlots.Contains(a.Slot));
 
@@ -264,6 +270,42 @@ public sealed partial class ZoneWorld
 
     internal static bool IsSilenced(ZoneEntity entity) =>
         entity.Abnormals.Any(a => a.Slot.Length > 0 && SilenceSlots.Contains(a.Slot));
+
+    internal static bool IsPhysicallyMuted(ZoneEntity entity) =>
+        entity.Abnormals.Any(a => a.Slot.Length > 0 && PhysicalMuteSlots.Contains(a.Slot));
+
+    /// <summary>
+    /// Mobius <c>Stun.onStart</c> → <c>startStunning</c> / <c>startParalyze</c>: abort attack, abort cast, stop move.
+    /// <c>onEvtSleeping</c> stops auto-attack and movement and does not abort the cast.
+    /// <c>onEvtRooted</c> only <c>clientStopMoving</c>.
+    /// </summary>
+    void ApplyControlFromSlot(ZoneEntity target, string? slot, ZoneEntity? attacker = null)
+    {
+        if (string.IsNullOrEmpty(slot))
+            return;
+        // Mobius Fear.onStart: abort an interruptible cast, then EVT_AFRAID (run 500 away).
+        if (slot.Equals("TURN_FLEE", StringComparison.OrdinalIgnoreCase))
+        {
+            AbortInterruptibleCast(target);
+            StartFearFlee(target, attacker, alongHeading: false);
+            return;
+        }
+        if (ActionBlockSlots.Contains(slot))
+        {
+            if (target.Session is { } session)
+            {
+                session.AutoAttackTargetId = 0;
+                session.ClearApproach();
+            }
+            if (!slot.Equals("SLEEP", StringComparison.OrdinalIgnoreCase))
+                AbortCast(target, "control", notify: false);
+            StopTimedMove(target);
+            return;
+        }
+
+        if (ImmobilizeSlots.Contains(slot))
+            StopTimedMove(target);
+    }
 
     bool CastNpcSupportSkill(
         ZoneEntity npc,

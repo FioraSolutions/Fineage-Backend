@@ -16,23 +16,26 @@ public sealed partial class ZoneWorld
         ZoneEntity target,
         long nowUnixMs,
         ZoneEntity? attacker = null,
-        bool force = false)
+        bool force = false,
+        int? durationSeconds = null)
     {
         if (!force && template.IsDebuff &&
             !RollDebuffLand(attacker, target, template, levelData, out _))
             return false;
 
+        int duration = durationSeconds ?? template.AbnormalTimeSeconds;
         ZoneAbnormals.Apply(
             target.Abnormals,
             template.SkillId,
             levelData.AbnormalLevel,
-            template.AbnormalTimeSeconds,
+            duration,
             nowUnixMs,
             levelData.Level,
             template.AbnormalType);
         if (target.Abnormals.Count > 0)
             _withAbnormals.Add(target.ObjectId);
         FanoutAbnormal(target);
+        ApplyControlFromSlot(target, template.AbnormalType, attacker);
         return true;
     }
 

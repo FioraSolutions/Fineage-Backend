@@ -6,12 +6,14 @@ namespace Fineage.Zone.Drops;
 public static class MobiusDropTestSeed
 {
     public const int DefaultSeed = 42;
+    public const int TrainingHallGremlinNpcId = 18342;
 
     public static DropStack ExpectedGremlinDeathDrop(int seed = DefaultSeed, DropCatalog? catalog = null)
     {
         catalog ??= DropCatalog.LoadDefault();
-        if (!catalog.TryGet(TalkingIsland.GremlinNpcId, out var definition))
-            throw new InvalidOperationException("Gremlin droplist missing from datapack.");
+        // Talking Island 20001 has no Mobius dropLists. Training-hall 18342 is the generated row.
+        if (!catalog.TryGet(TrainingHallGremlinNpcId, out var definition))
+            throw new InvalidOperationException("Training-hall gremlin droplist missing from datapack.");
 
         var rolls = DropRoller.RollDeath(definition, new Random(seed));
         if (rolls.Count != 1)

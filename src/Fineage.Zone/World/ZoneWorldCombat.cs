@@ -166,6 +166,127 @@ public sealed partial class ZoneWorld
         };
     }
 
+    /// <summary>Mobius <c>PlayableAI</c> blessing / karma / cursed-weapon gate. Sends SysMsg 144 and refuses the swing or bad cast.</summary>
+    bool HostilePlayableRefused(ZoneSession session, ZoneEntity attacker, ZoneEntity target, bool badSkill)
+    {
+        if (!PlayableAttackRules.Refused(
+                attacker.Kind == ZoneEntityKind.Player && target.Kind == ZoneEntityKind.Player,
+                attacker.Level, target.Level, attacker.Karma, target.Karma,
+                HasBlessing(attacker), HasBlessing(target),
+                HasCursedWeapon(attacker.Inventory), HasCursedWeapon(target.Inventory),
+                badSkill,
+                targetInPvp: target.InstanceId != 0 || Pvp.Contains(target.X, target.Y, target.Z)
+                    || InActiveSiegePvp(target.X, target.Y, target.Z)))
+            return false;
+        IncorrectTarget(session);
+        return true;
+    }
+
+    static bool HasBlessing(ZoneEntity entity) =>
+        entity.Abnormals.Any(a => a.Id == PlayableAttackRules.BlessingSkillId);
+
+    public const int SysMsgPeaceTarget = 85;
+    public const int SysMsgEnteredCombatZone = 283;
+    public const int SysMsgLeftCombatZone = 284;
+    public const int SysMsgFishingPole = 1472;
+    public const int SysMsgSiegeFriend = 2158;
+
+    /// <summary>Mobius <c>ArenaZone</c> onEnter/onExit: SysMsg 283/284 when a player crosses the polygon.</summary>
+    void TickArenaZones()
+    {
+        foreach (var player in Players())
+        {
+            if (player.Session == null)
+                continue;
+            bool inside = Pvp.Contains(player.X, player.Y, player.Z)
+                || InActiveSiegePvp(player.X, player.Y, player.Z);
+            if (inside == player.InArena)
+                continue;
+            player.InArena = inside;
+            ShotNotice(player.Session, inside ? SysMsgEnteredCombatZone : SysMsgLeftCombatZone,
+                inside ? "You have entered a combat zone." : "You have left a combat zone.");
+        }
+    }
+
+    /// <summary>
+    /// Mobius <c>isInsidePeaceZone</c>: both playable, and either stands in a peace zone.
+    /// Karma does not bypass (AltKarmaPlayerCanBeKilledInPeaceZone is false). Olympiad instances do.
+    /// <c>doAttack</c> refuses the swing with no system message. Bad skills send SysMsg 85
+    /// (<paramref name="notify"/>). A melee swing stays silent: the attack packet has no Ctrl bit,
+    /// so a forced attack cannot be told apart from a normal one.
+    /// </summary>
+    bool PeacePlayableRefused(ZoneSession session, ZoneEntity attacker, ZoneEntity target, bool notify = true)
+    {
+        if (attacker.Kind != ZoneEntityKind.Player || target.Kind != ZoneEntityKind.Player)
+            return false;
+        if (attacker.InstanceId != 0 || ZoneAdmin.AllowPeaceAttack(attacker.Name))
+            return false;
+        if (!Peace.Contains(attacker.X, attacker.Y, attacker.Z) && !Peace.Contains(target.X, target.Y, target.Z))
+            return false;
+        if (notify)
+            ShotNotice(session, SysMsgPeaceTarget, "You may not attack this target in a peaceful zone.");
+        return true;
+    }
+
+    /// <summary>Castle id when this point is inside a siege polygon whose siege is running, else 0.</summary>
+    internal int ActiveSiegeCastle(int x, int y, int z)
+    {
+        int castleId = SiegeAreas.CastleAt(x, y, z);
+        if (castleId <= 0)
+            return 0;
+        var castle = _siege.Find(castleId);
+        return castle != null && castle.InProgress ? castleId : 0;
+    }
+
+    bool InActiveSiegePvp(int x, int y, int z) => ActiveSiegeCastle(x, y, z) > 0;
+
+    /// <summary>
+    /// Mobius <c>Player.isSiegeFriend</c> after the first mid victory: same castle, same side.
+    /// Attackers are allies only while the castle has no owner. Defenders (including the owner) always are.
+    /// The pre-mid branch that treats every player as a friend is not applied: that flag starts false and flips
+    /// on the first capture, which this server does not track, so it would block siege PvP for the whole fight.
+    /// </summary>
+    bool SiegeFriendRefused(ZoneSession session, ZoneEntity attacker, ZoneEntity target)
+    {
+        if (attacker.Kind != ZoneEntityKind.Player || target.Kind != ZoneEntityKind.Player)
+            return false;
+        int castleId = ActiveSiegeCastle(attacker.X, attacker.Y, attacker.Z);
+        if (castleId <= 0)
+            return false;
+        int state = SiegeSide(attacker.ClanId, castleId);
+        int other = SiegeSide(target.ClanId, castleId);
+        if (state == 0 || other == 0 || state != other)
+            return false;
+        var castle = _siege.Find(castleId);
+        if (castle != null && state == SiegeProtocol.Attacker && castle.OwnerClanId > 0)
+            return false;
+        ShotNotice(session, SysMsgSiegeFriend,
+            "Force attack is impossible against a temporary allied member during a siege.");
+        return true;
+    }
+
+    /// <summary>0 outside the fight, 1 attacker, 2 defender. Owner clan counts as a defender.</summary>
+    int SiegeSide(int clanId, int castleId)
+    {
+        if (clanId <= 0)
+            return 0;
+        var castle = _siege.Find(castleId);
+        if (castle == null || !castle.InProgress)
+            return 0;
+        if (castle.OwnerClanId == clanId)
+            return 2;
+        foreach (var row in castle.Registrations)
+        {
+            if (row.ClanId != clanId)
+                continue;
+            if (row.Side == SiegeProtocol.Attacker)
+                return 1;
+            if (row.Side == SiegeProtocol.Defender)
+                return 2;
+        }
+        return 0;
+    }
+
     string? TryAttack(ZoneSession session, int requestedTargetId) =>
         TryAttack(session, requestedTargetId, out _);
 
@@ -181,6 +302,15 @@ public sealed partial class ZoneWorld
             return "world";
         if (player.Dead)
             return InventoryProtocol.Dead;
+        // Mobius onIntentionAttack: sitting, stunned, sleeping, paralyzed, or physically muted → ActionFailed.
+        if (player.Sitting || IsActionBlocked(player) || IsPhysicallyMuted(player))
+        {
+            approachMs = -1;
+            return null;
+        }
+        // A new attack replaces AI_INTENTION_INTERACT.
+        session.PendingTalkNpcId = 0;
+        session.PendingTalkAtUnixMs = 0;
         if (player.CastingUntilMs > _clock().ToUnixTimeMilliseconds())
             return null; // Mobius: auto-attack waits while casting
 
@@ -194,9 +324,33 @@ public sealed partial class ZoneWorld
             return "attack";
         if (!IsAttackable(player, target))
             return "attack";
+        if (HostilePlayableRefused(session, player, target, badSkill: false))
+        {
+            approachMs = -1;
+            return null;
+        }
         if (!VisibleTo(player.ObjectId, targetId))
             return "attack";
         AdvanceMove(player, _clock().ToUnixTimeMilliseconds());
+        var armed = PlayerStats(player);
+        // Mobius doAttack: isAttackWeapon false (datapack: the six fishing rods) refuses the swing unless GM.
+        if (armed.Weapon == Fineage.Game.WeaponType.FishingRod && !ZoneAdmin.AllowPeaceAttack(player.Name))
+        {
+            ShotNotice(session, SysMsgFishingPole,
+                "You look oddly at the fishing pole in disbelief and realize that you can't attack anything with this.");
+            approachMs = -1;
+            return null;
+        }
+        if (SiegeFriendRefused(session, player, target))
+        {
+            approachMs = -1;
+            return null;
+        }
+        if (PeacePlayableRefused(session, player, target, notify: false))
+        {
+            approachMs = -1;
+            return null;
+        }
         if (!ZoneCombat.Within(player.X, player.Y, target.X, target.Y, PlayerReach(player)))
         {
             approachMs = ApproachTarget(player, target, PlayerReach(player));
@@ -238,7 +392,20 @@ public sealed partial class ZoneWorld
             RechargeAutoShots(player);
         // Mobius doAttack turns the attacker to its target; the target's own facing decides back/side/front.
         player.Heading = ZoneCombat.HeadingFrom(player.X, player.Y, target.X, target.Y);
+        // Mobius doAttackHitByDual: two independent rolls, each damage / 2. timeToHit is timeAtk/2, then the
+        // hits are scheduled at sAtk/2 and sAtk, so timeAtk/4 and timeAtk/2. One Attack packet (the swing).
+        bool dual = ps.Weapon is Fineage.Game.WeaponType.Dual or Fineage.Game.WeaponType.Fist;
         var (damage, flags) = RollPlayerMelee(player, ps, target, soulshot);
+        int damage2 = 0;
+        byte flags2 = 0;
+        if (dual)
+        {
+            if ((flags & ZoneCombat.HitFlagMiss) == 0)
+                damage /= 2;
+            (damage2, flags2) = RollPlayerMelee(player, ps, target, soulshot);
+            if ((flags2 & ZoneCombat.HitFlagMiss) == 0)
+                damage2 /= 2;
+        }
 
         var attack = new AttackMsg
         {
@@ -261,7 +428,10 @@ public sealed partial class ZoneWorld
             ConsumeBowArrow(player);
         long now = _clock().ToUnixTimeMilliseconds();
         player.CombatUntilUnixMs = now + ClanProtocol.CombatStanceMillis;
-        _meleeHits.Add(new PendingMeleeHit(player.ObjectId, targetId, damage, now + PlayerAttackTimeMs(player.ObjectId) / 2));
+        long atk = PlayerAttackTimeMs(player.ObjectId);
+        _meleeHits.Add(new PendingMeleeHit(player.ObjectId, targetId, damage, now + (dual ? atk / 4 : atk / 2)));
+        if (dual)
+            _meleeHits.Add(new PendingMeleeHit(player.ObjectId, targetId, damage2, now + atk / 2));
 
         return null;
     }

@@ -36,6 +36,34 @@ static partial class NormalizedStoreWriter
 
     static void UpsertAccount(NpgsqlConnection conn, NpgsqlTransaction tx, JsonElement account)
     {
+        object email = account.TryGetProperty("email", out var e) && e.ValueKind == JsonValueKind.String
+            ? e.GetString()!
+            : DBNull.Value;
+        if (email is string es && string.IsNullOrWhiteSpace(es))
+            email = DBNull.Value;
+        UpsertAccountRow(
+            conn,
+            tx,
+            account.GetProperty("name").GetString() ?? "",
+            email,
+            account.GetProperty("passwordHash").GetString() ?? "",
+            account.GetProperty("passwordSalt").GetString() ?? "",
+            account.GetProperty("iterations").GetInt32());
+    }
+
+    /// <summary>
+    /// One account row. Character insert FKs <c>characters.account</c>, and a full snapshot
+    /// reproject would wipe the zone's item rows, so register must write this row by itself.
+    /// </summary>
+    public static void UpsertAccountRow(
+        NpgsqlConnection conn,
+        NpgsqlTransaction tx,
+        string name,
+        object? email,
+        string passwordHash,
+        string passwordSalt,
+        int iterations)
+    {
         using var cmd = conn.CreateCommand();
         cmd.Transaction = tx;
         cmd.CommandText =
@@ -48,16 +76,11 @@ static partial class NormalizedStoreWriter
                 password_salt = EXCLUDED.password_salt,
                 iterations = EXCLUDED.iterations
             """;
-        cmd.Parameters.AddWithValue("name", account.GetProperty("name").GetString() ?? "");
-        object email = account.TryGetProperty("email", out var e) && e.ValueKind == JsonValueKind.String
-            ? e.GetString()!
-            : DBNull.Value;
-        if (email is string es && string.IsNullOrWhiteSpace(es))
-            email = DBNull.Value;
-        cmd.Parameters.AddWithValue("email", email);
-        cmd.Parameters.AddWithValue("hash", account.GetProperty("passwordHash").GetString() ?? "");
-        cmd.Parameters.AddWithValue("salt", account.GetProperty("passwordSalt").GetString() ?? "");
-        cmd.Parameters.AddWithValue("iter", account.GetProperty("iterations").GetInt32());
+        cmd.Parameters.AddWithValue("name", name);
+        cmd.Parameters.AddWithValue("email", email ?? DBNull.Value);
+        cmd.Parameters.AddWithValue("hash", passwordHash);
+        cmd.Parameters.AddWithValue("salt", passwordSalt);
+        cmd.Parameters.AddWithValue("iter", iterations);
         cmd.ExecuteNonQuery();
     }
 

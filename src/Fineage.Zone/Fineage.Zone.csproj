@@ -39,6 +39,9 @@
     <Content Include="..\..\data\multisell.json" Link="data\multisell.json" CopyToOutputDirectory="PreserveNewest" />
     <Content Include="..\..\data\doors.json" Link="data\doors.json" CopyToOutputDirectory="PreserveNewest" />
     <Content Include="..\..\data\water-zones.json" Link="data\water-zones.json" CopyToOutputDirectory="PreserveNewest" />
+    <Content Include="..\..\data\peace-zones.json" Link="data\peace-zones.json" CopyToOutputDirectory="PreserveNewest" />
+    <Content Include="..\..\data\pvp-zones.json" Link="data\pvp-zones.json" CopyToOutputDirectory="PreserveNewest" />
+    <Content Include="..\..\data\siege-zones.json" Link="data\siege-zones.json" CopyToOutputDirectory="PreserveNewest" />
     <Content Include="..\..\data\xp-percent-lost.json" Link="data\xp-percent-lost.json" CopyToOutputDirectory="PreserveNewest" />
     <Content Include="..\..\data\death-drop.json" Link="data\death-drop.json" CopyToOutputDirectory="PreserveNewest" />
     <Content Include="..\..\data\npc-ai-support.json" Link="data\npc-ai-support.json" CopyToOutputDirectory="PreserveNewest" />

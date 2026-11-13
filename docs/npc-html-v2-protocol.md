@@ -26,7 +26,7 @@ MessagePack keys are a fixarray (`0..n-1`). Extra keys may be appended later. Do
 
 Same body as the quest wire: key 0 is the NPC object id.
 
-The player must be in the world, alive, and within **150** (3D) of a non-attackable NPC. That distance is `NpcHtmlProtocol.InteractionDistance` and `QuestProtocol.TalkRange`. Mobius Interlude `Npc.INTERACTION_DISTANCE` is 250 (`Npc.canInteract` is 3D, and the `npc_` bypass check is 2D). This server keeps 150 so quest talk and the HTML window share one distance.
+The player must be in the world, alive, and within **250** (3D) of a non-attackable NPC. That distance is `NpcHtmlProtocol.InteractionDistance` and `QuestProtocol.TalkRange`, matching Mobius Interlude `Npc.INTERACTION_DISTANCE` (`Npc.canInteract` is 3D). Trade stays 150.
 
 An attackable (a gremlin, any monster) is refused with `npc_attackable`. Combat, death, and respawn are unchanged.
 

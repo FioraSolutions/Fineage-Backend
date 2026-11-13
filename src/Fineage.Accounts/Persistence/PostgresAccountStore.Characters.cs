@@ -14,8 +14,26 @@ public sealed partial class PostgresAccountStore
 {
     public bool AccountExists(string account) => _inner.AccountExists(account);
 
-    public AddAccountStatus TryAddAccount(string name, string passwordHash, string passwordSalt, int iterations, string? email) =>
-        _inner.TryAddAccount(name, passwordHash, passwordSalt, iterations, email);
+    public AddAccountStatus TryAddAccount(string name, string passwordHash, string passwordSalt, int iterations, string? email)
+    {
+        var status = _inner.TryAddAccount(name, passwordHash, passwordSalt, iterations, email);
+        if (status != AddAccountStatus.Created)
+            return status;
+
+        // Memory + snapshot JSON are not enough: characters.account FKs this row.
+        string account = name.Trim();
+        object? canonicalEmail = string.IsNullOrWhiteSpace(email) ? null : email.Trim().ToLowerInvariant();
+        lock (_persistGate)
+        {
+            using var conn = _dataSource.OpenConnection();
+            using var tx = conn.BeginTransaction();
+            NormalizedStoreWriter.UpsertAccountRow(
+                conn, tx, account, canonicalEmail, passwordHash, passwordSalt, iterations);
+            tx.Commit();
+        }
+
+        return status;
+    }
 
     public bool TryGetCredentialByEmail(string email, out AccountCredential credential) =>
         _inner.TryGetCredentialByEmail(email, out credential);

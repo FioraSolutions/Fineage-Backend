@@ -117,7 +117,7 @@ Runtime Talking Island gremlins still use hard-coded `TalkingIsland.cs` until sp
 - `data/drops/*.json` is the source of truth. `scripts/gen_drops.py` converts Mobius `stats/npcs/*.xml`
   `<dropLists>` for every NPC id in `data/spawns/*.json`. `<drop><group>` → `death.groups`, loose `<drop><item>` →
   its own group, `<spoil>` → `corpse.items`. Files with `"generated": true` are rewritten on each run; remove the
-  flag to own a file by hand (npc-20001-gremlin.json is hand-written and skipped).
+  flag to own a file by hand. Talking Island gremlin 20001 has no Mobius `<dropLists>`, so it has no file.
 - Rolls stay in `DropRoller` (group chance, weighted item, min/max, `DropRates`).
 - Death loot: scatter ±70 around corpse (Mobius randDropLim), killer/party-only pickup for 15 s
   (DropProtection; others get SysMsg 145), auto-destroy after 600 s (herbs 60 s). Player discards never expire
