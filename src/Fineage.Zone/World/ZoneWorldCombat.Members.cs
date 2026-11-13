@@ -45,6 +45,7 @@ public sealed partial class ZoneWorld
         {
             long now = _clock().ToUnixTimeMilliseconds();
             TickPlayerMovement(now);
+            TickArenaZones();
             TickNpcMovement(now);
             TickRandomWalk(now);
             TickPendingHits(now);
@@ -54,6 +55,8 @@ public sealed partial class ZoneWorld
             TickPendingCasts(now);
             TickQueuedMoves(now);
             TickPendingPickups(now);
+            TickPendingTalks(now);
+            TickFear(now);
             // Proactive AI used to live only on RunCombatTickAsync (tests). Without these,
             // aggressive mobs never aggro or leash on the live CombatLoopAsync path.
             TickAggression(now);
@@ -99,6 +102,15 @@ public sealed partial class ZoneWorld
                 continue;
             }
             if (!VisibleTo(player.ObjectId, targetId))
+            {
+                session.AutoAttackTargetId = 0;
+                session.ClearApproach();
+                continue;
+            }
+            if (player.Sitting || IsActionBlocked(player) || IsPhysicallyMuted(player) ||
+                HostilePlayableRefused(session, player, target, badSkill: false) ||
+                SiegeFriendRefused(session, player, target) ||
+                PeacePlayableRefused(session, player, target, notify: false))
             {
                 session.AutoAttackTargetId = 0;
                 session.ClearApproach();

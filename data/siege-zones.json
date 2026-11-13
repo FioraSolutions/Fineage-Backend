@@ -1,0 +1,9 @@
+[{"name":"gludio_castle_battlefield_territory","castleId":1,"minZ":-14448,"maxZ":13551,"nodes":[[-22615,104510],[-13290,104564],[-13313,116950],[-22638,116896]]},
+{"name":"dion_castle_battlefield_territory","castleId":2,"minZ":-14642,"maxZ":14000,"nodes":[[26575,165240],[17250,165186],[17273,152800],[26598,152854]]},
+{"name":"giran_castle_battlefield_territory","castleId":3,"minZ":-14515,"maxZ":29935,"nodes":[[121412,140594],[121358,149919],[108972,149896],[109026,140571]]},
+{"name":"oren_castle_battlefield_territory","castleId":4,"minZ":-14242,"maxZ":29935,"nodes":[[87488,32689],[87434,42014],[75048,41991],[75102,32666]]},
+{"name":"aden_castle_battlefield_territory","castleId":5,"minZ":-13184,"maxZ":16816,"nodes":[[142431,362],[152263,1],[152710,15356],[142393,15215]]},
+{"name":"innadrile_castle_battlefield_territory","castleId":6,"minZ":-12738,"maxZ":14000,"nodes":[[120526,254019],[111201,253965],[111224,241579],[120549,241633]]},
+{"name":"godad_castle_battlefield_territory","castleId":7,"minZ":-13397,"maxZ":15100,"nodes":[[143023,-53210],[151893,-53210],[151949,-39107],[145899,-39107],[141457,-44407]]},
+{"name":"rune_castle_battlefield_territory","castleId":8,"minZ":-14350,"maxZ":20030,"nodes":[[6015,-56316],[17343,-53750],[19486,-52556],[23783,-52570],[27027,-49433],[27020,-48831],[23887,-45218],[19385,-45203],[17413,-44022],[6015,-41600]]},
+{"name":"schuttgart_castle_battlefield_territory","castleId":9,"minZ":-13997,"maxZ":18503,"nodes":[[71420,-159445],[83119,-159442],[83122,-150000],[77897,-143861],[71420,-148782]]}]

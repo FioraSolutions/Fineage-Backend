@@ -32,6 +32,10 @@ public sealed partial class ZoneWorld
             return SkillProtocol.Target;
         if (!IsAttackable(player, target))
             return SkillProtocol.Target;
+        if (HostilePlayableRefused(session, player, target, badSkill: true) ||
+            SiegeFriendRefused(session, player, target) ||
+            PeacePlayableRefused(session, player, target))
+            return null;
         if (!VisibleTo(player.ObjectId, targetId))
             return SkillProtocol.Target;
 
@@ -46,6 +50,8 @@ public sealed partial class ZoneWorld
             if (travelMs < 0)
                 return SkillProtocol.Range;
             session.AutoAttackTargetId = 0;
+            session.PendingTalkNpcId = 0;
+            session.PendingTalkAtUnixMs = 0;
             session.SelectedTargetId = targetId;
             session.PendingCastSkillId = request.SkillId;
             session.PendingCastTargetId = targetId;

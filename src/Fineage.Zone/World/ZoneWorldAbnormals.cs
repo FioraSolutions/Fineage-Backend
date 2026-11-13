@@ -35,6 +35,7 @@ public sealed partial class ZoneWorld
         if (target.Abnormals.Count > 0)
             _withAbnormals.Add(target.ObjectId);
         FanoutAbnormal(target);
+        ApplyControlFromSlot(target, template.AbnormalType, attacker);
         return true;
     }
 

@@ -1,3 +1,4 @@
+using Fineage.Game.Combat;
 using Fineage.Protocol;
 using Fineage.Zone.Combat;
 
@@ -20,43 +21,82 @@ public sealed partial class ZoneWorld
         return false;
     }
 
-    /// <summary>Mobius FearTask: run ~500 units away from the feared source.</summary>
-    void FleeFrom(ZoneEntity npc, ZoneEntity from, long now)
+    /// <summary>Mobius <c>CreatureAI.FEAR_RANGE</c> and <c>EffectTickRatio</c> 666 × Fear.getTicks() 5.</summary>
+    const int FearRange = 500;
+    const int FearStepMs = 5 * 666;
+
+    /// <summary>
+    /// Mobius <c>onEvtAfraid</c>: run <see cref="FearRange"/> along the angle from the caster (start)
+    /// or along the current heading (later ticks). Geo clips the dest in <see cref="StartTimedMove"/>.
+    /// </summary>
+    void StartFearFlee(ZoneEntity actor, ZoneEntity? from, bool alongHeading)
     {
-        double dx = npc.X - from.X;
-        double dy = npc.Y - from.Y;
-        double dist = Math.Sqrt(dx * dx + dy * dy);
-        if (dist < 1)
+        long now = _clock().ToUnixTimeMilliseconds();
+        actor.FearFleeAtUnixMs = now + FearStepMs;
+        if (actor.Session is { } session)
+            session.FearFleeAtUnixMs = actor.FearFleeAtUnixMs;
+        if (actor.Dead || actor.Sitting || IsImmobilized(actor))
+            return;
+
+        double degrees = !alongHeading && from != null && (from.X != actor.X || from.Y != actor.Y)
+            ? ZoneCombat.AngleFrom(from.X, from.Y, actor.X, actor.Y)
+            : actor.Heading / 182.044444444;
+        double rad = degrees * Math.PI / 180.0;
+        int destX = (int)Math.Round(actor.X + FearRange * Math.Cos(rad));
+        int destY = (int)Math.Round(actor.Y + FearRange * Math.Sin(rad));
+        actor.Heading = ZoneCombat.HeadingFrom(actor.X, actor.Y, destX, destY);
+        if (!actor.Running)
         {
-            dx = 1;
-            dy = 0;
-            dist = 1;
+            actor.Running = true;
+            FanoutMoveType(actor);
         }
 
-        const double fleeRange = 500;
-        int destX = (int)Math.Round(npc.X + dx / dist * fleeRange);
-        int destY = (int)Math.Round(npc.Y + dy / dist * fleeRange);
-        int destZ = npc.Z;
-
-        long ddx = destX - (long)npc.ChaseDestX, ddy = destY - (long)npc.ChaseDestY;
-        if (!npc.Chasing || !npc.MoveActive || ddx * ddx + ddy * ddy > 40L * 40L)
+        if (actor.Kind == ZoneEntityKind.Npc)
         {
-            if (!npc.HomeSet)
-            {
-                npc.HomeSet = true;
-                (npc.HomeX, npc.HomeY, npc.HomeZ) = (npc.X, npc.Y, npc.Z);
-            }
-            SetReturningHome(npc, false);
-            if (!npc.Running)
-            {
-                npc.Running = true;
-                FanoutMoveType(npc);
-            }
-            npc.Chasing = true;
-            npc.ChaseDestX = destX;
-            npc.ChaseDestY = destY;
-            StartNpcMove(npc, destX, destY, destZ, now);
+            actor.Chasing = false;
+            StartNpcMove(actor, destX, destY, actor.Z, now);
+            return;
         }
+
+        if (actor.Session is not { } live)
+            return;
+        live.AutoAttackTargetId = 0;
+        live.ClearApproach();
+        StartTimedMove(actor, live, new MoveToMsg
+        {
+            ObjectId = actor.ObjectId,
+            DestX = destX,
+            DestY = destY,
+            DestZ = actor.Z,
+            OriginX = actor.X,
+            OriginY = actor.Y,
+            OriginZ = actor.Z
+        });
+    }
+
+    /// <summary>Mobius Fear <c>onActionTime</c>: keep fleeing along the heading while TURN_FLEE is up.</summary>
+    void TickFear(long now)
+    {
+        foreach (var player in Players().ToList())
+        {
+            var session = player.Session;
+            if (session == null || !IsFeared(player) || now < player.FearFleeAtUnixMs)
+                continue;
+            StartFearFlee(player, from: null, alongHeading: true);
+        }
+    }
+
+    /// <summary>Mobius <c>Fear.onStart</c>: abort only when <c>canAbortCast</c> (magic / static).</summary>
+    void AbortInterruptibleCast(ZoneEntity actor)
+    {
+        var hit = actor.PendingHit;
+        if (hit == null)
+            return;
+        bool interruptible = hit.Combat != null
+            ? CastRules.Interruptible(hit.Combat.Magic)
+            : CastRules.Interruptible(hit.MagicType);
+        if (interruptible)
+            AbortCast(actor, "fear", notify: false);
     }
 
     void ChaseStep(ZoneEntity npc, ZoneEntity target, long now)

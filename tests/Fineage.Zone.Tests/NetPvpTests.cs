@@ -38,6 +38,13 @@ public sealed class NetPvpTests
         // Same tile: both in melee reach, and each knows the other.
         Assert.Contains(other.ObjectId, player.Knownlist);
         Assert.Contains(player.ObjectId, otherPlayer.Knownlist);
+        // Elven start sits in elf_start_peace1. Mobius refuses playable-vs-playable there.
+        player.X = session.X = 0;
+        player.Y = session.Y = 0;
+        player.Z = session.Z = 0;
+        otherPlayer.X = other.X = 40;
+        otherPlayer.Y = other.Y = 0;
+        otherPlayer.Z = other.Z = 0;
         return (kit, session, player, other, otherPlayer, rec);
     }
 

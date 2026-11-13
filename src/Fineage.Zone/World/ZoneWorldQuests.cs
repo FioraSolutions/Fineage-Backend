@@ -48,7 +48,7 @@ public sealed partial class ZoneWorld
             return Task.FromResult<string?>("bad_request");
 
         return Task.FromResult(WithDeferredInventoryPersist(
-            () => Talk(session, npcObjectId, questId: 0, eventName: null, out _)));
+            () => Talk(session, npcObjectId, questId: 0, eventName: null, out _, allowApproach: true)));
     }
 
     public Task<string?> TryQuestEventAsync(ZoneSession session, int npcObjectId, int questId, string? eventName, CancellationToken ct)
@@ -97,7 +97,7 @@ public sealed partial class ZoneWorld
         }
     }
 
-    string? Talk(ZoneSession session, int npcObjectId, int questId, string? eventName, out QuestOutcome? outcome)
+    string? Talk(ZoneSession session, int npcObjectId, int questId, string? eventName, out QuestOutcome? outcome, bool allowApproach = false)
     {
         outcome = null;
         if (!TryPlayer(session, out var player))
@@ -109,7 +109,33 @@ public sealed partial class ZoneWorld
         if (player.Dead)
             return InventoryProtocol.Dead;
         if (!InTalkRange(player, npc))
-            return "range";
+        {
+            // Mobius NpcAction: already targeted, not auto-attackable, !canInteract →
+            // AI_INTENTION_INTERACT → moveToPawn, then PlayerAI.thinkInteract → doInteract → onAction.
+            // Bypass links stay a hard range check (Npc.onBypassFeedback requires canInteract).
+            if (!allowApproach || eventName != null)
+                return "range";
+            long now = _clock().ToUnixTimeMilliseconds();
+            if (player.CastingUntilMs > now || player.Sitting)
+                return null;
+            session.AutoAttackTargetId = 0;
+            session.PendingCastSkillId = 0;
+            session.PendingCastAtUnixMs = 0;
+            long ms = ApproachTarget(player, npc, _game.Quests.TalkRange);
+            if (ms < 0)
+                return "range";
+            if (ms > 0)
+            {
+                session.PendingTalkNpcId = npc.ObjectId;
+                session.PendingTalkAtUnixMs = now + ms;
+                return null;
+            }
+        }
+
+        session.PendingTalkNpcId = 0;
+        session.PendingTalkAtUnixMs = 0;
+        // Mobius NpcAction sends MoveToPawn(player, npc, 100) before the chat window so the NPC faces the talker.
+        npc.Heading = ZoneCombat.HeadingFrom(npc.X, npc.Y, player.X, player.Y);
 
         // Mobius NewbieHelper onFirstTalk — before guide HTML / other quest hooks.
         if (eventName == null)
@@ -129,6 +155,39 @@ public sealed partial class ZoneWorld
         if (outcome.Ok || outcome.Lines.Count > 0 || outcome.JournalChanged)
             Publish(session, player, outcome, npc.ObjectId, npc.NpcId);
         return outcome.Ok ? null : FailureCode(outcome.Failure);
+    }
+
+    /// <summary>Mobius <c>PlayerAI.thinkInteract</c> on <c>EVT_ARRIVED</c>: open the chat once the run is in range.</summary>
+    void TickPendingTalks(long now)
+    {
+        foreach (var player in Players().ToList())
+        {
+            var session = player.Session;
+            if (session == null || session.PendingTalkNpcId <= 0 || now < session.PendingTalkAtUnixMs)
+                continue;
+            int npcId = session.PendingTalkNpcId;
+            session.PendingTalkNpcId = 0;
+            session.PendingTalkAtUnixMs = 0;
+            if (!_byId.TryGetValue(npcId, out var npc) || npc.Kind != ZoneEntityKind.Npc)
+                continue;
+            if (!InTalkRange(player, npc))
+            {
+                long ms = ApproachTarget(player, npc, _game.Quests.TalkRange);
+                if (ms > 0)
+                {
+                    session.PendingTalkNpcId = npcId;
+                    session.PendingTalkAtUnixMs = now + ms;
+                    continue;
+                }
+                if (ms < 0)
+                {
+                    NotifyLine(player.ObjectId, SysMsgTargetOutOfRange, "Your target is out of range.");
+                    continue;
+                }
+            }
+
+            Talk(session, npcId, questId: 0, eventName: null, out _, allowApproach: false);
+        }
     }
 
     static QuestActor QuestActorOf(ZoneEntity player) => new(player.Race, player.Level, player.ClassId);

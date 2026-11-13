@@ -165,10 +165,11 @@ public sealed partial class ZoneWorld
                 SetAggroTarget(npc, topHate);
             CallClanHelp(npc, player, now);
             npc.LastAiTickMs = now;
-            // Mobius Fear / TURN_FLEE: skip attack AI and run away from the feared source.
+            // Mobius onEvtAfraid: the first step is away from the caster; later steps follow heading.
             if (IsFeared(npc))
             {
-                FleeFrom(npc, player, now);
+                if (now >= npc.FearFleeAtUnixMs)
+                    StartFearFlee(npc, from: null, alongHeading: true);
                 continue;
             }
             // Sleep / stun / root / hold / paralyze: stop chase and do not swing (Mobius EffectFlag).

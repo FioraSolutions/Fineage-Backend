@@ -31,7 +31,8 @@ public static class QuestProtocol
     public const ushort Sound = 1063;
 
     public const int MaxActive = 25;
-    public const int TalkRange = 150;
+    /// <summary>Mobius <c>Npc.INTERACTION_DISTANCE</c>. Trade range stays 150.</summary>
+    public const int TalkRange = 250;
     public const int CompletedMaskLength = 128;
 
     public const string Unknown = "quest_unknown";
