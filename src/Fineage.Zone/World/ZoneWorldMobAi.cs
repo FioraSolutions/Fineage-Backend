@@ -136,6 +136,13 @@ public sealed partial class ZoneWorld
                 StopTimedMove(npc);
                 continue;
             }
+            // Mobius thinkAttack: attack timeout (2 min without a fresh onEvtAttacked) drops the fight
+            // and teleports a monster back to its spawn.
+            if (npc.AttackTimeoutAtMs > 0 && now >= npc.AttackTimeoutAtMs)
+            {
+                TeleportHome(npc);
+                continue;
+            }
             if (!_byId.TryGetValue(npc.AggroTargetId, out var player) ||
                 player.Kind != ZoneEntityKind.Player || player.Dead || player.Session == null ||
                 !SameInstance(npc.ObjectId, player.ObjectId) ||

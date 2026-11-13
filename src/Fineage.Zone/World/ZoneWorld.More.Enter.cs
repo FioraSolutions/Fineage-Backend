@@ -206,6 +206,8 @@ public sealed partial class ZoneWorld
             entity.Knownlist.Add(other.ObjectId);
             if (other.Session != null)
                 other.Knownlist.Add(entity.ObjectId);
+            else
+                TrackThink(other);
         }
 
         AnnounceClanEnter(entity);

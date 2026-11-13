@@ -113,12 +113,46 @@ sealed partial class ZoneEntity
         set => EnsureAggro().LastAiTickMs = value;
     }
 
+    /// <summary>Mobius <c>AttackableAI._globalAggro</c>. Starts at -10; think steps it toward 0.</summary>
+    public int GlobalAggro
+    {
+        get => Aggro?.GlobalAggro ?? -10;
+        set => EnsureAggro().GlobalAggro = value;
+    }
+
     /// <summary>Unix ms when thinkActive may add a player on its own. 0 means already allowed.</summary>
     public long ProactiveAggroAtMs
     {
         get => Aggro?.ProactiveAggroAtMs ?? 0;
         set => EnsureAggro().ProactiveAggroAtMs = value;
     }
+
+    /// <summary>Mobius attack timeout, unix ms. 0 means the mob is not on an attack intention.</summary>
+    public long AttackTimeoutAtMs
+    {
+        get => Aggro?.AttackTimeoutAtMs ?? 0;
+        set => EnsureAggro().AttackTimeoutAtMs = value;
+    }
+
+    public int LeaderObjectId
+    {
+        get => Aggro?.LeaderObjectId ?? 0;
+        set => EnsureAggro().LeaderObjectId = value;
+    }
+
+    public bool RaidMinion
+    {
+        get => Aggro?.RaidMinion ?? false;
+        set => EnsureAggro().RaidMinion = value;
+    }
+
+    public bool PrivatesSpawned
+    {
+        get => Aggro?.PrivatesSpawned ?? false;
+        set => EnsureAggro().PrivatesSpawned = value;
+    }
+
+    public List<int> MinionIds => EnsureAggro().MinionIds;
 
     /// <summary>NPC: spawn point captured on first aggro (Mobius <c>Attackable.returnHome</c> target).</summary>
     public bool HomeSet

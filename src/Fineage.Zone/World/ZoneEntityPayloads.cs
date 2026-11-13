@@ -249,8 +249,19 @@ sealed class ZoneNpcAggroPayload
     public Dictionary<int, long> HateList { get; } = [];
     public Dictionary<int, long> DamageBy { get; } = [];
     public long NextAggroScanMs { get; set; }
-    /// <summary>Mobius <c>_globalAggro</c> starts at -10: no proactive aggro until this unix ms.</summary>
+    /// <summary>Mobius <c>_globalAggro</c> starts at -10 and steps toward 0 once per think.</summary>
+    public int GlobalAggro { get; set; } = -10;
+    /// <summary>Legacy unix-ms gate. Think uses <see cref="GlobalAggro"/>.</summary>
     public long ProactiveAggroAtMs { get; set; }
+    /// <summary>Mobius <c>_attackTimeout</c>: unix ms when thinkAttack drops the target. 0 = not attacking.</summary>
+    public long AttackTimeoutAtMs { get; set; }
+    /// <summary>Mobius <c>Monster.getLeader()</c>. 0 = not a minion.</summary>
+    public int LeaderObjectId { get; set; }
+    /// <summary>Mobius <c>isRaidMinion</c>: follow offset is 500 instead of 200.</summary>
+    public bool RaidMinion { get; set; }
+    /// <summary>Privates already spawned for this master (Mobius <c>MinionList.spawnMinions</c>).</summary>
+    public bool PrivatesSpawned { get; set; }
+    public List<int> MinionIds { get; } = [];
     public long NextClanCallMs { get; set; }
     public bool StanceShown { get; set; }
     public int AggroTargetId { get; set; }

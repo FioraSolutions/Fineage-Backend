@@ -15,6 +15,8 @@ public sealed partial class ZoneWorld
 {
     const int AggroScanIntervalMs = 500;
     const int ClanCallIntervalMs = 1000;
+    /// <summary>Mobius <c>MAX_ATTACK_TIMEOUT = 1200</c> game ticks (100 ms), two minutes.</summary>
+    const int AttackTimeoutMs = 120_000;
 
     /// <summary>Mobius hate for <paramref name="damage"/> dealt to an NPC of <paramref name="npcLevel"/>.</summary>
     internal static long DamageHate(int damage, int npcLevel) => Math.Max(1, (long)damage * 100 / (Math.Max(1, npcLevel) + 7));
@@ -37,8 +39,10 @@ public sealed partial class ZoneWorld
         // Mobius FolkStatus: merchants/trainers/folk never hate. Guards/Monsters (Attackable types) do.
         if (!ZoneCombat.TakesNpcCombatDamage(npc.NpcType, npc.Attackable))
             return;
-        // Mobius onEvtAttacked: _globalAggro = 0, so a hit allows attack even during the spawn delay.
-        npc.ProactiveAggroAtMs = 0;
+        // Mobius onEvtAttacked: _globalAggro = 0 and the attack timeout restarts (1200 game ticks, 2 min).
+        if (npc.GlobalAggro < 0)
+            npc.GlobalAggro = 0;
+        npc.AttackTimeoutAtMs = _clock().ToUnixTimeMilliseconds() + AttackTimeoutMs;
         npc.HateList[attacker.ObjectId] = npc.HateList.GetValueOrDefault(attacker.ObjectId) + Math.Max(1, hate);
         int top = MostHated(npc);
         if (top == npc.AggroTargetId || top == 0)
@@ -98,16 +102,17 @@ public sealed partial class ZoneWorld
     {
         // Mobius thinkActive only matters when players exist nearby; empty world → no scan.
         var players = Players();
-        if (players.Count == 0)
+        if (players.Count == 0 || _thinking.Count == 0)
             return;
-        foreach (var npc in _byId.Values)
+        foreach (int id in _thinking.ToArray())
         {
+            if (!_byId.TryGetValue(id, out var npc))
+                continue;
             if (npc.Kind != ZoneEntityKind.Npc || !npc.Aggressive || npc.AggroRange <= 0 || !npc.Attackable ||
                 npc.CurHp <= 0 || npc.AggroTargetId > 0 || npc.ReturningHome || now < npc.NextAggroScanMs)
                 continue;
-            // Mobius AttackableAI: _globalAggro starts at -10 and climbs once per 1s think, so a fresh
-            // mob does not pick a target for 10s. onEvtAttacked zeroes it; a hit still hates immediately.
-            if (npc.ProactiveAggroAtMs > now)
+            // _globalAggro starts at -10 and climbs once per think. A hit zeroes it.
+            if (npc.GlobalAggro < 0)
                 continue;
             npc.NextAggroScanMs = now + AggroScanIntervalMs;
             foreach (var p in players)
@@ -133,8 +138,10 @@ public sealed partial class ZoneWorld
         if (caller.Clans == null || caller.ClanHelpRange <= 0 || now < caller.NextClanCallMs)
             return;
         caller.NextClanCallMs = now + ClanCallIntervalMs;
-        foreach (var other in _byId.Values)
+        foreach (int id in _aoi.GetVisible(caller.ObjectId))
         {
+            if (!_byId.TryGetValue(id, out var other))
+                continue;
             if (other.Kind != ZoneEntityKind.Npc || ReferenceEquals(other, caller) || other.CurHp <= 0 || !other.Attackable ||
                 other.AggroTargetId > 0 || other.Clans == null || !other.Clans.Any(c => caller.Clans.Contains(c)) ||
                 (caller.IgnoreNpcIds?.Contains(other.NpcId) ?? false) ||
@@ -152,27 +159,35 @@ public sealed partial class ZoneWorld
         if (NetBridge == null)
             return;
         List<ZoneEntity>? players = null;
-        foreach (var e in _byId.Values)
+        foreach (var e in Players())
+            NoteStance(e, now, ref players);
+        foreach (int id in _aiBusy)
         {
-            bool inStance = e.Kind switch
-            {
-                ZoneEntityKind.Player => !e.Dead && e.CombatUntilUnixMs > now,
-                ZoneEntityKind.Npc => e.CurHp > 0 && e.AggroTargetId > 0,
-                _ => false
-            };
-            if (inStance == e.StanceShown)
-                continue;
-            e.StanceShown = inStance;
-            // Self + every player that knows the entity (NPC knownlists are not tracked).
-            players ??= Players();
-            var watchers = new List<int>();
-            foreach (var w in players)
-            {
-                if (w.Session != null && (ReferenceEquals(w, e) || w.Knownlist.Contains(e.ObjectId)))
-                    watchers.Add(w.ObjectId);
-            }
-            if (watchers.Count > 0)
-                NetBridge.FanoutAttackStance(watchers, e.ObjectId, inStance);
+            if (_byId.TryGetValue(id, out var npc))
+                NoteStance(npc, now, ref players);
         }
+    }
+
+    void NoteStance(ZoneEntity e, long now, ref List<ZoneEntity>? players)
+    {
+        bool inStance = e.Kind switch
+        {
+            ZoneEntityKind.Player => !e.Dead && e.CombatUntilUnixMs > now,
+            ZoneEntityKind.Npc => e.CurHp > 0 && e.AggroTargetId > 0,
+            _ => false
+        };
+        if (inStance == e.StanceShown)
+            return;
+        e.StanceShown = inStance;
+        // Self + every player that knows the entity (NPC knownlists are not tracked).
+        players ??= Players();
+        var watchers = new List<int>();
+        foreach (var w in players)
+        {
+            if (w.Session != null && (ReferenceEquals(w, e) || w.Knownlist.Contains(e.ObjectId)))
+                watchers.Add(w.ObjectId);
+        }
+        if (watchers.Count > 0)
+            NetBridge!.FanoutAttackStance(watchers, e.ObjectId, inStance);
     }
 }

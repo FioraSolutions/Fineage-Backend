@@ -156,8 +156,7 @@ public sealed partial class ZoneWorld
             WalkSpeed = def.WalkSpeed,
             // Mobius Creature._isRunning starts false. Attack intention calls setRunning().
             Running = false,
-            // Mobius AttackableAI._globalAggro = -10: one think per second until it reaches 0.
-            ProactiveAggroAtMs = _clock().ToUnixTimeMilliseconds() + 10_000,
+            GlobalAggro = -10,
             // Mobius Spawn location is the returnHome target; captured at spawn, not at first aggro, so a mob that
             // drifted before being attacked still walks back to the real spawn point.
             HomeSet = true,
