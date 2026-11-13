@@ -166,8 +166,16 @@ public static class ZoneAcceptance
                 DestY = destY,
                 DestZ = destZ
             }));
-            var ack = NetCodec.DecodeMoveState((await link.ExpectNextAsync(NetOpcode.MoveState).ConfigureAwait(false)).Payload);
-            Require(ack.DestX == destX && ack.DestY == destY, $"move ack mismatch dest={ack.DestX},{ack.DestY}");
+            // Gremlins random-walk on the same opcode. The first MoveState in the inbox is often theirs.
+            MoveStateMsg ack;
+            while (true)
+            {
+                ack = NetCodec.DecodeMoveState((await link.ExpectNextAsync(NetOpcode.MoveState).ConfigureAwait(false)).Payload);
+                if (ack.EntityValue == self.EntityValue)
+                    break;
+            }
+            Require(ack.DestX == destX && ack.DestY == destY,
+                $"move ack mismatch want={destX},{destY} got={ack.DestX},{ack.DestY}");
         }
         finally
         {
