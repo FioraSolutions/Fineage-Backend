@@ -36,6 +36,12 @@ public static class ZoneBuffs
         365,  // Siren's Dance — mCritRate ×2
     ];
 
+    /// <summary>
+    /// <c>//mbuff</c> / <c>//fbuff</c> hold time. Real casts keep <c>skills.json</c> abnormalTime
+    /// (songs stay 120s when an SWS sings them).
+    /// </summary>
+    public const int AdminPackDurationSeconds = 3600;
+
     /// <summary>Chat <c>//fbuff</c> — fighter-oriented self-buff pack (max skill level).</summary>
     public static readonly int[] FighterSelfBuffs =
     [
@@ -51,5 +57,7 @@ public static class ZoneBuffs
         1045, // Blessed Body
         1388, // Greater Might
         1389, // Greater Shield
+        268,  // Song of Wind — runSpd +20 (admin pack lasts an hour; a real SWS cast stays 120s)
+        1062, // Berserker Spirit
     ];
 }

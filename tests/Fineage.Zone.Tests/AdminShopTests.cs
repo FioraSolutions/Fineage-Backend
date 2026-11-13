@@ -4,6 +4,7 @@ using Fineage.Login;
 using Fineage.Net.Contract;
 using Fineage.Protocol;
 using Fineage.Zone;
+using Fineage.Zone.Combat;
 using Fineage.Zone.NpcHtml;
 using Fineage.Zone.Net;
 using Fineage.Zone.World;
@@ -148,9 +149,37 @@ public sealed class AdminShopTests : IDisposable
 
         Assert.Null(await me.BypassAsync(0, "admin_mbuff"));
         Assert.True(me.Player.Abnormals.Count >= 3);
+        long packNow = kit.Now().ToUnixTimeMilliseconds();
+        var adminSong = Assert.Single(me.Player.Abnormals, a => a.Id == 268);
+        Assert.Equal(packNow + ZoneBuffs.AdminPackDurationSeconds * 1000L, adminSong.ExpiresAtUnixMs);
         // Expanded mage pack: SWS Song of Wind + BD dances must land.
         Assert.Contains(me.Player.Abnormals, a => a.Id == 268);
         Assert.Contains(me.Player.Abnormals, a => a.Id == 276);
         Assert.Contains(me.Player.Abnormals, a => a.Id == 365);
+    }
+
+    [Fact]
+    public async Task Fbuff_adds_song_of_wind_and_bers_for_an_hour_real_song_stays_default()
+    {
+        Assert.Contains(268, ZoneBuffs.FighterSelfBuffs);
+        Assert.Contains(1062, ZoneBuffs.FighterSelfBuffs);
+
+        var kit = new WorldBench();
+        BenchPlayer me = await kit.EnterAsync(name: "KuK");
+        Assert.Null(await me.BypassAsync(0, "admin_fbuff"));
+
+        long now = kit.Now().ToUnixTimeMilliseconds();
+        var song = Assert.Single(me.Player.Abnormals, a => a.Id == 268);
+        var bers = Assert.Single(me.Player.Abnormals, a => a.Id == 1062);
+        Assert.Equal(now + ZoneBuffs.AdminPackDurationSeconds * 1000L, song.ExpiresAtUnixMs);
+        Assert.Equal(now + ZoneBuffs.AdminPackDurationSeconds * 1000L, bers.ExpiresAtUnixMs);
+
+        var template = kit.Game.Skills.Find(268);
+        Assert.NotNull(template);
+        Assert.Equal(120, template!.AbnormalTimeSeconds);
+        Assert.True(template.TryLevelData(1, out var level));
+        var sung = new ZoneEntity { ObjectId = 99, Kind = ZoneEntityKind.Player };
+        Assert.True(kit.World.ApplyAbnormalFromSkillForTest(template, level, sung));
+        Assert.Equal(now + 120_000L, Assert.Single(sung.Abnormals).ExpiresAtUnixMs);
     }
 }
