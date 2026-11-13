@@ -31,8 +31,10 @@ public sealed partial class ZoneWorld
     /// </summary>
     void StartFearFlee(ZoneEntity actor, ZoneEntity? from, bool alongHeading)
     {
+        long now = _clock().ToUnixTimeMilliseconds();
+        actor.FearFleeAtUnixMs = now + FearStepMs;
         if (actor.Session is { } session)
-            session.FearFleeAtUnixMs = _clock().ToUnixTimeMilliseconds() + FearStepMs;
+            session.FearFleeAtUnixMs = actor.FearFleeAtUnixMs;
         if (actor.Dead || actor.Sitting || IsImmobilized(actor))
             return;
 
@@ -43,14 +45,21 @@ public sealed partial class ZoneWorld
         int destX = (int)Math.Round(actor.X + FearRange * Math.Cos(rad));
         int destY = (int)Math.Round(actor.Y + FearRange * Math.Sin(rad));
         actor.Heading = ZoneCombat.HeadingFrom(actor.X, actor.Y, destX, destY);
-
-        if (actor.Session is not { } live)
-            return;
         if (!actor.Running)
         {
             actor.Running = true;
             FanoutMoveType(actor);
         }
+
+        if (actor.Kind == ZoneEntityKind.Npc)
+        {
+            actor.Chasing = false;
+            StartNpcMove(actor, destX, destY, actor.Z, now);
+            return;
+        }
+
+        if (actor.Session is not { } live)
+            return;
         live.AutoAttackTargetId = 0;
         live.ClearApproach();
         StartTimedMove(actor, live, new MoveToMsg
@@ -71,7 +80,7 @@ public sealed partial class ZoneWorld
         foreach (var player in Players().ToList())
         {
             var session = player.Session;
-            if (session == null || !IsFeared(player) || now < session.FearFleeAtUnixMs)
+            if (session == null || !IsFeared(player) || now < player.FearFleeAtUnixMs)
                 continue;
             StartFearFlee(player, from: null, alongHeading: true);
         }
@@ -88,45 +97,6 @@ public sealed partial class ZoneWorld
             : CastRules.Interruptible(hit.MagicType);
         if (interruptible)
             AbortCast(actor, "fear", notify: false);
-    }
-
-    /// <summary>Mobius FearTask: run ~500 units away from the feared source.</summary>
-    void FleeFrom(ZoneEntity npc, ZoneEntity from, long now)
-    {
-        double dx = npc.X - from.X;
-        double dy = npc.Y - from.Y;
-        double dist = Math.Sqrt(dx * dx + dy * dy);
-        if (dist < 1)
-        {
-            dx = 1;
-            dy = 0;
-            dist = 1;
-        }
-
-        const double fleeRange = 500;
-        int destX = (int)Math.Round(npc.X + dx / dist * fleeRange);
-        int destY = (int)Math.Round(npc.Y + dy / dist * fleeRange);
-        int destZ = npc.Z;
-
-        long ddx = destX - (long)npc.ChaseDestX, ddy = destY - (long)npc.ChaseDestY;
-        if (!npc.Chasing || !npc.MoveActive || ddx * ddx + ddy * ddy > 40L * 40L)
-        {
-            if (!npc.HomeSet)
-            {
-                npc.HomeSet = true;
-                (npc.HomeX, npc.HomeY, npc.HomeZ) = (npc.X, npc.Y, npc.Z);
-            }
-            SetReturningHome(npc, false);
-            if (!npc.Running)
-            {
-                npc.Running = true;
-                FanoutMoveType(npc);
-            }
-            npc.Chasing = true;
-            npc.ChaseDestX = destX;
-            npc.ChaseDestY = destY;
-            StartNpcMove(npc, destX, destY, destZ, now);
-        }
     }
 
     void ChaseStep(ZoneEntity npc, ZoneEntity target, long now)

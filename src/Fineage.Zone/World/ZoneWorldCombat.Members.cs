@@ -107,7 +107,8 @@ public sealed partial class ZoneWorld
                 continue;
             }
             if (player.Sitting || IsActionBlocked(player) || IsPhysicallyMuted(player) ||
-                HostilePlayableRefused(session, player, target, badSkill: false))
+                HostilePlayableRefused(session, player, target, badSkill: false) ||
+                PeacePlayableRefused(session, player, target))
             {
                 session.AutoAttackTargetId = 0;
                 session.ClearApproach();

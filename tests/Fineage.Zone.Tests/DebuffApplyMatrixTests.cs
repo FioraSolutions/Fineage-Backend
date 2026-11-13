@@ -100,6 +100,24 @@ public sealed class DebuffApplyMatrixTests
     }
 
     [Fact]
+    public async Task Fear_runs_a_mob_away_from_the_caster_not_its_hate_target()
+    {
+        var kit = new NetTestKit(Fineage.Zone.Spawns.SpawnCatalog.LoadDefault(), "elven_starting");
+        await kit.EnterAsync(classId: 25, x: 0, y: 0, z: 0);
+        var npc = kit.World.AttackableForTest()!;
+        int x = npc.X, y = npc.Y;
+        npc.AggroTargetId = 9;
+        var caster = new ZoneEntity { X = x - 400, Y = y, Z = npc.Z };
+
+        var template = kit.Game.Skills.Find(Fear) ?? throw new InvalidOperationException("fear missing");
+        Assert.True(template.TryLevelData(1, out var data));
+        Assert.True(kit.World.ApplyAbnormalFromSkillForTest(template, data, npc, force: true, attacker: caster));
+
+        Assert.True(npc.MoveDestX > x, $"flee X {npc.MoveDestX} should pass {x}");
+        Assert.Equal(y, npc.MoveDestY);
+    }
+
+    [Fact]
     public async Task Spoil_appears_in_abnormal_snapshot_for_target_window()
     {
         var kit = new NetTestKit(Fineage.Zone.Spawns.SpawnCatalog.LoadDefault(), "elven_starting");

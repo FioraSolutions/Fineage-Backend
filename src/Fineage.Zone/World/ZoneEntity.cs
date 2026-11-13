@@ -40,6 +40,8 @@ sealed partial class ZoneEntity
     public int Z { get; set; }
     /// <summary>Facing 0..65535 (Mobius heading); updated while moving and when swinging at a target.</summary>
     public int Heading { get; set; }
+    /// <summary>Next Mobius Fear onActionTime. Shared by players and mobs so a mob flees the caster, not its hate target.</summary>
+    public long FearFleeAtUnixMs { get; set; }
     /// <summary>Players: changes on class transfer (Mobius setClassId).</summary>
     public int ClassId { get; set; }
     public int NpcId

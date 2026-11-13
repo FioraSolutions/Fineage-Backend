@@ -204,6 +204,100 @@ public sealed class WaterZones
     }
 }
 
+/// <summary>
+/// Mobius <c>PeaceZone</c> NPoly from <c>data/peace-zones.json</c> (zones/peace.xml and the peace rows in ssq.xml).
+/// <c>Creature.isInsidePeaceZone</c>: a playable may not attack another playable when either stands inside one.
+/// </summary>
+public sealed class PeaceZones
+{
+    public const string FileName = "peace-zones.json";
+    public static readonly PeaceZones Empty = new([]);
+
+    readonly PeaceZone[] _zones;
+
+    public PeaceZones(PeaceZone[] zones) => _zones = zones;
+
+    public int Count => _zones.Length;
+
+    public bool Contains(int x, int y, int z)
+    {
+        foreach (var zone in _zones)
+        {
+            if (z < zone.MinZ || z > zone.MaxZ || x < zone.MinX || x > zone.MaxX || y < zone.MinY || y > zone.MaxY)
+                continue;
+            if (Inside(zone.Nodes, x, y))
+                return true;
+        }
+        return false;
+    }
+
+    /// <summary>Even-odd ray cast. Mobius <c>ZoneForm</c> NPoly uses the same crossing test.</summary>
+    static bool Inside((int X, int Y)[] poly, int x, int y)
+    {
+        bool inside = false;
+        for (int i = 0, j = poly.Length - 1; i < poly.Length; j = i++)
+        {
+            int xi = poly[i].X, yi = poly[i].Y, xj = poly[j].X, yj = poly[j].Y;
+            if ((yi > y) != (yj > y) && x < (xj - xi) * (double)(y - yi) / (yj - yi) + xi)
+                inside = !inside;
+        }
+        return inside;
+    }
+
+    public static PeaceZones LoadDefault()
+    {
+        string? path = MoveZoneFiles.Find(FileName);
+        if (path == null)
+        {
+            ZoneLog.Info("[peace] data/peace-zones.json not found -> no peace zones");
+            return Empty;
+        }
+
+        try
+        {
+            using var doc = JsonDocument.Parse(File.ReadAllText(path));
+            var list = new List<PeaceZone>();
+            foreach (var r in doc.RootElement.EnumerateArray())
+            {
+                var nodes = r.GetProperty("nodes").EnumerateArray()
+                    .Select(n => (n[0].GetInt32(), n[1].GetInt32())).ToArray();
+                if (nodes.Length < 3)
+                    continue;
+                list.Add(new PeaceZone
+                {
+                    Name = r.TryGetProperty("name", out var nm) ? nm.GetString() ?? "" : "",
+                    MinZ = r.GetProperty("minZ").GetInt32(),
+                    MaxZ = r.GetProperty("maxZ").GetInt32(),
+                    Nodes = nodes,
+                    MinX = nodes.Min(n => n.Item1),
+                    MaxX = nodes.Max(n => n.Item1),
+                    MinY = nodes.Min(n => n.Item2),
+                    MaxY = nodes.Max(n => n.Item2)
+                });
+            }
+            ZoneLog.Info($"[peace] loaded {list.Count} peace zone(s) from {path}");
+            return new PeaceZones([.. list]);
+        }
+        catch (Exception ex)
+        {
+            ZoneLog.Info($"[peace] failed to load {path}: {ex.Message} -> no peace zones");
+            return Empty;
+        }
+    }
+}
+
+public sealed class PeaceZone
+{
+    public string Name { get; init; } = "";
+    public int MinZ { get; init; }
+    public int MaxZ { get; init; }
+    public (int X, int Y)[] Nodes { get; init; } = [];
+    public int MinX { get; init; }
+    public int MaxX { get; init; }
+    public int MinY { get; init; }
+    public int MaxY { get; init; }
+}
+
 static class MoveZoneFiles
 {
     internal static string? Find(string fileName)

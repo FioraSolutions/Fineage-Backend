@@ -287,8 +287,7 @@ public sealed partial class ZoneWorld
         if (slot.Equals("TURN_FLEE", StringComparison.OrdinalIgnoreCase))
         {
             AbortInterruptibleCast(target);
-            if (target.Kind == ZoneEntityKind.Player)
-                StartFearFlee(target, attacker, alongHeading: false);
+            StartFearFlee(target, attacker, alongHeading: false);
             return;
         }
         if (ActionBlockSlots.Contains(slot))

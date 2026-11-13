@@ -183,6 +183,24 @@ public sealed partial class ZoneWorld
     static bool HasBlessing(ZoneEntity entity) =>
         entity.Abnormals.Any(a => a.Id == PlayableAttackRules.BlessingSkillId);
 
+    public const int SysMsgPeaceTarget = 85;
+
+    /// <summary>
+    /// Mobius <c>isInsidePeaceZone</c>: both playable, and either stands in a peace zone.
+    /// Karma does not bypass (AltKarmaPlayerCanBeKilledInPeaceZone is false). Olympiad instances do.
+    /// </summary>
+    bool PeacePlayableRefused(ZoneSession session, ZoneEntity attacker, ZoneEntity target)
+    {
+        if (attacker.Kind != ZoneEntityKind.Player || target.Kind != ZoneEntityKind.Player)
+            return false;
+        if (attacker.InstanceId != 0 || ZoneAdmin.AllowPeaceAttack(attacker.Name))
+            return false;
+        if (!Peace.Contains(attacker.X, attacker.Y, attacker.Z) && !Peace.Contains(target.X, target.Y, target.Z))
+            return false;
+        ShotNotice(session, SysMsgPeaceTarget, "You may not attack this target in a peaceful zone.");
+        return true;
+    }
+
     string? TryAttack(ZoneSession session, int requestedTargetId) =>
         TryAttack(session, requestedTargetId, out _);
 
@@ -228,6 +246,11 @@ public sealed partial class ZoneWorld
         if (!VisibleTo(player.ObjectId, targetId))
             return "attack";
         AdvanceMove(player, _clock().ToUnixTimeMilliseconds());
+        if (PeacePlayableRefused(session, player, target))
+        {
+            approachMs = -1;
+            return null;
+        }
         if (!ZoneCombat.Within(player.X, player.Y, target.X, target.Y, PlayerReach(player)))
         {
             approachMs = ApproachTarget(player, target, PlayerReach(player));

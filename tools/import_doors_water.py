@@ -1,11 +1,13 @@
 #!/usr/bin/env python3
-"""Transcribe Mobius CT 0 Interlude doors and water zones into data/doors.json + data/water-zones.json.
+"""Transcribe Mobius CT 0 Interlude doors, water, and peace zones into data JSON.
 
 Reads the Mobius datapack (not copied into this repo) and writes original JSON (no GPL source copied).
 
 Mobius reference (L2J_Mobius_CT_0_Interlude):
   dist/game/data/Doors.xml        (DoorData: node1..4 polygon, nodeZ, height, default_status; missing = close)
   dist/game/data/zones/water.xml  (ZoneManager WaterZone: Cuboid nodes + minZ/maxZ)
+  dist/game/data/zones/peace.xml  (PeaceZone NPoly + minZ/maxZ)
+  dist/game/data/zones/ssq.xml    (PeaceZone rows only)
 
 Usage:
   python3 tools/import_doors_water.py /path/to/mobius/data [out_dir=data]
@@ -52,6 +54,29 @@ def doors(data: Path) -> list[dict]:
     return out
 
 
+def peace(data: Path) -> list[dict]:
+    """Mobius PeaceZone NPoly from zones/peace.xml and zones/ssq.xml."""
+    out = []
+    for file in ("peace.xml", "ssq.xml"):
+        for z in ET.parse(data / "zones" / file).getroot():
+            if local(z.tag) != "zone" or z.attrib.get("type") != "PeaceZone":
+                continue
+            a = z.attrib
+            if a.get("shape") != "NPoly":
+                print(f"skip non-NPoly peace zone {a.get('name')}", file=sys.stderr)
+                continue
+            nodes = [[int(n.attrib["X"]), int(n.attrib["Y"])] for n in z if local(n.tag) == "node"]
+            if len(nodes) < 3:
+                continue
+            out.append({
+                "name": a.get("name", ""),
+                "minZ": int(a["minZ"]),
+                "maxZ": int(a["maxZ"]),
+                "nodes": nodes,
+            })
+    return out
+
+
 def water(data: Path) -> list[dict]:
     out = []
     for z in ET.parse(data / "zones" / "water.xml").getroot():
@@ -74,10 +99,11 @@ def water(data: Path) -> list[dict]:
 def main() -> None:
     data = Path(sys.argv[1])
     out_dir = Path(sys.argv[2]) if len(sys.argv) > 2 else Path("data")
-    d, w = doors(data), water(data)
+    d, w, p = doors(data), water(data), peace(data)
     (out_dir / "doors.json").write_text(json.dumps(d, separators=(",", ":"), ensure_ascii=False, indent=None).replace("},{", "},\n{") + "\n")
     (out_dir / "water-zones.json").write_text(json.dumps(w, separators=(",", ":")).replace("},{", "},\n{") + "\n")
-    print(f"doors={len(d)} water={len(w)}")
+    (out_dir / "peace-zones.json").write_text(json.dumps(p, separators=(",", ":")).replace("},{", "},\n{") + "\n")
+    print(f"doors={len(d)} water={len(w)} peace={len(p)}")
 
 
 if __name__ == "__main__":
