@@ -51,11 +51,17 @@ public sealed class ZoneSession
     {
         ApproachTargetId = 0;
         ApproachArriveUnixMs = 0;
+        PendingTalkNpcId = 0;
+        PendingTalkAtUnixMs = 0;
     }
 
     /// <summary>Mobius AI_INTENTION_PICK_UP after moveToPawn: ground item to pick up once the run arrives.</summary>
     public int PendingPickupId { get; set; }
     public long PendingPickupAtUnixMs { get; set; }
+
+    /// <summary>Mobius AI_INTENTION_INTERACT after moveToPawn: NPC to talk to once the run arrives.</summary>
+    public int PendingTalkNpcId { get; set; }
+    public long PendingTalkAtUnixMs { get; set; }
 
     /// <summary>Mobius AI_INTENTION_CAST after moveToPawn: skill to fire once the server-driven approach arrives.</summary>
     public int PendingCastSkillId { get; set; }

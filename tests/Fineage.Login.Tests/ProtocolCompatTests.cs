@@ -156,7 +156,8 @@ public class ProtocolCompatTests
         Assert.Equal(QuestProtocol.NotAbortable, 38);
         Assert.Equal(QuestProtocol.MaxActive, 25);
         Assert.Equal(ChatProtocol.ChatBandFirst, (ushort)MsgType.SystemMessage);
-        Assert.Equal(TradeProtocol.Distance, QuestProtocol.TalkRange);
+        Assert.Equal(150, TradeProtocol.Distance);
+        Assert.Equal(250, QuestProtocol.TalkRange);
         Assert.Equal(90, (ushort)MsgType.SevenSignsStatusRequest);
         Assert.Equal(91, (ushort)MsgType.SevenSignsActionRequest);
         Assert.Equal(92, (ushort)MsgType.DungeonEnterRequest);

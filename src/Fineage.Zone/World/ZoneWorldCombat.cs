@@ -166,6 +166,23 @@ public sealed partial class ZoneWorld
         };
     }
 
+    /// <summary>Mobius <c>PlayableAI</c> blessing / karma / cursed-weapon gate. Sends SysMsg 144 and refuses the swing or bad cast.</summary>
+    bool HostilePlayableRefused(ZoneSession session, ZoneEntity attacker, ZoneEntity target, bool badSkill)
+    {
+        if (!PlayableAttackRules.Refused(
+                attacker.Kind == ZoneEntityKind.Player && target.Kind == ZoneEntityKind.Player,
+                attacker.Level, target.Level, attacker.Karma, target.Karma,
+                HasBlessing(attacker), HasBlessing(target),
+                HasCursedWeapon(attacker.Inventory), HasCursedWeapon(target.Inventory),
+                badSkill))
+            return false;
+        IncorrectTarget(session);
+        return true;
+    }
+
+    static bool HasBlessing(ZoneEntity entity) =>
+        entity.Abnormals.Any(a => a.Id == PlayableAttackRules.BlessingSkillId);
+
     string? TryAttack(ZoneSession session, int requestedTargetId) =>
         TryAttack(session, requestedTargetId, out _);
 
@@ -181,6 +198,15 @@ public sealed partial class ZoneWorld
             return "world";
         if (player.Dead)
             return InventoryProtocol.Dead;
+        // Mobius onIntentionAttack: sitting, stunned, sleeping, paralyzed, or physically muted → ActionFailed.
+        if (player.Sitting || IsActionBlocked(player) || IsPhysicallyMuted(player))
+        {
+            approachMs = -1;
+            return null;
+        }
+        // A new attack replaces AI_INTENTION_INTERACT.
+        session.PendingTalkNpcId = 0;
+        session.PendingTalkAtUnixMs = 0;
         if (player.CastingUntilMs > _clock().ToUnixTimeMilliseconds())
             return null; // Mobius: auto-attack waits while casting
 
@@ -194,6 +220,11 @@ public sealed partial class ZoneWorld
             return "attack";
         if (!IsAttackable(player, target))
             return "attack";
+        if (HostilePlayableRefused(session, player, target, badSkill: false))
+        {
+            approachMs = -1;
+            return null;
+        }
         if (!VisibleTo(player.ObjectId, targetId))
             return "attack";
         AdvanceMove(player, _clock().ToUnixTimeMilliseconds());

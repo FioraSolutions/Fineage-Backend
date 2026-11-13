@@ -28,7 +28,7 @@ The bypass only names the window. The bag changes on a later request, so a misse
 | S → C | 1015 | `InventoryUpdate` | existing rows |
 | S → C | 1040 | `SystemMessage` | ids 180–189 |
 
-The player must already be in the world, alive, and within **150** of the same non-attackable NPC the bypass used. That distance is `NpcHtmlProtocol.InteractionDistance`.
+The player must already be in the world, alive, and within **250** of the same non-attackable NPC the bypass used. That distance is `NpcHtmlProtocol.InteractionDistance` (Mobius `Npc.INTERACTION_DISTANCE`).
 
 ## Bypass
 

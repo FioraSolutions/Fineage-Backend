@@ -181,6 +181,8 @@ public sealed partial class ZoneWorld
             return SkillProtocol.Target;
         if (!IsAttackable(player, target))
             return SkillProtocol.Target;
+        if (HostilePlayableRefused(session, player, target, badSkill: true))
+            return null;
         if (!VisibleTo(player.ObjectId, targetId))
             return SkillProtocol.Target;
         if (!ZoneCombat.InCastRange(player.X, player.Y, target.X, target.Y, template.CastRange))

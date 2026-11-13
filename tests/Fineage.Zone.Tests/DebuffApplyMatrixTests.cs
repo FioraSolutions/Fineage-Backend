@@ -52,6 +52,30 @@ public sealed class DebuffApplyMatrixTests
     }
 
     [Fact]
+    public async Task Stun_aborts_the_swing_and_the_cast_sleep_leaves_the_cast_root_leaves_the_swing()
+    {
+        var kit = new NetTestKit(Fineage.Zone.Spawns.SpawnCatalog.LoadDefault(), "elven_starting");
+        var (session, player) = await kit.EnterAsync(classId: 25, x: 0, y: 0, z: 0);
+        long future = kit.Now.ToUnixTimeMilliseconds() + 5_000;
+
+        session.AutoAttackTargetId = 9;
+        player.CastingUntilMs = future;
+        ApplyForced(kit, player, ShieldStun, level: 1);
+        Assert.Equal(0, session.AutoAttackTargetId);
+        Assert.Equal(0, player.CastingUntilMs);
+
+        session.AutoAttackTargetId = 9;
+        player.CastingUntilMs = future;
+        ApplyForced(kit, player, Sleep, level: 1);
+        Assert.Equal(0, session.AutoAttackTargetId);
+        Assert.Equal(future, player.CastingUntilMs);
+
+        session.AutoAttackTargetId = 9;
+        ApplyForced(kit, player, DryadRoot, level: 1);
+        Assert.Equal(9, session.AutoAttackTargetId);
+    }
+
+    [Fact]
     public async Task Spoil_appears_in_abnormal_snapshot_for_target_window()
     {
         var kit = new NetTestKit(Fineage.Zone.Spawns.SpawnCatalog.LoadDefault(), "elven_starting");

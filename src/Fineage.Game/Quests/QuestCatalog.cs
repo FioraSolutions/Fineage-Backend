@@ -13,7 +13,8 @@ public sealed partial class QuestCatalog
     public const string MetaFileName = "_meta.json";
     public const string QuestFileName = "quest.json";
     public const int DefaultMaxActive = 25;
-    public const int DefaultTalkRange = 150;
+    /// <summary>Mobius <c>Npc.INTERACTION_DISTANCE</c>.</summary>
+    public const int DefaultTalkRange = 250;
     public const int AdenaItemId = 57;
 
     static readonly JsonSerializerOptions JsonOptions = new()

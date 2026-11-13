@@ -29,15 +29,15 @@ public sealed class NpcHtmlTests
     }
 
     [Fact]
-    public void Range_is_150_in_three_dimensions()
+    public void Range_is_250_in_three_dimensions()
     {
-        Assert.Equal(150, NpcHtmlProtocol.InteractionDistance);
+        Assert.Equal(250, NpcHtmlProtocol.InteractionDistance);
         Assert.Equal(QuestProtocol.TalkRange, NpcHtmlProtocol.InteractionDistance);
-        Assert.True(NpcHtmlProtocol.InRange(0, 0, 0, 150, 0, 0));
-        Assert.False(NpcHtmlProtocol.InRange(0, 0, 0, 151, 0, 0));
-        Assert.True(NpcHtmlProtocol.InRange(0, 0, 0, 0, 0, -150));
+        Assert.True(NpcHtmlProtocol.InRange(0, 0, 0, 250, 0, 0));
+        Assert.False(NpcHtmlProtocol.InRange(0, 0, 0, 251, 0, 0));
+        Assert.True(NpcHtmlProtocol.InRange(0, 0, 0, 0, 0, -250));
         Assert.True(NpcHtmlProtocol.InRange(0, 0, 0, 100, 100, 50));
-        Assert.False(NpcHtmlProtocol.InRange(0, 0, 0, 100, 100, 51));
+        Assert.False(NpcHtmlProtocol.InRange(0, 0, 0, 200, 200, 0));
     }
 
     [Fact]
@@ -225,7 +225,9 @@ public sealed class NpcHtmlTests
         // Well outside the 150 unit talk radius without moving the pawn through the world.
         actor.MoveTo(Spawns.HumanStartX + 1_000, Spawns.HumanStartY, Spawns.HumanStartZ);
 
-        Assert.Equal("range", await actor.Talk(MerchantObjectId));
+        // Mobius NpcAction: out of canInteract starts AI_INTENTION_INTERACT instead of refusing.
+        Assert.Null(await actor.Talk(MerchantObjectId));
+        Assert.Equal(MerchantObjectId, actor.Session.PendingTalkNpcId);
         Assert.Equal("range", await actor.BypassAsync(MerchantObjectId, "Buy 1"));
         Assert.Empty(Bench(bench, FanoutHtml));
     }

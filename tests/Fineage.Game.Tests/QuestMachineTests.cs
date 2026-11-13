@@ -10,7 +10,7 @@ public sealed class QuestMachineTests
     {
         var data = GameData.LoadDefault();
         Assert.Equal(25, data.Quests.MaxActive);
-        Assert.Equal(150, data.Quests.TalkRange);
+        Assert.Equal(250, data.Quests.TalkRange);
         var tutorial = data.Quests.Find(999);
         Assert.NotNull(tutorial);
         Assert.Equal("Newbie Tutorial", tutorial!.Name);

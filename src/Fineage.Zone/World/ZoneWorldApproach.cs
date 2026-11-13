@@ -20,7 +20,7 @@ public sealed partial class ZoneWorld
     /// </summary>
     long ApproachTarget(ZoneEntity player, ZoneEntity target, int range)
     {
-        if (player.Sitting || player.Dead)
+        if (player.Sitting || player.Dead || IsImmobilized(player))
             return -1;
         var session = player.Session;
         long now = _clock().ToUnixTimeMilliseconds();
