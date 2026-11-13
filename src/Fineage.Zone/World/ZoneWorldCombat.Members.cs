@@ -45,6 +45,7 @@ public sealed partial class ZoneWorld
         {
             long now = _clock().ToUnixTimeMilliseconds();
             TickPlayerMovement(now);
+            TickArenaZones();
             TickNpcMovement(now);
             TickRandomWalk(now);
             TickPendingHits(now);

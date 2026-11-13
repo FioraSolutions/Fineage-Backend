@@ -174,7 +174,8 @@ public sealed partial class ZoneWorld
                 attacker.Level, target.Level, attacker.Karma, target.Karma,
                 HasBlessing(attacker), HasBlessing(target),
                 HasCursedWeapon(attacker.Inventory), HasCursedWeapon(target.Inventory),
-                badSkill))
+                badSkill,
+                targetInPvp: target.InstanceId != 0 || Pvp.Contains(target.X, target.Y, target.Z)))
             return false;
         IncorrectTarget(session);
         return true;
@@ -184,6 +185,24 @@ public sealed partial class ZoneWorld
         entity.Abnormals.Any(a => a.Id == PlayableAttackRules.BlessingSkillId);
 
     public const int SysMsgPeaceTarget = 85;
+    public const int SysMsgEnteredCombatZone = 283;
+    public const int SysMsgLeftCombatZone = 284;
+
+    /// <summary>Mobius <c>ArenaZone</c> onEnter/onExit: SysMsg 283/284 when a player crosses the polygon.</summary>
+    void TickArenaZones()
+    {
+        foreach (var player in Players())
+        {
+            if (player.Session == null)
+                continue;
+            bool inside = Pvp.Contains(player.X, player.Y, player.Z);
+            if (inside == player.InArena)
+                continue;
+            player.InArena = inside;
+            ShotNotice(player.Session, inside ? SysMsgEnteredCombatZone : SysMsgLeftCombatZone,
+                inside ? "You have entered a combat zone." : "You have left a combat zone.");
+        }
+    }
 
     /// <summary>
     /// Mobius <c>isInsidePeaceZone</c>: both playable, and either stands in a peace zone.

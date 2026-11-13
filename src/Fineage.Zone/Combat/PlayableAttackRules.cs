@@ -2,8 +2,7 @@ namespace Fineage.Zone.Combat;
 
 /// <summary>
 /// Mobius <c>PlayableAI</c> gates on attack and on a bad cast against another player.
-/// <c>ZoneId.PVP</c> is not imported, so the blessing check applies everywhere
-/// (Mobius skips it only inside a PvP zone).
+/// The blessing check is skipped when the target is inside <c>ZoneId.PVP</c>.
 /// </summary>
 public static class PlayableAttackRules
 {
@@ -23,14 +22,15 @@ public static class PlayableAttackRules
         bool targetBlessed,
         bool attackerCursed,
         bool targetCursed,
-        bool badSkill)
+        bool badSkill,
+        bool targetInPvp = false)
     {
         if (!bothPlayers)
             return false;
 
-        bool blessing =
+        bool blessing = !targetInPvp && (
             (targetBlessed && attackerLevel - targetLevel >= BlessingLevelGap && attackerKarma > 0)
-            || (attackerBlessed && targetKarma > 0 && targetLevel - attackerLevel >= BlessingLevelGap);
+            || (attackerBlessed && targetKarma > 0 && targetLevel - attackerLevel >= BlessingLevelGap));
         if (blessing)
             return true;
 

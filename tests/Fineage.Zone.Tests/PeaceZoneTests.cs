@@ -18,6 +18,15 @@ public sealed class PeaceZoneTests
     }
 
     [Fact]
+    public void Gludin_arena_is_a_pvp_zone()
+    {
+        var pvp = PvpZones.LoadDefault();
+        Assert.Equal(6, pvp.Count);
+        Assert.True(pvp.Contains(-87920, 142220, -2000));
+        Assert.False(pvp.Contains(0, 0, 0));
+    }
+
+    [Fact]
     public async Task Two_players_inside_a_peace_zone_cannot_swing()
     {
         var kit = new NetTestKit(Fineage.Zone.Spawns.SpawnCatalog.LoadDefault(), "elven_starting");

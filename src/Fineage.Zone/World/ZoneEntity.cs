@@ -42,6 +42,8 @@ sealed partial class ZoneEntity
     public int Heading { get; set; }
     /// <summary>Next Mobius Fear onActionTime. Shared by players and mobs so a mob flees the caster, not its hate target.</summary>
     public long FearFleeAtUnixMs { get; set; }
+    /// <summary>Mobius <c>ArenaZone</c> membership already announced (enter/leave combat zone).</summary>
+    public bool InArena { get; set; }
     /// <summary>Players: changes on class transfer (Mobius setClassId).</summary>
     public int ClassId { get; set; }
     public int NpcId

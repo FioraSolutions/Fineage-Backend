@@ -219,9 +219,11 @@ public sealed class PeaceZones
 
     public int Count => _zones.Length;
 
-    public bool Contains(int x, int y, int z)
+    public bool Contains(int x, int y, int z) => Hit(_zones, x, y, z);
+
+    internal static bool Hit(PeaceZone[] zones, int x, int y, int z)
     {
-        foreach (var zone in _zones)
+        foreach (var zone in zones)
         {
             if (z < zone.MinZ || z > zone.MaxZ || x < zone.MinX || x > zone.MaxX || y < zone.MinY || y > zone.MaxY)
                 continue;
@@ -244,13 +246,15 @@ public sealed class PeaceZones
         return inside;
     }
 
-    public static PeaceZones LoadDefault()
+    public static PeaceZones LoadDefault() => new(LoadFile(FileName, "peace"));
+
+    internal static PeaceZone[] LoadFile(string fileName, string logTag)
     {
-        string? path = MoveZoneFiles.Find(FileName);
+        string? path = MoveZoneFiles.Find(fileName);
         if (path == null)
         {
-            ZoneLog.Info("[peace] data/peace-zones.json not found -> no peace zones");
-            return Empty;
+            ZoneLog.Info($"[{logTag}] data/{fileName} not found");
+            return [];
         }
 
         try
@@ -275,13 +279,13 @@ public sealed class PeaceZones
                     MaxY = nodes.Max(n => n.Item2)
                 });
             }
-            ZoneLog.Info($"[peace] loaded {list.Count} peace zone(s) from {path}");
-            return new PeaceZones([.. list]);
+            ZoneLog.Info($"[{logTag}] loaded {list.Count} zone(s) from {path}");
+            return [.. list];
         }
         catch (Exception ex)
         {
-            ZoneLog.Info($"[peace] failed to load {path}: {ex.Message} -> no peace zones");
-            return Empty;
+            ZoneLog.Info($"[{logTag}] failed to load {path}: {ex.Message}");
+            return [];
         }
     }
 }
@@ -296,6 +300,26 @@ public sealed class PeaceZone
     public int MaxX { get; init; }
     public int MinY { get; init; }
     public int MaxY { get; init; }
+}
+
+/// <summary>
+/// Mobius <c>ArenaZone</c> from <c>data/pvp-zones.json</c> (<c>zones/pvp.xml</c>). Entering sets <c>ZoneId.PVP</c>.
+/// Siege zones set that flag only while the siege is active, so they are not in this table.
+/// </summary>
+public sealed class PvpZones
+{
+    public const string FileName = "pvp-zones.json";
+    public static readonly PvpZones Empty = new([]);
+
+    readonly PeaceZone[] _zones;
+
+    public PvpZones(PeaceZone[] zones) => _zones = zones;
+
+    public int Count => _zones.Length;
+
+    public bool Contains(int x, int y, int z) => PeaceZones.Hit(_zones, x, y, z);
+
+    public static PvpZones LoadDefault() => new(PeaceZones.LoadFile(FileName, "pvp"));
 }
 
 static class MoveZoneFiles

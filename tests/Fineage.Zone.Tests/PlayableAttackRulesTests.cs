@@ -14,6 +14,7 @@ public sealed class PlayableAttackRulesTests
         Assert.True(PlayableAttackRules.Refused(true, 20, 40, 0, 1, true, false, false, false, true));
         Assert.False(PlayableAttackRules.Refused(true, 40, 20, 0, 0, false, true, false, false, false));
         Assert.False(PlayableAttackRules.Refused(false, 40, 20, 1, 0, false, true, false, false, false));
+        Assert.False(PlayableAttackRules.Refused(true, 40, 20, 1, 0, false, true, false, false, false, targetInPvp: true));
     }
 
     [Fact]
@@ -25,5 +26,6 @@ public sealed class PlayableAttackRulesTests
         Assert.False(PlayableAttackRules.Refused(true, 21, 80, 0, 0, false, false, false, true, false));
         Assert.True(PlayableAttackRules.Refused(true, 40, 20, 0, 0, false, false, false, true, badSkill: true));
         Assert.False(PlayableAttackRules.Refused(true, 21, 21, 0, 0, false, false, false, true, badSkill: true));
+        Assert.True(PlayableAttackRules.Refused(true, 20, 80, 0, 0, false, false, false, true, false, targetInPvp: true));
     }
 }
