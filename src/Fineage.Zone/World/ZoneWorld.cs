@@ -110,6 +110,7 @@ public sealed partial class ZoneWorld
     static readonly Lazy<WaterZones> SharedWater = new(WaterZones.LoadDefault);
     static readonly Lazy<PeaceZones> SharedPeace = new(PeaceZones.LoadDefault);
     static readonly Lazy<PvpZones> SharedPvp = new(PvpZones.LoadDefault);
+    static readonly Lazy<SiegeZones> SharedSiegeZones = new(SiegeZones.LoadDefault);
 
     /// <summary>Mobius DoorData (movement collision). Settable for tests.</summary>
     internal DoorTable Doors { get; set; } = DoorTable.Empty;
@@ -119,6 +120,7 @@ public sealed partial class ZoneWorld
     internal PeaceZones Peace { get; set; } = PeaceZones.Empty;
     /// <summary>Mobius ArenaZone polygons (<c>ZoneId.PVP</c>). Settable for tests.</summary>
     internal PvpZones Pvp { get; set; } = PvpZones.Empty;
+    internal SiegeZones SiegeAreas { get; set; } = SiegeZones.Empty;
 
     /// <summary>Server geodata (empty when no region files are present).</summary>
     public GeoEngine GeoData => _geo;
@@ -241,6 +243,7 @@ public sealed partial class ZoneWorld
             Water = SharedWater.Value;
             Peace = SharedPeace.Value;
             Pvp = SharedPvp.Value;
+            SiegeAreas = SharedSiegeZones.Value;
         }
         BootstrapSpawns();
         BootstrapBosses();

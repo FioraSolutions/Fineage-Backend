@@ -109,7 +109,8 @@ public sealed partial class ZoneWorld
             }
             if (player.Sitting || IsActionBlocked(player) || IsPhysicallyMuted(player) ||
                 HostilePlayableRefused(session, player, target, badSkill: false) ||
-                PeacePlayableRefused(session, player, target))
+                SiegeFriendRefused(session, player, target) ||
+                PeacePlayableRefused(session, player, target, notify: false))
             {
                 session.AutoAttackTargetId = 0;
                 session.ClearApproach();

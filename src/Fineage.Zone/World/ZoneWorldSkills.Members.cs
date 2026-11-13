@@ -33,6 +33,7 @@ public sealed partial class ZoneWorld
         if (!IsAttackable(player, target))
             return SkillProtocol.Target;
         if (HostilePlayableRefused(session, player, target, badSkill: true) ||
+            SiegeFriendRefused(session, player, target) ||
             PeacePlayableRefused(session, player, target))
             return null;
         if (!VisibleTo(player.ObjectId, targetId))

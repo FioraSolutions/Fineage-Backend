@@ -1,3 +1,4 @@
+using Fineage.Protocol;
 using Fineage.Zone.Geo;
 using Fineage.Zone.World;
 using Xunit;
@@ -37,9 +38,14 @@ public sealed class PeaceZoneTests
         victim.CurHp = 500;
         Assert.True(kit.World.Peace.Contains(player.X, player.Y, player.Z));
 
+        var (bridge, rec) = NetBridgeRecorder.Create();
+        kit.World.NetBridge = bridge;
         Assert.Null(await kit.World.TryAttackAsync(session, other.ObjectId, CancellationToken.None));
         Assert.Equal(0, session.AutoAttackTargetId);
         Assert.Equal(500, victim.CurHp);
+        // Mobius doAttack in a peace zone is ActionFailed with no system message. SysMsg 85 is for bad skills.
+        Assert.DoesNotContain(rec.Of(nameof(IWorldEventPublisher.FanoutSystemMessage)),
+            m => ((SystemMessageMsg)m[1]!).Id == ZoneWorld.SysMsgPeaceTarget);
 
         player.X = session.X = 0;
         player.Y = session.Y = 0;

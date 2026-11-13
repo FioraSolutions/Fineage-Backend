@@ -270,6 +270,7 @@ public sealed class PeaceZones
                 list.Add(new PeaceZone
                 {
                     Name = r.TryGetProperty("name", out var nm) ? nm.GetString() ?? "" : "",
+                    CastleId = r.TryGetProperty("castleId", out var cid) ? cid.GetInt32() : 0,
                     MinZ = r.GetProperty("minZ").GetInt32(),
                     MaxZ = r.GetProperty("maxZ").GetInt32(),
                     Nodes = nodes,
@@ -293,6 +294,7 @@ public sealed class PeaceZones
 public sealed class PeaceZone
 {
     public string Name { get; init; } = "";
+    public int CastleId { get; init; }
     public int MinZ { get; init; }
     public int MaxZ { get; init; }
     public (int X, int Y)[] Nodes { get; init; } = [];
@@ -304,7 +306,7 @@ public sealed class PeaceZone
 
 /// <summary>
 /// Mobius <c>ArenaZone</c> from <c>data/pvp-zones.json</c> (<c>zones/pvp.xml</c>). Entering sets <c>ZoneId.PVP</c>.
-/// Siege zones set that flag only while the siege is active, so they are not in this table.
+/// Siege polygons live in <see cref="SiegeZones"/> and set the flag only while that siege is running.
 /// </summary>
 public sealed class PvpZones
 {
@@ -320,6 +322,34 @@ public sealed class PvpZones
     public bool Contains(int x, int y, int z) => PeaceZones.Hit(_zones, x, y, z);
 
     public static PvpZones LoadDefault() => new(PeaceZones.LoadFile(FileName, "pvp"));
+}
+
+/// <summary>
+/// Mobius <c>SiegeZone</c> from <c>data/siege-zones.json</c> (<c>zones/castle_siege.xml</c>).
+/// The polygon is not <c>ZoneId.PVP</c> until that castle's siege is in progress.
+/// </summary>
+public sealed class SiegeZones
+{
+    public const string FileName = "siege-zones.json";
+    public static readonly SiegeZones Empty = new([]);
+
+    readonly PeaceZone[] _zones;
+
+    public SiegeZones(PeaceZone[] zones) => _zones = zones;
+
+    public int Count => _zones.Length;
+
+    public int CastleAt(int x, int y, int z)
+    {
+        foreach (var zone in _zones)
+        {
+            if (zone.CastleId > 0 && PeaceZones.Hit([zone], x, y, z))
+                return zone.CastleId;
+        }
+        return 0;
+    }
+
+    public static SiegeZones LoadDefault() => new(PeaceZones.LoadFile(FileName, "siege"));
 }
 
 static class MoveZoneFiles

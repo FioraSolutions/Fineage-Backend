@@ -9,6 +9,7 @@ Mobius reference (L2J_Mobius_CT_0_Interlude):
   dist/game/data/zones/peace.xml  (PeaceZone NPoly + minZ/maxZ)
   dist/game/data/zones/ssq.xml    (PeaceZone rows only)
   dist/game/data/zones/pvp.xml    (ArenaZone NPoly, Mobius ZoneId.PVP)
+  dist/game/data/zones/castle_siege.xml (SiegeZone NPoly + castleId; PVP only while that siege runs)
 
 Usage:
   python3 tools/import_doors_water.py /path/to/mobius/data [out_dir=data]
@@ -100,6 +101,36 @@ def arenas(data: Path) -> list[dict]:
     return out
 
 
+def sieges(data: Path) -> list[dict]:
+    """Mobius SiegeZone NPoly. ZoneId.PVP is applied only while that castle's siege is active."""
+    out = []
+    for z in ET.parse(data / "zones" / "castle_siege.xml").getroot():
+        if local(z.tag) != "zone" or z.attrib.get("type") != "SiegeZone":
+            continue
+        a = z.attrib
+        if a.get("shape") != "NPoly":
+            print(f"skip non-NPoly siege zone {a.get('name')}", file=sys.stderr)
+            continue
+        castle_id = 0
+        nodes = []
+        for child in z:
+            tag = local(child.tag)
+            if tag == "node":
+                nodes.append([int(child.attrib["X"]), int(child.attrib["Y"])])
+            elif tag == "stat" and child.attrib.get("name") == "castleId":
+                castle_id = int(child.attrib["val"])
+        if castle_id <= 0 or len(nodes) < 3:
+            continue
+        out.append({
+            "name": a.get("name", ""),
+            "castleId": castle_id,
+            "minZ": int(a["minZ"]),
+            "maxZ": int(a["maxZ"]),
+            "nodes": nodes,
+        })
+    return out
+
+
 def water(data: Path) -> list[dict]:
     out = []
     for z in ET.parse(data / "zones" / "water.xml").getroot():
@@ -122,12 +153,13 @@ def water(data: Path) -> list[dict]:
 def main() -> None:
     data = Path(sys.argv[1])
     out_dir = Path(sys.argv[2]) if len(sys.argv) > 2 else Path("data")
-    d, w, p, a = doors(data), water(data), peace(data), arenas(data)
+    d, w, p, a, s = doors(data), water(data), peace(data), arenas(data), sieges(data)
     (out_dir / "doors.json").write_text(json.dumps(d, separators=(",", ":"), ensure_ascii=False, indent=None).replace("},{", "},\n{") + "\n")
     (out_dir / "water-zones.json").write_text(json.dumps(w, separators=(",", ":")).replace("},{", "},\n{") + "\n")
     (out_dir / "peace-zones.json").write_text(json.dumps(p, separators=(",", ":")).replace("},{", "},\n{") + "\n")
     (out_dir / "pvp-zones.json").write_text(json.dumps(a, separators=(",", ":")).replace("},{", "},\n{") + "\n")
-    print(f"doors={len(d)} water={len(w)} peace={len(p)} pvp={len(a)}")
+    (out_dir / "siege-zones.json").write_text(json.dumps(s, separators=(",", ":")).replace("},{", "},\n{") + "\n")
+    print(f"doors={len(d)} water={len(w)} peace={len(p)} pvp={len(a)} siege={len(s)}")
 
 
 if __name__ == "__main__":

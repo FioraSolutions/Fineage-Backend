@@ -39,6 +39,7 @@ data/*
 !data/water-zones.json
 !data/peace-zones.json
 !data/pvp-zones.json
+!data/siege-zones.json
 !data/admin-characters.json
 # Prefer converters → JSON; do not commit the full Mobius datapack (~1486+ XML files).
 data/mobius-xml/
