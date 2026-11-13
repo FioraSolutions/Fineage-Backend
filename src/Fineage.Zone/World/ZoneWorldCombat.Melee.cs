@@ -116,13 +116,15 @@ public sealed partial class ZoneWorld
         }
 
         npc.SweepItems.Clear();
+        bool raid = npc.NpcType is "RaidBoss" or "GrandBoss";
+        int killerLevel = killer?.Level ?? npc.Level;
         if (npc.SpoilerObjectId != 0 && _dropCatalog.TryGet(npcId, out var definition))
         {
-            foreach (var stack in DropRoller.RollCorpse(definition, _dropRandom, _dropRates))
+            foreach (var stack in DropRoller.RollCorpse(definition, _dropRandom, _dropRates, npc.Level, killerLevel, raid))
                 npc.SweepItems.Add(stack);
         }
 
-        SpawnDeathDrops(npcId, x, y, z, killer, watchers);
+        SpawnDeathDrops(npcId, x, y, z, killer, watchers, npc.Level, raid);
         bool spoiled = npc.SpoilerObjectId != 0;
         npc.CorpseAwaitingSweep = npc.SweepItems.Count > 0;
         if (spoiled)

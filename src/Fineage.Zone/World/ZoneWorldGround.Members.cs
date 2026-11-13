@@ -170,7 +170,9 @@ public sealed partial class ZoneWorld
         int y,
         int z,
         ZoneEntity? killer,
-        IReadOnlyList<ZoneEntity> watchers)
+        IReadOnlyList<ZoneEntity> watchers,
+        int victimLevel = 0,
+        bool raid = false)
     {
         if (!_dropCatalog.TryGet(npcId, out var definition))
         {
@@ -178,7 +180,8 @@ public sealed partial class ZoneWorld
             return;
         }
 
-        var rolls = DropRoller.RollDeath(definition, _dropRandom, _dropRates);
+        int killerLevel = killer?.Level ?? victimLevel;
+        var rolls = DropRoller.RollDeath(definition, _dropRandom, _dropRates, victimLevel, killerLevel, raid);
         if (rolls.Count == 0)
             ZoneLog.Info($"drop empty npc={npcId}");
 
