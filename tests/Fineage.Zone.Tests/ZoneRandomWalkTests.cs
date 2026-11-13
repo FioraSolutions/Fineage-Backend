@@ -9,11 +9,17 @@ namespace Fineage.Zone.Tests;
 /// <summary>Mobius AttackableAI idle walk: a monster with no target walks inside MaxDriftRange.</summary>
 public sealed class ZoneRandomWalkTests
 {
-    sealed class AlwaysZero : Random
+    /// <summary>
+    /// Mobius roll that lands inside drift: Rnd.get(30)==0, Rnd.get(600)==300,
+    /// Rnd.get(300, 600) inclusive == 300. Offset is then (0, -300).
+    /// </summary>
+    sealed class MobiusWalkRoll : Random
     {
-        public override int Next(int maxValue) => 0;
-        public override double NextDouble() => 0.25;
+        public override int Next(int maxValue) => maxValue == RandomWalkRateExposed ? 0 : 300;
+        public override double NextDouble() => 0;
     }
+
+    const int RandomWalkRateExposed = 30;
 
     [Fact]
     public async Task Idle_monster_walks_away_from_its_spawn()
@@ -27,7 +33,7 @@ public sealed class ZoneRandomWalkTests
         async Task<(ZoneWorld World, ZoneEntity Player)> Enter(SpawnCatalog spawns)
         {
             var ticket = login.Play("walk", "pass1234", created.Value!.Name, HumanClasses.Fighter);
-            var world = new ZoneWorld(accounts: store, spawnCatalog: spawns, activeMapId: "walk", combatRandom: new AlwaysZero());
+            var world = new ZoneWorld(accounts: store, spawnCatalog: spawns, activeMapId: "walk", combatRandom: new MobiusWalkRoll());
             var session = new ZoneSession();
             session.Bind(ticket.Value!.CharacterId, ticket.Value.Account, ticket.Value.CharacterName, ticket.Value.ClassId);
             Assert.True(await world.TryEnterAsync(session, CancellationToken.None));

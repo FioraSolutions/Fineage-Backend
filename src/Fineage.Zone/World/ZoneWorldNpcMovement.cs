@@ -1,4 +1,5 @@
 using Fineage.Protocol;
+using Fineage.Zone.Combat;
 
 namespace Fineage.Zone.World;
 
@@ -76,9 +77,12 @@ public sealed partial class ZoneWorld
     }
 
     /// <summary>
-    /// Mobius <c>AttackableAI</c> idle walk (<c>RANDOM_WALK_RATE = 30</c>): once a second, one think in thirty
-    /// sends a monster walking to a point inside <see cref="ZoneNpcSettings.MaxDriftRange"/> of its spawn.
-    /// Guards and town NPCs stay on their posts. Chase, return-home and fear already own the mover.
+    /// Mobius <c>AttackableThinkTaskManager</c> (<c>TASK_DELAY = 1000</c>) calls <c>AttackableAI.thinkActive</c>.
+    /// Past <c>MaxDriftRange</c> with no target: <c>setWalking</c> + <c>returnHome</c> (<c>AttackableAI.java:627</c>).
+    /// Otherwise <c>Rnd.get(RANDOM_WALK_RATE) == 0</c> (rate 30) and <c>isRandomWalkingEnabled</c>
+    /// (<c>NpcTemplate</c> default true, false for Guard): offset inside the drift box, geo
+    /// <c>getValidLocation</c>, move only if that point is still within drift (<c>AttackableAI.java:689</c>).
+    /// The roll does not change run/walk. Chase sets running; return home sets walking.
     /// </summary>
     const int RandomWalkRate = 30;
     long _nextWanderScanMs;
@@ -89,35 +93,69 @@ public sealed partial class ZoneWorld
             return;
         _nextWanderScanMs = now + 1000;
         int drift = ZoneNpcSettings.MaxDriftRange;
+        long driftSq = (long)drift * drift;
         foreach (var npc in _byId.Values)
         {
             if (npc.Kind != ZoneEntityKind.Npc || npc.CurHp <= 0 || !npc.HomeSet)
                 continue;
-            if (npc.NpcType is not ("Monster" or "FriendlyMob"))
+            if (!ZoneCombat.IsCombatNpcType(npc.NpcType))
                 continue;
-            if (npc.AggroTargetId > 0 || npc.MoveActive || npc.Chasing || npc.ReturningHome)
+            if (npc.AggroTargetId > 0 || npc.Chasing || npc.ReturningHome)
                 continue;
             if (npc.CastingUntilMs > now || IsImmobilized(npc) || IsFeared(npc))
                 continue;
-            if (_combatRandom.Next(RandomWalkRate) != 0)
+
+            long hdx = npc.X - (long)npc.HomeX;
+            long hdy = npc.Y - (long)npc.HomeY;
+            long homeDistSq = hdx * hdx + hdy * hdy;
+            // calculateDistance2D > MAX_DRIFT_RANGE. Equal does not return home.
+            if (homeDistSq > driftSq)
+            {
+                ReturnHome(npc, now);
+                continue;
+            }
+
+            // NpcTemplate randomWalk defaults to false only for Guard. No XML overrides in CT0 stats.
+            if (npc.NpcType == "Guard")
+                continue;
+            if (RndBound(RandomWalkRate) != 0)
                 continue;
 
-            double angle = _combatRandom.NextDouble() * Math.PI * 2;
-            double radius = 40 + _combatRandom.NextDouble() * Math.Max(0, drift - 40);
-            int destX = npc.HomeX + (int)Math.Round(Math.Cos(angle) * radius);
-            int destY = npc.HomeY + (int)Math.Round(Math.Sin(angle) * radius);
-            long dx = destX - (long)npc.X;
-            long dy = destY - (long)npc.Y;
-            if (dx * dx + dy * dy < 40L * 40L)
-                continue;
-            if (npc.Running)
+            int x1 = npc.HomeX;
+            int y1 = npc.HomeY;
+            int z1 = npc.HomeZ;
+            // isInsideRadius2D is strict: distSq < radius^2.
+            if (homeDistSq < driftSq)
             {
-                npc.Running = false;
-                FanoutMoveType(npc);
+                int deltaX = RndBound(drift * 2);
+                int deltaY = RndInclusive(deltaX, drift * 2);
+                deltaY = (int)Math.Sqrt((double)deltaY * deltaY - (double)deltaX * deltaX);
+                x1 = deltaX + npc.HomeX - drift;
+                y1 = deltaY + npc.HomeY - drift;
+                z1 = npc.Z;
             }
-            StartNpcMove(npc, destX, destY, npc.Z, now);
+
+            int destX = x1;
+            int destY = y1;
+            int destZ = z1;
+            if (_geo.HasGeo(npc.X, npc.Y))
+                (destX, destY, destZ) = _geo.MoveCheck(npc.X, npc.Y, npc.Z, x1, y1, z1, out _);
+            long fdx = destX - (long)npc.HomeX;
+            long fdy = destY - (long)npc.HomeY;
+            if (fdx * fdx + fdy * fdy > driftSq)
+                continue;
+            if (destX == npc.X && destY == npc.Y)
+                continue;
+            StartNpcMove(npc, destX, destY, destZ, now);
         }
     }
+
+    /// <summary>Mobius <c>Rnd.get(bound)</c>: 0 inclusive, bound exclusive.</summary>
+    int RndBound(int bound) => bound <= 0 ? 0 : _combatRandom.Next(bound);
+
+    /// <summary>Mobius <c>Rnd.get(origin, bound)</c>: both ends inclusive.</summary>
+    int RndInclusive(int origin, int bound) =>
+        origin >= bound ? origin : _combatRandom.Next(origin, bound + 1);
 
     /// <summary>
     /// Mobius <c>AttackableAI.thinkAttack</c> distance leash (<c>AttackableAI.java:740</c>): a monster dragged further

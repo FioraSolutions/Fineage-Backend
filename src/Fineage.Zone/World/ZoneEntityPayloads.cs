@@ -249,6 +249,8 @@ sealed class ZoneNpcAggroPayload
     public Dictionary<int, long> HateList { get; } = [];
     public Dictionary<int, long> DamageBy { get; } = [];
     public long NextAggroScanMs { get; set; }
+    /// <summary>Mobius <c>_globalAggro</c> starts at -10: no proactive aggro until this unix ms.</summary>
+    public long ProactiveAggroAtMs { get; set; }
     public long NextClanCallMs { get; set; }
     public bool StanceShown { get; set; }
     public int AggroTargetId { get; set; }

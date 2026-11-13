@@ -37,6 +37,8 @@ public sealed partial class ZoneWorld
         // Mobius FolkStatus: merchants/trainers/folk never hate. Guards/Monsters (Attackable types) do.
         if (!ZoneCombat.TakesNpcCombatDamage(npc.NpcType, npc.Attackable))
             return;
+        // Mobius onEvtAttacked: _globalAggro = 0, so a hit allows attack even during the spawn delay.
+        npc.ProactiveAggroAtMs = 0;
         npc.HateList[attacker.ObjectId] = npc.HateList.GetValueOrDefault(attacker.ObjectId) + Math.Max(1, hate);
         int top = MostHated(npc);
         if (top == npc.AggroTargetId || top == 0)
@@ -102,6 +104,10 @@ public sealed partial class ZoneWorld
         {
             if (npc.Kind != ZoneEntityKind.Npc || !npc.Aggressive || npc.AggroRange <= 0 || !npc.Attackable ||
                 npc.CurHp <= 0 || npc.AggroTargetId > 0 || npc.ReturningHome || now < npc.NextAggroScanMs)
+                continue;
+            // Mobius AttackableAI: _globalAggro starts at -10 and climbs once per 1s think, so a fresh
+            // mob does not pick a target for 10s. onEvtAttacked zeroes it; a hit still hates immediately.
+            if (npc.ProactiveAggroAtMs > now)
                 continue;
             npc.NextAggroScanMs = now + AggroScanIntervalMs;
             foreach (var p in players)
