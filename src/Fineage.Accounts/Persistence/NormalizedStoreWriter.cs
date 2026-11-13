@@ -87,6 +87,53 @@ static partial class NormalizedStoreWriter
         }
     }
 
+    /// <summary>
+    /// Insert the character row when item/shortcut writes would otherwise fail the
+    /// <c>character_items_character_id_fkey</c> check. Does not overwrite a live row.
+    /// </summary>
+    public static void EnsureCharacterRecord(NpgsqlConnection conn, NpgsqlTransaction tx, CharacterRecord character)
+    {
+        UpsertCharacterColumns(
+            conn,
+            tx,
+            character.Id,
+            character.Account,
+            character.Name,
+            character.ClassId,
+            character.Race,
+            character.Sex,
+            character.Level,
+            character.HairStyle,
+            character.HairColor,
+            character.Face,
+            character.HasPosition,
+            character.X,
+            character.Y,
+            character.Z,
+            character.Exp,
+            character.Sp,
+            character.Title ?? "",
+            character.Newbie,
+            character.MaxHp,
+            character.Hp,
+            character.MaxMp,
+            character.Mp,
+            character.ClanId,
+            character.ClanJoinExpiryUnixMs,
+            character.ClanCreateExpiryUnixMs,
+            character.DeathPenaltyLevel,
+            character.Karma,
+            character.PkKills,
+            character.PvpKills,
+            character.CreatedAt,
+            character.LastAccess,
+            character.DeleteAt,
+            character.HennaDye1,
+            character.HennaDye2,
+            character.HennaDye3,
+            insertOnly: true);
+    }
+
     public static void UpsertCharacterRecord(NpgsqlConnection conn, NpgsqlTransaction tx, CharacterRecord character)
     {
         UpsertCharacterColumns(

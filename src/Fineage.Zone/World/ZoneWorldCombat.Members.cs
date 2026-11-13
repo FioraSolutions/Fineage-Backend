@@ -77,7 +77,21 @@ public sealed partial class ZoneWorld
         {
             while (await timer.WaitForNextTickAsync(ct).ConfigureAwait(false))
             {
-                await RunPlayerCombatTickAsync(ct).ConfigureAwait(false);
+                try
+                {
+                    await RunPlayerCombatTickAsync(ct).ConfigureAwait(false);
+                }
+                catch (OperationCanceledException)
+                {
+                    throw;
+                }
+                catch (Exception ex)
+                {
+                    // A Postgres failure while flushing a bag used to fault this task.
+                    // Movement, hits, mob AI and knownlist refresh all live here, so one
+                    // bad save stopped combat for the rest of the process.
+                    ZoneLog.Warn($"combat tick failed: {ex.GetType().Name}: {ex.Message}");
+                }
             }
         }
         catch (OperationCanceledException)

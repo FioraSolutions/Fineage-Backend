@@ -216,7 +216,8 @@ static partial class NormalizedStoreWriter
         DateTimeOffset? deleteAt,
         int hennaDye1 = 0,
         int hennaDye2 = 0,
-        int hennaDye3 = 0)
+        int hennaDye3 = 0,
+        bool insertOnly = false)
     {
         using var cmd = conn.CreateCommand();
         cmd.Transaction = tx;
@@ -238,6 +239,7 @@ static partial class NormalizedStoreWriter
                 @deathPenalty, @karma, @pk, @pvp,
                 @henna1, @henna2, @henna3,
                 @createdAt, @lastAccess, @deleteAt, '{}'::jsonb, now())
+            """ + (insertOnly ? "ON CONFLICT (id) DO NOTHING" : """
             ON CONFLICT (id) DO UPDATE SET
                 account = EXCLUDED.account,
                 name = EXCLUDED.name,
@@ -274,7 +276,7 @@ static partial class NormalizedStoreWriter
                 last_access = EXCLUDED.last_access,
                 delete_at = EXCLUDED.delete_at,
                 updated_at = now()
-            """;
+            """);
         cmd.Parameters.AddWithValue("id", id);
         cmd.Parameters.AddWithValue("account", account);
         cmd.Parameters.AddWithValue("name", name);

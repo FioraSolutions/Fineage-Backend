@@ -14,6 +14,25 @@ public sealed class ZonePvpKarmaTests
     }
 
     [Fact]
+    public async Task Wind_strike_on_a_player_deals_damage_and_flags()
+    {
+        // Outside elf_town_peace1. A cast inside the polygon is refused with no flag and no HP loss.
+        const int x = 49000;
+        const int y = 50000;
+        const int z = -3000;
+        var kit = new NetTestKit(Fineage.Zone.Spawns.SpawnCatalog.LoadDefault(), "elven_starting");
+        var (_, attacker) = await kit.EnterAsync(classId: 10, race: 0, x: x, y: y, z: z);
+        var (_, victim) = await kit.EnterAsync(classId: 10, race: 0, x: x + 40, y: y, z: z);
+        int hp = victim.CurHp;
+
+        Assert.Null(await kit.World.TrySkillUseAsync(attacker.Session!, 1177, victim.ObjectId, CancellationToken.None));
+        await kit.World.CompleteCastForTestAsync(attacker.Session!);
+
+        Assert.True(victim.CurHp < hp);
+        Assert.True(attacker.PvpFlagged);
+    }
+
+    [Fact]
     public async Task Damaging_white_player_flags_attacker()
     {
         var kit = new NetTestKit(Fineage.Zone.Spawns.SpawnCatalog.LoadDefault(), "elven_starting");

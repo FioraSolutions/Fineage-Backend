@@ -107,6 +107,7 @@ public sealed partial class PostgresAccountStore
             {
                 var record = _inner.FindById(account, characterId)
                     ?? throw new InvalidOperationException($"Character {characterId} missing after item replace.");
+                EnsureCharacterRow(conn, record);
                 NormalizedStoreWriter.ReplaceInventoryOnly(conn, characterId, record.Items ?? []);
             });
 
@@ -117,6 +118,7 @@ public sealed partial class PostgresAccountStore
             {
                 var record = _inner.FindById(account, characterId)
                     ?? throw new InvalidOperationException($"Character {characterId} missing after warehouse replace.");
+                EnsureCharacterRow(conn, record);
                 NormalizedStoreWriter.ReplaceWarehouseOnly(conn, characterId, record.Warehouse ?? []);
             });
 
@@ -161,6 +163,7 @@ public sealed partial class PostgresAccountStore
             conn =>
             {
                 using var tx = conn.BeginTransaction();
+                EnsureCharacterRow(conn, account, characterId, tx);
                 NormalizedStoreWriter.ReplaceQuests(conn, tx, characterId, quests);
                 tx.Commit();
             });
@@ -171,6 +174,7 @@ public sealed partial class PostgresAccountStore
             conn =>
             {
                 using var tx = conn.BeginTransaction();
+                EnsureCharacterRow(conn, account, characterId, tx);
                 NormalizedStoreWriter.ReplaceLearnedSkills(conn, tx, characterId, skills);
                 tx.Commit();
             });
@@ -181,6 +185,7 @@ public sealed partial class PostgresAccountStore
             conn =>
             {
                 using var tx = conn.BeginTransaction();
+                EnsureCharacterRow(conn, account, characterId, tx);
                 NormalizedStoreWriter.ReplaceEffects(conn, tx, characterId, effects);
                 tx.Commit();
             });
@@ -208,6 +213,7 @@ public sealed partial class PostgresAccountStore
             conn =>
             {
                 using var tx = conn.BeginTransaction();
+                EnsureCharacterRow(conn, account, characterId, tx);
                 NormalizedStoreWriter.ReplaceShortcuts(conn, tx, characterId, shortcuts);
                 tx.Commit();
             });
@@ -268,6 +274,26 @@ public sealed partial class PostgresAccountStore
 
     public IReadOnlyList<CharacterRecord> List(string account) =>
         List(account, DateTimeOffset.UtcNow);
+
+    /// <summary>
+    /// Zone memory can hold a character the <c>characters</c> table never received
+    /// (snapshot loaded while SQL already had other rows). Child inserts then fail
+    /// <c>character_*_character_id_fkey</c> and the client sees an internal error.
+    /// </summary>
+    void EnsureCharacterRow(NpgsqlConnection conn, CharacterRecord record)
+    {
+        using var tx = conn.BeginTransaction();
+        NormalizedStoreWriter.EnsureCharacterRecord(conn, tx, record);
+        tx.Commit();
+    }
+
+    void EnsureCharacterRow(NpgsqlConnection conn, string account, int characterId, NpgsqlTransaction tx)
+    {
+        var record = _inner.FindById(account, characterId);
+        if (record == null)
+            return;
+        NormalizedStoreWriter.EnsureCharacterRecord(conn, tx, record);
+    }
 
     void Hydrate(NpgsqlConnection conn, CharacterRecord record)
     {
