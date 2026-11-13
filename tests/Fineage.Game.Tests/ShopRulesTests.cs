@@ -16,9 +16,9 @@ public sealed class ShopRulesTests
         Assert.True(multis.Lists.Count >= 80);
         Assert.True(buys.TryGet(3000100, out var fighter));
         Assert.Contains(30001, fighter.Npcs);
-        Assert.Equal(768, fighter.Find(1)!.Price);
+        Assert.Equal(590, fighter.Find(1)!.Price);
         Assert.True(data.Items.TryGet(1, out var sword));
-        Assert.Equal(768, sword.ReferencePrice);
+        Assert.Equal(590, sword.ReferencePrice);
         Assert.True(sword.Weight > 0);
 
         Assert.True(multis.TryGet(3, out var exchange));
