@@ -12,7 +12,15 @@ using Xunit;
 
 namespace Fineage.Zone.Tests;
 
+/// <summary>
+/// Tests that swap <see cref="ZoneAdmin"/> and <c>FINEAGE_ZONE_ADMIN</c>. Both are process-wide, and
+/// <c>data/admin-characters.json</c> is <c>*</c>, so a parallel dispose reloads "any name" and a non-admin passes.
+/// </summary>
+[CollectionDefinition("Zone admin gate", DisableParallelization = true)]
+public sealed class ZoneAdminGateCollection;
+
 /// <summary>Mobius admin_gmshop / admin_buy / setlevel gated by KuK + FINEAGE_ZONE_ADMIN.</summary>
+[Collection("Zone admin gate")]
 public sealed class AdminShopTests : IDisposable
 {
     readonly string? _prevEnv;
