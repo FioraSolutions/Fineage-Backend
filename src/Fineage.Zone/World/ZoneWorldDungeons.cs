@@ -124,6 +124,9 @@ public sealed partial class ZoneWorld
         session.PendingPickupAtUnixMs = 0;
         session.AutoAttackTargetId = 0;
         session.ClearApproach();
+        // A running path must not keep ticking from the old cell after the snap.
+        SetMoveActive(entity, false);
+        entity.MovePath.Clear();
 
         var ack = new MoveToMsg
         {
@@ -155,8 +158,13 @@ public sealed partial class ZoneWorld
         // Net: Mobius TeleportToLocation to the owner and every peer that held it in view.
         // MoveToAck above only reaches the (dormant) V2 stream, so Net needed its own relocation.
         var netWatchers = new List<int> { entity.ObjectId };
+        var added = new List<int>();
+        var removed = new List<int>();
         foreach (int id in SortedExcept(after, before))
+        {
             LinkSeen(entity, id);
+            added.Add(id);
+        }
         foreach (int id in SortedShared(after, before))
         {
             if (_byId.TryGetValue(id, out var other) && other.Session != null)
@@ -166,7 +174,15 @@ public sealed partial class ZoneWorld
         }
 
         foreach (int id in SortedExcept(before, after))
+        {
             Forget(entity, id);
+            removed.Add(id);
+        }
+
+        // Mobius onTeleported rebuilds the knownlist. Without this the client keeps the old
+        // square's bodies (or drops them with the tile) and never receives them again on the way back.
+        if (added.Count > 0 || removed.Count > 0)
+            NetBridge?.FanoutKnownlistDiff(entity.ObjectId, added, removed);
 
         if (netTeleport)
         {
