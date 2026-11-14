@@ -38,6 +38,14 @@ public static class ActionProtocol
     /// <summary>Social: Advance.</summary>
     public const int SocialAdvance = 14;
 
+    /// <summary>
+    /// Interlude ActionWnd emotes. The id is the RequestActionUse id (12 greeting … 66 shyness).
+    /// 15 is SocialAction.LEVEL_UP and is not a panel button.
+    /// </summary>
+    public static bool IsPanelSocial(int actionId) => actionId is
+        SocialGreeting or SocialVictory or SocialAdvance
+        or 24 or 25 or 26 or 29 or 30 or 31 or 33 or 34 or 35 or 62 or 66;
+
     /// <summary>Interlude <c>ChangeWaitType</c> wait type: sitting.</summary>
     public const int WaitSitting = 0;
 
