@@ -30,8 +30,7 @@ public sealed partial class ZoneWorld
             ActionProtocol.WalkRun => ToggleWalkRun(player),
             ActionProtocol.Attack => TryAttack(session, targetObjectId),
             ActionProtocol.NextTarget => TryNextTarget(session, player),
-            ActionProtocol.SocialGreeting or ActionProtocol.SocialVictory or ActionProtocol.SocialAdvance
-                => FanoutSocial(player, actionId),
+            _ when ActionProtocol.IsPanelSocial(actionId) => FanoutSocial(player, actionId),
             >= 10 and <= 61 => ActionProtocol.Unsupported,
             _ => ActionProtocol.Unknown
         };
