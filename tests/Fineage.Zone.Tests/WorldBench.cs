@@ -42,7 +42,8 @@ internal sealed class WorldBench
         Fineage.Zone.Dungeons.DungeonAccessOptions? dungeonAccess = null,
         Random? combatRandom = null,
         Fineage.Zone.Manor.ManorSettings? manor = null,
-        Random? manorRandom = null)
+        Random? manorRandom = null,
+        Random? fishingRandom = null)
     {
         Game = game ?? GameData.LoadDefault();
         Store = MemoryAccountStore.InMemory();
@@ -74,7 +75,8 @@ internal sealed class WorldBench
             dungeonAccess: dungeonAccess,
             combatRandom: combatRandom,
             manor: manor,
-            manorRandom: manorRandom);
+            manorRandom: manorRandom,
+            fishingRandom: fishingRandom);
         (Bridge, Rec) = NetBridgeRecorder.Create();
         World.NetBridge = Bridge;
     }

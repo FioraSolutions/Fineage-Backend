@@ -317,5 +317,7 @@ namespace Fineage.Net.Contract
         public const ushort ManorCommand = 0x03BA;
         /// <summary>Zone → client: manor window (<c>ManorInfoNetMsg</c>): seeds, crop purchases, sell list, settings.</summary>
         public const ushort ManorInfo = 0x03BB;
+        /// <summary>Zone → client: fishing start / bite / HP tick / end (<c>FishingEventNetMsg</c>).</summary>
+        public const ushort FishingEvent = 0x03BC;
     }
 }

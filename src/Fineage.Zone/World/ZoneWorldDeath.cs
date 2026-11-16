@@ -85,6 +85,7 @@ public sealed partial class ZoneWorld
         if (player.Kind != ZoneEntityKind.Player || player.Dead)
             return;
 
+        EndFishing(player, win: false);
         player.Dead = true;
         player.CurHp = 0;
         ClosePrivateStore(player.ObjectId, standUp: false);

@@ -180,7 +180,8 @@ public sealed partial class ZoneWorld
         ArmorSetCatalog? armorSets = null,
         ItemEquipSkillCatalog? equipSkills = null,
         Fineage.Zone.Manor.ManorSettings? manor = null,
-        Random? manorRandom = null)
+        Random? manorRandom = null,
+        Random? fishingRandom = null)
     {
         _npcRegen = npcRegen ?? ZoneNpcSettings.NpcRegenEnabled;
         _skillCombat = skillCombat ?? SkillCombatCatalog.LoadDefault();
@@ -253,6 +254,7 @@ public sealed partial class ZoneWorld
         LoadClans();
         LoadSiege();
         InitManor(manor, manorRandom);
+        _fishingRandom = fishingRandom ?? Random.Shared;
         SpawnCastleDoors();
     }
 

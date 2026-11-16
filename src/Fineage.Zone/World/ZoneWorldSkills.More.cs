@@ -181,6 +181,8 @@ public sealed partial class ZoneWorld
         // Net timed move: measure range from where the pawn really is now, not the last move order.
         AdvanceMove(player, now);
 
+        if (IsFishingSkill(request.SkillId))
+            return TrySkillUseFishing(session, player, liveTemplate, liveLevelData, level, now);
         if (request.SkillId is SiegeProtocol.SealOfRulerSkillId or SiegeProtocol.BuildHeadquartersSkillId)
             return TrySkillUseSiege(session, player, request, liveTemplate, liveLevelData, level, now);
         if (_spoilRules.IsSpoilSkill(request.SkillId) || _spoilRules.IsSweepSkill(request.SkillId))

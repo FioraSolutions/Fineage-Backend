@@ -40,4 +40,7 @@ sealed partial class NetWorldEventPublisher
 
     void IWorldEventPublisher.FanoutManorInfo(IReadOnlyList<int> watcherObjectIds, ManorInfoNetMsg manor) =>
         SendAll(watcherObjectIds, NetOpcode.ManorInfo, NetCodec.EncodeManorInfo(manor));
+
+    void IWorldEventPublisher.FanoutFishing(IReadOnlyList<int> watcherObjectIds, FishingEventNetMsg fishing) =>
+        SendAll(watcherObjectIds, NetOpcode.FishingEvent, NetCodec.EncodeFishingEvent(fishing));
 }

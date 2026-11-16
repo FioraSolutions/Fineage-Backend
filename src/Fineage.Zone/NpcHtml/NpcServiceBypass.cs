@@ -95,6 +95,27 @@ public sealed class TrainerBypassHandler : IBypassHandler
     }
 }
 
+/// <summary>
+/// Fisherman bypasses (Mobius <c>Fisherman.onBypassFeedback</c>): <c>FishSkillList</c> opens the guild skill window,
+/// <c>FishingChampionship</c> shows the tournament page (the championship itself is not run yet).
+/// </summary>
+public sealed class FishermanBypassHandler : IBypassHandler
+{
+    readonly NpcHtmlCatalog _html;
+
+    public FishermanBypassHandler(NpcHtmlCatalog html) => _html = html ?? throw new ArgumentNullException(nameof(html));
+
+    public IReadOnlyList<string> Commands { get; } = ["FishSkillList", "FishingChampionship"];
+
+    public BypassReply Handle(BypassCall call)
+    {
+        if (BypassCommands.Token(call.Command).Equals("FishSkillList", StringComparison.OrdinalIgnoreCase))
+            return BypassReply.ServiceCall(NpcServiceIntent.FishSkillList);
+        var page = NpcHtmlPaths.ReadLink(_html, call.NpcType, "Link fisherman/fishing_championship.htm");
+        return page.RejectedPath ? BypassReply.Fail("bad_request") : BypassReply.Page(page.Html);
+    }
+}
+
 /// <summary>Merchant <c>TerritoryStatus</c> (Mobius <c>Merchant.showTerritoryStatusWindow</c>): castle, lord and tax page.</summary>
 public sealed class TerritoryBypassHandler : IBypassHandler
 {

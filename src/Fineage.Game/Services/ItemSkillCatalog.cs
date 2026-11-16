@@ -36,6 +36,25 @@ public sealed record ItemSkillEffect
 
     /// <summary>Restoration grant.</summary>
     public int ItemId { get; init; }
+
+    /// <summary>
+    /// Mobius <c>RestorationRandom</c> (fish, treasure boxes): one roll in [0,100) walks the groups by cumulative
+    /// chance; the first group whose running total passes the roll grants all its items.
+    /// </summary>
+    public IReadOnlyList<ItemSkillGroup> Groups { get; init; } = [];
+}
+
+/// <summary>One <c>RestorationRandom</c> outcome: its chance in percent and the items it grants.</summary>
+public sealed record ItemSkillGroup
+{
+    public double Chance { get; init; }
+    public IReadOnlyList<ItemSkillGrant> Items { get; init; } = [];
+}
+
+public sealed record ItemSkillGrant
+{
+    public int ItemId { get; init; }
+    public int Count { get; init; } = 1;
 }
 
 /// <summary>One usable item: what Mobius destroys a stack of and what it casts.</summary>

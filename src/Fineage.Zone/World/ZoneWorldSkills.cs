@@ -88,6 +88,15 @@ public sealed partial class ZoneWorld
                 return "world";
             if (player.Dead)
                 return InventoryProtocol.Dead;
+            if (skillType == FishingProtocol.AcquireSkillTypeFishing)
+            {
+                if (informing)
+                {
+                    PublishFishingSkillInfo(player, skillId, level);
+                    return null;
+                }
+                return LearnFishingSkill(session, player, skillId, level);
+            }
             if (skillType == AcquireSkillTypePledge)
             {
                 if (informing)

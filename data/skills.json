@@ -49369,6 +49369,640 @@
       ],
       "magicType": 2,
       "effectRange": 400
+    },
+    {
+      "skillId": 1312,
+      "name": "Fishing",
+      "levels": 1,
+      "passive": false,
+      "operateType": "A1",
+      "targetType": "SELF",
+      "castRange": -1,
+      "hitTimeMs": 0,
+      "reuseDelayMs": 0,
+      "levelData": [
+        {
+          "level": 1,
+          "mpConsume": 1,
+          "power": 0,
+          "abnormalLevel": 0,
+          "magicLevel": 1
+        }
+      ],
+      "magicType": 2,
+      "effectRange": -1
+    },
+    {
+      "skillId": 1313,
+      "name": "Pumping",
+      "levels": 27,
+      "passive": false,
+      "operateType": "A1",
+      "targetType": "SELF",
+      "castRange": -1,
+      "hitTimeMs": 0,
+      "reuseDelayMs": 2000,
+      "levelData": [
+        {
+          "level": 1,
+          "mpConsume": 2,
+          "power": 0,
+          "abnormalLevel": 0,
+          "magicLevel": 1
+        },
+        {
+          "level": 2,
+          "mpConsume": 2,
+          "power": 0,
+          "abnormalLevel": 0,
+          "magicLevel": 1
+        },
+        {
+          "level": 3,
+          "mpConsume": 2,
+          "power": 0,
+          "abnormalLevel": 0,
+          "magicLevel": 1
+        },
+        {
+          "level": 4,
+          "mpConsume": 2,
+          "power": 0,
+          "abnormalLevel": 0,
+          "magicLevel": 1
+        },
+        {
+          "level": 5,
+          "mpConsume": 2,
+          "power": 0,
+          "abnormalLevel": 0,
+          "magicLevel": 1
+        },
+        {
+          "level": 6,
+          "mpConsume": 2,
+          "power": 0,
+          "abnormalLevel": 0,
+          "magicLevel": 1
+        },
+        {
+          "level": 7,
+          "mpConsume": 2,
+          "power": 0,
+          "abnormalLevel": 0,
+          "magicLevel": 1
+        },
+        {
+          "level": 8,
+          "mpConsume": 2,
+          "power": 0,
+          "abnormalLevel": 0,
+          "magicLevel": 1
+        },
+        {
+          "level": 9,
+          "mpConsume": 2,
+          "power": 0,
+          "abnormalLevel": 0,
+          "magicLevel": 1
+        },
+        {
+          "level": 10,
+          "mpConsume": 2,
+          "power": 0,
+          "abnormalLevel": 0,
+          "magicLevel": 1
+        },
+        {
+          "level": 11,
+          "mpConsume": 2,
+          "power": 0,
+          "abnormalLevel": 0,
+          "magicLevel": 1
+        },
+        {
+          "level": 12,
+          "mpConsume": 2,
+          "power": 0,
+          "abnormalLevel": 0,
+          "magicLevel": 1
+        },
+        {
+          "level": 13,
+          "mpConsume": 2,
+          "power": 0,
+          "abnormalLevel": 0,
+          "magicLevel": 1
+        },
+        {
+          "level": 14,
+          "mpConsume": 2,
+          "power": 0,
+          "abnormalLevel": 0,
+          "magicLevel": 1
+        },
+        {
+          "level": 15,
+          "mpConsume": 2,
+          "power": 0,
+          "abnormalLevel": 0,
+          "magicLevel": 1
+        },
+        {
+          "level": 16,
+          "mpConsume": 2,
+          "power": 0,
+          "abnormalLevel": 0,
+          "magicLevel": 1
+        },
+        {
+          "level": 17,
+          "mpConsume": 2,
+          "power": 0,
+          "abnormalLevel": 0,
+          "magicLevel": 1
+        },
+        {
+          "level": 18,
+          "mpConsume": 2,
+          "power": 0,
+          "abnormalLevel": 0,
+          "magicLevel": 1
+        },
+        {
+          "level": 19,
+          "mpConsume": 2,
+          "power": 0,
+          "abnormalLevel": 0,
+          "magicLevel": 1
+        },
+        {
+          "level": 20,
+          "mpConsume": 2,
+          "power": 0,
+          "abnormalLevel": 0,
+          "magicLevel": 1
+        },
+        {
+          "level": 21,
+          "mpConsume": 2,
+          "power": 0,
+          "abnormalLevel": 0,
+          "magicLevel": 1
+        },
+        {
+          "level": 22,
+          "mpConsume": 2,
+          "power": 0,
+          "abnormalLevel": 0,
+          "magicLevel": 1
+        },
+        {
+          "level": 23,
+          "mpConsume": 2,
+          "power": 0,
+          "abnormalLevel": 0,
+          "magicLevel": 1
+        },
+        {
+          "level": 24,
+          "mpConsume": 2,
+          "power": 0,
+          "abnormalLevel": 0,
+          "magicLevel": 1
+        },
+        {
+          "level": 25,
+          "mpConsume": 2,
+          "power": 0,
+          "abnormalLevel": 0,
+          "magicLevel": 1
+        },
+        {
+          "level": 26,
+          "mpConsume": 2,
+          "power": 0,
+          "abnormalLevel": 0,
+          "magicLevel": 1
+        },
+        {
+          "level": 27,
+          "mpConsume": 2,
+          "power": 0,
+          "abnormalLevel": 0,
+          "magicLevel": 1
+        }
+      ],
+      "magicType": 2,
+      "effectRange": -1
+    },
+    {
+      "skillId": 1314,
+      "name": "Reeling",
+      "levels": 27,
+      "passive": false,
+      "operateType": "A1",
+      "targetType": "SELF",
+      "castRange": -1,
+      "hitTimeMs": 0,
+      "reuseDelayMs": 2000,
+      "levelData": [
+        {
+          "level": 1,
+          "mpConsume": 2,
+          "power": 0,
+          "abnormalLevel": 0,
+          "magicLevel": 1
+        },
+        {
+          "level": 2,
+          "mpConsume": 2,
+          "power": 0,
+          "abnormalLevel": 0,
+          "magicLevel": 1
+        },
+        {
+          "level": 3,
+          "mpConsume": 2,
+          "power": 0,
+          "abnormalLevel": 0,
+          "magicLevel": 1
+        },
+        {
+          "level": 4,
+          "mpConsume": 2,
+          "power": 0,
+          "abnormalLevel": 0,
+          "magicLevel": 1
+        },
+        {
+          "level": 5,
+          "mpConsume": 2,
+          "power": 0,
+          "abnormalLevel": 0,
+          "magicLevel": 1
+        },
+        {
+          "level": 6,
+          "mpConsume": 2,
+          "power": 0,
+          "abnormalLevel": 0,
+          "magicLevel": 1
+        },
+        {
+          "level": 7,
+          "mpConsume": 2,
+          "power": 0,
+          "abnormalLevel": 0,
+          "magicLevel": 1
+        },
+        {
+          "level": 8,
+          "mpConsume": 2,
+          "power": 0,
+          "abnormalLevel": 0,
+          "magicLevel": 1
+        },
+        {
+          "level": 9,
+          "mpConsume": 2,
+          "power": 0,
+          "abnormalLevel": 0,
+          "magicLevel": 1
+        },
+        {
+          "level": 10,
+          "mpConsume": 2,
+          "power": 0,
+          "abnormalLevel": 0,
+          "magicLevel": 1
+        },
+        {
+          "level": 11,
+          "mpConsume": 2,
+          "power": 0,
+          "abnormalLevel": 0,
+          "magicLevel": 1
+        },
+        {
+          "level": 12,
+          "mpConsume": 2,
+          "power": 0,
+          "abnormalLevel": 0,
+          "magicLevel": 1
+        },
+        {
+          "level": 13,
+          "mpConsume": 2,
+          "power": 0,
+          "abnormalLevel": 0,
+          "magicLevel": 1
+        },
+        {
+          "level": 14,
+          "mpConsume": 2,
+          "power": 0,
+          "abnormalLevel": 0,
+          "magicLevel": 1
+        },
+        {
+          "level": 15,
+          "mpConsume": 2,
+          "power": 0,
+          "abnormalLevel": 0,
+          "magicLevel": 1
+        },
+        {
+          "level": 16,
+          "mpConsume": 2,
+          "power": 0,
+          "abnormalLevel": 0,
+          "magicLevel": 1
+        },
+        {
+          "level": 17,
+          "mpConsume": 2,
+          "power": 0,
+          "abnormalLevel": 0,
+          "magicLevel": 1
+        },
+        {
+          "level": 18,
+          "mpConsume": 2,
+          "power": 0,
+          "abnormalLevel": 0,
+          "magicLevel": 1
+        },
+        {
+          "level": 19,
+          "mpConsume": 2,
+          "power": 0,
+          "abnormalLevel": 0,
+          "magicLevel": 1
+        },
+        {
+          "level": 20,
+          "mpConsume": 2,
+          "power": 0,
+          "abnormalLevel": 0,
+          "magicLevel": 1
+        },
+        {
+          "level": 21,
+          "mpConsume": 2,
+          "power": 0,
+          "abnormalLevel": 0,
+          "magicLevel": 1
+        },
+        {
+          "level": 22,
+          "mpConsume": 2,
+          "power": 0,
+          "abnormalLevel": 0,
+          "magicLevel": 1
+        },
+        {
+          "level": 23,
+          "mpConsume": 2,
+          "power": 0,
+          "abnormalLevel": 0,
+          "magicLevel": 1
+        },
+        {
+          "level": 24,
+          "mpConsume": 2,
+          "power": 0,
+          "abnormalLevel": 0,
+          "magicLevel": 1
+        },
+        {
+          "level": 25,
+          "mpConsume": 2,
+          "power": 0,
+          "abnormalLevel": 0,
+          "magicLevel": 1
+        },
+        {
+          "level": 26,
+          "mpConsume": 2,
+          "power": 0,
+          "abnormalLevel": 0,
+          "magicLevel": 1
+        },
+        {
+          "level": 27,
+          "mpConsume": 2,
+          "power": 0,
+          "abnormalLevel": 0,
+          "magicLevel": 1
+        }
+      ],
+      "magicType": 2,
+      "effectRange": -1
+    },
+    {
+      "skillId": 1315,
+      "name": "Fishing Expertise",
+      "levels": 27,
+      "passive": true,
+      "operateType": "P",
+      "targetType": "SELF",
+      "castRange": -1,
+      "hitTimeMs": 0,
+      "reuseDelayMs": 0,
+      "levelData": [
+        {
+          "level": 1,
+          "mpConsume": 0,
+          "power": 0,
+          "abnormalLevel": 0,
+          "magicLevel": 1
+        },
+        {
+          "level": 2,
+          "mpConsume": 0,
+          "power": 0,
+          "abnormalLevel": 0,
+          "magicLevel": 1
+        },
+        {
+          "level": 3,
+          "mpConsume": 0,
+          "power": 0,
+          "abnormalLevel": 0,
+          "magicLevel": 1
+        },
+        {
+          "level": 4,
+          "mpConsume": 0,
+          "power": 0,
+          "abnormalLevel": 0,
+          "magicLevel": 1
+        },
+        {
+          "level": 5,
+          "mpConsume": 0,
+          "power": 0,
+          "abnormalLevel": 0,
+          "magicLevel": 1
+        },
+        {
+          "level": 6,
+          "mpConsume": 0,
+          "power": 0,
+          "abnormalLevel": 0,
+          "magicLevel": 1
+        },
+        {
+          "level": 7,
+          "mpConsume": 0,
+          "power": 0,
+          "abnormalLevel": 0,
+          "magicLevel": 1
+        },
+        {
+          "level": 8,
+          "mpConsume": 0,
+          "power": 0,
+          "abnormalLevel": 0,
+          "magicLevel": 1
+        },
+        {
+          "level": 9,
+          "mpConsume": 0,
+          "power": 0,
+          "abnormalLevel": 0,
+          "magicLevel": 1
+        },
+        {
+          "level": 10,
+          "mpConsume": 0,
+          "power": 0,
+          "abnormalLevel": 0,
+          "magicLevel": 1
+        },
+        {
+          "level": 11,
+          "mpConsume": 0,
+          "power": 0,
+          "abnormalLevel": 0,
+          "magicLevel": 1
+        },
+        {
+          "level": 12,
+          "mpConsume": 0,
+          "power": 0,
+          "abnormalLevel": 0,
+          "magicLevel": 1
+        },
+        {
+          "level": 13,
+          "mpConsume": 0,
+          "power": 0,
+          "abnormalLevel": 0,
+          "magicLevel": 1
+        },
+        {
+          "level": 14,
+          "mpConsume": 0,
+          "power": 0,
+          "abnormalLevel": 0,
+          "magicLevel": 1
+        },
+        {
+          "level": 15,
+          "mpConsume": 0,
+          "power": 0,
+          "abnormalLevel": 0,
+          "magicLevel": 1
+        },
+        {
+          "level": 16,
+          "mpConsume": 0,
+          "power": 0,
+          "abnormalLevel": 0,
+          "magicLevel": 1
+        },
+        {
+          "level": 17,
+          "mpConsume": 0,
+          "power": 0,
+          "abnormalLevel": 0,
+          "magicLevel": 1
+        },
+        {
+          "level": 18,
+          "mpConsume": 0,
+          "power": 0,
+          "abnormalLevel": 0,
+          "magicLevel": 1
+        },
+        {
+          "level": 19,
+          "mpConsume": 0,
+          "power": 0,
+          "abnormalLevel": 0,
+          "magicLevel": 1
+        },
+        {
+          "level": 20,
+          "mpConsume": 0,
+          "power": 0,
+          "abnormalLevel": 0,
+          "magicLevel": 1
+        },
+        {
+          "level": 21,
+          "mpConsume": 0,
+          "power": 0,
+          "abnormalLevel": 0,
+          "magicLevel": 1
+        },
+        {
+          "level": 22,
+          "mpConsume": 0,
+          "power": 0,
+          "abnormalLevel": 0,
+          "magicLevel": 1
+        },
+        {
+          "level": 23,
+          "mpConsume": 0,
+          "power": 0,
+          "abnormalLevel": 0,
+          "magicLevel": 1
+        },
+        {
+          "level": 24,
+          "mpConsume": 0,
+          "power": 0,
+          "abnormalLevel": 0,
+          "magicLevel": 1
+        },
+        {
+          "level": 25,
+          "mpConsume": 0,
+          "power": 0,
+          "abnormalLevel": 0,
+          "magicLevel": 1
+        },
+        {
+          "level": 26,
+          "mpConsume": 0,
+          "power": 0,
+          "abnormalLevel": 0,
+          "magicLevel": 1
+        },
+        {
+          "level": 27,
+          "mpConsume": 0,
+          "power": 0,
+          "abnormalLevel": 0,
+          "magicLevel": 1
+        }
+      ],
+      "magicType": 2,
+      "effectRange": -1
     }
   ]
 }
