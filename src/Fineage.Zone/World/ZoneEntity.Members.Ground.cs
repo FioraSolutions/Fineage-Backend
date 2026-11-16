@@ -83,5 +83,24 @@ sealed partial class ZoneEntity
         set => EnsureSpoil().CorpseAwaitingSweep = value;
     }
 
+    /// <summary>Manor seed state (Mobius Attackable seed fields); 0 / false when nothing was sown.</summary>
+    public int SeedId { get => Spoil?.SeedId ?? 0; set => EnsureSpoil().SeedId = value; }
+    public int SeederObjectId { get => Spoil?.SeederObjectId ?? 0; set => EnsureSpoil().SeederObjectId = value; }
+    public bool Seeded { get => Spoil?.Seeded ?? false; set => EnsureSpoil().Seeded = value; }
+    public int HarvestItemId { get => Spoil?.HarvestItemId ?? 0; set => EnsureSpoil().HarvestItemId = value; }
+    public int HarvestCount { get => Spoil?.HarvestCount ?? 0; set => EnsureSpoil().HarvestCount = value; }
+
+    /// <summary>Mobius <c>Attackable.onSpawn</c> / decay: forget the seed and the crop.</summary>
+    public void ClearSeed()
+    {
+        if (Spoil == null)
+            return;
+        Spoil.SeedId = 0;
+        Spoil.SeederObjectId = 0;
+        Spoil.Seeded = false;
+        Spoil.HarvestItemId = 0;
+        Spoil.HarvestCount = 0;
+    }
+
     ZoneNpcSpoilPayload EnsureSpoil() => Spoil ??= new ZoneNpcSpoilPayload();
 }

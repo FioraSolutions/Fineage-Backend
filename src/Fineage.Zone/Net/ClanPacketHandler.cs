@@ -211,6 +211,26 @@ public sealed class ClanPacketHandler
             await _reject(conn, error, "Castle command failed.", ct).ConfigureAwait(false);
     }
 
+    /// <summary><see cref="NetOpcode.ManorCommand"/>: one manor manager / castle lord manor action.</summary>
+    public async Task OnManorCommandAsync(
+        NetConnection conn,
+        ZoneSession zoneSession,
+        PacketEnvelope envelope,
+        CancellationToken ct)
+    {
+        RequireHello(conn);
+        if (!zoneSession.Bound || !zoneSession.InWorld)
+        {
+            await _reject(conn, "not_in_world", "Enter world first.", ct).ConfigureAwait(false);
+            return;
+        }
+
+        var command = NetCodec.DecodeManorCommand(envelope.Payload);
+        string? error = await _world.TryManorCommandAsync(zoneSession, command, ct).ConfigureAwait(false);
+        if (error != null)
+            await _reject(conn, error, "Manor command failed.", ct).ConfigureAwait(false);
+    }
+
     static void RequireHello(NetConnection conn)
     {
         if (!conn.HelloCompleted)

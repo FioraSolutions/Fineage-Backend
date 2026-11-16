@@ -131,6 +131,9 @@ public sealed partial class NetZoneServer
                         case NetOpcode.CastleCommand:
                             await _clan.OnCastleCommandAsync(conn, zoneSession, envelope, ct).ConfigureAwait(false);
                             break;
+                        case NetOpcode.ManorCommand:
+                            await _clan.OnManorCommandAsync(conn, zoneSession, envelope, ct).ConfigureAwait(false);
+                            break;
                         case NetOpcode.NpcTalk:
                             await _npcTalk.OnTalkAsync(conn, zoneSession, envelope, ct).ConfigureAwait(false);
                             break;

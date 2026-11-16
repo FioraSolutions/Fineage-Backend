@@ -133,8 +133,9 @@ public sealed partial class ZoneWorld
                 npc.SweepItems.Add(stack);
         }
 
-        SpawnDeathDrops(npcId, x, y, z, killer, watchers, npc.Level, raid);
-        bool spoiled = npc.SpoilerObjectId != 0;
+        SpawnDeathDrops(npcId, x, y, z, killer, watchers, npc.Level, raid, seeded: npc.Seeded);
+        // Mobius DecayTaskManager: a seeded corpse gets the same extension as a spoiled one (time to harvest).
+        bool spoiled = npc.SpoilerObjectId != 0 || npc.Seeded;
         npc.CorpseAwaitingSweep = npc.SweepItems.Count > 0;
         if (spoiled)
             ZoneLog.Info($"corpse object={objectId} spoiler={npc.SpoilerObjectId} sweep={npc.SweepItems.Count}");
@@ -157,6 +158,7 @@ public sealed partial class ZoneWorld
         _aoi.Leave(objectId);
         _byId.Remove(objectId);
         npc.SpoilerObjectId = 0;
+        npc.ClearSeed();
         npc.SweepItems.Clear();
         npc.CorpseAwaitingSweep = false;
         SetDecayAtMs(npc, 0);

@@ -33,8 +33,10 @@ public sealed partial class ZoneWorld
 
     void ReleaseSiegeClan(int clanId)
     {
+        int castleId = _siege.CastleOwnedBy(clanId);
         _siege.ReleaseClan(clanId);
         PersistSiege();
+        ResetManorIfOwnerless(castleId);
     }
 
     string? CaptureLocked(int clanId, int castleId, long nowUnixMs, ZoneSession? actor = null)

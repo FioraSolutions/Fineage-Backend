@@ -165,6 +165,9 @@ interface IWorldEventPublisher
     /// <summary>Chamberlain castle window (<see cref="Fineage.Net.Contract.NetOpcode.CastleInfo"/>).</summary>
     void FanoutCastleInfo(IReadOnlyList<int> watcherObjectIds, Fineage.Net.Contract.CastleInfoNetMsg castle);
 
+    /// <summary>Manor window (<see cref="Fineage.Net.Contract.NetOpcode.ManorInfo"/>).</summary>
+    void FanoutManorInfo(IReadOnlyList<int> watcherObjectIds, Fineage.Net.Contract.ManorInfoNetMsg manor);
+
 
     void FanoutClanAskJoin(IReadOnlyList<int> watcherObjectIds, Fineage.Protocol.ClanAskJoinMsg ask);
 
