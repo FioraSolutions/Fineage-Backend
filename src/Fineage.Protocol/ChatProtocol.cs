@@ -39,8 +39,29 @@ public static class ChatProtocol
     /// <summary>Normal say radius in world units (2D). Shout ignores this and uses the whole zone.</summary>
     public const int LocalRange = 1250;
 
-    /// <summary>Maximum chat text length after the client has sent it, before trim. Longer bodies are rejected.</summary>
-    public const int MaxTextLength = 100;
+    /// <summary>
+    /// Maximum chat text length after the client has sent it, before trim. Longer bodies are rejected
+    /// (Mobius Say2: 105, verified on the official client).
+    /// </summary>
+    public const int MaxTextLength = 105;
+
+    /// <summary>Mobius ChatTrade: trade channel opens at this level.</summary>
+    public const int TradeMinLevel = 20;
+
+    /// <summary>Mobius FloodProtectorHeroVoiceInterval = 100 ticks: one hero line per 10 s.</summary>
+    public const int HeroVoiceIntervalMs = 10_000;
+
+    /// <summary>Interlude <c>THAT_PLAYER_IS_NOT_ONLINE</c>.</summary>
+    public const int PlayerNotOnline = 145;
+
+    /// <summary>Interlude <c>CHATTING_IS_CURRENTLY_PROHIBITED</c> (chat ban, Say2).</summary>
+    public const int ChattingProhibited = 147;
+
+    /// <summary>Interlude <c>THAT_PERSON_IS_IN_MESSAGE_REFUSAL_MODE</c> (whisper to a blocker / refusal / banned).</summary>
+    public const int MessageRefusal = 176;
+
+    /// <summary>Interlude <c>YOU_ARE_CURRENTLY_NOT_IN_A_PETITION_CHAT</c>.</summary>
+    public const int NotInPetitionChat = 745;
 
     /// <summary>Minimum gap between accepted say attempts on one session.</summary>
     public const int FloodIntervalMs = 1000;

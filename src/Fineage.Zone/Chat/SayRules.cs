@@ -21,8 +21,14 @@ public static class SayRules
         return true;
     }
 
-    public static bool IsDelivered(int chatType) =>
-        chatType == ChatProtocol.All || chatType == ChatProtocol.Shout;
+    /// <summary>
+    /// Channels with a Mobius CT_0 chat handler. GM (5), announcements (10 / 18), boat, friend and MSN have no
+    /// player handler and get the "not supported" notice; unknown types too.
+    /// </summary>
+    public static bool IsDelivered(int chatType) => chatType is
+        ChatProtocol.All or ChatProtocol.Shout or ChatProtocol.Tell or ChatProtocol.Party or ChatProtocol.Clan or
+        ChatProtocol.PetitionPlayer or ChatProtocol.PetitionGm or ChatProtocol.Trade or ChatProtocol.Alliance or
+        ChatProtocol.PartyMatchRoom or ChatProtocol.PartyRoomCommander or ChatProtocol.PartyRoomAll or ChatProtocol.Hero;
 
     public static bool IsFlood(long lastUnixMs, long nowUnixMs) =>
         lastUnixMs > 0 && nowUnixMs - lastUnixMs < ChatProtocol.FloodIntervalMs;

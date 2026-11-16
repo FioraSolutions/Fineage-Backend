@@ -81,6 +81,12 @@ public sealed class ZoneSession
     /// <summary>Unix milliseconds of the last accepted say. 0 means this session has not spoken.</summary>
     public long LastChatUnixMs { get; set; }
 
+    /// <summary>Mobius FloodProtectors HERO_VOICE: last accepted hero-channel line (10 s window).</summary>
+    public long LastHeroVoiceUnixMs { get; set; }
+
+    /// <summary>Mobius chat ban (PunishmentType.CHAT_BAN): unix ms until which banned channels are refused; 0 = none.</summary>
+    public long ChatBannedUntilUnixMs { get; set; }
+
     public bool Bound => ObjectId != 0;
 
     public void Bind(int objectId, string account, string name, int classId, int race = 0, int sex = 0)
@@ -125,5 +131,6 @@ public sealed class ZoneSession
         ClearApproach();
         FearFleeAtUnixMs = 0;
         LastChatUnixMs = 0;
+        LastHeroVoiceUnixMs = 0;
     }
 }
