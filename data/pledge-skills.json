@@ -1,0 +1,901 @@
+{
+ "source": "L2J Mobius CT_0 Interlude dist/game/data/stats/players/skillTrees/pledgeSkillTree.xml (datapack values converted to JSON)",
+ "skills": [
+  {
+   "skillId": 370,
+   "level": 1,
+   "name": "Clan Vitality",
+   "clanLevel": 5,
+   "reputation": 500,
+   "socialClass": "HEIR",
+   "items": [
+    {
+     "id": 8166,
+     "count": 1
+    }
+   ]
+  },
+  {
+   "skillId": 370,
+   "level": 2,
+   "name": "Clan Vitality",
+   "clanLevel": 5,
+   "reputation": 500,
+   "socialClass": "HEIR",
+   "items": [
+    {
+     "id": 8166,
+     "count": 1
+    }
+   ]
+  },
+  {
+   "skillId": 370,
+   "level": 3,
+   "name": "Clan Vitality",
+   "clanLevel": 5,
+   "reputation": 500,
+   "socialClass": "HEIR",
+   "items": [
+    {
+     "id": 8166,
+     "count": 1
+    }
+   ]
+  },
+  {
+   "skillId": 391,
+   "level": 1,
+   "name": "Clan Imperium",
+   "clanLevel": 5,
+   "reputation": 0,
+   "socialClass": "VASSAL",
+   "items": [
+    {
+     "id": 8176,
+     "count": 1
+    }
+   ]
+  },
+  {
+   "skillId": 373,
+   "level": 1,
+   "name": "Clan Lifeblood",
+   "clanLevel": 5,
+   "reputation": 500,
+   "socialClass": "HEIR",
+   "items": [
+    {
+     "id": 8166,
+     "count": 1
+    }
+   ]
+  },
+  {
+   "skillId": 373,
+   "level": 2,
+   "name": "Clan Lifeblood",
+   "clanLevel": 5,
+   "reputation": 500,
+   "socialClass": "HEIR",
+   "items": [
+    {
+     "id": 8166,
+     "count": 1
+    }
+   ]
+  },
+  {
+   "skillId": 373,
+   "level": 3,
+   "name": "Clan Lifeblood",
+   "clanLevel": 5,
+   "reputation": 500,
+   "socialClass": "HEIR",
+   "items": [
+    {
+     "id": 8166,
+     "count": 1
+    }
+   ]
+  },
+  {
+   "skillId": 379,
+   "level": 1,
+   "name": "Clan Magic Protection",
+   "clanLevel": 5,
+   "reputation": 500,
+   "socialClass": "HEIR",
+   "items": [
+    {
+     "id": 8163,
+     "count": 1
+    }
+   ]
+  },
+  {
+   "skillId": 379,
+   "level": 2,
+   "name": "Clan Magic Protection",
+   "clanLevel": 5,
+   "reputation": 500,
+   "socialClass": "HEIR",
+   "items": [
+    {
+     "id": 8163,
+     "count": 1
+    }
+   ]
+  },
+  {
+   "skillId": 379,
+   "level": 3,
+   "name": "Clan Magic Protection",
+   "clanLevel": 5,
+   "reputation": 500,
+   "socialClass": "HEIR",
+   "items": [
+    {
+     "id": 8163,
+     "count": 1
+    }
+   ]
+  },
+  {
+   "skillId": 376,
+   "level": 1,
+   "name": "Clan Might",
+   "clanLevel": 6,
+   "reputation": 1000,
+   "socialClass": "KNIGHT",
+   "items": [
+    {
+     "id": 8163,
+     "count": 1
+    }
+   ]
+  },
+  {
+   "skillId": 376,
+   "level": 2,
+   "name": "Clan Might",
+   "clanLevel": 6,
+   "reputation": 1000,
+   "socialClass": "KNIGHT",
+   "items": [
+    {
+     "id": 8163,
+     "count": 1
+    }
+   ]
+  },
+  {
+   "skillId": 376,
+   "level": 3,
+   "name": "Clan Might",
+   "clanLevel": 6,
+   "reputation": 1000,
+   "socialClass": "KNIGHT",
+   "items": [
+    {
+     "id": 8163,
+     "count": 1
+    }
+   ]
+  },
+  {
+   "skillId": 374,
+   "level": 1,
+   "name": "Clan Morale",
+   "clanLevel": 6,
+   "reputation": 900,
+   "socialClass": "ELDER",
+   "items": [
+    {
+     "id": 8169,
+     "count": 1
+    }
+   ]
+  },
+  {
+   "skillId": 374,
+   "level": 2,
+   "name": "Clan Morale",
+   "clanLevel": 6,
+   "reputation": 900,
+   "socialClass": "ELDER",
+   "items": [
+    {
+     "id": 8169,
+     "count": 1
+    }
+   ]
+  },
+  {
+   "skillId": 374,
+   "level": 3,
+   "name": "Clan Morale",
+   "clanLevel": 6,
+   "reputation": 900,
+   "socialClass": "ELDER",
+   "items": [
+    {
+     "id": 8169,
+     "count": 1
+    }
+   ]
+  },
+  {
+   "skillId": 377,
+   "level": 1,
+   "name": "Clan Aegis",
+   "clanLevel": 6,
+   "reputation": 1000,
+   "socialClass": "KNIGHT",
+   "items": [
+    {
+     "id": 8166,
+     "count": 1
+    }
+   ]
+  },
+  {
+   "skillId": 377,
+   "level": 2,
+   "name": "Clan Aegis",
+   "clanLevel": 6,
+   "reputation": 1000,
+   "socialClass": "KNIGHT",
+   "items": [
+    {
+     "id": 8166,
+     "count": 1
+    }
+   ]
+  },
+  {
+   "skillId": 377,
+   "level": 3,
+   "name": "Clan Aegis",
+   "clanLevel": 6,
+   "reputation": 1000,
+   "socialClass": "KNIGHT",
+   "items": [
+    {
+     "id": 8166,
+     "count": 1
+    }
+   ]
+  },
+  {
+   "skillId": 383,
+   "level": 1,
+   "name": "Clan Shield Defense",
+   "clanLevel": 6,
+   "reputation": 800,
+   "socialClass": "BARON",
+   "items": [
+    {
+     "id": 8163,
+     "count": 1
+    }
+   ]
+  },
+  {
+   "skillId": 383,
+   "level": 2,
+   "name": "Clan Shield Defense",
+   "clanLevel": 6,
+   "reputation": 800,
+   "socialClass": "BARON",
+   "items": [
+    {
+     "id": 8163,
+     "count": 1
+    }
+   ]
+  },
+  {
+   "skillId": 383,
+   "level": 3,
+   "name": "Clan Shield Defense",
+   "clanLevel": 6,
+   "reputation": 800,
+   "socialClass": "BARON",
+   "items": [
+    {
+     "id": 8163,
+     "count": 1
+    }
+   ]
+  },
+  {
+   "skillId": 371,
+   "level": 1,
+   "name": "Clan Spirit",
+   "clanLevel": 6,
+   "reputation": 800,
+   "socialClass": "BARON",
+   "items": [
+    {
+     "id": 8160,
+     "count": 1
+    }
+   ]
+  },
+  {
+   "skillId": 371,
+   "level": 2,
+   "name": "Clan Spirit",
+   "clanLevel": 6,
+   "reputation": 800,
+   "socialClass": "BARON",
+   "items": [
+    {
+     "id": 8160,
+     "count": 1
+    }
+   ]
+  },
+  {
+   "skillId": 371,
+   "level": 3,
+   "name": "Clan Spirit",
+   "clanLevel": 6,
+   "reputation": 800,
+   "socialClass": "BARON",
+   "items": [
+    {
+     "id": 8160,
+     "count": 1
+    }
+   ]
+  },
+  {
+   "skillId": 390,
+   "level": 1,
+   "name": "Clan Luck",
+   "clanLevel": 7,
+   "reputation": 2200,
+   "socialClass": "HEIR",
+   "items": [
+    {
+     "id": 8175,
+     "count": 1
+    }
+   ]
+  },
+  {
+   "skillId": 390,
+   "level": 2,
+   "name": "Clan Luck",
+   "clanLevel": 7,
+   "reputation": 2200,
+   "socialClass": "HEIR",
+   "items": [
+    {
+     "id": 8175,
+     "count": 1
+    }
+   ]
+  },
+  {
+   "skillId": 390,
+   "level": 3,
+   "name": "Clan Luck",
+   "clanLevel": 7,
+   "reputation": 2200,
+   "socialClass": "HEIR",
+   "items": [
+    {
+     "id": 8175,
+     "count": 1
+    }
+   ]
+  },
+  {
+   "skillId": 386,
+   "level": 1,
+   "name": "Clan Fortitude",
+   "clanLevel": 7,
+   "reputation": 1000,
+   "socialClass": "VISCOUNT",
+   "items": [
+    {
+     "id": 8176,
+     "count": 1
+    }
+   ]
+  },
+  {
+   "skillId": 386,
+   "level": 2,
+   "name": "Clan Fortitude",
+   "clanLevel": 7,
+   "reputation": 1000,
+   "socialClass": "VISCOUNT",
+   "items": [
+    {
+     "id": 8176,
+     "count": 1
+    }
+   ]
+  },
+  {
+   "skillId": 386,
+   "level": 3,
+   "name": "Clan Fortitude",
+   "clanLevel": 7,
+   "reputation": 1000,
+   "socialClass": "VISCOUNT",
+   "items": [
+    {
+     "id": 8176,
+     "count": 1
+    }
+   ]
+  },
+  {
+   "skillId": 387,
+   "level": 1,
+   "name": "Clan Freedom",
+   "clanLevel": 7,
+   "reputation": 1800,
+   "socialClass": "VISCOUNT",
+   "items": [
+    {
+     "id": 8176,
+     "count": 1
+    }
+   ]
+  },
+  {
+   "skillId": 387,
+   "level": 2,
+   "name": "Clan Freedom",
+   "clanLevel": 7,
+   "reputation": 1800,
+   "socialClass": "VISCOUNT",
+   "items": [
+    {
+     "id": 8176,
+     "count": 1
+    }
+   ]
+  },
+  {
+   "skillId": 387,
+   "level": 3,
+   "name": "Clan Freedom",
+   "clanLevel": 7,
+   "reputation": 1800,
+   "socialClass": "VISCOUNT",
+   "items": [
+    {
+     "id": 8176,
+     "count": 1
+    }
+   ]
+  },
+  {
+   "skillId": 380,
+   "level": 1,
+   "name": "Clan Guidance",
+   "clanLevel": 7,
+   "reputation": 1900,
+   "socialClass": "BARON",
+   "items": [
+    {
+     "id": 8160,
+     "count": 1
+    }
+   ]
+  },
+  {
+   "skillId": 380,
+   "level": 2,
+   "name": "Clan Guidance",
+   "clanLevel": 7,
+   "reputation": 1900,
+   "socialClass": "BARON",
+   "items": [
+    {
+     "id": 8160,
+     "count": 1
+    }
+   ]
+  },
+  {
+   "skillId": 380,
+   "level": 3,
+   "name": "Clan Guidance",
+   "clanLevel": 7,
+   "reputation": 1900,
+   "socialClass": "BARON",
+   "items": [
+    {
+     "id": 8160,
+     "count": 1
+    }
+   ]
+  },
+  {
+   "skillId": 385,
+   "level": 1,
+   "name": "Clan Magmatic Resistance",
+   "clanLevel": 7,
+   "reputation": 1800,
+   "socialClass": "VISCOUNT",
+   "items": [
+    {
+     "id": 8176,
+     "count": 1
+    }
+   ]
+  },
+  {
+   "skillId": 385,
+   "level": 2,
+   "name": "Clan Magmatic Resistance",
+   "clanLevel": 7,
+   "reputation": 1800,
+   "socialClass": "VISCOUNT",
+   "items": [
+    {
+     "id": 8176,
+     "count": 1
+    }
+   ]
+  },
+  {
+   "skillId": 385,
+   "level": 3,
+   "name": "Clan Magmatic Resistance",
+   "clanLevel": 7,
+   "reputation": 1800,
+   "socialClass": "VISCOUNT",
+   "items": [
+    {
+     "id": 8176,
+     "count": 1
+    }
+   ]
+  },
+  {
+   "skillId": 384,
+   "level": 1,
+   "name": "Clan Cyclonic Resistance",
+   "clanLevel": 7,
+   "reputation": 1800,
+   "socialClass": "VISCOUNT",
+   "items": [
+    {
+     "id": 8176,
+     "count": 1
+    }
+   ]
+  },
+  {
+   "skillId": 384,
+   "level": 2,
+   "name": "Clan Cyclonic Resistance",
+   "clanLevel": 7,
+   "reputation": 1800,
+   "socialClass": "VISCOUNT",
+   "items": [
+    {
+     "id": 8176,
+     "count": 1
+    }
+   ]
+  },
+  {
+   "skillId": 384,
+   "level": 3,
+   "name": "Clan Cyclonic Resistance",
+   "clanLevel": 7,
+   "reputation": 1800,
+   "socialClass": "VISCOUNT",
+   "items": [
+    {
+     "id": 8176,
+     "count": 1
+    }
+   ]
+  },
+  {
+   "skillId": 382,
+   "level": 1,
+   "name": "Clan Withstand-Attack",
+   "clanLevel": 7,
+   "reputation": 800,
+   "socialClass": "VISCOUNT",
+   "items": [
+    {
+     "id": 8160,
+     "count": 1
+    }
+   ]
+  },
+  {
+   "skillId": 382,
+   "level": 2,
+   "name": "Clan Withstand-Attack",
+   "clanLevel": 7,
+   "reputation": 800,
+   "socialClass": "VISCOUNT",
+   "items": [
+    {
+     "id": 8160,
+     "count": 1
+    }
+   ]
+  },
+  {
+   "skillId": 382,
+   "level": 3,
+   "name": "Clan Withstand-Attack",
+   "clanLevel": 7,
+   "reputation": 800,
+   "socialClass": "VISCOUNT",
+   "items": [
+    {
+     "id": 8160,
+     "count": 1
+    }
+   ]
+  },
+  {
+   "skillId": 388,
+   "level": 1,
+   "name": "Clan Vigilance",
+   "clanLevel": 7,
+   "reputation": 1800,
+   "socialClass": "VISCOUNT",
+   "items": [
+    {
+     "id": 8176,
+     "count": 1
+    }
+   ]
+  },
+  {
+   "skillId": 388,
+   "level": 2,
+   "name": "Clan Vigilance",
+   "clanLevel": 7,
+   "reputation": 1800,
+   "socialClass": "VISCOUNT",
+   "items": [
+    {
+     "id": 8176,
+     "count": 1
+    }
+   ]
+  },
+  {
+   "skillId": 388,
+   "level": 3,
+   "name": "Clan Vigilance",
+   "clanLevel": 7,
+   "reputation": 1800,
+   "socialClass": "VISCOUNT",
+   "items": [
+    {
+     "id": 8176,
+     "count": 1
+    }
+   ]
+  },
+  {
+   "skillId": 381,
+   "level": 1,
+   "name": "Clan Agility",
+   "clanLevel": 8,
+   "reputation": 4000,
+   "socialClass": "BARON",
+   "items": [
+    {
+     "id": 8160,
+     "count": 1
+    }
+   ]
+  },
+  {
+   "skillId": 381,
+   "level": 2,
+   "name": "Clan Agility",
+   "clanLevel": 8,
+   "reputation": 4000,
+   "socialClass": "BARON",
+   "items": [
+    {
+     "id": 8160,
+     "count": 1
+    }
+   ]
+  },
+  {
+   "skillId": 381,
+   "level": 3,
+   "name": "Clan Agility",
+   "clanLevel": 8,
+   "reputation": 4000,
+   "socialClass": "BARON",
+   "items": [
+    {
+     "id": 8160,
+     "count": 1
+    }
+   ]
+  },
+  {
+   "skillId": 375,
+   "level": 1,
+   "name": "Clan Clarity",
+   "clanLevel": 8,
+   "reputation": 3900,
+   "socialClass": "VISCOUNT",
+   "items": [
+    {
+     "id": 8172,
+     "count": 1
+    }
+   ]
+  },
+  {
+   "skillId": 375,
+   "level": 2,
+   "name": "Clan Clarity",
+   "clanLevel": 8,
+   "reputation": 3900,
+   "socialClass": "VISCOUNT",
+   "items": [
+    {
+     "id": 8172,
+     "count": 1
+    }
+   ]
+  },
+  {
+   "skillId": 375,
+   "level": 3,
+   "name": "Clan Clarity",
+   "clanLevel": 8,
+   "reputation": 3900,
+   "socialClass": "VISCOUNT",
+   "items": [
+    {
+     "id": 8172,
+     "count": 1
+    }
+   ]
+  },
+  {
+   "skillId": 378,
+   "level": 1,
+   "name": "Clan Empowerment",
+   "clanLevel": 8,
+   "reputation": 3900,
+   "socialClass": "VISCOUNT",
+   "items": [
+    {
+     "id": 8172,
+     "count": 1
+    }
+   ]
+  },
+  {
+   "skillId": 378,
+   "level": 2,
+   "name": "Clan Empowerment",
+   "clanLevel": 8,
+   "reputation": 3900,
+   "socialClass": "VISCOUNT",
+   "items": [
+    {
+     "id": 8172,
+     "count": 1
+    }
+   ]
+  },
+  {
+   "skillId": 378,
+   "level": 3,
+   "name": "Clan Empowerment",
+   "clanLevel": 8,
+   "reputation": 3900,
+   "socialClass": "VISCOUNT",
+   "items": [
+    {
+     "id": 8172,
+     "count": 1
+    }
+   ]
+  },
+  {
+   "skillId": 389,
+   "level": 1,
+   "name": "Clan March",
+   "clanLevel": 8,
+   "reputation": 3800,
+   "socialClass": "COUNT",
+   "items": [
+    {
+     "id": 8175,
+     "count": 1
+    }
+   ]
+  },
+  {
+   "skillId": 389,
+   "level": 2,
+   "name": "Clan March",
+   "clanLevel": 8,
+   "reputation": 3800,
+   "socialClass": "COUNT",
+   "items": [
+    {
+     "id": 8175,
+     "count": 1
+    }
+   ]
+  },
+  {
+   "skillId": 389,
+   "level": 3,
+   "name": "Clan March",
+   "clanLevel": 8,
+   "reputation": 3800,
+   "socialClass": "COUNT",
+   "items": [
+    {
+     "id": 8175,
+     "count": 1
+    }
+   ]
+  },
+  {
+   "skillId": 372,
+   "level": 1,
+   "name": "Clan Essence",
+   "clanLevel": 8,
+   "reputation": 3900,
+   "socialClass": "VISCOUNT",
+   "items": [
+    {
+     "id": 8172,
+     "count": 1
+    }
+   ]
+  },
+  {
+   "skillId": 372,
+   "level": 2,
+   "name": "Clan Essence",
+   "clanLevel": 8,
+   "reputation": 3900,
+   "socialClass": "VISCOUNT",
+   "items": [
+    {
+     "id": 8172,
+     "count": 1
+    }
+   ]
+  },
+  {
+   "skillId": 372,
+   "level": 3,
+   "name": "Clan Essence",
+   "clanLevel": 8,
+   "reputation": 3900,
+   "socialClass": "VISCOUNT",
+   "items": [
+    {
+     "id": 8172,
+     "count": 1
+    }
+   ]
+  }
+ ]
+}
