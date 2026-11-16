@@ -40,7 +40,9 @@ sealed partial class NetWorldEventPublisher
                 CurHp = src[i].CurHp,
                 MaxHp = src[i].MaxHp,
                 CurMp = src[i].CurMp,
-                MaxMp = src[i].MaxMp
+                MaxMp = src[i].MaxMp,
+                CurCp = src[i].CurCp,
+                MaxCp = src[i].MaxCp
             };
         }
         var payload = NetCodec.EncodePartyMemberList(new PartyMemberListNetMsg
@@ -51,5 +53,51 @@ sealed partial class NetWorldEventPublisher
         });
         foreach (int watcher in watcherObjectIds)
             _presence.TrySend(watcher, NetOpcode.PartyMemberList, payload);
+    }
+
+    void IWorldEventPublisher.FanoutPartyMemberUpdate(IReadOnlyList<int> watcherObjectIds, Fineage.Protocol.PartyMemberUpdateMsg u)
+    {
+        var payload = NetCodec.EncodePartyMemberUpdate(new PartyMemberUpdateNetMsg
+        {
+            ObjectId = u.ObjectId,
+            Level = u.Level,
+            ClassId = u.ClassId,
+            CurHp = u.CurHp,
+            MaxHp = u.MaxHp,
+            CurMp = u.CurMp,
+            MaxMp = u.MaxMp,
+            CurCp = u.CurCp,
+            MaxCp = u.MaxCp
+        });
+        foreach (int watcher in watcherObjectIds)
+            _presence.TrySend(watcher, NetOpcode.PartyMemberUpdate, payload);
+    }
+
+    void IWorldEventPublisher.FanoutPartySpelled(IReadOnlyList<int> watcherObjectIds, Fineage.Protocol.AbnormalStatusUpdateMsg update)
+    {
+        var effects = update.Effects ?? [];
+        var rows = new AbnormalEffectNet[effects.Length];
+        for (int i = 0; i < effects.Length; i++)
+            rows[i] = new AbnormalEffectNet
+            {
+                Id = effects[i].Id,
+                Value = effects[i].Value,
+                DurationSeconds = effects[i].DurationSeconds,
+                Slot = effects[i].Slot ?? ""
+            };
+        var payload = NetCodec.EncodePartySpelled(new AbnormalStatusUpdateNetMsg { ObjectId = update.ObjectId, Effects = rows });
+        foreach (int watcher in watcherObjectIds)
+            _presence.TrySendCritical(watcher, NetOpcode.PartySpelled, payload);
+    }
+
+    void IWorldEventPublisher.FanoutPartyMemberPosition(IReadOnlyList<int> watcherObjectIds, Fineage.Protocol.PartyMemberPositionMsg positions)
+    {
+        var src = positions.Members ?? [];
+        var rows = new PartyMemberPositionEntryNet[src.Length];
+        for (int i = 0; i < src.Length; i++)
+            rows[i] = new PartyMemberPositionEntryNet { ObjectId = src[i].ObjectId, X = src[i].X, Y = src[i].Y, Z = src[i].Z };
+        var payload = NetCodec.EncodePartyMemberPosition(new PartyMemberPositionNetMsg { Members = rows });
+        foreach (int watcher in watcherObjectIds)
+            _presence.TrySend(watcher, NetOpcode.PartyMemberPosition, payload);
     }
 }

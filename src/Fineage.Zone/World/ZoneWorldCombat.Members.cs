@@ -54,6 +54,8 @@ public sealed partial class ZoneWorld
             TickAutoAttacks();
             TickPendingCasts(now);
             TickQueuedMoves(now);
+            TickTradeRange();
+            TickParty(now);
             TickPendingPickups(now);
             TickPendingTalks(now);
             TickFear(now);

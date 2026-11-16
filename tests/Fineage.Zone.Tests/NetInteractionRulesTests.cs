@@ -142,25 +142,6 @@ public sealed class NetInteractionRulesTests
     }
 
     [Fact]
-    public async Task A_members_hp_change_refreshes_the_party_roster_with_the_new_bars()
-    {
-        var (kit, rec) = World();
-        var (leader, leaderEntity, member, memberEntity) = await Party(kit);
-        Assert.Null(await kit.World.TryAdminKillPlayerAsync(member, default));
-        int before = rec.Of(nameof(IWorldEventPublisher.FanoutPartyMemberList)).Count;
-
-        Assert.Null(await kit.World.TryReviveAsync(member, DeathProtocol.ReviveToVillage, default));
-
-        var lists = rec.Of(nameof(IWorldEventPublisher.FanoutPartyMemberList));
-        Assert.True(lists.Count > before);
-        var roster = Assert.IsType<PartyMemberListMsg>(lists[^1][1]);
-        var row = Assert.Single(roster.Members, m => m.ObjectId == memberEntity.ObjectId);
-        Assert.Equal(memberEntity.CurHp, row.CurHp);
-        Assert.True(row.CurHp > 0);
-        Assert.Contains(leaderEntity.ObjectId, Assert.IsAssignableFrom<IReadOnlyList<int>>(lists[^1][0]));
-    }
-
-    [Fact]
     public void Party_change_leader_request_round_trips_on_its_own_opcode()
     {
         Assert.Equal((ushort)0x03A8, Fineage.Net.Contract.NetOpcode.PartyChangeLeaderRequest);

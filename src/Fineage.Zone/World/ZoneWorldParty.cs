@@ -101,17 +101,189 @@ public sealed partial class ZoneWorld
         return null;
     }
 
+    /// <summary>Coalescing window for <c>PartyMemberUpdate</c>: at most one frame per member per window.</summary>
+    internal const int PartyUpdateIntervalMs = 300;
+    /// <summary>Interlude PartyMemberPosition cadence (map dots), only changed rows are sent.</summary>
+    internal const int PartyPositionIntervalMs = 3000;
+
+    readonly HashSet<int> _partyVitalsDirty = [];
+    readonly Dictionary<int, (long At, PartyMemberUpdateMsg Msg)> _partyVitalsSent = [];
+    readonly Dictionary<int, (int X, int Y, int Z)> _partyPositionSent = [];
+    long _partyPositionNextAtMs;
+
     /// <summary>
-    /// Mobius broadcasts PartySmallWindowUpdate to the party on every HP/MP change. Net has no small-window
-    /// update frame yet, so the roster (which carries HP/MP) is re-sent; the client already redraws from it.
+    /// Mobius broadcasts PartySmallWindowUpdate on every HP/MP/CP/level change. Here the change only marks the
+    /// member; <see cref="TickParty"/> coalesces it into one <c>PartyMemberUpdate</c> per window and skips no-ops.
     /// </summary>
     void FanPartyVitals(ZoneEntity subject)
     {
-        if (subject.Kind != ZoneEntityKind.Player || NetBridge == null ||
-            !_partyByPlayer.TryGetValue(subject.ObjectId, out int partyId) ||
-            !_parties.TryGetValue(partyId, out var party))
+        if (subject.Kind == ZoneEntityKind.Player && _partyByPlayer.ContainsKey(subject.ObjectId))
+            _partyVitalsDirty.Add(subject.ObjectId);
+    }
+
+    /// <summary>Mobius PartySpelled: a member's effect list to the other members (apply / remove / expire).</summary>
+    void FanPartySpelled(ZoneEntity subject)
+    {
+        if (NetBridge == null || subject.Kind != ZoneEntityKind.Player ||
+            !_partyByPlayer.TryGetValue(subject.ObjectId, out int partyId) || !_parties.TryGetValue(partyId, out var party))
             return;
-        FanPartyList(party);
+        var mates = OnlineMatesOf(party, subject.ObjectId);
+        if (mates.Count > 0)
+            NetBridge.FanoutPartySpelled(mates, AbnormalFor(subject));
+    }
+
+    /// <summary>On join: the newcomer gets every member's effects and the others get the newcomer's.</summary>
+    void ExchangePartySpelled(ZoneParty party, int newcomerId)
+    {
+        if (NetBridge == null)
+            return;
+        foreach (int id in party.MemberIds)
+        {
+            if (!_byId.TryGetValue(id, out var member) || member.Session == null)
+                continue;
+            var watchers = id == newcomerId ? OnlineMatesOf(party, id) : (Online(newcomerId) != null ? [newcomerId] : []);
+            if (watchers.Count > 0)
+                NetBridge.FanoutPartySpelled(watchers, AbnormalFor(member));
+        }
+        // Fresh member: everyone's map dot and bars are (re)sent on the next tick.
+        foreach (int id in party.MemberIds)
+        {
+            _partyPositionSent.Remove(id);
+            _partyVitalsSent.Remove(id);
+        }
+        _partyPositionNextAtMs = 0;
+    }
+
+    List<int> OnlineMatesOf(ZoneParty party, int exceptId)
+    {
+        var list = new List<int>(party.MemberIds.Count);
+        foreach (int id in party.MemberIds)
+            if (id != exceptId && Online(id) != null)
+                list.Add(id);
+        return list;
+    }
+
+    PartyMemberUpdateMsg PartyMemberUpdateFor(ZoneEntity e)
+    {
+        int maxCp = PartyMaxCp(e);
+        return new PartyMemberUpdateMsg
+        {
+            ObjectId = e.ObjectId,
+            Level = e.Level,
+            ClassId = e.ClassId,
+            CurHp = e.CurHp,
+            MaxHp = e.MaxHp,
+            CurMp = e.CurMp,
+            MaxMp = e.MaxMp,
+            // CP is not depleted server-side yet (UserInfo also sends CurCp = MaxCp).
+            CurCp = maxCp,
+            MaxCp = maxCp
+        };
+    }
+
+    int PartyMaxCp(ZoneEntity e)
+    {
+        if (!PlayerClasses.TryGet(e.ClassId, out var template) || template == null)
+            return 0;
+        try { return template.ModifiedCp(Math.Max(1, e.Level)); }
+        catch (ArgumentOutOfRangeException) { return template.MaxCp; }
+    }
+
+    static bool SameBars(PartyMemberUpdateMsg a, PartyMemberUpdateMsg b) =>
+        a.Level == b.Level && a.ClassId == b.ClassId && a.CurHp == b.CurHp && a.MaxHp == b.MaxHp &&
+        a.CurMp == b.CurMp && a.MaxMp == b.MaxMp && a.CurCp == b.CurCp && a.MaxCp == b.MaxCp;
+
+    /// <summary>Party bars (coalesced) + PartyMemberPosition (periodic). Runs on the combat/movement tick.</summary>
+    void TickParty(long now)
+    {
+        if (_parties.Count == 0 || NetBridge == null)
+        {
+            _partyVitalsDirty.Clear();
+            return;
+        }
+
+        if (_partyVitalsDirty.Count > 0)
+        {
+            foreach (int id in _partyVitalsDirty.ToArray())
+            {
+                if (!_byId.TryGetValue(id, out var e) || !_partyByPlayer.TryGetValue(id, out int partyId) ||
+                    !_parties.TryGetValue(partyId, out var party))
+                {
+                    _partyVitalsDirty.Remove(id);
+                    continue;
+                }
+                bool hadSent = _partyVitalsSent.TryGetValue(id, out var last);
+                if (hadSent && now - last.At < PartyUpdateIntervalMs)
+                    continue;   // stays dirty: flushed once the window passes
+                _partyVitalsDirty.Remove(id);
+                var msg = PartyMemberUpdateFor(e);
+                if (hadSent && SameBars(last.Msg, msg))
+                    continue;
+                _partyVitalsSent[id] = (now, msg);
+                var mates = OnlineMatesOf(party, id);
+                if (mates.Count > 0)
+                    NetBridge.FanoutPartyMemberUpdate(mates, msg);
+            }
+        }
+
+        if (now < _partyPositionNextAtMs)
+            return;
+        _partyPositionNextAtMs = now + PartyPositionIntervalMs;
+        foreach (var party in _parties.Values)
+        {
+            List<PartyMemberPositionEntryMsg>? changed = null;
+            foreach (int id in party.MemberIds)
+            {
+                if (Online(id) == null || !_byId.TryGetValue(id, out var e))
+                    continue;
+                var pos = (e.X, e.Y, e.Z);
+                if (_partyPositionSent.TryGetValue(id, out var sent) && sent == pos)
+                    continue;
+                _partyPositionSent[id] = pos;
+                (changed ??= []).Add(new PartyMemberPositionEntryMsg { ObjectId = id, X = e.X, Y = e.Y, Z = e.Z });
+            }
+            if (changed == null)
+                continue;
+            foreach (int watcher in party.MemberIds)
+            {
+                if (Online(watcher) == null)
+                    continue;
+                var rows = changed.Where(r => r.ObjectId != watcher).ToArray();
+                if (rows.Length > 0)
+                    NetBridge.FanoutPartyMemberPosition([watcher], new PartyMemberPositionMsg { Members = rows });
+            }
+        }
+    }
+
+    /// <summary>Test hook: set a player's HP through the normal vitals fanout (party bars included).</summary>
+    internal void SetPlayerHpForTest(ZoneEntity player, int hp)
+    {
+        lock (_gate)
+        {
+            player.CurHp = Math.Clamp(hp, 1, player.MaxHp);
+            FanoutVitals(player, PlayerVitalsStatus(player));
+        }
+    }
+
+    internal Task RunPartyTickForTest()
+    {
+        lock (_gate)
+            TickParty(_clock().ToUnixTimeMilliseconds());
+        return Task.CompletedTask;
+    }
+
+    internal Task RunTradeRangeTickForTest()
+    {
+        lock (_gate)
+            TickTradeRange();
+        return Task.CompletedTask;
+    }
+
+    void ForgetPartyMemberCaches(int objectId)
+    {
+        _partyVitalsDirty.Remove(objectId);
+        _partyVitalsSent.Remove(objectId);
+        _partyPositionSent.Remove(objectId);
     }
 
     void PartyPlayerLeftWorld(int objectId)
@@ -221,6 +393,7 @@ public sealed partial class ZoneWorld
 
         FanPartyJoinResult([requestorEntity.ObjectId], 1);
         FanPartyList(party);
+        ExchangePartySpelled(party, invitee.ObjectId);
         return null;
     }
 

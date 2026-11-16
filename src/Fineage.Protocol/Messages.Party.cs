@@ -44,6 +44,37 @@ public sealed class PartyMemberEntryMsg
     public int MaxHp { get; set; }
     public int CurMp { get; set; }
     public int MaxMp { get; set; }
+    public int CurCp { get; set; }
+    public int MaxCp { get; set; }
+}
+
+/// <summary>Interlude PartySmallWindowUpdate: one member's bars, level and class for the other members.</summary>
+public sealed class PartyMemberUpdateMsg
+{
+    public int ObjectId { get; set; }
+    public int Level { get; set; }
+    public int ClassId { get; set; }
+    public int CurHp { get; set; }
+    public int MaxHp { get; set; }
+    public int CurMp { get; set; }
+    public int MaxMp { get; set; }
+    public int CurCp { get; set; }
+    public int MaxCp { get; set; }
+}
+
+/// <summary>One row of <see cref="PartyMemberPositionMsg"/>.</summary>
+public sealed class PartyMemberPositionEntryMsg
+{
+    public int ObjectId { get; set; }
+    public int X { get; set; }
+    public int Y { get; set; }
+    public int Z { get; set; }
+}
+
+/// <summary>Interlude PartyMemberPosition: party mates' map positions, independent of AOI.</summary>
+public sealed class PartyMemberPositionMsg
+{
+    public PartyMemberPositionEntryMsg[] Members { get; set; } = [];
 }
 
 /// <summary>Opcode <see cref="MsgType.PartyMemberList"/> (1029).</summary>
