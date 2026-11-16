@@ -269,5 +269,17 @@ namespace Fineage.Net.Contract
         public const ushort FriendUpdate = 0x03A6;
         /// <summary>Zone → client: block list (+ block-all flag).</summary>
         public const ushort BlockList = 0x03A7;
+
+        /// <summary>Client → zone: party leader hands leadership to a member (Interlude <c>RequestChangePartyLeader</c>). Body: int32 target objectId.</summary>
+        public const ushort PartyChangeLeaderRequest = 0x03A8;
+
+        /// <summary>Zone → party mates: one member's bars (Interlude <c>PartySmallWindowUpdate</c>). Coalesced, only on change.</summary>
+        public const ushort PartyMemberUpdate = 0x03A9;
+
+        /// <summary>Zone → party mates: one member's effect list (Interlude <c>PartySpelled</c>). Same body as <see cref="AbnormalStatusUpdate"/>.</summary>
+        public const ushort PartySpelled = 0x03AA;
+
+        /// <summary>Zone → party mates: map positions of the other members (Interlude <c>PartyMemberPosition</c>), periodic, only changed rows.</summary>
+        public const ushort PartyMemberPosition = 0x03AB;
     }
 }

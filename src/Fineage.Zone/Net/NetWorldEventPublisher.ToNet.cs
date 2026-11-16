@@ -78,9 +78,18 @@ sealed partial class NetWorldEventPublisher
         if (watcherObjectIds.Count == 0 || !_world.TryGetEntityById(objectId, out var entity) ||
             entity.Kind != ZoneEntityKind.Player)
             return;
-        var payload = NetCodec.EncodeEntitySpawn(NetEnterWorldProjector.BuildRemoteSpawn(entity, _ids.AllocateOrGet(objectId), _playerSpawnPAtkSpd(entity)));
+        var id = _ids.AllocateOrGet(objectId);
+        var payload = NetCodec.EncodeEntitySpawn(NetEnterWorldProjector.BuildRemoteSpawn(entity, id, _playerSpawnPAtkSpd(entity)));
+        // A re-sent CharInfo rebuilds the remote pawn; keep it sitting / running instead of snapping to idle.
+        var followUps = NetEnterWorldProjector.BuildPresenceFollowUps(entity, id);
         foreach (int watcher in watcherObjectIds)
+        {
             _presence.TrySendCritical(watcher, NetOpcode.EntitySpawn, payload);
+            if (watcher == objectId)
+                continue;
+            foreach (var (opcode, frame) in followUps)
+                _presence.TrySendCritical(watcher, opcode, frame);
+        }
     }
 
     void IWorldEventPublisher.FanoutAttackState(IReadOnlyList<int> watcherObjectIds, Fineage.Protocol.AttackMsg attack)

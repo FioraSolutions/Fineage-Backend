@@ -129,6 +129,7 @@ public sealed partial class ZoneWorld
 
         if (netWatchers is { Count: > 0 } && NetBridge != null)
             NetBridge.FanoutAbnormalStatusUpdate(netWatchers, update);
+        FanPartySpelled(target);
     }
 
     /// <summary>

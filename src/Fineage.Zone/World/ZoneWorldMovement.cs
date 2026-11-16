@@ -77,6 +77,7 @@ public sealed partial class ZoneWorld
         entity.MoveDestX = destX;
         entity.MoveDestY = destY;
         entity.MoveDestZ = destZ;
+        entity.MoveCarryX = entity.MoveCarryY = 0;
         entity.MoveLastTickMs = now;
         SetMoveActive(entity, curX != destX || curY != destY);
         if (!entity.MoveActive)
@@ -101,8 +102,14 @@ public sealed partial class ZoneWorld
         {
             if (_byId.TryGetValue(session.ObjectId, out var e) && e.Kind == ZoneEntityKind.Player)
             {
+                AdvanceMove(e, _clock().ToUnixTimeMilliseconds());
+                bool wasMoving = e.MoveActive;
                 StopTimedMove(e);
                 SyncSession(e, session);
+                // Mobius StopMove is broadcast: peers would otherwise keep running the pawn to the old destination.
+                // An idle StopMove (client spam) fans nothing.
+                if (wasMoving)
+                    FanoutStopInPlace(e);
             }
         }
     }

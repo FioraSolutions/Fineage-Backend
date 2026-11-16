@@ -123,6 +123,12 @@ internal sealed class NetZoneSession : IAsyncDisposable
     /// <summary>Name carried by the self <c>EntitySpawn</c> of the last enter burst.</summary>
     public string? EnteredName { get; private set; }
 
+    /// <summary>Entity id carried by the self <c>EntitySpawn</c> of the last enter burst.</summary>
+    public ulong EnteredEntityValue { get; private set; }
+
+    /// <summary>Every frame of the last enter burst, in wire order (late-join knownlist assertions).</summary>
+    public List<PacketEnvelope> EnterFrames { get; } = [];
+
     public async Task HelloAsync(CancellationToken ct)
     {
         PacketEnvelope ack = await ExchangeAsync(
@@ -205,6 +211,7 @@ internal sealed class NetZoneSession : IAsyncDisposable
         }, ct).ConfigureAwait(false);
 
         bool sawWelcome = false;
+        EnterFrames.Clear();
         while (true)
         {
             using var quiet = CancellationTokenSource.CreateLinkedTokenSource(ct);
@@ -226,13 +233,17 @@ internal sealed class NetZoneSession : IAsyncDisposable
             if (envelope.Opcode == NetOpcode.Reject)
                 throw new InvalidOperationException($"enter refused: {NetCodec.DecodeReject(envelope.Payload).Code}");
 
+            EnterFrames.Add(envelope);
             if (envelope.Opcode == NetOpcode.SystemMessage)
                 sawWelcome = true;
             if (envelope.Opcode == NetOpcode.EntitySpawn)
             {
                 EntitySpawnMsg spawn = NetCodec.DecodeEntitySpawn(envelope.Payload);
                 if (spawn.IsSelf)
+                {
                     EnteredName = spawn.Name;
+                    EnteredEntityValue = spawn.EntityValue;
+                }
             }
         }
     }
@@ -250,6 +261,39 @@ internal sealed class NetZoneSession : IAsyncDisposable
             if (envelope.Opcode == NetOpcode.Reject)
                 throw new InvalidOperationException(
                     $"rejected while waiting for 0x{expected:X4}: {NetCodec.DecodeReject(envelope.Payload).Code}");
+        }
+    }
+
+    /// <summary>Sends one frame without waiting for a reply (fire-and-forget opcodes such as MoveInput).</summary>
+    public Task SendAsync(ushort opcode, byte[] payload, CancellationToken ct) =>
+        NetFraming.WriteAsync(_stream, new PacketEnvelope
+        {
+            Opcode = opcode,
+            RequestSequence = unchecked(++_sequence),
+            Payload = payload
+        }, ct);
+
+    /// <summary>Reads every frame until <paramref name="quietMs"/> passes with nothing new on the wire.</summary>
+    public async Task<List<PacketEnvelope>> DrainAsync(CancellationToken ct, int quietMs = 250)
+    {
+        var frames = new List<PacketEnvelope>();
+        while (true)
+        {
+            using var quiet = CancellationTokenSource.CreateLinkedTokenSource(ct);
+            quiet.CancelAfter(TimeSpan.FromMilliseconds(quietMs));
+            PacketEnvelope? envelope;
+            try
+            {
+                envelope = await NetFraming.ReadAsync(_stream, quiet.Token).ConfigureAwait(false);
+            }
+            catch (OperationCanceledException) when (!ct.IsCancellationRequested)
+            {
+                return frames;
+            }
+
+            if (envelope == null)
+                return frames;
+            frames.Add(envelope);
         }
     }
 

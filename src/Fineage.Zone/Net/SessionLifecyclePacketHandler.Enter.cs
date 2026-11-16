@@ -118,6 +118,9 @@ sealed partial class SessionLifecyclePacketHandler
             var remote = NetEnterWorldProjector.BuildPresenceSpawn(other, otherId, _playerSpawnPAtkSpd(other));
             await conn.SendAsync(NetOpcode.EntitySpawn, NetCodec.EncodeEntitySpawn(remote), ct: ct)
                 .ConfigureAwait(false);
+            // Late join: a peer mid-run / seated is shown in that state, not idle at a stale spot.
+            foreach (var (opcode, payload) in NetEnterWorldProjector.BuildPresenceFollowUps(other, otherId))
+                await conn.SendAsync(opcode, payload, ct: ct).ConfigureAwait(false);
         }
 
         var selfRemote = NetCodec.EncodeEntitySpawn(NetEnterWorldProjector.BuildRemoteSpawn(entity, self, _playerSpawnPAtkSpd(entity)));

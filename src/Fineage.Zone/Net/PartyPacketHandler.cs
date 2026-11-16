@@ -94,6 +94,26 @@ public sealed class PartyPacketHandler
             await _reject(conn, error, "Party kick failed.", ct).ConfigureAwait(false);
     }
 
+    public async Task OnChangeLeaderAsync(
+        NetConnection conn,
+        ZoneSession zoneSession,
+        PacketEnvelope envelope,
+        CancellationToken ct)
+    {
+        RequireHello(conn);
+        if (!zoneSession.Bound || !zoneSession.InWorld)
+        {
+            await _reject(conn, "not_in_world", "Enter world first.", ct).ConfigureAwait(false);
+            return;
+        }
+
+        var change = NetCodec.DecodePartyChangeLeaderRequest(envelope.Payload);
+        string? error = await _world.TryPartyChangeLeaderAsync(
+            zoneSession, change.TargetObjectId, ct).ConfigureAwait(false);
+        if (error != null)
+            await _reject(conn, error, "Party leader change failed.", ct).ConfigureAwait(false);
+    }
+
     static void RequireHello(NetConnection conn)
     {
         if (!conn.HelloCompleted)

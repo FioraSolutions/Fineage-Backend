@@ -177,6 +177,28 @@ public sealed partial class ZoneWorld
         _tradeByPlayer.Remove(session.PartnerObjectId);
     }
 
+    /// <summary>
+    /// An open trade window closes for both sides once the pair drifts out of <see cref="TradeProtocol.Distance"/>
+    /// (walk-away, knock-back, teleport) — not only when the next add/confirm notices it.
+    /// </summary>
+    void TickTradeRange()
+    {
+        if (_tradeByPlayer.Count == 0)
+            return;
+        foreach (var session in _tradeByPlayer.Values.Distinct().ToList())
+        {
+            if (!TradeInRange(session.RequestorObjectId, session.PartnerObjectId))
+                CancelTradeSession(session);
+        }
+    }
+
+    void CancelTradeIfOutOfRange(int objectId)
+    {
+        if (_tradeByPlayer.TryGetValue(objectId, out var session) &&
+            !TradeInRange(session.RequestorObjectId, session.PartnerObjectId))
+            CancelTradeSession(session);
+    }
+
     bool TradeInRange(int objectIdA, int objectIdB)
     {
         if (!_byId.TryGetValue(objectIdA, out var a) || !_byId.TryGetValue(objectIdB, out var b))
