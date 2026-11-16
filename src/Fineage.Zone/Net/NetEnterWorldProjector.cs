@@ -39,6 +39,47 @@ static class NetEnterWorldProjector
     public static EntitySpawnMsg BuildRemoteSpawn(ZoneEntity entity, EntityId id, int playerPAtkSpd = 0) =>
         BuildSpawn(entity, id, isSelf: false, playerPAtkSpd);
 
+    /// <summary>
+    /// State frames that must follow an <c>EntitySpawn</c> so a late joiner sees the pawn as it really is
+    /// (Mobius <c>Creature.sendInfo</c>): a running pawn gets <c>MoveState</c> toward its live destination,
+    /// a sitting player gets <c>ChangeWaitType</c> sitting. The spawn itself carries neither.
+    /// </summary>
+    public static List<(ushort Opcode, byte[] Payload)> BuildPresenceFollowUps(ZoneEntity entity, EntityId id)
+    {
+        ArgumentNullException.ThrowIfNull(entity);
+        var frames = new List<(ushort, byte[])>(2);
+        if (entity.Dead)
+            return frames;
+        if (entity.MoveActive)
+        {
+            frames.Add((NetOpcode.MoveState, NetCodec.EncodeMoveState(new MoveStateMsg
+            {
+                EntityValue = id.Value,
+                EntityGeneration = id.Generation,
+                OriginX = entity.X,
+                OriginY = entity.Y,
+                OriginZ = entity.Z,
+                DestX = entity.MoveDestX,
+                DestY = entity.MoveDestY,
+                DestZ = entity.MoveDestZ,
+                Running = entity.Running
+            })));
+        }
+        if (entity.Kind == ZoneEntityKind.Player && entity.Sitting)
+        {
+            frames.Add((NetOpcode.ChangeWaitType, NetCodec.EncodeChangeWaitType(new ChangeWaitTypeNetMsg
+            {
+                EntityValue = id.Value,
+                EntityGeneration = id.Generation,
+                WaitType = ActionProtocol.WaitSitting,
+                X = entity.X,
+                Y = entity.Y,
+                Z = entity.Z
+            })));
+        }
+        return frames;
+    }
+
     /// <summary>Player or NPC presence packet for Net knownlist (Mobius CharInfo / NpcInfo).</summary>
     public static EntitySpawnMsg BuildPresenceSpawn(ZoneEntity entity, EntityId id, int playerPAtkSpd = 0)
     {

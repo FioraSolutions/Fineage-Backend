@@ -36,6 +36,10 @@ namespace Fineage.Net.Contract
         public static PartyKickRequestNetMsg DecodePartyKickRequest(ReadOnlySpan<byte> p) =>
             new() { TargetObjectId = new Reader(p).ReadInt32() };
 
+        public static byte[] EncodePartyChangeLeaderRequest(PartyChangeLeaderRequestNetMsg m) => Write(w => w.WriteInt32(m.TargetObjectId));
+        public static PartyChangeLeaderRequestNetMsg DecodePartyChangeLeaderRequest(ReadOnlySpan<byte> p) =>
+            new() { TargetObjectId = new Reader(p).ReadInt32() };
+
         public static byte[] EncodePartyAskJoin(PartyAskJoinNetMsg m) => Write(w =>
         {
             w.WriteInt32(m.RequestorObjectId);

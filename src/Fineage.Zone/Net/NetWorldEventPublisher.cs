@@ -69,6 +69,7 @@ sealed partial class NetWorldEventPublisher : IWorldEventPublisher
         var self = _ids.AllocateOrGet(selfObjectId);
         var ct = CancellationToken.None;
         byte[]? selfSpawn = null;
+        List<(ushort Opcode, byte[] Payload)>? selfFollowUps = null;
         foreach (int id in added)
         {
             if (!_world.TryGetEntityById(id, out var seen))
@@ -93,14 +94,16 @@ sealed partial class NetWorldEventPublisher : IWorldEventPublisher
 
             _presence.TrySendCritical(selfObjectId, NetOpcode.EntitySpawn,
                 NetCodec.EncodeEntitySpawn(NetEnterWorldProjector.BuildPresenceSpawn(seen, otherId, _playerSpawnPAtkSpd(seen))));
-            if (seen.MoveActive)
-                SendMoveState(selfObjectId, otherId, seen);
+            // Same ordered (critical) lane as the spawn, so the state never overtakes the pawn it describes.
+            foreach (var (opcode, payload) in NetEnterWorldProjector.BuildPresenceFollowUps(seen, otherId))
+                _presence.TrySendCritical(selfObjectId, opcode, payload);
             if (seen.Kind == ZoneEntityKind.Player && seen.Session is { InWorld: true })
             {
                 selfSpawn ??= NetCodec.EncodeEntitySpawn(NetEnterWorldProjector.BuildRemoteSpawn(selfEntity, self, _playerSpawnPAtkSpd(selfEntity)));
                 _presence.TrySendCritical(id, NetOpcode.EntitySpawn, selfSpawn);
-                if (selfEntity.MoveActive)
-                    SendMoveState(id, self, selfEntity);
+                selfFollowUps ??= NetEnterWorldProjector.BuildPresenceFollowUps(selfEntity, self);
+                foreach (var (opcode, payload) in selfFollowUps)
+                    _presence.TrySendCritical(id, opcode, payload);
             }
         }
 
@@ -122,22 +125,6 @@ sealed partial class NetWorldEventPublisher : IWorldEventPublisher
             if (_world.TryGetLivePlayerById(id, out _))
                 _presence.TrySendCritical(id, NetOpcode.EntityDespawn, despawnSelf);
         }
-    }
-
-    void SendMoveState(int watcherObjectId, EntityId mover, ZoneEntity e)
-    {
-        _presence.TrySend(watcherObjectId, NetOpcode.MoveState, NetCodec.EncodeMoveState(new MoveStateMsg
-        {
-            EntityValue = mover.Value,
-            EntityGeneration = mover.Generation,
-            OriginX = e.X,
-            OriginY = e.Y,
-            OriginZ = e.Z,
-            DestX = e.MoveDestX,
-            DestY = e.MoveDestY,
-            DestZ = e.MoveDestZ,
-            Running = e.Running
-        }));
     }
 
     void IWorldEventPublisher.FanoutChangeMoveType(IReadOnlyList<int> watcherObjectIds, int moverObjectId, bool running, float runSpeed, float walkSpeed, bool inWater)

@@ -68,6 +68,7 @@ public sealed partial class ZoneWorld
         }
         else if (dist <= step || dist < 1)
         {
+            e.MoveCarryX = e.MoveCarryY = 0;
             e.X = e.MoveDestX;
             e.Y = e.MoveDestY;
             e.Z = e.MoveDestZ;
@@ -76,8 +77,12 @@ public sealed partial class ZoneWorld
         else
         {
             double k = step / dist;
-            e.X += (int)Math.Round(dx * k);
-            e.Y += (int)Math.Round(dy * k);
+            double nx = e.X + e.MoveCarryX + dx * k, ny = e.Y + e.MoveCarryY + dy * k;
+            int ix = (int)Math.Round(nx), iy = (int)Math.Round(ny);
+            e.MoveCarryX = nx - ix;
+            e.MoveCarryY = ny - iy;
+            e.X = ix;
+            e.Y = iy;
             e.Z += (int)Math.Round((e.MoveDestZ - e.Z) * k);
             if (_geo.HasGeo(e.X, e.Y))
                 e.Z = _geo.GetHeight(e.X, e.Y, e.Z);

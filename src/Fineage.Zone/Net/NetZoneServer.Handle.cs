@@ -164,6 +164,9 @@ public sealed partial class NetZoneServer
                         case NetOpcode.PartyKickRequest:
                             await _party.OnKickAsync(conn, zoneSession, envelope, ct).ConfigureAwait(false);
                             break;
+                        case NetOpcode.PartyChangeLeaderRequest:
+                            await _party.OnChangeLeaderAsync(conn, zoneSession, envelope, ct).ConfigureAwait(false);
+                            break;
                         case NetOpcode.TradeRequest:
                             await _trade.OnRequestAsync(conn, zoneSession, envelope, ct).ConfigureAwait(false);
                             break;

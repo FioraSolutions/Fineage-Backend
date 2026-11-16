@@ -73,6 +73,8 @@ public sealed partial class ZoneWorld
             return null;
         }
         CancelAttackIntentionOnMove(session, move);
+        // Mobius NextAction(EVT_ARRIVED, MOVE_TO, sitDown): a fresh move order cancels the pending sit.
+        session.SitOnArrive = false;
         if (NetBridge != null)
             return StartTimedMove(entity, session, move);
 

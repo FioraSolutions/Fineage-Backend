@@ -269,5 +269,8 @@ namespace Fineage.Net.Contract
         public const ushort FriendUpdate = 0x03A6;
         /// <summary>Zone → client: block list (+ block-all flag).</summary>
         public const ushort BlockList = 0x03A7;
+
+        /// <summary>Client → zone: party leader hands leadership to a member (Interlude <c>RequestChangePartyLeader</c>). Body: int32 target objectId.</summary>
+        public const ushort PartyChangeLeaderRequest = 0x03A8;
     }
 }

@@ -85,6 +85,7 @@ public sealed partial class ZoneWorld
         {
             NetBridge.FanoutStatusUpdate(netWatchers, status);
         }
+        FanPartyVitals(subject);
     }
 
     static StatusUpdateMsg PlayerVitalsStatus(ZoneEntity entity) => new()

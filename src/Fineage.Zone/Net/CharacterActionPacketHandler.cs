@@ -6,22 +6,20 @@ namespace Fineage.Zone.Net;
 
 /// <summary>
 /// Revive / HTML bypass opcodes extracted from <see cref="NetZoneServer"/> (B2b / #353).
-/// AOI refresh after teleport-style outcomes uses the shared knownlist fanout callback.
+/// AOI after a teleport-style outcome is fanned once by <c>ZoneWorld.Relocate</c> through the NetBridge
+/// (spawn / despawn for both sides); a second handler-side diff here sent every spawn/despawn twice.
 /// </summary>
 public sealed class CharacterActionPacketHandler
 {
     readonly ZoneWorld _world;
     readonly Func<NetConnection, string, string, CancellationToken, Task> _reject;
-    readonly Func<NetConnection, ZoneSession, EntityId, HashSet<int>, HashSet<int>, CancellationToken, Task> _fanKnownlistDiff;
 
     public CharacterActionPacketHandler(
         ZoneWorld world,
-        Func<NetConnection, string, string, CancellationToken, Task> reject,
-        Func<NetConnection, ZoneSession, EntityId, HashSet<int>, HashSet<int>, CancellationToken, Task> fanKnownlistDiff)
+        Func<NetConnection, string, string, CancellationToken, Task> reject)
     {
         _world = world ?? throw new ArgumentNullException(nameof(world));
         _reject = reject ?? throw new ArgumentNullException(nameof(reject));
-        _fanKnownlistDiff = fanKnownlistDiff ?? throw new ArgumentNullException(nameof(fanKnownlistDiff));
     }
 
     public async Task OnReviveAsync(
@@ -38,7 +36,6 @@ public sealed class CharacterActionPacketHandler
             return;
         }
 
-        var before = _world.SnapshotKnownIds(zoneSession);
         var revive = NetCodec.DecodeReviveRequest(envelope.Payload);
         string? error = await _world.TryReviveAsync(zoneSession, revive.Action, ct).ConfigureAwait(false);
         if (error != null)
@@ -47,9 +44,7 @@ public sealed class CharacterActionPacketHandler
             return;
         }
 
-        // Revive / Teleport / StatusUpdate fan via NetBridge; AOI after village relocate needs spawn/despawn.
-        var after = _world.SnapshotKnownIds(zoneSession);
-        await _fanKnownlistDiff(conn, zoneSession, self, before, after, ct).ConfigureAwait(false);
+        // Revive / Teleport / StatusUpdate and the village relocate's spawn/despawn all fan via NetBridge.
     }
 
     public async Task OnBypassAsync(
@@ -66,7 +61,6 @@ public sealed class CharacterActionPacketHandler
             return;
         }
 
-        var before = _world.SnapshotKnownIds(zoneSession);
         var bypass = NetCodec.DecodeBypassRequest(envelope.Payload);
         string? error = await _world.TryBypassAsync(
             zoneSession,
@@ -76,12 +70,9 @@ public sealed class CharacterActionPacketHandler
         if (error != null)
         {
             await _reject(conn, error, "Bypass failed.", ct).ConfigureAwait(false);
-            return;
         }
 
-        // Teleport bypass relocates; refresh AOI for Net peers.
-        var after = _world.SnapshotKnownIds(zoneSession);
-        await _fanKnownlistDiff(conn, zoneSession, self, before, after, ct).ConfigureAwait(false);
+        // A teleport bypass relocates; Relocate already fanned the AOI diff to the jumper and its peers.
     }
 
     static void RequireHello(NetConnection conn)

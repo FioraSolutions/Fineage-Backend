@@ -65,10 +65,11 @@ public sealed partial class ZoneWorld
         }
         else
         {
+            // Mobius Player.sitDown keeps the run/walk gait; only ChangeWaitType is broadcast.
             player.Sitting = true;
-            player.Running = false;
+            if (player.Session != null)
+                player.Session.SitOnArrive = false;
             FanoutWaitType(player, ActionProtocol.WaitSitting);
-            FanoutMoveType(player);
         }
 
         return null;
@@ -147,6 +148,16 @@ public sealed partial class ZoneWorld
 
     string? FanoutSocial(ZoneEntity player, int actionId)
     {
+        // Mobius RequestActionUse.useSocial: no store, no pending/active trade request, not casting,
+        // and AI intention IDLE (not sitting / running / attacking).
+        long now = _clock().ToUnixTimeMilliseconds();
+        AdvanceMove(player, now);
+        if (player.Sitting || player.MoveActive || IsCasting(player, now) ||
+            player.PrivateStoreType != PrivateStoreProtocol.TypeNone ||
+            _tradeByPlayer.ContainsKey(player.ObjectId) || _pendingTradeAsk.ContainsKey(player.ObjectId) ||
+            player.Session is { AutoAttackTargetId: > 0 })
+            return ActionProtocol.Blocked;
+
         // Mobius broadcastPacket(new SocialAction(...)): self + everyone holding the actor in view.
         NetBridge?.FanoutSocialAction(NetWatchersOf(player), player.ObjectId, actionId);
 

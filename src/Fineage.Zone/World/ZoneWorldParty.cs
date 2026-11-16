@@ -66,6 +66,54 @@ public sealed partial class ZoneWorld
             return Task.FromResult<string?>(TryPartyKick(session, targetObjectId));
     }
 
+    public Task<string?> TryPartyChangeLeaderAsync(ZoneSession session, int targetObjectId, CancellationToken ct)
+    {
+        if (!session.InWorld)
+            return Task.FromResult<string?>("world");
+
+        lock (_gate)
+            return Task.FromResult<string?>(TryPartyChangeLeader(session, targetObjectId));
+    }
+
+    /// <summary>
+    /// Mobius RequestChangePartyLeader → Party.changePartyLeader: only the leader, only to another online member;
+    /// the whole party gets the reordered roster.
+    /// </summary>
+    string? TryPartyChangeLeader(ZoneSession leader, int targetObjectId)
+    {
+        if (!IsLive(leader))
+            return "world";
+        if (!_partyByPlayer.TryGetValue(leader.ObjectId, out int partyId) ||
+            !_parties.TryGetValue(partyId, out var party))
+            return "party";
+        if (party.LeaderObjectId != leader.ObjectId)
+            return "party_leader";
+        if (targetObjectId == leader.ObjectId ||
+            !_partyByPlayer.TryGetValue(targetObjectId, out int targetPartyId) || targetPartyId != partyId ||
+            Online(targetObjectId) == null)
+            return "target";
+
+        party.LeaderObjectId = targetObjectId;
+        // Mobius keeps the leader at index 0 of the member list (the party window draws rows in that order).
+        party.MemberIds.Remove(targetObjectId);
+        party.MemberIds.Insert(0, targetObjectId);
+        FanPartyList(party);
+        return null;
+    }
+
+    /// <summary>
+    /// Mobius broadcasts PartySmallWindowUpdate to the party on every HP/MP change. Net has no small-window
+    /// update frame yet, so the roster (which carries HP/MP) is re-sent; the client already redraws from it.
+    /// </summary>
+    void FanPartyVitals(ZoneEntity subject)
+    {
+        if (subject.Kind != ZoneEntityKind.Player || NetBridge == null ||
+            !_partyByPlayer.TryGetValue(subject.ObjectId, out int partyId) ||
+            !_parties.TryGetValue(partyId, out var party))
+            return;
+        FanPartyList(party);
+    }
+
     void PartyPlayerLeftWorld(int objectId)
     {
         _pendingInvites.Remove(objectId);

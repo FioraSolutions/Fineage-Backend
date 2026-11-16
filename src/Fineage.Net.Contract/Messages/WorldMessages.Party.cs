@@ -17,6 +17,12 @@ namespace Fineage.Net.Contract
         public int TargetObjectId { get; set; }
     }
 
+    /// <summary>Client → zone <see cref="NetOpcode.PartyChangeLeaderRequest"/>: new leader's objectId.</summary>
+    public sealed class PartyChangeLeaderRequestNetMsg
+    {
+        public int TargetObjectId { get; set; }
+    }
+
     public sealed class PartyAskJoinNetMsg
     {
         public int RequestorObjectId { get; set; }

@@ -76,6 +76,10 @@ public sealed partial class ZoneWorld
         player.Dead = true;
         player.CurHp = 0;
         ClosePrivateStore(player.ObjectId, standUp: false);
+        // A dead player cannot finish an exchange: close the window on both sides, drop pending asks.
+        TradePlayerLeftWorld(player.ObjectId);
+        if (player.Session != null)
+            player.Session.SitOnArrive = false;
         player.Sitting = false;
         player.Running = false;
         player.ActiveEnchantObjectId = 0;
