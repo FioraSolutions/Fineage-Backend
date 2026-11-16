@@ -22,6 +22,7 @@
     <Content Include="..\..\data\pledge-skills.json" Link="data\pledge-skills.json" CopyToOutputDirectory="PreserveNewest" />
     <Content Include="..\..\data\clan-halls.json" Link="data\clan-halls.json" CopyToOutputDirectory="PreserveNewest" />
     <Content Include="..\..\data\castles.json" Link="data\castles.json" CopyToOutputDirectory="PreserveNewest" />
+    <Content Include="..\..\data\manor.json" Link="data\manor.json" CopyToOutputDirectory="PreserveNewest" />
     <Content Include="..\..\data\stat-bonuses.json" Link="data\stat-bonuses.json" CopyToOutputDirectory="PreserveNewest" />
     <Content Include="..\..\data\quests\**\*.*" Link="data\quests\%(RecursiveDir)%(Filename)%(Extension)" CopyToOutputDirectory="PreserveNewest" />
     <Content Include="..\..\data\skills.json" Link="data/skills.json" CopyToOutputDirectory="PreserveNewest" />
