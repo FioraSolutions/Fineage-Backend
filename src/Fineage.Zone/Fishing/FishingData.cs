@@ -88,6 +88,7 @@ public sealed class FishingData
     public IReadOnlyList<FishingSkillRow> SkillTree => _tree;
     public IReadOnlyList<FishingZone> Zones => _zones;
     public IEnumerable<FishingRodRow> Rods => _rods.Values;
+    public IReadOnlyList<double> SkillPower => _power;
 
     public FishingRodRow? Rod(int itemId) => _rods.TryGetValue(itemId, out var rod) ? rod : null;
 
