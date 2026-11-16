@@ -313,5 +313,9 @@ namespace Fineage.Net.Contract
         public const ushort CastleCommand = 0x03B8;
         /// <summary>Zone → client: castle page (<c>CastleInfoNetMsg</c>).</summary>
         public const ushort CastleInfo = 0x03B9;
+        /// <summary>Client → zone: manor manager / castle lord manor action (<c>ManorCommandKind</c>).</summary>
+        public const ushort ManorCommand = 0x03BA;
+        /// <summary>Zone → client: manor window (<c>ManorInfoNetMsg</c>): seeds, crop purchases, sell list, settings.</summary>
+        public const ushort ManorInfo = 0x03BB;
     }
 }

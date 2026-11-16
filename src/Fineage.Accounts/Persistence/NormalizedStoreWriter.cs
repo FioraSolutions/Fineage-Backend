@@ -141,6 +141,8 @@ static partial class NormalizedStoreWriter
             }
         }
 
+        SyncManor(conn, tx, root);
+
         if (root.TryGetProperty("siegeClans", out var siegeClans) && siegeClans.ValueKind == JsonValueKind.Array)
         {
             Exec(conn, tx, "DELETE FROM siege_clans");
@@ -153,6 +155,51 @@ static partial class NormalizedStoreWriter
                 ins.Parameters.AddWithValue("castle", row.GetProperty("castleId").GetInt32());
                 ins.Parameters.AddWithValue("clan", row.GetProperty("clanId").GetInt32());
                 ins.Parameters.AddWithValue("side", (short)row.GetProperty("side").GetInt32());
+                ins.ExecuteNonQuery();
+            }
+        }
+    }
+
+    /// <summary>Mobius <c>castle_manor_production</c> / <c>castle_manor_procure</c> mirrors of the snapshot manor rows.</summary>
+    static void SyncManor(NpgsqlConnection conn, NpgsqlTransaction tx, JsonElement root)
+    {
+        if (root.TryGetProperty("manorProduction", out var production) && production.ValueKind == JsonValueKind.Array)
+        {
+            Exec(conn, tx, "DELETE FROM castle_manor_production");
+            foreach (var row in production.EnumerateArray())
+            {
+                using var ins = conn.CreateCommand();
+                ins.Transaction = tx;
+                ins.CommandText =
+                    "INSERT INTO castle_manor_production (castle_id, seed_id, amount, start_amount, price, next_period) " +
+                    "VALUES (@castle, @seed, @amount, @start, @price, @next) ON CONFLICT DO NOTHING";
+                ins.Parameters.AddWithValue("castle", row.GetProperty("castleId").GetInt32());
+                ins.Parameters.AddWithValue("seed", row.GetProperty("seedId").GetInt32());
+                ins.Parameters.AddWithValue("amount", row.GetProperty("amount").GetInt64());
+                ins.Parameters.AddWithValue("start", row.GetProperty("startAmount").GetInt64());
+                ins.Parameters.AddWithValue("price", row.GetProperty("price").GetInt64());
+                ins.Parameters.AddWithValue("next", row.GetProperty("nextPeriod").GetBoolean());
+                ins.ExecuteNonQuery();
+            }
+        }
+
+        if (root.TryGetProperty("manorProcure", out var procure) && procure.ValueKind == JsonValueKind.Array)
+        {
+            Exec(conn, tx, "DELETE FROM castle_manor_procure");
+            foreach (var row in procure.EnumerateArray())
+            {
+                using var ins = conn.CreateCommand();
+                ins.Transaction = tx;
+                ins.CommandText =
+                    "INSERT INTO castle_manor_procure (castle_id, crop_id, amount, start_amount, price, reward_type, next_period) " +
+                    "VALUES (@castle, @crop, @amount, @start, @price, @reward, @next) ON CONFLICT DO NOTHING";
+                ins.Parameters.AddWithValue("castle", row.GetProperty("castleId").GetInt32());
+                ins.Parameters.AddWithValue("crop", row.GetProperty("cropId").GetInt32());
+                ins.Parameters.AddWithValue("amount", row.GetProperty("amount").GetInt64());
+                ins.Parameters.AddWithValue("start", row.GetProperty("startAmount").GetInt64());
+                ins.Parameters.AddWithValue("price", row.GetProperty("price").GetInt64());
+                ins.Parameters.AddWithValue("reward", (short)row.GetProperty("rewardType").GetInt32());
+                ins.Parameters.AddWithValue("next", row.GetProperty("nextPeriod").GetBoolean());
                 ins.ExecuteNonQuery();
             }
         }
