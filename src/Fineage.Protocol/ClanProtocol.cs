@@ -61,6 +61,8 @@ public static class ClanProtocol
     public const string Leader = "clan_leader";
     public const string LeaderLeave = "clan_leader_leave";
     public const string Pledge = "clan_pledge";
+    /// <summary>Mobius 1734/1735: target fails the academy requirements.</summary>
+    public const string Academy = "clan_academy_requirements";
     public const string Self = "clan_self";
     public const string Target = "clan_target";
     public const string TargetClan = "clan_target_clan";

@@ -85,6 +85,50 @@ static partial class NormalizedStoreWriter
                 ins.ExecuteNonQuery();
             }
         }
+
+        if (root.TryGetProperty("crests", out var crests) && crests.ValueKind == JsonValueKind.Array)
+        {
+            Exec(conn, tx, "DELETE FROM clan_crests");
+            foreach (var crest in crests.EnumerateArray())
+            {
+                using var ins = conn.CreateCommand();
+                ins.Transaction = tx;
+                ins.CommandText = "INSERT INTO clan_crests (id, kind, data) VALUES (@id, @kind, @data)";
+                ins.Parameters.AddWithValue("id", crest.GetProperty("id").GetInt32());
+                ins.Parameters.AddWithValue("kind", (short)crest.GetProperty("kind").GetInt32());
+                ins.Parameters.AddWithValue("data", crest.TryGetProperty("data", out var data) && data.ValueKind == JsonValueKind.String
+                    ? data.GetBytesFromBase64()
+                    : Array.Empty<byte>());
+                ins.ExecuteNonQuery();
+            }
+        }
+
+        if (root.TryGetProperty("clanHalls", out var halls) && halls.ValueKind == JsonValueKind.Array)
+        {
+            Exec(conn, tx, "DELETE FROM clan_halls");
+            foreach (var hall in halls.EnumerateArray())
+            {
+                using var ins = conn.CreateCommand();
+                ins.Transaction = tx;
+                ins.CommandText =
+                    "INSERT INTO clan_halls (id, owner_clan_id, paid_until_unix_ms, auction_end_unix_ms, payload) " +
+                    "VALUES (@id, @owner, @paid, @end, @payload::jsonb)";
+                ins.Parameters.AddWithValue("id", hall.GetProperty("id").GetInt32());
+                ins.Parameters.AddWithValue("owner", hall.TryGetProperty("ownerClanId", out var o) ? o.GetInt32() : 0);
+                ins.Parameters.AddWithValue("paid", hall.TryGetProperty("paidUntilUnixMs", out var p) ? p.GetInt64() : 0L);
+                ins.Parameters.AddWithValue("end", hall.TryGetProperty("auctionEndUnixMs", out var e) ? e.GetInt64() : 0L);
+                ins.Parameters.AddWithValue("payload", hall.GetRawText());
+                ins.ExecuteNonQuery();
+            }
+        }
+    }
+
+    static void Exec(NpgsqlConnection conn, NpgsqlTransaction tx, string sql)
+    {
+        using var cmd = conn.CreateCommand();
+        cmd.Transaction = tx;
+        cmd.CommandText = sql;
+        cmd.ExecuteNonQuery();
     }
 
     /// <summary>

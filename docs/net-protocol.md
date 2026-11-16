@@ -29,7 +29,9 @@ Login and Zone both fail fast at boot with a readable message when PostgreSQL is
 | `characters` | Identity, appearance, `x/y/z`, vitals, level/exp/sp, clan flags |
 | `character_items` | Durable `object_id`, `item_id`, `count`, `enchant_level`, `loc` (`inventory` / `paperdoll` / `warehouse`), `loc_data` (paperdoll slot) |
 | `character_quests` + `character_quest_vars` | Quest state |
-| `clans` | Still payload jsonb until a later epic |
+| `clans` | Payload jsonb: roster + Block C details (reputation, sub-units, rank privileges, wars, member grade / sponsor / apprentice / academy join level, ally, pending leader, clan warehouse rows) |
+| `clan_crests` | Crest blobs (`kind` 0 pledge, 1 large, 2 ally) |
+| `clan_halls` | Hall owner, lease paid-until, auction end, bids (payload) |
 | `store_meta` / sequences | `next_character_id`, `next_clan_id`, `next_item_object_id` |
 
 `PostgresAccountStore.FindById` / `List` read **normalized tables** (then hydrate the in-process mirror for hot writes). Login and Zone are separate processes, and both read the same database.
@@ -131,6 +133,47 @@ V2 MessagePack flushes still go to a discarded stream on the Net path. Net peers
 | Hotbar (shortcuts) | See **Shortcuts** below. `RequestShortCutReg` `0x0358` → `ShortCutRegister` `0x035B`; `RequestShortCutDel` `0x0359` → `ShortCutDelete` `0x035C`. |
 | Leave / disconnect | `EntityDespawn` of leaver to known Net peers (exactly once). |
 | Teleport (revive / gatekeeper / SoE / dungeon) | `TeleportToLocation` to self + old peers; AOI diff (`EntitySpawn` / `EntityDespawn`, both directions) fanned once by the world relocate. |
+
+## Clans (Block C, Mobius CT_0 parity)
+
+Lifecycle opcodes `ClanCreateRequest` `0x0368` … `ClanCancelDissolveRequest` `0x036E` are unchanged (see `docs/clan-v2-protocol.md`). Additions, all backward compatible (optional tails; old peers stop early):
+
+| Wire | Shape |
+|------|-------|
+| `ClanInviteRequest` `0x0369` | + optional `int32 pledgeType` tail: 0 main, −1 academy, 100/200 royal guard, 1001/1002/2001/2002 knights. Absent ⇒ 0. |
+| `PledgeStatus` | + tail `int32 reputation, largeCrestId, allyId, string allyName, int32 allyCrestId, castleId, hallId, byte atWar, int32 newLeaderObjectId`, sub-units (`int32 n` × `type, string name, leaderObjectId`), `int32[] rankPrivileges` (grades 1–9), clan skills (`int32 n` × `skillId, level`). |
+| `PledgeMemberList` | + tail `int32 n` × `powerGrade, sponsorObjectId, apprenticeObjectId, pledgeClass` (same order as rows). |
+| `UserInfo` | + tail `string title, int32 clanCrestId, largeCrestId, allyId, allyCrestId, clanPrivileges, pledgeClass, pledgeType, byte clanLeader`. |
+| `EntitySpawn` | + tail `string title, int32 clanId, clanCrestId, allyId, allyCrestId, largeCrestId, pledgeClass`. |
+| `WarehouseDepositList` / `WarehouseWithdrawList` | + tail `int32 warehouseType` (1 private, 2 clan). |
+| `PledgeCommand` `0x03AF` (C → S) | `int32 kind, targetObjectId, intArg1, intArg2, int64 amount, string name, string text, int32 blobLen, bytes blob` (≤ 8192). Kinds in `PledgeCommandKind`. Errors come back as `Reject` codes + `SystemMessage`. |
+| `CrestData` `0x03B0` | `int32 kind, crestId, int32 len, bytes` (empty ⇒ unknown id). |
+| `PledgeWarList` `0x03B1` | two lists (declared, under attack): `int32 n` × `clanId, string name, byte mutual`. |
+| `RelationChanged` `0x03B2` | `int32 objectId, relation, byte autoAttackable, int32 karma, byte pvpFlag`. Bits: 0x2 flag, 0x4 karma, 0x80 leader, 0x800 ally, 0x8000 mutual war, 0x10000 one-sided war. Sent to both sides on war changes and right after a player's `EntitySpawn` when war/ally bits are set. |
+| `PledgeInfo` `0x03B3` | `int32 clanId, string name, int32 crestId, allyId, string allyName, int32 allyCrestId`. |
+| `AllyInfo` `0x03B4` / `AllyAskJoin` `0x03B5` | Alliance (Block D). |
+| `ClanHallList` `0x03B6` | `int32 n` × `hallId, string name, string location, int32 grade, int64 lease, int32 ownerClanId, string ownerName, int64 auctionEndMs, startingBid, highestBid, int32 bidCount, int64 ownBid`. |
+
+`SystemMessage` id 0 = free text (Mobius `sendMessage`).
+
+| `PledgeCommandKind` | Rules (Mobius) |
+|------|-------|
+| 1 SetTitle (`targetObjectId` or `name`, `text` ≤ 16) | ASSIGN_TITLE, clan level ≥ 3 (271), online clan member (234 / 145). Persisted; member gets 214; watchers get a fresh `EntitySpawn`. Leaving / kicked members lose the title. |
+| 2 SetMemberPowerGrade (`name`, grade 2–8) | MODIFY_RANKS; never the leader or academy (1754). |
+| 3 SetRankPrivileges (grade 2–9, mask) / 4 RequestRankPrivileges | Leader only; grade 9 keeps only warehouse + hall/castle doors. Reply = `PledgeStatus` (`rankPrivileges`). |
+| 5 ReorganizeMember (`name`, new type, `text` = swap member) | MODIFY_RANKS; target unit must exist; without swap the unit must have room (233); captains and the leader stay in the main clan; academy only by invite. |
+| 6 SetSponsor (`name`, `text`, 1 set / 0 clear) | DISMISS_MENTEE (1762); one academy apprentice ↔ one regular sponsor (1755 / 1763). |
+| 7 DeclareWar / 8 StopWar / 9 SurrenderWar (`name` = clan) / 10 RequestWarList | WAR privilege; both clans level ≥ 3 with ≥ 15 members (1564); not allied (1569); stop refused while any member is in combat (1677). Mutual war: members are hostile without Ctrl and a war kill is PvP (+1 pvp, no karma), clan reputation ±1 (killer +1 if victim clan > 0; victim −1 if killer clan > 0). Academy members never count. |
+| 11 SetCrest (≤ 256 B) / 12 SetLargeCrest (≤ 2176 B), empty blob deletes | CHANGE_CREST, clan level ≥ 3 (272), refused while dissolving (552), size (209). Members re-spawned with the new crest id. |
+| 13 RequestCrest (`intArg1` id, `intArg2` kind) / 14 RequestPledgeInfo (`intArg1` clan) / 15 RequestMemberList | Any player (member list: own clan). |
+| 30 HallList / 31 HallBid (`intArg1` hall, `amount`) / 32 HallCancelBid | Clan level ≥ 2, HALL_AUCTION, no hall, one auction at a time; adena from the **clan warehouse**; bid ≥ starting bid and > highest (677); raising pays the difference; cancel refunds 90%. Auction lasts 7 days; at the end the highest bidder owns the hall (`hallId` in status / `UserInfo`), losers get 90% back; no bids ⇒ restart. Disbanded clans release the hall. |
+| 20–26 Alliance | Block D. |
+
+Village master bypasses (`npc_%id%_<verb>`, pages `data/html/village_master/ClanMaster`): `create_clan`, `increase_clan_level` (Mobius `levelUpClan` SP / adena / Blood Mark / Manifesto / Seal of Aspiration; 6–8 by reputation + members), `dissolve_clan`, `recover_clan`, `change_clan_leader` (applied at next start), `cancel_clan_leader_change`, `create_academy` (lvl 5), `create_royal` (lvl 6, 5000 rep, captain), `create_knight` (lvl 7, 10000 rep, captain), `rename_pledge`, `assign_subpl_leader`, `learn_clan_skills`. Warehouse `DepositC` / `WithdrawC` (clan level ≥ 1, withdraw leader-only, 200 slots).
+
+Academy: invite needs level ≤ 40 and no 2nd class (1734/1735); grade 9; leaving / kicked ⇒ no join penalty (the clan still gets the recruit penalty). On the 2nd class transfer the member graduates: clan +650…190 reputation by join level (1752), member leaves penalty-free (1749) and gets Academy Circlet 8181.
+
+Clan skills: pledge skill tree (`data/pledge-skills.json`), learned at the village master with reputation + items; applied to members whose pledge class reaches the skill's social class; disabled while reputation < 0 (1789 / 1862).
 
 ## Shortcuts (hotbar, Mobius ShortCuts)
 

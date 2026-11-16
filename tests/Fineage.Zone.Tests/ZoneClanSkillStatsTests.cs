@@ -39,6 +39,8 @@ public sealed class ZoneClanSkillStatsTests
         Assert.Null(await kit.World.TryClanCreateAsync(
             leaderSession, new ClanCreateRequestMsg { Name = "Fine" }, kit.Now, default));
         int clanId = leaderEntity.ClanId;
+        // Mobius Clan.addSkillEffects: Clan Might needs social class KNIGHT (pledge class 3+ → clan level 6).
+        Assert.True(kit.World.SetClanLevelForTest(clanId, 6));
         Assert.True(kit.World.TrySetClanSkillForTest(clanId, ClanMight, 3));
         Assert.Equal(3, leaderEntity.ClanSkills[ClanMight]);
 
@@ -62,6 +64,7 @@ public sealed class ZoneClanSkillStatsTests
         var (session, entity) = await kit.EnterAsync(leaderTicket);
         Assert.Null(await kit.World.TryClanCreateAsync(
             session, new ClanCreateRequestMsg { Name = "Fine" }, kit.Now, default));
+        Assert.True(kit.World.SetClanLevelForTest(entity.ClanId, 6));
         Assert.True(kit.World.TrySetClanSkillForTest(entity.ClanId, ClanMight, 2));
 
         var restarted = new NetTestKit(store: kit.Store);

@@ -34,6 +34,11 @@ public sealed partial class ZoneWorld
         if (!InTalkRange(player, npc))
             return "range";
 
+        if (string.Equals(verb, "DepositC", StringComparison.Ordinal) || string.Equals(verb, "WithdrawC", StringComparison.Ordinal))
+            return OpenClanWarehouse(session, player, npc, deposit: verb == "DepositC");
+        if (TryClanMasterVerb(session, player, npc, verb, out var clanError))
+            return clanError;
+
         var handler = _bypasses.Find(verb);
         if (handler == null)
         {

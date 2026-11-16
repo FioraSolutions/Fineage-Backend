@@ -290,5 +290,22 @@ namespace Fineage.Net.Contract
 
         /// <summary>Zone → player(s): Interlude <c>PlaySound</c> (quest jingles, server-driven music).</summary>
         public const ushort PlaySound = 0x03AE;
+
+        /// <summary>Client → zone: one clan / alliance window action (<see cref="PledgeCommandKind"/>).</summary>
+        public const ushort PledgeCommand = 0x03AF;
+        /// <summary>Zone → client: crest blob (Mobius PledgeCrest / ExPledgeCrestLarge / AllyCrest).</summary>
+        public const ushort CrestData = 0x03B0;
+        /// <summary>Zone → client: clan war lists (Mobius PledgeReceiveWarList).</summary>
+        public const ushort PledgeWarList = 0x03B1;
+        /// <summary>Zone → viewer: relation bits for one player (Mobius RelationChanged).</summary>
+        public const ushort RelationChanged = 0x03B2;
+        /// <summary>Zone → client: clan name / crest by id (Mobius PledgeInfo).</summary>
+        public const ushort PledgeInfo = 0x03B3;
+        /// <summary>Zone → client: alliance info (Mobius AllianceInfo).</summary>
+        public const ushort AllyInfo = 0x03B4;
+        /// <summary>Zone → client: alliance invitation (Mobius AskJoinAlly).</summary>
+        public const ushort AllyAskJoin = 0x03B5;
+        /// <summary>Zone → client: clan hall auction list.</summary>
+        public const ushort ClanHallList = 0x03B6;
     }
 }

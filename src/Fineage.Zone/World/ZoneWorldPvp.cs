@@ -98,6 +98,17 @@ public sealed partial class ZoneWorld
         if (InPvpArea(killer) || InPvpArea(victim))
             return;
 
+        // Mobius: a kill between clans at mutual war (no academy members) is a PvP kill, never a PK.
+        if (AtMutualWar(killer, victim))
+        {
+            killer.PvpKills++;
+            PersistKarmaPk(killer);
+            ApplyWarKillReputation(killer, victim);
+            ZoneLog.Info($"[pvp] war-kill killer={killer.ObjectId} victim={victim.ObjectId} pvp={killer.PvpKills}");
+            BroadcastPvpAppearance(killer);
+            return;
+        }
+
         if (victimWasFlagged && killer.Karma == 0 && victim.Karma == 0)
         {
             killer.PvpKills++;
@@ -240,6 +251,9 @@ public sealed partial class ZoneWorld
             return false;
         if (SameParty(attacker.ObjectId, target.ObjectId))
             return false;
+        // Mobius Player.isAutoAttackable: members of clans at mutual war are hostile without Ctrl.
+        if (AtMutualWar(attacker, target))
+            return true;
         if (target.PvpFlagged || target.Karma > 0)
             return true;
         return target.InstanceId != 0 || (InPvpArea(attacker) && InPvpArea(target));

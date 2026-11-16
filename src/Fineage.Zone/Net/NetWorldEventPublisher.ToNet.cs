@@ -71,7 +71,16 @@ sealed partial class NetWorldEventPublisher
             Karma = info.Karma,
             PvpFlag = info.PvpFlag,
             PvpKills = info.PvpKills,
-            PkKills = info.PkKills
+            PkKills = info.PkKills,
+            Title = info.Title ?? "",
+            ClanCrestId = info.ClanCrestId,
+            LargeCrestId = info.LargeCrestId,
+            AllyId = info.AllyId,
+            AllyCrestId = info.AllyCrestId,
+            ClanPrivileges = info.ClanPrivileges,
+            PledgeClass = info.PledgeClass,
+            PledgeType = info.PledgeType,
+            ClanLeader = info.ClanLeader
         };
     }
 
@@ -91,6 +100,8 @@ sealed partial class NetWorldEventPublisher
                 continue;
             foreach (var (opcode, frame) in followUps)
                 _presence.TrySendCritical(watcher, opcode, frame);
+            if (_world.TryGetEntityById(watcher, out var viewer) && _world.SpawnRelationFrame(entity, viewer) is { } relation)
+                _presence.TrySendCritical(watcher, NetOpcode.RelationChanged, relation);
         }
     }
 

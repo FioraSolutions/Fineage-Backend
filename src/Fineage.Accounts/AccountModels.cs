@@ -165,7 +165,9 @@ public sealed record ClanRecord(
     IReadOnlyList<ClanMemberRecord> Members,
     int CastleId = 0,
     /// <summary>Mobius <c>clan_skills</c> book (id → level). Applied to online members via ZoneEntity.ClanSkills.</summary>
-    IReadOnlyDictionary<int, int>? Skills = null);
+    IReadOnlyDictionary<int, int>? Skills = null,
+    /// <summary>Reputation, sub-units, privileges, wars, ally, member grades, warehouse (see <see cref="ClanDetails"/>).</summary>
+    ClanDetails? Details = null);
 
 /// <summary>Persisted castle row. Owner 0 is an NPC castle. Tax is a percent. Times are unix milliseconds.</summary>
 public sealed record CastleSave(

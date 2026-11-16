@@ -50,15 +50,38 @@ sealed partial class NetWorldEventPublisher
         CrestId = status.CrestId,
         MemberCount = status.MemberCount,
         DissolvingExpiryUnixMs = status.DissolvingExpiryUnixMs,
-        CharPenaltyExpiryUnixMs = status.CharPenaltyExpiryUnixMs
+        CharPenaltyExpiryUnixMs = status.CharPenaltyExpiryUnixMs,
+        Reputation = status.Reputation,
+        LargeCrestId = status.LargeCrestId,
+        AllyId = status.AllyId,
+        AllyName = status.AllyName ?? "",
+        AllyCrestId = status.AllyCrestId,
+        CastleId = status.CastleId,
+        HallId = status.HallId,
+        AtWar = status.AtWar,
+        NewLeaderObjectId = status.NewLeaderObjectId,
+        SubPledges = (status.SubPledges ?? []).Select(s => new SubPledgeNet { Type = s.Type, Name = s.Name ?? "", LeaderObjectId = s.LeaderObjectId }).ToArray(),
+        RankPrivileges = status.RankPrivileges ?? [],
+        Skills = (status.Skills ?? []).Select(s => new ClanSkillNet { SkillId = s.SkillId, Level = s.Level }).ToArray()
     };
 
     internal static PledgeMemberListNetMsg ToNetPledgeMemberList(Fineage.Protocol.PledgeMemberListMsg list)
     {
         var src = list.Members ?? [];
         var rows = new PledgeMemberNet[src.Length];
+        var extras = new PledgeMemberExtraNet[list.ClanId == 0 ? 0 : src.Length];
         for (int i = 0; i < src.Length; i++)
         {
+            if (extras.Length > 0)
+            {
+                extras[i] = new PledgeMemberExtraNet
+                {
+                    PowerGrade = src[i].PowerGrade,
+                    SponsorObjectId = src[i].SponsorObjectId,
+                    ApprenticeObjectId = src[i].ApprenticeObjectId,
+                    PledgeClass = src[i].PledgeClass
+                };
+            }
             rows[i] = new PledgeMemberNet
             {
                 ObjectId = src[i].ObjectId,
@@ -74,7 +97,8 @@ sealed partial class NetWorldEventPublisher
         {
             ClanId = list.ClanId,
             LeaderObjectId = list.LeaderObjectId,
-            Members = rows
+            Members = rows,
+            Extras = extras
         };
     }
 }

@@ -62,7 +62,7 @@ public sealed class ClanPacketHandler
         string? error = await _world
             .TryClanInviteAsync(
                 zoneSession,
-                new ClanInviteRequestMsg { TargetObjectId = invite.TargetObjectId, PledgeType = 0 },
+                new ClanInviteRequestMsg { TargetObjectId = invite.TargetObjectId, PledgeType = invite.PledgeType },
                 _clock(),
                 ct)
             .ConfigureAwait(false);
@@ -169,6 +169,26 @@ public sealed class ClanPacketHandler
         string? error = await _world.TryClanCancelDissolveAsync(zoneSession, _clock(), ct).ConfigureAwait(false);
         if (error != null)
             await _reject(conn, error, "Clan cancel dissolve failed.", ct).ConfigureAwait(false);
+    }
+
+    /// <summary><see cref="NetOpcode.PledgeCommand"/>: one clan / alliance window action.</summary>
+    public async Task OnPledgeCommandAsync(
+        NetConnection conn,
+        ZoneSession zoneSession,
+        PacketEnvelope envelope,
+        CancellationToken ct)
+    {
+        RequireHello(conn);
+        if (!zoneSession.Bound || !zoneSession.InWorld)
+        {
+            await _reject(conn, "not_in_world", "Enter world first.", ct).ConfigureAwait(false);
+            return;
+        }
+
+        var command = NetCodec.DecodePledgeCommand(envelope.Payload);
+        string? error = await _world.TryPledgeCommandAsync(zoneSession, command, _clock(), ct).ConfigureAwait(false);
+        if (error != null)
+            await _reject(conn, error, "Clan command failed.", ct).ConfigureAwait(false);
     }
 
     static void RequireHello(NetConnection conn)

@@ -110,6 +110,15 @@ sealed class ZonePlayerIdentityPayload
     public int PledgeClass { get; set; }
     public int CastleId { get; set; }
     public int HideoutId { get; set; }
+    public int PledgeType { get; set; }
+    public int PowerGrade { get; set; }
+    public int ClanPrivileges { get; set; }
+    public int ClanCrestId { get; set; }
+    public int LargeCrestId { get; set; }
+    public int AllyId { get; set; }
+    public int AllyCrestId { get; set; }
+    /// <summary>Active clan warehouse window (Mobius setActiveWarehouse(clan WH)).</summary>
+    public bool ClanWarehouseOpen { get; set; }
     public bool PvpFlagged { get; set; }
     public long PvpFlagUntilMs { get; set; }
     public bool PvpFlagBlink { get; set; }

@@ -53,6 +53,54 @@ sealed partial class ZoneEntity
         set => EnsureIdentity().HideoutId = value;
     }
 
+    public int PledgeType
+    {
+        get => Identity?.PledgeType ?? 0;
+        set => EnsureIdentity().PledgeType = value;
+    }
+
+    public int PowerGrade
+    {
+        get => Identity?.PowerGrade ?? 0;
+        set => EnsureIdentity().PowerGrade = value;
+    }
+
+    public int ClanPrivileges
+    {
+        get => Identity?.ClanPrivileges ?? 0;
+        set => EnsureIdentity().ClanPrivileges = value;
+    }
+
+    public int ClanCrestId
+    {
+        get => Identity?.ClanCrestId ?? 0;
+        set => EnsureIdentity().ClanCrestId = value;
+    }
+
+    public int LargeCrestId
+    {
+        get => Identity?.LargeCrestId ?? 0;
+        set => EnsureIdentity().LargeCrestId = value;
+    }
+
+    public int AllyId
+    {
+        get => Identity?.AllyId ?? 0;
+        set => EnsureIdentity().AllyId = value;
+    }
+
+    public int AllyCrestId
+    {
+        get => Identity?.AllyCrestId ?? 0;
+        set => EnsureIdentity().AllyCrestId = value;
+    }
+
+    public bool ClanWarehouseOpen
+    {
+        get => Identity?.ClanWarehouseOpen ?? false;
+        set => EnsureIdentity().ClanWarehouseOpen = value;
+    }
+
     public bool PvpFlagged
     {
         get => Identity?.PvpFlagged ?? false;

@@ -140,4 +140,20 @@ public interface IAccountStore
 
     /// <summary>Replaces castle rows and siege registrations, and writes each clan's <see cref="ClanRecord.CastleId"/>.</summary>
     bool SaveSiege(IReadOnlyList<CastleSave> castles, IReadOnlyList<SiegeClanSave> clans, IReadOnlyDictionary<int, int> clanCastleIds);
+
+    /// <summary>Stores a crest blob and returns its new id (Mobius <c>CrestTable.createCrest</c>).</summary>
+    CrestSave? InsertCrest(int kind, byte[] data);
+
+    CrestSave? FindCrest(int crestId);
+
+    IReadOnlyList<CrestSave> ListCrests();
+
+    bool DeleteCrest(int crestId);
+
+    IReadOnlyList<ClanHallSave> ListClanHalls();
+
+    bool SaveClanHalls(IReadOnlyList<ClanHallSave> halls);
+
+    /// <summary>Writes the character title (Mobius <c>RequestGiveNickName</c> / <c>setTitle</c>).</summary>
+    bool TrySetCharacterTitle(string account, int characterId, string title);
 }

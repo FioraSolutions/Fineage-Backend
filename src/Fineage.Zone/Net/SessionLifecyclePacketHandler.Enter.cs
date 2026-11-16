@@ -121,13 +121,19 @@ sealed partial class SessionLifecyclePacketHandler
             // Late join: a peer mid-run / seated is shown in that state, not idle at a stale spot.
             foreach (var (opcode, payload) in NetEnterWorldProjector.BuildPresenceFollowUps(other, otherId, _world))
                 await conn.SendAsync(opcode, payload, ct: ct).ConfigureAwait(false);
+            // Clan war / alliance colours for the pawn just shown (Mobius RelationChanged after CharInfo).
+            if (_world.SpawnRelationFrame(other, entity) is { } relation)
+                await conn.SendAsync(NetOpcode.RelationChanged, relation, ct: ct).ConfigureAwait(false);
         }
 
         var selfRemote = NetCodec.EncodeEntitySpawn(NetEnterWorldProjector.BuildRemoteSpawn(entity, self, _playerSpawnPAtkSpd(entity)));
         foreach (var peer in known)
         {
-            if (peer.Kind == ZoneEntityKind.Player)
-                await _presence.SendAsync(peer.ObjectId, NetOpcode.EntitySpawn, selfRemote, ct).ConfigureAwait(false);
+            if (peer.Kind != ZoneEntityKind.Player)
+                continue;
+            await _presence.SendAsync(peer.ObjectId, NetOpcode.EntitySpawn, selfRemote, ct).ConfigureAwait(false);
+            if (_world.SpawnRelationFrame(entity, peer) is { } relation)
+                await _presence.SendAsync(peer.ObjectId, NetOpcode.RelationChanged, relation, ct).ConfigureAwait(false);
         }
     }
 
