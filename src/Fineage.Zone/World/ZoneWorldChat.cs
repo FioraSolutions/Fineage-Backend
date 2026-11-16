@@ -6,7 +6,7 @@ namespace Fineage.Zone.World;
 /// <summary>
 /// Say2 channels (Mobius CT_0 chat handlers, reimplemented): who hears each line, and the refusals the speaker gets.
 /// Audiences: All = visible players within 1250; Shout / Trade = same map region (MapRegion locId) and instance;
-/// Tell = one online player by name; Party / Clan = online members; Hero = everyone; Alliance / Petition / party
+/// Tell = one online player by name; Party / Clan / Alliance = online members; Hero = everyone; Petition / party
 /// rooms are refused or ignored until those systems exist. Every receiver drops lines from players it blocks
 /// (block list or message refusal), as Mobius <c>BlockList.isBlocked(receiver, speaker)</c>.
 /// </summary>
@@ -102,8 +102,14 @@ public sealed partial class ZoneWorld
                     Players().Where(p => p.ClanId == speaker.ClanId).Select(p => p.ObjectId));
                 return null;
             case ChatProtocol.Alliance:
-                // No alliances on this server yet: Mobius answers exactly this to a clan without an ally.
-                return Plain("You are not in an alliance.");
+            {
+                // Mobius ChatAlliance: every online member of every clan in the speaker's alliance.
+                int allyId = speaker.ClanId == 0 ? 0 : ClanOf(speaker.ObjectId)?.D.AllyId ?? 0;
+                if (allyId == 0)
+                    return Plain("You are not in an alliance.");
+                SayToGroup(speaker, chatType, text, AllyOnlineIds(allyId));
+                return null;
+            }
             case ChatProtocol.Hero:
                 if (!speaker.Hero)
                     return Plain("Only Heroes can enter the Hero channel.");

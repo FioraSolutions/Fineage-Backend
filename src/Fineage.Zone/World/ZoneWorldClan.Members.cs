@@ -97,6 +97,8 @@ public sealed partial class ZoneWorld
             clan != null && clan.DissolvingExpiryUnixMs > nowMs);
         if (block != null || clan == null)
             return block ?? ClanProtocol.None;
+        if (DissolveConditionsBlock(session, clan) is { } conditions)
+            return conditions;
 
         long expiry = ClanRules.DissolveExpiry(nowMs);
         var record = ToRecord(clan) with { DissolvingExpiryUnixMs = expiry };
