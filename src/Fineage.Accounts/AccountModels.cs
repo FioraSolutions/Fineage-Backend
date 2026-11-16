@@ -186,6 +186,16 @@ public sealed record CastleSave(
     long Treasury = 0,
     IReadOnlyDictionary<int, int>? DoorUpgrades = null);
 
+/// <summary>
+/// One <c>castle_manor_production</c> row (Mobius <c>SeedProduction</c>): seeds a castle sells this period or the next.
+/// </summary>
+public sealed record ManorProductionSave(int CastleId, int SeedId, long Amount, long StartAmount, long Price, bool NextPeriod);
+
+/// <summary>
+/// One <c>castle_manor_procure</c> row (Mobius <c>CropProcure</c>): crops a castle buys; reward type 1 / 2 picks the reward item.
+/// </summary>
+public sealed record ManorProcureSave(int CastleId, int CropId, long Amount, long StartAmount, long Price, int RewardType, bool NextPeriod);
+
 /// <summary>One <c>siege_clans</c> row. Owner clans are not stored; side is attacker, defender, or pending.</summary>
 public sealed record SiegeClanSave(int CastleId, int ClanId, int Side);
 

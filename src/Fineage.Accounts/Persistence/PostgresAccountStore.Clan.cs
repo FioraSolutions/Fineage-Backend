@@ -81,6 +81,13 @@ public sealed partial class PostgresAccountStore
         IReadOnlyDictionary<int, int> clanCastleIds) =>
         _inner.SaveSiege(castles, clans, clanCastleIds);
 
+    public IReadOnlyList<ManorProductionSave> ListManorProduction() => _inner.ListManorProduction();
+
+    public IReadOnlyList<ManorProcureSave> ListManorProcure() => _inner.ListManorProcure();
+
+    public bool SaveManor(IReadOnlyList<ManorProductionSave> production, IReadOnlyList<ManorProcureSave> procure) =>
+        _inner.SaveManor(production, procure);
+
     public CrestSave? InsertCrest(int kind, byte[] data)
     {
         var saved = _inner.InsertCrest(kind, data);

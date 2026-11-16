@@ -46,6 +46,13 @@ sealed class ZoneNpcSpoilPayload
     public int SpoilerObjectId { get; set; }
     public List<Drops.DropStack> SweepItems { get; } = [];
     public bool CorpseAwaitingSweep { get; set; }
+    /// <summary>Mobius <c>Attackable._seed</c> / <c>_seederObjId</c>: the seed picked by the seed item, before Sowing lands.</summary>
+    public int SeedId { get; set; }
+    public int SeederObjectId { get; set; }
+    /// <summary>Mobius <c>_seeded</c>: Sowing succeeded; the crop below waits for the seeder's Harvester.</summary>
+    public bool Seeded { get; set; }
+    public int HarvestItemId { get; set; }
+    public int HarvestCount { get; set; }
 }
 
 /// <summary>NPC merchant tax/town fields composed off <see cref="ZoneEntity"/> (#353).</summary>

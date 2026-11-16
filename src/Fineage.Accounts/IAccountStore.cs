@@ -141,6 +141,13 @@ public interface IAccountStore
     /// <summary>Replaces castle rows and siege registrations, and writes each clan's <see cref="ClanRecord.CastleId"/>.</summary>
     bool SaveSiege(IReadOnlyList<CastleSave> castles, IReadOnlyList<SiegeClanSave> clans, IReadOnlyDictionary<int, int> clanCastleIds);
 
+    IReadOnlyList<ManorProductionSave> ListManorProduction();
+
+    IReadOnlyList<ManorProcureSave> ListManorProcure();
+
+    /// <summary>Replaces every castle manor row (Mobius <c>CastleManorManager.storeMe</c>).</summary>
+    bool SaveManor(IReadOnlyList<ManorProductionSave> production, IReadOnlyList<ManorProcureSave> procure);
+
     /// <summary>Stores a crest blob and returns its new id (Mobius <c>CrestTable.createCrest</c>).</summary>
     CrestSave? InsertCrest(int kind, byte[] data);
 

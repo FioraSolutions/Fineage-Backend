@@ -145,6 +145,34 @@ public sealed partial class MemoryAccountStore
         }
     }
 
+    public IReadOnlyList<ManorProductionSave> ListManorProduction()
+    {
+        lock (_gate)
+            return _data.ManorProduction.ToArray();
+    }
+
+    public IReadOnlyList<ManorProcureSave> ListManorProcure()
+    {
+        lock (_gate)
+            return _data.ManorProcure.ToArray();
+    }
+
+    public bool SaveManor(IReadOnlyList<ManorProductionSave> production, IReadOnlyList<ManorProcureSave> procure)
+    {
+        ArgumentNullException.ThrowIfNull(production);
+        ArgumentNullException.ThrowIfNull(procure);
+        lock (_gate)
+        {
+            if (production.Any(p => p.CastleId <= 0 || p.SeedId <= 0 || p.Amount < 0 || p.Price < 0) ||
+                procure.Any(p => p.CastleId <= 0 || p.CropId <= 0 || p.Amount < 0 || p.Price < 0))
+                return false;
+            _data.ManorProduction = production.ToList();
+            _data.ManorProcure = procure.ToList();
+            Save();
+            return true;
+        }
+    }
+
     public bool SaveSiege(IReadOnlyList<CastleSave> castles, IReadOnlyList<SiegeClanSave> clans, IReadOnlyDictionary<int, int> clanCastleIds)
     {
         ArgumentNullException.ThrowIfNull(castles);
