@@ -33,6 +33,20 @@ public sealed partial class ZoneWorld
         var scroll = player.Inventory!.Find(objectId);
         if (EnchantSessionRules.RequestError(scroll != null, scroll?.Template.Scroll != null) is { } requestError)
             return requestError;
+        // Mobius EnchantScrolls.onItemUse: not while casting, and one scroll at a time.
+        if (IsCasting(player, _clock().ToUnixTimeMilliseconds()))
+            return EnchantProtocol.Casting;
+        if (player.ActiveEnchantObjectId != 0 && player.ActiveEnchantObjectId != scroll!.ObjectId &&
+            player.Inventory.Find(player.ActiveEnchantObjectId) != null)
+        {
+            NetBridge?.FanoutSystemMessage([session.ObjectId], new SystemMessageMsg
+            {
+                Id = 0,
+                Text = "Another enchantment is in progress. Please complete the previous task, then try again.",
+                Params = []
+            });
+            return EnchantProtocol.Busy;
+        }
 
         player.ActiveEnchantObjectId = scroll!.ObjectId;
         var select = EnchantLines.Select(scroll);
@@ -95,9 +109,19 @@ public sealed partial class ZoneWorld
         }
 
         player.ActiveEnchantObjectId = 0;
+        // Mobius RequestEnchantItem: no enchanting from a private store / workshop or an open trade.
+        if (player.PrivateStoreType != PrivateStoreProtocol.TypeNone || _tradeByPlayer.ContainsKey(player.ObjectId))
+        {
+            EnchantRefused(session, EnchantProtocol.StoreOpen, "You cannot enchant while operating a Private Store or Private Workshop.");
+            return EnchantProtocol.Store;
+        }
+
         var definition = scroll!.Template.Scroll!;
         if (EnchantRules.Reject(target!.Template, target.EnchantLevel, definition) is { } denied)
+        {
+            EnchantRefused(session, EnchantProtocol.InappropriateConditions, "Inappropriate enchant conditions.");
             return DenyCode(denied);
+        }
 
         var before = PaperdollSnapshot(inventory);
         bool wasEquipped = target.IsEquipped;
@@ -236,9 +260,43 @@ public sealed partial class ZoneWorld
                 NetBridge.FanoutCharInfo(netPeers, player.ObjectId);
         }
 
+        if (resultCode == EnchantProtocol.ResultSuccess && target.EnchantLevel != oldLevel &&
+            EnchantProtocol.Announced(target.Template.Kind == ItemKind.Weapon, target.EnchantLevel))
+            AnnounceEnchant(player, target);
+
         SaveInventory(session, inventory);
         ZoneLog.Info(
             $"enchant object={session.ObjectId} result={resultCode} item={target.ItemId} {oldLevel}->{reportedLevel} crystals={crystalCount}");
         return null;
+    }
+
+    /// <summary>Mobius: <c>EnchantResult(0)</c> closes the window, then the reason line.</summary>
+    void EnchantRefused(ZoneSession session, int lineId, string text)
+    {
+        NetBridge?.FanoutEnchantResult([session.ObjectId], new EnchantResultMsg { Result = EnchantProtocol.ResultCancel });
+        NetBridge?.FanoutSystemMessage([session.ObjectId], new SystemMessageMsg { Id = lineId, Text = text, Params = [] });
+    }
+
+    /// <summary>
+    /// Mobius <c>broadcastMessage</c> + Firework (2024) <c>MagicSkillUse</c> for armor +6 and weapon +7 / +15:
+    /// the enchanter and every player who knows them.
+    /// </summary>
+    void AnnounceEnchant(ZoneEntity player, ItemInstance item)
+    {
+        var watchers = new List<int> { player.ObjectId };
+        foreach (int id in player.Knownlist)
+        {
+            if (_byId.TryGetValue(id, out var other) && other.Kind == ZoneEntityKind.Player && other.Session != null)
+                watchers.Add(id);
+        }
+
+        NetBridge?.FanoutSystemMessage(watchers, new SystemMessageMsg
+        {
+            Id = 0,
+            Text = $"{player.Name} has successfully enchanted a +{item.EnchantLevel} {item.Template.Name}.",
+            Params = []
+        });
+        var cast = BuildCast(player, player, EnchantProtocol.FireworkSkillId, 1, 0, 0);
+        NetBridge?.FanoutMagicSkillUse(watchers, cast);
     }
 }

@@ -41,6 +41,7 @@ namespace Fineage.Net.Contract
             w.WriteInt32(m.AllyCrestId);
             w.WriteInt32(m.LargeCrestId);
             w.WriteInt32(m.PledgeClass);
+            w.WriteInt32(m.WeaponEnchant);
         });
 
         public static EntitySpawnMsg DecodeEntitySpawn(ReadOnlySpan<byte> p)
@@ -97,6 +98,8 @@ namespace Fineage.Net.Contract
                 msg.LargeCrestId = r.ReadInt32();
                 msg.PledgeClass = r.ReadInt32();
             }
+            if (r.Remaining > 0)
+                msg.WeaponEnchant = r.ReadInt32();
             return msg;
         }
 

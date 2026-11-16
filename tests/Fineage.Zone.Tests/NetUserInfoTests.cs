@@ -28,7 +28,8 @@ public sealed class NetUserInfoTests
     }
 
     /// <summary>Block C spawn tail with an empty title: u16 length + clan, crest, ally, ally crest, large crest, pledge class.</summary>
-    const int ClanSpawnTail = 2 + 6 * 4;
+    // Clan badges (title + 6 ints) and the F1 weapon-enchant int after them.
+    const int ClanSpawnTail = 2 + 6 * 4 + 4;
 
     [Fact]
     public void EntitySpawn_paperdoll_is_optional_trailing_field()
