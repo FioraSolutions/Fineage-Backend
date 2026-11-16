@@ -84,12 +84,18 @@ public sealed partial class ZoneWorld
                 AbortCast(player, "no-los", notify: false);
                 return;
             }
+
+            // Mobius onMagicLaunchedTimer → broadcastPacket(MagicSkillLaunched) to the caster's knownlist.
+            FanoutSkillLaunched(player, hit.Combat.SkillId, hit.Level, target);
         }
 
         int damage = hit.Combat != null ? RollSkillDamage(player, target, hit.Combat, hit.Level) : hit.Damage;
         if (hit.Combat != null)
         {
             ZoneLog.Info($"[skill] hit {hit.Combat.SkillId} lv{hit.Level} target={target.ObjectId} damage={damage}");
+            // Mobius Player.sendDamageMessage after a damage skill: the caster sees its own number.
+            if (damage > 0)
+                QueueAttackerDamageLine(player, target, damage);
         }
         if (target.Kind == ZoneEntityKind.Player)
         {
@@ -145,6 +151,7 @@ public sealed partial class ZoneWorld
         target.CurHp = Math.Max(0, target.CurHp - damage);
         target.CombatUntilUnixMs = now + ClanProtocol.CombatStanceMillis;
         FanoutVitals(target, PlayerVitalsStatus(target));
+        SendVictimHitLines(attacker, target, damage, 0);
         if (target.CurHp > 0)
         {
             MaybeBreakCast(target, damage);
@@ -276,7 +283,7 @@ public sealed partial class ZoneWorld
             };
             // Swing now; player HP drops at hitTime (Mobius onHitTimer).
             FanoutAttack(npc, player, attack);
-            _meleeHits.Add(new PendingMeleeHit(npc.ObjectId, player.ObjectId, damage, now + npcAtkMs / 2));
+            _meleeHits.Add(new PendingMeleeHit(npc.ObjectId, player.ObjectId, damage, now + npcAtkMs / 2, flags));
         }
     }
 

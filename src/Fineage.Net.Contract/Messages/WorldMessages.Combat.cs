@@ -66,6 +66,48 @@ namespace Fineage.Net.Contract
         public int TargetX { get; set; }
         public int TargetY { get; set; }
         public int TargetZ { get; set; }
+
+        /// <summary>
+        /// Further hits of the same swing (Interlude Attack packet hit list: dual / fist second hit). Optional wire
+        /// tail: <c>int32 count</c> + rows <c>int32 damage, byte flags</c>. Absent ⇒ single hit.
+        /// </summary>
+        public AttackHitNet[] ExtraHits { get; set; } = System.Array.Empty<AttackHitNet>();
+    }
+
+    public sealed class AttackHitNet
+    {
+        public int Damage { get; set; }
+        public byte Flags { get; set; }
+    }
+
+    /// <summary>Interlude MagicSkillLaunched: the skill fires at hitTime on <see cref="TargetObjectIds"/>.</summary>
+    public sealed class MagicSkillLaunchedNetMsg
+    {
+        public int CasterObjectId { get; set; }
+        public int SkillId { get; set; }
+        public int SkillLevel { get; set; }
+        public int[] TargetObjectIds { get; set; } = System.Array.Empty<int>();
+    }
+
+    /// <summary>Interlude MagicSkillCanceled: stop the cast animation of <see cref="ObjectId"/>.</summary>
+    public sealed class MagicSkillCanceledNetMsg
+    {
+        public int ObjectId { get; set; }
+    }
+
+    /// <summary>
+    /// Interlude PlaySound: <see cref="Type"/> 0 = sound effect, 1 = music; <see cref="File"/> e.g.
+    /// <c>ItemSound.quest_accept</c>; <see cref="ObjectId"/> 0 = not bound to an object (play at the listener).
+    /// </summary>
+    public sealed class PlaySoundNetMsg
+    {
+        public int Type { get; set; }
+        public string File { get; set; } = "";
+        public int ObjectId { get; set; }
+        public int X { get; set; }
+        public int Y { get; set; }
+        public int Z { get; set; }
+        public int DelayMs { get; set; }
     }
 
     public sealed class StatusUpdateNetMsg

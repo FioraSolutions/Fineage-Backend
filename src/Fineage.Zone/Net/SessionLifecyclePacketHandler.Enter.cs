@@ -119,7 +119,7 @@ sealed partial class SessionLifecyclePacketHandler
             await conn.SendAsync(NetOpcode.EntitySpawn, NetCodec.EncodeEntitySpawn(remote), ct: ct)
                 .ConfigureAwait(false);
             // Late join: a peer mid-run / seated is shown in that state, not idle at a stale spot.
-            foreach (var (opcode, payload) in NetEnterWorldProjector.BuildPresenceFollowUps(other, otherId))
+            foreach (var (opcode, payload) in NetEnterWorldProjector.BuildPresenceFollowUps(other, otherId, _world))
                 await conn.SendAsync(opcode, payload, ct: ct).ConfigureAwait(false);
         }
 
@@ -182,7 +182,7 @@ sealed partial class SessionLifecyclePacketHandler
         return new ShortCutInitNetMsg { Shortcuts = rows };
     }
 
-    static AbnormalStatusUpdateNetMsg ToNetAbnormal(AbnormalStatusUpdateMsg update)
+    internal static AbnormalStatusUpdateNetMsg ToNetAbnormal(AbnormalStatusUpdateMsg update)
     {
         var src = update.Effects ?? [];
         var rows = new AbnormalEffectNet[src.Length];

@@ -44,7 +44,7 @@ static class NetEnterWorldProjector
     /// (Mobius <c>Creature.sendInfo</c>): a running pawn gets <c>MoveState</c> toward its live destination,
     /// a sitting player gets <c>ChangeWaitType</c> sitting. The spawn itself carries neither.
     /// </summary>
-    public static List<(ushort Opcode, byte[] Payload)> BuildPresenceFollowUps(ZoneEntity entity, EntityId id)
+    public static List<(ushort Opcode, byte[] Payload)> BuildPresenceFollowUps(ZoneEntity entity, EntityId id, ZoneWorld? world = null)
     {
         ArgumentNullException.ThrowIfNull(entity);
         var frames = new List<(ushort, byte[])>(2);
@@ -77,6 +77,11 @@ static class NetEnterWorldProjector
                 Z = entity.Z
             })));
         }
+        // Mobius Creature.sendInfo → updateAbnormalEffect: a player walking into AOI sees the buffs / debuffs
+        // (visual effects) already on the pawn, exactly what the watchers that were there all along see.
+        if (world != null && world.TryBuildPresenceAbnormal(entity, out var abnormal))
+            frames.Add((NetOpcode.AbnormalStatusUpdate,
+                NetCodec.EncodeAbnormalStatusUpdate(SessionLifecyclePacketHandler.ToNetAbnormal(abnormal))));
         return frames;
     }
 

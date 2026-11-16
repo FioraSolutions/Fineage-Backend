@@ -34,6 +34,8 @@ public sealed partial class ZoneWorld
         if (attacker.Kind == ZoneEntityKind.Player && target.Kind == ZoneEntityKind.Player)
             UpdatePvPStatus(attacker, target, now);
 
+        SendVictimHitLines(attacker, target, hit.Damage, hit.Damage <= 0 ? (byte)(hit.Flags | ZoneCombat.HitFlagMiss) : hit.Flags);
+
         if (hit.Damage <= 0)
         {
             // Miss (Attack carried HitFlagMiss): no HP change / StatusUpdate, but the fight and hate still start.

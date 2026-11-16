@@ -31,6 +31,9 @@ public sealed partial class ZoneWorld
                 Notice(session, CastRules.CastingInterruptedMessage, "Your casting has been interrupted.");
         }
 
+        // Mobius Creature.abortCast → broadcastPacket(MagicSkillCanceled): everyone who saw the cast start stops it.
+        if (NetBridge != null && ActorAudience(player) is { Count: > 0 } watchers)
+            NetBridge.FanoutMagicSkillCanceled(watchers, player.ObjectId);
         ZoneLog.Info($"[cast] abort obj={player.ObjectId} skill={skill} reason={reason}");
         return true;
     }
@@ -116,6 +119,7 @@ public sealed partial class ZoneWorld
         }
 
         ZoneLog.Info($"[skill] effect {hit.SkillId} lv{hit.Level} target={target!.ObjectId}");
+        FanoutSkillLaunched(player, hit.SkillId, hit.Level, target);
         effect(target, now);
     }
 

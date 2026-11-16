@@ -153,6 +153,15 @@ interface IWorldEventPublisher
 
     void FanoutPartyMemberPosition(IReadOnlyList<int> watcherObjectIds, Fineage.Protocol.PartyMemberPositionMsg positions);
 
+    /// <summary>Interlude MagicSkillLaunched at hitTime: caster + everyone who sees the caster.</summary>
+    void FanoutMagicSkillLaunched(IReadOnlyList<int> watcherObjectIds, int casterObjectId, int skillId, int skillLevel, int[] targetObjectIds);
+
+    /// <summary>Interlude MagicSkillCanceled: caster + everyone who sees the caster.</summary>
+    void FanoutMagicSkillCanceled(IReadOnlyList<int> watcherObjectIds, int objectId);
+
+    /// <summary>Interlude PlaySound (quest jingles): sent to the listed players only.</summary>
+    void FanoutPlaySound(IReadOnlyList<int> watcherObjectIds, int type, string file, int objectId, int x, int y, int z, int delayMs);
+
     void FanoutTradeAsk(IReadOnlyList<int> watcherObjectIds, Fineage.Protocol.TradeAskMsg ask);
 
     void FanoutTradeRequestResult(IReadOnlyList<int> watcherObjectIds, Fineage.Protocol.TradeRequestResultMsg result);

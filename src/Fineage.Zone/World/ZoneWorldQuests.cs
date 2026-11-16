@@ -342,7 +342,16 @@ public sealed partial class ZoneWorld
             }
         }
 
-        // outcome.Sounds had no Net frame; the V2 QuestSound notice is retired with the rest of V2.
+        // Mobius QuestState.playSound → player.sendPacket(new PlaySound(file)): the quest owner only, type 0,
+        // not bound to an object. Observers never hear someone else's quest jingle.
+        if (NetBridge != null)
+        {
+            foreach (string sound in outcome.Sounds)
+            {
+                if (!string.IsNullOrWhiteSpace(sound))
+                    NetBridge.FanoutPlaySound([session.ObjectId], 0, sound, 0, 0, 0, 0, 0);
+            }
+        }
 
         if (outcome.Html.Length > 0)
         {

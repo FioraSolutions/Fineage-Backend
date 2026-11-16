@@ -95,13 +95,13 @@ sealed partial class NetWorldEventPublisher : IWorldEventPublisher
             _presence.TrySendCritical(selfObjectId, NetOpcode.EntitySpawn,
                 NetCodec.EncodeEntitySpawn(NetEnterWorldProjector.BuildPresenceSpawn(seen, otherId, _playerSpawnPAtkSpd(seen))));
             // Same ordered (critical) lane as the spawn, so the state never overtakes the pawn it describes.
-            foreach (var (opcode, payload) in NetEnterWorldProjector.BuildPresenceFollowUps(seen, otherId))
+            foreach (var (opcode, payload) in NetEnterWorldProjector.BuildPresenceFollowUps(seen, otherId, _world))
                 _presence.TrySendCritical(selfObjectId, opcode, payload);
             if (seen.Kind == ZoneEntityKind.Player && seen.Session is { InWorld: true })
             {
                 selfSpawn ??= NetCodec.EncodeEntitySpawn(NetEnterWorldProjector.BuildRemoteSpawn(selfEntity, self, _playerSpawnPAtkSpd(selfEntity)));
                 _presence.TrySendCritical(id, NetOpcode.EntitySpawn, selfSpawn);
-                selfFollowUps ??= NetEnterWorldProjector.BuildPresenceFollowUps(selfEntity, self);
+                selfFollowUps ??= NetEnterWorldProjector.BuildPresenceFollowUps(selfEntity, self, _world);
                 foreach (var (opcode, payload) in selfFollowUps)
                     _presence.TrySendCritical(id, opcode, payload);
             }

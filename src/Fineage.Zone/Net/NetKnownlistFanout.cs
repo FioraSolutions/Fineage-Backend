@@ -68,7 +68,7 @@ sealed class NetKnownlistFanout
                 NetEnterWorldProjector.BuildPresenceSpawn(newlySeen, otherId, _playerSpawnPAtkSpd(newlySeen)));
             await conn.SendAsync(NetOpcode.EntitySpawn, spawn, ct: ct).ConfigureAwait(false);
             // Mobius sendInfo: a pawn already running / sitting must not appear idle-standing.
-            foreach (var (opcode, payload) in NetEnterWorldProjector.BuildPresenceFollowUps(newlySeen, otherId))
+            foreach (var (opcode, payload) in NetEnterWorldProjector.BuildPresenceFollowUps(newlySeen, otherId, _world))
                 await conn.SendAsync(opcode, payload, ct: ct).ConfigureAwait(false);
             if (newlySeen.Kind == ZoneEntityKind.Player &&
                 _world.TryGetLivePlayer(zoneSession, out var selfEntity))
@@ -77,7 +77,7 @@ sealed class NetKnownlistFanout
                     NetEnterWorldProjector.BuildRemoteSpawn(selfEntity, self, _playerSpawnPAtkSpd(selfEntity)));
                 await _presence.SendAsync(id, NetOpcode.EntitySpawn, toPeer, ct).ConfigureAwait(false);
                 // The mover just started this leg: the newly reached peer needs it, not only the stayed watchers.
-                foreach (var (opcode, payload) in NetEnterWorldProjector.BuildPresenceFollowUps(selfEntity, self))
+                foreach (var (opcode, payload) in NetEnterWorldProjector.BuildPresenceFollowUps(selfEntity, self, _world))
                     await _presence.SendAsync(id, opcode, payload, ct).ConfigureAwait(false);
             }
         }

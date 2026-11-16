@@ -83,7 +83,7 @@ sealed partial class NetWorldEventPublisher
         var id = _ids.AllocateOrGet(objectId);
         var payload = NetCodec.EncodeEntitySpawn(NetEnterWorldProjector.BuildRemoteSpawn(entity, id, _playerSpawnPAtkSpd(entity)));
         // A re-sent CharInfo rebuilds the remote pawn; keep it sitting / running instead of snapping to idle.
-        var followUps = NetEnterWorldProjector.BuildPresenceFollowUps(entity, id);
+        var followUps = NetEnterWorldProjector.BuildPresenceFollowUps(entity, id, _world);
         foreach (int watcher in watcherObjectIds)
         {
             _presence.TrySendCritical(watcher, NetOpcode.EntitySpawn, payload);
@@ -109,10 +109,43 @@ sealed partial class NetWorldEventPublisher
             AttackerZ = attack.AttackerZ,
             TargetX = attack.TargetX,
             TargetY = attack.TargetY,
-            TargetZ = attack.TargetZ
+            TargetZ = attack.TargetZ,
+            ExtraHits = attack.SecondHit is { } second
+                ? [new AttackHitNet { Damage = second.Damage, Flags = second.Flags }]
+                : []
         });
         foreach (int watcher in watcherObjectIds)
             _presence.TrySend(watcher, NetOpcode.AttackState, payload);
+    }
+
+    void IWorldEventPublisher.FanoutMagicSkillLaunched(IReadOnlyList<int> watcherObjectIds, int casterObjectId, int skillId, int skillLevel, int[] targetObjectIds)
+    {
+        var payload = NetCodec.EncodeMagicSkillLaunched(new MagicSkillLaunchedNetMsg
+        {
+            CasterObjectId = casterObjectId,
+            SkillId = skillId,
+            SkillLevel = skillLevel,
+            TargetObjectIds = targetObjectIds
+        });
+        foreach (int watcher in watcherObjectIds)
+            _presence.TrySend(watcher, NetOpcode.MagicSkillLaunched, payload);
+    }
+
+    void IWorldEventPublisher.FanoutMagicSkillCanceled(IReadOnlyList<int> watcherObjectIds, int objectId)
+    {
+        var payload = NetCodec.EncodeMagicSkillCanceled(new MagicSkillCanceledNetMsg { ObjectId = objectId });
+        foreach (int watcher in watcherObjectIds)
+            _presence.TrySend(watcher, NetOpcode.MagicSkillCanceled, payload);
+    }
+
+    void IWorldEventPublisher.FanoutPlaySound(IReadOnlyList<int> watcherObjectIds, int type, string file, int objectId, int x, int y, int z, int delayMs)
+    {
+        var payload = NetCodec.EncodePlaySound(new PlaySoundNetMsg
+        {
+            Type = type, File = file, ObjectId = objectId, X = x, Y = y, Z = z, DelayMs = delayMs
+        });
+        foreach (int watcher in watcherObjectIds)
+            _presence.TrySend(watcher, NetOpcode.PlaySound, payload);
     }
 
     void IWorldEventPublisher.FanoutStatusUpdate(IReadOnlyList<int> watcherObjectIds, Fineage.Protocol.StatusUpdateMsg status)
