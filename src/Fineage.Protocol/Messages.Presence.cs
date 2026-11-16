@@ -124,6 +124,15 @@ public sealed class UserInfoMsg
     public int PvpKills { get; set; }
     /// <summary>Mobius getPkKills.</summary>
     public int PkKills { get; set; }
+    public string Title { get; set; } = "";
+    public int LargeCrestId { get; set; }
+    public int AllyId { get; set; }
+    public int AllyCrestId { get; set; }
+    /// <summary>Mobius getClanPrivileges bitmask.</summary>
+    public int ClanPrivileges { get; set; }
+    public int PledgeClass { get; set; }
+    public int PledgeType { get; set; }
+    public bool ClanLeader { get; set; }
 }
 
 /// <summary>Opcode <see cref="MsgType.DeleteObject"/> (1007). Left knownlist.</summary>

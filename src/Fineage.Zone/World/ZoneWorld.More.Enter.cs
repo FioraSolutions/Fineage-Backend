@@ -138,6 +138,7 @@ public sealed partial class ZoneWorld
             ObjectId = session.ObjectId,
             Kind = ZoneEntityKind.Player,
             Name = session.Name,
+            Title = stored?.Title ?? "",
             X = spawn.X,
             Y = spawn.Y,
             Z = spawn.Z,

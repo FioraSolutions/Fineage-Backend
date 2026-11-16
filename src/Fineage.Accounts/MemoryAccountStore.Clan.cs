@@ -221,6 +221,7 @@ public sealed partial class MemoryAccountStore
         Skills = clan.Skills is { Count: > 0 }
             ? clan.Skills.ToDictionary(pair => pair.Key, pair => pair.Value)
             : null,
+        Details = clan.Details?.Clone(),
         Members = clan.Members.Select(member => new ClanMemberDto
         {
             CharacterId = member.CharacterId,
@@ -250,5 +251,93 @@ public sealed partial class MemoryAccountStore
         clan.CastleId,
         clan.Skills is { Count: > 0 }
             ? new Dictionary<int, int>(clan.Skills)
-            : null);
+            : null,
+        clan.Details?.Clone());
+
+    public CrestSave? InsertCrest(int kind, byte[] data)
+    {
+        ArgumentNullException.ThrowIfNull(data);
+        lock (_gate)
+        {
+            _data.Crests ??= [];
+            if (_data.NextCrestId < 1)
+                _data.NextCrestId = 1;
+            int id = _data.NextCrestId++;
+            _data.Crests.Add(new CrestDto { Id = id, Kind = kind, Data = data.ToArray() });
+            Save();
+            return new CrestSave(id, kind, data.ToArray());
+        }
+    }
+
+    public CrestSave? FindCrest(int crestId)
+    {
+        lock (_gate)
+        {
+            var dto = _data.Crests?.FirstOrDefault(c => c.Id == crestId);
+            return dto == null ? null : new CrestSave(dto.Id, dto.Kind, dto.Data.ToArray());
+        }
+    }
+
+    public IReadOnlyList<CrestSave> ListCrests()
+    {
+        lock (_gate)
+            return (_data.Crests ?? []).Select(dto => new CrestSave(dto.Id, dto.Kind, dto.Data.ToArray())).ToArray();
+    }
+
+    public bool DeleteCrest(int crestId)
+    {
+        lock (_gate)
+        {
+            int removed = _data.Crests?.RemoveAll(c => c.Id == crestId) ?? 0;
+            if (removed > 0)
+                Save();
+            return removed > 0;
+        }
+    }
+
+    public IReadOnlyList<ClanHallSave> ListClanHalls()
+    {
+        lock (_gate)
+            return (_data.ClanHalls ?? []).Select(CloneHall).ToArray();
+    }
+
+    public bool SaveClanHalls(IReadOnlyList<ClanHallSave> halls)
+    {
+        ArgumentNullException.ThrowIfNull(halls);
+        lock (_gate)
+        {
+            _data.ClanHalls = halls.Select(CloneHall).ToList();
+            Save();
+            return true;
+        }
+    }
+
+    static ClanHallSave CloneHall(ClanHallSave hall) => new()
+    {
+        Id = hall.Id,
+        OwnerClanId = hall.OwnerClanId,
+        PaidUntilUnixMs = hall.PaidUntilUnixMs,
+        AuctionEndUnixMs = hall.AuctionEndUnixMs,
+        StartingBid = hall.StartingBid,
+        Bids = hall.Bids.Select(bid => new ClanHallBidSave
+        {
+            ClanId = bid.ClanId,
+            BidderName = bid.BidderName,
+            Amount = bid.Amount,
+            TimeUnixMs = bid.TimeUnixMs
+        }).ToList()
+    };
+
+    public bool TrySetCharacterTitle(string account, int characterId, string title)
+    {
+        lock (_gate)
+        {
+            var character = FindCharacter(account, characterId);
+            if (character == null)
+                return false;
+            character.Title = title ?? "";
+            Save();
+            return true;
+        }
+    }
 }

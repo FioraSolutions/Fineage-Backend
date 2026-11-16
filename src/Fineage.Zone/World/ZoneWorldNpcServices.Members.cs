@@ -14,7 +14,8 @@ public sealed partial class ZoneWorld
     {
         if (!TryServicePair(session, npcObjectId, out var player, out var npc, out var error))
             return error;
-        if (player.Inventory == null || player.Warehouse == null)
+        var wh = ActiveWarehouse(player);
+        if (player.Inventory == null || wh == null)
             return "world";
         if (WarehouseSessionRules.NpcWindowError(IsWarehouse(npc)) is { } withdrawNpcError)
         {
@@ -29,10 +30,13 @@ public sealed partial class ZoneWorld
             return null;
         }
 
+        if (ClanWithdrawBlock(session, player) is { } clanWithdrawError)
+            return clanWithdrawError;
+
         if (!TryReadLines(lines, out var request, out error))
             return error;
 
-        var planned = new List<(WarehouseStack Stack, int Count, bool Stackable)>();
+        var planned = new List<(Fineage.Game.Services.WarehouseStack Stack, int Count, bool Stackable)>();
         var seen = new HashSet<int>();
         int slots = 0;
         int incomingWeight = 0;
@@ -40,7 +44,7 @@ public sealed partial class ZoneWorld
         {
             if (WarehouseSessionRules.LineDuplicateError(!seen.Add(line.ObjectId)) is { } withdrawDup)
                 return withdrawDup;
-            var stack = player.Warehouse.Find(line.ObjectId);
+            var stack = wh.Find(line.ObjectId);
             if (stack == null || stack.Count < line.Count)
                 return "bad_request";
             var template = _game.Items.Get(stack.ItemId);
@@ -67,7 +71,7 @@ public sealed partial class ZoneWorld
         var changes = new List<InventoryUpdateEntryMsg>();
         foreach (var (stack, count, stackable) in planned)
         {
-            if (!player.Warehouse.TryTake(stack.ObjectId, count, out _, out _))
+            if (!wh.TryTake(stack.ObjectId, count, out _, out _))
                 return "bad_request";
             bool existed = stackable && player.Inventory.FindByItemId(stack.ItemId) != null;
             var added = player.Inventory.Add(stack.ItemId, count, stack.EnchantLevel);
@@ -76,7 +80,7 @@ public sealed partial class ZoneWorld
 
         FanInventory(session, Collapse(changes));
         SaveInventory(session, player.Inventory);
-        SaveWarehouse(session, player);
+        SaveActiveWarehouse(session, player);
         Notice(session, NpcServiceProtocol.TransactionComplete, NpcServiceProtocol.TransactionCompleteText);
         return null;
     }

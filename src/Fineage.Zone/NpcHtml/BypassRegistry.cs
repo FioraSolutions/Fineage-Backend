@@ -69,8 +69,6 @@ public sealed class BypassRegistry
         registry.Register(new WarehouseBypassHandler());
         registry.Register(new StubBypassHandler(
             "Warehouse",
-            "DepositC",
-            "WithdrawC",
             "DepositF",
             "WithdrawF",
             "package_deposit",

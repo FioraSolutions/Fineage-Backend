@@ -25,7 +25,7 @@ sealed partial class ZoneEntity
     public int ObjectId { get; init; }
     public ZoneEntityKind Kind { get; init; }
     public string Name { get; init; } = "";
-    public string Title { get; init; } = "";
+    public string Title { get; set; } = "";
     /// <summary>NPC template payload; null until first template access (#353 composition).</summary>
     public ZoneNpcTemplatePayload? NpcTemplate { get; set; }
 

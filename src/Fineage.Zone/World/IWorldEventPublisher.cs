@@ -137,6 +137,28 @@ interface IWorldEventPublisher
 
     void FanoutPledgeMemberList(IReadOnlyList<int> watcherObjectIds, Fineage.Protocol.PledgeMemberListMsg list);
 
+    /// <summary>Mobius PledgeCrest / ExPledgeCrestLarge / AllyCrest reply. Called under the ZoneWorld gate.</summary>
+    void FanoutCrestData(IReadOnlyList<int> watcherObjectIds, Fineage.Net.Contract.CrestDataNetMsg crest);
+
+    /// <summary>Mobius PledgeReceiveWarList (both tabs). Called under the ZoneWorld gate.</summary>
+    void FanoutPledgeWarList(IReadOnlyList<int> watcherObjectIds, Fineage.Net.Contract.PledgeWarListNetMsg wars);
+
+    /// <summary>Mobius RelationChanged: per-viewer relation bits for one player. Called under the ZoneWorld gate.</summary>
+    void FanoutRelationChanged(IReadOnlyList<int> watcherObjectIds, Fineage.Net.Contract.RelationChangedNetMsg relation);
+
+    /// <summary>Mobius PledgeInfo (clan name/crest lookup by id). Called under the ZoneWorld gate.</summary>
+    void FanoutPledgeInfo(IReadOnlyList<int> watcherObjectIds, Fineage.Net.Contract.PledgeInfoNetMsg info);
+
+    /// <summary>Mobius AllianceInfo. Called under the ZoneWorld gate.</summary>
+    void FanoutAllyInfo(IReadOnlyList<int> watcherObjectIds, Fineage.Net.Contract.AllyInfoNetMsg info);
+
+    /// <summary>Mobius AskJoinAlly. Called under the ZoneWorld gate.</summary>
+    void FanoutAllyAskJoin(IReadOnlyList<int> watcherObjectIds, Fineage.Net.Contract.AllyAskJoinNetMsg ask);
+
+    /// <summary>Clan hall auction list (Mobius AuctionManager pages, as data). Called under the ZoneWorld gate.</summary>
+    void FanoutClanHallList(IReadOnlyList<int> watcherObjectIds, Fineage.Net.Contract.ClanHallListNetMsg halls);
+
+
     void FanoutClanAskJoin(IReadOnlyList<int> watcherObjectIds, Fineage.Protocol.ClanAskJoinMsg ask);
 
     void FanoutClanJoinResult(IReadOnlyList<int> watcherObjectIds, Fineage.Protocol.ClanJoinResultMsg result);

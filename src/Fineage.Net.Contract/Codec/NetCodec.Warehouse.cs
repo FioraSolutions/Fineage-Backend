@@ -16,12 +16,13 @@ namespace Fineage.Net.Contract
             w.WriteInt32(m.SlotsMax);
             w.WriteInt32(m.Adena);
             WriteItemListEntries(w, m.Items);
+            w.WriteInt32(m.WarehouseType);
         });
 
         public static WarehouseDepositListNetMsg DecodeWarehouseDepositList(ReadOnlySpan<byte> p)
         {
             var r = new Reader(p);
-            return new WarehouseDepositListNetMsg
+            var m = new WarehouseDepositListNetMsg
             {
                 NpcObjectId = r.ReadInt32(),
                 FeePerLine = r.ReadInt32(),
@@ -30,6 +31,9 @@ namespace Fineage.Net.Contract
                 Adena = r.ReadInt32(),
                 Items = ReadItemListEntries(ref r)
             };
+            if (r.Remaining >= 4)
+                m.WarehouseType = r.ReadInt32();
+            return m;
         }
 
         public static byte[] EncodeWarehouseWithdrawList(WarehouseWithdrawListNetMsg m) => Write(w =>
@@ -42,12 +46,13 @@ namespace Fineage.Net.Contract
             w.WriteInt32(m.CurrentWeight);
             w.WriteInt32(m.MaxWeight);
             WriteItemListEntries(w, m.Items);
+            w.WriteInt32(m.WarehouseType);
         });
 
         public static WarehouseWithdrawListNetMsg DecodeWarehouseWithdrawList(ReadOnlySpan<byte> p)
         {
             var r = new Reader(p);
-            return new WarehouseWithdrawListNetMsg
+            var m = new WarehouseWithdrawListNetMsg
             {
                 NpcObjectId = r.ReadInt32(),
                 SlotsUsed = r.ReadInt32(),
@@ -58,6 +63,9 @@ namespace Fineage.Net.Contract
                 MaxWeight = r.ReadInt32(),
                 Items = ReadItemListEntries(ref r)
             };
+            if (r.Remaining >= 4)
+                m.WarehouseType = r.ReadInt32();
+            return m;
         }
 
         public static byte[] EncodeWarehouseDepositRequest(WarehouseDepositRequestNetMsg m) => Write(w =>

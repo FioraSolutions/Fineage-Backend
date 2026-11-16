@@ -65,6 +65,14 @@ namespace Fineage.Net.Contract
         /// Absent on old peers — decode fills <see cref="MaxHp"/> (full) so select-target StatusUpdate is not a false hit.
         /// </summary>
         public int CurHp { get; set; }
+        // Optional tail (Block C): title and clan/ally badges (Mobius CharInfo).
+        public string Title { get; set; } = "";
+        public int ClanId { get; set; }
+        public int ClanCrestId { get; set; }
+        public int AllyId { get; set; }
+        public int AllyCrestId { get; set; }
+        public int LargeCrestId { get; set; }
+        public int PledgeClass { get; set; }
     }
 
     public sealed class PlayerStatsMsg
@@ -176,5 +184,15 @@ namespace Fineage.Net.Contract
         public int PvpKills { get; set; }
         /// <summary>Mobius <c>getPkKills</c> (status window). Optional wire tail after <see cref="PvpKills"/>.</summary>
         public int PkKills { get; set; }
+        // Optional tail (Block C): Mobius UserInfo title / crests / privileges / pledge class.
+        public string Title { get; set; } = "";
+        public int ClanCrestId { get; set; }
+        public int LargeCrestId { get; set; }
+        public int AllyId { get; set; }
+        public int AllyCrestId { get; set; }
+        public int ClanPrivileges { get; set; }
+        public int PledgeClass { get; set; }
+        public int PledgeType { get; set; }
+        public bool ClanLeader { get; set; }
     }
 }

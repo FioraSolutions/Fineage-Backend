@@ -1,0 +1,347 @@
+{
+ "source": "L2J Mobius CT_0 Interlude db_installer/sql/game/clanhall.sql (auctionable halls, datapack values); starting bids from ClanHallAuctionManager init rows",
+ "halls": [
+  {
+   "id": 22,
+   "name": "Moonstone Hall",
+   "lease": 500000,
+   "description": "Clan hall located in the Town of Gludio",
+   "location": "Gludio",
+   "grade": 2,
+   "startingBid": 20000000
+  },
+  {
+   "id": 23,
+   "name": "Onyx Hall",
+   "lease": 500000,
+   "description": "Clan hall located in the Town of Gludio",
+   "location": "Gludio",
+   "grade": 2,
+   "startingBid": 20000000
+  },
+  {
+   "id": 24,
+   "name": "Topaz Hall",
+   "lease": 500000,
+   "description": "Clan hall located in the Town of Gludio",
+   "location": "Gludio",
+   "grade": 2,
+   "startingBid": 20000000
+  },
+  {
+   "id": 25,
+   "name": "Ruby Hall",
+   "lease": 500000,
+   "description": "Clan hall located in the Town of Gludio",
+   "location": "Gludio",
+   "grade": 2,
+   "startingBid": 20000000
+  },
+  {
+   "id": 26,
+   "name": "Crystal Hall",
+   "lease": 500000,
+   "description": "Clan hall located in Gludin Village",
+   "location": "Gludin",
+   "grade": 2,
+   "startingBid": 20000000
+  },
+  {
+   "id": 27,
+   "name": "Onyx Hall",
+   "lease": 500000,
+   "description": "Clan hall located in Gludin Village",
+   "location": "Gludin",
+   "grade": 2,
+   "startingBid": 20000000
+  },
+  {
+   "id": 28,
+   "name": "Sapphire Hall",
+   "lease": 500000,
+   "description": "Clan hall located in Gludin Village",
+   "location": "Gludin",
+   "grade": 2,
+   "startingBid": 20000000
+  },
+  {
+   "id": 29,
+   "name": "Moonstone Hall",
+   "lease": 500000,
+   "description": "Clan hall located in Gludin Village",
+   "location": "Gludin",
+   "grade": 2,
+   "startingBid": 20000000
+  },
+  {
+   "id": 30,
+   "name": "Emerald Hall",
+   "lease": 500000,
+   "description": "Clan hall located in Gludin Village",
+   "location": "Gludin",
+   "grade": 2,
+   "startingBid": 20000000
+  },
+  {
+   "id": 31,
+   "name": "The Atramental Barracks",
+   "lease": 200000,
+   "description": "Clan hall located in the Town of Dion",
+   "location": "Dion",
+   "grade": 1,
+   "startingBid": 8000000
+  },
+  {
+   "id": 32,
+   "name": "The Scarlet Barracks",
+   "lease": 200000,
+   "description": "Clan hall located in the Town of Dion",
+   "location": "Dion",
+   "grade": 1,
+   "startingBid": 8000000
+  },
+  {
+   "id": 33,
+   "name": "The Viridian Barracks",
+   "lease": 200000,
+   "description": "Clan hall located in the Town of Dion",
+   "location": "Dion",
+   "grade": 1,
+   "startingBid": 8000000
+  },
+  {
+   "id": 36,
+   "name": "The Golden Chamber",
+   "lease": 1000000,
+   "description": "Clan hall located in the Town of Aden",
+   "location": "Aden",
+   "grade": 3,
+   "startingBid": 50000000
+  },
+  {
+   "id": 37,
+   "name": "The Silver Chamber",
+   "lease": 1000000,
+   "description": "Clan hall located in the Town of Aden",
+   "location": "Aden",
+   "grade": 3,
+   "startingBid": 50000000
+  },
+  {
+   "id": 38,
+   "name": "The Mithril Chamber",
+   "lease": 1000000,
+   "description": "Clan hall located in the Town of Aden",
+   "location": "Aden",
+   "grade": 3,
+   "startingBid": 50000000
+  },
+  {
+   "id": 39,
+   "name": "Silver Manor",
+   "lease": 1000000,
+   "description": "Clan hall located in the Town of Aden",
+   "location": "Aden",
+   "grade": 3,
+   "startingBid": 50000000
+  },
+  {
+   "id": 40,
+   "name": "Gold Manor",
+   "lease": 1000000,
+   "description": "Clan hall located in the Town of Aden",
+   "location": "Aden",
+   "grade": 3,
+   "startingBid": 50000000
+  },
+  {
+   "id": 41,
+   "name": "The Bronze Chamber",
+   "lease": 1000000,
+   "description": "Clan hall located in the Town of Aden",
+   "location": "Aden",
+   "grade": 3,
+   "startingBid": 50000000
+  },
+  {
+   "id": 42,
+   "name": "The Golden Chamber",
+   "lease": 1000000,
+   "description": "Clan hall located in the Town of Giran",
+   "location": "Giran",
+   "grade": 3,
+   "startingBid": 50000000
+  },
+  {
+   "id": 43,
+   "name": "The Silver Chamber",
+   "lease": 1000000,
+   "description": "Clan hall located in the Town of Giran",
+   "location": "Giran",
+   "grade": 3,
+   "startingBid": 50000000
+  },
+  {
+   "id": 44,
+   "name": "The Mithril Chamber",
+   "lease": 1000000,
+   "description": "Clan hall located in the Town of Giran",
+   "location": "Giran",
+   "grade": 3,
+   "startingBid": 50000000
+  },
+  {
+   "id": 45,
+   "name": "The Bronze Chamber",
+   "lease": 1000000,
+   "description": "Clan hall located in the Town of Giran",
+   "location": "Giran",
+   "grade": 3,
+   "startingBid": 50000000
+  },
+  {
+   "id": 46,
+   "name": "Silver Manor",
+   "lease": 1000000,
+   "description": "Clan hall located in the Town of Giran",
+   "location": "Giran",
+   "grade": 3,
+   "startingBid": 50000000
+  },
+  {
+   "id": 47,
+   "name": "Moonstone Hall",
+   "lease": 1000000,
+   "description": "Clan hall located in the Town of Goddard",
+   "location": "Goddard",
+   "grade": 3,
+   "startingBid": 50000000
+  },
+  {
+   "id": 48,
+   "name": "Onyx Hall",
+   "lease": 1000000,
+   "description": "Clan hall located in the Town of Goddard",
+   "location": "Goddard",
+   "grade": 3,
+   "startingBid": 50000000
+  },
+  {
+   "id": 49,
+   "name": "Emerald Hall",
+   "lease": 1000000,
+   "description": "Clan hall located in the Town of Goddard",
+   "location": "Goddard",
+   "grade": 3,
+   "startingBid": 50000000
+  },
+  {
+   "id": 50,
+   "name": "Sapphire Hall",
+   "lease": 1000000,
+   "description": "Clan hall located in the Town of Goddard",
+   "location": "Goddard",
+   "grade": 3,
+   "startingBid": 50000000
+  },
+  {
+   "id": 51,
+   "name": "Mont Chamber",
+   "lease": 1000000,
+   "description": "An upscale Clan hall located in the Rune Township",
+   "location": "Rune",
+   "grade": 3,
+   "startingBid": 50000000
+  },
+  {
+   "id": 52,
+   "name": "Astaire Chamber",
+   "lease": 1000000,
+   "description": "An upscale Clan hall located in the Rune Township",
+   "location": "Rune",
+   "grade": 3,
+   "startingBid": 50000000
+  },
+  {
+   "id": 53,
+   "name": "Aria Chamber",
+   "lease": 1000000,
+   "description": "An upscale Clan hall located in the Rune Township",
+   "location": "Rune",
+   "grade": 3,
+   "startingBid": 50000000
+  },
+  {
+   "id": 54,
+   "name": "Yiana Chamber",
+   "lease": 1000000,
+   "description": "An upscale Clan hall located in the Rune Township",
+   "location": "Rune",
+   "grade": 3,
+   "startingBid": 50000000
+  },
+  {
+   "id": 55,
+   "name": "Roien Chamber",
+   "lease": 1000000,
+   "description": "An upscale Clan hall located in the Rune Township",
+   "location": "Rune",
+   "grade": 3,
+   "startingBid": 50000000
+  },
+  {
+   "id": 56,
+   "name": "Luna Chamber",
+   "lease": 1000000,
+   "description": "An upscale Clan hall located in the Rune Township",
+   "location": "Rune",
+   "grade": 3,
+   "startingBid": 50000000
+  },
+  {
+   "id": 57,
+   "name": "Traban Chamber",
+   "lease": 1000000,
+   "description": "An upscale Clan hall located in the Rune Township",
+   "location": "Rune",
+   "grade": 3,
+   "startingBid": 50000000
+  },
+  {
+   "id": 58,
+   "name": "Eisen Hall",
+   "lease": 500000,
+   "description": "Clan hall located in the Town of Schuttgart",
+   "location": "Schuttgart",
+   "grade": 2,
+   "startingBid": 20000000
+  },
+  {
+   "id": 59,
+   "name": "Heavy Metal Hall",
+   "lease": 500000,
+   "description": "Clan hall located in the Town of Schuttgart",
+   "location": "Schuttgart",
+   "grade": 2,
+   "startingBid": 20000000
+  },
+  {
+   "id": 60,
+   "name": "Molten Ore Hall",
+   "lease": 500000,
+   "description": "Clan hall located in the Town of Schuttgart",
+   "location": "Schuttgart",
+   "grade": 2,
+   "startingBid": 20000000
+  },
+  {
+   "id": 61,
+   "name": "Titan Hall",
+   "lease": 500000,
+   "description": "Clan hall located in the Town of Schuttgart",
+   "location": "Schuttgart",
+   "grade": 2,
+   "startingBid": 20000000
+  }
+ ]
+}

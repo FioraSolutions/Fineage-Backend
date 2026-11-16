@@ -34,6 +34,13 @@ namespace Fineage.Net.Contract
             w.WriteInt32(m.Karma);
             w.WriteByte(m.PvpFlag);
             w.WriteInt32(m.CurHp);
+            w.WriteString(m.Title ?? "");
+            w.WriteInt32(m.ClanId);
+            w.WriteInt32(m.ClanCrestId);
+            w.WriteInt32(m.AllyId);
+            w.WriteInt32(m.AllyCrestId);
+            w.WriteInt32(m.LargeCrestId);
+            w.WriteInt32(m.PledgeClass);
         });
 
         public static EntitySpawnMsg DecodeEntitySpawn(ReadOnlySpan<byte> p)
@@ -80,6 +87,16 @@ namespace Fineage.Net.Contract
                 msg.CurHp = 0;
             else if (msg.MaxHp > 0)
                 msg.CurHp = msg.MaxHp;
+            if (r.Remaining > 0)
+            {
+                msg.Title = r.ReadString();
+                msg.ClanId = r.ReadInt32();
+                msg.ClanCrestId = r.ReadInt32();
+                msg.AllyId = r.ReadInt32();
+                msg.AllyCrestId = r.ReadInt32();
+                msg.LargeCrestId = r.ReadInt32();
+                msg.PledgeClass = r.ReadInt32();
+            }
             return msg;
         }
 
@@ -138,6 +155,15 @@ namespace Fineage.Net.Contract
             w.WriteByte(m.PvpFlag);
             w.WriteInt32(m.PvpKills);
             w.WriteInt32(m.PkKills);
+            w.WriteString(m.Title ?? "");
+            w.WriteInt32(m.ClanCrestId);
+            w.WriteInt32(m.LargeCrestId);
+            w.WriteInt32(m.AllyId);
+            w.WriteInt32(m.AllyCrestId);
+            w.WriteInt32(m.ClanPrivileges);
+            w.WriteInt32(m.PledgeClass);
+            w.WriteInt32(m.PledgeType);
+            w.WriteByte(m.ClanLeader ? (byte)1 : (byte)0);
         });
 
         public static UserInfoNetMsg DecodeUserInfo(ReadOnlySpan<byte> p)
@@ -202,6 +228,18 @@ namespace Fineage.Net.Contract
             {
                 m.PvpKills = r.ReadInt32();
                 m.PkKills = r.ReadInt32();
+            }
+            if (r.Remaining > 0)
+            {
+                m.Title = r.ReadString();
+                m.ClanCrestId = r.ReadInt32();
+                m.LargeCrestId = r.ReadInt32();
+                m.AllyId = r.ReadInt32();
+                m.AllyCrestId = r.ReadInt32();
+                m.ClanPrivileges = r.ReadInt32();
+                m.PledgeClass = r.ReadInt32();
+                m.PledgeType = r.ReadInt32();
+                m.ClanLeader = r.ReadByte() != 0;
             }
             return m;
         }

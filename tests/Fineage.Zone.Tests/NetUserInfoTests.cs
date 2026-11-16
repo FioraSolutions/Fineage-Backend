@@ -27,6 +27,9 @@ public sealed class NetUserInfoTests
         Assert.Equivalent(msg, back, strict: true);
     }
 
+    /// <summary>Block C spawn tail with an empty title: u16 length + clan, crest, ally, ally crest, large crest, pledge class.</summary>
+    const int ClanSpawnTail = 2 + 6 * 4;
+
     [Fact]
     public void EntitySpawn_paperdoll_is_optional_trailing_field()
     {
@@ -35,8 +38,9 @@ public sealed class NetUserInfoTests
         Assert.Equal(new[] { 0, 1101, 177 }, NetCodec.DecodeEntitySpawn(wire).Paperdoll);
 
         // Older peers stop after the Attackable byte: decode must still work with an empty paperdoll.
-        // Tail: u16 length + 3 ints + Dead + Level + MaxHp + PAtkSpd + Karma + PvpFlag + CurHp.
-        int tailBytes = 2 + 3 * 4 + 1 + 4 + 4 + 4 + 4 + 1 + 4;
+        // Tail: u16 length + 3 ints + Dead + Level + MaxHp + PAtkSpd + Karma + PvpFlag + CurHp
+        // + clan tail (title u16 + 6 ints).
+        int tailBytes = 2 + 3 * 4 + 1 + 4 + 4 + 4 + 4 + 1 + 4 + ClanSpawnTail;
         var old = NetCodec.DecodeEntitySpawn(wire.AsSpan(0, wire.Length - tailBytes));
         Assert.Empty(old.Paperdoll);
         Assert.Equal("P", old.Name);
@@ -60,9 +64,9 @@ public sealed class NetUserInfoTests
         Assert.Equal(400, decoded.MaxHp);
         Assert.Equal(120, decoded.CurHp);
 
-        // Strip CurHp tail (4 bytes): old frame still decodes, CurHp falls back to MaxHp.
+        // Strip CurHp + clan tail: old frame still decodes, CurHp falls back to MaxHp.
         byte[] wire = NetCodec.EncodeEntitySpawn(spawn);
-        var withoutCur = NetCodec.DecodeEntitySpawn(wire.AsSpan(0, wire.Length - 4));
+        var withoutCur = NetCodec.DecodeEntitySpawn(wire.AsSpan(0, wire.Length - 4 - ClanSpawnTail));
         Assert.Equal(400, withoutCur.MaxHp);
         Assert.Equal(400, withoutCur.CurHp);
     }

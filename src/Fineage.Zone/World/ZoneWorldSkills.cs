@@ -87,6 +87,15 @@ public sealed partial class ZoneWorld
                 return "world";
             if (player.Dead)
                 return InventoryProtocol.Dead;
+            if (skillType == AcquireSkillTypePledge)
+            {
+                if (informing)
+                {
+                    PublishPledgeSkillInfo(player, skillId, level);
+                    return null;
+                }
+                return LearnPledgeSkill(session, player, skillId, level);
+            }
             if (informing)
             {
                 PublishAcquireSkillInfo(session, player, skillId, level, skillType);

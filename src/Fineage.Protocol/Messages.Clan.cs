@@ -69,6 +69,20 @@ public sealed class PledgeStatusChangedMsg
     public int MemberCount { get; set; }
     public long DissolvingExpiryUnixMs { get; set; }
     public long CharPenaltyExpiryUnixMs { get; set; }
+    public int Reputation { get; set; }
+    public int LargeCrestId { get; set; }
+    public int AllyId { get; set; }
+    public string AllyName { get; set; } = "";
+    public int AllyCrestId { get; set; }
+    public int CastleId { get; set; }
+    public int HallId { get; set; }
+    public bool AtWar { get; set; }
+    public int NewLeaderObjectId { get; set; }
+    /// <summary>(type, name, leader object id) per sub-unit.</summary>
+    public (int Type, string Name, int LeaderObjectId)[] SubPledges { get; set; } = [];
+    /// <summary>Privilege masks for grades 1–9.</summary>
+    public int[] RankPrivileges { get; set; } = [];
+    public (int SkillId, int Level)[] Skills { get; set; } = [];
 }
 
 /// <summary>One row of <see cref="PledgeMemberListMsg"/>.</summary>
@@ -80,6 +94,10 @@ public sealed class PledgeMemberEntryMsg
     public int Level { get; set; }
     public bool Online { get; set; }
     public int PledgeType { get; set; }
+    public int PowerGrade { get; set; }
+    public int SponsorObjectId { get; set; }
+    public int ApprenticeObjectId { get; set; }
+    public int PledgeClass { get; set; }
 }
 
 /// <summary>Opcode <see cref="MsgType.PledgeMemberList"/> (1052).</summary>

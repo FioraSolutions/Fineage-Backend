@@ -26,8 +26,9 @@ public sealed partial class ZoneWorld
         {
             NpcObjectId = npc.ObjectId,
             FeePerLine = WarehouseRules.DepositFeePerLine,
-            SlotsUsed = player.Warehouse?.SlotCount ?? 0,
-            SlotsMax = WarehouseRules.WarehouseSlots(player.Race),
+            SlotsUsed = ActiveWarehouse(player)?.SlotCount ?? 0,
+            SlotsMax = ActiveWarehouseSlots(player),
+            WarehouseType = player.ClanWarehouseOpen ? PledgeProtocol.WarehouseTypeClan : PledgeProtocol.WarehouseTypePrivate,
             Adena = player.Inventory?.CountOf(WarehouseRules.AdenaItemId) ?? 0,
             Items = items.ToArray()
         };
@@ -38,17 +39,18 @@ public sealed partial class ZoneWorld
     void SendWithdrawList(ZoneSession session, ZoneEntity player, ZoneEntity npc)
     {
         var items = new List<ItemListEntryMsg>();
-        if (player.Warehouse != null)
+        if (ActiveWarehouse(player) is { } source)
         {
-            foreach (var stack in player.Warehouse.Items)
+            foreach (var stack in source.Items)
                 items.Add(StackEntry(stack));
         }
 
         var list = new WarehouseWithdrawListMsg
         {
             NpcObjectId = npc.ObjectId,
-            SlotsUsed = player.Warehouse?.SlotCount ?? 0,
-            SlotsMax = WarehouseRules.WarehouseSlots(player.Race),
+            SlotsUsed = ActiveWarehouse(player)?.SlotCount ?? 0,
+            SlotsMax = ActiveWarehouseSlots(player),
+            WarehouseType = player.ClanWarehouseOpen ? PledgeProtocol.WarehouseTypeClan : PledgeProtocol.WarehouseTypePrivate,
             InventorySlotsUsed = player.Inventory?.Items.Count ?? 0,
             InventorySlotsMax = WarehouseRules.InventorySlots(player.Race),
             CurrentWeight = player.Inventory == null ? 0 : _weights.Load(player.Inventory.Items.Select(item => (item.ItemId, item.Count))),

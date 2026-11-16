@@ -15,6 +15,9 @@ public sealed partial class MemoryAccountStore
         public List<ClanDto> Clans { get; set; } = [];
         public List<CastleDto> Castles { get; set; } = [];
         public List<SiegeClanDto> SiegeClans { get; set; } = [];
+        public int NextCrestId { get; set; } = 1;
+        public List<CrestDto> Crests { get; set; } = [];
+        public List<ClanHallSave> ClanHalls { get; set; } = [];
     }
 
     sealed class AccountDto
@@ -128,7 +131,15 @@ public sealed partial class MemoryAccountStore
         public long CharPenaltyExpiryUnixMs { get; set; }
         public int CastleId { get; set; }
         public Dictionary<int, int>? Skills { get; set; }
+        public ClanDetails? Details { get; set; }
         public List<ClanMemberDto> Members { get; set; } = [];
+    }
+
+    sealed class CrestDto
+    {
+        public int Id { get; set; }
+        public int Kind { get; set; }
+        public byte[] Data { get; set; } = [];
     }
 
     sealed class CastleDto

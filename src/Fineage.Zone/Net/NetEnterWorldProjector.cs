@@ -156,7 +156,14 @@ static class NetEnterWorldProjector
             PAtkSpd = pAtkSpd,
             Karma = entity.Karma,
             PvpFlag = ZoneWorld.PvpFlagWire(entity),
-            CurHp = entity.CurHp
+            CurHp = entity.CurHp,
+            Title = entity.Title ?? "",
+            ClanId = entity.ClanId,
+            ClanCrestId = entity.ClanCrestId,
+            AllyId = entity.AllyId,
+            AllyCrestId = entity.AllyCrestId,
+            LargeCrestId = entity.LargeCrestId,
+            PledgeClass = entity.PledgeClass
         };
 
     static Fineage.Net.Contract.PlayerStatsMsg BuildStats(ZoneEntity entity, EntityId self, int maxCp) =>

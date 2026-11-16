@@ -30,6 +30,9 @@ public sealed partial class ZoneWorld
         if (string.Equals(script, NewbieTravelToken.Script, StringComparison.OrdinalIgnoreCase) && _newbieBuffs.TravelToken is { } travel)
             return NewbieTravel(session, player, npc, travel, evt);
 
+        if (TryClanMasterScript(session, player, npc, script, evt))
+            return null;
+
         var masters = VillageMasters;
         if (!masters.Knows(script))
         {
@@ -133,6 +136,7 @@ public sealed partial class ZoneWorld
         int previous = player.ClassId;
         player.ClassId = change.ClassId;
         session.ChangeClass(change.ClassId);
+        GraduateFromAcademy(session, player);
         player.BaseRunSpeed = template.RunSpeed;
         player.BaseWalkSpeed = template.WalkSpeed;
         player.Dex = template.Dex;

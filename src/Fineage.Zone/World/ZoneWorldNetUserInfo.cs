@@ -90,7 +90,16 @@ public sealed partial class ZoneWorld
             Karma = e.Karma,
             PvpFlag = PvpFlagWire(e),
             PvpKills = e.PvpKills,
-            PkKills = e.PkKills
+            PkKills = e.PkKills,
+            Title = e.Title ?? "",
+            ClanCrestId = e.ClanCrestId,
+            LargeCrestId = e.LargeCrestId,
+            AllyId = e.AllyId,
+            AllyCrestId = e.AllyCrestId,
+            ClanPrivileges = e.ClanPrivileges,
+            PledgeClass = e.PledgeClass,
+            PledgeType = e.PledgeType,
+            ClanLeader = e.ClanLeader
         };
     }
 
