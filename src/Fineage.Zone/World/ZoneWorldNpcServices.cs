@@ -128,8 +128,24 @@ public sealed partial class ZoneWorld
         return null;
     }
 
+    /// <summary>
+    /// Mobius <c>AltKarmaPlayerCanUseGK = False</c> (Player.ini default): a gatekeeper refuses anyone with karma.
+    /// Shops, warehouses, trade and Scroll of Escape stay open (their AltKarmaPlayerCan* defaults are True).
+    /// </summary>
+    bool KarmaGkRefused(ZoneSession session, ZoneEntity player, ZoneEntity npc, bool html)
+    {
+        if (player.Karma <= 0)
+            return false;
+        Notice(session, NpcServiceProtocol.KarmaTeleportRefused, NpcServiceProtocol.KarmaTeleportRefusedText);
+        if (html)
+            SendHtml(session, player, npc, "<html><body>%npcname%:<br>" + NpcServiceProtocol.KarmaTeleportRefusedText + "</body></html>");
+        return true;
+    }
+
     string? ShowTeleportList(ZoneSession session, ZoneEntity player, ZoneEntity npc, string listName)
     {
+        if (KarmaGkRefused(session, player, npc, html: true))
+            return null;
         var list = _teleports.Find(npc.NpcId, string.IsNullOrWhiteSpace(listName) ? TeleportRules.Normal : listName);
         if (list == null)
         {
@@ -191,6 +207,8 @@ public sealed partial class ZoneWorld
             return error;
         if (player.Inventory == null)
             return "world";
+        if (KarmaGkRefused(session, player, npc, html))
+            return null;
 
         var list = _teleports.Find(npc.NpcId, string.IsNullOrWhiteSpace(listName) ? TeleportRules.Normal : listName);
         if (list == null || TeleportRules.IsNobles(list.Type))

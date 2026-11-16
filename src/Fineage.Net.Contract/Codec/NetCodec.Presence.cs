@@ -136,6 +136,8 @@ namespace Fineage.Net.Contract
             }
             w.WriteInt32(m.Karma);
             w.WriteByte(m.PvpFlag);
+            w.WriteInt32(m.PvpKills);
+            w.WriteInt32(m.PkKills);
         });
 
         public static UserInfoNetMsg DecodeUserInfo(ReadOnlySpan<byte> p)
@@ -196,6 +198,11 @@ namespace Fineage.Net.Contract
                 m.Karma = r.ReadInt32();
             if (r.Remaining > 0)
                 m.PvpFlag = r.ReadByte();
+            if (r.Remaining >= 8)
+            {
+                m.PvpKills = r.ReadInt32();
+                m.PkKills = r.ReadInt32();
+            }
             return m;
         }
 

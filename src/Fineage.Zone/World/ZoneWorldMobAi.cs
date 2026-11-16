@@ -132,6 +132,9 @@ public sealed partial class ZoneWorld
     /// <summary>Offensive skill landing on a player: HP, purple name, cast break, death. Same gate as a melee hit.</summary>
     void ApplySkillDamageToPlayer(ZoneEntity attacker, ZoneEntity target, int damage, long now)
     {
+        // Mobius callSkill: an offensive skill on a playable flags the caster whether it landed for damage or not.
+        if (attacker.Kind == ZoneEntityKind.Player)
+            UpdatePvPStatus(attacker, target, now);
         if (damage <= 0)
         {
             attacker.CombatUntilUnixMs = now + ClanProtocol.CombatStanceMillis;
@@ -142,8 +145,6 @@ public sealed partial class ZoneWorld
         target.CurHp = Math.Max(0, target.CurHp - damage);
         target.CombatUntilUnixMs = now + ClanProtocol.CombatStanceMillis;
         FanoutVitals(target, PlayerVitalsStatus(target));
-        if (attacker.Kind == ZoneEntityKind.Player)
-            UpdatePvPStatus(attacker, target, now);
         if (target.CurHp > 0)
         {
             MaybeBreakCast(target, damage);

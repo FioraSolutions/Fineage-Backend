@@ -30,6 +30,10 @@ public sealed partial class ZoneWorld
         if (!ZoneCombat.Within(attacker.X, attacker.Y, target.X, target.Y, reach))
             return;
 
+        // Mobius Creature.doAttack: any swing at a player (hit or miss) runs updatePvPStatus.
+        if (attacker.Kind == ZoneEntityKind.Player && target.Kind == ZoneEntityKind.Player)
+            UpdatePvPStatus(attacker, target, now);
+
         if (hit.Damage <= 0)
         {
             // Miss (Attack carried HitFlagMiss): no HP change / StatusUpdate, but the fight and hate still start.
@@ -66,8 +70,6 @@ public sealed partial class ZoneWorld
 
         target.CombatUntilUnixMs = now + ClanProtocol.CombatStanceMillis;
         FanoutVitals(target, PlayerVitalsStatus(target));
-        if (attacker.Kind == ZoneEntityKind.Player && hit.Damage > 0)
-            UpdatePvPStatus(attacker, target, now);
         if (target.CurHp > 0)
             MaybeBreakCast(target, hit.Damage);
         if (target.CurHp <= 0)

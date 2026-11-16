@@ -169,6 +169,8 @@ public sealed partial class ZoneWorld
     {
         if (exp == 0 && sp == 0)
             return false;
+        // Mobius PlayerStat.addExp: gained exp burns karma (outside PVP zones).
+        BurnKarmaByExp(player, exp);
 
         var table = _game.Classes?.Experience;
         if (table == null)

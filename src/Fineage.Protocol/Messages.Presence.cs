@@ -118,8 +118,12 @@ public sealed class UserInfoMsg
     public int MaxWeight { get; set; }
     /// <summary>Mobius karma — red PK name while &gt; 0.</summary>
     public int Karma { get; set; }
-    /// <summary>Mobius PvP flag — purple name while flagged (0/1).</summary>
+    /// <summary>Mobius PvP flag — 0 white, 1 purple, 2 purple blinking (last 20 s of the flag).</summary>
     public byte PvpFlag { get; set; }
+    /// <summary>Mobius getPvpKills.</summary>
+    public int PvpKills { get; set; }
+    /// <summary>Mobius getPkKills.</summary>
+    public int PkKills { get; set; }
 }
 
 /// <summary>Opcode <see cref="MsgType.DeleteObject"/> (1007). Left knownlist.</summary>

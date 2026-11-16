@@ -49,6 +49,9 @@ public static class NpcServiceProtocol
     public const int NoblesDeferred = 205;
     public const int CannotStore = 206;
     public const int FreightDeferred = 207;
+    /// <summary>Mobius TeleportHolder: <c>AltKarmaPlayerCanUseGK = False</c> refuses players with karma.</summary>
+    public const int KarmaTeleportRefused = 210;
+    public const string KarmaTeleportRefusedText = "Go away, you're not welcome here.";
     public const int BuffNone = 208;
     public const int EnchantOpen = 209;
 

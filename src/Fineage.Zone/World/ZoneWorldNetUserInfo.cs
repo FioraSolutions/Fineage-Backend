@@ -88,7 +88,9 @@ public sealed partial class ZoneWorld
             MaxWeight = MaxLoadOf(e),
             Paperdoll = slots,
             Karma = e.Karma,
-            PvpFlag = e.PvpFlagged ? (byte)1 : (byte)0
+            PvpFlag = PvpFlagWire(e),
+            PvpKills = e.PvpKills,
+            PkKills = e.PkKills
         };
     }
 

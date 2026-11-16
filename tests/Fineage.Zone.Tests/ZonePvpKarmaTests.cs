@@ -25,7 +25,13 @@ public sealed class ZonePvpKarmaTests
         var (_, victim) = await kit.EnterAsync(classId: 10, race: 0, x: x + 40, y: y, z: z);
         int hp = victim.CurHp;
 
+        // A white victim needs Ctrl (Mobius Player.useMagic: not auto-attackable and no forceUse → ActionFailed).
         Assert.Null(await kit.World.TrySkillUseAsync(attacker.Session!, 1177, victim.ObjectId, CancellationToken.None));
+        await kit.World.CompleteCastForTestAsync(attacker.Session!);
+        Assert.Equal(hp, victim.CurHp);
+        Assert.False(attacker.PvpFlagged);
+
+        Assert.Null(await kit.World.TrySkillUseAsync(attacker.Session!, 1177, victim.ObjectId, CancellationToken.None, ctrlPressed: true));
         await kit.World.CompleteCastForTestAsync(attacker.Session!);
 
         Assert.True(victim.CurHp < hp);

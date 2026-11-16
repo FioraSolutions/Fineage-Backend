@@ -33,7 +33,7 @@ public sealed class CombatPacketHandler
         }
 
         var attack = NetCodec.DecodeAttackRequest(envelope.Payload);
-        string? error = await _world.TryAttackAsync(zoneSession, attack.TargetObjectId, ct).ConfigureAwait(false);
+        string? error = await _world.TryAttackAsync(zoneSession, attack.TargetObjectId, ct, attack.Forced ?? true).ConfigureAwait(false);
         if (error != null)
             await _reject(conn, error, "Attack failed.", ct).ConfigureAwait(false);
         // AttackState / MoveState / StatusUpdate fan out via NetBridge from ZoneWorld combat.

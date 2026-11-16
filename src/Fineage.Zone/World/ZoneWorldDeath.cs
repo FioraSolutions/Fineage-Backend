@@ -86,7 +86,11 @@ public sealed partial class ZoneWorld
         player.Abnormals.Clear();
         RefreshRunSpeed(player); // dead: buff runSpd funcs drop with the abnormals
         player.CombatUntilUnixMs = 0;
+        // The kill is judged on the flag the victim died with (Mobius onKillUpdatePvPKarma reads getPvpFlag()
+        // before stopPvPFlag), so remember it before death wipes it.
+        bool wasFlagged = player.PvpFlagged;
         player.PvpFlagged = false;
+        player.PvpFlagBlink = false;
         player.PvpFlagUntilMs = 0;
         ClearReviveOffer(player);
 
@@ -97,13 +101,23 @@ public sealed partial class ZoneWorld
         if (killerObjectId > 0
             && _byId.TryGetValue(killerObjectId, out var killer)
             && killer.Kind == ZoneEntityKind.Player)
-            OnKillUpdatePvPKarma(killer, player);
+            OnKillUpdatePvPKarma(killer, player, wasFlagged);
 
         // Mobius Player.onDeath runs the exp penalty before the Die packet goes out, so the client's exp bar and the
         // Death Penalty level are already the post-death values on the death screen.
         ApplyDeathConsequences(player, killerObjectId);
         // Mobius Player.onDieDropItem — after exp/DP, before Die packet.
         OnDieDropItem(player, killerObjectId);
+        // Mobius Player.doDie karma tempfix: a dying PK keeps 3/4 of its karma (under 200 → 0).
+        if (player.Karma > 0)
+        {
+            player.Karma = KarmaAfterDeath(player.Karma);
+            PersistKarmaPk(player);
+            if (player.Karma == 0)
+                wasFlagged = true; // repaint below: the red name goes white
+        }
+        if (wasFlagged)
+            BroadcastPvpAppearance(player);
 
         FanoutPlayerDeath(player, killerObjectId);
         if (player.Session != null)

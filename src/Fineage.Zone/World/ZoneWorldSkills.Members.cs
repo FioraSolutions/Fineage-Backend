@@ -32,6 +32,9 @@ public sealed partial class ZoneWorld
             return SkillProtocol.Target;
         if (!IsAttackable(player, target))
             return SkillProtocol.Target;
+        // Mobius Player.useMagic: an offensive skill on a player that is not auto-attackable needs Ctrl.
+        if (!request.CtrlPressed && NeedsForce(player, target))
+            return null;
         if (HostilePlayableRefused(session, player, target, badSkill: true) ||
             SiegeFriendRefused(session, player, target) ||
             PeacePlayableRefused(session, player, target))
