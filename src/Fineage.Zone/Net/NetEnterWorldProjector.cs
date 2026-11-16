@@ -48,6 +48,9 @@ static class NetEnterWorldProjector
     {
         ArgumentNullException.ThrowIfNull(entity);
         var frames = new List<(ushort, byte[])>(2);
+        // Castle gates / walls: open, HP and attackable state (a broken gate is dead but still stands open).
+        if (entity.SiegeNpc is { Role: SiegeNpcRole.Door } && world?.DoorStatusFrame(entity) is { } door)
+            frames.Add((NetOpcode.DoorStatus, door));
         if (entity.Dead)
             return frames;
         if (entity.MoveActive)

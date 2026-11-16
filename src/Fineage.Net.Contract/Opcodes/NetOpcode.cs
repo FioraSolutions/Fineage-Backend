@@ -307,5 +307,11 @@ namespace Fineage.Net.Contract
         public const ushort AllyAskJoin = 0x03B5;
         /// <summary>Zone → client: clan hall auction list.</summary>
         public const ushort ClanHallList = 0x03B6;
+        /// <summary>Zone → client: castle gate / wall state (<c>DoorStatusNetMsg</c>), after its EntitySpawn.</summary>
+        public const ushort DoorStatus = 0x03B7;
+        /// <summary>Client → zone: castle lord action (<c>CastleCommandKind</c>).</summary>
+        public const ushort CastleCommand = 0x03B8;
+        /// <summary>Zone → client: castle page (<c>CastleInfoNetMsg</c>).</summary>
+        public const ushort CastleInfo = 0x03B9;
     }
 }

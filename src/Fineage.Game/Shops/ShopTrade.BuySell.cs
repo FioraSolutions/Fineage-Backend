@@ -26,6 +26,7 @@ public static partial class ShopTrade
         var plan = new List<PlannedBuy>();
         var wanted = new Dictionary<int, int>();
         long subtotal = 0;
+        long castleTax = 0;
         long addedWeight = 0;
         long slots = 0;
         foreach (var line in lines)
@@ -57,6 +58,7 @@ public static partial class ShopTrade
             subtotal += (long)line.Count * unit;
             if (subtotal > MaxAdena)
                 return ShopMutation.Fail(ShopDeny.Pocket);
+            castleTax += (long)(line.Count * (price * Math.Max(0, castleTaxPercent) / 100d));
 
             wanted[line.ItemId] = wanted.GetValueOrDefault(line.ItemId) + line.Count;
             addedWeight += (long)template.Weight * line.Count;
@@ -85,7 +87,7 @@ public static partial class ShopTrade
                 return ShopMutation.Fail(ShopDeny.Stock);
         }
 
-        var result = new ShopMutation();
+        var result = new ShopMutation { CastleTax = Math.Min(castleTax, subtotal) };
         PayAdena(inventory, (int)subtotal, result.Touches);
         foreach (var step in plan)
         {

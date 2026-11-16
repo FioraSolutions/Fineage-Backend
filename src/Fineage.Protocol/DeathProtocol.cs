@@ -23,6 +23,19 @@ public static class DeathProtocol
     /// <summary>Decline a pending skill resurrection offer (Mobius <c>reviveAnswer(0)</c>).</summary>
     public const int DeclineSkillResurrection = 2;
 
+    /// <summary>Mobius <c>RequestRestartPoint</c> case 2 (castle): owner clan, or defenders while a control tower stands.</summary>
+    public const int ReviveToCastle = 3;
+
+    /// <summary>Mobius <c>RequestRestartPoint</c> case 3 (siege HQ): attacker clan with a standing headquarters.</summary>
+    public const int ReviveToSiegeHq = 4;
+
+    /// <summary>Die restart bits for the dead player (Mobius <c>Die</c> canTeleport flags).</summary>
+    public const int RestartCastle = 1;
+    public const int RestartSiegeHq = 2;
+
+    public const string NoCastle = "revive_no_castle";
+    public const string NoHeadquarters = "revive_no_hq";
+
     public const string NotDead = "revive_not_dead";
     public const string AlreadyDead = "death_already";
     public const string Unsupported = "revive_unsupported";

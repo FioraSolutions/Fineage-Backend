@@ -47,6 +47,15 @@ public sealed partial class ZoneWorld
         int sa = subject.AllyId, va = viewer.AllyId;
         if (sa != 0 && sa == va && sc != vc)
             relation |= PledgeProtocol.RelationAlly;
+        // Mobius Player.getRelation: siege state 1 attacker / 2 defender while a siege of the clan runs.
+        int siegeState = PlayerSiegeState(subject);
+        if (siegeState != 0)
+        {
+            relation |= SiegeProtocol.RelationInSiege;
+            relation |= siegeState != PlayerSiegeState(viewer) ? SiegeProtocol.RelationEnemy : SiegeProtocol.RelationAlly;
+            if (siegeState == SiegeProtocol.StateAttacker)
+                relation |= SiegeProtocol.RelationAttacker;
+        }
         return relation;
     }
 
@@ -78,7 +87,8 @@ public sealed partial class ZoneWorld
         });
     }
 
-    const int SpawnRelationBits = PledgeProtocol.RelationMutualWar | PledgeProtocol.RelationOneSidedWar | PledgeProtocol.RelationAlly;
+    const int SpawnRelationBits = PledgeProtocol.RelationMutualWar | PledgeProtocol.RelationOneSidedWar | PledgeProtocol.RelationAlly |
+        SiegeProtocol.RelationInSiege;
 
     /// <summary>
     /// Mobius sends RelationChanged with every CharInfo. A fresh pawn starts at relation 0, so only war / ally bits

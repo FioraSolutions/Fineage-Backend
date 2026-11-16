@@ -152,6 +152,8 @@ public sealed partial class MemoryAccountStore
         public bool ScheduleAccepted { get; set; }
         public bool InProgress { get; set; }
         public long EndsUnixMs { get; set; }
+        public long Treasury { get; set; }
+        public Dictionary<int, int>? DoorUpgrades { get; set; }
     }
 
     sealed class SiegeClanDto

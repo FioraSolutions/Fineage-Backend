@@ -21,10 +21,7 @@ public sealed partial class ZoneWorld
         lock (_gate)
         {
             long ms = (now ?? _clock()).ToUnixTimeMilliseconds();
-            var kind = _siege.StartSiege(castleId, ms);
-            if (kind is SiegeStartKind.Started or SiegeStartKind.Cancelled)
-                PersistSiege();
-            return kind;
+            return StartSiegeLocked(castleId, ms);
         }
     }
 
@@ -35,7 +32,10 @@ public sealed partial class ZoneWorld
             long ms = (now ?? _clock()).ToUnixTimeMilliseconds();
             string? error = _siege.EndSiege(castleId, ms);
             if (error == null)
+            {
+                SyncSiegeRuntime(ms);
                 PersistSiege();
+            }
             return error;
         }
     }

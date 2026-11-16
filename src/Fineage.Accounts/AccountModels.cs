@@ -169,7 +169,11 @@ public sealed record ClanRecord(
     /// <summary>Reputation, sub-units, privileges, wars, ally, member grades, warehouse (see <see cref="ClanDetails"/>).</summary>
     ClanDetails? Details = null);
 
-/// <summary>Persisted castle row. Owner 0 is an NPC castle. Tax is a percent. Times are unix milliseconds.</summary>
+/// <summary>
+/// Persisted castle row. Owner 0 is an NPC castle. Tax is a percent. Times are unix milliseconds.
+/// <see cref="Treasury"/> is Mobius <c>castle.treasury</c>; <see cref="DoorUpgrades"/> is <c>castle_doorupgrade</c>
+/// (door id → HP ratio 2 / 3 / 5).
+/// </summary>
 public sealed record CastleSave(
     int Id,
     int OwnerClanId,
@@ -178,7 +182,9 @@ public sealed record CastleSave(
     bool RegistrationClosed,
     bool ScheduleAccepted,
     bool InProgress,
-    long EndsUnixMs);
+    long EndsUnixMs,
+    long Treasury = 0,
+    IReadOnlyDictionary<int, int>? DoorUpgrades = null);
 
 /// <summary>One <c>siege_clans</c> row. Owner clans are not stored; side is attacker, defender, or pending.</summary>
 public sealed record SiegeClanSave(int CastleId, int ClanId, int Side);

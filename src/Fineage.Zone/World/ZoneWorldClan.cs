@@ -186,6 +186,13 @@ public sealed partial class ZoneWorld
             _clans.Clear();
             _clanByPlayer.Clear();
             LoadClans();
+            foreach (var entity in _byId.Values)
+            {
+                if (entity.Kind != ZoneEntityKind.Player)
+                    continue;
+                entity.ClanId = ClanIdFor(entity.ObjectId);
+                SyncClanStanding(entity);
+            }
             return _clans.Count > 0;
         }
     }

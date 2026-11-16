@@ -18517,6 +18517,49 @@
       "effectRange": 400
     },
     {
+      "skillId": 246,
+      "name": "Seal of Ruler",
+      "levels": 1,
+      "passive": false,
+      "operateType": "A1",
+      "targetType": "HOLY",
+      "castRange": 85,
+      "hitTimeMs": 180000,
+      "reuseDelayMs": 5000,
+      "levelData": [
+        {
+          "level": 1,
+          "mpConsume": 50,
+          "power": 0,
+          "abnormalLevel": 0,
+          "magicLevel": 30
+        }
+      ],
+      "effectRange": 400,
+      "magicType": 2
+    },
+    {
+      "skillId": 247,
+      "name": "Build Headquarters",
+      "levels": 1,
+      "passive": false,
+      "operateType": "A1",
+      "targetType": "SELF",
+      "castRange": -1,
+      "hitTimeMs": 4000,
+      "reuseDelayMs": 1800000,
+      "levelData": [
+        {
+          "level": 1,
+          "mpConsume": 30,
+          "power": 0,
+          "abnormalLevel": 0,
+          "magicLevel": 30
+        }
+      ],
+      "magicType": 2
+    },
+    {
       "skillId": 248,
       "name": "Crystallize",
       "levels": 5,

@@ -155,7 +155,7 @@ public sealed partial class ZoneWorld
             }
 
             // NpcTemplate randomWalk defaults to false only for Guard. No XML overrides in CT0 stats.
-            if (npc.NpcType == "Guard")
+            if (npc.NpcType == "Guard" || npc.SiegeNpc != null)
                 continue;
             if (TryFollowLeader(npc, now))
                 continue;

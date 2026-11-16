@@ -123,6 +123,14 @@ namespace Fineage.Net.Contract
         public ulong EntityValue { get; set; }
         public uint EntityGeneration { get; set; }
         public int KillerObjectId { get; set; }
+        /// <summary>
+        /// Optional tail (Mobius <c>Die</c> restart buttons, dead player only): bit0 to castle, bit1 to siege
+        /// headquarters. Absent on older frames and on NPC deaths = 0.
+        /// </summary>
+        public int RestartFlags { get; set; }
+
+        public const int RestartCastle = 1;
+        public const int RestartSiegeHq = 2;
     }
 
     public sealed class UseSkillNetMsg
@@ -150,6 +158,10 @@ namespace Fineage.Net.Contract
         public const int AcceptSkillResurrection = 1;
         /// <summary>Decline skill resurrection. Matches <c>DeathProtocol.DeclineSkillResurrection</c>.</summary>
         public const int DeclineSkillResurrection = 2;
+        /// <summary>Restart inside the castle (owner / defender clan). Matches <c>DeathProtocol.ReviveToCastle</c>.</summary>
+        public const int ReviveToCastle = 3;
+        /// <summary>Restart at the clan's siege headquarters. Matches <c>DeathProtocol.ReviveToSiegeHq</c>.</summary>
+        public const int ReviveToSiegeHq = 4;
 
         public int Action { get; set; }
     }

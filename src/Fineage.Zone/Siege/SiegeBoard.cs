@@ -87,6 +87,13 @@ public sealed partial class SiegeBoard
             castle.InProgress = saved.InProgress;
             castle.EndsUnixMs = saved.EndsUnixMs;
             castle.RegistrationClosed = saved.RegistrationClosed;
+            castle.Treasury = Math.Max(0, saved.Treasury);
+            castle.DoorUpgrades.Clear();
+            foreach (var (doorId, ratio) in saved.DoorUpgrades ?? new Dictionary<int, int>())
+            {
+                if (ratio is 2 or 3 or 5)
+                    castle.DoorUpgrades[doorId] = ratio;
+            }
             castle.Registrations.Clear();
         }
 
@@ -131,7 +138,9 @@ public sealed partial class SiegeBoard
         castle.RegistrationClosed,
         castle.ScheduleAccepted,
         castle.InProgress,
-        castle.EndsUnixMs)).ToList();
+        castle.EndsUnixMs,
+        castle.Treasury,
+        castle.DoorUpgrades.Count > 0 ? new Dictionary<int, int>(castle.DoorUpgrades) : null)).ToList();
 
     public List<SiegeClanSave> ExportClans()
     {
@@ -143,6 +152,45 @@ public sealed partial class SiegeBoard
         }
 
         return rows;
+    }
+
+    /// <summary>Mobius <c>Castle.setTaxPercent</c>.</summary>
+    public void SetTax(int castleId, int percent)
+    {
+        var castle = Find(castleId);
+        if (castle != null)
+            castle.TaxPercent = Math.Clamp(percent, 0, 100);
+    }
+
+    /// <summary>Mobius <c>Castle.addToTreasuryNoTax</c>: false when the change would go negative.</summary>
+    public bool AddTreasury(int castleId, long amount)
+    {
+        var castle = Find(castleId);
+        if (castle == null)
+            return false;
+        long next = castle.Treasury + amount;
+        if (next < 0)
+            return false;
+        castle.Treasury = Math.Min(next, SiegeProtocolLimits.MaxTreasury);
+        return true;
+    }
+
+    /// <summary>Owner-side clans while a siege runs (owner first). Attackers when <paramref name="attackers"/>.</summary>
+    public List<int> SideClans(int castleId, bool attackers)
+    {
+        var castle = Find(castleId);
+        var list = new List<int>();
+        if (castle == null)
+            return list;
+        if (!attackers && castle.OwnerClanId > 0)
+            list.Add(castle.OwnerClanId);
+        foreach (var row in castle.Registrations)
+        {
+            if (attackers ? row.Side == SiegeProtocol.Attacker : row.Side == SiegeProtocol.Defender)
+                list.Add(row.ClanId);
+        }
+
+        return list;
     }
 
     internal void ScheduleAll(long nowUnixMs)

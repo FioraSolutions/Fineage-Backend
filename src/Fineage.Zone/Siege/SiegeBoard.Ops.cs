@@ -115,7 +115,15 @@ public sealed partial class SiegeBoard
     public string? CaptureCastle(int clanId, long nowUnixMs) =>
         CaptureCastle(clanId, 0, nowUnixMs);
 
-    public string? CaptureCastle(int clanId, int castleId, long nowUnixMs)
+    public string? CaptureCastle(int clanId, int castleId, long nowUnixMs) =>
+        CaptureCastle(clanId, castleId, nowUnixMs, null);
+
+    /// <summary>
+    /// Mobius <c>Castle.setOwner</c> → <c>Siege.midVictory</c>. <paramref name="allyOf"/> is the clan → alliance
+    /// lookup: the new owner's allies among the attackers switch to defenders, and a castle that was NPC-owned with
+    /// every attacker in the winner's alliance ends at once.
+    /// </summary>
+    public string? CaptureCastle(int clanId, int castleId, long nowUnixMs, Func<int, int>? allyOf)
     {
         CastleSiege? castle;
         if (castleId == 0)
@@ -158,7 +166,16 @@ public sealed partial class SiegeBoard
         }
 
         castle.OwnerClanId = clanId;
+        castle.DoorUpgrades.Clear();
         if (defendersEmpty && attackers == 1)
+        {
+            Finish(castle, nowUnixMs);
+            return null;
+        }
+
+        int allyId = allyOf?.Invoke(clanId) ?? 0;
+        if (defendersEmpty && allyId != 0 &&
+            castle.Registrations.Where(row => row.Side == SiegeProtocol.Attacker).All(row => allyOf!(row.ClanId) == allyId))
         {
             Finish(castle, nowUnixMs);
             return null;
@@ -173,6 +190,15 @@ public sealed partial class SiegeBoard
 
         if (previous > 0 && previous != clanId && castle.Registrations.All(row => row.ClanId != previous))
             castle.Registrations.Add(new SiegeRegistration(previous, SiegeProtocol.Attacker));
+        if (allyId != 0)
+        {
+            foreach (var row in castle.Registrations)
+            {
+                if (row.Side == SiegeProtocol.Attacker && row.ClanId != previous && allyOf!(row.ClanId) == allyId)
+                    row.Side = SiegeProtocol.Defender;
+            }
+        }
+
         return null;
     }
 

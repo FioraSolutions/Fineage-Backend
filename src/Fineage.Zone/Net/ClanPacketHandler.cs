@@ -191,6 +191,26 @@ public sealed class ClanPacketHandler
             await _reject(conn, error, "Clan command failed.", ct).ConfigureAwait(false);
     }
 
+    /// <summary><see cref="NetOpcode.CastleCommand"/>: one chamberlain (castle lord) action.</summary>
+    public async Task OnCastleCommandAsync(
+        NetConnection conn,
+        ZoneSession zoneSession,
+        PacketEnvelope envelope,
+        CancellationToken ct)
+    {
+        RequireHello(conn);
+        if (!zoneSession.Bound || !zoneSession.InWorld)
+        {
+            await _reject(conn, "not_in_world", "Enter world first.", ct).ConfigureAwait(false);
+            return;
+        }
+
+        var command = NetCodec.DecodeCastleCommand(envelope.Payload);
+        string? error = await _world.TryCastleCommandAsync(zoneSession, command, _clock(), ct).ConfigureAwait(false);
+        if (error != null)
+            await _reject(conn, error, "Castle command failed.", ct).ConfigureAwait(false);
+    }
+
     static void RequireHello(NetConnection conn)
     {
         if (!conn.HelloCompleted)

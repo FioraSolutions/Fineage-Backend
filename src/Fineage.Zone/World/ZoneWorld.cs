@@ -250,6 +250,7 @@ public sealed partial class ZoneWorld
         BootstrapQuestNpcs();
         LoadClans();
         LoadSiege();
+        SpawnCastleDoors();
     }
 
     /// <summary>Bypass handlers. A later <see cref="BypassRegistry.Register"/> replaces a stub.</summary>

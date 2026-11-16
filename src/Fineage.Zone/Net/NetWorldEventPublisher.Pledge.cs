@@ -31,4 +31,10 @@ sealed partial class NetWorldEventPublisher
 
     void IWorldEventPublisher.FanoutClanHallList(IReadOnlyList<int> watcherObjectIds, ClanHallListNetMsg halls) =>
         SendAll(watcherObjectIds, NetOpcode.ClanHallList, NetCodec.EncodeClanHallList(halls));
+
+    void IWorldEventPublisher.FanoutDoorStatus(IReadOnlyList<int> watcherObjectIds, DoorStatusNetMsg door) =>
+        SendAll(watcherObjectIds, NetOpcode.DoorStatus, NetCodec.EncodeDoorStatus(door));
+
+    void IWorldEventPublisher.FanoutCastleInfo(IReadOnlyList<int> watcherObjectIds, CastleInfoNetMsg castle) =>
+        SendAll(watcherObjectIds, NetOpcode.CastleInfo, NetCodec.EncodeCastleInfo(castle));
 }

@@ -32,6 +32,8 @@ public sealed class ShopMutation
     public string MissingName { get; private init; } = "";
     public List<ShopTouch> Touches { get; } = [];
     public List<ItemInstance> Taken { get; } = [];
+    /// <summary>Castle share of a buy (Mobius <c>RequestBuyItem</c> castle tax), credited to the castle treasury.</summary>
+    public long CastleTax { get; set; }
 
     public bool Ok => Deny == null;
 
