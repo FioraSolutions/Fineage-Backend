@@ -4,6 +4,9 @@ namespace Fineage.Net.Contract
     {
         public string Text { get; set; } = "";
         public int ChatType { get; set; }
+
+        /// <summary>Whisper (Tell, type 2) receiver name. Optional wire tail (string); absent ⇒ empty.</summary>
+        public string Target { get; set; } = "";
     }
 
     public sealed class CreatureSayNetMsg

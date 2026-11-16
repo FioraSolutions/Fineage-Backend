@@ -33,7 +33,7 @@ public sealed class SayRulesTests
         Assert.True(SayRules.InLocalRange(0, 0, ChatProtocol.LocalRange, 0));
         Assert.False(SayRules.InLocalRange(0, 0, ChatProtocol.LocalRange + 1, 0));
         Assert.Equal(1250, ChatProtocol.LocalRange);
-        Assert.Equal(100, ChatProtocol.MaxTextLength);
+        Assert.Equal(105, ChatProtocol.MaxTextLength);
         Assert.Equal(1000, ChatProtocol.FloodIntervalMs);
     }
 
@@ -123,7 +123,7 @@ public sealed class NetChatTests
     }
 
     [Fact]
-    public async Task Tell_party_and_clan_are_refused_without_a_broadcast()
+    public async Task Channels_without_a_player_handler_are_refused_without_a_broadcast()
     {
         var kit = new NetTestKit();
         var (bridge, rec) = NetBridgeRecorder.Create();
@@ -134,7 +134,8 @@ public sealed class NetChatTests
         rec.Calls.Clear();
 
         DateTimeOffset now = Now;
-        int[] types = [ChatProtocol.Tell, ChatProtocol.Party, ChatProtocol.Clan, ChatProtocol.Trade, ChatProtocol.Hero, 99];
+        int[] types = [ChatProtocol.Gm, ChatProtocol.Announcement, ChatProtocol.Boat, ChatProtocol.Friend, ChatProtocol.Msn,
+            ChatProtocol.CriticalAnnounce, 99];
         foreach (int type in types)
         {
             Assert.Null(await kit.World.TrySayAsync(speaker, "secret", type, now, CancellationToken.None));

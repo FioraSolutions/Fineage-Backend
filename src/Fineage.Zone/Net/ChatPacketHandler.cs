@@ -38,7 +38,7 @@ public sealed class ChatPacketHandler
 
         var say = NetCodec.DecodeSay(envelope.Payload);
         string? error = await _world.TrySayAsync(
-            zoneSession, say.Text, say.ChatType, _clock(), ct).ConfigureAwait(false);
+            zoneSession, say.Text, say.ChatType, _clock(), ct, say.Target).ConfigureAwait(false);
         if (error != null)
             await _reject(conn, error, "Say failed.", ct).ConfigureAwait(false);
     }

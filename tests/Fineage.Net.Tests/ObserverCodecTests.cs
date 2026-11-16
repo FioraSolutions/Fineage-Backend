@@ -72,3 +72,18 @@ public sealed class ObserverCodecTests
             Assert.Equal(1, all.Count(v => v == op));
     }
 }
+
+public sealed class SayTargetCodecTests
+{
+    [Fact]
+    public void Say_without_target_keeps_the_legacy_bytes_and_whisper_carries_the_name()
+    {
+        var legacy = NetCodec.EncodeSay(new SayNetMsg { Text = "hi", ChatType = 0 });
+        var back = NetCodec.DecodeSay(legacy);
+        Assert.Equal(("hi", 0, ""), (back.Text, back.ChatType, back.Target));
+
+        var tell = NetCodec.DecodeSay(NetCodec.EncodeSay(new SayNetMsg { Text = "psst", ChatType = 2, Target = "Alden" }));
+        Assert.Equal(("psst", 2, "Alden"), (tell.Text, tell.ChatType, tell.Target));
+        Assert.True(NetCodec.EncodeSay(new SayNetMsg { Text = "psst", ChatType = 2, Target = "Alden" }).Length > legacy.Length);
+    }
+}
