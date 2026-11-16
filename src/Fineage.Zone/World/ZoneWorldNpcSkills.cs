@@ -98,6 +98,7 @@ public sealed partial class ZoneWorld
 
             target.CurHp = Math.Max(0, target.CurHp - damage);
             FanoutVitals(target, PlayerVitalsStatus(target));
+            SendVictimHitLines(npc, target, damage, 0);
             target.CombatUntilUnixMs = now + ClanProtocol.CombatStanceMillis;
             if (target.CurHp > 0)
                 MaybeBreakCast(target, damage);

@@ -281,5 +281,14 @@ namespace Fineage.Net.Contract
 
         /// <summary>Zone → party mates: map positions of the other members (Interlude <c>PartyMemberPosition</c>), periodic, only changed rows.</summary>
         public const ushort PartyMemberPosition = 0x03AB;
+
+        /// <summary>Zone → caster + watchers: Interlude <c>MagicSkillLaunched</c> at hitTime (skill fires on its targets).</summary>
+        public const ushort MagicSkillLaunched = 0x03AC;
+
+        /// <summary>Zone → caster + watchers: Interlude <c>MagicSkillCanceled</c> (cast aborted / interrupted).</summary>
+        public const ushort MagicSkillCanceled = 0x03AD;
+
+        /// <summary>Zone → player(s): Interlude <c>PlaySound</c> (quest jingles, server-driven music).</summary>
+        public const ushort PlaySound = 0x03AE;
     }
 }

@@ -310,21 +310,7 @@ public sealed partial class ZoneWorld
         StatusUpdateMsg? targetStatus,
         StatusUpdateMsg casterMp)
     {
-        List<int>? netWatchers = null;
-        foreach (var watcher in Players())
-        {
-            if (watcher.Session == null)
-                continue;
-            bool cares = ReferenceEquals(watcher, caster) ||
-                         watcher.Knownlist.Contains(target.ObjectId) ||
-                         watcher.Knownlist.Contains(caster.ObjectId);
-            if (!cares)
-                continue;
-
-            netWatchers ??= [];
-            netWatchers.Add(watcher.ObjectId);
-        }
-
+        var netWatchers = ActorAudience(caster, target);
         if (netWatchers is { Count: > 0 } && NetBridge != null)
         {
             NetBridge.FanoutMagicSkillUse(netWatchers, cast);

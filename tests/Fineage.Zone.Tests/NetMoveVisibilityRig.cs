@@ -39,16 +39,19 @@ internal sealed class NetMoveVisibilityRig : IAsyncDisposable
 
     public DateTimeOffset Clock() => DateTimeOffset.FromUnixTimeMilliseconds(NowMs);
 
-    public static async Task<NetMoveVisibilityRig> StartAsync(CancellationToken ct)
+    /// <param name="spawns">Optional NPC catalog (observer-parity tests put mobs next to the players).</param>
+    /// <param name="mapId">Map of <paramref name="spawns"/> to load.</param>
+    public static async Task<NetMoveVisibilityRig> StartAsync(CancellationToken ct, SpawnCatalog? spawns = null, string? mapId = null)
     {
         var store = MemoryAccountStore.InMemory();
         NetMoveVisibilityRig? rig = null;
         DateTimeOffset Clock() => rig?.Clock() ?? DateTimeOffset.UtcNow;
-        var empty = SpawnCatalog.From(new Dictionary<string, SpawnMapDefinition>
+        var empty = spawns ?? SpawnCatalog.From(new Dictionary<string, SpawnMapDefinition>
         {
             [SpawnCatalog.DefaultMapId] = new(SpawnCatalog.DefaultMapId, true, [])
         });
-        var world = new ZoneWorld(new RangeAoi(Range), accounts: store, clock: Clock, spawnCatalog: empty, geo: GeoEngine.Empty);
+        var world = new ZoneWorld(new RangeAoi(Range), accounts: store, clock: Clock, spawnCatalog: empty, geo: GeoEngine.Empty,
+            activeMapId: mapId ?? SpawnCatalog.DefaultMapId);
         var host = await NetZoneHost.StartAsync(world, store, clock: Clock);
         rig = new NetMoveVisibilityRig(store, world, host, ct) { NowMs = DateTimeOffset.UtcNow.ToUnixTimeMilliseconds() };
         return rig;

@@ -159,6 +159,26 @@ public sealed partial class ZoneWorld
         };
     }
 
+    /// <summary>
+    /// Abnormal bar of a pawn entering someone's AOI (players and NPCs with live effects or a spoil mark);
+    /// false when there is nothing to show.
+    /// </summary>
+    internal bool TryBuildPresenceAbnormal(ZoneEntity entity, out AbnormalStatusUpdateMsg update)
+    {
+        lock (_gate)
+        {
+            if (entity.Dead || entity.Kind is not (ZoneEntityKind.Player or ZoneEntityKind.Npc) ||
+                (entity.Abnormals.Count == 0 && entity.SpoilerObjectId == 0))
+            {
+                update = null!;
+                return false;
+            }
+
+            update = AbnormalFor(entity);
+            return true;
+        }
+    }
+
     /// <summary>Mobius updateEffectIcons snapshot for EnterWorld (null when the bar is empty).</summary>
     internal bool TryBuildNetAbnormalStatus(ZoneSession session, out AbnormalStatusUpdateMsg update)
     {

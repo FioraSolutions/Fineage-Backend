@@ -187,10 +187,20 @@ public sealed partial class ZoneWorld
 
     readonly List<PendingMeleeHit> _meleeHits = new();
 
-    void QueueAttackerDamageLine(ZoneEntity attacker, ZoneEntity target, int damage)
+    void QueueAttackerDamageLine(ZoneEntity attacker, ZoneEntity target, int damage, byte flags = 0)
     {
-        // Mobius YOU_HIT_S1_FOR_S2_DAMAGE goes to the attacker only, never to watchers.
-        if (damage <= 0 || attacker.Session == null || NetBridge == null)
+        // Mobius Player.sendDamageMessage: YOU_HAVE_MISSED / CRITICAL_HIT / YOU_HIT_FOR_S1_DAMAGE go to the attacker
+        // only, never to watchers (they read the numbers from the Attack packet).
+        if (attacker.Session == null || NetBridge == null)
+            return;
+        if ((flags & ZoneCombat.HitFlagMiss) != 0)
+        {
+            NetBridge.FanoutSystemMessage([attacker.ObjectId], CombatLines.Missed());
+            return;
+        }
+        if ((flags & ZoneCombat.HitFlagCrit) != 0)
+            NetBridge.FanoutSystemMessage([attacker.ObjectId], CombatLines.CriticalHit());
+        if (damage <= 0)
             return;
 
         NetBridge.FanoutSystemMessage(
@@ -198,25 +208,61 @@ public sealed partial class ZoneWorld
             CombatLines.HitTarget(target.Name, damage));
     }
 
-    void FanoutAttack(ZoneEntity attacker, ZoneEntity target, AttackMsg attack)
+    /// <summary>
+    /// Victim side of a melee / skill hit (Mobius PlayerStatus.reduceHp S1_HIT_YOU_FOR_S2_DAMAGE,
+    /// Creature.sendDamageMessage YOU_HAVE_AVOIDED_S1_S_ATTACK, Formulas.calcShldUse shield line). Victim only.
+    /// </summary>
+    void SendVictimHitLines(ZoneEntity attacker, ZoneEntity victim, int damage, byte flags)
+    {
+        if (victim.Kind != ZoneEntityKind.Player || victim.Session == null || NetBridge == null)
+            return;
+        if ((flags & ZoneCombat.HitFlagMiss) != 0)
+        {
+            NetBridge.FanoutSystemMessage([victim.ObjectId], CombatLines.AvoidedAttack(attacker.Name));
+            return;
+        }
+        if ((flags & ZoneCombat.HitFlagShield) != 0)
+            NetBridge.FanoutSystemMessage([victim.ObjectId], CombatLines.ShieldDefense());
+        if (damage > 0)
+            NetBridge.FanoutSystemMessage([victim.ObjectId], CombatLines.HitYou(attacker.Name, damage));
+    }
+
+    /// <summary>
+    /// Mobius <c>Creature.broadcastPacket</c> audience for an actor's visual (Attack, MagicSkillUse, MagicSkillLaunched,
+    /// MagicSkillCanceled): the actor itself plus every player whose knownlist holds the actor. A player target is
+    /// always included (it is necessarily in the actor's AOI when the packet is legal).
+    /// </summary>
+    List<int>? ActorAudience(ZoneEntity actor, ZoneEntity? target = null)
     {
         List<int>? netWatchers = null;
         foreach (var watcher in Players())
         {
             if (watcher.Session == null)
                 continue;
-            bool cares = ReferenceEquals(watcher, attacker) ||
-                         watcher.Knownlist.Contains(target.ObjectId) ||
-                         watcher.Knownlist.Contains(attacker.ObjectId);
+            bool cares = ReferenceEquals(watcher, actor) ||
+                         (target != null && ReferenceEquals(watcher, target)) ||
+                         watcher.Knownlist.Contains(actor.ObjectId);
             if (!cares)
                 continue;
             netWatchers ??= [];
             netWatchers.Add(watcher.ObjectId);
         }
+        return netWatchers;
+    }
 
-        if (netWatchers is { Count: > 0 } && NetBridge != null)
-        {
+    void FanoutAttack(ZoneEntity attacker, ZoneEntity target, AttackMsg attack)
+    {
+        if (ActorAudience(attacker, target) is { Count: > 0 } netWatchers && NetBridge != null)
             NetBridge.FanoutAttackState(netWatchers, attack);
-        }
+    }
+
+    /// <summary>Mobius MagicSkillLaunched broadcast at hitTime.</summary>
+    void FanoutSkillLaunched(ZoneEntity caster, int skillId, int level, params ZoneEntity[] targets)
+    {
+        if (skillId <= 0 || NetBridge == null)
+            return;
+        if (ActorAudience(caster, targets.Length > 0 ? targets[0] : null) is { Count: > 0 } netWatchers)
+            NetBridge.FanoutMagicSkillLaunched(netWatchers, caster.ObjectId, skillId, Math.Max(1, level),
+                targets.Select(t => t.ObjectId).ToArray());
     }
 }

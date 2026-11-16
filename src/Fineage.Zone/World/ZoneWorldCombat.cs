@@ -430,20 +430,23 @@ public sealed partial class ZoneWorld
             AttackerZ = player.Z,
             TargetX = target.X,
             TargetY = target.Y,
-            TargetZ = target.Z
+            TargetZ = target.Z,
+            SecondHit = dual ? (damage2, flags2) : null
         };
 
         // Swing now; HP drops at hitTime (Mobius onHitTimer).
         FanoutAttack(player, target, attack);
-        QueueAttackerDamageLine(player, target, damage);
+        QueueAttackerDamageLine(player, target, damage, flags);
+        if (dual)
+            QueueAttackerDamageLine(player, target, damage2, flags2);
         if (ps.Weapon == Fineage.Game.WeaponType.Bow)
             ConsumeBowArrow(player);
         long now = _clock().ToUnixTimeMilliseconds();
         player.CombatUntilUnixMs = now + ClanProtocol.CombatStanceMillis;
         long atk = PlayerAttackTimeMs(player.ObjectId);
-        _meleeHits.Add(new PendingMeleeHit(player.ObjectId, targetId, damage, now + (dual ? atk / 4 : atk / 2)));
+        _meleeHits.Add(new PendingMeleeHit(player.ObjectId, targetId, damage, now + (dual ? atk / 4 : atk / 2), flags));
         if (dual)
-            _meleeHits.Add(new PendingMeleeHit(player.ObjectId, targetId, damage2, now + atk / 2));
+            _meleeHits.Add(new PendingMeleeHit(player.ObjectId, targetId, damage2, now + atk / 2, flags2));
 
         return null;
     }

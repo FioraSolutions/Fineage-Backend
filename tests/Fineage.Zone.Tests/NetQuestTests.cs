@@ -101,6 +101,35 @@ public sealed class NetQuestTests
     }
 
     [Fact]
+    public async Task Quest_jingles_play_for_the_quester_only_never_for_a_bystander()
+    {
+        // Mobius QuestState.playSound → player.sendPacket(PlaySound): private, type 0, not bound to an object.
+        var bench = new WorldBench(clock: FixedClock);
+        BenchPlayer actor = await bench.EnterAsync("jingle", "Jingle");
+        BenchPlayer bystander = await bench.EnterAsync("bystander", "Bystander");
+        var roxxy = TalkingIsland.Villagers[RoxxyIndex];
+        actor.MoveTo(roxxy.X, roxxy.Y, roxxy.Z);
+        bystander.MoveTo(roxxy.X + 20, roxxy.Y, roxxy.Z);
+        bench.Rec.Calls.Clear();
+
+        Assert.Null(await actor.QuestEvent(roxxy.ObjectId, QuestId, ""));
+        Assert.Null(await actor.QuestEvent(roxxy.ObjectId, QuestId, "accept"));
+        Assert.Null(await actor.AbortQuest(QuestId));
+
+        var sounds = bench.Rec.Of(nameof(IWorldEventPublisher.FanoutPlaySound))
+            .Select(args => (Watchers: (IReadOnlyList<int>)args[0]!, Type: (int)args[1]!, File: (string)args[2]!, Object: (int)args[3]!))
+            .ToList();
+        Assert.Contains(sounds, s => s.File == QuestSounds.Accept);
+        Assert.Contains(sounds, s => s.File == QuestSounds.GiveUp);
+        Assert.All(sounds, s =>
+        {
+            Assert.Equal(actor.ObjectId, Assert.Single(s.Watchers));
+            Assert.Equal(0, s.Type);
+            Assert.Equal(0, s.Object);
+        });
+    }
+
+    [Fact]
     public async Task Abort_removes_a_started_quest_so_it_can_be_accepted_again()
     {
         var bench = new WorldBench(clock: FixedClock);
