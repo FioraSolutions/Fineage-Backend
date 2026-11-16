@@ -260,6 +260,13 @@ public sealed partial class ZoneWorld
     }
 
     /// <summary>Test hook: both clans declare on each other (skips the size rules), relations re-sent.</summary>
+    /// <summary>Test hook: relation bits <paramref name="subject"/> shows to <paramref name="viewer"/>.</summary>
+    internal int RelationOfForTest(ZoneEntity subject, ZoneEntity viewer)
+    {
+        lock (_gate)
+            return RelationOf(subject, viewer);
+    }
+
     internal bool SetMutualWarForTest(int a, int b)
     {
         lock (_gate)

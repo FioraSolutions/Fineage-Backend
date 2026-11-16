@@ -36,7 +36,7 @@ public sealed partial class ZoneWorld
     {
         "create_clan", "increase_clan_level", "dissolve_clan", "recover_clan", "change_clan_leader",
         "cancel_clan_leader_change", "create_academy", "create_royal", "create_knight", "rename_pledge",
-        "assign_subpl_leader", "learn_clan_skills"
+        "assign_subpl_leader", "learn_clan_skills", "create_ally", "dissolve_ally"
     };
 
     static bool IsVillageMasterNpc(ZoneEntity npc) =>
@@ -84,6 +84,8 @@ public sealed partial class ZoneWorld
         {
             "create_clan" => CreateClanAtMaster(session, arg1, arg2, now),
             "learn_clan_skills" => ShowPledgeSkills(session, player, npc),
+            "create_ally" => arg1.Length == 0 ? null : CreateAlly(session, clan, arg1, now),
+            "dissolve_ally" => DissolveAlly(session, clan, now),
             _ when clan == null || clan.LeaderId != session.ObjectId => NotAuthorized(session),
             "increase_clan_level" => IncreaseClanLevel(session, player, clan!, now),
             "dissolve_clan" => DissolveAtMaster(session, player, clan!, now),
@@ -192,8 +194,8 @@ public sealed partial class ZoneWorld
         return list.ToArray();
     }
 
-    /// <summary>Mobius <c>VillageMaster.dissolveClan</c>: refused while allied, at war, owning a hall or castle, or siege-registered.</summary>
-    string? DissolveAtMaster(ZoneSession session, ZoneEntity player, ZoneClan clan, long now)
+    /// <summary>Mobius <c>VillageMaster.dissolveClan</c> conditions, shared with the direct dissolve request.</summary>
+    string? DissolveConditionsBlock(ZoneSession session, ZoneClan clan)
     {
         if (clan.D.AllyId != 0)
         {
@@ -215,6 +217,14 @@ public sealed partial class ZoneWorld
             SelfLine(session, 265, "You cannot dissolve a clan during a siege or while protecting a castle.");
             return PledgeProtocol.Conditions;
         }
+        return null;
+    }
+
+    /// <summary>Mobius <c>VillageMaster.dissolveClan</c>: refused while allied, at war, owning a hall or castle, or siege-registered.</summary>
+    string? DissolveAtMaster(ZoneSession session, ZoneEntity player, ZoneClan clan, long now)
+    {
+        if (DissolveConditionsBlock(session, clan) is { } block)
+            return block;
         if (clan.DissolvingExpiryUnixMs > now)
         {
             SelfLine(session, 263, "You have already requested the dissolution of your clan.");
