@@ -31,6 +31,12 @@ public static class EnchantProtocol
     public const string GradeMismatch = "grade_mismatch";
     public const string SlotMismatch = "slot_mismatch";
     public const string MaxEnchant = "max_enchant";
+    /// <summary>Mobius <c>isEnchanting</c>: another scroll is already waiting for a target.</summary>
+    public const string Busy = "enchant_busy";
+    /// <summary>Mobius <c>isCastingNow</c> at scroll use.</summary>
+    public const string Casting = "enchant_casting";
+    /// <summary>Mobius: a private store, workshop or trade window is open at confirm.</summary>
+    public const string Store = "enchant_store";
 
     /// <summary>Select a target. Params are the scroll object id and the scroll item id.</summary>
     public const int SelectItem = 10;
@@ -67,4 +73,25 @@ public static class EnchantProtocol
 
     /// <summary>Crystals gained from a normal failure. Params are the count and the crystal name.</summary>
     public const int Earned = 20;
+
+    /// <summary>Mobius client line 355 "Inappropriate enchant conditions." after a rejected confirm.</summary>
+    public const int InappropriateConditions = 355;
+
+    /// <summary>Mobius client line 1688: no enchanting while a private store or workshop is open.</summary>
+    public const int StoreOpen = 1688;
+
+    /// <summary>Mobius <c>CommonSkill.FIREWORK</c>, cast on the enchanter when a success is announced.</summary>
+    public const int FireworkSkillId = 2024;
+
+    /// <summary>Mobius announces armor (jewelry too) reaching +6.</summary>
+    public const int AnnounceArmor = 6;
+
+    /// <summary>Mobius announces weapons reaching +7 and +15.</summary>
+    public const int AnnounceWeapon = 7;
+
+    public const int AnnounceWeaponMax = 15;
+
+    /// <summary>Does this success get the Mobius broadcast and firework.</summary>
+    public static bool Announced(bool weapon, int newLevel) =>
+        weapon ? newLevel is AnnounceWeapon or AnnounceWeaponMax : newLevel == AnnounceArmor;
 }

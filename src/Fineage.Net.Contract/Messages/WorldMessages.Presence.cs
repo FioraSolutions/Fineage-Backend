@@ -73,6 +73,11 @@ namespace Fineage.Net.Contract
         public int AllyCrestId { get; set; }
         public int LargeCrestId { get; set; }
         public int PledgeClass { get; set; }
+        /// <summary>
+        /// Mobius CharInfo <c>getEnchantEffect</c>: the active weapon's enchant (0..127) that drives the weapon glow.
+        /// Optional wire tail after <see cref="PledgeClass"/>; 0 for NPCs / old peers.
+        /// </summary>
+        public int WeaponEnchant { get; set; }
     }
 
     public sealed class PlayerStatsMsg
