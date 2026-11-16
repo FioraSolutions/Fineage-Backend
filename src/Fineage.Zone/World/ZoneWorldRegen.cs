@@ -38,6 +38,7 @@ public sealed partial class ZoneWorld
                     TickHallAuctions(_clock().ToUnixTimeMilliseconds());
                     TickSieges(_clock().ToUnixTimeMilliseconds());
                     TickManor(_clock().ToUnixTimeMilliseconds());
+                    TickFishing(_clock().ToUnixTimeMilliseconds());
                     TickSevenSigns();
                     TickOlympiad();
                 }

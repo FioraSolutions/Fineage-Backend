@@ -68,6 +68,12 @@ public sealed partial class ZoneWorld
             return InventoryProtocol.Dead;
         if (objectId <= 0 || count < 1)
             return "bad_request";
+        if (player.Fishing)
+        {
+            // Mobius RequestDropItem: no dropping while fishing.
+            SelfLine(session, FishingProtocol.CannotWhileFishingDrop, "You cannot do that while fishing.");
+            return FishingProtocol.Busy;
+        }
 
         var item = player.Inventory.Find(objectId);
         if (item == null || item.IsEquipped)

@@ -264,7 +264,7 @@ public sealed partial class ZoneWorld
     };
 
     internal static bool IsImmobilized(ZoneEntity entity) =>
-        entity.Abnormals.Any(a => a.Slot.Length > 0 && ImmobilizeSlots.Contains(a.Slot));
+        entity.Fishing || entity.Abnormals.Any(a => a.Slot.Length > 0 && ImmobilizeSlots.Contains(a.Slot));
 
     internal static bool IsActionBlocked(ZoneEntity entity) =>
         entity.Abnormals.Any(a => a.Slot.Length > 0 && ActionBlockSlots.Contains(a.Slot));

@@ -46,6 +46,14 @@ public sealed partial class ZoneWorld
         var item = player.Inventory!.Find(objectId);
         if (GearRules.UseOwnedError(item != null) is { } ownedError)
             return ownedError;
+        // Mobius UseItem: nothing but fishing shots while the line is out.
+        if (player.Fishing && !FishingProtocol.IsFishShot(item!.ItemId))
+        {
+            SelfLine(session, FishingProtocol.CannotWhileFishingUse, "You cannot do that while fishing.");
+            return FishingProtocol.Busy;
+        }
+        if (FishingProtocol.IsFishShot(item!.ItemId))
+            return TryChargeFishShot(session, player, item);
         if (IsShot(item!.Template))
         {
             TryChargeShot(session, player, item, quiet: false);
@@ -83,6 +91,7 @@ public sealed partial class ZoneWorld
         {
             player.SoulshotCharged = false; // Mobius: charges live on the weapon instance
             player.SpiritshotCharge = 0;
+            player.FishShotCharged = false;
             if (item.IsEquipped)
                 RechargeAutoShots(player);
         }
@@ -112,6 +121,7 @@ public sealed partial class ZoneWorld
         {
             player.SoulshotCharged = false;
             player.SpiritshotCharge = 0;
+            player.FishShotCharged = false;
         }
         if (!PublishGear(session, player, before))
             return "bad_request";

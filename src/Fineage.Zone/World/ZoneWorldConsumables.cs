@@ -51,6 +51,7 @@ public sealed partial class ZoneWorld
         bool vitals = false, abnormals = false, moved = false, penaltyCleared = false;
         int hpTotal = 0, mpTotal = 0;
         List<(int ItemId, int Count)>? grants = null;
+        bool emptyBox = false;
         (int X, int Y, int Z)? destination = null;
 
         foreach (var effect in use.Effects)
@@ -114,6 +115,19 @@ public sealed partial class ZoneWorld
                     if (effect.ItemId > 0)
                         (grants ??= []).Add((effect.ItemId, Math.Max(1, effect.Count)));
                     break;
+                case "restorationRandom":
+                    // Mobius RestorationRandom: one roll in [0,100) lands in one group's slice of the roulette.
+                    if (RollRestoration(effect.Groups) is { } group)
+                    {
+                        foreach (var grant in group.Items)
+                        {
+                            if (grant.ItemId > 0 && grant.Count > 0)
+                                (grants ??= []).Add((grant.ItemId, grant.Count));
+                        }
+                    }
+                    else
+                        emptyBox = true;
+                    break;
                 case "recovery":
                     // Mobius EffectRecovery on Scroll: Recovery — clear the Death Penalty level.
                     if (player.DeathPenaltyLevel > 0)
@@ -167,6 +181,20 @@ public sealed partial class ZoneWorld
         NetBridge?.FanoutInventoryUpdate([session.ObjectId], InventoryMessages.Update(
                 removedEntirely ? InventoryChange.Remove : InventoryChange.Modify, item));
 
+        if (emptyBox)
+            SelfLine(session, FishingProtocol.NothingInside, "There was nothing found inside of that.");
+        if (grants != null && use.Effects.Any(e => e.Kind == "restorationRandom"))
+        {
+            foreach (var (itemId, count) in grants)
+            {
+                string name = _game.Items.TryGet(itemId, out var t) ? t.Name : itemId.ToString();
+                if (count > 1)
+                    SelfLine(session, ManorProtocol.ObtainedMany, $"You have obtained {count} {name}.", name, count.ToString());
+                else
+                    SelfLine(session, ManorProtocol.ObtainedOne, $"You have obtained {name}.", name);
+            }
+        }
+
         if (moved && destination is { } loc)
         {
             Relocate(player, loc.X, loc.Y, loc.Z);
@@ -182,4 +210,16 @@ public sealed partial class ZoneWorld
         return null;
     }
 
+    ItemSkillGroup? RollRestoration(IReadOnlyList<ItemSkillGroup> groups)
+    {
+        double roll = 100 * _fishingRandom.NextDouble();
+        double from = 0;
+        foreach (var group in groups)
+        {
+            if (roll >= from && roll <= from + group.Chance)
+                return group;
+            from += group.Chance;
+        }
+        return null;
+    }
 }

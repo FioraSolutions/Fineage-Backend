@@ -168,6 +168,8 @@ interface IWorldEventPublisher
     /// <summary>Manor window (<see cref="Fineage.Net.Contract.NetOpcode.ManorInfo"/>).</summary>
     void FanoutManorInfo(IReadOnlyList<int> watcherObjectIds, Fineage.Net.Contract.ManorInfoNetMsg manor);
 
+    void FanoutFishing(IReadOnlyList<int> watcherObjectIds, Fineage.Net.Contract.FishingEventNetMsg fishing);
+
 
     void FanoutClanAskJoin(IReadOnlyList<int> watcherObjectIds, Fineage.Protocol.ClanAskJoinMsg ask);
 

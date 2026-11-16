@@ -75,6 +75,7 @@ public sealed class BypassRegistry
             "package_withdraw"));
         registry.Register(new BuffBypassHandler());
         registry.Register(new TrainerBypassHandler());
+        registry.Register(new FishermanBypassHandler(html));
         return registry;
     }
 

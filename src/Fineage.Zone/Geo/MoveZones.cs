@@ -166,6 +166,19 @@ public sealed class WaterZones
 
     public int Count => _zones.Length;
 
+    /// <summary>
+    /// Mobius <c>WaterZone.getWaterZ</c> for the first water zone over (x, y): its top Z, the surface a bait floats on.
+    /// </summary>
+    public int? SurfaceAt(int x, int y)
+    {
+        foreach (var w in _zones)
+        {
+            if (x >= w.MinX && x <= w.MaxX && y >= w.MinY && y <= w.MaxY)
+                return w.MaxZ;
+        }
+        return null;
+    }
+
     public bool IsInWater(int x, int y, int z)
     {
         foreach (var w in _zones)
