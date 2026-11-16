@@ -209,3 +209,21 @@ public sealed partial class ZoneWorld
         ZoneLog.Info($"[manor] harvest target={target.ObjectId} by={player.ObjectId} item={itemId} x{count}");
     }
 }
+
+public sealed partial class ZoneWorld
+{
+    /// <summary>Test hook: spawn a template monster at a point (no respawn bookkeeping beyond the normal spawn).</summary>
+    internal ZoneEntity SpawnMonsterForTests(int npcId, int x, int y, int z)
+    {
+        lock (_gate)
+        {
+            var template = Fineage.Zone.Npcs.NpcCatalog.LoadDefault().ById[npcId];
+            int objectId = AllocateQuestNpcObjectId();
+            MaterializeSpawn(Fineage.Zone.Spawns.SpawnCatalog.FromTemplate(objectId, template, x, y, z, 0, attackable: true), _activeMapId);
+            var npc = _byId[objectId];
+            npc.HomeSet = false;
+            FanoutNewNpc(npc);
+            return npc;
+        }
+    }
+}
