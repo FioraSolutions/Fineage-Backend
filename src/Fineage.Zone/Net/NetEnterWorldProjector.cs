@@ -150,7 +150,7 @@ static class NetEnterWorldProjector
             MaxHp = entity.MaxHp,
             PAtkSpd = pAtkSpd,
             Karma = entity.Karma,
-            PvpFlag = entity.PvpFlagged ? (byte)1 : (byte)0,
+            PvpFlag = ZoneWorld.PvpFlagWire(entity),
             CurHp = entity.CurHp
         };
 

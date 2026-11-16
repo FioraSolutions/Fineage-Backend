@@ -98,6 +98,9 @@ public sealed partial class ZoneWorld
         ShotNotice(session, SysMsgCannotSeeTarget, "Cannot see target.");
     }
 
+    static bool IsGuard(ZoneEntity npc) =>
+        string.Equals(npc.NpcType, "Guard", StringComparison.Ordinal);
+
     void TickAggression(long now)
     {
         // Mobius thinkActive only matters when players exist nearby; empty world → no scan.
@@ -108,7 +111,10 @@ public sealed partial class ZoneWorld
         {
             if (!_byId.TryGetValue(id, out var npc))
                 continue;
-            if (npc.Kind != ZoneEntityKind.Npc || !npc.Aggressive || npc.AggroRange <= 0 || !npc.Attackable ||
+            // Mobius AttackableAI.autoAttackCondition: a Guard (attackable=false in the datapack) only auto-aggroes
+            // players carrying karma, inside its template aggro range and line of sight.
+            bool guard = IsGuard(npc);
+            if (npc.Kind != ZoneEntityKind.Npc || !npc.Aggressive || npc.AggroRange <= 0 || (!npc.Attackable && !guard) ||
                 npc.CurHp <= 0 || npc.AggroTargetId > 0 || npc.ReturningHome || now < npc.NextAggroScanMs)
                 continue;
             // _globalAggro starts at -10 and climbs once per think. A hit zeroes it.
@@ -118,6 +124,8 @@ public sealed partial class ZoneWorld
             foreach (var p in players)
             {
                 if (p.Dead || p.CurHp <= 0 || p.Session == null || !SameInstance(npc.ObjectId, p.ObjectId))
+                    continue;
+                if (guard && p.Karma <= 0)
                     continue;
                 long dx = npc.X - (long)p.X, dy = npc.Y - (long)p.Y, dz = npc.Z - (long)p.Z;
                 if (dx * dx + dy * dy + dz * dz > (long)npc.AggroRange * npc.AggroRange)

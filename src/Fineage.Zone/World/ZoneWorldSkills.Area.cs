@@ -35,12 +35,20 @@ public sealed partial class ZoneWorld
                 continue;
             if (!IsAttackable(caster, entity))
                 continue;
+            // Mobius area offensive skills skip players that are not auto-attackable (white, party mates) unless
+            // they are the target the caster picked; peace zones protect splash victims too.
+            if (entity.Kind == ZoneEntityKind.Player && entity.ObjectId != center.ObjectId &&
+                (!PlayerAutoAttackable(caster, entity) || (caster.Session != null &&
+                    PeacePlayableRefused(caster.Session, caster, entity, notify: false))))
+                continue;
             if (!ZoneCombat.InCastRange(center.X, center.Y, entity.X, entity.Y, affectRange))
                 continue;
             if (entity.ObjectId != center.ObjectId &&
                 entity.ObjectId != caster.ObjectId &&
                 !VisibleTo(caster.ObjectId, entity.ObjectId))
                 continue;
+            if (entity.Kind == ZoneEntityKind.Player)
+                UpdatePvPStatus(caster, entity, nowUnixMs);
             if (!ApplyAbnormalFromSkill(template, levelData, entity, nowUnixMs, attacker: caster))
                 continue;
             if (entity.Kind == ZoneEntityKind.Npc)
@@ -68,10 +76,18 @@ public sealed partial class ZoneWorld
             return SkillProtocol.Target;
         if (!IsAttackable(player, target))
             return SkillProtocol.Target;
+        if (!request.CtrlPressed && NeedsForce(player, target))
+            return null;
+        if (HostilePlayableRefused(session, player, target, badSkill: true) ||
+            SiegeFriendRefused(session, player, target) ||
+            PeacePlayableRefused(session, player, target))
+            return null;
         if (!VisibleTo(player.ObjectId, targetId))
             return SkillProtocol.Target;
         if (!ZoneCombat.InCastRange(player.X, player.Y, target.X, target.Y, template.CastRange))
             return SkillProtocol.Range;
+        // Mobius callSkill: a negative skill on a playable flags the caster (landing or resisted).
+        UpdatePvPStatus(player, target, now);
 
         player.CurMp = Math.Max(0, player.CurMp - levelData.MpConsume);
         var (hitMs, reuseMs) = ScaledSkillTimes(player, template);
@@ -125,10 +141,18 @@ public sealed partial class ZoneWorld
             return SkillProtocol.Target;
         if (!IsAttackable(player, target))
             return SkillProtocol.Target;
+        if (!request.CtrlPressed && NeedsForce(player, target))
+            return null;
+        if (HostilePlayableRefused(session, player, target, badSkill: true) ||
+            SiegeFriendRefused(session, player, target) ||
+            PeacePlayableRefused(session, player, target))
+            return null;
         if (!VisibleTo(player.ObjectId, targetId))
             return SkillProtocol.Target;
         if (!ZoneCombat.InCastRange(player.X, player.Y, target.X, target.Y, template.CastRange))
             return SkillProtocol.Range;
+        // Mobius callSkill: a negative skill on a playable flags the caster (landing or resisted).
+        UpdatePvPStatus(player, target, now);
 
         player.CurMp = Math.Max(0, player.CurMp - levelData.MpConsume);
         var (hitMs, reuseMs) = ScaledSkillTimes(player, template);
@@ -228,16 +252,18 @@ public sealed partial class ZoneWorld
     }
 
     /// <summary>
-    /// Ctrl-forced heal/buff on a non-self target raises the caster's PvP flag (purple name), including
-    /// when the target is a mob — Interlude force-use support behaviour the playtest expects.
+    /// Mobius <c>Creature.callSkill</c> for a positive skill: helping a flagged or karma player, or any attackable
+    /// creature (Ctrl-forced buff on a mob), runs <c>updatePvPStatus()</c> (normal flag time, not in PVP zones).
+    /// Healing or buffing a white player never flags.
     /// </summary>
     void FlagForcedSupport(ZoneEntity caster, ZoneEntity target, bool ctrlPressed, long now)
     {
-        if (!ctrlPressed || ReferenceEquals(caster, target))
+        if (caster.Kind != ZoneEntityKind.Player || ReferenceEquals(caster, target) || InPvpArea(caster))
             return;
-        if (target.Kind == ZoneEntityKind.Player)
-            UpdatePvPStatus(caster, target, now);
-        else
+        bool flags = target.Kind == ZoneEntityKind.Player
+            ? target.PvpFlagged || target.Karma > 0
+            : ctrlPressed;
+        if (flags)
             RaisePvpFlag(caster, now, PvpNormalTimeMs);
     }
 

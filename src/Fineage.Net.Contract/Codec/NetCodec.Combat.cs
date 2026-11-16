@@ -11,9 +11,20 @@ namespace Fineage.Net.Contract
         public static SelectTargetNetMsg DecodeSelectTarget(ReadOnlySpan<byte> p) =>
             new() { TargetObjectId = new Reader(p).ReadInt32() };
 
-        public static byte[] EncodeAttackRequest(AttackRequestNetMsg m) => Write(w => w.WriteInt32(m.TargetObjectId));
-        public static AttackRequestNetMsg DecodeAttackRequest(ReadOnlySpan<byte> p) =>
-            new() { TargetObjectId = new Reader(p).ReadInt32() };
+        public static byte[] EncodeAttackRequest(AttackRequestNetMsg m) => Write(w =>
+        {
+            w.WriteInt32(m.TargetObjectId);
+            if (m.Forced.HasValue)
+                w.WriteByte(m.Forced.Value ? (byte)1 : (byte)0);
+        });
+        public static AttackRequestNetMsg DecodeAttackRequest(ReadOnlySpan<byte> p)
+        {
+            var r = new Reader(p);
+            var m = new AttackRequestNetMsg { TargetObjectId = r.ReadInt32() };
+            if (r.Remaining > 0)
+                m.Forced = r.ReadByte() != 0;
+            return m;
+        }
 
         public static byte[] EncodeTargetSelected(TargetSelectedNetMsg m) => Write(w =>
         {

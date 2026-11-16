@@ -170,7 +170,11 @@ namespace Fineage.Net.Contract
         public PaperdollSlotNet[] Paperdoll { get; set; } = System.Array.Empty<PaperdollSlotNet>();
         /// <summary>Mobius karma — PK name colour. Optional wire tail.</summary>
         public int Karma { get; set; }
-        /// <summary>Mobius PvP flag — purple name while flagged. Optional wire tail.</summary>
+        /// <summary>Mobius PvP flag — 0 white, 1 purple, 2 purple blinking (last 20 s). Optional wire tail.</summary>
         public byte PvpFlag { get; set; }
+        /// <summary>Mobius <c>getPvpKills</c> (status window). Optional wire tail after <see cref="PvpFlag"/>.</summary>
+        public int PvpKills { get; set; }
+        /// <summary>Mobius <c>getPkKills</c> (status window). Optional wire tail after <see cref="PvpKills"/>.</summary>
+        public int PkKills { get; set; }
     }
 }

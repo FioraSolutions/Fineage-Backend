@@ -112,6 +112,7 @@ sealed class ZonePlayerIdentityPayload
     public int HideoutId { get; set; }
     public bool PvpFlagged { get; set; }
     public long PvpFlagUntilMs { get; set; }
+    public bool PvpFlagBlink { get; set; }
     public int PkKills { get; set; }
     public int PvpKills { get; set; }
     public int Karma { get; set; }

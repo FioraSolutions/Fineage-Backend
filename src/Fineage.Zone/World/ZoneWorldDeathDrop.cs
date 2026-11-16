@@ -16,9 +16,11 @@ public sealed partial class ZoneWorld
         if (player.Inventory == null || player.Session == null)
             return;
 
-        bool killerIsNpc = killerObjectId > 0
-                             && _byId.TryGetValue(killerObjectId, out var killer)
-                             && killer.Kind == ZoneEntityKind.Npc;
+        _byId.TryGetValue(killerObjectId, out var killer);
+        bool killerIsNpc = killer is { Kind: ZoneEntityKind.Npc };
+        // Mobius onDieDropItem: nothing drops when a player kills you inside a PVP zone (arena / siege).
+        if (killer is { Kind: ZoneEntityKind.Player } && InPvpArea(player))
+            return;
         var rates = _deathDrop.RatesFor(player.Karma, player.PkKills, killerIsNpc, player.Level);
         if (rates is not { } r)
             return;

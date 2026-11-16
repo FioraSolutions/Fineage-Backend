@@ -69,7 +69,9 @@ sealed partial class NetWorldEventPublisher
             MaxWeight = info.MaxWeight,
             Paperdoll = slots,
             Karma = info.Karma,
-            PvpFlag = info.PvpFlag
+            PvpFlag = info.PvpFlag,
+            PvpKills = info.PvpKills,
+            PkKills = info.PkKills
         };
     }
 

@@ -59,6 +59,13 @@ sealed partial class ZoneEntity
         set => EnsureIdentity().PvpFlagged = value;
     }
 
+    /// <summary>Mobius <c>updatePvPFlag(2)</c>: the flag is in its last 20 s and the name blinks.</summary>
+    public bool PvpFlagBlink
+    {
+        get => Identity?.PvpFlagBlink ?? false;
+        set => EnsureIdentity().PvpFlagBlink = value;
+    }
+
     /// <summary>Unix ms when the PvP flag expires (Mobius <c>_pvpFlagLasts</c>).</summary>
     public long PvpFlagUntilMs
     {

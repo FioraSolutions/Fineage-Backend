@@ -28,6 +28,12 @@ namespace Fineage.Net.Contract
     public sealed class AttackRequestNetMsg
     {
         public int TargetObjectId { get; set; }
+
+        /// <summary>
+        /// Ctrl / force-attack. Optional wire tail (one byte). Absent (old clients) = legacy behaviour, treated as forced.
+        /// New clients send 0 for a plain click: a white (non-flagged, karma 0) player or a party mate is then refused.
+        /// </summary>
+        public bool? Forced { get; set; }
     }
 
     public sealed class TargetSelectedNetMsg
