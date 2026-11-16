@@ -202,6 +202,36 @@ public sealed partial class ZoneWorld
         if (clan == null)
             entity.ClanWarehouseOpen = false;
         RefreshClanSkills(entity, clan);
+        if (SyncSiegeSkills(entity, clan) && entity.Session is { InWorld: true } && NetBridge != null)
+            NetBridge.FanoutSkillList([entity.ObjectId],
+                Fineage.Zone.Net.NetEnterWorldProjector.BuildSkills(entity, _clock().ToUnixTimeMilliseconds()));
+    }
+
+    /// <summary>
+    /// Mobius <c>SiegeManager.addSiegeSkills / removeSiegeSkills</c>: the leader of a level 4+ clan knows Seal of Ruler
+    /// and Build Headquarters. True when the skill book changed.
+    /// </summary>
+    bool SyncSiegeSkills(ZoneEntity entity, ZoneClan? clan)
+    {
+        if (entity.Kind != ZoneEntityKind.Player)
+            return false;
+        bool grant = clan != null && clan.LeaderId == entity.ObjectId && clan.Level >= SiegeProtocol.MinClanLevel;
+        bool changed = false;
+        foreach (int id in (ReadOnlySpan<int>)[SiegeProtocol.SealOfRulerSkillId, SiegeProtocol.BuildHeadquartersSkillId])
+        {
+            if (grant && _game.Skills.Find(id) != null)
+            {
+                if (!entity.KnownSkills.TryGetValue(id, out int have) || have < 1)
+                {
+                    entity.KnownSkills[id] = 1;
+                    changed = true;
+                }
+            }
+            else if (!grant && entity.KnownSkills.Remove(id))
+                changed = true;
+        }
+
+        return changed;
     }
 
     /// <summary>

@@ -54,7 +54,8 @@ interface IWorldEventPublisher
     void FanoutStatusUpdate(IReadOnlyList<int> watcherObjectIds, Fineage.Protocol.StatusUpdateMsg status);
 
     /// <summary>Mobius Die packet for <paramref name="objectId"/> (killer may be 0). Called under the ZoneWorld gate.</summary>
-    void FanoutDie(IReadOnlyList<int> watcherObjectIds, int objectId, int killerObjectId);
+    /// <param name="restartFlags">Optional <see cref="Fineage.Net.Contract.EntityDieMsg"/> restart buttons (castle / siege HQ).</param>
+    void FanoutDie(IReadOnlyList<int> watcherObjectIds, int objectId, int killerObjectId, int restartFlags = 0);
 
     /// <summary>Mobius DropItem (ground spawn with dropper FX). Called under the ZoneWorld gate.</summary>
     void FanoutDropItem(IReadOnlyList<int> watcherObjectIds, Fineage.Protocol.DropItemMsg drop);
@@ -157,6 +158,12 @@ interface IWorldEventPublisher
 
     /// <summary>Clan hall auction list (Mobius AuctionManager pages, as data). Called under the ZoneWorld gate.</summary>
     void FanoutClanHallList(IReadOnlyList<int> watcherObjectIds, Fineage.Net.Contract.ClanHallListNetMsg halls);
+
+    /// <summary>Castle gate / wall state (<see cref="Fineage.Net.Contract.NetOpcode.DoorStatus"/>).</summary>
+    void FanoutDoorStatus(IReadOnlyList<int> watcherObjectIds, Fineage.Net.Contract.DoorStatusNetMsg door);
+
+    /// <summary>Chamberlain castle window (<see cref="Fineage.Net.Contract.NetOpcode.CastleInfo"/>).</summary>
+    void FanoutCastleInfo(IReadOnlyList<int> watcherObjectIds, Fineage.Net.Contract.CastleInfoNetMsg castle);
 
 
     void FanoutClanAskJoin(IReadOnlyList<int> watcherObjectIds, Fineage.Protocol.ClanAskJoinMsg ask);

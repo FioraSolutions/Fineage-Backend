@@ -121,6 +121,41 @@ static partial class NormalizedStoreWriter
                 ins.ExecuteNonQuery();
             }
         }
+        if (root.TryGetProperty("castles", out var castles) && castles.ValueKind == JsonValueKind.Array)
+        {
+            Exec(conn, tx, "DELETE FROM castles");
+            foreach (var castle in castles.EnumerateArray())
+            {
+                using var ins = conn.CreateCommand();
+                ins.Transaction = tx;
+                ins.CommandText =
+                    "INSERT INTO castles (id, owner_clan_id, tax_percent, treasury, siege_unix_ms, payload) " +
+                    "VALUES (@id, @owner, @tax, @treasury, @siege, @payload::jsonb)";
+                ins.Parameters.AddWithValue("id", castle.GetProperty("id").GetInt32());
+                ins.Parameters.AddWithValue("owner", castle.TryGetProperty("ownerClanId", out var o) ? o.GetInt32() : 0);
+                ins.Parameters.AddWithValue("tax", castle.TryGetProperty("taxPercent", out var t) ? t.GetInt32() : 0);
+                ins.Parameters.AddWithValue("treasury", castle.TryGetProperty("treasury", out var m) ? m.GetInt64() : 0L);
+                ins.Parameters.AddWithValue("siege", castle.TryGetProperty("siegeUnixMs", out var d) ? d.GetInt64() : 0L);
+                ins.Parameters.AddWithValue("payload", castle.GetRawText());
+                ins.ExecuteNonQuery();
+            }
+        }
+
+        if (root.TryGetProperty("siegeClans", out var siegeClans) && siegeClans.ValueKind == JsonValueKind.Array)
+        {
+            Exec(conn, tx, "DELETE FROM siege_clans");
+            foreach (var row in siegeClans.EnumerateArray())
+            {
+                using var ins = conn.CreateCommand();
+                ins.Transaction = tx;
+                ins.CommandText = "INSERT INTO siege_clans (castle_id, clan_id, side) VALUES (@castle, @clan, @side) " +
+                                  "ON CONFLICT (castle_id, clan_id) DO NOTHING";
+                ins.Parameters.AddWithValue("castle", row.GetProperty("castleId").GetInt32());
+                ins.Parameters.AddWithValue("clan", row.GetProperty("clanId").GetInt32());
+                ins.Parameters.AddWithValue("side", (short)row.GetProperty("side").GetInt32());
+                ins.ExecuteNonQuery();
+            }
+        }
     }
 
     static void Exec(NpgsqlConnection conn, NpgsqlTransaction tx, string sql)

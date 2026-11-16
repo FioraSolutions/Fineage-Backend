@@ -172,13 +172,14 @@ sealed partial class NetWorldEventPublisher
             _presence.TrySend(watcher, NetOpcode.StatusUpdate, payload);
     }
 
-    void IWorldEventPublisher.FanoutDie(IReadOnlyList<int> watcherObjectIds, int objectId, int killerObjectId)
+    void IWorldEventPublisher.FanoutDie(IReadOnlyList<int> watcherObjectIds, int objectId, int killerObjectId, int restartFlags)
     {
         var payload = NetCodec.EncodeEntityDie(new EntityDieMsg
         {
             EntityValue = (ulong)(uint)objectId,
             EntityGeneration = 1,
-            KillerObjectId = killerObjectId
+            KillerObjectId = killerObjectId,
+            RestartFlags = restartFlags
         });
         foreach (int watcher in watcherObjectIds)
             _presence.TrySendCritical(watcher, NetOpcode.EntityDie, payload);

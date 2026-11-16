@@ -36,6 +36,7 @@ public sealed partial class ZoneWorld
                     TickBosses();
                     CompleteDueDissolutions(_clock().ToUnixTimeMilliseconds());
                     TickHallAuctions(_clock().ToUnixTimeMilliseconds());
+                    TickSieges(_clock().ToUnixTimeMilliseconds());
                     TickSevenSigns();
                     TickOlympiad();
                 }

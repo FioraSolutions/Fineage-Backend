@@ -131,7 +131,9 @@ public sealed partial class MemoryAccountStore
                 castle.RegistrationClosed,
                 castle.ScheduleAccepted,
                 castle.InProgress,
-                castle.EndsUnixMs)).ToArray();
+                castle.EndsUnixMs,
+                castle.Treasury,
+                castle.DoorUpgrades is { Count: > 0 } doors ? new Dictionary<int, int>(doors) : null)).ToArray();
         }
     }
 
@@ -173,7 +175,9 @@ public sealed partial class MemoryAccountStore
                 RegistrationClosed = castle.RegistrationClosed,
                 ScheduleAccepted = castle.ScheduleAccepted,
                 InProgress = castle.InProgress,
-                EndsUnixMs = castle.EndsUnixMs
+                EndsUnixMs = castle.EndsUnixMs,
+                Treasury = castle.Treasury,
+                DoorUpgrades = castle.DoorUpgrades is { Count: > 0 } doors ? new Dictionary<int, int>(doors) : null
             }).ToList();
             _data.SiegeClans = clans.Select(row => new SiegeClanDto
             {

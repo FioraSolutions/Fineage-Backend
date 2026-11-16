@@ -52,6 +52,7 @@ public sealed partial class ZoneWorld
                 entity.KnownSkills[pair.Key] = pair.Value;
         }
 
+        SyncSiegeSkills(entity, entity.ClanId == 0 ? null : ClanOf(entity.ObjectId));
         // Passive runSpd masteries (Quick Step, Agile Movement, armor sets) are part of the live run speed.
         RefreshRunSpeed(entity);
     }

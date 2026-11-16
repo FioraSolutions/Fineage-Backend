@@ -137,6 +137,17 @@ public sealed class NetShopTests
         var taxed = LastBuyList(bench.Rec);
         Assert.Equal(10, taxed.CastleTaxPercent);
         Assert.Equal(48, taxed.Items.Single(item => item.ItemId == Potion).Price);
+
+        // Mobius RequestBuyItem → Castle.addToTreasury: the castle share (10% of 40) lands in the treasury; Aden has
+        // no owner, so Giran keeps all of it.
+        Assert.Null(await actor.Buy(MerchantObjectId, 1, (Potion, 2)));
+        Assert.Equal(8, castle.Treasury);
+        var aden = bench.World.FindCastle(5)!;
+        aden.OwnerClanId = 9;
+        aden.TaxPercent = 50;
+        Assert.Null(await actor.Buy(MerchantObjectId, 1, (Potion, 2)));
+        Assert.Equal(8 + 4, castle.Treasury);
+        Assert.Equal(4, aden.Treasury);
     }
 
     [Fact]

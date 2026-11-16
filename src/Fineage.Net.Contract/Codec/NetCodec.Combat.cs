@@ -207,17 +207,22 @@ namespace Fineage.Net.Contract
             w.WriteUInt64(m.EntityValue);
             w.WriteUInt32(m.EntityGeneration);
             w.WriteInt32(m.KillerObjectId);
+            if (m.RestartFlags != 0)
+                w.WriteByte((byte)m.RestartFlags);
         });
 
         public static EntityDieMsg DecodeEntityDie(ReadOnlySpan<byte> p)
         {
             var r = new Reader(p);
-            return new EntityDieMsg
+            var die = new EntityDieMsg
             {
                 EntityValue = r.ReadUInt64(),
                 EntityGeneration = r.ReadUInt32(),
                 KillerObjectId = r.ReadInt32()
             };
+            if (r.Remaining >= 1)
+                die.RestartFlags = r.ReadByte();
+            return die;
         }
     }
 }

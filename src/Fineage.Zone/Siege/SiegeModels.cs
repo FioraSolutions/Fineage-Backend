@@ -34,6 +34,10 @@ public sealed class CastleSiege
     public bool ScheduleAccepted { get; internal set; }
     public bool InProgress { get; internal set; }
     public long EndsUnixMs { get; internal set; }
+    /// <summary>Mobius <c>castle.treasury</c>: shop / gatekeeper tax and the lord's deposits.</summary>
+    public long Treasury { get; internal set; }
+    /// <summary>Mobius <c>castle_doorupgrade</c>: door id → HP ratio (2 / 3 / 5). Reset when the castle changes hands.</summary>
+    public Dictionary<int, int> DoorUpgrades { get; } = [];
     internal List<SiegeRegistration> Registrations { get; } = [];
 }
 

@@ -58,6 +58,18 @@ public sealed partial class ZoneWorld
             ClearReviveOffer(player);
             return null;
         }
+        if (action == DeathProtocol.ReviveToCastle || action == DeathProtocol.ReviveToSiegeHq)
+        {
+            // Mobius RequestRestartPoint cases 2 / 3: castle (defender in a siege, or the owner clan) and siege HQ.
+            var point = action == DeathProtocol.ReviveToCastle ? CastleRestartPoint(player) : SiegeHqRestartPoint(player);
+            if (point is not { } p)
+                return action == DeathProtocol.ReviveToCastle ? DeathProtocol.NoCastle : DeathProtocol.NoHeadquarters;
+            ClearReviveOffer(player);
+            ReviveAtVillage(player, p.X, p.Y, p.Z);
+            ZoneLog.Info($"revive object={player.ObjectId} action={action} -> {p.X},{p.Y},{p.Z}");
+            return null;
+        }
+
         if (action != DeathProtocol.ReviveToVillage)
             return DeathProtocol.Unsupported;
 
@@ -235,7 +247,7 @@ public sealed partial class ZoneWorld
 
         if (netWatchers is { Count: > 0 } && NetBridge != null)
         {
-            NetBridge.FanoutDie(netWatchers, dead.ObjectId, killerObjectId);
+            NetBridge.FanoutDie(netWatchers, dead.ObjectId, killerObjectId, RestartFlagsFor(dead));
             NetBridge.FanoutStatusUpdate(netWatchers, status);
         }
     }

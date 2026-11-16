@@ -32,6 +32,7 @@ Login and Zone both fail fast at boot with a readable message when PostgreSQL is
 | `clans` | Payload jsonb: roster + Block C details (reputation, sub-units, rank privileges, wars, member grade / sponsor / apprentice / academy join level, ally, pending leader, clan warehouse rows) |
 | `clan_crests` | Crest blobs (`kind` 0 pledge, 1 large, 2 ally) |
 | `clan_halls` | Hall owner, lease paid-until, auction end, bids (payload) |
+| `castles` + `siege_clans` | Castle owner, tax %, treasury, siege date, payload (door upgrades, schedule); registered siege clans and side (migration 011) |
 | `store_meta` / sequences | `next_character_id`, `next_clan_id`, `next_item_object_id` |
 
 `PostgresAccountStore.FindById` / `List` read **normalized tables** (then hydrate the in-process mirror for hot writes). Login and Zone are separate processes, and both read the same database.
@@ -112,7 +113,7 @@ V2 MessagePack flushes still go to a discarded stream on the Net path. Net peers
 | Chat channels | Mobius CT_0 handlers. **All 0**: visible players within 1250 + speaker. **Shout 1 / Trade 8**: every player in the speaker's map region (`MapRegion.locId`) and instance; trade needs level 20 ("Players can use Trade chat after Lv. 20."); shout also skips players the speaker blocks. **Tell 2**: one online player by name (case-insensitive); receiver gets the speaker's name, sender gets `->Receiver`; offline → 145, blocked / message refusal / receiver chat-banned → 176. **Party 3 / Clan 4**: online members anywhere ("You are not in a party." / "You are not in a clan."). **Alliance 9**: online members of every clan in the speaker's alliance; no alliance → "You are not in an alliance.". **Hero 17**: heroes only, everyone online, one line per 10 s. **Petition 6/7**: 745 (no petitions yet). **Party rooms 14–16**: ignored (no rooms / command channels yet). GM 5, boat, friend, MSN, announcements from players → "not supported". Every receiver drops lines from players it blocks (block list or message refusal). Chat ban → 147 on All / Shout / Trade / Hero / Tell (party and clan stay open). Server announcements: `CreatureSay` type 10 (critical 18), objectId 0, empty name, to everyone online. |
 | Skills | `UseSkill` `0x031C` → world cast; `MagicSkillUse` `0x031D` + `StatusUpdate` (MP / heal HP). Hit damage uses existing vitals fanout. |
 | Cast visuals | Same audience as attacks (caster + player target + everyone who sees the caster). `MagicSkillUse` `0x031D` at cast start; `MagicSkillLaunched` `0x03AC` (`int32 casterId, skillId, level, int32 count, int32 targetIds…`) at hitTime when the skill fires (players and NPCs); `MagicSkillCanceled` `0x03AD` (`int32 objectId`) when a cast is aborted (hit-break, move, target gone / escaped / out of sight, stun…). Skill sounds and effects are client-side, keyed by `skillId` (+ level); soulshot / spiritshot glow is `MagicSkillUse` 2039/2150–2154 / 2047/2155–2159 / 2061/2160–2164 to the shooter and its watchers. |
-| Sounds | `PlaySound` `0x03AE` (`int32 type` 0 sound / 1 music, `string file`, `int32 objectId` 0 = unbound, `x, y, z`, `int32 delayMs`). Server-driven sounds only: quest jingles (`ItemSound.quest_accept / middle / itemget / finish / giveup`) to the quest owner only (Mobius `QuestState.playSound`). Everything else (swings, hits, skills, footsteps, UI) is played by the client from the packets above. Not yet sent (features not on the server): Siege_Victory, B04_S01 duel, SF_S_01 fishing, S_Race. |
+| Sounds | `PlaySound` `0x03AE` (`int32 type` 0 sound / 1 music, `string file`, `int32 objectId` 0 = unbound, `x, y, z`, `int32 delayMs`). Server-driven sounds only: quest jingles (`ItemSound.quest_accept / middle / itemget / finish / giveup`) to the quest owner only (Mobius `QuestState.playSound`). Everything else (swings, hits, skills, footsteps, UI) is played by the client from the packets above. `Siege_Victory` (type 1) to the clan that takes a castle mid-siege (Mobius `Siege.midVictory`). Not yet sent (features not on the server): B04_S01 duel, SF_S_01 fishing, S_Race. |
 | Revive | `ReviveRequest` `0x031E` (village) → `Revive` `0x031F` + `TeleportToLocation` `0x0320` + vitals; AOI spawn/despawn after relocate. |
 | Kill reward | Killer gets `SystemMessage` (id 95), `StatusUpdate`, and `PlayerStats` `0x0305` (exp/sp/level). |
 | Buffs | Skill / playtest abnormals → `AbnormalStatusUpdate` `0x0321` (full effect list). |
@@ -185,6 +186,33 @@ Clan skills: pledge skill tree (`data/pledge-skills.json`), learned at the villa
 | Crest / info | 8x12 crest ≤ 192 bytes (476), kind 2 in `clan_crests`, id on every member clan and in CharInfo. `AllyInfo` lists clan id, name, level, leader, members, online, crest. |
 | Relations / chat | `RelationAlly` (0x800) between members of different allied clans; `$` chat (type 9) to all allied online players. |
 | Persistence | `AllyId`, `AllyName`, `AllyCrestId`, `AllyPenaltyExpiry`, `AllyPenaltyType` in the clan payload. |
+
+## Castles and sieges (Block E1, Mobius CT_0 parity)
+
+Data: `data/castles.json` (written by `tools/import_castles.py` from Mobius Siege.ini, Doors.xml, castle zones and `castle_siege_guards` with isHired = 0): the 9 Interlude castles, artifact npc ids, control / flame towers, gates and walls (HP, defence, wall flag), HQ zones, owner restart points, NPC garrison.
+
+| Opcode | Payload |
+|--------|---------|
+| `DoorStatus` `0x03B7` (S → C) | `int32 objectId, doorId, bool open, int32 curHp, maxHp, bool attackable, bool wall, int32 castleId, upgradeRatio`. Comes after the gate's `EntitySpawn` (NpcType `Door`, npcId 0, name = door name) and again on every HP / open change. A broken gate stays dead and open. |
+| `CastleCommand` `0x03B8` (C → S) | `int32 kind, castleId, intArg1, intArg2, int64 amount`. Kinds (`CastleCommandKind`): 0 info, 1 set tax (`intArg1` %), 2 withdraw, 3 deposit (`amount`), 4 upgrade door (`intArg1` door id, `intArg2` ratio 2/3/5), 5 take Lord's Crown, 6 take circlet, 7 open / close gate (`intArg1` door, `intArg2` 1 open). `castleId` 0 = the caller's own castle. Errors: `Reject` codes `siege_*`. |
+| `CastleInfo` `0x03B9` (S → C) | `int32 castleId, string name, int32 ownerClanId, string ownerName, int32 taxPercent, maxTaxPercent, int64 treasury, int64 siegeUnixMs, bool inProgress, int32 n` × `doorId, upgradeType (1 outer, 2 inner, 3 wall), upgradeRatio, curHp, maxHp, bool open`. Treasury only for the leader / CASTLE_VAULT, doors only for the owner clan. |
+| `EntityDie` tail | optional **`byte restartFlags`**: bit0 castle, bit1 siege HQ (absent ⇒ 0). `ReviveRequest` action 3 = to castle, 4 = to siege HQ (`revive_no_castle` / `revive_no_hq`). |
+
+| Rule | Behaviour |
+|------|-----------|
+| Start | At the siege time (tick) or admin start. No attackers ⇒ cancelled (148 NPC castle, 295 owned) and the next date is picked. Otherwise everybody but the owner clan leaves the siege zone, 146 + time left, gates respawn closed at full HP, 3 control + 2 flame towers spawn, the NPC garrison spawns for an NPC-owned castle only. |
+| Countdown / end | 358 hours while > 1 h, 359 at 60 / 10 / 5 min, 360 at 10 s. End: 147, then 291 (clan won) or 856 (draw), reputation, flags removed, non-owners teleported, towers and guards removed, gates respawn. |
+| Zone | Siege zone = PvP while the siege runs (no flag, no karma; exp is lost as Mobius). Siege relation bits on `RelationChanged`: 0x200 in siege, 0x400 attacker, 0x800 same side, 0x1000 enemy side. |
+| Seal of Ruler (246) | Leader of an attacker clan, clan level ≥ 4, target = this castle's artifact, ≤ 200 range, not below it and ≤ 45 Z apart (else 748), 3 min static cast; 287 to defenders. Landing ⇒ ownership change (149 with clan + castle), `Siege_Victory` to the new owner, defenders ↔ attackers swap (alliance attackers join the defence), attackers back to their HQ or town, gates back at 50% HP, towers respawn. An NPC castle whose attackers are all in the winner's alliance ends at once. |
+| Headquarters (247) | Leader of an attacker clan, inside an HQ zone (else 290), 1 per clan (else 113), 300 × item 2131, 30 min reuse. Flag (npc 35062) can be hit by anyone but its clan; 286 to the clan when hit (30 s throttle). |
+| Gates / walls | Attackable during a siege by anyone but the owner clan; walls only take siege-weapon damage (players cannot break them). A broken gate opens the geo door and sends 288. |
+| Towers / guards | Control towers: registered attackers only. Each guard registers to the closest control tower; dead guards respawn while it stands. Guards scan every 3 s and attack any non-defender in aggro range; no random walk. |
+| Reputation | Lost castle: former owner −3000 (1772), new owner + min(1500, former's reputation); retaken by the former owner +750; NPC castle +1500 (1773). Circlets / crown are removed from the losing clan's online members. |
+| Chamberlain | Owner clan only, near the chamberlain when the world spawned one. Tax 0–15% (leader or CASTLE_VAULT, not during a siege). Deposit / withdraw without tax. Door upgrade ratio 2/3/5 (CASTLE_MANAGE_FUNCTIONS, not during a siege): outer 3M/4M/5M, inner 750k/900k/1M, wall 1.6M/1.8M/2M from the caller's adena. Lord's Crown (6841) for the leader, castle circlet for members, one each. Gates open / close (CASTLE_OPEN_DOOR). |
+| Taxes | Buy: castle share (price × tax%) to the merchant's castle treasury; multisell: entry tax × amount. Goddard / Schuttgart pay Rune's rate to Rune, the other castles pay Aden's rate to Aden, when that castle has an owner. |
+| Message ids | Registration replies 140–144 and the five pre-castle announcements 145–149 keep their legacy ids; everything newer uses Mobius `SystemMessageId` ids (Mobius equivalents of 145–149: 293, 711, 712, 846, 285). |
+
+Not yet: mercenaries, flame tower traps, siege golems (walls), castle functions / residential skills, noble / castle siege skills (326, 844, 845), circlet removal for offline members, manor (Block E2).
 
 ## Shortcuts (hotbar, Mobius ShortCuts)
 

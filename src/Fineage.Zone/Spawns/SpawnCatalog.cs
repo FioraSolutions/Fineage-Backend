@@ -111,54 +111,20 @@ public sealed class SpawnCatalog
                 if (row.RespawnRandomSeconds < 0)
                     throw new InvalidDataException($"{map.Path} object {objectId} has negative respawnRandomSeconds.");
 
-                npcs.Add(new SpawnNpcDefinition(
+                npcs.Add(FromTemplate(
                     objectId,
-                    row.NpcId,
-                    name,
+                    template,
                     row.X,
                     row.Y,
                     row.Z,
                     row.Heading,
-                    row.Attackable ?? template.Attackable,
+                    name,
                     maxHp,
+                    row.Attackable ?? template.Attackable,
                     Speed(row.RunSpeed, template.RunSpeed, 80f),
                     Speed(row.WalkSpeed, template.WalkSpeed, 40f),
                     Math.Max(0, row.RespawnDelaySeconds),
-                    Math.Max(0, row.RespawnRandomSeconds),
-                    template.Title,
-                    template.Type,
-                    Math.Max(1, template.Level),
-                    template.Exp,
-                    template.Sp,
-                    template.PAtk,
-                    template.PDef,
-                    template.AttackSpeed,
-                    template.Accuracy,
-                    template.Evasion,
-                    template.Critical,
-                    template.RandomDamage,
-                    template.Dex,
-                    template.ShieldDef,
-                    template.ShieldRate,
-                    template.MAtk,
-                    template.MDef,
-                    template.AttackRange,
-                    template.Aggressive,
-                    template.AggroRange,
-                    template.ClanHelpRange,
-                    template.Clans,
-                    template.IgnoreNpcIds,
-                    template.HpRegen,
-                    template.MpRegen,
-                    Math.Max(0, template.Mp),
-                    template.SoulShot,
-                    template.SoulShotChance,
-                    template.SpiritShot,
-                    template.SpiritShotChance,
-                    template.DefenceTraits,
-                    template.AiSkills,
-                    template.MinSkillChance,
-                    template.MaxSkillChance));
+                    Math.Max(0, row.RespawnRandomSeconds)));
             }
 
             maps.Add(map.MapId, new SpawnMapDefinition(map.MapId, map.Enabled, npcs));
@@ -166,6 +132,72 @@ public sealed class SpawnCatalog
 
         return new SpawnCatalog(maps);
     }
+
+    /// <summary>
+    /// One spawn row straight from an npcs.json template: the datapack rows above and the dynamic siege spawns
+    /// (towers, castle guards, headquarters) share this so stats never drift between the two.
+    /// </summary>
+    internal static SpawnNpcDefinition FromTemplate(
+        int objectId,
+        NpcTemplate template,
+        int x,
+        int y,
+        int z,
+        int heading,
+        string? name = null,
+        int? maxHp = null,
+        bool? attackable = null,
+        float? runSpeed = null,
+        float? walkSpeed = null,
+        int respawnDelaySeconds = 0,
+        int respawnRandomSeconds = 0) => new(
+        objectId,
+        template.NpcId,
+        string.IsNullOrWhiteSpace(name) ? template.Name : name,
+        x,
+        y,
+        z,
+        heading,
+        attackable ?? template.Attackable,
+        maxHp ?? Math.Max(1, template.Hp),
+        runSpeed ?? (template.RunSpeed > 0 ? template.RunSpeed : 80f),
+        walkSpeed ?? (template.WalkSpeed > 0 ? template.WalkSpeed : 40f),
+        respawnDelaySeconds,
+        respawnRandomSeconds,
+        template.Title,
+        template.Type,
+        Math.Max(1, template.Level),
+        template.Exp,
+        template.Sp,
+        template.PAtk,
+        template.PDef,
+        template.AttackSpeed,
+        template.Accuracy,
+        template.Evasion,
+        template.Critical,
+        template.RandomDamage,
+        template.Dex,
+        template.ShieldDef,
+        template.ShieldRate,
+        template.MAtk,
+        template.MDef,
+        template.AttackRange,
+        template.Aggressive,
+        template.AggroRange,
+        template.ClanHelpRange,
+        template.Clans,
+        template.IgnoreNpcIds,
+        template.HpRegen,
+        template.MpRegen,
+        Math.Max(0, template.Mp),
+        template.SoulShot,
+        template.SoulShotChance,
+        template.SpiritShot,
+        template.SpiritShotChance,
+        template.DefenceTraits,
+        template.AiSkills,
+        template.MinSkillChance,
+        template.MaxSkillChance);
 
     public static SpawnCatalog LoadDefault()
     {

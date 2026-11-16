@@ -48,6 +48,9 @@ public sealed partial class ZoneWorld
 
         if (target.Kind == ZoneEntityKind.Npc)
         {
+            // Castle gates / walls, towers and headquarters have their own Mobius reduceHp rules.
+            if (SiegeNpcHit(attacker, target, hit.Damage, now))
+                return;
             // Mobius FolkStatus.reduceHp: swing may land, but Folk/Merchant/Trainer take no damage and never hate.
             if (!ZoneCombat.TakesNpcCombatDamage(target.NpcType, target.Attackable))
             {
@@ -87,6 +90,8 @@ public sealed partial class ZoneWorld
     void RemoveDeadNpc(ZoneEntity npc, ZoneEntity? killer = null)
     {
         // Kill quest steps are not applied here. IQuestKillHook is the later combat entry.
+        if (npc.SiegeNpc != null)
+            OnSiegeNpcDied(npc);
         int objectId = npc.ObjectId;
         int npcId = npc.NpcId;
         int x = npc.X;
