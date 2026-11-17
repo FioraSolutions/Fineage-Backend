@@ -17,6 +17,12 @@ public sealed partial class ZoneWorld
 
     internal bool InOlympiadArena(int objectId) => _olympiadArena.Contains(objectId);
 
+    internal bool OlympiadTargetRefusedForTest(ZoneEntity attacker, ZoneEntity target)
+    {
+        lock (_gate)
+            return OlympiadTargetRefused(attacker, target);
+    }
+
     internal bool OlympiadObserving(int objectId) => _olympiadObservers.ContainsKey(objectId);
 
     void EnterOlympiadArena(ZoneEntity player)

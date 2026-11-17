@@ -43,7 +43,8 @@ internal sealed class WorldBench
         Random? combatRandom = null,
         Fineage.Zone.Manor.ManorSettings? manor = null,
         Random? manorRandom = null,
-        Random? fishingRandom = null)
+        Random? fishingRandom = null,
+        Fineage.Zone.Olympiad.OlympiadBoard? olympiad = null)
     {
         Game = game ?? GameData.LoadDefault();
         Store = MemoryAccountStore.InMemory();
@@ -70,6 +71,7 @@ internal sealed class WorldBench
             bosses: bosses,
             siege: siege,
             olympiadSettings: olympiadSettings,
+            olympiad: olympiad,
             sevenSigns: sevenSigns,
             dungeons: dungeons,
             dungeonAccess: dungeonAccess,
