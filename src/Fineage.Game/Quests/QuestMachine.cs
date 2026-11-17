@@ -248,7 +248,10 @@ public sealed partial class QuestMachine : IQuestKillHook
             Items = outcome.Items,
             Exp = outcome.Exp,
             Sp = outcome.Sp,
-            Spawns = outcome.Spawns
+            Spawns = outcome.Spawns,
+            Noble = outcome.Noble,
+            Teleport = outcome.Teleport,
+            Social = outcome.Social
         };
     }
 }

@@ -63,6 +63,15 @@ public sealed record SoundOp(string Name) : QuestOp;
 /// </summary>
 public sealed record SpawnNpcOp(int NpcId) : QuestOp;
 
+/// <summary>Mobius <c>player.setNoble(true)</c> (Possessor of a Precious Soul 4).</summary>
+public sealed record SetNobleOp : QuestOp;
+
+/// <summary>Mobius <c>player.teleToLocation(x, y, z)</c> from a quest event.</summary>
+public sealed record TeleportOp(int X, int Y, int Z) : QuestOp;
+
+/// <summary>Mobius <c>broadcastPacket(new SocialAction(player, action))</c>.</summary>
+public sealed record SocialOp(int Action) : QuestOp;
+
 public sealed record QuestDialog(
     int NpcId,
     QuestHook Hook,
@@ -86,14 +95,16 @@ public sealed record QuestDialog(
     /// <summary>Mobius <c>hasAtLeastOneQuestItem</c> — at least one listed item held.</summary>
     IReadOnlyList<int>? HasAny = null,
     /// <summary>Mobius <c>player.isMageClass()</c>. Null = no gate.</summary>
-    bool? IsMage = null);
+    bool? IsMage = null,
+    /// <summary>Mobius <c>player.isSubClassActive()</c>. Null = no gate.</summary>
+    bool? SubClass = null);
 
 /// <summary>
 /// Who is talking. Mobius quest scripts branch on <c>player.getRace()</c> / <c>getLevel()</c>
 /// before showing the start page; dialogs carry the same gates as data (races, minLevel, maxLevel).
 /// <c>ClassId</c> -1 = unknown (class gates do not match); Mobius path quests check <c>player.getClassId()</c>.
 /// </summary>
-public readonly record struct QuestActor(int Race, int Level, int ClassId = -1);
+public readonly record struct QuestActor(int Race, int Level, int ClassId = -1, bool SubClass = false);
 
 public sealed record QuestDefinition(
     int Id,

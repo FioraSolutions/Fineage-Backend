@@ -24,6 +24,13 @@ public sealed partial class QuestCatalog
             "sell_items" => ReadSell(op, items, where, questId),
             "sound" => ReadSound(op, where, questId),
             "spawn_npc" => ReadSpawn(op, where, questId),
+            "set_noble" => new SetNobleOp(),
+            "teleport" => op is { X: int x, Y: int y, Z: int z }
+                ? new TeleportOp(x, y, z)
+                : throw new InvalidDataException($"{where} quest {questId} teleport needs x, y and z."),
+            "social" => op.Action is int action and > 0
+                ? new SocialOp(action)
+                : throw new InvalidDataException($"{where} quest {questId} social needs a positive action."),
             _ => throw new InvalidDataException($"{where} quest {questId} has unknown op '{op.Op}'.")
         };
     }

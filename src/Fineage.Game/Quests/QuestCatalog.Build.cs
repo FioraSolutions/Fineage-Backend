@@ -63,8 +63,8 @@ public sealed partial class QuestCatalog
             ops.Add(ReadOp(op, items, where, questId));
 
         string html = ResolveHtml(dialog, htmlBaseDir, where, questId);
-        // Mobius addSpawn events often return null htmltext; allow empty HTML when spawn_npc is present.
-        bool spawnOnly = ops.Exists(static o => o is SpawnNpcOp);
+        // Mobius addSpawn / teleToLocation events often return null htmltext; allow empty HTML for those steps.
+        bool spawnOnly = ops.Exists(static o => o is SpawnNpcOp or TeleportOp);
         if (hook != QuestHook.Kill && string.IsNullOrWhiteSpace(html) && !spawnOnly)
             throw new InvalidDataException($"{where} quest {questId} step needs html.");
         if (html.Length > 12_000)
@@ -103,7 +103,8 @@ public sealed partial class QuestCatalog
             ReadItemList(dialog.LacksItems, items, where, questId, "lacksItems"),
             ReadAtLeast(dialog.AtLeast, items, where, questId),
             ReadItemList(dialog.HasAny, items, where, questId, "hasAny"),
-            dialog.IsMage);
+            dialog.IsMage,
+            dialog.SubClass);
     }
 
     static IReadOnlyDictionary<int, int>? ReadAtLeast(Dictionary<string, int>? rows, ItemCatalog items, string where, int questId)

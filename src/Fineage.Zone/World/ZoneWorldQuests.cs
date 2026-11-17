@@ -190,7 +190,7 @@ public sealed partial class ZoneWorld
         }
     }
 
-    static QuestActor QuestActorOf(ZoneEntity player) => new(player.Race, player.Level, player.ClassId);
+    static QuestActor QuestActorOf(ZoneEntity player) => new(player.Race, player.Level, player.ClassId, player.SubClassActive);
 
     /// <summary>
     /// Mobius <c>Quest.onKill</c> for the killer (killer-only steps) plus <c>party: true</c> steps shared to one random eligible member. Quest drops go straight to the
@@ -304,6 +304,9 @@ public sealed partial class ZoneWorld
         && outcome.Items.Count == 0
         && outcome.Sounds.Count == 0
         && outcome.Spawns.Count == 0
+        && !outcome.Noble
+        && outcome.Teleport == null
+        && outcome.Social == 0
         && outcome.Exp == 0
         && outcome.Sp == 0;
 
@@ -312,6 +315,10 @@ public sealed partial class ZoneWorld
         bool levelled = ApplyProgress(player, outcome);
         if (outcome.Spawns.Count > 0 && _byId.TryGetValue(npcObjectId, out var anchor))
             ApplyQuestSpawns(player, anchor, outcome.Spawns);
+        if (outcome.Noble)
+            SetNoble(player, true);
+        if (outcome.Social > 0)
+            NetBridge?.FanoutSocialAction(NetWatchersOf(player), player.ObjectId, outcome.Social);
         if (outcome.Items.Count > 0 && player.Inventory != null)
         {
             var invUpdate = new InventoryUpdateMsg
@@ -368,6 +375,16 @@ public sealed partial class ZoneWorld
 
         if (outcome.JournalChanged || outcome.Exp != 0 || outcome.Sp != 0)
             SaveQuestProgress(session, player);
+
+        // Mobius teleToLocation from a quest step (Possessor of a Precious Soul 4 → Lady of the Lake).
+        if (outcome.Teleport is { } to)
+        {
+            var (x, y) = Offset(to.X, to.Y);
+            if (Loaded(x, y))
+                Relocate(player, x, y, to.Z);
+            else
+                Notice(session, NpcServiceProtocol.DestinationUnloaded, NpcServiceProtocol.DestinationUnloadedText);
+        }
     }
 
 }
