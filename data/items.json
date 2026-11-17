@@ -53633,6 +53633,18 @@
       "sellable": false
     },
     {
+      "id": 6842,
+      "name": "Wings of Destiny Circlet",
+      "kind": "armor",
+      "bodySlot": "hair",
+      "icon": "icon.accessory_hero_cap_i00",
+      "equip": {
+        "hero": true
+      },
+      "weight": 10,
+      "sellable": false
+    },
+    {
       "id": 6843,
       "name": "Cat Ears",
       "kind": "armor",
