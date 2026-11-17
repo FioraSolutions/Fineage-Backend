@@ -127,7 +127,7 @@ public sealed class NetSubclassTests
         // The new subclass is level 40: a second one is refused until it reaches 75.
         Assert.Null(await p.BypassAsync(master2.ObjectId, $"Subclass 4 {Hawkeye}"));
         Assert.Contains("aren't eligible", LastHtml(bench2));
-        Assert.Equal(1, bench2.World.SubclassesOf(p.Player).Count);
+        Assert.Single(bench2.World.SubclassesOf(p.Player));
 
         p.Player.Level = 75;
         Assert.Null(await p.BypassAsync(master2.ObjectId, $"Subclass 4 {Hawkeye}"));

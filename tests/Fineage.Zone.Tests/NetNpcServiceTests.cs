@@ -62,6 +62,21 @@ public sealed class NetNpcServiceTests
     }
 
     [Fact]
+    public async Task Noblesse_list_opens_for_a_noble()
+    {
+        var bench = Open();
+        BenchPlayer actor = await bench.EnterAsync(
+            "noblegate", "Lord", items: [new StoredItem(Adena, 5000, -1)], level: 76, x: 0, y: 0, z: 0);
+        Assert.True(bench.World.TrySetNoble(actor.ObjectId, true));
+
+        Assert.Null(await actor.BypassAsync(GateObjectId, "showTeleports NOBLES_ADENA"));
+        Assert.Contains($"npc_{GateObjectId}_teleport NOBLES_ADENA 0", LastHtml(bench), StringComparison.Ordinal);
+        Assert.Null(await actor.Teleport(GateObjectId, "NOBLES_ADENA", 0));
+        Assert.Equal(100, actor.Session.X);
+        Assert.Equal(NpcServiceProtocol.Teleported, LastSystemMessageId(bench));
+    }
+
+    [Fact]
     public async Task Paid_teleport_takes_adena_and_the_monday_discount()
     {
         // Monday 21:00 UTC is inside the Mobius discount window.
