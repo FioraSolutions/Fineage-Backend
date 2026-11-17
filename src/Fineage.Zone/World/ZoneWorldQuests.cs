@@ -225,9 +225,12 @@ public sealed partial class ZoneWorld
     void ApplyQuestAttack(ZoneEntity attacker, ZoneEntity npc)
     {
         if (attacker.Kind != ZoneEntityKind.Player || attacker.Inventory == null || attacker.Dead || attacker.Session == null
-            || !_quests.HasAttackSteps(npc.NpcId))
+            || npc.QuestAttackSpawned || !_quests.HasAttackSteps(npc.NpcId))
             return;
-        PublishKill(attacker, _quests.OnAttack(attacker.Quests, attacker.Inventory, npc.NpcId, QuestActorOf(attacker)), npc);
+        var outcome = _quests.OnAttack(attacker.Quests, attacker.Inventory, npc.NpcId, QuestActorOf(attacker));
+        if (outcome.Ok && outcome.Spawns.Count > 0)
+            npc.QuestAttackSpawned = true;
+        PublishKill(attacker, outcome, npc);
     }
 
     /// <summary>Test hook: one landed hit by <paramref name="attacker"/> on <paramref name="npc"/>.</summary>

@@ -172,6 +172,19 @@ public sealed class SecondClassTrialTests
     public void Fates_whisper_needs_level_75() =>
         Assert.False(Walk(234, new QuestActor(0, 74, 88), 5011, 50, false, (1460, 984), (7893, 1)));
 
+    [Theory]
+    [InlineData(0.10, 2)]
+    [InlineData(0.30, 1)]
+    [InlineData(0.90, 0)]
+    public void Champion_harpy_hit_calls_matriarchs(double roll, int expected)
+    {
+        var m = new QuestMachine(Data.Quests, Data.Items, () => roll);
+        var j = new QuestJournal();
+        j.Add(223, QuestPhase.Started).Set(QuestProgress.CondVar, "6");
+        var outcome = m.OnAttack(j, new PlayerInventory(Data.Items), 20145, new QuestActor(0, 40, 1));
+        Assert.Equal(expected, outcome.Spawns.Count(id => id == 27088));
+    }
+
     [Fact]
     public void Raid_boss_kill_leaves_the_fates_whisper_chest_for_anyone()
     {

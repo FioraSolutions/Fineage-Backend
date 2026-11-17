@@ -244,6 +244,11 @@ def q223():
         *collect_all({20145: EGG, 27088: EGG, 20158: VENOM, 20553: BILE}, 30, 6, 7, chance=0.5),
         *[kill(m, [drop(RATMAN_HEAD, 1.0, 100, 11)], cond=10) for m in (27089, 20551)],
         *[kill(m, [drop(FANG, 0.5 + 0.1 * (m - 20577), 100, 13)], cond=12) for m in range(20577, 20583)],
+        # A hit on a Harpy (cond 6) / Road Scavenger (cond 10) calls one or two helpers half the time (once per mob):
+        # 50% * 30% = two, 50% * 70% = one; the second step rolls only when the first one missed.
+        *[r for mob, helper, c in ((20145, 27088, 6), (20551, 27089, 10)) for r in (
+            attack(mob, [spawn(helper), spawn(helper)], cond=c, chance=0.15),
+            attack(mob, [spawn(helper)], cond=c, chance=round(0.35 / 0.85, 4)))],
     ]
     write(223, "00223_test_of_the_champion", "Q00223_TestOfTheChampion", "Test of the Champion",
           [MASON_LETTER, VENOM, BILE, INSIGNIA, EGG, GROOT_LETTER, MOUEN_LETTER, L1, ROSE_RING, AXE_HEAD, L2, L3,

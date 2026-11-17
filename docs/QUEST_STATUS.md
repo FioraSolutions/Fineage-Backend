@@ -7,9 +7,9 @@ Status: **implemented** — every Mobius talk NPC and kill target is wired, the 
 
 | Status | Count |
 |---|---|
-| implemented | 166 |
-| partial | 103 |
-| stub | 37 |
+| implemented | 168 |
+| partial | 102 |
+| stub | 36 |
 | missing | 38 |
 | **total Mobius quests** | **344** |
 
@@ -160,7 +160,7 @@ Related non-quest scripts: `village_master/*Change1|Change2` and `FirstClassTran
 | 220 | Testimony of Glory | 37+ | 2nd class (Trial/Test) | implemented | hand-ported |
 | 221 | Testimony of Prosperity | 38+ | 2nd class (Trial/Test) | implemented | hand-ported |
 | 222 | Test of the Duelist | 39+ | 2nd class (Trial/Test) | implemented | hand-ported |
-| 223 | Test of the Champion | 39+ | 2nd class (Trial/Test) | partial | quest spawns missing; hand-ported |
+| 223 | Test of the Champion | 39+ | 2nd class (Trial/Test) | implemented | hand-ported |
 | 224 | Test of Sagittarius | 39+ | 2nd class (Trial/Test) | implemented | hand-ported |
 | 225 | Test of the Searcher | 39+ | 2nd class (Trial/Test) | implemented | timers; hand-ported |
 | 226 | Test of the Healer | 39+ | 2nd class (Trial/Test) | implemented | timers; hand-ported |
@@ -171,7 +171,7 @@ Related non-quest scripts: `village_master/*Change1|Change2` and `FirstClassTran
 | 231 | Test of the Maestro | 39+ | 2nd class (Trial/Test) | implemented | timers; hand-ported |
 | 232 | Test of the Lord | 39+ | 2nd class (Trial/Test) | implemented | timers; hand-ported |
 | 233 | Test of the War Spirit | 39+ | 2nd class (Trial/Test) | implemented | hand-ported |
-| 234 | Fate's Whisper | 75+ | subclass prerequisite | stub | 17 dialog(s), no start; auto-port |
+| 234 | Fate's Whisper | 75+ | subclass prerequisite | implemented | hand-ported |
 | 235 | Mimir's Elixir | 75+ | subclass prerequisite | partial | no kill: 2/2 mobs; auto-port |
 | 241 | Possessor of a Precious Soul - 1 | 50+ | noblesse | implemented | hand-ported |
 | 242 | Possessor of a Precious Soul - 2 | 60+ | noblesse | partial | quest spawns missing; timers; hand-ported |
