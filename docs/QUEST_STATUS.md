@@ -7,8 +7,8 @@ Status: **implemented** — every Mobius talk NPC and kill target is wired, the 
 
 | Status | Count |
 |---|---|
-| implemented | 149 |
-| partial | 104 |
+| implemented | 150 |
+| partial | 103 |
 | stub | 53 |
 | missing | 38 |
 | **total Mobius quests** | **344** |
@@ -149,13 +149,13 @@ Related non-quest scripts: `village_master/*Change1|Change2` and `FirstClassTran
 | 170 | Dangerous Seduction | 21+ | story / newbie | implemented | hand-ported |
 | 171 | Acts of Evil | 27+ | story / newbie | partial | no kill: 5/8 mobs; quest spawns missing; auto-port |
 | 211 | Trial of the Challenger | 35+ | 2nd class (Trial/Test) | implemented | hand-ported |
-| 212 | Trial of Duty | 35+ | 2nd class (Trial/Test) | implemented | auto-port |
+| 212 | Trial of Duty | 35+ | 2nd class (Trial/Test) | implemented | hand-ported |
 | 213 | Trial of the Seeker | 36+ | 2nd class (Trial/Test) | stub | 74 dialog(s), no start; auto-port |
 | 214 | Trial of the Scholar | 36+ | 2nd class (Trial/Test) | stub | 192 dialog(s), no start; auto-port |
 | 215 | Trial of the Pilgrim | 35+ | 2nd class (Trial/Test) | stub | 42 dialog(s), no start; auto-port |
 | 216 | Trial of the Guildsman | 35+ | 2nd class (Trial/Test) | stub | 64 dialog(s), no start; auto-port |
 | 217 | Testimony of Trust | 38+ | 2nd class (Trial/Test) | implemented | hand-ported |
-| 218 | Testimony of Life | 38+ | 2nd class (Trial/Test) | implemented | auto-port |
+| 218 | Testimony of Life | 38+ | 2nd class (Trial/Test) | implemented | hand-ported |
 | 219 | Testimony of Fate | 38+ | 2nd class (Trial/Test) | stub | 93 dialog(s), no start; auto-port |
 | 220 | Testimony of Glory | 37+ | 2nd class (Trial/Test) | stub | 131 dialog(s), no start; auto-port |
 | 221 | Testimony of Prosperity | 38+ | 2nd class (Trial/Test) | stub | 173 dialog(s), no start; auto-port |
@@ -163,7 +163,7 @@ Related non-quest scripts: `village_master/*Change1|Change2` and `FirstClassTran
 | 223 | Test of the Champion | 39+ | 2nd class (Trial/Test) | partial | quest spawns missing; hand-ported |
 | 224 | Test of Sagittarius | 39+ | 2nd class (Trial/Test) | stub | 51 dialog(s), no start; auto-port |
 | 225 | Test of the Searcher | 39+ | 2nd class (Trial/Test) | stub | 70 dialog(s), no start; timers; auto-port |
-| 226 | Test of the Healer | 39+ | 2nd class (Trial/Test) | partial | no kill: 1/6 mobs; timers; auto-port |
+| 226 | Test of the Healer | 39+ | 2nd class (Trial/Test) | implemented | timers; hand-ported |
 | 227 | Test of the Reformer | 39+ | 2nd class (Trial/Test) | stub | 45 dialog(s), no start; timers; auto-port |
 | 228 | Test of Magus | 39+ | 2nd class (Trial/Test) | stub | 52 dialog(s), no start; auto-port |
 | 229 | Test of Witchcraft | 39+ | 2nd class (Trial/Test) | stub | 94 dialog(s), no start; timers; auto-port |
