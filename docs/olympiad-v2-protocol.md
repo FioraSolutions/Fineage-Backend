@@ -227,7 +227,7 @@ The move is `MoveToAck` **1004**, the same path as a dungeon teleport.
 | 178 | Points earned or lost. Params are name, amount, and `earned` or `lost`. |
 | 179 | Win, tie, or a cancelled match. Param is the winner name, `tie`, or `cancel`. |
 
-174 and 175 go to every player in the world. 177–179 go to the two participants. Spectators are not implemented.
+174 and 175 go to every player in the world. 177–179 go to the two participants.
 
 ## Configuration
 
@@ -253,21 +253,35 @@ The move is `MoveToAck` **1004**, the same path as a dungeon teleport.
 | `FINEAGE_OLY_PERIOD` | MONTH |
 | `FINEAGE_OLY_PERIOD_MULTIPLIER` | 1 |
 | `FINEAGE_OLY_COMPETITION_DAYS` | 1,2,3,4,5,6,7 |
+| `FINEAGE_OLY_GP_PER_POINT` | 1000 |
+| `FINEAGE_OLY_HERO_POINTS` | 100 |
+| `FINEAGE_OLY_ENCHANT_LIMIT` | -1 (off) |
+| `FINEAGE_OLY_RESTRICTED_ITEMS` | empty |
+| `FINEAGE_OLY_DISABLE_BLESSED_SPIRITSHOTS` | true |
 
 `FINEAGE_OLY_WAIT_SECONDS` must be 120, 60, 30, 15, or 5. Anything else stays 120. Competition days use Java's numbering: 1 Sunday through 7 Saturday. They apply only when the custom period flag is on.
 
 ## Persistence
 
-`olympiad.json` sits beside the account store. It keeps the cycle, the period, the month end, the validation end, the next weekly add, the noblesse ids, and each noble's points and competition counts. Queues and live matches are not stored. The return town point is what the account file keeps while the match is running, so a crash does not leave the character inside the stadium.
+`olympiad.json` sits beside the account store. It keeps the cycle, the period, the month end, the validation end, the next weekly add, the noblesse ids, each noble's points and competition counts, the frozen last-period table, the heroes (claimed or not), and unclaimed gate passes. Queues and live matches are not stored. The return town point is what the account file keeps while the match is running, so a crash does not leave the character inside the stadium.
+
+## Arena (Block G2)
+
+The zone runs the fight itself (`ZoneWorldOlympiad.Arena.cs`), after Mobius `OlympiadGame.removals` and Olympiad-mode `reduceHp`:
+
+- On the port: the cast is aborted, the party is left, buffs are cleared, shots are discharged and auto shots switched off (each sends the auto-shot off state), hero items and `FINEAGE_OLY_RESTRICTED_ITEMS` are unequipped, every skill whose base reuse is at most 15 minutes is ready again, hero and clan skills rest, HP/MP fill (CP is always full on this server).
+- Inside: hero items and the restricted list cannot be equipped or used (`olympiad_restricted`, system message 1507 equip / 1508 use). Blessed spiritshots do not charge while `FINEAGE_OLY_DISABLE_BLESSED_SPIRITSHOTS` is on. Gear enchant counts at most `FINEAGE_OLY_ENCHANT_LIMIT`.
+- Only the opponent can be hit, and only in the fight phase; outsiders and spectators cannot reach in or be reached.
+- 0 HP is a knockout, not a death: no exp loss, no drop, the other side wins at once. On the way home bars fill, the knockout is revived, hero and clan skills come back.
+- Battle timer: the side that dealt more damage wins (`NoteDamage`), equal damage is the tie row.
+- Pre-fight buffs: Mobius CT 0 declares Wind Walk / Haste / Acumen but its countdown loop never reaches 0, so they are never cast. This server matches that and casts nothing.
+
+Spectators: Grand Olympiad Manager `Olympiad 1` lists the stadiums, `Olympiad 3_N` moves the noble into stadium N's instance. `OlympiadLeave` (the same request as leaving a queue) moves them back to where they stood. A fighter cannot spectate (`olympiad_selected`).
+
+Heroes: at the period end the best noble per class (at least 9 competitions and 1 win) is picked, gate passes are settled (`FINEAGE_OLY_GP_PER_POINT` per point, heroes get `FINEAGE_OLY_HERO_POINTS` on top) and can be taken at the manager. The chosen noble claims the status at a Monument of Heroes, which then hands out one Infinity weapon and the Wings of Destiny Circlet (6842). The hero flag comes back on every login, carries the hero skills on the base class, and goes out on UserInfo and on CharInfo (`EntitySpawn.Hero`, hero aura). A new period revokes old heroes and destroys their hero items.
 
 ## Deferred
 
-Combat (issue #95 in the client roadmap, and the zone combat owner) still has:
-
-- HP, damage, and death inside the stadium
-- Calling `ReportOlympiadResult` when one side reaches 0 HP, or with 0 when damage is equal
-- The pre-fight buffs (Wind Walk, Haste, Acumen) and the full heal
-- Removing hero skills, clan skills, summons, cubics, and party membership for the fight
-- Olympiad restricted items, the enchant limit, and blessed spiritshots
-- Spectators
-- Hero assignment at the end of the month
+- Hero diary / hero history entries are static pages; no fame log.
+- Summons, cubics and agathions are not removed on entry (the zone has no summons yet).
+- Olympiad state is a JSON sidecar (`olympiad.json`), not Postgres.
