@@ -7,9 +7,9 @@ Status: **implemented** — every Mobius talk NPC and kill target is wired, the 
 
 | Status | Count |
 |---|---|
-| implemented | 211 |
+| implemented | 213 |
 | partial | 93 |
-| stub | 33 |
+| stub | 31 |
 | missing | 7 |
 | **total Mobius quests** | **344** |
 
@@ -288,9 +288,9 @@ Related non-quest scripts: `village_master/*Change1|Change2` and `FirstClassTran
 | 416 | Path to an Orc Shaman | 19+ | 1st class (Path) | implemented | hand-ported |
 | 417 | Path to become a Scavenger | 19+ | 1st class (Path) | implemented | hand-ported |
 | 418 | Path to an Artisan | 19+ | 1st class (Path) | implemented | hand-ported |
-| 419 | Get a Pet | 15+ | pet | stub | 32 dialog(s), no start; auto-port |
+| 419 | Get a Pet | 15+ | pet | implemented | hand-ported |
 | 420 | Little Wing | 35+ | pet | partial | no kill: 17/17 mobs; teleport missing; auto-port |
-| 421 | Little Wing's Big Adventure | 45+ | pet | stub | 33 dialog(s), no start; auto-port |
+| 421 | Little Wing's Big Adventure | 45+ | pet | implemented | hand-ported |
 | 422 | Repent Your Sins | 20+ | repeatable | stub | 36 dialog(s), no start; auto-port |
 | 426 | Quest for Fishing Shot |  | fishing | missing |  |
 | 431 | Wedding March | 38+ | repeatable | stub | 2 dialog(s), no start; auto-port |
@@ -325,7 +325,7 @@ Related non-quest scripts: `village_master/*Change1|Change2` and `FirstClassTran
 | 621 | Egg Delivery | 68+ | repeatable | partial | no talk: 31544,31545,31546,31547; auto-port |
 | 622 | Specialty Liquor Delivery | 68+ | repeatable | partial | no talk: 31543,31544,31545,31546; auto-port |
 | 623 | The Finest Food | 71+ | repeatable | partial | no kill: 3/3 mobs; auto-port |
-| 624 | The Finest Ingredients - Part 1 | 73+ | repeatable | implemented | auto-port |
+| 624 | The Finest Ingredients - Part 1 | 73+ | repeatable | implemented | hand-ported |
 | 625 | The Finest Ingredients - Part 2 | 73+ | repeatable | partial | no kill: 1/1 mobs; timers; auto-port |
 | 626 | A Dark Twilight | 60+ | one-time | implemented | hand-ported |
 | 627 | Heart in Search of Power | 60+ | repeatable | partial | no kill: 14/14 mobs; auto-port |
