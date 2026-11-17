@@ -161,6 +161,10 @@ def parse_pack(folder: str) -> dict:
             "repeatable": q.get("repeatable", False)}
 
 
+# Mobius registers these mobs as kill targets of the quest without any effect on kill (spawned decoys only).
+NO_EFFECT_KILLS = {226: {27126}}
+
+
 def auto_ported_ids() -> set[int]:
     """Packs whose quest.json was last written by the structural auto-port (#303 / #304)."""
     auto_commits = {"239dbfc8", "55ffea8b"}
@@ -219,7 +223,7 @@ def main() -> None:
                 notes.append(f"{pk['dialogs']} dialog(s), no start")
             else:
                 miss_talk = sorted(mo["talk"] - pk["talk"])
-                miss_kill = sorted(mo["kill"] - pk["kill"])
+                miss_kill = sorted(mo["kill"] - pk["kill"] - NO_EFFECT_KILLS.get(qid, set()))
                 if miss_talk:
                     notes.append("no talk: " + ",".join(map(str, miss_talk[:6])) + ("…" if len(miss_talk) > 6 else ""))
                 if miss_kill:
