@@ -25,6 +25,7 @@ public sealed partial class ZoneWorld
             TickMobAttacks(now);
             TickSummons(now);
             TickCubics(now);
+            TickDuels(now);
             TickCorpseDecay(now);
             TickQuestSpawns(now);
             TickAttackStance(now);
@@ -121,6 +122,7 @@ public sealed partial class ZoneWorld
             player.CombatUntilUnixMs = now + ClanProtocol.CombatStanceMillis;
             return;
         }
+        DuelNoteOutsideHit(player, target);
         target.CurHp = Math.Max(0, target.CurHp - damage);
         FanoutVitals(target, StatusFor(target));
         RecordDamage(target, player, damage);
@@ -160,6 +162,8 @@ public sealed partial class ZoneWorld
             return;
         }
 
+        if (DuelBlocksHit(attacker, target))
+            return;
         target.CurHp = Math.Max(0, target.CurHp - damage);
         target.CombatUntilUnixMs = now + ClanProtocol.CombatStanceMillis;
         FanoutVitals(target, PlayerVitalsStatus(target));

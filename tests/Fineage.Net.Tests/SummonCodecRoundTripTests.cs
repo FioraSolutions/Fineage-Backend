@@ -67,7 +67,7 @@ public sealed class SummonCodecRoundTripTests
         Assert.Equal("Owner", spawn.Title);
 
         byte[] full = NetCodec.EncodeEntitySpawn(new EntitySpawnMsg { EntityValue = 4, Name = "Old", Hero = true });
-        var old = NetCodec.DecodeEntitySpawn(full.AsSpan(0, full.Length - 7)); // summon tail (5) + empty cubic list (2)
+        var old = NetCodec.DecodeEntitySpawn(full.AsSpan(0, full.Length - 8)); // summon tail (5) + empty cubic list (2) + duel team (1)
         Assert.True(old.Hero);
         Assert.Equal(SummonKindNet.None, old.SummonKind);
         Assert.Equal(0, old.OwnerObjectId);
@@ -79,7 +79,7 @@ public sealed class SummonCodecRoundTripTests
         var spawn = NetCodec.DecodeEntitySpawn(NetCodec.EncodeEntitySpawn(new EntitySpawnMsg { EntityValue = 5, Name = "Warlock", Cubics = [1, 3] }));
         Assert.Equal(new[] { 1, 3 }, spawn.Cubics);
         byte[] full = NetCodec.EncodeEntitySpawn(new EntitySpawnMsg { EntityValue = 5, Name = "Old", OwnerObjectId = 7, Cubics = [2] });
-        var old = NetCodec.DecodeEntitySpawn(full.AsSpan(0, full.Length - 6));
+        var old = NetCodec.DecodeEntitySpawn(full.AsSpan(0, full.Length - 7)); // cubic list (2 + 4) + duel team (1)
         Assert.Equal(7, old.OwnerObjectId);
         Assert.Empty(old.Cubics);
 
@@ -87,7 +87,7 @@ public sealed class SummonCodecRoundTripTests
         Assert.Equal(new[] { 9 }, info.Cubics);
         Assert.Equal(1, info.ClassIndex);
         byte[] ui = NetCodec.EncodeUserInfo(new UserInfoNetMsg { Name = "Old", ClassIndex = 2, Cubics = [4] });
-        var oldInfo = NetCodec.DecodeUserInfo(ui.AsSpan(0, ui.Length - 6));
+        var oldInfo = NetCodec.DecodeUserInfo(ui.AsSpan(0, ui.Length - 7));
         Assert.Equal(2, oldInfo.ClassIndex);
         Assert.Empty(oldInfo.Cubics);
     }

@@ -87,6 +87,8 @@ public sealed partial class ZoneWorld
         // A summon's kill is its owner's kill (Mobius Summon.asPlayer for onKillUpdatePvPKarma / death penalty).
         if (killerObjectId > 0 && _byId.TryGetValue(killerObjectId, out var killerSummon) && OwnerOf(killerSummon) is { } summoner)
             killerObjectId = summoner.ObjectId;
+        if (DuelKnockout(player))
+            return;
         if (OlympiadKnockout(player, killerObjectId))
             return;
 

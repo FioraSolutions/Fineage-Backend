@@ -61,6 +61,8 @@ public sealed partial class ZoneWorld
             return;
         }
 
+        if (DuelBlocksHit(attacker, target))
+            return;
         target.CurHp = Math.Max(0, target.CurHp - hit.Damage);
         if (_olympiadArena.Contains(attacker.ObjectId))
             _olympiad.NoteDamage(attacker.ObjectId, hit.Damage);
@@ -93,6 +95,7 @@ public sealed partial class ZoneWorld
     void DamageNpcBy(ZoneEntity attacker, ZoneEntity target, int damage, long now)
     {
         var credit = CreditOf(attacker);
+        DuelNoteOutsideHit(attacker, target);
         // Castle gates / walls, towers and headquarters have their own Mobius reduceHp rules.
         if (SiegeNpcHit(credit, target, damage, now))
             return;

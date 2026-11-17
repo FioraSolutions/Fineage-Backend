@@ -44,6 +44,9 @@ public sealed partial class ZoneWorld
     /// </summary>
     void UpdatePvPStatus(ZoneEntity attacker, ZoneEntity target, long now)
     {
+        // Mobius updatePvPStatus: fighters of the same duel never flag each other.
+        if (SameDuel(attacker, target))
+            return;
         if (attacker.Kind != ZoneEntityKind.Player || target.Kind != ZoneEntityKind.Player)
             return;
         if (ReferenceEquals(attacker, target) || target.Karma > 0)
@@ -249,6 +252,9 @@ public sealed partial class ZoneWorld
     {
         if (ReferenceEquals(attacker, target))
             return false;
+        // Mobius Player.isAutoAttackable: the other side of a running duel is hostile without Ctrl.
+        if (DuelFoes(attacker, target))
+            return true;
         if (SameParty(attacker.ObjectId, target.ObjectId))
             return false;
         // Mobius Player.isAutoAttackable: members of clans at mutual war are hostile without Ctrl.

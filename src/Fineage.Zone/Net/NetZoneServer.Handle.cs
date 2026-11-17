@@ -137,6 +137,9 @@ public sealed partial class NetZoneServer
                         case NetOpcode.SummonCommand:
                             await _clan.OnSummonCommandAsync(conn, zoneSession, envelope, ct).ConfigureAwait(false);
                             break;
+                        case NetOpcode.DuelCommand:
+                            await _clan.OnDuelCommandAsync(conn, zoneSession, envelope, ct).ConfigureAwait(false);
+                            break;
                         case NetOpcode.NpcTalk:
                             await _npcTalk.OnTalkAsync(conn, zoneSession, envelope, ct).ConfigureAwait(false);
                             break;

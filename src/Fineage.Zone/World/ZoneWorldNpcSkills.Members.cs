@@ -176,7 +176,7 @@ public sealed partial class ZoneWorld
                 return;
             }
         }
-        if (damage <= 0)
+        if (damage <= 0 || DuelBlocksHit(npc, target))
             return;
 
         target.CurHp = Math.Max(0, target.CurHp - damage);

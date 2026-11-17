@@ -177,6 +177,10 @@ interface IWorldEventPublisher
 
     /// <summary>Pet inventory to its owner (Mobius PetItemList). Called under the ZoneWorld gate.</summary>
     void FanoutPetInventory(IReadOnlyList<int> watcherObjectIds, Fineage.Net.Contract.PetInventoryNetMsg inventory);
+    /// <summary>Duel ask / ready / start / end (Mobius ExDuelAskStart / ExDuelReady / ExDuelStart / ExDuelEnd).</summary>
+    void FanoutDuelEvent(IReadOnlyList<int> watcherObjectIds, Fineage.Net.Contract.DuelEventNetMsg duel);
+    /// <summary>An opponent's bars during a duel (Mobius ExDuelUpdateUserInfo).</summary>
+    void FanoutDuelUserInfo(IReadOnlyList<int> watcherObjectIds, Fineage.Net.Contract.DuelUserInfoNetMsg info);
 
 
     void FanoutClanAskJoin(IReadOnlyList<int> watcherObjectIds, Fineage.Protocol.ClanAskJoinMsg ask);
