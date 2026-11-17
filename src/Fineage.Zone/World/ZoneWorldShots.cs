@@ -36,6 +36,13 @@ public sealed partial class ZoneWorld
     {
         var t = shot.Template;
         bool soul = t.IsSoulshot;
+        // Mobius OlympiadDisableBlessedSpiritShots: no blessed spiritshot charge inside an arena (auto use included).
+        if (t.IsBlessedSpiritshot && _olympiadArena.Contains(player.ObjectId) && _olympiad.Settings.DisableBlessedSpiritshots)
+        {
+            if (!quiet)
+                ShotNotice(session, OlympiadUseItemMessage, "You cannot use that item in a Grand Olympiad Games match.");
+            return false;
+        }
         var weapon = player.Inventory!.GetEquipped(PaperdollSlot.RHand)?.Template;
         int need = weapon == null || weapon.Kind != ItemKind.Weapon ? 0 : soul ? weapon.Soulshots : weapon.Spiritshots;
         bool alreadyCharged = soul ? player.SoulshotCharged : player.SpiritshotCharge > 0;

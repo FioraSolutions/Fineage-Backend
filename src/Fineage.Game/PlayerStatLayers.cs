@@ -91,12 +91,15 @@ public readonly record struct PlayerGearBases(
         int mysticNakedChestPDef,
         int mysticNakedLegsPDef,
         int nakedLegsPDef,
-        int defaultPlayerPDef)
+        int defaultPlayerPDef,
+        int enchantCap = -1)
     {
+        // Mobius OlympiadEnchantLimit: inside a match every enchant counts at most the cap (-1 = no cap).
+        int Cap(int level) => enchantCap >= 0 && level > enchantCap ? enchantCap : level;
         var weaponItem = equipped(PaperdollSlot.RHand);
         var weapon = weaponItem?.Template;
         bool armed = weapon != null && weapon.Kind == ItemKind.Weapon;
-        int weaponEnchant = armed ? weaponItem!.EnchantLevel : 0;
+        int weaponEnchant = armed ? Cap(weaponItem!.EnchantLevel) : 0;
         double basePAtk = armed && weapon!.PAtk > 0
             ? weapon.PAtk + EnchantCombatBonus.PhysicalAttack(weapon, weaponEnchant)
             : template.PAtk;
@@ -121,7 +124,7 @@ public readonly record struct PlayerGearBases(
             var armor = armorItem?.Template;
             if (armor == null || armor.Kind != ItemKind.Armor)
                 continue;
-            pDefBase += armor.PDef + EnchantCombatBonus.Defence(armorItem!.EnchantLevel) - nakedDef;
+            pDefBase += armor.PDef + EnchantCombatBonus.Defence(Cap(armorItem!.EnchantLevel)) - nakedDef;
             if (slot == PaperdollSlot.Chest && armor.BodySlot == BodySlot.FullArmor)
                 pDefBase -= mystic ? mysticNakedLegsPDef : nakedLegsPDef;
         }
@@ -131,7 +134,7 @@ public readonly record struct PlayerGearBases(
             var jewel = jewelItem?.Template;
             if (jewel == null || jewel.Kind != ItemKind.Armor)
                 continue;
-            mDefBase += jewel.MDef + EnchantCombatBonus.Defence(jewelItem!.EnchantLevel) - nakedDef;
+            mDefBase += jewel.MDef + EnchantCombatBonus.Defence(Cap(jewelItem!.EnchantLevel)) - nakedDef;
         }
 
         var shieldItem = equipped(PaperdollSlot.LHand);

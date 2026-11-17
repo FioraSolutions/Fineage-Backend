@@ -90,6 +90,11 @@ public sealed partial class ZoneWorld
 
     void SendNpcPage(ZoneSession session, ZoneEntity player, ZoneEntity npc, int page)
     {
+        if (page == 0 && OlympiadFirstPage(player, npc, out var olympiad))
+        {
+            SendHtml(session, player, npc, olympiad!);
+            return;
+        }
         if (page == 0 && MammonFirstPage(session, player, npc, out var mammon))
         {
             if (mammon != null)

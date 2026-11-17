@@ -8,7 +8,7 @@ namespace Fineage.Protocol;
 /// <c>Olympiad</c>, <c>OlympiadManager</c>, <c>OlympiadGame</c>, <c>OlympiadGameTask</c>,
 /// <c>OlympiadStadium</c>, <c>CompetitionType</c>, <c>OlympiadConfig</c>,
 /// <c>dist/game/config/Olympiad.ini</c>, and <c>dist/game/data/zones/olympiad_stadium.xml</c>.
-/// Hero promotion is not part of this slice.
+/// Block G2 adds the monthly hero selection, gate pass settlement, ranking and the Monument of Heroes.
 /// Requests are 60–64. Siege uses 46–49. Replies are 1070–1073. Siege info stays 1064.
 /// System lines are 160–179. Siege lines stay 140–149.
 /// </remarks>
@@ -85,6 +85,18 @@ public static class OlympiadProtocol
     public const int DwarfRace = 4;
     public const int Zariche = 8190;
     public const int Akamanah = 8689;
+
+    /// <summary>Mobius <c>OLYMPIAD_GET_HEROS</c>: a hero needs this many matches and at least one win.</summary>
+    public const int HeroMinMatches = 9;
+    /// <summary>Interlude third-class ids that crown a hero each period (Mobius <c>HERO_IDS</c>).</summary>
+    public const int FirstHeroClassId = 88;
+    public const int LastHeroClassId = 118;
+    /// <summary>Monument of Heroes Wings of Destiny Circlet and the eleven Infinity weapons.</summary>
+    public const int HeroCirclet = 6842;
+    public const int FirstHeroWeapon = 6611;
+    public const int LastHeroWeapon = 6621;
+    /// <summary>Hero crowning social action (Mobius <c>claimHero</c>).</summary>
+    public const int HeroSocialAction = 16;
 
     public const string Disabled = "olympiad_disabled";
     public const string Period = "olympiad_period";

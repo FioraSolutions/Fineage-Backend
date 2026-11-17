@@ -23,7 +23,7 @@ public sealed partial class ZoneWorld
             return;
         if (entity.Noble)
             AddLevelOne(entity, NobleSkillIds);
-        if (entity.Hero && !entity.SubClassActive)
+        if (entity.Hero && !entity.SubClassActive && !_olympiadArena.Contains(entity.ObjectId))
             AddLevelOne(entity, HeroSkillIds);
     }
 
@@ -38,6 +38,9 @@ public sealed partial class ZoneWorld
 
     void SyncOlympiadNoblesse(ZoneEntity entity)
     {
+        // Block G2: a claimed hero of the current era is a hero again on every login (Mobius Hero.isHero).
+        if (_olympiad.IsHero(entity.ObjectId))
+            entity.Hero = true;
         if (entity.Noble)
         {
             if (!_olympiad.IsNoble(entity.ObjectId))

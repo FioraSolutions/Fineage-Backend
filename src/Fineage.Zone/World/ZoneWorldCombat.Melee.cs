@@ -72,6 +72,8 @@ public sealed partial class ZoneWorld
         }
 
         target.CurHp = Math.Max(0, target.CurHp - hit.Damage);
+        if (_olympiadArena.Contains(attacker.ObjectId))
+            _olympiad.NoteDamage(attacker.ObjectId, hit.Damage);
 
         target.CombatUntilUnixMs = now + ClanProtocol.CombatStanceMillis;
         FanoutVitals(target, PlayerVitalsStatus(target));

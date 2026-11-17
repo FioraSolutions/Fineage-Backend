@@ -125,7 +125,7 @@ public sealed partial class ZoneWorld
             true,
             entity.Dead,
             entity.ClassId,
-            entity.ClassId,
+            entity.BaseClassId,
             entity.X,
             entity.Y,
             entity.Z,

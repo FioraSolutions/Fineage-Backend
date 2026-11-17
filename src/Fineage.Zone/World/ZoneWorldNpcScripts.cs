@@ -20,6 +20,8 @@ public sealed partial class ZoneWorld
             SendNoblesPage(session, player, npc, player.Noble);
             return null;
         }
+        if (scriptName.Equals("MonumentOfHeroes", StringComparison.OrdinalIgnoreCase))
+            return MonumentOfHeroesBypass(session, player, npc, scriptEvent);
         if (scriptName.Equals("SymbolMaker", StringComparison.OrdinalIgnoreCase))
             return SymbolMakerBypass(session, player, npc, scriptEvent);
         return VillageMasterBypass(session, player, npc, scriptName, scriptEvent);

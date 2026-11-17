@@ -78,6 +78,12 @@ public sealed partial class ZoneWorld
     {
         if (!IsLive(session))
             return Task.FromResult<string?>("world");
+        lock (_gate)
+        {
+            // Mobius RequestOlympiadObserverEnd: the same leave request ends an observation.
+            if (_byId.TryGetValue(session.ObjectId, out var watcher) && EndOlympiadObserve(watcher))
+                return Task.FromResult<string?>(null);
+        }
         return RunOlympiadAsync(now => _olympiad.Leave(session.ObjectId, now, LookupOlympiad));
     }
 
@@ -105,6 +111,8 @@ public sealed partial class ZoneWorld
     {
         if (entity.Kind != ZoneEntityKind.Player)
             return;
+        _olympiadArena.Remove(entity.ObjectId);
+        _olympiadObservers.Remove(entity.ObjectId);
         var step = _olympiad.Disconnect(entity.ObjectId, _clock().ToUnixTimeMilliseconds(), LookupOlympiad);
         ApplyOlympiad(step);
     }
@@ -137,6 +145,8 @@ public sealed partial class ZoneWorld
             QueueCountdown(countdown);
         foreach (var result in step.Results)
             QueueResult(result);
+        foreach (int id in step.RevokedHeroes)
+            RevokeHero(id);
 
         if (step.RefreshAll)
         {
@@ -160,6 +170,10 @@ public sealed partial class ZoneWorld
     {
         if (!_byId.TryGetValue(move.CharacterId, out var entity) || entity.Session == null)
             return;
+        if (!move.Persist)
+            EnterOlympiadArena(entity);
+        else
+            LeaveOlympiadArena(entity);
         int savedX = entity.X;
         int savedY = entity.Y;
         int savedZ = entity.Z;

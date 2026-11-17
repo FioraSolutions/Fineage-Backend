@@ -84,6 +84,8 @@ public sealed partial class ZoneWorld
     {
         if (player.Kind != ZoneEntityKind.Player || player.Dead)
             return;
+        if (OlympiadKnockout(player, killerObjectId))
+            return;
 
         EndFishing(player, win: false);
         player.Dead = true;
