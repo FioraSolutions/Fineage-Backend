@@ -67,7 +67,7 @@ public sealed partial class ZoneWorld
             SendKillReward(
                 attacker.Session,
                 attacker,
-                share.Exp * _rates.RateXp,
+                share.Exp * _rates.RateXp * ServitorExpMultiplier(attacker),
                 share.Sp * _rates.RateSp);
         }
     }
@@ -123,7 +123,8 @@ public sealed partial class ZoneWorld
         foreach (var member in valid)
         {
             double share = (double)((long)member.Level * member.Level) / sqLevelSum;
-            SendKillReward(member.Session!, member, expPool * share, spPool * share);
+            // Mobius Party.distributeXpAndSp: the servitor penalty scales the member's exp share.
+            SendKillReward(member.Session!, member, expPool * share * ServitorExpMultiplier(member), spPool * share);
         }
     }
 

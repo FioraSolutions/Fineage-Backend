@@ -148,6 +148,8 @@ public sealed partial class ZoneWorld
     bool IsAutoAttackable(ZoneEntity viewer, ZoneEntity target) =>
         target.Kind switch
         {
+            ZoneEntityKind.Npc when target.Summon != null =>
+                OwnerOf(target) is { } owner && !ReferenceEquals(owner, viewer) && PlayerAutoAttackable(viewer, owner),
             ZoneEntityKind.Npc => target.Attackable,
             ZoneEntityKind.Player => PlayerAutoAttackable(viewer, target),
             _ => false
@@ -174,6 +176,7 @@ public sealed partial class ZoneWorld
     /// <summary>Mobius <c>PlayableAI</c> blessing / karma / cursed-weapon gate. Sends SysMsg 144 and refuses the swing or bad cast.</summary>
     bool HostilePlayableRefused(ZoneSession session, ZoneEntity attacker, ZoneEntity target, bool badSkill)
     {
+        target = CreditOf(target);
         if (OlympiadTargetRefused(attacker, target))
         {
             IncorrectTarget(session);
@@ -227,6 +230,8 @@ public sealed partial class ZoneWorld
     /// </summary>
     bool PeacePlayableRefused(ZoneSession session, ZoneEntity attacker, ZoneEntity target, bool notify = true)
     {
+        attacker = CreditOf(attacker);
+        target = CreditOf(target);
         if (attacker.Kind != ZoneEntityKind.Player || target.Kind != ZoneEntityKind.Player)
             return false;
         if (attacker.InstanceId != 0 || ZoneAdmin.AllowPeaceAttack(attacker.Name))
@@ -334,6 +339,12 @@ public sealed partial class ZoneWorld
             return "attack";
         if (!IsAttackable(player, target))
             return "attack";
+        // Mobius: a player cannot attack its own summon.
+        if (target.Summon?.OwnerObjectId == player.ObjectId)
+        {
+            approachMs = -1;
+            return null;
+        }
         // Mobius onForcedAttack vs isAutoAttackable: a white player or a party mate needs Ctrl. A plain click is
         // answered with ActionFailed (no swing, no approach, no reject).
         if (!forced && NeedsForce(player, target))

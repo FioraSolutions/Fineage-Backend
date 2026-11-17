@@ -129,8 +129,8 @@ public sealed class NetEnchantAuditTests
     {
         var full = NetCodec.EncodeEntitySpawn(new EntitySpawnMsg { Name = "A", Kind = EntityKindNet.Player, WeaponEnchant = 16 });
         Assert.Equal(16, NetCodec.DecodeEntitySpawn(full).WeaponEnchant);
-        // An old server stops after PledgeClass (glow int + noble/hero bytes gone): no glow.
-        Assert.Equal(0, NetCodec.DecodeEntitySpawn(full.AsSpan(0, full.Length - 4 - 2)).WeaponEnchant);
+        // An old server stops after PledgeClass (glow int, noble/hero bytes, summon tail gone): no glow.
+        Assert.Equal(0, NetCodec.DecodeEntitySpawn(full.AsSpan(0, full.Length - 4 - 2 - 5)).WeaponEnchant);
     }
 
     [Fact]

@@ -82,6 +82,10 @@ namespace Fineage.Net.Contract
         public bool Noble { get; set; }
         /// <summary>Mobius CharInfo <c>isHero</c> (hero aura / name glow). Optional wire tail after <see cref="Noble"/>.</summary>
         public bool Hero { get; set; }
+        /// <summary>Summons only: <see cref="SummonKindNet"/> (optional wire tail after <see cref="Hero"/>; 0 for everything else / old peers).</summary>
+        public SummonKindNet SummonKind { get; set; }
+        /// <summary>Summons only: the owner's object id (Mobius Summon.getOwner), so a client can tie the pawn to its master.</summary>
+        public int OwnerObjectId { get; set; }
     }
 
     public sealed class PlayerStatsMsg

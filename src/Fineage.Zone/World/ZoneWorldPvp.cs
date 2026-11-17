@@ -263,9 +263,14 @@ public sealed partial class ZoneWorld
     /// L2J <c>useMagic</c> / <c>onForcedAttack</c>: a hostile act on a player that is not auto-attackable (white,
     /// or a party mate) needs Ctrl. Without it the request is answered with ActionFailed only.
     /// </summary>
-    bool NeedsForce(ZoneEntity attacker, ZoneEntity target) =>
-        attacker.Kind == ZoneEntityKind.Player && target.Kind == ZoneEntityKind.Player &&
-        !PlayerAutoAttackable(attacker, target);
+    bool NeedsForce(ZoneEntity attacker, ZoneEntity target)
+    {
+        // Another player's summon is judged as its owner (Mobius Summon.isAutoAttackable → owner).
+        if (target.Summon != null && OwnerOf(target) is { } owner && !ReferenceEquals(owner, attacker))
+            target = owner;
+        return attacker.Kind == ZoneEntityKind.Player && target.Kind == ZoneEntityKind.Player &&
+            !PlayerAutoAttackable(attacker, target);
+    }
 
     /// <summary>Test hook: apply PvP status as if <paramref name="attacker"/> damaged <paramref name="target"/>.</summary>
     internal void UpdatePvPStatusForTest(ZoneEntity attacker, ZoneEntity target)

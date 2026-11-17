@@ -192,6 +192,7 @@ public sealed partial class ZoneWorld
         }
 
         NoteOlympiadDisconnect(entity);
+        UnsummonOnLeave(entity);
 
         entity.Knownlist.Clear();
         _aoi.Leave(session.ObjectId);

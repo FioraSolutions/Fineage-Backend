@@ -129,7 +129,11 @@ static class NetEnterWorldProjector
             Level = entity.Level,
             MaxHp = entity.MaxHp,
             PAtkSpd = entity.PAtkSpd > 0 ? entity.PAtkSpd : ZoneCombat.DefaultNpcPAtkSpd,
-            CurHp = entity.CurHp
+            CurHp = entity.CurHp,
+            // Mobius SummonInfo / PetInfo: title is the owner's name; the tail ties the pawn to its owner.
+            Title = entity.Summon != null ? entity.Title : "",
+            SummonKind = entity.Summon?.Kind ?? SummonKindNet.None,
+            OwnerObjectId = entity.Summon?.OwnerObjectId ?? 0
         };
     }
 
