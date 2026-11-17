@@ -730,7 +730,7 @@ def q215():
         30648, 30571, 30649, 30550, 30651, 30650, 30117, 30036, 30362, 30652, 30612)
     (SAGE, VOUCHER, SPIRIT, ESSENCE, B_GERALD, BADGE, PICTURE, HAIR, STATUE, DARKNESS, DEBRIS, TAG) = range(2722, 2734)
     MARK = 2721
-    ok = [15, 29, 42, 49]
+    ok = [15, 29, 42, 50]
     d = [
         talk(SANTIAGO, "30648-03", when="absent", classes=ok, minLevel=35),
         talk(SANTIAGO, "30648-01", when="absent", classes=ok),
@@ -1210,6 +1210,132 @@ def q230():
     ]
     write(230, "00230_test_of_the_summoner", "Q00230_TestOfTheSummoner", "Test of the Summoner",
           list(range(3337, 3390)), d)
+
+
+@quest
+def q220():
+    KASMAN, VOKIAN, MANAKIA, KAKAI, TANAPI, VOLTAR, KEPRA, BURAI, HARAK, DRIKO, CHIANTA = (
+        30501, 30514, 30515, 30565, 30571, 30615, 30616, 30617, 30618, 30619, 30642)
+    PASHIKA, VULTUS, ENKU, MAKUM, REVENANT = 27080, 27081, 27082, 27083, 27086
+    (V_ORDER1, SHARD, TALON, FANG, V_ORDER2, NECKLACE, C_ORDER1, S_BREKA, S_ENKU, S_VUKU, S_TUREK, S_TUNATH, C_ORDER2,
+     C_ORDER3, SKULL, HEAD, BOX, H_PASHIKA, H_VULTUS, G_VOLTAR, H_ENKU, G_KEPRA, H_MAKUM, G_BURAI, M_LETTER1, M_LETTER2,
+     K_LETTER1, K_LETTER2, K_LETTER3, CONTRACT, HUSK, T_ORDER, S_TANTOS, RITUAL) = range(3204, 3238)
+    MARK = 3203
+    scepters = [S_BREKA, S_ENKU, S_VUKU, S_TUREK, S_TUNATH]
+    mid = list(range(4, 12))
+    sons = [spawn_at(PASHIKA, 80117, 120039, -2259), spawn_at(VULTUS, 80058, 120038, -2259)]
+    overlords = [spawn_at(ENKU, x, y, z) for x, y, z in ((19894, 189743, -3074), (19869, 189800, -3059),
+                                                        (19818, 189818, -3047), (19753, 189837, -3027))]
+    thugs = [spawn_at(MAKUM, -94292, 110781, -3701), spawn_at(MAKUM, -94293, 110861, -3701)]
+
+    def scepter(npc, page, ops, sc, **gates):
+        """Hand over a chief's scepter; the fifth one moves the trial on to cond 5."""
+        others = [x for x in scepters if x != sc]
+        merged = dict(gates)
+        held = merged.pop("hasItems", []) + others
+        return [talk(npc, page, ops=ops + [give(sc), cond(5)], hasItems=held, **merged),
+                talk(npc, page, ops=ops + [give(sc)], **gates)]
+
+    ok = dict(races=[ORC], classes=FIRST_CLASSES, minLevel=37)
+    d = [
+        talk(VOKIAN, "30514-03", when="absent", **ok),
+        talk(VOKIAN, "30514-01", when="absent", races=[0, 1, 2, 4]),
+        talk(VOKIAN, "30514-02", when="absent", races=[ORC], maxLevel=36),
+        talk(VOKIAN, "30514-01a", when="absent"),
+        event(VOKIAN, "30514-05", ops=START + [give(V_ORDER1)], when="absent", **ok),
+        talk(VOKIAN, "30514-06", cond=1),
+        talk(VOKIAN, "30514-08", cond=2, ops=[take(FANG, 10), take(SHARD, 10), take(TALON, 10), take(V_ORDER1),
+                                             give(NECKLACE), give(V_ORDER2), cond(3)]),
+        talk(VOKIAN, "30514-09", cond=3), talk(VOKIAN, "30514-10", cond=8),
+        talk(CHIANTA, "30642-01", cond=3), talk(CHIANTA, "30642-04", cond=4),
+        talk(CHIANTA, "30642-09", cond=5, hasItem=C_ORDER2, minLevel=37, ops=[take(C_ORDER2), give(C_ORDER3), cond(6)]),
+        talk(CHIANTA, "30642-08", cond=5, hasItem=C_ORDER2),
+        talk(CHIANTA, "30642-05", cond=5),
+        talk(CHIANTA, "30642-10", cond=6),
+        talk(CHIANTA, "30642-11", cond=7, ops=[take(C_ORDER3), take(NECKLACE), take(SKULL, 20), take(HEAD, 20), give(BOX),
+                                              cond(8)]),
+        talk(CHIANTA, "30642-12", cond=8),
+        *[talk(CHIANTA, "30642-13", cond=c) for c in (9, 10, 11)],
+        event(CHIANTA, "30642-03", ops=[take(V_ORDER2), give(C_ORDER1), cond(4)], cond=3),
+        event(CHIANTA, "30642-07", ops=[take_all(C_ORDER1, K_LETTER1, M_LETTER1, M_LETTER2, *scepters), give(C_ORDER3),
+                                        cond(6)], cond=5, minLevel=37),
+        event(CHIANTA, "30642-07", "30642-06", ops=[take_all(C_ORDER1, K_LETTER1, M_LETTER1, M_LETTER2, *scepters),
+                                                    give(C_ORDER2)], cond=5),
+        talk(KASMAN, "30501-01", hasItem=C_ORDER1),
+        *[talk(KASMAN, "30501-11", cond=c) for c in range(5, 12)],
+        talk(MANAKIA, "30515-01", hasItem=C_ORDER1),
+        *[talk(MANAKIA, "30515-08", cond=c) for c in range(5, 12)],
+    ]
+    # Kasman and Manakia write the introductions to the five chiefs (a second visit only reminds).
+    for npc, ev, letter, sc, extra, have_page, give_page in (
+            (KASMAN, "30501-02", K_LETTER1, S_VUKU, [CONTRACT], "30501-04", "30501-03"),
+            (KASMAN, "30501-05", K_LETTER2, S_TUREK, [G_BURAI, H_MAKUM], "30501-07", "30501-06"),
+            (KASMAN, "30501-08", K_LETTER3, S_TUNATH, [], "30501-10", "30501-09"),
+            (MANAKIA, "30515-02", M_LETTER1, S_BREKA, [G_VOLTAR, H_PASHIKA, H_VULTUS], "30515-04", "30515-03"),
+            (MANAKIA, "30515-05", M_LETTER2, S_ENKU, [G_KEPRA, H_ENKU], "30515-07", "30515-06")):
+        d += [
+            event(npc, ev, have_page, cond=4, hasItem=letter),
+            event(npc, ev, give_page, ops=[give(letter)], cond=4, lacksItems=[sc] + extra),
+            event(npc, ev, cond=4),
+        ]
+    d += [
+        talk(VOLTAR, "30615-02", hasItem=M_LETTER1),
+        talk(VOLTAR, "30615-05", hasItem=G_VOLTAR, ops=sons),
+        *scepter(VOLTAR, "30615-06", [take(H_PASHIKA), take(H_VULTUS)], S_BREKA, hasItems=[H_PASHIKA, H_VULTUS]),
+        talk(VOLTAR, "30615-07", hasItem=S_BREKA),
+        talk(VOLTAR, "30615-01", hasItem=C_ORDER1),
+        *[talk(VOLTAR, "30615-08", cond=c) for c in range(4, 9)],
+        event(VOLTAR, "30615-04", ops=[take(M_LETTER1), give(G_VOLTAR)] + sons, hasItem=M_LETTER1),
+        talk(KEPRA, "30616-02", hasItem=M_LETTER2),
+        talk(KEPRA, "30616-05", hasItem=G_KEPRA, ops=overlords),
+        *scepter(KEPRA, "30616-06", [take_all(H_ENKU)], S_ENKU, atLeast={H_ENKU: 4}),
+        talk(KEPRA, "30616-07", hasItem=S_ENKU),
+        talk(KEPRA, "30616-01", hasItem=C_ORDER1),
+        *[talk(KEPRA, "30616-08", cond=c) for c in range(4, 9)],
+        event(KEPRA, "30616-05", ops=[take(M_LETTER2), give(G_KEPRA)] + overlords, hasItem=M_LETTER2),
+        talk(BURAI, "30617-02", hasItem=K_LETTER2),
+        talk(BURAI, "30617-04", hasItem=G_BURAI, ops=thugs),
+        *scepter(BURAI, "30617-05", [take(H_MAKUM, 2)], S_TUREK, atLeast={H_MAKUM: 2}),
+        talk(BURAI, "30617-06", hasItem=S_TUREK),
+        talk(BURAI, "30617-01", hasItem=C_ORDER1),
+        *[talk(BURAI, "30617-07", cond=c) for c in range(4, 8)],
+        event(BURAI, "30617-04", ops=[take(K_LETTER2), give(G_BURAI)] + thugs, hasItem=K_LETTER2),
+        talk(HARAK, "30618-02", hasItem=K_LETTER3),
+        talk(HARAK, "30618-04", hasItem=S_TUNATH),
+        talk(HARAK, "30618-01", hasItem=C_ORDER1),
+        *[talk(HARAK, "30618-05", cond=c) for c in range(4, 9)],
+        *[event(HARAK, "30618-03", ops=row["ops"], hasItem=K_LETTER3, **({"hasItems": row["hasItems"]}
+                                                                         if "hasItems" in row else {}))
+          for row in scepter(HARAK, "x", [take(K_LETTER3)], S_TUNATH)],
+        talk(DRIKO, "30619-02", hasItem=K_LETTER1),
+        *scepter(DRIKO, "30619-05", [take(CONTRACT), take(HUSK, 30)], S_VUKU, hasItems=[CONTRACT], atLeast={HUSK: 30}),
+        talk(DRIKO, "30619-04", hasItem=CONTRACT),
+        talk(DRIKO, "30619-06", hasItem=S_VUKU),
+        talk(DRIKO, "30619-01", hasItem=C_ORDER1),
+        *[talk(DRIKO, "30619-07", cond=c) for c in range(4, 8)],
+        event(DRIKO, "30619-03", ops=[take(K_LETTER1), give(CONTRACT)], hasItem=K_LETTER1),
+        talk(TANAPI, "30571-01", cond=8), talk(TANAPI, "30571-04", cond=9),
+        talk(TANAPI, "30571-05", cond=10, ops=[take(S_TANTOS), take(T_ORDER), give(RITUAL), cond(11)]),
+        talk(TANAPI, "30571-06", cond=11),
+        event(TANAPI, "30571-03", ops=[take(BOX), give(T_ORDER), cond(9)], cond=8),
+        *[talk(KAKAI, "30565-01", cond=c) for c in (8, 9, 10)],
+        talk(KAKAI, "30565-02", cond=11, ops=[take(RITUAL)] + mark(MARK, 91457, 2500)),
+        *collect_all({20192: (TALON, 0.5), 20550: (FANG, 0.5), 20563: (SHARD, 0.75)}, 10, 1, 2),
+        kill(20234, [drop(HUSK, 0.75, 30)], hasItem=CONTRACT),
+        kill(PASHIKA, [give(H_PASHIKA), take(G_VOLTAR)], hasItems=[G_VOLTAR, H_VULTUS], lacksItems=[H_PASHIKA]),
+        kill(PASHIKA, [give(H_PASHIKA)], hasItem=G_VOLTAR, lacksItems=[H_PASHIKA]),
+        kill(VULTUS, [give(H_VULTUS), take(G_VOLTAR)], hasItems=[G_VOLTAR, H_PASHIKA], lacksItems=[H_VULTUS]),
+        kill(VULTUS, [give(H_VULTUS)], hasItem=G_VOLTAR, lacksItems=[H_VULTUS]),
+        kill(ENKU, [give(H_ENKU), take(G_KEPRA)], hasItem=G_KEPRA, atLeast={H_ENKU: 3}),
+        kill(ENKU, [give(H_ENKU)], hasItem=G_KEPRA),
+        kill(MAKUM, [give(H_MAKUM), take(G_BURAI)], hasItem=G_BURAI, atLeast={H_MAKUM: 1}),
+        kill(MAKUM, [give(H_MAKUM)], hasItem=G_BURAI),
+        *collect_all({**{m: (HEAD, round(0.5 + (m - 20583) * 0.1, 2)) for m in range(20583, 20589)},
+                      20601: (SKULL, 0.5), 20602: (SKULL, 0.6)}, 20, 6, 7),
+        *[kill(m, [spawn(REVENANT)], cond=9) for m in (20778, 20779)],
+        kill(REVENANT, [give(S_TANTOS), cond(10)], cond=9),
+    ]
+    write(220, "00220_testimony_of_glory", "Q00220_TestimonyOfGlory", "Testimony of Glory", list(range(3204, 3238)), d)
 
 
 if __name__ == "__main__":
