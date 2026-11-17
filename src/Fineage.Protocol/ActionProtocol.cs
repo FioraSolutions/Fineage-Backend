@@ -52,6 +52,12 @@ public static class ActionProtocol
     /// <summary>Interlude <c>ChangeWaitType</c> wait type: standing.</summary>
     public const int WaitStanding = 1;
 
+    /// <summary>Interlude <c>ChangeWaitType.WT_START_FAKEDEATH</c>: drop into the death pose without dying.</summary>
+    public const int WaitStartFakeDeath = 2;
+
+    /// <summary>Interlude <c>ChangeWaitType.WT_STOP_FAKEDEATH</c>: get back up (paired with <c>Revive</c>).</summary>
+    public const int WaitStopFakeDeath = 3;
+
     public const string Dead = "action_dead";
     /// <summary>Player cannot move (sleep/root/stun/paralyze).</summary>
     public const string Immobilized = "action_immobilized";

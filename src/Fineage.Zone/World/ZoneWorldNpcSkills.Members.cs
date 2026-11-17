@@ -159,6 +159,9 @@ public sealed partial class ZoneWorld
         FanoutSkillLaunched(npc, hit.Combat.SkillId, hit.Level, target);
         int damage = RollNpcSkillDamage(npc, target, hit.Combat, hit.Level);
         ZoneLog.Info($"[npc-skill] hit {hit.Combat.SkillId} lv{hit.Level} damage={damage}");
+        // Mobius onCreatureDamageReceived → TriggerSkillByDamage runs before the summon branch splits the victim kinds.
+        if (damage > 0 && target.Kind == ZoneEntityKind.Player)
+            RunDamageTriggers(target, npc, damage);
         if (summonCaster)
         {
             var targetPc = CreditOf(target);
@@ -183,6 +186,8 @@ public sealed partial class ZoneWorld
         FanoutVitals(target, PlayerVitalsStatus(target));
         SendVictimHitLines(npc, target, damage, 0);
         target.CombatUntilUnixMs = now + ClanProtocol.CombatStanceMillis;
+        // Mobius onCreatureDamageReceived → TriggerSkillByDamage (Mirage 445).
+        RunDamageTriggers(target, npc, damage);
         if (target.CurHp > 0)
             MaybeBreakCast(target, damage);
         if (target.CurHp <= 0)

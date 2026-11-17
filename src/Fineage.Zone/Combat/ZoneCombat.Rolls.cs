@@ -59,6 +59,32 @@ public static partial class ZoneCombat
         WithinAngle(AngleFrom(tx, ty, ax, ay), targetHeading);
 
     /// <summary>
+    /// Mobius position test used by positional stat funcs: <see cref="SkillPosition.Behind"/> /
+    /// <see cref="SkillPosition.Front"/> / <see cref="SkillPosition.Side"/> (neither) from the attacker towards the target.
+    /// </summary>
+    public static SkillPosition PositionOf(int ax, int ay, int tx, int ty, int targetHeading)
+    {
+        if (IsBehind(ax, ay, tx, ty, targetHeading))
+            return SkillPosition.Behind;
+        if (IsInFrontOf(ax, ay, tx, ty, targetHeading))
+            return SkillPosition.Front;
+        return SkillPosition.Side;
+    }
+
+    /// <summary>
+    /// Mobius <c>calcBlowDamage</c> / <c>calcBackstabDamage</c> halve the positional crit-damage bonus:
+    /// <c>criticalModPos = ((critDmgPos − 1) / 2) + 1</c>. A plain attack (<c>calcPhysDam</c>) uses it as-is.
+    /// </summary>
+    public static double BlowPositionalCritDamage(double critDmgPos) => (critDmgPos - 1) / 2 + 1;
+
+    /// <summary>
+    /// Mobius <c>Formulas.calcCrit</c> for a plain attack: <c>calcStat(CRITICAL_RATE_POS, getCriticalHit(target))</c>,
+    /// truncated by the caller and capped at <see cref="MaxCritPermille"/> at roll time.
+    /// </summary>
+    public static int PositionalCritPermille(int critPermille, double critRatePos) =>
+        (int)(critPermille * Math.Max(0, critRatePos));
+
+    /// <summary>
     /// Mobius <c>HitConditionBonusData.getConditionBonus</c>: 100 + high/low (Δz &gt; ±50) + dark (night) + back/front/side, /100, min 0.
     /// Rain is unsupported in Mobius as well.
     /// </summary>
@@ -106,11 +132,12 @@ public static partial class ZoneCombat
     /// Full swing: miss → shield → crit → calcPhysDam. Soulshot doubles P.Atk (flag 0x10 | grade); shield block
     /// adds sDef to P.Def, perfect block deals 1 (flag 0x40). Crit damage · <paramref name="critDamageMod"/>
     /// (<c>Stat.CRITICAL_DAMAGE</c>, default 1). <paramref name="weaponTraitBonus"/> is Mobius
-    /// <c>calcWeaponTraitBonus</c> (default 1).
+    /// <c>calcWeaponTraitBonus</c> (default 1). <paramref name="critDamageAdd"/> is Mobius
+    /// <c>Stat.CRITICAL_DAMAGE_ADD</c> (Vicious Stance, Critical Power, crit-damage SA): a flat term added on crit.
     /// </summary>
     public static (int Damage, byte Flags) RollMelee(Random rnd, double pAtk, double pDef, double accuracy, double evasion,
         int critPermille, int randomPercent, bool soulshot, int shotGrade, double shieldRate, int shieldDef, bool attackerBow,
-        double hitConditionBonus, double critDamageMod, double weaponTraitBonus)
+        double hitConditionBonus, double critDamageMod, double weaponTraitBonus, double critDamageAdd = 0)
     {
         byte ssFlags = soulshot ? (byte)(HitFlagSoulshot | (shotGrade & 0x0F)) : (byte)0;
         if (rnd.Next(1000) >= HitChancePermille(accuracy, evasion, hitConditionBonus))
@@ -126,7 +153,12 @@ public static partial class ZoneCombat
             pDef += shieldDef;
         double damage = 70d * Math.Max(0d, pAtk) / Math.Max(1d, pDef);
         if (crit)
+        {
             damage *= 2 * Math.Max(0, critDamageMod);
+            // Mobius calcPhysDam crit branch: + CRITICAL_DAMAGE_ADD · 77 / defence (flat, not scaled).
+            if (critDamageAdd > 0)
+                damage += critDamageAdd * 77d / Math.Max(1d, pDef);
+        }
         if (randomPercent > 0)
             damage *= 1 + rnd.Next(-randomPercent, randomPercent + 1) / 100d;
         damage *= Math.Max(0, weaponTraitBonus);

@@ -58,6 +58,10 @@ public sealed partial class ZoneWorld
 
     internal bool AbortCastForTest(ZoneEntity player) { lock (_gate) return AbortCast(player, "test", notify: false); }
     internal void ResolvePendingHitForTest(ZoneEntity player) { lock (_gate) ResolvePendingHit(player, _clock().ToUnixTimeMilliseconds()); }
+
+    /// <summary>Test hook: hand damage to a player from an attacker (Mobius onCreatureDamageReceived path).</summary>
+    internal void RunDamageTriggersForTest(ZoneEntity owner, ZoneEntity attacker, int damage) =>
+        RunDamageTriggers(owner, attacker, damage);
     internal void HitPlayerForTest(ZoneEntity player, int damage) { lock (_gate) { player.CurHp = Math.Max(1, player.CurHp - damage); MaybeBreakCast(player, damage); } }
 
     /// <summary>Effect run at hitTime for a non-damage skill (Mobius onMagicHitTimer → callSkill).</summary>

@@ -278,6 +278,18 @@ def load_templates(npc_dir: Path) -> list[dict]:
                 row["clans"] = clans
             if ignore_npc_ids:
                 row["ignoreNpcIds"] = ignore_npc_ids
+            # Mobius <parameters> on EffectPoint signets: how long the signet NPC stays and how often it
+            # re-applies its aura. SummonNpc reads despawn_time; the signet AI reads skill_delay.
+            parameters = child(node, "parameters")
+            if parameters is not None:
+                for item in parameters:
+                    if local(item.tag) != "param":
+                        continue
+                    pname = item.attrib.get("name")
+                    if pname in ("despawn_time", "skill_delay"):
+                        value = int(float(item.attrib.get("value", "0")))
+                        if value > 0:
+                            row["despawnTimeSeconds" if pname == "despawn_time" else "skillDelaySeconds"] = value
             templates[npc_id] = row
 
     return [templates[npc_id] for npc_id in sorted(templates)]

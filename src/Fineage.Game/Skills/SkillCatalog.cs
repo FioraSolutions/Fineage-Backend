@@ -62,8 +62,7 @@ public sealed class SkillCatalog
             if (row.LevelData == null || row.LevelData.Count == 0)
                 throw new InvalidDataException($"{where} skill {row.SkillId} has no levelData.");
 
-            var levels = new SkillLevelData[row.LevelData.Count];
-            for (int i = 0; i < row.LevelData.Count; i++)
+            var levels = new SkillLevelData[row.LevelData.Count];            for (int i = 0; i < row.LevelData.Count; i++)
             {
                 var levelRow = row.LevelData[i];
                 int level = levelRow.Level == 0 ? i + 1 : levelRow.Level;
@@ -73,7 +72,21 @@ public sealed class SkillCatalog
                     Math.Max(0, levelRow.MpConsume),
                     Math.Max(0, levelRow.Power),
                     abnormalLevel,
-                    Math.Max(0, levelRow.MagicLevel));
+                    Math.Max(0, levelRow.MagicLevel),
+                    Math.Max(0, levelRow.MpInitialConsume),
+                    Math.Max(0, levelRow.ItemConsumeId),
+                    Math.Max(0, levelRow.ItemConsumeCount))
+                {
+                    Extractable = (levelRow.Extractable ?? [])
+                        .Select(g => new ExtractableGroup(
+                            (g.Items ?? [])
+                                .Where(it => it.Id > 0 && it.Count > 0)
+                                .Select(it => new ExtractableItem(it.Id, it.Count))
+                                .ToList(),
+                            Math.Max(0, g.Chance)))
+                        .Where(g => g.Items.Count > 0)
+                        .ToList()
+                };
             }
 
             skills.Add(new SkillDefinition(
@@ -136,5 +149,21 @@ public sealed class SkillCatalog
         public int Power { get; set; }
         public int AbnormalLevel { get; set; } = 1;
         public int MagicLevel { get; set; }
+        public int MpInitialConsume { get; set; }
+        public int ItemConsumeId { get; set; }
+        public int ItemConsumeCount { get; set; }
+        public List<ExtractableDto>? Extractable { get; set; }
+    }
+
+    sealed class ExtractableDto
+    {
+        public List<ExtractableItemDto>? Items { get; set; }
+        public double Chance { get; set; }
+    }
+
+    sealed class ExtractableItemDto
+    {
+        public int Id { get; set; }
+        public int Count { get; set; }
     }
 }

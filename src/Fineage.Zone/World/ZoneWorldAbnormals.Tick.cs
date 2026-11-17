@@ -25,6 +25,7 @@ public sealed partial class ZoneWorld
             }
 
             TickDotDamage(entity, now);
+            TickToggleDrain(entity, now);
 
             if (!ZoneAbnormals.TickExpired(entity.Abnormals, now))
                 continue;
@@ -33,6 +34,55 @@ public sealed partial class ZoneWorld
             FanoutAbnormal(entity);
         }
     }
+
+    /// <summary>
+    /// Mobius toggle <c>onActionTime</c> for player abnormals: drain the toggle's MP every <c>ticks</c> seconds and end
+    /// it when the owner can no longer pay, its HP/seat condition broke, or it was already removed.
+    /// </summary>
+    void TickToggleDrain(ZoneEntity entity, long now)
+    {
+        if (entity.Kind != ZoneEntityKind.Player || entity.Dead)
+            return;
+        for (int i = entity.Abnormals.Count - 1; i >= 0; i--)
+        {
+            var entry = entity.Abnormals[i];
+            if (!IsToggleSkillId(entry.Id))
+                continue;
+            // Each effect ticks on its own period; the abnormal entry carries the next due time for the skill.
+            int periodMs = ToggleTickPeriodMs(entry.Id);
+            if (periodMs <= 0 || entry.NextDotAtUnixMs > now)
+                continue;
+            entry.NextDotAtUnixMs = now + periodMs;
+            if (!DrainToggleTick(entity, entry, now, out bool notified))
+                continue;
+            // The drain already printed the specific message (140 / 175) when notified; otherwise the toggle ends
+            // silently and DeactivateToggle sends S1_HAS_BEEN_ABORTED. Either way the skill's exit hook must run —
+            // for Fake Death that is what stands the pawn back up (WT_STOP_FAKEDEATH + Revive).
+            if (notified)
+                entity.Abnormals.RemoveAt(i);
+            DeactivateToggle(entity.Session, entity, entry.Id, _game.Skills.Find(entry.Id), "tick", sendAbort: !notified);
+        }
+        if (entity.Abnormals.Count == 0)
+            _withAbnormals.Remove(entity.ObjectId);
+    }
+
+    /// <summary>Mobius effect <c>ticks</c> in ms for a toggle's MP drain (0 when the skill has no ticking drain).</summary>
+    internal int ToggleTickPeriodMs(int skillId)
+    {
+        if (!_skillEffects.TryGet(skillId, out var effects))
+            return 0;
+        foreach (var effect in effects)
+        {
+            bool drains = effect.Name is "MpConsumePerLevel" or "FakeDeath" or "SilentMove" or "Relax" or "ChameleonRest";
+            if (drains && effect.Ticks > 0)
+                // Mobius schedules the effect task at ticks · EFFECT_TICK_RATIO ms (666 ≈ two thirds of a second per tick).
+                return (int)Math.Round(effect.Ticks * EffectTickRatio);
+        }
+        return 0;
+    }
+
+    internal bool IsToggleSkillId(int skillId) =>
+        _game.Skills.Find(skillId) is { } template && IsToggleSkill(template);
 
     /// <summary>Mobius DamOverTime / DamOverTimePercent while the abnormal is live.</summary>
     void TickDotDamage(ZoneEntity entity, long now)

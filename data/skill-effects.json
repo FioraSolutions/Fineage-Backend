@@ -40,11 +40,6 @@
           "name": "EnergyAttack",
           "power": "#power",
           "criticalChance": "15"
-        },
-        {
-          "name": "EnergyAttack",
-          "power": "#ench1Power",
-          "criticalChance": "15"
         }
       ]
     },
@@ -55,21 +50,6 @@
           "name": "EnergyAttack",
           "power": "#power",
           "criticalChance": "15"
-        },
-        {
-          "name": "EnergyAttack",
-          "power": "#ench1Power",
-          "criticalChance": "15"
-        },
-        {
-          "name": "EnergyAttack",
-          "power": "1827",
-          "criticalChance": "15"
-        },
-        {
-          "name": "EnergyAttack",
-          "power": "#ench2pvePower",
-          "criticalChance": "15"
         }
       ]
     },
@@ -79,11 +59,6 @@
         {
           "name": "EnergyAttack",
           "power": "#power",
-          "criticalChance": "15"
-        },
-        {
-          "name": "EnergyAttack",
-          "power": "#ench1Power",
           "criticalChance": "15"
         }
       ]
@@ -103,11 +78,6 @@
         {
           "name": "EnergyAttack",
           "power": "#power",
-          "criticalChance": "15"
-        },
-        {
-          "name": "EnergyAttack",
-          "power": "#ench1Power",
           "criticalChance": "15"
         }
       ]
@@ -161,13 +131,6 @@
           "consumeItemId": "2131",
           "consumeItemCount": "70",
           "lifeTime": "1200"
-        },
-        {
-          "name": "Summon",
-          "npcId": "#enchNpcId",
-          "consumeItemId": "2131",
-          "consumeItemCount": "70",
-          "lifeTime": "1200"
         }
       ]
     },
@@ -195,23 +158,12 @@
           "name": "EnergyAttack",
           "power": "#power",
           "criticalChance": "15"
-        },
-        {
-          "name": "EnergyAttack",
-          "power": "#ench1Power",
-          "criticalChance": "15"
         }
       ]
     },
     {
       "skillId": 18,
       "effects": [
-        {
-          "name": "TargetMe"
-        },
-        {
-          "name": "GetAgro"
-        },
         {
           "name": "TargetMe"
         },
@@ -233,7 +185,11 @@
       "effects": [
         {
           "name": "DispelBySlot",
-          "dispel": "#dispelAbnormals"
+          "dispel": [
+            "POISON,3",
+            "POISON,7",
+            "POISON,9"
+          ]
         }
       ]
     },
@@ -269,14 +225,6 @@
           "consumeItemCount": "#itemConsumeCountOT",
           "lifeTime": "1200",
           "expMultiplier": "0.85"
-        },
-        {
-          "name": "Summon",
-          "npcId": "#enchNpcId",
-          "consumeItemId": "1459",
-          "consumeItemCount": "4",
-          "lifeTime": "1200",
-          "expMultiplier": "#ench1expPenalty"
         }
       ]
     },
@@ -295,12 +243,6 @@
     {
       "skillId": 28,
       "effects": [
-        {
-          "name": "TargetMe"
-        },
-        {
-          "name": "GetAgro"
-        },
         {
           "name": "TargetMe"
         },
@@ -351,7 +293,11 @@
       "effects": [
         {
           "name": "DispelBySlot",
-          "dispel": "#dispelAbnormals"
+          "dispel": [
+            "BLEEDING,3",
+            "BLEEDING,7",
+            "BLEEDING,9"
+          ]
         }
       ]
     },
@@ -361,11 +307,6 @@
         {
           "name": "EnergyAttack",
           "power": "#power",
-          "criticalChance": "15"
-        },
-        {
-          "name": "EnergyAttack",
-          "power": "#ench1Power",
           "criticalChance": "15"
         }
       ]
@@ -386,26 +327,6 @@
         },
         {
           "name": "ConsumeBody"
-        },
-        {
-          "name": "Sweeper"
-        },
-        {
-          "name": "HpByLevel",
-          "power": "#ench1DrainHp"
-        },
-        {
-          "name": "ConsumeBody"
-        },
-        {
-          "name": "Sweeper"
-        },
-        {
-          "name": "ManaHealByLevel",
-          "power": "#ench2DrainMp"
-        },
-        {
-          "name": "ConsumeBody"
         }
       ]
     },
@@ -414,7 +335,11 @@
       "effects": [
         {
           "name": "DispelBySlot",
-          "dispel": "#dispelAbnormals"
+          "dispel": [
+            "BLEEDING,3",
+            "BLEEDING,7",
+            "BLEEDING,9"
+          ]
         }
       ]
     },
@@ -436,25 +361,12 @@
         },
         {
           "name": "ConsumeBody"
-        },
-        {
-          "name": "HpByLevel",
-          "power": "#enchDrain"
-        },
-        {
-          "name": "ConsumeBody"
         }
       ]
     },
     {
       "skillId": 48,
       "effects": [
-        {
-          "name": "PhysicalAttack"
-        },
-        {
-          "name": "Stun"
-        },
         {
           "name": "PhysicalAttack"
         },
@@ -496,11 +408,6 @@
           "name": "EnergyAttack",
           "power": "#power",
           "criticalChance": "15"
-        },
-        {
-          "name": "EnergyAttack",
-          "power": "#ench1Power",
-          "criticalChance": "15"
         }
       ]
     },
@@ -518,10 +425,6 @@
         {
           "name": "Heal",
           "power": "#amount"
-        },
-        {
-          "name": "Heal",
-          "power": "#ench1amount"
         }
       ]
     },
@@ -540,7 +443,11 @@
       "effects": [
         {
           "name": "DispelBySlot",
-          "dispel": "#dispelAbnormals"
+          "dispel": [
+            "BLEEDING,3",
+            "BLEEDING,7",
+            "BLEEDING,9"
+          ]
         }
       ]
     },
@@ -574,10 +481,6 @@
         {
           "name": "Heal",
           "power": "#amount"
-        },
-        {
-          "name": "Heal",
-          "power": "#ench1amount"
         }
       ]
     },
@@ -593,9 +496,6 @@
     {
       "skillId": 72,
       "effects": [
-        {
-          "name": "Buff"
-        },
         {
           "name": "Buff"
         }
@@ -677,23 +577,12 @@
           "name": "DamOverTime",
           "power": "#dot",
           "ticks": "5"
-        },
-        {
-          "name": "PhysicalAttack"
-        },
-        {
-          "name": "DamOverTime",
-          "power": "63",
-          "ticks": "5"
         }
       ]
     },
     {
       "skillId": 86,
       "effects": [
-        {
-          "name": "Buff"
-        },
         {
           "name": "Buff"
         }
@@ -809,16 +698,6 @@
         {
           "name": "TargetCancel",
           "chance": "40"
-        },
-        {
-          "name": "PhysicalAttack"
-        },
-        {
-          "name": "Stun"
-        },
-        {
-          "name": "TargetCancel",
-          "chance": "40"
         }
       ]
     },
@@ -896,12 +775,6 @@
       "effects": [
         {
           "name": "ImmobileBuff"
-        },
-        {
-          "name": "ImmobileBuff"
-        },
-        {
-          "name": "ImmobileBuff"
         }
       ]
     },
@@ -919,10 +792,6 @@
         {
           "name": "DefenceTrait",
           "BOW": "#trait_bow"
-        },
-        {
-          "name": "DefenceTrait",
-          "BOW": "40"
         }
       ]
     },
@@ -997,9 +866,6 @@
       "effects": [
         {
           "name": "Buff"
-        },
-        {
-          "name": "Buff"
         }
       ]
     },
@@ -1024,9 +890,6 @@
     {
       "skillId": 130,
       "effects": [
-        {
-          "name": "Buff"
-        },
         {
           "name": "Buff"
         }
@@ -1278,12 +1141,6 @@
       "effects": [
         {
           "name": "Buff"
-        },
-        {
-          "name": "Buff"
-        },
-        {
-          "name": "Buff"
         }
       ]
     },
@@ -1327,12 +1184,6 @@
     {
       "skillId": 211,
       "effects": [
-        {
-          "name": "Buff"
-        },
-        {
-          "name": "Buff"
-        },
         {
           "name": "Buff"
         }
@@ -1401,14 +1252,6 @@
     {
       "skillId": 223,
       "effects": [
-        {
-          "name": "PhysicalAttack"
-        },
-        {
-          "name": "DamOverTime",
-          "power": "#dot",
-          "ticks": "5"
-        },
         {
           "name": "PhysicalAttack"
         },
@@ -1598,20 +1441,6 @@
       "effects": [
         {
           "name": "Spoil"
-        },
-        {
-          "name": "Debuff"
-        },
-        {
-          "name": "Spoil"
-        },
-        {
-          "name": "DamOverTime",
-          "power": "118",
-          "ticks": "5"
-        },
-        {
-          "name": "Spoil"
         }
       ]
     },
@@ -1629,11 +1458,6 @@
         {
           "name": "MpConsumePerLevel",
           "power": "0.4",
-          "ticks": "5"
-        },
-        {
-          "name": "MpConsumePerLevel",
-          "power": "#ench1val",
           "ticks": "5"
         }
       ]
@@ -1670,12 +1494,6 @@
         },
         {
           "name": "Stun"
-        },
-        {
-          "name": "PhysicalAttack"
-        },
-        {
-          "name": "Stun"
         }
       ]
     },
@@ -1687,12 +1505,6 @@
           "power": "#power",
           "criticalChance": "15",
           "ignoreShieldDefence": "true"
-        },
-        {
-          "name": "EnergyAttack",
-          "power": "#ench1Power",
-          "criticalChance": "15",
-          "ignoreShieldDefence": "true"
         }
       ]
     },
@@ -1702,10 +1514,6 @@
         {
           "name": "Heal",
           "power": "#amount"
-        },
-        {
-          "name": "Heal",
-          "power": "#ench1amount"
         }
       ]
     },
@@ -1877,12 +1685,6 @@
         },
         {
           "name": "Stun"
-        },
-        {
-          "name": "PhysicalAttack"
-        },
-        {
-          "name": "Stun"
         }
       ]
     },
@@ -1904,14 +1706,6 @@
           "consumeItemCount": "#itemConsumeCountOT",
           "lifeTime": "1200",
           "expMultiplier": "0.85"
-        },
-        {
-          "name": "Summon",
-          "npcId": "#enchNpcIds",
-          "consumeItemId": "1459",
-          "consumeItemCount": "4",
-          "lifeTime": "1200",
-          "expMultiplier": "#ench1expPenalty"
         }
       ]
     },
@@ -1921,12 +1715,6 @@
         {
           "name": "EnergyAttack",
           "power": "#power",
-          "criticalChance": "15",
-          "ignoreShieldDefence": "true"
-        },
-        {
-          "name": "EnergyAttack",
-          "power": "#ench1Power",
           "criticalChance": "15",
           "ignoreShieldDefence": "true"
         }
@@ -1970,16 +1758,6 @@
         {
           "name": "MpConsumePerLevel",
           "power": "2",
-          "ticks": "5"
-        },
-        {
-          "name": "MpConsumePerLevel",
-          "power": "2",
-          "ticks": "5"
-        },
-        {
-          "name": "MpConsumePerLevel",
-          "power": "#ench2val",
           "ticks": "5"
         }
       ]
@@ -2076,13 +1854,6 @@
           "consumeItemId": "2132",
           "consumeItemCount": "20",
           "lifeTime": "1200"
-        },
-        {
-          "name": "Summon",
-          "npcId": "#enchNpcIds",
-          "consumeItemId": "2132",
-          "consumeItemCount": "20",
-          "lifeTime": "1200"
         }
       ]
     },
@@ -2096,14 +1867,6 @@
           "consumeItemCount": "5",
           "lifeTime": "1200",
           "expMultiplier": "0.7"
-        },
-        {
-          "name": "Summon",
-          "npcId": "#enchNpcIds",
-          "consumeItemId": "1458",
-          "consumeItemCount": "5",
-          "lifeTime": "1200",
-          "expMultiplier": "#ench1expPenalty"
         }
       ]
     },
@@ -2112,29 +1875,12 @@
       "effects": [
         {
           "name": "Spoil"
-        },
-        {
-          "name": "Debuff"
-        },
-        {
-          "name": "Spoil"
-        },
-        {
-          "name": "DamOverTime",
-          "power": "118",
-          "ticks": "5"
-        },
-        {
-          "name": "Spoil"
         }
       ]
     },
     {
       "skillId": 303,
       "effects": [
-        {
-          "name": "Buff"
-        },
         {
           "name": "Buff"
         }
@@ -2211,16 +1957,6 @@
           "name": "MpConsumePerLevel",
           "power": "0.8",
           "ticks": "5"
-        },
-        {
-          "name": "MpConsumePerLevel",
-          "power": "0.8",
-          "ticks": "5"
-        },
-        {
-          "name": "MpConsumePerLevel",
-          "power": "#ench2val",
-          "ticks": "5"
         }
       ]
     },
@@ -2229,12 +1965,6 @@
       "effects": [
         {
           "name": "ImmobileBuff"
-        },
-        {
-          "name": "ImmobileBuff"
-        },
-        {
-          "name": "Buff"
         }
       ]
     },
@@ -2273,9 +2003,6 @@
     {
       "skillId": 318,
       "effects": [
-        {
-          "name": "Buff"
-        },
         {
           "name": "Buff"
         }
@@ -2323,16 +2050,6 @@
         {
           "name": "MpConsumePerLevel",
           "power": "0.8",
-          "ticks": "5"
-        },
-        {
-          "name": "MpConsumePerLevel",
-          "power": "0.8",
-          "ticks": "5"
-        },
-        {
-          "name": "MpConsumePerLevel",
-          "power": "#ench2val",
           "ticks": "5"
         }
       ]
@@ -3027,22 +2744,6 @@
           "DUALFIST": "#traits",
           "POLE": "#traits",
           "DUALDAGGER": "#traits"
-        },
-        {
-          "name": "PhysicalAttack"
-        },
-        {
-          "name": "Debuff"
-        },
-        {
-          "name": "DefenceTrait",
-          "SWORD": "-20",
-          "BLUNT": "-20",
-          "DAGGER": "-20",
-          "DUAL": "-20",
-          "DUALFIST": "-20",
-          "POLE": "-20",
-          "DUALDAGGER": "-20"
         }
       ]
     },
@@ -3114,15 +2815,6 @@
         {
           "name": "Lethal",
           "fullLethal": "25"
-        },
-        {
-          "name": "RunAway",
-          "power": "#ench2Power",
-          "time": "20"
-        },
-        {
-          "name": "Lethal",
-          "fullLethal": "#ench2LethalStrikeRate"
         }
       ]
     },
@@ -3174,12 +2866,6 @@
     {
       "skillId": 410,
       "effects": [
-        {
-          "name": "Buff"
-        },
-        {
-          "name": "Buff"
-        },
         {
           "name": "Buff"
         }
@@ -3516,13 +3202,6 @@
           "consumeItemId": "2132",
           "consumeItemCount": "21",
           "lifeTime": "1200"
-        },
-        {
-          "name": "Summon",
-          "npcId": "#ench1npcId",
-          "consumeItemId": "2132",
-          "consumeItemCount": "21",
-          "lifeTime": "1200"
         }
       ]
     },
@@ -3574,13 +3253,6 @@
         {
           "name": "TargetCancel",
           "chance": "#chance"
-        },
-        {
-          "name": "Stun"
-        },
-        {
-          "name": "TargetCancel",
-          "chance": "#ench1Chance"
         }
       ]
     },
@@ -3668,7 +3340,10 @@
       "effects": [
         {
           "name": "DispelBySlot",
-          "dispel": "#dispelAbnormals"
+          "dispel": [
+            "ROOT_PHYSICALLY,3;ROOT_MAGICALLY,3",
+            "SPEED_DOWN,3;ROOT_PHYSICALLY,3;ROOT_MAGICALLY,3"
+          ]
         }
       ]
     },
@@ -3768,7 +3443,11 @@
       "effects": [
         {
           "name": "DispelBySlot",
-          "dispel": "#dispelAbnormals"
+          "dispel": [
+            "POISON,3",
+            "POISON,7",
+            "POISON,9"
+          ]
         }
       ]
     },
@@ -3778,10 +3457,6 @@
         {
           "name": "ManaHealByLevel",
           "power": "#amount"
-        },
-        {
-          "name": "ManaHealByLevel",
-          "power": "#ench1amount"
         }
       ]
     },
@@ -3808,7 +3483,11 @@
       "effects": [
         {
           "name": "DispelBySlot",
-          "dispel": "#dispelAbnormals"
+          "dispel": [
+            "POISON,3;BLEEDING,3;PARALYZE,1",
+            "POISON,7;BLEEDING,7;PARALYZE,1;TURN_STONE,2",
+            "POISON,9;BLEEDING,9;PARALYZE,1;TURN_STONE,2"
+          ]
         }
       ]
     },
@@ -3821,15 +3500,35 @@
         },
         {
           "name": "DispelBySlot",
-          "dispel": "#dispelAbnormals"
-        },
-        {
-          "name": "Heal",
-          "power": "#ench1amount"
-        },
-        {
-          "name": "DispelBySlot",
-          "dispel": "POISON,9;BLEEDING,9"
+          "dispel": [
+            "POISON,3;BLEEDING,3",
+            "POISON,3;BLEEDING,3",
+            "POISON,3;BLEEDING,3",
+            "POISON,3;BLEEDING,3",
+            "POISON,3;BLEEDING,3",
+            "POISON,7;BLEEDING,7",
+            "POISON,7;BLEEDING,7",
+            "POISON,7;BLEEDING,7",
+            "POISON,7;BLEEDING,7",
+            "POISON,7;BLEEDING,7",
+            "POISON,7;BLEEDING,7",
+            "POISON,7;BLEEDING,7",
+            "POISON,7;BLEEDING,7",
+            "POISON,7;BLEEDING,7",
+            "POISON,7;BLEEDING,7",
+            "POISON,7;BLEEDING,7",
+            "POISON,7;BLEEDING,7",
+            "POISON,7;BLEEDING,7",
+            "POISON,9;BLEEDING,9",
+            "POISON,9;BLEEDING,9",
+            "POISON,9;BLEEDING,9",
+            "POISON,9;BLEEDING,9",
+            "POISON,9;BLEEDING,9",
+            "POISON,9;BLEEDING,9",
+            "POISON,9;BLEEDING,9",
+            "POISON,9;BLEEDING,9",
+            "POISON,9;BLEEDING,9"
+          ]
         }
       ]
     },
@@ -4261,14 +3960,6 @@
           "consumeItemCount": "#itemConsumeCountOT",
           "lifeTime": "#summonLifeTime",
           "expMultiplier": "#summonExpMultiplier"
-        },
-        {
-          "name": "Summon",
-          "npcId": "#enchNpcId",
-          "consumeItemId": "1458",
-          "consumeItemCount": "2",
-          "lifeTime": "3600",
-          "expMultiplier": "#summonExpMultiplierEnch"
         }
       ]
     },
@@ -4278,10 +3969,6 @@
         {
           "name": "ManaHealByLevel",
           "power": "#amount"
-        },
-        {
-          "name": "ManaHealByLevel",
-          "power": "#ench1amount"
         }
       ]
     },
@@ -4291,10 +3978,6 @@
         {
           "name": "Heal",
           "power": "#amount"
-        },
-        {
-          "name": "Heal",
-          "power": "#ench1amount"
         }
       ]
     },
@@ -4308,23 +3991,12 @@
           "consumeItemCount": "#itemConsumeCountOT",
           "lifeTime": "#summonLifeTime",
           "expMultiplier": "#summonExpMultiplier"
-        },
-        {
-          "name": "Summon",
-          "npcId": "#enchNpcId",
-          "consumeItemId": "1458",
-          "consumeItemCount": "2",
-          "lifeTime": "3600",
-          "expMultiplier": "#summonExpMultiplierEnch"
         }
       ]
     },
     {
       "skillId": 1129,
       "effects": [
-        {
-          "name": "ConsumeBody"
-        },
         {
           "name": "Summon",
           "npcId": "#npcIds",
@@ -4334,12 +4006,7 @@
           "expMultiplier": "0.85"
         },
         {
-          "name": "Summon",
-          "npcId": "#enchNpcId",
-          "consumeItemId": "1459",
-          "consumeItemCount": "2",
-          "lifeTime": "3600",
-          "expMultiplier": "#summonExpMultiplierEnch"
+          "name": "ConsumeBody"
         }
       ]
     },
@@ -4417,17 +4084,6 @@
         },
         {
           "name": "ConsumeBody"
-        },
-        {
-          "name": "HpByLevel",
-          "power": "#ench1Drain"
-        },
-        {
-          "name": "ConsumeBody"
-        },
-        {
-          "name": "CpHeal",
-          "power": "#ench2Bravery"
         }
       ]
     },
@@ -4435,19 +4091,13 @@
       "skillId": 1154,
       "effects": [
         {
-          "name": "ConsumeBody"
-        },
-        {
           "name": "Summon",
           "npcId": "#npcIds",
           "lifeTime": "3600",
           "expMultiplier": "0.1"
         },
         {
-          "name": "Summon",
-          "npcId": "#enchNpcId",
-          "lifeTime": "3600",
-          "expMultiplier": "0.1"
+          "name": "ConsumeBody"
         }
       ]
     },
@@ -4622,12 +4272,6 @@
       "effects": [
         {
           "name": "Buff"
-        },
-        {
-          "name": "Buff"
-        },
-        {
-          "name": "Buff"
         }
       ]
     },
@@ -4657,24 +4301,12 @@
       "effects": [
         {
           "name": "Buff"
-        },
-        {
-          "name": "Buff"
-        },
-        {
-          "name": "Buff"
         }
       ]
     },
     {
       "skillId": 1191,
       "effects": [
-        {
-          "name": "Buff"
-        },
-        {
-          "name": "Buff"
-        },
         {
           "name": "Buff"
         }
@@ -4773,15 +4405,6 @@
         {
           "name": "Heal",
           "power": "#amount"
-        },
-        {
-          "name": "HealOverTime",
-          "power": "32",
-          "ticks": "1"
-        },
-        {
-          "name": "Heal",
-          "power": "#ench1amount"
         }
       ]
     },
@@ -4791,10 +4414,6 @@
         {
           "name": "Heal",
           "power": "#amount"
-        },
-        {
-          "name": "Heal",
-          "power": "#ench1amount"
         }
       ]
     },
@@ -4809,15 +4428,6 @@
         {
           "name": "Heal",
           "power": "#amount"
-        },
-        {
-          "name": "HealOverTime",
-          "power": "26",
-          "ticks": "1"
-        },
-        {
-          "name": "Heal",
-          "power": "#ench1amount"
         }
       ]
     },
@@ -4862,12 +4472,6 @@
           "npcId": "#npcIds",
           "lifeTime": "#summonLifeTime",
           "expMultiplier": "0.1"
-        },
-        {
-          "name": "Summon",
-          "npcId": "#enchNpcId",
-          "lifeTime": "3600",
-          "expMultiplier": "0.1"
         }
       ]
     },
@@ -4881,14 +4485,6 @@
           "consumeItemCount": "#itemConsumeCountOT",
           "lifeTime": "#summonLifeTime",
           "expMultiplier": "#summonExpMultiplier"
-        },
-        {
-          "name": "Summon",
-          "npcId": "#enchNpcId",
-          "consumeItemId": "3031",
-          "consumeItemCount": "2",
-          "lifeTime": "3600",
-          "expMultiplier": "#summonExpMultiplierEnch"
         }
       ]
     },
@@ -4899,12 +4495,6 @@
           "name": "Summon",
           "npcId": "#npcIds",
           "lifeTime": "#summonLifeTime",
-          "expMultiplier": "0.1"
-        },
-        {
-          "name": "Summon",
-          "npcId": "#enchNpcId",
-          "lifeTime": "3600",
           "expMultiplier": "0.1"
         }
       ]
@@ -4917,12 +4507,6 @@
           "npcId": "#npcIds",
           "lifeTime": "#summonLifeTime",
           "expMultiplier": "0.1"
-        },
-        {
-          "name": "Summon",
-          "npcId": "#enchNpcId",
-          "lifeTime": "3600",
-          "expMultiplier": "0.1"
         }
       ]
     },
@@ -4932,11 +4516,6 @@
         {
           "name": "HealOverTime",
           "power": "#hot",
-          "ticks": "1"
-        },
-        {
-          "name": "HealOverTime",
-          "power": "#ench1hot",
           "ticks": "1"
         }
       ]
@@ -5022,9 +4601,6 @@
     {
       "skillId": 1238,
       "effects": [
-        {
-          "name": "Buff"
-        },
         {
           "name": "Buff"
         }
@@ -5174,15 +4750,6 @@
         {
           "name": "Heal",
           "power": "#amount"
-        },
-        {
-          "name": "HealOverTime",
-          "power": "#ench1hot",
-          "ticks": "1"
-        },
-        {
-          "name": "Heal",
-          "power": "172"
         }
       ]
     },
@@ -5241,9 +4808,6 @@
     {
       "skillId": 1263,
       "effects": [
-        {
-          "name": "Debuff"
-        },
         {
           "name": "Debuff"
         }
@@ -5349,13 +4913,6 @@
           "consumeItemCount": "#itemConsumeCountOT",
           "lifeTime": "3600",
           "expMultiplier": "#summonExpMultiplier"
-        },
-        {
-          "name": "Summon",
-          "npcId": "#enchNpcId",
-          "consumeItemId": "1459",
-          "consumeItemCount": "6",
-          "lifeTime": "3600"
         }
       ]
     },
@@ -5369,13 +4926,6 @@
           "consumeItemCount": "#itemConsumeCountOT",
           "lifeTime": "3600",
           "expMultiplier": "#summonExpMultiplier"
-        },
-        {
-          "name": "Summon",
-          "npcId": "#enchNpcId",
-          "consumeItemId": "1459",
-          "consumeItemCount": "6",
-          "lifeTime": "3600"
         }
       ]
     },
@@ -5389,13 +4939,6 @@
           "consumeItemCount": "#itemConsumeCountOT",
           "lifeTime": "3600",
           "expMultiplier": "#summonExpMultiplier"
-        },
-        {
-          "name": "Summon",
-          "npcId": "#enchNpcId",
-          "consumeItemId": "1459",
-          "consumeItemCount": "6",
-          "lifeTime": "3600"
         }
       ]
     },
@@ -5595,12 +5138,6 @@
       "effects": [
         {
           "name": "ImmobilePetBuff"
-        },
-        {
-          "name": "ImmobilePetBuff"
-        },
-        {
-          "name": "ImmobilePetBuff"
         }
       ]
     },
@@ -5609,7 +5146,11 @@
       "effects": [
         {
           "name": "DispelBySlot",
-          "dispel": "#dispelAbnormals"
+          "dispel": [
+            "POISON,3;BLEEDING,3",
+            "POISON,7;BLEEDING,7",
+            "POISON,9;BLEEDING,9"
+          ]
         }
       ]
     },
@@ -5644,10 +5185,6 @@
         {
           "name": "CpHeal",
           "power": "#amount"
-        },
-        {
-          "name": "CpHeal",
-          "power": "#ench1amount"
         }
       ]
     },
@@ -5657,10 +5194,6 @@
         {
           "name": "CpHeal",
           "power": "#amount"
-        },
-        {
-          "name": "CpHeal",
-          "power": "#ench1amount"
         }
       ]
     },
@@ -5861,13 +5394,6 @@
           "consumeItemId": "1459",
           "consumeItemCount": "#itemConsumeCountOT",
           "lifeTime": "3600"
-        },
-        {
-          "name": "Summon",
-          "npcId": "#enchNpcId",
-          "consumeItemId": "1459",
-          "consumeItemCount": "6",
-          "lifeTime": "3600"
         }
       ]
     },
@@ -5880,13 +5406,6 @@
           "consumeItemId": "1459",
           "consumeItemCount": "#itemConsumeCountOT",
           "lifeTime": "3600"
-        },
-        {
-          "name": "Summon",
-          "npcId": "#enchNpcId",
-          "consumeItemId": "1459",
-          "consumeItemCount": "6",
-          "lifeTime": "3600"
         }
       ]
     },
@@ -5898,13 +5417,6 @@
           "npcId": "#npcIds",
           "consumeItemId": "1459",
           "consumeItemCount": "#itemConsumeCountOT",
-          "lifeTime": "3600"
-        },
-        {
-          "name": "Summon",
-          "npcId": "#enchNpcId",
-          "consumeItemId": "1459",
-          "consumeItemCount": "6",
           "lifeTime": "3600"
         }
       ]
@@ -5922,17 +5434,6 @@
           "consumeItemCount": "#itemConsumeCountOT",
           "lifeTime": "3600",
           "expMultiplier": "0.85"
-        },
-        {
-          "name": "ConsumeBody"
-        },
-        {
-          "name": "Summon",
-          "npcId": "#enchNpcId",
-          "consumeItemId": "1459",
-          "consumeItemCount": "2",
-          "lifeTime": "1200",
-          "expMultiplier": "#summonExpMultiplierEnch"
         }
       ]
     },
@@ -6390,15 +5891,6 @@
       "effects": [
         {
           "name": "Debuff"
-        },
-        {
-          "name": "Debuff"
-        },
-        {
-          "name": "MagicalAttack"
-        },
-        {
-          "name": "Debuff"
         }
       ]
     },
@@ -6554,24 +6046,6 @@
         {
           "name": "Lethal",
           "fullLethal": "25"
-        },
-        {
-          "name": "RunAway",
-          "power": "#ench1Power",
-          "time": "20"
-        },
-        {
-          "name": "Lethal",
-          "fullLethal": "#ench1LethalStrikeRate"
-        },
-        {
-          "name": "RunAway",
-          "power": "#ench1Power",
-          "time": "#ench2Time"
-        },
-        {
-          "name": "Lethal",
-          "fullLethal": "25"
         }
       ]
     },
@@ -6581,10 +6055,6 @@
         {
           "name": "Heal",
           "power": "#amount"
-        },
-        {
-          "name": "Heal",
-          "power": "#ench1amount"
         }
       ]
     },
@@ -6594,10 +6064,6 @@
         {
           "name": "Heal",
           "power": "#amount"
-        },
-        {
-          "name": "Heal",
-          "power": "#ench1amount"
         }
       ]
     },
@@ -6739,13 +6205,6 @@
         {
           "name": "TargetCancel",
           "chance": "#chance"
-        },
-        {
-          "name": "MagicalAttack"
-        },
-        {
-          "name": "TargetCancel",
-          "chance": "#ench2Chance"
         }
       ]
     },
@@ -17583,7 +17042,11 @@
       "effects": [
         {
           "name": "DispelBySlot",
-          "dispel": "#dispelAbnormals"
+          "dispel": [
+            "SPEED_DOWN,1",
+            "SPEED_DOWN,2",
+            "SPEED_DOWN,3"
+          ]
         }
       ]
     },

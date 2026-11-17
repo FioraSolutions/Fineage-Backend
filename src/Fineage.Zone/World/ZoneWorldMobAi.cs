@@ -28,6 +28,7 @@ public sealed partial class ZoneWorld
             TickDuels(now);
             TickCorpseDecay(now);
             TickQuestSpawns(now);
+            TickSignets(now);
             TickAttackStance(now);
             return 0;
         });
@@ -164,10 +165,16 @@ public sealed partial class ZoneWorld
 
         if (DuelBlocksHit(attacker, target))
             return;
+        // Mobius CreatureAI.checkTargetLostOrDead with Config.FAKE_DEATH_DAMAGE_STAND=true (CT0 default): a hit on a
+        // playing-dead pawn stands it up (stopFakeDeath(true)) instead of killing the corpse.
+        if (target.FakeDeath)
+            WakeUpFromFakeDeath(target, "damage");
         target.CurHp = Math.Max(0, target.CurHp - damage);
         target.CombatUntilUnixMs = now + ClanProtocol.CombatStanceMillis;
         FanoutVitals(target, PlayerVitalsStatus(target));
         SendVictimHitLines(attacker, target, damage, 0);
+        // Mobius onCreatureDamageReceived → TriggerSkillByDamage (Mirage 445).
+        RunDamageTriggers(target, attacker, damage);
         if (target.CurHp > 0)
         {
             MaybeBreakCast(target, damage);

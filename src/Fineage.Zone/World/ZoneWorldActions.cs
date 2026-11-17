@@ -39,6 +39,13 @@ public sealed partial class ZoneWorld
     string? ToggleSitStand(ZoneEntity player)
     {
         long now = _clock().ToUnixTimeMilliseconds();
+        // Mobius RequestActionUse case 0 / useSit: a fake-dead pawn is stood up by the sit action
+        // (player.stopEffects(FAKE_DEATH)) instead of toggling the seat.
+        if (player.FakeDeath)
+        {
+            WakeUpFromFakeDeath(player, "sit");
+            return null;
+        }
         if (!player.Sitting && ClanRules.IsInCombat(player.CombatUntilUnixMs, now))
             return ActionProtocol.Blocked;
         // Mobius Player.sitDown: isAttackingDisabled() (casting) → no sit.
