@@ -190,7 +190,12 @@ public sealed partial class ZoneWorld
         }
     }
 
-    static QuestActor QuestActorOf(ZoneEntity player) => new(player.Race, player.Level, player.ClassId, player.SubClassActive);
+    QuestActor QuestActorOf(ZoneEntity player, bool byPet = false) =>
+        new(player.Race, player.Level, player.ClassId, player.SubClassActive)
+        {
+            PetControlObjectId = PetControlObjectIdOf(player),
+            ByPet = byPet
+        };
 
     /// <summary>
     /// Mobius <c>Quest.onKill</c> for the killer (killer-only steps) plus <c>party: true</c> steps shared to one random eligible member. Quest drops go straight to the
@@ -222,7 +227,7 @@ public sealed partial class ZoneWorld
     }
 
     /// <summary>Mobius <c>Quest.onAttack</c>: a player's hit on an NPC some quest listens to (Q234 Pipette Knife on Baium).</summary>
-    void ApplyQuestAttack(ZoneEntity attacker, ZoneEntity npc)
+    void ApplyQuestAttack(ZoneEntity attacker, ZoneEntity npc, bool byPet = false)
     {
         if (attacker.Kind != ZoneEntityKind.Player || attacker.Inventory == null || attacker.Dead || attacker.Session == null)
             return;
@@ -230,17 +235,17 @@ public sealed partial class ZoneWorld
             return;
         if (npc.QuestAttackSpawned || !_quests.HasAttackSteps(npc.NpcId))
             return;
-        var outcome = _quests.OnAttack(attacker.Quests, attacker.Inventory, npc.NpcId, QuestActorOf(attacker));
+        var outcome = _quests.OnAttack(attacker.Quests, attacker.Inventory, npc.NpcId, QuestActorOf(attacker, byPet));
         if (outcome.Ok && outcome.Spawns.Count > 0)
             npc.QuestAttackSpawned = true;
         PublishKill(attacker, outcome, npc);
     }
 
     /// <summary>Test hook: one landed hit by <paramref name="attacker"/> on <paramref name="npc"/>.</summary>
-    internal void QuestAttackForTest(ZoneEntity attacker, ZoneEntity npc)
+    internal void QuestAttackForTest(ZoneEntity attacker, ZoneEntity npc, bool byPet = false)
     {
         lock (_gate)
-            ApplyQuestAttack(attacker, npc);
+            ApplyQuestAttack(attacker, npc, byPet);
     }
 
     /// <summary>Mobius VarkaKetra range for the alliance penalty around the corpse.</summary>

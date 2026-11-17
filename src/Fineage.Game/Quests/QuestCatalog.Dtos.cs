@@ -65,6 +65,14 @@ public sealed partial class QuestCatalog
         /// <summary>Mobius <c>getPaperdollItemId(PAPERDOLL_RHAND)</c> in this list. Null = no gate.</summary>
         public List<int>? Weapons { get; set; }
         public string? Owned { get; set; }
+        public string? Pet { get; set; }
+        public bool? ByPet { get; set; }
+        public int MinEnchant { get; set; }
+        public List<int>? SumItems { get; set; }
+        public int SumMin { get; set; }
+        public int SumMax { get; set; } = -1;
+        public string? HoldsVarItem { get; set; }
+        public HtmlByVarDto? HtmlByVar { get; set; }
     }
 
     sealed class OpDto
@@ -94,6 +102,8 @@ public sealed partial class QuestCatalog
         /// <summary><c>take_all</c>: item ids to remove entirely (Mobius <c>takeItems(player, id, -1)</c>).</summary>
         public List<int>? Items { get; set; }
         public string? Text { get; set; }
+        public int? MinEnchant { get; set; }
+        public int? Offset { get; set; }
         public int? ClassId { get; set; }
         public bool AtPlayer { get; set; }
         public int? DespawnSec { get; set; }
@@ -104,6 +114,13 @@ public sealed partial class QuestCatalog
         public string? GuardSay { get; set; }
         public Dictionary<string, string>? GoneVars { get; set; }
         public Dictionary<string, string>? DeadVars { get; set; }
+    }
+
+    sealed class HtmlByVarDto
+    {
+        public string? Var { get; set; }
+        /// <summary>Var value → html file in the quest folder.</summary>
+        public Dictionary<string, string>? Files { get; set; }
     }
 
     sealed class PriceDto

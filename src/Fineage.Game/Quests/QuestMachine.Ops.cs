@@ -303,6 +303,47 @@ public sealed partial class QuestMachine
                 case DespawnOp:
                     plan.Extras.Despawn = true;
                     break;
+                case PickRandomOp pick:
+                {
+                    var pool = (plan.Vars.GetValueOrDefault(pick.Pool) ?? "")
+                        .Split(' ', StringSplitOptions.RemoveEmptyEntries).ToList();
+                    if (pool.Count == 0)
+                    {
+                        plan.Vars.Remove(pick.Target);
+                        break;
+                    }
+
+                    int index = Math.Min(pool.Count - 1, (int)(_random() * pool.Count));
+                    plan.Vars[pick.Target] = pool[index];
+                    pool.RemoveAt(index);
+                    plan.Vars[pick.Pool] = string.Join(' ', pool);
+                    break;
+                }
+                case RememberItemOp remember:
+                {
+                    var held = inventory.Items.FirstOrDefault(i =>
+                        remember.Items.Contains(i.ItemId) && i.EnchantLevel >= remember.MinEnchant);
+                    if (held == null)
+                    {
+                        failure = Fail(QuestFailure.Item, "You do not have the required item.", quest.Id, "");
+                        return false;
+                    }
+
+                    plan.Vars[remember.Key] = held.ObjectId.ToString();
+                    break;
+                }
+                case ExchangeVarItemOp swap:
+                {
+                    int oid = plan.Vars.TryGetValue(swap.Key, out var rawOid) && int.TryParse(rawOid, out int parsedOid) ? parsedOid : 0;
+                    if (inventory.Find(oid) is not { } held || !swap.Items.Contains(held.ItemId))
+                    {
+                        failure = Fail(QuestFailure.Item, "You do not have the required item.", quest.Id, "");
+                        return false;
+                    }
+
+                    plan.Exchanges.Add((oid, held.ItemId + swap.Offset));
+                    break;
+                }
             }
         }
 
@@ -313,6 +354,17 @@ public sealed partial class QuestMachine
     {
         bool changed = WriteJournal(journal, quest.Id, plan);
         var touches = new List<BagTouch>();
+        foreach (var (objectId, newItemId) in plan.Exchanges)
+        {
+            if (inventory.Find(objectId) is not { } old)
+                continue;
+            int enchant = old.EnchantLevel;
+            inventory.Remove(old);
+            touches.Add(new BagTouch(BagTouchKind.Remove, old));
+            foreach (var piece in inventory.AddPieces(newItemId, 1, enchant))
+                touches.Add(new BagTouch(BagTouchKind.Add, piece));
+        }
+
         foreach (int itemId in plan.Delta.Keys.Order())
         {
             int delta = plan.Delta[itemId];

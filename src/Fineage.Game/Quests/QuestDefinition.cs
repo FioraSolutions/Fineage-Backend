@@ -120,6 +120,18 @@ public sealed record ChangeClassOp(int ClassId) : QuestOp;
 /// <summary>Mobius <c>deleteSpawn(npc)</c> on the dialog / attacked NPC, without its despawn vars.</summary>
 public sealed record DespawnOp : QuestOp;
 
+/// <summary>Mobius Q419 quiz: take one random space-separated token out of <c>Pool</c> into <c>Target</c>.</summary>
+public sealed record PickRandomOp(string Pool, string Target) : QuestOp;
+
+/// <summary>Store the object id of the first held item of <c>Items</c> (enchant at least <c>MinEnchant</c>) in <c>Key</c> (Q421 flute).</summary>
+public sealed record RememberItemOp(string Key, IReadOnlyList<int> Items, int MinEnchant) : QuestOp;
+
+/// <summary>Swap the item whose object id is in <c>Key</c> for item id + <c>Offset</c>, keeping its enchant (Q421 flute → bugle).</summary>
+public sealed record ExchangeVarItemOp(string Key, IReadOnlyList<int> Items, int Offset) : QuestOp;
+
+/// <summary>Page chosen after the ops ran, by the value of a quest var (Q419 random quiz question).</summary>
+public sealed record QuestHtmlByVar(string Var, IReadOnlyDictionary<string, string> Pages);
+
 /// <summary>Side effects that zone carries out after the journal commit (summons, NPC speech, class change).</summary>
 public sealed class QuestExtras
 {
@@ -180,14 +192,34 @@ public sealed record QuestDialog(
     /// Kill / attack step on a quest-owned spawn, run against the owner's journal: <c>any</c> (whoever killed it)
     /// or <c>solo</c> (the owner killed it outside a party). Null = an ordinary step.
     /// </summary>
-    string? Owned = null);
+    string? Owned = null,
+    /// <summary>Summoned pet vs the collar registered in var <c>summonOid</c>: none / out / registered / other.</summary>
+    string? Pet = null,
+    /// <summary>Attack step: the hit came from the player's pet (true) or the player (false).</summary>
+    bool? ByPet = null,
+    /// <summary>With <see cref="HasAny"/>: one of those items carries at least this enchant (pet collar level).</summary>
+    int MinEnchant = 0,
+    /// <summary>Sum of the held counts of these items must lie in [SumMin, SumMax] (SumMax -1 = no cap).</summary>
+    IReadOnlyList<int>? SumItems = null,
+    int SumMin = 0,
+    int SumMax = -1,
+    /// <summary>An item whose object id is stored in this var is still in the bag.</summary>
+    string? HoldsVarItem = null,
+    QuestHtmlByVar? HtmlByVar = null);
 
 /// <summary>
 /// Who is talking. Mobius quest scripts branch on <c>player.getRace()</c> / <c>getLevel()</c>
 /// before showing the start page; dialogs carry the same gates as data (races, minLevel, maxLevel).
 /// <c>ClassId</c> -1 = unknown (class gates do not match); Mobius path quests check <c>player.getClassId()</c>.
 /// </summary>
-public readonly record struct QuestActor(int Race, int Level, int ClassId = -1, bool SubClass = false);
+public readonly record struct QuestActor(int Race, int Level, int ClassId = -1, bool SubClass = false)
+{
+    /// <summary>Control item object id of the summoned pet (0 = none).</summary>
+    public int PetControlObjectId { get; init; }
+
+    /// <summary>Attack hook: the landed hit came from the player's pet.</summary>
+    public bool ByPet { get; init; }
+}
 
 public sealed record QuestDefinition(
     int Id,

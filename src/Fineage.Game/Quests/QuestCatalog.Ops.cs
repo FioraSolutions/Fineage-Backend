@@ -37,6 +37,19 @@ public sealed partial class QuestCatalog
                 ? new ChangeClassOp(cls)
                 : throw new InvalidDataException($"{where} quest {questId} change_class needs classId 0..136."),
             "despawn" => new DespawnOp(),
+            "pick_random" => ReadVarKey(op.Key, where, questId, "pick_random key") is { } pool &&
+                             ReadVarKey(op.Name, where, questId, "pick_random name") is { } target
+                ? new PickRandomOp(pool, target)
+                : throw new InvalidDataException($"{where} quest {questId} pick_random needs key (pool) and name (target)."),
+            "remember_item" => ReadVarKey(op.Key, where, questId, "remember_item key") is { } rememberKey &&
+                               op.Items is { Count: > 0 } rememberItems && rememberItems.All(id => items.TryGet(id, out _))
+                ? new RememberItemOp(rememberKey, rememberItems.Distinct().ToArray(), Math.Max(0, op.MinEnchant ?? 0))
+                : throw new InvalidDataException($"{where} quest {questId} remember_item needs key and known items."),
+            "exchange_var_item" => ReadVarKey(op.Key, where, questId, "exchange_var_item key") is { } swapKey &&
+                                   op.Items is { Count: > 0 } swapItems && op.Offset is int offset &&
+                                   swapItems.All(id => items.TryGet(id, out _) && items.TryGet(id + offset, out _))
+                ? new ExchangeVarItemOp(swapKey, swapItems.Distinct().ToArray(), offset)
+                : throw new InvalidDataException($"{where} quest {questId} exchange_var_item needs key, items and an offset to known items."),
             "teleport" => op is { X: int x, Y: int y, Z: int z }
                 ? new TeleportOp(x, y, z)
                 : throw new InvalidDataException($"{where} quest {questId} teleport needs x, y and z."),

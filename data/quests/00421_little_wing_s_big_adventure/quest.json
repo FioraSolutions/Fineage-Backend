@@ -12,292 +12,1042 @@
       "hook": "talk",
       "when": "absent",
       "maxLevel": 44,
-      "htmlFile": "30610-talk-000.htm"
+      "htmlFile": "30610-01.htm"
     },
     {
       "npcId": 30610,
       "hook": "talk",
       "when": "absent",
-      "htmlFile": "30610-talk-001.htm"
+      "sumItems": [
+        3500,
+        3501,
+        3502
+      ],
+      "sumMax": 0,
+      "htmlFile": "30610-02.htm"
+    },
+    {
+      "npcId": 30610,
+      "hook": "talk",
+      "when": "absent",
+      "sumItems": [
+        3500,
+        3501,
+        3502
+      ],
+      "sumMin": 2,
+      "htmlFile": "30610-02.htm"
+    },
+    {
+      "npcId": 30610,
+      "hook": "talk",
+      "when": "absent",
+      "hasAny": [
+        3500,
+        3501,
+        3502
+      ],
+      "minEnchant": 55,
+      "htmlFile": "30610-04.htm"
+    },
+    {
+      "npcId": 30610,
+      "hook": "talk",
+      "when": "absent",
+      "htmlFile": "30610-03.htm"
+    },
+    {
+      "npcId": 30610,
+      "hook": "event",
+      "when": "absent",
+      "event": "30610-06",
+      "minLevel": 45,
+      "sumItems": [
+        3500,
+        3501,
+        3502
+      ],
+      "sumMin": 1,
+      "sumMax": 1,
+      "hasAny": [
+        3500,
+        3501,
+        3502
+      ],
+      "minEnchant": 55,
+      "ops": [
+        {
+          "op": "create"
+        },
+        {
+          "op": "start"
+        },
+        {
+          "op": "remember_item",
+          "key": "summonOid",
+          "items": [
+            3500,
+            3501,
+            3502
+          ],
+          "minEnchant": 55
+        }
+      ],
+      "htmlFile": "30610-05.htm"
+    },
+    {
+      "npcId": 30610,
+      "hook": "event",
+      "when": "absent",
+      "event": "30610-06",
+      "htmlFile": "30610-06.htm"
     },
     {
       "npcId": 30610,
       "hook": "talk",
       "when": "started",
-      "htmlFile": "30610-talk-002.htm"
+      "htmlFile": "30610-07.htm"
     },
     {
       "npcId": 30747,
       "hook": "talk",
       "when": "started",
-      "whenVar": "memoState",
-      "whenValue": "100",
+      "cond": 1,
+      "varBelow": {
+        "met": 1
+      },
       "ops": [
         {
           "op": "set",
-          "key": "memoState",
-          "value": "200"
+          "key": "met",
+          "value": "1"
         }
       ],
-      "htmlFile": "30747-talk-003.htm"
+      "htmlFile": "30747-01.htm"
     },
     {
       "npcId": 30747,
       "hook": "talk",
       "when": "started",
-      "whenVar": "memoState",
-      "whenValue": "200",
-      "htmlFile": "30747-talk-004.htm"
+      "cond": 1,
+      "pet": "registered",
+      "htmlFile": "30747-04.htm"
     },
     {
       "npcId": 30747,
       "hook": "talk",
       "when": "started",
-      "whenVar": "memoState",
-      "whenValue": "200",
-      "htmlFile": "30747-talk-005.htm"
+      "cond": 1,
+      "pet": "other",
+      "htmlFile": "30747-03.htm"
     },
     {
       "npcId": 30747,
       "hook": "talk",
       "when": "started",
-      "whenVar": "memoState",
-      "whenValue": "0",
-      "htmlFile": "30747-talk-006.htm"
+      "cond": 1,
+      "htmlFile": "30747-02.htm"
     },
     {
       "npcId": 30747,
-      "hook": "talk",
-      "when": "started",
-      "hasItem": 4325,
-      "whenVar": "memoState",
-      "whenValue": "1",
-      "htmlFile": "30747-talk-007.htm"
-    },
-    {
-      "npcId": 30747,
-      "hook": "talk",
-      "when": "started",
-      "hasItem": 4325,
-      "whenVar": "memoState",
-      "whenValue": "2",
-      "htmlFile": "30747-talk-008.htm"
-    },
-    {
-      "npcId": 30747,
-      "hook": "talk",
-      "when": "started",
-      "hasItem": 4325,
-      "whenVar": "memoState",
-      "whenValue": "3",
-      "htmlFile": "30747-talk-009.htm"
-    },
-    {
-      "npcId": 30747,
-      "hook": "talk",
-      "when": "started",
-      "hasItem": 4325,
-      "whenVar": "memoState",
-      "whenValue": "4",
-      "htmlFile": "30747-talk-010.htm"
-    },
-    {
-      "npcId": 30747,
-      "hook": "talk",
-      "when": "started",
-      "hasItem": 4325,
-      "whenVar": "memoState",
-      "whenValue": "5",
-      "htmlFile": "30747-talk-011.htm"
-    },
-    {
-      "npcId": 30747,
-      "hook": "talk",
-      "when": "started",
-      "hasItem": 4325,
-      "whenVar": "memoState",
-      "whenValue": "6",
-      "htmlFile": "30747-talk-012.htm"
-    },
-    {
-      "npcId": 30747,
-      "hook": "talk",
-      "when": "started",
-      "hasItem": 4325,
-      "whenVar": "memoState",
-      "whenValue": "7",
-      "htmlFile": "30747-talk-013.htm"
-    },
-    {
-      "npcId": 30747,
-      "hook": "talk",
-      "when": "started",
-      "hasItem": 4325,
-      "whenVar": "memoState",
-      "whenValue": "8",
-      "htmlFile": "30747-talk-014.htm"
-    },
-    {
-      "npcId": 30747,
-      "hook": "talk",
-      "when": "started",
-      "hasItem": 4325,
-      "whenVar": "memoState",
-      "whenValue": "9",
-      "htmlFile": "30747-talk-015.htm"
-    },
-    {
-      "npcId": 30747,
-      "hook": "talk",
-      "when": "started",
-      "hasItem": 4325,
-      "whenVar": "memoState",
-      "whenValue": "10",
-      "htmlFile": "30747-talk-016.htm"
-    },
-    {
-      "npcId": 30747,
-      "hook": "talk",
-      "when": "started",
-      "hasItem": 4325,
-      "whenVar": "memoState",
-      "whenValue": "11",
-      "htmlFile": "30747-talk-017.htm"
-    },
-    {
-      "npcId": 30747,
-      "hook": "talk",
-      "when": "started",
-      "hasItem": 4325,
-      "whenVar": "memoState",
-      "whenValue": "12",
-      "htmlFile": "30747-talk-018.htm"
-    },
-    {
-      "npcId": 30747,
-      "hook": "talk",
-      "when": "started",
-      "hasItem": 4325,
-      "whenVar": "memoState",
-      "whenValue": "13",
-      "htmlFile": "30747-talk-019.htm"
-    },
-    {
-      "npcId": 30747,
-      "hook": "talk",
-      "when": "started",
-      "hasItem": 4325,
-      "whenVar": "memoState",
-      "whenValue": "14",
-      "htmlFile": "30747-talk-020.htm"
-    },
-    {
-      "npcId": 30747,
-      "hook": "talk",
-      "when": "started",
-      "lacksItems": [
-        4325
-      ],
-      "whenVar": "memoState",
-      "whenValue": "15",
-      "htmlFile": "30747-talk-021.htm"
-    },
-    {
-      "npcId": 30747,
-      "hook": "talk",
-      "when": "started",
-      "lacksItems": [
-        4325
-      ],
-      "whenVar": "memoState",
-      "whenValue": "15",
-      "ops": [
-        {
-          "op": "set",
-          "key": "memoState",
-          "value": "16"
-        }
-      ],
-      "htmlFile": "30747-talk-022.htm"
-    },
-    {
-      "npcId": 30747,
-      "hook": "talk",
-      "when": "started",
-      "whenVar": "memoState",
-      "whenValue": "15",
-      "htmlFile": "30747-talk-023.htm"
-    },
-    {
-      "npcId": 30747,
-      "hook": "talk",
-      "when": "started",
-      "whenVar": "memoState",
-      "whenValue": "15",
-      "ops": [
-        {
-          "op": "set",
-          "key": "memoState",
-          "value": "16"
-        }
-      ],
-      "htmlFile": "30747-talk-024.htm"
-    },
-    {
-      "npcId": 30610,
       "hook": "event",
-      "when": "absent",
-      "event": "30610-05",
-      "htmlFile": "30610-event-30610-05-025.htm"
+      "when": "started",
+      "event": "30747-02",
+      "cond": 1,
+      "pet": "registered",
+      "htmlFile": "30747-04.htm"
     },
     {
-      "npcId": 30610,
+      "npcId": 30747,
       "hook": "event",
-      "when": "absent",
-      "event": "30747-04",
-      "htmlFile": "30610-event-30747-04-026.htm"
+      "when": "started",
+      "event": "30747-02",
+      "cond": 1,
+      "pet": "other",
+      "htmlFile": "30747-03.htm"
     },
     {
-      "npcId": 30610,
+      "npcId": 30747,
       "hook": "event",
-      "when": "absent",
-      "event": "30747-04",
-      "htmlFile": "30610-event-30747-04-027.htm"
+      "when": "started",
+      "event": "30747-02",
+      "cond": 1,
+      "htmlFile": "30747-02.htm"
     },
     {
-      "npcId": 30610,
+      "npcId": 30747,
       "hook": "event",
-      "when": "absent",
+      "when": "started",
       "event": "30747-05",
-      "htmlFile": "30610-event-30747-05-028.htm"
+      "cond": 1,
+      "pet": "registered",
+      "ops": [
+        {
+          "op": "set_cond",
+          "cond": 2
+        },
+        {
+          "op": "give_item",
+          "itemId": 4325,
+          "count": 4
+        }
+      ],
+      "htmlFile": "30747-05.htm"
     },
     {
-      "npcId": 30610,
+      "npcId": 30747,
       "hook": "event",
-      "when": "absent",
-      "event": "30747-07",
-      "htmlFile": "30610-event-30747-07-029.htm"
+      "when": "started",
+      "event": "30747-05",
+      "cond": 1,
+      "htmlFile": "30747-06.htm"
     },
     {
-      "npcId": 30610,
+      "npcId": 30747,
+      "hook": "talk",
+      "when": "started",
+      "cond": 2,
+      "varBelow": {
+        "trees": 1
+      },
+      "htmlFile": "30747-07.htm"
+    },
+    {
+      "npcId": 30747,
+      "hook": "talk",
+      "when": "started",
+      "cond": 2,
+      "htmlFile": "30747-11.htm"
+    },
+    {
+      "npcId": 30747,
+      "hook": "talk",
+      "when": "started",
+      "cond": 3,
+      "varBelow": {
+        "fairy": 1
+      },
+      "pet": "none",
+      "htmlFile": "30747-12.htm"
+    },
+    {
+      "npcId": 30747,
+      "hook": "talk",
+      "when": "started",
+      "cond": 3,
+      "varBelow": {
+        "fairy": 1
+      },
+      "pet": "other",
+      "htmlFile": "30747-14.htm"
+    },
+    {
+      "npcId": 30747,
+      "hook": "talk",
+      "when": "started",
+      "cond": 3,
+      "varBelow": {
+        "fairy": 1
+      },
+      "ops": [
+        {
+          "op": "set",
+          "key": "fairy",
+          "value": "1"
+        }
+      ],
+      "htmlFile": "30747-13.htm"
+    },
+    {
+      "npcId": 30747,
+      "hook": "talk",
+      "when": "started",
+      "cond": 3,
+      "pet": "registered",
+      "htmlFile": "30747-15.htm"
+    },
+    {
+      "npcId": 30747,
+      "hook": "talk",
+      "when": "started",
+      "cond": 3,
+      "sumItems": [
+        3500,
+        3501,
+        3502
+      ],
+      "sumMin": 2,
+      "htmlFile": "30747-17.htm"
+    },
+    {
+      "npcId": 30747,
+      "hook": "talk",
+      "when": "started",
+      "cond": 3,
+      "holdsVarItem": "summonOid",
+      "ops": [
+        {
+          "op": "exchange_var_item",
+          "key": "summonOid",
+          "items": [
+            3500,
+            3501,
+            3502
+          ],
+          "offset": 922
+        },
+        {
+          "op": "complete"
+        }
+      ],
+      "htmlFile": "30747-16.htm"
+    },
+    {
+      "npcId": 30747,
+      "hook": "talk",
+      "when": "started",
+      "cond": 3,
+      "htmlFile": "30747-18.htm"
+    },
+    {
+      "npcId": 27185,
+      "hook": "attack",
+      "when": "started",
+      "cond": 2,
+      "varBelow": {
+        "t27185": 1
+      },
+      "varAtLeast": {
+        "trees": 3
+      },
+      "byPet": true,
+      "pet": "registered",
+      "hasItem": 4325,
+      "chance": 0.01,
+      "html": "",
+      "ops": [
+        {
+          "op": "set",
+          "key": "t27185",
+          "value": "1"
+        },
+        {
+          "op": "take_item",
+          "itemId": 4325,
+          "count": 1
+        },
+        {
+          "op": "say",
+          "text": "Give me a Fairy Leaf...!"
+        },
+        {
+          "op": "say",
+          "text": "Leave now, before you incur the wrath of the guardian ghost..."
+        },
+        {
+          "op": "add",
+          "key": "trees",
+          "value": "1"
+        },
+        {
+          "op": "set_cond",
+          "cond": 3
+        }
+      ]
+    },
+    {
+      "npcId": 27185,
+      "hook": "attack",
+      "when": "started",
+      "cond": 2,
+      "varBelow": {
+        "t27185": 1,
+        "trees": 3
+      },
+      "byPet": true,
+      "pet": "registered",
+      "hasItem": 4325,
+      "chance": 0.01,
+      "html": "",
+      "ops": [
+        {
+          "op": "set",
+          "key": "t27185",
+          "value": "1"
+        },
+        {
+          "op": "take_item",
+          "itemId": 4325,
+          "count": 1
+        },
+        {
+          "op": "say",
+          "text": "Give me a Fairy Leaf...!"
+        },
+        {
+          "op": "say",
+          "text": "Leave now, before you incur the wrath of the guardian ghost..."
+        },
+        {
+          "op": "add",
+          "key": "trees",
+          "value": "1"
+        },
+        {
+          "op": "sound",
+          "name": "ItemSound.quest_itemget"
+        }
+      ]
+    },
+    {
+      "npcId": 27185,
+      "hook": "kill",
+      "when": "any",
+      "html": "",
+      "ops": [
+        {
+          "op": "spawn_npc",
+          "npcId": 27189
+        },
+        {
+          "op": "spawn_npc",
+          "npcId": 27189
+        },
+        {
+          "op": "spawn_npc",
+          "npcId": 27189
+        },
+        {
+          "op": "spawn_npc",
+          "npcId": 27189
+        },
+        {
+          "op": "spawn_npc",
+          "npcId": 27189
+        },
+        {
+          "op": "spawn_npc",
+          "npcId": 27189
+        },
+        {
+          "op": "spawn_npc",
+          "npcId": 27189
+        },
+        {
+          "op": "spawn_npc",
+          "npcId": 27189
+        },
+        {
+          "op": "spawn_npc",
+          "npcId": 27189
+        },
+        {
+          "op": "spawn_npc",
+          "npcId": 27189
+        },
+        {
+          "op": "spawn_npc",
+          "npcId": 27189
+        },
+        {
+          "op": "spawn_npc",
+          "npcId": 27189
+        },
+        {
+          "op": "spawn_npc",
+          "npcId": 27189
+        },
+        {
+          "op": "spawn_npc",
+          "npcId": 27189
+        },
+        {
+          "op": "spawn_npc",
+          "npcId": 27189
+        },
+        {
+          "op": "spawn_npc",
+          "npcId": 27189
+        },
+        {
+          "op": "spawn_npc",
+          "npcId": 27189
+        },
+        {
+          "op": "spawn_npc",
+          "npcId": 27189
+        },
+        {
+          "op": "spawn_npc",
+          "npcId": 27189
+        },
+        {
+          "op": "spawn_npc",
+          "npcId": 27189
+        }
+      ]
+    },
+    {
+      "npcId": 27186,
+      "hook": "attack",
+      "when": "started",
+      "cond": 2,
+      "varBelow": {
+        "t27186": 1
+      },
+      "varAtLeast": {
+        "trees": 3
+      },
+      "byPet": true,
+      "pet": "registered",
+      "hasItem": 4325,
+      "chance": 0.01,
+      "html": "",
+      "ops": [
+        {
+          "op": "set",
+          "key": "t27186",
+          "value": "1"
+        },
+        {
+          "op": "take_item",
+          "itemId": 4325,
+          "count": 1
+        },
+        {
+          "op": "say",
+          "text": "Give me a Fairy Leaf...!"
+        },
+        {
+          "op": "say",
+          "text": "Leave now, before you incur the wrath of the guardian ghost..."
+        },
+        {
+          "op": "add",
+          "key": "trees",
+          "value": "1"
+        },
+        {
+          "op": "set_cond",
+          "cond": 3
+        }
+      ]
+    },
+    {
+      "npcId": 27186,
+      "hook": "attack",
+      "when": "started",
+      "cond": 2,
+      "varBelow": {
+        "t27186": 1,
+        "trees": 3
+      },
+      "byPet": true,
+      "pet": "registered",
+      "hasItem": 4325,
+      "chance": 0.01,
+      "html": "",
+      "ops": [
+        {
+          "op": "set",
+          "key": "t27186",
+          "value": "1"
+        },
+        {
+          "op": "take_item",
+          "itemId": 4325,
+          "count": 1
+        },
+        {
+          "op": "say",
+          "text": "Give me a Fairy Leaf...!"
+        },
+        {
+          "op": "say",
+          "text": "Leave now, before you incur the wrath of the guardian ghost..."
+        },
+        {
+          "op": "add",
+          "key": "trees",
+          "value": "1"
+        },
+        {
+          "op": "sound",
+          "name": "ItemSound.quest_itemget"
+        }
+      ]
+    },
+    {
+      "npcId": 27186,
+      "hook": "kill",
+      "when": "any",
+      "html": "",
+      "ops": [
+        {
+          "op": "spawn_npc",
+          "npcId": 27189
+        },
+        {
+          "op": "spawn_npc",
+          "npcId": 27189
+        },
+        {
+          "op": "spawn_npc",
+          "npcId": 27189
+        },
+        {
+          "op": "spawn_npc",
+          "npcId": 27189
+        },
+        {
+          "op": "spawn_npc",
+          "npcId": 27189
+        },
+        {
+          "op": "spawn_npc",
+          "npcId": 27189
+        },
+        {
+          "op": "spawn_npc",
+          "npcId": 27189
+        },
+        {
+          "op": "spawn_npc",
+          "npcId": 27189
+        },
+        {
+          "op": "spawn_npc",
+          "npcId": 27189
+        },
+        {
+          "op": "spawn_npc",
+          "npcId": 27189
+        },
+        {
+          "op": "spawn_npc",
+          "npcId": 27189
+        },
+        {
+          "op": "spawn_npc",
+          "npcId": 27189
+        },
+        {
+          "op": "spawn_npc",
+          "npcId": 27189
+        },
+        {
+          "op": "spawn_npc",
+          "npcId": 27189
+        },
+        {
+          "op": "spawn_npc",
+          "npcId": 27189
+        },
+        {
+          "op": "spawn_npc",
+          "npcId": 27189
+        },
+        {
+          "op": "spawn_npc",
+          "npcId": 27189
+        },
+        {
+          "op": "spawn_npc",
+          "npcId": 27189
+        },
+        {
+          "op": "spawn_npc",
+          "npcId": 27189
+        },
+        {
+          "op": "spawn_npc",
+          "npcId": 27189
+        }
+      ]
+    },
+    {
+      "npcId": 27187,
+      "hook": "attack",
+      "when": "started",
+      "cond": 2,
+      "varBelow": {
+        "t27187": 1
+      },
+      "varAtLeast": {
+        "trees": 3
+      },
+      "byPet": true,
+      "pet": "registered",
+      "hasItem": 4325,
+      "chance": 0.01,
+      "html": "",
+      "ops": [
+        {
+          "op": "set",
+          "key": "t27187",
+          "value": "1"
+        },
+        {
+          "op": "take_item",
+          "itemId": 4325,
+          "count": 1
+        },
+        {
+          "op": "say",
+          "text": "Give me a Fairy Leaf...!"
+        },
+        {
+          "op": "say",
+          "text": "Leave now, before you incur the wrath of the guardian ghost..."
+        },
+        {
+          "op": "add",
+          "key": "trees",
+          "value": "1"
+        },
+        {
+          "op": "set_cond",
+          "cond": 3
+        }
+      ]
+    },
+    {
+      "npcId": 27187,
+      "hook": "attack",
+      "when": "started",
+      "cond": 2,
+      "varBelow": {
+        "t27187": 1,
+        "trees": 3
+      },
+      "byPet": true,
+      "pet": "registered",
+      "hasItem": 4325,
+      "chance": 0.01,
+      "html": "",
+      "ops": [
+        {
+          "op": "set",
+          "key": "t27187",
+          "value": "1"
+        },
+        {
+          "op": "take_item",
+          "itemId": 4325,
+          "count": 1
+        },
+        {
+          "op": "say",
+          "text": "Give me a Fairy Leaf...!"
+        },
+        {
+          "op": "say",
+          "text": "Leave now, before you incur the wrath of the guardian ghost..."
+        },
+        {
+          "op": "add",
+          "key": "trees",
+          "value": "1"
+        },
+        {
+          "op": "sound",
+          "name": "ItemSound.quest_itemget"
+        }
+      ]
+    },
+    {
+      "npcId": 27187,
+      "hook": "kill",
+      "when": "any",
+      "html": "",
+      "ops": [
+        {
+          "op": "spawn_npc",
+          "npcId": 27189
+        },
+        {
+          "op": "spawn_npc",
+          "npcId": 27189
+        },
+        {
+          "op": "spawn_npc",
+          "npcId": 27189
+        },
+        {
+          "op": "spawn_npc",
+          "npcId": 27189
+        },
+        {
+          "op": "spawn_npc",
+          "npcId": 27189
+        },
+        {
+          "op": "spawn_npc",
+          "npcId": 27189
+        },
+        {
+          "op": "spawn_npc",
+          "npcId": 27189
+        },
+        {
+          "op": "spawn_npc",
+          "npcId": 27189
+        },
+        {
+          "op": "spawn_npc",
+          "npcId": 27189
+        },
+        {
+          "op": "spawn_npc",
+          "npcId": 27189
+        },
+        {
+          "op": "spawn_npc",
+          "npcId": 27189
+        },
+        {
+          "op": "spawn_npc",
+          "npcId": 27189
+        },
+        {
+          "op": "spawn_npc",
+          "npcId": 27189
+        },
+        {
+          "op": "spawn_npc",
+          "npcId": 27189
+        },
+        {
+          "op": "spawn_npc",
+          "npcId": 27189
+        },
+        {
+          "op": "spawn_npc",
+          "npcId": 27189
+        },
+        {
+          "op": "spawn_npc",
+          "npcId": 27189
+        },
+        {
+          "op": "spawn_npc",
+          "npcId": 27189
+        },
+        {
+          "op": "spawn_npc",
+          "npcId": 27189
+        },
+        {
+          "op": "spawn_npc",
+          "npcId": 27189
+        }
+      ]
+    },
+    {
+      "npcId": 27188,
+      "hook": "attack",
+      "when": "started",
+      "cond": 2,
+      "varBelow": {
+        "t27188": 1
+      },
+      "varAtLeast": {
+        "trees": 3
+      },
+      "byPet": true,
+      "pet": "registered",
+      "hasItem": 4325,
+      "chance": 0.01,
+      "html": "",
+      "ops": [
+        {
+          "op": "set",
+          "key": "t27188",
+          "value": "1"
+        },
+        {
+          "op": "take_item",
+          "itemId": 4325,
+          "count": 1
+        },
+        {
+          "op": "say",
+          "text": "Give me a Fairy Leaf...!"
+        },
+        {
+          "op": "say",
+          "text": "Leave now, before you incur the wrath of the guardian ghost..."
+        },
+        {
+          "op": "add",
+          "key": "trees",
+          "value": "1"
+        },
+        {
+          "op": "set_cond",
+          "cond": 3
+        }
+      ]
+    },
+    {
+      "npcId": 27188,
+      "hook": "attack",
+      "when": "started",
+      "cond": 2,
+      "varBelow": {
+        "t27188": 1,
+        "trees": 3
+      },
+      "byPet": true,
+      "pet": "registered",
+      "hasItem": 4325,
+      "chance": 0.01,
+      "html": "",
+      "ops": [
+        {
+          "op": "set",
+          "key": "t27188",
+          "value": "1"
+        },
+        {
+          "op": "take_item",
+          "itemId": 4325,
+          "count": 1
+        },
+        {
+          "op": "say",
+          "text": "Give me a Fairy Leaf...!"
+        },
+        {
+          "op": "say",
+          "text": "Leave now, before you incur the wrath of the guardian ghost..."
+        },
+        {
+          "op": "add",
+          "key": "trees",
+          "value": "1"
+        },
+        {
+          "op": "sound",
+          "name": "ItemSound.quest_itemget"
+        }
+      ]
+    },
+    {
+      "npcId": 27188,
+      "hook": "kill",
+      "when": "any",
+      "html": "",
+      "ops": [
+        {
+          "op": "spawn_npc",
+          "npcId": 27189
+        },
+        {
+          "op": "spawn_npc",
+          "npcId": 27189
+        },
+        {
+          "op": "spawn_npc",
+          "npcId": 27189
+        },
+        {
+          "op": "spawn_npc",
+          "npcId": 27189
+        },
+        {
+          "op": "spawn_npc",
+          "npcId": 27189
+        },
+        {
+          "op": "spawn_npc",
+          "npcId": 27189
+        },
+        {
+          "op": "spawn_npc",
+          "npcId": 27189
+        },
+        {
+          "op": "spawn_npc",
+          "npcId": 27189
+        },
+        {
+          "op": "spawn_npc",
+          "npcId": 27189
+        },
+        {
+          "op": "spawn_npc",
+          "npcId": 27189
+        },
+        {
+          "op": "spawn_npc",
+          "npcId": 27189
+        },
+        {
+          "op": "spawn_npc",
+          "npcId": 27189
+        },
+        {
+          "op": "spawn_npc",
+          "npcId": 27189
+        },
+        {
+          "op": "spawn_npc",
+          "npcId": 27189
+        },
+        {
+          "op": "spawn_npc",
+          "npcId": 27189
+        },
+        {
+          "op": "spawn_npc",
+          "npcId": 27189
+        },
+        {
+          "op": "spawn_npc",
+          "npcId": 27189
+        },
+        {
+          "op": "spawn_npc",
+          "npcId": 27189
+        },
+        {
+          "op": "spawn_npc",
+          "npcId": 27189
+        },
+        {
+          "op": "spawn_npc",
+          "npcId": 27189
+        }
+      ]
+    },
+    {
+      "npcId": 30747,
       "hook": "event",
-      "when": "absent",
+      "when": "any",
       "event": "30747-08",
-      "htmlFile": "30610-event-30747-08-030.htm"
+      "htmlFile": "30747-08.htm"
     },
     {
-      "npcId": 30610,
+      "npcId": 30747,
       "hook": "event",
-      "when": "absent",
+      "when": "any",
       "event": "30747-09",
-      "htmlFile": "30610-event-30747-09-031.htm"
+      "htmlFile": "30747-09.htm"
     },
     {
-      "npcId": 30610,
+      "npcId": 30747,
       "hook": "event",
-      "when": "absent",
+      "when": "any",
       "event": "30747-10",
-      "htmlFile": "30610-event-30747-10-032.htm"
+      "htmlFile": "30747-10.htm"
+    },
+    {
+      "npcId": 30747,
+      "hook": "event",
+      "when": "any",
+      "event": "30747-07",
+      "htmlFile": "30747-07.htm"
     }
   ]
 }
