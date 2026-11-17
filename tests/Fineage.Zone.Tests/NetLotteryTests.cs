@@ -119,7 +119,7 @@ public sealed class NetLotteryTests
         Assert.Equal([1, 2, 3, 4, 5], LotteryBoard.NumbersOf(ticket.Mask));
         Assert.Equal(52_000, rig.Board.Prize);
         Assert.Contains(LotteryProtocol.Earned, Lines(rig.Bench, p.ObjectId));
-        Assert.Contains("Loto 0", LastHtml(rig.Bench)); // -6: bought page
+        Assert.Contains("Thank you for playing the lottery.", LastHtml(rig.Bench)); // -6: bought page
 
         Assert.Null(rig.Bench.World.LotoForTest(p.Session, LotteryProtocol.PageJackpot));
         Assert.Contains("52000", LastHtml(rig.Bench));
@@ -227,7 +227,7 @@ public sealed class NetLotteryTests
         try
         {
             long now = Start.ToUnixTimeMilliseconds();
-            var board = LotteryBoard.OpenInStateDirectory(dir);
+            var board = LotteryBoard.OpenInStateDirectory(dir, nowUnixMs: now);
             int end = 0;
             var t = board.Sell(LotteryBoard.MaskOf([1, 2, 3, 4, 5])!.Value, now);
             Assert.NotNull(t);

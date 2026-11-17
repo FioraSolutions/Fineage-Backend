@@ -155,10 +155,10 @@ public sealed class LotteryBoard
         }
     }
 
-    public static LotteryBoard OpenInStateDirectory(string stateDirectory, LotterySettings? settings = null)
+    public static LotteryBoard OpenInStateDirectory(string stateDirectory, LotterySettings? settings = null, long? nowUnixMs = null)
     {
         string path = Path.Combine(string.IsNullOrWhiteSpace(stateDirectory) ? "data" : stateDirectory, "lottery.json");
-        return new LotteryBoard(settings ?? LotterySettings.FromEnvironment(), new JsonLotteryStore(path));
+        return new LotteryBoard(settings ?? LotterySettings.FromEnvironment(), new JsonLotteryStore(path), nowUnixMs);
     }
 
     public LotterySettings Settings => _settings;
