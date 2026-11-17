@@ -148,6 +148,31 @@ public sealed class SevenSignsBypassHandler : IBypassHandler
     }
 }
 
+/// <summary>
+/// Mobius <c>VillageMaster</c> <c>Subclass N [p1] [p2]</c>: 0 menu, 1 add list, 2 change list, 3 modify list,
+/// 4 add, 5 change, 6 modify choice, 7 modify. The arguments ride in the service arg.
+/// </summary>
+public sealed class SubclassBypassHandler : IBypassHandler
+{
+    public IReadOnlyList<string> Commands { get; } = ["Subclass"];
+
+    public BypassReply Handle(BypassCall call)
+    {
+        var parts = call.Command.Split(' ', StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries);
+        if (parts.Length < 2 || !int.TryParse(parts[1], out int choice) || choice is < 0 or > 7)
+            return BypassReply.Fail("bad_request");
+        return BypassReply.ServiceCall(NpcServiceIntent.Subclass, string.Join(' ', parts.Skip(2)), choice);
+    }
+}
+
+/// <summary>Mobius <c>Teleporter showNoblesSelect</c> (Block G1).</summary>
+public sealed class NoblesSelectBypassHandler : IBypassHandler
+{
+    public IReadOnlyList<string> Commands { get; } = ["showNoblesSelect"];
+
+    public BypassReply Handle(BypassCall call) => BypassReply.ServiceCall(NpcServiceIntent.NoblesSelect);
+}
+
 /// <summary>Merchant <c>TerritoryStatus</c> (Mobius <c>Merchant.showTerritoryStatusWindow</c>): castle, lord and tax page.</summary>
 public sealed class TerritoryBypassHandler : IBypassHandler
 {

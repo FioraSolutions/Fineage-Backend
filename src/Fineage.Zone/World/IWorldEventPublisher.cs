@@ -108,6 +108,9 @@ interface IWorldEventPublisher
     /// <summary>Full SkillList re-send after a trainer learn (Mobius sends SkillList after RequestAcquireSkill).</summary>
     void FanoutSkillList(IReadOnlyList<int> watcherObjectIds, Fineage.Protocol.SkillListMsg list);
 
+    /// <summary>Full ShortCutInit re-send (Mobius setActiveClass restores the shortcuts of the new class index).</summary>
+    void FanoutShortcutInit(IReadOnlyList<int> watcherObjectIds, Fineage.Protocol.ShortCutInitMsg init);
+
     /// <summary>Mobius ChangeWaitType (sit/stand) for <paramref name="objectId"/>. Called under the ZoneWorld gate.</summary>
     void FanoutChangeWaitType(IReadOnlyList<int> watcherObjectIds, int objectId, int waitType, int x, int y, int z);
 

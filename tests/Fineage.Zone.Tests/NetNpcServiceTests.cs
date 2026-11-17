@@ -56,9 +56,9 @@ public sealed class NetNpcServiceTests
         Assert.Equal(NpcServiceProtocol.DestinationUnloaded, LastSystemMessageId(bench));
         Assert.Equal(100, actor.Session.X);
 
-        // Noblesse teleport is still deferred; the gatekeeper says so instead of moving anyone.
+        // Noblesse lists refuse a non-noble (Mobius TeleportHolder) instead of moving anyone.
         Assert.Null(await actor.BypassAsync(GateObjectId, "showTeleports NOBLES_ADENA"));
-        Assert.Equal(NpcServiceProtocol.NoblesDeferred, LastSystemMessageId(bench));
+        Assert.Equal(NpcServiceProtocol.NoblesOnly, LastSystemMessageId(bench));
     }
 
     [Fact]

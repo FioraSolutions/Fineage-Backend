@@ -32,7 +32,7 @@ public sealed class CharacterClassState
     public bool Noble { get; set; }
     public List<StoredClassSlot> Slots { get; set; } = [];
 
-    public static readonly JsonSerializerOptions Json = new(JsonSerializerDefaults.Web);
+    public static readonly JsonSerializerOptions Json = new(JsonSerializerDefaults.Web) { IgnoreReadOnlyProperties = true };
 
     public string ToJson() => JsonSerializer.Serialize(this, Json);
 

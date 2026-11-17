@@ -36,6 +36,9 @@ sealed class ZoneCharacterPersist(IAccountStore? accounts)
     public void SaveClass(string account, int characterId, int classId) =>
         _accounts?.TrySaveClass(account, characterId, classId);
 
+    public void SaveClassState(string account, int characterId, CharacterClassState state) =>
+        _accounts?.TrySaveClassState(account, characterId, state);
+
     public void SaveDeathPenalty(string account, int characterId, int level) =>
         _accounts?.TrySaveDeathPenalty(account, characterId, level);
 

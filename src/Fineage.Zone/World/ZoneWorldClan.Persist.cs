@@ -198,7 +198,8 @@ public sealed partial class ZoneWorld
         entity.AllyId = clan?.D.AllyId ?? 0;
         entity.AllyCrestId = clan?.D.AllyCrestId ?? 0;
         entity.HideoutId = clan?.D.HallId ?? 0;
-        entity.PledgeClass = PledgeClassOf(clan, entity.ObjectId, member?.PledgeType ?? 0, entity.Hero);
+        // Noble floor 5 directly: on enter the entity is not in _byId yet, so PledgeClassOf cannot look it up.
+        entity.PledgeClass = Math.Max(PledgeClassOf(clan, entity.ObjectId, member?.PledgeType ?? 0, entity.Hero), entity.Noble ? 5 : 0);
         if (clan == null)
             entity.ClanWarehouseOpen = false;
         RefreshClanSkills(entity, clan);

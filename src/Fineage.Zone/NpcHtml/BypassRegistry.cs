@@ -65,7 +65,7 @@ public sealed class BypassRegistry
         registry.Register(new StubBypassHandler("Wear", "Wear"));
         registry.Register(new TerritoryBypassHandler());
         registry.Register(new TeleportBypassHandler());
-        registry.Register(new StubBypassHandler("Teleport", "showNoblesSelect"));
+        registry.Register(new NoblesSelectBypassHandler());
         registry.Register(new WarehouseBypassHandler());
         registry.Register(new StubBypassHandler(
             "Warehouse",
@@ -78,6 +78,7 @@ public sealed class BypassRegistry
         registry.Register(new FishermanBypassHandler(html));
         registry.Register(new LotoBypassHandler());
         registry.Register(new SevenSignsBypassHandler());
+        registry.Register(new SubclassBypassHandler());
         return registry;
     }
 

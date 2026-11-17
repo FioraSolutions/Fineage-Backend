@@ -138,7 +138,7 @@ public sealed partial class ZoneWorld
         player.ObjectId,
         player.Name,
         player.ClassId,
-        player.ClassId,
+        player.BaseClassId,
         player.Inventory?.Items.Count ?? 0,
         InventoryLimit(player),
         HasCursedWeapon(player.Inventory));

@@ -4,7 +4,7 @@ namespace Fineage.Game.Services;
 /// Gatekeeper price. Mobius <c>TeleportHolder.calculateFee</c> and <c>PlayerConfig.MAX_FREE_TELEPORT_LEVEL</c>
 /// (default 40). A normal list is free at that level and below. Monday and Tuesday from 20:00
 /// through 23:59 on the zone clock charge half, truncated toward zero. Other lists, including
-/// <c>OTHER</c>, always use the listed fee. Subclass characters are not free; this server has no subclasses.
+/// <c>OTHER</c>, always use the listed fee. Subclass characters are never free (Block G1 subclasses).
 /// </summary>
 public static class TeleportRules
 {

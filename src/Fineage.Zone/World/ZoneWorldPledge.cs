@@ -74,7 +74,7 @@ public sealed partial class ZoneWorld
     static int LeaderSubPledge(ZoneClan clan, int characterId) =>
         characterId == 0 ? 0 : clan.D.SubPledges.FirstOrDefault(sp => sp.LeaderId == characterId)?.Type ?? 0;
 
-    /// <summary>Mobius <c>ClanMember.calculatePledgeClass</c> for Interlude clan levels 0–8 (noble floor 5 not tracked yet, hero floor 8).</summary>
+    /// <summary>Mobius <c>ClanMember.calculatePledgeClass</c> for Interlude clan levels 0–8 (noble floor 5, hero floor 8).</summary>
     int PledgeClassOf(ZoneClan? clan, int characterId, int pledgeType, bool hero = false)
     {
         int value = 0;
@@ -91,6 +91,8 @@ public sealed partial class ZoneWorld
             };
         }
 
+        if (value < 5 && _byId.TryGetValue(characterId, out var who) && who.Noble)
+            value = 5;
         if (hero && value < 8)
             value = 8;
         return value;
