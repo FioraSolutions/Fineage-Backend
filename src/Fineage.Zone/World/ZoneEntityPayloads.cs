@@ -112,6 +112,14 @@ sealed class ZonePlayerIdentityPayload
     public int Race { get; set; }
     public int Sex { get; set; }
     public bool Hero { get; set; }
+    /// <summary>Block G1: Mobius <c>isNoble</c>, persisted in the class state.</summary>
+    public bool Noble { get; set; }
+    /// <summary>Mobius <c>getBaseClass</c>; 0 = same as the active class (never subclassed).</summary>
+    public int BaseClassId { get; set; }
+    /// <summary>Mobius <c>getClassIndex</c>: 0 = base class active, 1–3 = that subclass active.</summary>
+    public int ClassIndex { get; set; }
+    /// <summary>Every class slot that is not active (base parked at index 0 while a subclass plays).</summary>
+    public List<Fineage.Accounts.StoredClassSlot> ClassSlots { get; set; } = [];
     public bool InClan { get; set; }
     public bool ClanLeader { get; set; }
     public int PledgeClass { get; set; }

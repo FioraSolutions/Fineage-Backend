@@ -159,6 +159,9 @@ static partial class NormalizedStoreWriter
         ReplaceShortcuts(conn, tx, id, ReadShortcuts(ch));
         ReplaceLearnedSkills(conn, tx, id, ReadLearnedSkills(ch));
         ReplaceEffects(conn, tx, id, ReadEffects(ch));
+        if (ch.TryGetProperty("classState", out var classState) && classState.ValueKind == JsonValueKind.Object
+            && CharacterClassState.FromJson(classState.GetRawText()) is { } state)
+            UpsertClassState(conn, tx, id, state);
     }
 
     static List<StoredEffect>? ReadEffects(JsonElement character)

@@ -122,8 +122,14 @@ public sealed record CharacterRecord(
     int HennaDye1 = 0,
     int HennaDye2 = 0,
     int HennaDye3 = 0,
-    IReadOnlyList<StoredEffect>? Effects = null)
+    IReadOnlyList<StoredEffect>? Effects = null,
+    CharacterClassState? ClassState = null)
 {
+    /// <summary>Mobius <c>getBaseClass</c>: the class the character was created into (falls back to the active class).</summary>
+    public int BaseClassId => ClassState is { BaseClassId: > 0 } s ? s.BaseClassId : ClassId;
+
+    public bool Noble => ClassState?.Noble ?? false;
+
     /// <summary>Remaining whole seconds until hard delete. Zero when the character is not pending.</summary>
     public int DeleteSecondsLeft(DateTimeOffset now)
     {

@@ -182,6 +182,7 @@ static partial class NormalizedStoreReader
         var shortcuts = LoadShortcuts(conn, stub.Id);
         var learned = LoadLearnedSkills(conn, stub.Id);
         var effects = LoadEffects(conn, stub.Id);
+        var classState = LoadClassState(conn, stub.Id);
         return new CharacterRecord(
             stub.Id,
             stub.Name,
@@ -224,6 +225,7 @@ static partial class NormalizedStoreReader
             HennaDye1: stub.HennaDye1,
             HennaDye2: stub.HennaDye2,
             HennaDye3: stub.HennaDye3,
-            Effects: effects);
+            Effects: effects,
+            ClassState: classState);
     }
 }

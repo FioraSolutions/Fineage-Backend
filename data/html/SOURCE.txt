@@ -21,3 +21,7 @@ Adventurer, VillageMaster, PetManager getHtmlPath overrides.
 Clan / alliance village master pages (Block C/D): village_master/ClanMaster/9000-*.htm and
 village_master/AllianceMaster/9001-*.htm, from dist/game/data/scripts/village_master/{ClanMaster,AllianceMaster}.
 HTML text only. Rules reimplemented after ClanMaster/AllianceMaster scripts and VillageMaster (not copied).
+
+Subclass and grand master pages (Block G1): every remaining villagemaster/*.htm, including SubClass*.htm, from
+dist/game/data/html/villagemaster (existing files kept). HTML text only. Subclass rules reimplemented after
+VillageMaster / Player.addSubClass / setActiveClass (not copied).

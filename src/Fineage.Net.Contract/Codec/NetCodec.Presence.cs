@@ -42,6 +42,8 @@ namespace Fineage.Net.Contract
             w.WriteInt32(m.LargeCrestId);
             w.WriteInt32(m.PledgeClass);
             w.WriteInt32(m.WeaponEnchant);
+            w.WriteByte(m.Noble ? (byte)1 : (byte)0);
+            w.WriteByte(m.Hero ? (byte)1 : (byte)0);
         });
 
         public static EntitySpawnMsg DecodeEntitySpawn(ReadOnlySpan<byte> p)
@@ -100,6 +102,11 @@ namespace Fineage.Net.Contract
             }
             if (r.Remaining > 0)
                 msg.WeaponEnchant = r.ReadInt32();
+            if (r.Remaining >= 2)
+            {
+                msg.Noble = r.ReadByte() != 0;
+                msg.Hero = r.ReadByte() != 0;
+            }
             return msg;
         }
 
@@ -167,6 +174,10 @@ namespace Fineage.Net.Contract
             w.WriteInt32(m.PledgeClass);
             w.WriteInt32(m.PledgeType);
             w.WriteByte(m.ClanLeader ? (byte)1 : (byte)0);
+            w.WriteByte(m.Noble ? (byte)1 : (byte)0);
+            w.WriteByte(m.Hero ? (byte)1 : (byte)0);
+            w.WriteInt32(m.BaseClassId);
+            w.WriteInt32(m.ClassIndex);
         });
 
         public static UserInfoNetMsg DecodeUserInfo(ReadOnlySpan<byte> p)
@@ -243,6 +254,13 @@ namespace Fineage.Net.Contract
                 m.PledgeClass = r.ReadInt32();
                 m.PledgeType = r.ReadInt32();
                 m.ClanLeader = r.ReadByte() != 0;
+            }
+            if (r.Remaining >= 10)
+            {
+                m.Noble = r.ReadByte() != 0;
+                m.Hero = r.ReadByte() != 0;
+                m.BaseClassId = r.ReadInt32();
+                m.ClassIndex = r.ReadInt32();
             }
             return m;
         }

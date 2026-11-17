@@ -78,6 +78,10 @@ namespace Fineage.Net.Contract
         /// Optional wire tail after <see cref="PledgeClass"/>; 0 for NPCs / old peers.
         /// </summary>
         public int WeaponEnchant { get; set; }
+        /// <summary>Mobius CharInfo <c>isNoble</c> (Block G1). Optional wire tail after <see cref="WeaponEnchant"/>.</summary>
+        public bool Noble { get; set; }
+        /// <summary>Mobius CharInfo <c>isHero</c> (hero aura / name glow). Optional wire tail after <see cref="Noble"/>.</summary>
+        public bool Hero { get; set; }
     }
 
     public sealed class PlayerStatsMsg
@@ -199,5 +203,11 @@ namespace Fineage.Net.Contract
         public int PledgeClass { get; set; }
         public int PledgeType { get; set; }
         public bool ClanLeader { get; set; }
+        // Optional tail (Block G1): Mobius UserInfo isNoble / isHero, plus the base class and active class index
+        // (0 = base class, 1–3 = subclass) for the subclass UI.
+        public bool Noble { get; set; }
+        public bool Hero { get; set; }
+        public int BaseClassId { get; set; }
+        public int ClassIndex { get; set; }
     }
 }
