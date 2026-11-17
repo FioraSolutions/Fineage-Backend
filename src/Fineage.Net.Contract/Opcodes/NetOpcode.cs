@@ -319,5 +319,13 @@ namespace Fineage.Net.Contract
         public const ushort ManorInfo = 0x03BB;
         /// <summary>Zone → client: fishing start / bite / HP tick / end (<c>FishingEventNetMsg</c>).</summary>
         public const ushort FishingEvent = 0x03BC;
+        /// <summary>Client → zone: one summon / pet command (<c>SummonCommandNetMsg</c>, Interlude RequestActionUse pet actions).</summary>
+        public const ushort SummonCommand = 0x03BD;
+        /// <summary>Zone → owner: summon window (<c>SummonInfoNetMsg</c>, Mobius PetInfo / PetStatusUpdate).</summary>
+        public const ushort SummonInfo = 0x03BE;
+        /// <summary>Zone → owner: the summon is gone (<c>SummonGoneNetMsg</c>, Mobius PetDelete).</summary>
+        public const ushort SummonGone = 0x03BF;
+        /// <summary>Zone → owner: pet inventory (<c>PetInventoryNetMsg</c>, Mobius PetItemList).</summary>
+        public const ushort PetInventory = 0x03C0;
     }
 }

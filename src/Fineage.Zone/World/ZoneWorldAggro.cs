@@ -34,7 +34,8 @@ public sealed partial class ZoneWorld
 
     void AddHate(ZoneEntity npc, ZoneEntity attacker, long hate = 1)
     {
-        if (npc.Kind != ZoneEntityKind.Npc || attacker.Kind != ZoneEntityKind.Player || npc.CurHp <= 0)
+        if (npc.Kind != ZoneEntityKind.Npc || npc.Summon != null || npc.CurHp <= 0 ||
+            (attacker.Kind != ZoneEntityKind.Player && attacker.Summon == null))
             return;
         // Mobius FolkStatus: merchants/trainers/folk never hate. Guards/Monsters (Attackable types) do.
         if (!ZoneCombat.TakesNpcCombatDamage(npc.NpcType, npc.Attackable))
@@ -53,8 +54,13 @@ public sealed partial class ZoneWorld
     }
 
     bool ValidHateTarget(ZoneEntity npc, int playerId) =>
-        _byId.TryGetValue(playerId, out var p) && p.Kind == ZoneEntityKind.Player && !p.Dead && p.CurHp > 0 &&
-        p.Session != null && SameInstance(npc.ObjectId, p.ObjectId) && ZoneCombat.InAggroRange(npc.X, npc.Y, p.X, p.Y);
+        _byId.TryGetValue(playerId, out var p) && IsLivePlayable(p) &&
+        SameInstance(npc.ObjectId, p.ObjectId) && ZoneCombat.InAggroRange(npc.X, npc.Y, p.X, p.Y);
+
+    /// <summary>A connected living player, or a living summon (Mobius <c>isPlayable</c>).</summary>
+    static bool IsLivePlayable(ZoneEntity p) =>
+        !p.Dead && p.CurHp > 0 &&
+        ((p.Kind == ZoneEntityKind.Player && p.Session != null) || (p.Kind == ZoneEntityKind.Npc && p.Summon != null));
 
     /// <summary>Most hated valid attacker (drops invalid entries); 0 when the list is empty.</summary>
     internal int MostHated(ZoneEntity npc)

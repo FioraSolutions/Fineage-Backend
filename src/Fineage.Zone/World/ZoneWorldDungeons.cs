@@ -190,6 +190,7 @@ public sealed partial class ZoneWorld
         }
         // A jump away from the trade partner closes the window for both (Mobius teleToLocation → trade cancel).
         CancelTradeIfOutOfRange(entity.ObjectId);
+        SummonFollowTeleport(entity);
     }
 
     static DungeonEnteredMsg Entered(DungeonSite site, bool inside, int action) => new()

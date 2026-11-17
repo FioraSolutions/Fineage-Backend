@@ -44,6 +44,8 @@ namespace Fineage.Net.Contract
             w.WriteInt32(m.WeaponEnchant);
             w.WriteByte(m.Noble ? (byte)1 : (byte)0);
             w.WriteByte(m.Hero ? (byte)1 : (byte)0);
+            w.WriteByte((byte)m.SummonKind);
+            w.WriteInt32(m.OwnerObjectId);
         });
 
         public static EntitySpawnMsg DecodeEntitySpawn(ReadOnlySpan<byte> p)
@@ -106,6 +108,11 @@ namespace Fineage.Net.Contract
             {
                 msg.Noble = r.ReadByte() != 0;
                 msg.Hero = r.ReadByte() != 0;
+            }
+            if (r.Remaining >= 5)
+            {
+                msg.SummonKind = (SummonKindNet)r.ReadByte();
+                msg.OwnerObjectId = r.ReadInt32();
             }
             return msg;
         }

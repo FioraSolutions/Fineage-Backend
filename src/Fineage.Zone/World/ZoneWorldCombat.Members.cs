@@ -14,12 +14,29 @@ public sealed partial class ZoneWorld
     {
         if (npc.PAtk <= 0)
             return (ZoneCombat.MobMeleeDamage(npc.Level), 0);
-        var ps = PlayerStats(player);
+        double pDef, evasion, shieldRate;
+        int shieldDef;
+        if (player.Kind == ZoneEntityKind.Npc)
+        {
+            // NPC against NPC (summon ↔ monster): both sides from their templates.
+            pDef = NpcPDef(player);
+            evasion = NpcEvasion(player);
+            shieldRate = NpcShieldRate(player);
+            shieldDef = player.ShieldDef;
+        }
+        else
+        {
+            var ps = PlayerStats(player);
+            pDef = ps.PDef;
+            evasion = ps.Evasion;
+            shieldRate = ps.ShieldRate;
+            shieldDef = ps.ShieldDef;
+        }
         npc.Heading = ZoneCombat.HeadingFrom(npc.X, npc.Y, player.X, player.Y);
         // Mobius Npc.rechargeShots(physical): chance vs SoulShotRate, then stock--; charged for this swing.
         bool ss = TryNpcSoulshot(npc);
-        return ZoneCombat.RollMelee(_combatRandom, StatMods(npc).Apply(CombatStat.PAtk, npc.PAtk), ps.PDef, NpcAccuracy(npc), ps.Evasion,
-            NpcCritPermille(npc), npc.RandomDamage, ss, 0, ps.ShieldRate, ps.ShieldDef, false,
+        return ZoneCombat.RollMelee(_combatRandom, StatMods(npc).Apply(CombatStat.PAtk, npc.PAtk), pDef, NpcAccuracy(npc), evasion,
+            NpcCritPermille(npc), npc.RandomDamage, ss, 0, shieldRate, shieldDef, false,
             ZoneCombat.HitConditionBonus(npc.X, npc.Y, npc.Z, player.X, player.Y, player.Z, player.Heading, IsNight),
             StatMods(npc).Apply(CombatStat.CritDmg, 1d));
     }
@@ -64,6 +81,7 @@ public sealed partial class ZoneWorld
             TickAggression(now);
             TickLeash(now);
             TickMobAttacks(now);
+            TickSummons(now);
             TickCorpseDecay(now);
             TickAttackStance(now);
             TickGroundExpiry(now);

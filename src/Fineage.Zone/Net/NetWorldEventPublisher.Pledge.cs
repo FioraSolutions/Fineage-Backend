@@ -43,4 +43,10 @@ sealed partial class NetWorldEventPublisher
 
     void IWorldEventPublisher.FanoutFishing(IReadOnlyList<int> watcherObjectIds, FishingEventNetMsg fishing) =>
         SendAll(watcherObjectIds, NetOpcode.FishingEvent, NetCodec.EncodeFishingEvent(fishing));
+
+    void IWorldEventPublisher.FanoutSummonInfo(IReadOnlyList<int> watcherObjectIds, SummonInfoNetMsg info) =>
+        SendAll(watcherObjectIds, NetOpcode.SummonInfo, NetCodec.EncodeSummonInfo(info));
+
+    void IWorldEventPublisher.FanoutSummonGone(IReadOnlyList<int> watcherObjectIds, SummonGoneNetMsg gone) =>
+        SendAll(watcherObjectIds, NetOpcode.SummonGone, NetCodec.EncodeSummonGone(gone));
 }

@@ -172,6 +172,8 @@ interface IWorldEventPublisher
     void FanoutManorInfo(IReadOnlyList<int> watcherObjectIds, Fineage.Net.Contract.ManorInfoNetMsg manor);
 
     void FanoutFishing(IReadOnlyList<int> watcherObjectIds, Fineage.Net.Contract.FishingEventNetMsg fishing);
+    void FanoutSummonInfo(IReadOnlyList<int> watcherObjectIds, Fineage.Net.Contract.SummonInfoNetMsg info);
+    void FanoutSummonGone(IReadOnlyList<int> watcherObjectIds, Fineage.Net.Contract.SummonGoneNetMsg gone);
 
 
     void FanoutClanAskJoin(IReadOnlyList<int> watcherObjectIds, Fineage.Protocol.ClanAskJoinMsg ask);

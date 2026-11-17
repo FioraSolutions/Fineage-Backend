@@ -1,0 +1,3226 @@
+{
+ "reference": "Servitor summon skills transcribed from Mobius CT 0 Interlude stats/skills (effect Summon).",
+ "summons": [
+  {
+   "skillId": 13,
+   "name": "Summon Siege Golem",
+   "corpse": false,
+   "levels": [
+    {
+     "level": 1,
+     "npcId": 14737,
+     "itemId": 1459,
+     "itemCount": 300,
+     "upkeepItemId": 2131,
+     "upkeepCount": 70,
+     "upkeepIntervalSec": 0,
+     "lifeTimeSec": 1200,
+     "expMultiplier": 1.0
+    }
+   ]
+  },
+  {
+   "skillId": 25,
+   "name": "Summon Mechanic Golem",
+   "corpse": false,
+   "levels": [
+    {
+     "level": 1,
+     "npcId": 14663,
+     "itemId": 1458,
+     "itemCount": 7,
+     "upkeepItemId": 1458,
+     "upkeepCount": 4,
+     "upkeepIntervalSec": 0,
+     "lifeTimeSec": 1200,
+     "expMultiplier": 0.85
+    },
+    {
+     "level": 2,
+     "npcId": 14664,
+     "itemId": 1458,
+     "itemCount": 11,
+     "upkeepItemId": 1458,
+     "upkeepCount": 4,
+     "upkeepIntervalSec": 0,
+     "lifeTimeSec": 1200,
+     "expMultiplier": 0.85
+    },
+    {
+     "level": 3,
+     "npcId": 14665,
+     "itemId": 1459,
+     "itemCount": 3,
+     "upkeepItemId": 1459,
+     "upkeepCount": 1,
+     "upkeepIntervalSec": 0,
+     "lifeTimeSec": 1200,
+     "expMultiplier": 0.85
+    },
+    {
+     "level": 4,
+     "npcId": 14666,
+     "itemId": 1459,
+     "itemCount": 1,
+     "upkeepItemId": 1459,
+     "upkeepCount": 2,
+     "upkeepIntervalSec": 0,
+     "lifeTimeSec": 1200,
+     "expMultiplier": 0.85
+    },
+    {
+     "level": 5,
+     "npcId": 14667,
+     "itemId": 1459,
+     "itemCount": 3,
+     "upkeepItemId": 1459,
+     "upkeepCount": 2,
+     "upkeepIntervalSec": 0,
+     "lifeTimeSec": 1200,
+     "expMultiplier": 0.85
+    },
+    {
+     "level": 6,
+     "npcId": 14668,
+     "itemId": 1459,
+     "itemCount": 2,
+     "upkeepItemId": 1459,
+     "upkeepCount": 3,
+     "upkeepIntervalSec": 0,
+     "lifeTimeSec": 1200,
+     "expMultiplier": 0.85
+    },
+    {
+     "level": 7,
+     "npcId": 14669,
+     "itemId": 1459,
+     "itemCount": 4,
+     "upkeepItemId": 1459,
+     "upkeepCount": 3,
+     "upkeepIntervalSec": 0,
+     "lifeTimeSec": 1200,
+     "expMultiplier": 0.85
+    },
+    {
+     "level": 8,
+     "npcId": 14670,
+     "itemId": 1459,
+     "itemCount": 3,
+     "upkeepItemId": 1459,
+     "upkeepCount": 4,
+     "upkeepIntervalSec": 0,
+     "lifeTimeSec": 1200,
+     "expMultiplier": 0.85
+    },
+    {
+     "level": 9,
+     "npcId": 14671,
+     "itemId": 1459,
+     "itemCount": 5,
+     "upkeepItemId": 1459,
+     "upkeepCount": 4,
+     "upkeepIntervalSec": 0,
+     "lifeTimeSec": 1200,
+     "expMultiplier": 0.85
+    }
+   ]
+  },
+  {
+   "skillId": 283,
+   "name": "Summon Dark Panther",
+   "corpse": false,
+   "levels": [
+    {
+     "level": 1,
+     "npcId": 14799,
+     "itemId": 1459,
+     "itemCount": 1,
+     "upkeepItemId": 1459,
+     "upkeepCount": 1,
+     "upkeepIntervalSec": 0,
+     "lifeTimeSec": 1200,
+     "expMultiplier": 0.85
+    },
+    {
+     "level": 2,
+     "npcId": 14800,
+     "itemId": 1459,
+     "itemCount": 3,
+     "upkeepItemId": 1459,
+     "upkeepCount": 1,
+     "upkeepIntervalSec": 0,
+     "lifeTimeSec": 1200,
+     "expMultiplier": 0.85
+    },
+    {
+     "level": 3,
+     "npcId": 14801,
+     "itemId": 1459,
+     "itemCount": 3,
+     "upkeepItemId": 1459,
+     "upkeepCount": 2,
+     "upkeepIntervalSec": 0,
+     "lifeTimeSec": 1200,
+     "expMultiplier": 0.85
+    },
+    {
+     "level": 4,
+     "npcId": 14802,
+     "itemId": 1459,
+     "itemCount": 2,
+     "upkeepItemId": 1459,
+     "upkeepCount": 3,
+     "upkeepIntervalSec": 0,
+     "lifeTimeSec": 1200,
+     "expMultiplier": 0.85
+    },
+    {
+     "level": 5,
+     "npcId": 14803,
+     "itemId": 1459,
+     "itemCount": 4,
+     "upkeepItemId": 1459,
+     "upkeepCount": 4,
+     "upkeepIntervalSec": 0,
+     "lifeTimeSec": 1200,
+     "expMultiplier": 0.85
+    },
+    {
+     "level": 6,
+     "npcId": 14804,
+     "itemId": 1459,
+     "itemCount": 2,
+     "upkeepItemId": 1459,
+     "upkeepCount": 4,
+     "upkeepIntervalSec": 0,
+     "lifeTimeSec": 1200,
+     "expMultiplier": 0.85
+    },
+    {
+     "level": 7,
+     "npcId": 14805,
+     "itemId": 1459,
+     "itemCount": 4,
+     "upkeepItemId": 1459,
+     "upkeepCount": 4,
+     "upkeepIntervalSec": 0,
+     "lifeTimeSec": 1200,
+     "expMultiplier": 0.85
+    }
+   ]
+  },
+  {
+   "skillId": 299,
+   "name": "Summon Wild Hog Cannon",
+   "corpse": false,
+   "levels": [
+    {
+     "level": 1,
+     "npcId": 14768,
+     "itemId": 1460,
+     "itemCount": 120,
+     "upkeepItemId": 2132,
+     "upkeepCount": 30,
+     "upkeepIntervalSec": 0,
+     "lifeTimeSec": 1200,
+     "expMultiplier": 1.0
+    }
+   ]
+  },
+  {
+   "skillId": 301,
+   "name": "Summon Big Boom",
+   "corpse": false,
+   "levels": [
+    {
+     "level": 1,
+     "npcId": 14702,
+     "itemId": 1458,
+     "itemCount": 3,
+     "upkeepItemId": 1458,
+     "upkeepCount": 5,
+     "upkeepIntervalSec": 0,
+     "lifeTimeSec": 1200,
+     "expMultiplier": 0.7
+    },
+    {
+     "level": 2,
+     "npcId": 14703,
+     "itemId": 1458,
+     "itemCount": 3,
+     "upkeepItemId": 1458,
+     "upkeepCount": 5,
+     "upkeepIntervalSec": 0,
+     "lifeTimeSec": 1200,
+     "expMultiplier": 0.7
+    },
+    {
+     "level": 3,
+     "npcId": 14704,
+     "itemId": 1458,
+     "itemCount": 4,
+     "upkeepItemId": 1458,
+     "upkeepCount": 5,
+     "upkeepIntervalSec": 0,
+     "lifeTimeSec": 1200,
+     "expMultiplier": 0.7
+    },
+    {
+     "level": 4,
+     "npcId": 14705,
+     "itemId": 1458,
+     "itemCount": 4,
+     "upkeepItemId": 1458,
+     "upkeepCount": 5,
+     "upkeepIntervalSec": 0,
+     "lifeTimeSec": 1200,
+     "expMultiplier": 0.7
+    },
+    {
+     "level": 5,
+     "npcId": 14706,
+     "itemId": 1458,
+     "itemCount": 5,
+     "upkeepItemId": 1458,
+     "upkeepCount": 5,
+     "upkeepIntervalSec": 0,
+     "lifeTimeSec": 1200,
+     "expMultiplier": 0.7
+    }
+   ]
+  },
+  {
+   "skillId": 448,
+   "name": "Summon Swoop Cannon",
+   "corpse": false,
+   "levels": [
+    {
+     "level": 1,
+     "npcId": 14839,
+     "itemId": 1461,
+     "itemCount": 46,
+     "upkeepItemId": 2132,
+     "upkeepCount": 21,
+     "upkeepIntervalSec": 0,
+     "lifeTimeSec": 1200,
+     "expMultiplier": 1.0
+    }
+   ]
+  },
+  {
+   "skillId": 1111,
+   "name": "Summon Kat the Cat",
+   "corpse": false,
+   "levels": [
+    {
+     "level": 1,
+     "npcId": 14111,
+     "itemId": 1458,
+     "itemCount": 3,
+     "upkeepItemId": 1458,
+     "upkeepCount": 0,
+     "upkeepIntervalSec": 0,
+     "lifeTimeSec": 1200,
+     "expMultiplier": 0.7
+    },
+    {
+     "level": 2,
+     "npcId": 14112,
+     "itemId": 1458,
+     "itemCount": 4,
+     "upkeepItemId": 1458,
+     "upkeepCount": 0,
+     "upkeepIntervalSec": 0,
+     "lifeTimeSec": 1200,
+     "expMultiplier": 0.7
+    },
+    {
+     "level": 3,
+     "npcId": 14113,
+     "itemId": 1458,
+     "itemCount": 1,
+     "upkeepItemId": 1458,
+     "upkeepCount": 1,
+     "upkeepIntervalSec": 0,
+     "lifeTimeSec": 1200,
+     "expMultiplier": 0.7
+    },
+    {
+     "level": 4,
+     "npcId": 14114,
+     "itemId": 1458,
+     "itemCount": 3,
+     "upkeepItemId": 1458,
+     "upkeepCount": 1,
+     "upkeepIntervalSec": 0,
+     "lifeTimeSec": 1200,
+     "expMultiplier": 0.7
+    },
+    {
+     "level": 5,
+     "npcId": 14115,
+     "itemId": 1458,
+     "itemCount": 5,
+     "upkeepItemId": 1458,
+     "upkeepCount": 1,
+     "upkeepIntervalSec": 0,
+     "lifeTimeSec": 3600,
+     "expMultiplier": 0.7
+    },
+    {
+     "level": 6,
+     "npcId": 14116,
+     "itemId": 1458,
+     "itemCount": 3,
+     "upkeepItemId": 1458,
+     "upkeepCount": 2,
+     "upkeepIntervalSec": 0,
+     "lifeTimeSec": 3600,
+     "expMultiplier": 0.7
+    },
+    {
+     "level": 7,
+     "npcId": 14117,
+     "itemId": 1458,
+     "itemCount": 4,
+     "upkeepItemId": 1458,
+     "upkeepCount": 2,
+     "upkeepIntervalSec": 0,
+     "lifeTimeSec": 3600,
+     "expMultiplier": 0.7
+    },
+    {
+     "level": 8,
+     "npcId": 14118,
+     "itemId": 1458,
+     "itemCount": 4,
+     "upkeepItemId": 1458,
+     "upkeepCount": 3,
+     "upkeepIntervalSec": 0,
+     "lifeTimeSec": 3600,
+     "expMultiplier": 0.7
+    },
+    {
+     "level": 9,
+     "npcId": 14119,
+     "itemId": 1458,
+     "itemCount": 5,
+     "upkeepItemId": 1458,
+     "upkeepCount": 3,
+     "upkeepIntervalSec": 0,
+     "lifeTimeSec": 3600,
+     "expMultiplier": 0.7
+    },
+    {
+     "level": 10,
+     "npcId": 14120,
+     "itemId": 1458,
+     "itemCount": 6,
+     "upkeepItemId": 1458,
+     "upkeepCount": 3,
+     "upkeepIntervalSec": 0,
+     "lifeTimeSec": 3600,
+     "expMultiplier": 0.7
+    },
+    {
+     "level": 11,
+     "npcId": 14121,
+     "itemId": 1458,
+     "itemCount": 6,
+     "upkeepItemId": 1458,
+     "upkeepCount": 4,
+     "upkeepIntervalSec": 0,
+     "lifeTimeSec": 3600,
+     "expMultiplier": 0.7
+    },
+    {
+     "level": 12,
+     "npcId": 14122,
+     "itemId": 1458,
+     "itemCount": 7,
+     "upkeepItemId": 1458,
+     "upkeepCount": 4,
+     "upkeepIntervalSec": 0,
+     "lifeTimeSec": 3600,
+     "expMultiplier": 0.7
+    },
+    {
+     "level": 13,
+     "npcId": 14123,
+     "itemId": 1458,
+     "itemCount": 5,
+     "upkeepItemId": 1458,
+     "upkeepCount": 5,
+     "upkeepIntervalSec": 0,
+     "lifeTimeSec": 3600,
+     "expMultiplier": 0.7
+    },
+    {
+     "level": 14,
+     "npcId": 14124,
+     "itemId": 1458,
+     "itemCount": 6,
+     "upkeepItemId": 1458,
+     "upkeepCount": 5,
+     "upkeepIntervalSec": 0,
+     "lifeTimeSec": 3600,
+     "expMultiplier": 0.7
+    },
+    {
+     "level": 15,
+     "npcId": 14125,
+     "itemId": 1458,
+     "itemCount": 7,
+     "upkeepItemId": 1458,
+     "upkeepCount": 5,
+     "upkeepIntervalSec": 0,
+     "lifeTimeSec": 3600,
+     "expMultiplier": 0.7
+    },
+    {
+     "level": 16,
+     "npcId": 14126,
+     "itemId": 1458,
+     "itemCount": 9,
+     "upkeepItemId": 1458,
+     "upkeepCount": 5,
+     "upkeepIntervalSec": 0,
+     "lifeTimeSec": 3600,
+     "expMultiplier": 0.7
+    },
+    {
+     "level": 17,
+     "npcId": 14127,
+     "itemId": 1458,
+     "itemCount": 7,
+     "upkeepItemId": 1458,
+     "upkeepCount": 6,
+     "upkeepIntervalSec": 0,
+     "lifeTimeSec": 3600,
+     "expMultiplier": 0.7
+    },
+    {
+     "level": 18,
+     "npcId": 14128,
+     "itemId": 1458,
+     "itemCount": 8,
+     "upkeepItemId": 1458,
+     "upkeepCount": 6,
+     "upkeepIntervalSec": 0,
+     "lifeTimeSec": 3600,
+     "expMultiplier": 0.7
+    }
+   ]
+  },
+  {
+   "skillId": 1128,
+   "name": "Summon Shadow",
+   "corpse": false,
+   "levels": [
+    {
+     "level": 1,
+     "npcId": 14479,
+     "itemId": 1458,
+     "itemCount": 3,
+     "upkeepItemId": 1458,
+     "upkeepCount": 0,
+     "upkeepIntervalSec": 0,
+     "lifeTimeSec": 1200,
+     "expMultiplier": 0.7
+    },
+    {
+     "level": 2,
+     "npcId": 14480,
+     "itemId": 1458,
+     "itemCount": 4,
+     "upkeepItemId": 1458,
+     "upkeepCount": 0,
+     "upkeepIntervalSec": 0,
+     "lifeTimeSec": 1200,
+     "expMultiplier": 0.7
+    },
+    {
+     "level": 3,
+     "npcId": 14481,
+     "itemId": 1458,
+     "itemCount": 1,
+     "upkeepItemId": 1458,
+     "upkeepCount": 1,
+     "upkeepIntervalSec": 0,
+     "lifeTimeSec": 1200,
+     "expMultiplier": 0.7
+    },
+    {
+     "level": 4,
+     "npcId": 14482,
+     "itemId": 1458,
+     "itemCount": 3,
+     "upkeepItemId": 1458,
+     "upkeepCount": 1,
+     "upkeepIntervalSec": 0,
+     "lifeTimeSec": 1200,
+     "expMultiplier": 0.7
+    },
+    {
+     "level": 5,
+     "npcId": 14483,
+     "itemId": 1458,
+     "itemCount": 5,
+     "upkeepItemId": 1458,
+     "upkeepCount": 1,
+     "upkeepIntervalSec": 0,
+     "lifeTimeSec": 3600,
+     "expMultiplier": 0.7
+    },
+    {
+     "level": 6,
+     "npcId": 14484,
+     "itemId": 1458,
+     "itemCount": 3,
+     "upkeepItemId": 1458,
+     "upkeepCount": 2,
+     "upkeepIntervalSec": 0,
+     "lifeTimeSec": 3600,
+     "expMultiplier": 0.7
+    },
+    {
+     "level": 7,
+     "npcId": 14485,
+     "itemId": 1458,
+     "itemCount": 4,
+     "upkeepItemId": 1458,
+     "upkeepCount": 2,
+     "upkeepIntervalSec": 0,
+     "lifeTimeSec": 3600,
+     "expMultiplier": 0.7
+    },
+    {
+     "level": 8,
+     "npcId": 14486,
+     "itemId": 1458,
+     "itemCount": 4,
+     "upkeepItemId": 1458,
+     "upkeepCount": 3,
+     "upkeepIntervalSec": 0,
+     "lifeTimeSec": 3600,
+     "expMultiplier": 0.7
+    },
+    {
+     "level": 9,
+     "npcId": 14487,
+     "itemId": 1458,
+     "itemCount": 5,
+     "upkeepItemId": 1458,
+     "upkeepCount": 3,
+     "upkeepIntervalSec": 0,
+     "lifeTimeSec": 3600,
+     "expMultiplier": 0.7
+    },
+    {
+     "level": 10,
+     "npcId": 14488,
+     "itemId": 1458,
+     "itemCount": 6,
+     "upkeepItemId": 1458,
+     "upkeepCount": 3,
+     "upkeepIntervalSec": 0,
+     "lifeTimeSec": 3600,
+     "expMultiplier": 0.7
+    },
+    {
+     "level": 11,
+     "npcId": 14489,
+     "itemId": 1458,
+     "itemCount": 6,
+     "upkeepItemId": 1458,
+     "upkeepCount": 4,
+     "upkeepIntervalSec": 0,
+     "lifeTimeSec": 3600,
+     "expMultiplier": 0.7
+    },
+    {
+     "level": 12,
+     "npcId": 14490,
+     "itemId": 1458,
+     "itemCount": 7,
+     "upkeepItemId": 1458,
+     "upkeepCount": 4,
+     "upkeepIntervalSec": 0,
+     "lifeTimeSec": 3600,
+     "expMultiplier": 0.7
+    },
+    {
+     "level": 13,
+     "npcId": 14491,
+     "itemId": 1458,
+     "itemCount": 5,
+     "upkeepItemId": 1458,
+     "upkeepCount": 5,
+     "upkeepIntervalSec": 0,
+     "lifeTimeSec": 3600,
+     "expMultiplier": 0.7
+    },
+    {
+     "level": 14,
+     "npcId": 14492,
+     "itemId": 1458,
+     "itemCount": 6,
+     "upkeepItemId": 1458,
+     "upkeepCount": 5,
+     "upkeepIntervalSec": 0,
+     "lifeTimeSec": 3600,
+     "expMultiplier": 0.7
+    },
+    {
+     "level": 15,
+     "npcId": 14493,
+     "itemId": 1458,
+     "itemCount": 7,
+     "upkeepItemId": 1458,
+     "upkeepCount": 5,
+     "upkeepIntervalSec": 0,
+     "lifeTimeSec": 3600,
+     "expMultiplier": 0.7
+    },
+    {
+     "level": 16,
+     "npcId": 14494,
+     "itemId": 1458,
+     "itemCount": 9,
+     "upkeepItemId": 1458,
+     "upkeepCount": 5,
+     "upkeepIntervalSec": 0,
+     "lifeTimeSec": 3600,
+     "expMultiplier": 0.7
+    },
+    {
+     "level": 17,
+     "npcId": 14495,
+     "itemId": 1458,
+     "itemCount": 7,
+     "upkeepItemId": 1458,
+     "upkeepCount": 6,
+     "upkeepIntervalSec": 0,
+     "lifeTimeSec": 3600,
+     "expMultiplier": 0.7
+    },
+    {
+     "level": 18,
+     "npcId": 14496,
+     "itemId": 1458,
+     "itemCount": 8,
+     "upkeepItemId": 1458,
+     "upkeepCount": 6,
+     "upkeepIntervalSec": 0,
+     "lifeTimeSec": 3600,
+     "expMultiplier": 0.7
+    }
+   ]
+  },
+  {
+   "skillId": 1129,
+   "name": "Summon Reanimated Man",
+   "corpse": true,
+   "levels": [
+    {
+     "level": 1,
+     "npcId": 14001,
+     "itemId": 1459,
+     "itemCount": 2,
+     "upkeepItemId": 1459,
+     "upkeepCount": 1,
+     "upkeepIntervalSec": 0,
+     "lifeTimeSec": 3600,
+     "expMultiplier": 0.85
+    },
+    {
+     "level": 2,
+     "npcId": 14002,
+     "itemId": 1459,
+     "itemCount": 3,
+     "upkeepItemId": 1459,
+     "upkeepCount": 1,
+     "upkeepIntervalSec": 0,
+     "lifeTimeSec": 3600,
+     "expMultiplier": 0.85
+    },
+    {
+     "level": 3,
+     "npcId": 14003,
+     "itemId": 1459,
+     "itemCount": 3,
+     "upkeepItemId": 1459,
+     "upkeepCount": 2,
+     "upkeepIntervalSec": 0,
+     "lifeTimeSec": 3600,
+     "expMultiplier": 0.85
+    },
+    {
+     "level": 4,
+     "npcId": 14004,
+     "itemId": 1459,
+     "itemCount": 2,
+     "upkeepItemId": 1459,
+     "upkeepCount": 3,
+     "upkeepIntervalSec": 0,
+     "lifeTimeSec": 3600,
+     "expMultiplier": 0.85
+    },
+    {
+     "level": 5,
+     "npcId": 14005,
+     "itemId": 1459,
+     "itemCount": 4,
+     "upkeepItemId": 1459,
+     "upkeepCount": 3,
+     "upkeepIntervalSec": 0,
+     "lifeTimeSec": 3600,
+     "expMultiplier": 0.85
+    },
+    {
+     "level": 6,
+     "npcId": 14006,
+     "itemId": 1459,
+     "itemCount": 2,
+     "upkeepItemId": 1459,
+     "upkeepCount": 4,
+     "upkeepIntervalSec": 0,
+     "lifeTimeSec": 3600,
+     "expMultiplier": 0.85
+    },
+    {
+     "level": 7,
+     "npcId": 14007,
+     "itemId": 1459,
+     "itemCount": 4,
+     "upkeepItemId": 1459,
+     "upkeepCount": 4,
+     "upkeepIntervalSec": 0,
+     "lifeTimeSec": 3600,
+     "expMultiplier": 0.85
+    }
+   ]
+  },
+  {
+   "skillId": 1154,
+   "name": "Summon Corrupted Man",
+   "corpse": true,
+   "levels": [
+    {
+     "level": 1,
+     "npcId": 14038,
+     "itemId": 1458,
+     "itemCount": 3,
+     "upkeepItemId": 0,
+     "upkeepCount": 1,
+     "upkeepIntervalSec": 0,
+     "lifeTimeSec": 3600,
+     "expMultiplier": 0.1
+    },
+    {
+     "level": 2,
+     "npcId": 14039,
+     "itemId": 1458,
+     "itemCount": 3,
+     "upkeepItemId": 0,
+     "upkeepCount": 1,
+     "upkeepIntervalSec": 0,
+     "lifeTimeSec": 3600,
+     "expMultiplier": 0.1
+    },
+    {
+     "level": 3,
+     "npcId": 14040,
+     "itemId": 1458,
+     "itemCount": 3,
+     "upkeepItemId": 0,
+     "upkeepCount": 1,
+     "upkeepIntervalSec": 0,
+     "lifeTimeSec": 3600,
+     "expMultiplier": 0.1
+    },
+    {
+     "level": 4,
+     "npcId": 14041,
+     "itemId": 1458,
+     "itemCount": 3,
+     "upkeepItemId": 0,
+     "upkeepCount": 1,
+     "upkeepIntervalSec": 0,
+     "lifeTimeSec": 3600,
+     "expMultiplier": 0.1
+    },
+    {
+     "level": 5,
+     "npcId": 14042,
+     "itemId": 1458,
+     "itemCount": 3,
+     "upkeepItemId": 0,
+     "upkeepCount": 1,
+     "upkeepIntervalSec": 0,
+     "lifeTimeSec": 3600,
+     "expMultiplier": 0.1
+    },
+    {
+     "level": 6,
+     "npcId": 14043,
+     "itemId": 1458,
+     "itemCount": 3,
+     "upkeepItemId": 0,
+     "upkeepCount": 1,
+     "upkeepIntervalSec": 0,
+     "lifeTimeSec": 3600,
+     "expMultiplier": 0.1
+    }
+   ]
+  },
+  {
+   "skillId": 1225,
+   "name": "Summon Mew the Cat",
+   "corpse": false,
+   "levels": [
+    {
+     "level": 1,
+     "npcId": 14159,
+     "itemId": 1458,
+     "itemCount": 1,
+     "upkeepItemId": 0,
+     "upkeepCount": 1,
+     "upkeepIntervalSec": 0,
+     "lifeTimeSec": 1200,
+     "expMultiplier": 0.1
+    },
+    {
+     "level": 2,
+     "npcId": 14160,
+     "itemId": 1458,
+     "itemCount": 1,
+     "upkeepItemId": 0,
+     "upkeepCount": 1,
+     "upkeepIntervalSec": 0,
+     "lifeTimeSec": 1200,
+     "expMultiplier": 0.1
+    },
+    {
+     "level": 3,
+     "npcId": 14161,
+     "itemId": 1458,
+     "itemCount": 1,
+     "upkeepItemId": 0,
+     "upkeepCount": 1,
+     "upkeepIntervalSec": 0,
+     "lifeTimeSec": 1200,
+     "expMultiplier": 0.1
+    },
+    {
+     "level": 4,
+     "npcId": 14162,
+     "itemId": 1458,
+     "itemCount": 1,
+     "upkeepItemId": 0,
+     "upkeepCount": 1,
+     "upkeepIntervalSec": 0,
+     "lifeTimeSec": 1200,
+     "expMultiplier": 0.1
+    },
+    {
+     "level": 5,
+     "npcId": 14163,
+     "itemId": 1458,
+     "itemCount": 1,
+     "upkeepItemId": 0,
+     "upkeepCount": 1,
+     "upkeepIntervalSec": 0,
+     "lifeTimeSec": 3600,
+     "expMultiplier": 0.1
+    },
+    {
+     "level": 6,
+     "npcId": 14164,
+     "itemId": 1458,
+     "itemCount": 1,
+     "upkeepItemId": 0,
+     "upkeepCount": 1,
+     "upkeepIntervalSec": 0,
+     "lifeTimeSec": 3600,
+     "expMultiplier": 0.1
+    },
+    {
+     "level": 7,
+     "npcId": 14165,
+     "itemId": 1458,
+     "itemCount": 1,
+     "upkeepItemId": 0,
+     "upkeepCount": 1,
+     "upkeepIntervalSec": 0,
+     "lifeTimeSec": 3600,
+     "expMultiplier": 0.1
+    },
+    {
+     "level": 8,
+     "npcId": 14166,
+     "itemId": 1458,
+     "itemCount": 1,
+     "upkeepItemId": 0,
+     "upkeepCount": 1,
+     "upkeepIntervalSec": 0,
+     "lifeTimeSec": 3600,
+     "expMultiplier": 0.1
+    },
+    {
+     "level": 9,
+     "npcId": 14167,
+     "itemId": 1458,
+     "itemCount": 1,
+     "upkeepItemId": 0,
+     "upkeepCount": 1,
+     "upkeepIntervalSec": 0,
+     "lifeTimeSec": 3600,
+     "expMultiplier": 0.1
+    },
+    {
+     "level": 10,
+     "npcId": 14168,
+     "itemId": 1458,
+     "itemCount": 1,
+     "upkeepItemId": 0,
+     "upkeepCount": 1,
+     "upkeepIntervalSec": 0,
+     "lifeTimeSec": 3600,
+     "expMultiplier": 0.1
+    },
+    {
+     "level": 11,
+     "npcId": 14169,
+     "itemId": 1458,
+     "itemCount": 1,
+     "upkeepItemId": 0,
+     "upkeepCount": 1,
+     "upkeepIntervalSec": 0,
+     "lifeTimeSec": 3600,
+     "expMultiplier": 0.1
+    },
+    {
+     "level": 12,
+     "npcId": 14170,
+     "itemId": 1458,
+     "itemCount": 1,
+     "upkeepItemId": 0,
+     "upkeepCount": 1,
+     "upkeepIntervalSec": 0,
+     "lifeTimeSec": 3600,
+     "expMultiplier": 0.1
+    },
+    {
+     "level": 13,
+     "npcId": 14171,
+     "itemId": 1458,
+     "itemCount": 1,
+     "upkeepItemId": 0,
+     "upkeepCount": 1,
+     "upkeepIntervalSec": 0,
+     "lifeTimeSec": 3600,
+     "expMultiplier": 0.1
+    },
+    {
+     "level": 14,
+     "npcId": 14172,
+     "itemId": 1458,
+     "itemCount": 1,
+     "upkeepItemId": 0,
+     "upkeepCount": 1,
+     "upkeepIntervalSec": 0,
+     "lifeTimeSec": 3600,
+     "expMultiplier": 0.1
+    },
+    {
+     "level": 15,
+     "npcId": 14173,
+     "itemId": 1458,
+     "itemCount": 1,
+     "upkeepItemId": 0,
+     "upkeepCount": 1,
+     "upkeepIntervalSec": 0,
+     "lifeTimeSec": 3600,
+     "expMultiplier": 0.1
+    },
+    {
+     "level": 16,
+     "npcId": 14174,
+     "itemId": 1458,
+     "itemCount": 1,
+     "upkeepItemId": 0,
+     "upkeepCount": 1,
+     "upkeepIntervalSec": 0,
+     "lifeTimeSec": 3600,
+     "expMultiplier": 0.1
+    },
+    {
+     "level": 17,
+     "npcId": 14175,
+     "itemId": 1458,
+     "itemCount": 1,
+     "upkeepItemId": 0,
+     "upkeepCount": 1,
+     "upkeepIntervalSec": 0,
+     "lifeTimeSec": 3600,
+     "expMultiplier": 0.1
+    },
+    {
+     "level": 18,
+     "npcId": 14176,
+     "itemId": 1458,
+     "itemCount": 1,
+     "upkeepItemId": 0,
+     "upkeepCount": 1,
+     "upkeepIntervalSec": 0,
+     "lifeTimeSec": 3600,
+     "expMultiplier": 0.1
+    }
+   ]
+  },
+  {
+   "skillId": 1226,
+   "name": "Summon Boxer the Unicorn",
+   "corpse": false,
+   "levels": [
+    {
+     "level": 1,
+     "npcId": 14295,
+     "itemId": 1458,
+     "itemCount": 3,
+     "upkeepItemId": 1458,
+     "upkeepCount": 0,
+     "upkeepIntervalSec": 0,
+     "lifeTimeSec": 1200,
+     "expMultiplier": 0.7
+    },
+    {
+     "level": 2,
+     "npcId": 14296,
+     "itemId": 1458,
+     "itemCount": 4,
+     "upkeepItemId": 1458,
+     "upkeepCount": 0,
+     "upkeepIntervalSec": 0,
+     "lifeTimeSec": 1200,
+     "expMultiplier": 0.7
+    },
+    {
+     "level": 3,
+     "npcId": 14297,
+     "itemId": 1458,
+     "itemCount": 1,
+     "upkeepItemId": 1458,
+     "upkeepCount": 1,
+     "upkeepIntervalSec": 0,
+     "lifeTimeSec": 1200,
+     "expMultiplier": 0.7
+    },
+    {
+     "level": 4,
+     "npcId": 14298,
+     "itemId": 1458,
+     "itemCount": 3,
+     "upkeepItemId": 1458,
+     "upkeepCount": 1,
+     "upkeepIntervalSec": 0,
+     "lifeTimeSec": 1200,
+     "expMultiplier": 0.7
+    },
+    {
+     "level": 5,
+     "npcId": 14299,
+     "itemId": 1458,
+     "itemCount": 5,
+     "upkeepItemId": 1458,
+     "upkeepCount": 1,
+     "upkeepIntervalSec": 0,
+     "lifeTimeSec": 3600,
+     "expMultiplier": 0.7
+    },
+    {
+     "level": 6,
+     "npcId": 14300,
+     "itemId": 1458,
+     "itemCount": 3,
+     "upkeepItemId": 1458,
+     "upkeepCount": 2,
+     "upkeepIntervalSec": 0,
+     "lifeTimeSec": 3600,
+     "expMultiplier": 0.7
+    },
+    {
+     "level": 7,
+     "npcId": 14301,
+     "itemId": 1458,
+     "itemCount": 4,
+     "upkeepItemId": 1458,
+     "upkeepCount": 2,
+     "upkeepIntervalSec": 0,
+     "lifeTimeSec": 3600,
+     "expMultiplier": 0.7
+    },
+    {
+     "level": 8,
+     "npcId": 14302,
+     "itemId": 1458,
+     "itemCount": 4,
+     "upkeepItemId": 1458,
+     "upkeepCount": 3,
+     "upkeepIntervalSec": 0,
+     "lifeTimeSec": 3600,
+     "expMultiplier": 0.7
+    },
+    {
+     "level": 9,
+     "npcId": 14303,
+     "itemId": 1458,
+     "itemCount": 5,
+     "upkeepItemId": 1458,
+     "upkeepCount": 3,
+     "upkeepIntervalSec": 0,
+     "lifeTimeSec": 3600,
+     "expMultiplier": 0.7
+    },
+    {
+     "level": 10,
+     "npcId": 14304,
+     "itemId": 1458,
+     "itemCount": 6,
+     "upkeepItemId": 1458,
+     "upkeepCount": 3,
+     "upkeepIntervalSec": 0,
+     "lifeTimeSec": 3600,
+     "expMultiplier": 0.7
+    },
+    {
+     "level": 11,
+     "npcId": 14305,
+     "itemId": 1458,
+     "itemCount": 6,
+     "upkeepItemId": 1458,
+     "upkeepCount": 4,
+     "upkeepIntervalSec": 0,
+     "lifeTimeSec": 3600,
+     "expMultiplier": 0.7
+    },
+    {
+     "level": 12,
+     "npcId": 14306,
+     "itemId": 1458,
+     "itemCount": 7,
+     "upkeepItemId": 1458,
+     "upkeepCount": 4,
+     "upkeepIntervalSec": 0,
+     "lifeTimeSec": 3600,
+     "expMultiplier": 0.7
+    },
+    {
+     "level": 13,
+     "npcId": 14307,
+     "itemId": 1458,
+     "itemCount": 5,
+     "upkeepItemId": 1458,
+     "upkeepCount": 5,
+     "upkeepIntervalSec": 0,
+     "lifeTimeSec": 3600,
+     "expMultiplier": 0.7
+    },
+    {
+     "level": 14,
+     "npcId": 14308,
+     "itemId": 1458,
+     "itemCount": 6,
+     "upkeepItemId": 1458,
+     "upkeepCount": 5,
+     "upkeepIntervalSec": 0,
+     "lifeTimeSec": 3600,
+     "expMultiplier": 0.7
+    },
+    {
+     "level": 15,
+     "npcId": 14309,
+     "itemId": 1458,
+     "itemCount": 7,
+     "upkeepItemId": 1458,
+     "upkeepCount": 5,
+     "upkeepIntervalSec": 0,
+     "lifeTimeSec": 3600,
+     "expMultiplier": 0.7
+    },
+    {
+     "level": 16,
+     "npcId": 14310,
+     "itemId": 1458,
+     "itemCount": 9,
+     "upkeepItemId": 1458,
+     "upkeepCount": 5,
+     "upkeepIntervalSec": 0,
+     "lifeTimeSec": 3600,
+     "expMultiplier": 0.7
+    },
+    {
+     "level": 17,
+     "npcId": 14311,
+     "itemId": 1458,
+     "itemCount": 7,
+     "upkeepItemId": 1458,
+     "upkeepCount": 6,
+     "upkeepIntervalSec": 0,
+     "lifeTimeSec": 3600,
+     "expMultiplier": 0.7
+    },
+    {
+     "level": 18,
+     "npcId": 14312,
+     "itemId": 1458,
+     "itemCount": 8,
+     "upkeepItemId": 1458,
+     "upkeepCount": 6,
+     "upkeepIntervalSec": 0,
+     "lifeTimeSec": 3600,
+     "expMultiplier": 0.7
+    }
+   ]
+  },
+  {
+   "skillId": 1227,
+   "name": "Summon Mirage the Unicorn",
+   "corpse": false,
+   "levels": [
+    {
+     "level": 1,
+     "npcId": 14343,
+     "itemId": 1458,
+     "itemCount": 1,
+     "upkeepItemId": 0,
+     "upkeepCount": 1,
+     "upkeepIntervalSec": 0,
+     "lifeTimeSec": 1200,
+     "expMultiplier": 0.1
+    },
+    {
+     "level": 2,
+     "npcId": 14344,
+     "itemId": 1458,
+     "itemCount": 1,
+     "upkeepItemId": 0,
+     "upkeepCount": 1,
+     "upkeepIntervalSec": 0,
+     "lifeTimeSec": 1200,
+     "expMultiplier": 0.1
+    },
+    {
+     "level": 3,
+     "npcId": 14345,
+     "itemId": 1458,
+     "itemCount": 1,
+     "upkeepItemId": 0,
+     "upkeepCount": 1,
+     "upkeepIntervalSec": 0,
+     "lifeTimeSec": 1200,
+     "expMultiplier": 0.1
+    },
+    {
+     "level": 4,
+     "npcId": 14346,
+     "itemId": 1458,
+     "itemCount": 1,
+     "upkeepItemId": 0,
+     "upkeepCount": 1,
+     "upkeepIntervalSec": 0,
+     "lifeTimeSec": 1200,
+     "expMultiplier": 0.1
+    },
+    {
+     "level": 5,
+     "npcId": 14347,
+     "itemId": 1458,
+     "itemCount": 1,
+     "upkeepItemId": 0,
+     "upkeepCount": 1,
+     "upkeepIntervalSec": 0,
+     "lifeTimeSec": 3600,
+     "expMultiplier": 0.1
+    },
+    {
+     "level": 6,
+     "npcId": 14348,
+     "itemId": 1458,
+     "itemCount": 1,
+     "upkeepItemId": 0,
+     "upkeepCount": 1,
+     "upkeepIntervalSec": 0,
+     "lifeTimeSec": 3600,
+     "expMultiplier": 0.1
+    },
+    {
+     "level": 7,
+     "npcId": 14349,
+     "itemId": 1458,
+     "itemCount": 1,
+     "upkeepItemId": 0,
+     "upkeepCount": 1,
+     "upkeepIntervalSec": 0,
+     "lifeTimeSec": 3600,
+     "expMultiplier": 0.1
+    },
+    {
+     "level": 8,
+     "npcId": 14350,
+     "itemId": 1458,
+     "itemCount": 1,
+     "upkeepItemId": 0,
+     "upkeepCount": 1,
+     "upkeepIntervalSec": 0,
+     "lifeTimeSec": 3600,
+     "expMultiplier": 0.1
+    },
+    {
+     "level": 9,
+     "npcId": 14351,
+     "itemId": 1458,
+     "itemCount": 1,
+     "upkeepItemId": 0,
+     "upkeepCount": 1,
+     "upkeepIntervalSec": 0,
+     "lifeTimeSec": 3600,
+     "expMultiplier": 0.1
+    },
+    {
+     "level": 10,
+     "npcId": 14352,
+     "itemId": 1458,
+     "itemCount": 1,
+     "upkeepItemId": 0,
+     "upkeepCount": 1,
+     "upkeepIntervalSec": 0,
+     "lifeTimeSec": 3600,
+     "expMultiplier": 0.1
+    },
+    {
+     "level": 11,
+     "npcId": 14353,
+     "itemId": 1458,
+     "itemCount": 1,
+     "upkeepItemId": 0,
+     "upkeepCount": 1,
+     "upkeepIntervalSec": 0,
+     "lifeTimeSec": 3600,
+     "expMultiplier": 0.1
+    },
+    {
+     "level": 12,
+     "npcId": 14354,
+     "itemId": 1458,
+     "itemCount": 1,
+     "upkeepItemId": 0,
+     "upkeepCount": 1,
+     "upkeepIntervalSec": 0,
+     "lifeTimeSec": 3600,
+     "expMultiplier": 0.1
+    },
+    {
+     "level": 13,
+     "npcId": 14355,
+     "itemId": 1458,
+     "itemCount": 1,
+     "upkeepItemId": 0,
+     "upkeepCount": 1,
+     "upkeepIntervalSec": 0,
+     "lifeTimeSec": 3600,
+     "expMultiplier": 0.1
+    },
+    {
+     "level": 14,
+     "npcId": 14356,
+     "itemId": 1458,
+     "itemCount": 1,
+     "upkeepItemId": 0,
+     "upkeepCount": 1,
+     "upkeepIntervalSec": 0,
+     "lifeTimeSec": 3600,
+     "expMultiplier": 0.1
+    },
+    {
+     "level": 15,
+     "npcId": 14357,
+     "itemId": 1458,
+     "itemCount": 1,
+     "upkeepItemId": 0,
+     "upkeepCount": 1,
+     "upkeepIntervalSec": 0,
+     "lifeTimeSec": 3600,
+     "expMultiplier": 0.1
+    },
+    {
+     "level": 16,
+     "npcId": 14358,
+     "itemId": 1458,
+     "itemCount": 1,
+     "upkeepItemId": 0,
+     "upkeepCount": 1,
+     "upkeepIntervalSec": 0,
+     "lifeTimeSec": 3600,
+     "expMultiplier": 0.1
+    },
+    {
+     "level": 17,
+     "npcId": 14359,
+     "itemId": 1458,
+     "itemCount": 1,
+     "upkeepItemId": 0,
+     "upkeepCount": 1,
+     "upkeepIntervalSec": 0,
+     "lifeTimeSec": 3600,
+     "expMultiplier": 0.1
+    },
+    {
+     "level": 18,
+     "npcId": 14360,
+     "itemId": 1458,
+     "itemCount": 1,
+     "upkeepItemId": 0,
+     "upkeepCount": 1,
+     "upkeepIntervalSec": 0,
+     "lifeTimeSec": 3600,
+     "expMultiplier": 0.1
+    }
+   ]
+  },
+  {
+   "skillId": 1228,
+   "name": "Summon Silhouette",
+   "corpse": false,
+   "levels": [
+    {
+     "level": 1,
+     "npcId": 14527,
+     "itemId": 1458,
+     "itemCount": 1,
+     "upkeepItemId": 0,
+     "upkeepCount": 1,
+     "upkeepIntervalSec": 0,
+     "lifeTimeSec": 1200,
+     "expMultiplier": 0.1
+    },
+    {
+     "level": 2,
+     "npcId": 14528,
+     "itemId": 1458,
+     "itemCount": 1,
+     "upkeepItemId": 0,
+     "upkeepCount": 1,
+     "upkeepIntervalSec": 0,
+     "lifeTimeSec": 1200,
+     "expMultiplier": 0.1
+    },
+    {
+     "level": 3,
+     "npcId": 14529,
+     "itemId": 1458,
+     "itemCount": 1,
+     "upkeepItemId": 0,
+     "upkeepCount": 1,
+     "upkeepIntervalSec": 0,
+     "lifeTimeSec": 1200,
+     "expMultiplier": 0.1
+    },
+    {
+     "level": 4,
+     "npcId": 14530,
+     "itemId": 1458,
+     "itemCount": 1,
+     "upkeepItemId": 0,
+     "upkeepCount": 1,
+     "upkeepIntervalSec": 0,
+     "lifeTimeSec": 1200,
+     "expMultiplier": 0.1
+    },
+    {
+     "level": 5,
+     "npcId": 14531,
+     "itemId": 1458,
+     "itemCount": 1,
+     "upkeepItemId": 0,
+     "upkeepCount": 1,
+     "upkeepIntervalSec": 0,
+     "lifeTimeSec": 3600,
+     "expMultiplier": 0.1
+    },
+    {
+     "level": 6,
+     "npcId": 14532,
+     "itemId": 1458,
+     "itemCount": 1,
+     "upkeepItemId": 0,
+     "upkeepCount": 1,
+     "upkeepIntervalSec": 0,
+     "lifeTimeSec": 3600,
+     "expMultiplier": 0.1
+    },
+    {
+     "level": 7,
+     "npcId": 14533,
+     "itemId": 1458,
+     "itemCount": 1,
+     "upkeepItemId": 0,
+     "upkeepCount": 1,
+     "upkeepIntervalSec": 0,
+     "lifeTimeSec": 3600,
+     "expMultiplier": 0.1
+    },
+    {
+     "level": 8,
+     "npcId": 14534,
+     "itemId": 1458,
+     "itemCount": 1,
+     "upkeepItemId": 0,
+     "upkeepCount": 1,
+     "upkeepIntervalSec": 0,
+     "lifeTimeSec": 3600,
+     "expMultiplier": 0.1
+    },
+    {
+     "level": 9,
+     "npcId": 14535,
+     "itemId": 1458,
+     "itemCount": 1,
+     "upkeepItemId": 0,
+     "upkeepCount": 1,
+     "upkeepIntervalSec": 0,
+     "lifeTimeSec": 3600,
+     "expMultiplier": 0.1
+    },
+    {
+     "level": 10,
+     "npcId": 14536,
+     "itemId": 1458,
+     "itemCount": 1,
+     "upkeepItemId": 0,
+     "upkeepCount": 1,
+     "upkeepIntervalSec": 0,
+     "lifeTimeSec": 3600,
+     "expMultiplier": 0.1
+    },
+    {
+     "level": 11,
+     "npcId": 14537,
+     "itemId": 1458,
+     "itemCount": 1,
+     "upkeepItemId": 0,
+     "upkeepCount": 1,
+     "upkeepIntervalSec": 0,
+     "lifeTimeSec": 3600,
+     "expMultiplier": 0.1
+    },
+    {
+     "level": 12,
+     "npcId": 14538,
+     "itemId": 1458,
+     "itemCount": 1,
+     "upkeepItemId": 0,
+     "upkeepCount": 1,
+     "upkeepIntervalSec": 0,
+     "lifeTimeSec": 3600,
+     "expMultiplier": 0.1
+    },
+    {
+     "level": 13,
+     "npcId": 14539,
+     "itemId": 1458,
+     "itemCount": 1,
+     "upkeepItemId": 0,
+     "upkeepCount": 1,
+     "upkeepIntervalSec": 0,
+     "lifeTimeSec": 3600,
+     "expMultiplier": 0.1
+    },
+    {
+     "level": 14,
+     "npcId": 14540,
+     "itemId": 1458,
+     "itemCount": 1,
+     "upkeepItemId": 0,
+     "upkeepCount": 1,
+     "upkeepIntervalSec": 0,
+     "lifeTimeSec": 3600,
+     "expMultiplier": 0.1
+    },
+    {
+     "level": 15,
+     "npcId": 14541,
+     "itemId": 1458,
+     "itemCount": 1,
+     "upkeepItemId": 0,
+     "upkeepCount": 1,
+     "upkeepIntervalSec": 0,
+     "lifeTimeSec": 3600,
+     "expMultiplier": 0.1
+    },
+    {
+     "level": 16,
+     "npcId": 14542,
+     "itemId": 1458,
+     "itemCount": 1,
+     "upkeepItemId": 0,
+     "upkeepCount": 1,
+     "upkeepIntervalSec": 0,
+     "lifeTimeSec": 3600,
+     "expMultiplier": 0.1
+    },
+    {
+     "level": 17,
+     "npcId": 14543,
+     "itemId": 1458,
+     "itemCount": 1,
+     "upkeepItemId": 0,
+     "upkeepCount": 1,
+     "upkeepIntervalSec": 0,
+     "lifeTimeSec": 3600,
+     "expMultiplier": 0.1
+    },
+    {
+     "level": 18,
+     "npcId": 14544,
+     "itemId": 1458,
+     "itemCount": 1,
+     "upkeepItemId": 0,
+     "upkeepCount": 1,
+     "upkeepIntervalSec": 0,
+     "lifeTimeSec": 3600,
+     "expMultiplier": 0.1
+    }
+   ]
+  },
+  {
+   "skillId": 1276,
+   "name": "Summon Kai the Cat",
+   "corpse": false,
+   "levels": [
+    {
+     "level": 1,
+     "npcId": 14207,
+     "itemId": 1459,
+     "itemCount": 1,
+     "upkeepItemId": 1459,
+     "upkeepCount": 1,
+     "upkeepIntervalSec": 0,
+     "lifeTimeSec": 3600,
+     "expMultiplier": 0.9
+    },
+    {
+     "level": 2,
+     "npcId": 14208,
+     "itemId": 1459,
+     "itemCount": 1,
+     "upkeepItemId": 1459,
+     "upkeepCount": 1,
+     "upkeepIntervalSec": 0,
+     "lifeTimeSec": 3600,
+     "expMultiplier": 0.9
+    },
+    {
+     "level": 3,
+     "npcId": 14209,
+     "itemId": 1459,
+     "itemCount": 1,
+     "upkeepItemId": 1459,
+     "upkeepCount": 1,
+     "upkeepIntervalSec": 0,
+     "lifeTimeSec": 3600,
+     "expMultiplier": 0.9
+    },
+    {
+     "level": 4,
+     "npcId": 14210,
+     "itemId": 1459,
+     "itemCount": 2,
+     "upkeepItemId": 1459,
+     "upkeepCount": 1,
+     "upkeepIntervalSec": 0,
+     "lifeTimeSec": 3600,
+     "expMultiplier": 0.9
+    },
+    {
+     "level": 5,
+     "npcId": 14211,
+     "itemId": 1459,
+     "itemCount": 2,
+     "upkeepItemId": 1459,
+     "upkeepCount": 1,
+     "upkeepIntervalSec": 0,
+     "lifeTimeSec": 3600,
+     "expMultiplier": 0.9
+    },
+    {
+     "level": 6,
+     "npcId": 14212,
+     "itemId": 1459,
+     "itemCount": 2,
+     "upkeepItemId": 1459,
+     "upkeepCount": 1,
+     "upkeepIntervalSec": 0,
+     "lifeTimeSec": 3600,
+     "expMultiplier": 0.9
+    },
+    {
+     "level": 7,
+     "npcId": 14213,
+     "itemId": 1459,
+     "itemCount": 2,
+     "upkeepItemId": 1459,
+     "upkeepCount": 2,
+     "upkeepIntervalSec": 0,
+     "lifeTimeSec": 3600,
+     "expMultiplier": 0.9
+    },
+    {
+     "level": 8,
+     "npcId": 14214,
+     "itemId": 1459,
+     "itemCount": 2,
+     "upkeepItemId": 1459,
+     "upkeepCount": 2,
+     "upkeepIntervalSec": 0,
+     "lifeTimeSec": 3600,
+     "expMultiplier": 0.9
+    },
+    {
+     "level": 9,
+     "npcId": 14215,
+     "itemId": 1459,
+     "itemCount": 3,
+     "upkeepItemId": 1459,
+     "upkeepCount": 2,
+     "upkeepIntervalSec": 0,
+     "lifeTimeSec": 3600,
+     "expMultiplier": 0.9
+    },
+    {
+     "level": 10,
+     "npcId": 14216,
+     "itemId": 1459,
+     "itemCount": 3,
+     "upkeepItemId": 1459,
+     "upkeepCount": 2,
+     "upkeepIntervalSec": 0,
+     "lifeTimeSec": 3600,
+     "expMultiplier": 0.9
+    },
+    {
+     "level": 11,
+     "npcId": 14217,
+     "itemId": 1459,
+     "itemCount": 3,
+     "upkeepItemId": 1459,
+     "upkeepCount": 3,
+     "upkeepIntervalSec": 0,
+     "lifeTimeSec": 3600,
+     "expMultiplier": 0.9
+    },
+    {
+     "level": 12,
+     "npcId": 14218,
+     "itemId": 1459,
+     "itemCount": 3,
+     "upkeepItemId": 1459,
+     "upkeepCount": 3,
+     "upkeepIntervalSec": 0,
+     "lifeTimeSec": 3600,
+     "expMultiplier": 0.9
+    },
+    {
+     "level": 13,
+     "npcId": 14219,
+     "itemId": 1459,
+     "itemCount": 4,
+     "upkeepItemId": 1459,
+     "upkeepCount": 3,
+     "upkeepIntervalSec": 0,
+     "lifeTimeSec": 3600,
+     "expMultiplier": 0.9
+    },
+    {
+     "level": 14,
+     "npcId": 14220,
+     "itemId": 1459,
+     "itemCount": 4,
+     "upkeepItemId": 1459,
+     "upkeepCount": 3,
+     "upkeepIntervalSec": 0,
+     "lifeTimeSec": 3600,
+     "expMultiplier": 0.9
+    }
+   ]
+  },
+  {
+   "skillId": 1277,
+   "name": "Summon Merrow the Unicorn",
+   "corpse": false,
+   "levels": [
+    {
+     "level": 1,
+     "npcId": 14391,
+     "itemId": 1459,
+     "itemCount": 1,
+     "upkeepItemId": 1459,
+     "upkeepCount": 1,
+     "upkeepIntervalSec": 0,
+     "lifeTimeSec": 3600,
+     "expMultiplier": 0.9
+    },
+    {
+     "level": 2,
+     "npcId": 14392,
+     "itemId": 1459,
+     "itemCount": 1,
+     "upkeepItemId": 1459,
+     "upkeepCount": 1,
+     "upkeepIntervalSec": 0,
+     "lifeTimeSec": 3600,
+     "expMultiplier": 0.9
+    },
+    {
+     "level": 3,
+     "npcId": 14393,
+     "itemId": 1459,
+     "itemCount": 1,
+     "upkeepItemId": 1459,
+     "upkeepCount": 1,
+     "upkeepIntervalSec": 0,
+     "lifeTimeSec": 3600,
+     "expMultiplier": 0.9
+    },
+    {
+     "level": 4,
+     "npcId": 14394,
+     "itemId": 1459,
+     "itemCount": 2,
+     "upkeepItemId": 1459,
+     "upkeepCount": 1,
+     "upkeepIntervalSec": 0,
+     "lifeTimeSec": 3600,
+     "expMultiplier": 0.9
+    },
+    {
+     "level": 5,
+     "npcId": 14395,
+     "itemId": 1459,
+     "itemCount": 2,
+     "upkeepItemId": 1459,
+     "upkeepCount": 1,
+     "upkeepIntervalSec": 0,
+     "lifeTimeSec": 3600,
+     "expMultiplier": 0.9
+    },
+    {
+     "level": 6,
+     "npcId": 14396,
+     "itemId": 1459,
+     "itemCount": 2,
+     "upkeepItemId": 1459,
+     "upkeepCount": 1,
+     "upkeepIntervalSec": 0,
+     "lifeTimeSec": 3600,
+     "expMultiplier": 0.9
+    },
+    {
+     "level": 7,
+     "npcId": 14397,
+     "itemId": 1459,
+     "itemCount": 2,
+     "upkeepItemId": 1459,
+     "upkeepCount": 2,
+     "upkeepIntervalSec": 0,
+     "lifeTimeSec": 3600,
+     "expMultiplier": 0.9
+    },
+    {
+     "level": 8,
+     "npcId": 14398,
+     "itemId": 1459,
+     "itemCount": 2,
+     "upkeepItemId": 1459,
+     "upkeepCount": 2,
+     "upkeepIntervalSec": 0,
+     "lifeTimeSec": 3600,
+     "expMultiplier": 0.9
+    },
+    {
+     "level": 9,
+     "npcId": 14399,
+     "itemId": 1459,
+     "itemCount": 3,
+     "upkeepItemId": 1459,
+     "upkeepCount": 2,
+     "upkeepIntervalSec": 0,
+     "lifeTimeSec": 3600,
+     "expMultiplier": 0.9
+    },
+    {
+     "level": 10,
+     "npcId": 14400,
+     "itemId": 1459,
+     "itemCount": 3,
+     "upkeepItemId": 1459,
+     "upkeepCount": 2,
+     "upkeepIntervalSec": 0,
+     "lifeTimeSec": 3600,
+     "expMultiplier": 0.9
+    },
+    {
+     "level": 11,
+     "npcId": 14401,
+     "itemId": 1459,
+     "itemCount": 3,
+     "upkeepItemId": 1459,
+     "upkeepCount": 3,
+     "upkeepIntervalSec": 0,
+     "lifeTimeSec": 3600,
+     "expMultiplier": 0.9
+    },
+    {
+     "level": 12,
+     "npcId": 14402,
+     "itemId": 1459,
+     "itemCount": 3,
+     "upkeepItemId": 1459,
+     "upkeepCount": 3,
+     "upkeepIntervalSec": 0,
+     "lifeTimeSec": 3600,
+     "expMultiplier": 0.9
+    },
+    {
+     "level": 13,
+     "npcId": 14403,
+     "itemId": 1459,
+     "itemCount": 4,
+     "upkeepItemId": 1459,
+     "upkeepCount": 3,
+     "upkeepIntervalSec": 0,
+     "lifeTimeSec": 3600,
+     "expMultiplier": 0.9
+    },
+    {
+     "level": 14,
+     "npcId": 14404,
+     "itemId": 1459,
+     "itemCount": 4,
+     "upkeepItemId": 1459,
+     "upkeepCount": 3,
+     "upkeepIntervalSec": 0,
+     "lifeTimeSec": 3600,
+     "expMultiplier": 0.9
+    }
+   ]
+  },
+  {
+   "skillId": 1278,
+   "name": "Summon Soulless",
+   "corpse": false,
+   "levels": [
+    {
+     "level": 1,
+     "npcId": 14575,
+     "itemId": 1459,
+     "itemCount": 1,
+     "upkeepItemId": 1459,
+     "upkeepCount": 1,
+     "upkeepIntervalSec": 0,
+     "lifeTimeSec": 3600,
+     "expMultiplier": 0.9
+    },
+    {
+     "level": 2,
+     "npcId": 14576,
+     "itemId": 1459,
+     "itemCount": 1,
+     "upkeepItemId": 1459,
+     "upkeepCount": 1,
+     "upkeepIntervalSec": 0,
+     "lifeTimeSec": 3600,
+     "expMultiplier": 0.9
+    },
+    {
+     "level": 3,
+     "npcId": 14577,
+     "itemId": 1459,
+     "itemCount": 1,
+     "upkeepItemId": 1459,
+     "upkeepCount": 1,
+     "upkeepIntervalSec": 0,
+     "lifeTimeSec": 3600,
+     "expMultiplier": 0.9
+    },
+    {
+     "level": 4,
+     "npcId": 14578,
+     "itemId": 1459,
+     "itemCount": 2,
+     "upkeepItemId": 1459,
+     "upkeepCount": 1,
+     "upkeepIntervalSec": 0,
+     "lifeTimeSec": 3600,
+     "expMultiplier": 0.9
+    },
+    {
+     "level": 5,
+     "npcId": 14579,
+     "itemId": 1459,
+     "itemCount": 2,
+     "upkeepItemId": 1459,
+     "upkeepCount": 1,
+     "upkeepIntervalSec": 0,
+     "lifeTimeSec": 3600,
+     "expMultiplier": 0.9
+    },
+    {
+     "level": 6,
+     "npcId": 14580,
+     "itemId": 1459,
+     "itemCount": 2,
+     "upkeepItemId": 1459,
+     "upkeepCount": 1,
+     "upkeepIntervalSec": 0,
+     "lifeTimeSec": 3600,
+     "expMultiplier": 0.9
+    },
+    {
+     "level": 7,
+     "npcId": 14581,
+     "itemId": 1459,
+     "itemCount": 2,
+     "upkeepItemId": 1459,
+     "upkeepCount": 2,
+     "upkeepIntervalSec": 0,
+     "lifeTimeSec": 3600,
+     "expMultiplier": 0.9
+    },
+    {
+     "level": 8,
+     "npcId": 14582,
+     "itemId": 1459,
+     "itemCount": 2,
+     "upkeepItemId": 1459,
+     "upkeepCount": 2,
+     "upkeepIntervalSec": 0,
+     "lifeTimeSec": 3600,
+     "expMultiplier": 0.9
+    },
+    {
+     "level": 9,
+     "npcId": 14583,
+     "itemId": 1459,
+     "itemCount": 3,
+     "upkeepItemId": 1459,
+     "upkeepCount": 2,
+     "upkeepIntervalSec": 0,
+     "lifeTimeSec": 3600,
+     "expMultiplier": 0.9
+    },
+    {
+     "level": 10,
+     "npcId": 14584,
+     "itemId": 1459,
+     "itemCount": 3,
+     "upkeepItemId": 1459,
+     "upkeepCount": 2,
+     "upkeepIntervalSec": 0,
+     "lifeTimeSec": 3600,
+     "expMultiplier": 0.9
+    },
+    {
+     "level": 11,
+     "npcId": 14585,
+     "itemId": 1459,
+     "itemCount": 3,
+     "upkeepItemId": 1459,
+     "upkeepCount": 3,
+     "upkeepIntervalSec": 0,
+     "lifeTimeSec": 3600,
+     "expMultiplier": 0.9
+    },
+    {
+     "level": 12,
+     "npcId": 14586,
+     "itemId": 1459,
+     "itemCount": 3,
+     "upkeepItemId": 1459,
+     "upkeepCount": 3,
+     "upkeepIntervalSec": 0,
+     "lifeTimeSec": 3600,
+     "expMultiplier": 0.9
+    },
+    {
+     "level": 13,
+     "npcId": 14587,
+     "itemId": 1459,
+     "itemCount": 4,
+     "upkeepItemId": 1459,
+     "upkeepCount": 3,
+     "upkeepIntervalSec": 0,
+     "lifeTimeSec": 3600,
+     "expMultiplier": 0.9
+    },
+    {
+     "level": 14,
+     "npcId": 14588,
+     "itemId": 1459,
+     "itemCount": 4,
+     "upkeepItemId": 1459,
+     "upkeepCount": 3,
+     "upkeepIntervalSec": 0,
+     "lifeTimeSec": 3600,
+     "expMultiplier": 0.9
+    }
+   ]
+  },
+  {
+   "skillId": 1331,
+   "name": "Summon Feline Queen",
+   "corpse": false,
+   "levels": [
+    {
+     "level": 1,
+     "npcId": 14251,
+     "itemId": 1459,
+     "itemCount": 1,
+     "upkeepItemId": 1459,
+     "upkeepCount": 1,
+     "upkeepIntervalSec": 0,
+     "lifeTimeSec": 3600,
+     "expMultiplier": 0.95
+    },
+    {
+     "level": 2,
+     "npcId": 14252,
+     "itemId": 1459,
+     "itemCount": 1,
+     "upkeepItemId": 1459,
+     "upkeepCount": 1,
+     "upkeepIntervalSec": 0,
+     "lifeTimeSec": 3600,
+     "expMultiplier": 0.95
+    },
+    {
+     "level": 3,
+     "npcId": 14253,
+     "itemId": 1459,
+     "itemCount": 2,
+     "upkeepItemId": 1459,
+     "upkeepCount": 1,
+     "upkeepIntervalSec": 0,
+     "lifeTimeSec": 3600,
+     "expMultiplier": 0.95
+    },
+    {
+     "level": 4,
+     "npcId": 14254,
+     "itemId": 1459,
+     "itemCount": 2,
+     "upkeepItemId": 1459,
+     "upkeepCount": 1,
+     "upkeepIntervalSec": 0,
+     "lifeTimeSec": 3600,
+     "expMultiplier": 0.95
+    },
+    {
+     "level": 5,
+     "npcId": 14255,
+     "itemId": 1459,
+     "itemCount": 3,
+     "upkeepItemId": 1459,
+     "upkeepCount": 1,
+     "upkeepIntervalSec": 0,
+     "lifeTimeSec": 3600,
+     "expMultiplier": 0.95
+    },
+    {
+     "level": 6,
+     "npcId": 14256,
+     "itemId": 1459,
+     "itemCount": 2,
+     "upkeepItemId": 1459,
+     "upkeepCount": 2,
+     "upkeepIntervalSec": 0,
+     "lifeTimeSec": 3600,
+     "expMultiplier": 0.95
+    },
+    {
+     "level": 7,
+     "npcId": 14257,
+     "itemId": 1459,
+     "itemCount": 3,
+     "upkeepItemId": 1459,
+     "upkeepCount": 2,
+     "upkeepIntervalSec": 0,
+     "lifeTimeSec": 3600,
+     "expMultiplier": 0.95
+    },
+    {
+     "level": 8,
+     "npcId": 14258,
+     "itemId": 1459,
+     "itemCount": 4,
+     "upkeepItemId": 1459,
+     "upkeepCount": 2,
+     "upkeepIntervalSec": 0,
+     "lifeTimeSec": 3600,
+     "expMultiplier": 0.95
+    },
+    {
+     "level": 9,
+     "npcId": 14259,
+     "itemId": 1459,
+     "itemCount": 3,
+     "upkeepItemId": 1459,
+     "upkeepCount": 3,
+     "upkeepIntervalSec": 0,
+     "lifeTimeSec": 3600,
+     "expMultiplier": 0.95
+    },
+    {
+     "level": 10,
+     "npcId": 14260,
+     "itemId": 1459,
+     "itemCount": 4,
+     "upkeepItemId": 1459,
+     "upkeepCount": 3,
+     "upkeepIntervalSec": 0,
+     "lifeTimeSec": 3600,
+     "expMultiplier": 0.95
+    }
+   ]
+  },
+  {
+   "skillId": 1332,
+   "name": "Summon Unicorn Seraphim",
+   "corpse": false,
+   "levels": [
+    {
+     "level": 1,
+     "npcId": 14435,
+     "itemId": 1459,
+     "itemCount": 1,
+     "upkeepItemId": 1459,
+     "upkeepCount": 1,
+     "upkeepIntervalSec": 0,
+     "lifeTimeSec": 3600,
+     "expMultiplier": 0.95
+    },
+    {
+     "level": 2,
+     "npcId": 14436,
+     "itemId": 1459,
+     "itemCount": 1,
+     "upkeepItemId": 1459,
+     "upkeepCount": 1,
+     "upkeepIntervalSec": 0,
+     "lifeTimeSec": 3600,
+     "expMultiplier": 0.95
+    },
+    {
+     "level": 3,
+     "npcId": 14437,
+     "itemId": 1459,
+     "itemCount": 2,
+     "upkeepItemId": 1459,
+     "upkeepCount": 1,
+     "upkeepIntervalSec": 0,
+     "lifeTimeSec": 3600,
+     "expMultiplier": 0.95
+    },
+    {
+     "level": 4,
+     "npcId": 14438,
+     "itemId": 1459,
+     "itemCount": 2,
+     "upkeepItemId": 1459,
+     "upkeepCount": 1,
+     "upkeepIntervalSec": 0,
+     "lifeTimeSec": 3600,
+     "expMultiplier": 0.95
+    },
+    {
+     "level": 5,
+     "npcId": 14439,
+     "itemId": 1459,
+     "itemCount": 3,
+     "upkeepItemId": 1459,
+     "upkeepCount": 1,
+     "upkeepIntervalSec": 0,
+     "lifeTimeSec": 3600,
+     "expMultiplier": 0.95
+    },
+    {
+     "level": 6,
+     "npcId": 14440,
+     "itemId": 1459,
+     "itemCount": 2,
+     "upkeepItemId": 1459,
+     "upkeepCount": 2,
+     "upkeepIntervalSec": 0,
+     "lifeTimeSec": 3600,
+     "expMultiplier": 0.95
+    },
+    {
+     "level": 7,
+     "npcId": 14441,
+     "itemId": 1459,
+     "itemCount": 3,
+     "upkeepItemId": 1459,
+     "upkeepCount": 2,
+     "upkeepIntervalSec": 0,
+     "lifeTimeSec": 3600,
+     "expMultiplier": 0.95
+    },
+    {
+     "level": 8,
+     "npcId": 14442,
+     "itemId": 1459,
+     "itemCount": 4,
+     "upkeepItemId": 1459,
+     "upkeepCount": 2,
+     "upkeepIntervalSec": 0,
+     "lifeTimeSec": 3600,
+     "expMultiplier": 0.95
+    },
+    {
+     "level": 9,
+     "npcId": 14443,
+     "itemId": 1459,
+     "itemCount": 3,
+     "upkeepItemId": 1459,
+     "upkeepCount": 3,
+     "upkeepIntervalSec": 0,
+     "lifeTimeSec": 3600,
+     "expMultiplier": 0.95
+    },
+    {
+     "level": 10,
+     "npcId": 14444,
+     "itemId": 1459,
+     "itemCount": 4,
+     "upkeepItemId": 1459,
+     "upkeepCount": 3,
+     "upkeepIntervalSec": 0,
+     "lifeTimeSec": 3600,
+     "expMultiplier": 0.95
+    }
+   ]
+  },
+  {
+   "skillId": 1333,
+   "name": "Summon Nightshade",
+   "corpse": false,
+   "levels": [
+    {
+     "level": 1,
+     "npcId": 14619,
+     "itemId": 1459,
+     "itemCount": 1,
+     "upkeepItemId": 1459,
+     "upkeepCount": 1,
+     "upkeepIntervalSec": 0,
+     "lifeTimeSec": 3600,
+     "expMultiplier": 0.95
+    },
+    {
+     "level": 2,
+     "npcId": 14620,
+     "itemId": 1459,
+     "itemCount": 1,
+     "upkeepItemId": 1459,
+     "upkeepCount": 1,
+     "upkeepIntervalSec": 0,
+     "lifeTimeSec": 3600,
+     "expMultiplier": 0.95
+    },
+    {
+     "level": 3,
+     "npcId": 14621,
+     "itemId": 1459,
+     "itemCount": 2,
+     "upkeepItemId": 1459,
+     "upkeepCount": 1,
+     "upkeepIntervalSec": 0,
+     "lifeTimeSec": 3600,
+     "expMultiplier": 0.95
+    },
+    {
+     "level": 4,
+     "npcId": 14622,
+     "itemId": 1459,
+     "itemCount": 2,
+     "upkeepItemId": 1459,
+     "upkeepCount": 1,
+     "upkeepIntervalSec": 0,
+     "lifeTimeSec": 3600,
+     "expMultiplier": 0.95
+    },
+    {
+     "level": 5,
+     "npcId": 14623,
+     "itemId": 1459,
+     "itemCount": 3,
+     "upkeepItemId": 1459,
+     "upkeepCount": 1,
+     "upkeepIntervalSec": 0,
+     "lifeTimeSec": 3600,
+     "expMultiplier": 0.95
+    },
+    {
+     "level": 6,
+     "npcId": 14624,
+     "itemId": 1459,
+     "itemCount": 2,
+     "upkeepItemId": 1459,
+     "upkeepCount": 2,
+     "upkeepIntervalSec": 0,
+     "lifeTimeSec": 3600,
+     "expMultiplier": 0.95
+    },
+    {
+     "level": 7,
+     "npcId": 14625,
+     "itemId": 1459,
+     "itemCount": 3,
+     "upkeepItemId": 1459,
+     "upkeepCount": 2,
+     "upkeepIntervalSec": 0,
+     "lifeTimeSec": 3600,
+     "expMultiplier": 0.95
+    },
+    {
+     "level": 8,
+     "npcId": 14626,
+     "itemId": 1459,
+     "itemCount": 4,
+     "upkeepItemId": 1459,
+     "upkeepCount": 2,
+     "upkeepIntervalSec": 0,
+     "lifeTimeSec": 3600,
+     "expMultiplier": 0.95
+    },
+    {
+     "level": 9,
+     "npcId": 14627,
+     "itemId": 1459,
+     "itemCount": 3,
+     "upkeepItemId": 1459,
+     "upkeepCount": 3,
+     "upkeepIntervalSec": 0,
+     "lifeTimeSec": 3600,
+     "expMultiplier": 0.95
+    },
+    {
+     "level": 10,
+     "npcId": 14628,
+     "itemId": 1459,
+     "itemCount": 4,
+     "upkeepItemId": 1459,
+     "upkeepCount": 3,
+     "upkeepIntervalSec": 0,
+     "lifeTimeSec": 3600,
+     "expMultiplier": 0.95
+    }
+   ]
+  },
+  {
+   "skillId": 1334,
+   "name": "Summon Cursed Man",
+   "corpse": true,
+   "levels": [
+    {
+     "level": 1,
+     "npcId": 14074,
+     "itemId": 1459,
+     "itemCount": 1,
+     "upkeepItemId": 1459,
+     "upkeepCount": 2,
+     "upkeepIntervalSec": 0,
+     "lifeTimeSec": 3600,
+     "expMultiplier": 0.85
+    },
+    {
+     "level": 2,
+     "npcId": 14075,
+     "itemId": 1459,
+     "itemCount": 2,
+     "upkeepItemId": 1459,
+     "upkeepCount": 2,
+     "upkeepIntervalSec": 0,
+     "lifeTimeSec": 3600,
+     "expMultiplier": 0.85
+    },
+    {
+     "level": 3,
+     "npcId": 14076,
+     "itemId": 1459,
+     "itemCount": 2,
+     "upkeepItemId": 1459,
+     "upkeepCount": 3,
+     "upkeepIntervalSec": 0,
+     "lifeTimeSec": 3600,
+     "expMultiplier": 0.85
+    },
+    {
+     "level": 4,
+     "npcId": 14077,
+     "itemId": 1459,
+     "itemCount": 3,
+     "upkeepItemId": 1459,
+     "upkeepCount": 3,
+     "upkeepIntervalSec": 0,
+     "lifeTimeSec": 3600,
+     "expMultiplier": 0.85
+    },
+    {
+     "level": 5,
+     "npcId": 14078,
+     "itemId": 1459,
+     "itemCount": 3,
+     "upkeepItemId": 1459,
+     "upkeepCount": 3,
+     "upkeepIntervalSec": 0,
+     "lifeTimeSec": 3600,
+     "expMultiplier": 0.85
+    },
+    {
+     "level": 6,
+     "npcId": 14079,
+     "itemId": 1459,
+     "itemCount": 3,
+     "upkeepItemId": 1459,
+     "upkeepCount": 4,
+     "upkeepIntervalSec": 0,
+     "lifeTimeSec": 3600,
+     "expMultiplier": 0.85
+    },
+    {
+     "level": 7,
+     "npcId": 14080,
+     "itemId": 1459,
+     "itemCount": 3,
+     "upkeepItemId": 1459,
+     "upkeepCount": 4,
+     "upkeepIntervalSec": 0,
+     "lifeTimeSec": 3600,
+     "expMultiplier": 0.85
+    }
+   ]
+  },
+  {
+   "skillId": 1406,
+   "name": "Summon Feline King",
+   "corpse": false,
+   "levels": [
+    {
+     "level": 1,
+     "npcId": 14836,
+     "itemId": 1461,
+     "itemCount": 2,
+     "upkeepItemId": 1461,
+     "upkeepCount": 1,
+     "upkeepIntervalSec": 0,
+     "lifeTimeSec": 3600,
+     "expMultiplier": 1.0
+    }
+   ]
+  },
+  {
+   "skillId": 1407,
+   "name": "Summon Magnus the Unicorn",
+   "corpse": false,
+   "levels": [
+    {
+     "level": 1,
+     "npcId": 14837,
+     "itemId": 1461,
+     "itemCount": 2,
+     "upkeepItemId": 1461,
+     "upkeepCount": 1,
+     "upkeepIntervalSec": 0,
+     "lifeTimeSec": 3600,
+     "expMultiplier": 1.0
+    }
+   ]
+  },
+  {
+   "skillId": 1408,
+   "name": "Summon Spectral Lord",
+   "corpse": false,
+   "levels": [
+    {
+     "level": 1,
+     "npcId": 14838,
+     "itemId": 1461,
+     "itemCount": 2,
+     "upkeepItemId": 1461,
+     "upkeepCount": 1,
+     "upkeepIntervalSec": 0,
+     "lifeTimeSec": 3600,
+     "expMultiplier": 1.0
+    }
+   ]
+  },
+  {
+   "skillId": 7030,
+   "name": "Summon King Bugbear",
+   "corpse": false,
+   "levels": [
+    {
+     "level": 1,
+     "npcId": 20150,
+     "itemId": 1458,
+     "itemCount": 8,
+     "upkeepItemId": 0,
+     "upkeepCount": 1,
+     "upkeepIntervalSec": 0,
+     "lifeTimeSec": 1200,
+     "expMultiplier": 1.0
+    }
+   ]
+  },
+  {
+   "skillId": 7031,
+   "name": "Summon Skeleton Royal Guard",
+   "corpse": false,
+   "levels": [
+    {
+     "level": 1,
+     "npcId": 20169,
+     "itemId": 1458,
+     "itemCount": 8,
+     "upkeepItemId": 0,
+     "upkeepCount": 1,
+     "upkeepIntervalSec": 0,
+     "lifeTimeSec": 1200,
+     "expMultiplier": 1.0
+    }
+   ]
+  },
+  {
+   "skillId": 7032,
+   "name": "Summon Hunter Gargoyle",
+   "corpse": false,
+   "levels": [
+    {
+     "level": 1,
+     "npcId": 20241,
+     "itemId": 1458,
+     "itemCount": 8,
+     "upkeepItemId": 0,
+     "upkeepCount": 1,
+     "upkeepIntervalSec": 0,
+     "lifeTimeSec": 1200,
+     "expMultiplier": 1.0
+    }
+   ]
+  }
+ ],
+ "npcSkills": {
+  "14074": [
+   [
+    4708,
+    1
+   ],
+   [
+    4709,
+    1
+   ]
+  ],
+  "14075": [
+   [
+    4708,
+    2
+   ],
+   [
+    4709,
+    2
+   ]
+  ],
+  "14076": [
+   [
+    4708,
+    3
+   ],
+   [
+    4709,
+    3
+   ]
+  ],
+  "14077": [
+   [
+    4708,
+    4
+   ],
+   [
+    4709,
+    4
+   ]
+  ],
+  "14078": [
+   [
+    4708,
+    5
+   ],
+   [
+    4709,
+    5
+   ]
+  ],
+  "14079": [
+   [
+    4708,
+    6
+   ],
+   [
+    4709,
+    6
+   ]
+  ],
+  "14080": [
+   [
+    4708,
+    7
+   ],
+   [
+    4709,
+    7
+   ]
+  ],
+  "14167": [
+   [
+    4261,
+    5
+   ]
+  ],
+  "14168": [
+   [
+    4261,
+    6
+   ]
+  ],
+  "14169": [
+   [
+    4261,
+    6
+   ]
+  ],
+  "14170": [
+   [
+    4261,
+    6
+   ]
+  ],
+  "14171": [
+   [
+    4261,
+    6
+   ]
+  ],
+  "14172": [
+   [
+    4261,
+    6
+   ]
+  ],
+  "14173": [
+   [
+    4261,
+    7
+   ]
+  ],
+  "14174": [
+   [
+    4261,
+    7
+   ]
+  ],
+  "14175": [
+   [
+    4261,
+    7
+   ]
+  ],
+  "14176": [
+   [
+    4261,
+    7
+   ]
+  ],
+  "14351": [
+   [
+    4261,
+    5
+   ]
+  ],
+  "14352": [
+   [
+    4261,
+    6
+   ]
+  ],
+  "14353": [
+   [
+    4261,
+    6
+   ]
+  ],
+  "14354": [
+   [
+    4261,
+    6
+   ]
+  ],
+  "14355": [
+   [
+    4261,
+    6
+   ]
+  ],
+  "14356": [
+   [
+    4261,
+    6
+   ]
+  ],
+  "14357": [
+   [
+    4261,
+    7
+   ]
+  ],
+  "14358": [
+   [
+    4261,
+    7
+   ]
+  ],
+  "14359": [
+   [
+    4261,
+    7
+   ]
+  ],
+  "14360": [
+   [
+    4261,
+    7
+   ]
+  ],
+  "14391": [
+   [
+    4137,
+    4
+   ]
+  ],
+  "14392": [
+   [
+    4137,
+    4
+   ]
+  ],
+  "14393": [
+   [
+    4137,
+    5
+   ]
+  ],
+  "14394": [
+   [
+    4137,
+    5
+   ]
+  ],
+  "14395": [
+   [
+    4137,
+    5
+   ]
+  ],
+  "14396": [
+   [
+    4137,
+    6
+   ]
+  ],
+  "14397": [
+   [
+    4137,
+    6
+   ]
+  ],
+  "14398": [
+   [
+    4137,
+    6
+   ]
+  ],
+  "14399": [
+   [
+    4137,
+    6
+   ]
+  ],
+  "14400": [
+   [
+    4137,
+    6
+   ]
+  ],
+  "14401": [
+   [
+    4137,
+    7
+   ]
+  ],
+  "14402": [
+   [
+    4137,
+    7
+   ]
+  ],
+  "14403": [
+   [
+    4137,
+    7
+   ]
+  ],
+  "14404": [
+   [
+    4137,
+    7
+   ]
+  ],
+  "14575": [
+   [
+    4138,
+    4
+   ]
+  ],
+  "14576": [
+   [
+    4138,
+    4
+   ]
+  ],
+  "14577": [
+   [
+    4138,
+    5
+   ]
+  ],
+  "14578": [
+   [
+    4138,
+    5
+   ]
+  ],
+  "14579": [
+   [
+    4138,
+    5
+   ]
+  ],
+  "14580": [
+   [
+    4138,
+    6
+   ]
+  ],
+  "14581": [
+   [
+    4138,
+    6
+   ]
+  ],
+  "14582": [
+   [
+    4138,
+    6
+   ]
+  ],
+  "14583": [
+   [
+    4138,
+    6
+   ]
+  ],
+  "14584": [
+   [
+    4138,
+    6
+   ]
+  ],
+  "14585": [
+   [
+    4138,
+    7
+   ]
+  ],
+  "14586": [
+   [
+    4138,
+    7
+   ]
+  ],
+  "14587": [
+   [
+    4138,
+    7
+   ]
+  ],
+  "14588": [
+   [
+    4138,
+    7
+   ]
+  ],
+  "14663": [
+   [
+    4068,
+    3
+   ]
+  ],
+  "14664": [
+   [
+    4068,
+    3
+   ]
+  ],
+  "14665": [
+   [
+    4068,
+    4
+   ]
+  ],
+  "14666": [
+   [
+    4068,
+    5
+   ]
+  ],
+  "14667": [
+   [
+    4068,
+    5
+   ]
+  ],
+  "14668": [
+   [
+    4068,
+    6
+   ]
+  ],
+  "14669": [
+   [
+    4068,
+    6
+   ]
+  ],
+  "14670": [
+   [
+    4068,
+    7
+   ]
+  ],
+  "14671": [
+   [
+    4068,
+    7
+   ]
+  ],
+  "14702": [
+   [
+    4139,
+    6
+   ]
+  ],
+  "14703": [
+   [
+    4139,
+    6
+   ]
+  ],
+  "14704": [
+   [
+    4139,
+    6
+   ]
+  ],
+  "14705": [
+   [
+    4139,
+    7
+   ]
+  ],
+  "14706": [
+   [
+    4139,
+    7
+   ]
+  ],
+  "14737": [
+   [
+    4079,
+    1
+   ]
+  ],
+  "14768": [
+   [
+    4230,
+    1
+   ]
+  ],
+  "14836": [
+   [
+    5135,
+    1
+   ],
+   [
+    5136,
+    1
+   ]
+  ],
+  "14837": [
+   [
+    5138,
+    1
+   ],
+   [
+    5139,
+    1
+   ]
+  ],
+  "14838": [
+   [
+    5141,
+    1
+   ],
+   [
+    5142,
+    1
+   ]
+  ],
+  "14839": [
+   [
+    5110,
+    1
+   ],
+   [
+    5111,
+    1
+   ]
+  ],
+  "20241": [
+   [
+    4073,
+    5
+   ]
+  ]
+ }
+}

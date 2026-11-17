@@ -231,6 +231,26 @@ public sealed class ClanPacketHandler
             await _reject(conn, error, "Manor command failed.", ct).ConfigureAwait(false);
     }
 
+    /// <summary>Summon / pet orders (Interlude RequestActionUse pet actions, RequestPetMove, …).</summary>
+    public async Task OnSummonCommandAsync(
+        NetConnection conn,
+        ZoneSession zoneSession,
+        PacketEnvelope envelope,
+        CancellationToken ct)
+    {
+        RequireHello(conn);
+        if (!zoneSession.Bound || !zoneSession.InWorld)
+        {
+            await _reject(conn, "not_in_world", "Enter world first.", ct).ConfigureAwait(false);
+            return;
+        }
+
+        var command = NetCodec.DecodeSummonCommand(envelope.Payload);
+        string? error = await _world.TrySummonCommandAsync(zoneSession, command, ct).ConfigureAwait(false);
+        if (error != null)
+            await _reject(conn, error, "Summon command failed.", ct).ConfigureAwait(false);
+    }
+
     static void RequireHello(NetConnection conn)
     {
         if (!conn.HelloCompleted)
