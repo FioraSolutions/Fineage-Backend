@@ -60,6 +60,8 @@ public sealed partial class QuestCatalog
         public Dictionary<string, int>? VarAtLeast { get; set; }
         /// <summary>Mobius <c>st.getInt(key) &lt; n</c> per key (missing var reads 0).</summary>
         public Dictionary<string, int>? VarBelow { get; set; }
+        /// <summary>Mobius <c>getPaperdollItemId(PAPERDOLL_RHAND)</c> in this list. Null = no gate.</summary>
+        public List<int>? Weapons { get; set; }
     }
 
     sealed class OpDto

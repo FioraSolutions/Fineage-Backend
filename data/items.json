@@ -10019,10 +10019,20 @@
     {
       "id": 1142,
       "name": "Rusted Bronze Sword",
-      "kind": "etc",
+      "kind": "weapon",
       "icon": "icon.weapon_broad_sword_i00",
+      "bodySlot": "rhand",
+      "weaponType": "sword",
       "price": 116000,
-      "weight": 1400
+      "weight": 1400,
+      "pAtk": 18,
+      "mAtk": 21,
+      "pAtkSpd": 379,
+      "critRate": 8,
+      "attackRange": 40,
+      "randomDamage": 10,
+      "soulshots": 2,
+      "spiritshots": 2
     },
     {
       "id": 1143,
@@ -10392,18 +10402,38 @@
     {
       "id": 1181,
       "name": "Neti's Bow",
-      "kind": "etc",
+      "kind": "weapon",
       "icon": "icon.weapon_bow_i00",
+      "bodySlot": "lrhand",
+      "weaponType": "bow",
       "price": 0,
-      "weight": 1850
+      "weight": 1850,
+      "pAtk": 45,
+      "mAtk": 16,
+      "pAtkSpd": 293,
+      "critRate": 12,
+      "attackRange": 500,
+      "randomDamage": 5,
+      "soulshots": 7,
+      "spiritshots": 2
     },
     {
       "id": 1182,
       "name": "Neti's Dagger",
-      "kind": "etc",
+      "kind": "weapon",
       "icon": "icon.weapon_knife_i00",
+      "bodySlot": "rhand",
+      "weaponType": "dagger",
       "price": 0,
-      "weight": 1000
+      "weight": 1000,
+      "pAtk": 19,
+      "mAtk": 16,
+      "pAtkSpd": 433,
+      "critRate": 12,
+      "attackRange": 40,
+      "randomDamage": 5,
+      "soulshots": 2,
+      "spiritshots": 2
     },
     {
       "id": 1183,
