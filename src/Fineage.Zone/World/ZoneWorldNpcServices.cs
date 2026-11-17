@@ -70,6 +70,8 @@ public sealed partial class ZoneWorld
                 return ApplyBlessing(session, npc.ObjectId, html: true);
             case NpcServiceIntent.TerritoryStatus:
                 return ShowTerritoryStatus(session, player, npc);
+            case NpcServiceIntent.Loto:
+                return ShowLoto(session, player, npc, Math.Max(0, reply.ServiceId));
             case NpcServiceIntent.FishSkillList:
                 return ShowFishingSkills(session, player, npc);
             case NpcServiceIntent.SkillList:

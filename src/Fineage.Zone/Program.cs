@@ -81,6 +81,7 @@ var olympiad = OlympiadBoard.OpenInStateDirectory(stateDir, DateTimeOffset.UtcNo
 bool includeEnabledMaps = !ZoneMapFilter.IsExplicitlyOff(
     Environment.GetEnvironmentVariable("FINEAGE_ZONE_INCLUDE_ENABLED_MAPS"));
 var world = ZoneAoiSettings.CreateWorld(accounts: accounts, sevenSigns: sevenSigns, includeEnabledMaps: includeEnabledMaps, bosses: bosses, olympiad: olympiad);
+world.UseLottery(Fineage.Zone.Lottery.LotteryBoard.OpenInStateDirectory(stateDir));
 world.StartSimulation(shutdown.Token);
 FineageTelemetry.OnlineCount = () => world.OnlinePlayerCount;
 string host = bindAddress.Equals(IPAddress.Any) ? "0.0.0.0" : bindDisplay;
