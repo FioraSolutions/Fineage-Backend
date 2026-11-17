@@ -95,6 +95,7 @@ public sealed partial class QuestMachine : IQuestKillHook
         var lines = new List<QuestLine>();
         var items = new List<BagTouch>();
         var spawns = new List<int>();
+        var spawnsAt = new List<QuestSpawnPoint>();
         long exp = 0;
         int sp = 0;
         bool changed = false;
@@ -110,6 +111,7 @@ public sealed partial class QuestMachine : IQuestKillHook
             lines.AddRange(outcome.Lines);
             items.AddRange(outcome.Items);
             spawns.AddRange(outcome.Spawns);
+            spawnsAt.AddRange(outcome.SpawnsAt);
             exp += outcome.Exp;
             sp += outcome.Sp;
             changed |= outcome.JournalChanged;
@@ -131,6 +133,7 @@ public sealed partial class QuestMachine : IQuestKillHook
             Lines = lines,
             Items = items,
             Spawns = spawns,
+            SpawnsAt = spawnsAt,
             Exp = exp,
             Sp = sp
         };
@@ -254,6 +257,7 @@ public sealed partial class QuestMachine : IQuestKillHook
             Exp = outcome.Exp,
             Sp = outcome.Sp,
             Spawns = outcome.Spawns,
+            SpawnsAt = outcome.SpawnsAt,
             Noble = outcome.Noble,
             Teleport = outcome.Teleport,
             Social = outcome.Social

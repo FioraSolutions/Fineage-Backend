@@ -55,6 +55,8 @@ public sealed class QuestOutcome
     public int Sp { get; init; }
     /// <summary>Npc ids to spawn near the dialog NPC (Mobius quest <c>addSpawn</c>).</summary>
     public IReadOnlyList<int> Spawns { get; init; } = [];
+    /// <summary>Quest spawns at fixed world points.</summary>
+    public IReadOnlyList<QuestSpawnPoint> SpawnsAt { get; init; } = [];
     /// <summary>Mobius <c>setNoble(true)</c> requested by the step.</summary>
     public bool Noble { get; init; }
     /// <summary>Mobius <c>teleToLocation</c> requested by the step.</summary>

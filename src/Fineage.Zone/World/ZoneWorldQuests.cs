@@ -268,7 +268,7 @@ public sealed partial class ZoneWorld
     {
         if (outcome.QuestId == 0 || !outcome.Ok || player.Session == null)
             return;
-        if (outcome.Items.Count == 0 && !outcome.JournalChanged && outcome.Sounds.Count == 0 && outcome.Spawns.Count == 0)
+        if (outcome.Items.Count == 0 && !outcome.JournalChanged && outcome.Sounds.Count == 0 && outcome.Spawns.Count == 0 && outcome.SpawnsAt.Count == 0)
             return;
         Publish(player.Session, player, outcome, npc.ObjectId, npc.NpcId);
     }
@@ -304,6 +304,7 @@ public sealed partial class ZoneWorld
         && outcome.Items.Count == 0
         && outcome.Sounds.Count == 0
         && outcome.Spawns.Count == 0
+        && outcome.SpawnsAt.Count == 0
         && !outcome.Noble
         && outcome.Teleport == null
         && outcome.Social == 0
@@ -315,6 +316,8 @@ public sealed partial class ZoneWorld
         bool levelled = ApplyProgress(player, outcome);
         if (outcome.Spawns.Count > 0 && _byId.TryGetValue(npcObjectId, out var anchor))
             ApplyQuestSpawns(player, anchor, outcome.Spawns);
+        foreach (var point in outcome.SpawnsAt)
+            SpawnQuestNpc(player, point.NpcId, point.X, point.Y, point.Z, player.InstanceId, 0);
         if (outcome.Noble)
             SetNoble(player, true);
         if (outcome.Social > 0)

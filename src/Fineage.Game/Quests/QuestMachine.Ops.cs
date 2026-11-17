@@ -276,6 +276,9 @@ public sealed partial class QuestMachine
                 case SoundOp sound:
                     plan.Sounds.Add(sound.Name);
                     break;
+                case SpawnNpcOp { X: int sx, Y: int sy, Z: int sz } fixedSpawn:
+                    plan.SpawnsAt.Add(new QuestSpawnPoint(fixedSpawn.NpcId, sx, sy, sz));
+                    break;
                 case SpawnNpcOp spawn:
                     plan.Spawns.Add(spawn.NpcId);
                     break;
@@ -328,6 +331,7 @@ public sealed partial class QuestMachine
             Exp = plan.Exp,
             Sp = plan.Sp,
             Spawns = plan.Spawns,
+            SpawnsAt = plan.SpawnsAt,
             Noble = plan.Noble,
             Teleport = plan.Teleport,
             Social = plan.Social

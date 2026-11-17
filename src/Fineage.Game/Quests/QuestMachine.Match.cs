@@ -95,6 +95,12 @@ public sealed partial class QuestMachine
                 return false;
         }
 
+        foreach (var pair in dialog.Below ?? new Dictionary<int, int>())
+        {
+            if (inventory.CountOf(pair.Key) >= pair.Value)
+                return false;
+        }
+
         // Mobius hasAtLeastOneQuestItem.
         if (dialog.HasAny is { Count: > 0 } any)
         {
@@ -235,6 +241,7 @@ public sealed partial class QuestMachine
         public List<string> Sounds { get; } = [];
         public List<QuestLine> Lines { get; } = [];
         public List<int> Spawns { get; } = [];
+        public List<QuestSpawnPoint> SpawnsAt { get; } = [];
         public bool Noble;
         public (int X, int Y, int Z)? Teleport;
         public int Social;

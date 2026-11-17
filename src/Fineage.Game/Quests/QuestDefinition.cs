@@ -67,7 +67,11 @@ public sealed record SoundOp(string Name) : QuestOp;
 /// Mobius <c>addSpawn(npcId, npc, randomOffset, despawnDelay, isSummonSpawn)</c> from a quest event.
 /// Zone materializes the NPC near the talking NPC and adds hate toward the player.
 /// </summary>
-public sealed record SpawnNpcOp(int NpcId) : QuestOp;
+/// <summary>Mobius <c>addSpawn</c>: near the dialog / killed NPC, or at a fixed point when X/Y/Z are set.</summary>
+public sealed record SpawnNpcOp(int NpcId, int? X = null, int? Y = null, int? Z = null) : QuestOp;
+
+/// <summary>A quest spawn at a fixed world point (Mobius <c>addSpawn(id, x, y, z, …)</c>).</summary>
+public readonly record struct QuestSpawnPoint(int NpcId, int X, int Y, int Z);
 
 /// <summary>Mobius <c>player.setNoble(true)</c> (Possessor of a Precious Soul 4).</summary>
 public sealed record SetNobleOp : QuestOp;
@@ -107,7 +111,9 @@ public sealed record QuestDialog(
     double? Chance = null,
     IReadOnlyDictionary<string, int>? VarAtLeast = null,
     IReadOnlyDictionary<string, int>? VarBelow = null,
-    IReadOnlyList<int>? Weapons = null);
+    IReadOnlyList<int>? Weapons = null,
+    /// <summary>Mobius <c>getQuestItemsCount(id) &lt; n</c> per item (the upper bound of an <see cref="AtLeast"/> ladder).</summary>
+    IReadOnlyDictionary<int, int>? Below = null);
 
 /// <summary>
 /// Who is talking. Mobius quest scripts branch on <c>player.getRace()</c> / <c>getLevel()</c>

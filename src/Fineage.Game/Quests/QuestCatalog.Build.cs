@@ -108,7 +108,8 @@ public sealed partial class QuestCatalog
             ReadChance(dialog.Chance, where, questId),
             ReadVarGate(dialog.VarAtLeast, where, questId, "varAtLeast"),
             ReadVarGate(dialog.VarBelow, where, questId, "varBelow"),
-            ReadItemList(dialog.Weapons, items, where, questId, "weapons"));
+            ReadItemList(dialog.Weapons, items, where, questId, "weapons"),
+            ReadAtLeast(dialog.Below, items, where, questId));
     }
 
     static double? ReadChance(double? chance, string where, int questId)

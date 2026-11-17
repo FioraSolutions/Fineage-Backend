@@ -22272,6 +22272,16 @@
       "quest": true
     },
     {
+      "id": 2638,
+      "name": "Report Piece",
+      "kind": "etc",
+      "icon": "icon.etc_leather_gray_i00",
+      "price": 0,
+      "weight": 0,
+      "stackable": true,
+      "quest": true
+    },
+    {
       "id": 2639,
       "name": "Report Piece",
       "kind": "etc",
@@ -22286,6 +22296,26 @@
       "name": "Tear of Loyalty",
       "kind": "etc",
       "icon": "icon.etc_crystal_ball_silver_i00",
+      "price": 0,
+      "weight": 0,
+      "stackable": true,
+      "quest": true
+    },
+    {
+      "id": 2641,
+      "name": "Militas Article",
+      "kind": "etc",
+      "icon": "icon.etc_jewel_box_i00",
+      "price": 0,
+      "weight": 0,
+      "stackable": true,
+      "quest": true
+    },
+    {
+      "id": 2642,
+      "name": "Saints Ashes Urn",
+      "kind": "etc",
+      "icon": "icon.etc_oil_pot_white_i00",
       "price": 0,
       "weight": 0,
       "stackable": true,
@@ -22316,6 +22346,16 @@
       "name": "Athebaldt's Shin",
       "kind": "etc",
       "icon": "icon.etc_piece_bone_white_i00",
+      "price": 0,
+      "weight": 0,
+      "stackable": true,
+      "quest": true
+    },
+    {
+      "id": 2646,
+      "name": "Letter of Windawood",
+      "kind": "etc",
+      "icon": "icon.etc_letter_blue_i00",
       "price": 0,
       "weight": 0,
       "stackable": true,
@@ -25921,10 +25961,20 @@
     {
       "id": 3026,
       "name": "Talins Spear",
-      "kind": "etc",
+      "kind": "weapon",
       "icon": "icon.weapon_short_spear_i00",
-      "price": 105000,
-      "weight": 800
+      "bodySlot": "lrhand",
+      "weaponType": "pole",
+      "price": 136000,
+      "weight": 800,
+      "pAtk": 24,
+      "mAtk": 17,
+      "critRate": 8,
+      "pAtkSpd": 325,
+      "randomDamage": 10,
+      "attackRange": 80,
+      "soulshots": 2,
+      "spiritshots": 2
     },
     {
       "id": 3027,
@@ -25947,10 +25997,20 @@
     {
       "id": 3028,
       "name": "Crescent Moon Bow",
-      "kind": "etc",
+      "kind": "weapon",
       "icon": "icon.weapon_short_bow_i00",
-      "price": 41600,
-      "weight": 600
+      "bodySlot": "lrhand",
+      "weaponType": "bow",
+      "price": 54100,
+      "weight": 600,
+      "pAtk": 34,
+      "mAtk": 12,
+      "critRate": 12,
+      "pAtkSpd": 293,
+      "randomDamage": 5,
+      "attackRange": 500,
+      "soulshots": 6,
+      "spiritshots": 2
     },
     {
       "id": 3029,
