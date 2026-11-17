@@ -141,7 +141,11 @@ public sealed partial class ZoneWorld
             levelDataOk = true;
         }
         long now = _clock().ToUnixTimeMilliseconds();
-        bool onReuse = player.SkillReuseUntilMs.TryGetValue(request.SkillId, out long reuseUntil)
+        // A toggle that is already running is switched OFF by this press, and Mobius handles that in
+        // checkUseMagicConditions before the reuse / MP gates (isSkillDisabled is checked much later), so the active
+        // toggle's own reuse delay must not refuse the second press.
+        bool activeToggle = IsActiveToggle(player, template);
+        bool onReuse = !activeToggle && player.SkillReuseUntilMs.TryGetValue(request.SkillId, out long reuseUntil)
             && reuseUntil > now;
         // Casting queue is not a refusal — check before reuse/MP so queued casts still land.
         if (IsCasting(player, now))
@@ -192,17 +196,27 @@ public sealed partial class ZoneWorld
             return null;
         }
 
-        // Mobius RequestMagicSkillUse: a fake-dead pawn refuses every skill, the Fake Death toggle included
+        // Mobius operateType T: the second press switches the toggle off, otherwise it applies its own abnormal.
+        // This branch comes BEFORE the fake-death refuse, mirroring Player.checkUseMagicConditions
+        // ("Note: do not check this before TOGGLE reset"): a fake-dead pawn can switch Fake Death (60) off with a
+        // second press instead of only through the sit/stand action. Every OTHER toggle keeps Mobius' refusal.
+        if (IsToggleSkill(liveTemplate))
+        {
+            if (player.FakeDeath && request.SkillId != ToggleFakeDeath)
+            {
+                SelfLine(session, SysMsgCannotUseWhileStanding, "You cannot move while sitting.");
+                return ActionProtocol.Blocked;
+            }
+            return TrySkillUseToggle(session, player, request, liveTemplate, liveLevelData, level, now);
+        }
+
+        // Mobius RequestMagicSkillUse: a fake-dead pawn refuses every other skill
         // (YOU_CANNOT_MOVE_WHILE_SITTING + ActionFailed). Only sit/stand, damage or death bring it up.
         if (player.FakeDeath)
         {
             SelfLine(session, SysMsgCannotUseWhileStanding, "You cannot move while sitting.");
             return ActionProtocol.Blocked;
         }
-
-        // Mobius operateType T: the second press switches the toggle off, otherwise it applies its own abnormal.
-        if (IsToggleSkill(liveTemplate))
-            return TrySkillUseToggle(session, player, request, liveTemplate, liveLevelData, level, now);
 
         if (_summonSkills.Find(request.SkillId) is { } summonSkill)
             return TrySkillUseSummon(session, player, request, summonSkill, liveTemplate, liveLevelData, level, now);
