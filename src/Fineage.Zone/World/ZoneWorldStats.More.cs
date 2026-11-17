@@ -86,7 +86,7 @@ public sealed partial class ZoneWorld
     }
 
     /// <summary>Mobius <c>ConditionUsingItemType</c> — delegates to <see cref="ConditionUsingItemType"/>.</summary>
-    internal static bool Wearing(ZoneEntity player, string[] kinds) =>
+    internal static bool Wearing(ZoneEntity player, ReadOnlySpan<string> kinds) =>
         ConditionUsingItemType.Matches(player.Inventory, kinds);
 
     /// <summary>Live buff/debuff stat funcs on <paramref name="entity"/> (players and NPCs).</summary>

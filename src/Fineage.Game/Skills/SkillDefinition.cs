@@ -76,6 +76,29 @@ public sealed class SkillDefinition
     /// <summary>Mobius <c>basicProperty</c> (CON, MEN, …). Empty = none → always land.</summary>
     public string BasicProperty { get; init; } = "";
 
+    /// <summary>
+    /// Mobius <c>effectPoint</c> hate the hit itself writes on an attackable victim, per skill level (a scalar row is
+    /// repeated). <c>onMagicHitTimer</c> runs <c>addDamageHate(this, 0, −effectPoint)</c> when it is negative and
+    /// <c>reduceHate(this, effectPoint)</c> when positive, before the skill's <c>&lt;for&gt;</c> payloads. Empty = flat 0.
+    /// </summary>
+    public IReadOnlyList<int> EffectPoints { get; init; } = [];
+
+    /// <summary>The cast-level entry of <see cref="EffectPoints"/> (0 when the row has none).</summary>
+    public int EffectPointAt(int skillLevel)
+    {
+        if (EffectPoints.Count == 0)
+            return 0;
+        int index = Math.Clamp(Math.Max(1, skillLevel), 1, EffectPoints.Count) - 1;
+        return EffectPoints[index];
+    }
+
+    /// <summary>
+    /// Mobius <c>&lt;cond msgId="113"&gt;&lt;using kind="DAGGER,DUALDAGGER"/&gt;&lt;/cond&gt;</c>: the weapon kinds the
+    /// cast needs. Empty = no gate. Applies to every skill Mobius parses the condition for, derangement utilities
+    /// (Bluff 358) included — not only damage nukes.
+    /// </summary>
+    public string[] UsingKinds { get; init; } = [];
+
     public bool AppliesAbnormal => AbnormalTimeSeconds > 0;
 
     public bool IsBuffSkill => AppliesAbnormal && !IsDebuff;
@@ -86,9 +109,17 @@ public sealed class SkillDefinition
     /// Instant heal/utility (A1, no abnormal). Distinguished from nukes by <see cref="SkillLevelData.Power"/> == 0
     /// in our datapack (heal power was not imported; attack skills keep non-zero power).
     /// </summary>
+    /// <summary>
+    /// Mobius <c>IsInstantSupportSkill</c> guard: a skill whose <c>effectPoint</c> is negative is <c>isBad()</c> in
+    /// Mobius, i.e. offensive, no matter what its targetType says. Trick (11) / Switch (12) / Confusion (2) /
+    /// Forget (1156) are A1 ONE-target skills with power 0 and a negative effectPoint; they must never be treated as
+    /// a friendly heal.
+    /// </summary>
     public bool IsInstantSupportSkill(int skillLevel)
     {
         if (Passive || IsDebuff || AppliesAbnormal)
+            return false;
+        if (EffectPointAt(skillLevel) < 0)
             return false;
         if (!IsFriendlyTargetType(TargetType))
             return false;

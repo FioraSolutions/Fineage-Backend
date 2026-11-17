@@ -186,11 +186,10 @@ public sealed partial class ZoneWorld
         AdvanceMove(player, now);
 
         // Mobius Skill.checkCondition: <cond><using kind=..></cond> on the skill itself (Focus Chance / Focus Power need
-        // a dagger) refuses the cast with SysMsg 113 "<skill> cannot be used due to unsuitable terms." No MP/reuse spent.
-        // Same convention as the <using> gate in TrySkillUseAttack: the refusal is a notice, not an error code.
-        if (_statEffects.TryGet(request.SkillId, out var statEffect) &&
-            statEffect.Using is { Length: > 0 } requiredKinds &&
-            !Wearing(player, requiredKinds))
+        // a dagger, Trick/Switch/Bluff too) refuses the cast with SysMsg 113 "<skill> cannot be used due to unsuitable
+        // terms." No MP/reuse spent. Skill.checkCondition runs for every skill, so the gate lives here and not only in
+        // the damage path.
+        if (liveTemplate.UsingKinds.Length > 0 && !Wearing(player, liveTemplate.UsingKinds))
         {
             SelfLine(session, SysMsgUnsuitableTerms, $"{liveTemplate.Name} cannot be used due to unsuitable terms.");
             return null;
@@ -231,13 +230,27 @@ public sealed partial class ZoneWorld
                 _spoilRules.IsSweepSkill(request.SkillId));
         if (_skillEffects.HasResurrection(request.SkillId))
             return TrySkillUseResurrection(session, player, request, liveTemplate, liveLevelData, level, now);
-        if (liveTemplate.IsBuffSkill)
-            return TrySkillUseBuff(session, player, request, liveTemplate, liveLevelData, level, now);
-        // Mobius nukes that also apply a short abnormal (Aura Flare A3, Fire Vortex DoT+slow, …)
-        // are flagged isDebuff + abnormalTime in skills.json. Prefer skill-combat damage over the
-        // pure-CC debuff path so they still roll magic damage; ResolvePendingHit applies the abnormal.
+
+        // Mobius `isBad()` is `effectPoint < 0 && targetType != SELF`, and RequestMagicSkillUse's target check lets a
+        // bad skill pick an attackable victim. Trick (11) / Switch (12) / Bluff (358) are exactly that: ONE-target
+        // derangement skills with power 0, whose `<for>` payloads (TargetCancel / DeleteHateOfMe / RandomizeHate) are
+        // the whole behaviour. They must never be mistaken for an instant support heal, so they are routed to the
+        // hostile path — the debuff handler when they carry an abnormal, the attack handler otherwise.
+        if (_skillEffects.TryGet(request.SkillId, out var hostileRows) && HasDerangementPayload(hostileRows))
+        {
+            if (liveTemplate.IsDebuffSkill)
+                return TrySkillUseDebuff(session, player, request, liveTemplate, liveLevelData, level, now);
+            return TrySkillUseHostileUtility(session, player, request, liveTemplate, liveLevelData, level, now);
+        }
+
+        // Mobius nukes that also buff the caster through <selfEffects> (Critical Blow 409, Blinding Blow 321,
+        // Evade Shot 369, Aura Flare 1231) are flagged abnormalTime + abnormalType in skills.json while isDebuff
+        // stays false. They are still offensive skills, so `_skillCombat` must win over IsBuffSkill: the old order
+        // sent Critical Blow down the friendly-buff path, which then refused the hostile monster target.
         if (_skillCombat.TryGet(request.SkillId, out _))
             return TrySkillUseAttack(session, player, request, liveTemplate, liveLevelData, level, now);
+        if (liveTemplate.IsBuffSkill)
+            return TrySkillUseBuff(session, player, request, liveTemplate, liveLevelData, level, now);
         if (liveTemplate.IsDebuffSkill)
             return TrySkillUseDebuff(session, player, request, liveTemplate, liveLevelData, level, now);
         // Mobius DispelByCategory (Cancellation) / MagicalAttackMp — must not fall into InstantSupport.
@@ -270,6 +283,26 @@ public sealed partial class ZoneWorld
         foreach (var row in rows)
         {
             if (row.Name.Equals("RestorationRandom", StringComparison.OrdinalIgnoreCase))
+                return true;
+        }
+        return false;
+    }
+
+    /// <summary>
+    /// Mobius derangement payloads that make an A1 skill hostile despite power 0: <c>DeleteHateOfMe</c> (Trick 11,
+    /// Forget 1156, Bluff 358), <c>RandomizeHate</c> (Switch 12, Confusion 2), <c>TargetCancel</c> (Trick/Switch/Bluff)
+    /// and <c>Bluff</c> (turn the victim's back). Without this test they fell into <see cref="SkillDefinition.IsInstantSupportSkill"/>
+    /// because the datapack says targetType ONE, and the support handler refused the hostile monster.
+    /// </summary>
+    static bool HasDerangementPayload(SkillEffectCatalog.Effect[] rows)
+    {
+        foreach (var row in rows)
+        {
+            if (row.Name.Equals("DeleteHateOfMe", StringComparison.OrdinalIgnoreCase) ||
+                row.Name.Equals("RandomizeHate", StringComparison.OrdinalIgnoreCase) ||
+                row.Name.Equals("TargetCancel", StringComparison.OrdinalIgnoreCase) ||
+                row.Name.Equals("TransferHate", StringComparison.OrdinalIgnoreCase) ||
+                row.Name.Equals("Bluff", StringComparison.OrdinalIgnoreCase))
                 return true;
         }
         return false;

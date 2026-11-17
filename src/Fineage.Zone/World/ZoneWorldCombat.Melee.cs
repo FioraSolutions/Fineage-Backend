@@ -145,6 +145,16 @@ public sealed partial class ZoneWorld
                 watchers.Add(player);
         }
 
+        // Mobius Creature.doDie -> stopAllEffects(): a corpse carries no debuffs. Clearing them before the Die packet
+        // also empties the watchers' abnormal bar, so the client's stun/sleep pose no longer holds the pawn on the
+        // Idle state and the death animation actually plays (Zariche/herbs included).
+        if (npc.Abnormals.Count > 0)
+        {
+            npc.Abnormals.Clear();
+            _withAbnormals.Remove(objectId);
+            FanoutAbnormal(npc);
+        }
+
         // Mobius Creature.doDie -> broadcastPacket(new Die(this)): client plays the death animation.
         SetAggroTarget(npc, 0);
         npc.Chasing = false;

@@ -272,7 +272,49 @@
           "magicLevel": 74
         }
       ],
-      "effectRange": 400
+      "effectRange": 400,
+      "effectPoint": [
+        -213,
+        -219,
+        -225,
+        -231,
+        -237,
+        -242,
+        -248,
+        -254,
+        -260,
+        -265,
+        -271,
+        -277,
+        -283,
+        -288,
+        -294,
+        -299,
+        -305,
+        -310,
+        -316,
+        -321,
+        -326,
+        -331,
+        -336,
+        -340,
+        -345,
+        -350,
+        -354,
+        -358,
+        -362,
+        -366,
+        -370,
+        -373,
+        -377,
+        -380,
+        -383,
+        -386,
+        -388
+      ],
+      "usingKinds": [
+        "DUAL"
+      ]
     },
     {
       "skillId": 2,
@@ -517,7 +559,22 @@
           "magicLevel": 15
         }
       ],
-      "effectRange": 400
+      "effectRange": 400,
+      "effectPoint": [
+        -52,
+        -54,
+        -57,
+        -64,
+        -67,
+        -70,
+        -79,
+        -83,
+        -86
+      ],
+      "usingKinds": [
+        "SWORD",
+        "BLUNT"
+      ]
     },
     {
       "skillId": 4,
@@ -546,7 +603,11 @@
         }
       ],
       "abnormalTimeSeconds": 15,
-      "abnormalType": "SPEED_UP_SPECIAL"
+      "abnormalType": "SPEED_UP_SPECIAL",
+      "effectPoint": [
+        204,
+        438
+      ]
     },
     {
       "skillId": 5,
@@ -777,7 +838,40 @@
           "magicLevel": 74
         }
       ],
-      "effectRange": 400
+      "effectRange": 400,
+      "effectPoint": [
+        -372,
+        -381,
+        -389,
+        -398,
+        -407,
+        -415,
+        -424,
+        -432,
+        -440,
+        -449,
+        -457,
+        -465,
+        -473,
+        -481,
+        -488,
+        -496,
+        -503,
+        -510,
+        -517,
+        -524,
+        -531,
+        -537,
+        -543,
+        -549,
+        -555,
+        -560,
+        -565,
+        -570,
+        -574,
+        -578,
+        -582
+      ]
     },
     {
       "skillId": 6,
@@ -1050,7 +1144,46 @@
           "magicLevel": 74
         }
       ],
-      "effectRange": 1100
+      "effectRange": 1100,
+      "effectPoint": [
+        -183,
+        -188,
+        -193,
+        -198,
+        -203,
+        -208,
+        -213,
+        -218,
+        -223,
+        -228,
+        -233,
+        -237,
+        -242,
+        -247,
+        -252,
+        -257,
+        -261,
+        -266,
+        -271,
+        -275,
+        -279,
+        -284,
+        -288,
+        -292,
+        -296,
+        -300,
+        -304,
+        -307,
+        -311,
+        -314,
+        -317,
+        -320,
+        -323,
+        -326,
+        -328,
+        -331,
+        -333
+      ]
     },
     {
       "skillId": 7,
@@ -1316,7 +1449,37 @@
           "itemConsumeCount": 3
         }
       ],
-      "effectRange": 1000
+      "effectRange": 1000,
+      "effectPoint": [
+        -114,
+        -117,
+        -119,
+        -121,
+        -124,
+        -126,
+        -129,
+        -131,
+        -133,
+        -136,
+        -138,
+        -140,
+        -142,
+        -144,
+        -146,
+        -148,
+        -150,
+        -152,
+        -154,
+        -156,
+        -157,
+        -159,
+        -160,
+        -162,
+        -163,
+        -164,
+        -166,
+        -167
+      ]
     },
     {
       "skillId": 8,
@@ -1378,6 +1541,14 @@
           "abnormalLevel": 1,
           "magicLevel": 70
         }
+      ],
+      "effectPoint": [
+        200
+      ],
+      "usingKinds": [
+        "DUAL",
+        "SWORD",
+        "BLUNT"
       ]
     },
     {
@@ -1698,7 +1869,43 @@
           "itemConsumeCount": 3
         }
       ],
-      "effectRange": 1000
+      "effectRange": 1000,
+      "effectPoint": [
+        -99,
+        -102,
+        -104,
+        -107,
+        -109,
+        -112,
+        -114,
+        -117,
+        -119,
+        -121,
+        -124,
+        -126,
+        -129,
+        -131,
+        -133,
+        -136,
+        -138,
+        -140,
+        -142,
+        -144,
+        -146,
+        -148,
+        -150,
+        -152,
+        -154,
+        -156,
+        -157,
+        -159,
+        -160,
+        -162,
+        -163,
+        -164,
+        -166,
+        -167
+      ]
     },
     {
       "skillId": 10,
@@ -1891,7 +2098,21 @@
         }
       ],
       "effectRange": 900,
-      "trait": "DERANGEMENT"
+      "trait": "DERANGEMENT",
+      "effectPoint": [
+        -119,
+        -126,
+        -133,
+        -140,
+        -144,
+        -148,
+        -152,
+        -156,
+        -159,
+        -162,
+        -164,
+        -167
+      ]
     },
     {
       "skillId": 12,
@@ -2004,7 +2225,23 @@
         }
       ],
       "effectRange": 1100,
-      "trait": "DERANGEMENT"
+      "trait": "DERANGEMENT",
+      "effectPoint": [
+        -104,
+        -112,
+        -119,
+        -126,
+        -133,
+        -140,
+        -144,
+        -148,
+        -152,
+        -156,
+        -159,
+        -162,
+        -164,
+        -167
+      ]
     },
     {
       "skillId": 13,
@@ -2642,7 +2879,36 @@
           "magicLevel": 36
         }
       ],
-      "effectRange": 400
+      "effectRange": 400,
+      "effectPoint": [
+        -52,
+        -54,
+        -57,
+        -64,
+        -67,
+        -70,
+        -79,
+        -83,
+        -86,
+        -96,
+        -100,
+        -104,
+        -111,
+        -115,
+        -119,
+        -128,
+        -132,
+        -136,
+        -145,
+        -150,
+        -154,
+        -164,
+        -169,
+        -173
+      ],
+      "usingKinds": [
+        "DAGGER"
+      ]
     },
     {
       "skillId": 17,
@@ -2962,7 +3228,43 @@
           "itemConsumeCount": 2
         }
       ],
-      "effectRange": 400
+      "effectRange": 400,
+      "effectPoint": [
+        -116,
+        -119,
+        -121,
+        -124,
+        -127,
+        -130,
+        -133,
+        -136,
+        -139,
+        -142,
+        -144,
+        -147,
+        -150,
+        -153,
+        -155,
+        -158,
+        -161,
+        -163,
+        -166,
+        -168,
+        -170,
+        -173,
+        -175,
+        -177,
+        -179,
+        -181,
+        -183,
+        -185,
+        -187,
+        -189,
+        -190,
+        -192,
+        -193,
+        -194
+      ]
     },
     {
       "skillId": 18,
@@ -3237,7 +3539,46 @@
       ],
       "abnormalTimeSeconds": 3,
       "isDebuff": true,
-      "abnormalType": "TARGET_LOCK"
+      "abnormalType": "TARGET_LOCK",
+      "effectPoint": [
+        -3594,
+        -3690,
+        -3787,
+        -3885,
+        -3982,
+        -4080,
+        -4178,
+        -4276,
+        -4374,
+        -4471,
+        -4568,
+        -4665,
+        -4761,
+        -4856,
+        -4950,
+        -5043,
+        -5135,
+        -5226,
+        -5316,
+        -5403,
+        -5490,
+        -5574,
+        -5657,
+        -5737,
+        -5815,
+        -5891,
+        -5965,
+        -6036,
+        -6104,
+        -6170,
+        -6232,
+        -6292,
+        -6349,
+        -6402,
+        -6452,
+        -6499,
+        -6542
+      ]
     },
     {
       "skillId": 19,
@@ -3510,7 +3851,49 @@
           "magicLevel": 74
         }
       ],
-      "effectRange": 1400
+      "effectRange": 1400,
+      "effectPoint": [
+        -366,
+        -375,
+        -385,
+        -395,
+        -405,
+        -415,
+        -425,
+        -435,
+        -445,
+        -455,
+        -465,
+        -474,
+        -484,
+        -494,
+        -503,
+        -513,
+        -522,
+        -532,
+        -541,
+        -550,
+        -558,
+        -567,
+        -575,
+        -583,
+        -591,
+        -599,
+        -607,
+        -614,
+        -621,
+        -627,
+        -634,
+        -640,
+        -646,
+        -651,
+        -656,
+        -661,
+        -665
+      ],
+      "usingKinds": [
+        "BOW"
+      ]
     },
     {
       "skillId": 21,
@@ -3548,7 +3931,12 @@
           "mpInitialConsume": 11
         }
       ],
-      "magicType": 1
+      "magicType": 1,
+      "effectPoint": [
+        204,
+        379,
+        566
+      ]
     },
     {
       "skillId": 22,
@@ -3863,7 +4251,43 @@
           "magicLevel": 74
         }
       ],
-      "effectRange": 1000
+      "effectRange": 1000,
+      "effectPoint": [
+        -213,
+        -218,
+        -223,
+        -228,
+        -233,
+        -237,
+        -242,
+        -247,
+        -252,
+        -257,
+        -261,
+        -266,
+        -271,
+        -275,
+        -279,
+        -284,
+        -288,
+        -292,
+        -296,
+        -300,
+        -304,
+        -307,
+        -311,
+        -314,
+        -317,
+        -320,
+        -323,
+        -326,
+        -328,
+        -331,
+        -333
+      ],
+      "usingKinds": [
+        "BOW"
+      ]
     },
     {
       "skillId": 25,
@@ -4097,7 +4521,23 @@
           "itemConsumeCount": 17
         }
       ],
-      "effectRange": 400
+      "effectRange": 400,
+      "effectPoint": [
+        -1,
+        -2,
+        -3,
+        -4,
+        -5,
+        -6,
+        -7,
+        -8,
+        -9,
+        -10,
+        -11,
+        -12,
+        -13,
+        -14
+      ]
     },
     {
       "skillId": 28,
@@ -4456,7 +4896,58 @@
       ],
       "abnormalTimeSeconds": 3,
       "isDebuff": true,
-      "abnormalType": "TARGET_LOCK"
+      "abnormalType": "TARGET_LOCK",
+      "effectPoint": [
+        -2401,
+        -2487,
+        -2575,
+        -2755,
+        -2847,
+        -2942,
+        -3134,
+        -3233,
+        -3332,
+        -3536,
+        -3638,
+        -3743,
+        -3953,
+        -4058,
+        -4165,
+        -4273,
+        -4380,
+        -4487,
+        -4595,
+        -4703,
+        -4811,
+        -4918,
+        -5024,
+        -5131,
+        -5237,
+        -5341,
+        -5444,
+        -5547,
+        -5648,
+        -5748,
+        -5847,
+        -5943,
+        -6038,
+        -6131,
+        -6222,
+        -6310,
+        -6396,
+        -6480,
+        -6561,
+        -6639,
+        -6714,
+        -6786,
+        -6855,
+        -6921,
+        -6983,
+        -7042,
+        -7097,
+        -7148,
+        -7196
+      ]
     },
     {
       "skillId": 29,
@@ -4638,7 +5129,36 @@
           "magicLevel": 36
         }
       ],
-      "effectRange": 400
+      "effectRange": 400,
+      "effectPoint": [
+        -60,
+        -63,
+        -66,
+        -75,
+        -78,
+        -82,
+        -92,
+        -96,
+        -100,
+        -112,
+        -116,
+        -121,
+        -130,
+        -134,
+        -139,
+        -149,
+        -154,
+        -159,
+        -169,
+        -175,
+        -180,
+        -191,
+        -197,
+        -202
+      ],
+      "usingKinds": [
+        "DUALFIST"
+      ]
     },
     {
       "skillId": 30,
@@ -4911,7 +5431,50 @@
           "magicLevel": 74
         }
       ],
-      "effectRange": 400
+      "effectRange": 400,
+      "effectPoint": [
+        -305,
+        -313,
+        -321,
+        -329,
+        -338,
+        -346,
+        -354,
+        -363,
+        -371,
+        -379,
+        -387,
+        -395,
+        -404,
+        -412,
+        -420,
+        -428,
+        -435,
+        -443,
+        -451,
+        -458,
+        -465,
+        -472,
+        -479,
+        -486,
+        -493,
+        -499,
+        -506,
+        -512,
+        -517,
+        -523,
+        -528,
+        -533,
+        -538,
+        -543,
+        -547,
+        -551,
+        -554
+      ],
+      "usingKinds": [
+        "DAGGER",
+        "DUALDAGGER"
+      ]
     },
     {
       "skillId": 33,
@@ -5039,6 +5602,11 @@
           "abnormalLevel": 1,
           "magicLevel": 62
         }
+      ],
+      "effectPoint": [
+        204,
+        438,
+        582
       ]
     },
     {
@@ -5305,7 +5873,37 @@
           "itemConsumeCount": 2
         }
       ],
-      "effectRange": 1000
+      "effectRange": 1000,
+      "effectPoint": [
+        -133,
+        -136,
+        -139,
+        -142,
+        -144,
+        -147,
+        -150,
+        -153,
+        -155,
+        -158,
+        -161,
+        -163,
+        -166,
+        -168,
+        -170,
+        -173,
+        -175,
+        -177,
+        -179,
+        -181,
+        -183,
+        -185,
+        -187,
+        -189,
+        -190,
+        -192,
+        -193,
+        -194
+      ]
     },
     {
       "skillId": 36,
@@ -5577,6 +6175,48 @@
           "abnormalLevel": 1,
           "magicLevel": 74
         }
+      ],
+      "effectPoint": [
+        -183,
+        -188,
+        -193,
+        -198,
+        -203,
+        -208,
+        -213,
+        -218,
+        -223,
+        -228,
+        -233,
+        -237,
+        -242,
+        -247,
+        -252,
+        -257,
+        -261,
+        -266,
+        -271,
+        -275,
+        -279,
+        -284,
+        -288,
+        -292,
+        -296,
+        -300,
+        -304,
+        -307,
+        -311,
+        -314,
+        -317,
+        -320,
+        -323,
+        -326,
+        -328,
+        -331,
+        -333
+      ],
+      "usingKinds": [
+        "POLE"
       ]
     },
     {
@@ -5637,7 +6277,12 @@
           "mpInitialConsume": 11
         }
       ],
-      "magicType": 1
+      "magicType": 1,
+      "effectPoint": [
+        379,
+        467,
+        582
+      ]
     },
     {
       "skillId": 45,
@@ -5723,7 +6368,18 @@
           "mpInitialConsume": 22
         }
       ],
-      "magicType": 1
+      "magicType": 1,
+      "effectPoint": [
+        204,
+        214,
+        224,
+        245,
+        256,
+        267,
+        289,
+        301,
+        313
+      ]
     },
     {
       "skillId": 46,
@@ -6137,7 +6793,49 @@
       "trait": "SHOCK",
       "activateRate": 50,
       "lvlBonusRate": 1,
-      "basicProperty": "CON"
+      "basicProperty": "CON",
+      "effectPoint": [
+        -92,
+        -94,
+        -97,
+        -99,
+        -102,
+        -104,
+        -107,
+        -109,
+        -112,
+        -114,
+        -117,
+        -119,
+        -121,
+        -124,
+        -126,
+        -129,
+        -131,
+        -133,
+        -136,
+        -138,
+        -140,
+        -142,
+        -144,
+        -146,
+        -148,
+        -150,
+        -152,
+        -154,
+        -156,
+        -157,
+        -159,
+        -160,
+        -162,
+        -163,
+        -164,
+        -166,
+        -167
+      ],
+      "usingKinds": [
+        "POLE"
+      ]
     },
     {
       "skillId": 49,
@@ -6360,7 +7058,35 @@
         }
       ],
       "magicType": 1,
-      "effectRange": 900
+      "effectRange": 900,
+      "effectPoint": [
+        -418,
+        -438,
+        -448,
+        -467,
+        -477,
+        -495,
+        -505,
+        -523,
+        -532,
+        -549,
+        -558,
+        -566,
+        -574,
+        -582,
+        -590,
+        -597,
+        -604,
+        -611,
+        -617,
+        -624,
+        -630,
+        -635,
+        -641,
+        -646,
+        -650,
+        -655
+      ]
     },
     {
       "skillId": 50,
@@ -6422,6 +7148,12 @@
           "abnormalLevel": 1,
           "magicLevel": 72
         }
+      ],
+      "effectPoint": [
+        150
+      ],
+      "usingKinds": [
+        "DUALFIST"
       ]
     },
     {
@@ -6801,7 +7533,61 @@
           "magicLevel": 74
         }
       ],
-      "effectRange": 1100
+      "effectRange": 1100,
+      "effectPoint": [
+        -130,
+        -134,
+        -139,
+        -149,
+        -154,
+        -159,
+        -169,
+        -175,
+        -180,
+        -191,
+        -197,
+        -202,
+        -213,
+        -219,
+        -225,
+        -231,
+        -237,
+        -242,
+        -248,
+        -254,
+        -260,
+        -265,
+        -271,
+        -277,
+        -283,
+        -288,
+        -294,
+        -299,
+        -305,
+        -310,
+        -316,
+        -321,
+        -326,
+        -331,
+        -336,
+        -340,
+        -345,
+        -350,
+        -354,
+        -358,
+        -362,
+        -366,
+        -370,
+        -373,
+        -377,
+        -380,
+        -383,
+        -386,
+        -388
+      ],
+      "usingKinds": [
+        "DUALFIST"
+      ]
     },
     {
       "skillId": 56,
@@ -6983,7 +7769,36 @@
           "magicLevel": 36
         }
       ],
-      "effectRange": 1200
+      "effectRange": 1200,
+      "effectPoint": [
+        -103,
+        -108,
+        -113,
+        -128,
+        -134,
+        -140,
+        -158,
+        -165,
+        -171,
+        -192,
+        -199,
+        -207,
+        -222,
+        -230,
+        -238,
+        -255,
+        -264,
+        -272,
+        -290,
+        -299,
+        -308,
+        -327,
+        -337,
+        -346
+      ],
+      "usingKinds": [
+        "BOW"
+      ]
     },
     {
       "skillId": 58,
@@ -7437,7 +8252,64 @@
           "mpInitialConsume": 48
         }
       ],
-      "magicType": 1
+      "magicType": 1,
+      "effectPoint": [
+        101,
+        107,
+        114,
+        135,
+        143,
+        151,
+        168,
+        176,
+        185,
+        204,
+        214,
+        224,
+        245,
+        256,
+        267,
+        289,
+        301,
+        313,
+        337,
+        349,
+        362,
+        375,
+        388,
+        401,
+        414,
+        427,
+        440,
+        454,
+        467,
+        481,
+        494,
+        508,
+        521,
+        535,
+        549,
+        562,
+        575,
+        589,
+        602,
+        615,
+        628,
+        640,
+        653,
+        665,
+        677,
+        689,
+        700,
+        711,
+        722,
+        733,
+        743,
+        753,
+        763,
+        772,
+        780
+      ]
     },
     {
       "skillId": 60,
@@ -7495,7 +8367,12 @@
           "mpInitialConsume": 11
         }
       ],
-      "magicType": 1
+      "magicType": 1,
+      "effectPoint": [
+        235,
+        438,
+        582
+      ]
     },
     {
       "skillId": 65,
@@ -7620,7 +8497,22 @@
       "trait": "DERANGEMENT",
       "activateRate": 80,
       "lvlBonusRate": 1,
-      "basicProperty": "MEN"
+      "basicProperty": "MEN",
+      "effectPoint": [
+        -438,
+        -467,
+        -495,
+        -523,
+        -549,
+        -566,
+        -582,
+        -597,
+        -611,
+        -624,
+        -635,
+        -646,
+        -655
+      ]
     },
     {
       "skillId": 67,
@@ -7894,7 +8786,34 @@
         }
       ],
       "magicType": 1,
-      "effectRange": 1100
+      "effectRange": 1100,
+      "effectPoint": [
+        494,
+        508,
+        521,
+        535,
+        549,
+        562,
+        575,
+        589,
+        602,
+        615,
+        628,
+        640,
+        653,
+        665,
+        677,
+        689,
+        700,
+        711,
+        722,
+        733,
+        743,
+        753,
+        763,
+        772,
+        780
+      ]
     },
     {
       "skillId": 70,
@@ -8333,7 +9252,62 @@
         }
       ],
       "magicType": 1,
-      "effectRange": 1100
+      "effectRange": 1100,
+      "effectPoint": [
+        -78,
+        -84,
+        -95,
+        -102,
+        -110,
+        -114,
+        -118,
+        -251,
+        -259,
+        -268,
+        -285,
+        -294,
+        -303,
+        -322,
+        -331,
+        -341,
+        -360,
+        -369,
+        -379,
+        -389,
+        -399,
+        -408,
+        -418,
+        -428,
+        -438,
+        -448,
+        -457,
+        -467,
+        -477,
+        -486,
+        -495,
+        -505,
+        -514,
+        -523,
+        -532,
+        -541,
+        -549,
+        -558,
+        -566,
+        -574,
+        -582,
+        -590,
+        -597,
+        -604,
+        -611,
+        -617,
+        -624,
+        -630,
+        -635,
+        -641,
+        -646,
+        -650,
+        -655
+      ]
     },
     {
       "skillId": 72,
@@ -8373,7 +9347,12 @@
       ],
       "abnormalTimeSeconds": 1200,
       "magicType": 1,
-      "abnormalType": "MD_UP"
+      "abnormalType": "MD_UP",
+      "effectPoint": [
+        408,
+        467,
+        523
+      ]
     },
     {
       "skillId": 75,
@@ -8395,7 +9374,10 @@
         }
       ],
       "abnormalTimeSeconds": 600,
-      "abnormalType": "DETECT_WEAKNESS"
+      "abnormalType": "DETECT_WEAKNESS",
+      "effectPoint": [
+        303
+      ]
     },
     {
       "skillId": 76,
@@ -8417,7 +9399,13 @@
         }
       ],
       "abnormalTimeSeconds": 120,
-      "abnormalType": "POSSESSION"
+      "abnormalType": "POSSESSION",
+      "effectPoint": [
+        268
+      ],
+      "usingKinds": [
+        "DUALFIST"
+      ]
     },
     {
       "skillId": 77,
@@ -8449,7 +9437,11 @@
       ],
       "abnormalTimeSeconds": 1200,
       "magicType": 1,
-      "abnormalType": "PA_UP"
+      "abnormalType": "PA_UP",
+      "effectPoint": [
+        138,
+        268
+      ]
     },
     {
       "skillId": 78,
@@ -8478,7 +9470,11 @@
         }
       ],
       "abnormalTimeSeconds": 60,
-      "abnormalType": "PA_UP_SPECIAL"
+      "abnormalType": "PA_UP_SPECIAL",
+      "effectPoint": [
+        204,
+        408
+      ]
     },
     {
       "skillId": 80,
@@ -8500,7 +9496,10 @@
         }
       ],
       "abnormalTimeSeconds": 600,
-      "abnormalType": "DETECT_WEAKNESS"
+      "abnormalType": "DETECT_WEAKNESS",
+      "effectPoint": [
+        495
+      ]
     },
     {
       "skillId": 81,
@@ -8539,7 +9538,15 @@
       "isDebuff": true,
       "effectRange": 400,
       "abnormalType": "STUN",
-      "lvlBonusRate": 2
+      "lvlBonusRate": 2,
+      "effectPoint": [
+        -266,
+        -304,
+        -333
+      ],
+      "usingKinds": [
+        "DUALFIST"
+      ]
     },
     {
       "skillId": 82,
@@ -8575,7 +9582,12 @@
         }
       ],
       "abnormalTimeSeconds": 300,
-      "abnormalType": "MAJESTY"
+      "abnormalType": "MAJESTY",
+      "effectPoint": [
+        204,
+        379,
+        549
+      ]
     },
     {
       "skillId": 83,
@@ -8597,7 +9609,13 @@
         }
       ],
       "abnormalTimeSeconds": 120,
-      "abnormalType": "POSSESSION"
+      "abnormalType": "POSSESSION",
+      "effectPoint": [
+        204
+      ],
+      "usingKinds": [
+        "DUALFIST"
+      ]
     },
     {
       "skillId": 84,
@@ -8638,7 +9656,15 @@
       "trait": "POISON",
       "activateRate": 35,
       "lvlBonusRate": 1,
-      "basicProperty": "CON"
+      "basicProperty": "CON",
+      "effectPoint": [
+        -523,
+        -566,
+        -646
+      ],
+      "usingKinds": [
+        "DUAL"
+      ]
     },
     {
       "skillId": 86,
@@ -8678,7 +9704,12 @@
       ],
       "abnormalTimeSeconds": 1200,
       "magicType": 1,
-      "abnormalType": "DMG_SHIELD"
+      "abnormalType": "DMG_SHIELD",
+      "effectPoint": [
+        379,
+        438,
+        495
+      ]
     },
     {
       "skillId": 87,
@@ -8700,7 +9731,10 @@
         }
       ],
       "abnormalTimeSeconds": 600,
-      "abnormalType": "DETECT_WEAKNESS"
+      "abnormalType": "DETECT_WEAKNESS",
+      "effectPoint": [
+        379
+      ]
     },
     {
       "skillId": 88,
@@ -8722,7 +9756,10 @@
         }
       ],
       "abnormalTimeSeconds": 600,
-      "abnormalType": "DETECT_WEAKNESS"
+      "abnormalType": "DETECT_WEAKNESS",
+      "effectPoint": [
+        549
+      ]
     },
     {
       "skillId": 91,
@@ -8754,7 +9791,11 @@
       ],
       "abnormalTimeSeconds": 1200,
       "magicType": 1,
-      "abnormalType": "PD_UP"
+      "abnormalType": "PD_UP",
+      "effectPoint": [
+        111,
+        204
+      ]
     },
     {
       "skillId": 92,
@@ -9139,7 +10180,64 @@
       "trait": "SHOCK",
       "activateRate": 80,
       "lvlBonusRate": 2,
-      "basicProperty": "CON"
+      "basicProperty": "CON",
+      "effectPoint": [
+        -189,
+        -196,
+        -204,
+        -219,
+        -227,
+        -235,
+        -251,
+        -259,
+        -268,
+        -285,
+        -294,
+        -303,
+        -322,
+        -331,
+        -341,
+        -360,
+        -369,
+        -379,
+        -389,
+        -399,
+        -408,
+        -418,
+        -428,
+        -438,
+        -448,
+        -457,
+        -467,
+        -477,
+        -486,
+        -495,
+        -505,
+        -514,
+        -523,
+        -532,
+        -541,
+        -549,
+        -558,
+        -566,
+        -574,
+        -582,
+        -590,
+        -597,
+        -604,
+        -611,
+        -617,
+        -624,
+        -630,
+        -635,
+        -641,
+        -646,
+        -650,
+        -655
+      ],
+      "usingKinds": [
+        "SHIELD"
+      ]
     },
     {
       "skillId": 94,
@@ -9168,7 +10266,11 @@
         }
       ],
       "abnormalTimeSeconds": 90,
-      "abnormalType": "PA_UP_SPECIAL"
+      "abnormalType": "PA_UP_SPECIAL",
+      "effectPoint": [
+        235,
+        523
+      ]
     },
     {
       "skillId": 95,
@@ -9328,7 +10430,32 @@
       "abnormalType": "SPEED_DOWN",
       "activateRate": 80,
       "lvlBonusRate": 2,
-      "basicProperty": "MEN"
+      "basicProperty": "MEN",
+      "effectPoint": [
+        -204,
+        -235,
+        -268,
+        -303,
+        -341,
+        -379,
+        -408,
+        -438,
+        -467,
+        -495,
+        -523,
+        -549,
+        -566,
+        -582,
+        -597,
+        -611,
+        -624,
+        -635,
+        -646,
+        -655
+      ],
+      "usingKinds": [
+        "DUALFIST"
+      ]
     },
     {
       "skillId": 96,
@@ -9391,7 +10518,19 @@
       "trait": "BLEED",
       "activateRate": 100,
       "lvlBonusRate": 2,
-      "basicProperty": "CON"
+      "basicProperty": "CON",
+      "effectPoint": [
+        -119,
+        -154,
+        -237,
+        -279,
+        -311,
+        -323
+      ],
+      "usingKinds": [
+        "DAGGER",
+        "DUALDAGGER"
+      ]
     },
     {
       "skillId": 97,
@@ -9487,7 +10626,20 @@
       "abnormalType": "PA_DOWN",
       "activateRate": 40,
       "lvlBonusRate": 2,
-      "basicProperty": "MEN"
+      "basicProperty": "MEN",
+      "effectPoint": [
+        -495,
+        -523,
+        -549,
+        -566,
+        -582,
+        -597,
+        -611,
+        -624,
+        -635,
+        -646,
+        -655
+      ]
     },
     {
       "skillId": 98,
@@ -9543,7 +10695,14 @@
       "trait": "DERANGEMENT",
       "activateRate": 60,
       "lvlBonusRate": 1,
-      "basicProperty": "MEN"
+      "basicProperty": "MEN",
+      "effectPoint": [
+        -395,
+        -427,
+        -450,
+        -470,
+        -487
+      ]
     },
     {
       "skillId": 99,
@@ -9574,7 +10733,11 @@
         }
       ],
       "abnormalTimeSeconds": 1200,
-      "abnormalType": "ATTACK_SPEED_UP_BOW"
+      "abnormalType": "ATTACK_SPEED_UP_BOW",
+      "effectPoint": [
+        303,
+        549
+      ]
     },
     {
       "skillId": 100,
@@ -9700,7 +10863,27 @@
       "trait": "SHOCK",
       "activateRate": 50,
       "lvlBonusRate": 1,
-      "basicProperty": "CON"
+      "basicProperty": "CON",
+      "effectPoint": [
+        -96,
+        -100,
+        -104,
+        -111,
+        -115,
+        -119,
+        -128,
+        -132,
+        -136,
+        -145,
+        -150,
+        -154,
+        -164,
+        -169,
+        -173
+      ],
+      "usingKinds": [
+        "BLUNT"
+      ]
     },
     {
       "skillId": 101,
@@ -10001,7 +11184,52 @@
       "trait": "SHOCK",
       "activateRate": 50,
       "lvlBonusRate": 1,
-      "basicProperty": "CON"
+      "basicProperty": "CON",
+      "effectPoint": [
+        -327,
+        -337,
+        -346,
+        -366,
+        -375,
+        -385,
+        -395,
+        -405,
+        -415,
+        -425,
+        -435,
+        -445,
+        -455,
+        -465,
+        -474,
+        -484,
+        -494,
+        -503,
+        -513,
+        -522,
+        -532,
+        -541,
+        -550,
+        -558,
+        -567,
+        -575,
+        -583,
+        -591,
+        -599,
+        -607,
+        -614,
+        -621,
+        -627,
+        -634,
+        -640,
+        -646,
+        -651,
+        -656,
+        -661,
+        -665
+      ],
+      "usingKinds": [
+        "BOW"
+      ]
     },
     {
       "skillId": 102,
@@ -10150,7 +11378,25 @@
       "abnormalType": "SPEED_DOWN",
       "activateRate": 80,
       "lvlBonusRate": 2,
-      "basicProperty": "MEN"
+      "basicProperty": "MEN",
+      "effectPoint": [
+        -341,
+        -379,
+        -408,
+        -438,
+        -467,
+        -495,
+        -523,
+        -549,
+        -566,
+        -582,
+        -597,
+        -611,
+        -624,
+        -635,
+        -646,
+        -655
+      ]
     },
     {
       "skillId": 103,
@@ -10200,7 +11446,13 @@
       "trait": "POISON",
       "activateRate": 35,
       "lvlBonusRate": 1,
-      "basicProperty": "CON"
+      "basicProperty": "CON",
+      "effectPoint": [
+        -438,
+        -549,
+        -582,
+        -635
+      ]
     },
     {
       "skillId": 104,
@@ -10222,7 +11474,10 @@
         }
       ],
       "abnormalTimeSeconds": 600,
-      "abnormalType": "DETECT_WEAKNESS"
+      "abnormalType": "DETECT_WEAKNESS",
+      "effectPoint": [
+        438
+      ]
     },
     {
       "skillId": 105,
@@ -10435,7 +11690,33 @@
       "abnormalType": "SPEED_DOWN",
       "activateRate": 60,
       "lvlBonusRate": 1,
-      "basicProperty": "MEN"
+      "basicProperty": "MEN",
+      "effectPoint": [
+        -322,
+        -341,
+        -360,
+        -379,
+        -399,
+        -408,
+        -428,
+        -438,
+        -457,
+        -467,
+        -486,
+        -495,
+        -514,
+        -523,
+        -541,
+        -549,
+        -566,
+        -582,
+        -597,
+        -611,
+        -624,
+        -635,
+        -646,
+        -655
+      ]
     },
     {
       "skillId": 106,
@@ -10636,7 +11917,18 @@
       "trait": "HOLD",
       "activateRate": 40,
       "lvlBonusRate": 2,
-      "basicProperty": "MEN"
+      "basicProperty": "MEN",
+      "effectPoint": [
+        -549,
+        -566,
+        -582,
+        -597,
+        -611,
+        -624,
+        -635,
+        -646,
+        -655
+      ]
     },
     {
       "skillId": 109,
@@ -10658,7 +11950,13 @@
         }
       ],
       "abnormalTimeSeconds": 120,
-      "abnormalType": "POSSESSION"
+      "abnormalType": "POSSESSION",
+      "effectPoint": [
+        438
+      ],
+      "usingKinds": [
+        "DUALFIST"
+      ]
     },
     {
       "skillId": 110,
@@ -10687,7 +11985,11 @@
         }
       ],
       "abnormalTimeSeconds": 30,
-      "abnormalType": "PD_UP_SPECIAL"
+      "abnormalType": "PD_UP_SPECIAL",
+      "effectPoint": [
+        204,
+        438
+      ]
     },
     {
       "skillId": 111,
@@ -10716,7 +12018,11 @@
         }
       ],
       "abnormalTimeSeconds": 30,
-      "abnormalType": "AVOID_UP_SPECIAL"
+      "abnormalType": "AVOID_UP_SPECIAL",
+      "effectPoint": [
+        268,
+        523
+      ]
     },
     {
       "skillId": 112,
@@ -10759,7 +12065,13 @@
         }
       ],
       "abnormalTimeSeconds": 1200,
-      "abnormalType": "PD_UP_BOW"
+      "abnormalType": "PD_UP_BOW",
+      "effectPoint": [
+        10,
+        20,
+        30,
+        40
+      ]
     },
     {
       "skillId": 113,
@@ -10943,7 +12255,26 @@
       "abnormalType": "PA_DOWN",
       "activateRate": 80,
       "lvlBonusRate": 2,
-      "basicProperty": "MEN"
+      "basicProperty": "MEN",
+      "effectPoint": [
+        -152,
+        -171,
+        -190,
+        -204,
+        -219,
+        -234,
+        -248,
+        -262,
+        -275,
+        -283,
+        -291,
+        -299,
+        -306,
+        -312,
+        -318,
+        -323,
+        -328
+      ]
     },
     {
       "skillId": 116,
@@ -11060,7 +12391,23 @@
       "abnormalType": "PA_DOWN",
       "activateRate": 40,
       "lvlBonusRate": 2,
-      "basicProperty": "MEN"
+      "basicProperty": "MEN",
+      "effectPoint": [
+        -204,
+        -219,
+        -234,
+        -248,
+        -262,
+        -275,
+        -283,
+        -291,
+        -299,
+        -306,
+        -312,
+        -318,
+        -323,
+        -328
+      ]
     },
     {
       "skillId": 118,
@@ -11206,7 +12553,27 @@
       "trait": "SHOCK",
       "activateRate": 50,
       "lvlBonusRate": 2,
-      "basicProperty": "CON"
+      "basicProperty": "CON",
+      "effectPoint": [
+        -96,
+        -100,
+        -104,
+        -111,
+        -115,
+        -119,
+        -128,
+        -132,
+        -136,
+        -145,
+        -150,
+        -154,
+        -164,
+        -169,
+        -173
+      ],
+      "usingKinds": [
+        "DUALFIST"
+      ]
     },
     {
       "skillId": 121,
@@ -11263,7 +12630,15 @@
         }
       ],
       "abnormalTimeSeconds": 600,
-      "abnormalType": "MAX_HP_UP"
+      "abnormalType": "MAX_HP_UP",
+      "effectPoint": [
+        268,
+        379,
+        467,
+        549,
+        597,
+        635
+      ]
     },
     {
       "skillId": 122,
@@ -11389,7 +12764,24 @@
       "abnormalType": "PD_DOWN",
       "activateRate": 80,
       "lvlBonusRate": 2,
-      "basicProperty": "MEN"
+      "basicProperty": "MEN",
+      "effectPoint": [
+        -190,
+        -204,
+        -219,
+        -234,
+        -248,
+        -262,
+        -275,
+        -283,
+        -291,
+        -299,
+        -306,
+        -312,
+        -318,
+        -323,
+        -328
+      ]
     },
     {
       "skillId": 123,
@@ -11429,7 +12821,12 @@
       ],
       "abnormalTimeSeconds": 1200,
       "magicType": 1,
-      "abnormalType": "MD_UP"
+      "abnormalType": "MD_UP",
+      "effectPoint": [
+        379,
+        467,
+        549
+      ]
     },
     {
       "skillId": 127,
@@ -11561,7 +12958,23 @@
       "abnormalType": "SPEED_DOWN",
       "activateRate": 80,
       "lvlBonusRate": 2,
-      "basicProperty": "MEN"
+      "basicProperty": "MEN",
+      "effectPoint": [
+        -408,
+        -438,
+        -467,
+        -495,
+        -523,
+        -549,
+        -566,
+        -582,
+        -597,
+        -611,
+        -624,
+        -635,
+        -646,
+        -655
+      ]
     },
     {
       "skillId": 129,
@@ -11623,7 +13036,14 @@
       "trait": "POISON",
       "activateRate": 70,
       "lvlBonusRate": 1,
-      "basicProperty": "CON"
+      "basicProperty": "CON",
+      "effectPoint": [
+        -204,
+        -467,
+        -549,
+        -611,
+        -655
+      ]
     },
     {
       "skillId": 130,
@@ -11652,7 +13072,11 @@
         }
       ],
       "abnormalTimeSeconds": 300,
-      "abnormalType": "THRILL_FIGHT"
+      "abnormalType": "THRILL_FIGHT",
+      "effectPoint": [
+        438,
+        523
+      ]
     },
     {
       "skillId": 131,
@@ -11688,7 +13112,12 @@
         }
       ],
       "abnormalTimeSeconds": 300,
-      "abnormalType": "AB_HAWK_EYE"
+      "abnormalType": "AB_HAWK_EYE",
+      "effectPoint": [
+        379,
+        467,
+        549
+      ]
     },
     {
       "skillId": 134,
@@ -11778,7 +13207,12 @@
         }
       ],
       "abnormalTimeSeconds": 90,
-      "abnormalType": "PINCH"
+      "abnormalType": "PINCH",
+      "effectPoint": [
+        341,
+        408,
+        495
+      ]
     },
     {
       "skillId": 141,
@@ -13324,7 +14758,12 @@
         }
       ],
       "abnormalTimeSeconds": 90,
-      "abnormalType": "PINCH"
+      "abnormalType": "PINCH",
+      "effectPoint": [
+        303,
+        438,
+        523
+      ]
     },
     {
       "skillId": 181,
@@ -13344,6 +14783,9 @@
           "abnormalLevel": 1,
           "magicLevel": 55
         }
+      ],
+      "effectPoint": [
+        562
       ]
     },
     {
@@ -13617,7 +15059,50 @@
           "magicLevel": 74
         }
       ],
-      "effectRange": 400
+      "effectRange": 400,
+      "effectPoint": [
+        -183,
+        -188,
+        -193,
+        -198,
+        -203,
+        -208,
+        -213,
+        -218,
+        -223,
+        -228,
+        -233,
+        -237,
+        -242,
+        -247,
+        -252,
+        -257,
+        -261,
+        -266,
+        -271,
+        -275,
+        -279,
+        -284,
+        -288,
+        -292,
+        -296,
+        -300,
+        -304,
+        -307,
+        -311,
+        -314,
+        -317,
+        -320,
+        -323,
+        -326,
+        -328,
+        -331,
+        -333
+      ],
+      "usingKinds": [
+        "SWORD",
+        "BLUNT"
+      ]
     },
     {
       "skillId": 191,
@@ -16517,7 +18002,64 @@
       "trait": "BLEED",
       "activateRate": 50,
       "lvlBonusRate": 1,
-      "basicProperty": "CON"
+      "basicProperty": "CON",
+      "effectPoint": [
+        -111,
+        -115,
+        -119,
+        -128,
+        -132,
+        -136,
+        -145,
+        -150,
+        -154,
+        -164,
+        -169,
+        -173,
+        -183,
+        -188,
+        -193,
+        -198,
+        -203,
+        -208,
+        -213,
+        -218,
+        -223,
+        -228,
+        -233,
+        -237,
+        -242,
+        -247,
+        -252,
+        -257,
+        -261,
+        -266,
+        -271,
+        -275,
+        -279,
+        -284,
+        -288,
+        -292,
+        -296,
+        -300,
+        -304,
+        -307,
+        -311,
+        -314,
+        -317,
+        -320,
+        -323,
+        -326,
+        -328,
+        -331,
+        -333
+      ],
+      "usingKinds": [
+        "SWORD",
+        "DAGGER",
+        "DUAL",
+        "DUALDAGGER"
+      ]
     },
     {
       "skillId": 225,
@@ -17062,7 +18604,11 @@
       ],
       "abnormalTimeSeconds": 1200,
       "magicType": 1,
-      "abnormalType": "SPEED_UP"
+      "abnormalType": "SPEED_UP",
+      "effectPoint": [
+        219,
+        495
+      ]
     },
     {
       "skillId": 231,
@@ -19245,7 +20791,27 @@
           "magicLevel": 36
         }
       ],
-      "effectRange": 400
+      "effectRange": 400,
+      "effectPoint": [
+        -96,
+        -100,
+        -104,
+        -111,
+        -115,
+        -119,
+        -128,
+        -132,
+        -136,
+        -145,
+        -150,
+        -154,
+        -164,
+        -169,
+        -173
+      ],
+      "usingKinds": [
+        "POLE"
+      ]
     },
     {
       "skillId": 246,
@@ -21015,7 +22581,20 @@
           "magicLevel": 72
         }
       ],
-      "effectRange": 400
+      "effectRange": 400,
+      "effectPoint": [
+        -138,
+        -204,
+        -268,
+        -341,
+        -408,
+        -467,
+        -523,
+        -566,
+        -597,
+        -624,
+        -646
+      ]
     },
     {
       "skillId": 255,
@@ -21134,7 +22713,28 @@
           "magicLevel": 36
         }
       ],
-      "effectRange": 400
+      "effectRange": 400,
+      "effectPoint": [
+        -96,
+        -100,
+        -104,
+        -111,
+        -115,
+        -119,
+        -128,
+        -132,
+        -136,
+        -145,
+        -150,
+        -154,
+        -164,
+        -169,
+        -173
+      ],
+      "usingKinds": [
+        "SWORD",
+        "BLUNT"
+      ]
     },
     {
       "skillId": 256,
@@ -22250,7 +23850,49 @@
       "trait": "SHOCK",
       "activateRate": 50,
       "lvlBonusRate": 1,
-      "basicProperty": "CON"
+      "basicProperty": "CON",
+      "effectPoint": [
+        -183,
+        -188,
+        -193,
+        -198,
+        -203,
+        -208,
+        -213,
+        -218,
+        -223,
+        -228,
+        -233,
+        -237,
+        -242,
+        -247,
+        -252,
+        -257,
+        -261,
+        -266,
+        -271,
+        -275,
+        -279,
+        -284,
+        -288,
+        -292,
+        -296,
+        -300,
+        -304,
+        -307,
+        -311,
+        -314,
+        -317,
+        -320,
+        -323,
+        -326,
+        -328,
+        -331,
+        -333
+      ],
+      "usingKinds": [
+        "BLUNT"
+      ]
     },
     {
       "skillId": 261,
@@ -22418,7 +24060,31 @@
           "magicLevel": 74
         }
       ],
-      "effectRange": 400
+      "effectRange": 400,
+      "effectPoint": [
+        -598,
+        -609,
+        -620,
+        -631,
+        -641,
+        -651,
+        -661,
+        -671,
+        -680,
+        -690,
+        -699,
+        -708,
+        -716,
+        -724,
+        -732,
+        -739,
+        -746,
+        -753,
+        -759,
+        -765,
+        -771,
+        -776
+      ]
     },
     {
       "skillId": 262,
@@ -22692,7 +24358,46 @@
         }
       ],
       "magicType": 1,
-      "effectRange": 1100
+      "effectRange": 1100,
+      "effectPoint": [
+        337,
+        349,
+        362,
+        375,
+        388,
+        401,
+        414,
+        427,
+        440,
+        454,
+        467,
+        481,
+        494,
+        508,
+        521,
+        535,
+        549,
+        562,
+        575,
+        589,
+        602,
+        615,
+        628,
+        640,
+        653,
+        665,
+        677,
+        689,
+        700,
+        711,
+        722,
+        733,
+        743,
+        753,
+        763,
+        772,
+        780
+      ]
     },
     {
       "skillId": 263,
@@ -22965,7 +24670,50 @@
           "magicLevel": 74
         }
       ],
-      "effectRange": 400
+      "effectRange": 400,
+      "effectPoint": [
+        -183,
+        -188,
+        -193,
+        -198,
+        -203,
+        -208,
+        -213,
+        -218,
+        -223,
+        -228,
+        -233,
+        -237,
+        -242,
+        -247,
+        -252,
+        -257,
+        -261,
+        -266,
+        -271,
+        -275,
+        -279,
+        -284,
+        -288,
+        -292,
+        -296,
+        -300,
+        -304,
+        -307,
+        -311,
+        -314,
+        -317,
+        -320,
+        -323,
+        -326,
+        -328,
+        -331,
+        -333
+      ],
+      "usingKinds": [
+        "DAGGER",
+        "DUALDAGGER"
+      ]
     },
     {
       "skillId": 264,
@@ -22988,7 +24736,10 @@
       ],
       "abnormalTimeSeconds": 120,
       "magicType": 1,
-      "abnormalType": "SONG_OF_EARTH"
+      "abnormalType": "SONG_OF_EARTH",
+      "effectPoint": [
+        523
+      ]
     },
     {
       "skillId": 265,
@@ -23011,7 +24762,10 @@
       ],
       "abnormalTimeSeconds": 120,
       "magicType": 1,
-      "abnormalType": "SONG_OF_LIFE"
+      "abnormalType": "SONG_OF_LIFE",
+      "effectPoint": [
+        495
+      ]
     },
     {
       "skillId": 266,
@@ -23034,7 +24788,10 @@
       ],
       "abnormalTimeSeconds": 120,
       "magicType": 1,
-      "abnormalType": "SONG_OF_WATER"
+      "abnormalType": "SONG_OF_WATER",
+      "effectPoint": [
+        549
+      ]
     },
     {
       "skillId": 267,
@@ -23057,7 +24814,10 @@
       ],
       "abnormalTimeSeconds": 120,
       "magicType": 1,
-      "abnormalType": "SONG_OF_WARDING"
+      "abnormalType": "SONG_OF_WARDING",
+      "effectPoint": [
+        379
+      ]
     },
     {
       "skillId": 268,
@@ -23080,7 +24840,10 @@
       ],
       "abnormalTimeSeconds": 120,
       "magicType": 1,
-      "abnormalType": "SONG_OF_WIND"
+      "abnormalType": "SONG_OF_WIND",
+      "effectPoint": [
+        438
+      ]
     },
     {
       "skillId": 269,
@@ -23103,7 +24866,10 @@
       ],
       "abnormalTimeSeconds": 120,
       "magicType": 1,
-      "abnormalType": "SONG_OF_HUNTER"
+      "abnormalType": "SONG_OF_HUNTER",
+      "effectPoint": [
+        467
+      ]
     },
     {
       "skillId": 270,
@@ -23126,7 +24892,10 @@
       ],
       "abnormalTimeSeconds": 120,
       "magicType": 1,
-      "abnormalType": "SONG_OF_INVOCATION"
+      "abnormalType": "SONG_OF_INVOCATION",
+      "effectPoint": [
+        408
+      ]
     },
     {
       "skillId": 271,
@@ -23149,7 +24918,13 @@
       ],
       "abnormalTimeSeconds": 120,
       "magicType": 1,
-      "abnormalType": "DANCE_OF_WARRIOR"
+      "abnormalType": "DANCE_OF_WARRIOR",
+      "effectPoint": [
+        523
+      ],
+      "usingKinds": [
+        "DUAL"
+      ]
     },
     {
       "skillId": 272,
@@ -23172,7 +24947,13 @@
       ],
       "abnormalTimeSeconds": 120,
       "magicType": 1,
-      "abnormalType": "DANCE_OF_INSPIRATION"
+      "abnormalType": "DANCE_OF_INSPIRATION",
+      "effectPoint": [
+        438
+      ],
+      "usingKinds": [
+        "DUAL"
+      ]
     },
     {
       "skillId": 273,
@@ -23195,7 +24976,13 @@
       ],
       "abnormalTimeSeconds": 120,
       "magicType": 1,
-      "abnormalType": "DANCE_OF_MYSTIC"
+      "abnormalType": "DANCE_OF_MYSTIC",
+      "effectPoint": [
+        467
+      ],
+      "usingKinds": [
+        "DUAL"
+      ]
     },
     {
       "skillId": 274,
@@ -23218,7 +25005,13 @@
       ],
       "abnormalTimeSeconds": 120,
       "magicType": 1,
-      "abnormalType": "DANCE_OF_FIRE"
+      "abnormalType": "DANCE_OF_FIRE",
+      "effectPoint": [
+        379
+      ],
+      "usingKinds": [
+        "DUAL"
+      ]
     },
     {
       "skillId": 275,
@@ -23241,7 +25034,13 @@
       ],
       "abnormalTimeSeconds": 120,
       "magicType": 1,
-      "abnormalType": "DANCE_OF_FURY"
+      "abnormalType": "DANCE_OF_FURY",
+      "effectPoint": [
+        549
+      ],
+      "usingKinds": [
+        "DUAL"
+      ]
     },
     {
       "skillId": 276,
@@ -23264,7 +25063,13 @@
       ],
       "abnormalTimeSeconds": 120,
       "magicType": 1,
-      "abnormalType": "DANCE_OF_CONCENTRATION"
+      "abnormalType": "DANCE_OF_CONCENTRATION",
+      "effectPoint": [
+        495
+      ],
+      "usingKinds": [
+        "DUAL"
+      ]
     },
     {
       "skillId": 277,
@@ -23287,7 +25092,13 @@
       ],
       "abnormalTimeSeconds": 120,
       "magicType": 1,
-      "abnormalType": "DANCE_OF_LIGHT"
+      "abnormalType": "DANCE_OF_LIGHT",
+      "effectPoint": [
+        408
+      ],
+      "usingKinds": [
+        "DUAL"
+      ]
     },
     {
       "skillId": 278,
@@ -23422,7 +25233,14 @@
       "abnormalType": "PARALYZE",
       "activateRate": 40,
       "lvlBonusRate": 1,
-      "basicProperty": "MEN"
+      "basicProperty": "MEN",
+      "effectPoint": [
+        -828,
+        -877,
+        -921,
+        -958,
+        -987
+      ]
     },
     {
       "skillId": 280,
@@ -23695,7 +25513,49 @@
           "magicLevel": 74
         }
       ],
-      "effectRange": 400
+      "effectRange": 400,
+      "effectPoint": [
+        -213,
+        -219,
+        -225,
+        -231,
+        -237,
+        -242,
+        -248,
+        -254,
+        -260,
+        -265,
+        -271,
+        -277,
+        -283,
+        -288,
+        -294,
+        -299,
+        -305,
+        -310,
+        -316,
+        -321,
+        -326,
+        -331,
+        -336,
+        -340,
+        -345,
+        -350,
+        -354,
+        -358,
+        -362,
+        -366,
+        -370,
+        -373,
+        -377,
+        -380,
+        -383,
+        -386,
+        -388
+      ],
+      "usingKinds": [
+        "DUALFIST"
+      ]
     },
     {
       "skillId": 281,
@@ -23975,7 +25835,49 @@
       "trait": "SHOCK",
       "activateRate": 50,
       "lvlBonusRate": 1,
-      "basicProperty": "CON"
+      "basicProperty": "CON",
+      "effectPoint": [
+        -183,
+        -188,
+        -193,
+        -198,
+        -203,
+        -208,
+        -213,
+        -218,
+        -223,
+        -228,
+        -233,
+        -237,
+        -242,
+        -247,
+        -252,
+        -257,
+        -261,
+        -266,
+        -271,
+        -275,
+        -279,
+        -284,
+        -288,
+        -292,
+        -296,
+        -300,
+        -304,
+        -307,
+        -311,
+        -314,
+        -317,
+        -320,
+        -323,
+        -326,
+        -328,
+        -331,
+        -333
+      ],
+      "usingKinds": [
+        "DUALFIST"
+      ]
     },
     {
       "skillId": 282,
@@ -23997,7 +25899,13 @@
         }
       ],
       "abnormalTimeSeconds": 120,
-      "abnormalType": "POSSESSION"
+      "abnormalType": "POSSESSION",
+      "effectPoint": [
+        379
+      ],
+      "usingKinds": [
+        "DUALFIST"
+      ]
     },
     {
       "skillId": 283,
@@ -24375,7 +26283,49 @@
           "magicLevel": 74
         }
       ],
-      "effectRange": 400
+      "effectRange": 400,
+      "effectPoint": [
+        -286,
+        -295,
+        -303,
+        -320,
+        -328,
+        -337,
+        -346,
+        -355,
+        -363,
+        -372,
+        -381,
+        -389,
+        -398,
+        -407,
+        -415,
+        -424,
+        -432,
+        -440,
+        -449,
+        -457,
+        -465,
+        -473,
+        -481,
+        -488,
+        -496,
+        -503,
+        -510,
+        -517,
+        -524,
+        -531,
+        -537,
+        -543,
+        -549,
+        -555,
+        -560,
+        -565,
+        -570,
+        -574,
+        -578,
+        -582
+      ]
     },
     {
       "skillId": 285,
@@ -24609,7 +26559,12 @@
           "abnormalLevel": 1
         }
       ],
-      "abnormalType": "REAL_TARGET"
+      "abnormalType": "REAL_TARGET",
+      "effectPoint": [
+        -136,
+        -175,
+        -189
+      ]
     },
     {
       "skillId": 287,
@@ -24645,7 +26600,12 @@
         }
       ],
       "abnormalTimeSeconds": 60,
-      "abnormalType": "RESIST_SPIRITLESS"
+      "abnormalType": "RESIST_SPIRITLESS",
+      "effectPoint": [
+        341,
+        467,
+        582
+      ]
     },
     {
       "skillId": 288,
@@ -24821,7 +26781,24 @@
         }
       ],
       "magicType": 1,
-      "effectRange": 1100
+      "effectRange": 1100,
+      "effectPoint": [
+        -95,
+        -102,
+        -110,
+        -117,
+        -124,
+        -131,
+        -138,
+        -142,
+        -146,
+        -150,
+        -153,
+        -156,
+        -159,
+        -162,
+        -164
+      ]
     },
     {
       "skillId": 290,
@@ -25044,7 +27021,13 @@
         }
       ],
       "abnormalTimeSeconds": 180,
-      "abnormalType": "POSSESSION"
+      "abnormalType": "POSSESSION",
+      "effectPoint": [
+        624
+      ],
+      "usingKinds": [
+        "DUALFIST"
+      ]
     },
     {
       "skillId": 293,
@@ -25286,7 +27269,11 @@
         }
       ],
       "abnormalTimeSeconds": 60,
-      "abnormalType": "DUELIST_SPIRIT"
+      "abnormalType": "DUELIST_SPIRIT",
+      "effectPoint": [
+        597,
+        646
+      ]
     },
     {
       "skillId": 298,
@@ -25308,7 +27295,13 @@
         }
       ],
       "abnormalTimeSeconds": 120,
-      "abnormalType": "POSSESSION"
+      "abnormalType": "POSSESSION",
+      "effectPoint": [
+        582
+      ],
+      "usingKinds": [
+        "DUALFIST"
+      ]
     },
     {
       "skillId": 299,
@@ -25467,7 +27460,18 @@
           "magicLevel": 74
         }
       ],
-      "effectRange": 400
+      "effectRange": 400,
+      "effectPoint": [
+        -268,
+        -341,
+        -408,
+        -467,
+        -523,
+        -582,
+        -611,
+        -635,
+        -655
+      ]
     },
     {
       "skillId": 303,
@@ -25510,7 +27514,13 @@
         }
       ],
       "abnormalTimeSeconds": 1200,
-      "abnormalType": "MAX_MP_UP"
+      "abnormalType": "MAX_MP_UP",
+      "effectPoint": [
+        438,
+        549,
+        597,
+        635
+      ]
     },
     {
       "skillId": 304,
@@ -25533,7 +27543,10 @@
       ],
       "abnormalTimeSeconds": 120,
       "magicType": 1,
-      "abnormalType": "SONG_OF_VITALITY"
+      "abnormalType": "SONG_OF_VITALITY",
+      "effectPoint": [
+        611
+      ]
     },
     {
       "skillId": 305,
@@ -25556,7 +27569,10 @@
       ],
       "abnormalTimeSeconds": 120,
       "magicType": 1,
-      "abnormalType": "SONG_OF_VENGEANCE"
+      "abnormalType": "SONG_OF_VENGEANCE",
+      "effectPoint": [
+        655
+      ]
     },
     {
       "skillId": 306,
@@ -25579,7 +27595,10 @@
       ],
       "abnormalTimeSeconds": 120,
       "magicType": 1,
-      "abnormalType": "SONG_OF_FLAME_GUARD"
+      "abnormalType": "SONG_OF_FLAME_GUARD",
+      "effectPoint": [
+        582
+      ]
     },
     {
       "skillId": 307,
@@ -25602,7 +27621,13 @@
       ],
       "abnormalTimeSeconds": 120,
       "magicType": 1,
-      "abnormalType": "DANCE_OF_AQUA_GUARD"
+      "abnormalType": "DANCE_OF_AQUA_GUARD",
+      "effectPoint": [
+        635
+      ],
+      "usingKinds": [
+        "DUAL"
+      ]
     },
     {
       "skillId": 308,
@@ -25625,7 +27650,10 @@
       ],
       "abnormalTimeSeconds": 120,
       "magicType": 1,
-      "abnormalType": "SONG_OF_STORM_GUARD"
+      "abnormalType": "SONG_OF_STORM_GUARD",
+      "effectPoint": [
+        635
+      ]
     },
     {
       "skillId": 309,
@@ -25648,7 +27676,13 @@
       ],
       "abnormalTimeSeconds": 120,
       "magicType": 1,
-      "abnormalType": "DANCE_OF_EARTH_GUARD"
+      "abnormalType": "DANCE_OF_EARTH_GUARD",
+      "effectPoint": [
+        582
+      ],
+      "usingKinds": [
+        "DUAL"
+      ]
     },
     {
       "skillId": 310,
@@ -25671,7 +27705,13 @@
       ],
       "abnormalTimeSeconds": 120,
       "magicType": 1,
-      "abnormalType": "DANCE_OF_VAMPIRE"
+      "abnormalType": "DANCE_OF_VAMPIRE",
+      "effectPoint": [
+        655
+      ],
+      "usingKinds": [
+        "DUAL"
+      ]
     },
     {
       "skillId": 311,
@@ -25694,7 +27734,13 @@
       ],
       "abnormalTimeSeconds": 120,
       "magicType": 1,
-      "abnormalType": "DANCE_OF_PROTECTION"
+      "abnormalType": "DANCE_OF_PROTECTION",
+      "effectPoint": [
+        611
+      ],
+      "usingKinds": [
+        "DUAL"
+      ]
     },
     {
       "skillId": 312,
@@ -25938,7 +27984,20 @@
         }
       ],
       "abnormalTimeSeconds": 120,
-      "abnormalType": "SNIPE"
+      "abnormalType": "SNIPE",
+      "effectPoint": [
+        566,
+        582,
+        597,
+        611,
+        624,
+        635,
+        646,
+        655
+      ],
+      "usingKinds": [
+        "BOW"
+      ]
     },
     {
       "skillId": 314,
@@ -26064,7 +28123,28 @@
           "magicLevel": 74
         }
       ],
-      "effectRange": 1400
+      "effectRange": 1400,
+      "effectPoint": [
+        -567,
+        -575,
+        -583,
+        -591,
+        -599,
+        -607,
+        -614,
+        -621,
+        -627,
+        -634,
+        -640,
+        -646,
+        -651,
+        -656,
+        -661,
+        -665
+      ],
+      "usingKinds": [
+        "BOW"
+      ]
     },
     {
       "skillId": 315,
@@ -26190,7 +28270,25 @@
           "magicLevel": 74
         }
       ],
-      "effectRange": 400
+      "effectRange": 400,
+      "effectPoint": [
+        -425,
+        -431,
+        -438,
+        -444,
+        -449,
+        -455,
+        -460,
+        -466,
+        -471,
+        -475,
+        -480,
+        -484,
+        -488,
+        -492,
+        -496,
+        -499
+      ]
     },
     {
       "skillId": 316,
@@ -26391,7 +28489,22 @@
           "magicLevel": 74
         }
       ],
-      "effectRange": 400
+      "effectRange": 400,
+      "effectPoint": [
+        -307,
+        -311,
+        -314,
+        -317,
+        -320,
+        -323,
+        -326,
+        -328,
+        -331,
+        -333
+      ],
+      "usingKinds": [
+        "POLE"
+      ]
     },
     {
       "skillId": 321,
@@ -26477,7 +28590,23 @@
       ],
       "abnormalTimeSeconds": 15,
       "effectRange": 400,
-      "abnormalType": "SPEED_UP_SPECIAL"
+      "abnormalType": "SPEED_UP_SPECIAL",
+      "effectPoint": [
+        -307,
+        -311,
+        -314,
+        -317,
+        -320,
+        -323,
+        -326,
+        -328,
+        -331,
+        -333
+      ],
+      "usingKinds": [
+        "DAGGER",
+        "DUALDAGGER"
+      ]
     },
     {
       "skillId": 322,
@@ -26885,7 +29014,10 @@
       ],
       "abnormalTimeSeconds": 120,
       "effectRange": 400,
-      "abnormalType": "TOUCH_OF_LIFE"
+      "abnormalType": "TOUCH_OF_LIFE",
+      "effectPoint": [
+        810
+      ]
     },
     {
       "skillId": 342,
@@ -26913,7 +29045,10 @@
       "trait": "DEATH",
       "activateRate": 80,
       "lvlBonusRate": 1,
-      "basicProperty": "CON"
+      "basicProperty": "CON",
+      "effectPoint": [
+        -1338
+      ]
     },
     {
       "skillId": 343,
@@ -26935,7 +29070,13 @@
         }
       ],
       "effectRange": 1400,
-      "trait": "DEATH"
+      "trait": "DEATH",
+      "effectPoint": [
+        -897
+      ],
+      "usingKinds": [
+        "BOW"
+      ]
     },
     {
       "skillId": 344,
@@ -26957,7 +29098,14 @@
         }
       ],
       "effectRange": 400,
-      "trait": "DEATH"
+      "trait": "DEATH",
+      "effectPoint": [
+        -337
+      ],
+      "usingKinds": [
+        "DAGGER",
+        "DUALDAGGER"
+      ]
     },
     {
       "skillId": 345,
@@ -26978,7 +29126,13 @@
           "magicLevel": 78
         }
       ],
-      "effectRange": 1100
+      "effectRange": 1100,
+      "effectPoint": [
+        -340
+      ],
+      "usingKinds": [
+        "DUAL"
+      ]
     },
     {
       "skillId": 346,
@@ -26999,7 +29153,13 @@
           "magicLevel": 78
         }
       ],
-      "effectRange": 1100
+      "effectRange": 1100,
+      "effectPoint": [
+        -340
+      ],
+      "usingKinds": [
+        "DUALFIST"
+      ]
     },
     {
       "skillId": 347,
@@ -27019,6 +29179,12 @@
           "abnormalLevel": 1,
           "magicLevel": 78
         }
+      ],
+      "effectPoint": [
+        -679
+      ],
+      "usingKinds": [
+        "POLE"
       ]
     },
     {
@@ -27040,7 +29206,13 @@
           "magicLevel": 76
         }
       ],
-      "effectRange": 400
+      "effectRange": 400,
+      "effectPoint": [
+        -337
+      ],
+      "usingKinds": [
+        "BLUNT"
+      ]
     },
     {
       "skillId": 349,
@@ -27063,7 +29235,10 @@
       ],
       "abnormalTimeSeconds": 120,
       "magicType": 1,
-      "abnormalType": "SONG_OF_RENEWAL"
+      "abnormalType": "SONG_OF_RENEWAL",
+      "effectPoint": [
+        666
+      ]
     },
     {
       "skillId": 350,
@@ -27085,7 +29260,13 @@
         }
       ],
       "abnormalTimeSeconds": 300,
-      "abnormalType": "REFLECT_ABNORMAL"
+      "abnormalType": "REFLECT_ABNORMAL",
+      "effectPoint": [
+        669
+      ],
+      "usingKinds": [
+        "SHIELD"
+      ]
     },
     {
       "skillId": 351,
@@ -27107,7 +29288,13 @@
         }
       ],
       "abnormalTimeSeconds": 300,
-      "abnormalType": "REFLECT_ABNORMAL"
+      "abnormalType": "REFLECT_ABNORMAL",
+      "effectPoint": [
+        669
+      ],
+      "usingKinds": [
+        "SHIELD"
+      ]
     },
     {
       "skillId": 352,
@@ -27135,7 +29322,13 @@
       "trait": "SHOCK",
       "activateRate": 80,
       "lvlBonusRate": 2,
-      "basicProperty": "CON"
+      "basicProperty": "CON",
+      "effectPoint": [
+        -666
+      ],
+      "usingKinds": [
+        "SHIELD"
+      ]
     },
     {
       "skillId": 353,
@@ -27163,7 +29356,13 @@
       "trait": "DERANGEMENT",
       "activateRate": 40,
       "lvlBonusRate": 1,
-      "basicProperty": "MEN"
+      "basicProperty": "MEN",
+      "effectPoint": [
+        -666
+      ],
+      "usingKinds": [
+        "SHIELD"
+      ]
     },
     {
       "skillId": 354,
@@ -27190,7 +29389,13 @@
       "abnormalType": "SPEED_DOWN",
       "activateRate": 40,
       "lvlBonusRate": 1,
-      "basicProperty": "MEN"
+      "basicProperty": "MEN",
+      "effectPoint": [
+        -507
+      ],
+      "usingKinds": [
+        "BOW"
+      ]
     },
     {
       "skillId": 355,
@@ -27212,7 +29417,14 @@
         }
       ],
       "abnormalTimeSeconds": 120,
-      "abnormalType": "FOCUS_DAGGER"
+      "abnormalType": "FOCUS_DAGGER",
+      "effectPoint": [
+        669
+      ],
+      "usingKinds": [
+        "DAGGER",
+        "DUALDAGGER"
+      ]
     },
     {
       "skillId": 356,
@@ -27234,7 +29446,14 @@
         }
       ],
       "abnormalTimeSeconds": 120,
-      "abnormalType": "FOCUS_DAGGER"
+      "abnormalType": "FOCUS_DAGGER",
+      "effectPoint": [
+        669
+      ],
+      "usingKinds": [
+        "DAGGER",
+        "DUALDAGGER"
+      ]
     },
     {
       "skillId": 357,
@@ -27256,7 +29475,14 @@
         }
       ],
       "abnormalTimeSeconds": 120,
-      "abnormalType": "FOCUS_DAGGER"
+      "abnormalType": "FOCUS_DAGGER",
+      "effectPoint": [
+        669
+      ],
+      "usingKinds": [
+        "DAGGER",
+        "DUALDAGGER"
+      ]
     },
     {
       "skillId": 358,
@@ -27284,7 +29510,14 @@
       "trait": "DERANGEMENT",
       "activateRate": 40,
       "lvlBonusRate": 1,
-      "basicProperty": "MEN"
+      "basicProperty": "MEN",
+      "effectPoint": [
+        -1
+      ],
+      "usingKinds": [
+        "DAGGER",
+        "DUALDAGGER"
+      ]
     },
     {
       "skillId": 359,
@@ -27306,7 +29539,10 @@
         }
       ],
       "abnormalTimeSeconds": 600,
-      "abnormalType": "DETECT_WEAKNESS"
+      "abnormalType": "DETECT_WEAKNESS",
+      "effectPoint": [
+        666
+      ]
     },
     {
       "skillId": 360,
@@ -27328,7 +29564,10 @@
         }
       ],
       "abnormalTimeSeconds": 600,
-      "abnormalType": "DETECT_WEAKNESS"
+      "abnormalType": "DETECT_WEAKNESS",
+      "effectPoint": [
+        669
+      ]
     },
     {
       "skillId": 361,
@@ -27356,7 +29595,13 @@
       "trait": "SHOCK",
       "activateRate": 40,
       "lvlBonusRate": 1,
-      "basicProperty": "CON"
+      "basicProperty": "CON",
+      "effectPoint": [
+        -507
+      ],
+      "usingKinds": [
+        "POLE"
+      ]
     },
     {
       "skillId": 362,
@@ -27384,7 +29629,14 @@
       "trait": "SHOCK",
       "activateRate": 40,
       "lvlBonusRate": 1,
-      "basicProperty": "CON"
+      "basicProperty": "CON",
+      "effectPoint": [
+        -507
+      ],
+      "usingKinds": [
+        "BLUNT",
+        "SWORD"
+      ]
     },
     {
       "skillId": 363,
@@ -27407,7 +29659,10 @@
       ],
       "abnormalTimeSeconds": 120,
       "magicType": 1,
-      "abnormalType": "SONG_OF_MEDITATION"
+      "abnormalType": "SONG_OF_MEDITATION",
+      "effectPoint": [
+        666
+      ]
     },
     {
       "skillId": 364,
@@ -27430,7 +29685,10 @@
       ],
       "abnormalTimeSeconds": 120,
       "magicType": 1,
-      "abnormalType": "SONG_OF_CHAMPION"
+      "abnormalType": "SONG_OF_CHAMPION",
+      "effectPoint": [
+        669
+      ]
     },
     {
       "skillId": 365,
@@ -27453,7 +29711,13 @@
       ],
       "abnormalTimeSeconds": 120,
       "magicType": 1,
-      "abnormalType": "DANCE_OF_SIREN"
+      "abnormalType": "DANCE_OF_SIREN",
+      "effectPoint": [
+        669
+      ],
+      "usingKinds": [
+        "DUAL"
+      ]
     },
     {
       "skillId": 366,
@@ -27476,7 +29740,13 @@
       ],
       "abnormalTimeSeconds": 120,
       "magicType": 1,
-      "abnormalType": "DANCE_OF_SHADOW"
+      "abnormalType": "DANCE_OF_SHADOW",
+      "effectPoint": [
+        666
+      ],
+      "usingKinds": [
+        "DUAL"
+      ]
     },
     {
       "skillId": 367,
@@ -27502,7 +29772,13 @@
       "abnormalType": "TURN_STONE",
       "activateRate": 40,
       "lvlBonusRate": 1,
-      "basicProperty": "MEN"
+      "basicProperty": "MEN",
+      "effectPoint": [
+        -666
+      ],
+      "usingKinds": [
+        "DUAL"
+      ]
     },
     {
       "skillId": 368,
@@ -27524,7 +29800,13 @@
         }
       ],
       "abnormalTimeSeconds": 30,
-      "abnormalType": "PD_UP_SPECIAL"
+      "abnormalType": "PD_UP_SPECIAL",
+      "effectPoint": [
+        -7985
+      ],
+      "usingKinds": [
+        "SHIELD"
+      ]
     },
     {
       "skillId": 369,
@@ -27547,7 +29829,13 @@
       ],
       "abnormalTimeSeconds": 30,
       "effectRange": 1400,
-      "abnormalType": "SPEED_UP_SPECIAL"
+      "abnormalType": "SPEED_UP_SPECIAL",
+      "effectPoint": [
+        -337
+      ],
+      "usingKinds": [
+        "BOW"
+      ]
     },
     {
       "skillId": 400,
@@ -27637,7 +29925,23 @@
       "abnormalType": "CRITICAL_PROB_DOWN",
       "activateRate": 80,
       "lvlBonusRate": 1,
-      "basicProperty": "MEN"
+      "basicProperty": "MEN",
+      "effectPoint": [
+        -1046,
+        -1098,
+        -1132,
+        -1163,
+        -1193,
+        -1221,
+        -1247,
+        -1270,
+        -1291,
+        -1309
+      ],
+      "usingKinds": [
+        "SWORD",
+        "BLUNT"
+      ]
     },
     {
       "skillId": 401,
@@ -27727,7 +30031,24 @@
       "abnormalType": "CRITICAL_DMG_DOWN",
       "activateRate": 80,
       "lvlBonusRate": 2,
-      "basicProperty": "MEN"
+      "basicProperty": "MEN",
+      "effectPoint": [
+        -1046,
+        -1098,
+        -1132,
+        -1163,
+        -1193,
+        -1221,
+        -1247,
+        -1270,
+        -1291,
+        -1309
+      ],
+      "usingKinds": [
+        "SWORD",
+        "BLUNT",
+        "DUAL"
+      ]
     },
     {
       "skillId": 402,
@@ -27818,7 +30139,19 @@
       "trait": "HOLD",
       "activateRate": 80,
       "lvlBonusRate": 2,
-      "basicProperty": "MEN"
+      "basicProperty": "MEN",
+      "effectPoint": [
+        -1046,
+        -1098,
+        -1132,
+        -1163,
+        -1193,
+        -1221,
+        -1247,
+        -1270,
+        -1291,
+        -1309
+      ]
     },
     {
       "skillId": 403,
@@ -27909,7 +30242,19 @@
       "trait": "HOLD",
       "activateRate": 80,
       "lvlBonusRate": 2,
-      "basicProperty": "MEN"
+      "basicProperty": "MEN",
+      "effectPoint": [
+        -1046,
+        -1098,
+        -1132,
+        -1163,
+        -1193,
+        -1221,
+        -1247,
+        -1270,
+        -1291,
+        -1309
+      ]
     },
     {
       "skillId": 404,
@@ -27964,7 +30309,14 @@
       "trait": "HOLD",
       "activateRate": 40,
       "lvlBonusRate": 1,
-      "basicProperty": "MEN"
+      "basicProperty": "MEN",
+      "effectPoint": [
+        -1098,
+        -1163,
+        -1221,
+        -1270,
+        -1309
+      ]
     },
     {
       "skillId": 405,
@@ -28068,7 +30420,19 @@
           "itemConsumeCount": 10
         }
       ],
-      "effectRange": 650
+      "effectRange": 650,
+      "effectPoint": [
+        -523,
+        -549,
+        -566,
+        -582,
+        -597,
+        -611,
+        -624,
+        -635,
+        -646,
+        -655
+      ]
     },
     {
       "skillId": 406,
@@ -28104,7 +30468,12 @@
         }
       ],
       "abnormalTimeSeconds": 60,
-      "abnormalType": "POSSESSION"
+      "abnormalType": "POSSESSION",
+      "effectPoint": [
+        549,
+        611,
+        655
+      ]
     },
     {
       "skillId": 407,
@@ -28193,7 +30562,19 @@
       "abnormalType": "ALL_SPEED_DOWN",
       "activateRate": 50,
       "lvlBonusRate": 1,
-      "basicProperty": "MEN"
+      "basicProperty": "MEN",
+      "effectPoint": [
+        -523,
+        -549,
+        -566,
+        -582,
+        -597,
+        -611,
+        -624,
+        -635,
+        -646,
+        -655
+      ]
     },
     {
       "skillId": 408,
@@ -28282,7 +30663,22 @@
       "abnormalType": "ALL_ATTACK_DOWN",
       "activateRate": 40,
       "lvlBonusRate": 1,
-      "basicProperty": "MEN"
+      "basicProperty": "MEN",
+      "effectPoint": [
+        -523,
+        -549,
+        -566,
+        -582,
+        -597,
+        -611,
+        -624,
+        -635,
+        -646,
+        -655
+      ],
+      "usingKinds": [
+        "DUAL"
+      ]
     },
     {
       "skillId": 409,
@@ -28368,7 +30764,23 @@
       ],
       "abnormalTimeSeconds": 15,
       "effectRange": 400,
-      "abnormalType": "MIGHT_MORTAL"
+      "abnormalType": "MIGHT_MORTAL",
+      "effectPoint": [
+        -266,
+        -279,
+        -288,
+        -296,
+        -304,
+        -311,
+        -317,
+        -323,
+        -328,
+        -333
+      ],
+      "usingKinds": [
+        "DAGGER",
+        "DUALDAGGER"
+      ]
     },
     {
       "skillId": 410,
@@ -28404,7 +30816,16 @@
         }
       ],
       "abnormalTimeSeconds": 120,
-      "abnormalType": "MIGHT_MORTAL"
+      "abnormalType": "MIGHT_MORTAL",
+      "effectPoint": [
+        549,
+        611,
+        655
+      ],
+      "usingKinds": [
+        "DAGGER",
+        "DUALDAGGER"
+      ]
     },
     {
       "skillId": 411,
@@ -28440,7 +30861,12 @@
         }
       ],
       "abnormalTimeSeconds": 120,
-      "abnormalType": "STEALTH"
+      "abnormalType": "STEALTH",
+      "effectPoint": [
+        549,
+        611,
+        655
+      ]
     },
     {
       "skillId": 412,
@@ -28530,7 +30956,19 @@
       "abnormalType": "HIT_DOWN",
       "activateRate": 80,
       "lvlBonusRate": 2,
-      "basicProperty": "MEN"
+      "basicProperty": "MEN",
+      "effectPoint": [
+        -523,
+        -549,
+        -566,
+        -582,
+        -597,
+        -611,
+        -624,
+        -635,
+        -646,
+        -655
+      ]
     },
     {
       "skillId": 413,
@@ -28601,7 +31039,20 @@
         }
       ],
       "abnormalTimeSeconds": 120,
-      "abnormalType": "SNIPE"
+      "abnormalType": "SNIPE",
+      "effectPoint": [
+        566,
+        582,
+        597,
+        611,
+        624,
+        635,
+        646,
+        655
+      ],
+      "usingKinds": [
+        "BOW"
+      ]
     },
     {
       "skillId": 414,
@@ -28672,7 +31123,20 @@
         }
       ],
       "abnormalTimeSeconds": 120,
-      "abnormalType": "SNIPE"
+      "abnormalType": "SNIPE",
+      "effectPoint": [
+        566,
+        582,
+        597,
+        611,
+        624,
+        635,
+        646,
+        655
+      ],
+      "usingKinds": [
+        "BOW"
+      ]
     },
     {
       "skillId": 415,
@@ -28708,7 +31172,12 @@
         }
       ],
       "abnormalTimeSeconds": 1200,
-      "abnormalType": "MP_COST_DOWN"
+      "abnormalType": "MP_COST_DOWN",
+      "effectPoint": [
+        549,
+        611,
+        655
+      ]
     },
     {
       "skillId": 416,
@@ -28744,7 +31213,12 @@
         }
       ],
       "abnormalTimeSeconds": 1200,
-      "abnormalType": "REUSE_DELAY_DOWN"
+      "abnormalType": "REUSE_DELAY_DOWN",
+      "effectPoint": [
+        549,
+        611,
+        655
+      ]
     },
     {
       "skillId": 417,
@@ -28792,6 +31266,13 @@
           "abnormalLevel": 1,
           "magicLevel": 74
         }
+      ],
+      "effectPoint": [
+        549,
+        582,
+        611,
+        635,
+        655
       ]
     },
     {
@@ -29009,7 +31490,12 @@
         }
       ],
       "abnormalTimeSeconds": 60,
-      "abnormalType": "PD_UP_SPECIAL"
+      "abnormalType": "PD_UP_SPECIAL",
+      "effectPoint": [
+        549,
+        611,
+        655
+      ]
     },
     {
       "skillId": 421,
@@ -29059,7 +31545,17 @@
         }
       ],
       "abnormalTimeSeconds": 60,
-      "abnormalType": "POLEARM_ATTACK"
+      "abnormalType": "POLEARM_ATTACK",
+      "effectPoint": [
+        549,
+        582,
+        611,
+        635,
+        655
+      ],
+      "usingKinds": [
+        "POLE"
+      ]
     },
     {
       "skillId": 422,
@@ -29129,7 +31625,12 @@
         }
       ],
       "abnormalTimeSeconds": 300,
-      "abnormalType": "HOLY_ATTACK"
+      "abnormalType": "HOLY_ATTACK",
+      "effectPoint": [
+        549,
+        611,
+        655
+      ]
     },
     {
       "skillId": 424,
@@ -29185,7 +31686,13 @@
         }
       ],
       "abnormalTimeSeconds": 120,
-      "abnormalType": "POSSESSION"
+      "abnormalType": "POSSESSION",
+      "effectPoint": [
+        655
+      ],
+      "usingKinds": [
+        "DUALFIST"
+      ]
     },
     {
       "skillId": 426,
@@ -29207,7 +31714,10 @@
         }
       ],
       "magicType": 2,
-      "effectRange": 600
+      "effectRange": 600,
+      "effectPoint": [
+        1
+      ]
     },
     {
       "skillId": 427,
@@ -29229,7 +31739,10 @@
         }
       ],
       "magicType": 2,
-      "effectRange": 600
+      "effectRange": 600,
+      "effectPoint": [
+        1
+      ]
     },
     {
       "skillId": 428,
@@ -29436,7 +31949,10 @@
       "trait": "DERANGEMENT",
       "activateRate": 60,
       "lvlBonusRate": 1,
-      "basicProperty": "MEN"
+      "basicProperty": "MEN",
+      "effectPoint": [
+        -507
+      ]
     },
     {
       "skillId": 438,
@@ -29462,7 +31978,10 @@
       ],
       "abnormalTimeSeconds": 1800,
       "magicType": 1,
-      "abnormalType": "RESURRECTION_SPECIAL"
+      "abnormalType": "RESURRECTION_SPECIAL",
+      "effectPoint": [
+        673
+      ]
     },
     {
       "skillId": 439,
@@ -29484,7 +32003,10 @@
         }
       ],
       "abnormalTimeSeconds": 300,
-      "abnormalType": "COUNTER_SKILL"
+      "abnormalType": "COUNTER_SKILL",
+      "effectPoint": [
+        669
+      ]
     },
     {
       "skillId": 440,
@@ -29504,6 +32026,9 @@
           "abnormalLevel": 1,
           "magicLevel": 78
         }
+      ],
+      "effectPoint": [
+        669
       ]
     },
     {
@@ -29526,7 +32051,10 @@
         }
       ],
       "abnormalTimeSeconds": 60,
-      "abnormalType": "FORCE_MEDITATION"
+      "abnormalType": "FORCE_MEDITATION",
+      "effectPoint": [
+        673
+      ]
     },
     {
       "skillId": 442,
@@ -29548,7 +32076,10 @@
         }
       ],
       "abnormalTimeSeconds": 10,
-      "abnormalType": "INVINCIBILITY"
+      "abnormalType": "INVINCIBILITY",
+      "effectPoint": [
+        673
+      ]
     },
     {
       "skillId": 443,
@@ -29570,7 +32101,10 @@
         }
       ],
       "abnormalTimeSeconds": 10,
-      "abnormalType": "INVINCIBILITY"
+      "abnormalType": "INVINCIBILITY",
+      "effectPoint": [
+        676
+      ]
     },
     {
       "skillId": 445,
@@ -29592,7 +32126,10 @@
         }
       ],
       "abnormalTimeSeconds": 60,
-      "abnormalType": "MIRAGE"
+      "abnormalType": "MIRAGE",
+      "effectPoint": [
+        673
+      ]
     },
     {
       "skillId": 446,
@@ -29614,7 +32151,10 @@
         }
       ],
       "abnormalTimeSeconds": 5,
-      "abnormalType": "AVOID_SKILL"
+      "abnormalType": "AVOID_SKILL",
+      "effectPoint": [
+        337
+      ]
     },
     {
       "skillId": 447,
@@ -29636,7 +32176,10 @@
         }
       ],
       "abnormalTimeSeconds": 5,
-      "abnormalType": "COUNTER_SKILL"
+      "abnormalType": "COUNTER_SKILL",
+      "effectPoint": [
+        337
+      ]
     },
     {
       "skillId": 448,
@@ -29814,7 +32357,19 @@
           "itemConsumeCount": 10
         }
       ],
-      "effectRange": 650
+      "effectRange": 650,
+      "effectPoint": [
+        -523,
+        -549,
+        -566,
+        -582,
+        -597,
+        -611,
+        -624,
+        -635,
+        -646,
+        -655
+      ]
     },
     {
       "skillId": 451,
@@ -29843,7 +32398,11 @@
         }
       ],
       "abnormalTimeSeconds": 15,
-      "abnormalType": "SPEED_UP_SPECIAL"
+      "abnormalType": "SPEED_UP_SPECIAL",
+      "effectPoint": [
+        582,
+        624
+      ]
     },
     {
       "skillId": 452,
@@ -29898,7 +32457,13 @@
       "trait": "SHOCK",
       "activateRate": 50,
       "lvlBonusRate": 1,
-      "basicProperty": "CON"
+      "basicProperty": "CON",
+      "effectPoint": [
+        -1
+      ],
+      "usingKinds": [
+        "POLE"
+      ]
     },
     {
       "skillId": 453,
@@ -29918,6 +32483,9 @@
           "abnormalLevel": 1,
           "magicLevel": 60
         }
+      ],
+      "effectPoint": [
+        597
       ]
     },
     {
@@ -30113,6 +32681,9 @@
           "abnormalLevel": 1,
           "magicLevel": 66
         }
+      ],
+      "effectPoint": [
+        1
       ]
     },
     {
@@ -30246,7 +32817,12 @@
       ],
       "abnormalTimeSeconds": 1200,
       "magicType": 1,
-      "abnormalType": "CASTING_TIME_DOWN"
+      "abnormalType": "CASTING_TIME_DOWN",
+      "effectPoint": [
+        285,
+        418,
+        532
+      ]
     },
     {
       "skillId": 1003,
@@ -30286,7 +32862,12 @@
       ],
       "abnormalTimeSeconds": 1200,
       "magicType": 1,
-      "abnormalType": "PA_UP"
+      "abnormalType": "PA_UP",
+      "effectPoint": [
+        285,
+        379,
+        457
+      ]
     },
     {
       "skillId": 1004,
@@ -30326,7 +32907,12 @@
       ],
       "abnormalTimeSeconds": 1200,
       "magicType": 1,
-      "abnormalType": "CASTING_TIME_DOWN"
+      "abnormalType": "CASTING_TIME_DOWN",
+      "effectPoint": [
+        379,
+        457,
+        532
+      ]
     },
     {
       "skillId": 1005,
@@ -30366,7 +32952,12 @@
       ],
       "abnormalTimeSeconds": 1200,
       "magicType": 1,
-      "abnormalType": "PD_UP"
+      "abnormalType": "PD_UP",
+      "effectPoint": [
+        331,
+        418,
+        495
+      ]
     },
     {
       "skillId": 1006,
@@ -30406,7 +32997,12 @@
       ],
       "abnormalTimeSeconds": 1200,
       "magicType": 1,
-      "abnormalType": "MD_UP"
+      "abnormalType": "MD_UP",
+      "effectPoint": [
+        204,
+        379,
+        495
+      ]
     },
     {
       "skillId": 1007,
@@ -30446,7 +33042,12 @@
       ],
       "abnormalTimeSeconds": 1200,
       "magicType": 1,
-      "abnormalType": "PA_UP"
+      "abnormalType": "PA_UP",
+      "effectPoint": [
+        162,
+        243,
+        418
+      ]
     },
     {
       "skillId": 1008,
@@ -30486,7 +33087,12 @@
       ],
       "abnormalTimeSeconds": 1200,
       "magicType": 1,
-      "abnormalType": "MD_UP"
+      "abnormalType": "MD_UP",
+      "effectPoint": [
+        379,
+        457,
+        532
+      ]
     },
     {
       "skillId": 1009,
@@ -30526,7 +33132,12 @@
       ],
       "abnormalTimeSeconds": 1200,
       "magicType": 1,
-      "abnormalType": "PD_UP"
+      "abnormalType": "PD_UP",
+      "effectPoint": [
+        204,
+        285,
+        379
+      ]
     },
     {
       "skillId": 1010,
@@ -30567,7 +33178,12 @@
       "abnormalTimeSeconds": 1200,
       "magicType": 1,
       "effectRange": 900,
-      "abnormalType": "PD_UP"
+      "abnormalType": "PD_UP",
+      "effectPoint": [
+        121,
+        243,
+        331
+      ]
     },
     {
       "skillId": 1011,
@@ -30726,7 +33342,27 @@
         }
       ],
       "magicType": 1,
-      "effectRange": 1100
+      "effectRange": 1100,
+      "effectPoint": [
+        50,
+        58,
+        67,
+        83,
+        95,
+        107,
+        121,
+        135,
+        151,
+        176,
+        185,
+        195,
+        224,
+        234,
+        245,
+        278,
+        289,
+        301
+      ]
     },
     {
       "skillId": 1012,
@@ -30765,7 +33401,12 @@
         }
       ],
       "magicType": 1,
-      "effectRange": 1100
+      "effectRange": 1100,
+      "effectPoint": [
+        121,
+        331,
+        566
+      ]
     },
     {
       "skillId": 1013,
@@ -31036,7 +33677,41 @@
         }
       ],
       "magicType": 1,
-      "effectRange": 900
+      "effectRange": 900,
+      "effectPoint": [
+        268,
+        285,
+        313,
+        331,
+        360,
+        379,
+        399,
+        418,
+        438,
+        457,
+        477,
+        495,
+        514,
+        532,
+        541,
+        549,
+        558,
+        566,
+        574,
+        582,
+        590,
+        597,
+        604,
+        611,
+        617,
+        624,
+        630,
+        635,
+        641,
+        646,
+        650,
+        655
+      ]
     },
     {
       "skillId": 1015,
@@ -31171,7 +33846,24 @@
         }
       ],
       "magicType": 1,
-      "effectRange": 1100
+      "effectRange": 1100,
+      "effectPoint": [
+        66,
+        76,
+        86,
+        97,
+        108,
+        121,
+        141,
+        148,
+        156,
+        179,
+        188,
+        196,
+        222,
+        231,
+        241
+      ]
     },
     {
       "skillId": 1016,
@@ -31258,7 +33950,18 @@
         }
       ],
       "magicType": 1,
-      "effectRange": 900
+      "effectRange": 900,
+      "effectPoint": [
+        121,
+        196,
+        290,
+        374,
+        460,
+        502,
+        542,
+        595,
+        624
+      ]
     },
     {
       "skillId": 1018,
@@ -31297,7 +34000,12 @@
         }
       ],
       "magicType": 1,
-      "effectRange": 1100
+      "effectRange": 1100,
+      "effectPoint": [
+        418,
+        495,
+        566
+      ]
     },
     {
       "skillId": 1020,
@@ -31528,7 +34236,36 @@
         }
       ],
       "magicType": 1,
-      "effectRange": 1100
+      "effectRange": 1100,
+      "effectPoint": [
+        528,
+        544,
+        561,
+        593,
+        609,
+        626,
+        658,
+        674,
+        690,
+        706,
+        722,
+        737,
+        753,
+        768,
+        783,
+        798,
+        812,
+        826,
+        840,
+        854,
+        867,
+        879,
+        892,
+        904,
+        915,
+        926,
+        936
+      ]
     },
     {
       "skillId": 1027,
@@ -31662,7 +34399,24 @@
           "mpInitialConsume": 21
         }
       ],
-      "magicType": 1
+      "magicType": 1,
+      "effectPoint": [
+        66,
+        76,
+        86,
+        97,
+        108,
+        121,
+        141,
+        148,
+        156,
+        179,
+        188,
+        196,
+        222,
+        231,
+        241
+      ]
     },
     {
       "skillId": 1028,
@@ -31829,7 +34583,28 @@
         }
       ],
       "magicType": 1,
-      "effectRange": 900
+      "effectRange": 900,
+      "effectPoint": [
+        -360,
+        -379,
+        -399,
+        -418,
+        -438,
+        -457,
+        -477,
+        -495,
+        -514,
+        -532,
+        -549,
+        -566,
+        -582,
+        -597,
+        -611,
+        -624,
+        -635,
+        -646,
+        -655
+      ]
     },
     {
       "skillId": 1031,
@@ -31908,7 +34683,17 @@
         }
       ],
       "magicType": 1,
-      "effectRange": 900
+      "effectRange": 900,
+      "effectPoint": [
+        -182,
+        -204,
+        -227,
+        -243,
+        -268,
+        -285,
+        -313,
+        -331
+      ]
     },
     {
       "skillId": 1032,
@@ -31949,7 +34734,12 @@
       "abnormalTimeSeconds": 1200,
       "magicType": 1,
       "effectRange": 900,
-      "abnormalType": "RESIST_BLEEDING"
+      "abnormalType": "RESIST_BLEEDING",
+      "effectPoint": [
+        379,
+        457,
+        532
+      ]
     },
     {
       "skillId": 1033,
@@ -31990,7 +34780,12 @@
       "abnormalTimeSeconds": 1200,
       "magicType": 1,
       "effectRange": 900,
-      "abnormalType": "RESIST_POISON"
+      "abnormalType": "RESIST_POISON",
+      "effectPoint": [
+        331,
+        379,
+        418
+      ]
     },
     {
       "skillId": 1034,
@@ -32158,7 +34953,13 @@
       "abnormalTimeSeconds": 1200,
       "magicType": 1,
       "effectRange": 900,
-      "abnormalType": "RESIST_DERANGEMENT"
+      "abnormalType": "RESIST_DERANGEMENT",
+      "effectPoint": [
+        243,
+        379,
+        457,
+        532
+      ]
     },
     {
       "skillId": 1036,
@@ -32191,7 +34992,11 @@
       "abnormalTimeSeconds": 1200,
       "magicType": 1,
       "effectRange": 900,
-      "abnormalType": "MD_UP"
+      "abnormalType": "MD_UP",
+      "effectPoint": [
+        418,
+        495
+      ]
     },
     {
       "skillId": 1040,
@@ -32232,7 +35037,12 @@
       "abnormalTimeSeconds": 1200,
       "magicType": 1,
       "effectRange": 900,
-      "abnormalType": "PD_UP"
+      "abnormalType": "PD_UP",
+      "effectPoint": [
+        121,
+        243,
+        418
+      ]
     },
     {
       "skillId": 1042,
@@ -32350,7 +35160,21 @@
       "trait": "PARALYZE",
       "activateRate": 40,
       "lvlBonusRate": 1,
-      "basicProperty": "MEN"
+      "basicProperty": "MEN",
+      "effectPoint": [
+        -457,
+        -495,
+        -532,
+        -549,
+        -566,
+        -582,
+        -597,
+        -611,
+        -624,
+        -635,
+        -646,
+        -655
+      ]
     },
     {
       "skillId": 1043,
@@ -32375,7 +35199,10 @@
       "abnormalTimeSeconds": 1200,
       "magicType": 1,
       "effectRange": 900,
-      "abnormalType": "HOLY_ATTACK"
+      "abnormalType": "HOLY_ATTACK",
+      "effectPoint": [
+        243
+      ]
     },
     {
       "skillId": 1044,
@@ -32416,7 +35243,12 @@
       "abnormalTimeSeconds": 1200,
       "magicType": 1,
       "effectRange": 900,
-      "abnormalType": "HP_REGEN_UP"
+      "abnormalType": "HP_REGEN_UP",
+      "effectPoint": [
+        331,
+        457,
+        532
+      ]
     },
     {
       "skillId": 1045,
@@ -32481,7 +35313,15 @@
       "abnormalTimeSeconds": 1200,
       "magicType": 1,
       "effectRange": 900,
-      "abnormalType": "MAX_HP_UP"
+      "abnormalType": "MAX_HP_UP",
+      "effectPoint": [
+        418,
+        457,
+        495,
+        532,
+        597,
+        646
+      ]
     },
     {
       "skillId": 1047,
@@ -32537,7 +35377,13 @@
       ],
       "abnormalTimeSeconds": 1200,
       "magicType": 1,
-      "abnormalType": "MP_REGEN_UP"
+      "abnormalType": "MP_REGEN_UP",
+      "effectPoint": [
+        379,
+        457,
+        566,
+        635
+      ]
     },
     {
       "skillId": 1048,
@@ -32602,7 +35448,15 @@
       "abnormalTimeSeconds": 1200,
       "magicType": 1,
       "effectRange": 900,
-      "abnormalType": "MAX_MP_UP"
+      "abnormalType": "MAX_MP_UP",
+      "effectPoint": [
+        418,
+        457,
+        495,
+        532,
+        582,
+        635
+      ]
     },
     {
       "skillId": 1049,
@@ -32876,7 +35730,21 @@
         }
       ],
       "magicType": 1,
-      "effectRange": 1100
+      "effectRange": 1100,
+      "effectPoint": [
+        -455,
+        -493,
+        -530,
+        -547,
+        -564,
+        -580,
+        -595,
+        -609,
+        -622,
+        -633,
+        -644,
+        -653
+      ]
     },
     {
       "skillId": 1059,
@@ -32917,7 +35785,12 @@
       "abnormalTimeSeconds": 1200,
       "magicType": 1,
       "effectRange": 900,
-      "abnormalType": "MA_UP"
+      "abnormalType": "MA_UP",
+      "effectPoint": [
+        243,
+        418,
+        495
+      ]
     },
     {
       "skillId": 1062,
@@ -32950,7 +35823,11 @@
       "abnormalTimeSeconds": 1200,
       "magicType": 1,
       "effectRange": 900,
-      "abnormalType": "BERSERKER"
+      "abnormalType": "BERSERKER",
+      "effectPoint": [
+        331,
+        495
+      ]
     },
     {
       "skillId": 1064,
@@ -33084,7 +35961,23 @@
       "trait": "DERANGEMENT",
       "activateRate": 80,
       "lvlBonusRate": 2,
-      "basicProperty": "MEN"
+      "basicProperty": "MEN",
+      "effectPoint": [
+        -379,
+        -418,
+        -457,
+        -495,
+        -532,
+        -549,
+        -566,
+        -582,
+        -597,
+        -611,
+        -624,
+        -635,
+        -646,
+        -655
+      ]
     },
     {
       "skillId": 1068,
@@ -33125,7 +36018,12 @@
       "abnormalTimeSeconds": 1200,
       "magicType": 1,
       "effectRange": 900,
-      "abnormalType": "PA_UP"
+      "abnormalType": "PA_UP",
+      "effectPoint": [
+        121,
+        204,
+        379
+      ]
     },
     {
       "skillId": 1069,
@@ -33483,7 +36381,51 @@
       "trait": "SLEEP",
       "activateRate": 80,
       "lvlBonusRate": 2,
-      "basicProperty": "MEN"
+      "basicProperty": "MEN",
+      "effectPoint": [
+        -227,
+        -235,
+        -243,
+        -268,
+        -277,
+        -285,
+        -313,
+        -322,
+        -331,
+        -360,
+        -369,
+        -379,
+        -399,
+        -408,
+        -418,
+        -438,
+        -448,
+        -457,
+        -477,
+        -486,
+        -495,
+        -514,
+        -523,
+        -532,
+        -541,
+        -549,
+        -558,
+        -566,
+        -574,
+        -582,
+        -590,
+        -597,
+        -604,
+        -611,
+        -617,
+        -624,
+        -630,
+        -635,
+        -641,
+        -646,
+        -650,
+        -655
+      ]
     },
     {
       "skillId": 1071,
@@ -33616,7 +36558,23 @@
       "abnormalType": "ARMOR_WATER",
       "activateRate": 80,
       "lvlBonusRate": 2,
-      "basicProperty": "MEN"
+      "basicProperty": "MEN",
+      "effectPoint": [
+        -379,
+        -418,
+        -457,
+        -495,
+        -532,
+        -549,
+        -566,
+        -582,
+        -597,
+        -611,
+        -624,
+        -635,
+        -646,
+        -655
+      ]
     },
     {
       "skillId": 1072,
@@ -33678,7 +36636,14 @@
       "trait": "SLEEP",
       "activateRate": 40,
       "lvlBonusRate": 2,
-      "basicProperty": "MEN"
+      "basicProperty": "MEN",
+      "effectPoint": [
+        -418,
+        -532,
+        -582,
+        -611,
+        -635
+      ]
     },
     {
       "skillId": 1073,
@@ -33709,7 +36674,11 @@
       "abnormalTimeSeconds": 1200,
       "magicType": 1,
       "effectRange": 900,
-      "abnormalType": "MAX_BREATH_UP"
+      "abnormalType": "MAX_BREATH_UP",
+      "effectPoint": [
+        121,
+        417
+      ]
     },
     {
       "skillId": 1074,
@@ -33842,7 +36811,23 @@
       "abnormalType": "ARMOR_WIND",
       "activateRate": 80,
       "lvlBonusRate": 2,
-      "basicProperty": "MEN"
+      "basicProperty": "MEN",
+      "effectPoint": [
+        -379,
+        -418,
+        -457,
+        -495,
+        -532,
+        -549,
+        -566,
+        -582,
+        -597,
+        -611,
+        -624,
+        -635,
+        -646,
+        -655
+      ]
     },
     {
       "skillId": 1075,
@@ -34001,7 +36986,12 @@
       "abnormalTimeSeconds": 1200,
       "magicType": 1,
       "effectRange": 900,
-      "abnormalType": "CRITICAL_PROB_UP"
+      "abnormalType": "CRITICAL_PROB_UP",
+      "effectPoint": [
+        243,
+        418,
+        495
+      ]
     },
     {
       "skillId": 1078,
@@ -34060,7 +37050,15 @@
       "abnormalTimeSeconds": 1200,
       "magicType": 1,
       "effectRange": 900,
-      "abnormalType": "CANCEL_PROB_DOWN"
+      "abnormalType": "CANCEL_PROB_DOWN",
+      "effectPoint": [
+        204,
+        285,
+        418,
+        495,
+        566,
+        624
+      ]
     },
     {
       "skillId": 1083,
@@ -34216,7 +37214,26 @@
       "abnormalType": "ARMOR_FIRE",
       "activateRate": 80,
       "lvlBonusRate": 2,
-      "basicProperty": "MEN"
+      "basicProperty": "MEN",
+      "effectPoint": [
+        -243,
+        -285,
+        -331,
+        -379,
+        -418,
+        -457,
+        -495,
+        -532,
+        -549,
+        -566,
+        -582,
+        -597,
+        -611,
+        -624,
+        -635,
+        -646,
+        -655
+      ]
     },
     {
       "skillId": 1085,
@@ -34254,7 +37271,12 @@
       "abnormalTimeSeconds": 1200,
       "magicType": 1,
       "effectRange": 900,
-      "abnormalType": "CASTING_TIME_DOWN"
+      "abnormalType": "CASTING_TIME_DOWN",
+      "effectPoint": [
+        204,
+        331,
+        457
+      ]
     },
     {
       "skillId": 1086,
@@ -34285,7 +37307,11 @@
       "abnormalTimeSeconds": 1200,
       "magicType": 1,
       "effectRange": 900,
-      "abnormalType": "ATTACK_TIME_DOWN"
+      "abnormalType": "ATTACK_TIME_DOWN",
+      "effectPoint": [
+        418,
+        495
+      ]
     },
     {
       "skillId": 1087,
@@ -34323,7 +37349,12 @@
       "abnormalTimeSeconds": 1200,
       "magicType": 1,
       "effectRange": 900,
-      "abnormalType": "AVOID_UP"
+      "abnormalType": "AVOID_UP",
+      "effectPoint": [
+        243,
+        418,
+        495
+      ]
     },
     {
       "skillId": 1090,
@@ -34386,7 +37417,15 @@
         }
       ],
       "magicType": 1,
-      "effectRange": 1100
+      "effectRange": 1100,
+      "effectPoint": [
+        -121,
+        -162,
+        -204,
+        -243,
+        -285,
+        -331
+      ]
     },
     {
       "skillId": 1092,
@@ -34560,7 +37599,28 @@
       "trait": "DERANGEMENT",
       "activateRate": 40,
       "lvlBonusRate": 1,
-      "basicProperty": "MEN"
+      "basicProperty": "MEN",
+      "effectPoint": [
+        -162,
+        -204,
+        -243,
+        -285,
+        -331,
+        -379,
+        -418,
+        -457,
+        -495,
+        -532,
+        -549,
+        -566,
+        -582,
+        -597,
+        -611,
+        -624,
+        -635,
+        -646,
+        -655
+      ]
     },
     {
       "skillId": 1095,
@@ -34622,7 +37682,14 @@
       "trait": "POISON",
       "activateRate": 70,
       "lvlBonusRate": 1,
-      "basicProperty": "CON"
+      "basicProperty": "CON",
+      "effectPoint": [
+        -121,
+        -162,
+        -204,
+        -379,
+        -495
+      ]
     },
     {
       "skillId": 1096,
@@ -34770,7 +37837,25 @@
       "abnormalType": "HIT_DOWN",
       "activateRate": 60,
       "lvlBonusRate": 1,
-      "basicProperty": "MEN"
+      "basicProperty": "MEN",
+      "effectPoint": [
+        -285,
+        -331,
+        -379,
+        -418,
+        -457,
+        -495,
+        -532,
+        -549,
+        -566,
+        -582,
+        -597,
+        -611,
+        -624,
+        -635,
+        -646,
+        -655
+      ]
     },
     {
       "skillId": 1097,
@@ -34952,7 +38037,29 @@
       "trait": "SLEEP",
       "activateRate": 80,
       "lvlBonusRate": 2,
-      "basicProperty": "MEN"
+      "basicProperty": "MEN",
+      "effectPoint": [
+        -121,
+        -162,
+        -204,
+        -243,
+        -285,
+        -331,
+        -379,
+        -418,
+        -457,
+        -495,
+        -532,
+        -549,
+        -566,
+        -582,
+        -597,
+        -611,
+        -624,
+        -635,
+        -646,
+        -655
+      ]
     },
     {
       "skillId": 1099,
@@ -35092,7 +38199,24 @@
       "abnormalType": "SPEED_DOWN",
       "activateRate": 40,
       "lvlBonusRate": 1,
-      "basicProperty": "MEN"
+      "basicProperty": "MEN",
+      "effectPoint": [
+        -331,
+        -379,
+        -418,
+        -457,
+        -495,
+        -532,
+        -549,
+        -566,
+        -582,
+        -597,
+        -611,
+        -624,
+        -635,
+        -646,
+        -655
+      ]
     },
     {
       "skillId": 1100,
@@ -35129,7 +38253,11 @@
       "abnormalType": "DOT_ATTR",
       "activateRate": 70,
       "lvlBonusRate": 1,
-      "basicProperty": "MEN"
+      "basicProperty": "MEN",
+      "effectPoint": [
+        -121,
+        -162
+      ]
     },
     {
       "skillId": 1101,
@@ -35165,7 +38293,11 @@
       "abnormalType": "DOT_ATTR",
       "activateRate": 35,
       "lvlBonusRate": 1,
-      "basicProperty": "MEN"
+      "basicProperty": "MEN",
+      "effectPoint": [
+        -243,
+        -331
+      ]
     },
     {
       "skillId": 1102,
@@ -35234,7 +38366,15 @@
       "abnormalType": "DOT_MP",
       "activateRate": 80,
       "lvlBonusRate": 2,
-      "basicProperty": "MEN"
+      "basicProperty": "MEN",
+      "effectPoint": [
+        -243,
+        -331,
+        -418,
+        -495,
+        -597,
+        -635
+      ]
     },
     {
       "skillId": 1104,
@@ -35366,7 +38506,23 @@
       "abnormalType": "ATTACK_TIME_UP",
       "activateRate": 60,
       "lvlBonusRate": 1,
-      "basicProperty": "MEN"
+      "basicProperty": "MEN",
+      "effectPoint": [
+        -379,
+        -418,
+        -457,
+        -495,
+        -532,
+        -549,
+        -566,
+        -582,
+        -597,
+        -611,
+        -624,
+        -635,
+        -646,
+        -655
+      ]
     },
     {
       "skillId": 1105,
@@ -35525,7 +38681,27 @@
         }
       ],
       "magicType": 1,
-      "effectRange": 1100
+      "effectRange": 1100,
+      "effectPoint": [
+        -204,
+        -243,
+        -285,
+        -331,
+        -379,
+        -418,
+        -457,
+        -495,
+        -532,
+        -549,
+        -566,
+        -582,
+        -597,
+        -611,
+        -624,
+        -635,
+        -646,
+        -655
+      ]
     },
     {
       "skillId": 1107,
@@ -35562,7 +38738,11 @@
       "abnormalType": "DOT_ATTR",
       "activateRate": 70,
       "lvlBonusRate": 1,
-      "basicProperty": "MEN"
+      "basicProperty": "MEN",
+      "effectPoint": [
+        -204,
+        -285
+      ]
     },
     {
       "skillId": 1108,
@@ -35610,7 +38790,13 @@
       "abnormalType": "DOT_ATTR",
       "activateRate": 80,
       "lvlBonusRate": 1,
-      "basicProperty": "MEN"
+      "basicProperty": "MEN",
+      "effectPoint": [
+        -286,
+        -333,
+        -390,
+        -409
+      ]
     },
     {
       "skillId": 1111,
@@ -36073,7 +39259,43 @@
         }
       ],
       "magicType": 1,
-      "effectRange": 900
+      "effectRange": 900,
+      "effectPoint": [
+        227,
+        243,
+        268,
+        285,
+        313,
+        331,
+        360,
+        379,
+        399,
+        418,
+        438,
+        457,
+        477,
+        495,
+        514,
+        532,
+        541,
+        549,
+        558,
+        566,
+        574,
+        582,
+        590,
+        597,
+        604,
+        611,
+        617,
+        624,
+        630,
+        635,
+        641,
+        646,
+        650,
+        655
+      ]
     },
     {
       "skillId": 1127,
@@ -36448,7 +39670,54 @@
         }
       ],
       "magicType": 1,
-      "effectRange": 1100
+      "effectRange": 1100,
+      "effectPoint": [
+        121,
+        135,
+        151,
+        176,
+        185,
+        195,
+        224,
+        234,
+        245,
+        278,
+        289,
+        301,
+        337,
+        349,
+        362,
+        388,
+        401,
+        414,
+        440,
+        454,
+        467,
+        494,
+        508,
+        521,
+        549,
+        562,
+        575,
+        589,
+        602,
+        615,
+        628,
+        640,
+        653,
+        665,
+        677,
+        689,
+        700,
+        711,
+        722,
+        733,
+        743,
+        753,
+        763,
+        772,
+        780
+      ]
     },
     {
       "skillId": 1128,
@@ -36733,7 +40002,11 @@
       "abnormalTimeSeconds": 1200,
       "magicType": 1,
       "effectRange": 900,
-      "abnormalType": "MD_UP"
+      "abnormalType": "MD_UP",
+      "effectPoint": [
+        418,
+        495
+      ]
     },
     {
       "skillId": 1140,
@@ -36771,7 +40044,12 @@
       "abnormalTimeSeconds": 1200,
       "magicType": 1,
       "effectRange": 900,
-      "abnormalType": "PD_UP"
+      "abnormalType": "PD_UP",
+      "effectPoint": [
+        379,
+        457,
+        532
+      ]
     },
     {
       "skillId": 1141,
@@ -36802,7 +40080,11 @@
       "abnormalTimeSeconds": 1200,
       "magicType": 1,
       "effectRange": 900,
-      "abnormalType": "ATTACK_TIME_DOWN"
+      "abnormalType": "ATTACK_TIME_DOWN",
+      "effectPoint": [
+        418,
+        495
+      ]
     },
     {
       "skillId": 1144,
@@ -36833,7 +40115,11 @@
       "abnormalTimeSeconds": 1200,
       "magicType": 1,
       "effectRange": 900,
-      "abnormalType": "SPEED_UP"
+      "abnormalType": "SPEED_UP",
+      "effectPoint": [
+        331,
+        457
+      ]
     },
     {
       "skillId": 1145,
@@ -36871,7 +40157,12 @@
       "abnormalTimeSeconds": 1200,
       "magicType": 1,
       "effectRange": 900,
-      "abnormalType": "MA_UP"
+      "abnormalType": "MA_UP",
+      "effectPoint": [
+        331,
+        457,
+        532
+      ]
     },
     {
       "skillId": 1146,
@@ -36909,7 +40200,12 @@
       "abnormalTimeSeconds": 1200,
       "magicType": 1,
       "effectRange": 900,
-      "abnormalType": "PA_UP"
+      "abnormalType": "PA_UP",
+      "effectPoint": [
+        331,
+        457,
+        532
+      ]
     },
     {
       "skillId": 1147,
@@ -36972,7 +40268,15 @@
         }
       ],
       "magicType": 1,
-      "effectRange": 1100
+      "effectRange": 1100,
+      "effectPoint": [
+        -143,
+        -162,
+        -182,
+        -204,
+        -227,
+        -243
+      ]
     },
     {
       "skillId": 1148,
@@ -37117,7 +40421,22 @@
         }
       ],
       "magicType": 1,
-      "effectRange": 1400
+      "effectRange": 1400,
+      "effectPoint": [
+        -418,
+        -457,
+        -495,
+        -532,
+        -549,
+        -566,
+        -582,
+        -597,
+        -611,
+        -624,
+        -635,
+        -646,
+        -655
+      ]
     },
     {
       "skillId": 1151,
@@ -37464,7 +40783,24 @@
         }
       ],
       "magicType": 1,
-      "effectRange": 900
+      "effectRange": 900,
+      "effectPoint": [
+        -219,
+        -229,
+        -239,
+        -248,
+        -257,
+        -266,
+        -275,
+        -283,
+        -291,
+        -299,
+        -306,
+        -312,
+        -318,
+        -323,
+        -328
+      ]
     },
     {
       "skillId": 1156,
@@ -37628,7 +40964,14 @@
           "abnormalLevel": 1
         }
       ],
-      "magicType": 1
+      "magicType": 1,
+      "effectPoint": [
+        243,
+        379,
+        495,
+        549,
+        611
+      ]
     },
     {
       "skillId": 1159,
@@ -37819,7 +41162,31 @@
         }
       ],
       "magicType": 1,
-      "effectRange": 1400
+      "effectRange": 1400,
+      "effectPoint": [
+        -477,
+        -495,
+        -514,
+        -532,
+        -541,
+        -549,
+        -558,
+        -566,
+        -574,
+        -582,
+        -590,
+        -597,
+        -604,
+        -611,
+        -617,
+        -624,
+        -630,
+        -635,
+        -641,
+        -646,
+        -650,
+        -655
+      ]
     },
     {
       "skillId": 1160,
@@ -37960,7 +41327,24 @@
       "abnormalType": "SPEED_DOWN",
       "activateRate": 80,
       "lvlBonusRate": 2,
-      "basicProperty": "MEN"
+      "basicProperty": "MEN",
+      "effectPoint": [
+        -331,
+        -379,
+        -418,
+        -457,
+        -495,
+        -532,
+        -549,
+        -566,
+        -582,
+        -597,
+        -611,
+        -624,
+        -635,
+        -646,
+        -655
+      ]
     },
     {
       "skillId": 1163,
@@ -38089,7 +41473,23 @@
       "abnormalTimeSeconds": 20,
       "isDebuff": true,
       "magicType": 1,
-      "effectRange": 1100
+      "effectRange": 1100,
+      "effectPoint": [
+        -379,
+        -418,
+        -457,
+        -495,
+        -532,
+        -549,
+        -566,
+        -582,
+        -597,
+        -611,
+        -624,
+        -635,
+        -646,
+        -655
+      ]
     },
     {
       "skillId": 1164,
@@ -38262,7 +41662,28 @@
       "abnormalType": "PA_DOWN",
       "activateRate": 80,
       "lvlBonusRate": 2,
-      "basicProperty": "MEN"
+      "basicProperty": "MEN",
+      "effectPoint": [
+        -162,
+        -204,
+        -243,
+        -285,
+        -331,
+        -379,
+        -418,
+        -457,
+        -495,
+        -532,
+        -549,
+        -566,
+        -582,
+        -597,
+        -611,
+        -624,
+        -635,
+        -646,
+        -655
+      ]
     },
     {
       "skillId": 1167,
@@ -38332,7 +41753,15 @@
       "trait": "POISON",
       "activateRate": 35,
       "lvlBonusRate": 1,
-      "basicProperty": "CON"
+      "basicProperty": "CON",
+      "effectPoint": [
+        -243,
+        -331,
+        -457,
+        -532,
+        -597,
+        -655
+      ]
     },
     {
       "skillId": 1168,
@@ -38410,7 +41839,16 @@
       "trait": "POISON",
       "activateRate": 70,
       "lvlBonusRate": 1,
-      "basicProperty": "CON"
+      "basicProperty": "CON",
+      "effectPoint": [
+        -121,
+        -204,
+        -285,
+        -418,
+        -495,
+        -582,
+        -646
+      ]
     },
     {
       "skillId": 1169,
@@ -38544,7 +41982,23 @@
       "trait": "DERANGEMENT",
       "activateRate": 40,
       "lvlBonusRate": 1,
-      "basicProperty": "MEN"
+      "basicProperty": "MEN",
+      "effectPoint": [
+        -379,
+        -418,
+        -457,
+        -495,
+        -532,
+        -549,
+        -566,
+        -582,
+        -597,
+        -611,
+        -624,
+        -635,
+        -646,
+        -655
+      ]
     },
     {
       "skillId": 1170,
@@ -38670,7 +42124,22 @@
       "trait": "PARALYZE",
       "activateRate": 40,
       "lvlBonusRate": 1,
-      "basicProperty": "MEN"
+      "basicProperty": "MEN",
+      "effectPoint": [
+        -418,
+        -457,
+        -495,
+        -532,
+        -549,
+        -566,
+        -582,
+        -597,
+        -611,
+        -624,
+        -635,
+        -646,
+        -655
+      ]
     },
     {
       "skillId": 1171,
@@ -38836,7 +42305,28 @@
           "mpInitialConsume": 21
         }
       ],
-      "magicType": 1
+      "magicType": 1,
+      "effectPoint": [
+        -180,
+        -190,
+        -200,
+        -209,
+        -219,
+        -229,
+        -239,
+        -248,
+        -257,
+        -266,
+        -275,
+        -283,
+        -291,
+        -299,
+        -306,
+        -312,
+        -318,
+        -323,
+        -328
+      ]
     },
     {
       "skillId": 1172,
@@ -38915,7 +42405,17 @@
         }
       ],
       "magicType": 1,
-      "effectRange": 650
+      "effectRange": 650,
+      "effectPoint": [
+        -146,
+        -163,
+        -181,
+        -194,
+        -214,
+        -228,
+        -250,
+        -265
+      ]
     },
     {
       "skillId": 1174,
@@ -39106,7 +42606,31 @@
         }
       ],
       "magicType": 1,
-      "effectRange": 400
+      "effectRange": 400,
+      "effectPoint": [
+        -286,
+        -297,
+        -309,
+        -319,
+        -325,
+        -330,
+        -335,
+        -340,
+        -345,
+        -349,
+        -354,
+        -358,
+        -363,
+        -367,
+        -371,
+        -374,
+        -378,
+        -381,
+        -385,
+        -388,
+        -390,
+        -393
+      ]
     },
     {
       "skillId": 1175,
@@ -39185,7 +42709,17 @@
         }
       ],
       "magicType": 1,
-      "effectRange": 1250
+      "effectRange": 1250,
+      "effectPoint": [
+        -182,
+        -204,
+        -227,
+        -243,
+        -268,
+        -285,
+        -313,
+        -331
+      ]
     },
     {
       "skillId": 1176,
@@ -39320,7 +42854,24 @@
         }
       ],
       "magicType": 1,
-      "effectRange": 1000
+      "effectRange": 1000,
+      "effectPoint": [
+        -219,
+        -229,
+        -239,
+        -248,
+        -257,
+        -266,
+        -275,
+        -283,
+        -291,
+        -299,
+        -306,
+        -312,
+        -318,
+        -323,
+        -328
+      ]
     },
     {
       "skillId": 1177,
@@ -39375,7 +42926,14 @@
         }
       ],
       "magicType": 1,
-      "effectRange": 1100
+      "effectRange": 1100,
+      "effectPoint": [
+        -92,
+        -106,
+        -121,
+        -143,
+        -162
+      ]
     },
     {
       "skillId": 1178,
@@ -39454,7 +43012,17 @@
         }
       ],
       "magicType": 1,
-      "effectRange": 1250
+      "effectRange": 1250,
+      "effectPoint": [
+        -182,
+        -204,
+        -227,
+        -243,
+        -268,
+        -285,
+        -313,
+        -331
+      ]
     },
     {
       "skillId": 1181,
@@ -39493,7 +43061,12 @@
         }
       ],
       "magicType": 1,
-      "effectRange": 1000
+      "effectRange": 1000,
+      "effectPoint": [
+        -204,
+        -243,
+        -285
+      ]
     },
     {
       "skillId": 1182,
@@ -39531,7 +43104,12 @@
       "abnormalTimeSeconds": 1200,
       "magicType": 1,
       "effectRange": 900,
-      "abnormalType": "ARMOR_WATER"
+      "abnormalType": "ARMOR_WATER",
+      "effectPoint": [
+        243,
+        379,
+        418
+      ]
     },
     {
       "skillId": 1183,
@@ -39584,7 +43162,13 @@
       "abnormalType": "DOT_ATTR",
       "activateRate": 70,
       "lvlBonusRate": 2,
-      "basicProperty": "MEN"
+      "basicProperty": "MEN",
+      "effectPoint": [
+        -523,
+        -619,
+        -746,
+        -818
+      ]
     },
     {
       "skillId": 1184,
@@ -39653,7 +43237,15 @@
       "abnormalType": "SPEED_DOWN",
       "activateRate": 60,
       "lvlBonusRate": 1,
-      "basicProperty": "MEN"
+      "basicProperty": "MEN",
+      "effectPoint": [
+        -106,
+        -121,
+        -143,
+        -162,
+        -182,
+        -204
+      ]
     },
     {
       "skillId": 1189,
@@ -39691,7 +43283,12 @@
       "abnormalTimeSeconds": 1200,
       "magicType": 1,
       "effectRange": 900,
-      "abnormalType": "ARMOR_WIND"
+      "abnormalType": "ARMOR_WIND",
+      "effectPoint": [
+        331,
+        379,
+        418
+      ]
     },
     {
       "skillId": 1191,
@@ -39729,7 +43326,12 @@
       "abnormalTimeSeconds": 1200,
       "magicType": 1,
       "effectRange": 900,
-      "abnormalType": "ARMOR_FIRE"
+      "abnormalType": "ARMOR_FIRE",
+      "effectPoint": [
+        285,
+        379,
+        418
+      ]
     },
     {
       "skillId": 1201,
@@ -40015,7 +43617,42 @@
       "trait": "HOLD",
       "activateRate": 80,
       "lvlBonusRate": 2,
-      "basicProperty": "MEN"
+      "basicProperty": "MEN",
+      "effectPoint": [
+        -227,
+        -235,
+        -243,
+        -268,
+        -277,
+        -285,
+        -313,
+        -322,
+        -331,
+        -360,
+        -369,
+        -379,
+        -399,
+        -408,
+        -418,
+        -438,
+        -448,
+        -457,
+        -477,
+        -486,
+        -495,
+        -514,
+        -523,
+        -532,
+        -549,
+        -566,
+        -582,
+        -597,
+        -611,
+        -624,
+        -635,
+        -646,
+        -655
+      ]
     },
     {
       "skillId": 1204,
@@ -40048,7 +43685,11 @@
       "abnormalTimeSeconds": 1200,
       "magicType": 1,
       "effectRange": 900,
-      "abnormalType": "SPEED_UP"
+      "abnormalType": "SPEED_UP",
+      "effectPoint": [
+        204,
+        285
+      ]
     },
     {
       "skillId": 1206,
@@ -40221,7 +43862,28 @@
       "abnormalType": "ATTACK_TIME_UP",
       "activateRate": 80,
       "lvlBonusRate": 2,
-      "basicProperty": "MEN"
+      "basicProperty": "MEN",
+      "effectPoint": [
+        -162,
+        -204,
+        -243,
+        -285,
+        -331,
+        -379,
+        -418,
+        -457,
+        -495,
+        -532,
+        -549,
+        -566,
+        -582,
+        -597,
+        -611,
+        -624,
+        -635,
+        -646,
+        -655
+      ]
     },
     {
       "skillId": 1208,
@@ -40378,7 +44040,26 @@
       "trait": "HOLD",
       "activateRate": 40,
       "lvlBonusRate": 2,
-      "basicProperty": "MEN"
+      "basicProperty": "MEN",
+      "effectPoint": [
+        -243,
+        -285,
+        -331,
+        -379,
+        -418,
+        -457,
+        -495,
+        -532,
+        -549,
+        -566,
+        -582,
+        -597,
+        -611,
+        -624,
+        -635,
+        -646,
+        -655
+      ]
     },
     {
       "skillId": 1209,
@@ -40447,7 +44128,15 @@
       "trait": "POISON",
       "activateRate": 70,
       "lvlBonusRate": 1,
-      "basicProperty": "CON"
+      "basicProperty": "CON",
+      "effectPoint": [
+        -204,
+        -285,
+        -379,
+        -495,
+        -582,
+        -635
+      ]
     },
     {
       "skillId": 1210,
@@ -40499,7 +44188,13 @@
       "abnormalType": "DOT_MP",
       "activateRate": 60,
       "lvlBonusRate": 2,
-      "basicProperty": "MEN"
+      "basicProperty": "MEN",
+      "effectPoint": [
+        -418,
+        -495,
+        -597,
+        -646
+      ]
     },
     {
       "skillId": 1213,
@@ -40618,7 +44313,22 @@
         }
       ],
       "magicType": 1,
-      "trait": "DERANGEMENT"
+      "trait": "DERANGEMENT",
+      "effectPoint": [
+        -418,
+        -457,
+        -495,
+        -532,
+        -549,
+        -566,
+        -582,
+        -597,
+        -611,
+        -624,
+        -635,
+        -646,
+        -655
+      ]
     },
     {
       "skillId": 1216,
@@ -40640,7 +44350,10 @@
           "mpInitialConsume": 2
         }
       ],
-      "magicType": 1
+      "magicType": 1,
+      "effectPoint": [
+        10
+      ]
     },
     {
       "skillId": 1217,
@@ -40922,7 +44635,42 @@
       "magicType": 1,
       "effectRange": 1100,
       "abnormalType": "LIFE_FORCE_OTHERS",
-      "activateRate": 0
+      "activateRate": 0,
+      "effectPoint": [
+        236,
+        245,
+        254,
+        271,
+        281,
+        290,
+        308,
+        318,
+        327,
+        346,
+        356,
+        365,
+        384,
+        393,
+        403,
+        412,
+        421,
+        430,
+        439,
+        448,
+        457,
+        466,
+        474,
+        482,
+        490,
+        498,
+        506,
+        513,
+        520,
+        527,
+        534,
+        540,
+        546
+      ]
     },
     {
       "skillId": 1218,
@@ -41201,7 +44949,42 @@
         }
       ],
       "magicType": 1,
-      "effectRange": 1100
+      "effectRange": 1100,
+      "effectPoint": [
+        202,
+        210,
+        217,
+        233,
+        241,
+        248,
+        264,
+        272,
+        281,
+        297,
+        305,
+        313,
+        329,
+        337,
+        345,
+        353,
+        361,
+        369,
+        377,
+        384,
+        392,
+        399,
+        406,
+        413,
+        420,
+        427,
+        434,
+        440,
+        446,
+        452,
+        458,
+        463,
+        468
+      ]
     },
     {
       "skillId": 1219,
@@ -41482,7 +45265,42 @@
       "abnormalTimeSeconds": 15,
       "magicType": 1,
       "abnormalType": "LIFE_FORCE_OTHERS",
-      "activateRate": 0
+      "activateRate": 0,
+      "effectPoint": [
+        202,
+        210,
+        217,
+        233,
+        241,
+        248,
+        264,
+        272,
+        281,
+        297,
+        305,
+        313,
+        329,
+        337,
+        345,
+        353,
+        361,
+        369,
+        377,
+        384,
+        392,
+        399,
+        406,
+        413,
+        420,
+        427,
+        434,
+        440,
+        446,
+        452,
+        458,
+        463,
+        468
+      ]
     },
     {
       "skillId": 1220,
@@ -41561,7 +45379,17 @@
         }
       ],
       "magicType": 1,
-      "effectRange": 1250
+      "effectRange": 1250,
+      "effectPoint": [
+        -182,
+        -204,
+        -227,
+        -243,
+        -268,
+        -285,
+        -313,
+        -331
+      ]
     },
     {
       "skillId": 1222,
@@ -41702,7 +45530,24 @@
       "abnormalType": "HIT_DOWN",
       "activateRate": 80,
       "lvlBonusRate": 2,
-      "basicProperty": "MEN"
+      "basicProperty": "MEN",
+      "effectPoint": [
+        -331,
+        -379,
+        -418,
+        -457,
+        -495,
+        -532,
+        -549,
+        -566,
+        -582,
+        -597,
+        -611,
+        -624,
+        -635,
+        -646,
+        -655
+      ]
     },
     {
       "skillId": 1223,
@@ -41842,7 +45687,24 @@
       "abnormalType": "ARMOR_EARTH",
       "activateRate": 80,
       "lvlBonusRate": 2,
-      "basicProperty": "MEN"
+      "basicProperty": "MEN",
+      "effectPoint": [
+        -331,
+        -379,
+        -418,
+        -457,
+        -495,
+        -532,
+        -549,
+        -566,
+        -582,
+        -597,
+        -611,
+        -624,
+        -635,
+        -646,
+        -655
+      ]
     },
     {
       "skillId": 1224,
@@ -42000,7 +45862,26 @@
       "trait": "POISON",
       "activateRate": 80,
       "lvlBonusRate": 2,
-      "basicProperty": "CON"
+      "basicProperty": "CON",
+      "effectPoint": [
+        -243,
+        -285,
+        -331,
+        -379,
+        -418,
+        -457,
+        -495,
+        -532,
+        -549,
+        -566,
+        -582,
+        -597,
+        -611,
+        -624,
+        -635,
+        -646,
+        -655
+      ]
     },
     {
       "skillId": 1225,
@@ -42936,7 +46817,27 @@
       ],
       "abnormalTimeSeconds": 15,
       "magicType": 1,
-      "abnormalType": "LIFE_FORCE_ORC"
+      "abnormalType": "LIFE_FORCE_ORC",
+      "effectPoint": [
+        204,
+        243,
+        285,
+        331,
+        379,
+        418,
+        457,
+        495,
+        532,
+        549,
+        566,
+        582,
+        597,
+        611,
+        624,
+        635,
+        646,
+        655
+      ]
     },
     {
       "skillId": 1230,
@@ -43176,7 +47077,37 @@
       ],
       "magicType": 1,
       "effectRange": 1400,
-      "lvlBonusRate": 1
+      "lvlBonusRate": 1,
+      "effectPoint": [
+        -360,
+        -379,
+        -399,
+        -418,
+        -438,
+        -457,
+        -477,
+        -495,
+        -514,
+        -532,
+        -541,
+        -549,
+        -558,
+        -566,
+        -574,
+        -582,
+        -590,
+        -597,
+        -604,
+        -611,
+        -617,
+        -624,
+        -630,
+        -635,
+        -641,
+        -646,
+        -650,
+        -655
+      ]
     },
     {
       "skillId": 1231,
@@ -43418,7 +47349,37 @@
       "isDebuff": true,
       "magicType": 1,
       "effectRange": 350,
-      "abnormalType": "MA_DOWN"
+      "abnormalType": "MA_DOWN",
+      "effectPoint": [
+        -288,
+        -303,
+        -319,
+        -335,
+        -350,
+        -366,
+        -381,
+        -396,
+        -411,
+        -426,
+        -433,
+        -440,
+        -446,
+        -453,
+        -459,
+        -466,
+        -472,
+        -478,
+        -483,
+        -489,
+        -494,
+        -499,
+        -504,
+        -508,
+        -513,
+        -517,
+        -520,
+        -524
+      ]
     },
     {
       "skillId": 1232,
@@ -43459,7 +47420,12 @@
       "abnormalTimeSeconds": 1200,
       "magicType": 1,
       "effectRange": 900,
-      "abnormalType": "DMG_SHIELD"
+      "abnormalType": "DMG_SHIELD",
+      "effectPoint": [
+        379,
+        457,
+        532
+      ]
     },
     {
       "skillId": 1233,
@@ -43512,7 +47478,13 @@
       "abnormalType": "DOT_ATTR",
       "activateRate": 70,
       "lvlBonusRate": 1,
-      "basicProperty": "MEN"
+      "basicProperty": "MEN",
+      "effectPoint": [
+        -457,
+        -532,
+        -597,
+        -655
+      ]
     },
     {
       "skillId": 1234,
@@ -43751,7 +47723,37 @@
         }
       ],
       "magicType": 1,
-      "effectRange": 1400
+      "effectRange": 1400,
+      "effectPoint": [
+        -360,
+        -379,
+        -399,
+        -418,
+        -438,
+        -457,
+        -477,
+        -495,
+        -514,
+        -532,
+        -541,
+        -549,
+        -558,
+        -566,
+        -574,
+        -582,
+        -590,
+        -597,
+        -604,
+        -611,
+        -617,
+        -624,
+        -630,
+        -635,
+        -641,
+        -646,
+        -650,
+        -655
+      ]
     },
     {
       "skillId": 1235,
@@ -43991,7 +47993,37 @@
       ],
       "magicType": 1,
       "effectRange": 1400,
-      "lvlBonusRate": 1
+      "lvlBonusRate": 1,
+      "effectPoint": [
+        -360,
+        -379,
+        -399,
+        -418,
+        -438,
+        -457,
+        -477,
+        -495,
+        -514,
+        -532,
+        -541,
+        -549,
+        -558,
+        -566,
+        -574,
+        -582,
+        -590,
+        -597,
+        -604,
+        -611,
+        -617,
+        -624,
+        -630,
+        -635,
+        -641,
+        -646,
+        -650,
+        -655
+      ]
     },
     {
       "skillId": 1236,
@@ -44164,7 +48196,28 @@
       "abnormalType": "SPEED_DOWN",
       "activateRate": 60,
       "lvlBonusRate": 1,
-      "basicProperty": "MEN"
+      "basicProperty": "MEN",
+      "effectPoint": [
+        -360,
+        -379,
+        -399,
+        -418,
+        -438,
+        -457,
+        -477,
+        -495,
+        -514,
+        -532,
+        -549,
+        -566,
+        -582,
+        -597,
+        -611,
+        -624,
+        -635,
+        -646,
+        -655
+      ]
     },
     {
       "skillId": 1237,
@@ -44321,7 +48374,26 @@
       "abnormalType": "BLEEDING",
       "activateRate": 50,
       "lvlBonusRate": 2,
-      "basicProperty": "CON"
+      "basicProperty": "CON",
+      "effectPoint": [
+        -399,
+        -418,
+        -438,
+        -457,
+        -477,
+        -495,
+        -514,
+        -532,
+        -549,
+        -566,
+        -582,
+        -597,
+        -611,
+        -624,
+        -635,
+        -646,
+        -653
+      ]
     },
     {
       "skillId": 1238,
@@ -44362,7 +48434,12 @@
       "abnormalTimeSeconds": 1200,
       "magicType": 1,
       "effectRange": 900,
-      "abnormalType": "DMG_SHIELD"
+      "abnormalType": "DMG_SHIELD",
+      "effectPoint": [
+        379,
+        457,
+        532
+      ]
     },
     {
       "skillId": 1239,
@@ -44602,7 +48679,37 @@
       ],
       "magicType": 1,
       "effectRange": 1400,
-      "lvlBonusRate": 1
+      "lvlBonusRate": 1,
+      "effectPoint": [
+        -360,
+        -379,
+        -399,
+        -418,
+        -438,
+        -457,
+        -477,
+        -495,
+        -514,
+        -532,
+        -541,
+        -549,
+        -558,
+        -566,
+        -574,
+        -582,
+        -590,
+        -597,
+        -604,
+        -611,
+        -617,
+        -624,
+        -630,
+        -635,
+        -641,
+        -646,
+        -650,
+        -655
+      ]
     },
     {
       "skillId": 1240,
@@ -44643,7 +48750,12 @@
       "abnormalTimeSeconds": 1200,
       "magicType": 1,
       "effectRange": 900,
-      "abnormalType": "HIT_UP"
+      "abnormalType": "HIT_UP",
+      "effectPoint": [
+        379,
+        457,
+        532
+      ]
     },
     {
       "skillId": 1242,
@@ -44684,7 +48796,12 @@
       "abnormalTimeSeconds": 1200,
       "magicType": 1,
       "effectRange": 900,
-      "abnormalType": "CRITICAL_DMG_UP"
+      "abnormalType": "CRITICAL_DMG_UP",
+      "effectPoint": [
+        379,
+        457,
+        532
+      ]
     },
     {
       "skillId": 1243,
@@ -44749,7 +48866,15 @@
       "abnormalTimeSeconds": 1200,
       "magicType": 1,
       "effectRange": 900,
-      "abnormalType": "SHIELD_PROB_UP"
+      "abnormalType": "SHIELD_PROB_UP",
+      "effectPoint": [
+        379,
+        457,
+        532,
+        582,
+        611,
+        635
+      ]
     },
     {
       "skillId": 1244,
@@ -44802,7 +48927,13 @@
       "abnormalType": "DOT_ATTR",
       "activateRate": 70,
       "lvlBonusRate": 1,
-      "basicProperty": "MEN"
+      "basicProperty": "MEN",
+      "effectPoint": [
+        -379,
+        -495,
+        -597,
+        -646
+      ]
     },
     {
       "skillId": 1245,
@@ -44929,7 +49060,23 @@
         }
       ],
       "magicType": 1,
-      "effectRange": 1400
+      "effectRange": 1400,
+      "effectPoint": [
+        -379,
+        -418,
+        -457,
+        -495,
+        -532,
+        -549,
+        -566,
+        -582,
+        -597,
+        -611,
+        -624,
+        -635,
+        -646,
+        -655
+      ]
     },
     {
       "skillId": 1246,
@@ -45046,7 +49193,21 @@
       "trait": "DERANGEMENT",
       "activateRate": 40,
       "lvlBonusRate": 1,
-      "basicProperty": "MEN"
+      "basicProperty": "MEN",
+      "effectPoint": [
+        -457,
+        -495,
+        -532,
+        -549,
+        -566,
+        -582,
+        -597,
+        -611,
+        -624,
+        -635,
+        -646,
+        -655
+      ]
     },
     {
       "skillId": 1247,
@@ -45179,7 +49340,23 @@
       "trait": "BOSS",
       "activateRate": 80,
       "lvlBonusRate": 1,
-      "basicProperty": "MEN"
+      "basicProperty": "MEN",
+      "effectPoint": [
+        -379,
+        -418,
+        -457,
+        -495,
+        -532,
+        -549,
+        -566,
+        -582,
+        -597,
+        -611,
+        -624,
+        -635,
+        -646,
+        -655
+      ]
     },
     {
       "skillId": 1248,
@@ -45295,7 +49472,21 @@
       "abnormalType": "REUSE_DELAY_UP",
       "activateRate": 60,
       "lvlBonusRate": 1,
-      "basicProperty": "MEN"
+      "basicProperty": "MEN",
+      "effectPoint": [
+        -457,
+        -495,
+        -532,
+        -549,
+        -566,
+        -582,
+        -597,
+        -611,
+        -624,
+        -635,
+        -646,
+        -655
+      ]
     },
     {
       "skillId": 1249,
@@ -45335,7 +49526,12 @@
       ],
       "abnormalTimeSeconds": 1200,
       "magicType": 1,
-      "abnormalType": "HIT_UP"
+      "abnormalType": "HIT_UP",
+      "effectPoint": [
+        418,
+        495,
+        532
+      ]
     },
     {
       "skillId": 1250,
@@ -45375,7 +49571,12 @@
       ],
       "abnormalTimeSeconds": 1200,
       "magicType": 1,
-      "abnormalType": "SHIELD_PROB_UP"
+      "abnormalType": "SHIELD_PROB_UP",
+      "effectPoint": [
+        379,
+        457,
+        532
+      ]
     },
     {
       "skillId": 1251,
@@ -45407,7 +49608,11 @@
       ],
       "abnormalTimeSeconds": 1200,
       "magicType": 1,
-      "abnormalType": "ATTACK_TIME_DOWN"
+      "abnormalType": "ATTACK_TIME_DOWN",
+      "effectPoint": [
+        457,
+        532
+      ]
     },
     {
       "skillId": 1252,
@@ -45447,7 +49652,12 @@
       ],
       "abnormalTimeSeconds": 1200,
       "magicType": 1,
-      "abnormalType": "AVOID_UP"
+      "abnormalType": "AVOID_UP",
+      "effectPoint": [
+        379,
+        457,
+        532
+      ]
     },
     {
       "skillId": 1253,
@@ -45487,7 +49697,12 @@
       ],
       "abnormalTimeSeconds": 1200,
       "magicType": 1,
-      "abnormalType": "CRITICAL_DMG_UP"
+      "abnormalType": "CRITICAL_DMG_UP",
+      "effectPoint": [
+        418,
+        495,
+        532
+      ]
     },
     {
       "skillId": 1254,
@@ -45549,7 +49764,15 @@
           "mpInitialConsume": 89
         }
       ],
-      "magicType": 1
+      "magicType": 1,
+      "effectPoint": [
+        290,
+        331,
+        417,
+        460,
+        481,
+        578
+      ]
     },
     {
       "skillId": 1255,
@@ -45699,7 +49922,22 @@
       ],
       "abnormalTimeSeconds": 15,
       "magicType": 1,
-      "abnormalType": "LIFE_FORCE_ORC"
+      "abnormalType": "LIFE_FORCE_ORC",
+      "effectPoint": [
+        418,
+        457,
+        495,
+        532,
+        549,
+        566,
+        582,
+        597,
+        611,
+        624,
+        635,
+        646,
+        655
+      ]
     },
     {
       "skillId": 1257,
@@ -45740,7 +49978,12 @@
       "abnormalTimeSeconds": 1200,
       "magicType": 1,
       "effectRange": 900,
-      "abnormalType": "DECREASE_WEIGHT_PENALTY"
+      "abnormalType": "DECREASE_WEIGHT_PENALTY",
+      "effectPoint": [
+        331,
+        418,
+        495
+      ]
     },
     {
       "skillId": 1258,
@@ -45787,7 +50030,13 @@
         }
       ],
       "magicType": 1,
-      "effectRange": 1100
+      "effectRange": 1100,
+      "effectPoint": [
+        500,
+        666,
+        833,
+        1000
+      ]
     },
     {
       "skillId": 1259,
@@ -45836,7 +50085,13 @@
       "abnormalTimeSeconds": 1200,
       "magicType": 1,
       "effectRange": 900,
-      "abnormalType": "RESIST_SHOCK"
+      "abnormalType": "RESIST_SHOCK",
+      "effectPoint": [
+        379,
+        495,
+        597,
+        646
+      ]
     },
     {
       "skillId": 1260,
@@ -45876,7 +50131,12 @@
       ],
       "abnormalTimeSeconds": 1200,
       "magicType": 1,
-      "abnormalType": "AVOID_UP"
+      "abnormalType": "AVOID_UP",
+      "effectPoint": [
+        379,
+        457,
+        532
+      ]
     },
     {
       "skillId": 1261,
@@ -45908,7 +50168,11 @@
       ],
       "abnormalTimeSeconds": 1200,
       "magicType": 1,
-      "abnormalType": "BERSERKER"
+      "abnormalType": "BERSERKER",
+      "effectPoint": [
+        418,
+        495
+      ]
     },
     {
       "skillId": 1262,
@@ -46086,7 +50350,22 @@
       "abnormalType": "MD_DOWN",
       "activateRate": 80,
       "lvlBonusRate": 2,
-      "basicProperty": "MEN"
+      "basicProperty": "MEN",
+      "effectPoint": [
+        -209,
+        -229,
+        -248,
+        -266,
+        -275,
+        -283,
+        -291,
+        -299,
+        -306,
+        -312,
+        -318,
+        -323,
+        -328
+      ]
     },
     {
       "skillId": 1264,
@@ -46125,7 +50404,12 @@
         }
       ],
       "magicType": 1,
-      "effectRange": 1250
+      "effectRange": 1250,
+      "effectPoint": [
+        -303,
+        -357,
+        -414
+      ]
     },
     {
       "skillId": 1265,
@@ -46252,7 +50536,23 @@
         }
       ],
       "magicType": 1,
-      "effectRange": 1400
+      "effectRange": 1400,
+      "effectPoint": [
+        -474,
+        -523,
+        -571,
+        -619,
+        -665,
+        -687,
+        -708,
+        -727,
+        -746,
+        -763,
+        -779,
+        -794,
+        -807,
+        -818
+      ]
     },
     {
       "skillId": 1266,
@@ -46291,7 +50591,12 @@
         }
       ],
       "magicType": 1,
-      "effectRange": 1250
+      "effectRange": 1250,
+      "effectPoint": [
+        -303,
+        -357,
+        -414
+      ]
     },
     {
       "skillId": 1267,
@@ -46418,7 +50723,23 @@
         }
       ],
       "magicType": 1,
-      "effectRange": 1400
+      "effectRange": 1400,
+      "effectPoint": [
+        -474,
+        -523,
+        -571,
+        -619,
+        -665,
+        -687,
+        -708,
+        -727,
+        -746,
+        -763,
+        -779,
+        -794,
+        -807,
+        -818
+      ]
     },
     {
       "skillId": 1268,
@@ -46467,7 +50788,13 @@
       "abnormalTimeSeconds": 1200,
       "magicType": 1,
       "effectRange": 900,
-      "abnormalType": "VAMPIRIC_ATTACK"
+      "abnormalType": "VAMPIRIC_ATTACK",
+      "effectPoint": [
+        285,
+        418,
+        549,
+        646
+      ]
     },
     {
       "skillId": 1269,
@@ -46560,7 +50887,18 @@
       "abnormalType": "HEAL_EFFECT_DOWN",
       "activateRate": 80,
       "lvlBonusRate": 2,
-      "basicProperty": "MEN"
+      "basicProperty": "MEN",
+      "effectPoint": [
+        -549,
+        -566,
+        -582,
+        -597,
+        -611,
+        -624,
+        -635,
+        -646,
+        -655
+      ]
     },
     {
       "skillId": 1271,
@@ -46582,7 +50920,10 @@
           "mpInitialConsume": 43
         }
       ],
-      "magicType": 1
+      "magicType": 1,
+      "effectPoint": [
+        560
+      ]
     },
     {
       "skillId": 1272,
@@ -46707,7 +51048,22 @@
       "trait": "DERANGEMENT",
       "activateRate": 30,
       "lvlBonusRate": 1,
-      "basicProperty": "MEN"
+      "basicProperty": "MEN",
+      "effectPoint": [
+        -418,
+        -457,
+        -495,
+        -532,
+        -549,
+        -566,
+        -582,
+        -597,
+        -611,
+        -624,
+        -635,
+        -646,
+        -655
+      ]
     },
     {
       "skillId": 1273,
@@ -46873,7 +51229,13 @@
         }
       ],
       "magicType": 1,
-      "effectRange": 900
+      "effectRange": 900,
+      "effectPoint": [
+        -102,
+        -122,
+        -143,
+        -166
+      ]
     },
     {
       "skillId": 1275,
@@ -47000,7 +51362,23 @@
         }
       ],
       "magicType": 1,
-      "effectRange": 900
+      "effectRange": 900,
+      "effectPoint": [
+        -190,
+        -209,
+        -229,
+        -248,
+        -266,
+        -275,
+        -283,
+        -291,
+        -299,
+        -306,
+        -312,
+        -318,
+        -323,
+        -328
+      ]
     },
     {
       "skillId": 1276,
@@ -47806,7 +52184,11 @@
       ],
       "abnormalTimeSeconds": 1200,
       "magicType": 1,
-      "abnormalType": "SPEED_UP"
+      "abnormalType": "SPEED_UP",
+      "effectPoint": [
+        549,
+        597
+      ]
     },
     {
       "skillId": 1283,
@@ -47963,7 +52345,12 @@
       ],
       "abnormalTimeSeconds": 1200,
       "magicType": 1,
-      "abnormalType": "DMG_SHIELD"
+      "abnormalType": "DMG_SHIELD",
+      "effectPoint": [
+        582,
+        624,
+        655
+      ]
     },
     {
       "skillId": 1285,
@@ -47987,7 +52374,10 @@
       ],
       "abnormalTimeSeconds": 5,
       "magicType": 1,
-      "abnormalType": "HOLY_ATTACK"
+      "abnormalType": "HOLY_ATTACK",
+      "effectPoint": [
+        100
+      ]
     },
     {
       "skillId": 1286,
@@ -48011,7 +52401,10 @@
       ],
       "abnormalTimeSeconds": 5,
       "magicType": 1,
-      "abnormalType": "HOLY_ATTACK"
+      "abnormalType": "HOLY_ATTACK",
+      "effectPoint": [
+        100
+      ]
     },
     {
       "skillId": 1287,
@@ -48035,7 +52428,10 @@
       ],
       "abnormalTimeSeconds": 5,
       "magicType": 1,
-      "abnormalType": "HOLY_ATTACK"
+      "abnormalType": "HOLY_ATTACK",
+      "effectPoint": [
+        100
+      ]
     },
     {
       "skillId": 1288,
@@ -48058,7 +52454,10 @@
         }
       ],
       "magicType": 1,
-      "effectRange": 1400
+      "effectRange": 1400,
+      "effectPoint": [
+        -4200
+      ]
     },
     {
       "skillId": 1289,
@@ -48084,7 +52483,10 @@
       "isDebuff": true,
       "magicType": 1,
       "effectRange": 1400,
-      "abnormalType": "DOT_ATTR"
+      "abnormalType": "DOT_ATTR",
+      "effectPoint": [
+        -4200
+      ]
     },
     {
       "skillId": 1290,
@@ -48113,7 +52515,10 @@
       "abnormalType": "SPEED_DOWN",
       "activateRate": 40,
       "lvlBonusRate": 1,
-      "basicProperty": "MEN"
+      "basicProperty": "MEN",
+      "effectPoint": [
+        -4200
+      ]
     },
     {
       "skillId": 1291,
@@ -48139,7 +52544,10 @@
       "isDebuff": true,
       "magicType": 1,
       "effectRange": 1400,
-      "abnormalType": "HEAL_EFFECT_DOWN"
+      "abnormalType": "HEAL_EFFECT_DOWN",
+      "effectPoint": [
+        -4200
+      ]
     },
     {
       "skillId": 1292,
@@ -48162,7 +52570,10 @@
         }
       ],
       "magicType": 1,
-      "effectRange": 1400
+      "effectRange": 1400,
+      "effectPoint": [
+        -6000
+      ]
     },
     {
       "skillId": 1293,
@@ -48185,7 +52596,10 @@
         }
       ],
       "magicType": 1,
-      "effectRange": 1400
+      "effectRange": 1400,
+      "effectPoint": [
+        -6000
+      ]
     },
     {
       "skillId": 1294,
@@ -48208,7 +52622,10 @@
         }
       ],
       "magicType": 1,
-      "effectRange": 1400
+      "effectRange": 1400,
+      "effectPoint": [
+        -6000
+      ]
     },
     {
       "skillId": 1295,
@@ -48295,7 +52712,18 @@
         }
       ],
       "magicType": 1,
-      "effectRange": 1000
+      "effectRange": 1000,
+      "effectPoint": [
+        -275,
+        -283,
+        -291,
+        -299,
+        -306,
+        -312,
+        -318,
+        -323,
+        -328
+      ]
     },
     {
       "skillId": 1296,
@@ -48382,7 +52810,18 @@
         }
       ],
       "magicType": 1,
-      "effectRange": 1000
+      "effectRange": 1000,
+      "effectPoint": [
+        -275,
+        -283,
+        -291,
+        -299,
+        -306,
+        -312,
+        -318,
+        -323,
+        -328
+      ]
     },
     {
       "skillId": 1297,
@@ -48556,7 +52995,23 @@
       "abnormalType": "SPEED_DOWN",
       "activateRate": 40,
       "lvlBonusRate": 1,
-      "basicProperty": "MEN"
+      "basicProperty": "MEN",
+      "effectPoint": [
+        -574,
+        -582,
+        -590,
+        -597,
+        -604,
+        -611,
+        -617,
+        -624,
+        -630,
+        -635,
+        -641,
+        -646,
+        -650,
+        -655
+      ]
     },
     {
       "skillId": 1299,
@@ -48589,7 +53044,11 @@
       "abnormalTimeSeconds": 30,
       "magicType": 1,
       "effectRange": 900,
-      "abnormalType": "PD_UP_SPECIAL"
+      "abnormalType": "PD_UP_SPECIAL",
+      "effectPoint": [
+        495,
+        635
+      ]
     },
     {
       "skillId": 1300,
@@ -48628,7 +53087,12 @@
         }
       ],
       "magicType": 1,
-      "effectRange": 1100
+      "effectRange": 1100,
+      "effectPoint": [
+        379,
+        457,
+        566
+      ]
     },
     {
       "skillId": 1301,
@@ -48651,7 +53115,10 @@
         }
       ],
       "magicType": 1,
-      "effectRange": 1100
+      "effectRange": 1100,
+      "effectPoint": [
+        582
+      ]
     },
     {
       "skillId": 1303,
@@ -48684,7 +53151,11 @@
       "abnormalTimeSeconds": 1200,
       "magicType": 1,
       "effectRange": 900,
-      "abnormalType": "MAGIC_CRITICAL_UP"
+      "abnormalType": "MAGIC_CRITICAL_UP",
+      "effectPoint": [
+        582,
+        635
+      ]
     },
     {
       "skillId": 1304,
@@ -48725,7 +53196,12 @@
       "abnormalTimeSeconds": 1200,
       "magicType": 1,
       "effectRange": 900,
-      "abnormalType": "SHIELD_DEFENCE_UP"
+      "abnormalType": "SHIELD_DEFENCE_UP",
+      "effectPoint": [
+        549,
+        611,
+        646
+      ]
     },
     {
       "skillId": 1305,
@@ -48779,7 +53255,14 @@
           "mpInitialConsume": 48
         }
       ],
-      "magicType": 1
+      "magicType": 1,
+      "effectPoint": [
+        689,
+        722,
+        743,
+        763,
+        780
+      ]
     },
     {
       "skillId": 1306,
@@ -48842,7 +53325,15 @@
         }
       ],
       "magicType": 1,
-      "effectRange": 1100
+      "effectRange": 1100,
+      "effectPoint": [
+        677,
+        700,
+        722,
+        743,
+        763,
+        780
+      ]
     },
     {
       "skillId": 1307,
@@ -48882,7 +53373,12 @@
       ],
       "abnormalTimeSeconds": 1200,
       "magicType": 1,
-      "abnormalType": "HEAL_EFFECT_UP"
+      "abnormalType": "HEAL_EFFECT_UP",
+      "effectPoint": [
+        611,
+        635,
+        655
+      ]
     },
     {
       "skillId": 1308,
@@ -48922,7 +53418,12 @@
       ],
       "abnormalTimeSeconds": 1200,
       "magicType": 1,
-      "abnormalType": "CRITICAL_PROB_UP"
+      "abnormalType": "CRITICAL_PROB_UP",
+      "effectPoint": [
+        457,
+        566,
+        624
+      ]
     },
     {
       "skillId": 1309,
@@ -48962,7 +53463,12 @@
       ],
       "abnormalTimeSeconds": 1200,
       "magicType": 1,
-      "abnormalType": "HIT_UP"
+      "abnormalType": "HIT_UP",
+      "effectPoint": [
+        457,
+        549,
+        597
+      ]
     },
     {
       "skillId": 1310,
@@ -49010,7 +53516,13 @@
       ],
       "abnormalTimeSeconds": 1200,
       "magicType": 1,
-      "abnormalType": "VAMPIRIC_ATTACK"
+      "abnormalType": "VAMPIRIC_ATTACK",
+      "effectPoint": [
+        418,
+        549,
+        611,
+        655
+      ]
     },
     {
       "skillId": 1311,
@@ -49074,7 +53586,15 @@
       ],
       "abnormalTimeSeconds": 1200,
       "magicType": 1,
-      "abnormalType": "MAX_HP_UP"
+      "abnormalType": "MAX_HP_UP",
+      "effectPoint": [
+        457,
+        532,
+        566,
+        597,
+        624,
+        646
+      ]
     },
     {
       "skillId": 1320,
@@ -49933,7 +54453,10 @@
           "mpInitialConsume": 25
         }
       ],
-      "magicType": 1
+      "magicType": 1,
+      "effectPoint": [
+        398
+      ]
     },
     {
       "skillId": 1336,
@@ -49963,7 +54486,10 @@
       "trait": "DERANGEMENT",
       "activateRate": 80,
       "lvlBonusRate": 2,
-      "basicProperty": "MEN"
+      "basicProperty": "MEN",
+      "effectPoint": [
+        -666
+      ]
     },
     {
       "skillId": 1337,
@@ -49993,7 +54519,10 @@
       "trait": "DEATH",
       "activateRate": 80,
       "lvlBonusRate": 2,
-      "basicProperty": "MEN"
+      "basicProperty": "MEN",
+      "effectPoint": [
+        -669
+      ]
     },
     {
       "skillId": 1338,
@@ -50023,7 +54552,10 @@
       "trait": "DERANGEMENT",
       "activateRate": 40,
       "lvlBonusRate": 1,
-      "basicProperty": "MEN"
+      "basicProperty": "MEN",
+      "effectPoint": [
+        -669
+      ]
     },
     {
       "skillId": 1339,
@@ -50052,7 +54584,10 @@
       "abnormalType": "MULTI_DEBUFF_FIRE",
       "activateRate": 80,
       "lvlBonusRate": 2,
-      "basicProperty": "MEN"
+      "basicProperty": "MEN",
+      "effectPoint": [
+        -999
+      ]
     },
     {
       "skillId": 1340,
@@ -50081,7 +54616,10 @@
       "abnormalType": "MULTI_DEBUFF_WATER",
       "activateRate": 80,
       "lvlBonusRate": 2,
-      "basicProperty": "MEN"
+      "basicProperty": "MEN",
+      "effectPoint": [
+        -999
+      ]
     },
     {
       "skillId": 1341,
@@ -50110,7 +54648,10 @@
       "abnormalType": "MULTI_DEBUFF_WIND",
       "activateRate": 80,
       "lvlBonusRate": 2,
-      "basicProperty": "MEN"
+      "basicProperty": "MEN",
+      "effectPoint": [
+        -999
+      ]
     },
     {
       "skillId": 1342,
@@ -50139,7 +54680,10 @@
       "abnormalType": "MULTI_DEBUFF_HOLY",
       "activateRate": 80,
       "lvlBonusRate": 2,
-      "basicProperty": "MEN"
+      "basicProperty": "MEN",
+      "effectPoint": [
+        -993
+      ]
     },
     {
       "skillId": 1343,
@@ -50168,7 +54712,10 @@
       "abnormalType": "MULTI_DEBUFF_UNHOLY",
       "activateRate": 80,
       "lvlBonusRate": 2,
-      "basicProperty": "MEN"
+      "basicProperty": "MEN",
+      "effectPoint": [
+        -993
+      ]
     },
     {
       "skillId": 1344,
@@ -50190,7 +54737,10 @@
           "mpInitialConsume": 21
         }
       ],
-      "magicType": 1
+      "magicType": 1,
+      "effectPoint": [
+        -666
+      ]
     },
     {
       "skillId": 1345,
@@ -50212,7 +54762,10 @@
           "mpInitialConsume": 22
         }
       ],
-      "magicType": 1
+      "magicType": 1,
+      "effectPoint": [
+        -669
+      ]
     },
     {
       "skillId": 1346,
@@ -50239,7 +54792,10 @@
       "abnormalTimeSeconds": 300,
       "magicType": 1,
       "effectRange": 900,
-      "abnormalType": "MULTI_BUFF"
+      "abnormalType": "MULTI_BUFF",
+      "effectPoint": [
+        666
+      ]
     },
     {
       "skillId": 1347,
@@ -50266,7 +54822,10 @@
       "abnormalTimeSeconds": 300,
       "magicType": 1,
       "effectRange": 900,
-      "abnormalType": "MULTI_BUFF"
+      "abnormalType": "MULTI_BUFF",
+      "effectPoint": [
+        666
+      ]
     },
     {
       "skillId": 1348,
@@ -50293,7 +54852,10 @@
       "abnormalTimeSeconds": 300,
       "magicType": 1,
       "effectRange": 900,
-      "abnormalType": "MULTI_BUFF"
+      "abnormalType": "MULTI_BUFF",
+      "effectPoint": [
+        666
+      ]
     },
     {
       "skillId": 1349,
@@ -50320,7 +54882,10 @@
       "abnormalTimeSeconds": 300,
       "magicType": 1,
       "effectRange": 900,
-      "abnormalType": "MULTI_BUFF"
+      "abnormalType": "MULTI_BUFF",
+      "effectPoint": [
+        669
+      ]
     },
     {
       "skillId": 1350,
@@ -50343,7 +54908,10 @@
         }
       ],
       "magicType": 1,
-      "effectRange": 1100
+      "effectRange": 1100,
+      "effectPoint": [
+        -662
+      ]
     },
     {
       "skillId": 1351,
@@ -50366,7 +54934,10 @@
         }
       ],
       "magicType": 1,
-      "effectRange": 1100
+      "effectRange": 1100,
+      "effectPoint": [
+        -666
+      ]
     },
     {
       "skillId": 1352,
@@ -50391,7 +54962,10 @@
       "abnormalTimeSeconds": 1200,
       "magicType": 1,
       "effectRange": 900,
-      "abnormalType": "MD_UP_ATTR"
+      "abnormalType": "MD_UP_ATTR",
+      "effectPoint": [
+        662
+      ]
     },
     {
       "skillId": 1353,
@@ -50416,7 +54990,10 @@
       "abnormalTimeSeconds": 1200,
       "magicType": 1,
       "effectRange": 900,
-      "abnormalType": "RESIST_HOLY_UNHOLY"
+      "abnormalType": "RESIST_HOLY_UNHOLY",
+      "effectPoint": [
+        666
+      ]
     },
     {
       "skillId": 1354,
@@ -50441,7 +55018,10 @@
       "abnormalTimeSeconds": 1200,
       "magicType": 1,
       "effectRange": 900,
-      "abnormalType": "RESIST_DEBUFF_DISPEL"
+      "abnormalType": "RESIST_DEBUFF_DISPEL",
+      "effectPoint": [
+        662
+      ]
     },
     {
       "skillId": 1355,
@@ -50468,7 +55048,10 @@
       "abnormalTimeSeconds": 300,
       "magicType": 1,
       "effectRange": 600,
-      "abnormalType": "MULTI_BUFF"
+      "abnormalType": "MULTI_BUFF",
+      "effectPoint": [
+        669
+      ]
     },
     {
       "skillId": 1356,
@@ -50495,7 +55078,10 @@
       "abnormalTimeSeconds": 300,
       "magicType": 1,
       "effectRange": 900,
-      "abnormalType": "MULTI_BUFF"
+      "abnormalType": "MULTI_BUFF",
+      "effectPoint": [
+        669
+      ]
     },
     {
       "skillId": 1357,
@@ -50522,7 +55108,10 @@
       "abnormalTimeSeconds": 300,
       "magicType": 1,
       "effectRange": 900,
-      "abnormalType": "MULTI_BUFF"
+      "abnormalType": "MULTI_BUFF",
+      "effectPoint": [
+        669
+      ]
     },
     {
       "skillId": 1358,
@@ -50551,7 +55140,10 @@
       "abnormalType": "BLOCK_SHIELD_UP",
       "activateRate": 80,
       "lvlBonusRate": 2,
-      "basicProperty": "MEN"
+      "basicProperty": "MEN",
+      "effectPoint": [
+        -666
+      ]
     },
     {
       "skillId": 1359,
@@ -50580,7 +55172,10 @@
       "abnormalType": "BLOCK_SPEED_UP",
       "activateRate": 80,
       "lvlBonusRate": 2,
-      "basicProperty": "MEN"
+      "basicProperty": "MEN",
+      "effectPoint": [
+        -666
+      ]
     },
     {
       "skillId": 1360,
@@ -50608,7 +55203,10 @@
       "abnormalType": "BLOCK_SHIELD_UP",
       "activateRate": 40,
       "lvlBonusRate": 1,
-      "basicProperty": "MEN"
+      "basicProperty": "MEN",
+      "effectPoint": [
+        -666
+      ]
     },
     {
       "skillId": 1361,
@@ -50636,7 +55234,10 @@
       "abnormalType": "BLOCK_SPEED_UP",
       "activateRate": 40,
       "lvlBonusRate": 1,
-      "basicProperty": "MEN"
+      "basicProperty": "MEN",
+      "effectPoint": [
+        -669
+      ]
     },
     {
       "skillId": 1362,
@@ -50660,7 +55261,10 @@
       ],
       "abnormalTimeSeconds": 1200,
       "magicType": 1,
-      "abnormalType": "RESIST_DEBUFF_DISPEL"
+      "abnormalType": "RESIST_DEBUFF_DISPEL",
+      "effectPoint": [
+        666
+      ]
     },
     {
       "skillId": 1363,
@@ -50686,7 +55290,10 @@
       ],
       "abnormalTimeSeconds": 300,
       "magicType": 1,
-      "abnormalType": "MULTI_BUFF"
+      "abnormalType": "MULTI_BUFF",
+      "effectPoint": [
+        669
+      ]
     },
     {
       "skillId": 1364,
@@ -50710,7 +55317,10 @@
       ],
       "abnormalTimeSeconds": 1200,
       "magicType": 1,
-      "abnormalType": "IMPROVE_HIT_DEFENCE_CRT_RATE_UP"
+      "abnormalType": "IMPROVE_HIT_DEFENCE_CRT_RATE_UP",
+      "effectPoint": [
+        666
+      ]
     },
     {
       "skillId": 1365,
@@ -50734,7 +55344,10 @@
       ],
       "abnormalTimeSeconds": 1200,
       "magicType": 1,
-      "abnormalType": "IMPROVE_MA_MD_UP"
+      "abnormalType": "IMPROVE_MA_MD_UP",
+      "effectPoint": [
+        666
+      ]
     },
     {
       "skillId": 1366,
@@ -50763,7 +55376,10 @@
       "trait": "DEATH",
       "activateRate": 40,
       "lvlBonusRate": 1,
-      "basicProperty": "MEN"
+      "basicProperty": "MEN",
+      "effectPoint": [
+        -669
+      ]
     },
     {
       "skillId": 1367,
@@ -50792,7 +55408,10 @@
       "abnormalType": "HEAL_EFFECT_DOWN",
       "activateRate": 40,
       "lvlBonusRate": 1,
-      "basicProperty": "MEN"
+      "basicProperty": "MEN",
+      "effectPoint": [
+        -662
+      ]
     },
     {
       "skillId": 1368,
@@ -50973,7 +55592,19 @@
       "trait": "DERANGEMENT",
       "activateRate": 80,
       "lvlBonusRate": 2,
-      "basicProperty": "MEN"
+      "basicProperty": "MEN",
+      "effectPoint": [
+        -532,
+        -549,
+        -566,
+        -582,
+        -597,
+        -611,
+        -624,
+        -635,
+        -646,
+        -655
+      ]
     },
     {
       "skillId": 1381,
@@ -51033,7 +55664,14 @@
       "trait": "DERANGEMENT",
       "activateRate": 30,
       "lvlBonusRate": 1,
-      "basicProperty": "MEN"
+      "basicProperty": "MEN",
+      "effectPoint": [
+        -549,
+        -582,
+        -611,
+        -635,
+        -655
+      ]
     },
     {
       "skillId": 1382,
@@ -51099,7 +55737,14 @@
       "abnormalType": "MD_DOWN",
       "activateRate": 40,
       "lvlBonusRate": 1,
-      "basicProperty": "MEN"
+      "basicProperty": "MEN",
+      "effectPoint": [
+        -549,
+        -582,
+        -611,
+        -635,
+        -655
+      ]
     },
     {
       "skillId": 1383,
@@ -51165,7 +55810,14 @@
       "abnormalType": "ARMOR_FIRE",
       "activateRate": 40,
       "lvlBonusRate": 1,
-      "basicProperty": "MEN"
+      "basicProperty": "MEN",
+      "effectPoint": [
+        -549,
+        -582,
+        -611,
+        -635,
+        -655
+      ]
     },
     {
       "skillId": 1384,
@@ -51231,7 +55883,14 @@
       "abnormalType": "ARMOR_WATER",
       "activateRate": 40,
       "lvlBonusRate": 1,
-      "basicProperty": "MEN"
+      "basicProperty": "MEN",
+      "effectPoint": [
+        -549,
+        -582,
+        -611,
+        -635,
+        -655
+      ]
     },
     {
       "skillId": 1385,
@@ -51297,7 +55956,14 @@
       "abnormalType": "ARMOR_WIND",
       "activateRate": 40,
       "lvlBonusRate": 1,
-      "basicProperty": "MEN"
+      "basicProperty": "MEN",
+      "effectPoint": [
+        -549,
+        -582,
+        -611,
+        -635,
+        -655
+      ]
     },
     {
       "skillId": 1386,
@@ -51388,7 +56054,19 @@
       "abnormalType": "CASTING_TIME_UP",
       "activateRate": 80,
       "lvlBonusRate": 2,
-      "basicProperty": "MEN"
+      "basicProperty": "MEN",
+      "effectPoint": [
+        -532,
+        -549,
+        -566,
+        -582,
+        -597,
+        -611,
+        -624,
+        -635,
+        -646,
+        -655
+      ]
     },
     {
       "skillId": 1387,
@@ -51560,7 +56238,12 @@
       "abnormalTimeSeconds": 1200,
       "magicType": 1,
       "effectRange": 900,
-      "abnormalType": "PA_PD_UP"
+      "abnormalType": "PA_PD_UP",
+      "effectPoint": [
+        549,
+        611,
+        655
+      ]
     },
     {
       "skillId": 1389,
@@ -51604,7 +56287,12 @@
       "abnormalTimeSeconds": 1200,
       "magicType": 1,
       "effectRange": 900,
-      "abnormalType": "PA_PD_UP"
+      "abnormalType": "PA_PD_UP",
+      "effectPoint": [
+        549,
+        611,
+        655
+      ]
     },
     {
       "skillId": 1390,
@@ -51647,7 +56335,12 @@
       ],
       "abnormalTimeSeconds": 1200,
       "magicType": 1,
-      "abnormalType": "PA_PD_UP"
+      "abnormalType": "PA_PD_UP",
+      "effectPoint": [
+        549,
+        611,
+        655
+      ]
     },
     {
       "skillId": 1391,
@@ -51690,7 +56383,12 @@
       ],
       "abnormalTimeSeconds": 1200,
       "magicType": 1,
-      "abnormalType": "PA_PD_UP"
+      "abnormalType": "PA_PD_UP",
+      "effectPoint": [
+        549,
+        611,
+        655
+      ]
     },
     {
       "skillId": 1392,
@@ -51728,7 +56426,12 @@
       "abnormalTimeSeconds": 1200,
       "magicType": 1,
       "effectRange": 900,
-      "abnormalType": "ARMOR_HOLY"
+      "abnormalType": "ARMOR_HOLY",
+      "effectPoint": [
+        549,
+        611,
+        655
+      ]
     },
     {
       "skillId": 1393,
@@ -51766,7 +56469,12 @@
       "abnormalTimeSeconds": 1200,
       "magicType": 1,
       "effectRange": 900,
-      "abnormalType": "ARMOR_UNHOLY"
+      "abnormalType": "ARMOR_UNHOLY",
+      "effectPoint": [
+        549,
+        611,
+        655
+      ]
     },
     {
       "skillId": 1394,
@@ -51868,7 +56576,19 @@
       "trait": "SLEEP",
       "activateRate": 80,
       "lvlBonusRate": 2,
-      "basicProperty": "MEN"
+      "basicProperty": "MEN",
+      "effectPoint": [
+        -532,
+        -549,
+        -566,
+        -582,
+        -597,
+        -611,
+        -624,
+        -635,
+        -646,
+        -655
+      ]
     },
     {
       "skillId": 1395,
@@ -51984,7 +56704,19 @@
       ],
       "magicType": 1,
       "effectRange": 1100,
-      "trait": "DERANGEMENT"
+      "trait": "DERANGEMENT",
+      "effectPoint": [
+        -532,
+        -549,
+        -566,
+        -582,
+        -597,
+        -611,
+        -624,
+        -635,
+        -646,
+        -655
+      ]
     },
     {
       "skillId": 1396,
@@ -52085,7 +56817,19 @@
       "abnormalType": "MP_COST_UP",
       "activateRate": 80,
       "lvlBonusRate": 2,
-      "basicProperty": "MEN"
+      "basicProperty": "MEN",
+      "effectPoint": [
+        -532,
+        -549,
+        -566,
+        -582,
+        -597,
+        -611,
+        -624,
+        -635,
+        -646,
+        -655
+      ]
     },
     {
       "skillId": 1397,
@@ -52129,7 +56873,12 @@
       "abnormalTimeSeconds": 1200,
       "magicType": 1,
       "effectRange": 900,
-      "abnormalType": "CHEAP_MAGIC"
+      "abnormalType": "CHEAP_MAGIC",
+      "effectPoint": [
+        549,
+        611,
+        655
+      ]
     },
     {
       "skillId": 1398,
@@ -52214,7 +56963,19 @@
         }
       ],
       "magicType": 1,
-      "effectRange": 1400
+      "effectRange": 1400,
+      "effectPoint": [
+        -532,
+        -549,
+        -566,
+        -582,
+        -597,
+        -611,
+        -624,
+        -635,
+        -646,
+        -655
+      ]
     },
     {
       "skillId": 1399,
@@ -52263,7 +57024,14 @@
           "magicLevel": 74
         }
       ],
-      "magicType": 1
+      "magicType": 1,
+      "effectPoint": [
+        -549,
+        -582,
+        -611,
+        -635,
+        -655
+      ]
     },
     {
       "skillId": 1400,
@@ -52378,7 +57146,19 @@
         }
       ],
       "magicType": 1,
-      "effectRange": 1400
+      "effectRange": 1400,
+      "effectPoint": [
+        -532,
+        -549,
+        -566,
+        -582,
+        -597,
+        -611,
+        -624,
+        -635,
+        -646,
+        -655
+      ]
     },
     {
       "skillId": 1401,
@@ -52503,7 +57283,20 @@
         }
       ],
       "magicType": 1,
-      "effectRange": 1100
+      "effectRange": 1100,
+      "effectPoint": [
+        403,
+        421,
+        439,
+        457,
+        474,
+        490,
+        506,
+        520,
+        534,
+        546,
+        546
+      ]
     },
     {
       "skillId": 1402,
@@ -52562,7 +57355,14 @@
           "itemConsumeCount": 4
         }
       ],
-      "magicType": 1
+      "magicType": 1,
+      "effectPoint": [
+        421,
+        457,
+        490,
+        520,
+        546
+      ]
     },
     {
       "skillId": 1403,
@@ -52585,7 +57385,10 @@
         }
       ],
       "magicType": 1,
-      "effectRange": -2
+      "effectRange": -2,
+      "effectPoint": [
+        467
+      ]
     },
     {
       "skillId": 1405,
@@ -52723,7 +57526,10 @@
         }
       ],
       "magicType": 1,
-      "effectRange": 1100
+      "effectRange": 1100,
+      "effectPoint": [
+        1
+      ]
     },
     {
       "skillId": 1410,
@@ -52750,7 +57556,10 @@
       "abnormalTimeSeconds": 3600,
       "magicType": 1,
       "effectRange": 900,
-      "abnormalType": "RESURRECTION_SPECIAL"
+      "abnormalType": "RESURRECTION_SPECIAL",
+      "effectPoint": [
+        1
+      ]
     },
     {
       "skillId": 1411,
@@ -52774,7 +57583,10 @@
       "abnormalTimeSeconds": 30,
       "magicType": 1,
       "effectRange": 900,
-      "abnormalType": "ABNORMAL_INVINCIBILITY"
+      "abnormalType": "ABNORMAL_INVINCIBILITY",
+      "effectPoint": [
+        1
+      ]
     },
     {
       "skillId": 1412,
@@ -52797,7 +57609,10 @@
         }
       ],
       "magicType": 1,
-      "effectRange": 650
+      "effectRange": 650,
+      "effectPoint": [
+        -1
+      ]
     },
     {
       "skillId": 1413,
@@ -52823,7 +57638,10 @@
       ],
       "abnormalTimeSeconds": 300,
       "magicType": 1,
-      "abnormalType": "MULTI_BUFF"
+      "abnormalType": "MULTI_BUFF",
+      "effectPoint": [
+        669
+      ]
     },
     {
       "skillId": 1414,
@@ -52849,7 +57667,10 @@
       ],
       "abnormalTimeSeconds": 300,
       "magicType": 1,
-      "abnormalType": "MULTI_BUFF"
+      "abnormalType": "MULTI_BUFF",
+      "effectPoint": [
+        669
+      ]
     },
     {
       "skillId": 1415,
@@ -52873,7 +57694,10 @@
       ],
       "abnormalTimeSeconds": 300,
       "magicType": 1,
-      "abnormalType": "RESIST_DEBUFF_DISPEL"
+      "abnormalType": "RESIST_DEBUFF_DISPEL",
+      "effectPoint": [
+        669
+      ]
     },
     {
       "skillId": 1416,
@@ -52899,7 +57723,10 @@
       ],
       "abnormalTimeSeconds": 300,
       "magicType": 1,
-      "abnormalType": "CP_UP"
+      "abnormalType": "CP_UP",
+      "effectPoint": [
+        669
+      ]
     },
     {
       "skillId": 1417,
@@ -52958,7 +57785,14 @@
           "itemConsumeCount": 4
         }
       ],
-      "magicType": 1
+      "magicType": 1,
+      "effectPoint": [
+        -440,
+        -466,
+        -489,
+        -508,
+        -524
+      ]
     },
     {
       "skillId": 1418,
@@ -52982,7 +57816,10 @@
       "abnormalTimeSeconds": 10,
       "magicType": 1,
       "effectRange": 900,
-      "abnormalType": "INVINCIBILITY"
+      "abnormalType": "INVINCIBILITY",
+      "effectPoint": [
+        1
+      ]
     },
     {
       "skillId": 1419,
@@ -53006,7 +57843,10 @@
           "itemConsumeCount": 1
         }
       ],
-      "magicType": 1
+      "magicType": 1,
+      "effectPoint": [
+        -676
+      ]
     },
     {
       "skillId": 1420,
@@ -53030,7 +57870,10 @@
           "itemConsumeCount": 1
         }
       ],
-      "magicType": 1
+      "magicType": 1,
+      "effectPoint": [
+        -676
+      ]
     },
     {
       "skillId": 1421,
@@ -53054,7 +57897,10 @@
           "itemConsumeCount": 1
         }
       ],
-      "magicType": 1
+      "magicType": 1,
+      "effectPoint": [
+        -676
+      ]
     },
     {
       "skillId": 1422,
@@ -53102,7 +57948,10 @@
           "itemConsumeCount": 1
         }
       ],
-      "magicType": 1
+      "magicType": 1,
+      "effectPoint": [
+        -676
+      ]
     },
     {
       "skillId": 1424,
@@ -53246,7 +58095,10 @@
           "itemConsumeCount": 4
         }
       ],
-      "magicType": 1
+      "magicType": 1,
+      "effectPoint": [
+        467
+      ]
     },
     {
       "skillId": 1430,
@@ -53302,7 +58154,10 @@
       ],
       "abnormalTimeSeconds": 30,
       "magicType": 1,
-      "abnormalType": "FORCE_MEDITATION"
+      "abnormalType": "FORCE_MEDITATION",
+      "effectPoint": [
+        1
+      ]
     },
     {
       "skillId": 2096,
@@ -53324,7 +58179,10 @@
         }
       ],
       "magicType": 2,
-      "effectRange": 500
+      "effectRange": 500,
+      "effectPoint": [
+        -150
+      ]
     },
     {
       "skillId": 2097,
@@ -53404,7 +58262,10 @@
         }
       ],
       "magicType": 2,
-      "effectRange": -1
+      "effectRange": -1,
+      "usingKinds": [
+        "FISHINGROD"
+      ]
     },
     {
       "skillId": 1313,
@@ -53608,7 +58469,10 @@
         }
       ],
       "magicType": 2,
-      "effectRange": -1
+      "effectRange": -1,
+      "usingKinds": [
+        "FISHINGROD"
+      ]
     },
     {
       "skillId": 1314,
@@ -53812,7 +58676,10 @@
         }
       ],
       "magicType": 2,
-      "effectRange": -1
+      "effectRange": -1,
+      "usingKinds": [
+        "FISHINGROD"
+      ]
     },
     {
       "skillId": 1315,
@@ -54037,6 +58904,9 @@
           "itemConsumeId": 3031,
           "itemConsumeCount": 5
         }
+      ],
+      "effectPoint": [
+        -100
       ]
     },
     {
@@ -54082,7 +58952,10 @@
         }
       ],
       "abnormalTimeSeconds": 9,
-      "abnormalType": "PD_UP_SPECIAL"
+      "abnormalType": "PD_UP_SPECIAL",
+      "effectPoint": [
+        662
+      ]
     },
     {
       "skillId": 395,
@@ -54105,7 +58978,10 @@
         }
       ],
       "abnormalTimeSeconds": 30,
-      "abnormalType": "HERO_BUFF"
+      "abnormalType": "HERO_BUFF",
+      "effectPoint": [
+        676
+      ]
     },
     {
       "skillId": 396,
@@ -54128,7 +59004,10 @@
         }
       ],
       "abnormalTimeSeconds": 120,
-      "abnormalType": "HERO_BUFF"
+      "abnormalType": "HERO_BUFF",
+      "effectPoint": [
+        676
+      ]
     },
     {
       "skillId": 1323,
@@ -54152,7 +59031,10 @@
         }
       ],
       "abnormalTimeSeconds": 3600,
-      "abnormalType": "PRESERVE_ABNORMAL"
+      "abnormalType": "PRESERVE_ABNORMAL",
+      "effectPoint": [
+        1
+      ]
     },
     {
       "skillId": 1324,
@@ -54198,7 +59080,10 @@
         }
       ],
       "abnormalTimeSeconds": 3600,
-      "abnormalType": "REDUCE_DROP_PENALTY"
+      "abnormalType": "REDUCE_DROP_PENALTY",
+      "effectPoint": [
+        659
+      ]
     },
     {
       "skillId": 1326,
@@ -54220,6 +59105,9 @@
           "itemConsumeId": 3031,
           "itemConsumeCount": 5
         }
+      ],
+      "effectPoint": [
+        659
       ]
     },
     {
@@ -54242,6 +59130,9 @@
           "itemConsumeId": 3031,
           "itemConsumeCount": 5
         }
+      ],
+      "effectPoint": [
+        659
       ]
     },
     {
@@ -54266,7 +59157,10 @@
         }
       ],
       "abnormalTimeSeconds": 120,
-      "abnormalType": "HERO_BUFF"
+      "abnormalType": "HERO_BUFF",
+      "effectPoint": [
+        676
+      ]
     },
     {
       "skillId": 1375,
@@ -54291,7 +59185,10 @@
       ],
       "abnormalTimeSeconds": 30,
       "isDebuff": true,
-      "abnormalType": "HERO_DEBUFF"
+      "abnormalType": "HERO_DEBUFF",
+      "effectPoint": [
+        -676
+      ]
     },
     {
       "skillId": 1376,
@@ -54316,7 +59213,10 @@
       ],
       "abnormalTimeSeconds": 15,
       "isDebuff": true,
-      "abnormalType": "HERO_DEBUFF"
+      "abnormalType": "HERO_DEBUFF",
+      "effectPoint": [
+        -676
+      ]
     }
   ]
 }

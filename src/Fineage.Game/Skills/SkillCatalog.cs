@@ -108,7 +108,9 @@ public sealed class SkillCatalog
                 Trait = (row.Trait ?? "").Trim().ToUpperInvariant(),
                 ActivateRate = row.ActivateRate,
                 LvlBonusRate = row.LvlBonusRate <= 0 ? 1 : row.LvlBonusRate,
-                BasicProperty = (row.BasicProperty ?? "").Trim().ToUpperInvariant()
+                BasicProperty = (row.BasicProperty ?? "").Trim().ToUpperInvariant(),
+                EffectPoints = row.EffectPoint is { Count: > 0 } ep ? ep : [],
+                UsingKinds = (row.UsingKinds ?? []).Where(k => !string.IsNullOrWhiteSpace(k)).Select(k => k.Trim().ToUpperInvariant()).ToArray()
             });
         }
 
@@ -139,6 +141,10 @@ public sealed class SkillCatalog
         public string? BasicProperty { get; set; }
         public int MagicType { get; set; }
         public int EffectRange { get; set; }
+        /// <summary>Mobius <c>effectPoint</c>: a scalar row, or the per-level table expanded to a list.</summary>
+        public List<int>? EffectPoint { get; set; }
+        /// <summary>Mobius <c>&lt;cond msgId="113"&gt;&lt;using kind=".."/&gt;</c> weapon gate.</summary>
+        public List<string>? UsingKinds { get; set; }
         public List<LevelDto>? LevelData { get; set; }
     }
 
