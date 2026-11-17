@@ -103,7 +103,8 @@ public sealed partial class ZoneWorld
             Noble = e.Noble,
             Hero = e.Hero,
             BaseClassId = e.BaseClassId,
-            ClassIndex = e.ClassIndex
+            ClassIndex = e.ClassIndex,
+            Cubics = CubicIdsOf(e)
         };
     }
 

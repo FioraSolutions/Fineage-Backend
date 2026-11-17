@@ -1,0 +1,2929 @@
+{
+ "reference": "Cubics transcribed from Mobius CT 0 Interlude stats/cubics and stats/skills (SummonCubic, CubicMastery).",
+ "cubics": [
+  {
+   "id": 1,
+   "level": 1,
+   "durationSec": 900,
+   "delaySec": 10,
+   "maxCount": 30,
+   "useUp": true,
+   "power": 282,
+   "targetType": "TARGET",
+   "selection": "RANDOM",
+   "skills": [
+    {
+     "skillId": 4049,
+     "level": 1
+    }
+   ]
+  },
+  {
+   "id": 1,
+   "level": 2,
+   "durationSec": 900,
+   "delaySec": 10,
+   "maxCount": 30,
+   "useUp": true,
+   "power": 434,
+   "targetType": "TARGET",
+   "selection": "RANDOM",
+   "skills": [
+    {
+     "skillId": 4049,
+     "level": 2
+    }
+   ]
+  },
+  {
+   "id": 1,
+   "level": 3,
+   "durationSec": 900,
+   "delaySec": 10,
+   "maxCount": 30,
+   "useUp": true,
+   "power": 677,
+   "targetType": "TARGET",
+   "selection": "RANDOM",
+   "skills": [
+    {
+     "skillId": 4049,
+     "level": 3
+    }
+   ]
+  },
+  {
+   "id": 1,
+   "level": 4,
+   "durationSec": 900,
+   "delaySec": 10,
+   "maxCount": 30,
+   "useUp": true,
+   "power": 919,
+   "targetType": "TARGET",
+   "selection": "RANDOM",
+   "skills": [
+    {
+     "skillId": 4049,
+     "level": 4
+    }
+   ]
+  },
+  {
+   "id": 1,
+   "level": 5,
+   "durationSec": 900,
+   "delaySec": 10,
+   "maxCount": 30,
+   "useUp": true,
+   "power": 1141,
+   "targetType": "TARGET",
+   "selection": "RANDOM",
+   "skills": [
+    {
+     "skillId": 4049,
+     "level": 5
+    }
+   ]
+  },
+  {
+   "id": 1,
+   "level": 6,
+   "durationSec": 900,
+   "delaySec": 10,
+   "maxCount": 30,
+   "useUp": true,
+   "power": 1394,
+   "targetType": "TARGET",
+   "selection": "RANDOM",
+   "skills": [
+    {
+     "skillId": 4049,
+     "level": 6
+    }
+   ]
+  },
+  {
+   "id": 1,
+   "level": 7,
+   "durationSec": 900,
+   "delaySec": 10,
+   "maxCount": 30,
+   "useUp": true,
+   "power": 1673,
+   "targetType": "TARGET",
+   "selection": "RANDOM",
+   "skills": [
+    {
+     "skillId": 4049,
+     "level": 7
+    }
+   ]
+  },
+  {
+   "id": 1,
+   "level": 8,
+   "durationSec": 900,
+   "delaySec": 10,
+   "maxCount": 30,
+   "useUp": true,
+   "power": 1975,
+   "targetType": "TARGET",
+   "selection": "RANDOM",
+   "skills": [
+    {
+     "skillId": 4049,
+     "level": 8
+    }
+   ]
+  },
+  {
+   "id": 2,
+   "level": 1,
+   "durationSec": 900,
+   "delaySec": 15,
+   "maxCount": 20,
+   "useUp": true,
+   "power": 351,
+   "targetType": "TARGET",
+   "selection": "RANDOM",
+   "skills": [
+    {
+     "skillId": 4050,
+     "level": 1
+    }
+   ]
+  },
+  {
+   "id": 2,
+   "level": 2,
+   "durationSec": 900,
+   "delaySec": 15,
+   "maxCount": 20,
+   "useUp": true,
+   "power": 531,
+   "targetType": "TARGET",
+   "selection": "RANDOM",
+   "skills": [
+    {
+     "skillId": 4050,
+     "level": 2
+    }
+   ]
+  },
+  {
+   "id": 2,
+   "level": 3,
+   "durationSec": 900,
+   "delaySec": 15,
+   "maxCount": 20,
+   "useUp": true,
+   "power": 773,
+   "targetType": "TARGET",
+   "selection": "RANDOM",
+   "skills": [
+    {
+     "skillId": 4050,
+     "level": 3
+    }
+   ]
+  },
+  {
+   "id": 2,
+   "level": 4,
+   "durationSec": 900,
+   "delaySec": 15,
+   "maxCount": 20,
+   "useUp": true,
+   "power": 1026,
+   "targetType": "TARGET",
+   "selection": "RANDOM",
+   "skills": [
+    {
+     "skillId": 4050,
+     "level": 4
+    }
+   ]
+  },
+  {
+   "id": 2,
+   "level": 5,
+   "durationSec": 900,
+   "delaySec": 15,
+   "maxCount": 20,
+   "useUp": true,
+   "power": 1264,
+   "targetType": "TARGET",
+   "selection": "RANDOM",
+   "skills": [
+    {
+     "skillId": 4050,
+     "level": 5
+    }
+   ]
+  },
+  {
+   "id": 2,
+   "level": 6,
+   "durationSec": 900,
+   "delaySec": 15,
+   "maxCount": 20,
+   "useUp": true,
+   "power": 1530,
+   "targetType": "TARGET",
+   "selection": "RANDOM",
+   "skills": [
+    {
+     "skillId": 4050,
+     "level": 6
+    }
+   ]
+  },
+  {
+   "id": 2,
+   "level": 7,
+   "durationSec": 900,
+   "delaySec": 15,
+   "maxCount": 20,
+   "useUp": true,
+   "power": 1822,
+   "targetType": "TARGET",
+   "selection": "RANDOM",
+   "skills": [
+    {
+     "skillId": 4050,
+     "level": 7
+    }
+   ]
+  },
+  {
+   "id": 3,
+   "level": 1,
+   "durationSec": 900,
+   "delaySec": 13,
+   "maxCount": 20,
+   "useUp": true,
+   "power": 0,
+   "targetType": "HEAL",
+   "selection": "RANDOM",
+   "skills": [
+    {
+     "skillId": 4051,
+     "level": 1
+    }
+   ]
+  },
+  {
+   "id": 3,
+   "level": 2,
+   "durationSec": 900,
+   "delaySec": 13,
+   "maxCount": 20,
+   "useUp": true,
+   "power": 0,
+   "targetType": "HEAL",
+   "selection": "RANDOM",
+   "skills": [
+    {
+     "skillId": 4051,
+     "level": 2
+    }
+   ]
+  },
+  {
+   "id": 3,
+   "level": 3,
+   "durationSec": 900,
+   "delaySec": 13,
+   "maxCount": 20,
+   "useUp": true,
+   "power": 0,
+   "targetType": "HEAL",
+   "selection": "RANDOM",
+   "skills": [
+    {
+     "skillId": 4051,
+     "level": 3
+    }
+   ]
+  },
+  {
+   "id": 3,
+   "level": 4,
+   "durationSec": 900,
+   "delaySec": 13,
+   "maxCount": 20,
+   "useUp": true,
+   "power": 0,
+   "targetType": "HEAL",
+   "selection": "RANDOM",
+   "skills": [
+    {
+     "skillId": 4051,
+     "level": 4
+    }
+   ]
+  },
+  {
+   "id": 3,
+   "level": 5,
+   "durationSec": 900,
+   "delaySec": 13,
+   "maxCount": 20,
+   "useUp": true,
+   "power": 0,
+   "targetType": "HEAL",
+   "selection": "RANDOM",
+   "skills": [
+    {
+     "skillId": 4051,
+     "level": 5
+    }
+   ]
+  },
+  {
+   "id": 3,
+   "level": 6,
+   "durationSec": 900,
+   "delaySec": 13,
+   "maxCount": 20,
+   "useUp": true,
+   "power": 0,
+   "targetType": "HEAL",
+   "selection": "RANDOM",
+   "skills": [
+    {
+     "skillId": 4051,
+     "level": 6
+    }
+   ]
+  },
+  {
+   "id": 3,
+   "level": 7,
+   "durationSec": 900,
+   "delaySec": 13,
+   "maxCount": 20,
+   "useUp": true,
+   "power": 0,
+   "targetType": "HEAL",
+   "selection": "RANDOM",
+   "skills": [
+    {
+     "skillId": 4051,
+     "level": 7
+    }
+   ]
+  },
+  {
+   "id": 4,
+   "level": 1,
+   "durationSec": 900,
+   "delaySec": 20,
+   "maxCount": 15,
+   "useUp": false,
+   "power": 531,
+   "targetType": "TARGET",
+   "selection": "RANDOM",
+   "skills": [
+    {
+     "skillId": 4052,
+     "level": 1
+    }
+   ]
+  },
+  {
+   "id": 4,
+   "level": 2,
+   "durationSec": 900,
+   "delaySec": 20,
+   "maxCount": 15,
+   "useUp": false,
+   "power": 773,
+   "targetType": "TARGET",
+   "selection": "RANDOM",
+   "skills": [
+    {
+     "skillId": 4052,
+     "level": 2
+    }
+   ]
+  },
+  {
+   "id": 4,
+   "level": 3,
+   "durationSec": 900,
+   "delaySec": 20,
+   "maxCount": 15,
+   "useUp": false,
+   "power": 1026,
+   "targetType": "TARGET",
+   "selection": "RANDOM",
+   "skills": [
+    {
+     "skillId": 4052,
+     "level": 3
+    }
+   ]
+  },
+  {
+   "id": 4,
+   "level": 4,
+   "durationSec": 900,
+   "delaySec": 20,
+   "maxCount": 15,
+   "useUp": false,
+   "power": 1264,
+   "targetType": "TARGET",
+   "selection": "RANDOM",
+   "skills": [
+    {
+     "skillId": 4052,
+     "level": 4
+    }
+   ]
+  },
+  {
+   "id": 4,
+   "level": 5,
+   "durationSec": 900,
+   "delaySec": 20,
+   "maxCount": 15,
+   "useUp": false,
+   "power": 1530,
+   "targetType": "TARGET",
+   "selection": "RANDOM",
+   "skills": [
+    {
+     "skillId": 4052,
+     "level": 5
+    }
+   ]
+  },
+  {
+   "id": 4,
+   "level": 6,
+   "durationSec": 900,
+   "delaySec": 20,
+   "maxCount": 15,
+   "useUp": false,
+   "power": 1822,
+   "targetType": "TARGET",
+   "selection": "RANDOM",
+   "skills": [
+    {
+     "skillId": 4052,
+     "level": 6
+    }
+   ]
+  },
+  {
+   "id": 5,
+   "level": 1,
+   "durationSec": 900,
+   "delaySec": 8,
+   "maxCount": 30,
+   "useUp": true,
+   "power": 282,
+   "targetType": "TARGET",
+   "selection": "RANDOM",
+   "skills": [
+    {
+     "skillId": 4053,
+     "level": 1
+    },
+    {
+     "skillId": 4054,
+     "level": 1
+    },
+    {
+     "skillId": 4055,
+     "level": 1
+    }
+   ]
+  },
+  {
+   "id": 5,
+   "level": 2,
+   "durationSec": 900,
+   "delaySec": 8,
+   "maxCount": 30,
+   "useUp": true,
+   "power": 434,
+   "targetType": "TARGET",
+   "selection": "RANDOM",
+   "skills": [
+    {
+     "skillId": 4053,
+     "level": 2
+    },
+    {
+     "skillId": 4054,
+     "level": 2
+    },
+    {
+     "skillId": 4055,
+     "level": 2
+    }
+   ]
+  },
+  {
+   "id": 5,
+   "level": 3,
+   "durationSec": 900,
+   "delaySec": 8,
+   "maxCount": 30,
+   "useUp": true,
+   "power": 644,
+   "targetType": "TARGET",
+   "selection": "RANDOM",
+   "skills": [
+    {
+     "skillId": 4053,
+     "level": 3
+    },
+    {
+     "skillId": 4054,
+     "level": 3
+    },
+    {
+     "skillId": 4055,
+     "level": 3
+    }
+   ]
+  },
+  {
+   "id": 5,
+   "level": 4,
+   "durationSec": 900,
+   "delaySec": 8,
+   "maxCount": 30,
+   "useUp": true,
+   "power": 919,
+   "targetType": "TARGET",
+   "selection": "RANDOM",
+   "skills": [
+    {
+     "skillId": 4053,
+     "level": 4
+    },
+    {
+     "skillId": 4054,
+     "level": 4
+    },
+    {
+     "skillId": 4055,
+     "level": 4
+    }
+   ]
+  },
+  {
+   "id": 5,
+   "level": 5,
+   "durationSec": 900,
+   "delaySec": 8,
+   "maxCount": 30,
+   "useUp": true,
+   "power": 1141,
+   "targetType": "TARGET",
+   "selection": "RANDOM",
+   "skills": [
+    {
+     "skillId": 4053,
+     "level": 5
+    },
+    {
+     "skillId": 4054,
+     "level": 5
+    },
+    {
+     "skillId": 4055,
+     "level": 5
+    }
+   ]
+  },
+  {
+   "id": 5,
+   "level": 6,
+   "durationSec": 900,
+   "delaySec": 8,
+   "maxCount": 30,
+   "useUp": true,
+   "power": 1394,
+   "targetType": "TARGET",
+   "selection": "RANDOM",
+   "skills": [
+    {
+     "skillId": 4053,
+     "level": 6
+    },
+    {
+     "skillId": 4054,
+     "level": 6
+    },
+    {
+     "skillId": 4055,
+     "level": 6
+    }
+   ]
+  },
+  {
+   "id": 5,
+   "level": 7,
+   "durationSec": 900,
+   "delaySec": 8,
+   "maxCount": 30,
+   "useUp": true,
+   "power": 1673,
+   "targetType": "TARGET",
+   "selection": "RANDOM",
+   "skills": [
+    {
+     "skillId": 4053,
+     "level": 7
+    },
+    {
+     "skillId": 4054,
+     "level": 7
+    },
+    {
+     "skillId": 4055,
+     "level": 7
+    }
+   ]
+  },
+  {
+   "id": 5,
+   "level": 8,
+   "durationSec": 900,
+   "delaySec": 8,
+   "maxCount": 30,
+   "useUp": true,
+   "power": 1975,
+   "targetType": "TARGET",
+   "selection": "RANDOM",
+   "skills": [
+    {
+     "skillId": 4053,
+     "level": 8
+    },
+    {
+     "skillId": 4054,
+     "level": 8
+    },
+    {
+     "skillId": 4055,
+     "level": 8
+    }
+   ]
+  },
+  {
+   "id": 6,
+   "level": 1,
+   "durationSec": 900,
+   "delaySec": 30,
+   "maxCount": 10,
+   "useUp": true,
+   "power": 282,
+   "targetType": "TARGET",
+   "selection": "RANDOM",
+   "skills": [
+    {
+     "skillId": 4164,
+     "level": 1
+    }
+   ]
+  },
+  {
+   "id": 6,
+   "level": 2,
+   "durationSec": 900,
+   "delaySec": 30,
+   "maxCount": 10,
+   "useUp": true,
+   "power": 377,
+   "targetType": "TARGET",
+   "selection": "RANDOM",
+   "skills": [
+    {
+     "skillId": 4164,
+     "level": 2
+    }
+   ]
+  },
+  {
+   "id": 6,
+   "level": 3,
+   "durationSec": 900,
+   "delaySec": 30,
+   "maxCount": 10,
+   "useUp": true,
+   "power": 497,
+   "targetType": "TARGET",
+   "selection": "RANDOM",
+   "skills": [
+    {
+     "skillId": 4164,
+     "level": 3
+    }
+   ]
+  },
+  {
+   "id": 6,
+   "level": 4,
+   "durationSec": 900,
+   "delaySec": 30,
+   "maxCount": 10,
+   "useUp": true,
+   "power": 644,
+   "targetType": "TARGET",
+   "selection": "RANDOM",
+   "skills": [
+    {
+     "skillId": 4164,
+     "level": 4
+    }
+   ]
+  },
+  {
+   "id": 6,
+   "level": 5,
+   "durationSec": 900,
+   "delaySec": 30,
+   "maxCount": 10,
+   "useUp": true,
+   "power": 820,
+   "targetType": "TARGET",
+   "selection": "RANDOM",
+   "skills": [
+    {
+     "skillId": 4164,
+     "level": 5
+    }
+   ]
+  },
+  {
+   "id": 6,
+   "level": 6,
+   "durationSec": 900,
+   "delaySec": 30,
+   "maxCount": 10,
+   "useUp": true,
+   "power": 1026,
+   "targetType": "TARGET",
+   "selection": "RANDOM",
+   "skills": [
+    {
+     "skillId": 4164,
+     "level": 6
+    }
+   ]
+  },
+  {
+   "id": 6,
+   "level": 7,
+   "durationSec": 900,
+   "delaySec": 30,
+   "maxCount": 10,
+   "useUp": true,
+   "power": 1264,
+   "targetType": "TARGET",
+   "selection": "RANDOM",
+   "skills": [
+    {
+     "skillId": 4164,
+     "level": 7
+    }
+   ]
+  },
+  {
+   "id": 6,
+   "level": 8,
+   "durationSec": 900,
+   "delaySec": 30,
+   "maxCount": 10,
+   "useUp": true,
+   "power": 1530,
+   "targetType": "TARGET",
+   "selection": "RANDOM",
+   "skills": [
+    {
+     "skillId": 4164,
+     "level": 8
+    }
+   ]
+  },
+  {
+   "id": 6,
+   "level": 9,
+   "durationSec": 900,
+   "delaySec": 30,
+   "maxCount": 10,
+   "useUp": true,
+   "power": 1822,
+   "targetType": "TARGET",
+   "selection": "RANDOM",
+   "skills": [
+    {
+     "skillId": 4164,
+     "level": 9
+    }
+   ]
+  },
+  {
+   "id": 7,
+   "level": 1,
+   "durationSec": 900,
+   "delaySec": 30,
+   "maxCount": 10,
+   "useUp": true,
+   "power": 282,
+   "targetType": "TARGET",
+   "selection": "RANDOM",
+   "skills": [
+    {
+     "skillId": 4165,
+     "level": 1
+    }
+   ]
+  },
+  {
+   "id": 7,
+   "level": 2,
+   "durationSec": 900,
+   "delaySec": 30,
+   "maxCount": 10,
+   "useUp": true,
+   "power": 377,
+   "targetType": "TARGET",
+   "selection": "RANDOM",
+   "skills": [
+    {
+     "skillId": 4165,
+     "level": 2
+    }
+   ]
+  },
+  {
+   "id": 7,
+   "level": 3,
+   "durationSec": 900,
+   "delaySec": 30,
+   "maxCount": 10,
+   "useUp": true,
+   "power": 497,
+   "targetType": "TARGET",
+   "selection": "RANDOM",
+   "skills": [
+    {
+     "skillId": 4165,
+     "level": 3
+    }
+   ]
+  },
+  {
+   "id": 7,
+   "level": 4,
+   "durationSec": 900,
+   "delaySec": 30,
+   "maxCount": 10,
+   "useUp": true,
+   "power": 644,
+   "targetType": "TARGET",
+   "selection": "RANDOM",
+   "skills": [
+    {
+     "skillId": 4165,
+     "level": 4
+    }
+   ]
+  },
+  {
+   "id": 7,
+   "level": 5,
+   "durationSec": 900,
+   "delaySec": 30,
+   "maxCount": 10,
+   "useUp": true,
+   "power": 820,
+   "targetType": "TARGET",
+   "selection": "RANDOM",
+   "skills": [
+    {
+     "skillId": 4165,
+     "level": 5
+    }
+   ]
+  },
+  {
+   "id": 7,
+   "level": 6,
+   "durationSec": 900,
+   "delaySec": 30,
+   "maxCount": 10,
+   "useUp": true,
+   "power": 1141,
+   "targetType": "TARGET",
+   "selection": "RANDOM",
+   "skills": [
+    {
+     "skillId": 4165,
+     "level": 6
+    }
+   ]
+  },
+  {
+   "id": 7,
+   "level": 7,
+   "durationSec": 900,
+   "delaySec": 30,
+   "maxCount": 10,
+   "useUp": true,
+   "power": 1394,
+   "targetType": "TARGET",
+   "selection": "RANDOM",
+   "skills": [
+    {
+     "skillId": 4165,
+     "level": 7
+    }
+   ]
+  },
+  {
+   "id": 7,
+   "level": 8,
+   "durationSec": 900,
+   "delaySec": 30,
+   "maxCount": 10,
+   "useUp": true,
+   "power": 1673,
+   "targetType": "TARGET",
+   "selection": "RANDOM",
+   "skills": [
+    {
+     "skillId": 4165,
+     "level": 8
+    }
+   ]
+  },
+  {
+   "id": 7,
+   "level": 9,
+   "durationSec": 900,
+   "delaySec": 30,
+   "maxCount": 10,
+   "useUp": true,
+   "power": 1975,
+   "targetType": "TARGET",
+   "selection": "RANDOM",
+   "skills": [
+    {
+     "skillId": 4165,
+     "level": 9
+    }
+   ]
+  },
+  {
+   "id": 8,
+   "level": 1,
+   "durationSec": 900,
+   "delaySec": 30,
+   "maxCount": 10,
+   "useUp": true,
+   "power": 282,
+   "targetType": "TARGET",
+   "selection": "RANDOM",
+   "skills": [
+    {
+     "skillId": 4166,
+     "level": 1
+    }
+   ]
+  },
+  {
+   "id": 8,
+   "level": 2,
+   "durationSec": 900,
+   "delaySec": 30,
+   "maxCount": 10,
+   "useUp": true,
+   "power": 377,
+   "targetType": "TARGET",
+   "selection": "RANDOM",
+   "skills": [
+    {
+     "skillId": 4166,
+     "level": 2
+    }
+   ]
+  },
+  {
+   "id": 8,
+   "level": 3,
+   "durationSec": 900,
+   "delaySec": 30,
+   "maxCount": 10,
+   "useUp": true,
+   "power": 497,
+   "targetType": "TARGET",
+   "selection": "RANDOM",
+   "skills": [
+    {
+     "skillId": 4166,
+     "level": 3
+    }
+   ]
+  },
+  {
+   "id": 8,
+   "level": 4,
+   "durationSec": 900,
+   "delaySec": 30,
+   "maxCount": 10,
+   "useUp": true,
+   "power": 644,
+   "targetType": "TARGET",
+   "selection": "RANDOM",
+   "skills": [
+    {
+     "skillId": 4166,
+     "level": 4
+    }
+   ]
+  },
+  {
+   "id": 8,
+   "level": 5,
+   "durationSec": 900,
+   "delaySec": 30,
+   "maxCount": 10,
+   "useUp": true,
+   "power": 820,
+   "targetType": "TARGET",
+   "selection": "RANDOM",
+   "skills": [
+    {
+     "skillId": 4166,
+     "level": 5
+    }
+   ]
+  },
+  {
+   "id": 8,
+   "level": 6,
+   "durationSec": 900,
+   "delaySec": 30,
+   "maxCount": 10,
+   "useUp": true,
+   "power": 1026,
+   "targetType": "TARGET",
+   "selection": "RANDOM",
+   "skills": [
+    {
+     "skillId": 4166,
+     "level": 6
+    }
+   ]
+  },
+  {
+   "id": 8,
+   "level": 7,
+   "durationSec": 900,
+   "delaySec": 30,
+   "maxCount": 10,
+   "useUp": true,
+   "power": 1264,
+   "targetType": "TARGET",
+   "selection": "RANDOM",
+   "skills": [
+    {
+     "skillId": 4166,
+     "level": 7
+    }
+   ]
+  },
+  {
+   "id": 8,
+   "level": 8,
+   "durationSec": 900,
+   "delaySec": 30,
+   "maxCount": 10,
+   "useUp": true,
+   "power": 1530,
+   "targetType": "TARGET",
+   "selection": "RANDOM",
+   "skills": [
+    {
+     "skillId": 4166,
+     "level": 8
+    }
+   ]
+  },
+  {
+   "id": 8,
+   "level": 9,
+   "durationSec": 900,
+   "delaySec": 30,
+   "maxCount": 10,
+   "useUp": true,
+   "power": 1822,
+   "targetType": "TARGET",
+   "selection": "RANDOM",
+   "skills": [
+    {
+     "skillId": 4166,
+     "level": 9
+    }
+   ]
+  },
+  {
+   "id": 9,
+   "level": 1,
+   "durationSec": 900,
+   "delaySec": 8,
+   "maxCount": 300,
+   "useUp": true,
+   "power": 1026,
+   "targetType": "TARGET",
+   "selection": "RANDOM",
+   "skills": [
+    {
+     "skillId": 5115,
+     "level": 1
+    },
+    {
+     "skillId": 5116,
+     "level": 1
+    }
+   ]
+  },
+  {
+   "id": 9,
+   "level": 2,
+   "durationSec": 900,
+   "delaySec": 8,
+   "maxCount": 300,
+   "useUp": true,
+   "power": 1264,
+   "targetType": "TARGET",
+   "selection": "RANDOM",
+   "skills": [
+    {
+     "skillId": 5115,
+     "level": 2
+    },
+    {
+     "skillId": 5116,
+     "level": 2
+    }
+   ]
+  },
+  {
+   "id": 9,
+   "level": 3,
+   "durationSec": 900,
+   "delaySec": 8,
+   "maxCount": 300,
+   "useUp": true,
+   "power": 1530,
+   "targetType": "TARGET",
+   "selection": "RANDOM",
+   "skills": [
+    {
+     "skillId": 5115,
+     "level": 3
+    },
+    {
+     "skillId": 5116,
+     "level": 3
+    }
+   ]
+  },
+  {
+   "id": 9,
+   "level": 4,
+   "durationSec": 900,
+   "delaySec": 8,
+   "maxCount": 300,
+   "useUp": true,
+   "power": 1822,
+   "targetType": "TARGET",
+   "selection": "RANDOM",
+   "skills": [
+    {
+     "skillId": 5115,
+     "level": 4
+    },
+    {
+     "skillId": 5116,
+     "level": 4
+    }
+   ]
+  }
+ ],
+ "summonSkills": [
+  {
+   "skillId": 10,
+   "name": "Summon Storm Cubic",
+   "cubicId": 1,
+   "party": false,
+   "delaySec": 10,
+   "durationSec": 900,
+   "maxCount": 30,
+   "chance": 12,
+   "levels": [
+    {
+     "level": 1,
+     "power": 282,
+     "itemId": 1458,
+     "itemCount": 5,
+     "cubicLevel": 0
+    },
+    {
+     "level": 2,
+     "power": 434,
+     "itemId": 1458,
+     "itemCount": 6,
+     "cubicLevel": 0
+    },
+    {
+     "level": 3,
+     "power": 677,
+     "itemId": 1458,
+     "itemCount": 8,
+     "cubicLevel": 0
+    },
+    {
+     "level": 4,
+     "power": 919,
+     "itemId": 1458,
+     "itemCount": 9,
+     "cubicLevel": 0
+    },
+    {
+     "level": 5,
+     "power": 1141,
+     "itemId": 1458,
+     "itemCount": 11,
+     "cubicLevel": 0
+    },
+    {
+     "level": 6,
+     "power": 1394,
+     "itemId": 1458,
+     "itemCount": 12,
+     "cubicLevel": 0
+    },
+    {
+     "level": 7,
+     "power": 1673,
+     "itemId": 1458,
+     "itemCount": 13,
+     "cubicLevel": 0
+    },
+    {
+     "level": 8,
+     "power": 1975,
+     "itemId": 1458,
+     "itemCount": 14,
+     "cubicLevel": 0
+    }
+   ]
+  },
+  {
+   "skillId": 22,
+   "name": "Summon Vampiric Cubic",
+   "cubicId": 2,
+   "party": false,
+   "delaySec": 15,
+   "durationSec": 900,
+   "maxCount": 20,
+   "chance": 8,
+   "levels": [
+    {
+     "level": 1,
+     "power": 351,
+     "itemId": 1458,
+     "itemCount": 6,
+     "cubicLevel": 0
+    },
+    {
+     "level": 2,
+     "power": 531,
+     "itemId": 1458,
+     "itemCount": 7,
+     "cubicLevel": 0
+    },
+    {
+     "level": 3,
+     "power": 773,
+     "itemId": 1458,
+     "itemCount": 8,
+     "cubicLevel": 0
+    },
+    {
+     "level": 4,
+     "power": 1026,
+     "itemId": 1458,
+     "itemCount": 9,
+     "cubicLevel": 0
+    },
+    {
+     "level": 5,
+     "power": 1264,
+     "itemId": 1458,
+     "itemCount": 11,
+     "cubicLevel": 0
+    },
+    {
+     "level": 6,
+     "power": 1530,
+     "itemId": 1458,
+     "itemCount": 12,
+     "cubicLevel": 0
+    },
+    {
+     "level": 7,
+     "power": 1822,
+     "itemId": 1458,
+     "itemCount": 13,
+     "cubicLevel": 0
+    }
+   ]
+  },
+  {
+   "skillId": 33,
+   "name": "Summon Phantom Cubic",
+   "cubicId": 5,
+   "party": false,
+   "delaySec": 8,
+   "durationSec": 900,
+   "maxCount": 30,
+   "chance": 30,
+   "levels": [
+    {
+     "level": 1,
+     "power": 282,
+     "itemId": 1458,
+     "itemCount": 2,
+     "cubicLevel": 0
+    },
+    {
+     "level": 2,
+     "power": 434,
+     "itemId": 1458,
+     "itemCount": 3,
+     "cubicLevel": 0
+    },
+    {
+     "level": 3,
+     "power": 644,
+     "itemId": 1458,
+     "itemCount": 4,
+     "cubicLevel": 0
+    },
+    {
+     "level": 4,
+     "power": 919,
+     "itemId": 1458,
+     "itemCount": 4,
+     "cubicLevel": 0
+    },
+    {
+     "level": 5,
+     "power": 1141,
+     "itemId": 1458,
+     "itemCount": 5,
+     "cubicLevel": 0
+    },
+    {
+     "level": 6,
+     "power": 1394,
+     "itemId": 1458,
+     "itemCount": 6,
+     "cubicLevel": 0
+    },
+    {
+     "level": 7,
+     "power": 1673,
+     "itemId": 1458,
+     "itemCount": 6,
+     "cubicLevel": 0
+    },
+    {
+     "level": 8,
+     "power": 1975,
+     "itemId": 1458,
+     "itemCount": 7,
+     "cubicLevel": 0
+    }
+   ]
+  },
+  {
+   "skillId": 67,
+   "name": "Summon Life Cubic",
+   "cubicId": 3,
+   "party": false,
+   "delaySec": 13,
+   "durationSec": 900,
+   "maxCount": 20,
+   "chance": 0,
+   "levels": [
+    {
+     "level": 1,
+     "power": 0,
+     "itemId": 1458,
+     "itemCount": 6,
+     "cubicLevel": 0
+    },
+    {
+     "level": 2,
+     "power": 0,
+     "itemId": 1458,
+     "itemCount": 7,
+     "cubicLevel": 0
+    },
+    {
+     "level": 3,
+     "power": 0,
+     "itemId": 1458,
+     "itemCount": 8,
+     "cubicLevel": 0
+    },
+    {
+     "level": 4,
+     "power": 0,
+     "itemId": 1458,
+     "itemCount": 9,
+     "cubicLevel": 0
+    },
+    {
+     "level": 5,
+     "power": 0,
+     "itemId": 1458,
+     "itemCount": 11,
+     "cubicLevel": 0
+    },
+    {
+     "level": 6,
+     "power": 0,
+     "itemId": 1458,
+     "itemCount": 12,
+     "cubicLevel": 0
+    },
+    {
+     "level": 7,
+     "power": 0,
+     "itemId": 1458,
+     "itemCount": 13,
+     "cubicLevel": 0
+    }
+   ]
+  },
+  {
+   "skillId": 278,
+   "name": "Summon Viper Cubic",
+   "cubicId": 4,
+   "party": false,
+   "delaySec": 20,
+   "durationSec": 900,
+   "maxCount": 15,
+   "chance": 20,
+   "levels": [
+    {
+     "level": 1,
+     "power": 531,
+     "itemId": 1458,
+     "itemCount": 3,
+     "cubicLevel": 0
+    },
+    {
+     "level": 2,
+     "power": 773,
+     "itemId": 1458,
+     "itemCount": 4,
+     "cubicLevel": 0
+    },
+    {
+     "level": 3,
+     "power": 1026,
+     "itemId": 1458,
+     "itemCount": 5,
+     "cubicLevel": 0
+    },
+    {
+     "level": 4,
+     "power": 1264,
+     "itemId": 1458,
+     "itemCount": 6,
+     "cubicLevel": 0
+    },
+    {
+     "level": 5,
+     "power": 1530,
+     "itemId": 1458,
+     "itemCount": 6,
+     "cubicLevel": 0
+    },
+    {
+     "level": 6,
+     "power": 1822,
+     "itemId": 1458,
+     "itemCount": 6,
+     "cubicLevel": 0
+    }
+   ]
+  },
+  {
+   "skillId": 449,
+   "name": "Summon Attractive Cubic",
+   "cubicId": 9,
+   "party": false,
+   "delaySec": 8,
+   "durationSec": 900,
+   "maxCount": 300,
+   "chance": 50,
+   "levels": [
+    {
+     "level": 1,
+     "power": 1026,
+     "itemId": 1458,
+     "itemCount": 10,
+     "cubicLevel": 0
+    },
+    {
+     "level": 2,
+     "power": 1264,
+     "itemId": 1458,
+     "itemCount": 11,
+     "cubicLevel": 0
+    },
+    {
+     "level": 3,
+     "power": 1530,
+     "itemId": 1458,
+     "itemCount": 12,
+     "cubicLevel": 0
+    },
+    {
+     "level": 4,
+     "power": 1822,
+     "itemId": 1458,
+     "itemCount": 13,
+     "cubicLevel": 0
+    }
+   ]
+  },
+  {
+   "skillId": 1279,
+   "name": "Summon Binding Cubic",
+   "cubicId": 6,
+   "party": false,
+   "delaySec": 30,
+   "durationSec": 900,
+   "maxCount": 10,
+   "chance": 12,
+   "levels": [
+    {
+     "level": 1,
+     "power": 282,
+     "itemId": 1458,
+     "itemCount": 5,
+     "cubicLevel": 0
+    },
+    {
+     "level": 2,
+     "power": 377,
+     "itemId": 1458,
+     "itemCount": 6,
+     "cubicLevel": 0
+    },
+    {
+     "level": 3,
+     "power": 497,
+     "itemId": 1458,
+     "itemCount": 7,
+     "cubicLevel": 0
+    },
+    {
+     "level": 4,
+     "power": 644,
+     "itemId": 1458,
+     "itemCount": 8,
+     "cubicLevel": 0
+    },
+    {
+     "level": 5,
+     "power": 820,
+     "itemId": 1458,
+     "itemCount": 9,
+     "cubicLevel": 0
+    },
+    {
+     "level": 6,
+     "power": 1026,
+     "itemId": 1458,
+     "itemCount": 9,
+     "cubicLevel": 0
+    },
+    {
+     "level": 7,
+     "power": 1264,
+     "itemId": 1458,
+     "itemCount": 11,
+     "cubicLevel": 0
+    },
+    {
+     "level": 8,
+     "power": 1530,
+     "itemId": 1458,
+     "itemCount": 12,
+     "cubicLevel": 0
+    },
+    {
+     "level": 9,
+     "power": 1822,
+     "itemId": 1458,
+     "itemCount": 13,
+     "cubicLevel": 0
+    }
+   ]
+  },
+  {
+   "skillId": 1280,
+   "name": "Summon Aqua Cubic",
+   "cubicId": 7,
+   "party": false,
+   "delaySec": 30,
+   "durationSec": 900,
+   "maxCount": 10,
+   "chance": 30,
+   "levels": [
+    {
+     "level": 1,
+     "power": 282,
+     "itemId": 1458,
+     "itemCount": 2,
+     "cubicLevel": 0
+    },
+    {
+     "level": 2,
+     "power": 377,
+     "itemId": 1458,
+     "itemCount": 3,
+     "cubicLevel": 0
+    },
+    {
+     "level": 3,
+     "power": 497,
+     "itemId": 1458,
+     "itemCount": 3,
+     "cubicLevel": 0
+    },
+    {
+     "level": 4,
+     "power": 644,
+     "itemId": 1458,
+     "itemCount": 4,
+     "cubicLevel": 0
+    },
+    {
+     "level": 5,
+     "power": 820,
+     "itemId": 1458,
+     "itemCount": 4,
+     "cubicLevel": 0
+    },
+    {
+     "level": 6,
+     "power": 1141,
+     "itemId": 1458,
+     "itemCount": 5,
+     "cubicLevel": 0
+    },
+    {
+     "level": 7,
+     "power": 1394,
+     "itemId": 1458,
+     "itemCount": 6,
+     "cubicLevel": 0
+    },
+    {
+     "level": 8,
+     "power": 1673,
+     "itemId": 1458,
+     "itemCount": 6,
+     "cubicLevel": 0
+    },
+    {
+     "level": 9,
+     "power": 1975,
+     "itemId": 1458,
+     "itemCount": 7,
+     "cubicLevel": 0
+    }
+   ]
+  },
+  {
+   "skillId": 1281,
+   "name": "Summon Spark Cubic",
+   "cubicId": 8,
+   "party": false,
+   "delaySec": 30,
+   "durationSec": 900,
+   "maxCount": 10,
+   "chance": 12,
+   "levels": [
+    {
+     "level": 1,
+     "power": 282,
+     "itemId": 1458,
+     "itemCount": 5,
+     "cubicLevel": 0
+    },
+    {
+     "level": 2,
+     "power": 377,
+     "itemId": 1458,
+     "itemCount": 6,
+     "cubicLevel": 0
+    },
+    {
+     "level": 3,
+     "power": 497,
+     "itemId": 1458,
+     "itemCount": 7,
+     "cubicLevel": 0
+    },
+    {
+     "level": 4,
+     "power": 644,
+     "itemId": 1458,
+     "itemCount": 8,
+     "cubicLevel": 0
+    },
+    {
+     "level": 5,
+     "power": 820,
+     "itemId": 1458,
+     "itemCount": 9,
+     "cubicLevel": 0
+    },
+    {
+     "level": 6,
+     "power": 1026,
+     "itemId": 1458,
+     "itemCount": 9,
+     "cubicLevel": 0
+    },
+    {
+     "level": 7,
+     "power": 1264,
+     "itemId": 1458,
+     "itemCount": 11,
+     "cubicLevel": 0
+    },
+    {
+     "level": 8,
+     "power": 1530,
+     "itemId": 1458,
+     "itemCount": 12,
+     "cubicLevel": 0
+    },
+    {
+     "level": 9,
+     "power": 1822,
+     "itemId": 1458,
+     "itemCount": 13,
+     "cubicLevel": 0
+    }
+   ]
+  },
+  {
+   "skillId": 1328,
+   "name": "Mass Summon Storm Cubic",
+   "cubicId": 1,
+   "party": true,
+   "delaySec": 10,
+   "durationSec": 900,
+   "maxCount": 30,
+   "chance": 12,
+   "levels": [
+    {
+     "level": 1,
+     "power": 282,
+     "itemId": 1458,
+     "itemCount": 20,
+     "cubicLevel": 0
+    },
+    {
+     "level": 2,
+     "power": 434,
+     "itemId": 1458,
+     "itemCount": 24,
+     "cubicLevel": 0
+    },
+    {
+     "level": 3,
+     "power": 677,
+     "itemId": 1458,
+     "itemCount": 32,
+     "cubicLevel": 0
+    },
+    {
+     "level": 4,
+     "power": 919,
+     "itemId": 1458,
+     "itemCount": 36,
+     "cubicLevel": 0
+    },
+    {
+     "level": 5,
+     "power": 1141,
+     "itemId": 1458,
+     "itemCount": 44,
+     "cubicLevel": 0
+    },
+    {
+     "level": 6,
+     "power": 1394,
+     "itemId": 1458,
+     "itemCount": 48,
+     "cubicLevel": 0
+    },
+    {
+     "level": 7,
+     "power": 1673,
+     "itemId": 1458,
+     "itemCount": 56,
+     "cubicLevel": 0
+    },
+    {
+     "level": 8,
+     "power": 1975,
+     "itemId": 1458,
+     "itemCount": 52,
+     "cubicLevel": 0
+    }
+   ]
+  },
+  {
+   "skillId": 1329,
+   "name": "Mass Summon Aqua Cubic",
+   "cubicId": 7,
+   "party": true,
+   "delaySec": 30,
+   "durationSec": 900,
+   "maxCount": 10,
+   "chance": 30,
+   "levels": [
+    {
+     "level": 1,
+     "power": 282,
+     "itemId": 1458,
+     "itemCount": 8,
+     "cubicLevel": 0
+    },
+    {
+     "level": 2,
+     "power": 377,
+     "itemId": 1458,
+     "itemCount": 12,
+     "cubicLevel": 0
+    },
+    {
+     "level": 3,
+     "power": 497,
+     "itemId": 1458,
+     "itemCount": 12,
+     "cubicLevel": 0
+    },
+    {
+     "level": 4,
+     "power": 644,
+     "itemId": 1458,
+     "itemCount": 16,
+     "cubicLevel": 0
+    },
+    {
+     "level": 5,
+     "power": 820,
+     "itemId": 1458,
+     "itemCount": 16,
+     "cubicLevel": 0
+    },
+    {
+     "level": 6,
+     "power": 1141,
+     "itemId": 1458,
+     "itemCount": 20,
+     "cubicLevel": 0
+    },
+    {
+     "level": 7,
+     "power": 1394,
+     "itemId": 1458,
+     "itemCount": 24,
+     "cubicLevel": 0
+    },
+    {
+     "level": 8,
+     "power": 1673,
+     "itemId": 1458,
+     "itemCount": 24,
+     "cubicLevel": 0
+    },
+    {
+     "level": 9,
+     "power": 1975,
+     "itemId": 1458,
+     "itemCount": 28,
+     "cubicLevel": 0
+    }
+   ]
+  },
+  {
+   "skillId": 1330,
+   "name": "Mass Summon Phantom Cubic",
+   "cubicId": 5,
+   "party": true,
+   "delaySec": 8,
+   "durationSec": 900,
+   "maxCount": 30,
+   "chance": 30,
+   "levels": [
+    {
+     "level": 1,
+     "power": 282,
+     "itemId": 1458,
+     "itemCount": 8,
+     "cubicLevel": 0
+    },
+    {
+     "level": 2,
+     "power": 434,
+     "itemId": 1458,
+     "itemCount": 12,
+     "cubicLevel": 0
+    },
+    {
+     "level": 3,
+     "power": 644,
+     "itemId": 1458,
+     "itemCount": 16,
+     "cubicLevel": 0
+    },
+    {
+     "level": 4,
+     "power": 919,
+     "itemId": 1458,
+     "itemCount": 16,
+     "cubicLevel": 0
+    },
+    {
+     "level": 5,
+     "power": 1141,
+     "itemId": 1458,
+     "itemCount": 20,
+     "cubicLevel": 0
+    },
+    {
+     "level": 6,
+     "power": 1394,
+     "itemId": 1458,
+     "itemCount": 24,
+     "cubicLevel": 0
+    },
+    {
+     "level": 7,
+     "power": 1673,
+     "itemId": 1458,
+     "itemCount": 24,
+     "cubicLevel": 0
+    },
+    {
+     "level": 8,
+     "power": 1975,
+     "itemId": 1458,
+     "itemCount": 28,
+     "cubicLevel": 0
+    }
+   ]
+  },
+  {
+   "skillId": 4338,
+   "name": "Life Cubic for Beginners",
+   "cubicId": 3,
+   "party": false,
+   "delaySec": 13,
+   "durationSec": 3600,
+   "maxCount": 20,
+   "chance": 0,
+   "levels": [
+    {
+     "level": 1,
+     "power": 0,
+     "itemId": 0,
+     "itemCount": 0,
+     "cubicLevel": 0
+    }
+   ]
+  }
+ ],
+ "actions": [
+  {
+   "skillId": 4049,
+   "name": "Cubic DD",
+   "kind": "mdam",
+   "debuff": false,
+   "abnormalType": "",
+   "abnormalTimeSec": 0,
+   "activateRate": -1,
+   "basicProperty": "NONE",
+   "trait": "",
+   "lvlBonusRate": 0,
+   "dotTicks": 0,
+   "drainRatio": 0,
+   "aggroChance": 0,
+   "stats": [],
+   "levels": [
+    {
+     "level": 1,
+     "power": 436,
+     "magicLevel": 40,
+     "abnormalLevel": 0
+    },
+    {
+     "level": 2,
+     "power": 645,
+     "magicLevel": 46,
+     "abnormalLevel": 0
+    },
+    {
+     "level": 3,
+     "power": 936,
+     "magicLevel": 52,
+     "abnormalLevel": 0
+    },
+    {
+     "level": 4,
+     "power": 1242,
+     "magicLevel": 58,
+     "abnormalLevel": 0
+    },
+    {
+     "level": 5,
+     "power": 1520,
+     "magicLevel": 62,
+     "abnormalLevel": 0
+    },
+    {
+     "level": 6,
+     "power": 1792,
+     "magicLevel": 66,
+     "abnormalLevel": 0
+    },
+    {
+     "level": 7,
+     "power": 2086,
+     "magicLevel": 70,
+     "abnormalLevel": 0
+    },
+    {
+     "level": 8,
+     "power": 2399,
+     "magicLevel": 74,
+     "abnormalLevel": 0
+    }
+   ]
+  },
+  {
+   "skillId": 4050,
+   "name": "Cubic Drain",
+   "kind": "drain",
+   "debuff": false,
+   "abnormalType": "",
+   "abnormalTimeSec": 0,
+   "activateRate": -1,
+   "basicProperty": "NONE",
+   "trait": "",
+   "lvlBonusRate": 0,
+   "dotTicks": 0,
+   "drainRatio": 0.4,
+   "aggroChance": 0,
+   "stats": [],
+   "levels": [
+    {
+     "level": 1,
+     "power": 543,
+     "magicLevel": 43,
+     "abnormalLevel": 0
+    },
+    {
+     "level": 2,
+     "power": 760,
+     "magicLevel": 49,
+     "abnormalLevel": 0
+    },
+    {
+     "level": 3,
+     "power": 1084,
+     "magicLevel": 55,
+     "abnormalLevel": 0
+    },
+    {
+     "level": 4,
+     "power": 1377,
+     "magicLevel": 60,
+     "abnormalLevel": 0
+    },
+    {
+     "level": 5,
+     "power": 1635,
+     "magicLevel": 64,
+     "abnormalLevel": 0
+    },
+    {
+     "level": 6,
+     "power": 1955,
+     "magicLevel": 68,
+     "abnormalLevel": 0
+    },
+    {
+     "level": 7,
+     "power": 2262,
+     "magicLevel": 72,
+     "abnormalLevel": 0
+    }
+   ]
+  },
+  {
+   "skillId": 4051,
+   "name": "Cubic Heal",
+   "kind": "heal",
+   "debuff": false,
+   "abnormalType": "",
+   "abnormalTimeSec": 0,
+   "activateRate": -1,
+   "basicProperty": "NONE",
+   "trait": "",
+   "lvlBonusRate": 0,
+   "dotTicks": 0,
+   "drainRatio": 0,
+   "aggroChance": 0,
+   "stats": [],
+   "levels": [
+    {
+     "level": 1,
+     "power": 201,
+     "magicLevel": 43,
+     "abnormalLevel": 0,
+     "heal": 201
+    },
+    {
+     "level": 2,
+     "power": 241,
+     "magicLevel": 49,
+     "abnormalLevel": 0,
+     "heal": 241
+    },
+    {
+     "level": 3,
+     "power": 281,
+     "magicLevel": 55,
+     "abnormalLevel": 0,
+     "heal": 281
+    },
+    {
+     "level": 4,
+     "power": 314,
+     "magicLevel": 60,
+     "abnormalLevel": 0,
+     "heal": 314
+    },
+    {
+     "level": 5,
+     "power": 339,
+     "magicLevel": 64,
+     "abnormalLevel": 0,
+     "heal": 339
+    },
+    {
+     "level": 6,
+     "power": 361,
+     "magicLevel": 68,
+     "abnormalLevel": 0,
+     "heal": 361
+    },
+    {
+     "level": 7,
+     "power": 382,
+     "magicLevel": 72,
+     "abnormalLevel": 0,
+     "heal": 382
+    },
+    {
+     "level": 8,
+     "power": 390,
+     "magicLevel": 74,
+     "abnormalLevel": 0,
+     "heal": 390
+    },
+    {
+     "level": 9,
+     "power": 398,
+     "magicLevel": 76,
+     "abnormalLevel": 0,
+     "heal": 398
+    },
+    {
+     "level": 10,
+     "power": 405,
+     "magicLevel": 78,
+     "abnormalLevel": 0,
+     "heal": 405
+    },
+    {
+     "level": 11,
+     "power": 413,
+     "magicLevel": 80,
+     "abnormalLevel": 0,
+     "heal": 413
+    },
+    {
+     "level": 12,
+     "power": 418,
+     "magicLevel": 81,
+     "abnormalLevel": 0,
+     "heal": 418
+    },
+    {
+     "level": 13,
+     "power": 422,
+     "magicLevel": 82,
+     "abnormalLevel": 0,
+     "heal": 422
+    },
+    {
+     "level": 14,
+     "power": 426,
+     "magicLevel": 83,
+     "abnormalLevel": 0,
+     "heal": 426
+    },
+    {
+     "level": 15,
+     "power": 430,
+     "magicLevel": 84,
+     "abnormalLevel": 0,
+     "heal": 430
+    },
+    {
+     "level": 16,
+     "power": 434,
+     "magicLevel": 85,
+     "abnormalLevel": 0,
+     "heal": 434
+    },
+    {
+     "level": 17,
+     "power": 0,
+     "magicLevel": 0,
+     "abnormalLevel": 0,
+     "heal": 0
+    },
+    {
+     "level": 18,
+     "power": 0,
+     "magicLevel": 0,
+     "abnormalLevel": 0,
+     "heal": 0
+    },
+    {
+     "level": 19,
+     "power": 0,
+     "magicLevel": 0,
+     "abnormalLevel": 0,
+     "heal": 0
+    },
+    {
+     "level": 20,
+     "power": 68,
+     "magicLevel": 18,
+     "abnormalLevel": 0,
+     "heal": 68
+    }
+   ]
+  },
+  {
+   "skillId": 4052,
+   "name": "Poison",
+   "kind": "dot",
+   "debuff": true,
+   "abnormalType": "POISON",
+   "abnormalTimeSec": 30,
+   "activateRate": 70,
+   "basicProperty": "CON",
+   "trait": "",
+   "lvlBonusRate": 1,
+   "dotTicks": 3,
+   "drainRatio": 0,
+   "aggroChance": 0,
+   "stats": [],
+   "levels": [
+    {
+     "level": 1,
+     "power": 41,
+     "magicLevel": 49,
+     "abnormalLevel": 5,
+     "dot": 41
+    },
+    {
+     "level": 2,
+     "power": 50,
+     "magicLevel": 55,
+     "abnormalLevel": 6,
+     "dot": 50
+    },
+    {
+     "level": 3,
+     "power": 58,
+     "magicLevel": 60,
+     "abnormalLevel": 7,
+     "dot": 58
+    },
+    {
+     "level": 4,
+     "power": 58,
+     "magicLevel": 64,
+     "abnormalLevel": 7,
+     "dot": 58
+    },
+    {
+     "level": 5,
+     "power": 58,
+     "magicLevel": 68,
+     "abnormalLevel": 7,
+     "dot": 58
+    },
+    {
+     "level": 6,
+     "power": 63,
+     "magicLevel": 72,
+     "abnormalLevel": 8,
+     "dot": 63
+    }
+   ]
+  },
+  {
+   "skillId": 4053,
+   "name": "Decrease P.Atk",
+   "kind": "debuff",
+   "debuff": true,
+   "abnormalType": "PA_DOWN",
+   "abnormalTimeSec": 120,
+   "activateRate": 80,
+   "basicProperty": "MEN",
+   "trait": "",
+   "lvlBonusRate": 2,
+   "dotTicks": 0,
+   "drainRatio": 0,
+   "aggroChance": 0,
+   "stats": [
+    {
+     "stat": "pAtk",
+     "op": "mul",
+     "value": 0.77
+    }
+   ],
+   "levels": [
+    {
+     "level": 1,
+     "power": 0,
+     "magicLevel": 40,
+     "abnormalLevel": 3
+    },
+    {
+     "level": 2,
+     "power": 0,
+     "magicLevel": 46,
+     "abnormalLevel": 3
+    },
+    {
+     "level": 3,
+     "power": 0,
+     "magicLevel": 52,
+     "abnormalLevel": 3
+    },
+    {
+     "level": 4,
+     "power": 0,
+     "magicLevel": 58,
+     "abnormalLevel": 3
+    },
+    {
+     "level": 5,
+     "power": 0,
+     "magicLevel": 62,
+     "abnormalLevel": 3
+    },
+    {
+     "level": 6,
+     "power": 0,
+     "magicLevel": 66,
+     "abnormalLevel": 3
+    },
+    {
+     "level": 7,
+     "power": 0,
+     "magicLevel": 70,
+     "abnormalLevel": 3
+    },
+    {
+     "level": 8,
+     "power": 0,
+     "magicLevel": 74,
+     "abnormalLevel": 3
+    }
+   ]
+  },
+  {
+   "skillId": 4054,
+   "name": "Decrease P. Def",
+   "kind": "debuff",
+   "debuff": true,
+   "abnormalType": "PD_DOWN",
+   "abnormalTimeSec": 120,
+   "activateRate": 80,
+   "basicProperty": "MEN",
+   "trait": "",
+   "lvlBonusRate": 2,
+   "dotTicks": 0,
+   "drainRatio": 0,
+   "aggroChance": 0,
+   "stats": [
+    {
+     "stat": "pDef",
+     "op": "mul",
+     "value": 0.77
+    }
+   ],
+   "levels": [
+    {
+     "level": 1,
+     "power": 0,
+     "magicLevel": 40,
+     "abnormalLevel": 3
+    },
+    {
+     "level": 2,
+     "power": 0,
+     "magicLevel": 46,
+     "abnormalLevel": 3
+    },
+    {
+     "level": 3,
+     "power": 0,
+     "magicLevel": 52,
+     "abnormalLevel": 3
+    },
+    {
+     "level": 4,
+     "power": 0,
+     "magicLevel": 58,
+     "abnormalLevel": 3
+    },
+    {
+     "level": 5,
+     "power": 0,
+     "magicLevel": 62,
+     "abnormalLevel": 3
+    },
+    {
+     "level": 6,
+     "power": 0,
+     "magicLevel": 66,
+     "abnormalLevel": 3
+    },
+    {
+     "level": 7,
+     "power": 0,
+     "magicLevel": 70,
+     "abnormalLevel": 3
+    },
+    {
+     "level": 8,
+     "power": 0,
+     "magicLevel": 74,
+     "abnormalLevel": 3
+    }
+   ]
+  },
+  {
+   "skillId": 4055,
+   "name": "Decrease Atk.Speed",
+   "kind": "debuff",
+   "debuff": true,
+   "abnormalType": "ATTACK_TIME_UP",
+   "abnormalTimeSec": 120,
+   "activateRate": 80,
+   "basicProperty": "MEN",
+   "trait": "",
+   "lvlBonusRate": 2,
+   "dotTicks": 0,
+   "drainRatio": 0,
+   "aggroChance": 0,
+   "stats": [
+    {
+     "stat": "pAtkSpd",
+     "op": "mul",
+     "value": 0.77
+    }
+   ],
+   "levels": [
+    {
+     "level": 1,
+     "power": 0,
+     "magicLevel": 40,
+     "abnormalLevel": 3
+    },
+    {
+     "level": 2,
+     "power": 0,
+     "magicLevel": 46,
+     "abnormalLevel": 3
+    },
+    {
+     "level": 3,
+     "power": 0,
+     "magicLevel": 52,
+     "abnormalLevel": 3
+    },
+    {
+     "level": 4,
+     "power": 0,
+     "magicLevel": 58,
+     "abnormalLevel": 3
+    },
+    {
+     "level": 5,
+     "power": 0,
+     "magicLevel": 62,
+     "abnormalLevel": 3
+    },
+    {
+     "level": 6,
+     "power": 0,
+     "magicLevel": 66,
+     "abnormalLevel": 3
+    },
+    {
+     "level": 7,
+     "power": 0,
+     "magicLevel": 70,
+     "abnormalLevel": 3
+    },
+    {
+     "level": 8,
+     "power": 0,
+     "magicLevel": 74,
+     "abnormalLevel": 3
+    }
+   ]
+  },
+  {
+   "skillId": 4164,
+   "name": "Paralysis",
+   "kind": "paralyze",
+   "debuff": true,
+   "abnormalType": "PARALYZE",
+   "abnormalTimeSec": 120,
+   "activateRate": 40,
+   "basicProperty": "MEN",
+   "trait": "PARALYZE",
+   "lvlBonusRate": 1,
+   "dotTicks": 0,
+   "drainRatio": 0,
+   "aggroChance": 0,
+   "stats": [
+    {
+     "stat": "runSpd",
+     "op": "mul",
+     "value": 0.5
+    },
+    {
+     "stat": "pAtkSpd",
+     "op": "mul",
+     "value": 0.5
+    },
+    {
+     "stat": "mAtkSpd",
+     "op": "mul",
+     "value": 0.5
+    }
+   ],
+   "levels": [
+    {
+     "level": 1,
+     "power": 0,
+     "magicLevel": 40,
+     "abnormalLevel": 1
+    },
+    {
+     "level": 2,
+     "power": 0,
+     "magicLevel": 44,
+     "abnormalLevel": 1
+    },
+    {
+     "level": 3,
+     "power": 0,
+     "magicLevel": 48,
+     "abnormalLevel": 1
+    },
+    {
+     "level": 4,
+     "power": 0,
+     "magicLevel": 52,
+     "abnormalLevel": 1
+    },
+    {
+     "level": 5,
+     "power": 0,
+     "magicLevel": 56,
+     "abnormalLevel": 1
+    },
+    {
+     "level": 6,
+     "power": 0,
+     "magicLevel": 60,
+     "abnormalLevel": 1
+    },
+    {
+     "level": 7,
+     "power": 0,
+     "magicLevel": 64,
+     "abnormalLevel": 1
+    },
+    {
+     "level": 8,
+     "power": 0,
+     "magicLevel": 68,
+     "abnormalLevel": 1
+    },
+    {
+     "level": 9,
+     "power": 0,
+     "magicLevel": 72,
+     "abnormalLevel": 1
+    }
+   ]
+  },
+  {
+   "skillId": 4165,
+   "name": "Icy Air",
+   "kind": "dot",
+   "debuff": true,
+   "abnormalType": "DOT_ATTR",
+   "abnormalTimeSec": 15,
+   "activateRate": 70,
+   "basicProperty": "MEN",
+   "trait": "",
+   "lvlBonusRate": 1,
+   "dotTicks": 1,
+   "drainRatio": 0,
+   "aggroChance": 0,
+   "stats": [],
+   "levels": [
+    {
+     "level": 1,
+     "power": 102,
+     "magicLevel": 40,
+     "abnormalLevel": 5,
+     "dot": 102
+    },
+    {
+     "level": 2,
+     "power": 102,
+     "magicLevel": 44,
+     "abnormalLevel": 5,
+     "dot": 102
+    },
+    {
+     "level": 3,
+     "power": 102,
+     "magicLevel": 48,
+     "abnormalLevel": 5,
+     "dot": 102
+    },
+    {
+     "level": 4,
+     "power": 125,
+     "magicLevel": 52,
+     "abnormalLevel": 6,
+     "dot": 125
+    },
+    {
+     "level": 5,
+     "power": 125,
+     "magicLevel": 56,
+     "abnormalLevel": 6,
+     "dot": 125
+    },
+    {
+     "level": 6,
+     "power": 144,
+     "magicLevel": 62,
+     "abnormalLevel": 7,
+     "dot": 144
+    },
+    {
+     "level": 7,
+     "power": 144,
+     "magicLevel": 66,
+     "abnormalLevel": 7,
+     "dot": 144
+    },
+    {
+     "level": 8,
+     "power": 157,
+     "magicLevel": 70,
+     "abnormalLevel": 8,
+     "dot": 157
+    },
+    {
+     "level": 9,
+     "power": 157,
+     "magicLevel": 74,
+     "abnormalLevel": 8,
+     "dot": 157
+    }
+   ]
+  },
+  {
+   "skillId": 4166,
+   "name": "Shock",
+   "kind": "stun",
+   "debuff": true,
+   "abnormalType": "STUN",
+   "abnormalTimeSec": 9,
+   "activateRate": 80,
+   "basicProperty": "CON",
+   "trait": "SHOCK",
+   "lvlBonusRate": 1,
+   "dotTicks": 0,
+   "drainRatio": 0,
+   "aggroChance": 0,
+   "stats": [],
+   "levels": [
+    {
+     "level": 1,
+     "power": 0,
+     "magicLevel": 40,
+     "abnormalLevel": 1
+    },
+    {
+     "level": 2,
+     "power": 0,
+     "magicLevel": 44,
+     "abnormalLevel": 1
+    },
+    {
+     "level": 3,
+     "power": 0,
+     "magicLevel": 48,
+     "abnormalLevel": 1
+    },
+    {
+     "level": 4,
+     "power": 0,
+     "magicLevel": 52,
+     "abnormalLevel": 1
+    },
+    {
+     "level": 5,
+     "power": 0,
+     "magicLevel": 56,
+     "abnormalLevel": 1
+    },
+    {
+     "level": 6,
+     "power": 0,
+     "magicLevel": 60,
+     "abnormalLevel": 1
+    },
+    {
+     "level": 7,
+     "power": 0,
+     "magicLevel": 64,
+     "abnormalLevel": 1
+    },
+    {
+     "level": 8,
+     "power": 0,
+     "magicLevel": 68,
+     "abnormalLevel": 1
+    },
+    {
+     "level": 9,
+     "power": 0,
+     "magicLevel": 72,
+     "abnormalLevel": 1
+    }
+   ]
+  },
+  {
+   "skillId": 5115,
+   "name": "Cubic Hate",
+   "kind": "aggro",
+   "debuff": false,
+   "abnormalType": "",
+   "abnormalTimeSec": 0,
+   "activateRate": -1,
+   "basicProperty": "NONE",
+   "trait": "",
+   "lvlBonusRate": 0,
+   "dotTicks": 0,
+   "drainRatio": 0,
+   "aggroChance": 80,
+   "stats": [],
+   "levels": [
+    {
+     "level": 1,
+     "power": 0,
+     "magicLevel": 62,
+     "abnormalLevel": 0
+    },
+    {
+     "level": 2,
+     "power": 0,
+     "magicLevel": 66,
+     "abnormalLevel": 0
+    },
+    {
+     "level": 3,
+     "power": 0,
+     "magicLevel": 70,
+     "abnormalLevel": 0
+    },
+    {
+     "level": 4,
+     "power": 0,
+     "magicLevel": 74,
+     "abnormalLevel": 0
+    }
+   ]
+  },
+  {
+   "skillId": 5116,
+   "name": "Hold",
+   "kind": "root",
+   "debuff": true,
+   "abnormalType": "ROOT_MAGICALLY",
+   "abnormalTimeSec": 30,
+   "activateRate": 70,
+   "basicProperty": "MEN",
+   "trait": "HOLD",
+   "lvlBonusRate": 1,
+   "dotTicks": 0,
+   "drainRatio": 0,
+   "aggroChance": 0,
+   "stats": [],
+   "levels": [
+    {
+     "level": 1,
+     "power": 0,
+     "magicLevel": 62,
+     "abnormalLevel": 1
+    },
+    {
+     "level": 2,
+     "power": 0,
+     "magicLevel": 66,
+     "abnormalLevel": 1
+    },
+    {
+     "level": 3,
+     "power": 0,
+     "magicLevel": 70,
+     "abnormalLevel": 1
+    },
+    {
+     "level": 4,
+     "power": 0,
+     "magicLevel": 74,
+     "abnormalLevel": 1
+    }
+   ]
+  }
+ ],
+ "mastery": [
+  {
+   "skillId": 143,
+   "counts": [
+    2,
+    3
+   ]
+  }
+ ]
+}

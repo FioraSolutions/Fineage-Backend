@@ -46,6 +46,7 @@ namespace Fineage.Net.Contract
             w.WriteByte(m.Hero ? (byte)1 : (byte)0);
             w.WriteByte((byte)m.SummonKind);
             w.WriteInt32(m.OwnerObjectId);
+            w.WriteInt32Array(m.Cubics ?? Array.Empty<int>());
         });
 
         public static EntitySpawnMsg DecodeEntitySpawn(ReadOnlySpan<byte> p)
@@ -114,6 +115,8 @@ namespace Fineage.Net.Contract
                 msg.SummonKind = (SummonKindNet)r.ReadByte();
                 msg.OwnerObjectId = r.ReadInt32();
             }
+            if (r.Remaining >= 2)
+                msg.Cubics = r.ReadInt32Array();
             return msg;
         }
 
@@ -185,6 +188,7 @@ namespace Fineage.Net.Contract
             w.WriteByte(m.Hero ? (byte)1 : (byte)0);
             w.WriteInt32(m.BaseClassId);
             w.WriteInt32(m.ClassIndex);
+            w.WriteInt32Array(m.Cubics ?? Array.Empty<int>());
         });
 
         public static UserInfoNetMsg DecodeUserInfo(ReadOnlySpan<byte> p)
@@ -269,6 +273,8 @@ namespace Fineage.Net.Contract
                 m.BaseClassId = r.ReadInt32();
                 m.ClassIndex = r.ReadInt32();
             }
+            if (r.Remaining >= 2)
+                m.Cubics = r.ReadInt32Array();
             return m;
         }
 

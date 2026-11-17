@@ -82,6 +82,7 @@ public sealed partial class ZoneWorld
             TickLeash(now);
             TickMobAttacks(now);
             TickSummons(now);
+            TickCubics(now);
             TickCorpseDecay(now);
             TickAttackStance(now);
             TickGroundExpiry(now);

@@ -173,7 +173,8 @@ static class NetEnterWorldProjector
             PledgeClass = entity.PledgeClass,
             WeaponEnchant = Math.Min(127, entity.Inventory?.GetEquipped(Fineage.Game.PaperdollSlot.RHand)?.EnchantLevel ?? 0),
             Noble = entity.Noble,
-            Hero = entity.Hero
+            Hero = entity.Hero,
+            Cubics = entity.CubicIds()
         };
 
     static Fineage.Net.Contract.PlayerStatsMsg BuildStats(ZoneEntity entity, EntityId self, int maxCp) =>

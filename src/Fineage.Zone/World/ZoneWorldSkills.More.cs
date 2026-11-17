@@ -183,6 +183,8 @@ public sealed partial class ZoneWorld
 
         if (_summonSkills.Find(request.SkillId) is { } summonSkill)
             return TrySkillUseSummon(session, player, request, summonSkill, liveTemplate, liveLevelData, level, now);
+        if (Cubics.SummonSkill(request.SkillId) is { } cubicSkill)
+            return TrySkillUseCubic(session, player, request, cubicSkill, liveTemplate, liveLevelData, level, now);
         if (IsFishingSkill(request.SkillId))
             return TrySkillUseFishing(session, player, liveTemplate, liveLevelData, level, now);
         if (request.SkillId is SiegeProtocol.SealOfRulerSkillId or SiegeProtocol.BuildHeadquartersSkillId)

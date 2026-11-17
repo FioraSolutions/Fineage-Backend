@@ -66,3 +66,44 @@ sealed partial class ZoneEntity
     /// <summary>Set on a player: object id of its servitor / pet in the world, 0 when none.</summary>
     public int SummonObjectId { get; set; }
 }
+
+/// <summary>
+/// A cubic floating around its owner (Mobius <c>Cubic</c>): template, power, action interval and cap, lifetime and
+/// the running action session (Mobius <c>CubicAction</c> / <c>CubicHeal</c> task with its own activation count).
+/// </summary>
+sealed class CubicState
+{
+    public required Fineage.Game.Services.CubicTemplate Template { get; init; }
+    public int Id => Template.Id;
+    public double Power { get; init; }
+    public long DelayMs { get; init; }
+    public int Chance { get; init; }
+    public int MaxCount { get; init; }
+    public long ExpiresAtMs { get; init; }
+    public bool GivenByOther { get; init; }
+    /// <summary>Action task running (Mobius <c>_actionTask != null</c>).</summary>
+    public bool Running { get; set; }
+    public long NextActionMs { get; set; }
+    /// <summary>Activations in the current action session (Mobius <c>CubicAction._currentCount</c>).</summary>
+    public int Count { get; set; }
+}
+
+sealed partial class ZoneEntity
+{
+    /// <summary>Players only: active cubics, oldest first (Mobius <c>Player._cubics</c>).</summary>
+    public List<CubicState> Cubics => _cubics ??= [];
+
+    List<CubicState>? _cubics;
+
+    public bool HasCubics => _cubics is { Count: > 0 };
+
+    public int[] CubicIds()
+    {
+        if (!HasCubics)
+            return [];
+        var ids = new int[Cubics.Count];
+        for (int i = 0; i < ids.Length; i++)
+            ids[i] = Cubics[i].Id;
+        return ids;
+    }
+}
