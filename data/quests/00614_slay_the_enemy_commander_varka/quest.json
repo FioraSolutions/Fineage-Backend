@@ -1,6 +1,6 @@
 {
   "id": 614,
-  "name": "Slay the Enemy Commander! (Varka)",
+  "name": "Slay the enemy commander!",
   "repeatable": true,
   "abortable": true,
   "questItems": [
@@ -11,46 +11,67 @@
       "npcId": 31377,
       "hook": "talk",
       "when": "absent",
-      "htmlFile": "31377-event-31377-04-002.htm"
+      "minLevel": 75,
+      "hasItem": 7224,
+      "htmlFile": "31377-01.htm"
     },
     {
       "npcId": 31377,
       "hook": "talk",
-      "when": "started",
-      "htmlFile": "31377-talk-000.htm"
+      "when": "absent",
+      "minLevel": 75,
+      "htmlFile": "31377-02.htm"
     },
     {
       "npcId": 31377,
       "hook": "talk",
-      "when": "started",
-      "htmlFile": "31377-talk-001.htm"
+      "when": "absent",
+      "htmlFile": "31377-03.htm"
     },
     {
       "npcId": 31377,
       "hook": "event",
       "when": "absent",
       "event": "31377-04",
+      "minLevel": 75,
+      "hasItem": 7224,
       "ops": [
         {
           "op": "create"
         },
         {
           "op": "start"
-        },
-        {
-          "op": "set_cond",
-          "cond": 1
         }
       ],
-      "htmlFile": "31377-event-31377-04-002.htm"
+      "htmlFile": "31377-04.htm"
+    },
+    {
+      "npcId": 31377,
+      "hook": "talk",
+      "when": "started",
+      "cond": 2,
+      "hasItem": 7241,
+      "htmlFile": "31377-05.htm"
+    },
+    {
+      "npcId": 31377,
+      "hook": "talk",
+      "when": "started",
+      "htmlFile": "31377-06.htm"
     },
     {
       "npcId": 31377,
       "hook": "event",
-      "when": "absent",
+      "when": "started",
       "event": "31377-07",
+      "cond": 2,
       "hasItem": 7241,
       "ops": [
+        {
+          "op": "take_item",
+          "itemId": 7241,
+          "count": 1
+        },
         {
           "op": "give_item",
           "itemId": 7230,
@@ -65,7 +86,26 @@
           "op": "complete"
         }
       ],
-      "htmlFile": "31377-event-31377-07-003.htm"
+      "htmlFile": "31377-07.htm"
+    },
+    {
+      "npcId": 25302,
+      "hook": "kill",
+      "when": "started",
+      "cond": 1,
+      "everyone": true,
+      "html": "",
+      "ops": [
+        {
+          "op": "give_item",
+          "itemId": 7241,
+          "count": 1
+        },
+        {
+          "op": "set_cond",
+          "cond": 2
+        }
+      ]
     }
   ]
 }

@@ -240,12 +240,44 @@ public sealed partial class ZoneWorld
             ApplyQuestAttack(attacker, npc);
     }
 
+    /// <summary>Mobius VarkaKetra range for the alliance penalty around the corpse.</summary>
+    const int AlliancePenaltyRange = 1500;
+
+    /// <summary>Mobius VarkaKetra.onKill: allies of the slain monster's side near the corpse lose a mark level.</summary>
+    void ApplyAllianceBetrayal(ZoneEntity killer, ZoneEntity npc)
+    {
+        if (!QuestMachine.KetraMobs.Contains(npc.NpcId) && !QuestMachine.VarkaMobs.Contains(npc.NpcId))
+            return;
+        foreach (var member in QuestPartyCandidates(killer))
+        {
+            if (member.Inventory == null || member.Session == null)
+                continue;
+            long dx = member.X - (long)npc.X, dy = member.Y - (long)npc.Y;
+            if (npc.ObjectId != 0 && dx * dx + dy * dy > (long)AlliancePenaltyRange * AlliancePenaltyRange)
+                continue;
+            foreach (var outcome in _quests.BreakAlliance(member.Quests, member.Inventory, npc.NpcId))
+                PublishKill(member, outcome, npc);
+        }
+    }
+
     void ApplyQuestKill(ZoneEntity killer, ZoneEntity npc)
     {
         if (killer.Inventory == null || killer.Dead || killer.Session == null)
             return;
+        ApplyAllianceBetrayal(killer, npc);
         var outcome = _quests.OnKill(killer.Quests, killer.Inventory, npc.NpcId, QuestActorOf(killer));
         PublishKill(killer, outcome, npc);
+
+        // Mobius executeForEachPlayer: party members near the corpse share raid-head style steps.
+        if (_quests.HasEveryoneSteps(npc.NpcId))
+        {
+            foreach (var member in QuestPartyCandidates(killer))
+            {
+                if (member == killer || member.Inventory == null || member.Dead || member.Session == null)
+                    continue;
+                PublishKill(member, _quests.OnEveryoneKill(member.Quests, member.Inventory, npc.NpcId, QuestActorOf(member)), npc);
+            }
+        }
 
         // Mobius getRandomPartyMember(State): one random eligible member (killer included) within ALT_PARTY_RANGE.
         foreach (int questId in _quests.PartyKillQuests(npc.NpcId))

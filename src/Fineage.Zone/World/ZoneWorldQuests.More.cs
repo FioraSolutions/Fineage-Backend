@@ -44,6 +44,11 @@ public sealed partial class ZoneWorld
             return;
         }
 
+        // A quest-summoned raid boss (Ashutar, Nastron, …) exists once: another summon while it lives does nothing.
+        if (string.Equals(template.Type, "RaidBoss", StringComparison.Ordinal) &&
+            _byId.Values.Any(e => e.Kind == ZoneEntityKind.Npc && e.NpcId == npcId && !e.Dead && e.CurHp > 0))
+            return;
+
         int objectId = AllocateQuestNpcObjectId();
         if (_geo.HasGeo(x, y))
             z = _geo.GetHeight(x, y, z);

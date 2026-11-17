@@ -7,9 +7,9 @@ Status: **implemented** — every Mobius talk NPC and kill target is wired, the 
 
 | Status | Count |
 |---|---|
-| implemented | 168 |
-| partial | 102 |
-| stub | 36 |
+| implemented | 178 |
+| partial | 94 |
+| stub | 34 |
 | missing | 38 |
 | **total Mobius quests** | **344** |
 
@@ -306,18 +306,18 @@ Related non-quest scripts: `village_master/*Change1|Change2` and `FirstClassTran
 | 602 | Shadow of Light | 68+ | repeatable | implemented | hand-ported |
 | 603 | Daimon the White-Eyed - Part 1 | 73+ | repeatable | partial | no talk: 31548,31549,31550,31551,31552; no kill: 3/3 mobs; auto-port |
 | 604 | Daimon the White-Eyed - Part 2 | 73+ | repeatable | partial | no talk: 31541; no kill: 1/1 mobs; timers; auto-port |
-| 605 | Alliance with Ketra Orcs | 74+ | Ketra/Varka alliance | stub | 22 dialog(s), no start; auto-port |
-| 606 | War with Varka Silenos | 74+ | Ketra/Varka alliance | partial | no kill: 15/15 mobs; auto-port |
-| 607 | Prove your courage! | 75+ | Ketra/Varka alliance | partial | no kill: 1/1 mobs; auto-port |
-| 608 | Slay the enemy commander! | 75+ | Ketra/Varka alliance | partial | no kill: 1/1 mobs; auto-port |
-| 609 | Magical Power of Water - Part 1 | 74+ | Ketra/Varka alliance | partial | no kill: 21/21 mobs; quest spawns missing; timers; auto-port |
-| 610 | Magical Power of Water - Part 2 | 75+ | Ketra/Varka alliance | partial | no kill: 1/1 mobs; quest spawns missing; timers; auto-port |
-| 611 | Alliance with Varka Silenos | 74+ | Ketra/Varka alliance | stub | 22 dialog(s), no start; auto-port |
-| 612 | War with Ketra Orcs | 74+ | Ketra/Varka alliance | partial | no kill: 15/15 mobs; auto-port |
-| 613 | Prove your courage! | 75+ | Ketra/Varka alliance | partial | no kill: 1/1 mobs; auto-port |
-| 614 | Slay the enemy commander! | 75+ | Ketra/Varka alliance | partial | no kill: 1/1 mobs; auto-port |
-| 615 | Magical Power of Fire - Part 1 | 74+ | Ketra/Varka alliance | partial | no kill: 21/21 mobs; quest spawns missing; timers; auto-port |
-| 616 | Magical Power of Fire - Part 2 | 75+ | Ketra/Varka alliance | partial | no kill: 1/1 mobs; quest spawns missing; timers; auto-port |
+| 605 | Alliance with Ketra Orcs | 74+ | Ketra/Varka alliance | implemented | auto-port |
+| 606 | War with Varka Silenos | 74+ | Ketra/Varka alliance | implemented | auto-port |
+| 607 | Prove your courage! | 75+ | Ketra/Varka alliance | implemented | auto-port |
+| 608 | Slay the enemy commander! | 75+ | Ketra/Varka alliance | implemented | auto-port |
+| 609 | Magical Power of Water - Part 1 | 74+ | Ketra/Varka alliance | partial | quest spawns missing; timers; auto-port |
+| 610 | Magical Power of Water - Part 2 | 75+ | Ketra/Varka alliance | implemented | timers; auto-port |
+| 611 | Alliance with Varka Silenos | 74+ | Ketra/Varka alliance | implemented | auto-port |
+| 612 | War with Ketra Orcs | 74+ | Ketra/Varka alliance | implemented | auto-port |
+| 613 | Prove your courage! | 75+ | Ketra/Varka alliance | implemented | auto-port |
+| 614 | Slay the enemy commander! | 75+ | Ketra/Varka alliance | implemented | auto-port |
+| 615 | Magical Power of Fire - Part 1 | 74+ | Ketra/Varka alliance | partial | quest spawns missing; timers; auto-port |
+| 616 | Magical Power of Fire - Part 2 | 75+ | Ketra/Varka alliance | implemented | timers; auto-port |
 | 617 | Gather the Flames | 74+ | repeatable | implemented | hand-ported |
 | 618 | Into the Flame | 60+ | repeatable | partial | no kill: 12/12 mobs; auto-port |
 | 619 | Relics of the Old Empire | 74+ | repeatable | partial | no kill: 3/3 mobs; auto-port |

@@ -108,3 +108,41 @@ public sealed class NetQuestAttackTests
         Assert.Equal(0, hero.Inventory.CountOf(4665));
     }
 }
+
+/// <summary>Ketra / Varka: raid heads go to every party member (executeForEachPlayer); killing an ally costs the mark.</summary>
+public sealed class NetKetraVarkaTests
+{
+    [Fact]
+    public async Task Shadith_head_goes_to_every_party_member_on_the_quest()
+    {
+        var kit = new NetTestKit();
+        var (_, killer) = await kit.EnterAsync();
+        var (_, mate) = await kit.EnterAsync();
+        mate.X = killer.X + 300; mate.Y = killer.Y;
+        kit.World.JoinPartyForTest(killer, mate);
+        foreach (var p in new[] { killer, mate })
+            p.Quests.Add(607, QuestPhase.Started).Replace(QuestPhase.Started, new Dictionary<string, string> { ["cond"] = "1" });
+
+        kit.World.QuestKillForTest(killer, 25309);
+        Assert.Equal(1, killer.Inventory!.CountOf(7235));
+        Assert.Equal(1, mate.Inventory!.CountOf(7235));
+        Assert.Equal(2, mate.Quests.Find(607)!.Cond);
+    }
+
+    [Fact]
+    public async Task Killing_a_ketra_orc_while_allied_lowers_the_mark_for_the_party()
+    {
+        var kit = new NetTestKit();
+        var (_, killer) = await kit.EnterAsync();
+        var (_, mate) = await kit.EnterAsync();
+        mate.X = killer.X; mate.Y = killer.Y;
+        kit.World.JoinPartyForTest(killer, mate);
+        mate.Inventory!.Add(7212);
+        mate.Quests.Add(606, QuestPhase.Started).Replace(QuestPhase.Started, new Dictionary<string, string> { ["cond"] = "1" });
+
+        kit.World.QuestKillForTest(killer, 21324);
+        Assert.Equal(0, mate.Inventory.CountOf(7212));
+        Assert.Equal(1, mate.Inventory.CountOf(7211));
+        Assert.Null(mate.Quests.Find(606));
+    }
+}
