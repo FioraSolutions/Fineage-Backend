@@ -28,7 +28,7 @@ public sealed partial class QuestMachine : IQuestKillHook
     {
         foreach (var quest in _catalog.Quests)
         {
-            var dialog = Find(quest, QuestHook.FirstTalk, npcId, "", journal.Find(quest.Id), actor, inventory);
+            var dialog = Find(quest, QuestHook.FirstTalk, npcId, "", journal.Find(quest.Id), actor, inventory, _random);
             if (dialog == null)
                 continue;
             return Apply(journal, inventory, quest, dialog, "first_talk");
@@ -45,7 +45,7 @@ public sealed partial class QuestMachine : IQuestKillHook
     {
         if (_catalog.Find(questId) is not { } quest)
             return Fail(QuestFailure.Unknown, "That quest does not exist.", questId, "talk");
-        var dialog = Find(quest, QuestHook.Talk, npcId, "", journal.Find(quest.Id), actor, inventory);
+        var dialog = Find(quest, QuestHook.Talk, npcId, "", journal.Find(quest.Id), actor, inventory, _random);
         if (dialog == null)
             return Fail(QuestFailure.State, "That quest event does not apply.", questId, "talk");
         return Apply(journal, inventory, quest, dialog, "talk");
@@ -55,7 +55,7 @@ public sealed partial class QuestMachine : IQuestKillHook
     {
         if (_catalog.Find(questId) is not { } quest)
             return Fail(QuestFailure.Unknown, "That quest does not exist.", questId, "event", eventName);
-        var dialog = Find(quest, QuestHook.Event, npcId, eventName, journal.Find(quest.Id), actor, inventory);
+        var dialog = Find(quest, QuestHook.Event, npcId, eventName, journal.Find(quest.Id), actor, inventory, _random);
         if (dialog == null)
             return Fail(QuestFailure.State, "That quest event does not apply.", questId, "event", eventName);
         return Apply(journal, inventory, quest, dialog, "event");
@@ -94,12 +94,13 @@ public sealed partial class QuestMachine : IQuestKillHook
         var sounds = new List<string>();
         var lines = new List<QuestLine>();
         var items = new List<BagTouch>();
+        var spawns = new List<int>();
         long exp = 0;
         int sp = 0;
         bool changed = false;
         foreach (var quest in _catalog.Quests)
         {
-            var dialog = Find(quest, QuestHook.Kill, npcId, "", journal.Find(quest.Id), actor, inventory);
+            var dialog = Find(quest, QuestHook.Kill, npcId, "", journal.Find(quest.Id), actor, inventory, _random);
             if (dialog == null || dialog.Party)
                 continue;
             var outcome = Apply(journal, inventory, quest, dialog, "kill");
@@ -108,6 +109,7 @@ public sealed partial class QuestMachine : IQuestKillHook
             sounds.AddRange(outcome.Sounds);
             lines.AddRange(outcome.Lines);
             items.AddRange(outcome.Items);
+            spawns.AddRange(outcome.Spawns);
             exp += outcome.Exp;
             sp += outcome.Sp;
             changed |= outcome.JournalChanged;
@@ -128,6 +130,7 @@ public sealed partial class QuestMachine : IQuestKillHook
             Sounds = sounds,
             Lines = lines,
             Items = items,
+            Spawns = spawns,
             Exp = exp,
             Sp = sp
         };
@@ -177,7 +180,9 @@ public sealed partial class QuestMachine : IQuestKillHook
         if (!PartyKillApplies(journal, inventory, questId, npcId, actor))
             return new QuestOutcome { Hook = "kill" };
         var quest = _catalog.Find(questId)!;
-        var dialog = Find(quest, QuestHook.Kill, npcId, "", journal.Find(quest.Id), actor, inventory)!;
+        var dialog = Find(quest, QuestHook.Kill, npcId, "", journal.Find(quest.Id), actor, inventory, _random);
+        if (dialog == null)
+            return new QuestOutcome { Hook = "kill" };
         return Apply(journal, inventory, quest, dialog, "kill");
     }
 

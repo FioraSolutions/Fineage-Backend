@@ -268,7 +268,7 @@ public sealed partial class ZoneWorld
     {
         if (outcome.QuestId == 0 || !outcome.Ok || player.Session == null)
             return;
-        if (outcome.Items.Count == 0 && !outcome.JournalChanged && outcome.Sounds.Count == 0)
+        if (outcome.Items.Count == 0 && !outcome.JournalChanged && outcome.Sounds.Count == 0 && outcome.Spawns.Count == 0)
             return;
         Publish(player.Session, player, outcome, npc.ObjectId, npc.NpcId);
     }

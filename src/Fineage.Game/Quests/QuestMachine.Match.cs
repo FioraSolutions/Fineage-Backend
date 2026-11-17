@@ -4,7 +4,7 @@ namespace Fineage.Game.Quests;
 
 public sealed partial class QuestMachine
 {
-    static QuestDialog? Find(QuestDefinition quest, QuestHook hook, int npcId, string eventName, QuestProgress? state, QuestActor? actor = null, PlayerInventory? inventory = null)
+    static QuestDialog? Find(QuestDefinition quest, QuestHook hook, int npcId, string eventName, QuestProgress? state, QuestActor? actor = null, PlayerInventory? inventory = null, Func<double>? random = null)
     {
         foreach (var dialog in quest.Dialogs)
         {
@@ -19,6 +19,11 @@ public sealed partial class QuestMachine
             if (dialog.HasItem != 0 && inventory != null && inventory.CountOf(dialog.HasItem) < dialog.MinCount)
                 continue;
             if (!ItemsMatch(dialog, inventory))
+                continue;
+            if (!VarsMatch(dialog, state))
+                continue;
+            // Random branches roll only when the engine acts (talk / event / kill), never on a quest-list probe.
+            if (dialog.Chance is double chance && random != null && random() >= chance)
                 continue;
             return dialog;
         }
@@ -104,6 +109,24 @@ public sealed partial class QuestMachine
                 return false;
         }
 
+        return true;
+    }
+
+    static int IntVar(QuestProgress? state, string key) =>
+        state?.Get(key) is { } raw && int.TryParse(raw, out int value) ? value : 0;
+
+    static bool VarsMatch(QuestDialog dialog, QuestProgress? state)
+    {
+        foreach (var (key, min) in dialog.VarAtLeast ?? new Dictionary<string, int>())
+        {
+            if (IntVar(state, key) < min)
+                return false;
+        }
+        foreach (var (key, below) in dialog.VarBelow ?? new Dictionary<string, int>())
+        {
+            if (IntVar(state, key) >= below)
+                return false;
+        }
         return true;
     }
 

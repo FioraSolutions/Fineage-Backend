@@ -1,7 +1,7 @@
 {
   "id": 414,
-  "name": "Path Of The Orc Raider",
-  "repeatable": false,
+  "name": "Path to an Orc Raider",
+  "repeatable": true,
   "abortable": true,
   "questItems": [
     1578,
@@ -17,95 +17,114 @@
       "npcId": 30570,
       "hook": "talk",
       "when": "absent",
-      "hasItem": 1579,
-      "htmlFile": "30570-talk-000.htm"
+      "htmlFile": "30570-01.htm"
     },
     {
       "npcId": 30570,
-      "hook": "talk",
+      "hook": "event",
       "when": "absent",
-      "hasItem": 1579,
-      "htmlFile": "30570-talk-001.htm"
-    },
-    {
-      "npcId": 30570,
-      "hook": "talk",
-      "when": "absent",
-      "htmlFile": "30570-talk-002.htm"
-    },
-    {
-      "npcId": 30570,
-      "hook": "talk",
-      "when": "absent",
-      "hasItem": 1591,
-      "htmlFile": "30570-talk-003.htm"
-    },
-    {
-      "npcId": 30570,
-      "hook": "talk",
-      "when": "absent",
-      "htmlFile": "30570-talk-004.htm"
-    },
-    {
-      "npcId": 30501,
-      "hook": "talk",
-      "when": "absent",
-      "lacksItems": [
-        1591
+      "event": "30570-05",
+      "classes": [
+        44
       ],
-      "htmlFile": "30501-talk-005.htm"
-    },
-    {
-      "npcId": 30501,
-      "hook": "talk",
-      "when": "absent",
-      "htmlFile": "30501-talk-006.htm"
-    },
-    {
-      "npcId": 31978,
-      "hook": "talk",
-      "when": "absent",
-      "htmlFile": "31978-talk-007.htm"
-    },
-    {
-      "npcId": 31978,
-      "hook": "talk",
-      "when": "absent",
+      "minLevel": 19,
       "lacksItems": [
-        8544
+        1592
       ],
-      "htmlFile": "31978-talk-008.htm"
+      "ops": [
+        {
+          "op": "create"
+        },
+        {
+          "op": "start"
+        },
+        {
+          "op": "give_item",
+          "itemId": 1579,
+          "count": 1
+        }
+      ],
+      "htmlFile": "30570-05.htm"
     },
     {
       "npcId": 30570,
       "hook": "event",
       "when": "absent",
-      "event": "ACCEPT",
-      "minLevel": 18,
-      "hasItem": 1592,
-      "htmlFile": "30570-event-ACCEPT-009.htm"
+      "event": "30570-05",
+      "classes": [
+        44
+      ],
+      "minLevel": 19,
+      "htmlFile": "30570-04.htm"
     },
     {
       "npcId": 30570,
       "hook": "event",
       "when": "absent",
-      "event": "ACCEPT",
-      "hasItem": 1592,
-      "htmlFile": "30570-event-ACCEPT-010.htm"
+      "event": "30570-05",
+      "classes": [
+        44
+      ],
+      "htmlFile": "30570-02.htm"
     },
     {
       "npcId": 30570,
       "hook": "event",
       "when": "absent",
-      "event": "ACCEPT",
-      "htmlFile": "30570-event-ACCEPT-011.htm"
+      "event": "30570-05",
+      "classes": [
+        45
+      ],
+      "htmlFile": "30570-02a.htm"
     },
     {
       "npcId": 30570,
       "hook": "event",
       "when": "absent",
+      "event": "30570-05",
+      "htmlFile": "30570-03.htm"
+    },
+    {
+      "npcId": 30570,
+      "hook": "talk",
+      "when": "started",
+      "cond": 1,
+      "htmlFile": "30570-06.htm"
+    },
+    {
+      "npcId": 30570,
+      "hook": "talk",
+      "when": "started",
+      "cond": 2,
+      "htmlFile": "30570-07.htm"
+    },
+    {
+      "npcId": 30570,
+      "hook": "talk",
+      "when": "started",
+      "cond": 3,
+      "htmlFile": "30570-08.htm"
+    },
+    {
+      "npcId": 30570,
+      "hook": "talk",
+      "when": "started",
+      "cond": 4,
+      "htmlFile": "30570-08.htm"
+    },
+    {
+      "npcId": 30570,
+      "hook": "talk",
+      "when": "started",
+      "cond": 5,
+      "htmlFile": "30570-07b.htm"
+    },
+    {
+      "npcId": 30570,
+      "hook": "event",
+      "when": "started",
       "event": "30570-07a",
-      "hasItem": 1579,
+      "cond": 2,
       "ops": [
         {
           "op": "take_item",
@@ -113,9 +132,10 @@
           "count": 1
         },
         {
-          "op": "take_item",
-          "itemId": 1580,
-          "count": 1
+          "op": "take_all",
+          "items": [
+            1580
+          ]
         },
         {
           "op": "give_item",
@@ -132,14 +152,14 @@
           "cond": 3
         }
       ],
-      "htmlFile": "30570-event-30570-07a-012.htm"
+      "htmlFile": "30570-07a.htm"
     },
     {
       "npcId": 30570,
       "hook": "event",
-      "when": "absent",
+      "when": "started",
       "event": "30570-07b",
-      "hasItem": 1579,
+      "cond": 2,
       "ops": [
         {
           "op": "take_item",
@@ -147,123 +167,1005 @@
           "count": 1
         },
         {
-          "op": "take_item",
-          "itemId": 1580,
-          "count": 1
-        },
-        {
-          "op": "set",
-          "key": "memoState",
-          "value": "2"
+          "op": "take_all",
+          "items": [
+            1580
+          ]
         },
         {
           "op": "set_cond",
           "cond": 5
         }
       ],
-      "htmlFile": "30570-event-30570-07b-013.htm"
+      "htmlFile": "30570-07b.htm"
     },
     {
-      "npcId": 30570,
-      "hook": "event",
-      "when": "absent",
-      "event": "31978-04",
-      "htmlFile": "30570-event-31978-04-014.htm"
+      "npcId": 30501,
+      "hook": "talk",
+      "when": "started",
+      "cond": 3,
+      "hasItem": 1591,
+      "htmlFile": "30501-02.htm"
     },
     {
-      "npcId": 30570,
-      "hook": "event",
-      "when": "absent",
-      "event": "31978-02",
+      "npcId": 30501,
+      "hook": "talk",
+      "when": "started",
+      "cond": 3,
+      "htmlFile": "30501-01.htm"
+    },
+    {
+      "npcId": 30501,
+      "hook": "talk",
+      "when": "started",
+      "cond": 4,
       "ops": [
         {
-          "op": "set",
-          "key": "memoState",
-          "value": "3"
+          "op": "take_item",
+          "itemId": 1589,
+          "count": 1
         },
+        {
+          "op": "take_item",
+          "itemId": 1590,
+          "count": 1
+        },
+        {
+          "op": "take_all",
+          "items": [
+            1591
+          ]
+        },
+        {
+          "op": "give_item",
+          "itemId": 1592,
+          "count": 1
+        },
+        {
+          "op": "give_exp_sp",
+          "exp": 3200,
+          "sp": 2360
+        },
+        {
+          "op": "social",
+          "action": 3
+        },
+        {
+          "op": "complete"
+        }
+      ],
+      "htmlFile": "30501-03.htm"
+    },
+    {
+      "npcId": 31978,
+      "hook": "talk",
+      "when": "started",
+      "cond": 5,
+      "htmlFile": "31978-01.htm"
+    },
+    {
+      "npcId": 31978,
+      "hook": "talk",
+      "when": "started",
+      "cond": 6,
+      "htmlFile": "31978-04.htm"
+    },
+    {
+      "npcId": 31978,
+      "hook": "talk",
+      "when": "started",
+      "cond": 7,
+      "ops": [
+        {
+          "op": "take_item",
+          "itemId": 8544,
+          "count": 1
+        },
+        {
+          "op": "give_item",
+          "itemId": 1592,
+          "count": 1
+        },
+        {
+          "op": "give_exp_sp",
+          "exp": 3200,
+          "sp": 2360
+        },
+        {
+          "op": "social",
+          "action": 3
+        },
+        {
+          "op": "complete"
+        }
+      ],
+      "htmlFile": "31978-05.htm"
+    },
+    {
+      "npcId": 31978,
+      "hook": "event",
+      "when": "started",
+      "event": "31978-03",
+      "cond": 5,
+      "ops": [
         {
           "op": "set_cond",
           "cond": 6
         }
       ],
-      "htmlFile": "30570-event-31978-02-015.htm"
+      "htmlFile": "31978-03.htm"
+    },
+    {
+      "npcId": 20320,
+      "hook": "kill",
+      "when": "started",
+      "cond": 1,
+      "atLeast": {
+        "1578": 20
+      },
+      "chance": 1.0,
+      "html": "",
+      "ops": [
+        {
+          "op": "take_all",
+          "items": [
+            1578
+          ]
+        },
+        {
+          "op": "spawn_npc",
+          "npcId": 27045
+        }
+      ]
+    },
+    {
+      "npcId": 20320,
+      "hook": "kill",
+      "when": "started",
+      "cond": 1,
+      "atLeast": {
+        "1578": 20
+      },
+      "html": "",
+      "ops": [
+        {
+          "op": "give_item",
+          "itemId": 1578,
+          "count": 1
+        }
+      ]
+    },
+    {
+      "npcId": 20320,
+      "hook": "kill",
+      "when": "started",
+      "cond": 1,
+      "atLeast": {
+        "1578": 19
+      },
+      "chance": 0.95,
+      "html": "",
+      "ops": [
+        {
+          "op": "take_all",
+          "items": [
+            1578
+          ]
+        },
+        {
+          "op": "spawn_npc",
+          "npcId": 27045
+        }
+      ]
+    },
+    {
+      "npcId": 20320,
+      "hook": "kill",
+      "when": "started",
+      "cond": 1,
+      "atLeast": {
+        "1578": 19
+      },
+      "html": "",
+      "ops": [
+        {
+          "op": "give_item",
+          "itemId": 1578,
+          "count": 1
+        }
+      ]
+    },
+    {
+      "npcId": 20320,
+      "hook": "kill",
+      "when": "started",
+      "cond": 1,
+      "atLeast": {
+        "1578": 18
+      },
+      "chance": 0.9,
+      "html": "",
+      "ops": [
+        {
+          "op": "take_all",
+          "items": [
+            1578
+          ]
+        },
+        {
+          "op": "spawn_npc",
+          "npcId": 27045
+        }
+      ]
+    },
+    {
+      "npcId": 20320,
+      "hook": "kill",
+      "when": "started",
+      "cond": 1,
+      "atLeast": {
+        "1578": 18
+      },
+      "html": "",
+      "ops": [
+        {
+          "op": "give_item",
+          "itemId": 1578,
+          "count": 1
+        }
+      ]
+    },
+    {
+      "npcId": 20320,
+      "hook": "kill",
+      "when": "started",
+      "cond": 1,
+      "atLeast": {
+        "1578": 17
+      },
+      "chance": 0.85,
+      "html": "",
+      "ops": [
+        {
+          "op": "take_all",
+          "items": [
+            1578
+          ]
+        },
+        {
+          "op": "spawn_npc",
+          "npcId": 27045
+        }
+      ]
+    },
+    {
+      "npcId": 20320,
+      "hook": "kill",
+      "when": "started",
+      "cond": 1,
+      "atLeast": {
+        "1578": 17
+      },
+      "html": "",
+      "ops": [
+        {
+          "op": "give_item",
+          "itemId": 1578,
+          "count": 1
+        }
+      ]
+    },
+    {
+      "npcId": 20320,
+      "hook": "kill",
+      "when": "started",
+      "cond": 1,
+      "atLeast": {
+        "1578": 16
+      },
+      "chance": 0.8,
+      "html": "",
+      "ops": [
+        {
+          "op": "take_all",
+          "items": [
+            1578
+          ]
+        },
+        {
+          "op": "spawn_npc",
+          "npcId": 27045
+        }
+      ]
+    },
+    {
+      "npcId": 20320,
+      "hook": "kill",
+      "when": "started",
+      "cond": 1,
+      "atLeast": {
+        "1578": 16
+      },
+      "html": "",
+      "ops": [
+        {
+          "op": "give_item",
+          "itemId": 1578,
+          "count": 1
+        }
+      ]
+    },
+    {
+      "npcId": 20320,
+      "hook": "kill",
+      "when": "started",
+      "cond": 1,
+      "atLeast": {
+        "1578": 15
+      },
+      "chance": 0.75,
+      "html": "",
+      "ops": [
+        {
+          "op": "take_all",
+          "items": [
+            1578
+          ]
+        },
+        {
+          "op": "spawn_npc",
+          "npcId": 27045
+        }
+      ]
+    },
+    {
+      "npcId": 20320,
+      "hook": "kill",
+      "when": "started",
+      "cond": 1,
+      "atLeast": {
+        "1578": 15
+      },
+      "html": "",
+      "ops": [
+        {
+          "op": "give_item",
+          "itemId": 1578,
+          "count": 1
+        }
+      ]
+    },
+    {
+      "npcId": 20320,
+      "hook": "kill",
+      "when": "started",
+      "cond": 1,
+      "atLeast": {
+        "1578": 14
+      },
+      "chance": 0.7,
+      "html": "",
+      "ops": [
+        {
+          "op": "take_all",
+          "items": [
+            1578
+          ]
+        },
+        {
+          "op": "spawn_npc",
+          "npcId": 27045
+        }
+      ]
+    },
+    {
+      "npcId": 20320,
+      "hook": "kill",
+      "when": "started",
+      "cond": 1,
+      "atLeast": {
+        "1578": 14
+      },
+      "html": "",
+      "ops": [
+        {
+          "op": "give_item",
+          "itemId": 1578,
+          "count": 1
+        }
+      ]
+    },
+    {
+      "npcId": 20320,
+      "hook": "kill",
+      "when": "started",
+      "cond": 1,
+      "atLeast": {
+        "1578": 13
+      },
+      "chance": 0.65,
+      "html": "",
+      "ops": [
+        {
+          "op": "take_all",
+          "items": [
+            1578
+          ]
+        },
+        {
+          "op": "spawn_npc",
+          "npcId": 27045
+        }
+      ]
+    },
+    {
+      "npcId": 20320,
+      "hook": "kill",
+      "when": "started",
+      "cond": 1,
+      "atLeast": {
+        "1578": 13
+      },
+      "html": "",
+      "ops": [
+        {
+          "op": "give_item",
+          "itemId": 1578,
+          "count": 1
+        }
+      ]
+    },
+    {
+      "npcId": 20320,
+      "hook": "kill",
+      "when": "started",
+      "cond": 1,
+      "atLeast": {
+        "1578": 12
+      },
+      "chance": 0.6,
+      "html": "",
+      "ops": [
+        {
+          "op": "take_all",
+          "items": [
+            1578
+          ]
+        },
+        {
+          "op": "spawn_npc",
+          "npcId": 27045
+        }
+      ]
+    },
+    {
+      "npcId": 20320,
+      "hook": "kill",
+      "when": "started",
+      "cond": 1,
+      "atLeast": {
+        "1578": 12
+      },
+      "html": "",
+      "ops": [
+        {
+          "op": "give_item",
+          "itemId": 1578,
+          "count": 1
+        }
+      ]
+    },
+    {
+      "npcId": 20320,
+      "hook": "kill",
+      "when": "started",
+      "cond": 1,
+      "atLeast": {
+        "1578": 11
+      },
+      "chance": 0.55,
+      "html": "",
+      "ops": [
+        {
+          "op": "take_all",
+          "items": [
+            1578
+          ]
+        },
+        {
+          "op": "spawn_npc",
+          "npcId": 27045
+        }
+      ]
+    },
+    {
+      "npcId": 20320,
+      "hook": "kill",
+      "when": "started",
+      "cond": 1,
+      "atLeast": {
+        "1578": 11
+      },
+      "html": "",
+      "ops": [
+        {
+          "op": "give_item",
+          "itemId": 1578,
+          "count": 1
+        }
+      ]
+    },
+    {
+      "npcId": 20320,
+      "hook": "kill",
+      "when": "started",
+      "cond": 1,
+      "atLeast": {
+        "1578": 10
+      },
+      "chance": 0.5,
+      "html": "",
+      "ops": [
+        {
+          "op": "take_all",
+          "items": [
+            1578
+          ]
+        },
+        {
+          "op": "spawn_npc",
+          "npcId": 27045
+        }
+      ]
+    },
+    {
+      "npcId": 20320,
+      "hook": "kill",
+      "when": "started",
+      "cond": 1,
+      "atLeast": {
+        "1578": 10
+      },
+      "html": "",
+      "ops": [
+        {
+          "op": "give_item",
+          "itemId": 1578,
+          "count": 1
+        }
+      ]
+    },
+    {
+      "npcId": 20320,
+      "hook": "kill",
+      "when": "started",
+      "cond": 1,
+      "atLeast": {
+        "1578": 9
+      },
+      "chance": 0.45,
+      "html": "",
+      "ops": [
+        {
+          "op": "take_all",
+          "items": [
+            1578
+          ]
+        },
+        {
+          "op": "spawn_npc",
+          "npcId": 27045
+        }
+      ]
+    },
+    {
+      "npcId": 20320,
+      "hook": "kill",
+      "when": "started",
+      "cond": 1,
+      "atLeast": {
+        "1578": 9
+      },
+      "html": "",
+      "ops": [
+        {
+          "op": "give_item",
+          "itemId": 1578,
+          "count": 1
+        }
+      ]
+    },
+    {
+      "npcId": 20320,
+      "hook": "kill",
+      "when": "started",
+      "cond": 1,
+      "atLeast": {
+        "1578": 8
+      },
+      "chance": 0.4,
+      "html": "",
+      "ops": [
+        {
+          "op": "take_all",
+          "items": [
+            1578
+          ]
+        },
+        {
+          "op": "spawn_npc",
+          "npcId": 27045
+        }
+      ]
+    },
+    {
+      "npcId": 20320,
+      "hook": "kill",
+      "when": "started",
+      "cond": 1,
+      "atLeast": {
+        "1578": 8
+      },
+      "html": "",
+      "ops": [
+        {
+          "op": "give_item",
+          "itemId": 1578,
+          "count": 1
+        }
+      ]
+    },
+    {
+      "npcId": 20320,
+      "hook": "kill",
+      "when": "started",
+      "cond": 1,
+      "atLeast": {
+        "1578": 7
+      },
+      "chance": 0.35,
+      "html": "",
+      "ops": [
+        {
+          "op": "take_all",
+          "items": [
+            1578
+          ]
+        },
+        {
+          "op": "spawn_npc",
+          "npcId": 27045
+        }
+      ]
+    },
+    {
+      "npcId": 20320,
+      "hook": "kill",
+      "when": "started",
+      "cond": 1,
+      "atLeast": {
+        "1578": 7
+      },
+      "html": "",
+      "ops": [
+        {
+          "op": "give_item",
+          "itemId": 1578,
+          "count": 1
+        }
+      ]
+    },
+    {
+      "npcId": 20320,
+      "hook": "kill",
+      "when": "started",
+      "cond": 1,
+      "atLeast": {
+        "1578": 6
+      },
+      "chance": 0.3,
+      "html": "",
+      "ops": [
+        {
+          "op": "take_all",
+          "items": [
+            1578
+          ]
+        },
+        {
+          "op": "spawn_npc",
+          "npcId": 27045
+        }
+      ]
+    },
+    {
+      "npcId": 20320,
+      "hook": "kill",
+      "when": "started",
+      "cond": 1,
+      "atLeast": {
+        "1578": 6
+      },
+      "html": "",
+      "ops": [
+        {
+          "op": "give_item",
+          "itemId": 1578,
+          "count": 1
+        }
+      ]
+    },
+    {
+      "npcId": 20320,
+      "hook": "kill",
+      "when": "started",
+      "cond": 1,
+      "atLeast": {
+        "1578": 5
+      },
+      "chance": 0.25,
+      "html": "",
+      "ops": [
+        {
+          "op": "take_all",
+          "items": [
+            1578
+          ]
+        },
+        {
+          "op": "spawn_npc",
+          "npcId": 27045
+        }
+      ]
+    },
+    {
+      "npcId": 20320,
+      "hook": "kill",
+      "when": "started",
+      "cond": 1,
+      "atLeast": {
+        "1578": 5
+      },
+      "html": "",
+      "ops": [
+        {
+          "op": "give_item",
+          "itemId": 1578,
+          "count": 1
+        }
+      ]
+    },
+    {
+      "npcId": 20320,
+      "hook": "kill",
+      "when": "started",
+      "cond": 1,
+      "atLeast": {
+        "1578": 4
+      },
+      "chance": 0.2,
+      "html": "",
+      "ops": [
+        {
+          "op": "take_all",
+          "items": [
+            1578
+          ]
+        },
+        {
+          "op": "spawn_npc",
+          "npcId": 27045
+        }
+      ]
+    },
+    {
+      "npcId": 20320,
+      "hook": "kill",
+      "when": "started",
+      "cond": 1,
+      "atLeast": {
+        "1578": 4
+      },
+      "html": "",
+      "ops": [
+        {
+          "op": "give_item",
+          "itemId": 1578,
+          "count": 1
+        }
+      ]
+    },
+    {
+      "npcId": 20320,
+      "hook": "kill",
+      "when": "started",
+      "cond": 1,
+      "atLeast": {
+        "1578": 3
+      },
+      "chance": 0.15,
+      "html": "",
+      "ops": [
+        {
+          "op": "take_all",
+          "items": [
+            1578
+          ]
+        },
+        {
+          "op": "spawn_npc",
+          "npcId": 27045
+        }
+      ]
+    },
+    {
+      "npcId": 20320,
+      "hook": "kill",
+      "when": "started",
+      "cond": 1,
+      "atLeast": {
+        "1578": 3
+      },
+      "html": "",
+      "ops": [
+        {
+          "op": "give_item",
+          "itemId": 1578,
+          "count": 1
+        }
+      ]
+    },
+    {
+      "npcId": 20320,
+      "hook": "kill",
+      "when": "started",
+      "cond": 1,
+      "atLeast": {
+        "1578": 2
+      },
+      "chance": 0.1,
+      "html": "",
+      "ops": [
+        {
+          "op": "take_all",
+          "items": [
+            1578
+          ]
+        },
+        {
+          "op": "spawn_npc",
+          "npcId": 27045
+        }
+      ]
+    },
+    {
+      "npcId": 20320,
+      "hook": "kill",
+      "when": "started",
+      "cond": 1,
+      "atLeast": {
+        "1578": 2
+      },
+      "html": "",
+      "ops": [
+        {
+          "op": "give_item",
+          "itemId": 1578,
+          "count": 1
+        }
+      ]
+    },
+    {
+      "npcId": 20320,
+      "hook": "kill",
+      "when": "started",
+      "cond": 1,
+      "atLeast": {
+        "1578": 1
+      },
+      "chance": 0.05,
+      "html": "",
+      "ops": [
+        {
+          "op": "take_all",
+          "items": [
+            1578
+          ]
+        },
+        {
+          "op": "spawn_npc",
+          "npcId": 27045
+        }
+      ]
+    },
+    {
+      "npcId": 20320,
+      "hook": "kill",
+      "when": "started",
+      "cond": 1,
+      "atLeast": {
+        "1578": 1
+      },
+      "html": "",
+      "ops": [
+        {
+          "op": "give_item",
+          "itemId": 1578,
+          "count": 1
+        }
+      ]
+    },
+    {
+      "npcId": 20320,
+      "hook": "kill",
+      "when": "started",
+      "cond": 1,
+      "html": "",
+      "ops": [
+        {
+          "op": "give_item",
+          "itemId": 1578,
+          "count": 1
+        }
+      ]
     },
     {
       "npcId": 27045,
       "hook": "kill",
       "when": "started",
-      "hasItems": [
-        1579,
-        1580
-      ],
+      "cond": 1,
+      "html": "",
       "ops": [
         {
           "op": "drop_item",
           "itemId": 1580,
           "count": 1,
           "chance": 1.0,
-          "limit": 1
-        },
-        {
-          "op": "set_cond",
-          "cond": 2
+          "limit": 10,
+          "condAtLimit": 2
         }
-      ],
-      "html": ""
-    },
-    {
-      "npcId": 27045,
-      "hook": "kill",
-      "when": "started",
-      "hasItem": 1580,
-      "ops": [
-        {
-          "op": "drop_item",
-          "itemId": 1580,
-          "count": 1,
-          "chance": 1.0,
-          "limit": 1
-        },
-        {
-          "op": "set_cond",
-          "cond": 2
-        }
-      ],
-      "html": ""
+      ]
     },
     {
       "npcId": 27054,
       "hook": "kill",
       "when": "started",
+      "cond": 3,
+      "html": "",
       "ops": [
         {
-          "op": "set_cond",
-          "cond": 4
+          "op": "drop_item",
+          "itemId": 1591,
+          "count": 1,
+          "chance": 0.2,
+          "limit": 2,
+          "condAtLimit": 4
         }
-      ],
-      "html": ""
+      ]
     },
     {
       "npcId": 27320,
       "hook": "kill",
       "when": "started",
-      "lacksItems": [
-        8544
-      ],
+      "cond": 6,
+      "html": "",
       "ops": [
         {
           "op": "drop_item",
           "itemId": 8544,
           "count": 1,
-          "chance": 1.0,
-          "limit": 1
-        },
-        {
-          "op": "set_cond",
-          "cond": 7
+          "chance": 0.6,
+          "limit": 1,
+          "condAtLimit": 7
         }
-      ],
-      "html": ""
+      ]
+    },
+    {
+      "npcId": 31978,
+      "hook": "event",
+      "when": "any",
+      "event": "31978-02",
+      "htmlFile": "31978-02.htm"
     }
   ]
 }
