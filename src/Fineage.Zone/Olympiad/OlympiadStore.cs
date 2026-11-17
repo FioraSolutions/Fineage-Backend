@@ -13,6 +13,30 @@ public sealed class OlympiadSnapshot
     public long NextWeeklyUnixMs { get; set; }
     public List<int> Granted { get; set; } = [];
     public List<OlympiadNobleRow> Nobles { get; set; } = [];
+
+    /// <summary>Mobius <c>heroes</c>: heroes of the last finished period (claimed or not).</summary>
+    public List<OlympiadHeroRow> Heroes { get; set; } = [];
+
+    /// <summary>Mobius <c>olympiad_nobles_eom</c>: the nobles table frozen at the last period end (ranking pages).</summary>
+    public List<OlympiadNobleRow> LastPeriod { get; set; } = [];
+
+    /// <summary>Unclaimed Noblesse Gate Pass rewards per character (Mobius <c>UNCLAIMED_OLYMPIAD_PASSES</c>).</summary>
+    public List<OlympiadPassRow> Passes { get; set; } = [];
+}
+
+public sealed class OlympiadHeroRow
+{
+    public int CharacterId { get; set; }
+    public int ClassId { get; set; }
+    public string Name { get; set; } = "";
+    public bool Claimed { get; set; }
+    public int Count { get; set; }
+}
+
+public sealed class OlympiadPassRow
+{
+    public int CharacterId { get; set; }
+    public int Passes { get; set; }
 }
 
 public sealed class OlympiadNobleRow
@@ -78,6 +102,9 @@ public sealed class JsonOlympiadStore : IOlympiadStore
                 throw new InvalidDataException($"unsupported olympiad store version {data.Version}");
             data.Granted ??= [];
             data.Nobles ??= [];
+            data.Heroes ??= [];
+            data.LastPeriod ??= [];
+            data.Passes ??= [];
             return data;
         }
     }

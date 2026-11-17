@@ -54,9 +54,11 @@ public sealed partial class OlympiadBoard
                 _nobles[actor.CharacterId] = existing;
                 points = existing.Points;
             }
-            else if (!string.IsNullOrWhiteSpace(actor.Name))
+            else
             {
-                existing.Name = actor.Name;
+                if (!string.IsNullOrWhiteSpace(actor.Name))
+                    existing.Name = actor.Name;
+                existing.ClassId = actor.ClassId;
             }
 
             int floor = classed ? Settings.ClassedPointFloor : Settings.NonClassedPointFloor;

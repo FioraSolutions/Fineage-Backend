@@ -173,6 +173,14 @@ public sealed class NoblesSelectBypassHandler : IBypassHandler
     public BypassReply Handle(BypassCall call) => BypassReply.ServiceCall(NpcServiceIntent.NoblesSelect);
 }
 
+/// <summary>Grand Olympiad Manager / Monument of Heroes pages (Block G2): the whole command rides in the service arg.</summary>
+public sealed class OlympiadBypassHandler : IBypassHandler
+{
+    public IReadOnlyList<string> Commands { get; } = ["OlympiadDesc", "OlympiadNoble", "Olympiad"];
+
+    public BypassReply Handle(BypassCall call) => BypassReply.ServiceCall(NpcServiceIntent.Olympiad, call.Command.Trim());
+}
+
 /// <summary>Merchant <c>TerritoryStatus</c> (Mobius <c>Merchant.showTerritoryStatusWindow</c>): castle, lord and tax page.</summary>
 public sealed class TerritoryBypassHandler : IBypassHandler
 {

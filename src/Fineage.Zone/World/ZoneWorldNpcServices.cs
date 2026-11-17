@@ -75,6 +75,8 @@ public sealed partial class ZoneWorld
             case NpcServiceIntent.NoblesSelect:
                 SendNoblesPage(session, player, npc, player.Noble);
                 return null;
+            case NpcServiceIntent.Olympiad:
+                return OlympiadNpcBypass(session, player, npc, reply.ServiceArg);
             case NpcServiceIntent.Subclass:
                 return SubclassBypass(session, player, npc, reply.ServiceId, reply.ServiceArg);
             case NpcServiceIntent.AncientAdenaToAdena:

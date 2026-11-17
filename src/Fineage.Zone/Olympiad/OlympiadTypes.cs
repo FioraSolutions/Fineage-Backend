@@ -107,5 +107,7 @@ public sealed class OlympiadStep
     public List<OlympiadResultNote> Results { get; } = [];
     public List<OlympiadCountdownNote> Countdowns { get; } = [];
     public List<int> RefreshStatus { get; } = [];
+    /// <summary>Heroes of the finished period: the world strips the status, skills, and hero items.</summary>
+    public List<int> RevokedHeroes { get; } = [];
     public bool RefreshAll { get; set; }
 }

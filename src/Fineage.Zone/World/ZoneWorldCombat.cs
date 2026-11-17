@@ -174,6 +174,11 @@ public sealed partial class ZoneWorld
     /// <summary>Mobius <c>PlayableAI</c> blessing / karma / cursed-weapon gate. Sends SysMsg 144 and refuses the swing or bad cast.</summary>
     bool HostilePlayableRefused(ZoneSession session, ZoneEntity attacker, ZoneEntity target, bool badSkill)
     {
+        if (OlympiadTargetRefused(attacker, target))
+        {
+            IncorrectTarget(session);
+            return true;
+        }
         if (!PlayableAttackRules.Refused(
                 attacker.Kind == ZoneEntityKind.Player && target.Kind == ZoneEntityKind.Player,
                 attacker.Level, target.Level, attacker.Karma, target.Karma,
