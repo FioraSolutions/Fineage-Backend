@@ -192,6 +192,27 @@ public sealed class SagaQuestTests
     }
 
     [Fact]
+    public void Finest_ingredients_pays_the_ice_crystal_for_the_saga()
+    {
+        var m = new QuestMachine(Data.Quests, Data.Items, () => 0.0);
+        var me = new QuestActor(0, 76, 2);
+        var j = new QuestJournal();
+        var bag = Bag();
+        m.AdvEvent(j, bag, 624, 31521, "31521-02", me);
+        for (int i = 0; i < 60; i++)
+        {
+            foreach (int mob in new[] { 21319, 21321, 21314 })
+                m.OnPartyKill(j, bag, 624, mob, me);
+        }
+
+        Assert.Equal(2, j.Find(624)!.Cond);
+        m.AdvEvent(j, bag, 624, 31521, "31521-05", me);
+        Assert.Equal(1, bag.CountOf(7080));
+        Assert.Equal(0, bag.CountOf(7202));
+        Assert.Null(j.Find(624));
+    }
+
+    [Fact]
     public void Relog_resets_summon_vars()
     {
         var m = new QuestMachine(Data.Quests, Data.Items);

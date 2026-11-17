@@ -26,7 +26,7 @@ ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 
 # Quests implemented in C# rather than (or on top of) the declarative pack. id -> note.
 SCRIPTED = {
-    **{i: "C# saga engine (ZoneWorldSagas)" for i in range(70, 101)},
+    **{i: "saga engine (QuestCatalog.Sagas + _sagas.json); simplified: no skill casts, helper NPC chat timers" for i in range(70, 101)},
 }
 
 
@@ -199,7 +199,10 @@ def main() -> None:
         java = os.path.join(qdir, d, d + ".java")
         if os.path.exists(java):
             mobius[int(m.group(1))] = (m.group(2), parse_mobius(java))
-    packs = {int(os.path.basename(f)[:5]): f for f in glob.glob(os.path.join(ROOT, "data/quests/[0-9]*_*"))}
+    packs = {int(os.path.basename(f)[:5]): f for f in glob.glob(os.path.join(ROOT, "data/quests/[0-9]*_*"))
+             if os.path.exists(os.path.join(f, "quest.json"))}
+    saga_path = os.path.join(ROOT, "data/quests/_sagas.json")
+    saga_ids = {s["id"] for s in json.load(open(saga_path))["sagas"]} if os.path.exists(saga_path) else set()
     auto = auto_ported_ids()
     hand = {i for i in packs if i not in auto}
 
@@ -209,7 +212,7 @@ def main() -> None:
         cls, mo = mobius[qid]
         name = mo["name"] or re.sub(r"(?<!^)(?=[A-Z])", " ", cls)
         notes: list[str] = []
-        if qid in SCRIPTED and os.path.exists(os.path.join(ROOT, "data/sagas.json")):
+        if qid in SCRIPTED and qid in saga_ids:
             status = "implemented"
             notes.append(SCRIPTED[qid])
         elif qid not in packs:
