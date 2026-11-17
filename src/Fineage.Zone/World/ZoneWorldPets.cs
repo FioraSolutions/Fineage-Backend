@@ -873,6 +873,12 @@ public sealed partial class ZoneWorld
         }
     }
 
+    internal void KillSummonForTest(ZoneEntity summon)
+    {
+        lock (_gate)
+            SummonDied(summon, null, _clock().ToUnixTimeMilliseconds());
+    }
+
     internal StoredPet? LoadPetForTest(int controlObjectId)
     {
         lock (_gate)
