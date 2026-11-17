@@ -287,8 +287,8 @@ def q212():
         kill(20144, [spawn(TALIANUS), cond(8)], cond=7, chance=0.33),
         *[kill(m, [drop(ARTICLE, 1.0, 20, 12)], cond=11) for m in range(20577, 20583)],
         kill(20270, [give(SKULL)], cond=14, lacksItems=[SKULL], chance=0.5),
-        kill(20270, [give(RIBS)], cond=14, lacksItems=[RIBS], chance=0.5),
-        kill(20270, [give(SHIN), cond(15)], cond=14, lacksItems=[SHIN], chance=0.5),
+        kill(20270, [give(RIBS)], cond=14, hasItem=SKULL, lacksItems=[RIBS], chance=0.5),
+        kill(20270, [give(SHIN), cond(15)], cond=14, hasItems=[SKULL, RIBS], lacksItems=[SHIN], chance=0.5),
     ]
     write(212, "00212_trial_of_duty", "Q00212_TrialOfDuty", "Trial of Duty",
           [L_DUSTIN, TEAR, MIRROR, CONFESSION, PIECE1, PIECE2, LOYALTY, ARTICLE, URN, SKULL, RIBS, SHIN, L_WINDAWOOD,
@@ -454,6 +454,196 @@ def q218():
           [SPEAR, C_LETTER, CAMOMILE, H_LETTER, MOONFLOWER, DIAGRAM, T_LETTER1, T_LETTER2, T_INSTR, P_LIST, CUP,
            CONTRACT, A_INSTR, AD_LIST, ANDARIEL, STARDUST, I_INSTR, I_LETTER, GRAIL, TEARS, WATER, ORE, ACID, TALON,
            ICHOR, DOWN, *PIECES], d)
+
+
+@quest
+def q213():
+    TERRY, DUFNER, BRUNON, VIKTOR, MARINA = 30064, 30106, 30526, 30684, 30715
+    (D_LETTER, ORDER1, ORDER2, T_LETTER, V_LETTER, H_LETTER, MYST, OL_MAHUM, TUREK, ANT, TURAK, BOX, V_REQUEST, SCALES,
+     SHILEN, A_REQUEST, M_LETTER, TOOLS, RESULT, ORDER3, HOSTS, AB1, AB2, AB3, AB4, REPORT) = range(2647, 2673)
+    MARK = 2673
+    ok = [7, 22, 35]
+    d = [
+        talk(DUFNER, "30106-03", when="absent", classes=ok, minLevel=35),
+        talk(DUFNER, "30106-02", when="absent", classes=ok),
+        talk(DUFNER, "30106-00", when="absent"),
+        event(DUFNER, "30106-05", ops=START + [give(D_LETTER)], when="absent", classes=ok, minLevel=35),
+        talk(DUFNER, "30106-06", cond=1),
+        talk(DUFNER, "30106-08", hasItem=REPORT, ops=[take(REPORT)] + mark(MARK, 72126, 11000)),
+        talk(DUFNER, "30106-07"),
+        talk(TERRY, "30064-01", cond=1), talk(TERRY, "30064-04", cond=2), talk(TERRY, "30064-05", cond=3),
+        talk(TERRY, "30064-08", cond=4), talk(TERRY, "30064-09", cond=5), talk(TERRY, "30064-11", cond=6),
+        talk(TERRY, "30064-12", cond=7, ops=[take(V_LETTER), give(H_LETTER), cond(8)]),
+        talk(TERRY, "30064-13", cond=8),
+        *[talk(TERRY, "30064-14", cond=c) for c in range(9, 14)],
+        talk(TERRY, "30064-15", cond=14, lacksItems=[ORDER3]),
+        talk(TERRY, "30064-21", cond=14, minLevel=36, ops=[take(ORDER3), give(HOSTS), cond(15)]),
+        talk(TERRY, "30064-20", cond=14),
+        talk(TERRY, "30064-22", cond=15), talk(TERRY, "30064-22", cond=16),
+        talk(TERRY, "30064-23", cond=17, lacksItems=[REPORT],
+             ops=[take(HOSTS), take(AB1), take(AB2), take(AB3), take(AB4), give(REPORT)]),
+        talk(TERRY, "30064-24", cond=17),
+        event(TERRY, "30064-03", ops=[take(D_LETTER), give(ORDER1), cond(2)], cond=1),
+        event(TERRY, "30064-06", ops=[take(MYST), take(ORDER1), give(ORDER2), cond(4)], cond=3),
+        event(TERRY, "30064-10", ops=[take(ANT), take(OL_MAHUM), take(TURAK), take(TUREK), take(ORDER2), give(BOX),
+                                      give(T_LETTER), cond(6)], cond=5),
+        event(TERRY, "30064-18", ops=[take(RESULT), give(HOSTS), cond(16)], cond=14, hasItem=RESULT, minLevel=36),
+        event(TERRY, "30064-18", "30064-17", ops=[take(RESULT), give(ORDER3)], cond=14, hasItem=RESULT),
+        talk(VIKTOR, "30684-01", cond=6), talk(VIKTOR, "30684-05", cond=7), talk(VIKTOR, "30684-12", cond=8),
+        talk(VIKTOR, "30684-13", cond=9), talk(VIKTOR, "30684-14", cond=10), talk(VIKTOR, "30684-16", cond=11),
+        *[talk(VIKTOR, "30684-17", cond=c) for c in range(12, 18)],
+        event(VIKTOR, "30684-05", ops=[take(T_LETTER), give(V_LETTER), cond(7)], cond=6),
+        # Terry and Viktor already swapped their letters at cond 7; only the box and Hawkeye's letter are left to hand in.
+        event(VIKTOR, "30684-11", ops=[take(BOX), take(H_LETTER), give(V_REQUEST), cond(9)], cond=8),
+        event(VIKTOR, "30684-15", ops=[take(V_REQUEST), take(SCALES, 10), give(A_REQUEST), give(SHILEN), cond(11)],
+              cond=10),
+        talk(MARINA, "30715-01", cond=11), talk(MARINA, "30715-03", cond=12), talk(MARINA, "30715-04", cond=13),
+        talk(MARINA, "30715-06", hasItem=RESULT),
+        event(MARINA, "30715-02", ops=[take(SHILEN), take(A_REQUEST), give(M_LETTER), cond(12)], cond=11),
+        event(MARINA, "30715-05", ops=[take(TOOLS), give(RESULT), cond(14)], cond=13),
+        talk(BRUNON, "30526-01", cond=12, ops=[take(M_LETTER), give(TOOLS), cond(13)]),
+        talk(BRUNON, "30526-02", cond=13),
+        kill(20198, [give(MYST), cond(3)], cond=2, chance=0.1),
+        *collect_all({20080: ANT, 20211: OL_MAHUM, 20249: TURAK, 20495: TUREK}, 1, 4, 5, chance=0.25),
+        kill(20158, [drop(SCALES, 0.3, 10, 10)], cond=9),
+        *[row for c in (15, 16) for row in collect_all({20234: AB1, 20270: AB2, 20088: AB3, 20580: AB4}, 1, c, 17,
+                                                        chance=0.25)],
+    ]
+    write(213, "00213_trial_of_the_seeker", "Q00213_TrialOfTheSeeker", "Trial of the Seeker",
+          [D_LETTER, ORDER1, ORDER2, T_LETTER, V_LETTER, H_LETTER, MYST, OL_MAHUM, TUREK, ANT, TURAK, BOX, V_REQUEST,
+           SCALES, SHILEN, A_REQUEST, M_LETTER, TOOLS, RESULT, ORDER3, HOSTS, AB1, AB2, AB3, AB4, REPORT], d)
+
+
+@quest
+def q224():
+    BERNARD, HAMIL, ARON, VOKIAN, GAUEN = 30702, 30626, 30653, 30514, 30717
+    KADESH = 27090
+    (INTRO, H_L1, H_L2, H_L3, RUNE1, RUNE2, T_KADESH, T_SNAKE, CLIP, CHITIN, STRING, HORN, BLOOD) = range(3294, 3307)
+    BOW, ARROW, MARK = 3028, 17, 3293
+    ok = [7, 22, 35]
+    lizards = range(20577, 20583)
+    d = [
+        talk(BERNARD, "30702-03", when="absent", classes=ok, minLevel=39),
+        talk(BERNARD, "30702-01", when="absent", classes=ok),
+        talk(BERNARD, "30702-02", when="absent"),
+        event(BERNARD, "30702-04", ops=START + [give(INTRO)], when="absent", classes=ok, minLevel=39),
+        talk(BERNARD, "30702-05"),
+        talk(HAMIL, "30626-01", cond=1), talk(HAMIL, "30626-04", cond=2), talk(HAMIL, "30626-04", cond=3),
+        talk(HAMIL, "30626-05", cond=4),
+        *[talk(HAMIL, "30626-08", cond=c) for c in (5, 6, 7)],
+        talk(HAMIL, "30626-09", cond=8, ops=[take(RUNE2, 10), give(H_L3), cond(9)]),
+        *[talk(HAMIL, "30626-10", cond=c) for c in (9, 10, 11)],
+        talk(HAMIL, "30626-11", cond=12, ops=[cond(13)]),
+        talk(HAMIL, "30626-12", cond=13),
+        talk(HAMIL, "30626-13", cond=14, ops=[take_all(BLOOD), take(BOW), take(T_KADESH)] + mark(MARK, 54726, 20250)),
+        event(HAMIL, "30626-03", ops=[take(INTRO), give(H_L1), cond(2)], cond=1),
+        event(HAMIL, "30626-07", ops=[take(RUNE1, 10), give(H_L2), cond(5)], cond=4),
+        talk(ARON, "30653-01", cond=2),
+        *[talk(ARON, "30653-03", cond=c) for c in range(3, 15)],
+        event(ARON, "30653-02", ops=[take(H_L1), cond(3)], cond=2),
+        talk(VOKIAN, "30514-01", cond=5), talk(VOKIAN, "30514-03", cond=6),
+        talk(VOKIAN, "30514-04", cond=7, ops=[take(T_SNAKE), cond(8)]),
+        *[talk(VOKIAN, "30514-05", cond=c) for c in range(8, 15)],
+        event(VOKIAN, "30514-02", ops=[take(H_L2), cond(6)], cond=5),
+        talk(GAUEN, "30717-01", cond=9, ops=[take(H_L3), cond(10)]),
+        talk(GAUEN, "30717-03", cond=10),
+        talk(GAUEN, "30717-02", cond=11, ops=[take(HORN), take(CLIP), take(STRING), take(CHITIN), give(BOW),
+                                              give(ARROW, 10), cond(12)]),
+        *[talk(GAUEN, "30717-04", cond=c) for c in (12, 13, 14)],
+        *[kill(m, [drop(RUNE1, 0.5, 10, 4)], cond=3) for m in (20079, 20080, 20081, 20082, 20084, 20086, 20089, 20090)],
+    ]
+    for m in (20269, 20270):
+        d += [kill(m, [give(RUNE2), give(T_SNAKE), cond(7)], cond=6, atLeast={RUNE2: 9}, chance=0.5),
+              kill(m, [drop(RUNE2, 0.5, 10)], cond=6)]
+    d += collect_all({20230: CHITIN, 20232: CHITIN, 20234: CHITIN, 20233: STRING, 20551: CLIP, 20563: HORN}, 1, 10, 11,
+                     chance=0.1)
+    # Serpent Demon Kadesh answers the lizardman blood: past 120 vials each kill calls him with (count - 120) * 5 %.
+    for m in lizards:
+        d.append(kill(m, [take_all(BLOOD), spawn(KADESH)], cond=13, atLeast={BLOOD: 140}))
+        for k in range(139, 120, -1):
+            d.append(kill(m, [take_all(BLOOD), spawn(KADESH)], cond=13, atLeast={BLOOD: k}, below={BLOOD: k + 1},
+                          chance=round((k - 120) * 0.05, 2)))
+        d.append(kill(m, [give(BLOOD)], cond=13))
+    d += [
+        # Kadesh only yields his talisman to the Crescent Moon Bow; otherwise he rises again.
+        kill(KADESH, [give(T_KADESH), cond(14)], cond=13, weapons=[BOW]),
+        kill(KADESH, [spawn(KADESH)], cond=13),
+    ]
+    write(224, "00224_test_of_sagittarius", "Q00224_TestOfSagittarius", "Test of Sagittarius",
+          [INTRO, H_L1, H_L2, H_L3, RUNE1, RUNE2, T_KADESH, T_SNAKE, CLIP, CHITIN, STRING, HORN, BLOOD, BOW], d)
+
+
+@quest
+def q225():
+    ALEX, TYRA, TREE, CHEST, LUTHER, LEIRYNN, BORYS, JAX = 30291, 30420, 30627, 30628, 30690, 30728, 30729, 30730
+    (L_LETTER, WARRANT, ORDER1, TOTEM, ORDER2, FANG, REPORT, STRANGE, LAMBERT, A_LETTER, A_ORDER, CATALOG, CONTRACT,
+     SPORE, WINE, OLD_ORDER, DIARY, PIECE1, PIECE2, SOLT, MAKEL, COMBINED, KEY, GOLD, RECOMMEND) = range(2784, 2809)
+    MARK = 2809
+    ok = [7, 22, 35, 54]
+    chest = spawn_at(CHEST, 10098, 157287, -2406)
+    d = [
+        talk(LUTHER, "30690-04", when="absent", classes=[54], minLevel=39),
+        talk(LUTHER, "30690-03", when="absent", classes=ok, minLevel=39),
+        talk(LUTHER, "30690-02", when="absent", classes=ok),
+        talk(LUTHER, "30690-01", when="absent"),
+        event(LUTHER, "30690-05", ops=START + [give(L_LETTER)], when="absent", classes=ok, minLevel=39),
+        talk(LUTHER, "30690-06", cond=1),
+        *[talk(LUTHER, "30690-07", cond=c) for c in range(2, 19)],
+        talk(LUTHER, "30690-08", cond=19, ops=[take(RECOMMEND)] + mark(MARK, 37831, 18750)),
+        talk(ALEX, "30291-01", cond=1, ops=[take(L_LETTER), give(WARRANT), cond(2)]),
+        talk(ALEX, "30291-02", cond=2),
+        *[talk(ALEX, "30291-03", cond=c) for c in range(3, 7)],
+        talk(ALEX, "30291-04", cond=7),
+        *[talk(ALEX, "30291-08", cond=c) for c in range(8, 13)],
+        *[talk(ALEX, "30291-09", cond=c) for c in range(13, 16)],
+        talk(ALEX, "30291-10", cond=16), talk(ALEX, "30291-10", cond=17),
+        talk(ALEX, "30291-11", cond=18, ops=[take(A_ORDER), take(COMBINED), take_all(GOLD), give(RECOMMEND), cond(19)]),
+        talk(ALEX, "30291-12", cond=19),
+        event(ALEX, "30291-07", ops=[take(REPORT), take(STRANGE), give(A_LETTER), give(A_ORDER), give(LAMBERT),
+                                     cond(8)], cond=7),
+        talk(LEIRYNN, "30728-01", cond=2, ops=[take(WARRANT), give(ORDER1), cond(3)]),
+        talk(LEIRYNN, "30728-02", cond=3),
+        talk(LEIRYNN, "30728-03", cond=4, ops=[take_all(TOTEM), take(ORDER1), give(ORDER2), cond(5)]),
+        talk(LEIRYNN, "30728-04", cond=5),
+        talk(LEIRYNN, "30728-05", cond=6, ops=[take(FANG), take(ORDER2), give(REPORT), cond(7)]),
+        talk(LEIRYNN, "30728-06", cond=7),
+        *[talk(LEIRYNN, "30728-07", cond=c) for c in range(8, 20)],
+        talk(BORYS, "30729-01", cond=8, ops=[take(A_LETTER), give(CATALOG), cond(9)]),
+        *[talk(BORYS, "30729-02", cond=c) for c in (9, 10, 11)],
+        talk(BORYS, "30729-03", cond=12, ops=[take(WINE), give(OLD_ORDER), cond(13)]),
+        talk(BORYS, "30729-04", cond=13),
+        *[talk(BORYS, "30729-05", cond=c) for c in range(14, 20)],
+        talk(TYRA, "30420-01", cond=9), talk(TYRA, "30420-02", cond=10),
+        talk(TYRA, "30420-03", cond=11, ops=[take_all(SPORE), take(CONTRACT), give(WINE), cond(12)]),
+        *[talk(TYRA, "30420-04", cond=c) for c in range(12, 20)],
+        event(TYRA, "30420-01a", ops=[take(CATALOG), give(CONTRACT), cond(10)], cond=9),
+        talk(JAX, "30730-01", cond=13), talk(JAX, "30730-02", cond=14),
+        talk(JAX, "30730-03", cond=15, ops=[take(LAMBERT), take(MAKEL), take(DIARY), take(SOLT), give(COMBINED),
+                                           cond(16)]),
+        *[talk(JAX, "30730-04", cond=c) for c in range(16, 20)],
+        event(JAX, "30730-01d", ops=[take(OLD_ORDER), give(DIARY), cond(14)], cond=13),
+        talk(TREE, "30627-01", cond=16), talk(TREE, "30627-01", cond=17),
+        # The hanged tree raises the strong wooden chest at its Mobius point (again, if it went away unopened).
+        event(TREE, "30627-01a", ops=[give(KEY), cond(17), chest], cond=16),
+        event(TREE, "30627-01a", ops=[chest], cond=17),
+        talk(CHEST, "30628-01", cond=17),
+        event(CHEST, "30628-01a", ops=[take_all(KEY), give(GOLD, 20), cond(18)], cond=17, hasItem=KEY),
+        event(CHEST, "30628-01a", "30628-02", cond=17),
+        kill(20781, [drop(TOTEM, 1.0, 10, 4)], cond=3),
+        kill(27093, [give(FANG), give(STRANGE), cond(6)], cond=5),
+        kill(20555, [drop(SPORE, 1.0, 10, 11)], cond=10),
+    ]
+    # Torn map pieces: four of a kind make Solt's / Makel's map; with both maps the trial moves on.
+    for mob, piece, own, other in ((20551, PIECE1, SOLT, MAKEL), (20144, PIECE2, MAKEL, SOLT)):
+        d += [
+            kill(mob, [take_all(piece), give(own), cond(15)], cond=14, lacksItems=[own], hasItem=other,
+                 atLeast={piece: 3}, chance=0.5),
+            kill(mob, [take_all(piece), give(own)], cond=14, lacksItems=[own, other], atLeast={piece: 3}, chance=0.5),
+            kill(mob, [drop(piece, 0.5)], cond=14, lacksItems=[own], below={piece: 3}),
+        ]
+    write(225, "00225_test_of_the_searcher", "Q00225_TestOfTheSearcher", "Test of the Searcher",
+          [L_LETTER, WARRANT, ORDER1, TOTEM, ORDER2, FANG, REPORT, STRANGE, LAMBERT, A_LETTER, A_ORDER, CATALOG,
+           CONTRACT, SPORE, WINE, OLD_ORDER, DIARY, PIECE1, PIECE2, SOLT, MAKEL, COMBINED, KEY, GOLD, RECOMMEND], d)
 
 
 if __name__ == "__main__":

@@ -25997,10 +25997,20 @@
     {
       "id": 3028,
       "name": "Crescent Moon Bow",
-      "kind": "etc",
+      "kind": "weapon",
       "icon": "icon.weapon_short_bow_i00",
-      "price": 41600,
-      "weight": 600
+      "bodySlot": "lrhand",
+      "weaponType": "bow",
+      "price": 54100,
+      "weight": 600,
+      "pAtk": 34,
+      "mAtk": 12,
+      "critRate": 12,
+      "pAtkSpd": 293,
+      "randomDamage": 5,
+      "attackRange": 500,
+      "soulshots": 6,
+      "spiritshots": 2
     },
     {
       "id": 3029,

@@ -95,6 +95,12 @@ public sealed partial class QuestMachine
                 return false;
         }
 
+        foreach (var pair in dialog.Below ?? new Dictionary<int, int>())
+        {
+            if (inventory.CountOf(pair.Key) >= pair.Value)
+                return false;
+        }
+
         // Mobius hasAtLeastOneQuestItem.
         if (dialog.HasAny is { Count: > 0 } any)
         {

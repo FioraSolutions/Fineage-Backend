@@ -46,7 +46,7 @@ def _gates(d: dict, gates: dict) -> dict:
     for k, v in gates.items():
         if v is None:
             continue
-        if k == "atLeast":
+        if k in ("atLeast", "below"):
             v = {str(a): b for a, b in v.items()}
         d[k] = v
     return d
@@ -164,7 +164,8 @@ def collect_all(mobs, n, at, nxt, chance=1.0, limits=None, **gates):
     for npc, (item, p) in norm.items():
         need = {x: lim[x] for x in items if x != item}
         need[item] = lim[item] - 1
-        rows.append(kill(npc, [drop(item, p, lim[item], nxt)], cond=at, atLeast=need, **gates))
+        need = {x: c for x, c in need.items() if c > 0}
+        rows.append(kill(npc, [drop(item, p, lim[item], nxt)], cond=at, atLeast=need or None, **gates))
         rows.append(kill(npc, [drop(item, p, lim[item])], cond=at, **gates))
     return rows
 

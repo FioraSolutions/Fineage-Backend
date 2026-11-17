@@ -887,6 +887,7 @@
       "hook": "kill",
       "when": "started",
       "cond": 14,
+      "hasItem": 2643,
       "lacksItems": [
         2644
       ],
@@ -905,6 +906,10 @@
       "hook": "kill",
       "when": "started",
       "cond": 14,
+      "hasItems": [
+        2643,
+        2644
+      ],
       "lacksItems": [
         2645
       ],

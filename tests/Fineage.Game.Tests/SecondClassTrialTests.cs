@@ -57,6 +57,9 @@ public sealed class SecondClassTrialTests
     [InlineData(212, 0, 4, 2633)]   // Trial of Duty — Knight
     [InlineData(226, 0, 15, 2820)]  // Test of the Healer — Cleric
     [InlineData(218, 1, 19, 3140)]  // Testimony of Life — Elven Knight
+    [InlineData(213, 0, 7, 2673)]   // Trial of the Seeker — Rogue
+    [InlineData(224, 1, 22, 3293)]  // Test of Sagittarius — Elven Scout
+    [InlineData(225, 4, 54, 2809)]  // Test of the Searcher — Scavenger
     public void Trial_can_be_finished(int questId, int race, int classId, int mark) =>
         Assert.True(Walk(questId, new QuestActor(race, 45, classId), mark), $"quest {questId} never handed out {mark}");
 
@@ -68,6 +71,9 @@ public sealed class SecondClassTrialTests
     [InlineData(212, 0, 1)]   // Trial of Duty is for knights
     [InlineData(226, 0, 7)]
     [InlineData(218, 0, 4)]   // Testimony of Life is elf only
+    [InlineData(213, 0, 1)]
+    [InlineData(224, 4, 54)]  // Scavengers take the Searcher test, not Sagittarius
+    [InlineData(225, 0, 4)]
     public void Trial_refuses_other_classes(int questId, int race, int classId) =>
         Assert.False(Walk(questId, new QuestActor(race, 45, classId), 57, rounds: 1) ||
                      WalkStarts(questId, new QuestActor(race, 45, classId)));
@@ -91,6 +97,40 @@ public sealed class SecondClassTrialTests
     {
         Assert.True(Data.Items.TryGet(3026, out var spear));
         Assert.Equal(ItemKind.Weapon, spear!.Kind);
+    }
+
+    [Theory]
+    [InlineData(120, 0)]
+    [InlineData(130, 0.5)]
+    [InlineData(139, 0.95)]
+    public void Kadesh_answers_lizard_blood_by_count(int blood, double expected)
+    {
+        // Rows are an atLeast/below ladder: exactly one chance row matches a given vial count.
+        var quest = Data.Quests.Find(224)!;
+        var bag = new PlayerInventory(Data.Items);
+        bag.AddPieces(3306, blood);
+        var rows = quest.Dialogs.Where(d => d.Hook == QuestHook.Kill && d.NpcId == 20577 && d.Chance != null &&
+                                            (d.AtLeast?.All(p => bag.CountOf(p.Key) >= p.Value) ?? true) &&
+                                            (d.Below?.All(p => bag.CountOf(p.Key) < p.Value) ?? true)).ToArray();
+        Assert.Equal(expected == 0 ? 0 : 1, rows.Length);
+        if (rows.Length == 1)
+            Assert.Equal(expected, rows[0].Chance!.Value, 3);
+    }
+
+    [Fact]
+    public void Below_gate_stops_a_dialog_at_the_count()
+    {
+        var m = new QuestMachine(Data.Quests, Data.Items, () => 0.0);
+        var bag = new PlayerInventory(Data.Items);
+        var j = new QuestJournal();
+        var rogue = new QuestActor(0, 45, 7);
+        // Searcher map pieces: three torn pieces turn into Solt's map on the next lucky kill, never a fourth piece.
+        m.AdvEvent(j, bag, 225, 30690, "30690-05", rogue);
+        j.Find(225)!.Set("cond", "14");
+        bag.AddPieces(2801, 3);
+        m.OnKill(j, bag, 20551, rogue);
+        Assert.Equal(0, bag.CountOf(2801));
+        Assert.Equal(1, bag.CountOf(2803));
     }
 
     static bool WalkStarts(int questId, QuestActor me)

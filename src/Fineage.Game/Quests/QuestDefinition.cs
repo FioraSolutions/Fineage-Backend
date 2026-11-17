@@ -111,7 +111,9 @@ public sealed record QuestDialog(
     double? Chance = null,
     IReadOnlyDictionary<string, int>? VarAtLeast = null,
     IReadOnlyDictionary<string, int>? VarBelow = null,
-    IReadOnlyList<int>? Weapons = null);
+    IReadOnlyList<int>? Weapons = null,
+    /// <summary>Mobius <c>getQuestItemsCount(id) &lt; n</c> per item (the upper bound of an <see cref="AtLeast"/> ladder).</summary>
+    IReadOnlyDictionary<int, int>? Below = null);
 
 /// <summary>
 /// Who is talking. Mobius quest scripts branch on <c>player.getRace()</c> / <c>getLevel()</c>

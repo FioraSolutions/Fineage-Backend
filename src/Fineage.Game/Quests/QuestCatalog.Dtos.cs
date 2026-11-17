@@ -50,6 +50,7 @@ public sealed partial class QuestCatalog
         public List<int>? HasItems { get; set; }
         public List<int>? LacksItems { get; set; }
         public Dictionary<string, int>? AtLeast { get; set; }
+        public Dictionary<string, int>? Below { get; set; }
         public List<int>? HasAny { get; set; }
         public bool? IsMage { get; set; }
         /// <summary>Mobius <c>player.isSubClassActive()</c>. Null = no gate.</summary>

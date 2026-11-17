@@ -162,7 +162,7 @@ def parse_pack(folder: str) -> dict:
 
 
 # Mobius registers these mobs as kill targets of the quest without any effect on kill (spawned decoys only).
-NO_EFFECT_KILLS = {226: {27126}}
+NO_EFFECT_KILLS = {225: {27092}, 226: {27126}}
 
 
 def auto_ported_ids() -> set[int]:
