@@ -70,6 +70,25 @@ public sealed class SkillCatalogTests
     }
 
     /// <summary>
+    /// Retail self-skills are all 1 s (`skillgrp_Classic.hit_time=1.0`, Mobius `hitTime=1000`).
+    /// Escape Shackle (453) used to carry 4000 ms, which made the hero hold the escape pose and
+    /// shout the release line seconds after the animation ended.
+    /// </summary>
+    [Theory]
+    [InlineData(4, 1000)]    // Dash
+    [InlineData(111, 1000)]  // Ultimate Evasion
+    [InlineData(356, 2000)]  // Focus Chance
+    [InlineData(453, 1000)]  // Escape Shackle
+    public void Self_skill_hit_time_matches_retail(int skillId, int hitTimeMs)
+    {
+        var data = GameData.LoadDefault();
+        var skill = data.Skills.Find(skillId);
+        Assert.NotNull(skill);
+        Assert.Equal("SELF", skill!.TargetType);
+        Assert.Equal(hitTimeMs, skill.HitTimeMs);
+    }
+
+    /// <summary>
     /// Mobius lists Divine Inspiration (1405) with one Ancient Book per level (8618/8619/8620/8621).
     /// The tree must carry those items so the trainer can list and consume them.
     /// </summary>

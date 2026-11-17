@@ -29908,7 +29908,7 @@
       "operateType": "A1",
       "targetType": "SELF",
       "castRange": 40,
-      "hitTimeMs": 4000,
+      "hitTimeMs": 1000,
       "reuseDelayMs": 15000,
       "levelData": [
         {
