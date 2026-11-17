@@ -235,6 +235,7 @@ public sealed partial class QuestMachine
         public List<string> Sounds { get; } = [];
         public List<QuestLine> Lines { get; } = [];
         public List<int> Spawns { get; } = [];
+        public List<QuestSpawnPoint> SpawnsAt { get; } = [];
         public bool Noble;
         public (int X, int Y, int Z)? Teleport;
         public int Social;
