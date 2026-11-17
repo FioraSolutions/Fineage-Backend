@@ -26015,10 +26015,20 @@
     {
       "id": 3029,
       "name": "Sword of Binding",
-      "kind": "etc",
+      "kind": "weapon",
       "icon": "icon.weapon_gladius_i00",
-      "price": 41600,
-      "weight": 1200
+      "bodySlot": "rhand",
+      "weaponType": "sword",
+      "price": 54100,
+      "weight": 1200,
+      "pAtk": 17,
+      "mAtk": 12,
+      "critRate": 8,
+      "pAtkSpd": 379,
+      "randomDamage": 10,
+      "attackRange": 40,
+      "soulshots": 2,
+      "spiritshots": 2
     },
     {
       "id": 3030,

@@ -1,6 +1,6 @@
 {
   "id": 228,
-  "name": "Test Of Magus",
+  "name": "Test of Magus",
   "repeatable": false,
   "abortable": true,
   "questItems": [
@@ -33,439 +33,150 @@
       "npcId": 30629,
       "hook": "talk",
       "when": "absent",
-      "hasItem": 2841,
-      "htmlFile": "30629-talk-000.htm"
+      "classes": [
+        11,
+        26,
+        39
+      ],
+      "minLevel": 39,
+      "htmlFile": "30629-03.htm"
     },
     {
       "npcId": 30629,
       "hook": "talk",
       "when": "absent",
-      "hasItem": 2842,
-      "htmlFile": "30629-talk-001.htm"
+      "classes": [
+        11,
+        26,
+        39
+      ],
+      "htmlFile": "30629-02.htm"
     },
     {
       "npcId": 30629,
       "hook": "talk",
       "when": "absent",
-      "hasItems": [
-        2843,
-        2844,
-        2845,
-        2846
-      ],
-      "htmlFile": "30629-talk-002.htm"
-    },
-    {
-      "npcId": 30629,
-      "hook": "talk",
-      "when": "absent",
-      "hasItems": [
-        2844,
-        2845,
-        2846
-      ],
-      "htmlFile": "30629-talk-003.htm"
-    },
-    {
-      "npcId": 30629,
-      "hook": "talk",
-      "when": "absent",
-      "hasItems": [
-        2847,
-        2856,
-        2857,
-        2858,
-        2859
-      ],
-      "ops": [
-        {
-          "op": "give_item",
-          "itemId": 2840,
-          "count": 1
-        },
-        {
-          "op": "give_adena",
-          "count": 372154
-        },
-        {
-          "op": "give_exp_sp",
-          "exp": 2058244,
-          "sp": 141240
-        },
-        {
-          "op": "complete"
-        }
-      ],
-      "htmlFile": "30629-talk-004.htm"
-    },
-    {
-      "npcId": 30629,
-      "hook": "talk",
-      "when": "absent",
-      "hasItems": [
-        2856,
-        2857,
-        2858,
-        2859
-      ],
-      "ops": [
-        {
-          "op": "give_item",
-          "itemId": 2840,
-          "count": 1
-        },
-        {
-          "op": "give_adena",
-          "count": 372154
-        },
-        {
-          "op": "give_exp_sp",
-          "exp": 2058244,
-          "sp": 141240
-        },
-        {
-          "op": "complete"
-        }
-      ],
-      "htmlFile": "30629-talk-005.htm"
-    },
-    {
-      "npcId": 30391,
-      "hook": "talk",
-      "when": "absent",
-      "hasItem": 2841,
-      "htmlFile": "30391-talk-006.htm"
-    },
-    {
-      "npcId": 30391,
-      "hook": "talk",
-      "when": "absent",
-      "hasItem": 2842,
-      "htmlFile": "30391-talk-007.htm"
-    },
-    {
-      "npcId": 30391,
-      "hook": "talk",
-      "when": "absent",
-      "hasItem": 2843,
-      "htmlFile": "30391-talk-008.htm"
-    },
-    {
-      "npcId": 30391,
-      "hook": "talk",
-      "when": "absent",
-      "hasItem": 2847,
-      "htmlFile": "30391-talk-009.htm"
-    },
-    {
-      "npcId": 30409,
-      "hook": "talk",
-      "when": "absent",
-      "hasItem": 2847,
-      "htmlFile": "30409-talk-010.htm"
-    },
-    {
-      "npcId": 30409,
-      "hook": "talk",
-      "when": "absent",
-      "hasItems": [
-        2847,
-        2859
-      ],
-      "lacksItems": [
-        2863
-      ],
-      "htmlFile": "30409-talk-011.htm"
-    },
-    {
-      "npcId": 30409,
-      "hook": "talk",
-      "when": "absent",
-      "htmlFile": "30409-talk-012.htm"
-    },
-    {
-      "npcId": 30409,
-      "hook": "talk",
-      "when": "absent",
-      "hasItem": 2859,
-      "lacksItems": [
-        2863
-      ],
-      "htmlFile": "30409-talk-013.htm"
-    },
-    {
-      "npcId": 30411,
-      "hook": "talk",
-      "when": "absent",
-      "hasItem": 2847,
-      "ops": [
-        {
-          "op": "give_item",
-          "itemId": 2860,
-          "count": 1
-        }
-      ],
-      "htmlFile": "30411-talk-014.htm"
-    },
-    {
-      "npcId": 30411,
-      "hook": "talk",
-      "when": "absent",
-      "hasItems": [
-        2847,
-        2860
-      ],
-      "htmlFile": "30411-talk-015.htm"
-    },
-    {
-      "npcId": 30411,
-      "hook": "talk",
-      "when": "absent",
-      "hasItem": 2847,
-      "htmlFile": "30411-talk-016.htm"
-    },
-    {
-      "npcId": 30411,
-      "hook": "talk",
-      "when": "absent",
-      "hasItems": [
-        2847,
-        2857
-      ],
-      "lacksItems": [
-        2860
-      ],
-      "htmlFile": "30411-talk-017.htm"
-    },
-    {
-      "npcId": 30411,
-      "hook": "talk",
-      "when": "absent",
-      "ops": [
-        {
-          "op": "give_item",
-          "itemId": 2860,
-          "count": 1
-        }
-      ],
-      "htmlFile": "30411-talk-018.htm"
-    },
-    {
-      "npcId": 30411,
-      "hook": "talk",
-      "when": "absent",
-      "hasItem": 2860,
-      "htmlFile": "30411-talk-019.htm"
-    },
-    {
-      "npcId": 30411,
-      "hook": "talk",
-      "when": "absent",
-      "htmlFile": "30411-talk-020.htm"
-    },
-    {
-      "npcId": 30411,
-      "hook": "talk",
-      "when": "absent",
-      "hasItem": 2857,
-      "lacksItems": [
-        2860
-      ],
-      "htmlFile": "30411-talk-021.htm"
-    },
-    {
-      "npcId": 30412,
-      "hook": "talk",
-      "when": "absent",
-      "hasItem": 2847,
-      "htmlFile": "30412-talk-022.htm"
-    },
-    {
-      "npcId": 30412,
-      "hook": "talk",
-      "when": "absent",
-      "hasItems": [
-        2847,
-        2858
-      ],
-      "lacksItems": [
-        2861
-      ],
-      "htmlFile": "30412-talk-023.htm"
-    },
-    {
-      "npcId": 30412,
-      "hook": "talk",
-      "when": "absent",
-      "htmlFile": "30412-talk-024.htm"
-    },
-    {
-      "npcId": 30412,
-      "hook": "talk",
-      "when": "absent",
-      "hasItem": 2858,
-      "lacksItems": [
-        2861
-      ],
-      "htmlFile": "30412-talk-025.htm"
-    },
-    {
-      "npcId": 30413,
-      "hook": "talk",
-      "when": "absent",
-      "hasItem": 2847,
-      "ops": [
-        {
-          "op": "give_item",
-          "itemId": 2862,
-          "count": 1
-        }
-      ],
-      "htmlFile": "30413-talk-026.htm"
-    },
-    {
-      "npcId": 30413,
-      "hook": "talk",
-      "when": "absent",
-      "hasItems": [
-        2847,
-        2862
-      ],
-      "htmlFile": "30413-talk-027.htm"
-    },
-    {
-      "npcId": 30413,
-      "hook": "talk",
-      "when": "absent",
-      "hasItem": 2847,
-      "htmlFile": "30413-talk-028.htm"
-    },
-    {
-      "npcId": 30413,
-      "hook": "talk",
-      "when": "absent",
-      "hasItems": [
-        2847,
-        2856
-      ],
-      "lacksItems": [
-        2862
-      ],
-      "htmlFile": "30413-talk-029.htm"
-    },
-    {
-      "npcId": 30413,
-      "hook": "talk",
-      "when": "absent",
-      "ops": [
-        {
-          "op": "give_item",
-          "itemId": 2862,
-          "count": 1
-        }
-      ],
-      "htmlFile": "30413-talk-030.htm"
-    },
-    {
-      "npcId": 30413,
-      "hook": "talk",
-      "when": "absent",
-      "hasItem": 2862,
-      "htmlFile": "30413-talk-031.htm"
-    },
-    {
-      "npcId": 30413,
-      "hook": "talk",
-      "when": "absent",
-      "htmlFile": "30413-talk-032.htm"
-    },
-    {
-      "npcId": 30413,
-      "hook": "talk",
-      "when": "absent",
-      "hasItem": 2856,
-      "lacksItems": [
-        2862
-      ],
-      "htmlFile": "30413-talk-033.htm"
-    },
-    {
-      "npcId": 30612,
-      "hook": "talk",
-      "when": "absent",
-      "hasItem": 2842,
-      "htmlFile": "30612-talk-034.htm"
-    },
-    {
-      "npcId": 30612,
-      "hook": "talk",
-      "when": "absent",
-      "hasItems": [
-        2843,
-        2844,
-        2845,
-        2846
-      ],
-      "htmlFile": "30612-talk-035.htm"
-    },
-    {
-      "npcId": 30612,
-      "hook": "talk",
-      "when": "absent",
-      "hasItems": [
-        2844,
-        2845,
-        2846
-      ],
-      "htmlFile": "30612-talk-036.htm"
-    },
-    {
-      "npcId": 30612,
-      "hook": "talk",
-      "when": "absent",
-      "hasItem": 2847,
-      "htmlFile": "30612-talk-037.htm"
+      "htmlFile": "30629-01.htm"
     },
     {
       "npcId": 30629,
       "hook": "event",
       "when": "absent",
-      "event": "ACCEPT",
+      "event": "30629-04",
+      "classes": [
+        11,
+        26,
+        39
+      ],
+      "minLevel": 39,
       "ops": [
         {
+          "op": "create"
+        },
+        {
+          "op": "start"
+        },
+        {
           "op": "give_item",
-          "itemId": 7562,
-          "count": 122
+          "itemId": 2841,
+          "count": 1
         }
       ],
-      "htmlFile": "30629-event-ACCEPT-038.htm"
+      "htmlFile": "30629-04.htm"
     },
     {
       "npcId": 30629,
-      "hook": "event",
-      "when": "absent",
-      "event": "30629-09",
-      "htmlFile": "30629-event-30629-09-039.htm"
+      "hook": "talk",
+      "when": "started",
+      "cond": 1,
+      "htmlFile": "30629-05.htm"
     },
     {
       "npcId": 30629,
-      "hook": "event",
-      "when": "absent",
-      "event": "30409-02",
-      "htmlFile": "30629-event-30409-02-040.htm"
+      "hook": "talk",
+      "when": "started",
+      "cond": 2,
+      "htmlFile": "30629-06.htm"
     },
     {
       "npcId": 30629,
-      "hook": "event",
-      "when": "absent",
-      "event": "30629-10",
-      "hasItem": 2846,
+      "hook": "talk",
+      "when": "started",
+      "cond": 3,
+      "htmlFile": "30629-07.htm"
+    },
+    {
+      "npcId": 30629,
+      "hook": "talk",
+      "when": "started",
+      "cond": 4,
+      "htmlFile": "30629-08.htm"
+    },
+    {
+      "npcId": 30629,
+      "hook": "talk",
+      "when": "started",
+      "cond": 5,
+      "htmlFile": "30629-11.htm"
+    },
+    {
+      "npcId": 30629,
+      "hook": "talk",
+      "when": "started",
+      "cond": 6,
       "ops": [
         {
           "op": "take_item",
-          "itemId": 2843,
+          "itemId": 2847,
           "count": 1
         },
+        {
+          "op": "take_item",
+          "itemId": 2856,
+          "count": 1
+        },
+        {
+          "op": "take_item",
+          "itemId": 2857,
+          "count": 1
+        },
+        {
+          "op": "take_item",
+          "itemId": 2858,
+          "count": 1
+        },
+        {
+          "op": "take_item",
+          "itemId": 2859,
+          "count": 1
+        },
+        {
+          "op": "give_item",
+          "itemId": 2840,
+          "count": 1
+        },
+        {
+          "op": "give_exp_sp",
+          "exp": 139039,
+          "sp": 40000
+        },
+        {
+          "op": "social",
+          "action": 3
+        },
+        {
+          "op": "complete"
+        }
+      ],
+      "htmlFile": "30629-12.htm"
+    },
+    {
+      "npcId": 30629,
+      "hook": "event",
+      "when": "started",
+      "event": "30629-10",
+      "cond": 4,
+      "ops": [
         {
           "op": "take_item",
           "itemId": 2844,
@@ -482,6 +193,11 @@
           "count": 1
         },
         {
+          "op": "take_item",
+          "itemId": 2843,
+          "count": 1
+        },
+        {
           "op": "give_item",
           "itemId": 2847,
           "count": 1
@@ -491,14 +207,56 @@
           "cond": 5
         }
       ],
-      "htmlFile": "30629-event-30629-10-041.htm"
+      "htmlFile": "30629-10.htm"
     },
     {
-      "npcId": 30629,
+      "npcId": 30391,
+      "hook": "talk",
+      "when": "started",
+      "cond": 1,
+      "htmlFile": "30391-01.htm"
+    },
+    {
+      "npcId": 30391,
+      "hook": "talk",
+      "when": "started",
+      "cond": 2,
+      "htmlFile": "30391-03.htm"
+    },
+    {
+      "npcId": 30391,
+      "hook": "talk",
+      "when": "started",
+      "cond": 3,
+      "htmlFile": "30391-04.htm"
+    },
+    {
+      "npcId": 30391,
+      "hook": "talk",
+      "when": "started",
+      "cond": 4,
+      "htmlFile": "30391-04.htm"
+    },
+    {
+      "npcId": 30391,
+      "hook": "talk",
+      "when": "started",
+      "cond": 5,
+      "htmlFile": "30391-05.htm"
+    },
+    {
+      "npcId": 30391,
+      "hook": "talk",
+      "when": "started",
+      "cond": 6,
+      "htmlFile": "30391-05.htm"
+    },
+    {
+      "npcId": 30391,
       "hook": "event",
-      "when": "absent",
+      "when": "started",
       "event": "30391-02",
-      "hasItem": 2841,
+      "cond": 1,
       "ops": [
         {
           "op": "take_item",
@@ -515,41 +273,49 @@
           "cond": 2
         }
       ],
-      "htmlFile": "30629-event-30391-02-042.htm"
+      "htmlFile": "30391-02.htm"
     },
     {
-      "npcId": 30629,
-      "hook": "event",
-      "when": "absent",
-      "event": "30409-03",
-      "ops": [
-        {
-          "op": "give_item",
-          "itemId": 2863,
-          "count": 1
-        }
-      ],
-      "htmlFile": "30629-event-30409-03-043.htm"
+      "npcId": 30612,
+      "hook": "talk",
+      "when": "started",
+      "cond": 2,
+      "htmlFile": "30612-01.htm"
     },
     {
-      "npcId": 30629,
-      "hook": "event",
-      "when": "absent",
-      "event": "30412-02",
-      "ops": [
-        {
-          "op": "give_item",
-          "itemId": 2861,
-          "count": 1
-        }
-      ],
-      "htmlFile": "30629-event-30412-02-044.htm"
+      "npcId": 30612,
+      "hook": "talk",
+      "when": "started",
+      "cond": 3,
+      "htmlFile": "30612-03.htm"
     },
     {
-      "npcId": 30629,
+      "npcId": 30612,
+      "hook": "talk",
+      "when": "started",
+      "cond": 4,
+      "htmlFile": "30612-04.htm"
+    },
+    {
+      "npcId": 30612,
+      "hook": "talk",
+      "when": "started",
+      "cond": 5,
+      "htmlFile": "30612-05.htm"
+    },
+    {
+      "npcId": 30612,
+      "hook": "talk",
+      "when": "started",
+      "cond": 6,
+      "htmlFile": "30612-05.htm"
+    },
+    {
+      "npcId": 30612,
       "hook": "event",
-      "when": "absent",
+      "when": "started",
       "event": "30612-02",
+      "cond": 2,
       "ops": [
         {
           "op": "take_item",
@@ -566,115 +332,824 @@
           "cond": 3
         }
       ],
-      "htmlFile": "30629-event-30612-02-045.htm"
+      "htmlFile": "30612-02.htm"
+    },
+    {
+      "npcId": 30413,
+      "hook": "talk",
+      "when": "started",
+      "cond": 5,
+      "hasItems": [
+        2862,
+        2857,
+        2858,
+        2859
+      ],
+      "atLeast": {
+        "2848": 20
+      },
+      "ops": [
+        {
+          "op": "take_item",
+          "itemId": 2848,
+          "count": 20
+        },
+        {
+          "op": "take_item",
+          "itemId": 2862,
+          "count": 1
+        },
+        {
+          "op": "give_item",
+          "itemId": 2856,
+          "count": 1
+        },
+        {
+          "op": "set_cond",
+          "cond": 6
+        }
+      ],
+      "htmlFile": "30413-03.htm"
+    },
+    {
+      "npcId": 30413,
+      "hook": "talk",
+      "when": "started",
+      "cond": 5,
+      "hasItem": 2862,
+      "atLeast": {
+        "2848": 20
+      },
+      "ops": [
+        {
+          "op": "take_item",
+          "itemId": 2848,
+          "count": 20
+        },
+        {
+          "op": "take_item",
+          "itemId": 2862,
+          "count": 1
+        },
+        {
+          "op": "give_item",
+          "itemId": 2856,
+          "count": 1
+        }
+      ],
+      "htmlFile": "30413-03.htm"
+    },
+    {
+      "npcId": 30413,
+      "hook": "talk",
+      "when": "started",
+      "cond": 5,
+      "hasItem": 2862,
+      "htmlFile": "30413-02.htm"
+    },
+    {
+      "npcId": 30413,
+      "hook": "talk",
+      "when": "started",
+      "cond": 5,
+      "lacksItems": [
+        2856
+      ],
+      "ops": [
+        {
+          "op": "give_item",
+          "itemId": 2862,
+          "count": 1
+        }
+      ],
+      "htmlFile": "30413-01.htm"
+    },
+    {
+      "npcId": 30413,
+      "hook": "talk",
+      "when": "started",
+      "cond": 5,
+      "htmlFile": "30413-04.htm"
+    },
+    {
+      "npcId": 30413,
+      "hook": "talk",
+      "when": "started",
+      "cond": 6,
+      "htmlFile": "30413-04.htm"
+    },
+    {
+      "npcId": 30411,
+      "hook": "talk",
+      "when": "started",
+      "cond": 5,
+      "hasItems": [
+        2860,
+        2856,
+        2858,
+        2859
+      ],
+      "atLeast": {
+        "2849": 5
+      },
+      "ops": [
+        {
+          "op": "take_item",
+          "itemId": 2849,
+          "count": 5
+        },
+        {
+          "op": "take_item",
+          "itemId": 2860,
+          "count": 1
+        },
+        {
+          "op": "give_item",
+          "itemId": 2857,
+          "count": 1
+        },
+        {
+          "op": "set_cond",
+          "cond": 6
+        }
+      ],
+      "htmlFile": "30411-03.htm"
+    },
+    {
+      "npcId": 30411,
+      "hook": "talk",
+      "when": "started",
+      "cond": 5,
+      "hasItem": 2860,
+      "atLeast": {
+        "2849": 5
+      },
+      "ops": [
+        {
+          "op": "take_item",
+          "itemId": 2849,
+          "count": 5
+        },
+        {
+          "op": "take_item",
+          "itemId": 2860,
+          "count": 1
+        },
+        {
+          "op": "give_item",
+          "itemId": 2857,
+          "count": 1
+        }
+      ],
+      "htmlFile": "30411-03.htm"
+    },
+    {
+      "npcId": 30411,
+      "hook": "talk",
+      "when": "started",
+      "cond": 5,
+      "hasItem": 2860,
+      "htmlFile": "30411-02.htm"
+    },
+    {
+      "npcId": 30411,
+      "hook": "talk",
+      "when": "started",
+      "cond": 5,
+      "lacksItems": [
+        2857
+      ],
+      "ops": [
+        {
+          "op": "give_item",
+          "itemId": 2860,
+          "count": 1
+        }
+      ],
+      "htmlFile": "30411-01.htm"
+    },
+    {
+      "npcId": 30411,
+      "hook": "talk",
+      "when": "started",
+      "cond": 5,
+      "htmlFile": "30411-04.htm"
+    },
+    {
+      "npcId": 30411,
+      "hook": "talk",
+      "when": "started",
+      "cond": 6,
+      "htmlFile": "30411-04.htm"
+    },
+    {
+      "npcId": 30412,
+      "hook": "talk",
+      "when": "started",
+      "cond": 5,
+      "hasItems": [
+        2861,
+        2856,
+        2857,
+        2859
+      ],
+      "atLeast": {
+        "2850": 20,
+        "2851": 10,
+        "2852": 10
+      },
+      "ops": [
+        {
+          "op": "take_item",
+          "itemId": 2850,
+          "count": 20
+        },
+        {
+          "op": "take_item",
+          "itemId": 2851,
+          "count": 10
+        },
+        {
+          "op": "take_item",
+          "itemId": 2852,
+          "count": 10
+        },
+        {
+          "op": "take_item",
+          "itemId": 2861,
+          "count": 1
+        },
+        {
+          "op": "give_item",
+          "itemId": 2858,
+          "count": 1
+        },
+        {
+          "op": "set_cond",
+          "cond": 6
+        }
+      ],
+      "htmlFile": "30412-04.htm"
+    },
+    {
+      "npcId": 30412,
+      "hook": "talk",
+      "when": "started",
+      "cond": 5,
+      "hasItem": 2861,
+      "atLeast": {
+        "2850": 20,
+        "2851": 10,
+        "2852": 10
+      },
+      "ops": [
+        {
+          "op": "take_item",
+          "itemId": 2850,
+          "count": 20
+        },
+        {
+          "op": "take_item",
+          "itemId": 2851,
+          "count": 10
+        },
+        {
+          "op": "take_item",
+          "itemId": 2852,
+          "count": 10
+        },
+        {
+          "op": "take_item",
+          "itemId": 2861,
+          "count": 1
+        },
+        {
+          "op": "give_item",
+          "itemId": 2858,
+          "count": 1
+        }
+      ],
+      "htmlFile": "30412-04.htm"
+    },
+    {
+      "npcId": 30412,
+      "hook": "talk",
+      "when": "started",
+      "cond": 5,
+      "hasItem": 2861,
+      "htmlFile": "30412-03.htm"
+    },
+    {
+      "npcId": 30412,
+      "hook": "talk",
+      "when": "started",
+      "cond": 5,
+      "lacksItems": [
+        2858
+      ],
+      "htmlFile": "30412-01.htm"
+    },
+    {
+      "npcId": 30412,
+      "hook": "talk",
+      "when": "started",
+      "cond": 5,
+      "htmlFile": "30412-05.htm"
+    },
+    {
+      "npcId": 30412,
+      "hook": "talk",
+      "when": "started",
+      "cond": 6,
+      "htmlFile": "30412-05.htm"
+    },
+    {
+      "npcId": 30409,
+      "hook": "talk",
+      "when": "started",
+      "cond": 5,
+      "hasItems": [
+        2863,
+        2856,
+        2857,
+        2858
+      ],
+      "atLeast": {
+        "2853": 10,
+        "2854": 10,
+        "2855": 10
+      },
+      "ops": [
+        {
+          "op": "take_item",
+          "itemId": 2853,
+          "count": 10
+        },
+        {
+          "op": "take_item",
+          "itemId": 2854,
+          "count": 10
+        },
+        {
+          "op": "take_item",
+          "itemId": 2855,
+          "count": 10
+        },
+        {
+          "op": "take_item",
+          "itemId": 2863,
+          "count": 1
+        },
+        {
+          "op": "give_item",
+          "itemId": 2859,
+          "count": 1
+        },
+        {
+          "op": "set_cond",
+          "cond": 6
+        }
+      ],
+      "htmlFile": "30409-05.htm"
+    },
+    {
+      "npcId": 30409,
+      "hook": "talk",
+      "when": "started",
+      "cond": 5,
+      "hasItem": 2863,
+      "atLeast": {
+        "2853": 10,
+        "2854": 10,
+        "2855": 10
+      },
+      "ops": [
+        {
+          "op": "take_item",
+          "itemId": 2853,
+          "count": 10
+        },
+        {
+          "op": "take_item",
+          "itemId": 2854,
+          "count": 10
+        },
+        {
+          "op": "take_item",
+          "itemId": 2855,
+          "count": 10
+        },
+        {
+          "op": "take_item",
+          "itemId": 2863,
+          "count": 1
+        },
+        {
+          "op": "give_item",
+          "itemId": 2859,
+          "count": 1
+        }
+      ],
+      "htmlFile": "30409-05.htm"
+    },
+    {
+      "npcId": 30409,
+      "hook": "talk",
+      "when": "started",
+      "cond": 5,
+      "hasItem": 2863,
+      "htmlFile": "30409-04.htm"
+    },
+    {
+      "npcId": 30409,
+      "hook": "talk",
+      "when": "started",
+      "cond": 5,
+      "lacksItems": [
+        2859
+      ],
+      "htmlFile": "30409-01.htm"
+    },
+    {
+      "npcId": 30409,
+      "hook": "talk",
+      "when": "started",
+      "cond": 5,
+      "htmlFile": "30409-06.htm"
+    },
+    {
+      "npcId": 30409,
+      "hook": "talk",
+      "when": "started",
+      "cond": 6,
+      "htmlFile": "30409-06.htm"
+    },
+    {
+      "npcId": 30412,
+      "hook": "event",
+      "when": "started",
+      "event": "30412-02",
+      "cond": 5,
+      "lacksItems": [
+        2861,
+        2858
+      ],
+      "ops": [
+        {
+          "op": "give_item",
+          "itemId": 2861,
+          "count": 1
+        }
+      ],
+      "htmlFile": "30412-02.htm"
+    },
+    {
+      "npcId": 30409,
+      "hook": "event",
+      "when": "started",
+      "event": "30409-03",
+      "cond": 5,
+      "lacksItems": [
+        2863,
+        2859
+      ],
+      "ops": [
+        {
+          "op": "give_item",
+          "itemId": 2863,
+          "count": 1
+        }
+      ],
+      "htmlFile": "30409-03.htm"
     },
     {
       "npcId": 27095,
       "hook": "kill",
       "when": "started",
-      "hasItems": [
-        2843,
-        2845,
-        2846
-      ],
-      "lacksItems": [
-        2844
-      ],
+      "cond": 3,
+      "atLeast": {
+        "2845": 1,
+        "2846": 1
+      },
+      "html": "",
       "ops": [
         {
-          "op": "set_cond",
-          "cond": 4
+          "op": "drop_item",
+          "itemId": 2844,
+          "count": 1,
+          "chance": 1.0,
+          "limit": 1,
+          "condAtLimit": 4
         }
-      ],
-      "html": ""
+      ]
     },
     {
       "npcId": 27095,
       "hook": "kill",
       "when": "started",
-      "hasItems": [
-        2845,
-        2846
-      ],
+      "cond": 3,
+      "html": "",
       "ops": [
         {
-          "op": "set_cond",
-          "cond": 4
+          "op": "drop_item",
+          "itemId": 2844,
+          "count": 1,
+          "chance": 1.0,
+          "limit": 1
         }
-      ],
-      "html": ""
+      ]
     },
     {
       "npcId": 27096,
       "hook": "kill",
       "when": "started",
-      "hasItems": [
-        2843,
-        2844,
-        2846
-      ],
-      "lacksItems": [
-        2845
-      ],
+      "cond": 3,
+      "atLeast": {
+        "2844": 1,
+        "2846": 1
+      },
+      "html": "",
       "ops": [
         {
-          "op": "set_cond",
-          "cond": 4
+          "op": "drop_item",
+          "itemId": 2845,
+          "count": 1,
+          "chance": 1.0,
+          "limit": 1,
+          "condAtLimit": 4
         }
-      ],
-      "html": ""
+      ]
     },
     {
       "npcId": 27096,
       "hook": "kill",
       "when": "started",
-      "hasItems": [
-        2844,
-        2846
-      ],
+      "cond": 3,
+      "html": "",
       "ops": [
         {
-          "op": "set_cond",
-          "cond": 4
+          "op": "drop_item",
+          "itemId": 2845,
+          "count": 1,
+          "chance": 1.0,
+          "limit": 1
         }
-      ],
-      "html": ""
+      ]
     },
     {
       "npcId": 27097,
       "hook": "kill",
       "when": "started",
-      "hasItems": [
-        2843,
-        2844,
-        2845
-      ],
-      "lacksItems": [
-        2846
-      ],
+      "cond": 3,
+      "atLeast": {
+        "2844": 1,
+        "2845": 1
+      },
+      "html": "",
       "ops": [
         {
-          "op": "set_cond",
-          "cond": 4
+          "op": "drop_item",
+          "itemId": 2846,
+          "count": 1,
+          "chance": 1.0,
+          "limit": 1,
+          "condAtLimit": 4
         }
-      ],
-      "html": ""
+      ]
     },
     {
       "npcId": 27097,
       "hook": "kill",
       "when": "started",
-      "hasItems": [
-        2844,
-        2845
-      ],
+      "cond": 3,
+      "html": "",
       "ops": [
         {
-          "op": "set_cond",
-          "cond": 4
+          "op": "drop_item",
+          "itemId": 2846,
+          "count": 1,
+          "chance": 1.0,
+          "limit": 1
         }
-      ],
-      "html": ""
+      ]
+    },
+    {
+      "npcId": 27098,
+      "hook": "kill",
+      "when": "started",
+      "cond": 5,
+      "hasItem": 2860,
+      "html": "",
+      "ops": [
+        {
+          "op": "drop_item",
+          "itemId": 2849,
+          "count": 1,
+          "chance": 0.5,
+          "limit": 5
+        }
+      ]
+    },
+    {
+      "npcId": 20231,
+      "hook": "kill",
+      "when": "started",
+      "cond": 5,
+      "hasItem": 2862,
+      "html": "",
+      "ops": [
+        {
+          "op": "drop_item",
+          "itemId": 2848,
+          "count": 1,
+          "chance": 0.3,
+          "limit": 20
+        }
+      ]
+    },
+    {
+      "npcId": 20157,
+      "hook": "kill",
+      "when": "started",
+      "cond": 5,
+      "hasItem": 2862,
+      "html": "",
+      "ops": [
+        {
+          "op": "drop_item",
+          "itemId": 2848,
+          "count": 1,
+          "chance": 0.3,
+          "limit": 20
+        }
+      ]
+    },
+    {
+      "npcId": 20230,
+      "hook": "kill",
+      "when": "started",
+      "cond": 5,
+      "hasItem": 2862,
+      "html": "",
+      "ops": [
+        {
+          "op": "drop_item",
+          "itemId": 2848,
+          "count": 1,
+          "chance": 0.3,
+          "limit": 20
+        }
+      ]
+    },
+    {
+      "npcId": 20232,
+      "hook": "kill",
+      "when": "started",
+      "cond": 5,
+      "hasItem": 2862,
+      "html": "",
+      "ops": [
+        {
+          "op": "drop_item",
+          "itemId": 2848,
+          "count": 1,
+          "chance": 0.4,
+          "limit": 20
+        }
+      ]
+    },
+    {
+      "npcId": 20234,
+      "hook": "kill",
+      "when": "started",
+      "cond": 5,
+      "hasItem": 2862,
+      "html": "",
+      "ops": [
+        {
+          "op": "drop_item",
+          "itemId": 2848,
+          "count": 1,
+          "chance": 0.5,
+          "limit": 20
+        }
+      ]
+    },
+    {
+      "npcId": 20145,
+      "hook": "kill",
+      "when": "started",
+      "cond": 5,
+      "hasItem": 2861,
+      "html": "",
+      "ops": [
+        {
+          "op": "drop_item",
+          "itemId": 2850,
+          "count": 1,
+          "chance": 1.0,
+          "limit": 20
+        }
+      ]
+    },
+    {
+      "npcId": 20176,
+      "hook": "kill",
+      "when": "started",
+      "cond": 5,
+      "hasItem": 2861,
+      "html": "",
+      "ops": [
+        {
+          "op": "drop_item",
+          "itemId": 2851,
+          "count": 1,
+          "chance": 0.5,
+          "limit": 10
+        }
+      ]
+    },
+    {
+      "npcId": 20553,
+      "hook": "kill",
+      "when": "started",
+      "cond": 5,
+      "hasItem": 2861,
+      "html": "",
+      "ops": [
+        {
+          "op": "drop_item",
+          "itemId": 2852,
+          "count": 1,
+          "chance": 0.5,
+          "limit": 10
+        }
+      ]
+    },
+    {
+      "npcId": 20564,
+      "hook": "kill",
+      "when": "started",
+      "cond": 5,
+      "hasItem": 2863,
+      "html": "",
+      "ops": [
+        {
+          "op": "drop_item",
+          "itemId": 2853,
+          "count": 1,
+          "chance": 1.0,
+          "limit": 10
+        }
+      ]
+    },
+    {
+      "npcId": 20565,
+      "hook": "kill",
+      "when": "started",
+      "cond": 5,
+      "hasItem": 2863,
+      "html": "",
+      "ops": [
+        {
+          "op": "drop_item",
+          "itemId": 2854,
+          "count": 1,
+          "chance": 1.0,
+          "limit": 10
+        }
+      ]
+    },
+    {
+      "npcId": 20566,
+      "hook": "kill",
+      "when": "started",
+      "cond": 5,
+      "hasItem": 2863,
+      "html": "",
+      "ops": [
+        {
+          "op": "drop_item",
+          "itemId": 2855,
+          "count": 1,
+          "chance": 1.0,
+          "limit": 10
+        }
+      ]
+    },
+    {
+      "npcId": 30409,
+      "hook": "event",
+      "when": "any",
+      "event": "30409-02",
+      "htmlFile": "30409-02.htm"
+    },
+    {
+      "npcId": 30629,
+      "hook": "event",
+      "when": "any",
+      "event": "30629-09",
+      "htmlFile": "30629-09.htm"
     }
   ]
 }
