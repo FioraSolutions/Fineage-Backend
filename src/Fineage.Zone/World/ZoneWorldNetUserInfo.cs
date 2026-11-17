@@ -99,7 +99,11 @@ public sealed partial class ZoneWorld
             ClanPrivileges = e.ClanPrivileges,
             PledgeClass = e.PledgeClass,
             PledgeType = e.PledgeType,
-            ClanLeader = e.ClanLeader
+            ClanLeader = e.ClanLeader,
+            Noble = e.Noble,
+            Hero = e.Hero,
+            BaseClassId = e.BaseClassId,
+            ClassIndex = e.ClassIndex
         };
     }
 

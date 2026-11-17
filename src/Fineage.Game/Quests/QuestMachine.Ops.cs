@@ -258,6 +258,15 @@ public sealed partial class QuestMachine
                 case SpawnNpcOp spawn:
                     plan.Spawns.Add(spawn.NpcId);
                     break;
+                case SetNobleOp:
+                    plan.Noble = true;
+                    break;
+                case TeleportOp tp:
+                    plan.Teleport = (tp.X, tp.Y, tp.Z);
+                    break;
+                case SocialOp social:
+                    plan.Social = social.Action;
+                    break;
             }
         }
 
@@ -297,7 +306,10 @@ public sealed partial class QuestMachine
             Items = touches,
             Exp = plan.Exp,
             Sp = plan.Sp,
-            Spawns = plan.Spawns
+            Spawns = plan.Spawns,
+            Noble = plan.Noble,
+            Teleport = plan.Teleport,
+            Social = plan.Social
         };
     }
 }

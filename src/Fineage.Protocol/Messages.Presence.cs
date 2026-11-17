@@ -133,6 +133,10 @@ public sealed class UserInfoMsg
     public int PledgeClass { get; set; }
     public int PledgeType { get; set; }
     public bool ClanLeader { get; set; }
+    public bool Noble { get; set; }
+    public bool Hero { get; set; }
+    public int BaseClassId { get; set; }
+    public int ClassIndex { get; set; }
 }
 
 /// <summary>Opcode <see cref="MsgType.DeleteObject"/> (1007). Left knownlist.</summary>

@@ -79,6 +79,7 @@ public sealed partial class MemoryAccountStore
         public int HennaDye2 { get; set; }
         public int HennaDye3 { get; set; }
         public List<StoredEffectDto>? Effects { get; set; }
+        public CharacterClassState? ClassState { get; set; }
     }
 
     sealed class StoredSocialDto

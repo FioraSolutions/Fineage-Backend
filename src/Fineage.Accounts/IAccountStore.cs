@@ -57,6 +57,9 @@ public interface IAccountStore
     /// <summary>Writes the class after a class transfer (Mobius setClassId / setBaseClass).</summary>
     bool TrySaveClass(string account, int characterId, int classId);
 
+    /// <summary>Writes subclass slots, the active class index, base class and noblesse (Mobius character_subclasses).</summary>
+    bool TrySaveClassState(string account, int characterId, CharacterClassState state);
+
     /// <summary>
     /// Writes the Death Penalty level (Mobius <c>characters.death_penalty_level</c>, <c>Player.java:337</c>). It
     /// outlives the session, so the zone writes it the moment a death rolls it up.

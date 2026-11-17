@@ -383,6 +383,29 @@ static partial class NormalizedStoreWriter
     }
 
     /// <summary>Mobius henna dye slots (three tattoos).</summary>
+    /// <summary>Block G1 <c>character_class_state</c>: subclass slots, active index, base class, noblesse.</summary>
+    public static void UpsertClassState(NpgsqlConnection conn, NpgsqlTransaction? tx, int characterId, CharacterClassState state)
+    {
+        using var cmd = conn.CreateCommand();
+        cmd.Transaction = tx;
+        cmd.CommandText =
+            """
+            INSERT INTO character_class_state (character_id, base_class_id, class_index, noble, payload)
+            VALUES (@id, @base, @index, @noble, @payload::jsonb)
+            ON CONFLICT (character_id) DO UPDATE SET
+                base_class_id = EXCLUDED.base_class_id,
+                class_index = EXCLUDED.class_index,
+                noble = EXCLUDED.noble,
+                payload = EXCLUDED.payload
+            """;
+        cmd.Parameters.AddWithValue("id", characterId);
+        cmd.Parameters.AddWithValue("base", state.BaseClassId);
+        cmd.Parameters.AddWithValue("index", state.ClassIndex);
+        cmd.Parameters.AddWithValue("noble", state.Noble);
+        cmd.Parameters.AddWithValue("payload", state.ToJson());
+        cmd.ExecuteNonQuery();
+    }
+
     public static void UpdateHenna(NpgsqlConnection conn, int characterId, int dye1, int dye2, int dye3)
     {
         using var cmd = conn.CreateCommand();

@@ -46,7 +46,8 @@ public static class NpcServiceProtocol
     public const int BuffThirdClass = 202;
     public const int BlessingRefused = 203;
     public const int UnknownTeleport = 204;
-    public const int NoblesDeferred = 205;
+    /// <summary>Mobius TeleportHolder: noblesse lists refuse a non-noble (Block G1).</summary>
+    public const int NoblesOnly = 205;
     public const int CannotStore = 206;
     public const int FreightDeferred = 207;
     /// <summary>Mobius TeleportHolder: <c>AltKarmaPlayerCanUseGK = False</c> refuses players with karma.</summary>
@@ -69,7 +70,7 @@ public static class NpcServiceProtocol
     public const string BuffThirdClassText = "Only adventurers who have not completed their 3rd class transfer may receive these buffs.";
     public const string BlessingRefusedText = "The Blessing of Protection is only for characters under level 40 who have not completed their second class transfer.";
     public const string UnknownTeleportText = "That teleport is not available.";
-    public const string NoblesDeferredText = "Noblesse teleport is not available yet.";
+    public const string NoblesOnlyText = "Only a Noblesse can use the Noblesse Only Teleport.";
     public const string CannotStoreText = "That item cannot be stored.";
     public const string BuffNoneText = "There is no supplemental magic for your level.";
     public const string EnchantOpenText = "Finish enchanting before using the warehouse.";
@@ -110,4 +111,10 @@ public static class NpcServiceIntent
     public const string Loto = "loto";
     /// <summary>Black Marketeer of Mammon <c>SevenSigns 7 N</c>: N Ancient Adena for N adena (service id = N, −1 invalid).</summary>
     public const string AncientAdenaToAdena = "ancient-adena-to-adena";
+
+    /// <summary>Mobius <c>VillageMaster</c> <c>Subclass N [p1] [p2]</c> (Block G1).</summary>
+    public const string Subclass = "subclass";
+
+    /// <summary>Mobius <c>Teleporter showNoblesSelect</c>: nobles_select.htm for a noble, not_nobles.htm otherwise.</summary>
+    public const string NoblesSelect = "nobles-select";
 }

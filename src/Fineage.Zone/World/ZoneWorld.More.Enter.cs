@@ -169,6 +169,8 @@ public sealed partial class ZoneWorld
             PvpKills = Math.Max(0, stored?.PvpKills ?? 0)
         };
         LoadHenna(entity, stored);
+        LoadClassState(entity, stored);
+        SyncOlympiadNoblesse(entity);
         LoadQuestProgress(session, entity, stored);
         LoadLearnedSkills(entity, stored);
         LoadKnownRecipes(entity, stored);

@@ -23,6 +23,31 @@ sealed partial class ZoneEntity
         set => EnsureIdentity().Hero = value;
     }
 
+    public bool Noble
+    {
+        get => Identity?.Noble ?? false;
+        set => EnsureIdentity().Noble = value;
+    }
+
+    /// <summary>Mobius <c>getBaseClass</c>: the class the character was created into and advanced.</summary>
+    public int BaseClassId
+    {
+        get => Identity is { BaseClassId: > 0 } i ? i.BaseClassId : ClassId;
+        set => EnsureIdentity().BaseClassId = value;
+    }
+
+    public int ClassIndex
+    {
+        get => Identity?.ClassIndex ?? 0;
+        set => EnsureIdentity().ClassIndex = value;
+    }
+
+    /// <summary>Mobius <c>isSubClassActive</c>.</summary>
+    public bool SubClassActive => ClassIndex > 0;
+
+    /// <summary>Parked class slots (Mobius <c>getSubClasses</c> plus the base while a subclass is active).</summary>
+    public List<Fineage.Accounts.StoredClassSlot> ClassSlots => EnsureIdentity().ClassSlots;
+
     public bool InClan
     {
         get => Identity?.InClan ?? false;

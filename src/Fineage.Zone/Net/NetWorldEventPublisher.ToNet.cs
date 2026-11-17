@@ -80,7 +80,11 @@ sealed partial class NetWorldEventPublisher
             ClanPrivileges = info.ClanPrivileges,
             PledgeClass = info.PledgeClass,
             PledgeType = info.PledgeType,
-            ClanLeader = info.ClanLeader
+            ClanLeader = info.ClanLeader,
+            Noble = info.Noble,
+            Hero = info.Hero,
+            BaseClassId = info.BaseClassId,
+            ClassIndex = info.ClassIndex
         };
     }
 

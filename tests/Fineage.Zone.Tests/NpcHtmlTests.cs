@@ -130,7 +130,7 @@ public sealed class NpcHtmlTests
         Assert.Equal(NpcServiceIntent.Teleport, registry.Find("teleport OTHER 0")!.Handle(call with { Command = "teleport OTHER 0" }).Service);
         Assert.Equal("OTHER", registry.Find("teleport OTHER 0")!.Handle(call with { Command = "teleport OTHER 0" }).ServiceArg);
         Assert.Equal(0, registry.Find("teleport OTHER 0")!.Handle(call with { Command = "teleport OTHER 0" }).ServiceId);
-        Assert.Contains("Teleport is not implemented yet.", registry.Find("showNoblesSelect")!.Handle(call with { Command = "showNoblesSelect" }).Html, StringComparison.Ordinal);
+        Assert.Equal(NpcServiceIntent.NoblesSelect, registry.Find("showNoblesSelect")!.Handle(call with { Command = "showNoblesSelect" }).Service);
         var exchange = registry.Find("exc_multisell 003")!.Handle(call with { Command = "exc_multisell 003" });
         Assert.Equal(3, exchange.MultiSellListId);
         Assert.True(exchange.MultiSellInventoryOnly);

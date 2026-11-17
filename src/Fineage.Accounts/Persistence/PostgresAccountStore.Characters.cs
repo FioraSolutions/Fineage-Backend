@@ -147,6 +147,11 @@ public sealed partial class PostgresAccountStore
             () => _inner.TrySaveDeathPenalty(account, characterId, level),
             conn => NormalizedStoreWriter.UpdateDeathPenalty(conn, characterId, level));
 
+    public bool TrySaveClassState(string account, int characterId, CharacterClassState state) =>
+        RunSilent(
+            () => _inner.TrySaveClassState(account, characterId, state),
+            conn => NormalizedStoreWriter.UpsertClassState(conn, null, characterId, state));
+
     public bool TrySaveHenna(string account, int characterId, int dye1, int dye2, int dye3) =>
         RunSilent(
             () => _inner.TrySaveHenna(account, characterId, dye1, dye2, dye3),

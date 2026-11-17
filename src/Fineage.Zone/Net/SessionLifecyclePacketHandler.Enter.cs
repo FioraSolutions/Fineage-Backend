@@ -179,7 +179,7 @@ sealed partial class SessionLifecyclePacketHandler
             throw new InvalidOperationException("hello_required");
     }
 
-    static ShortCutInitNetMsg ToNetShortcutInit(ShortCutInitMsg init)
+    internal static ShortCutInitNetMsg ToNetShortcutInit(ShortCutInitMsg init)
     {
         var src = init.Shortcuts ?? [];
         var rows = new ShortCutNetMsg[src.Length];

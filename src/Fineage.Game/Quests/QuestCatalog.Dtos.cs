@@ -52,6 +52,8 @@ public sealed partial class QuestCatalog
         public Dictionary<string, int>? AtLeast { get; set; }
         public List<int>? HasAny { get; set; }
         public bool? IsMage { get; set; }
+        /// <summary>Mobius <c>player.isSubClassActive()</c>. Null = no gate.</summary>
+        public bool? SubClass { get; set; }
     }
 
     sealed class OpDto
@@ -74,6 +76,10 @@ public sealed partial class QuestCatalog
         public int? BonusAdena { get; set; }
         public int NpcId { get; set; }
         public List<PriceDto>? Prices { get; set; }
+        public int? X { get; set; }
+        public int? Y { get; set; }
+        public int? Z { get; set; }
+        public int? Action { get; set; }
     }
 
     sealed class PriceDto

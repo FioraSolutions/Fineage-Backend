@@ -44,6 +44,8 @@ public sealed partial class QuestMachine
             return false;
         if (dialog.IsMage is bool wantMage && IsMageClass(who.ClassId) != wantMage)
             return false;
+        if (dialog.SubClass is bool wantSub && who.SubClass != wantSub)
+            return false;
         return true;
     }
 
@@ -207,6 +209,9 @@ public sealed partial class QuestMachine
         public List<string> Sounds { get; } = [];
         public List<QuestLine> Lines { get; } = [];
         public List<int> Spawns { get; } = [];
+        public bool Noble;
+        public (int X, int Y, int Z)? Teleport;
+        public int Social;
         public long Exp;
         public int Sp;
     }

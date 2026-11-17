@@ -48618,6 +48618,15 @@
       "stackable": true
     },
     {
+      "id": 6029,
+      "name": "Lunargent",
+      "kind": "etc",
+      "icon": "icon.etc_mithril_ore_i00",
+      "price": 2500,
+      "weight": 0,
+      "stackable": true
+    },
+    {
       "id": 6033,
       "name": "Hellfire Oil",
       "kind": "etc",
@@ -56191,6 +56200,36 @@
       "quest": true
     },
     {
+      "id": 7587,
+      "name": "Legend of Seventeen",
+      "kind": "etc",
+      "icon": "icon.etc_piece_of_paper_gray_i00",
+      "price": 0,
+      "weight": 0,
+      "stackable": true,
+      "quest": true
+    },
+    {
+      "id": 7588,
+      "name": "Faded Poetry Book",
+      "kind": "etc",
+      "icon": "icon.etc_spellbook_red_i00",
+      "price": 0,
+      "weight": 0,
+      "stackable": true,
+      "quest": true
+    },
+    {
+      "id": 7589,
+      "name": "Echo Crystal - Forgotten Song",
+      "kind": "etc",
+      "icon": "icon.etc_echo_crystal_i02",
+      "price": 0,
+      "weight": 0,
+      "stackable": true,
+      "quest": true
+    },
+    {
       "id": 7590,
       "name": "Strand of Golden Hair",
       "kind": "etc",
@@ -56255,6 +56294,36 @@
       "name": "Sorcery Ingredient",
       "kind": "etc",
       "icon": "icon.etc_oil_pot_white_i00",
+      "price": 0,
+      "weight": 0,
+      "stackable": true,
+      "quest": true
+    },
+    {
+      "id": 7597,
+      "name": "Malruk Succubus Claw",
+      "kind": "etc",
+      "icon": "icon.etc_fang_gray_i00",
+      "price": 0,
+      "weight": 0,
+      "stackable": true,
+      "quest": true
+    },
+    {
+      "id": 7598,
+      "name": "Crimson Moss",
+      "kind": "etc",
+      "icon": "icon.etc_powder_red_i00",
+      "price": 0,
+      "weight": 0,
+      "stackable": true,
+      "quest": true
+    },
+    {
+      "id": 7599,
+      "name": "Rahorakti's Miraculous Medicine",
+      "kind": "etc",
+      "icon": "icon.etc_potion_scarlet_i00",
       "price": 0,
       "weight": 0,
       "stackable": true,

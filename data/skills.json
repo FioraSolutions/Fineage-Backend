@@ -50003,6 +50003,271 @@
       ],
       "magicType": 2,
       "effectRange": -1
+    },
+    {
+      "skillId": 325,
+      "name": "Strider Siege Assault",
+      "levels": 1,
+      "passive": false,
+      "operateType": "A1",
+      "targetType": "ONE",
+      "castRange": 40,
+      "hitTimeMs": 1080,
+      "reuseDelayMs": 5000,
+      "levelData": [
+        {
+          "level": 1,
+          "mpConsume": 168,
+          "power": 15005,
+          "abnormalLevel": 1
+        }
+      ]
+    },
+    {
+      "skillId": 326,
+      "name": "Build Advanced Headquarters",
+      "levels": 1,
+      "passive": false,
+      "operateType": "A1",
+      "targetType": "SELF",
+      "castRange": 40,
+      "hitTimeMs": 4000,
+      "reuseDelayMs": 3600000,
+      "levelData": [
+        {
+          "level": 1,
+          "mpConsume": 0,
+          "power": 0,
+          "abnormalLevel": 1
+        }
+      ]
+    },
+    {
+      "skillId": 327,
+      "name": "Wyvern Aegis",
+      "levels": 1,
+      "passive": false,
+      "operateType": "A2",
+      "targetType": "SELF",
+      "castRange": 40,
+      "hitTimeMs": 1000,
+      "reuseDelayMs": 1800000,
+      "levelData": [
+        {
+          "level": 1,
+          "mpConsume": 69,
+          "power": 0,
+          "abnormalLevel": 3
+        }
+      ],
+      "abnormalTimeSeconds": 9,
+      "abnormalType": "PD_UP_SPECIAL"
+    },
+    {
+      "skillId": 395,
+      "name": "Heroic Miracle",
+      "levels": 1,
+      "passive": false,
+      "operateType": "A2",
+      "targetType": "SELF",
+      "castRange": 40,
+      "hitTimeMs": 1000,
+      "reuseDelayMs": 1200000,
+      "levelData": [
+        {
+          "level": 1,
+          "mpConsume": 72,
+          "power": 0,
+          "abnormalLevel": 3
+        }
+      ],
+      "abnormalTimeSeconds": 30,
+      "abnormalType": "HERO_BUFF"
+    },
+    {
+      "skillId": 396,
+      "name": "Heroic Berserker",
+      "levels": 1,
+      "passive": false,
+      "operateType": "A2",
+      "targetType": "SELF",
+      "castRange": 40,
+      "hitTimeMs": 1000,
+      "reuseDelayMs": 1200000,
+      "levelData": [
+        {
+          "level": 1,
+          "mpConsume": 72,
+          "power": 0,
+          "abnormalLevel": 3
+        }
+      ],
+      "abnormalTimeSeconds": 120,
+      "abnormalType": "HERO_BUFF"
+    },
+    {
+      "skillId": 1323,
+      "name": "Noblesse Blessing",
+      "levels": 1,
+      "passive": false,
+      "operateType": "A2",
+      "targetType": "ONE",
+      "castRange": 400,
+      "hitTimeMs": 4000,
+      "reuseDelayMs": 6000,
+      "levelData": [
+        {
+          "level": 1,
+          "mpConsume": 55,
+          "power": 0,
+          "abnormalLevel": 1
+        }
+      ],
+      "abnormalTimeSeconds": 3600,
+      "abnormalType": "PRESERVE_ABNORMAL"
+    },
+    {
+      "skillId": 1324,
+      "name": "Summon CP Potion",
+      "levels": 1,
+      "passive": false,
+      "operateType": "A1",
+      "targetType": "SELF",
+      "castRange": 40,
+      "hitTimeMs": 20000,
+      "reuseDelayMs": 1800000,
+      "levelData": [
+        {
+          "level": 1,
+          "mpConsume": 330,
+          "power": 0,
+          "abnormalLevel": 1
+        }
+      ]
+    },
+    {
+      "skillId": 1325,
+      "name": "Fortune of Noblesse",
+      "levels": 1,
+      "passive": false,
+      "operateType": "A2",
+      "targetType": "PARTY",
+      "castRange": 40,
+      "hitTimeMs": 4000,
+      "reuseDelayMs": 20000,
+      "levelData": [
+        {
+          "level": 1,
+          "mpConsume": 220,
+          "power": 0,
+          "abnormalLevel": 6
+        }
+      ],
+      "abnormalTimeSeconds": 3600,
+      "abnormalType": "REDUCE_DROP_PENALTY"
+    },
+    {
+      "skillId": 1326,
+      "name": "Harmony of Noblesse",
+      "levels": 1,
+      "passive": false,
+      "operateType": "A1",
+      "targetType": "AREA",
+      "castRange": 700,
+      "hitTimeMs": 7000,
+      "reuseDelayMs": 3600000,
+      "levelData": [
+        {
+          "level": 1,
+          "mpConsume": 40,
+          "power": 250,
+          "abnormalLevel": 1
+        }
+      ]
+    },
+    {
+      "skillId": 1327,
+      "name": "Symphony of Noblesse",
+      "levels": 1,
+      "passive": false,
+      "operateType": "A1",
+      "targetType": "AREA",
+      "castRange": 700,
+      "hitTimeMs": 7000,
+      "reuseDelayMs": 3600000,
+      "levelData": [
+        {
+          "level": 1,
+          "mpConsume": 64,
+          "power": 400,
+          "abnormalLevel": 1
+        }
+      ]
+    },
+    {
+      "skillId": 1374,
+      "name": "Heroic Valor",
+      "levels": 1,
+      "passive": false,
+      "operateType": "A2",
+      "targetType": "CLAN",
+      "castRange": 40,
+      "hitTimeMs": 2500,
+      "reuseDelayMs": 1200000,
+      "levelData": [
+        {
+          "level": 1,
+          "mpConsume": 0,
+          "power": 0,
+          "abnormalLevel": 1
+        }
+      ],
+      "abnormalTimeSeconds": 120,
+      "abnormalType": "HERO_BUFF"
+    },
+    {
+      "skillId": 1375,
+      "name": "Heroic Grandeur",
+      "levels": 1,
+      "passive": false,
+      "operateType": "A2",
+      "targetType": "AURA",
+      "castRange": 40,
+      "hitTimeMs": 2500,
+      "reuseDelayMs": 300000,
+      "levelData": [
+        {
+          "level": 1,
+          "mpConsume": 0,
+          "power": 0,
+          "abnormalLevel": 1
+        }
+      ],
+      "abnormalTimeSeconds": 30,
+      "isDebuff": true,
+      "abnormalType": "HERO_DEBUFF"
+    },
+    {
+      "skillId": 1376,
+      "name": "Heroic Dread",
+      "levels": 1,
+      "passive": false,
+      "operateType": "A2",
+      "targetType": "AURA",
+      "castRange": 40,
+      "hitTimeMs": 2500,
+      "reuseDelayMs": 300000,
+      "levelData": [
+        {
+          "level": 1,
+          "mpConsume": 0,
+          "power": 0,
+          "abnormalLevel": 1
+        }
+      ],
+      "abnormalTimeSeconds": 15,
+      "isDebuff": true,
+      "abnormalType": "HERO_DEBUFF"
     }
   ]
 }

@@ -135,6 +135,10 @@ public sealed partial class ZoneWorld
 
         int previous = player.ClassId;
         player.ClassId = change.ClassId;
+        // Mobius setClassId: on the base class it is also setBaseClass; on a subclass only that slot changes.
+        bool trackBase = !player.SubClassActive && player.Identity is { BaseClassId: > 0 };
+        if (trackBase)
+            player.BaseClassId = change.ClassId;
         session.ChangeClass(change.ClassId);
         GraduateFromAcademy(session, player);
         player.BaseRunSpeed = template.RunSpeed;
@@ -170,6 +174,8 @@ public sealed partial class ZoneWorld
             NetBridge?.FanoutCharInfo(netPeers, player.ObjectId);
 
         _persist.SaveClass(session.Account, session.ObjectId, change.ClassId);
+        if (trackBase || player.SubClassActive)
+            SaveClassState(session, player);
         SaveInventory(session, inventory);
         SaveQuestProgress(session, player);
         ZoneLog.Info($"class-change object={session.ObjectId} {previous}->{change.ClassId} " +

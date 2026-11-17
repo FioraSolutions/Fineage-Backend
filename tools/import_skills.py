@@ -196,6 +196,15 @@ def main() -> None:
         for entry in tree["skills"]:
             referenced.add(entry["skillId"])
 
+    # Noble and hero trees have no classId (Mobius nobleSkillTree.xml / heroSkillTree.xml); their templates are still
+    # needed because the zone grants them on noblesse (Block G1) and hero status (Block G2).
+    for special in ("nobleSkillTree.xml", "heroSkillTree.xml"):
+        path = trees_root / special
+        if path.is_file():
+            for node in ET.parse(path).getroot().iter():
+                if local(node.tag) == "skill" and "skillId" in node.attrib:
+                    referenced.add(int(node.attrib["skillId"]))
+
     missing = sorted(skill for skill in referenced if skill not in templates)
     if missing:
         raise SystemExit(f"missing skill templates for ids: {missing[:20]}")
