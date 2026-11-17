@@ -7,9 +7,9 @@ Status: **implemented** — every Mobius talk NPC and kill target is wired, the 
 
 | Status | Count |
 |---|---|
-| implemented | 161 |
+| implemented | 166 |
 | partial | 103 |
-| stub | 42 |
+| stub | 37 |
 | missing | 38 |
 | **total Mobius quests** | **344** |
 
@@ -153,12 +153,12 @@ Related non-quest scripts: `village_master/*Change1|Change2` and `FirstClassTran
 | 213 | Trial of the Seeker | 36+ | 2nd class (Trial/Test) | implemented | hand-ported |
 | 214 | Trial of the Scholar | 36+ | 2nd class (Trial/Test) | implemented | hand-ported |
 | 215 | Trial of the Pilgrim | 35+ | 2nd class (Trial/Test) | implemented | hand-ported |
-| 216 | Trial of the Guildsman | 35+ | 2nd class (Trial/Test) | stub | 64 dialog(s), no start; auto-port |
+| 216 | Trial of the Guildsman | 35+ | 2nd class (Trial/Test) | implemented | hand-ported |
 | 217 | Testimony of Trust | 38+ | 2nd class (Trial/Test) | implemented | hand-ported |
 | 218 | Testimony of Life | 38+ | 2nd class (Trial/Test) | implemented | hand-ported |
 | 219 | Testimony of Fate | 38+ | 2nd class (Trial/Test) | implemented | hand-ported |
 | 220 | Testimony of Glory | 37+ | 2nd class (Trial/Test) | implemented | hand-ported |
-| 221 | Testimony of Prosperity | 38+ | 2nd class (Trial/Test) | stub | 173 dialog(s), no start; auto-port |
+| 221 | Testimony of Prosperity | 38+ | 2nd class (Trial/Test) | implemented | hand-ported |
 | 222 | Test of the Duelist | 39+ | 2nd class (Trial/Test) | implemented | hand-ported |
 | 223 | Test of the Champion | 39+ | 2nd class (Trial/Test) | partial | quest spawns missing; hand-ported |
 | 224 | Test of Sagittarius | 39+ | 2nd class (Trial/Test) | implemented | hand-ported |
@@ -168,9 +168,9 @@ Related non-quest scripts: `village_master/*Change1|Change2` and `FirstClassTran
 | 228 | Test of Magus | 39+ | 2nd class (Trial/Test) | implemented | hand-ported |
 | 229 | Test of Witchcraft | 39+ | 2nd class (Trial/Test) | implemented | timers; hand-ported |
 | 230 | Test of the Summoner | 39+ | 2nd class (Trial/Test) | implemented | hand-ported |
-| 231 | Test of the Maestro | 39+ | 2nd class (Trial/Test) | stub | 34 dialog(s), no start; timers; auto-port |
-| 232 | Test of the Lord | 39+ | 2nd class (Trial/Test) | stub | 64 dialog(s), no start; timers; auto-port |
-| 233 | Test of the War Spirit | 39+ | 2nd class (Trial/Test) | stub | 92 dialog(s), no start; auto-port |
+| 231 | Test of the Maestro | 39+ | 2nd class (Trial/Test) | implemented | timers; hand-ported |
+| 232 | Test of the Lord | 39+ | 2nd class (Trial/Test) | implemented | timers; hand-ported |
+| 233 | Test of the War Spirit | 39+ | 2nd class (Trial/Test) | implemented | hand-ported |
 | 234 | Fate's Whisper | 75+ | subclass prerequisite | stub | 17 dialog(s), no start; auto-port |
 | 235 | Mimir's Elixir | 75+ | subclass prerequisite | partial | no kill: 2/2 mobs; auto-port |
 | 241 | Possessor of a Precious Soul - 1 | 50+ | noblesse | implemented | hand-ported |
