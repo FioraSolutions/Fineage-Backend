@@ -270,24 +270,24 @@ Related non-quest scripts: `village_master/*Change1|Change2` and `FirstClassTran
 | 384 | Warehouse Keeper's Pastime | 40+ | repeatable | stub | 3 dialog(s), no start; auto-port |
 | 385 | Yoke of the Past | 20+ | repeatable | missing |  |
 | 386 | Stolen Dignity | 58+ | repeatable | stub | 2 dialog(s), no start; auto-port |
-| 401 | Path to a Warrior | 19+ | 1st class (Path) | implemented | auto-port |
-| 402 | Path to a Human Knight | 19+ | 1st class (Path) | partial | no talk: 30311; auto-port |
-| 403 | Path to a Rogue | 19+ | 1st class (Path) | implemented | auto-port |
+| 401 | Path to a Warrior | 19+ | 1st class (Path) | implemented | hand-ported |
+| 402 | Path to a Human Knight | 19+ | 1st class (Path) | partial | no talk: 30311; hand-ported |
+| 403 | Path to a Rogue | 19+ | 1st class (Path) | implemented | hand-ported |
 | 404 | Path to a Human Wizard | 19+ | 1st class (Path) | implemented | hand-ported |
 | 405 | Path to a Cleric | 19+ | 1st class (Path) | implemented | hand-ported |
 | 406 | Path to an Elven Knight | 19+ | 1st class (Path) | implemented | hand-ported |
 | 407 | Path to an Elven Scout | 19+ | 1st class (Path) | implemented | hand-ported |
 | 408 | Path to an Elven Wizard | 19+ | 1st class (Path) | implemented | hand-ported |
 | 409 | Path to an Elven Oracle | 19+ | 1st class (Path) | implemented | hand-ported |
-| 410 | Path to a Palus Knight | 19+ | 1st class (Path) | implemented | auto-port |
+| 410 | Path to a Palus Knight | 19+ | 1st class (Path) | implemented | hand-ported |
 | 411 | Path to an Assassin | 19+ | 1st class (Path) | implemented | hand-ported |
 | 412 | Path to a Dark Wizard | 19+ | 1st class (Path) | implemented | hand-ported |
 | 413 | Path to a Shillien Oracle | 19+ | 1st class (Path) | implemented | hand-ported |
 | 414 | Path to an Orc Raider | 19+ | 1st class (Path) | implemented | hand-ported |
-| 415 | Path to a Monk | 19+ | 1st class (Path) | implemented | auto-port |
-| 416 | Path to an Orc Shaman | 19+ | 1st class (Path) | implemented | auto-port |
+| 415 | Path to a Monk | 19+ | 1st class (Path) | implemented | hand-ported |
+| 416 | Path to an Orc Shaman | 19+ | 1st class (Path) | implemented | hand-ported |
 | 417 | Path to become a Scavenger | 19+ | 1st class (Path) | implemented | hand-ported |
-| 418 | Path to an Artisan | 19+ | 1st class (Path) | implemented | auto-port |
+| 418 | Path to an Artisan | 19+ | 1st class (Path) | implemented | hand-ported |
 | 419 | Get a Pet | 15+ | pet | stub | 32 dialog(s), no start; auto-port |
 | 420 | Little Wing | 35+ | pet | partial | no kill: 17/17 mobs; teleport missing; auto-port |
 | 421 | Little Wing's Big Adventure | 45+ | pet | stub | 33 dialog(s), no start; auto-port |
