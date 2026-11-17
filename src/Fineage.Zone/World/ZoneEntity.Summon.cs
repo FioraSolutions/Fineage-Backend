@@ -1,3 +1,5 @@
+using Fineage.Game;
+using Fineage.Game.Services;
 using Fineage.Net.Contract;
 
 namespace Fineage.Zone.World;
@@ -19,7 +21,7 @@ sealed class SummonState
     public long UpkeepIntervalMs { get; init; }
     public long UpkeepRemainingMs { get; set; }
     public double ExpMultiplier { get; init; } = 1;
-    public IReadOnlyList<(int SkillId, int Level)> Skills { get; init; } = [];
+    public IReadOnlyList<(int SkillId, int Level)> Skills { get; set; } = [];
 
     /// <summary>Mobius <c>Summon.getFollowStatus</c>: true runs after the owner, false stays put.</summary>
     public bool Following { get; set; } = true;
@@ -33,6 +35,27 @@ sealed class SummonState
     public long NextAttackMs { get; set; }
     /// <summary>Dead summon: when the corpse goes away.</summary>
     public long DecayAtMs { get; set; }
+
+    /// <summary>Pet only (Kind = Pet): collar, level table, exp, meal meter and the pet's own bag.</summary>
+    public PetState? Pet { get; init; }
+}
+
+/// <summary>Mobius <c>Pet</c>: control item, exp / level, current meal (<c>_curFed</c>) and <c>PetInventory</c>.</summary>
+sealed class PetState
+{
+    public required PetTemplate Template { get; init; }
+    public int ControlObjectId { get; init; }
+    public int ControlItemId { get; init; }
+    public long Exp { get; set; }
+    public int Fed { get; set; }
+    public required PlayerInventory Inventory { get; init; }
+    /// <summary>Exp before the last death (Mobius <c>_expBeforeDeath</c>), for a resurrection's restore.</summary>
+    public long ExpBeforeDeath { get; set; }
+    public long NextFeedMs { get; set; }
+    /// <summary>Pick-up order: ground item the pet runs to (Mobius AI_INTENTION_PICK_UP); 0 = none.</summary>
+    public int PickupTargetId { get; set; }
+    /// <summary>Custom pet name; empty shows the npc name.</summary>
+    public string Name { get; set; } = "";
 }
 
 sealed partial class ZoneEntity

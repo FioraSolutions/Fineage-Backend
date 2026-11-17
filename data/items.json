@@ -19951,6 +19951,15 @@
       "shotGrade": "s"
     },
     {
+      "id": 2515,
+      "name": "Food For Wolves",
+      "kind": "etc",
+      "stackable": true,
+      "icon": "icon.etc_pouch_yellow_i00",
+      "price": 100,
+      "weight": 40
+    },
+    {
       "id": 2516,
       "name": "Saber*Saber",
       "kind": "weapon",
@@ -30433,6 +30442,30 @@
       "weight": 0
     },
     {
+      "id": 3500,
+      "name": "Dragonflute of Wind",
+      "kind": "etc",
+      "icon": "icon.etc_flute_i00",
+      "price": 1000,
+      "weight": 20
+    },
+    {
+      "id": 3501,
+      "name": "Dragonflute of Star",
+      "kind": "etc",
+      "icon": "icon.etc_flute_i00",
+      "price": 1000,
+      "weight": 20
+    },
+    {
+      "id": 3502,
+      "name": "Dragonflute of Twilight",
+      "kind": "etc",
+      "icon": "icon.etc_flute_i00",
+      "price": 1000,
+      "weight": 20
+    },
+    {
       "id": 3671,
       "name": "Sophya's 1st Order",
       "kind": "etc",
@@ -33008,6 +33041,15 @@
       "spiritshots": 2
     },
     {
+      "id": 4038,
+      "name": "Food For Hatchling",
+      "kind": "etc",
+      "stackable": true,
+      "icon": "icon.etc_pouch_yellow_i00",
+      "price": 150,
+      "weight": 40
+    },
+    {
       "id": 4039,
       "name": "Mold Glue",
       "kind": "etc",
@@ -35085,6 +35127,30 @@
       "price": 500,
       "weight": 20,
       "stackable": true
+    },
+    {
+      "id": 4422,
+      "name": "Dragon Bugle of Wind",
+      "kind": "etc",
+      "icon": "icon.etc_bugle_i00",
+      "price": 2000,
+      "weight": 20
+    },
+    {
+      "id": 4423,
+      "name": "Dragon Bugle of Star",
+      "kind": "etc",
+      "icon": "icon.etc_bugle_i00",
+      "price": 2000,
+      "weight": 20
+    },
+    {
+      "id": 4424,
+      "name": "Dragon Bugle of Dusk",
+      "kind": "etc",
+      "icon": "icon.etc_bugle_i00",
+      "price": 2000,
+      "weight": 20
     },
     {
       "id": 4425,
@@ -43187,6 +43253,24 @@
       "weight": 30
     },
     {
+      "id": 5168,
+      "name": "Food for Strider",
+      "kind": "etc",
+      "stackable": true,
+      "icon": "icon.etc_pouch_yellow_i00",
+      "price": 200,
+      "weight": 40
+    },
+    {
+      "id": 5169,
+      "name": "Deluxe Food for Strider",
+      "kind": "etc",
+      "stackable": true,
+      "icon": "icon.etc_pouch_yellow_i00",
+      "price": 300,
+      "weight": 30
+    },
+    {
       "id": 5170,
       "name": "Mithril Panzer Coat",
       "kind": "armor",
@@ -49324,6 +49408,15 @@
       "spiritshots": 3
     },
     {
+      "id": 6316,
+      "name": "Food for Wyvern",
+      "kind": "etc",
+      "stackable": true,
+      "icon": "icon.etc_pouch_yellow_i00",
+      "price": 300,
+      "weight": 30
+    },
+    {
       "id": 6317,
       "name": "Mixing Manual",
       "kind": "etc",
@@ -52838,6 +52931,30 @@
       "stackable": true,
       "price": 100,
       "weight": 2
+    },
+    {
+      "id": 6648,
+      "name": "Baby Buffalo Panpipe",
+      "kind": "etc",
+      "icon": "icon.etc_buffalo_panpipe_i00",
+      "price": 100000,
+      "weight": 20
+    },
+    {
+      "id": 6649,
+      "name": "Baby Cougar Chime",
+      "kind": "etc",
+      "icon": "icon.etc_cougar_chime_i00",
+      "price": 100000,
+      "weight": 20
+    },
+    {
+      "id": 6650,
+      "name": "Baby Kookaburra Ocarina",
+      "kind": "etc",
+      "icon": "icon.etc_kukaburo_ocarina_i00",
+      "price": 100000,
+      "weight": 20
     },
     {
       "id": 6651,
@@ -59450,6 +59567,15 @@
       "price": 976000,
       "weight": 30,
       "stackable": true
+    },
+    {
+      "id": 7582,
+      "name": "Baby Spice",
+      "kind": "etc",
+      "stackable": true,
+      "icon": "icon.etc_pouch_yellow_i00",
+      "price": 100,
+      "weight": 10
     },
     {
       "id": 7583,

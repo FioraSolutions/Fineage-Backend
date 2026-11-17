@@ -74,28 +74,28 @@ sealed partial class ZoneEntity
     public double PAtk
     {
         get => NpcTemplate?.PAtk ?? 0;
-        init => EnsureNpcTemplate().PAtk = value;
+        set => EnsureNpcTemplate().PAtk = value;
     }
 
     /// <summary>NPC Mobius <c>vitals hpRegen</c>: HP restored per 3 s regen tick (players use the class table).</summary>
     public double HpRegen
     {
         get => NpcTemplate?.HpRegen ?? 0;
-        init => EnsureNpcTemplate().HpRegen = value;
+        set => EnsureNpcTemplate().HpRegen = value;
     }
 
     /// <summary>NPC Mobius <c>vitals mpRegen</c>: MP restored per 3 s regen tick.</summary>
     public double MpRegen
     {
         get => NpcTemplate?.MpRegen ?? 0;
-        init => EnsureNpcTemplate().MpRegen = value;
+        set => EnsureNpcTemplate().MpRegen = value;
     }
 
     /// <summary>NPC Mobius physical defence (0 = unknown).</summary>
     public double PDef
     {
         get => NpcTemplate?.PDef ?? 0;
-        init => EnsureNpcTemplate().PDef = value;
+        set => EnsureNpcTemplate().PDef = value;
     }
 
     /// <summary>NPC Mobius attack speed (Pspd, 0 = default 253).</summary>
@@ -226,13 +226,13 @@ sealed partial class ZoneEntity
     public double MAtk
     {
         get => NpcTemplate?.MAtk ?? 0;
-        init => EnsureNpcTemplate().MAtk = value;
+        set => EnsureNpcTemplate().MAtk = value;
     }
 
     public double MDef
     {
         get => NpcTemplate?.MDef ?? 0;
-        init => EnsureNpcTemplate().MDef = value;
+        set => EnsureNpcTemplate().MDef = value;
     }
     /// <summary>Mobius ChargedShot SOULSHOTS: weapon is charged; next swing doubles P.Atk and clears it.</summary>
     public bool SoulshotCharged

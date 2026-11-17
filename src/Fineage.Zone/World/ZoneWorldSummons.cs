@@ -212,7 +212,7 @@ public sealed partial class ZoneWorld
     SummonInfoNetMsg BuildSummonInfo(ZoneEntity s)
     {
         var st = s.Summon!;
-        return new SummonInfoNetMsg
+        var info = new SummonInfoNetMsg
         {
             ObjectId = s.ObjectId,
             Kind = st.Kind,
@@ -240,6 +240,9 @@ public sealed partial class ZoneWorld
             SkillIds = st.Skills.Select(static k => k.SkillId).ToArray(),
             Dead = s.Dead || s.CurHp <= 0
         };
+        if (st.Pet is { } pet)
+            FillPetInfo(info, s, pet);
+        return info;
     }
 
     void SendSummonInfo(ZoneEntity summon)
@@ -313,6 +316,8 @@ public sealed partial class ZoneWorld
         summon.MovePath.Clear();
         SetPendingHit(summon, null);
         st.DecayAtMs = now + SummonCorpseMs;
+        if (st.Pet is { } pet && OwnerOf(summon) is { } petOwner)
+            PetDied(petOwner, summon, pet, now);
         var watchers = KnownWatchers(summon.ObjectId);
         foreach (int w in watchers)
         {
@@ -343,7 +348,11 @@ public sealed partial class ZoneWorld
     void UnsummonOnLeave(ZoneEntity player)
     {
         if (SummonOf(player) is { } summon)
+        {
+            if (summon.Summon?.Pet != null)
+                StorePet(player, summon);
             RemoveSummon(summon, 4);
+        }
         player.SummonObjectId = 0;
     }
 
@@ -386,11 +395,35 @@ public sealed partial class ZoneWorld
                 RemoveSummon(s, 4);
                 continue;
             }
+            if (st.Pet is { } pet && owner.Inventory?.Find(pet.ControlObjectId) == null)
+            {
+                // The collar left the owner's bag (traded, dropped, destroyed): the pet goes back.
+                UnsummonPet(owner, s, 0);
+                continue;
+            }
             if (s.Dead || s.CurHp <= 0)
             {
                 if (st.DecayAtMs > 0 && now >= st.DecayAtMs)
-                    RemoveSummon(s, 3);
+                {
+                    if (st.Pet is { } deadPet)
+                        PetDecayed(owner, s, deadPet);
+                    else
+                        RemoveSummon(s, 3);
+                }
                 continue;
+            }
+            if (st.Pet is { } fedPet)
+            {
+                if (now >= fedPet.NextFeedMs)
+                {
+                    fedPet.NextFeedMs = now + PetFeedTickMs;
+                    if (!TickPetFeed(owner, s, fedPet, now))
+                        continue;
+                }
+                if (fedPet.Fed <= 0)
+                    continue; // Mobius: a starving pet does not obey (no attack / follow)
+                if (ThinkPetPickup(owner, s, fedPet, now))
+                    continue;
             }
             if (now >= st.NextLifeTickMs)
             {
@@ -598,6 +631,14 @@ public sealed partial class ZoneWorld
             return null;
         if (owner.Dead && msg.Kind != SummonCommandKind.Unsummon)
             return null;
+        var pet = st.Pet;
+        if (pet != null && pet.Fed <= 0 && msg.Kind is not (SummonCommandKind.Unsummon or SummonCommandKind.TakeItem or SummonCommandKind.GiveItem or SummonCommandKind.UseItem))
+        {
+            SelfLine(session, SysMsgPetUnresponsive, "Your pet/servitor is unresponsive and will not obey any orders.");
+            return null;
+        }
+        if (pet != null && msg.Kind != SummonCommandKind.PickUp)
+            pet.PickupTargetId = 0;
 
         switch (msg.Kind)
         {
@@ -650,6 +691,43 @@ public sealed partial class ZoneWorld
                 st.MoveOrder = false;
                 break;
             }
+            case SummonCommandKind.Unsummon when pet != null:
+                // Mobius RequestActionUse 19.
+                if (dead)
+                {
+                    SelfLine(session, SysMsgDeadPetCannotReturn, "A dead pet cannot be sent back.");
+                    return null;
+                }
+                if (s.CombatUntilUnixMs > now)
+                {
+                    SelfLine(session, SysMsgPetInBattle, "A pet cannot be sent back during battle.");
+                    return null;
+                }
+                if (pet.Fed * 100L < PetReturnMinFedPercent * (long)pet.Template.At(s.Level).MaxMeal)
+                {
+                    SelfLine(session, SysMsgHungryPetNoReturn, "You may not restore a hungry pet.");
+                    return null;
+                }
+                UnsummonPet(owner, s, 0);
+                return null;
+            case SummonCommandKind.PickUp when pet != null:
+                if (dead || !_byId.TryGetValue(msg.TargetObjectId > 0 ? msg.TargetObjectId : session.SelectedTargetId, out var ground) ||
+                    ground.Kind != ZoneEntityKind.GroundItem)
+                    return null;
+                st.TargetId = 0;
+                st.PendingSkillId = 0;
+                st.MoveOrder = false;
+                pet.PickupTargetId = ground.ObjectId;
+                break;
+            case SummonCommandKind.GiveItem when pet != null:
+                GiveItemToPet(session, owner, s, pet, msg.ItemObjectId, msg.Count);
+                return null;
+            case SummonCommandKind.TakeItem when pet != null:
+                TakeItemFromPet(session, owner, s, pet, msg.ItemObjectId, msg.Count);
+                return null;
+            case SummonCommandKind.UseItem when pet != null:
+                PetUseItem(session, owner, s, pet, msg.ItemObjectId);
+                return null;
             case SummonCommandKind.Unsummon:
                 if (!dead && s.CombatUntilUnixMs > now)
                 {

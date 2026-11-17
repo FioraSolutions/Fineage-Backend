@@ -142,6 +142,7 @@ static partial class NormalizedStoreWriter
         }
 
         SyncManor(conn, tx, root);
+        SyncPets(conn, tx, root);
 
         if (root.TryGetProperty("siegeClans", out var siegeClans) && siegeClans.ValueKind == JsonValueKind.Array)
         {

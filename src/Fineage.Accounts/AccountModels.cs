@@ -202,6 +202,22 @@ public sealed record ManorProductionSave(int CastleId, int SeedId, long Amount, 
 /// </summary>
 public sealed record ManorProcureSave(int CastleId, int CropId, long Amount, long StartAmount, long Price, int RewardType, bool NextPeriod);
 
+/// <summary>
+/// One pet (Mobius <c>pets</c> row, keyed by the control item's object id): who last owned it, its npc, name, level,
+/// exp, HP / MP, meal meter and the pet inventory. Survives logout, trade of the collar and server restarts.
+/// </summary>
+public sealed record StoredPet(
+    int ControlObjectId,
+    int OwnerCharacterId,
+    int NpcId,
+    string Name,
+    int Level,
+    long Exp,
+    int CurHp,
+    int CurMp,
+    int Fed,
+    IReadOnlyList<StoredItem> Items);
+
 /// <summary>One <c>siege_clans</c> row. Owner clans are not stored; side is attacker, defender, or pending.</summary>
 public sealed record SiegeClanSave(int CastleId, int ClanId, int Side);
 

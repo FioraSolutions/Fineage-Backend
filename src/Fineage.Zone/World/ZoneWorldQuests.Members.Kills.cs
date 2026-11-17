@@ -134,6 +134,7 @@ public sealed partial class ZoneWorld
     /// </summary>
     void SendKillReward(ZoneSession session, ZoneEntity player, double rawExp, double rawSp)
     {
+        (rawExp, rawSp) = SharePetExp(player, rawExp, rawSp);
         long exp = KillRewardFormula.Round(rawExp);
         int sp = (int)Math.Min(int.MaxValue, KillRewardFormula.Round(rawSp));
         if (exp <= 0 && sp <= 0)

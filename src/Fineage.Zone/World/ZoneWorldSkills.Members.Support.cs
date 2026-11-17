@@ -101,6 +101,9 @@ public sealed partial class ZoneWorld
             IncorrectTarget(session);
             return null;
         }
+        if (target.Summon?.Pet != null && target.Dead && VisibleTo(player.ObjectId, targetId))
+            return TrySkillUseResurrectPet(session, player, target, request.SkillId, template, levelData, level, now,
+                SkillResurrectRestorePercent(player, levelData.Power));
         if (target.Kind != ZoneEntityKind.Player || !target.Dead || ReferenceEquals(player, target))
         {
             IncorrectTarget(session);

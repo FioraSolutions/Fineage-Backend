@@ -49,4 +49,7 @@ sealed partial class NetWorldEventPublisher
 
     void IWorldEventPublisher.FanoutSummonGone(IReadOnlyList<int> watcherObjectIds, SummonGoneNetMsg gone) =>
         SendAll(watcherObjectIds, NetOpcode.SummonGone, NetCodec.EncodeSummonGone(gone));
+
+    void IWorldEventPublisher.FanoutPetInventory(IReadOnlyList<int> watcherObjectIds, PetInventoryNetMsg inventory) =>
+        SendAll(watcherObjectIds, NetOpcode.PetInventory, NetCodec.EncodePetInventory(inventory));
 }
