@@ -1,0 +1,1865 @@
+{
+  "reference": "L2J Mobius CT_0 Interlude LevelUpCrystalData.xml (values transcribed): chance is percent (Mobius getRandom(100) <= chance), skill = the monster must have been hit by Soul Crystal (2096) at no more than half HP, levels = crystal levels the monster can raise.",
+  "crystals": [
+    {
+      "itemId": 4629,
+      "level": 0,
+      "next": 4630
+    },
+    {
+      "itemId": 4630,
+      "level": 1,
+      "next": 4631
+    },
+    {
+      "itemId": 4631,
+      "level": 2,
+      "next": 4632
+    },
+    {
+      "itemId": 4632,
+      "level": 3,
+      "next": 4633
+    },
+    {
+      "itemId": 4633,
+      "level": 4,
+      "next": 4634
+    },
+    {
+      "itemId": 4634,
+      "level": 5,
+      "next": 4635
+    },
+    {
+      "itemId": 4635,
+      "level": 6,
+      "next": 4636
+    },
+    {
+      "itemId": 4636,
+      "level": 7,
+      "next": 4637
+    },
+    {
+      "itemId": 4637,
+      "level": 8,
+      "next": 4638
+    },
+    {
+      "itemId": 4638,
+      "level": 9,
+      "next": 4639
+    },
+    {
+      "itemId": 4639,
+      "level": 10,
+      "next": 5577
+    },
+    {
+      "itemId": 5577,
+      "level": 11,
+      "next": 5580
+    },
+    {
+      "itemId": 5580,
+      "level": 12,
+      "next": 5908
+    },
+    {
+      "itemId": 4640,
+      "level": 0,
+      "next": 4641
+    },
+    {
+      "itemId": 4641,
+      "level": 1,
+      "next": 4642
+    },
+    {
+      "itemId": 4642,
+      "level": 2,
+      "next": 4643
+    },
+    {
+      "itemId": 4643,
+      "level": 3,
+      "next": 4644
+    },
+    {
+      "itemId": 4644,
+      "level": 4,
+      "next": 4645
+    },
+    {
+      "itemId": 4645,
+      "level": 5,
+      "next": 4646
+    },
+    {
+      "itemId": 4646,
+      "level": 6,
+      "next": 4647
+    },
+    {
+      "itemId": 4647,
+      "level": 7,
+      "next": 4648
+    },
+    {
+      "itemId": 4648,
+      "level": 8,
+      "next": 4649
+    },
+    {
+      "itemId": 4649,
+      "level": 9,
+      "next": 4650
+    },
+    {
+      "itemId": 4650,
+      "level": 10,
+      "next": 5578
+    },
+    {
+      "itemId": 5578,
+      "level": 11,
+      "next": 5581
+    },
+    {
+      "itemId": 5581,
+      "level": 12,
+      "next": 5911
+    },
+    {
+      "itemId": 4651,
+      "level": 0,
+      "next": 4652
+    },
+    {
+      "itemId": 4652,
+      "level": 1,
+      "next": 4653
+    },
+    {
+      "itemId": 4653,
+      "level": 2,
+      "next": 4654
+    },
+    {
+      "itemId": 4654,
+      "level": 3,
+      "next": 4655
+    },
+    {
+      "itemId": 4655,
+      "level": 4,
+      "next": 4656
+    },
+    {
+      "itemId": 4656,
+      "level": 5,
+      "next": 4657
+    },
+    {
+      "itemId": 4657,
+      "level": 6,
+      "next": 4658
+    },
+    {
+      "itemId": 4658,
+      "level": 7,
+      "next": 4659
+    },
+    {
+      "itemId": 4659,
+      "level": 8,
+      "next": 4660
+    },
+    {
+      "itemId": 4660,
+      "level": 9,
+      "next": 4661
+    },
+    {
+      "itemId": 4661,
+      "level": 10,
+      "next": 5579
+    },
+    {
+      "itemId": 5579,
+      "level": 11,
+      "next": 5582
+    },
+    {
+      "itemId": 5582,
+      "level": 12,
+      "next": 5914
+    }
+  ],
+  "npcs": [
+    {
+      "npcId": 20583,
+      "chance": 9,
+      "skill": true,
+      "absorb": "LAST_HIT",
+      "levels": [
+        0,
+        1
+      ]
+    },
+    {
+      "npcId": 20584,
+      "chance": 9,
+      "skill": true,
+      "absorb": "LAST_HIT",
+      "levels": [
+        0,
+        1
+      ]
+    },
+    {
+      "npcId": 20585,
+      "chance": 9,
+      "skill": true,
+      "absorb": "LAST_HIT",
+      "levels": [
+        0,
+        1
+      ]
+    },
+    {
+      "npcId": 20586,
+      "chance": 9,
+      "skill": true,
+      "absorb": "LAST_HIT",
+      "levels": [
+        0,
+        1
+      ]
+    },
+    {
+      "npcId": 20587,
+      "chance": 9,
+      "skill": true,
+      "absorb": "LAST_HIT",
+      "levels": [
+        0,
+        1,
+        2
+      ]
+    },
+    {
+      "npcId": 20588,
+      "chance": 9,
+      "skill": true,
+      "absorb": "LAST_HIT",
+      "levels": [
+        0,
+        1,
+        2
+      ]
+    },
+    {
+      "npcId": 20625,
+      "chance": 9,
+      "skill": true,
+      "absorb": "LAST_HIT",
+      "levels": [
+        0,
+        1,
+        2,
+        3,
+        4,
+        5,
+        6,
+        7,
+        8,
+        9
+      ]
+    },
+    {
+      "npcId": 20626,
+      "chance": 9,
+      "skill": true,
+      "absorb": "LAST_HIT",
+      "levels": [
+        0,
+        1,
+        2,
+        3,
+        4,
+        5,
+        6,
+        7,
+        8,
+        9
+      ]
+    },
+    {
+      "npcId": 20627,
+      "chance": 9,
+      "skill": true,
+      "absorb": "LAST_HIT",
+      "levels": [
+        0,
+        1,
+        2,
+        3,
+        4,
+        5,
+        6,
+        7,
+        8,
+        9
+      ]
+    },
+    {
+      "npcId": 20628,
+      "chance": 9,
+      "skill": true,
+      "absorb": "LAST_HIT",
+      "levels": [
+        0,
+        1,
+        2,
+        3,
+        4,
+        5,
+        6,
+        7,
+        8,
+        9
+      ]
+    },
+    {
+      "npcId": 20629,
+      "chance": 9,
+      "skill": true,
+      "absorb": "LAST_HIT",
+      "levels": [
+        0,
+        1,
+        2,
+        3,
+        4,
+        5,
+        6,
+        7,
+        8,
+        9
+      ]
+    },
+    {
+      "npcId": 20636,
+      "chance": 9,
+      "skill": true,
+      "absorb": "LAST_HIT",
+      "levels": [
+        0,
+        1,
+        2
+      ]
+    },
+    {
+      "npcId": 20637,
+      "chance": 9,
+      "skill": true,
+      "absorb": "LAST_HIT",
+      "levels": [
+        0,
+        1,
+        2,
+        3
+      ]
+    },
+    {
+      "npcId": 20638,
+      "chance": 9,
+      "skill": true,
+      "absorb": "LAST_HIT",
+      "levels": [
+        0,
+        1,
+        2,
+        3
+      ]
+    },
+    {
+      "npcId": 20639,
+      "chance": 9,
+      "skill": true,
+      "absorb": "LAST_HIT",
+      "levels": [
+        0,
+        1,
+        2,
+        3
+      ]
+    },
+    {
+      "npcId": 20640,
+      "chance": 9,
+      "skill": true,
+      "absorb": "LAST_HIT",
+      "levels": [
+        0,
+        1,
+        2,
+        3,
+        4
+      ]
+    },
+    {
+      "npcId": 20641,
+      "chance": 9,
+      "skill": true,
+      "absorb": "LAST_HIT",
+      "levels": [
+        0,
+        1,
+        2,
+        3,
+        4
+      ]
+    },
+    {
+      "npcId": 20642,
+      "chance": 9,
+      "skill": true,
+      "absorb": "LAST_HIT",
+      "levels": [
+        0,
+        1,
+        2,
+        3,
+        4
+      ]
+    },
+    {
+      "npcId": 20646,
+      "chance": 9,
+      "skill": true,
+      "absorb": "LAST_HIT",
+      "levels": [
+        0,
+        1,
+        2,
+        3,
+        4,
+        5
+      ]
+    },
+    {
+      "npcId": 20647,
+      "chance": 9,
+      "skill": true,
+      "absorb": "LAST_HIT",
+      "levels": [
+        0,
+        1,
+        2,
+        3,
+        4,
+        5
+      ]
+    },
+    {
+      "npcId": 20648,
+      "chance": 9,
+      "skill": true,
+      "absorb": "LAST_HIT",
+      "levels": [
+        0,
+        1,
+        2,
+        3,
+        4,
+        5,
+        6
+      ]
+    },
+    {
+      "npcId": 20649,
+      "chance": 9,
+      "skill": true,
+      "absorb": "LAST_HIT",
+      "levels": [
+        0,
+        1,
+        2,
+        3,
+        4,
+        5,
+        6
+      ]
+    },
+    {
+      "npcId": 20650,
+      "chance": 9,
+      "skill": true,
+      "absorb": "LAST_HIT",
+      "levels": [
+        0,
+        1,
+        2,
+        3,
+        4,
+        5,
+        6,
+        7
+      ]
+    },
+    {
+      "npcId": 20674,
+      "chance": 9,
+      "skill": true,
+      "absorb": "LAST_HIT",
+      "levels": [
+        0,
+        1,
+        2,
+        3,
+        4,
+        5,
+        6,
+        7,
+        8,
+        9
+      ]
+    },
+    {
+      "npcId": 20761,
+      "chance": 9,
+      "skill": true,
+      "absorb": "LAST_HIT",
+      "levels": [
+        0,
+        1,
+        2,
+        3,
+        4,
+        5,
+        6,
+        7,
+        8,
+        9
+      ]
+    },
+    {
+      "npcId": 20762,
+      "chance": 9,
+      "skill": true,
+      "absorb": "LAST_HIT",
+      "levels": [
+        0,
+        1,
+        2,
+        3,
+        4,
+        5,
+        6,
+        7,
+        8,
+        9
+      ]
+    },
+    {
+      "npcId": 20767,
+      "chance": 9,
+      "skill": true,
+      "absorb": "LAST_HIT",
+      "levels": [
+        0,
+        1,
+        2
+      ]
+    },
+    {
+      "npcId": 20768,
+      "chance": 9,
+      "skill": true,
+      "absorb": "LAST_HIT",
+      "levels": [
+        0,
+        1,
+        2
+      ]
+    },
+    {
+      "npcId": 20769,
+      "chance": 9,
+      "skill": true,
+      "absorb": "LAST_HIT",
+      "levels": [
+        0,
+        1
+      ]
+    },
+    {
+      "npcId": 20770,
+      "chance": 9,
+      "skill": true,
+      "absorb": "LAST_HIT",
+      "levels": [
+        0,
+        1
+      ]
+    },
+    {
+      "npcId": 20793,
+      "chance": 9,
+      "skill": true,
+      "absorb": "LAST_HIT",
+      "levels": [
+        0,
+        1
+      ]
+    },
+    {
+      "npcId": 20794,
+      "chance": 9,
+      "skill": true,
+      "absorb": "LAST_HIT",
+      "levels": [
+        0,
+        1
+      ]
+    },
+    {
+      "npcId": 20795,
+      "chance": 9,
+      "skill": true,
+      "absorb": "LAST_HIT",
+      "levels": [
+        0,
+        1
+      ]
+    },
+    {
+      "npcId": 20796,
+      "chance": 9,
+      "skill": true,
+      "absorb": "LAST_HIT",
+      "levels": [
+        0,
+        1
+      ]
+    },
+    {
+      "npcId": 20797,
+      "chance": 9,
+      "skill": true,
+      "absorb": "LAST_HIT",
+      "levels": [
+        0,
+        1,
+        2
+      ]
+    },
+    {
+      "npcId": 20798,
+      "chance": 9,
+      "skill": true,
+      "absorb": "LAST_HIT",
+      "levels": [
+        0,
+        1,
+        2
+      ]
+    },
+    {
+      "npcId": 20799,
+      "chance": 9,
+      "skill": true,
+      "absorb": "LAST_HIT",
+      "levels": [
+        0,
+        1,
+        2
+      ]
+    },
+    {
+      "npcId": 20800,
+      "chance": 9,
+      "skill": true,
+      "absorb": "LAST_HIT",
+      "levels": [
+        0,
+        1,
+        2,
+        3
+      ]
+    },
+    {
+      "npcId": 20801,
+      "chance": 9,
+      "skill": true,
+      "absorb": "LAST_HIT",
+      "levels": [
+        0,
+        1,
+        2,
+        3
+      ]
+    },
+    {
+      "npcId": 20802,
+      "chance": 9,
+      "skill": true,
+      "absorb": "LAST_HIT",
+      "levels": [
+        0,
+        1,
+        2,
+        3
+      ]
+    },
+    {
+      "npcId": 20803,
+      "chance": 9,
+      "skill": true,
+      "absorb": "LAST_HIT",
+      "levels": [
+        0,
+        1,
+        2,
+        3,
+        4
+      ]
+    },
+    {
+      "npcId": 20821,
+      "chance": 9,
+      "skill": true,
+      "absorb": "LAST_HIT",
+      "levels": [
+        0,
+        1,
+        2,
+        3,
+        4,
+        5,
+        6,
+        7,
+        8,
+        9
+      ]
+    },
+    {
+      "npcId": 20823,
+      "chance": 9,
+      "skill": true,
+      "absorb": "LAST_HIT",
+      "levels": [
+        0,
+        1,
+        2,
+        3,
+        4,
+        5,
+        6,
+        7,
+        8,
+        9
+      ]
+    },
+    {
+      "npcId": 20826,
+      "chance": 9,
+      "skill": true,
+      "absorb": "LAST_HIT",
+      "levels": [
+        0,
+        1,
+        2,
+        3,
+        4,
+        5,
+        6,
+        7,
+        8,
+        9
+      ]
+    },
+    {
+      "npcId": 20827,
+      "chance": 9,
+      "skill": true,
+      "absorb": "LAST_HIT",
+      "levels": [
+        0,
+        1,
+        2,
+        3,
+        4,
+        5,
+        6,
+        7,
+        8,
+        9
+      ]
+    },
+    {
+      "npcId": 20828,
+      "chance": 9,
+      "skill": true,
+      "absorb": "LAST_HIT",
+      "levels": [
+        0,
+        1,
+        2,
+        3,
+        4,
+        5,
+        6,
+        7,
+        8,
+        9
+      ]
+    },
+    {
+      "npcId": 20829,
+      "chance": 9,
+      "skill": true,
+      "absorb": "LAST_HIT",
+      "levels": [
+        0,
+        1,
+        2,
+        3,
+        4,
+        5,
+        6,
+        7,
+        8,
+        9
+      ]
+    },
+    {
+      "npcId": 20830,
+      "chance": 9,
+      "skill": true,
+      "absorb": "LAST_HIT",
+      "levels": [
+        0,
+        1,
+        2,
+        3,
+        4,
+        5,
+        6,
+        7,
+        8,
+        9
+      ]
+    },
+    {
+      "npcId": 20831,
+      "chance": 9,
+      "skill": true,
+      "absorb": "LAST_HIT",
+      "levels": [
+        0,
+        1,
+        2,
+        3,
+        4,
+        5,
+        6,
+        7,
+        8,
+        9
+      ]
+    },
+    {
+      "npcId": 20839,
+      "chance": 9,
+      "skill": true,
+      "absorb": "LAST_HIT",
+      "levels": [
+        0,
+        1,
+        2
+      ]
+    },
+    {
+      "npcId": 20840,
+      "chance": 9,
+      "skill": true,
+      "absorb": "LAST_HIT",
+      "levels": [
+        0,
+        1,
+        2,
+        3
+      ]
+    },
+    {
+      "npcId": 20841,
+      "chance": 9,
+      "skill": true,
+      "absorb": "LAST_HIT",
+      "levels": [
+        0,
+        1,
+        2,
+        3
+      ]
+    },
+    {
+      "npcId": 20842,
+      "chance": 9,
+      "skill": true,
+      "absorb": "LAST_HIT",
+      "levels": [
+        0,
+        1,
+        2,
+        3
+      ]
+    },
+    {
+      "npcId": 20843,
+      "chance": 9,
+      "skill": true,
+      "absorb": "LAST_HIT",
+      "levels": [
+        0,
+        1,
+        2,
+        3,
+        4
+      ]
+    },
+    {
+      "npcId": 20844,
+      "chance": 9,
+      "skill": true,
+      "absorb": "LAST_HIT",
+      "levels": [
+        0,
+        1,
+        2,
+        3,
+        4
+      ]
+    },
+    {
+      "npcId": 20845,
+      "chance": 9,
+      "skill": true,
+      "absorb": "LAST_HIT",
+      "levels": [
+        0,
+        1,
+        2,
+        3,
+        4
+      ]
+    },
+    {
+      "npcId": 20846,
+      "chance": 9,
+      "skill": true,
+      "absorb": "LAST_HIT",
+      "levels": [
+        0,
+        1,
+        2,
+        3,
+        4,
+        5
+      ]
+    },
+    {
+      "npcId": 20847,
+      "chance": 9,
+      "skill": true,
+      "absorb": "LAST_HIT",
+      "levels": [
+        0,
+        1,
+        2,
+        3,
+        4,
+        5
+      ]
+    },
+    {
+      "npcId": 20848,
+      "chance": 9,
+      "skill": true,
+      "absorb": "LAST_HIT",
+      "levels": [
+        0,
+        1,
+        2
+      ]
+    },
+    {
+      "npcId": 20849,
+      "chance": 9,
+      "skill": true,
+      "absorb": "LAST_HIT",
+      "levels": [
+        0,
+        1
+      ]
+    },
+    {
+      "npcId": 20860,
+      "chance": 9,
+      "skill": true,
+      "absorb": "LAST_HIT",
+      "levels": [
+        0,
+        1,
+        2,
+        3,
+        4,
+        5,
+        6,
+        7,
+        8,
+        9
+      ]
+    },
+    {
+      "npcId": 20986,
+      "chance": 9,
+      "skill": true,
+      "absorb": "LAST_HIT",
+      "levels": [
+        0,
+        1,
+        2,
+        3,
+        4,
+        5
+      ]
+    },
+    {
+      "npcId": 20987,
+      "chance": 9,
+      "skill": true,
+      "absorb": "LAST_HIT",
+      "levels": [
+        0,
+        1,
+        2,
+        3,
+        4,
+        5
+      ]
+    },
+    {
+      "npcId": 20988,
+      "chance": 9,
+      "skill": true,
+      "absorb": "LAST_HIT",
+      "levels": [
+        0,
+        1,
+        2,
+        3,
+        4,
+        5
+      ]
+    },
+    {
+      "npcId": 20994,
+      "chance": 9,
+      "skill": true,
+      "absorb": "LAST_HIT",
+      "levels": [
+        0,
+        1,
+        2,
+        3,
+        4
+      ]
+    },
+    {
+      "npcId": 20995,
+      "chance": 9,
+      "skill": true,
+      "absorb": "LAST_HIT",
+      "levels": [
+        0,
+        1,
+        2,
+        3
+      ]
+    },
+    {
+      "npcId": 21006,
+      "chance": 9,
+      "skill": true,
+      "absorb": "LAST_HIT",
+      "levels": [
+        0,
+        1,
+        2,
+        3,
+        4,
+        5,
+        6,
+        7
+      ]
+    },
+    {
+      "npcId": 21007,
+      "chance": 9,
+      "skill": true,
+      "absorb": "LAST_HIT",
+      "levels": [
+        0,
+        1,
+        2,
+        3,
+        4,
+        5,
+        6,
+        7,
+        8
+      ]
+    },
+    {
+      "npcId": 21008,
+      "chance": 9,
+      "skill": true,
+      "absorb": "LAST_HIT",
+      "levels": [
+        0,
+        1,
+        2,
+        3,
+        4,
+        5,
+        6,
+        7,
+        8
+      ]
+    },
+    {
+      "npcId": 21009,
+      "chance": 9,
+      "skill": true,
+      "absorb": "LAST_HIT",
+      "levels": [
+        0,
+        1,
+        2,
+        3,
+        4,
+        5,
+        6,
+        7,
+        8,
+        9
+      ]
+    },
+    {
+      "npcId": 21010,
+      "chance": 9,
+      "skill": true,
+      "absorb": "LAST_HIT",
+      "levels": [
+        0,
+        1,
+        2,
+        3,
+        4,
+        5,
+        6,
+        7,
+        8,
+        9
+      ]
+    },
+    {
+      "npcId": 21062,
+      "chance": 9,
+      "skill": true,
+      "absorb": "LAST_HIT",
+      "levels": [
+        0,
+        1,
+        2,
+        3,
+        4,
+        5,
+        6,
+        7,
+        8,
+        9
+      ]
+    },
+    {
+      "npcId": 21063,
+      "chance": 9,
+      "skill": true,
+      "absorb": "LAST_HIT",
+      "levels": [
+        0,
+        1,
+        2,
+        3,
+        4,
+        5,
+        6,
+        7,
+        8,
+        9
+      ]
+    },
+    {
+      "npcId": 21064,
+      "chance": 9,
+      "skill": true,
+      "absorb": "LAST_HIT",
+      "levels": [
+        0,
+        1,
+        2,
+        3,
+        4,
+        5,
+        6,
+        7,
+        8,
+        9
+      ]
+    },
+    {
+      "npcId": 21065,
+      "chance": 9,
+      "skill": true,
+      "absorb": "LAST_HIT",
+      "levels": [
+        0,
+        1,
+        2,
+        3,
+        4,
+        5,
+        6,
+        7,
+        8,
+        9
+      ]
+    },
+    {
+      "npcId": 21066,
+      "chance": 9,
+      "skill": true,
+      "absorb": "LAST_HIT",
+      "levels": [
+        0,
+        1,
+        2,
+        3,
+        4,
+        5,
+        6,
+        7,
+        8,
+        9
+      ]
+    },
+    {
+      "npcId": 21067,
+      "chance": 9,
+      "skill": true,
+      "absorb": "LAST_HIT",
+      "levels": [
+        0,
+        1,
+        2,
+        3,
+        4,
+        5,
+        6,
+        7,
+        8,
+        9
+      ]
+    },
+    {
+      "npcId": 21068,
+      "chance": 9,
+      "skill": true,
+      "absorb": "LAST_HIT",
+      "levels": [
+        0,
+        1,
+        2,
+        3,
+        4,
+        5,
+        6,
+        7,
+        8,
+        9
+      ]
+    },
+    {
+      "npcId": 21069,
+      "chance": 9,
+      "skill": true,
+      "absorb": "LAST_HIT",
+      "levels": [
+        0,
+        1,
+        2,
+        3,
+        4,
+        5,
+        6,
+        7,
+        8,
+        9
+      ]
+    },
+    {
+      "npcId": 21070,
+      "chance": 9,
+      "skill": true,
+      "absorb": "LAST_HIT",
+      "levels": [
+        0,
+        1,
+        2,
+        3,
+        4,
+        5,
+        6,
+        7,
+        8,
+        9
+      ]
+    },
+    {
+      "npcId": 21071,
+      "chance": 9,
+      "skill": true,
+      "absorb": "LAST_HIT",
+      "levels": [
+        0,
+        1,
+        2,
+        3,
+        4,
+        5,
+        6,
+        7,
+        8,
+        9
+      ]
+    },
+    {
+      "npcId": 21072,
+      "chance": 9,
+      "skill": true,
+      "absorb": "LAST_HIT",
+      "levels": [
+        0,
+        1,
+        2,
+        3,
+        4,
+        5,
+        6,
+        7,
+        8,
+        9
+      ]
+    },
+    {
+      "npcId": 21611,
+      "chance": 9,
+      "skill": true,
+      "absorb": "LAST_HIT",
+      "levels": [
+        0,
+        1,
+        2
+      ]
+    },
+    {
+      "npcId": 21612,
+      "chance": 9,
+      "skill": true,
+      "absorb": "LAST_HIT",
+      "levels": [
+        0,
+        1,
+        2
+      ]
+    },
+    {
+      "npcId": 21614,
+      "chance": 9,
+      "skill": true,
+      "absorb": "LAST_HIT",
+      "levels": [
+        0,
+        1,
+        2,
+        3
+      ]
+    },
+    {
+      "npcId": 21615,
+      "chance": 9,
+      "skill": true,
+      "absorb": "LAST_HIT",
+      "levels": [
+        0,
+        1,
+        2,
+        3
+      ]
+    },
+    {
+      "npcId": 21617,
+      "chance": 9,
+      "skill": true,
+      "absorb": "LAST_HIT",
+      "levels": [
+        0,
+        1,
+        2,
+        3
+      ]
+    },
+    {
+      "npcId": 21620,
+      "chance": 9,
+      "skill": true,
+      "absorb": "LAST_HIT",
+      "levels": [
+        0,
+        1,
+        2,
+        3
+      ]
+    },
+    {
+      "npcId": 21621,
+      "chance": 9,
+      "skill": true,
+      "absorb": "LAST_HIT",
+      "levels": [
+        0,
+        1,
+        2,
+        3
+      ]
+    },
+    {
+      "npcId": 21623,
+      "chance": 9,
+      "skill": true,
+      "absorb": "LAST_HIT",
+      "levels": [
+        0,
+        1,
+        2,
+        3,
+        4
+      ]
+    },
+    {
+      "npcId": 21624,
+      "chance": 9,
+      "skill": true,
+      "absorb": "LAST_HIT",
+      "levels": [
+        0,
+        1,
+        2,
+        3,
+        4
+      ]
+    },
+    {
+      "npcId": 21626,
+      "chance": 9,
+      "skill": true,
+      "absorb": "LAST_HIT",
+      "levels": [
+        0,
+        1,
+        2,
+        3,
+        4
+      ]
+    },
+    {
+      "npcId": 21627,
+      "chance": 9,
+      "skill": true,
+      "absorb": "LAST_HIT",
+      "levels": [
+        0,
+        1,
+        2,
+        3,
+        4
+      ]
+    },
+    {
+      "npcId": 21629,
+      "chance": 9,
+      "skill": true,
+      "absorb": "LAST_HIT",
+      "levels": [
+        0,
+        1,
+        2,
+        3,
+        4
+      ]
+    },
+    {
+      "npcId": 21630,
+      "chance": 9,
+      "skill": true,
+      "absorb": "LAST_HIT",
+      "levels": [
+        0,
+        1,
+        2,
+        3,
+        4
+      ]
+    },
+    {
+      "npcId": 21632,
+      "chance": 9,
+      "skill": true,
+      "absorb": "LAST_HIT",
+      "levels": [
+        0,
+        1,
+        2,
+        3,
+        4,
+        5
+      ]
+    },
+    {
+      "npcId": 21633,
+      "chance": 9,
+      "skill": true,
+      "absorb": "LAST_HIT",
+      "levels": [
+        0,
+        1,
+        2,
+        3,
+        4,
+        5
+      ]
+    },
+    {
+      "npcId": 21635,
+      "chance": 9,
+      "skill": true,
+      "absorb": "LAST_HIT",
+      "levels": [
+        0,
+        1,
+        2,
+        3,
+        4,
+        5
+      ]
+    },
+    {
+      "npcId": 21636,
+      "chance": 9,
+      "skill": true,
+      "absorb": "LAST_HIT",
+      "levels": [
+        0,
+        1,
+        2,
+        3,
+        4,
+        5
+      ]
+    },
+    {
+      "npcId": 29026,
+      "chance": 9,
+      "skill": true,
+      "absorb": "LAST_HIT",
+      "levels": [
+        0,
+        1,
+        2,
+        3,
+        4
+      ]
+    },
+    {
+      "npcId": 35412,
+      "chance": 9,
+      "skill": true,
+      "absorb": "LAST_HIT",
+      "levels": [
+        0,
+        1,
+        2,
+        3,
+        4,
+        5,
+        6,
+        7,
+        8
+      ]
+    },
+    {
+      "npcId": 35413,
+      "chance": 9,
+      "skill": true,
+      "absorb": "LAST_HIT",
+      "levels": [
+        0,
+        1,
+        2,
+        3,
+        4,
+        5,
+        6,
+        7,
+        8
+      ]
+    },
+    {
+      "npcId": 29022,
+      "chance": 100,
+      "skill": false,
+      "absorb": "FULL_PARTY",
+      "levels": [
+        10,
+        11
+      ]
+    },
+    {
+      "npcId": 25337,
+      "chance": 10,
+      "skill": false,
+      "absorb": "PARTY_ONE_RANDOM",
+      "levels": [
+        10,
+        11
+      ]
+    },
+    {
+      "npcId": 25163,
+      "chance": 5,
+      "skill": false,
+      "absorb": "PARTY_ONE_RANDOM",
+      "levels": [
+        10,
+        11
+      ]
+    },
+    {
+      "npcId": 25269,
+      "chance": 5,
+      "skill": false,
+      "absorb": "PARTY_ONE_RANDOM",
+      "levels": [
+        10,
+        11
+      ]
+    },
+    {
+      "npcId": 25453,
+      "chance": 5,
+      "skill": false,
+      "absorb": "PARTY_ONE_RANDOM",
+      "levels": [
+        10,
+        11
+      ]
+    },
+    {
+      "npcId": 25328,
+      "chance": 5,
+      "skill": false,
+      "absorb": "PARTY_ONE_RANDOM",
+      "levels": [
+        10,
+        11
+      ]
+    },
+    {
+      "npcId": 25109,
+      "chance": 5,
+      "skill": false,
+      "absorb": "PARTY_ONE_RANDOM",
+      "levels": [
+        10,
+        11
+      ]
+    },
+    {
+      "npcId": 25202,
+      "chance": 5,
+      "skill": false,
+      "absorb": "PARTY_ONE_RANDOM",
+      "levels": [
+        10,
+        11
+      ]
+    },
+    {
+      "npcId": 29020,
+      "chance": 100,
+      "skill": false,
+      "absorb": "FULL_PARTY",
+      "levels": [
+        10,
+        11
+      ]
+    },
+    {
+      "npcId": 25338,
+      "chance": 10,
+      "skill": false,
+      "absorb": "PARTY_ONE_RANDOM",
+      "levels": [
+        12
+      ]
+    },
+    {
+      "npcId": 29065,
+      "chance": 10,
+      "skill": false,
+      "absorb": "PARTY_ONE_RANDOM",
+      "levels": [
+        10,
+        11
+      ]
+    },
+    {
+      "npcId": 25283,
+      "chance": 100,
+      "skill": false,
+      "absorb": "FULL_PARTY",
+      "levels": [
+        10,
+        11
+      ]
+    },
+    {
+      "npcId": 25286,
+      "chance": 100,
+      "skill": false,
+      "absorb": "FULL_PARTY",
+      "levels": [
+        10,
+        11
+      ]
+    },
+    {
+      "npcId": 25319,
+      "chance": 10,
+      "skill": false,
+      "absorb": "FULL_PARTY",
+      "levels": [
+        12
+      ]
+    },
+    {
+      "npcId": 22215,
+      "chance": 10,
+      "skill": false,
+      "absorb": "PARTY_ONE_RANDOM",
+      "levels": [
+        10,
+        11
+      ]
+    },
+    {
+      "npcId": 22216,
+      "chance": 10,
+      "skill": false,
+      "absorb": "PARTY_ONE_RANDOM",
+      "levels": [
+        10,
+        11
+      ]
+    },
+    {
+      "npcId": 22217,
+      "chance": 10,
+      "skill": false,
+      "absorb": "PARTY_ONE_RANDOM",
+      "levels": [
+        10,
+        11
+      ]
+    },
+    {
+      "npcId": 29047,
+      "chance": 100,
+      "skill": false,
+      "absorb": "FULL_PARTY",
+      "levels": [
+        12
+      ]
+    },
+    {
+      "npcId": 29019,
+      "chance": 100,
+      "skill": false,
+      "absorb": "FULL_PARTY",
+      "levels": [
+        12
+      ]
+    },
+    {
+      "npcId": 29066,
+      "chance": 100,
+      "skill": false,
+      "absorb": "FULL_PARTY",
+      "levels": [
+        12
+      ]
+    },
+    {
+      "npcId": 29067,
+      "chance": 100,
+      "skill": false,
+      "absorb": "FULL_PARTY",
+      "levels": [
+        12
+      ]
+    },
+    {
+      "npcId": 29068,
+      "chance": 100,
+      "skill": false,
+      "absorb": "FULL_PARTY",
+      "levels": [
+        12
+      ]
+    },
+    {
+      "npcId": 29028,
+      "chance": 100,
+      "skill": false,
+      "absorb": "FULL_PARTY",
+      "levels": [
+        12
+      ]
+    }
+  ]
+}
