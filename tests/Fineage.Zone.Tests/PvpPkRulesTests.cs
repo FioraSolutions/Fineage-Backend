@@ -182,7 +182,7 @@ public sealed class PvpPkRulesTests
         Assert.Equal((720, (byte)2, 3, 1), (back.Karma, back.PvpFlag, back.PvpKills, back.PkKills));
 
         // Strip the Block C clan tail (title u16 + 7 ints + leader byte) and the pvp/pk counts.
-        const int clanTail = 2 + 7 * 4 + 1 + 2 + 2 * 4; // + G1 noble/hero bytes and base class / class index
+        const int clanTail = 2 + 7 * 4 + 1 + 2 + 2 * 4 + 2; // + G1 noble/hero bytes, base class / class index, empty cubic list
         var old = NetCodec.DecodeUserInfo(full.AsSpan(0, full.Length - 8 - clanTail));
         Assert.Equal((720, (byte)2, 0, 0), (old.Karma, old.PvpFlag, old.PvpKills, old.PkKills));
     }
