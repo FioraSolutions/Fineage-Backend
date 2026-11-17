@@ -247,6 +247,9 @@ public sealed partial class ZoneWorld
         // pledge class (+1) to reach the skill's SocialClass.
         if (clan == null || clan.Skills.Count == 0 || clan.D.Reputation < 0)
             return;
+        // Mobius OlympiadGame.removals: clan skills rest inside an arena.
+        if (_olympiadArena.Contains(entity.ObjectId))
+            return;
         foreach (var (id, level) in clan.Skills)
         {
             if (id <= 0 || level <= 0)

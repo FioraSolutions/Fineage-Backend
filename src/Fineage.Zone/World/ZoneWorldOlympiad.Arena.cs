@@ -13,6 +13,56 @@ namespace Fineage.Zone.World;
 public sealed partial class ZoneWorld
 {
     readonly HashSet<int> _olympiadArena = [];
+    const int OlympiadEquipItemMessage = 1507, OlympiadUseItemMessage = 1508;
+    /// <summary>Mobius removals: every skill whose reuse delay is at most 15 minutes is ready again on entry.</summary>
+    const long OlympiadReuseResetMaxMs = 900_000;
+
+    /// <summary>
+    /// Mobius <c>ItemTemplate.checkCondition</c> in Olympiad mode: hero items and the configured restricted list cannot
+    /// be equipped or used inside an arena. Unequipping is always allowed.
+    /// </summary>
+    bool OlympiadRestrictedItem(int itemId) =>
+        IsHeroItem(itemId) || _olympiad.Settings.RestrictedItems.Contains(itemId);
+
+    string? OlympiadItemRefused(ZoneEntity player, ItemInstance item)
+    {
+        if (!_olympiadArena.Contains(player.ObjectId) || item.IsEquipped || !OlympiadRestrictedItem(item.ItemId))
+            return null;
+        if (player.Session is { } session)
+        {
+            bool equip = item.Template.Equippable;
+            ShotNotice(session, equip ? OlympiadEquipItemMessage : OlympiadUseItemMessage,
+                equip ? "You cannot equip that item in a Grand Olympiad Games match." : "You cannot use that item in a Grand Olympiad Games match.");
+        }
+        return InventoryProtocol.OlympiadRestricted;
+    }
+
+    /// <summary>Mobius <c>Player.checkItemRestriction</c> on arena entry: take off whatever the arena refuses.</summary>
+    void UnequipOlympiadRestricted(ZoneEntity player)
+    {
+        if (player.Inventory is not { } inventory || player.Session is not { } session)
+            return;
+        var doomed = inventory.Items.Where(i => i.IsEquipped && OlympiadRestrictedItem(i.ItemId)).ToList();
+        if (doomed.Count == 0)
+            return;
+        var before = PaperdollSnapshot(inventory);
+        foreach (var item in doomed)
+            inventory.Unequip(item);
+        player.SoulshotCharged = false;
+        player.SpiritshotCharge = 0;
+        PublishGear(session, player, before);
+        SaveInventory(session, inventory);
+    }
+
+    /// <summary>Mobius removals: skills with reuse up to 15 minutes come back; longer ones keep their timer.</summary>
+    void ResetOlympiadReuse(ZoneEntity player)
+    {
+        foreach (int skillId in player.SkillReuseUntilMs.Keys.ToList())
+        {
+            if (_game.Skills.Find(skillId) is { } skill && skill.ReuseDelayMs <= OlympiadReuseResetMaxMs)
+                player.SkillReuseUntilMs.Remove(skillId);
+        }
+    }
     readonly Dictionary<int, (int X, int Y, int Z, int InstanceId)> _olympiadObservers = [];
 
     internal bool InOlympiadArena(int objectId) => _olympiadArena.Contains(objectId);
@@ -30,10 +80,23 @@ public sealed partial class ZoneWorld
         if (!_olympiadArena.Add(player.ObjectId))
             return;
         EndOlympiadObserve(player);
+        AbortCast(player, "olympiad", notify: false);
         if (player.Session != null && _partyByPlayer.ContainsKey(player.ObjectId))
             TryPartyLeave(player.ObjectId);
         player.Abnormals.Clear();
         player.ActiveEnchantObjectId = 0;
+        // Mobius: shots discharged, auto shots off, restricted gear off, short reuses ready.
+        player.SoulshotCharged = false;
+        player.SpiritshotCharge = 0;
+        foreach (int shotId in player.AutoShots.ToList())
+        {
+            player.AutoShots.Remove(shotId);
+            if (player.Session is { } shotSession)
+                SendAutoShotState(shotSession, player, shotId, _game.Items.TryGet(shotId, out var shot) ? shot!.Name : "", false);
+        }
+        UnequipOlympiadRestricted(player);
+        ResetOlympiadReuse(player);
+        RefreshClanSkills(player, ClanOf(player.ObjectId)); // clan skills rest inside
         RefreshKnownSkills(player); // hero skills rest inside (AddStatusSkills)
         RefreshPlayerMaxima(player, fanout: false);
         FillBars(player);
@@ -51,6 +114,7 @@ public sealed partial class ZoneWorld
             return;
         bool wasDown = player.Dead;
         player.Dead = false;
+        RefreshClanSkills(player, ClanOf(player.ObjectId));
         RefreshKnownSkills(player);
         RefreshPlayerMaxima(player, fanout: false);
         FillBars(player);

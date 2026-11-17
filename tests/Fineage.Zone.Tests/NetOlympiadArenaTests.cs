@@ -17,7 +17,7 @@ public sealed class NetOlympiadArenaTests
 {
     static readonly DateTimeOffset Evening = new(2026, 10, 28, 18, 30, 0, TimeSpan.Zero);
     static readonly long EveningMs = Evening.ToUnixTimeMilliseconds();
-    const int Duelist = 88, Dreadnought = 89;
+    const int Duelist = 88, Dreadnought = 89, OlympiadManagerNpc = 31688;
 
     static OlympiadActor Noble(int id, string name, int classId = Duelist) =>
         new(id, name, classId, classId, 0, OlympiadProtocol.InventoryLimit, false);
@@ -172,6 +172,62 @@ public sealed class NetOlympiadArenaTests
     }
 
     [Fact]
+    public async Task Arena_takes_off_hero_gear_refuses_restricted_items_and_readies_short_reuses()
+    {
+        var (bench, one, _, _, at) = await Fight();
+        var ct = CancellationToken.None;
+        one.Player.Hero = true;
+        Assert.Null(await bench.World.TryGiveItemAsync(one.Session, 6611, 1, ct)); // Infinity Blade
+        Assert.Null(await bench.World.TryUseItemAsync(one.Session, one.Slot(6611), ct));
+        Assert.True(one.Inventory.Items.Single(i => i.ItemId == 6611).IsEquipped);
+        Assert.Null(await bench.World.TryGiveItemAsync(one.Session, 1, 1, ct)); // Short Sword (no grade)
+        Assert.Null(await bench.World.TryGiveItemAsync(one.Session, 3947, 10, ct)); // Blessed Spiritshot: No Grade
+        long far = Evening.ToUnixTimeMilliseconds() + 3_600_000;
+        one.Player.SkillReuseUntilMs[1] = far;   // Triple Slash, 3 s reuse
+        one.Player.SkillReuseUntilMs[395] = far; // Heroic Miracle, 20 min reuse
+
+        await at(Evening.AddSeconds(66)); // ported
+        Assert.True(bench.World.InOlympiadArena(one.ObjectId));
+        Assert.False(one.Inventory.Items.Single(i => i.ItemId == 6611).IsEquipped);
+        Assert.DoesNotContain(1, one.Player.SkillReuseUntilMs.Keys);
+        Assert.Equal(far, one.Player.SkillReuseUntilMs[395]);
+
+        Assert.Equal(InventoryProtocol.OlympiadRestricted, await bench.World.TryUseItemAsync(one.Session, one.Slot(6611), ct));
+        Assert.False(one.Inventory.Items.Single(i => i.ItemId == 6611).IsEquipped);
+
+        Assert.Null(await bench.World.TryUseItemAsync(one.Session, one.Slot(1), ct));
+        Assert.Null(await bench.World.TryUseItemAsync(one.Session, one.Slot(3947), ct));
+        Assert.Equal(0, one.Player.SpiritshotCharge);
+        Assert.Equal(10, one.Inventory.CountOf(3947));
+        Assert.Null(await bench.World.TryGiveItemAsync(one.Session, 2509, 10, ct)); // plain Spiritshot: No Grade still works
+        Assert.Null(await bench.World.TryUseItemAsync(one.Session, one.Slot(2509), ct));
+        Assert.True(one.Player.SpiritshotCharge > 0);
+    }
+
+    [Fact]
+    public async Task Observer_watches_a_stadium_untouchable_and_goes_back_where_they_stood()
+    {
+        var (bench, one, two, match, at) = await Fight();
+        var watcher = await bench.EnterAsync("arena4", "Watcher", classId: Duelist, level: 40);
+        var manager = bench.World.SpawnFolkForTests(OlympiadManagerNpc, watcher.Player.X + 20, watcher.Player.Y, watcher.Player.Z);
+        var (x, y, z) = (watcher.Player.X, watcher.Player.Y, watcher.Player.Z);
+        await at(Evening.AddSeconds(66)); // fighters ported
+
+        Assert.Null(await watcher.BypassAsync(manager.ObjectId, "Olympiad 1"));
+        Assert.Contains("Olympiad 3_", LastHtml(bench));
+        Assert.Null(await watcher.BypassAsync(manager.ObjectId, $"Olympiad 3_{match.StadiumId}"));
+        Assert.True(bench.World.OlympiadObserving(watcher.ObjectId));
+        Assert.Equal(one.Player.InstanceId, watcher.Player.InstanceId);
+        Assert.True(bench.World.OlympiadTargetRefusedForTest(one.Player, watcher.Player));
+        Assert.True(bench.World.OlympiadTargetRefusedForTest(watcher.Player, two.Player));
+
+        Assert.Null(await bench.World.TryOlympiadLeaveAsync(watcher.Session, CancellationToken.None));
+        Assert.False(bench.World.OlympiadObserving(watcher.ObjectId));
+        Assert.Equal((x, y, z), (watcher.Player.X, watcher.Player.Y, watcher.Player.Z));
+        Assert.Equal(0, watcher.Player.InstanceId);
+    }
+
+    [Fact]
     public async Task Outsiders_cannot_reach_into_an_arena()
     {
         var (bench, one, _, _, at) = await Fight();
@@ -264,6 +320,8 @@ public sealed class NetOlympiadArenaTests
         Assert.Equal(1, h.Player.KnownSkills[395]);
         Assert.True(heroBench.World.Olympiad.IsHero(h.ObjectId));
         Assert.True(Assert.IsType<UserInfoMsg>(heroBench.Rec.Of("FanoutUserInfo").Last()[1]).Hero);
+        // Hero aura for everyone else: the CharInfo (remote EntitySpawn) carries the flag.
+        Assert.True(Fineage.Zone.Net.NetEnterWorldProjector.BuildRemoteSpawn(h.Player, EntityId.FromObjectId(h.ObjectId)).Hero);
 
         Assert.Null(await h.BypassAsync(monument.ObjectId, "Script MonumentOfHeroes HeroWeapon"));
         Assert.Contains("MonumentOfHeroes 6611", LastHtml(heroBench));

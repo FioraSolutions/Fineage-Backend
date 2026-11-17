@@ -99,6 +99,8 @@ public static class InventoryProtocol
     public const string RaceRestricted = "race_restricted";
     public const string SexRestricted = "sex_restricted";
     public const string HeroRestricted = "hero_restricted";
+    /// <summary>Hero items and <c>FINEAGE_OLY_RESTRICTED_ITEMS</c> inside an Olympiad arena (Mobius checkCondition).</summary>
+    public const string OlympiadRestricted = "olympiad_restricted";
     public const string ClanLeaderRestricted = "clan_leader_restricted";
     public const string PledgeRestricted = "pledge_restricted";
     public const string PvpRestricted = "pvp_restricted";

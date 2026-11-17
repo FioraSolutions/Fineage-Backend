@@ -46,6 +46,8 @@ public sealed partial class ZoneWorld
         var item = player.Inventory!.Find(objectId);
         if (GearRules.UseOwnedError(item != null) is { } ownedError)
             return ownedError;
+        if (OlympiadItemRefused(player, item!) is { } olympiadError)
+            return olympiadError;
         // Mobius UseItem: nothing but fishing shots while the line is out.
         if (player.Fishing && !FishingProtocol.IsFishShot(item!.ItemId))
         {
