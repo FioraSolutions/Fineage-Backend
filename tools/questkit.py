@@ -147,3 +147,21 @@ def write(qid: int, folder: str, script: str, name: str, items: list[int], dialo
 
 def take_all(*ids): return {"op": "take_all", "items": list(ids)}
 def add(k, n=1): return {"op": "add", "key": k, "value": str(n)}
+
+
+# Interlude first-profession class ids (Mobius PlayerClass.level() == 1).
+FIRST_CLASSES = [1, 4, 7, 11, 15, 19, 22, 26, 29, 32, 35, 39, 42, 45, 47, 50, 54, 56]
+HUMAN, ELF, DARK_ELF, ORC, DWARF = 0, 1, 2, 3, 4
+
+
+def collect_all(mobs, n, at, nxt, chance=1.0, extra=None, **gates):
+    """Mobius "give one of my item (< n); when every item of the set holds n, set cond" kill blocks.
+    mobs: {npcId: itemId} (several npcs may share an item). extra: ops added on completion."""
+    items = sorted(set(mobs.values()))
+    rows = []
+    for npc, item in mobs.items():
+        need = {x: n for x in items if x != item}
+        need[item] = n - 1
+        rows.append(kill(npc, [drop(item, chance, n, nxt)] + list(extra or []), cond=at, atLeast=need, **gates))
+        rows.append(kill(npc, [drop(item, chance, n)], cond=at, **gates))
+    return rows
