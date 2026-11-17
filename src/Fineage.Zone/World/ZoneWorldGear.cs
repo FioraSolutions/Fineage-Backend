@@ -66,6 +66,8 @@ public sealed partial class ZoneWorld
             return TryUseSeed(session, player, item, seed);
         if (item.ItemId == ManorProtocol.HarvesterItemId)
             return TryUseHarvester(session, player);
+        if (_soulCrystals.IsCrystal(item.ItemId))
+            return TryUseSoulCrystal(session, player, item);
         if (!item.Template.Equippable)
         {
             if (_game.Recipes.TryGetByRecipeItem(item.ItemId, out _))

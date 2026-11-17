@@ -36795,6 +36795,270 @@
       "price": 500
     },
     {
+      "id": 4629,
+      "name": "Red Soul Crystal",
+      "kind": "etc",
+      "icon": "icon.etc_crystal_red_i00",
+      "price": 0,
+      "weight": 20
+    },
+    {
+      "id": 4630,
+      "name": "Red Soul Crystal - Stage 1",
+      "kind": "etc",
+      "icon": "icon.etc_crystal_red_i00",
+      "price": 0,
+      "weight": 20
+    },
+    {
+      "id": 4631,
+      "name": "Red Soul Crystal - Stage 2",
+      "kind": "etc",
+      "icon": "icon.etc_crystal_red_i00",
+      "price": 0,
+      "weight": 20
+    },
+    {
+      "id": 4632,
+      "name": "Red Soul Crystal - Stage 3",
+      "kind": "etc",
+      "icon": "icon.etc_crystal_red_i00",
+      "price": 0,
+      "weight": 20
+    },
+    {
+      "id": 4633,
+      "name": "Red Soul Crystal - Stage 4",
+      "kind": "etc",
+      "icon": "icon.etc_crystal_red_i00",
+      "price": 0,
+      "weight": 20
+    },
+    {
+      "id": 4634,
+      "name": "Red Soul Crystal - Stage 5",
+      "kind": "etc",
+      "icon": "icon.etc_crystal_red_i00",
+      "price": 0,
+      "weight": 20
+    },
+    {
+      "id": 4635,
+      "name": "Red Soul Crystal - Stage 6",
+      "kind": "etc",
+      "icon": "icon.etc_crystal_red_i00",
+      "price": 0,
+      "weight": 20
+    },
+    {
+      "id": 4636,
+      "name": "Red Soul Crystal - Stage 7",
+      "kind": "etc",
+      "icon": "icon.etc_crystal_red_i00",
+      "price": 0,
+      "weight": 20
+    },
+    {
+      "id": 4637,
+      "name": "Red Soul Crystal - Stage 8",
+      "kind": "etc",
+      "icon": "icon.etc_crystal_red_i00",
+      "price": 0,
+      "weight": 20
+    },
+    {
+      "id": 4638,
+      "name": "Red Soul Crystal - Stage 9",
+      "kind": "etc",
+      "icon": "icon.etc_crystal_red_i00",
+      "price": 0,
+      "weight": 20
+    },
+    {
+      "id": 4639,
+      "name": "Red Soul Crystal - Stage 10",
+      "kind": "etc",
+      "icon": "icon.etc_crystal_red_i00",
+      "price": 0,
+      "weight": 20
+    },
+    {
+      "id": 4640,
+      "name": "Green Soul Crystal",
+      "kind": "etc",
+      "icon": "icon.etc_crystal_green_i00",
+      "price": 0,
+      "weight": 20
+    },
+    {
+      "id": 4641,
+      "name": "Green Soul Crystal - Stage 1",
+      "kind": "etc",
+      "icon": "icon.etc_crystal_green_i00",
+      "price": 0,
+      "weight": 20
+    },
+    {
+      "id": 4642,
+      "name": "Green Soul Crystal - Stage 2",
+      "kind": "etc",
+      "icon": "icon.etc_crystal_green_i00",
+      "price": 0,
+      "weight": 20
+    },
+    {
+      "id": 4643,
+      "name": "Green Soul Crystal - Stage 3",
+      "kind": "etc",
+      "icon": "icon.etc_crystal_green_i00",
+      "price": 0,
+      "weight": 20
+    },
+    {
+      "id": 4644,
+      "name": "Green Soul Crystal - Stage 4",
+      "kind": "etc",
+      "icon": "icon.etc_crystal_green_i00",
+      "price": 0,
+      "weight": 20
+    },
+    {
+      "id": 4645,
+      "name": "Green Soul Crystal - Stage 5",
+      "kind": "etc",
+      "icon": "icon.etc_crystal_green_i00",
+      "price": 0,
+      "weight": 20
+    },
+    {
+      "id": 4646,
+      "name": "Green Soul Crystal - Stage 6",
+      "kind": "etc",
+      "icon": "icon.etc_crystal_green_i00",
+      "price": 0,
+      "weight": 20
+    },
+    {
+      "id": 4647,
+      "name": "Green Soul Crystal - Stage 7",
+      "kind": "etc",
+      "icon": "icon.etc_crystal_green_i00",
+      "price": 0,
+      "weight": 20
+    },
+    {
+      "id": 4648,
+      "name": "Green Soul Crystal - Stage 8",
+      "kind": "etc",
+      "icon": "icon.etc_crystal_green_i00",
+      "price": 0,
+      "weight": 20
+    },
+    {
+      "id": 4649,
+      "name": "Green Soul Crystal - Stage 9",
+      "kind": "etc",
+      "icon": "icon.etc_crystal_green_i00",
+      "price": 0,
+      "weight": 20
+    },
+    {
+      "id": 4650,
+      "name": "Green Soul Crystal - Stage 10",
+      "kind": "etc",
+      "icon": "icon.etc_crystal_green_i00",
+      "price": 0,
+      "weight": 20
+    },
+    {
+      "id": 4651,
+      "name": "Blue Soul Crystal",
+      "kind": "etc",
+      "icon": "icon.etc_crystal_blue_i00",
+      "price": 0,
+      "weight": 20
+    },
+    {
+      "id": 4652,
+      "name": "Blue Soul Crystal - Stage 1",
+      "kind": "etc",
+      "icon": "icon.etc_crystal_blue_i00",
+      "price": 0,
+      "weight": 20
+    },
+    {
+      "id": 4653,
+      "name": "Blue Soul Crystal - Stage 2",
+      "kind": "etc",
+      "icon": "icon.etc_crystal_blue_i00",
+      "price": 0,
+      "weight": 20
+    },
+    {
+      "id": 4654,
+      "name": "Blue Soul Crystal - Stage 3",
+      "kind": "etc",
+      "icon": "icon.etc_crystal_blue_i00",
+      "price": 0,
+      "weight": 20
+    },
+    {
+      "id": 4655,
+      "name": "Blue Soul Crystal - Stage 4",
+      "kind": "etc",
+      "icon": "icon.etc_crystal_blue_i00",
+      "price": 0,
+      "weight": 20
+    },
+    {
+      "id": 4656,
+      "name": "Blue Soul Crystal - Stage 5",
+      "kind": "etc",
+      "icon": "icon.etc_crystal_blue_i00",
+      "price": 0,
+      "weight": 20
+    },
+    {
+      "id": 4657,
+      "name": "Blue Soul Crystal - Stage 6",
+      "kind": "etc",
+      "icon": "icon.etc_crystal_blue_i00",
+      "price": 0,
+      "weight": 20
+    },
+    {
+      "id": 4658,
+      "name": "Blue Soul Crystal - Stage 7",
+      "kind": "etc",
+      "icon": "icon.etc_crystal_blue_i00",
+      "price": 0,
+      "weight": 20
+    },
+    {
+      "id": 4659,
+      "name": "Blue Soul Crystal - Stage 8",
+      "kind": "etc",
+      "icon": "icon.etc_crystal_blue_i00",
+      "price": 0,
+      "weight": 20
+    },
+    {
+      "id": 4660,
+      "name": "Blue Soul Crystal - Stage 9",
+      "kind": "etc",
+      "icon": "icon.etc_crystal_blue_i00",
+      "price": 0,
+      "weight": 20
+    },
+    {
+      "id": 4661,
+      "name": "Blue Soul Crystal - Stage 10",
+      "kind": "etc",
+      "icon": "icon.etc_crystal_blue_i00",
+      "price": 0,
+      "weight": 20
+    },
+    {
       "id": 4665,
       "name": "Pipette Knife",
       "kind": "weapon",
@@ -45045,6 +45309,54 @@
       "sellable": false
     },
     {
+      "id": 5577,
+      "name": "Red Soul Crystal - Stage 11",
+      "kind": "etc",
+      "icon": "icon.etc_crystal_red_i00",
+      "price": 0,
+      "weight": 20
+    },
+    {
+      "id": 5578,
+      "name": "Green Soul Crystal - Stage 11",
+      "kind": "etc",
+      "icon": "icon.etc_crystal_green_i00",
+      "price": 0,
+      "weight": 20
+    },
+    {
+      "id": 5579,
+      "name": "Blue Soul Crystal - Stage 11",
+      "kind": "etc",
+      "icon": "icon.etc_crystal_blue_i00",
+      "price": 0,
+      "weight": 20
+    },
+    {
+      "id": 5580,
+      "name": "Red Soul Crystal - Stage 12",
+      "kind": "etc",
+      "icon": "icon.etc_crystal_red_i00",
+      "price": 0,
+      "weight": 20
+    },
+    {
+      "id": 5581,
+      "name": "Green Soul Crystal - Stage 12",
+      "kind": "etc",
+      "icon": "icon.etc_crystal_green_i00",
+      "price": 0,
+      "weight": 20
+    },
+    {
+      "id": 5582,
+      "name": "Blue Soul Crystal - Stage 12",
+      "kind": "etc",
+      "icon": "icon.etc_crystal_blue_i00",
+      "price": 0,
+      "weight": 20
+    },
+    {
       "id": 5588,
       "name": "Tutorial Guide",
       "kind": "etc",
@@ -48618,6 +48930,30 @@
       "weight": 0,
       "stackable": true,
       "quest": true
+    },
+    {
+      "id": 5908,
+      "name": "Red Soul Crystal: Grade 13",
+      "kind": "etc",
+      "icon": "icon.etc_crystal_red_i00",
+      "price": 0,
+      "weight": 20
+    },
+    {
+      "id": 5911,
+      "name": "Green Soul Crystal: Grade 13",
+      "kind": "etc",
+      "icon": "icon.etc_crystal_green_i00",
+      "price": 0,
+      "weight": 20
+    },
+    {
+      "id": 5914,
+      "name": "Blue Soul Crystal: Grade 13",
+      "kind": "etc",
+      "icon": "icon.etc_crystal_blue_i00",
+      "price": 0,
+      "weight": 20
     },
     {
       "id": 5915,

@@ -16,6 +16,7 @@ public sealed partial class ZoneWorld
         if (killer.Kind != ZoneEntityKind.Player || killer.Session == null || npc.Kind != ZoneEntityKind.Npc)
             return;
         ApplyQuestKill(killer, npc);
+        LevelSoulCrystals(killer, npc);
         DistributeKillReward(npc);
     }
 

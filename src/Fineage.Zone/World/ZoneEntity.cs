@@ -44,6 +44,8 @@ sealed partial class ZoneEntity
     public long FearFleeAtUnixMs { get; set; }
     /// <summary>Mobius <c>ArenaZone</c> membership already announced (enter/leave combat zone).</summary>
     public bool InArena { get; set; }
+    /// <summary>Mobius <c>Attackable._absorbersList</c>: player object id → monster HP when their Soul Crystal landed.</summary>
+    public Dictionary<int, int>? SoulAbsorbers { get; set; }
     /// <summary>Mobius <c>npc.setScriptValue(1)</c> after an onAttack step spawned helpers (once per mob).</summary>
     public bool QuestAttackSpawned { get; set; }
     /// <summary>Players: changes on class transfer (Mobius setClassId).</summary>
