@@ -4,6 +4,7 @@ using Fineage.Game;
 using Fineage.Protocol;
 using Fineage.Zone.Inventory;
 using Fineage.Zone.Lottery;
+using Fineage.Zone.NpcHtml;
 
 namespace Fineage.Zone.World;
 
@@ -47,6 +48,19 @@ public sealed partial class ZoneWorld
     {
         lock (_gate)
             TickLottery(_clock().ToUnixTimeMilliseconds());
+    }
+
+    /// <summary>Test: one <c>Loto N</c> bypass against a lottery seller (spawned or a stand-in).</summary>
+    internal string? LotoForTest(ZoneSession session, int value, int npcId = LotteryPageNpc)
+    {
+        lock (_gate)
+        {
+            if (!_byId.TryGetValue(session.ObjectId, out var player))
+                return "world";
+            var npc = _byId.Values.FirstOrDefault(e => e.Kind == ZoneEntityKind.Npc && e.NpcId == npcId)
+                ?? new ZoneEntity { Kind = ZoneEntityKind.Npc, NpcId = npcId, ObjectId = 0 };
+            return ApplyNpcService(session, player, npc, BypassReply.ServiceCall(NpcServiceIntent.Loto, "", value));
+        }
     }
 
     string LotteryPage(ZoneEntity npc, int page)
