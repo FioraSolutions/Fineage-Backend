@@ -108,4 +108,6 @@ public static class NpcServiceIntent
     public const string FishSkillList = "fish-skill-list";
     /// <summary>Lottery seller <c>Loto N</c> (service id = N).</summary>
     public const string Loto = "loto";
+    /// <summary>Black Marketeer of Mammon <c>SevenSigns 7 N</c>: N Ancient Adena for N adena (service id = N, −1 invalid).</summary>
+    public const string AncientAdenaToAdena = "ancient-adena-to-adena";
 }

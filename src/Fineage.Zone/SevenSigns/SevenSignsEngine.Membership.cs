@@ -119,6 +119,39 @@ public sealed partial class SevenSignsEngine
     }
 
     /// <summary>
+    /// Mobius <c>getAncientAdenaReward</c> via priest <c>SevenSigns 9</c>: only during seal validation and only for a
+    /// member of the winning cabal. Collecting clears the reward and the stone tallies; the contribution score stays.
+    /// Rewards under 3 are refused (Mobius shows the "nothing to collect" page).
+    /// </summary>
+    public string? TryClaimReward(int characterId, out int ancientAdena)
+    {
+        ancientAdena = 0;
+        if (characterId <= 0)
+            return "bad_request";
+        lock (_gate)
+        {
+            if (_period != SevenSignsPeriod.SealValidation)
+                return SevenSignsProtocol.PeriodClosed;
+            var row = Find(characterId);
+            if (row.Cabal == SevenSignsCabal.None || row.Cabal != Winner())
+                return SevenSignsProtocol.NoReward;
+            if (row.AncientAdena < 3)
+                return SevenSignsProtocol.NoReward;
+            ancientAdena = row.AncientAdena;
+            row.AncientAdena = 0;
+            row.Blue = 0;
+            row.Green = 0;
+            row.Red = 0;
+            Persist(force: false);
+        }
+
+        return null;
+    }
+
+    /// <summary>Mobius <c>calcAncientAdenaReward</c>: what seal stones sell for at a priest (−1 on overflow).</summary>
+    public static int StoneAncientAdena(int blue, int green, int red) => SevenSignsRules.ContributionPoints(blue, green, red);
+
+    /// <summary>
     /// Festival of Darkness score hook. The same amount is removed from the rival when the rival has at least that many festival points.
     /// </summary>
     public void AddFestivalScore(SevenSignsCabal cabal, int amount)

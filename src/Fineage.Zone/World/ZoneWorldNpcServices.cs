@@ -72,6 +72,8 @@ public sealed partial class ZoneWorld
                 return ShowTerritoryStatus(session, player, npc);
             case NpcServiceIntent.Loto:
                 return ShowLoto(session, player, npc, Math.Max(0, reply.ServiceId));
+            case NpcServiceIntent.AncientAdenaToAdena:
+                return AncientAdenaToAdena(session, player, npc, reply.ServiceId);
             case NpcServiceIntent.FishSkillList:
                 return ShowFishingSkills(session, player, npc);
             case NpcServiceIntent.SkillList:
