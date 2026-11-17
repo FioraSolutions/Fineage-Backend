@@ -86,6 +86,8 @@ namespace Fineage.Net.Contract
         public SummonKindNet SummonKind { get; set; }
         /// <summary>Summons only: the owner's object id (Mobius Summon.getOwner), so a client can tie the pawn to its master.</summary>
         public int OwnerObjectId { get; set; }
+        /// <summary>Players only: active cubic ids (Mobius CharInfo cubic list, 1 Storm … 9 Attractive). Optional tail after <see cref="OwnerObjectId"/>.</summary>
+        public int[] Cubics { get; set; } = System.Array.Empty<int>();
     }
 
     public sealed class PlayerStatsMsg
@@ -213,5 +215,7 @@ namespace Fineage.Net.Contract
         public bool Hero { get; set; }
         public int BaseClassId { get; set; }
         public int ClassIndex { get; set; }
+        /// <summary>Active cubic ids (Mobius UserInfo cubic list). Optional tail after <see cref="ClassIndex"/>.</summary>
+        public int[] Cubics { get; set; } = System.Array.Empty<int>();
     }
 }

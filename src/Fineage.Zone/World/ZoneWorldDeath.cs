@@ -102,6 +102,7 @@ public sealed partial class ZoneWorld
         player.Running = false;
         player.ActiveEnchantObjectId = 0;
         player.Abnormals.Clear();
+        RemoveAllCubics(player); // Mobius CubicAction / CubicHeal: a dead owner loses its cubics
         RefreshRunSpeed(player); // dead: buff runSpd funcs drop with the abnormals
         player.CombatUntilUnixMs = 0;
         // The kill is judged on the flag the victim died with (Mobius onKillUpdatePvPKarma reads getPvpFlag()

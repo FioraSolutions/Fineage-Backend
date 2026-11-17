@@ -66,6 +66,7 @@ publish/
 !data/soul-crystals.json
 !data/summons.json
 !data/pets.json
+!data/cubics.json
 !data/xp-percent-lost.json
 !data/item-skills.json
 !data/map-regions.json
