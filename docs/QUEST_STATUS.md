@@ -7,9 +7,9 @@ Status: **implemented** — every Mobius talk NPC and kill target is wired, the 
 
 | Status | Count |
 |---|---|
-| implemented | 153 |
+| implemented | 161 |
 | partial | 103 |
-| stub | 50 |
+| stub | 42 |
 | missing | 38 |
 | **total Mobius quests** | **344** |
 
@@ -151,23 +151,23 @@ Related non-quest scripts: `village_master/*Change1|Change2` and `FirstClassTran
 | 211 | Trial of the Challenger | 35+ | 2nd class (Trial/Test) | implemented | hand-ported |
 | 212 | Trial of Duty | 35+ | 2nd class (Trial/Test) | implemented | hand-ported |
 | 213 | Trial of the Seeker | 36+ | 2nd class (Trial/Test) | implemented | hand-ported |
-| 214 | Trial of the Scholar | 36+ | 2nd class (Trial/Test) | stub | 192 dialog(s), no start; auto-port |
-| 215 | Trial of the Pilgrim | 35+ | 2nd class (Trial/Test) | stub | 42 dialog(s), no start; auto-port |
+| 214 | Trial of the Scholar | 36+ | 2nd class (Trial/Test) | implemented | hand-ported |
+| 215 | Trial of the Pilgrim | 35+ | 2nd class (Trial/Test) | implemented | hand-ported |
 | 216 | Trial of the Guildsman | 35+ | 2nd class (Trial/Test) | stub | 64 dialog(s), no start; auto-port |
 | 217 | Testimony of Trust | 38+ | 2nd class (Trial/Test) | implemented | hand-ported |
 | 218 | Testimony of Life | 38+ | 2nd class (Trial/Test) | implemented | hand-ported |
-| 219 | Testimony of Fate | 38+ | 2nd class (Trial/Test) | stub | 93 dialog(s), no start; auto-port |
-| 220 | Testimony of Glory | 37+ | 2nd class (Trial/Test) | stub | 131 dialog(s), no start; auto-port |
+| 219 | Testimony of Fate | 38+ | 2nd class (Trial/Test) | implemented | hand-ported |
+| 220 | Testimony of Glory | 37+ | 2nd class (Trial/Test) | implemented | hand-ported |
 | 221 | Testimony of Prosperity | 38+ | 2nd class (Trial/Test) | stub | 173 dialog(s), no start; auto-port |
 | 222 | Test of the Duelist | 39+ | 2nd class (Trial/Test) | implemented | hand-ported |
 | 223 | Test of the Champion | 39+ | 2nd class (Trial/Test) | partial | quest spawns missing; hand-ported |
 | 224 | Test of Sagittarius | 39+ | 2nd class (Trial/Test) | implemented | hand-ported |
 | 225 | Test of the Searcher | 39+ | 2nd class (Trial/Test) | implemented | timers; hand-ported |
 | 226 | Test of the Healer | 39+ | 2nd class (Trial/Test) | implemented | timers; hand-ported |
-| 227 | Test of the Reformer | 39+ | 2nd class (Trial/Test) | stub | 45 dialog(s), no start; timers; auto-port |
-| 228 | Test of Magus | 39+ | 2nd class (Trial/Test) | stub | 52 dialog(s), no start; auto-port |
-| 229 | Test of Witchcraft | 39+ | 2nd class (Trial/Test) | stub | 94 dialog(s), no start; timers; auto-port |
-| 230 | Test of the Summoner | 39+ | 2nd class (Trial/Test) | stub | 122 dialog(s), no start; auto-port |
+| 227 | Test of the Reformer | 39+ | 2nd class (Trial/Test) | implemented | timers; hand-ported |
+| 228 | Test of Magus | 39+ | 2nd class (Trial/Test) | implemented | hand-ported |
+| 229 | Test of Witchcraft | 39+ | 2nd class (Trial/Test) | implemented | timers; hand-ported |
+| 230 | Test of the Summoner | 39+ | 2nd class (Trial/Test) | implemented | hand-ported |
 | 231 | Test of the Maestro | 39+ | 2nd class (Trial/Test) | stub | 34 dialog(s), no start; timers; auto-port |
 | 232 | Test of the Lord | 39+ | 2nd class (Trial/Test) | stub | 64 dialog(s), no start; timers; auto-port |
 | 233 | Test of the War Spirit | 39+ | 2nd class (Trial/Test) | stub | 92 dialog(s), no start; auto-port |

@@ -60,6 +60,15 @@ public sealed class SecondClassTrialTests
     [InlineData(213, 0, 7, 2673)]   // Trial of the Seeker — Rogue
     [InlineData(224, 1, 22, 3293)]  // Test of Sagittarius — Elven Scout
     [InlineData(225, 4, 54, 2809)]  // Test of the Searcher — Scavenger
+    [InlineData(219, 2, 32, 3172)]  // Testimony of Fate — Palus Knight
+    [InlineData(215, 3, 50, 2721)]  // Trial of the Pilgrim — Orc Shaman
+    [InlineData(227, 2, 42, 2821)]  // Test of the Reformer — Shillien Oracle
+    [InlineData(228, 1, 26, 2840)]  // Test of Magus — Elven Wizard
+    [InlineData(229, 2, 32, 3307)]  // Test of Witchcraft — Palus Knight
+    [InlineData(229, 0, 11, 3307)]  // Test of Witchcraft — Wizard
+    [InlineData(214, 2, 39, 2674)]  // Trial of the Scholar — Dark Wizard
+    [InlineData(230, 1, 26, 3336)]  // Test of the Summoner — Elven Wizard
+    [InlineData(220, 3, 50, 3203)]  // Testimony of Glory — Orc Shaman
     public void Trial_can_be_finished(int questId, int race, int classId, int mark) =>
         Assert.True(Walk(questId, new QuestActor(race, 45, classId), mark), $"quest {questId} never handed out {mark}");
 
@@ -74,6 +83,14 @@ public sealed class SecondClassTrialTests
     [InlineData(213, 0, 1)]
     [InlineData(224, 4, 54)]  // Scavengers take the Searcher test, not Sagittarius
     [InlineData(225, 0, 4)]
+    [InlineData(219, 1, 19)]  // Testimony of Fate is dark elf only
+    [InlineData(215, 0, 1)]
+    [InlineData(227, 1, 29)]  // Elven Oracle may not take the Reformer test
+    [InlineData(228, 0, 15)]
+    [InlineData(229, 1, 26)]
+    [InlineData(214, 0, 15)]
+    [InlineData(230, 3, 49)]
+    [InlineData(220, 0, 1)]   // Testimony of Glory is orc only
     public void Trial_refuses_other_classes(int questId, int race, int classId) =>
         Assert.False(Walk(questId, new QuestActor(race, 45, classId), 57, rounds: 1) ||
                      WalkStarts(questId, new QuestActor(race, 45, classId)));
