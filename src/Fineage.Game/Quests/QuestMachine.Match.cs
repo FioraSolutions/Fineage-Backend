@@ -22,6 +22,9 @@ public sealed partial class QuestMachine
                 continue;
             if (!VarsMatch(dialog, state))
                 continue;
+            if (dialog.Weapons is { } weapons && inventory != null &&
+                !(inventory.GetEquipped(PaperdollSlot.RHand) is { } held && weapons.Contains(held.ItemId)))
+                continue;
             // Random branches roll only when the engine acts (talk / event / kill), never on a quest-list probe.
             if (dialog.Chance is double chance && random != null && random() >= chance)
                 continue;

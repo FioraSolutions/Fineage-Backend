@@ -13,7 +13,14 @@ public sealed class FirstClassPathQuestTests
         (new QuestMachine(Data.Quests, Data.Items, () => roll), new PlayerInventory(Data.Items), new QuestJournal());
 
     [Theory]
+    [InlineData(401, 30010, "30010-06", 0, 1145)]
+    [InlineData(402, 30417, "30417-08", 0, 1161)]
+    [InlineData(403, 30379, "30379-06", 0, 1190)]
     [InlineData(404, 30391, "30391-08", 10, 1292)]
+    [InlineData(410, 30329, "30329-06", 31, 1244)]
+    [InlineData(415, 30587, "30587-06", 44, 1615)]
+    [InlineData(416, 30585, "30585-06", 49, 1631)]
+    [InlineData(418, 30527, "30527-06", 53, 1635)]
     [InlineData(405, 30022, "30022-05", 10, 1201)]
     [InlineData(411, 30416, "30416-05", 31, 1252)]
     [InlineData(412, 30421, "30421-05", 38, 1261)]
@@ -25,7 +32,7 @@ public sealed class FirstClassPathQuestTests
         var (m, bag, j) = Setup();
         m.AdvEvent(j, bag, q, npc, ev, new QuestActor(0, 18, cls));
         Assert.Null(j.Find(q));
-        m.AdvEvent(j, bag, q, npc, ev, new QuestActor(0, 20, cls == 10 ? 31 : 10));
+        m.AdvEvent(j, bag, q, npc, ev, new QuestActor(0, 20, cls == 31 ? 10 : 31));
         Assert.Null(j.Find(q));
         var held = bag.Add(mark, 1);
         m.AdvEvent(j, bag, q, npc, ev, new QuestActor(0, 20, cls));
@@ -147,5 +154,123 @@ public sealed class FirstClassPathQuestTests
         Assert.Equal(7080, m.AdvEvent(j, bag, 417, 31958, "31958-02", me).Sp);
         Assert.Equal(1, bag.CountOf(1642));
         Assert.Null(j.Find(417));
+    }
+
+    [Fact]
+    public void Warrior_spider_legs_need_the_trial_sword_in_hand()
+    {
+        var (m, bag, j) = Setup();
+        var me = new QuestActor(0, 19, 0);
+        m.AdvEvent(j, bag, 401, 30010, "30010-06", me);
+        m.AdvEvent(j, bag, 401, 30253, "30253-02", me);
+        for (int i = 0; i < 10; i++)
+            m.OnKill(j, bag, 20035, me);
+        m.Talk(j, bag, 401, 30253, me);
+        m.AdvEvent(j, bag, 401, 30010, "30010-11", me);
+        Assert.Equal(5, j.Find(401)!.Cond);
+        m.OnKill(j, bag, 20038, me);
+        Assert.Equal(0, bag.CountOf(1144));                    // sword carried, not wielded
+        bag.Equip(bag.FindByItemId(1142)!);
+        for (int i = 0; i < 20; i++)
+            m.OnKill(j, bag, 20038, me);
+        Assert.Equal(6, j.Find(401)!.Cond);
+        Assert.Equal(1500, m.Talk(j, bag, 401, 30010, me).Sp);
+        Assert.Equal(1, bag.CountOf(1145));
+    }
+
+    [Fact]
+    public void Human_knight_pays_by_coin_count()
+    {
+        var (m, bag, j) = Setup();
+        var me = new QuestActor(0, 19, 0);
+        m.AdvEvent(j, bag, 402, 30417, "30417-08", me);
+        (int Npc, string Accept, int[] Mobs, int Need)[] trials =
+        [
+            (30332, "30332-02", [20775], 10), (30289, "30289-03", [27024], 12), (30379, "30379-02", [20038], 20),
+            (30037, "30037-02", [20030], 20)
+        ];
+        foreach (var (npc, accept, mobs, need) in trials)
+        {
+            Assert.True(m.AdvEvent(j, bag, 402, npc, accept, me).Ok);
+            for (int i = 0; i < need; i++)
+                m.OnKill(j, bag, mobs[0], me);
+            Assert.True(m.Talk(j, bag, 402, npc, me).Ok);
+        }
+
+        Assert.Equal("4", j.Find(402)!.Get("coins"));
+        var done = m.AdvEvent(j, bag, 402, 30417, "30417-13", me);
+        Assert.Equal(1500 + 1920, done.Sp);
+        Assert.Equal(1, bag.CountOf(1161));
+        Assert.Equal(0, bag.CountOf(1162));
+    }
+
+    [Fact]
+    public void Rogue_thief_drops_each_stolen_item_once()
+    {
+        var (m, bag, j) = Setup();
+        var me = new QuestActor(0, 19, 0);
+        m.AdvEvent(j, bag, 403, 30379, "30379-06", me);
+        m.AdvEvent(j, bag, 403, 30425, "30425-05", me);
+        bag.Equip(bag.FindByItemId(1182)!);
+        for (int i = 0; i < 10; i++)
+            m.OnKill(j, bag, 20054, me);
+        m.Talk(j, bag, 403, 30425, me);
+        m.Talk(j, bag, 403, 30379, me);
+        Assert.Equal(5, j.Find(403)!.Cond);
+        m.OnKill(j, bag, 27038, me);                           // roll 0 picks the jewelry
+        m.OnKill(j, bag, 27038, me);                           // jewelry again: wasted
+        Assert.Equal(1, bag.CountOf(1186));
+        foreach (double roll in new[] { 0.3, 0.9, 0.4 })      // tomes (1/3), necklace (last), ring (1/2)
+            Setup(roll).M.OnKill(j, bag, 27038, me);
+        Assert.Equal(6, j.Find(403)!.Cond);
+        Assert.Equal(1500, m.Talk(j, bag, 403, 30379, me).Sp);
+        Assert.Equal(1, bag.CountOf(1190));
+    }
+
+    [Fact]
+    public void Orc_shaman_durka_and_leopard_routes_finish()
+    {
+        var (m, bag, j) = Setup();
+        var me = new QuestActor(3, 19, 49);
+        m.AdvEvent(j, bag, 416, 30585, "30585-06", me);
+        foreach (int mob in new[] { 20479, 20478, 20415 })
+            m.OnKill(j, bag, mob, me);
+        Assert.Equal(2, j.Find(416)!.Cond);
+        m.Talk(j, bag, 416, 30585, me);
+        m.AdvEvent(j, bag, 416, 30592, "30592-03", me);
+        var alt = j.Find(416)!;
+        m.AdvEvent(j, bag, 416, 30585, "30585-11b", me);
+        m.Talk(j, bag, 416, 30502, me);
+        for (int i = 0; i < 3; i++)
+            m.OnKill(j, bag, 20335, me);
+        m.Talk(j, bag, 416, 30502, me);
+        m.AdvEvent(j, bag, 416, 30593, "30593-03", me);
+        for (int i = 0; i < 5; i++)
+            Assert.Empty(m.OnKill(j, bag, 20038, me).Spawns);
+        Assert.Equal([27056], m.OnKill(j, bag, 20038, me).Spawns);   // 5 parasites, roll 0 < 10 %
+        m.OnKill(j, bag, 27056, me);
+        m.Talk(j, bag, 416, 30593, me);
+        Assert.Equal(11, j.Find(416)!.Cond);
+        Assert.Equal(2600, m.AdvEvent(j, bag, 416, 30502, "30502-07", me).Sp);
+        Assert.Equal(1, bag.CountOf(1631));
+    }
+
+    [Fact]
+    public void Artisan_alternate_route_ends_at_lockirin()
+    {
+        var (m, bag, j) = Setup();
+        var me = new QuestActor(4, 19, 53);
+        m.AdvEvent(j, bag, 418, 30527, "30527-06", me);
+        for (int i = 0; i < 10; i++)
+            m.OnKill(j, bag, 20389, me);
+        m.OnKill(j, bag, 20390, me);
+        m.OnKill(j, bag, 20390, me);
+        Assert.Equal(2, j.Find(418)!.Cond);
+        m.AdvEvent(j, bag, 418, 30527, "30527-08b", me);
+        m.AdvEvent(j, bag, 418, 32052, "32052-06", me);
+        m.AdvEvent(j, bag, 418, 31963, "31963-04", me);
+        Assert.Equal(10, j.Find(418)!.Cond);
+        Assert.Equal(3490, m.AdvEvent(j, bag, 418, 30531, "30531-05", me).Sp);
+        Assert.Equal(1, bag.CountOf(1635));
     }
 }
