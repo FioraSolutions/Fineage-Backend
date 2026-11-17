@@ -179,7 +179,11 @@ public sealed partial class ZoneWorld
 
         foreach (var row in free)
         {
-            string? err = TryGiveItem(session, row.ItemId, row.Count);
+            // Mobius admin_buy grants the requested amount as-is. TryGiveItem caps at
+            // MaxGrantCount (10 000) to keep a single chat verb from minting unbounded items,
+            // but that cap would silently refuse "10 000 000 Gold Bar" on the GM currency page.
+            // Grant free GM rows in chunks so the whole requested amount lands in one purchase.
+            string? err = TryGiveAdminFreeItem(session, row.ItemId, row.Count);
             if (err != null)
                 return err;
         }

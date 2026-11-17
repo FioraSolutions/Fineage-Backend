@@ -159,6 +159,52 @@ public sealed partial class ZoneWorld
         return null;
     }
 
+    /// <summary>
+    /// Grants a free (price 0) GM buylist row. The admin shop must honour the exact requested amount:
+    /// Mobius <c>admin_buy</c> on the currency page is used to mint millions of adena/gold, and the
+    /// <see cref="MaxGrantCount"/> cap that guards the chat <c>admin_create_item</c> verb would refuse it.
+    /// The amount is applied in capped chunks so one purchase still lands as a single mutation.
+    /// </summary>
+    string? TryGiveAdminFreeItem(ZoneSession session, int itemId, int count)
+    {
+        if (!IsLive(session))
+            return "world";
+        if (!_byId.TryGetValue(session.ObjectId, out var player) || player.Inventory == null)
+            return "world";
+        if (itemId <= 0 || count <= 0 || !_game.Items.TryGet(itemId, out _))
+            return "bad_request";
+
+        var touched = new List<Fineage.Game.ItemInstance>();
+        int left = count;
+        while (left > 0)
+        {
+            int chunk = Math.Min(left, MaxGrantCount);
+            touched.Add(player.Inventory.Add(itemId, chunk));
+            left -= chunk;
+        }
+
+        if (touched.Count > 0)
+        {
+            // A stackable row merges into one instance, so fan out distinct object ids only.
+            var changes = new List<InventoryUpdateEntryMsg>(touched.Count);
+            var seen = new HashSet<int>();
+            foreach (var item in touched)
+            {
+                if (!seen.Add(item.ObjectId))
+                    continue;
+                changes.Add(InventoryMessages.ChangeRow(InventoryChange.Add, item));
+            }
+
+            NetBridge?.FanoutInventoryUpdate(
+                [session.ObjectId],
+                new InventoryUpdateMsg { Changes = changes.ToArray() });
+        }
+
+        ZoneLog.Info($"admin give object={session.ObjectId} item={itemId} count={count}");
+        RefreshWeightPenaltyAfterInventoryChange(session);
+        return null;
+    }
+
     bool TryLivePlayer(ZoneSession session, out ZoneEntity player, out string? error)
     {
         player = null!;
