@@ -157,7 +157,7 @@ Related non-quest scripts: `village_master/*Change1|Change2` and `FirstClassTran
 | 217 | Testimony of Trust | 38+ | 2nd class (Trial/Test) | implemented | hand-ported |
 | 218 | Testimony of Life | 38+ | 2nd class (Trial/Test) | implemented | hand-ported |
 | 219 | Testimony of Fate | 38+ | 2nd class (Trial/Test) | implemented | hand-ported |
-| 220 | Testimony of Glory | 37+ | 2nd class (Trial/Test) | implemented | auto-port |
+| 220 | Testimony of Glory | 37+ | 2nd class (Trial/Test) | implemented | hand-ported |
 | 221 | Testimony of Prosperity | 38+ | 2nd class (Trial/Test) | stub | 173 dialog(s), no start; auto-port |
 | 222 | Test of the Duelist | 39+ | 2nd class (Trial/Test) | implemented | hand-ported |
 | 223 | Test of the Champion | 39+ | 2nd class (Trial/Test) | partial | quest spawns missing; hand-ported |
