@@ -19,6 +19,13 @@ def mark(item, e, sp):
     return [give(item), exp(e, sp), FINISH, DONE]
 
 
+def _no_page(row):
+    """An action event that answers with no page (Mobius returns the event name, which is no file)."""
+    row.pop("htmlFile")
+    row["html"] = ""
+    return row
+
+
 def gate_start(npc, ok_page, start_page, ops, classes=None, races=None, level=0, refusals=()):
     """Created-state talk: ok page when eligible; refusals = [(page, gates)] tried in order after it.
     start_page: the accept event (gated the same as the ok page)."""
@@ -1336,6 +1343,483 @@ def q220():
         kill(REVENANT, [give(S_TANTOS), cond(10)], cond=9),
     ]
     write(220, "00220_testimony_of_glory", "Q00220_TestimonyOfGlory", "Testimony of Glory", list(range(3204, 3238)), d)
+
+
+@quest
+def q233():
+    VIVYAN, SARIEN, RACOY, SOMAK, MANAKIA, ORIM, MARTANKUS, PEKIRON = (
+        30030, 30436, 30507, 30510, 30515, 30630, 30649, 30682)
+    (VENDETTA, T_HEAD, W_TOTEM, CONTRACT, EYE, SCALE, TALON, BRAKI1, P_TOTEM, TO_SKULL, TO_RIB, TO_SPINE, TO_ARM,
+     TO_THIGH, TONAR1, M_TOTEM, HE_SKULL, HE_RIB, HE_SPINE, HE_ARM, HE_THIGH, HERMODT1, R_TOTEM, V_LETTER, BOOK,
+     KI_SKULL, KI_RIB, KI_SPINE, KI_ARM, KI_THIGH, KIRUNA1, BRAKI2, TONAR2, HERMODT2, KIRUNA2) = range(2880, 2915)
+    MARK = 2879
+    remains = [BRAKI1, TONAR1, HERMODT1, KIRUNA1]
+
+    def remains_rows(npc, page, ops, got, **gates):
+        """Hand in one set of bones for its remains; the fourth set moves the trial to cond 2."""
+        others = [r for r in remains if r != got]
+        g = dict(gates)
+        held = g.pop("hasItems", []) + others
+        return [talk(npc, page, ops=ops + [give(got), cond(2)], cond=1, hasItems=held, **g),
+                talk(npc, page, ops=ops + [give(got)], cond=1, **gates)]
+
+    d = [
+        talk(SOMAK, "30510-04", when="absent", classes=[50], minLevel=39),
+        talk(SOMAK, "30510-03", when="absent", classes=[50]),
+        talk(SOMAK, "30510-02", when="absent", races=[ORC]),
+        talk(SOMAK, "30510-01", when="absent"),
+        event(SOMAK, "30510-05", ops=START, when="absent", classes=[50], minLevel=39),
+        talk(SOMAK, "30510-06", cond=1),
+        talk(SOMAK, "30510-07", cond=2, ops=[take(r) for r in remains] + [give(VENDETTA), cond(3)]),
+        talk(SOMAK, "30510-08", cond=3),
+        talk(SOMAK, "30510-09", cond=4, ops=[take(VENDETTA), give(BRAKI2), give(HERMODT2), give(KIRUNA2), give(TONAR2),
+                                            give(W_TOTEM), cond(5)]),
+        talk(SOMAK, "30510-10", cond=5),
+        talk(MARTANKUS, "30649-01", cond=5),
+        event(MARTANKUS, "30649-03", ops=[take_all(T_HEAD, W_TOTEM, BRAKI2, HERMODT2, KIRUNA2, TONAR2)]
+              + mark(MARK, 63483, 17500), cond=5),
+        talk(ORIM, "30630-01", cond=1, lacksItems=[BRAKI1, CONTRACT]),
+        *remains_rows(ORIM, "30630-06", [take(SCALE, 10), take(TALON, 10), take(EYE, 10), take(CONTRACT)], BRAKI1,
+                      lacksItems=[BRAKI1], atLeast={EYE: 10, SCALE: 10, TALON: 10}),
+        talk(ORIM, "30630-05", cond=1, lacksItems=[BRAKI1]),
+        talk(ORIM, "30630-07"),
+        event(ORIM, "30630-04", ops=[give(CONTRACT)], cond=1, lacksItems=[BRAKI1, CONTRACT]),
+        talk(RACOY, "30507-01", cond=1, lacksItems=[KIRUNA1, R_TOTEM]),
+        talk(RACOY, "30507-04", cond=1, lacksItems=[KIRUNA1], hasItem=V_LETTER),
+        *remains_rows(RACOY, "30507-06", [take(BOOK), take(R_TOTEM), take(KI_ARM), take(KI_RIB), take(KI_SKULL),
+                                          take(KI_SPINE), take(KI_THIGH)], KIRUNA1, lacksItems=[KIRUNA1],
+                      hasItems=[BOOK, KI_ARM, KI_RIB, KI_SKULL, KI_SPINE, KI_THIGH]),
+        talk(RACOY, "30507-05", cond=1, lacksItems=[KIRUNA1], hasItem=BOOK),
+        talk(RACOY, "30507-03", cond=1, lacksItems=[KIRUNA1]),
+        talk(RACOY, "30507-07"),
+        event(RACOY, "30507-02", ops=[give(R_TOTEM)], cond=1, lacksItems=[KIRUNA1, R_TOTEM]),
+        talk(VIVYAN, "30030-05", cond=1, hasItems=[R_TOTEM, V_LETTER]),
+        talk(VIVYAN, "30030-06", cond=1, hasItems=[R_TOTEM, BOOK]),
+        talk(VIVYAN, "30030-01", cond=1, hasItem=R_TOTEM),
+        talk(VIVYAN, "30030-07"),
+        event(VIVYAN, "30030-04", ops=[give(V_LETTER)], cond=1, hasItem=R_TOTEM, lacksItems=[V_LETTER, BOOK]),
+        talk(SARIEN, "30436-01", cond=1, hasItems=[R_TOTEM, V_LETTER], ops=[take(V_LETTER), give(BOOK)]),
+        talk(SARIEN, "30436-02", cond=1, hasItems=[R_TOTEM, BOOK]),
+        talk(SARIEN, "30436-03", cond=1, hasItem=R_TOTEM),
+        talk(PEKIRON, "30682-01", cond=1, lacksItems=[TONAR1, P_TOTEM]),
+        *remains_rows(PEKIRON, "30682-04", [take(P_TOTEM), take(TO_ARM), take(TO_RIB), take(TO_SKULL), take(TO_SPINE),
+                                            take(TO_THIGH)], TONAR1, lacksItems=[TONAR1],
+                      hasItems=[TO_ARM, TO_RIB, TO_SKULL, TO_SPINE, TO_THIGH]),
+        talk(PEKIRON, "30682-03", cond=1, lacksItems=[TONAR1]),
+        talk(PEKIRON, "30682-05"),
+        event(PEKIRON, "30682-02", ops=[give(P_TOTEM)], cond=1, lacksItems=[TONAR1, P_TOTEM]),
+        talk(MANAKIA, "30515-01", cond=1, lacksItems=[HERMODT1, M_TOTEM]),
+        *remains_rows(MANAKIA, "30515-04", [take(M_TOTEM), take(HE_ARM), take(HE_RIB), take(HE_SKULL), take(HE_SPINE),
+                                            take(HE_THIGH)], HERMODT1, lacksItems=[HERMODT1],
+                      hasItems=[HE_ARM, HE_RIB, HE_SKULL, HE_SPINE, HE_THIGH]),
+        talk(MANAKIA, "30515-03", cond=1, lacksItems=[HERMODT1]),
+        talk(MANAKIA, "30515-05"),
+        event(MANAKIA, "30515-02", ops=[give(M_TOTEM)], cond=1, lacksItems=[HERMODT1, M_TOTEM]),
+        kill(20213, [drop(EYE, 1.0, 10)], hasItem=CONTRACT),
+        kill(20214, [drop(SCALE, 1.0, 10)], hasItem=CONTRACT),
+        kill(20215, [drop(TALON, 1.0, 10)], hasItem=CONTRACT),
+        kill(27108, [give(HE_SKULL)], hasItem=M_TOTEM, lacksItems=[HE_SKULL]),
+        *[kill(m, [drop(T_HEAD, 0.5, 13, 4)], cond=3, hasItem=VENDETTA) for m in (20601, 20602)],
+    ]
+    # Sequential bone hunts: each lucky kill brings the first missing bone of the set.
+    for mobs, gate, bones in (((20581, 20582), P_TOTEM, [TO_SKULL, TO_RIB, TO_SPINE, TO_ARM, TO_THIGH]),
+                              ((20158,), M_TOTEM, [HE_RIB, HE_SPINE, HE_ARM, HE_THIGH])):
+        for m in mobs:
+            for i, bone in enumerate(bones):
+                d.append(kill(m, [give(bone)], hasItems=[gate] + bones[:i], lacksItems=[bone], chance=0.5))
+    # Noble ants (Mobius getRandom(100) bands): 29 % thighbone then armbone, 30 % spine then ribbone, 30 % skull.
+    for m in (20089, 20090):
+        d += [
+            kill(m, [give(KI_THIGH)], hasItem=BOOK, lacksItems=[KI_THIGH], chance=0.29),
+            kill(m, [give(KI_ARM)], hasItems=[BOOK, KI_THIGH], lacksItems=[KI_ARM], chance=0.29),
+            kill(m, [give(KI_SPINE)], hasItem=BOOK, lacksItems=[KI_SPINE], chance=0.42),
+            kill(m, [give(KI_RIB)], hasItems=[BOOK, KI_SPINE], lacksItems=[KI_RIB], chance=0.42),
+            kill(m, [give(KI_SKULL)], hasItem=BOOK, lacksItems=[KI_SKULL], chance=0.73),
+        ]
+    write(233, "00233_test_of_the_war_spirit", "Q00233_TestOfTheWarSpirit", "Test of the War Spirit",
+          list(range(2880, 2915)), d)
+
+
+@quest
+def q232():
+    SOMAK, MANAKIA, JAKAL, SUMARI, KAKAI, VARKEES, TANTUS, HATOS, TAKUNA, CHIANTA, FIRST_ORC, MARTANKUS = (
+        30510, 30515, 30558, 30564, 30565, 30566, 30567, 30568, 30641, 30642, 30643, 30649)
+    (NECKLACE, C_VARKEES, C_TANTUS, C_HATOS, C_TAKUNA, C_CHIANTA, ORDERS, B_FANG, AMULET, HUGE_FANG, S_LETTER, URUTU,
+     SKULL, SWORD, AXE_BLADE, AXE, FEELER, FEET, BROOCH, CORNEA, CARVING, BEAR_NECKLACE, M_CHARM, R_HEAD,
+     R_NOTICE) = range(3391, 3416)
+    FLAME, ARROW, MARK = 3416, 1341, 3390
+    pieces = [SWORD, AXE, CARVING, BROOCH, HUGE_FANG]
+
+    def piece(npc, page, ops, got, **gates):
+        """Hand over one of the five ordeal pieces; with all five (and the necklace) the trial moves to cond 2."""
+        g = dict(gates)
+        held = g.pop("hasItems", []) + [x for x in pieces if x != got] + [NECKLACE]
+        return [talk(npc, page, ops=ops + [give(got), cond(2)], hasItems=held, **g),
+                talk(npc, page, ops=ops + [give(got)], **gates)]
+
+    first_orc = spawn_at(FIRST_ORC, 21036, -107690, -3038)
+    d = [
+        talk(KAKAI, "30565-04", when="absent", classes=[50], minLevel=39),
+        talk(KAKAI, "30565-03", when="absent", classes=[50]),
+        talk(KAKAI, "30565-02", when="absent", races=[ORC]),
+        talk(KAKAI, "30565-01", when="absent"),
+        event(KAKAI, "30565-05", ops=START + [give(NECKLACE)], when="absent", classes=[50], minLevel=39),
+        talk(KAKAI, "30565-06", cond=1), talk(KAKAI, "30565-07", cond=2), talk(KAKAI, "30565-09", cond=3),
+        *[talk(KAKAI, "30565-10", cond=c) for c in (4, 5, 6)],
+        talk(KAKAI, "30565-11", cond=7, ops=[take(FLAME)] + mark(MARK, 92955, 16250)),
+        event(KAKAI, "30565-08", ops=[take(p) for p in (SWORD, AXE, CARVING, BROOCH, NECKLACE, HUGE_FANG)]
+              + [give(BEAR_NECKLACE), cond(3)], cond=2),
+        talk(MARTANKUS, "30649-01", cond=3), talk(MARTANKUS, "30649-05", cond=4),
+        talk(MARTANKUS, "30649-06", cond=5, ops=[take(M_CHARM), take(R_HEAD), take(R_NOTICE), give(FLAME), cond(6)]),
+        talk(MARTANKUS, "30649-07", cond=6), talk(MARTANKUS, "30649-08", cond=7),
+        event(MARTANKUS, "30649-04", ops=[take(BEAR_NECKLACE), give(M_CHARM), cond(4)], cond=3),
+        # Martankus calls the First Orc to his Mobius point.
+        event(MARTANKUS, "30649-07", ops=[first_orc], cond=6),
+        talk(FIRST_ORC, "30643-01", cond=6), talk(FIRST_ORC, "30643-03", cond=7),
+        event(FIRST_ORC, "30643-02", ops=[cond(7)], cond=6),
+        talk(VARKEES, "30566-05", hasItem=HUGE_FANG),
+        *piece(VARKEES, "30566-04", [take_all(C_VARKEES, AMULET)], HUGE_FANG, hasItems=[C_VARKEES, AMULET]),
+        talk(VARKEES, "30566-03", hasItem=C_VARKEES),
+        talk(VARKEES, "30566-01"),
+        event(VARKEES, "30566-02", ops=[give(C_VARKEES)], lacksItems=[C_VARKEES, HUGE_FANG]),
+        talk(MANAKIA, "30515-05", hasItem=HUGE_FANG),
+        talk(MANAKIA, "30515-04", hasItem=AMULET),
+        talk(MANAKIA, "30515-03", hasItem=ORDERS, atLeast={B_FANG: 20}, ops=[take_all(ORDERS, B_FANG), give(AMULET)]),
+        talk(MANAKIA, "30515-02", hasItem=ORDERS),
+        talk(MANAKIA, "30515-01", ops=[give(ORDERS)]),
+        talk(TANTUS, "30567-05", hasItem=AXE),
+        *piece(TANTUS, "30567-04", [take(ARROW, 1000), take(AXE_BLADE), take(C_TANTUS)], AXE,
+               hasItems=[C_TANTUS, AXE_BLADE], atLeast={ARROW: 1000}),
+        talk(TANTUS, "30567-03", hasItem=C_TANTUS),
+        talk(TANTUS, "30567-01"),
+        event(TANTUS, "30567-02", ops=[give(C_TANTUS)], lacksItems=[C_TANTUS, AXE]),
+        talk(JAKAL, "30558-05", hasItem=AXE),
+        talk(JAKAL, "30558-04", hasItem=AXE_BLADE),
+        talk(JAKAL, "30558-01", hasItem=C_TANTUS, atLeast={57: 1000}),
+        talk(JAKAL, "30558-03", hasItem=C_TANTUS),
+        event(JAKAL, "30558-02", ops=[take(57, 1000), give(AXE_BLADE)], hasItem=C_TANTUS, atLeast={57: 1000},
+              lacksItems=[AXE_BLADE, AXE]),
+        talk(HATOS, "30568-05", hasItem=SWORD),
+        *piece(HATOS, "30568-04", [take(C_HATOS), take(URUTU), take_all(SKULL)], SWORD, hasItems=[C_HATOS, URUTU],
+               atLeast={SKULL: 10}),
+        talk(HATOS, "30568-03", hasItem=C_HATOS),
+        talk(HATOS, "30568-01"),
+        event(HATOS, "30568-02", ops=[give(C_HATOS)], lacksItems=[C_HATOS, SWORD]),
+        talk(SUMARI, "30564-03", hasItem=URUTU),
+        talk(SUMARI, "30564-02", hasItem=S_LETTER),
+        talk(SUMARI, "30564-01", hasItem=C_HATOS, ops=[give(S_LETTER)]),
+        talk(SOMAK, "30510-03", hasItem=SWORD),
+        talk(SOMAK, "30510-02", hasItem=URUTU),
+        talk(SOMAK, "30510-01", hasItem=S_LETTER, ops=[take(S_LETTER), give(URUTU)]),
+        talk(TAKUNA, "30641-05", hasItem=BROOCH),
+        *piece(TAKUNA, "30641-04", [take_all(FEELER, FEET), take(C_TAKUNA)], BROOCH, hasItems=[C_TAKUNA],
+               atLeast={FEELER: 10, FEET: 10}),
+        talk(TAKUNA, "30641-03", hasItem=C_TAKUNA),
+        talk(TAKUNA, "30641-01"),
+        event(TAKUNA, "30641-02", ops=[give(C_TAKUNA)], lacksItems=[C_TAKUNA, BROOCH]),
+        talk(CHIANTA, "30642-05", hasItem=CARVING),
+        *piece(CHIANTA, "30642-04", [take_all(CORNEA), take(C_CHIANTA)], CARVING, hasItems=[C_CHIANTA],
+               atLeast={CORNEA: 20}),
+        talk(CHIANTA, "30642-03", hasItem=C_CHIANTA),
+        talk(CHIANTA, "30642-01"),
+        event(CHIANTA, "30642-02", ops=[give(C_CHIANTA)], lacksItems=[C_CHIANTA, CARVING]),
+        kill(20564, [drop(CORNEA, 1.0, 20)], hasItem=C_CHIANTA),
+        *[kill(m, [drop(SKULL, p, 10)], hasItem=C_HATOS)
+          for m, p in ((20583, 0.71), (20584, 0.71), (20585, 0.71), (20586, 0.81), (20587, 1.0), (20588, 1.0))],
+        kill(20233, [drop(FEET, 1.0, 10)], hasItem=C_TAKUNA, atLeast={FEELER: 10}),
+        kill(20233, [give(FEELER)], hasItem=C_TAKUNA),
+        kill(20269, [drop(B_FANG, 0.41, 20)], hasItem=ORDERS),
+        kill(20270, [drop(B_FANG, 0.51, 20)], hasItem=ORDERS),
+        *[kill(m, [give(R_NOTICE)], hasItem=M_CHARM, lacksItems=[R_NOTICE]) for m in (20778, 20779)],
+        *[kill(m, [give(R_HEAD), cond(5)], hasItem=M_CHARM, lacksItems=[R_HEAD]) for m in (20778, 20779)],
+    ]
+    write(232, "00232_test_of_the_lord", "Q00232_TestOfTheLord", "Test of the Lord",
+          list(range(3391, 3417)), d)
+
+
+@quest
+def q216():
+    VALKON, NORMAN, ALTRAN, PINTER, DUNING = 30103, 30210, 30283, 30298, 30688
+    (R_RING, R_BEAD) = 3024, 3025
+    (V_REC, BERRY, A_INSTR, A_REC1, A_REC2, N_INSTR, N_RECEIPT, D_INSTR, D_KEY, N_LIST, POWDER, WHETSTONE, PIGMENT,
+     YARN, GEM, P_INSTR, BEAD, LUMP, DECO, RING) = range(3120, 3140)
+    MARK = 3119
+    ok = [54, 56]
+    d = [
+        talk(VALKON, "30103-03", when="absent", classes=ok, minLevel=35),
+        talk(VALKON, "30103-02", when="absent", classes=ok),
+        talk(VALKON, "30103-01", when="absent"),
+        # Valkon asks 2000 adena for his recommendation.
+        event(VALKON, "30103-06", ops=START + [take(57, 2000), give(V_REC)], when="absent", classes=ok, minLevel=35,
+              atLeast={57: 2000}),
+        event(VALKON, "30103-06", "30103-05a", when="absent"),
+        talk(VALKON, "30103-06c", cond=1),
+        *[talk(VALKON, "30103-07", cond=c) for c in (2, 3, 4)],
+        talk(VALKON, "30103-08", cond=5),
+        talk(VALKON, "30103-09", cond=6, atLeast={RING: 7}, below={RING: 8}),
+        talk(VALKON, "30103-08", cond=6),
+        *[event(VALKON, ev, ops=[cond(3)], cond=c) for ev in ("30103-06c", "30103-07c") for c in (1, 2)],
+        *[event(VALKON, ev, ops=[take(A_INSTR), take_all(RING)] + mark(MARK, 80993, 12250), cond=6,
+                atLeast={RING: 7}) for ev in ("30103-09a", "30103-09b")],
+        talk(ALTRAN, "30283-01", cond=1, ops=[cond(2)]),
+        talk(ALTRAN, "30283-01", cond=2), talk(ALTRAN, "30283-01", cond=3),
+        talk(ALTRAN, "30283-02", cond=4),
+        talk(ALTRAN, "30283-04", cond=5), talk(ALTRAN, "30283-04", cond=6),
+        event(ALTRAN, "30283-03", ops=[take(BERRY), take(V_REC), give(A_INSTR), give(A_REC1), give(A_REC2),
+                                       give(R_RING), cond(5)], cond=4),
+        # Norman: the receipt for Duning, then 30 keys, then the 4 x 70 materials for 7 Journeyman Gems.
+        talk(NORMAN, "30210-01", cond=5, hasItem=A_REC1),
+        talk(NORMAN, "30210-05", cond=5, hasItem=N_RECEIPT),
+        talk(NORMAN, "30210-06", cond=5, hasItem=D_INSTR),
+        talk(NORMAN, "30210-07", cond=5, atLeast={D_KEY: 30}, ops=[take_all(D_KEY)]),
+        *[talk(NORMAN, "30210-12", cond=5, hasItem=N_LIST,
+               atLeast={POWDER: 70, WHETSTONE: 70, PIGMENT: 70, YARN: 70, **extra},
+               ops=[take(N_INSTR), take(N_LIST), take_all(YARN, WHETSTONE, POWDER, PIGMENT), give(GEM, 7)] + more)
+          for extra, more in (({DECO: 7}, [cond(6)]), ({}, []))],
+        talk(NORMAN, "30210-11", cond=5, hasItem=N_LIST),
+        event(NORMAN, "30210-04", ops=[take(A_REC1), give(N_INSTR), give(N_RECEIPT)], cond=5, hasItem=A_REC1),
+        event(NORMAN, "30210-10", ops=[give(N_LIST)], cond=5, hasItem=N_INSTR, lacksItems=[N_LIST, D_INSTR, N_RECEIPT]),
+        talk(DUNING, "30688-01", cond=5, hasItem=N_RECEIPT),
+        talk(DUNING, "30688-03", cond=5, hasItem=D_INSTR, below={D_KEY: 30}),
+        talk(DUNING, "30688-04", cond=5, hasItem=D_INSTR, ops=[take(D_INSTR)]),
+        talk(DUNING, "30688-05", cond=5),
+        event(DUNING, "30688-02", ops=[take(N_RECEIPT), give(D_INSTR)], cond=5, hasItem=N_RECEIPT),
+        # Pinter: 70 amber beads for 7 Journeyman Deco Beads; Artisans also get the Amber Bead recipe.
+        talk(PINTER, "30298-02", cond=5, hasItem=A_REC2, minLevel=36),
+        talk(PINTER, "30298-01", cond=5, hasItem=A_REC2),
+        talk(PINTER, "30298-06", cond=5, hasItem=P_INSTR, below={BEAD: 70}),
+        *[talk(PINTER, "30298-07", cond=5, hasItem=P_INSTR, atLeast=extra or None,
+               ops=[take_all(BEAD), take(P_INSTR), give(DECO, 7)] + more)
+          for extra, more in (({GEM: 7}, [cond(6)]), ({}, []))],
+        talk(PINTER, "30298-08", cond=6, hasItem=DECO),
+        event(PINTER, "30298-04", "30298-05", ops=[take(A_REC2), give(P_INSTR), give(R_BEAD)], cond=5,
+              hasItem=A_REC2, classes=[56]),
+        event(PINTER, "30298-04", ops=[take(A_REC2), give(P_INSTR)], cond=5, hasItem=A_REC2),
+        *[kill(m, [give(BERRY), cond(4)], cond=3) for m in (20154, 20155, 20156)],
+        *[kill(m, [drop(D_KEY, 1.0, 30)], hasItem=D_INSTR) for m in (20267, 20268, 20269, 20270, 20271)],
+        *[kill(m, [drop(item, 1.0, 70, count=n)], hasItem=N_LIST)
+          for m, item, n in ((20201, POWDER, 5), (20200, POWDER, 5), (20083, WHETSTONE, 7), (20202, PIGMENT, 7),
+                             (20168, YARN, 10))],
+        # Ants: 5 Amber Beads a kill (up to 70); an Artisan also finds an Amber Lump half the time.
+        *[kill(m, [give(LUMP), drop(BEAD, 1.0, 70, count=5)], classes=[56], chance=0.5) for m in (20079, 20080)],
+        *[kill(m, [drop(BEAD, 1.0, 70, count=5)]) for m in (20079, 20080)],
+    ]
+    write(216, "00216_trial_of_the_guildsman", "Q00216_TrialOfTheGuildsman", "Trial of the Guildsman",
+          [R_RING, R_BEAD] + list(range(3120, 3140)), d)
+
+
+@quest
+def q221():
+    (WILFORD, PARMAN, LILITH, BRIGHT, SHARI, MION, LOCKIRIN, SPIRON, BALANKI, KEEF, FILAUR, ARIN, MARYSE, BOLTER,
+     TOROCCO, TOMA, PIOTUR, EMILY, NIKOLA, BOX) = (30005, 30104, 30368, 30466, 30517, 30519, 30531, 30532, 30533,
+                                                   30534, 30535, 30536, 30553, 30554, 30555, 30556, 30597, 30620,
+                                                   30621, 30622)
+    SKIN, R_KEY, KEY = 1867, 3023, 3030
+    (RING1, RING2, BOOK, SEED, E_RECIPE, WAFER, FRAGMENT, LICENSE, N1, N2, N3, N4, N5, C_SHARI, C_MION, C_MARYSE,
+     M_REQUEST, C_TOMA, R_BOLTER, R1, R2, R3, R4, R5, PROCURATION, B_LIST, PETAL, MOSS, BOUQUET, P_INSTR, P_LETTER,
+     CLAY, PATTERN, N_LIST, SHELL, SAC, THORN) = range(3239, 3276)
+    BROOCH = 3428
+    MARK = 3238
+    early = (1, 2)
+    four = [SEED, BOOK, E_RECIPE, WAFER]
+
+    def piece(npc, page, ops, got, cnd=1, **gates):
+        """Hand over one of the four Parman pieces; the last one moves the testimony to cond 2."""
+        others = [x for x in four if x != got]
+        g = dict(gates)
+        held = g.pop("hasItems", []) + others
+        return [talk_or_event(npc, page, ops + [give(got), cond(2)], cnd, hasItems=held, **g),
+                talk_or_event(npc, page, ops + [give(got)], cnd, **gates)]
+
+    def talk_or_event(npc, page, ops, cnd, **gates):
+        if page.startswith("ev:"):
+            return event(npc, page[3:], ops=ops, cond=cnd, **gates)
+        return talk(npc, page, ops=ops, cond=cnd, **gates)
+
+    def collector(npc, notice, receipt, pages, contrib_rows):
+        """Lockirin's five collectors: take the notice, swap the contribution(s) for a receipt."""
+        p01, p02, p03, p04 = pages
+        return [talk(npc, p01, cond=1, hasItems=[LICENSE, notice], ops=[take(notice)]),
+                *contrib_rows,
+                talk(npc, p04, cond=1, hasItems=[LICENSE, receipt]),
+                talk(npc, p02, cond=1, hasItem=LICENSE)]
+
+    d = [
+        talk(PARMAN, "30104-03", when="absent", races=[DWARF], classes=FIRST_CLASSES, minLevel=37),
+        talk(PARMAN, "30104-01", when="absent", races=[HUMAN, ELF, DARK_ELF, ORC]),
+        talk(PARMAN, "30104-02", when="absent", maxLevel=36),
+        talk(PARMAN, "30104-01a", when="absent"),
+        event(PARMAN, "30104-04", ops=START + [give(RING1)], when="absent", races=[DWARF], classes=FIRST_CLASSES,
+              minLevel=37),
+        talk(PARMAN, "30104-05", cond=1), talk(PARMAN, "30104-06", cond=2),
+        event(PARMAN, "30104-07", "30104-08", ops=[take(SEED), take(E_RECIPE), take(WAFER), take(BOOK), take(RING1),
+                                                   give(P_LETTER), give(RING2), cond(4)], cond=2, minLevel=38),
+        event(PARMAN, "30104-07", ops=[take(SEED), take(E_RECIPE), take(WAFER), take(BOOK), take(RING1),
+                                       give(P_INSTR), cond(3)], cond=2),
+        talk(PARMAN, "30104-10", cond=3, minLevel=38, ops=[take(P_INSTR), give(P_LETTER), give(RING2), cond(4)]),
+        talk(PARMAN, "30104-09", cond=3),
+        *[talk(PARMAN, "30104-11", cond=c) for c in (4, 5, 6)],
+        talk(PARMAN, "30104-12", cond=7), talk(PARMAN, "30104-12", cond=8),
+        talk(PARMAN, "30104-13", cond=9, ops=[take(FRAGMENT), take(RING2)] + mark(MARK, 12969, 1000)),
+        # Lockirin: collection licence and five notices; the five receipts buy the Old Account Book.
+        *[r for c in early for r in (
+            piece(LOCKIRIN, "30531-05", [take(LICENSE), take(R1), take(R2), take(R3), take(R4), take(R5)], BOOK, c,
+                  hasItems=[LICENSE, R1, R2, R3, R4, R5]))],
+        *[talk(LOCKIRIN, "30531-04", cond=c, hasItem=LICENSE) for c in early],
+        *[talk(LOCKIRIN, "30531-06", cond=c, hasItem=BOOK) for c in early],
+        *[talk(LOCKIRIN, "30531-01", cond=c) for c in early],
+        *[talk(LOCKIRIN, "30531-07", cond=c) for c in range(4, 10)],
+        event(LOCKIRIN, "30531-02", "30531-04", hasItem=LICENSE),
+        *[event(LOCKIRIN, "30531-03", ops=[give(LICENSE), give(N1), give(N2), give(N3), give(N4), give(N5)], cond=c,
+                lacksItems=[LICENSE, BOOK]) for c in early],
+        *collector(SPIRON, N1, R1, ("30532-01", "30532-02", "30532-03", "30532-04"),
+                   [talk(SPIRON, "30532-03", cond=1, hasItems=[LICENSE, C_SHARI], ops=[take(C_SHARI), give(R1)])]),
+        *collector(BALANKI, N2, R2, ("30533-01", "30533-02", "30533-03", "30533-04"),
+                   [talk(BALANKI, "30533-03", cond=1, hasItems=[LICENSE, C_MARYSE, C_MION],
+                         ops=[take(C_MARYSE), take(C_MION), give(R2)])]),
+        *collector(KEEF, N3, R3, ("30534-01", "30534-02", "30534-03", "30534-04"),
+                   [talk(KEEF, "30534-03", cond=1, hasItems=[LICENSE, PROCURATION])]),
+        event(KEEF, "30534-03a", "30534-03b", ops=[take(57, 5000), take(PROCURATION), give(R3)], cond=1,
+              hasItems=[LICENSE, PROCURATION], atLeast={57: 5000}),
+        event(KEEF, "30534-03a"),
+        *collector(FILAUR, N4, R4, ("30535-01", "30535-02", "30535-03", "30535-04"),
+                   [talk(FILAUR, "30535-03", cond=1, hasItems=[LICENSE, R_BOLTER], ops=[take(R_BOLTER), give(R4)])]),
+        *collector(ARIN, N5, R5, ("30536-01", "30536-02", "30536-03", "30536-04"),
+                   [talk(ARIN, "30536-03", cond=1, hasItems=[LICENSE, C_TOMA], ops=[take(C_TOMA), give(R5)])]),
+        talk(SHARI, "30517-02", cond=1, hasItems=[LICENSE, C_SHARI]),
+        talk(SHARI, "30517-01", cond=1, hasItem=LICENSE, lacksItems=[N1, R1], ops=[give(C_SHARI)]),
+        talk(MION, "30519-02", cond=1, hasItems=[LICENSE, C_MION]),
+        talk(MION, "30519-01", cond=1, hasItem=LICENSE, lacksItems=[N2, R2], ops=[give(C_MION)]),
+        talk(MARYSE, "30553-02", cond=1, hasItems=[LICENSE, M_REQUEST], below={SKIN: 100}),
+        talk(MARYSE, "30553-03", cond=1, hasItems=[LICENSE, M_REQUEST],
+             ops=[take(SKIN, 100), take(M_REQUEST), give(C_MARYSE)]),
+        talk(MARYSE, "30553-04", cond=1, hasItems=[LICENSE, C_MARYSE]),
+        talk(MARYSE, "30553-01", cond=1, hasItem=LICENSE, lacksItems=[N2, R2], ops=[give(M_REQUEST)]),
+        talk(TOROCCO, "30555-03", cond=1, hasItems=[LICENSE, PROCURATION]),
+        talk(TOROCCO, "30555-01", cond=1, hasItem=LICENSE, lacksItems=[N3, R3]),
+        event(TOROCCO, "30555-02", ops=[give(PROCURATION)], cond=1, hasItem=LICENSE, lacksItems=[N3, R3, PROCURATION]),
+        talk(BOLTER, "30554-02", cond=1, hasItems=[LICENSE, R_BOLTER]),
+        talk(BOLTER, "30554-01", cond=1, hasItem=LICENSE, lacksItems=[N4, R4], ops=[give(R_BOLTER)]),
+        talk(TOMA, "30556-02", cond=1, hasItems=[LICENSE, C_TOMA]),
+        talk(TOMA, "30556-01", cond=1, hasItem=LICENSE, lacksItems=[N5, R5], ops=[give(C_TOMA)]),
+        # Piotur's Blessed Seed, Wilford's brooch for Lilith's Elven Wafer, Bright's bouquet for Emily's recipe.
+        *[talk(PIOTUR, "30597-03", cond=c, hasItem=SEED) for c in early],
+        *[talk(PIOTUR, "30597-01", cond=c) for c in early],
+        *[talk(PIOTUR, "30597-04", cond=c) for c in range(4, 10)],
+        *[r for c in early for r in piece(PIOTUR, "ev:30597-02", [], SEED, c, lacksItems=[SEED])],
+        *[talk(WILFORD, "30005-06", cond=c, hasItem=WAFER) for c in early],
+        *[talk(WILFORD, "30005-05", cond=c, hasItem=BROOCH) for c in early],
+        *[talk(WILFORD, "30005-01", cond=c) for c in early],
+        *[talk(WILFORD, "30005-07", cond=c) for c in range(4, 10)],
+        *[event(WILFORD, "30005-04", ops=[give(BROOCH)], cond=c, lacksItems=[BROOCH, WAFER]) for c in early],
+        *[talk(LILITH, "30368-01", cond=c, hasItem=BROOCH) for c in early],
+        *[talk(LILITH, "30368-04", cond=c, hasItem=WAFER) for c in early],
+        *[talk(LILITH, "30368-05", cond=c) for c in range(4, 10)],
+        *[r for c in early for r in piece(LILITH, "ev:30368-03", [take(BROOCH)], WAFER, c, hasItems=[BROOCH])],
+        *[talk(BRIGHT, "30466-07", cond=c, hasItem=E_RECIPE) for c in early],
+        *[talk(BRIGHT, "30466-06", cond=c, hasItem=BOUQUET) for c in early],
+        *[talk(BRIGHT, "30466-05", cond=c, hasItem=B_LIST, atLeast={MOSS: 10, PETAL: 20},
+               ops=[take(B_LIST), take(MOSS, 10), take(PETAL, 20), give(BOUQUET)]) for c in early],
+        *[talk(BRIGHT, "30466-04", cond=c, hasItem=B_LIST) for c in early],
+        *[talk(BRIGHT, "30466-01", cond=c) for c in early],
+        *[talk(BRIGHT, "30466-08", cond=c) for c in range(4, 10)],
+        *[event(BRIGHT, "30466-03", ops=[give(B_LIST)], cond=c, lacksItems=[B_LIST, BOUQUET, E_RECIPE]) for c in early],
+        *[talk(EMILY, "30620-04", cond=c, hasItem=E_RECIPE) for c in early],
+        *[talk(EMILY, "30620-01", cond=c, hasItem=BOUQUET) for c in early],
+        *[talk(EMILY, "30620-05", cond=c) for c in range(4, 10)],
+        *[r for c in early for r in piece(EMILY, "ev:30620-03", [take(BOUQUET)], E_RECIPE, c, hasItems=[BOUQUET])],
+        # Nikola and the Box of Titan: the keyhole pattern, then a Key of Titan crafted from his recipe.
+        talk(NIKOLA, "30621-01", cond=4, ops=[take_all(P_LETTER)]),
+        talk(NIKOLA, "30621-05", cond=5),
+        talk(NIKOLA, "30621-06", cond=6, ops=[take(PATTERN), give(N_LIST), give(R_KEY), cond(7)]),
+        *[talk(NIKOLA, "30621-08", cond=c, hasItem=KEY) for c in (7, 8)],
+        *[talk(NIKOLA, "30621-07", cond=c) for c in (7, 8)],
+        talk(NIKOLA, "30621-09", cond=9),
+        event(NIKOLA, "30621-04", ops=[give(CLAY), cond(5)], cond=4),
+        talk(BOX, "30622-01", cond=5),
+        talk(BOX, "30622-03", cond=8, hasItem=KEY),
+        talk(BOX, "30622-05"),
+        event(BOX, "30622-02", ops=[take(CLAY), give(PATTERN), cond(6)], cond=5),
+        event(BOX, "30622-04", ops=[take(KEY), take(N_LIST), take_all(R_KEY, SHELL, THORN, SAC), give(FRAGMENT),
+                                    cond(9)], cond=8, hasItem=KEY),
+        *[kill(m, [drop(PETAL, p, 20)], hasItem=B_LIST)
+          for m, p in ((20223, 0.3), (20154, 0.6), (20155, 0.8), (20156, 1.0))],
+        kill(20228, [drop(MOSS, 1.0, 10)], hasItem=B_LIST),
+        *collect_all({20157: (SHELL, 0.2), 20230: (SHELL, 0.3), 20232: (SHELL, 0.5), 20234: (SHELL, 0.6),
+                      20231: (SAC, 0.2), 20233: (THORN, 0.2)}, 10, 7, 8, limits={SHELL: 20}),
+    ]
+    write(221, "00221_testimony_of_prosperity", "Q00221_TestimonyOfProsperity", "Testimony of Prosperity",
+          list(range(3239, 3276)) + [BROOCH], d)
+
+
+@quest
+def q231():
+    LOCKIRIN, SPIRON, BALANKI, KEEF, FILAUR, ARIN, TOMA, CROTO, DUBABAH, LORAIN = (
+        30531, 30532, 30533, 30534, 30535, 30536, 30556, 30671, 30672, 30673)
+    REC_B, REC_F, REC_A = 2864, 2865, 2866
+    (LETTER, PAINT_K, NECKLACE, PAINT_T, DEVICE, ARCH, REPORT, ANTIDOTE, NEEDLE, WEB, BLOOD) = range(2868, 2879)
+    BROKEN = 2916
+    MARK = 2867
+    recs = [REC_A, REC_B, REC_F]
+
+    def v(key, n):  # Mobius st.getInt(key) == n
+        return dict(varAtLeast={key: n}, varBelow={key: n + 1})
+
+    def rec(npc, page, ops, got, **gates):
+        others = [r for r in recs if r != got]
+        return [talk(npc, page, ops=ops + [give(got), cond(2)], cond=1, hasItems=others, **gates),
+                talk(npc, page, ops=ops + [give(got)], cond=1, **gates)]
+
+    d = [
+        talk(LOCKIRIN, "30531-03", when="absent", classes=[56], minLevel=39),
+        talk(LOCKIRIN, "30531-02", when="absent", classes=[56]),
+        talk(LOCKIRIN, "30531-01", when="absent"),
+        event(LOCKIRIN, "30531-04", ops=START, when="absent", classes=[56], minLevel=39),
+        talk(LOCKIRIN, "30531-05", cond=1),
+        talk(LOCKIRIN, "30531-06", cond=2, ops=[take(REC_A), take(REC_B), take(REC_F)] + mark(MARK, 46000, 5900)),
+        talk(SPIRON, "30532-01"), talk(KEEF, "30534-01"), talk(DUBABAH, "30672-01"),
+        # Balanki: Croto's soldiers want the Necklace of Kamuru off the Evil Eye Lord.
+        talk(BALANKI, "30533-01", **v("bCond", 0)),
+        talk(BALANKI, "30533-03", **v("bCond", 1)),
+        *rec(BALANKI, "30533-04", [setv("bCond", 3), take(LETTER)], REC_B, **v("bCond", 2)),
+        talk(BALANKI, "30533-05", **v("bCond", 3)),
+        event(BALANKI, "30533-02", ops=[setv("bCond", 1)], **v("bCond", 0)),
+        talk(CROTO, "30671-01", lacksItems=[PAINT_K], **v("bCond", 1)),
+        talk(CROTO, "30671-03", lacksItems=[NECKLACE], **v("bCond", 1)),
+        talk(CROTO, "30671-04", ops=[setv("bCond", 2), take(NECKLACE), take(PAINT_K), give(LETTER)], **v("bCond", 1)),
+        talk(CROTO, "30671-05", varAtLeast={"bCond": 2}),
+        event(CROTO, "30671-02", ops=[give(PAINT_K)], lacksItems=[PAINT_K], **v("bCond", 1)),
+        # Arin: Toma's teleport device; the trip drops the hero among King Bugbears.
+        talk(ARIN, "30536-01", ops=[setv("aCond", 1), give(PAINT_T)], **v("aCond", 0)),
+        talk(ARIN, "30536-02", **v("aCond", 1)),
+        *rec(ARIN, "30536-03", [setv("aCond", 3), take_all(DEVICE)], REC_A, **v("aCond", 2)),
+        talk(ARIN, "30536-04", **v("aCond", 3)),
+        talk(TOMA, "30556-01", lacksItems=[BROKEN], **v("aCond", 1)),
+        talk(TOMA, "30556-06", lacksItems=[DEVICE], ops=[setv("aCond", 2), take(BROKEN), give(DEVICE, 5)],
+             **v("aCond", 1)),
+        talk(TOMA, "30556-07", varAtLeast={"aCond": 2}),
+        _no_page(event(TOMA, "TELEPORT", ops=[take(PAINT_T), give(BROKEN), {"op": "teleport", "x": 140352, "y": -194133,
+                                                                     "z": -3146},
+                                        spawn_at(20150, 140333, -194153, -3138), spawn_at(20150, 140395, -194147, -3146),
+                                        spawn_at(20150, 140304, -194082, -3157)],
+               hasItem=PAINT_T, **v("aCond", 1))),
+        # Filaur: Lorain's antidote ingredients for the report on Kruma.
+        talk(FILAUR, "30535-01", ops=[setv("fCond", 1), give(ARCH)], **v("fCond", 0)),
+        talk(FILAUR, "30535-02", **v("fCond", 1)),
+        *rec(FILAUR, "30535-03", [setv("fCond", 3), take(REPORT)], REC_F, **v("fCond", 2)),
+        talk(FILAUR, "30535-04", **v("fCond", 3)),
+        talk(LORAIN, "30673-01", lacksItems=[REPORT, ANTIDOTE], ops=[take(ARCH), give(ANTIDOTE)], **v("fCond", 1)),
+        talk(LORAIN, "30673-03", lacksItems=[REPORT], atLeast={NEEDLE: 10, WEB: 10, BLOOD: 10}, **v("fCond", 1)),
+        talk(LORAIN, "30673-02", lacksItems=[REPORT], **v("fCond", 1)),
+        talk(LORAIN, "30673-05", varAtLeast={"fCond": 2}),
+        event(LORAIN, "30673-04", ops=[setv("fCond", 2), take_all(BLOOD, NEEDLE, WEB), take(ANTIDOTE), give(REPORT)],
+              hasItem=ANTIDOTE, atLeast={NEEDLE: 10, WEB: 10, BLOOD: 10}, **v("fCond", 1)),
+        *[kill(m, [drop(item, 1.0, 10)], cond=1, hasItem=ANTIDOTE)
+          for m, item in ((20225, BLOOD), (20229, NEEDLE), (20233, WEB))],
+        kill(27133, [give(NECKLACE)], cond=1, hasItem=PAINT_K, lacksItems=[NECKLACE]),
+    ]
+    write(231, "00231_test_of_the_maestro", "Q00231_TestOfTheMaestro", "Test of the Maestro",
+          [REC_B, REC_F, REC_A] + list(range(2868, 2879)) + [BROKEN], d)
 
 
 if __name__ == "__main__":
