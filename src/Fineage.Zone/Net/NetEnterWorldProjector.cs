@@ -39,6 +39,55 @@ static class NetEnterWorldProjector
     public static EntitySpawnMsg BuildRemoteSpawn(ZoneEntity entity, EntityId id, int playerPAtkSpd = 0) =>
         BuildSpawn(entity, id, isSelf: false, playerPAtkSpd);
 
+    /// <summary>
+    /// State frames that must follow an <c>EntitySpawn</c> so a late joiner sees the pawn as it really is
+    /// (Mobius <c>Creature.sendInfo</c>): a running pawn gets <c>MoveState</c> toward its live destination,
+    /// a sitting player gets <c>ChangeWaitType</c> sitting. The spawn itself carries neither.
+    /// </summary>
+    public static List<(ushort Opcode, byte[] Payload)> BuildPresenceFollowUps(ZoneEntity entity, EntityId id, ZoneWorld? world = null)
+    {
+        ArgumentNullException.ThrowIfNull(entity);
+        var frames = new List<(ushort, byte[])>(2);
+        // Castle gates / walls: open, HP and attackable state (a broken gate is dead but still stands open).
+        if (entity.SiegeNpc is { Role: SiegeNpcRole.Door } && world?.DoorStatusFrame(entity) is { } door)
+            frames.Add((NetOpcode.DoorStatus, door));
+        if (entity.Dead)
+            return frames;
+        if (entity.MoveActive)
+        {
+            frames.Add((NetOpcode.MoveState, NetCodec.EncodeMoveState(new MoveStateMsg
+            {
+                EntityValue = id.Value,
+                EntityGeneration = id.Generation,
+                OriginX = entity.X,
+                OriginY = entity.Y,
+                OriginZ = entity.Z,
+                DestX = entity.MoveDestX,
+                DestY = entity.MoveDestY,
+                DestZ = entity.MoveDestZ,
+                Running = entity.Running
+            })));
+        }
+        if (entity.Kind == ZoneEntityKind.Player && entity.Sitting)
+        {
+            frames.Add((NetOpcode.ChangeWaitType, NetCodec.EncodeChangeWaitType(new ChangeWaitTypeNetMsg
+            {
+                EntityValue = id.Value,
+                EntityGeneration = id.Generation,
+                WaitType = ActionProtocol.WaitSitting,
+                X = entity.X,
+                Y = entity.Y,
+                Z = entity.Z
+            })));
+        }
+        // Mobius Creature.sendInfo → updateAbnormalEffect: a player walking into AOI sees the buffs / debuffs
+        // (visual effects) already on the pawn, exactly what the watchers that were there all along see.
+        if (world != null && world.TryBuildPresenceAbnormal(entity, out var abnormal))
+            frames.Add((NetOpcode.AbnormalStatusUpdate,
+                NetCodec.EncodeAbnormalStatusUpdate(SessionLifecyclePacketHandler.ToNetAbnormal(abnormal))));
+        return frames;
+    }
+
     /// <summary>Player or NPC presence packet for Net knownlist (Mobius CharInfo / NpcInfo).</summary>
     public static EntitySpawnMsg BuildPresenceSpawn(ZoneEntity entity, EntityId id, int playerPAtkSpd = 0)
     {
@@ -80,7 +129,11 @@ static class NetEnterWorldProjector
             Level = entity.Level,
             MaxHp = entity.MaxHp,
             PAtkSpd = entity.PAtkSpd > 0 ? entity.PAtkSpd : ZoneCombat.DefaultNpcPAtkSpd,
-            CurHp = entity.CurHp
+            CurHp = entity.CurHp,
+            // Mobius SummonInfo / PetInfo: title is the owner's name; the tail ties the pawn to its owner.
+            Title = entity.Summon != null ? entity.Title : "",
+            SummonKind = entity.Summon?.Kind ?? SummonKindNet.None,
+            OwnerObjectId = entity.Summon?.OwnerObjectId ?? 0
         };
     }
 
@@ -109,8 +162,20 @@ static class NetEnterWorldProjector
             MaxHp = entity.MaxHp,
             PAtkSpd = pAtkSpd,
             Karma = entity.Karma,
-            PvpFlag = entity.PvpFlagged ? (byte)1 : (byte)0,
-            CurHp = entity.CurHp
+            PvpFlag = ZoneWorld.PvpFlagWire(entity),
+            CurHp = entity.CurHp,
+            Title = entity.Title ?? "",
+            ClanId = entity.ClanId,
+            ClanCrestId = entity.ClanCrestId,
+            AllyId = entity.AllyId,
+            AllyCrestId = entity.AllyCrestId,
+            LargeCrestId = entity.LargeCrestId,
+            PledgeClass = entity.PledgeClass,
+            WeaponEnchant = Math.Min(127, entity.Inventory?.GetEquipped(Fineage.Game.PaperdollSlot.RHand)?.EnchantLevel ?? 0),
+            Noble = entity.Noble,
+            Hero = entity.Hero,
+            Cubics = entity.CubicIds(),
+            Team = entity.DuelTeam
         };
 
     static Fineage.Net.Contract.PlayerStatsMsg BuildStats(ZoneEntity entity, EntityId self, int maxCp) =>

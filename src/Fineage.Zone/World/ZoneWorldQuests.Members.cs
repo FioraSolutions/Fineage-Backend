@@ -150,6 +150,7 @@ public sealed partial class ZoneWorld
         entity.Exp = stored.Exp;
         entity.Sp = stored.Sp;
         entity.Quests = QuestJournal.Load(stored.Quests);
+        _quests.ResetSpawnVars(entity.Quests);
     }
 
     /// <summary>

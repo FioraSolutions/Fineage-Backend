@@ -122,4 +122,33 @@ public sealed class PresenceCodecRoundTripTests
         Assert.Equal(1835, shot.ItemId);
         Assert.True(shot.Enabled);
     }
+    [Fact]
+    public void Noblesse_hero_and_class_index_tails_roundtrip()
+    {
+        var info = NetCodec.DecodeUserInfo(NetCodec.EncodeUserInfo(new UserInfoNetMsg
+        {
+            EntityValue = 4,
+            Name = "Noble",
+            ClassId = 5,
+            Noble = true,
+            Hero = true,
+            BaseClassId = 2,
+            ClassIndex = 1,
+            Paperdoll = []
+        }));
+        Assert.True(info.Noble);
+        Assert.True(info.Hero);
+        Assert.Equal(2, info.BaseClassId);
+        Assert.Equal(1, info.ClassIndex);
+
+        var spawn = NetCodec.DecodeEntitySpawn(NetCodec.EncodeEntitySpawn(new EntitySpawnMsg
+        {
+            EntityValue = 4,
+            Name = "Noble",
+            Noble = true,
+            Hero = false
+        }));
+        Assert.True(spawn.Noble);
+        Assert.False(spawn.Hero);
+    }
 }

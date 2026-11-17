@@ -71,6 +71,8 @@ public sealed partial class ZoneWorld
     void FanoutVitals(ZoneEntity subject, StatusUpdateMsg status)
     {
         SyncNeedRegen(subject);
+        if (subject.DuelId != 0)
+            SendDuelUserInfo(subject);
         List<int>? netWatchers = null;
         foreach (var watcher in Players())
         {
@@ -85,6 +87,7 @@ public sealed partial class ZoneWorld
         {
             NetBridge.FanoutStatusUpdate(netWatchers, status);
         }
+        FanPartyVitals(subject);
     }
 
     static StatusUpdateMsg PlayerVitalsStatus(ZoneEntity entity) => new()

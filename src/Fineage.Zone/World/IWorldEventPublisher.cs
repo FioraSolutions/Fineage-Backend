@@ -54,7 +54,8 @@ interface IWorldEventPublisher
     void FanoutStatusUpdate(IReadOnlyList<int> watcherObjectIds, Fineage.Protocol.StatusUpdateMsg status);
 
     /// <summary>Mobius Die packet for <paramref name="objectId"/> (killer may be 0). Called under the ZoneWorld gate.</summary>
-    void FanoutDie(IReadOnlyList<int> watcherObjectIds, int objectId, int killerObjectId);
+    /// <param name="restartFlags">Optional <see cref="Fineage.Net.Contract.EntityDieMsg"/> restart buttons (castle / siege HQ).</param>
+    void FanoutDie(IReadOnlyList<int> watcherObjectIds, int objectId, int killerObjectId, int restartFlags = 0);
 
     /// <summary>Mobius DropItem (ground spawn with dropper FX). Called under the ZoneWorld gate.</summary>
     void FanoutDropItem(IReadOnlyList<int> watcherObjectIds, Fineage.Protocol.DropItemMsg drop);
@@ -107,6 +108,9 @@ interface IWorldEventPublisher
     /// <summary>Full SkillList re-send after a trainer learn (Mobius sends SkillList after RequestAcquireSkill).</summary>
     void FanoutSkillList(IReadOnlyList<int> watcherObjectIds, Fineage.Protocol.SkillListMsg list);
 
+    /// <summary>Full ShortCutInit re-send (Mobius setActiveClass restores the shortcuts of the new class index).</summary>
+    void FanoutShortcutInit(IReadOnlyList<int> watcherObjectIds, Fineage.Protocol.ShortCutInitMsg init);
+
     /// <summary>Mobius ChangeWaitType (sit/stand) for <paramref name="objectId"/>. Called under the ZoneWorld gate.</summary>
     void FanoutChangeWaitType(IReadOnlyList<int> watcherObjectIds, int objectId, int waitType, int x, int y, int z);
 
@@ -137,6 +141,48 @@ interface IWorldEventPublisher
 
     void FanoutPledgeMemberList(IReadOnlyList<int> watcherObjectIds, Fineage.Protocol.PledgeMemberListMsg list);
 
+    /// <summary>Mobius PledgeCrest / ExPledgeCrestLarge / AllyCrest reply. Called under the ZoneWorld gate.</summary>
+    void FanoutCrestData(IReadOnlyList<int> watcherObjectIds, Fineage.Net.Contract.CrestDataNetMsg crest);
+
+    /// <summary>Mobius PledgeReceiveWarList (both tabs). Called under the ZoneWorld gate.</summary>
+    void FanoutPledgeWarList(IReadOnlyList<int> watcherObjectIds, Fineage.Net.Contract.PledgeWarListNetMsg wars);
+
+    /// <summary>Mobius RelationChanged: per-viewer relation bits for one player. Called under the ZoneWorld gate.</summary>
+    void FanoutRelationChanged(IReadOnlyList<int> watcherObjectIds, Fineage.Net.Contract.RelationChangedNetMsg relation);
+
+    /// <summary>Mobius PledgeInfo (clan name/crest lookup by id). Called under the ZoneWorld gate.</summary>
+    void FanoutPledgeInfo(IReadOnlyList<int> watcherObjectIds, Fineage.Net.Contract.PledgeInfoNetMsg info);
+
+    /// <summary>Mobius AllianceInfo. Called under the ZoneWorld gate.</summary>
+    void FanoutAllyInfo(IReadOnlyList<int> watcherObjectIds, Fineage.Net.Contract.AllyInfoNetMsg info);
+
+    /// <summary>Mobius AskJoinAlly. Called under the ZoneWorld gate.</summary>
+    void FanoutAllyAskJoin(IReadOnlyList<int> watcherObjectIds, Fineage.Net.Contract.AllyAskJoinNetMsg ask);
+
+    /// <summary>Clan hall auction list (Mobius AuctionManager pages, as data). Called under the ZoneWorld gate.</summary>
+    void FanoutClanHallList(IReadOnlyList<int> watcherObjectIds, Fineage.Net.Contract.ClanHallListNetMsg halls);
+
+    /// <summary>Castle gate / wall state (<see cref="Fineage.Net.Contract.NetOpcode.DoorStatus"/>).</summary>
+    void FanoutDoorStatus(IReadOnlyList<int> watcherObjectIds, Fineage.Net.Contract.DoorStatusNetMsg door);
+
+    /// <summary>Chamberlain castle window (<see cref="Fineage.Net.Contract.NetOpcode.CastleInfo"/>).</summary>
+    void FanoutCastleInfo(IReadOnlyList<int> watcherObjectIds, Fineage.Net.Contract.CastleInfoNetMsg castle);
+
+    /// <summary>Manor window (<see cref="Fineage.Net.Contract.NetOpcode.ManorInfo"/>).</summary>
+    void FanoutManorInfo(IReadOnlyList<int> watcherObjectIds, Fineage.Net.Contract.ManorInfoNetMsg manor);
+
+    void FanoutFishing(IReadOnlyList<int> watcherObjectIds, Fineage.Net.Contract.FishingEventNetMsg fishing);
+    void FanoutSummonInfo(IReadOnlyList<int> watcherObjectIds, Fineage.Net.Contract.SummonInfoNetMsg info);
+    void FanoutSummonGone(IReadOnlyList<int> watcherObjectIds, Fineage.Net.Contract.SummonGoneNetMsg gone);
+
+    /// <summary>Pet inventory to its owner (Mobius PetItemList). Called under the ZoneWorld gate.</summary>
+    void FanoutPetInventory(IReadOnlyList<int> watcherObjectIds, Fineage.Net.Contract.PetInventoryNetMsg inventory);
+    /// <summary>Duel ask / ready / start / end (Mobius ExDuelAskStart / ExDuelReady / ExDuelStart / ExDuelEnd).</summary>
+    void FanoutDuelEvent(IReadOnlyList<int> watcherObjectIds, Fineage.Net.Contract.DuelEventNetMsg duel);
+    /// <summary>An opponent's bars during a duel (Mobius ExDuelUpdateUserInfo).</summary>
+    void FanoutDuelUserInfo(IReadOnlyList<int> watcherObjectIds, Fineage.Net.Contract.DuelUserInfoNetMsg info);
+
+
     void FanoutClanAskJoin(IReadOnlyList<int> watcherObjectIds, Fineage.Protocol.ClanAskJoinMsg ask);
 
     void FanoutClanJoinResult(IReadOnlyList<int> watcherObjectIds, Fineage.Protocol.ClanJoinResultMsg result);
@@ -146,6 +192,21 @@ interface IWorldEventPublisher
     void FanoutPartyJoinResult(IReadOnlyList<int> watcherObjectIds, Fineage.Protocol.PartyJoinResultMsg result);
 
     void FanoutPartyMemberList(IReadOnlyList<int> watcherObjectIds, Fineage.Protocol.PartyMemberListMsg list);
+
+    void FanoutPartyMemberUpdate(IReadOnlyList<int> watcherObjectIds, Fineage.Protocol.PartyMemberUpdateMsg update);
+
+    void FanoutPartySpelled(IReadOnlyList<int> watcherObjectIds, Fineage.Protocol.AbnormalStatusUpdateMsg effects);
+
+    void FanoutPartyMemberPosition(IReadOnlyList<int> watcherObjectIds, Fineage.Protocol.PartyMemberPositionMsg positions);
+
+    /// <summary>Interlude MagicSkillLaunched at hitTime: caster + everyone who sees the caster.</summary>
+    void FanoutMagicSkillLaunched(IReadOnlyList<int> watcherObjectIds, int casterObjectId, int skillId, int skillLevel, int[] targetObjectIds);
+
+    /// <summary>Interlude MagicSkillCanceled: caster + everyone who sees the caster.</summary>
+    void FanoutMagicSkillCanceled(IReadOnlyList<int> watcherObjectIds, int objectId);
+
+    /// <summary>Interlude PlaySound (quest jingles): sent to the listed players only.</summary>
+    void FanoutPlaySound(IReadOnlyList<int> watcherObjectIds, int type, string file, int objectId, int x, int y, int z, int delayMs);
 
     void FanoutTradeAsk(IReadOnlyList<int> watcherObjectIds, Fineage.Protocol.TradeAskMsg ask);
 

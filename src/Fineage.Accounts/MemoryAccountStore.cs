@@ -179,7 +179,8 @@ public sealed partial class MemoryAccountStore : IAccountStore
                 SkillId = e.SkillId,
                 Level = e.Level,
                 RemainingSeconds = e.RemainingSeconds
-            }).ToList()
+            }).ToList(),
+            ClassState = character.ClassState?.Clone()
         };
 
     static StoredShortcutDto CopyShortcut(StoredShortcut s) => new()

@@ -24,7 +24,7 @@ public sealed partial class OlympiadBoard
             {
                 if (_inComp)
                     EndCompetition(step, announce);
-                BeginValidation(now);
+                BeginValidation(now, step);
                 moved = true;
             }
             else
@@ -115,8 +115,9 @@ public sealed partial class OlympiadBoard
         }
     }
 
-    void BeginValidation(long now)
+    void BeginValidation(long now, OlympiadStep step)
     {
+        CloseOlympiadPeriod(step);
         _period = OlympiadProtocol.PeriodValidation;
         _inComp = false;
         _compAnnounced = false;

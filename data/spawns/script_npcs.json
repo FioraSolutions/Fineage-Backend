@@ -1,0 +1,17 @@
+{
+  "mapId": "script_npcs",
+  "enabled": true,
+  "comment": "NPCs that Mobius CT 0 Interlude spawns from AI scripts rather than spawn XML. Master Toma (ai/areas/DwarvenVillage/Toma) hops between three spots every 30 minutes in Mobius; here he stands at the first of them (Mithril Mines).",
+  "npcs": [
+    {
+      "objectId": 98100,
+      "npcId": 30556,
+      "x": 151680,
+      "y": -174891,
+      "z": -1782,
+      "heading": 0,
+      "respawnDelaySeconds": 60,
+      "respawnRandomSeconds": 0
+    }
+  ]
+}

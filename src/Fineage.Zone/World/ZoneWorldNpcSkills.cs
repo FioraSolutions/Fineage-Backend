@@ -93,11 +93,12 @@ public sealed partial class ZoneWorld
             var (damage, _) = ZoneCombat.RollMagicDamage(
                 _combatRandom, mAtk, Math.Max(1d, ps.MDef), skill.Power,
                 npc.Level, magicLevel: npc.Level, target.Level, mCritRate: 10);
-            if (damage <= 0)
+            if (damage <= 0 || DuelBlocksHit(npc, target))
                 continue;
 
             target.CurHp = Math.Max(0, target.CurHp - damage);
             FanoutVitals(target, PlayerVitalsStatus(target));
+            SendVictimHitLines(npc, target, damage, 0);
             target.CombatUntilUnixMs = now + ClanProtocol.CombatStanceMillis;
             if (target.CurHp > 0)
                 MaybeBreakCast(target, damage);
@@ -263,9 +264,10 @@ public sealed partial class ZoneWorld
     };
 
     internal static bool IsImmobilized(ZoneEntity entity) =>
-        entity.Abnormals.Any(a => a.Slot.Length > 0 && ImmobilizeSlots.Contains(a.Slot));
+        entity.Fishing || entity.Abnormals.Any(a => a.Slot.Length > 0 && ImmobilizeSlots.Contains(a.Slot));
 
     internal static bool IsActionBlocked(ZoneEntity entity) =>
+        entity.DuelState == DuelFighterState.Dead || // Mobius onPlayerDefeat: disableAllSkills until the duel ends
         entity.Abnormals.Any(a => a.Slot.Length > 0 && ActionBlockSlots.Contains(a.Slot));
 
     internal static bool IsSilenced(ZoneEntity entity) =>

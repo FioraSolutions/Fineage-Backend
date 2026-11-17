@@ -27,11 +27,18 @@ public sealed partial class ZoneWorld
         if (!_byId.TryGetValue(killerObjectId, out var killer))
             return;
 
-        // Non-player killers are monsters / raid bosses, and Mobius charges both for a PvE death. A player killer is
-        // PvP: Mobius only removes exp inside a siege or outside a PVP zone, and never rolls the penalty without
-        // karma — which this zone does not model yet, so a clean PvP kill costs nothing.
-        if (killer.Kind != ZoneEntityKind.Npc)
+        // Mobius CT_0 Player.doDie: exp is lost on any death (PvE, PvP and PK) unless the victim stands in a
+        // non-siege PVP zone (arena). calculateDeathPenaltyBuffLevel skips PVP / siege zones and, for a playable
+        // killer, only rolls when the victim carries karma.
+        if (killer.Kind == ZoneEntityKind.Player)
+        {
+            if (InArenaOnly(player))
+                return;
+            ApplyDeathExpLoss(player);
+            if (player.Karma > 0 && !InPvpArea(player))
+                RollDeathPenalty(player, killer);
             return;
+        }
 
         ApplyDeathExpLoss(player);
         RollDeathPenalty(player, killer);

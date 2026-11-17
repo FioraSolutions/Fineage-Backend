@@ -70,6 +70,19 @@ public sealed partial class ZoneWorld
                 return ApplyBlessing(session, npc.ObjectId, html: true);
             case NpcServiceIntent.TerritoryStatus:
                 return ShowTerritoryStatus(session, player, npc);
+            case NpcServiceIntent.Loto:
+                return ShowLoto(session, player, npc, Math.Max(0, reply.ServiceId));
+            case NpcServiceIntent.NoblesSelect:
+                SendNoblesPage(session, player, npc, player.Noble);
+                return null;
+            case NpcServiceIntent.Olympiad:
+                return OlympiadNpcBypass(session, player, npc, reply.ServiceArg);
+            case NpcServiceIntent.Subclass:
+                return SubclassBypass(session, player, npc, reply.ServiceId, reply.ServiceArg);
+            case NpcServiceIntent.AncientAdenaToAdena:
+                return AncientAdenaToAdena(session, player, npc, reply.ServiceId);
+            case NpcServiceIntent.FishSkillList:
+                return ShowFishingSkills(session, player, npc);
             case NpcServiceIntent.SkillList:
                 return ShowTrainerSkills(session, player, npc);
             case NpcServiceIntent.LearnSkill:
@@ -128,8 +141,24 @@ public sealed partial class ZoneWorld
         return null;
     }
 
+    /// <summary>
+    /// Mobius <c>AltKarmaPlayerCanUseGK = False</c> (Player.ini default): a gatekeeper refuses anyone with karma.
+    /// Shops, warehouses, trade and Scroll of Escape stay open (their AltKarmaPlayerCan* defaults are True).
+    /// </summary>
+    bool KarmaGkRefused(ZoneSession session, ZoneEntity player, ZoneEntity npc, bool html)
+    {
+        if (player.Karma <= 0)
+            return false;
+        Notice(session, NpcServiceProtocol.KarmaTeleportRefused, NpcServiceProtocol.KarmaTeleportRefusedText);
+        if (html)
+            SendHtml(session, player, npc, "<html><body>%npcname%:<br>" + NpcServiceProtocol.KarmaTeleportRefusedText + "</body></html>");
+        return true;
+    }
+
     string? ShowTeleportList(ZoneSession session, ZoneEntity player, ZoneEntity npc, string listName)
     {
+        if (KarmaGkRefused(session, player, npc, html: true))
+            return null;
         var list = _teleports.Find(npc.NpcId, string.IsNullOrWhiteSpace(listName) ? TeleportRules.Normal : listName);
         if (list == null)
         {
@@ -138,10 +167,10 @@ public sealed partial class ZoneWorld
             return null;
         }
 
-        if (TeleportRules.IsNobles(list.Type))
+        if (TeleportRules.IsNobles(list.Type) && !player.Noble)
         {
-            Notice(session, NpcServiceProtocol.NoblesDeferred, NpcServiceProtocol.NoblesDeferredText);
-            SendHtml(session, player, npc, "<html><body>%npcname%:<br>Noblesse teleport is not available yet.</body></html>");
+            Notice(session, NpcServiceProtocol.NoblesOnly, NpcServiceProtocol.NoblesOnlyText);
+            SendNoblesPage(session, player, npc, noble: false);
             return null;
         }
 
@@ -152,7 +181,7 @@ public sealed partial class ZoneWorld
         for (int i = 0; i < list.Locations.Count; i++)
         {
             var loc = list.Locations[i];
-            int fee = TeleportRules.Quote(list.Type, player.Level, loc.FeeCount, when);
+            int fee = TeleportRules.Quote(list.Type, player.Level, loc.FeeCount, when, player.SubClassActive);
             rows[i] = new TeleportLocationMsg
             {
                 Id = loc.Id,
@@ -191,12 +220,14 @@ public sealed partial class ZoneWorld
             return error;
         if (player.Inventory == null)
             return "world";
+        if (KarmaGkRefused(session, player, npc, html))
+            return null;
 
         var list = _teleports.Find(npc.NpcId, string.IsNullOrWhiteSpace(listName) ? TeleportRules.Normal : listName);
-        if (list == null || TeleportRules.IsNobles(list.Type))
+        if (list == null || (TeleportRules.IsNobles(list.Type) && !player.Noble))
         {
-            int id = list != null ? NpcServiceProtocol.NoblesDeferred : NpcServiceProtocol.UnknownTeleport;
-            string text = list != null ? NpcServiceProtocol.NoblesDeferredText : NpcServiceProtocol.UnknownTeleportText;
+            int id = list != null ? NpcServiceProtocol.NoblesOnly : NpcServiceProtocol.UnknownTeleport;
+            string text = list != null ? NpcServiceProtocol.NoblesOnlyText : NpcServiceProtocol.UnknownTeleportText;
             Notice(session, id, text);
             if (html)
                 SendHtml(session, player, npc, "<html><body>%npcname%:<br>" + text + "</body></html>");
@@ -229,7 +260,7 @@ public sealed partial class ZoneWorld
             return null;
         }
 
-        int fee = TeleportRules.Quote(list.Type, player.Level, loc.FeeCount, _clock());
+        int fee = TeleportRules.Quote(list.Type, player.Level, loc.FeeCount, _clock(), player.SubClassActive);
         var changes = new List<InventoryUpdateEntryMsg>();
         if (fee > 0 && !Take(player.Inventory, loc.FeeItemId, fee, changes))
         {

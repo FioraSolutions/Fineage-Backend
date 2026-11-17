@@ -65,18 +65,21 @@ public sealed class BypassRegistry
         registry.Register(new StubBypassHandler("Wear", "Wear"));
         registry.Register(new TerritoryBypassHandler());
         registry.Register(new TeleportBypassHandler());
-        registry.Register(new StubBypassHandler("Teleport", "showNoblesSelect"));
+        registry.Register(new NoblesSelectBypassHandler());
+        registry.Register(new OlympiadBypassHandler());
         registry.Register(new WarehouseBypassHandler());
         registry.Register(new StubBypassHandler(
             "Warehouse",
-            "DepositC",
-            "WithdrawC",
             "DepositF",
             "WithdrawF",
             "package_deposit",
             "package_withdraw"));
         registry.Register(new BuffBypassHandler());
         registry.Register(new TrainerBypassHandler());
+        registry.Register(new FishermanBypassHandler(html));
+        registry.Register(new LotoBypassHandler());
+        registry.Register(new SevenSignsBypassHandler());
+        registry.Register(new SubclassBypassHandler());
         return registry;
     }
 

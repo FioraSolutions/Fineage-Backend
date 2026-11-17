@@ -14,6 +14,10 @@ public sealed partial class QuestCatalog
             "set_cond" => ReadCond(op, where, questId),
             "set" => ReadSet(op, where, questId),
             "unset" => ReadUnset(op, where, questId),
+            "add" => ReadAdd(op, where, questId),
+            "take_all" => op.Items is { Count: > 0 } ids && ids.All(id => items.TryGet(id, out _))
+                ? new TakeAllOp(ids.Distinct().ToArray())
+                : throw new InvalidDataException($"{where} quest {questId} take_all needs known item ids."),
             "give_item" => ReadGive(op, items, where, questId),
             "give_adena" => ReadAdena(op, where, questId),
             "give_exp_sp" => ReadExp(op, where, questId),
@@ -24,15 +28,82 @@ public sealed partial class QuestCatalog
             "sell_items" => ReadSell(op, items, where, questId),
             "sound" => ReadSound(op, where, questId),
             "spawn_npc" => ReadSpawn(op, where, questId),
+            "set_noble" => new SetNobleOp(),
+            "summon" => ReadSummon(op, where, questId),
+            "say" => !string.IsNullOrWhiteSpace(op.Text) && op.Text.Length <= 500
+                ? new SayOp(op.Text)
+                : throw new InvalidDataException($"{where} quest {questId} say needs text of 1..500 characters."),
+            "change_class" => op.ClassId is int cls and >= 0 and <= 136
+                ? new ChangeClassOp(cls)
+                : throw new InvalidDataException($"{where} quest {questId} change_class needs classId 0..136."),
+            "despawn" => new DespawnOp(),
+            "pick_random" => ReadVarKey(op.Key, where, questId, "pick_random key") is { } pool &&
+                             ReadVarKey(op.Name, where, questId, "pick_random name") is { } target
+                ? new PickRandomOp(pool, target)
+                : throw new InvalidDataException($"{where} quest {questId} pick_random needs key (pool) and name (target)."),
+            "remember_item" => ReadVarKey(op.Key, where, questId, "remember_item key") is { } rememberKey &&
+                               op.Items is { Count: > 0 } rememberItems && rememberItems.All(id => items.TryGet(id, out _))
+                ? new RememberItemOp(rememberKey, rememberItems.Distinct().ToArray(), Math.Max(0, op.MinEnchant ?? 0))
+                : throw new InvalidDataException($"{where} quest {questId} remember_item needs key and known items."),
+            "exchange_var_item" => ReadVarKey(op.Key, where, questId, "exchange_var_item key") is { } swapKey &&
+                                   op.Items is { Count: > 0 } swapItems && op.Offset is int offset &&
+                                   swapItems.All(id => items.TryGet(id, out _) && items.TryGet(id + offset, out _))
+                ? new ExchangeVarItemOp(swapKey, swapItems.Distinct().ToArray(), offset)
+                : throw new InvalidDataException($"{where} quest {questId} exchange_var_item needs key, items and an offset to known items."),
+            "teleport" => op is { X: int x, Y: int y, Z: int z }
+                ? new TeleportOp(x, y, z)
+                : throw new InvalidDataException($"{where} quest {questId} teleport needs x, y and z."),
+            "social" => op.Action is int action and > 0
+                ? new SocialOp(action)
+                : throw new InvalidDataException($"{where} quest {questId} social needs a positive action."),
             _ => throw new InvalidDataException($"{where} quest {questId} has unknown op '{op.Op}'.")
         };
+    }
+
+    static AddVarOp ReadAdd(OpDto op, string where, int questId)
+    {
+        string key = (op.Key ?? "").Trim();
+        if (!QuestJournal.IsStoredVar(key, "0") || key == QuestProgress.CondVar || !int.TryParse(op.Value ?? "1", out int delta))
+            throw new InvalidDataException($"{where} quest {questId} add needs a counter key (not cond) and an integer value.");
+        return new AddVarOp(key, delta);
     }
 
     static SpawnNpcOp ReadSpawn(OpDto op, string where, int questId)
     {
         if (op.NpcId <= 0)
             throw new InvalidDataException($"{where} quest {questId} spawn_npc needs a positive npcId.");
+        if (op is { X: int x, Y: int y, Z: int z })
+            return new SpawnNpcOp(op.NpcId, x, y, z);
+        if (op.X != null || op.Y != null || op.Z != null)
+            throw new InvalidDataException($"{where} quest {questId} spawn_npc needs all of x, y, z or none.");
         return new SpawnNpcOp(op.NpcId);
+    }
+
+    static SummonOp ReadSummon(OpDto op, string where, int questId)
+    {
+        if (op.NpcId <= 0)
+            throw new InvalidDataException($"{where} quest {questId} summon needs a positive npcId.");
+        bool fixedPoint = op is { X: not null, Y: not null, Z: not null };
+        if (fixedPoint == op.AtPlayer && (fixedPoint || op.X != null || op.Y != null || op.Z != null))
+            throw new InvalidDataException($"{where} quest {questId} summon needs either x/y/z or atPlayer, not both.");
+        if (op.DespawnSec is < 0 or > 86_400)
+            throw new InvalidDataException($"{where} quest {questId} summon despawnSec must be 0..86400.");
+        return new SummonOp(new QuestSummon(op.NpcId, op.X, op.Y, op.Z, op.AtPlayer, op.DespawnSec ?? 0, op.Owned,
+            op.SoloGuard, op.Say, op.GoneSay, op.GuardSay,
+            ReadVarMap(op.GoneVars, where, questId), ReadVarMap(op.DeadVars, where, questId)));
+    }
+
+    static IReadOnlyDictionary<string, string>? ReadVarMap(Dictionary<string, string>? rows, string where, int questId)
+    {
+        if (rows is not { Count: > 0 })
+            return null;
+        foreach (var pair in rows)
+        {
+            if (!QuestJournal.IsStoredVar(pair.Key, pair.Value) || pair.Key == QuestProgress.CondVar)
+                throw new InvalidDataException($"{where} quest {questId} summon var '{pair.Key}' is not a stored variable.");
+        }
+
+        return new Dictionary<string, string>(rows, StringComparer.Ordinal);
     }
 
     static DropItemOp ReadDrop(OpDto op, ItemCatalog items, string where, int questId)
@@ -147,6 +218,7 @@ public sealed partial class QuestCatalog
         "talk" => QuestHook.Talk,
         "event" => QuestHook.Event,
         "kill" => QuestHook.Kill,
+        "attack" => QuestHook.Attack,
         _ => throw new InvalidDataException($"{where} quest {questId} has unknown hook '{text}'.")
     };
 

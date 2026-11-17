@@ -69,7 +69,24 @@ sealed partial class NetWorldEventPublisher
             MaxWeight = info.MaxWeight,
             Paperdoll = slots,
             Karma = info.Karma,
-            PvpFlag = info.PvpFlag
+            PvpFlag = info.PvpFlag,
+            PvpKills = info.PvpKills,
+            PkKills = info.PkKills,
+            Title = info.Title ?? "",
+            ClanCrestId = info.ClanCrestId,
+            LargeCrestId = info.LargeCrestId,
+            AllyId = info.AllyId,
+            AllyCrestId = info.AllyCrestId,
+            ClanPrivileges = info.ClanPrivileges,
+            PledgeClass = info.PledgeClass,
+            PledgeType = info.PledgeType,
+            ClanLeader = info.ClanLeader,
+            Noble = info.Noble,
+            Hero = info.Hero,
+            BaseClassId = info.BaseClassId,
+            ClassIndex = info.ClassIndex,
+            Cubics = info.Cubics ?? [],
+            Team = info.Team
         };
     }
 
@@ -78,9 +95,20 @@ sealed partial class NetWorldEventPublisher
         if (watcherObjectIds.Count == 0 || !_world.TryGetEntityById(objectId, out var entity) ||
             entity.Kind != ZoneEntityKind.Player)
             return;
-        var payload = NetCodec.EncodeEntitySpawn(NetEnterWorldProjector.BuildRemoteSpawn(entity, _ids.AllocateOrGet(objectId), _playerSpawnPAtkSpd(entity)));
+        var id = _ids.AllocateOrGet(objectId);
+        var payload = NetCodec.EncodeEntitySpawn(NetEnterWorldProjector.BuildRemoteSpawn(entity, id, _playerSpawnPAtkSpd(entity)));
+        // A re-sent CharInfo rebuilds the remote pawn; keep it sitting / running instead of snapping to idle.
+        var followUps = NetEnterWorldProjector.BuildPresenceFollowUps(entity, id, _world);
         foreach (int watcher in watcherObjectIds)
+        {
             _presence.TrySendCritical(watcher, NetOpcode.EntitySpawn, payload);
+            if (watcher == objectId)
+                continue;
+            foreach (var (opcode, frame) in followUps)
+                _presence.TrySendCritical(watcher, opcode, frame);
+            if (_world.TryGetEntityById(watcher, out var viewer) && _world.SpawnRelationFrame(entity, viewer) is { } relation)
+                _presence.TrySendCritical(watcher, NetOpcode.RelationChanged, relation);
+        }
     }
 
     void IWorldEventPublisher.FanoutAttackState(IReadOnlyList<int> watcherObjectIds, Fineage.Protocol.AttackMsg attack)
@@ -98,10 +126,43 @@ sealed partial class NetWorldEventPublisher
             AttackerZ = attack.AttackerZ,
             TargetX = attack.TargetX,
             TargetY = attack.TargetY,
-            TargetZ = attack.TargetZ
+            TargetZ = attack.TargetZ,
+            ExtraHits = attack.SecondHit is { } second
+                ? [new AttackHitNet { Damage = second.Damage, Flags = second.Flags }]
+                : []
         });
         foreach (int watcher in watcherObjectIds)
             _presence.TrySend(watcher, NetOpcode.AttackState, payload);
+    }
+
+    void IWorldEventPublisher.FanoutMagicSkillLaunched(IReadOnlyList<int> watcherObjectIds, int casterObjectId, int skillId, int skillLevel, int[] targetObjectIds)
+    {
+        var payload = NetCodec.EncodeMagicSkillLaunched(new MagicSkillLaunchedNetMsg
+        {
+            CasterObjectId = casterObjectId,
+            SkillId = skillId,
+            SkillLevel = skillLevel,
+            TargetObjectIds = targetObjectIds
+        });
+        foreach (int watcher in watcherObjectIds)
+            _presence.TrySend(watcher, NetOpcode.MagicSkillLaunched, payload);
+    }
+
+    void IWorldEventPublisher.FanoutMagicSkillCanceled(IReadOnlyList<int> watcherObjectIds, int objectId)
+    {
+        var payload = NetCodec.EncodeMagicSkillCanceled(new MagicSkillCanceledNetMsg { ObjectId = objectId });
+        foreach (int watcher in watcherObjectIds)
+            _presence.TrySend(watcher, NetOpcode.MagicSkillCanceled, payload);
+    }
+
+    void IWorldEventPublisher.FanoutPlaySound(IReadOnlyList<int> watcherObjectIds, int type, string file, int objectId, int x, int y, int z, int delayMs)
+    {
+        var payload = NetCodec.EncodePlaySound(new PlaySoundNetMsg
+        {
+            Type = type, File = file, ObjectId = objectId, X = x, Y = y, Z = z, DelayMs = delayMs
+        });
+        foreach (int watcher in watcherObjectIds)
+            _presence.TrySend(watcher, NetOpcode.PlaySound, payload);
     }
 
     void IWorldEventPublisher.FanoutStatusUpdate(IReadOnlyList<int> watcherObjectIds, Fineage.Protocol.StatusUpdateMsg status)
@@ -117,13 +178,14 @@ sealed partial class NetWorldEventPublisher
             _presence.TrySend(watcher, NetOpcode.StatusUpdate, payload);
     }
 
-    void IWorldEventPublisher.FanoutDie(IReadOnlyList<int> watcherObjectIds, int objectId, int killerObjectId)
+    void IWorldEventPublisher.FanoutDie(IReadOnlyList<int> watcherObjectIds, int objectId, int killerObjectId, int restartFlags)
     {
         var payload = NetCodec.EncodeEntityDie(new EntityDieMsg
         {
             EntityValue = (ulong)(uint)objectId,
             EntityGeneration = 1,
-            KillerObjectId = killerObjectId
+            KillerObjectId = killerObjectId,
+            RestartFlags = restartFlags
         });
         foreach (int watcher in watcherObjectIds)
             _presence.TrySendCritical(watcher, NetOpcode.EntityDie, payload);

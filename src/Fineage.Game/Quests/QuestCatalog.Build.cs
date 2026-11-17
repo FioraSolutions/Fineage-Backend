@@ -63,9 +63,9 @@ public sealed partial class QuestCatalog
             ops.Add(ReadOp(op, items, where, questId));
 
         string html = ResolveHtml(dialog, htmlBaseDir, where, questId);
-        // Mobius addSpawn events often return null htmltext; allow empty HTML when spawn_npc is present.
-        bool spawnOnly = ops.Exists(static o => o is SpawnNpcOp);
-        if (hook != QuestHook.Kill && string.IsNullOrWhiteSpace(html) && !spawnOnly)
+        // Mobius addSpawn / teleToLocation events often return null htmltext; allow empty HTML for those steps.
+        bool spawnOnly = ops.Exists(static o => o is SpawnNpcOp or TeleportOp or SummonOp or DespawnOp);
+        if (hook is not (QuestHook.Kill or QuestHook.Attack) && string.IsNullOrWhiteSpace(html) && !spawnOnly)
             throw new InvalidDataException($"{where} quest {questId} step needs html.");
         if (html.Length > 12_000)
             throw new InvalidDataException($"{where} quest {questId} html is longer than 12000 characters.");
@@ -103,7 +103,85 @@ public sealed partial class QuestCatalog
             ReadItemList(dialog.LacksItems, items, where, questId, "lacksItems"),
             ReadAtLeast(dialog.AtLeast, items, where, questId),
             ReadItemList(dialog.HasAny, items, where, questId, "hasAny"),
-            dialog.IsMage);
+            dialog.IsMage,
+            dialog.SubClass,
+            ReadChance(dialog.Chance, where, questId),
+            ReadVarGate(dialog.VarAtLeast, where, questId, "varAtLeast"),
+            ReadVarGate(dialog.VarBelow, where, questId, "varBelow"),
+            ReadItemList(dialog.Weapons, items, where, questId, "weapons"),
+            ReadAtLeast(dialog.Below, items, where, questId),
+            dialog.Everyone && hook == QuestHook.Kill,
+            ReadOwned(dialog.Owned, hook, where, questId),
+            ReadPetGate(dialog.Pet, where, questId),
+            dialog.ByPet,
+            Math.Max(0, dialog.MinEnchant),
+            ReadItemList(dialog.SumItems, items, where, questId, "sumItems"),
+            Math.Max(0, dialog.SumMin),
+            dialog.SumMax,
+            ReadVarKey(dialog.HoldsVarItem, where, questId, "holdsVarItem"),
+            ReadHtmlByVar(dialog.HtmlByVar, htmlBaseDir, where, questId));
+    }
+
+    static string? ReadPetGate(string? pet, string where, int questId)
+    {
+        if (string.IsNullOrWhiteSpace(pet))
+            return null;
+        return pet is "none" or "out" or "registered" or "other"
+            ? pet
+            : throw new InvalidDataException($"{where} quest {questId} pet must be none, out, registered or other.");
+    }
+
+    static string? ReadVarKey(string? key, string where, int questId, string field)
+    {
+        if (string.IsNullOrWhiteSpace(key))
+            return null;
+        return QuestJournal.IsStoredVar(key.Trim(), "0") && key.Trim() != QuestProgress.CondVar
+            ? key.Trim()
+            : throw new InvalidDataException($"{where} quest {questId} {field} is not a stored variable name.");
+    }
+
+    static QuestHtmlByVar? ReadHtmlByVar(HtmlByVarDto? row, string? htmlBaseDir, string where, int questId)
+    {
+        if (row == null)
+            return null;
+        string key = ReadVarKey(row.Var, where, questId, "htmlByVar.var")
+            ?? throw new InvalidDataException($"{where} quest {questId} htmlByVar needs a var.");
+        if (row.Files is not { Count: > 0 } files)
+            throw new InvalidDataException($"{where} quest {questId} htmlByVar needs files.");
+        var pages = new Dictionary<string, string>(StringComparer.Ordinal);
+        foreach (var (value, file) in files)
+            pages[value] = ResolveHtml(new DialogDto { HtmlFile = file }, htmlBaseDir, where, questId);
+        return new QuestHtmlByVar(key, pages);
+    }
+
+    static string? ReadOwned(string? owned, QuestHook hook, string where, int questId)
+    {
+        if (string.IsNullOrWhiteSpace(owned))
+            return null;
+        if (hook is not (QuestHook.Kill or QuestHook.Attack) || owned is not ("any" or "solo"))
+            throw new InvalidDataException($"{where} quest {questId} owned must be 'any' or 'solo' on a kill / attack step.");
+        return owned;
+    }
+
+    static double? ReadChance(double? chance, string where, int questId)
+    {
+        if (chance is null)
+            return null;
+        if (chance is <= 0 or > 1)
+            throw new InvalidDataException($"{where} quest {questId} chance must be in (0, 1].");
+        return chance;
+    }
+
+    static IReadOnlyDictionary<string, int>? ReadVarGate(Dictionary<string, int>? rows, string where, int questId, string field)
+    {
+        if (rows is not { Count: > 0 })
+            return null;
+        foreach (var key in rows.Keys)
+        {
+            if (!QuestJournal.IsStoredVar(key, "0") || key == QuestProgress.CondVar)
+                throw new InvalidDataException($"{where} quest {questId} {field} key '{key}' is not a counter variable.");
+        }
+        return new Dictionary<string, int>(rows, StringComparer.Ordinal);
     }
 
     static IReadOnlyDictionary<int, int>? ReadAtLeast(Dictionary<string, int>? rows, ItemCatalog items, string where, int questId)

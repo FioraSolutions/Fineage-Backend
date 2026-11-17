@@ -33,16 +33,20 @@ public sealed partial class ZoneWorld
 
     void ReleaseSiegeClan(int clanId)
     {
+        int castleId = _siege.CastleOwnedBy(clanId);
         _siege.ReleaseClan(clanId);
         PersistSiege();
+        ResetManorIfOwnerless(castleId);
     }
 
     string? CaptureLocked(int clanId, int castleId, long nowUnixMs, ZoneSession? actor = null)
     {
         AnnounceClosed(nowUnixMs);
+        int target = castleId == 0 ? ActiveSiegeCastleFor(clanId) : castleId;
+        int previousOwner = target > 0 ? _siege.Find(target)?.OwnerClanId ?? 0 : 0;
         string? error = castleId == 0
             ? _siege.CaptureCastle(clanId, nowUnixMs)
-            : _siege.CaptureCastle(clanId, castleId, nowUnixMs);
+            : _siege.CaptureCastle(clanId, castleId, nowUnixMs, AllyOfClan);
         if (error != null)
             return error;
 
@@ -54,14 +58,36 @@ public sealed partial class ZoneWorld
 
         if (castle != null)
         {
-            Broadcast(SiegeLines.CastleCaptured(castle.Name));
-            if (!castle.InProgress)
-                Broadcast(SiegeLines.SiegeFinished(castle.Name));
+            string clanName = _clans.TryGetValue(clanId, out var winner) ? winner.Name : "";
+            Broadcast(SiegeLines.CastleCaptured(clanName, castle.Name));
+            if (castle.InProgress)
+                OnSiegeMidVictory(castle, previousOwner, nowUnixMs);
+            else
+            {
+                if (previousOwner != 0 && previousOwner != clanId && _clans.TryGetValue(previousOwner, out var loser))
+                    RemoveCirclets(loser, castle.Id);
+                SyncSiegeRuntime(nowUnixMs);
+            }
+
             if (actor != null)
                 QueueSiegeInfo(actor, castle.Id, nowUnixMs);
         }
 
         return null;
+    }
+
+    int AllyOfClan(int clanId) => _clans.TryGetValue(clanId, out var clan) ? clan.D.AllyId : 0;
+
+    /// <summary>The running siege this clan attacks (legacy capture without a castle id).</summary>
+    int ActiveSiegeCastleFor(int clanId)
+    {
+        foreach (var castle in _siege.Castles)
+        {
+            if (castle.InProgress && SiegeSide(clanId, castle.Id) == SiegeProtocol.StateAttacker)
+                return castle.Id;
+        }
+
+        return 0;
     }
 
     void AnnounceClosed(long nowUnixMs)
@@ -136,7 +162,6 @@ public sealed partial class ZoneWorld
         var live = new List<int>();
         foreach (var entity in _byId.Values.OrderBy(entity => entity.ObjectId))
         {
-            if (entity.Session is { InWorld: true } session)
             if (entity.Session is { InWorld: true })
                 live.Add(entity.ObjectId);
         }

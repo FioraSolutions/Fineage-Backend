@@ -23,7 +23,11 @@ public sealed partial class ZoneWorld
             TickAggression(now);
             TickLeash(now);
             TickMobAttacks(now);
+            TickSummons(now);
+            TickCubics(now);
+            TickDuels(now);
             TickCorpseDecay(now);
+            TickQuestSpawns(now);
             TickAttackStance(now);
             return 0;
         });
@@ -84,12 +88,24 @@ public sealed partial class ZoneWorld
                 AbortCast(player, "no-los", notify: false);
                 return;
             }
+
+            // Mobius onMagicLaunchedTimer → broadcastPacket(MagicSkillLaunched) to the caster's knownlist.
+            FanoutSkillLaunched(player, hit.Combat.SkillId, hit.Level, target);
         }
 
         int damage = hit.Combat != null ? RollSkillDamage(player, target, hit.Combat, hit.Level) : hit.Damage;
         if (hit.Combat != null)
         {
             ZoneLog.Info($"[skill] hit {hit.Combat.SkillId} lv{hit.Level} target={target.ObjectId} damage={damage}");
+            // Mobius Player.sendDamageMessage after a damage skill: the caster sees its own number.
+            if (damage > 0)
+                QueueAttackerDamageLine(player, target, damage);
+        }
+        if (target.Summon != null)
+        {
+            UpdatePvPStatus(player, CreditOf(target), now);
+            DamageSummon(player, target, damage, now);
+            return;
         }
         if (target.Kind == ZoneEntityKind.Player)
         {
@@ -98,15 +114,19 @@ public sealed partial class ZoneWorld
                 ApplySkillAbnormal(player, target, hit, now);
             return;
         }
+        if (SiegeNpcHit(player, target, damage, now))
+            return;
         // Mobius FolkStatus: offensive skills may cast on merchants, but they take no HP / hate.
         if (!ZoneCombat.TakesNpcCombatDamage(target.NpcType, target.Attackable))
         {
             player.CombatUntilUnixMs = now + ClanProtocol.CombatStanceMillis;
             return;
         }
+        DuelNoteOutsideHit(player, target);
         target.CurHp = Math.Max(0, target.CurHp - damage);
         FanoutVitals(target, StatusFor(target));
         RecordDamage(target, player, damage);
+        ApplyQuestAttack(player, target);
         AddHate(target, player, DamageHate(damage, target.Level));
         player.CombatUntilUnixMs = now + ClanProtocol.CombatStanceMillis;
 
@@ -132,6 +152,9 @@ public sealed partial class ZoneWorld
     /// <summary>Offensive skill landing on a player: HP, purple name, cast break, death. Same gate as a melee hit.</summary>
     void ApplySkillDamageToPlayer(ZoneEntity attacker, ZoneEntity target, int damage, long now)
     {
+        // Mobius callSkill: an offensive skill on a playable flags the caster whether it landed for damage or not.
+        if (attacker.Kind == ZoneEntityKind.Player)
+            UpdatePvPStatus(attacker, target, now);
         if (damage <= 0)
         {
             attacker.CombatUntilUnixMs = now + ClanProtocol.CombatStanceMillis;
@@ -139,11 +162,12 @@ public sealed partial class ZoneWorld
             return;
         }
 
+        if (DuelBlocksHit(attacker, target))
+            return;
         target.CurHp = Math.Max(0, target.CurHp - damage);
         target.CombatUntilUnixMs = now + ClanProtocol.CombatStanceMillis;
         FanoutVitals(target, PlayerVitalsStatus(target));
-        if (attacker.Kind == ZoneEntityKind.Player)
-            UpdatePvPStatus(attacker, target, now);
+        SendVictimHitLines(attacker, target, damage, 0);
         if (target.CurHp > 0)
         {
             MaybeBreakCast(target, damage);
@@ -169,7 +193,7 @@ public sealed partial class ZoneWorld
             return;
         foreach (int id in _aiBusy.ToArray())
         {
-            if (!_byId.TryGetValue(id, out var npc) || npc.Kind != ZoneEntityKind.Npc || npc.AggroTargetId <= 0)
+            if (!_byId.TryGetValue(id, out var npc) || npc.Kind != ZoneEntityKind.Npc || npc.AggroTargetId <= 0 || npc.Summon != null)
                 continue;
             if (npc.CurHp <= 0)
             {
@@ -186,7 +210,7 @@ public sealed partial class ZoneWorld
                 continue;
             }
             if (!_byId.TryGetValue(npc.AggroTargetId, out var player) ||
-                player.Kind != ZoneEntityKind.Player || player.Dead || player.Session == null ||
+                !IsLivePlayable(player) ||
                 !SameInstance(npc.ObjectId, player.ObjectId) ||
                 !ZoneCombat.InAggroRange(npc.X, npc.Y, player.X, player.Y))
             {
@@ -205,7 +229,9 @@ public sealed partial class ZoneWorld
             int topHate = MostHated(npc);
             if (topHate > 0)
                 SetAggroTarget(npc, topHate);
-            CallClanHelp(npc, player, now);
+            bool summonTarget = player.Summon != null;
+            if (!summonTarget)
+                CallClanHelp(npc, player, now);
             npc.LastAiTickMs = now;
             // Mobius onEvtAfraid: the first step is away from the caster; later steps follow heading.
             if (IsFeared(npc))
@@ -243,6 +269,25 @@ public sealed partial class ZoneWorld
             if (now < npc.NextMobAttackMs || npc.CastingUntilMs > now)
                 continue;
             // Mobius thinkAttack: SUICIDE (HP&lt;30%), then HEAL/BUFF/control/debuff, then ATTACK skill chance.
+            // Against a summon only the melee swing is used here (NPC skill paths roll against a player).
+            if (summonTarget)
+            {
+                int swingMs = ZoneCombat.AttackTimeMs(NpcPAtkSpd(npc));
+                npc.NextMobAttackMs = now + swingMs;
+                var (sDamage, sFlags) = NpcMeleeRoll(npc, player);
+                player.CombatUntilUnixMs = now + ClanProtocol.CombatStanceMillis;
+                FanoutAttack(npc, player, new AttackMsg
+                {
+                    AttackerObjectId = npc.ObjectId,
+                    TargetObjectId = player.ObjectId,
+                    Damage = sDamage,
+                    Flags = sFlags,
+                    AttackerX = npc.X, AttackerY = npc.Y, AttackerZ = npc.Z,
+                    TargetX = player.X, TargetY = player.Y, TargetZ = player.Z
+                });
+                _meleeHits.Add(new PendingMeleeHit(npc.ObjectId, player.ObjectId, sDamage, now + swingMs / 2, sFlags));
+                continue;
+            }
             if (TryNpcSuicideSkill(npc, player, now))
                 continue;
             if (TryNpcHealSkill(npc, now))
@@ -275,7 +320,7 @@ public sealed partial class ZoneWorld
             };
             // Swing now; player HP drops at hitTime (Mobius onHitTimer).
             FanoutAttack(npc, player, attack);
-            _meleeHits.Add(new PendingMeleeHit(npc.ObjectId, player.ObjectId, damage, now + npcAtkMs / 2));
+            _meleeHits.Add(new PendingMeleeHit(npc.ObjectId, player.ObjectId, damage, now + npcAtkMs / 2, flags));
         }
     }
 

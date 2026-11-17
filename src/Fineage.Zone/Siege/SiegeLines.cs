@@ -31,8 +31,25 @@ public static class SiegeLines
     public static SystemMessageMsg SiegeCancelled(string castle) =>
         Line(SiegeProtocol.SiegeCancelled, $"The siege of {castle} was cancelled because no attackers registered.", castle);
 
-    public static SystemMessageMsg CastleCaptured(string castle) =>
-        Line(SiegeProtocol.CastleCaptured, $"The attacking clan has taken {castle}.", castle);
+    public static SystemMessageMsg CastleCaptured(string clan, string castle) => new()
+    {
+        Id = SiegeProtocol.CastleCaptured,
+        Params = [clan, castle],
+        Text = clan.Length > 0 ? $"Clan {clan} has succeeded in engraving the ruler of {castle}." : $"The attacking clan has taken {castle}."
+    };
+
+    public static SystemMessageMsg CancelledOwned(string castle) =>
+        Line(SiegeProtocol.SiegeCancelledOwned, $"{castle}'s siege was canceled because there were no clans that participated.", castle);
+
+    public static SystemMessageMsg Victorious(string clan, string castle) => new()
+    {
+        Id = SiegeProtocol.Victorious,
+        Params = [clan, castle],
+        Text = $"Clan {clan} is victorious over {castle}'s castle siege!"
+    };
+
+    public static SystemMessageMsg Draw(string castle) =>
+        Line(SiegeProtocol.Draw, $"The siege of {castle} has ended in a draw.", castle);
 
     static SystemMessageMsg Line(int id, string text, string castle) => new()
     {

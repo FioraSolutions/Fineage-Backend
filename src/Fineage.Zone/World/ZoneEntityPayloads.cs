@@ -46,6 +46,13 @@ sealed class ZoneNpcSpoilPayload
     public int SpoilerObjectId { get; set; }
     public List<Drops.DropStack> SweepItems { get; } = [];
     public bool CorpseAwaitingSweep { get; set; }
+    /// <summary>Mobius <c>Attackable._seed</c> / <c>_seederObjId</c>: the seed picked by the seed item, before Sowing lands.</summary>
+    public int SeedId { get; set; }
+    public int SeederObjectId { get; set; }
+    /// <summary>Mobius <c>_seeded</c>: Sowing succeeded; the crop below waits for the seeder's Harvester.</summary>
+    public bool Seeded { get; set; }
+    public int HarvestItemId { get; set; }
+    public int HarvestCount { get; set; }
 }
 
 /// <summary>NPC merchant tax/town fields composed off <see cref="ZoneEntity"/> (#353).</summary>
@@ -105,13 +112,31 @@ sealed class ZonePlayerIdentityPayload
     public int Race { get; set; }
     public int Sex { get; set; }
     public bool Hero { get; set; }
+    /// <summary>Block G1: Mobius <c>isNoble</c>, persisted in the class state.</summary>
+    public bool Noble { get; set; }
+    /// <summary>Mobius <c>getBaseClass</c>; 0 = same as the active class (never subclassed).</summary>
+    public int BaseClassId { get; set; }
+    /// <summary>Mobius <c>getClassIndex</c>: 0 = base class active, 1–3 = that subclass active.</summary>
+    public int ClassIndex { get; set; }
+    /// <summary>Every class slot that is not active (base parked at index 0 while a subclass plays).</summary>
+    public List<Fineage.Accounts.StoredClassSlot> ClassSlots { get; set; } = [];
     public bool InClan { get; set; }
     public bool ClanLeader { get; set; }
     public int PledgeClass { get; set; }
     public int CastleId { get; set; }
     public int HideoutId { get; set; }
+    public int PledgeType { get; set; }
+    public int PowerGrade { get; set; }
+    public int ClanPrivileges { get; set; }
+    public int ClanCrestId { get; set; }
+    public int LargeCrestId { get; set; }
+    public int AllyId { get; set; }
+    public int AllyCrestId { get; set; }
+    /// <summary>Active clan warehouse window (Mobius setActiveWarehouse(clan WH)).</summary>
+    public bool ClanWarehouseOpen { get; set; }
     public bool PvpFlagged { get; set; }
     public long PvpFlagUntilMs { get; set; }
+    public bool PvpFlagBlink { get; set; }
     public int PkKills { get; set; }
     public int PvpKills { get; set; }
     public int Karma { get; set; }

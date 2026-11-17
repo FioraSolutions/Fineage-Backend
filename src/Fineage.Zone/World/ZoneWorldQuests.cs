@@ -190,7 +190,12 @@ public sealed partial class ZoneWorld
         }
     }
 
-    static QuestActor QuestActorOf(ZoneEntity player) => new(player.Race, player.Level, player.ClassId);
+    QuestActor QuestActorOf(ZoneEntity player, bool byPet = false) =>
+        new(player.Race, player.Level, player.ClassId, player.SubClassActive)
+        {
+            PetControlObjectId = PetControlObjectIdOf(player),
+            ByPet = byPet
+        };
 
     /// <summary>
     /// Mobius <c>Quest.onKill</c> for the killer (killer-only steps) plus <c>party: true</c> steps shared to one random eligible member. Quest drops go straight to the
@@ -221,12 +226,68 @@ public sealed partial class ZoneWorld
             GrantKillReward(killer, npc);
     }
 
+    /// <summary>Mobius <c>Quest.onAttack</c>: a player's hit on an NPC some quest listens to (Q234 Pipette Knife on Baium).</summary>
+    void ApplyQuestAttack(ZoneEntity attacker, ZoneEntity npc, bool byPet = false)
+    {
+        if (attacker.Kind != ZoneEntityKind.Player || attacker.Inventory == null || attacker.Dead || attacker.Session == null)
+            return;
+        if (npc.QuestSpawn != null && ApplyOwnedAttack(attacker, npc))
+            return;
+        if (npc.QuestAttackSpawned || !_quests.HasAttackSteps(npc.NpcId))
+            return;
+        var outcome = _quests.OnAttack(attacker.Quests, attacker.Inventory, npc.NpcId, QuestActorOf(attacker, byPet));
+        if (outcome.Ok && outcome.Spawns.Count > 0)
+            npc.QuestAttackSpawned = true;
+        PublishKill(attacker, outcome, npc);
+    }
+
+    /// <summary>Test hook: one landed hit by <paramref name="attacker"/> on <paramref name="npc"/>.</summary>
+    internal void QuestAttackForTest(ZoneEntity attacker, ZoneEntity npc, bool byPet = false)
+    {
+        lock (_gate)
+            ApplyQuestAttack(attacker, npc, byPet);
+    }
+
+    /// <summary>Mobius VarkaKetra range for the alliance penalty around the corpse.</summary>
+    const int AlliancePenaltyRange = 1500;
+
+    /// <summary>Mobius VarkaKetra.onKill: allies of the slain monster's side near the corpse lose a mark level.</summary>
+    void ApplyAllianceBetrayal(ZoneEntity killer, ZoneEntity npc)
+    {
+        if (!QuestMachine.KetraMobs.Contains(npc.NpcId) && !QuestMachine.VarkaMobs.Contains(npc.NpcId))
+            return;
+        foreach (var member in QuestPartyCandidates(killer))
+        {
+            if (member.Inventory == null || member.Session == null)
+                continue;
+            long dx = member.X - (long)npc.X, dy = member.Y - (long)npc.Y;
+            if (npc.ObjectId != 0 && dx * dx + dy * dy > (long)AlliancePenaltyRange * AlliancePenaltyRange)
+                continue;
+            foreach (var outcome in _quests.BreakAlliance(member.Quests, member.Inventory, npc.NpcId))
+                PublishKill(member, outcome, npc);
+        }
+    }
+
     void ApplyQuestKill(ZoneEntity killer, ZoneEntity npc)
     {
+        if (npc.QuestSpawn != null)
+            ApplyOwnedKill(killer, npc);
         if (killer.Inventory == null || killer.Dead || killer.Session == null)
             return;
+        ApplyAllianceBetrayal(killer, npc);
         var outcome = _quests.OnKill(killer.Quests, killer.Inventory, npc.NpcId, QuestActorOf(killer));
         PublishKill(killer, outcome, npc);
+
+        // Mobius executeForEachPlayer: party members near the corpse share raid-head style steps.
+        if (_quests.HasEveryoneSteps(npc.NpcId))
+        {
+            foreach (var member in QuestPartyCandidates(killer))
+            {
+                if (member == killer || member.Inventory == null || member.Dead || member.Session == null)
+                    continue;
+                PublishKill(member, _quests.OnEveryoneKill(member.Quests, member.Inventory, npc.NpcId, QuestActorOf(member)), npc);
+            }
+        }
 
         // Mobius getRandomPartyMember(State): one random eligible member (killer included) within ALT_PARTY_RANGE.
         foreach (int questId in _quests.PartyKillQuests(npc.NpcId))
@@ -268,7 +329,8 @@ public sealed partial class ZoneWorld
     {
         if (outcome.QuestId == 0 || !outcome.Ok || player.Session == null)
             return;
-        if (outcome.Items.Count == 0 && !outcome.JournalChanged && outcome.Sounds.Count == 0)
+        if (outcome.Items.Count == 0 && !outcome.JournalChanged && outcome.Sounds.Count == 0 && outcome.Spawns.Count == 0 &&
+            outcome.SpawnsAt.Count == 0 && outcome.Extras.Empty)
             return;
         Publish(player.Session, player, outcome, npc.ObjectId, npc.NpcId);
     }
@@ -304,6 +366,11 @@ public sealed partial class ZoneWorld
         && outcome.Items.Count == 0
         && outcome.Sounds.Count == 0
         && outcome.Spawns.Count == 0
+        && outcome.SpawnsAt.Count == 0
+        && !outcome.Noble
+        && outcome.Teleport == null
+        && outcome.Social == 0
+        && outcome.Extras.Empty
         && outcome.Exp == 0
         && outcome.Sp == 0;
 
@@ -312,6 +379,14 @@ public sealed partial class ZoneWorld
         bool levelled = ApplyProgress(player, outcome);
         if (outcome.Spawns.Count > 0 && _byId.TryGetValue(npcObjectId, out var anchor))
             ApplyQuestSpawns(player, anchor, outcome.Spawns);
+        foreach (var point in outcome.SpawnsAt)
+            SpawnQuestNpc(player, point.NpcId, point.X, point.Y, point.Z, player.InstanceId, 0);
+        if (!outcome.Extras.Empty)
+            ApplyQuestExtras(session, player, outcome.Extras, npcObjectId);
+        if (outcome.Noble)
+            SetNoble(player, true);
+        if (outcome.Social > 0)
+            NetBridge?.FanoutSocialAction(NetWatchersOf(player), player.ObjectId, outcome.Social);
         if (outcome.Items.Count > 0 && player.Inventory != null)
         {
             var invUpdate = new InventoryUpdateMsg
@@ -342,7 +417,16 @@ public sealed partial class ZoneWorld
             }
         }
 
-        // outcome.Sounds had no Net frame; the V2 QuestSound notice is retired with the rest of V2.
+        // Mobius QuestState.playSound → player.sendPacket(new PlaySound(file)): the quest owner only, type 0,
+        // not bound to an object. Observers never hear someone else's quest jingle.
+        if (NetBridge != null)
+        {
+            foreach (string sound in outcome.Sounds)
+            {
+                if (!string.IsNullOrWhiteSpace(sound))
+                    NetBridge.FanoutPlaySound([session.ObjectId], 0, sound, 0, 0, 0, 0, 0);
+            }
+        }
 
         if (outcome.Html.Length > 0)
         {
@@ -359,6 +443,16 @@ public sealed partial class ZoneWorld
 
         if (outcome.JournalChanged || outcome.Exp != 0 || outcome.Sp != 0)
             SaveQuestProgress(session, player);
+
+        // Mobius teleToLocation from a quest step (Possessor of a Precious Soul 4 → Lady of the Lake).
+        if (outcome.Teleport is { } to)
+        {
+            var (x, y) = Offset(to.X, to.Y);
+            if (Loaded(x, y))
+                Relocate(player, x, y, to.Z);
+            else
+                Notice(session, NpcServiceProtocol.DestinationUnloaded, NpcServiceProtocol.DestinationUnloadedText);
+        }
     }
 
 }

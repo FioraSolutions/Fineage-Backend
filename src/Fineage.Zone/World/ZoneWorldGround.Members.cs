@@ -97,6 +97,12 @@ public sealed partial class ZoneWorld
             return InventoryProtocol.Dead;
         if (objectId <= 0 || count < 1)
             return "bad_request";
+        if (player.Fishing)
+        {
+            // Mobius RequestDropItem: no dropping while fishing.
+            SelfLine(session, FishingProtocol.CannotWhileFishingDrop, "You cannot do that while fishing.");
+            return FishingProtocol.Busy;
+        }
 
         var item = player.Inventory.Find(objectId);
         if (item == null || item.IsEquipped)
@@ -172,7 +178,8 @@ public sealed partial class ZoneWorld
         ZoneEntity? killer,
         IReadOnlyList<ZoneEntity> watchers,
         int victimLevel = 0,
-        bool raid = false)
+        bool raid = false,
+        bool seeded = false)
     {
         if (!_dropCatalog.TryGet(npcId, out var definition))
         {
@@ -182,6 +189,9 @@ public sealed partial class ZoneWorld
 
         int killerLevel = killer?.Level ?? victimLevel;
         var rolls = DropRoller.RollDeath(definition, _dropRandom, _dropRates, victimLevel, killerLevel, raid);
+        // Mobius NpcTemplate.calculateDrops: a seeded monster drops only adena and seal stones (the crop replaces the rest).
+        if (seeded)
+            rolls = rolls.Where(s => s.ItemId is 57 or 6360 or 6361 or 6362 || IsHerb(s.ItemId)).ToList();
         if (rolls.Count == 0)
             ZoneLog.Info($"drop empty npc={npcId}");
 

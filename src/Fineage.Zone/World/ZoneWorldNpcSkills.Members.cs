@@ -139,11 +139,15 @@ public sealed partial class ZoneWorld
                 return;
             if (!ReferenceEquals(npc, target) && !CanSeeTarget(npc, target))
                 return;
+            FanoutSkillLaunched(npc, hit.SkillId, hit.Level, target);
             apply(target, now);
             return;
         }
 
-        if (hit.Combat == null || target.Kind != ZoneEntityKind.Player)
+        if (hit.Combat == null)
+            return;
+        bool summonCaster = npc.Summon != null;
+        if (target.Kind != ZoneEntityKind.Player && !(summonCaster && target.Kind == ZoneEntityKind.Npc))
             return;
 
         int escape = Fineage.Game.Combat.CastRules.EscapeRange(hit.Combat.CastRange, hit.Combat.EffectRange);
@@ -152,20 +156,44 @@ public sealed partial class ZoneWorld
         if (!CanSeeTarget(npc, target))
             return;
 
+        FanoutSkillLaunched(npc, hit.Combat.SkillId, hit.Level, target);
         int damage = RollNpcSkillDamage(npc, target, hit.Combat, hit.Level);
         ZoneLog.Info($"[npc-skill] hit {hit.Combat.SkillId} lv{hit.Level} damage={damage}");
-        if (damage <= 0)
+        if (summonCaster)
+        {
+            var targetPc = CreditOf(target);
+            if (targetPc.Kind == ZoneEntityKind.Player && OwnerOf(npc) is { } caster && !ReferenceEquals(caster, targetPc))
+                UpdatePvPStatus(caster, targetPc, now);
+            if (target.Summon != null)
+            {
+                DamageSummon(npc, target, damage, now);
+                return;
+            }
+            if (target.Kind == ZoneEntityKind.Npc)
+            {
+                if (damage > 0)
+                    DamageNpcBy(npc, target, damage, now);
+                return;
+            }
+        }
+        if (damage <= 0 || DuelBlocksHit(npc, target))
             return;
 
         target.CurHp = Math.Max(0, target.CurHp - damage);
         FanoutVitals(target, PlayerVitalsStatus(target));
+        SendVictimHitLines(npc, target, damage, 0);
         target.CombatUntilUnixMs = now + ClanProtocol.CombatStanceMillis;
         if (target.CurHp > 0)
             MaybeBreakCast(target, damage);
         if (target.CurHp <= 0)
         {
-            npc.HateList.Remove(target.ObjectId);
-            SetAggroTarget(npc, MostHated(npc));
+            if (summonCaster)
+                npc.Summon!.TargetId = 0;
+            else
+            {
+                npc.HateList.Remove(target.ObjectId);
+                SetAggroTarget(npc, MostHated(npc));
+            }
             if (target.Session != null)
                 target.Session.AutoAttackTargetId = 0;
             ApplyPlayerDeath(target, npc.ObjectId);
@@ -176,7 +204,19 @@ public sealed partial class ZoneWorld
     internal int RollNpcSkillDamage(ZoneEntity npc, ZoneEntity player, SkillCombatData combat, int level)
     {
         npc.CurMp = Math.Max(0, npc.CurMp - combat.MpAt(level));
-        var ps = PlayerStats(player);
+        bool npcTarget = player.Kind == ZoneEntityKind.Npc;
+        double targetMDef, targetPDef;
+        if (npcTarget)
+        {
+            targetMDef = Math.Max(1d, player.MDef);
+            targetPDef = NpcPDef(player);
+        }
+        else
+        {
+            var ps = PlayerStats(player);
+            targetMDef = Math.Max(1d, ps.MDef);
+            targetPDef = Math.Max(1d, ps.PDef);
+        }
         double power = combat.PowerAt(level);
         if (!combat.IsPhysical)
         {
@@ -186,7 +226,7 @@ public sealed partial class ZoneWorld
             if (magicLevel <= 0)
                 magicLevel = npc.Level;
             // NPC mCritRate table not imported — use unarmed base 10‰ (Mobius default).
-            var (damage, _) = ZoneCombat.RollMagicDamage(_combatRandom, mAtk, Math.Max(1d, ps.MDef), power,
+            var (damage, _) = ZoneCombat.RollMagicDamage(_combatRandom, mAtk, targetMDef, power,
                 npc.Level, magicLevel, player.Level, mCritRate: 10);
             return damage;
         }
@@ -194,7 +234,7 @@ public sealed partial class ZoneWorld
         bool ss = TryNpcSoulshot(npc);
         // Blow without blowEffect in catalog → physical skill formula (NPC Mortal Blow).
         return ZoneCombat.PhysicalSkillDamage(
-            StatMods(npc).Apply(CombatStat.PAtk, npc.PAtk), Math.Max(1d, ps.PDef), power, ss, crit: false);
+            StatMods(npc).Apply(CombatStat.PAtk, npc.PAtk), targetPDef, power, ss, crit: false);
     }
 
     /// <summary>Mobius <c>Npc.rechargeShots(false, true)</c> for spiritshots.</summary>
@@ -210,19 +250,7 @@ public sealed partial class ZoneWorld
 
     void FanoutNpcMagicSkillUse(ZoneEntity npc, ZoneEntity target, int skillId, int level, int hitTime, int reuse)
     {
-        List<int>? netWatchers = null;
-        foreach (var watcher in Players())
-        {
-            if (watcher.Session == null)
-                continue;
-            if (ReferenceEquals(watcher, target) ||
-                watcher.Knownlist.Contains(npc.ObjectId) ||
-                watcher.Knownlist.Contains(target.ObjectId))
-            {
-                netWatchers ??= [];
-                netWatchers.Add(watcher.ObjectId);
-            }
-        }
+        var netWatchers = ActorAudience(npc, target);
         if (netWatchers is { Count: > 0 })
         {
             NetBridge?.FanoutMagicSkillUse(netWatchers, new MagicSkillUseMsg

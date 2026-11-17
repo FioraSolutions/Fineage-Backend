@@ -57,6 +57,9 @@ public interface IAccountStore
     /// <summary>Writes the class after a class transfer (Mobius setClassId / setBaseClass).</summary>
     bool TrySaveClass(string account, int characterId, int classId);
 
+    /// <summary>Writes subclass slots, the active class index, base class and noblesse (Mobius character_subclasses).</summary>
+    bool TrySaveClassState(string account, int characterId, CharacterClassState state);
+
     /// <summary>
     /// Writes the Death Penalty level (Mobius <c>characters.death_penalty_level</c>, <c>Player.java:337</c>). It
     /// outlives the session, so the zone writes it the moment a death rolls it up.
@@ -140,4 +143,36 @@ public interface IAccountStore
 
     /// <summary>Replaces castle rows and siege registrations, and writes each clan's <see cref="ClanRecord.CastleId"/>.</summary>
     bool SaveSiege(IReadOnlyList<CastleSave> castles, IReadOnlyList<SiegeClanSave> clans, IReadOnlyDictionary<int, int> clanCastleIds);
+
+    IReadOnlyList<ManorProductionSave> ListManorProduction();
+
+    IReadOnlyList<ManorProcureSave> ListManorProcure();
+
+    /// <summary>Replaces every castle manor row (Mobius <c>CastleManorManager.storeMe</c>).</summary>
+    bool SaveManor(IReadOnlyList<ManorProductionSave> production, IReadOnlyList<ManorProcureSave> procure);
+
+    /// <summary>Stores a crest blob and returns its new id (Mobius <c>CrestTable.createCrest</c>).</summary>
+    CrestSave? InsertCrest(int kind, byte[] data);
+
+    CrestSave? FindCrest(int crestId);
+
+    IReadOnlyList<CrestSave> ListCrests();
+
+    bool DeleteCrest(int crestId);
+
+    IReadOnlyList<ClanHallSave> ListClanHalls();
+
+    bool SaveClanHalls(IReadOnlyList<ClanHallSave> halls);
+
+    /// <summary>The pet behind a collar (Mobius <c>Pet.restore</c> by control item object id), or null for a new pet.</summary>
+    StoredPet? FindPet(int controlObjectId);
+
+    /// <summary>Inserts or replaces the pet row (Mobius <c>Pet.storeMe</c>).</summary>
+    bool SavePet(StoredPet pet);
+
+    /// <summary>Deletes the pet row (Mobius <c>destroyControlItem</c> / decayed corpse).</summary>
+    bool DeletePet(int controlObjectId);
+
+    /// <summary>Writes the character title (Mobius <c>RequestGiveNickName</c> / <c>setTitle</c>).</summary>
+    bool TrySetCharacterTitle(string account, int characterId, string title);
 }

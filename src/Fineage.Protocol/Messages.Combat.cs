@@ -23,6 +23,8 @@ public sealed class AttackMsg
     public int TargetX { get; set; }
     public int TargetY { get; set; }
     public int TargetZ { get; set; }
+    /// <summary>Second hit of a dual / fist swing (Interlude Attack hit list); null for a single hit.</summary>
+    public (int Damage, byte Flags)? SecondHit { get; set; }
 }
 
 /// <summary>Opcode <see cref="MsgType.StatusUpdate"/> (1010). Interlude attribute ids in <see cref="AttributeIds"/>.</summary>

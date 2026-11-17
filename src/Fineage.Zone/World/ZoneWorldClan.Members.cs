@@ -17,25 +17,36 @@ public sealed partial class ZoneWorld
                             ClanRules.IsInCombat(targetEntity.CombatUntilUnixMs, nowMs);
         string? block = ClanRules.KickBlock(
             clan != null,
-            clan != null && clan.LeaderId == session.ObjectId,
+            clan != null && HasPriv(clan, session.ObjectId, PledgeProtocol.PrivRemoveMember),
             targetObjectId == session.ObjectId,
             targetMember != null,
             targetCombat);
         if (block != null || clan == null || targetMember == null)
             return block ?? ClanProtocol.None;
+        if (targetObjectId == clan.LeaderId)
+            return ClanProtocol.Leader;
 
-        long join = ClanRules.JoinPenaltyExpiry(nowMs);
-        long recruit = join;
-        long create = CreateExpiry(targetObjectId, targetMember!.Account);
+        // Mobius RequestOustPledgeMember: the clan gets the recruit penalty, the member the join penalty (none for academy).
+        long recruit = ClanRules.JoinPenaltyExpiry(nowMs);
+        long join = targetMember!.PledgeType == PledgeProtocol.Academy ? 0 : recruit;
+        long create = CreateExpiry(targetObjectId, targetMember.Account);
         var state = new CharacterClanState(targetMember.Account, targetMember.CharacterId, 0, join, create);
+        var undo = DetachMember(clan, targetMember);
         var record = ToRecord(clan, clan.Members.Where(m => m.CharacterId != targetObjectId)) with
         {
             CharPenaltyExpiryUnixMs = recruit
         };
         if (_accounts != null && !_accounts.UpdateClan(record, [state]))
+        {
+            undo();
             return ClanProtocol.Store;
+        }
 
         clan.Members.Remove(targetMember);
+        if (targetEntity != null)
+            ClearMemberTitle(targetEntity);
+        else
+            _accounts?.TrySetCharacterTitle(targetMember.Account, targetMember.CharacterId, "");
         _clanByPlayer.Remove(targetObjectId);
         clan.CharPenaltyExpiryUnixMs = recruit;
         _joinExpiry[targetObjectId] = join;
@@ -86,6 +97,8 @@ public sealed partial class ZoneWorld
             clan != null && clan.DissolvingExpiryUnixMs > nowMs);
         if (block != null || clan == null)
             return block ?? ClanProtocol.None;
+        if (DissolveConditionsBlock(session, clan) is { } conditions)
+            return conditions;
 
         long expiry = ClanRules.DissolveExpiry(nowMs);
         var record = ToRecord(clan) with { DissolvingExpiryUnixMs = expiry };
@@ -160,6 +173,8 @@ public sealed partial class ZoneWorld
 
         _clans.Remove(clanId);
         ReleaseSiegeClan(clanId);
+        ForgetWars(clanId);
+        ReleaseClanHalls(clanId);
         foreach (var pair in _pendingClanInvites.ToList())
         {
             if (pair.Value.ClanId == clanId)

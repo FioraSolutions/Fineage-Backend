@@ -33,8 +33,17 @@ sealed class ZoneCharacterPersist(IAccountStore? accounts)
         int mp) =>
         _accounts?.TrySaveProgress(account, characterId, level, exp, sp, maxHp, hp, maxMp, mp);
 
+    public StoredPet? FindPet(int controlObjectId) => _accounts?.FindPet(controlObjectId);
+
+    public void SavePet(StoredPet pet) => _accounts?.SavePet(pet);
+
+    public void DeletePet(int controlObjectId) => _accounts?.DeletePet(controlObjectId);
+
     public void SaveClass(string account, int characterId, int classId) =>
         _accounts?.TrySaveClass(account, characterId, classId);
+
+    public void SaveClassState(string account, int characterId, CharacterClassState state) =>
+        _accounts?.TrySaveClassState(account, characterId, state);
 
     public void SaveDeathPenalty(string account, int characterId, int level) =>
         _accounts?.TrySaveDeathPenalty(account, characterId, level);

@@ -50,7 +50,7 @@ public sealed class NetSkillTests
     [Fact]
     public async Task SkillUse_power_strike_damages_gremlin_and_sends_magic_skill_use()
     {
-        // A fixed clock and seed keep the gremlin's swing deterministic.
+        // A fixed clock keeps the cast / hit timers deterministic.
         Now = DateTimeOffset.FromUnixTimeMilliseconds(1_800_000_000_000);
         var bench = new WorldBench(
             clock: () => Now,
@@ -106,12 +106,17 @@ public sealed class NetSkillTests
         Assert.True(hit.Values[0] > 0);
         Assert.True(hit.Values[0] < hit.Values[1]);
 
-        // Mobius addDamageHate -> the mob swings back at the attacker.
+        // Mobius addDamageHate -> the mob swings back at the attacker. The gremlin's idle random walk (spawn random,
+        // not seeded here) may have carried it a few steps away before the hit landed; then it first runs back
+        // (thinkAttack -> moveToPawn) and swings on a later tick, so give it a few seconds instead of exactly one tick.
         bench.Rec.Calls.Clear();
-        Now = Now.AddSeconds(2);
-        await bench.World.RunCombatTickAsync(CancellationToken.None);
-
         Assert.True(bench.World.TryGetEntityById(gremlinObjectId, out var mob));
+        for (int step = 0; step < 6 && bench.Rec.Of(nameof(IWorldEventPublisher.FanoutAttackState)).Count == 0; step++)
+        {
+            Now = Now.AddSeconds(step == 0 ? 2 : 1);
+            await bench.World.RunCombatTickAsync(CancellationToken.None);
+        }
+
         Assert.Equal(actor.ObjectId, mob.AggroTargetId);
         Assert.NotEmpty(bench.Rec.Of(nameof(IWorldEventPublisher.FanoutAttackState)));
     }

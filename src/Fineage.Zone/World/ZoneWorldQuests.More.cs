@@ -20,92 +20,108 @@ public sealed partial class ZoneWorld
     /// </summary>
     void ApplyQuestSpawns(ZoneEntity player, ZoneEntity anchor, IReadOnlyList<int> npcIds)
     {
-        var templates = NpcCatalog.LoadDefault();
         foreach (int npcId in npcIds)
         {
-            if (!templates.ById.TryGetValue(npcId, out var template))
-            {
-                ZoneLog.Info($"quest spawn skip unknown npcId={npcId}");
-                continue;
-            }
-
-            int objectId = AllocateQuestNpcObjectId();
             // Mobius randomOffset around the talking NPC (~40–80 units).
             double angle = _spawnRandom.NextDouble() * Math.PI * 2;
             int dist = 40 + _spawnRandom.Next(0, 41);
             int x = anchor.X + (int)(Math.Cos(angle) * dist);
             int y = anchor.Y + (int)(Math.Sin(angle) * dist);
-            int z = anchor.Z;
-            if (_geo.HasGeo(x, y))
-                z = _geo.GetHeight(x, y, z);
-
-            var entity = new ZoneEntity
-            {
-                ObjectId = objectId,
-                Kind = ZoneEntityKind.Npc,
-                InstanceId = anchor.InstanceId,
-                Name = template.Name,
-                Title = template.Title,
-                NpcType = template.Type,
-                X = x,
-                Y = y,
-                Z = z,
-                Heading = anchor.Heading,
-                NpcId = template.NpcId,
-                Attackable = true,
-                MaxHp = template.Hp,
-                CurHp = template.Hp,
-                MaxMp = template.Mp,
-                CurMp = template.Mp,
-                Level = template.Level,
-                RewardExp = template.Exp,
-                RewardSp = template.Sp,
-                PAtk = template.PAtk,
-                HpRegen = template.HpRegen,
-                MpRegen = template.MpRegen,
-                PDef = template.PDef,
-                PAtkSpd = template.AttackSpeed,
-                BaseAccuracy = template.Accuracy,
-                BaseEvasion = template.Evasion,
-                BaseCritical = template.Critical,
-                RandomDamage = template.RandomDamage,
-                Dex = template.Dex,
-                ShieldDef = template.ShieldDef,
-                ShieldRate = template.ShieldRate,
-                MAtk = template.MAtk,
-                MDef = template.MDef,
-                AttackRange = template.AttackRange,
-                Aggressive = true,
-                AggroRange = Math.Max(template.AggroRange, 1000),
-                ClanHelpRange = template.ClanHelpRange,
-                Clans = template.Clans,
-                IgnoreNpcIds = template.IgnoreNpcIds,
-                NpcSoulShotLeft = template.SoulShot,
-                NpcSoulShotChance = template.SoulShotChance,
-                NpcSpiritShotLeft = template.SpiritShot,
-                NpcSpiritShotChance = template.SpiritShotChance,
-                DefenceTraits = template.DefenceTraits,
-                AiSkills = FilterAttackSkills(template.AiSkills, _npcAiSupport.Get(template.NpcId)?.Suicide),
-                MinSkillChance = template.MinSkillChance,
-                MaxSkillChance = template.MaxSkillChance,
-                AiHealSkills = _npcAiSupport.Get(template.NpcId)?.Heal,
-                AiBuffSkills = _npcAiSupport.Get(template.NpcId)?.Buff,
-                AiDebuffSkills = _npcAiSupport.Get(template.NpcId)?.Debuff,
-                AiImmobilizeSkills = _npcAiSupport.Get(template.NpcId)?.Immobilize,
-                AiSilenceSkills = _npcAiSupport.Get(template.NpcId)?.Silence,
-                AiSuicideSkills = _npcAiSupport.Get(template.NpcId)?.Suicide,
-                RunSpeed = template.RunSpeed,
-                WalkSpeed = template.WalkSpeed,
-                HomeSet = true,
-                HomeX = x,
-                HomeY = y,
-                HomeZ = z
-            };
-            _byId.Add(objectId, entity);
-            _aoi.Enter(objectId, x, y);
-            AddHate(entity, player, hate: 100);
-            FanoutNewNpc(entity);
+            SpawnQuestNpc(player, npcId, x, y, anchor.Z, anchor.InstanceId, anchor.Heading);
         }
+    }
+
+    /// <summary>
+    /// One quest spawn. Monsters come in hating the player; quest folk (Mobius chests, spirits, messengers raised
+    /// by a step) stay peaceful and talkable.
+    /// </summary>
+    ZoneEntity? SpawnQuestNpc(ZoneEntity player, int npcId, int x, int y, int z, int instanceId, int heading, QuestSummon? summon = null)
+    {
+        var templates = NpcCatalog.LoadDefault();
+        if (!templates.ById.TryGetValue(npcId, out var template))
+        {
+            ZoneLog.Info($"quest spawn skip unknown npcId={npcId}");
+            return null;
+        }
+
+        // A quest-summoned raid boss (Ashutar, Nastron, …) exists once: another summon while it lives does nothing.
+        if (string.Equals(template.Type, "RaidBoss", StringComparison.Ordinal) &&
+            _byId.Values.Any(e => e.Kind == ZoneEntityKind.Npc && e.NpcId == npcId && !e.Dead && e.CurHp > 0))
+            return null;
+
+        int objectId = AllocateQuestNpcObjectId();
+        if (_geo.HasGeo(x, y))
+            z = _geo.GetHeight(x, y, z);
+        bool hostile = template.Attackable;
+        var entity = new ZoneEntity
+        {
+            ObjectId = objectId,
+            Kind = ZoneEntityKind.Npc,
+            InstanceId = instanceId,
+            Name = template.Name,
+            Title = template.Title,
+            NpcType = template.Type,
+            X = x,
+            Y = y,
+            Z = z,
+            Heading = heading,
+            NpcId = template.NpcId,
+            Attackable = hostile,
+            MaxHp = template.Hp,
+            CurHp = template.Hp,
+            MaxMp = template.Mp,
+            CurMp = template.Mp,
+            Level = template.Level,
+            RewardExp = template.Exp,
+            RewardSp = template.Sp,
+            PAtk = template.PAtk,
+            HpRegen = template.HpRegen,
+            MpRegen = template.MpRegen,
+            PDef = template.PDef,
+            PAtkSpd = template.AttackSpeed,
+            BaseAccuracy = template.Accuracy,
+            BaseEvasion = template.Evasion,
+            BaseCritical = template.Critical,
+            RandomDamage = template.RandomDamage,
+            Dex = template.Dex,
+            ShieldDef = template.ShieldDef,
+            ShieldRate = template.ShieldRate,
+            MAtk = template.MAtk,
+            MDef = template.MDef,
+            AttackRange = template.AttackRange,
+            Aggressive = hostile,
+            AggroRange = Math.Max(template.AggroRange, 1000),
+            ClanHelpRange = template.ClanHelpRange,
+            Clans = template.Clans,
+            IgnoreNpcIds = template.IgnoreNpcIds,
+            NpcSoulShotLeft = template.SoulShot,
+            NpcSoulShotChance = template.SoulShotChance,
+            NpcSpiritShotLeft = template.SpiritShot,
+            NpcSpiritShotChance = template.SpiritShotChance,
+            DefenceTraits = template.DefenceTraits,
+            AiSkills = FilterAttackSkills(template.AiSkills, _npcAiSupport.Get(template.NpcId)?.Suicide),
+            MinSkillChance = template.MinSkillChance,
+            MaxSkillChance = template.MaxSkillChance,
+            AiHealSkills = _npcAiSupport.Get(template.NpcId)?.Heal,
+            AiBuffSkills = _npcAiSupport.Get(template.NpcId)?.Buff,
+            AiDebuffSkills = _npcAiSupport.Get(template.NpcId)?.Debuff,
+            AiImmobilizeSkills = _npcAiSupport.Get(template.NpcId)?.Immobilize,
+            AiSilenceSkills = _npcAiSupport.Get(template.NpcId)?.Silence,
+            AiSuicideSkills = _npcAiSupport.Get(template.NpcId)?.Suicide,
+            RunSpeed = template.RunSpeed,
+            WalkSpeed = template.WalkSpeed,
+            HomeSet = true,
+            HomeX = x,
+            HomeY = y,
+            HomeZ = z
+        };
+        _byId.Add(objectId, entity);
+        _aoi.Enter(objectId, x, y);
+        if (hostile)
+            AddHate(entity, player, hate: 100);
+        TrackQuestSpawn(entity, player, summon);
+        FanoutNewNpc(entity);
+        return entity;
     }
 
     int AllocateQuestNpcObjectId()
@@ -169,6 +185,8 @@ public sealed partial class ZoneWorld
     {
         if (exp == 0 && sp == 0)
             return false;
+        // Mobius PlayerStat.addExp: gained exp burns karma (outside PVP zones).
+        BurnKarmaByExp(player, exp);
 
         var table = _game.Classes?.Experience;
         if (table == null)

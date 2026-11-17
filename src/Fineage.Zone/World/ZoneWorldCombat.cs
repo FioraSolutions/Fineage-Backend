@@ -38,7 +38,11 @@ public sealed partial class ZoneWorld
         return Task.FromResult<string?>(null);
     }
 
-    public Task<string?> TryAttackAsync(ZoneSession session, int targetObjectId, CancellationToken ct)
+    /// <param name="forced">
+    /// Ctrl / force-attack from the client (<c>AttackRequest.Forced</c>). Legacy clients that do not send it are
+    /// treated as forced, which is what AttackRequest meant before the field existed.
+    /// </param>
+    public Task<string?> TryAttackAsync(ZoneSession session, int targetObjectId, CancellationToken ct, bool forced = true)
     {
         if (!IsLive(session))
             return Task.FromResult<string?>("world");
@@ -53,7 +57,7 @@ public sealed partial class ZoneWorld
             bool alreadySwinging = previous > 0 && previous == requested && session.ApproachTargetId == 0 &&
                 session.NextAutoAttackUnixMs > now0;
             // Re-click on the target already being hit: Mobius keeps the running attack, no extra swing.
-            error = alreadySwinging ? null : TryAttack(session, targetObjectId, out approachMs);
+            error = alreadySwinging ? null : TryAttack(session, targetObjectId, out approachMs, forced);
             if (error == null && !alreadySwinging && approachMs >= 0)
             {
                 session.AutoAttackTargetId = session.SelectedTargetId;
@@ -110,7 +114,7 @@ public sealed partial class ZoneWorld
     {
         bool creature = target.Kind is ZoneEntityKind.Npc or ZoneEntityKind.Player;
         int colour = creature
-            ? InterludeStatus.TargetColor(player.Level, target.Level, IsAutoAttackable(target))
+            ? InterludeStatus.TargetColor(player.Level, target.Level, IsAutoAttackable(player, target))
             : 0;
 
         if (NetBridge == null)
@@ -137,14 +141,17 @@ public sealed partial class ZoneWorld
 
     /// <summary>
     /// Mobius <c>Creature.isAutoAttackable(Player)</c> for the entities this zone carries: NPCs follow their
-    /// template flag; a player is hostile (coloured nameplate) when PvP-flagged or carrying karma. Everything
-    /// else is white (colour 0). Ctrl-attack of a white player is still allowed via <see cref="IsAttackable"/>.
+    /// template flag; a player is hostile (coloured nameplate) when PvP-flagged, carrying karma or both stand in a
+    /// PVP zone, and never when in the viewer's party (<see cref="PlayerAutoAttackable"/>). Everything else is
+    /// white (colour 0). Ctrl-attack of a white player is still allowed via <see cref="IsAttackable"/>.
     /// </summary>
-    static bool IsAutoAttackable(ZoneEntity target) =>
+    bool IsAutoAttackable(ZoneEntity viewer, ZoneEntity target) =>
         target.Kind switch
         {
+            ZoneEntityKind.Npc when target.Summon != null =>
+                OwnerOf(target) is { } owner && !ReferenceEquals(owner, viewer) && PlayerAutoAttackable(viewer, owner),
             ZoneEntityKind.Npc => target.Attackable,
-            ZoneEntityKind.Player => target.PvpFlagged || target.Karma > 0,
+            ZoneEntityKind.Player => PlayerAutoAttackable(viewer, target),
             _ => false
         };
 
@@ -169,6 +176,14 @@ public sealed partial class ZoneWorld
     /// <summary>Mobius <c>PlayableAI</c> blessing / karma / cursed-weapon gate. Sends SysMsg 144 and refuses the swing or bad cast.</summary>
     bool HostilePlayableRefused(ZoneSession session, ZoneEntity attacker, ZoneEntity target, bool badSkill)
     {
+        target = CreditOf(target);
+        if (OlympiadTargetRefused(attacker, target) || DuelTargetRefused(attacker, target))
+        {
+            IncorrectTarget(session);
+            return true;
+        }
+        if (DuelFoes(attacker, target))
+            return false;
         if (!PlayableAttackRules.Refused(
                 attacker.Kind == ZoneEntityKind.Player && target.Kind == ZoneEntityKind.Player,
                 attacker.Level, target.Level, attacker.Karma, target.Karma,
@@ -217,6 +232,8 @@ public sealed partial class ZoneWorld
     /// </summary>
     bool PeacePlayableRefused(ZoneSession session, ZoneEntity attacker, ZoneEntity target, bool notify = true)
     {
+        attacker = CreditOf(attacker);
+        target = CreditOf(target);
         if (attacker.Kind != ZoneEntityKind.Player || target.Kind != ZoneEntityKind.Player)
             return false;
         if (attacker.InstanceId != 0 || ZoneAdmin.AllowPeaceAttack(attacker.Name))
@@ -288,14 +305,14 @@ public sealed partial class ZoneWorld
     }
 
     string? TryAttack(ZoneSession session, int requestedTargetId) =>
-        TryAttack(session, requestedTargetId, out _);
+        TryAttack(session, requestedTargetId, out _, forced: true);
 
     /// <summary>
     /// Interlude RequestAttack: in range -> swing; out of range -> server moveToPawn (run to the target,
     /// MoveToAck to self + watchers) and the swing fires from <see cref="TickAutoAttacks"/> on arrival.
     /// <paramref name="approachMs"/> is the travel time when an approach was started, else 0.
     /// </summary>
-    string? TryAttack(ZoneSession session, int requestedTargetId, out long approachMs)
+    string? TryAttack(ZoneSession session, int requestedTargetId, out long approachMs, bool forced)
     {
         approachMs = 0;
         if (!_byId.TryGetValue(session.ObjectId, out var player) || player.Session == null)
@@ -324,6 +341,19 @@ public sealed partial class ZoneWorld
             return "attack";
         if (!IsAttackable(player, target))
             return "attack";
+        // Mobius: a player cannot attack its own summon.
+        if (target.Summon?.OwnerObjectId == player.ObjectId)
+        {
+            approachMs = -1;
+            return null;
+        }
+        // Mobius onForcedAttack vs isAutoAttackable: a white player or a party mate needs Ctrl. A plain click is
+        // answered with ActionFailed (no swing, no approach, no reject).
+        if (!forced && NeedsForce(player, target))
+        {
+            approachMs = -1;
+            return null;
+        }
         if (HostilePlayableRefused(session, player, target, badSkill: false))
         {
             approachMs = -1;
@@ -418,20 +448,23 @@ public sealed partial class ZoneWorld
             AttackerZ = player.Z,
             TargetX = target.X,
             TargetY = target.Y,
-            TargetZ = target.Z
+            TargetZ = target.Z,
+            SecondHit = dual ? (damage2, flags2) : null
         };
 
         // Swing now; HP drops at hitTime (Mobius onHitTimer).
         FanoutAttack(player, target, attack);
-        QueueAttackerDamageLine(player, target, damage);
+        QueueAttackerDamageLine(player, target, damage, flags);
+        if (dual)
+            QueueAttackerDamageLine(player, target, damage2, flags2);
         if (ps.Weapon == Fineage.Game.WeaponType.Bow)
             ConsumeBowArrow(player);
         long now = _clock().ToUnixTimeMilliseconds();
         player.CombatUntilUnixMs = now + ClanProtocol.CombatStanceMillis;
         long atk = PlayerAttackTimeMs(player.ObjectId);
-        _meleeHits.Add(new PendingMeleeHit(player.ObjectId, targetId, damage, now + (dual ? atk / 4 : atk / 2)));
+        _meleeHits.Add(new PendingMeleeHit(player.ObjectId, targetId, damage, now + (dual ? atk / 4 : atk / 2), flags));
         if (dual)
-            _meleeHits.Add(new PendingMeleeHit(player.ObjectId, targetId, damage2, now + atk / 2));
+            _meleeHits.Add(new PendingMeleeHit(player.ObjectId, targetId, damage2, now + atk / 2, flags2));
 
         return null;
     }

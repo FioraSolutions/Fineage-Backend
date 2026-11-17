@@ -95,6 +95,92 @@ public sealed class TrainerBypassHandler : IBypassHandler
     }
 }
 
+/// <summary>
+/// Fisherman bypasses (Mobius <c>Fisherman.onBypassFeedback</c>): <c>FishSkillList</c> opens the guild skill window,
+/// <c>FishingChampionship</c> shows the tournament page (the championship itself is not run yet).
+/// </summary>
+public sealed class FishermanBypassHandler : IBypassHandler
+{
+    readonly NpcHtmlCatalog _html;
+
+    public FishermanBypassHandler(NpcHtmlCatalog html) => _html = html ?? throw new ArgumentNullException(nameof(html));
+
+    public IReadOnlyList<string> Commands { get; } = ["FishSkillList", "FishingChampionship"];
+
+    public BypassReply Handle(BypassCall call)
+    {
+        if (BypassCommands.Token(call.Command).Equals("FishSkillList", StringComparison.OrdinalIgnoreCase))
+            return BypassReply.ServiceCall(NpcServiceIntent.FishSkillList);
+        var page = NpcHtmlPaths.ReadLink(_html, call.NpcType, "Link fisherman/fishing_championship.htm");
+        return page.RejectedPath ? BypassReply.Fail("bad_request") : BypassReply.Page(page.Html);
+    }
+}
+
+/// <summary>Lottery seller <c>Loto N</c> (Mobius <c>Loto</c> bypass): N picks the page, a number or a ticket to claim.</summary>
+public sealed class LotoBypassHandler : IBypassHandler
+{
+    public IReadOnlyList<string> Commands { get; } = ["Loto"];
+
+    public BypassReply Handle(BypassCall call)
+    {
+        var parts = call.Command.Split(' ', StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries);
+        int value = parts.Length > 1 && int.TryParse(parts[1], out int v) && v >= 0 ? v : 0;
+        return BypassReply.ServiceCall(NpcServiceIntent.Loto, "", value);
+    }
+}
+
+/// <summary>
+/// Mobius <c>SignsPriest</c> <c>SevenSigns N ...</c> as NPC HTML. Only the Black Marketeer's <c>SevenSigns 7 amount</c>
+/// (Ancient Adena → adena) runs over HTML; the priest record, join, contribution, reward, and stone exchange use the
+/// Seven Signs packets (91).
+/// </summary>
+public sealed class SevenSignsBypassHandler : IBypassHandler
+{
+    public IReadOnlyList<string> Commands { get; } = ["SevenSigns"];
+
+    public BypassReply Handle(BypassCall call)
+    {
+        var parts = call.Command.Split(' ', StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries);
+        if (parts.Length < 2 || parts[1] != "7")
+            return BypassReply.Fail("bad_request");
+        int amount = parts.Length > 2 && int.TryParse(parts[2], out int v) && v > 0 ? v : -1;
+        return BypassReply.ServiceCall(NpcServiceIntent.AncientAdenaToAdena, "", amount);
+    }
+}
+
+/// <summary>
+/// Mobius <c>VillageMaster</c> <c>Subclass N [p1] [p2]</c>: 0 menu, 1 add list, 2 change list, 3 modify list,
+/// 4 add, 5 change, 6 modify choice, 7 modify. The arguments ride in the service arg.
+/// </summary>
+public sealed class SubclassBypassHandler : IBypassHandler
+{
+    public IReadOnlyList<string> Commands { get; } = ["Subclass"];
+
+    public BypassReply Handle(BypassCall call)
+    {
+        var parts = call.Command.Split(' ', StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries);
+        if (parts.Length < 2 || !int.TryParse(parts[1], out int choice) || choice is < 0 or > 7)
+            return BypassReply.Fail("bad_request");
+        return BypassReply.ServiceCall(NpcServiceIntent.Subclass, string.Join(' ', parts.Skip(2)), choice);
+    }
+}
+
+/// <summary>Mobius <c>Teleporter showNoblesSelect</c> (Block G1).</summary>
+public sealed class NoblesSelectBypassHandler : IBypassHandler
+{
+    public IReadOnlyList<string> Commands { get; } = ["showNoblesSelect"];
+
+    public BypassReply Handle(BypassCall call) => BypassReply.ServiceCall(NpcServiceIntent.NoblesSelect);
+}
+
+/// <summary>Grand Olympiad Manager / Monument of Heroes pages (Block G2): the whole command rides in the service arg.</summary>
+public sealed class OlympiadBypassHandler : IBypassHandler
+{
+    public IReadOnlyList<string> Commands { get; } = ["OlympiadDesc", "OlympiadNoble", "Olympiad"];
+
+    public BypassReply Handle(BypassCall call) => BypassReply.ServiceCall(NpcServiceIntent.Olympiad, call.Command.Trim());
+}
+
 /// <summary>Merchant <c>TerritoryStatus</c> (Mobius <c>Merchant.showTerritoryStatusWindow</c>): castle, lord and tax page.</summary>
 public sealed class TerritoryBypassHandler : IBypassHandler
 {

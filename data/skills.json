@@ -18517,6 +18517,49 @@
       "effectRange": 400
     },
     {
+      "skillId": 246,
+      "name": "Seal of Ruler",
+      "levels": 1,
+      "passive": false,
+      "operateType": "A1",
+      "targetType": "HOLY",
+      "castRange": 85,
+      "hitTimeMs": 180000,
+      "reuseDelayMs": 5000,
+      "levelData": [
+        {
+          "level": 1,
+          "mpConsume": 50,
+          "power": 0,
+          "abnormalLevel": 0,
+          "magicLevel": 30
+        }
+      ],
+      "effectRange": 400,
+      "magicType": 2
+    },
+    {
+      "skillId": 247,
+      "name": "Build Headquarters",
+      "levels": 1,
+      "passive": false,
+      "operateType": "A1",
+      "targetType": "SELF",
+      "castRange": -1,
+      "hitTimeMs": 4000,
+      "reuseDelayMs": 1800000,
+      "levelData": [
+        {
+          "level": 1,
+          "mpConsume": 30,
+          "power": 0,
+          "abnormalLevel": 0,
+          "magicLevel": 30
+        }
+      ],
+      "magicType": 2
+    },
+    {
       "skillId": 248,
       "name": "Crystallize",
       "levels": 5,
@@ -49268,6 +49311,985 @@
       "abnormalTimeSeconds": 30,
       "magicType": 1,
       "abnormalType": "FORCE_MEDITATION"
+    },
+    {
+      "skillId": 2096,
+      "name": "Soul Crystal",
+      "levels": 1,
+      "passive": false,
+      "operateType": "A1",
+      "targetType": "ONE",
+      "castRange": 300,
+      "hitTimeMs": 1200,
+      "reuseDelayMs": 3000,
+      "levelData": [
+        {
+          "level": 1,
+          "mpConsume": 26,
+          "power": 0,
+          "abnormalLevel": 0,
+          "magicLevel": 1
+        }
+      ],
+      "magicType": 2,
+      "effectRange": 500
+    },
+    {
+      "skillId": 2097,
+      "name": "Sowing",
+      "levels": 3,
+      "passive": false,
+      "operateType": "A1",
+      "targetType": "ONE",
+      "castRange": 40,
+      "hitTimeMs": 1800,
+      "reuseDelayMs": 10000,
+      "levelData": [
+        {
+          "level": 1,
+          "mpConsume": 4,
+          "power": 0,
+          "abnormalLevel": 0,
+          "magicLevel": 10
+        },
+        {
+          "level": 2,
+          "mpConsume": 6,
+          "power": 0,
+          "abnormalLevel": 0,
+          "magicLevel": 20
+        },
+        {
+          "level": 3,
+          "mpConsume": 8,
+          "power": 0,
+          "abnormalLevel": 0,
+          "magicLevel": 30
+        }
+      ],
+      "magicType": 2,
+      "effectRange": 400
+    },
+    {
+      "skillId": 2098,
+      "name": "Harvesting",
+      "levels": 1,
+      "passive": false,
+      "operateType": "A1",
+      "targetType": "CORPSE_MOB",
+      "castRange": 20,
+      "hitTimeMs": 500,
+      "reuseDelayMs": 1000,
+      "levelData": [
+        {
+          "level": 1,
+          "mpConsume": 3,
+          "power": 0,
+          "abnormalLevel": 0,
+          "magicLevel": 1
+        }
+      ],
+      "magicType": 2,
+      "effectRange": 400
+    },
+    {
+      "skillId": 1312,
+      "name": "Fishing",
+      "levels": 1,
+      "passive": false,
+      "operateType": "A1",
+      "targetType": "SELF",
+      "castRange": -1,
+      "hitTimeMs": 0,
+      "reuseDelayMs": 0,
+      "levelData": [
+        {
+          "level": 1,
+          "mpConsume": 1,
+          "power": 0,
+          "abnormalLevel": 0,
+          "magicLevel": 1
+        }
+      ],
+      "magicType": 2,
+      "effectRange": -1
+    },
+    {
+      "skillId": 1313,
+      "name": "Pumping",
+      "levels": 27,
+      "passive": false,
+      "operateType": "A1",
+      "targetType": "SELF",
+      "castRange": -1,
+      "hitTimeMs": 0,
+      "reuseDelayMs": 2000,
+      "levelData": [
+        {
+          "level": 1,
+          "mpConsume": 2,
+          "power": 0,
+          "abnormalLevel": 0,
+          "magicLevel": 1
+        },
+        {
+          "level": 2,
+          "mpConsume": 2,
+          "power": 0,
+          "abnormalLevel": 0,
+          "magicLevel": 1
+        },
+        {
+          "level": 3,
+          "mpConsume": 2,
+          "power": 0,
+          "abnormalLevel": 0,
+          "magicLevel": 1
+        },
+        {
+          "level": 4,
+          "mpConsume": 2,
+          "power": 0,
+          "abnormalLevel": 0,
+          "magicLevel": 1
+        },
+        {
+          "level": 5,
+          "mpConsume": 2,
+          "power": 0,
+          "abnormalLevel": 0,
+          "magicLevel": 1
+        },
+        {
+          "level": 6,
+          "mpConsume": 2,
+          "power": 0,
+          "abnormalLevel": 0,
+          "magicLevel": 1
+        },
+        {
+          "level": 7,
+          "mpConsume": 2,
+          "power": 0,
+          "abnormalLevel": 0,
+          "magicLevel": 1
+        },
+        {
+          "level": 8,
+          "mpConsume": 2,
+          "power": 0,
+          "abnormalLevel": 0,
+          "magicLevel": 1
+        },
+        {
+          "level": 9,
+          "mpConsume": 2,
+          "power": 0,
+          "abnormalLevel": 0,
+          "magicLevel": 1
+        },
+        {
+          "level": 10,
+          "mpConsume": 2,
+          "power": 0,
+          "abnormalLevel": 0,
+          "magicLevel": 1
+        },
+        {
+          "level": 11,
+          "mpConsume": 2,
+          "power": 0,
+          "abnormalLevel": 0,
+          "magicLevel": 1
+        },
+        {
+          "level": 12,
+          "mpConsume": 2,
+          "power": 0,
+          "abnormalLevel": 0,
+          "magicLevel": 1
+        },
+        {
+          "level": 13,
+          "mpConsume": 2,
+          "power": 0,
+          "abnormalLevel": 0,
+          "magicLevel": 1
+        },
+        {
+          "level": 14,
+          "mpConsume": 2,
+          "power": 0,
+          "abnormalLevel": 0,
+          "magicLevel": 1
+        },
+        {
+          "level": 15,
+          "mpConsume": 2,
+          "power": 0,
+          "abnormalLevel": 0,
+          "magicLevel": 1
+        },
+        {
+          "level": 16,
+          "mpConsume": 2,
+          "power": 0,
+          "abnormalLevel": 0,
+          "magicLevel": 1
+        },
+        {
+          "level": 17,
+          "mpConsume": 2,
+          "power": 0,
+          "abnormalLevel": 0,
+          "magicLevel": 1
+        },
+        {
+          "level": 18,
+          "mpConsume": 2,
+          "power": 0,
+          "abnormalLevel": 0,
+          "magicLevel": 1
+        },
+        {
+          "level": 19,
+          "mpConsume": 2,
+          "power": 0,
+          "abnormalLevel": 0,
+          "magicLevel": 1
+        },
+        {
+          "level": 20,
+          "mpConsume": 2,
+          "power": 0,
+          "abnormalLevel": 0,
+          "magicLevel": 1
+        },
+        {
+          "level": 21,
+          "mpConsume": 2,
+          "power": 0,
+          "abnormalLevel": 0,
+          "magicLevel": 1
+        },
+        {
+          "level": 22,
+          "mpConsume": 2,
+          "power": 0,
+          "abnormalLevel": 0,
+          "magicLevel": 1
+        },
+        {
+          "level": 23,
+          "mpConsume": 2,
+          "power": 0,
+          "abnormalLevel": 0,
+          "magicLevel": 1
+        },
+        {
+          "level": 24,
+          "mpConsume": 2,
+          "power": 0,
+          "abnormalLevel": 0,
+          "magicLevel": 1
+        },
+        {
+          "level": 25,
+          "mpConsume": 2,
+          "power": 0,
+          "abnormalLevel": 0,
+          "magicLevel": 1
+        },
+        {
+          "level": 26,
+          "mpConsume": 2,
+          "power": 0,
+          "abnormalLevel": 0,
+          "magicLevel": 1
+        },
+        {
+          "level": 27,
+          "mpConsume": 2,
+          "power": 0,
+          "abnormalLevel": 0,
+          "magicLevel": 1
+        }
+      ],
+      "magicType": 2,
+      "effectRange": -1
+    },
+    {
+      "skillId": 1314,
+      "name": "Reeling",
+      "levels": 27,
+      "passive": false,
+      "operateType": "A1",
+      "targetType": "SELF",
+      "castRange": -1,
+      "hitTimeMs": 0,
+      "reuseDelayMs": 2000,
+      "levelData": [
+        {
+          "level": 1,
+          "mpConsume": 2,
+          "power": 0,
+          "abnormalLevel": 0,
+          "magicLevel": 1
+        },
+        {
+          "level": 2,
+          "mpConsume": 2,
+          "power": 0,
+          "abnormalLevel": 0,
+          "magicLevel": 1
+        },
+        {
+          "level": 3,
+          "mpConsume": 2,
+          "power": 0,
+          "abnormalLevel": 0,
+          "magicLevel": 1
+        },
+        {
+          "level": 4,
+          "mpConsume": 2,
+          "power": 0,
+          "abnormalLevel": 0,
+          "magicLevel": 1
+        },
+        {
+          "level": 5,
+          "mpConsume": 2,
+          "power": 0,
+          "abnormalLevel": 0,
+          "magicLevel": 1
+        },
+        {
+          "level": 6,
+          "mpConsume": 2,
+          "power": 0,
+          "abnormalLevel": 0,
+          "magicLevel": 1
+        },
+        {
+          "level": 7,
+          "mpConsume": 2,
+          "power": 0,
+          "abnormalLevel": 0,
+          "magicLevel": 1
+        },
+        {
+          "level": 8,
+          "mpConsume": 2,
+          "power": 0,
+          "abnormalLevel": 0,
+          "magicLevel": 1
+        },
+        {
+          "level": 9,
+          "mpConsume": 2,
+          "power": 0,
+          "abnormalLevel": 0,
+          "magicLevel": 1
+        },
+        {
+          "level": 10,
+          "mpConsume": 2,
+          "power": 0,
+          "abnormalLevel": 0,
+          "magicLevel": 1
+        },
+        {
+          "level": 11,
+          "mpConsume": 2,
+          "power": 0,
+          "abnormalLevel": 0,
+          "magicLevel": 1
+        },
+        {
+          "level": 12,
+          "mpConsume": 2,
+          "power": 0,
+          "abnormalLevel": 0,
+          "magicLevel": 1
+        },
+        {
+          "level": 13,
+          "mpConsume": 2,
+          "power": 0,
+          "abnormalLevel": 0,
+          "magicLevel": 1
+        },
+        {
+          "level": 14,
+          "mpConsume": 2,
+          "power": 0,
+          "abnormalLevel": 0,
+          "magicLevel": 1
+        },
+        {
+          "level": 15,
+          "mpConsume": 2,
+          "power": 0,
+          "abnormalLevel": 0,
+          "magicLevel": 1
+        },
+        {
+          "level": 16,
+          "mpConsume": 2,
+          "power": 0,
+          "abnormalLevel": 0,
+          "magicLevel": 1
+        },
+        {
+          "level": 17,
+          "mpConsume": 2,
+          "power": 0,
+          "abnormalLevel": 0,
+          "magicLevel": 1
+        },
+        {
+          "level": 18,
+          "mpConsume": 2,
+          "power": 0,
+          "abnormalLevel": 0,
+          "magicLevel": 1
+        },
+        {
+          "level": 19,
+          "mpConsume": 2,
+          "power": 0,
+          "abnormalLevel": 0,
+          "magicLevel": 1
+        },
+        {
+          "level": 20,
+          "mpConsume": 2,
+          "power": 0,
+          "abnormalLevel": 0,
+          "magicLevel": 1
+        },
+        {
+          "level": 21,
+          "mpConsume": 2,
+          "power": 0,
+          "abnormalLevel": 0,
+          "magicLevel": 1
+        },
+        {
+          "level": 22,
+          "mpConsume": 2,
+          "power": 0,
+          "abnormalLevel": 0,
+          "magicLevel": 1
+        },
+        {
+          "level": 23,
+          "mpConsume": 2,
+          "power": 0,
+          "abnormalLevel": 0,
+          "magicLevel": 1
+        },
+        {
+          "level": 24,
+          "mpConsume": 2,
+          "power": 0,
+          "abnormalLevel": 0,
+          "magicLevel": 1
+        },
+        {
+          "level": 25,
+          "mpConsume": 2,
+          "power": 0,
+          "abnormalLevel": 0,
+          "magicLevel": 1
+        },
+        {
+          "level": 26,
+          "mpConsume": 2,
+          "power": 0,
+          "abnormalLevel": 0,
+          "magicLevel": 1
+        },
+        {
+          "level": 27,
+          "mpConsume": 2,
+          "power": 0,
+          "abnormalLevel": 0,
+          "magicLevel": 1
+        }
+      ],
+      "magicType": 2,
+      "effectRange": -1
+    },
+    {
+      "skillId": 1315,
+      "name": "Fishing Expertise",
+      "levels": 27,
+      "passive": true,
+      "operateType": "P",
+      "targetType": "SELF",
+      "castRange": -1,
+      "hitTimeMs": 0,
+      "reuseDelayMs": 0,
+      "levelData": [
+        {
+          "level": 1,
+          "mpConsume": 0,
+          "power": 0,
+          "abnormalLevel": 0,
+          "magicLevel": 1
+        },
+        {
+          "level": 2,
+          "mpConsume": 0,
+          "power": 0,
+          "abnormalLevel": 0,
+          "magicLevel": 1
+        },
+        {
+          "level": 3,
+          "mpConsume": 0,
+          "power": 0,
+          "abnormalLevel": 0,
+          "magicLevel": 1
+        },
+        {
+          "level": 4,
+          "mpConsume": 0,
+          "power": 0,
+          "abnormalLevel": 0,
+          "magicLevel": 1
+        },
+        {
+          "level": 5,
+          "mpConsume": 0,
+          "power": 0,
+          "abnormalLevel": 0,
+          "magicLevel": 1
+        },
+        {
+          "level": 6,
+          "mpConsume": 0,
+          "power": 0,
+          "abnormalLevel": 0,
+          "magicLevel": 1
+        },
+        {
+          "level": 7,
+          "mpConsume": 0,
+          "power": 0,
+          "abnormalLevel": 0,
+          "magicLevel": 1
+        },
+        {
+          "level": 8,
+          "mpConsume": 0,
+          "power": 0,
+          "abnormalLevel": 0,
+          "magicLevel": 1
+        },
+        {
+          "level": 9,
+          "mpConsume": 0,
+          "power": 0,
+          "abnormalLevel": 0,
+          "magicLevel": 1
+        },
+        {
+          "level": 10,
+          "mpConsume": 0,
+          "power": 0,
+          "abnormalLevel": 0,
+          "magicLevel": 1
+        },
+        {
+          "level": 11,
+          "mpConsume": 0,
+          "power": 0,
+          "abnormalLevel": 0,
+          "magicLevel": 1
+        },
+        {
+          "level": 12,
+          "mpConsume": 0,
+          "power": 0,
+          "abnormalLevel": 0,
+          "magicLevel": 1
+        },
+        {
+          "level": 13,
+          "mpConsume": 0,
+          "power": 0,
+          "abnormalLevel": 0,
+          "magicLevel": 1
+        },
+        {
+          "level": 14,
+          "mpConsume": 0,
+          "power": 0,
+          "abnormalLevel": 0,
+          "magicLevel": 1
+        },
+        {
+          "level": 15,
+          "mpConsume": 0,
+          "power": 0,
+          "abnormalLevel": 0,
+          "magicLevel": 1
+        },
+        {
+          "level": 16,
+          "mpConsume": 0,
+          "power": 0,
+          "abnormalLevel": 0,
+          "magicLevel": 1
+        },
+        {
+          "level": 17,
+          "mpConsume": 0,
+          "power": 0,
+          "abnormalLevel": 0,
+          "magicLevel": 1
+        },
+        {
+          "level": 18,
+          "mpConsume": 0,
+          "power": 0,
+          "abnormalLevel": 0,
+          "magicLevel": 1
+        },
+        {
+          "level": 19,
+          "mpConsume": 0,
+          "power": 0,
+          "abnormalLevel": 0,
+          "magicLevel": 1
+        },
+        {
+          "level": 20,
+          "mpConsume": 0,
+          "power": 0,
+          "abnormalLevel": 0,
+          "magicLevel": 1
+        },
+        {
+          "level": 21,
+          "mpConsume": 0,
+          "power": 0,
+          "abnormalLevel": 0,
+          "magicLevel": 1
+        },
+        {
+          "level": 22,
+          "mpConsume": 0,
+          "power": 0,
+          "abnormalLevel": 0,
+          "magicLevel": 1
+        },
+        {
+          "level": 23,
+          "mpConsume": 0,
+          "power": 0,
+          "abnormalLevel": 0,
+          "magicLevel": 1
+        },
+        {
+          "level": 24,
+          "mpConsume": 0,
+          "power": 0,
+          "abnormalLevel": 0,
+          "magicLevel": 1
+        },
+        {
+          "level": 25,
+          "mpConsume": 0,
+          "power": 0,
+          "abnormalLevel": 0,
+          "magicLevel": 1
+        },
+        {
+          "level": 26,
+          "mpConsume": 0,
+          "power": 0,
+          "abnormalLevel": 0,
+          "magicLevel": 1
+        },
+        {
+          "level": 27,
+          "mpConsume": 0,
+          "power": 0,
+          "abnormalLevel": 0,
+          "magicLevel": 1
+        }
+      ],
+      "magicType": 2,
+      "effectRange": -1
+    },
+    {
+      "skillId": 325,
+      "name": "Strider Siege Assault",
+      "levels": 1,
+      "passive": false,
+      "operateType": "A1",
+      "targetType": "ONE",
+      "castRange": 40,
+      "hitTimeMs": 1080,
+      "reuseDelayMs": 5000,
+      "levelData": [
+        {
+          "level": 1,
+          "mpConsume": 168,
+          "power": 15005,
+          "abnormalLevel": 1
+        }
+      ]
+    },
+    {
+      "skillId": 326,
+      "name": "Build Advanced Headquarters",
+      "levels": 1,
+      "passive": false,
+      "operateType": "A1",
+      "targetType": "SELF",
+      "castRange": 40,
+      "hitTimeMs": 4000,
+      "reuseDelayMs": 3600000,
+      "levelData": [
+        {
+          "level": 1,
+          "mpConsume": 0,
+          "power": 0,
+          "abnormalLevel": 1
+        }
+      ]
+    },
+    {
+      "skillId": 327,
+      "name": "Wyvern Aegis",
+      "levels": 1,
+      "passive": false,
+      "operateType": "A2",
+      "targetType": "SELF",
+      "castRange": 40,
+      "hitTimeMs": 1000,
+      "reuseDelayMs": 1800000,
+      "levelData": [
+        {
+          "level": 1,
+          "mpConsume": 69,
+          "power": 0,
+          "abnormalLevel": 3
+        }
+      ],
+      "abnormalTimeSeconds": 9,
+      "abnormalType": "PD_UP_SPECIAL"
+    },
+    {
+      "skillId": 395,
+      "name": "Heroic Miracle",
+      "levels": 1,
+      "passive": false,
+      "operateType": "A2",
+      "targetType": "SELF",
+      "castRange": 40,
+      "hitTimeMs": 1000,
+      "reuseDelayMs": 1200000,
+      "levelData": [
+        {
+          "level": 1,
+          "mpConsume": 72,
+          "power": 0,
+          "abnormalLevel": 3
+        }
+      ],
+      "abnormalTimeSeconds": 30,
+      "abnormalType": "HERO_BUFF"
+    },
+    {
+      "skillId": 396,
+      "name": "Heroic Berserker",
+      "levels": 1,
+      "passive": false,
+      "operateType": "A2",
+      "targetType": "SELF",
+      "castRange": 40,
+      "hitTimeMs": 1000,
+      "reuseDelayMs": 1200000,
+      "levelData": [
+        {
+          "level": 1,
+          "mpConsume": 72,
+          "power": 0,
+          "abnormalLevel": 3
+        }
+      ],
+      "abnormalTimeSeconds": 120,
+      "abnormalType": "HERO_BUFF"
+    },
+    {
+      "skillId": 1323,
+      "name": "Noblesse Blessing",
+      "levels": 1,
+      "passive": false,
+      "operateType": "A2",
+      "targetType": "ONE",
+      "castRange": 400,
+      "hitTimeMs": 4000,
+      "reuseDelayMs": 6000,
+      "levelData": [
+        {
+          "level": 1,
+          "mpConsume": 55,
+          "power": 0,
+          "abnormalLevel": 1
+        }
+      ],
+      "abnormalTimeSeconds": 3600,
+      "abnormalType": "PRESERVE_ABNORMAL"
+    },
+    {
+      "skillId": 1324,
+      "name": "Summon CP Potion",
+      "levels": 1,
+      "passive": false,
+      "operateType": "A1",
+      "targetType": "SELF",
+      "castRange": 40,
+      "hitTimeMs": 20000,
+      "reuseDelayMs": 1800000,
+      "levelData": [
+        {
+          "level": 1,
+          "mpConsume": 330,
+          "power": 0,
+          "abnormalLevel": 1
+        }
+      ]
+    },
+    {
+      "skillId": 1325,
+      "name": "Fortune of Noblesse",
+      "levels": 1,
+      "passive": false,
+      "operateType": "A2",
+      "targetType": "PARTY",
+      "castRange": 40,
+      "hitTimeMs": 4000,
+      "reuseDelayMs": 20000,
+      "levelData": [
+        {
+          "level": 1,
+          "mpConsume": 220,
+          "power": 0,
+          "abnormalLevel": 6
+        }
+      ],
+      "abnormalTimeSeconds": 3600,
+      "abnormalType": "REDUCE_DROP_PENALTY"
+    },
+    {
+      "skillId": 1326,
+      "name": "Harmony of Noblesse",
+      "levels": 1,
+      "passive": false,
+      "operateType": "A1",
+      "targetType": "AREA",
+      "castRange": 700,
+      "hitTimeMs": 7000,
+      "reuseDelayMs": 3600000,
+      "levelData": [
+        {
+          "level": 1,
+          "mpConsume": 40,
+          "power": 250,
+          "abnormalLevel": 1
+        }
+      ]
+    },
+    {
+      "skillId": 1327,
+      "name": "Symphony of Noblesse",
+      "levels": 1,
+      "passive": false,
+      "operateType": "A1",
+      "targetType": "AREA",
+      "castRange": 700,
+      "hitTimeMs": 7000,
+      "reuseDelayMs": 3600000,
+      "levelData": [
+        {
+          "level": 1,
+          "mpConsume": 64,
+          "power": 400,
+          "abnormalLevel": 1
+        }
+      ]
+    },
+    {
+      "skillId": 1374,
+      "name": "Heroic Valor",
+      "levels": 1,
+      "passive": false,
+      "operateType": "A2",
+      "targetType": "CLAN",
+      "castRange": 40,
+      "hitTimeMs": 2500,
+      "reuseDelayMs": 1200000,
+      "levelData": [
+        {
+          "level": 1,
+          "mpConsume": 0,
+          "power": 0,
+          "abnormalLevel": 1
+        }
+      ],
+      "abnormalTimeSeconds": 120,
+      "abnormalType": "HERO_BUFF"
+    },
+    {
+      "skillId": 1375,
+      "name": "Heroic Grandeur",
+      "levels": 1,
+      "passive": false,
+      "operateType": "A2",
+      "targetType": "AURA",
+      "castRange": 40,
+      "hitTimeMs": 2500,
+      "reuseDelayMs": 300000,
+      "levelData": [
+        {
+          "level": 1,
+          "mpConsume": 0,
+          "power": 0,
+          "abnormalLevel": 1
+        }
+      ],
+      "abnormalTimeSeconds": 30,
+      "isDebuff": true,
+      "abnormalType": "HERO_DEBUFF"
+    },
+    {
+      "skillId": 1376,
+      "name": "Heroic Dread",
+      "levels": 1,
+      "passive": false,
+      "operateType": "A2",
+      "targetType": "AURA",
+      "castRange": 40,
+      "hitTimeMs": 2500,
+      "reuseDelayMs": 300000,
+      "levelData": [
+        {
+          "level": 1,
+          "mpConsume": 0,
+          "power": 0,
+          "abnormalLevel": 1
+        }
+      ],
+      "abnormalTimeSeconds": 15,
+      "isDebuff": true,
+      "abnormalType": "HERO_DEBUFF"
     }
   ]
 }

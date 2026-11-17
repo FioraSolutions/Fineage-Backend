@@ -58,6 +58,18 @@ public sealed partial class ZoneWorld
             ClearReviveOffer(player);
             return null;
         }
+        if (action == DeathProtocol.ReviveToCastle || action == DeathProtocol.ReviveToSiegeHq)
+        {
+            // Mobius RequestRestartPoint cases 2 / 3: castle (defender in a siege, or the owner clan) and siege HQ.
+            var point = action == DeathProtocol.ReviveToCastle ? CastleRestartPoint(player) : SiegeHqRestartPoint(player);
+            if (point is not { } p)
+                return action == DeathProtocol.ReviveToCastle ? DeathProtocol.NoCastle : DeathProtocol.NoHeadquarters;
+            ClearReviveOffer(player);
+            ReviveAtVillage(player, p.X, p.Y, p.Z);
+            ZoneLog.Info($"revive object={player.ObjectId} action={action} -> {p.X},{p.Y},{p.Z}");
+            return null;
+        }
+
         if (action != DeathProtocol.ReviveToVillage)
             return DeathProtocol.Unsupported;
 
@@ -72,17 +84,34 @@ public sealed partial class ZoneWorld
     {
         if (player.Kind != ZoneEntityKind.Player || player.Dead)
             return;
+        // A summon's kill is its owner's kill (Mobius Summon.asPlayer for onKillUpdatePvPKarma / death penalty).
+        if (killerObjectId > 0 && _byId.TryGetValue(killerObjectId, out var killerSummon) && OwnerOf(killerSummon) is { } summoner)
+            killerObjectId = summoner.ObjectId;
+        if (DuelKnockout(player))
+            return;
+        if (OlympiadKnockout(player, killerObjectId))
+            return;
 
+        EndFishing(player, win: false);
         player.Dead = true;
         player.CurHp = 0;
         ClosePrivateStore(player.ObjectId, standUp: false);
+        // A dead player cannot finish an exchange: close the window on both sides, drop pending asks.
+        TradePlayerLeftWorld(player.ObjectId);
+        if (player.Session != null)
+            player.Session.SitOnArrive = false;
         player.Sitting = false;
         player.Running = false;
         player.ActiveEnchantObjectId = 0;
         player.Abnormals.Clear();
+        RemoveAllCubics(player); // Mobius CubicAction / CubicHeal: a dead owner loses its cubics
         RefreshRunSpeed(player); // dead: buff runSpd funcs drop with the abnormals
         player.CombatUntilUnixMs = 0;
+        // The kill is judged on the flag the victim died with (Mobius onKillUpdatePvPKarma reads getPvpFlag()
+        // before stopPvPFlag), so remember it before death wipes it.
+        bool wasFlagged = player.PvpFlagged;
         player.PvpFlagged = false;
+        player.PvpFlagBlink = false;
         player.PvpFlagUntilMs = 0;
         ClearReviveOffer(player);
 
@@ -93,13 +122,23 @@ public sealed partial class ZoneWorld
         if (killerObjectId > 0
             && _byId.TryGetValue(killerObjectId, out var killer)
             && killer.Kind == ZoneEntityKind.Player)
-            OnKillUpdatePvPKarma(killer, player);
+            OnKillUpdatePvPKarma(killer, player, wasFlagged);
 
         // Mobius Player.onDeath runs the exp penalty before the Die packet goes out, so the client's exp bar and the
         // Death Penalty level are already the post-death values on the death screen.
         ApplyDeathConsequences(player, killerObjectId);
         // Mobius Player.onDieDropItem — after exp/DP, before Die packet.
         OnDieDropItem(player, killerObjectId);
+        // Mobius Player.doDie karma tempfix: a dying PK keeps 3/4 of its karma (under 200 → 0).
+        if (player.Karma > 0)
+        {
+            player.Karma = KarmaAfterDeath(player.Karma);
+            PersistKarmaPk(player);
+            if (player.Karma == 0)
+                wasFlagged = true; // repaint below: the red name goes white
+        }
+        if (wasFlagged)
+            BroadcastPvpAppearance(player);
 
         FanoutPlayerDeath(player, killerObjectId);
         if (player.Session != null)
@@ -217,7 +256,7 @@ public sealed partial class ZoneWorld
 
         if (netWatchers is { Count: > 0 } && NetBridge != null)
         {
-            NetBridge.FanoutDie(netWatchers, dead.ObjectId, killerObjectId);
+            NetBridge.FanoutDie(netWatchers, dead.ObjectId, killerObjectId, RestartFlagsFor(dead));
             NetBridge.FanoutStatusUpdate(netWatchers, status);
         }
     }

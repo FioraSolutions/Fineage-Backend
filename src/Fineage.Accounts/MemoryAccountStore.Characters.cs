@@ -193,6 +193,20 @@ public sealed partial class MemoryAccountStore
         }
     }
 
+    public bool TrySaveClassState(string account, int characterId, CharacterClassState state)
+    {
+        ArgumentNullException.ThrowIfNull(state);
+        lock (_gate)
+        {
+            var character = FindCharacter(account, characterId);
+            if (character == null)
+                return false;
+            character.ClassState = state.Clone();
+            Save();
+            return true;
+        }
+    }
+
     public bool TrySaveHenna(string account, int characterId, int dye1, int dye2, int dye3)
     {
         lock (_gate)

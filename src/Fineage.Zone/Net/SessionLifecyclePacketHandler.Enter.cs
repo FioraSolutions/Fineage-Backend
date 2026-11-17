@@ -118,13 +118,22 @@ sealed partial class SessionLifecyclePacketHandler
             var remote = NetEnterWorldProjector.BuildPresenceSpawn(other, otherId, _playerSpawnPAtkSpd(other));
             await conn.SendAsync(NetOpcode.EntitySpawn, NetCodec.EncodeEntitySpawn(remote), ct: ct)
                 .ConfigureAwait(false);
+            // Late join: a peer mid-run / seated is shown in that state, not idle at a stale spot.
+            foreach (var (opcode, payload) in NetEnterWorldProjector.BuildPresenceFollowUps(other, otherId, _world))
+                await conn.SendAsync(opcode, payload, ct: ct).ConfigureAwait(false);
+            // Clan war / alliance colours for the pawn just shown (Mobius RelationChanged after CharInfo).
+            if (_world.SpawnRelationFrame(other, entity) is { } relation)
+                await conn.SendAsync(NetOpcode.RelationChanged, relation, ct: ct).ConfigureAwait(false);
         }
 
         var selfRemote = NetCodec.EncodeEntitySpawn(NetEnterWorldProjector.BuildRemoteSpawn(entity, self, _playerSpawnPAtkSpd(entity)));
         foreach (var peer in known)
         {
-            if (peer.Kind == ZoneEntityKind.Player)
-                await _presence.SendAsync(peer.ObjectId, NetOpcode.EntitySpawn, selfRemote, ct).ConfigureAwait(false);
+            if (peer.Kind != ZoneEntityKind.Player)
+                continue;
+            await _presence.SendAsync(peer.ObjectId, NetOpcode.EntitySpawn, selfRemote, ct).ConfigureAwait(false);
+            if (_world.SpawnRelationFrame(entity, peer) is { } relation)
+                await _presence.SendAsync(peer.ObjectId, NetOpcode.RelationChanged, relation, ct).ConfigureAwait(false);
         }
     }
 
@@ -170,7 +179,7 @@ sealed partial class SessionLifecyclePacketHandler
             throw new InvalidOperationException("hello_required");
     }
 
-    static ShortCutInitNetMsg ToNetShortcutInit(ShortCutInitMsg init)
+    internal static ShortCutInitNetMsg ToNetShortcutInit(ShortCutInitMsg init)
     {
         var src = init.Shortcuts ?? [];
         var rows = new ShortCutNetMsg[src.Length];
@@ -179,7 +188,7 @@ sealed partial class SessionLifecyclePacketHandler
         return new ShortCutInitNetMsg { Shortcuts = rows };
     }
 
-    static AbnormalStatusUpdateNetMsg ToNetAbnormal(AbnormalStatusUpdateMsg update)
+    internal static AbnormalStatusUpdateNetMsg ToNetAbnormal(AbnormalStatusUpdateMsg update)
     {
         var src = update.Effects ?? [];
         var rows = new AbnormalEffectNet[src.Length];

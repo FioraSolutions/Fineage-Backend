@@ -25,7 +25,7 @@ sealed partial class ZoneEntity
     public int ObjectId { get; init; }
     public ZoneEntityKind Kind { get; init; }
     public string Name { get; init; } = "";
-    public string Title { get; init; } = "";
+    public string Title { get; set; } = "";
     /// <summary>NPC template payload; null until first template access (#353 composition).</summary>
     public ZoneNpcTemplatePayload? NpcTemplate { get; set; }
 
@@ -44,6 +44,12 @@ sealed partial class ZoneEntity
     public long FearFleeAtUnixMs { get; set; }
     /// <summary>Mobius <c>ArenaZone</c> membership already announced (enter/leave combat zone).</summary>
     public bool InArena { get; set; }
+    /// <summary>Mobius <c>Attackable._absorbersList</c>: player object id → monster HP when their Soul Crystal landed.</summary>
+    public Dictionary<int, int>? SoulAbsorbers { get; set; }
+    /// <summary>Mobius <c>npc.setScriptValue(1)</c> after an onAttack step spawned helpers (once per mob).</summary>
+    public bool QuestAttackSpawned { get; set; }
+    /// <summary>Set on NPCs a quest step raised: owner, despawn timer, saga summon data.</summary>
+    public QuestSpawnState? QuestSpawn { get; set; }
     /// <summary>Players: changes on class transfer (Mobius setClassId).</summary>
     public int ClassId { get; set; }
     public int NpcId

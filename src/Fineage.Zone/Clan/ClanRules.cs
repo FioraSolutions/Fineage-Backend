@@ -82,13 +82,16 @@ public static class ClanRules
         bool targetInClan,
         bool targetJoinPenalty,
         int memberCount,
-        int clanLevel)
+        int clanLevel,
+        bool unitExists = false,
+        bool academyEligible = true)
     {
         if (!inClan)
             return ClanProtocol.None;
+        // Mobius Clan.checkClanJoinCondition: INVITE privilege (leader passes <paramref name="leader"/> = true).
         if (!leader)
             return ClanProtocol.Leader;
-        if (pledgeType != ClanProtocol.MainPledge)
+        if (pledgeType != ClanProtocol.MainPledge && !unitExists)
             return ClanProtocol.Pledge;
         if (self)
             return ClanProtocol.Self;
@@ -104,6 +107,9 @@ public static class ClanRules
             return ClanProtocol.TargetClan;
         if (targetJoinPenalty)
             return ClanProtocol.JoinPenalty;
+        // Mobius: academy recruits must be level 40 or lower and not past the 2nd class transfer (1734 / 1735).
+        if (pledgeType == -1 && !academyEligible)
+            return ClanProtocol.Academy;
         if (memberCount >= MemberLimit(clanLevel, pledgeType))
             return ClanProtocol.Full;
         return null;

@@ -1,0 +1,1179 @@
+{
+  "id": 350,
+  "name": "Enhance Your Weapon",
+  "repeatable": true,
+  "abortable": true,
+  "questItems": [],
+  "dialogs": [
+    {
+      "npcId": 30115,
+      "hook": "talk",
+      "when": "absent",
+      "minLevel": 40,
+      "htmlFile": "30115-01.htm"
+    },
+    {
+      "npcId": 30115,
+      "hook": "talk",
+      "when": "absent",
+      "htmlFile": "30115-lvl.htm"
+    },
+    {
+      "npcId": 30115,
+      "hook": "event",
+      "when": "absent",
+      "event": "30115-04",
+      "minLevel": 40,
+      "ops": [
+        {
+          "op": "create"
+        },
+        {
+          "op": "start"
+        }
+      ],
+      "htmlFile": "30115-04.htm"
+    },
+    {
+      "npcId": 30115,
+      "hook": "talk",
+      "when": "started",
+      "hasAny": [
+        4629,
+        4630,
+        4631,
+        4632,
+        4633,
+        4634,
+        4635,
+        4636,
+        4637,
+        4638,
+        4639,
+        4640,
+        4641,
+        4642,
+        4643,
+        4644,
+        4645,
+        4646,
+        4647,
+        4648,
+        4649,
+        4650,
+        4651,
+        4652,
+        4653,
+        4654,
+        4655,
+        4656,
+        4657,
+        4658,
+        4659,
+        4660,
+        4661,
+        5577,
+        5578,
+        5579,
+        5580,
+        5581,
+        5582,
+        5908,
+        5911,
+        5914
+      ],
+      "htmlFile": "30115-03.htm"
+    },
+    {
+      "npcId": 30115,
+      "hook": "talk",
+      "when": "started",
+      "htmlFile": "30115-21.htm"
+    },
+    {
+      "npcId": 30115,
+      "hook": "event",
+      "when": "started",
+      "event": "30115-09",
+      "lacksItems": [
+        4629,
+        4630,
+        4631,
+        4632,
+        4633,
+        4634,
+        4635,
+        4636,
+        4637,
+        4638,
+        4639,
+        4640,
+        4641,
+        4642,
+        4643,
+        4644,
+        4645,
+        4646,
+        4647,
+        4648,
+        4649,
+        4650,
+        4651,
+        4652,
+        4653,
+        4654,
+        4655,
+        4656,
+        4657,
+        4658,
+        4659,
+        4660,
+        4661,
+        5577,
+        5578,
+        5579,
+        5580,
+        5581,
+        5582,
+        5908,
+        5911,
+        5914
+      ],
+      "ops": [
+        {
+          "op": "give_item",
+          "itemId": 4629,
+          "count": 1
+        }
+      ],
+      "htmlFile": "30115-09.htm"
+    },
+    {
+      "npcId": 30115,
+      "hook": "event",
+      "when": "started",
+      "event": "30115-10",
+      "lacksItems": [
+        4629,
+        4630,
+        4631,
+        4632,
+        4633,
+        4634,
+        4635,
+        4636,
+        4637,
+        4638,
+        4639,
+        4640,
+        4641,
+        4642,
+        4643,
+        4644,
+        4645,
+        4646,
+        4647,
+        4648,
+        4649,
+        4650,
+        4651,
+        4652,
+        4653,
+        4654,
+        4655,
+        4656,
+        4657,
+        4658,
+        4659,
+        4660,
+        4661,
+        5577,
+        5578,
+        5579,
+        5580,
+        5581,
+        5582,
+        5908,
+        5911,
+        5914
+      ],
+      "ops": [
+        {
+          "op": "give_item",
+          "itemId": 4640,
+          "count": 1
+        }
+      ],
+      "htmlFile": "30115-10.htm"
+    },
+    {
+      "npcId": 30115,
+      "hook": "event",
+      "when": "started",
+      "event": "30115-11",
+      "lacksItems": [
+        4629,
+        4630,
+        4631,
+        4632,
+        4633,
+        4634,
+        4635,
+        4636,
+        4637,
+        4638,
+        4639,
+        4640,
+        4641,
+        4642,
+        4643,
+        4644,
+        4645,
+        4646,
+        4647,
+        4648,
+        4649,
+        4650,
+        4651,
+        4652,
+        4653,
+        4654,
+        4655,
+        4656,
+        4657,
+        4658,
+        4659,
+        4660,
+        4661,
+        5577,
+        5578,
+        5579,
+        5580,
+        5581,
+        5582,
+        5908,
+        5911,
+        5914
+      ],
+      "ops": [
+        {
+          "op": "give_item",
+          "itemId": 4651,
+          "count": 1
+        }
+      ],
+      "htmlFile": "30115-11.htm"
+    },
+    {
+      "npcId": 30115,
+      "hook": "event",
+      "when": "started",
+      "event": "30115-09",
+      "htmlFile": "30115-03.htm"
+    },
+    {
+      "npcId": 30115,
+      "hook": "event",
+      "when": "started",
+      "event": "30115-10",
+      "htmlFile": "30115-03.htm"
+    },
+    {
+      "npcId": 30115,
+      "hook": "event",
+      "when": "started",
+      "event": "30115-11",
+      "htmlFile": "30115-03.htm"
+    },
+    {
+      "npcId": 30115,
+      "hook": "event",
+      "when": "started",
+      "event": "exit",
+      "ops": [
+        {
+          "op": "complete"
+        }
+      ],
+      "htmlFile": "30115-exit.htm"
+    },
+    {
+      "npcId": 30856,
+      "hook": "talk",
+      "when": "absent",
+      "minLevel": 40,
+      "htmlFile": "30856-01.htm"
+    },
+    {
+      "npcId": 30856,
+      "hook": "talk",
+      "when": "absent",
+      "htmlFile": "30856-lvl.htm"
+    },
+    {
+      "npcId": 30856,
+      "hook": "event",
+      "when": "absent",
+      "event": "30856-04",
+      "minLevel": 40,
+      "ops": [
+        {
+          "op": "create"
+        },
+        {
+          "op": "start"
+        }
+      ],
+      "htmlFile": "30856-04.htm"
+    },
+    {
+      "npcId": 30856,
+      "hook": "talk",
+      "when": "started",
+      "hasAny": [
+        4629,
+        4630,
+        4631,
+        4632,
+        4633,
+        4634,
+        4635,
+        4636,
+        4637,
+        4638,
+        4639,
+        4640,
+        4641,
+        4642,
+        4643,
+        4644,
+        4645,
+        4646,
+        4647,
+        4648,
+        4649,
+        4650,
+        4651,
+        4652,
+        4653,
+        4654,
+        4655,
+        4656,
+        4657,
+        4658,
+        4659,
+        4660,
+        4661,
+        5577,
+        5578,
+        5579,
+        5580,
+        5581,
+        5582,
+        5908,
+        5911,
+        5914
+      ],
+      "htmlFile": "30856-03.htm"
+    },
+    {
+      "npcId": 30856,
+      "hook": "talk",
+      "when": "started",
+      "htmlFile": "30856-21.htm"
+    },
+    {
+      "npcId": 30856,
+      "hook": "event",
+      "when": "started",
+      "event": "30856-09",
+      "lacksItems": [
+        4629,
+        4630,
+        4631,
+        4632,
+        4633,
+        4634,
+        4635,
+        4636,
+        4637,
+        4638,
+        4639,
+        4640,
+        4641,
+        4642,
+        4643,
+        4644,
+        4645,
+        4646,
+        4647,
+        4648,
+        4649,
+        4650,
+        4651,
+        4652,
+        4653,
+        4654,
+        4655,
+        4656,
+        4657,
+        4658,
+        4659,
+        4660,
+        4661,
+        5577,
+        5578,
+        5579,
+        5580,
+        5581,
+        5582,
+        5908,
+        5911,
+        5914
+      ],
+      "ops": [
+        {
+          "op": "give_item",
+          "itemId": 4629,
+          "count": 1
+        }
+      ],
+      "htmlFile": "30856-09.htm"
+    },
+    {
+      "npcId": 30856,
+      "hook": "event",
+      "when": "started",
+      "event": "30856-10",
+      "lacksItems": [
+        4629,
+        4630,
+        4631,
+        4632,
+        4633,
+        4634,
+        4635,
+        4636,
+        4637,
+        4638,
+        4639,
+        4640,
+        4641,
+        4642,
+        4643,
+        4644,
+        4645,
+        4646,
+        4647,
+        4648,
+        4649,
+        4650,
+        4651,
+        4652,
+        4653,
+        4654,
+        4655,
+        4656,
+        4657,
+        4658,
+        4659,
+        4660,
+        4661,
+        5577,
+        5578,
+        5579,
+        5580,
+        5581,
+        5582,
+        5908,
+        5911,
+        5914
+      ],
+      "ops": [
+        {
+          "op": "give_item",
+          "itemId": 4640,
+          "count": 1
+        }
+      ],
+      "htmlFile": "30856-10.htm"
+    },
+    {
+      "npcId": 30856,
+      "hook": "event",
+      "when": "started",
+      "event": "30856-11",
+      "lacksItems": [
+        4629,
+        4630,
+        4631,
+        4632,
+        4633,
+        4634,
+        4635,
+        4636,
+        4637,
+        4638,
+        4639,
+        4640,
+        4641,
+        4642,
+        4643,
+        4644,
+        4645,
+        4646,
+        4647,
+        4648,
+        4649,
+        4650,
+        4651,
+        4652,
+        4653,
+        4654,
+        4655,
+        4656,
+        4657,
+        4658,
+        4659,
+        4660,
+        4661,
+        5577,
+        5578,
+        5579,
+        5580,
+        5581,
+        5582,
+        5908,
+        5911,
+        5914
+      ],
+      "ops": [
+        {
+          "op": "give_item",
+          "itemId": 4651,
+          "count": 1
+        }
+      ],
+      "htmlFile": "30856-11.htm"
+    },
+    {
+      "npcId": 30856,
+      "hook": "event",
+      "when": "started",
+      "event": "30856-09",
+      "htmlFile": "30856-03.htm"
+    },
+    {
+      "npcId": 30856,
+      "hook": "event",
+      "when": "started",
+      "event": "30856-10",
+      "htmlFile": "30856-03.htm"
+    },
+    {
+      "npcId": 30856,
+      "hook": "event",
+      "when": "started",
+      "event": "30856-11",
+      "htmlFile": "30856-03.htm"
+    },
+    {
+      "npcId": 30856,
+      "hook": "event",
+      "when": "started",
+      "event": "exit",
+      "ops": [
+        {
+          "op": "complete"
+        }
+      ],
+      "htmlFile": "30856-exit.htm"
+    },
+    {
+      "npcId": 30194,
+      "hook": "talk",
+      "when": "absent",
+      "minLevel": 40,
+      "htmlFile": "30194-01.htm"
+    },
+    {
+      "npcId": 30194,
+      "hook": "talk",
+      "when": "absent",
+      "htmlFile": "30194-lvl.htm"
+    },
+    {
+      "npcId": 30194,
+      "hook": "event",
+      "when": "absent",
+      "event": "30194-04",
+      "minLevel": 40,
+      "ops": [
+        {
+          "op": "create"
+        },
+        {
+          "op": "start"
+        }
+      ],
+      "htmlFile": "30194-04.htm"
+    },
+    {
+      "npcId": 30194,
+      "hook": "talk",
+      "when": "started",
+      "hasAny": [
+        4629,
+        4630,
+        4631,
+        4632,
+        4633,
+        4634,
+        4635,
+        4636,
+        4637,
+        4638,
+        4639,
+        4640,
+        4641,
+        4642,
+        4643,
+        4644,
+        4645,
+        4646,
+        4647,
+        4648,
+        4649,
+        4650,
+        4651,
+        4652,
+        4653,
+        4654,
+        4655,
+        4656,
+        4657,
+        4658,
+        4659,
+        4660,
+        4661,
+        5577,
+        5578,
+        5579,
+        5580,
+        5581,
+        5582,
+        5908,
+        5911,
+        5914
+      ],
+      "htmlFile": "30194-03.htm"
+    },
+    {
+      "npcId": 30194,
+      "hook": "talk",
+      "when": "started",
+      "htmlFile": "30194-21.htm"
+    },
+    {
+      "npcId": 30194,
+      "hook": "event",
+      "when": "started",
+      "event": "30194-09",
+      "lacksItems": [
+        4629,
+        4630,
+        4631,
+        4632,
+        4633,
+        4634,
+        4635,
+        4636,
+        4637,
+        4638,
+        4639,
+        4640,
+        4641,
+        4642,
+        4643,
+        4644,
+        4645,
+        4646,
+        4647,
+        4648,
+        4649,
+        4650,
+        4651,
+        4652,
+        4653,
+        4654,
+        4655,
+        4656,
+        4657,
+        4658,
+        4659,
+        4660,
+        4661,
+        5577,
+        5578,
+        5579,
+        5580,
+        5581,
+        5582,
+        5908,
+        5911,
+        5914
+      ],
+      "ops": [
+        {
+          "op": "give_item",
+          "itemId": 4629,
+          "count": 1
+        }
+      ],
+      "htmlFile": "30194-09.htm"
+    },
+    {
+      "npcId": 30194,
+      "hook": "event",
+      "when": "started",
+      "event": "30194-10",
+      "lacksItems": [
+        4629,
+        4630,
+        4631,
+        4632,
+        4633,
+        4634,
+        4635,
+        4636,
+        4637,
+        4638,
+        4639,
+        4640,
+        4641,
+        4642,
+        4643,
+        4644,
+        4645,
+        4646,
+        4647,
+        4648,
+        4649,
+        4650,
+        4651,
+        4652,
+        4653,
+        4654,
+        4655,
+        4656,
+        4657,
+        4658,
+        4659,
+        4660,
+        4661,
+        5577,
+        5578,
+        5579,
+        5580,
+        5581,
+        5582,
+        5908,
+        5911,
+        5914
+      ],
+      "ops": [
+        {
+          "op": "give_item",
+          "itemId": 4640,
+          "count": 1
+        }
+      ],
+      "htmlFile": "30194-10.htm"
+    },
+    {
+      "npcId": 30194,
+      "hook": "event",
+      "when": "started",
+      "event": "30194-11",
+      "lacksItems": [
+        4629,
+        4630,
+        4631,
+        4632,
+        4633,
+        4634,
+        4635,
+        4636,
+        4637,
+        4638,
+        4639,
+        4640,
+        4641,
+        4642,
+        4643,
+        4644,
+        4645,
+        4646,
+        4647,
+        4648,
+        4649,
+        4650,
+        4651,
+        4652,
+        4653,
+        4654,
+        4655,
+        4656,
+        4657,
+        4658,
+        4659,
+        4660,
+        4661,
+        5577,
+        5578,
+        5579,
+        5580,
+        5581,
+        5582,
+        5908,
+        5911,
+        5914
+      ],
+      "ops": [
+        {
+          "op": "give_item",
+          "itemId": 4651,
+          "count": 1
+        }
+      ],
+      "htmlFile": "30194-11.htm"
+    },
+    {
+      "npcId": 30194,
+      "hook": "event",
+      "when": "started",
+      "event": "30194-09",
+      "htmlFile": "30194-03.htm"
+    },
+    {
+      "npcId": 30194,
+      "hook": "event",
+      "when": "started",
+      "event": "30194-10",
+      "htmlFile": "30194-03.htm"
+    },
+    {
+      "npcId": 30194,
+      "hook": "event",
+      "when": "started",
+      "event": "30194-11",
+      "htmlFile": "30194-03.htm"
+    },
+    {
+      "npcId": 30194,
+      "hook": "event",
+      "when": "started",
+      "event": "exit",
+      "ops": [
+        {
+          "op": "complete"
+        }
+      ],
+      "htmlFile": "30194-exit.htm"
+    },
+    {
+      "npcId": 30194,
+      "hook": "event",
+      "when": "any",
+      "event": "30194-08",
+      "htmlFile": "30194-08.htm"
+    },
+    {
+      "npcId": 30194,
+      "hook": "event",
+      "when": "any",
+      "event": "30194-12",
+      "htmlFile": "30194-12.htm"
+    },
+    {
+      "npcId": 30194,
+      "hook": "event",
+      "when": "any",
+      "event": "30194-13",
+      "htmlFile": "30194-13.htm"
+    },
+    {
+      "npcId": 30194,
+      "hook": "event",
+      "when": "any",
+      "event": "30194-14",
+      "htmlFile": "30194-14.htm"
+    },
+    {
+      "npcId": 30194,
+      "hook": "event",
+      "when": "any",
+      "event": "30194-15",
+      "htmlFile": "30194-15.htm"
+    },
+    {
+      "npcId": 30194,
+      "hook": "event",
+      "when": "any",
+      "event": "30194-16",
+      "htmlFile": "30194-16.htm"
+    },
+    {
+      "npcId": 30194,
+      "hook": "event",
+      "when": "any",
+      "event": "30194-17",
+      "htmlFile": "30194-17.htm"
+    },
+    {
+      "npcId": 30194,
+      "hook": "event",
+      "when": "any",
+      "event": "30194-18",
+      "htmlFile": "30194-18.htm"
+    },
+    {
+      "npcId": 30194,
+      "hook": "event",
+      "when": "any",
+      "event": "30194-19",
+      "htmlFile": "30194-19.htm"
+    },
+    {
+      "npcId": 30194,
+      "hook": "event",
+      "when": "any",
+      "event": "30194-20",
+      "htmlFile": "30194-20.htm"
+    },
+    {
+      "npcId": 30194,
+      "hook": "event",
+      "when": "any",
+      "event": "30194-05",
+      "htmlFile": "30194-05.htm"
+    },
+    {
+      "npcId": 30194,
+      "hook": "event",
+      "when": "any",
+      "event": "30194-06",
+      "htmlFile": "30194-06.htm"
+    },
+    {
+      "npcId": 30194,
+      "hook": "event",
+      "when": "any",
+      "event": "30194-07",
+      "htmlFile": "30194-07.htm"
+    },
+    {
+      "npcId": 30194,
+      "hook": "event",
+      "when": "any",
+      "event": "30194-02",
+      "htmlFile": "30194-02.htm"
+    },
+    {
+      "npcId": 30856,
+      "hook": "event",
+      "when": "any",
+      "event": "30856-08",
+      "htmlFile": "30856-08.htm"
+    },
+    {
+      "npcId": 30856,
+      "hook": "event",
+      "when": "any",
+      "event": "30856-12",
+      "htmlFile": "30856-12.htm"
+    },
+    {
+      "npcId": 30856,
+      "hook": "event",
+      "when": "any",
+      "event": "30856-13",
+      "htmlFile": "30856-13.htm"
+    },
+    {
+      "npcId": 30856,
+      "hook": "event",
+      "when": "any",
+      "event": "30856-14",
+      "htmlFile": "30856-14.htm"
+    },
+    {
+      "npcId": 30856,
+      "hook": "event",
+      "when": "any",
+      "event": "30856-15",
+      "htmlFile": "30856-15.htm"
+    },
+    {
+      "npcId": 30856,
+      "hook": "event",
+      "when": "any",
+      "event": "30856-16",
+      "htmlFile": "30856-16.htm"
+    },
+    {
+      "npcId": 30856,
+      "hook": "event",
+      "when": "any",
+      "event": "30856-17",
+      "htmlFile": "30856-17.htm"
+    },
+    {
+      "npcId": 30856,
+      "hook": "event",
+      "when": "any",
+      "event": "30856-18",
+      "htmlFile": "30856-18.htm"
+    },
+    {
+      "npcId": 30856,
+      "hook": "event",
+      "when": "any",
+      "event": "30856-19",
+      "htmlFile": "30856-19.htm"
+    },
+    {
+      "npcId": 30856,
+      "hook": "event",
+      "when": "any",
+      "event": "30856-20",
+      "htmlFile": "30856-20.htm"
+    },
+    {
+      "npcId": 30856,
+      "hook": "event",
+      "when": "any",
+      "event": "30856-05",
+      "htmlFile": "30856-05.htm"
+    },
+    {
+      "npcId": 30856,
+      "hook": "event",
+      "when": "any",
+      "event": "30856-06",
+      "htmlFile": "30856-06.htm"
+    },
+    {
+      "npcId": 30856,
+      "hook": "event",
+      "when": "any",
+      "event": "30856-07",
+      "htmlFile": "30856-07.htm"
+    },
+    {
+      "npcId": 30856,
+      "hook": "event",
+      "when": "any",
+      "event": "30856-02",
+      "htmlFile": "30856-02.htm"
+    },
+    {
+      "npcId": 30115,
+      "hook": "event",
+      "when": "any",
+      "event": "30115-08",
+      "htmlFile": "30115-08.htm"
+    },
+    {
+      "npcId": 30115,
+      "hook": "event",
+      "when": "any",
+      "event": "30115-12",
+      "htmlFile": "30115-12.htm"
+    },
+    {
+      "npcId": 30115,
+      "hook": "event",
+      "when": "any",
+      "event": "30115-13",
+      "htmlFile": "30115-13.htm"
+    },
+    {
+      "npcId": 30115,
+      "hook": "event",
+      "when": "any",
+      "event": "30115-14",
+      "htmlFile": "30115-14.htm"
+    },
+    {
+      "npcId": 30115,
+      "hook": "event",
+      "when": "any",
+      "event": "30115-15",
+      "htmlFile": "30115-15.htm"
+    },
+    {
+      "npcId": 30115,
+      "hook": "event",
+      "when": "any",
+      "event": "30115-16",
+      "htmlFile": "30115-16.htm"
+    },
+    {
+      "npcId": 30115,
+      "hook": "event",
+      "when": "any",
+      "event": "30115-17",
+      "htmlFile": "30115-17.htm"
+    },
+    {
+      "npcId": 30115,
+      "hook": "event",
+      "when": "any",
+      "event": "30115-18",
+      "htmlFile": "30115-18.htm"
+    },
+    {
+      "npcId": 30115,
+      "hook": "event",
+      "when": "any",
+      "event": "30115-19",
+      "htmlFile": "30115-19.htm"
+    },
+    {
+      "npcId": 30115,
+      "hook": "event",
+      "when": "any",
+      "event": "30115-20",
+      "htmlFile": "30115-20.htm"
+    },
+    {
+      "npcId": 30115,
+      "hook": "event",
+      "when": "any",
+      "event": "30115-05",
+      "htmlFile": "30115-05.htm"
+    },
+    {
+      "npcId": 30115,
+      "hook": "event",
+      "when": "any",
+      "event": "30115-06",
+      "htmlFile": "30115-06.htm"
+    },
+    {
+      "npcId": 30115,
+      "hook": "event",
+      "when": "any",
+      "event": "30115-07",
+      "htmlFile": "30115-07.htm"
+    },
+    {
+      "npcId": 30115,
+      "hook": "event",
+      "when": "any",
+      "event": "30115-02",
+      "htmlFile": "30115-02.htm"
+    }
+  ]
+}

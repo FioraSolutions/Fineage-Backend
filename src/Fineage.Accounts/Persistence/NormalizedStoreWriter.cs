@@ -85,6 +85,133 @@ static partial class NormalizedStoreWriter
                 ins.ExecuteNonQuery();
             }
         }
+
+        if (root.TryGetProperty("crests", out var crests) && crests.ValueKind == JsonValueKind.Array)
+        {
+            Exec(conn, tx, "DELETE FROM clan_crests");
+            foreach (var crest in crests.EnumerateArray())
+            {
+                using var ins = conn.CreateCommand();
+                ins.Transaction = tx;
+                ins.CommandText = "INSERT INTO clan_crests (id, kind, data) VALUES (@id, @kind, @data)";
+                ins.Parameters.AddWithValue("id", crest.GetProperty("id").GetInt32());
+                ins.Parameters.AddWithValue("kind", (short)crest.GetProperty("kind").GetInt32());
+                ins.Parameters.AddWithValue("data", crest.TryGetProperty("data", out var data) && data.ValueKind == JsonValueKind.String
+                    ? data.GetBytesFromBase64()
+                    : Array.Empty<byte>());
+                ins.ExecuteNonQuery();
+            }
+        }
+
+        if (root.TryGetProperty("clanHalls", out var halls) && halls.ValueKind == JsonValueKind.Array)
+        {
+            Exec(conn, tx, "DELETE FROM clan_halls");
+            foreach (var hall in halls.EnumerateArray())
+            {
+                using var ins = conn.CreateCommand();
+                ins.Transaction = tx;
+                ins.CommandText =
+                    "INSERT INTO clan_halls (id, owner_clan_id, paid_until_unix_ms, auction_end_unix_ms, payload) " +
+                    "VALUES (@id, @owner, @paid, @end, @payload::jsonb)";
+                ins.Parameters.AddWithValue("id", hall.GetProperty("id").GetInt32());
+                ins.Parameters.AddWithValue("owner", hall.TryGetProperty("ownerClanId", out var o) ? o.GetInt32() : 0);
+                ins.Parameters.AddWithValue("paid", hall.TryGetProperty("paidUntilUnixMs", out var p) ? p.GetInt64() : 0L);
+                ins.Parameters.AddWithValue("end", hall.TryGetProperty("auctionEndUnixMs", out var e) ? e.GetInt64() : 0L);
+                ins.Parameters.AddWithValue("payload", hall.GetRawText());
+                ins.ExecuteNonQuery();
+            }
+        }
+        if (root.TryGetProperty("castles", out var castles) && castles.ValueKind == JsonValueKind.Array)
+        {
+            Exec(conn, tx, "DELETE FROM castles");
+            foreach (var castle in castles.EnumerateArray())
+            {
+                using var ins = conn.CreateCommand();
+                ins.Transaction = tx;
+                ins.CommandText =
+                    "INSERT INTO castles (id, owner_clan_id, tax_percent, treasury, siege_unix_ms, payload) " +
+                    "VALUES (@id, @owner, @tax, @treasury, @siege, @payload::jsonb)";
+                ins.Parameters.AddWithValue("id", castle.GetProperty("id").GetInt32());
+                ins.Parameters.AddWithValue("owner", castle.TryGetProperty("ownerClanId", out var o) ? o.GetInt32() : 0);
+                ins.Parameters.AddWithValue("tax", castle.TryGetProperty("taxPercent", out var t) ? t.GetInt32() : 0);
+                ins.Parameters.AddWithValue("treasury", castle.TryGetProperty("treasury", out var m) ? m.GetInt64() : 0L);
+                ins.Parameters.AddWithValue("siege", castle.TryGetProperty("siegeUnixMs", out var d) ? d.GetInt64() : 0L);
+                ins.Parameters.AddWithValue("payload", castle.GetRawText());
+                ins.ExecuteNonQuery();
+            }
+        }
+
+        SyncManor(conn, tx, root);
+        SyncPets(conn, tx, root);
+
+        if (root.TryGetProperty("siegeClans", out var siegeClans) && siegeClans.ValueKind == JsonValueKind.Array)
+        {
+            Exec(conn, tx, "DELETE FROM siege_clans");
+            foreach (var row in siegeClans.EnumerateArray())
+            {
+                using var ins = conn.CreateCommand();
+                ins.Transaction = tx;
+                ins.CommandText = "INSERT INTO siege_clans (castle_id, clan_id, side) VALUES (@castle, @clan, @side) " +
+                                  "ON CONFLICT (castle_id, clan_id) DO NOTHING";
+                ins.Parameters.AddWithValue("castle", row.GetProperty("castleId").GetInt32());
+                ins.Parameters.AddWithValue("clan", row.GetProperty("clanId").GetInt32());
+                ins.Parameters.AddWithValue("side", (short)row.GetProperty("side").GetInt32());
+                ins.ExecuteNonQuery();
+            }
+        }
+    }
+
+    /// <summary>Mobius <c>castle_manor_production</c> / <c>castle_manor_procure</c> mirrors of the snapshot manor rows.</summary>
+    static void SyncManor(NpgsqlConnection conn, NpgsqlTransaction tx, JsonElement root)
+    {
+        if (root.TryGetProperty("manorProduction", out var production) && production.ValueKind == JsonValueKind.Array)
+        {
+            Exec(conn, tx, "DELETE FROM castle_manor_production");
+            foreach (var row in production.EnumerateArray())
+            {
+                using var ins = conn.CreateCommand();
+                ins.Transaction = tx;
+                ins.CommandText =
+                    "INSERT INTO castle_manor_production (castle_id, seed_id, amount, start_amount, price, next_period) " +
+                    "VALUES (@castle, @seed, @amount, @start, @price, @next) ON CONFLICT DO NOTHING";
+                ins.Parameters.AddWithValue("castle", row.GetProperty("castleId").GetInt32());
+                ins.Parameters.AddWithValue("seed", row.GetProperty("seedId").GetInt32());
+                ins.Parameters.AddWithValue("amount", row.GetProperty("amount").GetInt64());
+                ins.Parameters.AddWithValue("start", row.GetProperty("startAmount").GetInt64());
+                ins.Parameters.AddWithValue("price", row.GetProperty("price").GetInt64());
+                ins.Parameters.AddWithValue("next", row.GetProperty("nextPeriod").GetBoolean());
+                ins.ExecuteNonQuery();
+            }
+        }
+
+        if (root.TryGetProperty("manorProcure", out var procure) && procure.ValueKind == JsonValueKind.Array)
+        {
+            Exec(conn, tx, "DELETE FROM castle_manor_procure");
+            foreach (var row in procure.EnumerateArray())
+            {
+                using var ins = conn.CreateCommand();
+                ins.Transaction = tx;
+                ins.CommandText =
+                    "INSERT INTO castle_manor_procure (castle_id, crop_id, amount, start_amount, price, reward_type, next_period) " +
+                    "VALUES (@castle, @crop, @amount, @start, @price, @reward, @next) ON CONFLICT DO NOTHING";
+                ins.Parameters.AddWithValue("castle", row.GetProperty("castleId").GetInt32());
+                ins.Parameters.AddWithValue("crop", row.GetProperty("cropId").GetInt32());
+                ins.Parameters.AddWithValue("amount", row.GetProperty("amount").GetInt64());
+                ins.Parameters.AddWithValue("start", row.GetProperty("startAmount").GetInt64());
+                ins.Parameters.AddWithValue("price", row.GetProperty("price").GetInt64());
+                ins.Parameters.AddWithValue("reward", (short)row.GetProperty("rewardType").GetInt32());
+                ins.Parameters.AddWithValue("next", row.GetProperty("nextPeriod").GetBoolean());
+                ins.ExecuteNonQuery();
+            }
+        }
+    }
+
+    static void Exec(NpgsqlConnection conn, NpgsqlTransaction tx, string sql)
+    {
+        using var cmd = conn.CreateCommand();
+        cmd.Transaction = tx;
+        cmd.CommandText = sql;
+        cmd.ExecuteNonQuery();
     }
 
     /// <summary>
@@ -257,6 +384,29 @@ static partial class NormalizedStoreWriter
     }
 
     /// <summary>Mobius henna dye slots (three tattoos).</summary>
+    /// <summary>Block G1 <c>character_class_state</c>: subclass slots, active index, base class, noblesse.</summary>
+    public static void UpsertClassState(NpgsqlConnection conn, NpgsqlTransaction? tx, int characterId, CharacterClassState state)
+    {
+        using var cmd = conn.CreateCommand();
+        cmd.Transaction = tx;
+        cmd.CommandText =
+            """
+            INSERT INTO character_class_state (character_id, base_class_id, class_index, noble, payload)
+            VALUES (@id, @base, @index, @noble, @payload::jsonb)
+            ON CONFLICT (character_id) DO UPDATE SET
+                base_class_id = EXCLUDED.base_class_id,
+                class_index = EXCLUDED.class_index,
+                noble = EXCLUDED.noble,
+                payload = EXCLUDED.payload
+            """;
+        cmd.Parameters.AddWithValue("id", characterId);
+        cmd.Parameters.AddWithValue("base", state.BaseClassId);
+        cmd.Parameters.AddWithValue("index", state.ClassIndex);
+        cmd.Parameters.AddWithValue("noble", state.Noble);
+        cmd.Parameters.AddWithValue("payload", state.ToJson());
+        cmd.ExecuteNonQuery();
+    }
+
     public static void UpdateHenna(NpgsqlConnection conn, int characterId, int dye1, int dye2, int dye3)
     {
         using var cmd = conn.CreateCommand();

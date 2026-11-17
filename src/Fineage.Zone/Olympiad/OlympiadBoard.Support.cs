@@ -114,6 +114,7 @@ public sealed partial class OlympiadBoard
             };
         }
 
+        LoadHeroes(snap);
         bool fresh = snap.OlympiadEndUnixMs == 0;
         if (fresh)
         {
@@ -135,6 +136,8 @@ public sealed partial class OlympiadBoard
 
         if (now >= _olympiadEnd)
         {
+            // Down through the period end: settle it (heroes, ranking, passes) before the next one starts.
+            CloseOlympiadPeriod(new OlympiadStep());
             _olympiadEnd = OlympiadSchedule.MonthEnd(now, Settings);
             _nextWeekly = now + OlympiadSchedule.WeeklyDelay(Settings);
             _announcePeriodStart = true;
@@ -181,7 +184,7 @@ public sealed partial class OlympiadBoard
             });
         }
 
-        return new OlympiadSnapshot
+        var snap = new OlympiadSnapshot
         {
             Version = 1,
             Cycle = _cycle,
@@ -192,6 +195,8 @@ public sealed partial class OlympiadBoard
             Granted = _granted.OrderBy(id => id).ToList(),
             Nobles = nobles
         };
+        ExportHeroes(snap);
+        return snap;
     }
 
     sealed class Noble
@@ -228,6 +233,8 @@ public sealed partial class OlympiadBoard
         public int ReturnTwoX;
         public int ReturnTwoY;
         public int ReturnTwoZ;
+        public int DamageOne;
+        public int DamageTwo;
         public int CountdownKind;
         public int Cursor;
         public List<OlympiadSchedule.Announcement> Announcements = [];

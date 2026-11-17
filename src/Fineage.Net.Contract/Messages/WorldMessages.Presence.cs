@@ -65,6 +65,31 @@ namespace Fineage.Net.Contract
         /// Absent on old peers — decode fills <see cref="MaxHp"/> (full) so select-target StatusUpdate is not a false hit.
         /// </summary>
         public int CurHp { get; set; }
+        // Optional tail (Block C): title and clan/ally badges (Mobius CharInfo).
+        public string Title { get; set; } = "";
+        public int ClanId { get; set; }
+        public int ClanCrestId { get; set; }
+        public int AllyId { get; set; }
+        public int AllyCrestId { get; set; }
+        public int LargeCrestId { get; set; }
+        public int PledgeClass { get; set; }
+        /// <summary>
+        /// Mobius CharInfo <c>getEnchantEffect</c>: the active weapon's enchant (0..127) that drives the weapon glow.
+        /// Optional wire tail after <see cref="PledgeClass"/>; 0 for NPCs / old peers.
+        /// </summary>
+        public int WeaponEnchant { get; set; }
+        /// <summary>Mobius CharInfo <c>isNoble</c> (Block G1). Optional wire tail after <see cref="WeaponEnchant"/>.</summary>
+        public bool Noble { get; set; }
+        /// <summary>Mobius CharInfo <c>isHero</c> (hero aura / name glow). Optional wire tail after <see cref="Noble"/>.</summary>
+        public bool Hero { get; set; }
+        /// <summary>Summons only: <see cref="SummonKindNet"/> (optional wire tail after <see cref="Hero"/>; 0 for everything else / old peers).</summary>
+        public SummonKindNet SummonKind { get; set; }
+        /// <summary>Summons only: the owner's object id (Mobius Summon.getOwner), so a client can tie the pawn to its master.</summary>
+        public int OwnerObjectId { get; set; }
+        /// <summary>Players only: active cubic ids (Mobius CharInfo cubic list, 1 Storm … 9 Attractive). Optional tail after <see cref="OwnerObjectId"/>.</summary>
+        public int[] Cubics { get; set; } = System.Array.Empty<int>();
+        /// <summary>Players only: duel team circle (Mobius setTeam: 0 none, 1 blue, 2 red). Optional tail after <see cref="Cubics"/>.</summary>
+        public byte Team { get; set; }
     }
 
     public sealed class PlayerStatsMsg
@@ -170,7 +195,31 @@ namespace Fineage.Net.Contract
         public PaperdollSlotNet[] Paperdoll { get; set; } = System.Array.Empty<PaperdollSlotNet>();
         /// <summary>Mobius karma — PK name colour. Optional wire tail.</summary>
         public int Karma { get; set; }
-        /// <summary>Mobius PvP flag — purple name while flagged. Optional wire tail.</summary>
+        /// <summary>Mobius PvP flag — 0 white, 1 purple, 2 purple blinking (last 20 s). Optional wire tail.</summary>
         public byte PvpFlag { get; set; }
+        /// <summary>Mobius <c>getPvpKills</c> (status window). Optional wire tail after <see cref="PvpFlag"/>.</summary>
+        public int PvpKills { get; set; }
+        /// <summary>Mobius <c>getPkKills</c> (status window). Optional wire tail after <see cref="PvpKills"/>.</summary>
+        public int PkKills { get; set; }
+        // Optional tail (Block C): Mobius UserInfo title / crests / privileges / pledge class.
+        public string Title { get; set; } = "";
+        public int ClanCrestId { get; set; }
+        public int LargeCrestId { get; set; }
+        public int AllyId { get; set; }
+        public int AllyCrestId { get; set; }
+        public int ClanPrivileges { get; set; }
+        public int PledgeClass { get; set; }
+        public int PledgeType { get; set; }
+        public bool ClanLeader { get; set; }
+        // Optional tail (Block G1): Mobius UserInfo isNoble / isHero, plus the base class and active class index
+        // (0 = base class, 1–3 = subclass) for the subclass UI.
+        public bool Noble { get; set; }
+        public bool Hero { get; set; }
+        public int BaseClassId { get; set; }
+        public int ClassIndex { get; set; }
+        /// <summary>Active cubic ids (Mobius UserInfo cubic list). Optional tail after <see cref="ClassIndex"/>.</summary>
+        public int[] Cubics { get; set; } = System.Array.Empty<int>();
+        /// <summary>Players only: duel team circle (Mobius setTeam: 0 none, 1 blue, 2 red). Optional tail after <see cref="Cubics"/>.</summary>
+        public byte Team { get; set; }
     }
 }

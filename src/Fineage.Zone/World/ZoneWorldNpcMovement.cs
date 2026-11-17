@@ -42,6 +42,7 @@ public sealed partial class ZoneWorld
         npc.MoveDestX = destX;
         npc.MoveDestY = destY;
         npc.MoveDestZ = destZ;
+        npc.MoveCarryX = npc.MoveCarryY = 0;
         npc.MoveLastTickMs = now;
         SetMoveActive(npc, npc.X != destX || npc.Y != destY);
         BroadcastNpcMove(npc, destX, destY, destZ);
@@ -154,7 +155,7 @@ public sealed partial class ZoneWorld
             }
 
             // NpcTemplate randomWalk defaults to false only for Guard. No XML overrides in CT0 stats.
-            if (npc.NpcType == "Guard")
+            if (npc.NpcType == "Guard" || npc.SiegeNpc != null)
                 continue;
             if (TryFollowLeader(npc, now))
                 continue;

@@ -1,6 +1,6 @@
 {
   "id": 247,
-  "name": "PossessorOfAPreciousSoul4",
+  "name": "Possessor of a Precious Soul - 4",
   "repeatable": false,
   "abortable": true,
   "questItems": [],
@@ -8,42 +8,130 @@
     {
       "npcId": 31740,
       "hook": "talk",
-      "when": "started",
-      "htmlFile": "31740-talk-000.htm"
+      "when": "absent",
+      "subClass": true,
+      "minLevel": 75,
+      "hasItem": 7679,
+      "htmlFile": "31740-01.htm"
     },
     {
-      "npcId": 31745,
+      "npcId": 31740,
       "hook": "talk",
       "when": "absent",
-      "htmlFile": "31745-talk-001.htm"
+      "hasItem": 7679,
+      "htmlFile": "31740-02.htm"
     },
     {
       "npcId": 31740,
       "hook": "event",
       "when": "absent",
-      "event": "31740-3",
+      "event": "31740-03",
+      "subClass": true,
+      "minLevel": 75,
+      "hasItem": 7679,
       "ops": [
+        {
+          "op": "create"
+        },
+        {
+          "op": "start"
+        },
         {
           "op": "take_item",
           "itemId": 7679,
           "count": 1
         }
       ],
-      "htmlFile": "31740-event-31740-3-002.htm"
+      "htmlFile": "31740-03.htm"
+    },
+    {
+      "npcId": 31740,
+      "hook": "talk",
+      "when": "started",
+      "cond": 1,
+      "subClass": true,
+      "htmlFile": "31740-04.htm"
+    },
+    {
+      "npcId": 31740,
+      "hook": "talk",
+      "when": "started",
+      "cond": 2,
+      "subClass": true,
+      "htmlFile": "31740-06.htm"
     },
     {
       "npcId": 31740,
       "hook": "event",
-      "when": "absent",
-      "event": "31740-5",
-      "htmlFile": "31740-event-31740-5-003.htm"
-    },
-    {
-      "npcId": 31740,
-      "hook": "event",
-      "when": "absent",
-      "event": "31745-5",
+      "when": "started",
+      "event": "TELEPORT",
+      "html": "",
       "ops": [
+        {
+          "op": "set_cond",
+          "cond": 2
+        },
+        {
+          "op": "teleport",
+          "x": 143209,
+          "y": 43968,
+          "z": -3038
+        }
+      ]
+    },
+    {
+      "npcId": 31745,
+      "hook": "talk",
+      "when": "started",
+      "cond": 2,
+      "subClass": true,
+      "minLevel": 75,
+      "htmlFile": "31745-01.htm"
+    },
+    {
+      "npcId": 31745,
+      "hook": "talk",
+      "when": "started",
+      "cond": 2,
+      "subClass": true,
+      "htmlFile": "31745-06.htm"
+    },
+    {
+      "npcId": 31745,
+      "hook": "event",
+      "when": "started",
+      "event": "31745-02",
+      "cond": 2,
+      "htmlFile": "31745-02.htm"
+    },
+    {
+      "npcId": 31745,
+      "hook": "event",
+      "when": "started",
+      "event": "31745-03",
+      "cond": 2,
+      "htmlFile": "31745-03.htm"
+    },
+    {
+      "npcId": 31745,
+      "hook": "event",
+      "when": "started",
+      "event": "31745-04",
+      "cond": 2,
+      "htmlFile": "31745-04.htm"
+    },
+    {
+      "npcId": 31745,
+      "hook": "event",
+      "when": "started",
+      "event": "31745-05",
+      "cond": 2,
+      "subClass": true,
+      "minLevel": 75,
+      "ops": [
+        {
+          "op": "set_noble"
+        },
         {
           "op": "give_item",
           "itemId": 7694,
@@ -53,9 +141,16 @@
           "op": "give_exp_sp",
           "exp": 93836,
           "sp": 0
+        },
+        {
+          "op": "social",
+          "action": 3
+        },
+        {
+          "op": "complete"
         }
       ],
-      "htmlFile": "31740-event-31745-5-004.htm"
+      "htmlFile": "31745-05.htm"
     }
   ]
 }

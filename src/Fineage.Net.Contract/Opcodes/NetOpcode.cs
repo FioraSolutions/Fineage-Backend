@@ -269,5 +269,69 @@ namespace Fineage.Net.Contract
         public const ushort FriendUpdate = 0x03A6;
         /// <summary>Zone → client: block list (+ block-all flag).</summary>
         public const ushort BlockList = 0x03A7;
+
+        /// <summary>Client → zone: party leader hands leadership to a member (Interlude <c>RequestChangePartyLeader</c>). Body: int32 target objectId.</summary>
+        public const ushort PartyChangeLeaderRequest = 0x03A8;
+
+        /// <summary>Zone → party mates: one member's bars (Interlude <c>PartySmallWindowUpdate</c>). Coalesced, only on change.</summary>
+        public const ushort PartyMemberUpdate = 0x03A9;
+
+        /// <summary>Zone → party mates: one member's effect list (Interlude <c>PartySpelled</c>). Same body as <see cref="AbnormalStatusUpdate"/>.</summary>
+        public const ushort PartySpelled = 0x03AA;
+
+        /// <summary>Zone → party mates: map positions of the other members (Interlude <c>PartyMemberPosition</c>), periodic, only changed rows.</summary>
+        public const ushort PartyMemberPosition = 0x03AB;
+
+        /// <summary>Zone → caster + watchers: Interlude <c>MagicSkillLaunched</c> at hitTime (skill fires on its targets).</summary>
+        public const ushort MagicSkillLaunched = 0x03AC;
+
+        /// <summary>Zone → caster + watchers: Interlude <c>MagicSkillCanceled</c> (cast aborted / interrupted).</summary>
+        public const ushort MagicSkillCanceled = 0x03AD;
+
+        /// <summary>Zone → player(s): Interlude <c>PlaySound</c> (quest jingles, server-driven music).</summary>
+        public const ushort PlaySound = 0x03AE;
+
+        /// <summary>Client → zone: one clan / alliance window action (<see cref="PledgeCommandKind"/>).</summary>
+        public const ushort PledgeCommand = 0x03AF;
+        /// <summary>Zone → client: crest blob (Mobius PledgeCrest / ExPledgeCrestLarge / AllyCrest).</summary>
+        public const ushort CrestData = 0x03B0;
+        /// <summary>Zone → client: clan war lists (Mobius PledgeReceiveWarList).</summary>
+        public const ushort PledgeWarList = 0x03B1;
+        /// <summary>Zone → viewer: relation bits for one player (Mobius RelationChanged).</summary>
+        public const ushort RelationChanged = 0x03B2;
+        /// <summary>Zone → client: clan name / crest by id (Mobius PledgeInfo).</summary>
+        public const ushort PledgeInfo = 0x03B3;
+        /// <summary>Zone → client: alliance info (Mobius AllianceInfo).</summary>
+        public const ushort AllyInfo = 0x03B4;
+        /// <summary>Zone → client: alliance invitation (Mobius AskJoinAlly).</summary>
+        public const ushort AllyAskJoin = 0x03B5;
+        /// <summary>Zone → client: clan hall auction list.</summary>
+        public const ushort ClanHallList = 0x03B6;
+        /// <summary>Zone → client: castle gate / wall state (<c>DoorStatusNetMsg</c>), after its EntitySpawn.</summary>
+        public const ushort DoorStatus = 0x03B7;
+        /// <summary>Client → zone: castle lord action (<c>CastleCommandKind</c>).</summary>
+        public const ushort CastleCommand = 0x03B8;
+        /// <summary>Zone → client: castle page (<c>CastleInfoNetMsg</c>).</summary>
+        public const ushort CastleInfo = 0x03B9;
+        /// <summary>Client → zone: manor manager / castle lord manor action (<c>ManorCommandKind</c>).</summary>
+        public const ushort ManorCommand = 0x03BA;
+        /// <summary>Zone → client: manor window (<c>ManorInfoNetMsg</c>): seeds, crop purchases, sell list, settings.</summary>
+        public const ushort ManorInfo = 0x03BB;
+        /// <summary>Zone → client: fishing start / bite / HP tick / end (<c>FishingEventNetMsg</c>).</summary>
+        public const ushort FishingEvent = 0x03BC;
+        /// <summary>Client → zone: one summon / pet command (<c>SummonCommandNetMsg</c>, Interlude RequestActionUse pet actions).</summary>
+        public const ushort SummonCommand = 0x03BD;
+        /// <summary>Zone → owner: summon window (<c>SummonInfoNetMsg</c>, Mobius PetInfo / PetStatusUpdate).</summary>
+        public const ushort SummonInfo = 0x03BE;
+        /// <summary>Zone → owner: the summon is gone (<c>SummonGoneNetMsg</c>, Mobius PetDelete).</summary>
+        public const ushort SummonGone = 0x03BF;
+        /// <summary>Zone → owner: pet inventory (<c>PetInventoryNetMsg</c>, Mobius PetItemList).</summary>
+        public const ushort PetInventory = 0x03C0;
+        /// <summary>Client → zone: duel request / answer / surrender (<c>DuelCommandNetMsg</c>, Mobius RequestDuelStart / RequestDuelAnswerStart).</summary>
+        public const ushort DuelCommand = 0x03C1;
+        /// <summary>Zone → client: duel ask / ready / start / end (<c>DuelEventNetMsg</c>, Mobius ExDuelAskStart / ExDuelReady / ExDuelStart / ExDuelEnd).</summary>
+        public const ushort DuelEvent = 0x03C2;
+        /// <summary>Zone → client: an opponent's bars during a duel (<c>DuelUserInfoNetMsg</c>, Mobius ExDuelUpdateUserInfo).</summary>
+        public const ushort DuelUserInfo = 0x03C3;
     }
 }

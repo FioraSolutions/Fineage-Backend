@@ -125,6 +125,21 @@ public sealed partial class NetZoneServer
                         case NetOpcode.ClanCancelDissolveRequest:
                             await _clan.OnCancelDissolveAsync(conn, zoneSession, ct).ConfigureAwait(false);
                             break;
+                        case NetOpcode.PledgeCommand:
+                            await _clan.OnPledgeCommandAsync(conn, zoneSession, envelope, ct).ConfigureAwait(false);
+                            break;
+                        case NetOpcode.CastleCommand:
+                            await _clan.OnCastleCommandAsync(conn, zoneSession, envelope, ct).ConfigureAwait(false);
+                            break;
+                        case NetOpcode.ManorCommand:
+                            await _clan.OnManorCommandAsync(conn, zoneSession, envelope, ct).ConfigureAwait(false);
+                            break;
+                        case NetOpcode.SummonCommand:
+                            await _clan.OnSummonCommandAsync(conn, zoneSession, envelope, ct).ConfigureAwait(false);
+                            break;
+                        case NetOpcode.DuelCommand:
+                            await _clan.OnDuelCommandAsync(conn, zoneSession, envelope, ct).ConfigureAwait(false);
+                            break;
                         case NetOpcode.NpcTalk:
                             await _npcTalk.OnTalkAsync(conn, zoneSession, envelope, ct).ConfigureAwait(false);
                             break;
@@ -163,6 +178,9 @@ public sealed partial class NetZoneServer
                             break;
                         case NetOpcode.PartyKickRequest:
                             await _party.OnKickAsync(conn, zoneSession, envelope, ct).ConfigureAwait(false);
+                            break;
+                        case NetOpcode.PartyChangeLeaderRequest:
+                            await _party.OnChangeLeaderAsync(conn, zoneSession, envelope, ct).ConfigureAwait(false);
                             break;
                         case NetOpcode.TradeRequest:
                             await _trade.OnRequestAsync(conn, zoneSession, envelope, ct).ConfigureAwait(false);

@@ -25,6 +25,12 @@ sealed partial class ZoneEntity
     public ZoneEntityMovePayload? Move { get; set; }
 
     /// <summary>
+    /// Sub-unit remainder of the timed move (L2 units). Rounding each tick's step on its own made a pawn
+    /// faster than its speed (e.g. 12.6u/tick → 13), so server positions ran ahead of what peers extrapolate.
+    /// </summary>
+    internal double MoveCarryX, MoveCarryY;
+
+    /// <summary>
     /// Base run speed (Mobius <c>CreatureTemplate.baseRunSpd</c>). Buffs and debuffs change the live
     /// <see cref="RunSpeed"/> through the <c>runSpd</c> (<c>Stat.MOVE_SPEED</c>) functions; the base is only rewritten
     /// by a template / class change.

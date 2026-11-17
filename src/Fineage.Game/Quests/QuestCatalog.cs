@@ -98,6 +98,8 @@ public sealed partial class QuestCatalog
             quests.Add(BuildQuest(row, items, questPath, dir, seen));
         }
 
+        LoadSagas(questsDirectory, items, seen, quests);
+
         if (quests.Count == 0)
             throw new InvalidDataException($"{questsDirectory} has no {QuestFileName} folders.");
 

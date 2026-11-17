@@ -30,59 +30,102 @@ public sealed partial class ZoneWorld
         if (!ZoneCombat.Within(attacker.X, attacker.Y, target.X, target.Y, reach))
             return;
 
+        // Mobius Creature.doAttack: any swing at a playable (hit or miss) runs updatePvPStatus on the players behind
+        // both sides (a summon acts for its owner, a hit on a summon is a hit on its owner).
+        var attackerPc = CreditOf(attacker);
+        var targetPc = CreditOf(target);
+        if (attackerPc.Kind == ZoneEntityKind.Player && targetPc.Kind == ZoneEntityKind.Player && !ReferenceEquals(attackerPc, targetPc))
+            UpdatePvPStatus(attackerPc, targetPc, now);
+
+        SendVictimHitLines(attacker, target, hit.Damage, hit.Damage <= 0 ? (byte)(hit.Flags | ZoneCombat.HitFlagMiss) : hit.Flags);
+
         if (hit.Damage <= 0)
         {
             // Miss (Attack carried HitFlagMiss): no HP change / StatusUpdate, but the fight and hate still start.
             attacker.CombatUntilUnixMs = now + ClanProtocol.CombatStanceMillis;
             target.CombatUntilUnixMs = now + ClanProtocol.CombatStanceMillis;
-            if (target.Kind == ZoneEntityKind.Npc)
+            if (target.Kind == ZoneEntityKind.Npc && target.Summon == null)
                 AddHate(target, attacker);
+            return;
+        }
+
+        if (target.Summon != null)
+        {
+            DamageSummon(attacker, target, hit.Damage, now);
             return;
         }
 
         if (target.Kind == ZoneEntityKind.Npc)
         {
-            // Mobius FolkStatus.reduceHp: swing may land, but Folk/Merchant/Trainer take no damage and never hate.
-            if (!ZoneCombat.TakesNpcCombatDamage(target.NpcType, target.Attackable))
-            {
-                attacker.CombatUntilUnixMs = now + ClanProtocol.CombatStanceMillis;
-                return;
-            }
-
-            target.CurHp = Math.Max(0, target.CurHp - hit.Damage);
-            FanoutVitals(target, StatusFor(target));
-            RecordDamage(target, attacker, hit.Damage);
-            AddHate(target, attacker, DamageHate(hit.Damage, target.Level));
-            attacker.CombatUntilUnixMs = now + ClanProtocol.CombatStanceMillis;
-            if (target.CurHp <= 0)
-            {
-                RemoveDeadNpc(target, killer: attacker);
-                GrantKillReward(attacker, target);
-            }
+            DamageNpcBy(attacker, target, hit.Damage, now);
             return;
         }
 
+        if (DuelBlocksHit(attacker, target))
+            return;
         target.CurHp = Math.Max(0, target.CurHp - hit.Damage);
+        if (_olympiadArena.Contains(attacker.ObjectId))
+            _olympiad.NoteDamage(attacker.ObjectId, hit.Damage);
 
         target.CombatUntilUnixMs = now + ClanProtocol.CombatStanceMillis;
         FanoutVitals(target, PlayerVitalsStatus(target));
-        if (attacker.Kind == ZoneEntityKind.Player && hit.Damage > 0)
-            UpdatePvPStatus(attacker, target, now);
         if (target.CurHp > 0)
             MaybeBreakCast(target, hit.Damage);
         if (target.CurHp <= 0)
         {
-            attacker.HateList.Remove(target.ObjectId);
-            SetAggroTarget(attacker, MostHated(attacker));
+            if (attacker.Summon == null)
+            {
+                attacker.HateList.Remove(target.ObjectId);
+                SetAggroTarget(attacker, MostHated(attacker));
+            }
+            else
+            {
+                attacker.Summon.TargetId = 0;
+            }
             if (target.Session != null)
                 target.Session.AutoAttackTargetId = 0;
             ApplyPlayerDeath(target, attacker.ObjectId);
         }
     }
 
+    /// <summary>
+    /// Damage on an NPC from a player or a summon (melee or skill). A summon's damage, quest attack and kill count for
+    /// its owner (Mobius <c>asPlayer()</c>), while the monster hates the summon itself.
+    /// </summary>
+    void DamageNpcBy(ZoneEntity attacker, ZoneEntity target, int damage, long now)
+    {
+        var credit = CreditOf(attacker);
+        DuelNoteOutsideHit(attacker, target);
+        // Castle gates / walls, towers and headquarters have their own Mobius reduceHp rules.
+        if (SiegeNpcHit(credit, target, damage, now))
+            return;
+        // Mobius FolkStatus.reduceHp: swing may land, but Folk/Merchant/Trainer take no damage and never hate.
+        if (!ZoneCombat.TakesNpcCombatDamage(target.NpcType, target.Attackable))
+        {
+            attacker.CombatUntilUnixMs = now + ClanProtocol.CombatStanceMillis;
+            return;
+        }
+
+        target.CurHp = Math.Max(0, target.CurHp - damage);
+        FanoutVitals(target, StatusFor(target));
+        RecordDamage(target, credit, damage);
+        ApplyQuestAttack(credit, target, byPet: attacker.Summon?.Pet != null);
+        AddHate(target, attacker, DamageHate(damage, target.Level));
+        attacker.CombatUntilUnixMs = now + ClanProtocol.CombatStanceMillis;
+        if (target.CurHp <= 0)
+        {
+            if (attacker.Summon != null)
+                attacker.Summon.TargetId = 0;
+            RemoveDeadNpc(target, killer: credit);
+            GrantKillReward(credit, target);
+        }
+    }
+
     void RemoveDeadNpc(ZoneEntity npc, ZoneEntity? killer = null)
     {
         // Kill quest steps are not applied here. IQuestKillHook is the later combat entry.
+        if (npc.SiegeNpc != null)
+            OnSiegeNpcDied(npc);
         int objectId = npc.ObjectId;
         int npcId = npc.NpcId;
         int x = npc.X;
@@ -124,8 +167,9 @@ public sealed partial class ZoneWorld
                 npc.SweepItems.Add(stack);
         }
 
-        SpawnDeathDrops(npcId, x, y, z, killer, watchers, npc.Level, raid);
-        bool spoiled = npc.SpoilerObjectId != 0;
+        SpawnDeathDrops(npcId, x, y, z, killer, watchers, npc.Level, raid, seeded: npc.Seeded);
+        // Mobius DecayTaskManager: a seeded corpse gets the same extension as a spoiled one (time to harvest).
+        bool spoiled = npc.SpoilerObjectId != 0 || npc.Seeded;
         npc.CorpseAwaitingSweep = npc.SweepItems.Count > 0;
         if (spoiled)
             ZoneLog.Info($"corpse object={objectId} spoiler={npc.SpoilerObjectId} sweep={npc.SweepItems.Count}");
@@ -148,6 +192,7 @@ public sealed partial class ZoneWorld
         _aoi.Leave(objectId);
         _byId.Remove(objectId);
         npc.SpoilerObjectId = 0;
+        npc.ClearSeed();
         npc.SweepItems.Clear();
         npc.CorpseAwaitingSweep = false;
         SetDecayAtMs(npc, 0);

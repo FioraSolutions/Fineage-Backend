@@ -34,6 +34,20 @@ namespace Fineage.Net.Contract
             w.WriteInt32(m.Karma);
             w.WriteByte(m.PvpFlag);
             w.WriteInt32(m.CurHp);
+            w.WriteString(m.Title ?? "");
+            w.WriteInt32(m.ClanId);
+            w.WriteInt32(m.ClanCrestId);
+            w.WriteInt32(m.AllyId);
+            w.WriteInt32(m.AllyCrestId);
+            w.WriteInt32(m.LargeCrestId);
+            w.WriteInt32(m.PledgeClass);
+            w.WriteInt32(m.WeaponEnchant);
+            w.WriteByte(m.Noble ? (byte)1 : (byte)0);
+            w.WriteByte(m.Hero ? (byte)1 : (byte)0);
+            w.WriteByte((byte)m.SummonKind);
+            w.WriteInt32(m.OwnerObjectId);
+            w.WriteInt32Array(m.Cubics ?? Array.Empty<int>());
+            w.WriteByte(m.Team);
         });
 
         public static EntitySpawnMsg DecodeEntitySpawn(ReadOnlySpan<byte> p)
@@ -80,6 +94,32 @@ namespace Fineage.Net.Contract
                 msg.CurHp = 0;
             else if (msg.MaxHp > 0)
                 msg.CurHp = msg.MaxHp;
+            if (r.Remaining > 0)
+            {
+                msg.Title = r.ReadString();
+                msg.ClanId = r.ReadInt32();
+                msg.ClanCrestId = r.ReadInt32();
+                msg.AllyId = r.ReadInt32();
+                msg.AllyCrestId = r.ReadInt32();
+                msg.LargeCrestId = r.ReadInt32();
+                msg.PledgeClass = r.ReadInt32();
+            }
+            if (r.Remaining > 0)
+                msg.WeaponEnchant = r.ReadInt32();
+            if (r.Remaining >= 2)
+            {
+                msg.Noble = r.ReadByte() != 0;
+                msg.Hero = r.ReadByte() != 0;
+            }
+            if (r.Remaining >= 5)
+            {
+                msg.SummonKind = (SummonKindNet)r.ReadByte();
+                msg.OwnerObjectId = r.ReadInt32();
+            }
+            if (r.Remaining >= 2)
+                msg.Cubics = r.ReadInt32Array();
+            if (r.Remaining >= 1)
+                msg.Team = r.ReadByte();
             return msg;
         }
 
@@ -136,6 +176,23 @@ namespace Fineage.Net.Contract
             }
             w.WriteInt32(m.Karma);
             w.WriteByte(m.PvpFlag);
+            w.WriteInt32(m.PvpKills);
+            w.WriteInt32(m.PkKills);
+            w.WriteString(m.Title ?? "");
+            w.WriteInt32(m.ClanCrestId);
+            w.WriteInt32(m.LargeCrestId);
+            w.WriteInt32(m.AllyId);
+            w.WriteInt32(m.AllyCrestId);
+            w.WriteInt32(m.ClanPrivileges);
+            w.WriteInt32(m.PledgeClass);
+            w.WriteInt32(m.PledgeType);
+            w.WriteByte(m.ClanLeader ? (byte)1 : (byte)0);
+            w.WriteByte(m.Noble ? (byte)1 : (byte)0);
+            w.WriteByte(m.Hero ? (byte)1 : (byte)0);
+            w.WriteInt32(m.BaseClassId);
+            w.WriteInt32(m.ClassIndex);
+            w.WriteInt32Array(m.Cubics ?? Array.Empty<int>());
+            w.WriteByte(m.Team);
         });
 
         public static UserInfoNetMsg DecodeUserInfo(ReadOnlySpan<byte> p)
@@ -196,6 +253,34 @@ namespace Fineage.Net.Contract
                 m.Karma = r.ReadInt32();
             if (r.Remaining > 0)
                 m.PvpFlag = r.ReadByte();
+            if (r.Remaining >= 8)
+            {
+                m.PvpKills = r.ReadInt32();
+                m.PkKills = r.ReadInt32();
+            }
+            if (r.Remaining > 0)
+            {
+                m.Title = r.ReadString();
+                m.ClanCrestId = r.ReadInt32();
+                m.LargeCrestId = r.ReadInt32();
+                m.AllyId = r.ReadInt32();
+                m.AllyCrestId = r.ReadInt32();
+                m.ClanPrivileges = r.ReadInt32();
+                m.PledgeClass = r.ReadInt32();
+                m.PledgeType = r.ReadInt32();
+                m.ClanLeader = r.ReadByte() != 0;
+            }
+            if (r.Remaining >= 10)
+            {
+                m.Noble = r.ReadByte() != 0;
+                m.Hero = r.ReadByte() != 0;
+                m.BaseClassId = r.ReadInt32();
+                m.ClassIndex = r.ReadInt32();
+            }
+            if (r.Remaining >= 2)
+                m.Cubics = r.ReadInt32Array();
+            if (r.Remaining >= 1)
+                m.Team = r.ReadByte();
             return m;
         }
 

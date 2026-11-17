@@ -52,6 +52,8 @@ public sealed partial class ZoneWorld
                 entity.KnownSkills[pair.Key] = pair.Value;
         }
 
+        AddStatusSkills(entity);
+        SyncSiegeSkills(entity, entity.ClanId == 0 ? null : ClanOf(entity.ObjectId));
         // Passive runSpd masteries (Quick Step, Agile Movement, armor sets) are part of the live run speed.
         RefreshRunSpeed(entity);
     }
@@ -87,6 +89,24 @@ public sealed partial class ZoneWorld
                 return "world";
             if (player.Dead)
                 return InventoryProtocol.Dead;
+            if (skillType == FishingProtocol.AcquireSkillTypeFishing)
+            {
+                if (informing)
+                {
+                    PublishFishingSkillInfo(player, skillId, level);
+                    return null;
+                }
+                return LearnFishingSkill(session, player, skillId, level);
+            }
+            if (skillType == AcquireSkillTypePledge)
+            {
+                if (informing)
+                {
+                    PublishPledgeSkillInfo(player, skillId, level);
+                    return null;
+                }
+                return LearnPledgeSkill(session, player, skillId, level);
+            }
             if (informing)
             {
                 PublishAcquireSkillInfo(session, player, skillId, level, skillType);

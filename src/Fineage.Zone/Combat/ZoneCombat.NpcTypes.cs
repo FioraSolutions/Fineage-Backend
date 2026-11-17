@@ -5,7 +5,7 @@ public static partial class ZoneCombat
     /// <summary>
     /// Mobius <c>Attackable</c> instance types: take HP damage, build hate, and swing back.
     /// Folk / Merchant / Trainer / Teleporter / … extend <c>Npc</c> only — <c>FolkStatus.reduceHp</c>
-    /// is a no-op and they never retaliate. Do <b>not</b> use the XML <c>attackable</c> flag alone when
+    /// is a no-op and they never retaliate. A castle <c>Artefact</c> is sealed with skill 246, never hit. Do <b>not</b> use the XML <c>attackable</c> flag alone when
     /// <paramref name="npcType"/> is set: town Guards ship with <c>attackable=false</c> but still fight.
     /// </summary>
     public static bool IsCombatNpcType(string? npcType)
@@ -17,7 +17,7 @@ public static partial class ZoneCombat
             "Monster" or "Guard" or "Defender" or "FriendlyMob"
                 or "RaidBoss" or "GrandBoss"
                 or "FestivalMonster" or "RiftInvader" or "SepulcherMonster"
-                or "FeedableBeast" or "Chest" or "Artefact" or "TamedBeast"
+                or "FeedableBeast" or "Chest" or "TamedBeast"
                 or "Pet" or "Servitor" => true,
             _ => false
         };

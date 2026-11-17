@@ -5,6 +5,14 @@ namespace Fineage.Accounts;
 
 static partial class NormalizedStoreReader
 {
+    static CharacterClassState? LoadClassState(NpgsqlConnection conn, int characterId)
+    {
+        using var cmd = conn.CreateCommand();
+        cmd.CommandText = "SELECT payload::text FROM character_class_state WHERE character_id = @cid";
+        cmd.Parameters.AddWithValue("cid", characterId);
+        return cmd.ExecuteScalar() is string json ? CharacterClassState.FromJson(json) : null;
+    }
+
     static List<StoredItem> LoadItems(NpgsqlConnection conn, int characterId, params string[] locs)
     {
         using var cmd = conn.CreateCommand();

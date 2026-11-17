@@ -29,6 +29,17 @@ public sealed class OlympiadSettings
     public int PeriodMultiplier { get; init; } = 1;
     public IReadOnlyList<int> CompetitionDays { get; init; } = [1, 2, 3, 4, 5, 6, 7];
     public TimeZoneInfo TimeZone { get; init; } = TimeZoneInfo.Utc;
+    /// <summary>Mobius <c>OlympiadGPPerPoint</c>: Noblesse Gate Passes per settled point.</summary>
+    public int GatePassPerPoint { get; init; } = OlympiadProtocol.GatePassesPerPoint;
+    /// <summary>Mobius <c>OlympiadHeroPoints</c>: bonus points a hero settles with.</summary>
+    public int HeroPoints { get; init; } = OlympiadProtocol.HeroPoints;
+    /// <summary>Mobius <c>OlympiadEnchantLimit</c>: highest enchant counted inside a match; -1 is off.</summary>
+    public int EnchantLimit { get; init; } = -1;
+    /// <summary>Mobius <c>OlympiadRestrictedItems</c>: item ids that cannot be equipped or used inside an arena,
+    /// on top of the hero items, which are always refused there.</summary>
+    public IReadOnlySet<int> RestrictedItems { get; init; } = new HashSet<int>();
+    /// <summary>Mobius <c>OlympiadDisableBlessedSpiritShots</c> (default on).</summary>
+    public bool DisableBlessedSpiritshots { get; init; } = true;
 
     public static OlympiadSettings Mobius { get; } = new();
 
@@ -60,8 +71,26 @@ public sealed class OlympiadSettings
             PeriodKind = ReadPeriod(Environment.GetEnvironmentVariable("FINEAGE_OLY_PERIOD")),
             PeriodMultiplier = ReadInt("FINEAGE_OLY_PERIOD_MULTIPLIER", 1, 1, 12),
             CompetitionDays = ReadDays(Environment.GetEnvironmentVariable("FINEAGE_OLY_COMPETITION_DAYS")),
-            TimeZone = ReadZone()
+            TimeZone = ReadZone(),
+            GatePassPerPoint = ReadInt("FINEAGE_OLY_GP_PER_POINT", OlympiadProtocol.GatePassesPerPoint, 0, 1_000_000),
+            HeroPoints = ReadInt("FINEAGE_OLY_HERO_POINTS", OlympiadProtocol.HeroPoints, 0, 1_000_000),
+            EnchantLimit = ReadInt("FINEAGE_OLY_ENCHANT_LIMIT", -1, -1, 65_535),
+            RestrictedItems = ReadIds(Environment.GetEnvironmentVariable("FINEAGE_OLY_RESTRICTED_ITEMS")),
+            DisableBlessedSpiritshots = ReadBool("FINEAGE_OLY_DISABLE_BLESSED_SPIRITSHOTS", true)
         };
+    }
+
+    static IReadOnlySet<int> ReadIds(string? text)
+    {
+        var ids = new HashSet<int>();
+        if (string.IsNullOrWhiteSpace(text))
+            return ids;
+        foreach (string part in text.Split(',', StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries))
+        {
+            if (int.TryParse(part, out int id) && id > 0)
+                ids.Add(id);
+        }
+        return ids;
     }
 
     static TimeZoneInfo ReadZone()

@@ -34,6 +34,11 @@ public sealed partial class ZoneWorld
         if (!InTalkRange(player, npc))
             return "range";
 
+        if (string.Equals(verb, "DepositC", StringComparison.Ordinal) || string.Equals(verb, "WithdrawC", StringComparison.Ordinal))
+            return OpenClanWarehouse(session, player, npc, deposit: verb == "DepositC");
+        if (TryClanMasterVerb(session, player, npc, verb, out var clanError))
+            return clanError;
+
         var handler = _bypasses.Find(verb);
         if (handler == null)
         {
@@ -85,6 +90,17 @@ public sealed partial class ZoneWorld
 
     void SendNpcPage(ZoneSession session, ZoneEntity player, ZoneEntity npc, int page)
     {
+        if (page == 0 && OlympiadFirstPage(player, npc, out var olympiad))
+        {
+            SendHtml(session, player, npc, olympiad!);
+            return;
+        }
+        if (page == 0 && MammonFirstPage(session, player, npc, out var mammon))
+        {
+            if (mammon != null)
+                SendHtml(session, player, npc, mammon);
+            return;
+        }
         SendHtml(session, player, npc, NpcHtmlPaths.Read(_html, npc.NpcType, npc.NpcId, page));
     }
 

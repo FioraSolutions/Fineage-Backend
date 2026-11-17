@@ -5,7 +5,9 @@ public enum QuestHook
     FirstTalk,
     Talk,
     Event,
-    Kill
+    Kill,
+    /// <summary>Mobius <c>onAttack</c>: a player's hit lands on the NPC (no page; gates such as <c>weapons</c> apply).</summary>
+    Attack
 }
 
 public enum QuestWhen
@@ -27,6 +29,12 @@ public sealed record StartOp : QuestOp;
 public sealed record SetCondOp(int Cond) : QuestOp;
 
 public sealed record SetVarOp(string Key, string Value) : QuestOp;
+
+/// <summary>Mobius <c>st.set(key, st.getInt(key) + n)</c>: integer counter (missing var reads 0).</summary>
+public sealed record AddVarOp(string Key, int Delta) : QuestOp;
+
+/// <summary>Mobius <c>takeItems(player, id, -1)</c> for each id: removes whatever is held; never fails.</summary>
+public sealed record TakeAllOp(IReadOnlyList<int> ItemIds) : QuestOp;
 
 public sealed record UnsetVarOp(string Key) : QuestOp;
 
@@ -61,7 +69,90 @@ public sealed record SoundOp(string Name) : QuestOp;
 /// Mobius <c>addSpawn(npcId, npc, randomOffset, despawnDelay, isSummonSpawn)</c> from a quest event.
 /// Zone materializes the NPC near the talking NPC and adds hate toward the player.
 /// </summary>
-public sealed record SpawnNpcOp(int NpcId) : QuestOp;
+/// <summary>Mobius <c>addSpawn</c>: near the dialog / killed NPC, or at a fixed point when X/Y/Z are set.</summary>
+public sealed record SpawnNpcOp(int NpcId, int? X = null, int? Y = null, int? Z = null) : QuestOp;
+
+/// <summary>A quest spawn at a fixed world point (Mobius <c>addSpawn(id, x, y, z, …)</c>).</summary>
+public readonly record struct QuestSpawnPoint(int NpcId, int X, int Y, int Z);
+
+/// <summary>Mobius <c>player.setNoble(true)</c> (Possessor of a Precious Soul 4).</summary>
+public sealed record SetNobleOp : QuestOp;
+
+/// <summary>Mobius <c>player.teleToLocation(x, y, z)</c> from a quest event.</summary>
+public sealed record TeleportOp(int X, int Y, int Z) : QuestOp;
+
+/// <summary>Mobius <c>broadcastPacket(new SocialAction(player, action))</c>.</summary>
+public sealed record SocialOp(int Action) : QuestOp;
+
+/// <summary>
+/// Mobius <c>addSpawn</c> + a per-spawn quest timer (sagas): an NPC owned by the quest player, optionally at the
+/// player's feet, that despawns after <see cref="DespawnSec"/> and writes vars back into the owner's quest row.
+/// </summary>
+public sealed record QuestSummon(
+    int NpcId,
+    int? X,
+    int? Y,
+    int? Z,
+    bool AtPlayer,
+    int DespawnSec,
+    /// <summary>Kill / attack credit for this spawn goes to the owner's journal (<c>owned</c> steps).</summary>
+    bool Owned,
+    /// <summary>Mobius Archon of Halisha: a hit from anyone else, or from the owner in a party, makes it leave.</summary>
+    bool SoloGuard,
+    string? Say,
+    string? GoneSay,
+    string? GuardSay,
+    IReadOnlyDictionary<string, string>? GoneVars,
+    IReadOnlyDictionary<string, string>? DeadVars)
+{
+    /// <summary>Quest whose row the vars go into; filled when the step runs.</summary>
+    public int QuestId { get; init; }
+}
+
+public sealed record SummonOp(QuestSummon Summon) : QuestOp;
+
+/// <summary>Mobius <c>NpcSay</c> from the dialog / killed NPC; <c>PLAYERNAME</c> becomes the player's name.</summary>
+public sealed record SayOp(string Text) : QuestOp;
+
+/// <summary>Mobius <c>player.setPlayerClass</c> (+ base class when no subclass is active) — the saga 3rd class.</summary>
+public sealed record ChangeClassOp(int ClassId) : QuestOp;
+
+/// <summary>Mobius <c>deleteSpawn(npc)</c> on the dialog / attacked NPC, without its despawn vars.</summary>
+public sealed record DespawnOp : QuestOp;
+
+/// <summary>Mobius Q419 quiz: take one random space-separated token out of <c>Pool</c> into <c>Target</c>.</summary>
+public sealed record PickRandomOp(string Pool, string Target) : QuestOp;
+
+/// <summary>Store the object id of the first held item of <c>Items</c> (enchant at least <c>MinEnchant</c>) in <c>Key</c> (Q421 flute).</summary>
+public sealed record RememberItemOp(string Key, IReadOnlyList<int> Items, int MinEnchant) : QuestOp;
+
+/// <summary>Swap the item whose object id is in <c>Key</c> for item id + <c>Offset</c>, keeping its enchant (Q421 flute → bugle).</summary>
+public sealed record ExchangeVarItemOp(string Key, IReadOnlyList<int> Items, int Offset) : QuestOp;
+
+/// <summary>Page chosen after the ops ran, by the value of a quest var (Q419 random quiz question).</summary>
+public sealed record QuestHtmlByVar(string Var, IReadOnlyDictionary<string, string> Pages);
+
+/// <summary>Side effects that zone carries out after the journal commit (summons, NPC speech, class change).</summary>
+public sealed class QuestExtras
+{
+    public static QuestExtras None { get; } = new();
+
+    public List<QuestSummon> Summons { get; } = [];
+    public List<string> Says { get; } = [];
+    public int ClassChange { get; set; }
+    public bool Despawn { get; set; }
+
+    public bool Empty => Summons.Count == 0 && Says.Count == 0 && ClassChange == 0 && !Despawn;
+
+    public void MergeFrom(QuestExtras other)
+    {
+        Summons.AddRange(other.Summons);
+        Says.AddRange(other.Says);
+        if (other.ClassChange != 0)
+            ClassChange = other.ClassChange;
+        Despawn |= other.Despawn;
+    }
+}
 
 public sealed record QuestDialog(
     int NpcId,
@@ -86,14 +177,49 @@ public sealed record QuestDialog(
     /// <summary>Mobius <c>hasAtLeastOneQuestItem</c> — at least one listed item held.</summary>
     IReadOnlyList<int>? HasAny = null,
     /// <summary>Mobius <c>player.isMageClass()</c>. Null = no gate.</summary>
-    bool? IsMage = null);
+    bool? IsMage = null,
+    /// <summary>Mobius <c>player.isSubClassActive()</c>. Null = no gate.</summary>
+    bool? SubClass = null,
+    double? Chance = null,
+    IReadOnlyDictionary<string, int>? VarAtLeast = null,
+    IReadOnlyDictionary<string, int>? VarBelow = null,
+    IReadOnlyList<int>? Weapons = null,
+    /// <summary>Mobius <c>getQuestItemsCount(id) &lt; n</c> per item (the upper bound of an <see cref="AtLeast"/> ladder).</summary>
+    IReadOnlyDictionary<int, int>? Below = null,
+    /// <summary>Mobius <c>executeForEachPlayer</c> kill step: every party member near the corpse runs it, not only the killer.</summary>
+    bool Everyone = false,
+    /// <summary>
+    /// Kill / attack step on a quest-owned spawn, run against the owner's journal: <c>any</c> (whoever killed it)
+    /// or <c>solo</c> (the owner killed it outside a party). Null = an ordinary step.
+    /// </summary>
+    string? Owned = null,
+    /// <summary>Summoned pet vs the collar registered in var <c>summonOid</c>: none / out / registered / other.</summary>
+    string? Pet = null,
+    /// <summary>Attack step: the hit came from the player's pet (true) or the player (false).</summary>
+    bool? ByPet = null,
+    /// <summary>With <see cref="HasAny"/>: one of those items carries at least this enchant (pet collar level).</summary>
+    int MinEnchant = 0,
+    /// <summary>Sum of the held counts of these items must lie in [SumMin, SumMax] (SumMax -1 = no cap).</summary>
+    IReadOnlyList<int>? SumItems = null,
+    int SumMin = 0,
+    int SumMax = -1,
+    /// <summary>An item whose object id is stored in this var is still in the bag.</summary>
+    string? HoldsVarItem = null,
+    QuestHtmlByVar? HtmlByVar = null);
 
 /// <summary>
 /// Who is talking. Mobius quest scripts branch on <c>player.getRace()</c> / <c>getLevel()</c>
 /// before showing the start page; dialogs carry the same gates as data (races, minLevel, maxLevel).
 /// <c>ClassId</c> -1 = unknown (class gates do not match); Mobius path quests check <c>player.getClassId()</c>.
 /// </summary>
-public readonly record struct QuestActor(int Race, int Level, int ClassId = -1);
+public readonly record struct QuestActor(int Race, int Level, int ClassId = -1, bool SubClass = false)
+{
+    /// <summary>Control item object id of the summoned pet (0 = none).</summary>
+    public int PetControlObjectId { get; init; }
+
+    /// <summary>Attack hook: the landed hit came from the player's pet.</summary>
+    public bool ByPet { get; init; }
+}
 
 public sealed record QuestDefinition(
     int Id,

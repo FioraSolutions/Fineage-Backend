@@ -62,7 +62,7 @@ public sealed class ClanPacketHandler
         string? error = await _world
             .TryClanInviteAsync(
                 zoneSession,
-                new ClanInviteRequestMsg { TargetObjectId = invite.TargetObjectId, PledgeType = 0 },
+                new ClanInviteRequestMsg { TargetObjectId = invite.TargetObjectId, PledgeType = invite.PledgeType },
                 _clock(),
                 ct)
             .ConfigureAwait(false);
@@ -169,6 +169,106 @@ public sealed class ClanPacketHandler
         string? error = await _world.TryClanCancelDissolveAsync(zoneSession, _clock(), ct).ConfigureAwait(false);
         if (error != null)
             await _reject(conn, error, "Clan cancel dissolve failed.", ct).ConfigureAwait(false);
+    }
+
+    /// <summary><see cref="NetOpcode.PledgeCommand"/>: one clan / alliance window action.</summary>
+    public async Task OnPledgeCommandAsync(
+        NetConnection conn,
+        ZoneSession zoneSession,
+        PacketEnvelope envelope,
+        CancellationToken ct)
+    {
+        RequireHello(conn);
+        if (!zoneSession.Bound || !zoneSession.InWorld)
+        {
+            await _reject(conn, "not_in_world", "Enter world first.", ct).ConfigureAwait(false);
+            return;
+        }
+
+        var command = NetCodec.DecodePledgeCommand(envelope.Payload);
+        string? error = await _world.TryPledgeCommandAsync(zoneSession, command, _clock(), ct).ConfigureAwait(false);
+        if (error != null)
+            await _reject(conn, error, "Clan command failed.", ct).ConfigureAwait(false);
+    }
+
+    /// <summary><see cref="NetOpcode.CastleCommand"/>: one chamberlain (castle lord) action.</summary>
+    public async Task OnCastleCommandAsync(
+        NetConnection conn,
+        ZoneSession zoneSession,
+        PacketEnvelope envelope,
+        CancellationToken ct)
+    {
+        RequireHello(conn);
+        if (!zoneSession.Bound || !zoneSession.InWorld)
+        {
+            await _reject(conn, "not_in_world", "Enter world first.", ct).ConfigureAwait(false);
+            return;
+        }
+
+        var command = NetCodec.DecodeCastleCommand(envelope.Payload);
+        string? error = await _world.TryCastleCommandAsync(zoneSession, command, _clock(), ct).ConfigureAwait(false);
+        if (error != null)
+            await _reject(conn, error, "Castle command failed.", ct).ConfigureAwait(false);
+    }
+
+    /// <summary><see cref="NetOpcode.ManorCommand"/>: one manor manager / castle lord manor action.</summary>
+    public async Task OnManorCommandAsync(
+        NetConnection conn,
+        ZoneSession zoneSession,
+        PacketEnvelope envelope,
+        CancellationToken ct)
+    {
+        RequireHello(conn);
+        if (!zoneSession.Bound || !zoneSession.InWorld)
+        {
+            await _reject(conn, "not_in_world", "Enter world first.", ct).ConfigureAwait(false);
+            return;
+        }
+
+        var command = NetCodec.DecodeManorCommand(envelope.Payload);
+        string? error = await _world.TryManorCommandAsync(zoneSession, command, ct).ConfigureAwait(false);
+        if (error != null)
+            await _reject(conn, error, "Manor command failed.", ct).ConfigureAwait(false);
+    }
+
+    /// <summary>Summon / pet orders (Interlude RequestActionUse pet actions, RequestPetMove, …).</summary>
+    public async Task OnSummonCommandAsync(
+        NetConnection conn,
+        ZoneSession zoneSession,
+        PacketEnvelope envelope,
+        CancellationToken ct)
+    {
+        RequireHello(conn);
+        if (!zoneSession.Bound || !zoneSession.InWorld)
+        {
+            await _reject(conn, "not_in_world", "Enter world first.", ct).ConfigureAwait(false);
+            return;
+        }
+
+        var command = NetCodec.DecodeSummonCommand(envelope.Payload);
+        string? error = await _world.TrySummonCommandAsync(zoneSession, command, ct).ConfigureAwait(false);
+        if (error != null)
+            await _reject(conn, error, "Summon command failed.", ct).ConfigureAwait(false);
+    }
+
+    /// <summary>/duel, /partyduel, duel answer, /surrender (Mobius RequestDuelStart / RequestDuelAnswerStart).</summary>
+    public async Task OnDuelCommandAsync(
+        NetConnection conn,
+        ZoneSession zoneSession,
+        PacketEnvelope envelope,
+        CancellationToken ct)
+    {
+        RequireHello(conn);
+        if (!zoneSession.Bound || !zoneSession.InWorld)
+        {
+            await _reject(conn, "not_in_world", "Enter world first.", ct).ConfigureAwait(false);
+            return;
+        }
+
+        var command = NetCodec.DecodeDuelCommand(envelope.Payload);
+        string? error = await _world.TryDuelCommandAsync(zoneSession, command, ct).ConfigureAwait(false);
+        if (error != null)
+            await _reject(conn, error, "Duel command failed.", ct).ConfigureAwait(false);
     }
 
     static void RequireHello(NetConnection conn)

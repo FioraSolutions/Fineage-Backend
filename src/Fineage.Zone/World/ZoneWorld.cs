@@ -178,7 +178,10 @@ public sealed partial class ZoneWorld
         ZoneGameTime? gameTime = null,
         HennaCatalog? henna = null,
         ArmorSetCatalog? armorSets = null,
-        ItemEquipSkillCatalog? equipSkills = null)
+        ItemEquipSkillCatalog? equipSkills = null,
+        Fineage.Zone.Manor.ManorSettings? manor = null,
+        Random? manorRandom = null,
+        Random? fishingRandom = null)
     {
         _npcRegen = npcRegen ?? ZoneNpcSettings.NpcRegenEnabled;
         _skillCombat = skillCombat ?? SkillCombatCatalog.LoadDefault();
@@ -250,6 +253,9 @@ public sealed partial class ZoneWorld
         BootstrapQuestNpcs();
         LoadClans();
         LoadSiege();
+        InitManor(manor, manorRandom);
+        _fishingRandom = fishingRandom ?? Random.Shared;
+        SpawnCastleDoors();
     }
 
     /// <summary>Bypass handlers. A later <see cref="BypassRegistry.Register"/> replaces a stub.</summary>

@@ -43,7 +43,18 @@ public sealed partial class OlympiadBoard
                 case OlympiadMatchPhase.Fighting:
                     if (!match.Resolved)
                     {
-                        Commit(match, OlympiadRules.Tie(ScoreOf(match.OneId), ScoreOf(match.TwoId), Settings.MaxPoints), step);
+                        // Mobius validateWinner on a timeout: the side that dealt more damage wins, else a tie.
+                        var transfer = match.DamageOne == match.DamageTwo
+                            ? OlympiadRules.Tie(ScoreOf(match.OneId), ScoreOf(match.TwoId), Settings.MaxPoints)
+                            : OlympiadRules.Win(
+                                ScoreOf(match.OneId),
+                                ScoreOf(match.TwoId),
+                                match.DamageOne > match.DamageTwo,
+                                match.Classed,
+                                Settings.MaxPoints,
+                                match.Classed ? Settings.ClassedRewardCount : Settings.NonClassedRewardCount,
+                                match.DamageOne > match.DamageTwo ? match.OneId : match.TwoId);
+                        Commit(match, transfer, step);
                         BeginReturn(match, match.PhaseEnds);
                         NotePhase(match, step);
                     }

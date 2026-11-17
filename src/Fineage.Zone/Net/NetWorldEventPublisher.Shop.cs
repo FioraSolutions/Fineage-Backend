@@ -149,7 +149,8 @@ sealed partial class NetWorldEventPublisher
         SlotsUsed = list.SlotsUsed,
         SlotsMax = list.SlotsMax,
         Adena = list.Adena,
-        Items = ToNetWarehouseItemRows(list.Items)
+        Items = ToNetWarehouseItemRows(list.Items),
+        WarehouseType = list.WarehouseType
     };
 
     static WarehouseWithdrawListNetMsg ToNetWarehouseWithdrawList(Fineage.Protocol.WarehouseWithdrawListMsg list) => new()
@@ -161,7 +162,8 @@ sealed partial class NetWorldEventPublisher
         InventorySlotsMax = list.InventorySlotsMax,
         CurrentWeight = list.CurrentWeight,
         MaxWeight = list.MaxWeight,
-        Items = ToNetWarehouseItemRows(list.Items)
+        Items = ToNetWarehouseItemRows(list.Items),
+        WarehouseType = list.WarehouseType
     };
 
     static ItemListEntryNet[] ToNetWarehouseItemRows(Fineage.Protocol.ItemListEntryMsg[]? items)

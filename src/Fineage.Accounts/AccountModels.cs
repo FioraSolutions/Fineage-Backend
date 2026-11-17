@@ -122,8 +122,14 @@ public sealed record CharacterRecord(
     int HennaDye1 = 0,
     int HennaDye2 = 0,
     int HennaDye3 = 0,
-    IReadOnlyList<StoredEffect>? Effects = null)
+    IReadOnlyList<StoredEffect>? Effects = null,
+    CharacterClassState? ClassState = null)
 {
+    /// <summary>Mobius <c>getBaseClass</c>: the class the character was created into (falls back to the active class).</summary>
+    public int BaseClassId => ClassState is { BaseClassId: > 0 } s ? s.BaseClassId : ClassId;
+
+    public bool Noble => ClassState?.Noble ?? false;
+
     /// <summary>Remaining whole seconds until hard delete. Zero when the character is not pending.</summary>
     public int DeleteSecondsLeft(DateTimeOffset now)
     {
@@ -165,9 +171,15 @@ public sealed record ClanRecord(
     IReadOnlyList<ClanMemberRecord> Members,
     int CastleId = 0,
     /// <summary>Mobius <c>clan_skills</c> book (id → level). Applied to online members via ZoneEntity.ClanSkills.</summary>
-    IReadOnlyDictionary<int, int>? Skills = null);
+    IReadOnlyDictionary<int, int>? Skills = null,
+    /// <summary>Reputation, sub-units, privileges, wars, ally, member grades, warehouse (see <see cref="ClanDetails"/>).</summary>
+    ClanDetails? Details = null);
 
-/// <summary>Persisted castle row. Owner 0 is an NPC castle. Tax is a percent. Times are unix milliseconds.</summary>
+/// <summary>
+/// Persisted castle row. Owner 0 is an NPC castle. Tax is a percent. Times are unix milliseconds.
+/// <see cref="Treasury"/> is Mobius <c>castle.treasury</c>; <see cref="DoorUpgrades"/> is <c>castle_doorupgrade</c>
+/// (door id → HP ratio 2 / 3 / 5).
+/// </summary>
 public sealed record CastleSave(
     int Id,
     int OwnerClanId,
@@ -176,7 +188,35 @@ public sealed record CastleSave(
     bool RegistrationClosed,
     bool ScheduleAccepted,
     bool InProgress,
-    long EndsUnixMs);
+    long EndsUnixMs,
+    long Treasury = 0,
+    IReadOnlyDictionary<int, int>? DoorUpgrades = null);
+
+/// <summary>
+/// One <c>castle_manor_production</c> row (Mobius <c>SeedProduction</c>): seeds a castle sells this period or the next.
+/// </summary>
+public sealed record ManorProductionSave(int CastleId, int SeedId, long Amount, long StartAmount, long Price, bool NextPeriod);
+
+/// <summary>
+/// One <c>castle_manor_procure</c> row (Mobius <c>CropProcure</c>): crops a castle buys; reward type 1 / 2 picks the reward item.
+/// </summary>
+public sealed record ManorProcureSave(int CastleId, int CropId, long Amount, long StartAmount, long Price, int RewardType, bool NextPeriod);
+
+/// <summary>
+/// One pet (Mobius <c>pets</c> row, keyed by the control item's object id): who last owned it, its npc, name, level,
+/// exp, HP / MP, meal meter and the pet inventory. Survives logout, trade of the collar and server restarts.
+/// </summary>
+public sealed record StoredPet(
+    int ControlObjectId,
+    int OwnerCharacterId,
+    int NpcId,
+    string Name,
+    int Level,
+    long Exp,
+    int CurHp,
+    int CurMp,
+    int Fed,
+    IReadOnlyList<StoredItem> Items);
 
 /// <summary>One <c>siege_clans</c> row. Owner clans are not stored; side is attacker, defender, or pending.</summary>
 public sealed record SiegeClanSave(int CastleId, int ClanId, int Side);

@@ -92,6 +92,27 @@ public sealed partial class QuestMachine
                     }
 
                     break;
+                case TakeAllOp takeAll:
+                    foreach (int itemId in takeAll.ItemIds)
+                    {
+                        int held = inventory.CountOf(itemId) + plan.Delta.GetValueOrDefault(itemId);
+                        if (held > 0)
+                            AddDelta(inventory, plan, itemId, -held);
+                    }
+
+                    break;
+                case AddVarOp add:
+                {
+                    if (!plan.Present || plan.Delete || plan.Phase == QuestPhase.Completed)
+                    {
+                        failure = Fail(QuestFailure.State, "That quest cannot be updated.", quest.Id, "");
+                        return false;
+                    }
+
+                    long now = plan.Vars.TryGetValue(add.Key, out var raw) && long.TryParse(raw, out long parsed) ? parsed : 0;
+                    plan.Vars[add.Key] = Math.Clamp(now + add.Delta, int.MinValue, int.MaxValue).ToString();
+                    break;
+                }
                 case UnsetVarOp unset:
                     if (!plan.Present || plan.Delete || plan.Phase == QuestPhase.Completed)
                     {
@@ -255,9 +276,74 @@ public sealed partial class QuestMachine
                 case SoundOp sound:
                     plan.Sounds.Add(sound.Name);
                     break;
+                case SpawnNpcOp { X: int sx, Y: int sy, Z: int sz } fixedSpawn:
+                    plan.SpawnsAt.Add(new QuestSpawnPoint(fixedSpawn.NpcId, sx, sy, sz));
+                    break;
                 case SpawnNpcOp spawn:
                     plan.Spawns.Add(spawn.NpcId);
                     break;
+                case SetNobleOp:
+                    plan.Noble = true;
+                    break;
+                case TeleportOp tp:
+                    plan.Teleport = (tp.X, tp.Y, tp.Z);
+                    break;
+                case SocialOp social:
+                    plan.Social = social.Action;
+                    break;
+                case SummonOp summon:
+                    plan.Extras.Summons.Add(summon.Summon with { QuestId = quest.Id });
+                    break;
+                case SayOp say:
+                    plan.Extras.Says.Add(say.Text);
+                    break;
+                case ChangeClassOp change:
+                    plan.Extras.ClassChange = change.ClassId;
+                    break;
+                case DespawnOp:
+                    plan.Extras.Despawn = true;
+                    break;
+                case PickRandomOp pick:
+                {
+                    var pool = (plan.Vars.GetValueOrDefault(pick.Pool) ?? "")
+                        .Split(' ', StringSplitOptions.RemoveEmptyEntries).ToList();
+                    if (pool.Count == 0)
+                    {
+                        plan.Vars.Remove(pick.Target);
+                        break;
+                    }
+
+                    int index = Math.Min(pool.Count - 1, (int)(_random() * pool.Count));
+                    plan.Vars[pick.Target] = pool[index];
+                    pool.RemoveAt(index);
+                    plan.Vars[pick.Pool] = string.Join(' ', pool);
+                    break;
+                }
+                case RememberItemOp remember:
+                {
+                    var held = inventory.Items.FirstOrDefault(i =>
+                        remember.Items.Contains(i.ItemId) && i.EnchantLevel >= remember.MinEnchant);
+                    if (held == null)
+                    {
+                        failure = Fail(QuestFailure.Item, "You do not have the required item.", quest.Id, "");
+                        return false;
+                    }
+
+                    plan.Vars[remember.Key] = held.ObjectId.ToString();
+                    break;
+                }
+                case ExchangeVarItemOp swap:
+                {
+                    int oid = plan.Vars.TryGetValue(swap.Key, out var rawOid) && int.TryParse(rawOid, out int parsedOid) ? parsedOid : 0;
+                    if (inventory.Find(oid) is not { } held || !swap.Items.Contains(held.ItemId))
+                    {
+                        failure = Fail(QuestFailure.Item, "You do not have the required item.", quest.Id, "");
+                        return false;
+                    }
+
+                    plan.Exchanges.Add((oid, held.ItemId + swap.Offset));
+                    break;
+                }
             }
         }
 
@@ -268,6 +354,17 @@ public sealed partial class QuestMachine
     {
         bool changed = WriteJournal(journal, quest.Id, plan);
         var touches = new List<BagTouch>();
+        foreach (var (objectId, newItemId) in plan.Exchanges)
+        {
+            if (inventory.Find(objectId) is not { } old)
+                continue;
+            int enchant = old.EnchantLevel;
+            inventory.Remove(old);
+            touches.Add(new BagTouch(BagTouchKind.Remove, old));
+            foreach (var piece in inventory.AddPieces(newItemId, 1, enchant))
+                touches.Add(new BagTouch(BagTouchKind.Add, piece));
+        }
+
         foreach (int itemId in plan.Delta.Keys.Order())
         {
             int delta = plan.Delta[itemId];
@@ -297,7 +394,12 @@ public sealed partial class QuestMachine
             Items = touches,
             Exp = plan.Exp,
             Sp = plan.Sp,
-            Spawns = plan.Spawns
+            Spawns = plan.Spawns,
+            SpawnsAt = plan.SpawnsAt,
+            Noble = plan.Noble,
+            Teleport = plan.Teleport,
+            Social = plan.Social,
+            Extras = plan.Extras.Empty ? QuestExtras.None : plan.Extras
         };
     }
 }

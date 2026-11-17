@@ -210,6 +210,8 @@ public sealed class WarehouseDepositListMsg
     public int SlotsMax { get; set; }
     public int Adena { get; set; }
     public ItemListEntryMsg[] Items { get; set; } = [];
+    /// <summary>1 private, 2 clan (Mobius WarehouseListType).</summary>
+    public int WarehouseType { get; set; } = 1;
 }
 
 /// <summary>Opcode <see cref="MsgType.WarehouseWithdrawList"/> (1107).</summary>
@@ -223,4 +225,6 @@ public sealed class WarehouseWithdrawListMsg
     public int CurrentWeight { get; set; }
     public int MaxWeight { get; set; }
     public ItemListEntryMsg[] Items { get; set; } = [];
+    /// <summary>1 private, 2 clan (Mobius WarehouseListType).</summary>
+    public int WarehouseType { get; set; } = 1;
 }

@@ -16,6 +16,8 @@ public sealed partial class ZoneWorld
 
         party.MemberIds.Remove(objectId);
         _partyByPlayer.Remove(objectId);
+        ForgetPartyMemberCaches(objectId);
+        DuelOnPartyRemove(objectId);
 
         if (party.MemberIds.Count == 0)
         {
@@ -31,6 +33,8 @@ public sealed partial class ZoneWorld
             int lastId = party.MemberIds[0];
             party.MemberIds.RemoveAt(0);
             _partyByPlayer.Remove(lastId);
+            ForgetPartyMemberCaches(lastId);
+            DuelOnPartyRemove(lastId);
             _parties.Remove(partyId);
             // Mobius sends an empty list so the last member's window closes.
             FanPartyList([lastId], 0, 0, []);
@@ -98,7 +102,9 @@ public sealed partial class ZoneWorld
                 CurHp = entity.CurHp,
                 MaxHp = entity.MaxHp,
                 CurMp = entity.CurMp,
-                MaxMp = entity.MaxMp
+                MaxMp = entity.MaxMp,
+                CurCp = PartyMaxCp(entity),
+                MaxCp = PartyMaxCp(entity)
             };
         }
 

@@ -46,12 +46,32 @@ public sealed partial class ZoneWorld
         var item = player.Inventory!.Find(objectId);
         if (GearRules.UseOwnedError(item != null) is { } ownedError)
             return ownedError;
+        if (OlympiadItemRefused(player, item!) is { } olympiadError)
+            return olympiadError;
+        // Mobius UseItem: nothing but fishing shots while the line is out.
+        if (player.Fishing && !FishingProtocol.IsFishShot(item!.ItemId))
+        {
+            SelfLine(session, FishingProtocol.CannotWhileFishingUse, "You cannot do that while fishing.");
+            return FishingProtocol.Busy;
+        }
+        if (FishingProtocol.IsFishShot(item!.ItemId))
+            return TryChargeFishShot(session, player, item);
         if (IsShot(item!.Template))
         {
             TryChargeShot(session, player, item, quiet: false);
             return null;
         }
         // Mobius UseItem: recipe scrolls register into the craft book; ItemSkills handle potions / SOE / shots.
+        if (_manor.Data.Seed(item.ItemId) is { } seed)
+            return TryUseSeed(session, player, item, seed);
+        if (item.ItemId == ManorProtocol.HarvesterItemId)
+            return TryUseHarvester(session, player);
+        if (_pets.ByItem(item.ItemId) is { } petTemplate)
+            return TryUseCollar(session, player, item, petTemplate);
+        if (item.ItemId == PetResurrectScrollId)
+            return TryUsePetResurrectScroll(session, player, item);
+        if (_soulCrystals.IsCrystal(item.ItemId))
+            return TryUseSoulCrystal(session, player, item);
         if (!item.Template.Equippable)
         {
             if (_game.Recipes.TryGetByRecipeItem(item.ItemId, out _))
@@ -79,6 +99,7 @@ public sealed partial class ZoneWorld
         {
             player.SoulshotCharged = false; // Mobius: charges live on the weapon instance
             player.SpiritshotCharge = 0;
+            player.FishShotCharged = false;
             if (item.IsEquipped)
                 RechargeAutoShots(player);
         }
@@ -108,6 +129,7 @@ public sealed partial class ZoneWorld
         {
             player.SoulshotCharged = false;
             player.SpiritshotCharge = 0;
+            player.FishShotCharged = false;
         }
         if (!PublishGear(session, player, before))
             return "bad_request";

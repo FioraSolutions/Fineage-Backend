@@ -27,4 +27,21 @@ public sealed class QuestSpawnTests
         Assert.Equal(elf.ObjectId, lizard.AggroTargetId);
         Assert.InRange(Math.Abs(lizard.X - elf.X) + Math.Abs(lizard.Y - elf.Y), 1, 200);
     }
+
+    [Fact]
+    public async Task Quest_folk_spawns_are_peaceful()
+    {
+        var kit = new NetTestKit();
+        var (_, knight) = await kit.EnterAsync(classId: 4);
+        knight.X = 10_000;
+        knight.Y = 20_000;
+        knight.Z = -3000;
+
+        // Spirit of Sir Talianus (Q212) rises as a folk NPC to be talked to, not fought.
+        kit.World.QuestSpawnNearForTest(knight, anchorNpcId: 30654, knight.X, knight.Y, knight.Z, [30656]);
+        var spirit = kit.World.FindNpcTemplateForTest(30656);
+        Assert.NotNull(spirit);
+        Assert.False(spirit!.Attackable);
+        Assert.NotEqual(knight.ObjectId, spirit.AggroTargetId);
+    }
 }

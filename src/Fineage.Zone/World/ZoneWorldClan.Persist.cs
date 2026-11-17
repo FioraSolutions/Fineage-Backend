@@ -32,7 +32,9 @@ public sealed partial class ZoneWorld
             LeaderId = record.LeaderId,
             DissolvingExpiryUnixMs = record.DissolvingExpiryUnixMs,
             CharPenaltyExpiryUnixMs = record.CharPenaltyExpiryUnixMs,
-            CastleId = record.CastleId
+            CastleId = record.CastleId,
+            CrestId = record.CrestId,
+            D = record.Details?.Clone() ?? new ClanDetails()
         };
         if (record.Skills != null)
         {
@@ -50,7 +52,8 @@ public sealed partial class ZoneWorld
                 Account = member.Account,
                 Name = member.Name,
                 ClassId = member.ClassId,
-                Level = member.Level
+                Level = member.Level,
+                PledgeType = member.PledgeType
             });
         }
 
@@ -64,7 +67,7 @@ public sealed partial class ZoneWorld
         clan.Name,
         clan.Level,
         clan.LeaderId,
-        ClanProtocol.CrestId,
+        clan.CrestId,
         clan.DissolvingExpiryUnixMs,
         clan.CharPenaltyExpiryUnixMs,
         members.Select(member => new ClanMemberRecord(
@@ -73,9 +76,10 @@ public sealed partial class ZoneWorld
             member.Name,
             member.ClassId,
             member.Level,
-            ClanProtocol.MainPledge)).ToArray(),
+            member.PledgeType)).ToArray(),
         clan.CastleId,
-        clan.Skills.Count == 0 ? null : new Dictionary<int, int>(clan.Skills));
+        clan.Skills.Count == 0 ? null : new Dictionary<int, int>(clan.Skills),
+        DetailsFor(clan, members));
 
     PledgeStatusChangedMsg StatusOf(ZoneClan clan) => new()
     {
@@ -83,10 +87,22 @@ public sealed partial class ZoneWorld
         Name = clan.Name,
         Level = clan.Level,
         LeaderObjectId = clan.LeaderId,
-        CrestId = ClanProtocol.CrestId,
+        CrestId = clan.CrestId,
         MemberCount = clan.Members.Count,
         DissolvingExpiryUnixMs = clan.DissolvingExpiryUnixMs,
-        CharPenaltyExpiryUnixMs = clan.CharPenaltyExpiryUnixMs
+        CharPenaltyExpiryUnixMs = clan.CharPenaltyExpiryUnixMs,
+        Reputation = clan.D.Reputation,
+        LargeCrestId = clan.D.LargeCrestId,
+        AllyId = clan.D.AllyId,
+        AllyName = clan.D.AllyName ?? "",
+        AllyCrestId = clan.D.AllyCrestId,
+        CastleId = clan.CastleId,
+        HallId = clan.D.HallId,
+        AtWar = IsAtWar(clan),
+        NewLeaderObjectId = clan.D.NewLeaderId,
+        SubPledges = clan.D.SubPledges.Select(sp => (sp.Type, sp.Name, sp.LeaderId)).ToArray(),
+        RankPrivileges = Enumerable.Range(PledgeProtocol.MinPowerGrade, PledgeProtocol.MaxPowerGrade).Select(g => RankPrivilegesOf(clan, g)).ToArray(),
+        Skills = clan.Skills.OrderBy(p => p.Key).Select(p => (p.Key, p.Value)).ToArray()
     };
 
     PledgeMemberListMsg MembersOf(ZoneClan clan) => new()
@@ -100,7 +116,11 @@ public sealed partial class ZoneWorld
             ClassId = member.ClassId,
             Level = member.Level,
             Online = Online(member.CharacterId) != null,
-            PledgeType = ClanProtocol.MainPledge
+            PledgeType = member.PledgeType,
+            PowerGrade = GradeOf(clan, member.CharacterId),
+            SponsorObjectId = MemberDetail(clan, member.CharacterId)?.SponsorId ?? 0,
+            ApprenticeObjectId = MemberDetail(clan, member.CharacterId)?.ApprenticeId ?? 0,
+            PledgeClass = PledgeClassOf(clan, member.CharacterId, member.PledgeType)
         }).ToArray()
     };
 
@@ -169,7 +189,50 @@ public sealed partial class ZoneWorld
         entity.InClan = clan != null;
         entity.ClanLeader = clan != null && clan.LeaderId == entity.ObjectId;
         entity.CastleId = clan?.CastleId ?? 0;
+        var member = clan?.Members.FirstOrDefault(m => m.CharacterId == entity.ObjectId);
+        entity.PledgeType = member?.PledgeType ?? 0;
+        entity.PowerGrade = clan == null ? 0 : GradeOf(clan, entity.ObjectId);
+        entity.ClanPrivileges = clan == null ? 0 : PrivilegesOf(clan, entity.ObjectId);
+        entity.ClanCrestId = clan?.CrestId ?? 0;
+        entity.LargeCrestId = clan?.D.LargeCrestId ?? 0;
+        entity.AllyId = clan?.D.AllyId ?? 0;
+        entity.AllyCrestId = clan?.D.AllyCrestId ?? 0;
+        entity.HideoutId = clan?.D.HallId ?? 0;
+        // Noble floor 5 directly: on enter the entity is not in _byId yet, so PledgeClassOf cannot look it up.
+        entity.PledgeClass = Math.Max(PledgeClassOf(clan, entity.ObjectId, member?.PledgeType ?? 0, entity.Hero), entity.Noble ? 5 : 0);
+        if (clan == null)
+            entity.ClanWarehouseOpen = false;
         RefreshClanSkills(entity, clan);
+        if (SyncSiegeSkills(entity, clan) && entity.Session is { InWorld: true } && NetBridge != null)
+            NetBridge.FanoutSkillList([entity.ObjectId],
+                Fineage.Zone.Net.NetEnterWorldProjector.BuildSkills(entity, _clock().ToUnixTimeMilliseconds()));
+    }
+
+    /// <summary>
+    /// Mobius <c>SiegeManager.addSiegeSkills / removeSiegeSkills</c>: the leader of a level 4+ clan knows Seal of Ruler
+    /// and Build Headquarters. True when the skill book changed.
+    /// </summary>
+    bool SyncSiegeSkills(ZoneEntity entity, ZoneClan? clan)
+    {
+        if (entity.Kind != ZoneEntityKind.Player)
+            return false;
+        bool grant = clan != null && clan.LeaderId == entity.ObjectId && clan.Level >= SiegeProtocol.MinClanLevel;
+        bool changed = false;
+        foreach (int id in (ReadOnlySpan<int>)[SiegeProtocol.SealOfRulerSkillId, SiegeProtocol.BuildHeadquartersSkillId])
+        {
+            if (grant && _game.Skills.Find(id) != null)
+            {
+                if (!entity.KnownSkills.TryGetValue(id, out int have) || have < 1)
+                {
+                    entity.KnownSkills[id] = 1;
+                    changed = true;
+                }
+            }
+            else if (!grant && entity.KnownSkills.Remove(id))
+                changed = true;
+        }
+
+        return changed;
     }
 
     /// <summary>
@@ -180,12 +243,20 @@ public sealed partial class ZoneWorld
     {
         var live = entity.ClanSkills;
         live.Clear();
-        if (clan == null || clan.Skills.Count == 0)
+        // Mobius Clan.addSkillEffects: nothing while reputation is negative; each skill needs the member's
+        // pledge class (+1) to reach the skill's SocialClass.
+        if (clan == null || clan.Skills.Count == 0 || clan.D.Reputation < 0)
+            return;
+        // Mobius OlympiadGame.removals: clan skills rest inside an arena.
+        if (_olympiadArena.Contains(entity.ObjectId))
             return;
         foreach (var (id, level) in clan.Skills)
         {
-            if (id > 0 && level > 0)
-                live[id] = level;
+            if (id <= 0 || level <= 0)
+                continue;
+            if (entity.PledgeClass + 1 < (int)PledgeSkills.RequiredClass(id, level))
+                continue;
+            live[id] = level;
         }
     }
 

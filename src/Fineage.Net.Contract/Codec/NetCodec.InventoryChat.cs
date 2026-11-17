@@ -136,12 +136,17 @@ namespace Fineage.Net.Contract
         {
             w.WriteString(m.Text ?? "");
             w.WriteInt32(m.ChatType);
+            if (!string.IsNullOrEmpty(m.Target))
+                w.WriteString(m.Target);
         });
 
         public static SayNetMsg DecodeSay(ReadOnlySpan<byte> p)
         {
             var r = new Reader(p);
-            return new SayNetMsg { Text = r.ReadString(), ChatType = r.ReadInt32() };
+            var m = new SayNetMsg { Text = r.ReadString(), ChatType = r.ReadInt32() };
+            if (r.Remaining > 0)
+                m.Target = r.ReadString();
+            return m;
         }
 
         public static byte[] EncodeCreatureSay(CreatureSayNetMsg m) => Write(w =>

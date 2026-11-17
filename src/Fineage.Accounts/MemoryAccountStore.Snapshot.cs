@@ -16,6 +16,9 @@ public sealed partial class MemoryAccountStore
         data.Clans ??= [];
         data.Castles ??= [];
         data.SiegeClans ??= [];
+        data.Crests ??= [];
+        data.ClanHalls ??= [];
+        data.Pets ??= [];
         if (data.NextItemObjectId < PlayerInventory.FirstObjectId)
             data.NextItemObjectId = PlayerInventory.FirstObjectId;
         EnsureItemObjectIds(data);
@@ -211,5 +214,6 @@ public sealed partial class MemoryAccountStore
             character.HennaDye3,
             character.Effects == null
                 ? null
-                : character.Effects.Select(e => new StoredEffect(e.SkillId, e.Level, e.RemainingSeconds)).ToArray());
+                : character.Effects.Select(e => new StoredEffect(e.SkillId, e.Level, e.RemainingSeconds)).ToArray(),
+            character.ClassState?.Clone());
 }

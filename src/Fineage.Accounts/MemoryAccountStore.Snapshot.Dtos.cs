@@ -15,6 +15,12 @@ public sealed partial class MemoryAccountStore
         public List<ClanDto> Clans { get; set; } = [];
         public List<CastleDto> Castles { get; set; } = [];
         public List<SiegeClanDto> SiegeClans { get; set; } = [];
+        public int NextCrestId { get; set; } = 1;
+        public List<CrestDto> Crests { get; set; } = [];
+        public List<ClanHallSave> ClanHalls { get; set; } = [];
+        public List<ManorProductionSave> ManorProduction { get; set; } = [];
+        public List<ManorProcureSave> ManorProcure { get; set; } = [];
+        public List<StoredPet> Pets { get; set; } = [];
     }
 
     sealed class AccountDto
@@ -74,6 +80,7 @@ public sealed partial class MemoryAccountStore
         public int HennaDye2 { get; set; }
         public int HennaDye3 { get; set; }
         public List<StoredEffectDto>? Effects { get; set; }
+        public CharacterClassState? ClassState { get; set; }
     }
 
     sealed class StoredSocialDto
@@ -128,7 +135,15 @@ public sealed partial class MemoryAccountStore
         public long CharPenaltyExpiryUnixMs { get; set; }
         public int CastleId { get; set; }
         public Dictionary<int, int>? Skills { get; set; }
+        public ClanDetails? Details { get; set; }
         public List<ClanMemberDto> Members { get; set; } = [];
+    }
+
+    sealed class CrestDto
+    {
+        public int Id { get; set; }
+        public int Kind { get; set; }
+        public byte[] Data { get; set; } = [];
     }
 
     sealed class CastleDto
@@ -141,6 +156,8 @@ public sealed partial class MemoryAccountStore
         public bool ScheduleAccepted { get; set; }
         public bool InProgress { get; set; }
         public long EndsUnixMs { get; set; }
+        public long Treasury { get; set; }
+        public Dictionary<int, int>? DoorUpgrades { get; set; }
     }
 
     sealed class SiegeClanDto

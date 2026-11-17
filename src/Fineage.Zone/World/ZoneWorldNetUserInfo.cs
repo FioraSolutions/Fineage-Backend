@@ -88,7 +88,24 @@ public sealed partial class ZoneWorld
             MaxWeight = MaxLoadOf(e),
             Paperdoll = slots,
             Karma = e.Karma,
-            PvpFlag = e.PvpFlagged ? (byte)1 : (byte)0
+            PvpFlag = PvpFlagWire(e),
+            PvpKills = e.PvpKills,
+            PkKills = e.PkKills,
+            Title = e.Title ?? "",
+            ClanCrestId = e.ClanCrestId,
+            LargeCrestId = e.LargeCrestId,
+            AllyId = e.AllyId,
+            AllyCrestId = e.AllyCrestId,
+            ClanPrivileges = e.ClanPrivileges,
+            PledgeClass = e.PledgeClass,
+            PledgeType = e.PledgeType,
+            ClanLeader = e.ClanLeader,
+            Noble = e.Noble,
+            Hero = e.Hero,
+            BaseClassId = e.BaseClassId,
+            ClassIndex = e.ClassIndex,
+            Cubics = CubicIdsOf(e),
+            Team = e.DuelTeam
         };
     }
 

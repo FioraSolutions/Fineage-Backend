@@ -23,6 +23,31 @@ sealed partial class ZoneEntity
         set => EnsureIdentity().Hero = value;
     }
 
+    public bool Noble
+    {
+        get => Identity?.Noble ?? false;
+        set => EnsureIdentity().Noble = value;
+    }
+
+    /// <summary>Mobius <c>getBaseClass</c>: the class the character was created into and advanced.</summary>
+    public int BaseClassId
+    {
+        get => Identity is { BaseClassId: > 0 } i ? i.BaseClassId : ClassId;
+        set => EnsureIdentity().BaseClassId = value;
+    }
+
+    public int ClassIndex
+    {
+        get => Identity?.ClassIndex ?? 0;
+        set => EnsureIdentity().ClassIndex = value;
+    }
+
+    /// <summary>Mobius <c>isSubClassActive</c>.</summary>
+    public bool SubClassActive => ClassIndex > 0;
+
+    /// <summary>Parked class slots (Mobius <c>getSubClasses</c> plus the base while a subclass is active).</summary>
+    public List<Fineage.Accounts.StoredClassSlot> ClassSlots => EnsureIdentity().ClassSlots;
+
     public bool InClan
     {
         get => Identity?.InClan ?? false;
@@ -53,10 +78,65 @@ sealed partial class ZoneEntity
         set => EnsureIdentity().HideoutId = value;
     }
 
+    public int PledgeType
+    {
+        get => Identity?.PledgeType ?? 0;
+        set => EnsureIdentity().PledgeType = value;
+    }
+
+    public int PowerGrade
+    {
+        get => Identity?.PowerGrade ?? 0;
+        set => EnsureIdentity().PowerGrade = value;
+    }
+
+    public int ClanPrivileges
+    {
+        get => Identity?.ClanPrivileges ?? 0;
+        set => EnsureIdentity().ClanPrivileges = value;
+    }
+
+    public int ClanCrestId
+    {
+        get => Identity?.ClanCrestId ?? 0;
+        set => EnsureIdentity().ClanCrestId = value;
+    }
+
+    public int LargeCrestId
+    {
+        get => Identity?.LargeCrestId ?? 0;
+        set => EnsureIdentity().LargeCrestId = value;
+    }
+
+    public int AllyId
+    {
+        get => Identity?.AllyId ?? 0;
+        set => EnsureIdentity().AllyId = value;
+    }
+
+    public int AllyCrestId
+    {
+        get => Identity?.AllyCrestId ?? 0;
+        set => EnsureIdentity().AllyCrestId = value;
+    }
+
+    public bool ClanWarehouseOpen
+    {
+        get => Identity?.ClanWarehouseOpen ?? false;
+        set => EnsureIdentity().ClanWarehouseOpen = value;
+    }
+
     public bool PvpFlagged
     {
         get => Identity?.PvpFlagged ?? false;
         set => EnsureIdentity().PvpFlagged = value;
+    }
+
+    /// <summary>Mobius <c>updatePvPFlag(2)</c>: the flag is in its last 20 s and the name blinks.</summary>
+    public bool PvpFlagBlink
+    {
+        get => Identity?.PvpFlagBlink ?? false;
+        set => EnsureIdentity().PvpFlagBlink = value;
     }
 
     /// <summary>Unix ms when the PvP flag expires (Mobius <c>_pvpFlagLasts</c>).</summary>

@@ -118,8 +118,29 @@ public sealed class UserInfoMsg
     public int MaxWeight { get; set; }
     /// <summary>Mobius karma — red PK name while &gt; 0.</summary>
     public int Karma { get; set; }
-    /// <summary>Mobius PvP flag — purple name while flagged (0/1).</summary>
+    /// <summary>Mobius PvP flag — 0 white, 1 purple, 2 purple blinking (last 20 s of the flag).</summary>
     public byte PvpFlag { get; set; }
+    /// <summary>Mobius getPvpKills.</summary>
+    public int PvpKills { get; set; }
+    /// <summary>Mobius getPkKills.</summary>
+    public int PkKills { get; set; }
+    public string Title { get; set; } = "";
+    public int LargeCrestId { get; set; }
+    public int AllyId { get; set; }
+    public int AllyCrestId { get; set; }
+    /// <summary>Mobius getClanPrivileges bitmask.</summary>
+    public int ClanPrivileges { get; set; }
+    public int PledgeClass { get; set; }
+    public int PledgeType { get; set; }
+    public bool ClanLeader { get; set; }
+    public bool Noble { get; set; }
+    public bool Hero { get; set; }
+    public int BaseClassId { get; set; }
+    public int ClassIndex { get; set; }
+    /// <summary>Active cubic ids (Mobius UserInfo cubic list).</summary>
+    public int[] Cubics { get; set; } = [];
+    /// <summary>Duel team circle (0 none, 1 blue, 2 red).</summary>
+    public byte Team { get; set; }
 }
 
 /// <summary>Opcode <see cref="MsgType.DeleteObject"/> (1007). Left knownlist.</summary>

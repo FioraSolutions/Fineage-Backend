@@ -13,6 +13,13 @@ sealed partial class NetWorldEventPublisher
             _presence.TrySend(watcher, NetOpcode.SkillList, payload);
     }
 
+    void IWorldEventPublisher.FanoutShortcutInit(IReadOnlyList<int> watcherObjectIds, Fineage.Protocol.ShortCutInitMsg init)
+    {
+        var payload = NetCodec.EncodeShortCutInit(SessionLifecyclePacketHandler.ToNetShortcutInit(init));
+        foreach (int watcher in watcherObjectIds)
+            _presence.TrySend(watcher, NetOpcode.ShortCutInit, payload);
+    }
+
     void IWorldEventPublisher.FanoutChangeWaitType(IReadOnlyList<int> watcherObjectIds, int objectId, int waitType, int x, int y, int z)
     {
         var payload = NetCodec.EncodeChangeWaitType(new ChangeWaitTypeNetMsg

@@ -23,9 +23,15 @@ public sealed partial class ZoneWorld
         public long CharPenaltyExpiryUnixMs { get; set; }
         /// <summary>Mobius <c>hasCastle</c>. 0 when this clan owns no castle.</summary>
         public int CastleId { get; set; }
+        /// <summary>Mobius <c>crest_id</c> (pledge crest, 0 none).</summary>
+        public int CrestId { get; set; }
         /// <summary>Mobius <c>clan_skills</c> book. Copied onto members via <see cref="RefreshClanSkills"/>.</summary>
         public Dictionary<int, int> Skills { get; } = [];
         public List<ZoneClanMember> Members { get; } = [];
+        /// <summary>Reputation, sub-units, privileges, wars, ally, member grades, warehouse rows (persisted in the clan payload).</summary>
+        public ClanDetails D { get; set; } = new();
+        /// <summary>Mobius <c>ClanWarehouse</c>, rebuilt from <see cref="ClanDetails.Warehouse"/> on first use.</summary>
+        public Fineage.Game.Services.PrivateWarehouse? Warehouse { get; set; }
     }
 
     sealed class ZoneClanMember
@@ -35,9 +41,11 @@ public sealed partial class ZoneWorld
         public string Name { get; set; } = "";
         public int ClassId { get; set; }
         public int Level { get; set; }
+        /// <summary>Mobius <c>ClanMember.getPledgeType</c>: 0 main, -1 academy, 100/200 royal, 1001..2002 knights.</summary>
+        public int PledgeType { get; set; }
     }
 
-    readonly record struct PendingClanInvite(int InviterObjectId, int ClanId, long ExpiresUnixMs);
+    readonly record struct PendingClanInvite(int InviterObjectId, int ClanId, long ExpiresUnixMs, int PledgeType = 0);
 
     public async Task<string?> TryClanCreateAsync(
         ZoneSession session,
@@ -147,7 +155,8 @@ public sealed partial class ZoneWorld
     }
 
     void LoadClans()
-    {        if (_accounts == null)
+    {
+        if (_accounts == null)
             return;
 
         foreach (var record in _accounts.ListClans())
@@ -157,6 +166,14 @@ public sealed partial class ZoneWorld
             foreach (var member in clan.Members)
                 _clanByPlayer[member.CharacterId] = clan.Id;
         }
+
+        // Mobius ClanTable load: a pending leader delegation takes effect at server start.
+        foreach (var clan in _clans.Values)
+        {
+            if (clan.D.NewLeaderId != 0)
+                ApplyLeaderDelegation(clan);
+        }
+        _halls = null;
 
         CompleteDueDissolutions(_clock().ToUnixTimeMilliseconds());
     }
@@ -169,6 +186,13 @@ public sealed partial class ZoneWorld
             _clans.Clear();
             _clanByPlayer.Clear();
             LoadClans();
+            foreach (var entity in _byId.Values)
+            {
+                if (entity.Kind != ZoneEntityKind.Player)
+                    continue;
+                entity.ClanId = ClanIdFor(entity.ObjectId);
+                SyncClanStanding(entity);
+            }
             return _clans.Count > 0;
         }
     }

@@ -107,6 +107,8 @@ namespace Fineage.Net.Contract
         public int SlotsMax { get; set; }
         public int Adena { get; set; }
         public ItemListEntryNet[] Items { get; set; } = System.Array.Empty<ItemListEntryNet>();
+        /// <summary>Mobius WareHouseDepositList type: 1 private, 2 clan. Optional tail (absent = private).</summary>
+        public int WarehouseType { get; set; } = 1;
     }
 
     public sealed class WarehouseWithdrawListNetMsg
@@ -119,6 +121,8 @@ namespace Fineage.Net.Contract
         public int CurrentWeight { get; set; }
         public int MaxWeight { get; set; }
         public ItemListEntryNet[] Items { get; set; } = System.Array.Empty<ItemListEntryNet>();
+        /// <summary>Mobius WareHouseWithdrawalList type: 1 private, 2 clan. Optional tail (absent = private).</summary>
+        public int WarehouseType { get; set; } = 1;
     }
 
     public sealed class WarehouseDepositRequestNetMsg

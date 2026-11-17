@@ -25,6 +25,7 @@ public sealed partial class ZoneWorld
             return null;
         }
 
+        player.ClanWarehouseOpen = false;
         SendDepositList(session, player, npc);
         SendHtml(session, player, npc, "<html><body>%npcname%:<br>Deposit an item. The fee is 30 adena per item.</body></html>");
         return null;
@@ -45,6 +46,7 @@ public sealed partial class ZoneWorld
             return null;
         }
 
+        player.ClanWarehouseOpen = false;
         SendWithdrawList(session, player, npc);
         SendHtml(session, player, npc, "<html><body>%npcname%:<br>Withdraw an item from your private warehouse.</body></html>");
         return null;
@@ -54,7 +56,8 @@ public sealed partial class ZoneWorld
     {
         if (!TryServicePair(session, npcObjectId, out var player, out var npc, out var error))
             return error;
-        if (player.Inventory == null || player.Warehouse == null)
+        var wh = ActiveWarehouse(player);
+        if (player.Inventory == null || wh == null)
             return "world";
         if (WarehouseSessionRules.NpcWindowError(IsWarehouse(npc)) is { } depositNpcError)
         {
@@ -68,6 +71,9 @@ public sealed partial class ZoneWorld
             Notice(session, NpcServiceProtocol.EnchantOpen, NpcServiceProtocol.EnchantOpenText);
             return null;
         }
+
+        if (ClanDepositBlock(session, player) is { } clanDepositError)
+            return clanDepositError;
 
         if (!TryReadLines(lines, out var request, out error))
             return error;
@@ -93,10 +99,10 @@ public sealed partial class ZoneWorld
             planned.Add((item, line.Count, stackable));
             if (item.ItemId == WarehouseRules.AdenaItemId)
                 depositedAdena = checked(depositedAdena + line.Count);
-            slots += WarehouseRules.SlotsFor(stackable, player.Warehouse.ContainsItem(item.ItemId), line.Count);
+            slots += WarehouseRules.SlotsFor(stackable, wh.ContainsItem(item.ItemId), line.Count);
         }
 
-        if (player.Warehouse.SlotCount + slots > WarehouseRules.WarehouseSlots(player.Race))
+        if (wh.SlotCount + slots > ActiveWarehouseSlots(player))
         {
             Notice(session, NpcServiceProtocol.WarehouseFull, NpcServiceProtocol.WarehouseFullText);
             return null;
@@ -124,12 +130,12 @@ public sealed partial class ZoneWorld
             changes.Add(removed
                 ? InventoryMessages.RemoveRow(taken, -1)
                 : InventoryMessages.ChangeRow(InventoryChange.Modify, taken));
-            player.Warehouse.Add(taken.ItemId, count, taken.EnchantLevel, out _);
+            wh.Add(taken.ItemId, count, taken.EnchantLevel, out _);
         }
 
         FanInventory(session, Collapse(changes));
         SaveInventory(session, player.Inventory);
-        SaveWarehouse(session, player);
+        SaveActiveWarehouse(session, player);
         Notice(session, NpcServiceProtocol.TransactionComplete, NpcServiceProtocol.TransactionCompleteText);
         return null;
     }

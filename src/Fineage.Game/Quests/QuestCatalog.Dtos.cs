@@ -46,12 +46,33 @@ public sealed partial class QuestCatalog
         public int HasItem { get; set; }
         public int MinCount { get; set; } = 1;
         public bool Party { get; set; }
+        public bool Everyone { get; set; }
         public List<int>? Classes { get; set; }
         public List<int>? HasItems { get; set; }
         public List<int>? LacksItems { get; set; }
         public Dictionary<string, int>? AtLeast { get; set; }
+        public Dictionary<string, int>? Below { get; set; }
         public List<int>? HasAny { get; set; }
         public bool? IsMage { get; set; }
+        /// <summary>Mobius <c>player.isSubClassActive()</c>. Null = no gate.</summary>
+        public bool? SubClass { get; set; }
+        /// <summary>Mobius <c>getRandom(n) &lt; k</c> branch: the row matches with this probability (0..1). Null = always.</summary>
+        public double? Chance { get; set; }
+        /// <summary>Mobius <c>st.getInt(key) &gt;= n</c> per key (missing var reads 0).</summary>
+        public Dictionary<string, int>? VarAtLeast { get; set; }
+        /// <summary>Mobius <c>st.getInt(key) &lt; n</c> per key (missing var reads 0).</summary>
+        public Dictionary<string, int>? VarBelow { get; set; }
+        /// <summary>Mobius <c>getPaperdollItemId(PAPERDOLL_RHAND)</c> in this list. Null = no gate.</summary>
+        public List<int>? Weapons { get; set; }
+        public string? Owned { get; set; }
+        public string? Pet { get; set; }
+        public bool? ByPet { get; set; }
+        public int MinEnchant { get; set; }
+        public List<int>? SumItems { get; set; }
+        public int SumMin { get; set; }
+        public int SumMax { get; set; } = -1;
+        public string? HoldsVarItem { get; set; }
+        public HtmlByVarDto? HtmlByVar { get; set; }
     }
 
     sealed class OpDto
@@ -74,6 +95,32 @@ public sealed partial class QuestCatalog
         public int? BonusAdena { get; set; }
         public int NpcId { get; set; }
         public List<PriceDto>? Prices { get; set; }
+        public int? X { get; set; }
+        public int? Y { get; set; }
+        public int? Z { get; set; }
+        public int? Action { get; set; }
+        /// <summary><c>take_all</c>: item ids to remove entirely (Mobius <c>takeItems(player, id, -1)</c>).</summary>
+        public List<int>? Items { get; set; }
+        public string? Text { get; set; }
+        public int? MinEnchant { get; set; }
+        public int? Offset { get; set; }
+        public int? ClassId { get; set; }
+        public bool AtPlayer { get; set; }
+        public int? DespawnSec { get; set; }
+        public bool Owned { get; set; }
+        public bool SoloGuard { get; set; }
+        public string? Say { get; set; }
+        public string? GoneSay { get; set; }
+        public string? GuardSay { get; set; }
+        public Dictionary<string, string>? GoneVars { get; set; }
+        public Dictionary<string, string>? DeadVars { get; set; }
+    }
+
+    sealed class HtmlByVarDto
+    {
+        public string? Var { get; set; }
+        /// <summary>Var value → html file in the quest folder.</summary>
+        public Dictionary<string, string>? Files { get; set; }
     }
 
     sealed class PriceDto

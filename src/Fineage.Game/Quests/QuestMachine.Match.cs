@@ -4,11 +4,14 @@ namespace Fineage.Game.Quests;
 
 public sealed partial class QuestMachine
 {
-    static QuestDialog? Find(QuestDefinition quest, QuestHook hook, int npcId, string eventName, QuestProgress? state, QuestActor? actor = null, PlayerInventory? inventory = null)
+    static QuestDialog? Find(QuestDefinition quest, QuestHook hook, int npcId, string eventName, QuestProgress? state, QuestActor? actor = null, PlayerInventory? inventory = null, Func<double>? random = null, string? ownedMode = null)
     {
         foreach (var dialog in quest.Dialogs)
         {
             if (dialog.Hook != hook || dialog.NpcId != npcId)
+                continue;
+            // Owned steps run only for the owner of a quest spawn: "solo" credit also allows "any" rows.
+            if (ownedMode == null ? dialog.Owned != null : dialog.Owned == null || (dialog.Owned == "solo" && ownedMode != "solo"))
                 continue;
             if (hook == QuestHook.Event && !string.Equals(dialog.Event, eventName, StringComparison.Ordinal))
                 continue;
@@ -19,6 +22,16 @@ public sealed partial class QuestMachine
             if (dialog.HasItem != 0 && inventory != null && inventory.CountOf(dialog.HasItem) < dialog.MinCount)
                 continue;
             if (!ItemsMatch(dialog, inventory))
+                continue;
+            if (!VarsMatch(dialog, state))
+                continue;
+            if (!PetMatches(dialog, actor, state) || !ExtraItemsMatch(dialog, inventory, state))
+                continue;
+            if (dialog.Weapons is { } weapons && inventory != null &&
+                !(inventory.GetEquipped(PaperdollSlot.RHand) is { } held && weapons.Contains(held.ItemId)))
+                continue;
+            // Random branches roll only when the engine acts (talk / event / kill), never on a quest-list probe.
+            if (dialog.Chance is double chance && random != null && random() >= chance)
                 continue;
             return dialog;
         }
@@ -43,6 +56,8 @@ public sealed partial class QuestMachine
         if (dialog.Classes is { Count: > 0 } classes && !classes.Contains(who.ClassId))
             return false;
         if (dialog.IsMage is bool wantMage && IsMageClass(who.ClassId) != wantMage)
+            return false;
+        if (dialog.SubClass is bool wantSub && who.SubClass != wantSub)
             return false;
         return true;
     }
@@ -85,6 +100,12 @@ public sealed partial class QuestMachine
                 return false;
         }
 
+        foreach (var pair in dialog.Below ?? new Dictionary<int, int>())
+        {
+            if (inventory.CountOf(pair.Key) >= pair.Value)
+                return false;
+        }
+
         // Mobius hasAtLeastOneQuestItem.
         if (dialog.HasAny is { Count: > 0 } any)
         {
@@ -102,6 +123,68 @@ public sealed partial class QuestMachine
                 return false;
         }
 
+        return true;
+    }
+
+    /// <summary>Var holding the registered pet collar object id (Mobius Q421 <c>summonOid</c>).</summary>
+    public const string PetVar = "summonOid";
+
+    static bool PetMatches(QuestDialog dialog, QuestActor? actor, QuestProgress? state)
+    {
+        if (actor is not { } who)
+            return true;
+        if (dialog.ByPet is bool byPet && who.ByPet != byPet)
+            return false;
+        if (dialog.Pet == null)
+            return true;
+        int pet = who.PetControlObjectId;
+        bool registered = pet != 0 && pet == IntVar(state, PetVar);
+        return dialog.Pet switch
+        {
+            "none" => pet == 0,
+            "out" => pet != 0,
+            "registered" => registered,
+            "other" => pet != 0 && !registered,
+            _ => false
+        };
+    }
+
+    static bool ExtraItemsMatch(QuestDialog dialog, PlayerInventory? inventory, QuestProgress? state)
+    {
+        if (inventory == null)
+            return true;
+        if (dialog.MinEnchant > 0 &&
+            !inventory.Items.Any(i => (dialog.HasAny ?? []).Contains(i.ItemId) && i.EnchantLevel >= dialog.MinEnchant))
+            return false;
+        if (dialog.SumItems is { Count: > 0 } sumItems)
+        {
+            long sum = 0;
+            foreach (int id in sumItems)
+                sum += inventory.CountOf(id);
+            if (sum < dialog.SumMin || (dialog.SumMax >= 0 && sum > dialog.SumMax))
+                return false;
+        }
+
+        if (dialog.HoldsVarItem is { } key && (IntVar(state, key) is var oid && (oid == 0 || inventory.Find(oid) == null)))
+            return false;
+        return true;
+    }
+
+    static int IntVar(QuestProgress? state, string key) =>
+        state?.Get(key) is { } raw && int.TryParse(raw, out int value) ? value : 0;
+
+    static bool VarsMatch(QuestDialog dialog, QuestProgress? state)
+    {
+        foreach (var (key, min) in dialog.VarAtLeast ?? new Dictionary<string, int>())
+        {
+            if (IntVar(state, key) < min)
+                return false;
+        }
+        foreach (var (key, below) in dialog.VarBelow ?? new Dictionary<string, int>())
+        {
+            if (IntVar(state, key) >= below)
+                return false;
+        }
         return true;
     }
 
@@ -207,6 +290,13 @@ public sealed partial class QuestMachine
         public List<string> Sounds { get; } = [];
         public List<QuestLine> Lines { get; } = [];
         public List<int> Spawns { get; } = [];
+        /// <summary>Object id → new item id (enchant kept), applied at commit.</summary>
+        public List<(int ObjectId, int NewItemId)> Exchanges { get; } = [];
+        public List<QuestSpawnPoint> SpawnsAt { get; } = [];
+        public bool Noble;
+        public (int X, int Y, int Z)? Teleport;
+        public int Social;
+        public QuestExtras Extras { get; } = new();
         public long Exp;
         public int Sp;
     }

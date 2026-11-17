@@ -30,6 +30,14 @@ Server time zone is `FINEAGE_SERVER_TIMEZONE` (default `UTC`). The weekly bounda
 
 `Action` 2 contributes seal stones the character is holding: blue 6360 (3), green 6361 (5), red 6362 (10). The per-player cap is 1000000. Over-cap contributions are rejected whole.
 
+`Action` 3 collects the contribution reward (Mobius priest `SevenSigns 9`): only during seal validation and only for a member of the winning cabal. The reward is the stones' value in Ancient Adena (5575); collecting clears it and the stone tallies, the contribution score stays. Under 3 AA, a loser, or a non-member gets `seven_signs_no_reward`; any other period gets `seven_signs_period`.
+
+`Action` 4 sells seal stones for Ancient Adena in any period (Mobius `SevenSigns 17/18`): `BlueStones`/`GreenStones`/`RedStones` are destroyed and paid 3/5/10 AA each. "Exchange all" is the client sending every stone it holds. Missing stones → `seven_signs_stones`.
+
+## Mammon
+
+Merchant of Mammon (31113) and Blacksmith of Mammon (31126) spawn only during competition results and seal validation while the winning cabal also owns Avarice (merchant) or Gnosis (blacksmith). Each appears 30 s after its seal goes live and moves every hour to a random spot: the eight Necropolises (merchant) or six Catacombs (blacksmith), Mobius `random_spawn_loc` groups 11/12. Their talk pages are NPC HTML (`seven_signs/mammmerch_1.htm`, `seven_signs/mammblack_1.htm`); with `FINEAGE_SSQ_STRICT` (default true) only a member of the winning cabal that holds the matching seal may talk (system 1301 / 1302, or 1176 when there is no winner). Shops are the datapack multisells 311132501 and 311262501–311262512 (release/re-seal A and S armor and jewels, special abilities, upgrade/exchange weapons). Black Marketeer of Mammon (31092, town spawns) swaps Ancient Adena for adena 1:1 via the HTML bypass `SevenSigns 7 <amount>`.
+
 ## Status and sky
 
 `SevenSignsStatus` is one record for the four Interlude SSQStatus pages: period, cycle, the caller's cabal and seal, stone points, festival points, the 500-point stone share plus festival score, seal owners, member and seal-choice counts, and the next boundary in unix milliseconds.
@@ -38,7 +46,7 @@ Server time zone is `FINEAGE_SERVER_TIMEZONE` (default `UTC`). The weekly bounda
 
 ## Errors
 
-Failures use `Error` **1099** with snake_case codes: `seven_signs_period`, `seven_signs_cabal`, `seven_signs_seal`, `seven_signs_class`, `seven_signs_castle`, `seven_signs_fee`, `seven_signs_contrib`, `seven_signs_stones`, plus `world` and `bad_request`.
+Failures use `Error` **1099** with snake_case codes: `seven_signs_period`, `seven_signs_cabal`, `seven_signs_seal`, `seven_signs_class`, `seven_signs_castle`, `seven_signs_fee`, `seven_signs_contrib`, `seven_signs_stones`, `seven_signs_no_reward`, plus `world` and `bad_request`.
 
 ## Persistence
 

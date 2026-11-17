@@ -150,6 +150,7 @@ public sealed partial class ZoneWorld
             return null;
         }
 
+        CreditCastleTax(npc.MerchantCastleId, mutation.CastleTax);
         SendTouches(session, mutation);
         SendComplete(session);
         var buy = BuyList(npc, liveList, baseTax, castleTax);
@@ -210,6 +211,11 @@ public sealed partial class ZoneWorld
             SendDeny(session, mutation);
             return null;
         }
+
+        // Mobius MultiSellChoose: the entry's tax share goes to the castle treasury.
+        Tax(npc, out _, out _, out bool taxedOwner);
+        if (taxedOwner && liveEntry.TaxAmount > 0)
+            CreditCastleTax(npc.MerchantCastleId, (long)liveEntry.TaxAmount * amount);
 
         SendTouches(session, mutation);
         SendComplete(session);

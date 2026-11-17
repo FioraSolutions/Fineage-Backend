@@ -101,6 +101,9 @@ public sealed partial class ZoneWorld
             IncorrectTarget(session);
             return null;
         }
+        if (target.Summon?.Pet != null && target.Dead && VisibleTo(player.ObjectId, targetId))
+            return TrySkillUseResurrectPet(session, player, target, request.SkillId, template, levelData, level, now,
+                SkillResurrectRestorePercent(player, levelData.Power));
         if (target.Kind != ZoneEntityKind.Player || !target.Dead || ReferenceEquals(player, target))
         {
             IncorrectTarget(session);
@@ -181,6 +184,9 @@ public sealed partial class ZoneWorld
             return SkillProtocol.Target;
         if (!IsAttackable(player, target))
             return SkillProtocol.Target;
+        // Mobius Player.useMagic: an offensive skill on a player that is not auto-attackable needs Ctrl.
+        if (!request.CtrlPressed && NeedsForce(player, target))
+            return null;
         if (HostilePlayableRefused(session, player, target, badSkill: true) ||
             SiegeFriendRefused(session, player, target) ||
             PeacePlayableRefused(session, player, target))
@@ -189,6 +195,8 @@ public sealed partial class ZoneWorld
             return SkillProtocol.Target;
         if (!ZoneCombat.InCastRange(player.X, player.Y, target.X, target.Y, template.CastRange))
             return SkillProtocol.Range;
+        // Mobius callSkill: a negative skill on a playable flags the caster (landing or resisted).
+        UpdatePvPStatus(player, target, now);
 
         player.CurMp = Math.Max(0, player.CurMp - levelData.MpConsume);
         var (hitMs, reuseMs) = ScaledSkillTimes(player, template);

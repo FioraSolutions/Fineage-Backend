@@ -16,6 +16,7 @@ public sealed partial class ZoneWorld
         if (killer.Kind != ZoneEntityKind.Player || killer.Session == null || npc.Kind != ZoneEntityKind.Npc)
             return;
         ApplyQuestKill(killer, npc);
+        LevelSoulCrystals(killer, npc);
         DistributeKillReward(npc);
     }
 
@@ -66,7 +67,7 @@ public sealed partial class ZoneWorld
             SendKillReward(
                 attacker.Session,
                 attacker,
-                share.Exp * _rates.RateXp,
+                share.Exp * _rates.RateXp * ServitorExpMultiplier(attacker),
                 share.Sp * _rates.RateSp);
         }
     }
@@ -122,7 +123,8 @@ public sealed partial class ZoneWorld
         foreach (var member in valid)
         {
             double share = (double)((long)member.Level * member.Level) / sqLevelSum;
-            SendKillReward(member.Session!, member, expPool * share, spPool * share);
+            // Mobius Party.distributeXpAndSp: the servitor penalty scales the member's exp share.
+            SendKillReward(member.Session!, member, expPool * share * ServitorExpMultiplier(member), spPool * share);
         }
     }
 
@@ -132,6 +134,7 @@ public sealed partial class ZoneWorld
     /// </summary>
     void SendKillReward(ZoneSession session, ZoneEntity player, double rawExp, double rawSp)
     {
+        (rawExp, rawSp) = SharePetExp(player, rawExp, rawSp);
         long exp = KillRewardFormula.Round(rawExp);
         int sp = (int)Math.Min(int.MaxValue, KillRewardFormula.Round(rawSp));
         if (exp <= 0 && sp <= 0)

@@ -32,3 +32,9 @@ public sealed class SiegeSettings
         return value;
     }
 }
+
+static class SiegeProtocolLimits
+{
+    /// <summary>Mobius <c>Inventory.MAX_ADENA</c> (int adena in CT0): the treasury never grows past it.</summary>
+    public const long MaxTreasury = int.MaxValue;
+}
