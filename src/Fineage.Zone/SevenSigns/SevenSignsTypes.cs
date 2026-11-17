@@ -123,6 +123,12 @@ public sealed class SevenSignsOptions
     /// </summary>
     public bool LazyUpdate { get; init; } = true;
 
+    /// <summary>
+    /// Mobius <c>StrictSevenSigns</c> (default true): the Merchant of Mammon serves only the winning cabal when it also
+    /// holds Avarice, the Blacksmith of Mammon only when it also holds Gnosis.
+    /// </summary>
+    public bool Strict { get; init; } = true;
+
     public static SevenSignsOptions FromEnvironment()
     {
         string? zoneId = Environment.GetEnvironmentVariable("FINEAGE_SERVER_TIMEZONE");
@@ -151,6 +157,7 @@ public sealed class SevenSignsOptions
             MinorLength = TimeSpan.FromMinutes(ReadInt("FINEAGE_SSQ_MINOR_MINUTES", 15, 1, 24 * 60)),
             PeriodStartDay = ReadDay(Environment.GetEnvironmentVariable("FINEAGE_SSQ_START_DAY")),
             LazyUpdate = ReadBool("FINEAGE_SSQ_LAZY_UPDATE", true),
+            Strict = ReadBool("FINEAGE_SSQ_STRICT", true),
             MaxPlayerContribution = ReadInt("FINEAGE_SSQ_MAX_CONTRIB", DefaultMaxContribution, 1, int.MaxValue),
             DawnJoinFeeAdena = ReadInt("FINEAGE_SSQ_DAWN_FEE", DefaultDawnJoinFee, 0, int.MaxValue)
         };

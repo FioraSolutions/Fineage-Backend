@@ -32,6 +32,10 @@ public static class SevenSignsProtocol
 
     public const int ActionJoin = 1;
     public const int ActionContribute = 2;
+    /// <summary>Mobius priest <c>SevenSigns 9</c>: winners collect their contribution reward in Ancient Adena during seal validation.</summary>
+    public const int ActionClaimReward = 3;
+    /// <summary>Mobius priest <c>SevenSigns 17/18</c>: sell the given seal stones for Ancient Adena (3 / 5 / 10 each), any period.</summary>
+    public const int ActionExchangeStones = 4;
 
     public const int BlueSealStoneId = 6360;
     public const int GreenSealStoneId = 6361;
@@ -79,4 +83,17 @@ public static class SevenSignsProtocol
     public const string FeeRequired = "seven_signs_fee";
     public const string ContributionRejected = "seven_signs_contrib";
     public const string StonesMissing = "seven_signs_stones";
+    /// <summary>Nothing to collect (reward under 3 AA, wrong period, or not the winning cabal).</summary>
+    public const string NoReward = "seven_signs_no_reward";
+
+    public const int AncientAdenaItemId = 5575;
+
+    public const int MammonMerchantId = 31113;
+    public const int MammonBlacksmithId = 31126;
+    public const int MammonMarketeerId = 31092;
+
+    /// <summary>SystemMessage 1176 / 1301 / 1302 for Mammon access refusals (Mobius strict seven signs).</summary>
+    public const int QuestEventPeriodMessage = 1176;
+    public const int OnlyDawnMessage = 1301;
+    public const int OnlyDuskMessage = 1302;
 }

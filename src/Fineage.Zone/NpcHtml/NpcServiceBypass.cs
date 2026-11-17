@@ -129,6 +129,25 @@ public sealed class LotoBypassHandler : IBypassHandler
     }
 }
 
+/// <summary>
+/// Mobius <c>SignsPriest</c> <c>SevenSigns N ...</c> as NPC HTML. Only the Black Marketeer's <c>SevenSigns 7 amount</c>
+/// (Ancient Adena → adena) runs over HTML; the priest record, join, contribution, reward, and stone exchange use the
+/// Seven Signs packets (91).
+/// </summary>
+public sealed class SevenSignsBypassHandler : IBypassHandler
+{
+    public IReadOnlyList<string> Commands { get; } = ["SevenSigns"];
+
+    public BypassReply Handle(BypassCall call)
+    {
+        var parts = call.Command.Split(' ', StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries);
+        if (parts.Length < 2 || parts[1] != "7")
+            return BypassReply.Fail("bad_request");
+        int amount = parts.Length > 2 && int.TryParse(parts[2], out int v) && v > 0 ? v : -1;
+        return BypassReply.ServiceCall(NpcServiceIntent.AncientAdenaToAdena, "", amount);
+    }
+}
+
 /// <summary>Merchant <c>TerritoryStatus</c> (Mobius <c>Merchant.showTerritoryStatusWindow</c>): castle, lord and tax page.</summary>
 public sealed class TerritoryBypassHandler : IBypassHandler
 {

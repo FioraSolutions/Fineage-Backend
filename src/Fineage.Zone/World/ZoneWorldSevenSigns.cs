@@ -72,6 +72,8 @@ public sealed partial class ZoneWorld
         {
             SevenSignsProtocol.ActionJoin => Join(session, player, request, notices),
             SevenSignsProtocol.ActionContribute => Contribute(session, player.Inventory, request),
+            SevenSignsProtocol.ActionClaimReward => ClaimSevenSignsReward(session, player.Inventory),
+            SevenSignsProtocol.ActionExchangeStones => ExchangeSealStones(session, player.Inventory, request),
             _ => "bad_request"
         };
         if (error != null)
@@ -150,6 +152,38 @@ public sealed partial class ZoneWorld
             SaveInventory(session, inventory);
         }
 
+        return null;
+    }
+
+    string? ClaimSevenSignsReward(ZoneSession session, PlayerInventory inventory)
+    {
+        if (_sevenSigns.TryClaimReward(session.ObjectId, out int reward) is { } error)
+            return error;
+        GiveItem(session, inventory, SevenSignsProtocol.AncientAdenaItemId, reward);
+        ZoneLog.Info($"[ssq] reward object={session.ObjectId} aa={reward}");
+        return null;
+    }
+
+    /// <summary>Mobius priest <c>SevenSigns 17/18</c>: the stones are destroyed and paid for in Ancient Adena.</summary>
+    string? ExchangeSealStones(ZoneSession session, PlayerInventory inventory, SevenSignsActionRequestMsg request)
+    {
+        if (request.BlueStones < 0 || request.GreenStones < 0 || request.RedStones < 0)
+            return "bad_request";
+        int reward = SevenSignsEngine.StoneAncientAdena(request.BlueStones, request.GreenStones, request.RedStones);
+        if (reward <= 0)
+            return reward < 0 ? "bad_request" : SevenSignsProtocol.StonesMissing;
+        if (!HasStones(inventory, SevenSignsProtocol.BlueSealStoneId, request.BlueStones) ||
+            !HasStones(inventory, SevenSignsProtocol.GreenSealStoneId, request.GreenStones) ||
+            !HasStones(inventory, SevenSignsProtocol.RedSealStoneId, request.RedStones))
+            return SevenSignsProtocol.StonesMissing;
+
+        var changes = new List<InventoryUpdateEntryMsg>();
+        Take(inventory, SevenSignsProtocol.BlueSealStoneId, request.BlueStones, changes);
+        Take(inventory, SevenSignsProtocol.GreenSealStoneId, request.GreenStones, changes);
+        Take(inventory, SevenSignsProtocol.RedSealStoneId, request.RedStones, changes);
+        if (changes.Count > 0)
+            NetBridge?.FanoutInventoryUpdate([session.ObjectId], new InventoryUpdateMsg { Changes = changes.ToArray() });
+        GiveItem(session, inventory, SevenSignsProtocol.AncientAdenaItemId, reward);
         return null;
     }
 

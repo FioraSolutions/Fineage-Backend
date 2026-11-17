@@ -41,6 +41,7 @@ public sealed partial class ZoneWorld
                     TickFishing(_clock().ToUnixTimeMilliseconds());
                     TickLottery(_clock().ToUnixTimeMilliseconds());
                     TickSevenSigns();
+                    TickMammon(_clock().ToUnixTimeMilliseconds());
                     TickOlympiad();
                 }
                 await Task.CompletedTask.ConfigureAwait(false);
