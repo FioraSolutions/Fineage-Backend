@@ -13,7 +13,8 @@
      "mpInitial": 0,
      "abnormalTimeSeconds": 7,
      "abnormalLevel": 1,
-     "slot": "COMBINATION"
+     "slot": "COMBINATION",
+     "affectRange": 200
     }
    ]
   },
@@ -29,7 +30,8 @@
      "mpInitial": 0,
      "abnormalTimeSeconds": 7,
      "abnormalLevel": 1,
-     "slot": "COMBINATION"
+     "slot": "COMBINATION",
+     "affectRange": 200
     }
    ]
   },
@@ -45,7 +47,8 @@
      "mpInitial": 0,
      "abnormalTimeSeconds": 7,
      "abnormalLevel": 1,
-     "slot": "COMBINATION"
+     "slot": "COMBINATION",
+     "affectRange": 200
     }
    ]
   },
@@ -61,7 +64,8 @@
      "mpInitial": 0,
      "abnormalTimeSeconds": 7,
      "abnormalLevel": 1,
-     "slot": "COMBINATION"
+     "slot": "COMBINATION",
+     "affectRange": 200
     }
    ]
   },
@@ -77,7 +81,8 @@
      "mpInitial": 0,
      "abnormalTimeSeconds": 120,
      "abnormalLevel": 1,
-     "slot": "MULTI_DEBUFF"
+     "slot": "MULTI_DEBUFF",
+     "affectRange": 200
     }
    ]
   },
@@ -780,7 +785,8 @@
      "mpInitial": 17,
      "abnormalTimeSeconds": 30,
      "abnormalLevel": 1,
-     "slot": "PARALYZE"
+     "slot": "PARALYZE",
+     "affectRange": 200
     }
    ]
   },
@@ -1676,7 +1682,8 @@
      "mpInitial": 0,
      "abnormalTimeSeconds": 300,
      "abnormalLevel": 3,
-     "slot": "MULTI_BUFF"
+     "slot": "MULTI_BUFF",
+     "affectRange": 900
     }
    ]
   },
@@ -1770,7 +1777,8 @@
      "mpInitial": 0,
      "abnormalTimeSeconds": 300,
      "abnormalLevel": 3,
-     "slot": "MULTI_BUFF"
+     "slot": "MULTI_BUFF",
+     "affectRange": 900
     }
    ]
   },
@@ -1864,7 +1872,8 @@
      "mpInitial": 0,
      "abnormalTimeSeconds": 300,
      "abnormalLevel": 3,
-     "slot": "MULTI_BUFF"
+     "slot": "MULTI_BUFF",
+     "affectRange": 900
     }
    ]
   },
@@ -1958,7 +1967,8 @@
      "mpInitial": 0,
      "abnormalTimeSeconds": 300,
      "abnormalLevel": 3,
-     "slot": "MULTI_BUFF"
+     "slot": "MULTI_BUFF",
+     "affectRange": 900
     }
    ]
   },
@@ -2125,7 +2135,8 @@
      "mpInitial": 0,
      "abnormalTimeSeconds": 300,
      "abnormalLevel": 3,
-     "slot": "MULTI_BUFF"
+     "slot": "MULTI_BUFF",
+     "affectRange": 900
     }
    ],
    "debuff": [
@@ -2154,7 +2165,8 @@
      "mpInitial": 0,
      "abnormalTimeSeconds": 300,
      "abnormalLevel": 3,
-     "slot": "MULTI_BUFF"
+     "slot": "MULTI_BUFF",
+     "affectRange": 900
     }
    ],
    "debuff": [
@@ -2183,7 +2195,8 @@
      "mpInitial": 0,
      "abnormalTimeSeconds": 300,
      "abnormalLevel": 3,
-     "slot": "MULTI_BUFF"
+     "slot": "MULTI_BUFF",
+     "affectRange": 900
     }
    ],
    "debuff": [
@@ -2212,7 +2225,8 @@
      "mpInitial": 0,
      "abnormalTimeSeconds": 300,
      "abnormalLevel": 3,
-     "slot": "MULTI_BUFF"
+     "slot": "MULTI_BUFF",
+     "affectRange": 900
     }
    ],
    "debuff": [
@@ -2241,7 +2255,8 @@
      "mpInitial": 0,
      "abnormalTimeSeconds": 300,
      "abnormalLevel": 3,
-     "slot": "MULTI_BUFF"
+     "slot": "MULTI_BUFF",
+     "affectRange": 900
     }
    ],
    "debuff": [
@@ -2270,7 +2285,8 @@
      "mpInitial": 0,
      "abnormalTimeSeconds": 300,
      "abnormalLevel": 3,
-     "slot": "MULTI_BUFF"
+     "slot": "MULTI_BUFF",
+     "affectRange": 900
     }
    ],
    "debuff": [
@@ -2299,7 +2315,8 @@
      "mpInitial": 0,
      "abnormalTimeSeconds": 300,
      "abnormalLevel": 3,
-     "slot": "MULTI_BUFF"
+     "slot": "MULTI_BUFF",
+     "affectRange": 900
     }
    ],
    "debuff": [
@@ -2328,7 +2345,8 @@
      "mpInitial": 0,
      "abnormalTimeSeconds": 300,
      "abnormalLevel": 3,
-     "slot": "MULTI_BUFF"
+     "slot": "MULTI_BUFF",
+     "affectRange": 900
     }
    ],
    "debuff": [
@@ -2414,7 +2432,8 @@
      "mpInitial": 10,
      "abnormalTimeSeconds": 300,
      "abnormalLevel": 2,
-     "slot": "ATTACK_TIME_DOWN"
+     "slot": "ATTACK_TIME_DOWN",
+     "affectRange": 900
     }
    ]
   },
@@ -4837,7 +4856,8 @@
      "mpInitial": 11,
      "abnormalTimeSeconds": 30,
      "abnormalLevel": 1,
-     "slot": "PARALYZE"
+     "slot": "PARALYZE",
+     "affectRange": 200
     }
    ]
   },
@@ -4891,7 +4911,8 @@
      "mpInitial": 11,
      "abnormalTimeSeconds": 30,
      "abnormalLevel": 1,
-     "slot": "PARALYZE"
+     "slot": "PARALYZE",
+     "affectRange": 200
     }
    ]
   },
@@ -5089,7 +5110,8 @@
      "mpInitial": 17,
      "abnormalTimeSeconds": 30,
      "abnormalLevel": 1,
-     "slot": "PARALYZE"
+     "slot": "PARALYZE",
+     "affectRange": 200
     }
    ]
   },
@@ -5177,7 +5199,8 @@
      "mpInitial": 17,
      "abnormalTimeSeconds": 30,
      "abnormalLevel": 1,
-     "slot": "PARALYZE"
+     "slot": "PARALYZE",
+     "affectRange": 200
     }
    ]
   },
@@ -5540,7 +5563,8 @@
      "mpInitial": 20,
      "abnormalTimeSeconds": 30,
      "abnormalLevel": 1,
-     "slot": "PARALYZE"
+     "slot": "PARALYZE",
+     "affectRange": 200
     }
    ]
   },
@@ -5572,7 +5596,8 @@
      "mpInitial": 21,
      "abnormalTimeSeconds": 30,
      "abnormalLevel": 1,
-     "slot": "PARALYZE"
+     "slot": "PARALYZE",
+     "affectRange": 200
     }
    ]
   },
@@ -5872,7 +5897,8 @@
      "mpInitial": 17,
      "abnormalTimeSeconds": 30,
      "abnormalLevel": 1,
-     "slot": "PARALYZE"
+     "slot": "PARALYZE",
+     "affectRange": 200
     }
    ]
   },
@@ -6260,7 +6286,8 @@
      "mpInitial": 20,
      "abnormalTimeSeconds": 30,
      "abnormalLevel": 1,
-     "slot": "PARALYZE"
+     "slot": "PARALYZE",
+     "affectRange": 200
     }
    ]
   },
@@ -6335,7 +6362,8 @@
      "mpInitial": 21,
      "abnormalTimeSeconds": 30,
      "abnormalLevel": 1,
-     "slot": "PARALYZE"
+     "slot": "PARALYZE",
+     "affectRange": 200
     }
    ]
   },
@@ -6376,7 +6404,8 @@
      "mpInitial": 17,
      "abnormalTimeSeconds": 30,
      "abnormalLevel": 1,
-     "slot": "PARALYZE"
+     "slot": "PARALYZE",
+     "affectRange": 200
     }
    ]
   },
@@ -6406,7 +6435,8 @@
      "mpInitial": 21,
      "abnormalTimeSeconds": 30,
      "abnormalLevel": 1,
-     "slot": "PARALYZE"
+     "slot": "PARALYZE",
+     "affectRange": 200
     }
    ]
   },
@@ -8035,7 +8065,8 @@
      "mpInitial": 20,
      "abnormalTimeSeconds": 300,
      "abnormalLevel": 3,
-     "slot": "MULTI_BUFF"
+     "slot": "MULTI_BUFF",
+     "affectRange": 900
     }
    ]
   },
@@ -8487,7 +8518,8 @@
      "mpInitial": 10,
      "abnormalTimeSeconds": 300,
      "abnormalLevel": 2,
-     "slot": "ATTACK_TIME_DOWN"
+     "slot": "ATTACK_TIME_DOWN",
+     "affectRange": 900
     }
    ]
   },
@@ -8559,7 +8591,8 @@
      "mpInitial": 10,
      "abnormalTimeSeconds": 300,
      "abnormalLevel": 2,
-     "slot": "ATTACK_TIME_DOWN"
+     "slot": "ATTACK_TIME_DOWN",
+     "affectRange": 900
     }
    ]
   },
@@ -8660,7 +8693,8 @@
      "mpInitial": 10,
      "abnormalTimeSeconds": 300,
      "abnormalLevel": 2,
-     "slot": "ATTACK_TIME_DOWN"
+     "slot": "ATTACK_TIME_DOWN",
+     "affectRange": 900
     }
    ]
   },
@@ -8676,7 +8710,8 @@
      "mpInitial": 10,
      "abnormalTimeSeconds": 300,
      "abnormalLevel": 2,
-     "slot": "ATTACK_TIME_DOWN"
+     "slot": "ATTACK_TIME_DOWN",
+     "affectRange": 900
     }
    ],
    "debuff": [
@@ -8716,7 +8751,8 @@
      "mpInitial": 10,
      "abnormalTimeSeconds": 300,
      "abnormalLevel": 2,
-     "slot": "ATTACK_TIME_DOWN"
+     "slot": "ATTACK_TIME_DOWN",
+     "affectRange": 900
     }
    ]
   },
@@ -8862,7 +8898,8 @@
      "mpInitial": 10,
      "abnormalTimeSeconds": 300,
      "abnormalLevel": 2,
-     "slot": "ATTACK_TIME_DOWN"
+     "slot": "ATTACK_TIME_DOWN",
+     "affectRange": 900
     }
    ]
   },
@@ -8934,7 +8971,8 @@
      "mpInitial": 10,
      "abnormalTimeSeconds": 300,
      "abnormalLevel": 2,
-     "slot": "ATTACK_TIME_DOWN"
+     "slot": "ATTACK_TIME_DOWN",
+     "affectRange": 900
     }
    ],
    "debuff": [
@@ -9037,7 +9075,8 @@
      "mpInitial": 10,
      "abnormalTimeSeconds": 300,
      "abnormalLevel": 2,
-     "slot": "ATTACK_TIME_DOWN"
+     "slot": "ATTACK_TIME_DOWN",
+     "affectRange": 900
     }
    ],
    "debuff": [
@@ -9066,7 +9105,8 @@
      "mpInitial": 10,
      "abnormalTimeSeconds": 300,
      "abnormalLevel": 2,
-     "slot": "ATTACK_TIME_DOWN"
+     "slot": "ATTACK_TIME_DOWN",
+     "affectRange": 900
     }
    ],
    "debuff": [
@@ -9106,7 +9146,8 @@
      "mpInitial": 10,
      "abnormalTimeSeconds": 300,
      "abnormalLevel": 2,
-     "slot": "ATTACK_TIME_DOWN"
+     "slot": "ATTACK_TIME_DOWN",
+     "affectRange": 900
     }
    ]
   },
@@ -9324,7 +9365,8 @@
      "mpInitial": 20,
      "abnormalTimeSeconds": 300,
      "abnormalLevel": 3,
-     "slot": "MULTI_BUFF"
+     "slot": "MULTI_BUFF",
+     "affectRange": 900
     }
    ]
   },
@@ -9372,7 +9414,8 @@
      "mpInitial": 0,
      "abnormalTimeSeconds": 300,
      "abnormalLevel": 3,
-     "slot": "MULTI_BUFF"
+     "slot": "MULTI_BUFF",
+     "affectRange": 900
     }
    ]
   },
@@ -9537,7 +9580,8 @@
      "mpInitial": 10,
      "abnormalTimeSeconds": 300,
      "abnormalLevel": 2,
-     "slot": "ATTACK_TIME_DOWN"
+     "slot": "ATTACK_TIME_DOWN",
+     "affectRange": 900
     }
    ],
    "debuff": [
@@ -9755,7 +9799,8 @@
      "mpInitial": 20,
      "abnormalTimeSeconds": 300,
      "abnormalLevel": 3,
-     "slot": "MULTI_BUFF"
+     "slot": "MULTI_BUFF",
+     "affectRange": 900
     },
     {
      "id": 4595,
@@ -9766,7 +9811,8 @@
      "mpInitial": 20,
      "abnormalTimeSeconds": 300,
      "abnormalLevel": 3,
-     "slot": "MULTI_BUFF"
+     "slot": "MULTI_BUFF",
+     "affectRange": 900
     }
    ]
   },
@@ -9782,7 +9828,8 @@
      "mpInitial": 20,
      "abnormalTimeSeconds": 300,
      "abnormalLevel": 3,
-     "slot": "MULTI_BUFF"
+     "slot": "MULTI_BUFF",
+     "affectRange": 900
     },
     {
      "id": 4601,
@@ -9793,7 +9840,8 @@
      "mpInitial": 0,
      "abnormalTimeSeconds": 300,
      "abnormalLevel": 3,
-     "slot": "MULTI_BUFF"
+     "slot": "MULTI_BUFF",
+     "affectRange": 900
     }
    ],
    "debuff": [
@@ -10864,7 +10912,8 @@
      "mpInitial": 0,
      "abnormalTimeSeconds": 300,
      "abnormalLevel": 3,
-     "slot": "MULTI_BUFF"
+     "slot": "MULTI_BUFF",
+     "affectRange": 900
     }
    ]
   },
@@ -11049,7 +11098,8 @@
      "mpInitial": 0,
      "abnormalTimeSeconds": 300,
      "abnormalLevel": 3,
-     "slot": "MULTI_BUFF"
+     "slot": "MULTI_BUFF",
+     "affectRange": 900
     }
    ]
   },
@@ -11140,7 +11190,8 @@
      "mpInitial": 0,
      "abnormalTimeSeconds": 300,
      "abnormalLevel": 3,
-     "slot": "MULTI_BUFF"
+     "slot": "MULTI_BUFF",
+     "affectRange": 900
     }
    ]
   },
@@ -11202,7 +11253,8 @@
      "mpInitial": 0,
      "abnormalTimeSeconds": 300,
      "abnormalLevel": 3,
-     "slot": "MULTI_BUFF"
+     "slot": "MULTI_BUFF",
+     "affectRange": 900
     }
    ]
   },
@@ -11715,7 +11767,8 @@
      "mpInitial": 20,
      "abnormalTimeSeconds": 300,
      "abnormalLevel": 3,
-     "slot": "MULTI_BUFF"
+     "slot": "MULTI_BUFF",
+     "affectRange": 900
     }
    ]
   },
@@ -12120,7 +12173,8 @@
      "mpInitial": 10,
      "abnormalTimeSeconds": 300,
      "abnormalLevel": 2,
-     "slot": "ATTACK_TIME_DOWN"
+     "slot": "ATTACK_TIME_DOWN",
+     "affectRange": 900
     }
    ]
   },
@@ -13249,7 +13303,8 @@
      "mpInitial": 22,
      "abnormalTimeSeconds": 30,
      "abnormalLevel": 1,
-     "slot": "ROOT_MAGICALLY"
+     "slot": "ROOT_MAGICALLY",
+     "affectRange": 200
     }
    ]
   },
@@ -13343,7 +13398,8 @@
      "mpInitial": 26,
      "abnormalTimeSeconds": 30,
      "abnormalLevel": 3,
-     "slot": "PD_DOWN"
+     "slot": "PD_DOWN",
+     "affectRange": 200
     }
    ]
   },
@@ -13359,7 +13415,8 @@
      "mpInitial": 20,
      "abnormalTimeSeconds": 300,
      "abnormalLevel": 3,
-     "slot": "MULTI_BUFF"
+     "slot": "MULTI_BUFF",
+     "affectRange": 900
     }
    ]
   },
@@ -13512,7 +13569,8 @@
      "mpInitial": 0,
      "abnormalTimeSeconds": 30,
      "abnormalLevel": 1,
-     "slot": "ROOT_MAGICALLY"
+     "slot": "ROOT_MAGICALLY",
+     "affectRange": 150
     }
    ]
   },
@@ -13692,7 +13750,8 @@
      "mpInitial": 0,
      "abnormalTimeSeconds": 120,
      "abnormalLevel": 2,
-     "slot": "ATTACK_TIME_DOWN"
+     "slot": "ATTACK_TIME_DOWN",
+     "affectRange": 900
     }
    ],
    "debuff": [
@@ -13705,7 +13764,8 @@
      "mpInitial": 30,
      "abnormalTimeSeconds": 30,
      "abnormalLevel": 3,
-     "slot": "PD_DOWN"
+     "slot": "PD_DOWN",
+     "affectRange": 200
     }
    ]
   },
@@ -13721,7 +13781,8 @@
      "mpInitial": 0,
      "abnormalTimeSeconds": 30,
      "abnormalLevel": 1,
-     "slot": "ROOT_MAGICALLY"
+     "slot": "ROOT_MAGICALLY",
+     "affectRange": 300
     }
    ]
   },
@@ -13751,7 +13812,8 @@
      "mpInitial": 0,
      "abnormalTimeSeconds": 300,
      "abnormalLevel": 99,
-     "slot": "ATTACK_TIME_DOWN"
+     "slot": "ATTACK_TIME_DOWN",
+     "affectRange": 400
     }
    ]
   },
@@ -13783,7 +13845,8 @@
      "mpInitial": 0,
      "abnormalTimeSeconds": 300,
      "abnormalLevel": 99,
-     "slot": "PA_UP"
+     "slot": "PA_UP",
+     "affectRange": 400
     }
    ]
   },
@@ -13799,7 +13862,8 @@
      "mpInitial": 0,
      "abnormalTimeSeconds": 30,
      "abnormalLevel": 2,
-     "slot": "PA_DOWN"
+     "slot": "PA_DOWN",
+     "affectRange": 200
     }
    ]
   },
@@ -13815,7 +13879,8 @@
      "mpInitial": 0,
      "abnormalTimeSeconds": 300,
      "abnormalLevel": 99,
-     "slot": "PD_UP"
+     "slot": "PD_UP",
+     "affectRange": 400
     }
    ]
   },
@@ -13831,7 +13896,8 @@
      "mpInitial": 0,
      "abnormalTimeSeconds": 30,
      "abnormalLevel": 1,
-     "slot": "ROOT_MAGICALLY"
+     "slot": "ROOT_MAGICALLY",
+     "affectRange": 300
     }
    ]
   },
@@ -13863,7 +13929,8 @@
      "mpInitial": 0,
      "abnormalTimeSeconds": 30,
      "abnormalLevel": 1,
-     "slot": "ROOT_MAGICALLY"
+     "slot": "ROOT_MAGICALLY",
+     "affectRange": 200
     }
    ]
   },
@@ -13890,7 +13957,8 @@
      "mpInitial": 0,
      "abnormalTimeSeconds": 300,
      "abnormalLevel": 99,
-     "slot": "ATTACK_TIME_DOWN"
+     "slot": "ATTACK_TIME_DOWN",
+     "affectRange": 400
     }
    ]
   },
@@ -13906,7 +13974,8 @@
      "mpInitial": 0,
      "abnormalTimeSeconds": 300,
      "abnormalLevel": 99,
-     "slot": "ATTACK_TIME_DOWN"
+     "slot": "ATTACK_TIME_DOWN",
+     "affectRange": 400
     }
    ]
   },
@@ -13922,7 +13991,8 @@
      "mpInitial": 0,
      "abnormalTimeSeconds": 30,
      "abnormalLevel": 1,
-     "slot": "ROOT_MAGICALLY"
+     "slot": "ROOT_MAGICALLY",
+     "affectRange": 300
     }
    ]
   },
@@ -13970,7 +14040,8 @@
      "mpInitial": 0,
      "abnormalTimeSeconds": 30,
      "abnormalLevel": 1,
-     "slot": "SLEEP"
+     "slot": "SLEEP",
+     "affectRange": 200
     }
    ]
   },
@@ -13986,7 +14057,8 @@
      "mpInitial": 0,
      "abnormalTimeSeconds": 30,
      "abnormalLevel": 1,
-     "slot": "ROOT_MAGICALLY"
+     "slot": "ROOT_MAGICALLY",
+     "affectRange": 300
     }
    ]
   },
@@ -14029,7 +14101,8 @@
      "mpInitial": 0,
      "abnormalTimeSeconds": 300,
      "abnormalLevel": 99,
-     "slot": "ATTACK_TIME_DOWN"
+     "slot": "ATTACK_TIME_DOWN",
+     "affectRange": 400
     }
    ]
   },
@@ -14045,7 +14118,8 @@
      "mpInitial": 0,
      "abnormalTimeSeconds": 60,
      "abnormalLevel": 2,
-     "slot": "SPEED_DOWN"
+     "slot": "SPEED_DOWN",
+     "affectRange": 200
     }
    ]
   },
@@ -14061,7 +14135,8 @@
      "mpInitial": 0,
      "abnormalTimeSeconds": 300,
      "abnormalLevel": 99,
-     "slot": "PA_UP"
+     "slot": "PA_UP",
+     "affectRange": 400
     }
    ]
   },
@@ -14077,7 +14152,8 @@
      "mpInitial": 0,
      "abnormalTimeSeconds": 30,
      "abnormalLevel": 1,
-     "slot": "ROOT_MAGICALLY"
+     "slot": "ROOT_MAGICALLY",
+     "affectRange": 300
     }
    ]
   },
@@ -14109,7 +14185,8 @@
      "mpInitial": 0,
      "abnormalTimeSeconds": 30,
      "abnormalLevel": 1,
-     "slot": "ROOT_MAGICALLY"
+     "slot": "ROOT_MAGICALLY",
+     "affectRange": 300
     }
    ]
   },
@@ -14141,7 +14218,8 @@
      "mpInitial": 0,
      "abnormalTimeSeconds": 30,
      "abnormalLevel": 1,
-     "slot": "ROOT_MAGICALLY"
+     "slot": "ROOT_MAGICALLY",
+     "affectRange": 300
     }
    ]
   },
@@ -14200,7 +14278,8 @@
      "mpInitial": 0,
      "abnormalTimeSeconds": 300,
      "abnormalLevel": 99,
-     "slot": "ATTACK_TIME_DOWN"
+     "slot": "ATTACK_TIME_DOWN",
+     "affectRange": 400
     }
    ]
   },
@@ -14232,7 +14311,8 @@
      "mpInitial": 0,
      "abnormalTimeSeconds": 30,
      "abnormalLevel": 1,
-     "slot": "SLEEP"
+     "slot": "SLEEP",
+     "affectRange": 200
     }
    ]
   },
@@ -14248,7 +14328,8 @@
      "mpInitial": 0,
      "abnormalTimeSeconds": 30,
      "abnormalLevel": 1,
-     "slot": "ROOT_MAGICALLY"
+     "slot": "ROOT_MAGICALLY",
+     "affectRange": 300
     }
    ]
   },
@@ -14280,7 +14361,8 @@
      "mpInitial": 0,
      "abnormalTimeSeconds": 30,
      "abnormalLevel": 1,
-     "slot": "ROOT_MAGICALLY"
+     "slot": "ROOT_MAGICALLY",
+     "affectRange": 300
     }
    ]
   },
@@ -14328,7 +14410,8 @@
      "mpInitial": 0,
      "abnormalTimeSeconds": 30,
      "abnormalLevel": 1,
-     "slot": "ROOT_MAGICALLY"
+     "slot": "ROOT_MAGICALLY",
+     "affectRange": 300
     }
    ]
   },
@@ -14360,7 +14443,8 @@
      "mpInitial": 0,
      "abnormalTimeSeconds": 30,
      "abnormalLevel": 3,
-     "slot": "PA_DOWN"
+     "slot": "PA_DOWN",
+     "affectRange": 200
     }
    ]
   },
@@ -14408,7 +14492,8 @@
      "mpInitial": 0,
      "abnormalTimeSeconds": 30,
      "abnormalLevel": 1,
-     "slot": "ROOT_MAGICALLY"
+     "slot": "ROOT_MAGICALLY",
+     "affectRange": 300
     }
    ]
   },
@@ -14451,7 +14536,8 @@
      "mpInitial": 0,
      "abnormalTimeSeconds": 300,
      "abnormalLevel": 99,
-     "slot": "PA_UP"
+     "slot": "PA_UP",
+     "affectRange": 400
     }
    ]
   },
@@ -14467,7 +14553,8 @@
      "mpInitial": 0,
      "abnormalTimeSeconds": 30,
      "abnormalLevel": 1,
-     "slot": "ROOT_MAGICALLY"
+     "slot": "ROOT_MAGICALLY",
+     "affectRange": 300
     }
    ]
   },
@@ -14499,7 +14586,8 @@
      "mpInitial": 0,
      "abnormalTimeSeconds": 30,
      "abnormalLevel": 3,
-     "slot": "ATTACK_TIME_UP"
+     "slot": "ATTACK_TIME_UP",
+     "affectRange": 200
     }
    ],
    "immobilize": [
@@ -14512,7 +14600,8 @@
      "mpInitial": 0,
      "abnormalTimeSeconds": 30,
      "abnormalLevel": 1,
-     "slot": "PARALYZE"
+     "slot": "PARALYZE",
+     "affectRange": 200
     }
    ]
   },
@@ -14528,7 +14617,8 @@
      "mpInitial": 0,
      "abnormalTimeSeconds": 30,
      "abnormalLevel": 1,
-     "slot": "ROOT_MAGICALLY"
+     "slot": "ROOT_MAGICALLY",
+     "affectRange": 200
     }
    ]
   },
@@ -14544,7 +14634,8 @@
      "mpInitial": 0,
      "abnormalTimeSeconds": 30,
      "abnormalLevel": 1,
-     "slot": "ROOT_MAGICALLY"
+     "slot": "ROOT_MAGICALLY",
+     "affectRange": 300
     }
    ]
   },
@@ -14603,7 +14694,8 @@
      "mpInitial": 0,
      "abnormalTimeSeconds": 300,
      "abnormalLevel": 99,
-     "slot": "ATTACK_TIME_DOWN"
+     "slot": "ATTACK_TIME_DOWN",
+     "affectRange": 400
     }
    ]
   },
@@ -14695,7 +14787,8 @@
      "mpInitial": 0,
      "abnormalTimeSeconds": 30,
      "abnormalLevel": 3,
-     "slot": "ATTACK_TIME_UP"
+     "slot": "ATTACK_TIME_UP",
+     "affectRange": 200
     }
    ]
   },
@@ -14711,7 +14804,8 @@
      "mpInitial": 0,
      "abnormalTimeSeconds": 30,
      "abnormalLevel": 1,
-     "slot": "ROOT_MAGICALLY"
+     "slot": "ROOT_MAGICALLY",
+     "affectRange": 300
     }
    ]
   },
@@ -14727,7 +14821,8 @@
      "mpInitial": 0,
      "abnormalTimeSeconds": 300,
      "abnormalLevel": 99,
-     "slot": "ATTACK_TIME_DOWN"
+     "slot": "ATTACK_TIME_DOWN",
+     "affectRange": 400
     }
    ]
   },
@@ -14759,7 +14854,8 @@
      "mpInitial": 0,
      "abnormalTimeSeconds": 30,
      "abnormalLevel": 1,
-     "slot": "ROOT_MAGICALLY"
+     "slot": "ROOT_MAGICALLY",
+     "affectRange": 300
     }
    ]
   },
@@ -14791,7 +14887,8 @@
      "mpInitial": 0,
      "abnormalTimeSeconds": 30,
      "abnormalLevel": 3,
-     "slot": "PA_DOWN"
+     "slot": "PA_DOWN",
+     "affectRange": 200
     }
    ],
    "immobilize": [
@@ -14804,7 +14901,8 @@
      "mpInitial": 0,
      "abnormalTimeSeconds": 30,
      "abnormalLevel": 1,
-     "slot": "PARALYZE"
+     "slot": "PARALYZE",
+     "affectRange": 200
     }
    ]
   },
@@ -14820,7 +14918,8 @@
      "mpInitial": 0,
      "abnormalTimeSeconds": 30,
      "abnormalLevel": 1,
-     "slot": "ROOT_MAGICALLY"
+     "slot": "ROOT_MAGICALLY",
+     "affectRange": 300
     }
    ]
   },
@@ -14852,7 +14951,8 @@
      "mpInitial": 0,
      "abnormalTimeSeconds": 300,
      "abnormalLevel": 99,
-     "slot": "ATTACK_TIME_DOWN"
+     "slot": "ATTACK_TIME_DOWN",
+     "affectRange": 400
     }
    ]
   },
@@ -14868,7 +14968,8 @@
      "mpInitial": 0,
      "abnormalTimeSeconds": 30,
      "abnormalLevel": 3,
-     "slot": "PA_DOWN"
+     "slot": "PA_DOWN",
+     "affectRange": 200
     }
    ],
    "immobilize": [
@@ -14881,7 +14982,8 @@
      "mpInitial": 0,
      "abnormalTimeSeconds": 30,
      "abnormalLevel": 1,
-     "slot": "PARALYZE"
+     "slot": "PARALYZE",
+     "affectRange": 200
     }
    ]
   },
@@ -14897,7 +14999,8 @@
      "mpInitial": 0,
      "abnormalTimeSeconds": 30,
      "abnormalLevel": 1,
-     "slot": "ROOT_MAGICALLY"
+     "slot": "ROOT_MAGICALLY",
+     "affectRange": 300
     }
    ]
   },
@@ -14913,7 +15016,8 @@
      "mpInitial": 0,
      "abnormalTimeSeconds": 30,
      "abnormalLevel": 1,
-     "slot": "ROOT_MAGICALLY"
+     "slot": "ROOT_MAGICALLY",
+     "affectRange": 300
     }
    ]
   },
@@ -14945,7 +15049,8 @@
      "mpInitial": 0,
      "abnormalTimeSeconds": 30,
      "abnormalLevel": 1,
-     "slot": "ROOT_MAGICALLY"
+     "slot": "ROOT_MAGICALLY",
+     "affectRange": 300
     }
    ]
   },
@@ -14961,7 +15066,8 @@
      "mpInitial": 0,
      "abnormalTimeSeconds": 30,
      "abnormalLevel": 1,
-     "slot": "ROOT_MAGICALLY"
+     "slot": "ROOT_MAGICALLY",
+     "affectRange": 300
     }
    ]
   },
@@ -15004,7 +15110,8 @@
      "mpInitial": 0,
      "abnormalTimeSeconds": 300,
      "abnormalLevel": 99,
-     "slot": "ATTACK_TIME_DOWN"
+     "slot": "ATTACK_TIME_DOWN",
+     "affectRange": 400
     }
    ]
   },
@@ -15036,7 +15143,8 @@
      "mpInitial": 0,
      "abnormalTimeSeconds": 30,
      "abnormalLevel": 3,
-     "slot": "ATTACK_TIME_UP"
+     "slot": "ATTACK_TIME_UP",
+     "affectRange": 200
     },
     {
      "id": 4187,
@@ -15047,7 +15155,8 @@
      "mpInitial": 0,
      "abnormalTimeSeconds": 60,
      "abnormalLevel": 3,
-     "slot": "SPEED_DOWN"
+     "slot": "SPEED_DOWN",
+     "affectRange": 200
     }
    ]
   },
@@ -15106,7 +15215,8 @@
      "mpInitial": 0,
      "abnormalTimeSeconds": 300,
      "abnormalLevel": 99,
-     "slot": "PD_UP"
+     "slot": "PD_UP",
+     "affectRange": 400
     }
    ]
   },
@@ -15122,7 +15232,8 @@
      "mpInitial": 0,
      "abnormalTimeSeconds": 300,
      "abnormalLevel": 99,
-     "slot": "PD_UP"
+     "slot": "PD_UP",
+     "affectRange": 400
     }
    ]
   },
@@ -15170,7 +15281,8 @@
      "mpInitial": 0,
      "abnormalTimeSeconds": 30,
      "abnormalLevel": 1,
-     "slot": "ROOT_MAGICALLY"
+     "slot": "ROOT_MAGICALLY",
+     "affectRange": 300
     }
    ]
   },
@@ -15186,7 +15298,8 @@
      "mpInitial": 0,
      "abnormalTimeSeconds": 30,
      "abnormalLevel": 3,
-     "slot": "PA_DOWN"
+     "slot": "PA_DOWN",
+     "affectRange": 200
     }
    ],
    "immobilize": [
@@ -15199,7 +15312,8 @@
      "mpInitial": 0,
      "abnormalTimeSeconds": 30,
      "abnormalLevel": 1,
-     "slot": "PARALYZE"
+     "slot": "PARALYZE",
+     "affectRange": 200
     }
    ]
   },
@@ -15263,7 +15377,8 @@
      "mpInitial": 0,
      "abnormalTimeSeconds": 30,
      "abnormalLevel": 1,
-     "slot": "ROOT_MAGICALLY"
+     "slot": "ROOT_MAGICALLY",
+     "affectRange": 300
     }
    ]
   },
@@ -15279,7 +15394,8 @@
      "mpInitial": 0,
      "abnormalTimeSeconds": 30,
      "abnormalLevel": 1,
-     "slot": "SLEEP"
+     "slot": "SLEEP",
+     "affectRange": 200
     }
    ]
   },
@@ -15311,7 +15427,8 @@
      "mpInitial": 0,
      "abnormalTimeSeconds": 30,
      "abnormalLevel": 1,
-     "slot": "ROOT_MAGICALLY"
+     "slot": "ROOT_MAGICALLY",
+     "affectRange": 300
     }
    ]
   },
@@ -15338,7 +15455,8 @@
      "mpInitial": 0,
      "abnormalTimeSeconds": 300,
      "abnormalLevel": 99,
-     "slot": "PA_UP"
+     "slot": "PA_UP",
+     "affectRange": 400
     }
    ]
   },
@@ -15402,7 +15520,8 @@
      "mpInitial": 0,
      "abnormalTimeSeconds": 30,
      "abnormalLevel": 1,
-     "slot": "ROOT_MAGICALLY"
+     "slot": "ROOT_MAGICALLY",
+     "affectRange": 300
     }
    ]
   },
@@ -15429,7 +15548,8 @@
      "mpInitial": 0,
      "abnormalTimeSeconds": 300,
      "abnormalLevel": 99,
-     "slot": "PD_UP"
+     "slot": "PD_UP",
+     "affectRange": 400
     }
    ]
   },
@@ -15445,7 +15565,8 @@
      "mpInitial": 0,
      "abnormalTimeSeconds": 30,
      "abnormalLevel": 1,
-     "slot": "SLEEP"
+     "slot": "SLEEP",
+     "affectRange": 200
     }
    ]
   },
@@ -15488,7 +15609,8 @@
      "mpInitial": 0,
      "abnormalTimeSeconds": 300,
      "abnormalLevel": 99,
-     "slot": "PD_UP"
+     "slot": "PD_UP",
+     "affectRange": 400
     }
    ]
   },
@@ -15504,7 +15626,8 @@
      "mpInitial": 0,
      "abnormalTimeSeconds": 60,
      "abnormalLevel": 3,
-     "slot": "SPEED_DOWN"
+     "slot": "SPEED_DOWN",
+     "affectRange": 200
     }
    ],
    "immobilize": [
@@ -15517,7 +15640,8 @@
      "mpInitial": 0,
      "abnormalTimeSeconds": 30,
      "abnormalLevel": 1,
-     "slot": "SLEEP"
+     "slot": "SLEEP",
+     "affectRange": 200
     }
    ]
   },
@@ -15533,7 +15657,8 @@
      "mpInitial": 0,
      "abnormalTimeSeconds": 30,
      "abnormalLevel": 1,
-     "slot": "ROOT_MAGICALLY"
+     "slot": "ROOT_MAGICALLY",
+     "affectRange": 300
     }
    ]
   },
@@ -15565,7 +15690,8 @@
      "mpInitial": 0,
      "abnormalTimeSeconds": 30,
      "abnormalLevel": 1,
-     "slot": "ROOT_MAGICALLY"
+     "slot": "ROOT_MAGICALLY",
+     "affectRange": 300
     }
    ]
   },
@@ -15613,7 +15739,8 @@
      "mpInitial": 0,
      "abnormalTimeSeconds": 30,
      "abnormalLevel": 3,
-     "slot": "ATTACK_TIME_UP"
+     "slot": "ATTACK_TIME_UP",
+     "affectRange": 200
     }
    ]
   },
@@ -15629,7 +15756,8 @@
      "mpInitial": 0,
      "abnormalTimeSeconds": 300,
      "abnormalLevel": 99,
-     "slot": "PD_UP"
+     "slot": "PD_UP",
+     "affectRange": 400
     }
    ]
   },
@@ -15661,7 +15789,8 @@
      "mpInitial": 0,
      "abnormalTimeSeconds": 60,
      "abnormalLevel": 3,
-     "slot": "SPEED_DOWN"
+     "slot": "SPEED_DOWN",
+     "affectRange": 200
     }
    ]
   },
@@ -15677,7 +15806,8 @@
      "mpInitial": 0,
      "abnormalTimeSeconds": 30,
      "abnormalLevel": 1,
-     "slot": "PARALYZE"
+     "slot": "PARALYZE",
+     "affectRange": 200
     }
    ]
   },
@@ -15720,7 +15850,8 @@
      "mpInitial": 0,
      "abnormalTimeSeconds": 300,
      "abnormalLevel": 99,
-     "slot": "ATTACK_TIME_DOWN"
+     "slot": "ATTACK_TIME_DOWN",
+     "affectRange": 400
     }
    ]
   },
@@ -15736,7 +15867,8 @@
      "mpInitial": 0,
      "abnormalTimeSeconds": 30,
      "abnormalLevel": 1,
-     "slot": "ROOT_MAGICALLY"
+     "slot": "ROOT_MAGICALLY",
+     "affectRange": 300
     }
    ]
   },
@@ -15752,7 +15884,8 @@
      "mpInitial": 0,
      "abnormalTimeSeconds": 30,
      "abnormalLevel": 1,
-     "slot": "ROOT_MAGICALLY"
+     "slot": "ROOT_MAGICALLY",
+     "affectRange": 300
     }
    ]
   },
@@ -15896,7 +16029,8 @@
      "mpInitial": 0,
      "abnormalTimeSeconds": 300,
      "abnormalLevel": 99,
-     "slot": "PD_UP"
+     "slot": "PD_UP",
+     "affectRange": 400
     }
    ]
   },
@@ -15912,7 +16046,8 @@
      "mpInitial": 0,
      "abnormalTimeSeconds": 300,
      "abnormalLevel": 99,
-     "slot": "PD_UP"
+     "slot": "PD_UP",
+     "affectRange": 400
     }
    ]
   },
@@ -15944,7 +16079,8 @@
      "mpInitial": 0,
      "abnormalTimeSeconds": 30,
      "abnormalLevel": 1,
-     "slot": "ROOT_MAGICALLY"
+     "slot": "ROOT_MAGICALLY",
+     "affectRange": 300
     }
    ]
   },
@@ -15976,7 +16112,8 @@
      "mpInitial": 0,
      "abnormalTimeSeconds": 30,
      "abnormalLevel": 3,
-     "slot": "ATTACK_TIME_UP"
+     "slot": "ATTACK_TIME_UP",
+     "affectRange": 200
     },
     {
      "id": 4187,
@@ -15987,7 +16124,8 @@
      "mpInitial": 0,
      "abnormalTimeSeconds": 60,
      "abnormalLevel": 3,
-     "slot": "SPEED_DOWN"
+     "slot": "SPEED_DOWN",
+     "affectRange": 200
     }
    ]
   },
@@ -16019,7 +16157,8 @@
      "mpInitial": 0,
      "abnormalTimeSeconds": 300,
      "abnormalLevel": 99,
-     "slot": "PD_UP"
+     "slot": "PD_UP",
+     "affectRange": 400
     }
    ]
   },
@@ -16035,7 +16174,8 @@
      "mpInitial": 0,
      "abnormalTimeSeconds": 30,
      "abnormalLevel": 1,
-     "slot": "ROOT_MAGICALLY"
+     "slot": "ROOT_MAGICALLY",
+     "affectRange": 300
     }
    ]
   },
@@ -16051,7 +16191,8 @@
      "mpInitial": 0,
      "abnormalTimeSeconds": 30,
      "abnormalLevel": 2,
-     "slot": "ATTACK_TIME_UP"
+     "slot": "ATTACK_TIME_UP",
+     "affectRange": 200
     }
    ],
    "immobilize": [
@@ -16064,7 +16205,8 @@
      "mpInitial": 0,
      "abnormalTimeSeconds": 30,
      "abnormalLevel": 1,
-     "slot": "ROOT_MAGICALLY"
+     "slot": "ROOT_MAGICALLY",
+     "affectRange": 200
     }
    ]
   },
@@ -16091,7 +16233,8 @@
      "mpInitial": 0,
      "abnormalTimeSeconds": 300,
      "abnormalLevel": 99,
-     "slot": "PA_UP"
+     "slot": "PA_UP",
+     "affectRange": 400
     }
    ]
   },
@@ -16107,7 +16250,8 @@
      "mpInitial": 0,
      "abnormalTimeSeconds": 30,
      "abnormalLevel": 1,
-     "slot": "ROOT_MAGICALLY"
+     "slot": "ROOT_MAGICALLY",
+     "affectRange": 300
     }
    ]
   },
@@ -16139,7 +16283,8 @@
      "mpInitial": 0,
      "abnormalTimeSeconds": 300,
      "abnormalLevel": 99,
-     "slot": "PD_UP"
+     "slot": "PD_UP",
+     "affectRange": 400
     }
    ]
   },
@@ -16155,7 +16300,8 @@
      "mpInitial": 0,
      "abnormalTimeSeconds": 30,
      "abnormalLevel": 2,
-     "slot": "PA_DOWN"
+     "slot": "PA_DOWN",
+     "affectRange": 200
     }
    ],
    "immobilize": [
@@ -16168,7 +16314,8 @@
      "mpInitial": 0,
      "abnormalTimeSeconds": 30,
      "abnormalLevel": 1,
-     "slot": "SLEEP"
+     "slot": "SLEEP",
+     "affectRange": 200
     }
    ]
   },
@@ -16200,7 +16347,8 @@
      "mpInitial": 0,
      "abnormalTimeSeconds": 30,
      "abnormalLevel": 1,
-     "slot": "ROOT_MAGICALLY"
+     "slot": "ROOT_MAGICALLY",
+     "affectRange": 300
     }
    ]
   },
@@ -16227,7 +16375,8 @@
      "mpInitial": 0,
      "abnormalTimeSeconds": 300,
      "abnormalLevel": 99,
-     "slot": "ATTACK_TIME_DOWN"
+     "slot": "ATTACK_TIME_DOWN",
+     "affectRange": 400
     }
    ]
   },
@@ -16243,7 +16392,8 @@
      "mpInitial": 0,
      "abnormalTimeSeconds": 30,
      "abnormalLevel": 1,
-     "slot": "ROOT_MAGICALLY"
+     "slot": "ROOT_MAGICALLY",
+     "affectRange": 300
     }
    ]
   },
@@ -16259,7 +16409,8 @@
      "mpInitial": 0,
      "abnormalTimeSeconds": 60,
      "abnormalLevel": 2,
-     "slot": "SPEED_DOWN"
+     "slot": "SPEED_DOWN",
+     "affectRange": 200
     }
    ]
   },
@@ -16275,7 +16426,8 @@
      "mpInitial": 0,
      "abnormalTimeSeconds": 30,
      "abnormalLevel": 1,
-     "slot": "ROOT_MAGICALLY"
+     "slot": "ROOT_MAGICALLY",
+     "affectRange": 300
     }
    ]
   },
@@ -16307,7 +16459,8 @@
      "mpInitial": 0,
      "abnormalTimeSeconds": 30,
      "abnormalLevel": 1,
-     "slot": "ROOT_MAGICALLY"
+     "slot": "ROOT_MAGICALLY",
+     "affectRange": 300
     }
    ]
   },
@@ -16323,7 +16476,8 @@
      "mpInitial": 0,
      "abnormalTimeSeconds": 300,
      "abnormalLevel": 99,
-     "slot": "PD_UP"
+     "slot": "PD_UP",
+     "affectRange": 400
     }
    ]
   },
@@ -16366,7 +16520,8 @@
      "mpInitial": 0,
      "abnormalTimeSeconds": 300,
      "abnormalLevel": 99,
-     "slot": "ATTACK_TIME_DOWN"
+     "slot": "ATTACK_TIME_DOWN",
+     "affectRange": 400
     }
    ]
   },
@@ -16382,7 +16537,8 @@
      "mpInitial": 0,
      "abnormalTimeSeconds": 30,
      "abnormalLevel": 1,
-     "slot": "ROOT_MAGICALLY"
+     "slot": "ROOT_MAGICALLY",
+     "affectRange": 300
     }
    ]
   },
@@ -16398,7 +16554,8 @@
      "mpInitial": 0,
      "abnormalTimeSeconds": 30,
      "abnormalLevel": 1,
-     "slot": "ROOT_MAGICALLY"
+     "slot": "ROOT_MAGICALLY",
+     "affectRange": 300
     }
    ]
   },
@@ -16414,7 +16571,8 @@
      "mpInitial": 0,
      "abnormalTimeSeconds": 30,
      "abnormalLevel": 1,
-     "slot": "ROOT_MAGICALLY"
+     "slot": "ROOT_MAGICALLY",
+     "affectRange": 300
     }
    ]
   },
@@ -16430,7 +16588,8 @@
      "mpInitial": 0,
      "abnormalTimeSeconds": 30,
      "abnormalLevel": 1,
-     "slot": "ROOT_MAGICALLY"
+     "slot": "ROOT_MAGICALLY",
+     "affectRange": 300
     }
    ]
   },
@@ -16446,7 +16605,8 @@
      "mpInitial": 0,
      "abnormalTimeSeconds": 60,
      "abnormalLevel": 3,
-     "slot": "SPEED_DOWN"
+     "slot": "SPEED_DOWN",
+     "affectRange": 200
     }
    ],
    "immobilize": [
@@ -16459,7 +16619,8 @@
      "mpInitial": 0,
      "abnormalTimeSeconds": 30,
      "abnormalLevel": 1,
-     "slot": "SLEEP"
+     "slot": "SLEEP",
+     "affectRange": 200
     }
    ]
   },
@@ -16502,7 +16663,8 @@
      "mpInitial": 0,
      "abnormalTimeSeconds": 300,
      "abnormalLevel": 99,
-     "slot": "ATTACK_TIME_DOWN"
+     "slot": "ATTACK_TIME_DOWN",
+     "affectRange": 400
     }
    ]
   },
@@ -16518,7 +16680,8 @@
      "mpInitial": 0,
      "abnormalTimeSeconds": 30,
      "abnormalLevel": 1,
-     "slot": "ROOT_MAGICALLY"
+     "slot": "ROOT_MAGICALLY",
+     "affectRange": 300
     }
    ]
   },
@@ -16534,7 +16697,8 @@
      "mpInitial": 0,
      "abnormalTimeSeconds": 30,
      "abnormalLevel": 1,
-     "slot": "PARALYZE"
+     "slot": "PARALYZE",
+     "affectRange": 200
     }
    ]
   },
@@ -16561,7 +16725,8 @@
      "mpInitial": 0,
      "abnormalTimeSeconds": 300,
      "abnormalLevel": 99,
-     "slot": "PD_UP"
+     "slot": "PD_UP",
+     "affectRange": 400
     }
    ]
   },
@@ -16577,7 +16742,8 @@
      "mpInitial": 0,
      "abnormalTimeSeconds": 60,
      "abnormalLevel": 3,
-     "slot": "SPEED_DOWN"
+     "slot": "SPEED_DOWN",
+     "affectRange": 200
     }
    ]
   },
@@ -16593,7 +16759,8 @@
      "mpInitial": 0,
      "abnormalTimeSeconds": 30,
      "abnormalLevel": 1,
-     "slot": "ROOT_MAGICALLY"
+     "slot": "ROOT_MAGICALLY",
+     "affectRange": 300
     }
    ]
   },
@@ -16609,7 +16776,8 @@
      "mpInitial": 0,
      "abnormalTimeSeconds": 30,
      "abnormalLevel": 1,
-     "slot": "ROOT_MAGICALLY"
+     "slot": "ROOT_MAGICALLY",
+     "affectRange": 300
     }
    ]
   },
@@ -16636,7 +16804,8 @@
      "mpInitial": 0,
      "abnormalTimeSeconds": 300,
      "abnormalLevel": 99,
-     "slot": "PA_UP"
+     "slot": "PA_UP",
+     "affectRange": 400
     }
    ]
   },
@@ -16652,7 +16821,8 @@
      "mpInitial": 0,
      "abnormalTimeSeconds": 30,
      "abnormalLevel": 1,
-     "slot": "ROOT_MAGICALLY"
+     "slot": "ROOT_MAGICALLY",
+     "affectRange": 300
     }
    ]
   },
@@ -16700,7 +16870,8 @@
      "mpInitial": 0,
      "abnormalTimeSeconds": 30,
      "abnormalLevel": 1,
-     "slot": "ROOT_MAGICALLY"
+     "slot": "ROOT_MAGICALLY",
+     "affectRange": 300
     }
    ]
   },
@@ -16732,7 +16903,8 @@
      "mpInitial": 0,
      "abnormalTimeSeconds": 60,
      "abnormalLevel": 3,
-     "slot": "SPEED_DOWN"
+     "slot": "SPEED_DOWN",
+     "affectRange": 200
     }
    ],
    "immobilize": [
@@ -16745,7 +16917,8 @@
      "mpInitial": 0,
      "abnormalTimeSeconds": 30,
      "abnormalLevel": 1,
-     "slot": "ROOT_MAGICALLY"
+     "slot": "ROOT_MAGICALLY",
+     "affectRange": 200
     }
    ]
   },
@@ -16772,7 +16945,8 @@
      "mpInitial": 0,
      "abnormalTimeSeconds": 300,
      "abnormalLevel": 99,
-     "slot": "ATTACK_TIME_DOWN"
+     "slot": "ATTACK_TIME_DOWN",
+     "affectRange": 400
     }
    ]
   },
@@ -16788,7 +16962,8 @@
      "mpInitial": 0,
      "abnormalTimeSeconds": 30,
      "abnormalLevel": 3,
-     "slot": "PA_DOWN"
+     "slot": "PA_DOWN",
+     "affectRange": 200
     }
    ]
   },
@@ -16820,7 +16995,8 @@
      "mpInitial": 0,
      "abnormalTimeSeconds": 300,
      "abnormalLevel": 99,
-     "slot": "PD_UP"
+     "slot": "PD_UP",
+     "affectRange": 400
     }
    ]
   },
@@ -16836,7 +17012,8 @@
      "mpInitial": 0,
      "abnormalTimeSeconds": 30,
      "abnormalLevel": 3,
-     "slot": "ATTACK_TIME_UP"
+     "slot": "ATTACK_TIME_UP",
+     "affectRange": 200
     }
    ]
   },
@@ -16863,7 +17040,8 @@
      "mpInitial": 0,
      "abnormalTimeSeconds": 300,
      "abnormalLevel": 99,
-     "slot": "PA_UP"
+     "slot": "PA_UP",
+     "affectRange": 400
     }
    ]
   },
@@ -16890,7 +17068,8 @@
      "mpInitial": 0,
      "abnormalTimeSeconds": 300,
      "abnormalLevel": 99,
-     "slot": "ATTACK_TIME_DOWN"
+     "slot": "ATTACK_TIME_DOWN",
+     "affectRange": 400
     }
    ]
   },
@@ -16906,7 +17085,8 @@
      "mpInitial": 0,
      "abnormalTimeSeconds": 30,
      "abnormalLevel": 1,
-     "slot": "ROOT_MAGICALLY"
+     "slot": "ROOT_MAGICALLY",
+     "affectRange": 300
     }
    ]
   },
@@ -16933,7 +17113,8 @@
      "mpInitial": 0,
      "abnormalTimeSeconds": 300,
      "abnormalLevel": 99,
-     "slot": "PD_UP"
+     "slot": "PD_UP",
+     "affectRange": 400
     }
    ]
   },
@@ -16949,7 +17130,8 @@
      "mpInitial": 0,
      "abnormalTimeSeconds": 30,
      "abnormalLevel": 1,
-     "slot": "SLEEP"
+     "slot": "SLEEP",
+     "affectRange": 200
     }
    ]
   },
@@ -16965,7 +17147,8 @@
      "mpInitial": 0,
      "abnormalTimeSeconds": 30,
      "abnormalLevel": 1,
-     "slot": "ROOT_MAGICALLY"
+     "slot": "ROOT_MAGICALLY",
+     "affectRange": 300
     }
    ]
   },
@@ -16997,7 +17180,8 @@
      "mpInitial": 0,
      "abnormalTimeSeconds": 30,
      "abnormalLevel": 1,
-     "slot": "ROOT_MAGICALLY"
+     "slot": "ROOT_MAGICALLY",
+     "affectRange": 300
     }
    ]
   },
@@ -17013,7 +17197,8 @@
      "mpInitial": 0,
      "abnormalTimeSeconds": 30,
      "abnormalLevel": 1,
-     "slot": "PARALYZE"
+     "slot": "PARALYZE",
+     "affectRange": 200
     }
    ]
   },
@@ -17040,7 +17225,8 @@
      "mpInitial": 0,
      "abnormalTimeSeconds": 300,
      "abnormalLevel": 99,
-     "slot": "PA_UP"
+     "slot": "PA_UP",
+     "affectRange": 400
     }
    ]
   },
@@ -17056,7 +17242,8 @@
      "mpInitial": 0,
      "abnormalTimeSeconds": 300,
      "abnormalLevel": 99,
-     "slot": "PD_UP"
+     "slot": "PD_UP",
+     "affectRange": 400
     }
    ]
   },
@@ -17072,7 +17259,8 @@
      "mpInitial": 0,
      "abnormalTimeSeconds": 30,
      "abnormalLevel": 1,
-     "slot": "ROOT_MAGICALLY"
+     "slot": "ROOT_MAGICALLY",
+     "affectRange": 300
     }
    ]
   },
@@ -17088,7 +17276,8 @@
      "mpInitial": 0,
      "abnormalTimeSeconds": 30,
      "abnormalLevel": 1,
-     "slot": "ROOT_MAGICALLY"
+     "slot": "ROOT_MAGICALLY",
+     "affectRange": 300
     }
    ]
   },
@@ -17120,7 +17309,8 @@
      "mpInitial": 0,
      "abnormalTimeSeconds": 30,
      "abnormalLevel": 1,
-     "slot": "SLEEP"
+     "slot": "SLEEP",
+     "affectRange": 200
     }
    ]
   },
@@ -17136,7 +17326,8 @@
      "mpInitial": 0,
      "abnormalTimeSeconds": 30,
      "abnormalLevel": 1,
-     "slot": "ROOT_MAGICALLY"
+     "slot": "ROOT_MAGICALLY",
+     "affectRange": 300
     }
    ]
   },
@@ -17152,7 +17343,8 @@
      "mpInitial": 0,
      "abnormalTimeSeconds": 30,
      "abnormalLevel": 3,
-     "slot": "PA_DOWN"
+     "slot": "PA_DOWN",
+     "affectRange": 200
     }
    ]
   },
@@ -17168,7 +17360,8 @@
      "mpInitial": 0,
      "abnormalTimeSeconds": 30,
      "abnormalLevel": 1,
-     "slot": "ROOT_MAGICALLY"
+     "slot": "ROOT_MAGICALLY",
+     "affectRange": 300
     }
    ]
   },
@@ -17184,7 +17377,8 @@
      "mpInitial": 0,
      "abnormalTimeSeconds": 30,
      "abnormalLevel": 1,
-     "slot": "ROOT_MAGICALLY"
+     "slot": "ROOT_MAGICALLY",
+     "affectRange": 300
     }
    ]
   },
@@ -17216,7 +17410,8 @@
      "mpInitial": 0,
      "abnormalTimeSeconds": 30,
      "abnormalLevel": 1,
-     "slot": "ROOT_MAGICALLY"
+     "slot": "ROOT_MAGICALLY",
+     "affectRange": 200
     }
    ]
   },
@@ -17248,7 +17443,8 @@
      "mpInitial": 0,
      "abnormalTimeSeconds": 30,
      "abnormalLevel": 1,
-     "slot": "ROOT_MAGICALLY"
+     "slot": "ROOT_MAGICALLY",
+     "affectRange": 300
     }
    ]
   },
@@ -17291,7 +17487,8 @@
      "mpInitial": 0,
      "abnormalTimeSeconds": 300,
      "abnormalLevel": 99,
-     "slot": "PA_UP"
+     "slot": "PA_UP",
+     "affectRange": 400
     }
    ]
   },
@@ -17371,7 +17568,8 @@
      "mpInitial": 17,
      "abnormalTimeSeconds": 30,
      "abnormalLevel": 1,
-     "slot": "PARALYZE"
+     "slot": "PARALYZE",
+     "affectRange": 200
     }
    ]
   },
@@ -17627,6 +17825,17 @@
    "npcId": 27299,
    "buff": [
     {
+     "id": 4522,
+     "level": 1,
+     "hitTimeMs": 0,
+     "reuseDelayMs": 0,
+     "mp": 0,
+     "mpInitial": 0,
+     "abnormalTimeSeconds": 600,
+     "abnormalLevel": 1,
+     "slot": "PUBLIC_SLOT"
+    },
+    {
      "id": 4523,
      "level": 1,
      "hitTimeMs": 10000,
@@ -17643,6 +17852,17 @@
    "npcId": 27300,
    "buff": [
     {
+     "id": 4522,
+     "level": 1,
+     "hitTimeMs": 0,
+     "reuseDelayMs": 0,
+     "mp": 0,
+     "mpInitial": 0,
+     "abnormalTimeSeconds": 600,
+     "abnormalLevel": 1,
+     "slot": "PUBLIC_SLOT"
+    },
+    {
      "id": 4523,
      "level": 1,
      "hitTimeMs": 10000,
@@ -17658,6 +17878,17 @@
   {
    "npcId": 27301,
    "buff": [
+    {
+     "id": 4522,
+     "level": 1,
+     "hitTimeMs": 0,
+     "reuseDelayMs": 0,
+     "mp": 0,
+     "mpInitial": 0,
+     "abnormalTimeSeconds": 600,
+     "abnormalLevel": 1,
+     "slot": "PUBLIC_SLOT"
+    },
     {
      "id": 4523,
      "level": 1,
@@ -17731,7 +17962,8 @@
      "mpInitial": 0,
      "abnormalTimeSeconds": 60,
      "abnormalLevel": 3,
-     "slot": "SPEED_DOWN"
+     "slot": "SPEED_DOWN",
+     "affectRange": 200
     }
    ]
   },
@@ -17747,7 +17979,8 @@
      "mpInitial": 0,
      "abnormalTimeSeconds": 120,
      "abnormalLevel": 1,
-     "slot": "PARALYZE"
+     "slot": "PARALYZE",
+     "affectRange": 200
     }
    ]
   },
@@ -17763,7 +17996,8 @@
      "mpInitial": 0,
      "abnormalTimeSeconds": 120,
      "abnormalLevel": 1,
-     "slot": "ANTARAS_DEBUFF"
+     "slot": "ANTARAS_DEBUFF",
+     "affectRange": 850
     }
    ]
   },
@@ -17790,7 +18024,8 @@
      "mpInitial": 0,
      "abnormalTimeSeconds": 300,
      "abnormalLevel": 99,
-     "slot": "ATTACK_TIME_DOWN"
+     "slot": "ATTACK_TIME_DOWN",
+     "affectRange": 400
     }
    ]
   },
@@ -17806,7 +18041,8 @@
      "mpInitial": 0,
      "abnormalTimeSeconds": 30,
      "abnormalLevel": 1,
-     "slot": "ROOT_MAGICALLY"
+     "slot": "ROOT_MAGICALLY",
+     "affectRange": 300
     }
    ]
   },
@@ -17854,7 +18090,8 @@
      "mpInitial": 0,
      "abnormalTimeSeconds": 30,
      "abnormalLevel": 3,
-     "slot": "ATTACK_TIME_UP"
+     "slot": "ATTACK_TIME_UP",
+     "affectRange": 200
     }
    ]
   },
@@ -17886,7 +18123,8 @@
      "mpInitial": 0,
      "abnormalTimeSeconds": 300,
      "abnormalLevel": 99,
-     "slot": "PD_UP"
+     "slot": "PD_UP",
+     "affectRange": 400
     }
    ]
   },
@@ -17929,7 +18167,8 @@
      "mpInitial": 0,
      "abnormalTimeSeconds": 300,
      "abnormalLevel": 99,
-     "slot": "PA_UP"
+     "slot": "PA_UP",
+     "affectRange": 400
     }
    ]
   },
@@ -17972,7 +18211,8 @@
      "mpInitial": 0,
      "abnormalTimeSeconds": 300,
      "abnormalLevel": 99,
-     "slot": "ATTACK_TIME_DOWN"
+     "slot": "ATTACK_TIME_DOWN",
+     "affectRange": 400
     }
    ]
   },
@@ -18004,7 +18244,8 @@
      "mpInitial": 0,
      "abnormalTimeSeconds": 30,
      "abnormalLevel": 3,
-     "slot": "PA_DOWN"
+     "slot": "PA_DOWN",
+     "affectRange": 200
     }
    ]
   },
@@ -18298,7 +18539,8 @@
      "mpInitial": 0,
      "abnormalTimeSeconds": 9,
      "abnormalLevel": 1,
-     "slot": "STUN"
+     "slot": "STUN",
+     "affectRange": 200
     }
    ]
   },
@@ -18314,7 +18556,8 @@
      "mpInitial": 0,
      "abnormalTimeSeconds": 30,
      "abnormalLevel": 1,
-     "slot": "ROOT_MAGICALLY"
+     "slot": "ROOT_MAGICALLY",
+     "affectRange": 200
     }
    ]
   },

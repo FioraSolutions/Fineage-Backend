@@ -50292,6 +50292,51 @@
       "sellable": false
     },
     {
+      "id": 6389,
+      "name": "Squash Seed",
+      "kind": "etc",
+      "icon": "icon.etc_gourd_i00",
+      "stackable": true,
+      "price": 0,
+      "weight": 0
+    },
+    {
+      "id": 6390,
+      "name": "Large Squash Seed",
+      "kind": "etc",
+      "icon": "icon.etc_gourd_i01",
+      "stackable": true,
+      "price": 0,
+      "weight": 0
+    },
+    {
+      "id": 6391,
+      "name": "Nectar",
+      "kind": "etc",
+      "icon": "icon.etc_nectar_i00",
+      "stackable": true,
+      "price": 0,
+      "weight": 0
+    },
+    {
+      "id": 6392,
+      "name": "Event - Medal",
+      "kind": "etc",
+      "icon": "icon.etc_event_medal_i00",
+      "stackable": true,
+      "price": 0,
+      "weight": 0
+    },
+    {
+      "id": 6393,
+      "name": "Event - Glittering Medal",
+      "kind": "etc",
+      "icon": "icon.etc_event_glitter_medal_i00",
+      "stackable": true,
+      "price": 0,
+      "weight": 0
+    },
+    {
       "id": 6394,
       "name": "Red Party Mask",
       "kind": "armor",
@@ -50335,6 +50380,42 @@
       "icon": "icon.etc_spell_books_white_i00",
       "price": 4600,
       "weight": 120
+    },
+    {
+      "id": 6399,
+      "name": "Badge of Rabbit",
+      "kind": "etc",
+      "icon": "icon.etc_paper_black_i00",
+      "stackable": true,
+      "price": 0,
+      "weight": 0
+    },
+    {
+      "id": 6400,
+      "name": "Badge of Hyena",
+      "kind": "etc",
+      "icon": "icon.etc_paper_red_i00",
+      "stackable": true,
+      "price": 0,
+      "weight": 0
+    },
+    {
+      "id": 6401,
+      "name": "Badge of Fox",
+      "kind": "etc",
+      "icon": "icon.etc_paper_red_i00",
+      "stackable": true,
+      "price": 0,
+      "weight": 0
+    },
+    {
+      "id": 6402,
+      "name": "Badge of Wolf",
+      "kind": "etc",
+      "icon": "icon.etc_paper_red_i00",
+      "stackable": true,
+      "price": 0,
+      "weight": 0
     },
     {
       "id": 6408,
@@ -53117,6 +53198,15 @@
       "weight": 10
     },
     {
+      "id": 6673,
+      "name": "Festival Adena",
+      "kind": "etc",
+      "icon": "icon.etc_coin_of_fair_i00",
+      "stackable": true,
+      "price": 0,
+      "weight": 0
+    },
+    {
       "id": 6674,
       "name": "Sealed Imperial Crusader Breastplate",
       "kind": "armor",
@@ -54399,6 +54489,15 @@
       "bodySlot": "lhand"
     },
     {
+      "id": 6903,
+      "name": "Music Box M",
+      "kind": "etc",
+      "icon": "icon.etc_m_i00",
+      "stackable": true,
+      "price": 0,
+      "weight": 10
+    },
+    {
       "id": 6904,
       "name": "Party Mask Fabric",
       "kind": "etc",
@@ -55087,6 +55186,15 @@
       "stackable": true
     },
     {
+      "id": 7079,
+      "name": "Dimensional Fragment",
+      "kind": "etc",
+      "icon": "icon.etc_broken_crystal_blue_i00",
+      "stackable": true,
+      "price": 0,
+      "weight": 0
+    },
+    {
       "id": 7080,
       "name": "Ice Crystal",
       "kind": "etc",
@@ -55420,6 +55528,33 @@
       "price": 0,
       "weight": 0,
       "stackable": true
+    },
+    {
+      "id": 7114,
+      "name": "Voucher - Buffalo",
+      "kind": "etc",
+      "icon": "icon.etc_ticket_i00",
+      "stackable": true,
+      "price": 0,
+      "weight": 0
+    },
+    {
+      "id": 7115,
+      "name": "Voucher - Cougar",
+      "kind": "etc",
+      "icon": "icon.etc_ticket_blue_i00",
+      "stackable": true,
+      "price": 0,
+      "weight": 0
+    },
+    {
+      "id": 7116,
+      "name": "Voucher - Kookaburra",
+      "kind": "etc",
+      "icon": "icon.etc_ticket_red_i00",
+      "stackable": true,
+      "price": 0,
+      "weight": 0
     },
     {
       "id": 7117,
@@ -55893,6 +56028,15 @@
       "quest": true
     },
     {
+      "id": 7166,
+      "name": "Medicinal Herb",
+      "kind": "etc",
+      "icon": "icon.etc_ginseng_red_i00",
+      "stackable": true,
+      "price": 0,
+      "weight": 0
+    },
+    {
       "id": 7167,
       "name": "Crystal of Seal",
       "kind": "etc",
@@ -55953,6 +56097,15 @@
       "quest": true
     },
     {
+      "id": 7173,
+      "name": "Feather Ornament",
+      "kind": "etc",
+      "icon": "icon.etc_feather_white_i00",
+      "stackable": true,
+      "price": 0,
+      "weight": 0
+    },
+    {
       "id": 7174,
       "name": "Tooth of Totem",
       "kind": "etc",
@@ -55961,6 +56114,15 @@
       "weight": 0,
       "stackable": true,
       "quest": true
+    },
+    {
+      "id": 7175,
+      "name": "Tooth of Dragon",
+      "kind": "etc",
+      "icon": "icon.etc_claw_i00",
+      "stackable": true,
+      "price": 0,
+      "weight": 0
     },
     {
       "id": 7176,
@@ -55981,6 +56143,15 @@
       "weight": 0,
       "stackable": true,
       "quest": true
+    },
+    {
+      "id": 7178,
+      "name": "Black Bone Necklace",
+      "kind": "etc",
+      "icon": "icon.etc_totem_necklace_black_i00",
+      "stackable": true,
+      "price": 0,
+      "weight": 0
     },
     {
       "id": 7182,
@@ -67452,6 +67623,60 @@
       "quest": true
     },
     {
+      "id": 8515,
+      "name": "Charm of Courage: No Grade",
+      "kind": "etc",
+      "icon": "icon.etc_charm_of_courage_i00",
+      "stackable": true,
+      "price": 2000,
+      "weight": 10
+    },
+    {
+      "id": 8516,
+      "name": "Charm of Courage (D-Grade)",
+      "kind": "etc",
+      "icon": "icon.etc_charm_of_courage_i01",
+      "stackable": true,
+      "price": 6600,
+      "weight": 10
+    },
+    {
+      "id": 8517,
+      "name": "Charm of Courage (C-Grade)",
+      "kind": "etc",
+      "icon": "icon.etc_charm_of_courage_i02",
+      "stackable": true,
+      "price": 13200,
+      "weight": 10
+    },
+    {
+      "id": 8518,
+      "name": "Charm of Courage (B-Grade)",
+      "kind": "etc",
+      "icon": "icon.etc_charm_of_courage_i03",
+      "stackable": true,
+      "price": 26000,
+      "weight": 10
+    },
+    {
+      "id": 8519,
+      "name": "Charm of Courage (A-Grade)",
+      "kind": "etc",
+      "icon": "icon.etc_charm_of_courage_i04",
+      "stackable": true,
+      "price": 54000,
+      "weight": 10
+    },
+    {
+      "id": 8520,
+      "name": "Charm of Courage (S-Grade)",
+      "kind": "etc",
+      "icon": "icon.etc_charm_of_courage_i05",
+      "stackable": true,
+      "price": 100000,
+      "weight": 10
+    },
+    {
       "id": 8521,
       "name": "Seed: Sea Coba",
       "kind": "etc",
@@ -69644,6 +69869,42 @@
       "icon": "icon.etc_lottery_card_i00",
       "price": 0,
       "weight": 0
+    },
+    {
+      "id": 8873,
+      "name": "Phoenix Blood",
+      "kind": "etc",
+      "icon": "icon.etc_feather_gold_i00",
+      "stackable": true,
+      "price": 20000,
+      "weight": 20
+    },
+    {
+      "id": 8874,
+      "name": "Einhasad's Holy Water",
+      "kind": "etc",
+      "icon": "icon.etc_holy_grail_i00",
+      "stackable": true,
+      "price": 20000,
+      "weight": 20
+    },
+    {
+      "id": 8875,
+      "name": "Battle Symbol",
+      "kind": "etc",
+      "icon": "icon.etc_debris_i00",
+      "stackable": true,
+      "price": 20000,
+      "weight": 20
+    },
+    {
+      "id": 8876,
+      "name": "Magic Symbol",
+      "kind": "etc",
+      "icon": "icon.etc_dragon_egg_i02",
+      "stackable": true,
+      "price": 20000,
+      "weight": 20
     },
     {
       "id": 8877,

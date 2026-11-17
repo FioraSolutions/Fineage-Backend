@@ -319,6 +319,13 @@ public sealed partial class ZoneWorld
             return "world";
         if (player.Dead)
             return InventoryProtocol.Dead;
+        // Mobius Creature.isAttackDisabled → isAlikeDead (Player.isAlikeDead includes _isFakeDeath): a prone pawn does
+        // not swing; only the sit action, incoming damage or death bring it up.
+        if (player.FakeDeath)
+        {
+            approachMs = -1;
+            return null;
+        }
         // Mobius onIntentionAttack: sitting, stunned, sleeping, paralyzed, or physically muted → ActionFailed.
         if (player.Sitting || IsActionBlocked(player) || IsPhysicallyMuted(player))
         {

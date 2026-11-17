@@ -8,7 +8,8 @@ public readonly record struct PlayerCombatStats(
     int PAtk, int MAtk, int PDef, int MDef, int PAtkSpd, int MAtkSpd, int Accuracy, int CritRate,
     int AttackRange, WeaponType Weapon, int Evasion = 0, int RandomDamage = ZoneCombat.DefaultPlayerRandomDamage,
     int ShieldDef = 0, double ShieldRate = 0, int Soulshots = 0, CrystalGrade WeaponGrade = CrystalGrade.None,
-    int MCritRate = 0, double MagicCritDmg = 1d, double CritDmg = 1d, double BlowRate = 1d);
+    int MCritRate = 0, double MagicCritDmg = 1d, double CritDmg = 1d, double BlowRate = 1d,
+    double CritDmgAdd = 0d);
 
 public sealed partial class ZoneWorld
 {
@@ -53,7 +54,8 @@ public sealed partial class ZoneWorld
             MCritRate: (int)mods.Apply(CombatStat.MCritRate, formula.MagicCritBase) * 10,
             MagicCritDmg: mods.Apply(CombatStat.MagicCritDmg, 1d),
             CritDmg: mods.Apply(CombatStat.CritDmg, 1d),
-            BlowRate: mods.Apply(CombatStat.BlowRate, 1d));
+            BlowRate: mods.Apply(CombatStat.BlowRate, 1d),
+            CritDmgAdd: mods.Apply(CombatStat.CritDmgAdd, 0d));
     }
 
     /// <summary>Template + henna + bonus table (shared by combat, regen, weight, move speed).</summary>
@@ -113,7 +115,9 @@ public sealed partial class ZoneWorld
     {
         if (player.Abnormals.Count == 0)
             return null;
-        var mods = SkillStatEffects.Collect(_statEffects, player.Abnormals);
+        // Buff funcs can carry their own <using kind> gate (Focus Chance / Focus Power need a dagger; Rapid Shot a bow).
+        var mods = SkillStatEffects.Collect(_statEffects, player.Abnormals,
+            wearing: kinds => ConditionUsingItemType.Matches(player.Inventory, kinds));
         return ReferenceEquals(mods, CombatStatMods.None) ? null : mods;
     }
 
@@ -122,7 +126,11 @@ public sealed partial class ZoneWorld
         var passiveLevels = PassiveSkillLevels(player);
         return passiveLevels.Count == 0
             ? mods
-            : _passives.CollectPassives(passiveLevels, kinds => ConditionUsingItemType.Matches(player.Inventory, kinds), mods);
+            : _passives.CollectPassives(
+                passiveLevels,
+                kinds => ConditionUsingItemType.Matches(player.Inventory, kinds),
+                mods,
+                resting: player.Sitting);
     }
 
     /// <summary>

@@ -20,17 +20,53 @@ public enum CombatStat
     MCritRate,     // mCritRate
     MagicCritDmg,  // mCritPower
     CritDmg,       // critDmg
+    CritDmgAdd,    // critDmgAdd (flat, Vicious Stance / Critical Power / SA)
+    CritRatePos,   // critRatePos (Focus Chance 356: multiplier on the plain-attack crit rate, by attack side)
+    CritDmgPos,    // critDmgPos (Focus Power 357 / Focus Death 355: multiplier on crit damage, by attack side)
     BlowRate,      // blowRate
     PSkillEvasion  // pSkillEvas
 }
 
+/// <summary>
+/// Attacker's side relative to the target for Mobius positional funcs
+/// (<c>&lt;player front="true"/&gt;</c>, <c>&lt;player behind="true"/&gt;</c>, and the <c>and</c> of both negated = side).
+/// </summary>
+public enum SkillPosition
+{
+    /// <summary>No target yet / no positional condition — positional funcs are skipped.</summary>
+    None = 0,
+    Front,
+    Side,
+    Behind
+}
+
 /// <param name="Using">Mobius <c>&lt;using kind&gt;</c> condition (upper-case kinds); null = unconditional.</param>
-public sealed record SkillStatFunc(CombatStat Stat, char Op, double[] Values, string[]? Using = null)
+/// <param name="Resting">
+/// Mobius <c>&lt;player resting="true"/&gt;</c> condition (Vital Force 148 HP/MP regen): applies only while seated.
+/// </param>
+/// <param name="Position">
+/// Mobius <c>&lt;player front|behind&gt;</c> condition (Focus Chance 356 crit rate, Focus Power 357 crit damage):
+/// the func applies only when the owner attacks from that side; <see cref="SkillPosition.None"/> = unconditional.
+/// </param>
+public sealed record SkillStatFunc(
+    CombatStat Stat,
+    char Op,
+    double[] Values,
+    string[]? Using = null,
+    bool Resting = false,
+    SkillPosition Position = SkillPosition.None)
 {
     public double ValueAt(int level) => Values.Length == 0 ? 0 : Values[Math.Clamp(level, 1, Values.Length) - 1];
 }
 
-public sealed record SkillStatEffect(int SkillId, string Name, int Levels, IReadOnlyList<SkillStatFunc> Funcs);
+public sealed record SkillStatEffect(int SkillId, string Name, int Levels, IReadOnlyList<SkillStatFunc> Funcs)
+{
+    /// <summary>
+    /// Mobius skill-level <c>&lt;cond&gt;&lt;using kind&gt;</c> (Focus Chance 356 / Focus Power 357 need a dagger).
+    /// Mobius refuses the cast with SysMsg 113 when the owner does not wear one; null = no gate.
+    /// </summary>
+    public string[]? Using { get; init; }
+}
 
 /// <summary>
 /// Accumulated stat functions from active abnormals / passives. Mobius order

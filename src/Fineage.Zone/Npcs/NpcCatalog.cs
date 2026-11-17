@@ -59,7 +59,11 @@ public sealed record NpcTemplate(
     /// <summary>Mobius <c>ai skill minChance</c> (default 7).</summary>
     int MinSkillChance = 7,
     /// <summary>Mobius <c>ai skill maxChance</c> (default 15).</summary>
-    int MaxSkillChance = 15);
+    int MaxSkillChance = 15,
+    /// <summary>Mobius <c>&lt;param name="despawn_time"&gt;</c> on EffectPoint signets, in seconds.</summary>
+    int DespawnTimeSeconds = 0,
+    /// <summary>Mobius <c>&lt;param name="skill_delay"&gt;</c>: seconds between signet aura pulses.</summary>
+    int SkillDelaySeconds = 0);
 
 /// <summary>One active Mobius NPC AI attack skill (id + level from skillList).</summary>
 public readonly record struct NpcAiSkill(int SkillId, int Level);
@@ -199,7 +203,9 @@ public sealed class NpcCatalog
                 row.DefenceTraits is { Count: > 0 } ? row.DefenceTraits : null,
                 ParseAiSkills(row.AiSkills),
                 row.MinSkillChance > 0 ? row.MinSkillChance : 7,
-                row.MaxSkillChance > 0 ? row.MaxSkillChance : 15));
+                row.MaxSkillChance > 0 ? row.MaxSkillChance : 15,
+                Math.Max(0, row.DespawnTimeSeconds),
+                Math.Max(0, row.SkillDelaySeconds)));
         }
 
     static IReadOnlyList<NpcAiSkill>? ParseAiSkills(List<AiSkillDto>? rows)
@@ -281,6 +287,10 @@ public sealed class NpcCatalog
         public List<AiSkillDto>? AiSkills { get; set; }
         public int MinSkillChance { get; set; }
         public int MaxSkillChance { get; set; }
+        /// <summary>Mobius EffectPoint <c>&lt;param name="despawn_time"&gt;</c>, in seconds.</summary>
+        public int DespawnTimeSeconds { get; set; }
+        /// <summary>Mobius EffectPoint <c>&lt;param name="skill_delay"&gt;</c>, in seconds.</summary>
+        public int SkillDelaySeconds { get; set; }
     }
 
     sealed class AiSkillDto

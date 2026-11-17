@@ -50,12 +50,23 @@ public sealed partial class ZoneWorld
 
         var defenceTraits = target.Kind == ZoneEntityKind.Npc ? target.DefenceTraits : null;
         var attackTraits = AttackTraitCatalog.FromAbnormals(player.Abnormals.Select(a => (a.Id, a.SkillLevel)));
+        // Mobius calcCrit: crit rate is folded through CRITICAL_RATE_POS while the target is known
+        // (Focus Chance 356 → ×0.7 front, ×1.6 behind, ×1.3 side).
+        var position = ZoneCombat.PositionOf(player.X, player.Y, target.X, target.Y, target.Heading);
+        var positional = SkillStatEffects.CollectPositional(_statEffects, player.Abnormals, position);
+        int critPermille = positional.IsEmpty
+            ? ps.CritRate
+            : ZoneCombat.PositionalCritPermille(ps.CritRate, positional.Apply(CombatStat.CritRatePos, 1d));
+        double critDamageMod = positional.IsEmpty
+            ? ps.CritDmg
+            : ps.CritDmg * positional.Apply(CombatStat.CritDmgPos, 1d);
         return ZoneCombat.RollMelee(_combatRandom, ps.PAtk, pDef,
-            ps.Accuracy, evasion, ps.CritRate, ps.RandomDamage,
+            ps.Accuracy, evasion, critPermille, ps.RandomDamage,
             soulshot, (int)ps.WeaponGrade, shieldRate, shieldDef, ps.Weapon == Fineage.Game.WeaponType.Bow,
             ZoneCombat.HitConditionBonus(player.X, player.Y, player.Z, target.X, target.Y, target.Z, target.Heading, IsNight),
-            ps.CritDmg,
-            ZoneCombat.AttackTraitBonus(ps.Weapon, defenceTraits, attackTraits));
+            critDamageMod,
+            ZoneCombat.AttackTraitBonus(ps.Weapon, defenceTraits, attackTraits),
+            ps.CritDmgAdd);
     }
 
     /// <summary>
@@ -71,5 +82,9 @@ public sealed partial class ZoneWorld
     }
 
     internal double NpcPDefForTest(ZoneEntity npc) => NpcPDef(npc);
+
+    /// <summary>Test hook: one melee roll against the player's current stats and stance (no HP change).</summary>
+    internal (int Damage, byte Flags) RollPlayerMeleeForTest(ZoneEntity player, ZoneEntity target, bool soulshot = false) =>
+        RollPlayerMelee(player, PlayerStats(player), target, soulshot);
 
 }

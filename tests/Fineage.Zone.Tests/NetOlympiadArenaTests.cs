@@ -184,13 +184,13 @@ public sealed class NetOlympiadArenaTests
         Assert.Null(await bench.World.TryGiveItemAsync(one.Session, 3947, 10, ct)); // Blessed Spiritshot: No Grade
         long far = Evening.ToUnixTimeMilliseconds() + 3_600_000;
         one.Player.SkillReuseUntilMs[1] = far;   // Triple Slash, 3 s reuse
-        one.Player.SkillReuseUntilMs[395] = far; // Heroic Miracle, 20 min reuse
+        one.Player.SkillReuseUntilMs[460] = far; // Symbol of the Assassin, 30 min reuse (kept, 900000 < delay)
 
         await at(Evening.AddSeconds(66)); // ported
         Assert.True(bench.World.InOlympiadArena(one.ObjectId));
         Assert.False(one.Inventory.Items.Single(i => i.ItemId == 6611).IsEquipped);
         Assert.DoesNotContain(1, one.Player.SkillReuseUntilMs.Keys);
-        Assert.Equal(far, one.Player.SkillReuseUntilMs[395]);
+        Assert.Equal(far, one.Player.SkillReuseUntilMs[460]);
 
         Assert.Equal(InventoryProtocol.OlympiadRestricted, await bench.World.TryUseItemAsync(one.Session, one.Slot(6611), ct));
         Assert.False(one.Inventory.Items.Single(i => i.ItemId == 6611).IsEquipped);

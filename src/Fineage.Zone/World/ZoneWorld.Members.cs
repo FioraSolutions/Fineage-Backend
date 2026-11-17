@@ -38,6 +38,10 @@ public sealed partial class ZoneWorld
         var entity = _byId[session.ObjectId];
         if (entity.Dead)
             return InventoryProtocol.Dead;
+        // Mobius Creature.isMovementDisabled → isAlikeDead → Player.isAlikeDead includes _isFakeDeath, so a prone pawn
+        // simply does not move; the move request is refused without standing it up.
+        if (entity.FakeDeath)
+            return ActionProtocol.Blocked;
         if (IsImmobilized(entity))
             return ActionProtocol.Immobilized;
         if (entity.Sitting)

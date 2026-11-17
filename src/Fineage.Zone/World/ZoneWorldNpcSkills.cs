@@ -100,6 +100,8 @@ public sealed partial class ZoneWorld
             FanoutVitals(target, PlayerVitalsStatus(target));
             SendVictimHitLines(npc, target, damage, 0);
             target.CombatUntilUnixMs = now + ClanProtocol.CombatStanceMillis;
+            // Mobius onCreatureDamageReceived → TriggerSkillByDamage (Mirage 445).
+            RunDamageTriggers(target, npc, damage);
             if (target.CurHp > 0)
                 MaybeBreakCast(target, damage);
             if (target.CurHp <= 0)

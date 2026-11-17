@@ -53,8 +53,13 @@ public sealed partial class ZoneWorld
         npc.NextMobAttackMs = _clock().ToUnixTimeMilliseconds() + ZoneCombat.HitTimeMs(NpcPAtkSpd(npc));
     }
 
+    /// <summary>
+    /// Mobius <c>AttackableAI.checkAggroCondition</c> / <c>AggroInfo.checkHate</c>: <c>target.isAlikeDead()</c> covers
+    /// fake death (<c>Player.isAlikeDead()</c> includes <c>_isFakeDeath</c>), so a playing-dead pawn is never a hate
+    /// target and its hate is zeroed — the mob drops it until it stands up and is hit again.
+    /// </summary>
     bool ValidHateTarget(ZoneEntity npc, int playerId) =>
-        _byId.TryGetValue(playerId, out var p) && IsLivePlayable(p) &&
+        _byId.TryGetValue(playerId, out var p) && IsLivePlayable(p) && !p.FakeDeath &&
         SameInstance(npc.ObjectId, p.ObjectId) && ZoneCombat.InAggroRange(npc.X, npc.Y, p.X, p.Y);
 
     /// <summary>A connected living player, or a living summon (Mobius <c>isPlayable</c>).</summary>
@@ -129,7 +134,7 @@ public sealed partial class ZoneWorld
             npc.NextAggroScanMs = now + AggroScanIntervalMs;
             foreach (var p in players)
             {
-                if (p.Dead || p.CurHp <= 0 || p.Session == null || !SameInstance(npc.ObjectId, p.ObjectId))
+                if (p.Dead || p.CurHp <= 0 || p.Session == null || p.FakeDeath || !SameInstance(npc.ObjectId, p.ObjectId))
                     continue;
                 if (guard && p.Karma <= 0)
                     continue;

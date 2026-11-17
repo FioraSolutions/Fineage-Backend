@@ -181,6 +181,29 @@ public sealed partial class ZoneWorld
         // Net timed move: measure range from where the pawn really is now, not the last move order.
         AdvanceMove(player, now);
 
+        // Mobius Skill.checkCondition: <cond><using kind=..></cond> on the skill itself (Focus Chance / Focus Power need
+        // a dagger) refuses the cast with SysMsg 113 "<skill> cannot be used due to unsuitable terms." No MP/reuse spent.
+        // Same convention as the <using> gate in TrySkillUseAttack: the refusal is a notice, not an error code.
+        if (_statEffects.TryGet(request.SkillId, out var statEffect) &&
+            statEffect.Using is { Length: > 0 } requiredKinds &&
+            !Wearing(player, requiredKinds))
+        {
+            SelfLine(session, SysMsgUnsuitableTerms, $"{liveTemplate.Name} cannot be used due to unsuitable terms.");
+            return null;
+        }
+
+        // Mobius RequestMagicSkillUse: a fake-dead pawn refuses every skill, the Fake Death toggle included
+        // (YOU_CANNOT_MOVE_WHILE_SITTING + ActionFailed). Only sit/stand, damage or death bring it up.
+        if (player.FakeDeath)
+        {
+            SelfLine(session, SysMsgCannotUseWhileStanding, "You cannot move while sitting.");
+            return ActionProtocol.Blocked;
+        }
+
+        // Mobius operateType T: the second press switches the toggle off, otherwise it applies its own abnormal.
+        if (IsToggleSkill(liveTemplate))
+            return TrySkillUseToggle(session, player, request, liveTemplate, liveLevelData, level, now);
+
         if (_summonSkills.Find(request.SkillId) is { } summonSkill)
             return TrySkillUseSummon(session, player, request, summonSkill, liveTemplate, liveLevelData, level, now);
         if (Cubics.SummonSkill(request.SkillId) is { } cubicSkill)
@@ -206,12 +229,36 @@ public sealed partial class ZoneWorld
         // Mobius DispelByCategory (Cancellation) / MagicalAttackMp — must not fall into InstantSupport.
         if (_skillEffects.TryDispelByCategory(request.SkillId, out var dispel))
             return TrySkillUseCancel(session, player, request, liveTemplate, liveLevelData, level, now, dispel);
+        // Mobius DispelBySlot: Escape Shackle / Break Duress / Cure Poison / Purify / Servitor cures. Vitalize (1020)
+        // also heals, so it takes the cleanse first and its Heal comes back through the support path only when the
+        // row carries a real power (it does not — 1020's heal is a #amount table, handled by skill-combat power).
+        if (_skillEffects.TryDispelBySlot(request.SkillId, out var slotRows))
+            return TrySkillUseDispelBySlot(session, player, request, liveTemplate, liveLevelData, level, now, slotRows);
         if (_skillEffects.HasMagicalAttackMp(request.SkillId))
             return TrySkillUseManaBurn(session, player, request, liveTemplate, liveLevelData, level, now);
+
+        // Mobius RestorationRandom (Summon Treasure Key 419) and SummonNpc signets (454–460): self A1 skills whose
+        // effect rows are neither a heal nor an attack. Without this they fell into the support/attack fallthrough,
+        // which threw on the missing heal power (419) or refused the self target (460).
+        if (_skillEffects.TryGet(request.SkillId, out var effectRows) && HasRestorationRandom(effectRows))
+            return TrySkillUseRestorationRandom(session, player, request, liveTemplate, liveLevelData, level, now);
+        if (SignetSkillIds.Contains(request.SkillId))
+            return TrySkillUseSignet(session, player, request, liveTemplate, liveLevelData, level, now);
+
         if (liveTemplate.IsInstantSupportSkill(level) || _skillEffects.HasHeal(request.SkillId))
             return TrySkillUseSupport(session, player, request, liveTemplate, liveLevelData, level, now);
 
         return TrySkillUseAttack(session, player, request, liveTemplate, liveLevelData, level, now);
+    }
+
+    static bool HasRestorationRandom(SkillEffectCatalog.Effect[] rows)
+    {
+        foreach (var row in rows)
+        {
+            if (row.Name.Equals("RestorationRandom", StringComparison.OrdinalIgnoreCase))
+                return true;
+        }
+        return false;
     }
 
 }

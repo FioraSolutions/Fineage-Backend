@@ -224,8 +224,11 @@ public sealed partial class ZoneWorld
             }
             if (!ApplyAbnormalFromSkill(template, levelData, t, at, attacker: player))
                 return;
+            // Mobius adds the skill's effectPoint hate on landing, then the <for> payloads run in datapack order. Bluff (358)
+            // is exactly that case: TargetCancel + DeleteHateOfMe must wipe the hate the hit just produced.
             if (t.Kind == ZoneEntityKind.Npc)
                 AddHate(t, player, hate: Math.Max(1, Math.Abs(levelData.Power)));
+            RunInstantPayloadEffects(player, t, request.SkillId);
         });
         return null;
     }
