@@ -164,6 +164,15 @@ public interface IAccountStore
 
     bool SaveClanHalls(IReadOnlyList<ClanHallSave> halls);
 
+    /// <summary>The pet behind a collar (Mobius <c>Pet.restore</c> by control item object id), or null for a new pet.</summary>
+    StoredPet? FindPet(int controlObjectId);
+
+    /// <summary>Inserts or replaces the pet row (Mobius <c>Pet.storeMe</c>).</summary>
+    bool SavePet(StoredPet pet);
+
+    /// <summary>Deletes the pet row (Mobius <c>destroyControlItem</c> / decayed corpse).</summary>
+    bool DeletePet(int controlObjectId);
+
     /// <summary>Writes the character title (Mobius <c>RequestGiveNickName</c> / <c>setTitle</c>).</summary>
     bool TrySetCharacterTitle(string account, int characterId, string title);
 }

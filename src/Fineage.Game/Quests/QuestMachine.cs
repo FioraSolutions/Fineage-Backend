@@ -338,7 +338,10 @@ public sealed partial class QuestMachine : IQuestKillHook
         {
             Failure = outcome.Failure,
             Message = outcome.Message,
-            Html = dialog.Html,
+            Html = dialog.HtmlByVar is { } byVar && plan.Vars.TryGetValue(byVar.Var, out var pick) &&
+                   byVar.Pages.TryGetValue(pick, out var page)
+                ? page
+                : dialog.Html,
             QuestId = quest.Id,
             Hook = hook,
             Event = dialog.Event,

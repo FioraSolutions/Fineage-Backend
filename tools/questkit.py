@@ -107,6 +107,8 @@ def write(qid: int, folder: str, script: str, name: str, items: list[int], dialo
     for d in dialogs:
         if "htmlFile" in d:
             npcs_by_page.setdefault(d["htmlFile"], d["npcId"])
+        for f in (d.get("htmlByVar") or {}).get("files", {}).values():
+            npcs_by_page.setdefault(f, d["npcId"])
     known_events = {(d["npcId"], d.get("event")) for d in dialogs if d["hook"] == "event"}
     pending = list(npcs_by_page.items())
     written: set[str] = set()

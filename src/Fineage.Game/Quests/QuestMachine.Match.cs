@@ -25,6 +25,8 @@ public sealed partial class QuestMachine
                 continue;
             if (!VarsMatch(dialog, state))
                 continue;
+            if (!PetMatches(dialog, actor, state) || !ExtraItemsMatch(dialog, inventory, state))
+                continue;
             if (dialog.Weapons is { } weapons && inventory != null &&
                 !(inventory.GetEquipped(PaperdollSlot.RHand) is { } held && weapons.Contains(held.ItemId)))
                 continue;
@@ -121,6 +123,50 @@ public sealed partial class QuestMachine
                 return false;
         }
 
+        return true;
+    }
+
+    /// <summary>Var holding the registered pet collar object id (Mobius Q421 <c>summonOid</c>).</summary>
+    public const string PetVar = "summonOid";
+
+    static bool PetMatches(QuestDialog dialog, QuestActor? actor, QuestProgress? state)
+    {
+        if (actor is not { } who)
+            return true;
+        if (dialog.ByPet is bool byPet && who.ByPet != byPet)
+            return false;
+        if (dialog.Pet == null)
+            return true;
+        int pet = who.PetControlObjectId;
+        bool registered = pet != 0 && pet == IntVar(state, PetVar);
+        return dialog.Pet switch
+        {
+            "none" => pet == 0,
+            "out" => pet != 0,
+            "registered" => registered,
+            "other" => pet != 0 && !registered,
+            _ => false
+        };
+    }
+
+    static bool ExtraItemsMatch(QuestDialog dialog, PlayerInventory? inventory, QuestProgress? state)
+    {
+        if (inventory == null)
+            return true;
+        if (dialog.MinEnchant > 0 &&
+            !inventory.Items.Any(i => (dialog.HasAny ?? []).Contains(i.ItemId) && i.EnchantLevel >= dialog.MinEnchant))
+            return false;
+        if (dialog.SumItems is { Count: > 0 } sumItems)
+        {
+            long sum = 0;
+            foreach (int id in sumItems)
+                sum += inventory.CountOf(id);
+            if (sum < dialog.SumMin || (dialog.SumMax >= 0 && sum > dialog.SumMax))
+                return false;
+        }
+
+        if (dialog.HoldsVarItem is { } key && (IntVar(state, key) is var oid && (oid == 0 || inventory.Find(oid) == null)))
+            return false;
         return true;
     }
 
@@ -244,6 +290,8 @@ public sealed partial class QuestMachine
         public List<string> Sounds { get; } = [];
         public List<QuestLine> Lines { get; } = [];
         public List<int> Spawns { get; } = [];
+        /// <summary>Object id → new item id (enchant kept), applied at commit.</summary>
+        public List<(int ObjectId, int NewItemId)> Exchanges { get; } = [];
         public List<QuestSpawnPoint> SpawnsAt { get; } = [];
         public bool Noble;
         public (int X, int Y, int Z)? Teleport;

@@ -145,6 +145,46 @@ public sealed partial class MemoryAccountStore
         }
     }
 
+    public StoredPet? FindPet(int controlObjectId)
+    {
+        lock (_gate)
+            return _data.Pets.FirstOrDefault(p => p.ControlObjectId == controlObjectId);
+    }
+
+    public bool SavePet(StoredPet pet)
+    {
+        ArgumentNullException.ThrowIfNull(pet);
+        if (pet.ControlObjectId <= 0 || pet.NpcId <= 0 || pet.Level <= 0 || pet.Exp < 0)
+            return false;
+        lock (_gate)
+        {
+            var copy = pet with { Name = pet.Name ?? "", Items = (pet.Items ?? []).ToArray() };
+            int index = _data.Pets.FindIndex(p => p.ControlObjectId == pet.ControlObjectId);
+            if (index >= 0)
+                _data.Pets[index] = copy;
+            else
+                _data.Pets.Add(copy);
+            foreach (var item in copy.Items)
+            {
+                if (item.ObjectId >= _data.NextItemObjectId)
+                    _data.NextItemObjectId = item.ObjectId + 1;
+            }
+            Save();
+            return true;
+        }
+    }
+
+    public bool DeletePet(int controlObjectId)
+    {
+        lock (_gate)
+        {
+            if (_data.Pets.RemoveAll(p => p.ControlObjectId == controlObjectId) == 0)
+                return false;
+            Save();
+            return true;
+        }
+    }
+
     public IReadOnlyList<ManorProductionSave> ListManorProduction()
     {
         lock (_gate)

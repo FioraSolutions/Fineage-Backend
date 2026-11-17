@@ -66,6 +66,10 @@ public sealed partial class ZoneWorld
             return TryUseSeed(session, player, item, seed);
         if (item.ItemId == ManorProtocol.HarvesterItemId)
             return TryUseHarvester(session, player);
+        if (_pets.ByItem(item.ItemId) is { } petTemplate)
+            return TryUseCollar(session, player, item, petTemplate);
+        if (item.ItemId == PetResurrectScrollId)
+            return TryUsePetResurrectScroll(session, player, item);
         if (_soulCrystals.IsCrystal(item.ItemId))
             return TryUseSoulCrystal(session, player, item);
         if (!item.Template.Equippable)

@@ -18,6 +18,7 @@ public sealed partial class MemoryAccountStore
         data.SiegeClans ??= [];
         data.Crests ??= [];
         data.ClanHalls ??= [];
+        data.Pets ??= [];
         if (data.NextItemObjectId < PlayerInventory.FirstObjectId)
             data.NextItemObjectId = PlayerInventory.FirstObjectId;
         EnsureItemObjectIds(data);

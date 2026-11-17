@@ -111,7 +111,47 @@ public sealed partial class QuestCatalog
             ReadItemList(dialog.Weapons, items, where, questId, "weapons"),
             ReadAtLeast(dialog.Below, items, where, questId),
             dialog.Everyone && hook == QuestHook.Kill,
-            ReadOwned(dialog.Owned, hook, where, questId));
+            ReadOwned(dialog.Owned, hook, where, questId),
+            ReadPetGate(dialog.Pet, where, questId),
+            dialog.ByPet,
+            Math.Max(0, dialog.MinEnchant),
+            ReadItemList(dialog.SumItems, items, where, questId, "sumItems"),
+            Math.Max(0, dialog.SumMin),
+            dialog.SumMax,
+            ReadVarKey(dialog.HoldsVarItem, where, questId, "holdsVarItem"),
+            ReadHtmlByVar(dialog.HtmlByVar, htmlBaseDir, where, questId));
+    }
+
+    static string? ReadPetGate(string? pet, string where, int questId)
+    {
+        if (string.IsNullOrWhiteSpace(pet))
+            return null;
+        return pet is "none" or "out" or "registered" or "other"
+            ? pet
+            : throw new InvalidDataException($"{where} quest {questId} pet must be none, out, registered or other.");
+    }
+
+    static string? ReadVarKey(string? key, string where, int questId, string field)
+    {
+        if (string.IsNullOrWhiteSpace(key))
+            return null;
+        return QuestJournal.IsStoredVar(key.Trim(), "0") && key.Trim() != QuestProgress.CondVar
+            ? key.Trim()
+            : throw new InvalidDataException($"{where} quest {questId} {field} is not a stored variable name.");
+    }
+
+    static QuestHtmlByVar? ReadHtmlByVar(HtmlByVarDto? row, string? htmlBaseDir, string where, int questId)
+    {
+        if (row == null)
+            return null;
+        string key = ReadVarKey(row.Var, where, questId, "htmlByVar.var")
+            ?? throw new InvalidDataException($"{where} quest {questId} htmlByVar needs a var.");
+        if (row.Files is not { Count: > 0 } files)
+            throw new InvalidDataException($"{where} quest {questId} htmlByVar needs files.");
+        var pages = new Dictionary<string, string>(StringComparer.Ordinal);
+        foreach (var (value, file) in files)
+            pages[value] = ResolveHtml(new DialogDto { HtmlFile = file }, htmlBaseDir, where, questId);
+        return new QuestHtmlByVar(key, pages);
     }
 
     static string? ReadOwned(string? owned, QuestHook hook, string where, int questId)

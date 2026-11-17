@@ -20,6 +20,7 @@ public sealed partial class MemoryAccountStore
         public List<ClanHallSave> ClanHalls { get; set; } = [];
         public List<ManorProductionSave> ManorProduction { get; set; } = [];
         public List<ManorProcureSave> ManorProcure { get; set; } = [];
+        public List<StoredPet> Pets { get; set; } = [];
     }
 
     sealed class AccountDto
