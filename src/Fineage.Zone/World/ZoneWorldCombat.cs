@@ -177,11 +177,13 @@ public sealed partial class ZoneWorld
     bool HostilePlayableRefused(ZoneSession session, ZoneEntity attacker, ZoneEntity target, bool badSkill)
     {
         target = CreditOf(target);
-        if (OlympiadTargetRefused(attacker, target))
+        if (OlympiadTargetRefused(attacker, target) || DuelTargetRefused(attacker, target))
         {
             IncorrectTarget(session);
             return true;
         }
+        if (DuelFoes(attacker, target))
+            return false;
         if (!PlayableAttackRules.Refused(
                 attacker.Kind == ZoneEntityKind.Player && target.Kind == ZoneEntityKind.Player,
                 attacker.Level, target.Level, attacker.Karma, target.Karma,

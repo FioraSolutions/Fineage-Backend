@@ -85,7 +85,8 @@ sealed partial class NetWorldEventPublisher
             Hero = info.Hero,
             BaseClassId = info.BaseClassId,
             ClassIndex = info.ClassIndex,
-            Cubics = info.Cubics ?? []
+            Cubics = info.Cubics ?? [],
+            Team = info.Team
         };
     }
 

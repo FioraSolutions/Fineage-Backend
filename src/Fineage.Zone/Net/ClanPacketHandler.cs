@@ -251,6 +251,26 @@ public sealed class ClanPacketHandler
             await _reject(conn, error, "Summon command failed.", ct).ConfigureAwait(false);
     }
 
+    /// <summary>/duel, /partyduel, duel answer, /surrender (Mobius RequestDuelStart / RequestDuelAnswerStart).</summary>
+    public async Task OnDuelCommandAsync(
+        NetConnection conn,
+        ZoneSession zoneSession,
+        PacketEnvelope envelope,
+        CancellationToken ct)
+    {
+        RequireHello(conn);
+        if (!zoneSession.Bound || !zoneSession.InWorld)
+        {
+            await _reject(conn, "not_in_world", "Enter world first.", ct).ConfigureAwait(false);
+            return;
+        }
+
+        var command = NetCodec.DecodeDuelCommand(envelope.Payload);
+        string? error = await _world.TryDuelCommandAsync(zoneSession, command, ct).ConfigureAwait(false);
+        if (error != null)
+            await _reject(conn, error, "Duel command failed.", ct).ConfigureAwait(false);
+    }
+
     static void RequireHello(NetConnection conn)
     {
         if (!conn.HelloCompleted)

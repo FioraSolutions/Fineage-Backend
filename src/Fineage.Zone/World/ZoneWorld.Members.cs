@@ -194,6 +194,7 @@ public sealed partial class ZoneWorld
         NoteOlympiadDisconnect(entity);
         UnsummonOnLeave(entity);
         RemoveAllCubics(entity, broadcast: false);
+        DuelOnLeave(entity);
 
         entity.Knownlist.Clear();
         _aoi.Leave(session.ObjectId);

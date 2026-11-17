@@ -88,6 +88,8 @@ namespace Fineage.Net.Contract
         public int OwnerObjectId { get; set; }
         /// <summary>Players only: active cubic ids (Mobius CharInfo cubic list, 1 Storm … 9 Attractive). Optional tail after <see cref="OwnerObjectId"/>.</summary>
         public int[] Cubics { get; set; } = System.Array.Empty<int>();
+        /// <summary>Players only: duel team circle (Mobius setTeam: 0 none, 1 blue, 2 red). Optional tail after <see cref="Cubics"/>.</summary>
+        public byte Team { get; set; }
     }
 
     public sealed class PlayerStatsMsg
@@ -217,5 +219,7 @@ namespace Fineage.Net.Contract
         public int ClassIndex { get; set; }
         /// <summary>Active cubic ids (Mobius UserInfo cubic list). Optional tail after <see cref="ClassIndex"/>.</summary>
         public int[] Cubics { get; set; } = System.Array.Empty<int>();
+        /// <summary>Players only: duel team circle (Mobius setTeam: 0 none, 1 blue, 2 red). Optional tail after <see cref="Cubics"/>.</summary>
+        public byte Team { get; set; }
     }
 }

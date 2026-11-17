@@ -367,6 +367,8 @@ public sealed partial class ZoneWorld
             return null;
         if (_olympiadArena.Contains(owner.ObjectId))
             return target.Kind == ZoneEntityKind.Player && !OlympiadTargetRefused(owner, target) ? target : null;
+        if (owner.DuelActive)
+            return DuelCubicTarget(owner, target);
 
         if (target.Kind == ZoneEntityKind.Npc && target.Summon == null)
         {

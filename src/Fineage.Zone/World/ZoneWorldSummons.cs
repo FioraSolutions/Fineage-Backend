@@ -332,6 +332,7 @@ public sealed partial class ZoneWorld
     /// <summary>Hit on a summon (melee, skill): HP, bars to the owner, PvP for a player attacker, death.</summary>
     void DamageSummon(ZoneEntity attacker, ZoneEntity summon, int damage, long now)
     {
+        DuelNoteOutsideHit(attacker, summon);
         attacker.CombatUntilUnixMs = now + ClanProtocol.CombatStanceMillis;
         summon.CombatUntilUnixMs = now + ClanProtocol.CombatStanceMillis;
         if (damage <= 0 || summon.Dead)

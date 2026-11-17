@@ -52,4 +52,10 @@ sealed partial class NetWorldEventPublisher
 
     void IWorldEventPublisher.FanoutPetInventory(IReadOnlyList<int> watcherObjectIds, PetInventoryNetMsg inventory) =>
         SendAll(watcherObjectIds, NetOpcode.PetInventory, NetCodec.EncodePetInventory(inventory));
+
+    void IWorldEventPublisher.FanoutDuelEvent(IReadOnlyList<int> watcherObjectIds, DuelEventNetMsg duel) =>
+        SendAll(watcherObjectIds, NetOpcode.DuelEvent, NetCodec.EncodeDuelEvent(duel));
+
+    void IWorldEventPublisher.FanoutDuelUserInfo(IReadOnlyList<int> watcherObjectIds, DuelUserInfoNetMsg info) =>
+        SendAll(watcherObjectIds, NetOpcode.DuelUserInfo, NetCodec.EncodeDuelUserInfo(info));
 }

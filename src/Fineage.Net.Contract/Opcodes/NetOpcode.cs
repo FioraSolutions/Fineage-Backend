@@ -327,5 +327,11 @@ namespace Fineage.Net.Contract
         public const ushort SummonGone = 0x03BF;
         /// <summary>Zone → owner: pet inventory (<c>PetInventoryNetMsg</c>, Mobius PetItemList).</summary>
         public const ushort PetInventory = 0x03C0;
+        /// <summary>Client → zone: duel request / answer / surrender (<c>DuelCommandNetMsg</c>, Mobius RequestDuelStart / RequestDuelAnswerStart).</summary>
+        public const ushort DuelCommand = 0x03C1;
+        /// <summary>Zone → client: duel ask / ready / start / end (<c>DuelEventNetMsg</c>, Mobius ExDuelAskStart / ExDuelReady / ExDuelStart / ExDuelEnd).</summary>
+        public const ushort DuelEvent = 0x03C2;
+        /// <summary>Zone → client: an opponent's bars during a duel (<c>DuelUserInfoNetMsg</c>, Mobius ExDuelUpdateUserInfo).</summary>
+        public const ushort DuelUserInfo = 0x03C3;
     }
 }

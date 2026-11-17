@@ -104,7 +104,8 @@ public sealed partial class ZoneWorld
             Hero = e.Hero,
             BaseClassId = e.BaseClassId,
             ClassIndex = e.ClassIndex,
-            Cubics = CubicIdsOf(e)
+            Cubics = CubicIdsOf(e),
+            Team = e.DuelTeam
         };
     }
 

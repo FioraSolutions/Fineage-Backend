@@ -139,6 +139,8 @@ public sealed class UserInfoMsg
     public int ClassIndex { get; set; }
     /// <summary>Active cubic ids (Mobius UserInfo cubic list).</summary>
     public int[] Cubics { get; set; } = [];
+    /// <summary>Duel team circle (0 none, 1 blue, 2 red).</summary>
+    public byte Team { get; set; }
 }
 
 /// <summary>Opcode <see cref="MsgType.DeleteObject"/> (1007). Left knownlist.</summary>
