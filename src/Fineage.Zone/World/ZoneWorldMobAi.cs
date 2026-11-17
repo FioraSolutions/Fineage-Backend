@@ -115,6 +115,7 @@ public sealed partial class ZoneWorld
         target.CurHp = Math.Max(0, target.CurHp - damage);
         FanoutVitals(target, StatusFor(target));
         RecordDamage(target, player, damage);
+        ApplyQuestAttack(player, target);
         AddHate(target, player, DamageHate(damage, target.Level));
         player.CombatUntilUnixMs = now + ClanProtocol.CombatStanceMillis;
 

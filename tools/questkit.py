@@ -95,7 +95,9 @@ def _mobius_page(script: str, page: str) -> pathlib.Path | None:
 
 
 def write(qid: int, folder: str, script: str, name: str, items: list[int], dialogs: list[dict],
-          repeatable: bool = False, abortable: bool = True) -> None:
+          repeatable: bool = False, abortable: bool = True, pages: dict[str, tuple[int, str]] | None = None) -> None:
+    """pages: extra pages {file: (npcId, html)} built here (e.g. a Mobius page with a %placeholder% filled in);
+    their links are followed like Mobius pages."""
     out = ROOT / "data/quests" / folder
     for old in list(out.glob("*.htm")) + list(out.glob("*.html")):
         old.unlink()
@@ -108,6 +110,19 @@ def write(qid: int, folder: str, script: str, name: str, items: list[int], dialo
     known_events = {(d["npcId"], d.get("event")) for d in dialogs if d["hook"] == "event"}
     pending = list(npcs_by_page.items())
     written: set[str] = set()
+    for page, (npc, text) in (pages or {}).items():
+        for m in link.finditer(text):
+            ev = m.group(1)
+            if (npc, ev) in known_events:
+                continue
+            target = _mobius_page(script, _page(ev))
+            if target is None:
+                continue
+            dialogs.append({"npcId": npc, "hook": "event", "when": "any", "event": ev, "htmlFile": target.name})
+            known_events.add((npc, ev))
+            pending.append((target.name, npc))
+        (out / page).write_text(link.sub(lambda m: f'quest_event:{qid}:{m.group(1)}"', text), encoding="utf-8")
+        written.add(page)
     while pending:
         page, npc = pending.pop()
         if page in written:
@@ -143,6 +158,21 @@ def write(qid: int, folder: str, script: str, name: str, items: list[int], dialo
              "dialogs": dialogs}
     (out / "quest.json").write_text(json.dumps(quest, indent=2) + "\n", encoding="utf-8")
     print(f"{folder}: {len(dialogs)} dialogs, {len(written)} pages")
+
+
+def attack(npc, ops, cond=None, when="started", **gates):
+    """Mobius onAttack step: fires on every landed hit (no page)."""
+    d = kill(npc, ops, cond=cond, when=when, **gates)
+    d["hook"] = "attack"
+    return d
+
+
+def mobius_page(script: str, page: str) -> str:
+    """Raw text of a Mobius quest page (for pages built with a placeholder filled in)."""
+    src = _mobius_page(script, _page(page))
+    if src is None:
+        raise SystemExit(f"missing Mobius page {script}/{page}")
+    return src.read_text(encoding="utf-8", errors="replace")
 
 
 def take_all(*ids): return {"op": "take_all", "items": list(ids)}

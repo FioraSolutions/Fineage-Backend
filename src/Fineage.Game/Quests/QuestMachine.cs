@@ -88,7 +88,22 @@ public sealed partial class QuestMachine : IQuestKillHook
 
     public QuestOutcome OnKill(QuestJournal journal, PlayerInventory inventory, int npcId) => OnKill(journal, inventory, npcId, null);
 
-    public QuestOutcome OnKill(QuestJournal journal, PlayerInventory inventory, int npcId, QuestActor? actor)
+    public QuestOutcome OnKill(QuestJournal journal, PlayerInventory inventory, int npcId, QuestActor? actor) =>
+        OnNpc(journal, inventory, npcId, actor, QuestHook.Kill, "kill");
+
+    /// <summary>Mobius <c>onAttack</c> steps for this NPC (e.g. Q234 Pipette Knife on Baium).</summary>
+    public QuestOutcome OnAttack(QuestJournal journal, PlayerInventory inventory, int npcId, QuestActor? actor) =>
+        OnNpc(journal, inventory, npcId, actor, QuestHook.Attack, "attack");
+
+    /// <summary>True when some quest has an attack step for this NPC (cheap pre-check for the hit path).</summary>
+    public bool HasAttackSteps(int npcId) =>
+        (_attackNpcs ??= _catalog.Quests.SelectMany(static q => q.Dialogs)
+            .Where(static d => d.Hook == QuestHook.Attack).Select(static d => d.NpcId).ToHashSet()).Contains(npcId);
+
+    HashSet<int>? _attackNpcs;
+
+    QuestOutcome OnNpc(QuestJournal journal, PlayerInventory inventory, int npcId, QuestActor? actor, QuestHook hook,
+        string label)
     {
         QuestOutcome? last = null;
         var sounds = new List<string>();
@@ -101,10 +116,10 @@ public sealed partial class QuestMachine : IQuestKillHook
         bool changed = false;
         foreach (var quest in _catalog.Quests)
         {
-            var dialog = Find(quest, QuestHook.Kill, npcId, "", journal.Find(quest.Id), actor, inventory, _random);
+            var dialog = Find(quest, hook, npcId, "", journal.Find(quest.Id), actor, inventory, _random);
             if (dialog == null || dialog.Party)
                 continue;
-            var outcome = Apply(journal, inventory, quest, dialog, "kill");
+            var outcome = Apply(journal, inventory, quest, dialog, label);
             if (!outcome.Ok)
                 return outcome;
             sounds.AddRange(outcome.Sounds);
@@ -120,14 +135,14 @@ public sealed partial class QuestMachine : IQuestKillHook
 
         if (last == null)
         {
-            return new QuestOutcome { Hook = "kill" };
+            return new QuestOutcome { Hook = label };
         }
 
         return new QuestOutcome
         {
             Html = last.Html,
             QuestId = last.QuestId,
-            Hook = "kill",
+            Hook = label,
             JournalChanged = changed,
             Sounds = sounds,
             Lines = lines,

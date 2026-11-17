@@ -221,6 +221,22 @@ public sealed partial class ZoneWorld
             GrantKillReward(killer, npc);
     }
 
+    /// <summary>Mobius <c>Quest.onAttack</c>: a player's hit on an NPC some quest listens to (Q234 Pipette Knife on Baium).</summary>
+    void ApplyQuestAttack(ZoneEntity attacker, ZoneEntity npc)
+    {
+        if (attacker.Kind != ZoneEntityKind.Player || attacker.Inventory == null || attacker.Dead || attacker.Session == null
+            || !_quests.HasAttackSteps(npc.NpcId))
+            return;
+        PublishKill(attacker, _quests.OnAttack(attacker.Quests, attacker.Inventory, npc.NpcId, QuestActorOf(attacker)), npc);
+    }
+
+    /// <summary>Test hook: one landed hit by <paramref name="attacker"/> on <paramref name="npc"/>.</summary>
+    internal void QuestAttackForTest(ZoneEntity attacker, ZoneEntity npc)
+    {
+        lock (_gate)
+            ApplyQuestAttack(attacker, npc);
+    }
+
     void ApplyQuestKill(ZoneEntity killer, ZoneEntity npc)
     {
         if (killer.Inventory == null || killer.Dead || killer.Session == null)

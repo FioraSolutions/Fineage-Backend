@@ -9,8 +9,9 @@ Usage: python3 tools/author_trials.py [qid ...]
 """
 import sys
 
-from questkit import (DONE, START, FIRST_CLASSES, HUMAN, ELF, DARK_ELF, ORC, DWARF, add, adena, collect_all, cond,
-                      drop, event, exp, give, kill, setv, social, spawn, spawn_at, take, take_all, talk, unset, write)
+from questkit import (DONE, START, FIRST_CLASSES, HUMAN, ELF, DARK_ELF, ORC, DWARF, add, adena, attack, collect_all,
+                      cond, drop, event, exp, give, kill, mobius_page, setv, social, spawn, spawn_at, take, take_all,
+                      talk, unset, write)
 
 FINISH = social(3)
 
@@ -1820,6 +1821,93 @@ def q231():
     ]
     write(231, "00231_test_of_the_maestro", "Q00231_TestOfTheMaestro", "Test of the Maestro",
           [REC_B, REC_F, REC_A] + list(range(2868, 2879)) + [BROKEN], d)
+
+
+@quest
+def q234():
+    """Fate's Whisper: Reorin forges an A-grade weapon from a B-grade one (3rd-class prerequisite)."""
+    import json
+    import pathlib
+    REORIN, CLIFF, FERRIS, ZENKIN, KASPAR = 31002, 30182, 30847, 30178, 30833
+    PIPETTE, ORB, KERNON, GOLKONDA, HALLATE, HAMMER, MOLD, VARNISH, RED = (
+        4665, 4666, 4667, 4668, 4669, 4670, 4671, 4672, 4673)
+    CRYSTAL_B, STAR = 1460, 5011
+    SCRIPT = "Q00234_FatesWhisper"
+    chests = {25035: 31027, 25054: 31028, 25126: 31029, 25220: 31030}
+    b_grade = [79, 2626, 287, 97, 175, 210, 234, 268, 171, 7883, 7889, 7901, 7893]
+    a_grade = [80, 288, 98, 150, 212, 235, 269, 2504, 5233, 7884, 7894, 7899]
+    rows = json.loads((pathlib.Path(__file__).resolve().parent.parent / "data/items.json").read_text())["items"]
+    names = {r["id"]: r["name"] for r in rows}
+
+    def v(key, n):
+        return dict(varAtLeast={key: n}, varBelow={key: n + 1})
+
+    pages = {}
+
+    def named(page, item):
+        """Mobius fills %weaponname% at runtime; here each weapon gets its own copy of the page."""
+        out = f"{page}-{item}.htm"
+        pages[out] = (REORIN, mobius_page(SCRIPT, page).replace("%weaponname%", names[item]))
+        return out
+
+    d = [
+        talk(REORIN, "31002-02", when="absent", minLevel=75),
+        talk(REORIN, "31002-01", when="absent"),
+        event(REORIN, "31002-03", ops=START, when="absent", minLevel=75),
+        talk(REORIN, "31002-05", cond=1, hasItem=ORB, ops=[take(ORB), cond(2)]),
+        talk(REORIN, "31002-04b", cond=1),
+        talk(REORIN, "31002-06", cond=2, hasItems=[KERNON, GOLKONDA, HALLATE],
+             ops=[take(GOLKONDA), take(HALLATE), take(KERNON), cond(3)]),
+        talk(REORIN, "31002-05c", cond=2),
+        talk(REORIN, "31002-07", cond=3, hasItem=VARNISH, ops=[take(VARNISH), cond(4)]),
+        talk(REORIN, "31002-06b", cond=3),
+        talk(REORIN, "31002-08", cond=4, hasItem=HAMMER, ops=[take(HAMMER), cond(5)]),
+        talk(REORIN, "31002-07b", cond=4),
+        *[talk(REORIN, "31002-08b", cond=c) for c in (5, 6, 7)],
+        talk(REORIN, "31002-09", cond=8, ops=[take_all(MOLD), cond(9)]),
+        talk(REORIN, "31002-BGradeList", cond=9, atLeast={CRYSTAL_B: 984}, ops=[take(CRYSTAL_B, 984), cond(10)]),
+        talk(REORIN, "31002-09b", cond=9),
+        *[talk(REORIN, named("31002-AGradeList", w), cond=10, hasItem=w, varAtLeast={"bypass": 1, "weaponId": w},
+               varBelow={"weaponId": w + 1}) for w in b_grade],
+        *[talk(REORIN, named("31002-15", w), cond=10, varAtLeast={"bypass": 1, "weaponId": w},
+               varBelow={"weaponId": w + 1}) for w in b_grade],
+        talk(REORIN, "31002-BGradeList", cond=10),
+        # The B-grade choice is locked once confirmed (Mobius "bypass" var).
+        *[event(REORIN, f"selectBGrade_{w}", named("31002-13", w), ops=[setv("weaponId", w)], cond=10,
+                varBelow={"bypass": 1}) for w in b_grade],
+        *[event(REORIN, "confirmWeapon", named("31002-14", w), ops=[setv("bypass", 1)], cond=10, **v("weaponId", w))
+          for w in b_grade],
+        *[event(REORIN, f"selectAGrade_{a}", named("31002-12", a),
+                ops=[take(w), give(a), give(STAR), social(3), {"op": "complete"}], cond=10, hasItem=w,
+                varAtLeast={"bypass": 1, "weaponId": w}, varBelow={"weaponId": w + 1})
+          for a in a_grade for w in b_grade],
+        *[event(REORIN, f"selectAGrade_{a}", named("31002-15", w), cond=10, varAtLeast={"bypass": 1, "weaponId": w},
+                varBelow={"weaponId": w + 1}) for a in a_grade for w in b_grade],
+        *[event(REORIN, f"selectAGrade_{a}", "31002-16") for a in a_grade],
+        talk(CLIFF, "30182-01", cond=3, lacksItems=[VARNISH]),
+        talk(CLIFF, "30182-02", cond=3),
+        event(CLIFF, "30182-01c", ops=[give(VARNISH)], cond=3, lacksItems=[VARNISH]),
+        talk(FERRIS, "30847-01", cond=4, lacksItems=[HAMMER], ops=[give(HAMMER)]),
+        *[talk(FERRIS, "30847-02", cond=c, hasItem=HAMMER) for c in range(4, 11)],
+        talk(ZENKIN, "30178-01", cond=5),
+        *[talk(ZENKIN, "30178-02", cond=c) for c in range(6, 11)],
+        event(ZENKIN, "30178-01a", ops=[cond(6)], cond=5),
+        talk(KASPAR, "30833-01", cond=6),
+        talk(KASPAR, "30833-03", cond=7, hasItem=RED, ops=[take(RED), give(MOLD), cond(8)]),
+        talk(KASPAR, "30833-02", cond=7),
+        *[talk(KASPAR, "30833-04", cond=c) for c in range(8, 11)],
+        event(KASPAR, "30833-01b", ops=[give(PIPETTE), cond(7)], cond=6),
+        # Raid bosses leave a chest; Reiria's orb and the three Infernium scepters are inside.
+        *[kill(boss, [spawn(chest)], when="any") for boss, chest in chests.items()],
+        talk(31027, "31027-01", cond=1, lacksItems=[ORB], ops=[give(ORB)]),
+        talk(31027, "31027-02"),
+        *[r for chest, item in ((31028, KERNON), (31029, GOLKONDA), (31030, HALLATE)) for r in (
+            talk(chest, f"{chest}-01", cond=2, lacksItems=[item], ops=[give(item)]),
+            talk(chest, f"{chest}-02"))],
+        # Baium's blood: strike him with the Pipette Knife in hand.
+        attack(29020, [take(PIPETTE), give(RED)], cond=7, weapons=[PIPETTE], lacksItems=[RED]),
+    ]
+    write(234, "00234_fateswhisper", SCRIPT, "Fate's Whisper", [PIPETTE, RED], d, pages=pages)
 
 
 if __name__ == "__main__":

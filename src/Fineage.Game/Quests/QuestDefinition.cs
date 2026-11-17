@@ -5,7 +5,9 @@ public enum QuestHook
     FirstTalk,
     Talk,
     Event,
-    Kill
+    Kill,
+    /// <summary>Mobius <c>onAttack</c>: a player's hit lands on the NPC (no page; gates such as <c>weapons</c> apply).</summary>
+    Attack
 }
 
 public enum QuestWhen

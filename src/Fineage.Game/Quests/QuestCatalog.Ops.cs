@@ -170,6 +170,7 @@ public sealed partial class QuestCatalog
         "talk" => QuestHook.Talk,
         "event" => QuestHook.Event,
         "kill" => QuestHook.Kill,
+        "attack" => QuestHook.Attack,
         _ => throw new InvalidDataException($"{where} quest {questId} has unknown hook '{text}'.")
     };
 

@@ -26,6 +26,7 @@ public sealed class SecondClassTrialTests
         var talks = quest.Dialogs.Where(d => d.Hook == QuestHook.Talk).Select(d => d.NpcId).Distinct().ToArray();
         var events = quest.Dialogs.Where(d => d.Hook == QuestHook.Event).Select(d => (d.NpcId, d.Event)).Distinct().ToArray();
         var kills = quest.Dialogs.Where(d => d.Hook == QuestHook.Kill).Select(d => d.NpcId).Distinct().ToArray();
+        var hits = quest.Dialogs.Where(d => d.Hook == QuestHook.Attack).Select(d => d.NpcId).Distinct().ToArray();
         for (int round = 0; round < rounds; round++)
         {
             foreach (var (npc, ev) in events)
@@ -49,6 +50,8 @@ public sealed class SecondClassTrialTests
 
             foreach (int npc in kills)
                 m.OnKill(j, bag, npc, me);
+            foreach (int npc in hits)
+                m.OnAttack(j, bag, npc, me);
 
             // Dwarven trials craft their quest items (Journeyman Ring, Key of Titan): learn each recipe scroll, then
             // make the item whenever every ingredient is in the bag.
@@ -159,6 +162,43 @@ public sealed class SecondClassTrialTests
     public void Dwarf_trial_can_be_finished_by_crafting(int questId, int race, int classId, int mark) =>
         Assert.True(Walk(questId, new QuestActor(race, 45, classId), mark, 400, true, (57, 10000), (1458, 200),
             (1867, 100)), $"quest {questId} never handed out {mark}");
+
+    [Fact]
+    public void Fates_whisper_forges_an_A_grade_weapon() =>
+        // The walker picks every B-grade in turn, so the last one (Kaim Vanul's Bones) is the confirmed choice.
+        Assert.True(Walk(234, new QuestActor(0, 76, 88), 5011, 400, false, (1460, 984), (7893, 1)));
+
+    [Fact]
+    public void Fates_whisper_needs_level_75() =>
+        Assert.False(Walk(234, new QuestActor(0, 74, 88), 5011, 50, false, (1460, 984), (7893, 1)));
+
+    [Fact]
+    public void Raid_boss_kill_leaves_the_fates_whisper_chest_for_anyone()
+    {
+        var m = new QuestMachine(Data.Quests, Data.Items, () => 0.0);
+        var outcome = m.OnKill(new QuestJournal(), new PlayerInventory(Data.Items), 25035, new QuestActor(0, 76, 88));
+        Assert.Contains(31027, outcome.Spawns);
+    }
+
+    [Fact]
+    public void Baium_reddens_the_pipette_knife_only_when_it_is_in_hand()
+    {
+        const int Knife = 4665, Red = 4673, Baium = 29020;
+        var m = new QuestMachine(Data.Quests, Data.Items, () => 0.0);
+        var bag = new PlayerInventory(Data.Items);
+        var j = new QuestJournal();
+        var me = new QuestActor(0, 76, 88);
+        j.Add(234, QuestPhase.Started).Set(QuestProgress.CondVar, "7");
+        bag.AddPieces(Knife, 1);
+        m.OnAttack(j, bag, Baium, me);
+        Assert.Equal(0, bag.CountOf(Red));
+        bag.Equip(bag.FindByItemId(Knife)!);
+        m.OnAttack(j, bag, Baium, me);
+        Assert.Equal(1, bag.CountOf(Red));
+        Assert.Equal(0, bag.CountOf(Knife));
+        Assert.True(m.HasAttackSteps(Baium));
+        Assert.False(m.HasAttackSteps(20001));
+    }
 
     [Theory]
     [InlineData(120, 0)]

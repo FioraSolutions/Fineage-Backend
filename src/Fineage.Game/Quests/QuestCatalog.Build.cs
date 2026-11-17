@@ -65,7 +65,7 @@ public sealed partial class QuestCatalog
         string html = ResolveHtml(dialog, htmlBaseDir, where, questId);
         // Mobius addSpawn / teleToLocation events often return null htmltext; allow empty HTML for those steps.
         bool spawnOnly = ops.Exists(static o => o is SpawnNpcOp or TeleportOp);
-        if (hook != QuestHook.Kill && string.IsNullOrWhiteSpace(html) && !spawnOnly)
+        if (hook is not (QuestHook.Kill or QuestHook.Attack) && string.IsNullOrWhiteSpace(html) && !spawnOnly)
             throw new InvalidDataException($"{where} quest {questId} step needs html.");
         if (html.Length > 12_000)
             throw new InvalidDataException($"{where} quest {questId} html is longer than 12000 characters.");
