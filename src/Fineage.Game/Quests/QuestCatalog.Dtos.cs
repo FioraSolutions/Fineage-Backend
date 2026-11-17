@@ -54,6 +54,12 @@ public sealed partial class QuestCatalog
         public bool? IsMage { get; set; }
         /// <summary>Mobius <c>player.isSubClassActive()</c>. Null = no gate.</summary>
         public bool? SubClass { get; set; }
+        /// <summary>Mobius <c>getRandom(n) &lt; k</c> branch: the row matches with this probability (0..1). Null = always.</summary>
+        public double? Chance { get; set; }
+        /// <summary>Mobius <c>st.getInt(key) &gt;= n</c> per key (missing var reads 0).</summary>
+        public Dictionary<string, int>? VarAtLeast { get; set; }
+        /// <summary>Mobius <c>st.getInt(key) &lt; n</c> per key (missing var reads 0).</summary>
+        public Dictionary<string, int>? VarBelow { get; set; }
     }
 
     sealed class OpDto
@@ -80,6 +86,8 @@ public sealed partial class QuestCatalog
         public int? Y { get; set; }
         public int? Z { get; set; }
         public int? Action { get; set; }
+        /// <summary><c>take_all</c>: item ids to remove entirely (Mobius <c>takeItems(player, id, -1)</c>).</summary>
+        public List<int>? Items { get; set; }
     }
 
     sealed class PriceDto

@@ -14,6 +14,10 @@ public sealed partial class QuestCatalog
             "set_cond" => ReadCond(op, where, questId),
             "set" => ReadSet(op, where, questId),
             "unset" => ReadUnset(op, where, questId),
+            "add" => ReadAdd(op, where, questId),
+            "take_all" => op.Items is { Count: > 0 } ids && ids.All(id => items.TryGet(id, out _))
+                ? new TakeAllOp(ids.Distinct().ToArray())
+                : throw new InvalidDataException($"{where} quest {questId} take_all needs known item ids."),
             "give_item" => ReadGive(op, items, where, questId),
             "give_adena" => ReadAdena(op, where, questId),
             "give_exp_sp" => ReadExp(op, where, questId),
@@ -33,6 +37,14 @@ public sealed partial class QuestCatalog
                 : throw new InvalidDataException($"{where} quest {questId} social needs a positive action."),
             _ => throw new InvalidDataException($"{where} quest {questId} has unknown op '{op.Op}'.")
         };
+    }
+
+    static AddVarOp ReadAdd(OpDto op, string where, int questId)
+    {
+        string key = (op.Key ?? "").Trim();
+        if (!QuestJournal.IsStoredVar(key, "0") || key == QuestProgress.CondVar || !int.TryParse(op.Value ?? "1", out int delta))
+            throw new InvalidDataException($"{where} quest {questId} add needs a counter key (not cond) and an integer value.");
+        return new AddVarOp(key, delta);
     }
 
     static SpawnNpcOp ReadSpawn(OpDto op, string where, int questId)

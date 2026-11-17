@@ -92,6 +92,27 @@ public sealed partial class QuestMachine
                     }
 
                     break;
+                case TakeAllOp takeAll:
+                    foreach (int itemId in takeAll.ItemIds)
+                    {
+                        int held = inventory.CountOf(itemId) + plan.Delta.GetValueOrDefault(itemId);
+                        if (held > 0)
+                            AddDelta(inventory, plan, itemId, -held);
+                    }
+
+                    break;
+                case AddVarOp add:
+                {
+                    if (!plan.Present || plan.Delete || plan.Phase == QuestPhase.Completed)
+                    {
+                        failure = Fail(QuestFailure.State, "That quest cannot be updated.", quest.Id, "");
+                        return false;
+                    }
+
+                    long now = plan.Vars.TryGetValue(add.Key, out var raw) && long.TryParse(raw, out long parsed) ? parsed : 0;
+                    plan.Vars[add.Key] = Math.Clamp(now + add.Delta, int.MinValue, int.MaxValue).ToString();
+                    break;
+                }
                 case UnsetVarOp unset:
                     if (!plan.Present || plan.Delete || plan.Phase == QuestPhase.Completed)
                     {

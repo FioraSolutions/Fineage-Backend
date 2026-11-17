@@ -28,6 +28,12 @@ public sealed record SetCondOp(int Cond) : QuestOp;
 
 public sealed record SetVarOp(string Key, string Value) : QuestOp;
 
+/// <summary>Mobius <c>st.set(key, st.getInt(key) + n)</c>: integer counter (missing var reads 0).</summary>
+public sealed record AddVarOp(string Key, int Delta) : QuestOp;
+
+/// <summary>Mobius <c>takeItems(player, id, -1)</c> for each id: removes whatever is held; never fails.</summary>
+public sealed record TakeAllOp(IReadOnlyList<int> ItemIds) : QuestOp;
+
 public sealed record UnsetVarOp(string Key) : QuestOp;
 
 public sealed record GiveItemOp(int ItemId, int Count) : QuestOp;
@@ -97,7 +103,10 @@ public sealed record QuestDialog(
     /// <summary>Mobius <c>player.isMageClass()</c>. Null = no gate.</summary>
     bool? IsMage = null,
     /// <summary>Mobius <c>player.isSubClassActive()</c>. Null = no gate.</summary>
-    bool? SubClass = null);
+    bool? SubClass = null,
+    double? Chance = null,
+    IReadOnlyDictionary<string, int>? VarAtLeast = null,
+    IReadOnlyDictionary<string, int>? VarBelow = null);
 
 /// <summary>
 /// Who is talking. Mobius quest scripts branch on <c>player.getRace()</c> / <c>getLevel()</c>

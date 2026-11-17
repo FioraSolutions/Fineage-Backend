@@ -104,7 +104,31 @@ public sealed partial class QuestCatalog
             ReadAtLeast(dialog.AtLeast, items, where, questId),
             ReadItemList(dialog.HasAny, items, where, questId, "hasAny"),
             dialog.IsMage,
-            dialog.SubClass);
+            dialog.SubClass,
+            ReadChance(dialog.Chance, where, questId),
+            ReadVarGate(dialog.VarAtLeast, where, questId, "varAtLeast"),
+            ReadVarGate(dialog.VarBelow, where, questId, "varBelow"));
+    }
+
+    static double? ReadChance(double? chance, string where, int questId)
+    {
+        if (chance is null)
+            return null;
+        if (chance is <= 0 or > 1)
+            throw new InvalidDataException($"{where} quest {questId} chance must be in (0, 1].");
+        return chance;
+    }
+
+    static IReadOnlyDictionary<string, int>? ReadVarGate(Dictionary<string, int>? rows, string where, int questId, string field)
+    {
+        if (rows is not { Count: > 0 })
+            return null;
+        foreach (var key in rows.Keys)
+        {
+            if (!QuestJournal.IsStoredVar(key, "0") || key == QuestProgress.CondVar)
+                throw new InvalidDataException($"{where} quest {questId} {field} key '{key}' is not a counter variable.");
+        }
+        return new Dictionary<string, int>(rows, StringComparer.Ordinal);
     }
 
     static IReadOnlyDictionary<int, int>? ReadAtLeast(Dictionary<string, int>? rows, ItemCatalog items, string where, int questId)

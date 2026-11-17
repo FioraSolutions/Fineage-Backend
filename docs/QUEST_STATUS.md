@@ -7,9 +7,9 @@ Status: **implemented** — every Mobius talk NPC and kill target is wired, the 
 
 | Status | Count |
 |---|---|
-| implemented | 131 |
+| implemented | 138 |
 | partial | 108 |
-| stub | 67 |
+| stub | 60 |
 | missing | 38 |
 | **total Mobius quests** | **344** |
 
@@ -273,20 +273,20 @@ Related non-quest scripts: `village_master/*Change1|Change2` and `FirstClassTran
 | 401 | Path to a Warrior | 19+ | 1st class (Path) | partial | no completion; auto-port |
 | 402 | Path to a Human Knight | 19+ | 1st class (Path) | partial | no talk: 30311; no kill: 12/12 mobs; no completion; auto-port |
 | 403 | Path to a Rogue | 19+ | 1st class (Path) | partial | no kill: 7/7 mobs; no completion; auto-port |
-| 404 | Path to a Human Wizard | 19+ | 1st class (Path) | stub | 24 dialog(s), no start; auto-port |
-| 405 | Path to a Cleric | 19+ | 1st class (Path) | stub | 19 dialog(s), no start; auto-port |
+| 404 | Path to a Human Wizard | 19+ | 1st class (Path) | implemented | auto-port |
+| 405 | Path to a Cleric | 19+ | 1st class (Path) | implemented | auto-port |
 | 406 | Path to an Elven Knight | 19+ | 1st class (Path) | implemented | hand-ported |
 | 407 | Path to an Elven Scout | 19+ | 1st class (Path) | implemented | hand-ported |
 | 408 | Path to an Elven Wizard | 19+ | 1st class (Path) | implemented | hand-ported |
 | 409 | Path to an Elven Oracle | 19+ | 1st class (Path) | implemented | hand-ported |
 | 410 | Path to a Palus Knight | 19+ | 1st class (Path) | partial | no completion; auto-port |
-| 411 | Path to an Assassin | 19+ | 1st class (Path) | stub | 31 dialog(s), no start; auto-port |
-| 412 | Path to a Dark Wizard | 19+ | 1st class (Path) | stub | 31 dialog(s), no start; auto-port |
-| 413 | Path to a Shillien Oracle | 19+ | 1st class (Path) | stub | 33 dialog(s), no start; auto-port |
-| 414 | Path to an Orc Raider | 19+ | 1st class (Path) | stub | 20 dialog(s), no start; auto-port |
+| 411 | Path to an Assassin | 19+ | 1st class (Path) | implemented | auto-port |
+| 412 | Path to a Dark Wizard | 19+ | 1st class (Path) | implemented | auto-port |
+| 413 | Path to a Shillien Oracle | 19+ | 1st class (Path) | implemented | auto-port |
+| 414 | Path to an Orc Raider | 19+ | 1st class (Path) | implemented | auto-port |
 | 415 | Path to a Monk | 19+ | 1st class (Path) | partial | no completion; auto-port |
 | 416 | Path to an Orc Shaman | 19+ | 1st class (Path) | partial | no kill: 8/8 mobs; no completion; quest spawns missing; auto-port |
-| 417 | Path to become a Scavenger | 19+ | 1st class (Path) | stub | 58 dialog(s), no start; auto-port |
+| 417 | Path to become a Scavenger | 19+ | 1st class (Path) | implemented | auto-port |
 | 418 | Path to an Artisan | 19+ | 1st class (Path) | partial | no completion; auto-port |
 | 419 | Get a Pet | 15+ | pet | stub | 32 dialog(s), no start; auto-port |
 | 420 | Little Wing | 35+ | pet | partial | no kill: 17/17 mobs; teleport missing; auto-port |
