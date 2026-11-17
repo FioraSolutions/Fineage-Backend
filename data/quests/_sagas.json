@@ -1,0 +1,2329 @@
+{
+ "sagas": [
+  {
+   "id": 70,
+   "name": "Saga of the Phoenix Knight",
+   "npc": [
+    30849,
+    31624,
+    31277,
+    30849,
+    31631,
+    31646,
+    31647,
+    31650,
+    31654,
+    31655,
+    31657,
+    31277
+   ],
+   "items": [
+    7080,
+    7534,
+    7081,
+    7485,
+    7268,
+    7299,
+    7330,
+    7361,
+    7392,
+    7423,
+    7093,
+    6482
+   ],
+   "mob": [
+    27286,
+    27219,
+    27278
+   ],
+   "classId": 90,
+   "prevClass": 5,
+   "x": [
+    191046,
+    46087,
+    46066
+   ],
+   "y": [
+    -40640,
+    -36372,
+    -36396
+   ],
+   "z": [
+    -3042,
+    -1685,
+    -1685
+   ],
+   "text": [
+    "PLAYERNAME! Pursued to here! However, I jumped out of the Banshouren boundaries! You look at the giant as the sign of power!",
+    "... Oh ... good! So it was ... let's begin!",
+    "I do not have the patience ..! I have been a giant force ...! Cough chatter ah ah ah!",
+    "Paying homage to those who disrupt the orderly will be PLAYERNAME's death!",
+    "Now, my soul freed from the shackles of the millennium, Halixia, to the back side I come ...",
+    "Why do you interfere others' battles?",
+    "This is a waste of time.. Say goodbye...!",
+    "...That is the enemy",
+    "...Goodness! PLAYERNAME you are still looking?",
+    "PLAYERNAME ... Not just to whom the victory. Only personnel involved in the fighting are eligible to share in the victory.",
+    "Your sword is not an ornament. Don't you think, PLAYERNAME?",
+    "Goodness! I no longer sense a battle there now.",
+    "let...",
+    "Only engaged in the battle to bar their choice. Perhaps you should regret.",
+    "The human nation was foolish to try and fight a giant's strength.",
+    "Must...Retreat... Too...Strong.",
+    "PLAYERNAME. Defeat...by...retaining...and...Mo...Hacker",
+    "....! Fight...Defeat...It...Fight...Defeat...It..."
+   ],
+   "folder": "00070_saga_of_the_phoenix_knight"
+  },
+  {
+   "id": 71,
+   "name": "Saga of Eva's Templar",
+   "npc": [
+    30852,
+    31624,
+    31278,
+    30852,
+    31638,
+    31646,
+    31648,
+    31651,
+    31654,
+    31655,
+    31658,
+    31281
+   ],
+   "items": [
+    7080,
+    7535,
+    7081,
+    7486,
+    7269,
+    7300,
+    7331,
+    7362,
+    7393,
+    7424,
+    7094,
+    6482
+   ],
+   "mob": [
+    27287,
+    27220,
+    27279
+   ],
+   "classId": 99,
+   "prevClass": 20,
+   "x": [
+    119518,
+    181215,
+    181227
+   ],
+   "y": [
+    -28658,
+    36676,
+    36703
+   ],
+   "z": [
+    -3811,
+    -4812,
+    -4816
+   ],
+   "text": [
+    "PLAYERNAME! Pursued to here! However, I jumped out of the Banshouren boundaries! You look at the giant as the sign of power!",
+    "... Oh ... good! So it was ... let's begin!",
+    "I do not have the patience ..! I have been a giant force ...! Cough chatter ah ah ah!",
+    "Paying homage to those who disrupt the orderly will be PLAYERNAME's death!",
+    "Now, my soul freed from the shackles of the millennium, Halixia, to the back side I come ...",
+    "Why do you interfere others' battles?",
+    "This is a waste of time.. Say goodbye...!",
+    "...That is the enemy",
+    "...Goodness! PLAYERNAME you are still looking?",
+    "PLAYERNAME ... Not just to whom the victory. Only personnel involved in the fighting are eligible to share in the victory.",
+    "Your sword is not an ornament. Don't you think, PLAYERNAME?",
+    "Goodness! I no longer sense a battle there now.",
+    "let...",
+    "Only engaged in the battle to bar their choice. Perhaps you should regret.",
+    "The human nation was foolish to try and fight a giant's strength.",
+    "Must...Retreat... Too...Strong.",
+    "PLAYERNAME. Defeat...by...retaining...and...Mo...Hacker",
+    "....! Fight...Defeat...It...Fight...Defeat...It..."
+   ],
+   "folder": "00071_saga_of_evas_templar"
+  },
+  {
+   "id": 72,
+   "name": "Saga of the Sword Muse",
+   "npc": [
+    30853,
+    31624,
+    31583,
+    31537,
+    31618,
+    31646,
+    31649,
+    31652,
+    31654,
+    31655,
+    31659,
+    31281
+   ],
+   "items": [
+    7080,
+    7536,
+    7081,
+    7487,
+    7270,
+    7301,
+    7332,
+    7363,
+    7394,
+    7425,
+    7095,
+    6482
+   ],
+   "mob": [
+    27288,
+    27221,
+    27280
+   ],
+   "classId": 100,
+   "prevClass": 21,
+   "x": [
+    161719,
+    124355,
+    124376
+   ],
+   "y": [
+    -92823,
+    82155,
+    82127
+   ],
+   "z": [
+    -1893,
+    -2803,
+    -2796
+   ],
+   "text": [
+    "PLAYERNAME! Pursued to here! However, I jumped out of the Banshouren boundaries! You look at the giant as the sign of power!",
+    "... Oh ... good! So it was ... let's begin!",
+    "I do not have the patience ..! I have been a giant force ...! Cough chatter ah ah ah!",
+    "Paying homage to those who disrupt the orderly will be PLAYERNAME's death!",
+    "Now, my soul freed from the shackles of the millennium, Halixia, to the back side I come ...",
+    "Why do you interfere others' battles?",
+    "This is a waste of time.. Say goodbye...!",
+    "...That is the enemy",
+    "...Goodness! PLAYERNAME you are still looking?",
+    "PLAYERNAME ... Not just to whom the victory. Only personnel involved in the fighting are eligible to share in the victory.",
+    "Your sword is not an ornament. Don't you think, PLAYERNAME?",
+    "Goodness! I no longer sense a battle there now.",
+    "let...",
+    "Only engaged in the battle to bar their choice. Perhaps you should regret.",
+    "The human nation was foolish to try and fight a giant's strength.",
+    "Must...Retreat... Too...Strong.",
+    "PLAYERNAME. Defeat...by...retaining...and...Mo...Hacker",
+    "....! Fight...Defeat...It...Fight...Defeat...It..."
+   ],
+   "folder": "00072_saga_of_the_sword_muse"
+  },
+  {
+   "id": 73,
+   "name": "Saga of the Duelist",
+   "npc": [
+    30849,
+    31624,
+    31226,
+    31331,
+    31639,
+    31646,
+    31647,
+    31653,
+    31654,
+    31655,
+    31656,
+    31277
+   ],
+   "items": [
+    7080,
+    7537,
+    7081,
+    7488,
+    7271,
+    7302,
+    7333,
+    7364,
+    7395,
+    7426,
+    7096,
+    7546
+   ],
+   "mob": [
+    27289,
+    27222,
+    27281
+   ],
+   "classId": 88,
+   "prevClass": 2,
+   "x": [
+    164650,
+    47429,
+    47391
+   ],
+   "y": [
+    -74121,
+    -56923,
+    -56929
+   ],
+   "z": [
+    -2871,
+    -2383,
+    -2370
+   ],
+   "text": [
+    "PLAYERNAME! Pursued to here! However, I jumped out of the Banshouren boundaries! You look at the giant as the sign of power!",
+    "... Oh ... good! So it was ... let's begin!",
+    "I do not have the patience ..! I have been a giant force ...! Cough chatter ah ah ah!",
+    "Paying homage to those who disrupt the orderly will be PLAYERNAME's death!",
+    "Now, my soul freed from the shackles of the millennium, Halixia, to the back side I come ...",
+    "Why do you interfere others' battles?",
+    "This is a waste of time.. Say goodbye...!",
+    "...That is the enemy",
+    "...Goodness! PLAYERNAME you are still looking?",
+    "PLAYERNAME ... Not just to whom the victory. Only personnel involved in the fighting are eligible to share in the victory.",
+    "Your sword is not an ornament. Don't you think, PLAYERNAME?",
+    "Goodness! I no longer sense a battle there now.",
+    "let...",
+    "Only engaged in the battle to bar their choice. Perhaps you should regret.",
+    "The human nation was foolish to try and fight a giant's strength.",
+    "Must...Retreat... Too...Strong.",
+    "PLAYERNAME. Defeat...by...retaining...and...Mo...Hacker",
+    "....! Fight...Defeat...It...Fight...Defeat...It..."
+   ],
+   "folder": "00073_saga_of_the_duelist"
+  },
+  {
+   "id": 74,
+   "name": "Saga of the Dreadnoughts",
+   "npc": [
+    30850,
+    31624,
+    31298,
+    31276,
+    31595,
+    31646,
+    31648,
+    31650,
+    31654,
+    31655,
+    31657,
+    31522
+   ],
+   "items": [
+    7080,
+    7538,
+    7081,
+    7489,
+    7272,
+    7303,
+    7334,
+    7365,
+    7396,
+    7427,
+    7097,
+    6480
+   ],
+   "mob": [
+    27290,
+    27223,
+    27282
+   ],
+   "classId": 89,
+   "prevClass": 3,
+   "x": [
+    191046,
+    46087,
+    46066
+   ],
+   "y": [
+    -40640,
+    -36372,
+    -36396
+   ],
+   "z": [
+    -3042,
+    -1685,
+    -1685
+   ],
+   "text": [
+    "PLAYERNAME! Pursued to here! However, I jumped out of the Banshouren boundaries! You look at the giant as the sign of power!",
+    "... Oh ... good! So it was ... let's begin!",
+    "I do not have the patience ..! I have been a giant force ...! Cough chatter ah ah ah!",
+    "Paying homage to those who disrupt the orderly will be PLAYERNAME's death!",
+    "Now, my soul freed from the shackles of the millennium, Halixia, to the back side I come ...",
+    "Why do you interfere others' battles?",
+    "This is a waste of time.. Say goodbye...!",
+    "...That is the enemy",
+    "...Goodness! PLAYERNAME you are still looking?",
+    "PLAYERNAME ... Not just to whom the victory. Only personnel involved in the fighting are eligible to share in the victory.",
+    "Your sword is not an ornament. Don't you think, PLAYERNAME?",
+    "Goodness! I no longer sense a battle there now.",
+    "let...",
+    "Only engaged in the battle to bar their choice. Perhaps you should regret.",
+    "The human nation was foolish to try and fight a giant's strength.",
+    "Must...Retreat... Too...Strong.",
+    "PLAYERNAME. Defeat...by...retaining...and...Mo...Hacker",
+    "....! Fight...Defeat...It...Fight...Defeat...It..."
+   ],
+   "folder": "00074_saga_of_the_dreadnought"
+  },
+  {
+   "id": 75,
+   "name": "Saga of the Titan",
+   "npc": [
+    31327,
+    31624,
+    31289,
+    31290,
+    31607,
+    31646,
+    31649,
+    31651,
+    31654,
+    31655,
+    31658,
+    31290
+   ],
+   "items": [
+    7080,
+    7539,
+    7081,
+    7490,
+    7273,
+    7304,
+    7335,
+    7366,
+    7397,
+    7428,
+    7098,
+    0
+   ],
+   "mob": [
+    27292,
+    27224,
+    27283
+   ],
+   "classId": 113,
+   "prevClass": 46,
+   "x": [
+    119518,
+    181215,
+    181227
+   ],
+   "y": [
+    -28658,
+    36676,
+    36703
+   ],
+   "z": [
+    -3811,
+    -4812,
+    -4816
+   ],
+   "text": [
+    "PLAYERNAME! Pursued to here! However, I jumped out of the Banshouren boundaries! You look at the giant as the sign of power!",
+    "... Oh ... good! So it was ... let's begin!",
+    "I do not have the patience ..! I have been a giant force ...! Cough chatter ah ah ah!",
+    "Paying homage to those who disrupt the orderly will be PLAYERNAME's death!",
+    "Now, my soul freed from the shackles of the millennium, Halixia, to the back side I come ...",
+    "Why do you interfere others' battles?",
+    "This is a waste of time.. Say goodbye...!",
+    "...That is the enemy",
+    "...Goodness! PLAYERNAME you are still looking?",
+    "PLAYERNAME ... Not just to whom the victory. Only personnel involved in the fighting are eligible to share in the victory.",
+    "Your sword is not an ornament. Don't you think, PLAYERNAME?",
+    "Goodness! I no longer sense a battle there now.",
+    "let...",
+    "Only engaged in the battle to bar their choice. Perhaps you should regret.",
+    "The human nation was foolish to try and fight a giant's strength.",
+    "Must...Retreat... Too...Strong.",
+    "PLAYERNAME. Defeat...by...retaining...and...Mo...Hacker",
+    "....! Fight...Defeat...It...Fight...Defeat...It..."
+   ],
+   "folder": "00075_saga_of_the_titan"
+  },
+  {
+   "id": 76,
+   "name": "Saga of the Grand Khavatari",
+   "npc": [
+    31339,
+    31624,
+    31589,
+    31290,
+    31637,
+    31646,
+    31647,
+    31652,
+    31654,
+    31655,
+    31659,
+    31290
+   ],
+   "items": [
+    7080,
+    7539,
+    7081,
+    7491,
+    7274,
+    7305,
+    7336,
+    7367,
+    7398,
+    7429,
+    7099,
+    0
+   ],
+   "mob": [
+    27293,
+    27226,
+    27284
+   ],
+   "classId": 114,
+   "prevClass": 48,
+   "x": [
+    161719,
+    124355,
+    124376
+   ],
+   "y": [
+    -92823,
+    82155,
+    82127
+   ],
+   "z": [
+    -1893,
+    -2803,
+    -2796
+   ],
+   "text": [
+    "PLAYERNAME! Pursued to here! However, I jumped out of the Banshouren boundaries! You look at the giant as the sign of power!",
+    "... Oh ... good! So it was ... let's begin!",
+    "I do not have the patience ..! I have been a giant force ...! Cough chatter ah ah ah!",
+    "Paying homage to those who disrupt the orderly will be PLAYERNAME's death!",
+    "Now, my soul freed from the shackles of the millennium, Halixia, to the back side I come ...",
+    "Why do you interfere others' battles?",
+    "This is a waste of time.. Say goodbye...!",
+    "...That is the enemy",
+    "...Goodness! PLAYERNAME you are still looking?",
+    "PLAYERNAME ... Not just to whom the victory. Only personnel involved in the fighting are eligible to share in the victory.",
+    "Your sword is not an ornament. Don't you think, PLAYERNAME?",
+    "Goodness! I no longer sense a battle there now.",
+    "let...",
+    "Only engaged in the battle to bar their choice. Perhaps you should regret.",
+    "The human nation was foolish to try and fight a giant's strength.",
+    "Must...Retreat... Too...Strong.",
+    "PLAYERNAME. Defeat...by...retaining...and...Mo...Hacker",
+    "....! Fight...Defeat...It...Fight...Defeat...It..."
+   ],
+   "folder": "00076_saga_of_the_grand_khavatari"
+  },
+  {
+   "id": 77,
+   "name": "Saga of the Dominator",
+   "npc": [
+    31336,
+    31624,
+    31371,
+    31290,
+    31636,
+    31646,
+    31648,
+    31653,
+    31654,
+    31655,
+    31656,
+    31290
+   ],
+   "items": [
+    7080,
+    7539,
+    7081,
+    7492,
+    7275,
+    7306,
+    7337,
+    7368,
+    7399,
+    7430,
+    7100,
+    0
+   ],
+   "mob": [
+    27294,
+    27226,
+    27262
+   ],
+   "classId": 115,
+   "prevClass": 51,
+   "x": [
+    164650,
+    47429,
+    47391
+   ],
+   "y": [
+    -74121,
+    -56923,
+    -56929
+   ],
+   "z": [
+    -2871,
+    -2383,
+    -2370
+   ],
+   "text": [
+    "PLAYERNAME! Pursued to here! However, I jumped out of the Banshouren boundaries! You look at the giant as the sign of power!",
+    "... Oh ... good! So it was ... let's begin!",
+    "I do not have the patience ..! I have been a giant force ...! Cough chatter ah ah ah!",
+    "Paying homage to those who disrupt the orderly will be PLAYERNAME's death!",
+    "Now, my soul freed from the shackles of the millennium, Halixia, to the back side I come ...",
+    "Why do you interfere others' battles?",
+    "This is a waste of time.. Say goodbye...!",
+    "...That is the enemy",
+    "...Goodness! PLAYERNAME you are still looking?",
+    "PLAYERNAME ... Not just to whom the victory. Only personnel involved in the fighting are eligible to share in the victory.",
+    "Your sword is not an ornament. Don't you think, PLAYERNAME?",
+    "Goodness! I no longer sense a battle there now.",
+    "let...",
+    "Only engaged in the battle to bar their choice. Perhaps you should regret.",
+    "The human nation was foolish to try and fight a giant's strength.",
+    "Must...Retreat... Too...Strong.",
+    "PLAYERNAME. Defeat...by...retaining...and...Mo...Hacker",
+    "....! Fight...Defeat...It...Fight...Defeat...It..."
+   ],
+   "folder": "00077_saga_of_the_dominator"
+  },
+  {
+   "id": 78,
+   "name": "Saga of the Doomcryer",
+   "npc": [
+    31336,
+    31624,
+    31589,
+    31290,
+    31642,
+    31646,
+    31649,
+    31650,
+    31654,
+    31655,
+    31657,
+    31290
+   ],
+   "items": [
+    7080,
+    7539,
+    7081,
+    7493,
+    7276,
+    7307,
+    7338,
+    7369,
+    7400,
+    7431,
+    7101,
+    0
+   ],
+   "mob": [
+    27295,
+    27227,
+    27285
+   ],
+   "classId": 116,
+   "prevClass": 52,
+   "x": [
+    191046,
+    46087,
+    46066
+   ],
+   "y": [
+    -40640,
+    -36372,
+    -36396
+   ],
+   "z": [
+    -3042,
+    -1685,
+    -1685
+   ],
+   "text": [
+    "PLAYERNAME! Pursued to here! However, I jumped out of the Banshouren boundaries! You look at the giant as the sign of power!",
+    "... Oh ... good! So it was ... let's begin!",
+    "I do not have the patience ..! I have been a giant force ...! Cough chatter ah ah ah!",
+    "Paying homage to those who disrupt the orderly will be PLAYERNAME's death!",
+    "Now, my soul freed from the shackles of the millennium, Halixia, to the back side I come ...",
+    "Why do you interfere others' battles?",
+    "This is a waste of time.. Say goodbye...!",
+    "...That is the enemy",
+    "...Goodness! PLAYERNAME you are still looking?",
+    "PLAYERNAME ... Not just to whom the victory. Only personnel involved in the fighting are eligible to share in the victory.",
+    "Your sword is not an ornament. Don't you think, PLAYERNAME?",
+    "Goodness! I no longer sense a battle there now.",
+    "let...",
+    "Only engaged in the battle to bar their choice. Perhaps you should regret.",
+    "The human nation was foolish to try and fight a giant's strength.",
+    "Must...Retreat... Too...Strong.",
+    "PLAYERNAME. Defeat...by...retaining...and...Mo...Hacker",
+    "....! Fight...Defeat...It...Fight...Defeat...It..."
+   ],
+   "folder": "00078_saga_of_the_doomcryer"
+  },
+  {
+   "id": 79,
+   "name": "Saga of the Adventurer",
+   "npc": [
+    31603,
+    31584,
+    31579,
+    31615,
+    31619,
+    31646,
+    31647,
+    31651,
+    31654,
+    31655,
+    31658,
+    31616
+   ],
+   "items": [
+    7080,
+    7516,
+    7081,
+    7494,
+    7277,
+    7308,
+    7339,
+    7370,
+    7401,
+    7432,
+    7102,
+    0
+   ],
+   "mob": [
+    27299,
+    27228,
+    27302
+   ],
+   "classId": 93,
+   "prevClass": 8,
+   "x": [
+    119518,
+    181205,
+    181215
+   ],
+   "y": [
+    -28658,
+    36676,
+    36676
+   ],
+   "z": [
+    -3811,
+    -4816,
+    -4812
+   ],
+   "text": [
+    "PLAYERNAME! Pursued to here! However, I jumped out of the Banshouren boundaries! You look at the giant as the sign of power!",
+    "... Oh ... good! So it was ... let's begin!",
+    "I do not have the patience ..! I have been a giant force ...! Cough chatter ah ah ah!",
+    "Paying homage to those who disrupt the orderly will be PLAYERNAME's death!",
+    "Now, my soul freed from the shackles of the millennium, Halixia, to the back side I come ...",
+    "Why do you interfere others' battles?",
+    "This is a waste of time.. Say goodbye...!",
+    "...That is the enemy",
+    "...Goodness! PLAYERNAME you are still looking?",
+    "PLAYERNAME ... Not just to whom the victory. Only personnel involved in the fighting are eligible to share in the victory.",
+    "Your sword is not an ornament. Don't you think, PLAYERNAME?",
+    "Goodness! I no longer sense a battle there now.",
+    "let...",
+    "Only engaged in the battle to bar their choice. Perhaps you should regret.",
+    "The human nation was foolish to try and fight a giant's strength.",
+    "Must...Retreat... Too...Strong.",
+    "PLAYERNAME. Defeat...by...retaining...and...Mo...Hacker",
+    "....! Fight...Defeat...It...Fight...Defeat...It..."
+   ],
+   "folder": "00079_saga_of_the_adventurer"
+  },
+  {
+   "id": 80,
+   "name": "Saga of the Wind Rider",
+   "npc": [
+    31603,
+    31624,
+    31284,
+    31615,
+    31612,
+    31646,
+    31648,
+    31652,
+    31654,
+    31655,
+    31659,
+    31616
+   ],
+   "items": [
+    7080,
+    7517,
+    7081,
+    7495,
+    7278,
+    7309,
+    7340,
+    7371,
+    7402,
+    7433,
+    7103,
+    0
+   ],
+   "mob": [
+    27300,
+    27229,
+    27303
+   ],
+   "classId": 101,
+   "prevClass": 23,
+   "x": [
+    161719,
+    124314,
+    124355
+   ],
+   "y": [
+    -92823,
+    82155,
+    82155
+   ],
+   "z": [
+    -1893,
+    -2803,
+    -2803
+   ],
+   "text": [
+    "PLAYERNAME! Pursued to here! However, I jumped out of the Banshouren boundaries! You look at the giant as the sign of power!",
+    "... Oh ... good! So it was ... let's begin!",
+    "I do not have the patience ..! I have been a giant force ...! Cough chatter ah ah ah!",
+    "Paying homage to those who disrupt the orderly will be PLAYERNAME's death!",
+    "Now, my soul freed from the shackles of the millennium, Halixia, to the back side I come ...",
+    "Why do you interfere others' battles?",
+    "This is a waste of time.. Say goodbye...!",
+    "...That is the enemy",
+    "...Goodness! PLAYERNAME you are still looking?",
+    "PLAYERNAME ... Not just to whom the victory. Only personnel involved in the fighting are eligible to share in the victory.",
+    "Your sword is not an ornament. Don't you think, PLAYERNAME?",
+    "Goodness! I no longer sense a battle there now.",
+    "let...",
+    "Only engaged in the battle to bar their choice. Perhaps you should regret.",
+    "The human nation was foolish to try and fight a giant's strength.",
+    "Must...Retreat... Too...Strong.",
+    "PLAYERNAME. Defeat...by...retaining...and...Mo...Hacker",
+    "....! Fight...Defeat...It...Fight...Defeat...It..."
+   ],
+   "folder": "00080_saga_of_the_wind_rider"
+  },
+  {
+   "id": 81,
+   "name": "Saga of the Ghost Hunter",
+   "npc": [
+    31603,
+    31624,
+    31286,
+    31615,
+    31617,
+    31646,
+    31649,
+    31653,
+    31654,
+    31655,
+    31656,
+    31616
+   ],
+   "items": [
+    7080,
+    7518,
+    7081,
+    7496,
+    7279,
+    7310,
+    7341,
+    7372,
+    7403,
+    7434,
+    7104,
+    0
+   ],
+   "mob": [
+    27301,
+    27230,
+    27304
+   ],
+   "classId": 108,
+   "prevClass": 36,
+   "x": [
+    164650,
+    47391,
+    47429
+   ],
+   "y": [
+    -74121,
+    -56929,
+    -56923
+   ],
+   "z": [
+    -2871,
+    -2370,
+    -2383
+   ],
+   "text": [
+    "PLAYERNAME! Pursued to here! However, I jumped out of the Banshouren boundaries! You look at the giant as the sign of power!",
+    "... Oh ... good! So it was ... let's begin!",
+    "I do not have the patience ..! I have been a giant force ...! Cough chatter ah ah ah!",
+    "Paying homage to those who disrupt the orderly will be PLAYERNAME's death!",
+    "Now, my soul freed from the shackles of the millennium, Halixia, to the back side I come ...",
+    "Why do you interfere others' battles?",
+    "This is a waste of time.. Say goodbye...!",
+    "...That is the enemy",
+    "...Goodness! PLAYERNAME you are still looking?",
+    "PLAYERNAME ... Not just to whom the victory. Only personnel involved in the fighting are eligible to share in the victory.",
+    "Your sword is not an ornament. Don't you think, PLAYERNAME?",
+    "Goodness! I no longer sense a battle there now.",
+    "let...",
+    "Only engaged in the battle to bar their choice. Perhaps you should regret.",
+    "The human nation was foolish to try and fight a giant's strength.",
+    "Must...Retreat... Too...Strong.",
+    "PLAYERNAME. Defeat...by...retaining...and...Mo...Hacker",
+    "....! Fight...Defeat...It...Fight...Defeat...It..."
+   ],
+   "folder": "00081_saga_of_the_ghost_hunter"
+  },
+  {
+   "id": 82,
+   "name": "Saga of the Sagittarius",
+   "npc": [
+    30702,
+    31627,
+    31604,
+    31640,
+    31633,
+    31646,
+    31647,
+    31650,
+    31654,
+    31655,
+    31657,
+    31641
+   ],
+   "items": [
+    7080,
+    7519,
+    7081,
+    7497,
+    7280,
+    7311,
+    7342,
+    7373,
+    7404,
+    7435,
+    7105,
+    0
+   ],
+   "mob": [
+    27296,
+    27231,
+    27305
+   ],
+   "classId": 92,
+   "prevClass": 9,
+   "x": [
+    191046,
+    46066,
+    46066
+   ],
+   "y": [
+    -40640,
+    -36396,
+    -36396
+   ],
+   "z": [
+    -3042,
+    -1685,
+    -1685
+   ],
+   "text": [
+    "PLAYERNAME! Pursued to here! However, I jumped out of the Banshouren boundaries! You look at the giant as the sign of power!",
+    "... Oh ... good! So it was ... let's begin!",
+    "I do not have the patience ..! I have been a giant force ...! Cough chatter ah ah ah!",
+    "Paying homage to those who disrupt the orderly will be PLAYERNAME's death!",
+    "Now, my soul freed from the shackles of the millennium, Halixia, to the back side I come ...",
+    "Why do you interfere others' battles?",
+    "This is a waste of time.. Say goodbye...!",
+    "...That is the enemy",
+    "...Goodness! PLAYERNAME you are still looking?",
+    "PLAYERNAME ... Not just to whom the victory. Only personnel involved in the fighting are eligible to share in the victory.",
+    "Your sword is not an ornament. Don't you think, PLAYERNAME?",
+    "Goodness! I no longer sense a battle there now.",
+    "let...",
+    "Only engaged in the battle to bar their choice. Perhaps you should regret.",
+    "The human nation was foolish to try and fight a giant's strength.",
+    "Must...Retreat... Too...Strong.",
+    "PLAYERNAME. Defeat...by...retaining...and...Mo...Hacker",
+    "....! Fight...Defeat...It...Fight...Defeat...It..."
+   ],
+   "folder": "00082_saga_of_the_sagittarius"
+  },
+  {
+   "id": 83,
+   "name": "Saga of the Moonlight Sentinel",
+   "npc": [
+    30702,
+    31627,
+    31604,
+    31640,
+    31634,
+    31646,
+    31648,
+    31652,
+    31654,
+    31655,
+    31658,
+    31641
+   ],
+   "items": [
+    7080,
+    7520,
+    7081,
+    7498,
+    7281,
+    7312,
+    7343,
+    7374,
+    7405,
+    7436,
+    7106,
+    0
+   ],
+   "mob": [
+    27297,
+    27232,
+    27306
+   ],
+   "classId": 102,
+   "prevClass": 24,
+   "x": [
+    161719,
+    181227,
+    181215
+   ],
+   "y": [
+    -92823,
+    36703,
+    36676
+   ],
+   "z": [
+    -1893,
+    -4816,
+    -4812
+   ],
+   "text": [
+    "PLAYERNAME! Pursued to here! However, I jumped out of the Banshouren boundaries! You look at the giant as the sign of power!",
+    "... Oh ... good! So it was ... let's begin!",
+    "I do not have the patience ..! I have been a giant force ...! Cough chatter ah ah ah!",
+    "Paying homage to those who disrupt the orderly will be PLAYERNAME's death!",
+    "Now, my soul freed from the shackles of the millennium, Halixia, to the back side I come ...",
+    "Why do you interfere others' battles?",
+    "This is a waste of time.. Say goodbye...!",
+    "...That is the enemy",
+    "...Goodness! PLAYERNAME you are still looking?",
+    "PLAYERNAME ... Not just to whom the victory. Only personnel involved in the fighting are eligible to share in the victory.",
+    "Your sword is not an ornament. Don't you think, PLAYERNAME?",
+    "Goodness! I no longer sense a battle there now.",
+    "let...",
+    "Only engaged in the battle to bar their choice. Perhaps you should regret.",
+    "The human nation was foolish to try and fight a giant's strength.",
+    "Must...Retreat... Too...Strong.",
+    "PLAYERNAME. Defeat...by...retaining...and...Mo...Hacker",
+    "....! Fight...Defeat...It...Fight...Defeat...It..."
+   ],
+   "folder": "00083_saga_of_the_moonlight_sentinel"
+  },
+  {
+   "id": 84,
+   "name": "Saga of the Ghost Sentinel",
+   "npc": [
+    30702,
+    31587,
+    31604,
+    31640,
+    31635,
+    31646,
+    31649,
+    31652,
+    31654,
+    31655,
+    31659,
+    31641
+   ],
+   "items": [
+    7080,
+    7521,
+    7081,
+    7499,
+    7282,
+    7313,
+    7344,
+    7375,
+    7406,
+    7437,
+    7107,
+    0
+   ],
+   "mob": [
+    27298,
+    27233,
+    27307
+   ],
+   "classId": 109,
+   "prevClass": 37,
+   "x": [
+    161719,
+    124376,
+    124376
+   ],
+   "y": [
+    -92823,
+    82127,
+    82127
+   ],
+   "z": [
+    -1893,
+    -2796,
+    -2796
+   ],
+   "text": [
+    "PLAYERNAME! Pursued to here! However, I jumped out of the Banshouren boundaries! You look at the giant as the sign of power!",
+    "... Oh ... good! So it was ... let's begin!",
+    "I do not have the patience ..! I have been a giant force ...! Cough chatter ah ah ah!",
+    "Paying homage to those who disrupt the orderly will be PLAYERNAME's death!",
+    "Now, my soul freed from the shackles of the millennium, Halixia, to the back side I come ...",
+    "Why do you interfere others' battles?",
+    "This is a waste of time.. Say goodbye...!",
+    "...That is the enemy",
+    "...Goodness! PLAYERNAME you are still looking?",
+    "PLAYERNAME ... Not just to whom the victory. Only personnel involved in the fighting are eligible to share in the victory.",
+    "Your sword is not an ornament. Don't you think, PLAYERNAME?",
+    "Goodness! I no longer sense a battle there now.",
+    "let...",
+    "Only engaged in the battle to bar their choice. Perhaps you should regret.",
+    "The human nation was foolish to try and fight a giant's strength.",
+    "Must...Retreat... Too...Strong.",
+    "PLAYERNAME. Defeat...by...retaining...and...Mo...Hacker",
+    "....! Fight...Defeat...It...Fight...Defeat...It..."
+   ],
+   "folder": "00084_saga_of_the_ghost_sentinel"
+  },
+  {
+   "id": 85,
+   "name": "Saga of the Cardinal",
+   "npc": [
+    30191,
+    31626,
+    31588,
+    31280,
+    31644,
+    31646,
+    31647,
+    31651,
+    31654,
+    31655,
+    31658,
+    31280
+   ],
+   "items": [
+    7080,
+    7522,
+    7081,
+    7500,
+    7283,
+    7314,
+    7345,
+    7376,
+    7407,
+    7438,
+    7087,
+    0
+   ],
+   "mob": [
+    27267,
+    27234,
+    27274
+   ],
+   "classId": 97,
+   "prevClass": 16,
+   "x": [
+    119518,
+    181215,
+    181227
+   ],
+   "y": [
+    -28658,
+    36676,
+    36703
+   ],
+   "z": [
+    -3811,
+    -4812,
+    -4816
+   ],
+   "text": [
+    "PLAYERNAME! Pursued to here! However, I jumped out of the Banshouren boundaries! You look at the giant as the sign of power!",
+    "... Oh ... good! So it was ... let's begin!",
+    "I do not have the patience ..! I have been a giant force ...! Cough chatter ah ah ah!",
+    "Paying homage to those who disrupt the orderly will be PLAYERNAME's death!",
+    "Now, my soul freed from the shackles of the millennium, Halixia, to the back side I come ...",
+    "Why do you interfere others' battles?",
+    "This is a waste of time.. Say goodbye...!",
+    "...That is the enemy",
+    "...Goodness! PLAYERNAME you are still looking?",
+    "PLAYERNAME ... Not just to whom the victory. Only personnel involved in the fighting are eligible to share in the victory.",
+    "Your sword is not an ornament. Don't you think, PLAYERNAME?",
+    "Goodness! I no longer sense a battle there now.",
+    "let...",
+    "Only engaged in the battle to bar their choice. Perhaps you should regret.",
+    "The human nation was foolish to try and fight a giant's strength.",
+    "Must...Retreat... Too...Strong.",
+    "PLAYERNAME. Defeat...by...retaining...and...Mo...Hacker",
+    "....! Fight...Defeat...It...Fight...Defeat...It..."
+   ],
+   "folder": "00085_saga_of_the_cardinal"
+  },
+  {
+   "id": 86,
+   "name": "Saga of the Hierophant",
+   "npc": [
+    30191,
+    31626,
+    31588,
+    31280,
+    31591,
+    31646,
+    31648,
+    31652,
+    31654,
+    31655,
+    31659,
+    31280
+   ],
+   "items": [
+    7080,
+    7523,
+    7081,
+    7501,
+    7284,
+    7315,
+    7346,
+    7377,
+    7408,
+    7439,
+    7089,
+    0
+   ],
+   "mob": [
+    27269,
+    27235,
+    27275
+   ],
+   "classId": 98,
+   "prevClass": 17,
+   "x": [
+    161719,
+    124355,
+    124376
+   ],
+   "y": [
+    -92823,
+    82155,
+    82127
+   ],
+   "z": [
+    -1893,
+    -2803,
+    -2796
+   ],
+   "text": [
+    "PLAYERNAME! Pursued to here! However, I jumped out of the Banshouren boundaries! You look at the giant as the sign of power!",
+    "... Oh ... good! So it was ... let's begin!",
+    "I do not have the patience ..! I have been a giant force ...! Cough chatter ah ah ah!",
+    "Paying homage to those who disrupt the orderly will be PLAYERNAME's death!",
+    "Now, my soul freed from the shackles of the millennium, Halixia, to the back side I come ...",
+    "Why do you interfere others' battles?",
+    "This is a waste of time.. Say goodbye...!",
+    "...That is the enemy",
+    "...Goodness! PLAYERNAME you are still looking?",
+    "PLAYERNAME ... Not just to whom the victory. Only personnel involved in the fighting are eligible to share in the victory.",
+    "Your sword is not an ornament. Don't you think, PLAYERNAME?",
+    "Goodness! I no longer sense a battle there now.",
+    "let...",
+    "Only engaged in the battle to bar their choice. Perhaps you should regret.",
+    "The human nation was foolish to try and fight a giant's strength.",
+    "Must...Retreat... Too...Strong.",
+    "PLAYERNAME. Defeat...by...retaining...and...Mo...Hacker",
+    "....! Fight...Defeat...It...Fight...Defeat...It..."
+   ],
+   "folder": "00086_saga_of_the_hierophant"
+  },
+  {
+   "id": 87,
+   "name": "Saga of Eva's Saint",
+   "npc": [
+    30191,
+    31626,
+    31588,
+    31280,
+    31620,
+    31646,
+    31649,
+    31653,
+    31654,
+    31655,
+    31657,
+    31280
+   ],
+   "items": [
+    7080,
+    7524,
+    7081,
+    7502,
+    7285,
+    7316,
+    7347,
+    7378,
+    7409,
+    7440,
+    7088,
+    0
+   ],
+   "mob": [
+    27266,
+    27236,
+    27276
+   ],
+   "classId": 105,
+   "prevClass": 30,
+   "x": [
+    164650,
+    46087,
+    46066
+   ],
+   "y": [
+    -74121,
+    -36372,
+    -36396
+   ],
+   "z": [
+    -2871,
+    -1685,
+    -1685
+   ],
+   "text": [
+    "PLAYERNAME! Pursued to here! However, I jumped out of the Banshouren boundaries! You look at the giant as the sign of power!",
+    "... Oh ... good! So it was ... let's begin!",
+    "I do not have the patience ..! I have been a giant force ...! Cough chatter ah ah ah!",
+    "Paying homage to those who disrupt the orderly will be PLAYERNAME's death!",
+    "Now, my soul freed from the shackles of the millennium, Halixia, to the back side I come ...",
+    "Why do you interfere others' battles?",
+    "This is a waste of time.. Say goodbye...!",
+    "...That is the enemy",
+    "...Goodness! PLAYERNAME you are still looking?",
+    "PLAYERNAME ... Not just to whom the victory. Only personnel involved in the fighting are eligible to share in the victory.",
+    "Your sword is not an ornament. Don't you think, PLAYERNAME?",
+    "Goodness! I no longer sense a battle there now.",
+    "let...",
+    "Only engaged in the battle to bar their choice. Perhaps you should regret.",
+    "The human nation was foolish to try and fight a giant's strength.",
+    "Must...Retreat... Too...Strong.",
+    "PLAYERNAME. Defeat...by...retaining...and...Mo...Hacker",
+    "....! Fight...Defeat...It...Fight...Defeat...It..."
+   ],
+   "folder": "00087_saga_of_evas_saint"
+  },
+  {
+   "id": 88,
+   "name": "Saga of the Archmage",
+   "npc": [
+    30176,
+    31627,
+    31282,
+    31282,
+    31590,
+    31646,
+    31647,
+    31650,
+    31654,
+    31655,
+    31657,
+    31282
+   ],
+   "items": [
+    7080,
+    7529,
+    7081,
+    7503,
+    7286,
+    7317,
+    7348,
+    7379,
+    7410,
+    7441,
+    7082,
+    0
+   ],
+   "mob": [
+    27250,
+    27237,
+    27254
+   ],
+   "classId": 94,
+   "prevClass": 12,
+   "x": [
+    191046,
+    46066,
+    46087
+   ],
+   "y": [
+    -40640,
+    -36396,
+    -36372
+   ],
+   "z": [
+    -3042,
+    -1685,
+    -1685
+   ],
+   "text": [
+    "PLAYERNAME! Pursued to here! However, I jumped out of the Banshouren boundaries! You look at the giant as the sign of power!",
+    "... Oh ... good! So it was ... let's begin!",
+    "I do not have the patience ..! I have been a giant force ...! Cough chatter ah ah ah!",
+    "Paying homage to those who disrupt the orderly will be PLAYERNAME's death!",
+    "Now, my soul freed from the shackles of the millennium, Halixia, to the back side I come ...",
+    "Why do you interfere others' battles?",
+    "This is a waste of time.. Say goodbye...!",
+    "...That is the enemy",
+    "...Goodness! PLAYERNAME you are still looking?",
+    "PLAYERNAME ... Not just to whom the victory. Only personnel involved in the fighting are eligible to share in the victory.",
+    "Your sword is not an ornament. Don't you think, PLAYERNAME?",
+    "Goodness! I no longer sense a battle there now.",
+    "let...",
+    "Only engaged in the battle to bar their choice. Perhaps you should regret.",
+    "The human nation was foolish to try and fight a giant's strength.",
+    "Must...Retreat... Too...Strong.",
+    "PLAYERNAME. Defeat...by...retaining...and...Mo...Hacker",
+    "....! Fight...Defeat...It...Fight...Defeat...It..."
+   ],
+   "folder": "00088_saga_of_the_archmage"
+  },
+  {
+   "id": 89,
+   "name": "Saga of the Mystic Muse",
+   "npc": [
+    30174,
+    31627,
+    31283,
+    31283,
+    31643,
+    31646,
+    31648,
+    31651,
+    31654,
+    31655,
+    31658,
+    31283
+   ],
+   "items": [
+    7080,
+    7530,
+    7081,
+    7504,
+    7287,
+    7318,
+    7349,
+    7380,
+    7411,
+    7442,
+    7083,
+    0
+   ],
+   "mob": [
+    27251,
+    27238,
+    27255
+   ],
+   "classId": 103,
+   "prevClass": 27,
+   "x": [
+    119518,
+    181227,
+    181215
+   ],
+   "y": [
+    -28658,
+    36703,
+    36676
+   ],
+   "z": [
+    -3811,
+    -4816,
+    -4812
+   ],
+   "text": [
+    "PLAYERNAME! Pursued to here! However, I jumped out of the Banshouren boundaries! You look at the giant as the sign of power!",
+    "... Oh ... good! So it was ... let's begin!",
+    "I do not have the patience ..! I have been a giant force ...! Cough chatter ah ah ah!",
+    "Paying homage to those who disrupt the orderly will be PLAYERNAME's death!",
+    "Now, my soul freed from the shackles of the millennium, Halixia, to the back side I come ...",
+    "Why do you interfere others' battles?",
+    "This is a waste of time.. Say goodbye...!",
+    "...That is the enemy",
+    "...Goodness! PLAYERNAME you are still looking?",
+    "PLAYERNAME ... Not just to whom the victory. Only personnel involved in the fighting are eligible to share in the victory.",
+    "Your sword is not an ornament. Don't you think, PLAYERNAME?",
+    "Goodness! I no longer sense a battle there now.",
+    "let...",
+    "Only engaged in the battle to bar their choice. Perhaps you should regret.",
+    "The human nation was foolish to try and fight a giant's strength.",
+    "Must...Retreat... Too...Strong.",
+    "PLAYERNAME. Defeat...by...retaining...and...Mo...Hacker",
+    "....! Fight...Defeat...It...Fight...Defeat...It..."
+   ],
+   "folder": "00089_saga_of_the_mystic_muse"
+  },
+  {
+   "id": 90,
+   "name": "Saga of the Storm Screamer",
+   "npc": [
+    30175,
+    31627,
+    31287,
+    31287,
+    31598,
+    31646,
+    31649,
+    31652,
+    31654,
+    31655,
+    31659,
+    31287
+   ],
+   "items": [
+    7080,
+    7531,
+    7081,
+    7505,
+    7288,
+    7319,
+    7350,
+    7381,
+    7412,
+    7443,
+    7084,
+    0
+   ],
+   "mob": [
+    27252,
+    27239,
+    27256
+   ],
+   "classId": 110,
+   "prevClass": 40,
+   "x": [
+    161719,
+    124376,
+    124355
+   ],
+   "y": [
+    -92823,
+    82127,
+    82155
+   ],
+   "z": [
+    -1893,
+    -2796,
+    -2803
+   ],
+   "text": [
+    "PLAYERNAME! Pursued to here! However, I jumped out of the Banshouren boundaries! You look at the giant as the sign of power!",
+    "... Oh ... good! So it was ... let's begin!",
+    "I do not have the patience ..! I have been a giant force ...! Cough chatter ah ah ah!",
+    "Paying homage to those who disrupt the orderly will be PLAYERNAME's death!",
+    "Now, my soul freed from the shackles of the millennium, Halixia, to the back side I come ...",
+    "Why do you interfere others' battles?",
+    "This is a waste of time.. Say goodbye...!",
+    "...That is the enemy",
+    "...Goodness! PLAYERNAME you are still looking?",
+    "PLAYERNAME ... Not just to whom the victory. Only personnel involved in the fighting are eligible to share in the victory.",
+    "Your sword is not an ornament. Don't you think, PLAYERNAME?",
+    "Goodness! I no longer sense a battle there now.",
+    "let...",
+    "Only engaged in the battle to bar their choice. Perhaps you should regret.",
+    "The human nation was foolish to try and fight a giant's strength.",
+    "Must...Retreat... Too...Strong.",
+    "PLAYERNAME. Defeat...by...retaining...and...Mo...Hacker",
+    "....! Fight...Defeat...It...Fight...Defeat...It..."
+   ],
+   "folder": "00090_saga_of_the_storm_screamer"
+  },
+  {
+   "id": 91,
+   "name": "Saga of the Arcana Lord",
+   "npc": [
+    31605,
+    31622,
+    31585,
+    31608,
+    31586,
+    31646,
+    31647,
+    31651,
+    31654,
+    31655,
+    31658,
+    31608
+   ],
+   "items": [
+    7080,
+    7604,
+    7081,
+    7506,
+    7289,
+    7320,
+    7351,
+    7382,
+    7413,
+    7444,
+    7110,
+    0
+   ],
+   "mob": [
+    27313,
+    27240,
+    27310
+   ],
+   "classId": 96,
+   "prevClass": 14,
+   "x": [
+    119518,
+    181215,
+    181227
+   ],
+   "y": [
+    -28658,
+    36676,
+    36703
+   ],
+   "z": [
+    -3811,
+    -4812,
+    -4816
+   ],
+   "text": [
+    "PLAYERNAME! Pursued to here! However, I jumped out of the Banshouren boundaries! You look at the giant as the sign of power!",
+    "... Oh ... good! So it was ... let's begin!",
+    "I do not have the patience ..! I have been a giant force ...! Cough chatter ah ah ah!",
+    "Paying homage to those who disrupt the orderly will be PLAYERNAME's death!",
+    "Now, my soul freed from the shackles of the millennium, Halixia, to the back side I come ...",
+    "Why do you interfere others' battles?",
+    "This is a waste of time.. Say goodbye...!",
+    "...That is the enemy",
+    "...Goodness! PLAYERNAME you are still looking?",
+    "PLAYERNAME ... Not just to whom the victory. Only personnel involved in the fighting are eligible to share in the victory.",
+    "Your sword is not an ornament. Don't you think, PLAYERNAME?",
+    "Goodness! I no longer sense a battle there now.",
+    "let...",
+    "Only engaged in the battle to bar their choice. Perhaps you should regret.",
+    "The human nation was foolish to try and fight a giant's strength.",
+    "Must...Retreat... Too...Strong.",
+    "PLAYERNAME. Defeat...by...retaining...and...Mo...Hacker",
+    "....! Fight...Defeat...It...Fight...Defeat...It..."
+   ],
+   "folder": "00091_saga_of_the_arcana_lord"
+  },
+  {
+   "id": 92,
+   "name": "Saga of the Elemental Master",
+   "npc": [
+    30174,
+    31281,
+    31614,
+    31614,
+    31629,
+    31646,
+    31648,
+    31652,
+    31654,
+    31655,
+    31659,
+    31614
+   ],
+   "items": [
+    7080,
+    7605,
+    7081,
+    7507,
+    7290,
+    7321,
+    7352,
+    7383,
+    7414,
+    7445,
+    7111,
+    0
+   ],
+   "mob": [
+    27314,
+    27241,
+    27311
+   ],
+   "classId": 104,
+   "prevClass": 28,
+   "x": [
+    161719,
+    124376,
+    124355
+   ],
+   "y": [
+    -92823,
+    82127,
+    82155
+   ],
+   "z": [
+    -1893,
+    -2796,
+    -2803
+   ],
+   "text": [
+    "PLAYERNAME! Pursued to here! However, I jumped out of the Banshouren boundaries! You look at the giant as the sign of power!",
+    "... Oh ... good! So it was ... let's begin!",
+    "I do not have the patience ..! I have been a giant force ...! Cough chatter ah ah ah!",
+    "Paying homage to those who disrupt the orderly will be PLAYERNAME's death!",
+    "Now, my soul freed from the shackles of the millennium, Halixia, to the back side I come ...",
+    "Why do you interfere others' battles?",
+    "This is a waste of time.. Say goodbye...!",
+    "...That is the enemy",
+    "...Goodness! PLAYERNAME you are still looking?",
+    "PLAYERNAME ... Not just to whom the victory. Only personnel involved in the fighting are eligible to share in the victory.",
+    "Your sword is not an ornament. Don't you think, PLAYERNAME?",
+    "Goodness! I no longer sense a battle there now.",
+    "let...",
+    "Only engaged in the battle to bar their choice. Perhaps you should regret.",
+    "The human nation was foolish to try and fight a giant's strength.",
+    "Must...Retreat... Too...Strong.",
+    "PLAYERNAME. Defeat...by...retaining...and...Mo...Hacker",
+    "....! Fight...Defeat...It...Fight...Defeat...It..."
+   ],
+   "folder": "00092_saga_of_the_elemental_master"
+  },
+  {
+   "id": 93,
+   "name": "Saga of the Spectral Master",
+   "npc": [
+    30175,
+    31287,
+    31613,
+    30175,
+    31632,
+    31646,
+    31649,
+    31653,
+    31654,
+    31655,
+    31656,
+    31613
+   ],
+   "items": [
+    7080,
+    7606,
+    7081,
+    7508,
+    7291,
+    7322,
+    7353,
+    7384,
+    7415,
+    7446,
+    7112,
+    0
+   ],
+   "mob": [
+    27315,
+    27242,
+    27312
+   ],
+   "classId": 111,
+   "prevClass": 41,
+   "x": [
+    164650,
+    47429,
+    47391
+   ],
+   "y": [
+    -74121,
+    -56923,
+    -56929
+   ],
+   "z": [
+    -2871,
+    -2383,
+    -2370
+   ],
+   "text": [
+    "PLAYERNAME! Pursued to here! However, I jumped out of the Banshouren boundaries! You look at the giant as the sign of power!",
+    "... Oh ... good! So it was ... let's begin!",
+    "I do not have the patience ..! I have been a giant force ...! Cough chatter ah ah ah!",
+    "Paying homage to those who disrupt the orderly will be PLAYERNAME's death!",
+    "Now, my soul freed from the shackles of the millennium, Halixia, to the back side I come ...",
+    "Why do you interfere others' battles?",
+    "This is a waste of time.. Say goodbye...!",
+    "...That is the enemy",
+    "...Goodness! PLAYERNAME you are still looking?",
+    "PLAYERNAME ... Not just to whom the victory. Only personnel involved in the fighting are eligible to share in the victory.",
+    "Your sword is not an ornament. Don't you think, PLAYERNAME?",
+    "Goodness! I no longer sense a battle there now.",
+    "let...",
+    "Only engaged in the battle to bar their choice. Perhaps you should regret.",
+    "The human nation was foolish to try and fight a giant's strength.",
+    "Must...Retreat... Too...Strong.",
+    "PLAYERNAME. Defeat...by...retaining...and...Mo...Hacker",
+    "....! Fight...Defeat...It...Fight...Defeat...It..."
+   ],
+   "folder": "00093_saga_of_the_spectral_master"
+  },
+  {
+   "id": 94,
+   "name": "Saga of the Soultaker",
+   "npc": [
+    30832,
+    31623,
+    31279,
+    31279,
+    31645,
+    31646,
+    31648,
+    31650,
+    31654,
+    31655,
+    31657,
+    31279
+   ],
+   "items": [
+    7080,
+    7533,
+    7081,
+    7509,
+    7292,
+    7323,
+    7354,
+    7385,
+    7416,
+    7447,
+    7085,
+    0
+   ],
+   "mob": [
+    27257,
+    27243,
+    27265
+   ],
+   "classId": 95,
+   "prevClass": 13,
+   "x": [
+    191046,
+    46066,
+    46087
+   ],
+   "y": [
+    -40640,
+    -36396,
+    -36372
+   ],
+   "z": [
+    -3042,
+    -1685,
+    -1685
+   ],
+   "text": [
+    "PLAYERNAME! Pursued to here! However, I jumped out of the Banshouren boundaries! You look at the giant as the sign of power!",
+    "... Oh ... good! So it was ... let's begin!",
+    "I do not have the patience ..! I have been a giant force ...! Cough chatter ah ah ah!",
+    "Paying homage to those who disrupt the orderly will be PLAYERNAME's death!",
+    "Now, my soul freed from the shackles of the millennium, Halixia, to the back side I come ...",
+    "Why do you interfere others' battles?",
+    "This is a waste of time.. Say goodbye...!",
+    "...That is the enemy",
+    "...Goodness! PLAYERNAME you are still looking?",
+    "PLAYERNAME ... Not just to whom the victory. Only personnel involved in the fighting are eligible to share in the victory.",
+    "Your sword is not an ornament. Don't you think, PLAYERNAME?",
+    "Goodness! I no longer sense a battle there now.",
+    "let...",
+    "Only engaged in the battle to bar their choice. Perhaps you should regret.",
+    "The human nation was foolish to try and fight a giant's strength.",
+    "Must...Retreat... Too...Strong.",
+    "PLAYERNAME. Defeat...by...retaining...and...Mo...Hacker",
+    "....! Fight...Defeat...It...Fight...Defeat...It..."
+   ],
+   "folder": "00094_saga_of_the_soultaker"
+  },
+  {
+   "id": 95,
+   "name": "Saga of the Hell Knight",
+   "npc": [
+    31582,
+    31623,
+    31297,
+    31297,
+    31599,
+    31646,
+    31647,
+    31653,
+    31654,
+    31655,
+    31656,
+    31297
+   ],
+   "items": [
+    7080,
+    7532,
+    7081,
+    7510,
+    7293,
+    7324,
+    7355,
+    7386,
+    7417,
+    7448,
+    7086,
+    0
+   ],
+   "mob": [
+    27258,
+    27244,
+    27263
+   ],
+   "classId": 91,
+   "prevClass": 6,
+   "x": [
+    164650,
+    47391,
+    47429
+   ],
+   "y": [
+    -74121,
+    -56929,
+    -56923
+   ],
+   "z": [
+    -2871,
+    -2370,
+    -2383
+   ],
+   "text": [
+    "PLAYERNAME! Pursued to here! However, I jumped out of the Banshouren boundaries! You look at the giant as the sign of power!",
+    "... Oh ... good! So it was ... let's begin!",
+    "I do not have the patience ..! I have been a giant force ...! Cough chatter ah ah ah!",
+    "Paying homage to those who disrupt the orderly will be PLAYERNAME's death!",
+    "Now, my soul freed from the shackles of the millennium, Halixia, to the back side I come ...",
+    "Why do you interfere others' battles?",
+    "This is a waste of time.. Say goodbye...!",
+    "...That is the enemy",
+    "...Goodness! PLAYERNAME you are still looking?",
+    "PLAYERNAME ... Not just to whom the victory. Only personnel involved in the fighting are eligible to share in the victory.",
+    "Your sword is not an ornament. Don't you think, PLAYERNAME?",
+    "Goodness! I no longer sense a battle there now.",
+    "let...",
+    "Only engaged in the battle to bar their choice. Perhaps you should regret.",
+    "The human nation was foolish to try and fight a giant's strength.",
+    "Must...Retreat... Too...Strong.",
+    "PLAYERNAME. Defeat...by...retaining...and...Mo...Hacker",
+    "....! Fight...Defeat...It...Fight...Defeat...It..."
+   ],
+   "folder": "00095_saga_of_the_hell_knight"
+  },
+  {
+   "id": 96,
+   "name": "Saga of the Spectral Dancer",
+   "npc": [
+    31582,
+    31623,
+    31284,
+    31284,
+    31611,
+    31646,
+    31649,
+    31653,
+    31654,
+    31655,
+    31656,
+    31284
+   ],
+   "items": [
+    7080,
+    7527,
+    7081,
+    7511,
+    7294,
+    7325,
+    7356,
+    7387,
+    7418,
+    7449,
+    7092,
+    0
+   ],
+   "mob": [
+    27272,
+    27245,
+    27264
+   ],
+   "classId": 107,
+   "prevClass": 34,
+   "x": [
+    164650,
+    47429,
+    47391
+   ],
+   "y": [
+    -74121,
+    -56923,
+    -56929
+   ],
+   "z": [
+    -2871,
+    -2383,
+    -2370
+   ],
+   "text": [
+    "PLAYERNAME! Pursued to here! However, I jumped out of the Banshouren boundaries! You look at the giant as the sign of power!",
+    "... Oh ... good! So it was ... let's begin!",
+    "I do not have the patience ..! I have been a giant force ...! Cough chatter ah ah ah!",
+    "Paying homage to those who disrupt the orderly will be PLAYERNAME's death!",
+    "Now, my soul freed from the shackles of the millennium, Halixia, to the back side I come ...",
+    "Why do you interfere others' battles?",
+    "This is a waste of time.. Say goodbye...!",
+    "...That is the enemy",
+    "...Goodness! PLAYERNAME you are still looking?",
+    "PLAYERNAME ... Not just to whom the victory. Only personnel involved in the fighting are eligible to share in the victory.",
+    "Your sword is not an ornament. Don't you think, PLAYERNAME?",
+    "Goodness! I no longer sense a battle there now.",
+    "let...",
+    "Only engaged in the battle to bar their choice. Perhaps you should regret.",
+    "The human nation was foolish to try and fight a giant's strength.",
+    "Must...Retreat... Too...Strong.",
+    "PLAYERNAME. Defeat...by...retaining...and...Mo...Hacker",
+    "....! Fight...Defeat...It...Fight...Defeat...It..."
+   ],
+   "folder": "00096_saga_of_the_spectral_dancer"
+  },
+  {
+   "id": 97,
+   "name": "Saga of the Shillien Templar",
+   "npc": [
+    31580,
+    31623,
+    31285,
+    31285,
+    31610,
+    31646,
+    31648,
+    31652,
+    31654,
+    31655,
+    31659,
+    31285
+   ],
+   "items": [
+    7080,
+    7526,
+    7081,
+    7512,
+    7295,
+    7326,
+    7357,
+    7388,
+    7419,
+    7450,
+    7091,
+    0
+   ],
+   "mob": [
+    27271,
+    27246,
+    27273
+   ],
+   "classId": 106,
+   "prevClass": 33,
+   "x": [
+    161719,
+    124355,
+    124376
+   ],
+   "y": [
+    -92823,
+    82155,
+    82127
+   ],
+   "z": [
+    -1893,
+    -2803,
+    -2796
+   ],
+   "text": [
+    "PLAYERNAME! Pursued to here! However, I jumped out of the Banshouren boundaries! You look at the giant as the sign of power!",
+    "... Oh ... good! So it was ... let's begin!",
+    "I do not have the patience ..! I have been a giant force ...! Cough chatter ah ah ah!",
+    "Paying homage to those who disrupt the orderly will be PLAYERNAME's death!",
+    "Now, my soul freed from the shackles of the millennium, Halixia, to the back side I come ...",
+    "Why do you interfere others' battles?",
+    "This is a waste of time.. Say goodbye...!",
+    "...That is the enemy",
+    "...Goodness! PLAYERNAME you are still looking?",
+    "PLAYERNAME ... Not just to whom the victory. Only personnel involved in the fighting are eligible to share in the victory.",
+    "Your sword is not an ornament. Don't you think, PLAYERNAME?",
+    "Goodness! I no longer sense a battle there now.",
+    "let...",
+    "Only engaged in the battle to bar their choice. Perhaps you should regret.",
+    "The human nation was foolish to try and fight a giant's strength.",
+    "Must...Retreat... Too...Strong.",
+    "PLAYERNAME. Defeat...by...retaining...and...Mo...Hacker",
+    "....! Fight...Defeat...It...Fight...Defeat...It..."
+   ],
+   "folder": "00097_saga_of_the_shillien_templar"
+  },
+  {
+   "id": 98,
+   "name": "Saga of the Shillien Saint",
+   "npc": [
+    31581,
+    31626,
+    31588,
+    31287,
+    31621,
+    31646,
+    31647,
+    31651,
+    31654,
+    31655,
+    31658,
+    31287
+   ],
+   "items": [
+    7080,
+    7525,
+    7081,
+    7513,
+    7296,
+    7327,
+    7358,
+    7389,
+    7420,
+    7451,
+    7090,
+    0
+   ],
+   "mob": [
+    27270,
+    27247,
+    27277
+   ],
+   "classId": 112,
+   "prevClass": 43,
+   "x": [
+    119518,
+    181215,
+    181227
+   ],
+   "y": [
+    -28658,
+    36676,
+    36703
+   ],
+   "z": [
+    -3811,
+    -4812,
+    -4816
+   ],
+   "text": [
+    "PLAYERNAME! Pursued to here! However, I jumped out of the Banshouren boundaries! You look at the giant as the sign of power!",
+    "... Oh ... good! So it was ... let's begin!",
+    "I do not have the patience ..! I have been a giant force ...! Cough chatter ah ah ah!",
+    "Paying homage to those who disrupt the orderly will be PLAYERNAME's death!",
+    "Now, my soul freed from the shackles of the millennium, Halixia, to the back side I come ...",
+    "Why do you interfere others' battles?",
+    "This is a waste of time.. Say goodbye...!",
+    "...That is the enemy",
+    "...Goodness! PLAYERNAME you are still looking?",
+    "PLAYERNAME ... Not just to whom the victory. Only personnel involved in the fighting are eligible to share in the victory.",
+    "Your sword is not an ornament. Don't you think, PLAYERNAME?",
+    "Goodness! I no longer sense a battle there now.",
+    "let...",
+    "Only engaged in the battle to bar their choice. Perhaps you should regret.",
+    "The human nation was foolish to try and fight a giant's strength.",
+    "Must...Retreat... Too...Strong.",
+    "PLAYERNAME. Defeat...by...retaining...and...Mo...Hacker",
+    "....! Fight...Defeat...It...Fight...Defeat...It..."
+   ],
+   "folder": "00098_saga_of_the_shillien_saint"
+  },
+  {
+   "id": 99,
+   "name": "Saga of the Fortune Seeker",
+   "npc": [
+    31594,
+    31623,
+    31600,
+    31600,
+    31601,
+    31646,
+    31649,
+    31650,
+    31654,
+    31655,
+    31657,
+    31600
+   ],
+   "items": [
+    7080,
+    7608,
+    7081,
+    7514,
+    7297,
+    7328,
+    7359,
+    7390,
+    7421,
+    7452,
+    7109,
+    0
+   ],
+   "mob": [
+    27259,
+    27248,
+    27309
+   ],
+   "classId": 117,
+   "prevClass": 55,
+   "x": [
+    191046,
+    46066,
+    46087
+   ],
+   "y": [
+    -40640,
+    -36396,
+    -36372
+   ],
+   "z": [
+    -3042,
+    -1685,
+    -1685
+   ],
+   "text": [
+    "PLAYERNAME! Pursued to here! However, I jumped out of the Banshouren boundaries! You look at the giant as the sign of power!",
+    "... Oh ... good! So it was ... let's begin!",
+    "I do not have the patience ..! I have been a giant force ...! Cough chatter ah ah ah!",
+    "Paying homage to those who disrupt the orderly will be PLAYERNAME's death!",
+    "Now, my soul freed from the shackles of the millennium, Halixia, to the back side I come ...",
+    "Why do you interfere others' battles?",
+    "This is a waste of time.. Say goodbye...!",
+    "...That is the enemy",
+    "...Goodness! PLAYERNAME you are still looking?",
+    "PLAYERNAME ... Not just to whom the victory. Only personnel involved in the fighting are eligible to share in the victory.",
+    "Your sword is not an ornament. Don't you think, PLAYERNAME?",
+    "Goodness! I no longer sense a battle there now.",
+    "let...",
+    "Only engaged in the battle to bar their choice. Perhaps you should regret.",
+    "The human nation was foolish to try and fight a giant's strength.",
+    "Must...Retreat... Too...Strong.",
+    "PLAYERNAME. Defeat...by...retaining...and...Mo...Hacker",
+    "....! Fight...Defeat...It...Fight...Defeat...It..."
+   ],
+   "folder": "00099_saga_of_the_fortune_seeker"
+  },
+  {
+   "id": 100,
+   "name": "Saga of the Maestro",
+   "npc": [
+    31592,
+    31273,
+    31597,
+    31597,
+    31596,
+    31646,
+    31648,
+    31653,
+    31654,
+    31655,
+    31656,
+    31597
+   ],
+   "items": [
+    7080,
+    7607,
+    7081,
+    7515,
+    7298,
+    7329,
+    7360,
+    7391,
+    7422,
+    7453,
+    7108,
+    0
+   ],
+   "mob": [
+    27260,
+    27249,
+    27308
+   ],
+   "classId": 118,
+   "prevClass": 57,
+   "x": [
+    164650,
+    47429,
+    47391
+   ],
+   "y": [
+    -74121,
+    -56923,
+    -56929
+   ],
+   "z": [
+    -2871,
+    -2383,
+    -2370
+   ],
+   "text": [
+    "PLAYERNAME! Pursued to here! However, I jumped out of the Banshouren boundaries! You look at the giant as the sign of power!",
+    "... Oh ... good! So it was ... let's begin!",
+    "I do not have the patience ..! I have been a giant force ...! Cough chatter ah ah ah!",
+    "Paying homage to those who disrupt the orderly will be PLAYERNAME's death!",
+    "Now, my soul freed from the shackles of the millennium, Halixia, to the back side I come ...",
+    "Why do you interfere others' battles?",
+    "This is a waste of time.. Say goodbye...!",
+    "...That is the enemy",
+    "...Goodness! PLAYERNAME you are still looking?",
+    "PLAYERNAME ... Not just to whom the victory. Only personnel involved in the fighting are eligible to share in the victory.",
+    "Your sword is not an ornament. Don't you think, PLAYERNAME?",
+    "Goodness! I no longer sense a battle there now.",
+    "let...",
+    "Only engaged in the battle to bar their choice. Perhaps you should regret.",
+    "The human nation was foolish to try and fight a giant's strength.",
+    "Must...Retreat... Too...Strong.",
+    "PLAYERNAME. Defeat...by...retaining...and...Mo...Hacker",
+    "....! Fight...Defeat...It...Fight...Defeat...It..."
+   ],
+   "folder": "00100_saga_of_the_maestro"
+  }
+ ]
+}

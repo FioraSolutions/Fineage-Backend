@@ -224,8 +224,11 @@ public sealed partial class ZoneWorld
     /// <summary>Mobius <c>Quest.onAttack</c>: a player's hit on an NPC some quest listens to (Q234 Pipette Knife on Baium).</summary>
     void ApplyQuestAttack(ZoneEntity attacker, ZoneEntity npc)
     {
-        if (attacker.Kind != ZoneEntityKind.Player || attacker.Inventory == null || attacker.Dead || attacker.Session == null
-            || npc.QuestAttackSpawned || !_quests.HasAttackSteps(npc.NpcId))
+        if (attacker.Kind != ZoneEntityKind.Player || attacker.Inventory == null || attacker.Dead || attacker.Session == null)
+            return;
+        if (npc.QuestSpawn != null && ApplyOwnedAttack(attacker, npc))
+            return;
+        if (npc.QuestAttackSpawned || !_quests.HasAttackSteps(npc.NpcId))
             return;
         var outcome = _quests.OnAttack(attacker.Quests, attacker.Inventory, npc.NpcId, QuestActorOf(attacker));
         if (outcome.Ok && outcome.Spawns.Count > 0)
@@ -262,6 +265,8 @@ public sealed partial class ZoneWorld
 
     void ApplyQuestKill(ZoneEntity killer, ZoneEntity npc)
     {
+        if (npc.QuestSpawn != null)
+            ApplyOwnedKill(killer, npc);
         if (killer.Inventory == null || killer.Dead || killer.Session == null)
             return;
         ApplyAllianceBetrayal(killer, npc);
@@ -319,7 +324,8 @@ public sealed partial class ZoneWorld
     {
         if (outcome.QuestId == 0 || !outcome.Ok || player.Session == null)
             return;
-        if (outcome.Items.Count == 0 && !outcome.JournalChanged && outcome.Sounds.Count == 0 && outcome.Spawns.Count == 0 && outcome.SpawnsAt.Count == 0)
+        if (outcome.Items.Count == 0 && !outcome.JournalChanged && outcome.Sounds.Count == 0 && outcome.Spawns.Count == 0 &&
+            outcome.SpawnsAt.Count == 0 && outcome.Extras.Empty)
             return;
         Publish(player.Session, player, outcome, npc.ObjectId, npc.NpcId);
     }
@@ -359,6 +365,7 @@ public sealed partial class ZoneWorld
         && !outcome.Noble
         && outcome.Teleport == null
         && outcome.Social == 0
+        && outcome.Extras.Empty
         && outcome.Exp == 0
         && outcome.Sp == 0;
 
@@ -369,6 +376,8 @@ public sealed partial class ZoneWorld
             ApplyQuestSpawns(player, anchor, outcome.Spawns);
         foreach (var point in outcome.SpawnsAt)
             SpawnQuestNpc(player, point.NpcId, point.X, point.Y, point.Z, player.InstanceId, 0);
+        if (!outcome.Extras.Empty)
+            ApplyQuestExtras(session, player, outcome.Extras, npcObjectId);
         if (outcome.Noble)
             SetNoble(player, true);
         if (outcome.Social > 0)

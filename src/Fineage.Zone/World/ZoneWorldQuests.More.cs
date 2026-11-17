@@ -35,19 +35,19 @@ public sealed partial class ZoneWorld
     /// One quest spawn. Monsters come in hating the player; quest folk (Mobius chests, spirits, messengers raised
     /// by a step) stay peaceful and talkable.
     /// </summary>
-    void SpawnQuestNpc(ZoneEntity player, int npcId, int x, int y, int z, int instanceId, int heading)
+    ZoneEntity? SpawnQuestNpc(ZoneEntity player, int npcId, int x, int y, int z, int instanceId, int heading, QuestSummon? summon = null)
     {
         var templates = NpcCatalog.LoadDefault();
         if (!templates.ById.TryGetValue(npcId, out var template))
         {
             ZoneLog.Info($"quest spawn skip unknown npcId={npcId}");
-            return;
+            return null;
         }
 
         // A quest-summoned raid boss (Ashutar, Nastron, …) exists once: another summon while it lives does nothing.
         if (string.Equals(template.Type, "RaidBoss", StringComparison.Ordinal) &&
             _byId.Values.Any(e => e.Kind == ZoneEntityKind.Npc && e.NpcId == npcId && !e.Dead && e.CurHp > 0))
-            return;
+            return null;
 
         int objectId = AllocateQuestNpcObjectId();
         if (_geo.HasGeo(x, y))
@@ -119,7 +119,9 @@ public sealed partial class ZoneWorld
         _aoi.Enter(objectId, x, y);
         if (hostile)
             AddHate(entity, player, hate: 100);
+        TrackQuestSpawn(entity, player, summon);
         FanoutNewNpc(entity);
+        return entity;
     }
 
     int AllocateQuestNpcObjectId()

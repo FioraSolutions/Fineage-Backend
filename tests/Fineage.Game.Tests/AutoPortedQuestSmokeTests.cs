@@ -28,7 +28,7 @@ public sealed class AutoPortedQuestSmokeTests
             if (startDialog is null)
                 continue;
             startable++;
-            var actor = new QuestActor(0, Math.Max(1, startDialog.MinLevel), 0);
+            var actor = new QuestActor(0, Math.Max(1, startDialog.MinLevel), startDialog.Classes?.FirstOrDefault() ?? 0);
             string html = machine.QuestChoiceHtml(journal, startDialog.NpcId, "Npc", actor);
             if (html.Contains($"quest_talk:{quest.Id}", StringComparison.Ordinal))
                 listed++;

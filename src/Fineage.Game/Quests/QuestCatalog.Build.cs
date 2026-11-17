@@ -64,7 +64,7 @@ public sealed partial class QuestCatalog
 
         string html = ResolveHtml(dialog, htmlBaseDir, where, questId);
         // Mobius addSpawn / teleToLocation events often return null htmltext; allow empty HTML for those steps.
-        bool spawnOnly = ops.Exists(static o => o is SpawnNpcOp or TeleportOp);
+        bool spawnOnly = ops.Exists(static o => o is SpawnNpcOp or TeleportOp or SummonOp or DespawnOp);
         if (hook is not (QuestHook.Kill or QuestHook.Attack) && string.IsNullOrWhiteSpace(html) && !spawnOnly)
             throw new InvalidDataException($"{where} quest {questId} step needs html.");
         if (html.Length > 12_000)
@@ -110,7 +110,17 @@ public sealed partial class QuestCatalog
             ReadVarGate(dialog.VarBelow, where, questId, "varBelow"),
             ReadItemList(dialog.Weapons, items, where, questId, "weapons"),
             ReadAtLeast(dialog.Below, items, where, questId),
-            dialog.Everyone && hook == QuestHook.Kill);
+            dialog.Everyone && hook == QuestHook.Kill,
+            ReadOwned(dialog.Owned, hook, where, questId));
+    }
+
+    static string? ReadOwned(string? owned, QuestHook hook, string where, int questId)
+    {
+        if (string.IsNullOrWhiteSpace(owned))
+            return null;
+        if (hook is not (QuestHook.Kill or QuestHook.Attack) || owned is not ("any" or "solo"))
+            throw new InvalidDataException($"{where} quest {questId} owned must be 'any' or 'solo' on a kill / attack step.");
+        return owned;
     }
 
     static double? ReadChance(double? chance, string where, int questId)

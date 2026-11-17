@@ -116,8 +116,68 @@ public sealed partial class QuestMachine : IQuestKillHook
 
     HashSet<int>? _everyoneNpcs;
 
+    /// <summary>
+    /// A quest-owned spawn died or was hit by its owner: run the <c>owned</c> steps against the owner's journal.
+    /// <paramref name="solo"/> = the owner did it outside a party (Mobius <c>st == st2 &amp;&amp; !isInParty()</c>).
+    /// </summary>
+    public QuestOutcome OnOwned(QuestJournal ownerJournal, PlayerInventory ownerInventory, int npcId, QuestActor? ownerActor,
+        QuestHook hook, bool solo) =>
+        OnNpc(ownerJournal, ownerInventory, npcId, ownerActor, hook, hook == QuestHook.Kill ? "kill" : "attack",
+            ownedMode: solo ? "solo" : "any");
+
+    /// <summary>True when some quest has owned steps for this NPC.</summary>
+    public bool HasOwnedSteps(int npcId) =>
+        (_ownedNpcs ??= _catalog.Quests.SelectMany(static q => q.Dialogs)
+            .Where(static d => d.Owned != null).Select(static d => d.NpcId).ToHashSet()).Contains(npcId);
+
+    HashSet<int>? _ownedNpcs;
+
+    /// <summary>Writes a quest spawn's despawn / death vars into its owner's quest row (no-op when the row is gone).</summary>
+    public bool ApplySpawnVars(QuestJournal ownerJournal, int questId, IReadOnlyDictionary<string, string>? vars)
+    {
+        if (vars is not { Count: > 0 } || StartedRow(ownerJournal, questId) is not { } row)
+            return false;
+        var plan = new Plan(row);
+        foreach (var pair in vars)
+            plan.Vars[pair.Key] = pair.Value;
+        return WriteJournal(ownerJournal, questId, plan);
+    }
+
+    /// <summary>
+    /// Summons do not survive a relog or restart: put every started quest back to the state its summons' despawn
+    /// vars describe (saga <c>spawned</c> / <c>Quest0</c>), so the step can be redone.
+    /// </summary>
+    public bool ResetSpawnVars(QuestJournal journal)
+    {
+        bool changed = false;
+        foreach (var row in journal.All().ToList())
+        {
+            if (row.Phase != QuestPhase.Started || _catalog.Find(row.QuestId) is not { } quest)
+                continue;
+            Dictionary<string, string>? vars = null;
+            foreach (var dialog in quest.Dialogs)
+            {
+                foreach (var op in dialog.Ops)
+                {
+                    if (op is SummonOp { Summon.GoneVars: { } gone })
+                    {
+                        foreach (var pair in gone)
+                            (vars ??= new(StringComparer.Ordinal))[pair.Key] = pair.Value;
+                    }
+                }
+            }
+
+            changed |= ApplySpawnVars(journal, row.QuestId, vars);
+        }
+
+        return changed;
+    }
+
+    static QuestProgress? StartedRow(QuestJournal journal, int questId) =>
+        journal.Find(questId) is { Phase: QuestPhase.Started } row ? row : null;
+
     QuestOutcome OnNpc(QuestJournal journal, PlayerInventory inventory, int npcId, QuestActor? actor, QuestHook hook,
-        string label, bool everyoneOnly = false)
+        string label, bool everyoneOnly = false, string? ownedMode = null)
     {
         QuestOutcome? last = null;
         var sounds = new List<string>();
@@ -125,12 +185,13 @@ public sealed partial class QuestMachine : IQuestKillHook
         var items = new List<BagTouch>();
         var spawns = new List<int>();
         var spawnsAt = new List<QuestSpawnPoint>();
+        var extras = new QuestExtras();
         long exp = 0;
         int sp = 0;
         bool changed = false;
         foreach (var quest in _catalog.Quests)
         {
-            var dialog = Find(quest, hook, npcId, "", journal.Find(quest.Id), actor, inventory, _random);
+            var dialog = Find(quest, hook, npcId, "", journal.Find(quest.Id), actor, inventory, _random, ownedMode);
             if (dialog == null || dialog.Party || (everyoneOnly && !dialog.Everyone))
                 continue;
             var outcome = Apply(journal, inventory, quest, dialog, label);
@@ -141,6 +202,7 @@ public sealed partial class QuestMachine : IQuestKillHook
             items.AddRange(outcome.Items);
             spawns.AddRange(outcome.Spawns);
             spawnsAt.AddRange(outcome.SpawnsAt);
+            extras.MergeFrom(outcome.Extras);
             exp += outcome.Exp;
             sp += outcome.Sp;
             changed |= outcome.JournalChanged;
@@ -163,6 +225,7 @@ public sealed partial class QuestMachine : IQuestKillHook
             Items = items,
             Spawns = spawns,
             SpawnsAt = spawnsAt,
+            Extras = extras.Empty ? QuestExtras.None : extras,
             Exp = exp,
             Sp = sp
         };
@@ -289,7 +352,8 @@ public sealed partial class QuestMachine : IQuestKillHook
             SpawnsAt = outcome.SpawnsAt,
             Noble = outcome.Noble,
             Teleport = outcome.Teleport,
-            Social = outcome.Social
+            Social = outcome.Social,
+            Extras = outcome.Extras
         };
     }
 }

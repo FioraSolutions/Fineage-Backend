@@ -7,10 +7,10 @@ Status: **implemented** — every Mobius talk NPC and kill target is wired, the 
 
 | Status | Count |
 |---|---|
-| implemented | 179 |
-| partial | 94 |
-| stub | 34 |
-| missing | 37 |
+| implemented | 211 |
+| partial | 93 |
+| stub | 33 |
+| missing | 7 |
 | **total Mobius quests** | **344** |
 
 Fineage-only packs: 256, 998 (Q256 newbie helper gift, Q998 Net smoke).
@@ -69,37 +69,37 @@ Related non-quest scripts: `village_master/*Change1|Change2` and `FirstClassTran
 | 51 | O'Fulle's Special Bait | 36+ | fishing | partial | no kill: 1/1 mobs; auto-port |
 | 52 | Willie's Special Bait | 48+ | fishing | partial | no kill: 1/1 mobs; auto-port |
 | 53 | Linnaeus' Special Bait | 60+ | fishing | partial | no kill: 1/1 mobs; auto-port |
-| 70 | Saga of the Phoenix Knight |  | 3rd class (Saga) | missing | AbstractSagaQuest |
-| 71 | Saga of Eva's Templar |  | 3rd class (Saga) | missing | AbstractSagaQuest |
-| 72 | Saga of the Sword Muse |  | 3rd class (Saga) | missing | AbstractSagaQuest |
-| 73 | Saga of the Duelist |  | 3rd class (Saga) | stub | 1 dialog(s), no start; auto-port |
-| 74 | Saga of the Dreadnoughts |  | 3rd class (Saga) | missing | AbstractSagaQuest |
-| 75 | Saga of the Titan |  | 3rd class (Saga) | missing | AbstractSagaQuest |
-| 76 | Saga of the Grand Khavatari |  | 3rd class (Saga) | missing | AbstractSagaQuest |
-| 77 | Saga of the Dominator |  | 3rd class (Saga) | missing | AbstractSagaQuest |
-| 78 | Saga of the Doomcryer |  | 3rd class (Saga) | missing | AbstractSagaQuest |
-| 79 | Saga of the Adventurer |  | 3rd class (Saga) | missing | AbstractSagaQuest |
-| 80 | Saga of the Wind Rider |  | 3rd class (Saga) | missing | AbstractSagaQuest |
-| 81 | Saga of the Ghost Hunter |  | 3rd class (Saga) | missing | AbstractSagaQuest |
-| 82 | Saga of the Sagittarius |  | 3rd class (Saga) | missing | AbstractSagaQuest |
-| 83 | Saga of the Moonlight Sentinel |  | 3rd class (Saga) | missing | AbstractSagaQuest |
-| 84 | Saga of the Ghost Sentinel |  | 3rd class (Saga) | missing | AbstractSagaQuest |
-| 85 | Saga of the Cardinal |  | 3rd class (Saga) | missing | AbstractSagaQuest |
-| 86 | Saga of the Hierophant |  | 3rd class (Saga) | missing | AbstractSagaQuest |
-| 87 | Saga of Eva's Saint |  | 3rd class (Saga) | missing | AbstractSagaQuest |
-| 88 | Saga of the Archmage |  | 3rd class (Saga) | missing | AbstractSagaQuest |
-| 89 | Saga of the Mystic Muse |  | 3rd class (Saga) | missing | AbstractSagaQuest |
-| 90 | Saga of the Storm Screamer |  | 3rd class (Saga) | missing | AbstractSagaQuest |
-| 91 | Saga of the Arcana Lord |  | 3rd class (Saga) | missing | AbstractSagaQuest |
-| 92 | Saga of the Elemental Master |  | 3rd class (Saga) | missing | AbstractSagaQuest |
-| 93 | Saga of the Spectral Master |  | 3rd class (Saga) | missing | AbstractSagaQuest |
-| 94 | Saga of the Soultaker |  | 3rd class (Saga) | missing | AbstractSagaQuest |
-| 95 | Saga of the Hell Knight |  | 3rd class (Saga) | missing | AbstractSagaQuest |
-| 96 | Saga of the Spectral Dancer |  | 3rd class (Saga) | missing | AbstractSagaQuest |
-| 97 | Saga of the Shillien Templar |  | 3rd class (Saga) | missing | AbstractSagaQuest |
-| 98 | Saga of the Shillien Saint |  | 3rd class (Saga) | missing | AbstractSagaQuest |
-| 99 | Saga of the Fortune Seeker |  | 3rd class (Saga) | missing | AbstractSagaQuest |
-| 100 | Saga of the Maestro |  | 3rd class (Saga) | missing | AbstractSagaQuest |
+| 70 | Saga of the Phoenix Knight |  | 3rd class (Saga) | implemented | saga engine (QuestCatalog.Sagas + _sagas.json); simplified: no skill casts, helper NPC chat timers |
+| 71 | Saga of Eva's Templar |  | 3rd class (Saga) | implemented | saga engine (QuestCatalog.Sagas + _sagas.json); simplified: no skill casts, helper NPC chat timers |
+| 72 | Saga of the Sword Muse |  | 3rd class (Saga) | implemented | saga engine (QuestCatalog.Sagas + _sagas.json); simplified: no skill casts, helper NPC chat timers |
+| 73 | Saga of the Duelist |  | 3rd class (Saga) | implemented | saga engine (QuestCatalog.Sagas + _sagas.json); simplified: no skill casts, helper NPC chat timers |
+| 74 | Saga of the Dreadnoughts |  | 3rd class (Saga) | implemented | saga engine (QuestCatalog.Sagas + _sagas.json); simplified: no skill casts, helper NPC chat timers |
+| 75 | Saga of the Titan |  | 3rd class (Saga) | implemented | saga engine (QuestCatalog.Sagas + _sagas.json); simplified: no skill casts, helper NPC chat timers |
+| 76 | Saga of the Grand Khavatari |  | 3rd class (Saga) | implemented | saga engine (QuestCatalog.Sagas + _sagas.json); simplified: no skill casts, helper NPC chat timers |
+| 77 | Saga of the Dominator |  | 3rd class (Saga) | implemented | saga engine (QuestCatalog.Sagas + _sagas.json); simplified: no skill casts, helper NPC chat timers |
+| 78 | Saga of the Doomcryer |  | 3rd class (Saga) | implemented | saga engine (QuestCatalog.Sagas + _sagas.json); simplified: no skill casts, helper NPC chat timers |
+| 79 | Saga of the Adventurer |  | 3rd class (Saga) | implemented | saga engine (QuestCatalog.Sagas + _sagas.json); simplified: no skill casts, helper NPC chat timers |
+| 80 | Saga of the Wind Rider |  | 3rd class (Saga) | implemented | saga engine (QuestCatalog.Sagas + _sagas.json); simplified: no skill casts, helper NPC chat timers |
+| 81 | Saga of the Ghost Hunter |  | 3rd class (Saga) | implemented | saga engine (QuestCatalog.Sagas + _sagas.json); simplified: no skill casts, helper NPC chat timers |
+| 82 | Saga of the Sagittarius |  | 3rd class (Saga) | implemented | saga engine (QuestCatalog.Sagas + _sagas.json); simplified: no skill casts, helper NPC chat timers |
+| 83 | Saga of the Moonlight Sentinel |  | 3rd class (Saga) | implemented | saga engine (QuestCatalog.Sagas + _sagas.json); simplified: no skill casts, helper NPC chat timers |
+| 84 | Saga of the Ghost Sentinel |  | 3rd class (Saga) | implemented | saga engine (QuestCatalog.Sagas + _sagas.json); simplified: no skill casts, helper NPC chat timers |
+| 85 | Saga of the Cardinal |  | 3rd class (Saga) | implemented | saga engine (QuestCatalog.Sagas + _sagas.json); simplified: no skill casts, helper NPC chat timers |
+| 86 | Saga of the Hierophant |  | 3rd class (Saga) | implemented | saga engine (QuestCatalog.Sagas + _sagas.json); simplified: no skill casts, helper NPC chat timers |
+| 87 | Saga of Eva's Saint |  | 3rd class (Saga) | implemented | saga engine (QuestCatalog.Sagas + _sagas.json); simplified: no skill casts, helper NPC chat timers |
+| 88 | Saga of the Archmage |  | 3rd class (Saga) | implemented | saga engine (QuestCatalog.Sagas + _sagas.json); simplified: no skill casts, helper NPC chat timers |
+| 89 | Saga of the Mystic Muse |  | 3rd class (Saga) | implemented | saga engine (QuestCatalog.Sagas + _sagas.json); simplified: no skill casts, helper NPC chat timers |
+| 90 | Saga of the Storm Screamer |  | 3rd class (Saga) | implemented | saga engine (QuestCatalog.Sagas + _sagas.json); simplified: no skill casts, helper NPC chat timers |
+| 91 | Saga of the Arcana Lord |  | 3rd class (Saga) | implemented | saga engine (QuestCatalog.Sagas + _sagas.json); simplified: no skill casts, helper NPC chat timers |
+| 92 | Saga of the Elemental Master |  | 3rd class (Saga) | implemented | saga engine (QuestCatalog.Sagas + _sagas.json); simplified: no skill casts, helper NPC chat timers |
+| 93 | Saga of the Spectral Master |  | 3rd class (Saga) | implemented | saga engine (QuestCatalog.Sagas + _sagas.json); simplified: no skill casts, helper NPC chat timers |
+| 94 | Saga of the Soultaker |  | 3rd class (Saga) | implemented | saga engine (QuestCatalog.Sagas + _sagas.json); simplified: no skill casts, helper NPC chat timers |
+| 95 | Saga of the Hell Knight |  | 3rd class (Saga) | implemented | saga engine (QuestCatalog.Sagas + _sagas.json); simplified: no skill casts, helper NPC chat timers |
+| 96 | Saga of the Spectral Dancer |  | 3rd class (Saga) | implemented | saga engine (QuestCatalog.Sagas + _sagas.json); simplified: no skill casts, helper NPC chat timers |
+| 97 | Saga of the Shillien Templar |  | 3rd class (Saga) | implemented | saga engine (QuestCatalog.Sagas + _sagas.json); simplified: no skill casts, helper NPC chat timers |
+| 98 | Saga of the Shillien Saint |  | 3rd class (Saga) | implemented | saga engine (QuestCatalog.Sagas + _sagas.json); simplified: no skill casts, helper NPC chat timers |
+| 99 | Saga of the Fortune Seeker |  | 3rd class (Saga) | implemented | saga engine (QuestCatalog.Sagas + _sagas.json); simplified: no skill casts, helper NPC chat timers |
+| 100 | Saga of the Maestro |  | 3rd class (Saga) | implemented | saga engine (QuestCatalog.Sagas + _sagas.json); simplified: no skill casts, helper NPC chat timers |
 | 101 | Sword of Solidarity | 9+ | story / newbie | implemented | hand-ported |
 | 102 | Sea of Spores Fever | 12+ | story / newbie | implemented | hand-ported |
 | 103 | Spirit of Craftsman | 11+ | story / newbie | partial | no kill: 1/5 mobs; auto-port |
@@ -325,7 +325,7 @@ Related non-quest scripts: `village_master/*Change1|Change2` and `FirstClassTran
 | 621 | Egg Delivery | 68+ | repeatable | partial | no talk: 31544,31545,31546,31547; auto-port |
 | 622 | Specialty Liquor Delivery | 68+ | repeatable | partial | no talk: 31543,31544,31545,31546; auto-port |
 | 623 | The Finest Food | 71+ | repeatable | partial | no kill: 3/3 mobs; auto-port |
-| 624 | The Finest Ingredients - Part 1 | 73+ | repeatable | partial | no kill: 4/4 mobs; auto-port |
+| 624 | The Finest Ingredients - Part 1 | 73+ | repeatable | implemented | auto-port |
 | 625 | The Finest Ingredients - Part 2 | 73+ | repeatable | partial | no kill: 1/1 mobs; timers; auto-port |
 | 626 | A Dark Twilight | 60+ | one-time | implemented | hand-ported |
 | 627 | Heart in Search of Power | 60+ | repeatable | partial | no kill: 14/14 mobs; auto-port |
