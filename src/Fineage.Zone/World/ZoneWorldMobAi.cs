@@ -24,6 +24,7 @@ public sealed partial class ZoneWorld
             TickLeash(now);
             TickMobAttacks(now);
             TickCorpseDecay(now);
+            TickQuestSpawns(now);
             TickAttackStance(now);
             return 0;
         });

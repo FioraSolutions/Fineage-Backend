@@ -64,6 +64,7 @@ public sealed partial class QuestCatalog
         public Dictionary<string, int>? VarBelow { get; set; }
         /// <summary>Mobius <c>getPaperdollItemId(PAPERDOLL_RHAND)</c> in this list. Null = no gate.</summary>
         public List<int>? Weapons { get; set; }
+        public string? Owned { get; set; }
     }
 
     sealed class OpDto
@@ -92,6 +93,17 @@ public sealed partial class QuestCatalog
         public int? Action { get; set; }
         /// <summary><c>take_all</c>: item ids to remove entirely (Mobius <c>takeItems(player, id, -1)</c>).</summary>
         public List<int>? Items { get; set; }
+        public string? Text { get; set; }
+        public int? ClassId { get; set; }
+        public bool AtPlayer { get; set; }
+        public int? DespawnSec { get; set; }
+        public bool Owned { get; set; }
+        public bool SoloGuard { get; set; }
+        public string? Say { get; set; }
+        public string? GoneSay { get; set; }
+        public string? GuardSay { get; set; }
+        public Dictionary<string, string>? GoneVars { get; set; }
+        public Dictionary<string, string>? DeadVars { get; set; }
     }
 
     sealed class PriceDto

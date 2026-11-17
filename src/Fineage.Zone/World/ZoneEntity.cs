@@ -48,6 +48,8 @@ sealed partial class ZoneEntity
     public Dictionary<int, int>? SoulAbsorbers { get; set; }
     /// <summary>Mobius <c>npc.setScriptValue(1)</c> after an onAttack step spawned helpers (once per mob).</summary>
     public bool QuestAttackSpawned { get; set; }
+    /// <summary>Set on NPCs a quest step raised: owner, despawn timer, saga summon data.</summary>
+    public QuestSpawnState? QuestSpawn { get; set; }
     /// <summary>Players: changes on class transfer (Mobius setClassId).</summary>
     public int ClassId { get; set; }
     public int NpcId

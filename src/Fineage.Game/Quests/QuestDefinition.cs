@@ -84,6 +84,64 @@ public sealed record TeleportOp(int X, int Y, int Z) : QuestOp;
 /// <summary>Mobius <c>broadcastPacket(new SocialAction(player, action))</c>.</summary>
 public sealed record SocialOp(int Action) : QuestOp;
 
+/// <summary>
+/// Mobius <c>addSpawn</c> + a per-spawn quest timer (sagas): an NPC owned by the quest player, optionally at the
+/// player's feet, that despawns after <see cref="DespawnSec"/> and writes vars back into the owner's quest row.
+/// </summary>
+public sealed record QuestSummon(
+    int NpcId,
+    int? X,
+    int? Y,
+    int? Z,
+    bool AtPlayer,
+    int DespawnSec,
+    /// <summary>Kill / attack credit for this spawn goes to the owner's journal (<c>owned</c> steps).</summary>
+    bool Owned,
+    /// <summary>Mobius Archon of Halisha: a hit from anyone else, or from the owner in a party, makes it leave.</summary>
+    bool SoloGuard,
+    string? Say,
+    string? GoneSay,
+    string? GuardSay,
+    IReadOnlyDictionary<string, string>? GoneVars,
+    IReadOnlyDictionary<string, string>? DeadVars)
+{
+    /// <summary>Quest whose row the vars go into; filled when the step runs.</summary>
+    public int QuestId { get; init; }
+}
+
+public sealed record SummonOp(QuestSummon Summon) : QuestOp;
+
+/// <summary>Mobius <c>NpcSay</c> from the dialog / killed NPC; <c>PLAYERNAME</c> becomes the player's name.</summary>
+public sealed record SayOp(string Text) : QuestOp;
+
+/// <summary>Mobius <c>player.setPlayerClass</c> (+ base class when no subclass is active) — the saga 3rd class.</summary>
+public sealed record ChangeClassOp(int ClassId) : QuestOp;
+
+/// <summary>Mobius <c>deleteSpawn(npc)</c> on the dialog / attacked NPC, without its despawn vars.</summary>
+public sealed record DespawnOp : QuestOp;
+
+/// <summary>Side effects that zone carries out after the journal commit (summons, NPC speech, class change).</summary>
+public sealed class QuestExtras
+{
+    public static QuestExtras None { get; } = new();
+
+    public List<QuestSummon> Summons { get; } = [];
+    public List<string> Says { get; } = [];
+    public int ClassChange { get; set; }
+    public bool Despawn { get; set; }
+
+    public bool Empty => Summons.Count == 0 && Says.Count == 0 && ClassChange == 0 && !Despawn;
+
+    public void MergeFrom(QuestExtras other)
+    {
+        Summons.AddRange(other.Summons);
+        Says.AddRange(other.Says);
+        if (other.ClassChange != 0)
+            ClassChange = other.ClassChange;
+        Despawn |= other.Despawn;
+    }
+}
+
 public sealed record QuestDialog(
     int NpcId,
     QuestHook Hook,
@@ -117,7 +175,12 @@ public sealed record QuestDialog(
     /// <summary>Mobius <c>getQuestItemsCount(id) &lt; n</c> per item (the upper bound of an <see cref="AtLeast"/> ladder).</summary>
     IReadOnlyDictionary<int, int>? Below = null,
     /// <summary>Mobius <c>executeForEachPlayer</c> kill step: every party member near the corpse runs it, not only the killer.</summary>
-    bool Everyone = false);
+    bool Everyone = false,
+    /// <summary>
+    /// Kill / attack step on a quest-owned spawn, run against the owner's journal: <c>any</c> (whoever killed it)
+    /// or <c>solo</c> (the owner killed it outside a party). Null = an ordinary step.
+    /// </summary>
+    string? Owned = null);
 
 /// <summary>
 /// Who is talking. Mobius quest scripts branch on <c>player.getRace()</c> / <c>getLevel()</c>

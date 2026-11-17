@@ -291,6 +291,18 @@ public sealed partial class QuestMachine
                 case SocialOp social:
                     plan.Social = social.Action;
                     break;
+                case SummonOp summon:
+                    plan.Extras.Summons.Add(summon.Summon with { QuestId = quest.Id });
+                    break;
+                case SayOp say:
+                    plan.Extras.Says.Add(say.Text);
+                    break;
+                case ChangeClassOp change:
+                    plan.Extras.ClassChange = change.ClassId;
+                    break;
+                case DespawnOp:
+                    plan.Extras.Despawn = true;
+                    break;
             }
         }
 
@@ -334,7 +346,8 @@ public sealed partial class QuestMachine
             SpawnsAt = plan.SpawnsAt,
             Noble = plan.Noble,
             Teleport = plan.Teleport,
-            Social = plan.Social
+            Social = plan.Social,
+            Extras = plan.Extras.Empty ? QuestExtras.None : plan.Extras
         };
     }
 }

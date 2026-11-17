@@ -4,11 +4,14 @@ namespace Fineage.Game.Quests;
 
 public sealed partial class QuestMachine
 {
-    static QuestDialog? Find(QuestDefinition quest, QuestHook hook, int npcId, string eventName, QuestProgress? state, QuestActor? actor = null, PlayerInventory? inventory = null, Func<double>? random = null)
+    static QuestDialog? Find(QuestDefinition quest, QuestHook hook, int npcId, string eventName, QuestProgress? state, QuestActor? actor = null, PlayerInventory? inventory = null, Func<double>? random = null, string? ownedMode = null)
     {
         foreach (var dialog in quest.Dialogs)
         {
             if (dialog.Hook != hook || dialog.NpcId != npcId)
+                continue;
+            // Owned steps run only for the owner of a quest spawn: "solo" credit also allows "any" rows.
+            if (ownedMode == null ? dialog.Owned != null : dialog.Owned == null || (dialog.Owned == "solo" && ownedMode != "solo"))
                 continue;
             if (hook == QuestHook.Event && !string.Equals(dialog.Event, eventName, StringComparison.Ordinal))
                 continue;
@@ -245,6 +248,7 @@ public sealed partial class QuestMachine
         public bool Noble;
         public (int X, int Y, int Z)? Teleport;
         public int Social;
+        public QuestExtras Extras { get; } = new();
         public long Exp;
         public int Sp;
     }

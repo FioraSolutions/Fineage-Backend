@@ -63,6 +63,7 @@ public sealed class QuestOutcome
     public (int X, int Y, int Z)? Teleport { get; init; }
     /// <summary>Mobius SocialAction id broadcast for the player, 0 none.</summary>
     public int Social { get; init; }
+    public QuestExtras Extras { get; init; } = QuestExtras.None;
 
     public bool Ok => Failure == QuestFailure.None;
 }
