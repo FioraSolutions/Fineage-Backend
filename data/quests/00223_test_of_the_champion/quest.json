@@ -939,6 +939,70 @@
       ]
     },
     {
+      "npcId": 20145,
+      "hook": "attack",
+      "when": "started",
+      "cond": 6,
+      "chance": 0.15,
+      "html": "",
+      "ops": [
+        {
+          "op": "spawn_npc",
+          "npcId": 27088
+        },
+        {
+          "op": "spawn_npc",
+          "npcId": 27088
+        }
+      ]
+    },
+    {
+      "npcId": 20145,
+      "hook": "attack",
+      "when": "started",
+      "cond": 6,
+      "chance": 0.4118,
+      "html": "",
+      "ops": [
+        {
+          "op": "spawn_npc",
+          "npcId": 27088
+        }
+      ]
+    },
+    {
+      "npcId": 20551,
+      "hook": "attack",
+      "when": "started",
+      "cond": 10,
+      "chance": 0.15,
+      "html": "",
+      "ops": [
+        {
+          "op": "spawn_npc",
+          "npcId": 27089
+        },
+        {
+          "op": "spawn_npc",
+          "npcId": 27089
+        }
+      ]
+    },
+    {
+      "npcId": 20551,
+      "hook": "attack",
+      "when": "started",
+      "cond": 10,
+      "chance": 0.4118,
+      "html": "",
+      "ops": [
+        {
+          "op": "spawn_npc",
+          "npcId": 27089
+        }
+      ]
+    },
+    {
       "npcId": 30196,
       "hook": "event",
       "when": "any",

@@ -86,3 +86,25 @@ public sealed class NetQuestPartyKillTests
         Assert.Equal(1, mate.Inventory!.CountOf(1043));
     }
 }
+
+/// <summary>Mobius Quest.onAttack: Q234 Fate's Whisper reddens the Pipette Knife on a hit against Baium.</summary>
+public sealed class NetQuestAttackTests
+{
+    [Fact]
+    public async Task Hitting_baium_with_the_pipette_knife_gives_the_red_knife()
+    {
+        var kit = new NetTestKit();
+        var (_, hero) = await kit.EnterAsync();
+        hero.Quests.Add(234, QuestPhase.Started).Replace(QuestPhase.Started, new Dictionary<string, string> { ["cond"] = "7" });
+        var knife = hero.Inventory!.Add(4665);
+        var baium = new ZoneEntity { Kind = ZoneEntityKind.Npc, NpcId = 29020, ObjectId = 0 };
+
+        kit.World.QuestAttackForTest(hero, baium);
+        Assert.Equal(0, hero.Inventory.CountOf(4673));
+
+        hero.Inventory.Equip(knife);
+        kit.World.QuestAttackForTest(hero, baium);
+        Assert.Equal(1, hero.Inventory.CountOf(4673));
+        Assert.Equal(0, hero.Inventory.CountOf(4665));
+    }
+}

@@ -1,3 +1,4 @@
+using Fineage.Game.Recipes;
 using Fineage.Game.Quests;
 using Xunit;
 
@@ -12,15 +13,20 @@ public sealed class SecondClassTrialTests
 {
     static readonly GameData Data = GameData.LoadDefault();
 
-    internal static bool Walk(int questId, QuestActor me, int rewardItem, int rounds = 400)
+    internal static bool Walk(int questId, QuestActor me, int rewardItem, int rounds = 400, bool craft = false,
+        params (int ItemId, int Count)[] seed)
     {
         var quest = Data.Quests.Find(questId)!;
         var m = new QuestMachine(Data.Quests, Data.Items, () => 0.0);
         var bag = new PlayerInventory(Data.Items);
+        foreach (var (itemId, count) in seed)
+            bag.AddPieces(itemId, count);
         var j = new QuestJournal();
+        var known = new List<RecipeDefinition>();
         var talks = quest.Dialogs.Where(d => d.Hook == QuestHook.Talk).Select(d => d.NpcId).Distinct().ToArray();
         var events = quest.Dialogs.Where(d => d.Hook == QuestHook.Event).Select(d => (d.NpcId, d.Event)).Distinct().ToArray();
         var kills = quest.Dialogs.Where(d => d.Hook == QuestHook.Kill).Select(d => d.NpcId).Distinct().ToArray();
+        var hits = quest.Dialogs.Where(d => d.Hook == QuestHook.Attack).Select(d => d.NpcId).Distinct().ToArray();
         for (int round = 0; round < rounds; round++)
         {
             foreach (var (npc, ev) in events)
@@ -44,9 +50,31 @@ public sealed class SecondClassTrialTests
 
             foreach (int npc in kills)
                 m.OnKill(j, bag, npc, me);
+            foreach (int npc in hits)
+                m.OnAttack(j, bag, npc, me);
+
+            // Dwarven trials craft their quest items (Journeyman Ring, Key of Titan): learn each recipe scroll, then
+            // make the item whenever every ingredient is in the bag.
+            if (craft)
+                Craft(bag, known);
         }
 
         return false;
+    }
+
+    static void Craft(PlayerInventory bag, List<RecipeDefinition> known)
+    {
+        foreach (var item in bag.Items.ToArray())
+            if (Data.Recipes.TryGetByRecipeItem(item.ItemId, out var learn) && !known.Contains(learn)
+                && bag.TryTake(item.ItemId, 1, new List<BagTouch>()))
+                known.Add(learn);
+        foreach (var r in known)
+            while (r.Ingredients.All(i => bag.CountOf(i.ItemId) >= i.Count))
+            {
+                foreach (var i in r.Ingredients)
+                    bag.TryTake(i.ItemId, i.Count, new List<BagTouch>());
+                bag.AddPieces(r.Production.ItemId, r.Production.Count);
+            }
     }
 
     [Theory]
@@ -69,6 +97,7 @@ public sealed class SecondClassTrialTests
     [InlineData(214, 2, 39, 2674)]  // Trial of the Scholar — Dark Wizard
     [InlineData(230, 1, 26, 3336)]  // Test of the Summoner — Elven Wizard
     [InlineData(220, 3, 50, 3203)]  // Testimony of Glory — Orc Shaman
+    [InlineData(233, 3, 50, 2879)]  // Test of the War Spirit — Orc Shaman
     public void Trial_can_be_finished(int questId, int race, int classId, int mark) =>
         Assert.True(Walk(questId, new QuestActor(race, 45, classId), mark), $"quest {questId} never handed out {mark}");
 
@@ -91,6 +120,11 @@ public sealed class SecondClassTrialTests
     [InlineData(214, 0, 15)]
     [InlineData(230, 3, 49)]
     [InlineData(220, 0, 1)]   // Testimony of Glory is orc only
+    [InlineData(233, 3, 45)]
+    [InlineData(216, 0, 1)]
+    [InlineData(221, 0, 1)]   // Testimony of Prosperity is dwarf only
+    [InlineData(231, 4, 54)]  // Maestro is for Artisans
+    [InlineData(232, 3, 47)]
     public void Trial_refuses_other_classes(int questId, int race, int classId) =>
         Assert.False(Walk(questId, new QuestActor(race, 45, classId), 57, rounds: 1) ||
                      WalkStarts(questId, new QuestActor(race, 45, classId)));
@@ -114,6 +148,69 @@ public sealed class SecondClassTrialTests
     {
         Assert.True(Data.Items.TryGet(3026, out var spear));
         Assert.Equal(ItemKind.Weapon, spear!.Kind);
+    }
+
+    [Fact]
+    public void Lord_trial_can_be_finished_with_adena_and_bone_arrows() =>
+        Assert.True(Walk(232, new QuestActor(3, 45, 50), 3390, 400, false, (57, 1000), (1341, 1000)));
+
+    [Theory]
+    [InlineData(216, 4, 54, 3119)]  // Trial of the Guildsman — Scavenger
+    [InlineData(216, 4, 56, 3119)]  // Trial of the Guildsman — Artisan
+    [InlineData(221, 4, 54, 3238)]  // Testimony of Prosperity — Scavenger
+    [InlineData(231, 4, 56, 2867)]  // Test of the Maestro — Artisan
+    public void Dwarf_trial_can_be_finished_by_crafting(int questId, int race, int classId, int mark) =>
+        Assert.True(Walk(questId, new QuestActor(race, 45, classId), mark, 400, true, (57, 10000), (1458, 200),
+            (1867, 100)), $"quest {questId} never handed out {mark}");
+
+    [Fact]
+    public void Fates_whisper_forges_an_A_grade_weapon() =>
+        // The walker picks every B-grade in turn, so the last one (Kaim Vanul's Bones) is the confirmed choice.
+        Assert.True(Walk(234, new QuestActor(0, 76, 88), 5011, 400, false, (1460, 984), (7893, 1)));
+
+    [Fact]
+    public void Fates_whisper_needs_level_75() =>
+        Assert.False(Walk(234, new QuestActor(0, 74, 88), 5011, 50, false, (1460, 984), (7893, 1)));
+
+    [Theory]
+    [InlineData(0.10, 2)]
+    [InlineData(0.30, 1)]
+    [InlineData(0.90, 0)]
+    public void Champion_harpy_hit_calls_matriarchs(double roll, int expected)
+    {
+        var m = new QuestMachine(Data.Quests, Data.Items, () => roll);
+        var j = new QuestJournal();
+        j.Add(223, QuestPhase.Started).Set(QuestProgress.CondVar, "6");
+        var outcome = m.OnAttack(j, new PlayerInventory(Data.Items), 20145, new QuestActor(0, 40, 1));
+        Assert.Equal(expected, outcome.Spawns.Count(id => id == 27088));
+    }
+
+    [Fact]
+    public void Raid_boss_kill_leaves_the_fates_whisper_chest_for_anyone()
+    {
+        var m = new QuestMachine(Data.Quests, Data.Items, () => 0.0);
+        var outcome = m.OnKill(new QuestJournal(), new PlayerInventory(Data.Items), 25035, new QuestActor(0, 76, 88));
+        Assert.Contains(31027, outcome.Spawns);
+    }
+
+    [Fact]
+    public void Baium_reddens_the_pipette_knife_only_when_it_is_in_hand()
+    {
+        const int Knife = 4665, Red = 4673, Baium = 29020;
+        var m = new QuestMachine(Data.Quests, Data.Items, () => 0.0);
+        var bag = new PlayerInventory(Data.Items);
+        var j = new QuestJournal();
+        var me = new QuestActor(0, 76, 88);
+        j.Add(234, QuestPhase.Started).Set(QuestProgress.CondVar, "7");
+        bag.AddPieces(Knife, 1);
+        m.OnAttack(j, bag, Baium, me);
+        Assert.Equal(0, bag.CountOf(Red));
+        bag.Equip(bag.FindByItemId(Knife)!);
+        m.OnAttack(j, bag, Baium, me);
+        Assert.Equal(1, bag.CountOf(Red));
+        Assert.Equal(0, bag.CountOf(Knife));
+        Assert.True(m.HasAttackSteps(Baium));
+        Assert.False(m.HasAttackSteps(20001));
     }
 
     [Theory]
