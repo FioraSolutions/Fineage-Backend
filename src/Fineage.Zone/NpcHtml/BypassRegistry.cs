@@ -76,6 +76,7 @@ public sealed class BypassRegistry
         registry.Register(new BuffBypassHandler());
         registry.Register(new TrainerBypassHandler());
         registry.Register(new FishermanBypassHandler(html));
+        registry.Register(new LotoBypassHandler());
         return registry;
     }
 

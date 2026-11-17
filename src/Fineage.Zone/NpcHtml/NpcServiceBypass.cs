@@ -116,6 +116,19 @@ public sealed class FishermanBypassHandler : IBypassHandler
     }
 }
 
+/// <summary>Lottery seller <c>Loto N</c> (Mobius <c>Loto</c> bypass): N picks the page, a number or a ticket to claim.</summary>
+public sealed class LotoBypassHandler : IBypassHandler
+{
+    public IReadOnlyList<string> Commands { get; } = ["Loto"];
+
+    public BypassReply Handle(BypassCall call)
+    {
+        var parts = call.Command.Split(' ', StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries);
+        int value = parts.Length > 1 && int.TryParse(parts[1], out int v) && v >= 0 ? v : 0;
+        return BypassReply.ServiceCall(NpcServiceIntent.Loto, "", value);
+    }
+}
+
 /// <summary>Merchant <c>TerritoryStatus</c> (Mobius <c>Merchant.showTerritoryStatusWindow</c>): castle, lord and tax page.</summary>
 public sealed class TerritoryBypassHandler : IBypassHandler
 {

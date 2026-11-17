@@ -35039,6 +35039,14 @@
       "weight": 30
     },
     {
+      "id": 4442,
+      "name": "Lottery Ticket",
+      "kind": "etc",
+      "icon": "icon.etc_lottery_card_i00",
+      "price": 2,
+      "weight": 20
+    },
+    {
       "id": 4445,
       "name": "Dye of STR (Str+1 Con-3)",
       "kind": "etc",

@@ -30,6 +30,9 @@ public sealed class ZoneSession
     /// </summary>
     public int TrainerNpcId { get; set; }
 
+    /// <summary>Lottery numbers picked on the ticket seller's button page (Mobius <c>Player.getLoto</c>), 0 = empty.</summary>
+    public int[] LotoPicks { get; } = new int[5];
+
     /// <summary>Interlude-style auto attack: target kept swinging at until it dies or the player stops.</summary>
     public int AutoAttackTargetId { get; set; }
     public long NextAutoAttackUnixMs { get; set; }
