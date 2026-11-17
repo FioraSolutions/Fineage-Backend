@@ -89,7 +89,8 @@ public sealed partial class ZoneWorld
             return null;
         }
 
-        StartStaticCast(session, player, corpse ?? player, request.SkillId, template, levelData, level, now, (_, at) =>
+        // Cast on self; a corpse target is re-checked when the cast lands (the deferred path wants a living target).
+        StartStaticCast(session, player, player, request.SkillId, template, levelData, level, now, (_, at) =>
         {
             if (player.Dead || SummonOf(player) != null)
                 return;
@@ -703,6 +704,16 @@ public sealed partial class ZoneWorld
     {
         lock (_gate)
             return SummonOf(player);
+    }
+
+    internal bool TryGetEntityForTest(int objectId, out ZoneEntity? entity)
+    {
+        lock (_gate)
+        {
+            bool found = _byId.TryGetValue(objectId, out var e);
+            entity = e;
+            return found;
+        }
     }
 
     internal void TickSummonsForTest()
