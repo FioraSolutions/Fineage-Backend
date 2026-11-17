@@ -51,6 +51,10 @@ public sealed partial class QuestCatalog
     {
         if (op.NpcId <= 0)
             throw new InvalidDataException($"{where} quest {questId} spawn_npc needs a positive npcId.");
+        if (op is { X: int x, Y: int y, Z: int z })
+            return new SpawnNpcOp(op.NpcId, x, y, z);
+        if (op.X != null || op.Y != null || op.Z != null)
+            throw new InvalidDataException($"{where} quest {questId} spawn_npc needs all of x, y, z or none.");
         return new SpawnNpcOp(op.NpcId);
     }
 

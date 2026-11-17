@@ -154,14 +154,19 @@ FIRST_CLASSES = [1, 4, 7, 11, 15, 19, 22, 26, 29, 32, 35, 39, 42, 45, 47, 50, 54
 HUMAN, ELF, DARK_ELF, ORC, DWARF = 0, 1, 2, 3, 4
 
 
-def collect_all(mobs, n, at, nxt, chance=1.0, extra=None, **gates):
-    """Mobius "give one of my item (< n); when every item of the set holds n, set cond" kill blocks.
-    mobs: {npcId: itemId} (several npcs may share an item). extra: ops added on completion."""
-    items = sorted(set(mobs.values()))
+def collect_all(mobs, n, at, nxt, chance=1.0, limits=None, **gates):
+    """Mobius "give one of my item (< n); when every item of the set holds its count, set cond" kill blocks.
+    mobs: {npcId: itemId or (itemId, chance)} (several npcs may share an item); limits: per-item counts (default n)."""
+    norm = {npc: (v if isinstance(v, tuple) else (v, chance)) for npc, v in mobs.items()}
+    items = sorted({item for item, _ in norm.values()})
+    lim = {x: (limits or {}).get(x, n) for x in items}
     rows = []
-    for npc, item in mobs.items():
-        need = {x: n for x in items if x != item}
-        need[item] = n - 1
-        rows.append(kill(npc, [drop(item, chance, n, nxt)] + list(extra or []), cond=at, atLeast=need, **gates))
-        rows.append(kill(npc, [drop(item, chance, n)], cond=at, **gates))
+    for npc, (item, p) in norm.items():
+        need = {x: lim[x] for x in items if x != item}
+        need[item] = lim[item] - 1
+        rows.append(kill(npc, [drop(item, p, lim[item], nxt)], cond=at, atLeast=need, **gates))
+        rows.append(kill(npc, [drop(item, p, lim[item])], cond=at, **gates))
     return rows
+
+
+def spawn_at(npc, x, y, z): return {"op": "spawn_npc", "npcId": npc, "x": x, "y": y, "z": z}
