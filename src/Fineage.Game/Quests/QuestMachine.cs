@@ -102,8 +102,22 @@ public sealed partial class QuestMachine : IQuestKillHook
 
     HashSet<int>? _attackNpcs;
 
+    /// <summary>
+    /// Mobius <c>executeForEachPlayer</c>: a party member near the corpse (not the killer, who already ran
+    /// <see cref="OnKill(QuestJournal, PlayerInventory, int, QuestActor?)"/>) gets the <c>everyone</c> kill steps.
+    /// </summary>
+    public QuestOutcome OnEveryoneKill(QuestJournal journal, PlayerInventory inventory, int npcId, QuestActor? actor) =>
+        OnNpc(journal, inventory, npcId, actor, QuestHook.Kill, "kill", everyoneOnly: true);
+
+    /// <summary>True when some quest has an <c>everyone</c> kill step for this NPC.</summary>
+    public bool HasEveryoneSteps(int npcId) =>
+        (_everyoneNpcs ??= _catalog.Quests.SelectMany(static q => q.Dialogs)
+            .Where(static d => d.Hook == QuestHook.Kill && d.Everyone).Select(static d => d.NpcId).ToHashSet()).Contains(npcId);
+
+    HashSet<int>? _everyoneNpcs;
+
     QuestOutcome OnNpc(QuestJournal journal, PlayerInventory inventory, int npcId, QuestActor? actor, QuestHook hook,
-        string label)
+        string label, bool everyoneOnly = false)
     {
         QuestOutcome? last = null;
         var sounds = new List<string>();
@@ -117,7 +131,7 @@ public sealed partial class QuestMachine : IQuestKillHook
         foreach (var quest in _catalog.Quests)
         {
             var dialog = Find(quest, hook, npcId, "", journal.Find(quest.Id), actor, inventory, _random);
-            if (dialog == null || dialog.Party)
+            if (dialog == null || dialog.Party || (everyoneOnly && !dialog.Everyone))
                 continue;
             var outcome = Apply(journal, inventory, quest, dialog, label);
             if (!outcome.Ok)

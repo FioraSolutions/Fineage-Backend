@@ -46,6 +46,7 @@ public sealed partial class QuestCatalog
         public int HasItem { get; set; }
         public int MinCount { get; set; } = 1;
         public bool Party { get; set; }
+        public bool Everyone { get; set; }
         public List<int>? Classes { get; set; }
         public List<int>? HasItems { get; set; }
         public List<int>? LacksItems { get; set; }

@@ -137,7 +137,7 @@ public sealed class NpcTemplateSpawnTests
             ["giran"] = 113,
             ["gludin"] = 84,
             ["gludio"] = 79,
-            ["goddard"] = 160,
+            ["goddard"] = 162, // + Varka / Ketra holy altars (Mobius Q610 / Q616 addSpawn, static here)
             ["heine"] = 61,
             ["hunters"] = 63,
             ["orc_village"] = 72,

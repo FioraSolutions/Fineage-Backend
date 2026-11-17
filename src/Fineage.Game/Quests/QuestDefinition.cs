@@ -115,7 +115,9 @@ public sealed record QuestDialog(
     IReadOnlyDictionary<string, int>? VarBelow = null,
     IReadOnlyList<int>? Weapons = null,
     /// <summary>Mobius <c>getQuestItemsCount(id) &lt; n</c> per item (the upper bound of an <see cref="AtLeast"/> ladder).</summary>
-    IReadOnlyDictionary<int, int>? Below = null);
+    IReadOnlyDictionary<int, int>? Below = null,
+    /// <summary>Mobius <c>executeForEachPlayer</c> kill step: every party member near the corpse runs it, not only the killer.</summary>
+    bool Everyone = false);
 
 /// <summary>
 /// Who is talking. Mobius quest scripts branch on <c>player.getRace()</c> / <c>getLevel()</c>

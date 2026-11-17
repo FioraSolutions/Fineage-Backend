@@ -127,6 +127,9 @@ public sealed partial class ZoneWorld
                     continue;
                 if (guard && p.Karma <= 0)
                     continue;
+                // Mobius VarkaKetra.onNpcHate: Ketra / Varka monsters leave their allies alone.
+                if (Fineage.Game.Quests.QuestMachine.IsAlliedWith(npc.NpcId, p.Inventory))
+                    continue;
                 long dx = npc.X - (long)p.X, dy = npc.Y - (long)p.Y, dz = npc.Z - (long)p.Z;
                 if (dx * dx + dy * dy + dz * dz > (long)npc.AggroRange * npc.AggroRange)
                     continue;

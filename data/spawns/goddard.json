@@ -1602,6 +1602,26 @@
       "heading": 25000,
       "respawnDelaySeconds": 60,
       "respawnRandomSeconds": 0
+    },
+    {
+      "objectId": 98101,
+      "npcId": 31560,
+      "x": 105452,
+      "y": -36775,
+      "z": -1050,
+      "heading": 34000,
+      "respawnDelaySeconds": 60,
+      "respawnRandomSeconds": 0
+    },
+    {
+      "objectId": 98102,
+      "npcId": 31558,
+      "x": 142368,
+      "y": -82512,
+      "z": -6487,
+      "heading": 58000,
+      "respawnDelaySeconds": 60,
+      "respawnRandomSeconds": 0
     }
   ]
 }

@@ -55250,6 +55250,26 @@
       "quest": true
     },
     {
+      "id": 7186,
+      "name": "Horn of Buffalo",
+      "kind": "etc",
+      "icon": "icon.etc_horn_i00",
+      "price": 0,
+      "weight": 0,
+      "stackable": true,
+      "quest": true
+    },
+    {
+      "id": 7187,
+      "name": "Nepenthes Seed",
+      "kind": "etc",
+      "icon": "icon.etc_seed_green_i00",
+      "price": 0,
+      "weight": 0,
+      "stackable": true,
+      "quest": true
+    },
+    {
       "id": 7188,
       "name": "Proof of Avenger",
       "kind": "etc",
@@ -55400,10 +55420,50 @@
       "quest": true
     },
     {
+      "id": 7211,
+      "name": "Mark of Ketra's Alliance - Level 1",
+      "kind": "etc",
+      "icon": "icon.etc_ketra_friendship_1_i00",
+      "price": 0,
+      "weight": 0,
+      "stackable": true,
+      "quest": true
+    },
+    {
+      "id": 7212,
+      "name": "Mark of Ketra's Alliance - Level 2",
+      "kind": "etc",
+      "icon": "icon.etc_ketra_friendship_2_i00",
+      "price": 0,
+      "weight": 0,
+      "stackable": true,
+      "quest": true
+    },
+    {
       "id": 7213,
       "name": "Mark of Ketra's Alliance - Level 3",
       "kind": "etc",
       "icon": "icon.etc_ketra_friendship_3_i00",
+      "price": 0,
+      "weight": 0,
+      "stackable": true,
+      "quest": true
+    },
+    {
+      "id": 7214,
+      "name": "Mark of Ketra's Alliance - Level 4",
+      "kind": "etc",
+      "icon": "icon.etc_ketra_friendship_4_i00",
+      "price": 0,
+      "weight": 0,
+      "stackable": true,
+      "quest": true
+    },
+    {
+      "id": 7215,
+      "name": "Mark of Ketra's Alliance - Level 5",
+      "kind": "etc",
+      "icon": "icon.etc_ketra_friendship_5_i00",
       "price": 0,
       "weight": 0,
       "stackable": true,
@@ -55460,10 +55520,50 @@
       "quest": true
     },
     {
+      "id": 7221,
+      "name": "Mark of Varka's Alliance - Level 1",
+      "kind": "etc",
+      "icon": "icon.etc_barka_friendship_1_i00",
+      "price": 0,
+      "weight": 0,
+      "stackable": true,
+      "quest": true
+    },
+    {
+      "id": 7222,
+      "name": "Mark of Varka's Alliance - Level 2",
+      "kind": "etc",
+      "icon": "icon.etc_barka_friendship_2_i00",
+      "price": 0,
+      "weight": 0,
+      "stackable": true,
+      "quest": true
+    },
+    {
       "id": 7223,
       "name": "Mark of Varka's Alliance - Level 3",
       "kind": "etc",
       "icon": "icon.etc_barka_friendship_3_i00",
+      "price": 0,
+      "weight": 0,
+      "stackable": true,
+      "quest": true
+    },
+    {
+      "id": 7224,
+      "name": "Mark of Varka's Alliance - Level 4",
+      "kind": "etc",
+      "icon": "icon.etc_barka_friendship_4_i00",
+      "price": 0,
+      "weight": 0,
+      "stackable": true,
+      "quest": true
+    },
+    {
+      "id": 7225,
+      "name": "Mark of Varka's Alliance - Level 5",
+      "kind": "etc",
+      "icon": "icon.etc_barka_friendship_5_i00",
       "price": 0,
       "weight": 0,
       "stackable": true,
