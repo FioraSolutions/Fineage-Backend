@@ -49313,6 +49313,28 @@
       "abnormalType": "FORCE_MEDITATION"
     },
     {
+      "skillId": 2096,
+      "name": "Soul Crystal",
+      "levels": 1,
+      "passive": false,
+      "operateType": "A1",
+      "targetType": "ONE",
+      "castRange": 300,
+      "hitTimeMs": 1200,
+      "reuseDelayMs": 3000,
+      "levelData": [
+        {
+          "level": 1,
+          "mpConsume": 26,
+          "power": 0,
+          "abnormalLevel": 0,
+          "magicLevel": 1
+        }
+      ],
+      "magicType": 2,
+      "effectRange": 500
+    },
+    {
       "skillId": 2097,
       "name": "Sowing",
       "levels": 3,

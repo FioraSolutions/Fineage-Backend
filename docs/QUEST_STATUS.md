@@ -7,10 +7,10 @@ Status: **implemented** — every Mobius talk NPC and kill target is wired, the 
 
 | Status | Count |
 |---|---|
-| implemented | 178 |
+| implemented | 179 |
 | partial | 94 |
 | stub | 34 |
-| missing | 38 |
+| missing | 37 |
 | **total Mobius quests** | **344** |
 
 Fineage-only packs: 256, 998 (Q256 newbie helper gift, Q998 Net smoke).
@@ -234,7 +234,7 @@ Related non-quest scripts: `village_master/*Change1|Change2` and `FirstClassTran
 | 345 | Method to Raise the Dead | 35+ | repeatable | partial | no kill: 2/2 mobs; auto-port |
 | 347 | Go Get the Calculator | 12+ | repeatable | implemented | hand-ported |
 | 348 | An Arrogant Search | 60+ | repeatable | partial | no kill: 5/9 mobs; quest spawns missing; auto-port |
-| 350 | Enhance Your Weapon | 40+ | repeatable | missing |  |
+| 350 | Enhance Your Weapon | 40+ | repeatable | implemented | hand-ported |
 | 351 | Black Swan | 32+ | repeatable | partial | no kill: 4/4 mobs; auto-port |
 | 352 | Help Rood Raise A New Pet! | 39+ | repeatable | partial | no kill: 4/4 mobs; auto-port |
 | 353 | Power of Darkness | 55+ | repeatable | implemented | hand-ported |
