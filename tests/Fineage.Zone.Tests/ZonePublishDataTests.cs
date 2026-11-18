@@ -9,7 +9,7 @@ namespace Fineage.Zone.Tests;
 /// <c>Fineage.Zone.csproj</c> lists every <c>data/*.json</c> it copies to the output by hand. A catalog can
 /// be added, its JSON committed, every test still green — because tests find <c>data/</c> by walking up the
 /// source tree — and then <c>dotnet publish</c> ships without the file and the deployed Zone dies on
-/// <see cref="FileNotFoundException"/>. That is exactly what broke <c>deploy-pi</c> (herbs.json, spoil.json,
+/// <see cref="FileNotFoundException"/>. That is exactly what broke a deploy (herbs.json, spoil.json,
 /// skill-combat.json, skill-passives.json, skill-stat-effects.json, village-masters.json).
 /// </para>
 /// <para>
