@@ -177,11 +177,30 @@ public sealed class ZoneToggleAndFakeDeathTests
         Assert.Equal(ActionProtocol.Blocked,
             await kit.World.TryMoveAsync(session, player.X + 100, player.Y, player.Z, CancellationToken.None));
 
-        // A different skill is refused; the Fake Death toggle itself is refused as well (Mobius
-        // RequestMagicSkillUse checks isFakeDeath before the toggle switch).
+        // Another toggle is still refused while the pose is held (Mobius RequestMagicSkillUse isFakeDeath gate).
         Assert.Equal(ActionProtocol.Blocked,
             await kit.World.TrySkillUseAsync(session, SilentMove, 0, CancellationToken.None));
         Assert.True(player.FakeDeath);
+    }
+
+    [Fact]
+    public async Task Fake_death_second_press_stands_the_pawn_up()
+    {
+        var (kit, rec, session, player) = await EnterWithBridgeAsync();
+        player.KnownSkills[FakeDeath] = 1;
+        player.CurMp = 400;
+        Assert.Null(await kit.World.TrySkillUseAsync(session, FakeDeath, 0, CancellationToken.None));
+        Assert.True(player.FakeDeath);
+
+        // Mobius Player.checkUseMagicConditions resets the toggle before the isFakeDeath refuse, so the same skill
+        // used again switches the pose off instead of being blocked.
+        Assert.Null(await kit.World.TrySkillUseAsync(session, FakeDeath, 0, CancellationToken.None));
+
+        Assert.False(player.FakeDeath);
+        Assert.DoesNotContain(player.Abnormals, a => a.Id == FakeDeath);
+        var waits = rec.Of(nameof(IWorldEventPublisher.FanoutChangeWaitType));
+        Assert.Contains(waits, a => (int)a[2]! == ActionProtocol.WaitStopFakeDeath);
+        Assert.Contains(rec.Of(nameof(IWorldEventPublisher.FanoutRevive)), a => (int)a[1]! == player.ObjectId);
     }
 
     [Fact]

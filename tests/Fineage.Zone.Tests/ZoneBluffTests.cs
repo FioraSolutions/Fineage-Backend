@@ -15,6 +15,7 @@ namespace Fineage.Zone.Tests;
 public sealed class ZoneBluffTests
 {
     const int BluffSkill = 358;
+    const int Dagger = 10;
     const int MobId = 9_400_631;
     const int RaidId = 9_400_632;
 
@@ -51,6 +52,11 @@ public sealed class ZoneBluffTests
         var (session, player) = await kit.EnterAsync(classId: 7, race: 0, level: 60); // Rogue, knows Bluff at 55
         player.KnownSkills[BluffSkill] = 1;
         player.CurMp = player.MaxMp = 500;
+        // Bluff carries Mobius' <cond><using kind="DAGGER,DUALDAGGER"/></cond>; class 7 has no starter kit row in
+        // starter-kits.json, so give it the retail dagger the skill demands instead of failing the cast with 113.
+        var bag = player.Inventory!;
+        if (bag.GetEquipped(PaperdollSlot.RHand)?.Template.WeaponType != WeaponType.Dagger)
+            bag.Equip(bag.Add(Dagger)); // Dagger
         Assert.True(kit.World.TryGetEntityById(MobId, out var mob));
         mob.MaxHp = mob.CurHp = 50_000;
         mob.Heading = 0;

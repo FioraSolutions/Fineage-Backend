@@ -138,6 +138,9 @@ public sealed partial class ZoneWorld
                 case "DeleteHateOfMe":
                     DeleteHateOf(caster, target, effect.Chance);
                     break;
+                case "RandomizeHate":
+                    RandomizeHate(caster, target, effect.Chance);
+                    break;
             }
         }
     }
@@ -154,9 +157,30 @@ public sealed partial class ZoneWorld
         if (target.NpcId == 35062 || target.NpcType is "RaidBoss" or "GrandBoss" || target.RaidMinion)
             return;
         // Mobius sends StartRotation + StopRotation to the region and settles the victim at the caster's heading, so the
-        // caster now sees its back (positional crit). The Net contract has no rotation opcode yet, so only the server
-        // heading changes here — peers pick it up on the next presence packet.
-        target.Heading = caster.Heading;
+        // caster now sees its back (positional crit). StopRotation carries the new heading, so the Net fanout reuses
+        // PositionCorrection — the client turns the pawn instead of leaving it facing the caster until the next spawn.
+        ApplyHeadingTurn(target, caster.Heading);
+    }
+
+    /// <summary>
+    /// Mobius <c>StopRotation</c>: set the pawn's heading and tell every watcher, so the client's model turns at once.
+    /// <see cref="ZoneEntity.Heading"/> alone is server-side only — the old Bluff path changed it and the monster kept
+    /// facing the player on screen.
+    /// </summary>
+    void ApplyHeadingTurn(ZoneEntity entity, int heading)
+    {
+        entity.Heading = heading;
+        List<int>? netWatchers = null;
+        foreach (var watcher in Players())
+        {
+            if (watcher.Session != null && watcher.Knownlist.Contains(entity.ObjectId))
+            {
+                netWatchers ??= [];
+                netWatchers.Add(watcher.ObjectId);
+            }
+        }
+        if (netWatchers is { Count: > 0 } && NetBridge != null)
+            NetBridge.FanoutPositionCorrection(netWatchers, entity.ObjectId, entity.X, entity.Y, entity.Z, heading);
     }
 
     /// <summary>Mobius <c>DeleteHateOfMe.onStart</c>: <c>stopHating(effector)</c> on an attackable victim.</summary>
@@ -170,6 +194,37 @@ public sealed partial class ZoneWorld
             return;
         if (target.AggroTargetId == caster.ObjectId)
             SetAggroTarget(target, MostHated(target));
+    }
+
+    /// <summary>
+    /// Mobius <c>RandomizeHate.onStart</c> (Switch 12): the victim's hate for the caster is moved onto a random other
+    /// creature already on its hate list, so a mob fighting a group switches its attention without forgetting the
+    /// caster entirely. Nothing happens when the caster is the only one it hates.
+    /// </summary>
+    void RandomizeHate(ZoneEntity caster, ZoneEntity target, int chance)
+    {
+        if (chance > 0 && chance < 100 && _combatRandom.Next(100) >= chance)
+            return;
+        if (target.Kind != ZoneEntityKind.Npc || !target.Attackable)
+            return;
+        if (ReferenceEquals(caster, target))
+            return;
+
+        List<int> others = [];
+        foreach (int id in target.HateList.Keys)
+        {
+            if (id != caster.ObjectId && _byId.TryGetValue(id, out var other) && other.CurHp > 0 && !other.Dead)
+                others.Add(id);
+        }
+        if (others.Count == 0)
+            return;
+
+        int picked = others[_combatRandom.Next(others.Count)];
+        long hate = target.HateList.GetValueOrDefault(caster.ObjectId);
+        target.HateList.Remove(caster.ObjectId);
+        if (hate > 0)
+            target.HateList[picked] = target.HateList.GetValueOrDefault(picked) + hate;
+        SetAggroTarget(target, MostHated(target));
     }
 
     /// <summary>

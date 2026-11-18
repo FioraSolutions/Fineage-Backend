@@ -40,6 +40,14 @@ public sealed partial class ZoneWorld
         string.Equals(template.OperateType, "T", StringComparison.OrdinalIgnoreCase);
 
     /// <summary>
+    /// Mobius <c>checkUseMagicConditions</c> handles the "already active" toggle before the reuse/MP gates:
+    /// <c>if (skill.isToggle() &amp;&amp; isAffectedBySkill(id)) { stopSkillEffects(...); return false; }</c>. So a press
+    /// that switches a toggle OFF never hits <c>isSkillDisabled</c> / <c>checkDoCastConditions</c>.
+    /// </summary>
+    internal static bool IsActiveToggle(ZoneEntity player, SkillDefinition? template) =>
+        template != null && IsToggleSkill(template) && ActiveToggleIndex(player, template.SkillId) >= 0;
+
+    /// <summary>
     /// Mobius <c>SkillUseIntent</c> entry for <c>operateType T</c>: switch off when already active, otherwise run the
     /// skill's own start gates (Relax needs a seated caster, CHAMELEON_REST too) and apply the toggle abnormal.
     /// </summary>

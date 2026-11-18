@@ -53207,6 +53207,33 @@
       "weight": 0
     },
     {
+      "id": 3470,
+      "name": "Gold Bar",
+      "kind": "etc",
+      "icon": "icon.etc_lump_yellow_i00",
+      "stackable": true,
+      "price": 0,
+      "weight": 0
+    },
+    {
+      "id": 9142,
+      "name": "Apiga",
+      "kind": "etc",
+      "icon": "icon.etc_coin_of_fair_i00",
+      "stackable": true,
+      "price": 0,
+      "weight": 0
+    },
+    {
+      "id": 9143,
+      "name": "Golden Apiga",
+      "kind": "etc",
+      "icon": "icon.etc_coin_of_fair_i00",
+      "stackable": true,
+      "price": 0,
+      "weight": 0
+    },
+    {
       "id": 6674,
       "name": "Sealed Imperial Crusader Breastplate",
       "kind": "armor",

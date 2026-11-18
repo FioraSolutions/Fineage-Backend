@@ -224,6 +224,10 @@ public sealed class NetSkillTests
         caster.KnownSkills[FireVortex] = 1;
         int gremlinObjectId = GremlinObjectId(bench.World);
         Assert.True(bench.World.TryGetEntityById(gremlinObjectId, out var gremlin));
+        // A 40 HP gremlin dies to the 16.8k Fire Vortex hit, and Mobius Creature.doDie -> stopAllEffects() then clears
+        // the abnormal. Keep it alive so the assertion still checks that the debuff lands (Aura Flare passes only
+        // because its lower damage leaves the gremlin breathing).
+        gremlin.MaxHp = gremlin.CurHp = 50_000;
         int hpBefore = gremlin.CurHp;
 
         Assert.Null(await bench.World.TrySelectTargetAsync(actor.Session, gremlinObjectId, CancellationToken.None));

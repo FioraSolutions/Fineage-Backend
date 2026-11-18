@@ -92,6 +92,34 @@ public sealed partial class ZoneWorld
         return best;
     }
 
+    /// <summary>
+    /// Mobius <c>Attackable.reduceHate(target, amount)</c>: <c>AggroInfo.addHate(amount)</c> against the entry —
+    /// a hate-reducing skill (a positive <c>effectPoint</c>, e.g. Trick 11 at the attacker's end of the trade) lowers
+    /// the number, and a zero/negative most-hated entry clears the fight and returns the pawn to idle.
+    /// </summary>
+    void ReduceHate(ZoneEntity npc, ZoneEntity target, long amount)
+    {
+        if (npc.Kind != ZoneEntityKind.Npc || amount <= 0)
+            return;
+        if (!npc.HateList.TryGetValue(target.ObjectId, out long hate))
+            return;
+        long left = hate - amount;
+        if (left > 0)
+        {
+            npc.HateList[target.ObjectId] = left;
+            return;
+        }
+        npc.HateList.Remove(target.ObjectId);
+        int next = MostHated(npc);
+        SetAggroTarget(npc, next);
+        if (next > 0 || npc.ReturningHome)
+            return;
+        // Mobius: nothing left to hate → the pawn goes back to ACTIVE (idle) and stops walking.
+        npc.Chasing = false;
+        StopTimedMove(npc);
+        BroadcastNpcMove(npc, npc.X, npc.Y, npc.Z);
+    }
+
     /// <summary>Mobius <c>GeoEngine.canSeeTarget(creature, target)</c>: no closed door between, then geo LOS.</summary>
     internal bool CanSeeTarget(ZoneEntity from, ZoneEntity to)
     {
