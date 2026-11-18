@@ -1,0 +1,67 @@
+name: deploy
+
+# Pushes to main only (not pull_request) so CI never SSHes from PR builds.
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+concurrency:
+  group: deploy-main
+  cancel-in-progress: false
+
+jobs:
+  deploy:
+    name: deploy-linux-x64-to-homeserver
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup .NET
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: '10.0.x'
+
+      - name: Test
+        run: dotnet test Fineage.Backend.slnx --configuration Release --verbosity minimal
+
+      # The live host is homeserver (Debian 13, x86-64). An arm64 publish made the
+      # binaries unrunnable there, so keep the runtime identifier aligned with the host.
+      - name: Publish Login and Zone (linux-x64 self-contained)
+        run: |
+          dotnet publish src/Fineage.Login/Fineage.Login.csproj \
+            -c Release -r linux-x64 --self-contained true -o publish/login
+          dotnet publish src/Fineage.Zone/Fineage.Zone.csproj \
+            -c Release -r linux-x64 --self-contained true -o publish/zone
+
+      # Reaching the host over the tailnet means the deploy works from any runner network
+      # and needs no public SSH exposure. The OAuth client is tagged so the node appears
+      # as tag:github-actions and the ACL lets it dial homeserver:22.
+      - name: Tailscale
+        uses: tailscale/github-action@v4
+        with:
+          oauth-client-id: ${{ secrets.TS_OAUTH_CLIENT_ID }}
+          oauth-secret: ${{ secrets.TS_OAUTH_SECRET }}
+          tags: tag:github-actions
+          ping: ${{ vars.FINEAGE_HOST || 'homeserver.tailaf5692.ts.net' }}
+
+      # Defaults match the live host, so the workflow runs without per-repo variables.
+      # Override FINEAGE_HOST / FINEAGE_DEPLOY_USER / FINEAGE_APP_ROOT as repository
+      # variables only if the layout changes.
+      - name: Configure SSH
+        env:
+          SSH_PRIVATE_KEY: ${{ secrets.FINEAGE_SSH_PRIVATE_KEY || secrets.FINEAGE_PI_SSH_PRIVATE_KEY }}
+        run: |
+          install -m 700 -d ~/.ssh
+          printf '%s\n' "$SSH_PRIVATE_KEY" > ~/.ssh/id_ed25519
+          chmod 600 ~/.ssh/id_ed25519
+
+      - name: Deploy to homeserver
+        env:
+          FINEAGE_HOST: ${{ vars.FINEAGE_HOST || 'homeserver.tailaf5692.ts.net' }}
+          FINEAGE_DEPLOY_USER: ${{ vars.FINEAGE_DEPLOY_USER || 'nikita' }}
+          FINEAGE_APP_ROOT: ${{ vars.FINEAGE_APP_ROOT || '/home/nikita/fineage-backend/deploy' }}
+          FINEAGE_SSH_KEY: ~/.ssh/id_ed25519
+        run: |
+          chmod +x deploy/deploy-to-host.sh deploy/run-login.sh deploy/run-zone.sh
+          deploy/deploy-to-host.sh publish/login publish/zone

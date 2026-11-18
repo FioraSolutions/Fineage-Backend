@@ -24,7 +24,14 @@ sealed class ZoneHost : IAsyncDisposable
 
     public int Port { get; }
 
-    /// <summary>Net listener on an ephemeral port, with the world simulation started beside it.</summary>
+    /// <summary>
+    /// Net listener on an ephemeral port, with the world simulation started beside it.
+    /// Geo is explicitly empty: the selftest asserts the exact destination it asked for, and
+    /// <see cref="GeoEngine.LoadDefault"/> would silently pick up an operator's local
+    /// <c>data/geodata</c> and clip the leg, so the same test passed in CI (no region files)
+    /// and failed on a dev box with them installed. Keep this host geo-free; geo behavior is
+    /// covered by the dedicated geo tests.
+    /// </summary>
     public static ZoneHost StartNet(HandoffTokens tokens, ZoneWorld? world = null, IAccountStore? accounts = null)
     {
         var cts = new CancellationTokenSource();
@@ -33,7 +40,8 @@ sealed class ZoneHost : IAsyncDisposable
             aoi: new SingleCellAoi(),
             accounts: accounts,
             includeEnabledMaps: false,
-            activeMapId: SpawnCatalog.SmokeMapId);
+            activeMapId: SpawnCatalog.SmokeMapId,
+            geo: Geo.GeoEngine.Empty);
         created.StartSimulation(cts.Token);
         var server = new NetTcpServer();
         var netZone = new NetZoneServer(tokens, created, accounts);

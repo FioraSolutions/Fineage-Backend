@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# Restart Fineage Login on the live Pi layout (/home/pi/fineage-backend).
+# Restart Fineage Login from the deploy layout (see deploy/deploy-to-host.sh).
 # Public ports: Net TCP 9106 (FINEAGE_NET_LOGIN_PORT), HTTP 5080 (FINEAGE_LOGIN_HTTP_PORT).
 # Net (PacketEnvelope) is the only client transport; the legacy MessagePack V2 listener is gone.
 set -euo pipefail

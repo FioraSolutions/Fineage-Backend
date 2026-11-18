@@ -61,33 +61,113 @@ HTTP register body is `{ "username", "email", "password" }`. Login body is `{ "u
 
 The ticket’s zone address comes from `FINEAGE_ZONE_HOST` (default `127.0.0.1`) and `FINEAGE_ZONE_PORT` (default `9777`). Set the host to the address clients can dial. It is not the bind address.
 
-## Raspberry Pi (live SoT)
+## Live server (`homeserver`)
 
-Live stack on Tailscale host `raspberrypi` (`100.123.81.1`): **`/home/pi/fineage-backend/`** (`login/`, `zone/`, `data/`, `logs/`, `run-login.sh`, `run-zone.sh`, `fineage.env`). Point the landing Worker’s `FINEAGE_LOGIN_API_URL` at `http://<pi>:5080` on a reachable path. This repo does not change Cloudflare or DNS.
+Live stack runs on the Debian host **`homeserver`** — an x86-64 Debian 13 box, reached over Tailscale
+as **`100.118.63.28`** (`ssh homeserver`) from any network. Artifacts live in
+**`/home/nikita/fineage-backend/deploy/`** (`login/`, `zone/`, `data/`, `logs/`, `fineage.env`);
+the git checkout of this repo sits one level up in `/home/nikita/fineage-backend/`.
 
 | Port | Process | Role |
 |------|---------|------|
-| 5080 | `Fineage.Login` | HTTP register/login and `GET /api/status`. Playtest tunnel `https://api.fineage.evpoint.by` forwards here |
-| 2106 | `Fineage.Login` | Net login (WAN remap; process listens **9106**, `FINEAGE_NET_LOGIN_PORT`) |
-| 7777 | `Fineage.Zone` | Net zone (WAN remap; process listens **9777**, `FINEAGE_NET_ZONE_PORT`) |
+| 5080 | `Fineage.Login` | HTTP register/login and `GET /api/status`. Playtest tunnel `https://api-fineage.evpoint.by` forwards here |
+| 2106 | `Fineage.Login` | Net login (public port; process listens **2106**, `FINEAGE_NET_LOGIN_PORT`) |
+| 7777 | `Fineage.Zone` | Net zone (public port; process listens **7777**, `FINEAGE_NET_ZONE_PORT`) |
 
 Zone also binds **127.0.0.1:7780** for `GET /status`. Login’s `GET /api/status` probes it. Set `FINEAGE_ZONE_HOST` / `FINEAGE_HANDOFF_SECRET` (or `handoff.secret`) in `fineage.env`. Deploy never overwrites `data/`, `fineage.env`, or `handoff.secret`.
 
-**Auto-deploy:** push to **`main`** → [`.github/workflows/deploy-pi.yml`](.github/workflows/deploy-pi.yml) (or Actions → deploy-pi → Run workflow). PRs never deploy.
+Public names, both plain A records (DNS-only, no Cloudflare proxy — the orange cloud would break TCP):
 
-**Manual** (machine on Tailscale):
+| Name | Points at | Serves |
+|------|-----------|--------|
+| `login.fineage.evpoint.by` | dynamic WAN IPv4 of `homeserver` | Net login **2106** |
+| `game.fineage.evpoint.by` | same | Net zone **7777** |
+
+The WAN address is dynamic, so both records are kept current by the **DDNS timer** below. Router port
+forwards **2106 → `192.168.1.13:2106`** and **7777 → `192.168.1.13:7777`**. When the ISP moves the
+WAN IP, DNS catches up within five minutes and no redeploy is needed.
+
+### systemd units (all `enabled`)
+
+| Unit | Role |
+|------|------|
+| `fineage-login.service` | `deploy/login/Fineage.Login --bind 0.0.0.0 --http-port 5080` |
+| `fineage-zone.service` | `deploy/zone/Fineage.Zone --bind 0.0.0.0 --state-dir deploy/data` |
+| `cloudflared.service` | Cloudflare tunnel behind `api-fineage` / `fineage.evpoint.by` |
+| `tailscaled.service` | Tailscale (`100.118.63.28`); `--accept-dns=false` so it leaves server DNS alone |
+| `fineage-ddns.timer` | Runs `fineage-ddns.service` every 5 min |
+
+`systemctl restart fineage-login fineage-zone` after replacing binaries; `journalctl -u fineage-login -n 50`.
+
+### DDNS (keeps the A records on the right IP)
+
+`/opt/fineage-ddns/update.sh`, driven by `fineage-ddns.timer` (`OnBootSec=2min`, then every 5 min):
+
+1. Reads this host’s public IPv4 (ifconfig.me, then api.ipify.org, then icanhazip.com).
+2. Compares it with `/var/lib/fineage-ddns/last-ip`; exits when unchanged, so the API is not hit every tick.
+3. `PATCH`es `login.fineage.evpoint.by` and `game.fineage.evpoint.by` on change and stores the new IP.
+
+The Cloudflare API token lives in `/etc/fineage-ddns.env` (`CF_API_TOKEN=…`, root `0600`) and is scoped to
+`Zone → DNS → Edit` on `evpoint.by` only. Rotate it from the Cloudflare dashboard and overwrite that one
+line. A revoked or expired token shows up as `HTTP 403` in `journalctl -u fineage-ddns`; DNS then simply
+stops updating — nothing else breaks.
 
 ```bash
-dotnet publish src/Fineage.Login/Fineage.Login.csproj -c Release -r linux-arm64 --self-contained true -o publish/login
-dotnet publish src/Fineage.Zone/Fineage.Zone.csproj -c Release -r linux-arm64 --self-contained true -o publish/zone
-FINEAGE_PI_HOST=raspberrypi ./deploy/deploy-to-pi.sh publish/login publish/zone
+sudo systemctl start fineage-ddns.service   # force one run
+journalctl -u fineage-ddns -n 20 --output=cat
 ```
 
-**Restart on the Pi** (after binaries are in place):
+This repo does not change Cloudflare or DNS records itself; the timer above does.
+
+### Deploy
+
+**Auto-deploy:** push to **`main`** → [`.github/workflows/deploy.yml`](.github/workflows/deploy.yml)
+(or Actions → `deploy` → Run workflow). PRs never deploy. It publishes `linux-x64`, joins the tailnet as
+`tag:github-actions`, and calls `deploy/deploy-to-host.sh`, which restarts the systemd units and
+health-checks the listeners.
+
+Workflow configuration (repository **variables**, not secrets, for the non-sensitive addresses):
+
+| Name | Value |
+|------|-------|
+| `FINEAGE_HOST` | `homeserver` (or `homeserver.tailaf5692.ts.net`) |
+| `FINEAGE_DEPLOY_USER` | `nikita` |
+| `FINEAGE_APP_ROOT` | `/home/nikita/fineage-backend/deploy` |
+
+Secrets: `FINEAGE_SSH_PRIVATE_KEY` (a key accepted by `nikita@homeserver`), `TS_OAUTH_CLIENT_ID`,
+`TS_OAUTH_SECRET` (Tailscale OAuth client tagged `tag:github-actions`). The ACL must allow that tag to
+reach `homeserver:22`.
+
+**Manual** (from a checkout on `homeserver`, or cross-publish):
 
 ```bash
-cd /home/pi/fineage-backend && ./run-login.sh && ./run-zone.sh
+# on homeserver, x86-64
+dotnet publish src/Fineage.Login/Fineage.Login.csproj -c Release -o publish/login
+dotnet publish src/Fineage.Zone/Fineage.Zone.csproj -c Release -o publish/zone
+./deploy/deploy-to-host.sh publish/login publish/zone
 ```
+
+Cross-machine, same script with explicit targets:
+
+```bash
+FINEAGE_HOST=homeserver FINEAGE_DEPLOY_USER=nikita \
+  FINEAGE_APP_ROOT=/home/nikita/fineage-backend/deploy \
+  ./deploy/deploy-to-host.sh publish/login publish/zone
+```
+
+`deploy/deploy-to-host.sh` rsyncs the two publish trees, preserves `data/`, `logs/`, `fineage.env`,
+restarts `fineage-login` / `fineage-zone` through systemd, then health-checks
+`FINEAGE_NET_LOGIN_PORT` / `FINEAGE_NET_ZONE_PORT` / `FINEAGE_LOGIN_HTTP_PORT` on loopback.
+Set `FINEAGE_RESTART=scripts` to fall back to `run-login.sh` / `run-zone.sh` on a host without units.
+
+**Restart only** (binaries already in place):
+
+```bash
+cd /home/nikita/fineage-backend/deploy && ./run-login.sh && ./run-zone.sh
+```
+
+`deploy/deploy-to-host.sh` and `run-*.sh` keep their historical filenames; `run-*.sh` still restarts
+without systemd, which is why the script defaults to `systemctl` on this host.
 
 Env sample: [`deploy/fineage.env.example`](deploy/fineage.env.example).
 
@@ -121,7 +201,7 @@ The landing does not scrape Prometheus. Zone always publishes the same online ga
 
 See the commented block in `deploy/fineage.env.example`. Export the same meter with the OpenTelemetry .NET SDK (`OTEL_SERVICE_NAME`, `OTEL_EXPORTER_OTLP_ENDPOINT`) if you want a collector instead of `/metrics`.
 
-CI is `.github/workflows/build-and-test.yml` (`dotnet test` on pull requests and pushes to `main` and `cursor/**`). Deploy secrets for the Pi workflow: `TS_OAUTH_CLIENT_ID`, `TS_OAUTH_SECRET`, `FINEAGE_PI_SSH_PRIVATE_KEY`, optional `FINEAGE_PI_HOST` / `FINEAGE_PI_USER` / `FINEAGE_PI_APP_ROOT`.
+CI is `.github/workflows/build-and-test.yml` (`dotnet test` on pull requests and pushes to `main` and `cursor/**`).
 
 Login CLI (same Postgres store):
 

@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# Restart Fineage Zone on the live Pi layout (/home/pi/fineage-backend).
+# Restart Fineage Zone from the deploy layout (see deploy/deploy-to-host.sh).
 # Public port: Net TCP 9777 (FINEAGE_NET_ZONE_PORT). Net (PacketEnvelope) is the only client
 # transport; the legacy MessagePack V2 listener is gone.
 set -euo pipefail
