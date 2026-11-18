@@ -104,6 +104,10 @@ public sealed partial class ZoneWorld
         player.Running = false;
         player.ActiveEnchantObjectId = 0;
         player.Abnormals.Clear();
+        _withAbnormals.Remove(player.ObjectId);
+        // Mobius Creature.doDie -> getEffectList().stopAllEffects() then updateEffectIcons: the corpse's abnormal bar
+        // empties for every watcher, so a stunned/slept victim still plays its death animation and revives clean.
+        FanoutAbnormal(player);
         RemoveAllCubics(player); // Mobius CubicAction / CubicHeal: a dead owner loses its cubics
         RefreshRunSpeed(player); // dead: buff runSpd funcs drop with the abnormals
         player.CombatUntilUnixMs = 0;

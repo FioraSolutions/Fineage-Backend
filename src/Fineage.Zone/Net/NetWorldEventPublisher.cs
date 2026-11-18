@@ -147,6 +147,22 @@ sealed partial class NetWorldEventPublisher : IWorldEventPublisher
             _presence.TrySend(watcher, NetOpcode.ChangeMoveType, payload);
     }
 
+    void IWorldEventPublisher.FanoutPositionCorrection(IReadOnlyList<int> watcherObjectIds, int objectId, int x, int y, int z, int heading)
+    {
+        var id = _ids.AllocateOrGet(objectId);
+        var payload = NetCodec.EncodePositionCorrection(new PositionCorrectionMsg
+        {
+            EntityValue = id.Value,
+            EntityGeneration = id.Generation,
+            X = x,
+            Y = y,
+            Z = z,
+            Heading = heading
+        });
+        foreach (int watcher in watcherObjectIds)
+            _presence.TrySend(watcher, NetOpcode.PositionCorrection, payload);
+    }
+
     void IWorldEventPublisher.FanoutAttackStance(IReadOnlyList<int> watcherObjectIds, int objectId, bool inStance)
     {
         var id = _ids.AllocateOrGet(objectId);

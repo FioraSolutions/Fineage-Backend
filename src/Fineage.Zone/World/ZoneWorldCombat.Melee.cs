@@ -63,12 +63,18 @@ public sealed partial class ZoneWorld
 
         if (DuelBlocksHit(attacker, target))
             return;
+        // Mobius CreatureAI.checkTargetLostOrDead (FAKE_DEATH_DAMAGE_STAND=true): a melee hit on a playing-dead pawn
+        // stands it up before the damage lands.
+        if (target.FakeDeath)
+            WakeUpFromFakeDeath(target, "damage");
         target.CurHp = Math.Max(0, target.CurHp - hit.Damage);
         if (_olympiadArena.Contains(attacker.ObjectId))
             _olympiad.NoteDamage(attacker.ObjectId, hit.Damage);
 
         target.CombatUntilUnixMs = now + ClanProtocol.CombatStanceMillis;
         FanoutVitals(target, PlayerVitalsStatus(target));
+        // Mobius onCreatureDamageReceived → TriggerSkillByDamage (Mirage 445 cancels the attacker's target).
+        RunDamageTriggers(target, attacker, hit.Damage);
         if (target.CurHp > 0)
             MaybeBreakCast(target, hit.Damage);
         if (target.CurHp <= 0)
@@ -139,6 +145,16 @@ public sealed partial class ZoneWorld
                 watchers.Add(player);
         }
 
+        // Mobius Creature.doDie -> stopAllEffects(): a corpse carries no debuffs. Clearing them before the Die packet
+        // also empties the watchers' abnormal bar, so the client's stun/sleep pose no longer holds the pawn on the
+        // Idle state and the death animation actually plays (Zariche/herbs included).
+        if (npc.Abnormals.Count > 0)
+        {
+            npc.Abnormals.Clear();
+            _withAbnormals.Remove(objectId);
+            FanoutAbnormal(npc);
+        }
+
         // Mobius Creature.doDie -> broadcastPacket(new Die(this)): client plays the death animation.
         SetAggroTarget(npc, 0);
         npc.Chasing = false;
@@ -188,6 +204,7 @@ public sealed partial class ZoneWorld
     void DespawnNpc(ZoneEntity npc)
     {
         int objectId = npc.ObjectId;
+        _signets.Remove(objectId);
 
         _aoi.Leave(objectId);
         _byId.Remove(objectId);

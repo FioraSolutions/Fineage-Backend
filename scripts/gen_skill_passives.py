@@ -7,16 +7,29 @@ defenceTraits / attackTraits so jewelry resists (Queen Ant, Antharas, Zaken, Orf
 """
 import glob, json, sys, xml.etree.ElementTree as ET
 STATS = {"runSpd","pAtk","pDef","mAtk","mDef","pAtkSpd","mAtkSpd","accCombat","rEvas","critRate",
-         "regHp","regMp","weightLimit","weightPenalty","mCritRate","mCritPower","critDmg","blowRate","pSkillEvas"}
+         "regHp","regMp","weightLimit","weightPenalty","mCritRate","mCritPower","critDmg","critDmgAdd","blowRate","pSkillEvas"}
 OPS = {"add":"add","sub":"sub","mul":"mul","set":"set"}
 
 def kinds_of(node):
-    """Returns (ok, kinds) where kinds is None for unconditional; ok False for unsupported conditions."""
+    """Returns (ok, kinds, resting) where kinds is None for unconditional; ok False for unsupported conditions.
+
+    Mobius conditions we can honour: ``<using kind="DAGGER"/>`` (right-hand weapon / chest+legs armor / shield) and
+    ``<player resting="true"/>`` (Vital Force 148 regen only while seated).
+    """
     conds = [c for c in node if c.tag not in OPS and c.tag not in ("effect",)]
-    if not conds: return True, None
-    if len(conds) == 1 and conds[0].tag == "using" and conds[0].get("kind"):
-        return True, [k.strip().upper() for k in conds[0].get("kind").split(",")]
-    return False, None
+    if not conds: return True, None, False
+    kinds = None
+    resting = False
+    for c in conds:
+        if c.tag == "using" and c.get("kind"):
+            kinds = [k.strip().upper() for k in c.get("kind").split(",")]
+        elif c.tag == "player" and c.get("resting", "false").lower() == "true":
+            resting = True
+        elif c.tag == "player" and len(c.attrib) == 0:
+            continue
+        else:
+            return False, None, False
+    return True, kinds, resting
 
 def resolve_table(tables, raw, levels):
     if raw is None:
@@ -65,9 +78,10 @@ for f in sorted(glob.glob(sys.argv[1] + "/*.xml")):
             if k.startswith("#"):
                 tables[k[1:]] = v
         skill_cond = None
+        skill_resting = False
         cond = sk.find("cond")
         if cond is not None:
-            ok, skill_cond = kinds_of(cond)
+            ok, skill_cond, skill_resting = kinds_of(cond)
             if not ok: continue
         funcs = []
         fr = sk.find("for")
@@ -84,7 +98,7 @@ for f in sorted(glob.glob(sys.argv[1] + "/*.xml")):
                     continue
                 for fn in parent:
                     if fn.tag not in OPS or fn.get("stat") not in STATS: continue
-                    ok, kinds = kinds_of(fn)
+                    ok, kinds, resting = kinds_of(fn)
                     if not ok: continue
                     v = fn.get("val", "0")
                     try:
@@ -92,8 +106,10 @@ for f in sorted(glob.glob(sys.argv[1] + "/*.xml")):
                     except (KeyError, ValueError):
                         continue
                     kinds = kinds or skill_cond
+                    resting = resting or skill_resting
                     row = {"stat": fn.get("stat"), "op": OPS[fn.tag], "values": vals}
                     if kinds: row["using"] = kinds
+                    if resting: row["resting"] = True
                     funcs.append(row)
         if not funcs and not defence and not attack:
             continue

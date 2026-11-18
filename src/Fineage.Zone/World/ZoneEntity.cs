@@ -148,5 +148,15 @@ sealed partial class ZoneEntity
         set => EnsureVitals().Sitting = value;
     }
 
+    /// <summary>
+    /// Mobius <c>_isFakeDeath</c>. The pawn keeps full HP/MP and is never <see cref="Dead"/>; it just plays the death
+    /// animation (<c>ChangeWaitType WT_START_FAKEDEATH</c>), drops every mob's hate and refuses actions until it wakes.
+    /// </summary>
+    public bool FakeDeath
+    {
+        get => Vitals?.FakeDeath ?? false;
+        set => EnsureVitals().FakeDeath = value;
+    }
+
     ZoneEntityVitalsPayload EnsureVitals() => Vitals ??= new ZoneEntityVitalsPayload();
 }

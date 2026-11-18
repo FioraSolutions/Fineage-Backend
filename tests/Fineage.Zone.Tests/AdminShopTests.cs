@@ -92,6 +92,32 @@ public sealed class AdminShopTests : IDisposable
     }
 
     [Fact]
+    public async Task Currency_page_grants_full_amount_of_every_row()
+    {
+        // Live catalog: GM Shop "Currency" is buylist 9916 (Adena, Ancient Adena, Festival Adena,
+        // Gold Bar, Apiga, Golden Apiga) with price 0 on every row.
+        var kit = new WorldBench();
+        BenchPlayer me = await kit.EnterAsync(name: "KuK");
+
+        foreach (int itemId in new[] { 57, 5575, 6673, 3470, 9142, 9143 })
+            Assert.True(kit.Game.Items.TryGet(itemId, out _), "currency item " + itemId + " missing from items.json");
+
+        Assert.Null(await me.BypassAsync(0, "admin_buy 9916"));
+
+        // Above MaxGrantCount (10 000): the admin page is used to mint large sums, the cap that
+        // guards admin_create_item must not truncate or refuse the purchase.
+        Assert.Null(await me.Buy(0, 9916, (57, 25_000)));
+        Assert.Equal(25_000, me.Inventory.CountOf(57));
+
+        Assert.Null(await me.Buy(0, 9916, (3470, 10)));
+        Assert.Equal(10, me.Inventory.CountOf(3470));
+
+        // Free rows stay in the list (infinite GM stock, never sold out).
+        var buy = Assert.IsType<Fineage.Protocol.BuyListMsg>(kit.Rec.Of(nameof(IWorldEventPublisher.FanoutBuyList)).Last()[1]);
+        Assert.All(buy.Items, row => Assert.Equal(-1, row.Count));
+    }
+
+    [Fact]
     public async Task Non_admin_name_is_forbidden()
     {
         var kit = new WorldBench(html: NpcHtmlCatalog.FromDocuments(new Dictionary<string, string>

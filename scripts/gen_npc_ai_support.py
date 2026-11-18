@@ -137,6 +137,10 @@ def skill_row(sid: int, level: int, info: dict) -> dict:
             row["abnormalLevel"] = table_at(abn, level, default=level)
         if info.get("slot"):
             row["slot"] = info["slot"]
+        # AURA signet skills (5123–5129) pulse on everyone inside affectRange; the zone needs that radius
+        # to know who the EffectPoint NPC buffs.
+        if info.get("affectRange"):
+            row["affectRange"] = info["affectRange"]
     return row
 
 

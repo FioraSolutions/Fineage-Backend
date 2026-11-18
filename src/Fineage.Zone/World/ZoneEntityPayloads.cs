@@ -165,6 +165,8 @@ sealed class ZoneEntityVitalsPayload
     public long ExpBeforeDeath { get; set; }
     public int Sp { get; set; }
     public bool Sitting { get; set; }
+    /// <summary>Mobius <c>_isFakeDeath</c>: the pawn plays dead without being flagged dead.</summary>
+    public bool FakeDeath { get; set; }
     public bool Dead { get; set; }
     /// <summary>Mobius <c>_reviveRequested</c>: a skill resurrection ConfirmDlg is outstanding.</summary>
     public bool ReviveRequested { get; set; }

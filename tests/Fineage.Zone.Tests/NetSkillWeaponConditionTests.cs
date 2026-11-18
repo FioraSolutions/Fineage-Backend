@@ -63,4 +63,29 @@ public sealed class NetSkillWeaponConditionTests
         Assert.False(Unsuitable(rec));
         Assert.True(player.PendingHit != null || session.PendingCastSkillId == MortalBlow);
     }
+
+    const int FocusChance = 356;
+
+    [Fact]
+    public async Task Focus_chance_buff_also_needs_a_dagger()
+    {
+        var (kit, session, player, rec) = await SetupAsync();
+        player.KnownSkills[FocusChance] = 1;
+        var bag = player.Inventory!;
+        if (bag.GetEquipped(PaperdollSlot.RHand) is { } w && w.Template.WeaponType == WeaponType.Dagger)
+            bag.Equip(bag.Add(1)); // Short Sword
+        if (bag.GetEquipped(PaperdollSlot.LHand) is { } off)
+            bag.Unequip(off);
+
+        // Mobius <cond><using kind="DAGGER,DUALDAGGER"/> on the buff itself → SysMsg 113, no MP spent.
+        int mp = player.CurMp;
+        Assert.Null(await kit.World.TrySkillUseAsync(session, FocusChance, 0, CancellationToken.None));
+        Assert.True(Unsuitable(rec));
+        Assert.Equal(mp, player.CurMp);
+        Assert.False(player.SkillReuseUntilMs.ContainsKey(FocusChance));
+
+        bag.Equip(bag.Add(10)); // Dagger
+        Assert.Null(await kit.World.TrySkillUseAsync(session, FocusChance, 0, CancellationToken.None));
+        Assert.True(player.CurMp < mp);
+    }
 }

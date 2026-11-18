@@ -31,6 +31,13 @@ interface IWorldEventPublisher
     void FanoutChangeMoveType(IReadOnlyList<int> watcherObjectIds, int moverObjectId, bool running, float runSpeed, float walkSpeed, bool inWater);
 
     /// <summary>
+    /// Mobius <c>StopRotation</c> (also the tail of <c>StartRotation</c>): the pawn now faces <paramref name="heading"/>.
+    /// Sent as PositionCorrection because the Net contract has no dedicated rotation opcode and the client already
+    /// applies X/Y/Z/heading from it. Called under the ZoneWorld gate.
+    /// </summary>
+    void FanoutPositionCorrection(IReadOnlyList<int> watcherObjectIds, int objectId, int x, int y, int z, int heading);
+
+    /// <summary>
     /// Mobius EtcStatusUpdate (weight penalty level, grade-penalty flag, force charges) to the owner.
     /// Called under the ZoneWorld gate.
     /// </summary>

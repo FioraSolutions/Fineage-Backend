@@ -169,14 +169,19 @@ public static partial class ZoneCombat
 
     /// <summary>
     /// Physical skill damage; on crit Mobius <c>PhysicalAttack</c> ·2 then Fineage also folds
-    /// <paramref name="critDamageMod"/> (<c>CRITICAL_DAMAGE</c>).
+    /// <paramref name="critDamageMod"/> (<c>CRITICAL_DAMAGE</c>), plus the flat <c>CRITICAL_DAMAGE_ADD</c> term
+    /// (<c>critDmgAdd · 6.1 · 77 / pDef</c>) that Mobius sums after the multipliers.
     /// </summary>
     public static int PhysicalSkillDamage(double pAtk, double pDef, double power, bool soulshot, bool crit,
-        double critDamageMod = 1d, double weaponTraitBonus = 1d)
+        double critDamageMod = 1d, double weaponTraitBonus = 1d, double critDamageAdd = 0)
     {
         double damage = 70d * (Math.Max(0, pAtk) * (soulshot ? 2 : 1) + Math.Max(0, power)) / Math.Max(1d, pDef);
         if (crit)
+        {
             damage *= 2 * Math.Max(0, critDamageMod);
+            if (critDamageAdd > 0)
+                damage += critDamageAdd * 6.1 * 77 / Math.Max(1d, pDef);
+        }
         damage *= Math.Max(0, weaponTraitBonus);
         if (damage <= 0)
             return 0;

@@ -102,8 +102,14 @@ public sealed partial class ZoneWorld
             ShotNotice(player.Session, SysMsgCriticalHit, "Critical hit!");
         var defenceTraits = target.Kind == ZoneEntityKind.Npc ? target.DefenceTraits : null;
         var attackTraits = AttackTraitCatalog.FromAbnormals(player.Abnormals.Select(a => (a.Id, a.SkillLevel)));
-        return ZoneCombat.PhysicalSkillDamage(ps.PAtk, pDef, power, ss, crit, ps.CritDmg,
-            ZoneCombat.AttackTraitBonus(ps.Weapon, defenceTraits, attackTraits));
+        // Mobius calcPhysDam crit branch reads CRITICAL_DAMAGE_POS without halving it (only blow/backstab halve).
+        var position = ZoneCombat.PositionOf(player.X, player.Y, target.X, target.Y, target.Heading);
+        var positional = SkillStatEffects.CollectPositional(_statEffects, player.Abnormals, position);
+        double critDamageMod = positional.IsEmpty
+            ? ps.CritDmg
+            : ps.CritDmg * positional.Apply(CombatStat.CritDmgPos, 1d);
+        return ZoneCombat.PhysicalSkillDamage(ps.PAtk, pDef, power, ss, crit, critDamageMod,
+            ZoneCombat.AttackTraitBonus(ps.Weapon, defenceTraits, attackTraits), ps.CritDmgAdd);
     }
 
     public const int SysMsgLethalSuccess = 1668;
@@ -125,9 +131,17 @@ public sealed partial class ZoneWorld
             return 0;
         }
         var attackTraits = AttackTraitCatalog.FromAbnormals(player.Abnormals.Select(a => (a.Id, a.SkillLevel)));
+        // Mobius calcBlowSuccess runs calcStat(BLOW_RATE, …, target, skill), so a positional blow-rate func would fold
+        // here too; CT0's dagger buffs only carry positional crit rate/damage.
+        // calcBlowDamage halves the positional crit-damage bonus: criticalModPos = ((critDmgPos − 1) / 2) + 1.
+        var position = ZoneCombat.PositionOf(player.X, player.Y, target.X, target.Y, target.Heading);
+        var positional = SkillStatEffects.CollectPositional(_statEffects, player.Abnormals, position);
+        double critDamageMod = positional.IsEmpty
+            ? ps.CritDmg
+            : ps.CritDmg * ZoneCombat.BlowPositionalCritDamage(positional.Apply(CombatStat.CritDmgPos, 1d));
         var (damage, outcome) = ZoneCombat.RollBlowDamage(_combatRandom, blow, ps.PAtk, NpcPDef(target), combat.PowerAt(level), ss,
-            front, behind, ps.RandomDamage, combat.BaseCritRate, str, NpcShieldRate(target), target.ShieldDef, ps.CritDmg,
-            ZoneCombat.AttackTraitBonus(ps.Weapon, target.DefenceTraits, attackTraits));
+            front, behind, ps.RandomDamage, combat.BaseCritRate, str, NpcShieldRate(target), target.ShieldDef, critDamageMod,
+            ZoneCombat.AttackTraitBonus(ps.Weapon, target.DefenceTraits, attackTraits), ps.CritDmgAdd);
         int hpAfter = Math.Max(0, target.CurHp - damage);
         bool lethalable = target.NpcType is not ("RaidBoss" or "GrandBoss");
         var (extra, lethal) = ZoneCombat.RollLethal(_combatRandom, combat.FullLethal, combat.HalfLethal,

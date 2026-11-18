@@ -22,8 +22,15 @@ public sealed class SkillStatEffectCatalog
         ["regHp"] = CombatStat.RegHp, ["regMp"] = CombatStat.RegMp,
         ["weightLimit"] = CombatStat.WeightLimit, ["weightPenalty"] = CombatStat.WeightPenalty,
         ["mCritRate"] = CombatStat.MCritRate, ["mCritPower"] = CombatStat.MagicCritDmg,
-        ["critDmg"] = CombatStat.CritDmg, ["blowRate"] = CombatStat.BlowRate,
-        ["pSkillEvas"] = CombatStat.PSkillEvasion
+        ["critDmg"] = CombatStat.CritDmg, ["critDmgAdd"] = CombatStat.CritDmgAdd, ["blowRate"] = CombatStat.BlowRate,
+        ["pSkillEvas"] = CombatStat.PSkillEvasion,
+        // Mobius positional stats (Focus Chance 356 / Focus Power 357 / Focus Death 355 / Assassin Servitor 1348).
+        ["critRatePos"] = CombatStat.CritRatePos, ["critDmgPos"] = CombatStat.CritDmgPos
+    };
+
+    static readonly Dictionary<string, SkillPosition> PositionNames = new(StringComparer.OrdinalIgnoreCase)
+    {
+        ["front"] = SkillPosition.Front, ["side"] = SkillPosition.Side, ["behind"] = SkillPosition.Behind
     };
 
     readonly Dictionary<int, SkillStatEffect> _byId;
@@ -40,8 +47,14 @@ public sealed class SkillStatEffectCatalog
     /// <summary>
     /// Folds every source's stat funcs. Level = stored skill level, else abnormal level clamped to the skill's levels.
     /// <paramref name="onMissing"/> is invoked once per unknown skill id (fail-loud hook).
+    /// <paramref name="position"/> is the owner's current attack side for Mobius positional funcs
+    /// (<c>&lt;player front|behind&gt;</c>, Focus Chance / Focus Power); <see cref="SkillPosition.None"/> keeps them out.
     /// </summary>
-    public CombatStatMods Collect(IEnumerable<SkillStatSource> sources, Action<int>? onMissing = null)
+    public CombatStatMods Collect(
+        IEnumerable<SkillStatSource> sources,
+        Action<int>? onMissing = null,
+        SkillPosition position = SkillPosition.None,
+        Func<string[], bool>? wearing = null)
     {
         CombatStatMods? mods = null;
         foreach (var a in sources)
@@ -57,16 +70,28 @@ public sealed class SkillStatEffectCatalog
                 : (effect.Levels <= 1 ? 1 : Math.Clamp(a.AbnormalValue, 1, effect.Levels));
             mods ??= new CombatStatMods();
             foreach (var f in effect.Funcs)
+            {
+                if (f.Position != SkillPosition.None && f.Position != position)
+                    continue;
+                // Mobius skill-level <cond><using kind> (Focus Chance / Focus Power require a dagger in hand).
+                if (f.Using != null && wearing != null && !wearing(f.Using))
+                    continue;
                 mods.Add(f, level);
+            }
         }
         return mods ?? CombatStatMods.None;
     }
 
     /// <summary>
     /// Folds passive skill funcs (Mobius operateType P) for the <paramref name="known"/> skill → level map into
-    /// <paramref name="mods"/>. Funcs with a <c>using</c> condition apply only when <paramref name="wearing"/> accepts it.
+    /// <paramref name="mods"/>. Funcs with a <c>using</c> condition apply only when <paramref name="wearing"/> accepts it;
+    /// <c>resting</c> funcs (Vital Force) apply only when <paramref name="resting"/> says the owner is seated.
     /// </summary>
-    public CombatStatMods CollectPassives(IReadOnlyDictionary<int, int> known, Func<string[], bool> wearing, CombatStatMods? mods = null)
+    public CombatStatMods CollectPassives(
+        IReadOnlyDictionary<int, int> known,
+        Func<string[], bool> wearing,
+        CombatStatMods? mods = null,
+        bool resting = false)
     {
         foreach (var (skillId, level) in known)
         {
@@ -75,6 +100,41 @@ public sealed class SkillStatEffectCatalog
             foreach (var f in effect.Funcs)
             {
                 if (f.Using != null && !wearing(f.Using))
+                    continue;
+                if (f.Resting && !resting)
+                    continue;
+                mods ??= new CombatStatMods();
+                mods.Add(f, level);
+            }
+        }
+        return mods ?? CombatStatMods.None;
+    }
+
+    /// <summary>
+    /// Folds only the functions gated on an attack side (<c>&lt;player front|behind&gt;</c>). Mobius resolves those in
+    /// <c>calcStat(stat, …, target, skill)</c>, so they must not sit on the cached player stat line — they are folded per
+    /// swing. Returns <see cref="CombatStatMods.None"/> when no active abnormal has positional funcs.
+    /// </summary>
+    public CombatStatMods CollectPositional(
+        IEnumerable<SkillStatSource> sources,
+        SkillPosition position,
+        Func<string[], bool>? wearing = null)
+    {
+        if (position == SkillPosition.None)
+            return CombatStatMods.None;
+        CombatStatMods? mods = null;
+        foreach (var a in sources)
+        {
+            if (!_byId.TryGetValue(a.SkillId, out var effect))
+                continue;
+            int level = a.SkillLevel > 0
+                ? a.SkillLevel
+                : (effect.Levels <= 1 ? 1 : Math.Clamp(a.AbnormalValue, 1, effect.Levels));
+            foreach (var f in effect.Funcs)
+            {
+                if (f.Position == SkillPosition.None || f.Position != position)
+                    continue;
+                if (f.Using != null && wearing != null && !wearing(f.Using))
                     continue;
                 mods ??= new CombatStatMods();
                 mods.Add(f, level);
@@ -119,10 +179,21 @@ public sealed class SkillStatEffectCatalog
                 string[]? usingKinds = e.TryGetProperty("using", out var u)
                     ? u.EnumerateArray().Select(k => (k.GetString() ?? "").ToUpperInvariant()).ToArray()
                     : null;
-                funcs.Add(new SkillStatFunc(stat, op, values, usingKinds));
+                bool resting = e.TryGetProperty("resting", out var r) && r.GetBoolean();
+                SkillPosition position = e.TryGetProperty("position", out var p) &&
+                    PositionNames.TryGetValue(p.GetString() ?? "", out var parsedPosition)
+                        ? parsedPosition
+                        : SkillPosition.None;
+                funcs.Add(new SkillStatFunc(stat, op, values, usingKinds, resting, position));
             }
             if (funcs.Count > 0)
-                byId[id] = new SkillStatEffect(id, name, Math.Max(1, levels), funcs);
+            {
+                // Skill-level <cond><using kind> applies to the skill itself (cast refusal), not only to its funcs.
+                string[]? skillUsing = row.TryGetProperty("using", out var su)
+                    ? su.EnumerateArray().Select(k => (k.GetString() ?? "").ToUpperInvariant()).ToArray()
+                    : null;
+                byId[id] = new SkillStatEffect(id, name, Math.Max(1, levels), funcs) { Using = skillUsing };
+            }
         }
         return new SkillStatEffectCatalog(byId);
     }

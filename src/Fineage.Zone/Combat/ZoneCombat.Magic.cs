@@ -47,11 +47,13 @@ public static partial class ZoneCombat
     /// <summary>
     /// Mobius calcBlowDamage (FatalBlow): 77·(power + pAtk·ss1.458)/pDef · proximity (behind 1.2, side 1.1, front 1).
     /// Backstab (calcBackstabDamage): 77·(power + pAtk)/pDef · ss1.458 · proximity. Shield block adds sDef, perfect → 1.
-    /// Then weapon random spread and skill crit ×2 (rate = baseCritRate·10·STR bonus ‰).
+    /// Then weapon random spread and skill crit ×2 (rate = baseCritRate·10·STR bonus ‰), plus the flat
+    /// <c>critDmgAdd</c> term Mobius adds unconditionally in <c>calcBlowDamage</c>: <c>critDmgAdd · 6.1 · 77 / pDef</c>.
     /// </summary>
     public static (int Damage, BlowOutcome Outcome) RollBlowDamage(Random rnd, BlowEffect effect, double pAtk, double pDef,
         double power, bool soulshot, bool front, bool behind, int randomPercent, int baseCritRate, double strBonus,
-        double shieldRate = 0, int shieldDef = 0, double critDamageMod = 1d, double weaponTraitBonus = 1d)
+        double shieldRate = 0, int shieldDef = 0, double critDamageMod = 1d, double weaponTraitBonus = 1d,
+        double critDamageAdd = 0)
     {
         var shield = RollShield(rnd, shieldRate, false);
         if (shield == ShieldResult.Perfect)
@@ -66,7 +68,13 @@ public static partial class ZoneCombat
             damage *= 1 + rnd.Next(-randomPercent, randomPercent + 1) / 100d;
         bool crit = RollSkillCrit(rnd, baseCritRate, strBonus);
         if (crit)
+        {
             damage *= 2 * Math.Max(0, critDamageMod);
+            // Mobius: criticalAddMod is summed after the multipliers, so Vicious Stance / Critical Power /
+            // crit-damage SA add a flat term instead of scaling the blow.
+            if (critDamageAdd > 0)
+                damage += critDamageAdd * 6.1 * 77 / def;
+        }
         damage *= Math.Max(0, weaponTraitBonus);
         if (damage <= 0)
             return (0, crit ? BlowOutcome.Critical : BlowOutcome.Hit);

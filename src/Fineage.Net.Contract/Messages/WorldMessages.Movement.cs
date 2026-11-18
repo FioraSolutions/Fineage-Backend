@@ -66,7 +66,11 @@ namespace Fineage.Net.Contract
         public int X { get; set; }
         public int Y { get; set; }
         public int Z { get; set; }
-        public int Heading { get; set; }
+        /// <summary>
+        /// L2 heading units (0..65535) when this packet doubles as Mobius <c>StopRotation</c> (Bluff, turn effects).
+        /// <c>-1</c> = position only (ValidatePosition drift / StopMove), so the client must not spin the pawn north.
+        /// </summary>
+        public int Heading { get; set; } = -1;
     }
 
     /// <summary>Mobius/V2 ItemList row (self bag + paperdoll) for Net enter.</summary>

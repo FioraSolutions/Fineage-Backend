@@ -210,11 +210,14 @@ public sealed partial class ZoneWorld
         player.CastingUntilMs = now + Math.Max(0, hitMs);
         session.SelectedTargetId = targetId;
         // Mobius onMagicHitTimer: debuff lands at hitTime; a dead/escaped/hidden target aborts it.
-        // Debuffs also add hate (Mobius EffectPoint / addDamageHate) so Fear AI and retaliation start
-        // even when the cast dealt no HP damage.
+        // Hate on landing is Mobius `effectPoint`, not `power`: onMagicHitTimer runs
+        // `addDamageHate(this, 0, -effectPoint)` for a negative point and `reduceHate(this, effectPoint)` for a
+        // positive one, BEFORE the `<for>` payloads. Veil (106) has no effectPoint at all, so it writes no hate —
+        // the old unconditional AddHate(power) is what made a Veil'd monster turn on the caster.
         // AREA (Poisonous Cloud): affect around the primary target (Mobius affectRange, typically 200).
         bool isArea = template.TargetType.Equals("AREA", StringComparison.OrdinalIgnoreCase);
         int affectRange = isArea ? ResolveAffectRange(template) : 0;
+        int effectPoint = template.EffectPointAt(level);
         ScheduleEffect(player, target, template, level, now, hitMs, (t, at) =>
         {
             if (isArea)
@@ -225,9 +228,111 @@ public sealed partial class ZoneWorld
             if (!ApplyAbnormalFromSkill(template, levelData, t, at, attacker: player))
                 return;
             if (t.Kind == ZoneEntityKind.Npc)
-                AddHate(t, player, hate: Math.Max(1, Math.Abs(levelData.Power)));
+                ApplyEffectPointHate(player, t, effectPoint);
+            // Mobius `Passive` (Veil's whole payload) sets EffectFlag.PASSIVE: Monster.isAggressive() turns false, so
+            // the victim stops starting fights. TURN_PASSIVE also skips the EVT_ATTACKED notify entirely, and the
+            // pawn forgets the caster it was hitting.
+            if (IsTurnPassive(template.AbnormalType))
+                PacifyNpc(t, player, at);
+            RunInstantPayloadEffects(player, t, request.SkillId);
         });
         return null;
+    }
+
+    /// <summary>
+    /// Mobius hostile A1 utility: Trick (11) and Switch (12) carry no abnormal at all — their whole payload is the
+    /// <c>&lt;for&gt;</c> block (<c>DeleteHateOfMe</c> / <c>RandomizeHate</c> / <c>TargetCancel</c>) plus the negative
+    /// <c>effectPoint</c> hate. Same target/range/refusal gates as a debuff, but nothing is applied to the abnormal
+    /// bar; the instant payloads run when the hit lands.
+    /// </summary>
+    string? TrySkillUseHostileUtility(
+        ZoneSession session,
+        ZoneEntity player,
+        SkillUseIntent request,
+        SkillDefinition template,
+        SkillLevelData levelData,
+        int level,
+        long now)
+    {
+        int targetId = request.TargetObjectId > 0 ? request.TargetObjectId : session.SelectedTargetId;
+        if (targetId <= 0)
+            return SkillProtocol.Target;
+        if (!_byId.TryGetValue(targetId, out var target))
+            return SkillProtocol.Target;
+        if (!IsAttackable(player, target))
+            return SkillProtocol.Target;
+        if (!request.CtrlPressed && NeedsForce(player, target))
+            return null;
+        if (HostilePlayableRefused(session, player, target, badSkill: true) ||
+            SiegeFriendRefused(session, player, target) ||
+            PeacePlayableRefused(session, player, target))
+            return null;
+        if (!VisibleTo(player.ObjectId, targetId))
+            return SkillProtocol.Target;
+        if (!ZoneCombat.InCastRange(player.X, player.Y, target.X, target.Y, template.CastRange))
+            return SkillProtocol.Range;
+        UpdatePvPStatus(player, target, now);
+
+        player.CurMp = Math.Max(0, player.CurMp - levelData.MpConsume);
+        var (hitMs, reuseMs) = ScaledSkillTimes(player, template);
+        if (reuseMs > 0)
+            player.SkillReuseUntilMs[request.SkillId] = now + reuseMs;
+
+        var cast = BuildCast(player, target, request.SkillId, level, hitMs, reuseMs);
+        StopForCast(player, target, now);
+        FanoutSkill(player, target, cast, targetStatus: null, CasterMpStatus(player));
+        player.CombatUntilUnixMs = now + ClanProtocol.CombatStanceMillis;
+        player.CastingUntilMs = now + Math.Max(0, hitMs);
+        session.SelectedTargetId = targetId;
+
+        int effectPoint = template.EffectPointAt(level);
+        ScheduleEffect(player, target, template, level, now, hitMs, (t, at) =>
+        {
+            if (t.Kind == ZoneEntityKind.Npc)
+                ApplyEffectPointHate(player, t, effectPoint);
+            RunInstantPayloadEffects(player, t, request.SkillId);
+        });
+        return null;
+    }
+
+    /// <summary>Mobius <c>AbnormalType.TURN_PASSIVE</c> — Veil's slot, the one abnormal Creature.callSkill exempts.</summary>
+    static bool IsTurnPassive(string? slot) =>
+        !string.IsNullOrEmpty(slot) && slot.Equals("TURN_PASSIVE", StringComparison.OrdinalIgnoreCase);
+
+    /// <summary>
+    /// Mobius <c>Creature.onMagicHitTimer</c> hate for an attackable victim: a negative <c>effectPoint</c> adds
+    /// <c>-effectPoint</c> hate, a positive one reduces it, 0 does nothing. Damage skills keep their own
+    /// <c>addDamageHate(damage · 100 / (level + 7))</c> in the melee/skill-damage paths.
+    /// </summary>
+    void ApplyEffectPointHate(ZoneEntity caster, ZoneEntity target, int effectPoint)
+    {
+        if (target.Kind != ZoneEntityKind.Npc || effectPoint == 0)
+            return;
+        if (effectPoint < 0)
+            AddHate(target, caster, hate: -effectPoint);
+        else
+            ReduceHate(target, caster, effectPoint);
+    }
+
+    /// <summary>
+    /// Mobius <c>EffectFlag.PASSIVE</c> / <c>AbnormalType.TURN_PASSIVE</c>: the victim stops being aggressive and
+    /// stops attacking the caster. Its hate entry for the caster is dropped so that, exactly like retail, the mob does
+    /// not retaliate for the Veil itself; other attackers stay on the hate list.
+    /// </summary>
+    void PacifyNpc(ZoneEntity npc, ZoneEntity caster, long now)
+    {
+        if (npc.Kind != ZoneEntityKind.Npc)
+            return;
+        if (npc.AggroTargetId > 0)
+        {
+            _meleeHits.RemoveAll(h => h.AttackerId == npc.ObjectId);
+            npc.NextMobAttackMs = now + ZoneCombat.HitTimeMs(NpcPAtkSpd(npc));
+            npc.Chasing = false;
+            StopTimedMove(npc);
+        }
+        if (npc.HateList.Remove(caster.ObjectId) && npc.AggroTargetId == caster.ObjectId)
+            SetAggroTarget(npc, MostHated(npc));
+        BroadcastNpcMove(npc, npc.X, npc.Y, npc.Z);
     }
 }
 

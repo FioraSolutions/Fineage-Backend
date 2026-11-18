@@ -62,8 +62,7 @@ public sealed class SkillCatalog
             if (row.LevelData == null || row.LevelData.Count == 0)
                 throw new InvalidDataException($"{where} skill {row.SkillId} has no levelData.");
 
-            var levels = new SkillLevelData[row.LevelData.Count];
-            for (int i = 0; i < row.LevelData.Count; i++)
+            var levels = new SkillLevelData[row.LevelData.Count];            for (int i = 0; i < row.LevelData.Count; i++)
             {
                 var levelRow = row.LevelData[i];
                 int level = levelRow.Level == 0 ? i + 1 : levelRow.Level;
@@ -73,7 +72,21 @@ public sealed class SkillCatalog
                     Math.Max(0, levelRow.MpConsume),
                     Math.Max(0, levelRow.Power),
                     abnormalLevel,
-                    Math.Max(0, levelRow.MagicLevel));
+                    Math.Max(0, levelRow.MagicLevel),
+                    Math.Max(0, levelRow.MpInitialConsume),
+                    Math.Max(0, levelRow.ItemConsumeId),
+                    Math.Max(0, levelRow.ItemConsumeCount))
+                {
+                    Extractable = (levelRow.Extractable ?? [])
+                        .Select(g => new ExtractableGroup(
+                            (g.Items ?? [])
+                                .Where(it => it.Id > 0 && it.Count > 0)
+                                .Select(it => new ExtractableItem(it.Id, it.Count))
+                                .ToList(),
+                            Math.Max(0, g.Chance)))
+                        .Where(g => g.Items.Count > 0)
+                        .ToList()
+                };
             }
 
             skills.Add(new SkillDefinition(
@@ -95,7 +108,9 @@ public sealed class SkillCatalog
                 Trait = (row.Trait ?? "").Trim().ToUpperInvariant(),
                 ActivateRate = row.ActivateRate,
                 LvlBonusRate = row.LvlBonusRate <= 0 ? 1 : row.LvlBonusRate,
-                BasicProperty = (row.BasicProperty ?? "").Trim().ToUpperInvariant()
+                BasicProperty = (row.BasicProperty ?? "").Trim().ToUpperInvariant(),
+                EffectPoints = row.EffectPoint is { Count: > 0 } ep ? ep : [],
+                UsingKinds = (row.UsingKinds ?? []).Where(k => !string.IsNullOrWhiteSpace(k)).Select(k => k.Trim().ToUpperInvariant()).ToArray()
             });
         }
 
@@ -126,6 +141,10 @@ public sealed class SkillCatalog
         public string? BasicProperty { get; set; }
         public int MagicType { get; set; }
         public int EffectRange { get; set; }
+        /// <summary>Mobius <c>effectPoint</c>: a scalar row, or the per-level table expanded to a list.</summary>
+        public List<int>? EffectPoint { get; set; }
+        /// <summary>Mobius <c>&lt;cond msgId="113"&gt;&lt;using kind=".."/&gt;</c> weapon gate.</summary>
+        public List<string>? UsingKinds { get; set; }
         public List<LevelDto>? LevelData { get; set; }
     }
 
@@ -136,5 +155,21 @@ public sealed class SkillCatalog
         public int Power { get; set; }
         public int AbnormalLevel { get; set; } = 1;
         public int MagicLevel { get; set; }
+        public int MpInitialConsume { get; set; }
+        public int ItemConsumeId { get; set; }
+        public int ItemConsumeCount { get; set; }
+        public List<ExtractableDto>? Extractable { get; set; }
+    }
+
+    sealed class ExtractableDto
+    {
+        public List<ExtractableItemDto>? Items { get; set; }
+        public double Chance { get; set; }
+    }
+
+    sealed class ExtractableItemDto
+    {
+        public int Id { get; set; }
+        public int Count { get; set; }
     }
 }

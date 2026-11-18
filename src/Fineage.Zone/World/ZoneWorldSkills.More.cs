@@ -141,7 +141,11 @@ public sealed partial class ZoneWorld
             levelDataOk = true;
         }
         long now = _clock().ToUnixTimeMilliseconds();
-        bool onReuse = player.SkillReuseUntilMs.TryGetValue(request.SkillId, out long reuseUntil)
+        // A toggle that is already running is switched OFF by this press, and Mobius handles that in
+        // checkUseMagicConditions before the reuse / MP gates (isSkillDisabled is checked much later), so the active
+        // toggle's own reuse delay must not refuse the second press.
+        bool activeToggle = IsActiveToggle(player, template);
+        bool onReuse = !activeToggle && player.SkillReuseUntilMs.TryGetValue(request.SkillId, out long reuseUntil)
             && reuseUntil > now;
         // Casting queue is not a refusal — check before reuse/MP so queued casts still land.
         if (IsCasting(player, now))
@@ -181,6 +185,42 @@ public sealed partial class ZoneWorld
         // Net timed move: measure range from where the pawn really is now, not the last move order.
         AdvanceMove(player, now);
 
+        // Mobius Skill.checkCondition: <cond><using kind=..></cond> on the skill itself (Focus Chance / Focus Power need
+        // a dagger, Trick/Switch/Bluff too) refuses the cast with SysMsg 113 "<skill> cannot be used due to unsuitable
+        // terms." No MP/reuse spent. Skill.checkCondition runs for every skill, so the gate lives here and not only in
+        // the damage path.
+        // Fishing (1312) also carries <using kind="FISHINGROD"/>, but Mobius' Fishing effect handler owns the rod and
+        // bait checks and answers with 1453 / 1454 ("no fishing pole" / "put bait on your hook"), which is what the
+        // client shows. Letting the generic gate win would replace those retail lines with a bare 113.
+        if (liveTemplate.UsingKinds.Length > 0 && !IsFishingSkill(request.SkillId) &&
+            !Wearing(player, liveTemplate.UsingKinds))
+        {
+            SelfLine(session, SysMsgUnsuitableTerms, $"{liveTemplate.Name} cannot be used due to unsuitable terms.");
+            return null;
+        }
+
+        // Mobius operateType T: the second press switches the toggle off, otherwise it applies its own abnormal.
+        // This branch comes BEFORE the fake-death refuse, mirroring Player.checkUseMagicConditions
+        // ("Note: do not check this before TOGGLE reset"): a fake-dead pawn can switch Fake Death (60) off with a
+        // second press instead of only through the sit/stand action. Every OTHER toggle keeps Mobius' refusal.
+        if (IsToggleSkill(liveTemplate))
+        {
+            if (player.FakeDeath && request.SkillId != ToggleFakeDeath)
+            {
+                SelfLine(session, SysMsgCannotUseWhileStanding, "You cannot move while sitting.");
+                return ActionProtocol.Blocked;
+            }
+            return TrySkillUseToggle(session, player, request, liveTemplate, liveLevelData, level, now);
+        }
+
+        // Mobius RequestMagicSkillUse: a fake-dead pawn refuses every other skill
+        // (YOU_CANNOT_MOVE_WHILE_SITTING + ActionFailed). Only sit/stand, damage or death bring it up.
+        if (player.FakeDeath)
+        {
+            SelfLine(session, SysMsgCannotUseWhileStanding, "You cannot move while sitting.");
+            return ActionProtocol.Blocked;
+        }
+
         if (_summonSkills.Find(request.SkillId) is { } summonSkill)
             return TrySkillUseSummon(session, player, request, summonSkill, liveTemplate, liveLevelData, level, now);
         if (Cubics.SummonSkill(request.SkillId) is { } cubicSkill)
@@ -194,24 +234,82 @@ public sealed partial class ZoneWorld
                 _spoilRules.IsSweepSkill(request.SkillId));
         if (_skillEffects.HasResurrection(request.SkillId))
             return TrySkillUseResurrection(session, player, request, liveTemplate, liveLevelData, level, now);
-        if (liveTemplate.IsBuffSkill)
-            return TrySkillUseBuff(session, player, request, liveTemplate, liveLevelData, level, now);
-        // Mobius nukes that also apply a short abnormal (Aura Flare A3, Fire Vortex DoT+slow, …)
-        // are flagged isDebuff + abnormalTime in skills.json. Prefer skill-combat damage over the
-        // pure-CC debuff path so they still roll magic damage; ResolvePendingHit applies the abnormal.
+
+        // Mobius `isBad()` is `effectPoint < 0 && targetType != SELF`, and RequestMagicSkillUse's target check lets a
+        // bad skill pick an attackable victim. Trick (11) / Switch (12) / Bluff (358) are exactly that: ONE-target
+        // derangement skills with power 0, whose `<for>` payloads (TargetCancel / DeleteHateOfMe / RandomizeHate) are
+        // the whole behaviour. They must never be mistaken for an instant support heal, so they are routed to the
+        // hostile path — the debuff handler when they carry an abnormal, the attack handler otherwise.
+        if (_skillEffects.TryGet(request.SkillId, out var hostileRows) && HasDerangementPayload(hostileRows))
+        {
+            if (liveTemplate.IsDebuffSkill)
+                return TrySkillUseDebuff(session, player, request, liveTemplate, liveLevelData, level, now);
+            return TrySkillUseHostileUtility(session, player, request, liveTemplate, liveLevelData, level, now);
+        }
+
+        // Mobius nukes that also buff the caster through <selfEffects> (Critical Blow 409, Blinding Blow 321,
+        // Evade Shot 369, Aura Flare 1231) are flagged abnormalTime + abnormalType in skills.json while isDebuff
+        // stays false. They are still offensive skills, so `_skillCombat` must win over IsBuffSkill: the old order
+        // sent Critical Blow down the friendly-buff path, which then refused the hostile monster target.
         if (_skillCombat.TryGet(request.SkillId, out _))
             return TrySkillUseAttack(session, player, request, liveTemplate, liveLevelData, level, now);
+        if (liveTemplate.IsBuffSkill)
+            return TrySkillUseBuff(session, player, request, liveTemplate, liveLevelData, level, now);
         if (liveTemplate.IsDebuffSkill)
             return TrySkillUseDebuff(session, player, request, liveTemplate, liveLevelData, level, now);
         // Mobius DispelByCategory (Cancellation) / MagicalAttackMp — must not fall into InstantSupport.
         if (_skillEffects.TryDispelByCategory(request.SkillId, out var dispel))
             return TrySkillUseCancel(session, player, request, liveTemplate, liveLevelData, level, now, dispel);
+        // Mobius DispelBySlot: Escape Shackle / Break Duress / Cure Poison / Purify / Servitor cures. Vitalize (1020)
+        // also heals, so it takes the cleanse first and its Heal comes back through the support path only when the
+        // row carries a real power (it does not — 1020's heal is a #amount table, handled by skill-combat power).
+        if (_skillEffects.TryDispelBySlot(request.SkillId, out var slotRows))
+            return TrySkillUseDispelBySlot(session, player, request, liveTemplate, liveLevelData, level, now, slotRows);
         if (_skillEffects.HasMagicalAttackMp(request.SkillId))
             return TrySkillUseManaBurn(session, player, request, liveTemplate, liveLevelData, level, now);
+
+        // Mobius RestorationRandom (Summon Treasure Key 419) and SummonNpc signets (454–460): self A1 skills whose
+        // effect rows are neither a heal nor an attack. Without this they fell into the support/attack fallthrough,
+        // which threw on the missing heal power (419) or refused the self target (460).
+        if (_skillEffects.TryGet(request.SkillId, out var effectRows) && HasRestorationRandom(effectRows))
+            return TrySkillUseRestorationRandom(session, player, request, liveTemplate, liveLevelData, level, now);
+        if (SignetSkillIds.Contains(request.SkillId))
+            return TrySkillUseSignet(session, player, request, liveTemplate, liveLevelData, level, now);
+
         if (liveTemplate.IsInstantSupportSkill(level) || _skillEffects.HasHeal(request.SkillId))
             return TrySkillUseSupport(session, player, request, liveTemplate, liveLevelData, level, now);
 
         return TrySkillUseAttack(session, player, request, liveTemplate, liveLevelData, level, now);
+    }
+
+    static bool HasRestorationRandom(SkillEffectCatalog.Effect[] rows)
+    {
+        foreach (var row in rows)
+        {
+            if (row.Name.Equals("RestorationRandom", StringComparison.OrdinalIgnoreCase))
+                return true;
+        }
+        return false;
+    }
+
+    /// <summary>
+    /// Mobius derangement payloads that make an A1 skill hostile despite power 0: <c>DeleteHateOfMe</c> (Trick 11,
+    /// Forget 1156, Bluff 358), <c>RandomizeHate</c> (Switch 12, Confusion 2), <c>TargetCancel</c> (Trick/Switch/Bluff)
+    /// and <c>Bluff</c> (turn the victim's back). Without this test they fell into <see cref="SkillDefinition.IsInstantSupportSkill"/>
+    /// because the datapack says targetType ONE, and the support handler refused the hostile monster.
+    /// </summary>
+    static bool HasDerangementPayload(SkillEffectCatalog.Effect[] rows)
+    {
+        foreach (var row in rows)
+        {
+            if (row.Name.Equals("DeleteHateOfMe", StringComparison.OrdinalIgnoreCase) ||
+                row.Name.Equals("RandomizeHate", StringComparison.OrdinalIgnoreCase) ||
+                row.Name.Equals("TargetCancel", StringComparison.OrdinalIgnoreCase) ||
+                row.Name.Equals("TransferHate", StringComparison.OrdinalIgnoreCase) ||
+                row.Name.Equals("Bluff", StringComparison.OrdinalIgnoreCase))
+                return true;
+        }
+        return false;
     }
 
 }

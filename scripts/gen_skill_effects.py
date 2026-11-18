@@ -25,13 +25,28 @@ for f in sorted(src.glob("*.xml")):
                 except (TypeError, ValueError):
                     pass
         rows = []
-        for e in sk.iter("effect"):
+        # Base blocks only: <for> plus the conditional blocks Mobius actually raises (channeling / self / start / end).
+        # enchant1for/enchant2for repeat the same effect with enchant values, so a consumer would tick/drain the same
+        # effect several times per period (Vicious Stance 312 lists MpConsumePerLevel three times) and duplicate rows
+        # would also be emitted for plain skills (Buff twice).
+        blocks = (sk.find("for"), sk.find("channelingEffects"), sk.find("selfEffects"),
+                  sk.find("startEffects"), sk.find("endEffects"))
+        effects = []
+        for block in blocks:
+            if block is not None:
+                effects.extend(block.iter("effect"))
+        # Mobius per-level tables: <table name="#dispelAbnormals">POISON,3 POISON,7</table> is one dispel list per level.
+        tables = {}
+        for t in sk.findall("table"):
+            if t.get("name"):
+                tables[t.get("name")] = (t.text or "").split()
+        for e in effects:
             name = (e.get("name") or "").strip()
             if not name:
                 continue
             row = {"name": name}
             for p in e.findall("param"):
-                # Mobius uses either name=/val= or bare attrs (slot/rate/max).
+                # Mobius uses either name=/val= or bare attrs (slot/rate/max/dispel).
                 pname = p.get("name")
                 pval = p.get("val")
                 if pname and pval is not None:
@@ -39,7 +54,8 @@ for f in sorted(src.glob("*.xml")):
                 for attr, val in p.attrib.items():
                     if attr in ("name", "val"):
                         continue
-                    row[attr] = val
+                    # Only dispel reads per-level tables; other params (#amount, #power) resolve in skills.json.
+                    row[attr] = tables[val] if attr == "dispel" and val in tables else val
             # Also copy effect element attrs except name.
             for attr, val in e.attrib.items():
                 if attr != "name" and attr not in row:

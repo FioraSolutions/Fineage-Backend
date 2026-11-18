@@ -53,8 +53,13 @@ public sealed partial class ZoneWorld
         npc.NextMobAttackMs = _clock().ToUnixTimeMilliseconds() + ZoneCombat.HitTimeMs(NpcPAtkSpd(npc));
     }
 
+    /// <summary>
+    /// Mobius <c>AttackableAI.checkAggroCondition</c> / <c>AggroInfo.checkHate</c>: <c>target.isAlikeDead()</c> covers
+    /// fake death (<c>Player.isAlikeDead()</c> includes <c>_isFakeDeath</c>), so a playing-dead pawn is never a hate
+    /// target and its hate is zeroed — the mob drops it until it stands up and is hit again.
+    /// </summary>
     bool ValidHateTarget(ZoneEntity npc, int playerId) =>
-        _byId.TryGetValue(playerId, out var p) && IsLivePlayable(p) &&
+        _byId.TryGetValue(playerId, out var p) && IsLivePlayable(p) && !p.FakeDeath &&
         SameInstance(npc.ObjectId, p.ObjectId) && ZoneCombat.InAggroRange(npc.X, npc.Y, p.X, p.Y);
 
     /// <summary>A connected living player, or a living summon (Mobius <c>isPlayable</c>).</summary>
@@ -85,6 +90,34 @@ public sealed partial class ZoneWorld
             foreach (int id in stale)
                 npc.HateList.Remove(id);
         return best;
+    }
+
+    /// <summary>
+    /// Mobius <c>Attackable.reduceHate(target, amount)</c>: <c>AggroInfo.addHate(amount)</c> against the entry —
+    /// a hate-reducing skill (a positive <c>effectPoint</c>, e.g. Trick 11 at the attacker's end of the trade) lowers
+    /// the number, and a zero/negative most-hated entry clears the fight and returns the pawn to idle.
+    /// </summary>
+    void ReduceHate(ZoneEntity npc, ZoneEntity target, long amount)
+    {
+        if (npc.Kind != ZoneEntityKind.Npc || amount <= 0)
+            return;
+        if (!npc.HateList.TryGetValue(target.ObjectId, out long hate))
+            return;
+        long left = hate - amount;
+        if (left > 0)
+        {
+            npc.HateList[target.ObjectId] = left;
+            return;
+        }
+        npc.HateList.Remove(target.ObjectId);
+        int next = MostHated(npc);
+        SetAggroTarget(npc, next);
+        if (next > 0 || npc.ReturningHome)
+            return;
+        // Mobius: nothing left to hate → the pawn goes back to ACTIVE (idle) and stops walking.
+        npc.Chasing = false;
+        StopTimedMove(npc);
+        BroadcastNpcMove(npc, npc.X, npc.Y, npc.Z);
     }
 
     /// <summary>Mobius <c>GeoEngine.canSeeTarget(creature, target)</c>: no closed door between, then geo LOS.</summary>
@@ -129,7 +162,7 @@ public sealed partial class ZoneWorld
             npc.NextAggroScanMs = now + AggroScanIntervalMs;
             foreach (var p in players)
             {
-                if (p.Dead || p.CurHp <= 0 || p.Session == null || !SameInstance(npc.ObjectId, p.ObjectId))
+                if (p.Dead || p.CurHp <= 0 || p.Session == null || p.FakeDeath || !SameInstance(npc.ObjectId, p.ObjectId))
                     continue;
                 if (guard && p.Karma <= 0)
                     continue;
