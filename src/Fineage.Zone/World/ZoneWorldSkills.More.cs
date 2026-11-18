@@ -189,7 +189,11 @@ public sealed partial class ZoneWorld
         // a dagger, Trick/Switch/Bluff too) refuses the cast with SysMsg 113 "<skill> cannot be used due to unsuitable
         // terms." No MP/reuse spent. Skill.checkCondition runs for every skill, so the gate lives here and not only in
         // the damage path.
-        if (liveTemplate.UsingKinds.Length > 0 && !Wearing(player, liveTemplate.UsingKinds))
+        // Fishing (1312) also carries <using kind="FISHINGROD"/>, but Mobius' Fishing effect handler owns the rod and
+        // bait checks and answers with 1453 / 1454 ("no fishing pole" / "put bait on your hook"), which is what the
+        // client shows. Letting the generic gate win would replace those retail lines with a bare 113.
+        if (liveTemplate.UsingKinds.Length > 0 && !IsFishingSkill(request.SkillId) &&
+            !Wearing(player, liveTemplate.UsingKinds))
         {
             SelfLine(session, SysMsgUnsuitableTerms, $"{liveTemplate.Name} cannot be used due to unsuitable terms.");
             return null;
