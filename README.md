@@ -121,9 +121,22 @@ This repo does not change Cloudflare or DNS records itself; the timer above does
 
 ### Deploy
 
-**Auto-deploy:** push to **`main`** → [`.github/workflows/deploy-pi.yml`](.github/workflows/deploy-pi.yml)
-(or Actions → `deploy-pi` → Run workflow). PRs never deploy. The workflow publishes `linux-arm64`, which
-does **not** run on this x86-64 host — use the manual path below until the workflow is retargeted.
+**Auto-deploy:** push to **`main`** → [`.github/workflows/deploy.yml`](.github/workflows/deploy.yml)
+(or Actions → `deploy` → Run workflow). PRs never deploy. It publishes `linux-x64`, joins the tailnet as
+`tag:github-actions`, and calls `deploy/deploy-to-host.sh`, which restarts the systemd units and
+health-checks the listeners.
+
+Workflow configuration (repository **variables**, not secrets, for the non-sensitive addresses):
+
+| Name | Value |
+|------|-------|
+| `FINEAGE_HOST` | `homeserver` (or `homeserver.tailaf5692.ts.net`) |
+| `FINEAGE_DEPLOY_USER` | `nikita` |
+| `FINEAGE_APP_ROOT` | `/home/nikita/fineage-backend/deploy` |
+
+Secrets: `FINEAGE_SSH_PRIVATE_KEY` (a key accepted by `nikita@homeserver`), `TS_OAUTH_CLIENT_ID`,
+`TS_OAUTH_SECRET` (Tailscale OAuth client tagged `tag:github-actions`). The ACL must allow that tag to
+reach `homeserver:22`.
 
 **Manual** (from a checkout on `homeserver`, or cross-publish):
 
@@ -131,14 +144,21 @@ does **not** run on this x86-64 host — use the manual path below until the wor
 # on homeserver, x86-64
 dotnet publish src/Fineage.Login/Fineage.Login.csproj -c Release -o publish/login
 dotnet publish src/Fineage.Zone/Fineage.Zone.csproj -c Release -o publish/zone
-FINEAGE_PI_HOST=homeserver FINEAGE_PI_USER=nikita \
-  FINEAGE_PI_APP_ROOT=/home/nikita/fineage-backend/deploy \
-  ./deploy/deploy-to-pi.sh publish/login publish/zone
+./deploy/deploy-to-host.sh publish/login publish/zone
 ```
 
-`deploy/deploy-to-pi.sh` rsyncs the two publish trees, preserves `data/`, `logs/`, `fineage.env`, and
-restarts both processes via `run-login.sh` / `run-zone.sh`, then health-checks
+Cross-machine, same script with explicit targets:
+
+```bash
+FINEAGE_HOST=homeserver FINEAGE_DEPLOY_USER=nikita \
+  FINEAGE_APP_ROOT=/home/nikita/fineage-backend/deploy \
+  ./deploy/deploy-to-host.sh publish/login publish/zone
+```
+
+`deploy/deploy-to-host.sh` rsyncs the two publish trees, preserves `data/`, `logs/`, `fineage.env`,
+restarts `fineage-login` / `fineage-zone` through systemd, then health-checks
 `FINEAGE_NET_LOGIN_PORT` / `FINEAGE_NET_ZONE_PORT` / `FINEAGE_LOGIN_HTTP_PORT` on loopback.
+Set `FINEAGE_RESTART=scripts` to fall back to `run-login.sh` / `run-zone.sh` on a host without units.
 
 **Restart only** (binaries already in place):
 
@@ -146,8 +166,8 @@ restarts both processes via `run-login.sh` / `run-zone.sh`, then health-checks
 cd /home/nikita/fineage-backend/deploy && ./run-login.sh && ./run-zone.sh
 ```
 
-`deploy/deploy-to-pi.sh` and `run-*.sh` keep their historical filenames and defaults (`FINEAGE_PI_*`
-variables, old app root). Pass the values above on this host; renaming them is a separate change.
+`deploy/deploy-to-host.sh` and `run-*.sh` keep their historical filenames; `run-*.sh` still restarts
+without systemd, which is why the script defaults to `systemctl` on this host.
 
 Env sample: [`deploy/fineage.env.example`](deploy/fineage.env.example).
 
@@ -181,7 +201,7 @@ The landing does not scrape Prometheus. Zone always publishes the same online ga
 
 See the commented block in `deploy/fineage.env.example`. Export the same meter with the OpenTelemetry .NET SDK (`OTEL_SERVICE_NAME`, `OTEL_EXPORTER_OTLP_ENDPOINT`) if you want a collector instead of `/metrics`.
 
-CI is `.github/workflows/build-and-test.yml` (`dotnet test` on pull requests and pushes to `main` and `cursor/**`). Deploy secrets for the `deploy-pi` workflow: `TS_OAUTH_CLIENT_ID`, `TS_OAUTH_SECRET`, `FINEAGE_PI_SSH_PRIVATE_KEY`, optional `FINEAGE_PI_HOST` / `FINEAGE_PI_USER` / `FINEAGE_PI_APP_ROOT`. Set `FINEAGE_PI_HOST=homeserver`, `FINEAGE_PI_USER=nikita`, and `FINEAGE_PI_APP_ROOT=/home/nikita/fineage-backend/deploy` for this host.
+CI is `.github/workflows/build-and-test.yml` (`dotnet test` on pull requests and pushes to `main` and `cursor/**`).
 
 Login CLI (same Postgres store):
 
