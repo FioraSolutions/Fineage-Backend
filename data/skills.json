@@ -871,6 +871,9 @@
         -574,
         -578,
         -582
+      ],
+      "usingKinds": [
+        "DUAL"
       ]
     },
     {
@@ -1183,6 +1186,11 @@
         -328,
         -331,
         -333
+      ],
+      "usingKinds": [
+        "DUAL",
+        "SWORD",
+        "BLUNT"
       ]
     },
     {
@@ -1479,6 +1487,11 @@
         -164,
         -166,
         -167
+      ],
+      "usingKinds": [
+        "DUAL",
+        "SWORD",
+        "BLUNT"
       ]
     },
     {
@@ -1543,6 +1556,12 @@
         }
       ],
       "effectPoint": [
+        200,
+        200,
+        200,
+        200,
+        200,
+        200,
         200
       ],
       "usingKinds": [
@@ -1869,7 +1888,7 @@
           "itemConsumeCount": 3
         }
       ],
-      "effectRange": 1000,
+      "effectRange": 400,
       "effectPoint": [
         -99,
         -102,
@@ -1905,6 +1924,11 @@
         -164,
         -166,
         -167
+      ],
+      "usingKinds": [
+        "DUAL",
+        "SWORD",
+        "BLUNT"
       ]
     },
     {
@@ -4552,7 +4576,7 @@
       "passive": false,
       "operateType": "A2",
       "targetType": "ONE",
-      "castRange": 40,
+      "castRange": 400,
       "hitTimeMs": 1000,
       "reuseDelayMs": 3000,
       "levelData": [
@@ -4904,56 +4928,57 @@
       "isDebuff": true,
       "abnormalType": "TARGET_LOCK",
       "effectPoint": [
-        -2401,
-        -2487,
-        -2575,
-        -2755,
-        -2847,
-        -2942,
-        -3134,
-        -3233,
-        -3332,
-        -3536,
-        -3638,
-        -3743,
-        -3953,
-        -4058,
-        -4165,
-        -4273,
-        -4380,
-        -4487,
-        -4595,
-        -4703,
-        -4811,
-        -4918,
-        -5024,
-        -5131,
-        -5237,
-        -5341,
-        -5444,
-        -5547,
-        -5648,
-        -5748,
-        -5847,
-        -5943,
-        -6038,
-        -6131,
-        -6222,
-        -6310,
-        -6396,
-        -6480,
-        -6561,
-        -6639,
-        -6714,
-        -6786,
-        -6855,
-        -6921,
-        -6983,
-        -7042,
-        -7097,
-        -7148,
-        -7196
-      ]
+        -2183,
+        -2261,
+        -2341,
+        -2505,
+        -2589,
+        -2675,
+        -2850,
+        -2940,
+        -3030,
+        -3215,
+        -3308,
+        -3403,
+        -3594,
+        -3690,
+        -3787,
+        -3885,
+        -3982,
+        -4080,
+        -4178,
+        -4276,
+        -4374,
+        -4471,
+        -4568,
+        -4665,
+        -4761,
+        -4856,
+        -4950,
+        -5043,
+        -5135,
+        -5226,
+        -5316,
+        -5403,
+        -5490,
+        -5574,
+        -5657,
+        -5737,
+        -5815,
+        -5891,
+        -5965,
+        -6036,
+        -6104,
+        -6170,
+        -6232,
+        -6292,
+        -6349,
+        -6402,
+        -6452,
+        -6499,
+        -6542
+      ],
+      "effectRange": 900
     },
     {
       "skillId": 29,
@@ -5478,8 +5503,7 @@
         -554
       ],
       "usingKinds": [
-        "DAGGER",
-        "DUALDAGGER"
+        "DAGGER"
       ]
     },
     {
@@ -6347,7 +6371,7 @@
           "power": 187,
           "abnormalLevel": 1,
           "magicLevel": 32,
-          "mpInitialConsume": 19
+          "mpInitialConsume": 18
         },
         {
           "level": 7,
@@ -6371,7 +6395,7 @@
           "power": 219,
           "abnormalLevel": 1,
           "magicLevel": 36,
-          "mpInitialConsume": 22
+          "mpInitialConsume": 21
         }
       ],
       "magicType": 1,
@@ -6420,7 +6444,7 @@
           "power": 100,
           "abnormalLevel": 1,
           "magicLevel": 46,
-          "mpInitialConsume": 9
+          "mpInitialConsume": 8
         },
         {
           "level": 4,
@@ -6484,7 +6508,7 @@
           "power": 100,
           "abnormalLevel": 1,
           "magicLevel": 66,
-          "mpInitialConsume": 13
+          "mpInitialConsume": 12
         },
         {
           "level": 12,
@@ -6508,7 +6532,7 @@
           "power": 100,
           "abnormalLevel": 1,
           "magicLevel": 72,
-          "mpInitialConsume": 14
+          "mpInitialConsume": 13
         },
         {
           "level": 15,
@@ -6841,7 +6865,8 @@
       ],
       "usingKinds": [
         "POLE"
-      ]
+      ],
+      "abnormalVisualEffect": "STUN"
     },
     {
       "skillId": 49,
@@ -6868,7 +6893,7 @@
           "power": 49,
           "abnormalLevel": 1,
           "magicLevel": 46,
-          "mpInitialConsume": 5
+          "mpInitialConsume": 4
         },
         {
           "level": 3,
@@ -6876,7 +6901,7 @@
           "power": 51,
           "abnormalLevel": 1,
           "magicLevel": 47,
-          "mpInitialConsume": 5
+          "mpInitialConsume": 4
         },
         {
           "level": 4,
@@ -6924,7 +6949,7 @@
           "power": 63,
           "abnormalLevel": 1,
           "magicLevel": 56,
-          "mpInitialConsume": 6
+          "mpInitialConsume": 5
         },
         {
           "level": 10,
@@ -6996,7 +7021,7 @@
           "power": 77,
           "abnormalLevel": 1,
           "magicLevel": 66,
-          "mpInitialConsume": 7
+          "mpInitialConsume": 6
         },
         {
           "level": 19,
@@ -7004,7 +7029,7 @@
           "power": 78,
           "abnormalLevel": 1,
           "magicLevel": 67,
-          "mpInitialConsume": 7
+          "mpInitialConsume": 6
         },
         {
           "level": 20,
@@ -8397,7 +8422,7 @@
           "power": 0,
           "abnormalLevel": 1,
           "magicLevel": 46,
-          "mpInitialConsume": 5
+          "mpInitialConsume": 4
         },
         {
           "level": 2,
@@ -8461,7 +8486,7 @@
           "power": 0,
           "abnormalLevel": 3,
           "magicLevel": 66,
-          "mpInitialConsume": 7
+          "mpInitialConsume": 6
         },
         {
           "level": 10,
@@ -8498,27 +8523,28 @@
       ],
       "abnormalTimeSeconds": 10,
       "magicType": 1,
-      "effectRange": 1100,
+      "effectRange": 900,
       "abnormalType": "TURN_FLEE",
       "trait": "DERANGEMENT",
-      "activateRate": 80,
+      "activateRate": 40,
       "lvlBonusRate": 1,
       "basicProperty": "MEN",
       "effectPoint": [
-        -438,
-        -467,
-        -495,
-        -523,
-        -549,
-        -566,
-        -582,
-        -597,
-        -611,
-        -624,
-        -635,
-        -646,
-        -655
-      ]
+        -100,
+        -100,
+        -100,
+        -100,
+        -100,
+        -100,
+        -100,
+        -100,
+        -100,
+        -100,
+        -100,
+        -100,
+        -100
+      ],
+      "abnormalVisualEffect": "TURN_FLEE"
     },
     {
       "skillId": 67,
@@ -10243,7 +10269,8 @@
       ],
       "usingKinds": [
         "SHIELD"
-      ]
+      ],
+      "abnormalVisualEffect": "STUN"
     },
     {
       "skillId": 94,
@@ -10534,9 +10561,9 @@
         -323
       ],
       "usingKinds": [
-        "DAGGER",
-        "DUALDAGGER"
-      ]
+        "DAGGER"
+      ],
+      "abnormalVisualEffect": "DOT_BLEEDING"
     },
     {
       "skillId": 97,
@@ -10743,6 +10770,9 @@
       "effectPoint": [
         303,
         549
+      ],
+      "usingKinds": [
+        "BOW"
       ]
     },
     {
@@ -10889,7 +10919,8 @@
       ],
       "usingKinds": [
         "BLUNT"
-      ]
+      ],
+      "abnormalVisualEffect": "STUN"
     },
     {
       "skillId": 101,
@@ -11235,7 +11266,8 @@
       ],
       "usingKinds": [
         "BOW"
-      ]
+      ],
+      "abnormalVisualEffect": "STUN"
     },
     {
       "skillId": 102,
@@ -11458,7 +11490,8 @@
         -549,
         -582,
         -635
-      ]
+      ],
+      "abnormalVisualEffect": "DOT_POISON"
     },
     {
       "skillId": 104,
@@ -11995,7 +12028,8 @@
       "effectPoint": [
         204,
         438
-      ]
+      ],
+      "abnormalVisualEffect": "ULTIMATE_DEFENCE"
     },
     {
       "skillId": 111,
@@ -12104,6 +12138,9 @@
           "abnormalLevel": 1,
           "magicLevel": 40
         }
+      ],
+      "usingKinds": [
+        "BOW"
       ]
     },
     {
@@ -12980,7 +13017,8 @@
         -635,
         -646,
         -655
-      ]
+      ],
+      "magicType": 1
     },
     {
       "skillId": 129,
@@ -13300,6 +13338,9 @@
           "abnormalLevel": 1,
           "magicLevel": 15
         }
+      ],
+      "usingKinds": [
+        "LIGHT"
       ]
     },
     {
@@ -13599,6 +13640,9 @@
           "abnormalLevel": 1,
           "magicLevel": 74
         }
+      ],
+      "usingKinds": [
+        "DUAL"
       ]
     },
     {
@@ -14441,6 +14485,9 @@
           "abnormalLevel": 1,
           "magicLevel": 52
         }
+      ],
+      "usingKinds": [
+        "SHIELD"
       ]
     },
     {
@@ -16051,6 +16098,9 @@
           "abnormalLevel": 1,
           "magicLevel": 74
         }
+      ],
+      "usingKinds": [
+        "BOW"
       ]
     },
     {
@@ -16379,6 +16429,9 @@
           "abnormalLevel": 1,
           "magicLevel": 74
         }
+      ],
+      "usingKinds": [
+        "DAGGER"
       ]
     },
     {
@@ -17276,6 +17329,9 @@
           "abnormalLevel": 1,
           "magicLevel": 74
         }
+      ],
+      "usingKinds": [
+        "POLE"
       ]
     },
     {
@@ -17604,11 +17660,15 @@
           "abnormalLevel": 1,
           "magicLevel": 74
         }
+      ],
+      "usingKinds": [
+        "SWORD",
+        "BLUNT"
       ]
     },
     {
       "skillId": 221,
-    "abnormalVisualEffect": "STEALTH",
+      "abnormalVisualEffect": "STEALTH",
       "name": "Silent Move",
       "levels": 1,
       "passive": false,
@@ -18483,6 +18543,9 @@
           "abnormalLevel": 1,
           "magicLevel": 74
         }
+      ],
+      "usingKinds": [
+        "LIGHT"
       ]
     },
     {
@@ -18978,6 +19041,9 @@
           "abnormalLevel": 1,
           "magicLevel": 74
         }
+      ],
+      "usingKinds": [
+        "HEAVY"
       ]
     },
     {
@@ -19355,6 +19421,9 @@
           "abnormalLevel": 1,
           "magicLevel": 74
         }
+      ],
+      "usingKinds": [
+        "HEAVY"
       ]
     },
     {
@@ -19697,6 +19766,9 @@
           "abnormalLevel": 1,
           "magicLevel": 74
         }
+      ],
+      "usingKinds": [
+        "LIGHT"
       ]
     },
     {
@@ -23089,6 +23161,10 @@
           "abnormalLevel": 1,
           "magicLevel": 74
         }
+      ],
+      "usingKinds": [
+        "SWORD",
+        "BLUNT"
       ]
     },
     {
@@ -23899,7 +23975,8 @@
       ],
       "usingKinds": [
         "BLUNT"
-      ]
+      ],
+      "abnormalVisualEffect": "STUN"
     },
     {
       "skillId": 261,
@@ -24091,6 +24168,9 @@
         -765,
         -771,
         -776
+      ],
+      "usingKinds": [
+        "DUAL"
       ]
     },
     {
@@ -24718,8 +24798,7 @@
         -333
       ],
       "usingKinds": [
-        "DAGGER",
-        "DUALDAGGER"
+        "DAGGER"
       ]
     },
     {
@@ -25951,7 +26030,7 @@
           "power": 0,
           "abnormalLevel": 1,
           "magicLevel": 58,
-          "mpInitialConsume": 22,
+          "mpInitialConsume": 21,
           "itemConsumeId": 1459,
           "itemConsumeCount": 3
         },
@@ -25991,7 +26070,7 @@
           "power": 0,
           "abnormalLevel": 1,
           "magicLevel": 74,
-          "mpInitialConsume": 28,
+          "mpInitialConsume": 27,
           "itemConsumeId": 1459,
           "itemConsumeCount": 4
         }
@@ -26551,19 +26630,22 @@
           "level": 1,
           "mpConsume": 57,
           "power": 0,
-          "abnormalLevel": 1
+          "abnormalLevel": 1,
+          "magicLevel": 43
         },
         {
           "level": 2,
           "mpConsume": 75,
           "power": 0,
-          "abnormalLevel": 1
+          "abnormalLevel": 1,
+          "magicLevel": 55
         },
         {
           "level": 3,
           "mpConsume": 83,
           "power": 0,
-          "abnormalLevel": 1
+          "abnormalLevel": 1,
+          "magicLevel": 60
         }
       ],
       "effectPoint": [
@@ -27230,7 +27312,7 @@
     },
     {
       "skillId": 296,
-    "abnormalVisualEffect": "STEALTH",
+      "abnormalVisualEffect": "STEALTH",
       "name": "Chameleon Rest",
       "levels": 1,
       "passive": false,
@@ -27280,6 +27362,9 @@
       "effectPoint": [
         597,
         646
+      ],
+      "usingKinds": [
+        "DUAL"
       ]
     },
     {
@@ -27496,7 +27581,7 @@
           "mpConsume": 0,
           "power": 0,
           "abnormalLevel": 1,
-          "magicLevel": 40
+          "magicLevel": 46
         },
         {
           "level": 2,
@@ -28364,7 +28449,17 @@
           "magicLevel": 74
         }
       ],
-      "abnormalTimeSeconds": 120
+      "abnormalTimeSeconds": 120,
+      "usingKinds": [
+        "POLE"
+      ],
+      "effectPoint": [
+        303,
+        303,
+        303,
+        303,
+        303
+      ]
     },
     {
       "skillId": 318,
@@ -28692,7 +28787,7 @@
           "mpConsume": 366,
           "power": 0,
           "abnormalLevel": 1,
-          "magicLevel": 60,
+          "magicLevel": 66,
           "itemConsumeId": 1461,
           "itemConsumeCount": 1,
           "extractable": [
@@ -29050,7 +29145,7 @@
       "effectRange": 400,
       "abnormalType": "TOUCH_OF_DEATH",
       "trait": "DEATH",
-      "activateRate": 80,
+      "activateRate": 40,
       "lvlBonusRate": 1,
       "basicProperty": "CON",
       "effectPoint": [
@@ -29110,8 +29205,7 @@
         -337
       ],
       "usingKinds": [
-        "DAGGER",
-        "DUALDAGGER"
+        "DAGGER"
       ]
     },
     {
@@ -29369,7 +29463,8 @@
       ],
       "usingKinds": [
         "SHIELD"
-      ]
+      ],
+      "abnormalVisualEffect": "SILENCE"
     },
     {
       "skillId": 354,
@@ -29515,16 +29610,17 @@
       "effectRange": 400,
       "abnormalType": "STUN",
       "trait": "DERANGEMENT",
-      "activateRate": 40,
+      "activateRate": 50,
       "lvlBonusRate": 1,
-      "basicProperty": "MEN",
+      "basicProperty": "CON",
       "effectPoint": [
-        -1
+        -360
       ],
       "usingKinds": [
         "DAGGER",
         "DUALDAGGER"
-      ]
+      ],
+      "abnormalVisualEffect": "STUN"
     },
     {
       "skillId": 359,
@@ -29567,7 +29663,7 @@
           "mpConsume": 71,
           "power": 0,
           "abnormalLevel": 2,
-          "magicLevel": 77
+          "magicLevel": 78
         }
       ],
       "abnormalTimeSeconds": 600,
@@ -29608,7 +29704,8 @@
       ],
       "usingKinds": [
         "POLE"
-      ]
+      ],
+      "abnormalVisualEffect": "STUN"
     },
     {
       "skillId": 362,
@@ -29748,7 +29845,7 @@
       "abnormalTimeSeconds": 120,
       "magicType": 1,
       "abnormalType": "DANCE_OF_SHADOW",
-    "abnormalVisualEffect": "STEALTH",
+      "abnormalVisualEffect": "STEALTH",
       "effectPoint": [
         666
       ],
@@ -29810,7 +29907,7 @@
       "abnormalTimeSeconds": 30,
       "abnormalType": "PD_UP_SPECIAL",
       "effectPoint": [
-        -7985
+        -3992
       ],
       "usingKinds": [
         "SHIELD"
@@ -29929,22 +30026,22 @@
       ],
       "abnormalTimeSeconds": 30,
       "isDebuff": true,
-      "effectRange": 400,
+      "effectRange": 90,
       "abnormalType": "HIT_DOWN",
-      "activateRate": 80,
-      "lvlBonusRate": 1,
+      "activateRate": 30,
+      "lvlBonusRate": 2,
       "basicProperty": "MEN",
       "effectPoint": [
-        -1046,
-        -1098,
-        -1132,
-        -1163,
-        -1193,
-        -1221,
-        -1247,
-        -1270,
-        -1291,
-        -1309
+        -655,
+        -679,
+        -703,
+        -752,
+        -777,
+        -803,
+        -855,
+        -882,
+        -909,
+        -965
       ],
       "usingKinds": [
         "SWORD",
@@ -30035,27 +30132,26 @@
       ],
       "abnormalTimeSeconds": 30,
       "isDebuff": true,
-      "effectRange": 400,
+      "effectRange": 90,
       "abnormalType": "HIT_DOWN",
-      "activateRate": 80,
+      "activateRate": 30,
       "lvlBonusRate": 2,
       "basicProperty": "MEN",
       "effectPoint": [
-        -1046,
-        -1098,
-        -1132,
-        -1163,
-        -1193,
-        -1221,
-        -1247,
-        -1270,
-        -1291,
-        -1309
+        -655,
+        -679,
+        -703,
+        -752,
+        -777,
+        -803,
+        -855,
+        -882,
+        -909,
+        -965
       ],
       "usingKinds": [
         "SWORD",
-        "BLUNT",
-        "DUAL"
+        "BLUNT"
       ]
     },
     {
@@ -30245,24 +30341,25 @@
       ],
       "abnormalTimeSeconds": 15,
       "isDebuff": true,
-      "effectRange": 1100,
+      "effectRange": 900,
       "abnormalType": "ROOT_PHYSICALLY",
       "trait": "HOLD",
-      "activateRate": 80,
+      "activateRate": 60,
       "lvlBonusRate": 2,
       "basicProperty": "MEN",
       "effectPoint": [
-        -1046,
-        -1098,
-        -1132,
-        -1163,
-        -1193,
-        -1221,
-        -1247,
-        -1270,
-        -1291,
-        -1309
-      ]
+        -227,
+        -235,
+        -243,
+        -268,
+        -277,
+        -285,
+        -313,
+        -322,
+        -331,
+        -360
+      ],
+      "abnormalVisualEffect": "ROOT"
     },
     {
       "skillId": 404,
@@ -30316,15 +30413,16 @@
       "abnormalType": "ROOT_PHYSICALLY",
       "trait": "HOLD",
       "activateRate": 40,
-      "lvlBonusRate": 1,
+      "lvlBonusRate": 2,
       "basicProperty": "MEN",
       "effectPoint": [
-        -1098,
-        -1163,
-        -1221,
-        -1270,
-        -1309
-      ]
+        -549,
+        -566,
+        -582,
+        -597,
+        -611
+      ],
+      "abnormalVisualEffect": "ROOT"
     },
     {
       "skillId": 405,
@@ -30428,18 +30526,18 @@
           "itemConsumeCount": 10
         }
       ],
-      "effectRange": 650,
+      "effectRange": 3000,
       "effectPoint": [
-        -523,
-        -549,
-        -566,
-        -582,
-        -597,
-        -611,
-        -624,
-        -635,
-        -646,
-        -655
+        -162,
+        -204,
+        -243,
+        -285,
+        -331,
+        -379,
+        -418,
+        -457,
+        -495,
+        -532
       ]
     },
     {
@@ -30478,9 +30576,15 @@
       "abnormalTimeSeconds": 60,
       "abnormalType": "POSSESSION",
       "effectPoint": [
-        549,
-        611,
-        655
+        303,
+        438,
+        523
+      ],
+      "usingKinds": [
+        "SWORD",
+        "POLE",
+        "DUALFIST",
+        "BLUNT"
       ]
     },
     {
@@ -30774,20 +30878,19 @@
       "effectRange": 400,
       "abnormalType": "MIGHT_MORTAL",
       "effectPoint": [
-        -266,
-        -279,
-        -288,
-        -296,
-        -304,
+        -307,
         -311,
+        -314,
         -317,
+        -320,
         -323,
+        -326,
         -328,
+        -331,
         -333
       ],
       "usingKinds": [
-        "DAGGER",
-        "DUALDAGGER"
+        "DAGGER"
       ]
     },
     {
@@ -30870,11 +30973,11 @@
       ],
       "abnormalTimeSeconds": 120,
       "abnormalType": "STEALTH",
-    "abnormalVisualEffect": "STEALTH",
+      "abnormalVisualEffect": "STEALTH",
       "effectPoint": [
-        549,
-        611,
-        655
+        379,
+        379,
+        379
       ]
     },
     {
@@ -30963,20 +31066,20 @@
       "isDebuff": true,
       "effectRange": 300,
       "abnormalType": "HIT_DOWN",
-      "activateRate": 80,
-      "lvlBonusRate": 2,
+      "activateRate": 40,
+      "lvlBonusRate": 1,
       "basicProperty": "MEN",
       "effectPoint": [
-        -523,
-        -549,
-        -566,
-        -582,
-        -597,
-        -611,
-        -624,
-        -635,
-        -646,
-        -655
+        -100,
+        -100,
+        -100,
+        -100,
+        -100,
+        -100,
+        -100,
+        -100,
+        -100,
+        -100
       ]
     },
     {
@@ -31183,9 +31286,9 @@
       "abnormalTimeSeconds": 1200,
       "abnormalType": "MP_COST_DOWN",
       "effectPoint": [
-        549,
-        611,
-        655
+        243,
+        418,
+        495
       ]
     },
     {
@@ -31224,9 +31327,9 @@
       "abnormalTimeSeconds": 1200,
       "abnormalType": "REUSE_DELAY_DOWN",
       "effectPoint": [
-        549,
-        611,
-        655
+        243,
+        418,
+        495
       ]
     },
     {
@@ -31277,11 +31380,11 @@
         }
       ],
       "effectPoint": [
+        243,
+        379,
+        495,
         549,
-        582,
-        611,
-        635,
-        655
+        611
       ]
     },
     {
@@ -31556,11 +31659,11 @@
       "abnormalTimeSeconds": 60,
       "abnormalType": "POSSESSION",
       "effectPoint": [
-        549,
-        582,
-        611,
-        635,
-        655
+        120,
+        120,
+        120,
+        120,
+        120
       ],
       "usingKinds": [
         "POLE"
@@ -31582,22 +31685,25 @@
           "mpConsume": 11,
           "power": 0,
           "abnormalLevel": 1,
-          "magicLevel": 58
+          "magicLevel": 35
         },
         {
           "level": 2,
           "mpConsume": 13,
           "power": 0,
           "abnormalLevel": 1,
-          "magicLevel": 66
+          "magicLevel": 55
         },
         {
           "level": 3,
           "mpConsume": 14,
           "power": 0,
           "abnormalLevel": 1,
-          "magicLevel": 74
+          "magicLevel": 65
         }
+      ],
+      "usingKinds": [
+        "POLE"
       ]
     },
     {
@@ -31791,6 +31897,9 @@
           "abnormalLevel": 1,
           "magicLevel": 78
         }
+      ],
+      "usingKinds": [
+        "HEAVY"
       ]
     },
     {
@@ -31811,6 +31920,13 @@
           "abnormalLevel": 1,
           "magicLevel": 78
         }
+      ],
+      "usingKinds": [
+        "SWORD",
+        "BLUNT",
+        "POLE",
+        "DUAL",
+        "DUALFIST"
       ]
     },
     {
@@ -31829,8 +31945,11 @@
           "mpConsume": 0,
           "power": 0,
           "abnormalLevel": 1,
-          "magicLevel": 78
+          "magicLevel": 1
         }
+      ],
+      "usingKinds": [
+        "BOW"
       ]
     },
     {
@@ -31851,6 +31970,9 @@
           "abnormalLevel": 1,
           "magicLevel": 78
         }
+      ],
+      "usingKinds": [
+        "DAGGER"
       ]
     },
     {
@@ -31979,7 +32101,7 @@
           "mpConsume": 200,
           "power": 0,
           "abnormalLevel": 2,
-          "magicLevel": 79,
+          "magicLevel": 0,
           "mpInitialConsume": 50,
           "itemConsumeId": 8873,
           "itemConsumeCount": 1
@@ -31989,7 +32111,7 @@
       "magicType": 1,
       "abnormalType": "RESURRECTION_SPECIAL",
       "effectPoint": [
-        673
+        1
       ]
     },
     {
@@ -32014,7 +32136,7 @@
       "abnormalTimeSeconds": 300,
       "abnormalType": "COUNTER_SKILL",
       "effectPoint": [
-        669
+        379
       ]
     },
     {
@@ -32037,7 +32159,7 @@
         }
       ],
       "effectPoint": [
-        669
+        0
       ]
     },
     {
@@ -32087,7 +32209,13 @@
       "abnormalTimeSeconds": 10,
       "abnormalType": "INVINCIBILITY",
       "effectPoint": [
-        673
+        341
+      ],
+      "abnormalVisualEffect": "INVINCIBILITY",
+      "basicProperty": "MEN",
+      "lvlBonusRate": 2,
+      "usingKinds": [
+        "DUAL"
       ]
     },
     {
@@ -32137,7 +32265,7 @@
       "abnormalTimeSeconds": 60,
       "abnormalType": "MIRAGE",
       "effectPoint": [
-        673
+        669
       ]
     },
     {
@@ -32366,18 +32494,18 @@
           "itemConsumeCount": 10
         }
       ],
-      "effectRange": 650,
+      "effectRange": 300,
       "effectPoint": [
-        -523,
-        -549,
-        -566,
-        -582,
-        -597,
-        -611,
-        -624,
-        -635,
-        -646,
-        -655
+        -162,
+        -204,
+        -243,
+        -285,
+        -331,
+        -379,
+        -418,
+        -457,
+        -495,
+        -532
       ]
     },
     {
@@ -32409,8 +32537,11 @@
       "abnormalTimeSeconds": 15,
       "abnormalType": "SPEED_UP_SPECIAL",
       "effectPoint": [
-        582,
-        624
+        204,
+        438
+      ],
+      "usingKinds": [
+        "DUAL"
       ]
     },
     {
@@ -32468,11 +32599,16 @@
       "lvlBonusRate": 1,
       "basicProperty": "CON",
       "effectPoint": [
-        -1
+        -203,
+        -203,
+        -203,
+        -203,
+        -203
       ],
       "usingKinds": [
         "POLE"
-      ]
+      ],
+      "abnormalVisualEffect": "STUN"
     },
     {
       "skillId": 453,
@@ -32494,7 +32630,7 @@
         }
       ],
       "effectPoint": [
-        597
+        1
       ]
     },
     {
