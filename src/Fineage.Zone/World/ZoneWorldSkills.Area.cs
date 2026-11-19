@@ -89,7 +89,7 @@ public sealed partial class ZoneWorld
         // Mobius callSkill: a negative skill on a playable flags the caster (landing or resisted).
         UpdatePvPStatus(player, target, now);
 
-        player.CurMp = Math.Max(0, player.CurMp - levelData.MpConsume);
+        ConsumeSkillMp(player, template, levelData.MpConsume);
         var (hitMs, reuseMs) = ScaledSkillTimes(player, template, level);
         if (reuseMs > 0)
             player.SkillReuseUntilMs[request.SkillId] = now + reuseMs;
@@ -155,7 +155,7 @@ public sealed partial class ZoneWorld
         // Mobius callSkill: a negative skill on a playable flags the caster (landing or resisted).
         UpdatePvPStatus(player, target, now);
 
-        player.CurMp = Math.Max(0, player.CurMp - levelData.MpConsume);
+        ConsumeSkillMp(player, template, levelData.MpConsume);
         var (hitMs, reuseMs) = ScaledSkillTimes(player, template, level);
         if (reuseMs > 0)
             player.SkillReuseUntilMs[request.SkillId] = now + reuseMs;
@@ -301,7 +301,7 @@ public sealed partial class ZoneWorld
         bool magic = template.MagicType == 1;
         return (
             ZoneCombat.SkillTimeMs(template.HitTimeMs, magic, ps.MAtkSpd, ps.PAtkSpd),
-            ZoneCombat.SkillReuseMs(template.ReuseDelayMsAt(level), magic, ps.MAtkSpd, ps.PAtkSpd));
+            SkillReuseMsFor(player, template, template.ReuseDelayMsAt(level)));
     }
 
     static MagicSkillUseMsg BuildCast(

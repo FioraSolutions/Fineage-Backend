@@ -73,6 +73,7 @@ public sealed partial class ZoneWorld
         if (target.FakeDeath)
             WakeUpFromFakeDeath(target, "damage");
         target.CurHp = Math.Max(0, target.CurHp - hit.Damage);
+        ApplyReflectAndAbsorb(attacker, target, hit.Damage);
         if (_olympiadArena.Contains(attacker.ObjectId))
             _olympiad.NoteDamage(attacker.ObjectId, hit.Damage);
 
@@ -122,6 +123,7 @@ public sealed partial class ZoneWorld
             return;
 
         target.CurHp = Math.Max(0, target.CurHp - damage);
+        ApplyReflectAndAbsorb(attacker, target, damage);
         FanoutVitals(target, StatusFor(target));
         RecordDamage(target, credit, damage);
         ApplyQuestAttack(credit, target, byPet: attacker.Summon?.Pet != null);

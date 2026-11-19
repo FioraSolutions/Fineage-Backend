@@ -2,6 +2,24 @@
  "reference": "Combat stat funcs of passive (operateType P) skills from L2J Mobius CT 0 Interlude dist/game/data/stats/skills. 'using' = Mobius <using kind> condition (weapon type of the right hand, armor type of chest+legs, SHIELD). Funcs with other conditions are skipped. defenceTraits/attackTraits carry Mobius DefenceTrait/AttackTrait percent tables (POISON/HOLD/SHOCK/\u2026).",
  "skills": [
   {
+   "skillId": 113,
+   "name": "Long Shot",
+   "levels": 2,
+   "effects": [
+    {
+     "stat": "pAtkRange",
+     "op": "add",
+     "values": [
+      200.0,
+      400.0
+     ],
+     "using": [
+      "BOW"
+     ]
+    }
+   ]
+  },
+  {
    "skillId": 134,
    "name": "Toughness",
    "levels": 1,
@@ -394,6 +412,21 @@
    }
   },
   {
+   "skillId": 173,
+   "name": "Acrobatics",
+   "levels": 2,
+   "effects": [
+    {
+     "stat": "fall",
+     "op": "sub",
+     "values": [
+      60.0,
+      100.0
+     ]
+    }
+   ]
+  },
+  {
    "skillId": 191,
    "name": "Focus Mind",
    "levels": 6,
@@ -427,6 +460,21 @@
       177.0,
       295.0,
       384.0
+     ]
+    }
+   ]
+  },
+  {
+   "skillId": 195,
+   "name": "Breath Boost",
+   "levels": 2,
+   "effects": [
+    {
+     "stat": "breath",
+     "op": "add",
+     "values": [
+      180.0,
+      300.0
      ]
     }
    ]
@@ -695,6 +743,29 @@
      ],
      "using": [
       "DUALFIST"
+     ]
+    }
+   ]
+  },
+  {
+   "skillId": 211,
+   "name": "Boost HP",
+   "levels": 10,
+   "effects": [
+    {
+     "stat": "maxHp",
+     "op": "add",
+     "values": [
+      60.0,
+      100.0,
+      150.0,
+      200.0,
+      250.0,
+      300.0,
+      350.0,
+      400.0,
+      440.0,
+      480.0
      ]
     }
    ]
@@ -2224,6 +2295,59 @@
    ]
   },
   {
+   "skillId": 290,
+   "name": "Final Frenzy",
+   "levels": 14,
+   "effects": [
+    {
+     "stat": "pAtk",
+     "op": "add",
+     "values": [
+      32.9,
+      39.4,
+      46.6,
+      54.6,
+      63.3,
+      72.7,
+      79.3,
+      86.1,
+      93.1,
+      100.2,
+      107.5,
+      114.8,
+      122.1,
+      129.3
+     ],
+     "hpBelow": 30
+    }
+   ]
+  },
+  {
+   "skillId": 291,
+   "name": "Final Fortress",
+   "levels": 11,
+   "effects": [
+    {
+     "stat": "pDef",
+     "op": "add",
+     "values": [
+      116.875,
+      129.0,
+      141.625,
+      150.375,
+      159.25,
+      168.375,
+      177.625,
+      187.0,
+      196.5,
+      206.125,
+      215.75
+     ],
+     "hpBelow": 30
+    }
+   ]
+  },
+  {
    "skillId": 319,
    "name": "Agile Movement",
    "levels": 2,
@@ -2282,6 +2406,20 @@
      20.0
     ]
    }
+  },
+  {
+   "skillId": 330,
+   "name": "Skill Mastery",
+   "levels": 1,
+   "effects": [
+    {
+     "stat": "skillCritical",
+     "op": "add",
+     "values": [
+      2.0
+     ]
+    }
+   ]
   },
   {
    "skillId": 373,

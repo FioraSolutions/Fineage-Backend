@@ -159,9 +159,41 @@ public static partial class ZoneCombat
     public static int SkillTimeMs(int baseMs, bool magic, int mAtkSpd, int pAtkSpd) =>
         baseMs <= 0 ? 0 : (int)(magic ? baseMs * 333d / Math.Max(1, mAtkSpd) : baseMs * 300d / Math.Max(1, pAtkSpd));
 
-    /// <summary>Interlude reuse scaling: reuse·333 / (magic ? Cspd : Pspd).</summary>
-    public static int SkillReuseMs(int baseMs, bool magic, int mAtkSpd, int pAtkSpd) =>
-        baseMs <= 0 ? 0 : (int)(baseMs * 333d / Math.Max(1, magic ? mAtkSpd : pAtkSpd));
+    /// <summary>
+    /// Interlude reuse scaling: reuse · reuseMul · 333 / (magic ? Cspd : Pspd).
+    /// <paramref name="reuseMul"/> is Mobius <c>pReuse</c> / <c>mReuse</c> / <c>dReuse</c> (default 1).
+    /// </summary>
+    public static int SkillReuseMs(int baseMs, bool magic, int mAtkSpd, int pAtkSpd, double reuseMul = 1d) =>
+        baseMs <= 0 ? 0 : (int)(baseMs * (reuseMul > 0 ? reuseMul : 1d) * 333d / Math.Max(1, magic ? mAtkSpd : pAtkSpd));
+
+    /// <summary>
+    /// Mobius <c>Formulas.calcSkillMastery</c>: a non-static skill may reset reuse to 100 ms (and later double
+    /// buff duration) when <c>skillCritical</c> is set. Interlude XML uses 2 for STR-based mastery (comment: STR);
+    /// Mobius Java only switches 1=STR and 4=INT, which would leave 2 dead — any non-zero value other than 4 uses STR.
+    /// Chance is the base-stat bonus × <c>skillCriticalProbability</c> (Focus Skill Mastery), rolled against 100.
+    /// </summary>
+    public static bool RollSkillMastery(
+        Random rnd, int skillCritical, double skillCriticalProbability, double strBonus, double intBonus,
+        bool isStatic = false)
+    {
+        if (isStatic || skillCritical == 0)
+            return false;
+        double chance = (skillCritical == 4 ? intBonus : strBonus) *
+                        (skillCriticalProbability > 0 ? skillCriticalProbability : 1d);
+        return rnd.Next(100) < chance;
+    }
+
+    /// <summary>Mobius reflectDam: percent of dealt damage, capped at the target's max HP. No reflect vs bows.</summary>
+    public static int ReflectedDamage(int damage, double reflectDamPercent, int targetMaxHp, bool attackerBow) =>
+        attackerBow || damage <= 0 || reflectDamPercent <= 0
+            ? 0
+            : Math.Min(targetMaxHp, (int)(reflectDamPercent / 100d * damage));
+
+    /// <summary>Mobius absorbDam: percent of dealt damage, capped at the attacker's missing HP. No absorb vs bows.</summary>
+    public static int AbsorbedDamage(int damage, double absorbDamPercent, int missingHp, bool attackerBow) =>
+        attackerBow || damage <= 0 || absorbDamPercent <= 0 || missingHp <= 0
+            ? 0
+            : Math.Min(missingHp, (int)(absorbDamPercent / 100d * damage));
 
     /// <summary>Interlude <c>calcPhysDam</c> with skill: 70·(pAtk·(ss?2:1) + power) / (pDef [+ sDef]).</summary>
     public static int PhysicalSkillDamage(double pAtk, double pDef, double power, bool soulshot) =>

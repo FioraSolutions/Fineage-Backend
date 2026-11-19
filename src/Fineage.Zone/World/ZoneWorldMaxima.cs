@@ -33,9 +33,10 @@ public sealed partial class ZoneWorld
             }
         }
 
-        maxHp = Math.Max(1, maxHp);
-        maxMp = Math.Max(1, maxMp);
-        maxCp = Math.Max(0, maxCp);
+        var mods = PlayerStatMods(player);
+        maxHp = Math.Max(1, mods.Apply(CombatStat.MaxHp, maxHp));
+        maxMp = Math.Max(1, mods.Apply(CombatStat.MaxMp, maxMp));
+        maxCp = Math.Max(0, mods.Apply(CombatStat.MaxCp, maxCp));
         bool changed = player.MaxHp != maxHp || player.MaxMp != maxMp || player.MaxCp != maxCp;
         player.MaxHp = maxHp;
         player.MaxMp = maxMp;

@@ -43,7 +43,7 @@ public sealed partial class ZoneWorld
             !InSkillCastRange(player, target, template.CastRange))
             return SkillProtocol.Range;
 
-        player.CurMp = Math.Max(0, player.CurMp - levelData.MpConsume);
+        ConsumeSkillMp(player, template, levelData.MpConsume);
         if (template.ReuseDelayMsAt(level) > 0)
             player.SkillReuseUntilMs[request.SkillId] = now + template.ReuseDelayMsAt(level);
 
@@ -66,7 +66,7 @@ public sealed partial class ZoneWorld
         ScheduleEffect(player, target, template, level, now, hitMs, (t, _) =>
         {
             if (heal > 0 && t.MaxHp > 0)
-                t.CurHp = Math.Min(t.MaxHp, t.CurHp + heal);
+                t.CurHp = Math.Min(t.MaxHp, t.CurHp + HealedAmount(t, heal));
             FanoutVitals(t, new StatusUpdateMsg
             {
                 ObjectId = t.ObjectId,
@@ -124,7 +124,7 @@ public sealed partial class ZoneWorld
             return null;
         }
 
-        player.CurMp = Math.Max(0, player.CurMp - levelData.MpConsume);
+        ConsumeSkillMp(player, template, levelData.MpConsume);
         if (template.ReuseDelayMsAt(level) > 0)
             player.SkillReuseUntilMs[request.SkillId] = now + template.ReuseDelayMsAt(level);
 
@@ -200,7 +200,7 @@ public sealed partial class ZoneWorld
         // Mobius callSkill: a negative skill on a playable flags the caster (landing or resisted).
         UpdatePvPStatus(player, target, now);
 
-        player.CurMp = Math.Max(0, player.CurMp - levelData.MpConsume);
+        ConsumeSkillMp(player, template, levelData.MpConsume);
         var (hitMs, reuseMs) = ScaledSkillTimes(player, template, level);
         if (reuseMs > 0)
             player.SkillReuseUntilMs[request.SkillId] = now + reuseMs;
@@ -277,7 +277,7 @@ public sealed partial class ZoneWorld
             return rangeError;
         UpdatePvPStatus(player, target, now);
 
-        player.CurMp = Math.Max(0, player.CurMp - levelData.MpConsume);
+        ConsumeSkillMp(player, template, levelData.MpConsume);
         var (hitMs, reuseMs) = ScaledSkillTimes(player, template, level);
         if (reuseMs > 0)
             player.SkillReuseUntilMs[request.SkillId] = now + reuseMs;

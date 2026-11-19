@@ -21,7 +21,7 @@ public sealed partial class ZoneWorld
             // NPC against NPC (summon ↔ monster): both sides from their templates.
             pDef = NpcPDef(player);
             evasion = NpcEvasion(player);
-            shieldRate = NpcShieldRate(player);
+            shieldRate = ShieldRateInArc(player, npc, NpcShieldRate(player), 0);
             shieldDef = player.ShieldDef;
         }
         else
@@ -29,7 +29,7 @@ public sealed partial class ZoneWorld
             var ps = PlayerStats(player);
             pDef = ps.PDef;
             evasion = ps.Evasion;
-            shieldRate = ps.ShieldRate;
+            shieldRate = ShieldRateInArc(player, npc, ps.ShieldRate, ps.ShieldDefAngle);
             shieldDef = ps.ShieldDef;
         }
         npc.Heading = ZoneCombat.HeadingFrom(npc.X, npc.Y, player.X, player.Y);

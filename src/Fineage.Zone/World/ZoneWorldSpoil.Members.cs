@@ -121,7 +121,7 @@ public sealed partial class ZoneWorld
         else if (!ApplySweep(session, player, target))
             return null; // Sweeper conditions (343/683/1247) cost nothing
 
-        player.CurMp = Math.Max(0, player.CurMp - levelData.MpConsume);
+        ConsumeSkillMp(player, template, levelData.MpConsume);
         var (hitMs, reuseMs) = ScaledSkillTimes(player, template, level);
         if (reuseMs > 0)
             player.SkillReuseUntilMs[request.SkillId] = now + reuseMs;

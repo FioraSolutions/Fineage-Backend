@@ -7,8 +7,28 @@ public static partial class ZoneCombat
     public enum ShieldResult { None, Block, Perfect }
 
     /// <summary>
-    /// Mobius <c>Formulas.calcShldUse</c> (no facing-angle check yet): rate = rShld · DEX bonus (×1.3 vs bows);
+    /// Mobius <c>Formulas.calcShldUse</c> facing cone: <c>degreeside = shieldDefAngle + 120</c>.
+    /// Aegis Stance sets the angle to 360, so the cone is a full circle. Default is a 120° arc
+    /// (60° either side of the defender's heading).
+    /// </summary>
+    public static bool ShieldArcCovers(
+        int defenderX, int defenderY, int defenderHeading, int attackerX, int attackerY, int shieldDefAngleBonus)
+    {
+        int degreeside = shieldDefAngleBonus + 120;
+        if (degreeside >= 360)
+            return true;
+        double dir = AngleFrom(defenderX, defenderY, attackerX, attackerY);
+        double headingDeg = defenderHeading / 182.044444444;
+        double diff = Math.Abs(dir - headingDeg);
+        if (diff > 180)
+            diff = 360 - diff;
+        return diff <= degreeside / 2.0;
+    }
+
+    /// <summary>
+    /// Mobius <c>Formulas.calcShldUse</c>: rate = rShld · DEX bonus (×1.3 vs bows);
     /// perfect block when Rnd(100) &gt; 100 − 5, else block when rate &gt; Rnd(100).
+    /// Facing is applied by the caller via <see cref="ShieldArcCovers"/> (rate 0 when out of arc).
     /// </summary>
     public static ShieldResult RollShield(Random rnd, double shieldRate, bool attackerBow)
     {
