@@ -9,7 +9,11 @@ public readonly record struct PlayerCombatStats(
     int AttackRange, WeaponType Weapon, int Evasion = 0, int RandomDamage = ZoneCombat.DefaultPlayerRandomDamage,
     int ShieldDef = 0, double ShieldRate = 0, int Soulshots = 0, CrystalGrade WeaponGrade = CrystalGrade.None,
     int MCritRate = 0, double MagicCritDmg = 1d, double CritDmg = 1d, double BlowRate = 1d,
-    double CritDmgAdd = 0d);
+    double CritDmgAdd = 0d,
+    int ShieldDefAngle = 0, double PReuse = 1d, double MReuse = 1d, double DReuse = 1d,
+    double PhysicalMpConsumeRate = 1d, double MagicalMpConsumeRate = 1d, double DanceMpConsumeRate = 1d,
+    double ReflectDam = 0d, double AbsorbDam = 0d, double HealEffect = 1d,
+    int SkillCritical = 0, double SkillCriticalProbability = 1d, int AtkCountMax = 1);
 
 public sealed partial class ZoneWorld
 {
@@ -43,19 +47,33 @@ public sealed partial class ZoneWorld
             MAtkSpd: Math.Max(1, mods.Apply(CombatStat.MAtkSpd, formula.MAtkSpd)),
             Accuracy: mods.Apply(CombatStat.Accuracy, formula.Accuracy),
             CritRate: mods.Apply(CombatStat.CritRate, formula.CritRate),
-            AttackRange: gear.AttackRange,
+            AttackRange: Math.Max(0, mods.Apply(CombatStat.PAtkRange, gear.AttackRange)),
             Weapon: gear.Weapon,
             Evasion: mods.Apply(CombatStat.Evasion, formula.Evasion),
             RandomDamage: gear.RandomDamage,
-            ShieldDef: gear.ShieldDef,
-            ShieldRate: formula.ShieldRate,
+            ShieldDef: Math.Max(0, mods.Apply(CombatStat.SDef, gear.ShieldDef)),
+            ShieldRate: mods.Apply(CombatStat.RShld, formula.ShieldRate),
             Soulshots: gear.Soulshots,
             WeaponGrade: gear.WeaponGrade,
             MCritRate: (int)mods.Apply(CombatStat.MCritRate, formula.MagicCritBase) * 10,
             MagicCritDmg: mods.Apply(CombatStat.MagicCritDmg, 1d),
             CritDmg: mods.Apply(CombatStat.CritDmg, 1d),
             BlowRate: mods.Apply(CombatStat.BlowRate, 1d),
-            CritDmgAdd: mods.Apply(CombatStat.CritDmgAdd, 0d));
+            CritDmgAdd: mods.Apply(CombatStat.CritDmgAdd, 0d),
+            ShieldDefAngle: mods.Apply(CombatStat.ShieldDefAngle, 0),
+            PReuse: mods.Apply(CombatStat.PReuse, 1d),
+            MReuse: mods.Apply(CombatStat.MReuse, 1d),
+            DReuse: mods.Apply(CombatStat.DReuse, 1d),
+            PhysicalMpConsumeRate: mods.Apply(CombatStat.PhysicalMpConsumeRate, 1d),
+            MagicalMpConsumeRate: mods.Apply(CombatStat.MagicalMpConsumeRate, 1d),
+            DanceMpConsumeRate: mods.Apply(CombatStat.DanceMpConsumeRate, 1d),
+            ReflectDam: mods.Apply(CombatStat.ReflectDam, 0d),
+            AbsorbDam: mods.Apply(CombatStat.AbsorbDam, 0d),
+            HealEffect: mods.Apply(CombatStat.HealEffect, 1d),
+            SkillCritical: mods.Apply(CombatStat.SkillCritical, 0),
+            SkillCriticalProbability: mods.Apply(CombatStat.SkillCriticalProbability, 1d),
+            // Mobius calcStat(ATTACK_COUNT_MAX, 1): a pole starts at 1 hit; Fell Swoop adds extras.
+            AtkCountMax: Math.Max(1, mods.Apply(CombatStat.AtkCountMax, 1)));
     }
 
     /// <summary>Template + henna + bonus table (shared by combat, regen, weight, move speed).</summary>
@@ -130,7 +148,8 @@ public sealed partial class ZoneWorld
                 passiveLevels,
                 kinds => ConditionUsingItemType.Matches(player.Inventory, kinds),
                 mods,
-                resting: player.Sitting);
+                resting: player.Sitting,
+                hpPercent: player.MaxHp <= 0 ? 100d : 100d * player.CurHp / player.MaxHp);
     }
 
     /// <summary>

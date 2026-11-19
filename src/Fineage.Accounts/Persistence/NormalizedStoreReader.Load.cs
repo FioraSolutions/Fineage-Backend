@@ -98,7 +98,7 @@ static partial class NormalizedStoreReader
         using var cmd = conn.CreateCommand();
         cmd.CommandText =
             """
-            SELECT skill_id, skill_level, remaining_time
+            SELECT skill_id, skill_level, remaining_time, reuse_delay, systime, restore_type
             FROM character_skills_save
             WHERE character_id = @cid
             ORDER BY skill_id
@@ -109,7 +109,15 @@ static partial class NormalizedStoreReader
         {
             using var reader = cmd.ExecuteReader();
             while (reader.Read())
-                rows.Add(new StoredEffect(reader.GetInt32(0), reader.GetInt32(1), reader.GetInt32(2)));
+            {
+                rows.Add(new StoredEffect(
+                    reader.GetInt32(0),
+                    reader.GetInt32(1),
+                    reader.GetInt32(2),
+                    reader.FieldCount > 3 && !reader.IsDBNull(3) ? reader.GetInt64(3) : 0,
+                    reader.FieldCount > 4 && !reader.IsDBNull(4) ? reader.GetInt64(4) : 0,
+                    reader.FieldCount > 5 && !reader.IsDBNull(5) ? reader.GetInt32(5) : 0));
+            }
         }
         catch (PostgresException)
         {

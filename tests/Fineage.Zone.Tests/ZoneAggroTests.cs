@@ -86,6 +86,11 @@ public sealed class ZoneAggroTests
         Assert.True(caller.HateList[player.ObjectId] >= 1);
         var stances = ((StanceRecorder)(object)bridge).Stances;
         Assert.Contains((9_100_001, true), stances);
+        // Aggro-range and clan-help enter attack intention the same way a hit does: they run.
+        Assert.True(caller.Running);
+        Assert.True(world.TryGetEntityById(9_100_002, out var helper) && helper.Running);
+        Assert.True(world.TryGetEntityById(9_100_003, out var otherClan) && !otherClan.Running);
+        Assert.True(world.TryGetEntityById(9_100_004, out var tooFar) && !tooFar.Running);
     }
 
     [Fact]

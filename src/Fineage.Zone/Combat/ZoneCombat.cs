@@ -62,8 +62,41 @@ public static partial class ZoneCombat
     /// <summary>Collision allowance added to the weapon range (player ~9 + NPC radius); 40 + 40 = <see cref="MeleeRange"/>.</summary>
     public const int CollisionAllowance = MeleeRange - DefaultWeaponRange;
 
-    /// <summary>Player reach for an auto-attack with a weapon of <paramref name="weaponRange"/>.</summary>
-    public static int PlayerAttackReach(int weaponRange) => Math.Max(DefaultWeaponRange, weaponRange) + CollisionAllowance;
+    /// <summary>Mobius player template <c>collisionRadius</c> (Interlude fighters/mystics are 9).</summary>
+    public const int PlayerCollisionRadius = 9;
+
+    /// <summary>
+    /// Fallback NPC radius when a template has none, so <see cref="PlayerAttackReach(int)"/> stays
+    /// weapon + <see cref="CollisionAllowance"/> (40 + 9 + 31 = 80).
+    /// </summary>
+    public const int DefaultNpcCollision = CollisionAllowance - PlayerCollisionRadius;
+
+    /// <summary>
+    /// Player reach for an auto-attack when the target's collision is unknown: weapon range +
+    /// <see cref="CollisionAllowance"/> (Mobius <c>physRange + both collision radii</c> with the default NPC radius).
+    /// </summary>
+    public static int PlayerAttackReach(int weaponRange) => PlayerAttackReach(weaponRange, DefaultNpcCollision);
+
+    /// <summary>
+    /// One Mobius physical reach: attacker's weapon/NPC attackRange + both collision radii.
+    /// The other side's attackRange is never included. Used for players and NPCs, start/hit/chase.
+    /// </summary>
+    public static int AttackReach(int attackRange, int casterCollision, int targetCollision) =>
+        Math.Max(DefaultWeaponRange, attackRange) + Math.Max(0, casterCollision) + Math.Max(0, targetCollision);
+
+    /// <summary>
+    /// Mobius <c>maybeMoveToPawn(target, getPhysicalAttackRange())</c>: weapon attackRange + both collision radii.
+    /// </summary>
+    public static int PlayerAttackReach(int weaponRange, int targetCollision) =>
+        AttackReach(weaponRange, PlayerCollisionRadius, targetCollision);
+
+    /// <summary>
+    /// Mobius <c>maybeMoveToPawn(target, skill.getCastRange())</c>: <c>castRange + casterRadius + targetRadius</c>.
+    /// The +100 in <c>maybeMoveToPawn</c> is follow hysteresis for a moving target already being followed, not extra
+    /// start range.
+    /// </summary>
+    public static int SkillCastReach(int castRange, int casterCollision, int targetCollision) =>
+        Math.Max(0, castRange) + Math.Max(0, casterCollision) + Math.Max(0, targetCollision);
 
     public const int NakedLegsPDef = 18;
     public const int MysticNakedChestPDef = 15;

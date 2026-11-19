@@ -175,9 +175,8 @@ public sealed partial class ZoneWorld
             MaxHp = e.MaxHp,
             CurMp = e.CurMp,
             MaxMp = e.MaxMp,
-            // CP is not depleted server-side yet (UserInfo also sends CurCp = MaxCp).
-            CurCp = maxCp,
-            MaxCp = maxCp
+            CurCp = e.MaxCp > 0 ? Math.Clamp(e.CurCp, 0, e.MaxCp) : maxCp,
+            MaxCp = e.MaxCp > 0 ? e.MaxCp : maxCp
         };
     }
 

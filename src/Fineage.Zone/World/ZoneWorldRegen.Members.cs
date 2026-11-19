@@ -103,43 +103,61 @@ public sealed partial class ZoneWorld
         Values = [entity.CurHp, entity.MaxHp, entity.CurMp, entity.MaxMp]
     };
 
-    (int hp, int maxHp, int mp, int maxMp, int level, int race, int sex) LoadVitals(
+    (int hp, int maxHp, int mp, int maxMp, int cp, int maxCp, int level, int race, int sex) LoadVitals(
         ZoneSession session,
         CharacterRecord? stored = null)
     {
         if (stored != null)
         {
-            var (maxHp, maxMp) = ResolveMaxima(stored);
-            int hp = stored.Hp > 0 ? Math.Min(stored.Hp, maxHp) : maxHp;
-            int mp = stored.Mp > 0 ? Math.Min(stored.Mp, maxMp) : maxMp;
+            var (maxHp, maxMp, maxCp) = ResolveMaxima(stored);
+            // MaxHp/MaxMp/MaxCp > 0 means a previous logout wrote the bar, including 0 current (dead).
+            int hp = RestoreBar(stored.Hp, stored.MaxHp, maxHp);
+            int mp = RestoreBar(stored.Mp, stored.MaxMp, maxMp);
+            int cp = RestoreBar(stored.Cp, stored.MaxCp, maxCp);
             int level = stored.Level > 0 ? stored.Level : 1;
-            return (hp, maxHp, mp, maxMp, level, stored.Race, stored.Sex);
+            return (hp, maxHp, mp, maxMp, cp, maxCp, level, stored.Race, stored.Sex);
         }
 
         if (PlayerClasses.TryGet(session.ClassId, out var template) && template != null)
-            return (template.MaxHp, template.MaxHp, template.MaxMp, template.MaxMp, 1, template.Race, 0);
+            return (template.MaxHp, template.MaxHp, template.MaxMp, template.MaxMp, template.MaxCp, template.MaxCp, 1, template.Race, 0);
 
         return (ClassTemplates.HumanFighterHp, ClassTemplates.HumanFighterHp, ClassTemplates.HumanFighterMp,
-            ClassTemplates.HumanFighterMp, 1, 0, 0);
+            ClassTemplates.HumanFighterMp, 0, 0, 1, 0, 0);
     }
 
-    (int maxHp, int maxMp) ResolveMaxima(CharacterRecord record)
+    static int RestoreBar(int storedCurrent, int storedMax, int liveMax)
     {
-        if (record.MaxHp > 0 && record.MaxMp > 0)
-            return (record.MaxHp, record.MaxMp);
+        if (liveMax <= 0)
+            return 0;
+        if (storedMax > 0)
+            return Math.Clamp(storedCurrent, 0, liveMax);
+        if (storedCurrent > 0)
+            return Math.Min(storedCurrent, liveMax);
+        return liveMax;
+    }
+
+    (int maxHp, int maxMp, int maxCp) ResolveMaxima(CharacterRecord record)
+    {
         if (PlayerClasses.TryGet(record.ClassId, out var template) && template != null)
         {
             int level = record.Level > 0 ? record.Level : 1;
-            return (template.ModifiedHp(level), template.ModifiedMp(level));
+            int maxHp = record.MaxHp > 0 ? record.MaxHp : template.ModifiedHp(level);
+            int maxMp = record.MaxMp > 0 ? record.MaxMp : template.ModifiedMp(level);
+            int maxCp;
+            try { maxCp = record.MaxCp > 0 ? record.MaxCp : template.ModifiedCp(level); }
+            catch (ArgumentOutOfRangeException) { maxCp = record.MaxCp > 0 ? record.MaxCp : template.MaxCp; }
+            return (maxHp, maxMp, maxCp);
         }
 
-        return (ClassTemplates.HumanFighterHp, ClassTemplates.HumanFighterMp);
+        return (record.MaxHp > 0 ? record.MaxHp : ClassTemplates.HumanFighterHp,
+            record.MaxMp > 0 ? record.MaxMp : ClassTemplates.HumanFighterMp,
+            Math.Max(0, record.MaxCp));
     }
 
     void SaveVitals(ZoneSession session, ZoneEntity entity)
     {
         if (entity.Kind != ZoneEntityKind.Player)
             return;
-        _persist.SaveVitals(session.Account, session.ObjectId, entity.CurHp, entity.CurMp);
+        _persist.SaveVitals(session.Account, session.ObjectId, entity.CurHp, entity.CurMp, entity.CurCp);
     }
 }

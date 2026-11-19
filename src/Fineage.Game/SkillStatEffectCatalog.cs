@@ -25,7 +25,26 @@ public sealed class SkillStatEffectCatalog
         ["critDmg"] = CombatStat.CritDmg, ["critDmgAdd"] = CombatStat.CritDmgAdd, ["blowRate"] = CombatStat.BlowRate,
         ["pSkillEvas"] = CombatStat.PSkillEvasion,
         // Mobius positional stats (Focus Chance 356 / Focus Power 357 / Focus Death 355 / Assassin Servitor 1348).
-        ["critRatePos"] = CombatStat.CritRatePos, ["critDmgPos"] = CombatStat.CritDmgPos
+        ["critRatePos"] = CombatStat.CritRatePos, ["critDmgPos"] = CombatStat.CritDmgPos,
+        ["maxHp"] = CombatStat.MaxHp, ["maxMp"] = CombatStat.MaxMp, ["maxCp"] = CombatStat.MaxCp,
+        ["healEffect"] = CombatStat.HealEffect,
+        ["pReuse"] = CombatStat.PReuse, ["mReuse"] = CombatStat.MReuse, ["dReuse"] = CombatStat.DReuse,
+        ["sDef"] = CombatStat.SDef, ["rShld"] = CombatStat.RShld,
+        ["reflectDam"] = CombatStat.ReflectDam,
+        ["reflectSkillPhysic"] = CombatStat.ReflectSkillPhysic, ["reflectSkillMagic"] = CombatStat.ReflectSkillMagic,
+        ["vengeancePdam"] = CombatStat.VengeancePdam, ["vengeanceMdam"] = CombatStat.VengeanceMdam,
+        ["absorbDam"] = CombatStat.AbsorbDam,
+        ["physicalMpConsumeRate"] = CombatStat.PhysicalMpConsumeRate,
+        ["magicalMpConsumeRate"] = CombatStat.MagicalMpConsumeRate,
+        ["danceMpConsumeRate"] = CombatStat.DanceMpConsumeRate,
+        ["shieldDefAngle"] = CombatStat.ShieldDefAngle,
+        ["skillCritical"] = CombatStat.SkillCritical,
+        ["skillCriticalProbability"] = CombatStat.SkillCriticalProbability,
+        ["atkCountMax"] = CombatStat.AtkCountMax,
+        ["pAtkRange"] = CombatStat.PAtkRange,
+        ["breath"] = CombatStat.Breath, ["fall"] = CombatStat.Fall,
+        ["cancelVuln"] = CombatStat.CancelVuln, ["debuffVuln"] = CombatStat.DebuffVuln,
+        ["holyPower"] = CombatStat.HolyPower, ["darkRes"] = CombatStat.DarkRes
     };
 
     static readonly Dictionary<string, SkillPosition> PositionNames = new(StringComparer.OrdinalIgnoreCase)
@@ -54,7 +73,8 @@ public sealed class SkillStatEffectCatalog
         IEnumerable<SkillStatSource> sources,
         Action<int>? onMissing = null,
         SkillPosition position = SkillPosition.None,
-        Func<string[], bool>? wearing = null)
+        Func<string[], bool>? wearing = null,
+        double hpPercent = 100d)
     {
         CombatStatMods? mods = null;
         foreach (var a in sources)
@@ -76,6 +96,8 @@ public sealed class SkillStatEffectCatalog
                 // Mobius skill-level <cond><using kind> (Focus Chance / Focus Power require a dagger in hand).
                 if (f.Using != null && wearing != null && !wearing(f.Using))
                     continue;
+                if (f.HpBelowPercent is int maxHpPct && hpPercent > maxHpPct)
+                    continue;
                 mods.Add(f, level);
             }
         }
@@ -85,13 +107,15 @@ public sealed class SkillStatEffectCatalog
     /// <summary>
     /// Folds passive skill funcs (Mobius operateType P) for the <paramref name="known"/> skill → level map into
     /// <paramref name="mods"/>. Funcs with a <c>using</c> condition apply only when <paramref name="wearing"/> accepts it;
-    /// <c>resting</c> funcs (Vital Force) apply only when <paramref name="resting"/> says the owner is seated.
+    /// <c>resting</c> funcs (Vital Force) apply only when <paramref name="resting"/> says the owner is seated;
+    /// <c>hpBelow</c> funcs (Final Frenzy / Final Fortress) apply only when current HP is at or below that percent.
     /// </summary>
     public CombatStatMods CollectPassives(
         IReadOnlyDictionary<int, int> known,
         Func<string[], bool> wearing,
         CombatStatMods? mods = null,
-        bool resting = false)
+        bool resting = false,
+        double hpPercent = 100d)
     {
         foreach (var (skillId, level) in known)
         {
@@ -102,6 +126,8 @@ public sealed class SkillStatEffectCatalog
                 if (f.Using != null && !wearing(f.Using))
                     continue;
                 if (f.Resting && !resting)
+                    continue;
+                if (f.HpBelowPercent is int maxHpPct && hpPercent > maxHpPct)
                     continue;
                 mods ??= new CombatStatMods();
                 mods.Add(f, level);
@@ -184,7 +210,8 @@ public sealed class SkillStatEffectCatalog
                     PositionNames.TryGetValue(p.GetString() ?? "", out var parsedPosition)
                         ? parsedPosition
                         : SkillPosition.None;
-                funcs.Add(new SkillStatFunc(stat, op, values, usingKinds, resting, position));
+                int? hpBelow = e.TryGetProperty("hpBelow", out var hp) ? hp.GetInt32() : null;
+                funcs.Add(new SkillStatFunc(stat, op, values, usingKinds, resting, position, hpBelow));
             }
             if (funcs.Count > 0)
             {

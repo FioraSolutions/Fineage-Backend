@@ -70,21 +70,13 @@ public sealed partial class ZoneWorld
         if (player.CurMp < initial)
             return SkillProtocol.Mp;
 
-        // Mobius Relax/ChameleonRest: canStart needs the caster seated, else the press does nothing.
-        if (RequiresSitting(template) && !player.Sitting)
-        {
-            // Mobius Player.checkUseMagicConditions: sitting is a hard gate for the skill list entry.
-            SelfLine(session, SysMsgCannotUseWhileStanding, "You cannot use this skill while standing.");
-            return null;
-        }
-
         // Mobius Player._isFakeDeath check comes after the toggle reset: a fake-dead pawn may only switch toggles off.
         if (player.FakeDeath)
             return ActionProtocol.Blocked;
 
         var ps = PlayerStats(player);
         int hitMs = ZoneCombat.SkillTimeMs(template.HitTimeMs, template.MagicType == 1, ps.MAtkSpd, ps.PAtkSpd);
-        int reuseMs = ZoneCombat.SkillReuseMs(template.ReuseDelayMs, template.MagicType == 1, ps.MAtkSpd, ps.PAtkSpd);
+        int reuseMs = SkillReuseMsFor(player, template, template.ReuseDelayMsAt(level));
         if (reuseMs > 0)
             player.SkillReuseUntilMs[request.SkillId] = now + reuseMs;
 
@@ -105,9 +97,6 @@ public sealed partial class ZoneWorld
 
     /// <summary>Mobius <c>Player.checkUseMagicConditions</c>: a seated caster cannot start a skill.</summary>
     public const int SysMsgCannotUseWhileStanding = 31;
-
-    static bool RequiresSitting(SkillDefinition template) =>
-        template.SkillId is ToggleRelax or ToggleChameleonRest;
 
     internal const int ToggleFakeDeath = 60;
     internal const int ToggleSilentMove = 221;
@@ -130,7 +119,7 @@ public sealed partial class ZoneWorld
     /// <c>Creature.checkDoCastConditions</c> gates on exactly this sum.
     /// </summary>
     int ToggleInitialMpCost(ZoneEntity player, SkillDefinition template, SkillLevelData levelData) =>
-        Math.Max(0, levelData.MpConsume) + Math.Max(0, levelData.MpInitialConsume);
+        SkillMpCost(player, template, Math.Max(0, levelData.MpConsume) + Math.Max(0, levelData.MpInitialConsume));
 
     void ApplyToggleAbnormal(
         ZoneEntity player, SkillDefinition template, SkillLevelData levelData, int level, long now, int skillId)
@@ -156,11 +145,28 @@ public sealed partial class ZoneWorld
     /// <summary>Sentinel duration for a toggle (<c>ZoneAbnormals</c> would overflow on <see cref="int.MaxValue"/> s).</summary>
     internal const int ToggleForeverSeconds = 60 * 60 * 24 * 30;
 
-    /// <summary>Per-skill start hook: Fake Death broadcasts the wait type and drops hate.</summary>
+    /// <summary>
+    /// Start hooks driven by effect type: Fake Death plays dead; Relax / ChameleonRest sit the
+    /// owner (Mobius <c>sitDown(false)</c> — do not refuse for the toggle's own cast window).
+    /// </summary>
     void StartToggleSideEffects(ZoneEntity player, int skillId, long now)
     {
         if (skillId == ToggleFakeDeath)
             StartFakeDeath(player, now);
+        else if (IsRelaxingEffect(skillId))
+            SitDown(player, checkCast: false);
+    }
+
+    /// <summary>Effect payload is <c>Relax</c> or <c>ChameleonRest</c> (skills 226 / 296 and any peer).</summary>
+    bool IsRelaxingEffect(int skillId)
+    {
+        foreach (var effect in EffectsOf(skillId))
+        {
+            if (effect.Name.Equals("Relax", StringComparison.OrdinalIgnoreCase) ||
+                effect.Name.Equals("ChameleonRest", StringComparison.OrdinalIgnoreCase))
+                return true;
+        }
+        return false;
     }
 
     /// <summary>
@@ -309,7 +315,7 @@ public sealed partial class ZoneWorld
             }
 
             // Relax / ChameleonRest end as soon as HP is fully recovered (Mobius checks before the MP drain).
-            if (entry.Id is ToggleRelax or ToggleChameleonRest && player.CurHp + 1 > player.MaxHp)
+            if (effect.Name is "Relax" or "ChameleonRest" && player.CurHp + 1 > player.MaxHp)
             {
                 if (player.Session != null)
                     ShotNotice(player.Session, SysMsgRelaxHpFull, "That skill has been de-activated as HP was fully recovered.");
@@ -318,7 +324,7 @@ public sealed partial class ZoneWorld
             }
 
             // Mobius: a seated-only toggle ends when the owner stands up (Relax, Chameleon Rest).
-            if (entry.Id is ToggleRelax or ToggleChameleonRest && !player.Sitting)
+            if (effect.Name is "Relax" or "ChameleonRest" && !player.Sitting)
                 return true;
 
             if (perTick <= 0)

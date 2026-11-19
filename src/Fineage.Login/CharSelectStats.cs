@@ -27,10 +27,13 @@ readonly record struct CharSelectStats(
         {
             try { maxCp = t.ModifiedCp(level); } catch (ArgumentOutOfRangeException) { maxCp = t.MaxCp; }
         }
-        int hp = c.Hp > 0 ? Math.Min(c.Hp, maxHp) : maxHp;
-        int mp = c.Mp > 0 ? Math.Min(c.Mp, maxMp) : maxMp;
+        if (c.MaxCp > 0)
+            maxCp = c.MaxCp;
+        int hp = c.MaxHp > 0 ? Math.Clamp(c.Hp, 0, Math.Max(1, maxHp)) : (c.Hp > 0 ? Math.Min(c.Hp, maxHp) : maxHp);
+        int mp = c.MaxMp > 0 ? Math.Clamp(c.Mp, 0, Math.Max(1, maxMp)) : (c.Mp > 0 ? Math.Min(c.Mp, maxMp) : maxMp);
+        int cp = c.MaxCp > 0 ? Math.Clamp(c.Cp, 0, Math.Max(0, maxCp)) : (c.Cp > 0 ? Math.Min(c.Cp, maxCp) : maxCp);
         var paperdoll = PaperdollFromItems(c.Items);
-        return new CharSelectStats(hp, maxHp, mp, maxMp, maxCp, maxCp, paperdoll[(int)PaperdollSlot.RHand], paperdoll);
+        return new CharSelectStats(hp, maxHp, mp, maxMp, cp, maxCp, paperdoll[(int)PaperdollSlot.RHand], paperdoll);
     }
 
     /// <summary>Builds a length-17 paperdoll (item ids by slot). Later equip wins on the same slot.</summary>

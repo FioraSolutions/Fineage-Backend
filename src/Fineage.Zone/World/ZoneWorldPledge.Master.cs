@@ -154,7 +154,7 @@ public sealed partial class ZoneWorld
         if (cost.Sp > 0)
         {
             player.Sp -= cost.Sp;
-            _persist.SaveProgress(session.Account, session.ObjectId, player.Level, player.Exp, player.Sp, player.MaxHp, player.CurHp, player.MaxMp, player.CurMp);
+            _persist.SaveProgress(session.Account, session.ObjectId, player.Level, player.Exp, player.Sp, player.MaxHp, player.CurHp, player.MaxMp, player.CurMp, player.MaxCp, player.CurCp);
         }
         if (changes.Count > 0)
         {

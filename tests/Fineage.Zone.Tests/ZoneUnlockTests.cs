@@ -214,7 +214,8 @@ public sealed class ZoneUnlockTests
         Resolve(kit, player);
         int keys = player.Inventory!.CountOf(ThiefKey);
         int mp = player.CurMp;
-        kit.Now = kit.Now.AddSeconds(40);
+        // Past Mobius Unlock reuse (120 s); the refusal we want is "already opened", not skill_reuse.
+        kit.Now = kit.Now.AddSeconds(130);
 
         Assert.Null(await kit.World.TrySkillUseAsync(session, Unlock, MimicId, CancellationToken.None));
 

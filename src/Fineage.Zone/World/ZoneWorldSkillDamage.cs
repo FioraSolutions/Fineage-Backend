@@ -15,14 +15,15 @@ public sealed partial class ZoneWorld
     string? CastMobiusAttack(ZoneSession session, ZoneEntity player, ZoneEntity target, int skillId, int level,
         SkillCombatData combat, SkillDefinition template, long now)
     {
-        int mpInitial = combat.MpInitialAt(level);
-        if (player.CurMp < mpInitial + combat.MpAt(level))
+        int mpInitial = SkillMpCost(player, template, combat.MpInitialAt(level));
+        int mpLaunch = SkillMpCost(player, template, combat.MpAt(level));
+        if (player.CurMp < mpInitial + mpLaunch)
             return SkillProtocol.Mp;
 
         var ps = PlayerStats(player);
         int hitTime = ZoneCombat.SkillTimeMs(combat.HitTimeMs, combat.Magic, ps.MAtkSpd, ps.PAtkSpd);
         int coolTime = ZoneCombat.SkillTimeMs(combat.CoolTimeMs, combat.Magic, ps.MAtkSpd, ps.PAtkSpd);
-        int reuse = ZoneCombat.SkillReuseMs(combat.ReuseDelayMs, combat.Magic, ps.MAtkSpd, ps.PAtkSpd);
+        int reuse = SkillReuseMsFor(player, combat.Magic, combat.ReuseDelayMs);
 
         player.CurMp = Math.Max(0, player.CurMp - mpInitial);
         if (reuse > 0)
@@ -52,19 +53,31 @@ public sealed partial class ZoneWorld
     }
 
     /// <summary>Damage for a Mobius attack skill at launch; consumes mpConsume and (physical) a charged soulshot.</summary>
-    int RollSkillDamage(ZoneEntity player, ZoneEntity target, SkillCombatData combat, int level)
+    /// <summary>
+    /// Mobius <c>Skill.getPower</c> DeathLink: <c>power * (2 - 2 * hp/maxHp)</c>. Full HP → 0; empty → 2×.
+    /// </summary>
+    internal static double DeathLinkPowerMul(int curHp, int maxHp) =>
+        maxHp <= 0 ? 1d : Math.Max(0d, 2d - 2d * Math.Clamp(curHp, 0, maxHp) / (double)maxHp);
+
+    int RollSkillDamage(ZoneEntity player, ZoneEntity target, SkillCombatData combat, int level, bool consumeResources = true)
     {
-        player.CurMp = Math.Max(0, player.CurMp - combat.MpAt(level));
+        if (consumeResources)
+            player.CurMp = Math.Max(0, player.CurMp - SkillMpCost(player, _game.Skills.Find(combat.SkillId), combat.MpAt(level)));
         var ps = PlayerStats(player);
         double power = combat.PowerAt(level);
+        if (_skillEffects.TryGet(combat.SkillId, out var deathRows) && RowsHave(deathRows, "DeathLink"))
+            power *= DeathLinkPowerMul(player.CurHp, player.MaxHp);
         if (!combat.IsPhysical)
         {
             double mDef = StatMods(target).Apply(CombatStat.MDef, target.MDef > 0 ? target.MDef : Math.Max(1, target.Level) * 30d);
             // Mobius calcMagicDam: blessed spiritshot ×4 M.Atk, spiritshot ×2; the charge fires on this cast.
-            int spirit = player.SpiritshotCharge;
-            player.SpiritshotCharge = 0;
-            if (spirit > 0)
-                RechargeAutoShots(player);
+            int spirit = consumeResources ? player.SpiritshotCharge : 0;
+            if (consumeResources)
+            {
+                player.SpiritshotCharge = 0;
+                if (spirit > 0)
+                    RechargeAutoShots(player);
+            }
             double mAtk = ps.MAtk * ZoneCombat.SpiritshotMAtkMultiplier(spirit);
             // Mobius skill magicLevel (skill-combat.json); missing table → attacker level.
             int magicLevel = combat.MagicLevelAt(level);
@@ -93,7 +106,9 @@ public sealed partial class ZoneWorld
         if (combat.Kind == SkillDamageKind.Blow && combat.Blow is { } blow)
             return RollBlow(player, target, combat, level, blow, ps, ss);
         double pDef = NpcPDef(target);
-        var shield = ZoneCombat.RollShield(_combatRandom, NpcShieldRate(target), ps.Weapon == Fineage.Game.WeaponType.Bow);
+        var shield = ZoneCombat.RollShield(_combatRandom,
+            ShieldRateInArc(target, player, NpcShieldRate(target), 0),
+            ps.Weapon == Fineage.Game.WeaponType.Bow);
         if (shield == ZoneCombat.ShieldResult.Perfect)
             return 1;
         if (shield == ZoneCombat.ShieldResult.Block)
@@ -142,7 +157,7 @@ public sealed partial class ZoneWorld
             ? ps.CritDmg
             : ps.CritDmg * ZoneCombat.BlowPositionalCritDamage(positional.Apply(CombatStat.CritDmgPos, 1d));
         var (damage, outcome) = ZoneCombat.RollBlowDamage(_combatRandom, blow, ps.PAtk, NpcPDef(target), combat.PowerAt(level), ss,
-            front, behind, ps.RandomDamage, combat.BaseCritRate, str, NpcShieldRate(target), target.ShieldDef, critDamageMod,
+            front, behind, ps.RandomDamage, combat.BaseCritRate, str, ShieldRateInArc(target, player, NpcShieldRate(target), 0), target.ShieldDef, critDamageMod,
             ZoneCombat.AttackTraitBonus(ps.Weapon, target.DefenceTraits, attackTraits), ps.CritDmgAdd);
         int hpAfter = Math.Max(0, target.CurHp - damage);
         bool lethalable = target.NpcType is not ("RaidBoss" or "GrandBoss");

@@ -63,23 +63,62 @@ public sealed partial class ZoneWorld
         }
 
         if (player.Sitting)
-        {
-            // Mobius: standing up ends a private store.
-            if (player.PrivateStoreType != PrivateStoreProtocol.TypeNone)
-                ClosePrivateStore(player.ObjectId, standUp: false);
-            player.Sitting = false;
-            FanoutWaitType(player, ActionProtocol.WaitStanding);
-        }
+            StandUp(player);
         else
-        {
-            // Mobius Player.sitDown keeps the run/walk gait; only ChangeWaitType is broadcast.
-            player.Sitting = true;
-            if (player.Session != null)
-                player.Session.SitOnArrive = false;
-            FanoutWaitType(player, ActionProtocol.WaitSitting);
-        }
+            SitDown(player, checkCast: false);
 
         return null;
+    }
+
+    /// <summary>
+    /// Mobius <c>Player.sitDown(checkCast)</c>: sit immediately and broadcast ChangeWaitType only.
+    /// Combat, sit-on-arrive, and the Fake Death wake-up stay RequestActionUse gates, not this helper.
+    /// Relax / ChameleonRest pass <paramref name="checkCast"/> false so the toggle's own cast window
+    /// does not refuse the sit.
+    /// </summary>
+    void SitDown(ZoneEntity player, bool checkCast)
+    {
+        if (player.Sitting)
+            return;
+        long now = _clock().ToUnixTimeMilliseconds();
+        if (checkCast && IsCasting(player, now))
+            return;
+        // Mobius Player.sitDown keeps the run/walk gait; only ChangeWaitType is broadcast.
+        player.Sitting = true;
+        if (player.Session != null)
+            player.Session.SitOnArrive = false;
+        FanoutWaitType(player, ActionProtocol.WaitSitting);
+    }
+
+    /// <summary>
+    /// Mobius <c>Player.standUp</c>: stop EffectType.RELAXING, then broadcast WT_STANDING.
+    /// HP-full Relax exit does not stand the pawn — the effect just ends.
+    /// </summary>
+    void StandUp(ZoneEntity player)
+    {
+        // Mobius: standing up ends a private store.
+        if (player.PrivateStoreType != PrivateStoreProtocol.TypeNone)
+            ClosePrivateStore(player.ObjectId, standUp: false);
+        StopRelaxingEffects(player);
+        if (!player.Sitting)
+            return;
+        player.Sitting = false;
+        FanoutWaitType(player, ActionProtocol.WaitStanding);
+    }
+
+    /// <summary>
+    /// Mobius <c>stopEffects(EffectType.RELAXING)</c>: end every Relax / ChameleonRest toggle and fan
+    /// AbnormalStatus so the client toggle glow clears.
+    /// </summary>
+    void StopRelaxingEffects(ZoneEntity player)
+    {
+        for (int i = player.Abnormals.Count - 1; i >= 0; i--)
+        {
+            int skillId = player.Abnormals[i].Id;
+            if (!IsRelaxingEffect(skillId))
+                continue;
+            DeactivateToggle(player.Session, player, skillId, _game.Skills.Find(skillId), "stand", sendAbort: false);
+        }
     }
 
     string? ToggleWalkRun(ZoneEntity player)
@@ -174,6 +213,15 @@ public sealed partial class ZoneWorld
     void FanoutWaitType(ZoneEntity player, int waitType)
     {
         // Mobius Player.sitDown/standUp: broadcastPacket(new ChangeWaitType(this, ...)), self included.
+        string label = waitType switch
+        {
+            ActionProtocol.WaitSitting => "sit",
+            ActionProtocol.WaitStanding => "stand",
+            ActionProtocol.WaitStartFakeDeath => "fakedeath",
+            ActionProtocol.WaitStopFakeDeath => "stop-fakedeath",
+            _ => waitType.ToString()
+        };
+        ZoneLog.Info($"[wait-type] obj={player.ObjectId} type={label} x={player.X} y={player.Y} z={player.Z}");
         NetBridge?.FanoutChangeWaitType(NetWatchersOf(player), player.ObjectId, waitType, player.X, player.Y, player.Z);
     }
 

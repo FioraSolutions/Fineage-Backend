@@ -23,10 +23,15 @@ public sealed partial class ZoneWorld
     {
         if (!_byId.TryGetValue(hit.AttackerId, out var attacker) || attacker.CurHp <= 0 || attacker.Dead)
             return;
+        // Mobius onHitTimer: recharge auto shots at hit time — also when the target died or left reach meanwhile.
+        if (hit.RechargeShots && attacker.Kind == ZoneEntityKind.Player)
+            RechargeAutoShots(attacker);
         if (!_byId.TryGetValue(hit.TargetId, out var target) || target.CurHp <= 0 || target.Dead)
             return;
-        // Mobius onHitTimer: target ran out of reach during the swing -> no damage.
-        int reach = (attacker.Kind == ZoneEntityKind.Npc ? ZoneCombat.MobAttackReach(attacker.AttackRange) : PlayerReach(attacker)) + ZoneCombat.HitRangeTolerance;
+        // Mobius onHitTimer has no second range gate (the swing already started in range). We still drop the
+        // hit if the target has left the same attack reach used to start the swing — no extra HitRangeTolerance,
+        // which previously let a dagger land from ~120 instead of weapon 40 + collisions.
+        int reach = AttackReachAgainst(attacker, target);
         if (!ZoneCombat.Within(attacker.X, attacker.Y, target.X, target.Y, reach))
             return;
 
@@ -68,6 +73,7 @@ public sealed partial class ZoneWorld
         if (target.FakeDeath)
             WakeUpFromFakeDeath(target, "damage");
         target.CurHp = Math.Max(0, target.CurHp - hit.Damage);
+        ApplyReflectAndAbsorb(attacker, target, hit.Damage);
         if (_olympiadArena.Contains(attacker.ObjectId))
             _olympiad.NoteDamage(attacker.ObjectId, hit.Damage);
 
@@ -117,6 +123,7 @@ public sealed partial class ZoneWorld
             return;
 
         target.CurHp = Math.Max(0, target.CurHp - damage);
+        ApplyReflectAndAbsorb(attacker, target, damage);
         FanoutVitals(target, StatusFor(target));
         RecordDamage(target, credit, damage);
         ApplyQuestAttack(credit, target, byPet: attacker.Summon?.Pet != null);
@@ -244,7 +251,6 @@ public sealed partial class ZoneWorld
             NetBridge.FanoutEntityDespawn(netWatchers, objectId);
         }
     }
-
 
     internal int LastDeathDropNpcIdForTest { get; private set; }
 

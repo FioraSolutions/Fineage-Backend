@@ -48,6 +48,8 @@ namespace Fineage.Net.Contract
             w.WriteInt32(m.OwnerObjectId);
             w.WriteInt32Array(m.Cubics ?? Array.Empty<int>());
             w.WriteByte(m.Team);
+            w.WriteInt32(m.Rhand);
+            w.WriteInt32(m.Lhand);
         });
 
         public static EntitySpawnMsg DecodeEntitySpawn(ReadOnlySpan<byte> p)
@@ -120,6 +122,11 @@ namespace Fineage.Net.Contract
                 msg.Cubics = r.ReadInt32Array();
             if (r.Remaining >= 1)
                 msg.Team = r.ReadByte();
+            if (r.Remaining >= 8)
+            {
+                msg.Rhand = r.ReadInt32();
+                msg.Lhand = r.ReadInt32();
+            }
             return msg;
         }
 

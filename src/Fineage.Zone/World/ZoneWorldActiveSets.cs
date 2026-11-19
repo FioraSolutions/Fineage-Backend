@@ -47,6 +47,14 @@ public sealed partial class ZoneWorld
     {
         npc.AggroTargetId = targetId;
         SyncAiBusy(npc);
+        // Mobius setIntention(ATTACK) → setRunning() / ChangeMoveType. Every path that
+        // enters combat (damage hate, AddHate payloads, aggro-range scan, clan help)
+        // comes through here — not only a melee hit.
+        if (targetId > 0 && !npc.Running)
+        {
+            npc.Running = true;
+            FanoutMoveType(npc);
+        }
     }
 
     void SyncAiBusy(ZoneEntity npc)

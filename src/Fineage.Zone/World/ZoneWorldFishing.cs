@@ -68,7 +68,7 @@ public sealed partial class ZoneWorld
     string? TrySkillUseFishing(ZoneSession session, ZoneEntity player, Fineage.Game.Skills.SkillDefinition template,
         Fineage.Game.Skills.SkillLevelData levelData, int level, long now)
     {
-        player.CurMp = Math.Max(0, player.CurMp - levelData.MpConsume);
+        ConsumeSkillMp(player, template, levelData.MpConsume);
         int reuseMs = Math.Max(0, template.ReuseDelayMs);
         if (reuseMs > 0)
             player.SkillReuseUntilMs[template.SkillId] = now + reuseMs;

@@ -86,8 +86,8 @@ public sealed partial class ZoneWorld
         if (ConsumeItemBlocked(session, player, levelData))
             return null;
 
-        player.CurMp = Math.Max(0, player.CurMp - levelData.MpConsume);
-        var (hitMs, reuseMs) = ScaledSkillTimes(player, template);
+        ConsumeSkillMp(player, template, levelData.MpConsume);
+        var (hitMs, reuseMs) = ScaledSkillTimes(player, template, level);
         if (reuseMs > 0)
             player.SkillReuseUntilMs[request.SkillId] = now + reuseMs;
 
@@ -242,8 +242,8 @@ public sealed partial class ZoneWorld
             z = ground.Z;
         }
 
-        player.CurMp = Math.Max(0, player.CurMp - levelData.MpConsume);
-        var (hitMs, reuseMs) = ScaledSkillTimes(player, template);
+        ConsumeSkillMp(player, template, levelData.MpConsume);
+        var (hitMs, reuseMs) = ScaledSkillTimes(player, template, level);
         if (reuseMs > 0)
             player.SkillReuseUntilMs[request.SkillId] = now + reuseMs;
 

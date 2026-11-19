@@ -77,6 +77,10 @@ sealed class ZoneNpcTemplatePayload
     public double PDef { get; set; }
     public int PAtkSpd { get; set; }
     public int AttackRange { get; set; }
+    public string AttackType { get; set; } = "";
+    public int Rhand { get; set; }
+    public int Lhand { get; set; }
+    public int CollisionRadius { get; set; }
     public bool Aggressive { get; set; }
     public int AggroRange { get; set; }
     public int ClanHelpRange { get; set; }
@@ -159,6 +163,8 @@ sealed class ZoneEntityVitalsPayload
     public int MaxHp { get; set; }
     public int CurMp { get; set; }
     public int MaxMp { get; set; }
+    public int CurCp { get; set; }
+    public int MaxCp { get; set; }
     public int Level { get; set; } = 1;
     public long Exp { get; set; }
     /// <summary>Mobius <c>_expBeforeDeath</c>: exp snapshot taken before the death penalty, used by resurrection restore.</summary>
@@ -257,6 +263,21 @@ sealed class ZonePlayerStatusPayload
     public int HennaInt { get; set; }
     public int HennaMen { get; set; }
     public int HennaWit { get; set; }
+
+    /// <summary>Mobius player element-seed expiry timestamps (FIRE/WATER/WIND/EARTH), unix ms.</summary>
+    public Dictionary<string, List<long>> ElementSeedUntilMs { get; } = new(StringComparer.OrdinalIgnoreCase);
+
+    /// <summary>Mobius CA1 channel: skill still ticking until this unix ms. 0 = not channeling.</summary>
+    public long ChannelUntilMs { get; set; }
+    public int ChannelSkillId { get; set; }
+    public int ChannelSkillLevel { get; set; }
+    public int ChannelX { get; set; }
+    public int ChannelY { get; set; }
+    public int ChannelZ { get; set; }
+    public long ChannelNextTickMs { get; set; }
+    public int ChannelTickMs { get; set; }
+    public int ChannelMpPerTick { get; set; }
+    public int ChannelAffectRange { get; set; }
 }
 
 /// <summary>Player private-store / manufacture fields composed off <see cref="ZoneEntity"/> (#353).</summary>

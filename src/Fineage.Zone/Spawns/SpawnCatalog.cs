@@ -197,7 +197,10 @@ public sealed class SpawnCatalog
         template.DefenceTraits,
         template.AiSkills,
         template.MinSkillChance,
-        template.MaxSkillChance);
+        template.MaxSkillChance,
+        template.AttackType,
+        template.Rhand,
+        template.Lhand);
 
     public static SpawnCatalog LoadDefault()
     {

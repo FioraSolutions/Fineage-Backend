@@ -158,7 +158,9 @@ public sealed partial class ZoneWorld
                 player.MaxHp,
                 player.CurHp,
                 player.MaxMp,
-                player.CurMp);
+                player.CurMp,
+                player.MaxCp,
+                player.CurCp);
         }
     }
 
@@ -210,7 +212,9 @@ public sealed partial class ZoneWorld
                 player.MaxHp,
                 player.CurHp,
                 player.MaxMp,
-                player.CurMp);
+                player.CurMp,
+                player.MaxCp,
+                player.CurCp);
         }
     }
 

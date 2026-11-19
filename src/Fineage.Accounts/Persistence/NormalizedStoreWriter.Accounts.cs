@@ -150,7 +150,9 @@ static partial class NormalizedStoreWriter
             ReadDate(ch, "deleteAt"),
             ReadInt(ch, "hennaDye1", 0),
             ReadInt(ch, "hennaDye2", 0),
-            ReadInt(ch, "hennaDye3", 0));
+            ReadInt(ch, "hennaDye3", 0),
+            ReadInt(ch, "maxCp", 0),
+            ReadInt(ch, "cp", 0));
 
         var inventory = ReadItems(ch, "items");
         var warehouse = ReadItems(ch, "warehouse");
@@ -174,7 +176,10 @@ static partial class NormalizedStoreWriter
             var row = new StoredEffect(
                 ReadInt(e, "skillId", 0),
                 ReadInt(e, "level", 0),
-                ReadInt(e, "remainingSeconds", 0));
+                ReadInt(e, "remainingSeconds", 0),
+                ReadLong(e, "reuseDelayMs", 0),
+                ReadLong(e, "systimeMs", 0),
+                ReadInt(e, "restoreType", 0));
             if (row.IsValid)
                 rows.Add(row);
         }
@@ -220,6 +225,8 @@ static partial class NormalizedStoreWriter
         int hennaDye1 = 0,
         int hennaDye2 = 0,
         int hennaDye3 = 0,
+        int maxCp = 0,
+        int cp = 0,
         bool insertOnly = false)
     {
         using var cmd = conn.CreateCommand();
@@ -229,7 +236,7 @@ static partial class NormalizedStoreWriter
             INSERT INTO characters (
                 id, account, name, class_id, race, sex, level,
                 hair_style, hair_color, face, has_position, x, y, z, heading,
-                exp, sp, title, newbie, max_hp, hp, max_mp, mp,
+                exp, sp, title, newbie, max_hp, hp, max_mp, mp, max_cp, cp,
                 clan_id, clan_join_expiry_unix_ms, clan_create_expiry_unix_ms,
                 death_penalty_level, karma, pk_kills, pvp_kills,
                 henna_dye1, henna_dye2, henna_dye3,
@@ -237,7 +244,7 @@ static partial class NormalizedStoreWriter
             VALUES (
                 @id, @account, @name, @classId, @race, @sex, @level,
                 @hairStyle, @hairColor, @face, @hasPosition, @x, @y, @z, 0,
-                @exp, @sp, @title, @newbie, @maxHp, @hp, @maxMp, @mp,
+                @exp, @sp, @title, @newbie, @maxHp, @hp, @maxMp, @mp, @maxCp, @cp,
                 @clanId, @clanJoin, @clanCreate,
                 @deathPenalty, @karma, @pk, @pvp,
                 @henna1, @henna2, @henna3,
@@ -265,6 +272,8 @@ static partial class NormalizedStoreWriter
                 hp = EXCLUDED.hp,
                 max_mp = EXCLUDED.max_mp,
                 mp = EXCLUDED.mp,
+                max_cp = EXCLUDED.max_cp,
+                cp = EXCLUDED.cp,
                 clan_id = EXCLUDED.clan_id,
                 clan_join_expiry_unix_ms = EXCLUDED.clan_join_expiry_unix_ms,
                 clan_create_expiry_unix_ms = EXCLUDED.clan_create_expiry_unix_ms,
@@ -302,6 +311,8 @@ static partial class NormalizedStoreWriter
         cmd.Parameters.AddWithValue("hp", hp);
         cmd.Parameters.AddWithValue("maxMp", maxMp);
         cmd.Parameters.AddWithValue("mp", mp);
+        cmd.Parameters.AddWithValue("maxCp", maxCp);
+        cmd.Parameters.AddWithValue("cp", cp);
         cmd.Parameters.AddWithValue("clanId", clanId);
         cmd.Parameters.AddWithValue("clanJoin", clanJoinExpiry);
         cmd.Parameters.AddWithValue("clanCreate", clanCreateExpiry);

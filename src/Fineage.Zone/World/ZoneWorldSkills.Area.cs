@@ -8,11 +8,12 @@ namespace Fineage.Zone.World;
 
 public sealed partial class ZoneWorld
 {
-    /// <summary>Mobius AREA affectRange around the primary target. Falls back to 200 when unset.</summary>
+    /// <summary>Mobius <c>affectRange</c>: stored on the template when present, else 200 for AURA/AREA.</summary>
     static int ResolveAffectRange(SkillDefinition template)
     {
-        // skills.json currently stores Mobius effectRange (escape) not affectRange; Poisonous Cloud
-        // affectRange is 200. Prefer a sane AoE radius over the 1000 escape value.
+        if (template.AffectRange > 0)
+            return template.AffectRange;
+        // skills.json historically stored Mobius effectRange (escape) on some AREA skills (Poisonous Cloud 200).
         if (template.EffectRange > 0 && template.EffectRange <= 400)
             return template.EffectRange;
         return 200;
@@ -84,13 +85,13 @@ public sealed partial class ZoneWorld
             return null;
         if (!VisibleTo(player.ObjectId, targetId))
             return SkillProtocol.Target;
-        if (!ZoneCombat.InCastRange(player.X, player.Y, target.X, target.Y, template.CastRange))
-            return SkillProtocol.Range;
+        if (!TryEnsureHostileSkillRange(session, player, target, request, template, now, out var rangeError))
+            return rangeError;
         // Mobius callSkill: a negative skill on a playable flags the caster (landing or resisted).
         UpdatePvPStatus(player, target, now);
 
-        player.CurMp = Math.Max(0, player.CurMp - levelData.MpConsume);
-        var (hitMs, reuseMs) = ScaledSkillTimes(player, template);
+        ConsumeSkillMp(player, template, levelData.MpConsume);
+        var (hitMs, reuseMs) = ScaledSkillTimes(player, template, level);
         if (reuseMs > 0)
             player.SkillReuseUntilMs[request.SkillId] = now + reuseMs;
 
@@ -135,53 +136,77 @@ public sealed partial class ZoneWorld
         int level,
         long now)
     {
+        ZoneEntity? primary = null;
         int targetId = request.TargetObjectId > 0 ? request.TargetObjectId : session.SelectedTargetId;
-        if (targetId <= 0)
-            return SkillProtocol.Target;
-        if (!_byId.TryGetValue(targetId, out var target))
-            return SkillProtocol.Target;
-        if (!IsAttackable(player, target))
-            return SkillProtocol.Target;
-        if (!request.CtrlPressed && NeedsForce(player, target))
-            return null;
-        if (HostilePlayableRefused(session, player, target, badSkill: true) ||
-            SiegeFriendRefused(session, player, target) ||
-            PeacePlayableRefused(session, player, target))
-            return null;
-        if (!VisibleTo(player.ObjectId, targetId))
-            return SkillProtocol.Target;
-        if (!ZoneCombat.InCastRange(player.X, player.Y, target.X, target.Y, template.CastRange))
-            return SkillProtocol.Range;
-        // Mobius callSkill: a negative skill on a playable flags the caster (landing or resisted).
-        UpdatePvPStatus(player, target, now);
+        if (IsMultiHostileTarget(template))
+        {
+            if (targetId > 0 && _byId.TryGetValue(targetId, out var selected) &&
+                IsAttackable(player, selected))
+                primary = selected;
+        }
+        else
+        {
+            if (targetId <= 0)
+                return SkillProtocol.Target;
+            if (!_byId.TryGetValue(targetId, out var target))
+                return SkillProtocol.Target;
+            if (!IsAttackable(player, target))
+                return SkillProtocol.Target;
+            if (!request.CtrlPressed && NeedsForce(player, target))
+                return null;
+            if (HostilePlayableRefused(session, player, target, badSkill: true) ||
+                SiegeFriendRefused(session, player, target) ||
+                PeacePlayableRefused(session, player, target))
+                return null;
+            if (!VisibleTo(player.ObjectId, targetId))
+                return SkillProtocol.Target;
+            if (!TryEnsureHostileSkillRange(session, player, target, request, template, now, out var rangeError))
+                return rangeError;
+            primary = target;
+        }
 
-        player.CurMp = Math.Max(0, player.CurMp - levelData.MpConsume);
-        var (hitMs, reuseMs) = ScaledSkillTimes(player, template);
+        if (primary != null)
+            UpdatePvPStatus(player, primary, now);
+
+        ConsumeSkillMp(player, template, levelData.MpConsume);
+        var (hitMs, reuseMs) = ScaledSkillTimes(player, template, level);
         if (reuseMs > 0)
             player.SkillReuseUntilMs[request.SkillId] = now + reuseMs;
 
-        var cast = BuildCast(player, target, request.SkillId, level, hitMs, reuseMs);
-        StopForCast(player, target, now);
-        FanoutSkill(player, target, cast, targetStatus: null, CasterMpStatus(player));
-        // Mobius onMagicFinalizer: a mana burn is isBad() (negative effectPoint, non-SELF) → attack stance.
+        var anim = primary ?? player;
+        var cast = BuildCast(player, anim, request.SkillId, level, hitMs, reuseMs);
+        StopForCast(player, anim, now);
+        FanoutSkill(player, anim, cast, targetStatus: null, CasterMpStatus(player));
         EnterCombatStanceOnCast(player, template, level, now);
         player.CastingUntilMs = now + Math.Max(0, hitMs);
-        session.SelectedTargetId = targetId;
+        session.SelectedTargetId = primary?.ObjectId ?? session.SelectedTargetId;
         int power = Math.Max(1, levelData.Power);
-        ScheduleEffect(player, target, template, level, now, hitMs, (t, _) =>
+        var victims = IsMultiHostileTarget(template)
+            ? HostileAffectTargets(player, primary, template).ToList()
+            : [primary!];
+        ScheduleEffect(player, anim, template, level, now, hitMs, (_, at) =>
         {
-            int burned = Math.Min(t.CurMp, power);
-            if (burned <= 0)
-                return;
-            t.CurMp = Math.Max(0, t.CurMp - burned);
-            FanoutVitals(t, new StatusUpdateMsg
+            foreach (var t in victims)
             {
-                ObjectId = t.ObjectId,
-                AttributeIds = [InterludeStatus.CurMp, InterludeStatus.MaxMp],
-                Values = [t.CurMp, t.MaxMp]
-            });
-            if (t.Kind == ZoneEntityKind.Npc)
-                AddHate(t, player, hate: Math.Max(1, burned));
+                if (t.Dead || t.CurMp <= 0)
+                    continue;
+                if (t.Kind == ZoneEntityKind.Player &&
+                    (SiegeFriendRefused(session, player, t) ||
+                     PeacePlayableRefused(session, player, t, notify: false)))
+                    continue;
+                int burned = Math.Min(t.CurMp, power);
+                if (burned <= 0)
+                    continue;
+                t.CurMp = Math.Max(0, t.CurMp - burned);
+                FanoutVitals(t, new StatusUpdateMsg
+                {
+                    ObjectId = t.ObjectId,
+                    AttributeIds = [InterludeStatus.CurMp, InterludeStatus.MaxMp],
+                    Values = [t.CurMp, t.MaxMp]
+                });
+                if (t.Kind == ZoneEntityKind.Npc)
+                    AddHate(t, player, hate: Math.Max(1, burned));
+            }
         });
         return null;
     }
@@ -295,13 +320,13 @@ public sealed partial class ZoneWorld
     }
 
     /// <summary>Mobius calcAtkSpd for skill HitTime / ReuseDelay (magic ·333/Cspd, phys ·300/Pspd for hit).</summary>
-    (int HitMs, int ReuseMs) ScaledSkillTimes(ZoneEntity player, SkillDefinition template)
+    (int HitMs, int ReuseMs) ScaledSkillTimes(ZoneEntity player, SkillDefinition template, int level = 1)
     {
         var ps = PlayerStats(player);
         bool magic = template.MagicType == 1;
         return (
             ZoneCombat.SkillTimeMs(template.HitTimeMs, magic, ps.MAtkSpd, ps.PAtkSpd),
-            ZoneCombat.SkillReuseMs(template.ReuseDelayMs, magic, ps.MAtkSpd, ps.PAtkSpd));
+            SkillReuseMsFor(player, template, template.ReuseDelayMsAt(level)));
     }
 
     static MagicSkillUseMsg BuildCast(

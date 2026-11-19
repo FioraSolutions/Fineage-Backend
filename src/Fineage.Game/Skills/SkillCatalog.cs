@@ -66,7 +66,7 @@ public sealed class SkillCatalog
             {
                 var levelRow = row.LevelData[i];
                 int level = levelRow.Level == 0 ? i + 1 : levelRow.Level;
-                int abnormalLevel = levelRow.AbnormalLevel <= 0 ? 1 : levelRow.AbnormalLevel;
+                int abnormalLevel = levelRow.AbnormalLevel ?? 1;
                 levels[i] = new SkillLevelData(
                     level,
                     Math.Max(0, levelRow.MpConsume),
@@ -77,6 +77,7 @@ public sealed class SkillCatalog
                     Math.Max(0, levelRow.ItemConsumeId),
                     Math.Max(0, levelRow.ItemConsumeCount))
                 {
+                    ReuseDelayMs = levelRow.ReuseDelayMs,
                     Extractable = (levelRow.Extractable ?? [])
                         .Select(g => new ExtractableGroup(
                             (g.Items ?? [])
@@ -104,17 +105,41 @@ public sealed class SkillCatalog
             {
                 MagicType = Math.Clamp(row.MagicType, 0, 2),
                 EffectRange = Math.Max(0, row.EffectRange),
+                AffectRange = Math.Max(0, row.AffectRange),
                 AbnormalType = (row.AbnormalType ?? "").Trim(),
+                AbnormalVisualEffect = (row.AbnormalVisualEffect ?? "").Trim(),
                 Trait = (row.Trait ?? "").Trim().ToUpperInvariant(),
                 ActivateRate = row.ActivateRate,
                 LvlBonusRate = row.LvlBonusRate <= 0 ? 1 : row.LvlBonusRate,
                 BasicProperty = (row.BasicProperty ?? "").Trim().ToUpperInvariant(),
                 EffectPoints = row.EffectPoint is { Count: > 0 } ep ? ep : [],
-                UsingKinds = (row.UsingKinds ?? []).Where(k => !string.IsNullOrWhiteSpace(k)).Select(k => k.Trim().ToUpperInvariant()).ToArray()
+                UsingKinds = (row.UsingKinds ?? []).Where(k => !string.IsNullOrWhiteSpace(k)).Select(k => k.Trim().ToUpperInvariant()).ToArray(),
+                PlayerConditions = ReadPlayerConditions(row),
+                ChannelingTickMs = row.ChannelingTickInterval > 0 ? row.ChannelingTickInterval * 1000 : 0,
+                MpPerChanneling = Math.Max(0, row.MpPerChanneling),
+                ChannelingSkillId = Math.Max(0, row.ChannelingSkillId)
             });
         }
 
         return new SkillCatalog(skills);
+    }
+
+
+    static SkillPlayerCondition[] ReadPlayerConditions(SkillDto row)
+    {
+        var list = new List<SkillPlayerCondition>();
+        foreach (var c in row.PlayerConditions ?? [])
+        {
+            string type = (c.Type ?? "").Trim();
+            if (type.Length == 0)
+                continue;
+            string arg = (c.Element ?? "").Trim();
+            if (string.IsNullOrEmpty(arg) && c.SkillId > 0)
+                arg = c.SkillId.ToString();
+            int value = c.Value > 0 ? c.Value : c.Level;
+            list.Add(new SkillPlayerCondition(type, arg, value));
+        }
+        return list.Count > 0 ? list.ToArray() : [];
     }
 
     sealed class SkillFileDto
@@ -135,17 +160,32 @@ public sealed class SkillCatalog
         public int AbnormalTimeSeconds { get; set; }
         public bool IsDebuff { get; set; }
         public string? AbnormalType { get; set; }
+        public string? AbnormalVisualEffect { get; set; }
         public string? Trait { get; set; }
         public int ActivateRate { get; set; }
         public int LvlBonusRate { get; set; } = 1;
         public string? BasicProperty { get; set; }
         public int MagicType { get; set; }
         public int EffectRange { get; set; }
+        public int AffectRange { get; set; }
         /// <summary>Mobius <c>effectPoint</c>: a scalar row, or the per-level table expanded to a list.</summary>
         public List<int>? EffectPoint { get; set; }
         /// <summary>Mobius <c>&lt;cond msgId="113"&gt;&lt;using kind=".."/&gt;</c> weapon gate.</summary>
         public List<string>? UsingKinds { get; set; }
+        public int ChannelingTickInterval { get; set; }
+        public int MpPerChanneling { get; set; }
+        public int ChannelingSkillId { get; set; }
+        public List<PlayerConditionDto>? PlayerConditions { get; set; }
         public List<LevelDto>? LevelData { get; set; }
+    }
+
+    sealed class PlayerConditionDto
+    {
+        public string? Type { get; set; }
+        public string? Element { get; set; }
+        public int SkillId { get; set; }
+        public int Value { get; set; }
+        public int Level { get; set; }
     }
 
     sealed class LevelDto
@@ -153,11 +193,12 @@ public sealed class SkillCatalog
         public int Level { get; set; }
         public int MpConsume { get; set; }
         public int Power { get; set; }
-        public int AbnormalLevel { get; set; } = 1;
+        public int? AbnormalLevel { get; set; }
         public int MagicLevel { get; set; }
         public int MpInitialConsume { get; set; }
         public int ItemConsumeId { get; set; }
         public int ItemConsumeCount { get; set; }
+        public int? ReuseDelayMs { get; set; }
         public List<ExtractableDto>? Extractable { get; set; }
     }
 

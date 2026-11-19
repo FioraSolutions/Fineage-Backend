@@ -17,6 +17,13 @@
    ]
   },
   {
+   "skillId": 60,
+   "name": "Fake Death",
+   "levels": 1,
+   "effects": [
+   ]
+  },
+  {
    "skillId": 72,
    "name": "Iron Will",
    "levels": 3,
@@ -155,6 +162,22 @@
    ],
    "using": [
     "DUALFIST"
+   ]
+  },
+  {
+   "skillId": 86,
+   "name": "Reflect Damage",
+   "levels": 3,
+   "effects": [
+    {
+     "stat": "reflectDam",
+     "op": "add",
+     "values": [
+      10.0,
+      15.0,
+      20.0
+     ]
+    }
    ]
   },
   {
@@ -709,6 +732,35 @@
    ]
   },
   {
+   "skillId": 196,
+   "name": "Holy Blade",
+   "levels": 1,
+   "effects": [
+    {
+     "stat": "holyPower",
+     "op": "add",
+     "values": [
+      10.0
+     ]
+    }
+   ]
+  },
+  {
+   "skillId": 197,
+   "name": "Holy Armor",
+   "levels": 2,
+   "effects": [
+    {
+     "stat": "darkRes",
+     "op": "add",
+     "values": [
+      7.0,
+      10.0
+     ]
+    }
+   ]
+  },
+  {
    "skillId": 221,
    "name": "Silent Move",
    "levels": 1,
@@ -734,6 +786,13 @@
       1.25
      ]
     }
+   ]
+  },
+  {
+   "skillId": 226,
+   "name": "Relax",
+   "levels": 1,
+   "effects": [
    ]
   },
   {
@@ -1026,6 +1085,22 @@
    ]
   },
   {
+   "skillId": 287,
+   "name": "Lionheart",
+   "levels": 3,
+   "effects": [
+    {
+     "stat": "cancelVuln",
+     "op": "sub",
+     "values": [
+      60.0,
+      60.0,
+      60.0
+     ]
+    }
+   ]
+  },
+  {
    "skillId": 288,
    "name": "Guard Stance",
    "levels": 4,
@@ -1060,6 +1135,13 @@
    ],
    "using": [
     "DUALFIST"
+   ]
+  },
+  {
+   "skillId": 296,
+   "name": "Chameleon Rest",
+   "levels": 1,
+   "effects": [
    ]
   },
   {
@@ -1118,6 +1200,23 @@
    ],
    "using": [
     "DUALFIST"
+   ]
+  },
+  {
+   "skillId": 303,
+   "name": "Soul of Sagittarius",
+   "levels": 4,
+   "effects": [
+    {
+     "stat": "maxMp",
+     "op": "mul",
+     "values": [
+      1.1,
+      1.15,
+      1.2,
+      1.25
+     ]
+    }
    ]
   },
   {
@@ -1250,6 +1349,60 @@
    ]
   },
   {
+   "skillId": 318,
+   "name": "Aegis Stance",
+   "levels": 1,
+   "effects": [
+    {
+     "stat": "sDef",
+     "op": "mul",
+     "values": [
+      0.6
+     ]
+    },
+    {
+     "stat": "shieldDefAngle",
+     "op": "set",
+     "values": [
+      360.0
+     ]
+    }
+   ]
+  },
+  {
+   "skillId": 322,
+   "name": "Shield Fortress",
+   "levels": 6,
+   "effects": [
+    {
+     "stat": "sDef",
+     "op": "add",
+     "values": [
+      446.0,
+      469.0,
+      491.0,
+      514.0,
+      537.0,
+      560.0
+     ]
+    }
+   ]
+  },
+  {
+   "skillId": 334,
+   "name": "Focus Skill Mastery",
+   "levels": 1,
+   "effects": [
+    {
+     "stat": "skillCriticalProbability",
+     "op": "mul",
+     "values": [
+      11.0
+     ]
+    }
+   ]
+  },
+  {
    "skillId": 336,
    "name": "Arcane Wisdom",
    "levels": 1,
@@ -1357,6 +1510,89 @@
      "op": "sub",
      "values": [
       4.0
+     ]
+    }
+   ]
+  },
+  {
+   "skillId": 341,
+   "name": "Touch of Life",
+   "levels": 1,
+   "effects": [
+    {
+     "stat": "cancelVuln",
+     "op": "sub",
+     "values": [
+      60.0
+     ]
+    },
+    {
+     "stat": "debuffVuln",
+     "op": "sub",
+     "values": [
+      30.0
+     ]
+    },
+    {
+     "stat": "healEffect",
+     "op": "mul",
+     "values": [
+      1.3
+     ]
+    }
+   ]
+  },
+  {
+   "skillId": 342,
+   "name": "Touch of Death",
+   "levels": 1,
+   "effects": [
+    {
+     "stat": "maxCp",
+     "op": "mul",
+     "values": [
+      0.1
+     ]
+    },
+    {
+     "stat": "debuffVuln",
+     "op": "add",
+     "values": [
+      30.0
+     ]
+    },
+    {
+     "stat": "healEffect",
+     "op": "mul",
+     "values": [
+      0.7
+     ]
+    }
+   ]
+  },
+  {
+   "skillId": 350,
+   "name": "Physical Mirror",
+   "levels": 1,
+   "effects": [
+    {
+     "stat": "reflectSkillPhysic",
+     "op": "add",
+     "values": [
+      30.0
+     ],
+     "using": [
+      "SHIELD"
+     ]
+    },
+    {
+     "stat": "reflectSkillMagic",
+     "op": "add",
+     "values": [
+      10.0
+     ],
+     "using": [
+      "SHIELD"
      ]
     }
    ]
@@ -2206,6 +2442,38 @@
    ]
   },
   {
+   "skillId": 415,
+   "name": "Spirit of Sagittarius",
+   "levels": 3,
+   "effects": [
+    {
+     "stat": "physicalMpConsumeRate",
+     "op": "mul",
+     "values": [
+      0.7,
+      0.6,
+      0.5
+     ]
+    }
+   ]
+  },
+  {
+   "skillId": 416,
+   "name": "Blessing of Sagittarius",
+   "levels": 3,
+   "effects": [
+    {
+     "stat": "pReuse",
+     "op": "mul",
+     "values": [
+      0.9,
+      0.8,
+      0.7
+     ]
+    }
+   ]
+  },
+  {
    "skillId": 420,
    "name": "Zealot",
    "levels": 3,
@@ -2278,6 +2546,24 @@
    ]
   },
   {
+   "skillId": 421,
+   "name": "Fell Swoop",
+   "levels": 5,
+   "effects": [
+    {
+     "stat": "atkCountMax",
+     "op": "add",
+     "values": [
+      3.0,
+      4.0,
+      5.0,
+      6.0,
+      7.0
+     ]
+    }
+   ]
+  },
+  {
    "skillId": 422,
    "name": "Polearm Accuracy",
    "levels": 3,
@@ -2343,6 +2629,20 @@
    ],
    "using": [
     "DUALFIST"
+   ]
+  },
+  {
+   "skillId": 439,
+   "name": "Shield of Revenge",
+   "levels": 1,
+   "effects": [
+    {
+     "stat": "vengeancePdam",
+     "op": "add",
+     "values": [
+      40.0
+     ]
+    }
    ]
   },
   {

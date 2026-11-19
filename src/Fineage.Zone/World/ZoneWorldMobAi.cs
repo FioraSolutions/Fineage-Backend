@@ -29,6 +29,7 @@ public sealed partial class ZoneWorld
             TickCorpseDecay(now);
             TickQuestSpawns(now);
             TickSignets(now);
+            TickSkillChannels(now);
             TickAttackStance(now);
             return 0;
         });
@@ -78,7 +79,7 @@ public sealed partial class ZoneWorld
         if (hit.Combat != null)
         {
             int escape = Fineage.Game.Combat.CastRules.EscapeRange(hit.Combat.CastRange, hit.Combat.EffectRange);
-            if (escape > 0 && !ZoneCombat.InCastRange(player.X, player.Y, target.X, target.Y, escape + ZoneCombat.HitRangeTolerance))
+            if (escape > 0 && !ZoneCombat.Within(player.X, player.Y, target.X, target.Y, SkillCastReach(escape, player, target)))
             {
                 AbortCast(player, "escaped", notify: false);
                 return;
@@ -106,13 +107,18 @@ public sealed partial class ZoneWorld
         {
             UpdatePvPStatus(player, CreditOf(target), now);
             DamageSummon(player, target, damage, now);
+            if (hit.Combat != null && damage > 0)
+                ApplyHpDrainAfterDamage(player, target, damage, hit.Combat.SkillId);
             return;
         }
         if (target.Kind == ZoneEntityKind.Player)
         {
             ApplySkillDamageToPlayer(player, target, damage, now);
             if (hit.Combat != null && damage > 0)
+            {
+                ApplyHpDrainAfterDamage(player, target, damage, hit.Combat.SkillId);
                 ApplySkillAbnormal(player, target, hit, now);
+            }
             return;
         }
         if (SiegeNpcHit(player, target, damage, now))
@@ -128,6 +134,8 @@ public sealed partial class ZoneWorld
         DuelNoteOutsideHit(player, target);
         target.CurHp = Math.Max(0, target.CurHp - damage);
         FanoutVitals(target, StatusFor(target));
+        if (hit.Combat != null && damage > 0)
+            ApplyHpDrainAfterDamage(player, target, damage, hit.Combat.SkillId);
         RecordDamage(target, player, damage);
         ApplyQuestAttack(player, target);
         AddHate(target, player, DamageHate(damage, target.Level));
@@ -172,6 +180,7 @@ public sealed partial class ZoneWorld
         if (target.FakeDeath)
             WakeUpFromFakeDeath(target, "damage");
         target.CurHp = Math.Max(0, target.CurHp - damage);
+        ApplyReflectAndAbsorb(attacker, target, damage);
         target.CombatUntilUnixMs = now + ClanProtocol.CombatStanceMillis;
         FanoutVitals(target, PlayerVitalsStatus(target));
         SendVictimHitLines(attacker, target, damage, 0);
@@ -220,7 +229,7 @@ public sealed partial class ZoneWorld
                 continue;
             }
             if (!_byId.TryGetValue(npc.AggroTargetId, out var player) ||
-                !IsLivePlayable(player) ||
+                !IsValidMobAttackTarget(npc, player) ||
                 !SameInstance(npc.ObjectId, player.ObjectId) ||
                 !ZoneCombat.InAggroRange(npc.X, npc.Y, player.X, player.Y))
             {
@@ -262,7 +271,7 @@ public sealed partial class ZoneWorld
                 continue;
             }
             // Mobius thinkAttack: no LOS to the most hated → moveTo(target) instead of swinging.
-            if (!ZoneCombat.InMobReach(npc.X, npc.Y, player.X, player.Y, ZoneCombat.MobAttackReach(npc.AttackRange)) ||
+            if (!ZoneCombat.Within(npc.X, npc.Y, player.X, player.Y, AttackReachAgainst(npc, player)) ||
                 !CanSeeTarget(npc, player))
             {
                 // Mobius AttackableAI.thinkAttack -> moveToPawn(target, range): mob runs to the attacker.

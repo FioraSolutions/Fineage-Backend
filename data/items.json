@@ -7028,6 +7028,15 @@
       "sellable": false
     },
     {
+      "id": 733,
+      "name": "Endeavor Potion",
+      "kind": "etc",
+      "icon": "icon.etc_lesser_potion_yellow_i00",
+      "stackable": true,
+      "price": 500,
+      "weight": 180
+    },
+    {
       "id": 734,
       "name": "Haste Potion",
       "kind": "etc",
@@ -9435,6 +9444,15 @@
       "quest": true
     },
     {
+      "id": 1073,
+      "name": "Beginner's Potion",
+      "kind": "etc",
+      "icon": "icon.etc_potion_red_i00",
+      "stackable": true,
+      "price": 0,
+      "weight": 5
+    },
+    {
       "id": 1074,
       "name": "Boat Ticket: Talking Island to Gludin",
       "kind": "etc",
@@ -11809,8 +11827,11 @@
       "id": 1342,
       "name": "Steel Arrow",
       "kind": "etc",
-      "stackable": true,
       "icon": "icon.etc_fine_steel_quiver_i00",
+      "bodySlot": "lhand",
+      "etcType": "arrow",
+      "stackable": true,
+      "crystal": "c",
       "price": 5,
       "weight": 4
     },
@@ -11818,8 +11839,11 @@
       "id": 1343,
       "name": "Silver Arrow",
       "kind": "etc",
-      "stackable": true,
       "icon": "icon.etc_silver_quiver_i00",
+      "bodySlot": "lhand",
+      "etcType": "arrow",
+      "stackable": true,
+      "crystal": "b",
       "price": 7,
       "weight": 4
     },
@@ -11827,9 +11851,24 @@
       "id": 1344,
       "name": "Mithril Arrow",
       "kind": "etc",
-      "stackable": true,
       "icon": "icon.etc_mithril_quiver_i00",
+      "bodySlot": "lhand",
+      "etcType": "arrow",
+      "stackable": true,
+      "crystal": "a",
       "price": 8,
+      "weight": 3
+    },
+    {
+      "id": 1345,
+      "name": "Shining Arrow",
+      "kind": "etc",
+      "icon": "icon.etc_shining_quiver_i00",
+      "bodySlot": "lhand",
+      "etcType": "arrow",
+      "stackable": true,
+      "crystal": "s",
+      "price": 20,
       "weight": 3
     },
     {
@@ -12067,6 +12106,24 @@
       "weight": 120
     },
     {
+      "id": 1374,
+      "name": "Greater Haste Potion",
+      "kind": "etc",
+      "icon": "icon.etc_lesser_potion_green_i00",
+      "stackable": true,
+      "price": 3000,
+      "weight": 20
+    },
+    {
+      "id": 1375,
+      "name": "Greater Swift Attack Potion",
+      "kind": "etc",
+      "icon": "icon.etc_lesser_potion_purple_i00",
+      "stackable": true,
+      "price": 6000,
+      "weight": 20
+    },
+    {
       "id": 1376,
       "name": "Guard Spear",
       "kind": "weapon",
@@ -12096,6 +12153,14 @@
       "weight": 120
     },
     {
+      "id": 1378,
+      "name": "Spellbook: Divine Heal",
+      "kind": "etc",
+      "icon": "icon.etc_spell_books_white_i00",
+      "price": 800,
+      "weight": 120
+    },
+    {
       "id": 1383,
       "name": "Spellbook: Poison",
       "kind": "etc",
@@ -12112,11 +12177,83 @@
       "weight": 120
     },
     {
+      "id": 1387,
+      "name": "Spellbook: Resist Poison",
+      "kind": "etc",
+      "icon": "icon.etc_spell_books_assistance_i00",
+      "price": 2450,
+      "weight": 120
+    },
+    {
+      "id": 1388,
+      "name": "Spellbook: Mental Shield",
+      "kind": "etc",
+      "icon": "icon.etc_spell_books_assistance_i00",
+      "price": 1250,
+      "weight": 120
+    },
+    {
+      "id": 1389,
+      "name": "Spellbook: Holy Weapon",
+      "kind": "etc",
+      "icon": "icon.etc_spell_books_white_i00",
+      "price": 1250,
+      "weight": 120
+    },
+    {
+      "id": 1390,
+      "name": "Spellbook: Regeneration",
+      "kind": "etc",
+      "icon": "icon.etc_spell_books_assistance_i00",
+      "price": 2450,
+      "weight": 120
+    },
+    {
+      "id": 1392,
+      "name": "Spellbook: Berserker Spirit",
+      "kind": "etc",
+      "icon": "icon.etc_spell_books_assistance_i00",
+      "price": 2450,
+      "weight": 120
+    },
+    {
+      "id": 1394,
+      "name": "Spellbook: Sleep",
+      "kind": "etc",
+      "icon": "icon.etc_spell_books_assistance_i00",
+      "price": 1800,
+      "weight": 120
+    },
+    {
+      "id": 1397,
+      "name": "Spellbook: Peace",
+      "kind": "etc",
+      "icon": "icon.etc_spell_books_assistance_i00",
+      "price": 2450,
+      "weight": 120
+    },
+    {
+      "id": 1398,
+      "name": "Spellbook: Focus",
+      "kind": "etc",
+      "icon": "icon.etc_spell_books_assistance_i00",
+      "price": 1250,
+      "weight": 120
+    },
+    {
       "id": 1399,
       "name": "Spellbook: Concentration",
       "kind": "etc",
       "icon": "icon.etc_spell_books_assistance_i00",
       "price": 800,
+      "weight": 120
+    },
+    {
+      "id": 1400,
+      "name": "Spellbook: Surrender To Fire",
+      "kind": "etc",
+      "icon": "icon.etc_spell_books_element_i00",
+      "price": 1250,
       "weight": 120
     },
     {
@@ -12136,6 +12273,14 @@
       "weight": 120
     },
     {
+      "id": 1404,
+      "name": "Spellbook: Servitor Recharge",
+      "kind": "etc",
+      "icon": "icon.etc_spell_books_summon_i00",
+      "price": 1250,
+      "weight": 120
+    },
+    {
       "id": 1405,
       "name": "Spellbook: Servitor Heal",
       "kind": "etc",
@@ -12144,11 +12289,75 @@
       "weight": 120
     },
     {
+      "id": 1406,
+      "name": "Spellbook: Servitor Wind Walk",
+      "kind": "etc",
+      "icon": "icon.etc_spell_books_summon_i00",
+      "price": 2450,
+      "weight": 120
+    },
+    {
+      "id": 1409,
+      "name": "Spellbook: Slow",
+      "kind": "etc",
+      "icon": "icon.etc_spell_books_black_i00",
+      "price": 2450,
+      "weight": 120
+    },
+    {
+      "id": 1410,
+      "name": "Spellbook: Poisonous Cloud",
+      "kind": "etc",
+      "icon": "icon.etc_spell_books_black_i00",
+      "price": 1250,
+      "weight": 120
+    },
+    {
       "id": 1411,
       "name": "Spellbook: Aura Burn",
       "kind": "etc",
       "icon": "icon.etc_spell_books_element_i00",
       "price": 800,
+      "weight": 120
+    },
+    {
+      "id": 1412,
+      "name": "Spellbook: Resist Aqua",
+      "kind": "etc",
+      "icon": "icon.etc_spell_books_assistance_i00",
+      "price": 2450,
+      "weight": 120
+    },
+    {
+      "id": 1413,
+      "name": "Spellbook: Resist Wind",
+      "kind": "etc",
+      "icon": "icon.etc_spell_books_assistance_i00",
+      "price": 2450,
+      "weight": 120
+    },
+    {
+      "id": 1414,
+      "name": "Spellbook: Resist Fire",
+      "kind": "etc",
+      "icon": "icon.etc_spell_books_assistance_i00",
+      "price": 1800,
+      "weight": 120
+    },
+    {
+      "id": 1415,
+      "name": "Spellbook: Dryad Root",
+      "kind": "etc",
+      "icon": "icon.etc_spell_books_assistance_i00",
+      "price": 1250,
+      "weight": 120
+    },
+    {
+      "id": 1416,
+      "name": "Spellbook: Curse of Chaos",
+      "kind": "etc",
+      "icon": "icon.etc_spell_books_black_i00",
+      "price": 2450,
       "weight": 120
     },
     {
@@ -13060,6 +13269,22 @@
       "weight": 120
     },
     {
+      "id": 1516,
+      "name": "Spellbook: Corpse Life Drain",
+      "kind": "etc",
+      "icon": "icon.etc_spell_books_black_i00",
+      "price": 1800,
+      "weight": 120
+    },
+    {
+      "id": 1517,
+      "name": "Spellbook: Body To Mind",
+      "kind": "etc",
+      "icon": "icon.etc_spell_books_black_i00",
+      "price": 1250,
+      "weight": 120
+    },
+    {
       "id": 1538,
       "name": "Blessed Scroll of Escape",
       "icon": "icon.etc_scroll_of_return_i01",
@@ -13076,6 +13301,15 @@
       "price": 900,
       "kind": "etc",
       "stackable": true
+    },
+    {
+      "id": 1540,
+      "name": "Quick Healing Potion",
+      "kind": "etc",
+      "icon": "icon.etc_potion_gold_i00",
+      "stackable": true,
+      "price": 10000,
+      "weight": 180
     },
     {
       "id": 1541,
@@ -14193,6 +14427,14 @@
       "weight": 120
     },
     {
+      "id": 1668,
+      "name": "Spellbook: Summon Mew the Cat",
+      "kind": "etc",
+      "icon": "icon.etc_spell_books_summon_i00",
+      "price": 1250,
+      "weight": 120
+    },
+    {
       "id": 1669,
       "name": "Spellbook: Summon Boxer the Unicorn",
       "kind": "etc",
@@ -14207,6 +14449,1005 @@
       "icon": "icon.etc_spell_books_summon_i00",
       "price": 800,
       "weight": 120
+    },
+    {
+      "id": 1674,
+      "name": "Twig of Treant",
+      "kind": "etc",
+      "icon": "icon.etc_branch_gold_i00",
+      "stackable": true,
+      "price": 80,
+      "weight": 2
+    },
+    {
+      "id": 1675,
+      "name": "Beast Blood",
+      "kind": "etc",
+      "icon": "icon.etc_reagent_red_i00",
+      "stackable": true,
+      "price": 40,
+      "weight": 2
+    },
+    {
+      "id": 1676,
+      "name": "Beast Bone",
+      "kind": "etc",
+      "icon": "icon.etc_piece_bone_white_i00",
+      "stackable": true,
+      "price": 20,
+      "weight": 2
+    },
+    {
+      "id": 1677,
+      "name": "Hot Oil",
+      "kind": "etc",
+      "icon": "icon.etc_oil_pot_black_i00",
+      "stackable": true,
+      "price": 40,
+      "weight": 2
+    },
+    {
+      "id": 1678,
+      "name": "(Not In Use) Thread",
+      "kind": "etc",
+      "icon": "icon.etc_skein_white_i00",
+      "stackable": true,
+      "price": 10,
+      "weight": 2
+    },
+    {
+      "id": 1679,
+      "name": "Bronze",
+      "kind": "etc",
+      "icon": "icon.etc_lump_gray_i00",
+      "stackable": true,
+      "price": 150,
+      "weight": 2
+    },
+    {
+      "id": 1680,
+      "name": "Fur",
+      "kind": "etc",
+      "icon": "icon.etc_leather_brown_i00",
+      "stackable": true,
+      "price": 40,
+      "weight": 2
+    },
+    {
+      "id": 1681,
+      "name": "Elf Stone",
+      "kind": "etc",
+      "icon": "icon.etc_crystal_ball_green_i00",
+      "stackable": true,
+      "price": 1500,
+      "weight": 2
+    },
+    {
+      "id": 1682,
+      "name": "Tear of Holy Spirit",
+      "kind": "etc",
+      "icon": "icon.etc_lesser_potion_clear_i00",
+      "stackable": true,
+      "price": 1000,
+      "weight": 2
+    },
+    {
+      "id": 1683,
+      "name": "Mithril",
+      "kind": "etc",
+      "icon": "icon.etc_squares_silver_i00",
+      "stackable": true,
+      "price": 400,
+      "weight": 2
+    },
+    {
+      "id": 1684,
+      "name": "Durable Stem",
+      "kind": "etc",
+      "icon": "icon.etc_herb_green_i00",
+      "stackable": true,
+      "price": 220,
+      "weight": 2
+    },
+    {
+      "id": 1685,
+      "name": "Wooden Frame",
+      "kind": "etc",
+      "icon": "icon.etc_squares_wood_i00",
+      "stackable": true,
+      "price": 2000,
+      "weight": 2
+    },
+    {
+      "id": 1686,
+      "name": "Bark of Treant",
+      "kind": "etc",
+      "icon": "icon.etc_branch_gold_i00",
+      "stackable": true,
+      "price": 480,
+      "weight": 2
+    },
+    {
+      "id": 1687,
+      "name": "(Not In Use) Coarse Bone Powder",
+      "kind": "etc",
+      "icon": "icon.etc_powder_white_i00",
+      "stackable": true,
+      "price": 80,
+      "weight": 2
+    },
+    {
+      "id": 1688,
+      "name": "Refined Steel",
+      "kind": "etc",
+      "icon": "icon.etc_plate_black_i00",
+      "stackable": true,
+      "price": 480,
+      "weight": 2
+    },
+    {
+      "id": 1689,
+      "name": "(Not In Use) Leather",
+      "kind": "etc",
+      "icon": "icon.etc_leather_brown_i00",
+      "stackable": true,
+      "price": 300,
+      "weight": 2
+    },
+    {
+      "id": 1690,
+      "name": "Bowstring",
+      "kind": "etc",
+      "icon": "icon.etc_skein_white_i00",
+      "stackable": true,
+      "price": 300,
+      "weight": 2
+    },
+    {
+      "id": 1691,
+      "name": "Steel Frame",
+      "kind": "etc",
+      "icon": "icon.etc_mold_i00",
+      "stackable": true,
+      "price": 4400,
+      "weight": 2
+    },
+    {
+      "id": 1692,
+      "name": "(Not In Use) Cord",
+      "kind": "etc",
+      "icon": "icon.etc_skein_gray_i00",
+      "stackable": true,
+      "price": 45,
+      "weight": 2
+    },
+    {
+      "id": 1693,
+      "name": "Refined Bronze",
+      "kind": "etc",
+      "icon": "icon.etc_plate_blue_i00",
+      "stackable": true,
+      "price": 890,
+      "weight": 2
+    },
+    {
+      "id": 1694,
+      "name": "Treant Potion",
+      "kind": "etc",
+      "icon": "icon.etc_potion_green_i00",
+      "stackable": true,
+      "price": 800,
+      "weight": 2
+    },
+    {
+      "id": 1695,
+      "name": "Spell Paper",
+      "kind": "etc",
+      "icon": "icon.etc_piece_of_paper_white_i00",
+      "stackable": true,
+      "price": 580,
+      "weight": 2
+    },
+    {
+      "id": 1696,
+      "name": "Flaming Oil",
+      "kind": "etc",
+      "icon": "icon.etc_oil_pot_black_i00",
+      "stackable": true,
+      "price": 500,
+      "weight": 2
+    },
+    {
+      "id": 1697,
+      "name": "Magic Powder",
+      "kind": "etc",
+      "icon": "icon.etc_powder_gray_i00",
+      "stackable": true,
+      "price": 3080,
+      "weight": 2
+    },
+    {
+      "id": 1698,
+      "name": "Refined Mithril",
+      "kind": "etc",
+      "icon": "icon.etc_plate_white_i00",
+      "stackable": true,
+      "price": 2100,
+      "weight": 2
+    },
+    {
+      "id": 1699,
+      "name": "Reinforced Steel",
+      "kind": "etc",
+      "icon": "icon.etc_squares_silver_i00",
+      "stackable": true,
+      "price": 1860,
+      "weight": 2
+    },
+    {
+      "id": 1700,
+      "name": "(Not In Use) Oriharukon",
+      "kind": "etc",
+      "icon": "icon.etc_squares_wood_i00",
+      "stackable": true,
+      "price": 6300,
+      "weight": 2
+    },
+    {
+      "id": 1701,
+      "name": "Spell Solution",
+      "kind": "etc",
+      "icon": "icon.etc_potion_gold_i00",
+      "stackable": true,
+      "price": 8160,
+      "weight": 2
+    },
+    {
+      "id": 1702,
+      "name": "Metal Frame",
+      "kind": "etc",
+      "icon": "icon.etc_mold_i00",
+      "stackable": true,
+      "price": 12500,
+      "weight": 2
+    },
+    {
+      "id": 1703,
+      "name": "Steel of the Highest Grade",
+      "kind": "etc",
+      "icon": "icon.etc_squares_gray_i00",
+      "stackable": true,
+      "price": 3720,
+      "weight": 2
+    },
+    {
+      "id": 1704,
+      "name": "Stone of Anguish",
+      "kind": "etc",
+      "icon": "icon.etc_bead_red_i00",
+      "stackable": true,
+      "price": 157,
+      "weight": 60
+    },
+    {
+      "id": 1705,
+      "name": "Sprig of Wisdom",
+      "kind": "etc",
+      "icon": "icon.etc_leaf_gold_i00",
+      "stackable": true,
+      "price": 258,
+      "weight": 60
+    },
+    {
+      "id": 1706,
+      "name": "Blue Diamond Fragment",
+      "kind": "etc",
+      "icon": "icon.etc_crystal_ball_blue_i00",
+      "stackable": true,
+      "price": 471,
+      "weight": 60
+    },
+    {
+      "id": 1707,
+      "name": "Saint's Molar",
+      "kind": "etc",
+      "icon": "icon.etc_molar_white_i00",
+      "stackable": true,
+      "price": 568,
+      "weight": 60
+    },
+    {
+      "id": 1708,
+      "name": "Smoky Quartz",
+      "kind": "etc",
+      "icon": "icon.etc_bead_white_i00",
+      "stackable": true,
+      "price": 1136,
+      "weight": 60
+    },
+    {
+      "id": 1709,
+      "name": "Blood of Manticore",
+      "kind": "etc",
+      "icon": "icon.etc_reagent_gold_i00",
+      "stackable": true,
+      "price": 568,
+      "weight": 60
+    },
+    {
+      "id": 1710,
+      "name": "Tiger's Eye Crystal",
+      "kind": "etc",
+      "icon": "icon.etc_crystal_ball_gold_i00",
+      "stackable": true,
+      "price": 3215,
+      "weight": 60
+    },
+    {
+      "id": 1711,
+      "name": "Claw of Leopard",
+      "kind": "etc",
+      "icon": "icon.etc_claw_i00",
+      "stackable": true,
+      "price": 402,
+      "weight": 60
+    },
+    {
+      "id": 1712,
+      "name": "Leather Shoes Material",
+      "kind": "etc",
+      "icon": "icon.etc_piece_of_cloth_white_i00",
+      "stackable": true,
+      "price": 87,
+      "weight": 60
+    },
+    {
+      "id": 1713,
+      "name": "Leather Tunic Material",
+      "kind": "etc",
+      "icon": "icon.etc_piece_of_cloth_white_i00",
+      "stackable": true,
+      "price": 261,
+      "weight": 60
+    },
+    {
+      "id": 1714,
+      "name": "Leather Stockings Material",
+      "kind": "etc",
+      "icon": "icon.etc_piece_of_cloth_white_i00",
+      "stackable": true,
+      "price": 129,
+      "weight": 60
+    },
+    {
+      "id": 1715,
+      "name": "Leather Helmet Material",
+      "kind": "etc",
+      "icon": "icon.etc_piece_of_cloth_white_i00",
+      "stackable": true,
+      "price": 240,
+      "weight": 60
+    },
+    {
+      "id": 1716,
+      "name": "Leather Gloves Texture",
+      "kind": "etc",
+      "icon": "icon.etc_piece_of_cloth_black_i00",
+      "stackable": true,
+      "price": 226,
+      "weight": 60
+    },
+    {
+      "id": 1717,
+      "name": "Leather Gloves Lining",
+      "kind": "etc",
+      "icon": "icon.etc_piece_of_cloth_green_i00",
+      "stackable": true,
+      "price": 113,
+      "weight": 60
+    },
+    {
+      "id": 1718,
+      "name": "Black Bone Fragment",
+      "kind": "etc",
+      "icon": "icon.etc_piece_bone_black_i00",
+      "stackable": true,
+      "price": 693,
+      "weight": 60
+    },
+    {
+      "id": 1719,
+      "name": "Hard Leather Shirt Material",
+      "kind": "etc",
+      "icon": "icon.etc_piece_of_cloth_white_i00",
+      "stackable": true,
+      "price": 963,
+      "weight": 60
+    },
+    {
+      "id": 1720,
+      "name": "Blue-Black Bone Fragment",
+      "kind": "etc",
+      "icon": "icon.etc_piece_bone_black_i00",
+      "stackable": true,
+      "price": 1493,
+      "weight": 60
+    },
+    {
+      "id": 1721,
+      "name": "Hard Leather Gaiter Material",
+      "kind": "etc",
+      "icon": "icon.etc_piece_of_cloth_blue_i00",
+      "stackable": true,
+      "price": 500,
+      "weight": 60
+    },
+    {
+      "id": 1722,
+      "name": "Boots Material",
+      "kind": "etc",
+      "icon": "icon.etc_leather_brown_i00",
+      "stackable": true,
+      "price": 271,
+      "weight": 60
+    },
+    {
+      "id": 1723,
+      "name": "Leather Boots Material",
+      "kind": "etc",
+      "icon": "icon.etc_piece_of_cloth_white_i00",
+      "stackable": true,
+      "price": 364,
+      "weight": 60
+    },
+    {
+      "id": 1724,
+      "name": "Skull Fragment",
+      "kind": "etc",
+      "icon": "icon.etc_skull_black_i00",
+      "stackable": true,
+      "price": 512,
+      "weight": 60
+    },
+    {
+      "id": 1725,
+      "name": "Dark Stockings Material",
+      "kind": "etc",
+      "icon": "icon.etc_leather_gray_i00",
+      "stackable": true,
+      "price": 632,
+      "weight": 60
+    },
+    {
+      "id": 1726,
+      "name": "Crafted Leather Gloves Lining",
+      "kind": "etc",
+      "icon": "icon.etc_piece_of_cloth_blue_i00",
+      "stackable": true,
+      "price": 523,
+      "weight": 60
+    },
+    {
+      "id": 1727,
+      "name": "Crafted Leather Gloves Texture",
+      "kind": "etc",
+      "icon": "icon.etc_piece_of_cloth_black_i00",
+      "stackable": true,
+      "price": 261,
+      "weight": 60
+    },
+    {
+      "id": 1728,
+      "name": "Steel Scale",
+      "kind": "etc",
+      "icon": "icon.etc_plate_glay_i00",
+      "stackable": true,
+      "price": 1790,
+      "weight": 60
+    },
+    {
+      "id": 1729,
+      "name": "Pure White Cloth",
+      "kind": "etc",
+      "icon": "icon.etc_piece_of_cloth_white_i00",
+      "stackable": true,
+      "price": 833,
+      "weight": 60
+    },
+    {
+      "id": 1730,
+      "name": "Purifying Potion",
+      "kind": "etc",
+      "icon": "icon.etc_potion_clear_i00",
+      "stackable": true,
+      "price": 3330,
+      "weight": 60
+    },
+    {
+      "id": 1731,
+      "name": "Steel Scale Gaiters",
+      "kind": "etc",
+      "icon": "icon.etc_plate_blue_i00",
+      "stackable": true,
+      "price": 1148,
+      "weight": 60
+    },
+    {
+      "id": 1732,
+      "name": "Leather Fittings",
+      "kind": "etc",
+      "icon": "icon.etc_leather_gray_i00",
+      "stackable": true,
+      "price": 1520,
+      "weight": 60
+    },
+    {
+      "id": 1733,
+      "name": "Large Sheet Iron",
+      "kind": "etc",
+      "icon": "icon.etc_plate_black_i00",
+      "stackable": true,
+      "price": 1900,
+      "weight": 60
+    },
+    {
+      "id": 1734,
+      "name": "Small Leather Fittings",
+      "kind": "etc",
+      "icon": "icon.etc_leather_brown_i00",
+      "stackable": true,
+      "price": 952,
+      "weight": 60
+    },
+    {
+      "id": 1735,
+      "name": "Small Sheet Iron",
+      "kind": "etc",
+      "icon": "icon.etc_plate_glay_i00",
+      "stackable": true,
+      "price": 1190,
+      "weight": 60
+    },
+    {
+      "id": 1736,
+      "name": "Iron Boots Binding",
+      "kind": "etc",
+      "icon": "icon.etc_squares_gray_i00",
+      "stackable": true,
+      "price": 635,
+      "weight": 60
+    },
+    {
+      "id": 1737,
+      "name": "Iron Boots Frame",
+      "kind": "etc",
+      "icon": "icon.etc_mold_i00",
+      "stackable": true,
+      "price": 508,
+      "weight": 60
+    },
+    {
+      "id": 1738,
+      "name": "Wide Blade",
+      "kind": "etc",
+      "icon": "icon.etc_sword_body_i00",
+      "stackable": true,
+      "price": 625,
+      "weight": 60
+    },
+    {
+      "id": 1739,
+      "name": "Broadsword Mold",
+      "kind": "etc",
+      "icon": "icon.etc_mold_i00",
+      "stackable": true,
+      "price": 1250,
+      "weight": 60
+    },
+    {
+      "id": 1740,
+      "name": "Crafted Willow Branch",
+      "kind": "etc",
+      "icon": "icon.etc_branch_blue_i00",
+      "stackable": true,
+      "price": 833,
+      "weight": 60
+    },
+    {
+      "id": 1741,
+      "name": "Stave",
+      "kind": "etc",
+      "icon": "icon.etc_branch_gold_i00",
+      "stackable": true,
+      "price": 900,
+      "weight": 60
+    },
+    {
+      "id": 1742,
+      "name": "Red Cedar Branch",
+      "kind": "etc",
+      "icon": "icon.etc_branch_gold_i00",
+      "stackable": true,
+      "price": 1797,
+      "weight": 60
+    },
+    {
+      "id": 1743,
+      "name": "Dirk Blade",
+      "kind": "etc",
+      "icon": "icon.etc_sword_body_i00",
+      "stackable": true,
+      "price": 1082,
+      "weight": 60
+    },
+    {
+      "id": 1744,
+      "name": "Dirk Mold",
+      "kind": "etc",
+      "icon": "icon.etc_mold_i00",
+      "stackable": true,
+      "price": 5410,
+      "weight": 60
+    },
+    {
+      "id": 1745,
+      "name": "Brandish Blade",
+      "kind": "etc",
+      "icon": "icon.etc_sword_body_i00",
+      "stackable": true,
+      "price": 1880,
+      "weight": 60
+    },
+    {
+      "id": 1746,
+      "name": "Short Spear Blade",
+      "kind": "etc",
+      "icon": "icon.etc_sword_body_i00",
+      "stackable": true,
+      "price": 3000,
+      "weight": 60
+    },
+    {
+      "id": 1747,
+      "name": "Shining Blade",
+      "kind": "etc",
+      "icon": "icon.etc_sword_body_i00",
+      "stackable": true,
+      "price": 1700,
+      "weight": 60
+    },
+    {
+      "id": 1748,
+      "name": "Sword of Reflection Mold",
+      "kind": "etc",
+      "icon": "icon.etc_mold_i00",
+      "stackable": true,
+      "price": 13600,
+      "weight": 60
+    },
+    {
+      "id": 1749,
+      "name": "Branch of the Mother Tree",
+      "kind": "etc",
+      "icon": "icon.etc_branch_green_i00",
+      "stackable": true,
+      "price": 4533,
+      "weight": 60
+    },
+    {
+      "id": 1750,
+      "name": "Dark Forest Leaf",
+      "kind": "etc",
+      "icon": "icon.etc_herb_blue_i00",
+      "stackable": true,
+      "price": 2267,
+      "weight": 60
+    },
+    {
+      "id": 1751,
+      "name": "Lump of Iron",
+      "kind": "etc",
+      "icon": "icon.etc_bead_silver_i00",
+      "stackable": true,
+      "price": 5278,
+      "weight": 60
+    },
+    {
+      "id": 1752,
+      "name": "Piece of Sword Breaker",
+      "kind": "etc",
+      "icon": "icon.etc_bark_gold_i00",
+      "stackable": true,
+      "price": 3050,
+      "weight": 60
+    },
+    {
+      "id": 1753,
+      "name": "Sword Breaker Mold",
+      "kind": "etc",
+      "icon": "icon.etc_mold_i00",
+      "stackable": true,
+      "price": 24400,
+      "weight": 60
+    },
+    {
+      "id": 1754,
+      "name": "Steel Bow Mold",
+      "kind": "etc",
+      "icon": "icon.etc_mold_i00",
+      "stackable": true,
+      "price": 4067,
+      "weight": 60
+    },
+    {
+      "id": 1755,
+      "name": "Metal Stave",
+      "kind": "etc",
+      "icon": "icon.etc_branch_gold_i00",
+      "stackable": true,
+      "price": 8133,
+      "weight": 60
+    },
+    {
+      "id": 1756,
+      "name": "Spirit of the Saber Smith",
+      "kind": "etc",
+      "icon": "icon.etc_skull_black_i00",
+      "stackable": true,
+      "price": 4544,
+      "weight": 60
+    },
+    {
+      "id": 1757,
+      "name": "Saber Blade",
+      "kind": "etc",
+      "icon": "icon.etc_sword_body_i00",
+      "stackable": true,
+      "price": 5453,
+      "weight": 60
+    },
+    {
+      "id": 1758,
+      "name": "Saber Mold",
+      "kind": "etc",
+      "icon": "icon.etc_mold_i00",
+      "stackable": true,
+      "price": 13633,
+      "weight": 60
+    },
+    {
+      "id": 1759,
+      "name": "Blood of Assassin",
+      "kind": "etc",
+      "icon": "icon.etc_reagent_red_i00",
+      "stackable": true,
+      "price": 4544,
+      "weight": 60
+    },
+    {
+      "id": 1760,
+      "name": "Assassin Blade",
+      "kind": "etc",
+      "icon": "icon.etc_sword_body_i00",
+      "stackable": true,
+      "price": 5453,
+      "weight": 60
+    },
+    {
+      "id": 1761,
+      "name": "Assassin Mold",
+      "kind": "etc",
+      "icon": "icon.etc_mold_i00",
+      "stackable": true,
+      "price": 27267,
+      "weight": 60
+    },
+    {
+      "id": 1762,
+      "name": "Piece of Trident",
+      "kind": "etc",
+      "icon": "icon.etc_bark_blue_i00",
+      "stackable": true,
+      "price": 6850,
+      "weight": 60
+    },
+    {
+      "id": 1763,
+      "name": "Ruby Fragment",
+      "kind": "etc",
+      "icon": "icon.etc_powder_red_i00",
+      "stackable": true,
+      "price": 5113,
+      "weight": 60
+    },
+    {
+      "id": 1764,
+      "name": "Deep Sea Water",
+      "kind": "etc",
+      "icon": "icon.etc_potion_blue_i00",
+      "stackable": true,
+      "price": 10225,
+      "weight": 60
+    },
+    {
+      "id": 1765,
+      "name": "Spinebone Fragment",
+      "kind": "etc",
+      "icon": "icon.etc_piece_bone_white_i00",
+      "stackable": true,
+      "price": 6440,
+      "weight": 60
+    },
+    {
+      "id": 1766,
+      "name": "Spinebone Pattern",
+      "kind": "etc",
+      "icon": "icon.etc_mold_i00",
+      "stackable": true,
+      "price": 12880,
+      "weight": 60
+    },
+    {
+      "id": 1767,
+      "name": "Piece of Mace of Judgment",
+      "kind": "etc",
+      "icon": "icon.etc_bark_gold_i00",
+      "stackable": true,
+      "price": 7156,
+      "weight": 60
+    },
+    {
+      "id": 1768,
+      "name": "Pattern of Judgment",
+      "kind": "etc",
+      "icon": "icon.etc_mold_i00",
+      "stackable": true,
+      "price": 10733,
+      "weight": 60
+    },
+    {
+      "id": 1769,
+      "name": "Piece of Conjuror's Staff",
+      "kind": "etc",
+      "icon": "icon.etc_bark_blue_i00",
+      "stackable": true,
+      "price": 6440,
+      "weight": 60
+    },
+    {
+      "id": 1770,
+      "name": "Magic Flute",
+      "kind": "etc",
+      "icon": "icon.etc_flute_i00",
+      "stackable": true,
+      "price": 12880,
+      "weight": 60
+    },
+    {
+      "id": 1771,
+      "name": "Elven Stave",
+      "kind": "etc",
+      "icon": "icon.etc_branch_green_i00",
+      "stackable": true,
+      "price": 21467,
+      "weight": 60
+    },
+    {
+      "id": 1772,
+      "name": "Leaf of the Mother Tree",
+      "kind": "etc",
+      "icon": "icon.etc_herb_green_i00",
+      "stackable": true,
+      "price": 5367,
+      "weight": 60
+    },
+    {
+      "id": 1773,
+      "name": "Piece of Dwarven Trident",
+      "kind": "etc",
+      "icon": "icon.etc_bark_green_i00",
+      "stackable": true,
+      "price": 8613,
+      "weight": 60
+    },
+    {
+      "id": 1774,
+      "name": "Piece of Two-Handed Sword",
+      "kind": "etc",
+      "icon": "icon.etc_sword_body_i00",
+      "stackable": true,
+      "price": 5688,
+      "weight": 60
+    },
+    {
+      "id": 1775,
+      "name": "Two-Handed Sword Mold",
+      "kind": "etc",
+      "icon": "icon.etc_mold_i00",
+      "stackable": true,
+      "price": 96700,
+      "weight": 60
+    },
+    {
+      "id": 1776,
+      "name": "Piece of Spiked Club",
+      "kind": "etc",
+      "icon": "icon.etc_bark_blue_i00",
+      "stackable": true,
+      "price": 32233,
+      "weight": 60
+    },
+    {
+      "id": 1777,
+      "name": "Steel Piece of Club",
+      "kind": "etc",
+      "icon": "icon.etc_plate_glay_i00",
+      "stackable": true,
+      "price": 6447,
+      "weight": 60
+    },
+    {
+      "id": 1778,
+      "name": "Shilen Bone",
+      "kind": "etc",
+      "icon": "icon.etc_piece_bone_white_i00",
+      "stackable": true,
+      "price": 6447,
+      "weight": 60
+    },
+    {
+      "id": 1779,
+      "name": "Shilen Mane",
+      "kind": "etc",
+      "icon": "icon.etc_mane_i00",
+      "stackable": true,
+      "price": 64467,
+      "weight": 60
+    },
+    {
+      "id": 1780,
+      "name": "Purity Bronze",
+      "kind": "etc",
+      "icon": "icon.etc_plate_blue_i00",
+      "stackable": true,
+      "price": 9210,
+      "weight": 60
+    },
+    {
+      "id": 1781,
+      "name": "Gastraphetes Stave",
+      "kind": "etc",
+      "icon": "icon.weapon_short_bow_i00",
+      "stackable": true,
+      "price": 32233,
+      "weight": 60
+    },
+    {
+      "id": 1782,
+      "name": "Gastraphetes Addendum",
+      "kind": "etc",
+      "icon": "icon.etc_orcish_talisman_i00",
+      "stackable": true,
+      "price": 6447,
+      "weight": 60
+    },
+    {
+      "id": 1783,
+      "name": "Blood of Fiend",
+      "kind": "etc",
+      "icon": "icon.etc_reagent_gold_i00",
+      "stackable": true,
+      "price": 10744,
+      "weight": 60
+    },
+    {
+      "id": 1784,
+      "name": "Cursed Leather",
+      "kind": "etc",
+      "icon": "icon.etc_leather_gray_i00",
+      "stackable": true,
+      "price": 10744,
+      "weight": 60
     },
     {
       "id": 1785,
@@ -14425,12 +15666,75 @@
       "weight": 30
     },
     {
+      "id": 1809,
+      "name": "Recipe: Durable Stem",
+      "kind": "etc",
+      "icon": "icon.etc_recipe_white_i00",
+      "stackable": true,
+      "price": 100,
+      "weight": 30
+    },
+    {
+      "id": 1810,
+      "name": "Recipe: Wooden Frame",
+      "kind": "etc",
+      "icon": "icon.etc_recipe_white_i00",
+      "stackable": true,
+      "price": 100,
+      "weight": 30
+    },
+    {
+      "id": 1811,
+      "name": "Recipe: Bark of Treant",
+      "kind": "etc",
+      "icon": "icon.etc_recipe_white_i00",
+      "stackable": true,
+      "price": 100,
+      "weight": 30
+    },
+    {
+      "id": 1812,
+      "name": "Recipe: Coarse Bone Powder",
+      "kind": "etc",
+      "icon": "icon.etc_recipe_white_i00",
+      "stackable": true,
+      "price": 100,
+      "weight": 30
+    },
+    {
+      "id": 1813,
+      "name": "Recipe: Refined Steel",
+      "kind": "etc",
+      "icon": "icon.etc_recipe_white_i00",
+      "stackable": true,
+      "price": 100,
+      "weight": 30
+    },
+    {
       "id": 1814,
       "name": "Recipe: Leather",
       "kind": "etc",
       "icon": "icon.etc_recipe_white_i00",
       "stackable": true,
       "price": 380,
+      "weight": 30
+    },
+    {
+      "id": 1815,
+      "name": "Recipe: Bowstring",
+      "kind": "etc",
+      "icon": "icon.etc_recipe_white_i00",
+      "stackable": true,
+      "price": 100,
+      "weight": 30
+    },
+    {
+      "id": 1816,
+      "name": "Recipe: Steel Frame",
+      "kind": "etc",
+      "icon": "icon.etc_recipe_white_i00",
+      "stackable": true,
+      "price": 500,
       "weight": 30
     },
     {
@@ -14443,12 +15747,102 @@
       "weight": 30
     },
     {
+      "id": 1818,
+      "name": "Recipe: Refined Bronze",
+      "kind": "etc",
+      "icon": "icon.etc_recipe_white_i00",
+      "stackable": true,
+      "price": 500,
+      "weight": 30
+    },
+    {
+      "id": 1819,
+      "name": "Recipe: Treant Potion",
+      "kind": "etc",
+      "icon": "icon.etc_recipe_white_i00",
+      "stackable": true,
+      "price": 500,
+      "weight": 30
+    },
+    {
+      "id": 1820,
+      "name": "Recipe: Spell Paper",
+      "kind": "etc",
+      "icon": "icon.etc_recipe_white_i00",
+      "stackable": true,
+      "price": 500,
+      "weight": 30
+    },
+    {
+      "id": 1821,
+      "name": "Recipe: Flaming Oil",
+      "kind": "etc",
+      "icon": "icon.etc_recipe_white_i00",
+      "stackable": true,
+      "price": 500,
+      "weight": 30
+    },
+    {
+      "id": 1822,
+      "name": "Recipe: Magic Powder",
+      "kind": "etc",
+      "icon": "icon.etc_recipe_blue_i00",
+      "stackable": true,
+      "price": 1000,
+      "weight": 30
+    },
+    {
+      "id": 1823,
+      "name": "Recipe: Refined Mithril",
+      "kind": "etc",
+      "icon": "icon.etc_recipe_blue_i00",
+      "stackable": true,
+      "price": 1000,
+      "weight": 30
+    },
+    {
+      "id": 1824,
+      "name": "Recipe: Reinforced Steel",
+      "kind": "etc",
+      "icon": "icon.etc_recipe_blue_i00",
+      "stackable": true,
+      "price": 1000,
+      "weight": 30
+    },
+    {
       "id": 1825,
       "name": "Recipe: Oriharukon",
       "kind": "etc",
       "icon": "icon.etc_recipe_blue_i00",
       "stackable": true,
       "price": 2800,
+      "weight": 30
+    },
+    {
+      "id": 1826,
+      "name": "Recipe: Spell Solution",
+      "kind": "etc",
+      "icon": "icon.etc_recipe_blue_i00",
+      "stackable": true,
+      "price": 1000,
+      "weight": 30
+    },
+    {
+      "id": 1827,
+      "name": "Recipe: Metal Frame",
+      "kind": "etc",
+      "icon": "icon.etc_recipe_blue_i00",
+      "stackable": true,
+      "price": 1000,
+      "weight": 30
+    },
+    {
+      "id": 1828,
+      "name": "Recipe: Steel of Highest Grade",
+      "kind": "etc",
+      "icon": "icon.etc_recipe_blue_i00",
+      "stackable": true,
+      "price": 1000,
       "weight": 30
     },
     {
@@ -15150,12 +16544,30 @@
       "weight": 60
     },
     {
+      "id": 1917,
+      "name": "Sage's Necklace Chain",
+      "kind": "etc",
+      "icon": "icon.etc_jewel_box_i00",
+      "stackable": true,
+      "price": 5845,
+      "weight": 60
+    },
+    {
       "id": 1918,
       "name": "Nassen's Earring Gemstone",
       "kind": "etc",
       "stackable": true,
       "icon": "icon.etc_gem_red_i00",
       "price": 4618,
+      "weight": 60
+    },
+    {
+      "id": 1919,
+      "name": "Ring of Sage Gemstone",
+      "kind": "etc",
+      "icon": "icon.etc_bead_silver_i00",
+      "stackable": true,
+      "price": 3482,
       "weight": 60
     },
     {
@@ -15474,6 +16886,15 @@
       "weight": 60
     },
     {
+      "id": 1955,
+      "name": "Chain Helmet Design",
+      "kind": "etc",
+      "icon": "icon.etc_pouch_brown_i00",
+      "stackable": true,
+      "price": 2481,
+      "weight": 60
+    },
+    {
       "id": 1956,
       "name": "Square Shield Fragment",
       "kind": "etc",
@@ -15555,6 +16976,15 @@
       "weight": 60
     },
     {
+      "id": 1965,
+      "name": "Metal Plate Helmet Material",
+      "kind": "etc",
+      "icon": "icon.etc_leather_gray_i00",
+      "stackable": true,
+      "price": 2967,
+      "weight": 60
+    },
+    {
       "id": 1966,
       "name": "Plated Leather Fragment",
       "kind": "etc",
@@ -15615,6 +17045,15 @@
       "stackable": true,
       "icon": "icon.etc_plate_silver_i00",
       "price": 2500,
+      "weight": 60
+    },
+    {
+      "id": 1973,
+      "name": "Pa'agrian Hand Design",
+      "kind": "etc",
+      "icon": "icon.etc_jewel_box_i00",
+      "stackable": true,
+      "price": 2378,
       "weight": 60
     },
     {
@@ -15690,6 +17129,15 @@
       "weight": 60
     },
     {
+      "id": 1982,
+      "name": "Forgotten Boots Pattern",
+      "kind": "etc",
+      "icon": "icon.etc_letter_red_i00",
+      "stackable": true,
+      "price": 3400,
+      "weight": 60
+    },
+    {
       "id": 1983,
       "name": "Shining Circlet Pattern",
       "kind": "etc",
@@ -15750,6 +17198,141 @@
       "stackable": true,
       "icon": "icon.etc_letter_red_i00",
       "price": 6636,
+      "weight": 60
+    },
+    {
+      "id": 1990,
+      "name": "Mithril Helmet Design",
+      "kind": "etc",
+      "icon": "icon.etc_letter_red_i00",
+      "stackable": true,
+      "price": 5782,
+      "weight": 60
+    },
+    {
+      "id": 1991,
+      "name": "Cap of Mana Pattern",
+      "kind": "etc",
+      "icon": "icon.etc_letter_red_i00",
+      "stackable": true,
+      "price": 5782,
+      "weight": 60
+    },
+    {
+      "id": 1992,
+      "name": "Paradia Hood Material",
+      "kind": "etc",
+      "icon": "icon.etc_plate_silver_i00",
+      "stackable": true,
+      "price": 5782,
+      "weight": 60
+    },
+    {
+      "id": 1993,
+      "name": "Hood of Solar Eclipse Texture",
+      "kind": "etc",
+      "icon": "icon.etc_leather_gray_i00",
+      "stackable": true,
+      "price": 5782,
+      "weight": 60
+    },
+    {
+      "id": 1994,
+      "name": "Hood of Summoning Texture",
+      "kind": "etc",
+      "icon": "icon.etc_leather_gray_i00",
+      "stackable": true,
+      "price": 5782,
+      "weight": 60
+    },
+    {
+      "id": 1995,
+      "name": "Elemental Hood Material",
+      "kind": "etc",
+      "icon": "icon.etc_plate_silver_i00",
+      "stackable": true,
+      "price": 5782,
+      "weight": 60
+    },
+    {
+      "id": 1996,
+      "name": "Hood of Grace Texture",
+      "kind": "etc",
+      "icon": "icon.etc_leather_gray_i00",
+      "stackable": true,
+      "price": 5782,
+      "weight": 60
+    },
+    {
+      "id": 1997,
+      "name": "Phoenix Hood Material",
+      "kind": "etc",
+      "icon": "icon.etc_plate_silver_i00",
+      "stackable": true,
+      "price": 5782,
+      "weight": 60
+    },
+    {
+      "id": 1998,
+      "name": "Hood of Aid Material",
+      "kind": "etc",
+      "icon": "icon.etc_plate_silver_i00",
+      "stackable": true,
+      "price": 5782,
+      "weight": 60
+    },
+    {
+      "id": 1999,
+      "name": "Flame Helm Design",
+      "kind": "etc",
+      "icon": "icon.etc_pouch_yellow_i00",
+      "stackable": true,
+      "price": 5782,
+      "weight": 60
+    },
+    {
+      "id": 2000,
+      "name": "Tallum Helm Design",
+      "kind": "etc",
+      "icon": "icon.etc_pouch_yellow_i00",
+      "stackable": true,
+      "price": 68831,
+      "weight": 60
+    },
+    {
+      "id": 2001,
+      "name": "Helm of Avadon Design",
+      "kind": "etc",
+      "icon": "icon.etc_pouch_yellow_i00",
+      "stackable": true,
+      "price": 5782,
+      "weight": 60
+    },
+    {
+      "id": 2002,
+      "name": "Helmet of Pledge Pattern",
+      "kind": "etc",
+      "icon": "icon.etc_letter_red_i00",
+      "stackable": true,
+      "price": 5782,
+      "weight": 60
+    },
+    {
+      "id": 2003,
+      "name": "Gauntlets of Ghost Pattern",
+      "kind": "etc",
+      "icon": "icon.etc_letter_red_i00",
+      "stackable": true,
+      "price": 3673,
+      "weight": 60
+    },
+    {
+      "id": 2004,
+      "name": "Adamantite Boots Design",
+      "kind": "etc",
+      "icon": "icon.etc_pouch_yellow_i00",
+      "stackable": true,
+      "price": 3673,
       "weight": 60
     },
     {
@@ -16095,12 +17678,39 @@
       "weight": 60
     },
     {
+      "id": 2043,
+      "name": "Eye of Infinity Stone",
+      "kind": "etc",
+      "icon": "icon.etc_crystal_ball_gold_i00",
+      "stackable": true,
+      "price": 21643,
+      "weight": 60
+    },
+    {
       "id": 2044,
       "name": "Cursed Maingauche Edge",
       "kind": "etc",
       "stackable": true,
       "icon": "icon.etc_sword_body_i00",
       "price": 18929,
+      "weight": 60
+    },
+    {
+      "id": 2045,
+      "name": "Blue Crystal Skull Part",
+      "kind": "etc",
+      "icon": "icon.etc_skull_red_i00",
+      "stackable": true,
+      "price": 21786,
+      "weight": 60
+    },
+    {
+      "id": 2046,
+      "name": "Demon Fangs Part",
+      "kind": "etc",
+      "icon": "icon.etc_horn_i00",
+      "stackable": true,
+      "price": 21786,
       "weight": 60
     },
     {
@@ -16182,6 +17792,24 @@
       "stackable": true,
       "icon": "icon.etc_sword_body_i00",
       "price": 24188,
+      "weight": 60
+    },
+    {
+      "id": 2056,
+      "name": "Vajra Wand Frame",
+      "kind": "etc",
+      "icon": "icon.etc_mold_i00",
+      "stackable": true,
+      "price": 22812,
+      "weight": 60
+    },
+    {
+      "id": 2057,
+      "name": "Ancient Reagent Remnant",
+      "kind": "etc",
+      "icon": "icon.etc_potion_clear_i00",
+      "stackable": true,
+      "price": 22812,
       "weight": 60
     },
     {
@@ -16298,6 +17926,15 @@
       "kind": "etc",
       "stackable": true,
       "icon": "icon.etc_sword_body_i00",
+      "price": 25188,
+      "weight": 60
+    },
+    {
+      "id": 2071,
+      "name": "Wolverine Needle Edge",
+      "kind": "etc",
+      "icon": "icon.etc_sword_body_i00",
+      "stackable": true,
       "price": 25188,
       "weight": 60
     },
@@ -16437,6 +18074,15 @@
       "weight": 60
     },
     {
+      "id": 2087,
+      "name": "Tears of Fairy Drop",
+      "kind": "etc",
+      "icon": "icon.etc_lesser_potion_clear_i00",
+      "stackable": true,
+      "price": 28378,
+      "weight": 60
+    },
+    {
       "id": 2088,
       "name": "Horn of Glory Fragment",
       "kind": "etc",
@@ -16478,6 +18124,24 @@
       "kind": "etc",
       "stackable": true,
       "icon": "icon.etc_sword_body_i00",
+      "price": 36700,
+      "weight": 60
+    },
+    {
+      "id": 2093,
+      "name": "Poleaxe Blade",
+      "kind": "etc",
+      "icon": "icon.etc_sword_body_i00",
+      "stackable": true,
+      "price": 36800,
+      "weight": 60
+    },
+    {
+      "id": 2094,
+      "name": "Sword of Limit Blade",
+      "kind": "etc",
+      "icon": "icon.etc_sword_body_i00",
+      "stackable": true,
       "price": 36700,
       "weight": 60
     },
@@ -16532,6 +18196,15 @@
       "kind": "etc",
       "stackable": true,
       "icon": "icon.etc_squares_gray_i00",
+      "price": 35480,
+      "weight": 60
+    },
+    {
+      "id": 2101,
+      "name": "Inferno Staff Head",
+      "kind": "etc",
+      "icon": "icon.etc_squares_gray_i00",
+      "stackable": true,
       "price": 35480,
       "weight": 60
     },
@@ -16613,6 +18286,15 @@
       "kind": "etc",
       "stackable": true,
       "icon": "icon.etc_piece_of_paper_white_i00",
+      "price": 35480,
+      "weight": 60
+    },
+    {
+      "id": 2111,
+      "name": "Hex Doll Fragment",
+      "kind": "etc",
+      "icon": "icon.etc_bark_gold_i00",
+      "stackable": true,
       "price": 35480,
       "weight": 60
     },
@@ -16716,6 +18398,69 @@
       "weight": 60
     },
     {
+      "id": 2123,
+      "name": "Candle of Wisdom Model",
+      "kind": "etc",
+      "icon": "icon.etc_mold_i00",
+      "stackable": true,
+      "price": 42509,
+      "weight": 60
+    },
+    {
+      "id": 2124,
+      "name": "Blessed Branch Splinter",
+      "kind": "etc",
+      "icon": "icon.etc_branch_blue_i00",
+      "stackable": true,
+      "price": 42509,
+      "weight": 60
+    },
+    {
+      "id": 2125,
+      "name": "Phoenix Feather Piece",
+      "kind": "etc",
+      "icon": "icon.etc_feather_gold_i00",
+      "stackable": true,
+      "price": 42509,
+      "weight": 60
+    },
+    {
+      "id": 2126,
+      "name": "Cerberus Eye Fragment",
+      "kind": "etc",
+      "icon": "icon.etc_eyeball_i00",
+      "stackable": true,
+      "price": 42509,
+      "weight": 60
+    },
+    {
+      "id": 2127,
+      "name": "Scroll of Destruction Page",
+      "kind": "etc",
+      "icon": "icon.etc_scroll_gray_i00",
+      "stackable": true,
+      "price": 42509,
+      "weight": 60
+    },
+    {
+      "id": 2128,
+      "name": "Claws of Black Dragon Piece",
+      "kind": "etc",
+      "icon": "icon.etc_claw_i00",
+      "stackable": true,
+      "price": 42509,
+      "weight": 60
+    },
+    {
+      "id": 2129,
+      "name": "Three Eyed Crow's Feather Piece",
+      "kind": "etc",
+      "icon": "icon.etc_feather_black_i00",
+      "stackable": true,
+      "price": 42509,
+      "weight": 60
+    },
+    {
       "id": 2130,
       "name": "Gemstone D",
       "kind": "etc",
@@ -16732,6 +18477,15 @@
       "price": 3000,
       "weight": 2,
       "stackable": true
+    },
+    {
+      "id": 2132,
+      "name": "Gemstone B",
+      "kind": "etc",
+      "icon": "icon.etc_bead_green_i00",
+      "stackable": true,
+      "price": 10000,
+      "weight": 2
     },
     {
       "id": 2133,
@@ -17076,6 +18830,24 @@
       "weight": 30
     },
     {
+      "id": 2171,
+      "name": "Recipe: Sage's Ring",
+      "kind": "etc",
+      "icon": "icon.etc_recipe_red_i00",
+      "stackable": true,
+      "price": 5640,
+      "weight": 30
+    },
+    {
+      "id": 2172,
+      "name": "Recipe: Sage's Necklace",
+      "kind": "etc",
+      "icon": "icon.etc_recipe_red_i00",
+      "stackable": true,
+      "price": 11300,
+      "weight": 30
+    },
+    {
       "id": 2173,
       "name": "Recipe: Hard Leather Shirt",
       "kind": "etc",
@@ -17274,6 +19046,15 @@
       "weight": 30
     },
     {
+      "id": 2195,
+      "name": "Recipe: Half Plate Armor",
+      "kind": "etc",
+      "icon": "icon.etc_recipe_blue_i00",
+      "stackable": true,
+      "price": 7820,
+      "weight": 30
+    },
+    {
       "id": 2196,
       "name": "Recipe: Plate Gaiters",
       "kind": "etc",
@@ -17307,6 +19088,15 @@
       "stackable": true,
       "icon": "icon.etc_recipe_yellow_i00",
       "price": 4740,
+      "weight": 30
+    },
+    {
+      "id": 2200,
+      "name": "Recipe: Chain Helmet",
+      "kind": "etc",
+      "icon": "icon.etc_recipe_blue_i00",
+      "stackable": true,
+      "price": 2940,
       "weight": 30
     },
     {
@@ -17391,6 +19181,15 @@
       "weight": 30
     },
     {
+      "id": 2210,
+      "name": "Recipe: Steel Plate Helmet",
+      "kind": "etc",
+      "icon": "icon.etc_recipe_yellow_i00",
+      "stackable": true,
+      "price": 4120,
+      "weight": 30
+    },
+    {
       "id": 2211,
       "name": "Recipe: Plated Leather Armor",
       "kind": "etc",
@@ -17451,6 +19250,15 @@
       "stackable": true,
       "icon": "icon.etc_recipe_yellow_i00",
       "price": 3380,
+      "weight": 30
+    },
+    {
+      "id": 2218,
+      "name": "Recipe: Pa'agrian Hand",
+      "kind": "etc",
+      "icon": "icon.etc_recipe_yellow_i00",
+      "stackable": true,
+      "price": 3220,
       "weight": 30
     },
     {
@@ -17526,6 +19334,15 @@
       "weight": 30
     },
     {
+      "id": 2227,
+      "name": "Recipe: Forgotten Boots",
+      "kind": "etc",
+      "icon": "icon.etc_recipe_yellow_i00",
+      "stackable": true,
+      "price": 4900,
+      "weight": 30
+    },
+    {
       "id": 2228,
       "name": "Recipe: Shining Circlet",
       "kind": "etc",
@@ -17586,6 +19403,141 @@
       "stackable": true,
       "icon": "icon.etc_recipe_yellow_i00",
       "price": 13420,
+      "weight": 30
+    },
+    {
+      "id": 2235,
+      "name": "Recipe: Mithril Helmet",
+      "kind": "etc",
+      "icon": "icon.etc_recipe_yellow_i00",
+      "stackable": true,
+      "price": 10720,
+      "weight": 30
+    },
+    {
+      "id": 2236,
+      "name": "Recipe: Cap of Mana",
+      "kind": "etc",
+      "icon": "icon.etc_recipe_yellow_i00",
+      "stackable": true,
+      "price": 10720,
+      "weight": 30
+    },
+    {
+      "id": 2237,
+      "name": "Recipe: Paradia Hood",
+      "kind": "etc",
+      "icon": "icon.etc_recipe_yellow_i00",
+      "stackable": true,
+      "price": 10720,
+      "weight": 30
+    },
+    {
+      "id": 2238,
+      "name": "Recipe: Hood of Solar Eclipse",
+      "kind": "etc",
+      "icon": "icon.etc_recipe_yellow_i00",
+      "stackable": true,
+      "price": 10720,
+      "weight": 30
+    },
+    {
+      "id": 2239,
+      "name": "Recipe: Hood of Summoning",
+      "kind": "etc",
+      "icon": "icon.etc_recipe_yellow_i00",
+      "stackable": true,
+      "price": 10720,
+      "weight": 30
+    },
+    {
+      "id": 2240,
+      "name": "Recipe: Elemental Hood",
+      "kind": "etc",
+      "icon": "icon.etc_recipe_yellow_i00",
+      "stackable": true,
+      "price": 10720,
+      "weight": 30
+    },
+    {
+      "id": 2241,
+      "name": "Recipe: Hood of Grace",
+      "kind": "etc",
+      "icon": "icon.etc_recipe_yellow_i00",
+      "stackable": true,
+      "price": 10720,
+      "weight": 30
+    },
+    {
+      "id": 2242,
+      "name": "Recipe: Phoenix Hood",
+      "kind": "etc",
+      "icon": "icon.etc_recipe_yellow_i00",
+      "stackable": true,
+      "price": 10720,
+      "weight": 30
+    },
+    {
+      "id": 2243,
+      "name": "Recipe: Hood of Aid",
+      "kind": "etc",
+      "icon": "icon.etc_recipe_yellow_i00",
+      "stackable": true,
+      "price": 10720,
+      "weight": 30
+    },
+    {
+      "id": 2244,
+      "name": "Recipe: Flame Helm",
+      "kind": "etc",
+      "icon": "icon.etc_recipe_yellow_i00",
+      "stackable": true,
+      "price": 10720,
+      "weight": 30
+    },
+    {
+      "id": 2245,
+      "name": "Recipe: Tallum Helm",
+      "kind": "etc",
+      "icon": "icon.etc_recipe_violet_i00",
+      "stackable": true,
+      "price": 10720,
+      "weight": 30
+    },
+    {
+      "id": 2246,
+      "name": "Recipe: Helm of Avadon",
+      "kind": "etc",
+      "icon": "icon.etc_recipe_yellow_i00",
+      "stackable": true,
+      "price": 10720,
+      "weight": 30
+    },
+    {
+      "id": 2247,
+      "name": "Recipe: Helmet of Pledge",
+      "kind": "etc",
+      "icon": "icon.etc_recipe_yellow_i00",
+      "stackable": true,
+      "price": 10720,
+      "weight": 30
+    },
+    {
+      "id": 2248,
+      "name": "Recipe: Gauntlets of Ghost",
+      "kind": "etc",
+      "icon": "icon.etc_recipe_yellow_i00",
+      "stackable": true,
+      "price": 7160,
+      "weight": 30
+    },
+    {
+      "id": 2249,
+      "name": "Recipe: Adamantite Boots",
+      "kind": "etc",
+      "icon": "icon.etc_recipe_yellow_i00",
+      "stackable": true,
+      "price": 7160,
       "weight": 30
     },
     {
@@ -17868,12 +19820,39 @@
       "weight": 30
     },
     {
+      "id": 2281,
+      "name": "Recipe: Eye of Infinity",
+      "kind": "etc",
+      "icon": "icon.etc_recipe_blue_i00",
+      "stackable": true,
+      "price": 28000,
+      "weight": 30
+    },
+    {
       "id": 2282,
       "name": "Recipe: Cursed Maingauche",
       "kind": "etc",
       "stackable": true,
       "icon": "icon.etc_recipe_blue_i00",
       "price": 28000,
+      "weight": 30
+    },
+    {
+      "id": 2283,
+      "name": "Recipe: Blue Crystal Skull",
+      "kind": "etc",
+      "icon": "icon.etc_recipe_blue_i00",
+      "stackable": true,
+      "price": 30400,
+      "weight": 30
+    },
+    {
+      "id": 2284,
+      "name": "Recipe: Demon Fangs",
+      "kind": "etc",
+      "icon": "icon.etc_recipe_blue_i00",
+      "stackable": true,
+      "price": 30400,
       "weight": 30
     },
     {
@@ -17954,6 +19933,24 @@
       "kind": "etc",
       "stackable": true,
       "icon": "icon.etc_recipe_blue_i00",
+      "price": 36000,
+      "weight": 30
+    },
+    {
+      "id": 2294,
+      "name": "Recipe: Vajra Wands",
+      "kind": "etc",
+      "icon": "icon.etc_recipe_blue_i00",
+      "stackable": true,
+      "price": 36000,
+      "weight": 30
+    },
+    {
+      "id": 2295,
+      "name": "Recipe: Ancient Reagent",
+      "kind": "etc",
+      "icon": "icon.etc_recipe_blue_i00",
+      "stackable": true,
       "price": 36000,
       "weight": 30
     },
@@ -18057,11 +20054,29 @@
       "weight": 30
     },
     {
+      "id": 2307,
+      "name": "Recipe: Heavy Doom Axe",
+      "kind": "etc",
+      "icon": "icon.etc_recipe_yellow_i00",
+      "stackable": true,
+      "price": 45800,
+      "weight": 30
+    },
+    {
       "id": 2308,
       "name": "Recipe: Cursed Dagger",
       "kind": "etc",
       "stackable": true,
       "icon": "icon.etc_recipe_yellow_i00",
+      "price": 45800,
+      "weight": 30
+    },
+    {
+      "id": 2309,
+      "name": "Recipe: Wolverine Needle",
+      "kind": "etc",
+      "icon": "icon.etc_recipe_yellow_i00",
+      "stackable": true,
       "price": 45800,
       "weight": 30
     },
@@ -18108,6 +20123,15 @@
       "stackable": true,
       "icon": "icon.etc_recipe_yellow_i00",
       "price": 45800,
+      "weight": 30
+    },
+    {
+      "id": 2315,
+      "name": "Recipe: Shamshir",
+      "kind": "etc",
+      "icon": "icon.etc_recipe_yellow_i00",
+      "stackable": true,
+      "price": 57400,
       "weight": 30
     },
     {
@@ -18192,12 +20216,30 @@
       "weight": 30
     },
     {
+      "id": 2325,
+      "name": "Recipe: Tears of Fairy",
+      "kind": "etc",
+      "icon": "icon.etc_recipe_yellow_i00",
+      "stackable": true,
+      "price": 57400,
+      "weight": 30
+    },
+    {
       "id": 2326,
       "name": "Recipe: Horn of Glory",
       "kind": "etc",
       "stackable": true,
       "icon": "icon.etc_recipe_yellow_i00",
       "price": 57400,
+      "weight": 30
+    },
+    {
+      "id": 2327,
+      "name": "Recipe: Caliburs",
+      "kind": "etc",
+      "icon": "icon.etc_recipe_yellow_i00",
+      "stackable": true,
+      "price": 86000,
       "weight": 30
     },
     {
@@ -18224,6 +20266,24 @@
       "kind": "etc",
       "stackable": true,
       "icon": "icon.etc_recipe_yellow_i00",
+      "price": 86000,
+      "weight": 30
+    },
+    {
+      "id": 2331,
+      "name": "Recipe: Poleaxe",
+      "kind": "etc",
+      "icon": "icon.etc_recipe_yellow_i00",
+      "stackable": true,
+      "price": 86000,
+      "weight": 30
+    },
+    {
+      "id": 2332,
+      "name": "Recipe: Sword of Limit",
+      "kind": "etc",
+      "icon": "icon.etc_recipe_yellow_i00",
+      "stackable": true,
       "price": 86000,
       "weight": 30
     },
@@ -18278,6 +20338,15 @@
       "kind": "etc",
       "stackable": true,
       "icon": "icon.etc_recipe_yellow_i00",
+      "price": 86000,
+      "weight": 30
+    },
+    {
+      "id": 2339,
+      "name": "Recipe: Inferno Staff",
+      "kind": "etc",
+      "icon": "icon.etc_recipe_yellow_i00",
+      "stackable": true,
       "price": 86000,
       "weight": 30
     },
@@ -18360,6 +20429,24 @@
       "stackable": true,
       "icon": "icon.etc_recipe_yellow_i00",
       "price": 86000,
+      "weight": 30
+    },
+    {
+      "id": 2349,
+      "name": "Recipe: Hex Doll",
+      "kind": "etc",
+      "icon": "icon.etc_recipe_yellow_i00",
+      "stackable": true,
+      "price": 86000,
+      "weight": 30
+    },
+    {
+      "id": 2350,
+      "name": "Recipe: Pa'agrian Axe",
+      "kind": "etc",
+      "icon": "icon.etc_recipe_yellow_i00",
+      "stackable": true,
+      "price": 95600,
       "weight": 30
     },
     {
@@ -18449,6 +20536,69 @@
       "kind": "etc",
       "stackable": true,
       "icon": "icon.etc_recipe_yellow_i00",
+      "price": 122600,
+      "weight": 30
+    },
+    {
+      "id": 2361,
+      "name": "Recipe: Candle of Wisdom",
+      "kind": "etc",
+      "icon": "icon.etc_recipe_yellow_i00",
+      "stackable": true,
+      "price": 122600,
+      "weight": 30
+    },
+    {
+      "id": 2362,
+      "name": "Recipe: Blessed Branch",
+      "kind": "etc",
+      "icon": "icon.etc_recipe_yellow_i00",
+      "stackable": true,
+      "price": 122600,
+      "weight": 30
+    },
+    {
+      "id": 2363,
+      "name": "Recipe: Phoenix Feather",
+      "kind": "etc",
+      "icon": "icon.etc_recipe_yellow_i00",
+      "stackable": true,
+      "price": 122600,
+      "weight": 30
+    },
+    {
+      "id": 2364,
+      "name": "Recipe: Cerberus Eye",
+      "kind": "etc",
+      "icon": "icon.etc_recipe_yellow_i00",
+      "stackable": true,
+      "price": 122600,
+      "weight": 30
+    },
+    {
+      "id": 2365,
+      "name": "Recipe: Scroll of Destruction",
+      "kind": "etc",
+      "icon": "icon.etc_recipe_yellow_i00",
+      "stackable": true,
+      "price": 122600,
+      "weight": 30
+    },
+    {
+      "id": 2366,
+      "name": "Recipe: Claws of Black Dragon",
+      "kind": "etc",
+      "icon": "icon.etc_recipe_yellow_i00",
+      "stackable": true,
+      "price": 122600,
+      "weight": 30
+    },
+    {
+      "id": 2367,
+      "name": "Recipe: Three Eyed Crow's Feather",
+      "kind": "etc",
+      "icon": "icon.etc_recipe_yellow_i00",
+      "stackable": true,
       "price": 122600,
       "weight": 30
     },
@@ -25092,6 +27242,24 @@
       "weight": 60
     },
     {
+      "id": 2920,
+      "name": "Elven Mithril Tunic Pattern",
+      "kind": "etc",
+      "icon": "icon.etc_piece_of_cloth_white_i00",
+      "stackable": true,
+      "price": 3921,
+      "weight": 60
+    },
+    {
+      "id": 2921,
+      "name": "Elven Mithril Stockings Pattern",
+      "kind": "etc",
+      "icon": "icon.etc_piece_of_cloth_white_i00",
+      "stackable": true,
+      "price": 2518,
+      "weight": 60
+    },
+    {
       "id": 2922,
       "name": "Brigandine Helmet Design",
       "kind": "etc",
@@ -25416,6 +27584,15 @@
       "weight": 60
     },
     {
+      "id": 2958,
+      "name": "Divine Boots Fabric",
+      "kind": "etc",
+      "icon": "icon.etc_leather_gray_i00",
+      "stackable": true,
+      "price": 3673,
+      "weight": 60
+    },
+    {
       "id": 2959,
       "name": "Full Plate Helmet Design",
       "kind": "etc",
@@ -25466,6 +27643,15 @@
       "kind": "etc",
       "stackable": true,
       "icon": "icon.etc_letter_red_i00",
+      "price": 3673,
+      "weight": 60
+    },
+    {
+      "id": 2965,
+      "name": "Blessed Gloves Design",
+      "kind": "etc",
+      "icon": "icon.etc_leather_gray_i00",
+      "stackable": true,
       "price": 3673,
       "weight": 60
     },
@@ -25530,6 +27716,24 @@
       "stackable": true,
       "icon": "icon.etc_recipe_blue_i00",
       "price": 3740,
+      "weight": 30
+    },
+    {
+      "id": 2973,
+      "name": "Recipe: Elven Mithril Tunic",
+      "kind": "etc",
+      "icon": "icon.etc_recipe_blue_i00",
+      "stackable": true,
+      "price": 4480,
+      "weight": 30
+    },
+    {
+      "id": 2974,
+      "name": "Recipe: Elven Mithril Stockings",
+      "kind": "etc",
+      "icon": "icon.etc_recipe_blue_i00",
+      "stackable": true,
+      "price": 2800,
       "weight": 30
     },
     {
@@ -25857,6 +28061,15 @@
       "weight": 30
     },
     {
+      "id": 3011,
+      "name": "Recipe: Divine Boots",
+      "kind": "etc",
+      "icon": "icon.etc_recipe_yellow_i00",
+      "stackable": true,
+      "price": 7160,
+      "weight": 30
+    },
+    {
       "id": 3012,
       "name": "Recipe: Full Plate Helmet",
       "kind": "etc",
@@ -25907,6 +28120,15 @@
       "kind": "etc",
       "stackable": true,
       "icon": "icon.etc_recipe_yellow_i00",
+      "price": 7160,
+      "weight": 30
+    },
+    {
+      "id": 3018,
+      "name": "Recipe: Blessed Gloves",
+      "kind": "etc",
+      "icon": "icon.etc_recipe_yellow_i00",
+      "stackable": true,
       "price": 7160,
       "weight": 30
     },
@@ -32798,6 +35020,15 @@
       "spiritshots": 0
     },
     {
+      "id": 3936,
+      "name": "Blessed Scroll of Resurrection",
+      "kind": "etc",
+      "icon": "icon.etc_scroll_of_resurrection_i01",
+      "stackable": true,
+      "price": 400000,
+      "weight": 120
+    },
+    {
       "id": 3937,
       "name": "Giant Bar",
       "kind": "weapon",
@@ -33128,6 +35359,24 @@
       "weight": 2
     },
     {
+      "id": 4047,
+      "name": "Craftsman Mold",
+      "kind": "etc",
+      "icon": "icon.etc_mold_i00",
+      "stackable": true,
+      "price": 710000,
+      "weight": 2
+    },
+    {
+      "id": 4048,
+      "name": "Maestro Mold",
+      "kind": "etc",
+      "icon": "icon.etc_silver_mold_i00",
+      "stackable": true,
+      "price": 154000,
+      "weight": 2
+    },
+    {
       "id": 4049,
       "name": "Adamantite Earring Gemstone",
       "kind": "etc",
@@ -33206,6 +35455,60 @@
       "stackable": true,
       "icon": "icon.etc_leather_gray_i00",
       "price": 7150,
+      "weight": 60
+    },
+    {
+      "id": 4058,
+      "name": "Implosion Boots Part",
+      "kind": "etc",
+      "icon": "icon.etc_plate_silver_i00",
+      "stackable": true,
+      "price": 4455,
+      "weight": 60
+    },
+    {
+      "id": 4059,
+      "name": "Boots of Silence Fabric",
+      "kind": "etc",
+      "icon": "icon.etc_leather_gray_i00",
+      "stackable": true,
+      "price": 3843,
+      "weight": 60
+    },
+    {
+      "id": 4060,
+      "name": "Guardian's Boots Fabric",
+      "kind": "etc",
+      "icon": "icon.etc_leather_gray_i00",
+      "stackable": true,
+      "price": 3843,
+      "weight": 60
+    },
+    {
+      "id": 4061,
+      "name": "Paradia Boots Pattern",
+      "kind": "etc",
+      "icon": "icon.etc_letter_red_i00",
+      "stackable": true,
+      "price": 4455,
+      "weight": 60
+    },
+    {
+      "id": 4062,
+      "name": "Elemental Boots Lining",
+      "kind": "etc",
+      "icon": "icon.etc_leather_gray_i00",
+      "stackable": true,
+      "price": 4455,
+      "weight": 60
+    },
+    {
+      "id": 4063,
+      "name": "Boots of Grace Lining",
+      "kind": "etc",
+      "icon": "icon.etc_leather_gray_i00",
+      "stackable": true,
+      "price": 4455,
       "weight": 60
     },
     {
@@ -33299,6 +35602,33 @@
       "weight": 60
     },
     {
+      "id": 4074,
+      "name": "Chain Gloves of Silence Design",
+      "kind": "etc",
+      "icon": "icon.etc_pouch_brown_i00",
+      "stackable": true,
+      "price": 3843,
+      "weight": 60
+    },
+    {
+      "id": 4075,
+      "name": "Guardian's Gloves Design",
+      "kind": "etc",
+      "icon": "icon.etc_pouch_brown_i00",
+      "stackable": true,
+      "price": 3843,
+      "weight": 60
+    },
+    {
+      "id": 4076,
+      "name": "Gloves of Blessing Pattern",
+      "kind": "etc",
+      "icon": "icon.etc_letter_red_i00",
+      "stackable": true,
+      "price": 3843,
+      "weight": 60
+    },
+    {
       "id": 4077,
       "name": "Doom Shield Fragment",
       "kind": "etc",
@@ -33314,6 +35644,15 @@
       "stackable": true,
       "icon": "icon.etc_plate_silver_i00",
       "price": 13692,
+      "weight": 60
+    },
+    {
+      "id": 4079,
+      "name": "Boots of Blessing Design",
+      "kind": "etc",
+      "icon": "icon.etc_pouch_brown_i00",
+      "stackable": true,
+      "price": 3843,
       "weight": 60
     },
     {
@@ -33425,6 +35764,42 @@
       "weight": 60
     },
     {
+      "id": 4092,
+      "name": "Elemental Gloves Lining",
+      "kind": "etc",
+      "icon": "icon.etc_leather_gray_i00",
+      "stackable": true,
+      "price": 4455,
+      "weight": 60
+    },
+    {
+      "id": 4093,
+      "name": "Gloves of Grace Lining",
+      "kind": "etc",
+      "icon": "icon.etc_leather_gray_i00",
+      "stackable": true,
+      "price": 4455,
+      "weight": 60
+    },
+    {
+      "id": 4094,
+      "name": "Implosion Gauntlet Fabric",
+      "kind": "etc",
+      "icon": "icon.etc_leather_gray_i00",
+      "stackable": true,
+      "price": 4455,
+      "weight": 60
+    },
+    {
+      "id": 4095,
+      "name": "Paradia Gloves Pattern",
+      "kind": "etc",
+      "icon": "icon.etc_letter_red_i00",
+      "stackable": true,
+      "price": 4455,
+      "weight": 60
+    },
+    {
       "id": 4096,
       "name": "Sealed Blue Wolf Gloves Fabric",
       "kind": "etc",
@@ -33488,6 +35863,15 @@
       "weight": 60
     },
     {
+      "id": 4103,
+      "name": "Pata Blade",
+      "kind": "etc",
+      "icon": "icon.etc_sword_body_i00",
+      "stackable": true,
+      "price": 32950,
+      "weight": 60
+    },
+    {
       "id": 4104,
       "name": "Great Sword Blade",
       "kind": "etc",
@@ -33538,6 +35922,15 @@
       "kind": "etc",
       "stackable": true,
       "icon": "icon.etc_sword_body_i00",
+      "price": 35500,
+      "weight": 60
+    },
+    {
+      "id": 4110,
+      "name": "Hell Knife Edge",
+      "kind": "etc",
+      "icon": "icon.etc_sword_body_i00",
+      "stackable": true,
       "price": 35500,
       "weight": 60
     },
@@ -33758,6 +36151,60 @@
       "weight": 30
     },
     {
+      "id": 4135,
+      "name": "Recipe: Implosion Boots (100%)",
+      "kind": "etc",
+      "icon": "icon.etc_recipe_red_i00",
+      "stackable": true,
+      "price": 16080,
+      "weight": 30
+    },
+    {
+      "id": 4136,
+      "name": "Recipe: Boots of Silence (100%)",
+      "kind": "etc",
+      "icon": "icon.etc_recipe_red_i00",
+      "stackable": true,
+      "price": 10380,
+      "weight": 30
+    },
+    {
+      "id": 4137,
+      "name": "Recipe: Guardian's Boots (100%)",
+      "kind": "etc",
+      "icon": "icon.etc_recipe_red_i00",
+      "stackable": true,
+      "price": 10380,
+      "weight": 30
+    },
+    {
+      "id": 4138,
+      "name": "Recipe: Paradia Boots (100%)",
+      "kind": "etc",
+      "icon": "icon.etc_recipe_red_i00",
+      "stackable": true,
+      "price": 16080,
+      "weight": 30
+    },
+    {
+      "id": 4139,
+      "name": "Recipe: Elemental Boots (100%)",
+      "kind": "etc",
+      "icon": "icon.etc_recipe_red_i00",
+      "stackable": true,
+      "price": 16080,
+      "weight": 30
+    },
+    {
+      "id": 4140,
+      "name": "Recipe: Boots of Grace (100%)",
+      "kind": "etc",
+      "icon": "icon.etc_recipe_red_i00",
+      "stackable": true,
+      "price": 16080,
+      "weight": 30
+    },
+    {
       "id": 4141,
       "name": "Recipe: Avadon Breastplate (100%)",
       "kind": "etc",
@@ -33848,6 +36295,33 @@
       "weight": 30
     },
     {
+      "id": 4151,
+      "name": "Recipe: Chain Gloves of Silence (100%)",
+      "kind": "etc",
+      "icon": "icon.etc_recipe_red_i00",
+      "stackable": true,
+      "price": 10380,
+      "weight": 30
+    },
+    {
+      "id": 4152,
+      "name": "Recipe: Guardian's Gloves (100%)",
+      "kind": "etc",
+      "icon": "icon.etc_recipe_red_i00",
+      "stackable": true,
+      "price": 10380,
+      "weight": 30
+    },
+    {
+      "id": 4153,
+      "name": "Recipe: Gloves of Blessing (100%)",
+      "kind": "etc",
+      "icon": "icon.etc_recipe_red_i00",
+      "stackable": true,
+      "price": 10380,
+      "weight": 30
+    },
+    {
       "id": 4154,
       "name": "Recipe: Doom Shield (100%)",
       "kind": "etc",
@@ -33863,6 +36337,15 @@
       "stackable": true,
       "icon": "icon.etc_recipe_red_i00",
       "price": 64400,
+      "weight": 30
+    },
+    {
+      "id": 4156,
+      "name": "Recipe: Boots of Blessing (100%)",
+      "kind": "etc",
+      "icon": "icon.etc_recipe_red_i00",
+      "stackable": true,
+      "price": 10380,
       "weight": 30
     },
     {
@@ -33938,6 +36421,15 @@
       "weight": 30
     },
     {
+      "id": 4165,
+      "name": "Recipe: Blue Wolf Helmet (100%)",
+      "kind": "etc",
+      "icon": "icon.etc_recipe_red_i00",
+      "stackable": true,
+      "price": 24200,
+      "weight": 30
+    },
+    {
       "id": 4166,
       "name": "Recipe: Doom Helmet (100%)",
       "kind": "etc",
@@ -33961,6 +36453,42 @@
       "kind": "etc",
       "stackable": true,
       "icon": "icon.etc_recipe_red_i00",
+      "price": 16080,
+      "weight": 30
+    },
+    {
+      "id": 4169,
+      "name": "Recipe: Elemental Gloves (100%)",
+      "kind": "etc",
+      "icon": "icon.etc_recipe_red_i00",
+      "stackable": true,
+      "price": 16080,
+      "weight": 30
+    },
+    {
+      "id": 4170,
+      "name": "Recipe: Gloves of Grace (100%)",
+      "kind": "etc",
+      "icon": "icon.etc_recipe_red_i00",
+      "stackable": true,
+      "price": 16080,
+      "weight": 30
+    },
+    {
+      "id": 4171,
+      "name": "Recipe: Implosion Gauntlets (100%)",
+      "kind": "etc",
+      "icon": "icon.etc_recipe_red_i00",
+      "stackable": true,
+      "price": 16080,
+      "weight": 30
+    },
+    {
+      "id": 4172,
+      "name": "Recipe: Paradia Gloves (100%)",
+      "kind": "etc",
+      "icon": "icon.etc_recipe_red_i00",
+      "stackable": true,
       "price": 16080,
       "weight": 30
     },
@@ -34034,6 +36562,15 @@
       "stackable": true,
       "icon": "icon.etc_recipe_red_i00",
       "price": 1800,
+      "weight": 30
+    },
+    {
+      "id": 4181,
+      "name": "Recipe: Pata (100%)",
+      "kind": "etc",
+      "icon": "icon.etc_recipe_yellow_i00",
+      "stackable": true,
+      "price": 156600,
       "weight": 30
     },
     {
@@ -41335,6 +43872,14 @@
       "weight": 120
     },
     {
+      "id": 4917,
+      "name": "Spellbook: Aura Bolt",
+      "kind": "etc",
+      "icon": "icon.etc_spell_books_element_i00",
+      "price": 3200,
+      "weight": 120
+    },
+    {
       "id": 4918,
       "name": "Spellbook: Summon Kai the Cat",
       "kind": "etc",
@@ -41542,6 +44087,24 @@
       "weight": 30
     },
     {
+      "id": 4942,
+      "name": "Recipe: Boots of Silence (60%)",
+      "kind": "etc",
+      "icon": "icon.etc_recipe_red_i00",
+      "stackable": true,
+      "price": 10380,
+      "weight": 30
+    },
+    {
+      "id": 4943,
+      "name": "Recipe: Guardian's Boots (60%)",
+      "kind": "etc",
+      "icon": "icon.etc_recipe_red_i00",
+      "stackable": true,
+      "price": 10380,
+      "weight": 30
+    },
+    {
       "id": 4944,
       "name": "Recipe: Avadon Breastplate (60%)",
       "kind": "etc",
@@ -41628,6 +44191,42 @@
       "kind": "etc",
       "stackable": true,
       "icon": "icon.etc_recipe_red_i00",
+      "price": 10380,
+      "weight": 30
+    },
+    {
+      "id": 4954,
+      "name": "Recipe: Chain Gloves of Silence (60%)",
+      "kind": "etc",
+      "icon": "icon.etc_recipe_red_i00",
+      "stackable": true,
+      "price": 10380,
+      "weight": 30
+    },
+    {
+      "id": 4955,
+      "name": "Recipe: Guardian's Gloves (60%)",
+      "kind": "etc",
+      "icon": "icon.etc_recipe_red_i00",
+      "stackable": true,
+      "price": 10380,
+      "weight": 30
+    },
+    {
+      "id": 4956,
+      "name": "Recipe: Gloves of Blessing (60%)",
+      "kind": "etc",
+      "icon": "icon.etc_recipe_red_i00",
+      "stackable": true,
+      "price": 10380,
+      "weight": 30
+    },
+    {
+      "id": 4957,
+      "name": "Recipe: Boots of Blessing (60%)",
+      "kind": "etc",
+      "icon": "icon.etc_recipe_red_i00",
+      "stackable": true,
       "price": 10380,
       "weight": 30
     },
@@ -41794,6 +44393,42 @@
       "weight": 30
     },
     {
+      "id": 4976,
+      "name": "Recipe: Implosion Boots (60%)",
+      "kind": "etc",
+      "icon": "icon.etc_recipe_red_i00",
+      "stackable": true,
+      "price": 16080,
+      "weight": 30
+    },
+    {
+      "id": 4977,
+      "name": "Recipe: Paradia Boots (60%)",
+      "kind": "etc",
+      "icon": "icon.etc_recipe_red_i00",
+      "stackable": true,
+      "price": 16080,
+      "weight": 30
+    },
+    {
+      "id": 4978,
+      "name": "Recipe: Elemental Boots (60%)",
+      "kind": "etc",
+      "icon": "icon.etc_recipe_red_i00",
+      "stackable": true,
+      "price": 16080,
+      "weight": 30
+    },
+    {
+      "id": 4979,
+      "name": "Recipe: Boots of Grace (60%)",
+      "kind": "etc",
+      "icon": "icon.etc_recipe_red_i00",
+      "stackable": true,
+      "price": 16080,
+      "weight": 30
+    },
+    {
       "id": 4980,
       "name": "Recipe: Doom Shield (60%)",
       "kind": "etc",
@@ -41920,6 +44555,42 @@
       "weight": 30
     },
     {
+      "id": 4994,
+      "name": "Recipe: Elemental Gloves (60%)",
+      "kind": "etc",
+      "icon": "icon.etc_recipe_red_i00",
+      "stackable": true,
+      "price": 16080,
+      "weight": 30
+    },
+    {
+      "id": 4995,
+      "name": "Recipe: Gloves of Grace (60%)",
+      "kind": "etc",
+      "icon": "icon.etc_recipe_red_i00",
+      "stackable": true,
+      "price": 16080,
+      "weight": 30
+    },
+    {
+      "id": 4996,
+      "name": "Recipe: Implosion Gauntlets (60%)",
+      "kind": "etc",
+      "icon": "icon.etc_recipe_red_i00",
+      "stackable": true,
+      "price": 16080,
+      "weight": 30
+    },
+    {
+      "id": 4997,
+      "name": "Recipe: Paradia Gloves (60%)",
+      "kind": "etc",
+      "icon": "icon.etc_recipe_red_i00",
+      "stackable": true,
+      "price": 16080,
+      "weight": 30
+    },
+    {
       "id": 4998,
       "name": "Recipe: Sealed Blue Wolf Gloves (60%)",
       "kind": "etc",
@@ -41998,6 +44669,24 @@
       "stackable": true,
       "icon": "icon.etc_recipe_red_i00",
       "price": 262000,
+      "weight": 30
+    },
+    {
+      "id": 5007,
+      "name": "Recipe: Bow of Peril (60%)",
+      "kind": "etc",
+      "icon": "icon.etc_recipe_red_i00",
+      "stackable": true,
+      "price": 262000,
+      "weight": 30
+    },
+    {
+      "id": 5008,
+      "name": "Recipe: Pata (60%)",
+      "kind": "etc",
+      "icon": "icon.etc_recipe_yellow_i00",
+      "stackable": true,
+      "price": 156600,
       "weight": 30
     },
     {
@@ -43727,6 +46416,141 @@
       "spiritshots": 1
     },
     {
+      "id": 5234,
+      "name": "Mystery Potion",
+      "kind": "etc",
+      "icon": "icon.etc_lesser_potion_clear_i00",
+      "stackable": true,
+      "price": 10000,
+      "weight": 50
+    },
+    {
+      "id": 5235,
+      "name": "Facelifting Potion - A",
+      "kind": "etc",
+      "icon": "icon.etc_lesser_potion_purple_i00",
+      "stackable": true,
+      "price": 20000,
+      "weight": 50
+    },
+    {
+      "id": 5236,
+      "name": "Facelifting Potion - B",
+      "kind": "etc",
+      "icon": "icon.etc_lesser_potion_purple_i00",
+      "stackable": true,
+      "price": 20000,
+      "weight": 50
+    },
+    {
+      "id": 5237,
+      "name": "Facelifting Potion - C",
+      "kind": "etc",
+      "icon": "icon.etc_lesser_potion_purple_i00",
+      "stackable": true,
+      "price": 20000,
+      "weight": 50
+    },
+    {
+      "id": 5238,
+      "name": "Dye Potion - A",
+      "kind": "etc",
+      "icon": "icon.etc_lesser_potion_scarlet_i00",
+      "stackable": true,
+      "price": 20000,
+      "weight": 50
+    },
+    {
+      "id": 5239,
+      "name": "Dye Potion - B",
+      "kind": "etc",
+      "icon": "icon.etc_lesser_potion_scarlet_i00",
+      "stackable": true,
+      "price": 20000,
+      "weight": 50
+    },
+    {
+      "id": 5240,
+      "name": "Dye Potion - C",
+      "kind": "etc",
+      "icon": "icon.etc_lesser_potion_scarlet_i00",
+      "stackable": true,
+      "price": 20000,
+      "weight": 50
+    },
+    {
+      "id": 5241,
+      "name": "Dye Potion - D",
+      "kind": "etc",
+      "icon": "icon.etc_lesser_potion_scarlet_i00",
+      "stackable": true,
+      "price": 20000,
+      "weight": 50
+    },
+    {
+      "id": 5242,
+      "name": "Hair Style Change Potion - A",
+      "kind": "etc",
+      "icon": "icon.etc_lesser_potion_green_i00",
+      "stackable": true,
+      "price": 20000,
+      "weight": 50
+    },
+    {
+      "id": 5243,
+      "name": "Hair Style Change Potion - B",
+      "kind": "etc",
+      "icon": "icon.etc_lesser_potion_green_i00",
+      "stackable": true,
+      "price": 20000,
+      "weight": 50
+    },
+    {
+      "id": 5244,
+      "name": "Hair Style Change Potion - C",
+      "kind": "etc",
+      "icon": "icon.etc_lesser_potion_green_i00",
+      "stackable": true,
+      "price": 20000,
+      "weight": 50
+    },
+    {
+      "id": 5245,
+      "name": "Hair Style Change Potion - D",
+      "kind": "etc",
+      "icon": "icon.etc_lesser_potion_green_i00",
+      "stackable": true,
+      "price": 20000,
+      "weight": 50
+    },
+    {
+      "id": 5246,
+      "name": "Hair Style Change Potion - E",
+      "kind": "etc",
+      "icon": "icon.etc_lesser_potion_green_i00",
+      "stackable": true,
+      "price": 20000,
+      "weight": 50
+    },
+    {
+      "id": 5247,
+      "name": "Hair Style Change Potion - F",
+      "kind": "etc",
+      "icon": "icon.etc_lesser_potion_green_i00",
+      "stackable": true,
+      "price": 20000,
+      "weight": 50
+    },
+    {
+      "id": 5248,
+      "name": "Hair Style Change Potion - G",
+      "kind": "etc",
+      "icon": "icon.etc_lesser_potion_green_i00",
+      "stackable": true,
+      "price": 20000,
+      "weight": 50
+    },
+    {
       "id": 5250,
       "name": "Greater Compressed Package of Soulshots: No-grade",
       "kind": "etc",
@@ -44480,11 +47304,65 @@
       "weight": 30
     },
     {
+      "id": 5333,
+      "name": "Recipe: Sealed Dark Crystal Leather Armor(100%)",
+      "kind": "etc",
+      "icon": "icon.etc_recipe_violet_i00",
+      "stackable": true,
+      "price": 69400,
+      "weight": 30
+    },
+    {
+      "id": 5334,
+      "name": "Recipe: Sealed Tallum Leather Armor(60%)",
+      "kind": "etc",
+      "icon": "icon.etc_recipe_violet_i00",
+      "stackable": true,
+      "price": 101600,
+      "weight": 30
+    },
+    {
+      "id": 5335,
+      "name": "Recipe: Sealed Tallum Leather Armor(100%)",
+      "kind": "etc",
+      "icon": "icon.etc_recipe_violet_i00",
+      "stackable": true,
+      "price": 101600,
+      "weight": 30
+    },
+    {
+      "id": 5336,
+      "name": "Recipe: Sealed Leather Armor of Nightmare(60%)",
+      "kind": "etc",
+      "icon": "icon.etc_recipe_violet_i00",
+      "stackable": true,
+      "price": 154600,
+      "weight": 30
+    },
+    {
+      "id": 5337,
+      "name": "Recipe: Sealed Leather Armor of Nightmare(100%)",
+      "kind": "etc",
+      "icon": "icon.etc_recipe_violet_i00",
+      "stackable": true,
+      "price": 154600,
+      "weight": 30
+    },
+    {
       "id": 5338,
       "name": "Recipe: Sealed Majestic Leather Armor(60%)",
       "kind": "etc",
       "stackable": true,
       "icon": "icon.etc_recipe_violet_i00",
+      "price": 154600,
+      "weight": 30
+    },
+    {
+      "id": 5339,
+      "name": "Recipe: Sealed Majestic Leather Armor(100%)",
+      "kind": "etc",
+      "icon": "icon.etc_recipe_violet_i00",
+      "stackable": true,
       "price": 154600,
       "weight": 30
     },
@@ -44498,11 +47376,29 @@
       "weight": 30
     },
     {
+      "id": 5341,
+      "name": "Recipe: Sealed Dark Crystal Leggings(100%)",
+      "kind": "etc",
+      "icon": "icon.etc_recipe_violet_i00",
+      "stackable": true,
+      "price": 43400,
+      "weight": 30
+    },
+    {
       "id": 5346,
       "name": "Recipe: Sealed Tallum Tunic(60%)",
       "kind": "etc",
       "stackable": true,
       "icon": "icon.etc_recipe_violet_i00",
+      "price": 69400,
+      "weight": 30
+    },
+    {
+      "id": 5347,
+      "name": "Recipe: Sealed Tallum Tunic(100%)",
+      "kind": "etc",
+      "icon": "icon.etc_recipe_violet_i00",
+      "stackable": true,
       "price": 69400,
       "weight": 30
     },
@@ -44516,11 +47412,29 @@
       "stackable": true
     },
     {
+      "id": 5349,
+      "name": "Recipe: Sealed Dark Crystal Robe(100%)",
+      "kind": "etc",
+      "icon": "icon.etc_recipe_violet_i00",
+      "stackable": true,
+      "price": 101600,
+      "weight": 30
+    },
+    {
       "id": 5350,
       "name": "Recipe: Sealed Robe of Nightmare(60%)",
       "kind": "etc",
       "stackable": true,
       "icon": "icon.etc_recipe_violet_i00",
+      "price": 154600,
+      "weight": 30
+    },
+    {
+      "id": 5351,
+      "name": "Recipe: Sealed Robe of Nightmare(100%)",
+      "kind": "etc",
+      "icon": "icon.etc_recipe_violet_i00",
+      "stackable": true,
       "price": 154600,
       "weight": 30
     },
@@ -44534,11 +47448,29 @@
       "weight": 30
     },
     {
+      "id": 5353,
+      "name": "Recipe: Sealed Majestic Robe(100%)",
+      "kind": "etc",
+      "icon": "icon.etc_recipe_violet_i00",
+      "stackable": true,
+      "price": 154600,
+      "weight": 30
+    },
+    {
       "id": 5354,
       "name": "Recipe: Sealed Tallum Stockings(60%)",
       "kind": "etc",
       "stackable": true,
       "icon": "icon.etc_recipe_violet_i00",
+      "price": 43400,
+      "weight": 30
+    },
+    {
+      "id": 5355,
+      "name": "Recipe: Sealed Tallum Stockings(100%)",
+      "kind": "etc",
+      "icon": "icon.etc_recipe_violet_i00",
+      "stackable": true,
       "price": 43400,
       "weight": 30
     },
@@ -44552,6 +47484,15 @@
       "stackable": true
     },
     {
+      "id": 5365,
+      "name": "Recipe: Sealed Dark Crystal Shield(100%)",
+      "kind": "etc",
+      "icon": "icon.etc_recipe_violet_i00",
+      "stackable": true,
+      "price": 24400,
+      "weight": 30
+    },
+    {
       "id": 5366,
       "name": "Recipe: Sealed Shield of Nightmare(60%)",
       "kind": "etc",
@@ -44559,6 +47500,15 @@
       "price": 37000,
       "weight": 30,
       "stackable": true
+    },
+    {
+      "id": 5367,
+      "name": "Recipe: Sealed Shield of Nightmare(100%)",
+      "kind": "etc",
+      "icon": "icon.etc_recipe_violet_i00",
+      "stackable": true,
+      "price": 37000,
+      "weight": 30
     },
     {
       "id": 5368,
@@ -44570,6 +47520,15 @@
       "stackable": true
     },
     {
+      "id": 5369,
+      "name": "Recipe: Sealed Dark Crystal Boots(100%)",
+      "kind": "etc",
+      "icon": "icon.etc_recipe_violet_i00",
+      "stackable": true,
+      "price": 23200,
+      "weight": 30
+    },
+    {
       "id": 5370,
       "name": "Recipe: Sealed Tallum Boots(60%)",
       "kind": "etc",
@@ -44577,6 +47536,15 @@
       "price": 23200,
       "weight": 30,
       "stackable": true
+    },
+    {
+      "id": 5371,
+      "name": "Recipe: Sealed Tallum Boots(100%)",
+      "kind": "etc",
+      "icon": "icon.etc_recipe_violet_i00",
+      "stackable": true,
+      "price": 23200,
+      "weight": 30
     },
     {
       "id": 5380,
@@ -44588,6 +47556,15 @@
       "stackable": true
     },
     {
+      "id": 5381,
+      "name": "Recipe: Sealed Boots of Nightmare(100%)",
+      "kind": "etc",
+      "icon": "icon.etc_recipe_violet_i00",
+      "stackable": true,
+      "price": 35200,
+      "weight": 30
+    },
+    {
       "id": 5382,
       "name": "Recipe: Sealed Majestic Boots(60%)",
       "kind": "etc",
@@ -44595,6 +47572,15 @@
       "price": 35200,
       "weight": 30,
       "stackable": true
+    },
+    {
+      "id": 5383,
+      "name": "Recipe: Sealed Majestic Boots(100%)",
+      "kind": "etc",
+      "icon": "icon.etc_recipe_violet_i00",
+      "stackable": true,
+      "price": 35200,
+      "weight": 30
     },
     {
       "id": 5392,
@@ -44606,6 +47592,15 @@
       "stackable": true
     },
     {
+      "id": 5393,
+      "name": "Recipe: Sealed Dark Crystal Gloves(100%)",
+      "kind": "etc",
+      "icon": "icon.etc_recipe_violet_i00",
+      "stackable": true,
+      "price": 23200,
+      "weight": 30
+    },
+    {
       "id": 5394,
       "name": "Recipe: Sealed Tallum Gloves(60%)",
       "kind": "etc",
@@ -44613,6 +47608,15 @@
       "price": 23200,
       "weight": 30,
       "stackable": true
+    },
+    {
+      "id": 5395,
+      "name": "Recipe: Sealed Tallum Gloves(100%)",
+      "kind": "etc",
+      "icon": "icon.etc_recipe_violet_i00",
+      "stackable": true,
+      "price": 23200,
+      "weight": 30
     },
     {
       "id": 5404,
@@ -44624,6 +47628,15 @@
       "stackable": true
     },
     {
+      "id": 5405,
+      "name": "Recipe: Sealed Gauntlets of Nightmare(100%)",
+      "kind": "etc",
+      "icon": "icon.etc_recipe_violet_i00",
+      "stackable": true,
+      "price": 35200,
+      "weight": 30
+    },
+    {
       "id": 5406,
       "name": "Recipe: Sealed Majestic Gauntlets(60%)",
       "kind": "etc",
@@ -44633,11 +47646,29 @@
       "stackable": true
     },
     {
+      "id": 5407,
+      "name": "Recipe: Sealed Majestic Gauntlets(100%)",
+      "kind": "etc",
+      "icon": "icon.etc_recipe_violet_i00",
+      "stackable": true,
+      "price": 35200,
+      "weight": 30
+    },
+    {
       "id": 5416,
       "name": "Recipe: Sealed Dark Crystal Breastplate(60%)",
       "kind": "etc",
       "stackable": true,
       "icon": "icon.etc_recipe_violet_i00",
+      "price": 92600,
+      "weight": 30
+    },
+    {
+      "id": 5417,
+      "name": "Recipe: Sealed Dark Crystal Breastplate(100%)",
+      "kind": "etc",
+      "icon": "icon.etc_recipe_violet_i00",
+      "stackable": true,
       "price": 92600,
       "weight": 30
     },
@@ -44651,11 +47682,29 @@
       "weight": 30
     },
     {
+      "id": 5419,
+      "name": "Recipe: Sealed Tallum Plate Armor(100%)",
+      "kind": "etc",
+      "icon": "icon.etc_recipe_violet_i00",
+      "stackable": true,
+      "price": 135400,
+      "weight": 30
+    },
+    {
       "id": 5420,
       "name": "Recipe: Sealed Armor of Nightmare(60%)",
       "kind": "etc",
       "stackable": true,
       "icon": "icon.etc_recipe_violet_i00",
+      "price": 206000,
+      "weight": 30
+    },
+    {
+      "id": 5421,
+      "name": "Recipe: Sealed Armor of Nightmare(100%)",
+      "kind": "etc",
+      "icon": "icon.etc_recipe_violet_i00",
+      "stackable": true,
       "price": 206000,
       "weight": 30
     },
@@ -44669,11 +47718,29 @@
       "weight": 30
     },
     {
+      "id": 5423,
+      "name": "Recipe: Sealed Majestic Plate Armor(100%)",
+      "kind": "etc",
+      "icon": "icon.etc_recipe_violet_i00",
+      "stackable": true,
+      "price": 206000,
+      "weight": 30
+    },
+    {
       "id": 5424,
       "name": "Recipe: Sealed Dark Crystal Gaiters(60%)",
       "kind": "etc",
       "stackable": true,
       "icon": "icon.etc_recipe_violet_i00",
+      "price": 57800,
+      "weight": 30
+    },
+    {
+      "id": 5425,
+      "name": "Recipe: Sealed Dark Crystal Gaiters(100%)",
+      "kind": "etc",
+      "icon": "icon.etc_recipe_violet_i00",
+      "stackable": true,
       "price": 57800,
       "weight": 30
     },
@@ -44687,6 +47754,15 @@
       "stackable": true
     },
     {
+      "id": 5427,
+      "name": "Recipe: Sealed Dark Crystal Helmet(100%)",
+      "kind": "etc",
+      "icon": "icon.etc_recipe_violet_i00",
+      "stackable": true,
+      "price": 34800,
+      "weight": 30
+    },
+    {
       "id": 5428,
       "name": "Recipe: Sealed Tallum Helmet(60%)",
       "kind": "etc",
@@ -44694,6 +47770,15 @@
       "price": 34800,
       "weight": 30,
       "stackable": true
+    },
+    {
+      "id": 5429,
+      "name": "Recipe: Sealed Tallum Helmet(100%)",
+      "kind": "etc",
+      "icon": "icon.etc_recipe_violet_i00",
+      "stackable": true,
+      "price": 34800,
+      "weight": 30
     },
     {
       "id": 5430,
@@ -44705,6 +47790,15 @@
       "stackable": true
     },
     {
+      "id": 5431,
+      "name": "Recipe: Sealed Helm of Nightmare(100%)",
+      "kind": "etc",
+      "icon": "icon.etc_recipe_violet_i00",
+      "stackable": true,
+      "price": 52800,
+      "weight": 30
+    },
+    {
       "id": 5432,
       "name": "Recipe: Sealed Majestic Circlet (60%)",
       "kind": "etc",
@@ -44714,11 +47808,29 @@
       "stackable": true
     },
     {
+      "id": 5433,
+      "name": "Recipe: Sealed Majestic Circlet (100%)",
+      "kind": "etc",
+      "icon": "icon.etc_recipe_violet_i00",
+      "stackable": true,
+      "price": 52800,
+      "weight": 30
+    },
+    {
       "id": 5434,
       "name": "Recipe: Dragon Slayer(60%)",
       "kind": "etc",
       "stackable": true,
       "icon": "icon.etc_recipe_violet_i00",
+      "price": 540000,
+      "weight": 30
+    },
+    {
+      "id": 5435,
+      "name": "Recipe: Dragon Slayer(100%)",
+      "kind": "etc",
+      "icon": "icon.etc_recipe_violet_i00",
+      "stackable": true,
       "price": 540000,
       "weight": 30
     },
@@ -44750,11 +47862,29 @@
       "weight": 30
     },
     {
+      "id": 5439,
+      "name": "Recipe: Meteor Shower(100%)",
+      "kind": "etc",
+      "icon": "icon.etc_recipe_violet_i00",
+      "stackable": true,
+      "price": 366000,
+      "weight": 30
+    },
+    {
       "id": 5440,
       "name": "Recipe: Elysian(60%)",
       "kind": "etc",
       "stackable": true,
       "icon": "icon.etc_recipe_violet_i00",
+      "price": 540000,
+      "weight": 30
+    },
+    {
+      "id": 5441,
+      "name": "Recipe: Elysian(100%)",
+      "kind": "etc",
+      "icon": "icon.etc_recipe_violet_i00",
+      "stackable": true,
       "price": 540000,
       "weight": 30
     },
@@ -44768,11 +47898,29 @@
       "weight": 30
     },
     {
+      "id": 5443,
+      "name": "Recipe: Soul Bow(100%)",
+      "kind": "etc",
+      "icon": "icon.etc_recipe_violet_i00",
+      "stackable": true,
+      "price": 540000,
+      "weight": 30
+    },
+    {
       "id": 5444,
       "name": "Recipe: Carnage Bow(60%)",
       "kind": "etc",
       "stackable": true,
       "icon": "icon.etc_recipe_violet_i00",
+      "price": 366000,
+      "weight": 30
+    },
+    {
+      "id": 5445,
+      "name": "Recipe: Carnage Bow(100%)",
+      "kind": "etc",
+      "icon": "icon.etc_recipe_violet_i00",
+      "stackable": true,
       "price": 366000,
       "weight": 30
     },
@@ -44786,11 +47934,29 @@
       "weight": 30
     },
     {
+      "id": 5447,
+      "name": "Recipe: Bloody Orchid(100%)",
+      "kind": "etc",
+      "icon": "icon.etc_recipe_violet_i00",
+      "stackable": true,
+      "price": 366000,
+      "weight": 30
+    },
+    {
       "id": 5448,
       "name": "Recipe: Soul Separator(60%)",
       "kind": "etc",
       "stackable": true,
       "icon": "icon.etc_recipe_violet_i00",
+      "price": 540000,
+      "weight": 30
+    },
+    {
+      "id": 5449,
+      "name": "Recipe: Soul Separator(100%)",
+      "kind": "etc",
+      "icon": "icon.etc_recipe_violet_i00",
+      "stackable": true,
       "price": 540000,
       "weight": 30
     },
@@ -44804,11 +47970,29 @@
       "weight": 30
     },
     {
+      "id": 5451,
+      "name": "Recipe: Dragon Grinder(100%)",
+      "kind": "etc",
+      "icon": "icon.etc_recipe_violet_i00",
+      "stackable": true,
+      "price": 540000,
+      "weight": 30
+    },
+    {
       "id": 5452,
       "name": "Recipe: Blood Tornado(60%)",
       "kind": "etc",
       "stackable": true,
       "icon": "icon.etc_recipe_violet_i00",
+      "price": 366000,
+      "weight": 30
+    },
+    {
+      "id": 5453,
+      "name": "Recipe: Blood Tornado(100%)",
+      "kind": "etc",
+      "icon": "icon.etc_recipe_violet_i00",
+      "stackable": true,
       "price": 366000,
       "weight": 30
     },
@@ -44822,11 +48006,47 @@
       "weight": 30
     },
     {
+      "id": 5457,
+      "name": "Recipe: Tallum Glaive(100%)",
+      "kind": "etc",
+      "icon": "icon.etc_recipe_violet_i00",
+      "stackable": true,
+      "price": 540000,
+      "weight": 30
+    },
+    {
+      "id": 5458,
+      "name": "Recipe: Halberd(60%)",
+      "kind": "etc",
+      "icon": "icon.etc_recipe_violet_i00",
+      "stackable": true,
+      "price": 366000,
+      "weight": 30
+    },
+    {
+      "id": 5459,
+      "name": "Recipe: Halberd(100%)",
+      "kind": "etc",
+      "icon": "icon.etc_recipe_violet_i00",
+      "stackable": true,
+      "price": 366000,
+      "weight": 30
+    },
+    {
       "id": 5460,
       "name": "Recipe: Dasparion's Staff(60%)",
       "kind": "etc",
       "stackable": true,
       "icon": "icon.etc_recipe_violet_i00",
+      "price": 366000,
+      "weight": 30
+    },
+    {
+      "id": 5461,
+      "name": "Recipe: Dasparion's Staff(100%)",
+      "kind": "etc",
+      "icon": "icon.etc_recipe_violet_i00",
+      "stackable": true,
       "price": 366000,
       "weight": 30
     },
@@ -44840,11 +48060,29 @@
       "weight": 30
     },
     {
+      "id": 5463,
+      "name": "Recipe: Branch of the Mother Tree(100%)",
+      "kind": "etc",
+      "icon": "icon.etc_recipe_violet_i00",
+      "stackable": true,
+      "price": 540000,
+      "weight": 30
+    },
+    {
       "id": 5464,
       "name": "Recipe: Dark Legion's Edge(60%)",
       "kind": "etc",
       "stackable": true,
       "icon": "icon.etc_recipe_violet_i00",
+      "price": 540000,
+      "weight": 30
+    },
+    {
+      "id": 5465,
+      "name": "Recipe: Dark Legion's Edge(100%)",
+      "kind": "etc",
+      "icon": "icon.etc_recipe_violet_i00",
+      "stackable": true,
       "price": 540000,
       "weight": 30
     },
@@ -44858,11 +48096,47 @@
       "weight": 30
     },
     {
+      "id": 5467,
+      "name": "Recipe: Sword of Miracles(100%)",
+      "kind": "etc",
+      "icon": "icon.etc_recipe_violet_i00",
+      "stackable": true,
+      "price": 540000,
+      "weight": 30
+    },
+    {
+      "id": 5468,
+      "name": "Recipe: Elemental Sword(60%)",
+      "kind": "etc",
+      "icon": "icon.etc_recipe_violet_i00",
+      "stackable": true,
+      "price": 366000,
+      "weight": 30
+    },
+    {
+      "id": 5469,
+      "name": "Recipe: Elemental Sword(100%)",
+      "kind": "etc",
+      "icon": "icon.etc_recipe_violet_i00",
+      "stackable": true,
+      "price": 366000,
+      "weight": 30
+    },
+    {
       "id": 5470,
       "name": "Recipe: Tallum Blade(60%)",
       "kind": "etc",
       "stackable": true,
       "icon": "icon.etc_recipe_violet_i00",
+      "price": 366000,
+      "weight": 30
+    },
+    {
+      "id": 5471,
+      "name": "Recipe: Tallum Blade(100%)",
+      "kind": "etc",
+      "icon": "icon.etc_recipe_violet_i00",
+      "stackable": true,
       "price": 366000,
       "weight": 30
     },
@@ -45063,6 +48337,15 @@
       "price": 11842,
       "weight": 60,
       "stackable": true
+    },
+    {
+      "id": 5516,
+      "name": "Sealed Dark Legion Gloves Design",
+      "kind": "etc",
+      "icon": "icon.etc_pouch_brown_i00",
+      "stackable": true,
+      "price": 8993,
+      "weight": 60
     },
     {
       "id": 5520,
@@ -45371,6 +48654,42 @@
       "weight": 2
     },
     {
+      "id": 5556,
+      "name": "Star Ornament",
+      "kind": "etc",
+      "icon": "icon.etc_deco_star_i00",
+      "stackable": true,
+      "price": 1,
+      "weight": 0
+    },
+    {
+      "id": 5557,
+      "name": "Bead Ornament",
+      "kind": "etc",
+      "icon": "icon.etc_deco_bead_i00",
+      "stackable": true,
+      "price": 1,
+      "weight": 0
+    },
+    {
+      "id": 5558,
+      "name": "Fir Tree Branch",
+      "kind": "etc",
+      "icon": "icon.etc_fir_spring_i00",
+      "stackable": true,
+      "price": 1,
+      "weight": 0
+    },
+    {
+      "id": 5559,
+      "name": "Flower Pot",
+      "kind": "etc",
+      "icon": "icon.etc_flowerpot_i00",
+      "stackable": true,
+      "price": 1,
+      "weight": 0
+    },
+    {
       "id": 5567,
       "name": "Letter of Greetings",
       "kind": "etc",
@@ -45462,6 +48781,51 @@
       "stackable": true,
       "price": 100,
       "weight": 10
+    },
+    {
+      "id": 5591,
+      "name": "CP Potion",
+      "kind": "etc",
+      "icon": "icon.etc_cp_potion_i00",
+      "stackable": true,
+      "price": 200,
+      "weight": 25
+    },
+    {
+      "id": 5592,
+      "name": "Greater CP Potion",
+      "kind": "etc",
+      "icon": "icon.etc_cp_potion_i01",
+      "stackable": true,
+      "price": 500,
+      "weight": 100
+    },
+    {
+      "id": 5593,
+      "name": "SP Scroll (Low-Grade)",
+      "kind": "etc",
+      "icon": "icon.etc_sp_scroll1_i00",
+      "stackable": true,
+      "price": 2000,
+      "weight": 30
+    },
+    {
+      "id": 5594,
+      "name": "SP Scroll (Medium-Grade)",
+      "kind": "etc",
+      "icon": "icon.etc_sp_scroll2_i00",
+      "stackable": true,
+      "price": 20000,
+      "weight": 30
+    },
+    {
+      "id": 5595,
+      "name": "SP Scroll (High Grade)",
+      "kind": "etc",
+      "icon": "icon.etc_sp_scroll3_i00",
+      "stackable": true,
+      "price": 400000,
+      "weight": 30
     },
     {
       "id": 5596,
@@ -48581,6 +51945,24 @@
       "icon": "icon.etc_codran_i05",
       "price": 1000,
       "weight": 1
+    },
+    {
+      "id": 5858,
+      "name": "Blessed Scroll of Escape: Clan Hall",
+      "kind": "etc",
+      "icon": "icon.etc_scroll_of_return_agit_i01",
+      "stackable": true,
+      "price": 100000,
+      "weight": 120
+    },
+    {
+      "id": 5859,
+      "name": "Blessed Scroll of Escape: Castle",
+      "kind": "etc",
+      "icon": "icon.etc_scroll_of_return_castle_i01",
+      "stackable": true,
+      "price": 80000,
+      "weight": 120
     },
     {
       "id": 5860,
@@ -53052,6 +56434,42 @@
       "price": 200
     },
     {
+      "id": 6652,
+      "name": "Scroll: Protection of Valakas",
+      "kind": "etc",
+      "icon": "icon.etc_blesscharm_ward_val_i00",
+      "stackable": true,
+      "price": 100000,
+      "weight": 10
+    },
+    {
+      "id": 6653,
+      "name": "Scroll: Flames of Valakas",
+      "kind": "etc",
+      "icon": "icon.etc_aidcharm_cancel_deathfire_i00",
+      "stackable": true,
+      "price": 5000,
+      "weight": 10
+    },
+    {
+      "id": 6654,
+      "name": "Scroll: Flames of Valakas",
+      "kind": "etc",
+      "icon": "icon.etc_aidcharm_cancel_valbreath_i00",
+      "stackable": true,
+      "price": 40000,
+      "weight": 10
+    },
+    {
+      "id": 6655,
+      "name": "Scroll: Slay Valakas",
+      "kind": "etc",
+      "icon": "icon.etc_blesscharm_slay_val_i00",
+      "stackable": true,
+      "price": 80000,
+      "weight": 10
+    },
+    {
       "id": 6656,
       "name": "Earring of Antharas",
       "kind": "armor",
@@ -53458,6 +56876,15 @@
       "stackable": true,
       "icon": "icon.etc_sword_body_i00",
       "price": 92529,
+      "weight": 60
+    },
+    {
+      "id": 6692,
+      "name": "Shining Bow Shaft",
+      "kind": "etc",
+      "icon": "icon.etc_branch_gold_i00",
+      "stackable": true,
+      "price": 91471,
       "weight": 60
     },
     {
@@ -53922,6 +57349,15 @@
       "weight": 1
     },
     {
+      "id": 6735,
+      "name": "Seed: Alternative Red Coba",
+      "kind": "etc",
+      "icon": "icon.etc_red_coba_seed_i00",
+      "stackable": true,
+      "price": 500,
+      "weight": 1
+    },
+    {
       "id": 6736,
       "name": "Seed: Alternative Desert Coba",
       "kind": "etc",
@@ -53954,6 +57390,15 @@
       "kind": "etc",
       "stackable": true,
       "icon": "icon.etc_desert_coba_seed_i00",
+      "price": 750,
+      "weight": 1
+    },
+    {
+      "id": 6740,
+      "name": "Seed: Alternative Desert Coba",
+      "kind": "etc",
+      "icon": "icon.etc_desert_coba_seed_i00",
+      "stackable": true,
       "price": 750,
       "weight": 1
     },
@@ -54003,6 +57448,15 @@
       "weight": 1
     },
     {
+      "id": 6746,
+      "name": "Seed: Alternative Blue Coba",
+      "kind": "etc",
+      "icon": "icon.etc_blue_coba_seed_i00",
+      "stackable": true,
+      "price": 400,
+      "weight": 1
+    },
+    {
       "id": 6747,
       "name": "Seed: Alternative Golden Coba",
       "kind": "etc",
@@ -54044,6 +57498,15 @@
       "kind": "etc",
       "stackable": true,
       "icon": "icon.etc_golden_coba_seed_i00",
+      "price": 650,
+      "weight": 1
+    },
+    {
+      "id": 6752,
+      "name": "Seed: Alternative Golden Coba",
+      "kind": "etc",
+      "icon": "icon.etc_golden_coba_seed_i00",
+      "stackable": true,
       "price": 650,
       "weight": 1
     },
@@ -54120,6 +57583,15 @@
       "weight": 1
     },
     {
+      "id": 6761,
+      "name": "Seed: Red Coba",
+      "kind": "etc",
+      "icon": "icon.etc_red_coba_seed_i00",
+      "stackable": true,
+      "price": 500,
+      "weight": 1
+    },
+    {
       "id": 6762,
       "name": "Seed: Desert Coba",
       "kind": "etc",
@@ -54152,6 +57624,15 @@
       "kind": "etc",
       "stackable": true,
       "icon": "icon.etc_desert_coba_seed_i00",
+      "price": 750,
+      "weight": 1
+    },
+    {
+      "id": 6766,
+      "name": "Seed: Desert Coba",
+      "kind": "etc",
+      "icon": "icon.etc_desert_coba_seed_i00",
+      "stackable": true,
       "price": 750,
       "weight": 1
     },
@@ -54201,6 +57682,15 @@
       "weight": 1
     },
     {
+      "id": 6772,
+      "name": "Seed: Blue Coba",
+      "kind": "etc",
+      "icon": "icon.etc_blue_coba_seed_i00",
+      "stackable": true,
+      "price": 400,
+      "weight": 1
+    },
+    {
       "id": 6773,
       "name": "Seed: Golden Coba",
       "kind": "etc",
@@ -54242,6 +57732,15 @@
       "kind": "etc",
       "stackable": true,
       "icon": "icon.etc_golden_coba_seed_i00",
+      "price": 650,
+      "weight": 1
+    },
+    {
+      "id": 6778,
+      "name": "Seed: Golden Coba",
+      "kind": "etc",
+      "icon": "icon.etc_golden_coba_seed_i00",
+      "stackable": true,
       "price": 650,
       "weight": 1
     },
@@ -54396,6 +57895,15 @@
       "stackable": true
     },
     {
+      "id": 6848,
+      "name": "Recipe: Sealed Tateossian Earring (100%)",
+      "kind": "etc",
+      "icon": "icon.etc_recipe_black_i00",
+      "stackable": true,
+      "price": 74000,
+      "weight": 30
+    },
+    {
       "id": 6849,
       "name": "Recipe: Sealed Tateossian Ring(70%)",
       "kind": "etc",
@@ -54403,6 +57911,15 @@
       "price": 49400,
       "weight": 30,
       "stackable": true
+    },
+    {
+      "id": 6850,
+      "name": "Recipe: Sealed Tateossian Ring(100%)",
+      "kind": "etc",
+      "icon": "icon.etc_recipe_black_i00",
+      "stackable": true,
+      "price": 49400,
+      "weight": 30
     },
     {
       "id": 6851,
@@ -54414,6 +57931,267 @@
       "stackable": true
     },
     {
+      "id": 6852,
+      "name": "Recipe: Sealed Tateossian Necklace(100%)",
+      "kind": "etc",
+      "icon": "icon.etc_recipe_black_i00",
+      "stackable": true,
+      "price": 98800,
+      "weight": 30
+    },
+    {
+      "id": 6853,
+      "name": "Recipe: Sealed Imperial Crusader Breastplate (60%)",
+      "kind": "etc",
+      "icon": "icon.etc_recipe_black_i00",
+      "stackable": true,
+      "price": 286000,
+      "weight": 30
+    },
+    {
+      "id": 6854,
+      "name": "Recipe: Sealed Imperial Crusader Breastplate (100%)",
+      "kind": "etc",
+      "icon": "icon.etc_recipe_black_i00",
+      "stackable": true,
+      "price": 286000,
+      "weight": 30
+    },
+    {
+      "id": 6855,
+      "name": "Recipe: Sealed Imperial Crusader Gaiters (60%)",
+      "kind": "etc",
+      "icon": "icon.etc_recipe_black_i00",
+      "stackable": true,
+      "price": 179200,
+      "weight": 30
+    },
+    {
+      "id": 6856,
+      "name": "Recipe: Sealed Imperial Crusader Gaiters (100%)",
+      "kind": "etc",
+      "icon": "icon.etc_recipe_black_i00",
+      "stackable": true,
+      "price": 179200,
+      "weight": 30
+    },
+    {
+      "id": 6857,
+      "name": "Recipe: Sealed Imperial Crusader Gauntlets (60%)",
+      "kind": "etc",
+      "icon": "icon.etc_recipe_black_i00",
+      "stackable": true,
+      "price": 71600,
+      "weight": 30
+    },
+    {
+      "id": 6858,
+      "name": "Recipe: Sealed Imperial Crusader Gauntlets (100%)",
+      "kind": "etc",
+      "icon": "icon.etc_recipe_black_i00",
+      "stackable": true,
+      "price": 71600,
+      "weight": 30
+    },
+    {
+      "id": 6859,
+      "name": "Recipe: Sealed Imperial Crusader Boots (60%)",
+      "kind": "etc",
+      "icon": "icon.etc_recipe_black_i00",
+      "stackable": true,
+      "price": 71600,
+      "weight": 30
+    },
+    {
+      "id": 6860,
+      "name": "Recipe: Sealed Imperial Crusader Boots (100%)",
+      "kind": "etc",
+      "icon": "icon.etc_recipe_black_i00",
+      "stackable": true,
+      "price": 71600,
+      "weight": 30
+    },
+    {
+      "id": 6861,
+      "name": "Recipe: Sealed Imperial Crusader Shield (60%)",
+      "kind": "etc",
+      "icon": "icon.etc_recipe_black_i00",
+      "stackable": true,
+      "price": 75200,
+      "weight": 30
+    },
+    {
+      "id": 6862,
+      "name": "Recipe: Sealed Imperial Crusader Shield (100%)",
+      "kind": "etc",
+      "icon": "icon.etc_recipe_black_i00",
+      "stackable": true,
+      "price": 75200,
+      "weight": 30
+    },
+    {
+      "id": 6863,
+      "name": "Recipe: Sealed Imperial Crusader Helmet (60%)",
+      "kind": "etc",
+      "icon": "icon.etc_recipe_black_i00",
+      "stackable": true,
+      "price": 107400,
+      "weight": 30
+    },
+    {
+      "id": 6864,
+      "name": "Recipe: Sealed Imperial Crusader Helmet (100%)",
+      "kind": "etc",
+      "icon": "icon.etc_recipe_black_i00",
+      "stackable": true,
+      "price": 107400,
+      "weight": 30
+    },
+    {
+      "id": 6865,
+      "name": "Recipe: Sealed Draconic Leather Armor (60%)",
+      "kind": "etc",
+      "icon": "icon.etc_recipe_black_i00",
+      "stackable": true,
+      "price": 348000,
+      "weight": 30
+    },
+    {
+      "id": 6866,
+      "name": "Recipe: Sealed Draconic Leather Armor (100%)",
+      "kind": "etc",
+      "icon": "icon.etc_recipe_black_i00",
+      "stackable": true,
+      "price": 348000,
+      "weight": 30
+    },
+    {
+      "id": 6867,
+      "name": "Recipe: Sealed Draconic Leather Gloves (60%)",
+      "kind": "etc",
+      "icon": "icon.etc_recipe_black_i00",
+      "stackable": true,
+      "price": 71600,
+      "weight": 30
+    },
+    {
+      "id": 6868,
+      "name": "Recipe: Sealed Draconic Leather Gloves (100%)",
+      "kind": "etc",
+      "icon": "icon.etc_recipe_black_i00",
+      "stackable": true,
+      "price": 71600,
+      "weight": 30
+    },
+    {
+      "id": 6869,
+      "name": "Recipe: Sealed Draconic Leather Boots (60%)",
+      "kind": "etc",
+      "icon": "icon.etc_recipe_black_i00",
+      "stackable": true,
+      "price": 71600,
+      "weight": 30
+    },
+    {
+      "id": 6870,
+      "name": "Recipe: Sealed Draconic Leather Boots (100%)",
+      "kind": "etc",
+      "icon": "icon.etc_recipe_black_i00",
+      "stackable": true,
+      "price": 71600,
+      "weight": 30
+    },
+    {
+      "id": 6871,
+      "name": "Recipe: Sealed Draconic Leather Helmet (60%)",
+      "kind": "etc",
+      "icon": "icon.etc_recipe_black_i00",
+      "stackable": true,
+      "price": 107400,
+      "weight": 30
+    },
+    {
+      "id": 6872,
+      "name": "Recipe: Sealed Draconic Leather Helmet (100%)",
+      "kind": "etc",
+      "icon": "icon.etc_recipe_black_i00",
+      "stackable": true,
+      "price": 107400,
+      "weight": 30
+    },
+    {
+      "id": 6873,
+      "name": "Recipe: Sealed Major Arcana Robe (60%)",
+      "kind": "etc",
+      "icon": "icon.etc_recipe_black_i00",
+      "stackable": true,
+      "price": 348000,
+      "weight": 30
+    },
+    {
+      "id": 6874,
+      "name": "Recipe: Sealed Major Arcana Robe (100%)",
+      "kind": "etc",
+      "icon": "icon.etc_recipe_black_i00",
+      "stackable": true,
+      "price": 348000,
+      "weight": 30
+    },
+    {
+      "id": 6875,
+      "name": "Recipe: Sealed Major Arcana Gloves (60%)",
+      "kind": "etc",
+      "icon": "icon.etc_recipe_black_i00",
+      "stackable": true,
+      "price": 71600,
+      "weight": 30
+    },
+    {
+      "id": 6876,
+      "name": "Recipe: Sealed Major Arcana Gloves (100%)",
+      "kind": "etc",
+      "icon": "icon.etc_recipe_black_i00",
+      "stackable": true,
+      "price": 71600,
+      "weight": 30
+    },
+    {
+      "id": 6877,
+      "name": "Recipe: Sealed Major Arcana Boots (60%)",
+      "kind": "etc",
+      "icon": "icon.etc_recipe_black_i00",
+      "stackable": true,
+      "price": 71600,
+      "weight": 30
+    },
+    {
+      "id": 6878,
+      "name": "Recipe: Sealed Major Arcana Boots (100%)",
+      "kind": "etc",
+      "icon": "icon.etc_recipe_black_i00",
+      "stackable": true,
+      "price": 71600,
+      "weight": 30
+    },
+    {
+      "id": 6879,
+      "name": "Recipe: Sealed Major Arcana Circlet (60%)",
+      "kind": "etc",
+      "icon": "icon.etc_recipe_black_i00",
+      "stackable": true,
+      "price": 107400,
+      "weight": 30
+    },
+    {
+      "id": 6880,
+      "name": "Recipe: Sealed Major Arcana Circlet (100%)",
+      "kind": "etc",
+      "icon": "icon.etc_recipe_black_i00",
+      "stackable": true,
+      "price": 107400,
+      "weight": 30
+    },
+    {
       "id": 6881,
       "name": "Recipe: Forgotten Blade (60%)",
       "kind": "etc",
@@ -54421,6 +58199,15 @@
       "price": 976000,
       "weight": 30,
       "stackable": true
+    },
+    {
+      "id": 6882,
+      "name": "Recipe: Forgotten Blade (100%)",
+      "kind": "etc",
+      "icon": "icon.etc_recipe_black_i00",
+      "stackable": true,
+      "price": 976000,
+      "weight": 30
     },
     {
       "id": 6883,
@@ -54432,6 +58219,15 @@
       "stackable": true
     },
     {
+      "id": 6884,
+      "name": "Recipe: Basalt Battlehammer (100%)",
+      "kind": "etc",
+      "icon": "icon.etc_recipe_black_i00",
+      "stackable": true,
+      "price": 976000,
+      "weight": 30
+    },
+    {
       "id": 6885,
       "name": "Recipe: Imperial Staff (60%)",
       "kind": "etc",
@@ -54439,6 +58235,15 @@
       "price": 976000,
       "weight": 30,
       "stackable": true
+    },
+    {
+      "id": 6886,
+      "name": "Recipe: Imperial Staff(100%)",
+      "kind": "etc",
+      "icon": "icon.etc_recipe_black_i00",
+      "stackable": true,
+      "price": 976000,
+      "weight": 30
     },
     {
       "id": 6887,
@@ -54450,6 +58255,15 @@
       "stackable": true
     },
     {
+      "id": 6888,
+      "name": "Recipe: Angel Slayer (100%)",
+      "kind": "etc",
+      "icon": "icon.etc_recipe_black_i00",
+      "stackable": true,
+      "price": 976000,
+      "weight": 30
+    },
+    {
       "id": 6889,
       "name": "Recipe: Shining Bow (60%)",
       "kind": "etc",
@@ -54457,6 +58271,15 @@
       "price": 976000,
       "weight": 30,
       "stackable": true
+    },
+    {
+      "id": 6890,
+      "name": "Recipe: Shining Bow (100%)",
+      "kind": "etc",
+      "icon": "icon.etc_recipe_black_i00",
+      "stackable": true,
+      "price": 976000,
+      "weight": 30
     },
     {
       "id": 6891,
@@ -54468,6 +58291,15 @@
       "stackable": true
     },
     {
+      "id": 6892,
+      "name": "Recipe: Dragon Hunter Axe (100%)",
+      "kind": "etc",
+      "icon": "icon.etc_recipe_black_i00",
+      "stackable": true,
+      "price": 976000,
+      "weight": 30
+    },
+    {
       "id": 6893,
       "name": "Recipe: Saint Spear (60%)",
       "kind": "etc",
@@ -54475,6 +58307,15 @@
       "price": 976000,
       "weight": 30,
       "stackable": true
+    },
+    {
+      "id": 6894,
+      "name": "Recipe: Saint Spear (100%)",
+      "kind": "etc",
+      "icon": "icon.etc_recipe_black_i00",
+      "stackable": true,
+      "price": 976000,
+      "weight": 30
     },
     {
       "id": 6895,
@@ -54486,6 +58327,15 @@
       "stackable": true
     },
     {
+      "id": 6896,
+      "name": "Recipe: Demon Splinter (100%)",
+      "kind": "etc",
+      "icon": "icon.etc_recipe_black_i00",
+      "stackable": true,
+      "price": 976000,
+      "weight": 30
+    },
+    {
       "id": 6897,
       "name": "Recipe: Heavens Divider (60%)",
       "kind": "etc",
@@ -54495,6 +58345,15 @@
       "stackable": true
     },
     {
+      "id": 6898,
+      "name": "Recipe: Heavens Divider (100%)",
+      "kind": "etc",
+      "icon": "icon.etc_recipe_black_i00",
+      "stackable": true,
+      "price": 976000,
+      "weight": 30
+    },
+    {
       "id": 6899,
       "name": "Recipe: Arcana Mace (60%)",
       "kind": "etc",
@@ -54502,6 +58361,15 @@
       "price": 976000,
       "weight": 30,
       "stackable": true
+    },
+    {
+      "id": 6900,
+      "name": "Recipe: Arcana Mace (100%)",
+      "kind": "etc",
+      "icon": "icon.etc_recipe_black_i00",
+      "stackable": true,
+      "price": 976000,
+      "weight": 30
     },
     {
       "id": 6901,
@@ -54646,6 +58514,24 @@
       "stackable": true,
       "price": 450,
       "weight": 30
+    },
+    {
+      "id": 6917,
+      "name": "Monster Only (Poison Sting)",
+      "kind": "weapon",
+      "icon": "icon.weapon_monster_i00",
+      "bodySlot": "rhand",
+      "weaponType": "etc",
+      "price": 2,
+      "weight": 6,
+      "pAtk": 0,
+      "mAtk": 0,
+      "pAtkSpd": 0,
+      "critRate": 0,
+      "attackRange": 40,
+      "randomDamage": 10,
+      "soulshots": 0,
+      "spiritshots": 0
     },
     {
       "id": 6920,
@@ -56187,6 +60073,39 @@
       "weight": 0
     },
     {
+      "id": 7179,
+      "name": "Red Bone Necklace",
+      "kind": "etc",
+      "icon": "icon.etc_totem_necklace_red_i00",
+      "stackable": true,
+      "price": 0,
+      "weight": 0,
+      "sellable": false,
+      "quest": true
+    },
+    {
+      "id": 7180,
+      "name": "Incense Pouch",
+      "kind": "etc",
+      "icon": "icon.etc_pouch_yellow_i00",
+      "stackable": true,
+      "price": 0,
+      "weight": 0,
+      "sellable": false,
+      "quest": true
+    },
+    {
+      "id": 7181,
+      "name": "Gem of Maille Lizardman",
+      "kind": "etc",
+      "icon": "icon.etc_crystal_ball_blue_i00",
+      "stackable": true,
+      "price": 0,
+      "weight": 0,
+      "sellable": false,
+      "quest": true
+    },
+    {
       "id": 7182,
       "name": "Patrol's Report",
       "kind": "etc",
@@ -56214,6 +60133,17 @@
       "price": 0,
       "weight": 0,
       "stackable": true,
+      "quest": true
+    },
+    {
+      "id": 7185,
+      "name": "Jewel of Innocence",
+      "kind": "etc",
+      "icon": "icon.etc_crystal_ball_white_i00",
+      "stackable": true,
+      "price": 0,
+      "weight": 0,
+      "sellable": false,
       "quest": true
     },
     {
@@ -56347,6 +60277,39 @@
       "quest": true
     },
     {
+      "id": 7199,
+      "name": "Leaf of Flava",
+      "kind": "etc",
+      "icon": "icon.etc_herb_green_i00",
+      "stackable": true,
+      "price": 0,
+      "weight": 0,
+      "sellable": false,
+      "quest": true
+    },
+    {
+      "id": 7200,
+      "name": "Buffalo Meat",
+      "kind": "etc",
+      "icon": "icon.etc_meat_i00",
+      "stackable": true,
+      "price": 0,
+      "weight": 0,
+      "sellable": false,
+      "quest": true
+    },
+    {
+      "id": 7201,
+      "name": "Antelope Horn",
+      "kind": "etc",
+      "icon": "icon.etc_horn_i00",
+      "stackable": true,
+      "price": 0,
+      "weight": 0,
+      "sellable": false,
+      "quest": true
+    },
+    {
       "id": 7202,
       "name": "Trunk of Nepenthes",
       "kind": "etc",
@@ -56384,6 +60347,61 @@
       "price": 0,
       "weight": 0,
       "stackable": true,
+      "quest": true
+    },
+    {
+      "id": 7206,
+      "name": "Boiled Eggs for Delivery",
+      "kind": "etc",
+      "icon": "icon.etc_egg_bundle_i00",
+      "stackable": true,
+      "price": 0,
+      "weight": 0,
+      "sellable": false,
+      "quest": true
+    },
+    {
+      "id": 7207,
+      "name": "Special Drink for Delivery",
+      "kind": "etc",
+      "icon": "icon.etc_winebottle_white_i00",
+      "stackable": true,
+      "price": 0,
+      "weight": 0,
+      "sellable": false,
+      "quest": true
+    },
+    {
+      "id": 7208,
+      "name": "Hot Food Box",
+      "kind": "etc",
+      "icon": "icon.etc_jewel_box_i00",
+      "stackable": true,
+      "price": 0,
+      "weight": 0,
+      "sellable": false,
+      "quest": true
+    },
+    {
+      "id": 7209,
+      "name": "Food for Bumbalump",
+      "kind": "etc",
+      "icon": "icon.etc_food_dish_i00",
+      "stackable": true,
+      "price": 0,
+      "weight": 0,
+      "sellable": false,
+      "quest": true
+    },
+    {
+      "id": 7210,
+      "name": "Special Yeti Meat",
+      "kind": "etc",
+      "icon": "icon.etc_meat_i00",
+      "stackable": true,
+      "price": 0,
+      "weight": 0,
+      "sellable": false,
       "quest": true
     },
     {
@@ -56877,6 +60895,17 @@
       "quest": true
     },
     {
+      "id": 7260,
+      "name": "Chapel Key",
+      "kind": "etc",
+      "icon": "icon.etc_key_i00",
+      "stackable": true,
+      "price": 0,
+      "weight": 0,
+      "sellable": false,
+      "quest": true
+    },
+    {
       "id": 7261,
       "name": "Used Grave Pass",
       "kind": "etc",
@@ -56934,6 +60963,17 @@
       "price": 0,
       "weight": 0,
       "stackable": true,
+      "quest": true
+    },
+    {
+      "id": 7267,
+      "name": "Vacualite Floating Stone",
+      "kind": "etc",
+      "icon": "icon.etc_vacualite_glowing_white_i00",
+      "stackable": true,
+      "price": 0,
+      "weight": 0,
+      "sellable": false,
       "quest": true
     },
     {
@@ -58797,6 +62837,347 @@
       "quest": true
     },
     {
+      "id": 7454,
+      "name": "Resonance Amulet - 7",
+      "kind": "etc",
+      "icon": "icon.etc_resonance_amulet_i00",
+      "stackable": true,
+      "price": 0,
+      "weight": 0,
+      "sellable": false,
+      "quest": true
+    },
+    {
+      "id": 7455,
+      "name": "Resonance Amulet - 7",
+      "kind": "etc",
+      "icon": "icon.etc_resonance_amulet_i00",
+      "stackable": true,
+      "price": 0,
+      "weight": 0,
+      "sellable": false,
+      "quest": true
+    },
+    {
+      "id": 7456,
+      "name": "Resonance Amulet - 7",
+      "kind": "etc",
+      "icon": "icon.etc_resonance_amulet_i00",
+      "stackable": true,
+      "price": 0,
+      "weight": 0,
+      "sellable": false,
+      "quest": true
+    },
+    {
+      "id": 7457,
+      "name": "Resonance Amulet - 7",
+      "kind": "etc",
+      "icon": "icon.etc_resonance_amulet_i00",
+      "stackable": true,
+      "price": 0,
+      "weight": 0,
+      "sellable": false,
+      "quest": true
+    },
+    {
+      "id": 7458,
+      "name": "Resonance Amulet - 7",
+      "kind": "etc",
+      "icon": "icon.etc_resonance_amulet_i00",
+      "stackable": true,
+      "price": 0,
+      "weight": 0,
+      "sellable": false,
+      "quest": true
+    },
+    {
+      "id": 7459,
+      "name": "Resonance Amulet - 7",
+      "kind": "etc",
+      "icon": "icon.etc_resonance_amulet_i00",
+      "stackable": true,
+      "price": 0,
+      "weight": 0,
+      "sellable": false,
+      "quest": true
+    },
+    {
+      "id": 7460,
+      "name": "Resonance Amulet - 7",
+      "kind": "etc",
+      "icon": "icon.etc_resonance_amulet_i00",
+      "stackable": true,
+      "price": 0,
+      "weight": 0,
+      "sellable": false,
+      "quest": true
+    },
+    {
+      "id": 7461,
+      "name": "Resonance Amulet - 7",
+      "kind": "etc",
+      "icon": "icon.etc_resonance_amulet_i00",
+      "stackable": true,
+      "price": 0,
+      "weight": 0,
+      "sellable": false,
+      "quest": true
+    },
+    {
+      "id": 7462,
+      "name": "Resonance Amulet - 7",
+      "kind": "etc",
+      "icon": "icon.etc_resonance_amulet_i00",
+      "stackable": true,
+      "price": 0,
+      "weight": 0,
+      "sellable": false,
+      "quest": true
+    },
+    {
+      "id": 7463,
+      "name": "Resonance Amulet - 7",
+      "kind": "etc",
+      "icon": "icon.etc_resonance_amulet_i00",
+      "stackable": true,
+      "price": 0,
+      "weight": 0,
+      "sellable": false,
+      "quest": true
+    },
+    {
+      "id": 7464,
+      "name": "Resonance Amulet - 7",
+      "kind": "etc",
+      "icon": "icon.etc_resonance_amulet_i00",
+      "stackable": true,
+      "price": 0,
+      "weight": 0,
+      "sellable": false,
+      "quest": true
+    },
+    {
+      "id": 7465,
+      "name": "Resonance Amulet - 7",
+      "kind": "etc",
+      "icon": "icon.etc_resonance_amulet_i00",
+      "stackable": true,
+      "price": 0,
+      "weight": 0,
+      "sellable": false,
+      "quest": true
+    },
+    {
+      "id": 7466,
+      "name": "Resonance Amulet - 7",
+      "kind": "etc",
+      "icon": "icon.etc_resonance_amulet_i00",
+      "stackable": true,
+      "price": 0,
+      "weight": 0,
+      "sellable": false,
+      "quest": true
+    },
+    {
+      "id": 7467,
+      "name": "Resonance Amulet - 7",
+      "kind": "etc",
+      "icon": "icon.etc_resonance_amulet_i00",
+      "stackable": true,
+      "price": 0,
+      "weight": 0,
+      "sellable": false,
+      "quest": true
+    },
+    {
+      "id": 7468,
+      "name": "Resonance Amulet - 7",
+      "kind": "etc",
+      "icon": "icon.etc_resonance_amulet_i00",
+      "stackable": true,
+      "price": 0,
+      "weight": 0,
+      "sellable": false,
+      "quest": true
+    },
+    {
+      "id": 7469,
+      "name": "Resonance Amulet - 7",
+      "kind": "etc",
+      "icon": "icon.etc_resonance_amulet_i00",
+      "stackable": true,
+      "price": 0,
+      "weight": 0,
+      "sellable": false,
+      "quest": true
+    },
+    {
+      "id": 7470,
+      "name": "Resonance Amulet - 7",
+      "kind": "etc",
+      "icon": "icon.etc_resonance_amulet_i00",
+      "stackable": true,
+      "price": 0,
+      "weight": 0,
+      "sellable": false,
+      "quest": true
+    },
+    {
+      "id": 7471,
+      "name": "Resonance Amulet - 7",
+      "kind": "etc",
+      "icon": "icon.etc_resonance_amulet_i00",
+      "stackable": true,
+      "price": 0,
+      "weight": 0,
+      "sellable": false,
+      "quest": true
+    },
+    {
+      "id": 7472,
+      "name": "Resonance Amulet - 7",
+      "kind": "etc",
+      "icon": "icon.etc_resonance_amulet_i00",
+      "stackable": true,
+      "price": 0,
+      "weight": 0,
+      "sellable": false,
+      "quest": true
+    },
+    {
+      "id": 7473,
+      "name": "Resonance Amulet - 7",
+      "kind": "etc",
+      "icon": "icon.etc_resonance_amulet_i00",
+      "stackable": true,
+      "price": 0,
+      "weight": 0,
+      "sellable": false,
+      "quest": true
+    },
+    {
+      "id": 7474,
+      "name": "Resonance Amulet - 7",
+      "kind": "etc",
+      "icon": "icon.etc_resonance_amulet_i00",
+      "stackable": true,
+      "price": 0,
+      "weight": 0,
+      "sellable": false,
+      "quest": true
+    },
+    {
+      "id": 7475,
+      "name": "Resonance Amulet - 7",
+      "kind": "etc",
+      "icon": "icon.etc_resonance_amulet_i00",
+      "stackable": true,
+      "price": 0,
+      "weight": 0,
+      "sellable": false,
+      "quest": true
+    },
+    {
+      "id": 7476,
+      "name": "Resonance Amulet - 7",
+      "kind": "etc",
+      "icon": "icon.etc_resonance_amulet_i00",
+      "stackable": true,
+      "price": 0,
+      "weight": 0,
+      "sellable": false,
+      "quest": true
+    },
+    {
+      "id": 7477,
+      "name": "Resonance Amulet - 7",
+      "kind": "etc",
+      "icon": "icon.etc_resonance_amulet_i00",
+      "stackable": true,
+      "price": 0,
+      "weight": 0,
+      "sellable": false,
+      "quest": true
+    },
+    {
+      "id": 7478,
+      "name": "Resonance Amulet - 7",
+      "kind": "etc",
+      "icon": "icon.etc_resonance_amulet_i00",
+      "stackable": true,
+      "price": 0,
+      "weight": 0,
+      "sellable": false,
+      "quest": true
+    },
+    {
+      "id": 7479,
+      "name": "Resonance Amulet - 7",
+      "kind": "etc",
+      "icon": "icon.etc_resonance_amulet_i00",
+      "stackable": true,
+      "price": 0,
+      "weight": 0,
+      "sellable": false,
+      "quest": true
+    },
+    {
+      "id": 7480,
+      "name": "Resonance Amulet - 7",
+      "kind": "etc",
+      "icon": "icon.etc_resonance_amulet_i00",
+      "stackable": true,
+      "price": 0,
+      "weight": 0,
+      "sellable": false,
+      "quest": true
+    },
+    {
+      "id": 7481,
+      "name": "Resonance Amulet - 7",
+      "kind": "etc",
+      "icon": "icon.etc_resonance_amulet_i00",
+      "stackable": true,
+      "price": 0,
+      "weight": 0,
+      "sellable": false,
+      "quest": true
+    },
+    {
+      "id": 7482,
+      "name": "Resonance Amulet - 7",
+      "kind": "etc",
+      "icon": "icon.etc_resonance_amulet_i00",
+      "stackable": true,
+      "price": 0,
+      "weight": 0,
+      "sellable": false,
+      "quest": true
+    },
+    {
+      "id": 7483,
+      "name": "Resonance Amulet - 7",
+      "kind": "etc",
+      "icon": "icon.etc_resonance_amulet_i00",
+      "stackable": true,
+      "price": 0,
+      "weight": 0,
+      "sellable": false,
+      "quest": true
+    },
+    {
+      "id": 7484,
+      "name": "Resonance Amulet - 7",
+      "kind": "etc",
+      "icon": "icon.etc_resonance_amulet_i00",
+      "stackable": true,
+      "price": 0,
+      "weight": 0,
+      "sellable": false,
+      "quest": true
+    },
+    {
       "id": 7485,
       "name": "Halisha's Mark",
       "kind": "etc",
@@ -59773,6 +64154,15 @@
       "stackable": true
     },
     {
+      "id": 7581,
+      "name": "Recipe: Draconic Bow (100%)",
+      "kind": "etc",
+      "icon": "icon.etc_recipe_black_i00",
+      "stackable": true,
+      "price": 976000,
+      "weight": 30
+    },
+    {
       "id": 7582,
       "name": "Baby Spice",
       "kind": "etc",
@@ -59948,6 +64338,50 @@
       "quest": true
     },
     {
+      "id": 7600,
+      "name": "Worn Tarot Card - Wealth",
+      "kind": "etc",
+      "icon": "icon.etc_piece_of_report_i00",
+      "stackable": true,
+      "price": 0,
+      "weight": 0,
+      "sellable": false,
+      "quest": true
+    },
+    {
+      "id": 7601,
+      "name": "Worn Tarot Card - Power",
+      "kind": "etc",
+      "icon": "icon.etc_piece_of_report_i00",
+      "stackable": true,
+      "price": 0,
+      "weight": 0,
+      "sellable": false,
+      "quest": true
+    },
+    {
+      "id": 7602,
+      "name": "Worn Tarot Card - Love",
+      "kind": "etc",
+      "icon": "icon.etc_piece_of_report_i00",
+      "stackable": true,
+      "price": 0,
+      "weight": 0,
+      "sellable": false,
+      "quest": true
+    },
+    {
+      "id": 7603,
+      "name": "Worn Tarot Card - Knowledge",
+      "kind": "etc",
+      "icon": "icon.etc_piece_of_report_i00",
+      "stackable": true,
+      "price": 0,
+      "weight": 0,
+      "sellable": false,
+      "quest": true
+    },
+    {
       "id": 7604,
       "name": "Summoner Keats' Letter",
       "kind": "etc",
@@ -60042,6 +64476,17 @@
       "stackable": true
     },
     {
+      "id": 7620,
+      "name": "Trash",
+      "kind": "etc",
+      "icon": "icon.etc_dragons_blood_i01",
+      "stackable": true,
+      "price": 0,
+      "weight": 0,
+      "sellable": false,
+      "quest": true
+    },
+    {
       "id": 7621,
       "name": "Essence of Wind",
       "kind": "etc",
@@ -60120,6 +64565,87 @@
       "weight": 0,
       "stackable": true,
       "quest": true
+    },
+    {
+      "id": 7629,
+      "name": "Looted Goods - White Cargo box",
+      "kind": "etc",
+      "icon": "icon.etc_treasure_box_i00",
+      "stackable": true,
+      "price": 0,
+      "weight": 1
+    },
+    {
+      "id": 7630,
+      "name": "Looted Goods - Blue Cargo box",
+      "kind": "etc",
+      "icon": "icon.etc_treasure_box_i01",
+      "stackable": true,
+      "price": 0,
+      "weight": 1
+    },
+    {
+      "id": 7631,
+      "name": "Looted Goods - Yellow Cargo box",
+      "kind": "etc",
+      "icon": "icon.etc_treasure_box_i02",
+      "stackable": true,
+      "price": 0,
+      "weight": 1
+    },
+    {
+      "id": 7632,
+      "name": "Looted Goods - Red Cargo Box",
+      "kind": "etc",
+      "icon": "icon.etc_royal_seal_of_lord_i00",
+      "stackable": true,
+      "price": 0,
+      "weight": 1
+    },
+    {
+      "id": 7633,
+      "name": "Looted Goods - Purple Cargo Box",
+      "kind": "etc",
+      "icon": "icon.etc_royal_seal_of_lord_i03",
+      "stackable": true,
+      "price": 0,
+      "weight": 1
+    },
+    {
+      "id": 7634,
+      "name": "Looted Goods - Brown Pouch",
+      "kind": "etc",
+      "icon": "icon.etc_pouch_brown_i00",
+      "stackable": true,
+      "price": 0,
+      "weight": 1
+    },
+    {
+      "id": 7635,
+      "name": "Looted Goods - Gray Pouch",
+      "kind": "etc",
+      "icon": "icon.etc_pouch_gray_i00",
+      "stackable": true,
+      "price": 0,
+      "weight": 1
+    },
+    {
+      "id": 7636,
+      "name": "Booty - Yellow Pouch",
+      "kind": "etc",
+      "icon": "icon.etc_pouch_yellow_i00",
+      "stackable": true,
+      "price": 0,
+      "weight": 1
+    },
+    {
+      "id": 7637,
+      "name": "Booty - Brown Pouch",
+      "kind": "etc",
+      "icon": "icon.etc_pouch_brown_i00",
+      "stackable": true,
+      "price": 0,
+      "weight": 1
     },
     {
       "id": 7638,
@@ -63253,6 +67779,42 @@
       "spiritshots": 1
     },
     {
+      "id": 7906,
+      "name": "Fire Blessing",
+      "kind": "etc",
+      "icon": "icon.etc_fire_crystal_1_i00",
+      "stackable": true,
+      "price": 2000,
+      "weight": 20
+    },
+    {
+      "id": 7907,
+      "name": "Water Blessing",
+      "kind": "etc",
+      "icon": "icon.etc_water_crystal_1_i00",
+      "stackable": true,
+      "price": 2000,
+      "weight": 20
+    },
+    {
+      "id": 7908,
+      "name": "Wind Blessing",
+      "kind": "etc",
+      "icon": "icon.etc_wind_crystal_1_i00",
+      "stackable": true,
+      "price": 2000,
+      "weight": 20
+    },
+    {
+      "id": 7909,
+      "name": "Earth Blessing",
+      "kind": "etc",
+      "icon": "icon.etc_earth_crystal_1_i00",
+      "stackable": true,
+      "price": 2000,
+      "weight": 20
+    },
+    {
       "id": 7910,
       "name": "Dark Blessing",
       "kind": "etc",
@@ -63268,6 +67830,42 @@
       "stackable": true,
       "icon": "icon.etc_holy_crystal_1_i00",
       "price": 5000,
+      "weight": 20
+    },
+    {
+      "id": 7912,
+      "name": "Fire Shard",
+      "kind": "etc",
+      "icon": "icon.etc_fire_crystal_1_i00",
+      "stackable": true,
+      "price": 2000,
+      "weight": 20
+    },
+    {
+      "id": 7913,
+      "name": "Water Shard",
+      "kind": "etc",
+      "icon": "icon.etc_water_crystal_1_i00",
+      "stackable": true,
+      "price": 2000,
+      "weight": 20
+    },
+    {
+      "id": 7914,
+      "name": "Wind Shard",
+      "kind": "etc",
+      "icon": "icon.etc_wind_crystal_1_i00",
+      "stackable": true,
+      "price": 2000,
+      "weight": 20
+    },
+    {
+      "id": 7915,
+      "name": "Earth Shard",
+      "kind": "etc",
+      "icon": "icon.etc_earth_crystal_1_i00",
+      "stackable": true,
+      "price": 2000,
       "weight": 20
     },
     {
@@ -63287,6 +67885,1014 @@
       "icon": "icon.etc_holy_crystal_1_i00",
       "price": 3000,
       "weight": 20
+    },
+    {
+      "id": 7918,
+      "name": "Mercenary Posting Ticket (Sword/Stationary)",
+      "kind": "etc",
+      "icon": "icon.mticket_sword_fix_i00",
+      "stackable": true,
+      "price": 50000,
+      "weight": 0
+    },
+    {
+      "id": 7919,
+      "name": "Mercenary Posting Ticket (Spear/Stationary)",
+      "kind": "etc",
+      "icon": "icon.mticket_pole_fix_i00",
+      "stackable": true,
+      "price": 60000,
+      "weight": 0
+    },
+    {
+      "id": 7920,
+      "name": "Mercenary Posting Ticket (Bow/Stationary)",
+      "kind": "etc",
+      "icon": "icon.mticket_bow_fix_i00",
+      "stackable": true,
+      "price": 70000,
+      "weight": 0
+    },
+    {
+      "id": 7921,
+      "name": "Mercenary Posting Ticket (Cleric/Stationary)",
+      "kind": "etc",
+      "icon": "icon.mticket_cleric_fix_i00",
+      "stackable": true,
+      "price": 170000,
+      "weight": 0
+    },
+    {
+      "id": 7922,
+      "name": "Mercenary Posting Ticket (Wizard/Stationary)",
+      "kind": "etc",
+      "icon": "icon.mticket_wizard_fix_i00",
+      "stackable": true,
+      "price": 170000,
+      "weight": 0
+    },
+    {
+      "id": 7923,
+      "name": "Mercenary Posting Ticket (Sword/Mobile)",
+      "kind": "etc",
+      "icon": "icon.mticket_sword_move_i00",
+      "stackable": true,
+      "price": 50000,
+      "weight": 0
+    },
+    {
+      "id": 7924,
+      "name": "Mercenary Posting Ticket (Spear/Mobile)",
+      "kind": "etc",
+      "icon": "icon.mticket_pole_move_i00",
+      "stackable": true,
+      "price": 60000,
+      "weight": 0
+    },
+    {
+      "id": 7925,
+      "name": "Mercenary Posting Ticket (Bow/Mobile)",
+      "kind": "etc",
+      "icon": "icon.mticket_bow_move_i00",
+      "stackable": true,
+      "price": 70000,
+      "weight": 0
+    },
+    {
+      "id": 7926,
+      "name": "Mercenary Posting Ticket (Cleric/Mobile)",
+      "kind": "etc",
+      "icon": "icon.mticket_cleric_move_i00",
+      "stackable": true,
+      "price": 170000,
+      "weight": 0
+    },
+    {
+      "id": 7927,
+      "name": "Mercenary Posting Ticket (Wizard/Mobile)",
+      "kind": "etc",
+      "icon": "icon.mticket_wizard_move_i00",
+      "stackable": true,
+      "price": 170000,
+      "weight": 0
+    },
+    {
+      "id": 7928,
+      "name": "Mercenary Posting Ticket (Teleporter1)",
+      "kind": "etc",
+      "icon": "icon.mticket_teleporter_fix_i00",
+      "stackable": true,
+      "price": 100000,
+      "weight": 0
+    },
+    {
+      "id": 7929,
+      "name": "Mercenary Posting Ticket (Teleporter2)",
+      "kind": "etc",
+      "icon": "icon.mticket_teleporter_fix_i00",
+      "stackable": true,
+      "price": 100000,
+      "weight": 0
+    },
+    {
+      "id": 7930,
+      "name": "Mercenary Posting Ticket (Teleporter3)",
+      "kind": "etc",
+      "icon": "icon.mticket_teleporter_fix_i00",
+      "stackable": true,
+      "price": 100000,
+      "weight": 0
+    },
+    {
+      "id": 7931,
+      "name": "Greater Mercenary Posting Ticket (Sword/Stationary)",
+      "kind": "etc",
+      "icon": "icon.mticket_sword_fix_i00",
+      "stackable": true,
+      "price": 80000,
+      "weight": 0
+    },
+    {
+      "id": 7932,
+      "name": "Greater Mercenary Posting Ticket (Spear/Stationary)",
+      "kind": "etc",
+      "icon": "icon.mticket_pole_fix_i00",
+      "stackable": true,
+      "price": 100000,
+      "weight": 0
+    },
+    {
+      "id": 7933,
+      "name": "Greater Mercenary Posting Ticket (Bow/Stationary)",
+      "kind": "etc",
+      "icon": "icon.mticket_bow_fix_i00",
+      "stackable": true,
+      "price": 120000,
+      "weight": 0
+    },
+    {
+      "id": 7934,
+      "name": "Greater Mercenary Posting Ticket (Cleric/Stationary)",
+      "kind": "etc",
+      "icon": "icon.mticket_cleric_fix_i00",
+      "stackable": true,
+      "price": 250000,
+      "weight": 0
+    },
+    {
+      "id": 7935,
+      "name": "Greater Mercenary Posting Ticket (Wizard/Stationary)",
+      "kind": "etc",
+      "icon": "icon.mticket_wizard_fix_i00",
+      "stackable": true,
+      "price": 250000,
+      "weight": 0
+    },
+    {
+      "id": 7936,
+      "name": "Greater Mercenary Posting Ticket (Sword/Mobile)",
+      "kind": "etc",
+      "icon": "icon.mticket_sword_move_i00",
+      "stackable": true,
+      "price": 80000,
+      "weight": 0
+    },
+    {
+      "id": 7937,
+      "name": "Greater Mercenary Posting Ticket (Spear/Mobile)",
+      "kind": "etc",
+      "icon": "icon.mticket_pole_move_i00",
+      "stackable": true,
+      "price": 100000,
+      "weight": 0
+    },
+    {
+      "id": 7938,
+      "name": "Greater Mercenary Posting Ticket (Bow/Mobile)",
+      "kind": "etc",
+      "icon": "icon.mticket_bow_move_i00",
+      "stackable": true,
+      "price": 120000,
+      "weight": 0
+    },
+    {
+      "id": 7939,
+      "name": "Greater Mercenary Posting Ticket (Cleric/Mobile)",
+      "kind": "etc",
+      "icon": "icon.mticket_cleric_move_i00",
+      "stackable": true,
+      "price": 250000,
+      "weight": 0
+    },
+    {
+      "id": 7940,
+      "name": "Greater Mercenary Posting Ticket (Wizard/Mobile)",
+      "kind": "etc",
+      "icon": "icon.mticket_wizard_move_i00",
+      "stackable": true,
+      "price": 250000,
+      "weight": 0
+    },
+    {
+      "id": 7941,
+      "name": "Dawn Mercenary Posting Ticket (Sword/Stationary)",
+      "kind": "etc",
+      "icon": "icon.mticket_sword_fix_i00",
+      "stackable": true,
+      "price": 140000,
+      "weight": 0
+    },
+    {
+      "id": 7942,
+      "name": "Dawn Mercenary Posting Ticket (Spear/Stationary)",
+      "kind": "etc",
+      "icon": "icon.mticket_pole_fix_i00",
+      "stackable": true,
+      "price": 170000,
+      "weight": 0
+    },
+    {
+      "id": 7943,
+      "name": "Dawn Mercenary Posting Ticket (Bow/Stationary)",
+      "kind": "etc",
+      "icon": "icon.mticket_bow_fix_i00",
+      "stackable": true,
+      "price": 200000,
+      "weight": 0
+    },
+    {
+      "id": 7944,
+      "name": "Dawn Mercenary Posting Ticket (Cleric/Stationary)",
+      "kind": "etc",
+      "icon": "icon.mticket_cleric_fix_i00",
+      "stackable": true,
+      "price": 350000,
+      "weight": 0
+    },
+    {
+      "id": 7945,
+      "name": "Dawn Mercenary Posting Ticket (Wizard/Stationary)",
+      "kind": "etc",
+      "icon": "icon.mticket_wizard_fix_i00",
+      "stackable": true,
+      "price": 350000,
+      "weight": 0
+    },
+    {
+      "id": 7946,
+      "name": "Dawn Mercenary Posting Ticket (Sword/Mobile)",
+      "kind": "etc",
+      "icon": "icon.mticket_sword_move_i00",
+      "stackable": true,
+      "price": 140000,
+      "weight": 0
+    },
+    {
+      "id": 7947,
+      "name": "Dawn Mercenary Posting Ticket (Spear/Mobile)",
+      "kind": "etc",
+      "icon": "icon.mticket_pole_move_i00",
+      "stackable": true,
+      "price": 170000,
+      "weight": 0
+    },
+    {
+      "id": 7948,
+      "name": "Dawn Mercenary Posting Ticket (Bow/Mobile)",
+      "kind": "etc",
+      "icon": "icon.mticket_bow_move_i00",
+      "stackable": true,
+      "price": 200000,
+      "weight": 0
+    },
+    {
+      "id": 7949,
+      "name": "Dawn Mercenary Posting Ticket (Cleric/Mobile)",
+      "kind": "etc",
+      "icon": "icon.mticket_cleric_move_i00",
+      "stackable": true,
+      "price": 350000,
+      "weight": 0
+    },
+    {
+      "id": 7950,
+      "name": "Dawn Mercenary Posting Ticket (Wizard/Mobile)",
+      "kind": "etc",
+      "icon": "icon.mticket_wizard_move_i00",
+      "stackable": true,
+      "price": 350000,
+      "weight": 0
+    },
+    {
+      "id": 7951,
+      "name": "Greater Recruit Posting Ticket (Sword/Stationary)",
+      "kind": "etc",
+      "icon": "icon.mticket_sword_fix_i00",
+      "stackable": true,
+      "price": 70000,
+      "weight": 0
+    },
+    {
+      "id": 7952,
+      "name": "Greater Recruit Posting Ticket (Spear/Stationary)",
+      "kind": "etc",
+      "icon": "icon.mticket_pole_fix_i00",
+      "stackable": true,
+      "price": 90000,
+      "weight": 0
+    },
+    {
+      "id": 7953,
+      "name": "Greater Recruit Posting Ticket (Bow/Stationary)",
+      "kind": "etc",
+      "icon": "icon.mticket_bow_fix_i00",
+      "stackable": true,
+      "price": 110000,
+      "weight": 0
+    },
+    {
+      "id": 7954,
+      "name": "Greater Recruit Posting Ticket (Cleric/Stationary)",
+      "kind": "etc",
+      "icon": "icon.mticket_cleric_fix_i00",
+      "stackable": true,
+      "price": 230000,
+      "weight": 0
+    },
+    {
+      "id": 7955,
+      "name": "Greater Recruit Posting Ticket (Wizard/Stationary)",
+      "kind": "etc",
+      "icon": "icon.mticket_wizard_fix_i00",
+      "stackable": true,
+      "price": 230000,
+      "weight": 0
+    },
+    {
+      "id": 7956,
+      "name": "Greater Recruit Posting Ticket (Sword/Mobile)",
+      "kind": "etc",
+      "icon": "icon.mticket_sword_move_i00",
+      "stackable": true,
+      "price": 70000,
+      "weight": 0
+    },
+    {
+      "id": 7957,
+      "name": "Greater Recruit Posting Ticket (Spear/Mobile)",
+      "kind": "etc",
+      "icon": "icon.mticket_pole_move_i00",
+      "stackable": true,
+      "price": 90000,
+      "weight": 0
+    },
+    {
+      "id": 7958,
+      "name": "Greater Recruit Posting Ticket (Bow/Mobile)",
+      "kind": "etc",
+      "icon": "icon.mticket_bow_move_i00",
+      "stackable": true,
+      "price": 110000,
+      "weight": 0
+    },
+    {
+      "id": 7959,
+      "name": "Greater Recruit Posting Ticket (Cleric/Mobile)",
+      "kind": "etc",
+      "icon": "icon.mticket_cleric_move_i00",
+      "stackable": true,
+      "price": 230000,
+      "weight": 0
+    },
+    {
+      "id": 7960,
+      "name": "Greater Recruit Posting Ticket (Wizard/Mobile)",
+      "kind": "etc",
+      "icon": "icon.mticket_wizard_move_i00",
+      "stackable": true,
+      "price": 230000,
+      "weight": 0
+    },
+    {
+      "id": 7961,
+      "name": "Recruit Posting Ticket (Sword/Stationary)",
+      "kind": "etc",
+      "icon": "icon.mticket_sword_fix_i00",
+      "stackable": true,
+      "price": 40000,
+      "weight": 0
+    },
+    {
+      "id": 7962,
+      "name": "Recruit Posting Ticket (Spear/Stationary)",
+      "kind": "etc",
+      "icon": "icon.mticket_pole_fix_i00",
+      "stackable": true,
+      "price": 50000,
+      "weight": 0
+    },
+    {
+      "id": 7963,
+      "name": "Recruit Posting Ticket (Bow/Stationary)",
+      "kind": "etc",
+      "icon": "icon.mticket_bow_fix_i00",
+      "stackable": true,
+      "price": 60000,
+      "weight": 0
+    },
+    {
+      "id": 7964,
+      "name": "Recruit Posting Ticket (Cleric/Stationary)",
+      "kind": "etc",
+      "icon": "icon.mticket_cleric_fix_i00",
+      "stackable": true,
+      "price": 150000,
+      "weight": 0
+    },
+    {
+      "id": 7965,
+      "name": "Recruit Posting Ticket (Wizard/Stationary)",
+      "kind": "etc",
+      "icon": "icon.mticket_wizard_fix_i00",
+      "stackable": true,
+      "price": 150000,
+      "weight": 0
+    },
+    {
+      "id": 7966,
+      "name": "Recruit Posting Ticket (Sword/Mobile)",
+      "kind": "etc",
+      "icon": "icon.mticket_sword_move_i00",
+      "stackable": true,
+      "price": 40000,
+      "weight": 0
+    },
+    {
+      "id": 7967,
+      "name": "Recruit Posting Ticket (Spear/Mobile)",
+      "kind": "etc",
+      "icon": "icon.mticket_pole_move_i00",
+      "stackable": true,
+      "price": 50000,
+      "weight": 0
+    },
+    {
+      "id": 7968,
+      "name": "Recruit Posting Ticket (Bow/Mobile)",
+      "kind": "etc",
+      "icon": "icon.mticket_bow_move_i00",
+      "stackable": true,
+      "price": 60000,
+      "weight": 0
+    },
+    {
+      "id": 7969,
+      "name": "Recruit Posting Ticket (Cleric/Mobile)",
+      "kind": "etc",
+      "icon": "icon.mticket_cleric_move_i00",
+      "stackable": true,
+      "price": 150000,
+      "weight": 0
+    },
+    {
+      "id": 7970,
+      "name": "Recruit Posting Ticket (Wizard/Mobile)",
+      "kind": "etc",
+      "icon": "icon.mticket_wizard_move_i00",
+      "stackable": true,
+      "price": 150000,
+      "weight": 0
+    },
+    {
+      "id": 7971,
+      "name": "Nephilim Warrior Posting Ticket",
+      "kind": "etc",
+      "icon": "icon.mticket_sword_move_i00",
+      "stackable": true,
+      "price": 2500000,
+      "weight": 0
+    },
+    {
+      "id": 7972,
+      "name": "Nephilim Shaman Posting Ticket",
+      "kind": "etc",
+      "icon": "icon.mticket_wizard_move_i00",
+      "stackable": true,
+      "price": 5000000,
+      "weight": 0
+    },
+    {
+      "id": 7973,
+      "name": "Mercenary Posting Ticket (Sword/Stationary)",
+      "kind": "etc",
+      "icon": "icon.mticket_sword_fix_i00",
+      "stackable": true,
+      "price": 50000,
+      "weight": 0
+    },
+    {
+      "id": 7974,
+      "name": "Mercenary Posting Ticket (Spear/Stationary)",
+      "kind": "etc",
+      "icon": "icon.mticket_pole_fix_i00",
+      "stackable": true,
+      "price": 60000,
+      "weight": 0
+    },
+    {
+      "id": 7975,
+      "name": "Mercenary Posting Ticket (Bow/Stationary)",
+      "kind": "etc",
+      "icon": "icon.mticket_bow_fix_i00",
+      "stackable": true,
+      "price": 70000,
+      "weight": 0
+    },
+    {
+      "id": 7976,
+      "name": "Mercenary Posting Ticket (Cleric/Stationary)",
+      "kind": "etc",
+      "icon": "icon.mticket_cleric_fix_i00",
+      "stackable": true,
+      "price": 170000,
+      "weight": 0
+    },
+    {
+      "id": 7977,
+      "name": "Mercenary Posting Ticket (Wizard/Stationary)",
+      "kind": "etc",
+      "icon": "icon.mticket_wizard_fix_i00",
+      "stackable": true,
+      "price": 170000,
+      "weight": 0
+    },
+    {
+      "id": 7978,
+      "name": "Mercenary Posting Ticket (Sword/Mobile)",
+      "kind": "etc",
+      "icon": "icon.mticket_sword_move_i00",
+      "stackable": true,
+      "price": 50000,
+      "weight": 0
+    },
+    {
+      "id": 7979,
+      "name": "Mercenary Posting Ticket (Spear/Mobile)",
+      "kind": "etc",
+      "icon": "icon.mticket_pole_move_i00",
+      "stackable": true,
+      "price": 60000,
+      "weight": 0
+    },
+    {
+      "id": 7980,
+      "name": "Mercenary Posting Ticket (Bow/Mobile)",
+      "kind": "etc",
+      "icon": "icon.mticket_bow_move_i00",
+      "stackable": true,
+      "price": 70000,
+      "weight": 0
+    },
+    {
+      "id": 7981,
+      "name": "Mercenary Posting Ticket (Cleric/Mobile)",
+      "kind": "etc",
+      "icon": "icon.mticket_cleric_move_i00",
+      "stackable": true,
+      "price": 170000,
+      "weight": 0
+    },
+    {
+      "id": 7982,
+      "name": "Mercenary Posting Ticket (Wizard/Mobile)",
+      "kind": "etc",
+      "icon": "icon.mticket_wizard_move_i00",
+      "stackable": true,
+      "price": 170000,
+      "weight": 0
+    },
+    {
+      "id": 7983,
+      "name": "Mercenary Posting Ticket (Teleporter1)",
+      "kind": "etc",
+      "icon": "icon.mticket_teleporter_fix_i00",
+      "stackable": true,
+      "price": 100000,
+      "weight": 0
+    },
+    {
+      "id": 7984,
+      "name": "Mercenary Posting Ticket (Teleporter2)",
+      "kind": "etc",
+      "icon": "icon.mticket_teleporter_fix_i00",
+      "stackable": true,
+      "price": 100000,
+      "weight": 0
+    },
+    {
+      "id": 7985,
+      "name": "Mercenary Posting Ticket (Teleporter3)",
+      "kind": "etc",
+      "icon": "icon.mticket_teleporter_fix_i00",
+      "stackable": true,
+      "price": 100000,
+      "weight": 0
+    },
+    {
+      "id": 7986,
+      "name": "Mercenary Posting Ticket (Teleporter4)",
+      "kind": "etc",
+      "icon": "icon.mticket_teleporter_fix_i00",
+      "stackable": true,
+      "price": 100000,
+      "weight": 0
+    },
+    {
+      "id": 7987,
+      "name": "Mercenary Posting Ticket (Teleporter5)",
+      "kind": "etc",
+      "icon": "icon.mticket_teleporter_fix_i00",
+      "stackable": true,
+      "price": 100000,
+      "weight": 0
+    },
+    {
+      "id": 7988,
+      "name": "Greater Mercenary Posting Ticket (Sword/Stationary)",
+      "kind": "etc",
+      "icon": "icon.mticket_sword_fix_i00",
+      "stackable": true,
+      "price": 120000,
+      "weight": 0
+    },
+    {
+      "id": 7989,
+      "name": "Greater Mercenary Posting Ticket (Spear/Stationary)",
+      "kind": "etc",
+      "icon": "icon.mticket_pole_fix_i00",
+      "stackable": true,
+      "price": 250000,
+      "weight": 0
+    },
+    {
+      "id": 7990,
+      "name": "Greater Mercenary Posting Ticket (Bow/Stationary)",
+      "kind": "etc",
+      "icon": "icon.mticket_bow_fix_i00",
+      "stackable": true,
+      "price": 250000,
+      "weight": 0
+    },
+    {
+      "id": 7991,
+      "name": "Greater Mercenary Posting Ticket (Cleric/Stationary)",
+      "kind": "etc",
+      "icon": "icon.mticket_cleric_fix_i00",
+      "stackable": true,
+      "price": 80000,
+      "weight": 0
+    },
+    {
+      "id": 7992,
+      "name": "Greater Mercenary Posting Ticket (Wizard/Stationary)",
+      "kind": "etc",
+      "icon": "icon.mticket_wizard_fix_i00",
+      "stackable": true,
+      "price": 100000,
+      "weight": 0
+    },
+    {
+      "id": 7993,
+      "name": "Greater Mercenary Posting Ticket (Sword/Mobile)",
+      "kind": "etc",
+      "icon": "icon.mticket_sword_move_i00",
+      "stackable": true,
+      "price": 120000,
+      "weight": 0
+    },
+    {
+      "id": 7994,
+      "name": "Greater Mercenary Posting Ticket (Spear/Mobile)",
+      "kind": "etc",
+      "icon": "icon.mticket_pole_move_i00",
+      "stackable": true,
+      "price": 250000,
+      "weight": 0
+    },
+    {
+      "id": 7995,
+      "name": "Greater Mercenary Posting Ticket (Bow/Mobile)",
+      "kind": "etc",
+      "icon": "icon.mticket_bow_move_i00",
+      "stackable": true,
+      "price": 250000,
+      "weight": 0
+    },
+    {
+      "id": 7996,
+      "name": "Greater Mercenary Posting Ticket (Cleric/Mobile)",
+      "kind": "etc",
+      "icon": "icon.mticket_cleric_move_i00",
+      "stackable": true,
+      "price": 140000,
+      "weight": 0
+    },
+    {
+      "id": 7997,
+      "name": "Greater Mercenary Posting Ticket (Wizard/Mobile)",
+      "kind": "etc",
+      "icon": "icon.mticket_wizard_move_i00",
+      "stackable": true,
+      "price": 170000,
+      "weight": 0
+    },
+    {
+      "id": 7998,
+      "name": "Dawn Mercenary Posting Ticket (Sword/Stationary)",
+      "kind": "etc",
+      "icon": "icon.mticket_sword_fix_i00",
+      "stackable": true,
+      "price": 200000,
+      "weight": 0
+    },
+    {
+      "id": 7999,
+      "name": "Dawn Mercenary Posting Ticket (Spear/Stationary)",
+      "kind": "etc",
+      "icon": "icon.mticket_pole_fix_i00",
+      "stackable": true,
+      "price": 350000,
+      "weight": 0
+    },
+    {
+      "id": 8000,
+      "name": "Dawn Mercenary Posting Ticket (Bow/Stationary)",
+      "kind": "etc",
+      "icon": "icon.mticket_bow_fix_i00",
+      "stackable": true,
+      "price": 350000,
+      "weight": 0
+    },
+    {
+      "id": 8001,
+      "name": "Dawn Mercenary Posting Ticket (Cleric/Stationary)",
+      "kind": "etc",
+      "icon": "icon.mticket_cleric_fix_i00",
+      "stackable": true,
+      "price": 140000,
+      "weight": 0
+    },
+    {
+      "id": 8002,
+      "name": "Dawn Mercenary Posting Ticket (Wizard/Stationary)",
+      "kind": "etc",
+      "icon": "icon.mticket_wizard_fix_i00",
+      "stackable": true,
+      "price": 170000,
+      "weight": 0
+    },
+    {
+      "id": 8003,
+      "name": "Dawn Mercenary Posting Ticket (Sword/Mobile)",
+      "kind": "etc",
+      "icon": "icon.mticket_sword_move_i00",
+      "stackable": true,
+      "price": 200000,
+      "weight": 0
+    },
+    {
+      "id": 8004,
+      "name": "Dawn Mercenary Posting Ticket (Spear/Mobile)",
+      "kind": "etc",
+      "icon": "icon.mticket_pole_move_i00",
+      "stackable": true,
+      "price": 350000,
+      "weight": 0
+    },
+    {
+      "id": 8005,
+      "name": "Dawn Mercenary Posting Ticket (Bow/Mobile)",
+      "kind": "etc",
+      "icon": "icon.mticket_bow_move_i00",
+      "stackable": true,
+      "price": 350000,
+      "weight": 0
+    },
+    {
+      "id": 8006,
+      "name": "Dawn Mercenary Posting Ticket (Cleric/Mobile)",
+      "kind": "etc",
+      "icon": "icon.mticket_cleric_move_i00",
+      "stackable": true,
+      "price": 70000,
+      "weight": 0
+    },
+    {
+      "id": 8007,
+      "name": "Dawn Mercenary Posting Ticket (Wizard/Mobile)",
+      "kind": "etc",
+      "icon": "icon.mticket_wizard_move_i00",
+      "stackable": true,
+      "price": 90000,
+      "weight": 0
+    },
+    {
+      "id": 8008,
+      "name": "Greater Recruit Posting Ticket (Sword/Stationary)",
+      "kind": "etc",
+      "icon": "icon.mticket_sword_fix_i00",
+      "stackable": true,
+      "price": 110000,
+      "weight": 0
+    },
+    {
+      "id": 8009,
+      "name": "Greater Recruit Posting Ticket (Spear/Stationary)",
+      "kind": "etc",
+      "icon": "icon.mticket_pole_fix_i00",
+      "stackable": true,
+      "price": 230000,
+      "weight": 0
+    },
+    {
+      "id": 8010,
+      "name": "Greater Recruit Posting Ticket (Bow/Stationary)",
+      "kind": "etc",
+      "icon": "icon.mticket_bow_fix_i00",
+      "stackable": true,
+      "price": 230000,
+      "weight": 0
+    },
+    {
+      "id": 8011,
+      "name": "Greater Recruit Posting Ticket (Cleric/Stationary)",
+      "kind": "etc",
+      "icon": "icon.mticket_cleric_fix_i00",
+      "stackable": true,
+      "price": 70000,
+      "weight": 0
+    },
+    {
+      "id": 8012,
+      "name": "Greater Recruit Posting Ticket (Wizard/Stationary)",
+      "kind": "etc",
+      "icon": "icon.mticket_wizard_fix_i00",
+      "stackable": true,
+      "price": 90000,
+      "weight": 0
+    },
+    {
+      "id": 8013,
+      "name": "Greater Recruit Posting Ticket (Sword/Mobile)",
+      "kind": "etc",
+      "icon": "icon.mticket_sword_move_i00",
+      "stackable": true,
+      "price": 110000,
+      "weight": 0
+    },
+    {
+      "id": 8014,
+      "name": "Greater Recruit Posting Ticket (Spear/Mobile)",
+      "kind": "etc",
+      "icon": "icon.mticket_pole_move_i00",
+      "stackable": true,
+      "price": 230000,
+      "weight": 0
+    },
+    {
+      "id": 8015,
+      "name": "Greater Recruit Posting Ticket (Bow/Mobile)",
+      "kind": "etc",
+      "icon": "icon.mticket_bow_move_i00",
+      "stackable": true,
+      "price": 230000,
+      "weight": 0
+    },
+    {
+      "id": 8016,
+      "name": "Greater Recruit Posting Ticket (Cleric/Mobile)",
+      "kind": "etc",
+      "icon": "icon.mticket_cleric_move_i00",
+      "stackable": true,
+      "price": 40000,
+      "weight": 0
+    },
+    {
+      "id": 8017,
+      "name": "Greater Recruit Posting Ticket (Wizard/Mobile)",
+      "kind": "etc",
+      "icon": "icon.mticket_wizard_move_i00",
+      "stackable": true,
+      "price": 50000,
+      "weight": 0
+    },
+    {
+      "id": 8018,
+      "name": "Recruit Posting Ticket (Sword/Stationary)",
+      "kind": "etc",
+      "icon": "icon.mticket_sword_fix_i00",
+      "stackable": true,
+      "price": 60000,
+      "weight": 0
+    },
+    {
+      "id": 8019,
+      "name": "Recruit Posting Ticket (Spear/Stationary)",
+      "kind": "etc",
+      "icon": "icon.mticket_pole_fix_i00",
+      "stackable": true,
+      "price": 150000,
+      "weight": 0
+    },
+    {
+      "id": 8020,
+      "name": "Recruit Posting Ticket (Bow/Stationary)",
+      "kind": "etc",
+      "icon": "icon.mticket_bow_fix_i00",
+      "stackable": true,
+      "price": 150000,
+      "weight": 0
+    },
+    {
+      "id": 8021,
+      "name": "Recruit Posting Ticket (Cleric/Stationary)",
+      "kind": "etc",
+      "icon": "icon.mticket_cleric_fix_i00",
+      "stackable": true,
+      "price": 40000,
+      "weight": 0
+    },
+    {
+      "id": 8022,
+      "name": "Recruit Posting Ticket (Wizard/Stationary)",
+      "kind": "etc",
+      "icon": "icon.mticket_wizard_fix_i00",
+      "stackable": true,
+      "price": 50000,
+      "weight": 0
+    },
+    {
+      "id": 8023,
+      "name": "Recruit Posting Ticket (Sword/Mobile)",
+      "kind": "etc",
+      "icon": "icon.mticket_sword_move_i00",
+      "stackable": true,
+      "price": 60000,
+      "weight": 0
+    },
+    {
+      "id": 8024,
+      "name": "Recruit Posting Ticket (Spear/Mobile)",
+      "kind": "etc",
+      "icon": "icon.mticket_pole_move_i00",
+      "stackable": true,
+      "price": 150000,
+      "weight": 0
+    },
+    {
+      "id": 8025,
+      "name": "Recruit Posting Ticket (Bow/Mobile)",
+      "kind": "etc",
+      "icon": "icon.mticket_bow_move_i00",
+      "stackable": true,
+      "price": 150000,
+      "weight": 0
+    },
+    {
+      "id": 8026,
+      "name": "Recruit Posting Ticket (Cleric/Mobile)",
+      "kind": "etc",
+      "icon": "icon.mticket_cleric_move_i00",
+      "stackable": true,
+      "price": 2500000,
+      "weight": 0
+    },
+    {
+      "id": 8027,
+      "name": "Recruit Posting Ticket (Wizard/Mobile)",
+      "kind": "etc",
+      "icon": "icon.mticket_wizard_move_i00",
+      "stackable": true,
+      "price": 5000000,
+      "weight": 0
+    },
+    {
+      "id": 8028,
+      "name": "Nephilim Warrior Posting Ticket",
+      "kind": "etc",
+      "icon": "icon.mticket_sword_move_i00",
+      "stackable": true,
+      "price": 2500000,
+      "weight": 0
+    },
+    {
+      "id": 8029,
+      "name": "Nephilim Shaman Posting Ticket",
+      "kind": "etc",
+      "icon": "icon.mticket_wizard_move_i00",
+      "stackable": true,
+      "price": 5000000,
+      "weight": 0
     },
     {
       "id": 8034,
@@ -64888,6 +70494,17 @@
       "maxMp": 42
     },
     {
+      "id": 8192,
+      "name": "Breaking Arrow",
+      "kind": "etc",
+      "icon": "icon.etc_destory_soul_arrow_i00",
+      "bodySlot": "lhand",
+      "etcType": "arrow",
+      "stackable": true,
+      "price": 0,
+      "weight": 3
+    },
+    {
       "id": 8193,
       "name": "Fisherman's Potion - Green",
       "kind": "etc",
@@ -64955,6 +70572,15 @@
       "name": "Fisherman's Potion - White",
       "kind": "etc",
       "icon": "icon.etc_oblivion_white_i00",
+      "stackable": true,
+      "price": 5000,
+      "weight": 100
+    },
+    {
+      "id": 8201,
+      "name": "Fisherman's Potion - Black",
+      "kind": "etc",
+      "icon": "icon.etc_oblivion_black_i00",
       "stackable": true,
       "price": 5000,
       "weight": 100
@@ -67728,6 +73354,42 @@
       "weight": 1
     },
     {
+      "id": 8523,
+      "name": "Seed: Twin Coba",
+      "kind": "etc",
+      "icon": "icon.etc_twin_coba_seed_i00",
+      "stackable": true,
+      "price": 1000,
+      "weight": 1
+    },
+    {
+      "id": 8524,
+      "name": "Seed: Alternative Twin Coba",
+      "kind": "etc",
+      "icon": "icon.etc_twin_coba_seed_i00",
+      "stackable": true,
+      "price": 1000,
+      "weight": 1
+    },
+    {
+      "id": 8525,
+      "name": "Seed: Great Coba",
+      "kind": "etc",
+      "icon": "icon.etc_great_coba_seed_i00",
+      "stackable": true,
+      "price": 1200,
+      "weight": 1
+    },
+    {
+      "id": 8526,
+      "name": "Seed: Alternative Great Coba",
+      "kind": "etc",
+      "icon": "icon.etc_great_coba_seed_i00",
+      "stackable": true,
+      "price": 1200,
+      "weight": 1
+    },
+    {
       "id": 8527,
       "name": "For Monsters Only (Reinforced Bow)",
       "kind": "weapon",
@@ -68118,6 +73780,42 @@
       "weight": 10
     },
     {
+      "id": 8596,
+      "name": "Scroll: Recovery (Grade C)",
+      "kind": "etc",
+      "icon": "icon.etc_penalty_recovery_i02",
+      "stackable": true,
+      "price": 14000,
+      "weight": 10
+    },
+    {
+      "id": 8597,
+      "name": "Scroll: Recovery (Grade B)",
+      "kind": "etc",
+      "icon": "icon.etc_penalty_recovery_i03",
+      "stackable": true,
+      "price": 28000,
+      "weight": 10
+    },
+    {
+      "id": 8598,
+      "name": "Scroll: Recovery (Grade A)",
+      "kind": "etc",
+      "icon": "icon.etc_penalty_recovery_i04",
+      "stackable": true,
+      "price": 48000,
+      "weight": 10
+    },
+    {
+      "id": 8599,
+      "name": "Scroll: Recovery (Grade S)",
+      "kind": "etc",
+      "icon": "icon.etc_penalty_recovery_i05",
+      "stackable": true,
+      "price": 80000,
+      "weight": 10
+    },
+    {
       "id": 8600,
       "name": "Herb of Life",
       "kind": "etc",
@@ -68238,6 +73936,15 @@
       "weight": 0
     },
     {
+      "id": 8615,
+      "name": "Summoning Crystal",
+      "kind": "etc",
+      "icon": "icon.etc_recall_crystal_i00",
+      "stackable": true,
+      "price": 35000,
+      "weight": 10
+    },
+    {
       "id": 8616,
       "name": "Spellbook: Summon Friend",
       "kind": "etc",
@@ -68301,12 +74008,84 @@
       "weight": 5
     },
     {
+      "id": 8624,
+      "name": "Elixir of Life (C-Grade)",
+      "kind": "etc",
+      "icon": "icon.etc_super_hp_potion_i02",
+      "stackable": true,
+      "price": 7200,
+      "weight": 5
+    },
+    {
+      "id": 8625,
+      "name": "Elixir of Life (B-Grade)",
+      "kind": "etc",
+      "icon": "icon.etc_super_hp_potion_i03",
+      "stackable": true,
+      "price": 10000,
+      "weight": 5
+    },
+    {
+      "id": 8626,
+      "name": "Elixir of Life (A-Grade)",
+      "kind": "etc",
+      "icon": "icon.etc_super_hp_potion_i04",
+      "stackable": true,
+      "price": 12500,
+      "weight": 5
+    },
+    {
       "id": 8627,
       "name": "Elixir of Life (S-Grade)",
       "kind": "etc",
       "stackable": true,
       "icon": "icon.etc_super_hp_potion_i05",
       "price": 15000,
+      "weight": 5
+    },
+    {
+      "id": 8628,
+      "name": "Elixir of Mental Strength (No Grade)",
+      "kind": "etc",
+      "icon": "icon.etc_super_mp_potion_i00",
+      "stackable": true,
+      "price": 1400,
+      "weight": 5
+    },
+    {
+      "id": 8629,
+      "name": "Elixir of Mental Strength (D-Grade)",
+      "kind": "etc",
+      "icon": "icon.etc_super_mp_potion_i01",
+      "stackable": true,
+      "price": 3400,
+      "weight": 5
+    },
+    {
+      "id": 8630,
+      "name": "Elixir of Mental Strength (C-Grade)",
+      "kind": "etc",
+      "icon": "icon.etc_super_mp_potion_i02",
+      "stackable": true,
+      "price": 8700,
+      "weight": 5
+    },
+    {
+      "id": 8631,
+      "name": "Elixir of Mental Strength (B-Grade)",
+      "kind": "etc",
+      "icon": "icon.etc_super_mp_potion_i03",
+      "stackable": true,
+      "price": 11600,
+      "weight": 5
+    },
+    {
+      "id": 8632,
+      "name": "Elixir of Mental Strength (A-Grade)",
+      "kind": "etc",
+      "icon": "icon.etc_super_mp_potion_i04",
+      "stackable": true,
+      "price": 14400,
       "weight": 5
     },
     {
@@ -68335,6 +74114,42 @@
       "stackable": true,
       "crystal": "d",
       "price": 1400,
+      "weight": 5
+    },
+    {
+      "id": 8636,
+      "name": "Elixir of CP (C-Grade)",
+      "kind": "etc",
+      "icon": "icon.etc_super_cp_potion_i02",
+      "stackable": true,
+      "price": 3000,
+      "weight": 5
+    },
+    {
+      "id": 8637,
+      "name": "Elixir of CP (B-Grade)",
+      "kind": "etc",
+      "icon": "icon.etc_super_cp_potion_i03",
+      "stackable": true,
+      "price": 4000,
+      "weight": 5
+    },
+    {
+      "id": 8638,
+      "name": "Elixir of CP (A-Grade)",
+      "kind": "etc",
+      "icon": "icon.etc_super_cp_potion_i04",
+      "stackable": true,
+      "price": 5000,
+      "weight": 5
+    },
+    {
+      "id": 8639,
+      "name": "Elixir of CP (S-Grade)",
+      "kind": "etc",
+      "icon": "icon.etc_super_cp_potion_i05",
+      "stackable": true,
+      "price": 6000,
       "weight": 5
     },
     {
@@ -68597,6 +74412,303 @@
       "randomDamage": 20,
       "soulshots": 1,
       "spiritshots": 1
+    },
+    {
+      "id": 8690,
+      "name": "Recipe: Sirra's Blade (60%)",
+      "kind": "etc",
+      "icon": "icon.etc_recipe_violet_i00",
+      "stackable": true,
+      "price": 706000,
+      "weight": 30
+    },
+    {
+      "id": 8691,
+      "name": "Recipe: Sirra's Blade (100%)",
+      "kind": "etc",
+      "icon": "icon.etc_recipe_violet_i00",
+      "stackable": true,
+      "price": 706000,
+      "weight": 30
+    },
+    {
+      "id": 8692,
+      "name": "Recipe: Sword of Ipos (60%)",
+      "kind": "etc",
+      "icon": "icon.etc_recipe_violet_i00",
+      "stackable": true,
+      "price": 706000,
+      "weight": 30
+    },
+    {
+      "id": 8693,
+      "name": "Recipe: Sword of Ipos (100%)",
+      "kind": "etc",
+      "icon": "icon.etc_recipe_violet_i00",
+      "stackable": true,
+      "price": 706000,
+      "weight": 30
+    },
+    {
+      "id": 8694,
+      "name": "Recipe: Barakiel's Axe (60%)",
+      "kind": "etc",
+      "icon": "icon.etc_recipe_violet_i00",
+      "stackable": true,
+      "price": 706000,
+      "weight": 30
+    },
+    {
+      "id": 8695,
+      "name": "Recipe: Barakiel's Axe (100%)",
+      "kind": "etc",
+      "icon": "icon.etc_recipe_violet_i00",
+      "stackable": true,
+      "price": 706000,
+      "weight": 30
+    },
+    {
+      "id": 8696,
+      "name": "Recipe: Behemoth's Tuning Fork (60%)",
+      "kind": "etc",
+      "icon": "icon.etc_recipe_violet_i00",
+      "stackable": true,
+      "price": 706000,
+      "weight": 30
+    },
+    {
+      "id": 8697,
+      "name": "Recipe: Behemoth's Tuning Fork (100%)",
+      "kind": "etc",
+      "icon": "icon.etc_recipe_violet_i00",
+      "stackable": true,
+      "price": 706000,
+      "weight": 30
+    },
+    {
+      "id": 8698,
+      "name": "Recipe: Naga Storm (60%)",
+      "kind": "etc",
+      "icon": "icon.etc_recipe_violet_i00",
+      "stackable": true,
+      "price": 706000,
+      "weight": 30
+    },
+    {
+      "id": 8699,
+      "name": "Recipe: Naga Storm (100%)",
+      "kind": "etc",
+      "icon": "icon.etc_recipe_violet_i00",
+      "stackable": true,
+      "price": 706000,
+      "weight": 30
+    },
+    {
+      "id": 8700,
+      "name": "Recipe: Tiphon's Spear (60%)",
+      "kind": "etc",
+      "icon": "icon.etc_recipe_violet_i00",
+      "stackable": true,
+      "price": 706000,
+      "weight": 30
+    },
+    {
+      "id": 8701,
+      "name": "Recipe: Tiphon's Spear (100%)",
+      "kind": "etc",
+      "icon": "icon.etc_recipe_violet_i00",
+      "stackable": true,
+      "price": 706000,
+      "weight": 30
+    },
+    {
+      "id": 8702,
+      "name": "Recipe: Shyeed's Bow (60%)",
+      "kind": "etc",
+      "icon": "icon.etc_recipe_violet_i00",
+      "stackable": true,
+      "price": 706000,
+      "weight": 30
+    },
+    {
+      "id": 8703,
+      "name": "Recipe: Shyeed's Bow (100%)",
+      "kind": "etc",
+      "icon": "icon.etc_recipe_violet_i00",
+      "stackable": true,
+      "price": 706000,
+      "weight": 30
+    },
+    {
+      "id": 8704,
+      "name": "Recipe: Sobekk's Hurricane (60%)",
+      "kind": "etc",
+      "icon": "icon.etc_recipe_violet_i00",
+      "stackable": true,
+      "price": 706000,
+      "weight": 30
+    },
+    {
+      "id": 8705,
+      "name": "Recipe: Sobekk's Hurricane (100%)",
+      "kind": "etc",
+      "icon": "icon.etc_recipe_violet_i00",
+      "stackable": true,
+      "price": 706000,
+      "weight": 30
+    },
+    {
+      "id": 8706,
+      "name": "Recipe: Themis' Tongue (60%)",
+      "kind": "etc",
+      "icon": "icon.etc_recipe_violet_i00",
+      "stackable": true,
+      "price": 706000,
+      "weight": 30
+    },
+    {
+      "id": 8707,
+      "name": "Recipe: Themis' Tongue (100%)",
+      "kind": "etc",
+      "icon": "icon.etc_recipe_violet_i00",
+      "stackable": true,
+      "price": 706000,
+      "weight": 30
+    },
+    {
+      "id": 8708,
+      "name": "Recipe: Cabrio's Hand (60%)",
+      "kind": "etc",
+      "icon": "icon.etc_recipe_violet_i00",
+      "stackable": true,
+      "price": 706000,
+      "weight": 30
+    },
+    {
+      "id": 8709,
+      "name": "Recipe: Cabrio's Hand (100%)",
+      "kind": "etc",
+      "icon": "icon.etc_recipe_violet_i00",
+      "stackable": true,
+      "price": 706000,
+      "weight": 30
+    },
+    {
+      "id": 8710,
+      "name": "Recipe: Daimon Crystal (60%)",
+      "kind": "etc",
+      "icon": "icon.etc_recipe_violet_i00",
+      "stackable": true,
+      "price": 706000,
+      "weight": 30
+    },
+    {
+      "id": 8711,
+      "name": "Recipe: Daimon Crystal (100%)",
+      "kind": "etc",
+      "icon": "icon.etc_recipe_violet_i00",
+      "stackable": true,
+      "price": 706000,
+      "weight": 30
+    },
+    {
+      "id": 8712,
+      "name": "Sirra's Blade Edge",
+      "kind": "etc",
+      "icon": "icon.etc_sword_body_i00",
+      "stackable": true,
+      "price": 82400,
+      "weight": 60
+    },
+    {
+      "id": 8713,
+      "name": "Sword of Ipos Blade",
+      "kind": "etc",
+      "icon": "icon.etc_sword_body_i00",
+      "stackable": true,
+      "price": 82400,
+      "weight": 60
+    },
+    {
+      "id": 8714,
+      "name": "Barakiel's Axe Piece",
+      "kind": "etc",
+      "icon": "icon.etc_bark_gold_i00",
+      "stackable": true,
+      "price": 82400,
+      "weight": 60
+    },
+    {
+      "id": 8715,
+      "name": "Behemoth's Tuning Fork Piece",
+      "kind": "etc",
+      "icon": "icon.etc_bark_gold_i00",
+      "stackable": true,
+      "price": 82400,
+      "weight": 60
+    },
+    {
+      "id": 8716,
+      "name": "Naga Storm Piece",
+      "kind": "etc",
+      "icon": "icon.etc_bark_gold_i00",
+      "stackable": true,
+      "price": 82400,
+      "weight": 60
+    },
+    {
+      "id": 8717,
+      "name": "Tiphon's Spear Edge",
+      "kind": "etc",
+      "icon": "icon.etc_sword_body_i00",
+      "stackable": true,
+      "price": 82400,
+      "weight": 60
+    },
+    {
+      "id": 8718,
+      "name": "Shyeed's Bow Shaft",
+      "kind": "etc",
+      "icon": "icon.etc_branch_gold_i00",
+      "stackable": true,
+      "price": 82400,
+      "weight": 60
+    },
+    {
+      "id": 8719,
+      "name": "Sobekk's Hurricane Edge",
+      "kind": "etc",
+      "icon": "icon.etc_sword_body_i00",
+      "stackable": true,
+      "price": 82400,
+      "weight": 60
+    },
+    {
+      "id": 8720,
+      "name": "Themis' Tongue Piece",
+      "kind": "etc",
+      "icon": "icon.etc_bark_gold_i00",
+      "stackable": true,
+      "price": 82400,
+      "weight": 60
+    },
+    {
+      "id": 8721,
+      "name": "Cabrio's Hand Head",
+      "kind": "etc",
+      "icon": "icon.etc_squares_gray_i00",
+      "stackable": true,
+      "price": 82400,
+      "weight": 60
+    },
+    {
+      "id": 8722,
+      "name": "Daimon Crystal Fragment",
+      "kind": "etc",
+      "icon": "icon.etc_bark_gold_i00",
+      "stackable": true,
+      "price": 82400,
+      "weight": 60
     },
     {
       "id": 8723,
@@ -69173,6 +75285,15 @@
       "weight": 0,
       "stackable": true,
       "quest": true
+    },
+    {
+      "id": 8786,
+      "name": "Primeval Potion",
+      "kind": "etc",
+      "icon": "icon.etc_potion_red_i00",
+      "stackable": true,
+      "price": 5000,
+      "weight": 2
     },
     {
       "id": 8787,
@@ -69994,6 +76115,15 @@
       "weight": 120
     },
     {
+      "id": 8883,
+      "name": "Spellbook: Mystic Immunity",
+      "kind": "etc",
+      "stackable": true,
+      "icon": "icon.etc_spell_books_assistance_i00",
+      "price": 30000,
+      "weight": 120
+    },
+    {
       "id": 8884,
       "name": "Spellbook: Spell Turning",
       "kind": "etc",
@@ -70039,6 +76169,15 @@
       "weight": 120
     },
     {
+      "id": 8891,
+      "name": "Spellbook: Aura Flash",
+      "kind": "etc",
+      "stackable": true,
+      "icon": "icon.etc_spell_books_element_i00",
+      "price": 6750,
+      "weight": 120
+    },
+    {
       "id": 8892,
       "name": "Ancient Tactical Manual: Symbol of Defense",
       "kind": "etc",
@@ -70050,6 +76189,15 @@
     {
       "id": 8893,
       "name": "Ancient Tactical Manual: Symbol of Noise",
+      "kind": "etc",
+      "stackable": true,
+      "icon": "icon.etc_spell_books_assistance_i00",
+      "price": 40000,
+      "weight": 120
+    },
+    {
+      "id": 8895,
+      "name": "Ancient Tactical Manual: Symbol of Honor",
       "kind": "etc",
       "stackable": true,
       "icon": "icon.etc_spell_books_assistance_i00",
@@ -70102,8 +76250,26 @@
       "weight": 120
     },
     {
+      "id": 8903,
+      "name": "Ancient Spellbook: Gehenna",
+      "kind": "etc",
+      "stackable": true,
+      "icon": "icon.etc_spell_books_element_i00",
+      "price": 40000,
+      "weight": 120
+    },
+    {
       "id": 8904,
       "name": "Ancient Spellbook: Anti-Summoning Field",
+      "kind": "etc",
+      "stackable": true,
+      "icon": "icon.etc_spell_books_element_i00",
+      "price": 40000,
+      "weight": 120
+    },
+    {
+      "id": 8905,
+      "name": "Ancient Spellbook: Purification Field",
       "kind": "etc",
       "stackable": true,
       "icon": "icon.etc_spell_books_element_i00",
@@ -70433,6 +76599,96 @@
       "price": 0,
       "weight": 10,
       "bodySlot": "hair2"
+    },
+    {
+      "id": 9146,
+      "name": "Scroll of Guidance (Event)",
+      "kind": "etc",
+      "icon": "icon.etc_scroll_white_i00",
+      "stackable": true,
+      "price": 0,
+      "weight": 120
+    },
+    {
+      "id": 9147,
+      "name": "Scroll of Death Whisper (Event)",
+      "kind": "etc",
+      "icon": "icon.etc_scroll_white_i00",
+      "stackable": true,
+      "price": 0,
+      "weight": 120
+    },
+    {
+      "id": 9148,
+      "name": "Scroll of Focus (Event)",
+      "kind": "etc",
+      "icon": "icon.etc_scroll_white_i00",
+      "stackable": true,
+      "price": 0,
+      "weight": 120
+    },
+    {
+      "id": 9149,
+      "name": "Scroll of Acumen (Event)",
+      "kind": "etc",
+      "icon": "icon.etc_scroll_white_i00",
+      "stackable": true,
+      "price": 0,
+      "weight": 120
+    },
+    {
+      "id": 9150,
+      "name": "Scroll of Haste (Event)",
+      "kind": "etc",
+      "icon": "icon.etc_scroll_white_i00",
+      "stackable": true,
+      "price": 0,
+      "weight": 120
+    },
+    {
+      "id": 9151,
+      "name": "Scroll of Agility (Event)",
+      "kind": "etc",
+      "icon": "icon.etc_scroll_white_i00",
+      "stackable": true,
+      "price": 0,
+      "weight": 120
+    },
+    {
+      "id": 9152,
+      "name": "Scroll of Empower (Event)",
+      "kind": "etc",
+      "icon": "icon.etc_scroll_white_i00",
+      "stackable": true,
+      "price": 0,
+      "weight": 120
+    },
+    {
+      "id": 9153,
+      "name": "Scroll of Might (Event)",
+      "kind": "etc",
+      "icon": "icon.etc_scroll_white_i00",
+      "stackable": true,
+      "price": 0,
+      "weight": 120
+    },
+    {
+      "id": 9154,
+      "name": "Scroll of Wind Walk (Event)",
+      "kind": "etc",
+      "icon": "icon.etc_scroll_white_i00",
+      "stackable": true,
+      "price": 0,
+      "weight": 120
+    },
+    {
+      "id": 9155,
+      "name": "Scroll of Shield (Event)",
+      "kind": "etc",
+      "icon": "icon.etc_scroll_white_i00",
+      "stackable": true,
+      "price": 0,
+      "weight": 120
     },
     {
       "id": 9158,

@@ -7,7 +7,7 @@ namespace Fineage.Zone.Tests;
 
 /// <summary>
 /// Mobius <c>operateType T</c> toggles and Fake Death (skill 60) through the zone world: activation cost, per-tick MP
-/// drain, the second press switching off, the seated-only gate of Relax and the fake-death pose
+/// drain, the second press switching off, Relax sitting the caster on start and the fake-death pose
 /// (<c>WT_START_FAKEDEATH</c> / <c>WT_STOP_FAKEDEATH</c> + <c>Revive</c>).
 /// </summary>
 public sealed class ZoneToggleAndFakeDeathTests
@@ -88,12 +88,15 @@ public sealed class ZoneToggleAndFakeDeathTests
     {
         var (kit, _, session, player) = await EnterWithBridgeAsync();
         player.KnownSkills[Relax] = 1;
-        player.CurMp = 500;
+        kit.World.RefreshPlayerMaxima(player, fanout: false);
+        player.CurMp = player.MaxMp;
         player.Sitting = true;
+        if (player.MaxHp > 1)
+            player.CurHp = player.MaxHp - 1;
 
         Assert.Null(await kit.World.TrySkillUseAsync(session, Relax, 0, CancellationToken.None));
         int afterStart = player.CurMp;
-        Assert.Equal(498, afterStart);
+        Assert.Equal(player.MaxMp - 2, afterStart);
 
         // Relax ticks 3 → 3 · 666 ms ≈ 1998 ms, power 1.
         kit.Now = kit.Now.AddMilliseconds(2000);
@@ -108,6 +111,8 @@ public sealed class ZoneToggleAndFakeDeathTests
         player.KnownSkills[Relax] = 1;
         player.Sitting = true;
         player.CurMp = 2; // exactly the start cost; nothing left for the first tick.
+        if (player.MaxHp > 1)
+            player.CurHp = player.MaxHp - 1;
 
         Assert.Null(await kit.World.TrySkillUseAsync(session, Relax, 0, CancellationToken.None));
         Assert.Contains(player.Abnormals, a => a.Id == Relax);
@@ -121,14 +126,85 @@ public sealed class ZoneToggleAndFakeDeathTests
     }
 
     [Fact]
-    public async Task Relax_needs_a_seated_caster()
+    public async Task Relax_sits_the_caster()
     {
-        var (kit, _, session, player) = await EnterWithBridgeAsync();
+        var (kit, rec, session, player) = await EnterWithBridgeAsync();
         player.KnownSkills[Relax] = 1;
         player.CurMp = 500;
+        if (player.MaxHp > 1)
+            player.CurHp = player.MaxHp - 1;
+        player.Sitting = false;
+        int movesBefore = rec.Of(nameof(IWorldEventPublisher.FanoutMoveState)).Count;
 
         Assert.Null(await kit.World.TrySkillUseAsync(session, Relax, 0, CancellationToken.None));
+        Assert.True(player.Sitting);
+        Assert.Contains(player.Abnormals, a => a.Id == Relax);
+        var waits = rec.Of(nameof(IWorldEventPublisher.FanoutChangeWaitType));
+        Assert.Contains(waits, a =>
+            (int)a[1]! == player.ObjectId && (int)a[2]! == ActionProtocol.WaitSitting);
+        var relaxUpdates = rec.Of(nameof(IWorldEventPublisher.FanoutAbnormalStatusUpdate));
+        Assert.Contains(relaxUpdates, a =>
+        {
+            var msg = (AbnormalStatusUpdateMsg)a[1]!;
+            return msg.ObjectId == player.ObjectId &&
+                   msg.Effects.Any(e => e.Id == Relax && e.Value > 0);
+        });
+        // Same sit pipeline as the Sit action: ChangeWaitType only, no extra stop/move packet
+        // for a standing-still caster (Mobius sitDown broadcasts only the wait type).
+        Assert.Equal(movesBefore, rec.Of(nameof(IWorldEventPublisher.FanoutMoveState)).Count);
+    }
+
+    [Fact]
+    public async Task Relax_ends_when_hp_is_full()
+    {
+        var (kit, rec, session, player) = await EnterWithBridgeAsync();
+        player.KnownSkills[Relax] = 1;
+        player.CurMp = 500;
+        Assert.True(player.MaxHp > 0);
+        player.CurHp = player.MaxHp;
+
+        Assert.Null(await kit.World.TrySkillUseAsync(session, Relax, 0, CancellationToken.None));
+        Assert.Contains(player.Abnormals, a => a.Id == Relax);
+        int before = rec.Of(nameof(IWorldEventPublisher.FanoutAbnormalStatusUpdate)).Count;
+
+        kit.Now = kit.Now.AddMilliseconds(2000);
+        await kit.World.RunAbnormalTickAsync(CancellationToken.None);
+
         Assert.DoesNotContain(player.Abnormals, a => a.Id == Relax);
+        // Mobius onActionTime returns false — the effect exits, the pawn stays sitting.
+        Assert.True(player.Sitting);
+        Assert.Contains(player.ObjectId, Messages(rec, 175));
+        var updates = rec.Of(nameof(IWorldEventPublisher.FanoutAbnormalStatusUpdate));
+        Assert.True(updates.Count > before);
+        var last = (AbnormalStatusUpdateMsg)updates[^1][1]!;
+        Assert.DoesNotContain(last.Effects, e => e.Id == Relax);
+    }
+
+    [Fact]
+    public async Task Standing_ends_relaxing_effects()
+    {
+        var (kit, rec, session, player) = await EnterWithBridgeAsync();
+        player.KnownSkills[Relax] = 1;
+        player.CurMp = 500;
+        if (player.MaxHp > 1)
+            player.CurHp = player.MaxHp - 1;
+
+        Assert.Null(await kit.World.TrySkillUseAsync(session, Relax, 0, CancellationToken.None));
+        Assert.Contains(player.Abnormals, a => a.Id == Relax);
+        Assert.True(player.Sitting);
+        int before = rec.Of(nameof(IWorldEventPublisher.FanoutAbnormalStatusUpdate)).Count;
+
+        Assert.Null(await kit.World.TryCharacterActionAsync(session, ActionProtocol.SitStand, 0, CancellationToken.None));
+
+        Assert.False(player.Sitting);
+        Assert.DoesNotContain(player.Abnormals, a => a.Id == Relax);
+        var waits = rec.Of(nameof(IWorldEventPublisher.FanoutChangeWaitType));
+        Assert.Contains(waits, a =>
+            (int)a[1]! == player.ObjectId && (int)a[2]! == ActionProtocol.WaitStanding);
+        var updates = rec.Of(nameof(IWorldEventPublisher.FanoutAbnormalStatusUpdate));
+        Assert.True(updates.Count > before);
+        var last = (AbnormalStatusUpdateMsg)updates[^1][1]!;
+        Assert.DoesNotContain(last.Effects, e => e.Id == Relax);
     }
 
     [Fact]
@@ -163,6 +239,16 @@ public sealed class ZoneToggleAndFakeDeathTests
 
         var waits = rec.Of(nameof(IWorldEventPublisher.FanoutChangeWaitType));
         Assert.Contains(waits, a => (int)a[2]! == ActionProtocol.WaitStartFakeDeath);
+
+        // Mobius updateEffectIcons includes a toggle; Fake Death must be on the bar and
+        // the shortcut toggle shine (client reads AbnormalStatusUpdate, self included).
+        var updates = rec.Of(nameof(IWorldEventPublisher.FanoutAbnormalStatusUpdate));
+        Assert.Contains(updates, a =>
+        {
+            var msg = (AbnormalStatusUpdateMsg)a[1]!;
+            return msg.ObjectId == player.ObjectId &&
+                   msg.Effects.Any(e => e.Id == FakeDeath && e.Value > 0);
+        });
     }
 
     [Fact]

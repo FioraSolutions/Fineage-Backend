@@ -11,14 +11,31 @@ public sealed partial class ZoneWorld
     /// pawn drifted; the actual travel is done by <see cref="TickNpcMovement"/> on the shared speed-tick mover.
     /// </summary>
     /// <summary>Mobius <c>TURN_FLEE</c> / <c>onEvtAfraid</c> — slot comes from skills.json abnormalType.</summary>
-    static bool IsFeared(ZoneEntity entity)
+    static bool HasAbnormalSlot(ZoneEntity entity, string slot)
     {
         for (int i = 0; i < entity.Abnormals.Count; i++)
         {
-            if (string.Equals(entity.Abnormals[i].Slot, "TURN_FLEE", StringComparison.OrdinalIgnoreCase))
+            if (string.Equals(entity.Abnormals[i].Slot, slot, StringComparison.OrdinalIgnoreCase))
                 return true;
         }
         return false;
+    }
+
+    static bool IsFeared(ZoneEntity entity) => HasAbnormalSlot(entity, "TURN_FLEE");
+
+    /// <summary>
+    /// Attackables normally only swing at playables. Distrust / Confuse is the generic exception:
+    /// the victim may keep a monster (or any attackable) as <c>AggroTargetId</c> while the slot is up.
+    /// </summary>
+    static bool IsValidMobAttackTarget(ZoneEntity npc, ZoneEntity target)
+    {
+        if (IsLivePlayable(target))
+            return true;
+        if (target.Dead || target.CurHp <= 0 || ReferenceEquals(npc, target))
+            return false;
+        if (!HasAbnormalSlot(npc, "DISTRUST") && !HasAbnormalSlot(npc, "CONFUSED"))
+            return false;
+        return target.Kind == ZoneEntityKind.Npc && target.Attackable;
     }
 
     /// <summary>Mobius <c>CreatureAI.FEAR_RANGE</c> and <c>EffectTickRatio</c> 666 × Fear.getTicks() 5.</summary>
@@ -106,7 +123,7 @@ public sealed partial class ZoneWorld
         double dx = target.X - npc.X;
         double dy = target.Y - npc.Y;
         double dist = Math.Sqrt(dx * dx + dy * dy);
-        double stopAt = ZoneCombat.MobAttackReach(npc.AttackRange) - ZoneCombat.ApproachSlack;
+        double stopAt = Math.Max(10, AttackReachAgainst(npc, target) - ZoneCombat.ApproachSlack);
         if (dist <= stopAt)
             return;
 
