@@ -18,4 +18,8 @@
     <!-- Test fixtures seed via LoginService / LoginHttpHost; production Zone references Accounts only. -->
     <ProjectReference Include="..\..\src\Fineage.Login\Fineage.Login.csproj" />
   </ItemGroup>
+  <ItemGroup>
+    <Content Include="..\Fineage.Game.Tests\Fixtures\skill-combat-snapshot.json" Link="Fixtures\skill-combat-snapshot.json" CopyToOutputDirectory="PreserveNewest" />
+  </ItemGroup>
 </Project>
+
