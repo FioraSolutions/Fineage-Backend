@@ -82,8 +82,8 @@ public sealed partial class ZoneWorld
         double mAtk = def.MAtk;
         double mDef = def.MDef;
         int level = def.Level;
-        if ((pDef <= 0 || pAtk <= 0) &&
-            Fineage.Zone.Npcs.NpcCatalog.LoadDefault().ById.TryGetValue(def.NpcId, out var template))
+        int collisionRadius = 0;
+        if (Fineage.Zone.Npcs.NpcCatalog.LoadDefault().ById.TryGetValue(def.NpcId, out var template))
         {
             if (pAtk <= 0)
                 pAtk = template.PAtk;
@@ -95,6 +95,8 @@ public sealed partial class ZoneWorld
                 mDef = template.MDef;
             if (level <= 1 && template.Level > 1)
                 level = template.Level;
+            if (template.CollisionRadius > 0)
+                collisionRadius = (int)template.CollisionRadius;
         }
 
         var tax = MerchantTowns.For(mapId);
@@ -133,6 +135,7 @@ public sealed partial class ZoneWorld
             MAtk = mAtk,
             MDef = mDef,
             AttackRange = def.AttackRange,
+            CollisionRadius = collisionRadius,
             Aggressive = def.Aggressive,
             AggroRange = def.AggroRange,
             ClanHelpRange = def.ClanHelpRange,

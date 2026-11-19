@@ -112,6 +112,13 @@ sealed partial class ZoneEntity
         init => EnsureNpcTemplate().AttackRange = value;
     }
 
+    /// <summary>Mobius NPC <c>collisionRadius</c>; 0 when unknown (range checks then use the default NPC radius).</summary>
+    public int CollisionRadius
+    {
+        get => NpcTemplate?.CollisionRadius ?? 0;
+        init => EnsureNpcTemplate().CollisionRadius = value;
+    }
+
     /// <summary>Mobius <c>ai isAggressive</c>; attacks players inside <see cref="AggroRange"/> on its own.</summary>
     public bool Aggressive
     {

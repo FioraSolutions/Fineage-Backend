@@ -105,7 +105,7 @@ public sealed partial class ZoneWorld
         if (player.CurMp < levelData.MpConsume)
             return SkillProtocol.Mp;
         AdvanceMove(player, now);
-        if (!ZoneCombat.InCastRange(player.X, player.Y, target.X, target.Y, Math.Max(40, template.CastRange) + 100))
+        if (!InSkillCastRange(player, target, template.CastRange))
             return SkillProtocol.Range;
 
         player.CurMp = Math.Max(0, player.CurMp - levelData.MpConsume);

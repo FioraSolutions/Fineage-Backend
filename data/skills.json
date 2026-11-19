@@ -7171,7 +7171,7 @@
       "targetType": "ONE",
       "castRange": 400,
       "hitTimeMs": 1500,
-      "reuseDelayMs": 3000,
+      "reuseDelayMs": 10000,
       "levelData": [
         {
           "level": 1,
@@ -30958,7 +30958,7 @@
       ],
       "abnormalTimeSeconds": 30,
       "isDebuff": true,
-      "effectRange": 650,
+      "effectRange": 300,
       "abnormalType": "HIT_DOWN",
       "activateRate": 80,
       "lvlBonusRate": 2,

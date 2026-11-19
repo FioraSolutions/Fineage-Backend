@@ -88,11 +88,11 @@ public sealed partial class ZoneWorld
             return null;
         }
 
-        if (!ZoneCombat.InCastRange(player.X, player.Y, target.X, target.Y, Math.Max(40, template.CastRange) + 100))
+        if (!InSkillCastRange(player, target, template.CastRange))
         {
             if (sweep)
                 return SkillProtocol.Range;
-            long travelMs = ApproachTarget(player, target, Math.Max(40, template.CastRange));
+            long travelMs = ApproachTarget(player, target, SkillCastReach(template.CastRange, player, target));
             if (travelMs < 0)
                 return SkillProtocol.Range;
             session.AutoAttackTargetId = 0;

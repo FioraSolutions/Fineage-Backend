@@ -44,7 +44,7 @@ public sealed partial class ZoneWorld
         }
         if (template.CastRange > 0 &&
             targetId != player.ObjectId &&
-            !ZoneCombat.InCastRange(player.X, player.Y, target.X, target.Y, template.CastRange))
+            !InSkillCastRange(player, target, template.CastRange))
             return SkillProtocol.Range;
 
         // One level's worth of pairs per cast: the table index is the skill level, not the target.

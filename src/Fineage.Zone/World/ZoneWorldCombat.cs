@@ -388,9 +388,9 @@ public sealed partial class ZoneWorld
             approachMs = -1;
             return null;
         }
-        if (!ZoneCombat.Within(player.X, player.Y, target.X, target.Y, PlayerReach(player)))
+        if (!ZoneCombat.Within(player.X, player.Y, target.X, target.Y, PlayerReach(player, target)))
         {
-            approachMs = ApproachTarget(player, target, PlayerReach(player));
+            approachMs = ApproachTarget(player, target, PlayerReach(player, target));
             return approachMs < 0 ? "attack" : null;
         }
         if (player.MoveActive)

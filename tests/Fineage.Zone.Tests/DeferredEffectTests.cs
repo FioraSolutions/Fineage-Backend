@@ -64,6 +64,9 @@ public sealed class DeferredEffectTests
         mob.X -= 5000;
 
         // Spoil is a physical skill (no isMagic): a hit never breaks it, the spoil flag lands at hitTime.
+        // Cast range is 40 + collisions (~80), not the old castRange+100 slack that let this start at 100 UU.
+        p.X = mob.X + 40;
+        p.Y = mob.Y;
         p.KnownSkills[254] = 11;
         mob.Level = 1;
         kit.Now = kit.Now.AddSeconds(30);

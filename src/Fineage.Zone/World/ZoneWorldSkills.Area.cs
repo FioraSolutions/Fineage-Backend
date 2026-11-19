@@ -84,8 +84,8 @@ public sealed partial class ZoneWorld
             return null;
         if (!VisibleTo(player.ObjectId, targetId))
             return SkillProtocol.Target;
-        if (!ZoneCombat.InCastRange(player.X, player.Y, target.X, target.Y, template.CastRange))
-            return SkillProtocol.Range;
+        if (!TryEnsureHostileSkillRange(session, player, target, request, template, now, out var rangeError))
+            return rangeError;
         // Mobius callSkill: a negative skill on a playable flags the caster (landing or resisted).
         UpdatePvPStatus(player, target, now);
 
@@ -150,8 +150,8 @@ public sealed partial class ZoneWorld
             return null;
         if (!VisibleTo(player.ObjectId, targetId))
             return SkillProtocol.Target;
-        if (!ZoneCombat.InCastRange(player.X, player.Y, target.X, target.Y, template.CastRange))
-            return SkillProtocol.Range;
+        if (!TryEnsureHostileSkillRange(session, player, target, request, template, now, out var rangeError))
+            return rangeError;
         // Mobius callSkill: a negative skill on a playable flags the caster (landing or resisted).
         UpdatePvPStatus(player, target, now);
 

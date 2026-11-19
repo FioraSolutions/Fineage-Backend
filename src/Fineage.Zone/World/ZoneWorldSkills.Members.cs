@@ -42,25 +42,8 @@ public sealed partial class ZoneWorld
         if (!VisibleTo(player.ObjectId, targetId))
             return SkillProtocol.Target;
 
-        bool inRange = template.CastRange > 0
-            ? ZoneCombat.InCastRange(player.X, player.Y, target.X, target.Y, template.CastRange + 100)
-            : ZoneCombat.InMeleeRange(player.X, player.Y, target.X, target.Y);
-        if (!inRange)
-        {
-            // Mobius AI_INTENTION_CAST: moveToPawn(target, castRange) then cast on arrival instead of refusing.
-            int reach = template.CastRange > 0 ? Math.Max(40, template.CastRange) : ZoneCombat.MeleeRange;
-            long travelMs = ApproachTarget(player, target, reach);
-            if (travelMs < 0)
-                return SkillProtocol.Range;
-            session.AutoAttackTargetId = 0;
-            session.PendingTalkNpcId = 0;
-            session.PendingTalkAtUnixMs = 0;
-            session.SelectedTargetId = targetId;
-            session.PendingCastSkillId = request.SkillId;
-            session.PendingCastTargetId = targetId;
-            session.PendingCastAtUnixMs = now + travelMs;
-            return null;
-        }
+        if (!TryEnsureHostileSkillRange(session, player, target, request, template, now, out var rangeError))
+            return rangeError;
 
         session.AutoAttackTargetId = 0;
         // Mobius Creature.doCast / Skill.checkCondition: target out of sight → SysMsg 181, no cast.
@@ -107,7 +90,7 @@ public sealed partial class ZoneWorld
             IncorrectTarget(session);
             return null;
         }
-        if (!ZoneCombat.InCastRange(player.X, player.Y, target.X, target.Y, template.CastRange))
+        if (!InSkillCastRange(player, target, template.CastRange))
             return SkillProtocol.Range;
 
         player.CurMp = Math.Max(0, player.CurMp - levelData.MpConsume);
@@ -126,6 +109,53 @@ public sealed partial class ZoneWorld
         ScheduleEffect(player, target, template, level, now, hitMs,
             (t, at) => ApplyAbnormalFromSkill(template, levelData, t, at, attacker: player));
         return null;
+    }
+
+
+    /// <summary>
+    /// Mobius <c>isInsideRadius2D(target, castRange + both collision radii)</c>. Used for friendly skills
+    /// that simply refuse when the target is too far (no moveToPawn).
+    /// </summary>
+    bool InSkillCastRange(ZoneEntity caster, ZoneEntity target, int castRange) =>
+        ZoneCombat.Within(caster.X, caster.Y, target.X, target.Y, SkillCastReach(castRange, caster, target));
+
+    /// <summary>
+    /// Mobius <c>AI_INTENTION_CAST</c>: if the target is outside <see cref="SkillCastReach"/>, walk in
+    /// (<c>maybeMoveToPawn(target, castRange)</c>) and queue the cast on arrival. The +100 in Mobius is only
+    /// follow hysteresis, not extra start range.
+    /// </summary>
+    /// <returns>
+    /// <see langword="true"/> when the caster is already in range and the skill may start.
+    /// <see langword="false"/> when an approach was started (<paramref name="error"/> is null) or the target
+    /// cannot be reached (<paramref name="error"/> is <see cref="SkillProtocol.Range"/>).
+    /// </returns>
+    bool TryEnsureHostileSkillRange(
+        ZoneSession session,
+        ZoneEntity player,
+        ZoneEntity target,
+        SkillUseIntent request,
+        Fineage.Game.Skills.SkillDefinition template,
+        long now,
+        out string? error)
+    {
+        error = null;
+        int reach = SkillCastReach(template.CastRange, player, target);
+        if (ZoneCombat.Within(player.X, player.Y, target.X, target.Y, reach))
+            return true;
+        long travelMs = ApproachTarget(player, target, reach);
+        if (travelMs < 0)
+        {
+            error = SkillProtocol.Range;
+            return false;
+        }
+        session.AutoAttackTargetId = 0;
+        session.PendingTalkNpcId = 0;
+        session.PendingTalkAtUnixMs = 0;
+        session.SelectedTargetId = target.ObjectId;
+        session.PendingCastSkillId = request.SkillId;
+        session.PendingCastTargetId = target.ObjectId;
+        session.PendingCastAtUnixMs = now + travelMs;
+        return false;
     }
 
     /// <summary>Instant heal/utility (Elemental Heal, Heal, Self Heal, …).</summary>

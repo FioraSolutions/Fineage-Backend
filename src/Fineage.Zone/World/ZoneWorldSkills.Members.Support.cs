@@ -40,7 +40,7 @@ public sealed partial class ZoneWorld
         }
         if (template.CastRange > 0 &&
             targetId != player.ObjectId &&
-            !ZoneCombat.InCastRange(player.X, player.Y, target.X, target.Y, template.CastRange))
+            !InSkillCastRange(player, target, template.CastRange))
             return SkillProtocol.Range;
 
         player.CurMp = Math.Max(0, player.CurMp - levelData.MpConsume);
@@ -116,7 +116,7 @@ public sealed partial class ZoneWorld
             return null;
         }
         if (template.CastRange > 0 &&
-            !ZoneCombat.InCastRange(player.X, player.Y, target.X, target.Y, template.CastRange))
+            !InSkillCastRange(player, target, template.CastRange))
             return SkillProtocol.Range;
         if (target.ReviveRequested)
         {
@@ -195,8 +195,8 @@ public sealed partial class ZoneWorld
             return null;
         if (!VisibleTo(player.ObjectId, targetId))
             return SkillProtocol.Target;
-        if (!ZoneCombat.InCastRange(player.X, player.Y, target.X, target.Y, template.CastRange))
-            return SkillProtocol.Range;
+        if (!TryEnsureHostileSkillRange(session, player, target, request, template, now, out var rangeError))
+            return rangeError;
         // Mobius callSkill: a negative skill on a playable flags the caster (landing or resisted).
         UpdatePvPStatus(player, target, now);
 
@@ -273,8 +273,8 @@ public sealed partial class ZoneWorld
             return null;
         if (!VisibleTo(player.ObjectId, targetId))
             return SkillProtocol.Target;
-        if (!ZoneCombat.InCastRange(player.X, player.Y, target.X, target.Y, template.CastRange))
-            return SkillProtocol.Range;
+        if (!TryEnsureHostileSkillRange(session, player, target, request, template, now, out var rangeError))
+            return rangeError;
         UpdatePvPStatus(player, target, now);
 
         player.CurMp = Math.Max(0, player.CurMp - levelData.MpConsume);
@@ -308,8 +308,6 @@ public sealed partial class ZoneWorld
     /// Mobius <c>Creature.onMagicHitTimer</c> hate for an attackable victim: a negative <c>effectPoint</c> adds
     /// <c>-effectPoint</c> hate, a positive one reduces it, 0 does nothing. Damage skills keep their own
     /// <c>addDamageHate(damage · 100 / (level + 7))</c> in the melee/skill-damage paths.
-    /// </summary>
-    /// <summary>
     /// Mobius <c>Creature.callSkill</c> after <c>activateSkill</c>: an attackable target is added to
     /// <c>attackByList</c> (except Lure 51 / Temptation 511), but the AI is only notified as attacked
     /// when the skill is negative, has no <c>EffectType.HATE</c> (<c>DeleteHate</c> / <c>DeleteHateOfMe</c>),

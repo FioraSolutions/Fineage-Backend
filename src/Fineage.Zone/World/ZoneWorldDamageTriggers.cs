@@ -141,6 +141,16 @@ public sealed partial class ZoneWorld
                 case "RandomizeHate":
                     RandomizeHate(caster, target, effect.Chance);
                     break;
+                case "AddHate":
+                    // Mobius AddHate.onStart: attackable only, addDamageHate(effector, 0, power).
+                    // Lure (51) / Temptation (511) also skip EVT_ATTACKED / addAttackerToAttackByList,
+                    // so this is the only hate write — quietly pulls the mob without clan-help notify.
+                    if (target.Kind == ZoneEntityKind.Npc && target.Attackable)
+                    {
+                        long power = effect.Power > 0 ? (long)effect.Power : 1;
+                        AddHate(target, caster, power);
+                    }
+                    break;
             }
         }
     }
