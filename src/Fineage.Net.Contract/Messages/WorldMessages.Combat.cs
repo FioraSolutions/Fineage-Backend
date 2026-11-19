@@ -178,6 +178,8 @@ namespace Fineage.Net.Contract
         public int DurationSeconds { get; set; }
         /// <summary>Mobius <c>abnormalType</c> slot (SLEEP, STUN, PARALYZE, …).</summary>
         public string Slot { get; set; } = "";
+        /// <summary>Mobius <c>abnormalVisualEffect</c> (STEALTH, DOT_POISON, …). Empty when unset.</summary>
+        public string Visual { get; set; } = "";
     }
 
     public sealed class AbnormalStatusUpdateNetMsg

@@ -398,9 +398,8 @@ public sealed partial class ZoneWorld
         }
         if (player.MoveActive)
         {
-            // Mobius onEvtArrived: in reach -> stop the run and swing from here (no slide past the target).
-            StopTimedMove(player);
-            SyncSession(player, session);
+            // Mobius stopMove before doAttack: in reach -> stop the run and swing from here (no slide past the target).
+            StopForAttack(player, session);
         }
         session.ClearApproach();
         // Mobius Creature.doAttack: no LOS → SysMsg 181 "Cannot see target.", intention ACTIVE, ActionFailed.

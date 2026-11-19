@@ -83,7 +83,8 @@ sealed partial class NetWorldEventPublisher
                 Id = effects[i].Id,
                 Value = effects[i].Value,
                 DurationSeconds = effects[i].DurationSeconds,
-                Slot = effects[i].Slot ?? ""
+                Slot = effects[i].Slot ?? "",
+                Visual = effects[i].Visual ?? ""
             };
         var payload = NetCodec.EncodePartySpelled(new AbnormalStatusUpdateNetMsg { ObjectId = update.ObjectId, Effects = rows });
         foreach (int watcher in watcherObjectIds)
