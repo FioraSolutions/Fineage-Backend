@@ -57,9 +57,8 @@ public sealed partial class ZoneWorld
                 continue;
             // The drain already printed the specific message (140 / 175) when notified; otherwise the toggle ends
             // silently and DeactivateToggle sends S1_HAS_BEEN_ABORTED. Either way the skill's exit hook must run —
-            // for Fake Death that is what stands the pawn back up (WT_STOP_FAKEDEATH + Revive).
-            if (notified)
-                entity.Abnormals.RemoveAt(i);
+            // for Fake Death that is what stands the pawn back up (WT_STOP_FAKEDEATH + Revive). Always go through
+            // DeactivateToggle so FanoutAbnormal reaches the client (removing the row first skipped the glow clear).
             DeactivateToggle(entity.Session, entity, entry.Id, _game.Skills.Find(entry.Id), "tick", sendAbort: !notified);
         }
         if (entity.Abnormals.Count == 0)
