@@ -12177,6 +12177,22 @@
       "weight": 120
     },
     {
+      "id": 1381,
+      "name": "Spellbook: Freezing Strike",
+      "kind": "etc",
+      "icon": "icon.etc_spell_books_defighter_i00",
+      "price": 2600,
+      "weight": 120
+    },
+    {
+      "id": 1382,
+      "name": "Spellbook: Power Break",
+      "kind": "etc",
+      "icon": "icon.etc_spell_books_defighter_i00",
+      "price": 2600,
+      "weight": 120
+    },
+    {
       "id": 1383,
       "name": "Spellbook: Poison",
       "kind": "etc",
@@ -12238,6 +12254,14 @@
       "kind": "etc",
       "icon": "icon.etc_spell_books_assistance_i00",
       "price": 2450,
+      "weight": 120
+    },
+    {
+      "id": 1391,
+      "name": "Spellbook: Empower",
+      "kind": "etc",
+      "icon": "icon.etc_spell_books_assistance_i00",
+      "price": 1250,
       "weight": 120
     },
     {
@@ -12345,6 +12369,14 @@
       "weight": 120
     },
     {
+      "id": 1408,
+      "name": "Spellbook: Mighty Servitor",
+      "kind": "etc",
+      "icon": "icon.etc_spell_books_summon_i00",
+      "price": 2450,
+      "weight": 120
+    },
+    {
       "id": 1409,
       "name": "Spellbook: Slow",
       "kind": "etc",
@@ -12413,6 +12445,14 @@
       "name": "Spellbook: Surrender To Earth",
       "kind": "etc",
       "icon": "icon.etc_spell_books_element_i00",
+      "price": 1250,
+      "weight": 120
+    },
+    {
+      "id": 1418,
+      "name": "Spellbook: Surrender To Poison",
+      "kind": "etc",
+      "icon": "icon.etc_spell_books_black_i00",
       "price": 1250,
       "weight": 120
     },
@@ -13299,6 +13339,14 @@
       "randomDamage": 20,
       "soulshots": 1,
       "spiritshots": 1
+    },
+    {
+      "id": 1512,
+      "name": "Spellbook: Confusion",
+      "kind": "etc",
+      "icon": "icon.etc_spell_books_defighter_i00",
+      "price": 1150,
+      "weight": 120
     },
     {
       "id": 1513,
@@ -43904,6 +43952,30 @@
       "kind": "etc",
       "icon": "icon.etc_spell_books_element_i00",
       "price": 3200,
+      "weight": 120
+    },
+    {
+      "id": 4908,
+      "name": "Spellbook: Shadow Spark",
+      "kind": "etc",
+      "icon": "icon.etc_spell_books_element_i00",
+      "price": 1250,
+      "weight": 120
+    },
+    {
+      "id": 4909,
+      "name": "Spellbook: Shadow Flare",
+      "kind": "etc",
+      "icon": "icon.etc_spell_books_element_i00",
+      "price": 3200,
+      "weight": 120
+    },
+    {
+      "id": 4910,
+      "name": "Spellbook: Vampiric Rage",
+      "kind": "etc",
+      "icon": "icon.etc_spell_books_assistance_i00",
+      "price": 1800,
       "weight": 120
     },
     {
@@ -76324,6 +76396,14 @@
       "name": "Ancient Spellbook: Volcano",
       "kind": "etc",
       "stackable": true,
+      "icon": "icon.etc_spell_books_element_i00",
+      "price": 40000,
+      "weight": 120
+    },
+    {
+      "id": 8900,
+      "name": "Ancient Spellbook: Cyclone",
+      "kind": "etc",
       "icon": "icon.etc_spell_books_element_i00",
       "price": 40000,
       "weight": 120
