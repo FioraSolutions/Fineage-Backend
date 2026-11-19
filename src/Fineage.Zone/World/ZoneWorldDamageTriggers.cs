@@ -167,7 +167,11 @@ public sealed partial class ZoneWorld
                     ApplyLethalEffect(caster, target, effect, template, level);
                     break;
                 case "RunAway":
+                case "Fear":
                     ApplyRunAway(caster, target, effect, skillId, now);
+                    break;
+                case "Confuse":
+                    ApplyConfuse(caster, target, effect, skillId, now);
                     break;
                 case "DispelByCategory":
                     if (!string.IsNullOrEmpty(effect.Slot) && effect.Rate > 0)

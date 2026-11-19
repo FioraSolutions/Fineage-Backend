@@ -37,7 +37,7 @@ public sealed partial class ZoneWorld
 
     /// <summary>Mobius Life Scavenge family: <c>HpByLevel</c> on a <c>CORPSE_MOB</c> plus <c>ConsumeBody</c>.</summary>
     static bool HasCorpseScavengePayload(SkillEffectCatalog.Effect[] rows) =>
-        RowsHave(rows, "HpByLevel") || RowsHave(rows, "ConsumeBody");
+        RowsHave(rows, "HpByLevel");
 
     internal bool HasPolearmSingleTarget(ZoneEntity player)
     {
@@ -558,6 +558,72 @@ public sealed partial class ZoneWorld
             QueueAttackerDamageLine(player, entity, damage, flags);
             _meleeHits.Add(new PendingMeleeHit(player.ObjectId, entity.ObjectId, damage, due, flags));
             queued++;
+        }
+    }
+
+
+    /// <summary>
+    /// Mobius Confuse (instant): chance-gated CONFUSED slot, then the victim attacks a random nearby creature.
+    /// </summary>
+    internal void ApplyConfuse(ZoneEntity caster, ZoneEntity target, SkillEffectCatalog.Effect effect, int skillId, long now)
+    {
+        if (target.Dead || target.CurHp <= 0)
+            return;
+        if (target.NpcType is "RaidBoss" or "GrandBoss" || target.RaidMinion)
+            return;
+        if (EffectChanceFails(effect))
+            return;
+        int timeSec = effect.ReadExtraInt("abnormalTime");
+        if (timeSec <= 0)
+            timeSec = effect.ReadExtraInt("time");
+        if (timeSec <= 0)
+            timeSec = 20;
+        long until = now + timeSec * 1000L;
+        target.Abnormals.RemoveAll(a => a.Slot.Equals("CONFUSED", StringComparison.OrdinalIgnoreCase));
+        target.Abnormals.Add(new ZoneAbnormalEntry
+        {
+            Id = skillId,
+            Value = 1,
+            SkillLevel = 1,
+            Slot = "CONFUSED",
+            ExpiresAtUnixMs = until
+        });
+        _withAbnormals.Add(target.ObjectId);
+        FanoutAbnormal(target);
+
+        int range = 2000;
+        var template = _game.Skills.Find(skillId);
+        if (template != null && template.EffectRange > 0)
+            range = template.EffectRange;
+        var candidates = new List<ZoneEntity>();
+        foreach (var entity in _byId.Values)
+        {
+            if (ReferenceEquals(entity, target) || entity.Dead || entity.CurHp <= 0)
+                continue;
+            if (entity.Kind == ZoneEntityKind.Npc && !entity.Attackable)
+                continue;
+            if (entity.Kind != ZoneEntityKind.Npc && entity.Kind != ZoneEntityKind.Player)
+                continue;
+            if (!ZoneCombat.InCastRange(target.X, target.Y, entity.X, entity.Y, range))
+                continue;
+            candidates.Add(entity);
+        }
+        if (candidates.Count == 0)
+            return;
+        var pick = candidates[_combatRandom.Next(candidates.Count)];
+        if (target.Kind == ZoneEntityKind.Npc && target.Attackable)
+        {
+            AddHate(target, pick, hate: 10_000, allowNpcAttacker: true);
+            if (!target.Running)
+            {
+                target.Running = true;
+                FanoutMoveType(target);
+            }
+        }
+        else if (target.Session is { } session)
+        {
+            session.AutoAttackTargetId = pick.ObjectId;
+            session.SelectedTargetId = pick.ObjectId;
         }
     }
 

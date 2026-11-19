@@ -53,19 +53,31 @@ public sealed partial class ZoneWorld
     }
 
     /// <summary>Damage for a Mobius attack skill at launch; consumes mpConsume and (physical) a charged soulshot.</summary>
-    int RollSkillDamage(ZoneEntity player, ZoneEntity target, SkillCombatData combat, int level)
+    /// <summary>
+    /// Mobius <c>Skill.getPower</c> DeathLink: <c>power * (2 - 2 * hp/maxHp)</c>. Full HP → 0; empty → 2×.
+    /// </summary>
+    internal static double DeathLinkPowerMul(int curHp, int maxHp) =>
+        maxHp <= 0 ? 1d : Math.Max(0d, 2d - 2d * Math.Clamp(curHp, 0, maxHp) / (double)maxHp);
+
+    int RollSkillDamage(ZoneEntity player, ZoneEntity target, SkillCombatData combat, int level, bool consumeResources = true)
     {
-        player.CurMp = Math.Max(0, player.CurMp - SkillMpCost(player, _game.Skills.Find(combat.SkillId), combat.MpAt(level)));
+        if (consumeResources)
+            player.CurMp = Math.Max(0, player.CurMp - SkillMpCost(player, _game.Skills.Find(combat.SkillId), combat.MpAt(level)));
         var ps = PlayerStats(player);
         double power = combat.PowerAt(level);
+        if (_skillEffects.TryGet(combat.SkillId, out var deathRows) && RowsHave(deathRows, "DeathLink"))
+            power *= DeathLinkPowerMul(player.CurHp, player.MaxHp);
         if (!combat.IsPhysical)
         {
             double mDef = StatMods(target).Apply(CombatStat.MDef, target.MDef > 0 ? target.MDef : Math.Max(1, target.Level) * 30d);
             // Mobius calcMagicDam: blessed spiritshot ×4 M.Atk, spiritshot ×2; the charge fires on this cast.
-            int spirit = player.SpiritshotCharge;
-            player.SpiritshotCharge = 0;
-            if (spirit > 0)
-                RechargeAutoShots(player);
+            int spirit = consumeResources ? player.SpiritshotCharge : 0;
+            if (consumeResources)
+            {
+                player.SpiritshotCharge = 0;
+                if (spirit > 0)
+                    RechargeAutoShots(player);
+            }
             double mAtk = ps.MAtk * ZoneCombat.SpiritshotMAtkMultiplier(spirit);
             // Mobius skill magicLevel (skill-combat.json); missing table → attacker level.
             int magicLevel = combat.MagicLevelAt(level);
