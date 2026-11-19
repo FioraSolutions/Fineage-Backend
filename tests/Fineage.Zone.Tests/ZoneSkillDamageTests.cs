@@ -14,7 +14,7 @@ public sealed class ZoneSkillDamageTests
         Assert.True(cat.TryGet(3, out var ps));      // Power Strike
         Assert.Equal(SkillDamageKind.Physical, ps.Kind);
         Assert.Equal(30, ps.PowerAt(1));
-        Assert.Equal(3000, ps.ReuseDelayMs);
+        Assert.Equal(13_000, ps.ReuseDelayMs);
         Assert.Equal(720, ps.CoolTimeMs);
         Assert.True(cat.TryGet(1177, out var ws));   // Wind Strike
         Assert.True(ws.Magic);

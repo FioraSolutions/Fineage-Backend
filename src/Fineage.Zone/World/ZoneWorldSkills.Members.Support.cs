@@ -44,14 +44,14 @@ public sealed partial class ZoneWorld
             return SkillProtocol.Range;
 
         player.CurMp = Math.Max(0, player.CurMp - levelData.MpConsume);
-        if (template.ReuseDelayMs > 0)
-            player.SkillReuseUntilMs[request.SkillId] = now + template.ReuseDelayMs;
+        if (template.ReuseDelayMsAt(level) > 0)
+            player.SkillReuseUntilMs[request.SkillId] = now + template.ReuseDelayMsAt(level);
 
         if (levelData.Power <= 0)
             throw new InvalidOperationException(
                 $"skill {request.SkillId} lv{level} heal power missing — refuse invented heal amount");
         int heal = levelData.Power;
-        var (hitMs, reuseMs) = ScaledSkillTimes(player, template);
+        var (hitMs, reuseMs) = ScaledSkillTimes(player, template, level);
         if (reuseMs > 0)
             player.SkillReuseUntilMs[request.SkillId] = now + reuseMs;
 
@@ -125,15 +125,15 @@ public sealed partial class ZoneWorld
         }
 
         player.CurMp = Math.Max(0, player.CurMp - levelData.MpConsume);
-        if (template.ReuseDelayMs > 0)
-            player.SkillReuseUntilMs[request.SkillId] = now + template.ReuseDelayMs;
+        if (template.ReuseDelayMsAt(level) > 0)
+            player.SkillReuseUntilMs[request.SkillId] = now + template.ReuseDelayMsAt(level);
 
         double power = SkillResurrectRestorePercent(player, levelData.Power);
         long restoreExp = 0;
         if (target.ExpBeforeDeath > target.Exp && power > 0d)
             restoreExp = (long)Math.Round((target.ExpBeforeDeath - target.Exp) * power / 100d);
 
-        var (hitMs, reuseMs) = ScaledSkillTimes(player, template);
+        var (hitMs, reuseMs) = ScaledSkillTimes(player, template, level);
         if (reuseMs > 0)
             player.SkillReuseUntilMs[request.SkillId] = now + reuseMs;
 
@@ -201,7 +201,7 @@ public sealed partial class ZoneWorld
         UpdatePvPStatus(player, target, now);
 
         player.CurMp = Math.Max(0, player.CurMp - levelData.MpConsume);
-        var (hitMs, reuseMs) = ScaledSkillTimes(player, template);
+        var (hitMs, reuseMs) = ScaledSkillTimes(player, template, level);
         if (reuseMs > 0)
             player.SkillReuseUntilMs[request.SkillId] = now + reuseMs;
 
@@ -278,7 +278,7 @@ public sealed partial class ZoneWorld
         UpdatePvPStatus(player, target, now);
 
         player.CurMp = Math.Max(0, player.CurMp - levelData.MpConsume);
-        var (hitMs, reuseMs) = ScaledSkillTimes(player, template);
+        var (hitMs, reuseMs) = ScaledSkillTimes(player, template, level);
         if (reuseMs > 0)
             player.SkillReuseUntilMs[request.SkillId] = now + reuseMs;
 
@@ -309,11 +309,12 @@ public sealed partial class ZoneWorld
     /// <c>-effectPoint</c> hate, a positive one reduces it, 0 does nothing. Damage skills keep their own
     /// <c>addDamageHate(damage · 100 / (level + 7))</c> in the melee/skill-damage paths.
     /// Mobius <c>Creature.callSkill</c> after <c>activateSkill</c>: an attackable target is added to
-    /// <c>attackByList</c> (except Lure 51 / Temptation 511), but the AI is only notified as attacked
-    /// when the skill is negative, has no <c>EffectType.HATE</c> (<c>DeleteHate</c> / <c>DeleteHateOfMe</c>),
-    /// and is not <c>AbnormalType.TURN_PASSIVE</c>. Trick (11) carries DeleteHateOfMe, so an idle mob
-    /// must not start attacking the caster. A mob already in combat keeps its current target; the
-    /// hate-removal payloads still run.
+    /// <c>attackByList</c> except for AddHate-only utility skills, and the AI is only notified as
+    /// attacked when the skill is negative, has no <c>EffectType.HATE</c> (<c>DeleteHate</c> /
+    /// <c>DeleteHateOfMe</c>) or <c>AddHate</c>, and is not <c>AbnormalType.TURN_PASSIVE</c>. Trick
+    /// carries DeleteHateOfMe, so an idle mob must not start attacking the caster. AddHate payloads
+    /// write hate themselves (and wake the AI). A mob already in combat keeps its current target;
+    /// the hate-removal payloads still run.
     /// </summary>
     void ApplyEffectPointHate(
         ZoneEntity caster, ZoneEntity target, int effectPoint, SkillDefinition template, int skillId)
@@ -331,20 +332,26 @@ public sealed partial class ZoneWorld
             ReduceHate(target, caster, effectPoint);
     }
 
-    const int LureSkillId = 51;
-    const int TemptationSkillId = 511;
-
     /// <summary>
-    /// Mobius <c>callSkill</c> skips <c>notifyActionAttacked</c> for EffectType.HATE and TURN_PASSIVE,
-    /// and skips <c>attackByList</c> for Lure / Temptation.
+    /// Mobius <c>callSkill</c> skips <c>notifyActionAttacked</c> for EffectType.HATE, AddHate
+    /// payloads, and TURN_PASSIVE. Classification is by effect/abnormal, not by skill id.
     /// </summary>
     bool SuppressesAttackNotify(SkillDefinition template, int skillId)
     {
-        if (skillId is LureSkillId or TemptationSkillId)
-            return true;
         if (IsTurnPassive(template.AbnormalType))
             return true;
-        return HasHateEffectType(skillId);
+        return HasHateEffectType(skillId) || HasAddHatePayload(skillId);
+    }
+
+    /// <summary>The skill's <c>for</c> payload is <c>AddHate</c> (Lure, Temptation, and any peer).</summary>
+    bool HasAddHatePayload(int skillId)
+    {
+        foreach (var effect in EffectsOf(skillId))
+        {
+            if (effect.Name.Equals("AddHate", StringComparison.OrdinalIgnoreCase))
+                return true;
+        }
+        return false;
     }
 
     /// <summary>Mobius <c>EffectType.HATE</c>: <c>DeleteHate</c> and <c>DeleteHateOfMe</c> (Trick, Bluff, Forget).</summary>

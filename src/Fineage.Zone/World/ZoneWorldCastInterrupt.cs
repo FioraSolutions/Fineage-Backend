@@ -109,7 +109,7 @@ public sealed partial class ZoneWorld
 
         if (!ReferenceEquals(player, target!))
         {
-            if (hit.EscapeRange > 0 && !ZoneCombat.InCastRange(player.X, player.Y, target!.X, target.Y, hit.EscapeRange + ZoneCombat.HitRangeTolerance))
+            if (hit.EscapeRange > 0 && !ZoneCombat.Within(player.X, player.Y, target!.X, target.Y, SkillCastReach(hit.EscapeRange, player, target)))
             {
                 AbortCast(player, "escaped", notify: false);
                 return;

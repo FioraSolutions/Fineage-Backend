@@ -69,6 +69,12 @@ public sealed class ZoneLureTests
 
         Assert.Equal(500, mob.HateList[player.ObjectId]);
         Assert.Equal(player.ObjectId, mob.AggroTargetId);
+        // Attack intention itself switches the NPC to running (Mobius setIntention(ATTACK) → setRunning).
+        Assert.True(mob.Running);
+
+        await kit.World.RunCombatTickAsync(CancellationToken.None);
+        Assert.True(mob.Running);
+        Assert.True(mob.MoveActive, "lured mob out of melee should chase");
     }
 
     [Fact]

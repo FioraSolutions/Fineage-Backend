@@ -10,7 +10,7 @@
       "targetType": "ONE",
       "castRange": 40,
       "hitTimeMs": 1733,
-      "reuseDelayMs": 3000,
+      "reuseDelayMs": 13000,
       "levelData": [
         {
           "level": 1,
@@ -325,7 +325,7 @@
       "targetType": "ONE",
       "castRange": 600,
       "hitTimeMs": 1500,
-      "reuseDelayMs": 5000,
+      "reuseDelayMs": 20000,
       "levelData": [
         {
           "level": 1,
@@ -493,7 +493,7 @@
       "targetType": "ONE",
       "castRange": 40,
       "hitTimeMs": 1080,
-      "reuseDelayMs": 3000,
+      "reuseDelayMs": 13000,
       "levelData": [
         {
           "level": 1,
@@ -585,7 +585,7 @@
       "targetType": "SELF",
       "castRange": 40,
       "hitTimeMs": 1000,
-      "reuseDelayMs": 30000,
+      "reuseDelayMs": 80000,
       "levelData": [
         {
           "level": 1,
@@ -618,7 +618,7 @@
       "targetType": "ONE",
       "castRange": 40,
       "hitTimeMs": 1733,
-      "reuseDelayMs": 3000,
+      "reuseDelayMs": 11000,
       "levelData": [
         {
           "level": 1,
@@ -882,7 +882,7 @@
       "targetType": "ONE",
       "castRange": 600,
       "hitTimeMs": 1900,
-      "reuseDelayMs": 3000,
+      "reuseDelayMs": 10000,
       "levelData": [
         {
           "level": 1,
@@ -1194,7 +1194,7 @@
       "targetType": "AREA",
       "castRange": 500,
       "hitTimeMs": 1900,
-      "reuseDelayMs": 3000,
+      "reuseDelayMs": 13000,
       "levelData": [
         {
           "level": 1,
@@ -1560,7 +1560,7 @@
       "targetType": "FRONT_AREA",
       "castRange": 40,
       "hitTimeMs": 720,
-      "reuseDelayMs": 2000,
+      "reuseDelayMs": 6000,
       "levelData": [
         {
           "level": 1,
@@ -1916,7 +1916,7 @@
       "targetType": "SELF",
       "castRange": 40,
       "hitTimeMs": 6000,
-      "reuseDelayMs": 5000,
+      "reuseDelayMs": 20000,
       "levelData": [
         {
           "level": 1,
@@ -2126,7 +2126,7 @@
       "targetType": "ONE",
       "castRange": 600,
       "hitTimeMs": 1200,
-      "reuseDelayMs": 3000,
+      "reuseDelayMs": 12000,
       "levelData": [
         {
           "level": 1,
@@ -2258,7 +2258,7 @@
       "targetType": "SELF",
       "castRange": 40,
       "hitTimeMs": 300000,
-      "reuseDelayMs": 5000,
+      "reuseDelayMs": 20000,
       "levelData": [
         {
           "level": 1,
@@ -2282,7 +2282,7 @@
       "targetType": "ONE",
       "castRange": 600,
       "hitTimeMs": 1500,
-      "reuseDelayMs": 15000,
+      "reuseDelayMs": 60000,
       "levelData": [
         {
           "level": 1,
@@ -2714,7 +2714,7 @@
       "targetType": "ONE",
       "castRange": 40,
       "hitTimeMs": 1080,
-      "reuseDelayMs": 3000,
+      "reuseDelayMs": 11000,
       "levelData": [
         {
           "level": 1,
@@ -2925,7 +2925,7 @@
       "targetType": "FRONT_AREA",
       "castRange": 40,
       "hitTimeMs": 783,
-      "reuseDelayMs": 3000,
+      "reuseDelayMs": 10000,
       "levelData": [
         {
           "level": 1,
@@ -3281,7 +3281,7 @@
       "targetType": "AURA",
       "castRange": 40,
       "hitTimeMs": 1200,
-      "reuseDelayMs": 8000,
+      "reuseDelayMs": 3000,
       "levelData": [
         {
           "level": 1,
@@ -3595,7 +3595,7 @@
       "targetType": "ONE",
       "castRange": 900,
       "hitTimeMs": 3000,
-      "reuseDelayMs": 3000,
+      "reuseDelayMs": 25000,
       "levelData": [
         {
           "level": 1,
@@ -3910,7 +3910,7 @@
       "targetType": "SELF",
       "castRange": 40,
       "hitTimeMs": 1000,
-      "reuseDelayMs": 2000,
+      "reuseDelayMs": 6000,
       "levelData": [
         {
           "level": 1,
@@ -3953,7 +3953,7 @@
       "targetType": "SELF",
       "castRange": 40,
       "hitTimeMs": 6000,
-      "reuseDelayMs": 5000,
+      "reuseDelayMs": 20000,
       "levelData": [
         {
           "level": 1,
@@ -4037,7 +4037,7 @@
       "targetType": "AREA",
       "castRange": 500,
       "hitTimeMs": 3200,
-      "reuseDelayMs": 6000,
+      "reuseDelayMs": 25000,
       "levelData": [
         {
           "level": 1,
@@ -4304,7 +4304,7 @@
       "targetType": "SELF",
       "castRange": 40,
       "hitTimeMs": 15000,
-      "reuseDelayMs": 5000,
+      "reuseDelayMs": 20000,
       "levelData": [
         {
           "level": 1,
@@ -4398,7 +4398,7 @@
       "targetType": "UNLOCKABLE",
       "castRange": 40,
       "hitTimeMs": 2500,
-      "reuseDelayMs": 30000,
+      "reuseDelayMs": 120000,
       "levelData": [
         {
           "level": 1,
@@ -4554,7 +4554,7 @@
       "targetType": "ONE",
       "castRange": 40,
       "hitTimeMs": 1000,
-      "reuseDelayMs": 6000,
+      "reuseDelayMs": 3000,
       "levelData": [
         {
           "level": 1,
@@ -4964,7 +4964,7 @@
       "targetType": "ONE",
       "castRange": 40,
       "hitTimeMs": 1600,
-      "reuseDelayMs": 4000,
+      "reuseDelayMs": 15000,
       "levelData": [
         {
           "level": 1,
@@ -5175,7 +5175,7 @@
       "targetType": "ONE",
       "castRange": 40,
       "hitTimeMs": 1080,
-      "reuseDelayMs": 3000,
+      "reuseDelayMs": 11000,
       "levelData": [
         {
           "level": 1,
@@ -5491,7 +5491,7 @@
       "targetType": "SELF",
       "castRange": 40,
       "hitTimeMs": 6000,
-      "reuseDelayMs": 5000,
+      "reuseDelayMs": 20000,
       "levelData": [
         {
           "level": 1,
@@ -5585,7 +5585,7 @@
       "targetType": "SELF",
       "castRange": 40,
       "hitTimeMs": 1500,
-      "reuseDelayMs": 1000,
+      "reuseDelayMs": 3000,
       "levelData": [
         {
           "level": 1,
@@ -5624,7 +5624,7 @@
       "targetType": "AREA",
       "castRange": 500,
       "hitTimeMs": 2000,
-      "reuseDelayMs": 5000,
+      "reuseDelayMs": 20000,
       "levelData": [
         {
           "level": 1,
@@ -5920,7 +5920,7 @@
       "targetType": "AURA",
       "castRange": 40,
       "hitTimeMs": 1067,
-      "reuseDelayMs": 4000,
+      "reuseDelayMs": 17000,
       "levelData": [
         {
           "level": 1,
@@ -6256,7 +6256,7 @@
       "targetType": "SELF",
       "castRange": 40,
       "hitTimeMs": 4000,
-      "reuseDelayMs": 2000,
+      "reuseDelayMs": 6000,
       "levelData": [
         {
           "level": 1,
@@ -6299,7 +6299,7 @@
       "targetType": "SELF",
       "castRange": 40,
       "hitTimeMs": 4000,
-      "reuseDelayMs": 3000,
+      "reuseDelayMs": 10000,
       "levelData": [
         {
           "level": 1,
@@ -6396,7 +6396,7 @@
       "targetType": "CORPSE_MOB",
       "castRange": 400,
       "hitTimeMs": 1500,
-      "reuseDelayMs": 5000,
+      "reuseDelayMs": 20000,
       "levelData": [
         {
           "level": 1,
@@ -6531,7 +6531,7 @@
       "targetType": "AURA",
       "castRange": 40,
       "hitTimeMs": 1080,
-      "reuseDelayMs": 5000,
+      "reuseDelayMs": 20000,
       "levelData": [
         {
           "level": 1,
@@ -6852,7 +6852,7 @@
       "targetType": "ONE",
       "castRange": 400,
       "hitTimeMs": 1900,
-      "reuseDelayMs": 1000,
+      "reuseDelayMs": 4000,
       "levelData": [
         {
           "level": 1,
@@ -7193,7 +7193,7 @@
       "targetType": "ONE",
       "castRange": 600,
       "hitTimeMs": 1900,
-      "reuseDelayMs": 4000,
+      "reuseDelayMs": 15000,
       "levelData": [
         {
           "level": 1,
@@ -7604,7 +7604,7 @@
       "targetType": "ONE",
       "castRange": 700,
       "hitTimeMs": 3200,
-      "reuseDelayMs": 6000,
+      "reuseDelayMs": 25000,
       "levelData": [
         {
           "level": 1,
@@ -7815,7 +7815,7 @@
       "targetType": "SELF",
       "castRange": 40,
       "hitTimeMs": 5000,
-      "reuseDelayMs": 3000,
+      "reuseDelayMs": 10000,
       "levelData": [
         {
           "level": 1,
@@ -8346,7 +8346,7 @@
       "targetType": "SELF",
       "castRange": 40,
       "hitTimeMs": 4000,
-      "reuseDelayMs": 2000,
+      "reuseDelayMs": 6000,
       "levelData": [
         {
           "level": 1,
@@ -8389,7 +8389,7 @@
       "targetType": "ONE",
       "castRange": 600,
       "hitTimeMs": 3000,
-      "reuseDelayMs": 5000,
+      "reuseDelayMs": 30000,
       "levelData": [
         {
           "level": 1,
@@ -8529,7 +8529,7 @@
       "targetType": "SELF",
       "castRange": 40,
       "hitTimeMs": 6000,
-      "reuseDelayMs": 5000,
+      "reuseDelayMs": 20000,
       "levelData": [
         {
           "level": 1,
@@ -8613,7 +8613,7 @@
       "targetType": "ONE",
       "castRange": 600,
       "hitTimeMs": 1500,
-      "reuseDelayMs": 2000,
+      "reuseDelayMs": 8000,
       "levelData": [
         {
           "level": 1,
@@ -8830,7 +8830,7 @@
       "targetType": "ONE",
       "castRange": 600,
       "hitTimeMs": 3000,
-      "reuseDelayMs": 4000,
+      "reuseDelayMs": 15000,
       "levelData": [
         {
           "level": 1,
@@ -9324,7 +9324,7 @@
       "targetType": "SELF",
       "castRange": 40,
       "hitTimeMs": 4000,
-      "reuseDelayMs": 2000,
+      "reuseDelayMs": 6000,
       "levelData": [
         {
           "level": 1,
@@ -9369,7 +9369,7 @@
       "targetType": "SELF",
       "castRange": 40,
       "hitTimeMs": 1500,
-      "reuseDelayMs": 3000,
+      "reuseDelayMs": 10000,
       "levelData": [
         {
           "level": 1,
@@ -9394,7 +9394,7 @@
       "targetType": "SELF",
       "castRange": 40,
       "hitTimeMs": 2000,
-      "reuseDelayMs": 23000,
+      "reuseDelayMs": 90000,
       "levelData": [
         {
           "level": 1,
@@ -9422,7 +9422,7 @@
       "targetType": "SELF",
       "castRange": 40,
       "hitTimeMs": 4000,
-      "reuseDelayMs": 2000,
+      "reuseDelayMs": 6000,
       "levelData": [
         {
           "level": 1,
@@ -9458,7 +9458,7 @@
       "targetType": "SELF",
       "castRange": 40,
       "hitTimeMs": 1500,
-      "reuseDelayMs": 45000,
+      "reuseDelayMs": 180000,
       "levelData": [
         {
           "level": 1,
@@ -9491,7 +9491,7 @@
       "targetType": "SELF",
       "castRange": 40,
       "hitTimeMs": 1500,
-      "reuseDelayMs": 3000,
+      "reuseDelayMs": 10000,
       "levelData": [
         {
           "level": 1,
@@ -9516,7 +9516,7 @@
       "targetType": "ONE",
       "castRange": 40,
       "hitTimeMs": 1360,
-      "reuseDelayMs": 300000,
+      "reuseDelayMs": 120000,
       "levelData": [
         {
           "level": 1,
@@ -9563,7 +9563,7 @@
       "targetType": "SELF",
       "castRange": 40,
       "hitTimeMs": 1500,
-      "reuseDelayMs": 3000,
+      "reuseDelayMs": 10000,
       "levelData": [
         {
           "level": 1,
@@ -9604,7 +9604,7 @@
       "targetType": "SELF",
       "castRange": 40,
       "hitTimeMs": 2000,
-      "reuseDelayMs": 23000,
+      "reuseDelayMs": 90000,
       "levelData": [
         {
           "level": 1,
@@ -9632,7 +9632,7 @@
       "targetType": "AURA",
       "castRange": 40,
       "hitTimeMs": 1833,
-      "reuseDelayMs": 15000,
+      "reuseDelayMs": 60000,
       "levelData": [
         {
           "level": 1,
@@ -9681,7 +9681,7 @@
       "targetType": "SELF",
       "castRange": 40,
       "hitTimeMs": 4000,
-      "reuseDelayMs": 2000,
+      "reuseDelayMs": 6000,
       "levelData": [
         {
           "level": 1,
@@ -9726,7 +9726,7 @@
       "targetType": "SELF",
       "castRange": 40,
       "hitTimeMs": 1500,
-      "reuseDelayMs": 3000,
+      "reuseDelayMs": 10000,
       "levelData": [
         {
           "level": 1,
@@ -9751,7 +9751,7 @@
       "targetType": "SELF",
       "castRange": 40,
       "hitTimeMs": 1500,
-      "reuseDelayMs": 3000,
+      "reuseDelayMs": 10000,
       "levelData": [
         {
           "level": 1,
@@ -9776,7 +9776,7 @@
       "targetType": "SELF",
       "castRange": 40,
       "hitTimeMs": 4000,
-      "reuseDelayMs": 2000,
+      "reuseDelayMs": 6000,
       "levelData": [
         {
           "level": 1,
@@ -10254,7 +10254,7 @@
       "targetType": "SELF",
       "castRange": 40,
       "hitTimeMs": 1500,
-      "reuseDelayMs": 75000,
+      "reuseDelayMs": 300000,
       "levelData": [
         {
           "level": 1,
@@ -10287,7 +10287,7 @@
       "targetType": "ONE",
       "castRange": 40,
       "hitTimeMs": 1604,
-      "reuseDelayMs": 2000,
+      "reuseDelayMs": 7000,
       "levelData": [
         {
           "level": 1,
@@ -10472,7 +10472,7 @@
       "targetType": "ONE",
       "castRange": 40,
       "hitTimeMs": 1080,
-      "reuseDelayMs": 3000,
+      "reuseDelayMs": 13000,
       "levelData": [
         {
           "level": 1,
@@ -10547,7 +10547,7 @@
       "targetType": "AREA",
       "castRange": 40,
       "hitTimeMs": 1500,
-      "reuseDelayMs": 2000,
+      "reuseDelayMs": 8000,
       "levelData": [
         {
           "level": 1,
@@ -10656,7 +10656,7 @@
       "targetType": "ONE",
       "castRange": 40,
       "hitTimeMs": 2000,
-      "reuseDelayMs": 15000,
+      "reuseDelayMs": 60000,
       "levelData": [
         {
           "level": 1,
@@ -10719,7 +10719,7 @@
       "targetType": "SELF",
       "castRange": 40,
       "hitTimeMs": 1500,
-      "reuseDelayMs": 3000,
+      "reuseDelayMs": 10000,
       "levelData": [
         {
           "level": 1,
@@ -10754,7 +10754,7 @@
       "targetType": "ONE",
       "castRange": 40,
       "hitTimeMs": 1080,
-      "reuseDelayMs": 3000,
+      "reuseDelayMs": 13000,
       "levelData": [
         {
           "level": 1,
@@ -10900,7 +10900,7 @@
       "targetType": "ONE",
       "castRange": 900,
       "hitTimeMs": 3000,
-      "reuseDelayMs": 3000,
+      "reuseDelayMs": 10000,
       "levelData": [
         {
           "level": 1,
@@ -11246,7 +11246,7 @@
       "targetType": "ONE",
       "castRange": 600,
       "hitTimeMs": 3000,
-      "reuseDelayMs": 2000,
+      "reuseDelayMs": 7000,
       "levelData": [
         {
           "level": 1,
@@ -11413,7 +11413,7 @@
       "targetType": "AREA_CORPSE_MOB",
       "castRange": 400,
       "hitTimeMs": 1500,
-      "reuseDelayMs": 5000,
+      "reuseDelayMs": 20000,
       "levelData": [
         {
           "level": 1,
@@ -11469,7 +11469,7 @@
       "targetType": "SELF",
       "castRange": 40,
       "hitTimeMs": 1500,
-      "reuseDelayMs": 3000,
+      "reuseDelayMs": 10000,
       "levelData": [
         {
           "level": 1,
@@ -11494,7 +11494,7 @@
       "targetType": "ONE",
       "castRange": 600,
       "hitTimeMs": 3000,
-      "reuseDelayMs": 2000,
+      "reuseDelayMs": 8000,
       "levelData": [
         {
           "level": 1,
@@ -11733,7 +11733,7 @@
       "targetType": "ONE",
       "castRange": 500,
       "hitTimeMs": 1200,
-      "reuseDelayMs": 5000,
+      "reuseDelayMs": 20000,
       "levelData": [
         {
           "level": 1,
@@ -11851,7 +11851,7 @@
       "targetType": "AREA",
       "castRange": 40,
       "hitTimeMs": 2000,
-      "reuseDelayMs": 5000,
+      "reuseDelayMs": 40000,
       "levelData": [
         {
           "level": 1,
@@ -11945,7 +11945,7 @@
       "targetType": "SELF",
       "castRange": 40,
       "hitTimeMs": 2000,
-      "reuseDelayMs": 30000,
+      "reuseDelayMs": 120000,
       "levelData": [
         {
           "level": 1,
@@ -11973,7 +11973,7 @@
       "targetType": "SELF",
       "castRange": 40,
       "hitTimeMs": 1000,
-      "reuseDelayMs": 900000,
+      "reuseDelayMs": 1800000,
       "levelData": [
         {
           "level": 1,
@@ -12006,7 +12006,7 @@
       "targetType": "SELF",
       "castRange": 40,
       "hitTimeMs": 1000,
-      "reuseDelayMs": 900000,
+      "reuseDelayMs": 1800000,
       "levelData": [
         {
           "level": 1,
@@ -12039,7 +12039,7 @@
       "targetType": "SELF",
       "castRange": 40,
       "hitTimeMs": 1500,
-      "reuseDelayMs": 3000,
+      "reuseDelayMs": 10000,
       "levelData": [
         {
           "level": 1,
@@ -12115,7 +12115,7 @@
       "targetType": "ONE",
       "castRange": 600,
       "hitTimeMs": 1200,
-      "reuseDelayMs": 2000,
+      "reuseDelayMs": 8000,
       "levelData": [
         {
           "level": 1,
@@ -12291,7 +12291,7 @@
       "targetType": "AURA",
       "castRange": 40,
       "hitTimeMs": 1200,
-      "reuseDelayMs": 2000,
+      "reuseDelayMs": 8000,
       "levelData": [
         {
           "level": 1,
@@ -12444,7 +12444,7 @@
       "targetType": "ONE",
       "castRange": 40,
       "hitTimeMs": 1604,
-      "reuseDelayMs": 3000,
+      "reuseDelayMs": 13000,
       "levelData": [
         {
           "level": 1,
@@ -12590,7 +12590,7 @@
       "targetType": "SELF",
       "castRange": 40,
       "hitTimeMs": 1500,
-      "reuseDelayMs": 150000,
+      "reuseDelayMs": 600000,
       "levelData": [
         {
           "level": 1,
@@ -12655,7 +12655,7 @@
       "targetType": "ONE",
       "castRange": 600,
       "hitTimeMs": 1200,
-      "reuseDelayMs": 2000,
+      "reuseDelayMs": 6000,
       "levelData": [
         {
           "level": 1,
@@ -12798,7 +12798,7 @@
       "targetType": "SELF",
       "castRange": 40,
       "hitTimeMs": 4000,
-      "reuseDelayMs": 2000,
+      "reuseDelayMs": 6000,
       "levelData": [
         {
           "level": 1,
@@ -12843,7 +12843,7 @@
       "targetType": "ONE",
       "castRange": 600,
       "hitTimeMs": 3000,
-      "reuseDelayMs": 2000,
+      "reuseDelayMs": 7000,
       "levelData": [
         {
           "level": 1,
@@ -12991,7 +12991,7 @@
       "targetType": "ONE",
       "castRange": 600,
       "hitTimeMs": 3000,
-      "reuseDelayMs": 2000,
+      "reuseDelayMs": 9000,
       "levelData": [
         {
           "level": 1,
@@ -13060,7 +13060,7 @@
       "targetType": "SELF",
       "castRange": 40,
       "hitTimeMs": 1500,
-      "reuseDelayMs": 3000,
+      "reuseDelayMs": 10000,
       "levelData": [
         {
           "level": 1,
@@ -13093,7 +13093,7 @@
       "targetType": "SELF",
       "castRange": 40,
       "hitTimeMs": 1500,
-      "reuseDelayMs": 3000,
+      "reuseDelayMs": 10000,
       "levelData": [
         {
           "level": 1,
@@ -13188,7 +13188,7 @@
       "targetType": "SELF",
       "castRange": 40,
       "hitTimeMs": 1500,
-      "reuseDelayMs": 150000,
+      "reuseDelayMs": 600000,
       "levelData": [
         {
           "level": 1,
@@ -14739,7 +14739,7 @@
       "targetType": "SELF",
       "castRange": 40,
       "hitTimeMs": 1500,
-      "reuseDelayMs": 150000,
+      "reuseDelayMs": 600000,
       "levelData": [
         {
           "level": 1,
@@ -14780,7 +14780,7 @@
       "targetType": "SELF",
       "castRange": 40,
       "hitTimeMs": 1500,
-      "reuseDelayMs": 900000,
+      "reuseDelayMs": 3600000,
       "levelData": [
         {
           "level": 1,
@@ -14803,7 +14803,7 @@
       "targetType": "ONE",
       "castRange": 40,
       "hitTimeMs": 1080,
-      "reuseDelayMs": 3000,
+      "reuseDelayMs": 13000,
       "levelData": [
         {
           "level": 1,
@@ -17655,7 +17655,7 @@
       "targetType": "ONE",
       "castRange": 40,
       "hitTimeMs": 1080,
-      "reuseDelayMs": 3000,
+      "reuseDelayMs": 11000,
       "levelData": [
         {
           "level": 1,
@@ -18589,7 +18589,7 @@
       "targetType": "SELF",
       "castRange": 40,
       "hitTimeMs": 4000,
-      "reuseDelayMs": 3000,
+      "reuseDelayMs": 10000,
       "levelData": [
         {
           "level": 1,
@@ -20689,7 +20689,7 @@
       "targetType": "FRONT_AREA",
       "castRange": 40,
       "hitTimeMs": 1080,
-      "reuseDelayMs": 4000,
+      "reuseDelayMs": 17000,
       "levelData": [
         {
           "level": 1,
@@ -22507,7 +22507,7 @@
       "targetType": "ONE",
       "castRange": 40,
       "hitTimeMs": 1800,
-      "reuseDelayMs": 3000,
+      "reuseDelayMs": 10000,
       "levelData": [
         {
           "level": 1,
@@ -22611,7 +22611,7 @@
       "targetType": "ONE",
       "castRange": 40,
       "hitTimeMs": 1080,
-      "reuseDelayMs": 3000,
+      "reuseDelayMs": 13000,
       "levelData": [
         {
           "level": 1,
@@ -23587,7 +23587,7 @@
       "targetType": "ONE",
       "castRange": 40,
       "hitTimeMs": 1080,
-      "reuseDelayMs": 3000,
+      "reuseDelayMs": 13000,
       "levelData": [
         {
           "level": 1,
@@ -23909,7 +23909,7 @@
       "targetType": "ONE",
       "castRange": 40,
       "hitTimeMs": 1667,
-      "reuseDelayMs": 5000,
+      "reuseDelayMs": 20000,
       "levelData": [
         {
           "level": 1,
@@ -24101,7 +24101,7 @@
       "targetType": "ONE",
       "castRange": 600,
       "hitTimeMs": 5000,
-      "reuseDelayMs": 3000,
+      "reuseDelayMs": 10000,
       "levelData": [
         {
           "level": 1,
@@ -24414,7 +24414,7 @@
       "targetType": "ONE",
       "castRange": 40,
       "hitTimeMs": 1080,
-      "reuseDelayMs": 3000,
+      "reuseDelayMs": 11000,
       "levelData": [
         {
           "level": 1,
@@ -24730,7 +24730,7 @@
       "targetType": "PARTY",
       "castRange": 40,
       "hitTimeMs": 2500,
-      "reuseDelayMs": 3000,
+      "reuseDelayMs": 10000,
       "levelData": [
         {
           "level": 1,
@@ -24756,7 +24756,7 @@
       "targetType": "PARTY",
       "castRange": 40,
       "hitTimeMs": 2500,
-      "reuseDelayMs": 3000,
+      "reuseDelayMs": 10000,
       "levelData": [
         {
           "level": 1,
@@ -24782,7 +24782,7 @@
       "targetType": "PARTY",
       "castRange": 40,
       "hitTimeMs": 2500,
-      "reuseDelayMs": 3000,
+      "reuseDelayMs": 10000,
       "levelData": [
         {
           "level": 1,
@@ -24808,7 +24808,7 @@
       "targetType": "PARTY",
       "castRange": 40,
       "hitTimeMs": 2500,
-      "reuseDelayMs": 3000,
+      "reuseDelayMs": 10000,
       "levelData": [
         {
           "level": 1,
@@ -24834,7 +24834,7 @@
       "targetType": "PARTY",
       "castRange": 40,
       "hitTimeMs": 2500,
-      "reuseDelayMs": 3000,
+      "reuseDelayMs": 10000,
       "levelData": [
         {
           "level": 1,
@@ -24860,7 +24860,7 @@
       "targetType": "PARTY",
       "castRange": 40,
       "hitTimeMs": 2500,
-      "reuseDelayMs": 3000,
+      "reuseDelayMs": 10000,
       "levelData": [
         {
           "level": 1,
@@ -24886,7 +24886,7 @@
       "targetType": "PARTY",
       "castRange": 40,
       "hitTimeMs": 2500,
-      "reuseDelayMs": 3000,
+      "reuseDelayMs": 10000,
       "levelData": [
         {
           "level": 1,
@@ -24912,7 +24912,7 @@
       "targetType": "PARTY",
       "castRange": 40,
       "hitTimeMs": 2500,
-      "reuseDelayMs": 3000,
+      "reuseDelayMs": 10000,
       "levelData": [
         {
           "level": 1,
@@ -24941,7 +24941,7 @@
       "targetType": "PARTY",
       "castRange": 40,
       "hitTimeMs": 2500,
-      "reuseDelayMs": 3000,
+      "reuseDelayMs": 10000,
       "levelData": [
         {
           "level": 1,
@@ -24970,7 +24970,7 @@
       "targetType": "PARTY",
       "castRange": 40,
       "hitTimeMs": 2500,
-      "reuseDelayMs": 3000,
+      "reuseDelayMs": 10000,
       "levelData": [
         {
           "level": 1,
@@ -24999,7 +24999,7 @@
       "targetType": "PARTY",
       "castRange": 40,
       "hitTimeMs": 2500,
-      "reuseDelayMs": 3000,
+      "reuseDelayMs": 10000,
       "levelData": [
         {
           "level": 1,
@@ -25028,7 +25028,7 @@
       "targetType": "PARTY",
       "castRange": 40,
       "hitTimeMs": 2500,
-      "reuseDelayMs": 3000,
+      "reuseDelayMs": 10000,
       "levelData": [
         {
           "level": 1,
@@ -25057,7 +25057,7 @@
       "targetType": "PARTY",
       "castRange": 40,
       "hitTimeMs": 2500,
-      "reuseDelayMs": 3000,
+      "reuseDelayMs": 10000,
       "levelData": [
         {
           "level": 1,
@@ -25086,7 +25086,7 @@
       "targetType": "PARTY",
       "castRange": 40,
       "hitTimeMs": 2500,
-      "reuseDelayMs": 3000,
+      "reuseDelayMs": 10000,
       "levelData": [
         {
           "level": 1,
@@ -25115,7 +25115,7 @@
       "targetType": "SELF",
       "castRange": 40,
       "hitTimeMs": 6000,
-      "reuseDelayMs": 5000,
+      "reuseDelayMs": 20000,
       "levelData": [
         {
           "level": 1,
@@ -25189,7 +25189,7 @@
       "targetType": "ONE",
       "castRange": 400,
       "hitTimeMs": 3000,
-      "reuseDelayMs": 15000,
+      "reuseDelayMs": 60000,
       "levelData": [
         {
           "level": 1,
@@ -25257,7 +25257,7 @@
       "targetType": "ONE",
       "castRange": 40,
       "hitTimeMs": 1900,
-      "reuseDelayMs": 4000,
+      "reuseDelayMs": 15000,
       "levelData": [
         {
           "level": 1,
@@ -25572,7 +25572,7 @@
       "targetType": "ONE",
       "castRange": 40,
       "hitTimeMs": 0,
-      "reuseDelayMs": 3000,
+      "reuseDelayMs": 13000,
       "levelData": [
         {
           "level": 1,
@@ -25894,7 +25894,7 @@
       "targetType": "SELF",
       "castRange": 40,
       "hitTimeMs": 2000,
-      "reuseDelayMs": 30000,
+      "reuseDelayMs": 120000,
       "levelData": [
         {
           "level": 1,
@@ -25922,7 +25922,7 @@
       "targetType": "SELF",
       "castRange": 40,
       "hitTimeMs": 15000,
-      "reuseDelayMs": 5000,
+      "reuseDelayMs": 20000,
       "levelData": [
         {
           "level": 1,
@@ -26006,7 +26006,7 @@
       "targetType": "ONE",
       "castRange": 40,
       "hitTimeMs": 1360,
-      "reuseDelayMs": 4000,
+      "reuseDelayMs": 17000,
       "levelData": [
         {
           "level": 1,
@@ -26544,7 +26544,7 @@
       "targetType": "AURA",
       "castRange": 40,
       "hitTimeMs": 1500,
-      "reuseDelayMs": 4000,
+      "reuseDelayMs": 15000,
       "levelData": [
         {
           "level": 1,
@@ -26581,7 +26581,7 @@
       "targetType": "SELF",
       "castRange": 40,
       "hitTimeMs": 1500,
-      "reuseDelayMs": 150000,
+      "reuseDelayMs": 900000,
       "levelData": [
         {
           "level": 1,
@@ -26663,7 +26663,7 @@
       "targetType": "ONE",
       "castRange": 600,
       "hitTimeMs": 3000,
-      "reuseDelayMs": 4000,
+      "reuseDelayMs": 15000,
       "levelData": [
         {
           "level": 1,
@@ -27016,7 +27016,7 @@
       "targetType": "SELF",
       "castRange": 40,
       "hitTimeMs": 1500,
-      "reuseDelayMs": 30000,
+      "reuseDelayMs": 120000,
       "levelData": [
         {
           "level": 1,
@@ -27257,7 +27257,7 @@
       "targetType": "SELF",
       "castRange": 40,
       "hitTimeMs": 1500,
-      "reuseDelayMs": 30000,
+      "reuseDelayMs": 120000,
       "levelData": [
         {
           "level": 1,
@@ -27290,7 +27290,7 @@
       "targetType": "SELF",
       "castRange": 40,
       "hitTimeMs": 2000,
-      "reuseDelayMs": 30000,
+      "reuseDelayMs": 180000,
       "levelData": [
         {
           "level": 1,
@@ -27318,7 +27318,7 @@
       "targetType": "SELF",
       "castRange": 40,
       "hitTimeMs": 300000,
-      "reuseDelayMs": 5000,
+      "reuseDelayMs": 20000,
       "levelData": [
         {
           "level": 1,
@@ -27342,7 +27342,7 @@
       "targetType": "SELF",
       "castRange": 40,
       "hitTimeMs": 6000,
-      "reuseDelayMs": 5000,
+      "reuseDelayMs": 20000,
       "levelData": [
         {
           "level": 1,
@@ -27400,7 +27400,7 @@
       "targetType": "AREA",
       "castRange": 40,
       "hitTimeMs": 1800,
-      "reuseDelayMs": 3000,
+      "reuseDelayMs": 10000,
       "levelData": [
         {
           "level": 1,
@@ -27488,7 +27488,7 @@
       "targetType": "SELF",
       "castRange": 40,
       "hitTimeMs": 2000,
-      "reuseDelayMs": 4000,
+      "reuseDelayMs": 6000,
       "levelData": [
         {
           "level": 1,
@@ -27537,7 +27537,7 @@
       "targetType": "PARTY",
       "castRange": 40,
       "hitTimeMs": 2500,
-      "reuseDelayMs": 3000,
+      "reuseDelayMs": 10000,
       "levelData": [
         {
           "level": 1,
@@ -27563,7 +27563,7 @@
       "targetType": "PARTY",
       "castRange": 40,
       "hitTimeMs": 2500,
-      "reuseDelayMs": 3000,
+      "reuseDelayMs": 10000,
       "levelData": [
         {
           "level": 1,
@@ -27589,7 +27589,7 @@
       "targetType": "PARTY",
       "castRange": 40,
       "hitTimeMs": 2500,
-      "reuseDelayMs": 3000,
+      "reuseDelayMs": 10000,
       "levelData": [
         {
           "level": 1,
@@ -27615,7 +27615,7 @@
       "targetType": "PARTY",
       "castRange": 40,
       "hitTimeMs": 2500,
-      "reuseDelayMs": 3000,
+      "reuseDelayMs": 10000,
       "levelData": [
         {
           "level": 1,
@@ -27644,7 +27644,7 @@
       "targetType": "PARTY",
       "castRange": 40,
       "hitTimeMs": 2500,
-      "reuseDelayMs": 3000,
+      "reuseDelayMs": 10000,
       "levelData": [
         {
           "level": 1,
@@ -27670,7 +27670,7 @@
       "targetType": "PARTY",
       "castRange": 40,
       "hitTimeMs": 2500,
-      "reuseDelayMs": 3000,
+      "reuseDelayMs": 10000,
       "levelData": [
         {
           "level": 1,
@@ -27699,7 +27699,7 @@
       "targetType": "PARTY",
       "castRange": 40,
       "hitTimeMs": 2500,
-      "reuseDelayMs": 3000,
+      "reuseDelayMs": 10000,
       "levelData": [
         {
           "level": 1,
@@ -27728,7 +27728,7 @@
       "targetType": "PARTY",
       "castRange": 40,
       "hitTimeMs": 2500,
-      "reuseDelayMs": 3000,
+      "reuseDelayMs": 10000,
       "levelData": [
         {
           "level": 1,
@@ -27930,7 +27930,7 @@
       "targetType": "SELF",
       "castRange": 40,
       "hitTimeMs": 2000,
-      "reuseDelayMs": 75000,
+      "reuseDelayMs": 180000,
       "levelData": [
         {
           "level": 1,
@@ -28014,7 +28014,7 @@
       "targetType": "ONE",
       "castRange": 900,
       "hitTimeMs": 3000,
-      "reuseDelayMs": 5000,
+      "reuseDelayMs": 20000,
       "levelData": [
         {
           "level": 1,
@@ -28161,7 +28161,7 @@
       "targetType": "ONE",
       "castRange": 40,
       "hitTimeMs": 1620,
-      "reuseDelayMs": 7000,
+      "reuseDelayMs": 26000,
       "levelData": [
         {
           "level": 1,
@@ -28422,7 +28422,7 @@
       "targetType": "FRONT_AREA",
       "castRange": 40,
       "hitTimeMs": 1080,
-      "reuseDelayMs": 30000,
+      "reuseDelayMs": 120000,
       "levelData": [
         {
           "level": 1,
@@ -28521,7 +28521,7 @@
       "targetType": "ONE",
       "castRange": 40,
       "hitTimeMs": 1080,
-      "reuseDelayMs": 30000,
+      "reuseDelayMs": 90000,
       "levelData": [
         {
           "level": 1,
@@ -28684,7 +28684,7 @@
       "targetType": "SELF",
       "castRange": 40,
       "hitTimeMs": 3000,
-      "reuseDelayMs": 600000,
+      "reuseDelayMs": 1800000,
       "levelData": [
         {
           "level": 1,
@@ -28736,7 +28736,7 @@
       "targetType": "SELF",
       "castRange": 40,
       "hitTimeMs": 3000,
-      "reuseDelayMs": 600000,
+      "reuseDelayMs": 1800000,
       "levelData": [
         {
           "level": 1,
@@ -29008,7 +29008,7 @@
       "targetType": "ONE",
       "castRange": 40,
       "hitTimeMs": 1800,
-      "reuseDelayMs": 300000,
+      "reuseDelayMs": 1200000,
       "levelData": [
         {
           "level": 1,
@@ -29034,7 +29034,7 @@
       "targetType": "ONE",
       "castRange": 40,
       "hitTimeMs": 1800,
-      "reuseDelayMs": 150000,
+      "reuseDelayMs": 600000,
       "levelData": [
         {
           "level": 1,
@@ -29065,7 +29065,7 @@
       "targetType": "ONE",
       "castRange": 900,
       "hitTimeMs": 4000,
-      "reuseDelayMs": 8000,
+      "reuseDelayMs": 30000,
       "levelData": [
         {
           "level": 1,
@@ -29093,7 +29093,7 @@
       "targetType": "ONE",
       "castRange": 40,
       "hitTimeMs": 1800,
-      "reuseDelayMs": 4000,
+      "reuseDelayMs": 15000,
       "levelData": [
         {
           "level": 1,
@@ -29176,7 +29176,7 @@
       "targetType": "AURA",
       "castRange": 40,
       "hitTimeMs": 1800,
-      "reuseDelayMs": 8000,
+      "reuseDelayMs": 30000,
       "levelData": [
         {
           "level": 1,
@@ -29202,7 +29202,7 @@
       "targetType": "ONE",
       "castRange": 40,
       "hitTimeMs": 1800,
-      "reuseDelayMs": 3000,
+      "reuseDelayMs": 10000,
       "levelData": [
         {
           "level": 1,
@@ -29229,7 +29229,7 @@
       "targetType": "PARTY",
       "castRange": 40,
       "hitTimeMs": 2500,
-      "reuseDelayMs": 3000,
+      "reuseDelayMs": 10000,
       "levelData": [
         {
           "level": 1,
@@ -29255,7 +29255,7 @@
       "targetType": "SELF",
       "castRange": 40,
       "hitTimeMs": 2000,
-      "reuseDelayMs": 150000,
+      "reuseDelayMs": 600000,
       "levelData": [
         {
           "level": 1,
@@ -29283,7 +29283,7 @@
       "targetType": "SELF",
       "castRange": 40,
       "hitTimeMs": 2000,
-      "reuseDelayMs": 150000,
+      "reuseDelayMs": 600000,
       "levelData": [
         {
           "level": 1,
@@ -29311,7 +29311,7 @@
       "targetType": "ONE",
       "castRange": 40,
       "hitTimeMs": 1000,
-      "reuseDelayMs": 3000,
+      "reuseDelayMs": 10000,
       "levelData": [
         {
           "level": 1,
@@ -29345,7 +29345,7 @@
       "targetType": "ONE",
       "castRange": 40,
       "hitTimeMs": 2000,
-      "reuseDelayMs": 8000,
+      "reuseDelayMs": 60000,
       "levelData": [
         {
           "level": 1,
@@ -29379,7 +29379,7 @@
       "targetType": "ONE",
       "castRange": 900,
       "hitTimeMs": 4000,
-      "reuseDelayMs": 15000,
+      "reuseDelayMs": 60000,
       "levelData": [
         {
           "level": 1,
@@ -29412,7 +29412,7 @@
       "targetType": "SELF",
       "castRange": 40,
       "hitTimeMs": 2000,
-      "reuseDelayMs": 30000,
+      "reuseDelayMs": 120000,
       "levelData": [
         {
           "level": 1,
@@ -29441,7 +29441,7 @@
       "targetType": "SELF",
       "castRange": 40,
       "hitTimeMs": 2000,
-      "reuseDelayMs": 30000,
+      "reuseDelayMs": 120000,
       "levelData": [
         {
           "level": 1,
@@ -29470,7 +29470,7 @@
       "targetType": "SELF",
       "castRange": 40,
       "hitTimeMs": 2000,
-      "reuseDelayMs": 30000,
+      "reuseDelayMs": 120000,
       "levelData": [
         {
           "level": 1,
@@ -29499,7 +29499,7 @@
       "targetType": "ONE",
       "castRange": 40,
       "hitTimeMs": 1000,
-      "reuseDelayMs": 8000,
+      "reuseDelayMs": 30000,
       "levelData": [
         {
           "level": 1,
@@ -29534,7 +29534,7 @@
       "targetType": "SELF",
       "castRange": 40,
       "hitTimeMs": 2000,
-      "reuseDelayMs": 3000,
+      "reuseDelayMs": 10000,
       "levelData": [
         {
           "level": 1,
@@ -29559,7 +29559,7 @@
       "targetType": "SELF",
       "castRange": 40,
       "hitTimeMs": 2000,
-      "reuseDelayMs": 3000,
+      "reuseDelayMs": 10000,
       "levelData": [
         {
           "level": 1,
@@ -29584,7 +29584,7 @@
       "targetType": "AREA",
       "castRange": 500,
       "hitTimeMs": 4000,
-      "reuseDelayMs": 8000,
+      "reuseDelayMs": 30000,
       "levelData": [
         {
           "level": 1,
@@ -29618,7 +29618,7 @@
       "targetType": "ONE",
       "castRange": 40,
       "hitTimeMs": 2000,
-      "reuseDelayMs": 4000,
+      "reuseDelayMs": 15000,
       "levelData": [
         {
           "level": 1,
@@ -29653,7 +29653,7 @@
       "targetType": "PARTY",
       "castRange": 40,
       "hitTimeMs": 2500,
-      "reuseDelayMs": 3000,
+      "reuseDelayMs": 10000,
       "levelData": [
         {
           "level": 1,
@@ -29679,7 +29679,7 @@
       "targetType": "PARTY",
       "castRange": 40,
       "hitTimeMs": 2500,
-      "reuseDelayMs": 3000,
+      "reuseDelayMs": 10000,
       "levelData": [
         {
           "level": 1,
@@ -29705,7 +29705,7 @@
       "targetType": "PARTY",
       "castRange": 40,
       "hitTimeMs": 2500,
-      "reuseDelayMs": 3000,
+      "reuseDelayMs": 10000,
       "levelData": [
         {
           "level": 1,
@@ -29734,7 +29734,7 @@
       "targetType": "PARTY",
       "castRange": 40,
       "hitTimeMs": 2500,
-      "reuseDelayMs": 3000,
+      "reuseDelayMs": 10000,
       "levelData": [
         {
           "level": 1,
@@ -29763,7 +29763,7 @@
       "targetType": "AURA",
       "castRange": 40,
       "hitTimeMs": 2000,
-      "reuseDelayMs": 30000,
+      "reuseDelayMs": 120000,
       "levelData": [
         {
           "level": 1,
@@ -29795,7 +29795,7 @@
       "targetType": "AURA",
       "castRange": 40,
       "hitTimeMs": 1000,
-      "reuseDelayMs": 900000,
+      "reuseDelayMs": 1800000,
       "levelData": [
         {
           "level": 1,
@@ -29823,7 +29823,7 @@
       "targetType": "ONE",
       "castRange": 900,
       "hitTimeMs": 4000,
-      "reuseDelayMs": 75000,
+      "reuseDelayMs": 300000,
       "levelData": [
         {
           "level": 1,
@@ -29852,7 +29852,7 @@
       "targetType": "ONE",
       "castRange": 40,
       "hitTimeMs": 1300,
-      "reuseDelayMs": 4000,
+      "reuseDelayMs": 11000,
       "levelData": [
         {
           "level": 1,
@@ -29958,7 +29958,7 @@
       "targetType": "ONE",
       "castRange": 40,
       "hitTimeMs": 1300,
-      "reuseDelayMs": 4000,
+      "reuseDelayMs": 11000,
       "levelData": [
         {
           "level": 1,
@@ -30065,7 +30065,7 @@
       "targetType": "ONE",
       "castRange": 150,
       "hitTimeMs": 2000,
-      "reuseDelayMs": 4000,
+      "reuseDelayMs": 8000,
       "levelData": [
         {
           "level": 1,
@@ -30168,7 +30168,7 @@
       "targetType": "ONE",
       "castRange": 600,
       "hitTimeMs": 2000,
-      "reuseDelayMs": 4000,
+      "reuseDelayMs": 8000,
       "levelData": [
         {
           "level": 1,
@@ -30271,7 +30271,7 @@
       "targetType": "AURA",
       "castRange": 40,
       "hitTimeMs": 3000,
-      "reuseDelayMs": 8000,
+      "reuseDelayMs": 40000,
       "levelData": [
         {
           "level": 1,
@@ -30333,7 +30333,7 @@
       "targetType": "ONE",
       "castRange": 150,
       "hitTimeMs": 2000,
-      "reuseDelayMs": 4000,
+      "reuseDelayMs": 20000,
       "levelData": [
         {
           "level": 1,
@@ -30449,7 +30449,7 @@
       "targetType": "SELF",
       "castRange": 40,
       "hitTimeMs": 2000,
-      "reuseDelayMs": 300000,
+      "reuseDelayMs": 600000,
       "levelData": [
         {
           "level": 1,
@@ -30490,7 +30490,7 @@
       "targetType": "AURA",
       "castRange": 40,
       "hitTimeMs": 3000,
-      "reuseDelayMs": 15000,
+      "reuseDelayMs": 300000,
       "levelData": [
         {
           "level": 1,
@@ -30591,7 +30591,7 @@
       "targetType": "AURA",
       "castRange": 40,
       "hitTimeMs": 3000,
-      "reuseDelayMs": 15000,
+      "reuseDelayMs": 300000,
       "levelData": [
         {
           "level": 1,
@@ -30695,7 +30695,7 @@
       "targetType": "ONE",
       "castRange": 40,
       "hitTimeMs": 1300,
-      "reuseDelayMs": 30000,
+      "reuseDelayMs": 90000,
       "levelData": [
         {
           "level": 1,
@@ -30797,7 +30797,7 @@
       "targetType": "SELF",
       "castRange": 40,
       "hitTimeMs": 2000,
-      "reuseDelayMs": 15000,
+      "reuseDelayMs": 300000,
       "levelData": [
         {
           "level": 1,
@@ -30842,7 +30842,7 @@
       "targetType": "SELF",
       "castRange": 40,
       "hitTimeMs": 2000,
-      "reuseDelayMs": 4000,
+      "reuseDelayMs": 120000,
       "levelData": [
         {
           "level": 1,
@@ -30883,7 +30883,7 @@
       "targetType": "ONE",
       "castRange": 150,
       "hitTimeMs": 2000,
-      "reuseDelayMs": 4000,
+      "reuseDelayMs": 8000,
       "levelData": [
         {
           "level": 1,
@@ -30985,7 +30985,7 @@
       "targetType": "SELF",
       "castRange": 40,
       "hitTimeMs": 2000,
-      "reuseDelayMs": 75000,
+      "reuseDelayMs": 180000,
       "levelData": [
         {
           "level": 1,
@@ -31069,7 +31069,7 @@
       "targetType": "SELF",
       "castRange": 40,
       "hitTimeMs": 2000,
-      "reuseDelayMs": 75000,
+      "reuseDelayMs": 180000,
       "levelData": [
         {
           "level": 1,
@@ -31153,7 +31153,7 @@
       "targetType": "SELF",
       "castRange": 40,
       "hitTimeMs": 2000,
-      "reuseDelayMs": 4000,
+      "reuseDelayMs": 180000,
       "levelData": [
         {
           "level": 1,
@@ -31194,7 +31194,7 @@
       "targetType": "SELF",
       "castRange": 40,
       "hitTimeMs": 2000,
-      "reuseDelayMs": 4000,
+      "reuseDelayMs": 6000,
       "levelData": [
         {
           "level": 1,
@@ -31235,7 +31235,7 @@
       "targetType": "SELF",
       "castRange": 40,
       "hitTimeMs": 2000,
-      "reuseDelayMs": 8000,
+      "reuseDelayMs": 20000,
       "levelData": [
         {
           "level": 1,
@@ -31324,7 +31324,7 @@
       "targetType": "SELF",
       "castRange": 40,
       "hitTimeMs": 3000,
-      "reuseDelayMs": 600000,
+      "reuseDelayMs": 1200000,
       "levelData": [
         {
           "level": 1,
@@ -31471,7 +31471,7 @@
       "targetType": "SELF",
       "castRange": 40,
       "hitTimeMs": 2000,
-      "reuseDelayMs": 300000,
+      "reuseDelayMs": 900000,
       "levelData": [
         {
           "level": 1,
@@ -31512,7 +31512,7 @@
       "targetType": "SELF",
       "castRange": 40,
       "hitTimeMs": 2000,
-      "reuseDelayMs": 75000,
+      "reuseDelayMs": 120000,
       "levelData": [
         {
           "level": 1,
@@ -31606,7 +31606,7 @@
       "targetType": "SELF",
       "castRange": 40,
       "hitTimeMs": 2000,
-      "reuseDelayMs": 4000,
+      "reuseDelayMs": 10000,
       "levelData": [
         {
           "level": 1,
@@ -31681,7 +31681,7 @@
       "targetType": "SELF",
       "castRange": 40,
       "hitTimeMs": 2000,
-      "reuseDelayMs": 30000,
+      "reuseDelayMs": 300000,
       "levelData": [
         {
           "level": 1,
@@ -31939,7 +31939,7 @@
       "targetType": "AURA",
       "castRange": 40,
       "hitTimeMs": 2500,
-      "reuseDelayMs": 150000,
+      "reuseDelayMs": 240000,
       "levelData": [
         {
           "level": 1,
@@ -31998,7 +31998,7 @@
       "targetType": "SELF",
       "castRange": 40,
       "hitTimeMs": 4000,
-      "reuseDelayMs": 150000,
+      "reuseDelayMs": 600000,
       "levelData": [
         {
           "level": 1,
@@ -32023,7 +32023,7 @@
       "targetType": "SELF",
       "castRange": 40,
       "hitTimeMs": 1500,
-      "reuseDelayMs": 150000,
+      "reuseDelayMs": 120000,
       "levelData": [
         {
           "level": 1,
@@ -32046,7 +32046,7 @@
       "targetType": "SELF",
       "castRange": 40,
       "hitTimeMs": 2000,
-      "reuseDelayMs": 900000,
+      "reuseDelayMs": 1800000,
       "levelData": [
         {
           "level": 1,
@@ -32121,7 +32121,7 @@
       "targetType": "SELF",
       "castRange": 40,
       "hitTimeMs": 2000,
-      "reuseDelayMs": 150000,
+      "reuseDelayMs": 300000,
       "levelData": [
         {
           "level": 1,
@@ -32146,7 +32146,7 @@
       "targetType": "SELF",
       "castRange": 40,
       "hitTimeMs": 500,
-      "reuseDelayMs": 75000,
+      "reuseDelayMs": 300000,
       "levelData": [
         {
           "level": 1,
@@ -32171,7 +32171,7 @@
       "targetType": "SELF",
       "castRange": 40,
       "hitTimeMs": 500,
-      "reuseDelayMs": 75000,
+      "reuseDelayMs": 300000,
       "levelData": [
         {
           "level": 1,
@@ -32196,7 +32196,7 @@
       "targetType": "SELF",
       "castRange": 40,
       "hitTimeMs": 10000,
-      "reuseDelayMs": 5000,
+      "reuseDelayMs": 20000,
       "levelData": [
         {
           "level": 1,
@@ -32220,7 +32220,7 @@
       "targetType": "SELF",
       "castRange": 40,
       "hitTimeMs": 6000,
-      "reuseDelayMs": 5000,
+      "reuseDelayMs": 20000,
       "levelData": [
         {
           "level": 1,
@@ -32270,7 +32270,7 @@
       "targetType": "ONE",
       "castRange": 150,
       "hitTimeMs": 4000,
-      "reuseDelayMs": 4000,
+      "reuseDelayMs": 20000,
       "levelData": [
         {
           "level": 1,
@@ -32386,7 +32386,7 @@
       "targetType": "SELF",
       "castRange": 40,
       "hitTimeMs": 1000,
-      "reuseDelayMs": 30000,
+      "reuseDelayMs": 60000,
       "levelData": [
         {
           "level": 1,
@@ -32419,7 +32419,7 @@
       "targetType": "AURA",
       "castRange": 40,
       "hitTimeMs": 500,
-      "reuseDelayMs": 5000,
+      "reuseDelayMs": 13000,
       "levelData": [
         {
           "level": 1,
@@ -32480,7 +32480,7 @@
       "targetType": "SELF",
       "castRange": 40,
       "hitTimeMs": 1000,
-      "reuseDelayMs": 15000,
+      "reuseDelayMs": 6000,
       "levelData": [
         {
           "level": 1,
@@ -32671,7 +32671,7 @@
       "targetType": "SELF",
       "castRange": 40,
       "hitTimeMs": 3000,
-      "reuseDelayMs": 4000,
+      "reuseDelayMs": 30000,
       "levelData": [
         {
           "level": 1,
@@ -32794,7 +32794,7 @@
       "targetType": "PARTY",
       "castRange": 40,
       "hitTimeMs": 2500,
-      "reuseDelayMs": 5000,
+      "reuseDelayMs": 20000,
       "levelData": [
         {
           "level": 1,
@@ -32839,7 +32839,7 @@
       "targetType": "PARTY_CLAN",
       "castRange": 40,
       "hitTimeMs": 2500,
-      "reuseDelayMs": 5000,
+      "reuseDelayMs": 20000,
       "levelData": [
         {
           "level": 1,
@@ -32884,7 +32884,7 @@
       "targetType": "PARTY_CLAN",
       "castRange": 40,
       "hitTimeMs": 2500,
-      "reuseDelayMs": 5000,
+      "reuseDelayMs": 20000,
       "levelData": [
         {
           "level": 1,
@@ -32929,7 +32929,7 @@
       "targetType": "PARTY_CLAN",
       "castRange": 40,
       "hitTimeMs": 2500,
-      "reuseDelayMs": 5000,
+      "reuseDelayMs": 20000,
       "levelData": [
         {
           "level": 1,
@@ -32974,7 +32974,7 @@
       "targetType": "PARTY",
       "castRange": 40,
       "hitTimeMs": 2500,
-      "reuseDelayMs": 5000,
+      "reuseDelayMs": 20000,
       "levelData": [
         {
           "level": 1,
@@ -33019,7 +33019,7 @@
       "targetType": "PARTY",
       "castRange": 40,
       "hitTimeMs": 2500,
-      "reuseDelayMs": 5000,
+      "reuseDelayMs": 20000,
       "levelData": [
         {
           "level": 1,
@@ -33064,7 +33064,7 @@
       "targetType": "PARTY_CLAN",
       "castRange": 40,
       "hitTimeMs": 2500,
-      "reuseDelayMs": 5000,
+      "reuseDelayMs": 20000,
       "levelData": [
         {
           "level": 1,
@@ -33109,7 +33109,7 @@
       "targetType": "PARTY",
       "castRange": 40,
       "hitTimeMs": 2500,
-      "reuseDelayMs": 5000,
+      "reuseDelayMs": 20000,
       "levelData": [
         {
           "level": 1,
@@ -33154,7 +33154,7 @@
       "targetType": "ONE",
       "castRange": 400,
       "hitTimeMs": 2500,
-      "reuseDelayMs": 1000,
+      "reuseDelayMs": 5000,
       "levelData": [
         {
           "level": 1,
@@ -33200,7 +33200,7 @@
       "targetType": "ONE",
       "castRange": 600,
       "hitTimeMs": 5000,
-      "reuseDelayMs": 3000,
+      "reuseDelayMs": 10000,
       "levelData": [
         {
           "level": 1,
@@ -33379,7 +33379,7 @@
       "targetType": "ONE",
       "castRange": 600,
       "hitTimeMs": 4000,
-      "reuseDelayMs": 4000,
+      "reuseDelayMs": 15000,
       "levelData": [
         {
           "level": 1,
@@ -33423,7 +33423,7 @@
       "targetType": "ONE",
       "castRange": 400,
       "hitTimeMs": 6000,
-      "reuseDelayMs": 3000,
+      "reuseDelayMs": 12000,
       "levelData": [
         {
           "level": 1,
@@ -33728,7 +33728,7 @@
       "targetType": "ONE",
       "castRange": 600,
       "hitTimeMs": 2000,
-      "reuseDelayMs": 1000,
+      "reuseDelayMs": 3000,
       "levelData": [
         {
           "level": 1,
@@ -33880,7 +33880,7 @@
       "targetType": "PC_BODY",
       "castRange": 400,
       "hitTimeMs": 6000,
-      "reuseDelayMs": 30000,
+      "reuseDelayMs": 120000,
       "levelData": [
         {
           "level": 1,
@@ -33978,7 +33978,7 @@
       "targetType": "ONE",
       "castRange": 600,
       "hitTimeMs": 4000,
-      "reuseDelayMs": 4000,
+      "reuseDelayMs": 15000,
       "levelData": [
         {
           "level": 1,
@@ -34022,7 +34022,7 @@
       "targetType": "ONE",
       "castRange": 600,
       "hitTimeMs": 5000,
-      "reuseDelayMs": 3000,
+      "reuseDelayMs": 10000,
       "levelData": [
         {
           "level": 1,
@@ -34282,7 +34282,7 @@
       "targetType": "PARTY",
       "castRange": 40,
       "hitTimeMs": 7000,
-      "reuseDelayMs": 6000,
+      "reuseDelayMs": 25000,
       "levelData": [
         {
           "level": 1,
@@ -34433,7 +34433,7 @@
       "targetType": "ONE",
       "castRange": 400,
       "hitTimeMs": 2500,
-      "reuseDelayMs": 1000,
+      "reuseDelayMs": 4000,
       "levelData": [
         {
           "level": 1,
@@ -34621,7 +34621,7 @@
       "targetType": "ONE",
       "castRange": 400,
       "hitTimeMs": 2500,
-      "reuseDelayMs": 1000,
+      "reuseDelayMs": 4000,
       "levelData": [
         {
           "level": 1,
@@ -34710,7 +34710,7 @@
       "targetType": "ONE",
       "castRange": 400,
       "hitTimeMs": 4000,
-      "reuseDelayMs": 2000,
+      "reuseDelayMs": 6000,
       "levelData": [
         {
           "level": 1,
@@ -34756,7 +34756,7 @@
       "targetType": "ONE",
       "castRange": 400,
       "hitTimeMs": 4000,
-      "reuseDelayMs": 2000,
+      "reuseDelayMs": 6000,
       "levelData": [
         {
           "level": 1,
@@ -34802,7 +34802,7 @@
       "targetType": "ONE",
       "castRange": 40,
       "hitTimeMs": 1500,
-      "reuseDelayMs": 5000,
+      "reuseDelayMs": 20000,
       "levelData": [
         {
           "level": 1,
@@ -34921,7 +34921,7 @@
       "targetType": "ONE",
       "castRange": 400,
       "hitTimeMs": 4000,
-      "reuseDelayMs": 2000,
+      "reuseDelayMs": 6000,
       "levelData": [
         {
           "level": 1,
@@ -34976,7 +34976,7 @@
       "targetType": "ONE",
       "castRange": 400,
       "hitTimeMs": 4000,
-      "reuseDelayMs": 2000,
+      "reuseDelayMs": 6000,
       "levelData": [
         {
           "level": 1,
@@ -35013,7 +35013,7 @@
       "targetType": "ONE",
       "castRange": 400,
       "hitTimeMs": 4000,
-      "reuseDelayMs": 2000,
+      "reuseDelayMs": 6000,
       "levelData": [
         {
           "level": 1,
@@ -35059,7 +35059,7 @@
       "targetType": "ONE",
       "castRange": 400,
       "hitTimeMs": 6000,
-      "reuseDelayMs": 8000,
+      "reuseDelayMs": 60000,
       "levelData": [
         {
           "level": 1,
@@ -35191,7 +35191,7 @@
       "targetType": "PARTY_MEMBER",
       "castRange": 400,
       "hitTimeMs": 4000,
-      "reuseDelayMs": 2000,
+      "reuseDelayMs": 6000,
       "levelData": [
         {
           "level": 1,
@@ -35219,7 +35219,7 @@
       "targetType": "ONE",
       "castRange": 400,
       "hitTimeMs": 4000,
-      "reuseDelayMs": 2000,
+      "reuseDelayMs": 6000,
       "levelData": [
         {
           "level": 1,
@@ -35265,7 +35265,7 @@
       "targetType": "ONE",
       "castRange": 400,
       "hitTimeMs": 4000,
-      "reuseDelayMs": 2000,
+      "reuseDelayMs": 6000,
       "levelData": [
         {
           "level": 1,
@@ -35338,7 +35338,7 @@
       "targetType": "SELF",
       "castRange": 40,
       "hitTimeMs": 4000,
-      "reuseDelayMs": 2000,
+      "reuseDelayMs": 6000,
       "levelData": [
         {
           "level": 1,
@@ -35400,7 +35400,7 @@
       "targetType": "ONE",
       "castRange": 400,
       "hitTimeMs": 4000,
-      "reuseDelayMs": 2000,
+      "reuseDelayMs": 6000,
       "levelData": [
         {
           "level": 1,
@@ -35473,7 +35473,7 @@
       "targetType": "AREA",
       "castRange": 40,
       "hitTimeMs": 7000,
-      "reuseDelayMs": 5000,
+      "reuseDelayMs": 20000,
       "levelData": [
         {
           "level": 1,
@@ -35606,7 +35606,7 @@
       "targetType": "SELF",
       "castRange": 40,
       "hitTimeMs": 0,
-      "reuseDelayMs": 75000,
+      "reuseDelayMs": 300000,
       "levelData": [
         {
           "level": 1,
@@ -35636,7 +35636,7 @@
       "targetType": "ONE",
       "castRange": 600,
       "hitTimeMs": 6000,
-      "reuseDelayMs": 30000,
+      "reuseDelayMs": 120000,
       "levelData": [
         {
           "level": 1,
@@ -35761,7 +35761,7 @@
       "targetType": "ONE",
       "castRange": 400,
       "hitTimeMs": 4000,
-      "reuseDelayMs": 2000,
+      "reuseDelayMs": 6000,
       "levelData": [
         {
           "level": 1,
@@ -35807,7 +35807,7 @@
       "targetType": "PARTY_MEMBER",
       "castRange": 400,
       "hitTimeMs": 4000,
-      "reuseDelayMs": 2000,
+      "reuseDelayMs": 6000,
       "levelData": [
         {
           "level": 1,
@@ -35844,7 +35844,7 @@
       "targetType": "ONE",
       "castRange": 600,
       "hitTimeMs": 4000,
-      "reuseDelayMs": 8000,
+      "reuseDelayMs": 60000,
       "levelData": [
         {
           "level": 1,
@@ -35994,7 +35994,7 @@
       "targetType": "ONE",
       "castRange": 400,
       "hitTimeMs": 4000,
-      "reuseDelayMs": 2000,
+      "reuseDelayMs": 6000,
       "levelData": [
         {
           "level": 1,
@@ -36040,7 +36040,7 @@
       "targetType": "ONE",
       "castRange": 600,
       "hitTimeMs": 10000,
-      "reuseDelayMs": 4000,
+      "reuseDelayMs": 6000,
       "levelData": [
         {
           "level": 1,
@@ -36442,7 +36442,7 @@
       "targetType": "ONE",
       "castRange": 900,
       "hitTimeMs": 1500,
-      "reuseDelayMs": 2000,
+      "reuseDelayMs": 8000,
       "levelData": [
         {
           "level": 1,
@@ -36591,7 +36591,7 @@
       "targetType": "AREA",
       "castRange": 500,
       "hitTimeMs": 15000,
-      "reuseDelayMs": 8000,
+      "reuseDelayMs": 20000,
       "levelData": [
         {
           "level": 1,
@@ -36660,7 +36660,7 @@
       "targetType": "ONE",
       "castRange": 400,
       "hitTimeMs": 4000,
-      "reuseDelayMs": 2000,
+      "reuseDelayMs": 6000,
       "levelData": [
         {
           "level": 1,
@@ -36695,7 +36695,7 @@
       "targetType": "ONE",
       "castRange": 900,
       "hitTimeMs": 1500,
-      "reuseDelayMs": 2000,
+      "reuseDelayMs": 8000,
       "levelData": [
         {
           "level": 1,
@@ -36844,7 +36844,7 @@
       "targetType": "ONE",
       "castRange": 600,
       "hitTimeMs": 4000,
-      "reuseDelayMs": 5000,
+      "reuseDelayMs": 20000,
       "levelData": [
         {
           "level": 1,
@@ -36965,7 +36965,7 @@
       "targetType": "ONE",
       "castRange": 400,
       "hitTimeMs": 4000,
-      "reuseDelayMs": 2000,
+      "reuseDelayMs": 6000,
       "levelData": [
         {
           "level": 1,
@@ -37008,7 +37008,7 @@
       "targetType": "ONE",
       "castRange": 400,
       "hitTimeMs": 4000,
-      "reuseDelayMs": 2000,
+      "reuseDelayMs": 6000,
       "levelData": [
         {
           "level": 1,
@@ -37075,7 +37075,7 @@
       "targetType": "ONE",
       "castRange": 40,
       "hitTimeMs": 1500,
-      "reuseDelayMs": 2000,
+      "reuseDelayMs": 8000,
       "levelData": [
         {
           "level": 1,
@@ -37250,7 +37250,7 @@
       "targetType": "ONE",
       "castRange": 400,
       "hitTimeMs": 4000,
-      "reuseDelayMs": 2000,
+      "reuseDelayMs": 6000,
       "levelData": [
         {
           "level": 1,
@@ -37293,7 +37293,7 @@
       "targetType": "ONE",
       "castRange": 400,
       "hitTimeMs": 4000,
-      "reuseDelayMs": 2000,
+      "reuseDelayMs": 6000,
       "levelData": [
         {
           "level": 1,
@@ -37328,7 +37328,7 @@
       "targetType": "ONE",
       "castRange": 400,
       "hitTimeMs": 4000,
-      "reuseDelayMs": 2000,
+      "reuseDelayMs": 6000,
       "levelData": [
         {
           "level": 1,
@@ -37371,7 +37371,7 @@
       "targetType": "ONE",
       "castRange": 600,
       "hitTimeMs": 4000,
-      "reuseDelayMs": 2000,
+      "reuseDelayMs": 6000,
       "levelData": [
         {
           "level": 1,
@@ -37442,7 +37442,7 @@
       "targetType": "ONE",
       "castRange": 600,
       "hitTimeMs": 4000,
-      "reuseDelayMs": 5000,
+      "reuseDelayMs": 30000,
       "levelData": [
         {
           "level": 1,
@@ -37637,7 +37637,7 @@
       "targetType": "ONE",
       "castRange": 600,
       "hitTimeMs": 4000,
-      "reuseDelayMs": 3000,
+      "reuseDelayMs": 12000,
       "levelData": [
         {
           "level": 1,
@@ -37706,7 +37706,7 @@
       "targetType": "AURA",
       "castRange": 40,
       "hitTimeMs": 1500,
-      "reuseDelayMs": 2000,
+      "reuseDelayMs": 8000,
       "levelData": [
         {
           "level": 1,
@@ -37872,7 +37872,7 @@
       "targetType": "ONE",
       "castRange": 600,
       "hitTimeMs": 4000,
-      "reuseDelayMs": 2000,
+      "reuseDelayMs": 6000,
       "levelData": [
         {
           "level": 1,
@@ -38076,7 +38076,7 @@
       "targetType": "AURA",
       "castRange": 40,
       "hitTimeMs": 4000,
-      "reuseDelayMs": 5000,
+      "reuseDelayMs": 20000,
       "levelData": [
         {
           "level": 1,
@@ -38233,7 +38233,7 @@
       "targetType": "ONE",
       "castRange": 600,
       "hitTimeMs": 4000,
-      "reuseDelayMs": 2000,
+      "reuseDelayMs": 6000,
       "levelData": [
         {
           "level": 1,
@@ -38274,7 +38274,7 @@
       "targetType": "AURA",
       "castRange": 40,
       "hitTimeMs": 4000,
-      "reuseDelayMs": 4000,
+      "reuseDelayMs": 15000,
       "levelData": [
         {
           "level": 1,
@@ -38314,7 +38314,7 @@
       "targetType": "ONE",
       "castRange": 600,
       "hitTimeMs": 4000,
-      "reuseDelayMs": 3000,
+      "reuseDelayMs": 12000,
       "levelData": [
         {
           "level": 1,
@@ -38391,7 +38391,7 @@
       "targetType": "AURA",
       "castRange": 40,
       "hitTimeMs": 1500,
-      "reuseDelayMs": 2000,
+      "reuseDelayMs": 8000,
       "levelData": [
         {
           "level": 1,
@@ -38539,7 +38539,7 @@
       "targetType": "ONE",
       "castRange": 600,
       "hitTimeMs": 4000,
-      "reuseDelayMs": 10000,
+      "reuseDelayMs": 40000,
       "levelData": [
         {
           "level": 1,
@@ -38718,7 +38718,7 @@
       "targetType": "ONE",
       "castRange": 750,
       "hitTimeMs": 4000,
-      "reuseDelayMs": 2000,
+      "reuseDelayMs": 6000,
       "levelData": [
         {
           "level": 1,
@@ -38759,7 +38759,7 @@
       "targetType": "AURA",
       "castRange": 40,
       "hitTimeMs": 4000,
-      "reuseDelayMs": 5000,
+      "reuseDelayMs": 20000,
       "levelData": [
         {
           "level": 1,
@@ -38813,7 +38813,7 @@
       "targetType": "SELF",
       "castRange": 40,
       "hitTimeMs": 15000,
-      "reuseDelayMs": 0,
+      "reuseDelayMs": 21600000,
       "levelData": [
         {
           "level": 1,
@@ -38853,6 +38853,7 @@
         },
         {
           "level": 5,
+          "reuseDelayMs": 20000,
           "mpConsume": 56,
           "power": 0,
           "abnormalLevel": 1,
@@ -38862,6 +38863,7 @@
         },
         {
           "level": 6,
+          "reuseDelayMs": 20000,
           "mpConsume": 62,
           "power": 0,
           "abnormalLevel": 1,
@@ -38871,6 +38873,7 @@
         },
         {
           "level": 7,
+          "reuseDelayMs": 20000,
           "mpConsume": 70,
           "power": 0,
           "abnormalLevel": 1,
@@ -38880,6 +38883,7 @@
         },
         {
           "level": 8,
+          "reuseDelayMs": 20000,
           "mpConsume": 75,
           "power": 0,
           "abnormalLevel": 1,
@@ -38889,6 +38893,7 @@
         },
         {
           "level": 9,
+          "reuseDelayMs": 20000,
           "mpConsume": 82,
           "power": 0,
           "abnormalLevel": 1,
@@ -38898,6 +38903,7 @@
         },
         {
           "level": 10,
+          "reuseDelayMs": 20000,
           "mpConsume": 86,
           "power": 0,
           "abnormalLevel": 1,
@@ -38907,6 +38913,7 @@
         },
         {
           "level": 11,
+          "reuseDelayMs": 20000,
           "mpConsume": 88,
           "power": 0,
           "abnormalLevel": 1,
@@ -38916,6 +38923,7 @@
         },
         {
           "level": 12,
+          "reuseDelayMs": 20000,
           "mpConsume": 92,
           "power": 0,
           "abnormalLevel": 1,
@@ -38925,6 +38933,7 @@
         },
         {
           "level": 13,
+          "reuseDelayMs": 20000,
           "mpConsume": 95,
           "power": 0,
           "abnormalLevel": 1,
@@ -38934,6 +38943,7 @@
         },
         {
           "level": 14,
+          "reuseDelayMs": 20000,
           "mpConsume": 98,
           "power": 0,
           "abnormalLevel": 1,
@@ -38943,6 +38953,7 @@
         },
         {
           "level": 15,
+          "reuseDelayMs": 20000,
           "mpConsume": 102,
           "power": 0,
           "abnormalLevel": 1,
@@ -38952,6 +38963,7 @@
         },
         {
           "level": 16,
+          "reuseDelayMs": 20000,
           "mpConsume": 104,
           "power": 0,
           "abnormalLevel": 1,
@@ -38961,6 +38973,7 @@
         },
         {
           "level": 17,
+          "reuseDelayMs": 20000,
           "mpConsume": 106,
           "power": 0,
           "abnormalLevel": 1,
@@ -38970,6 +38983,7 @@
         },
         {
           "level": 18,
+          "reuseDelayMs": 20000,
           "mpConsume": 110,
           "power": 0,
           "abnormalLevel": 1,
@@ -38989,7 +39003,7 @@
       "targetType": "SERVITOR",
       "castRange": 400,
       "hitTimeMs": 4000,
-      "reuseDelayMs": 3000,
+      "reuseDelayMs": 12000,
       "levelData": [
         {
           "level": 1,
@@ -39312,7 +39326,7 @@
       "targetType": "SERVITOR",
       "castRange": 600,
       "hitTimeMs": 4000,
-      "reuseDelayMs": 3000,
+      "reuseDelayMs": 10000,
       "levelData": [
         {
           "level": 1,
@@ -39734,7 +39748,7 @@
       "targetType": "SELF",
       "castRange": 40,
       "hitTimeMs": 15000,
-      "reuseDelayMs": 0,
+      "reuseDelayMs": 21600000,
       "levelData": [
         {
           "level": 1,
@@ -39774,6 +39788,7 @@
         },
         {
           "level": 5,
+          "reuseDelayMs": 20000,
           "mpConsume": 56,
           "power": 0,
           "abnormalLevel": 1,
@@ -39783,6 +39798,7 @@
         },
         {
           "level": 6,
+          "reuseDelayMs": 20000,
           "mpConsume": 62,
           "power": 0,
           "abnormalLevel": 1,
@@ -39792,6 +39808,7 @@
         },
         {
           "level": 7,
+          "reuseDelayMs": 20000,
           "mpConsume": 70,
           "power": 0,
           "abnormalLevel": 1,
@@ -39801,6 +39818,7 @@
         },
         {
           "level": 8,
+          "reuseDelayMs": 20000,
           "mpConsume": 75,
           "power": 0,
           "abnormalLevel": 1,
@@ -39810,6 +39828,7 @@
         },
         {
           "level": 9,
+          "reuseDelayMs": 20000,
           "mpConsume": 82,
           "power": 0,
           "abnormalLevel": 1,
@@ -39819,6 +39838,7 @@
         },
         {
           "level": 10,
+          "reuseDelayMs": 20000,
           "mpConsume": 86,
           "power": 0,
           "abnormalLevel": 1,
@@ -39828,6 +39848,7 @@
         },
         {
           "level": 11,
+          "reuseDelayMs": 20000,
           "mpConsume": 88,
           "power": 0,
           "abnormalLevel": 1,
@@ -39837,6 +39858,7 @@
         },
         {
           "level": 12,
+          "reuseDelayMs": 20000,
           "mpConsume": 92,
           "power": 0,
           "abnormalLevel": 1,
@@ -39846,6 +39868,7 @@
         },
         {
           "level": 13,
+          "reuseDelayMs": 20000,
           "mpConsume": 95,
           "power": 0,
           "abnormalLevel": 1,
@@ -39855,6 +39878,7 @@
         },
         {
           "level": 14,
+          "reuseDelayMs": 20000,
           "mpConsume": 98,
           "power": 0,
           "abnormalLevel": 1,
@@ -39864,6 +39888,7 @@
         },
         {
           "level": 15,
+          "reuseDelayMs": 20000,
           "mpConsume": 102,
           "power": 0,
           "abnormalLevel": 1,
@@ -39873,6 +39898,7 @@
         },
         {
           "level": 16,
+          "reuseDelayMs": 20000,
           "mpConsume": 104,
           "power": 0,
           "abnormalLevel": 1,
@@ -39882,6 +39908,7 @@
         },
         {
           "level": 17,
+          "reuseDelayMs": 20000,
           "mpConsume": 106,
           "power": 0,
           "abnormalLevel": 1,
@@ -39891,6 +39918,7 @@
         },
         {
           "level": 18,
+          "reuseDelayMs": 20000,
           "mpConsume": 110,
           "power": 0,
           "abnormalLevel": 1,
@@ -39910,7 +39938,7 @@
       "targetType": "CORPSE_MOB",
       "castRange": 40,
       "hitTimeMs": 15000,
-      "reuseDelayMs": 5000,
+      "reuseDelayMs": 20000,
       "levelData": [
         {
           "level": 1,
@@ -39988,7 +40016,7 @@
       "targetType": "SERVITOR",
       "castRange": 400,
       "hitTimeMs": 4000,
-      "reuseDelayMs": 2000,
+      "reuseDelayMs": 6000,
       "levelData": [
         {
           "level": 1,
@@ -40023,7 +40051,7 @@
       "targetType": "SERVITOR",
       "castRange": 400,
       "hitTimeMs": 4000,
-      "reuseDelayMs": 2000,
+      "reuseDelayMs": 6000,
       "levelData": [
         {
           "level": 1,
@@ -40066,7 +40094,7 @@
       "targetType": "SERVITOR",
       "castRange": 400,
       "hitTimeMs": 4000,
-      "reuseDelayMs": 2000,
+      "reuseDelayMs": 6000,
       "levelData": [
         {
           "level": 1,
@@ -40101,7 +40129,7 @@
       "targetType": "SERVITOR",
       "castRange": 400,
       "hitTimeMs": 4000,
-      "reuseDelayMs": 2000,
+      "reuseDelayMs": 6000,
       "levelData": [
         {
           "level": 1,
@@ -40136,7 +40164,7 @@
       "targetType": "SERVITOR",
       "castRange": 400,
       "hitTimeMs": 4000,
-      "reuseDelayMs": 2000,
+      "reuseDelayMs": 6000,
       "levelData": [
         {
           "level": 1,
@@ -40179,7 +40207,7 @@
       "targetType": "SERVITOR",
       "castRange": 400,
       "hitTimeMs": 4000,
-      "reuseDelayMs": 2000,
+      "reuseDelayMs": 6000,
       "levelData": [
         {
           "level": 1,
@@ -40222,7 +40250,7 @@
       "targetType": "ONE",
       "castRange": 600,
       "hitTimeMs": 4000,
-      "reuseDelayMs": 3000,
+      "reuseDelayMs": 12000,
       "levelData": [
         {
           "level": 1,
@@ -40293,7 +40321,7 @@
       "targetType": "ONE",
       "castRange": 900,
       "hitTimeMs": 4000,
-      "reuseDelayMs": 1000,
+      "reuseDelayMs": 6000,
       "levelData": [
         {
           "level": 1,
@@ -40453,7 +40481,7 @@
       "targetType": "CORPSE_MOB",
       "castRange": 400,
       "hitTimeMs": 1500,
-      "reuseDelayMs": 5000,
+      "reuseDelayMs": 20000,
       "levelData": [
         {
           "level": 1,
@@ -40596,7 +40624,7 @@
       "targetType": "CORPSE_MOB",
       "castRange": 40,
       "hitTimeMs": 15000,
-      "reuseDelayMs": 5000,
+      "reuseDelayMs": 20000,
       "levelData": [
         {
           "level": 1,
@@ -40665,7 +40693,7 @@
       "targetType": "AREA_CORPSE_MOB",
       "castRange": 400,
       "hitTimeMs": 1500,
-      "reuseDelayMs": 5000,
+      "reuseDelayMs": 20000,
       "levelData": [
         {
           "level": 1,
@@ -40817,7 +40845,7 @@
       "targetType": "ONE",
       "castRange": 400,
       "hitTimeMs": 1500,
-      "reuseDelayMs": 5000,
+      "reuseDelayMs": 20000,
       "levelData": [
         {
           "level": 1,
@@ -40937,7 +40965,7 @@
       "targetType": "SELF",
       "castRange": 40,
       "hitTimeMs": 4000,
-      "reuseDelayMs": 5000,
+      "reuseDelayMs": 20000,
       "levelData": [
         {
           "level": 1,
@@ -40988,7 +41016,7 @@
       "targetType": "ONE",
       "castRange": 900,
       "hitTimeMs": 4000,
-      "reuseDelayMs": 1000,
+      "reuseDelayMs": 6000,
       "levelData": [
         {
           "level": 1,
@@ -41203,7 +41231,7 @@
       "targetType": "ONE",
       "castRange": 600,
       "hitTimeMs": 4000,
-      "reuseDelayMs": 2000,
+      "reuseDelayMs": 7000,
       "levelData": [
         {
           "level": 1,
@@ -41361,7 +41389,7 @@
       "targetType": "ONE",
       "castRange": 600,
       "hitTimeMs": 4000,
-      "reuseDelayMs": 10000,
+      "reuseDelayMs": 40000,
       "levelData": [
         {
           "level": 1,
@@ -41506,7 +41534,7 @@
       "targetType": "ONE",
       "castRange": 600,
       "hitTimeMs": 1500,
-      "reuseDelayMs": 2000,
+      "reuseDelayMs": 8000,
       "levelData": [
         {
           "level": 1,
@@ -41700,7 +41728,7 @@
       "targetType": "AREA",
       "castRange": 500,
       "hitTimeMs": 4000,
-      "reuseDelayMs": 5000,
+      "reuseDelayMs": 20000,
       "levelData": [
         {
           "level": 1,
@@ -41778,7 +41806,7 @@
       "targetType": "ONE",
       "castRange": 600,
       "hitTimeMs": 4000,
-      "reuseDelayMs": 3000,
+      "reuseDelayMs": 12000,
       "levelData": [
         {
           "level": 1,
@@ -41865,7 +41893,7 @@
       "targetType": "ONE",
       "castRange": 600,
       "hitTimeMs": 4000,
-      "reuseDelayMs": 3000,
+      "reuseDelayMs": 30000,
       "levelData": [
         {
           "level": 1,
@@ -42015,7 +42043,7 @@
       "targetType": "ONE",
       "castRange": 400,
       "hitTimeMs": 6000,
-      "reuseDelayMs": 23000,
+      "reuseDelayMs": 180000,
       "levelData": [
         {
           "level": 1,
@@ -42035,6 +42063,7 @@
         },
         {
           "level": 3,
+          "reuseDelayMs": 120000,
           "mpConsume": 38,
           "power": 0,
           "abnormalLevel": 1,
@@ -42043,6 +42072,7 @@
         },
         {
           "level": 4,
+          "reuseDelayMs": 120000,
           "mpConsume": 42,
           "power": 0,
           "abnormalLevel": 1,
@@ -42051,6 +42081,7 @@
         },
         {
           "level": 5,
+          "reuseDelayMs": 120000,
           "mpConsume": 43,
           "power": 0,
           "abnormalLevel": 1,
@@ -42059,6 +42090,7 @@
         },
         {
           "level": 6,
+          "reuseDelayMs": 120000,
           "mpConsume": 44,
           "power": 0,
           "abnormalLevel": 1,
@@ -42067,6 +42099,7 @@
         },
         {
           "level": 7,
+          "reuseDelayMs": 120000,
           "mpConsume": 46,
           "power": 0,
           "abnormalLevel": 1,
@@ -42075,6 +42108,7 @@
         },
         {
           "level": 8,
+          "reuseDelayMs": 120000,
           "mpConsume": 48,
           "power": 0,
           "abnormalLevel": 1,
@@ -42083,6 +42117,7 @@
         },
         {
           "level": 9,
+          "reuseDelayMs": 120000,
           "mpConsume": 50,
           "power": 0,
           "abnormalLevel": 1,
@@ -42091,6 +42126,7 @@
         },
         {
           "level": 10,
+          "reuseDelayMs": 120000,
           "mpConsume": 51,
           "power": 0,
           "abnormalLevel": 1,
@@ -42099,6 +42135,7 @@
         },
         {
           "level": 11,
+          "reuseDelayMs": 120000,
           "mpConsume": 52,
           "power": 0,
           "abnormalLevel": 1,
@@ -42107,6 +42144,7 @@
         },
         {
           "level": 12,
+          "reuseDelayMs": 120000,
           "mpConsume": 54,
           "power": 0,
           "abnormalLevel": 1,
@@ -42115,6 +42153,7 @@
         },
         {
           "level": 13,
+          "reuseDelayMs": 120000,
           "mpConsume": 55,
           "power": 0,
           "abnormalLevel": 1,
@@ -42156,7 +42195,7 @@
       "targetType": "AURA",
       "castRange": 40,
       "hitTimeMs": 4000,
-      "reuseDelayMs": 4000,
+      "reuseDelayMs": 15000,
       "levelData": [
         {
           "level": 1,
@@ -42343,7 +42382,7 @@
       "targetType": "ONE",
       "castRange": 150,
       "hitTimeMs": 1500,
-      "reuseDelayMs": 1000,
+      "reuseDelayMs": 2500,
       "levelData": [
         {
           "level": 1,
@@ -42432,7 +42471,7 @@
       "targetType": "FRONT_AREA",
       "castRange": 40,
       "hitTimeMs": 3000,
-      "reuseDelayMs": 4000,
+      "reuseDelayMs": 15000,
       "levelData": [
         {
           "level": 1,
@@ -42647,7 +42686,7 @@
       "targetType": "ONE",
       "castRange": 750,
       "hitTimeMs": 4000,
-      "reuseDelayMs": 1000,
+      "reuseDelayMs": 6000,
       "levelData": [
         {
           "level": 1,
@@ -42736,7 +42775,7 @@
       "targetType": "AREA",
       "castRange": 500,
       "hitTimeMs": 5000,
-      "reuseDelayMs": 4000,
+      "reuseDelayMs": 15000,
       "levelData": [
         {
           "level": 1,
@@ -42888,7 +42927,7 @@
       "targetType": "ONE",
       "castRange": 600,
       "hitTimeMs": 4000,
-      "reuseDelayMs": 1000,
+      "reuseDelayMs": 6000,
       "levelData": [
         {
           "level": 1,
@@ -42950,7 +42989,7 @@
       "targetType": "ONE",
       "castRange": 750,
       "hitTimeMs": 4000,
-      "reuseDelayMs": 1000,
+      "reuseDelayMs": 6000,
       "levelData": [
         {
           "level": 1,
@@ -43039,7 +43078,7 @@
       "targetType": "AREA",
       "castRange": 500,
       "hitTimeMs": 4000,
-      "reuseDelayMs": 4000,
+      "reuseDelayMs": 15000,
       "levelData": [
         {
           "level": 1,
@@ -43083,7 +43122,7 @@
       "targetType": "ONE",
       "castRange": 400,
       "hitTimeMs": 4000,
-      "reuseDelayMs": 2000,
+      "reuseDelayMs": 6000,
       "levelData": [
         {
           "level": 1,
@@ -43126,7 +43165,7 @@
       "targetType": "ONE",
       "castRange": 600,
       "hitTimeMs": 4000,
-      "reuseDelayMs": 2000,
+      "reuseDelayMs": 6000,
       "levelData": [
         {
           "level": 1,
@@ -43185,7 +43224,7 @@
       "targetType": "ONE",
       "castRange": 600,
       "hitTimeMs": 3100,
-      "reuseDelayMs": 2000,
+      "reuseDelayMs": 8000,
       "levelData": [
         {
           "level": 1,
@@ -43262,7 +43301,7 @@
       "targetType": "ONE",
       "castRange": 400,
       "hitTimeMs": 4000,
-      "reuseDelayMs": 2000,
+      "reuseDelayMs": 6000,
       "levelData": [
         {
           "level": 1,
@@ -43305,7 +43344,7 @@
       "targetType": "ONE",
       "castRange": 400,
       "hitTimeMs": 4000,
-      "reuseDelayMs": 2000,
+      "reuseDelayMs": 6000,
       "levelData": [
         {
           "level": 1,
@@ -43348,7 +43387,7 @@
       "targetType": "ONE",
       "castRange": 600,
       "hitTimeMs": 2500,
-      "reuseDelayMs": 2000,
+      "reuseDelayMs": 8000,
       "levelData": [
         {
           "level": 1,
@@ -43669,7 +43708,7 @@
       "targetType": "ONE",
       "castRange": 400,
       "hitTimeMs": 4000,
-      "reuseDelayMs": 2000,
+      "reuseDelayMs": 6000,
       "levelData": [
         {
           "level": 1,
@@ -43706,7 +43745,7 @@
       "targetType": "ONE",
       "castRange": 600,
       "hitTimeMs": 1500,
-      "reuseDelayMs": 2000,
+      "reuseDelayMs": 8000,
       "levelData": [
         {
           "level": 1,
@@ -43900,7 +43939,7 @@
       "targetType": "AURA",
       "castRange": 40,
       "hitTimeMs": 4000,
-      "reuseDelayMs": 5000,
+      "reuseDelayMs": 20000,
       "levelData": [
         {
           "level": 1,
@@ -44076,7 +44115,7 @@
       "targetType": "AURA",
       "castRange": 40,
       "hitTimeMs": 4000,
-      "reuseDelayMs": 4000,
+      "reuseDelayMs": 15000,
       "levelData": [
         {
           "level": 1,
@@ -44153,7 +44192,7 @@
       "targetType": "AURA",
       "castRange": 40,
       "hitTimeMs": 4000,
-      "reuseDelayMs": 2000,
+      "reuseDelayMs": 20000,
       "levelData": [
         {
           "level": 1,
@@ -44211,7 +44250,7 @@
       "targetType": "AURA",
       "castRange": 40,
       "hitTimeMs": 4000,
-      "reuseDelayMs": 5000,
+      "reuseDelayMs": 20000,
       "levelData": [
         {
           "level": 1,
@@ -44345,7 +44384,7 @@
       "targetType": "SELF",
       "castRange": 40,
       "hitTimeMs": 5000,
-      "reuseDelayMs": 3000,
+      "reuseDelayMs": 10000,
       "levelData": [
         {
           "level": 1,
@@ -44370,7 +44409,7 @@
       "targetType": "ONE",
       "castRange": 600,
       "hitTimeMs": 5000,
-      "reuseDelayMs": 3000,
+      "reuseDelayMs": 10000,
       "levelData": [
         {
           "level": 1,
@@ -44687,7 +44726,7 @@
       "targetType": "ONE",
       "castRange": 600,
       "hitTimeMs": 2000,
-      "reuseDelayMs": 1000,
+      "reuseDelayMs": 3000,
       "levelData": [
         {
           "level": 1,
@@ -45001,7 +45040,7 @@
       "targetType": "PARTY",
       "castRange": 40,
       "hitTimeMs": 7000,
-      "reuseDelayMs": 6000,
+      "reuseDelayMs": 25000,
       "levelData": [
         {
           "level": 1,
@@ -45317,7 +45356,7 @@
       "targetType": "ONE",
       "castRange": 750,
       "hitTimeMs": 4000,
-      "reuseDelayMs": 1000,
+      "reuseDelayMs": 6000,
       "levelData": [
         {
           "level": 1,
@@ -45406,7 +45445,7 @@
       "targetType": "ONE",
       "castRange": 600,
       "hitTimeMs": 1500,
-      "reuseDelayMs": 2000,
+      "reuseDelayMs": 8000,
       "levelData": [
         {
           "level": 1,
@@ -45564,7 +45603,7 @@
       "targetType": "ONE",
       "castRange": 40,
       "hitTimeMs": 1500,
-      "reuseDelayMs": 2000,
+      "reuseDelayMs": 8000,
       "levelData": [
         {
           "level": 1,
@@ -45721,7 +45760,7 @@
       "targetType": "ONE",
       "castRange": 40,
       "hitTimeMs": 1500,
-      "reuseDelayMs": 2000,
+      "reuseDelayMs": 8000,
       "levelData": [
         {
           "level": 1,
@@ -45898,7 +45937,7 @@
       "targetType": "SELF",
       "castRange": 40,
       "hitTimeMs": 15000,
-      "reuseDelayMs": 0,
+      "reuseDelayMs": 21600000,
       "levelData": [
         {
           "level": 1,
@@ -45942,6 +45981,7 @@
         },
         {
           "level": 5,
+          "reuseDelayMs": 20000,
           "mpConsume": 56,
           "power": 0,
           "abnormalLevel": 1,
@@ -45952,6 +45992,7 @@
         },
         {
           "level": 6,
+          "reuseDelayMs": 20000,
           "mpConsume": 62,
           "power": 0,
           "abnormalLevel": 1,
@@ -45962,6 +46003,7 @@
         },
         {
           "level": 7,
+          "reuseDelayMs": 20000,
           "mpConsume": 69,
           "power": 0,
           "abnormalLevel": 1,
@@ -45972,6 +46014,7 @@
         },
         {
           "level": 8,
+          "reuseDelayMs": 20000,
           "mpConsume": 75,
           "power": 0,
           "abnormalLevel": 1,
@@ -45982,6 +46025,7 @@
         },
         {
           "level": 9,
+          "reuseDelayMs": 20000,
           "mpConsume": 82,
           "power": 0,
           "abnormalLevel": 1,
@@ -45992,6 +46036,7 @@
         },
         {
           "level": 10,
+          "reuseDelayMs": 20000,
           "mpConsume": 85,
           "power": 0,
           "abnormalLevel": 1,
@@ -46002,6 +46047,7 @@
         },
         {
           "level": 11,
+          "reuseDelayMs": 20000,
           "mpConsume": 88,
           "power": 0,
           "abnormalLevel": 1,
@@ -46012,6 +46058,7 @@
         },
         {
           "level": 12,
+          "reuseDelayMs": 20000,
           "mpConsume": 92,
           "power": 0,
           "abnormalLevel": 1,
@@ -46022,6 +46069,7 @@
         },
         {
           "level": 13,
+          "reuseDelayMs": 20000,
           "mpConsume": 95,
           "power": 0,
           "abnormalLevel": 1,
@@ -46032,6 +46080,7 @@
         },
         {
           "level": 14,
+          "reuseDelayMs": 20000,
           "mpConsume": 98,
           "power": 0,
           "abnormalLevel": 1,
@@ -46042,6 +46091,7 @@
         },
         {
           "level": 15,
+          "reuseDelayMs": 20000,
           "mpConsume": 101,
           "power": 0,
           "abnormalLevel": 1,
@@ -46052,6 +46102,7 @@
         },
         {
           "level": 16,
+          "reuseDelayMs": 20000,
           "mpConsume": 104,
           "power": 0,
           "abnormalLevel": 1,
@@ -46062,6 +46113,7 @@
         },
         {
           "level": 17,
+          "reuseDelayMs": 20000,
           "mpConsume": 106,
           "power": 0,
           "abnormalLevel": 1,
@@ -46072,6 +46124,7 @@
         },
         {
           "level": 18,
+          "reuseDelayMs": 20000,
           "mpConsume": 109,
           "power": 0,
           "abnormalLevel": 1,
@@ -46092,7 +46145,7 @@
       "targetType": "SELF",
       "castRange": 40,
       "hitTimeMs": 15000,
-      "reuseDelayMs": 0,
+      "reuseDelayMs": 21600000,
       "levelData": [
         {
           "level": 1,
@@ -46136,6 +46189,7 @@
         },
         {
           "level": 5,
+          "reuseDelayMs": 20000,
           "mpConsume": 56,
           "power": 0,
           "abnormalLevel": 1,
@@ -46146,6 +46200,7 @@
         },
         {
           "level": 6,
+          "reuseDelayMs": 20000,
           "mpConsume": 62,
           "power": 0,
           "abnormalLevel": 1,
@@ -46156,6 +46211,7 @@
         },
         {
           "level": 7,
+          "reuseDelayMs": 20000,
           "mpConsume": 69,
           "power": 0,
           "abnormalLevel": 1,
@@ -46166,6 +46222,7 @@
         },
         {
           "level": 8,
+          "reuseDelayMs": 20000,
           "mpConsume": 75,
           "power": 0,
           "abnormalLevel": 1,
@@ -46176,6 +46233,7 @@
         },
         {
           "level": 9,
+          "reuseDelayMs": 20000,
           "mpConsume": 82,
           "power": 0,
           "abnormalLevel": 1,
@@ -46186,6 +46244,7 @@
         },
         {
           "level": 10,
+          "reuseDelayMs": 20000,
           "mpConsume": 85,
           "power": 0,
           "abnormalLevel": 1,
@@ -46196,6 +46255,7 @@
         },
         {
           "level": 11,
+          "reuseDelayMs": 20000,
           "mpConsume": 88,
           "power": 0,
           "abnormalLevel": 1,
@@ -46206,6 +46266,7 @@
         },
         {
           "level": 12,
+          "reuseDelayMs": 20000,
           "mpConsume": 92,
           "power": 0,
           "abnormalLevel": 1,
@@ -46216,6 +46277,7 @@
         },
         {
           "level": 13,
+          "reuseDelayMs": 20000,
           "mpConsume": 95,
           "power": 0,
           "abnormalLevel": 1,
@@ -46226,6 +46288,7 @@
         },
         {
           "level": 14,
+          "reuseDelayMs": 20000,
           "mpConsume": 98,
           "power": 0,
           "abnormalLevel": 1,
@@ -46236,6 +46299,7 @@
         },
         {
           "level": 15,
+          "reuseDelayMs": 20000,
           "mpConsume": 101,
           "power": 0,
           "abnormalLevel": 1,
@@ -46246,6 +46310,7 @@
         },
         {
           "level": 16,
+          "reuseDelayMs": 20000,
           "mpConsume": 104,
           "power": 0,
           "abnormalLevel": 1,
@@ -46256,6 +46321,7 @@
         },
         {
           "level": 17,
+          "reuseDelayMs": 20000,
           "mpConsume": 106,
           "power": 0,
           "abnormalLevel": 1,
@@ -46266,6 +46332,7 @@
         },
         {
           "level": 18,
+          "reuseDelayMs": 20000,
           "mpConsume": 109,
           "power": 0,
           "abnormalLevel": 1,
@@ -46286,7 +46353,7 @@
       "targetType": "SELF",
       "castRange": 40,
       "hitTimeMs": 15000,
-      "reuseDelayMs": 0,
+      "reuseDelayMs": 21600000,
       "levelData": [
         {
           "level": 1,
@@ -46330,6 +46397,7 @@
         },
         {
           "level": 5,
+          "reuseDelayMs": 20000,
           "mpConsume": 56,
           "power": 0,
           "abnormalLevel": 1,
@@ -46340,6 +46408,7 @@
         },
         {
           "level": 6,
+          "reuseDelayMs": 20000,
           "mpConsume": 62,
           "power": 0,
           "abnormalLevel": 1,
@@ -46350,6 +46419,7 @@
         },
         {
           "level": 7,
+          "reuseDelayMs": 20000,
           "mpConsume": 69,
           "power": 0,
           "abnormalLevel": 1,
@@ -46360,6 +46430,7 @@
         },
         {
           "level": 8,
+          "reuseDelayMs": 20000,
           "mpConsume": 75,
           "power": 0,
           "abnormalLevel": 1,
@@ -46370,6 +46441,7 @@
         },
         {
           "level": 9,
+          "reuseDelayMs": 20000,
           "mpConsume": 82,
           "power": 0,
           "abnormalLevel": 1,
@@ -46380,6 +46452,7 @@
         },
         {
           "level": 10,
+          "reuseDelayMs": 20000,
           "mpConsume": 85,
           "power": 0,
           "abnormalLevel": 1,
@@ -46390,6 +46463,7 @@
         },
         {
           "level": 11,
+          "reuseDelayMs": 20000,
           "mpConsume": 88,
           "power": 0,
           "abnormalLevel": 1,
@@ -46400,6 +46474,7 @@
         },
         {
           "level": 12,
+          "reuseDelayMs": 20000,
           "mpConsume": 92,
           "power": 0,
           "abnormalLevel": 1,
@@ -46410,6 +46485,7 @@
         },
         {
           "level": 13,
+          "reuseDelayMs": 20000,
           "mpConsume": 95,
           "power": 0,
           "abnormalLevel": 1,
@@ -46420,6 +46496,7 @@
         },
         {
           "level": 14,
+          "reuseDelayMs": 20000,
           "mpConsume": 98,
           "power": 0,
           "abnormalLevel": 1,
@@ -46430,6 +46507,7 @@
         },
         {
           "level": 15,
+          "reuseDelayMs": 20000,
           "mpConsume": 101,
           "power": 0,
           "abnormalLevel": 1,
@@ -46440,6 +46518,7 @@
         },
         {
           "level": 16,
+          "reuseDelayMs": 20000,
           "mpConsume": 104,
           "power": 0,
           "abnormalLevel": 1,
@@ -46450,6 +46529,7 @@
         },
         {
           "level": 17,
+          "reuseDelayMs": 20000,
           "mpConsume": 106,
           "power": 0,
           "abnormalLevel": 1,
@@ -46460,6 +46540,7 @@
         },
         {
           "level": 18,
+          "reuseDelayMs": 20000,
           "mpConsume": 109,
           "power": 0,
           "abnormalLevel": 1,
@@ -46480,7 +46561,7 @@
       "targetType": "SELF",
       "castRange": 40,
       "hitTimeMs": 15000,
-      "reuseDelayMs": 0,
+      "reuseDelayMs": 21600000,
       "levelData": [
         {
           "level": 1,
@@ -46524,6 +46605,7 @@
         },
         {
           "level": 5,
+          "reuseDelayMs": 20000,
           "mpConsume": 56,
           "power": 0,
           "abnormalLevel": 1,
@@ -46534,6 +46616,7 @@
         },
         {
           "level": 6,
+          "reuseDelayMs": 20000,
           "mpConsume": 62,
           "power": 0,
           "abnormalLevel": 1,
@@ -46544,6 +46627,7 @@
         },
         {
           "level": 7,
+          "reuseDelayMs": 20000,
           "mpConsume": 69,
           "power": 0,
           "abnormalLevel": 1,
@@ -46554,6 +46638,7 @@
         },
         {
           "level": 8,
+          "reuseDelayMs": 20000,
           "mpConsume": 75,
           "power": 0,
           "abnormalLevel": 1,
@@ -46564,6 +46649,7 @@
         },
         {
           "level": 9,
+          "reuseDelayMs": 20000,
           "mpConsume": 82,
           "power": 0,
           "abnormalLevel": 1,
@@ -46574,6 +46660,7 @@
         },
         {
           "level": 10,
+          "reuseDelayMs": 20000,
           "mpConsume": 85,
           "power": 0,
           "abnormalLevel": 1,
@@ -46584,6 +46671,7 @@
         },
         {
           "level": 11,
+          "reuseDelayMs": 20000,
           "mpConsume": 88,
           "power": 0,
           "abnormalLevel": 1,
@@ -46594,6 +46682,7 @@
         },
         {
           "level": 12,
+          "reuseDelayMs": 20000,
           "mpConsume": 92,
           "power": 0,
           "abnormalLevel": 1,
@@ -46604,6 +46693,7 @@
         },
         {
           "level": 13,
+          "reuseDelayMs": 20000,
           "mpConsume": 95,
           "power": 0,
           "abnormalLevel": 1,
@@ -46614,6 +46704,7 @@
         },
         {
           "level": 14,
+          "reuseDelayMs": 20000,
           "mpConsume": 98,
           "power": 0,
           "abnormalLevel": 1,
@@ -46624,6 +46715,7 @@
         },
         {
           "level": 15,
+          "reuseDelayMs": 20000,
           "mpConsume": 101,
           "power": 0,
           "abnormalLevel": 1,
@@ -46634,6 +46726,7 @@
         },
         {
           "level": 16,
+          "reuseDelayMs": 20000,
           "mpConsume": 104,
           "power": 0,
           "abnormalLevel": 1,
@@ -46644,6 +46737,7 @@
         },
         {
           "level": 17,
+          "reuseDelayMs": 20000,
           "mpConsume": 106,
           "power": 0,
           "abnormalLevel": 1,
@@ -46654,6 +46748,7 @@
         },
         {
           "level": 18,
+          "reuseDelayMs": 20000,
           "mpConsume": 109,
           "power": 0,
           "abnormalLevel": 1,
@@ -46674,7 +46769,7 @@
       "targetType": "PARTY",
       "castRange": 40,
       "hitTimeMs": 7000,
-      "reuseDelayMs": 5000,
+      "reuseDelayMs": 20000,
       "levelData": [
         {
           "level": 1,
@@ -46854,7 +46949,7 @@
       "targetType": "ONE",
       "castRange": 900,
       "hitTimeMs": 4000,
-      "reuseDelayMs": 1200,
+      "reuseDelayMs": 6000,
       "levelData": [
         {
           "level": 1,
@@ -47124,7 +47219,7 @@
       "targetType": "ONE",
       "castRange": 150,
       "hitTimeMs": 1500,
-      "reuseDelayMs": 200,
+      "reuseDelayMs": 2500,
       "levelData": [
         {
           "level": 1,
@@ -47396,7 +47491,7 @@
       "targetType": "ONE",
       "castRange": 400,
       "hitTimeMs": 4000,
-      "reuseDelayMs": 2000,
+      "reuseDelayMs": 6000,
       "levelData": [
         {
           "level": 1,
@@ -47442,7 +47537,7 @@
       "targetType": "ONE",
       "castRange": 600,
       "hitTimeMs": 4000,
-      "reuseDelayMs": 2000,
+      "reuseDelayMs": 6000,
       "levelData": [
         {
           "level": 1,
@@ -47501,7 +47596,7 @@
       "targetType": "ONE",
       "castRange": 900,
       "hitTimeMs": 4000,
-      "reuseDelayMs": 3000,
+      "reuseDelayMs": 12000,
       "levelData": [
         {
           "level": 1,
@@ -47770,7 +47865,7 @@
       "targetType": "ONE",
       "castRange": 900,
       "hitTimeMs": 4000,
-      "reuseDelayMs": 1000,
+      "reuseDelayMs": 6000,
       "levelData": [
         {
           "level": 1,
@@ -48040,7 +48135,7 @@
       "targetType": "ONE",
       "castRange": 900,
       "hitTimeMs": 3100,
-      "reuseDelayMs": 1000,
+      "reuseDelayMs": 8000,
       "levelData": [
         {
           "level": 1,
@@ -48234,7 +48329,7 @@
       "targetType": "ONE",
       "castRange": 900,
       "hitTimeMs": 2500,
-      "reuseDelayMs": 1000,
+      "reuseDelayMs": 8000,
       "levelData": [
         {
           "level": 1,
@@ -48410,7 +48505,7 @@
       "targetType": "ONE",
       "castRange": 400,
       "hitTimeMs": 4000,
-      "reuseDelayMs": 2000,
+      "reuseDelayMs": 6000,
       "levelData": [
         {
           "level": 1,
@@ -48456,7 +48551,7 @@
       "targetType": "ONE",
       "castRange": 900,
       "hitTimeMs": 4000,
-      "reuseDelayMs": 1000,
+      "reuseDelayMs": 6000,
       "levelData": [
         {
           "level": 1,
@@ -48726,7 +48821,7 @@
       "targetType": "ONE",
       "castRange": 400,
       "hitTimeMs": 4000,
-      "reuseDelayMs": 2000,
+      "reuseDelayMs": 6000,
       "levelData": [
         {
           "level": 1,
@@ -48772,7 +48867,7 @@
       "targetType": "ONE",
       "castRange": 400,
       "hitTimeMs": 4000,
-      "reuseDelayMs": 2000,
+      "reuseDelayMs": 6000,
       "levelData": [
         {
           "level": 1,
@@ -48818,7 +48913,7 @@
       "targetType": "ONE",
       "castRange": 400,
       "hitTimeMs": 4000,
-      "reuseDelayMs": 2000,
+      "reuseDelayMs": 6000,
       "levelData": [
         {
           "level": 1,
@@ -48891,7 +48986,7 @@
       "targetType": "ONE",
       "castRange": 900,
       "hitTimeMs": 4000,
-      "reuseDelayMs": 2000,
+      "reuseDelayMs": 6000,
       "levelData": [
         {
           "level": 1,
@@ -48950,7 +49045,7 @@
       "targetType": "ONE",
       "castRange": 900,
       "hitTimeMs": 4000,
-      "reuseDelayMs": 2000,
+      "reuseDelayMs": 6000,
       "levelData": [
         {
           "level": 1,
@@ -49093,7 +49188,7 @@
       "targetType": "AURA",
       "castRange": 40,
       "hitTimeMs": 4000,
-      "reuseDelayMs": 5000,
+      "reuseDelayMs": 20000,
       "levelData": [
         {
           "level": 1,
@@ -49224,7 +49319,7 @@
       "targetType": "AURA",
       "castRange": 40,
       "hitTimeMs": 4000,
-      "reuseDelayMs": 5000,
+      "reuseDelayMs": 20000,
       "levelData": [
         {
           "level": 1,
@@ -49373,7 +49468,7 @@
       "targetType": "AURA",
       "castRange": 40,
       "hitTimeMs": 4000,
-      "reuseDelayMs": 5000,
+      "reuseDelayMs": 20000,
       "levelData": [
         {
           "level": 1,
@@ -49503,7 +49598,7 @@
       "targetType": "PARTY_CLAN",
       "castRange": 40,
       "hitTimeMs": 2500,
-      "reuseDelayMs": 5000,
+      "reuseDelayMs": 20000,
       "levelData": [
         {
           "level": 1,
@@ -49548,7 +49643,7 @@
       "targetType": "PARTY_CLAN",
       "castRange": 40,
       "hitTimeMs": 2500,
-      "reuseDelayMs": 5000,
+      "reuseDelayMs": 20000,
       "levelData": [
         {
           "level": 1,
@@ -49593,7 +49688,7 @@
       "targetType": "PARTY",
       "castRange": 40,
       "hitTimeMs": 2500,
-      "reuseDelayMs": 5000,
+      "reuseDelayMs": 20000,
       "levelData": [
         {
           "level": 1,
@@ -49629,7 +49724,7 @@
       "targetType": "PARTY",
       "castRange": 40,
       "hitTimeMs": 2500,
-      "reuseDelayMs": 5000,
+      "reuseDelayMs": 20000,
       "levelData": [
         {
           "level": 1,
@@ -49674,7 +49769,7 @@
       "targetType": "PARTY",
       "castRange": 40,
       "hitTimeMs": 2500,
-      "reuseDelayMs": 5000,
+      "reuseDelayMs": 20000,
       "levelData": [
         {
           "level": 1,
@@ -49719,7 +49814,7 @@
       "targetType": "CORPSE_CLAN",
       "castRange": 40,
       "hitTimeMs": 10000,
-      "reuseDelayMs": 150000,
+      "reuseDelayMs": 600000,
       "levelData": [
         {
           "level": 1,
@@ -49789,7 +49884,7 @@
       "targetType": "PARTY",
       "castRange": 40,
       "hitTimeMs": 0,
-      "reuseDelayMs": 150000,
+      "reuseDelayMs": 600000,
       "levelData": [
         {
           "level": 1,
@@ -49819,7 +49914,7 @@
       "targetType": "PARTY_CLAN",
       "castRange": 40,
       "hitTimeMs": 2500,
-      "reuseDelayMs": 5000,
+      "reuseDelayMs": 20000,
       "levelData": [
         {
           "level": 1,
@@ -49954,7 +50049,7 @@
       "targetType": "ONE",
       "castRange": 400,
       "hitTimeMs": 4000,
-      "reuseDelayMs": 2000,
+      "reuseDelayMs": 6000,
       "levelData": [
         {
           "level": 1,
@@ -50000,7 +50095,7 @@
       "targetType": "ONE",
       "castRange": 600,
       "hitTimeMs": 8000,
-      "reuseDelayMs": 30000,
+      "reuseDelayMs": 120000,
       "levelData": [
         {
           "level": 1,
@@ -50053,7 +50148,7 @@
       "targetType": "ONE",
       "castRange": 400,
       "hitTimeMs": 4000,
-      "reuseDelayMs": 2000,
+      "reuseDelayMs": 6000,
       "levelData": [
         {
           "level": 1,
@@ -50108,7 +50203,7 @@
       "targetType": "PARTY_CLAN",
       "castRange": 40,
       "hitTimeMs": 2500,
-      "reuseDelayMs": 5000,
+      "reuseDelayMs": 20000,
       "levelData": [
         {
           "level": 1,
@@ -50153,7 +50248,7 @@
       "targetType": "PARTY_CLAN",
       "castRange": 40,
       "hitTimeMs": 2500,
-      "reuseDelayMs": 5000,
+      "reuseDelayMs": 20000,
       "levelData": [
         {
           "level": 1,
@@ -50242,7 +50337,7 @@
       "targetType": "ONE",
       "castRange": 900,
       "hitTimeMs": 1500,
-      "reuseDelayMs": 2000,
+      "reuseDelayMs": 8000,
       "levelData": [
         {
           "level": 1,
@@ -50382,7 +50477,7 @@
       "targetType": "ONE",
       "castRange": 750,
       "hitTimeMs": 5000,
-      "reuseDelayMs": 8000,
+      "reuseDelayMs": 30000,
       "levelData": [
         {
           "level": 1,
@@ -50426,7 +50521,7 @@
       "targetType": "ONE",
       "castRange": 900,
       "hitTimeMs": 5000,
-      "reuseDelayMs": 8000,
+      "reuseDelayMs": 30000,
       "levelData": [
         {
           "level": 1,
@@ -50569,7 +50664,7 @@
       "targetType": "ONE",
       "castRange": 750,
       "hitTimeMs": 5000,
-      "reuseDelayMs": 8000,
+      "reuseDelayMs": 30000,
       "levelData": [
         {
           "level": 1,
@@ -50613,7 +50708,7 @@
       "targetType": "ONE",
       "castRange": 900,
       "hitTimeMs": 5000,
-      "reuseDelayMs": 8000,
+      "reuseDelayMs": 30000,
       "levelData": [
         {
           "level": 1,
@@ -50756,7 +50851,7 @@
       "targetType": "ONE",
       "castRange": 400,
       "hitTimeMs": 4000,
-      "reuseDelayMs": 2000,
+      "reuseDelayMs": 6000,
       "levelData": [
         {
           "level": 1,
@@ -50811,7 +50906,7 @@
       "targetType": "ONE",
       "castRange": 600,
       "hitTimeMs": 4000,
-      "reuseDelayMs": 4000,
+      "reuseDelayMs": 15000,
       "levelData": [
         {
           "level": 1,
@@ -50915,7 +51010,7 @@
       "targetType": "PARTY",
       "castRange": 40,
       "hitTimeMs": 7000,
-      "reuseDelayMs": 900000,
+      "reuseDelayMs": 3600000,
       "levelData": [
         {
           "level": 1,
@@ -50940,7 +51035,7 @@
       "targetType": "AURA",
       "castRange": 40,
       "hitTimeMs": 4000,
-      "reuseDelayMs": 150000,
+      "reuseDelayMs": 20000,
       "levelData": [
         {
           "level": 1,
@@ -51080,7 +51175,7 @@
       "targetType": "AURA",
       "castRange": 40,
       "hitTimeMs": 4000,
-      "reuseDelayMs": 900000,
+      "reuseDelayMs": 20000,
       "levelData": [
         {
           "level": 1,
@@ -51199,7 +51294,7 @@
       "targetType": "ONE",
       "castRange": 400,
       "hitTimeMs": 2000,
-      "reuseDelayMs": 1000,
+      "reuseDelayMs": 3000,
       "levelData": [
         {
           "level": 1,
@@ -51252,7 +51347,7 @@
       "targetType": "ONE",
       "castRange": 400,
       "hitTimeMs": 2000,
-      "reuseDelayMs": 1000,
+      "reuseDelayMs": 3000,
       "levelData": [
         {
           "level": 1,
@@ -51395,7 +51490,7 @@
       "targetType": "SELF",
       "castRange": 40,
       "hitTimeMs": 15000,
-      "reuseDelayMs": 5000,
+      "reuseDelayMs": 20000,
       "levelData": [
         {
           "level": 1,
@@ -51549,7 +51644,7 @@
       "targetType": "SELF",
       "castRange": 40,
       "hitTimeMs": 15000,
-      "reuseDelayMs": 5000,
+      "reuseDelayMs": 20000,
       "levelData": [
         {
           "level": 1,
@@ -51703,7 +51798,7 @@
       "targetType": "SELF",
       "castRange": 40,
       "hitTimeMs": 15000,
-      "reuseDelayMs": 5000,
+      "reuseDelayMs": 20000,
       "levelData": [
         {
           "level": 1,
@@ -51857,7 +51952,7 @@
       "targetType": "SELF",
       "castRange": 40,
       "hitTimeMs": 6000,
-      "reuseDelayMs": 5000,
+      "reuseDelayMs": 20000,
       "levelData": [
         {
           "level": 1,
@@ -51961,7 +52056,7 @@
       "targetType": "SELF",
       "castRange": 40,
       "hitTimeMs": 6000,
-      "reuseDelayMs": 5000,
+      "reuseDelayMs": 20000,
       "levelData": [
         {
           "level": 1,
@@ -52065,7 +52160,7 @@
       "targetType": "SELF",
       "castRange": 40,
       "hitTimeMs": 6000,
-      "reuseDelayMs": 5000,
+      "reuseDelayMs": 20000,
       "levelData": [
         {
           "level": 1,
@@ -52169,7 +52264,7 @@
       "targetType": "PARTY_CLAN",
       "castRange": 40,
       "hitTimeMs": 2500,
-      "reuseDelayMs": 5000,
+      "reuseDelayMs": 20000,
       "levelData": [
         {
           "level": 1,
@@ -52322,7 +52417,7 @@
       "targetType": "PARTY",
       "castRange": 40,
       "hitTimeMs": 2500,
-      "reuseDelayMs": 5000,
+      "reuseDelayMs": 20000,
       "levelData": [
         {
           "level": 1,
@@ -52367,7 +52462,7 @@
       "targetType": "ONE",
       "castRange": 600,
       "hitTimeMs": 4000,
-      "reuseDelayMs": 2000,
+      "reuseDelayMs": 3600000,
       "levelData": [
         {
           "level": 1,
@@ -52394,7 +52489,7 @@
       "targetType": "ONE",
       "castRange": 600,
       "hitTimeMs": 4000,
-      "reuseDelayMs": 2000,
+      "reuseDelayMs": 3600000,
       "levelData": [
         {
           "level": 1,
@@ -52421,7 +52516,7 @@
       "targetType": "ONE",
       "castRange": 600,
       "hitTimeMs": 4000,
-      "reuseDelayMs": 2000,
+      "reuseDelayMs": 3600000,
       "levelData": [
         {
           "level": 1,
@@ -52448,7 +52543,7 @@
       "targetType": "ONE",
       "castRange": 900,
       "hitTimeMs": 7000,
-      "reuseDelayMs": 300000,
+      "reuseDelayMs": 3600000,
       "levelData": [
         {
           "level": 1,
@@ -52474,7 +52569,7 @@
       "targetType": "ONE",
       "castRange": 900,
       "hitTimeMs": 7000,
-      "reuseDelayMs": 300000,
+      "reuseDelayMs": 3600000,
       "levelData": [
         {
           "level": 1,
@@ -52503,7 +52598,7 @@
       "targetType": "ONE",
       "castRange": 900,
       "hitTimeMs": 7000,
-      "reuseDelayMs": 300000,
+      "reuseDelayMs": 3600000,
       "levelData": [
         {
           "level": 1,
@@ -52535,7 +52630,7 @@
       "targetType": "ONE",
       "castRange": 900,
       "hitTimeMs": 7000,
-      "reuseDelayMs": 300000,
+      "reuseDelayMs": 3600000,
       "levelData": [
         {
           "level": 1,
@@ -52564,7 +52659,7 @@
       "targetType": "ONE",
       "castRange": 900,
       "hitTimeMs": 7000,
-      "reuseDelayMs": 300000,
+      "reuseDelayMs": 3600000,
       "levelData": [
         {
           "level": 1,
@@ -52590,7 +52685,7 @@
       "targetType": "ONE",
       "castRange": 900,
       "hitTimeMs": 7000,
-      "reuseDelayMs": 300000,
+      "reuseDelayMs": 3600000,
       "levelData": [
         {
           "level": 1,
@@ -52616,7 +52711,7 @@
       "targetType": "ONE",
       "castRange": 900,
       "hitTimeMs": 7000,
-      "reuseDelayMs": 300000,
+      "reuseDelayMs": 3600000,
       "levelData": [
         {
           "level": 1,
@@ -52642,7 +52737,7 @@
       "targetType": "AREA",
       "castRange": 500,
       "hitTimeMs": 5000,
-      "reuseDelayMs": 5000,
+      "reuseDelayMs": 20000,
       "levelData": [
         {
           "level": 1,
@@ -52740,7 +52835,7 @@
       "targetType": "AREA",
       "castRange": 500,
       "hitTimeMs": 5000,
-      "reuseDelayMs": 5000,
+      "reuseDelayMs": 20000,
       "levelData": [
         {
           "level": 1,
@@ -52893,7 +52988,7 @@
       "targetType": "AREA",
       "castRange": 500,
       "hitTimeMs": 4000,
-      "reuseDelayMs": 5000,
+      "reuseDelayMs": 20000,
       "levelData": [
         {
           "level": 1,
@@ -53028,7 +53123,7 @@
       "targetType": "SERVITOR",
       "castRange": 400,
       "hitTimeMs": 1000,
-      "reuseDelayMs": 900000,
+      "reuseDelayMs": 1800000,
       "levelData": [
         {
           "level": 1,
@@ -53065,7 +53160,7 @@
       "targetType": "SERVITOR",
       "castRange": 600,
       "hitTimeMs": 4000,
-      "reuseDelayMs": 4000,
+      "reuseDelayMs": 15000,
       "levelData": [
         {
           "level": 1,
@@ -53109,7 +53204,7 @@
       "targetType": "SERVITOR",
       "castRange": 600,
       "hitTimeMs": 4000,
-      "reuseDelayMs": 4000,
+      "reuseDelayMs": 15000,
       "levelData": [
         {
           "level": 1,
@@ -53135,7 +53230,7 @@
       "targetType": "ONE",
       "castRange": 400,
       "hitTimeMs": 4000,
-      "reuseDelayMs": 2000,
+      "reuseDelayMs": 6000,
       "levelData": [
         {
           "level": 1,
@@ -53172,7 +53267,7 @@
       "targetType": "ONE",
       "castRange": 400,
       "hitTimeMs": 4000,
-      "reuseDelayMs": 2000,
+      "reuseDelayMs": 6000,
       "levelData": [
         {
           "level": 1,
@@ -53218,7 +53313,7 @@
       "targetType": "PARTY_CLAN",
       "castRange": 40,
       "hitTimeMs": 2500,
-      "reuseDelayMs": 5000,
+      "reuseDelayMs": 20000,
       "levelData": [
         {
           "level": 1,
@@ -53279,7 +53374,7 @@
       "targetType": "ONE",
       "castRange": 600,
       "hitTimeMs": 5000,
-      "reuseDelayMs": 5000,
+      "reuseDelayMs": 20000,
       "levelData": [
         {
           "level": 1,
@@ -53350,7 +53445,7 @@
       "targetType": "PARTY",
       "castRange": 40,
       "hitTimeMs": 4000,
-      "reuseDelayMs": 5000,
+      "reuseDelayMs": 20000,
       "levelData": [
         {
           "level": 1,
@@ -53395,7 +53490,7 @@
       "targetType": "PARTY",
       "castRange": 40,
       "hitTimeMs": 2500,
-      "reuseDelayMs": 5000,
+      "reuseDelayMs": 20000,
       "levelData": [
         {
           "level": 1,
@@ -53440,7 +53535,7 @@
       "targetType": "PARTY",
       "castRange": 40,
       "hitTimeMs": 2500,
-      "reuseDelayMs": 5000,
+      "reuseDelayMs": 20000,
       "levelData": [
         {
           "level": 1,
@@ -53485,7 +53580,7 @@
       "targetType": "PARTY",
       "castRange": 40,
       "hitTimeMs": 2500,
-      "reuseDelayMs": 5000,
+      "reuseDelayMs": 20000,
       "levelData": [
         {
           "level": 1,
@@ -53539,7 +53634,7 @@
       "targetType": "PARTY",
       "castRange": 40,
       "hitTimeMs": 4000,
-      "reuseDelayMs": 150000,
+      "reuseDelayMs": 600000,
       "levelData": [
         {
           "level": 1,
@@ -53729,7 +53824,7 @@
       "targetType": "PARTY",
       "castRange": 40,
       "hitTimeMs": 6000,
-      "reuseDelayMs": 5000,
+      "reuseDelayMs": 20000,
       "levelData": [
         {
           "level": 1,
@@ -53823,7 +53918,7 @@
       "targetType": "PARTY",
       "castRange": 40,
       "hitTimeMs": 6000,
-      "reuseDelayMs": 5000,
+      "reuseDelayMs": 20000,
       "levelData": [
         {
           "level": 1,
@@ -53927,7 +54022,7 @@
       "targetType": "PARTY",
       "castRange": 40,
       "hitTimeMs": 6000,
-      "reuseDelayMs": 5000,
+      "reuseDelayMs": 20000,
       "levelData": [
         {
           "level": 1,
@@ -54021,7 +54116,7 @@
       "targetType": "SELF",
       "castRange": 40,
       "hitTimeMs": 15000,
-      "reuseDelayMs": 5000,
+      "reuseDelayMs": 20000,
       "levelData": [
         {
           "level": 1,
@@ -54135,7 +54230,7 @@
       "targetType": "SELF",
       "castRange": 40,
       "hitTimeMs": 15000,
-      "reuseDelayMs": 5000,
+      "reuseDelayMs": 20000,
       "levelData": [
         {
           "level": 1,
@@ -54249,7 +54344,7 @@
       "targetType": "SELF",
       "castRange": 40,
       "hitTimeMs": 15000,
-      "reuseDelayMs": 5000,
+      "reuseDelayMs": 20000,
       "levelData": [
         {
           "level": 1,
@@ -54363,7 +54458,7 @@
       "targetType": "CORPSE_MOB",
       "castRange": 40,
       "hitTimeMs": 1500,
-      "reuseDelayMs": 5000,
+      "reuseDelayMs": 20000,
       "levelData": [
         {
           "level": 1,
@@ -54448,7 +54543,7 @@
       "targetType": "PARTY",
       "castRange": 40,
       "hitTimeMs": 5000,
-      "reuseDelayMs": 30000,
+      "reuseDelayMs": 120000,
       "levelData": [
         {
           "level": 1,
@@ -54473,7 +54568,7 @@
       "targetType": "ONE",
       "castRange": 600,
       "hitTimeMs": 4000,
-      "reuseDelayMs": 30000,
+      "reuseDelayMs": 120000,
       "levelData": [
         {
           "level": 1,
@@ -54506,7 +54601,7 @@
       "targetType": "ONE",
       "castRange": 600,
       "hitTimeMs": 4000,
-      "reuseDelayMs": 30000,
+      "reuseDelayMs": 300000,
       "levelData": [
         {
           "level": 1,
@@ -54539,7 +54634,7 @@
       "targetType": "ONE",
       "castRange": 600,
       "hitTimeMs": 4000,
-      "reuseDelayMs": 15000,
+      "reuseDelayMs": 60000,
       "levelData": [
         {
           "level": 1,
@@ -54572,7 +54667,7 @@
       "targetType": "ONE",
       "castRange": 900,
       "hitTimeMs": 6000,
-      "reuseDelayMs": 15000,
+      "reuseDelayMs": 60000,
       "levelData": [
         {
           "level": 1,
@@ -54604,7 +54699,7 @@
       "targetType": "ONE",
       "castRange": 900,
       "hitTimeMs": 6000,
-      "reuseDelayMs": 15000,
+      "reuseDelayMs": 60000,
       "levelData": [
         {
           "level": 1,
@@ -54636,7 +54731,7 @@
       "targetType": "ONE",
       "castRange": 900,
       "hitTimeMs": 6000,
-      "reuseDelayMs": 15000,
+      "reuseDelayMs": 60000,
       "levelData": [
         {
           "level": 1,
@@ -54668,7 +54763,7 @@
       "targetType": "ONE",
       "castRange": 900,
       "hitTimeMs": 6000,
-      "reuseDelayMs": 15000,
+      "reuseDelayMs": 60000,
       "levelData": [
         {
           "level": 1,
@@ -54700,7 +54795,7 @@
       "targetType": "ONE",
       "castRange": 900,
       "hitTimeMs": 6000,
-      "reuseDelayMs": 15000,
+      "reuseDelayMs": 60000,
       "levelData": [
         {
           "level": 1,
@@ -54732,7 +54827,7 @@
       "targetType": "AURA",
       "castRange": 40,
       "hitTimeMs": 4000,
-      "reuseDelayMs": 8000,
+      "reuseDelayMs": 30000,
       "levelData": [
         {
           "level": 1,
@@ -54757,7 +54852,7 @@
       "targetType": "AURA",
       "castRange": 40,
       "hitTimeMs": 4000,
-      "reuseDelayMs": 8000,
+      "reuseDelayMs": 30000,
       "levelData": [
         {
           "level": 1,
@@ -54782,7 +54877,7 @@
       "targetType": "SERVITOR",
       "castRange": 400,
       "hitTimeMs": 4000,
-      "reuseDelayMs": 60000,
+      "reuseDelayMs": 300000,
       "levelData": [
         {
           "level": 1,
@@ -54812,7 +54907,7 @@
       "targetType": "SERVITOR",
       "castRange": 400,
       "hitTimeMs": 4000,
-      "reuseDelayMs": 60000,
+      "reuseDelayMs": 300000,
       "levelData": [
         {
           "level": 1,
@@ -54842,7 +54937,7 @@
       "targetType": "SERVITOR",
       "castRange": 400,
       "hitTimeMs": 4000,
-      "reuseDelayMs": 60000,
+      "reuseDelayMs": 300000,
       "levelData": [
         {
           "level": 1,
@@ -54872,7 +54967,7 @@
       "targetType": "SERVITOR",
       "castRange": 400,
       "hitTimeMs": 4000,
-      "reuseDelayMs": 60000,
+      "reuseDelayMs": 600000,
       "levelData": [
         {
           "level": 1,
@@ -54902,7 +54997,7 @@
       "targetType": "ONE",
       "castRange": 600,
       "hitTimeMs": 4000,
-      "reuseDelayMs": 3000,
+      "reuseDelayMs": 10000,
       "levelData": [
         {
           "level": 1,
@@ -54928,7 +55023,7 @@
       "targetType": "ONE",
       "castRange": 600,
       "hitTimeMs": 4000,
-      "reuseDelayMs": 3000,
+      "reuseDelayMs": 10000,
       "levelData": [
         {
           "level": 1,
@@ -54954,7 +55049,7 @@
       "targetType": "ONE",
       "castRange": 400,
       "hitTimeMs": 4000,
-      "reuseDelayMs": 3000,
+      "reuseDelayMs": 10000,
       "levelData": [
         {
           "level": 1,
@@ -54982,7 +55077,7 @@
       "targetType": "ONE",
       "castRange": 400,
       "hitTimeMs": 4000,
-      "reuseDelayMs": 3000,
+      "reuseDelayMs": 10000,
       "levelData": [
         {
           "level": 1,
@@ -55010,7 +55105,7 @@
       "targetType": "ONE",
       "castRange": 400,
       "hitTimeMs": 4000,
-      "reuseDelayMs": 3000,
+      "reuseDelayMs": 10000,
       "levelData": [
         {
           "level": 1,
@@ -55038,7 +55133,7 @@
       "targetType": "PARTY_MEMBER",
       "castRange": 400,
       "hitTimeMs": 4000,
-      "reuseDelayMs": 4000,
+      "reuseDelayMs": 120000,
       "levelData": [
         {
           "level": 1,
@@ -55068,7 +55163,7 @@
       "targetType": "PARTY_MEMBER",
       "castRange": 400,
       "hitTimeMs": 4000,
-      "reuseDelayMs": 4000,
+      "reuseDelayMs": 120000,
       "levelData": [
         {
           "level": 1,
@@ -55098,7 +55193,7 @@
       "targetType": "PARTY_MEMBER",
       "castRange": 400,
       "hitTimeMs": 4000,
-      "reuseDelayMs": 4000,
+      "reuseDelayMs": 120000,
       "levelData": [
         {
           "level": 1,
@@ -55128,7 +55223,7 @@
       "targetType": "ONE",
       "castRange": 600,
       "hitTimeMs": 4000,
-      "reuseDelayMs": 8000,
+      "reuseDelayMs": 30000,
       "levelData": [
         {
           "level": 1,
@@ -55160,7 +55255,7 @@
       "targetType": "ONE",
       "castRange": 600,
       "hitTimeMs": 4000,
-      "reuseDelayMs": 8000,
+      "reuseDelayMs": 30000,
       "levelData": [
         {
           "level": 1,
@@ -55192,7 +55287,7 @@
       "targetType": "AURA",
       "castRange": 40,
       "hitTimeMs": 4000,
-      "reuseDelayMs": 30000,
+      "reuseDelayMs": 120000,
       "levelData": [
         {
           "level": 1,
@@ -55223,7 +55318,7 @@
       "targetType": "AURA",
       "castRange": 40,
       "hitTimeMs": 4000,
-      "reuseDelayMs": 30000,
+      "reuseDelayMs": 120000,
       "levelData": [
         {
           "level": 1,
@@ -55254,7 +55349,7 @@
       "targetType": "PARTY",
       "castRange": 40,
       "hitTimeMs": 2500,
-      "reuseDelayMs": 5000,
+      "reuseDelayMs": 20000,
       "levelData": [
         {
           "level": 1,
@@ -55281,7 +55376,7 @@
       "targetType": "PARTY",
       "castRange": 40,
       "hitTimeMs": 2500,
-      "reuseDelayMs": 300000,
+      "reuseDelayMs": 1200000,
       "levelData": [
         {
           "level": 1,
@@ -55310,7 +55405,7 @@
       "targetType": "PARTY_CLAN",
       "castRange": 40,
       "hitTimeMs": 2500,
-      "reuseDelayMs": 5000,
+      "reuseDelayMs": 20000,
       "levelData": [
         {
           "level": 1,
@@ -55337,7 +55432,7 @@
       "targetType": "PARTY_CLAN",
       "castRange": 40,
       "hitTimeMs": 2500,
-      "reuseDelayMs": 5000,
+      "reuseDelayMs": 20000,
       "levelData": [
         {
           "level": 1,
@@ -55364,7 +55459,7 @@
       "targetType": "AURA",
       "castRange": 40,
       "hitTimeMs": 4000,
-      "reuseDelayMs": 30000,
+      "reuseDelayMs": 300000,
       "levelData": [
         {
           "level": 1,
@@ -55396,7 +55491,7 @@
       "targetType": "AREA",
       "castRange": 600,
       "hitTimeMs": 4000,
-      "reuseDelayMs": 15000,
+      "reuseDelayMs": 60000,
       "levelData": [
         {
           "level": 1,
@@ -55497,7 +55592,7 @@
       "targetType": "ENEMY_SUMMON",
       "castRange": 600,
       "hitTimeMs": 4000,
-      "reuseDelayMs": 3000,
+      "reuseDelayMs": 30000,
       "levelData": [
         {
           "level": 1,
@@ -55621,7 +55716,7 @@
       "targetType": "AREA",
       "castRange": 500,
       "hitTimeMs": 6000,
-      "reuseDelayMs": 75000,
+      "reuseDelayMs": 20000,
       "levelData": [
         {
           "level": 1,
@@ -55688,7 +55783,7 @@
       "targetType": "AREA",
       "castRange": 900,
       "hitTimeMs": 6000,
-      "reuseDelayMs": 15000,
+      "reuseDelayMs": 40000,
       "levelData": [
         {
           "level": 1,
@@ -55761,7 +55856,7 @@
       "targetType": "AREA_SUMMON",
       "castRange": 900,
       "hitTimeMs": 6000,
-      "reuseDelayMs": 8000,
+      "reuseDelayMs": 40000,
       "levelData": [
         {
           "level": 1,
@@ -55834,7 +55929,7 @@
       "targetType": "AREA_SUMMON",
       "castRange": 900,
       "hitTimeMs": 6000,
-      "reuseDelayMs": 8000,
+      "reuseDelayMs": 40000,
       "levelData": [
         {
           "level": 1,
@@ -55907,7 +56002,7 @@
       "targetType": "AREA_SUMMON",
       "castRange": 900,
       "hitTimeMs": 6000,
-      "reuseDelayMs": 8000,
+      "reuseDelayMs": 40000,
       "levelData": [
         {
           "level": 1,
@@ -55980,7 +56075,7 @@
       "targetType": "ONE",
       "castRange": 600,
       "hitTimeMs": 4000,
-      "reuseDelayMs": 4000,
+      "reuseDelayMs": 20000,
       "levelData": [
         {
           "level": 1,
@@ -56083,7 +56178,7 @@
       "targetType": "SELF",
       "castRange": 40,
       "hitTimeMs": 10000,
-      "reuseDelayMs": 600000,
+      "reuseDelayMs": 1200000,
       "levelData": [
         {
           "level": 1,
@@ -56211,7 +56306,7 @@
       "targetType": "ONE",
       "castRange": 400,
       "hitTimeMs": 4000,
-      "reuseDelayMs": 2000,
+      "reuseDelayMs": 6000,
       "levelData": [
         {
           "level": 1,
@@ -56260,7 +56355,7 @@
       "targetType": "ONE",
       "castRange": 400,
       "hitTimeMs": 4000,
-      "reuseDelayMs": 2000,
+      "reuseDelayMs": 6000,
       "levelData": [
         {
           "level": 1,
@@ -56309,7 +56404,7 @@
       "targetType": "PARTY",
       "castRange": 40,
       "hitTimeMs": 2500,
-      "reuseDelayMs": 5000,
+      "reuseDelayMs": 20000,
       "levelData": [
         {
           "level": 1,
@@ -56357,7 +56452,7 @@
       "targetType": "PARTY",
       "castRange": 40,
       "hitTimeMs": 2500,
-      "reuseDelayMs": 5000,
+      "reuseDelayMs": 20000,
       "levelData": [
         {
           "level": 1,
@@ -56405,7 +56500,7 @@
       "targetType": "ONE",
       "castRange": 400,
       "hitTimeMs": 4000,
-      "reuseDelayMs": 2000,
+      "reuseDelayMs": 10000,
       "levelData": [
         {
           "level": 1,
@@ -56448,7 +56543,7 @@
       "targetType": "ONE",
       "castRange": 400,
       "hitTimeMs": 4000,
-      "reuseDelayMs": 2000,
+      "reuseDelayMs": 10000,
       "levelData": [
         {
           "level": 1,
@@ -56491,7 +56586,7 @@
       "targetType": "ONE",
       "castRange": 600,
       "hitTimeMs": 3000,
-      "reuseDelayMs": 1000,
+      "reuseDelayMs": 5000,
       "levelData": [
         {
           "level": 1,
@@ -56605,7 +56700,7 @@
       "targetType": "ENEMY_SUMMON",
       "castRange": 600,
       "hitTimeMs": 4000,
-      "reuseDelayMs": 11000,
+      "reuseDelayMs": 32000,
       "levelData": [
         {
           "level": 1,
@@ -56733,7 +56828,7 @@
       "targetType": "ONE",
       "castRange": 600,
       "hitTimeMs": 4000,
-      "reuseDelayMs": 4000,
+      "reuseDelayMs": 6000,
       "levelData": [
         {
           "level": 1,
@@ -56846,7 +56941,7 @@
       "targetType": "ONE",
       "castRange": 600,
       "hitTimeMs": 4000,
-      "reuseDelayMs": 2000,
+      "reuseDelayMs": 6000,
       "levelData": [
         {
           "level": 1,
@@ -56992,7 +57087,7 @@
       "targetType": "AURA",
       "castRange": 40,
       "hitTimeMs": 6000,
-      "reuseDelayMs": 15000,
+      "reuseDelayMs": 10000,
       "levelData": [
         {
           "level": 1,
@@ -57048,7 +57143,7 @@
       "targetType": "ONE",
       "castRange": 900,
       "hitTimeMs": 4000,
-      "reuseDelayMs": 4000,
+      "reuseDelayMs": 20000,
       "levelData": [
         {
           "level": 1,
@@ -57175,7 +57270,7 @@
       "targetType": "ONE",
       "castRange": 600,
       "hitTimeMs": 5000,
-      "reuseDelayMs": 1000,
+      "reuseDelayMs": 6000,
       "levelData": [
         {
           "level": 1,
@@ -57313,7 +57408,7 @@
       "targetType": "PARTY",
       "castRange": 40,
       "hitTimeMs": 7000,
-      "reuseDelayMs": 3000,
+      "reuseDelayMs": 10000,
       "levelData": [
         {
           "level": 1,
@@ -57379,7 +57474,7 @@
       "targetType": "ONE",
       "castRange": 40,
       "hitTimeMs": 15000,
-      "reuseDelayMs": 150000,
+      "reuseDelayMs": 450000,
       "levelData": [
         {
           "level": 1,
@@ -57446,7 +57541,7 @@
       "targetType": "SELF",
       "castRange": 40,
       "hitTimeMs": 15000,
-      "reuseDelayMs": 5000,
+      "reuseDelayMs": 300000,
       "levelData": [
         {
           "level": 1,
@@ -57470,7 +57565,7 @@
       "targetType": "SELF",
       "castRange": 40,
       "hitTimeMs": 15000,
-      "reuseDelayMs": 5000,
+      "reuseDelayMs": 300000,
       "levelData": [
         {
           "level": 1,
@@ -57494,7 +57589,7 @@
       "targetType": "SELF",
       "castRange": 40,
       "hitTimeMs": 15000,
-      "reuseDelayMs": 5000,
+      "reuseDelayMs": 300000,
       "levelData": [
         {
           "level": 1,
@@ -57518,7 +57613,7 @@
       "targetType": "ONE",
       "castRange": 600,
       "hitTimeMs": 4000,
-      "reuseDelayMs": 8000,
+      "reuseDelayMs": 120000,
       "levelData": [
         {
           "level": 1,
@@ -57576,7 +57671,7 @@
       "targetType": "PARTY_MEMBER",
       "castRange": 400,
       "hitTimeMs": 4000,
-      "reuseDelayMs": 150000,
+      "reuseDelayMs": 120000,
       "levelData": [
         {
           "level": 1,
@@ -57603,7 +57698,7 @@
       "targetType": "ONE",
       "castRange": 150,
       "hitTimeMs": 500,
-      "reuseDelayMs": 30000,
+      "reuseDelayMs": 15000,
       "levelData": [
         {
           "level": 1,
@@ -57629,7 +57724,7 @@
       "targetType": "PARTY",
       "castRange": 40,
       "hitTimeMs": 2500,
-      "reuseDelayMs": 300000,
+      "reuseDelayMs": 1200000,
       "levelData": [
         {
           "level": 1,
@@ -57658,7 +57753,7 @@
       "targetType": "PARTY_CLAN",
       "castRange": 40,
       "hitTimeMs": 2500,
-      "reuseDelayMs": 300000,
+      "reuseDelayMs": 1200000,
       "levelData": [
         {
           "level": 1,
@@ -57687,7 +57782,7 @@
       "targetType": "PARTY_CLAN",
       "castRange": 40,
       "hitTimeMs": 2500,
-      "reuseDelayMs": 300000,
+      "reuseDelayMs": 120000,
       "levelData": [
         {
           "level": 1,
@@ -57714,7 +57809,7 @@
       "targetType": "PARTY_CLAN",
       "castRange": 40,
       "hitTimeMs": 2500,
-      "reuseDelayMs": 300000,
+      "reuseDelayMs": 120000,
       "levelData": [
         {
           "level": 1,
@@ -57743,7 +57838,7 @@
       "targetType": "AURA",
       "castRange": 40,
       "hitTimeMs": 1000,
-      "reuseDelayMs": 8000,
+      "reuseDelayMs": 25000,
       "levelData": [
         {
           "level": 1,
@@ -57809,7 +57904,7 @@
       "targetType": "ONE",
       "castRange": 400,
       "hitTimeMs": 4000,
-      "reuseDelayMs": 600000,
+      "reuseDelayMs": 1800000,
       "levelData": [
         {
           "level": 1,
@@ -58199,7 +58294,7 @@
       "targetType": "ONE",
       "castRange": 40,
       "hitTimeMs": 1800,
-      "reuseDelayMs": 1000,
+      "reuseDelayMs": 10000,
       "levelData": [
         {
           "level": 1,
@@ -58900,7 +58995,7 @@
       "targetType": "ONE",
       "castRange": 40,
       "hitTimeMs": 1080,
-      "reuseDelayMs": 1000,
+      "reuseDelayMs": 5000,
       "levelData": [
         {
           "level": 1,
@@ -58946,7 +59041,7 @@
       "targetType": "SELF",
       "castRange": 40,
       "hitTimeMs": 1000,
-      "reuseDelayMs": 600000,
+      "reuseDelayMs": 1800000,
       "levelData": [
         {
           "level": 1,
@@ -58972,7 +59067,7 @@
       "targetType": "SELF",
       "castRange": 40,
       "hitTimeMs": 1000,
-      "reuseDelayMs": 900000,
+      "reuseDelayMs": 1200000,
       "levelData": [
         {
           "level": 1,
@@ -58998,7 +59093,7 @@
       "targetType": "SELF",
       "castRange": 40,
       "hitTimeMs": 1000,
-      "reuseDelayMs": 900000,
+      "reuseDelayMs": 1200000,
       "levelData": [
         {
           "level": 1,
@@ -59024,7 +59119,7 @@
       "targetType": "ONE",
       "castRange": 400,
       "hitTimeMs": 4000,
-      "reuseDelayMs": 2000,
+      "reuseDelayMs": 6000,
       "levelData": [
         {
           "level": 1,
@@ -59051,7 +59146,7 @@
       "targetType": "SELF",
       "castRange": 40,
       "hitTimeMs": 20000,
-      "reuseDelayMs": 600000,
+      "reuseDelayMs": 1800000,
       "levelData": [
         {
           "level": 1,
@@ -59073,7 +59168,7 @@
       "targetType": "PARTY",
       "castRange": 40,
       "hitTimeMs": 4000,
-      "reuseDelayMs": 5000,
+      "reuseDelayMs": 20000,
       "levelData": [
         {
           "level": 1,
@@ -59100,7 +59195,7 @@
       "targetType": "AREA",
       "castRange": 700,
       "hitTimeMs": 7000,
-      "reuseDelayMs": 900000,
+      "reuseDelayMs": 3600000,
       "levelData": [
         {
           "level": 1,
@@ -59125,7 +59220,7 @@
       "targetType": "AREA",
       "castRange": 700,
       "hitTimeMs": 7000,
-      "reuseDelayMs": 900000,
+      "reuseDelayMs": 3600000,
       "levelData": [
         {
           "level": 1,
@@ -59150,7 +59245,7 @@
       "targetType": "CLAN",
       "castRange": 40,
       "hitTimeMs": 2500,
-      "reuseDelayMs": 900000,
+      "reuseDelayMs": 1200000,
       "levelData": [
         {
           "level": 1,
@@ -59177,7 +59272,7 @@
       "targetType": "AURA",
       "castRange": 40,
       "hitTimeMs": 2500,
-      "reuseDelayMs": 900000,
+      "reuseDelayMs": 300000,
       "levelData": [
         {
           "level": 1,
@@ -59205,7 +59300,7 @@
       "targetType": "AURA",
       "castRange": 40,
       "hitTimeMs": 2500,
-      "reuseDelayMs": 900000,
+      "reuseDelayMs": 300000,
       "levelData": [
         {
           "level": 1,

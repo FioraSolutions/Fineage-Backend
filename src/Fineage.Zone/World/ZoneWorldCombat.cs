@@ -368,7 +368,10 @@ public sealed partial class ZoneWorld
         }
         if (!VisibleTo(player.ObjectId, targetId))
             return "attack";
-        AdvanceMove(player, _clock().ToUnixTimeMilliseconds());
+        long nowMove = _clock().ToUnixTimeMilliseconds();
+        AdvanceMove(player, nowMove);
+        if (target.MoveActive)
+            AdvanceMove(target, nowMove);
         var armed = PlayerStats(player);
         // Mobius doAttack: isAttackWeapon false (datapack: the six fishing rods) refuses the swing unless GM.
         if (armed.Weapon == Fineage.Game.WeaponType.FishingRod && !ZoneAdmin.AllowPeaceAttack(player.Name))

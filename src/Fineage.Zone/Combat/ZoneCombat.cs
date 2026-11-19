@@ -78,10 +78,17 @@ public static partial class ZoneCombat
     public static int PlayerAttackReach(int weaponRange) => PlayerAttackReach(weaponRange, DefaultNpcCollision);
 
     /// <summary>
+    /// One Mobius physical reach: attacker's weapon/NPC attackRange + both collision radii.
+    /// The other side's attackRange is never included. Used for players and NPCs, start/hit/chase.
+    /// </summary>
+    public static int AttackReach(int attackRange, int casterCollision, int targetCollision) =>
+        Math.Max(DefaultWeaponRange, attackRange) + Math.Max(0, casterCollision) + Math.Max(0, targetCollision);
+
+    /// <summary>
     /// Mobius <c>maybeMoveToPawn(target, getPhysicalAttackRange())</c>: weapon attackRange + both collision radii.
     /// </summary>
     public static int PlayerAttackReach(int weaponRange, int targetCollision) =>
-        Math.Max(DefaultWeaponRange, weaponRange) + PlayerCollisionRadius + Math.Max(0, targetCollision);
+        AttackReach(weaponRange, PlayerCollisionRadius, targetCollision);
 
     /// <summary>
     /// Mobius <c>maybeMoveToPawn(target, skill.getCastRange())</c>: <c>castRange + casterRadius + targetRadius</c>.

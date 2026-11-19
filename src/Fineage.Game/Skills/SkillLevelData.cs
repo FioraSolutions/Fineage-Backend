@@ -55,6 +55,12 @@ public sealed class SkillLevelData
 
     /// <summary>Mobius <c>magicLevel</c> for calcSkillSuccess / Lethal. 0 = unknown.</summary>
     public int MagicLevel { get; }
+
+    /// <summary>
+    /// Per-level <c>reuseDelay</c> when the Mobius table varies by rank. Null means use the template
+    /// <see cref="SkillDefinition.ReuseDelayMs"/>.
+    /// </summary>
+    public int? ReuseDelayMs { get; init; }
 }
 
 /// <summary>One Mobius <c>ExtractableProductItem</c>: the items one roulette segment hands out and its width.</summary>

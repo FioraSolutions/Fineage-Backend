@@ -77,6 +77,7 @@ public sealed class SkillCatalog
                     Math.Max(0, levelRow.ItemConsumeId),
                     Math.Max(0, levelRow.ItemConsumeCount))
                 {
+                    ReuseDelayMs = levelRow.ReuseDelayMs,
                     Extractable = (levelRow.Extractable ?? [])
                         .Select(g => new ExtractableGroup(
                             (g.Items ?? [])
@@ -158,6 +159,7 @@ public sealed class SkillCatalog
         public int MpInitialConsume { get; set; }
         public int ItemConsumeId { get; set; }
         public int ItemConsumeCount { get; set; }
+        public int? ReuseDelayMs { get; set; }
         public List<ExtractableDto>? Extractable { get; set; }
     }
 

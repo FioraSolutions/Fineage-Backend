@@ -90,7 +90,7 @@ public sealed partial class ZoneWorld
         UpdatePvPStatus(player, target, now);
 
         player.CurMp = Math.Max(0, player.CurMp - levelData.MpConsume);
-        var (hitMs, reuseMs) = ScaledSkillTimes(player, template);
+        var (hitMs, reuseMs) = ScaledSkillTimes(player, template, level);
         if (reuseMs > 0)
             player.SkillReuseUntilMs[request.SkillId] = now + reuseMs;
 
@@ -156,7 +156,7 @@ public sealed partial class ZoneWorld
         UpdatePvPStatus(player, target, now);
 
         player.CurMp = Math.Max(0, player.CurMp - levelData.MpConsume);
-        var (hitMs, reuseMs) = ScaledSkillTimes(player, template);
+        var (hitMs, reuseMs) = ScaledSkillTimes(player, template, level);
         if (reuseMs > 0)
             player.SkillReuseUntilMs[request.SkillId] = now + reuseMs;
 
@@ -295,13 +295,13 @@ public sealed partial class ZoneWorld
     }
 
     /// <summary>Mobius calcAtkSpd for skill HitTime / ReuseDelay (magic ·333/Cspd, phys ·300/Pspd for hit).</summary>
-    (int HitMs, int ReuseMs) ScaledSkillTimes(ZoneEntity player, SkillDefinition template)
+    (int HitMs, int ReuseMs) ScaledSkillTimes(ZoneEntity player, SkillDefinition template, int level = 1)
     {
         var ps = PlayerStats(player);
         bool magic = template.MagicType == 1;
         return (
             ZoneCombat.SkillTimeMs(template.HitTimeMs, magic, ps.MAtkSpd, ps.PAtkSpd),
-            ZoneCombat.SkillReuseMs(template.ReuseDelayMs, magic, ps.MAtkSpd, ps.PAtkSpd));
+            ZoneCombat.SkillReuseMs(template.ReuseDelayMsAt(level), magic, ps.MAtkSpd, ps.PAtkSpd));
     }
 
     static MagicSkillUseMsg BuildCast(

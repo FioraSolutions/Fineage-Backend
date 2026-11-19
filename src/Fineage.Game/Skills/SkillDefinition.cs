@@ -53,6 +53,11 @@ public sealed class SkillDefinition
 
     public int ReuseDelayMs { get; }
 
+    /// <summary>Template reuse, or the per-level table when this rank lists its own delay.</summary>
+    public int ReuseDelayMsAt(int level) =>
+        TryLevelData(level, out var data) && data.ReuseDelayMs is int ms ? Math.Max(0, ms) : ReuseDelayMs;
+
+
     /// <summary>Mobius <c>abnormalTime</c> in seconds. 0 when the skill does not apply an abnormal.</summary>
     public int AbnormalTimeSeconds { get; }
 

@@ -28,8 +28,7 @@ public sealed partial class ZoneWorld
         int weapon = attacker.Kind == ZoneEntityKind.Npc
             ? attacker.AttackRange
             : PlayerStats(attacker).AttackRange;
-        return Math.Max(ZoneCombat.DefaultWeaponRange, weapon)
-            + CollisionRadiusOf(attacker) + CollisionRadiusOf(target);
+        return ZoneCombat.AttackReach(weapon, CollisionRadiusOf(attacker), CollisionRadiusOf(target));
     }
 
     /// <summary>

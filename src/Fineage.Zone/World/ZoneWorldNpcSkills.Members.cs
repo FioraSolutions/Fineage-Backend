@@ -135,7 +135,7 @@ public sealed partial class ZoneWorld
         if (hit.Apply is Action<ZoneEntity, long> apply)
         {
             if (hit.EscapeRange > 0
-                && !ZoneCombat.InCastRange(npc.X, npc.Y, target.X, target.Y, hit.EscapeRange + ZoneCombat.HitRangeTolerance))
+                && !ZoneCombat.Within(npc.X, npc.Y, target.X, target.Y, SkillCastReach(hit.EscapeRange, npc, target)))
                 return;
             if (!ReferenceEquals(npc, target) && !CanSeeTarget(npc, target))
                 return;
@@ -151,7 +151,7 @@ public sealed partial class ZoneWorld
             return;
 
         int escape = Fineage.Game.Combat.CastRules.EscapeRange(hit.Combat.CastRange, hit.Combat.EffectRange);
-        if (escape > 0 && !ZoneCombat.InCastRange(npc.X, npc.Y, target.X, target.Y, escape + ZoneCombat.HitRangeTolerance))
+        if (escape > 0 && !ZoneCombat.Within(npc.X, npc.Y, target.X, target.Y, SkillCastReach(escape, npc, target)))
             return;
         if (!CanSeeTarget(npc, target))
             return;

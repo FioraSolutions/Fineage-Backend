@@ -106,7 +106,7 @@ public sealed partial class ZoneWorld
         double dx = target.X - npc.X;
         double dy = target.Y - npc.Y;
         double dist = Math.Sqrt(dx * dx + dy * dy);
-        double stopAt = ZoneCombat.MobAttackReach(npc.AttackRange) - ZoneCombat.ApproachSlack;
+        double stopAt = Math.Max(10, AttackReachAgainst(npc, target) - ZoneCombat.ApproachSlack);
         if (dist <= stopAt)
             return;
 

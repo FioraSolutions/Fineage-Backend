@@ -143,6 +143,8 @@ public sealed partial class ZoneWorld
                 session.ClearApproach();
                 continue;
             }
+            if (target.MoveActive)
+                AdvanceMove(target, now);
             if (player.Sitting || IsActionBlocked(player) || IsPhysicallyMuted(player) ||
                 HostilePlayableRefused(session, player, target, badSkill: false) ||
                 SiegeFriendRefused(session, player, target) ||

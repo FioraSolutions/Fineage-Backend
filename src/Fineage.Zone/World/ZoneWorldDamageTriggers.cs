@@ -143,7 +143,7 @@ public sealed partial class ZoneWorld
                     break;
                 case "AddHate":
                     // Mobius AddHate.onStart: attackable only, addDamageHate(effector, 0, power).
-                    // Lure (51) / Temptation (511) also skip EVT_ATTACKED / addAttackerToAttackByList,
+                    // AddHate payloads skip EVT_ATTACKED / addAttackerToAttackByList (the payload itself wakes the mob),
                     // so this is the only hate write — quietly pulls the mob without clan-help notify.
                     if (target.Kind == ZoneEntityKind.Npc && target.Attackable)
                     {
