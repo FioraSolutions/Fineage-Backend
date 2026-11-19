@@ -53,7 +53,14 @@ public enum CombatStat
     CancelVuln,    // cancelVuln
     DebuffVuln,    // debuffVuln
     HolyPower,     // holyPower
-    DarkRes        // darkRes
+    DarkRes,       // darkRes
+    HolyRes,       // holyRes
+    FireRes,       // fireRes
+    WaterRes,      // waterRes
+    WindRes,       // windRes
+    EarthRes,      // earthRes
+    TransDam,      // transDam (Transfer Pain: percent of incoming damage sent to the servitor)
+    Cancel         // cancel / ATTACK_CANCEL (Concentration: folded onto calcAtkBreak init)
 }
 
 /// <summary>

@@ -13,7 +13,9 @@ public readonly record struct PlayerCombatStats(
     int ShieldDefAngle = 0, double PReuse = 1d, double MReuse = 1d, double DReuse = 1d,
     double PhysicalMpConsumeRate = 1d, double MagicalMpConsumeRate = 1d, double DanceMpConsumeRate = 1d,
     double ReflectDam = 0d, double AbsorbDam = 0d, double HealEffect = 1d,
-    int SkillCritical = 0, double SkillCriticalProbability = 1d, int AtkCountMax = 1);
+    int SkillCritical = 0, double SkillCriticalProbability = 1d, int AtkCountMax = 1,
+    double DarkRes = 0d, double HolyRes = 0d, double FireRes = 0d, double WaterRes = 0d,
+    double WindRes = 0d, double EarthRes = 0d, double TransDam = 0d);
 
 public sealed partial class ZoneWorld
 {
@@ -73,7 +75,15 @@ public sealed partial class ZoneWorld
             SkillCritical: mods.Apply(CombatStat.SkillCritical, 0),
             SkillCriticalProbability: mods.Apply(CombatStat.SkillCriticalProbability, 1d),
             // Mobius calcStat(ATTACK_COUNT_MAX, 1): a pole starts at 1 hit; Fell Swoop adds extras.
-            AtkCountMax: Math.Max(1, mods.Apply(CombatStat.AtkCountMax, 1)));
+            AtkCountMax: Math.Max(1, mods.Apply(CombatStat.AtkCountMax, 1)),
+            DarkRes: mods.Apply(CombatStat.DarkRes, 0d),
+            HolyRes: mods.Apply(CombatStat.HolyRes, 0d),
+            FireRes: mods.Apply(CombatStat.FireRes, 0d),
+            WaterRes: mods.Apply(CombatStat.WaterRes, 0d),
+            WindRes: mods.Apply(CombatStat.WindRes, 0d),
+            EarthRes: mods.Apply(CombatStat.EarthRes, 0d),
+            // Mobius TRANSFER_DAMAGE_PERCENT (transDam): percent of incoming damage sent to the servitor.
+            TransDam: mods.Apply(CombatStat.TransDam, 0d));
     }
 
     /// <summary>Template + henna + bonus table (shared by combat, regen, weight, move speed).</summary>

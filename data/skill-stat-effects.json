@@ -839,6 +839,20 @@
    ]
   },
   {
+   "skillId": 265,
+   "name": "Song of Life",
+   "levels": 1,
+   "effects": [
+    {
+     "stat": "regHp",
+     "op": "mul",
+     "values": [
+      1.2
+     ]
+    }
+   ]
+  },
+  {
    "skillId": 266,
    "name": "Song of Water",
    "levels": 1,
@@ -890,6 +904,20 @@
      "op": "mul",
      "values": [
       2.0
+     ]
+    }
+   ]
+  },
+  {
+   "skillId": 270,
+   "name": "Song of Invocation",
+   "levels": 1,
+   "effects": [
+    {
+     "stat": "darkRes",
+     "op": "add",
+     "values": [
+      20.0
      ]
     }
    ]
@@ -1215,6 +1243,62 @@
       1.15,
       1.2,
       1.25
+     ]
+    }
+   ]
+  },
+  {
+   "skillId": 304,
+   "name": "Song of Vitality",
+   "levels": 1,
+   "effects": [
+    {
+     "stat": "maxHp",
+     "op": "mul",
+     "values": [
+      1.3
+     ]
+    }
+   ]
+  },
+  {
+   "skillId": 305,
+   "name": "Song of Vengeance",
+   "levels": 1,
+   "effects": [
+    {
+     "stat": "reflectDam",
+     "op": "add",
+     "values": [
+      20.0
+     ]
+    }
+   ]
+  },
+  {
+   "skillId": 306,
+   "name": "Song of Flame Guard",
+   "levels": 1,
+   "effects": [
+    {
+     "stat": "fireRes",
+     "op": "add",
+     "values": [
+      30.0
+     ]
+    }
+   ]
+  },
+  {
+   "skillId": 308,
+   "name": "Song of Storm Guard",
+   "levels": 1,
+   "effects": [
+    {
+     "stat": "windRes",
+     "op": "add",
+     "values": [
+      30.0
      ]
     }
    ]
@@ -1571,6 +1655,41 @@
    ]
   },
   {
+   "skillId": 349,
+   "name": "Song of Renewal",
+   "levels": 1,
+   "effects": [
+    {
+     "stat": "mReuse",
+     "op": "mul",
+     "values": [
+      0.7
+     ]
+    },
+    {
+     "stat": "pReuse",
+     "op": "mul",
+     "values": [
+      0.7
+     ]
+    },
+    {
+     "stat": "magicalMpConsumeRate",
+     "op": "mul",
+     "values": [
+      0.95
+     ]
+    },
+    {
+     "stat": "physicalMpConsumeRate",
+     "op": "mul",
+     "values": [
+      0.95
+     ]
+    }
+   ]
+  },
+  {
    "skillId": 350,
    "name": "Physical Mirror",
    "levels": 1,
@@ -1590,6 +1709,33 @@
      "op": "add",
      "values": [
       10.0
+     ],
+     "using": [
+      "SHIELD"
+     ]
+    }
+   ]
+  },
+  {
+   "skillId": 351,
+   "name": "Magical Mirror",
+   "levels": 1,
+   "effects": [
+    {
+     "stat": "reflectSkillPhysic",
+     "op": "add",
+     "values": [
+      10.0
+     ],
+     "using": [
+      "SHIELD"
+     ]
+    },
+    {
+     "stat": "reflectSkillMagic",
+     "op": "add",
+     "values": [
+      30.0
      ],
      "using": [
       "SHIELD"
@@ -1829,6 +1975,48 @@
    "using": [
     "BLUNT",
     "SWORD"
+   ]
+  },
+  {
+   "skillId": 363,
+   "name": "Song of Meditation",
+   "levels": 1,
+   "effects": [
+    {
+     "stat": "regMp",
+     "op": "mul",
+     "values": [
+      1.2
+     ]
+    },
+    {
+     "stat": "magicalMpConsumeRate",
+     "op": "mul",
+     "values": [
+      0.9
+     ]
+    }
+   ]
+  },
+  {
+   "skillId": 364,
+   "name": "Song of Champion",
+   "levels": 1,
+   "effects": [
+    {
+     "stat": "pReuse",
+     "op": "mul",
+     "values": [
+      0.7
+     ]
+    },
+    {
+     "stat": "physicalMpConsumeRate",
+     "op": "mul",
+     "values": [
+      0.8
+     ]
+    }
    ]
   },
   {
@@ -2936,6 +3124,23 @@
    ]
   },
   {
+   "skillId": 1047,
+   "name": "Mana Regeneration",
+   "levels": 4,
+   "effects": [
+    {
+     "stat": "regMp",
+     "op": "add",
+     "values": [
+      1.72,
+      2.16,
+      2.74,
+      3.09
+     ]
+    }
+   ]
+  },
+  {
    "skillId": 1048,
    "name": "Blessed Soul",
    "levels": 6,
@@ -3058,6 +3263,53 @@
    ]
   },
   {
+   "skillId": 1071,
+   "name": "Surrender To Water",
+   "levels": 14,
+   "effects": [
+    {
+     "stat": "waterRes",
+     "op": "sub",
+     "values": [
+      30.0,
+      30.0,
+      30.0,
+      30.0,
+      30.0,
+      30.0,
+      30.0,
+      30.0,
+      30.0,
+      30.0,
+      30.0,
+      30.0,
+      30.0,
+      30.0
+     ]
+    },
+    {
+     "stat": "fireRes",
+     "op": "add",
+     "values": [
+      15.0,
+      15.0,
+      15.0,
+      15.0,
+      15.0,
+      15.0,
+      15.0,
+      15.0,
+      15.0,
+      15.0,
+      15.0,
+      15.0,
+      15.0,
+      15.0
+     ]
+    }
+   ]
+  },
+  {
    "skillId": 1073,
    "name": "Kiss of Eva",
    "levels": 2,
@@ -3084,6 +3336,25 @@
       1.2,
       1.25,
       1.3
+     ]
+    }
+   ]
+  },
+  {
+   "skillId": 1078,
+   "name": "Concentration",
+   "levels": 6,
+   "effects": [
+    {
+     "stat": "cancel",
+     "op": "sub",
+     "values": [
+      18.0,
+      25.0,
+      36.0,
+      42.0,
+      48.0,
+      53.0
      ]
     }
    ]
@@ -3437,6 +3708,22 @@
    ]
   },
   {
+   "skillId": 1182,
+   "name": "Resist Aqua",
+   "levels": 3,
+   "effects": [
+    {
+     "stat": "waterRes",
+     "op": "add",
+     "values": [
+      15.0,
+      23.0,
+      30.0
+     ]
+    }
+   ]
+  },
+  {
    "skillId": 1184,
    "name": "Ice Bolt",
    "levels": 6,
@@ -3531,6 +3818,55 @@
    ]
   },
   {
+   "skillId": 1223,
+   "name": "Surrender To Earth",
+   "levels": 15,
+   "effects": [
+    {
+     "stat": "earthRes",
+     "op": "sub",
+     "values": [
+      30.0,
+      30.0,
+      30.0,
+      30.0,
+      30.0,
+      30.0,
+      30.0,
+      30.0,
+      30.0,
+      30.0,
+      30.0,
+      30.0,
+      30.0,
+      30.0,
+      30.0
+     ]
+    },
+    {
+     "stat": "windRes",
+     "op": "add",
+     "values": [
+      15.0,
+      15.0,
+      15.0,
+      15.0,
+      15.0,
+      15.0,
+      15.0,
+      15.0,
+      15.0,
+      15.0,
+      15.0,
+      15.0,
+      15.0,
+      15.0,
+      15.0
+     ]
+    }
+   ]
+  },
+  {
    "skillId": 1232,
    "name": "Blazing Skin",
    "levels": 3,
@@ -3574,6 +3910,22 @@
       0.8,
       0.8,
       0.8
+     ]
+    }
+   ]
+  },
+  {
+   "skillId": 1238,
+   "name": "Freezing Skin",
+   "levels": 3,
+   "effects": [
+    {
+     "stat": "reflectDam",
+     "op": "add",
+     "values": [
+      10.0,
+      15.0,
+      20.0
      ]
     }
    ]
@@ -3693,6 +4045,22 @@
    ]
   },
   {
+   "skillId": 1257,
+   "name": "Decrease Weight",
+   "levels": 3,
+   "effects": [
+    {
+     "stat": "weightPenalty",
+     "op": "add",
+     "values": [
+      3000.0,
+      6000.0,
+      9000.0
+     ]
+    }
+   ]
+  },
+  {
    "skillId": 1260,
    "name": "The Tact of Pa'agrio",
    "levels": 3,
@@ -3775,6 +4143,24 @@
      "values": [
       2.0,
       4.0
+     ]
+    }
+   ]
+  },
+  {
+   "skillId": 1262,
+   "name": "Transfer Pain",
+   "levels": 5,
+   "effects": [
+    {
+     "stat": "transDam",
+     "op": "add",
+     "values": [
+      10.0,
+      20.0,
+      30.0,
+      40.0,
+      50.0
      ]
     }
    ]
@@ -3942,6 +4328,22 @@
      "op": "add",
      "values": [
       1.0,
+      2.0
+     ]
+    }
+   ]
+  },
+  {
+   "skillId": 1304,
+   "name": "Advanced Block",
+   "levels": 3,
+   "effects": [
+    {
+     "stat": "sDef",
+     "op": "mul",
+     "values": [
+      1.6,
+      1.8,
       2.0
      ]
     }
@@ -4453,6 +4855,27 @@
    ]
   },
   {
+   "skillId": 1354,
+   "name": "Arcane Protection",
+   "levels": 1,
+   "effects": [
+    {
+     "stat": "cancelVuln",
+     "op": "sub",
+     "values": [
+      30.0
+     ]
+    },
+    {
+     "stat": "debuffVuln",
+     "op": "sub",
+     "values": [
+      20.0
+     ]
+    }
+   ]
+  },
+  {
    "skillId": 1355,
    "name": "Prophecy of Water",
    "levels": 1,
@@ -4877,6 +5300,35 @@
    ]
   },
   {
+   "skillId": 1384,
+   "name": "Mass Surrender to Water",
+   "levels": 5,
+   "effects": [
+    {
+     "stat": "waterRes",
+     "op": "sub",
+     "values": [
+      30.0,
+      30.0,
+      30.0,
+      30.0,
+      30.0
+     ]
+    },
+    {
+     "stat": "fireRes",
+     "op": "add",
+     "values": [
+      15.0,
+      15.0,
+      15.0,
+      15.0,
+      15.0
+     ]
+    }
+   ]
+  },
+  {
    "skillId": 1386,
    "name": "Arcane Disruption",
    "levels": 10,
@@ -5014,6 +5466,31 @@
       1.9,
       1.95,
       2.0
+     ]
+    }
+   ]
+  },
+  {
+   "skillId": 1397,
+   "name": "Clarity",
+   "levels": 3,
+   "effects": [
+    {
+     "stat": "magicalMpConsumeRate",
+     "op": "mul",
+     "values": [
+      0.96,
+      0.93,
+      0.9
+     ]
+    },
+    {
+     "stat": "physicalMpConsumeRate",
+     "op": "mul",
+     "values": [
+      0.9,
+      0.85,
+      0.8
      ]
     }
    ]

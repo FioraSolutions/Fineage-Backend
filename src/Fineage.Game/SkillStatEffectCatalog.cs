@@ -44,7 +44,11 @@ public sealed class SkillStatEffectCatalog
         ["pAtkRange"] = CombatStat.PAtkRange,
         ["breath"] = CombatStat.Breath, ["fall"] = CombatStat.Fall,
         ["cancelVuln"] = CombatStat.CancelVuln, ["debuffVuln"] = CombatStat.DebuffVuln,
-        ["holyPower"] = CombatStat.HolyPower, ["darkRes"] = CombatStat.DarkRes
+        ["holyPower"] = CombatStat.HolyPower, ["darkRes"] = CombatStat.DarkRes,
+        ["holyRes"] = CombatStat.HolyRes, ["fireRes"] = CombatStat.FireRes,
+        ["waterRes"] = CombatStat.WaterRes, ["windRes"] = CombatStat.WindRes,
+        ["earthRes"] = CombatStat.EarthRes, ["transDam"] = CombatStat.TransDam,
+        ["cancel"] = CombatStat.Cancel
     };
 
     static readonly Dictionary<string, SkillPosition> PositionNames = new(StringComparer.OrdinalIgnoreCase)
