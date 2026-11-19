@@ -123,6 +123,8 @@ public sealed partial class ZoneWorld
             player.CombatUntilUnixMs = now + ClanProtocol.CombatStanceMillis;
             return;
         }
+        if (TryExplodeTreasureBox(player, target, now))
+            return;
         DuelNoteOutsideHit(player, target);
         target.CurHp = Math.Max(0, target.CurHp - damage);
         FanoutVitals(target, StatusFor(target));
@@ -200,7 +202,8 @@ public sealed partial class ZoneWorld
             return;
         foreach (int id in _aiBusy.ToArray())
         {
-            if (!_byId.TryGetValue(id, out var npc) || npc.Kind != ZoneEntityKind.Npc || npc.AggroTargetId <= 0 || npc.Summon != null)
+            if (!_byId.TryGetValue(id, out var npc) || npc.Kind != ZoneEntityKind.Npc || npc.AggroTargetId <= 0 || npc.Summon != null ||
+                IsTreasureBox(npc.NpcId))
                 continue;
             if (npc.CurHp <= 0)
             {

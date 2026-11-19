@@ -112,6 +112,10 @@ public sealed partial class ZoneWorld
             return;
         }
 
+        // A still-closed treasure box explodes on the first hit (Unlock skills go through OpenChest instead).
+        if (TryExplodeTreasureBox(attacker, target, now))
+            return;
+
         target.CurHp = Math.Max(0, target.CurHp - damage);
         FanoutVitals(target, StatusFor(target));
         RecordDamage(target, credit, damage);
@@ -183,7 +187,9 @@ public sealed partial class ZoneWorld
                 npc.SweepItems.Add(stack);
         }
 
-        SpawnDeathDrops(npcId, x, y, z, killer, watchers, npc.Level, raid, seeded: npc.Seeded);
+        int dropNpcId = ChestDropNpcId(npcId, npc.ChestSpecialDrop);
+        LastDeathDropNpcIdForTest = dropNpcId;
+        SpawnDeathDrops(dropNpcId, x, y, z, killer, watchers, npc.Level, raid, seeded: npc.Seeded);
         // Mobius DecayTaskManager: a seeded corpse gets the same extension as a spoiled one (time to harvest).
         bool spoiled = npc.SpoilerObjectId != 0 || npc.Seeded;
         npc.CorpseAwaitingSweep = npc.SweepItems.Count > 0;
@@ -237,6 +243,15 @@ public sealed partial class ZoneWorld
         {
             NetBridge.FanoutEntityDespawn(netWatchers, objectId);
         }
+    }
+
+
+    internal int LastDeathDropNpcIdForTest { get; private set; }
+
+    internal void DamageNpcByForTest(ZoneEntity attacker, ZoneEntity target, int damage)
+    {
+        lock (_gate)
+            DamageNpcBy(attacker, target, damage, _clock().ToUnixTimeMilliseconds());
     }
 
     bool VisibleTo(int observerId, int otherId)

@@ -276,6 +276,9 @@ public sealed partial class ZoneWorld
         if (SignetSkillIds.Contains(request.SkillId))
             return TrySkillUseSignet(session, player, request, liveTemplate, liveLevelData, level, now);
 
+        if (_skillEffects.TryGet(request.SkillId, out var openRows) && HasOpenChest(openRows))
+            return TrySkillUseOpenChest(session, player, request, liveTemplate, liveLevelData, level, now);
+
         if (liveTemplate.IsInstantSupportSkill(level) || _skillEffects.HasHeal(request.SkillId))
             return TrySkillUseSupport(session, player, request, liveTemplate, liveLevelData, level, now);
 

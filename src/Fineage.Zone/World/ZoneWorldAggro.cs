@@ -169,7 +169,8 @@ public sealed partial class ZoneWorld
             // players carrying karma, inside its template aggro range and line of sight.
             bool guard = IsGuard(npc);
             if (npc.Kind != ZoneEntityKind.Npc || !npc.Aggressive || npc.AggroRange <= 0 || (!npc.Attackable && !guard) ||
-                npc.CurHp <= 0 || npc.AggroTargetId > 0 || npc.ReturningHome || now < npc.NextAggroScanMs)
+                npc.CurHp <= 0 || npc.AggroTargetId > 0 || npc.ReturningHome || now < npc.NextAggroScanMs ||
+                IsTreasureBox(npc.NpcId))
                 continue;
             // _globalAggro starts at -10 and climbs once per think. A hit zeroes it.
             if (npc.GlobalAggro < 0)

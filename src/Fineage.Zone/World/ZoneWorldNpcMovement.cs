@@ -134,7 +134,7 @@ public sealed partial class ZoneWorld
                 _thinking.Remove(id);
                 continue;
             }
-            if (!ZoneCombat.IsCombatNpcType(npc.NpcType))
+            if (!ZoneCombat.IsCombatNpcType(npc.NpcType) || IsTreasureBox(npc.NpcId))
                 continue;
             // One step of _globalAggro toward 0 per think (AttackableAI.thinkActive).
             if (npc.GlobalAggro != 0)
