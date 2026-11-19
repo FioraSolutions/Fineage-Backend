@@ -121,4 +121,27 @@ static partial class NormalizedStoreWriter
             del.ExecuteNonQuery();
         }
     }
+
+    /// <summary>
+    /// Permanently remove a character. Child tables with ON DELETE CASCADE go with the
+    /// row; pets have no FK and are deleted first.
+    /// </summary>
+    public static void DeleteCharacter(NpgsqlConnection conn, NpgsqlTransaction tx, int characterId)
+    {
+        using (var pets = conn.CreateCommand())
+        {
+            pets.Transaction = tx;
+            pets.CommandText = "DELETE FROM pets WHERE owner_character_id = @id";
+            pets.Parameters.AddWithValue("id", characterId);
+            pets.ExecuteNonQuery();
+        }
+
+        using (var del = conn.CreateCommand())
+        {
+            del.Transaction = tx;
+            del.CommandText = "DELETE FROM characters WHERE id = @id";
+            del.Parameters.AddWithValue("id", characterId);
+            del.ExecuteNonQuery();
+        }
+    }
 }

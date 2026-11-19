@@ -18,6 +18,7 @@ public sealed partial class MemoryAccountStore
             if (_data.Clans.Any(c => c.Members.Any(m => m.CharacterId == characterId)))
                 return false;
             row.Characters.Remove(character);
+            _data.Pets.RemoveAll(p => p.OwnerCharacterId == characterId);
             Save();
             return true;
         }

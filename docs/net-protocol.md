@@ -69,9 +69,7 @@ Skills are still derived at zone enter, not listed on CharSelect.
 | `RestoreCharacter` `0x020B` | C→S | same body |
 | `DeleteResult` `0x020A` | S→C | `ok` byte, `code`, `message`, `slot`, `characterId` |
 
-`FINEAGE_DELETE_CHAR_AFTER_DAYS` (default `7`) decides hard vs soft delete: `0` removes the record, `> 0` sets a delete timer and the roster keeps the row flagged `pendingDelete` with `deleteSecondsLeft`. Restore clears that timer. On success the server sends `DeleteResult` then a fresh `CharacterRoster`, so the client redraws from server truth instead of patching its list locally.
-
-The char-select client currently treats delete/restore as a no-op on Net (`CharSelectWindow.DeletePressed`, `TODO(#131)`); it can now send these opcodes.
+`FINEAGE_DELETE_CHAR_AFTER_DAYS` (default `0`) decides hard vs soft delete: `0` immediately removes the character and its items, skills, shortcuts, quests, and pets; `> 0` sets a delete timer and the roster keeps the row flagged `pendingDelete` with `deleteSecondsLeft`. Restore clears that timer. Clan leaders and clan members cannot be deleted (Mobius). On success the server sends `DeleteResult` then a fresh `CharacterRoster`, so the client redraws from server truth instead of patching its list locally.
 
 ## EnterWorld (zone Net)
 
