@@ -294,6 +294,11 @@ public sealed partial class ZoneWorld
             StartFearFlee(target, attacker, alongHeading: false);
             return;
         }
+        if (slot.Equals("DISTRUST", StringComparison.OrdinalIgnoreCase))
+        {
+            ApplyDistrust(attacker ?? target, target);
+            return;
+        }
         if (ActionBlockSlots.Contains(slot))
         {
             if (target.Session is { } session)

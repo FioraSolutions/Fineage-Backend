@@ -4096,12 +4096,12 @@
         }
       ]
     },
-    {
+        {
       "skillId": 1147,
       "effects": [
         {
           "name": "HpDrain",
-          "power": "0.4"
+          "power": 0.4
         }
       ]
     },
@@ -4113,12 +4113,29 @@
         }
       ]
     },
-    {
+        {
       "skillId": 1151,
       "effects": [
         {
           "name": "HpByLevel",
-          "power": "#drain"
+          "power": [
+            260,
+            299,
+            347,
+            384,
+            426,
+            467,
+            509,
+            529,
+            550,
+            571,
+            590,
+            609,
+            628,
+            645,
+            662,
+            678
+          ]
         },
         {
           "name": "ConsumeBody"
@@ -4184,13 +4201,11 @@
         }
       ]
     },
-    {
+        {
       "skillId": 1163,
       "effects": [
         {
-          "name": "Confuse",
-          "chance": "20",
-          "abnormalTime": "20"
+          "name": "Distrust"
         }
       ]
     },
@@ -4418,7 +4433,7 @@
       "effects": [
         {
           "name": "Confuse",
-          "chance": "60",
+          "chance": "20",
           "abnormalTime": "20"
         }
       ]
@@ -4595,12 +4610,12 @@
         }
       ]
     },
-    {
+        {
       "skillId": 1234,
       "effects": [
         {
           "name": "HpDrain",
-          "power": "0.4"
+          "power": 0.4
         }
       ]
     },
@@ -5048,27 +5063,39 @@
         }
       ]
     },
-    {
+        {
       "skillId": 1285,
       "effects": [
         {
           "name": "Buff"
+        },
+        {
+          "name": "ElementSeed",
+          "element": "FIRE"
         }
       ]
     },
-    {
+        {
       "skillId": 1286,
       "effects": [
         {
           "name": "Buff"
+        },
+        {
+          "name": "ElementSeed",
+          "element": "WATER"
         }
       ]
     },
-    {
+        {
       "skillId": 1287,
       "effects": [
         {
           "name": "Buff"
+        },
+        {
+          "name": "ElementSeed",
+          "element": "WIND"
         }
       ]
     },
@@ -5564,17 +5591,17 @@
         }
       ]
     },
-    {
+        {
       "skillId": 1343,
       "effects": [
         {
           "name": "HpDrain",
-          "power": "0.4"
+          "power": 0.4
         },
         {
           "name": "ManaDamOverTime",
-          "power": "12",
-          "ticks": "5"
+          "power": 12,
+          "ticks": 5
         }
       ]
     },
@@ -5916,11 +5943,13 @@
         }
       ]
     },
-    {
+        {
       "skillId": 1381,
       "effects": [
         {
-          "name": "Fear"
+          "name": "RunAway",
+          "power": 30,
+          "time": 20
         }
       ]
     },
@@ -6257,11 +6286,18 @@
         }
       ]
     },
-    {
+        {
       "skillId": 1419,
       "effects": [
         {
-          "name": "MagicalAttack"
+          "name": "SummonNpc",
+          "npcId": "13027",
+          "npcCount": "1",
+          "phase": "start"
+        },
+        {
+          "name": "MagicalAttack",
+          "phase": "channeling"
         }
       ]
     },
@@ -6291,11 +6327,18 @@
         }
       ]
     },
-    {
+        {
       "skillId": 1423,
       "effects": [
         {
-          "name": "MagicalAttack"
+          "name": "SummonNpc",
+          "npcId": "13030",
+          "npcCount": "1",
+          "phase": "start"
+        },
+        {
+          "name": "MagicalAttack",
+          "phase": "channeling"
         }
       ]
     },

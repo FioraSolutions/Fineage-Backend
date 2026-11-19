@@ -29,6 +29,7 @@ public sealed partial class ZoneWorld
             TickCorpseDecay(now);
             TickQuestSpawns(now);
             TickSignets(now);
+            TickSkillChannels(now);
             TickAttackStance(now);
             return 0;
         });
@@ -228,7 +229,7 @@ public sealed partial class ZoneWorld
                 continue;
             }
             if (!_byId.TryGetValue(npc.AggroTargetId, out var player) ||
-                !IsLivePlayable(player) ||
+                !IsValidMobAttackTarget(npc, player) ||
                 !SameInstance(npc.ObjectId, player.ObjectId) ||
                 !ZoneCombat.InAggroRange(npc.X, npc.Y, player.X, player.Y))
             {

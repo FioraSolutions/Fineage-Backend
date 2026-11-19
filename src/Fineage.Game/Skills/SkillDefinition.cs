@@ -150,6 +150,19 @@ public sealed class SkillDefinition
             || targetType.Equals("PET", StringComparison.OrdinalIgnoreCase);
     }
 
+    /// <summary>Mobius <c>&lt;player elementSeeds|elementSeed|active_effect_id_lvl&gt;</c> gates (all must pass).</summary>
+    public IReadOnlyList<SkillPlayerCondition> PlayerConditions { get; init; } = [];
+
+    /// <summary>Mobius <c>channelingTickInterval</c> in milliseconds (CA1 ticks). 0 = not a channeled skill.</summary>
+    public int ChannelingTickMs { get; init; }
+
+    /// <summary>Mobius <c>mpPerChanneling</c> spent on each CA1 tick after the initial consume.</summary>
+    public int MpPerChanneling { get; init; }
+
+    public bool IsChanneled =>
+        ChannelingTickMs > 0 ||
+        OperateType.StartsWith("CA", StringComparison.OrdinalIgnoreCase);
+
     public int MaxLevel => _levels.Length;
 
     public SkillLevelData LevelData(int level)

@@ -48,6 +48,7 @@ public sealed partial class ZoneWorld
             _withAbnormals.Add(target.ObjectId);
         FanoutAbnormal(target);
         ApplyControlFromSlot(target, template.AbnormalType, attacker);
+        ApplyElementSeedsFromSkill(template, target, nowUnixMs);
         return true;
     }
 

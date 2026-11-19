@@ -199,6 +199,10 @@ public sealed partial class ZoneWorld
             return null;
         }
 
+        // Mobius Skill.checkCondition <player elementSeed(s)|active_effect_id_lvl> (SysMsg 113).
+        if (!PlayerConditionsMet(session, player, liveTemplate))
+            return null;
+
         // Mobius operateType T: the second press switches the toggle off, otherwise it applies its own abnormal.
         // This branch comes BEFORE the fake-death refuse, mirroring Player.checkUseMagicConditions
         // ("Note: do not check this before TOGGLE reset"): a fake-dead pawn can switch Fake Death (60) off with a
@@ -234,6 +238,9 @@ public sealed partial class ZoneWorld
                 _spoilRules.IsSweepSkill(request.SkillId));
         if (_skillEffects.HasResurrection(request.SkillId))
             return TrySkillUseResurrection(session, player, request, liveTemplate, liveLevelData, level, now);
+
+        if (liveTemplate.IsChanneled)
+            return TrySkillUseChannel(session, player, request, liveTemplate, liveLevelData, level, now);
 
         // Mobius `isBad()` is `effectPoint < 0 && targetType != SELF`, and RequestMagicSkillUse's target check lets a
         // bad skill pick an attackable victim. Trick (11) / Switch (12) / Bluff (358) / Lure (51) are that family:
@@ -320,7 +327,10 @@ public sealed partial class ZoneWorld
                 row.Name.Equals("TargetMe", StringComparison.OrdinalIgnoreCase) ||
                 row.Name.Equals("CpDamPercent", StringComparison.OrdinalIgnoreCase) ||
                 row.Name.Equals("Lethal", StringComparison.OrdinalIgnoreCase) ||
-                row.Name.Equals("RunAway", StringComparison.OrdinalIgnoreCase))
+                row.Name.Equals("RunAway", StringComparison.OrdinalIgnoreCase) ||
+                row.Name.Equals("Fear", StringComparison.OrdinalIgnoreCase) ||
+                row.Name.Equals("Confuse", StringComparison.OrdinalIgnoreCase) ||
+                row.Name.Equals("Distrust", StringComparison.OrdinalIgnoreCase))
                 return true;
         }
         return false;

@@ -32,10 +32,11 @@ public sealed partial class ZoneWorld
         npc.DamageBy[attacker.ObjectId] = npc.DamageBy.GetValueOrDefault(attacker.ObjectId) + damage;
     }
 
-    void AddHate(ZoneEntity npc, ZoneEntity attacker, long hate = 1)
+    void AddHate(ZoneEntity npc, ZoneEntity attacker, long hate = 1, bool allowNpcAttacker = false)
     {
-        if (npc.Kind != ZoneEntityKind.Npc || npc.Summon != null || npc.CurHp <= 0 ||
-            (attacker.Kind != ZoneEntityKind.Player && attacker.Summon == null))
+        if (npc.Kind != ZoneEntityKind.Npc || npc.Summon != null || npc.CurHp <= 0)
+            return;
+        if (!allowNpcAttacker && attacker.Kind != ZoneEntityKind.Player && attacker.Summon == null)
             return;
         // Mobius FolkStatus: merchants/trainers/folk never hate. Guards/Monsters (Attackable types) do.
         if (!ZoneCombat.TakesNpcCombatDamage(npc.NpcType, npc.Attackable))
@@ -73,9 +74,10 @@ public sealed partial class ZoneWorld
     /// fake death (<c>Player.isAlikeDead()</c> includes <c>_isFakeDeath</c>), so a playing-dead pawn is never a hate
     /// target and its hate is zeroed — the mob drops it until it stands up and is hit again.
     /// </summary>
-    bool ValidHateTarget(ZoneEntity npc, int playerId) =>
-        _byId.TryGetValue(playerId, out var p) && IsLivePlayable(p) && !p.FakeDeath &&
-        SameInstance(npc.ObjectId, p.ObjectId) && ZoneCombat.InAggroRange(npc.X, npc.Y, p.X, p.Y);
+    bool ValidHateTarget(ZoneEntity npc, int targetId) =>
+        _byId.TryGetValue(targetId, out var t) && !t.FakeDeath &&
+        SameInstance(npc.ObjectId, t.ObjectId) && ZoneCombat.InAggroRange(npc.X, npc.Y, t.X, t.Y) &&
+        IsValidMobAttackTarget(npc, t);
 
     /// <summary>A connected living player, or a living summon (Mobius <c>isPlayable</c>).</summary>
     static bool IsLivePlayable(ZoneEntity p) =>

@@ -52680,6 +52680,12 @@
       "passive": false,
       "operateType": "A1",
       "targetType": "ONE",
+      "playerConditions": [
+        {
+          "type": "elementSeeds",
+          "value": 2
+        }
+      ],
       "castRange": 900,
       "hitTimeMs": 7000,
       "reuseDelayMs": 3600000,
@@ -52706,6 +52712,13 @@
       "passive": false,
       "operateType": "A2",
       "targetType": "ONE",
+      "playerConditions": [
+        {
+          "type": "elementSeed",
+          "element": "FIRE",
+          "value": 2
+        }
+      ],
       "castRange": 900,
       "hitTimeMs": 7000,
       "reuseDelayMs": 3600000,
@@ -52735,6 +52748,13 @@
       "passive": false,
       "operateType": "A2",
       "targetType": "ONE",
+      "playerConditions": [
+        {
+          "type": "elementSeed",
+          "element": "WATER",
+          "value": 2
+        }
+      ],
       "castRange": 900,
       "hitTimeMs": 7000,
       "reuseDelayMs": 3600000,
@@ -52767,6 +52787,13 @@
       "passive": false,
       "operateType": "A2",
       "targetType": "ONE",
+      "playerConditions": [
+        {
+          "type": "elementSeed",
+          "element": "WIND",
+          "value": 2
+        }
+      ],
       "castRange": 900,
       "hitTimeMs": 7000,
       "reuseDelayMs": 3600000,
@@ -52796,6 +52823,18 @@
       "passive": false,
       "operateType": "A1",
       "targetType": "ONE",
+      "playerConditions": [
+        {
+          "type": "elementSeed",
+          "element": "WATER",
+          "value": 1
+        },
+        {
+          "type": "elementSeed",
+          "element": "WIND",
+          "value": 1
+        }
+      ],
       "castRange": 900,
       "hitTimeMs": 7000,
       "reuseDelayMs": 3600000,
@@ -55853,6 +55892,7 @@
       "passive": false,
       "operateType": "A1",
       "targetType": "AREA",
+      "affectRange": 200,
       "castRange": 500,
       "hitTimeMs": 6000,
       "reuseDelayMs": 20000,
@@ -57223,6 +57263,7 @@
       "passive": false,
       "operateType": "A1",
       "targetType": "AURA",
+      "affectRange": 200,
       "castRange": 40,
       "hitTimeMs": 6000,
       "reuseDelayMs": 10000,
@@ -58067,6 +58108,16 @@
       "passive": false,
       "operateType": "CA1",
       "targetType": "GROUND",
+      "affectRange": 200,
+      "channelingTickInterval": 2,
+      "mpPerChanneling": 80,
+      "playerConditions": [
+        {
+          "type": "activeEffectIdLvl",
+          "skillId": 5105,
+          "level": 3
+        }
+      ],
       "castRange": 900,
       "hitTimeMs": 15000,
       "reuseDelayMs": 1800000,
@@ -58172,6 +58223,16 @@
       "passive": false,
       "operateType": "CA1",
       "targetType": "GROUND",
+      "affectRange": 200,
+      "channelingTickInterval": 2,
+      "mpPerChanneling": 80,
+      "playerConditions": [
+        {
+          "type": "activeEffectIdLvl",
+          "skillId": 5105,
+          "level": 3
+        }
+      ],
       "castRange": 900,
       "hitTimeMs": 15000,
       "reuseDelayMs": 1800000,

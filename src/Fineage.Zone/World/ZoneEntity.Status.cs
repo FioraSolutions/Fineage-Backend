@@ -128,4 +128,66 @@ sealed partial class ZoneEntity
         get => Status?.RegenCarryMp ?? 0;
         set => EnsureStatus().RegenCarryMp = value;
     }
+
+    public Dictionary<string, List<long>> ElementSeedUntilMs => EnsureStatus().ElementSeedUntilMs;
+
+    public long ChannelUntilMs
+    {
+        get => Status?.ChannelUntilMs ?? 0;
+        set => EnsureStatus().ChannelUntilMs = value;
+    }
+
+    public int ChannelSkillId
+    {
+        get => Status?.ChannelSkillId ?? 0;
+        set => EnsureStatus().ChannelSkillId = value;
+    }
+
+    public int ChannelSkillLevel
+    {
+        get => Status?.ChannelSkillLevel ?? 0;
+        set => EnsureStatus().ChannelSkillLevel = value;
+    }
+
+    public int ChannelX
+    {
+        get => Status?.ChannelX ?? 0;
+        set => EnsureStatus().ChannelX = value;
+    }
+
+    public int ChannelY
+    {
+        get => Status?.ChannelY ?? 0;
+        set => EnsureStatus().ChannelY = value;
+    }
+
+    public int ChannelZ
+    {
+        get => Status?.ChannelZ ?? 0;
+        set => EnsureStatus().ChannelZ = value;
+    }
+
+    public long ChannelNextTickMs
+    {
+        get => Status?.ChannelNextTickMs ?? 0;
+        set => EnsureStatus().ChannelNextTickMs = value;
+    }
+
+    public int ChannelTickMs
+    {
+        get => Status?.ChannelTickMs ?? 0;
+        set => EnsureStatus().ChannelTickMs = value;
+    }
+
+    public int ChannelMpPerTick
+    {
+        get => Status?.ChannelMpPerTick ?? 0;
+        set => EnsureStatus().ChannelMpPerTick = value;
+    }
+
+    public int ChannelAffectRange
+    {
+        get => Status?.ChannelAffectRange ?? 0;
+        set => EnsureStatus().ChannelAffectRange = value;
+    }
 }
