@@ -12153,6 +12153,14 @@
       "weight": 120
     },
     {
+      "id": 1378,
+      "name": "Spellbook: Divine Heal",
+      "kind": "etc",
+      "icon": "icon.etc_spell_books_white_i00",
+      "price": 800,
+      "weight": 120
+    },
+    {
       "id": 1383,
       "name": "Spellbook: Poison",
       "kind": "etc",
@@ -75987,6 +75995,15 @@
     {
       "id": 8893,
       "name": "Ancient Tactical Manual: Symbol of Noise",
+      "kind": "etc",
+      "stackable": true,
+      "icon": "icon.etc_spell_books_assistance_i00",
+      "price": 40000,
+      "weight": 120
+    },
+    {
+      "id": 8895,
+      "name": "Ancient Tactical Manual: Symbol of Honor",
       "kind": "etc",
       "stackable": true,
       "icon": "icon.etc_spell_books_assistance_i00",
