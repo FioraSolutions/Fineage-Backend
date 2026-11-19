@@ -5596,7 +5596,7 @@
       "effects": [
         {
           "name": "HpDrain",
-          "power": 0.4
+          "power": 0.5
         },
         {
           "name": "ManaDamOverTime",

@@ -239,7 +239,7 @@ public sealed partial class ZoneWorld
         if (_skillEffects.HasResurrection(request.SkillId))
             return TrySkillUseResurrection(session, player, request, liveTemplate, liveLevelData, level, now);
 
-        if (liveTemplate.IsChanneled)
+        if (liveTemplate.IsGroundDamageChannel)
             return TrySkillUseChannel(session, player, request, liveTemplate, liveLevelData, level, now);
 
         // Mobius `isBad()` is `effectPoint < 0 && targetType != SELF`, and RequestMagicSkillUse's target check lets a

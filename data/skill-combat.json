@@ -6177,6 +6177,52 @@
    ]
   },
   {
+   "skillId": 1147,
+   "name": "Vampiric Touch",
+   "levels": 6,
+   "kind": "magical",
+   "magic": true,
+   "power": [
+    18.0,
+    21.0,
+    23.0,
+    26.0,
+    29.0,
+    32.0
+   ],
+   "mpConsume": [
+    20,
+    22,
+    25,
+    28,
+    30,
+    32
+   ],
+   "mpInitialConsume": [
+    5,
+    6,
+    7,
+    7,
+    8,
+    8
+   ],
+   "hitTimeMs": 4000,
+   "coolTimeMs": 0,
+   "reuseDelayMs": 12000,
+   "castRange": 600,
+   "baseCritRate": 0,
+   "overHit": false,
+   "effectRange": 1100,
+   "magicLevel": [
+    11,
+    14,
+    17,
+    20,
+    23,
+    25
+   ]
+  },
+  {
    "skillId": 1148,
    "name": "Death Spike",
    "levels": 13,
@@ -6198,30 +6244,30 @@
     108.0
    ],
    "mpConsume": [
-    19,
+    18,
     22,
     24,
     28,
     29,
-    31,
+    30,
     32,
     33,
-    35,
+    34,
     36,
     37,
     38,
     40
    ],
    "mpInitialConsume": [
-    4,
+    5,
     5,
     6,
     7,
     7,
-    7,
     8,
     8,
     8,
+    9,
     9,
     9,
     9,
@@ -6329,6 +6375,116 @@
     68,
     70,
     72,
+    74
+   ]
+  },
+  {
+   "skillId": 1159,
+   "name": "Curse Death Link",
+   "levels": 22,
+   "kind": "magical",
+   "magic": true,
+   "power": [
+    68.0,
+    72.0,
+    75.0,
+    78.0,
+    80.0,
+    82.0,
+    84.0,
+    85.0,
+    87.0,
+    89.0,
+    90.0,
+    92.0,
+    94.0,
+    96.0,
+    97.0,
+    99.0,
+    100.0,
+    102.0,
+    104.0,
+    105.0,
+    107.0,
+    108.0
+   ],
+   "mpConsume": [
+    36,
+    38,
+    39,
+    41,
+    42,
+    43,
+    44,
+    44,
+    45,
+    46,
+    47,
+    48,
+    48,
+    49,
+    50,
+    51,
+    51,
+    52,
+    53,
+    53,
+    54,
+    55
+   ],
+   "mpInitialConsume": [
+    9,
+    10,
+    10,
+    11,
+    11,
+    11,
+    11,
+    11,
+    12,
+    12,
+    12,
+    12,
+    12,
+    13,
+    13,
+    13,
+    13,
+    13,
+    14,
+    14,
+    14,
+    14
+   ],
+   "hitTimeMs": 4000,
+   "coolTimeMs": 0,
+   "reuseDelayMs": 6000,
+   "castRange": 900,
+   "baseCritRate": 0,
+   "overHit": false,
+   "effectRange": 1400,
+   "magicLevel": [
+    50,
+    52,
+    54,
+    56,
+    57,
+    58,
+    59,
+    60,
+    61,
+    62,
+    63,
+    64,
+    65,
+    66,
+    67,
+    68,
+    69,
+    70,
+    71,
+    72,
+    73,
     74
    ]
   },
@@ -6833,8 +6989,8 @@
    "magic": true,
    "power": [
     13.0,
-    14.0,
-    14.0
+    16.0,
+    19.0
    ],
    "mpConsume": [
     23,
@@ -7189,13 +7345,147 @@
     14,
     14
    ],
-   "hitTimeMs": 650,
+   "hitTimeMs": 1500,
    "coolTimeMs": 0,
    "reuseDelayMs": 2500,
    "castRange": 150,
    "baseCritRate": 0,
    "overHit": false,
-   "effectRange": 350,
+   "effectRange": 650,
+   "magicLevel": [
+    38,
+    40,
+    42,
+    44,
+    46,
+    48,
+    50,
+    52,
+    54,
+    56,
+    57,
+    58,
+    59,
+    60,
+    61,
+    62,
+    63,
+    64,
+    65,
+    66,
+    67,
+    68,
+    69,
+    70,
+    71,
+    72,
+    73,
+    74
+   ]
+  },
+  {
+   "skillId": 1234,
+   "name": "Vampiric Claw",
+   "levels": 28,
+   "kind": "magical",
+   "magic": true,
+   "power": [
+    49.0,
+    52.0,
+    55.0,
+    58.0,
+    61.0,
+    65.0,
+    68.0,
+    72.0,
+    75.0,
+    78.0,
+    80.0,
+    82.0,
+    84.0,
+    85.0,
+    87.0,
+    89.0,
+    90.0,
+    92.0,
+    94.0,
+    96.0,
+    97.0,
+    99.0,
+    100.0,
+    102.0,
+    104.0,
+    105.0,
+    107.0,
+    108.0
+   ],
+   "mpConsume": [
+    48,
+    50,
+    54,
+    56,
+    58,
+    62,
+    65,
+    68,
+    71,
+    74,
+    75,
+    78,
+    78,
+    80,
+    82,
+    82,
+    84,
+    85,
+    87,
+    88,
+    89,
+    91,
+    91,
+    93,
+    95,
+    96,
+    97,
+    98
+   ],
+   "mpInitialConsume": [
+    12,
+    13,
+    13,
+    14,
+    16,
+    16,
+    17,
+    17,
+    18,
+    19,
+    19,
+    19,
+    20,
+    20,
+    20,
+    22,
+    21,
+    22,
+    22,
+    22,
+    23,
+    23,
+    24,
+    24,
+    24,
+    24,
+    25,
+    25
+   ],
+   "hitTimeMs": 4000,
+   "coolTimeMs": 0,
+   "reuseDelayMs": 12000,
+   "castRange": 900,
+   "baseCritRate": 0,
+   "overHit": false,
+   "effectRange": 1400,
    "magicLevel": [
     38,
     40,
@@ -7921,13 +8211,13 @@
    ],
    "mpConsume": [
     8,
-    9,
+    10,
     11,
     12
    ],
    "mpInitialConsume": [
     2,
-    3,
+    2,
     3,
     3
    ],
@@ -8030,7 +8320,7 @@
    "kind": "magical",
    "magic": true,
    "power": [
-    150.0
+    350.0
    ],
    "mpConsume": [
     200
@@ -8038,7 +8328,7 @@
    "mpInitialConsume": [
     50
    ],
-   "hitTimeMs": 4000,
+   "hitTimeMs": 7000,
    "coolTimeMs": 0,
    "reuseDelayMs": 3600000,
    "castRange": 900,
@@ -8056,7 +8346,7 @@
    "kind": "magical",
    "magic": true,
    "power": [
-    150.0
+    350.0
    ],
    "mpConsume": [
     200
@@ -8064,7 +8354,7 @@
    "mpInitialConsume": [
     50
    ],
-   "hitTimeMs": 4000,
+   "hitTimeMs": 7000,
    "coolTimeMs": 0,
    "reuseDelayMs": 3600000,
    "castRange": 900,
@@ -8134,7 +8424,7 @@
    "kind": "magical",
    "magic": true,
    "power": [
-    200.0
+    500.0
    ],
    "mpConsume": [
     200
@@ -8142,7 +8432,7 @@
    "mpInitialConsume": [
     50
    ],
-   "hitTimeMs": 4000,
+   "hitTimeMs": 7000,
    "coolTimeMs": 0,
    "reuseDelayMs": 3600000,
    "castRange": 900,
@@ -8426,6 +8716,32 @@
    ]
   },
   {
+   "skillId": 1343,
+   "name": "Dark Vortex",
+   "levels": 1,
+   "kind": "magical",
+   "magic": true,
+   "power": [
+    111.0
+   ],
+   "mpConsume": [
+    84
+   ],
+   "mpInitialConsume": [
+    21
+   ],
+   "hitTimeMs": 6000,
+   "coolTimeMs": 0,
+   "reuseDelayMs": 60000,
+   "castRange": 900,
+   "baseCritRate": 0,
+   "overHit": false,
+   "effectRange": 1400,
+   "magicLevel": [
+    76
+   ]
+  },
+  {
    "skillId": 1417,
    "name": "Aura Flash",
    "levels": 5,
@@ -8439,18 +8755,18 @@
     65.0
    ],
    "mpConsume": [
-    54,
-    58,
-    62,
-    65,
-    69
+    43,
+    46,
+    50,
+    52,
+    55
    ],
    "mpInitialConsume": [
-    0,
-    0,
-    0,
-    0,
-    0
+    11,
+    12,
+    12,
+    13,
+    14
    ],
    "hitTimeMs": 1000,
    "coolTimeMs": 0,
@@ -8464,6 +8780,58 @@
     66,
     70,
     74
+   ]
+  },
+  {
+   "skillId": 1419,
+   "name": "Volcano",
+   "levels": 1,
+   "kind": "magical",
+   "magic": true,
+   "power": [
+    500.0
+   ],
+   "mpConsume": [
+    36
+   ],
+   "mpInitialConsume": [
+    36
+   ],
+   "hitTimeMs": 15000,
+   "coolTimeMs": 0,
+   "reuseDelayMs": 1800000,
+   "castRange": 900,
+   "baseCritRate": 0,
+   "overHit": false,
+   "effectRange": 1000,
+   "magicLevel": [
+    80
+   ]
+  },
+  {
+   "skillId": 1423,
+   "name": "Gehenna",
+   "levels": 1,
+   "kind": "magical",
+   "magic": true,
+   "power": [
+    500.0
+   ],
+   "mpConsume": [
+    36
+   ],
+   "mpInitialConsume": [
+    36
+   ],
+   "hitTimeMs": 15000,
+   "coolTimeMs": 0,
+   "reuseDelayMs": 1800000,
+   "castRange": 900,
+   "baseCritRate": 0,
+   "overHit": false,
+   "effectRange": 1000,
+   "magicLevel": [
+    80
    ]
   },
   {
