@@ -186,6 +186,20 @@ sealed partial class ZoneEntity
         set => EnsureAggro().ReturningHome = value;
     }
 
+    /// <summary>A treasure box that has already been opened, smashed, or provoked.</summary>
+    public bool ChestInteracted
+    {
+        get => Aggro?.ChestInteracted ?? false;
+        set => EnsureAggro().ChestInteracted = value;
+    }
+
+    /// <summary>Successful Unlock: drop the chest's own table, not the smashed/mimic remap.</summary>
+    public bool ChestSpecialDrop
+    {
+        get => Aggro?.ChestSpecialDrop ?? false;
+        set => EnsureAggro().ChestSpecialDrop = value;
+    }
+
     ZoneNpcAggroPayload EnsureAggro() => Aggro ??= new ZoneNpcAggroPayload();
     /// <summary>NPC corpse: unix ms when DecayTaskManager removes it. 0 = alive / not scheduled.</summary>
     public long DecayAtMs

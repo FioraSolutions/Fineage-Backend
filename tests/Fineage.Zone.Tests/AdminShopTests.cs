@@ -216,4 +216,77 @@ public sealed class AdminShopTests : IDisposable
         Assert.True(kit.World.ApplyAbnormalFromSkillForTest(template, level, sung));
         Assert.Equal(now + 120_000L, Assert.Single(sung.Abnormals).ExpiresAtUnixMs);
     }
+
+    [Fact]
+    public async Task Mana_potion_and_thief_key_are_on_the_gm_shop()
+    {
+        var kit = new WorldBench();
+        BenchPlayer me = await kit.EnterAsync(name: "KuK");
+        Assert.True(kit.Game.Items.TryGet(728, out _), "Mana Potion 728 missing from items.json");
+        Assert.True(kit.Game.Items.TryGet(1661, out _), "Thief Key 1661 missing from items.json");
+
+        int potions = me.Inventory.CountOf(728);
+        int keys = me.Inventory.CountOf(1661);
+        Assert.Null(await me.BypassAsync(0, "admin_buy 9928"));
+        Assert.Null(await me.Buy(0, 9928, (728, 10)));
+        Assert.Equal(potions + 10, me.Inventory.CountOf(728));
+
+        Assert.Null(await me.BypassAsync(0, "admin_buy 9978"));
+        Assert.Null(await me.Buy(0, 9978, (1661, 20)));
+        Assert.Equal(keys + 20, me.Inventory.CountOf(1661));
+    }
+
+    [Fact]
+    public async Task Admin_spawn_places_the_npc_in_front_of_the_gm()
+    {
+        const int ChestId = 18268; // Treasure Chest lv 30
+        var kit = new WorldBench();
+        BenchPlayer me = await kit.EnterAsync(name: "KuK");
+        me.Player.Heading = 0;
+        int x0 = me.Player.X;
+        int y0 = me.Player.Y;
+        int z0 = me.Player.Z;
+        Assert.Equal(0, kit.World.CountNpcTemplateForTest(ChestId));
+
+        Assert.Null(await me.BypassAsync(0, "admin_spawn 18268"));
+        var chest = kit.World.FindNpcTemplateForTest(ChestId);
+        Assert.NotNull(chest);
+        Assert.Equal(ChestId, chest!.NpcId);
+        Assert.Equal("Chest", chest.NpcType, ignoreCase: true);
+        Assert.Equal(30, chest.Level);
+        Assert.True(chest.Attackable);
+        var expected = Fineage.Zone.Combat.ZoneCombat.PointAlongHeading(x0, y0, 0, 80);
+        Assert.Equal(expected.X, chest.X);
+        Assert.Equal(expected.Y, chest.Y);
+        Assert.Equal(z0, chest.Z);
+        Assert.Contains(chest.ObjectId, me.Player.Knownlist);
+
+        // One-shot: no respawn book entry, so a dead chest stays gone.
+        kit.World.DespawnNpcForTests(chest.ObjectId);
+        kit.World.AdvanceSpawnsForTests();
+        Assert.Null(kit.World.FindNpcTemplateForTest(ChestId));
+    }
+
+    [Fact]
+    public async Task Admin_spawn_monster_alias_spawns_the_requested_count()
+    {
+        const int ChestId = 18268;
+        var kit = new WorldBench();
+        BenchPlayer me = await kit.EnterAsync(name: "KuK");
+        me.Player.Heading = 0;
+        Assert.Null(await me.BypassAsync(0, "admin_spawn_monster 18268 3"));
+        Assert.Equal(3, kit.World.CountNpcTemplateForTest(ChestId));
+    }
+
+    [Fact]
+    public async Task Admin_spawn_refuses_an_unknown_npc_and_a_non_admin()
+    {
+        var kit = new WorldBench();
+        BenchPlayer me = await kit.EnterAsync(name: "KuK");
+        Assert.Equal("bad_request", await me.BypassAsync(0, "admin_spawn 99999999"));
+        Assert.Equal("bad_request", await me.BypassAsync(0, "admin_spawn"));
+
+        BenchPlayer other = await kit.EnterAsync(name: "NotAdmin");
+        Assert.Equal("forbidden", await other.BypassAsync(0, "admin_spawn 18268"));
+    }
 }

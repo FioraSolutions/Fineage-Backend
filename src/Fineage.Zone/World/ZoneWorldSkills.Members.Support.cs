@@ -232,7 +232,7 @@ public sealed partial class ZoneWorld
             if (!ApplyAbnormalFromSkill(template, levelData, t, at, attacker: player))
                 return;
             if (t.Kind == ZoneEntityKind.Npc)
-                ApplyEffectPointHate(player, t, effectPoint);
+                ApplyEffectPointHate(player, t, effectPoint, template, request.SkillId);
             // Mobius `Passive` (Veil's whole payload) sets EffectFlag.PASSIVE: Monster.isAggressive() turns false, so
             // the victim stops starting fights. TURN_PASSIVE also skips the EVT_ATTACKED notify entirely, and the
             // pawn forgets the caster it was hitting.
@@ -294,7 +294,7 @@ public sealed partial class ZoneWorld
         ScheduleEffect(player, target, template, level, now, hitMs, (t, at) =>
         {
             if (t.Kind == ZoneEntityKind.Npc)
-                ApplyEffectPointHate(player, t, effectPoint);
+                ApplyEffectPointHate(player, t, effectPoint, template, request.SkillId);
             RunInstantPayloadEffects(player, t, request.SkillId);
         });
         return null;
@@ -309,14 +309,56 @@ public sealed partial class ZoneWorld
     /// <c>-effectPoint</c> hate, a positive one reduces it, 0 does nothing. Damage skills keep their own
     /// <c>addDamageHate(damage · 100 / (level + 7))</c> in the melee/skill-damage paths.
     /// </summary>
-    void ApplyEffectPointHate(ZoneEntity caster, ZoneEntity target, int effectPoint)
+    /// <summary>
+    /// Mobius <c>Creature.callSkill</c> after <c>activateSkill</c>: an attackable target is added to
+    /// <c>attackByList</c> (except Lure 51 / Temptation 511), but the AI is only notified as attacked
+    /// when the skill is negative, has no <c>EffectType.HATE</c> (<c>DeleteHate</c> / <c>DeleteHateOfMe</c>),
+    /// and is not <c>AbnormalType.TURN_PASSIVE</c>. Trick (11) carries DeleteHateOfMe, so an idle mob
+    /// must not start attacking the caster. A mob already in combat keeps its current target; the
+    /// hate-removal payloads still run.
+    /// </summary>
+    void ApplyEffectPointHate(
+        ZoneEntity caster, ZoneEntity target, int effectPoint, SkillDefinition template, int skillId)
     {
         if (target.Kind != ZoneEntityKind.Npc || effectPoint == 0)
             return;
         if (effectPoint < 0)
-            AddHate(target, caster, hate: -effectPoint);
+        {
+            if (SuppressesAttackNotify(template, skillId))
+                RecordHate(target, caster, hate: -effectPoint);
+            else
+                AddHate(target, caster, hate: -effectPoint);
+        }
         else
             ReduceHate(target, caster, effectPoint);
+    }
+
+    const int LureSkillId = 51;
+    const int TemptationSkillId = 511;
+
+    /// <summary>
+    /// Mobius <c>callSkill</c> skips <c>notifyActionAttacked</c> for EffectType.HATE and TURN_PASSIVE,
+    /// and skips <c>attackByList</c> for Lure / Temptation.
+    /// </summary>
+    bool SuppressesAttackNotify(SkillDefinition template, int skillId)
+    {
+        if (skillId is LureSkillId or TemptationSkillId)
+            return true;
+        if (IsTurnPassive(template.AbnormalType))
+            return true;
+        return HasHateEffectType(skillId);
+    }
+
+    /// <summary>Mobius <c>EffectType.HATE</c>: <c>DeleteHate</c> and <c>DeleteHateOfMe</c> (Trick, Bluff, Forget).</summary>
+    bool HasHateEffectType(int skillId)
+    {
+        foreach (var effect in EffectsOf(skillId))
+        {
+            if (effect.Name.Equals("DeleteHate", StringComparison.OrdinalIgnoreCase) ||
+                effect.Name.Equals("DeleteHateOfMe", StringComparison.OrdinalIgnoreCase))
+                return true;
+        }
+        return false;
     }
 
     /// <summary>

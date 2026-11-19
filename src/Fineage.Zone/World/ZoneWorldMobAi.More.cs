@@ -101,6 +101,8 @@ public sealed partial class ZoneWorld
 
     void ChaseStep(ZoneEntity npc, ZoneEntity target, long now)
     {
+        if (IsTreasureBox(npc.NpcId))
+            return;
         double dx = target.X - npc.X;
         double dy = target.Y - npc.Y;
         double dist = Math.Sqrt(dx * dx + dy * dy);

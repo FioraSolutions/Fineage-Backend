@@ -302,4 +302,8 @@ sealed class ZoneNpcAggroPayload
     public int HomeY { get; set; }
     public int HomeZ { get; set; }
     public bool ReturningHome { get; set; }
+    /// <summary>A treasure box that has already been opened, smashed, or provoked (Mobius Chest._isInteracted).</summary>
+    public bool ChestInteracted { get; set; }
+    /// <summary>Successful Unlock: drop the chest's own table, not the smashed/mimic remap.</summary>
+    public bool ChestSpecialDrop { get; set; }
 }

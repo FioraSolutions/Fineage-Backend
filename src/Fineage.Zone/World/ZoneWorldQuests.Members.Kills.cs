@@ -26,6 +26,8 @@ public sealed partial class ZoneWorld
     /// </summary>
     void DistributeKillReward(ZoneEntity npc)
     {
+        if (IsTreasureBox(npc.NpcId))
+            return;
         long rewardExp = npc.RewardExp;
         int rewardSp = npc.RewardSp;
         if (rewardExp <= 0 && rewardSp <= 0)

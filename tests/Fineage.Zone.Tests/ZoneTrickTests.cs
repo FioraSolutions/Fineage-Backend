@@ -27,7 +27,15 @@ public sealed class ZoneTrickTests
         public override double NextDouble() => 0d;
     }
 
-    static (NetTestKit Kit, NetBridgeRecorder Rec) Kit()
+    /// <summary>Every <c>chance</c> roll fails (<c>Rnd.get(100)</c> → 99).</summary>
+    sealed class NeverRoll : Random
+    {
+        public override int Next(int maxValue) => maxValue > 0 ? maxValue - 1 : 0;
+        public override int Next(int minValue, int maxValue) => maxValue > minValue ? maxValue - 1 : minValue;
+        public override double NextDouble() => 0.99d;
+    }
+
+    static (NetTestKit Kit, NetBridgeRecorder Rec) Kit(Random? combatRandom = null)
     {
         var kit = new NetTestKit(SpawnCatalog.From(new Dictionary<string, SpawnMapDefinition>
         {
@@ -40,7 +48,7 @@ public sealed class ZoneTrickTests
                     NetTestKit.ElfX + 120, NetTestKit.ElfY, NetTestKit.ElfZ, 0, true, 50_000, 1f, 1f, 60, 0, "", "RaidBoss",
                     Level: 40, AttackRange: 40, AttackSpeed: 253, Aggressive: false, AggroRange: 0, ClanHelpRange: 0, Clans: [])
             ])
-        }), "trick", geo: GeoEngine.Empty, combatRandom: new AlwaysRoll());
+        }), "trick", geo: GeoEngine.Empty, combatRandom: combatRandom ?? new AlwaysRoll());
         var (bridge, rec) = NetBridgeRecorder.Create();
         kit.World.NetBridge = bridge;
         return (kit, rec);
@@ -79,6 +87,30 @@ public sealed class ZoneTrickTests
         Assert.Equal(["DeleteHateOfMe", "TargetCancel"], rows.Select(r => r.Name).ToArray());
         Assert.Equal(50, rows[0].Chance);
         Assert.Equal(70, rows[1].Chance);
+    }
+
+
+    [Fact]
+    public async Task Trick_on_an_idle_mob_does_not_wake_it()
+    {
+        // DeleteHateOfMe is refused so effectPoint hate stays on the list — still must not set the aggro target.
+        // Mobius callSkill skips notifyActionAttacked for EffectType.HATE.
+        var (kit, _) = Kit(new NeverRoll());
+        var (session, player) = await kit.EnterAsync(classId: 7, race: 0, level: 60);
+        GiveTrick(player);
+        Assert.True(kit.World.TryGetEntityById(MobId, out var mob));
+        mob.MaxHp = mob.CurHp = 50_000;
+        mob.GlobalAggro = -10;
+        mob.HateList.Clear();
+        mob.AggroTargetId = 0;
+
+        Assert.Null(await kit.World.TrySkillUseAsync(session, Trick, MobId, CancellationToken.None));
+        kit.Now = kit.Now.AddSeconds(2);
+        kit.World.ResolvePendingHitForTest(player);
+
+        Assert.Equal(0, mob.AggroTargetId);
+        Assert.True(mob.GlobalAggro < 0);
+        Assert.True(mob.HateList.GetValueOrDefault(player.ObjectId) > 0);
     }
 
     [Fact]
