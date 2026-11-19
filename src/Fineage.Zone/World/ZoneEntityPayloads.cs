@@ -163,6 +163,8 @@ sealed class ZoneEntityVitalsPayload
     public int MaxHp { get; set; }
     public int CurMp { get; set; }
     public int MaxMp { get; set; }
+    public int CurCp { get; set; }
+    public int MaxCp { get; set; }
     public int Level { get; set; } = 1;
     public long Exp { get; set; }
     /// <summary>Mobius <c>_expBeforeDeath</c>: exp snapshot taken before the death penalty, used by resurrection restore.</summary>

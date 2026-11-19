@@ -143,7 +143,7 @@ public sealed partial class MemoryAccountStore
         }
     }
 
-    public bool TrySaveVitals(string account, int characterId, int hp, int mp)
+    public bool TrySaveVitals(string account, int characterId, int hp, int mp, int cp)
     {
         lock (_gate)
         {
@@ -152,14 +152,15 @@ public sealed partial class MemoryAccountStore
                 return false;
             character.Hp = hp;
             character.Mp = mp;
+            character.Cp = cp;
             Save();
             return true;
         }
     }
 
-    public bool TrySaveProgress(string account, int characterId, int level, long exp, int sp, int maxHp, int hp, int maxMp, int mp)
+    public bool TrySaveProgress(string account, int characterId, int level, long exp, int sp, int maxHp, int hp, int maxMp, int mp, int maxCp, int cp)
     {
-        if (level < 1 || exp < 0 || sp < 0 || maxHp < 0 || hp < 0 || maxMp < 0 || mp < 0)
+        if (level < 1 || exp < 0 || sp < 0 || maxHp < 0 || hp < 0 || maxMp < 0 || mp < 0 || maxCp < 0 || cp < 0)
             return false;
         lock (_gate)
         {
@@ -173,6 +174,8 @@ public sealed partial class MemoryAccountStore
             character.Hp = hp;
             character.MaxMp = maxMp;
             character.Mp = mp;
+            character.MaxCp = maxCp;
+            character.Cp = cp;
             Save();
             return true;
         }

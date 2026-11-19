@@ -103,8 +103,8 @@ public sealed partial class ZoneWorld
                 MaxHp = entity.MaxHp,
                 CurMp = entity.CurMp,
                 MaxMp = entity.MaxMp,
-                CurCp = PartyMaxCp(entity),
-                MaxCp = PartyMaxCp(entity)
+                CurCp = entity.MaxCp > 0 ? Math.Clamp(entity.CurCp, 0, entity.MaxCp) : PartyMaxCp(entity),
+                MaxCp = entity.MaxCp > 0 ? entity.MaxCp : PartyMaxCp(entity)
             };
         }
 

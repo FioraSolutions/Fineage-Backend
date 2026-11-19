@@ -21,6 +21,7 @@ data/*
 !data/skill-stat-effects.json
 !data/skill-passives.json
 !data/skill-effects.json
+!data/skill-persist-flags.json
 !data/skill-dots.json
 !data/skill-trees.json
 !data/henna.json

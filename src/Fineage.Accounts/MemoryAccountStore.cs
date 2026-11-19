@@ -136,6 +136,8 @@ public sealed partial class MemoryAccountStore : IAccountStore
             Hp = character.Hp,
             MaxMp = character.MaxMp,
             Mp = character.Mp,
+            MaxCp = character.MaxCp,
+            Cp = character.Cp,
             Sp = character.Sp,
             Adena = character.Adena,
             Title = character.Title ?? "",
@@ -178,7 +180,10 @@ public sealed partial class MemoryAccountStore : IAccountStore
             {
                 SkillId = e.SkillId,
                 Level = e.Level,
-                RemainingSeconds = e.RemainingSeconds
+                RemainingSeconds = e.RemainingSeconds,
+                ReuseDelayMs = e.ReuseDelayMs,
+                SystimeMs = e.SystimeMs,
+                RestoreType = e.RestoreType
             }).ToList(),
             ClassState = character.ClassState?.Clone()
         };

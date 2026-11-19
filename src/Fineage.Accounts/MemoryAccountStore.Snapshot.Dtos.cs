@@ -55,6 +55,8 @@ public sealed partial class MemoryAccountStore
         public int Hp { get; set; }
         public int MaxMp { get; set; }
         public int Mp { get; set; }
+        public int MaxCp { get; set; }
+        public int Cp { get; set; }
         public int Sp { get; set; }
         public long Adena { get; set; }
         public string Title { get; set; } = "";
@@ -100,6 +102,9 @@ public sealed partial class MemoryAccountStore
         public int SkillId { get; set; }
         public int Level { get; set; }
         public int RemainingSeconds { get; set; }
+        public long ReuseDelayMs { get; set; }
+        public long SystimeMs { get; set; }
+        public int RestoreType { get; set; }
     }
 
     sealed class StoredShortcutDto

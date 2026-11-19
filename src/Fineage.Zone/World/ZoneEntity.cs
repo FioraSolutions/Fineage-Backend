@@ -90,6 +90,18 @@ sealed partial class ZoneEntity
         set => EnsureVitals().MaxMp = value;
     }
 
+    public int CurCp
+    {
+        get => Vitals?.CurCp ?? 0;
+        set => EnsureVitals().CurCp = value;
+    }
+
+    public int MaxCp
+    {
+        get => Vitals?.MaxCp ?? 0;
+        set => EnsureVitals().MaxCp = value;
+    }
+
     public int Level
     {
         get => Vitals?.Level ?? 1;

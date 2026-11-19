@@ -100,7 +100,9 @@ public sealed partial class ZoneWorld
             player.MaxHp,
             player.CurHp,
             player.MaxMp,
-            player.CurMp);
+            player.CurMp,
+            player.MaxCp,
+            player.CurCp);
         ZoneLog.Info($"admin setlevel object={player.ObjectId} {previous}->{player.Level}");
         return null;
     }

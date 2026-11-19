@@ -193,8 +193,8 @@ static class NetEnterWorldProjector
             MaxHp = entity.MaxHp,
             Mp = entity.CurMp,
             MaxMp = entity.MaxMp,
-            Cp = maxCp,
-            MaxCp = maxCp
+            Cp = entity.MaxCp > 0 ? entity.CurCp : maxCp,
+            MaxCp = entity.MaxCp > 0 ? entity.MaxCp : maxCp
         };
 
     static ItemListNetMsg BuildItems(PlayerInventory inventory)
