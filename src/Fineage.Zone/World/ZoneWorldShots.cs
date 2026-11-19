@@ -29,12 +29,31 @@ public sealed partial class ZoneWorld
     static readonly int[] SpiritshotSkillByGrade = [2047, 2155, 2156, 2157, 2158, 2159];
     static readonly int[] BlessedSpiritshotSkillByGrade = [2061, 2160, 2161, 2162, 2163, 2164];
 
-    internal static bool IsShot(ItemTemplate t) => t.IsSoulshot || t.IsSpiritshot || t.IsBlessedSpiritshot;
+    /// <summary>Interlude beast shot item ids (Mobius BeastSoulShot / BeastSpiritShot / BlessedBeastSpiritShot).</summary>
+    internal static bool IsBeastShot(int itemId) =>
+        itemId is 6645 or 6646 or 6647 or 20332 or 20333 or 20334;
+
+    internal static bool IsBeastSoulshot(int itemId) => itemId is 6645 or 20332;
+
+    internal static bool IsShot(ItemTemplate t) =>
+        t.IsSoulshot || t.IsSpiritshot || t.IsBlessedSpiritshot || IsBeastShot(t.Id);
+
+    /// <summary>Mobius: one auto slot per kind (player soul, player spirit, beast soul, beast spirit).</summary>
+    static bool SameAutoSlot(ItemTemplate a, ItemTemplate b)
+    {
+        if (IsBeastShot(a.Id) || IsBeastShot(b.Id))
+            return IsBeastShot(a.Id) && IsBeastShot(b.Id) && IsBeastSoulshot(a.Id) == IsBeastSoulshot(b.Id);
+        return a.IsSoulshot == b.IsSoulshot;
+    }
 
     /// <summary>Charges the weapon with <paramref name="shot"/>. <paramref name="quiet"/> (auto recharge) skips the refusal notices.</summary>
     bool TryChargeShot(ZoneSession session, ZoneEntity player, ItemInstance shot, bool quiet)
     {
         var t = shot.Template;
+        // Beast shots charge the pet/servitor, not the player's weapon. Pet consume is not wired yet;
+        // keep the auto flag (and the ExAutoSoulShot shine) without mis-charging the player.
+        if (IsBeastShot(t.Id))
+            return false;
         bool soul = t.IsSoulshot;
         // Mobius OlympiadDisableBlessedSpiritShots: no blessed spiritshot charge inside an arena (auto use included).
         if (t.IsBlessedSpiritshot && _olympiadArena.Contains(player.ObjectId) && _olympiad.Settings.DisableBlessedSpiritshots)
@@ -140,14 +159,18 @@ public sealed partial class ZoneWorld
                 SendAutoShotState(session, player, itemId, stack?.Template.Name ?? "", false);
             return null;
         }
-        if (ShotRules.AutoEnableError(stack != null, stack != null && IsShot(stack.Template)) is { } autoError)
+        if (ShotRules.AutoEnableError(
+                stack != null,
+                stack != null && IsShot(stack.Template),
+                stack != null && IsBeastShot(stack.ItemId),
+                player.SummonObjectId > 0) is { } autoError)
             return autoError;
         var liveStack = stack!;
-        // Mobius: one auto slot per shot kind; switching grades replaces the old one.
+        // Mobius: one auto slot per shot kind; switching grades (or the other beast shot of that kind) replaces the old one.
         foreach (int other in player.AutoShots.ToList())
         {
             var o = player.Inventory.FindByItemId(other)?.Template;
-            if (o == null || o.IsSoulshot == liveStack.Template.IsSoulshot)
+            if (o == null || SameAutoSlot(o, liveStack.Template))
             {
                 player.AutoShots.Remove(other);
                 SendAutoShotState(session, player, other, o?.Name ?? "", false);
